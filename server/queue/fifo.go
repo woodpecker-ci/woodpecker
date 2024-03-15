@@ -52,6 +52,8 @@ type fifo struct {
 }
 
 // New returns a new fifo queue.
+//
+//nolint:gomnd
 func New(_ context.Context) Queue {
 	return &fifo{
 		workers:       map[*worker]struct{}{},

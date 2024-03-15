@@ -123,13 +123,13 @@ func execWithAxis(c *cli.Context, file, repoPath string, axis matrix.Axis) error
 
 	pipelineEnv := make(map[string]string)
 	for _, env := range c.StringSlice("env") {
-		envs := strings.SplitN(env, "=", 2)
-		pipelineEnv[envs[0]] = envs[1]
-		if oldVar, exists := environ[envs[0]]; exists {
+		before, after, _ := strings.Cut(env, "=")
+		pipelineEnv[before] = after
+		if oldVar, exists := environ[before]; exists {
 			// override existing values, but print a warning
-			log.Warn().Msgf("environment variable '%s' had value '%s', but got overwritten", envs[0], oldVar)
+			log.Warn().Msgf("environment variable '%s' had value '%s', but got overwritten", before, oldVar)
 		}
-		environ[envs[0]] = envs[1]
+		environ[before] = after
 	}
 
 	tmpl, err := envsubst.ParseFile(file)
@@ -244,8 +244,16 @@ func execWithAxis(c *cli.Context, file, repoPath string, axis matrix.Axis) error
 	).Run(c.Context)
 }
 
+// convertPathForWindows converts a path to use slash separators
+// for Windows. If the path is a Windows volume name like C:, it
+// converts it to an absolute root path starting with slash (e.g.
+// C: -> /c). Otherwise it just converts backslash separators to
+// slashes.
 func convertPathForWindows(path string) string {
 	base := filepath.VolumeName(path)
+
+	// Check if path is volume name like C:
+	//nolint: gomnd
 	if len(base) == 2 {
 		path = strings.TrimPrefix(path, base)
 		base = strings.ToLower(strings.TrimSuffix(base, ":"))

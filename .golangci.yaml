@@ -166,6 +166,13 @@ linters:
     - contextcheck
     - forcetypeassert
     - gci
+    - gomnd
+
+issues:
+  exclude-rules:
+    - path: 'fixtures|cmd/agent/flags.go|cmd/server/flags.go|pipeline/backend/kubernetes/flags.go|_test.go'
+      linters:
+        - gomnd
 
 run:
   timeout: 15m
