@@ -1,6 +1,6 @@
 # Changelog
 
-## [2.4.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.4.0) - 2024-03-15
+## [2.4.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.4.0) - 2024-03-16
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -71,6 +71,7 @@
 
 ### Misc
 
+- chore(deps): update dependency eslint-config-airbnb-typescript to v18 [[#3490](https://github.com/woodpecker-ci/woodpecker/pull/3490)]
 - chore(deps): update web npm deps non-major [[#3489](https://github.com/woodpecker-ci/woodpecker/pull/3489)]
 - fix(deps): update golang (packages) [[#3486](https://github.com/woodpecker-ci/woodpecker/pull/3486)]
 - fix(deps): update module google.golang.org/protobuf to v1.33.0 [security] [[#3487](https://github.com/woodpecker-ci/woodpecker/pull/3487)]
