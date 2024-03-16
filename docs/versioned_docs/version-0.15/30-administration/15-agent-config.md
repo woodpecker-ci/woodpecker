@@ -73,7 +73,7 @@ pipeline:
 
 ```
 
-See [Conditionals Pipeline](../20-usage/20-pipeline-syntax.md#step-when---conditional-execution) syntax for more
+See [Conditionals Pipeline](../20-usage/22-conditional-execution.md) syntax for more
 
 
 ## All agent configuration options
