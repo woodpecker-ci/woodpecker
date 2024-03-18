@@ -24,6 +24,7 @@ import (
 
 	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
 	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/internal/config"
 	"go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker"
 )
 
@@ -56,6 +57,7 @@ var Command = &cli.Command{
 			Usage:   "custom parameters to be injected into the step environment. Format: KEY=value",
 		},
 	},
+	Before: config.Load,
 }
 
 func deploy(c *cli.Context) error {

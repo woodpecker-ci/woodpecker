@@ -22,6 +22,7 @@ import (
 	"github.com/urfave/cli/v2"
 
 	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/internal/config"
 	"go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker"
 )
 
@@ -36,6 +37,7 @@ var Command = &cli.Command{
 		secretInfoCmd,
 		secretListCmd,
 	},
+	Before: config.Load,
 }
 
 func parseTargetArgs(client woodpecker.Client, c *cli.Context) (global bool, orgID, repoID int64, err error) {

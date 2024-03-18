@@ -16,6 +16,8 @@ package log
 
 import (
 	"github.com/urfave/cli/v2"
+
+	"go.woodpecker-ci.org/woodpecker/v2/cli/internal/config"
 )
 
 // Command exports the log command set.
@@ -25,4 +27,5 @@ var Command = &cli.Command{
 	Subcommands: []*cli.Command{
 		logPurgeCmd,
 	},
+	Before: config.Load,
 }

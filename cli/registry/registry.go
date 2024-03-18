@@ -16,6 +16,8 @@ package registry
 
 import (
 	"github.com/urfave/cli/v2"
+
+	"go.woodpecker-ci.org/woodpecker/v2/cli/internal/config"
 )
 
 // Command exports the registry command set.
@@ -29,4 +31,5 @@ var Command = &cli.Command{
 		registryInfoCmd,
 		registryListCmd,
 	},
+	Before: config.Load,
 }

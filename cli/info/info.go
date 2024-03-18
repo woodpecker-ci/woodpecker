@@ -22,6 +22,7 @@ import (
 
 	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
 	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/internal/config"
 )
 
 // Command exports the info command.
@@ -31,6 +32,7 @@ var Command = &cli.Command{
 	ArgsUsage: " ",
 	Action:    info,
 	Flags:     []cli.Flag{common.FormatFlag(tmplInfo, true)},
+	Before:    config.Load,
 }
 
 func info(c *cli.Context) error {

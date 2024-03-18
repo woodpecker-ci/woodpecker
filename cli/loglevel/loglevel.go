@@ -20,6 +20,7 @@ import (
 	"github.com/urfave/cli/v2"
 
 	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/internal/config"
 	"go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker"
 )
 
@@ -29,6 +30,7 @@ var Command = &cli.Command{
 	ArgsUsage: "[level]",
 	Usage:     "get the logging level of the server, or set it with [level]",
 	Action:    logLevel,
+	Before:    config.Load,
 }
 
 func logLevel(c *cli.Context) error {

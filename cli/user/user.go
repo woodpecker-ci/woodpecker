@@ -16,6 +16,8 @@ package user
 
 import (
 	"github.com/urfave/cli/v2"
+
+	"go.woodpecker-ci.org/woodpecker/v2/cli/internal/config"
 )
 
 // Command exports the user command set.
@@ -28,4 +30,5 @@ var Command = &cli.Command{
 		userAddCmd,
 		userRemoveCmd,
 	},
+	Before: config.Load,
 }

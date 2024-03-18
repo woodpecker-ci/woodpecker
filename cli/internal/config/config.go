@@ -17,6 +17,8 @@ type Config struct {
 	LogLevel  string `json:"log_level"`
 }
 
+var ErrNotSetup = errors.New("woodpecker-cli is not setup")
+
 func Load(c *cli.Context) error {
 	// If the command is setup, we don't need to load the config
 	if firstArg := c.Args().First(); firstArg == "setup" {
@@ -30,7 +32,7 @@ func Load(c *cli.Context) error {
 
 	if config == nil && !c.IsSet("server-url") && !c.IsSet("token") {
 		log.Info().Msg("The woodpecker-cli is not yet set up. Please run `woodpecker-cli setup`")
-		return errors.New("woodpecker-cli is not setup")
+		return ErrNotSetup
 	}
 
 	if !c.IsSet("server") {

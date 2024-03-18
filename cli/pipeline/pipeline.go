@@ -16,6 +16,8 @@ package pipeline
 
 import (
 	"github.com/urfave/cli/v2"
+
+	"go.woodpecker-ci.org/woodpecker/v2/cli/internal/config"
 )
 
 // Command exports the pipeline command set.
@@ -36,4 +38,5 @@ var Command = &cli.Command{
 		pipelinePsCmd,
 		pipelineCreateCmd,
 	},
+	Before: config.Load,
 }

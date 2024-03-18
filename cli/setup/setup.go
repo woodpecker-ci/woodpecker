@@ -25,6 +25,7 @@ var Command = &cli.Command{
 			Usage: "The token to authenticate with the woodpecker server",
 		},
 	},
+	Before: config.Load,
 	Action: setup,
 }
 

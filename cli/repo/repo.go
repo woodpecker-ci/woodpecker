@@ -16,6 +16,8 @@ package repo
 
 import (
 	"github.com/urfave/cli/v2"
+
+	"go.woodpecker-ci.org/woodpecker/v2/cli/internal/config"
 )
 
 // Command exports the repository command.
@@ -32,4 +34,5 @@ var Command = &cli.Command{
 		repoChownCmd,
 		repoSyncCmd,
 	},
+	Before: config.Load,
 }

@@ -16,6 +16,8 @@ package cron
 
 import (
 	"github.com/urfave/cli/v2"
+
+	"go.woodpecker-ci.org/woodpecker/v2/cli/internal/config"
 )
 
 // Command exports the cron command set.
@@ -29,4 +31,5 @@ var Command = &cli.Command{
 		cronInfoCmd,
 		cronListCmd,
 	},
+	Before: config.Load,
 }
