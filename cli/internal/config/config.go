@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"os"
+	"slices"
 
 	"github.com/adrg/xdg"
 	"github.com/rs/zerolog/log"
@@ -17,9 +18,11 @@ type Config struct {
 	LogLevel  string `json:"log_level"`
 }
 
+var skipSetupForCommands = []string{"setup", "help", "version", "update"}
+
 func Load(c *cli.Context) error {
 	// If the command is setup, we don't need to load the config
-	if firstArg := c.Args().First(); firstArg == "setup" {
+	if firstArg := c.Args().First(); firstArg == "" || slices.Contains(skipSetupForCommands, firstArg) {
 		return nil
 	}
 
