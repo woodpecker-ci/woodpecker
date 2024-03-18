@@ -57,6 +57,32 @@ func (s storage) WorkflowsCreate(workflows []*model.Workflow) error {
 	return sess.Commit()
 }
 
+func (s storage) WorkflowsDelete(pipeline *model.Pipeline) error {
+	return s.workflowsDelete(s.engine.NewSession(), pipeline.ID)
+}
+
+func (s storage) workflowsDelete(sess *xorm.Session, pipelineID int64) error {
+	// delete related steps
+	for startSteps := 0; ; startSteps += perPage {
+		stepIDs := make([]int64, 0, perPage)
+		if err := sess.Limit(perPage, startSteps).Table("steps").Cols("step_id").Where("step_pipeline_id = ?", pipelineID).Find(&stepIDs); err != nil {
+			return err
+		}
+		if len(stepIDs) == 0 {
+			break
+		}
+
+		for i := range stepIDs {
+			if err := deleteStep(sess, stepIDs[i]); err != nil {
+				return err
+			}
+		}
+	}
+
+	_, err := sess.Where("workflow_pipeline_id = ?", pipelineID).Delete(new(model.Workflow))
+	return err
+}
+
 func (s storage) WorkflowList(pipeline *model.Pipeline) ([]*model.Workflow, error) {
 	return s.workflowList(s.engine.NewSession(), pipeline)
 }

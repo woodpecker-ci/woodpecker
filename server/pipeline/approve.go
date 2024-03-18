@@ -79,24 +79,15 @@ func Approve(ctx context.Context, store store.Store, currentPipeline *model.Pipe
 		return nil, fmt.Errorf(msg)
 	}
 
-	// TODO improve this
-	for _, item := range pipelineItems {
-		for _, wf := range currentPipeline.Workflows {
-			if item.Workflow.Name == wf.Name {
-				item.Workflow = wf
-				for _, stage := range item.Config.Stages {
-					for _, step := range stage.Steps {
-						for _, storeStep := range wf.Children {
-							if storeStep.Name == step.Name {
-								step.UUID = storeStep.UUID
-								break
-							}
-						}
-					}
-				}
-
-				break
-			}
+	// we have now way to link old workflows & steps in database to new engine generated steps.
+	// so we just delete the old and insert the new ones
+	{
+		if err := store.WorkflowsDelete(currentPipeline); err != nil {
+			return nil, err
+		}
+		if err := store.WorkflowsCreate(currentPipeline.Workflows); err != nil {
+			log.Error().Err(err).Str("repo", repo.FullName).Msgf("error persisting steps for %s#%d", repo.FullName, currentPipeline.Number)
+			return nil, err
 		}
 	}
 
