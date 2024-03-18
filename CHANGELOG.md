@@ -9,6 +9,7 @@
 ### 🔒 Security
 
 - Improve security context handling [[#3482](https://github.com/woodpecker-ci/woodpecker/pull/3482)]
+- fix(deps): update module github.com/moby/moby to v24.0.9+incompatible [[#3323](https://github.com/woodpecker-ci/woodpecker/pull/3323)]
 
 ### ✨ Features
 
@@ -100,8 +101,6 @@
 - chore(deps): update docker.io/woodpeckerci/plugin-docker-buildx docker tag to v3.1.0 [[#3394](https://github.com/woodpecker-ci/woodpecker/pull/3394)]
 - Add link checking [[#3371](https://github.com/woodpecker-ci/woodpecker/pull/3371)]
 - Apply `dependencies` label to all PRs [[#3358](https://github.com/woodpecker-ci/woodpecker/pull/3358)]
-- Fix linter [[#3354](https://github.com/woodpecker-ci/woodpecker/pull/3354)]
-- fix(deps): update module github.com/moby/moby to v24.0.9+incompatible [security] [[#3323](https://github.com/woodpecker-ci/woodpecker/pull/3323)]
 - chore(deps): update docker.io/woodpeckerci/plugin-docker-buildx docker tag to v3.0.1 [[#3324](https://github.com/woodpecker-ci/woodpecker/pull/3324)]
 
 ## [2.3.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.3.0) - 2024-01-31
