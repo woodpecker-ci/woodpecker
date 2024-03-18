@@ -245,7 +245,7 @@ func TestPipelines(t *testing.T) {
 			g.Assert(err1).IsNil()
 			err2 := store.CreatePipeline(pipeline2, []*model.Step{}...)
 			g.Assert(err2).IsNil()
-			pipelines, err3 := store.GetPipelineList(&model.Repo{ID: 1}, &model.ListOptions{Page: 1, PerPage: 50}, &model.PipelineFilter{Before: dt2.Unix()})
+			pipelines, err3 := store.GetPipelineList(&model.Repo{ID: 1}, &model.ListOptions{Page: 1, PerPage: 50}, &model.FilterOptions{Before: dt2.Unix()})
 			g.Assert(err3).IsNil()
 			g.Assert(len(pipelines)).Equal(1)
 			g.Assert(pipelines[0].ID).Equal(pipeline1.ID)

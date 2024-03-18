@@ -109,19 +109,20 @@ func createTmpPipeline(event model.WebhookEvent, commit *model.Commit, user *mod
 //	@Param		repo_id			path	int		true	"the repository id"
 //	@Param		page			query	int		false	"for response pagination, page offset number"	default(1)
 //	@Param		perPage			query	int		false	"for response pagination, max items per page"	default(50)
-//	@Param		before			query	string	false	"only return pipelines before this RFC3339 date"
-//	@Param		after			query	string	false	"only return pipelines after this RFC3339 date"
+//	@Param		before			query	string	false	"only return pipelines before this RFC3339 date" default(time.Now)
 func GetPipelines(c *gin.Context) {
 	repo := session.Repo(c)
 	before := c.Query("before")
 	after := c.Query("after")
 
-	filter := new(model.PipelineFilter)
+	filter := &model.FilterOptions{
+		Before: time.Now().UTC().Unix(),
+	}
 
 	if before != "" {
 		beforeDt, err := time.Parse(time.RFC3339, before)
 		if err != nil {
-			_ = c.AbortWithError(http.StatusBadRequest, err)
+			_ = c.AbortWithError(http.StatusInternalServerError, err)
 			return
 		}
 		filter.Before = beforeDt.Unix()
@@ -130,7 +131,7 @@ func GetPipelines(c *gin.Context) {
 	if after != "" {
 		afterDt, err := time.Parse(time.RFC3339, after)
 		if err != nil {
-			_ = c.AbortWithError(http.StatusBadRequest, err)
+			_ = c.AbortWithError(http.StatusInternalServerError, err)
 			return
 		}
 		filter.After = afterDt.Unix()

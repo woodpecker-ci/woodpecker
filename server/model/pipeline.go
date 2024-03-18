@@ -53,7 +53,7 @@ type Pipeline struct {
 	IsPrerelease        bool                   `json:"is_prerelease,omitempty"     xorm:"is_prerelease"`
 } //	@name Pipeline
 
-type PipelineFilter struct {
+type FilterOptions struct {
 	Before int64
 	After  int64
 }

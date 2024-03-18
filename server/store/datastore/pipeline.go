@@ -52,22 +52,18 @@ func (s storage) GetPipelineLastBefore(repo *model.Repo, branch string, num int6
 		Get(pipeline))
 }
 
-func (s storage) GetPipelineList(repo *model.Repo, p *model.ListOptions, f *model.PipelineFilter) ([]*model.Pipeline, error) {
+func (s storage) GetPipelineList(repo *model.Repo, p *model.ListOptions, f *model.FilterOptions) ([]*model.Pipeline, error) {
 	pipelines := make([]*model.Pipeline, 0, 16)
 
-	cond := builder.NewCond().And(builder.Eq{"pipeline_repo_id": repo.ID})
-
 	if f != nil {
-		if f.After != 0 {
-			cond = cond.And(builder.Gt{"pipeline_started": f.After})
-		}
-
-		if f.Before != 0 {
-			cond = cond.And(builder.Lt{"pipeline_started": f.Before})
-		}
+		return pipelines, s.paginate(p).Where(builder.Eq{"pipeline_repo_id": repo.ID}).
+			And(builder.Gt{"pipeline_started": f.After}).
+			And(builder.Lt{"pipeline_started": f.Before}).
+			Desc("pipeline_number").
+			Find(&pipelines)
 	}
 
-	return pipelines, s.paginate(p).Where(cond).
+	return pipelines, s.paginate(p).Where(builder.Eq{"pipeline_repo_id": repo.ID}).
 		Desc("pipeline_number").
 		Find(&pipelines)
 }
