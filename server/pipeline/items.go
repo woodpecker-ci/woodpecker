@@ -126,7 +126,7 @@ func setPipelineStepsOnPipeline(pipeline *model.Pipeline, pipelineItems []*stepb
 	}
 
 	// the workflows in the pipeline should be empty as only we do populate them,
-	// but it a pipeline was already loaded form database it might contain things, so we just clean it
+	// but if a pipeline was already loaded form database it might contain things, so we just clean it
 	pipeline.Workflows = nil
 	for _, item := range pipelineItems {
 		for _, stage := range item.Config.Stages {
