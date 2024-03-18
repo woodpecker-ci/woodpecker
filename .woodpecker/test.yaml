@@ -105,7 +105,7 @@ steps:
     image: *golang_image
     environment:
       - WOODPECKER_DATABASE_DRIVER=postgres
-      - WOODPECKER_DATABASE_DATASOURCE=host=postgres user=postgres dbname=postgres sslmode=disable
+      - WOODPECKER_DATABASE_DATASOURCE=host=sv-postgres user=postgres dbname=postgres sslmode=disable
     commands:
       - make test-server-datastore
     when: *when
@@ -116,7 +116,7 @@ steps:
     image: *golang_image
     environment:
       - WOODPECKER_DATABASE_DRIVER=mysql
-      - WOODPECKER_DATABASE_DATASOURCE=root@tcp(mysql:3306)/test?parseTime=true
+      - WOODPECKER_DATABASE_DATASOURCE=root@tcp(sv-mysql:3306)/test?parseTime=true
     commands:
       - make test-server-datastore
     when: *when
