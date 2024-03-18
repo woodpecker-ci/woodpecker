@@ -141,7 +141,7 @@ steps:
     failure: ignore
 
 services:
-  postgres:
+  sv-postgres:
     image: docker.io/postgres:16
     ports: ['5432']
     environment:
@@ -149,7 +149,7 @@ services:
       - POSTGRES_HOST_AUTH_METHOD=trust
     when: *when
 
-  mysql:
+  sv-mysql:
     image: docker.io/mysql:8.2.0
     ports: ['3306']
     environment:
