@@ -73,6 +73,7 @@
 
 ### Misc
 
+- chore(deps): update dependency alpine_3_18/ca-certificates to v20240226 [[#3501](https://github.com/woodpecker-ci/woodpecker/pull/3501)]
 - Temp rename CI services to avoid duplicate name issues [[#3497](https://github.com/woodpecker-ci/woodpecker/pull/3497)]
 - fix(deps): update module github.com/google/go-github/v59 to v60 [[#3493](https://github.com/woodpecker-ci/woodpecker/pull/3493)]
 - fix(deps): update dependency @intlify/unplugin-vue-i18n to v3 [[#3492](https://github.com/woodpecker-ci/woodpecker/pull/3492)]
