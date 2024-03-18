@@ -38,6 +38,8 @@ steps:
     image: *golang_image
     commands:
       - go run go.woodpecker-ci.org/woodpecker/v2/cmd/cli lint
+    environment:
+      WOODPECKER_DISABLE_UPDATE_CHECK: true
     when:
       - event: pull_request
         path:
@@ -93,7 +95,7 @@ steps:
       - vendor
     image: *golang_image
     environment:
-      - WOODPECKER_DATABASE_DRIVER=sqlite3
+      WOODPECKER_DATABASE_DRIVER: sqlite3
     commands:
       - make test-server-datastore-coverage
     when:
@@ -104,8 +106,8 @@ steps:
       - vendor
     image: *golang_image
     environment:
-      - WOODPECKER_DATABASE_DRIVER=postgres
-      - WOODPECKER_DATABASE_DATASOURCE=host=sv-postgres user=postgres dbname=postgres sslmode=disable
+      WOODPECKER_DATABASE_DRIVER: postgres
+      WOODPECKER_DATABASE_DATASOURCE: 'host=postgres user=postgres dbname=postgres sslmode=disable'
     commands:
       - make test-server-datastore
     when: *when
@@ -115,8 +117,8 @@ steps:
       - vendor
     image: *golang_image
     environment:
-      - WOODPECKER_DATABASE_DRIVER=mysql
-      - WOODPECKER_DATABASE_DATASOURCE=root@tcp(sv-mysql:3306)/test?parseTime=true
+      WOODPECKER_DATABASE_DRIVER: mysql
+      WOODPECKER_DATABASE_DATASOURCE: root@tcp(mysql:3306)/test?parseTime=true
     commands:
       - make test-server-datastore
     when: *when
@@ -141,18 +143,18 @@ steps:
     failure: ignore
 
 services:
-  sv-postgres:
+  postgres:
     image: docker.io/postgres:16
     ports: ['5432']
     environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_HOST_AUTH_METHOD=trust
+      POSTGRES_USER: postgres
+      POSTGRES_HOST_AUTH_METHOD: trust
     when: *when
 
-  sv-mysql:
+  mysql:
     image: docker.io/mysql:8.2.0
     ports: ['3306']
     environment:
-      - MYSQL_DATABASE=test
-      - MYSQL_ALLOW_EMPTY_PASSWORD=yes
+      MYSQL_DATABASE: test
+      MYSQL_ALLOW_EMPTY_PASSWORD: yes
     when: *when
