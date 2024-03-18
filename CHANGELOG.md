@@ -87,8 +87,6 @@
 - chore(deps): update woodpeckerci/plugin-ready-release-go docker tag to v1.1.0 [[#3464](https://github.com/woodpecker-ci/woodpecker/pull/3464)]
 - chore(deps): lock file maintenance [[#3465](https://github.com/woodpecker-ci/woodpecker/pull/3465)]
 - chore(deps): update postgres docker tag to v16.2 [[#3461](https://github.com/woodpecker-ci/woodpecker/pull/3461)]
-- chore(deps): update web npm deps non-major [[#3460](https://github.com/woodpecker-ci/woodpecker/pull/3460)]
-- chore(deps): update web npm deps non-major [[#3454](https://github.com/woodpecker-ci/woodpecker/pull/3454)]
 - chore(deps): update lycheeverse/lychee docker tag to v0.14.3 [[#3429](https://github.com/woodpecker-ci/woodpecker/pull/3429)]
 - fix(deps): update golang (packages) [[#3430](https://github.com/woodpecker-ci/woodpecker/pull/3430)]
 - More `when` filters [[#3407](https://github.com/woodpecker-ci/woodpecker/pull/3407)]
@@ -103,8 +101,6 @@
 - Add link checking [[#3371](https://github.com/woodpecker-ci/woodpecker/pull/3371)]
 - Apply `dependencies` label to all PRs [[#3358](https://github.com/woodpecker-ci/woodpecker/pull/3358)]
 - Fix linter [[#3354](https://github.com/woodpecker-ci/woodpecker/pull/3354)]
-- chore(deps): lock file maintenance [[#3350](https://github.com/woodpecker-ci/woodpecker/pull/3350)]
-- [pre-commit.ci] pre-commit autoupdate [[#3329](https://github.com/woodpecker-ci/woodpecker/pull/3329)]
 - fix(deps): update module github.com/moby/moby to v24.0.9+incompatible [security] [[#3323](https://github.com/woodpecker-ci/woodpecker/pull/3323)]
 - chore(deps): update docker.io/woodpeckerci/plugin-docker-buildx docker tag to v3.0.1 [[#3324](https://github.com/woodpecker-ci/woodpecker/pull/3324)]
 
