@@ -79,7 +79,7 @@ func Approve(ctx context.Context, store store.Store, currentPipeline *model.Pipe
 		return nil, fmt.Errorf(msg)
 	}
 
-	// we have now way to link old workflows & steps in database to new engine generated steps.
+	// we have no way to link old workflows and steps in database to new engine generated steps,
 	// so we just delete the old and insert the new ones
 	{
 		if err := store.WorkflowsDelete(currentPipeline); err != nil {
