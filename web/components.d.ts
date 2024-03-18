@@ -109,7 +109,6 @@ declare module 'vue' {
     Tab: typeof import('./src/components/layout/scaffold/Tab.vue')['default']
     Tabs: typeof import('./src/components/layout/scaffold/Tabs.vue')['default']
     TextField: typeof import('./src/components/form/TextField.vue')['default']
-    UserAPITab: typeof import('./src/components/user/UserAPITab.vue')['default']
     UserCLIAndAPITab: typeof import('./src/components/user/UserCLIAndAPITab.vue')['default']
     UserGeneralTab: typeof import('./src/components/user/UserGeneralTab.vue')['default']
     UserSecretsTab: typeof import('./src/components/user/UserSecretsTab.vue')['default']
