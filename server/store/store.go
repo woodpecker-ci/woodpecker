@@ -171,7 +171,7 @@ type Store interface {
 	// Workflow
 	WorkflowGetTree(*model.Pipeline) ([]*model.Workflow, error)
 	WorkflowsCreate([]*model.Workflow) error
-	WorkflowsDelete(*model.Pipeline) error
+	WorkflowsSwitch(*model.Pipeline, []*model.Workflow) error
 	WorkflowLoad(int64) (*model.Workflow, error)
 	WorkflowUpdate(*model.Workflow) error
 

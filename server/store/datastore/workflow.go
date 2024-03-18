@@ -44,6 +44,14 @@ func (s storage) WorkflowsCreate(workflows []*model.Workflow) error {
 		return err
 	}
 
+	if err := s.workflowsCreate(sess, workflows); err != nil {
+		return err
+	}
+
+	return sess.Commit()
+}
+
+func (s storage) workflowsCreate(sess *xorm.Session, workflows []*model.Workflow) error {
 	for i := range workflows {
 		// only Insert on single object ref set auto created ID back to object
 		if err := s.stepCreate(sess, workflows[i].Children); err != nil {
@@ -53,12 +61,26 @@ func (s storage) WorkflowsCreate(workflows []*model.Workflow) error {
 			return err
 		}
 	}
-
-	return sess.Commit()
+	return nil
 }
 
-func (s storage) WorkflowsDelete(pipeline *model.Pipeline) error {
-	return s.workflowsDelete(s.engine.NewSession(), pipeline.ID)
+// WorkflowsSwitch do "update" workflows and related steps by deleting all existing workflow and steps and insert the new ones
+func (s storage) WorkflowsSwitch(pipeline *model.Pipeline, workflows []*model.Workflow) error {
+	sess := s.engine.NewSession()
+	defer sess.Close()
+	if err := sess.Begin(); err != nil {
+		return err
+	}
+
+	if err := s.workflowsDelete(sess, pipeline.ID); err != nil {
+		return err
+	}
+
+	if err := s.workflowsCreate(sess, workflows); err != nil {
+		return err
+	}
+
+	return sess.Commit()
 }
 
 func (s storage) workflowsDelete(sess *xorm.Session, pipelineID int64) error {
