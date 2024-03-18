@@ -21,7 +21,6 @@ type Config struct {
 var skipSetupForCommands = []string{"setup", "help", "h", "version", "update", "lint", ""}
 
 func Load(c *cli.Context) error {
-	// If the command is setup, we don't need to load the config
 	if firstArg := c.Args().First(); slices.Contains(skipSetupForCommands, firstArg) {
 		return nil
 	}
