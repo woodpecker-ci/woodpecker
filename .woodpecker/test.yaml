@@ -156,5 +156,5 @@ services:
     ports: ['3306']
     environment:
       MYSQL_DATABASE: test
-      MYSQL_ALLOW_EMPTY_PASSWORD: yes
+      MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
     when: *when
