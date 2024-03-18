@@ -109,7 +109,8 @@ func createTmpPipeline(event model.WebhookEvent, commit *model.Commit, user *mod
 //	@Param		repo_id			path	int		true	"the repository id"
 //	@Param		page			query	int		false	"for response pagination, page offset number"	default(1)
 //	@Param		perPage			query	int		false	"for response pagination, max items per page"	default(50)
-//	@Param		before			query	string	false	"only return pipelines before this RFC3339 date" default(time.Now)
+//	@Param		before			query	string	false	"only return pipelines before this RFC3339 date"
+//	@Param		after			query	string	false	"only return pipelines after this RFC3339 date"
 func GetPipelines(c *gin.Context) {
 	repo := session.Repo(c)
 	before := c.Query("before")
