@@ -18,7 +18,7 @@ type Config struct {
 	LogLevel  string `json:"log_level"`
 }
 
-var skipSetupForCommands = []string{"setup", "help", "version", "update"}
+var skipSetupForCommands = []string{"setup", "help", "version", "update", "lint"}
 
 func Load(c *cli.Context) error {
 	// If the command is setup, we don't need to load the config
