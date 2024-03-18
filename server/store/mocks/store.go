@@ -2419,12 +2419,12 @@ func (_m *Store) WorkflowsCreate(_a0 []*model.Workflow) error {
 	return r0
 }
 
-// WorkflowsSwitch provides a mock function with given fields: _a0, _a1
-func (_m *Store) WorkflowsSwitch(_a0 *model.Pipeline, _a1 []*model.Workflow) error {
+// WorkflowsReplace provides a mock function with given fields: _a0, _a1
+func (_m *Store) WorkflowsReplace(_a0 *model.Pipeline, _a1 []*model.Workflow) error {
 	ret := _m.Called(_a0, _a1)
 
 	if len(ret) == 0 {
-		panic("no return value specified for WorkflowsSwitch")
+		panic("no return value specified for WorkflowsReplace")
 	}
 
 	var r0 error

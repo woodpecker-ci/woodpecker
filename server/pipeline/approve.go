@@ -81,7 +81,7 @@ func Approve(ctx context.Context, store store.Store, currentPipeline *model.Pipe
 
 	// we have no way to link old workflows and steps in database to new engine generated steps,
 	// so we just delete the old and insert the new ones
-	if err := store.WorkflowsSwitch(currentPipeline, currentPipeline.Workflows); err != nil {
+	if err := store.WorkflowsReplace(currentPipeline, currentPipeline.Workflows); err != nil {
 		log.Error().Err(err).Str("repo", repo.FullName).Msgf("error persisting new steps for %s#%d after approval", repo.FullName, currentPipeline.Number)
 		return nil, err
 	}

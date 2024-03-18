@@ -64,8 +64,8 @@ func (s storage) workflowsCreate(sess *xorm.Session, workflows []*model.Workflow
 	return nil
 }
 
-// WorkflowsSwitch do "update" workflows and related steps by deleting all existing workflow and steps and insert the new ones
-func (s storage) WorkflowsSwitch(pipeline *model.Pipeline, workflows []*model.Workflow) error {
+// WorkflowsReplace performs an atomic replacement of workflows and associated steps by deleting all existing workflows and steps and inserting the new ones
+func (s storage) WorkflowsReplace(pipeline *model.Pipeline, workflows []*model.Workflow) error {
 	sess := s.engine.NewSession()
 	defer sess.Close()
 	if err := sess.Begin(); err != nil {
