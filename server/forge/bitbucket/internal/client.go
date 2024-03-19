@@ -53,6 +53,7 @@ const (
 	pathPullRequests  = "%s/2.0/repositories/%s/%s/pullrequests?%s"
 	pathBranchCommits = "%s/2.0/repositories/%s/%s/commits/%s"
 	pathDir           = "%s/2.0/repositories/%s/%s/src/%s%s"
+	pageSize          = 100
 )
 
 type Client struct {
@@ -115,7 +116,7 @@ func (c *Client) ListRepos(workspace string, opts *ListOpts) (*RepoResp, error) 
 
 func (c *Client) ListReposAll(workspace string) ([]*Repo, error) {
 	return shared_utils.Paginate(func(page int) ([]*Repo, error) {
-		resp, err := c.ListRepos(workspace, &ListOpts{Page: page, PageLen: 100})
+		resp, err := c.ListRepos(workspace, &ListOpts{Page: page, PageLen: pageSize})
 		if err != nil {
 			return nil, err
 		}
@@ -183,7 +184,7 @@ func (c *Client) ListPermissions(opts *ListOpts) (*RepoPermResp, error) {
 
 func (c *Client) ListPermissionsAll() ([]*RepoPerm, error) {
 	return shared_utils.Paginate(func(page int) ([]*RepoPerm, error) {
-		resp, err := c.ListPermissions(&ListOpts{Page: page, PageLen: 100})
+		resp, err := c.ListPermissions(&ListOpts{Page: page, PageLen: pageSize})
 		if err != nil {
 			return nil, err
 		}
@@ -198,22 +199,22 @@ func (c *Client) ListBranches(owner, name string, opts *ListOpts) ([]*Branch, er
 	return out.Values, err
 }
 
-func (c *Client) GetBranchHead(owner, name, branch string) (string, error) {
+func (c *Client) GetBranchHead(owner, name, branch string) (*Commit, error) {
 	out := new(CommitsResp)
 	uri := fmt.Sprintf(pathBranchCommits, c.base, owner, name, branch)
 	_, err := c.do(uri, get, nil, out)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	if len(out.Values) == 0 {
-		return "", fmt.Errorf("no commits in branch %s", branch)
+		return nil, fmt.Errorf("no commits in branch %s", branch)
 	}
-	return out.Values[0].Hash, nil
+	return out.Values[0], nil
 }
 
 func (c *Client) GetUserWorkspaceMembership(workspace, user string) (string, error) {
 	out := new(WorkspaceMembershipResp)
-	opts := &ListOpts{Page: 1, PageLen: 100}
+	opts := &ListOpts{Page: 1, PageLen: pageSize}
 	for {
 		uri := fmt.Sprintf(pathOrgPerms, c.base, workspace, opts.Encode())
 		_, err := c.do(uri, get, nil, out)

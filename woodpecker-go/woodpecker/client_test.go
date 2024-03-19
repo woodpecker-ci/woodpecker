@@ -26,7 +26,7 @@ import (
 )
 
 func Test_QueueInfo(t *testing.T) {
-	fixtureHandler := func(w http.ResponseWriter, r *http.Request) {
+	fixtureHandler := func(w http.ResponseWriter, _ *http.Request) {
 		fmt.Fprint(w, `{
 			"pending": null,
 			"running": [

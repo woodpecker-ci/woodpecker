@@ -27,6 +27,7 @@ import (
 
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge/bitbucket/fixtures"
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge/bitbucket/internal"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
@@ -63,34 +64,35 @@ func Test_bitbucket(t *testing.T) {
 
 		g.Describe("Given an authorization request", func() {
 			g.It("Should redirect to authorize", func() {
-				w := httptest.NewRecorder()
-				r, _ := http.NewRequest("GET", "", nil)
-				_, err := c.Login(ctx, w, r)
+				user, _, err := c.Login(ctx, &types.OAuthRequest{})
 				g.Assert(err).IsNil()
-				g.Assert(w.Code).Equal(http.StatusSeeOther)
+				g.Assert(user).IsNil()
 			})
 			g.It("Should return authenticated user", func() {
-				r, _ := http.NewRequest("GET", "?code=code", nil)
-				u, err := c.Login(ctx, nil, r)
+				u, _, err := c.Login(ctx, &types.OAuthRequest{
+					Code: "code",
+				})
 				g.Assert(err).IsNil()
 				g.Assert(u.Login).Equal(fakeUser.Login)
 				g.Assert(u.Token).Equal("2YotnFZFEjr1zCsicMWpAA")
 				g.Assert(u.Secret).Equal("tGzv3JOkF0XG5Qx2TlKWIA")
 			})
 			g.It("Should handle failure to exchange code", func() {
-				w := httptest.NewRecorder()
-				r, _ := http.NewRequest("GET", "?code=code_bad_request", nil)
-				_, err := c.Login(ctx, w, r)
+				_, _, err := c.Login(ctx, &types.OAuthRequest{
+					Code: "code_bad_request",
+				})
 				g.Assert(err).IsNotNil()
 			})
 			g.It("Should handle failure to resolve user", func() {
-				r, _ := http.NewRequest("GET", "?code=code_user_not_found", nil)
-				_, err := c.Login(ctx, nil, r)
+				_, _, err := c.Login(ctx, &types.OAuthRequest{
+					Code: "code_user_not_found",
+				})
 				g.Assert(err).IsNotNil()
 			})
 			g.It("Should handle authentication errors", func() {
-				r, _ := http.NewRequest("GET", "?error=invalid_scope", nil)
-				_, err := c.Login(ctx, nil, r)
+				_, _, err := c.Login(ctx, &types.OAuthRequest{
+					Error: "invalid_scope",
+				})
 				g.Assert(err).IsNotNil()
 			})
 		})
@@ -184,7 +186,8 @@ func Test_bitbucket(t *testing.T) {
 			g.It("Should return the details", func() {
 				branchHead, err := c.BranchHead(ctx, fakeUser, fakeRepo, "branch_name")
 				g.Assert(err).IsNil()
-				g.Assert(branchHead).Equal("branch_head_name")
+				g.Assert(branchHead.SHA).Equal("branch_head_name")
+				g.Assert(branchHead.ForgeURL).Equal("https://bitbucket.org/commitlink")
 			})
 			g.It("Should handle not found errors", func() {
 				_, err := c.BranchHead(ctx, fakeUser, fakeRepo, "branch_not_found")

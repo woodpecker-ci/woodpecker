@@ -219,7 +219,7 @@ var flags = append([]cli.Flag{
 		EnvVars:  []string{"WOODPECKER_DATABASE_DATASOURCE"},
 		Name:     "datasource",
 		Usage:    "database driver configuration string",
-		Value:    "woodpecker.sqlite",
+		Value:    datasourceDefaultValue(),
 		FilePath: os.Getenv("WOODPECKER_DATABASE_DATASOURCE_FILE"),
 	},
 	&cli.StringFlag{
@@ -438,6 +438,43 @@ var flags = append([]cli.Flag{
 		Usage:   "gitlab skip ssl verification",
 	},
 	//
+	// Bitbucket DataCenter/Server (previously Stash)
+	//
+	&cli.BoolFlag{
+		EnvVars: []string{"WOODPECKER_BITBUCKET_DC"},
+		Name:    "bitbucket-dc",
+		Usage:   "Bitbucket DataCenter/Server driver is enabled",
+	},
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_BITBUCKET_DC_URL"},
+		Name:    "bitbucket-dc-server",
+		Usage:   "Bitbucket DataCenter/Server server address",
+	},
+	&cli.StringFlag{
+		EnvVars:  []string{"WOODPECKER_BITBUCKET_DC_CLIENT_ID"},
+		Name:     "bitbucket-dc-client-id",
+		Usage:    "Bitbucket DataCenter/Server OAuth 2.0 client id",
+		FilePath: os.Getenv("WOODPECKER_BITBUCKET_DC_CLIENT_ID_FILE"),
+	},
+	&cli.StringFlag{
+		EnvVars:  []string{"WOODPECKER_BITBUCKET_DC_CLIENT_SECRET"},
+		Name:     "bitbucket-dc-client-secret",
+		Usage:    "Bitbucket DataCenter/Server OAuth 2.0 client secret",
+		FilePath: os.Getenv("WOODPECKER_BITBUCKET_DC_CLIENT_SECRET_FILE"),
+	},
+	&cli.StringFlag{
+		EnvVars:  []string{"WOODPECKER_BITBUCKET_DC_GIT_USERNAME"},
+		Name:     "bitbucket-dc-git-username",
+		Usage:    "Bitbucket DataCenter/Server service account username",
+		FilePath: os.Getenv("WOODPECKER_BITBUCKET_DC_GIT_USERNAME_FILE"),
+	},
+	&cli.StringFlag{
+		EnvVars:  []string{"WOODPECKER_BITBUCKET_DC_GIT_PASSWORD"},
+		Name:     "bitbucket-dc-git-password",
+		Usage:    "Bitbucket DataCenter/Server service account password",
+		FilePath: os.Getenv("WOODPECKER_BITBUCKET_DC_GIT_PASSWORD_FILE"),
+	},
+	//
 	// development flags
 	//
 	&cli.StringFlag{
@@ -473,3 +510,13 @@ var flags = append([]cli.Flag{
 		Usage:   "Flag to decrypt all encrypted data and disable encryption on server",
 	},
 }, logger.GlobalLoggerFlags...)
+
+// If woodpecker is running inside a container the default value for
+// the datasource is different from running outside a container.
+func datasourceDefaultValue() string {
+	_, found := os.LookupEnv("WOODPECKER_IN_CONTAINER")
+	if found {
+		return "/var/lib/woodpecker/woodpecker.sqlite"
+	}
+	return "woodpecker.sqlite"
+}

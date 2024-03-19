@@ -35,20 +35,6 @@ func (s storage) GetPipelineNumber(repo *model.Repo, num int64) (*model.Pipeline
 	).Get(pipeline))
 }
 
-func (s storage) GetPipelineRef(repo *model.Repo, ref string) (*model.Pipeline, error) {
-	pipeline := new(model.Pipeline)
-	return pipeline, wrapGet(s.engine.Where(
-		builder.Eq{"pipeline_repo_id": repo.ID, "pipeline_ref": ref},
-	).Get(pipeline))
-}
-
-func (s storage) GetPipelineCommit(repo *model.Repo, sha, branch string) (*model.Pipeline, error) {
-	pipeline := new(model.Pipeline)
-	return pipeline, wrapGet(s.engine.Where(
-		builder.Eq{"pipeline_repo_id": repo.ID, "pipeline_branch": branch, "pipeline_commit": sha},
-	).Get(pipeline))
-}
-
 func (s storage) GetPipelineLast(repo *model.Repo, branch string) (*model.Pipeline, error) {
 	pipeline := new(model.Pipeline)
 	return pipeline, wrapGet(s.engine.
@@ -140,24 +126,7 @@ func (s storage) DeletePipeline(pipeline *model.Pipeline) error {
 }
 
 func (s storage) deletePipeline(sess *xorm.Session, pipelineID int64) error {
-	// delete related steps
-	for startSteps := 0; ; startSteps += perPage {
-		stepIDs := make([]int64, 0, perPage)
-		if err := sess.Limit(perPage, startSteps).Table("steps").Cols("step_id").Where("step_pipeline_id = ?", pipelineID).Find(&stepIDs); err != nil {
-			return err
-		}
-		if len(stepIDs) == 0 {
-			break
-		}
-
-		for i := range stepIDs {
-			if err := deleteStep(sess, stepIDs[i]); err != nil {
-				return err
-			}
-		}
-	}
-
-	if _, err := sess.Where("workflow_pipeline_id = ?", pipelineID).Delete(new(model.Workflow)); err != nil {
+	if err := s.workflowsDelete(sess, pipelineID); err != nil {
 		return err
 	}
 

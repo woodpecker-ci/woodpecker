@@ -28,10 +28,11 @@ import (
 )
 
 const (
-	mergeRefs = "refs/merge-requests/%d/head" // merge request merged with base
+	mergeRefs               = "refs/merge-requests/%d/head" // merge request merged with base
+	VisibilityLevelInternal = 10
 )
 
-func (g *GitLab) convertGitLabRepo(_repo *gitlab.Project) (*model.Repo, error) {
+func (g *GitLab) convertGitLabRepo(_repo *gitlab.Project, projectMember *gitlab.ProjectMember) (*model.Repo, error) {
 	parts := strings.Split(_repo.PathWithNamespace, "/")
 	owner := strings.Join(parts[:len(parts)-1], "/")
 	name := parts[len(parts)-1]
@@ -48,9 +49,9 @@ func (g *GitLab) convertGitLabRepo(_repo *gitlab.Project) (*model.Repo, error) {
 		Visibility:    model.RepoVisibility(_repo.Visibility),
 		IsSCMPrivate:  !_repo.Public,
 		Perm: &model.Perm{
-			Pull:  isRead(_repo),
-			Push:  isWrite(_repo),
-			Admin: isAdmin(_repo),
+			Pull:  isRead(_repo, projectMember),
+			Push:  isWrite(projectMember),
+			Admin: isAdmin(projectMember),
 		},
 		PREnabled: _repo.MergeRequestsEnabled,
 	}
@@ -112,7 +113,7 @@ func convertMergeRequestHook(hook *gitlab.MergeEvent, req *http.Request) (int, *
 	}
 
 	pipeline.Event = model.EventPull
-	if obj.State == "closed" {
+	if obj.State == "closed" || obj.State == "merged" {
 		pipeline.Event = model.EventPullClosed
 	}
 
@@ -258,7 +259,7 @@ func convertReleaseHook(hook *gitlab.ReleaseEvent) (*model.Repo, *model.Pipeline
 	repo.CloneSSH = hook.Project.GitSSHURL
 	repo.FullName = hook.Project.PathWithNamespace
 	repo.Branch = hook.Project.DefaultBranch
-	repo.IsSCMPrivate = hook.Project.VisibilityLevel > 10
+	repo.IsSCMPrivate = hook.Project.VisibilityLevel > VisibilityLevelInternal
 
 	pipeline := &model.Pipeline{
 		Event:    model.EventRelease,
@@ -292,9 +293,13 @@ func getUserAvatar(email string) string {
 	)
 }
 
+// extractFromPath splits a repository path string into owner and name components.
+// It requires at least two path components, otherwise an error is returned.
 func extractFromPath(str string) (string, string, error) {
+	const minPathComponents = 2
+
 	s := strings.Split(str, "/")
-	if len(s) < 2 {
+	if len(s) < minPathComponents {
 		return "", "", fmt.Errorf("minimum match not found")
 	}
 	return s[0], s[1], nil

@@ -25,7 +25,14 @@ steps:
     commands:
       - echo "test"
     when:
-      event: [push, pull_request, tag, deployment]
+      event:
+        - manual
+        - push
+        - pull_request
+        - pull_request_closed
+        - tag
+        - deployment
+        - release
 
   when-event-exclude-pull_request_closed:
     image: alpine
