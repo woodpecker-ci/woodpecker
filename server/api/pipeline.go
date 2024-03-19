@@ -162,9 +162,7 @@ func DeletePipelines(c *gin.Context) {
 	before := c.Query("before")
 	after := c.Query("after")
 
-	filter := &model.PipelineFilter{
-		Before: time.Now().UTC().Unix(),
-	}
+	filter := new(model.PipelineFilter)
 
 	if before != "" {
 		beforeDt, err := time.Parse(time.RFC3339, before)

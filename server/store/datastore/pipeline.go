@@ -57,12 +57,14 @@ func (s storage) GetPipelineList(repo *model.Repo, p *model.ListOptions, f *mode
 
 	cond := builder.NewCond().And(builder.Eq{"pipeline_repo_id": repo.ID})
 
-	if f.After != 0 {
-		cond = cond.And(builder.Gt{"pipeline_started": f.After})
-	}
+	if f != nil {
+		if f.After != 0 {
+			cond = cond.And(builder.Gt{"pipeline_started": f.After})
+		}
 
-	if f.Before != 0 {
-		cond = cond.And(builder.Lt{"pipeline_started": f.Before})
+		if f.Before != 0 {
+			cond = cond.And(builder.Lt{"pipeline_started": f.Before})
+		}
 	}
 
 	return pipelines, s.paginate(p).Where(cond).
