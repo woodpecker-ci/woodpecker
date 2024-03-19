@@ -200,6 +200,10 @@ var flags = []cli.Flag{
 		Name:    "pipeline-target",
 	},
 	&cli.StringFlag{
+		EnvVars: []string{"CI_PIPELINE_TASK"},
+		Name:    "pipeline-task",
+	},
+	&cli.StringFlag{
 		EnvVars: []string{"CI_COMMIT_SHA"},
 		Name:    "commit-sha",
 	},
