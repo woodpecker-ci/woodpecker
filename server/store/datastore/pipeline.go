@@ -55,8 +55,7 @@ func (s storage) GetPipelineLastBefore(repo *model.Repo, branch string, num int6
 func (s storage) GetPipelineList(repo *model.Repo, p *model.ListOptions, f *model.FilterOptions) ([]*model.Pipeline, error) {
 	pipelines := make([]*model.Pipeline, 0, 16)
 
-	cond := builder.NewCond()
-	cond = cond.And(builder.Eq{"pipeline_repo_id": repo.ID})
+	cond := builder.NewCond().And(builder.Eq{"pipeline_repo_id": repo.ID})
 
 	if f != nil {
 		cond = cond.And(builder.Gt{"pipeline_started": f.After})
