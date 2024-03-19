@@ -274,7 +274,7 @@ const config: Config = {
             '1.0': {
               label: '1.0.x',
               banner: 'unmaintained',
-            }
+            },
           },
         },
         blog: {
