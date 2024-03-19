@@ -116,9 +116,7 @@ func GetPipelines(c *gin.Context) {
 	before := c.Query("before")
 	after := c.Query("after")
 
-	filter := &model.FilterOptions{
-		Before: time.Now().UTC().Unix(),
-	}
+	filter := new(model.FilterOptions)
 
 	if before != "" {
 		beforeDt, err := time.Parse(time.RFC3339, before)
