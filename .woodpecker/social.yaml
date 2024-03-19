@@ -1,0 +1,25 @@
+depends_on:
+  - docker
+  - binaries
+
+when:
+  - event: tag
+
+steps:
+  mastodon-toot:
+    image: docker.io/woodpeckerci/plugin-mastodon-post
+    settings:
+      server: https://floss.social
+      access_token:
+        from_secret: mastodon_token
+      visibility: public
+      ai_token:
+        from_secret: openai_token
+      ai_prompt: |
+        We want to present the next version of our app on Twitter.
+        Therefore we want to post a catching text, so users will know why they should
+        update to the newest version. If there is no special feature included
+        just summarize the changes in a few sentences. Use #WoodpeckerCI, #release and fitting
+        hashtags and emojis to make the post more appealing.
+
+        The changelog entry: {{ changelog }}
