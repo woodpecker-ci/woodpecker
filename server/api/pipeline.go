@@ -116,7 +116,7 @@ func GetPipelines(c *gin.Context) {
 	before := c.Query("before")
 	after := c.Query("after")
 
-	filter := new(model.FilterOptions)
+	filter := new(model.PipelineFilter)
 
 	if before != "" {
 		beforeDt, err := time.Parse(time.RFC3339, before)
@@ -142,6 +142,66 @@ func GetPipelines(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, pipelines)
+}
+
+// DeletePipelines
+//
+//	@Summary	Delete pipelines
+//	@Router		/repos/{repo_id}/pipelines [delete]
+//	@Produce	plain
+//	@Success	204
+//	@Tags		Pipelines
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		repo_id			path	int		true	"the repository id"
+//	@Param		page			query	int		false	"for response pagination, page offset number"	default(1)
+//	@Param		perPage			query	int		false	"for response pagination, max items per page"	default(50)
+//	@Param		before			query	string	false	"only return pipelines before this RFC3339 date"
+//	@Param		after			query	string	false	"only return pipelines after this RFC3339 date"
+func DeletePipelines(c *gin.Context) {
+	repo := session.Repo(c)
+	before := c.Query("before")
+	after := c.Query("after")
+
+	filter := &model.PipelineFilter{
+		Before: time.Now().UTC().Unix(),
+	}
+
+	if before != "" {
+		beforeDt, err := time.Parse(time.RFC3339, before)
+		if err != nil {
+			_ = c.AbortWithError(http.StatusInternalServerError, err)
+			return
+		}
+		filter.Before = beforeDt.Unix()
+	}
+
+	if after != "" {
+		afterDt, err := time.Parse(time.RFC3339, after)
+		if err != nil {
+			_ = c.AbortWithError(http.StatusInternalServerError, err)
+			return
+		}
+		filter.After = afterDt.Unix()
+	}
+
+	pipelines, err := store.FromContext(c).GetPipelineList(repo, session.Pagination(c), filter)
+	if err != nil {
+		_ = c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	for _, p := range pipelines {
+		if delWErr := store.FromContext(c).DeletePipeline(p); err != nil {
+			err = errors.Join(err, delWErr)
+		}
+	}
+
+	if err != nil {
+		c.String(http.StatusInternalServerError, "Error deleting pipelines. %s", err)
+		return
+	}
+
+	c.Status(http.StatusNoContent)
 }
 
 // GetPipeline
@@ -586,7 +646,7 @@ func DeletePipelineLogs(c *gin.Context) {
 		}
 	}
 	if err != nil {
-		c.String(http.StatusInternalServerError, "There was a problem deleting your logs. %s", err)
+		c.String(http.StatusInternalServerError, "Error deleting pipeline logs. %s", err)
 		return
 	}
 

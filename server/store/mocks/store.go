@@ -802,7 +802,7 @@ func (_m *Store) GetPipelineLastBefore(_a0 *model.Repo, _a1 string, _a2 int64) (
 }
 
 // GetPipelineList provides a mock function with given fields: _a0, _a1, _a2
-func (_m *Store) GetPipelineList(_a0 *model.Repo, _a1 *model.ListOptions, _a2 *model.FilterOptions) ([]*model.Pipeline, error) {
+func (_m *Store) GetPipelineList(_a0 *model.Repo, _a1 *model.ListOptions, _a2 *model.PipelineFilter) ([]*model.Pipeline, error) {
 	ret := _m.Called(_a0, _a1, _a2)
 
 	if len(ret) == 0 {
@@ -811,10 +811,10 @@ func (_m *Store) GetPipelineList(_a0 *model.Repo, _a1 *model.ListOptions, _a2 *m
 
 	var r0 []*model.Pipeline
 	var r1 error
-	if rf, ok := ret.Get(0).(func(*model.Repo, *model.ListOptions, *model.FilterOptions) ([]*model.Pipeline, error)); ok {
+	if rf, ok := ret.Get(0).(func(*model.Repo, *model.ListOptions, *model.PipelineFilter) ([]*model.Pipeline, error)); ok {
 		return rf(_a0, _a1, _a2)
 	}
-	if rf, ok := ret.Get(0).(func(*model.Repo, *model.ListOptions, *model.FilterOptions) []*model.Pipeline); ok {
+	if rf, ok := ret.Get(0).(func(*model.Repo, *model.ListOptions, *model.PipelineFilter) []*model.Pipeline); ok {
 		r0 = rf(_a0, _a1, _a2)
 	} else {
 		if ret.Get(0) != nil {
@@ -822,7 +822,7 @@ func (_m *Store) GetPipelineList(_a0 *model.Repo, _a1 *model.ListOptions, _a2 *m
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(*model.Repo, *model.ListOptions, *model.FilterOptions) error); ok {
+	if rf, ok := ret.Get(1).(func(*model.Repo, *model.ListOptions, *model.PipelineFilter) error); ok {
 		r1 = rf(_a0, _a1, _a2)
 	} else {
 		r1 = ret.Error(1)
