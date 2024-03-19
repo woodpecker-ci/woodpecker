@@ -19,7 +19,7 @@ steps:
         We want to present the next version of our app on Twitter.
         Therefore we want to post a catching text, so users will know why they should
         update to the newest version. If there is no special feature included
-        just summarize the changes in a few sentences. Use #WoodpeckerCI, #release and fitting
-        hashtags and emojis to make the post more appealing.
+        just summarize the changes in a few sentences. Use #WoodpeckerCI, #release and
+        additional fitting hashtags and emojis to make the post more appealing.
 
         The changelog entry: {{ changelog }}
