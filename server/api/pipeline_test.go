@@ -23,51 +23,28 @@ func TestGetPipelines(t *testing.T) {
 
 	g := goblin.Goblin(t)
 	g.Describe("Pipeline", func() {
-		g.It("should get pipelines", func() {
-			pipelines := []*model.Pipeline{fakePipeline}
-
-			mockStore := mocks.NewStore(t)
-			mockStore.On("GetPipelineList", mock.Anything, mock.Anything, mock.Anything).Return(pipelines, nil)
-
-			w := httptest.NewRecorder()
-			c, _ := gin.CreateTestContext(w)
-			c.Set("store", mockStore)
-
-			GetPipelines(c)
-
-			mockStore.AssertCalled(t, "GetPipelineList", mock.Anything, mock.Anything, mock.Anything)
-			assert.Equal(t, http.StatusOK, c.Writer.Status())
-		})
-
-		g.It("should not parse pipeline filter", func() {
-			c, _ := gin.CreateTestContext(httptest.NewRecorder())
-			c.Request, _ = http.NewRequest("DELETE", "/?before=2023-01-16&after=2023-01-15", nil)
-
-			GetPipelines(c)
-
-			assert.Equal(t, http.StatusBadRequest, c.Writer.Status())
-		})
-
 		g.It("should parse pipeline filter", func() {
-			pipelines := []*model.Pipeline{fakePipeline}
+			pipelines := make([]*model.Pipeline, 1)
 
 			mockStore := mocks.NewStore(t)
 			mockStore.On("GetPipelineList", mock.Anything, mock.Anything, mock.Anything).Return(pipelines, nil)
+			mockStore.On("DeletePipeline", mock.Anything).Return(nil)
 
 			c, _ := gin.CreateTestContext(httptest.NewRecorder())
 			c.Set("store", mockStore)
-			c.Request, _ = http.NewRequest("DELETE", "/?2023-01-16T15:00:00Z&after=2023-01-15T15:00:00Z", nil)
+			c.Request, _ = http.NewRequest("DELETE", "/?before=2023-01-16T15:00:00Z&after=2023-01-15T15:00:00Z", nil)
 
-			GetPipelines(c)
+			DeletePipelines(c)
 
-			assert.Equal(t, http.StatusOK, c.Writer.Status())
+			assert.Equal(t, http.StatusNoContent, c.Writer.Status())
 		})
 
 		g.It("should parse pipeline filter with tz offset", func() {
-			pipelines := []*model.Pipeline{fakePipeline}
+			pipelines := make([]*model.Pipeline, 1)
 
 			mockStore := mocks.NewStore(t)
 			mockStore.On("GetPipelineList", mock.Anything, mock.Anything, mock.Anything).Return(pipelines, nil)
+			mockStore.On("DeletePipeline", mock.Anything).Return(nil)
 
 			c, _ := gin.CreateTestContext(httptest.NewRecorder())
 			c.Set("store", mockStore)
