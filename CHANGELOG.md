@@ -4,11 +4,17 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@qwerty287
+@6543, @qwerty287, @xoxys
 
 ### 🐛 Bug Fixes
 
+- Fix uppercased env [[#3516](https://github.com/woodpecker-ci/woodpecker/pull/3516)]
 - Fix env schema [[#3514](https://github.com/woodpecker-ci/woodpecker/pull/3514)]
+
+### Misc
+
+- Temp pin golangci version in makefile [[#3520](https://github.com/woodpecker-ci/woodpecker/pull/3520)]
+- Fix links in CHANGELOG.md [[#3519](https://github.com/woodpecker-ci/woodpecker/pull/3519)]
 
 ## [2.4.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.4.0) - 2024-03-19
 
