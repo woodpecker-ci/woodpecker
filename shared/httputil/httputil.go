@@ -15,6 +15,7 @@
 package httputil
 
 import (
+	"math"
 	"net/http"
 	"strings"
 )
@@ -47,7 +48,7 @@ func SetCookie(w http.ResponseWriter, r *http.Request, name, value string) {
 		Domain:   r.URL.Host,
 		HttpOnly: true,
 		Secure:   IsHTTPS(r),
-		MaxAge:   2147483647, // the cooke value (token) is responsible for expiration
+		MaxAge:   math.MaxInt32, // the cookie value (token) is responsible for expiration
 	}
 
 	http.SetCookie(w, &cookie)

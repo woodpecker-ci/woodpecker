@@ -34,6 +34,8 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 )
 
+const listLimit = 250
+
 // Opts defines configuration options.
 type Opts struct {
 	URL          string // Bitbucket server url for API access.
@@ -166,7 +168,7 @@ func (c *client) Repo(ctx context.Context, u *model.User, rID model.ForgeRemoteI
 
 	var repo *bb.Repository
 	if rID.IsValid() {
-		opts := &bb.RepositorySearchOptions{Permission: bb.PermissionRepoWrite, ListOptions: bb.ListOptions{Limit: 250}}
+		opts := &bb.RepositorySearchOptions{Permission: bb.PermissionRepoWrite, ListOptions: bb.ListOptions{Limit: listLimit}}
 		for {
 			repos, resp, err := bc.Projects.SearchRepositories(ctx, opts)
 			if err != nil {
@@ -213,7 +215,7 @@ func (c *client) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error
 		return nil, fmt.Errorf("unable to create bitbucket client: %w", err)
 	}
 
-	opts := &bb.RepositorySearchOptions{Permission: bb.PermissionRepoWrite, ListOptions: bb.ListOptions{Limit: 250}}
+	opts := &bb.RepositorySearchOptions{Permission: bb.PermissionRepoWrite, ListOptions: bb.ListOptions{Limit: listLimit}}
 	var all []*model.Repo
 	for {
 		repos, resp, err := bc.Projects.SearchRepositories(ctx, opts)
@@ -231,7 +233,7 @@ func (c *client) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error
 	}
 
 	// Add admin permissions to relevant repositories
-	opts = &bb.RepositorySearchOptions{Permission: bb.PermissionRepoAdmin, ListOptions: bb.ListOptions{Limit: 250}}
+	opts = &bb.RepositorySearchOptions{Permission: bb.PermissionRepoAdmin, ListOptions: bb.ListOptions{Limit: listLimit}}
 	for {
 		repos, resp, err := bc.Projects.SearchRepositories(ctx, opts)
 		if err != nil {
@@ -524,6 +526,8 @@ func (c *client) getUserAndRepo(ctx context.Context, r *model.Repo) (*model.User
 		return nil, nil, fmt.Errorf("unable to get user: %w", err)
 	}
 	log.Trace().Any("user", user).Msg("got user")
+
+	forge.Refresh(ctx, c, _store, user)
 
 	return user, repo, nil
 }

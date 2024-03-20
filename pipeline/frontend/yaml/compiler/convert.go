@@ -105,12 +105,12 @@ func (c *Compiler) createProcess(container *yaml_types.Container, stepType backe
 
 	// TODO: why don't we pass settings to services?
 	if stepType != backend_types.StepTypeService {
-		if err := settings.ParamsToEnv(container.Settings, environment, getSecretValue); err != nil {
+		if err := settings.ParamsToEnv(container.Settings, environment, "PLUGIN_", getSecretValue); err != nil {
 			return nil, err
 		}
 	}
 
-	if err := settings.ParamsToEnv(container.Environment, environment, getSecretValue); err != nil {
+	if err := settings.ParamsToEnv(container.Environment, environment, "", getSecretValue); err != nil {
 		return nil, err
 	}
 
