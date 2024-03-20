@@ -399,10 +399,10 @@ func (c *Gitea) Activate(ctx context.Context, u *model.User, r *model.Repo, link
 	_, response, err := client.CreateRepoHook(r.Owner, r.Name, hook)
 	if err != nil {
 		if response != nil {
-			if response.StatusCode == 404 {
+			if response.StatusCode == http.StatusNotFound {
 				return fmt.Errorf("could not find repository")
 			}
-			if response.StatusCode == 200 {
+			if response.StatusCode == http.StatusOK {
 				return fmt.Errorf("could not find repository, repository was probably renamed")
 			}
 		}
