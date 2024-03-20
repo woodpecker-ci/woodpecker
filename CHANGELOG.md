@@ -1,5 +1,15 @@
 # Changelog
 
+## [2.4.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.4.1) - 2024-03-20
+
+### ❤️ Thanks to all contributors! ❤️
+
+@qwerty287
+
+### 🐛 Bug Fixes
+
+- Fix env schema [[#3514](https://github.com/woodpecker-ci/woodpecker/pull/3514)]
+
 ## [2.4.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.4.0) - 2024-03-19
 
 ### ❤️ Thanks to all contributors! ❤️
