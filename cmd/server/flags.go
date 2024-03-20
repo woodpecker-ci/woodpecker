@@ -370,7 +370,7 @@ var flags = append([]cli.Flag{
 		Value:   "https://try.gitea.io",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_GITEA_OAUTH2_URL"},
+		EnvVars: []string{"WOODPECKER_GITEA_OAUTH_URL"},
 		Name:    "gitea-oauth-server",
 		Usage:   "user-facing gitea server address",
 	},

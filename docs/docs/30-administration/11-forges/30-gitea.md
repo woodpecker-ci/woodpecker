@@ -64,7 +64,7 @@ Enables the Gitea driver.
 
 Configures the Gitea server address.
 
-### `WOODPECKER_GITEA_OAUTH2_URL`
+### `WOODPECKER_GITEA_OAUTH_URL`
 
 > Default: value of `WOODPECKER_GITEA_URL`
 
