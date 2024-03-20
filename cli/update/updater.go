@@ -10,6 +10,7 @@ import (
 	"os"
 	"path"
 	"runtime"
+	"strings"
 
 	"github.com/rs/zerolog/log"
 
@@ -45,7 +46,7 @@ func CheckForUpdate(ctx context.Context, force bool) (*NewVersion, error) {
 	}
 
 	// using the latest release
-	if release.TagName == version.String() && !force {
+	if strings.TrimPrefix(release.TagName, "v") == strings.TrimPrefix(version.String(), "v") && !force {
 		return nil, nil
 	}
 
