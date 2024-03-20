@@ -37,7 +37,7 @@ func Before(c *cli.Context) error {
 
 		log.Debug().Msg("Checking for updates ...")
 
-		newVersion, err := update.CheckForUpdate(waitForUpdateCheck, true)
+		newVersion, err := update.CheckForUpdate(waitForUpdateCheck, false)
 		if err != nil {
 			log.Error().Err(err).Msgf("Failed to check for updates")
 			return
