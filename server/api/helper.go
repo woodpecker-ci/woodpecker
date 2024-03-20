@@ -64,3 +64,14 @@ func refreshUserToken(c *gin.Context, user *model.User) {
 	}
 	forge.Refresh(c, _forge, _store, user)
 }
+
+// pipelineDeleteAllowed checks if the given pipeline can be deleted based on its status.
+// It returns a bool indicating if delete is allowed, and the pipeline's status.
+func pipelineDeleteAllowed(pl *model.Pipeline) (bool, model.StatusValue) {
+	switch pl.Status {
+	case model.StatusRunning, model.StatusPending, model.StatusBlocked:
+		return false, pl.Status
+	}
+
+	return true, pl.Status
+}

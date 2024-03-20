@@ -188,8 +188,13 @@ func DeletePipelines(c *gin.Context) {
 		return
 	}
 
-	for _, p := range pipelines {
-		if delWErr := store.FromContext(c).DeletePipeline(p); err != nil {
+	for _, pl := range pipelines {
+		if ok, status := pipelineDeleteAllowed(pl); !ok {
+			c.String(http.StatusUnprocessableEntity, "Cannot delete pipeline with status %s", status)
+			return
+		}
+
+		if delWErr := store.FromContext(c).DeletePipeline(pl); err != nil {
 			err = errors.Join(err, delWErr)
 		}
 	}
@@ -632,9 +637,8 @@ func DeletePipelineLogs(c *gin.Context) {
 		return
 	}
 
-	switch pl.Status {
-	case model.StatusRunning, model.StatusPending:
-		c.String(http.StatusUnprocessableEntity, "Cannot delete logs for a pending or running pipeline")
+	if ok, status := pipelineDeleteAllowed(pl); !ok {
+		c.String(http.StatusUnprocessableEntity, "Cannot delete logs for pipeline with status %s", status)
 		return
 	}
 

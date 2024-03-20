@@ -21,10 +21,18 @@ var fakePipeline = &model.Pipeline{
 func TestGetPipelines(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
+	pipeline1 := &model.Pipeline{
+		Status: model.StatusSuccess,
+	}
+	pipeline2 := &model.Pipeline{
+		Status: model.StatusPending,
+	}
+
 	g := goblin.Goblin(t)
 	g.Describe("Pipeline", func() {
 		g.It("should parse pipeline filter", func() {
-			pipelines := make([]*model.Pipeline, 1)
+			pipelines := make([]*model.Pipeline, 0)
+			pipelines = append(pipelines, pipeline1)
 
 			mockStore := mocks.NewStore(t)
 			mockStore.On("GetPipelineList", mock.Anything, mock.Anything, mock.Anything).Return(pipelines, nil)
@@ -40,7 +48,8 @@ func TestGetPipelines(t *testing.T) {
 		})
 
 		g.It("should parse pipeline filter with tz offset", func() {
-			pipelines := make([]*model.Pipeline, 1)
+			pipelines := make([]*model.Pipeline, 0)
+			pipelines = append(pipelines, pipeline1)
 
 			mockStore := mocks.NewStore(t)
 			mockStore.On("GetPipelineList", mock.Anything, mock.Anything, mock.Anything).Return(pipelines, nil)
@@ -53,6 +62,23 @@ func TestGetPipelines(t *testing.T) {
 			GetPipelines(c)
 
 			assert.Equal(t, http.StatusOK, c.Writer.Status())
+		})
+
+		g.It("should not delete pending", func() {
+			pipelines := make([]*model.Pipeline, 0)
+			pipelines = append(pipelines, pipeline2)
+
+			mockStore := mocks.NewStore(t)
+			mockStore.On("GetPipelineList", mock.Anything, mock.Anything, mock.Anything).Return(pipelines, nil)
+
+			c, _ := gin.CreateTestContext(httptest.NewRecorder())
+			c.Set("store", mockStore)
+
+			DeletePipelines(c)
+
+			mockStore.AssertCalled(t, "GetPipelineList", mock.Anything, mock.Anything, mock.Anything)
+			mockStore.AssertNotCalled(t, "DeletePipeline", mock.Anything)
+			assert.Equal(t, http.StatusUnprocessableEntity, c.Writer.Status())
 		})
 	})
 }
