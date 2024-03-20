@@ -136,7 +136,10 @@ func convertPullRequestEvent(ev *bb.PullRequestEvent, baseURL string) *model.Pip
 
 func authorLabel(name string) string {
 	var result string
-	if len(name) > 40 {
+
+	const maxNameLength = 40
+
+	if len(name) > maxNameLength {
 		result = name[0:37] + "..."
 	} else {
 		result = name

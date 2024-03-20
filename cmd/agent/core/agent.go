@@ -89,7 +89,7 @@ func run(c *cli.Context, backends []types.Backend) error {
 
 	agentToken := c.String("grpc-token")
 	authClient := agentRpc.NewAuthGrpcClient(authConn, agentToken, agentConfig.AgentID)
-	authInterceptor, err := agentRpc.NewAuthInterceptor(authClient, 30*time.Minute)
+	authInterceptor, err := agentRpc.NewAuthInterceptor(authClient, 30*time.Minute) //nolint: gomnd
 	if err != nil {
 		return err
 	}
@@ -276,12 +276,12 @@ func stringSliceAddToMap(sl []string, m map[string]string) error {
 		m = make(map[string]string)
 	}
 	for _, v := range utils.StringSliceDeleteEmpty(sl) {
-		parts := strings.SplitN(v, "=", 2)
-		switch len(parts) {
-		case 2:
-			m[parts[0]] = parts[1]
-		case 1:
-			return fmt.Errorf("key '%s' does not have a value assigned", parts[0])
+		before, after, _ := strings.Cut(v, "=")
+		switch {
+		case before != "" && after != "":
+			m[before] = after
+		case before != "":
+			return fmt.Errorf("key '%s' does not have a value assigned", before)
 		default:
 			return fmt.Errorf("empty string in slice")
 		}

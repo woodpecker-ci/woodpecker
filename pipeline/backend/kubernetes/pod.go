@@ -122,7 +122,7 @@ func podSpec(step *types.Step, config *config, options BackendOptions) (v1.PodSp
 		HostAliases:        hostAliases(step.ExtraHosts),
 		NodeSelector:       nodeSelector(options.NodeSelector, step.Environment["CI_SYSTEM_PLATFORM"]),
 		Tolerations:        tolerations(options.Tolerations),
-		SecurityContext:    podSecurityContext(options.SecurityContext, config.SecurityContext),
+		SecurityContext:    podSecurityContext(options.SecurityContext, config.SecurityContext, step.Privileged),
 	}
 	spec.Volumes, err = volumes(step.Volumes)
 	if err != nil {
@@ -339,7 +339,7 @@ func toleration(backendToleration Toleration) v1.Toleration {
 	}
 }
 
-func podSecurityContext(sc *SecurityContext, secCtxConf SecurityContextConfig) *v1.PodSecurityContext {
+func podSecurityContext(sc *SecurityContext, secCtxConf SecurityContextConfig, stepPrivileged bool) *v1.PodSecurityContext {
 	var (
 		nonRoot *bool
 		user    *int64
@@ -348,21 +348,31 @@ func podSecurityContext(sc *SecurityContext, secCtxConf SecurityContextConfig) *
 		seccomp *v1.SeccompProfile
 	)
 
-	if sc != nil && sc.RunAsNonRoot != nil {
-		if *sc.RunAsNonRoot {
-			nonRoot = sc.RunAsNonRoot // true
+	if secCtxConf.RunAsNonRoot {
+		nonRoot = newBool(true)
+	}
+
+	if sc != nil {
+		// only allow to set user if its not root or step is privileged
+		if sc.RunAsUser != nil && (*sc.RunAsUser != 0 || stepPrivileged) {
+			user = sc.RunAsUser
 		}
-	} else if secCtxConf.RunAsNonRoot {
-		nonRoot = &secCtxConf.RunAsNonRoot // true
-	}
 
-	if sc != nil {
-		user = sc.RunAsUser
-		group = sc.RunAsGroup
-		fsGroup = sc.FSGroup
-	}
+		// only allow to set group if its not root or step is privileged
+		if sc.RunAsGroup != nil && (*sc.RunAsGroup != 0 || stepPrivileged) {
+			group = sc.RunAsGroup
+		}
 
-	if sc != nil {
+		// only allow to set fsGroup if its not root or step is privileged
+		if sc.FSGroup != nil && (*sc.FSGroup != 0 || stepPrivileged) {
+			fsGroup = sc.FSGroup
+		}
+
+		// only allow to set nonRoot if it's not set globally already
+		if nonRoot == nil && sc.RunAsNonRoot != nil {
+			nonRoot = sc.RunAsNonRoot
+		}
+
 		seccomp = seccompProfile(sc.SeccompProfile)
 	}
 
@@ -398,23 +408,19 @@ func seccompProfile(scp *SecProfile) *v1.SeccompProfile {
 }
 
 func containerSecurityContext(sc *SecurityContext, stepPrivileged bool) *v1.SecurityContext {
-	var privileged *bool
-
-	if sc != nil && sc.Privileged != nil && *sc.Privileged {
-		privileged = sc.Privileged // true
-	} else if stepPrivileged {
-		privileged = &stepPrivileged // true
-	}
-
-	if privileged == nil {
+	if !stepPrivileged {
 		return nil
 	}
 
-	securityContext := &v1.SecurityContext{
-		Privileged: privileged,
+	if sc != nil && sc.Privileged != nil && *sc.Privileged {
+		securityContext := &v1.SecurityContext{
+			Privileged: newBool(true),
+		}
+		log.Trace().Msgf("container security context that will be used: %v", securityContext)
+		return securityContext
 	}
-	log.Trace().Msgf("container security context that will be used: %v", securityContext)
-	return securityContext
+
+	return nil
 }
 
 func apparmorAnnotation(containerName string, scp *SecProfile) (*string, *string) {

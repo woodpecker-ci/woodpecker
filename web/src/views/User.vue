@@ -8,8 +8,8 @@
     <Tab id="secrets" :title="$t('user.settings.secrets.secrets')">
       <UserSecretsTab />
     </Tab>
-    <Tab id="api" :title="$t('user.settings.api.api')">
-      <UserAPITab />
+    <Tab id="cli-and-api" :title="$t('user.settings.cli_and_api.cli_and_api')">
+      <UserCLIAndAPITab />
     </Tab>
   </Scaffold>
 </template>
@@ -17,7 +17,7 @@
 <script lang="ts" setup>
 import Scaffold from '~/components/layout/scaffold/Scaffold.vue';
 import Tab from '~/components/layout/scaffold/Tab.vue';
-import UserAPITab from '~/components/user/UserAPITab.vue';
+import UserCLIAndAPITab from '~/components/user/UserCLIAndAPITab.vue';
 import UserGeneralTab from '~/components/user/UserGeneralTab.vue';
 import UserSecretsTab from '~/components/user/UserSecretsTab.vue';
 import useConfig from '~/compositions/useConfig';

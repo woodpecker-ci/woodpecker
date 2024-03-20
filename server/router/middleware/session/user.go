@@ -75,10 +75,10 @@ func MustAdmin() gin.HandlerFunc {
 		user := User(c)
 		switch {
 		case user == nil:
-			c.String(401, "User not authorized")
+			c.String(http.StatusUnauthorized, "User not authorized")
 			c.Abort()
 		case !user.Admin:
-			c.String(403, "User not authorized")
+			c.String(http.StatusForbidden, "User not authorized")
 			c.Abort()
 		default:
 			c.Next()
@@ -92,10 +92,10 @@ func MustRepoAdmin() gin.HandlerFunc {
 		perm := Perm(c)
 		switch {
 		case user == nil:
-			c.String(401, "User not authorized")
+			c.String(http.StatusUnauthorized, "User not authorized")
 			c.Abort()
 		case !perm.Admin:
-			c.String(403, "User not authorized")
+			c.String(http.StatusForbidden, "User not authorized")
 			c.Abort()
 		default:
 			c.Next()
@@ -108,7 +108,7 @@ func MustUser() gin.HandlerFunc {
 		user := User(c)
 		switch {
 		case user == nil:
-			c.String(401, "User not authorized")
+			c.String(http.StatusUnauthorized, "User not authorized")
 			c.Abort()
 		default:
 			c.Next()

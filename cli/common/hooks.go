@@ -8,6 +8,7 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v2"
 
+	"go.woodpecker-ci.org/woodpecker/v2/cli/internal/config"
 	"go.woodpecker-ci.org/woodpecker/v2/cli/update"
 )
 
@@ -17,7 +18,7 @@ var (
 )
 
 func Before(c *cli.Context) error {
-	if err := SetupGlobalLogger(c); err != nil {
+	if err := setupGlobalLogger(c); err != nil {
 		return err
 	}
 
@@ -49,7 +50,7 @@ func Before(c *cli.Context) error {
 		}
 	}()
 
-	return nil
+	return config.Load(c)
 }
 
 func After(_ *cli.Context) error {

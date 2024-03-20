@@ -43,35 +43,35 @@ func Handler() http.Handler {
 func listRepoHooks(c *gin.Context) {
 	page := c.Query("page")
 	if page != "" && page != "1" {
-		c.String(200, "[]")
+		c.String(http.StatusOK, "[]")
 	} else {
-		c.String(200, listRepoHookPayloads)
+		c.String(http.StatusOK, listRepoHookPayloads)
 	}
 }
 
 func getRepo(c *gin.Context) {
 	switch c.Param("name") {
 	case "repo_not_found":
-		c.String(404, "")
+		c.String(http.StatusNotFound, "")
 	default:
-		c.String(200, repoPayload)
+		c.String(http.StatusOK, repoPayload)
 	}
 }
 
 func getRepoByID(c *gin.Context) {
 	switch c.Param("id") {
 	case "repo_not_found":
-		c.String(404, "")
+		c.String(http.StatusNotFound, "")
 	default:
-		c.String(200, repoPayload)
+		c.String(http.StatusOK, repoPayload)
 	}
 }
 
 func createRepoCommitStatus(c *gin.Context) {
 	if c.Param("commit") == "v1.0.0" || c.Param("commit") == "9ecad50" {
-		c.String(200, repoPayload)
+		c.String(http.StatusOK, repoPayload)
 	}
-	c.String(404, "")
+	c.String(http.StatusNotFound, "")
 }
 
 func getRepoFile(c *gin.Context) {
@@ -79,12 +79,12 @@ func getRepoFile(c *gin.Context) {
 	ref := c.Query("ref")
 
 	if file == "file_not_found" {
-		c.String(404, "")
+		c.String(http.StatusNotFound, "")
 	}
 	if ref == "v1.0.0" || ref == "9ecad50" {
-		c.String(200, repoFilePayload)
+		c.String(http.StatusOK, repoFilePayload)
 	}
-	c.String(404, "")
+	c.String(http.StatusNotFound, "")
 }
 
 func createRepoHook(c *gin.Context) {
@@ -99,41 +99,41 @@ func createRepoHook(c *gin.Context) {
 	if in.Type != "gitea" ||
 		in.Conf.Type != "json" ||
 		in.Conf.URL != "http://localhost" {
-		c.String(500, "")
+		c.String(http.StatusInternalServerError, "")
 		return
 	}
 
-	c.String(200, "{}")
+	c.String(http.StatusOK, "{}")
 }
 
 func deleteRepoHook(c *gin.Context) {
-	c.String(200, "{}")
+	c.String(http.StatusOK, "{}")
 }
 
 func getUserRepos(c *gin.Context) {
 	switch c.Request.Header.Get("Authorization") {
 	case "token repos_not_found":
-		c.String(404, "")
+		c.String(http.StatusNotFound, "")
 	default:
 		page := c.Query("page")
 		if page != "" && page != "1" {
-			c.String(200, "[]")
+			c.String(http.StatusOK, "[]")
 		} else {
-			c.String(200, userRepoPayload)
+			c.String(http.StatusOK, userRepoPayload)
 		}
 	}
 }
 
 func getVersion(c *gin.Context) {
-	c.JSON(200, map[string]any{"version": "1.18.0"})
+	c.JSON(http.StatusOK, map[string]any{"version": "1.18.0"})
 }
 
 func getPRFiles(c *gin.Context) {
 	page := c.Query("page")
 	if page == "1" {
-		c.String(200, prFilesPayload)
+		c.String(http.StatusOK, prFilesPayload)
 	} else {
-		c.String(200, "[]")
+		c.String(http.StatusOK, "[]")
 	}
 }
 

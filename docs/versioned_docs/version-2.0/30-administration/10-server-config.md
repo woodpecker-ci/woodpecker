@@ -605,7 +605,7 @@ Enable the Swagger UI for API documentation.
 
 ### `WOODPECKER_GITHUB_...`
 
-See [GitHub configuration](forges/github/#configuration)
+See [GitHub configuration](forges/github/#all-github-configuration-options)
 
 ### `WOODPECKER_GITEA_...`
 

@@ -65,7 +65,7 @@ func Send(ctx context.Context, method, path string, privateKey crypto.PrivateKey
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != 200 {
+	if resp.StatusCode != http.StatusOK {
 		body, err := io.ReadAll(resp.Body)
 		if err != nil {
 			return resp.StatusCode, err

@@ -1,7 +1,7 @@
 FROM docker.io/alpine:3.19
 
 # renovate: datasource=repology depName=alpine_3_18/ca-certificates versioning=loose
-ENV CA_CERTIFICATES_VERSION="20230506-r0"
+ENV CA_CERTIFICATES_VERSION="20240226-r0"
 
 ARG TARGETOS TARGETARCH
 RUN apk add -U --no-cache ca-certificates=${CA_CERTIFICATES_VERSION}

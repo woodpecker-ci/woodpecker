@@ -44,7 +44,7 @@ func GetRegistry(c *gin.Context) {
 		handleDBError(c, err)
 		return
 	}
-	c.JSON(200, registry.Copy())
+	c.JSON(http.StatusOK, registry.Copy())
 }
 
 // PostRegistry

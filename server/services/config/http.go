@@ -18,6 +18,7 @@ import (
 	"context"
 	"crypto"
 	"fmt"
+	nethttp "net/http"
 
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
@@ -75,7 +76,7 @@ func (h *http) Fetch(ctx context.Context, forge forge.Forge, user *model.User, r
 		return nil, fmt.Errorf("failed to fetch config via http (%d) %w", status, err)
 	}
 
-	if status != 200 {
+	if status != nethttp.StatusOK {
 		return oldConfigData, nil
 	}
 

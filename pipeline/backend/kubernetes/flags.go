@@ -15,8 +15,6 @@
 package kubernetes
 
 import (
-	"time"
-
 	"github.com/urfave/cli/v2"
 )
 
@@ -61,18 +59,6 @@ var Flags = []cli.Flag{
 		EnvVars: []string{"WOODPECKER_BACKEND_K8S_SECCTX_NONROOT"},
 		Name:    "backend-k8s-secctx-nonroot",
 		Usage:   "`run as non root` Kubernetes security context option",
-	},
-	&cli.IntFlag{
-		EnvVars: []string{"WOODPECKER_CONNECT_RETRY_COUNT"},
-		Name:    "connect-retry-count",
-		Usage:   "number of times to retry connecting to the server",
-		Value:   5,
-	},
-	&cli.DurationFlag{
-		EnvVars: []string{"WOODPECKER_CONNECT_RETRY_DELAY"},
-		Name:    "connect-retry-delay",
-		Usage:   "duration to wait before retrying to connect to the server",
-		Value:   time.Second * 2,
 	},
 	&cli.StringSliceFlag{
 		EnvVars: []string{"WOODPECKER_BACKEND_K8S_PULL_SECRET_NAMES"},

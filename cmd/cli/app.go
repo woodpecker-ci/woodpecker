@@ -29,6 +29,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/cli/registry"
 	"go.woodpecker-ci.org/woodpecker/v2/cli/repo"
 	"go.woodpecker-ci.org/woodpecker/v2/cli/secret"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/setup"
 	"go.woodpecker-ci.org/woodpecker/v2/cli/update"
 	"go.woodpecker-ci.org/woodpecker/v2/cli/user"
 	"go.woodpecker-ci.org/woodpecker/v2/version"
@@ -58,6 +59,7 @@ func newApp() *cli.App {
 		lint.Command,
 		loglevel.Command,
 		cron.Command,
+		setup.Command,
 		update.Command,
 	}
 

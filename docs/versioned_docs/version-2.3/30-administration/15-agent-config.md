@@ -184,7 +184,7 @@ See [Kubernetes backend configuration](./22-backends/40-kubernetes.md#configurat
 
 ### `WOODPECKER_BACKEND_LOCAL_*`
 
-See [Local backend configuration](./22-backends/20-local.md#further-configuration)
+See [Local backend configuration](./22-backends/20-local.md#options)
 
 ## Advanced Settings
 

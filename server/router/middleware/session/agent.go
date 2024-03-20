@@ -16,6 +16,8 @@
 package session
 
 import (
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 
 	"go.woodpecker-ci.org/woodpecker/v2/shared/token"
@@ -25,7 +27,7 @@ import (
 func AuthorizeAgent(c *gin.Context) {
 	secret, _ := c.MustGet("agent").(string)
 	if secret == "" {
-		c.String(401, "invalid or empty token.")
+		c.String(http.StatusUnauthorized, "invalid or empty token.")
 		return
 	}
 
@@ -34,10 +36,10 @@ func AuthorizeAgent(c *gin.Context) {
 	})
 	switch {
 	case err != nil:
-		c.String(500, "invalid or empty token. %s", err)
+		c.String(http.StatusInternalServerError, "invalid or empty token. %s", err)
 		c.Abort()
 	case parsed.Kind != token.AgentToken:
-		c.String(403, "invalid token. please use an agent token")
+		c.String(http.StatusForbidden, "invalid token. please use an agent token")
 		c.Abort()
 	default:
 		c.Next()

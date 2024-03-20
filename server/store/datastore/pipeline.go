@@ -126,24 +126,7 @@ func (s storage) DeletePipeline(pipeline *model.Pipeline) error {
 }
 
 func (s storage) deletePipeline(sess *xorm.Session, pipelineID int64) error {
-	// delete related steps
-	for startSteps := 0; ; startSteps += perPage {
-		stepIDs := make([]int64, 0, perPage)
-		if err := sess.Limit(perPage, startSteps).Table("steps").Cols("step_id").Where("step_pipeline_id = ?", pipelineID).Find(&stepIDs); err != nil {
-			return err
-		}
-		if len(stepIDs) == 0 {
-			break
-		}
-
-		for i := range stepIDs {
-			if err := deleteStep(sess, stepIDs[i]); err != nil {
-				return err
-			}
-		}
-	}
-
-	if _, err := sess.Where("workflow_pipeline_id = ?", pipelineID).Delete(new(model.Workflow)); err != nil {
+	if err := s.workflowsDelete(sess, pipelineID); err != nil {
 		return err
 	}
 

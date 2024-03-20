@@ -26,7 +26,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/google/go-github/v59/github"
+	"github.com/google/go-github/v60/github"
 	"github.com/rs/zerolog/log"
 	"golang.org/x/oauth2"
 
@@ -465,15 +465,7 @@ func matchingHooks(hooks []*github.Hook, rawurl string) *github.Hook {
 		if hook.ID == nil {
 			continue
 		}
-		v, ok := hook.Config["url"]
-		if !ok {
-			continue
-		}
-		s, ok := v.(string)
-		if !ok {
-			continue
-		}
-		hookURL, err := url.Parse(s)
+		hookURL, err := url.Parse(hook.Config.GetURL())
 		if err == nil && hookURL.Host == link.Host {
 			return hook
 		}
@@ -489,7 +481,9 @@ func (c *client) Status(ctx context.Context, user *model.User, repo *model.Repo,
 	client := c.newClientToken(ctx, user.Token)
 
 	if pipeline.Event == model.EventDeploy {
+		// Get id from url. If not found, skip.
 		matches := reDeploy.FindStringSubmatch(pipeline.ForgeURL)
+		//nolint:gomnd
 		if len(matches) != 2 {
 			return nil
 		}
@@ -526,9 +520,9 @@ func (c *client) Activate(ctx context.Context, u *model.User, r *model.Repo, lin
 			"pull_request",
 			"deployment",
 		},
-		Config: map[string]any{
-			"url":          link,
-			"content_type": "form",
+		Config: &github.HookConfig{
+			URL:         &link,
+			ContentType: github.String("form"),
 		},
 	}
 	_, _, err := client.Repositories.CreateHook(ctx, r.Owner, r.Name, hook)
