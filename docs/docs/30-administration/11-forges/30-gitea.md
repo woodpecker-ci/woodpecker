@@ -64,12 +64,6 @@ Enables the Gitea driver.
 
 Configures the Gitea server address.
 
-### `WOODPECKER_GITEA_OAUTH_URL`
-
-> Default: value of `WOODPECKER_GITEA_URL`
-
-Configures the user-facing Gitea server address. Should be used if `WOODPECKER_GITEA_URL` points to an internal URL used for API requests.
-
 ### `WOODPECKER_GITEA_CLIENT`
 
 > Default: empty
@@ -99,3 +93,11 @@ Read the value for `WOODPECKER_GITEA_SECRET` from the specified filepath
 > Default: `false`
 
 Configure if SSL verification should be skipped.
+
+## Advanced options
+
+### `WOODPECKER_DEV_GITEA_OAUTH_URL`
+
+> Default: value of `WOODPECKER_GITEA_URL`
+
+Configures the user-facing Gitea server address. Should be used if `WOODPECKER_GITEA_URL` points to an internal URL used for API requests.
