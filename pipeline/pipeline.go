@@ -250,7 +250,7 @@ func (r *Runtime) exec(step *backend.Step) (*backend.State, error) {
 	}
 
 	// nothing else to do, this is a detached process.
-	if step.Detached {
+	if step.Type == backend.StepTypeService {
 		return nil, nil
 	}
 
