@@ -1,6 +1,6 @@
 # Changelog
 
-## [2.4.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.4.0) - 2024-03-19
+## [2.4.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.4.0) - 2024-03-19
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -105,7 +105,7 @@
 - Apply `dependencies` label to all PRs [[#3358](https://github.com/woodpecker-ci/woodpecker/pull/3358)]
 - chore(deps): update docker.io/woodpeckerci/plugin-docker-buildx docker tag to v3.0.1 [[#3324](https://github.com/woodpecker-ci/woodpecker/pull/3324)]
 
-## [2.3.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.3.0) - 2024-01-31
+## [2.3.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.3.0) - 2024-01-31
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -162,7 +162,7 @@
 
 - build: fix nfpm path for server binary [[#3246](https://github.com/woodpecker-ci/woodpecker/pull/3246)]
 
-## [2.2.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.2.1) - 2024-01-21
+## [2.2.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.2.1) - 2024-01-21
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -176,7 +176,7 @@
 
 - Build tarball for distribution packages [[#3244](https://github.com/woodpecker-ci/woodpecker/pull/3244)]
 
-## [2.2.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.2.0) - 2024-01-21
+## [2.2.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.2.0) - 2024-01-21
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -296,7 +296,7 @@
 - Use `yamllint` [[#3066](https://github.com/woodpecker-ci/woodpecker/pull/3066)]
 - Use dag in ci config [[#3010](https://github.com/woodpecker-ci/woodpecker/pull/3010)]
 
-## [2.1.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.1.1) - 2023-12-27
+## [2.1.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.1.1) - 2023-12-27
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -317,7 +317,7 @@
 
 - Add some tests [[#3030](https://github.com/woodpecker-ci/woodpecker/pull/3030)]
 
-## [2.1.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.1.0) - 2023-12-26
+## [2.1.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.1.0) - 2023-12-26
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -422,7 +422,7 @@
 - Update web npm deps non-major [[#2884](https://github.com/woodpecker-ci/woodpecker/pull/2884)]
 - Update docker.io/woodpeckerci/plugin-docker-buildx Docker tag to v2.2.1 [[#2883](https://github.com/woodpecker-ci/woodpecker/pull/2883)]
 
-## [2.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.0.0) - 2023-11-23
+## [2.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.0.0) - 2023-11-23
 
 ### ❤️ Thanks to all contributors! ❤️
 
