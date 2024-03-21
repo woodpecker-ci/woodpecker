@@ -50,7 +50,11 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 
 	skipMatch := skipPipelineRegex.FindString(pipeline.Message)
 	if len(skipMatch) > 0 {
-		log.Debug().Str("repo", repo.FullName).Msgf("ignoring pipeline as skip-ci was found in the commit (%s) message '%s'", pipeline.Commit, pipeline.Message)
+		ref := pipeline.Commit
+		if len(ref) == 0 {
+			ref = pipeline.Ref
+		}
+		log.Debug().Str("repo", repo.FullName).Msgf("ignoring pipeline as skip-ci was found in the commit (%s) message '%s'", ref, pipeline.Message)
 		return nil, ErrFiltered
 	}
 
@@ -71,8 +75,8 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 	}
 
 	// fetch the pipeline file from the forge
-	configFetcher := forge.NewConfigFetcher(_forge, server.Config.Services.Timeout, server.Config.Services.ConfigService, repoUser, repo, pipeline)
-	forgeYamlConfigs, configFetchErr := configFetcher.Fetch(ctx)
+	configService := server.Config.Services.Manager.ConfigServiceFromRepo(repo)
+	forgeYamlConfigs, configFetchErr := configService.Fetch(ctx, _forge, repoUser, repo, pipeline, nil, false)
 	if errors.Is(configFetchErr, &forge_types.ErrConfigNotFound{}) {
 		log.Debug().Str("repo", repo.FullName).Err(configFetchErr).Msgf("cannot find config '%s' in '%s' with user: '%s'", repo.Config, pipeline.Ref, repoUser.Login)
 		if err := _store.DeletePipeline(pipeline); err != nil {
@@ -122,8 +126,12 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 		return nil, fmt.Errorf(msg)
 	}
 
+	if err := prepareStart(ctx, _forge, _store, pipeline, repoUser, repo); err != nil {
+		log.Error().Err(err).Str("repo", repo.FullName).Msgf("error preparing pipeline for %s#%d", repo.FullName, pipeline.Number)
+		return nil, err
+	}
+
 	if pipeline.Status == model.StatusBlocked {
-		publishPipeline(ctx, _forge, pipeline, repo, repoUser)
 		return pipeline, nil
 	}
 

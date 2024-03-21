@@ -61,9 +61,9 @@ func CreatePipeline(c *gin.Context) {
 
 	lastCommit, _ := forge.BranchHead(c, user, repo, opts.Branch)
 
-	tmpBuild := createTmpPipeline(model.EventManual, lastCommit, repo, user, &opts)
+	tmpPipeline := createTmpPipeline(model.EventManual, lastCommit, user, &opts)
 
-	pl, err := pipeline.Create(c, _store, repo, tmpBuild)
+	pl, err := pipeline.Create(c, _store, repo, tmpPipeline)
 	if err != nil {
 		handlePipelineErr(c, err)
 	} else {
@@ -71,10 +71,10 @@ func CreatePipeline(c *gin.Context) {
 	}
 }
 
-func createTmpPipeline(event model.WebhookEvent, commitSHA string, repo *model.Repo, user *model.User, opts *model.PipelineOptions) *model.Pipeline {
+func createTmpPipeline(event model.WebhookEvent, commit *model.Commit, user *model.User, opts *model.PipelineOptions) *model.Pipeline {
 	return &model.Pipeline{
 		Event:     event,
-		Commit:    commitSHA,
+		Commit:    commit.SHA,
 		Branch:    opts.Branch,
 		Timestamp: time.Now().UTC().Unix(),
 
@@ -87,8 +87,7 @@ func createTmpPipeline(event model.WebhookEvent, commitSHA string, repo *model.R
 		Author: user.Login,
 		Email:  user.Email,
 
-		// TODO: Generate proper URL to commit
-		ForgeURL: repo.ForgeURL,
+		ForgeURL: commit.ForgeURL,
 	}
 }
 
@@ -313,11 +312,11 @@ func PostApproval(c *gin.Context) {
 		return
 	}
 
-	newpipeline, err := pipeline.Approve(c, _store, pl, user, repo)
+	newPipeline, err := pipeline.Approve(c, _store, pl, user, repo)
 	if err != nil {
 		handlePipelineErr(c, err)
 	} else {
-		c.JSON(http.StatusOK, newpipeline)
+		c.JSON(http.StatusOK, newPipeline)
 	}
 }
 
@@ -412,12 +411,19 @@ func PostPipeline(c *gin.Context) {
 	// make Deploy overridable
 	pl.Deploy = c.DefaultQuery("deploy_to", pl.Deploy)
 
-	// make Event overridable
+	// make Event overridable to deploy
+	// TODO refactor to use own proper API for deploy
 	if event, ok := c.GetQuery("event"); ok {
+		// only allow deploy from push, tag and release
+		if pl.Event != model.EventPush && pl.Event != model.EventTag && pl.Event != model.EventRelease {
+			_ = c.AbortWithError(http.StatusBadRequest, fmt.Errorf("can only deploy push, tag and release pipelines"))
+			return
+		}
+
 		pl.Event = model.WebhookEvent(event)
 
-		if err := model.ValidateWebhookEvent(pl.Event); err != nil {
-			_ = c.AbortWithError(http.StatusBadRequest, err)
+		if pl.Event != model.EventDeploy {
+			_ = c.AbortWithError(http.StatusBadRequest, model.ErrInvalidWebhookEvent)
 			return
 		}
 	}
@@ -437,13 +443,7 @@ func PostPipeline(c *gin.Context) {
 		}
 	}
 
-	netrc, err := _forge.Netrc(user, repo)
-	if err != nil {
-		handlePipelineErr(c, err)
-		return
-	}
-
-	newpipeline, err := pipeline.Restart(c, _store, pl, user, repo, envs, netrc)
+	newpipeline, err := pipeline.Restart(c, _store, pl, user, repo, envs)
 	if err != nil {
 		handlePipelineErr(c, err)
 	} else {

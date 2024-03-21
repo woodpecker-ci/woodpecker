@@ -25,6 +25,7 @@ import (
 	"github.com/rs/zerolog/log"
 
 	"go.woodpecker-ci.org/woodpecker/v2/server"
+	forge_types "go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 	"go.woodpecker-ci.org/woodpecker/v2/server/router/middleware/session"
 	"go.woodpecker-ci.org/woodpecker/v2/server/store"
@@ -49,15 +50,20 @@ func HandleAuth(c *gin.Context) {
 	// cannot, however, remember why, so need to revisit this line.
 	c.Writer.Header().Del("Content-Type")
 
-	tmpuser, err := _forge.Login(c, c.Writer, c.Request)
+	tmpuser, redirectURL, err := _forge.Login(c, &forge_types.OAuthRequest{
+		Error:            c.Request.FormValue("error"),
+		ErrorURI:         c.Request.FormValue("error_uri"),
+		ErrorDescription: c.Request.FormValue("error_description"),
+		Code:             c.Request.FormValue("code"),
+	})
 	if err != nil {
 		log.Error().Err(err).Msg("cannot authenticate user")
 		c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=oauth_error")
 		return
 	}
-	// this will happen when the forge redirects the user as
-	// part of the authorization workflow.
+	// The user is not authorized yet -> redirect
 	if tmpuser == nil {
+		http.Redirect(c.Writer, c.Request, redirectURL, http.StatusSeeOther)
 		return
 	}
 
@@ -81,8 +87,8 @@ func HandleAuth(c *gin.Context) {
 		if server.Config.Permissions.Orgs.IsConfigured {
 			teams, terr := _forge.Teams(c, tmpuser)
 			if terr != nil || !server.Config.Permissions.Orgs.IsMember(teams) {
-				log.Error().Err(terr).Msgf("cannot verify team membership for %s", u.Login)
-				c.Redirect(303, server.Config.Server.RootPath+"/login?error=access_denied")
+				log.Error().Err(terr).Msgf("cannot verify team membership for %s.", u.Login)
+				c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=access_denied")
 				return
 			}
 		}
@@ -111,9 +117,38 @@ func HandleAuth(c *gin.Context) {
 		// the user was stored as org. now we adopt it to the user.
 		if org, err := _store.OrgFindByName(u.Login); err == nil && org != nil {
 			org.IsUser = true
+			u.OrgID = org.ID
 			if err := _store.OrgUpdate(org); err != nil {
 				log.Error().Err(err).Msgf("on user creation, could not mark org as user")
 			}
+		} else {
+			if err != nil && !errors.Is(err, types.RecordNotExist) {
+				_ = c.AbortWithError(http.StatusInternalServerError, err)
+				return
+			}
+			org = &model.Org{
+				Name:    u.Login,
+				IsUser:  true,
+				Private: false,
+			}
+			if err := _store.OrgCreate(org); err != nil {
+				log.Error().Err(err).Msgf("on user creation, could create org for user")
+			}
+			u.OrgID = org.ID
+		}
+	}
+
+	// update org name
+	if u.Login != tmpuser.Login {
+		org, err := _store.OrgGet(u.OrgID)
+		if err != nil {
+			log.Error().Err(err).Msgf("cannot get org %s", u.Login)
+			c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=internal_error")
+			return
+		}
+		org.Name = u.Login
+		if err := _store.OrgUpdate(org); err != nil {
+			log.Error().Err(err).Msgf("on user creation, could not mark org as user")
 		}
 	}
 

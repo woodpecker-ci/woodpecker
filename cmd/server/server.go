@@ -41,17 +41,16 @@ import (
 	woodpeckerGrpcServer "go.woodpecker-ci.org/woodpecker/v2/server/grpc"
 	"go.woodpecker-ci.org/woodpecker/v2/server/logging"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
-	"go.woodpecker-ci.org/woodpecker/v2/server/plugins/permissions"
 	"go.woodpecker-ci.org/woodpecker/v2/server/pubsub"
 	"go.woodpecker-ci.org/woodpecker/v2/server/router"
 	"go.woodpecker-ci.org/woodpecker/v2/server/router/middleware"
+	"go.woodpecker-ci.org/woodpecker/v2/server/services"
+	"go.woodpecker-ci.org/woodpecker/v2/server/services/permissions"
 	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 	"go.woodpecker-ci.org/woodpecker/v2/server/web"
 	"go.woodpecker-ci.org/woodpecker/v2/shared/constant"
 	"go.woodpecker-ci.org/woodpecker/v2/shared/logger"
 	"go.woodpecker-ci.org/woodpecker/v2/version"
-	// "go.woodpecker-ci.org/woodpecker/v2/server/plugins/encryption"
-	// encryptedStore "go.woodpecker-ci.org/woodpecker/v2/server/plugins/encryption/wrapper/store"
 )
 
 func run(c *cli.Context) error {
@@ -181,7 +180,7 @@ func run(c *cli.Context) error {
 		webUIServe,
 		middleware.Logger(time.RFC3339, true),
 		middleware.Version,
-		middleware.Store(c, _store),
+		middleware.Store(_store),
 	)
 
 	switch {
@@ -271,46 +270,17 @@ func run(c *cli.Context) error {
 }
 
 func setupEvilGlobals(c *cli.Context, s store.Store) error {
-	// forge
-	server.Config.Services.Timeout = c.Duration("forge-timeout")
-
 	// services
 	server.Config.Services.Queue = setupQueue(c, s)
 	server.Config.Services.Logs = logging.New()
 	server.Config.Services.Pubsub = pubsub.New()
-	var err error
-	server.Config.Services.Registries, err = setupRegistryService(c, s)
-	if err != nil {
-		return err
-	}
+	server.Config.Services.Membership = setupMembershipService(c, f)
 
-	// TODO(1544): fix encrypted store
-	// // encryption
-	// encryptedSecretStore := encryptedStore.NewSecretStore(v)
-	// err := encryption.Encryption(c, v).WithClient(encryptedSecretStore).Build()
-	// if err != nil {
-	// 	log.Fatal().Err(err).Msg("could not create encryption service")
-	// }
-	// server.Config.Services.Secrets = setupSecretService(c, encryptedSecretStore)
-	server.Config.Services.Secrets, err = setupSecretService(c, s)
+	serviceMangager, err := services.NewManager(c, s)
 	if err != nil {
-		return err
+		return fmt.Errorf("could not setup service manager: %w", err)
 	}
-	server.Config.Services.Environ, err = setupEnvironService(c, s)
-	if err != nil {
-		return err
-	}
-	server.Config.Services.Membership = setupMembershipService(c, s)
-
-	server.Config.Services.SignaturePrivateKey, server.Config.Services.SignaturePublicKey, err = setupSignatureKeys(s)
-	if err != nil {
-		return err
-	}
-
-	server.Config.Services.ConfigService, err = setupConfigService(c)
-	if err != nil {
-		return err
-	}
+	server.Config.Services.Manager = serviceMangager
 
 	// authentication
 	server.Config.Pipeline.AuthenticatePublicRepos = c.Bool("authenticate-public-repos")

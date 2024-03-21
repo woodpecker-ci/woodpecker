@@ -127,7 +127,7 @@ check-xgo: ## Check if xgo is installed
 
 install-tools: ## Install development tools
 	@hash golangci-lint > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
-		go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest; \
+		go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest ; \
 	fi ; \
 	hash gofumpt > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
 		go install mvdan.cc/gofumpt@latest; \
@@ -149,9 +149,7 @@ lint: install-tools ## Lint code
 	@echo "Running golangci-lint"
 	golangci-lint run
 
-lint-ui: ## Lint UI code
-	(cd web/; pnpm install)
-	(cd web/; pnpm lesshint)
+lint-ui: ui-dependencies ## Lint UI code
 	(cd web/; pnpm lint --quiet)
 
 test-agent: ## Test agent code
@@ -180,7 +178,7 @@ test-lib: ## Test lib code
 	go test -race -cover -coverprofile coverage.out -timeout 30s $(shell go list ./... | grep -v '/cmd\|/agent\|/cli\|/server')
 
 .PHONY: test
-test: test-agent test-server test-server-datastore test-cli test-lib test-ui ## Run all tests
+test: test-agent test-server test-server-datastore test-cli test-lib ## Run all tests
 
 ##@ Build
 
@@ -195,6 +193,17 @@ build-agent: ## Build agent
 
 build-cli: ## Build cli
 	CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -ldflags '${LDFLAGS}' -o dist/woodpecker-cli${BIN_SUFFIX} go.woodpecker-ci.org/woodpecker/v2/cmd/cli
+
+build-tarball: ## Build tar archive
+	mkdir -p dist && tar chzvf dist/woodpecker-src.tar.gz \
+	  --exclude="*.exe" \
+	  --exclude="./.pnpm-store" \
+	  --exclude="node_modules" \
+	  --exclude="./dist" \
+	  --exclude="./data" \
+	  --exclude="./build" \
+	  --exclude="./.git" \
+	  .
 
 .PHONY: build
 build: build-agent build-server build-cli ## Build all binaries
@@ -217,7 +226,7 @@ release-server-xgo: check-xgo ## Create server binaries for release using xgo
 	@echo "arch (xgo):$(TARGETARCH_XGO)"
 	@echo "arch (buildx):$(TARGETARCH_BUILDX)"
 
-	CGO_CFLAGS="$(CGO_CFLAGS)" xgo -go $(XGO_VERSION) -dest ./dist/server/$(TARGETOS)_$(TARGETARCH_BUILDX) -tags 'netgo osusergo $(TAGS)' -ldflags '-linkmode external $(LDFLAGS)' -targets '$(TARGETOS)/$(TARGETARCH_XGO)' -out woodpecker-server -pkg cmd/server .
+	CGO_CFLAGS="$(CGO_CFLAGS)" xgo -go $(XGO_VERSION) -dest ./dist/server/$(TARGETOS)_$(TARGETARCH_BUILDX) -tags 'netgo osusergo grpcnotrace $(TAGS)' -ldflags '-linkmode external $(LDFLAGS)' -targets '$(TARGETOS)/$(TARGETARCH_XGO)' -out woodpecker-server -pkg cmd/server .
 	@if [ "$${XGO_IN_XGO:-0}" -eq "1" ]; then echo "inside xgo image"; \
 	  mkdir -p ./dist/server/$(TARGETOS)_$(TARGETARCH_BUILDX); \
 	  mv -vf /build/woodpecker-server* ./dist/server/$(TARGETOS)_$(TARGETARCH_BUILDX)/woodpecker-server$(BIN_SUFFIX); \
@@ -229,18 +238,18 @@ release-server-xgo: check-xgo ## Create server binaries for release using xgo
 
 release-server: ## Create server binaries for release
 	# compile
-	GOOS=$(TARGETOS) GOARCH=$(TARGETARCH) CGO_ENABLED=${CGO_ENABLED} go build -ldflags '${LDFLAGS}' -o dist/server/$(TARGETOS)_$(TARGETARCH)/woodpecker-server$(BIN_SUFFIX) go.woodpecker-ci.org/woodpecker/v2/cmd/server
+	GOOS=$(TARGETOS) GOARCH=$(TARGETARCH) CGO_ENABLED=${CGO_ENABLED} go build -ldflags '${LDFLAGS}' -tags 'grpcnotrace $(TAGS)' -o dist/server/$(TARGETOS)_$(TARGETARCH)/woodpecker-server$(BIN_SUFFIX) go.woodpecker-ci.org/woodpecker/v2/cmd/server
 	# tar binary files
 	tar -cvzf dist/woodpecker-server_$(TARGETOS)_$(TARGETARCH).tar.gz -C dist/server/$(TARGETOS)_$(TARGETARCH) woodpecker-server$(BIN_SUFFIX)
 
 release-agent: ## Create agent binaries for release
 	# compile
-	GOOS=linux   GOARCH=amd64 CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -o dist/agent/linux_amd64/woodpecker-agent       go.woodpecker-ci.org/woodpecker/v2/cmd/agent
-	GOOS=linux   GOARCH=arm64 CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -o dist/agent/linux_arm64/woodpecker-agent       go.woodpecker-ci.org/woodpecker/v2/cmd/agent
-	GOOS=linux   GOARCH=arm   CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -o dist/agent/linux_arm/woodpecker-agent         go.woodpecker-ci.org/woodpecker/v2/cmd/agent
-	GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -o dist/agent/windows_amd64/woodpecker-agent.exe go.woodpecker-ci.org/woodpecker/v2/cmd/agent
-	GOOS=darwin  GOARCH=amd64 CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -o dist/agent/darwin_amd64/woodpecker-agent      go.woodpecker-ci.org/woodpecker/v2/cmd/agent
-	GOOS=darwin  GOARCH=arm64 CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -o dist/agent/darwin_arm64/woodpecker-agent      go.woodpecker-ci.org/woodpecker/v2/cmd/agent
+	GOOS=linux   GOARCH=amd64 CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -tags 'grpcnotrace $(TAGS)' -o dist/agent/linux_amd64/woodpecker-agent       go.woodpecker-ci.org/woodpecker/v2/cmd/agent
+	GOOS=linux   GOARCH=arm64 CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -tags 'grpcnotrace $(TAGS)' -o dist/agent/linux_arm64/woodpecker-agent       go.woodpecker-ci.org/woodpecker/v2/cmd/agent
+	GOOS=linux   GOARCH=arm   CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -tags 'grpcnotrace $(TAGS)' -o dist/agent/linux_arm/woodpecker-agent         go.woodpecker-ci.org/woodpecker/v2/cmd/agent
+	GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -tags 'grpcnotrace $(TAGS)' -o dist/agent/windows_amd64/woodpecker-agent.exe go.woodpecker-ci.org/woodpecker/v2/cmd/agent
+	GOOS=darwin  GOARCH=amd64 CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -tags 'grpcnotrace $(TAGS)' -o dist/agent/darwin_amd64/woodpecker-agent      go.woodpecker-ci.org/woodpecker/v2/cmd/agent
+	GOOS=darwin  GOARCH=arm64 CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -tags 'grpcnotrace $(TAGS)' -o dist/agent/darwin_arm64/woodpecker-agent      go.woodpecker-ci.org/woodpecker/v2/cmd/agent
 	# tar binary files
 	tar -cvzf dist/woodpecker-agent_linux_amd64.tar.gz   -C dist/agent/linux_amd64   woodpecker-agent
 	tar -cvzf dist/woodpecker-agent_linux_arm64.tar.gz   -C dist/agent/linux_arm64   woodpecker-agent

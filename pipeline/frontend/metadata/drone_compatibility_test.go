@@ -19,6 +19,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/metadata"
 )
 
@@ -112,11 +113,11 @@ DRONE_TARGET_BRANCH=main`
 func convertListToEnvMap(t *testing.T, list string) map[string]string {
 	result := make(map[string]string)
 	for _, s := range strings.Split(list, "\n") {
-		ss := strings.SplitN(strings.TrimSpace(s), "=", 2)
-		if len(ss) != 2 {
+		before, after, _ := strings.Cut(strings.TrimSpace(s), "=")
+		if before == "" || after == "" {
 			t.Fatal("helper function got invalid test data")
 		}
-		result[ss[0]] = ss[1]
+		result[before] = after
 	}
 	return result
 }

@@ -66,6 +66,10 @@ func (e *local) IsAvailable(context.Context) bool {
 	return true
 }
 
+func (e *local) Flags() []cli.Flag {
+	return Flags
+}
+
 func (e *local) Load(ctx context.Context) (*types.BackendInfo, error) {
 	c, ok := ctx.Value(types.CliContext).(*cli.Context)
 	if ok {
@@ -146,6 +150,7 @@ func (e *local) StartStep(ctx context.Context, step *types.Step, taskUUID string
 // execCommands use step.Image as shell and run the commands in it
 func (e *local) execCommands(ctx context.Context, step *types.Step, state *workflowState, env []string) error {
 	// Prepare commands
+	// TODO support `entrypoint` from pipeline config
 	args, err := e.genCmdByShell(step.Image, step.Commands)
 	if err != nil {
 		return fmt.Errorf("could not convert commands into args: %w", err)

@@ -23,7 +23,7 @@ const FeatureList = [
       <>
         Woodpecker uses docker containers to execute pipeline steps. If you need more than a normal docker image, you
         can create plugins to extend the pipeline features.{' '}
-        <a href="/docs/usage/plugins/plugins">How do plugins work?</a>
+        <a href="/docs/usage/plugins/overview">How do plugins work?</a>
       </>
     ),
   },

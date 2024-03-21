@@ -26,15 +26,14 @@ import (
 
 	backend_types "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 	pipeline_errors "go.woodpecker-ci.org/woodpecker/v2/pipeline/errors"
-	yaml_types "go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/types"
-	forge_types "go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
-
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/metadata"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/compiler"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/linter"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/matrix"
+	yaml_types "go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/types"
 	"go.woodpecker-ci.org/woodpecker/v2/server"
+	forge_types "go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
@@ -238,16 +237,19 @@ func (b *StepBuilder) environmentVariables(metadata metadata.Metadata, axis matr
 	return environ
 }
 
-func (b *StepBuilder) toInternalRepresentation(parsed *yaml_types.Workflow, environ map[string]string, metadata metadata.Metadata, stepID int64) (*backend_types.Config, error) {
+func (b *StepBuilder) toInternalRepresentation(parsed *yaml_types.Workflow, environ map[string]string, metadata metadata.Metadata, workflowID int64) (*backend_types.Config, error) {
 	var secrets []compiler.Secret
 	for _, sec := range b.Secs {
-		if !sec.Match(b.Curr.Event) {
-			continue
+		var events []string
+		for _, event := range sec.Events {
+			events = append(events, string(event))
 		}
+
 		secrets = append(secrets, compiler.Secret{
 			Name:           sec.Name,
 			Value:          sec.Value,
 			AllowedPlugins: sec.Images,
+			Events:         events,
 		})
 	}
 
@@ -257,7 +259,6 @@ func (b *StepBuilder) toInternalRepresentation(parsed *yaml_types.Workflow, envi
 			Hostname: reg.Address,
 			Username: reg.Username,
 			Password: reg.Password,
-			Email:    reg.Email,
 		})
 	}
 
@@ -285,7 +286,7 @@ func (b *StepBuilder) toInternalRepresentation(parsed *yaml_types.Workflow, envi
 			fmt.Sprintf(
 				"wp_%s_%d",
 				strings.ToLower(ulid.Make().String()),
-				stepID,
+				workflowID,
 			),
 		),
 		compiler.WithProxy(b.ProxyOpts),

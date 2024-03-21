@@ -17,11 +17,6 @@ package main
 
 import (
 	"context"
-	"crypto"
-	"crypto/ed25519"
-	"crypto/rand"
-	"encoding/hex"
-	"errors"
 	"fmt"
 	"os"
 	"time"
@@ -37,14 +32,12 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge/loader"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
-	"go.woodpecker-ci.org/woodpecker/v2/server/plugins/config"
 	"go.woodpecker-ci.org/woodpecker/v2/server/plugins/environments"
 	"go.woodpecker-ci.org/woodpecker/v2/server/plugins/registry"
 	"go.woodpecker-ci.org/woodpecker/v2/server/plugins/secrets"
 	"go.woodpecker-ci.org/woodpecker/v2/server/queue"
 	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 	"go.woodpecker-ci.org/woodpecker/v2/server/store/datastore"
-	"go.woodpecker-ci.org/woodpecker/v2/server/store/types"
 	"go.woodpecker-ci.org/woodpecker/v2/shared/addon"
 	addonTypes "go.woodpecker-ci.org/woodpecker/v2/shared/addon/types"
 )
@@ -214,47 +207,4 @@ func setupMetrics(g *errgroup.Group, _store store.Store) {
 			time.Sleep(10 * time.Second)
 		}
 	})
-}
-
-// setupSignatureKeys generate or load key pair to sign webhooks requests (i.e. used for extensions)
-func setupSignatureKeys(_store store.Store) (crypto.PrivateKey, crypto.PublicKey, error) {
-	privKeyID := "signature-private-key"
-
-	privKey, err := _store.ServerConfigGet(privKeyID)
-	if errors.Is(err, types.RecordNotExist) {
-		_, privKey, err := ed25519.GenerateKey(rand.Reader)
-		if err != nil {
-			return nil, nil, fmt.Errorf("failed to generate private key: %w", err)
-		}
-		err = _store.ServerConfigSet(privKeyID, hex.EncodeToString(privKey))
-		if err != nil {
-			return nil, nil, fmt.Errorf("failed to store private key: %w", err)
-		}
-		log.Debug().Msg("created private key")
-		return privKey, privKey.Public(), nil
-	} else if err != nil {
-		return nil, nil, fmt.Errorf("failed to load private key: %w", err)
-	}
-	privKeyStr, err := hex.DecodeString(privKey)
-	if err != nil {
-		return nil, nil, fmt.Errorf("failed to decode private key: %w", err)
-	}
-	privateKey := ed25519.PrivateKey(privKeyStr)
-	return privateKey, privateKey.Public(), nil
-}
-
-func setupConfigService(c *cli.Context) (config.Extension, error) {
-	addonExt, err := addon.Load[config.Extension](c.StringSlice("addons"), addonTypes.TypeConfigService)
-	if err != nil {
-		return nil, err
-	}
-	if addonExt != nil {
-		return addonExt.Value, nil
-	}
-
-	if endpoint := c.String("config-service-endpoint"); endpoint != "" {
-		return config.NewHTTP(endpoint, server.Config.Services.SignaturePrivateKey), nil
-	}
-
-	return nil, nil
 }

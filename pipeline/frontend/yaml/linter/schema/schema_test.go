@@ -106,6 +106,16 @@ func TestSchema(t *testing.T) {
 			testFile: ".woodpecker/test-array-syntax.yaml",
 			fail:     false,
 		},
+		{
+			name:     "Step DAG syntax",
+			testFile: ".woodpecker/test-dag.yaml",
+			fail:     false,
+		},
+		{
+			name:     "Custom backend",
+			testFile: ".woodpecker/test-custom-backend.yaml",
+			fail:     false,
+		},
 	}
 
 	for _, tt := range testTable {

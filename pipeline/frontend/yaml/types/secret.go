@@ -33,10 +33,10 @@ type (
 func (s *Secrets) UnmarshalYAML(value *yaml.Node) error {
 	y, _ := yaml.Marshal(value)
 
-	var strslice []string
-	err := yaml.Unmarshal(y, &strslice)
+	var secrets []string
+	err := yaml.Unmarshal(y, &secrets)
 	if err == nil {
-		for _, str := range strslice {
+		for _, str := range secrets {
 			s.Secrets = append(s.Secrets, &Secret{
 				Source: str,
 				Target: str,

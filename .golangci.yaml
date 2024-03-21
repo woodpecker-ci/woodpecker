@@ -103,6 +103,7 @@ linters-settings:
           - pkg: 'go.woodpecker-ci.org/woodpecker/v2/cmd/cli'
           - pkg: 'go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker'
   gci:
+    custom-order: true
     sections:
       - standard
       - default
@@ -127,7 +128,6 @@ linters:
     - bidichk
     - errcheck
     - gofmt
-    - goimports
     - gosimple
     - govet
     - ineffassign
@@ -165,6 +165,14 @@ linters:
     - stylecheck
     - contextcheck
     - forcetypeassert
+    - gci
+    - gomnd
+
+issues:
+  exclude-rules:
+    - path: 'fixtures|cmd/agent/flags.go|cmd/server/flags.go|pipeline/backend/kubernetes/flags.go|_test.go'
+      linters:
+        - gomnd
 
 run:
   timeout: 15m

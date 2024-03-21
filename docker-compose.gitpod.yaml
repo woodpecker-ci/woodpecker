@@ -1,8 +1,9 @@
+# cSpell:ignore pgdata pgsql localtime
 version: '3'
 
 services:
   gitea-database:
-    image: postgres:16.1-alpine
+    image: postgres:16.2-alpine
     environment:
       POSTGRES_USER: gitea
       POSTGRES_PASSWORD: 123456

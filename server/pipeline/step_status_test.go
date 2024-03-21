@@ -20,15 +20,19 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store/mocks"
 )
 
-type mockUpdateStepStore struct{}
-
-func (m *mockUpdateStepStore) StepUpdate(_ *model.Step) error {
-	return nil
+func mockStoreStep(t *testing.T) store.Store {
+	s := mocks.NewStore(t)
+	s.On("StepUpdate", mock.Anything).Return(nil)
+	return s
 }
 
 func TestUpdateStepStatusNotExited(t *testing.T) {
@@ -42,11 +46,11 @@ func TestUpdateStepStatusNotExited(t *testing.T) {
 		Exited:  false,
 		// Dummy data
 		Finished: int64(1),
-		ExitCode: 137,
+		ExitCode: pipeline.ExitCodeKilled,
 		Error:    "not an error",
 	}
 
-	err := UpdateStepStatus(&mockUpdateStepStore{}, step, state)
+	err := UpdateStepStatus(mockStoreStep(t), step, state)
 	assert.NoError(t, err)
 	assert.EqualValues(t, model.StatusRunning, step.State)
 	assert.EqualValues(t, 42, step.Started)
@@ -66,11 +70,11 @@ func TestUpdateStepStatusNotExitedButStopped(t *testing.T) {
 		Exited: false,
 		// Dummy data
 		Finished: int64(1),
-		ExitCode: 137,
+		ExitCode: pipeline.ExitCodeKilled,
 		Error:    "not an error",
 	}
 
-	err := UpdateStepStatus(&mockUpdateStepStore{}, step, state)
+	err := UpdateStepStatus(mockStoreStep(t), step, state)
 	assert.NoError(t, err)
 	assert.EqualValues(t, model.StatusKilled, step.State)
 	assert.EqualValues(t, 42, step.Started)
@@ -90,16 +94,16 @@ func TestUpdateStepStatusExited(t *testing.T) {
 		Started:  int64(42),
 		Exited:   true,
 		Finished: int64(34),
-		ExitCode: 137,
+		ExitCode: pipeline.ExitCodeKilled,
 		Error:    "an error",
 	}
 
-	err := UpdateStepStatus(&mockUpdateStepStore{}, step, state)
+	err := UpdateStepStatus(mockStoreStep(t), step, state)
 	assert.NoError(t, err)
 	assert.EqualValues(t, model.StatusKilled, step.State)
 	assert.EqualValues(t, 42, step.Started)
 	assert.EqualValues(t, 34, step.Stopped)
-	assert.EqualValues(t, 137, step.ExitCode)
+	assert.EqualValues(t, pipeline.ExitCodeKilled, step.ExitCode)
 	assert.EqualValues(t, "an error", step.Error)
 }
 
@@ -117,7 +121,7 @@ func TestUpdateStepStatusExitedButNot137(t *testing.T) {
 		Error:    "an error",
 	}
 
-	err := UpdateStepStatus(&mockUpdateStepStore{}, step, state)
+	err := UpdateStepStatus(mockStoreStep(t), step, state)
 	assert.NoError(t, err)
 	assert.EqualValues(t, model.StatusFailure, step.State)
 	assert.EqualValues(t, 42, step.Started)
@@ -138,39 +142,30 @@ func TestUpdateStepStatusExitedWithCode(t *testing.T) {
 		Error:    "an error",
 	}
 	step := &model.Step{}
-	err := UpdateStepStatus(&mockUpdateStepStore{}, step, state)
+	err := UpdateStepStatus(mockStoreStep(t), step, state)
 	assert.NoError(t, err)
 
-	if step.State != model.StatusFailure {
-		t.Errorf("Step status not equals '%s' != '%s'", model.StatusFailure, step.State)
-	} else if step.ExitCode != 1 {
-		t.Errorf("Step exit code not equals 1 != %d", step.ExitCode)
-	}
+	assert.Equal(t, model.StatusFailure, step.State)
+	assert.Equal(t, 1, step.ExitCode)
 }
 
 func TestUpdateStepPToStatusStarted(t *testing.T) {
 	t.Parallel()
 
 	state := rpc.State{Started: int64(42)}
-	step, _ := UpdateStepToStatusStarted(&mockUpdateStepStore{}, model.Step{}, state)
+	step, _ := UpdateStepToStatusStarted(mockStoreStep(t), model.Step{}, state)
 
-	if step.State != model.StatusRunning {
-		t.Errorf("Step status not equals '%s' != '%s'", model.StatusRunning, step.State)
-	} else if step.Started != int64(42) {
-		t.Errorf("Step started not equals 42 != %d", step.Started)
-	}
+	assert.Equal(t, model.StatusRunning, step.State)
+	assert.EqualValues(t, 42, step.Started)
 }
 
 func TestUpdateStepToStatusSkipped(t *testing.T) {
 	t.Parallel()
 
-	step, _ := UpdateStepToStatusSkipped(&mockUpdateStepStore{}, model.Step{}, int64(1))
+	step, _ := UpdateStepToStatusSkipped(mockStoreStep(t), model.Step{}, int64(1))
 
-	if step.State != model.StatusSkipped {
-		t.Errorf("Step status not equals '%s' != '%s'", model.StatusSkipped, step.State)
-	} else if step.Stopped != int64(0) {
-		t.Errorf("Step stopped not equals 0 != %d", step.Stopped)
-	}
+	assert.Equal(t, model.StatusSkipped, step.State)
+	assert.EqualValues(t, 0, step.Stopped)
 }
 
 func TestUpdateStepToStatusSkippedButStarted(t *testing.T) {
@@ -180,13 +175,10 @@ func TestUpdateStepToStatusSkippedButStarted(t *testing.T) {
 		Started: int64(42),
 	}
 
-	step, _ = UpdateStepToStatusSkipped(&mockUpdateStepStore{}, *step, int64(1))
+	step, _ = UpdateStepToStatusSkipped(mockStoreStep(t), *step, int64(1))
 
-	if step.State != model.StatusSuccess {
-		t.Errorf("Step status not equals '%s' != '%s'", model.StatusSuccess, step.State)
-	} else if step.Stopped != int64(1) {
-		t.Errorf("Step stopped not equals 1 != %d", step.Stopped)
-	}
+	assert.Equal(t, model.StatusSuccess, step.State)
+	assert.EqualValues(t, 1, step.Stopped)
 }
 
 func TestUpdateStepStatusToDoneSkipped(t *testing.T) {
@@ -196,18 +188,12 @@ func TestUpdateStepStatusToDoneSkipped(t *testing.T) {
 		Finished: int64(34),
 	}
 
-	step, _ := UpdateStepStatusToDone(&mockUpdateStepStore{}, model.Step{}, state)
+	step, _ := UpdateStepStatusToDone(mockStoreStep(t), model.Step{}, state)
 
-	switch {
-	case step.State != model.StatusSkipped:
-		t.Errorf("Step status not equals '%s' != '%s'", model.StatusSkipped, step.State)
-	case step.Stopped != int64(34):
-		t.Errorf("Step stopped not equals 34 != %d", step.Stopped)
-	case step.Error != "":
-		t.Errorf("Step error not equals '' != '%s'", step.Error)
-	case step.ExitCode != 0:
-		t.Errorf("Step exit code not equals 0 != %d", step.ExitCode)
-	}
+	assert.Equal(t, model.StatusSkipped, step.State)
+	assert.EqualValues(t, 34, step.Stopped)
+	assert.Empty(t, step.Error)
+	assert.Equal(t, 0, step.ExitCode)
 }
 
 func TestUpdateStepStatusToDoneSuccess(t *testing.T) {
@@ -218,18 +204,12 @@ func TestUpdateStepStatusToDoneSuccess(t *testing.T) {
 		Finished: int64(34),
 	}
 
-	step, _ := UpdateStepStatusToDone(&mockUpdateStepStore{}, model.Step{}, state)
+	step, _ := UpdateStepStatusToDone(mockStoreStep(t), model.Step{}, state)
 
-	switch {
-	case step.State != model.StatusSuccess:
-		t.Errorf("Step status not equals '%s' != '%s'", model.StatusSuccess, step.State)
-	case step.Stopped != int64(34):
-		t.Errorf("Step stopped not equals 34 != %d", step.Stopped)
-	case step.Error != "":
-		t.Errorf("Step error not equals '' != '%s'", step.Error)
-	case step.ExitCode != 0:
-		t.Errorf("Step exit code not equals 0 != %d", step.ExitCode)
-	}
+	assert.Equal(t, model.StatusSuccess, step.State)
+	assert.EqualValues(t, 34, step.Stopped)
+	assert.Empty(t, step.Error)
+	assert.Equal(t, 0, step.ExitCode)
 }
 
 func TestUpdateStepStatusToDoneFailureWithError(t *testing.T) {
@@ -237,11 +217,9 @@ func TestUpdateStepStatusToDoneFailureWithError(t *testing.T) {
 
 	state := rpc.State{Error: "an error"}
 
-	step, _ := UpdateStepStatusToDone(&mockUpdateStepStore{}, model.Step{}, state)
+	step, _ := UpdateStepStatusToDone(mockStoreStep(t), model.Step{}, state)
 
-	if step.State != model.StatusFailure {
-		t.Errorf("Step status not equals '%s' != '%s'", model.StatusFailure, step.State)
-	}
+	assert.Equal(t, model.StatusFailure, step.State)
 }
 
 func TestUpdateStepStatusToDoneFailureWithExitCode(t *testing.T) {
@@ -249,11 +227,9 @@ func TestUpdateStepStatusToDoneFailureWithExitCode(t *testing.T) {
 
 	state := rpc.State{ExitCode: 43}
 
-	step, _ := UpdateStepStatusToDone(&mockUpdateStepStore{}, model.Step{}, state)
+	step, _ := UpdateStepStatusToDone(mockStoreStep(t), model.Step{}, state)
 
-	if step.State != model.StatusFailure {
-		t.Errorf("Step status not equals '%s' != '%s'", model.StatusFailure, step.State)
-	}
+	assert.Equal(t, model.StatusFailure, step.State)
 }
 
 func TestUpdateStepToStatusKilledStarted(t *testing.T) {
@@ -261,26 +237,18 @@ func TestUpdateStepToStatusKilledStarted(t *testing.T) {
 
 	now := time.Now().Unix()
 
-	step, _ := UpdateStepToStatusKilled(&mockUpdateStepStore{}, model.Step{})
+	step, _ := UpdateStepToStatusKilled(mockStoreStep(t), model.Step{})
 
-	switch {
-	case step.State != model.StatusKilled:
-		t.Errorf("Step status not equals '%s' != '%s'", model.StatusKilled, step.State)
-	case step.Stopped < now:
-		t.Errorf("Step stopped not equals %d < %d", now, step.Stopped)
-	case step.Started != step.Stopped:
-		t.Errorf("Step started not equals %d != %d", step.Stopped, step.Started)
-	case step.ExitCode != 137:
-		t.Errorf("Step exit code not equals 137 != %d", step.ExitCode)
-	}
+	assert.Equal(t, model.StatusKilled, step.State)
+	assert.LessOrEqual(t, now, step.Stopped)
+	assert.Equal(t, step.Stopped, step.Started)
+	assert.Equal(t, 137, step.ExitCode)
 }
 
 func TestUpdateStepToStatusKilledNotStarted(t *testing.T) {
 	t.Parallel()
 
-	step, _ := UpdateStepToStatusKilled(&mockUpdateStepStore{}, model.Step{Started: int64(1)})
+	step, _ := UpdateStepToStatusKilled(mockStoreStep(t), model.Step{Started: int64(1)})
 
-	if step.Started != int64(1) {
-		t.Errorf("Step started not equals 1 != %d", step.Started)
-	}
+	assert.EqualValues(t, 1, step.Started)
 }

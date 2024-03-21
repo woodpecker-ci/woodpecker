@@ -66,13 +66,13 @@ func (r *Repo) ResetVisibility() {
 
 // ParseRepo parses the repository owner and name from a string.
 func ParseRepo(str string) (user, repo string, err error) {
-	parts := strings.Split(str, "/")
-	if len(parts) != 2 {
-		err = fmt.Errorf("error: Invalid or missing repository. eg octocat/hello-world")
+	before, after, _ := strings.Cut(str, "/")
+	if before == "" || after == "" {
+		err = fmt.Errorf("invalid or missing repository (e.g. octocat/hello-world)")
 		return
 	}
-	user = parts[0]
-	repo = parts[1]
+	user = before
+	repo = after
 	return
 }
 

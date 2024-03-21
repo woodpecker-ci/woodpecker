@@ -18,13 +18,13 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/gin-gonic/gin"
+	"github.com/rs/zerolog/log"
+
 	"go.woodpecker-ci.org/woodpecker/v2/server"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 	"go.woodpecker-ci.org/woodpecker/v2/shared/token"
-
-	"github.com/gin-gonic/gin"
-	"github.com/rs/zerolog/log"
 )
 
 func User(c *gin.Context) *model.User {
@@ -55,7 +55,7 @@ func SetUser() gin.HandlerFunc {
 			// this means the user is accessing with a web browser,
 			// so we should implement CSRF protection measures.
 			if t.Kind == token.SessToken {
-				err = token.CheckCsrf(c.Request, func(t *token.Token) (string, error) {
+				err = token.CheckCsrf(c.Request, func(_ *token.Token) (string, error) {
 					return user.Hash, nil
 				})
 				// if csrf token validation fails, exit immediately
@@ -75,10 +75,10 @@ func MustAdmin() gin.HandlerFunc {
 		user := User(c)
 		switch {
 		case user == nil:
-			c.String(401, "User not authorized")
+			c.String(http.StatusUnauthorized, "User not authorized")
 			c.Abort()
 		case !user.Admin:
-			c.String(403, "User not authorized")
+			c.String(http.StatusForbidden, "User not authorized")
 			c.Abort()
 		default:
 			c.Next()
@@ -92,10 +92,10 @@ func MustRepoAdmin() gin.HandlerFunc {
 		perm := Perm(c)
 		switch {
 		case user == nil:
-			c.String(401, "User not authorized")
+			c.String(http.StatusUnauthorized, "User not authorized")
 			c.Abort()
 		case !perm.Admin:
-			c.String(403, "User not authorized")
+			c.String(http.StatusForbidden, "User not authorized")
 			c.Abort()
 		default:
 			c.Next()
@@ -108,7 +108,7 @@ func MustUser() gin.HandlerFunc {
 		user := User(c)
 		switch {
 		case user == nil:
-			c.String(401, "User not authorized")
+			c.String(http.StatusUnauthorized, "User not authorized")
 			c.Abort()
 		default:
 			c.Next()

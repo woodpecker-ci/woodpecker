@@ -20,6 +20,6 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/shared/logger"
 )
 
-func SetupGlobalLogger(c *cli.Context) error {
+func setupGlobalLogger(c *cli.Context) error {
 	return logger.SetupGlobalLogger(c, false)
 }

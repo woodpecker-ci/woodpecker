@@ -43,12 +43,14 @@ func parsePipeline(forge forge.Forge, store store.Store, currentPipeline *model.
 		log.Error().Err(err).Str("repo", repo.FullName).Msgf("error getting last pipeline before pipeline number '%d'", currentPipeline.Number)
 	}
 
-	secs, err := server.Config.Services.Secrets.SecretListPipeline(repo, currentPipeline, &model.ListOptions{All: true})
+	secretService := server.Config.Services.Manager.SecretServiceFromRepo(repo)
+	secs, err := secretService.SecretListPipeline(repo, currentPipeline, &model.ListOptions{All: true})
 	if err != nil {
 		log.Error().Err(err).Msgf("error getting secrets for %s#%d", repo.FullName, currentPipeline.Number)
 	}
 
-	regs, err := server.Config.Services.Registries.RegistryList(repo, &model.ListOptions{All: true})
+	registryService := server.Config.Services.Manager.RegistryServiceFromRepo(repo)
+	regs, err := registryService.RegistryList(repo, &model.ListOptions{All: true})
 	if err != nil {
 		log.Error().Err(err).Msgf("error getting registry credentials for %s#%d", repo.FullName, currentPipeline.Number)
 	}
@@ -56,8 +58,10 @@ func parsePipeline(forge forge.Forge, store store.Store, currentPipeline *model.
 	if envs == nil {
 		envs = map[string]string{}
 	}
-	if server.Config.Services.Environ != nil {
-		globals, _ := server.Config.Services.Environ.EnvironList(repo)
+
+	environmentService := server.Config.Services.Manager.EnvironmentService()
+	if environmentService != nil {
+		globals, _ := environmentService.EnvironList(repo)
 		for _, global := range globals {
 			envs[global.Name] = global.Value
 		}
@@ -122,14 +126,13 @@ func setPipelineStepsOnPipeline(pipeline *model.Pipeline, pipelineItems []*stepb
 		}
 	}
 
+	// the workflows in the pipeline should be empty as only we do populate them,
+	// but if a pipeline was already loaded form database it might contain things, so we just clean it
+	pipeline.Workflows = nil
 	for _, item := range pipelineItems {
 		for _, stage := range item.Config.Stages {
-			var gid int
 			for _, step := range stage.Steps {
 				pidSequence++
-				if gid == 0 {
-					gid = pidSequence
-				}
 				step := &model.Step{
 					Name:       step.Name,
 					UUID:       step.UUID,
@@ -143,8 +146,14 @@ func setPipelineStepsOnPipeline(pipeline *model.Pipeline, pipelineItems []*stepb
 				if item.Workflow.State == model.StatusSkipped {
 					step.State = model.StatusSkipped
 				}
+				if pipeline.Status == model.StatusBlocked {
+					step.State = model.StatusBlocked
+				}
 				item.Workflow.Children = append(item.Workflow.Children, step)
 			}
+		}
+		if pipeline.Status == model.StatusBlocked {
+			item.Workflow.State = model.StatusBlocked
 		}
 		item.Workflow.PipelineID = pipeline.ID
 		pipeline.Workflows = append(pipeline.Workflows, item.Workflow)

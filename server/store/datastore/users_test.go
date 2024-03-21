@@ -52,11 +52,11 @@ func TestUsers(t *testing.T) {
 			}
 			err1 := store.CreateUser(&user)
 			err2 := store.UpdateUser(&user)
-			getuser, err3 := store.GetUser(user.ID)
+			getUser, err3 := store.GetUser(user.ID)
 			g.Assert(err1).IsNil()
 			g.Assert(err2).IsNil()
 			g.Assert(err3).IsNil()
-			g.Assert(user.ID).Equal(getuser.ID)
+			g.Assert(user.ID).Equal(getUser.ID)
 		})
 
 		g.It("Should Add a new User", func() {
@@ -80,14 +80,14 @@ func TestUsers(t *testing.T) {
 			}
 
 			g.Assert(store.CreateUser(user)).IsNil()
-			getuser, err := store.GetUser(user.ID)
+			getUser, err := store.GetUser(user.ID)
 			g.Assert(err).IsNil()
-			g.Assert(user.ID).Equal(getuser.ID)
-			g.Assert(user.Login).Equal(getuser.Login)
-			g.Assert(user.Token).Equal(getuser.Token)
-			g.Assert(user.Secret).Equal(getuser.Secret)
-			g.Assert(user.Email).Equal(getuser.Email)
-			g.Assert(user.Avatar).Equal(getuser.Avatar)
+			g.Assert(user.ID).Equal(getUser.ID)
+			g.Assert(user.Login).Equal(getUser.Login)
+			g.Assert(user.Token).Equal(getUser.Token)
+			g.Assert(user.Secret).Equal(getUser.Secret)
+			g.Assert(user.Email).Equal(getUser.Email)
+			g.Assert(user.Avatar).Equal(getUser.Avatar)
 		})
 
 		g.It("Should Get a User By Login", func() {
@@ -97,10 +97,10 @@ func TestUsers(t *testing.T) {
 				Token: "e42080dddf012c718e476da161d21ad5",
 			}
 			g.Assert(store.CreateUser(user))
-			getuser, err := store.GetUserLogin(user.Login)
+			getUser, err := store.GetUserLogin(user.Login)
 			g.Assert(err).IsNil()
-			g.Assert(user.ID).Equal(getuser.ID)
-			g.Assert(user.Login).Equal(getuser.Login)
+			g.Assert(user.ID).Equal(getUser.ID)
+			g.Assert(user.Login).Equal(getUser.Login)
 		})
 
 		g.It("Should Enforce Unique User Login", func() {

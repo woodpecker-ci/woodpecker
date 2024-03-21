@@ -23,10 +23,10 @@ import (
 	"net/http"
 	"net/url"
 
-	shared_utils "go.woodpecker-ci.org/woodpecker/v2/shared/utils"
-
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/bitbucket"
+
+	shared_utils "go.woodpecker-ci.org/woodpecker/v2/shared/utils"
 )
 
 const (
@@ -38,7 +38,8 @@ const (
 const (
 	pathUser          = "%s/2.0/user/"
 	pathEmails        = "%s/2.0/user/emails"
-	pathPermissions   = "%s/2.0/user/permissions/repositories?q=repository.full_name=%q"
+	pathPermission    = "%s/2.0/user/permissions/repositories?q=repository.full_name=%q"
+	pathPermissions   = "%s/2.0/user/permissions/repositories?%s"
 	pathWorkspaces    = "%s/2.0/workspaces/?%s"
 	pathWorkspace     = "%s/2.0/workspaces/%s"
 	pathRepo          = "%s/2.0/repositories/%s/%s"
@@ -49,9 +50,10 @@ const (
 	pathStatus        = "%s/2.0/repositories/%s/%s/commit/%s/statuses/build"
 	pathBranches      = "%s/2.0/repositories/%s/%s/refs/branches?%s"
 	pathOrgPerms      = "%s/2.0/workspaces/%s/permissions?%s"
-	pathPullRequests  = "%s/2.0/repositories/%s/%s/pullrequests"
+	pathPullRequests  = "%s/2.0/repositories/%s/%s/pullrequests?%s"
 	pathBranchCommits = "%s/2.0/repositories/%s/%s/commits/%s"
 	pathDir           = "%s/2.0/repositories/%s/%s/src/%s%s"
+	pageSize          = 100
 )
 
 type Client struct {
@@ -114,7 +116,7 @@ func (c *Client) ListRepos(workspace string, opts *ListOpts) (*RepoResp, error) 
 
 func (c *Client) ListReposAll(workspace string) ([]*Repo, error) {
 	return shared_utils.Paginate(func(page int) ([]*Repo, error) {
-		resp, err := c.ListRepos(workspace, &ListOpts{Page: page, PageLen: 100})
+		resp, err := c.ListRepos(workspace, &ListOpts{Page: page, PageLen: pageSize})
 		if err != nil {
 			return nil, err
 		}
@@ -161,7 +163,7 @@ func (c *Client) CreateStatus(owner, name, revision string, status *PipelineStat
 
 func (c *Client) GetPermission(fullName string) (*RepoPerm, error) {
 	out := new(RepoPermResp)
-	uri := fmt.Sprintf(pathPermissions, c.base, fullName)
+	uri := fmt.Sprintf(pathPermission, c.base, fullName)
 	_, err := c.do(uri, get, nil, out)
 	if err != nil {
 		return nil, err
@@ -173,6 +175,23 @@ func (c *Client) GetPermission(fullName string) (*RepoPerm, error) {
 	return out.Values[0], nil
 }
 
+func (c *Client) ListPermissions(opts *ListOpts) (*RepoPermResp, error) {
+	out := new(RepoPermResp)
+	uri := fmt.Sprintf(pathPermissions, c.base, opts.Encode())
+	_, err := c.do(uri, get, nil, out)
+	return out, err
+}
+
+func (c *Client) ListPermissionsAll() ([]*RepoPerm, error) {
+	return shared_utils.Paginate(func(page int) ([]*RepoPerm, error) {
+		resp, err := c.ListPermissions(&ListOpts{Page: page, PageLen: pageSize})
+		if err != nil {
+			return nil, err
+		}
+		return resp.Values, nil
+	})
+}
+
 func (c *Client) ListBranches(owner, name string, opts *ListOpts) ([]*Branch, error) {
 	out := new(BranchResp)
 	uri := fmt.Sprintf(pathBranches, c.base, owner, name, opts.Encode())
@@ -180,22 +199,22 @@ func (c *Client) ListBranches(owner, name string, opts *ListOpts) ([]*Branch, er
 	return out.Values, err
 }
 
-func (c *Client) GetBranchHead(owner, name, branch string) (string, error) {
+func (c *Client) GetBranchHead(owner, name, branch string) (*Commit, error) {
 	out := new(CommitsResp)
 	uri := fmt.Sprintf(pathBranchCommits, c.base, owner, name, branch)
 	_, err := c.do(uri, get, nil, out)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	if len(out.Values) == 0 {
-		return "", fmt.Errorf("no commits in branch %s", branch)
+		return nil, fmt.Errorf("no commits in branch %s", branch)
 	}
-	return out.Values[0].Hash, nil
+	return out.Values[0], nil
 }
 
 func (c *Client) GetUserWorkspaceMembership(workspace, user string) (string, error) {
 	out := new(WorkspaceMembershipResp)
-	opts := &ListOpts{Page: 1, PageLen: 100}
+	opts := &ListOpts{Page: 1, PageLen: pageSize}
 	for {
 		uri := fmt.Sprintf(pathOrgPerms, c.base, workspace, opts.Encode())
 		_, err := c.do(uri, get, nil, out)
@@ -217,8 +236,8 @@ func (c *Client) GetUserWorkspaceMembership(workspace, user string) (string, err
 
 func (c *Client) ListPullRequests(owner, name string, opts *ListOpts) ([]*PullRequest, error) {
 	out := new(PullRequestResp)
-	uri := fmt.Sprintf(pathPullRequests, c.base, owner, name)
-	_, err := c.do(uri, get, opts.Encode(), out)
+	uri := fmt.Sprintf(pathPullRequests, c.base, owner, name, opts.Encode())
+	_, err := c.do(uri, get, nil, out)
 	return out.Values, err
 }
 

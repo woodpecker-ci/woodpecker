@@ -135,6 +135,10 @@ const config: Config = {
               href: 'https://ci.woodpecker-ci.org/repos/3780',
               label: 'CI',
             },
+            {
+              href: 'https://opencollective.com/woodpecker-ci',
+              label: 'Open Collective',
+            },
           ],
         },
       ],
@@ -242,14 +246,26 @@ const config: Config = {
           sidebarPath: require.resolve('./sidebars.js'),
           editUrl: 'https://github.com/woodpecker-ci/woodpecker/edit/main/docs/',
           includeCurrentVersion: true,
-          lastVersion: '2.1',
+          lastVersion: '2.4',
           versions: {
             current: {
               label: 'Next',
               banner: 'unreleased',
             },
+            '2.4': {
+              label: '2.4.x',
+            },
+            '2.3': {
+              label: '2.3.x',
+              banner: 'unmaintained',
+            },
+            '2.2': {
+              label: '2.2.x',
+              banner: 'unmaintained',
+            },
             '2.1': {
               label: '2.1.x',
+              banner: 'unmaintained',
             },
             '2.0': {
               label: '2.0.x',
@@ -257,10 +273,6 @@ const config: Config = {
             },
             '1.0': {
               label: '1.0.x',
-              banner: 'unmaintained',
-            },
-            0.15: {
-              label: '0.15.x',
               banner: 'unmaintained',
             },
           },
