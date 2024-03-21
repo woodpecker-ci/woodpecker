@@ -186,7 +186,7 @@ func TestFetchFromConfigService(t *testing.T) {
 
 	ts := httptest.NewServer(http.HandlerFunc(fixtureHandler))
 	defer ts.Close()
-	httpFetcher := config.NewHTTP(ts.URL + "/", privEd25519Key)
+	httpFetcher := config.NewHTTP(ts.URL+"/", privEd25519Key)
 
 	for _, tt := range testTable {
 		t.Run(tt.name, func(t *testing.T) {
