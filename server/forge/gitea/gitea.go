@@ -71,7 +71,7 @@ type Opts struct {
 // New returns a Forge implementation that integrates with Gitea,
 // an open source Git service written in Go. See https://gitea.io/
 func New(opts Opts) (forge.Forge, error) {
-	if opts.OAuth2URL != "" {
+	if opts.OAuth2URL == "" {
 		opts.OAuth2URL = opts.URL
 	}
 
