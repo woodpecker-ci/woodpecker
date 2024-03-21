@@ -292,7 +292,8 @@ func Test_GitLab(t *testing.T) {
 					if assert.NotNil(t, hookRepo) && assert.NotNil(t, pipeline) {
 						assert.Equal(t, "refs/tags/0.0.2", pipeline.Ref)
 						assert.Equal(t, "ci", hookRepo.Name)
-						assert.Equal(t, "created release Awesome version 0.0.2", pipeline.Message)
+						assert.Equal(t, "created release Awesome version 0.0.2", pipeline.Title)
+						assert.Equal(t, "new version desc", pipeline.Message)
 						assert.Equal(t, model.EventRelease, pipeline.Event)
 					}
 				})

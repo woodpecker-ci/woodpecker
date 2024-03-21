@@ -178,6 +178,7 @@ func convertPullHook(from *internal.PullRequestHook) *model.Pipeline {
 		),
 		ForgeURL:  from.PullRequest.Links.HTML.Href,
 		Branch:    from.PullRequest.Dest.Branch.Name,
+		Title:     from.PullRequest.Title,
 		Message:   from.PullRequest.Desc,
 		Avatar:    from.Actor.Links.Avatar.Href,
 		Author:    from.Actor.Login,
@@ -199,6 +200,7 @@ func convertPushHook(hook *internal.PushHook, change *internal.Change) *model.Pi
 		Sender:    hook.Actor.Login,
 		Timestamp: change.New.Target.Date.UTC().Unix(),
 	}
+	pipeline.Title, _, _ = strings.Cut(pipeline.Message, "\n")
 	switch change.New.Type {
 	case "tag", "annotated_tag", "bookmark":
 		pipeline.Event = model.EventTag

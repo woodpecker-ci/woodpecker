@@ -89,12 +89,15 @@ func pipelineFromPush(hook *pushHook) *model.Pipeline {
 		link = hook.HeadCommit.URL
 	}
 
+	title, _, _ := strings.Cut(message, "\n")
+
 	return &model.Pipeline{
 		Event:        model.EventPush,
 		Commit:       hook.After,
 		Ref:          hook.Ref,
 		ForgeURL:     link,
 		Branch:       strings.TrimPrefix(hook.Ref, "refs/heads/"),
+		Title:        title,
 		Message:      message,
 		Avatar:       avatar,
 		Author:       hook.Sender.UserName,
@@ -129,11 +132,13 @@ func pipelineFromTag(hook *pushHook) *model.Pipeline {
 	)
 
 	return &model.Pipeline{
-		Event:     model.EventTag,
-		Commit:    hook.Sha,
-		Ref:       fmt.Sprintf("refs/tags/%s", hook.Ref),
-		ForgeURL:  fmt.Sprintf("%s/src/tag/%s", hook.Repo.HTMLURL, hook.Ref),
-		Message:   fmt.Sprintf("created tag %s", hook.Ref),
+		Event:    model.EventTag,
+		Commit:   hook.Sha,
+		Ref:      fmt.Sprintf("refs/tags/%s", hook.Ref),
+		ForgeURL: fmt.Sprintf("%s/src/tag/%s", hook.Repo.HTMLURL, hook.Ref),
+		Title:    fmt.Sprintf("created tag %s", hook.Ref),
+		// TODO: get tag message and title via webhook (gitea change needed)
+		Message:   "", // if empty api will be asked
 		Avatar:    avatar,
 		Author:    hook.Sender.UserName,
 		Sender:    hook.Sender.UserName,
@@ -160,12 +165,12 @@ func pipelineFromPullRequest(hook *pullRequestHook) *model.Pipeline {
 		ForgeURL: hook.PullRequest.HTMLURL,
 		Ref:      fmt.Sprintf("refs/pull/%d/head", hook.Number),
 		Branch:   hook.PullRequest.Base.Ref,
-		Message:  hook.PullRequest.Title,
+		Title:    hook.PullRequest.Title,
+		Message:  hook.PullRequest.Body,
 		Author:   hook.PullRequest.Poster.UserName,
 		Avatar:   avatar,
 		Sender:   hook.Sender.UserName,
 		Email:    hook.Sender.Email,
-		Title:    hook.PullRequest.Title,
 		Refspec: fmt.Sprintf("%s:%s",
 			hook.PullRequest.Head.Ref,
 			hook.PullRequest.Base.Ref,
@@ -187,7 +192,8 @@ func pipelineFromRelease(hook *releaseHook) *model.Pipeline {
 		Ref:          fmt.Sprintf("refs/tags/%s", hook.Release.TagName),
 		ForgeURL:     hook.Release.HTMLURL,
 		Branch:       hook.Release.Target,
-		Message:      fmt.Sprintf("created release %s", hook.Release.Title),
+		Title:        fmt.Sprintf("created release %s", hook.Release.Title),
+		Message:      hook.Release.Note,
 		Avatar:       avatar,
 		Author:       hook.Sender.UserName,
 		Sender:       hook.Sender.UserName,
