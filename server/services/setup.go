@@ -55,7 +55,7 @@ func setupSecretService(store store.Store) secret.Service {
 	return secret.NewDB(store)
 }
 
-func setupConfigService(c *cli.Context, privateSignatureKey crypto.PrivateKey) config.Service {
+func setupConfigService(c *cli.Context, privateSignatureKey ed25519.PrivateKey) config.Service {
 	timeout := c.Duration("forge-timeout")
 	configFetcher := config.NewForge(timeout)
 
@@ -68,7 +68,7 @@ func setupConfigService(c *cli.Context, privateSignatureKey crypto.PrivateKey) c
 }
 
 // setupSignatureKeys generate or load key pair to sign webhooks requests (i.e. used for service extensions)
-func setupSignatureKeys(_store store.Store) (crypto.PrivateKey, crypto.PublicKey, error) {
+func setupSignatureKeys(_store store.Store) (ed25519.PrivateKey, crypto.PublicKey, error) {
 	privKeyID := "signature-private-key"
 
 	privKey, err := _store.ServerConfigGet(privKeyID)

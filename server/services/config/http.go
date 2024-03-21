@@ -16,7 +16,7 @@ package config
 
 import (
 	"context"
-	"crypto"
+	"crypto/ed25519"
 	"fmt"
 	nethttp "net/http"
 
@@ -28,7 +28,7 @@ import (
 
 type http struct {
 	endpoint   string
-	privateKey crypto.PrivateKey
+	privateKey ed25519.PrivateKey
 }
 
 // configData same as forge.FileMeta but with json tags and string data
@@ -48,7 +48,7 @@ type responseStructure struct {
 	Configs []*configData `json:"configs"`
 }
 
-func NewHTTP(endpoint string, privateKey crypto.PrivateKey) Service {
+func NewHTTP(endpoint string, privateKey ed25519.PrivateKey) Service {
 	return &http{endpoint, privateKey}
 }
 
