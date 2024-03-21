@@ -62,7 +62,7 @@ type Gitea struct {
 // Opts defines configuration options.
 type Opts struct {
 	URL        string // Gitea server url.
-	OAuth2URL  string // Gitea server url.
+	OAuth2URL  string // User-facing Gitea server url for OAuth2.
 	Client     string // OAuth2 Client ID
 	Secret     string // OAuth2 Client Secret
 	SkipVerify bool   // Skip ssl verification.
