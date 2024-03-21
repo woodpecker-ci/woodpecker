@@ -32,7 +32,7 @@ import (
 )
 
 func parsePipeline(forge forge.Forge, store store.Store, currentPipeline *model.Pipeline, user *model.User, repo *model.Repo, yamls []*forge_types.FileMeta, envs map[string]string) ([]*stepbuilder.Item, error) {
-	netrc, err := server.Config.Services.Forge.Netrc(user, repo)
+	netrc, err := forge.Netrc(user, repo)
 	if err != nil {
 		log.Error().Err(err).Msg("failed to generate netrc file")
 	}
@@ -107,7 +107,7 @@ func createPipelineItems(c context.Context, forge forge.Forge, store store.Store
 		return currentPipeline, nil, err
 	} else if err != nil {
 		currentPipeline.Errors = pipeline_errors.GetPipelineErrors(err)
-		err = updatePipelinePending(c, store, currentPipeline, repo, user)
+		err = updatePipelinePending(c, forge, store, currentPipeline, repo, user)
 	}
 
 	currentPipeline = setPipelineStepsOnPipeline(currentPipeline, pipelineItems)

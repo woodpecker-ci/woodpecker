@@ -139,7 +139,7 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 		return nil, err
 	}
 
-	pipeline, err = start(ctx, _store, pipeline, repoUser, repo, pipelineItems)
+	pipeline, err = start(ctx, _forge, _store, pipeline, repoUser, repo, pipelineItems)
 	if err != nil {
 		msg := fmt.Sprintf("failed to start pipeline for %s", repo.FullName)
 		log.Error().Err(err).Msg(msg)
