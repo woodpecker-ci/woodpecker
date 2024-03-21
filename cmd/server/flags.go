@@ -386,6 +386,11 @@ var flags = append([]cli.Flag{
 		Name:    "gitea-skip-verify",
 		Usage:   "gitea skip ssl verification",
 	},
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_DEV_GITEA_OAUTH_URL"},
+		Name:    "gitea-oauth-server",
+		Usage:   "user-facing gitea server url for oauth",
+	},
 	//
 	// Bitbucket
 	//
