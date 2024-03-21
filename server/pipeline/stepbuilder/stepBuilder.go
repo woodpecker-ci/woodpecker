@@ -17,8 +17,10 @@ package stepbuilder
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 	"strings"
+	"text/template"
 
 	"github.com/oklog/ulid/v2"
 	"github.com/rs/zerolog/log"
@@ -127,9 +129,30 @@ func (b *StepBuilder) genItemForWorkflow(workflow *model.Workflow, axis matrix.A
 	}
 
 	// substitute vars
-	substituted, err := metadata.EnvVarSubst(data, environ)
-	if err != nil {
-		return nil, multierr.Append(errorsAndWarnings, err)
+	var substituted string
+	if os.Getenv("WOODPECKER_EXPERIMENTAL_GO_PREPROCESSOR") == "true" {
+		var err error
+		tmpl, err := template.New("pipeline").Parse(data)
+		if err != nil {
+			return nil, multierr.Append(errorsAndWarnings, err)
+		}
+
+		var sb strings.Builder
+		ctx := map[string]any{
+			"env": environ,
+		}
+		err = tmpl.Execute(&sb, ctx)
+		if err != nil {
+			return nil, multierr.Append(errorsAndWarnings, err)
+		}
+	}
+
+	if os.Getenv("WOODPECKER_EXPERIMENTAL_DISABLE_LEAGAY_PREPROCESSOR") != "true" {
+		var err error
+		substituted, err = metadata.EnvVarSubst(data, environ)
+		if err != nil {
+			return nil, multierr.Append(errorsAndWarnings, err)
+		}
 	}
 
 	// parse yaml pipeline
