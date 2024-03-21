@@ -29,8 +29,6 @@ import (
 
 	"go.woodpecker-ci.org/woodpecker/v2/server"
 	"go.woodpecker-ci.org/woodpecker/v2/server/cache"
-	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
-	"go.woodpecker-ci.org/woodpecker/v2/server/forge/loader"
 	"go.woodpecker-ci.org/woodpecker/v2/server/queue"
 	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 	"go.woodpecker-ci.org/woodpecker/v2/server/store/datastore"
@@ -95,10 +93,6 @@ func setupQueue(c *cli.Context, s store.Store) queue.Queue {
 
 func setupMembershipService(_ *cli.Context, _store store.Store) cache.MembershipService {
 	return cache.NewMembershipService(_store)
-}
-
-func setupForgeService(_ *cli.Context, _store store.Store) forge.ForgeService {
-	return loader.NewForgeService(_store)
 }
 
 func setupMetrics(g *errgroup.Group, _store store.Store) {

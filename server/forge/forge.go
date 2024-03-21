@@ -31,6 +31,7 @@ import (
 type ForgeService interface {
 	FromRepo(repo *model.Repo) (Forge, error)
 	FromUser(user *model.User) (Forge, error)
+	Main() (Forge, error)
 }
 
 type Forge interface {

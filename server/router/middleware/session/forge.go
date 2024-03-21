@@ -17,7 +17,8 @@ func Forge(c *gin.Context) forge.Forge {
 	}
 	f, ok := v.(forge.Forge)
 	if !ok {
-		return nil
+		log.Error().Msg("Cannot detect forge")
+		return nil // TODO: this should not happen, either panic or return an error
 	}
 	return f
 }

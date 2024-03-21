@@ -44,7 +44,11 @@ func HandleLogin(c *gin.Context) {
 
 func HandleAuth(c *gin.Context) {
 	_store := store.FromContext(c)
-	_forge := session.Forge(c)
+	_forge, err := server.Config.Services.Forge.Main()
+	if err != nil {
+		_ = c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
 
 	// when dealing with redirects, we may need to adjust the content type. I
 	// cannot, however, remember why, so need to revisit this line.

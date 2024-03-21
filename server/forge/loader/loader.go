@@ -24,9 +24,11 @@ type forgeLoader struct {
 	ttl   time.Duration
 }
 
+const forgeCacheTTL = 10 * time.Minute
+
 func NewForgeService(_store store.Store) forge.ForgeService {
 	return &forgeLoader{
-		ttl:   10 * time.Minute,
+		ttl:   forgeCacheTTL,
 		store: _store,
 		cache: ttlcache.New(ttlcache.WithDisableTouchOnHit[int64, forge.Forge]()),
 	}
@@ -59,6 +61,10 @@ func (f *forgeLoader) FromRepo(repo *model.Repo) (forge.Forge, error) {
 
 func (f *forgeLoader) FromUser(user *model.User) (forge.Forge, error) {
 	return f.getForgeByID(user.ForgeID)
+}
+
+func (f *forgeLoader) Main() (forge.Forge, error) {
+	return f.getForgeByID(0) // main forge is always 0 and is configured via environment variables
 }
 
 func setupForge(forge *model.Forge) (forge.Forge, error) {
