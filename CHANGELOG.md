@@ -1,13 +1,14 @@
 # Changelog
 
-## [2.5.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.5.0) - 2024-03-20
+## [2.5.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.5.0) - 2024-03-21
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@manuelluis
+@manuelluis, @qwerty287
 
 ### 📈 Enhancement
 
+- Allow separate gitea oauth URL  [[#3513](https://github.com/woodpecker-ci/woodpecker/pull/3513)]
 - Add option to set the local repository path to the cli command exec. [[#3524](https://github.com/woodpecker-ci/woodpecker/pull/3524)]
 
 ## [2.4.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.4.1) - 2024-03-20
