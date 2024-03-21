@@ -6,6 +6,10 @@
 
 @manuelluis, @qwerty287
 
+### 🐛 Bug Fixes
+
+- Fix flag name [[#3534](https://github.com/woodpecker-ci/woodpecker/pull/3534)]
+
 ### 📈 Enhancement
 
 - Allow separate gitea oauth URL  [[#3513](https://github.com/woodpecker-ci/woodpecker/pull/3513)]
