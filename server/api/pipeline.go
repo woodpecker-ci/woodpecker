@@ -384,7 +384,6 @@ func GetPipelineQueue(c *gin.Context) {
 //	@Param			deploy_to		query	string	false	"override the target deploy value"
 func PostPipeline(c *gin.Context) {
 	_store := store.FromContext(c)
-	_forge := session.Forge(c)
 	repo := session.Repo(c)
 
 	num, err := strconv.ParseInt(c.Param("number"), 10, 64)

@@ -274,7 +274,7 @@ func setupEvilGlobals(c *cli.Context, s store.Store) error {
 	server.Config.Services.Queue = setupQueue(c, s)
 	server.Config.Services.Logs = logging.New()
 	server.Config.Services.Pubsub = pubsub.New()
-	server.Config.Services.Membership = setupMembershipService(c, f)
+	server.Config.Services.Membership = setupMembershipService(c, s)
 
 	serviceMangager, err := services.NewManager(c, s)
 	if err != nil {
