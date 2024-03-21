@@ -23,8 +23,8 @@ import (
 	"github.com/franela/goblin"
 	"github.com/gin-gonic/gin"
 
-	"github.com/woodpecker-ci/woodpecker/server/forge/github/fixtures"
-	"github.com/woodpecker-ci/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge/github/fixtures"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
 func Test_github(t *testing.T) {
@@ -51,11 +51,12 @@ func Test_github(t *testing.T) {
 					Secret:     "I1NiIsInR5",
 					SkipVerify: true,
 				})
-				g.Assert(forge.(*client).url).Equal("http://localhost:8080")
-				g.Assert(forge.(*client).API).Equal("http://localhost:8080/api/v3/")
-				g.Assert(forge.(*client).Client).Equal("0ZXh0IjoiI")
-				g.Assert(forge.(*client).Secret).Equal("I1NiIsInR5")
-				g.Assert(forge.(*client).SkipVerify).Equal(true)
+				f, _ := forge.(*client)
+				g.Assert(f.url).Equal("http://localhost:8080")
+				g.Assert(f.API).Equal("http://localhost:8080/api/v3/")
+				g.Assert(f.Client).Equal("0ZXh0IjoiI")
+				g.Assert(f.Secret).Equal("I1NiIsInR5")
+				g.Assert(f.SkipVerify).Equal(true)
 			})
 		})
 
@@ -86,7 +87,7 @@ func Test_github(t *testing.T) {
 				g.Assert(repo.FullName).Equal(fakeRepo.FullName)
 				g.Assert(repo.IsSCMPrivate).IsTrue()
 				g.Assert(repo.Clone).Equal(fakeRepo.Clone)
-				g.Assert(repo.Link).Equal(fakeRepo.Link)
+				g.Assert(repo.ForgeURL).Equal(fakeRepo.ForgeURL)
 			})
 			g.It("Should handle a not found error", func() {
 				_, err := c.Repo(ctx, fakeUser, "0", fakeRepoNotFound.Owner, fakeRepoNotFound.Name)
@@ -124,7 +125,7 @@ var (
 		Name:          "Hello-World",
 		FullName:      "octocat/Hello-World",
 		Avatar:        "https://github.com/images/error/octocat_happy.gif",
-		Link:          "https://github.com/octocat/Hello-World",
+		ForgeURL:      "https://github.com/octocat/Hello-World",
 		Clone:         "https://github.com/octocat/Hello-World.git",
 		IsSCMPrivate:  true,
 	}

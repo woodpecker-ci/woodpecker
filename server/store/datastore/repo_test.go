@@ -21,7 +21,7 @@ import (
 	"github.com/franela/goblin"
 	"github.com/stretchr/testify/assert"
 
-	"github.com/woodpecker-ci/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
 func TestRepos(t *testing.T) {
@@ -68,6 +68,27 @@ func TestRepos(t *testing.T) {
 			err := store.CreateRepo(&repo)
 			g.Assert(err).IsNil()
 			g.Assert(repo.ID != 0).IsTrue()
+		})
+
+		g.It("Should fail if repo has no name / owner / fullname", func() {
+			g.Assert(store.CreateRepo(&model.Repo{
+				UserID:   1,
+				FullName: "bradrydzewski/",
+				Owner:    "bradrydzewski",
+				Name:     "",
+			})).IsNotNil()
+			g.Assert(store.CreateRepo(&model.Repo{
+				UserID:   1,
+				FullName: "/test",
+				Owner:    "",
+				Name:     "test",
+			})).IsNotNil()
+			g.Assert(store.CreateRepo(&model.Repo{
+				UserID:   1,
+				FullName: "",
+				Owner:    "bradrydzewski",
+				Name:     "test",
+			})).IsNotNil()
 		})
 
 		g.It("Should Get a Repo by ID", func() {
@@ -180,19 +201,10 @@ func TestRepoList(t *testing.T) {
 	}
 
 	repos, err := store.RepoList(user, false, false)
-	if err != nil {
-		t.Error(err)
-		return
-	}
-	if got, want := len(repos), 2; got != want {
-		t.Errorf("Want %d repositories, got %d", want, got)
-	}
-	if got, want := repos[0].ID, repo1.ID; got != want {
-		t.Errorf("Want repository id %d, got %d", want, got)
-	}
-	if got, want := repos[1].ID, repo2.ID; got != want {
-		t.Errorf("Want repository id %d, got %d", want, got)
-	}
+	assert.NoError(t, err)
+	assert.Len(t, repos, 2)
+	assert.Equal(t, repo1.ID, repos[0].ID)
+	assert.Equal(t, repo2.ID, repos[1].ID)
 }
 
 func TestOwnedRepoList(t *testing.T) {
@@ -245,19 +257,10 @@ func TestOwnedRepoList(t *testing.T) {
 	}
 
 	repos, err := store.RepoList(user, true, false)
-	if err != nil {
-		t.Error(err)
-		return
-	}
-	if got, want := len(repos), 2; got != want {
-		t.Errorf("Want %d repositories, got %d", want, got)
-	}
-	if got, want := repos[0].ID, repo1.ID; got != want {
-		t.Errorf("Want repository id %d, got %d", want, got)
-	}
-	if got, want := repos[1].ID, repo2.ID; got != want {
-		t.Errorf("Want repository id %d, got %d", want, got)
-	}
+	assert.NoError(t, err)
+	assert.Len(t, repos, 2)
+	assert.Equal(t, repo1.ID, repos[0].ID)
+	assert.Equal(t, repo2.ID, repos[1].ID)
 }
 
 func TestRepoCount(t *testing.T) {
@@ -286,10 +289,9 @@ func TestRepoCount(t *testing.T) {
 	assert.NoError(t, store.CreateRepo(repo2))
 	assert.NoError(t, store.CreateRepo(repo3))
 
-	count, _ := store.GetRepoCount()
-	if got, want := count, int64(2); got != want {
-		t.Errorf("Want %d repositories, got %d", want, got)
-	}
+	count, err := store.GetRepoCount()
+	assert.NoError(t, err)
+	assert.EqualValues(t, 2, count)
 }
 
 func TestRepoCrud(t *testing.T) {
@@ -304,7 +306,8 @@ func TestRepoCrud(t *testing.T) {
 		new(model.Secret),
 		new(model.Registry),
 		new(model.Config),
-		new(model.Redirection))
+		new(model.Redirection),
+		new(model.Workflow))
 	defer closer()
 
 	repo := model.Repo{

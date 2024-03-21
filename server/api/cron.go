@@ -21,12 +21,12 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/woodpecker-ci/woodpecker/server"
-	cronScheduler "github.com/woodpecker-ci/woodpecker/server/cron"
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/pipeline"
-	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
-	"github.com/woodpecker-ci/woodpecker/server/store"
+	"go.woodpecker-ci.org/woodpecker/v2/server"
+	cronScheduler "go.woodpecker-ci.org/woodpecker/v2/server/cron"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/pipeline"
+	"go.woodpecker-ci.org/woodpecker/v2/server/router/middleware/session"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 )
 
 // GetCron
@@ -49,7 +49,7 @@ func GetCron(c *gin.Context) {
 
 	cron, err := store.FromContext(c).CronFind(repo, id)
 	if err != nil {
-		handleDbError(c, err)
+		handleDBError(c, err)
 		return
 	}
 	c.JSON(http.StatusOK, cron)
@@ -76,7 +76,7 @@ func RunCron(c *gin.Context) {
 
 	cron, err := _store.CronFind(repo, id)
 	if err != nil {
-		handleDbError(c, err)
+		handleDBError(c, err)
 		return
 	}
 
@@ -102,7 +102,7 @@ func RunCron(c *gin.Context) {
 //	@Produce	json
 //	@Success	200	{object}	Cron
 //	@Tags		Repository cron jobs
-//	@Param		Authorization	header	string		true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 //	@Param		repo_id			path	int		true	"the repository id"
 //	@Param		cronJob			body	Cron	true	"the new cron job"
 func PostCron(c *gin.Context) {
@@ -158,9 +158,9 @@ func PostCron(c *gin.Context) {
 //	@Produce	json
 //	@Success	200	{object}	Cron
 //	@Tags		Repository cron jobs
-//	@Param		Authorization	header	string		true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 //	@Param		repo_id			path	int		true	"the repository id"
-//	@Param		cron			path	string		true	"the cron job id"
+//	@Param		cron			path	string	true	"the cron job id"
 //	@Param		cronJob			body	Cron	true	"the cron job data"
 func PatchCron(c *gin.Context) {
 	repo := session.Repo(c)
@@ -183,7 +183,7 @@ func PatchCron(c *gin.Context) {
 
 	cron, err := _store.CronFind(repo, id)
 	if err != nil {
-		handleDbError(c, err)
+		handleDBError(c, err)
 		return
 	}
 	if in.Branch != "" {
@@ -259,7 +259,7 @@ func DeleteCron(c *gin.Context) {
 		return
 	}
 	if err := store.FromContext(c).CronDelete(repo, id); err != nil {
-		handleDbError(c, err)
+		handleDBError(c, err)
 		return
 	}
 	c.Status(http.StatusNoContent)

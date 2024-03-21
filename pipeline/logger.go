@@ -15,20 +15,10 @@
 package pipeline
 
 import (
-	backend "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
-	"github.com/woodpecker-ci/woodpecker/pipeline/multipart"
+	"io"
+
+	backend "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 )
 
 // Logger handles the process logging.
-type Logger interface {
-	Log(*backend.Step, multipart.Reader) error
-}
-
-// LogFunc type is an adapter to allow the use of an ordinary
-// function for process logging.
-type LogFunc func(*backend.Step, multipart.Reader) error
-
-// Log calls f(step, r).
-func (f LogFunc) Log(step *backend.Step, r multipart.Reader) error {
-	return f(step, r)
-}
+type Logger func(*backend.Step, io.Reader) error

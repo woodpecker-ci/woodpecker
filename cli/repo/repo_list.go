@@ -20,8 +20,8 @@ import (
 
 	"github.com/urfave/cli/v2"
 
-	"github.com/woodpecker-ci/woodpecker/cli/common"
-	"github.com/woodpecker-ci/woodpecker/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
 )
 
 var repoListCmd = &cli.Command{
@@ -29,13 +29,13 @@ var repoListCmd = &cli.Command{
 	Usage:     "list all repos",
 	ArgsUsage: " ",
 	Action:    repoList,
-	Flags: append(common.GlobalFlags,
+	Flags: []cli.Flag{
 		common.FormatFlag(tmplRepoList),
 		&cli.StringFlag{
 			Name:  "org",
 			Usage: "filter by organization",
 		},
-	),
+	},
 }
 
 func repoList(c *cli.Context) error {

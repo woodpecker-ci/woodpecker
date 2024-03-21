@@ -16,10 +16,10 @@ package compiler
 
 import (
 	"net/url"
-	"path/filepath"
+	"path"
 	"strings"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/metadata"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/metadata"
 )
 
 // Option configures a compiler option.
@@ -36,7 +36,7 @@ func WithOption(option Option, b bool) Option {
 	case b:
 		return option
 	default:
-		return func(compiler *Compiler) {}
+		return func(_ *Compiler) {}
 	}
 }
 
@@ -104,13 +104,13 @@ func WithWorkspace(base, path string) Option {
 
 // WithWorkspaceFromURL configures the compiler with the workspace
 // base and path based on the repository url.
-func WithWorkspaceFromURL(base, link string) Option {
-	path := "src"
-	parsed, err := url.Parse(link)
+func WithWorkspaceFromURL(base, u string) Option {
+	srcPath := "src"
+	parsed, err := url.Parse(u)
 	if err == nil {
-		path = filepath.Join(path, parsed.Hostname(), parsed.Path)
+		srcPath = path.Join(srcPath, parsed.Hostname(), parsed.Path)
 	}
-	return WithWorkspace(base, path)
+	return WithWorkspace(base, srcPath)
 }
 
 // WithEscalated configures the compiler to automatically execute

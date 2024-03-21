@@ -22,10 +22,10 @@ import (
 	"github.com/robfig/cron"
 	"github.com/rs/zerolog/log"
 
-	"github.com/woodpecker-ci/woodpecker/server/forge"
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/pipeline"
-	"github.com/woodpecker-ci/woodpecker/server/store"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/pipeline"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 )
 
 const (
@@ -45,7 +45,7 @@ func Start(ctx context.Context, store store.Store, forge forge.Forge) error {
 		case <-time.After(checkTime):
 			go func() {
 				now := time.Now()
-				log.Trace().Msg("Cron: fetch next crons")
+				log.Trace().Msg("cron: fetch next crons")
 
 				crons, err := store.CronListNextExecute(now.Unix(), checkItems)
 				if err != nil {
@@ -78,7 +78,7 @@ func CalcNewNext(schedule string, now time.Time) (time.Time, error) {
 }
 
 func runCron(store store.Store, forge forge.Forge, cron *model.Cron, now time.Time) error {
-	log.Trace().Msgf("Cron: run id[%d]", cron.ID)
+	log.Trace().Msgf("cron: run id[%d]", cron.ID)
 	ctx := context.Background()
 
 	newNext, err := CalcNewNext(cron.Schedule, now)
@@ -133,12 +133,12 @@ func CreatePipeline(ctx context.Context, store store.Store, f forge.Forge, cron 
 
 	return repo, &model.Pipeline{
 		Event:     model.EventCron,
-		Commit:    commit,
+		Commit:    commit.SHA,
 		Ref:       "refs/heads/" + cron.Branch,
 		Branch:    cron.Branch,
 		Message:   cron.Name,
 		Timestamp: cron.NextExec,
 		Sender:    cron.Name,
-		Link:      repo.Link,
+		ForgeURL:  commit.ForgeURL,
 	}, nil
 }

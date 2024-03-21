@@ -21,36 +21,29 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline"
-	backend "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
-	"github.com/woodpecker-ci/woodpecker/pipeline/multipart"
-	"github.com/woodpecker-ci/woodpecker/pipeline/rpc"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline"
+	backend "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc"
 )
 
-func (r *Runner) createLogger(logger zerolog.Logger, uploads *sync.WaitGroup, workflow *rpc.Workflow) pipeline.LogFunc {
-	return func(step *backend.Step, rc multipart.Reader) error {
+func (r *Runner) createLogger(logger zerolog.Logger, uploads *sync.WaitGroup, workflow *rpc.Workflow) pipeline.Logger {
+	return func(step *backend.Step, rc io.Reader) error {
 		loglogger := logger.With().
 			Str("image", step.Image).
-			Str("stage", step.Alias).
+			Str("workflowID", workflow.ID).
 			Logger()
 
-		part, rerr := rc.NextPart()
-		if rerr != nil {
-			return rerr
-		}
 		uploads.Add(1)
 
 		var secrets []string
 		for _, secret := range workflow.Config.Secrets {
-			if secret.Mask {
-				secrets = append(secrets, secret.Value)
-			}
+			secrets = append(secrets, secret.Value)
 		}
 
 		loglogger.Debug().Msg("log stream opened")
 
 		logStream := rpc.NewLineWriter(r.client, step.UUID, secrets...)
-		if _, err := io.Copy(logStream, part); err != nil {
+		if _, err := io.Copy(logStream, rc); err != nil {
 			log.Error().Err(err).Msg("copy limited logStream part")
 		}
 

@@ -21,8 +21,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v3"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/constraint"
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types/base"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/constraint"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/types/base"
 )
 
 var containerYaml = []byte(`
@@ -39,12 +39,14 @@ devices:
 directory: example/
 dns: 8.8.8.8
 dns_search: example.com
+entrypoint: [/bin/sh, -c]
 environment:
   - RACK_ENV=development
   - SHOW=true
 extra_hosts:
  - somehost:162.242.195.82
  - otherhost:50.31.209.229
+ - ipv6:2001:db8::10
 name: my-build-container
 network_mode: bridge
 networks:
@@ -68,6 +70,10 @@ when:
 settings:
   foo: bar
   baz: false
+ports:
+  - 8080
+  - 4443/tcp
+  - 51820/udp
 `)
 
 func TestUnmarshalContainer(t *testing.T) {
@@ -81,8 +87,9 @@ func TestUnmarshalContainer(t *testing.T) {
 		Directory:    "example/",
 		DNS:          base.StringOrSlice{"8.8.8.8"},
 		DNSSearch:    base.StringOrSlice{"example.com"},
+		Entrypoint:   []string{"/bin/sh", "-c"},
 		Environment:  base.SliceOrMap{"RACK_ENV": "development", "SHOW": "true"},
-		ExtraHosts:   []string{"somehost:162.242.195.82", "otherhost:50.31.209.229"},
+		ExtraHosts:   []string{"somehost:162.242.195.82", "otherhost:50.31.209.229", "ipv6:2001:db8::10"},
 		Image:        "golang:latest",
 		MemLimit:     base.MemStringOrInt(1024),
 		MemSwapLimit: base.MemStringOrInt(1024),
@@ -122,10 +129,11 @@ func TestUnmarshalContainer(t *testing.T) {
 				},
 			},
 		},
-		Settings: map[string]interface{}{
+		Settings: map[string]any{
 			"foo": "bar",
 			"baz": false,
 		},
+		Ports: []string{"8080", "4443/tcp", "51820/udp"},
 	}
 	got := Container{}
 	err := yaml.Unmarshal(containerYaml, &got)
@@ -156,7 +164,7 @@ func TestUnmarshalContainers(t *testing.T) {
 				{
 					Name:  "unit_test",
 					Image: "node",
-					Settings: map[string]interface{}{
+					Settings: map[string]any{
 						"normal_setting": true,
 					},
 				},
@@ -187,7 +195,7 @@ func TestUnmarshalContainers(t *testing.T) {
 						Source: "docker_password",
 						Target: "docker_password",
 					}}},
-					Settings: map[string]interface{}{
+					Settings: map[string]any{
 						"repo":       "woodpeckerci/woodpecker-agent",
 						"dockerfile": "docker/Dockerfile.agent",
 						"tag":        stringsToInterface("next", "latest"),
@@ -220,7 +228,7 @@ func TestUnmarshalContainers(t *testing.T) {
 					Name:  "publish-cli",
 					Image: "print/env",
 					Group: "docker",
-					Settings: map[string]interface{}{
+					Settings: map[string]any{
 						"repo":       "woodpeckerci/woodpecker-cli",
 						"dockerfile": "docker/Dockerfile.cli",
 						"tag":        stringsToInterface("next"),
@@ -286,8 +294,8 @@ func TestUnmarshalContainersErr(t *testing.T) {
 	}
 }
 
-func stringsToInterface(val ...string) []interface{} {
-	res := make([]interface{}, len(val))
+func stringsToInterface(val ...string) []any {
+	res := make([]any, len(val))
 	for i := range val {
 		res[i] = val[i]
 	}
@@ -301,5 +309,11 @@ func TestIsPlugin(t *testing.T) {
 	}).IsPlugin())
 	assert.False(t, (&Container{
 		Commands: base.StringOrSlice(strslice.StrSlice{"echo 'this is not a plugin'"}),
+	}).IsPlugin())
+	assert.True(t, (&Container{
+		Entrypoint: base.StringOrSlice(strslice.StrSlice{}),
+	}).IsPlugin())
+	assert.False(t, (&Container{
+		Entrypoint: base.StringOrSlice(strslice.StrSlice{"echo 'this is not a plugin'"}),
 	}).IsPlugin())
 }

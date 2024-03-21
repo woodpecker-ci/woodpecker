@@ -21,7 +21,8 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/woodpecker-ci/woodpecker/server/model"
+
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
 func TestLogging(t *testing.T) {
@@ -41,10 +42,10 @@ func TestLogging(t *testing.T) {
 	logger := New()
 	assert.NoError(t, logger.Open(ctx, testStepID))
 	go func() {
-		assert.NoError(t, logger.Tail(ctx, testStepID, func(entry ...*model.LogEntry) { wg.Done() }))
+		assert.NoError(t, logger.Tail(ctx, testStepID, func(_ ...*model.LogEntry) { wg.Done() }))
 	}()
 	go func() {
-		assert.NoError(t, logger.Tail(ctx, testStepID, func(entry ...*model.LogEntry) { wg.Done() }))
+		assert.NoError(t, logger.Tail(ctx, testStepID, func(_ ...*model.LogEntry) { wg.Done() }))
 	}()
 
 	<-time.After(500 * time.Millisecond)
@@ -59,7 +60,7 @@ func TestLogging(t *testing.T) {
 
 	wg.Add(1)
 	go func() {
-		assert.NoError(t, logger.Tail(ctx, testStepID, func(entry ...*model.LogEntry) { wg.Done() }))
+		assert.NoError(t, logger.Tail(ctx, testStepID, func(_ ...*model.LogEntry) { wg.Done() }))
 	}()
 
 	<-time.After(500 * time.Millisecond)

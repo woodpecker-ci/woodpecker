@@ -15,9 +15,15 @@
 package datastore
 
 import (
-	"xorm.io/builder"
+	"crypto/sha256"
+	"errors"
+	"fmt"
 
-	"github.com/woodpecker-ci/woodpecker/server/model"
+	"xorm.io/builder"
+	"xorm.io/xorm"
+
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store/types"
 )
 
 func (s storage) ConfigsForPipeline(pipelineID int64) ([]*model.Config, error) {
@@ -29,27 +35,51 @@ func (s storage) ConfigsForPipeline(pipelineID int64) ([]*model.Config, error) {
 		Find(&configs)
 }
 
-func (s storage) ConfigFindIdentical(repoID int64, hash string) (*model.Config, error) {
+func (s storage) configFindIdentical(sess *xorm.Session, repoID int64, hash, name string) (*model.Config, error) {
 	conf := new(model.Config)
-	if err := wrapGet(s.engine.Where(
-		builder.Eq{"config_repo_id": repoID, "config_hash": hash},
+	if err := wrapGet(sess.Where(
+		builder.Eq{"config_repo_id": repoID, "config_hash": hash, "config_name": name},
 	).Get(conf)); err != nil {
 		return nil, err
 	}
 	return conf, nil
 }
 
-func (s storage) ConfigFindApproved(config *model.Config) (bool, error) {
-	return s.engine.Table("pipelines").Select("pipelines.pipeline_id").
-		Join("INNER", "pipeline_config", "pipelines.pipeline_id = pipeline_config.pipeline_id").
-		Where(builder.Eq{"pipelines.pipeline_repo_id": config.RepoID, "pipeline_config.config_id": config.ID}.
-			And(builder.NotIn("pipelines.pipeline_status", model.StatusBlocked, model.StatusPending))).
-		Exist()
+func (s storage) ConfigPersist(conf *model.Config) (*model.Config, error) {
+	conf.Hash = fmt.Sprintf("%x", sha256.Sum256(conf.Data))
+
+	sess := s.engine.NewSession()
+	defer sess.Close()
+	if err := sess.Begin(); err != nil {
+		return nil, err
+	}
+
+	existingConfig, err := s.configFindIdentical(sess, conf.RepoID, conf.Hash, conf.Name)
+	if err != nil && !errors.Is(err, types.RecordNotExist) {
+		return nil, err
+	}
+	if existingConfig != nil {
+		return existingConfig, nil
+	}
+
+	if err := s.configCreate(sess, conf); err != nil {
+		return nil, err
+	}
+
+	return conf, sess.Commit()
 }
 
-func (s storage) ConfigCreate(config *model.Config) error {
+func (s storage) configCreate(sess *xorm.Session, config *model.Config) error {
+	// should never happen but just in case
+	if config.Name == "" {
+		return fmt.Errorf("insert config to store failed: 'Name' has to be set")
+	}
+	if config.Hash == "" {
+		return fmt.Errorf("insert config to store failed: 'Hash' has to be set")
+	}
+
 	// only Insert set auto created ID back to object
-	_, err := s.engine.Insert(config)
+	_, err := sess.Insert(config)
 	return err
 }
 

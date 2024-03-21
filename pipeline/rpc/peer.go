@@ -18,7 +18,7 @@ package rpc
 import (
 	"context"
 
-	backend "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
+	backend "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 )
 
 type (
@@ -27,9 +27,9 @@ type (
 		Labels map[string]string `json:"labels"`
 	}
 
-	// State defines the workflow state.
+	// State defines the step state.
 	State struct {
-		Step     string `json:"step"`
+		StepUUID string `json:"step_uuid"`
 		Exited   bool   `json:"exited"`
 		ExitCode int    `json:"exit_code"`
 		Started  int64  `json:"started"`
@@ -61,16 +61,16 @@ type Peer interface {
 	// Wait blocks until the workflow is complete
 	Wait(c context.Context, id string) error
 
-	// Init signals the workflow is initialized
+	// Init signals the step is initialized
 	Init(c context.Context, id string, state State) error
 
-	// Done signals the workflow is complete
+	// Done signals the step is complete
 	Done(c context.Context, id string, state State) error
 
 	// Extend extends the workflow deadline
 	Extend(c context.Context, id string) error
 
-	// Update updates the workflow state
+	// Update updates the step state
 	Update(c context.Context, id string, state State) error
 
 	// Log writes the workflow log entry
@@ -78,6 +78,9 @@ type Peer interface {
 
 	// RegisterAgent register our agent to the server
 	RegisterAgent(ctx context.Context, platform, backend, version string, capacity int) (int64, error)
+
+	// UnregisterAgent unregister our agent from the server
+	UnregisterAgent(ctx context.Context) error
 
 	// ReportHealth reports health status of the agent to the server
 	ReportHealth(c context.Context) error

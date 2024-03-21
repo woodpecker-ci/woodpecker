@@ -22,9 +22,9 @@ import (
 
 	"github.com/urfave/cli/v2"
 
-	"github.com/woodpecker-ci/woodpecker/cli/common"
-	"github.com/woodpecker-ci/woodpecker/cli/internal"
-	"github.com/woodpecker-ci/woodpecker/woodpecker-go/woodpecker"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker"
 )
 
 // Command exports the deploy command.
@@ -33,7 +33,7 @@ var Command = &cli.Command{
 	Usage:     "deploy code",
 	ArgsUsage: "<repo-id|repo-full-name> <pipeline> <environment>",
 	Action:    deploy,
-	Flags: append(common.GlobalFlags,
+	Flags: []cli.Flag{
 		common.FormatFlag(tmplDeployInfo),
 		&cli.StringFlag{
 			Name:  "branch",
@@ -55,7 +55,7 @@ var Command = &cli.Command{
 			Aliases: []string{"p"},
 			Usage:   "custom parameters to be injected into the step environment. Format: KEY=value",
 		},
-	),
+	},
 }
 
 func deploy(c *cli.Context) error {
@@ -75,7 +75,7 @@ func deploy(c *cli.Context) error {
 	status := c.String("status")
 
 	pipelineArg := c.Args().Get(1)
-	var number int
+	var number int64
 	if pipelineArg == "last" {
 		// Fetch the pipeline number from the last pipeline
 		pipelines, berr := client.PipelineList(repoID)
@@ -97,18 +97,19 @@ func deploy(c *cli.Context) error {
 			}
 		}
 		if number == 0 {
-			return fmt.Errorf("Cannot deploy failure pipeline")
+			return fmt.Errorf("cannot deploy failure pipeline")
 		}
 	} else {
-		number, err = strconv.Atoi(pipelineArg)
+		number, err = strconv.ParseInt(pipelineArg, 10, 64)
 		if err != nil {
 			return err
 		}
 	}
 
-	env := c.Args().Get(2)
+	envArgIndex := 2
+	env := c.Args().Get(envArgIndex)
 	if env == "" {
-		return fmt.Errorf("Please specify the target environment (ie production)")
+		return fmt.Errorf("please specify the target environment (i.e. production)")
 	}
 
 	params := internal.ParseKeyPair(c.StringSlice("param"))

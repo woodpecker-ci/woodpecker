@@ -20,9 +20,9 @@ import (
 
 	"github.com/urfave/cli/v2"
 
-	"github.com/woodpecker-ci/woodpecker/cli/common"
-	"github.com/woodpecker-ci/woodpecker/cli/internal"
-	"github.com/woodpecker-ci/woodpecker/woodpecker-go/woodpecker"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker"
 )
 
 var cronCreateCmd = &cli.Command{
@@ -30,7 +30,7 @@ var cronCreateCmd = &cli.Command{
 	Usage:     "add a cron job",
 	ArgsUsage: "[repo-id|repo-full-name]",
 	Action:    cronCreate,
-	Flags: append(common.GlobalFlags,
+	Flags: []cli.Flag{
 		common.RepoFlag,
 		&cli.StringFlag{
 			Name:     "name",
@@ -47,7 +47,7 @@ var cronCreateCmd = &cli.Command{
 			Required: true,
 		},
 		common.FormatFlag(tmplCronList, true),
-	),
+	},
 }
 
 func cronCreate(c *cli.Context) error {

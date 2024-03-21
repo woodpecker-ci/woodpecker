@@ -27,18 +27,30 @@ import (
 )
 
 var (
-	dnsPattern           = regexp.MustCompile(`^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$`)
-	ErrDNSPatternInvalid = errors.New("name is not a valid kubernetes DNS name")
+	dnsPattern = regexp.MustCompile(`^[a-z0-9]` + // must start with
+		`([-a-z0-9]*[a-z0-9])?` + // inside can als contain -
+		`(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$`, // allow the same pattern as before with dots in between but only one dot
+	)
+	dnsDisallowedCharacters = regexp.MustCompile(`[^-^.a-z0-9]+`)
+	ErrDNSPatternInvalid    = errors.New("name is not a valid kubernetes DNS name")
 )
 
 func dnsName(i string) (string, error) {
-	res := strings.Replace(i, "_", "-", -1)
+	res := strings.ToLower(strings.ReplaceAll(i, "_", "-"))
 
 	if found := dnsPattern.FindStringIndex(res); found == nil {
 		return "", ErrDNSPatternInvalid
 	}
 
 	return res, nil
+}
+
+func toDNSName(in string) (string, error) {
+	lower := strings.ToLower(in)
+	withoutUnderscores := strings.ReplaceAll(lower, "_", "-")
+	withoutSpaces := strings.ReplaceAll(withoutUnderscores, " ", "-")
+	almostDNS := dnsDisallowedCharacters.ReplaceAllString(withoutSpaces, "")
+	return dnsName(almostDNS)
 }
 
 func isImagePullBackOffState(pod *v1.Pod) bool {
@@ -77,4 +89,16 @@ func getClientInsideOfCluster() (kubernetes.Interface, error) {
 	}
 
 	return kubernetes.NewForConfig(config)
+}
+
+func newBool(val bool) *bool {
+	ptr := new(bool)
+	*ptr = val
+	return ptr
+}
+
+func newInt64(val int64) *int64 {
+	ptr := new(int64)
+	*ptr = val
+	return ptr
 }

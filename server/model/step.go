@@ -15,17 +15,6 @@
 
 package model
 
-// StepStore persists process information to storage.
-type StepStore interface {
-	StepLoad(int64) (*Step, error)
-	StepFind(*Pipeline, int) (*Step, error)
-	StepChild(*Pipeline, int, string) (*Step, error)
-	StepList(*Pipeline) ([]*Step, error)
-	StepCreate([]*Step) error
-	StepUpdate(*Step) error
-	StepClear(*Pipeline) error
-}
-
 // Different ways to handle failure states
 const (
 	FailureIgnore = "ignore"
@@ -49,10 +38,6 @@ type Step struct {
 	Stopped    int64       `json:"end_time,omitempty"   xorm:"step_stopped"`
 	Type       StepType    `json:"type,omitempty"       xorm:"step_type"`
 } //	@name Step
-
-type UpdateStepStore interface {
-	StepUpdate(*Step) error
-}
 
 // TableName return database table name for xorm
 func (Step) TableName() string {

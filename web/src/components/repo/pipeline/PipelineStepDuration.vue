@@ -5,9 +5,9 @@
 <script lang="ts" setup>
 import { computed, toRef } from 'vue';
 
+import { useDate } from '~/compositions/useDate';
 import { useElapsedTime } from '~/compositions/useElapsedTime';
 import { PipelineStep, PipelineWorkflow } from '~/lib/api/types';
-import { durationAsNumber } from '~/utils/duration';
 
 const props = defineProps<{
   step?: PipelineStep;
@@ -16,6 +16,7 @@ const props = defineProps<{
 
 const step = toRef(props, 'step');
 const workflow = toRef(props, 'workflow');
+const { durationAsNumber } = useDate();
 
 const durationRaw = computed(() => {
   const start = (step.value ? step.value?.start_time : workflow.value?.start_time) || 0;

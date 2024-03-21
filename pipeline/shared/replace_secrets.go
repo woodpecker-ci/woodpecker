@@ -16,11 +16,21 @@ package shared
 
 import "strings"
 
+// NewSecretsReplacer creates a new strings.Replacer to replace sensitive
+// strings with asterisks. It takes a slice of secrets strings as input
+// and returns a populated strings.Replacer that will replace those
+// secrets with asterisks. Each secret string is split on newlines to
+// handle multi-line secrets.
 func NewSecretsReplacer(secrets []string) *strings.Replacer {
 	var oldnew []string
+
+	// Strings shorter than minStringLength are not considered secrets.
+	// Do not sanitize them.
+	const minStringLength = 3
+
 	for _, old := range secrets {
 		old = strings.TrimSpace(old)
-		if len(old) == 0 {
+		if len(old) <= minStringLength {
 			continue
 		}
 		// since replacer is executed on each line we have to split multi-line-secrets

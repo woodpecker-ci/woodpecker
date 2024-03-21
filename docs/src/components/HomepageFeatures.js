@@ -23,17 +23,17 @@ const FeatureList = [
       <>
         Woodpecker uses docker containers to execute pipeline steps. If you need more than a normal docker image, you
         can create plugins to extend the pipeline features.{' '}
-        <a href="/docs/usage/plugins/plugins">How do plugins work?</a>
+        <a href="/docs/usage/plugins/overview">How do plugins work?</a>
       </>
     ),
   },
   {
-    title: 'Multi pipelines',
-    Svg: require('../../static/img/feat-multipipelines.svg').default,
+    title: 'Multi workflows',
+    Svg: require('../../static/img/workflows.svg').default,
     description: (
       <>
-        Woodpecker allows you to easily create multiple pipelines for your project. They can even depend on each other.
-        Check out the <a href="/docs/usage/multi-pipeline">docs</a>
+        Woodpecker allows you to easily create multiple workflows for your project. They can even depend on each other.
+        Check out the <a href="/docs/usage/workflows">docs</a>
       </>
     ),
   },

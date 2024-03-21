@@ -15,14 +15,14 @@
 package main
 
 import (
-	"fmt"
 	"os"
 
 	_ "github.com/joho/godotenv/autoload"
+	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v2"
-	_ "github.com/woodpecker-ci/woodpecker/cmd/server/docs"
 
-	"github.com/woodpecker-ci/woodpecker/version"
+	_ "go.woodpecker-ci.org/woodpecker/v2/cmd/server/docs"
+	"go.woodpecker-ci.org/woodpecker/v2/version"
 )
 
 func main() {
@@ -43,7 +43,6 @@ func main() {
 	setupSwaggerStaticConfig()
 
 	if err := app.Run(os.Args); err != nil {
-		_, _ = fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
+		log.Fatal().Err(err).Msgf("error running server") //nolint:forbidigo
 	}
 }

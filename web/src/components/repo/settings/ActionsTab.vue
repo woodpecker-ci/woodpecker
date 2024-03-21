@@ -12,8 +12,8 @@
 
       <Button
         v-if="isActive"
-        class="mr-4 my-1"
         color="blue"
+        class="mr-4 my-1"
         start-icon="turn-off"
         :is-loading="isDeactivatingRepo"
         :text="$t('repo.settings.actions.disable.disable')"

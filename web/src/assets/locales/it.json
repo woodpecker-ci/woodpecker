@@ -28,8 +28,6 @@
   },
   "back": "Indietro",
   "cancel": "Annulla",
-  "color_scheme_dark": "Passa al tema chiaro",
-  "color_scheme_light": "Passa al tema scuro",
   "docs": "Documentazione",
   "documentation_for": "Documentazione per \"{topic}\"",
   "errors": {

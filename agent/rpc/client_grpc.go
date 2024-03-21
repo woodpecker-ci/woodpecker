@@ -26,9 +26,9 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	backend "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
-	"github.com/woodpecker-ci/woodpecker/pipeline/rpc"
-	"github.com/woodpecker-ci/woodpecker/pipeline/rpc/proto"
+	backend "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc/proto"
 )
 
 // set grpc version on compile time to compare against server version response
@@ -53,8 +53,8 @@ func (c *client) Close() error {
 
 func (c *client) newBackOff() backoff.BackOff {
 	b := backoff.NewExponentialBackOff()
-	b.MaxInterval = 10 * time.Second
-	b.InitialInterval = 10 * time.Millisecond
+	b.MaxInterval = 10 * time.Second          //nolint: gomnd
+	b.InitialInterval = 10 * time.Millisecond //nolint: gomnd
 	return b
 }
 
@@ -89,7 +89,7 @@ func (c *client) Next(ctx context.Context, f rpc.Filter) (*rpc.Workflow, error) 
 			// https://github.com/woodpecker-ci/woodpecker/issues/717#issuecomment-1049365104
 			log.Trace().Err(err).Msg("grpc: to many keepalive pings without sending data")
 		} else {
-			log.Err(err).Msgf("grpc error: done(): code: %v: %s", status.Code(err), err)
+			log.Error().Err(err).Msgf("grpc error: done(): code: %v", status.Code(err))
 		}
 
 		switch status.Code(err) {
@@ -136,7 +136,7 @@ func (c *client) Wait(ctx context.Context, id string) (err error) {
 			break
 		}
 
-		log.Err(err).Msgf("grpc error: wait(): code: %v: %s", status.Code(err), err)
+		log.Error().Err(err).Msgf("grpc error: wait(): code: %v", status.Code(err))
 
 		switch status.Code(err) {
 		case
@@ -170,14 +170,14 @@ func (c *client) Init(ctx context.Context, id string, state rpc.State) (err erro
 	req.State.Exited = state.Exited
 	req.State.Finished = state.Finished
 	req.State.Started = state.Started
-	req.State.Name = state.Step
+	req.State.StepUuid = state.StepUUID
 	for {
 		_, err = c.client.Init(ctx, req)
 		if err == nil {
 			break
 		}
 
-		log.Err(err).Msgf("grpc error: init(): code: %v: %s", status.Code(err), err)
+		log.Error().Err(err).Msgf("grpc error: init(): code: %v", status.Code(err))
 
 		switch status.Code(err) {
 		case
@@ -211,14 +211,14 @@ func (c *client) Done(ctx context.Context, id string, state rpc.State) (err erro
 	req.State.Exited = state.Exited
 	req.State.Finished = state.Finished
 	req.State.Started = state.Started
-	req.State.Name = state.Step
+	req.State.StepUuid = state.StepUUID
 	for {
 		_, err = c.client.Done(ctx, req)
 		if err == nil {
 			break
 		}
 
-		log.Err(err).Msgf("grpc error: done(): code: %v: %s", status.Code(err), err)
+		log.Error().Err(err).Msgf("grpc error: done(): code: %v", status.Code(err))
 
 		switch status.Code(err) {
 		case
@@ -252,7 +252,7 @@ func (c *client) Extend(ctx context.Context, id string) (err error) {
 			break
 		}
 
-		log.Err(err).Msgf("grpc error: extend(): code: %v: %s", status.Code(err), err)
+		log.Error().Err(err).Msgf("grpc error: extend(): code: %v", status.Code(err))
 
 		switch status.Code(err) {
 		case
@@ -286,14 +286,14 @@ func (c *client) Update(ctx context.Context, id string, state rpc.State) (err er
 	req.State.Exited = state.Exited
 	req.State.Finished = state.Finished
 	req.State.Started = state.Started
-	req.State.Name = state.Step
+	req.State.StepUuid = state.StepUUID
 	for {
 		_, err = c.client.Update(ctx, req)
 		if err == nil {
 			break
 		}
 
-		log.Err(err).Msgf("grpc error: update(): code: %v: %s", status.Code(err), err)
+		log.Error().Err(err).Msgf("grpc error: update(): code: %v", status.Code(err))
 
 		switch status.Code(err) {
 		case
@@ -332,7 +332,7 @@ func (c *client) Log(ctx context.Context, logEntry *rpc.LogEntry) (err error) {
 			break
 		}
 
-		log.Err(err).Msgf("grpc error: log(): code: %v: %s", status.Code(err), err)
+		log.Error().Err(err).Msgf("grpc error: log(): code: %v", status.Code(err))
 
 		switch status.Code(err) {
 		case
@@ -364,6 +364,11 @@ func (c *client) RegisterAgent(ctx context.Context, platform, backend, version s
 
 	res, err := c.client.RegisterAgent(ctx, req)
 	return res.GetAgentId(), err
+}
+
+func (c *client) UnregisterAgent(ctx context.Context) error {
+	_, err := c.client.UnregisterAgent(ctx, &proto.Empty{})
+	return err
 }
 
 func (c *client) ReportHealth(ctx context.Context) (err error) {

@@ -20,7 +20,7 @@ import (
 	"xorm.io/builder"
 	"xorm.io/xorm"
 
-	"github.com/woodpecker-ci/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
 func (s storage) PermFind(user *model.User, repo *model.Repo) (*model.Perm, error) {
@@ -69,17 +69,6 @@ func (s storage) permUpsert(sess *xorm.Session, perm *model.Perm) error {
 		// only Insert set auto created ID back to object
 		_, err = sess.Insert(perm)
 	}
-	return err
-}
-
-func (s storage) PermDelete(perm *model.Perm) error {
-	return wrapDelete(s.engine.Where(userIDAndRepoIDCond(perm)).Delete(new(model.Perm)))
-}
-
-func (s storage) PermFlush(user *model.User, before int64) error {
-	_, err := s.engine.
-		Where("perm_user_id = ? AND perm_synced < ?", user.ID, before).
-		Delete(new(model.Perm))
 	return err
 }
 

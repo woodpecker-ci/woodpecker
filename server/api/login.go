@@ -24,13 +24,13 @@ import (
 	"github.com/gorilla/securecookie"
 	"github.com/rs/zerolog/log"
 
-	"github.com/woodpecker-ci/woodpecker/server"
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/router/middleware"
-	"github.com/woodpecker-ci/woodpecker/server/store"
-	"github.com/woodpecker-ci/woodpecker/server/store/types"
-	"github.com/woodpecker-ci/woodpecker/shared/httputil"
-	"github.com/woodpecker-ci/woodpecker/shared/token"
+	"go.woodpecker-ci.org/woodpecker/v2/server"
+	forge_types "go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store/types"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/httputil"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/token"
 )
 
 func HandleLogin(c *gin.Context) {
@@ -45,22 +45,26 @@ func HandleAuth(c *gin.Context) {
 	_store := store.FromContext(c)
 	_forge := server.Config.Services.Forge
 
-	// when dealing with redirects we may need to adjust the content type. I
+	// when dealing with redirects, we may need to adjust the content type. I
 	// cannot, however, remember why, so need to revisit this line.
 	c.Writer.Header().Del("Content-Type")
 
-	tmpuser, err := _forge.Login(c, c.Writer, c.Request)
+	tmpuser, redirectURL, err := _forge.Login(c, &forge_types.OAuthRequest{
+		Error:            c.Request.FormValue("error"),
+		ErrorURI:         c.Request.FormValue("error_uri"),
+		ErrorDescription: c.Request.FormValue("error_description"),
+		Code:             c.Request.FormValue("code"),
+	})
 	if err != nil {
-		log.Error().Msgf("cannot authenticate user. %s", err)
+		log.Error().Err(err).Msg("cannot authenticate user")
 		c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=oauth_error")
 		return
 	}
-	// this will happen when the user is redirected by the forge as
-	// part of the authorization workflow.
+	// The user is not authorized yet -> redirect
 	if tmpuser == nil {
+		http.Redirect(c.Writer, c.Request, redirectURL, http.StatusSeeOther)
 		return
 	}
-	config := middleware.GetConfig(c)
 
 	// get the user from the database
 	u, err := _store.GetUserRemoteID(tmpuser.ForgeRemoteID, tmpuser.Login)
@@ -71,19 +75,19 @@ func HandleAuth(c *gin.Context) {
 		}
 
 		// if self-registration is disabled we should return a not authorized error
-		if !config.Open && !config.IsAdmin(tmpuser) {
+		if !server.Config.Permissions.Open && !server.Config.Permissions.Admins.IsAdmin(tmpuser) {
 			log.Error().Msgf("cannot register %s. registration closed", tmpuser.Login)
 			c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=access_denied")
 			return
 		}
 
-		// if self-registration is enabled for whitelisted organizations we need to
+		// if self-registration is enabled for allowed organizations we need to
 		// check the user's organization membership.
-		if len(config.Orgs) != 0 {
+		if server.Config.Permissions.Orgs.IsConfigured {
 			teams, terr := _forge.Teams(c, tmpuser)
-			if terr != nil || !config.IsMember(teams) {
+			if terr != nil || !server.Config.Permissions.Orgs.IsMember(teams) {
 				log.Error().Err(terr).Msgf("cannot verify team membership for %s.", u.Login)
-				c.Redirect(303, server.Config.Server.RootPath+"/login?error=access_denied")
+				c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=access_denied")
 				return
 			}
 		}
@@ -103,7 +107,7 @@ func HandleAuth(c *gin.Context) {
 
 		// insert the user into the database
 		if err := _store.CreateUser(u); err != nil {
-			log.Error().Msgf("cannot insert %s. %s", u.Login, err)
+			log.Error().Err(err).Msgf("cannot insert %s", u.Login)
 			c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=internal_error")
 			return
 		}
@@ -112,9 +116,38 @@ func HandleAuth(c *gin.Context) {
 		// the user was stored as org. now we adopt it to the user.
 		if org, err := _store.OrgFindByName(u.Login); err == nil && org != nil {
 			org.IsUser = true
+			u.OrgID = org.ID
 			if err := _store.OrgUpdate(org); err != nil {
 				log.Error().Err(err).Msgf("on user creation, could not mark org as user")
 			}
+		} else {
+			if err != nil && !errors.Is(err, types.RecordNotExist) {
+				_ = c.AbortWithError(http.StatusInternalServerError, err)
+				return
+			}
+			org = &model.Org{
+				Name:    u.Login,
+				IsUser:  true,
+				Private: false,
+			}
+			if err := _store.OrgCreate(org); err != nil {
+				log.Error().Err(err).Msgf("on user creation, could create org for user")
+			}
+			u.OrgID = org.ID
+		}
+	}
+
+	// update org name
+	if u.Login != tmpuser.Login {
+		org, err := _store.OrgGet(u.OrgID)
+		if err != nil {
+			log.Error().Err(err).Msgf("cannot get org %s", u.Login)
+			c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=internal_error")
+			return
+		}
+		org.Name = u.Login
+		if err := _store.OrgUpdate(org); err != nil {
+			log.Error().Err(err).Msgf("on user creation, could not mark org as user")
 		}
 	}
 
@@ -125,21 +158,21 @@ func HandleAuth(c *gin.Context) {
 	u.Avatar = tmpuser.Avatar
 	u.ForgeRemoteID = tmpuser.ForgeRemoteID
 	u.Login = tmpuser.Login
-	u.Admin = u.Admin || config.IsAdmin(tmpuser)
+	u.Admin = u.Admin || server.Config.Permissions.Admins.IsAdmin(tmpuser)
 
-	// if self-registration is enabled for whitelisted organizations we need to
+	// if self-registration is enabled for allowed organizations we need to
 	// check the user's organization membership.
-	if len(config.Orgs) != 0 {
+	if server.Config.Permissions.Orgs.IsConfigured {
 		teams, terr := _forge.Teams(c, u)
-		if terr != nil || !config.IsMember(teams) {
-			log.Error().Err(terr).Msgf("cannot verify team membership for %s.", u.Login)
+		if terr != nil || !server.Config.Permissions.Orgs.IsMember(teams) {
+			log.Error().Err(terr).Msgf("cannot verify team membership for %s", u.Login)
 			c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=access_denied")
 			return
 		}
 	}
 
 	if err := _store.UpdateUser(u); err != nil {
-		log.Error().Msgf("cannot update %s. %s", u.Login, err)
+		log.Error().Err(err).Msgf("cannot update %s", u.Login)
 		c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=internal_error")
 		return
 	}
@@ -147,7 +180,7 @@ func HandleAuth(c *gin.Context) {
 	exp := time.Now().Add(server.Config.Server.SessionExpires).Unix()
 	tokenString, err := token.New(token.SessToken, u.Login).SignExpires(u.Hash, exp)
 	if err != nil {
-		log.Error().Msgf("cannot create token for %s. %s", u.Login, err)
+		log.Error().Msgf("cannot create token for %s", u.Login)
 		c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=internal_error")
 		return
 	}
@@ -159,7 +192,7 @@ func HandleAuth(c *gin.Context) {
 			continue
 		}
 		if err != nil {
-			log.Error().Msgf("cannot list repos for %s. %s", u.Login, err)
+			log.Error().Err(err).Msgf("cannot list repos for %s", u.Login)
 			c.Redirect(http.StatusSeeOther, "/login?error=internal_error")
 			return
 		}
@@ -168,14 +201,14 @@ func HandleAuth(c *gin.Context) {
 			continue
 		}
 
-		log.Debug().Msgf("Synced user permission for %s %s", u.Login, dbRepo.FullName)
+		log.Debug().Msgf("synced user permission for %s %s", u.Login, dbRepo.FullName)
 		perm := forgeRepo.Perm
 		perm.Repo = dbRepo
 		perm.RepoID = dbRepo.ID
 		perm.UserID = u.ID
 		perm.Synced = time.Now().Unix()
 		if err := _store.PermUpsert(perm); err != nil {
-			log.Error().Msgf("cannot update permissions for %s. %s", u.Login, err)
+			log.Error().Err(err).Msgf("cannot update permissions for %s", u.Login)
 			c.Redirect(http.StatusSeeOther, "/login?error=internal_error")
 			return
 		}
@@ -210,7 +243,7 @@ func GetLoginToken(c *gin.Context) {
 
 	user, err := _store.GetUserLogin(login)
 	if err != nil {
-		handleDbError(c, err)
+		handleDBError(c, err)
 		return
 	}
 

@@ -34,10 +34,10 @@ func WithContextSigtermCallback(ctx context.Context, f func()) context.Context {
 		select {
 		case <-ctx.Done():
 		case <-receivedSignal:
-			cancel(fmt.Errorf("received signal: %v", receivedSignal))
 			if f != nil {
 				f()
 			}
+			cancel(fmt.Errorf("received signal: %v", receivedSignal))
 		}
 	}()
 

@@ -8,7 +8,7 @@ global:
 
 scrape_configs:
   - job_name: 'woodpecker'
-    bearer_token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+    bearer_token: dummyToken...
 
     static_configs:
        - targets: ['woodpecker.domain.com']
@@ -24,7 +24,7 @@ global:
 
 scrape_configs:
   - job_name: 'woodpecker'
-+   bearer_token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
++   bearer_token: dummyToken...
 
     static_configs:
        - targets: ['woodpecker.domain.com']

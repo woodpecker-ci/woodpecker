@@ -57,3 +57,26 @@ func sliceToCountMap[E comparable](list []E) map[E]int {
 	}
 	return m
 }
+
+// SliceToBoolMap is a helper function to convert a string slice to a map.
+func SliceToBoolMap(s []string) map[string]bool {
+	v := map[string]bool{}
+	for _, ss := range s {
+		if ss == "" {
+			continue
+		}
+		v[ss] = true
+	}
+	return v
+}
+
+// StringSliceDeleteEmpty removes empty strings from a string slice.
+func StringSliceDeleteEmpty(s []string) []string {
+	r := make([]string, 0)
+	for _, str := range s {
+		if str != "" {
+			r = append(r, str)
+		}
+	}
+	return r
+}

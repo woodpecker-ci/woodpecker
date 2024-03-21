@@ -20,16 +20,17 @@ import (
 
 	"github.com/urfave/cli/v2"
 
-	"github.com/woodpecker-ci/woodpecker/cli/common"
-	"github.com/woodpecker-ci/woodpecker/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
 )
 
+//nolint:gomnd
 var pipelineListCmd = &cli.Command{
 	Name:      "ls",
 	Usage:     "show pipeline history",
 	ArgsUsage: "<repo-id|repo-full-name>",
 	Action:    pipelineList,
-	Flags: append(common.GlobalFlags,
+	Flags: []cli.Flag{
 		common.FormatFlag(tmplPipelineList),
 		&cli.StringFlag{
 			Name:  "branch",
@@ -48,7 +49,7 @@ var pipelineListCmd = &cli.Command{
 			Usage: "limit the list size",
 			Value: 25,
 		},
-	),
+	},
 }
 
 func pipelineList(c *cli.Context) error {

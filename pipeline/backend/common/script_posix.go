@@ -25,6 +25,9 @@ import (
 // for a linux container using the given
 func generateScriptPosix(commands []string) string {
 	var buf bytes.Buffer
+
+	buf.WriteString(setupScript)
+
 	for _, command := range commands {
 		buf.WriteString(fmt.Sprintf(
 			traceScript,
@@ -32,11 +35,8 @@ func generateScriptPosix(commands []string) string {
 			command,
 		))
 	}
-	script := fmt.Sprintf(
-		setupScript,
-		buf.String(),
-	)
-	return script
+
+	return buf.String()
 }
 
 // setupScript is a helper script this is added to the step script to ensure
@@ -53,7 +53,6 @@ fi
 unset CI_NETRC_USERNAME
 unset CI_NETRC_PASSWORD
 unset CI_SCRIPT
-%s
 `
 
 // traceScript is a helper script that is added to the step script

@@ -17,9 +17,8 @@ package types
 import (
 	"testing"
 
-	"gopkg.in/yaml.v3"
-
 	"github.com/stretchr/testify/assert"
+	"gopkg.in/yaml.v3"
 )
 
 func TestMarshalVolumes(t *testing.T) {
@@ -88,7 +87,7 @@ func TestMarshalVolumes(t *testing.T) {
 	}
 	for _, volume := range volumes {
 		bytes, err := yaml.Marshal(volume.volumes)
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.Equal(t, volume.expected, string(bytes), "should be equal")
 	}
 }
@@ -151,7 +150,7 @@ func TestUnmarshalVolumes(t *testing.T) {
 	for _, volume := range volumes {
 		actual := &Volumes{}
 		err := yaml.Unmarshal([]byte(volume.yaml), actual)
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.Equal(t, volume.expected, actual, "should be equal")
 	}
 }

@@ -25,7 +25,7 @@ import (
 type StringOrInt int64
 
 // UnmarshalYAML implements the Unmarshaler interface.
-func (s *StringOrInt) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (s *StringOrInt) UnmarshalYAML(unmarshal func(any) error) error {
 	var intType int64
 	if err := unmarshal(&intType); err == nil {
 		*s = StringOrInt(intType)
@@ -42,7 +42,7 @@ func (s *StringOrInt) UnmarshalYAML(unmarshal func(interface{}) error) error {
 		return nil
 	}
 
-	return errors.New("Failed to unmarshal StringOrInt")
+	return errors.New("failed to unmarshal StringOrInt")
 }
 
 // MemStringOrInt represents a string or an integer
@@ -50,7 +50,7 @@ func (s *StringOrInt) UnmarshalYAML(unmarshal func(interface{}) error) error {
 type MemStringOrInt int64
 
 // UnmarshalYAML implements the Unmarshaler interface.
-func (s *MemStringOrInt) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (s *MemStringOrInt) UnmarshalYAML(unmarshal func(any) error) error {
 	var intType int64
 	if err := unmarshal(&intType); err == nil {
 		*s = MemStringOrInt(intType)
@@ -67,5 +67,5 @@ func (s *MemStringOrInt) UnmarshalYAML(unmarshal func(interface{}) error) error 
 		return nil
 	}
 
-	return errors.New("Failed to unmarshal MemStringOrInt")
+	return errors.New("failed to unmarshal MemStringOrInt")
 }

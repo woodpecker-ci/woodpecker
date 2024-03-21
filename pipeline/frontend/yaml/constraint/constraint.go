@@ -15,18 +15,18 @@
 package constraint
 
 import (
-	"errors"
 	"fmt"
 	"maps"
 	"path"
 	"strings"
 
-	"github.com/antonmedv/expr"
 	"github.com/bmatcuk/doublestar/v4"
+	"github.com/expr-lang/expr"
+	"go.uber.org/multierr"
 	"gopkg.in/yaml.v3"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/metadata"
-	yamlBaseTypes "github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types/base"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/metadata"
+	yamlBaseTypes "go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/types/base"
 )
 
 type (
@@ -42,7 +42,6 @@ type (
 		Instance    List
 		Platform    List
 		Environment List
-		Event       List
 		Branch      List
 		Cron        List
 		Status      List
@@ -50,6 +49,8 @@ type (
 		Local       yamlBaseTypes.BoolTrue
 		Path        Path
 		Evaluate    string `yaml:"evaluate,omitempty"`
+		// TODO change to StringOrSlice in 3.x
+		Event List
 	}
 
 	// List defines a runtime constraint for exclude & include string slices.
@@ -195,7 +196,11 @@ func (c *Constraint) Match(m metadata.Metadata, global bool, env map[string]stri
 		if err != nil {
 			return false, err
 		}
-		match = match && result.(bool)
+		bresult, ok := result.(bool)
+		if !ok {
+			return false, fmt.Errorf("could not parse result: %v", result)
+		}
+		match = match && bresult
 	}
 
 	return match, nil
@@ -254,14 +259,14 @@ func (c *List) UnmarshalYAML(value *yaml.Node) error {
 	err2 := value.Decode(&out2)
 
 	c.Exclude = out1.Exclude
-	c.Include = append(
+	c.Include = append( //nolint:gocritic
 		out1.Include,
 		out2...,
 	)
 
 	if err1 != nil && err2 != nil {
 		y, _ := yaml.Marshal(value)
-		return fmt.Errorf("Could not parse condition: %s: %w", y, errors.Join(err1, err2))
+		return fmt.Errorf("could not parse condition: %s: %w", y, multierr.Append(err1, err2))
 	}
 
 	return nil
@@ -298,7 +303,7 @@ func (c *Map) Match(params map[string]string) bool {
 }
 
 // UnmarshalYAML unmarshal the constraint map.
-func (c *Map) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (c *Map) UnmarshalYAML(unmarshal func(any) error) error {
 	out1 := struct {
 		Include map[string]string
 		Exclude map[string]string
@@ -335,14 +340,14 @@ func (c *Path) UnmarshalYAML(value *yaml.Node) error {
 
 	c.Exclude = out1.Exclude
 	c.IgnoreMessage = out1.IgnoreMessage
-	c.Include = append(
+	c.Include = append( //nolint:gocritic
 		out1.Include,
 		out2...,
 	)
 
 	if err1 != nil && err2 != nil {
 		y, _ := yaml.Marshal(value)
-		return fmt.Errorf("Could not parse condition: %s", y)
+		return fmt.Errorf("could not parse condition: %s", y)
 	}
 
 	return nil

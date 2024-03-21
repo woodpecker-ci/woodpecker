@@ -20,27 +20,30 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/woodpecker-ci/woodpecker/server"
-	"github.com/woodpecker-ci/woodpecker/server/forge"
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/pipeline"
-	"github.com/woodpecker-ci/woodpecker/server/store"
-	"github.com/woodpecker-ci/woodpecker/server/store/types"
+	"go.woodpecker-ci.org/woodpecker/v2/server"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/pipeline"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store/types"
 )
 
 func handlePipelineErr(c *gin.Context, err error) {
-	if errors.Is(err, &pipeline.ErrNotFound{}) {
+	switch {
+	case errors.Is(err, &pipeline.ErrNotFound{}):
 		c.String(http.StatusNotFound, "%s", err)
-	} else if errors.Is(err, &pipeline.ErrBadRequest{}) {
+	case errors.Is(err, &pipeline.ErrBadRequest{}):
 		c.String(http.StatusBadRequest, "%s", err)
-	} else if errors.Is(err, pipeline.ErrFiltered) {
+	case errors.Is(err, pipeline.ErrFiltered):
+		// for debugging purpose we add a header
+		c.Writer.Header().Add("Pipeline-Filtered", "true")
 		c.Status(http.StatusNoContent)
-	} else {
+	default:
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 	}
 }
 
-func handleDbError(c *gin.Context, err error) {
+func handleDBError(c *gin.Context, err error) {
 	if errors.Is(err, types.RecordNotExist) {
 		c.AbortWithStatus(http.StatusNotFound)
 		return

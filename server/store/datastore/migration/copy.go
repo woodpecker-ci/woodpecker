@@ -15,7 +15,9 @@
 package migration
 
 import (
+	"context"
 	"fmt"
+	"time"
 
 	"github.com/rs/zerolog/log"
 	"xorm.io/xorm"
@@ -35,16 +37,13 @@ func Copy(src, dest *xorm.Engine) error {
 	}
 
 	// next we make sure the all required migrations are executed
-	if err := Migrate(src); err != nil {
+	if err := Migrate(src, true); err != nil {
 		return fmt.Errorf("migrate source database failed: %w", err)
 	}
 
 	// init schema in destination
-	if err := dest.Sync(new(migrations)); err != nil {
+	if err := initSchemaOnly(dest); err != nil {
 		return err
-	}
-	if err := initNew(dest); err != nil {
-		return fmt.Errorf("init schema at destination failed: %w", err)
 	}
 
 	// copy data
@@ -101,9 +100,6 @@ func Copy(src, dest *xorm.Engine) error {
 		if err := copyBean[model.Org](src, dest); err != nil {
 			return err
 		}
-		if err := copyNonMigratedLogs(src, dest); err != nil {
-			return err
-		}
 	}
 
 	return nil
@@ -149,34 +145,19 @@ func copyBean[T any](src, dest *xorm.Engine) error {
 	return nil
 }
 
-// TODO: drop at v1.2.0
-func copyNonMigratedLogs(src, dest *xorm.Engine) error {
-	type logs struct {
-		ID     int64  `xorm:"pk autoincr 'log_id'"`
-		StepID int64  `xorm:"UNIQUE 'log_step_id'"`
-		Data   []byte `xorm:"LONGBLOB 'log_data'"`
-	}
+var showBeAliveSignDelay = time.Second * 20
 
-	// check if we need to run custom migration at all
-	exist, err := src.IsTableExist(new(logs))
-	if err != nil {
-		log.Error().Err(err).Msg("could not detect old 'logs' table")
-		return nil
-	} else if !exist {
-		return nil
-	}
-	if empty, err := src.IsTableEmpty(new(logs)); err != nil || empty {
-		return err
-	}
-
-	if err := dest.Sync(new(logs)); err != nil {
-		return err
-	}
-
-	// https://github.com/woodpecker-ci/woodpecker/pull/1828
-	if _, err := dest.Exec("DELETE FROM migrations WHERE name like 'migrate-logs-to-log_entries';"); err != nil {
-		return err
-	}
-
-	return copyBean[logs](src, dest)
+func showBeAliveSign(taskName string) context.CancelCauseFunc {
+	ctx, cancel := context.WithCancelCause(context.Background())
+	go func() {
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-time.After(showBeAliveSignDelay):
+				log.Info().Msgf("Migration '%s' is still running, please be patient", taskName)
+			}
+		}
+	}()
+	return cancel
 }

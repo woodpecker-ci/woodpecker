@@ -126,7 +126,7 @@ func (t *Token) SignExpires(secret string, exp int64) (string, error) {
 }
 
 func keyFunc(token *Token, fn SecretFunc) jwt.Keyfunc {
-	return func(t *jwt.Token) (interface{}, error) {
+	return func(t *jwt.Token) (any, error) {
 		claims, ok := t.Claims.(jwt.MapClaims)
 		if !ok {
 			return nil, fmt.Errorf("token claim is not a MapClaims")
