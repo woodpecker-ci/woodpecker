@@ -22,7 +22,7 @@ import (
 	"github.com/rs/zerolog/log"
 	"xorm.io/xorm"
 
-	"github.com/woodpecker-ci/woodpecker/server/model"
+	"github.com/woodpecker-ci/woodpecker/v2/server/model"
 )
 
 func Copy(src, dest *xorm.Engine) error {
