@@ -49,7 +49,7 @@
     "@types/react": "^18.2.67",
     "@types/react-helmet": "^6.1.11",
     "@types/react-router-dom": "^5.3.3",
-    "typescript": "^5.3.3"
+    "typescript": "^5.4.3"
   },
   "pnpm": {
     "overrides": {
