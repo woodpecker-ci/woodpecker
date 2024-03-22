@@ -50,7 +50,7 @@ For Go, we provide a plugin library you can use to get easy access to internal e
 
 ## Metadata
 
-In your documentation, you can use a Markdown header to define metadata for your plugin. This data is used for example by [our index](/plugins).
+In your documentation, you can use a Markdown header to define metadata for your plugin. This data is used by [our plugin index](/plugins).
 
 Supported metadata:
 
