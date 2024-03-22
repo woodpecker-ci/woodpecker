@@ -134,14 +134,23 @@ func setupBitbucket(c *cli.Context) (forge.Forge, error) {
 	return bitbucket.New(opts)
 }
 
-// setupGitea helper function to setup the Gitea forge from the CLI arguments.
+// setupGitea helper function to set up the Gitea forge from the CLI arguments.
 func setupGitea(c *cli.Context) (forge.Forge, error) {
 	server, err := url.Parse(c.String("gitea-server"))
 	if err != nil {
 		return nil, err
 	}
+	oauth2Server := c.String("gitea-oauth-server")
+	if oauth2Server != "" {
+		oauth2URL, err := url.Parse(oauth2Server)
+		if err != nil {
+			return nil, err
+		}
+		oauth2Server = strings.TrimRight(oauth2URL.String(), "/")
+	}
 	opts := gitea.Opts{
 		URL:        strings.TrimRight(server.String(), "/"),
+		OAuth2URL:  oauth2Server,
 		Client:     c.String("gitea-client"),
 		Secret:     c.String("gitea-secret"),
 		SkipVerify: c.Bool("gitea-skip-verify"),

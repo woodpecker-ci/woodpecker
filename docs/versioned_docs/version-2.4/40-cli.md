@@ -280,6 +280,8 @@ execute a local pipeline
 
 **--repo-clone-url**="":
 
+**--repo-path**="": path to local repository
+
 **--repo-private**="":
 
 **--repo-remote-id**="":
