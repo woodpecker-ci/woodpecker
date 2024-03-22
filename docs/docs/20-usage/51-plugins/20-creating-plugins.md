@@ -48,6 +48,23 @@ Secrets should be passed as settings too. Therefore, users should use [`from_sec
 
 For Go, we provide a plugin library you can use to get easy access to internal env vars and your settings. See <https://codeberg.org/woodpecker-plugins/go-plugin>.
 
+## Metadata
+
+In your documentation, you can use a Markdown header to define metadata for your plugin. This data is used for example by [our index](/plugins).
+
+Supported metadata:
+
+- `name`: The plugin's full name
+- `icon`: URL to your plugin's icon
+- `description`: A short description of what it's doing
+- `author`: Your name
+- `tags`: List of keywords (e.g. `[git, clone]` for the clone plugin)
+- `containerImage`: name of the container image
+- `containerImageUrl`: link to the container image
+- `url`: homepage or repository of your plugin
+
+If you would like to get your plugin listed in the index, you should add as many fields as possible, but only `name` is required.
+
 ## Example plugin
 
 This provides a brief tutorial for creating a Woodpecker webhook plugin, using simple shell scripting, to make HTTP requests during the build pipeline.
