@@ -69,12 +69,12 @@ func TestParamsToEnv(t *testing.T) {
 		return "", fmt.Errorf("secret %q not found or not allowed to be used", name)
 	}
 
-	assert.NoError(t, ParamsToEnv(from, got, "PLUGIN_", getSecretValue))
+	assert.NoError(t, ParamsToEnv(from, got, "PLUGIN_", true, getSecretValue))
 	assert.EqualValues(t, want, got, "Problem converting plugin parameters to environment variables")
 
 	// handle edge cases (#1609)
 	got = map[string]string{}
-	assert.NoError(t, ParamsToEnv(map[string]any{"a": []any{"a", nil}}, got, "PLUGIN_", nil))
+	assert.NoError(t, ParamsToEnv(map[string]any{"a": []any{"a", nil}}, got, "PLUGIN_", true, nil))
 	assert.EqualValues(t, map[string]string{"PLUGIN_A": "a,"}, got)
 }
 
@@ -92,7 +92,7 @@ func TestParamsToEnvPrefix(t *testing.T) {
 		return "", fmt.Errorf("secret %q not found or not allowed to be used", name)
 	}
 
-	assert.NoError(t, ParamsToEnv(from, got, "PLUGIN_", getSecretValue))
+	assert.NoError(t, ParamsToEnv(from, got, "PLUGIN_", true, getSecretValue))
 	assert.EqualValues(t, wantPrefixPlugin, got, "Problem converting plugin parameters to environment variables")
 
 	wantNoPrefix := map[string]string{
@@ -102,14 +102,16 @@ func TestParamsToEnvPrefix(t *testing.T) {
 
 	// handle edge cases (#1609)
 	got = map[string]string{}
-	assert.NoError(t, ParamsToEnv(from, got, "", getSecretValue))
+	assert.NoError(t, ParamsToEnv(from, got, "", true, getSecretValue))
 	assert.EqualValues(t, wantNoPrefix, got, "Problem converting plugin parameters to environment variables")
 }
 
 func TestSanitizeParamKey(t *testing.T) {
-	assert.EqualValues(t, "PLUGIN_DRY_RUN", sanitizeParamKey("PLUGIN_", "dry-run"))
-	assert.EqualValues(t, "PLUGIN_DRY_RUN", sanitizeParamKey("PLUGIN_", "dry_Run"))
-	assert.EqualValues(t, "PLUGIN_DRY_RUN", sanitizeParamKey("PLUGIN_", "dry.run"))
+	assert.EqualValues(t, "PLUGIN_DRY_RUN", sanitizeParamKey("PLUGIN_", true, "dry-run"))
+	assert.EqualValues(t, "PLUGIN_DRY_RUN", sanitizeParamKey("PLUGIN_", true, "dry_Run"))
+	assert.EqualValues(t, "PLUGIN_DRY_RUN", sanitizeParamKey("PLUGIN_", true, "dry.run"))
+	assert.EqualValues(t, "PLUGIN_dry_run", sanitizeParamKey("PLUGIN_", false, "dry-run"))
+	assert.EqualValues(t, "PLUGIN_dry_Run", sanitizeParamKey("PLUGIN_", false, "dry_Run"))
 }
 
 func TestYAMLToParamsToEnv(t *testing.T) {
@@ -164,7 +166,7 @@ list.map:
 		return "", fmt.Errorf("secret %q not found or not allowed to be used", name)
 	}
 
-	assert.NoError(t, ParamsToEnv(from, got, "PLUGIN_", getSecretValue))
+	assert.NoError(t, ParamsToEnv(from, got, "PLUGIN_", true, getSecretValue))
 	assert.EqualValues(t, want, got, "Problem converting plugin parameters to environment variables")
 }
 
@@ -188,7 +190,7 @@ func TestYAMLToParamsToEnvError(t *testing.T) {
 		return "", fmt.Errorf("secret %q not found or not allowed to be used", name)
 	}
 
-	assert.Error(t, ParamsToEnv(from, make(map[string]string), "PLUGIN_", getSecretValue))
+	assert.Error(t, ParamsToEnv(from, make(map[string]string), "PLUGIN_", true, getSecretValue))
 }
 
 func stringsToInterface(val ...string) []any {
@@ -219,6 +221,6 @@ func TestSecretNotFound(t *testing.T) {
 	got := map[string]string{}
 
 	assert.ErrorContains(t,
-		ParamsToEnv(from, got, "PLUGIN_", getSecretValue),
+		ParamsToEnv(from, got, "PLUGIN_", true, getSecretValue),
 		fmt.Sprintf("secret %q not found or not allowed to be used", "secret_token"))
 }

@@ -45,7 +45,10 @@
               @click="restartPipeline"
             />
             <Button
-              v-if="pipeline.status === 'success'"
+              v-if="
+                pipeline.status === 'success' &&
+                (pipeline.event === 'push' || pipeline.event === 'tag' || pipeline.event === 'release')
+              "
               class="flex-shrink-0"
               :text="$t('repo.pipeline.actions.deploy')"
               @click="showDeployPipelinePopup = true"

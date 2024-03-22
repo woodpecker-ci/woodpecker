@@ -195,16 +195,6 @@ var flags = append([]cli.Flag{
 		Usage:   "server-side enforcement policy on the minimum amount of time a client should wait before sending a keepalive ping.",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_SECRET_ENDPOINT"},
-		Name:    "secret-service",
-		Usage:   "secret plugin endpoint",
-	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_REGISTRY_ENDPOINT"},
-		Name:    "registry-service",
-		Usage:   "registry plugin endpoint",
-	},
-	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_CONFIG_SERVICE_ENDPOINT"},
 		Name:    "config-service-endpoint",
 		Usage:   "url used for calling configuration service endpoint",
@@ -385,6 +375,11 @@ var flags = append([]cli.Flag{
 		EnvVars: []string{"WOODPECKER_GITEA_SKIP_VERIFY"},
 		Name:    "gitea-skip-verify",
 		Usage:   "gitea skip ssl verification",
+	},
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_DEV_GITEA_OAUTH_URL"},
+		Name:    "gitea-oauth-server",
+		Usage:   "user-facing gitea server url for oauth",
 	},
 	//
 	// Bitbucket

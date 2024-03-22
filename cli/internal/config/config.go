@@ -18,7 +18,7 @@ type Config struct {
 	LogLevel  string `json:"log_level"`
 }
 
-var skipSetupForCommands = []string{"setup", "help", "h", "version", "update", "lint", ""}
+var skipSetupForCommands = []string{"setup", "help", "h", "version", "update", "lint", "exec", ""}
 
 func Load(c *cli.Context) error {
 	if firstArg := c.Args().First(); slices.Contains(skipSetupForCommands, firstArg) {

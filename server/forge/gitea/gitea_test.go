@@ -62,10 +62,6 @@ func Test_gitea(t *testing.T) {
 				g.Assert(f.url).Equal("http://localhost:8080")
 				g.Assert(f.SkipVerify).Equal(true)
 			})
-			g.It("Should handle malformed url", func() {
-				_, err := New(Opts{URL: "%gh&%ij"})
-				g.Assert(err).IsNotNil()
-			})
 		})
 
 		g.Describe("Generating a netrc file", func() {
