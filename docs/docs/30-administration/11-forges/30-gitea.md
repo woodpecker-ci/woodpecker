@@ -16,7 +16,7 @@ WOODPECKER_GITEA_SECRET=YOUR_GITEA_CLIENT_SECRET
 ## Gitea on the same host with containers
 
 If you have Gitea also running on the same host within a container, make sure the agent does have access to it.
-The agent tries to clone using the URL which Gitea reports through its API. For simplified connectivity, you should add the woodpecker agent to the same docker network as Gitea is in.
+The agent tries to clone using the URL which Gitea reports through its API. For simplified connectivity, you should add the Woodpecker agent to the same docker network as Gitea is in.
 Otherwise, the communication should go via the `docker0` gateway (usually 172.17.0.1).
 
 To configure the Docker network if the network's name is `gitea`, configure it like this:
