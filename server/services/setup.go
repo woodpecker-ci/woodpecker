@@ -59,7 +59,7 @@ func setupConfigService(c *cli.Context, privateSignatureKey ed25519.PrivateKey) 
 	timeout := c.Duration("forge-timeout")
 	configFetcher := config.NewForge(timeout)
 
-	if endpoint := c.String("config-extension-endpoint"); endpoint != "" {
+	if endpoint := c.String("config-service-endpoint"); endpoint != "" {
 		httpFetcher := config.NewHTTP(endpoint, privateSignatureKey)
 		return config.NewCombined(configFetcher, httpFetcher)
 	}
