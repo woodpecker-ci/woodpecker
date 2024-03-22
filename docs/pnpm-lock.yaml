@@ -114,17 +114,17 @@ importers:
         specifier: ^20.0.0
         version: 20.11.24
       axios:
-        specifier: ^1.6.0
-        version: 1.6.7
+        specifier: ^1.6.8
+        version: 1.6.8
       concurrently:
         specifier: ^8.0.0
         version: 8.2.2
       isomorphic-dompurify:
-        specifier: ^2.0.0
-        version: 2.4.0
+        specifier: ^2.5.0
+        version: 2.5.0
       marked:
-        specifier: ^12.0.0
-        version: 12.0.0
+        specifier: ^12.0.1
+        version: 12.0.1
       tslib:
         specifier: ^2.6.1
         version: 2.6.2
@@ -3887,8 +3887,8 @@ packages:
       postcss: 8.4.35
       postcss-value-parser: 4.2.0
 
-  /axios@1.6.7:
-    resolution: {integrity: sha512-/hDJGff6/c7u0hDkvkGxR/oy6CbCs8ziCsC7SqmhjfozqiJGc8Z11wrv9z9lYfY4K8l+H9TpjcMDX0xOZmx+RA==}
+  /axios@1.6.8:
+    resolution: {integrity: sha512-v/ZHtJDU39mDpyBoFVkETcd/uNdxrWRrg3bKpOKzXFA6Bvqopts6ALSMU3y6ijYxbw2B+wPrIv46egTzJXCLGQ==}
     dependencies:
       follow-redirects: 1.15.6(debug@4.3.4)
       form-data: 4.0.0
@@ -4992,8 +4992,8 @@ packages:
     resolution: {integrity: sha512-kxxKlPEDa6Nc5WJi+qRgPbOAbgTpSULL+vI3NUXsZMlkJxTqYI9wg5ZTay2sFrdZRWHPWNi+EdAhcJf81WtoMQ==}
     dev: false
 
-  /dompurify@3.0.9:
-    resolution: {integrity: sha512-uyb4NDIvQ3hRn6NiC+SIFaP4mJ/MdXlvtunaqK9Bn6dD3RuB/1S/gasEjDHD8eiaqdSael2vBv+hOs7Y+jhYOQ==}
+  /dompurify@3.0.11:
+    resolution: {integrity: sha512-Fan4uMuyB26gFV3ovPoEoQbxRRPfTu3CvImyZnhGq5fsIEO+gEFLp45ISFt+kQBWsK5ulDdT0oV28jS1UrwQLg==}
     dev: true
 
   /domutils@2.8.0:
@@ -6311,12 +6311,12 @@ packages:
     resolution: {integrity: sha512-WhB9zCku7EGTj/HQQRz5aUQEUeoQZH2bWcltRErOpymJ4boYE6wL9Tbr23krRPSZ+C5zqNSrSw+Cc7sZZ4b7vg==}
     engines: {node: '>=0.10.0'}
 
-  /isomorphic-dompurify@2.4.0:
-    resolution: {integrity: sha512-OW3VSGrjppnbshcHz7RNKnoYlCJkyBBJzEE5yxrTSA+kOl9JPTIrXsnIgOuH4wdLqqRujx22bz/IXebGWPLMAg==}
+  /isomorphic-dompurify@2.5.0:
+    resolution: {integrity: sha512-0hz0SiZG2ca5NuR4SGVGBfghzTQnHtV3s90zH0nCl5vW4lsxtnwEYEuv0hkKlNAMIuFrd9Yaqki0/wqKZ0Nmng==}
     engines: {node: '>=18'}
     dependencies:
       '@types/dompurify': 3.0.5
-      dompurify: 3.0.9
+      dompurify: 3.0.11
       jsdom: 24.0.0
     transitivePeerDependencies:
       - bufferutil
@@ -6603,8 +6603,8 @@ packages:
   /markdown-table@3.0.3:
     resolution: {integrity: sha512-Z1NL3Tb1M9wH4XESsCDEksWoKTdlUafKc4pt0GRwjUyXaCFZ+dc3g2erqB6zm3szA2IUSi7VnPI+o/9jnxh9hw==}
 
-  /marked@12.0.0:
-    resolution: {integrity: sha512-Vkwtq9rLqXryZnWaQc86+FHLC6tr/fycMfYAhiOIXkrNmeGAyhSxjqu0Rs1i0bBqw5u0S7+lV9fdH2ZSVaoa0w==}
+  /marked@12.0.1:
+    resolution: {integrity: sha512-Y1/V2yafOcOdWQCX0XpAKXzDakPOpn6U0YLxTJs3cww6VxOzZV1BTOOYWLvH3gX38cq+iLwljHHTnMtlDfg01Q==}
     engines: {node: '>= 18'}
     hasBin: true
     dev: true
