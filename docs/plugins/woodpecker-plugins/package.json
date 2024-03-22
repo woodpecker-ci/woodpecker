@@ -15,7 +15,7 @@
     "@docusaurus/types": "^3.0.0",
     "@tsconfig/docusaurus": "^2.0.0",
     "@types/marked": "^5.0.0",
-    "@types/node": "^20.0.0",
+    "@types/node": "^20.11.30",
     "axios": "^1.6.8",
     "concurrently": "^8.0.0",
     "isomorphic-dompurify": "^2.5.0",
