@@ -6,7 +6,7 @@ toc_max_heading_level: 2
 
 ## User registration
 
-Woodpecker does not have its own user registry; users are provided from your [forge](./11-forges/10-overview.md) (using OAuth2).
+Woodpecker does not have its own user registry; users are provided from your [forge](./11-forges/11-overview.md) (using OAuth2).
 
 Registration is closed by default (`WOODPECKER_OPEN=false`). If registration is open (`WOODPECKER_OPEN=true`) then every user with an account at the configured forge can login to Woodpecker.
 
@@ -477,7 +477,7 @@ Supported variables:
 
 > Default: empty
 
-List of addon files. See [addons](./75-addons/00-overview.md).
+List of addon files. See [addons](./75-addons/75-overview.md).
 
 ---
 
