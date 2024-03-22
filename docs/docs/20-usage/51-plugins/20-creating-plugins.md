@@ -63,7 +63,7 @@ Supported metadata:
 - `containerImageUrl`: link to the container image
 - `url`: homepage or repository of your plugin
 
-If you would like to get your plugin listed in the index, you should add as many fields as possible, but only `name` is required.
+If you want your plugin to be listed in the index, you should add as many fields as possible, but only `name` is required.
 
 ## Example plugin
 
