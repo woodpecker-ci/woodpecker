@@ -251,7 +251,7 @@ func DeleteStepLogs(c *gin.Context) {
 		return
 	}
 
-	stepID, err := strconv.ParseInt(c.Params.ByName("stepID"), 10, 64)
+	stepID, err := strconv.ParseInt(c.Params.ByName("stepId"), 10, 64)
 	if err != nil {
 		_ = c.AbortWithError(http.StatusBadRequest, err)
 		return
