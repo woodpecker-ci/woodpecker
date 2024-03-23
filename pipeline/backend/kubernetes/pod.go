@@ -357,7 +357,6 @@ func podSecurityContext(step *types.Step, sc *SecurityContext, secCtxConf Securi
 	}
 
 	if sc != nil {
-
 		// only allow to set user if it's not root or repository is trusted
 		if sc.RunAsUser != nil && (*sc.RunAsUser != 0 || trustedRepo) {
 			user = sc.RunAsUser
@@ -423,9 +422,8 @@ func containerSecurityContext(step *types.Step, sc *SecurityContext) *v1.Securit
 	}
 
 	if sc != nil {
-
-		// only allow to set privileged if it's least or repository is trusted
-		if sc.Privileged != nil && (*sc.Privileged == false || trustedRepo) {
+		// only allow to set privileged if it's false or repository is trusted
+		if sc.Privileged != nil && (!*sc.Privileged || trustedRepo) {
 			privileged = sc.Privileged
 		}
 	}
