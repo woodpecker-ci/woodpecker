@@ -27,6 +27,8 @@ type Agent struct {
 	Capacity    int32  `json:"capacity"      xorm:"capacity"`
 	Version     string `json:"version"       xorm:"'version'"`
 	NoSchedule  bool   `json:"no_schedule"   xorm:"no_schedule"`
+	// Server side enforced agent filters
+	Filters map[string]string `json:"filters" xorm:"'filters' json"`
 } //	@name Agent
 
 // TableName return database table name for xorm

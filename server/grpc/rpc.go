@@ -56,12 +56,17 @@ func (s *RPC) Next(c context.Context, agentFilter rpc.Filter) (*rpc.Workflow, er
 		log.Debug().Msgf("agent connected: %s: polling", hostname)
 	}
 
-	filterFn := createFilterFunc(agentFilter)
-
 	agent, err := s.getAgentFromContext(c)
 	if err != nil {
 		return nil, err
 	}
+
+	// enforce server set agent filters
+	for k, v := range agent.Filters {
+		agentFilter.Labels[k] = v
+	}
+
+	filterFn := createFilterFunc(agentFilter)
 
 	if agent.NoSchedule {
 		time.Sleep(1 * time.Second)
