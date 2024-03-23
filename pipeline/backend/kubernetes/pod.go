@@ -18,6 +18,7 @@ import (
 	"context"
 	"fmt"
 	"maps"
+	"strconv"
 	"strings"
 
 	"github.com/rs/zerolog/log"
@@ -122,7 +123,7 @@ func podSpec(step *types.Step, config *config, options BackendOptions) (v1.PodSp
 		HostAliases:        hostAliases(step.ExtraHosts),
 		NodeSelector:       nodeSelector(options.NodeSelector, step.Environment["CI_SYSTEM_PLATFORM"]),
 		Tolerations:        tolerations(options.Tolerations),
-		SecurityContext:    podSecurityContext(options.SecurityContext, config.SecurityContext, step.Privileged),
+		SecurityContext:    podSecurityContext(step, options.SecurityContext, config.SecurityContext),
 	}
 	spec.Volumes, err = volumes(step.Volumes)
 	if err != nil {
@@ -156,7 +157,7 @@ func podContainer(step *types.Step, podName, goos string, options BackendOptions
 
 	container.Env = mapToEnvVars(step.Environment)
 	container.Ports = containerPorts(step.Ports)
-	container.SecurityContext = containerSecurityContext(options.SecurityContext, step.Privileged)
+	container.SecurityContext = containerSecurityContext(step, options.SecurityContext)
 
 	container.Resources, err = resourceRequirements(options.Resources)
 	if err != nil {
@@ -339,7 +340,7 @@ func toleration(backendToleration Toleration) v1.Toleration {
 	}
 }
 
-func podSecurityContext(sc *SecurityContext, secCtxConf SecurityContextConfig, stepPrivileged bool) *v1.PodSecurityContext {
+func podSecurityContext(step *types.Step, sc *SecurityContext, secCtxConf SecurityContextConfig) *v1.PodSecurityContext {
 	var (
 		nonRoot *bool
 		user    *int64
@@ -348,28 +349,32 @@ func podSecurityContext(sc *SecurityContext, secCtxConf SecurityContextConfig, s
 		seccomp *v1.SeccompProfile
 	)
 
+	trustedRepo := isRepoTrusted(step)
+
+	// from Agent configuration
 	if secCtxConf.RunAsNonRoot {
 		nonRoot = newBool(true)
 	}
 
 	if sc != nil {
-		// only allow to set user if its not root or step is privileged
-		if sc.RunAsUser != nil && (*sc.RunAsUser != 0 || stepPrivileged) {
+
+		// only allow to set user if it's not root or repository is trusted
+		if sc.RunAsUser != nil && (*sc.RunAsUser != 0 || trustedRepo) {
 			user = sc.RunAsUser
 		}
 
-		// only allow to set group if its not root or step is privileged
-		if sc.RunAsGroup != nil && (*sc.RunAsGroup != 0 || stepPrivileged) {
+		// only allow to set group if it's not root or repository is trusted
+		if sc.RunAsGroup != nil && (*sc.RunAsGroup != 0 || trustedRepo) {
 			group = sc.RunAsGroup
 		}
 
-		// only allow to set fsGroup if its not root or step is privileged
-		if sc.FSGroup != nil && (*sc.FSGroup != 0 || stepPrivileged) {
+		// only allow to set fsGroup if it's not root or repository is trusted
+		if sc.FSGroup != nil && (*sc.FSGroup != 0 || trustedRepo) {
 			fsGroup = sc.FSGroup
 		}
 
-		// only allow to set nonRoot if it's not set globally already
-		if nonRoot == nil && sc.RunAsNonRoot != nil {
+		// only allow to set nonRoot if it's not root or repository is trusted
+		if sc.RunAsNonRoot != nil && (*sc.RunAsNonRoot || trustedRepo) {
 			nonRoot = sc.RunAsNonRoot
 		}
 
@@ -407,20 +412,33 @@ func seccompProfile(scp *SecProfile) *v1.SeccompProfile {
 	return seccompProfile
 }
 
-func containerSecurityContext(sc *SecurityContext, stepPrivileged bool) *v1.SecurityContext {
-	if !stepPrivileged {
+func containerSecurityContext(step *types.Step, sc *SecurityContext) *v1.SecurityContext {
+	var privileged *bool
+
+	trustedRepo := isRepoTrusted(step)
+
+	// from Step
+	if step.Privileged {
+		privileged = newBool(true)
+	}
+
+	if sc != nil {
+
+		// only allow to set privileged if it's least or repository is trusted
+		if sc.Privileged != nil && (*sc.Privileged == false || trustedRepo) {
+			privileged = sc.Privileged
+		}
+	}
+
+	if privileged == nil {
 		return nil
 	}
 
-	if sc != nil && sc.Privileged != nil && *sc.Privileged {
-		securityContext := &v1.SecurityContext{
-			Privileged: newBool(true),
-		}
-		log.Trace().Msgf("container security context that will be used: %v", securityContext)
-		return securityContext
+	securityContext := &v1.SecurityContext{
+		Privileged: privileged,
 	}
-
-	return nil
+	log.Trace().Msgf("container security context that will be used: %v", securityContext)
+	return securityContext
 }
 
 func apparmorAnnotation(containerName string, scp *SecProfile) (*string, *string) {
@@ -462,6 +480,15 @@ func mapToEnvVars(m map[string]string) []v1.EnvVar {
 		})
 	}
 	return ev
+}
+
+func isRepoTrusted(step *types.Step) bool {
+	// TODO: probably, should be stored in the model (pipeline/backend/types/config.go)
+	trustedRepo, err := strconv.ParseBool(step.Environment["CI_REPO_TRUSTED"])
+	if err == nil {
+		return trustedRepo
+	}
+	return false
 }
 
 func startPod(ctx context.Context, engine *kube, step *types.Step, options BackendOptions) (*v1.Pod, error) {
