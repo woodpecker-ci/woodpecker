@@ -8,6 +8,7 @@
 
 ### 📚 Documentation
 
+- Update docs npm deps non-major [[#3485](https://github.com/woodpecker-ci/woodpecker/pull/3485)]
 - Remove `esbuild-loader` [[#3542](https://github.com/woodpecker-ci/woodpecker/pull/3542)]
 - Docs updates and fixes [[#3535](https://github.com/woodpecker-ci/woodpecker/pull/3535)]
 
