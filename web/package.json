@@ -37,7 +37,7 @@
     "@iconify/json": "^2.2.171",
     "@types/lodash": "^4.14.202",
     "@types/node": "^20.11.5",
-    "@types/node-emoji": "^1.8.2",
+    "@types/node-emoji": "^2.0.0",
     "@types/prismjs": "^1.26.3",
     "@types/semver": "^7.5.6",
     "@typescript-eslint/eslint-plugin": "^7.0.0",
