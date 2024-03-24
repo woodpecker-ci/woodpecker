@@ -15,7 +15,7 @@ require (
 	github.com/charmbracelet/bubbles v0.18.0
 	github.com/charmbracelet/bubbletea v0.25.0
 	github.com/distribution/reference v0.5.0
-	github.com/docker/cli v24.0.9+incompatible
+	github.com/docker/cli v26.0.0+incompatible
 	github.com/docker/docker v24.0.9+incompatible
 	github.com/docker/go-connections v0.5.0
 	github.com/docker/go-units v0.5.0
