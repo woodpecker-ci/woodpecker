@@ -112,7 +112,7 @@ import { decode } from 'js-base64';
 import { debounce } from 'lodash';
 import { computed, inject, nextTick, onMounted, Ref, ref, toRef, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useRouter, useRoute } from 'vue-router';
+import { useRoute } from 'vue-router';
 
 import IconButton from '~/components/atomic/IconButton.vue';
 import PipelineStatusIcon from '~/components/repo/pipeline/PipelineStatusIcon.vue';
@@ -145,7 +145,6 @@ const stepId = toRef(props, 'stepId');
 const repo = inject<Ref<Repo>>('repo');
 const repoPermissions = inject<Ref<RepoPermissions>>('repo-permissions');
 const apiClient = useApiClient();
-const router = useRouter();
 const route = useRoute();
 
 const loadedStepSlug = ref<string>();
@@ -312,9 +311,13 @@ async function deleteLogs() {
     throw new Error('The repository, pipeline or step was undefined');
   }
 
+  if (!confirm(i18n.t('repo.pipeline.log_delete_confirm'))) {
+    return;
+  }
+
   try {
     await apiClient.deleteLogs(repo.value.id, pipeline.value.number, step.value.id);
-    router.go();
+    log.value = [];
   } catch (e) {
     notifications.notifyError(e, i18n.t('repo.pipeline.log_delete_error'));
   }

@@ -241,6 +241,7 @@
       "pipeline": "Pipeline #{pipelineId}",
       "log_title": "Step Logs",
       "log_download_error": "There was an error while downloading the log file",
+      "log_delete_confirm": "Do you really want to delete logs of this step?",
       "log_delete_error": "There was an error while deleting the step logs",
       "actions": {
         "cancel": "Cancel",
