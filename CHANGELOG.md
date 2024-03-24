@@ -4,10 +4,11 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@manuelluis, @qwerty287
+@6543, @manuelluis, @qwerty287
 
 ### 📚 Documentation
 
+- Update dependency @types/marked to v6 [[#3544](https://github.com/woodpecker-ci/woodpecker/pull/3544)]
 - Update docs npm deps non-major [[#3485](https://github.com/woodpecker-ci/woodpecker/pull/3485)]
 - Remove `esbuild-loader` [[#3542](https://github.com/woodpecker-ci/woodpecker/pull/3542)]
 - Docs updates and fixes [[#3535](https://github.com/woodpecker-ci/woodpecker/pull/3535)]
@@ -23,6 +24,8 @@
 
 ### Misc
 
+- Update dependency @types/node-emoji to v2 [[#3545](https://github.com/woodpecker-ci/woodpecker/pull/3545)]
+- Update golang (packages) [[#3543](https://github.com/woodpecker-ci/woodpecker/pull/3543)]
 - Lock file maintenance [[#3541](https://github.com/woodpecker-ci/woodpecker/pull/3541)]
 - Update docker.io/woodpeckerci/plugin-docker-buildx Docker tag to v3.2.0 [[#3540](https://github.com/woodpecker-ci/woodpecker/pull/3540)]
 
