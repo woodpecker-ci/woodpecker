@@ -90,9 +90,7 @@ func TestTinyPod(t *testing.T) {
 					"image": "gradle:8.4.0-jdk21",
 					"command": [
 						"/bin/sh",
-						"-c"
-					],
-					"args": [
+						"-c",
 						"echo $CI_SCRIPT | base64 -d | /bin/sh -e"
 					],
 					"workingDir": "/woodpecker/src",
@@ -182,9 +180,6 @@ func TestFullPod(t *testing.T) {
 					"command": [
 						"/bin/sh",
 						"-c"
-					],
-					"args": [
-						"echo $CI_SCRIPT | base64 -d | /bin/sh -e"
 					],
 					"workingDir": "/woodpecker/src",
 					"ports": [
