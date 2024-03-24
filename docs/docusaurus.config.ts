@@ -306,15 +306,6 @@ const config: Config = {
       },
     ],
   ],
-  webpack: {
-    jsLoader: (isServer) => ({
-      loader: require.resolve('esbuild-loader'),
-      options: {
-        loader: 'tsx',
-        target: isServer ? 'node12' : 'es2017',
-      },
-    }),
-  },
   markdown: {
     format: 'detect',
   },
