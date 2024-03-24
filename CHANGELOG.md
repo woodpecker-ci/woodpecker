@@ -23,6 +23,7 @@
 
 ### Misc
 
+- Lock file maintenance [[#3541](https://github.com/woodpecker-ci/woodpecker/pull/3541)]
 - Update docker.io/woodpeckerci/plugin-docker-buildx Docker tag to v3.2.0 [[#3540](https://github.com/woodpecker-ci/woodpecker/pull/3540)]
 
 ## [2.4.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.4.1) - 2024-03-20
