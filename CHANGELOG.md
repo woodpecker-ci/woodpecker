@@ -8,10 +8,8 @@
 
 ### 📚 Documentation
 
-- Reenable `esbuild-loader` [[#3546](https://github.com/woodpecker-ci/woodpecker/pull/3546)]
 - Update dependency @types/marked to v6 [[#3544](https://github.com/woodpecker-ci/woodpecker/pull/3544)]
 - Update docs npm deps non-major [[#3485](https://github.com/woodpecker-ci/woodpecker/pull/3485)]
-- Remove `esbuild-loader` [[#3542](https://github.com/woodpecker-ci/woodpecker/pull/3542)]
 - Docs updates and fixes [[#3535](https://github.com/woodpecker-ci/woodpecker/pull/3535)]
 
 ### 🐛 Bug Fixes
@@ -25,6 +23,7 @@
 
 ### Misc
 
+- Update web npm deps non-major [[#3549](https://github.com/woodpecker-ci/woodpecker/pull/3549)]
 - Update dependency @types/node-emoji to v2 [[#3545](https://github.com/woodpecker-ci/woodpecker/pull/3545)]
 - Update golang (packages) [[#3543](https://github.com/woodpecker-ci/woodpecker/pull/3543)]
 - Lock file maintenance [[#3541](https://github.com/woodpecker-ci/woodpecker/pull/3541)]
