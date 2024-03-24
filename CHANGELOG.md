@@ -8,6 +8,7 @@
 
 ### 📚 Documentation
 
+- Reenable `esbuild-loader` [[#3546](https://github.com/woodpecker-ci/woodpecker/pull/3546)]
 - Update dependency @types/marked to v6 [[#3544](https://github.com/woodpecker-ci/woodpecker/pull/3544)]
 - Update docs npm deps non-major [[#3485](https://github.com/woodpecker-ci/woodpecker/pull/3485)]
 - Remove `esbuild-loader` [[#3542](https://github.com/woodpecker-ci/woodpecker/pull/3542)]
