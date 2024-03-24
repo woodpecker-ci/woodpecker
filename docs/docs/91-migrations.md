@@ -11,7 +11,6 @@ Some versions need some changes to the server configuration or the pipeline conf
 - Deprecated uppercasing all secret env vars, instead, the value of the `secrets` property is used. [Read more](./20-usage/40-secrets.md#use-secrets-in-commands)
 - Deprecated alternative names for secrets, use `environment` with `from_secret`
 - Deprecated slice definition for env vars
-- Deprecated `draft-cavage-http-signatures-12` for external config services in favor of RFC9421
 
 ## 2.0.0
 

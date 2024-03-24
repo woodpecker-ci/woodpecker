@@ -24,7 +24,6 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/go-ap/httpsig"
 	"github.com/yaronf/httpsign"
 )
 
@@ -60,11 +59,6 @@ func Send(ctx context.Context, method, path string, privateKey ed25519.PrivateKe
 		return 0, err
 	}
 
-	err = signRequest(privateKey, req)
-	if err != nil {
-		return 0, err
-	}
-
 	resp, err := client.Do(req)
 	if err != nil {
 		return 0, err
@@ -95,13 +89,4 @@ func signClient(privateKey ed25519.PrivateKey) (*httpsign.Client, error) {
 		return nil, err
 	}
 	return httpsign.NewDefaultClient(httpsign.NewClientConfig().SetSignatureName(pubKeyID).SetSigner(signer)), nil // sign requests, don't verify responses
-}
-
-// TODO remove in 3.x
-func signRequest(privateKey ed25519.PrivateKey, req *http.Request) error {
-	pubKeyID := "woodpecker-ci-plugins"
-
-	signer := httpsig.NewEd25519Signer(pubKeyID, privateKey, nil)
-
-	return signer.Sign(req)
 }
