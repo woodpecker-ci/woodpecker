@@ -48,6 +48,7 @@ type (
 		When           constraint.When    `yaml:"when,omitempty"`
 		Ports          []string           `yaml:"ports,omitempty"`
 		DependsOn      base.StringOrSlice `yaml:"depends_on,omitempty"`
+		Uses           base.StringOrSlice `yaml:"uses"`
 
 		// TODO make []string in 3.x
 		Secrets Secrets `yaml:"secrets,omitempty"`

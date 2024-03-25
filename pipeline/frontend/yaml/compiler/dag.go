@@ -26,15 +26,18 @@ type dagCompilerStep struct {
 	name      string
 	group     string
 	dependsOn []string
+	uses      []string
 }
 
 type dagCompiler struct {
-	steps []*dagCompilerStep
+	steps    []*dagCompilerStep
+	services []*dagCompilerStep
 }
 
-func newDAGCompiler(steps []*dagCompilerStep) dagCompiler {
+func newDAGCompiler(steps []*dagCompilerStep, services []*dagCompilerStep) dagCompiler {
 	return dagCompiler{
-		steps: steps,
+		steps:    steps,
+		services: services,
 	}
 }
 
@@ -55,7 +58,14 @@ func (c dagCompiler) compile() ([]*backend_types.Stage, error) {
 }
 
 func (c dagCompiler) compileByGroup() ([]*backend_types.Stage, error) {
-	stages := make([]*backend_types.Stage, 0, len(c.steps))
+	var stages []*backend_types.Stage
+
+	serviceStage := new(backend_types.Stage)
+	for _, srv := range c.services {
+		serviceStage.Steps = append(serviceStage.Steps, srv.step)
+	}
+	stages = append(stages, serviceStage)
+
 	var currentStage *backend_types.Stage
 	var currentGroup string
 
@@ -80,7 +90,11 @@ func (c dagCompiler) compileByDependsOn() ([]*backend_types.Stage, error) {
 	for _, s := range c.steps {
 		stepMap[s.name] = s
 	}
-	return convertDAGToStages(stepMap)
+	serviceMap := make(map[string]*dagCompilerStep, len(c.steps))
+	for _, s := range c.services {
+		stepMap[s.name] = s
+	}
+	return convertDAGToStages(stepMap, serviceMap)
 }
 
 func dfsVisit(steps map[string]*dagCompilerStep, name string, visited map[string]struct{}, path []string) error {
@@ -102,14 +116,31 @@ func dfsVisit(steps map[string]*dagCompilerStep, name string, visited map[string
 	return nil
 }
 
-func convertDAGToStages(steps map[string]*dagCompilerStep) ([]*backend_types.Stage, error) {
+func convertDAGToStages(steps map[string]*dagCompilerStep, services map[string]*dagCompilerStep) ([]*backend_types.Stage, error) {
 	addedSteps := make(map[string]struct{})
+	addedServices := make(map[string]struct{})
 	stages := make([]*backend_types.Stage, 0)
+
+	// TODO remove in next major
+	if !hasServiceUses(steps, services) {
+		stage := new(backend_types.Stage)
+		for _, srv := range services {
+			stage.Steps = append(stage.Steps, srv.step)
+		}
+		stages = append(stages, stage)
+	}
 
 	for name, step := range steps {
 		// check if all depends_on are valid
 		for _, dep := range step.dependsOn {
 			if _, ok := steps[dep]; !ok {
+				return nil, &ErrStepMissingDependency{name: name, dep: dep}
+			}
+		}
+
+		// check if all uses are valid
+		for _, dep := range step.uses {
+			if _, ok := services[dep]; !ok {
 				return nil, &ErrStepMissingDependency{name: name, dep: dep}
 			}
 		}
@@ -122,16 +153,36 @@ func convertDAGToStages(steps map[string]*dagCompilerStep) ([]*backend_types.Sta
 	}
 
 	for len(steps) > 0 {
-		addedNodesThisLevel := make(map[string]struct{})
 		stage := new(backend_types.Stage)
 
 		var stepsToAdd []*dagCompilerStep
 		for name, step := range steps {
 			if allDependenciesSatisfied(step, addedSteps) {
 				stepsToAdd = append(stepsToAdd, step)
-				addedNodesThisLevel[name] = struct{}{}
 				delete(steps, name)
 			}
+		}
+
+		var servicesToAdd []*dagCompilerStep
+		for _, step := range stepsToAdd {
+			for _, u := range step.uses {
+				if _, has := addedServices[u]; !has {
+					servicesToAdd = append(servicesToAdd, services[u])
+					addedServices[u] = struct{}{}
+				}
+			}
+		}
+		sort.Slice(servicesToAdd, func(i, j int) bool {
+			return servicesToAdd[i].position < servicesToAdd[j].position
+		})
+		var serviceSteps []*backend_types.Step
+		for _, step := range servicesToAdd {
+			serviceSteps = append(serviceSteps, step.step)
+		}
+		if len(stages) == 0 {
+			stages = append(stages, &backend_types.Stage{Steps: serviceSteps})
+		} else {
+			stages[len(stages)-1].Steps = append(stages[len(stages)-1].Steps, serviceSteps...)
 		}
 
 		// as steps are from a map that has no deterministic order,
@@ -140,18 +191,32 @@ func convertDAGToStages(steps map[string]*dagCompilerStep) ([]*backend_types.Sta
 			return stepsToAdd[i].position < stepsToAdd[j].position
 		})
 
-		for i := range stepsToAdd {
-			stage.Steps = append(stage.Steps, stepsToAdd[i].step)
+		for _, step := range stepsToAdd {
+			stage.Steps = append(stage.Steps, step.step)
 		}
 
-		for name := range addedNodesThisLevel {
-			addedSteps[name] = struct{}{}
+		for _, step := range stepsToAdd {
+			addedSteps[step.name] = struct{}{}
 		}
 
 		stages = append(stages, stage)
 	}
 
 	return stages, nil
+}
+
+func hasServiceUses(steps map[string]*dagCompilerStep, services map[string]*dagCompilerStep) bool {
+	for _, step := range steps {
+		if len(step.uses) > 0 {
+			return true
+		}
+	}
+	for _, step := range services {
+		if len(step.uses) > 0 {
+			return true
+		}
+	}
+	return false
 }
 
 func allDependenciesSatisfied(step *dagCompilerStep, addedSteps map[string]struct{}) bool {
