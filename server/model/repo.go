@@ -23,12 +23,12 @@ import (
 // Repo represents a repository.
 type Repo struct {
 	ID     int64 `json:"id,omitempty"                    xorm:"pk autoincr 'repo_id'"`
-	UserID int64 `json:"-"                               xorm:"repo_user_id"`
+	UserID int64 `json:"-"                               xorm:"INDEX repo_user_id"`
 	// ForgeRemoteID is the unique identifier for the repository on the forge.
 	ForgeRemoteID                ForgeRemoteID  `json:"forge_remote_id"                 xorm:"forge_remote_id"`
-	OrgID                        int64          `json:"org_id"                          xorm:"repo_org_id"`
-	Owner                        string         `json:"owner"                           xorm:"UNIQUE(name) 'repo_owner'"`
-	Name                         string         `json:"name"                            xorm:"UNIQUE(name) 'repo_name'"`
+	OrgID                        int64          `json:"org_id"                          xorm:"INDEX repo_org_id"`
+	Owner                        string         `json:"owner"                           xorm:"INDEX UNIQUE(name) 'repo_owner'"`
+	Name                         string         `json:"name"                            xorm:"INDEX UNIQUE(name) 'repo_name'"`
 	FullName                     string         `json:"full_name"                       xorm:"UNIQUE 'repo_full_name'"`
 	Avatar                       string         `json:"avatar_url,omitempty"            xorm:"varchar(500) 'repo_avatar'"`
 	ForgeURL                     string         `json:"forge_url,omitempty"             xorm:"varchar(1000) 'repo_forge_url'"`
