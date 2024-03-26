@@ -1,6 +1,6 @@
 # Changelog
 
-## [2.5.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.5.0) - 2024-03-24
+## [2.5.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.5.0) - 2024-03-26
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -23,6 +23,7 @@
 
 ### Misc
 
+- Update pre-commit non-major [[#3556](https://github.com/woodpecker-ci/woodpecker/pull/3556)]
 - Update web npm deps non-major [[#3549](https://github.com/woodpecker-ci/woodpecker/pull/3549)]
 - Update dependency @types/node-emoji to v2 [[#3545](https://github.com/woodpecker-ci/woodpecker/pull/3545)]
 - Update golang (packages) [[#3543](https://github.com/woodpecker-ci/woodpecker/pull/3543)]
