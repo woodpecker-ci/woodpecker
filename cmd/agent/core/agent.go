@@ -187,7 +187,6 @@ func run(c *cli.Context, backends []types.Backend) error {
 		"hostname": hostname,
 		"platform": engInfo.Platform,
 		"backend":  backendEngine.Name(),
-		"repo":     "*", // allow all repos by default
 	}
 
 	if err := stringSliceAddToMap(c.StringSlice("filter"), labels); err != nil {

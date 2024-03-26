@@ -39,3 +39,20 @@ func (Agent) TableName() string {
 func (a *Agent) IsSystemAgent() bool {
 	return a.OwnerID == -1
 }
+
+func (a *Agent) GetFilters() map[string]string {
+	filters := a.Filters
+	if filters == nil {
+		filters = make(map[string]string)
+	}
+
+	// enforce filters for user and organization agents
+	if a.IsSystemAgent() {
+		filters["repo"] = "*"  // allow all repos by default
+		filters["owner"] = "*" // allow all owners by default
+	} else {
+		filters["owner"] = "*" // we dont have org agents implemented jet
+	}
+
+	return filters
+}
