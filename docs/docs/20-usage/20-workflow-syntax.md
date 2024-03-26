@@ -188,7 +188,8 @@ Some of the steps may be allowed to fail without causing the whole workflow and 
 
 ### `when` - Conditional Execution
 
-Woodpecker supports defining a list of conditions for a step by using a `when` block. If at least one of the conditions in the `when` block evaluate to true the step is executed, otherwise it is skipped. A condition can be a check like:
+Woodpecker supports defining a list of conditions for a step by using a `when` block. If at least one of the conditions in the `when` block evaluate to true the step is executed, otherwise it is skipped. A condition is evaluated to true if _all_ subconditions are true.
+A condition can be a check like:
 
 ```diff
  steps:
@@ -202,6 +203,11 @@ Woodpecker supports defining a list of conditions for a step by using a `when` b
 +      - event: push
 +        branch: main
 ```
+
+The `slack` step is executed if one of these conditions is met:
+
+1. The pipeline is executed from a pull request in the repo `test/test`
+2. The pipeline is executed from a push to `maiǹ`
 
 #### `repo`
 
@@ -652,7 +658,7 @@ Example configuration to use a custom clone plugin:
 
 ```diff
  clone:
-   git:
+   - name: git
 +    image: octocat/custom-git-plugin
 ```
 
@@ -702,7 +708,7 @@ skip_clone: true
 
 ## `when` - Global workflow conditions
 
-Woodpecker gives the ability to skip whole workflows (not just steps #when---conditional-execution-1) based on certain conditions by a `when` block. If all conditions in the `when` block evaluate to true the workflow is executed, otherwise it is skipped, but treated as successful and other workflows depending on it will still continue.
+Woodpecker gives the ability to skip whole workflows ([not just steps](#when---conditional-execution)) based on certain conditions by a `when` block. If all conditions in the `when` block evaluate to true the workflow is executed, otherwise it is skipped, but treated as successful and other workflows depending on it will still continue.
 
 For more information about the specific filters, take a look at the [step-specific `when` filters](#when---conditional-execution).
 

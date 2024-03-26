@@ -61,7 +61,7 @@ You can install Woodpecker on multiple ways:
 
 Authentication is done using OAuth and is delegated to your forge which is configured using environment variables.
 
-See the complete reference for all supported forges [here](../11-forges/10-overview.md).
+See the complete reference for all supported forges [here](../11-forges/11-overview.md).
 
 ## Database
 

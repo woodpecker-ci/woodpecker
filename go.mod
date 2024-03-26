@@ -20,7 +20,7 @@ require (
 	github.com/docker/go-connections v0.5.0
 	github.com/docker/go-units v0.5.0
 	github.com/drone/envsubst v1.0.3
-	github.com/expr-lang/expr v1.16.1
+	github.com/expr-lang/expr v1.16.2
 	github.com/franela/goblin v0.0.0-20211003143422-0a4f594942bf
 	github.com/fsnotify/fsnotify v1.7.0
 	github.com/gin-gonic/gin v1.9.1
@@ -51,9 +51,9 @@ require (
 	github.com/swaggo/swag v1.16.3
 	github.com/tevino/abool/v2 v2.1.0
 	github.com/urfave/cli/v2 v2.27.1
-	github.com/xanzy/go-gitlab v0.100.0
+	github.com/xanzy/go-gitlab v0.101.0
 	github.com/xeipuuv/gojsonschema v1.2.0
-	github.com/zalando/go-keyring v0.2.3
+	github.com/zalando/go-keyring v0.2.4
 	go.uber.org/multierr v1.11.0
 	golang.org/x/crypto v0.21.0
 	golang.org/x/net v0.22.0
@@ -64,12 +64,12 @@ require (
 	google.golang.org/grpc v1.62.1
 	google.golang.org/protobuf v1.33.0
 	gopkg.in/yaml.v3 v3.0.1
-	k8s.io/api v0.29.2
-	k8s.io/apimachinery v0.29.2
-	k8s.io/client-go v0.29.2
+	k8s.io/api v0.29.3
+	k8s.io/apimachinery v0.29.3
+	k8s.io/client-go v0.29.3
 	src.techknowlogick.com/xormigrate v1.7.1
 	xorm.io/builder v0.3.13
-	xorm.io/xorm v1.3.8
+	xorm.io/xorm v1.3.9
 )
 
 require (
@@ -108,7 +108,7 @@ require (
 	github.com/goccy/go-json v0.10.2 // indirect
 	github.com/godbus/dbus/v5 v5.1.0 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
-	github.com/golang/protobuf v1.5.3 // indirect
+	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/google/gnostic-models v0.6.8 // indirect
 	github.com/google/go-cmp v0.6.0 // indirect

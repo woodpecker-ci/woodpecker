@@ -14,7 +14,7 @@ WOODPECKER_BITBUCKET_SECRET=...
 
 ## Registration
 
-You must register an OAuth application at Bitbucket in order to get a key and secret combination for woodpecker. Navigate to your workspace settings and choose `OAuth consumers` from the menu, and finally click `Add Consumer` (the url should be like: `https://bitbucket.org/[your-project-name]/workspace/settings/api`).
+You must register an OAuth application at Bitbucket in order to get a key and secret combination for Woodpecker. Navigate to your workspace settings and choose `OAuth consumers` from the menu, and finally click `Add Consumer` (the url should be like: `https://bitbucket.org/[your-project-name]/workspace/settings/api`).
 
 Please set a name and set the `Callback URL` like this:
 

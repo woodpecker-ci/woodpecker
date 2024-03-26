@@ -81,7 +81,7 @@ steps:
       template: config/k8s/service.yaml
 ```
 
-See [plugin docs](./20-usage/51-plugins/10-overview.md).
+See [plugin docs](./20-usage/51-plugins/51-overview.md).
 
 ## Continue reading
 
