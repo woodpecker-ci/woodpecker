@@ -9,6 +9,7 @@ import (
 // BackendOptions defines all the advanced options for the kubernetes backend
 type BackendOptions struct {
 	Resources          Resources         `mapstructure:"resources"`
+	RuntimeClassName   *string           `mapstructure:"runtimeClassName"`
 	ServiceAccountName string            `mapstructure:"serviceAccountName"`
 	NodeSelector       map[string]string `mapstructure:"nodeSelector"`
 	Tolerations        []Toleration      `mapstructure:"tolerations"`
