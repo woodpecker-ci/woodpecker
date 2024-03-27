@@ -25,7 +25,7 @@ func CheckForUpdate(ctx context.Context, force bool) (*NewVersion, error) {
 		return nil, nil
 	}
 
-	req, err := http.NewRequestWithContext(ctx, "GET", githubReleaseURL, nil)
+	req, err := http.NewRequestWithContext(ctx, "GET", woodpeckerVersionURL, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -40,34 +40,31 @@ func CheckForUpdate(ctx context.Context, force bool) (*NewVersion, error) {
 		return nil, errors.New("failed to fetch the latest release")
 	}
 
-	var release GithubRelease
-	if err := json.NewDecoder(resp.Body).Decode(&release); err != nil {
+	var versionData VersionData
+	if err := json.NewDecoder(resp.Body).Decode(&versionData); err != nil {
 		return nil, err
 	}
 
+	upstreamVersion := versionData.Latest
+	if strings.HasPrefix(version.String(), "next-") {
+		upstreamVersion = versionData.Next
+	} else if strings.HasSuffix(version.String(), "rc-") {
+		upstreamVersion = versionData.RC
+	}
+
+	installedVersion := strings.TrimPrefix(version.Version, "v")
+	upstreamVersion = strings.TrimPrefix(upstreamVersion, "v")
+
 	// using the latest release
-	if strings.TrimPrefix(release.TagName, "v") == strings.TrimPrefix(version.String(), "v") && !force {
+	if installedVersion == upstreamVersion && !force {
 		return nil, nil
 	}
 
-	log.Debug().Msgf("Latest version: %s", release.TagName)
+	log.Debug().Msgf("New version available: %s", upstreamVersion)
 
-	assetURL := ""
-	fileName := fmt.Sprintf("woodpecker-cli_%s_%s.tar.gz", runtime.GOOS, runtime.GOARCH)
-	for _, asset := range release.Assets {
-		if fileName == asset.Name {
-			assetURL = asset.BrowserDownloadURL
-			log.Debug().Msgf("Found asset for the current OS and arch: %s", assetURL)
-			break
-		}
-	}
-
-	if assetURL == "" {
-		return nil, errors.New("no asset found for the current OS")
-	}
-
+	assetURL := fmt.Sprintf(githubBinaryURL, upstreamVersion, runtime.GOOS, runtime.GOARCH)
 	return &NewVersion{
-		Version:  release.TagName,
+		Version:  upstreamVersion,
 		AssetURL: assetURL,
 	}, nil
 }
