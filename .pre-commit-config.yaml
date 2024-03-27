@@ -10,7 +10,7 @@ repos:
       - id: end-of-file-fixer
       - id: trailing-whitespace
   - repo: https://github.com/golangci/golangci-lint
-    rev: v1.55.2
+    rev: v1.57.1
     hooks:
       - id: golangci-lint
   - repo: https://github.com/igorshubovych/markdownlint-cli
@@ -32,7 +32,7 @@ repos:
     hooks:
       - id: prettier
   - repo: https://github.com/adrienverge/yamllint.git
-    rev: v1.33.0
+    rev: v1.35.1
     hooks:
       - id: yamllint
         args: [--strict, -c=.yamllint.yaml]
@@ -53,7 +53,7 @@ ci:
   autofix_prs: true
   autoupdate_branch: ''
   autoupdate_commit_msg: '[pre-commit.ci] pre-commit autoupdate'
-  autoupdate_schedule: monthly
+  autoupdate_schedule: quarterly
   # NB: hadolint not included in pre-commit.ci
   skip: [check-hooks-apply, check-useless-excludes, hadolint, prettier]
   submodules: false

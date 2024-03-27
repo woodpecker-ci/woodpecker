@@ -57,7 +57,12 @@ func run(c *cli.Context) error {
 
 func execDir(c *cli.Context, dir string) error {
 	// TODO: respect pipeline dependency
-	repoPath, _ := filepath.Abs(filepath.Dir(dir))
+	repoPath := c.String("repo-path")
+	if repoPath != "" {
+		repoPath, _ = filepath.Abs(repoPath)
+	} else {
+		repoPath, _ = filepath.Abs(filepath.Dir(dir))
+	}
 	if runtime.GOOS == "windows" {
 		repoPath = convertPathForWindows(repoPath)
 	}
@@ -79,7 +84,12 @@ func execDir(c *cli.Context, dir string) error {
 }
 
 func execFile(c *cli.Context, file string) error {
-	repoPath, _ := filepath.Abs(filepath.Dir(file))
+	repoPath := c.String("repo-path")
+	if repoPath != "" {
+		repoPath, _ = filepath.Abs(repoPath)
+	} else {
+		repoPath, _ = filepath.Abs(filepath.Dir(file))
+	}
 	if runtime.GOOS == "windows" {
 		repoPath = convertPathForWindows(repoPath)
 	}
