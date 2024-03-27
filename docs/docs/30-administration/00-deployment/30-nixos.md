@@ -1,7 +1,7 @@
 # NixOS
 
 :::info
-Note that this module is not maintained by the woodpecker-developers.
+Note that this module is not maintained by the Woodpecker developers.
 If you experience issues please open a bug report in the [nixpkgs repo](https://github.com/NixOS/nixpkgs/issues/new/choose) where the module is maintained.
 :::
 
@@ -85,4 +85,4 @@ All configuration options can be found via [NixOS Search](https://search.nixos.o
 
 ## Tips and tricks
 
-There are some resources on how to utilize Woodpecker more effectively with NixOS on the [Awesome Woodpecker](../../92-awesome.md) page, like using the runners nix-store in the pipeline
+There are some resources on how to utilize Woodpecker more effectively with NixOS on the [Awesome Woodpecker](../../92-awesome.md) page, like using the runners nix-store in the pipeline.
