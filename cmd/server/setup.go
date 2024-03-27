@@ -101,28 +101,6 @@ func setupMembershipService(_ *cli.Context, _store store.Store) cache.Membership
 }
 
 func setupForgeService(c *cli.Context, _store store.Store) (forge.ForgeService, error) {
-	var forgeType string
-	additionalOptions := map[string]any{}
-
-	switch {
-	case c.Bool("github"):
-		forgeType = "github"
-		additionalOptions["merge-ref"] = c.Bool("github-merge-ref")
-	case c.Bool("gitlab"):
-		forgeType = "gitlab"
-	case c.Bool("gitea"):
-		forgeType = "gitea"
-		additionalOptions["oauth-server"] = c.String("gitea-oauth-server")
-	case c.Bool("bitbucket"):
-		forgeType = "bitbucket"
-	case c.Bool("bitbucket-dc"):
-		forgeType = "bitbucket-dc"
-		additionalOptions["git-username"] = c.String("bitbucket-dc-git-username")
-		additionalOptions["git-password"] = c.String("bitbucket-dc-git-password")
-	default:
-		return nil, errors.New("forge not configured")
-	}
-
 	_forge, err := _store.ForgeGet(0)
 	if errors.Is(err, types.RecordNotExist) {
 		return nil, err
@@ -134,12 +112,38 @@ func setupForgeService(c *cli.Context, _store store.Store) (forge.ForgeService, 
 		}
 	}
 
-	_forge.Type = forgeType
 	_forge.Client = c.String("forge-oauth-client")
 	_forge.ClientSecret = c.String("forge-oauth-secret")
 	_forge.URL = c.String("forge-url")
 	_forge.SkipVerify = c.Bool("forge-skip-verify")
-	_forge.AdditionalOptions = additionalOptions
+
+	switch {
+	case c.Bool("github"):
+		_forge.Type = "github"
+		_forge.AdditionalOptions["merge-ref"] = c.Bool("github-merge-ref")
+		if _forge.URL == "" {
+			_forge.URL = "https://github.com"
+		}
+	case c.Bool("gitlab"):
+		_forge.Type = "gitlab"
+		if _forge.URL == "" {
+			_forge.URL = "https://gitlab.com"
+		}
+	case c.Bool("gitea"):
+		_forge.Type = "gitea"
+		_forge.AdditionalOptions["oauth-server"] = c.String("gitea-oauth-server")
+		if _forge.URL == "" {
+			_forge.URL = "https://try.gitea.com"
+		}
+	case c.Bool("bitbucket"):
+		_forge.Type = "bitbucket"
+	case c.Bool("bitbucket-dc"):
+		_forge.Type = "bitbucket-dc"
+		_forge.AdditionalOptions["git-username"] = c.String("bitbucket-dc-git-username")
+		_forge.AdditionalOptions["git-password"] = c.String("bitbucket-dc-git-password")
+	default:
+		return nil, errors.New("forge not configured")
+	}
 
 	if forgeExists {
 		err := _store.ForgeUpdate(_forge)

@@ -317,12 +317,12 @@ var flags = append([]cli.Flag{
 	&cli.StringFlag{
 		Name:    "forge-oauth-client",
 		Usage:   "oauth2 client id",
-		EnvVars: []string{"WOODPECKER_FORGE_CLIENT", "WOODPECKER_GITHUB_CLIENT", "WOODPECKER_GITLAB_CLIENT", "WOODPECKER_GITEA_CLIENT", "WOODPECKER_BITBUCKET_CLIENT"},
+		EnvVars: []string{"WOODPECKER_FORGE_CLIENT", "WOODPECKER_GITHUB_CLIENT", "WOODPECKER_GITLAB_CLIENT", "WOODPECKER_GITEA_CLIENT", "WOODPECKER_BITBUCKET_CLIENT", "WOODPECKER_BITBUCKET_DC_CLIENT_ID"},
 	},
 	&cli.StringFlag{
 		Name:    "forge-oauth-secret",
 		Usage:   "oauth2 client secret",
-		EnvVars: []string{"WOODPECKER_FORGE_SECRET", "WOODPECKER_GITHUB_SECRET", "WOODPECKER_GITLAB_SECRET", "WOODPECKER_GITEA_SECRET", "WOODPECKER_BITBUCKET_SECRET"},
+		EnvVars: []string{"WOODPECKER_FORGE_SECRET", "WOODPECKER_GITHUB_SECRET", "WOODPECKER_GITLAB_SECRET", "WOODPECKER_GITEA_SECRET", "WOODPECKER_BITBUCKET_SECRET", "WOODPECKER_BITBUCKET_DC_CLIENT_SECRET"},
 	},
 	&cli.BoolFlag{
 		Name:    "forge-skip-verify",
@@ -337,34 +337,11 @@ var flags = append([]cli.Flag{
 		Name:    "github",
 		Usage:   "github driver is enabled",
 	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_GITHUB_URL"},
-		Name:    "github-server",
-		Usage:   "github server address",
-		Value:   "https://github.com",
-	},
-	&cli.StringFlag{
-		EnvVars:  []string{"WOODPECKER_GITHUB_CLIENT"},
-		Name:     "github-client",
-		Usage:    "github oauth2 client id",
-		FilePath: os.Getenv("WOODPECKER_GITHUB_CLIENT_FILE"),
-	},
-	&cli.StringFlag{
-		EnvVars:  []string{"WOODPECKER_GITHUB_SECRET"},
-		Name:     "github-secret",
-		Usage:    "github oauth2 client secret",
-		FilePath: os.Getenv("WOODPECKER_GITHUB_SECRET_FILE"),
-	},
 	&cli.BoolFlag{
 		EnvVars: []string{"WOODPECKER_GITHUB_MERGE_REF"},
 		Name:    "github-merge-ref",
 		Usage:   "github pull requests use merge ref",
 		Value:   true,
-	},
-	&cli.BoolFlag{
-		EnvVars: []string{"WOODPECKER_GITHUB_SKIP_VERIFY"},
-		Name:    "github-skip-verify",
-		Usage:   "github skip ssl verification",
 	},
 	//
 	// Gitea
@@ -373,29 +350,6 @@ var flags = append([]cli.Flag{
 		EnvVars: []string{"WOODPECKER_GITEA"},
 		Name:    "gitea",
 		Usage:   "gitea driver is enabled",
-	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_GITEA_URL"},
-		Name:    "gitea-server",
-		Usage:   "gitea server address",
-		Value:   "https://try.gitea.io",
-	},
-	&cli.StringFlag{
-		EnvVars:  []string{"WOODPECKER_GITEA_CLIENT"},
-		Name:     "gitea-client",
-		Usage:    "gitea oauth2 client id",
-		FilePath: os.Getenv("WOODPECKER_GITEA_CLIENT_FILE"),
-	},
-	&cli.StringFlag{
-		EnvVars:  []string{"WOODPECKER_GITEA_SECRET"},
-		Name:     "gitea-secret",
-		Usage:    "gitea oauth2 client secret",
-		FilePath: os.Getenv("WOODPECKER_GITEA_SECRET_FILE"),
-	},
-	&cli.BoolFlag{
-		EnvVars: []string{"WOODPECKER_GITEA_SKIP_VERIFY"},
-		Name:    "gitea-skip-verify",
-		Usage:   "gitea skip ssl verification",
 	},
 	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_DEV_GITEA_OAUTH_URL"},
@@ -410,18 +364,6 @@ var flags = append([]cli.Flag{
 		Name:    "bitbucket",
 		Usage:   "bitbucket driver is enabled",
 	},
-	&cli.StringFlag{
-		EnvVars:  []string{"WOODPECKER_BITBUCKET_CLIENT"},
-		Name:     "bitbucket-client",
-		Usage:    "bitbucket oauth2 client id",
-		FilePath: os.Getenv("WOODPECKER_BITBUCKET_CLIENT_FILE"),
-	},
-	&cli.StringFlag{
-		EnvVars:  []string{"WOODPECKER_BITBUCKET_SECRET"},
-		Name:     "bitbucket-secret",
-		Usage:    "bitbucket oauth2 client secret",
-		FilePath: os.Getenv("WOODPECKER_BITBUCKET_SECRET_FILE"),
-	},
 	//
 	// Gitlab
 	//
@@ -430,29 +372,6 @@ var flags = append([]cli.Flag{
 		Name:    "gitlab",
 		Usage:   "gitlab driver is enabled",
 	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_GITLAB_URL"},
-		Name:    "gitlab-server",
-		Usage:   "gitlab server address",
-		Value:   "https://gitlab.com",
-	},
-	&cli.StringFlag{
-		EnvVars:  []string{"WOODPECKER_GITLAB_CLIENT"},
-		Name:     "gitlab-client",
-		Usage:    "gitlab oauth2 client id",
-		FilePath: os.Getenv("WOODPECKER_GITLAB_CLIENT_FILE"),
-	},
-	&cli.StringFlag{
-		EnvVars:  []string{"WOODPECKER_GITLAB_SECRET"},
-		Name:     "gitlab-secret",
-		Usage:    "gitlab oauth2 client secret",
-		FilePath: os.Getenv("WOODPECKER_GITLAB_SECRET_FILE"),
-	},
-	&cli.BoolFlag{
-		EnvVars: []string{"WOODPECKER_GITLAB_SKIP_VERIFY"},
-		Name:    "gitlab-skip-verify",
-		Usage:   "gitlab skip ssl verification",
-	},
 	//
 	// Bitbucket DataCenter/Server (previously Stash)
 	//
@@ -460,23 +379,6 @@ var flags = append([]cli.Flag{
 		EnvVars: []string{"WOODPECKER_BITBUCKET_DC"},
 		Name:    "bitbucket-dc",
 		Usage:   "Bitbucket DataCenter/Server driver is enabled",
-	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_BITBUCKET_DC_URL"},
-		Name:    "bitbucket-dc-server",
-		Usage:   "Bitbucket DataCenter/Server server address",
-	},
-	&cli.StringFlag{
-		EnvVars:  []string{"WOODPECKER_BITBUCKET_DC_CLIENT_ID"},
-		Name:     "bitbucket-dc-client-id",
-		Usage:    "Bitbucket DataCenter/Server OAuth 2.0 client id",
-		FilePath: os.Getenv("WOODPECKER_BITBUCKET_DC_CLIENT_ID_FILE"),
-	},
-	&cli.StringFlag{
-		EnvVars:  []string{"WOODPECKER_BITBUCKET_DC_CLIENT_SECRET"},
-		Name:     "bitbucket-dc-client-secret",
-		Usage:    "Bitbucket DataCenter/Server OAuth 2.0 client secret",
-		FilePath: os.Getenv("WOODPECKER_BITBUCKET_DC_CLIENT_SECRET_FILE"),
 	},
 	&cli.StringFlag{
 		EnvVars:  []string{"WOODPECKER_BITBUCKET_DC_GIT_USERNAME"},

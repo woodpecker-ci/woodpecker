@@ -55,11 +55,6 @@ func (c *membershipCache) Get(ctx context.Context, _forge forge.Forge, u *model.
 		return item.Value(), nil
 	}
 
-	// _forge, err := loader.GetForgeFromUser(c.store, u)
-	// if err != nil {
-	// 	return nil, err
-	// }
-
 	perm, err := _forge.OrgMembership(ctx, u, org)
 	if err != nil {
 		return nil, err

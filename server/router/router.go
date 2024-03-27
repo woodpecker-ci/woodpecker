@@ -29,6 +29,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server/api/metrics"
 	"go.woodpecker-ci.org/woodpecker/v2/server/router/middleware/header"
 	"go.woodpecker-ci.org/woodpecker/v2/server/router/middleware/session"
+	"go.woodpecker-ci.org/woodpecker/v2/server/router/middleware/token"
 	"go.woodpecker-ci.org/woodpecker/v2/server/web"
 )
 
@@ -48,7 +49,7 @@ func Load(noRouteHandler http.HandlerFunc, middleware ...gin.HandlerFunc) http.H
 	e.Use(header.Secure)
 	e.Use(middleware...)
 	e.Use(session.SetUser())
-	// e.Use(token.Refresh) // TODO: allow to get forge from user?
+	e.Use(token.Refresh)
 
 	e.NoRoute(gin.WrapF(noRouteHandler))
 

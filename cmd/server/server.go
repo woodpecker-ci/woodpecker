@@ -81,12 +81,6 @@ func run(c *cli.Context) error {
 		)
 	}
 
-	// TODO: add configured forge to database
-	// _forge, err := setupForge(c)
-	// if err != nil {
-	// 	return fmt.Errorf("can't setup forge: %w", err)
-	// }
-
 	_store, err := setupStore(c)
 	if err != nil {
 		return fmt.Errorf("can't setup store: %w", err)
