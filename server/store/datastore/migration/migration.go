@@ -59,6 +59,7 @@ var migrationTasks = []*xormigrate.Migration{
 	&convertToNewPipelineErrorFormat,
 	&renameLinkToURL,
 	&cleanRegistryPipeline,
+	&setForgeID,
 }
 
 var allBeans = []any{

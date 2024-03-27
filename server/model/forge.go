@@ -16,35 +16,10 @@ package model
 
 type Forge struct {
 	ID                int64          `xorm:"pk autoincr"`
-	Type              string         `xorm:"VARCHAR(250)"` // github, gitlab, gitea, gogs, bitbucket, stash, coding
+	Type              string         `xorm:"VARCHAR(250)"` // github, gitlab, gitea, bitbucket, bitbucket-dc
 	URL               string         `xorm:"VARCHAR(500)"`
 	Client            string         `xorm:"VARCHAR(250)"`
 	ClientSecret      string         `xorm:"VARCHAR(250)"`
 	SkipVerify        bool           `xorm:"bool"`
-	AdditionalOptions map[string]any `xorm:"json"` // TODO: think about the best format for this
-	Created           int64          `xorm:"created"`
-	Updated           int64          `xorm:"updated"`
+	AdditionalOptions map[string]any `xorm:"json"`
 }
-
-// bitbucket
-// Client: c.String("bitbucket-client"),
-// Secret: c.String("bitbucket-secret"),
-
-// gitea
-// URL:        strings.TrimRight(server.String(), "/"),
-// Client:     c.String("gitea-client"),
-// Secret:     c.String("gitea-secret"),
-// SkipVerify: c.Bool("gitea-skip-verify"),
-
-// gitlab
-// URL:          c.String("gitlab-server"),
-// ClientID:     c.String("gitlab-client"),
-// ClientSecret: c.String("gitlab-secret"),
-// SkipVerify:   c.Bool("gitlab-skip-verify"),
-
-// github
-// URL:        c.String("github-server"),
-// Client:     c.String("github-client"),
-// Secret:     c.String("github-secret"),
-// SkipVerify: c.Bool("github-skip-verify"),
-// ### MergeRef:   c.Bool("github-merge-ref"),
