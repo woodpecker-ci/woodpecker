@@ -11,6 +11,7 @@ import (
 
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge/bitbucket"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge/bitbucketdatacenter"
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge/gitea"
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge/github"
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge/gitlab"
@@ -77,6 +78,8 @@ func setupForge(forge *model.Forge) (forge.Forge, error) {
 		return setupBitbucket(forge)
 	case "gitea":
 		return setupGitea(forge)
+	case "bitbucket-dc":
+		return setupBitbucketDatacenter(forge)
 	default:
 		return nil, fmt.Errorf("forge not configured")
 	}
@@ -98,11 +101,18 @@ func setupGitea(forge *model.Forge) (forge.Forge, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	oauthURL, ok := forge.AdditionalOptions["oauth-server"].(string)
+	if !ok {
+		return nil, fmt.Errorf("missing oauth-server")
+	}
+
 	opts := gitea.Opts{
 		URL:        strings.TrimRight(server.String(), "/"),
 		Client:     forge.Client,
 		Secret:     forge.ClientSecret,
 		SkipVerify: forge.SkipVerify,
+		OAuth2URL:  oauthURL,
 	}
 	if len(opts.URL) == 0 {
 		return nil, fmt.Errorf("WOODPECKER_GITEA_URL must be set")
@@ -123,13 +133,40 @@ func setupGitLab(forge *model.Forge) (forge.Forge, error) {
 
 // helper function to setup the GitHub forge from the CLI arguments.
 func setupGitHub(forge *model.Forge) (forge.Forge, error) {
+	mergeRef, ok := forge.AdditionalOptions["merge-ref"].(bool)
+	if !ok {
+		return nil, fmt.Errorf("missing merge-ref")
+	}
+
 	opts := github.Opts{
 		URL:        forge.URL,
 		Client:     forge.Client,
 		Secret:     forge.ClientSecret,
 		SkipVerify: forge.SkipVerify,
-		// MergeRef:   c.Bool("github-merge-ref"),
+		MergeRef:   mergeRef,
 	}
 	log.Trace().Msgf("Forge (github) opts: %#v", opts)
 	return github.New(opts)
+}
+
+// setupBitbucketDatacenter helper function to setup the Bitbucket DataCenter/Server forge from the CLI arguments.
+func setupBitbucketDatacenter(forge *model.Forge) (forge.Forge, error) {
+	gitUsername, ok := forge.AdditionalOptions["git-username"].(string)
+	if !ok {
+		return nil, fmt.Errorf("missing git-username")
+	}
+	gitPassword, ok := forge.AdditionalOptions["git-password"].(string)
+	if !ok {
+		return nil, fmt.Errorf("missing git-password")
+	}
+
+	opts := bitbucketdatacenter.Opts{
+		URL:          forge.URL,
+		ClientID:     forge.Client,
+		ClientSecret: forge.ClientSecret,
+		Username:     gitUsername,
+		Password:     gitPassword,
+	}
+	log.Trace().Msgf("Forge (bitbucketdatacenter) opts: %#v", opts)
+	return bitbucketdatacenter.New(opts)
 }

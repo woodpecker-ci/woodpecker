@@ -38,7 +38,6 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc/proto"
 	"go.woodpecker-ci.org/woodpecker/v2/server"
 	"go.woodpecker-ci.org/woodpecker/v2/server/cron"
-	"go.woodpecker-ci.org/woodpecker/v2/server/forge/loader"
 	woodpeckerGrpcServer "go.woodpecker-ci.org/woodpecker/v2/server/grpc"
 	"go.woodpecker-ci.org/woodpecker/v2/server/logging"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
@@ -276,7 +275,11 @@ func setupEvilGlobals(c *cli.Context, s store.Store) error {
 	server.Config.Services.Logs = logging.New()
 	server.Config.Services.Pubsub = pubsub.New()
 	server.Config.Services.Membership = setupMembershipService(c, s)
-	server.Config.Services.Forge = loader.NewForgeService(s)
+	_forge, err := setupForgeService(c, s)
+	if err != nil {
+		return fmt.Errorf("can't setup forge service: %w", err)
+	}
+	server.Config.Services.Forge = _forge
 
 	serviceMangager, err := services.NewManager(c, s)
 	if err != nil {

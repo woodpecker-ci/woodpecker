@@ -15,15 +15,15 @@
 package model
 
 type Forge struct {
-	ID                int64  `xorm:"pk autoincr"`
-	Type              string `xorm:"VARCHAR(250)"` // github, gitlab, gitea, gogs, bitbucket, stash, coding
-	URL               string `xorm:"VARCHAR(500)"`
-	Client            string `xorm:"VARCHAR(250)"`
-	ClientSecret      string `xorm:"VARCHAR(250)"`
-	SkipVerify        bool   `xorm:"bool"`
-	AdditionalOptions string `xorm:"TEXT"` // TODO: think about the best format for this
-	Created           int64  `xorm:"created"`
-	Updated           int64  `xorm:"updated"`
+	ID                int64          `xorm:"pk autoincr"`
+	Type              string         `xorm:"VARCHAR(250)"` // github, gitlab, gitea, gogs, bitbucket, stash, coding
+	URL               string         `xorm:"VARCHAR(500)"`
+	Client            string         `xorm:"VARCHAR(250)"`
+	ClientSecret      string         `xorm:"VARCHAR(250)"`
+	SkipVerify        bool           `xorm:"bool"`
+	AdditionalOptions map[string]any `xorm:"json"` // TODO: think about the best format for this
+	Created           int64          `xorm:"created"`
+	Updated           int64          `xorm:"updated"`
 }
 
 // bitbucket

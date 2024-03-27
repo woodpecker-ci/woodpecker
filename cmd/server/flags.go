@@ -309,6 +309,27 @@ var flags = append([]cli.Flag{
 		Usage:   "set the cpus allowed to execute containers",
 	},
 	//
+	&cli.StringFlag{
+		Name:    "forge-url",
+		Usage:   "url of the forge",
+		EnvVars: []string{"WOODPECKER_FORGE_URL", "WOODPECKER_GITHUB_URL", "WOODPECKER_GITLAB_URL", "WOODPECKER_GITEA_URL", "WOODPECKER_BITBUCKET_URL"},
+	},
+	&cli.StringFlag{
+		Name:    "forge-oauth-client",
+		Usage:   "oauth2 client id",
+		EnvVars: []string{"WOODPECKER_FORGE_CLIENT", "WOODPECKER_GITHUB_CLIENT", "WOODPECKER_GITLAB_CLIENT", "WOODPECKER_GITEA_CLIENT", "WOODPECKER_BITBUCKET_CLIENT"},
+	},
+	&cli.StringFlag{
+		Name:    "forge-oauth-secret",
+		Usage:   "oauth2 client secret",
+		EnvVars: []string{"WOODPECKER_FORGE_SECRET", "WOODPECKER_GITHUB_SECRET", "WOODPECKER_GITLAB_SECRET", "WOODPECKER_GITEA_SECRET", "WOODPECKER_BITBUCKET_SECRET"},
+	},
+	&cli.BoolFlag{
+		Name:    "forge-skip-verify",
+		Usage:   "skip ssl verification",
+		EnvVars: []string{"WOODPECKER_FORGE_SKIP_VERIFY", "WOODPECKER_GITHUB_SKIP_VERIFY", "WOODPECKER_GITLAB_SKIP_VERIFY", "WOODPECKER_GITEA_SKIP_VERIFY", "WOODPECKER_BITBUCKET_SKIP_VERIFY"},
+	},
+	//
 	// GitHub
 	//
 	&cli.BoolFlag{
