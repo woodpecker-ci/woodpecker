@@ -40,10 +40,24 @@ WOODPECKER_DATABASE_DATASOURCE=postgres://root:password@1.2.3.4:5432/postgres?ss
 
 Woodpecker does not create your database automatically. If you are using the MySQL or Postgres driver you will need to manually create your database using `CREATE DATABASE`.
 
-## Database Migration
+## Database Schema Migration
 
-Woodpecker automatically handles database migration, including the initial creation of tables and indexes. New versions of Woodpecker will automatically upgrade the database unless otherwise specified in the release notes.
+Woodpecker automatically handles database migration between versions, including the initial creation of tables and indexes. New versions of Woodpecker will automatically upgrade the database unless otherwise specified in the release notes.
 
+## Database DBMS Migration
+
+If you have an existing database and want to change the DBMS (e.g. from SQLite to Mariadb):
+
+1. Rename `WOODPECKER_DATABASE_DRIVER` to `WOODPECKER_OLD_DATABASE_DRIVER` and `WOODPECKER_DATABASE_DATASOURCE` to `WOODPECKER_OLD_DATABASE_DATASOURCE`
+2. Add the database configuration as you would with a new installation.  
+
+On next start, a schema migration will run on the **old** database.
+Then the new database is initialized and all data copied.
+
+:::info
+If you don't want to start the server afterwards set `WOODPECKER_OLD_DATABASE_IMPORT_ONLY` to **true**.  
+If the new database already contains data the server will just error and exit.
+:::
 ## Database Backups
 
 Woodpecker does not perform database backups. This should be handled by separate third party tools provided by your database vendor of choice.

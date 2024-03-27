@@ -61,6 +61,7 @@ var migrationTasks = []*xormigrate.Migration{
 	&cleanRegistryPipeline,
 }
 
+// IMPORTANT: if you add something here, also add it to copy.go Copy() func
 var allBeans = []any{
 	new(model.Agent),
 	new(model.Pipeline),
@@ -79,6 +80,15 @@ var allBeans = []any{
 	new(model.Redirection),
 	new(model.Workflow),
 	new(model.Org),
+}
+
+func initSchemaOnly(e *xorm.Engine) error {
+	m := xormigrate.New(e, migrationTasks)
+	m.InitSchema(func(_ *xorm.Engine) error {
+		// do nothing on schema init, models are synced in any case below
+		return nil
+	})
+	return m.Migrate()
 }
 
 func Migrate(e *xorm.Engine, allowLong bool) error {
