@@ -22,12 +22,14 @@ import (
 	"strings"
 
 	"github.com/alessio/shellescape"
+
+	backend "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 )
 
 func (e *local) genCmdByShell(shell string, cmds []string) (args []string, err error) {
 	script := ""
 	for _, cmd := range cmds {
-		script += fmt.Sprintf("echo %s\n%s\n", strings.TrimSpace(shellescape.Quote("+ "+cmd)), cmd)
+		script += fmt.Sprintf("echo %s\n%s\n", strings.TrimSpace(shellescape.Quote(backend.CommandPrefix+" "+cmd)), cmd)
 	}
 	script = strings.TrimSpace(script)
 
@@ -35,7 +37,7 @@ func (e *local) genCmdByShell(shell string, cmds []string) (args []string, err e
 	case "cmd":
 		script := "@SET PROMPT=$\n"
 		for _, cmd := range cmds {
-			script += fmt.Sprintf("@echo + %s\n", strings.TrimSpace(shellescape.Quote(cmd)))
+			script += fmt.Sprintf("@echo %s\n", strings.TrimSpace(shellescape.Quote(backend.CommandPrefix+" "+cmd)))
 			script += fmt.Sprintf("@%s\n", cmd)
 			script += "@IF NOT %ERRORLEVEL% == 0 exit %ERRORLEVEL%\n"
 		}
@@ -51,7 +53,7 @@ func (e *local) genCmdByShell(shell string, cmds []string) (args []string, err e
 	case "fish":
 		script := ""
 		for _, cmd := range cmds {
-			script += fmt.Sprintf("echo %s\n%s || exit $status\n", strings.TrimSpace(shellescape.Quote("+ "+cmd)), cmd)
+			script += fmt.Sprintf("echo %s\n%s || exit $status\n", strings.TrimSpace(shellescape.Quote(backend.CommandPrefix+" "+cmd)), cmd)
 		}
 		return []string{"-c", script}, nil
 	case "powershell", "pwsh":
