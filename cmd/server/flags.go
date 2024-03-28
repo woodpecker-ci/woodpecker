@@ -246,10 +246,10 @@ var flags = append([]cli.Flag{
 		Usage:   "Disable version check in admin web ui.",
 		Name:    "skip-version-check",
 	},
-	&cli.StringSliceFlag{
-		EnvVars: []string{"WOODPECKER_ADDONS"},
-		Name:    "addons",
-		Usage:   "list of addon files",
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_ADDON_FORGE"},
+		Name:    "addon-forge",
+		Usage:   "forge addon",
 	},
 	//
 	// backend options for pipeline compiler

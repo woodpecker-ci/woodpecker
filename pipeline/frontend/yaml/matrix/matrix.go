@@ -19,7 +19,7 @@ import (
 
 	"codeberg.org/6543/xyaml"
 
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/errors"
+	errorTypes "go.woodpecker-ci.org/woodpecker/v2/pipeline/errors/types"
 )
 
 const (
@@ -116,7 +116,7 @@ func parse(raw []byte) (Matrix, error) {
 		Matrix map[string][]string
 	}{}
 	if err := xyaml.Unmarshal(raw, &data); err != nil {
-		return nil, &errors.PipelineError{Message: err.Error(), Type: errors.PipelineErrorTypeCompiler}
+		return nil, &errorTypes.PipelineError{Message: err.Error(), Type: errorTypes.PipelineErrorTypeCompiler}
 	}
 	return data.Matrix, nil
 }
@@ -129,7 +129,7 @@ func parseList(raw []byte) ([]Axis, error) {
 	}{}
 
 	if err := xyaml.Unmarshal(raw, &data); err != nil {
-		return nil, &errors.PipelineError{Message: err.Error(), Type: errors.PipelineErrorTypeCompiler}
+		return nil, &errorTypes.PipelineError{Message: err.Error(), Type: errorTypes.PipelineErrorTypeCompiler}
 	}
 	return data.Matrix.Include, nil
 }

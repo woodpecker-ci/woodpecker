@@ -32,6 +32,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server"
 	"go.woodpecker-ci.org/woodpecker/v2/server/cache"
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge/addon"
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge/bitbucket"
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge/bitbucketdatacenter"
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge/gitea"
@@ -40,8 +41,6 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server/queue"
 	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 	"go.woodpecker-ci.org/woodpecker/v2/server/store/datastore"
-	"go.woodpecker-ci.org/woodpecker/v2/shared/addon"
-	addonTypes "go.woodpecker-ci.org/woodpecker/v2/shared/addon/types"
 )
 
 func setupStore(c *cli.Context) (store.Store, error) {
@@ -107,15 +106,9 @@ func setupMembershipService(_ *cli.Context, r forge.Forge) cache.MembershipServi
 
 // setupForge helper function to set up the forge from the CLI arguments.
 func setupForge(c *cli.Context) (forge.Forge, error) {
-	addonForge, err := addon.Load[forge.Forge](c.StringSlice("addons"), addonTypes.TypeForge)
-	if err != nil {
-		return nil, err
-	}
-	if addonForge != nil {
-		return addonForge.Value, nil
-	}
-
 	switch {
+	case c.String("addon-forge") != "":
+		return addon.Load(c.String("addon-forge"))
 	case c.Bool("github"):
 		return setupGitHub(c)
 	case c.Bool("gitlab"):

@@ -18,16 +18,16 @@ import (
 	"src.techknowlogick.com/xormigrate"
 	"xorm.io/xorm"
 
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/errors"
+	errorTypes "go.woodpecker-ci.org/woodpecker/v2/pipeline/errors/types"
 )
 
 // perPage027 set the size of the slice to read per page
 var perPage027 = 100
 
 type pipeline027 struct {
-	ID     int64                   `json:"id"              xorm:"pk autoincr 'pipeline_id'"`
-	Error  string                  `json:"error"           xorm:"LONGTEXT 'pipeline_error'"` // old error format
-	Errors []*errors.PipelineError `json:"errors"          xorm:"json 'pipeline_errors'"`    // new error format
+	ID     int64                       `json:"id"              xorm:"pk autoincr 'pipeline_id'"`
+	Error  string                      `json:"error"           xorm:"LONGTEXT 'pipeline_error'"` // old error format
+	Errors []*errorTypes.PipelineError `json:"errors"          xorm:"json 'pipeline_errors'"`    // new error format
 }
 
 func (pipeline027) TableName() string {
@@ -64,7 +64,7 @@ var convertToNewPipelineErrorFormat = xormigrate.Migration{
 			for _, oldPipeline := range oldPipelines {
 				var newPipeline pipeline027
 				newPipeline.ID = oldPipeline.ID
-				newPipeline.Errors = []*errors.PipelineError{{
+				newPipeline.Errors = []*errorTypes.PipelineError{{
 					Type:    "generic",
 					Message: oldPipeline.Error,
 				}}
