@@ -322,6 +322,12 @@ var flags = append([]cli.Flag{
 		Usage:   "github server address",
 		Value:   "https://github.com",
 	},
+	&cli.BoolFlag{
+		EnvVars: []string{"WOODPECKER_GITHUB_ONLY_PUBLIC"},
+		Name:    "github-only-public",
+		Usage:   "github tokens should only get access to public repos",
+		Value:   false,
+	},
 	&cli.StringFlag{
 		EnvVars:  []string{"WOODPECKER_GITHUB_CLIENT"},
 		Name:     "github-client",

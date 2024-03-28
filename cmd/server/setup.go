@@ -200,6 +200,7 @@ func setupGitHub(c *cli.Context) (forge.Forge, error) {
 		Secret:     c.String("github-secret"),
 		SkipVerify: c.Bool("github-skip-verify"),
 		MergeRef:   c.Bool("github-merge-ref"),
+		OnlyPublic: c.Bool("github-only-public"),
 	}
 	log.Trace().Msgf("forge (github) opts: %#v", opts)
 	return github.New(opts)
