@@ -35,12 +35,6 @@ type LogEntry struct {
 	Type    LogEntryType `json:"type"`
 } //	@name LogEntry
 
-type LogStore interface {
-	LogFind(step *Step) ([]*LogEntry, error)
-	LogAppend(logEntry *LogEntry) error
-	LogDelete(step *Step) error
-}
-
 // TODO: store info what specific command the line belongs to (must be optional and impl. by backend)
 
 func (LogEntry) TableName() string {
