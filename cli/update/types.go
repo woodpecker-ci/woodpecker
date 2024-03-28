@@ -13,5 +13,5 @@ type NewVersion struct {
 
 const (
 	woodpeckerVersionURL = "https://woodpecker-ci.org/version.json"
-	githubBinaryURL      = "https://github.com/woodpecker-ci/woodpecker/releases/download/v%s/woodpecker-agent_%s_%s.tar.gz"
+	githubBinaryURL      = "https://github.com/woodpecker-ci/woodpecker/releases/download/v%s/woodpecker-cli_%s_%s.tar.gz"
 )

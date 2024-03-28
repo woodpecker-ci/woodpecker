@@ -18,14 +18,18 @@ import (
 )
 
 func CheckForUpdate(ctx context.Context, force bool) (*NewVersion, error) {
+	return checkForUpdate(ctx, woodpeckerVersionURL, force)
+}
+
+func checkForUpdate(ctx context.Context, versionURL string, force bool) (*NewVersion, error) {
 	log.Debug().Msgf("Current version: %s", version.String())
 
-	if version.String() == "dev" && !force {
-		log.Debug().Msgf("Skipping update check for development version")
+	if (version.String() == "dev" || strings.HasPrefix(version.String(), "next-")) && !force {
+		log.Debug().Msgf("Skipping update check for development & next versions")
 		return nil, nil
 	}
 
-	req, err := http.NewRequestWithContext(ctx, "GET", woodpeckerVersionURL, nil)
+	req, err := http.NewRequestWithContext(ctx, "GET", versionURL, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -57,6 +61,7 @@ func CheckForUpdate(ctx context.Context, force bool) (*NewVersion, error) {
 
 	// using the latest release
 	if installedVersion == upstreamVersion && !force {
+		log.Debug().Msgf("No new version available")
 		return nil, nil
 	}
 
