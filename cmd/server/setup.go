@@ -270,9 +270,7 @@ func setupMetrics(g *errgroup.Group, _store store.Store) {
 func setupLogStore(c *cli.Context, s store.Store) (logService.Service, error) {
 	switch c.String("log-store") {
 	case "file":
-		return file.LogStore{
-			Base: c.String("log-store-file-base"),
-		}, nil
+		return file.NewLogStore(c.String("log-store-file-base"))
 	default:
 		return s, nil
 	}

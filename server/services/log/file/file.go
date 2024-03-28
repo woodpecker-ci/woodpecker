@@ -8,17 +8,28 @@ import (
 	"strconv"
 
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/services/log"
 )
 
-type LogStore struct {
-	Base string
+type logStore struct {
+	base string
 }
 
-func (l LogStore) filePath(id int64) string {
-	return filepath.Join(l.Base, strconv.Itoa(int(id))+".json")
+func NewLogStore(base string) (log.Service, error) {
+	if _, err := os.Stat(base); err != nil && os.IsNotExist(err) {
+		err = os.MkdirAll(base, 0600)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return logStore{base: base}, nil
 }
 
-func (l LogStore) LogFind(step *model.Step) ([]*model.LogEntry, error) {
+func (l logStore) filePath(id int64) string {
+	return filepath.Join(l.base, strconv.Itoa(int(id))+".json")
+}
+
+func (l logStore) LogFind(step *model.Step) ([]*model.LogEntry, error) {
 	file, err := os.ReadFile(l.filePath(step.ID))
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -43,7 +54,7 @@ func (l LogStore) LogFind(step *model.Step) ([]*model.LogEntry, error) {
 	return entries, nil
 }
 
-func (l LogStore) LogAppend(logEntry *model.LogEntry) error {
+func (l logStore) LogAppend(logEntry *model.LogEntry) error {
 	file, err := os.OpenFile(l.filePath(logEntry.StepID), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0600)
 	if err != nil {
 		return err
@@ -59,6 +70,6 @@ func (l LogStore) LogAppend(logEntry *model.LogEntry) error {
 	return file.Close()
 }
 
-func (l LogStore) LogDelete(step *model.Step) error {
+func (l logStore) LogDelete(step *model.Step) error {
 	return os.Remove(l.filePath(step.ID))
 }
