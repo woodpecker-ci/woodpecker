@@ -41,7 +41,7 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 		return nil, fmt.Errorf(msg)
 	}
 
-	_forge, err := server.Config.Services.Forge.FromRepo(repo)
+	_forge, err := server.Config.Services.Manager.ForgeFromRepo(repo)
 	if err != nil {
 		msg := fmt.Sprintf("failure to load forge for repo '%s'", repo.FullName)
 		log.Error().Err(err).Str("repo", repo.FullName).Msg(msg)

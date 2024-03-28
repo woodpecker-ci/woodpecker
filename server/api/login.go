@@ -44,7 +44,7 @@ func HandleLogin(c *gin.Context) {
 
 func HandleAuth(c *gin.Context) {
 	_store := store.FromContext(c)
-	_forge, err := server.Config.Services.Forge.Main()
+	_forge, err := server.Config.Services.Manager.ForgeMain()
 	if err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return

@@ -1,12 +1,10 @@
-package service
+package setup
 
 import (
 	"fmt"
 	"net/url"
 	"strings"
-	"time"
 
-	"github.com/jellydator/ttlcache/v3"
 	"github.com/rs/zerolog/log"
 
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
@@ -16,69 +14,19 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge/github"
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge/gitlab"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
-	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 )
 
-type forgeService struct {
-	cache *ttlcache.Cache[int64, forge.Forge]
-	store store.Store
-	ttl   time.Duration
-}
-
-const forgeCacheTTL = 10 * time.Minute
-
-func NewForgeService(_store store.Store) forge.Service {
-	return &forgeService{
-		ttl:   forgeCacheTTL,
-		store: _store,
-		cache: ttlcache.New(ttlcache.WithDisableTouchOnHit[int64, forge.Forge]()),
-	}
-}
-
-func (f *forgeService) getForgeByID(id int64) (forge.Forge, error) {
-	item := f.cache.Get(id)
-	if item != nil && !item.IsExpired() {
-		return item.Value(), nil
-	}
-
-	forgeModel, err := f.store.ForgeGet(id)
-	if err != nil {
-		return nil, err
-	}
-
-	forge, err := setupForge(forgeModel)
-	if err != nil {
-		return nil, err
-	}
-
-	f.cache.Set(id, forge, f.ttl)
-
-	return forge, nil
-}
-
-func (f *forgeService) FromRepo(repo *model.Repo) (forge.Forge, error) {
-	return f.getForgeByID(repo.ForgeID)
-}
-
-func (f *forgeService) FromUser(user *model.User) (forge.Forge, error) {
-	return f.getForgeByID(user.ForgeID)
-}
-
-func (f *forgeService) Main() (forge.Forge, error) {
-	return f.getForgeByID(0) // main forge is always 0 and is configured via environment variables
-}
-
-func setupForge(forge *model.Forge) (forge.Forge, error) {
+func SetupForge(forge *model.Forge) (forge.Forge, error) {
 	switch forge.Type {
-	case "github":
+	case model.ForgeTypeGithub:
 		return setupGitHub(forge)
-	case "gitlab":
+	case model.ForgeTypeGitlab:
 		return setupGitLab(forge)
-	case "bitbucket":
+	case model.ForgeTypeBitbucket:
 		return setupBitbucket(forge)
-	case "gitea":
+	case model.ForgeTypeGitea:
 		return setupGitea(forge)
-	case "bitbucket-dc":
+	case model.ForgeTypeBitbucketDatacenter:
 		return setupBitbucketDatacenter(forge)
 	default:
 		return nil, fmt.Errorf("forge not configured")

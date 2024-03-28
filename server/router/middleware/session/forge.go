@@ -35,7 +35,7 @@ func SetForge() gin.HandlerFunc {
 				return
 			}
 
-			forge, err := server.Config.Services.Forge.FromUser(user)
+			forge, err := server.Config.Services.Manager.ForgeFromUser(user)
 			if err != nil {
 				log.Debug().Err(err).Msg("Cannot get forge")
 				c.AbortWithStatus(http.StatusInternalServerError)
@@ -47,7 +47,7 @@ func SetForge() gin.HandlerFunc {
 			return
 		}
 
-		forge, err := server.Config.Services.Forge.FromRepo(repo)
+		forge, err := server.Config.Services.Manager.ForgeFromRepo(repo)
 		if err != nil {
 			log.Debug().Err(err).Msg("Cannot get forge")
 			c.AbortWithStatus(http.StatusInternalServerError)

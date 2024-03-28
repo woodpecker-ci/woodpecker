@@ -25,11 +25,12 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server"
 	mocks_forge "go.woodpecker-ci.org/woodpecker/v2/server/forge/mocks"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	mocks_manager "go.woodpecker-ci.org/woodpecker/v2/server/services/mocks"
 	mocks_store "go.woodpecker-ci.org/woodpecker/v2/server/store/mocks"
 )
 
 func TestCreatePipeline(t *testing.T) {
-	_forgeService := mocks_forge.NewService(t)
+	_manager := mocks_manager.NewManager(t)
 	_forge := mocks_forge.NewForge(t)
 	store := mocks_store.NewStore(t)
 	ctx := context.Background()
@@ -53,9 +54,8 @@ func TestCreatePipeline(t *testing.T) {
 		ForgeURL: "https://example.com/sha1",
 		SHA:      "sha1",
 	}, nil)
-	_forgeService.On("FromRepo", repo1).Return(_forge, nil)
-
-	server.Config.Services.Forge = _forgeService
+	_manager.On("ForgeFromRepo", repo1).Return(_forge, nil)
+	server.Config.Services.Manager = _manager
 
 	_, pipeline, err := CreatePipeline(ctx, store, &model.Cron{
 		Name: "test",

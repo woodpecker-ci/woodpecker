@@ -14,9 +14,19 @@
 
 package model
 
+type ForgeType string
+
+const (
+	ForgeTypeGithub              ForgeType = "github"
+	ForgeTypeGitlab              ForgeType = "gitlab"
+	ForgeTypeGitea               ForgeType = "gitea"
+	ForgeTypeBitbucket           ForgeType = "bitbucket"
+	ForgeTypeBitbucketDatacenter ForgeType = "bitbucket-dc"
+)
+
 type Forge struct {
 	ID                int64          `xorm:"pk autoincr"`
-	Type              string         `xorm:"VARCHAR(250)"` // github, gitlab, gitea, bitbucket, bitbucket-dc
+	Type              ForgeType      `xorm:"VARCHAR(250)"`
 	URL               string         `xorm:"VARCHAR(500)"`
 	Client            string         `xorm:"VARCHAR(250)"`
 	ClientSecret      string         `xorm:"VARCHAR(250)"`

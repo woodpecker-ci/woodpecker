@@ -112,7 +112,7 @@ func CreatePipeline(ctx context.Context, store store.Store, cron *model.Cron) (*
 		return nil, nil, err
 	}
 
-	_forge, err := server.Config.Services.Forge.FromRepo(repo)
+	_forge, err := server.Config.Services.Manager.ForgeFromRepo(repo)
 	if err != nil {
 		return nil, nil, err
 	}

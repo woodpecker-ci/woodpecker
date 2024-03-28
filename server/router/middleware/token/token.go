@@ -28,7 +28,7 @@ import (
 func Refresh(c *gin.Context) {
 	user := session.User(c)
 	if user != nil {
-		_forge, err := server.Config.Services.Forge.FromUser(user)
+		_forge, err := server.Config.Services.Manager.ForgeFromUser(user)
 		if err != nil {
 			_ = c.AbortWithError(http.StatusInternalServerError, err)
 			return
