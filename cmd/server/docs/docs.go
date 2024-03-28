@@ -3916,6 +3916,9 @@ const docTemplate = `{
                 "created_at": {
                     "type": "integer"
                 },
+                "deploy_task": {
+                    "type": "string"
+                },
                 "deploy_to": {
                     "type": "string"
                 },

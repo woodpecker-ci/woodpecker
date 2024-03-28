@@ -120,16 +120,17 @@ func parsePushHook(hook *github.PushEvent) (*model.Repo, *model.Pipeline) {
 // If the commit type is unsupported nil values are returned.
 func parseDeployHook(hook *github.DeploymentEvent) (*model.Repo, *model.Pipeline) {
 	pipeline := &model.Pipeline{
-		Event:    model.EventDeploy,
-		Commit:   hook.GetDeployment().GetSHA(),
-		ForgeURL: hook.GetDeployment().GetURL(),
-		Message:  hook.GetDeployment().GetDescription(),
-		Ref:      hook.GetDeployment().GetRef(),
-		Branch:   hook.GetDeployment().GetRef(),
-		Deploy:   hook.GetDeployment().GetEnvironment(),
-		Avatar:   hook.GetSender().GetAvatarURL(),
-		Author:   hook.GetSender().GetLogin(),
-		Sender:   hook.GetSender().GetLogin(),
+		Event:      model.EventDeploy,
+		Commit:     hook.GetDeployment().GetSHA(),
+		ForgeURL:   hook.GetDeployment().GetURL(),
+		Message:    hook.GetDeployment().GetDescription(),
+		Ref:        hook.GetDeployment().GetRef(),
+		Branch:     hook.GetDeployment().GetRef(),
+		Deploy:     hook.GetDeployment().GetEnvironment(),
+		Avatar:     hook.GetSender().GetAvatarURL(),
+		Author:     hook.GetSender().GetLogin(),
+		Sender:     hook.GetSender().GetLogin(),
+		DeployTask: hook.GetDeployment().GetTask(),
 	}
 	// if the ref is a sha or short sha we need to manually construct the ref.
 	if strings.HasPrefix(pipeline.Commit, pipeline.Ref) || pipeline.Commit == pipeline.Ref {

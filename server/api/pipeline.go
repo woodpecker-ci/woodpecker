@@ -409,6 +409,9 @@ func PostPipeline(c *gin.Context) {
 	// make Deploy overridable
 	pl.Deploy = c.DefaultQuery("deploy_to", pl.Deploy)
 
+	// make Deploy task overridable
+	pl.DeployTask = c.DefaultQuery("deploy_task", pl.DeployTask)
+
 	// make Event overridable to deploy
 	// TODO refactor to use own proper API for deploy
 	if event, ok := c.GetQuery("event"); ok {

@@ -33,6 +33,7 @@ type Pipeline struct {
 	Started             int64                   `json:"started_at"              xorm:"pipeline_started"`
 	Finished            int64                   `json:"finished_at"             xorm:"pipeline_finished"`
 	Deploy              string                  `json:"deploy_to"               xorm:"pipeline_deploy"`
+	DeployTask          string                  `json:"deploy_task"             xorm:"pipeline_deploy_task"`
 	Commit              string                  `json:"commit"                  xorm:"pipeline_commit"`
 	Branch              string                  `json:"branch"                  xorm:"pipeline_branch"`
 	Ref                 string                  `json:"ref"                     xorm:"pipeline_ref"`

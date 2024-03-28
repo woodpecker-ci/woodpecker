@@ -119,6 +119,8 @@ func Test_parser(t *testing.T) {
 				g.Assert(b).IsNotNil()
 				g.Assert(p).IsNil()
 				g.Assert(b.Event).Equal(model.EventDeploy)
+				g.Assert(b.Deploy).Equal("production")
+				g.Assert(b.DeployTask).Equal("deploy")
 			})
 		})
 

@@ -85,6 +85,7 @@ This is the reference list of all environment variables available to your pipeli
 | `CI_PIPELINE_URL`                | link to the web UI for the pipeline                                                                                |
 | `CI_PIPELINE_FORGE_URL`          | link to the forge's web UI for the commit(s) or tag that triggered the pipeline                                    |
 | `CI_PIPELINE_DEPLOY_TARGET`      | pipeline deploy target for `deployment` events (i.e. production)                                                   |
+| `CI_PIPELINE_DEPLOY_TASK`        | pipeline deploy task for `deployment` events (i.e. migration)                                                      |
 | `CI_PIPELINE_STATUS`             | pipeline status (success, failure)                                                                                 |
 | `CI_PIPELINE_CREATED`            | pipeline created UNIX timestamp                                                                                    |
 | `CI_PIPELINE_STARTED`            | pipeline started UNIX timestamp                                                                                    |
@@ -118,6 +119,7 @@ This is the reference list of all environment variables available to your pipeli
 | `CI_PREV_PIPELINE_URL`           | previous pipeline link in CI                                                                                       |
 | `CI_PREV_PIPELINE_FORGE_URL`     | previous pipeline link to event in forge                                                                           |
 | `CI_PREV_PIPELINE_DEPLOY_TARGET` | previous pipeline deploy target for `deployment` events (ie production)                                            |
+| `CI_PREV_PIPELINE_DEPLOY_TASK`   | previous pipeline deploy task for `deployment` events (ie migration)                                               |
 | `CI_PREV_PIPELINE_STATUS`        | previous pipeline status (success, failure)                                                                        |
 | `CI_PREV_PIPELINE_CREATED`       | previous pipeline created UNIX timestamp                                                                           |
 | `CI_PREV_PIPELINE_STARTED`       | previous pipeline started UNIX timestamp                                                                           |

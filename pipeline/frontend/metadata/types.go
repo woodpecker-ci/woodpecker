@@ -53,6 +53,7 @@ type (
 		Event    string `json:"event,omitempty"`
 		ForgeURL string `json:"forge_url,omitempty"`
 		Target   string `json:"target,omitempty"`
+		Task     string `json:"task,omitempty"`
 		Trusted  bool   `json:"trusted,omitempty"`
 		Commit   Commit `json:"commit,omitempty"`
 		Parent   int64  `json:"parent,omitempty"`

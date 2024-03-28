@@ -255,6 +255,10 @@
           "description": "Execute a step only for a specific environment. Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#environment",
           "$ref": "#/definitions/constraint_list"
         },
+        "task": {
+          "description": "Execute a step only for a specific task. Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#task",
+          "$ref": "#/definitions/constraint_list"
+        },
         "instance": {
           "description": "Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#instance",
           "$ref": "#/definitions/constraint_list"
@@ -436,6 +440,10 @@
         },
         "environment": {
           "description": "Execute a step only for a specific environment. Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#environment",
+          "$ref": "#/definitions/constraint_list"
+        },
+        "task": {
+          "description": "Execute a step only for a specific task. Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#task",
           "$ref": "#/definitions/constraint_list"
         },
         "matrix": {
