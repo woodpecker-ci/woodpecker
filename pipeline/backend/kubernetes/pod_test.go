@@ -16,6 +16,7 @@ package kubernetes
 
 import (
 	"encoding/json"
+	"strconv"
 	"testing"
 
 	"github.com/kinbiko/jsonassert"
@@ -351,11 +352,12 @@ func TestFullPod(t *testing.T) {
 }
 
 func TestPodPrivilege(t *testing.T) {
-	createTestPod := func(stepPrivileged, globalRunAsRoot bool, secCtx SecurityContext) (*v1.Pod, error) {
+	createTestPod := func(stepPrivileged, globalRunAsRoot, trustedRepo bool, secCtx SecurityContext) (*v1.Pod, error) {
 		return mkPod(&types.Step{
-			Name:       "go-test",
-			Image:      "golang:1.16",
-			Privileged: stepPrivileged,
+			Name:        "go-test",
+			Image:       "golang:1.16",
+			Privileged:  stepPrivileged,
+			Environment: map[string]string{"CI_REPO_TRUSTED": strconv.FormatBool(trustedRepo)},
 		}, &config{
 			Namespace:       "woodpecker",
 			SecurityContext: SecurityContextConfig{RunAsNonRoot: globalRunAsRoot},
@@ -370,45 +372,73 @@ func TestPodPrivilege(t *testing.T) {
 		RunAsGroup: newInt64(101),
 		FSGroup:    newInt64(101),
 	}
-	pod, err := createTestPod(false, false, secCtx)
+	pod, err := createTestPod(false, false, false, secCtx)
 	assert.NoError(t, err)
 	assert.Equal(t, int64(101), *pod.Spec.SecurityContext.RunAsUser)
 	assert.Equal(t, int64(101), *pod.Spec.SecurityContext.RunAsGroup)
 	assert.Equal(t, int64(101), *pod.Spec.SecurityContext.FSGroup)
 
-	// securty context is requesting root, but step is not privileged
+	// securty context is requesting root, but step is not privileged and repo is untrusted
 	secCtx = SecurityContext{
 		RunAsUser:  newInt64(0),
 		RunAsGroup: newInt64(0),
 		FSGroup:    newInt64(0),
 	}
-	pod, err = createTestPod(false, false, secCtx)
+	pod, err = createTestPod(false, false, false, secCtx)
 	assert.NoError(t, err)
 	assert.Nil(t, pod.Spec.SecurityContext)
 	assert.Nil(t, pod.Spec.Containers[0].SecurityContext)
 
-	// step is not privileged, but security context is requesting privileged
+	// securty context is requesting root and repo is trusted
+	secCtx = SecurityContext{
+		RunAsUser:  newInt64(0),
+		RunAsGroup: newInt64(0),
+		FSGroup:    newInt64(0),
+	}
+	pod, err = createTestPod(false, false, true, secCtx)
+	assert.NoError(t, err)
+	assert.Equal(t, int64(0), *pod.Spec.SecurityContext.RunAsUser)
+	assert.Equal(t, int64(0), *pod.Spec.SecurityContext.RunAsGroup)
+	assert.Equal(t, int64(0), *pod.Spec.SecurityContext.FSGroup)
+
+	// step is not privileged, but security context is requesting privileged and repo is untrusted
 	secCtx = SecurityContext{
 		Privileged: newBool(true),
 	}
-	pod, err = createTestPod(false, false, secCtx)
+	pod, err = createTestPod(false, false, false, secCtx)
 	assert.NoError(t, err)
 	assert.Nil(t, pod.Spec.SecurityContext)
 	assert.Nil(t, pod.Spec.Containers[0].SecurityContext)
+
+	// step is not privileged, but security context is requesting privileged and repo is trusted
+	secCtx = SecurityContext{
+		Privileged: newBool(true),
+	}
+	pod, err = createTestPod(false, false, true, secCtx)
+	assert.NoError(t, err)
+	assert.Equal(t, true, *pod.Spec.Containers[0].SecurityContext.Privileged)
 
 	// step is privileged and security context is requesting privileged
 	secCtx = SecurityContext{
 		Privileged: newBool(true),
 	}
-	pod, err = createTestPod(true, false, secCtx)
+	pod, err = createTestPod(true, false, false, secCtx)
 	assert.NoError(t, err)
 	assert.Equal(t, true, *pod.Spec.Containers[0].SecurityContext.Privileged)
 
-	// global runAsNonRoot is true and override is requested value by security context
+	// global runAsNonRoot is true and override is requested value by security context and repo is untrusted
 	secCtx = SecurityContext{
 		RunAsNonRoot: newBool(false),
 	}
-	pod, err = createTestPod(false, true, secCtx)
+	pod, err = createTestPod(false, true, false, secCtx)
 	assert.NoError(t, err)
 	assert.Equal(t, true, *pod.Spec.SecurityContext.RunAsNonRoot)
+
+	// global runAsNonRoot is true and override is requested value by security context and repo is trusted
+	secCtx = SecurityContext{
+		RunAsNonRoot: newBool(false),
+	}
+	pod, err = createTestPod(false, true, true, secCtx)
+	assert.NoError(t, err)
+	assert.Equal(t, false, *pod.Spec.SecurityContext.RunAsNonRoot)
 }
