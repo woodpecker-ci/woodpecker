@@ -28,7 +28,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 	"go.woodpecker-ci.org/woodpecker/v2/server/pipeline"
 	"go.woodpecker-ci.org/woodpecker/v2/server/router/middleware/session"
@@ -48,6 +47,7 @@ import (
 func CreatePipeline(c *gin.Context) {
 	_store := store.FromContext(c)
 	repo := session.Repo(c)
+	forge := session.Forge(c)
 
 	// parse create options
 	var opts model.PipelineOptions
@@ -59,7 +59,7 @@ func CreatePipeline(c *gin.Context) {
 
 	user := session.User(c)
 
-	lastCommit, _ := server.Config.Services.Forge.BranchHead(c, user, repo, opts.Branch)
+	lastCommit, _ := forge.BranchHead(c, user, repo, opts.Branch)
 
 	tmpPipeline := createTmpPipeline(model.EventManual, lastCommit, user, &opts)
 
@@ -270,6 +270,7 @@ func GetPipelineConfig(c *gin.Context) {
 //	@Param		number			path	int		true	"the number of the pipeline"
 func CancelPipeline(c *gin.Context) {
 	_store := store.FromContext(c)
+	_forge := session.Forge(c)
 	repo := session.Repo(c)
 	user := session.User(c)
 	num, _ := strconv.ParseInt(c.Params.ByName("number"), 10, 64)
@@ -280,7 +281,7 @@ func CancelPipeline(c *gin.Context) {
 		return
 	}
 
-	if err := pipeline.Cancel(c, _store, repo, user, pl); err != nil {
+	if err := pipeline.Cancel(c, _forge, _store, repo, user, pl); err != nil {
 		handlePipelineErr(c, err)
 	} else {
 		c.Status(http.StatusNoContent)

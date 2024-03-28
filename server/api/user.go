@@ -86,7 +86,7 @@ func GetFeed(c *gin.Context) {
 //	@Param			all				query	bool	false	"query all repos, including inactive ones"
 func GetRepos(c *gin.Context) {
 	_store := store.FromContext(c)
-	_forge := server.Config.Services.Forge
+	_forge := session.Forge(c)
 
 	user := session.User(c)
 	all, _ := strconv.ParseBool(c.Query("all"))

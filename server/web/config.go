@@ -44,7 +44,7 @@ func Config(c *gin.Context) {
 		"csrf":               csrf,
 		"version":            version.String(),
 		"skip_version_check": server.Config.WebUI.SkipVersionCheck,
-		"forge":              server.Config.Services.Forge.Name(),
+		"forge":              "deprecated", // TODO: remove this and use the forge type from the corresponding repo
 		"root_path":          server.Config.Server.RootPath,
 		"enable_swagger":     server.Config.WebUI.EnableSwagger,
 	}

@@ -21,7 +21,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server"
 	cronScheduler "go.woodpecker-ci.org/woodpecker/v2/server/cron"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 	"go.woodpecker-ci.org/woodpecker/v2/server/pipeline"
@@ -80,7 +79,7 @@ func RunCron(c *gin.Context) {
 		return
 	}
 
-	repo, newPipeline, err := cronScheduler.CreatePipeline(c, _store, server.Config.Services.Forge, cron)
+	repo, newPipeline, err := cronScheduler.CreatePipeline(c, _store, cron)
 	if err != nil {
 		c.String(http.StatusInternalServerError, "Error creating pipeline for cron %q. %s", id, err)
 		return
@@ -109,7 +108,7 @@ func PostCron(c *gin.Context) {
 	repo := session.Repo(c)
 	user := session.User(c)
 	_store := store.FromContext(c)
-	forge := server.Config.Services.Forge
+	forge := session.Forge(c)
 
 	in := new(model.Cron)
 	if err := c.Bind(in); err != nil {
@@ -166,7 +165,7 @@ func PatchCron(c *gin.Context) {
 	repo := session.Repo(c)
 	user := session.User(c)
 	_store := store.FromContext(c)
-	forge := server.Config.Services.Forge
+	forge := session.Forge(c)
 
 	id, err := strconv.ParseInt(c.Param("cron"), 10, 64)
 	if err != nil {

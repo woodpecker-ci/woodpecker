@@ -27,6 +27,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server"
 	forge_types "go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/router/middleware/session"
 	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 	"go.woodpecker-ci.org/woodpecker/v2/server/store/types"
 	"go.woodpecker-ci.org/woodpecker/v2/shared/httputil"
@@ -43,7 +44,11 @@ func HandleLogin(c *gin.Context) {
 
 func HandleAuth(c *gin.Context) {
 	_store := store.FromContext(c)
-	_forge := server.Config.Services.Forge
+	_forge, err := server.Config.Services.Manager.ForgeMain()
+	if err != nil {
+		_ = c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
 
 	// when dealing with redirects, we may need to adjust the content type. I
 	// cannot, however, remember why, so need to revisit this line.
@@ -227,6 +232,7 @@ func GetLogout(c *gin.Context) {
 
 func GetLoginToken(c *gin.Context) {
 	_store := store.FromContext(c)
+	forge := session.Forge(c)
 
 	in := &tokenPayload{}
 	err := c.Bind(in)
@@ -235,7 +241,7 @@ func GetLoginToken(c *gin.Context) {
 		return
 	}
 
-	login, err := server.Config.Services.Forge.Auth(c, in.Access, in.Refresh)
+	login, err := forge.Auth(c, in.Access, in.Refresh)
 	if err != nil {
 		_ = c.AbortWithError(http.StatusUnauthorized, err)
 		return

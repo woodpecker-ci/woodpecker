@@ -15,6 +15,8 @@
 package token
 
 import (
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 
 	"go.woodpecker-ci.org/woodpecker/v2/server"
@@ -26,7 +28,13 @@ import (
 func Refresh(c *gin.Context) {
 	user := session.User(c)
 	if user != nil {
-		forge.Refresh(c, server.Config.Services.Forge, store.FromContext(c), user)
+		_forge, err := server.Config.Services.Manager.ForgeFromUser(user)
+		if err != nil {
+			_ = c.AbortWithError(http.StatusInternalServerError, err)
+			return
+		}
+
+		forge.Refresh(c, _forge, store.FromContext(c), user)
 	}
 
 	c.Next()
