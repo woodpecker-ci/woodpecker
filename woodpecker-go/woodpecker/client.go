@@ -41,6 +41,7 @@ const (
 	pathDecline        = "%s/api/repos/%d/pipelines/%d/decline"
 	pathStop           = "%s/api/repos/%d/pipelines/%d/cancel"
 	pathLogPurge       = "%s/api/repos/%d/logs/%d"
+	pathStepLogPurge   = "%s/api/repos/%d/logs/%d/%d"
 	pathRepoSecrets    = "%s/api/repos/%d/secrets"
 	pathRepoSecret     = "%s/api/repos/%d/secrets/%s"
 	pathRepoRegistries = "%s/api/repos/%d/registry"
@@ -320,6 +321,13 @@ func (c *client) Deploy(repoID, pipeline int64, env string, params map[string]st
 // LogsPurge purges the pipeline logs for the specified pipeline.
 func (c *client) LogsPurge(repoID, pipeline int64) error {
 	uri := fmt.Sprintf(pathLogPurge, c.addr, repoID, pipeline)
+	err := c.delete(uri)
+	return err
+}
+
+// StepLogsPurge purges the pipeline logs for the specified step.
+func (c *client) StepLogsPurge(repoID, pipelineNumber int64, stepID int64) error {
+	uri := fmt.Sprintf(pathStepLogPurge, c.addr, repoID, pipelineNumber, stepID)
 	err := c.delete(uri)
 	return err
 }
