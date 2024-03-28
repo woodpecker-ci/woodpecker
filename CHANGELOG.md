@@ -1,5 +1,35 @@
 # Changelog
 
+## [2.5.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.5.0) - 2024-03-26
+
+### ❤️ Thanks to all contributors! ❤️
+
+@6543, @manuelluis, @qwerty287
+
+### 📚 Documentation
+
+- Update dependency @types/marked to v6 [[#3544](https://github.com/woodpecker-ci/woodpecker/pull/3544)]
+- Update docs npm deps non-major [[#3485](https://github.com/woodpecker-ci/woodpecker/pull/3485)]
+- Docs updates and fixes [[#3535](https://github.com/woodpecker-ci/woodpecker/pull/3535)]
+
+### 🐛 Bug Fixes
+
+- Fix flag name [[#3534](https://github.com/woodpecker-ci/woodpecker/pull/3534)]
+
+### 📈 Enhancement
+
+- Allow separate gitea oauth URL  [[#3513](https://github.com/woodpecker-ci/woodpecker/pull/3513)]
+- Add option to set the local repository path to the cli command exec. [[#3524](https://github.com/woodpecker-ci/woodpecker/pull/3524)]
+
+### Misc
+
+- Update pre-commit non-major [[#3556](https://github.com/woodpecker-ci/woodpecker/pull/3556)]
+- Update web npm deps non-major [[#3549](https://github.com/woodpecker-ci/woodpecker/pull/3549)]
+- Update dependency @types/node-emoji to v2 [[#3545](https://github.com/woodpecker-ci/woodpecker/pull/3545)]
+- Update golang (packages) [[#3543](https://github.com/woodpecker-ci/woodpecker/pull/3543)]
+- Lock file maintenance [[#3541](https://github.com/woodpecker-ci/woodpecker/pull/3541)]
+- Update docker.io/woodpeckerci/plugin-docker-buildx Docker tag to v3.2.0 [[#3540](https://github.com/woodpecker-ci/woodpecker/pull/3540)]
+
 ## [2.4.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.4.1) - 2024-03-20
 
 ### ❤️ Thanks to all contributors! ❤️
