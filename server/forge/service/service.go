@@ -1,4 +1,4 @@
-package loader
+package service
 
 import (
 	"fmt"
@@ -19,7 +19,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 )
 
-type forgeLoader struct {
+type forgeService struct {
 	cache *ttlcache.Cache[int64, forge.Forge]
 	store store.Store
 	ttl   time.Duration
@@ -27,15 +27,15 @@ type forgeLoader struct {
 
 const forgeCacheTTL = 10 * time.Minute
 
-func NewForgeService(_store store.Store) forge.ForgeService {
-	return &forgeLoader{
+func NewForgeService(_store store.Store) forge.Service {
+	return &forgeService{
 		ttl:   forgeCacheTTL,
 		store: _store,
 		cache: ttlcache.New(ttlcache.WithDisableTouchOnHit[int64, forge.Forge]()),
 	}
 }
 
-func (f *forgeLoader) getForgeByID(id int64) (forge.Forge, error) {
+func (f *forgeService) getForgeByID(id int64) (forge.Forge, error) {
 	item := f.cache.Get(id)
 	if item != nil && !item.IsExpired() {
 		return item.Value(), nil
@@ -56,15 +56,15 @@ func (f *forgeLoader) getForgeByID(id int64) (forge.Forge, error) {
 	return forge, nil
 }
 
-func (f *forgeLoader) FromRepo(repo *model.Repo) (forge.Forge, error) {
+func (f *forgeService) FromRepo(repo *model.Repo) (forge.Forge, error) {
 	return f.getForgeByID(repo.ForgeID)
 }
 
-func (f *forgeLoader) FromUser(user *model.User) (forge.Forge, error) {
+func (f *forgeService) FromUser(user *model.User) (forge.Forge, error) {
 	return f.getForgeByID(user.ForgeID)
 }
 
-func (f *forgeLoader) Main() (forge.Forge, error) {
+func (f *forgeService) Main() (forge.Forge, error) {
 	return f.getForgeByID(0) // main forge is always 0 and is configured via environment variables
 }
 

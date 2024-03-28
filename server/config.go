@@ -35,7 +35,7 @@ var Config = struct {
 		Pubsub     *pubsub.Publisher
 		Queue      queue.Queue
 		Logs       logging.Log
-		Forge      forge.ForgeService
+		Forge      forge.Service
 		Membership cache.MembershipService
 		Manager    *services.Manager
 	}

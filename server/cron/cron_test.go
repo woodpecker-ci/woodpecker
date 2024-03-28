@@ -22,13 +22,15 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
+	"go.woodpecker-ci.org/woodpecker/v2/server"
 	mocks_forge "go.woodpecker-ci.org/woodpecker/v2/server/forge/mocks"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 	mocks_store "go.woodpecker-ci.org/woodpecker/v2/server/store/mocks"
 )
 
-func TestCreateBuild(t *testing.T) {
-	forge := mocks_forge.NewForge(t)
+func TestCreatePipeline(t *testing.T) {
+	_forgeService := mocks_forge.NewService(t)
+	_forge := mocks_forge.NewForge(t)
 	store := mocks_store.NewStore(t)
 	ctx := context.Background()
 
@@ -47,10 +49,13 @@ func TestCreateBuild(t *testing.T) {
 	// mock things
 	store.On("GetRepo", mock.Anything).Return(repo1, nil)
 	store.On("GetUser", mock.Anything).Return(creator, nil)
-	forge.On("BranchHead", mock.Anything, creator, repo1, "default").Return(&model.Commit{
+	_forge.On("BranchHead", mock.Anything, creator, repo1, "default").Return(&model.Commit{
 		ForgeURL: "https://example.com/sha1",
 		SHA:      "sha1",
 	}, nil)
+	_forgeService.On("FromRepo", repo1).Return(_forge, nil)
+
+	server.Config.Services.Forge = _forgeService
 
 	_, pipeline, err := CreatePipeline(ctx, store, &model.Cron{
 		Name: "test",

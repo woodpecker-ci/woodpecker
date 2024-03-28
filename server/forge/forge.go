@@ -17,6 +17,7 @@ package forge
 
 //go:generate go install github.com/vektra/mockery/v2@latest
 //go:generate mockery --name Forge --output mocks --case underscore
+//go:generate mockery --name Service --output mocks --case underscore
 
 import (
 	"context"
@@ -28,7 +29,7 @@ import (
 
 // TODO: use pagination
 
-type ForgeService interface {
+type Service interface {
 	FromRepo(repo *model.Repo) (Forge, error)
 	FromUser(user *model.User) (Forge, error)
 	Main() (Forge, error)
