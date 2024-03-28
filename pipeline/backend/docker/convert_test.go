@@ -105,8 +105,7 @@ func TestToConfigSmall(t *testing.T) {
 	assert.EqualValues(t, &container.Config{
 		AttachStdout: true,
 		AttachStderr: true,
-		Cmd:          []string{"echo $CI_SCRIPT | base64 -d | /bin/sh -e"},
-		Entrypoint:   []string{"/bin/sh", "-c"},
+		Entrypoint:   []string{"/bin/sh", "-c", "echo $CI_SCRIPT | base64 -d | /bin/sh -e"},
 		Labels: map[string]string{
 			"wp_step": "test",
 			"wp_uuid": "09238932",
@@ -163,8 +162,7 @@ func TestToConfigFull(t *testing.T) {
 		WorkingDir:   "/src/abc",
 		AttachStdout: true,
 		AttachStderr: true,
-		Cmd:          []string{"echo $CI_SCRIPT | base64 -d | /bin/sh -e"},
-		Entrypoint:   []string{"/bin/sh", "-c"},
+		Entrypoint:   []string{"/bin/sh", "-c", "echo $CI_SCRIPT | base64 -d | /bin/sh -e"},
 		Labels: map[string]string{
 			"wp_step": "test",
 			"wp_uuid": "09238932",
