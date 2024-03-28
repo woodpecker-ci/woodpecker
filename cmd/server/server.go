@@ -286,6 +286,12 @@ func setupEvilGlobals(c *cli.Context, s store.Store, f forge.Forge) error {
 	}
 	server.Config.Services.Manager = serviceMangager
 
+	println(c.String("log-store"))
+	server.Config.Services.LogStore, err = setupLogStore(c, s)
+	if err != nil {
+		return fmt.Errorf("could not setup log store manager: %w", err)
+	}
+
 	// authentication
 	server.Config.Pipeline.AuthenticatePublicRepos = c.Bool("authenticate-public-repos")
 

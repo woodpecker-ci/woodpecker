@@ -38,6 +38,7 @@ var Config = struct {
 		Forge      forge.Forge
 		Membership cache.MembershipService
 		Manager    *services.Manager
+		LogStore   model.LogStore
 	}
 	Server struct {
 		Key                 string

@@ -37,9 +37,11 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge/gitea"
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge/github"
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge/gitlab"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 	"go.woodpecker-ci.org/woodpecker/v2/server/queue"
 	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 	"go.woodpecker-ci.org/woodpecker/v2/server/store/datastore"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store/log/file"
 	"go.woodpecker-ci.org/woodpecker/v2/shared/addon"
 	addonTypes "go.woodpecker-ci.org/woodpecker/v2/shared/addon/types"
 )
@@ -263,4 +265,15 @@ func setupMetrics(g *errgroup.Group, _store store.Store) {
 			time.Sleep(10 * time.Second)
 		}
 	})
+}
+
+func setupLogStore(c *cli.Context, s store.Store) (model.LogStore, error) {
+	switch c.String("log-store") {
+	case "file":
+		return file.LogStore{
+			Base: c.String("log-store-file-base"),
+		}, nil
+	default:
+		return s, nil
+	}
 }
