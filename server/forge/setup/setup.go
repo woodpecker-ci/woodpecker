@@ -86,12 +86,18 @@ func setupGitHub(forge *model.Forge) (forge.Forge, error) {
 		return nil, fmt.Errorf("missing merge-ref")
 	}
 
+	publicOnly, ok := forge.AdditionalOptions["public-only"].(bool)
+	if !ok {
+		return nil, fmt.Errorf("missing public-only")
+	}
+
 	opts := github.Opts{
 		URL:        forge.URL,
 		Client:     forge.Client,
 		Secret:     forge.ClientSecret,
 		SkipVerify: forge.SkipVerify,
 		MergeRef:   mergeRef,
+		OnlyPublic: publicOnly,
 	}
 	log.Trace().Msgf("Forge (github) opts: %#v", opts)
 	return github.New(opts)

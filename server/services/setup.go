@@ -116,6 +116,7 @@ func setupForgeService(c *cli.Context, _store store.Store) error {
 	case c.Bool("github"):
 		_forge.Type = model.ForgeTypeGithub
 		_forge.AdditionalOptions["merge-ref"] = c.Bool("github-merge-ref")
+		_forge.AdditionalOptions["public-only"] = c.Bool("github-public-only")
 		if _forge.URL == "" {
 			_forge.URL = "https://github.com"
 		}

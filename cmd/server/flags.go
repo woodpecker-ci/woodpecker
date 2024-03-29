@@ -343,6 +343,12 @@ var flags = append([]cli.Flag{
 		Usage:   "github pull requests use merge ref",
 		Value:   true,
 	},
+	&cli.BoolFlag{
+		EnvVars: []string{"WOODPECKER_GITHUB_PUBLIC_ONLY"},
+		Name:    "github-public-only",
+		Usage:   "github tokens should only get access to public repos",
+		Value:   false,
+	},
 	//
 	// Gitea
 	//
