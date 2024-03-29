@@ -156,7 +156,7 @@ const selectedStepId = computed({
   },
 });
 
-const { forge } = useConfig();
+const { forge } = useConfig(); // TODO: remove this and use the forge type from the corresponding repo
 const { message } = usePipeline(pipeline);
 
 const selectedStep = computed(() => findStep(pipeline.value.workflows || [], selectedStepId.value || -1));

@@ -39,12 +39,20 @@ func Config(c *gin.Context) {
 		).Sign(user.Hash)
 	}
 
+	// TODO: remove this and use the forge type from the corresponding repo
+	mainForge, err := server.Config.Services.Manager.ForgeMain()
+	if err != nil {
+		log.Error().Err(err).Msg("could not get main forge")
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
 	configData := map[string]any{
 		"user":               user,
 		"csrf":               csrf,
 		"version":            version.String(),
 		"skip_version_check": server.Config.WebUI.SkipVersionCheck,
-		"forge":              "deprecated", // TODO: remove this and use the forge type from the corresponding repo
+		"forge":              mainForge.Name(),
 		"root_path":          server.Config.Server.RootPath,
 		"enable_swagger":     server.Config.WebUI.EnableSwagger,
 	}
