@@ -322,12 +322,6 @@ var flags = append([]cli.Flag{
 		Usage:   "github server address",
 		Value:   "https://github.com",
 	},
-	&cli.BoolFlag{
-		EnvVars: []string{"WOODPECKER_GITHUB_ONLY_PUBLIC"},
-		Name:    "github-only-public",
-		Usage:   "github tokens should only get access to public repos",
-		Value:   false,
-	},
 	&cli.StringFlag{
 		EnvVars:  []string{"WOODPECKER_GITHUB_CLIENT"},
 		Name:     "github-client",
@@ -345,6 +339,12 @@ var flags = append([]cli.Flag{
 		Name:    "github-merge-ref",
 		Usage:   "github pull requests use merge ref",
 		Value:   true,
+	},
+	&cli.BoolFlag{
+		EnvVars: []string{"WOODPECKER_GITHUB_PUBLIC_ONLY"},
+		Name:    "github-public-only",
+		Usage:   "github tokens should only get access to public repos",
+		Value:   false,
 	},
 	&cli.BoolFlag{
 		EnvVars: []string{"WOODPECKER_GITHUB_SKIP_VERIFY"},

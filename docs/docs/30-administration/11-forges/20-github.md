@@ -82,7 +82,7 @@ Read the value for `WOODPECKER_GITHUB_SECRET` from the specified filepath.
 
 Configure if SSL verification should be skipped.
 
-### `WOODPECKER_GITHUB_ONLY_PUBLIC`
+### `WOODPECKER_GITHUB_PUBLIC_ONLY`
 
 > Default: `false`
 
