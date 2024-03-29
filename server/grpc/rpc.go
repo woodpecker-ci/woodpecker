@@ -105,11 +105,16 @@ func (s *RPC) Wait(c context.Context, id string) error {
 
 // Extend implements the rpc.Extend function
 func (s *RPC) Extend(c context.Context, id string) error {
-	return s.queue.Extend(c, id)
+	agent, err := s.getAgentFromContext(c)
+	if err != nil {
+		return err
+	}
+
+	return s.queue.Extend(c, agent.ID, id)
 }
 
 // Update implements the rpc.Update function
-func (s *RPC) Update(_ context.Context, id string, state rpc.State) error {
+func (s *RPC) Update(c context.Context, id string, state rpc.State) error {
 	workflowID, err := strconv.ParseInt(id, 10, 64)
 	if err != nil {
 		return err
@@ -125,6 +130,15 @@ func (s *RPC) Update(_ context.Context, id string, state rpc.State) error {
 	if err != nil {
 		log.Error().Err(err).Msgf("cannot find pipeline with id %d", workflow.PipelineID)
 		return err
+	}
+
+	agent, err := s.getAgentFromContext(c)
+	if err != nil {
+		return err
+	}
+
+	if !agent.IsSystemAgent() {
+		// TODO: check if agent is allowed to alter things
 	}
 
 	step, err := s.store.StepByUUID(state.StepUUID)
@@ -191,6 +205,11 @@ func (s *RPC) Init(c context.Context, id string, state rpc.State) error {
 	if err != nil {
 		return err
 	}
+
+	if !agent.IsSystemAgent() {
+		// TODO: check if agent is allowed to alter things
+	}
+
 	workflow.AgentID = agent.ID
 
 	currentPipeline, err := s.store.GetPipeline(workflow.PipelineID)
@@ -270,6 +289,15 @@ func (s *RPC) Done(c context.Context, id string, state rpc.State) error {
 		return err
 	}
 
+	agent, err := s.getAgentFromContext(c)
+	if err != nil {
+		return err
+	}
+
+	if !agent.IsSystemAgent() {
+		// TODO: check if agent is allowed to alter things
+	}
+
 	logger := log.With().
 		Str("repo_id", fmt.Sprint(repo.ID)).
 		Str("pipeline_id", fmt.Sprint(currentPipeline.ID)).
@@ -336,6 +364,16 @@ func (s *RPC) Log(c context.Context, _logEntry *rpc.LogEntry) error {
 	if err != nil {
 		return fmt.Errorf("could not find step with uuid %s in store: %w", _logEntry.StepUUID, err)
 	}
+
+	agent, err := s.getAgentFromContext(c)
+	if err != nil {
+		return err
+	}
+
+	if !agent.IsSystemAgent() {
+		// TODO: check if agent is allowed to alter things
+	}
+
 	logEntry := &model.LogEntry{
 		StepID: step.ID,
 		Time:   _logEntry.Time,
