@@ -138,7 +138,6 @@ func podContainer(step *types.Step, podName, goos string, options BackendOptions
 		Name:            podName,
 		Image:           step.Image,
 		WorkingDir:      step.WorkingDir,
-		Env:             mapToEnvVars(step.Environment),
 		Ports:           containerPorts(step.Ports),
 		SecurityContext: containerSecurityContext(options.SecurityContext, step.Privileged),
 	}
@@ -156,6 +155,8 @@ func podContainer(step *types.Step, podName, goos string, options BackendOptions
 		container.Args = []string{args}
 		maps.Copy(step.Environment, scriptEnv)
 	}
+
+	container.Env = mapToEnvVars(step.Environment)
 
 	container.Resources, err = resourceRequirements(options.Resources)
 	if err != nil {
