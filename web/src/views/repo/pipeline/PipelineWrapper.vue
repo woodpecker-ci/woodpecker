@@ -46,8 +46,7 @@
             />
             <Button
               v-if="
-                pipeline.status === 'success' &&
-                (pipeline.event === 'push' || pipeline.event === 'tag' || pipeline.event === 'release')
+                pipeline.status === 'success' && repo.allow_deploy
               "
               class="flex-shrink-0"
               :text="$t('repo.pipeline.actions.deploy')"

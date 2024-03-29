@@ -30,6 +30,11 @@
           :description="$t('repo.settings.general.allow_pr.desc')"
         />
         <Checkbox
+          v-model="repoSettings.allow_deploy"
+          :label="$t('repo.settings.general.allow_deploy.allow')"
+          :description="$t('repo.settings.general.allow_deploy.desc')"
+        />
+        <Checkbox
           v-model="repoSettings.gated"
           :label="$t('repo.settings.general.protected.protected')"
           :description="$t('repo.settings.general.protected.desc')"
@@ -132,8 +137,9 @@ function loadRepoSettings() {
     gated: repo.value.gated,
     trusted: repo.value.trusted,
     allow_pr: repo.value.allow_pr,
+    allow_deploy: repo.value.allow_deploy,
     cancel_previous_pipeline_events: repo.value.cancel_previous_pipeline_events || [],
-    netrc_only_trusted: repo.value.netrc_only_trusted,
+    netrc_only_trusted: repo.value.netrc_only_trusted
   };
 }
 

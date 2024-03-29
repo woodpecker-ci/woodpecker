@@ -16,6 +16,15 @@ Your Version-Control-System will notify Woodpecker about events via webhooks. If
 
 Enables handling webhook's pull request event. If disabled, then pipeline won't run for pull requests.
 
+## Allow deployments
+
+Allows you to start a pipeline with `deploy` event from a succeeded pipeline.
+
+:::danger
+Only enable this option if you trust all users that have push access to your repository.
+Otherwise these users are able to steal secrets only available to `deploy` events.
+:::
+
 ## Protected
 
 Every pipeline initiated by an webhook event needs to be approved by a project members with push permissions before being executed.
