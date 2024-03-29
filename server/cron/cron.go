@@ -54,7 +54,7 @@ func Start(ctx context.Context, store store.Store, forge forge.Forge) error {
 				}
 
 				for _, cron := range crons {
-					if err := runCron(store, forge, cron, now); err != nil {
+					if err := runCron(ctx, store, forge, cron, now); err != nil {
 						log.Error().Err(err).Int64("cronID", cron.ID).Msg("run cron failed")
 					}
 				}
@@ -77,9 +77,8 @@ func CalcNewNext(schedule string, now time.Time) (time.Time, error) {
 	return c.Next(now), nil
 }
 
-func runCron(store store.Store, forge forge.Forge, cron *model.Cron, now time.Time) error {
+func runCron(ctx context.Context, store store.Store, forge forge.Forge, cron *model.Cron, now time.Time) error {
 	log.Trace().Msgf("cron: run id[%d]", cron.ID)
-	ctx := context.Background()
 
 	newNext, err := CalcNewNext(cron.Schedule, now)
 	if err != nil {
