@@ -4,10 +4,11 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @anbraten, @manuelluis, @qwerty287
+@6543, @anbraten, @manuelluis, @qwerty287, @stevapple
 
 ### 📈 Enhancement
 
+- Add `runtimeClassName` in Kubernetes backend options [[#3474](https://github.com/woodpecker-ci/woodpecker/pull/3474)]
 - Remove unused cache properties [[#3567](https://github.com/woodpecker-ci/woodpecker/pull/3567)]
 - Allow separate gitea oauth URL  [[#3513](https://github.com/woodpecker-ci/woodpecker/pull/3513)]
 - Add option to set the local repository path to the cli command exec. [[#3524](https://github.com/woodpecker-ci/woodpecker/pull/3524)]
