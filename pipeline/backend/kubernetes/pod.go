@@ -136,9 +136,11 @@ func podSpec(step *types.Step, config *config, options BackendOptions) (v1.PodSp
 func podContainer(step *types.Step, podName, goos string, options BackendOptions) (v1.Container, error) {
 	var err error
 	container := v1.Container{
-		Name:       podName,
-		Image:      step.Image,
-		WorkingDir: step.WorkingDir,
+		Name:            podName,
+		Image:           step.Image,
+		WorkingDir:      step.WorkingDir,
+		Ports:           containerPorts(step.Ports),
+		SecurityContext: containerSecurityContext(options.SecurityContext, step.Privileged),
 	}
 
 	if step.Pull {
@@ -156,8 +158,6 @@ func podContainer(step *types.Step, podName, goos string, options BackendOptions
 	}
 
 	container.Env = mapToEnvVars(step.Environment)
-	container.Ports = containerPorts(step.Ports)
-	container.SecurityContext = containerSecurityContext(options.SecurityContext, step.Privileged)
 
 	container.Resources, err = resourceRequirements(options.Resources)
 	if err != nil {
