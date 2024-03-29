@@ -341,6 +341,12 @@ var flags = append([]cli.Flag{
 		Value:   true,
 	},
 	&cli.BoolFlag{
+		EnvVars: []string{"WOODPECKER_GITHUB_PUBLIC_ONLY"},
+		Name:    "github-public-only",
+		Usage:   "github tokens should only get access to public repos",
+		Value:   false,
+	},
+	&cli.BoolFlag{
 		EnvVars: []string{"WOODPECKER_GITHUB_SKIP_VERIFY"},
 		Name:    "github-skip-verify",
 		Usage:   "github skip ssl verification",
