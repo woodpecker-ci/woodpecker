@@ -139,7 +139,7 @@ function loadRepoSettings() {
     allow_pr: repo.value.allow_pr,
     allow_deploy: repo.value.allow_deploy,
     cancel_previous_pipeline_events: repo.value.cancel_previous_pipeline_events || [],
-    netrc_only_trusted: repo.value.netrc_only_trusted
+    netrc_only_trusted: repo.value.netrc_only_trusted,
   };
 }
 
