@@ -14,6 +14,8 @@
 
 package model
 
+import "errors"
+
 type Agent struct {
 	ID          int64  `json:"id"            xorm:"pk autoincr 'id'"`
 	Created     int64  `json:"created"       xorm:"created"`
@@ -40,7 +42,9 @@ func (a *Agent) IsSystemAgent() bool {
 	return a.OwnerID == -1
 }
 
-func (a *Agent) GetFilters() map[string]string {
+var ErrFiltersBroken = errors.New("while creating filters map error ocured")
+
+func (a *Agent) GetFilters() (map[string]string, error) {
 	filters := a.Filters
 	if filters == nil {
 		filters = make(map[string]string)
@@ -52,7 +56,11 @@ func (a *Agent) GetFilters() map[string]string {
 		filters["owner"] = "*" // allow all owners by default
 	} else {
 		filters["owner"] = "*" // we dont have org agents implemented jet
+		// we expect this filter to be set else we fail
+		if _, ok := filters["repo"]; !ok {
+			return nil, ErrFiltersBroken
+		}
 	}
 
-	return filters
+	return filters, nil
 }

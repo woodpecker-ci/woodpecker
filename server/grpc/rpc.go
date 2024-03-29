@@ -62,7 +62,12 @@ func (s *RPC) Next(c context.Context, agentFilter rpc.Filter) (*rpc.Workflow, er
 	}
 
 	// enforce server set agent filters
-	for k, v := range agent.Filters {
+	agentFilters, err := agent.GetFilters()
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range agentFilters {
 		agentFilter.Labels[k] = v
 	}
 
