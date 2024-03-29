@@ -55,7 +55,7 @@ func (a *Agent) GetFilters() (map[string]string, error) {
 		filters["repo"] = "*"  // allow all repos by default
 		filters["owner"] = "*" // allow all owners by default
 	} else {
-		filters["owner"] = "*" // we dont have org agents implemented jet
+		filters["owner"] = "*" // we don't have org agents implemented yet
 		// we expect this filter to be set else we fail
 		if _, ok := filters["repo"]; !ok {
 			return nil, ErrFiltersBroken
