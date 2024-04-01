@@ -32,6 +32,7 @@ import (
 	"k8s.io/client-go/informers"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/scheme"
+
 	// To authenticate to GCP K8s clusters
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	"k8s.io/client-go/rest"
@@ -316,6 +317,9 @@ func (e *kube) TailStep(ctx context.Context, step *types.Step, taskUUID string) 
 		}
 
 		if pod.Name == podName {
+			if isImagePullBackOffState(pod) {
+				up <- false
+			}
 			switch pod.Status.Phase {
 			case v1.PodRunning, v1.PodSucceeded, v1.PodFailed:
 				up <- true
