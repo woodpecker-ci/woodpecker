@@ -1,13 +1,14 @@
 # Changelog
 
-## [2.5.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.5.0) - 2024-03-29
+## [2.5.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.5.0) - 2024-04-01
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @anbraten, @manuelluis, @qwerty287, @stevapple
+@6543, @anbraten, @aumetra, @manuelluis, @qwerty287, @stevapple
 
 ### 📈 Enhancement
 
+- Add flag to only access public repositories on GitHub [[#3566](https://github.com/woodpecker-ci/woodpecker/pull/3566)]
 - Add `runtimeClassName` in Kubernetes backend options [[#3474](https://github.com/woodpecker-ci/woodpecker/pull/3474)]
 - Remove unused cache properties [[#3567](https://github.com/woodpecker-ci/woodpecker/pull/3567)]
 - Allow separate gitea oauth URL  [[#3513](https://github.com/woodpecker-ci/woodpecker/pull/3513)]
@@ -27,6 +28,10 @@
 
 ### Misc
 
+- Update pre-commit hook golangci/golangci-lint to v1.57.2 [[#3575](https://github.com/woodpecker-ci/woodpecker/pull/3575)]
+- Update docker.io/woodpeckerci/plugin-docker-buildx Docker tag to v3.2.1 [[#3574](https://github.com/woodpecker-ci/woodpecker/pull/3574)]
+- Update web npm deps non-major [[#3576](https://github.com/woodpecker-ci/woodpecker/pull/3576)]
+- Update dependency @intlify/unplugin-vue-i18n to v4 [[#3572](https://github.com/woodpecker-ci/woodpecker/pull/3572)]
 - Update golang (packages) [[#3564](https://github.com/woodpecker-ci/woodpecker/pull/3564)]
 - Update dependency typescript to v5.4.3 [[#3563](https://github.com/woodpecker-ci/woodpecker/pull/3563)]
 - Update pre-commit non-major [[#3556](https://github.com/woodpecker-ci/woodpecker/pull/3556)]
