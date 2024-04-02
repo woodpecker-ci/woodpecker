@@ -92,7 +92,7 @@
         },
         "allow_deploy": {
           "allow": "Allow deployments",
-          "desc": "Allow deployments from succeeded pipelines. Only use if you trust all users with push access."
+          "desc": "Allow deployments from successful pipelines. Only use if you trust all users with push access."
         },
         "protected": {
           "protected": "Protected",

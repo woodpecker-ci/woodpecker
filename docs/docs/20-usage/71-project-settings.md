@@ -18,11 +18,11 @@ Enables handling webhook's pull request event. If disabled, then pipeline won't 
 
 ## Allow deployments
 
-Allows you to start a pipeline with `deploy` event from a succeeded pipeline.
+Enables a pipeline to be started with the `deploy` event from a successful pipeline.
 
 :::danger
-Only enable this option if you trust all users that have push access to your repository.
-Otherwise these users are able to steal secrets only available to `deploy` events.
+Only activate this option if you trust all users who have push access to your repository.
+Otherwise, these users will be able to steal secrets that are only available for `deploy` events.
 :::
 
 ## Protected
