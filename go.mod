@@ -13,8 +13,8 @@ require (
 	github.com/caddyserver/certmagic v0.20.0
 	github.com/cenkalti/backoff/v4 v4.3.0
 	github.com/charmbracelet/huh v0.3.0
-	github.com/charmbracelet/huh/spinner v0.0.0-20240327025511-ec643317aa10
-	github.com/distribution/reference v0.5.0
+	github.com/charmbracelet/huh/spinner v0.3.0
+	github.com/distribution/reference v0.6.0
 	github.com/docker/cli v24.0.9+incompatible
 	github.com/docker/docker v24.0.9+incompatible
 	github.com/docker/go-connections v0.5.0
