@@ -1,6 +1,6 @@
 # Changelog
 
-## [2.5.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.5.0) - 2024-04-01
+## [2.5.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.5.0) - 2024-04-03
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -8,6 +8,7 @@
 
 ### 📈 Enhancement
 
+- Allow to disable deployments [[#3570](https://github.com/woodpecker-ci/woodpecker/pull/3570)]
 - Add flag to only access public repositories on GitHub [[#3566](https://github.com/woodpecker-ci/woodpecker/pull/3566)]
 - Add `runtimeClassName` in Kubernetes backend options [[#3474](https://github.com/woodpecker-ci/woodpecker/pull/3474)]
 - Remove unused cache properties [[#3567](https://github.com/woodpecker-ci/woodpecker/pull/3567)]
