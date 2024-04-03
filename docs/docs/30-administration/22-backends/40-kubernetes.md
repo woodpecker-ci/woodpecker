@@ -40,6 +40,11 @@ steps:
 
 You can use [Limit Ranges](https://kubernetes.io/docs/concepts/policy/limit-range/) if you want to set the limits by per-namespace basis.
 
+### Runtime class
+
+`runtimeClassName` specifies the name of the RuntimeClass which will be used to run this pod. If no `runtimeClassName` is specified, the default RuntimeHandler will be used.
+See the [kubernetes documentation](https://kubernetes.io/docs/concepts/containers/runtime-class/) for more information on specifying runtime classes.
+
 ### Service account
 
 `serviceAccountName` specifies the name of the ServiceAccount which the pod will mount. This service account must be created externally.
