@@ -8,12 +8,12 @@
       "addLabels": ["devx"]
     },
     {
-      "groupName": "golang (lang)",
+      "groupName": "golang-lang",
       "matchPackagePatterns": ["^golang$", "xgo"],
       "matchUpdateTypes": ["minor", "patch"]
     },
     {
-      "groupName": "golang (packages)",
+      "groupName": "golang-packages",
       "matchManagers": ["gomod"],
       "matchUpdateTypes": ["minor", "patch"]
     },
