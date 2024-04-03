@@ -42,7 +42,7 @@ Only server admins can set this option. If you are not a server admin this optio
 
 ## Only inject netrc credentials into trusted containers
 
-Cloning pipeline step may need git credentials. They are injected via netrc. By default, they're only injected if this option is enabled, the repo is trusted ([see above](#trusted)) or the image is a trusted clone image. If you uncheck the option, git credentials will be injected into any container in clone step.
+Cloning pipeline step may need git credentials. They are injected via netrc. By default, they're only injected if this option is enabled, the repo is trusted ([see above](#trusted)) or the image is a trusted clone image. If you uncheck the option, git credentials will be injected into any container of the pipeline. This can be helpful if you want to execute `git push`  commands in a container that is not "trusted" by default.
 
 ## Project visibility
 
