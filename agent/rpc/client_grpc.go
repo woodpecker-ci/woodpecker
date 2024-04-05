@@ -97,7 +97,6 @@ func (c *client) Next(ctx context.Context, f rpc.Filter) (*rpc.Workflow, error) 
 			codes.Aborted,
 			codes.DataLoss,
 			codes.DeadlineExceeded,
-			codes.Internal,
 			codes.Unavailable:
 			// non-fatal errors
 		default:
@@ -143,7 +142,6 @@ func (c *client) Wait(ctx context.Context, id string) (err error) {
 			codes.Aborted,
 			codes.DataLoss,
 			codes.DeadlineExceeded,
-			codes.Internal,
 			codes.Unavailable:
 			// non-fatal errors
 		default:
@@ -184,7 +182,6 @@ func (c *client) Init(ctx context.Context, id string, state rpc.State) (err erro
 			codes.Aborted,
 			codes.DataLoss,
 			codes.DeadlineExceeded,
-			codes.Internal,
 			codes.Unavailable:
 			// non-fatal errors
 		default:
@@ -225,7 +222,6 @@ func (c *client) Done(ctx context.Context, id string, state rpc.State) (err erro
 			codes.Aborted,
 			codes.DataLoss,
 			codes.DeadlineExceeded,
-			codes.Internal,
 			codes.Unavailable:
 			// non-fatal errors
 		default:
@@ -259,7 +255,6 @@ func (c *client) Extend(ctx context.Context, id string) (err error) {
 			codes.Aborted,
 			codes.DataLoss,
 			codes.DeadlineExceeded,
-			codes.Internal,
 			codes.Unavailable:
 			// non-fatal errors
 		default:
@@ -300,7 +295,6 @@ func (c *client) Update(ctx context.Context, id string, state rpc.State) (err er
 			codes.Aborted,
 			codes.DataLoss,
 			codes.DeadlineExceeded,
-			codes.Internal,
 			codes.Unavailable:
 			// non-fatal errors
 		default:
@@ -339,7 +333,6 @@ func (c *client) Log(ctx context.Context, logEntry *rpc.LogEntry) (err error) {
 			codes.Aborted,
 			codes.DataLoss,
 			codes.DeadlineExceeded,
-			codes.Internal,
 			codes.Unavailable:
 			// non-fatal errors
 		default:
@@ -386,7 +379,6 @@ func (c *client) ReportHealth(ctx context.Context) (err error) {
 			codes.Aborted,
 			codes.DataLoss,
 			codes.DeadlineExceeded,
-			codes.Internal,
 			codes.Unavailable:
 			// non-fatal errors
 		default:
