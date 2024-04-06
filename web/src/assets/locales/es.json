@@ -185,6 +185,7 @@
         "branches": "Ramas",
         "deploy_pipeline": {
             "enter_target": "Entorno de despliegue de destino",
+            "enter_task": "Tarea de despliegue",
             "title": "Iniciar despliegue para el pipeline actual #{pipelineId}",
             "trigger": "Despliegue",
             "variables": {

@@ -27,6 +27,7 @@
             },
             "title": "Acionar o evento de implantação para o pipeline atual #{pipelineId}",
             "enter_target": "Ambiente de implantação de destino",
+            "enter_task": "Tarefa de implantação",
             "trigger": "Implementar"
         },
         "enable": {

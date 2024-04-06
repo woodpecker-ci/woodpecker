@@ -187,6 +187,7 @@
         "branches": "Branches",
         "deploy_pipeline": {
             "enter_target": "Environnement de déploiement ciblé",
+            "enter_task": "Tâche de déploiement",
             "title": "Déclenchement d'un événement de déploiement pour le pipeline courant #{pipelineId}",
             "trigger": "Déployer",
             "variables": {

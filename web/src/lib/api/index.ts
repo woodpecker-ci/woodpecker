@@ -31,6 +31,7 @@ type PipelineOptions = {
 type DeploymentOptions = {
   id: string;
   environment: string;
+  task: string;
   variables: Record<string, string>;
 };
 
@@ -82,12 +83,13 @@ export default class WoodpeckerClient extends ApiClient {
   }
 
   // Deploy triggers a deployment for an existing pipeline using the
-  // specified target environment.
+  // specified target environment and task.
   deployPipeline(repoId: number, pipelineNumber: string, options: DeploymentOptions): Promise<Pipeline> {
     const vars = {
       ...options.variables,
       event: 'deployment',
       deploy_to: options.environment,
+      deploy_task: options.task,
     };
     const query = encodeQueryString(vars);
     return this._post(`/api/repos/${repoId}/pipelines/${pipelineNumber}?${query}`) as Promise<Pipeline>;
