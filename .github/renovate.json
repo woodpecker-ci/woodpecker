@@ -3,17 +3,27 @@
   "extends": ["github>woodpecker-ci/renovate-config"],
   "packageRules": [
     {
+      "matchCurrentVersion": "<1.0.0",
+      "matchPackageNames": ["github.com/distribution/reference"],
+      "matchUpdateTypes": ["major", "minor"],
+      "dependencyDashboardApproval": true
+    },
+    {
+      "matchPackageNames": ["github.com/charmbracelet/huh/spinner"],
+      "enabled": false
+    },
+    {
       "matchManagers": ["docker-compose"],
       "matchFileNames": ["docker-compose.gitpod.yml"],
       "addLabels": ["devx"]
     },
     {
-      "groupName": "golang (lang)",
+      "groupName": "golang-lang",
       "matchPackagePatterns": ["^golang$", "xgo"],
       "matchUpdateTypes": ["minor", "patch"]
     },
     {
-      "groupName": "golang (packages)",
+      "groupName": "golang-packages",
       "matchManagers": ["gomod"],
       "matchUpdateTypes": ["minor", "patch"]
     },
