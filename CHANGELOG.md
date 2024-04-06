@@ -1,6 +1,6 @@
 # Changelog
 
-## [2.5.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.5.0) - 2024-04-03
+## [2.5.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.5.0) - 2024-04-06
 
 ### ❤️ Thanks to all contributors! ❤️
 
