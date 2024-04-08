@@ -10,6 +10,7 @@ import (
 	"runtime"
 	"time"
 
+	"github.com/charmbracelet/huh/spinner"
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
 )
@@ -37,13 +38,27 @@ func receiveTokenFromUI(c context.Context, serverURL string) (string, error) {
 		return "", err
 	}
 
+	spinnerCtx, spinnerDone := context.WithCancelCause(c)
+	go func() {
+		err = spinner.New().
+			Title("Waiting for token ...").
+			Context(spinnerCtx).
+			Run()
+		if err != nil {
+			return
+		}
+	}()
+
 	// wait for token to be received or timeout
 	select {
 	case token := <-tokenReceived:
+		spinnerDone(nil)
 		return token, nil
 	case <-c.Done():
+		spinnerDone(nil)
 		return "", c.Err()
 	case <-time.After(5 * time.Minute):
+		spinnerDone(nil)
 		return "", errors.New("timed out waiting for token")
 	}
 }
