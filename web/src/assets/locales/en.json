@@ -90,6 +90,10 @@
           "allow": "Allow Pull Requests",
           "desc": "Pipelines can run on pull requests."
         },
+        "allow_deploy": {
+          "allow": "Allow deployments",
+          "desc": "Allow deployments from successful pipelines. Only use if you trust all users with push access."
+        },
         "protected": {
           "protected": "Protected",
           "desc": "Every pipeline needs to be approved before being executed."

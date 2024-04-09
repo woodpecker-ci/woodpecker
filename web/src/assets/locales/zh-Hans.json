@@ -398,11 +398,11 @@
                     "placeholder": "Registry 地址（如 docker.io）"
                 },
                 "created": "Registry 密码已创建",
-                "credentials": "注册表凭据",
+                "credentials": "Registry 凭据",
                 "delete": "删除 registry",
                 "deleted": "Registry 密码已删除",
                 "desc": "可以添加 Registry 密码，以在流水线中使用私有镜像。",
-                "edit": "编辑注册表",
+                "edit": "编辑 Registry",
                 "none": "现在没有 Registry 密码。",
                 "registries": "注册表",
                 "save": "保存 Registry",
