@@ -18,6 +18,7 @@ package bitbucket
 import (
 	"bytes"
 	"context"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -179,6 +180,7 @@ func Test_bitbucket(t *testing.T) {
 			g.It("Should handle not found error", func() {
 				_, err := c.File(ctx, fakeUser, fakeRepo, fakePipeline, "file_not_found")
 				g.Assert(err).IsNotNil()
+				g.Assert(errors.Is(err, &types.ErrConfigNotFound{})).IsTrue()
 			})
 		})
 
@@ -222,8 +224,9 @@ func Test_bitbucket(t *testing.T) {
 				g.Assert(string(files[0].Data)).Equal("dummy payload")
 			})
 			g.It("Should handle not found errors", func() {
-				_, err := c.Dir(ctx, fakeUser, fakeRepo, fakePipeline, "/dir_not_found")
+				_, err := c.Dir(ctx, fakeUser, fakeRepo, fakePipeline, "dir_not_found/")
 				g.Assert(err).IsNotNil()
+				g.Assert(errors.Is(err, &types.ErrConfigNotFound{})).IsTrue()
 			})
 		})
 
