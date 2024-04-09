@@ -215,5 +215,5 @@ func getChangedFilesFromCommits(commits []*github.HeadCommit) []string {
 		files = append(files, cm.Removed...)
 		files = append(files, cm.Modified...)
 	}
-	return utils.DedupStrings(files)
+	return utils.DeduplicateStrings(files)
 }
