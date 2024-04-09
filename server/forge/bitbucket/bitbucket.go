@@ -232,9 +232,14 @@ func (c *config) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error
 func (c *config) File(ctx context.Context, u *model.User, r *model.Repo, p *model.Pipeline, f string) ([]byte, error) {
 	config, err := c.newClient(ctx, u).FindSource(r.Owner, r.Name, p.Commit, f)
 	if err != nil {
+		if rspErr, ok := err.(internal.Error); ok && rspErr.Status == http.StatusNotFound {
+			return nil, &forge_types.ErrConfigNotFound{
+				Configs: []string{f},
+			}
+		}
 		return nil, err
 	}
-	return []byte(*config), err
+	return []byte(*config), nil
 }
 
 // Dir fetches a folder from the bitbucket repository
@@ -245,6 +250,11 @@ func (c *config) Dir(ctx context.Context, u *model.User, r *model.Repo, p *model
 	for {
 		filesResp, err := client.GetRepoFiles(r.Owner, r.Name, p.Commit, f, page)
 		if err != nil {
+			if rspErr, ok := err.(internal.Error); ok && rspErr.Status == http.StatusNotFound {
+				return nil, &forge_types.ErrConfigNotFound{
+					Configs: []string{f},
+				}
+			}
 			return nil, err
 		}
 		for _, file := range filesResp.Values {
