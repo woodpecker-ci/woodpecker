@@ -480,7 +480,7 @@ Normally steps of a workflow are executed serially in the order in which they ar
 ```
 
 :::note
-Add a single empty `depends_on`  execute all steps in parallel:
+Add a single empty `depends_on` execute all steps in parallel:
 
 ```yaml
 steps:
