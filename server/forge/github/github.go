@@ -630,7 +630,7 @@ func (c *client) loadChangedFilesFromPullRequest(ctx context.Context, pull *gith
 
 			opts.Page = resp.NextPage
 		}
-		return utils.DedupStrings(fileList), nil
+		return utils.DeduplicateStrings(fileList), nil
 	})
 
 	return pipeline, err
