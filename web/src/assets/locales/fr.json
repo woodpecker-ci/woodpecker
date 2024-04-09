@@ -390,6 +390,10 @@
                         "public": "Publique"
                     },
                     "visibility": "Visibilité du projet"
+                },
+                "allow_deploy": {
+                    "allow": "Autoriser les déploiements",
+                    "desc": "Autoriser les déploiements depuis les pipelines ayant réussis. À utiliser que si vous avez confiance dans les utilisateurs ayant un accès en écriture."
                 }
             },
             "not_allowed": "Vous n'êtes pas autorisé à accéder aux paramètres de ce dépôt",
