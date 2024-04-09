@@ -256,7 +256,7 @@
           "$ref": "#/definitions/constraint_list"
         },
         "task": {
-          "description": "Execute a step only for a specific task. Read more: https://woodpecker-ci.org/docs/usage/pipeline-syntax#task",
+          "description": "Execute a step only for a specific task. Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#task",
           "$ref": "#/definitions/constraint_list"
         },
         "instance": {
