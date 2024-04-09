@@ -8,6 +8,7 @@
 
 ### 🐛 Bug Fixes
 
+- Fix bitbucket file fetching [[#3604](https://github.com/woodpecker-ci/woodpecker/pull/3604)]
 - agent: Continue to retry indefinitely [[#3599](https://github.com/woodpecker-ci/woodpecker/pull/3599)]
 - Fix cli version comparison and improve setup [[#3518](https://github.com/woodpecker-ci/woodpecker/pull/3518)]
 - Fix flag name [[#3534](https://github.com/woodpecker-ci/woodpecker/pull/3534)]
@@ -30,6 +31,7 @@
 
 ### Misc
 
+- Fix spellcheck and enable more dirs [[#3603](https://github.com/woodpecker-ci/woodpecker/pull/3603)]
 - Update docker.io/golang Docker tag to v1.22.2 [[#3596](https://github.com/woodpecker-ci/woodpecker/pull/3596)]
 - Update pre-commit hook pre-commit/pre-commit-hooks to v4.6.0 [[#3597](https://github.com/woodpecker-ci/woodpecker/pull/3597)]
 - Update module github.com/google/go-github/v60 to v61 [[#3595](https://github.com/woodpecker-ci/woodpecker/pull/3595)]
