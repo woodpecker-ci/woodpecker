@@ -480,9 +480,9 @@ Normally steps of a workflow are executed serially in the order in which they ar
 ```
 
 :::note
-Add a single empty `depends_on`, to make all steps execute in parallel:
+Add a single empty `depends_on`  execute all steps in parallel:
 
-```json
+```yaml
 steps:
   - name: check code format
     image: mstruebing/editorconfig-checker
