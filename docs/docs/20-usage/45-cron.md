@@ -19,7 +19,7 @@ To configure cron jobs you need at least push access to the repository.
    +      cron: "name of the cron job" # if you only want to execute this step by a specific cron job
    ```
 
-1. Create a new cron job in the repository settings:
+2. Create a new cron job in the repository settings:
 
    ![cron settings](./cron-settings.png)
 

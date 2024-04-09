@@ -195,16 +195,6 @@ var flags = append([]cli.Flag{
 		Usage:   "server-side enforcement policy on the minimum amount of time a client should wait before sending a keepalive ping.",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_SECRET_ENDPOINT"},
-		Name:    "secret-service",
-		Usage:   "secret plugin endpoint",
-	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_REGISTRY_ENDPOINT"},
-		Name:    "registry-service",
-		Usage:   "registry plugin endpoint",
-	},
-	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_CONFIG_SERVICE_ENDPOINT"},
 		Name:    "config-service-endpoint",
 		Usage:   "url used for calling configuration service endpoint",
@@ -351,6 +341,12 @@ var flags = append([]cli.Flag{
 		Value:   true,
 	},
 	&cli.BoolFlag{
+		EnvVars: []string{"WOODPECKER_GITHUB_PUBLIC_ONLY"},
+		Name:    "github-public-only",
+		Usage:   "github tokens should only get access to public repos",
+		Value:   false,
+	},
+	&cli.BoolFlag{
 		EnvVars: []string{"WOODPECKER_GITHUB_SKIP_VERIFY"},
 		Name:    "github-skip-verify",
 		Usage:   "github skip ssl verification",
@@ -385,6 +381,11 @@ var flags = append([]cli.Flag{
 		EnvVars: []string{"WOODPECKER_GITEA_SKIP_VERIFY"},
 		Name:    "gitea-skip-verify",
 		Usage:   "gitea skip ssl verification",
+	},
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_DEV_GITEA_OAUTH_URL"},
+		Name:    "gitea-oauth-server",
+		Usage:   "user-facing gitea server url for oauth",
 	},
 	//
 	// Bitbucket
