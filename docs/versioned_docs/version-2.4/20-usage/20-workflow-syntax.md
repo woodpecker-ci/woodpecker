@@ -480,7 +480,7 @@ Normally steps of a workflow are executed serially in the order in which they ar
 ```
 
 :::note
-You can define a step to start immediately without dependencies by adding an empty `depends_on: []`. By setting `depends_on` on a single step all other steps will be immediately executed as well if no further dependencies are specified. 
+You can define a step to start immediately without dependencies by adding an empty `depends_on: []`. By setting `depends_on` on a single step all other steps will be immediately executed as well if no further dependencies are specified.
 
 ```yaml
 steps:
