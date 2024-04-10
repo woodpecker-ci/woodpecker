@@ -408,23 +408,22 @@ func PostPipeline(c *gin.Context) {
 	refreshUserToken(c, user)
 
 	// make Deploy overridable
-	pl.Deploy = c.DefaultQuery("deploy_to", pl.Deploy)
 
 	// make Event overridable to deploy
 	// TODO refactor to use own proper API for deploy
 	if event, ok := c.GetQuery("event"); ok {
-		// only allow deploy from push, tag and release
-		if pl.Event != model.EventPush && pl.Event != model.EventTag && pl.Event != model.EventRelease {
-			_ = c.AbortWithError(http.StatusBadRequest, fmt.Errorf("can only deploy push, tag and release pipelines"))
-			return
-		}
-
 		pl.Event = model.WebhookEvent(event)
-
 		if pl.Event != model.EventDeploy {
 			_ = c.AbortWithError(http.StatusBadRequest, model.ErrInvalidWebhookEvent)
 			return
 		}
+
+		if !repo.AllowDeploy {
+			_ = c.AbortWithError(http.StatusForbidden, fmt.Errorf("repo does not allow deployments"))
+			return
+		}
+
+		pl.Deploy = c.DefaultQuery("deploy_to", pl.Deploy)
 	}
 
 	// Read query string parameters into pipelineParams, exclude reserved params
