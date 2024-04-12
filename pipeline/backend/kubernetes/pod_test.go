@@ -159,11 +159,13 @@ func TestFullPod(t *testing.T) {
 			"creationTimestamp": null,
 			"labels": {
 				"app": "test",
+				"part-of": "woodpecker-ci",
 				"step": "go-test"
 			},
 			"annotations": {
 				"apps.kubernetes.io/pod-index": "0",
-				"container.apparmor.security.beta.kubernetes.io/wp-01he8bebctabr3kgk0qj36d2me-0": "localhost/k8s-apparmor-example-deny-write"
+				"container.apparmor.security.beta.kubernetes.io/wp-01he8bebctabr3kgk0qj36d2me-0": "localhost/k8s-apparmor-example-deny-write",
+				"kubernetes.io/limit-ranger": "LimitRanger plugin set: cpu, memory request and limit for container"
 			}
 		},
 		"spec": {
@@ -334,6 +336,8 @@ func TestFullPod(t *testing.T) {
 		PodAnnotations:       map[string]string{"apps.kubernetes.io/pod-index": "0"},
 		SecurityContext:      SecurityContextConfig{RunAsNonRoot: false},
 	}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{
+		Labels:             map[string]string{"part-of": "woodpecker-ci"},
+		Annotations:        map[string]string{"kubernetes.io/limit-ranger": "LimitRanger plugin set: cpu, memory request and limit for container"},
 		NodeSelector:       map[string]string{"storage": "ssd"},
 		RuntimeClassName:   &runtimeClass,
 		ServiceAccountName: "wp-svc-acc",

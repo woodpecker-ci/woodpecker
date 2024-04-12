@@ -11,6 +11,8 @@ type BackendOptions struct {
 	Resources          Resources         `mapstructure:"resources"`
 	RuntimeClassName   *string           `mapstructure:"runtimeClassName"`
 	ServiceAccountName string            `mapstructure:"serviceAccountName"`
+	Labels             map[string]string `mapstructure:"labels"`
+	Annotations        map[string]string `mapstructure:"annotations"`
 	NodeSelector       map[string]string `mapstructure:"nodeSelector"`
 	Tolerations        []Toleration      `mapstructure:"tolerations"`
 	SecurityContext    *SecurityContext  `mapstructure:"securityContext"`
