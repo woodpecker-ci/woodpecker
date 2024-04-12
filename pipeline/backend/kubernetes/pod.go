@@ -121,7 +121,7 @@ func podSpec(step *types.Step, config *config, options BackendOptions) (v1.PodSp
 		ServiceAccountName: options.ServiceAccountName,
 		ImagePullSecrets:   imagePullSecretsReferences(config.ImagePullSecretNames),
 		HostAliases:        hostAliases(step.ExtraHosts),
-		NodeSelector:       nodeSelector(options.NodeSelector, step.Environment["CI_SYSTEM_PLATFORM"]),
+		NodeSelector:       nodeSelector(options.NodeSelector, config.PodNodeSelector, step.Environment["CI_SYSTEM_PLATFORM"]),
 		Tolerations:        tolerations(options.Tolerations),
 		SecurityContext:    podSecurityContext(options.SecurityContext, config.SecurityContext, step.Privileged),
 	}
@@ -299,13 +299,18 @@ func resourceList(resources map[string]string) (v1.ResourceList, error) {
 	return requestResources, nil
 }
 
-func nodeSelector(backendNodeSelector map[string]string, platform string) map[string]string {
+func nodeSelector(backendNodeSelector map[string]string, configNodeSelector map[string]string, platform string) map[string]string {
 	nodeSelector := make(map[string]string)
 
 	if platform != "" {
 		arch := strings.Split(platform, "/")[1]
 		nodeSelector[v1.LabelArchStable] = arch
 		log.Trace().Msgf("using the node selector from the Agent's platform: %v", nodeSelector)
+	}
+
+	if len(configNodeSelector) > 0 {
+		log.Trace().Msgf("appending labels to the node selector from the configuration: %v", configNodeSelector)
+		maps.Copy(nodeSelector, configNodeSelector)
 	}
 
 	if len(backendNodeSelector) > 0 {

@@ -243,7 +243,8 @@ func TestFullPod(t *testing.T) {
 			],
 			"restartPolicy": "Never",
 			"nodeSelector": {
-				"storage": "ssd"
+				"storage": "ssd",
+				"topology.kubernetes.io/region": "eu-central-1"
 			},
 			"runtimeClassName": "runc",
 			"serviceAccountName": "wp-svc-acc",
@@ -332,6 +333,7 @@ func TestFullPod(t *testing.T) {
 		ImagePullSecretNames: []string{"regcred", "another-pull-secret"},
 		PodLabels:            map[string]string{"app": "test"},
 		PodAnnotations:       map[string]string{"apps.kubernetes.io/pod-index": "0"},
+		PodNodeSelector:      map[string]string{"topology.kubernetes.io/region": "eu-central-1"},
 		SecurityContext:      SecurityContextConfig{RunAsNonRoot: false},
 	}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{
 		NodeSelector:       map[string]string{"storage": "ssd"},
