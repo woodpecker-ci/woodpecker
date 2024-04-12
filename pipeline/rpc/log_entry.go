@@ -89,7 +89,7 @@ func (w *LineWriter) Write(p []byte) (n int, err error) {
 		Line:     w.num,
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second) //nolint: gomnd
 	defer cancel()
 
 	if err := w.peer.Log(ctx, line); err != nil {
