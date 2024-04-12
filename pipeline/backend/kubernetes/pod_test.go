@@ -330,11 +330,13 @@ func TestFullPod(t *testing.T) {
 		ExtraHosts:  hostAliases,
 		Ports:       ports,
 	}, &config{
-		Namespace:            "woodpecker",
-		ImagePullSecretNames: []string{"regcred", "another-pull-secret"},
-		PodLabels:            map[string]string{"app": "test"},
-		PodAnnotations:       map[string]string{"apps.kubernetes.io/pod-index": "0"},
-		SecurityContext:      SecurityContextConfig{RunAsNonRoot: false},
+		Namespace:                   "woodpecker",
+		ImagePullSecretNames:        []string{"regcred", "another-pull-secret"},
+		PodLabels:                   map[string]string{"app": "test"},
+		PodLabelsAllowFromStep:      true,
+		PodAnnotations:              map[string]string{"apps.kubernetes.io/pod-index": "0"},
+		PodAnnotationsAllowFromStep: true,
+		SecurityContext:             SecurityContextConfig{RunAsNonRoot: false},
 	}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{
 		Labels:             map[string]string{"part-of": "woodpecker-ci"},
 		Annotations:        map[string]string{"kubernetes.io/limit-ranger": "LimitRanger plugin set: cpu, memory request and limit for container"},
