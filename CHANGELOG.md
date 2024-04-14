@@ -1,25 +1,25 @@
 # Changelog
 
-## [2.5.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.5.0) - 2024-04-10
+## [2.5.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.5.0) - 2024-04-14
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @anbraten, @aumetra, @manuelluis, @nemunaire, @qwerty287, @stevapple
-
-### 📚 Documentation
-
-- Document how to enable parallel step exec for all steps [[#3605](https://github.com/woodpecker-ci/woodpecker/pull/3605)]
-- Lock file maintenance [[#3562](https://github.com/woodpecker-ci/woodpecker/pull/3562)]
-- Update dependency @types/marked to v6 [[#3544](https://github.com/woodpecker-ci/woodpecker/pull/3544)]
-- Update docs npm deps non-major [[#3485](https://github.com/woodpecker-ci/woodpecker/pull/3485)]
-- Docs updates and fixes [[#3535](https://github.com/woodpecker-ci/woodpecker/pull/3535)]
+@6543, @anbraten, @aumetra, @manuelluis, @nemunaire, @qwerty287, @stevapple, @xoxys
 
 ### 🐛 Bug Fixes
 
+- Apply skip ci filter only on push events [[#3612](https://github.com/woodpecker-ci/woodpecker/pull/3612)]
 - Fix bitbucket file fetching [[#3604](https://github.com/woodpecker-ci/woodpecker/pull/3604)]
 - agent: Continue to retry indefinitely [[#3599](https://github.com/woodpecker-ci/woodpecker/pull/3599)]
 - Fix cli version comparison and improve setup [[#3518](https://github.com/woodpecker-ci/woodpecker/pull/3518)]
 - Fix flag name [[#3534](https://github.com/woodpecker-ci/woodpecker/pull/3534)]
+
+### 📚 Documentation
+
+- Document how to enable parallel step exec for all steps [[#3605](https://github.com/woodpecker-ci/woodpecker/pull/3605)]
+- Update dependency @types/marked to v6 [[#3544](https://github.com/woodpecker-ci/woodpecker/pull/3544)]
+- Update docs npm deps non-major [[#3485](https://github.com/woodpecker-ci/woodpecker/pull/3485)]
+- Docs updates and fixes [[#3535](https://github.com/woodpecker-ci/woodpecker/pull/3535)]
 
 ### 📈 Enhancement
 
@@ -42,6 +42,7 @@
 - Update dependency @intlify/unplugin-vue-i18n to v4 [[#3572](https://github.com/woodpecker-ci/woodpecker/pull/3572)]
 - Update golang (packages) [[#3564](https://github.com/woodpecker-ci/woodpecker/pull/3564)]
 - Update dependency typescript to v5.4.3 [[#3563](https://github.com/woodpecker-ci/woodpecker/pull/3563)]
+- Lock file maintenance [[#3562](https://github.com/woodpecker-ci/woodpecker/pull/3562)]
 - Update pre-commit non-major [[#3556](https://github.com/woodpecker-ci/woodpecker/pull/3556)]
 - Update web npm deps non-major [[#3549](https://github.com/woodpecker-ci/woodpecker/pull/3549)]
 - Update dependency @types/node-emoji to v2 [[#3545](https://github.com/woodpecker-ci/woodpecker/pull/3545)]
