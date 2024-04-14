@@ -50,7 +50,8 @@ git commit -m "updated README [CI SKIP]"
 
 ## Steps
 
-Every step of your workflow executes commands inside a specified container. The defined commands are executed serially.
+Every step of your workflow executes commands inside a specified container.<br>
+The defined steps are executed in sequence by default, if they should run in parallel you can use [`depends_on`](./20-workflow-syntax.md#depends_on).<br>
 The associated commit is checked out with git to a workspace which is mounted to every step of the workflow as the working directory.
 
 ```diff
@@ -483,6 +484,19 @@ Normally steps of a workflow are executed serially in the order in which they ar
      commands:
        - go test
 ```
+
+:::note
+You can define a step to start immediately without dependencies by adding an empty `depends_on: []`. By setting `depends_on` on a single step all other steps will be immediately executed as well if no further dependencies are specified.
+
+```yaml
+steps:
+  - name: check code format
+    image: mstruebing/editorconfig-checker
+    depends_on: [] # enable parallel steps
+  ...
+```
+
+:::
 
 ### `volumes`
 
