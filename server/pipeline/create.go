@@ -42,7 +42,7 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 		return nil, fmt.Errorf(msg)
 	}
 
-	if pipeline.Event == model.EventPush {
+	if pipeline.Event == model.EventPush || pipeline.Event == model.EventPull || pipeline.Event == model.EventPullClosed {
 		skipMatch := skipPipelineRegex.FindString(pipeline.Message)
 		if len(skipMatch) > 0 {
 			ref := pipeline.Commit
