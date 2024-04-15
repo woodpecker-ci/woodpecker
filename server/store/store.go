@@ -14,7 +14,6 @@
 
 package store
 
-//go:generate go install github.com/vektra/mockery/v2@latest
 //go:generate mockery --name Store --output mocks --case underscore
 
 import (
