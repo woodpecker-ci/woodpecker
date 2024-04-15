@@ -90,7 +90,11 @@
     "binutils",
     "nocolor",
     "logfile",
-    "Keyfunc"
+    "Keyfunc",
+    "protoc",
+    "PROTOC",
+    "GOBIN",
+    "GOPATH"
   ],
   "ignorePaths": [
     "**/node_modules/**/*",
