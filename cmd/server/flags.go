@@ -246,11 +246,6 @@ var flags = append([]cli.Flag{
 		Usage:   "Disable version check in admin web ui.",
 		Name:    "skip-version-check",
 	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_ADDON_FORGE"},
-		Name:    "addon-forge",
-		Usage:   "forge addon",
-	},
 	//
 	// backend options for pipeline compiler
 	//
@@ -328,6 +323,14 @@ var flags = append([]cli.Flag{
 		Name:    "forge-skip-verify",
 		Usage:   "skip ssl verification",
 		EnvVars: []string{"WOODPECKER_FORGE_SKIP_VERIFY", "WOODPECKER_GITHUB_SKIP_VERIFY", "WOODPECKER_GITLAB_SKIP_VERIFY", "WOODPECKER_GITEA_SKIP_VERIFY", "WOODPECKER_BITBUCKET_SKIP_VERIFY"},
+	},
+	//
+	// Addon
+	//
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_ADDON_FORGE"},
+		Name:    "addon-forge",
+		Usage:   "path to forge addon executable",
 	},
 	//
 	// GitHub

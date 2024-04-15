@@ -113,6 +113,9 @@ func setupForgeService(c *cli.Context, _store store.Store) error {
 	_forge.SkipVerify = c.Bool("forge-skip-verify")
 
 	switch {
+	case c.String("addon-forge") != "":
+		_forge.Type = model.ForgeTypeAddon
+		_forge.AdditionalOptions["executable"] = c.String("addon-forge")
 	case c.Bool("github"):
 		_forge.Type = model.ForgeTypeGithub
 		_forge.AdditionalOptions["merge-ref"] = c.Bool("github-merge-ref")
