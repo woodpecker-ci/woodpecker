@@ -1,10 +1,14 @@
 # Changelog
 
-## [2.5.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.5.0) - 2024-04-14
+## [2.5.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.5.0) - 2024-04-15
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @anbraten, @aumetra, @manuelluis, @nemunaire, @qwerty287, @stevapple, @xoxys
+@6543, @anbraten, @aumetra, @manuelluis, @nemunaire, @qwerty287, @stevapple, @xoxys, @zc-devs
+
+### ✨ Features
+
+- Step logs removing API and Button [[#3451](https://github.com/woodpecker-ci/woodpecker/pull/3451)]
 
 ### 🐛 Bug Fixes
 
