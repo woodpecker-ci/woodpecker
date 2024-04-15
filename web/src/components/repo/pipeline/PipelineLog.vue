@@ -21,7 +21,7 @@
             @click="download"
           />
           <IconButton
-            v-if="step?.end_time !== undefined && hasLogs && isRepoAdmin"
+            v-if="step?.end_time !== undefined && hasLogs && hasPushPermission"
             :title="$t('repo.pipeline.actions.log_delete')"
             class="!hover:bg-white !hover:bg-opacity-10"
             icon="trash"
@@ -168,7 +168,7 @@ ansiUp.value.use_classes = true;
 const logBuffer = ref<LogLine[]>([]);
 
 const maxLineCount = 5000; // TODO(2653): set back to 500 and implement lazy-loading support
-const isRepoAdmin = computed(() => repoPermissions?.value?.admin);
+const hasPushPermission = computed(() => repoPermissions?.value?.push);
 
 function isSelected(line: LogLine): boolean {
   return route.hash === `#L${line.number}`;
@@ -311,8 +311,15 @@ async function deleteLogs() {
     throw new Error('The repository, pipeline or step was undefined');
   }
 
+  // TODO use proper dialog (copy-pasted from web/src/components/secrets/SecretList.vue:deleteSecret)
+  // eslint-disable-next-line no-alert, no-restricted-globals
+  if (!confirm(i18n.t('repo.pipeline.log_delete_confirm'))) {
+    return;
+  }
+
   try {
     await apiClient.deleteLogs(repo.value.id, pipeline.value.number, step.value.id);
+    log.value = [];
   } catch (e) {
     notifications.notifyError(e, i18n.t('repo.pipeline.log_delete_error'));
   }

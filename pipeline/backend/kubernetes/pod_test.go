@@ -20,6 +20,7 @@ import (
 
 	"github.com/kinbiko/jsonassert"
 	"github.com/stretchr/testify/assert"
+	v1 "k8s.io/api/core/v1"
 
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 )
@@ -244,6 +245,7 @@ func TestFullPod(t *testing.T) {
 			"nodeSelector": {
 				"storage": "ssd"
 			},
+			"runtimeClassName": "runc",
 			"serviceAccountName": "wp-svc-acc",
 			"securityContext": {
 				"runAsUser": 101,
@@ -288,6 +290,7 @@ func TestFullPod(t *testing.T) {
 		"status": {}
 	}`
 
+	runtimeClass := "runc"
 	hostAliases := []types.HostAlias{
 		{Name: "cloudflare", IP: "1.1.1.1"},
 		{Name: "cf.v6", IP: "2606:4700:4700::64"},
@@ -332,6 +335,7 @@ func TestFullPod(t *testing.T) {
 		SecurityContext:      SecurityContextConfig{RunAsNonRoot: false},
 	}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{
 		NodeSelector:       map[string]string{"storage": "ssd"},
+		RuntimeClassName:   &runtimeClass,
 		ServiceAccountName: "wp-svc-acc",
 		Tolerations:        []Toleration{{Key: "net-port", Value: "100Mbit", Effect: TaintEffectNoSchedule}},
 		Resources: Resources{
@@ -347,4 +351,67 @@ func TestFullPod(t *testing.T) {
 
 	ja := jsonassert.New(t)
 	ja.Assertf(string(podJSON), expected)
+}
+
+func TestPodPrivilege(t *testing.T) {
+	createTestPod := func(stepPrivileged, globalRunAsRoot bool, secCtx SecurityContext) (*v1.Pod, error) {
+		return mkPod(&types.Step{
+			Name:       "go-test",
+			Image:      "golang:1.16",
+			Privileged: stepPrivileged,
+		}, &config{
+			Namespace:       "woodpecker",
+			SecurityContext: SecurityContextConfig{RunAsNonRoot: globalRunAsRoot},
+		}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{
+			SecurityContext: &secCtx,
+		})
+	}
+
+	// securty context is requesting user and group 101 (non-root)
+	secCtx := SecurityContext{
+		RunAsUser:  newInt64(101),
+		RunAsGroup: newInt64(101),
+		FSGroup:    newInt64(101),
+	}
+	pod, err := createTestPod(false, false, secCtx)
+	assert.NoError(t, err)
+	assert.Equal(t, int64(101), *pod.Spec.SecurityContext.RunAsUser)
+	assert.Equal(t, int64(101), *pod.Spec.SecurityContext.RunAsGroup)
+	assert.Equal(t, int64(101), *pod.Spec.SecurityContext.FSGroup)
+
+	// securty context is requesting root, but step is not privileged
+	secCtx = SecurityContext{
+		RunAsUser:  newInt64(0),
+		RunAsGroup: newInt64(0),
+		FSGroup:    newInt64(0),
+	}
+	pod, err = createTestPod(false, false, secCtx)
+	assert.NoError(t, err)
+	assert.Nil(t, pod.Spec.SecurityContext)
+	assert.Nil(t, pod.Spec.Containers[0].SecurityContext)
+
+	// step is not privileged, but security context is requesting privileged
+	secCtx = SecurityContext{
+		Privileged: newBool(true),
+	}
+	pod, err = createTestPod(false, false, secCtx)
+	assert.NoError(t, err)
+	assert.Nil(t, pod.Spec.SecurityContext)
+	assert.Nil(t, pod.Spec.Containers[0].SecurityContext)
+
+	// step is privileged and security context is requesting privileged
+	secCtx = SecurityContext{
+		Privileged: newBool(true),
+	}
+	pod, err = createTestPod(true, false, secCtx)
+	assert.NoError(t, err)
+	assert.Equal(t, true, *pod.Spec.Containers[0].SecurityContext.Privileged)
+
+	// global runAsNonRoot is true and override is requested value by security context
+	secCtx = SecurityContext{
+		RunAsNonRoot: newBool(false),
+	}
+	pod, err = createTestPod(false, true, secCtx)
+	assert.NoError(t, err)
+	assert.Equal(t, true, *pod.Spec.SecurityContext.RunAsNonRoot)
 }

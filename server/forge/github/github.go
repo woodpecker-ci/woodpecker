@@ -26,7 +26,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/google/go-github/v59/github"
+	"github.com/google/go-github/v61/github"
 	"github.com/rs/zerolog/log"
 	"golang.org/x/oauth2"
 
@@ -51,6 +51,7 @@ type Opts struct {
 	Secret     string // GitHub oauth client secret.
 	SkipVerify bool   // Skip ssl verification.
 	MergeRef   bool   // Clone pull requests using the merge ref.
+	OnlyPublic bool   // Only obtain OAuth tokens with access to public repos.
 }
 
 // New returns a Forge implementation that integrates with a GitHub Cloud or
@@ -63,6 +64,7 @@ func New(opts Opts) (forge.Forge, error) {
 		Secret:     opts.Secret,
 		SkipVerify: opts.SkipVerify,
 		MergeRef:   opts.MergeRef,
+		OnlyPublic: opts.OnlyPublic,
 	}
 	if opts.URL != defaultURL {
 		r.url = strings.TrimSuffix(opts.URL, "/")
@@ -79,6 +81,7 @@ type client struct {
 	Secret     string
 	SkipVerify bool
 	MergeRef   bool
+	OnlyPublic bool
 }
 
 // Name returns the string name of this driver
@@ -405,10 +408,17 @@ func (c *client) newContext(ctx context.Context) context.Context {
 
 // helper function to return the GitHub oauth2 config
 func (c *client) newConfig() *oauth2.Config {
+	scopes := []string{"user:email", "read:org"}
+	if c.OnlyPublic {
+		scopes = append(scopes, []string{"admin:repo_hook", "repo:status"}...)
+	} else {
+		scopes = append(scopes, "repo")
+	}
+
 	return &oauth2.Config{
 		ClientID:     c.Client,
 		ClientSecret: c.Secret,
-		Scopes:       []string{"repo", "user:email", "read:org"},
+		Scopes:       scopes,
 		Endpoint: oauth2.Endpoint{
 			AuthURL:  fmt.Sprintf("%s/login/oauth/authorize", c.url),
 			TokenURL: fmt.Sprintf("%s/login/oauth/access_token", c.url),
@@ -465,15 +475,7 @@ func matchingHooks(hooks []*github.Hook, rawurl string) *github.Hook {
 		if hook.ID == nil {
 			continue
 		}
-		v, ok := hook.Config["url"]
-		if !ok {
-			continue
-		}
-		s, ok := v.(string)
-		if !ok {
-			continue
-		}
-		hookURL, err := url.Parse(s)
+		hookURL, err := url.Parse(hook.Config.GetURL())
 		if err == nil && hookURL.Host == link.Host {
 			return hook
 		}
@@ -489,7 +491,9 @@ func (c *client) Status(ctx context.Context, user *model.User, repo *model.Repo,
 	client := c.newClientToken(ctx, user.Token)
 
 	if pipeline.Event == model.EventDeploy {
+		// Get id from url. If not found, skip.
 		matches := reDeploy.FindStringSubmatch(pipeline.ForgeURL)
+		//nolint:gomnd
 		if len(matches) != 2 {
 			return nil
 		}
@@ -526,9 +530,9 @@ func (c *client) Activate(ctx context.Context, u *model.User, r *model.Repo, lin
 			"pull_request",
 			"deployment",
 		},
-		Config: map[string]any{
-			"url":          link,
-			"content_type": "form",
+		Config: &github.HookConfig{
+			URL:         &link,
+			ContentType: github.String("form"),
 		},
 	}
 	_, _, err := client.Repositories.CreateHook(ctx, r.Owner, r.Name, hook)
@@ -626,7 +630,7 @@ func (c *client) loadChangedFilesFromPullRequest(ctx context.Context, pull *gith
 
 			opts.Page = resp.NextPage
 		}
-		return utils.DedupStrings(fileList), nil
+		return utils.DeduplicateStrings(fileList), nil
 	})
 
 	return pipeline, err

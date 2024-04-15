@@ -390,6 +390,10 @@
                         "public": "Publique"
                     },
                     "visibility": "Visibilité du projet"
+                },
+                "allow_deploy": {
+                    "allow": "Autoriser les déploiements",
+                    "desc": "Autoriser les déploiements depuis les pipelines ayant réussis. À utiliser que si vous avez confiance dans les utilisateurs ayant un accès en écriture."
                 }
             },
             "not_allowed": "Vous n'êtes pas autorisé à accéder aux paramètres de ce dépôt",
@@ -505,10 +509,27 @@
                 "show": "Afficher les secrets",
                 "value": "Valeur"
             },
-            "settings": "Paramètres du compte utilisateur"
+            "settings": "Paramètres du compte utilisateur",
+            "cli_and_api": {
+                "desc": "Jeton d'Accès Personnel, ligne de command et usage de l'API",
+                "token": "Jeton d'Accès Personnel",
+                "api_usage": "Exemple d'utilisation de l'API",
+                "download_cli": "Télécharger l'interface en ligne de commande",
+                "reset_token": "Réinitialiser le jeton\"",
+                "cli_and_api": "Ligne de commande et API",
+                "cli_usage": "Exemple d'utilisation de la ligne de commande",
+                "swagger_ui": "Interface Swagger"
+            }
         }
     },
     "username": "Nom d'utilisateur",
     "welcome": "Bienvenue sur Woodpecker",
-    "empty_list": "Aucune {entity} trouvée !"
+    "empty_list": "Aucune {entity} trouvée !",
+    "login_to_cli": "Login en ligne de commande",
+    "abort": "Abandonner",
+    "cli_login_success": "Connexion en ligne de commande réussie",
+    "cli_login_failed": "Connexion en ligne de commande échouée",
+    "cli_login_denied": "Connexion à la ligne de commande interdite",
+    "return_to_cli": "Vous pouvez fermer cet onglet et revenir à la ligne de commande.",
+    "login_to_cli_description": "En continuant, vous serez connecté via la ligne de commande."
 }

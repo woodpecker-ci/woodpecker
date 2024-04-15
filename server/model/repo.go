@@ -44,6 +44,7 @@ type Repo struct {
 	IsGated                      bool           `json:"gated"                           xorm:"repo_gated"`
 	IsActive                     bool           `json:"active"                          xorm:"repo_active"`
 	AllowPull                    bool           `json:"allow_pr"                        xorm:"repo_allow_pr"`
+	AllowDeploy                  bool           `json:"allow_deploy"                    xorm:"repo_allow_deploy"`
 	Config                       string         `json:"config_file"                     xorm:"varchar(500) 'repo_config_path'"`
 	Hash                         string         `json:"-"                               xorm:"varchar(500) 'repo_hash'"`
 	Perm                         *Perm          `json:"-"                               xorm:"-"`
@@ -65,13 +66,13 @@ func (r *Repo) ResetVisibility() {
 
 // ParseRepo parses the repository owner and name from a string.
 func ParseRepo(str string) (user, repo string, err error) {
-	parts := strings.Split(str, "/")
-	if len(parts) != 2 {
-		err = fmt.Errorf("error: Invalid or missing repository. eg octocat/hello-world")
+	before, after, _ := strings.Cut(str, "/")
+	if before == "" || after == "" {
+		err = fmt.Errorf("invalid or missing repository (e.g. octocat/hello-world)")
 		return
 	}
-	user = parts[0]
-	repo = parts[1]
+	user = before
+	repo = after
 	return
 }
 
@@ -112,6 +113,7 @@ type RepoPatch struct {
 	Timeout                      *int64          `json:"timeout,omitempty"`
 	Visibility                   *string         `json:"visibility,omitempty"`
 	AllowPull                    *bool           `json:"allow_pr,omitempty"`
+	AllowDeploy                  *bool           `json:"allow_deploy,omitempty"`
 	CancelPreviousPipelineEvents *[]WebhookEvent `json:"cancel_previous_pipeline_events"`
 	NetrcOnlyTrusted             *bool           `json:"netrc_only_trusted"`
 } //	@name RepoPatch

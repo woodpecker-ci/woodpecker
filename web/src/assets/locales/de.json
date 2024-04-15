@@ -391,6 +391,10 @@
                         "public": "Öffentlich"
                     },
                     "visibility": "Sichtbarkeit des Projekts"
+                },
+                "allow_deploy": {
+                    "allow": "Deployments erlauben",
+                    "desc": "Deployments von erolgreichen Pipelines erlauben. Nur benutzen, wenn du allen Nutzern mit Push-Zugriff vertraust."
                 }
             },
             "not_allowed": "Zugriff auf die Einstellungen dieses Repositories nicht erlaubt",
@@ -506,9 +510,26 @@
                 "show": "Geheimnisse anzeigen",
                 "value": "Wert"
             },
-            "settings": "Benutzereinstellungen"
+            "settings": "Benutzereinstellungen",
+            "cli_and_api": {
+                "desc": "Persönlicher Zugangsschlüssel, CLI- und API-Nutzung",
+                "token": "Persönlicher Zugangsschlüssel",
+                "api_usage": "Beispiel zur Nutzung der API",
+                "download_cli": "CLI herunterladen",
+                "reset_token": "Schlüssel zurücksetzen",
+                "swagger_ui": "Swagger-UI",
+                "cli_and_api": "CLI/API",
+                "cli_usage": "Beispiel zur Nutzung des CLI"
+            }
         }
     },
     "username": "Benutzername",
-    "welcome": "Willkommen bei Woodpecker"
+    "welcome": "Willkommen bei Woodpecker",
+    "login_to_cli": "In CLI anmelden",
+    "login_to_cli_description": "Wenn du fortfährst, wirst bei im CLI angemeldet.",
+    "abort": "Abbrechen",
+    "cli_login_success": "Anmelden im CLI erfolgreich",
+    "cli_login_failed": "Anmelden im CLI fehlgeschlagen",
+    "cli_login_denied": "Anmelden im CLI abgelehnt",
+    "return_to_cli": "Du kannst diesen Tab jetzt schließen und zur CLI zurückkehren."
 }

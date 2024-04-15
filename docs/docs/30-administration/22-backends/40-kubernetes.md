@@ -6,6 +6,12 @@ toc_max_heading_level: 2
 
 The kubernetes backend executes steps inside standalone pods. A temporary PVC is created for the lifetime of the pipeline to transfer files between steps.
 
+## Images from private registries
+
+In order to pull private container images defined in your pipeline YAML you must provide [registry credentials in Kubernetes secret](https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/).
+As the secret is Agent-wide, it has to be placed in namespace defined by `WOODPECKER_BACKEND_K8S_NAMESPACE`.
+Besides, you need to provide the secret name to Agent via `WOODPECKER_BACKEND_K8S_PULL_SECRET_NAMES`.
+
 ## Job specific configuration
 
 ### Resources
@@ -32,14 +38,21 @@ steps:
             cpu: 1000m
 ```
 
-### `serviceAccountName`
+You can use [Limit Ranges](https://kubernetes.io/docs/concepts/policy/limit-range/) if you want to set the limits by per-namespace basis.
 
-Specify the name of the ServiceAccount which the build pod will mount. This serviceAccount must be created externally.
-See the [kubernetes documentation](https://kubernetes.io/docs/concepts/security/service-accounts/) for more information on using serviceAccounts.
+### Runtime class
 
-### `nodeSelector`
+`runtimeClassName` specifies the name of the RuntimeClass which will be used to run this pod. If no `runtimeClassName` is specified, the default RuntimeHandler will be used.
+See the [kubernetes documentation](https://kubernetes.io/docs/concepts/containers/runtime-class/) for more information on specifying runtime classes.
 
-Specifies the label which is used to select the node on which the job will be executed.
+### Service account
+
+`serviceAccountName` specifies the name of the ServiceAccount which the pod will mount. This service account must be created externally.
+See the [kubernetes documentation](https://kubernetes.io/docs/concepts/security/service-accounts/) for more information on using service accounts.
+
+### Node selector
+
+`nodeSelector` specifies the labels which are used to select the node on which the job will be executed.
 
 Labels defined here will be appended to a list which already contains `"kubernetes.io/arch"`.
 By default `"kubernetes.io/arch"` is inferred from the agents' platform. One can override it by setting that label in the `nodeSelector` section of the `backend_options`.
@@ -66,9 +79,11 @@ And then overwrite the `nodeSelector` in the `backend_options` section of the st
           kubernetes.io/arch: "${ARCH}"
 ```
 
-### `tolerations`
+You can use [PodNodeSelector](https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#podnodeselector) admission controller if you want to set the node selector by per-namespace basis.
 
-When you use nodeSelector and the node pool is configured with Taints, you need to specify the Tolerations. Tolerations allow the scheduler to schedule pods with matching taints.
+### Tolerations
+
+When you use `nodeSelector` and the node pool is configured with Taints, you need to specify the Tolerations. Tolerations allow the scheduler to schedule pods with matching taints.
 See the [kubernetes documentation](https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/) for more information on using tolerations.
 
 Example pipeline configuration:
@@ -102,8 +117,8 @@ steps:
 
 ### Volumes
 
-To mount volumes a persistent volume (PV) and persistent volume claim (PVC) are needed on the cluster which can be referenced in steps via the `volume:` option.
-Assuming a PVC named "woodpecker-cache" exists, it can be referenced as follows in a step:
+To mount volumes a persistent volume (PV) and persistent volume claim (PVC) are needed on the cluster which can be referenced in steps via the `volumes` option.
+Assuming a PVC named `woodpecker-cache` exists, it can be referenced as follows in a step:
 
 ```yaml
 steps:
@@ -117,9 +132,9 @@ steps:
     [...]
 ```
 
-### `securityContext`
+### Security context
 
-Use the following configuration to set the `securityContext` for the pod/container running a given pipeline step:
+Use the following configuration to set the [Security Context](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/) for the pod/container running a given pipeline step:
 
 ```yaml
 steps:
@@ -154,7 +169,31 @@ spec:
   [...]
 ```
 
-See the [kubernetes documentation](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/) for more information on using `securityContext`.
+You can also restrict a container's syscalls with [seccomp](https://kubernetes.io/docs/tutorials/security/seccomp/) profile
+
+```yaml
+backend_options:
+  kubernetes:
+    securityContext:
+      seccompProfile:
+        type: Localhost
+        localhostProfile: profiles/audit.json
+```
+
+or restrict a container's access to resources by specifying [AppArmor](https://kubernetes.io/docs/tutorials/security/apparmor/) profile
+
+```yaml
+backend_options:
+  kubernetes:
+    securityContext:
+      apparmorProfile:
+        type: Localhost
+        localhostProfile: k8s-apparmor-example-deny-write
+```
+
+:::note
+AppArmor syntax follows [KEP-24](https://github.com/kubernetes/enhancements/blob/fddcbb9cbf3df39ded03bad71228265ac6e5215f/keps/sig-node/24-apparmor/README.md).
+:::
 
 ## Tips and tricks
 
@@ -215,3 +254,9 @@ Additional annotations to apply to worker pods. Must be a YAML object, e.g. `{"e
 > Default: `false`
 
 Determines if containers must be required to run as non-root users.
+
+### `WOODPECKER_BACKEND_K8S_PULL_SECRET_NAMES`
+
+> Default: empty
+
+Secret names to pull images from private repositories. See, how to [Pull an Image from a Private Registry](https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/).

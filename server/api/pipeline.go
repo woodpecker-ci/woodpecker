@@ -251,13 +251,13 @@ func DeleteStepLogs(c *gin.Context) {
 		return
 	}
 
-	stepId, err := strconv.ParseInt(c.Params.ByName("stepId"), 10, 64)
+	stepID, err := strconv.ParseInt(c.Params.ByName("stepId"), 10, 64)
 	if err != nil {
 		_ = c.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
 
-	_step, err := _store.StepLoad(stepId)
+	_step, err := _store.StepLoad(stepID)
 	if err != nil {
 		handleDBError(c, err)
 		return
@@ -265,7 +265,7 @@ func DeleteStepLogs(c *gin.Context) {
 
 	if _step.PipelineID != _pipeline.ID {
 		// make sure we cannot read arbitrary logs by id
-		_ = c.AbortWithError(http.StatusBadRequest, fmt.Errorf("step with id %d is not part of repo %s", stepId, repo.FullName))
+		_ = c.AbortWithError(http.StatusBadRequest, fmt.Errorf("step with id %d is not part of repo %s", stepID, repo.FullName))
 		return
 	}
 
@@ -467,16 +467,22 @@ func PostPipeline(c *gin.Context) {
 	refreshUserToken(c, user)
 
 	// make Deploy overridable
-	pl.Deploy = c.DefaultQuery("deploy_to", pl.Deploy)
 
-	// make Event overridable
+	// make Event overridable to deploy
+	// TODO refactor to use own proper API for deploy
 	if event, ok := c.GetQuery("event"); ok {
 		pl.Event = model.WebhookEvent(event)
-
-		if err := pl.Event.Validate(); err != nil {
-			_ = c.AbortWithError(http.StatusBadRequest, err)
+		if pl.Event != model.EventDeploy {
+			_ = c.AbortWithError(http.StatusBadRequest, model.ErrInvalidWebhookEvent)
 			return
 		}
+
+		if !repo.AllowDeploy {
+			_ = c.AbortWithError(http.StatusForbidden, fmt.Errorf("repo does not allow deployments"))
+			return
+		}
+
+		pl.Deploy = c.DefaultQuery("deploy_to", pl.Deploy)
 	}
 
 	// Read query string parameters into pipelineParams, exclude reserved params

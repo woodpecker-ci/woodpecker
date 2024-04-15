@@ -50,7 +50,8 @@ git commit -m "updated README [CI SKIP]"
 
 ## Steps
 
-Every step of your workflow executes commands inside a specified container. The defined commands are executed serially.
+Every step of your workflow executes commands inside a specified container.<br>
+The defined steps are executed in sequence by default, if they should run in parallel you can use [`depends_on`](./20-workflow-syntax.md#depends_on).<br>
 The associated commit is checked out with git to a workspace which is mounted to every step of the workflow as the working directory.
 
 ```diff
@@ -188,7 +189,8 @@ Some of the steps may be allowed to fail without causing the whole workflow and 
 
 ### `when` - Conditional Execution
 
-Woodpecker supports defining a list of conditions for a step by using a `when` block. If at least one of the conditions in the `when` block evaluate to true the step is executed, otherwise it is skipped. A condition can be a check like:
+Woodpecker supports defining a list of conditions for a step by using a `when` block. If at least one of the conditions in the `when` block evaluate to true the step is executed, otherwise it is skipped. A condition is evaluated to true if _all_ subconditions are true.
+A condition can be a check like:
 
 ```diff
  steps:
@@ -202,6 +204,11 @@ Woodpecker supports defining a list of conditions for a step by using a `when` b
 +      - event: push
 +        branch: main
 ```
+
+The `slack` step is executed if one of these conditions is met:
+
+1. The pipeline is executed from a pull request in the repo `test/test`
+2. The pipeline is executed from a push to `maiǹ`
 
 #### `repo`
 
@@ -478,6 +485,19 @@ Normally steps of a workflow are executed serially in the order in which they ar
        - go test
 ```
 
+:::note
+You can define a step to start immediately without dependencies by adding an empty `depends_on: []`. By setting `depends_on` on a single step all other steps will be immediately executed as well if no further dependencies are specified.
+
+```yaml
+steps:
+  - name: check code format
+    image: mstruebing/editorconfig-checker
+    depends_on: [] # enable parallel steps
+  ...
+```
+
+:::
+
 ### `volumes`
 
 Woodpecker gives the ability to define Docker volumes in the YAML. You can use this parameter to mount files or folders on the host machine into your containers.
@@ -652,7 +672,7 @@ Example configuration to use a custom clone plugin:
 
 ```diff
  clone:
-   git:
+   - name: git
 +    image: octocat/custom-git-plugin
 ```
 
@@ -702,7 +722,7 @@ skip_clone: true
 
 ## `when` - Global workflow conditions
 
-Woodpecker gives the ability to skip whole workflows (not just steps #when---conditional-execution-1) based on certain conditions by a `when` block. If all conditions in the `when` block evaluate to true the workflow is executed, otherwise it is skipped, but treated as successful and other workflows depending on it will still continue.
+Woodpecker gives the ability to skip whole workflows ([not just steps](#when---conditional-execution)) based on certain conditions by a `when` block. If all conditions in the `when` block evaluate to true the workflow is executed, otherwise it is skipped, but treated as successful and other workflows depending on it will still continue.
 
 For more information about the specific filters, take a look at the [step-specific `when` filters](#when---conditional-execution).
 

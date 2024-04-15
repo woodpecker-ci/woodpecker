@@ -90,6 +90,10 @@
           "allow": "Allow Pull Requests",
           "desc": "Pipelines can run on pull requests."
         },
+        "allow_deploy": {
+          "allow": "Allow deployments",
+          "desc": "Allow deployments from successful pipelines. Only use if you trust all users with push access."
+        },
         "protected": {
           "protected": "Protected",
           "desc": "Every pipeline needs to be approved before being executed."
@@ -241,6 +245,7 @@
       "pipeline": "Pipeline #{pipelineId}",
       "log_title": "Step Logs",
       "log_download_error": "There was an error while downloading the log file",
+      "log_delete_confirm": "Do you really want to delete logs of this step?",
       "log_delete_error": "There was an error while deleting the step logs",
       "actions": {
         "cancel": "Cancel",
@@ -488,15 +493,13 @@
           "pr_warning": "Please be careful with this option as a bad actor can submit a malicious pull request that exposes your secrets."
         }
       },
-      "api": {
-        "api": "API",
-        "desc": "Personal Access Token and API usage",
+      "cli_and_api": {
+        "cli_and_api": "CLI & API",
+        "desc": "Personal Access Token, CLI and API usage",
         "token": "Personal Access Token",
-        "shell_setup": "Shell setup",
         "api_usage": "Example API Usage",
         "cli_usage": "Example CLI Usage",
-        "dl_cli": "Download CLI",
-        "shell_setup_before": "do shell setup steps before",
+        "download_cli": "Download CLI",
         "reset_token": "Reset token",
         "swagger_ui": "Swagger UI"
       }
@@ -510,5 +513,12 @@
   "running_version": "You are running Woodpecker {0}",
   "update_woodpecker": "Please update your Woodpecker instance to {0}",
   "global_level_secret": "global secret",
-  "org_level_secret": "organization secret"
+  "org_level_secret": "organization secret",
+  "login_to_cli": "Login to CLI",
+  "login_to_cli_description": "By continuing you will be logged in to the CLI.",
+  "abort": "Abort",
+  "cli_login_success": "Login to CLI successful",
+  "cli_login_failed": "Login to CLI failed",
+  "cli_login_denied": "Login to CLI denied",
+  "return_to_cli": "You can now close this tab and return to the CLI."
 }

@@ -16,7 +16,6 @@ package types
 
 import (
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/constraint"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/types/base"
 )
 
 type (
@@ -33,9 +32,8 @@ type (
 		SkipClone bool              `yaml:"skip_clone"`
 
 		// Undocumented
-		Cache    base.StringOrSlice `yaml:"cache,omitempty"`
-		Networks WorkflowNetworks   `yaml:"networks,omitempty"`
-		Volumes  WorkflowVolumes    `yaml:"volumes,omitempty"`
+		Networks WorkflowNetworks `yaml:"networks,omitempty"`
+		Volumes  WorkflowVolumes  `yaml:"volumes,omitempty"`
 
 		// Deprecated
 		PlatformDoNotUseIt string `yaml:"platform,omitempty"` // TODO: remove in next major version

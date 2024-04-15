@@ -19,7 +19,7 @@ import (
 	"testing"
 
 	"github.com/franela/goblin"
-	"github.com/google/go-github/v59/github"
+	"github.com/google/go-github/v61/github"
 
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )

@@ -79,7 +79,18 @@
     "HEALTHCHECK",
     "devx",
     "gomod",
-    "laszlocph"
+    "laszlocph",
+    "charmbracelet",
+    "GODEBUG",
+    "netdns",
+    "BUILDPLATFORM",
+    "repology",
+    "WORKDIR",
+    "corepack",
+    "binutils",
+    "nocolor",
+    "logfile",
+    "Keyfunc"
   ],
   "ignorePaths": [
     "**/node_modules/**/*",
@@ -103,10 +114,8 @@
     "agent/",
     "cli/",
     "cmd/",
-    "docker/",
     "docs/",
     "pipeline/",
-    "shared/",
     "server/"
   ],
   "enableFiletypes": ["dockercompose"]

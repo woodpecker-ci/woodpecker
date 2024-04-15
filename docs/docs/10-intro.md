@@ -75,13 +75,13 @@ kubectl apply -f $PLUGIN_TEMPLATE
 
 ```yaml title=".woodpecker.yaml"
 steps:
-  deploy-to-k8s:
+  - name: deploy-to-k8s
     image: laszlocloud/my-k8s-plugin
     settings:
       template: config/k8s/service.yaml
 ```
 
-See [plugin docs](./20-usage/51-plugins/10-overview.md).
+See [plugin docs](./20-usage/51-plugins/51-overview.md).
 
 ## Continue reading
 

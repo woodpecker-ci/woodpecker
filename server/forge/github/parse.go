@@ -22,7 +22,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/google/go-github/v59/github"
+	"github.com/google/go-github/v61/github"
 
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
@@ -215,5 +215,5 @@ func getChangedFilesFromCommits(commits []*github.HeadCommit) []string {
 		files = append(files, cm.Removed...)
 		files = append(files, cm.Modified...)
 	}
-	return utils.DedupStrings(files)
+	return utils.DeduplicateStrings(files)
 }

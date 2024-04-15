@@ -630,7 +630,7 @@
         {
           "type": "object",
           "additionalProperties": {
-            "type": ["boolean", "string", "number"]
+            "type": ["boolean", "string", "number", "array", "object"]
           }
         }
       ]
@@ -696,6 +696,10 @@
         },
         "securityContext": {
           "$ref": "#/definitions/step_backend_kubernetes_security_context"
+        },
+        "runtimeClassName": {
+          "description": "Read more: https://woodpecker-ci.org/docs/administration/backends/kubernetes#runtimeclassname",
+          "type": "string"
         }
       }
     },

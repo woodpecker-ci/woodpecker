@@ -190,7 +190,7 @@ See [Docker backend configuration](./22-backends/10-docker.md#configuration)
 
 ### `WOODPECKER_BACKEND_K8S_*`
 
-See [Kubernetes backend configuration](./22-backends/40-kubernetes.md#configuration)
+See [Kubernetes backend configuration](./22-backends/40-kubernetes.md#general-configuration)
 
 ### `WOODPECKER_BACKEND_LOCAL_*`
 
