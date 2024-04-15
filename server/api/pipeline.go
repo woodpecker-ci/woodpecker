@@ -224,6 +224,66 @@ func GetStepLogs(c *gin.Context) {
 	c.JSON(http.StatusOK, logs)
 }
 
+// DeleteStepLogs
+//
+//	@Summary	Deletes step log
+//	@Router		/repos/{repo_id}/logs/{number}/{stepId} [delete]
+//	@Produce	plain
+//	@Success	204
+//	@Tags		Pipeline logs
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		repo_id			path	int		true	"the repository id"
+//	@Param		number			path	int		true	"the number of the pipeline"
+//	@Param		stepId			path	int		true	"the step id"
+func DeleteStepLogs(c *gin.Context) {
+	_store := store.FromContext(c)
+	repo := session.Repo(c)
+
+	pipelineNumber, err := strconv.ParseInt(c.Params.ByName("number"), 10, 64)
+	if err != nil {
+		_ = c.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+
+	_pipeline, err := _store.GetPipelineNumber(repo, pipelineNumber)
+	if err != nil {
+		handleDBError(c, err)
+		return
+	}
+
+	stepID, err := strconv.ParseInt(c.Params.ByName("stepId"), 10, 64)
+	if err != nil {
+		_ = c.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+
+	_step, err := _store.StepLoad(stepID)
+	if err != nil {
+		handleDBError(c, err)
+		return
+	}
+
+	if _step.PipelineID != _pipeline.ID {
+		// make sure we cannot read arbitrary logs by id
+		_ = c.AbortWithError(http.StatusBadRequest, fmt.Errorf("step with id %d is not part of repo %s", stepID, repo.FullName))
+		return
+	}
+
+	switch _step.State {
+	case model.StatusRunning, model.StatusPending:
+		c.String(http.StatusUnprocessableEntity, "Cannot delete logs for a pending or running step")
+		return
+	}
+
+	err = _store.LogDelete(_step)
+	if err != nil {
+		handleDBError(c, err)
+		return
+	}
+
+	c.Status(http.StatusNoContent)
+}
+
 // GetPipelineConfig
 //
 //	@Summary	Pipeline configuration
@@ -407,23 +467,22 @@ func PostPipeline(c *gin.Context) {
 	refreshUserToken(c, user)
 
 	// make Deploy overridable
-	pl.Deploy = c.DefaultQuery("deploy_to", pl.Deploy)
 
 	// make Event overridable to deploy
 	// TODO refactor to use own proper API for deploy
 	if event, ok := c.GetQuery("event"); ok {
-		// only allow deploy from push, tag and release
-		if pl.Event != model.EventPush && pl.Event != model.EventTag && pl.Event != model.EventRelease {
-			_ = c.AbortWithError(http.StatusBadRequest, fmt.Errorf("can only deploy push, tag and release pipelines"))
-			return
-		}
-
 		pl.Event = model.WebhookEvent(event)
-
 		if pl.Event != model.EventDeploy {
 			_ = c.AbortWithError(http.StatusBadRequest, model.ErrInvalidWebhookEvent)
 			return
 		}
+
+		if !repo.AllowDeploy {
+			_ = c.AbortWithError(http.StatusForbidden, fmt.Errorf("repo does not allow deployments"))
+			return
+		}
+
+		pl.Deploy = c.DefaultQuery("deploy_to", pl.Deploy)
 	}
 
 	// Read query string parameters into pipelineParams, exclude reserved params
