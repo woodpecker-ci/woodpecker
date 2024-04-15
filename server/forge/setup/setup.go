@@ -17,7 +17,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
-func SetupForge(forge *model.Forge) (forge.Forge, error) {
+func Forge(forge *model.Forge) (forge.Forge, error) {
 	switch forge.Type {
 	case model.ForgeTypeAddon:
 		return setupAddon(forge)

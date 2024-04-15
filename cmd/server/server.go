@@ -270,7 +270,7 @@ func setupEvilGlobals(c *cli.Context, s store.Store) error {
 	server.Config.Services.Logs = logging.New()
 	server.Config.Services.Pubsub = pubsub.New()
 	server.Config.Services.Membership = setupMembershipService(c, s)
-	serviceMangager, err := services.NewManager(c, s, setup.SetupForge)
+	serviceMangager, err := services.NewManager(c, s, setup.Forge)
 	if err != nil {
 		return fmt.Errorf("could not setup service manager: %w", err)
 	}
