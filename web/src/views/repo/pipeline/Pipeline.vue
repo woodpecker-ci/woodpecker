@@ -35,13 +35,6 @@
               <span class="text-xl">{{ $t('repo.pipeline.protected.awaits') }}</span>
               <div v-if="repoPermissions.push" class="flex gap-2 flex-wrap items-center justify-center">
                 <Button
-                  color="blue"
-                  :start-icon="forge ?? 'repo'"
-                  :text="$t('repo.pipeline.protected.review')"
-                  :to="pipeline.forge_url"
-                  :title="message"
-                />
-                <Button
                   color="green"
                   :text="$t('repo.pipeline.protected.approve')"
                   :is-loading="isApprovingPipeline"
