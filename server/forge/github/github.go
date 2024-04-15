@@ -26,7 +26,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/google/go-github/v60/github"
+	"github.com/google/go-github/v61/github"
 	"github.com/rs/zerolog/log"
 	"golang.org/x/oauth2"
 
@@ -630,7 +630,7 @@ func (c *client) loadChangedFilesFromPullRequest(ctx context.Context, pull *gith
 
 			opts.Page = resp.NextPage
 		}
-		return utils.DedupStrings(fileList), nil
+		return utils.DeduplicateStrings(fileList), nil
 	})
 
 	return pipeline, err
