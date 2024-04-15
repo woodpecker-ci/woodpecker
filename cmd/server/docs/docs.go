@@ -3891,6 +3891,9 @@ const docTemplate = `{
         "Org": {
             "type": "object",
             "properties": {
+                "forge_id": {
+                    "type": "integer"
+                },
                 "id": {
                     "type": "integer"
                 },
