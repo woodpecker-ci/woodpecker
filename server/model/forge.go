@@ -22,6 +22,7 @@ const (
 	ForgeTypeGitea               ForgeType = "gitea"
 	ForgeTypeBitbucket           ForgeType = "bitbucket"
 	ForgeTypeBitbucketDatacenter ForgeType = "bitbucket-dc"
+	ForgeTypeAddon               ForgeType = "addon"
 )
 
 type Forge struct {
