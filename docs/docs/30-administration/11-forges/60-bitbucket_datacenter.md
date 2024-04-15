@@ -10,24 +10,23 @@ Woodpecker comes with experimental support for Bitbucket Datacenter / Server, fo
 
 To enable Bitbucket Server you should configure the Woodpecker container using the following environment variables:
 
-```diff
-# docker-compose.yml
-version: '3'
+```diff title="docker-compose.yaml"
+ version: '3'
 
-services:
-  woodpecker-server:
-    [...]
-    environment:
-      - [...]
-+     - WOODPECKER_BITBUCKET_DC=true
-+     - WOODPECKER_BITBUCKET_DC_GIT_USERNAME=foo
-+     - WOODPECKER_BITBUCKET_DC_GIT_PASSWORD=bar
-+     - WOODPECKER_BITBUCKET_DC_CLIENT_ID=xxx
-+     - WOODPECKER_BITBUCKET_DC_CLIENT_SECRET=yyy
-+     - WOODPECKER_BITBUCKET_DC_URL=http://stash.mycompany.com
+ services:
+   woodpecker-server:
+     [...]
+     environment:
+       - [...]
++      - WOODPECKER_BITBUCKET_DC=true
++      - WOODPECKER_BITBUCKET_DC_GIT_USERNAME=foo
++      - WOODPECKER_BITBUCKET_DC_GIT_PASSWORD=bar
++      - WOODPECKER_BITBUCKET_DC_CLIENT_ID=xxx
++      - WOODPECKER_BITBUCKET_DC_CLIENT_SECRET=yyy
++      - WOODPECKER_BITBUCKET_DC_URL=http://stash.mycompany.com
 
-  woodpecker-agent:
-    [...]
+   woodpecker-agent:
+     [...]
 ```
 
 ## Service Account
