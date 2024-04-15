@@ -114,7 +114,7 @@ func lintFile(_ *cli.Context, file string) error {
 				hasErrors = true
 			}
 
-			if data := err.GetLinterData(); data != nil {
+			if data := pipeline_errors.GetLinterData(err); data != nil {
 				line = fmt.Sprintf("%s %s\t%s", line, output.String(data.Field).Bold(), err.Message)
 			} else {
 				line = fmt.Sprintf("%s %s", line, err.Message)
