@@ -2012,6 +2012,53 @@ const docTemplate = `{
                 }
             }
         },
+        "/repos/{repo_id}/logs/{number}/{stepId}": {
+            "delete": {
+                "produces": [
+                    "text/plain"
+                ],
+                "tags": [
+                    "Pipeline logs"
+                ],
+                "summary": "Deletes step log",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cpersonal access token\u003e",
+                        "description": "Insert your personal access token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "the repository id",
+                        "name": "repo_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "the number of the pipeline",
+                        "name": "number",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "the step id",
+                        "name": "stepId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        },
         "/repos/{repo_id}/move": {
             "post": {
                 "produces": [
@@ -4048,6 +4095,9 @@ const docTemplate = `{
                 "active": {
                     "type": "boolean"
                 },
+                "allow_deploy": {
+                    "type": "boolean"
+                },
                 "allow_pr": {
                     "type": "boolean"
                 },
@@ -4123,6 +4173,9 @@ const docTemplate = `{
         "RepoPatch": {
             "type": "object",
             "properties": {
+                "allow_deploy": {
+                    "type": "boolean"
+                },
                 "allow_pr": {
                     "type": "boolean"
                 },

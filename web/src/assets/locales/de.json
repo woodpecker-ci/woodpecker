@@ -391,6 +391,10 @@
                         "public": "Öffentlich"
                     },
                     "visibility": "Sichtbarkeit des Projekts"
+                },
+                "allow_deploy": {
+                    "allow": "Deployments erlauben",
+                    "desc": "Deployments von erolgreichen Pipelines erlauben. Nur benutzen, wenn du allen Nutzern mit Push-Zugriff vertraust."
                 }
             },
             "not_allowed": "Zugriff auf die Einstellungen dieses Repositories nicht erlaubt",

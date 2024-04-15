@@ -90,6 +90,10 @@
           "allow": "Allow Pull Requests",
           "desc": "Pipelines can run on pull requests."
         },
+        "allow_deploy": {
+          "allow": "Allow deployments",
+          "desc": "Allow deployments from successful pipelines. Only use if you trust all users with push access."
+        },
         "protected": {
           "protected": "Protected",
           "desc": "Every pipeline needs to be approved before being executed."
@@ -241,6 +245,8 @@
       "pipeline": "Pipeline #{pipelineId}",
       "log_title": "Step Logs",
       "log_download_error": "There was an error while downloading the log file",
+      "log_delete_confirm": "Do you really want to delete logs of this step?",
+      "log_delete_error": "There was an error while deleting the step logs",
       "actions": {
         "cancel": "Cancel",
         "restart": "Restart",
@@ -249,6 +255,7 @@
         "deploy": "Deploy",
         "restart_success": "Pipeline restarted",
         "log_download": "Download",
+        "log_delete": "Delete",
         "log_auto_scroll": "Automatically scroll down",
         "log_auto_scroll_off": "Turn off automatic scrolling"
       },
