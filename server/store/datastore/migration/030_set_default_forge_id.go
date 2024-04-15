@@ -26,11 +26,16 @@ import (
 var setForgeID = xormigrate.Migration{
 	ID: "set-forge-id",
 	MigrateSession: func(sess *xorm.Session) (err error) {
-		if err := sess.Sync(new(model.User), new(model.Repo), new(model.Forge)); err != nil {
+		if err := sess.Sync(new(model.User), new(model.Repo), new(model.Forge), new(model.Org)); err != nil {
 			return fmt.Errorf("sync new models failed: %w", err)
 		}
 
 		_, err = sess.Exec(fmt.Sprintf("UPDATE `%s` SET forge_id=1;", model.User{}.TableName()))
+		if err != nil {
+			return err
+		}
+
+		_, err = sess.Exec(fmt.Sprintf("UPDATE `%s` SET forge_id=1;", model.Org{}.TableName()))
 		if err != nil {
 			return err
 		}
