@@ -20,7 +20,9 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/rs/zerolog/log"
 
+	"go.woodpecker-ci.org/woodpecker/v2/server"
 	cronScheduler "go.woodpecker-ci.org/woodpecker/v2/server/cron"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 	"go.woodpecker-ci.org/woodpecker/v2/server/pipeline"
@@ -108,7 +110,12 @@ func PostCron(c *gin.Context) {
 	repo := session.Repo(c)
 	user := session.User(c)
 	_store := store.FromContext(c)
-	forge := session.Forge(c)
+	_forge, err := server.Config.Services.Manager.ForgeFromRepo(repo)
+	if err != nil {
+		log.Error().Err(err).Msg("Cannot get forge from repo")
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
 
 	in := new(model.Cron)
 	if err := c.Bind(in); err != nil {
@@ -136,7 +143,7 @@ func PostCron(c *gin.Context) {
 
 	if in.Branch != "" {
 		// check if branch exists on forge
-		_, err := forge.BranchHead(c, user, repo, in.Branch)
+		_, err := _forge.BranchHead(c, user, repo, in.Branch)
 		if err != nil {
 			c.String(http.StatusBadRequest, "Error inserting cron. branch not resolved: %s", err)
 			return
@@ -165,7 +172,12 @@ func PatchCron(c *gin.Context) {
 	repo := session.Repo(c)
 	user := session.User(c)
 	_store := store.FromContext(c)
-	forge := session.Forge(c)
+	_forge, err := server.Config.Services.Manager.ForgeFromRepo(repo)
+	if err != nil {
+		log.Error().Err(err).Msg("Cannot get forge from repo")
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
 
 	id, err := strconv.ParseInt(c.Param("cron"), 10, 64)
 	if err != nil {
@@ -187,7 +199,7 @@ func PatchCron(c *gin.Context) {
 	}
 	if in.Branch != "" {
 		// check if branch exists on forge
-		_, err := forge.BranchHead(c, user, repo, in.Branch)
+		_, err := _forge.BranchHead(c, user, repo, in.Branch)
 		if err != nil {
 			c.String(http.StatusBadRequest, "Error inserting cron. branch not resolved: %s", err)
 			return

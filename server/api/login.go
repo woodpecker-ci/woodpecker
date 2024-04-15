@@ -27,7 +27,6 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server"
 	forge_types "go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
-	"go.woodpecker-ci.org/woodpecker/v2/server/router/middleware/session"
 	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 	"go.woodpecker-ci.org/woodpecker/v2/server/store/types"
 	"go.woodpecker-ci.org/woodpecker/v2/shared/httputil"
@@ -235,16 +234,22 @@ func GetLogout(c *gin.Context) {
 
 func GetLoginToken(c *gin.Context) {
 	_store := store.FromContext(c)
-	forge := session.Forge(c)
+
+	_forge, err := server.Config.Services.Manager.ForgeMain() // TODO: get selected forge from auth request
+	if err != nil {
+		log.Error().Err(err).Msg("Cannot get main forge")
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
 
 	in := &tokenPayload{}
-	err := c.Bind(in)
+	err = c.Bind(in)
 	if err != nil {
 		_ = c.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
 
-	login, err := forge.Auth(c, in.Access, in.Refresh)
+	login, err := _forge.Auth(c, in.Access, in.Refresh)
 	if err != nil {
 		_ = c.AbortWithError(http.StatusUnauthorized, err)
 		return

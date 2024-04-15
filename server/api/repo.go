@@ -46,8 +46,13 @@ import (
 //	@Param		forge_remote_id	query	string	true	"the id of a repository at the forge"
 func PostRepo(c *gin.Context) {
 	_store := store.FromContext(c)
-	forge := session.Forge(c)
 	user := session.User(c)
+	_forge, err := server.Config.Services.Manager.ForgeFromUser(user)
+	if err != nil {
+		log.Error().Err(err).Msg("Cannot get forge from user")
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
 
 	forgeRemoteID := model.ForgeRemoteID(c.Query("forge_remote_id"))
 	if !forgeRemoteID.IsValid() {
@@ -67,7 +72,7 @@ func PostRepo(c *gin.Context) {
 		return
 	}
 
-	from, err := forge.Repo(c, user, forgeRemoteID, "", "")
+	from, err := _forge.Repo(c, user, forgeRemoteID, "", "")
 	if err != nil {
 		c.String(http.StatusInternalServerError, "Could not fetch repository from forge.")
 		return
@@ -138,7 +143,7 @@ func PostRepo(c *gin.Context) {
 
 	// create an org if it doesn't exist yet
 	if errors.Is(err, types.RecordNotExist) {
-		org, err = forge.Org(c, user, repo.Owner)
+		org, err = _forge.Org(c, user, repo.Owner)
 		if err != nil {
 			msg := "could not fetch organization from forge."
 			log.Error().Err(err).Msg(msg)
@@ -158,7 +163,7 @@ func PostRepo(c *gin.Context) {
 
 	repo.OrgID = org.ID
 
-	err = forge.Activate(c, user, repo, hookURL)
+	err = _forge.Activate(c, user, repo, hookURL)
 	if err != nil {
 		msg := "could not create webhook in forge."
 		log.Error().Err(err).Msg(msg)
@@ -344,9 +349,14 @@ func GetRepoPermissions(c *gin.Context) {
 func GetRepoBranches(c *gin.Context) {
 	repo := session.Repo(c)
 	user := session.User(c)
-	forge := session.Forge(c)
+	_forge, err := server.Config.Services.Manager.ForgeFromRepo(repo)
+	if err != nil {
+		log.Error().Err(err).Msg("Cannot get forge from repo")
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
 
-	branches, err := forge.Branches(c, user, repo, session.Pagination(c))
+	branches, err := _forge.Branches(c, user, repo, session.Pagination(c))
 	if err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
@@ -369,9 +379,14 @@ func GetRepoBranches(c *gin.Context) {
 func GetRepoPullRequests(c *gin.Context) {
 	repo := session.Repo(c)
 	user := session.User(c)
-	forge := session.Forge(c)
+	_forge, err := server.Config.Services.Manager.ForgeFromRepo(repo)
+	if err != nil {
+		log.Error().Err(err).Msg("Cannot get forge from repo")
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
 
-	prs, err := forge.PullRequests(c, user, repo, session.Pagination(c))
+	prs, err := _forge.PullRequests(c, user, repo, session.Pagination(c))
 	if err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
@@ -392,9 +407,14 @@ func GetRepoPullRequests(c *gin.Context) {
 func DeleteRepo(c *gin.Context) {
 	remove, _ := strconv.ParseBool(c.Query("remove"))
 	_store := store.FromContext(c)
-	forge := session.Forge(c)
 	repo := session.Repo(c)
 	user := session.User(c)
+	_forge, err := server.Config.Services.Manager.ForgeFromRepo(repo)
+	if err != nil {
+		log.Error().Err(err).Msg("Cannot get forge from repo")
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
 
 	repo.IsActive = false
 	repo.UserID = 0
@@ -411,7 +431,7 @@ func DeleteRepo(c *gin.Context) {
 		}
 	}
 
-	if err := forge.Deactivate(c, user, repo, server.Config.Server.WebhookHost); err != nil {
+	if err := _forge.Deactivate(c, user, repo, server.Config.Server.WebhookHost); err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
@@ -447,10 +467,15 @@ func RepairRepo(c *gin.Context) {
 //	@Param		repo_id			path	int		true	"the repository id"
 //	@Param		to				query	string	true	"the username to move the repository to"
 func MoveRepo(c *gin.Context) {
-	forge := session.Forge(c)
 	_store := store.FromContext(c)
 	repo := session.Repo(c)
 	user := session.User(c)
+	_forge, err := server.Config.Services.Manager.ForgeFromRepo(repo)
+	if err != nil {
+		log.Error().Err(err).Msg("Cannot get forge from repo")
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
 
 	to, exists := c.GetQuery("to")
 	if !exists {
@@ -465,7 +490,7 @@ func MoveRepo(c *gin.Context) {
 		return
 	}
 
-	from, err := forge.Repo(c, user, "", owner, name)
+	from, err := _forge.Repo(c, user, "", owner, name)
 	if err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
@@ -510,10 +535,10 @@ func MoveRepo(c *gin.Context) {
 		sig,
 	)
 
-	if err := forge.Deactivate(c, user, repo, host); err != nil {
+	if err := _forge.Deactivate(c, user, repo, host); err != nil {
 		log.Trace().Err(err).Msgf("deactivate repo '%s' for move to activate later, got an error", repo.FullName)
 	}
-	if err := forge.Activate(c, user, repo, hookURL); err != nil {
+	if err := _forge.Activate(c, user, repo, hookURL); err != nil {
 		c.String(http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -574,7 +599,12 @@ func RepairAllRepos(c *gin.Context) {
 
 func repairRepo(c *gin.Context, repo *model.Repo, withPerms, skipOnErr bool) {
 	_store := store.FromContext(c)
-	_forge := session.Forge(c)
+	_forge, err := server.Config.Services.Manager.ForgeFromRepo(repo)
+	if err != nil {
+		log.Error().Err(err).Msg("Cannot get forge from repo")
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
 
 	user, err := _store.GetUser(repo.UserID)
 	if err != nil {

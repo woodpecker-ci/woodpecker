@@ -119,7 +119,6 @@ func MustUser() gin.HandlerFunc {
 func MustOrgMember(admin bool) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		_store := store.FromContext(c)
-		_forge := Forge(c)
 
 		user := User(c)
 		if user == nil {
@@ -143,6 +142,13 @@ func MustOrgMember(admin bool) gin.HandlerFunc {
 		// User can access his own, admin can access all
 		if (org.Name == user.Login) || user.Admin {
 			c.Next()
+			return
+		}
+
+		_forge, err := server.Config.Services.Manager.ForgeFromUser(user)
+		if err != nil {
+			log.Error().Err(err).Msg("Cannot get forge from user")
+			c.AbortWithStatus(http.StatusInternalServerError)
 			return
 		}
 
