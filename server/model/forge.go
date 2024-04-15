@@ -26,9 +26,9 @@ const (
 )
 
 type Forge struct {
-	ID                int64          `xorm:"pk autoincr"`
+	ID                int64          `xorm:"pk autoincr 'id'"`
 	Type              ForgeType      `xorm:"VARCHAR(250)"`
-	URL               string         `xorm:"VARCHAR(500)"`
+	URL               string         `xorm:"VARCHAR(500) 'url'"`
 	Client            string         `xorm:"VARCHAR(250)"`
 	ClientSecret      string         `xorm:"VARCHAR(250)"`
 	SkipVerify        bool           `xorm:"bool"`

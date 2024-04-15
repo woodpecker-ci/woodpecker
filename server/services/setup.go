@@ -96,8 +96,8 @@ func setupSignatureKeys(_store store.Store) (crypto.PrivateKey, crypto.PublicKey
 }
 
 func setupForgeService(c *cli.Context, _store store.Store) error {
-	_forge, err := _store.ForgeGet(0)
-	if errors.Is(err, types.RecordNotExist) {
+	_forge, err := _store.ForgeGet(1)
+	if err != nil && !errors.Is(err, types.RecordNotExist) {
 		return err
 	}
 	forgeExists := err == nil
@@ -105,6 +105,9 @@ func setupForgeService(c *cli.Context, _store store.Store) error {
 		_forge = &model.Forge{
 			ID: 0,
 		}
+	}
+	if _forge.AdditionalOptions == nil {
+		_forge.AdditionalOptions = make(map[string]any)
 	}
 
 	_forge.Client = c.String("forge-oauth-client")
@@ -129,13 +132,13 @@ func setupForgeService(c *cli.Context, _store store.Store) error {
 			_forge.URL = "https://gitlab.com"
 		}
 	case c.Bool("gitea"):
-		_forge.Type = model.ForgeTypeBitbucket
+		_forge.Type = model.ForgeTypeGitea
 		_forge.AdditionalOptions["oauth-server"] = c.String("gitea-oauth-server")
 		if _forge.URL == "" {
 			_forge.URL = "https://try.gitea.com"
 		}
 	case c.Bool("bitbucket"):
-		_forge.Type = "bitbucket"
+		_forge.Type = model.ForgeTypeBitbucket
 	case c.Bool("bitbucket-dc"):
 		_forge.Type = model.ForgeTypeBitbucketDatacenter
 		_forge.AdditionalOptions["git-username"] = c.String("bitbucket-dc-git-username")

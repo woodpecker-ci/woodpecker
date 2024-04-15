@@ -146,6 +146,7 @@ func PostRepo(c *gin.Context) {
 			return
 		}
 
+		org.ForgeID = user.ForgeID
 		err = _store.OrgCreate(org)
 		if err != nil {
 			msg := "could not create organization in store."
@@ -168,6 +169,7 @@ func PostRepo(c *gin.Context) {
 	if enabledOnce {
 		err = _store.UpdateRepo(repo)
 	} else {
+		repo.ForgeID = user.ForgeID // TODO: allow to use other connected forges of the user
 		err = _store.CreateRepo(repo)
 	}
 	if err != nil {

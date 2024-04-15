@@ -30,12 +30,12 @@ var setForgeID = xormigrate.Migration{
 			return fmt.Errorf("sync new models failed: %w", err)
 		}
 
-		_, err = sess.Exec(fmt.Sprintf("UPDATE `%s` SET forge_id=0;", model.User{}.TableName()))
+		_, err = sess.Exec(fmt.Sprintf("UPDATE `%s` SET forge_id=1;", model.User{}.TableName()))
 		if err != nil {
 			return err
 		}
 
-		_, err = sess.Exec(fmt.Sprintf("UPDATE `%s` SET forge_id=0;", model.Repo{}.TableName()))
+		_, err = sess.Exec(fmt.Sprintf("UPDATE `%s` SET forge_id=1;", model.Repo{}.TableName()))
 		return err
 	},
 }

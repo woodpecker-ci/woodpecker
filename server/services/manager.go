@@ -123,7 +123,7 @@ func (m *manager) ForgeFromUser(user *model.User) (forge.Forge, error) {
 }
 
 func (m *manager) ForgeMain() (forge.Forge, error) {
-	return m.getForgeByID(0) // main forge is always 0 and is configured via environment variables
+	return m.getForgeByID(1) // main forge is always 1 and is configured via environment variables
 }
 
 func (m *manager) getForgeByID(id int64) (forge.Forge, error) {

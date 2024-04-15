@@ -13,6 +13,7 @@ import (
 func Forge(c *gin.Context) forge.Forge {
 	v, ok := c.Get("forge")
 	if !ok {
+		log.Error().Msg("Cannot get forge from context")
 		return nil
 	}
 	f, ok := v.(forge.Forge)
