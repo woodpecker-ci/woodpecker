@@ -12,6 +12,7 @@
 
 ### 📈 Enhancement
 
+- Remove review button from approval view [[#3617](https://github.com/woodpecker-ci/woodpecker/pull/3617)]
 - Rework addons (use rpc) [[#3268](https://github.com/woodpecker-ci/woodpecker/pull/3268)]
 - Allow to disable deployments [[#3570](https://github.com/woodpecker-ci/woodpecker/pull/3570)]
 - Add flag to only access public repositories on GitHub [[#3566](https://github.com/woodpecker-ci/woodpecker/pull/3566)]
