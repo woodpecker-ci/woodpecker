@@ -33,12 +33,16 @@ export function usePagination<T, S = unknown>(
       return;
     }
 
+    console.log('loadData', page.value, each.value);
+
     loading.value = true;
     const newData = (await _loadData(page.value, each.value?.[0] as S)) ?? [];
     hasMore.value = newData.length >= pageSize.value && newData.length > 0;
     if (newData.length > 0) {
       data.value.push(...newData);
     }
+
+    console.log('loadData1', page.value, hasMore.value, each.value);
 
     // last page and each has more
     if (!hasMore.value && each.value.length > 0) {
