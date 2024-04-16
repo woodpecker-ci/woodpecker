@@ -21,6 +21,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/securecookie"
+	"github.com/rs/zerolog/log"
 
 	"go.woodpecker-ci.org/woodpecker/v2/server"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
@@ -86,9 +87,14 @@ func GetFeed(c *gin.Context) {
 //	@Param			all				query	bool	false	"query all repos, including inactive ones"
 func GetRepos(c *gin.Context) {
 	_store := store.FromContext(c)
-	_forge := server.Config.Services.Forge
-
 	user := session.User(c)
+	_forge, err := server.Config.Services.Manager.ForgeFromUser(user)
+	if err != nil {
+		log.Error().Err(err).Msg("Cannot get forge from user")
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
 	all, _ := strconv.ParseBool(c.Query("all"))
 
 	if all {

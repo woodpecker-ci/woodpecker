@@ -43,7 +43,12 @@ func HandleLogin(c *gin.Context) {
 
 func HandleAuth(c *gin.Context) {
 	_store := store.FromContext(c)
-	_forge := server.Config.Services.Forge
+	_forge, err := server.Config.Services.Manager.ForgeMain()
+	if err != nil {
+		_ = c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+	forgeID := int64(1) // TODO: replace with forge id when multiple forges are supported
 
 	// when dealing with redirects, we may need to adjust the content type. I
 	// cannot, however, remember why, so need to revisit this line.
@@ -68,12 +73,12 @@ func HandleAuth(c *gin.Context) {
 
 	// get the user from the database
 	u, err := _store.GetUserRemoteID(tmpuser.ForgeRemoteID, tmpuser.Login)
-	if err != nil {
-		if !errors.Is(err, types.RecordNotExist) {
-			_ = c.AbortWithError(http.StatusInternalServerError, err)
-			return
-		}
+	if err != nil && !errors.Is(err, types.RecordNotExist) {
+		_ = c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
 
+	if errors.Is(err, types.RecordNotExist) {
 		// if self-registration is disabled we should return a not authorized error
 		if !server.Config.Permissions.Open && !server.Config.Permissions.Admins.IsAdmin(tmpuser) {
 			log.Error().Msgf("cannot register %s. registration closed", tmpuser.Login)
@@ -100,6 +105,7 @@ func HandleAuth(c *gin.Context) {
 			Secret:        tmpuser.Secret,
 			Email:         tmpuser.Email,
 			Avatar:        tmpuser.Avatar,
+			ForgeID:       forgeID,
 			Hash: base32.StdEncoding.EncodeToString(
 				securecookie.GenerateRandomKey(32),
 			),
@@ -129,6 +135,7 @@ func HandleAuth(c *gin.Context) {
 				Name:    u.Login,
 				IsUser:  true,
 				Private: false,
+				ForgeID: u.ForgeID,
 			}
 			if err := _store.OrgCreate(org); err != nil {
 				log.Error().Err(err).Msgf("on user creation, could create org for user")
@@ -228,14 +235,21 @@ func GetLogout(c *gin.Context) {
 func GetLoginToken(c *gin.Context) {
 	_store := store.FromContext(c)
 
+	_forge, err := server.Config.Services.Manager.ForgeMain() // TODO: get selected forge from auth request
+	if err != nil {
+		log.Error().Err(err).Msg("Cannot get main forge")
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
 	in := &tokenPayload{}
-	err := c.Bind(in)
+	err = c.Bind(in)
 	if err != nil {
 		_ = c.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
 
-	login, err := server.Config.Services.Forge.Auth(c, in.Access, in.Refresh)
+	login, err := _forge.Auth(c, in.Access, in.Refresh)
 	if err != nil {
 		_ = c.AbortWithError(http.StatusUnauthorized, err)
 		return

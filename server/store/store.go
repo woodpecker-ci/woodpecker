@@ -159,6 +159,13 @@ type Store interface {
 	CronListNextExecute(int64, int64) ([]*model.Cron, error)
 	CronGetLock(*model.Cron, int64) (bool, error)
 
+	// Forge
+	ForgeCreate(*model.Forge) error
+	ForgeGet(int64) (*model.Forge, error)
+	ForgeList(p *model.ListOptions) ([]*model.Forge, error)
+	ForgeUpdate(*model.Forge) error
+	ForgeDelete(*model.Forge) error
+
 	// Agent
 	AgentCreate(*model.Agent) error
 	AgentFind(int64) (*model.Agent, error)
