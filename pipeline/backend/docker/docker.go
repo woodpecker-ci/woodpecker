@@ -213,7 +213,11 @@ func (e *docker) StartStep(ctx context.Context, step *backend.Step, taskUUID str
 	}
 
 	// add default volumes to the host configuration
-	hostConfig.Binds = utils.DeduplicateStrings(append(hostConfig.Binds, e.volumes...))
+	if step.UseTmpfs {
+		hostConfig.Binds = e.volumes
+	} else {
+		hostConfig.Binds = utils.DeduplicateStrings(append(hostConfig.Binds, e.volumes...))
+	}
 
 	_, err := e.client.ContainerCreate(ctx, config, hostConfig, nil, nil, containerName)
 	if client.IsErrNotFound(err) {

@@ -47,6 +47,7 @@ type Step struct {
 	NetworkMode    string            `json:"network_mode,omitempty"`
 	Ports          []Port            `json:"ports,omitempty"`
 	BackendOptions map[string]any    `json:"backend_options,omitempty"`
+	UseTmpfs 	   bool              `json:"use_tmpfs,omitempty"`
 }
 
 // StepType identifies the type of step

@@ -106,20 +106,11 @@ func toHostConfig(step *types.Step) *container.HostConfig {
 	if len(step.Devices) != 0 {
 		config.Devices = toDev(step.Devices)
 	}
-	if len(step.Volumes) != 0 {
+
+	if !step.UseTmpfs {
 		config.Binds = step.Volumes
-	}
-	config.Tmpfs = map[string]string{}
-	for _, path := range step.Tmpfs {
-		if !strings.Contains(path, ":") {
-			config.Tmpfs[path] = ""
-			continue
-		}
-		parts, err := splitVolumeParts(path)
-		if err != nil {
-			continue
-		}
-		config.Tmpfs[parts[0]] = parts[1]
+	} else {
+		config.Tmpfs = map[string]string{"/woodpecker": ""}
 	}
 
 	return config

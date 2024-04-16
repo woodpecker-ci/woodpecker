@@ -96,7 +96,7 @@ steps:
       - apt install -y tree
       - make cross-compile-server
     environment:
-      PLATFORMS: linux|amd64
+      PLATFORMS: linux|arm64
       TAGS: bindata sqlite sqlite_unlock_notify netgo
       XGO_VERSION: *xgo_version
     when:
@@ -135,24 +135,24 @@ steps:
     settings:
       repo: woodpeckerci/woodpecker-server
       dockerfile: docker/Dockerfile.server.multiarch
-      platforms: *platforms_preview
+      platforms: linux/arm64
       tag: pull_${CI_COMMIT_PULL_REQUEST}
       logins: *publish_logins
     when: &when-preview
       evaluate: 'CI_COMMIT_PULL_REQUEST_LABELS contains "build_pr_images"'
       event: pull_request
 
-  publish-server-alpine-preview:
-    depends_on:
-      - cross-compile-server-preview
-    image: *buildx_plugin
-    settings:
-      repo: woodpeckerci/woodpecker-server
-      dockerfile: docker/Dockerfile.server.alpine.multiarch
-      platforms: *platforms_preview
-      tag: pull_${CI_COMMIT_PULL_REQUEST}-alpine
-      logins: *publish_logins
-    when: *when-preview
+  # publish-server-alpine-preview:
+  #   depends_on:
+  #     - cross-compile-server-preview
+  #   image: *buildx_plugin
+  #   settings:
+  #     repo: woodpeckerci/woodpecker-server
+  #     dockerfile: docker/Dockerfile.server.alpine.multiarch
+  #     platforms: linux/arm64
+  #     tag: pull_${CI_COMMIT_PULL_REQUEST}-alpine
+  #     logins: *publish_logins
+  #   when: *when-preview
 
   build-server-dryrun:
     depends_on:
@@ -239,7 +239,7 @@ steps:
     settings:
       repo: woodpeckerci/woodpecker-agent
       dockerfile: docker/Dockerfile.agent.multiarch
-      platforms: *platforms_preview
+      platforms: linux/arm64
       tag: pull_${CI_COMMIT_PULL_REQUEST}
       build_args: *build_args
       logins: *publish_logins
@@ -331,18 +331,18 @@ steps:
   # C L I #
   #########
 
-  publish-cli-preview:
-    depends_on:
-      - vendor
-    image: *buildx_plugin
-    settings:
-      repo: woodpeckerci/woodpecker-cli
-      dockerfile: docker/Dockerfile.cli.multiarch
-      platforms: *platforms_preview
-      tag: pull_${CI_COMMIT_PULL_REQUEST}
-      build_args: *build_args
-      logins: *publish_logins
-    when: *when-preview
+  # publish-cli-preview:
+  #   depends_on:
+  #     - vendor
+  #   image: *buildx_plugin
+  #   settings:
+  #     repo: woodpeckerci/woodpecker-cli
+  #     dockerfile: docker/Dockerfile.cli.multiarch
+  #     platforms: *platforms_preview
+  #     tag: pull_${CI_COMMIT_PULL_REQUEST}
+  #     build_args: *build_args
+  #     logins: *publish_logins
+  #   when: *when-preview
 
   build-cli-dryrun:
     depends_on:

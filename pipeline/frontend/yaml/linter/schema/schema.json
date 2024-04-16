@@ -371,6 +371,10 @@
         },
         "backend_options": {
           "$ref": "#/definitions/step_backend_options"
+        },
+        "use_tmpfs": {
+          "description": "Use a tmpfs volume instead of a local volume for the working directory mount",
+          "type": "boolean"
         }
       }
     },
