@@ -1,14 +1,24 @@
 # Changelog
 
-## [2.5.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.5.0) - 2024-04-15
+## [2.5.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.5.0) - 2024-04-16
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @anbraten, @aumetra, @eliasscosta, @manuelluis, @nemunaire, @qwerty287, @stevapple, @xoxys, @zc-devs
+@6543, @Elara6331, @anbraten, @aumetra, @eliasscosta, @manuelluis, @nemunaire, @qwerty287, @stevapple, @xoxys, @zc-devs
 
 ### ✨ Features
 
 - Step logs removing API and Button [[#3451](https://github.com/woodpecker-ci/woodpecker/pull/3451)]
+
+### 🐛 Bug Fixes
+
+- fix cli config loading and correct comment [[#3618](https://github.com/woodpecker-ci/woodpecker/pull/3618)]
+- Handle ImagePullBackOff pod status [[#3580](https://github.com/woodpecker-ci/woodpecker/pull/3580)]
+- Apply skip ci filter only on push events [[#3612](https://github.com/woodpecker-ci/woodpecker/pull/3612)]
+- Fix bitbucket file fetching [[#3604](https://github.com/woodpecker-ci/woodpecker/pull/3604)]
+- agent: Continue to retry indefinitely [[#3599](https://github.com/woodpecker-ci/woodpecker/pull/3599)]
+- Fix cli version comparison and improve setup [[#3518](https://github.com/woodpecker-ci/woodpecker/pull/3518)]
+- Fix flag name [[#3534](https://github.com/woodpecker-ci/woodpecker/pull/3534)]
 
 ### 📈 Enhancement
 
@@ -29,17 +39,9 @@
 - Update docs npm deps non-major [[#3485](https://github.com/woodpecker-ci/woodpecker/pull/3485)]
 - Docs updates and fixes [[#3535](https://github.com/woodpecker-ci/woodpecker/pull/3535)]
 
-### 🐛 Bug Fixes
-
-- Handle ImagePullBackOff pod status [[#3580](https://github.com/woodpecker-ci/woodpecker/pull/3580)]
-- Apply skip ci filter only on push events [[#3612](https://github.com/woodpecker-ci/woodpecker/pull/3612)]
-- Fix bitbucket file fetching [[#3604](https://github.com/woodpecker-ci/woodpecker/pull/3604)]
-- agent: Continue to retry indefinitely [[#3599](https://github.com/woodpecker-ci/woodpecker/pull/3599)]
-- Fix cli version comparison and improve setup [[#3518](https://github.com/woodpecker-ci/woodpecker/pull/3518)]
-- Fix flag name [[#3534](https://github.com/woodpecker-ci/woodpecker/pull/3534)]
-
 ### Misc
 
+- Add Twine plugin [[#3619](https://github.com/woodpecker-ci/woodpecker/pull/3619)]
 - Fix spellcheck and enable more dirs [[#3603](https://github.com/woodpecker-ci/woodpecker/pull/3603)]
 - Update docker.io/golang Docker tag to v1.22.2 [[#3596](https://github.com/woodpecker-ci/woodpecker/pull/3596)]
 - Update pre-commit hook pre-commit/pre-commit-hooks to v4.6.0 [[#3597](https://github.com/woodpecker-ci/woodpecker/pull/3597)]
