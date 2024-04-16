@@ -26,7 +26,7 @@ export function usePagination<T, S = unknown>(
   const hasMore = ref(true);
   const data = ref<T[]>([]) as Ref<T[]>;
   const loading = ref(false);
-  const each = ref(_each ?? []);
+  const each = ref([...(_each ?? [])]);
 
   async function loadData() {
     if (loading.value === true || hasMore.value === false) {
@@ -75,7 +75,7 @@ export function usePagination<T, S = unknown>(
     hasMore.value = true;
     data.value = [];
     loading.value = false;
-    each.value = (_each ?? []) as UnwrapRef<S[]>;
+    each.value = [...(_each ?? [])] as UnwrapRef<S[]>;
 
     if (_page === 1) {
       // we need to reload manually as the page is already 1, so changing won't trigger watcher
