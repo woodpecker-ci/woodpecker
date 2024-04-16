@@ -70,10 +70,12 @@ export function usePagination<T, S = unknown>(
   async function resetPage() {
     const _page = page.value;
 
+    page.value = 1;
+    pageSize.value = 0;
     hasMore.value = true;
     data.value = [];
+    loading.value = false;
     each.value = (_each ?? []) as UnwrapRef<S[]>;
-    page.value = 1;
 
     if (_page === 1) {
       // we need to reload manually as the page is already 1, so changing won't trigger watcher
