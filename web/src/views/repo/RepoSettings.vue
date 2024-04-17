@@ -20,7 +20,7 @@
     <Tab id="secrets" :title="$t('repo.settings.secrets.secrets')">
       <SecretsTab />
     </Tab>
-    <Tab id="registries" :title="$t('repo.settings.registries.registries')">
+    <!-- <Tab id="registries" :title="$t('repo.settings.registries.registries')">
       <RegistriesTab />
     </Tab>
     <Tab id="crons" :title="$t('repo.settings.crons.crons')">
@@ -31,7 +31,7 @@
     </Tab>
     <Tab id="actions" :title="$t('repo.settings.actions.actions')">
       <ActionsTab />
-    </Tab>
+    </Tab> -->
   </Scaffold>
 </template>
 
