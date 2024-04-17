@@ -168,12 +168,17 @@ func apiRoutes(e *gin.RouterGroup) {
 			queue.GET("/norunningpipelines", api.BlockTilQueueHasRunningItem)
 		}
 
-		apiBase.GET("/secrets", session.MustUser(), api.GetGlobalSecretList) // global secrets can be read without actual values by any user
+		// global secrets can be read without actual values by any user
+		readGlobalSecrets := apiBase.Group("/secrets")
+		{
+			readGlobalSecrets.Use(session.MustUser())
+			readGlobalSecrets.GET("", api.GetSecretList)
+			readGlobalSecrets.GET("/:secret", api.GetSecret)
+		}
 		secrets := apiBase.Group("/secrets")
 		{
 			secrets.Use(session.MustAdmin())
 			secrets.POST("", api.PostGlobalSecret)
-			secrets.GET("/:secret", api.GetGlobalSecret)
 			secrets.PATCH("/:secret", api.PatchGlobalSecret)
 			secrets.DELETE("/:secret", api.DeleteGlobalSecret)
 		}
