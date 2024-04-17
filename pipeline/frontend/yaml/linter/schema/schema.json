@@ -1,7 +1,7 @@
 {
   "title": "Woodpecker CI configuration file",
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://raw.githubusercontent.com/woodpecker-ci/woodpecker/main/pipeline/frontend/yaml/linter/schema/schema.json",
+  "$id": "https://raw.githubusercontent.com/woodpecker-ci/woodpecker/tmpfs/pipeline/frontend/yaml/linter/schema/schema.json",
   "description": "Schema of a Woodpecker pipeline file. Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax",
   "type": "object",
   "required": ["steps"],
@@ -371,10 +371,6 @@
         },
         "backend_options": {
           "$ref": "#/definitions/step_backend_options"
-        },
-        "use_tmpfs": {
-          "description": "Use a tmpfs volume instead of a local volume for the working directory mount",
-          "type": "boolean"
         }
       }
     },
@@ -681,6 +677,11 @@
     "step_directory": {
       "description": "Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#directory",
       "type": "string"
+    },
+    "step_use_tmpfs": {
+      "description": "fixme",
+      "type": "boolean",
+      "default": false
     },
     "step_backend_options": {
       "description": "Advanced options for the different agent backends",
