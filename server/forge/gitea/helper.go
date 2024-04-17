@@ -118,7 +118,7 @@ func getChangedFilesFromPushHook(hook *pushHook) []string {
 	files = append(files, hook.HeadCommit.Removed...)
 	files = append(files, hook.HeadCommit.Modified...)
 
-	return utils.DedupStrings(files)
+	return utils.DeduplicateStrings(files)
 }
 
 // helper function that extracts the Pipeline data from a Gitea tag hook

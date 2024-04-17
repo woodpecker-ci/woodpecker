@@ -21,7 +21,6 @@ import (
 	"time"
 
 	"go.woodpecker-ci.org/woodpecker/v2/server/cache"
-	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
 	"go.woodpecker-ci.org/woodpecker/v2/server/logging"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 	"go.woodpecker-ci.org/woodpecker/v2/server/pubsub"
@@ -35,9 +34,8 @@ var Config = struct {
 		Pubsub     *pubsub.Publisher
 		Queue      queue.Queue
 		Logs       logging.Log
-		Forge      forge.Forge
 		Membership cache.MembershipService
-		Manager    *services.Manager
+		Manager    services.Manager
 	}
 	Server struct {
 		Key                 string

@@ -21,7 +21,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestDedupStrings(t *testing.T) {
+func TestDeduplicateStrings(t *testing.T) {
 	tests := []struct {
 		in  []string
 		out []string
@@ -37,7 +37,7 @@ func TestDedupStrings(t *testing.T) {
 	}}
 
 	for _, tc := range tests {
-		result := DedupStrings(tc.in)
+		result := DeduplicateStrings(tc.in)
 		sort.Strings(result)
 		if len(tc.out) == 0 {
 			assert.Len(t, result, 0)

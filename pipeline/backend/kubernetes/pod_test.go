@@ -245,6 +245,7 @@ func TestFullPod(t *testing.T) {
 			"nodeSelector": {
 				"storage": "ssd"
 			},
+			"runtimeClassName": "runc",
 			"serviceAccountName": "wp-svc-acc",
 			"securityContext": {
 				"runAsUser": 101,
@@ -289,6 +290,7 @@ func TestFullPod(t *testing.T) {
 		"status": {}
 	}`
 
+	runtimeClass := "runc"
 	hostAliases := []types.HostAlias{
 		{Name: "cloudflare", IP: "1.1.1.1"},
 		{Name: "cf.v6", IP: "2606:4700:4700::64"},
@@ -333,6 +335,7 @@ func TestFullPod(t *testing.T) {
 		SecurityContext:      SecurityContextConfig{RunAsNonRoot: false},
 	}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{
 		NodeSelector:       map[string]string{"storage": "ssd"},
+		RuntimeClassName:   &runtimeClass,
 		ServiceAccountName: "wp-svc-acc",
 		Tolerations:        []Toleration{{Key: "net-port", Value: "100Mbit", Effect: TaintEffectNoSchedule}},
 		Resources: Resources{

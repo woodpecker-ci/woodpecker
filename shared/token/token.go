@@ -139,19 +139,19 @@ func keyFunc(token *Token, fn SecretFunc) jwt.Keyfunc {
 
 		// extract the token kind and cast to
 		// the expected type.
-		kindv, ok := claims["type"]
+		kind, ok := claims["type"]
 		if !ok {
 			return nil, jwt.ErrInvalidType
 		}
-		token.Kind, _ = kindv.(string)
+		token.Kind, _ = kind.(string)
 
 		// extract the token value and cast to
 		// expected type.
-		textv, ok := claims["text"]
+		text, ok := claims["text"]
 		if !ok {
 			return nil, jwt.ErrInvalidType
 		}
-		token.Text, _ = textv.(string)
+		token.Text, _ = text.(string)
 
 		// invoke the callback function to retrieve
 		// the secret key used to verify

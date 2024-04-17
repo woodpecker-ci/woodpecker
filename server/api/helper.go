@@ -19,6 +19,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/rs/zerolog/log"
 
 	"go.woodpecker-ci.org/woodpecker/v2/server"
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
@@ -54,7 +55,12 @@ func handleDBError(c *gin.Context, err error) {
 // If the forge has a refresh token, the current access token may be stale.
 // Therefore, we should refresh prior to dispatching the job.
 func refreshUserToken(c *gin.Context, user *model.User) {
-	_forge := server.Config.Services.Forge
 	_store := store.FromContext(c)
+	_forge, err := server.Config.Services.Manager.ForgeFromUser(user)
+	if err != nil {
+		log.Error().Err(err).Msg("Cannot get forge from user")
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
 	forge.Refresh(c, _forge, _store, user)
 }

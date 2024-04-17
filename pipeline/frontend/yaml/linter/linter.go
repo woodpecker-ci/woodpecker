@@ -21,6 +21,7 @@ import (
 	"go.uber.org/multierr"
 
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/errors"
+	errorTypes "go.woodpecker-ci.org/woodpecker/v2/pipeline/errors/types"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/linter/schema"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/types"
 )
@@ -210,8 +211,8 @@ func (l *Linter) lintDeprecations(config *WorkflowConfig) (err error) {
 	}
 
 	if parsed.PipelineDoNotUseIt.ContainerList != nil {
-		err = multierr.Append(err, &errors.PipelineError{
-			Type:    errors.PipelineErrorTypeDeprecation,
+		err = multierr.Append(err, &errorTypes.PipelineError{
+			Type:    errorTypes.PipelineErrorTypeDeprecation,
 			Message: "Please use 'steps:' instead of deprecated 'pipeline:' list",
 			Data: errors.DeprecationErrorData{
 				File:  config.File,
@@ -223,8 +224,8 @@ func (l *Linter) lintDeprecations(config *WorkflowConfig) (err error) {
 	}
 
 	if parsed.PlatformDoNotUseIt != "" {
-		err = multierr.Append(err, &errors.PipelineError{
-			Type:    errors.PipelineErrorTypeDeprecation,
+		err = multierr.Append(err, &errorTypes.PipelineError{
+			Type:    errorTypes.PipelineErrorTypeDeprecation,
 			Message: "Please use labels instead of deprecated 'platform' filters",
 			Data: errors.DeprecationErrorData{
 				File:  config.File,
@@ -236,8 +237,8 @@ func (l *Linter) lintDeprecations(config *WorkflowConfig) (err error) {
 	}
 
 	if parsed.BranchesDoNotUseIt != nil {
-		err = multierr.Append(err, &errors.PipelineError{
-			Type:    errors.PipelineErrorTypeDeprecation,
+		err = multierr.Append(err, &errorTypes.PipelineError{
+			Type:    errorTypes.PipelineErrorTypeDeprecation,
 			Message: "Please use global when instead of deprecated 'branches' filter",
 			Data: errors.DeprecationErrorData{
 				File:  config.File,
@@ -250,8 +251,8 @@ func (l *Linter) lintDeprecations(config *WorkflowConfig) (err error) {
 
 	for _, step := range parsed.Steps.ContainerList {
 		if step.Group != "" {
-			err = multierr.Append(err, &errors.PipelineError{
-				Type:    errors.PipelineErrorTypeDeprecation,
+			err = multierr.Append(err, &errorTypes.PipelineError{
+				Type:    errorTypes.PipelineErrorTypeDeprecation,
 				Message: "Please use depends_on instead of deprecated 'group' setting",
 				Data: errors.DeprecationErrorData{
 					File:  config.File,
@@ -265,8 +266,8 @@ func (l *Linter) lintDeprecations(config *WorkflowConfig) (err error) {
 
 	for i, c := range parsed.When.Constraints {
 		if len(c.Event.Exclude) != 0 {
-			err = multierr.Append(err, &errors.PipelineError{
-				Type:    errors.PipelineErrorTypeDeprecation,
+			err = multierr.Append(err, &errorTypes.PipelineError{
+				Type:    errorTypes.PipelineErrorTypeDeprecation,
 				Message: "Please only use allow lists for events",
 				Data: errors.DeprecationErrorData{
 					File:  config.File,
@@ -281,8 +282,8 @@ func (l *Linter) lintDeprecations(config *WorkflowConfig) (err error) {
 	for _, step := range parsed.Steps.ContainerList {
 		for i, c := range step.When.Constraints {
 			if len(c.Event.Exclude) != 0 {
-				err = multierr.Append(err, &errors.PipelineError{
-					Type:    errors.PipelineErrorTypeDeprecation,
+				err = multierr.Append(err, &errorTypes.PipelineError{
+					Type:    errorTypes.PipelineErrorTypeDeprecation,
 					Message: "Please only use allow lists for events",
 					Data: errors.DeprecationErrorData{
 						File:  config.File,
@@ -298,8 +299,8 @@ func (l *Linter) lintDeprecations(config *WorkflowConfig) (err error) {
 	for _, step := range parsed.Steps.ContainerList {
 		for i, c := range step.Secrets.Secrets {
 			if c.Source != c.Target {
-				err = multierr.Append(err, &errors.PipelineError{
-					Type:    errors.PipelineErrorTypeDeprecation,
+				err = multierr.Append(err, &errorTypes.PipelineError{
+					Type:    errorTypes.PipelineErrorTypeDeprecation,
 					Message: "Secrets alternative names are deprecated, use environment with from_secret",
 					Data: errors.DeprecationErrorData{
 						File:  config.File,
@@ -348,8 +349,8 @@ func (l *Linter) lintBadHabits(config *WorkflowConfig) (err error) {
 				}
 			}
 			if field != "" {
-				err = multierr.Append(err, &errors.PipelineError{
-					Type:    errors.PipelineErrorTypeBadHabit,
+				err = multierr.Append(err, &errorTypes.PipelineError{
+					Type:    errorTypes.PipelineErrorTypeBadHabit,
 					Message: "Please set an event filter on all when branches",
 					Data: errors.LinterErrorData{
 						File:  config.File,

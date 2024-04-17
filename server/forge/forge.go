@@ -15,7 +15,6 @@
 
 package forge
 
-//go:generate go install github.com/vektra/mockery/v2@latest
 //go:generate mockery --name Forge --output mocks --case underscore
 
 import (

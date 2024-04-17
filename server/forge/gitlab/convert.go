@@ -189,7 +189,7 @@ func convertPushHook(hook *gitlab.PushEvent) (*model.Repo, *model.Pipeline, erro
 		files = append(files, cm.Removed...)
 		files = append(files, cm.Modified...)
 	}
-	pipeline.ChangedFiles = utils.DedupStrings(files)
+	pipeline.ChangedFiles = utils.DeduplicateStrings(files)
 
 	return repo, pipeline, nil
 }

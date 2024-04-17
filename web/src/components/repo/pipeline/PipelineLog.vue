@@ -21,6 +21,13 @@
             @click="download"
           />
           <IconButton
+            v-if="step?.end_time !== undefined && hasLogs && hasPushPermission"
+            :title="$t('repo.pipeline.actions.log_delete')"
+            class="!hover:bg-white !hover:bg-opacity-10"
+            icon="trash"
+            @click="deleteLogs"
+          />
+          <IconButton
             v-if="step?.end_time === undefined"
             :title="
               autoScroll ? $t('repo.pipeline.actions.log_auto_scroll_off') : $t('repo.pipeline.actions.log_auto_scroll')
@@ -111,7 +118,7 @@ import IconButton from '~/components/atomic/IconButton.vue';
 import PipelineStatusIcon from '~/components/repo/pipeline/PipelineStatusIcon.vue';
 import useApiClient from '~/compositions/useApiClient';
 import useNotifications from '~/compositions/useNotifications';
-import { Pipeline, Repo } from '~/lib/api/types';
+import { Pipeline, Repo, RepoPermissions } from '~/lib/api/types';
 import { findStep, isStepFinished, isStepRunning } from '~/utils/helpers';
 
 type LogLine = {
@@ -136,6 +143,7 @@ const i18n = useI18n();
 const pipeline = toRef(props, 'pipeline');
 const stepId = toRef(props, 'stepId');
 const repo = inject<Ref<Repo>>('repo');
+const repoPermissions = inject<Ref<RepoPermissions>>('repo-permissions');
 const apiClient = useApiClient();
 const route = useRoute();
 
@@ -160,6 +168,7 @@ ansiUp.value.use_classes = true;
 const logBuffer = ref<LogLine[]>([]);
 
 const maxLineCount = 5000; // TODO(2653): set back to 500 and implement lazy-loading support
+const hasPushPermission = computed(() => repoPermissions?.value?.push);
 
 function isSelected(line: LogLine): boolean {
   return route.hash === `#L${line.number}`;
@@ -294,6 +303,25 @@ async function loadLogs() {
       writeLog({ index: line.line, text: decode(line.data), time: line.time });
       flushLogs(true);
     });
+  }
+}
+
+async function deleteLogs() {
+  if (!repo?.value || !pipeline.value || !step.value) {
+    throw new Error('The repository, pipeline or step was undefined');
+  }
+
+  // TODO use proper dialog (copy-pasted from web/src/components/secrets/SecretList.vue:deleteSecret)
+  // eslint-disable-next-line no-alert, no-restricted-globals
+  if (!confirm(i18n.t('repo.pipeline.log_delete_confirm'))) {
+    return;
+  }
+
+  try {
+    await apiClient.deleteLogs(repo.value.id, pipeline.value.number, step.value.id);
+    log.value = [];
+  } catch (e) {
+    notifications.notifyError(e, i18n.t('repo.pipeline.log_delete_error'));
   }
 }
 

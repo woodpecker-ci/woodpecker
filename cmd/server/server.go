@@ -38,7 +38,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc/proto"
 	"go.woodpecker-ci.org/woodpecker/v2/server"
 	"go.woodpecker-ci.org/woodpecker/v2/server/cron"
-	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge/setup"
 	woodpeckerGrpcServer "go.woodpecker-ci.org/woodpecker/v2/server/grpc"
 	"go.woodpecker-ci.org/woodpecker/v2/server/logging"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
@@ -82,11 +82,6 @@ func run(c *cli.Context) error {
 		)
 	}
 
-	_forge, err := setupForge(c)
-	if err != nil {
-		return fmt.Errorf("can't setup forge: %w", err)
-	}
-
 	_store, err := setupStore(c)
 	if err != nil {
 		return fmt.Errorf("can't setup store: %w", err)
@@ -97,7 +92,7 @@ func run(c *cli.Context) error {
 		}
 	}()
 
-	err = setupEvilGlobals(c, _store, _forge)
+	err = setupEvilGlobals(c, _store)
 	if err != nil {
 		return fmt.Errorf("can't setup globals: %w", err)
 	}
@@ -107,7 +102,7 @@ func run(c *cli.Context) error {
 	setupMetrics(&g, _store)
 
 	g.Go(func() error {
-		return cron.Start(c.Context, _store, _forge)
+		return cron.Start(c.Context, _store)
 	})
 
 	// start the grpc server
@@ -130,7 +125,6 @@ func run(c *cli.Context) error {
 		)
 
 		woodpeckerServer := woodpeckerGrpcServer.NewWoodpeckerServer(
-			_forge,
 			server.Config.Services.Queue,
 			server.Config.Services.Logs,
 			server.Config.Services.Pubsub,
@@ -270,17 +264,13 @@ func run(c *cli.Context) error {
 	return g.Wait()
 }
 
-func setupEvilGlobals(c *cli.Context, s store.Store, f forge.Forge) error {
-	// forge
-	server.Config.Services.Forge = f
-
+func setupEvilGlobals(c *cli.Context, s store.Store) error {
 	// services
 	server.Config.Services.Queue = setupQueue(c, s)
 	server.Config.Services.Logs = logging.New()
 	server.Config.Services.Pubsub = pubsub.New()
-	server.Config.Services.Membership = setupMembershipService(c, f)
-
-	serviceMangager, err := services.NewManager(c, s)
+	server.Config.Services.Membership = setupMembershipService(c, s)
+	serviceMangager, err := services.NewManager(c, s, setup.Forge)
 	if err != nil {
 		return fmt.Errorf("could not setup service manager: %w", err)
 	}

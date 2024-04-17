@@ -1,11 +1,9 @@
 package update
 
-type GithubRelease struct {
-	TagName string `json:"tag_name"`
-	Assets  []struct {
-		Name               string `json:"name"`
-		BrowserDownloadURL string `json:"browser_download_url"`
-	} `json:"assets"`
+type VersionData struct {
+	Latest string `json:"latest"`
+	Next   string `json:"next"`
+	RC     string `json:"rc"`
 }
 
 type NewVersion struct {
@@ -13,4 +11,7 @@ type NewVersion struct {
 	AssetURL string
 }
 
-const githubReleaseURL = "https://api.github.com/repos/woodpecker-ci/woodpecker/releases/latest"
+const (
+	woodpeckerVersionURL = "https://woodpecker-ci.org/version.json"
+	githubBinaryURL      = "https://github.com/woodpecker-ci/woodpecker/releases/download/v%s/woodpecker-cli_%s_%s.tar.gz"
+)

@@ -30,9 +30,12 @@ func Load(c *cli.Context) error {
 		return err
 	}
 
-	if config == nil && !c.IsSet("server-url") && !c.IsSet("token") {
-		log.Info().Msg("The woodpecker-cli is not yet set up. Please run `woodpecker-cli setup`")
-		return errors.New("woodpecker-cli is not setup")
+	if config == nil {
+		config = &Config{
+			LogLevel:  "info",
+			ServerURL: c.String("server-url"),
+			Token:     c.String("token"),
+		}
 	}
 
 	if !c.IsSet("server") {
@@ -54,6 +57,11 @@ func Load(c *cli.Context) error {
 		if err != nil {
 			return err
 		}
+	}
+
+	if config.ServerURL == "" || config.Token == "" {
+		log.Info().Msg("The woodpecker-cli is not yet set up. Please run `woodpecker-cli setup` or provide the required environment variables / flags.")
+		return errors.New("woodpecker-cli is not configured")
 	}
 
 	return nil

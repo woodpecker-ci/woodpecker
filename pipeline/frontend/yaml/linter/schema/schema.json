@@ -696,6 +696,10 @@
         },
         "securityContext": {
           "$ref": "#/definitions/step_backend_kubernetes_security_context"
+        },
+        "runtimeClassName": {
+          "description": "Read more: https://woodpecker-ci.org/docs/administration/backends/kubernetes#runtimeclassname",
+          "type": "string"
         }
       }
     },

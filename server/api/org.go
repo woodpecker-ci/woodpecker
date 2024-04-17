@@ -68,6 +68,13 @@ func GetOrgPermissions(c *gin.Context) {
 	user := session.User(c)
 	_store := store.FromContext(c)
 
+	_forge, err := server.Config.Services.Manager.ForgeFromUser(user)
+	if err != nil {
+		log.Error().Err(err).Msg("Cannot get forge from user")
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
 	orgID, err := strconv.ParseInt(c.Param("org_id"), 10, 64)
 	if err != nil {
 		c.String(http.StatusBadRequest, "Error parsing org id. %s", err)
@@ -96,7 +103,7 @@ func GetOrgPermissions(c *gin.Context) {
 		return
 	}
 
-	perm, err := server.Config.Services.Membership.Get(c, user, org.Name)
+	perm, err := server.Config.Services.Membership.Get(c, _forge, user, org.Name)
 	if err != nil {
 		c.String(http.StatusInternalServerError, "Error getting membership for %d. %s", orgID, err)
 		return
@@ -116,6 +123,13 @@ func GetOrgPermissions(c *gin.Context) {
 //	@Param		org_full_name	path	string	true	"the organizations full-name / slug"
 func LookupOrg(c *gin.Context) {
 	_store := store.FromContext(c)
+	user := session.User(c)
+	_forge, err := server.Config.Services.Manager.ForgeFromUser(user)
+	if err != nil {
+		log.Error().Err(err).Msg("Cannot get forge from user")
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
 
 	orgFullName := strings.TrimLeft(c.Param("org_full_name"), "/")
 
@@ -137,7 +151,7 @@ func LookupOrg(c *gin.Context) {
 			c.AbortWithStatus(http.StatusNotFound)
 			return
 		} else if !user.Admin {
-			perm, err := server.Config.Services.Membership.Get(c, user, org.Name)
+			perm, err := server.Config.Services.Membership.Get(c, _forge, user, org.Name)
 			if err != nil {
 				log.Error().Err(err).Msg("failed to check membership")
 				c.Status(http.StatusInternalServerError)

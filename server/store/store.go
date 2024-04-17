@@ -14,7 +14,6 @@
 
 package store
 
-//go:generate go install github.com/vektra/mockery/v2@latest
 //go:generate mockery --name Store --output mocks --case underscore
 
 import (
@@ -159,6 +158,13 @@ type Store interface {
 	CronDelete(*model.Repo, int64) error
 	CronListNextExecute(int64, int64) ([]*model.Cron, error)
 	CronGetLock(*model.Cron, int64) (bool, error)
+
+	// Forge
+	ForgeCreate(*model.Forge) error
+	ForgeGet(int64) (*model.Forge, error)
+	ForgeList(p *model.ListOptions) ([]*model.Forge, error)
+	ForgeUpdate(*model.Forge) error
+	ForgeDelete(*model.Forge) error
 
 	// Agent
 	AgentCreate(*model.Agent) error

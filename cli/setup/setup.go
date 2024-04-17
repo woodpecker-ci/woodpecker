@@ -13,8 +13,10 @@ import (
 
 // Command exports the setup command.
 var Command = &cli.Command{
-	Name:  "setup",
-	Usage: "setup the woodpecker-cli for the first time",
+	Name:      "setup",
+	Usage:     "setup the woodpecker-cli for the first time",
+	Args:      true,
+	ArgsUsage: "[server-url]",
 	Flags: []cli.Flag{
 		&cli.StringFlag{
 			Name:  "server-url",
@@ -45,6 +47,9 @@ func setup(c *cli.Context) error {
 	}
 
 	serverURL := c.String("server-url")
+	if serverURL == "" {
+		serverURL = c.Args().First()
+	}
 
 	if serverURL == "" {
 		serverURL, err = ui.Ask("Enter the URL of the woodpecker server", "https://ci.woodpecker-ci.org", true)

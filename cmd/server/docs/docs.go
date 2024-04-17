@@ -2012,6 +2012,53 @@ const docTemplate = `{
                 }
             }
         },
+        "/repos/{repo_id}/logs/{number}/{stepId}": {
+            "delete": {
+                "produces": [
+                    "text/plain"
+                ],
+                "tags": [
+                    "Pipeline logs"
+                ],
+                "summary": "Deletes step log",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cpersonal access token\u003e",
+                        "description": "Insert your personal access token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "the repository id",
+                        "name": "repo_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "the number of the pipeline",
+                        "name": "number",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "the step id",
+                        "name": "stepId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        },
         "/repos/{repo_id}/move": {
             "post": {
                 "produces": [
@@ -3844,6 +3891,9 @@ const docTemplate = `{
         "Org": {
             "type": "object",
             "properties": {
+                "forge_id": {
+                    "type": "integer"
+                },
                 "id": {
                     "type": "integer"
                 },
@@ -3922,7 +3972,7 @@ const docTemplate = `{
                 "errors": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/errors.PipelineError"
+                        "$ref": "#/definitions/types.PipelineError"
                     }
                 },
                 "event": {
@@ -4048,6 +4098,9 @@ const docTemplate = `{
                 "active": {
                     "type": "boolean"
                 },
+                "allow_deploy": {
+                    "type": "boolean"
+                },
                 "allow_pr": {
                     "type": "boolean"
                 },
@@ -4071,6 +4124,9 @@ const docTemplate = `{
                 },
                 "default_branch": {
                     "type": "string"
+                },
+                "forge_id": {
+                    "type": "integer"
                 },
                 "forge_remote_id": {
                     "description": "ForgeRemoteID is the unique identifier for the repository on the forge.",
@@ -4123,6 +4179,9 @@ const docTemplate = `{
         "RepoPatch": {
             "type": "object",
             "properties": {
+                "allow_deploy": {
+                    "type": "boolean"
+                },
                 "allow_pr": {
                     "type": "boolean"
                 },
@@ -4365,6 +4424,9 @@ const docTemplate = `{
                     "description": "Email is the email address for this user.\n\nrequired: true",
                     "type": "string"
                 },
+                "forge_id": {
+                    "type": "integer"
+                },
                 "id": {
                     "description": "the id for this user.\n\nrequired: true",
                     "type": "integer"
@@ -4400,45 +4462,6 @@ const docTemplate = `{
                 "EventDeploy",
                 "EventCron",
                 "EventManual"
-            ]
-        },
-        "errors.PipelineError": {
-            "type": "object",
-            "properties": {
-                "data": {},
-                "is_warning": {
-                    "type": "boolean"
-                },
-                "message": {
-                    "type": "string"
-                },
-                "type": {
-                    "$ref": "#/definitions/errors.PipelineErrorType"
-                }
-            }
-        },
-        "errors.PipelineErrorType": {
-            "type": "string",
-            "enum": [
-                "linter",
-                "deprecation",
-                "compiler",
-                "generic",
-                "bad_habit"
-            ],
-            "x-enum-comments": {
-                "PipelineErrorTypeBadHabit": "some bad-habit error",
-                "PipelineErrorTypeCompiler": "some error with the config semantics",
-                "PipelineErrorTypeDeprecation": "using some deprecated feature",
-                "PipelineErrorTypeGeneric": "some generic error",
-                "PipelineErrorTypeLinter": "some error with the config syntax"
-            },
-            "x-enum-varnames": [
-                "PipelineErrorTypeLinter",
-                "PipelineErrorTypeDeprecation",
-                "PipelineErrorTypeCompiler",
-                "PipelineErrorTypeGeneric",
-                "PipelineErrorTypeBadHabit"
             ]
         },
         "model.Workflow": {
@@ -4487,6 +4510,45 @@ const docTemplate = `{
                     "$ref": "#/definitions/StatusValue"
                 }
             }
+        },
+        "types.PipelineError": {
+            "type": "object",
+            "properties": {
+                "data": {},
+                "is_warning": {
+                    "type": "boolean"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "type": {
+                    "$ref": "#/definitions/types.PipelineErrorType"
+                }
+            }
+        },
+        "types.PipelineErrorType": {
+            "type": "string",
+            "enum": [
+                "linter",
+                "deprecation",
+                "compiler",
+                "generic",
+                "bad_habit"
+            ],
+            "x-enum-comments": {
+                "PipelineErrorTypeBadHabit": "some bad-habit error",
+                "PipelineErrorTypeCompiler": "some error with the config semantics",
+                "PipelineErrorTypeDeprecation": "using some deprecated feature",
+                "PipelineErrorTypeGeneric": "some generic error",
+                "PipelineErrorTypeLinter": "some error with the config syntax"
+            },
+            "x-enum-varnames": [
+                "PipelineErrorTypeLinter",
+                "PipelineErrorTypeDeprecation",
+                "PipelineErrorTypeCompiler",
+                "PipelineErrorTypeGeneric",
+                "PipelineErrorTypeBadHabit"
+            ]
         }
     }
 }`
