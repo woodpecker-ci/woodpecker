@@ -60,6 +60,8 @@ func queuePipeline(ctx context.Context, repo *model.Repo, pipelineItems []*stepb
 func enforcedLabels(task *model.Task, repo *model.Repo) {
 	task.Labels["repo"] = repo.FullName
 	task.Labels["owner"] = repo.Owner
+	task.Labels["repo-id"] = fmt.Sprint(repo.ID)
+	task.Labels["org-id"] = fmt.Sprint(repo.OrgID)
 }
 
 func taskIDs(dependsOn []string, pipelineItems []*stepbuilder.Item) (taskIDs []string) {
