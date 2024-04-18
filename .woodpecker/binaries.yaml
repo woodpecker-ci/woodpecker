@@ -90,11 +90,10 @@ steps:
   release:
     depends_on:
       - checksums
-    image: docker.io/plugins/github-release
-    secrets:
-      - source: github_token
-        target: github_release_api_key
+    image: woodpeckerci/plugin-github-release:1.1.2
     settings:
+      api_key:
+        from_secret: github_token
       files:
         - dist/*.tar.gz
         - dist/*.deb
