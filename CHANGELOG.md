@@ -1,6 +1,6 @@
 # Changelog
 
-## [2.5.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.5.0) - 2024-04-16
+## [2.5.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.5.0) - 2024-04-18
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -43,6 +43,7 @@
 
 ### Misc
 
+- chore(deps): lock file maintenance [[#3622](https://github.com/woodpecker-ci/woodpecker/pull/3622)]
 - Fix spellcheck and enable more dirs [[#3603](https://github.com/woodpecker-ci/woodpecker/pull/3603)]
 - Update docker.io/golang Docker tag to v1.22.2 [[#3596](https://github.com/woodpecker-ci/woodpecker/pull/3596)]
 - Update pre-commit hook pre-commit/pre-commit-hooks to v4.6.0 [[#3597](https://github.com/woodpecker-ci/woodpecker/pull/3597)]
