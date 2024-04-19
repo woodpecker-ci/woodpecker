@@ -59,6 +59,7 @@ var migrationTasks = []*xormigrate.Migration{
 	&convertToNewPipelineErrorFormat,
 	&renameLinkToURL,
 	&cleanRegistryPipeline,
+	&setForgeID,
 }
 
 var allBeans = []any{
@@ -77,6 +78,7 @@ var allBeans = []any{
 	new(model.ServerConfig),
 	new(model.Cron),
 	new(model.Redirection),
+	new(model.Forge),
 	new(model.Workflow),
 	new(model.Org),
 }
