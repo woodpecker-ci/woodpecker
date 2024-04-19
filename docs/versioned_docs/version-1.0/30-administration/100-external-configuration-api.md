@@ -47,7 +47,7 @@ WOODPECKER_CONFIG_SERVICE_ENDPOINT=https://example.com/ciconfig
     "updated": 0,
     "version": 0
   },
-  "build": {
+  "pipeline": {
     "author": "myUser",
     "author_avatar": "https://myforge.com/avatars/d6b3f7787a685fcdf2a44e2c685c7e03",
     "author_email": "my@email.com",

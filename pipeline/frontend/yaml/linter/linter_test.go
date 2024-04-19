@@ -1,19 +1,38 @@
-package linter
+// Copyright 2023 Woodpecker Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+package linter_test
 
 import (
 	"testing"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml"
+	"github.com/stretchr/testify/assert"
+
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/errors"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/linter"
 )
 
 func TestLint(t *testing.T) {
 	testdatas := []struct{ Title, Data string }{{
 		Title: "map", Data: `
+when:
+  event: push
+
 steps:
   build:
     image: docker
-    privileged: true
-    network_mode: host
     volumes:
       - /tmp:/tmp
     commands:
@@ -21,8 +40,8 @@ steps:
       - go test
   publish:
     image: plugins/docker
-    repo: foo/bar
     settings:
+      repo: foo/bar
       foo: bar
 services:
   redis:
@@ -30,11 +49,12 @@ services:
 `,
 	}, {
 		Title: "list", Data: `
+when:
+  event: push
+
 steps:
   - name: build
     image: docker
-    privileged: true
-    network_mode: host
     volumes:
       - /tmp:/tmp
     commands:
@@ -42,12 +62,18 @@ steps:
       - go test
   - name: publish
     image: plugins/docker
-    repo: foo/bar
     settings:
+      repo: foo/bar
       foo: bar
+services:
+  - name: redis
+    image: redis
 `,
 	}, {
 		Title: "merge maps", Data: `
+when:
+  event: push
+
 variables:
   step_template: &base-step
     image: golang:1.19
@@ -66,12 +92,13 @@ steps:
 	for _, testd := range testdatas {
 		t.Run(testd.Title, func(t *testing.T) {
 			conf, err := yaml.ParseString(testd.Data)
-			if err != nil {
-				t.Fatalf("Cannot unmarshal yaml %q. Error: %s", testd, err)
-			}
-			if err := New(WithTrusted(true)).Lint(conf); err != nil {
-				t.Errorf("Expected lint returns no errors, got %q", err)
-			}
+			assert.NoError(t, err)
+
+			assert.NoError(t, linter.New(linter.WithTrusted(true)).Lint([]*linter.WorkflowConfig{{
+				File:      testd.Title,
+				RawConfig: testd.Data,
+				Workflow:  conf,
+			}}), "expected lint returns no errors")
 		})
 	}
 }
@@ -83,7 +110,7 @@ func TestLintErrors(t *testing.T) {
 	}{
 		{
 			from: "",
-			want: "Invalid or missing pipeline section",
+			want: "Invalid or missing steps section",
 		},
 		{
 			from: "steps: { build: { image: '' }  }",
@@ -130,23 +157,65 @@ func TestLintErrors(t *testing.T) {
 			from: "steps: { build: { image: golang, network_mode: 'container:name' }  }",
 			want: "Insufficient privileges to use network_mode",
 		},
+	}
+
+	for _, test := range testdata {
+		conf, err := yaml.ParseString(test.from)
+		assert.NoError(t, err)
+
+		lerr := linter.New().Lint([]*linter.WorkflowConfig{{
+			File:      test.from,
+			RawConfig: test.from,
+			Workflow:  conf,
+		}})
+		assert.Error(t, lerr, "expected lint error for configuration", test.from)
+
+		lerrors := errors.GetPipelineErrors(lerr)
+		found := false
+		for _, lerr := range lerrors {
+			if lerr.Message == test.want {
+				found = true
+				break
+			}
+		}
+		assert.True(t, found, "Expected error %q, got %q", test.want, lerrors)
+	}
+}
+
+func TestBadHabits(t *testing.T) {
+	testdata := []struct {
+		from string
+		want string
+	}{
 		{
-			from: "steps: { build: { image: golang, sysctls: [ net.core.somaxconn=1024 ] }  }",
-			want: "Insufficient privileges to use sysctls",
+			from: "steps: { build: { image: golang } }",
+			want: "Please set an event filter on all when branches",
+		},
+		{
+			from: "when: [{branch: xyz}, {event: push}]\nsteps: { build: { image: golang } }",
+			want: "Please set an event filter on all when branches",
 		},
 	}
 
 	for _, test := range testdata {
 		conf, err := yaml.ParseString(test.from)
-		if err != nil {
-			t.Fatalf("Cannot unmarshal yaml %q. Error: %s", test.from, err)
-		}
+		assert.NoError(t, err)
 
-		lerr := New().Lint(conf)
-		if lerr == nil {
-			t.Errorf("Expected lint error for configuration %q", test.from)
-		} else if lerr.Error() != test.want {
-			t.Errorf("Want error %q, got %q", test.want, lerr.Error())
+		lerr := linter.New().Lint([]*linter.WorkflowConfig{{
+			File:      test.from,
+			RawConfig: test.from,
+			Workflow:  conf,
+		}})
+		assert.Error(t, lerr, "expected lint error for configuration", test.from)
+
+		lerrors := errors.GetPipelineErrors(lerr)
+		found := false
+		for _, lerr := range lerrors {
+			if lerr.Message == test.want {
+				found = true
+				break
+			}
 		}
+		assert.True(t, found, "Expected error %q, got %q", test.want, lerrors)
 	}
 }

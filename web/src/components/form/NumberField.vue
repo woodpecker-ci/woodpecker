@@ -2,45 +2,25 @@
   <TextField v-model="innerValue" :placeholder="placeholder" type="number" />
 </template>
 
-<script lang="ts">
-import { computed, defineComponent, toRef } from 'vue';
+<script lang="ts" setup>
+import { computed, toRef } from 'vue';
 
 import TextField from '~/components/form/TextField.vue';
 
-export default defineComponent({
-  name: 'NumberField',
+const props = defineProps<{
+  modelValue: number;
+  placeholder?: string;
+}>();
 
-  components: { TextField },
+const emit = defineEmits<{
+  (event: 'update:modelValue', value: number): void;
+}>();
 
-  props: {
-    modelValue: {
-      type: Number,
-      required: true,
-    },
-
-    placeholder: {
-      type: String,
-      default: '',
-    },
-  },
-
-  emits: {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    'update:modelValue': (_value: number): boolean => true,
-  },
-
-  setup: (props, ctx) => {
-    const modelValue = toRef(props, 'modelValue');
-    const innerValue = computed({
-      get: () => modelValue.value.toString(),
-      set: (value) => {
-        ctx.emit('update:modelValue', parseFloat(value));
-      },
-    });
-
-    return {
-      innerValue,
-    };
+const modelValue = toRef(props, 'modelValue');
+const innerValue = computed({
+  get: () => modelValue.value.toString(),
+  set: (value) => {
+    emit('update:modelValue', parseFloat(value));
   },
 });
 </script>

@@ -1,24 +1,23 @@
 # Welcome to Woodpecker
 
-Woodpecker is a simple CI engine with great extensibility. It focuses on executing pipelines inside [containers](https://opencontainers.org/).
+Woodpecker is a simple yet powerful CI/CD engine with great extensibility. It focuses on executing pipelines inside [containers](https://opencontainers.org/).
 If you are already using containers in your daily workflow, you'll for sure love Woodpecker.
 
 ![woodpecker](woodpecker.png)
 
-## .woodpecker.yml
+## `.woodpecker.yaml`
 
-- Place your pipeline in a file named `.woodpecker.yml` in your repository
+- Place your pipeline in a file named `.woodpecker.yaml` in your repository
 - Pipeline steps can be named as you like
 - Run any command in the commands section
 
-```yaml
-# .woodpecker.yml
+```yaml title=".woodpecker.yaml"
 steps:
-  build:
+  - name: build
     image: debian
     commands:
       - echo "This is the build step"
-  a-test-step:
+  - name: a-test-step
     image: debian
     commands:
       - echo "Testing.."
@@ -32,12 +31,12 @@ steps:
 - List the commands that should be executed in the container
 
 ```diff
-steps:
-  build:
--   image: debian
-+   image: mycompany/image-with-awscli
-    commands:
-      - aws help
+ steps:
+   - name: build
+-    image: debian
++    image: mycompany/image-with-awscli
+     commands:
+       - aws help
 ```
 
 ### File changes are incremental
@@ -45,14 +44,13 @@ steps:
 - Woodpecker clones the source code in the beginning
 - File changes are persisted throughout individual steps as the same volume is being mounted in all steps
 
-```yaml
-# .woodpecker.yml
+```yaml title=".woodpecker.yaml"
 steps:
-  build:
+  - name: build
     image: debian
     commands:
       - touch myfile
-  a-test-step:
+  - name: a-test-step
     image: debian
     commands:
       - cat myfile
@@ -65,30 +63,27 @@ steps:
 - And make the yaml declarative
 - Plugins are Docker images with your script as an entrypoint
 
-```Dockerfile
-# Dockerfile
+```dockerfile title="Dockerfile"
 FROM laszlocloud/kubectl
 COPY deploy /usr/local/deploy
 ENTRYPOINT ["/usr/local/deploy"]
 ```
 
-```bash
-# deploy
+```bash title="deploy"
 kubectl apply -f $PLUGIN_TEMPLATE
 ```
 
-```yaml
-# .woodpecker.yml
+```yaml title=".woodpecker.yaml"
 steps:
-  deploy-to-k8s:
+  - name: deploy-to-k8s
     image: laszlocloud/my-k8s-plugin
     settings:
-      template: config/k8s/service.yml
+      template: config/k8s/service.yaml
 ```
 
-See [plugin docs](./20-usage/51-plugins/10-plugins.md).
+See [plugin docs](./20-usage/51-plugins/51-overview.md).
 
 ## Continue reading
 
 - [Create a Woodpecker pipeline for your repository](./20-usage/10-intro.md)
-- [Setup your own Woodpecker instance](./30-administration/00-setup.md)
+- [Setup your own Woodpecker instance](./30-administration/00-deployment/00-overview.md)

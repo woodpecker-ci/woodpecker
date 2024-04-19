@@ -22,22 +22,22 @@ import (
 
 	"github.com/rs/zerolog"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline"
-	"github.com/woodpecker-ci/woodpecker/pipeline/rpc"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc"
 )
 
-func (r *Runner) createTracer(ctxmeta context.Context, logger zerolog.Logger, work *rpc.Pipeline) pipeline.TraceFunc {
+func (r *Runner) createTracer(ctxmeta context.Context, logger zerolog.Logger, workflow *rpc.Workflow) pipeline.TraceFunc {
 	return func(state *pipeline.State) error {
 		steplogger := logger.With().
 			Str("image", state.Pipeline.Step.Image).
-			Str("stage", state.Pipeline.Step.Alias).
+			Str("workflowID", workflow.ID).
 			Err(state.Process.Error).
 			Int("exit_code", state.Process.ExitCode).
 			Bool("exited", state.Process.Exited).
 			Logger()
 
 		stepState := rpc.State{
-			Step:     state.Pipeline.Step.Alias,
+			StepUUID: state.Pipeline.Step.UUID,
 			Exited:   state.Process.Exited,
 			ExitCode: state.Process.ExitCode,
 			Started:  time.Now().Unix(), // TODO do not do this
@@ -50,7 +50,7 @@ func (r *Runner) createTracer(ctxmeta context.Context, logger zerolog.Logger, wo
 		defer func() {
 			steplogger.Debug().Msg("update step status")
 
-			if uerr := r.client.Update(ctxmeta, work.ID, stepState); uerr != nil {
+			if uerr := r.client.Update(ctxmeta, workflow.ID, stepState); uerr != nil {
 				steplogger.Debug().
 					Err(uerr).
 					Msg("update step status error")

@@ -1,9 +1,5 @@
 <template>
-  <Panel>
-    <div class="flex flex-row border-b mb-4 pb-4 items-center dark:border-wp-background-100">
-      <h1 class="text-xl ml-2 text-wp-text-100">{{ $t('repo.settings.actions.actions') }}</h1>
-    </div>
-
+  <Settings :title="$t('repo.settings.actions.actions')">
     <div class="flex flex-wrap items-center">
       <Button
         class="mr-4 my-1"
@@ -16,8 +12,8 @@
 
       <Button
         v-if="isActive"
-        class="mr-4 my-1"
         color="blue"
+        class="mr-4 my-1"
         start-icon="turn-off"
         :is-loading="isDeactivatingRepo"
         :text="$t('repo.settings.actions.disable.disable')"
@@ -42,7 +38,7 @@
         @click="deleteRepo"
       />
     </div>
-  </Panel>
+  </Settings>
 </template>
 
 <script lang="ts" setup>
@@ -51,7 +47,7 @@ import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 
 import Button from '~/components/atomic/Button.vue';
-import Panel from '~/components/layout/Panel.vue';
+import Settings from '~/components/layout/Settings.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useNotifications from '~/compositions/useNotifications';

@@ -18,9 +18,9 @@ package github
 import (
 	"fmt"
 
-	"github.com/google/go-github/v39/github"
+	"github.com/google/go-github/v61/github"
 
-	"github.com/woodpecker-ci/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
 const (
@@ -86,14 +86,16 @@ func convertRepo(from *github.Repository) *model.Repo {
 		ForgeRemoteID: model.ForgeRemoteID(fmt.Sprint(from.GetID())),
 		Name:          from.GetName(),
 		FullName:      from.GetFullName(),
-		Link:          from.GetHTMLURL(),
+		ForgeURL:      from.GetHTMLURL(),
 		IsSCMPrivate:  from.GetPrivate(),
 		Clone:         from.GetCloneURL(),
+		CloneSSH:      from.GetSSHURL(),
 		Branch:        from.GetDefaultBranch(),
 		Owner:         from.GetOwner().GetLogin(),
 		Avatar:        from.GetOwner().GetAvatarURL(),
 		Perm:          convertPerm(from.GetPermissions()),
 		SCMKind:       model.RepoGit,
+		PREnabled:     true,
 	}
 	return repo
 }
@@ -145,11 +147,13 @@ func convertRepoHook(eventRepo *github.PushEventRepository) *model.Repo {
 		Owner:         eventRepo.GetOwner().GetLogin(),
 		Name:          eventRepo.GetName(),
 		FullName:      eventRepo.GetFullName(),
-		Link:          eventRepo.GetHTMLURL(),
+		ForgeURL:      eventRepo.GetHTMLURL(),
 		IsSCMPrivate:  eventRepo.GetPrivate(),
 		Clone:         eventRepo.GetCloneURL(),
+		CloneSSH:      eventRepo.GetSSHURL(),
 		Branch:        eventRepo.GetDefaultBranch(),
 		SCMKind:       model.RepoGit,
+		PREnabled:     true,
 	}
 	if repo.FullName == "" {
 		repo.FullName = repo.Owner + "/" + repo.Name

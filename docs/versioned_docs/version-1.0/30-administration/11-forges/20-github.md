@@ -21,7 +21,7 @@ services:
 
 ## Registration
 
-Register your application with GitHub to create your client id and secret. It is very important that the authorization callback URL matches your http(s) scheme and hostname exactly with `<scheme>://<host>/authorize` as the path.
+Register your application with GitHub to create your client id and secret. Grant "repo", "user:email" and "read:org" scopes. It is very important that the authorization callback URL matches your http(s) scheme and hostname exactly with `<scheme>://<host>/authorize` as the path.
 
 Please use this screenshot for reference:
 

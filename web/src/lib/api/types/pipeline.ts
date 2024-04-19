@@ -1,5 +1,12 @@
 import { WebhookEvents } from './webhook';
 
+export type PipelineError<D = unknown> = {
+  type: string;
+  message: string;
+  data?: D;
+  is_warning: boolean;
+};
+
 // A pipeline for a repository.
 export type Pipeline = {
   id: number;
@@ -15,16 +22,13 @@ export type Pipeline = {
   //  The current status of the pipeline.
   status: PipelineStatus;
 
-  error: string;
+  errors?: PipelineError[];
 
   // When the pipeline request was received.
   created_at: number;
 
   // When the pipeline was updated last time in database.
   updated_at: number;
-
-  // When the pipeline was enqueued.
-  enqueued_at: number;
 
   // When the pipeline began execution.
   started_at: number;
@@ -69,9 +73,8 @@ export type Pipeline = {
   //  email for the author of the commit.
   author_email: string;
 
-  // The link to view the repository.
-  // This link will point to the repository state associated with the pipeline's commit.
-  link_url: string;
+  // This url will point to the repository state associated with the pipeline's commit.
+  forge_url: string;
 
   signed: boolean;
 
@@ -143,9 +146,9 @@ export type PipelineFeed = Pipeline & {
 };
 
 export enum StepType {
-  Clone = 1,
-  Service,
-  Plugin,
-  Commands,
-  Cache,
+  Clone = 'clone',
+  Service = 'service',
+  Plugin = 'plugin',
+  Commands = 'commands',
+  Cache = 'cache',
 }

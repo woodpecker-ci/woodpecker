@@ -6,8 +6,8 @@
 
     <template #titleActions>
       <IconButton
-        v-if="!org.is_user && orgPermissions.admin"
-        :to="{ name: 'repo-settings' }"
+        v-if="orgPermissions.admin"
+        :to="{ name: org.is_user ? 'user' : 'repo-settings' }"
         :title="$t('org.settings.settings')"
         icon="settings"
       />
@@ -41,14 +41,7 @@ provide('org-permissions', orgPermissions);
 
 async function load() {
   org.value = await apiClient.getOrg(orgId.value);
-  if (org.value.is_user) {
-    orgPermissions.value = {
-      member: true,
-      admin: true,
-    };
-  } else {
-    orgPermissions.value = await apiClient.getOrgPermissions(org.value.id);
-  }
+  orgPermissions.value = await apiClient.getOrgPermissions(org.value.id);
 }
 
 onMounted(load);

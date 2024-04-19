@@ -6,9 +6,9 @@
 
     <template #titleActions>
       <IconButton
-        v-if="!org.is_user && orgPermissions.admin"
+        v-if="orgPermissions.admin"
         icon="settings"
-        :to="{ name: 'org-settings' }"
+        :to="{ name: org.is_user ? 'user' : 'org-settings' }"
         :title="$t('org.settings.settings')"
       />
     </template>

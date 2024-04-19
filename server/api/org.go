@@ -15,19 +15,17 @@
 package api
 
 import (
-	"errors"
 	"net/http"
 	"strconv"
 	"strings"
 
-	"github.com/rs/zerolog/log"
-	"github.com/woodpecker-ci/woodpecker/server"
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
-	"github.com/woodpecker-ci/woodpecker/server/store"
-	"github.com/woodpecker-ci/woodpecker/server/store/types"
-
 	"github.com/gin-gonic/gin"
+	"github.com/rs/zerolog/log"
+
+	"go.woodpecker-ci.org/woodpecker/v2/server"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/router/middleware/session"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 )
 
 // GetOrg
@@ -50,11 +48,7 @@ func GetOrg(c *gin.Context) {
 
 	org, err := _store.OrgGet(orgID)
 	if err != nil {
-		if errors.Is(err, types.RecordNotExist) {
-			c.AbortWithStatus(http.StatusNotFound)
-			return
-		}
-		_ = c.AbortWithError(http.StatusInternalServerError, err)
+		handleDBError(c, err)
 		return
 	}
 
@@ -74,6 +68,13 @@ func GetOrgPermissions(c *gin.Context) {
 	user := session.User(c)
 	_store := store.FromContext(c)
 
+	_forge, err := server.Config.Services.Manager.ForgeFromUser(user)
+	if err != nil {
+		log.Error().Err(err).Msg("Cannot get forge from user")
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
 	orgID, err := strconv.ParseInt(c.Param("org_id"), 10, 64)
 	if err != nil {
 		c.String(http.StatusBadRequest, "Error parsing org id. %s", err)
@@ -91,15 +92,18 @@ func GetOrgPermissions(c *gin.Context) {
 		return
 	}
 
-	if (org.IsUser && org.Name == user.Login) || user.Admin {
+	if (org.IsUser && org.Name == user.Login) || (user.Admin && !org.IsUser) {
 		c.JSON(http.StatusOK, &model.OrgPerm{
 			Member: true,
 			Admin:  true,
 		})
 		return
+	} else if org.IsUser {
+		c.JSON(http.StatusOK, &model.OrgPerm{})
+		return
 	}
 
-	perm, err := server.Config.Services.Membership.Get(c, user, org.Name)
+	perm, err := server.Config.Services.Membership.Get(c, _forge, user, org.Name)
 	if err != nil {
 		c.String(http.StatusInternalServerError, "Error getting membership for %d. %s", orgID, err)
 		return
@@ -119,17 +123,19 @@ func GetOrgPermissions(c *gin.Context) {
 //	@Param		org_full_name	path	string	true	"the organizations full-name / slug"
 func LookupOrg(c *gin.Context) {
 	_store := store.FromContext(c)
+	user := session.User(c)
+	_forge, err := server.Config.Services.Manager.ForgeFromUser(user)
+	if err != nil {
+		log.Error().Err(err).Msg("Cannot get forge from user")
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
 
 	orgFullName := strings.TrimLeft(c.Param("org_full_name"), "/")
 
 	org, err := _store.OrgFindByName(orgFullName)
 	if err != nil {
-		if errors.Is(err, types.RecordNotExist) {
-			c.AbortWithStatus(http.StatusNotFound)
-			return
-		}
-
-		_ = c.AbortWithError(http.StatusInternalServerError, err)
+		handleDBError(c, err)
 		return
 	}
 
@@ -145,10 +151,10 @@ func LookupOrg(c *gin.Context) {
 			c.AbortWithStatus(http.StatusNotFound)
 			return
 		} else if !user.Admin {
-			perm, err := server.Config.Services.Membership.Get(c, user, org.Name)
+			perm, err := server.Config.Services.Membership.Get(c, _forge, user, org.Name)
 			if err != nil {
-				log.Error().Msgf("Failed to check membership: %v", err)
-				c.String(http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+				log.Error().Err(err).Msg("failed to check membership")
+				c.Status(http.StatusInternalServerError)
 				return
 			}
 

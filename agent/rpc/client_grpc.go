@@ -20,17 +20,16 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cenkalti/backoff/v4"
 	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	backend "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
-	"github.com/woodpecker-ci/woodpecker/pipeline/rpc"
-	"github.com/woodpecker-ci/woodpecker/pipeline/rpc/proto"
+	backend "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc/proto"
 )
-
-var backoff = time.Second
 
 // set grpc version on compile time to compare against server version response
 const ClientGrpcVersion int32 = proto.Version
@@ -52,6 +51,14 @@ func (c *client) Close() error {
 	return c.conn.Close()
 }
 
+func (c *client) newBackOff() backoff.BackOff {
+	b := backoff.NewExponentialBackOff()
+	b.MaxElapsedTime = 0
+	b.MaxInterval = 10 * time.Second          //nolint: gomnd
+	b.InitialInterval = 10 * time.Millisecond //nolint: gomnd
+	return b
+}
+
 // Version returns the server- & grpc-version
 func (c *client) Version(ctx context.Context) (*rpc.Version, error) {
 	res, err := c.client.Version(ctx, &proto.Empty{})
@@ -64,10 +71,11 @@ func (c *client) Version(ctx context.Context) (*rpc.Version, error) {
 	}, nil
 }
 
-// Next returns the next pipeline in the queue.
-func (c *client) Next(ctx context.Context, f rpc.Filter) (*rpc.Pipeline, error) {
+// Next returns the next workflow in the queue.
+func (c *client) Next(ctx context.Context, f rpc.Filter) (*rpc.Workflow, error) {
 	var res *proto.NextResponse
 	var err error
+	retry := c.newBackOff()
 	req := new(proto.NextRequest)
 	req.Filter = new(proto.Filter)
 	req.Filter.Labels = f.Labels
@@ -82,7 +90,7 @@ func (c *client) Next(ctx context.Context, f rpc.Filter) (*rpc.Pipeline, error) 
 			// https://github.com/woodpecker-ci/woodpecker/issues/717#issuecomment-1049365104
 			log.Trace().Err(err).Msg("grpc: to many keepalive pings without sending data")
 		} else {
-			log.Err(err).Msgf("grpc error: done(): code: %v: %s", status.Code(err), err)
+			log.Error().Err(err).Msgf("grpc error: done(): code: %v", status.Code(err))
 		}
 
 		switch status.Code(err) {
@@ -96,28 +104,31 @@ func (c *client) Next(ctx context.Context, f rpc.Filter) (*rpc.Pipeline, error) 
 		default:
 			return nil, err
 		}
-		if ctx.Err() != nil {
+
+		select {
+		case <-time.After(retry.NextBackOff()):
+		case <-ctx.Done():
 			return nil, ctx.Err()
 		}
-		<-time.After(backoff)
 	}
 
-	if res.GetPipeline() == nil {
+	if res.GetWorkflow() == nil {
 		return nil, nil
 	}
 
-	p := new(rpc.Pipeline)
-	p.ID = res.GetPipeline().GetId()
-	p.Timeout = res.GetPipeline().GetTimeout()
-	p.Config = new(backend.Config)
-	if err := json.Unmarshal(res.GetPipeline().GetPayload(), p.Config); err != nil {
-		log.Error().Err(err).Msgf("could not unmarshal pipeline config of '%s'", p.ID)
+	w := new(rpc.Workflow)
+	w.ID = res.GetWorkflow().GetId()
+	w.Timeout = res.GetWorkflow().GetTimeout()
+	w.Config = new(backend.Config)
+	if err := json.Unmarshal(res.GetWorkflow().GetPayload(), w.Config); err != nil {
+		log.Error().Err(err).Msgf("could not unmarshal workflow config of '%s'", w.ID)
 	}
-	return p, nil
+	return w, nil
 }
 
-// Wait blocks until the pipeline is complete.
+// Wait blocks until the workflow is complete.
 func (c *client) Wait(ctx context.Context, id string) (err error) {
+	retry := c.newBackOff()
 	req := new(proto.WaitRequest)
 	req.Id = id
 	for {
@@ -126,7 +137,7 @@ func (c *client) Wait(ctx context.Context, id string) (err error) {
 			break
 		}
 
-		log.Err(err).Msgf("grpc error: wait(): code: %v: %s", status.Code(err), err)
+		log.Error().Err(err).Msgf("grpc error: wait(): code: %v", status.Code(err))
 
 		switch status.Code(err) {
 		case
@@ -139,13 +150,19 @@ func (c *client) Wait(ctx context.Context, id string) (err error) {
 		default:
 			return err
 		}
-		<-time.After(backoff)
+
+		select {
+		case <-time.After(retry.NextBackOff()):
+		case <-ctx.Done():
+			return ctx.Err()
+		}
 	}
 	return nil
 }
 
-// Init signals the pipeline is initialized.
+// Init signals the workflow is initialized.
 func (c *client) Init(ctx context.Context, id string, state rpc.State) (err error) {
+	retry := c.newBackOff()
 	req := new(proto.InitRequest)
 	req.Id = id
 	req.State = new(proto.State)
@@ -154,14 +171,14 @@ func (c *client) Init(ctx context.Context, id string, state rpc.State) (err erro
 	req.State.Exited = state.Exited
 	req.State.Finished = state.Finished
 	req.State.Started = state.Started
-	req.State.Name = state.Step
+	req.State.StepUuid = state.StepUUID
 	for {
 		_, err = c.client.Init(ctx, req)
 		if err == nil {
 			break
 		}
 
-		log.Err(err).Msgf("grpc error: init(): code: %v: %s", status.Code(err), err)
+		log.Error().Err(err).Msgf("grpc error: init(): code: %v", status.Code(err))
 
 		switch status.Code(err) {
 		case
@@ -174,13 +191,19 @@ func (c *client) Init(ctx context.Context, id string, state rpc.State) (err erro
 		default:
 			return err
 		}
-		<-time.After(backoff)
+
+		select {
+		case <-time.After(retry.NextBackOff()):
+		case <-ctx.Done():
+			return ctx.Err()
+		}
 	}
 	return nil
 }
 
-// Done signals the pipeline is complete.
+// Done signals the work is complete.
 func (c *client) Done(ctx context.Context, id string, state rpc.State) (err error) {
+	retry := c.newBackOff()
 	req := new(proto.DoneRequest)
 	req.Id = id
 	req.State = new(proto.State)
@@ -189,14 +212,14 @@ func (c *client) Done(ctx context.Context, id string, state rpc.State) (err erro
 	req.State.Exited = state.Exited
 	req.State.Finished = state.Finished
 	req.State.Started = state.Started
-	req.State.Name = state.Step
+	req.State.StepUuid = state.StepUUID
 	for {
 		_, err = c.client.Done(ctx, req)
 		if err == nil {
 			break
 		}
 
-		log.Err(err).Msgf("grpc error: done(): code: %v: %s", status.Code(err), err)
+		log.Error().Err(err).Msgf("grpc error: done(): code: %v", status.Code(err))
 
 		switch status.Code(err) {
 		case
@@ -209,13 +232,19 @@ func (c *client) Done(ctx context.Context, id string, state rpc.State) (err erro
 		default:
 			return err
 		}
-		<-time.After(backoff)
+
+		select {
+		case <-time.After(retry.NextBackOff()):
+		case <-ctx.Done():
+			return ctx.Err()
+		}
 	}
 	return nil
 }
 
-// Extend extends the pipeline deadline
+// Extend extends the workflow deadline
 func (c *client) Extend(ctx context.Context, id string) (err error) {
+	retry := c.newBackOff()
 	req := new(proto.ExtendRequest)
 	req.Id = id
 	for {
@@ -224,7 +253,7 @@ func (c *client) Extend(ctx context.Context, id string) (err error) {
 			break
 		}
 
-		log.Err(err).Msgf("grpc error: extend(): code: %v: %s", status.Code(err), err)
+		log.Error().Err(err).Msgf("grpc error: extend(): code: %v", status.Code(err))
 
 		switch status.Code(err) {
 		case
@@ -237,13 +266,19 @@ func (c *client) Extend(ctx context.Context, id string) (err error) {
 		default:
 			return err
 		}
-		<-time.After(backoff)
+
+		select {
+		case <-time.After(retry.NextBackOff()):
+		case <-ctx.Done():
+			return ctx.Err()
+		}
 	}
 	return nil
 }
 
-// Update updates the pipeline state.
+// Update updates the workflow state.
 func (c *client) Update(ctx context.Context, id string, state rpc.State) (err error) {
+	retry := c.newBackOff()
 	req := new(proto.UpdateRequest)
 	req.Id = id
 	req.State = new(proto.State)
@@ -252,14 +287,14 @@ func (c *client) Update(ctx context.Context, id string, state rpc.State) (err er
 	req.State.Exited = state.Exited
 	req.State.Finished = state.Finished
 	req.State.Started = state.Started
-	req.State.Name = state.Step
+	req.State.StepUuid = state.StepUUID
 	for {
 		_, err = c.client.Update(ctx, req)
 		if err == nil {
 			break
 		}
 
-		log.Err(err).Msgf("grpc error: update(): code: %v: %s", status.Code(err), err)
+		log.Error().Err(err).Msgf("grpc error: update(): code: %v", status.Code(err))
 
 		switch status.Code(err) {
 		case
@@ -272,13 +307,19 @@ func (c *client) Update(ctx context.Context, id string, state rpc.State) (err er
 		default:
 			return err
 		}
-		<-time.After(backoff)
+
+		select {
+		case <-time.After(retry.NextBackOff()):
+		case <-ctx.Done():
+			return ctx.Err()
+		}
 	}
 	return nil
 }
 
-// Log writes the pipeline log entry.
+// Log writes the workflow log entry.
 func (c *client) Log(ctx context.Context, logEntry *rpc.LogEntry) (err error) {
+	retry := c.newBackOff()
 	req := new(proto.LogRequest)
 	req.LogEntry = new(proto.LogEntry)
 	req.LogEntry.StepUuid = logEntry.StepUUID
@@ -292,7 +333,7 @@ func (c *client) Log(ctx context.Context, logEntry *rpc.LogEntry) (err error) {
 			break
 		}
 
-		log.Err(err).Msgf("grpc error: log(): code: %v: %s", status.Code(err), err)
+		log.Error().Err(err).Msgf("grpc error: log(): code: %v", status.Code(err))
 
 		switch status.Code(err) {
 		case
@@ -305,7 +346,12 @@ func (c *client) Log(ctx context.Context, logEntry *rpc.LogEntry) (err error) {
 		default:
 			return err
 		}
-		<-time.After(backoff)
+
+		select {
+		case <-time.After(retry.NextBackOff()):
+		case <-ctx.Done():
+			return ctx.Err()
+		}
 	}
 	return nil
 }
@@ -321,7 +367,13 @@ func (c *client) RegisterAgent(ctx context.Context, platform, backend, version s
 	return res.GetAgentId(), err
 }
 
+func (c *client) UnregisterAgent(ctx context.Context) error {
+	_, err := c.client.UnregisterAgent(ctx, &proto.Empty{})
+	return err
+}
+
 func (c *client) ReportHealth(ctx context.Context) (err error) {
+	retry := c.newBackOff()
 	req := new(proto.ReportHealthRequest)
 	req.Status = "I am alive!"
 
@@ -341,6 +393,11 @@ func (c *client) ReportHealth(ctx context.Context) (err error) {
 		default:
 			return err
 		}
-		<-time.After(backoff)
+
+		select {
+		case <-time.After(retry.NextBackOff()):
+		case <-ctx.Done():
+			return ctx.Err()
+		}
 	}
 }

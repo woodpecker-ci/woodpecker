@@ -27,12 +27,12 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
 
-	"github.com/woodpecker-ci/woodpecker/server"
-	"github.com/woodpecker-ci/woodpecker/server/badges"
-	"github.com/woodpecker-ci/woodpecker/server/ccmenu"
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/store"
-	"github.com/woodpecker-ci/woodpecker/server/store/types"
+	"go.woodpecker-ci.org/woodpecker/v2/server"
+	"go.woodpecker-ci.org/woodpecker/v2/server/badges"
+	"go.woodpecker-ci.org/woodpecker/v2/server/ccmenu"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store/types"
 )
 
 // GetBadge
@@ -42,7 +42,7 @@ import (
 //	@Produce	image/svg+xml
 //	@Success	200
 //	@Tags		Badges
-//	@Param		repo_id			path	int		true	"the repository id"
+//	@Param		repo_id	path	int	true	"the repository id"
 func GetBadge(c *gin.Context) {
 	_store := store.FromContext(c)
 
@@ -61,12 +61,8 @@ func GetBadge(c *gin.Context) {
 		repo, err = _store.GetRepo(repoID)
 	}
 
-	if err != nil || !repo.IsActive {
-		if err == nil || errors.Is(err, types.RecordNotExist) {
-			c.AbortWithStatus(http.StatusNotFound)
-			return
-		}
-		_ = c.AbortWithError(http.StatusInternalServerError, err)
+	if err != nil {
+		handleDBError(c, err)
 		return
 	}
 
@@ -101,13 +97,26 @@ func GetBadge(c *gin.Context) {
 //	@Produce		xml
 //	@Success		200
 //	@Tags			Badges
-//	@Param			owner	path	string	true	"the repository owner's name"
-//	@Param			name	path	string	true	"the repository name"
+//	@Param			repo_id	path	int	true	"the repository id"
 func GetCC(c *gin.Context) {
 	_store := store.FromContext(c)
-	repo, err := _store.GetRepoName(c.Param("owner") + "/" + c.Param("name"))
+	var repo *model.Repo
+	var err error
+
+	if c.Param("repo_name") != "" {
+		repo, err = _store.GetRepoName(c.Param("repo_id_or_owner") + "/" + c.Param("repo_name"))
+	} else {
+		var repoID int64
+		repoID, err = strconv.ParseInt(c.Param("repo_id_or_owner"), 10, 64)
+		if err != nil {
+			c.AbortWithStatus(http.StatusBadRequest)
+			return
+		}
+		repo, err = _store.GetRepo(repoID)
+	}
+
 	if err != nil {
-		handleDbGetError(c, err)
+		handleDBError(c, err)
 		return
 	}
 
@@ -122,7 +131,7 @@ func GetCC(c *gin.Context) {
 		return
 	}
 
-	url := fmt.Sprintf("%s/%s/%d", server.Config.Server.Host, repo.FullName, pipelines[0].Number)
+	url := fmt.Sprintf("%s/repos/%d/pipeline/%d", server.Config.Server.Host, repo.ID, pipelines[0].Number)
 	cc := ccmenu.New(repo, pipelines[0], url)
 	c.XML(http.StatusOK, cc)
 }

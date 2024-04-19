@@ -21,14 +21,14 @@ import (
 
 	"xorm.io/xorm"
 
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/store/types"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store/types"
 )
 
 // wrapGet return error if err not nil or if requested entry do not exist
 func wrapGet(exist bool, err error) error {
 	if !exist {
-		err = types.RecordNotExist
+		return types.RecordNotExist
 	}
 	if err != nil {
 		// we only ask for the function's name if needed, as it's not as preformatted as to just execute it
@@ -41,7 +41,7 @@ func wrapGet(exist bool, err error) error {
 // wrapDelete return error if err not nil or if requested entry do not exist
 func wrapDelete(c int64, err error) error {
 	if c == 0 {
-		err = types.RecordNotExist
+		return types.RecordNotExist
 	}
 	if err != nil {
 		// we only ask for the function's name if needed, as it's not as preformatted as to just execute it

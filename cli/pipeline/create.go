@@ -19,12 +19,11 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/woodpecker-ci/woodpecker/woodpecker-go/woodpecker"
-
 	"github.com/urfave/cli/v2"
 
-	"github.com/woodpecker-ci/woodpecker/cli/common"
-	"github.com/woodpecker-ci/woodpecker/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker"
 )
 
 var pipelineCreateCmd = &cli.Command{
@@ -32,7 +31,7 @@ var pipelineCreateCmd = &cli.Command{
 	Usage:     "create new pipeline",
 	ArgsUsage: "<repo-id|repo-full-name>",
 	Action:    pipelineCreate,
-	Flags: append(common.GlobalFlags,
+	Flags: []cli.Flag{
 		common.FormatFlag(tmplPipelineList),
 		&cli.StringFlag{
 			Name:     "branch",
@@ -43,7 +42,7 @@ var pipelineCreateCmd = &cli.Command{
 			Name:  "var",
 			Usage: "key=value",
 		},
-	),
+	},
 }
 
 func pipelineCreate(c *cli.Context) error {
@@ -61,9 +60,9 @@ func pipelineCreate(c *cli.Context) error {
 	variables := make(map[string]string)
 
 	for _, vaz := range c.StringSlice("var") {
-		sp := strings.SplitN(vaz, "=", 2)
-		if len(sp) == 2 {
-			variables[sp[0]] = sp[1]
+		before, after, _ := strings.Cut(vaz, "=")
+		if before != "" && after != "" {
+			variables[before] = after
 		}
 	}
 

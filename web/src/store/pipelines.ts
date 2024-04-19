@@ -4,7 +4,7 @@ import { computed, reactive, Ref, ref } from 'vue';
 import useApiClient from '~/compositions/useApiClient';
 import { Pipeline, PipelineFeed, PipelineWorkflow } from '~/lib/api/types';
 import { useRepoStore } from '~/store/repos';
-import { comparePipelines, isPipelineActive } from '~/utils/helpers';
+import { comparePipelines, comparePipelinesWithStatus, isPipelineActive } from '~/utils/helpers';
 
 export const usePipelineStore = defineStore('pipelines', () => {
   const apiClient = useApiClient();
@@ -71,7 +71,7 @@ export const usePipelineStore = defineStore('pipelines', () => {
         );
         return [...acc, ...repoPipelinesArray];
       }, [])
-      .sort(comparePipelines)
+      .sort(comparePipelinesWithStatus)
       .filter((pipeline) => repoStore.ownedRepoIds.includes(pipeline.repo_id)),
   );
 

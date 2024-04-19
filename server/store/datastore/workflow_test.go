@@ -18,7 +18,9 @@ package datastore
 import (
 	"testing"
 
-	"github.com/woodpecker-ci/woodpecker/server/model"
+	"github.com/stretchr/testify/assert"
+
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
 func TestWorkflowLoad(t *testing.T) {
@@ -47,27 +49,12 @@ func TestWorkflowLoad(t *testing.T) {
 			},
 		},
 	}
-	err := store.WorkflowsCreate([]*model.Workflow{wf})
-	if err != nil {
-		t.Errorf("Unexpected error: insert steps: %s", err)
-		return
-	}
+	assert.NoError(t, store.WorkflowsCreate([]*model.Workflow{wf}))
 	workflowGet, err := store.WorkflowLoad(1)
-	if err != nil {
-		t.Errorf("Unexpected error: insert steps: %s", err)
-		return
-	}
-
-	if got, want := workflowGet.PipelineID, int64(1); got != want {
-		t.Errorf("Want pipeline id %d, got %d", want, got)
-	}
-	if got, want := workflowGet.PID, 1; got != want {
-		t.Errorf("Want workflow pid %d, got %d", want, got)
-	}
-	// children are not loaded
-	if got, want := len(workflowGet.Children), 0; got != want {
-		t.Errorf("Want children len %d, got %d", want, got)
-	}
+	assert.NoError(t, err)
+	assert.EqualValues(t, 1, workflowGet.PipelineID)
+	assert.Equal(t, 1, workflowGet.PID)
+	assert.Len(t, workflowGet.Children, 0)
 }
 
 func TestWorkflowGetTree(t *testing.T) {
@@ -96,36 +83,16 @@ func TestWorkflowGetTree(t *testing.T) {
 			},
 		},
 	}
-	err := store.WorkflowsCreate([]*model.Workflow{wf})
-	if err != nil {
-		t.Errorf("Unexpected error: insert steps: %s", err)
-		return
-	}
+	assert.NoError(t, store.WorkflowsCreate([]*model.Workflow{wf}))
 
 	workflowsGet, err := store.WorkflowGetTree(&model.Pipeline{ID: 1})
-	if err != nil {
-		t.Error(err)
-		return
-	}
-
-	if got, want := len(workflowsGet), 1; got != want {
-		t.Errorf("Want workflow len %d, got %d", want, got)
-		return
-	}
+	assert.NoError(t, err)
+	assert.Len(t, workflowsGet, 1)
 	workflowGet := workflowsGet[0]
-	if got, want := workflowGet.Name, "woodpecker"; got != want {
-		t.Errorf("Want workflow name %s, got %s", want, got)
-	}
-	if got, want := len(workflowGet.Children), 2; got != want {
-		t.Errorf("Want children len %d, got %d", want, got)
-		return
-	}
-	if got, want := workflowGet.Children[0].PID, 2; got != want {
-		t.Errorf("Want children len %d, got %d", want, got)
-	}
-	if got, want := workflowGet.Children[1].PID, 3; got != want {
-		t.Errorf("Want children len %d, got %d", want, got)
-	}
+	assert.Equal(t, "woodpecker", workflowGet.Name)
+	assert.Len(t, workflowGet.Children, 2)
+	assert.Equal(t, 2, workflowGet.Children[0].PID)
+	assert.Equal(t, 3, workflowGet.Children[1].PID)
 }
 
 func TestWorkflowUpdate(t *testing.T) {
@@ -138,34 +105,16 @@ func TestWorkflowUpdate(t *testing.T) {
 		Name:       "woodpecker",
 		State:      "pending",
 	}
-	err := store.WorkflowsCreate([]*model.Workflow{wf})
-	if err != nil {
-		t.Errorf("Unexpected error: insert steps: %s", err)
-		return
-	}
+	assert.NoError(t, store.WorkflowsCreate([]*model.Workflow{wf}))
 	workflowGet, err := store.WorkflowLoad(1)
-	if err != nil {
-		t.Errorf("Unexpected error: insert steps: %s", err)
-		return
-	}
+	assert.NoError(t, err)
 
-	if got, want := workflowGet.State, model.StatusValue("pending"); got != want {
-		t.Errorf("Want workflow state %s, got %s", want, got)
-	}
+	assert.Equal(t, model.StatusValue("pending"), workflowGet.State)
 
 	wf.State = "success"
 
-	err = store.WorkflowUpdate(wf)
-	if err != nil {
-		t.Errorf("Unexpected error: insert steps: %s", err)
-		return
-	}
+	assert.NoError(t, store.WorkflowUpdate(wf))
 	workflowGet, err = store.WorkflowLoad(1)
-	if err != nil {
-		t.Errorf("Unexpected error: insert steps: %s", err)
-		return
-	}
-	if got, want := workflowGet.State, model.StatusValue("success"); got != want {
-		t.Errorf("Want workflow state %s, got %s", want, got)
-	}
+	assert.NoError(t, err)
+	assert.Equal(t, model.StatusValue("success"), workflowGet.State)
 }

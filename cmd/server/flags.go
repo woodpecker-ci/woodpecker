@@ -20,15 +20,11 @@ import (
 
 	"github.com/urfave/cli/v2"
 
-	"github.com/woodpecker-ci/woodpecker/shared/constant"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/constant"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/logger"
 )
 
-var flags = []cli.Flag{
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_LOG_LEVEL"},
-		Name:    "log-level",
-		Usage:   "set logging level",
-	},
+var flags = append([]cli.Flag{
 	&cli.BoolFlag{
 		EnvVars: []string{"WOODPECKER_LOG_XORM"},
 		Name:    "log-xorm",
@@ -39,31 +35,15 @@ var flags = []cli.Flag{
 		Name:    "log-xorm-sql",
 		Usage:   "enable xorm sql command logging",
 	},
-	&cli.BoolFlag{
-		EnvVars: []string{"WOODPECKER_DEBUG_PRETTY"},
-		Name:    "pretty",
-		Usage:   "enable pretty-printed debug output",
-	},
-	&cli.BoolFlag{
-		EnvVars: []string{"WOODPECKER_DEBUG_NOCOLOR"},
-		Name:    "nocolor",
-		Usage:   "disable colored debug output",
-		Value:   true,
-	},
 	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_HOST"},
 		Name:    "server-host",
-		Usage:   "server fully qualified url (<scheme>://<host>)",
+		Usage:   "server fully qualified url (<scheme>://<host>[/<prefixpath>])",
 	},
 	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_WEBHOOK_HOST"},
 		Name:    "server-webhook-host",
-		Usage:   "server fully qualified url for forge's Webhooks (<scheme>://<host>)",
-	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_ROOT_PATH", "WOODPECKER_ROOT_URL"},
-		Name:    "root-path",
-		Usage:   "server url root (used for statics loading when having a url path prefix)",
+		Usage:   "server fully qualified url for forge's Webhooks (<scheme>://<host>[/<prefixpath>])",
 	},
 	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_SERVER_ADDR"},
@@ -175,12 +155,6 @@ var flags = []cli.Flag{
 		Usage:   "The maximum time in minutes you can set in the repo settings before a pipeline gets killed",
 		Value:   120,
 	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_DOCS"},
-		Name:    "docs",
-		Usage:   "link to user documentation",
-		Value:   "https://woodpecker-ci.org/",
-	},
 	&cli.DurationFlag{
 		EnvVars: []string{"WOODPECKER_SESSION_EXPIRES"},
 		Name:    "session-expires",
@@ -221,16 +195,6 @@ var flags = []cli.Flag{
 		Usage:   "server-side enforcement policy on the minimum amount of time a client should wait before sending a keepalive ping.",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_SECRET_ENDPOINT"},
-		Name:    "secret-service",
-		Usage:   "secret plugin endpoint",
-	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_REGISTRY_ENDPOINT"},
-		Name:    "registry-service",
-		Usage:   "registry plugin endpoint",
-	},
-	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_CONFIG_SERVICE_ENDPOINT"},
 		Name:    "config-service-endpoint",
 		Usage:   "url used for calling configuration service endpoint",
@@ -245,7 +209,7 @@ var flags = []cli.Flag{
 		EnvVars:  []string{"WOODPECKER_DATABASE_DATASOURCE"},
 		Name:     "datasource",
 		Usage:    "database driver configuration string",
-		Value:    "woodpecker.sqlite",
+		Value:    datasourceDefaultValue(),
 		FilePath: os.Getenv("WOODPECKER_DATABASE_DATASOURCE_FILE"),
 	},
 	&cli.StringFlag{
@@ -265,7 +229,7 @@ var flags = []cli.Flag{
 		EnvVars: []string{"WOODPECKER_STATUS_CONTEXT_FORMAT"},
 		Name:    "status-context-format",
 		Usage:   "status context format",
-		Value:   "{{ .context }}/{{ .event }}/{{ .workflow }}",
+		Value:   "{{ .context }}/{{ .event }}/{{ .workflow }}{{if not (eq .axis_id 0)}}/{{.axis_id}}{{end}}",
 	},
 	&cli.BoolFlag{
 		EnvVars: []string{"WOODPECKER_MIGRATIONS_ALLOW_LONG"},
@@ -276,6 +240,29 @@ var flags = []cli.Flag{
 		EnvVars: []string{"WOODPECKER_ENABLE_SWAGGER"},
 		Name:    "enable-swagger",
 		Value:   true,
+	},
+	&cli.BoolFlag{
+		EnvVars: []string{"WOODPECKER_DISABLE_VERSION_CHECK"},
+		Usage:   "Disable version check in admin web ui.",
+		Name:    "skip-version-check",
+	},
+	//
+	// backend options for pipeline compiler
+	//
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_BACKEND_NO_PROXY", "NO_PROXY", "no_proxy"},
+		Usage:   "if set, pass the environment variable down as \"NO_PROXY\" to steps",
+		Name:    "backend-no-proxy",
+	},
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_BACKEND_HTTP_PROXY", "HTTP_PROXY", "http_proxy"},
+		Usage:   "if set, pass the environment variable down as \"HTTP_PROXY\" to steps",
+		Name:    "backend-http-proxy",
+	},
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_BACKEND_HTTPS_PROXY", "HTTPS_PROXY", "https_proxy"},
+		Usage:   "if set, pass the environment variable down as \"HTTPS_PROXY\" to steps",
+		Name:    "backend-https-proxy",
 	},
 	//
 	// resource limit parameters
@@ -317,30 +304,41 @@ var flags = []cli.Flag{
 		Usage:   "set the cpus allowed to execute containers",
 	},
 	//
+	&cli.StringFlag{
+		Name:    "forge-url",
+		Usage:   "url of the forge",
+		EnvVars: []string{"WOODPECKER_FORGE_URL", "WOODPECKER_GITHUB_URL", "WOODPECKER_GITLAB_URL", "WOODPECKER_GITEA_URL", "WOODPECKER_BITBUCKET_URL"},
+	},
+	&cli.StringFlag{
+		Name:    "forge-oauth-client",
+		Usage:   "oauth2 client id",
+		EnvVars: []string{"WOODPECKER_FORGE_CLIENT", "WOODPECKER_GITHUB_CLIENT", "WOODPECKER_GITLAB_CLIENT", "WOODPECKER_GITEA_CLIENT", "WOODPECKER_BITBUCKET_CLIENT", "WOODPECKER_BITBUCKET_DC_CLIENT_ID"},
+	},
+	&cli.StringFlag{
+		Name:    "forge-oauth-secret",
+		Usage:   "oauth2 client secret",
+		EnvVars: []string{"WOODPECKER_FORGE_SECRET", "WOODPECKER_GITHUB_SECRET", "WOODPECKER_GITLAB_SECRET", "WOODPECKER_GITEA_SECRET", "WOODPECKER_BITBUCKET_SECRET", "WOODPECKER_BITBUCKET_DC_CLIENT_SECRET"},
+	},
+	&cli.BoolFlag{
+		Name:    "forge-skip-verify",
+		Usage:   "skip ssl verification",
+		EnvVars: []string{"WOODPECKER_FORGE_SKIP_VERIFY", "WOODPECKER_GITHUB_SKIP_VERIFY", "WOODPECKER_GITLAB_SKIP_VERIFY", "WOODPECKER_GITEA_SKIP_VERIFY", "WOODPECKER_BITBUCKET_SKIP_VERIFY"},
+	},
+	//
+	// Addon
+	//
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_ADDON_FORGE"},
+		Name:    "addon-forge",
+		Usage:   "path to forge addon executable",
+	},
+	//
 	// GitHub
 	//
 	&cli.BoolFlag{
 		EnvVars: []string{"WOODPECKER_GITHUB"},
 		Name:    "github",
 		Usage:   "github driver is enabled",
-	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_GITHUB_URL"},
-		Name:    "github-server",
-		Usage:   "github server address",
-		Value:   "https://github.com",
-	},
-	&cli.StringFlag{
-		EnvVars:  []string{"WOODPECKER_GITHUB_CLIENT"},
-		Name:     "github-client",
-		Usage:    "github oauth2 client id",
-		FilePath: os.Getenv("WOODPECKER_GITHUB_CLIENT_FILE"),
-	},
-	&cli.StringFlag{
-		EnvVars:  []string{"WOODPECKER_GITHUB_SECRET"},
-		Name:     "github-secret",
-		Usage:    "github oauth2 client secret",
-		FilePath: os.Getenv("WOODPECKER_GITHUB_SECRET_FILE"),
 	},
 	&cli.BoolFlag{
 		EnvVars: []string{"WOODPECKER_GITHUB_MERGE_REF"},
@@ -349,9 +347,10 @@ var flags = []cli.Flag{
 		Value:   true,
 	},
 	&cli.BoolFlag{
-		EnvVars: []string{"WOODPECKER_GITHUB_SKIP_VERIFY"},
-		Name:    "github-skip-verify",
-		Usage:   "github skip ssl verification",
+		EnvVars: []string{"WOODPECKER_GITHUB_PUBLIC_ONLY"},
+		Name:    "github-public-only",
+		Usage:   "github tokens should only get access to public repos",
+		Value:   false,
 	},
 	//
 	// Gitea
@@ -362,27 +361,9 @@ var flags = []cli.Flag{
 		Usage:   "gitea driver is enabled",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_GITEA_URL"},
-		Name:    "gitea-server",
-		Usage:   "gitea server address",
-		Value:   "https://try.gitea.io",
-	},
-	&cli.StringFlag{
-		EnvVars:  []string{"WOODPECKER_GITEA_CLIENT"},
-		Name:     "gitea-client",
-		Usage:    "gitea oauth2 client id",
-		FilePath: os.Getenv("WOODPECKER_GITEA_CLIENT_FILE"),
-	},
-	&cli.StringFlag{
-		EnvVars:  []string{"WOODPECKER_GITEA_SECRET"},
-		Name:     "gitea-secret",
-		Usage:    "gitea oauth2 client secret",
-		FilePath: os.Getenv("WOODPECKER_GITEA_SECRET_FILE"),
-	},
-	&cli.BoolFlag{
-		EnvVars: []string{"WOODPECKER_GITEA_SKIP_VERIFY"},
-		Name:    "gitea-skip-verify",
-		Usage:   "gitea skip ssl verification",
+		EnvVars: []string{"WOODPECKER_DEV_GITEA_OAUTH_URL"},
+		Name:    "gitea-oauth-server",
+		Usage:   "user-facing gitea server url for oauth",
 	},
 	//
 	// Bitbucket
@@ -392,18 +373,6 @@ var flags = []cli.Flag{
 		Name:    "bitbucket",
 		Usage:   "bitbucket driver is enabled",
 	},
-	&cli.StringFlag{
-		EnvVars:  []string{"WOODPECKER_BITBUCKET_CLIENT"},
-		Name:     "bitbucket-client",
-		Usage:    "bitbucket oauth2 client id",
-		FilePath: os.Getenv("WOODPECKER_BITBUCKET_CLIENT_FILE"),
-	},
-	&cli.StringFlag{
-		EnvVars:  []string{"WOODPECKER_BITBUCKET_SECRET"},
-		Name:     "bitbucket-secret",
-		Usage:    "bitbucket oauth2 client secret",
-		FilePath: os.Getenv("WOODPECKER_BITBUCKET_SECRET_FILE"),
-	},
 	//
 	// Gitlab
 	//
@@ -412,28 +381,25 @@ var flags = []cli.Flag{
 		Name:    "gitlab",
 		Usage:   "gitlab driver is enabled",
 	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_GITLAB_URL"},
-		Name:    "gitlab-server",
-		Usage:   "gitlab server address",
-		Value:   "https://gitlab.com",
-	},
-	&cli.StringFlag{
-		EnvVars:  []string{"WOODPECKER_GITLAB_CLIENT"},
-		Name:     "gitlab-client",
-		Usage:    "gitlab oauth2 client id",
-		FilePath: os.Getenv("WOODPECKER_GITLAB_CLIENT_FILE"),
-	},
-	&cli.StringFlag{
-		EnvVars:  []string{"WOODPECKER_GITLAB_SECRET"},
-		Name:     "gitlab-secret",
-		Usage:    "gitlab oauth2 client secret",
-		FilePath: os.Getenv("WOODPECKER_GITLAB_SECRET_FILE"),
-	},
+	//
+	// Bitbucket DataCenter/Server (previously Stash)
+	//
 	&cli.BoolFlag{
-		EnvVars: []string{"WOODPECKER_GITLAB_SKIP_VERIFY"},
-		Name:    "gitlab-skip-verify",
-		Usage:   "gitlab skip ssl verification",
+		EnvVars: []string{"WOODPECKER_BITBUCKET_DC"},
+		Name:    "bitbucket-dc",
+		Usage:   "Bitbucket DataCenter/Server driver is enabled",
+	},
+	&cli.StringFlag{
+		EnvVars:  []string{"WOODPECKER_BITBUCKET_DC_GIT_USERNAME"},
+		Name:     "bitbucket-dc-git-username",
+		Usage:    "Bitbucket DataCenter/Server service account username",
+		FilePath: os.Getenv("WOODPECKER_BITBUCKET_DC_GIT_USERNAME_FILE"),
+	},
+	&cli.StringFlag{
+		EnvVars:  []string{"WOODPECKER_BITBUCKET_DC_GIT_PASSWORD"},
+		Name:     "bitbucket-dc-git-password",
+		Usage:    "Bitbucket DataCenter/Server service account password",
+		FilePath: os.Getenv("WOODPECKER_BITBUCKET_DC_GIT_PASSWORD_FILE"),
 	},
 	//
 	// development flags
@@ -447,7 +413,7 @@ var flags = []cli.Flag{
 	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_DEV_OAUTH_HOST"},
 		Name:    "server-dev-oauth-host",
-		Usage:   "server fully qualified url (<scheme>://<host>) used for oauth redirect (used for development)",
+		Usage:   "server fully qualified url (<scheme>://<host>[/<prefixpath>]) used for oauth redirect (used for development)",
 		Value:   "",
 		Hidden:  true,
 	},
@@ -470,4 +436,14 @@ var flags = []cli.Flag{
 		Name:    "encryption-disable-flag",
 		Usage:   "Flag to decrypt all encrypted data and disable encryption on server",
 	},
+}, logger.GlobalLoggerFlags...)
+
+// If woodpecker is running inside a container the default value for
+// the datasource is different from running outside a container.
+func datasourceDefaultValue() string {
+	_, found := os.LookupEnv("WOODPECKER_IN_CONTAINER")
+	if found {
+		return "/var/lib/woodpecker/woodpecker.sqlite"
+	}
+	return "woodpecker.sqlite"
 }

@@ -4,12 +4,14 @@
     :title="$t('repo.pipeline.status.status', { status: $t(`repo.pipeline.status.${status}`) })"
   >
     <Icon
-      :name="`status-${status}`"
+      :name="service ? 'settings' : `status-${status}`"
       :class="{
         'text-wp-state-error-100': pipelineStatusColors[status] === 'red',
         'text-wp-state-neutral-100': pipelineStatusColors[status] === 'gray',
         'text-wp-state-ok-100': pipelineStatusColors[status] === 'green',
         'text-wp-state-info-100': pipelineStatusColors[status] === 'blue',
+        'text-wp-state-warn-100': pipelineStatusColors[status] === 'orange',
+        'animate-spin': service && pipelineStatusColors[status] === 'blue',
       }"
     />
   </div>
@@ -23,5 +25,6 @@ import { pipelineStatusColors } from './pipeline-status';
 
 defineProps<{
   status: PipelineStatus;
+  service?: boolean;
 }>();
 </script>

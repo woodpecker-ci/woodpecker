@@ -10,8 +10,11 @@ export type Repo = {
   forge_remote_id: string;
 
   // The source control management being used.
-  // Currently this is either 'git' or 'hg' (Mercurial).
+  // Currently, this is either 'git' or 'hg' (Mercurial).
   scm: string;
+
+  // Whether the forge repo has PRs enabled.
+  pr_enabled: boolean;
 
   // The id of the organization that owns the repository.
   org_id: number;
@@ -29,8 +32,8 @@ export type Repo = {
   // The url for the avatar image.
   avatar_url: string;
 
-  // The link to view the repository.
-  link_url: string;
+  // The url to view the repository.
+  forge_url: string;
 
   // The url used to clone the repository.
   clone_url: string;
@@ -52,6 +55,8 @@ export type Repo = {
 
   // Whether pull requests should trigger a pipeline.
   allow_pr: boolean;
+
+  allow_deploy: boolean;
 
   config_file: string;
 
@@ -81,6 +86,7 @@ export type RepoSettings = Pick<
   | 'trusted'
   | 'gated'
   | 'allow_pr'
+  | 'allow_deploy'
   | 'cancel_previous_pipeline_events'
   | 'netrc_only_trusted'
 >;

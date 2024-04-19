@@ -19,17 +19,10 @@ import (
 	"strings"
 )
 
-// TaskStore defines storage for scheduled Tasks.
-type TaskStore interface {
-	TaskList() ([]*Task, error)
-	TaskInsert(*Task) error
-	TaskDelete(string) error
-}
-
 // Task defines scheduled pipeline Task.
 type Task struct {
 	ID           string                 `json:"id"           xorm:"PK UNIQUE 'task_id'"`
-	Data         []byte                 `json:"data"         xorm:"'task_data'"`
+	Data         []byte                 `json:"data"         xorm:"LONGBLOB 'task_data'"`
 	Labels       map[string]string      `json:"labels"       xorm:"json 'task_labels'"`
 	Dependencies []string               `json:"dependencies" xorm:"json 'task_dependencies'"`
 	RunOn        []string               `json:"run_on"       xorm:"json 'task_run_on'"`

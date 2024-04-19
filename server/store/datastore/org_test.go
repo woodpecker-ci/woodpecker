@@ -19,11 +19,11 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/woodpecker-ci/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
 func TestOrgCRUD(t *testing.T) {
-	store, closer := newTestStore(t, new(model.Org), new(model.Repo))
+	store, closer := newTestStore(t, new(model.Org), new(model.Repo), new(model.Secret), new(model.Config), new(model.Perm), new(model.Registry), new(model.Redirection), new(model.Pipeline))
 	defer closer()
 
 	org1 := &model.Org{
@@ -63,6 +63,7 @@ func TestOrgCRUD(t *testing.T) {
 	assert.NoError(t, store.CreateRepo(&model.Repo{UserID: 1, Owner: "some_other_u", Name: "abc", FullName: "some_other_u/abc", OrgID: someUser.ID}))
 	assert.NoError(t, store.CreateRepo(&model.Repo{UserID: 1, Owner: "some_other_u", Name: "xyz", FullName: "some_other_u/xyz", OrgID: someUser.ID}))
 	assert.NoError(t, store.CreateRepo(&model.Repo{UserID: 1, Owner: "renamedorg", Name: "567", FullName: "renamedorg/567", OrgID: orgOne.ID}))
+	assert.Error(t, store.OrgCreate(&model.Org{Name: ""}), "expect to fail if name is empty")
 
 	// get all repos for a specific org
 	repos, err := store.OrgRepoList(someUser, &model.ListOptions{All: true})

@@ -1,3 +1,17 @@
+// Copyright 2023 Woodpecker Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package internal
 
 import (
@@ -13,7 +27,7 @@ import (
 	"golang.org/x/net/proxy"
 	"golang.org/x/oauth2"
 
-	"github.com/woodpecker-ci/woodpecker/woodpecker-go/woodpecker"
+	"go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker"
 )
 
 // NewClient returns a new client from the CLI context.
@@ -30,16 +44,16 @@ func NewClient(c *cli.Context) (woodpecker.Client, error) {
 	// if no server url is provided we can default
 	// to the hosted Woodpecker service.
 	if len(server) == 0 {
-		return nil, fmt.Errorf("Error: you must provide the Woodpecker server address")
+		return nil, fmt.Errorf("you must provide the Woodpecker server address")
 	}
 	if len(token) == 0 {
-		return nil, fmt.Errorf("Error: you must provide your Woodpecker access token")
+		return nil, fmt.Errorf("you must provide your Woodpecker access token")
 	}
 
 	// attempt to find system CA certs
 	certs, err := x509.SystemCertPool()
 	if err != nil {
-		log.Error().Msgf("failed to find system CA certs: %v", err)
+		log.Error().Err(err).Msg("failed to find system CA certs")
 	}
 	tlsConfig := &tls.Config{
 		RootCAs:            certs,
@@ -93,11 +107,11 @@ func ParseRepo(client woodpecker.Client, str string) (repoID int64, err error) {
 func ParseKeyPair(p []string) map[string]string {
 	params := map[string]string{}
 	for _, i := range p {
-		parts := strings.SplitN(i, "=", 2)
-		if len(parts) != 2 {
+		before, after, ok := strings.Cut(i, "=")
+		if !ok || before == "" {
 			continue
 		}
-		params[parts[0]] = parts[1]
+		params[before] = after
 	}
 	return params
 }

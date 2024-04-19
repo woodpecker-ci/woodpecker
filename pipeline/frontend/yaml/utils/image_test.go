@@ -1,7 +1,23 @@
+// Copyright 2023 Woodpecker Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package utils
 
 import (
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func Test_trimImage(t *testing.T) {
@@ -52,10 +68,7 @@ func Test_trimImage(t *testing.T) {
 		},
 	}
 	for _, test := range testdata {
-		got, want := trimImage(test.from), test.want
-		if got != want {
-			t.Errorf("Want image %q trimmed to %q, got %q", test.from, want, got)
-		}
+		assert.Equal(t, test.want, trimImage(test.from))
 	}
 }
 
@@ -107,10 +120,7 @@ func Test_expandImage(t *testing.T) {
 		},
 	}
 	for _, test := range testdata {
-		got, want := expandImage(test.from), test.want
-		if got != want {
-			t.Errorf("Want image %q expanded to %q, got %q", test.from, want, got)
-		}
+		assert.Equal(t, test.want, expandImage(test.from))
 	}
 }
 
@@ -191,10 +201,7 @@ func Test_matchImage(t *testing.T) {
 		},
 	}
 	for _, test := range testdata {
-		got, want := MatchImage(test.from, test.to), test.want
-		if got != want {
-			t.Errorf("Want image %q matching %q is %v", test.from, test.to, want)
-		}
+		assert.Equal(t, test.want, MatchImage(test.from, test.to))
 	}
 }
 
@@ -250,9 +257,6 @@ func Test_matchHostname(t *testing.T) {
 		},
 	}
 	for _, test := range testdata {
-		got, want := MatchHostname(test.image, test.hostname), test.want
-		if got != want {
-			t.Errorf("Want image %q matching hostname %q is %v", test.image, test.hostname, want)
-		}
+		assert.Equal(t, test.want, MatchHostname(test.image, test.hostname))
 	}
 }

@@ -19,55 +19,34 @@
   />
 </template>
 
-<script lang="ts">
-import { computed, defineComponent, toRef } from 'vue';
+<script lang="ts" setup>
+import { computed, toRef } from 'vue';
 
-export default defineComponent({
-  name: 'TextField',
-
-  props: {
-    modelValue: {
-      type: String,
-      default: '',
-    },
-
-    placeholder: {
-      type: String,
-      default: '',
-    },
-
-    type: {
-      type: String,
-      default: 'text',
-    },
-
-    lines: {
-      type: Number,
-      default: 1,
-    },
-
-    disabled: {
-      type: Boolean,
-    },
+const props = withDefaults(
+  defineProps<{
+    modelValue?: string;
+    placeholder?: string;
+    type?: string;
+    lines?: number;
+    disabled?: boolean;
+  }>(),
+  {
+    modelValue: '',
+    placeholder: '',
+    type: 'text',
+    lines: 1,
   },
+);
 
-  emits: {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    'update:modelValue': (_value: string): boolean => true,
-  },
+const emit = defineEmits<{
+  (event: 'update:modelValue', value: string): void;
+}>();
 
-  setup: (props, ctx) => {
-    const modelValue = toRef(props, 'modelValue');
-    const innerValue = computed({
-      get: () => modelValue.value,
-      set: (value) => {
-        ctx.emit('update:modelValue', value);
-      },
-    });
-
-    return {
-      innerValue,
-    };
+const modelValue = toRef(props, 'modelValue');
+const innerValue = computed({
+  get: () => modelValue.value,
+  set: (value) => {
+    emit('update:modelValue', value);
   },
 });
 </script>

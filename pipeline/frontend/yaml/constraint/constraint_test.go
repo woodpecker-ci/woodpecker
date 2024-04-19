@@ -1,3 +1,17 @@
+// Copyright 2023 Woodpecker Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package constraint
 
 import (
@@ -6,8 +20,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v3"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend"
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/metadata"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/metadata"
 )
 
 func TestConstraint(t *testing.T) {
@@ -145,10 +158,7 @@ func TestConstraint(t *testing.T) {
 	}
 	for _, test := range testdata {
 		c := parseConstraint(t, test.conf)
-		got, want := c.Match(test.with), test.want
-		if got != want {
-			t.Errorf("Expect %q matches %q is %v", test.with, test.conf, want)
-		}
+		assert.Equal(t, test.want, c.Match(test.with))
 	}
 }
 
@@ -253,10 +263,7 @@ func TestConstraintList(t *testing.T) {
 	}
 	for _, test := range testdata {
 		c := parseConstraintPath(t, test.conf)
-		got, want := c.Match(test.with, test.message), test.want
-		if got != want {
-			t.Errorf("Expect %q matches %q should be %v got %v", test.with, test.conf, want, got)
-		}
+		assert.Equal(t, test.want, c.Match(test.with, test.message))
 	}
 }
 
@@ -529,16 +536,12 @@ func TestConstraints(t *testing.T) {
 
 	for _, test := range testdata {
 		t.Run(test.desc, func(t *testing.T) {
-			conf, err := frontend.EnvVarSubst(test.conf, test.with.Environ())
+			conf, err := metadata.EnvVarSubst(test.conf, test.with.Environ())
 			assert.NoError(t, err)
 			c := parseConstraints(t, conf)
 			got, err := c.Match(test.with, false, test.env)
-			if err != nil {
-				t.Errorf("Match returned error: %v", err)
-			}
-			if got != test.want {
-				t.Errorf("Expect %+v matches %q is %v", test.with, test.conf, test.want)
-			}
+			assert.NoError(t, err)
+			assert.Equal(t, test.want, got)
 		})
 	}
 }

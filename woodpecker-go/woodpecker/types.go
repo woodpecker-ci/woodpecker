@@ -33,7 +33,7 @@ type (
 		Name                         string   `json:"name"`
 		FullName                     string   `json:"full_name"`
 		Avatar                       string   `json:"avatar_url,omitempty"`
-		Link                         string   `json:"link_url,omitempty"`
+		ForgeURL                     string   `json:"forge_url,omitempty"`
 		Clone                        string   `json:"clone_url,omitempty"`
 		DefaultBranch                string   `json:"default_branch,omitempty"`
 		SCMKind                      string   `json:"scm,omitempty"`
@@ -60,16 +60,25 @@ type (
 		PipelineCounter *int    `json:"pipeline_counter,omitempty"`
 	}
 
+	PipelineError struct {
+		Type      string `json:"type"`
+		Message   string `json:"message"`
+		IsWarning bool   `json:"is_warning"`
+		Data      any    `json:"data"`
+	}
+
 	// Pipeline defines a pipeline object.
 	Pipeline struct {
-		ID        int64       `json:"id"`
-		Number    int         `json:"number"`
-		Parent    int         `json:"parent"`
-		Event     string      `json:"event"`
-		Status    string      `json:"status"`
-		Error     string      `json:"error"`
+		ID     int64            `json:"id"`
+		Number int64            `json:"number"`
+		Parent int64            `json:"parent"`
+		Event  string           `json:"event"`
+		Status string           `json:"status"`
+		Errors []*PipelineError `json:"errors"`
+		// Deprecated TODO remove in 3.x
 		Enqueued  int64       `json:"enqueued_at"`
 		Created   int64       `json:"created_at"`
+		Updated   int64       `json:"updated_at"`
 		Started   int64       `json:"started_at"`
 		Finished  int64       `json:"finished_at"`
 		Deploy    string      `json:"deploy_to"`
@@ -85,7 +94,7 @@ type (
 		Author    string      `json:"author"`
 		Avatar    string      `json:"author_avatar"`
 		Email     string      `json:"author_email"`
-		Link      string      `json:"link_url"`
+		ForgeURL  string      `json:"forge_url"`
 		Reviewer  string      `json:"reviewed_by"`
 		Reviewed  int64       `json:"reviewed_at"`
 		Workflows []*Workflow `json:"workflows,omitempty"`
@@ -126,26 +135,28 @@ type (
 		Address  string `json:"address"`
 		Username string `json:"username"`
 		Password string `json:"password,omitempty"`
-		Email    string `json:"email"`
-		Token    string `json:"token"`
+		// Deprecated
+		Email string `json:"email"` // TODO remove in 3.x
+		// Deprecated
+		Token string `json:"token"` // TODO remove in 3.x
 	}
 
 	// Secret represents a secret variable, such as a password or token.
 	Secret struct {
-		ID          int64    `json:"id"`
-		Name        string   `json:"name"`
-		Value       string   `json:"value,omitempty"`
-		Images      []string `json:"image"`
-		PluginsOnly bool     `json:"plugins_only"`
-		Events      []string `json:"event"`
+		ID     int64    `json:"id"`
+		OrgID  int64    `json:"org_id"`
+		RepoID int64    `json:"repo_id"`
+		Name   string   `json:"name"`
+		Value  string   `json:"value,omitempty"`
+		Images []string `json:"images"`
+		Events []string `json:"events"`
 	}
 
-	// Activity represents an item in the user's feed or timeline.
-	Activity struct {
-		Owner    string `json:"owner"`
-		Name     string `json:"name"`
-		FullName string `json:"full_name"`
-		Number   int    `json:"number,omitempty"`
+	// Feed represents an item in the user's feed or timeline.
+	Feed struct {
+		RepoID   int64  `json:"repo_id"`
+		ID       int64  `json:"id,omitempty"`
+		Number   int64  `json:"number,omitempty"`
 		Event    string `json:"event,omitempty"`
 		Status   string `json:"status,omitempty"`
 		Created  int64  `json:"created_at,omitempty"`
@@ -155,7 +166,7 @@ type (
 		Branch   string `json:"branch,omitempty"`
 		Ref      string `json:"ref,omitempty"`
 		Refspec  string `json:"refspec,omitempty"`
-		CloneURL string `json:"clone_url,omitempty"`
+		Remote   string `json:"remote,omitempty"`
 		Title    string `json:"title,omitempty"`
 		Message  string `json:"message,omitempty"`
 		Author   string `json:"author,omitempty"`

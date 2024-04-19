@@ -1,3 +1,17 @@
+// Copyright 2023 Woodpecker Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package grpc
 
 import (
@@ -44,7 +58,7 @@ func NewAuthorizer(jwtManager *JWTManager) *Authorizer {
 	return &Authorizer{jwtManager: jwtManager}
 }
 
-func (a *Authorizer) StreamInterceptor(srv interface{}, stream grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
+func (a *Authorizer) StreamInterceptor(srv any, stream grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
 	_stream := newStreamContextWrapper(stream)
 
 	newCtx, err := a.authorize(stream.Context(), info.FullMethod)
@@ -57,7 +71,7 @@ func (a *Authorizer) StreamInterceptor(srv interface{}, stream grpc.ServerStream
 	return handler(srv, _stream)
 }
 
-func (a *Authorizer) UnaryInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
+func (a *Authorizer) UnaryInterceptor(ctx context.Context, req any, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp any, err error) {
 	newCtx, err := a.authorize(ctx, info.FullMethod)
 	if err != nil {
 		return nil, err

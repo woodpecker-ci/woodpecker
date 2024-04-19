@@ -16,7 +16,6 @@ package web
 
 import (
 	"bytes"
-	"crypto/md5"
 	"errors"
 	"fmt"
 	"io"
@@ -28,16 +27,11 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
 
-	"github.com/woodpecker-ci/woodpecker/server"
-	"github.com/woodpecker-ci/woodpecker/web"
+	"go.woodpecker-ci.org/woodpecker/v2/server"
+	"go.woodpecker-ci.org/woodpecker/v2/web"
 )
 
-// etag is an identifier for a resource version
-// it lets caches determine if resource is still the same and not send it again
-var (
-	etag      = fmt.Sprintf("%x", md5.Sum([]byte(time.Now().String())))
-	indexHTML []byte
-)
+var indexHTML []byte
 
 type prefixFS struct {
 	fs     http.FileSystem
@@ -51,9 +45,11 @@ func (f *prefixFS) Open(name string) (http.File, error) {
 // New returns a gin engine to serve the web frontend.
 func New() (*gin.Engine, error) {
 	e := gin.New()
-	indexHTML = parseIndex()
-
-	e.Use(setupCache)
+	var err error
+	indexHTML, err = parseIndex()
+	if err != nil {
+		return nil, err
+	}
 
 	rootPath := server.Config.Server.RootPath
 
@@ -72,20 +68,21 @@ func New() (*gin.Engine, error) {
 }
 
 func handleCustomFilesAndAssets(fs *prefixFS) func(ctx *gin.Context) {
-	serveFileOrEmptyContent := func(w http.ResponseWriter, r *http.Request, localFileName string) {
+	serveFileOrEmptyContent := func(w http.ResponseWriter, r *http.Request, localFileName, fileName string) {
 		if len(localFileName) > 0 {
 			http.ServeFile(w, r, localFileName)
 		} else {
 			// prefer zero content over sending a 404 Not Found
-			http.ServeContent(w, r, localFileName, time.Now(), bytes.NewReader([]byte{}))
+			http.ServeContent(w, r, fileName, time.Now(), bytes.NewReader([]byte{}))
 		}
 	}
 	return func(ctx *gin.Context) {
-		if strings.HasSuffix(ctx.Request.RequestURI, "/assets/custom.js") {
-			serveFileOrEmptyContent(ctx.Writer, ctx.Request, server.Config.Server.CustomJsFile)
-		} else if strings.HasSuffix(ctx.Request.RequestURI, "/assets/custom.css") {
-			serveFileOrEmptyContent(ctx.Writer, ctx.Request, server.Config.Server.CustomCSSFile)
-		} else {
+		switch {
+		case strings.HasSuffix(ctx.Request.RequestURI, "/assets/custom.js"):
+			serveFileOrEmptyContent(ctx.Writer, ctx.Request, server.Config.Server.CustomJsFile, "file.js")
+		case strings.HasSuffix(ctx.Request.RequestURI, "/assets/custom.css"):
+			serveFileOrEmptyContent(ctx.Writer, ctx.Request, server.Config.Server.CustomCSSFile, "file.css")
+		default:
 			serveFile(fs)(ctx)
 		}
 	}
@@ -118,12 +115,14 @@ func serveFile(f *prefixFS) func(ctx *gin.Context) {
 		case strings.HasSuffix(ctx.Request.URL.Path, ".png"):
 			mime = "image/png"
 		case strings.HasSuffix(ctx.Request.URL.Path, ".svg"):
-			mime = "image/svg"
+			mime = "image/svg+xml"
 		}
 		ctx.Status(http.StatusOK)
+		ctx.Writer.Header().Set("Cache-Control", "public, max-age=31536000")
+		ctx.Writer.Header().Del("Expires")
 		ctx.Writer.Header().Set("Content-Type", mime)
 		if _, err := ctx.Writer.Write(replaceBytes(data)); err != nil {
-			log.Error().Err(err).Msgf("can not write %s", ctx.Request.URL.Path)
+			log.Error().Err(err).Msgf("cannot write %s", ctx.Request.URL.Path)
 		}
 	}
 }
@@ -142,10 +141,11 @@ func redirect(location string, status ...int) func(ctx *gin.Context) {
 
 func handleIndex(c *gin.Context) {
 	rw := c.Writer
+	rw.Header().Set("Cache-Control", "no-cache")
 	rw.Header().Set("Content-Type", "text/html; charset=UTF-8")
 	rw.WriteHeader(http.StatusOK)
 	if _, err := rw.Write(indexHTML); err != nil {
-		log.Error().Err(err).Msg("can not write index.html")
+		log.Error().Err(err).Msg("cannot write index.html")
 	}
 }
 
@@ -161,19 +161,13 @@ func replaceBytes(data []byte) []byte {
 	return bytes.ReplaceAll(data, []byte("/BASE_PATH"), []byte(server.Config.Server.RootPath))
 }
 
-func parseIndex() []byte {
+func parseIndex() ([]byte, error) {
 	data, err := loadFile("index.html")
 	if err != nil {
-		log.Fatal().Err(err).Msg("can not find index.html")
+		return nil, fmt.Errorf("cannot find index.html: %w", err)
 	}
 	data = bytes.ReplaceAll(data, []byte("/web-config.js"), []byte(server.Config.Server.RootPath+"/web-config.js"))
 	data = bytes.ReplaceAll(data, []byte("/assets/custom.css"), []byte(server.Config.Server.RootPath+"/assets/custom.css"))
 	data = bytes.ReplaceAll(data, []byte("/assets/custom.js"), []byte(server.Config.Server.RootPath+"/assets/custom.js"))
-	return data
-}
-
-func setupCache(c *gin.Context) {
-	c.Writer.Header().Set("Cache-Control", "public, max-age=31536000")
-	c.Writer.Header().Del("Expires")
-	c.Writer.Header().Set("ETag", etag)
+	return data, nil
 }

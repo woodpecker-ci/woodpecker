@@ -17,13 +17,15 @@ package docker
 import (
 	"context"
 	"io"
+	"net/http"
 	"os"
-	"runtime"
+	"path/filepath"
 	"strings"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/network"
 	"github.com/docker/docker/api/types/volume"
+	"github.com/docker/go-connections/tlsconfig"
 	"github.com/moby/moby/client"
 	"github.com/moby/moby/pkg/jsonmessage"
 	"github.com/moby/moby/pkg/stdcopy"
@@ -31,8 +33,8 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v2"
 
-	backend "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
-	"github.com/woodpecker-ci/woodpecker/shared/utils"
+	backend "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/utils"
 )
 
 type docker struct {
@@ -40,6 +42,7 @@ type docker struct {
 	enableIPv6 bool
 	network    string
 	volumes    []string
+	info       types.Info
 }
 
 const (
@@ -48,8 +51,8 @@ const (
 	volumeDriver        = "local"
 )
 
-// New returns a new Docker Engine.
-func New() backend.Engine {
+// New returns a new Docker Backend.
+func New() backend.Backend {
 	return &docker{
 		client: nil,
 	}
@@ -67,20 +70,65 @@ func (e *docker) IsAvailable(context.Context) bool {
 	return err == nil
 }
 
-// Load new client for Docker Engine using environment variables.
-func (e *docker) Load(ctx context.Context) error {
-	cl, err := client.NewClientWithOpts(client.FromEnv)
+func httpClientOfOpts(dockerCertPath string, verifyTLS bool) *http.Client {
+	if dockerCertPath == "" {
+		return nil
+	}
+
+	options := tlsconfig.Options{
+		CAFile:             filepath.Join(dockerCertPath, "ca.pem"),
+		CertFile:           filepath.Join(dockerCertPath, "cert.pem"),
+		KeyFile:            filepath.Join(dockerCertPath, "key.pem"),
+		InsecureSkipVerify: !verifyTLS,
+	}
+	tlsConf, err := tlsconfig.Client(options)
 	if err != nil {
-		return err
+		log.Error().Err(err).Msg("could not create http client out of docker backend options")
+		return nil
+	}
+
+	return &http.Client{
+		Transport:     &http.Transport{TLSClientConfig: tlsConf},
+		CheckRedirect: client.CheckRedirect,
+	}
+}
+
+func (e *docker) Flags() []cli.Flag {
+	return Flags
+}
+
+// Load new client for Docker Backend using environment variables.
+func (e *docker) Load(ctx context.Context) (*backend.BackendInfo, error) {
+	c, ok := ctx.Value(backend.CliContext).(*cli.Context)
+	if !ok {
+		return nil, backend.ErrNoCliContextFound
+	}
+
+	var dockerClientOpts []client.Opt
+	if httpClient := httpClientOfOpts(c.String("backend-docker-cert"), c.Bool("backend-docker-tls-verify")); httpClient != nil {
+		dockerClientOpts = append(dockerClientOpts, client.WithHTTPClient(httpClient))
+	}
+	if dockerHost := c.String("backend-docker-host"); dockerHost != "" {
+		dockerClientOpts = append(dockerClientOpts, client.WithHost(dockerHost))
+	}
+	if dockerAPIVersion := c.String("backend-docker-api-version"); dockerAPIVersion != "" {
+		dockerClientOpts = append(dockerClientOpts, client.WithVersion(dockerAPIVersion))
+	} else {
+		dockerClientOpts = append(dockerClientOpts, client.WithAPIVersionNegotiation())
+	}
+
+	cl, err := client.NewClientWithOpts(dockerClientOpts...)
+	if err != nil {
+		return nil, err
 	}
 	e.client = cl
 
-	c, ok := ctx.Value(backend.CliContext).(*cli.Context)
-	if !ok {
-		return backend.ErrNoCliContextFound
+	e.info, err = cl.Info(ctx)
+	if err != nil {
+		return nil, err
 	}
-	e.enableIPv6 = c.Bool("backend-docker-ipv6")
 
+	e.enableIPv6 = c.Bool("backend-docker-ipv6")
 	e.network = c.String("backend-docker-network")
 
 	volumes := strings.Split(c.String("backend-docker-volumes"), ",")
@@ -98,14 +146,16 @@ func (e *docker) Load(ctx context.Context) error {
 		e.volumes = append(e.volumes, strings.Join(parts, ":"))
 	}
 
-	return nil
+	return &backend.BackendInfo{
+		Platform: e.info.OSType + "/" + normalizeArchType(e.info.Architecture),
+	}, nil
 }
 
-func (e *docker) SetupWorkflow(_ context.Context, conf *backend.Config, taskUUID string) error {
+func (e *docker) SetupWorkflow(ctx context.Context, conf *backend.Config, taskUUID string) error {
 	log.Trace().Str("taskUUID", taskUUID).Msg("create workflow environment")
 
 	for _, vol := range conf.Volumes {
-		_, err := e.client.VolumeCreate(noContext, volume.VolumeCreateBody{
+		_, err := e.client.VolumeCreate(ctx, volume.CreateOptions{
 			Name:   vol.Name,
 			Driver: volumeDriver,
 		})
@@ -115,11 +165,11 @@ func (e *docker) SetupWorkflow(_ context.Context, conf *backend.Config, taskUUID
 	}
 
 	networkDriver := networkDriverBridge
-	if runtime.GOOS == "windows" {
+	if e.info.OSType == "windows" {
 		networkDriver = networkDriverNAT
 	}
 	for _, n := range conf.Networks {
-		_, err := e.client.NetworkCreate(noContext, n.Name, types.NetworkCreate{
+		_, err := e.client.NetworkCreate(ctx, n.Name, types.NetworkCreate{
 			Driver:     networkDriver,
 			EnableIPv6: e.enableIPv6,
 		})
@@ -133,7 +183,7 @@ func (e *docker) SetupWorkflow(_ context.Context, conf *backend.Config, taskUUID
 func (e *docker) StartStep(ctx context.Context, step *backend.Step, taskUUID string) error {
 	log.Trace().Str("taskUUID", taskUUID).Msgf("start step %s", step.Name)
 
-	config := toConfig(step)
+	config := e.toConfig(step)
 	hostConfig := toHostConfig(step)
 	containerName := toContainerName(step)
 
@@ -163,7 +213,7 @@ func (e *docker) StartStep(ctx context.Context, step *backend.Step, taskUUID str
 	}
 
 	// add default volumes to the host configuration
-	hostConfig.Binds = utils.DedupStrings(append(hostConfig.Binds, e.volumes...))
+	hostConfig.Binds = utils.DeduplicateStrings(append(hostConfig.Binds, e.volumes...))
 
 	_, err := e.client.ContainerCreate(ctx, config, hostConfig, nil, nil, containerName)
 	if client.IsErrNotFound(err) {
@@ -223,9 +273,6 @@ func (e *docker) WaitStep(ctx context.Context, step *backend.Step, taskUUID stri
 	if err != nil {
 		return nil, err
 	}
-	// if info.State.Running {
-	// TODO
-	// }
 
 	return &backend.State{
 		Exited:    true,
@@ -252,27 +299,43 @@ func (e *docker) TailStep(ctx context.Context, step *backend.Step, taskUUID stri
 	return rc, nil
 }
 
-func (e *docker) DestroyWorkflow(_ context.Context, conf *backend.Config, taskUUID string) error {
+func (e *docker) DestroyStep(ctx context.Context, step *backend.Step, taskUUID string) error {
+	log.Trace().Str("taskUUID", taskUUID).Msgf("stop step %s", step.Name)
+
+	containerName := toContainerName(step)
+
+	if err := e.client.ContainerKill(ctx, containerName, "9"); err != nil && !isErrContainerNotFoundOrNotRunning(err) {
+		return err
+	}
+
+	if err := e.client.ContainerRemove(ctx, containerName, removeOpts); err != nil && !isErrContainerNotFoundOrNotRunning(err) {
+		return err
+	}
+
+	return nil
+}
+
+func (e *docker) DestroyWorkflow(ctx context.Context, conf *backend.Config, taskUUID string) error {
 	log.Trace().Str("taskUUID", taskUUID).Msgf("delete workflow environment")
 
 	for _, stage := range conf.Stages {
 		for _, step := range stage.Steps {
 			containerName := toContainerName(step)
-			if err := e.client.ContainerKill(noContext, containerName, "9"); err != nil && !isErrContainerNotFoundOrNotRunning(err) {
-				log.Error().Err(err).Msgf("could not kill container '%s'", stage.Name)
+			if err := e.client.ContainerKill(ctx, containerName, "9"); err != nil && !isErrContainerNotFoundOrNotRunning(err) {
+				log.Error().Err(err).Msgf("could not kill container '%s'", step.Name)
 			}
-			if err := e.client.ContainerRemove(noContext, containerName, removeOpts); err != nil && !isErrContainerNotFoundOrNotRunning(err) {
-				log.Error().Err(err).Msgf("could not remove container '%s'", stage.Name)
+			if err := e.client.ContainerRemove(ctx, containerName, removeOpts); err != nil && !isErrContainerNotFoundOrNotRunning(err) {
+				log.Error().Err(err).Msgf("could not remove container '%s'", step.Name)
 			}
 		}
 	}
 	for _, v := range conf.Volumes {
-		if err := e.client.VolumeRemove(noContext, v.Name, true); err != nil {
+		if err := e.client.VolumeRemove(ctx, v.Name, true); err != nil {
 			log.Error().Err(err).Msgf("could not remove volume '%s'", v.Name)
 		}
 	}
 	for _, n := range conf.Networks {
-		if err := e.client.NetworkRemove(noContext, n.Name); err != nil {
+		if err := e.client.NetworkRemove(ctx, n.Name); err != nil {
 			log.Error().Err(err).Msgf("could not remove network '%s'", n.Name)
 		}
 	}
@@ -280,8 +343,6 @@ func (e *docker) DestroyWorkflow(_ context.Context, conf *backend.Config, taskUU
 }
 
 var (
-	noContext = context.Background()
-
 	startOpts = types.ContainerStartOptions{}
 
 	removeOpts = types.ContainerRemoveOptions{
@@ -302,6 +363,19 @@ var (
 func isErrContainerNotFoundOrNotRunning(err error) bool {
 	// Error response from daemon: Cannot kill container: ...: No such container: ...
 	// Error response from daemon: Cannot kill container: ...: Container ... is not running"
+	// Error response from podman daemon: can only kill running containers. ... is in state exited
 	// Error: No such container: ...
-	return err != nil && (strings.Contains(err.Error(), "No such container") || strings.Contains(err.Error(), "is not running"))
+	return err != nil && (strings.Contains(err.Error(), "No such container") || strings.Contains(err.Error(), "is not running") || strings.Contains(err.Error(), "can only kill running containers"))
+}
+
+// normalizeArchType converts the arch type reported by docker info into
+// the runtime.GOARCH format
+// TODO: find out if we we need to convert other arch types too
+func normalizeArchType(s string) string {
+	switch s {
+	case "x86_64":
+		return "amd64"
+	default:
+		return s
+	}
 }

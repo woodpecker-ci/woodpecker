@@ -28,11 +28,8 @@ type Workflow struct {
 	AgentID    int64             `json:"agent_id,omitempty"   xorm:"workflow_agent_id"`
 	Platform   string            `json:"platform,omitempty"   xorm:"workflow_platform"`
 	Environ    map[string]string `json:"environ,omitempty"    xorm:"json 'workflow_environ'"`
+	AxisID     int               `json:"-"                    xorm:"workflow_axis_id"`
 	Children   []*Step           `json:"children,omitempty"   xorm:"-"`
-}
-
-type UpdateWorkflowStore interface {
-	WorkflowUpdate(*Workflow) error
 }
 
 // TableName return database table name for xorm

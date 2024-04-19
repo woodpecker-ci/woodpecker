@@ -1,3 +1,17 @@
+// Copyright 2023 Woodpecker Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package registry
 
 import (
@@ -6,8 +20,8 @@ import (
 
 	"github.com/urfave/cli/v2"
 
-	"github.com/woodpecker-ci/woodpecker/cli/common"
-	"github.com/woodpecker-ci/woodpecker/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
 )
 
 var registryInfoCmd = &cli.Command{
@@ -15,7 +29,7 @@ var registryInfoCmd = &cli.Command{
 	Usage:     "display registry info",
 	ArgsUsage: "[repo-id|repo-full-name]",
 	Action:    registryInfo,
-	Flags: append(common.GlobalFlags,
+	Flags: []cli.Flag{
 		common.RepoFlag,
 		&cli.StringFlag{
 			Name:  "hostname",
@@ -23,7 +37,7 @@ var registryInfoCmd = &cli.Command{
 			Value: "docker.io",
 		},
 		common.FormatFlag(tmplRegistryList, true),
-	),
+	},
 }
 
 func registryInfo(c *cli.Context) error {

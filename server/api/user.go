@@ -21,11 +21,13 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/securecookie"
-	"github.com/woodpecker-ci/woodpecker/server"
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
-	"github.com/woodpecker-ci/woodpecker/server/store"
-	"github.com/woodpecker-ci/woodpecker/shared/token"
+	"github.com/rs/zerolog/log"
+
+	"go.woodpecker-ci.org/woodpecker/v2/server"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/router/middleware/session"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/token"
 )
 
 // GetSelf
@@ -82,23 +84,28 @@ func GetFeed(c *gin.Context) {
 //	@Success		200	{array}	Repo
 //	@Tags			User
 //	@Param			Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param			all		query	bool	false	"query all repos, including inactive ones"
+//	@Param			all				query	bool	false	"query all repos, including inactive ones"
 func GetRepos(c *gin.Context) {
 	_store := store.FromContext(c)
-	_forge := server.Config.Services.Forge
-
 	user := session.User(c)
-	all, _ := strconv.ParseBool(c.Query("all"))
-
-	activeRepos, err := _store.RepoList(user, true, true)
+	_forge, err := server.Config.Services.Manager.ForgeFromUser(user)
 	if err != nil {
-		c.String(http.StatusInternalServerError, "Error fetching repository list. %s", err)
+		log.Error().Err(err).Msg("Cannot get forge from user")
+		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
 
+	all, _ := strconv.ParseBool(c.Query("all"))
+
 	if all {
+		dbRepos, err := _store.RepoList(user, true, false)
+		if err != nil {
+			c.String(http.StatusInternalServerError, "Error fetching repository list. %s", err)
+			return
+		}
+
 		active := map[model.ForgeRemoteID]*model.Repo{}
-		for _, r := range activeRepos {
+		for _, r := range dbRepos {
 			active[r.ForgeRemoteID] = r
 		}
 
@@ -110,13 +117,14 @@ func GetRepos(c *gin.Context) {
 
 		var repos []*model.Repo
 		for _, r := range _repos {
-			if r.Perm.Push {
-				if active[r.ForgeRemoteID] != nil && active[r.ForgeRemoteID].IsActive {
+			if r.Perm.Push && server.Config.Permissions.OwnersAllowlist.IsAllowed(r) {
+				if active[r.ForgeRemoteID] != nil {
 					existingRepo := active[r.ForgeRemoteID]
 					existingRepo.Update(r)
-					existingRepo.IsActive = true
+					existingRepo.IsActive = active[r.ForgeRemoteID].IsActive
 					repos = append(repos, existingRepo)
-				} else {
+				} else if r.Perm.Admin {
+					// you must be admin to enable the repo
 					repos = append(repos, r)
 				}
 			}
@@ -126,17 +134,23 @@ func GetRepos(c *gin.Context) {
 		return
 	}
 
+	activeRepos, err := _store.RepoList(user, true, true)
+	if err != nil {
+		c.String(http.StatusInternalServerError, "Error fetching repository list. %s", err)
+		return
+	}
+
 	c.JSON(http.StatusOK, activeRepos)
 }
 
 // PostToken
 //
-//	@Summary		Return the token of the current user as stringª
-//	@Router			/user/token [post]
-//	@Produce		plain
-//	@Success		200
-//	@Tags			User
-//	@Param			Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Summary	Return the token of the current user as string
+//	@Router		/user/token [post]
+//	@Produce	plain
+//	@Success	200
+//	@Tags		User
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 func PostToken(c *gin.Context) {
 	user := session.User(c)
 	tokenString, err := token.New(token.UserToken, user.Login).Sign(user.Hash)

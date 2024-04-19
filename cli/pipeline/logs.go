@@ -18,10 +18,9 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/woodpecker-ci/woodpecker/cli/common"
-	"github.com/woodpecker-ci/woodpecker/cli/internal"
-
 	"github.com/urfave/cli/v2"
+
+	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
 )
 
 var pipelineLogsCmd = &cli.Command{
@@ -29,7 +28,6 @@ var pipelineLogsCmd = &cli.Command{
 	Usage:     "show pipeline logs",
 	ArgsUsage: "<repo-id|repo-full-name> [pipeline] [stepID]",
 	Action:    pipelineLogs,
-	Flags:     common.GlobalFlags,
 }
 
 func pipelineLogs(c *cli.Context) error {
@@ -43,12 +41,14 @@ func pipelineLogs(c *cli.Context) error {
 		return err
 	}
 
-	number, err := strconv.Atoi(c.Args().Get(1))
+	numberArgIndex := 1
+	number, err := strconv.ParseInt(c.Args().Get(numberArgIndex), 10, 64)
 	if err != nil {
 		return err
 	}
 
-	step, err := strconv.Atoi(c.Args().Get(2))
+	stepArgIndex := 2
+	step, err := strconv.ParseInt(c.Args().Get(stepArgIndex), 10, 64)
 	if err != nil {
 		return err
 	}

@@ -3,11 +3,7 @@
   "compounds": [
     {
       "name": "Woodpecker CI",
-      "configurations": [
-        "Woodpecker UI",
-        "Woodpecker server",
-        "Woodpecker agent"
-      ],
+      "configurations": ["Woodpecker UI", "Woodpecker server", "Woodpecker agent"],
       "stopAll": true
     }
   ],
@@ -43,17 +39,11 @@
       "type": "node",
       "request": "launch",
       "runtimeExecutable": "pnpm",
-      "runtimeArgs": [
-        "start",
-      ],
+      "runtimeArgs": ["start"],
       "cwd": "${workspaceFolder}/web",
-      "resolveSourceMapLocations": [
-        "${workspaceFolder}/web/**",
-        "!**/node_modules/**"
-      ],
-      "skipFiles": [
-        "<node_internals>/**"
-      ]
+      "resolveSourceMapLocations": ["${workspaceFolder}/web/**", "!**/node_modules/**"],
+      "envFile": "${workspaceFolder}/.env",
+      "skipFiles": ["<node_internals>/**"]
     }
   ]
 }

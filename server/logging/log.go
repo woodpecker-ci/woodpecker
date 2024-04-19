@@ -1,10 +1,24 @@
+// Copyright 2023 Woodpecker Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package logging
 
 import (
 	"context"
 	"sync"
 
-	"github.com/woodpecker-ci/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
 // TODO (bradrydzewski) writing to subscribers is currently a blocking
@@ -65,9 +79,16 @@ func (l *log) Write(ctx context.Context, stepID int64, logEntry *model.LogEntry)
 	l.Lock()
 	s, ok := l.streams[stepID]
 	l.Unlock()
+
+	// auto open the stream if it does not exist
 	if !ok {
-		return l.Open(ctx, stepID)
+		err := l.Open(ctx, stepID)
+		if err != nil {
+			return err
+		}
+		s = l.streams[stepID]
 	}
+
 	s.Lock()
 	s.list = append(s.list, logEntry)
 	for sub := range s.subs {

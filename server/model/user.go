@@ -23,7 +23,9 @@ import (
 // validate a username (e.g. from github)
 var reUsername = regexp.MustCompile("^[a-zA-Z0-9-_.]+$")
 
-var errUserLoginInvalid = errors.New("Invalid User Login")
+var errUserLoginInvalid = errors.New("invalid user login")
+
+const maxLoginLen = 250
 
 // User represents a registered user.
 type User struct {
@@ -31,6 +33,8 @@ type User struct {
 	//
 	// required: true
 	ID int64 `json:"id" xorm:"pk autoincr 'user_id'"`
+
+	ForgeID int64 `json:"forge_id,omitempty" xorm:"forge_id"`
 
 	ForgeRemoteID ForgeRemoteID `json:"-" xorm:"forge_remote_id"`
 
@@ -59,11 +63,14 @@ type User struct {
 	// Admin indicates the user is a system administrator.
 	//
 	// NOTE: If the username is part of the WOODPECKER_ADMIN
-	// environment variable this value will be set to true on login.
+	// environment variable, this value will be set to true on login.
 	Admin bool `json:"admin,omitempty" xorm:"user_admin"`
 
 	// Hash is a unique token used to sign tokens.
 	Hash string `json:"-" xorm:"UNIQUE varchar(500) 'user_hash'"`
+
+	// OrgID is the of the user as model.Org.
+	OrgID int64 `json:"org_id" xorm:"user_org_id"`
 } //	@name User
 
 // TableName return database table name for xorm
@@ -76,7 +83,7 @@ func (u *User) Validate() error {
 	switch {
 	case len(u.Login) == 0:
 		return errUserLoginInvalid
-	case len(u.Login) > 250:
+	case len(u.Login) > maxLoginLen:
 		return errUserLoginInvalid
 	case !reUsername.MatchString(u.Login):
 		return errUserLoginInvalid

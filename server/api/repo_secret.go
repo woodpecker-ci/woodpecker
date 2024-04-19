@@ -16,13 +16,12 @@ package api
 
 import (
 	"net/http"
-	"strings"
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/woodpecker-ci/woodpecker/server"
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
+	"go.woodpecker-ci.org/woodpecker/v2/server"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/router/middleware/session"
 )
 
 // GetSecret
@@ -36,13 +35,13 @@ import (
 //	@Param		repo_id			path	int		true	"the repository id"
 //	@Param		secretName		path	string	true	"the secret name"
 func GetSecret(c *gin.Context) {
-	var (
-		repo = session.Repo(c)
-		name = c.Param("secret")
-	)
-	secret, err := server.Config.Services.Secrets.SecretFind(repo, name)
+	repo := session.Repo(c)
+	name := c.Param("secret")
+
+	secretService := server.Config.Services.Manager.SecretServiceFromRepo(repo)
+	secret, err := secretService.SecretFind(repo, name)
 	if err != nil {
-		handleDbGetError(c, err)
+		handleDBError(c, err)
 		return
 	}
 	c.JSON(http.StatusOK, secret.Copy())
@@ -55,7 +54,7 @@ func GetSecret(c *gin.Context) {
 //	@Produce	json
 //	@Success	200	{object}	Secret
 //	@Tags		Repository secrets
-//	@Param		Authorization	header	string			true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 //	@Param		repo_id			path	int		true	"the repository id"
 //	@Param		secret			body	Secret	true	"the new secret"
 func PostSecret(c *gin.Context) {
@@ -67,18 +66,19 @@ func PostSecret(c *gin.Context) {
 		return
 	}
 	secret := &model.Secret{
-		RepoID:      repo.ID,
-		Name:        strings.ToLower(in.Name),
-		Value:       in.Value,
-		Events:      in.Events,
-		Images:      in.Images,
-		PluginsOnly: in.PluginsOnly,
+		RepoID: repo.ID,
+		Name:   in.Name,
+		Value:  in.Value,
+		Events: in.Events,
+		Images: in.Images,
 	}
 	if err := secret.Validate(); err != nil {
 		c.String(http.StatusUnprocessableEntity, "Error inserting secret. %s", err)
 		return
 	}
-	if err := server.Config.Services.Secrets.SecretCreate(repo, secret); err != nil {
+
+	secretService := server.Config.Services.Manager.SecretServiceFromRepo(repo)
+	if err := secretService.SecretCreate(repo, secret); err != nil {
 		c.String(http.StatusInternalServerError, "Error inserting secret %q. %s", in.Name, err)
 		return
 	}
@@ -92,9 +92,9 @@ func PostSecret(c *gin.Context) {
 //	@Produce	json
 //	@Success	200	{object}	Secret
 //	@Tags		Repository secrets
-//	@Param		Authorization	header	string			true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 //	@Param		repo_id			path	int		true	"the repository id"
-//	@Param		secretName		path	string			true	"the secret name"
+//	@Param		secretName		path	string	true	"the secret name"
 //	@Param		secret			body	Secret	true	"the secret itself"
 func PatchSecret(c *gin.Context) {
 	var (
@@ -109,9 +109,10 @@ func PatchSecret(c *gin.Context) {
 		return
 	}
 
-	secret, err := server.Config.Services.Secrets.SecretFind(repo, name)
+	secretService := server.Config.Services.Manager.SecretServiceFromRepo(repo)
+	secret, err := secretService.SecretFind(repo, name)
 	if err != nil {
-		handleDbGetError(c, err)
+		handleDBError(c, err)
 		return
 	}
 	if in.Value != "" {
@@ -123,13 +124,12 @@ func PatchSecret(c *gin.Context) {
 	if in.Images != nil {
 		secret.Images = in.Images
 	}
-	secret.PluginsOnly = in.PluginsOnly
 
 	if err := secret.Validate(); err != nil {
 		c.String(http.StatusUnprocessableEntity, "Error updating secret. %s", err)
 		return
 	}
-	if err := server.Config.Services.Secrets.SecretUpdate(repo, secret); err != nil {
+	if err := secretService.SecretUpdate(repo, secret); err != nil {
 		c.String(http.StatusInternalServerError, "Error updating secret %q. %s", in.Name, err)
 		return
 	}
@@ -149,7 +149,8 @@ func PatchSecret(c *gin.Context) {
 //	@Param		perPage			query	int		false	"for response pagination, max items per page"	default(50)
 func GetSecretList(c *gin.Context) {
 	repo := session.Repo(c)
-	list, err := server.Config.Services.Secrets.SecretList(repo, session.Pagination(c))
+	secretService := server.Config.Services.Manager.SecretServiceFromRepo(repo)
+	list, err := secretService.SecretList(repo, session.Pagination(c))
 	if err != nil {
 		c.String(http.StatusInternalServerError, "Error getting secret list. %s", err)
 		return
@@ -173,13 +174,13 @@ func GetSecretList(c *gin.Context) {
 //	@Param		repo_id			path	int		true	"the repository id"
 //	@Param		secretName		path	string	true	"the secret name"
 func DeleteSecret(c *gin.Context) {
-	var (
-		repo = session.Repo(c)
-		name = c.Param("secret")
-	)
-	if err := server.Config.Services.Secrets.SecretDelete(repo, name); err != nil {
-		handleDbGetError(c, err)
+	repo := session.Repo(c)
+	name := c.Param("secret")
+
+	secretService := server.Config.Services.Manager.SecretServiceFromRepo(repo)
+	if err := secretService.SecretDelete(repo, name); err != nil {
+		handleDBError(c, err)
 		return
 	}
-	c.String(http.StatusNoContent, "")
+	c.Status(http.StatusNoContent)
 }

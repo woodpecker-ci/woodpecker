@@ -39,50 +39,18 @@ func newClient(url, accessToken string, skipVerify bool) (*gitlab.Client, error)
 
 // isRead is a helper function that returns true if the
 // user has Read-only access to the repository.
-func isRead(proj *gitlab.Project) bool {
-	user := proj.Permissions.ProjectAccess
-	group := proj.Permissions.GroupAccess
-
-	switch {
-	case proj.Public:
-		return true
-	case user != nil && user.AccessLevel >= 20:
-		return true
-	case group != nil && group.AccessLevel >= 20:
-		return true
-	default:
-		return false
-	}
+func isRead(proj *gitlab.Project, projectMember *gitlab.ProjectMember) bool {
+	return proj.Public || projectMember != nil && projectMember.AccessLevel >= gitlab.ReporterPermissions
 }
 
 // isWrite is a helper function that returns true if the
 // user has Read-Write access to the repository.
-func isWrite(proj *gitlab.Project) bool {
-	user := proj.Permissions.ProjectAccess
-	group := proj.Permissions.GroupAccess
-
-	switch {
-	case user != nil && user.AccessLevel >= 30:
-		return true
-	case group != nil && group.AccessLevel >= 30:
-		return true
-	default:
-		return false
-	}
+func isWrite(projectMember *gitlab.ProjectMember) bool {
+	return projectMember != nil && projectMember.AccessLevel >= gitlab.DeveloperPermissions
 }
 
 // isAdmin is a helper function that returns true if the
 // user has Admin access to the repository.
-func isAdmin(proj *gitlab.Project) bool {
-	user := proj.Permissions.ProjectAccess
-	group := proj.Permissions.GroupAccess
-
-	switch {
-	case user != nil && user.AccessLevel >= 40:
-		return true
-	case group != nil && group.AccessLevel >= 40:
-		return true
-	default:
-		return false
-	}
+func isAdmin(projectMember *gitlab.ProjectMember) bool {
+	return projectMember != nil && projectMember.AccessLevel >= gitlab.MaintainerPermissions
 }
