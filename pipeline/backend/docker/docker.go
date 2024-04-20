@@ -213,7 +213,7 @@ func (e *docker) StartStep(ctx context.Context, step *backend.Step, taskUUID str
 	}
 
 	// add default volumes to the host configuration
-	if step.UseTmpfs {
+	if step.Workspace.Tmpfs.Size != 0 {
 		hostConfig.Binds = e.volumes
 	} else {
 		hostConfig.Binds = utils.DeduplicateStrings(append(hostConfig.Binds, e.volumes...))

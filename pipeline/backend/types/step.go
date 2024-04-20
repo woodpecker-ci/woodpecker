@@ -47,12 +47,7 @@ type Step struct {
 	NetworkMode    string            `json:"network_mode,omitempty"`
 	Ports          []Port            `json:"ports,omitempty"`
 	BackendOptions map[string]any    `json:"backend_options,omitempty"`
-	Workspace      struct {
-		Tmpfs struct {
-			Size int
-			Path string
-		}
-	}
+	Workspace      []Workspace       `json:"workspace,omitempty"`
 }
 
 // StepType identifies the type of step

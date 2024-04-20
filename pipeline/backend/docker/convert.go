@@ -108,10 +108,10 @@ func toHostConfig(step *types.Step) *container.HostConfig {
 		config.Devices = toDev(step.Devices)
 	}
 
-	if step.Workspace.Tmpfs.Size != 0 {
-		config.Binds = step.Volumes
+	if len(step.Workspace) != 0 {
+		config.Tmpfs = map[string]string{step.Workspace[0].Tmpfs[0].Path: "size=" + strconv.Itoa(step.Workspace[0].Tmpfs[0].Size)}
 	} else {
-		config.Tmpfs = map[string]string{step.Workspace.Tmpfs.Path: "size=" + strconv.Itoa(step.Workspace.Tmpfs.Size)}
+		config.Binds = step.Volumes
 	}
 
 	return config
