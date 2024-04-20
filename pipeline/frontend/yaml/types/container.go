@@ -71,7 +71,7 @@ type (
 		Networks     Networks            `yaml:"networks,omitempty"`
 		ShmSize      base.MemStringOrInt `yaml:"shm_size,omitempty"`
 		Tmpfs        []string            `yaml:"tmpfs,omitempty"`
-		UseTmpfs	 bool                `yaml:"use_tmpfs,omitempty"`
+		Workspace    []Workspace         `yaml:"workspace"`
 	}
 )
 

@@ -19,6 +19,7 @@ import (
 	"encoding/json"
 	"maps"
 	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/docker/docker/api/types/container"
@@ -107,10 +108,10 @@ func toHostConfig(step *types.Step) *container.HostConfig {
 		config.Devices = toDev(step.Devices)
 	}
 
-	if !step.UseTmpfs {
+	if step.Workspace.Tmpfs.Size != 0 {
 		config.Binds = step.Volumes
 	} else {
-		config.Tmpfs = map[string]string{"/woodpecker": ""}
+		config.Tmpfs = map[string]string{step.Workspace.Tmpfs.Path: "size=" + strconv.Itoa(step.Workspace.Tmpfs.Size)}
 	}
 
 	return config
