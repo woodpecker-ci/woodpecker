@@ -215,7 +215,7 @@ func (c *Compiler) createProcess(container *yaml_types.Container, stepType backe
 		NetworkMode:    networkMode,
 		Ports:          ports,
 		BackendOptions: container.BackendOptions,
-		Workspace:      container.Workspace,
+		Workspace: 			workspace,
 	}, nil
 }
 
