@@ -359,20 +359,6 @@ when:
   - platform: [linux/*, windows/amd64]
 ```
 
-<!-- markdownlint-disable no-duplicate-heading -->
-
-#### `environment`
-
-<!-- markdownlint-enable no-duplicate-heading -->
-
-Execute a step for deployment events matching the target deployment environment:
-
-```yaml
-when:
-  - environment: production
-  - event: deployment
-```
-
 #### `matrix`
 
 Execute a step for a single matrix permutation:
