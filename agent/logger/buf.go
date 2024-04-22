@@ -15,9 +15,8 @@ type LogBuffer struct {
 }
 
 func NewLogBuffer(writer io.Writer, bufferSize int, flushInterval time.Duration) *LogBuffer {
-	buffer := bufio.NewWriterSize(writer, bufferSize)
 	lb := &LogBuffer{
-		buffer:        buffer,
+		buffer:        bufio.NewWriterSize(writer, bufferSize),
 		flushInterval: flushInterval,
 		timer:         time.NewTimer(flushInterval),
 		flushChan:     make(chan struct{}, 1),

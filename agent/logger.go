@@ -50,7 +50,7 @@ func (r *Runner) createLogger(logger zerolog.Logger, uploads *sync.WaitGroup, wo
 		loglogger.Debug().Msg("log stream opened")
 
 		logStream := rpc.NewLineWriter(r.client, step.UUID, secrets...)
-		logStreamBufferWithTimeout := agentLogger.NewLogBuffer(logStream)
+		logStreamBufferWithTimeout := agentLogger.NewLogBuffer(logStream, writeBufferSize, flushInterval)
 		if _, err := io.Copy(logStreamBufferWithTimeout, rc); err != nil {
 			log.Error().Err(err).Msg("copy limited logStream part")
 		}
