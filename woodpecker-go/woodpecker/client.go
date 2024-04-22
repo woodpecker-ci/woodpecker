@@ -313,7 +313,7 @@ func (c *client) StepLogEntries(repoID, num, step int64) ([]*LogEntry, error) {
 }
 
 // StepLogsPurge purges the pipeline logs for the specified step.
-func (c *client) StepLogsPurge(repoID, pipelineNumber int64, stepID int64) error {
+func (c *client) StepLogsPurge(repoID, pipelineNumber, stepID int64) error {
 	uri := fmt.Sprintf(pathStepLogs, c.addr, repoID, pipelineNumber, stepID)
 	err := c.delete(uri)
 	return err
