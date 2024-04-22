@@ -1,10 +1,14 @@
 # Changelog
 
-## [2.5.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.5.0) - 2024-04-18
+## [2.5.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.5.0) - 2024-04-22
 
 ### ❤️ Thanks to all contributors! ❤️
 
 @6543, @Elara6331, @anbraten, @aumetra, @eliasscosta, @manuelluis, @nemunaire, @qwerty287, @stevapple, @xoxys, @zc-devs
+
+### 🔒 Security
+
+- bump golang.org/x/net to v0.24.0 [[#3628](https://github.com/woodpecker-ci/woodpecker/pull/3628)]
 
 ### ✨ Features
 
@@ -12,6 +16,7 @@
 
 ### 📈 Enhancement
 
+- Add task details to queue info in woodpecker-go [[#3636](https://github.com/woodpecker-ci/woodpecker/pull/3636)]
 - Use forge from db [[#1417](https://github.com/woodpecker-ci/woodpecker/pull/1417)]
 - Remove review button from approval view [[#3617](https://github.com/woodpecker-ci/woodpecker/pull/3617)]
 - Rework addons (use rpc) [[#3268](https://github.com/woodpecker-ci/woodpecker/pull/3268)]
@@ -24,6 +29,8 @@
 
 ### 📚 Documentation
 
+- Fix step syntax in docs [[#3635](https://github.com/woodpecker-ci/woodpecker/pull/3635)]
+- chore(deps): update docs npm deps non-major [[#3632](https://github.com/woodpecker-ci/woodpecker/pull/3632)]
 - Add Twine plugin [[#3619](https://github.com/woodpecker-ci/woodpecker/pull/3619)]
 - Fix docs [[#3615](https://github.com/woodpecker-ci/woodpecker/pull/3615)]
 - Document how to enable parallel step exec for all steps [[#3605](https://github.com/woodpecker-ci/woodpecker/pull/3605)]
@@ -43,6 +50,8 @@
 
 ### Misc
 
+- chore(deps): update web npm deps non-major [[#3631](https://github.com/woodpecker-ci/woodpecker/pull/3631)]
+- Use our github-release plugin [[#3624](https://github.com/woodpecker-ci/woodpecker/pull/3624)]
 - chore(deps): lock file maintenance [[#3622](https://github.com/woodpecker-ci/woodpecker/pull/3622)]
 - Fix spellcheck and enable more dirs [[#3603](https://github.com/woodpecker-ci/woodpecker/pull/3603)]
 - Update docker.io/golang Docker tag to v1.22.2 [[#3596](https://github.com/woodpecker-ci/woodpecker/pull/3596)]
