@@ -16,6 +16,7 @@
 
 ### 📈 Enhancement
 
+- CLI: remove step logs [[#3458](https://github.com/woodpecker-ci/woodpecker/pull/3458)]
 - Add task details to queue info in woodpecker-go [[#3636](https://github.com/woodpecker-ci/woodpecker/pull/3636)]
 - Use forge from db [[#1417](https://github.com/woodpecker-ci/woodpecker/pull/1417)]
 - Remove review button from approval view [[#3617](https://github.com/woodpecker-ci/woodpecker/pull/3617)]
