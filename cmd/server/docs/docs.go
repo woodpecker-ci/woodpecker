@@ -2242,63 +2242,6 @@ const docTemplate = `{
                         }
                     }
                 }
-            },
-            "delete": {
-                "produces": [
-                    "text/plain"
-                ],
-                "tags": [
-                    "Pipelines"
-                ],
-                "summary": "Delete pipelines",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "default": "Bearer \u003cpersonal access token\u003e",
-                        "description": "Insert your personal access token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "description": "the repository id",
-                        "name": "repo_id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "default": 1,
-                        "description": "for response pagination, page offset number",
-                        "name": "page",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "default": 50,
-                        "description": "for response pagination, max items per page",
-                        "name": "perPage",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "only return pipelines before this RFC3339 date",
-                        "name": "before",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "only return pipelines after this RFC3339 date",
-                        "name": "after",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "No Content"
-                    }
-                }
             }
         },
         "/repos/{repo_id}/pipelines/{number}": {
@@ -2394,6 +2337,44 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/Pipeline"
                         }
+                    }
+                }
+            },
+            "delete": {
+                "produces": [
+                    "text/plain"
+                ],
+                "tags": [
+                    "Pipelines"
+                ],
+                "summary": "Delete pipeline",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cpersonal access token\u003e",
+                        "description": "Insert your personal access token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "the repository id",
+                        "name": "repo_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "the number of the pipeline",
+                        "name": "number",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
                     }
                 }
             }
@@ -4531,45 +4512,6 @@ const docTemplate = `{
                 "EventDeploy",
                 "EventCron",
                 "EventManual"
-            ]
-        },
-        "errors.PipelineError": {
-            "type": "object",
-            "properties": {
-                "data": {},
-                "is_warning": {
-                    "type": "boolean"
-                },
-                "message": {
-                    "type": "string"
-                },
-                "type": {
-                    "$ref": "#/definitions/errors.PipelineErrorType"
-                }
-            }
-        },
-        "errors.PipelineErrorType": {
-            "type": "string",
-            "enum": [
-                "linter",
-                "deprecation",
-                "compiler",
-                "generic",
-                "bad_habit"
-            ],
-            "x-enum-comments": {
-                "PipelineErrorTypeBadHabit": "some bad-habit error",
-                "PipelineErrorTypeCompiler": "some error with the config semantics",
-                "PipelineErrorTypeDeprecation": "using some deprecated feature",
-                "PipelineErrorTypeGeneric": "some generic error",
-                "PipelineErrorTypeLinter": "some error with the config syntax"
-            },
-            "x-enum-varnames": [
-                "PipelineErrorTypeLinter",
-                "PipelineErrorTypeDeprecation",
-                "PipelineErrorTypeCompiler",
-                "PipelineErrorTypeGeneric",
-                "PipelineErrorTypeBadHabit"
             ]
         },
         "model.Workflow": {
