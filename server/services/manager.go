@@ -46,6 +46,7 @@ type Manager interface {
 	EnvironmentService() environment.Service
 	ForgeFromRepo(repo *model.Repo) (forge.Forge, error)
 	ForgeFromUser(user *model.User) (forge.Forge, error)
+	ForgeByID(forgeID int64) (forge.Forge, error)
 	ForgeMain() (forge.Forge, error)
 }
 
@@ -115,24 +116,20 @@ func (m *manager) EnvironmentService() environment.Service {
 }
 
 func (m *manager) ForgeFromRepo(repo *model.Repo) (forge.Forge, error) {
-	return m.getForgeByID(repo.ForgeID)
+	return m.ForgeByID(repo.ForgeID)
 }
 
 func (m *manager) ForgeFromUser(user *model.User) (forge.Forge, error) {
-	return m.getForgeByID(user.ForgeID)
+	return m.ForgeByID(user.ForgeID)
 }
 
-func (m *manager) ForgeMain() (forge.Forge, error) {
-	return m.getForgeByID(1) // main forge is always 1 and is configured via environment variables
-}
-
-func (m *manager) getForgeByID(id int64) (forge.Forge, error) {
-	item := m.forgeCache.Get(id)
+func (m *manager) ForgeByID(forgeID int64) (forge.Forge, error) {
+	item := m.forgeCache.Get(forgeID)
 	if item != nil && !item.IsExpired() {
 		return item.Value(), nil
 	}
 
-	forgeModel, err := m.store.ForgeGet(id)
+	forgeModel, err := m.store.ForgeGet(forgeID)
 	if err != nil {
 		return nil, err
 	}
@@ -142,7 +139,11 @@ func (m *manager) getForgeByID(id int64) (forge.Forge, error) {
 		return nil, err
 	}
 
-	m.forgeCache.Set(id, forge, forgeCacheTTL)
+	m.forgeCache.Set(forgeID, forge, forgeCacheTTL)
 
 	return forge, nil
+}
+
+func (m *manager) ForgeMain() (forge.Forge, error) {
+	return m.ForgeByID(1) // main forge is always 1 and is configured via environment variables
 }

@@ -17,7 +17,9 @@ package api
 import (
 	"encoding/base32"
 	"errors"
+	"fmt"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -33,22 +35,42 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/shared/token"
 )
 
+func getForgeID(c *gin.Context) int64 {
+	_forgeID := c.Query("forge_id")
+	if _forgeID == "" {
+		_forgeID, _ = c.Cookie("forge_id")
+	}
+	if _forgeID == "" {
+		return 1
+	}
+	forgeID, err := strconv.ParseInt(_forgeID, 10, 64)
+	if err != nil {
+		return 1
+	}
+	return forgeID
+}
+
 func HandleLogin(c *gin.Context) {
+	forgeID := getForgeID(c)
+
 	if err := c.Request.FormValue("error"); err != "" {
-		c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login/error?code="+err)
+		c.Redirect(http.StatusSeeOther, fmt.Sprintf("%s/login/error?code=%s&forge_id=%d", server.Config.Server.RootPath, err, forgeID))
 	} else {
-		c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/authorize")
+		c.Redirect(http.StatusSeeOther, fmt.Sprintf("%s/authorize?forge_id=%d", server.Config.Server.RootPath, forgeID))
 	}
 }
 
 func HandleAuth(c *gin.Context) {
 	_store := store.FromContext(c)
-	_forge, err := server.Config.Services.Manager.ForgeMain()
+	forgeID := getForgeID(c)
+
+	log.Debug().Msgf("trying to login with forge_id: %d", forgeID)
+
+	_forge, err := server.Config.Services.Manager.ForgeByID(forgeID)
 	if err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
-	forgeID := int64(1) // TODO: replace with forge id when multiple forges are supported
 
 	// when dealing with redirects, we may need to adjust the content type. I
 	// cannot, however, remember why, so need to revisit this line.
@@ -138,7 +160,7 @@ func HandleAuth(c *gin.Context) {
 				ForgeID: u.ForgeID,
 			}
 			if err := _store.OrgCreate(org); err != nil {
-				log.Error().Err(err).Msgf("on user creation, could create org for user")
+				log.Error().Err(err).Msgf("on user creation, could not create org for user")
 			}
 			u.OrgID = org.ID
 		}
@@ -235,17 +257,16 @@ func GetLogout(c *gin.Context) {
 func GetLoginToken(c *gin.Context) {
 	_store := store.FromContext(c)
 
-	_forge, err := server.Config.Services.Manager.ForgeMain() // TODO: get selected forge from auth request
+	in := &tokenPayload{}
+	err := c.Bind(in)
 	if err != nil {
-		log.Error().Err(err).Msg("Cannot get main forge")
-		c.AbortWithStatus(http.StatusInternalServerError)
+		_ = c.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
 
-	in := &tokenPayload{}
-	err = c.Bind(in)
+	_forge, err := server.Config.Services.Manager.ForgeByID(in.ForgeID)
 	if err != nil {
-		_ = c.AbortWithError(http.StatusBadRequest, err)
+		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
 
@@ -279,4 +300,5 @@ type tokenPayload struct {
 	Access  string `json:"access_token,omitempty"`
 	Refresh string `json:"refresh_token,omitempty"`
 	Expires int64  `json:"expires_in,omitempty"`
+	ForgeID int64  `json:"forge_id,omitempty"`
 }
