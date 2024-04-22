@@ -45,11 +45,11 @@ func logPurge(c *cli.Context) (err error) {
 		return err
 	}
 
-	stepArg := c.Args().Get(2)
+	stepArg := c.Args().Get(2) //nolint: gomnd
 	// TODO: Add lookup by name: stepID, err := internal.ParseStep(client, repoID, stepIDOrName)
 	var stepID int64
 	if len(stepArg) != 0 {
-		stepID, err = strconv.ParseInt(c.Args().Get(2), 10, 64)
+		stepID, err = strconv.ParseInt(stepArg, 10, 64)
 		if err != nil {
 			return err
 		}
