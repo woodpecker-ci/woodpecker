@@ -118,7 +118,7 @@ func PostRepo(c *gin.Context) {
 	}
 
 	// creates the jwt token used to verify the repository
-	t := token.New(token.HookToken, repo.FullName)
+	t := token.New(token.HookToken, strconv.FormatInt(repo.ID, 10))
 	sig, err := t.Sign(repo.Hash)
 	if err != nil {
 		msg := "could not generate new jwt token."
@@ -520,7 +520,7 @@ func MoveRepo(c *gin.Context) {
 	}
 
 	// creates the jwt token used to verify the repository
-	t := token.New(token.HookToken, repo.FullName)
+	t := token.New(token.HookToken, strconv.FormatInt(repo.ID, 10))
 	sig, err := t.Sign(repo.Hash)
 	if err != nil {
 		c.String(http.StatusInternalServerError, err.Error())
@@ -536,7 +536,7 @@ func MoveRepo(c *gin.Context) {
 	)
 
 	if err := _forge.Deactivate(c, user, repo, host); err != nil {
-		log.Trace().Err(err).Msgf("deactivate repo '%s' for move to activate later, got an error", repo.FullName)
+		log.Trace().Err(err).Msgf("deactivate repo '%s' for move to activate later, got an error", strconv.FormatInt(repo.ID, 10))
 	}
 	if err := _forge.Activate(c, user, repo, hookURL); err != nil {
 		c.String(http.StatusInternalServerError, err.Error())
@@ -620,7 +620,7 @@ func repairRepo(c *gin.Context, repo *model.Repo, withPerms, skipOnErr bool) {
 	}
 
 	// creates the jwt token used to verify the repository
-	t := token.New(token.HookToken, repo.FullName)
+	t := token.New(token.HookToken, strconv.FormatInt(repo.ID, 10))
 	sig, err := t.Sign(repo.Hash)
 	if err != nil {
 		c.String(http.StatusInternalServerError, err.Error())

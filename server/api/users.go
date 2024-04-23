@@ -17,6 +17,7 @@ package api
 import (
 	"encoding/base32"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/securecookie"
@@ -57,7 +58,8 @@ func GetUsers(c *gin.Context) {
 //	@Param			Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 //	@Param			login			path	string	true	"the user's login name"
 func GetUser(c *gin.Context) {
-	user, err := store.FromContext(c).GetUserLogin(c.Param("login"))
+	forgeID := int64(1) // TODO: use correct forge
+	user, err := getUserFromLogin(c, forgeID)
 	if err != nil {
 		handleDBError(c, err)
 		return
@@ -87,7 +89,8 @@ func PatchUser(c *gin.Context) {
 		return
 	}
 
-	user, err := _store.GetUserLogin(c.Param("login"))
+	forgeID := int64(1) // TODO: use correct forge
+	user, err := getUserFromLogin(c, forgeID)
 	if err != nil {
 		handleDBError(c, err)
 		return
@@ -159,7 +162,8 @@ func PostUser(c *gin.Context) {
 func DeleteUser(c *gin.Context) {
 	_store := store.FromContext(c)
 
-	user, err := _store.GetUserLogin(c.Param("login"))
+	forgeID := int64(1) // TODO: use correct forge
+	user, err := getUserFromLogin(c, forgeID)
 	if err != nil {
 		handleDBError(c, err)
 		return
@@ -169,4 +173,14 @@ func DeleteUser(c *gin.Context) {
 		return
 	}
 	c.Status(http.StatusNoContent)
+}
+
+func getUserFromLogin(c *gin.Context, forgeID int64) (*model.User, error) {
+	_store := store.FromContext(c)
+
+	if userID, err := strconv.ParseInt(c.Param("login"), 10, 64); err == nil {
+		return _store.GetUser(userID)
+	}
+
+	return _store.GetUserLogin(forgeID, c.Param("login"))
 }

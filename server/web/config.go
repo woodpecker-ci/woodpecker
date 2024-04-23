@@ -17,6 +17,7 @@ package web
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 	"text/template"
 
 	"github.com/gin-gonic/gin"
@@ -35,7 +36,7 @@ func Config(c *gin.Context) {
 	if user != nil {
 		csrf, _ = token.New(
 			token.CsrfToken,
-			user.Login,
+			strconv.FormatInt(user.ID, 10),
 		).Sign(user.Hash)
 	}
 

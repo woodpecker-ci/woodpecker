@@ -62,6 +62,8 @@ func HandleLogin(c *gin.Context) {
 
 func HandleAuth(c *gin.Context) {
 	_store := store.FromContext(c)
+
+	// TODO: get forge-id in state
 	forgeID := getForgeID(c)
 
 	log.Debug().Msgf("trying to login with forge_id: %d", forgeID)
@@ -76,7 +78,11 @@ func HandleAuth(c *gin.Context) {
 	// cannot, however, remember why, so need to revisit this line.
 	c.Writer.Header().Del("Content-Type")
 
+	stateID := "woodpecker-state-123" // TODO: generate a random id
+	// TODO: add selected forgeID to content of the state
+
 	tmpuser, redirectURL, err := _forge.Login(c, &forge_types.OAuthRequest{
+		State:            stateID,
 		Error:            c.Request.FormValue("error"),
 		ErrorURI:         c.Request.FormValue("error_uri"),
 		ErrorDescription: c.Request.FormValue("error_description"),
@@ -87,14 +93,19 @@ func HandleAuth(c *gin.Context) {
 		c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=oauth_error")
 		return
 	}
+
 	// The user is not authorized yet -> redirect
 	if tmpuser == nil {
+		// TODO: set forge-id in state
+		httputil.SetCookie(c.Writer, c.Request, "forge_id", fmt.Sprintf("%d", forgeID))
 		http.Redirect(c.Writer, c.Request, redirectURL, http.StatusSeeOther)
 		return
 	}
+	// TODO: set forge-id in state
+	httputil.DelCookie(c.Writer, c.Request, "forge_id")
 
 	// get the user from the database
-	u, err := _store.GetUserRemoteID(tmpuser.ForgeRemoteID, tmpuser.Login)
+	u, err := _store.GetUserRemoteID(forgeID, tmpuser.ForgeRemoteID)
 	if err != nil && !errors.Is(err, types.RecordNotExist) {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
@@ -207,7 +218,7 @@ func HandleAuth(c *gin.Context) {
 	}
 
 	exp := time.Now().Add(server.Config.Server.SessionExpires).Unix()
-	tokenString, err := token.New(token.SessToken, u.Login).SignExpires(u.Hash, exp)
+	tokenString, err := token.New(token.SessToken, strconv.FormatInt(u.ID, 10)).SignExpires(u.Hash, exp)
 	if err != nil {
 		log.Error().Msgf("cannot create token for %s", u.Login)
 		c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=internal_error")
@@ -264,7 +275,9 @@ func GetLoginToken(c *gin.Context) {
 		return
 	}
 
-	_forge, err := server.Config.Services.Manager.ForgeByID(in.ForgeID)
+	forgeID := int64(1) // TODO: use correct forge
+
+	_forge, err := server.Config.Services.Manager.ForgeByID(forgeID)
 	if err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
@@ -276,14 +289,14 @@ func GetLoginToken(c *gin.Context) {
 		return
 	}
 
-	user, err := _store.GetUserLogin(login)
+	user, err := _store.GetUserLogin(forgeID, login)
 	if err != nil {
 		handleDBError(c, err)
 		return
 	}
 
 	exp := time.Now().Add(server.Config.Server.SessionExpires).Unix()
-	newToken := token.New(token.SessToken, user.Login)
+	newToken := token.New(token.SessToken, strconv.FormatInt(user.ID, 10))
 	tokenStr, err := newToken.SignExpires(user.Hash, exp)
 	if err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
@@ -300,5 +313,4 @@ type tokenPayload struct {
 	Access  string `json:"access_token,omitempty"`
 	Refresh string `json:"refresh_token,omitempty"`
 	Expires int64  `json:"expires_in,omitempty"`
-	ForgeID int64  `json:"forge_id,omitempty"`
 }

@@ -94,7 +94,7 @@ func (c *client) Login(ctx context.Context, req *forge_types.OAuthRequest) (*mod
 	config := c.newOAuth2Config()
 
 	// TODO: Add proper state and pkce...
-	redirectURL := config.AuthCodeURL("woodpecker")
+	redirectURL := config.AuthCodeURL(req.State)
 
 	if req.Error != "" {
 		return nil, redirectURL, &forge_types.AuthError{

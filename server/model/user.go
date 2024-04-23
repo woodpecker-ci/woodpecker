@@ -34,14 +34,14 @@ type User struct {
 	// required: true
 	ID int64 `json:"id" xorm:"pk autoincr 'user_id'"`
 
-	ForgeID int64 `json:"forge_id,omitempty" xorm:"forge_id"`
+	ForgeID int64 `json:"forge_id,omitempty" xorm:"UNIQUE(s) 'forge_id'"`
 
 	ForgeRemoteID ForgeRemoteID `json:"-" xorm:"forge_remote_id"`
 
 	// Login is the username for this user.
 	//
 	// required: true
-	Login string `json:"login"  xorm:"UNIQUE 'user_login'"`
+	Login string `json:"login"  xorm:"UNIQUE(s) 'user_login'"`
 
 	// Token is the oauth2 token.
 	Token string `json:"-"  xorm:"TEXT 'user_token'"`
