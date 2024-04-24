@@ -387,7 +387,7 @@ func (l *Linter) lintBadHabits(config *WorkflowConfig) (err error) {
 					Data: errors.BadHabitErrorData{
 						File:  config.File,
 						Field: field,
-						Docs: "https://woodpecker-ci.org/docs/usage/linter#event-filter-for-all-steps",
+						Docs:  "https://woodpecker-ci.org/docs/usage/linter#event-filter-for-all-steps",
 					},
 					IsWarning: true,
 				})

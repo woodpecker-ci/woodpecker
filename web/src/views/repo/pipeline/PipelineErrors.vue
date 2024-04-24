@@ -11,7 +11,10 @@
           }"
         />
         <span>[{{ error.type }}]</span>
-        <span v-if="isLinterError(error) || isDeprecationError(error) || isBadHabitError(error)" class="whitespace-nowrap">
+        <span
+          v-if="isLinterError(error) || isDeprecationError(error) || isBadHabitError(error)"
+          class="whitespace-nowrap"
+        >
           <span v-if="error.data?.file" class="font-bold">{{ error.data?.file }}: </span>
           <span>{{ error.data?.field }}</span>
         </span>

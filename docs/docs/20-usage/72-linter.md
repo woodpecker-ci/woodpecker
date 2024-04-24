@@ -24,8 +24,8 @@ Example:
 
 ```yaml
 when:
- - branch: main
- - event: push
+  - branch: main
+  - event: push
 ```
 
 This will trigger the warning because the first item (`branch: main`) does not filter with an event.

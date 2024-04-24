@@ -189,11 +189,11 @@ func TestBadHabits(t *testing.T) {
 	}{
 		{
 			from: "steps: { build: { image: golang } }",
-			want: "Please set an event filter on all when branches",
+			want: "Please set an event filter for all or the whole workflow on all items of the when block",
 		},
 		{
 			from: "when: [{branch: xyz}, {event: push}]\nsteps: { build: { image: golang } }",
-			want: "Please set an event filter on all when branches",
+			want: "Please set an event filter for all or the whole workflow on all items of the when block",
 		},
 	}
 
