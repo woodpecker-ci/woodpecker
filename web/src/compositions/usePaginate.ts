@@ -44,8 +44,6 @@ export function usePagination<T, S = unknown>(
       data.value.push(...newData);
     }
 
-    console.log('loadData', each.value?.[0], page.value);
-
     // last page and each has more
     if (!hasMore.value && each.value.length > 0) {
       // use next each element
