@@ -18,14 +18,45 @@ Woodpecker warns you if your configuration contains some bad habits.
 
 ### Event filter for all steps
 
-All your items in `when` blocks should have an `event` filter, so no step runs on all events. This is recommended because if new events are added, your steps probably shouldn't run.
+All your items in `when` blocks should have an `event` filter, so no step runs on all events. This is recommended because if new events are added, your steps probably shouldn't run on those as well.
 
-Example:
+Examples of an **incorrect** config for this rule:
 
 ```yaml
 when:
   - branch: main
-  - event: push
+  - event: tag
 ```
 
 This will trigger the warning because the first item (`branch: main`) does not filter with an event.
+
+```yaml
+steps:
+  - name: test
+    when:
+      branch: main
+
+  - name: deploy
+    when:
+      event: tag
+```
+
+Examples of a **correct** config for this rule:
+
+```yaml
+when:
+  - branch: main
+    event: push
+  - event: tag
+```
+
+```yaml
+steps:
+  - name: test
+    when:
+      event: [tag, push] 
+
+  - name: deploy
+    when:
+      - event: tag
+```

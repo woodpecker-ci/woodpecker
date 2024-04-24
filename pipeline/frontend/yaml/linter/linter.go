@@ -383,7 +383,7 @@ func (l *Linter) lintBadHabits(config *WorkflowConfig) (err error) {
 			if field != "" {
 				err = multierr.Append(err, &errorTypes.PipelineError{
 					Type:    errorTypes.PipelineErrorTypeBadHabit,
-					Message: "Please set an event filter for all or the whole workflow on all items of the when block",
+					Message: "Please set an event filter for all steps or the whole workflow on all items of the when block",
 					Data: errors.BadHabitErrorData{
 						File:  config.File,
 						Field: field,
