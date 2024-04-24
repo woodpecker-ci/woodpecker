@@ -19,6 +19,12 @@ type DeprecationErrorData struct {
 	Docs  string `json:"docs"`
 }
 
+type BadHabitErrorData struct {
+	File  string `json:"file"`
+	Field string `json:"field"`
+	Docs  string `json:"docs"`
+}
+
 func GetLinterData(e *types.PipelineError) *LinterErrorData {
 	if e.Type != types.PipelineErrorTypeLinter {
 		return nil
