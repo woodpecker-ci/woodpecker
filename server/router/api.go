@@ -172,8 +172,8 @@ func apiRoutes(e *gin.RouterGroup) {
 		readGlobalSecrets := apiBase.Group("/secrets")
 		{
 			readGlobalSecrets.Use(session.MustUser())
-			readGlobalSecrets.GET("", api.GetSecretList)
-			readGlobalSecrets.GET("/:secret", api.GetSecret)
+			readGlobalSecrets.GET("", api.GetGlobalSecretList)
+			readGlobalSecrets.GET("/:secret", api.GetGlobalSecret)
 		}
 		secrets := apiBase.Group("/secrets")
 		{

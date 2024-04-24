@@ -14,15 +14,14 @@
       <Button v-else :text="$t('repo.settings.secrets.add')" start-icon="plus" @click="showAddSecret" />
     </template>
 
-    <Pagination v-if="!selectedSecret" :pagination="secretsPagination">
-      <SecretList
-        :model-value="secrets"
-        i18n-prefix="repo.settings.secrets."
-        :is-deleting="isDeleting"
-        @edit="editSecret"
-        @delete="deleteSecret"
-      />
-    </Pagination>
+    <SecretList
+      v-if="!selectedSecret"
+      :model-value="secrets"
+      i18n-prefix="repo.settings.secrets."
+      :is-deleting="isDeleting"
+      @edit="editSecret"
+      @delete="deleteSecret"
+    />
 
     <SecretEdit
       v-else
@@ -84,7 +83,6 @@ async function loadSecrets(page: number, level: 'repo' | 'org' | 'global'): Prom
 
 const secretsPagination = usePagination(loadSecrets, () => !selectedSecret.value, {
   each: ['repo', 'org', 'global'],
-  scrollElement: null,
   pageSize: 50,
 });
 const { resetPage, data: _secrets } = secretsPagination;
