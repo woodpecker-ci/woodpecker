@@ -1,44 +1,36 @@
 <template>
   <div>
-    <div v-if="loading">loading ...</div>
+    <div v-if="loading">
+      <Icon name="loading" class="animate-spin" />
+    </div>
     <div v-else>
-      <slot :data="data" />
+      <slot />
     </div>
 
-    <Button v-if="hasMore" :is-loading="loading" text="Load more" class="mx-auto mt-4" @click="nextPage" />
+    <Button v-if="hasMore" :is-loading="loading" :text="$t('load_more')" class="mx-auto mt-4" @click="nextPage" />
   </div>
 </template>
 
 <script lang="ts" setup>
-import { nextTick } from 'vue';
+import { computed, nextTick } from 'vue';
 
 import Button from '~/components/atomic/Button.vue';
-
+import Icon from '~/components/atomic/Icon.vue';
 import { usePagination } from '~/compositions/usePaginate';
 
 const props = defineProps<{
-  loadData: () => Promise<unknown[] | null>;
+  pagination: ReturnType<typeof usePagination>;
 }>();
-
-const {
-  loading,
-  data,
-  nextPage: _nextPage,
-  hasMore,
-} = usePagination(props.loadData, () => true, {
-  name: 'secrets',
-  each: ['repo', 'org', 'global'],
-});
-
+const loading = computed(() => props.pagination.loading.value);
+const hasMore = computed(() => props.pagination.hasMore.value);
 function scrollDown() {
   window.scrollTo({
     top: document.body.scrollHeight,
     behavior: 'smooth',
   });
 }
-
 function nextPage() {
-  _nextPage();
+  props.pagination.nextPage();
   nextTick(() => {
     setTimeout(scrollDown, 100);
   });
