@@ -67,7 +67,7 @@ Some versions need some changes to the server configuration or the pipeline conf
 
   Only projects created after updating will have an empty value by default. Existing projects will stick to the current pipeline path which is `.drone.yml` in most cases.
 
-  Read more about it at the [Project Settings](./20-usage/71-project-settings.md#pipeline-path)
+  Read more about it at the [Project Settings](./20-usage/75-project-settings.md#pipeline-path)
 
 - From version `0.15.0` ongoing there will be three types of docker images: `latest`, `next` and `x.x.x` with an alpine variant for each type like `latest-alpine`.
   If you used `latest` before to try pre-release features you should switch to `next` after this release.
