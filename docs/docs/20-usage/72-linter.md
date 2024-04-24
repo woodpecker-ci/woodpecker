@@ -54,7 +54,7 @@ when:
 steps:
   - name: test
     when:
-      event: [tag, push] 
+      event: [tag, push]
 
   - name: deploy
     when:
