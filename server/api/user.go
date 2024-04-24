@@ -21,6 +21,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/securecookie"
+	"github.com/rs/zerolog/log"
 
 	"go.woodpecker-ci.org/woodpecker/v2/server"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
@@ -83,12 +84,17 @@ func GetFeed(c *gin.Context) {
 //	@Success		200	{array}	Repo
 //	@Tags			User
 //	@Param			Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param			all		query	bool	false	"query all repos, including inactive ones"
+//	@Param			all				query	bool	false	"query all repos, including inactive ones"
 func GetRepos(c *gin.Context) {
 	_store := store.FromContext(c)
-	_forge := server.Config.Services.Forge
-
 	user := session.User(c)
+	_forge, err := server.Config.Services.Manager.ForgeFromUser(user)
+	if err != nil {
+		log.Error().Err(err).Msg("Cannot get forge from user")
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
 	all, _ := strconv.ParseBool(c.Query("all"))
 
 	if all {
@@ -117,11 +123,9 @@ func GetRepos(c *gin.Context) {
 					existingRepo.Update(r)
 					existingRepo.IsActive = active[r.ForgeRemoteID].IsActive
 					repos = append(repos, existingRepo)
-				} else {
-					if r.Perm.Admin {
-						// you must be admin to enable the repo
-						repos = append(repos, r)
-					}
+				} else if r.Perm.Admin {
+					// you must be admin to enable the repo
+					repos = append(repos, r)
 				}
 			}
 		}
@@ -141,12 +145,12 @@ func GetRepos(c *gin.Context) {
 
 // PostToken
 //
-//	@Summary		Return the token of the current user as string
-//	@Router			/user/token [post]
-//	@Produce		plain
-//	@Success		200
-//	@Tags			User
-//	@Param			Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Summary	Return the token of the current user as string
+//	@Router		/user/token [post]
+//	@Produce	plain
+//	@Success	200
+//	@Tags		User
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 func PostToken(c *gin.Context) {
 	user := session.User(c)
 	tokenString, err := token.New(token.UserToken, user.Login).Sign(user.Hash)

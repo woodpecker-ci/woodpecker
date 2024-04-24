@@ -42,7 +42,6 @@ type (
 		Instance    List
 		Platform    List
 		Environment List
-		Event       List
 		Branch      List
 		Cron        List
 		Status      List
@@ -50,6 +49,8 @@ type (
 		Local       yamlBaseTypes.BoolTrue
 		Path        Path
 		Evaluate    string `yaml:"evaluate,omitempty"`
+		// TODO change to StringOrSlice in 3.x
+		Event List
 	}
 
 	// List defines a runtime constraint for exclude & include string slices.
@@ -195,7 +196,11 @@ func (c *Constraint) Match(m metadata.Metadata, global bool, env map[string]stri
 		if err != nil {
 			return false, err
 		}
-		match = match && result.(bool)
+		bresult, ok := result.(bool)
+		if !ok {
+			return false, fmt.Errorf("could not parse result: %v", result)
+		}
+		match = match && bresult
 	}
 
 	return match, nil
@@ -254,14 +259,14 @@ func (c *List) UnmarshalYAML(value *yaml.Node) error {
 	err2 := value.Decode(&out2)
 
 	c.Exclude = out1.Exclude
-	c.Include = append(
+	c.Include = append( //nolint:gocritic
 		out1.Include,
 		out2...,
 	)
 
 	if err1 != nil && err2 != nil {
 		y, _ := yaml.Marshal(value)
-		return fmt.Errorf("Could not parse condition: %s: %w", y, multierr.Append(err1, err2))
+		return fmt.Errorf("could not parse condition: %s: %w", y, multierr.Append(err1, err2))
 	}
 
 	return nil
@@ -335,14 +340,14 @@ func (c *Path) UnmarshalYAML(value *yaml.Node) error {
 
 	c.Exclude = out1.Exclude
 	c.IgnoreMessage = out1.IgnoreMessage
-	c.Include = append(
+	c.Include = append( //nolint:gocritic
 		out1.Include,
 		out2...,
 	)
 
 	if err1 != nil && err2 != nil {
 		y, _ := yaml.Marshal(value)
-		return fmt.Errorf("Could not parse condition: %s", y)
+		return fmt.Errorf("could not parse condition: %s", y)
 	}
 
 	return nil

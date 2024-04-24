@@ -49,6 +49,7 @@ func toRepo(from *gitea.Repository) *model.Repo {
 		CloneSSH:      from.SSHURL,
 		Branch:        from.DefaultBranch,
 		Perm:          toPerm(from.Permissions),
+		PREnabled:     from.HasPullRequests,
 	}
 }
 
@@ -76,16 +77,16 @@ func pipelineFromPush(hook *pushHook) *model.Pipeline {
 		fixMalformedAvatar(hook.Sender.AvatarURL),
 	)
 
-	message := ""
+	var message string
 	link := hook.Compare
 	if len(hook.Commits) > 0 {
 		message = hook.Commits[0].Message
+		if len(hook.Commits) == 1 {
+			link = hook.Commits[0].URL
+		}
 	} else {
 		message = hook.HeadCommit.Message
-	}
-
-	if len(hook.Commits) == 1 {
-		link = hook.Commits[0].URL
+		link = hook.HeadCommit.URL
 	}
 
 	return &model.Pipeline{
@@ -117,7 +118,7 @@ func getChangedFilesFromPushHook(hook *pushHook) []string {
 	files = append(files, hook.HeadCommit.Removed...)
 	files = append(files, hook.HeadCommit.Modified...)
 
-	return utils.DedupStrings(files)
+	return utils.DeduplicateStrings(files)
 }
 
 // helper function that extracts the Pipeline data from a Gitea tag hook
@@ -132,11 +133,11 @@ func pipelineFromTag(hook *pushHook) *model.Pipeline {
 		Commit:    hook.Sha,
 		Ref:       fmt.Sprintf("refs/tags/%s", hook.Ref),
 		ForgeURL:  fmt.Sprintf("%s/src/tag/%s", hook.Repo.HTMLURL, hook.Ref),
-		Branch:    fmt.Sprintf("refs/tags/%s", hook.Ref),
 		Message:   fmt.Sprintf("created tag %s", hook.Ref),
 		Avatar:    avatar,
 		Author:    hook.Sender.UserName,
 		Sender:    hook.Sender.UserName,
+		Email:     hook.Sender.Email,
 		Timestamp: time.Now().UTC().Unix(),
 	}
 }
@@ -147,16 +148,23 @@ func pipelineFromPullRequest(hook *pullRequestHook) *model.Pipeline {
 		hook.Repo.HTMLURL,
 		fixMalformedAvatar(hook.PullRequest.Poster.AvatarURL),
 	)
+
+	event := model.EventPull
+	if hook.Action == actionClose {
+		event = model.EventPullClosed
+	}
+
 	pipeline := &model.Pipeline{
-		Event:    model.EventPull,
+		Event:    event,
 		Commit:   hook.PullRequest.Head.Sha,
-		ForgeURL: hook.PullRequest.URL,
+		ForgeURL: hook.PullRequest.HTMLURL,
 		Ref:      fmt.Sprintf("refs/pull/%d/head", hook.Number),
 		Branch:   hook.PullRequest.Base.Ref,
 		Message:  hook.PullRequest.Title,
 		Author:   hook.PullRequest.Poster.UserName,
 		Avatar:   avatar,
 		Sender:   hook.Sender.UserName,
+		Email:    hook.Sender.Email,
 		Title:    hook.PullRequest.Title,
 		Refspec: fmt.Sprintf("%s:%s",
 			hook.PullRequest.Head.Ref,
@@ -164,7 +172,28 @@ func pipelineFromPullRequest(hook *pullRequestHook) *model.Pipeline {
 		),
 		PullRequestLabels: convertLabels(hook.PullRequest.Labels),
 	}
+
 	return pipeline
+}
+
+func pipelineFromRelease(hook *releaseHook) *model.Pipeline {
+	avatar := expandAvatar(
+		hook.Repo.HTMLURL,
+		fixMalformedAvatar(hook.Sender.AvatarURL),
+	)
+
+	return &model.Pipeline{
+		Event:        model.EventRelease,
+		Ref:          fmt.Sprintf("refs/tags/%s", hook.Release.TagName),
+		ForgeURL:     hook.Release.HTMLURL,
+		Branch:       hook.Release.Target,
+		Message:      fmt.Sprintf("created release %s", hook.Release.Title),
+		Avatar:       avatar,
+		Author:       hook.Sender.UserName,
+		Sender:       hook.Sender.UserName,
+		Email:        hook.Sender.Email,
+		IsPrerelease: hook.Release.IsPrerelease,
+	}
 }
 
 // helper function that parses a push hook from a read closer.
@@ -180,6 +209,12 @@ func parsePullRequest(r io.Reader) (*pullRequestHook, error) {
 	return pr, err
 }
 
+func parseRelease(r io.Reader) (*releaseHook, error) {
+	pr := new(releaseHook)
+	err := json.NewDecoder(r).Decode(pr)
+	return pr, err
+}
+
 // fixMalformedAvatar is a helper function that fixes an avatar url if malformed
 // (currently a known bug with gitea)
 func fixMalformedAvatar(url string) string {
@@ -189,7 +224,7 @@ func fixMalformedAvatar(url string) string {
 	}
 	index = strings.Index(url, "//avatars/")
 	if index != -1 {
-		return strings.Replace(url, "//avatars/", "/avatars/", -1)
+		return strings.ReplaceAll(url, "//avatars/", "/avatars/")
 	}
 	return url
 }

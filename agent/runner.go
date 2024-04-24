@@ -50,7 +50,7 @@ func NewRunner(workEngine rpc.Peer, f rpc.Filter, h string, state *State, backen
 	}
 }
 
-func (r *Runner) Run(runnerCtx context.Context) error {
+func (r *Runner) Run(runnerCtx context.Context) error { //nolint:contextcheck
 	log.Debug().Msg("request next execution")
 
 	meta, _ := metadata.FromOutgoingContext(runnerCtx)
@@ -133,12 +133,13 @@ func (r *Runner) Run(runnerCtx context.Context) error {
 	state := rpc.State{}
 	state.Started = time.Now().Unix()
 
-	err = r.client.Init(ctxmeta, work.ID, state)
+	err = r.client.Init(runnerCtx, work.ID, state)
 	if err != nil {
 		logger.Error().Err(err).Msg("pipeline initialization failed")
 	}
 
 	var uploads sync.WaitGroup
+	//nolint:contextcheck
 	err = pipeline.New(work.Config,
 		pipeline.WithContext(workflowCtx),
 		pipeline.WithTaskUUID(fmt.Sprint(work.ID)),
@@ -157,16 +158,17 @@ func (r *Runner) Run(runnerCtx context.Context) error {
 
 	if canceled.IsSet() {
 		state.Error = ""
-		state.ExitCode = 137
+		state.ExitCode = pipeline.ExitCodeKilled
 	} else if err != nil {
 		pExitError := &pipeline.ExitError{}
-		if errors.As(err, &pExitError) {
+		switch {
+		case errors.As(err, &pExitError):
 			state.ExitCode = pExitError.Code
-		} else if errors.Is(err, pipeline.ErrCancel) {
+		case errors.Is(err, pipeline.ErrCancel):
 			state.Error = ""
-			state.ExitCode = 137
+			state.ExitCode = pipeline.ExitCodeKilled
 			canceled.SetTo(true)
-		} else {
+		default:
 			state.ExitCode = 1
 			state.Error = err.Error()
 		}
@@ -187,7 +189,7 @@ func (r *Runner) Run(runnerCtx context.Context) error {
 		Int("exit_code", state.ExitCode).
 		Msg("updating pipeline status")
 
-	if err := r.client.Done(ctxmeta, work.ID, state); err != nil {
+	if err := r.client.Done(runnerCtx, work.ID, state); err != nil {
 		logger.Error().Err(err).Msg("updating pipeline status failed")
 	} else {
 		logger.Debug().Msg("updating pipeline status complete")

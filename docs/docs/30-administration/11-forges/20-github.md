@@ -1,9 +1,13 @@
+---
+toc_max_heading_level: 2
+---
+
 # GitHub
 
 Woodpecker comes with built-in support for GitHub and GitHub Enterprise.
 To use Woodpecker with GitHub the following environment variables should be set for the server component:
 
-```bash
+```ini
 WOODPECKER_GITHUB=true
 WOODPECKER_GITHUB_CLIENT=YOUR_GITHUB_CLIENT_ID
 WOODPECKER_GITHUB_SECRET=YOUR_GITHUB_CLIENT_SECRET
@@ -77,3 +81,9 @@ Read the value for `WOODPECKER_GITHUB_SECRET` from the specified filepath.
 > Default: `false`
 
 Configure if SSL verification should be skipped.
+
+### `WOODPECKER_GITHUB_PUBLIC_ONLY`
+
+> Default: `false`
+
+Configures the GitHub OAuth client to only obtain a token that can manage public repositories.

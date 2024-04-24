@@ -15,6 +15,7 @@
   "unknown_error": "An unknown error occurred",
   "documentation_for": "Documentation for \"{topic}\"",
   "pipeline_feed": "Pipeline feed",
+  "empty_list": "No {entity} found!",
   "not_found": {
     "not_found": "Whoa 404, either we broke something or you had a typing mishap :-/",
     "back_home": "Back to home"
@@ -23,7 +24,7 @@
     "not_found": "Server could not find requested object"
   },
   "time": {
-    "tmpl": "MMM D, YYYY, HH:mm z",
+    "template": "MMM D, YYYY, HH:mm z",
     "weeks_short": "w",
     "days_short": "d",
     "hours_short": "h",
@@ -37,7 +38,7 @@
       "trigger": "Run pipeline",
       "select_branch": "Select branch",
       "variables": {
-        "add": "Add variable",
+        "delete": "Delete variable",
         "title": "Additional pipeline variables",
         "desc": "Specify additional variables to use in your pipeline. Variables with the same name will be overwritten.",
         "name": "Variable name",
@@ -49,7 +50,7 @@
       "enter_target": "Target deployment environment",
       "trigger": "Deploy",
       "variables": {
-        "add": "Add variable",
+        "delete": "Delete variable",
         "title": "Additional pipeline variables",
         "desc": "Specify additional variables to use in your pipeline. Variables with the same name will be overwritten.",
         "name": "Variable name",
@@ -88,6 +89,10 @@
         "allow_pr": {
           "allow": "Allow Pull Requests",
           "desc": "Pipelines can run on pull requests."
+        },
+        "allow_deploy": {
+          "allow": "Allow deployments",
+          "desc": "Allow deployments from successful pipelines. Only use if you trust all users with push access."
         },
         "protected": {
           "protected": "Protected",
@@ -152,7 +157,7 @@
       },
       "registries": {
         "registries": "Registries",
-        "creds": "Registry credentials",
+        "credentials": "Registry credentials",
         "desc": "Registries credentials can be added to use private images for your pipeline.",
         "show": "Show registries",
         "add": "Add registry",
@@ -240,6 +245,8 @@
       "pipeline": "Pipeline #{pipelineId}",
       "log_title": "Step Logs",
       "log_download_error": "There was an error while downloading the log file",
+      "log_delete_confirm": "Do you really want to delete logs of this step?",
+      "log_delete_error": "There was an error while deleting the step logs",
       "actions": {
         "cancel": "Cancel",
         "restart": "Restart",
@@ -248,11 +255,11 @@
         "deploy": "Deploy",
         "restart_success": "Pipeline restarted",
         "log_download": "Download",
+        "log_delete": "Delete",
         "log_auto_scroll": "Automatically scroll down",
         "log_auto_scroll_off": "Turn off automatic scrolling"
       },
       "protected": {
-        "review": "Review changes",
         "awaits": "This pipeline is awaiting approval by a maintainer!",
         "approve": "Approve",
         "decline": "Decline",
@@ -266,7 +273,8 @@
         "pr": "Pull Request",
         "deploy": "Deploy",
         "cron": "Cron",
-        "manual": "Manual"
+        "manual": "Manual",
+        "release": "Release"
       },
       "status": {
         "status": "Status: {status}",
@@ -484,15 +492,13 @@
           "pr_warning": "Please be careful with this option as a bad actor can submit a malicious pull request that exposes your secrets."
         }
       },
-      "api": {
-        "api": "API",
-        "desc": "Personal Access Token and API usage",
+      "cli_and_api": {
+        "cli_and_api": "CLI & API",
+        "desc": "Personal Access Token, CLI and API usage",
         "token": "Personal Access Token",
-        "shell_setup": "Shell setup",
         "api_usage": "Example API Usage",
         "cli_usage": "Example CLI Usage",
-        "dl_cli": "Download CLI",
-        "shell_setup_before": "do shell setup steps before",
+        "download_cli": "Download CLI",
         "reset_token": "Reset token",
         "swagger_ui": "Swagger UI"
       }
@@ -506,5 +512,12 @@
   "running_version": "You are running Woodpecker {0}",
   "update_woodpecker": "Please update your Woodpecker instance to {0}",
   "global_level_secret": "global secret",
-  "org_level_secret": "organization secret"
+  "org_level_secret": "organization secret",
+  "login_to_cli": "Login to CLI",
+  "login_to_cli_description": "By continuing you will be logged in to the CLI.",
+  "abort": "Abort",
+  "cli_login_success": "Login to CLI successful",
+  "cli_login_failed": "Login to CLI failed",
+  "cli_login_denied": "Login to CLI denied",
+  "return_to_cli": "You can now close this tab and return to the CLI."
 }

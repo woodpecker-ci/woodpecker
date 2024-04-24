@@ -34,7 +34,7 @@ export default (pipeline: Ref<Pipeline | undefined>) => {
       return null;
     }
 
-    // TODO check whetehr elapsed works
+    // TODO check whether elapsed works
     return timeAgo(sinceElapsed.value);
   });
 
@@ -96,7 +96,7 @@ export default (pipeline: Ref<Pipeline | undefined>) => {
       return pipeline.value.ref.replaceAll('refs/tags/', '');
     }
 
-    if (pipeline.value?.event === 'pull_request') {
+    if (pipeline.value?.event === 'pull_request' || pipeline.value?.event === 'pull_request_closed') {
       return `#${pipeline.value.ref
         .replaceAll('refs/pull/', '')
         .replaceAll('refs/merge-requests/', '')

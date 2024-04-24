@@ -40,6 +40,8 @@ docker-compose.yml
 extras/
 /build/
 /dist/
+/data/
+datastore/migration/testfiles/
 
 docs/venv
 

@@ -19,27 +19,29 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 )
 
 func TestServiceName(t *testing.T) {
-	name, err := serviceName(&types.Step{Name: "wp_01he8bebctabr3kgk0qj36d2me_0_services_0"})
+	name, err := serviceName(&types.Step{Name: "database", UUID: "01he8bebctabr3kgk0qj36d2me"})
 	assert.NoError(t, err)
-	assert.Equal(t, "wp-01he8bebctabr3kgk0qj36d2me-0-services-0", name)
+	assert.Equal(t, "wp-svc-01he8bebctabr3kgk0qj36d2me-database", name)
 
-	name, err = serviceName(&types.Step{Name: "wp-01he8bebctabr3kgk0qj36d2me-0\\services-0"})
+	name, err = serviceName(&types.Step{Name: "wp-01he8bebctabr3kgk0qj36d2me-0-services-0.woodpecker-runtime.svc.cluster.local", UUID: "01he8bebctabr3kgk0qj36d2me"})
 	assert.NoError(t, err)
-	assert.Equal(t, "wp-01he8bebctabr3kgk0qj36d2me-0\\services-0", name)
+	assert.Equal(t, "wp-svc-01he8bebctabr3kgk0qj36d2me-wp-01he8bebctabr3kgk0qj36d2me-0-services-0.woodpecker-runtime.svc.cluster.local", name)
 
-	_, err = serviceName(&types.Step{Name: "wp-01he8bebctabr3kgk0qj36d2me-0-services-0.woodpecker-runtime.svc.cluster.local"})
-	assert.ErrorIs(t, err, ErrDNSPatternInvalid)
+	name, err = serviceName(&types.Step{Name: "awesome_service", UUID: "01he8bebctabr3kgk0qj36d2me"})
+	assert.NoError(t, err)
+	assert.Equal(t, "wp-svc-01he8bebctabr3kgk0qj36d2me-awesome-service", name)
 }
 
 func TestService(t *testing.T) {
 	expected := `
 	{
 	  "metadata": {
-	    "name": "bar",
+	    "name": "wp-svc-01he8bebctabr3kgk0qj36d2me-0-bar",
 	    "namespace": "foo",
 	    "creationTimestamp": null
 	  },
@@ -52,17 +54,19 @@ func TestService(t *testing.T) {
 	      },
 	      {
 	        "name": "port-2",
+	        "protocol": "TCP",
 	        "port": 2,
 	        "targetPort": 2
 	      },
 	      {
 	        "name": "port-3",
+	        "protocol": "UDP",
 	        "port": 3,
 	        "targetPort": 3
 	      }
 	    ],
 	    "selector": {
-	      "step": "baz"
+	      "service": "wp-svc-01he8bebctabr3kgk0qj36d2me-0-bar"
 	    },
 	    "type": "ClusterIP"
 	  },
@@ -70,8 +74,17 @@ func TestService(t *testing.T) {
 	    "loadBalancer": {}
 	  }
 	}`
-
-	s, _ := mkService("foo", "bar", []uint16{1, 2, 3}, map[string]string{"step": "baz"})
+	ports := []types.Port{
+		{Number: 1},
+		{Number: 2, Protocol: "tcp"},
+		{Number: 3, Protocol: "udp"},
+	}
+	s, err := mkService(&types.Step{
+		Name:  "bar",
+		UUID:  "01he8bebctabr3kgk0qj36d2me-0",
+		Ports: ports,
+	}, &config{Namespace: "foo"})
+	assert.NoError(t, err)
 	j, err := json.Marshal(s)
 	assert.NoError(t, err)
 	assert.JSONEq(t, expected, string(j))

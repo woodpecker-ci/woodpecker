@@ -45,7 +45,7 @@
               @click="restartPipeline"
             />
             <Button
-              v-if="pipeline.status === 'success'"
+              v-if="pipeline.status === 'success' && repo.allow_deploy"
               class="flex-shrink-0"
               :text="$t('repo.pipeline.actions.deploy')"
               @click="showDeployPipelinePopup = true"
@@ -88,7 +88,7 @@
     <Tab id="config" :title="$t('repo.pipeline.config')" />
     <Tab
       v-if="
-        (pipeline.event === 'push' || pipeline.event === 'pull_request') &&
+        (pipeline.event === 'push' || pipeline.event === 'pull_request' || pipeline.event === 'pull_request_closed') &&
         pipeline.changed_files &&
         pipeline.changed_files.length > 0
       "

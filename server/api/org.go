@@ -19,9 +19,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/rs/zerolog/log"
-
 	"github.com/gin-gonic/gin"
+	"github.com/rs/zerolog/log"
 
 	"go.woodpecker-ci.org/woodpecker/v2/server"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
@@ -49,7 +48,7 @@ func GetOrg(c *gin.Context) {
 
 	org, err := _store.OrgGet(orgID)
 	if err != nil {
-		handleDbError(c, err)
+		handleDBError(c, err)
 		return
 	}
 
@@ -68,6 +67,13 @@ func GetOrg(c *gin.Context) {
 func GetOrgPermissions(c *gin.Context) {
 	user := session.User(c)
 	_store := store.FromContext(c)
+
+	_forge, err := server.Config.Services.Manager.ForgeFromUser(user)
+	if err != nil {
+		log.Error().Err(err).Msg("Cannot get forge from user")
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
 
 	orgID, err := strconv.ParseInt(c.Param("org_id"), 10, 64)
 	if err != nil {
@@ -97,7 +103,7 @@ func GetOrgPermissions(c *gin.Context) {
 		return
 	}
 
-	perm, err := server.Config.Services.Membership.Get(c, user, org.Name)
+	perm, err := server.Config.Services.Membership.Get(c, _forge, user, org.Name)
 	if err != nil {
 		c.String(http.StatusInternalServerError, "Error getting membership for %d. %s", orgID, err)
 		return
@@ -117,12 +123,19 @@ func GetOrgPermissions(c *gin.Context) {
 //	@Param		org_full_name	path	string	true	"the organizations full-name / slug"
 func LookupOrg(c *gin.Context) {
 	_store := store.FromContext(c)
+	user := session.User(c)
+	_forge, err := server.Config.Services.Manager.ForgeFromUser(user)
+	if err != nil {
+		log.Error().Err(err).Msg("Cannot get forge from user")
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
 
 	orgFullName := strings.TrimLeft(c.Param("org_full_name"), "/")
 
 	org, err := _store.OrgFindByName(orgFullName)
 	if err != nil {
-		handleDbError(c, err)
+		handleDBError(c, err)
 		return
 	}
 
@@ -138,9 +151,9 @@ func LookupOrg(c *gin.Context) {
 			c.AbortWithStatus(http.StatusNotFound)
 			return
 		} else if !user.Admin {
-			perm, err := server.Config.Services.Membership.Get(c, user, org.Name)
+			perm, err := server.Config.Services.Membership.Get(c, _forge, user, org.Name)
 			if err != nil {
-				log.Error().Msgf("Failed to check membership: %v", err)
+				log.Error().Err(err).Msg("failed to check membership")
 				c.Status(http.StatusInternalServerError)
 				return
 			}

@@ -21,6 +21,7 @@ import (
 	"go.uber.org/multierr"
 
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/errors"
+	errorTypes "go.woodpecker-ci.org/woodpecker/v2/pipeline/errors/types"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/linter/schema"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/types"
 )
@@ -169,12 +170,6 @@ func (l *Linter) lintTrusted(config *WorkflowConfig, c *types.Container, area st
 	if len(c.NetworkMode) != 0 {
 		err = "Insufficient privileges to use network_mode"
 	}
-	if len(c.IpcMode) != 0 {
-		err = "Insufficient privileges to use ipc_mode"
-	}
-	if len(c.Sysctls) != 0 {
-		err = "Insufficient privileges to use sysctls"
-	}
 	if c.Networks.Networks != nil && len(c.Networks.Networks) != 0 {
 		err = "Insufficient privileges to use networks"
 	}
@@ -215,9 +210,9 @@ func (l *Linter) lintDeprecations(config *WorkflowConfig) (err error) {
 		return err
 	}
 
-	if parsed.PipelineDontUseIt.ContainerList != nil {
-		err = multierr.Append(err, &errors.PipelineError{
-			Type:    errors.PipelineErrorTypeDeprecation,
+	if parsed.PipelineDoNotUseIt.ContainerList != nil {
+		err = multierr.Append(err, &errorTypes.PipelineError{
+			Type:    errorTypes.PipelineErrorTypeDeprecation,
 			Message: "Please use 'steps:' instead of deprecated 'pipeline:' list",
 			Data: errors.DeprecationErrorData{
 				File:  config.File,
@@ -228,9 +223,9 @@ func (l *Linter) lintDeprecations(config *WorkflowConfig) (err error) {
 		})
 	}
 
-	if parsed.PlatformDontUseIt != "" {
-		err = multierr.Append(err, &errors.PipelineError{
-			Type:    errors.PipelineErrorTypeDeprecation,
+	if parsed.PlatformDoNotUseIt != "" {
+		err = multierr.Append(err, &errorTypes.PipelineError{
+			Type:    errorTypes.PipelineErrorTypeDeprecation,
 			Message: "Please use labels instead of deprecated 'platform' filters",
 			Data: errors.DeprecationErrorData{
 				File:  config.File,
@@ -241,9 +236,9 @@ func (l *Linter) lintDeprecations(config *WorkflowConfig) (err error) {
 		})
 	}
 
-	if parsed.BranchesDontUseIt != nil {
-		err = multierr.Append(err, &errors.PipelineError{
-			Type:    errors.PipelineErrorTypeDeprecation,
+	if parsed.BranchesDoNotUseIt != nil {
+		err = multierr.Append(err, &errorTypes.PipelineError{
+			Type:    errorTypes.PipelineErrorTypeDeprecation,
 			Message: "Please use global when instead of deprecated 'branches' filter",
 			Data: errors.DeprecationErrorData{
 				File:  config.File,
@@ -254,10 +249,118 @@ func (l *Linter) lintDeprecations(config *WorkflowConfig) (err error) {
 		})
 	}
 
+	for _, step := range parsed.Steps.ContainerList {
+		if step.Group != "" {
+			err = multierr.Append(err, &errorTypes.PipelineError{
+				Type:    errorTypes.PipelineErrorTypeDeprecation,
+				Message: "Please use depends_on instead of deprecated 'group' setting",
+				Data: errors.DeprecationErrorData{
+					File:  config.File,
+					Field: "steps." + step.Name + ".group",
+					Docs:  "https://woodpecker-ci.org/docs/next/usage/workflow-syntax#depends_on",
+				},
+				IsWarning: true,
+			})
+		}
+	}
+
+	for i, c := range parsed.When.Constraints {
+		if len(c.Event.Exclude) != 0 {
+			err = multierr.Append(err, &errorTypes.PipelineError{
+				Type:    errorTypes.PipelineErrorTypeDeprecation,
+				Message: "Please only use allow lists for events",
+				Data: errors.DeprecationErrorData{
+					File:  config.File,
+					Field: fmt.Sprintf("when[%d].event", i),
+					Docs:  "https://woodpecker-ci.org/docs/usage/workflow-syntax#event-1",
+				},
+				IsWarning: true,
+			})
+		}
+	}
+
+	for _, step := range parsed.Steps.ContainerList {
+		for i, c := range step.When.Constraints {
+			if len(c.Event.Exclude) != 0 {
+				err = multierr.Append(err, &errorTypes.PipelineError{
+					Type:    errorTypes.PipelineErrorTypeDeprecation,
+					Message: "Please only use allow lists for events",
+					Data: errors.DeprecationErrorData{
+						File:  config.File,
+						Field: fmt.Sprintf("steps.%s.when[%d].event", step.Name, i),
+						Docs:  "https://woodpecker-ci.org/docs/usage/workflow-syntax#event",
+					},
+					IsWarning: true,
+				})
+			}
+		}
+	}
+
+	for _, step := range parsed.Steps.ContainerList {
+		for i, c := range step.Secrets.Secrets {
+			if c.Source != c.Target {
+				err = multierr.Append(err, &errorTypes.PipelineError{
+					Type:    errorTypes.PipelineErrorTypeDeprecation,
+					Message: "Secrets alternative names are deprecated, use environment with from_secret",
+					Data: errors.DeprecationErrorData{
+						File:  config.File,
+						Field: fmt.Sprintf("steps.%s.secrets[%d]", step.Name, i),
+						Docs:  "https://woodpecker-ci.org/docs/usage/workflow-syntax#event",
+					},
+					IsWarning: true,
+				})
+			}
+		}
+	}
+
 	return err
 }
 
-func (l *Linter) lintBadHabits(_ *WorkflowConfig) error {
-	// TODO: add bad habit warnings
-	return nil
+func (l *Linter) lintBadHabits(config *WorkflowConfig) (err error) {
+	parsed := new(types.Workflow)
+	err = xyaml.Unmarshal([]byte(config.RawConfig), parsed)
+	if err != nil {
+		return err
+	}
+
+	rootEventFilters := len(parsed.When.Constraints) > 0
+	for _, c := range parsed.When.Constraints {
+		if len(c.Event.Include) == 0 {
+			rootEventFilters = false
+			break
+		}
+	}
+	if !rootEventFilters {
+		// root whens do not necessarily have an event filter, check steps
+		for _, step := range parsed.Steps.ContainerList {
+			var field string
+			if len(step.When.Constraints) == 0 {
+				field = fmt.Sprintf("steps.%s", step.Name)
+			} else {
+				stepEventIndex := -1
+				for i, c := range step.When.Constraints {
+					if len(c.Event.Include) == 0 {
+						stepEventIndex = i
+						break
+					}
+				}
+				if stepEventIndex > -1 {
+					field = fmt.Sprintf("steps.%s.when[%d]", step.Name, stepEventIndex)
+				}
+			}
+			if field != "" {
+				err = multierr.Append(err, &errorTypes.PipelineError{
+					Type:    errorTypes.PipelineErrorTypeBadHabit,
+					Message: "Please set an event filter on all when branches",
+					Data: errors.LinterErrorData{
+						File:  config.File,
+						Field: field,
+					},
+					IsWarning: true,
+				})
+			}
+		}
+	}
+
+	return
 }

@@ -1,70 +1,47 @@
+---
+toc_max_heading_level: 2
+---
+
 # Server configuration
 
 ## User registration
 
-Woodpecker does not have its own user registry; users are provided from your [forge](./11-forges/10-overview.md) (using OAuth2).
+Woodpecker does not have its own user registry; users are provided from your [forge](./11-forges/11-overview.md) (using OAuth2).
 
 Registration is closed by default (`WOODPECKER_OPEN=false`). If registration is open (`WOODPECKER_OPEN=true`) then every user with an account at the configured forge can login to Woodpecker.
 
 To open registration:
 
-```diff title="docker-compose.yml"
-version: '3'
-
-services:
-  woodpecker-server:
-    [...]
-    environment:
-      - [...]
-+     - WOODPECKER_OPEN=true
+```ini
+WOODPECKER_OPEN=true
 ```
 
-You can **also restrict** registration, by keep registration closed and ...\
-... **adding** new **users manually** via the CLI: `woodpecker-cli user add`, or\
-... allowing specific **admin users** via the `WOODPECKER_ADMIN` setting, or\
-by open registration and **filter by organization** membership through the `WOODPECKER_ORGS` setting.
+You can **also restrict** registration, by keep registration closed and:
 
-### To close registration, but allow specific admin users
+- **adding** new **users manually** via the CLI: `woodpecker-cli user add`
+- allowing specific **admin users** via the `WOODPECKER_ADMIN` setting
+- by open registration and **filter by organization** membership through the `WOODPECKER_ORGS` setting
 
-```diff title="docker-compose.yml"
-version: '3'
+### Close registration, but allow specific admin users
 
-services:
-  woodpecker-server:
-    [...]
-    environment:
-      - [...]
-+     - WOODPECKER_OPEN=false
-+     - WOODPECKER_ADMIN=johnsmith,janedoe
+```ini
+WOODPECKER_OPEN=false
+WOODPECKER_ADMIN=johnsmith,janedoe
 ```
 
-### To only allow registration of users, who are members of approved organizations
+### Only allow registration of users, who are members of approved organizations
 
-```diff title="docker-compose.yml"
-version: '3'
-
-services:
-  woodpecker-server:
-    [...]
-    environment:
-      - [...]
-+     - WOODPECKER_OPEN=true
-+     - WOODPECKER_ORGS=dolores,dogpatch
+```ini
+WOODPECKER_OPEN=true
+WOODPECKER_ORGS=dolores,dogpatch
 ```
 
 ## Administrators
 
 Administrators should also be enumerated in your configuration.
 
-```diff title="docker-compose.yml"
-version: '3'
-
-services:
-  woodpecker-server:
-    [...]
-    environment:
-      - [...]
-+     - WOODPECKER_ADMIN=johnsmith,janedoe
+```ini
+WOODPECKER_ADMIN=johnsmith,janedoe
 ```
 
 ## Filtering repositories
@@ -73,15 +50,8 @@ Woodpecker operates with the user's OAuth permission. Due to the coarse permissi
 
 Use the `WOODPECKER_REPO_OWNERS` variable to filter which GitHub user's repos should be synced only. You typically want to put here your company's GitHub name.
 
-```diff title="docker-compose.yml"
-version: '3'
-
-services:
-  woodpecker-server:
-    [...]
-    environment:
-      - [...]
-+     - WOODPECKER_REPO_OWNERS=mycompany,mycompanyossgithubuser
+```ini
+WOODPECKER_REPO_OWNERS=mycompany,mycompanyossgithubuser
 ```
 
 ## Global registry setting
@@ -89,67 +59,62 @@ services:
 If you want to make available a specific private registry to all pipelines, use the `WOODPECKER_DOCKER_CONFIG` server configuration.
 Point it to your server's docker config.
 
-```diff title="docker-compose.yml"
-version: '3'
-
-services:
-  woodpecker-server:
-    [...]
-    volumes:
-      - [...]
-+     - /home/user/.docker/config.json:/root/.docker/config.json:ro
-    environment:
-      - [...]
-+     - WOODPECKER_DOCKER_CONFIG=/root/.docker/config.json
+```ini
+WOODPECKER_DOCKER_CONFIG=/root/.docker/config.json
 ```
 
 ## Handling sensitive data in docker-compose and docker-swarm
 
 To handle sensitive data in docker-compose or docker-swarm configurations there are several options:
 
-For docker-compose you can use a .env file next to your compose configuration to store the secrets outside of the compose file. While this separates configuration from secrets it is still not very secure.
+For docker-compose you can use a `.env` file next to your compose configuration to store the secrets outside of the compose file. While this separates configuration from secrets it is still not very secure.
 
-Alternatively use docker-secrets. As it may be difficult to use docker secrets for environment variables woodpecker allows to read sensible data from files by providing a `*_FILE` option of all sensible configuration variables. Woodpecker will try to read the value directly from this file. Keep in mind that when the original environment variable gets specified at the same time it will override the value read from the file.
+Alternatively use docker-secrets. As it may be difficult to use docker secrets for environment variables Woodpecker allows to read sensible data from files by providing a `*_FILE` option of all sensible configuration variables. Woodpecker will try to read the value directly from this file. Keep in mind that when the original environment variable gets specified at the same time it will override the value read from the file.
 
-```diff title="docker-compose.yml"
-version: '3'
+```diff title="docker-compose.yaml"
+ version: '3'
 
-services:
-  woodpecker-server:
-    [...]
-    environment:
-      - [...]
-+     - WOODPECKER_AGENT_SECRET_FILE=/run/secrets/woodpecker-agent-secret
-+   secrets:
-+     - woodpecker-agent-secret
+ services:
+   woodpecker-server:
+     [...]
+     environment:
+       - [...]
++      - WOODPECKER_AGENT_SECRET_FILE=/run/secrets/woodpecker-agent-secret
++    secrets:
++      - woodpecker-agent-secret
 +
-+secrets:
-+  woodpecker-agent-secret:
-+    external: true
++ secrets:
++   woodpecker-agent-secret:
++     external: true
 ```
 
 Store a value to a docker secret like this:
-`echo "my_agent_secret_key" | docker secret create woodpecker-agent-secret -`
+
+```bash
+echo "my_agent_secret_key" | docker secret create woodpecker-agent-secret -
+```
 
 or generate a random one like this:
 
-`openssl rand -hex 32 | docker secret create woodpecker-agent-secret -`
+```bash
+openssl rand -hex 32 | docker secret create woodpecker-agent-secret -
+```
 
-## Custom Javascript and CSS Styling (a.k.a. white-labeling)
+## Custom JavaScript and CSS
 
-Woodpecker supports custom styling of the Web UI by providing custom JS and CSS files.
+Woodpecker supports custom JS and CSS files.
 These files must be present in the server's filesystem.
 They can be backed in a Docker image or mounted from a ConfigMap inside a Kubernetes environment.
 The configuration variables are independent of each other, which means it can be just one file present, or both.
 
-```text
+```ini
 WOODPECKER_CUSTOM_CSS_FILE=/usr/local/www/woodpecker.css
-WOODPECKER_CUSTOM_CSS_FILE=/usr/local/www/woodpecker.js
+WOODPECKER_CUSTOM_JS_FILE=/usr/local/www/woodpecker.js
 ```
 
 The examples below show how to place a banner message in the top navigation bar of Woodpecker.
 
-### woodpecker.css
+### `woodpecker.css`
 
 ```css
 .banner-message {
@@ -165,7 +130,7 @@ The examples below show how to place a banner message in the top navigation bar 
 }
 ```
 
-### woodpecker.js
+### `woodpecker.js`
 
 ```javascript
 // place/copy a minified version of jQuery or ZeptoJS here ...
@@ -188,6 +153,13 @@ The following list describes all available server configuration options.
 > Default: empty
 
 Configures the logging level. Possible values are `trace`, `debug`, `info`, `warn`, `error`, `fatal`, `panic`, `disabled` and empty.
+
+### `WOODPECKER_LOG_FILE`
+
+> Default: `stderr`
+
+Output destination for logs.
+'stdout' and 'stderr' can be used as special keywords.
 
 ### `WOODPECKER_LOG_XORM`
 
@@ -217,9 +189,13 @@ Disable colored debug output.
 
 > Default: empty
 
-Server fully qualified URL of the user-facing hostname and path prefix.
+Server fully qualified URL of the user-facing hostname, port (if not default for HTTP/HTTPS) and path prefix.
 
-Example: `WOODPECKER_HOST=http://woodpecker.example.org` or `WOODPECKER_HOST=http://example.org/woodpecker`
+Examples:
+
+- `WOODPECKER_HOST=http://woodpecker.example.org`
+- `WOODPECKER_HOST=http://example.org/woodpecker`
+- `WOODPECKER_HOST=http://example.org:1234/woodpecker`
 
 ### `WOODPECKER_WEBHOOK_HOST`
 
@@ -443,7 +419,7 @@ The database driver name. Possible values are `sqlite3`, `mysql` or `postgres`.
 
 ### `WOODPECKER_DATABASE_DATASOURCE`
 
-> Default: `woodpecker.sqlite`
+> Default: `woodpecker.sqlite` if not running inside a container, `/var/lib/woodpecker/woodpecker.sqlite` if running inside a container
 
 The database connection string. The default value is the path of the embedded SQLite database file.
 
@@ -464,30 +440,6 @@ WOODPECKER_DATABASE_DATASOURCE=postgres://root:password@1.2.3.4:5432/woodpecker?
 > Default: empty
 
 Read the value for `WOODPECKER_DATABASE_DATASOURCE` from the specified filepath
-
-### `WOODPECKER_ENCRYPTION_KEY`
-
-> Default: empty
-
-Encryption key used to encrypt secrets in DB. See [secrets encryption](./40-encryption.md)
-
-### `WOODPECKER_ENCRYPTION_KEY_FILE`
-
-> Default: empty
-
-Read the value for `WOODPECKER_ENCRYPTION_KEY` from the specified filepath
-
-### `WOODPECKER_ENCRYPTION_TINK_KEYSET_FILE`
-
-> Default: empty
-
-Filepath to encryption keyset used to encrypt secrets in DB. See [secrets encryption](./40-encryption.md)
-
-### `WOODPECKER_ENCRYPTION_DISABLE`
-
-> Default: empty
-
-Boolean flag to decrypt secrets in DB and disable server encryption. See [secrets encryption](./40-encryption.md)
 
 ### `WOODPECKER_PROMETHEUS_AUTH_TOKEN`
 
@@ -569,9 +521,9 @@ Specify a configuration service endpoint, see [Configuration Extension](./100-ex
 
 ### `WOODPECKER_FORGE_TIMEOUT`
 
-> Default: 3sec
+> Default: 3s
 
-Specify how many seconds before timeout when fetching the Woodpecker configuration from a Forge
+Specify timeout when fetching the Woodpecker configuration from forge. See <https://pkg.go.dev/time#ParseDuration> for syntax reference.
 
 ### `WOODPECKER_ENABLE_SWAGGER`
 
@@ -579,20 +531,30 @@ Specify how many seconds before timeout when fetching the Woodpecker configurati
 
 Enable the Swagger UI for API documentation.
 
+### `WOODPECKER_DISABLE_VERSION_CHECK`
+
+> Default: false
+
+Disable version check in admin web UI.
+
 ---
 
 ### `WOODPECKER_GITHUB_...`
 
-See [GitHub configuration](forges/github/#configuration)
+See [GitHub configuration](./11-forges/20-github.md#configuration)
 
 ### `WOODPECKER_GITEA_...`
 
-See [Gitea configuration](forges/gitea/#configuration)
+See [Gitea configuration](./11-forges/30-gitea.md#configuration)
 
 ### `WOODPECKER_BITBUCKET_...`
 
-See [Bitbucket configuration](forges/bitbucket/#configuration)
+See [Bitbucket configuration](./11-forges/50-bitbucket.md#configuration)
 
 ### `WOODPECKER_GITLAB_...`
 
-See [Gitlab configuration](forges/gitlab/#configuration)
+See [GitLab configuration](./11-forges/40-gitlab.md#configuration)
+
+### `WOODPECKER_ADDON_FORGE`
+
+See [addon forges](./11-forges/100-addon.md).

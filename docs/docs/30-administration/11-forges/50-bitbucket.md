@@ -1,30 +1,24 @@
+---
+toc_max_heading_level: 2
+---
+
 # Bitbucket
 
 Woodpecker comes with built-in support for Bitbucket Cloud. To enable Bitbucket Cloud you should configure the Woodpecker container using the following environment variables:
 
-```diff title="docker-compose.yml"
-version: '3'
-
-services:
-  woodpecker-server:
-    [...]
-    environment:
-      - [...]
-+     - WOODPECKER_BITBUCKET=true
-+     - WOODPECKER_BITBUCKET_CLIENT=... # called "Key" in Bitbucket
-+     - WOODPECKER_BITBUCKET_SECRET=...
-
-  woodpecker-agent:
-    [...]
+```ini
+WOODPECKER_BITBUCKET=true
+WOODPECKER_BITBUCKET_CLIENT=... # called "Key" in Bitbucket
+WOODPECKER_BITBUCKET_SECRET=...
 ```
 
 ## Registration
 
-You must register an OAuth application at Bitbucket in order to get a key and secret combination for woodpecker. Navigate to your workspace settings and choose `OAuth consumers` from the menu, and finally click `Add Consumer` (the url should be like: `https://bitbucket.org/[your-project-name]/workspace/settings/api`).
+You must register an OAuth application at Bitbucket in order to get a key and secret combination for Woodpecker. Navigate to your workspace settings and choose `OAuth consumers` from the menu, and finally click `Add Consumer` (the url should be like: `https://bitbucket.org/[your-project-name]/workspace/settings/api`).
 
 Please set a name and set the `Callback URL` like this:
 
-```nohighlight
+```uri
 https://<your-woodpecker-address>/authorize
 ```
 
@@ -32,14 +26,12 @@ https://<your-woodpecker-address>/authorize
 
 Please also be sure to check the following permissions:
 
-```nohighlight
-Account: Email, Read
-Workspace membership: Read
-Projects: Read
-Repositories: Read
-Pull requests: Read
-Webhooks: Read and Write
-```
+- Account: Email, Read
+- Workspace membership: Read
+- Projects: Read
+- Repositories: Read
+- Pull requests: Read
+- Webhooks: Read and Write
 
 ![bitbucket permissions](bitbucket_permissions.png)
 
@@ -79,5 +71,5 @@ Read the value for `WOODPECKER_BITBUCKET_SECRET` from the specified filepath
 
 ## Missing Features
 
-Merge requests are not currently supported. We are interested in patches to include this functionality.
+Path filters for pull requests are not supported. We are interested in patches to include this functionality.
 If you are interested in contributing to Woodpecker and submitting a patch please **contact us** via [Discord](https://discord.gg/fcMQqSMXJy) or [Matrix](https://matrix.to/#/#WoodpeckerCI-Develop:obermui.de).

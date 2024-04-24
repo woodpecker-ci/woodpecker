@@ -3,43 +3,45 @@
 Woodpecker provides the ability to pass environment variables to individual pipeline steps. Note that these can't overwrite any existing, built-in variables. Example pipeline step with custom environment variables:
 
 ```diff
-steps:
-  build:
-    image: golang
-+   environment:
-+     - CGO=0
-+     - GOOS=linux
-+     - GOARCH=amd64
-    commands:
-      - go build
-      - go test
+ steps:
+   - name: build
+     image: golang
++    environment:
++      CGO: 0
++      GOOS: linux
++      GOARCH: amd64
+     commands:
+       - go build
+       - go test
 ```
 
 Please note that the environment section is not able to expand environment variables. If you need to expand variables they should be exported in the commands section.
 
 ```diff
-steps:
-  build:
-    image: golang
--   environment:
--     - PATH=$PATH:/go
-    commands:
-+     - export PATH=$PATH:/go
-      - go build
-      - go test
+ steps:
+   - name: build
+     image: golang
+-    environment:
+-      - PATH=$PATH:/go
+     commands:
++      - export PATH=$PATH:/go
+       - go build
+       - go test
 ```
 
-> Please be warned that `${variable}` expressions are subject to pre-processing. If you do not want the pre-processor to evaluate your expression it must be escaped:
+:::warning
+`${variable}` expressions are subject to pre-processing. If you do not want the pre-processor to evaluate your expression it must be escaped:
+:::
 
 ```diff
-steps:
-  build:
-    image: golang
-    commands:
--     - export PATH=${PATH}:/go
-+     - export PATH=$${PATH}:/go
-      - go build
-      - go test
+ steps:
+   - name: build
+     image: golang
+     commands:
+-      - export PATH=${PATH}:/go
++      - export PATH=$${PATH}:/go
+       - go build
+       - go test
 ```
 
 ## Built-in environment variables
@@ -66,22 +68,23 @@ This is the reference list of all environment variables available to your pipeli
 | `CI_COMMIT_REF`                  | commit ref                                                                                                         |
 | `CI_COMMIT_REFSPEC`              | commit ref spec                                                                                                    |
 | `CI_COMMIT_BRANCH`               | commit branch (equals target branch for pull requests)                                                             |
-| `CI_COMMIT_SOURCE_BRANCH`        | commit source branch (empty if event is not `pull_request`)                                                        |
-| `CI_COMMIT_TARGET_BRANCH`        | commit target branch (empty if event is not `pull_request`)                                                        |
+| `CI_COMMIT_SOURCE_BRANCH`        | commit source branch (empty if event is not `pull_request` or `pull_request_closed`)                               |
+| `CI_COMMIT_TARGET_BRANCH`        | commit target branch (empty if event is not `pull_request` or `pull_request_closed`)                               |
 | `CI_COMMIT_TAG`                  | commit tag name (empty if event is not `tag`)                                                                      |
-| `CI_COMMIT_PULL_REQUEST`         | commit pull request number (empty if event is not `pull_request`)                                                  |
-| `CI_COMMIT_PULL_REQUEST_LABELS`  | labels assigned to pull request (empty if event is not `pull_request`)                                             |
+| `CI_COMMIT_PULL_REQUEST`         | commit pull request number (empty if event is not `pull_request` or `pull_request_closed`)                         |
+| `CI_COMMIT_PULL_REQUEST_LABELS`  | labels assigned to pull request (empty if event is not `pull_request` or `pull_request_closed`)                    |
 | `CI_COMMIT_MESSAGE`              | commit message                                                                                                     |
 | `CI_COMMIT_AUTHOR`               | commit author username                                                                                             |
 | `CI_COMMIT_AUTHOR_EMAIL`         | commit author email address                                                                                        |
 | `CI_COMMIT_AUTHOR_AVATAR`        | commit author avatar                                                                                               |
+| `CI_COMMIT_PRERELEASE`           | release is a pre-release (empty if event is not `release`)                                                         |
 |                                  | **Current pipeline**                                                                                               |
 | `CI_PIPELINE_NUMBER`             | pipeline number                                                                                                    |
 | `CI_PIPELINE_PARENT`             | number of parent pipeline                                                                                          |
-| `CI_PIPELINE_EVENT`              | pipeline event (push, pull_request, tag, deployment, cron, manual)                                                 |
+| `CI_PIPELINE_EVENT`              | pipeline event (see [pipeline events](../20-usage/15-terminology/index.md#pipeline-events))                        |
 | `CI_PIPELINE_URL`                | link to the web UI for the pipeline                                                                                |
 | `CI_PIPELINE_FORGE_URL`          | link to the forge's web UI for the commit(s) or tag that triggered the pipeline                                    |
-| `CI_PIPELINE_DEPLOY_TARGET`      | pipeline deploy target for `deployment` events (ie production)                                                     |
+| `CI_PIPELINE_DEPLOY_TARGET`      | pipeline deploy target for `deployment` events (i.e. production)                                                   |
 | `CI_PIPELINE_STATUS`             | pipeline status (success, failure)                                                                                 |
 | `CI_PIPELINE_CREATED`            | pipeline created UNIX timestamp                                                                                    |
 | `CI_PIPELINE_STARTED`            | pipeline started UNIX timestamp                                                                                    |
@@ -111,7 +114,7 @@ This is the reference list of all environment variables available to your pipeli
 |                                  | **Previous pipeline**                                                                                              |
 | `CI_PREV_PIPELINE_NUMBER`        | previous pipeline number                                                                                           |
 | `CI_PREV_PIPELINE_PARENT`        | previous pipeline number of parent pipeline                                                                        |
-| `CI_PREV_PIPELINE_EVENT`         | previous pipeline event (push, pull_request, tag, deployment)                                                      |
+| `CI_PREV_PIPELINE_EVENT`         | previous pipeline event (see [pipeline events](../20-usage/15-terminology/index.md#pipeline-events))               |
 | `CI_PREV_PIPELINE_URL`           | previous pipeline link in CI                                                                                       |
 | `CI_PREV_PIPELINE_FORGE_URL`     | previous pipeline link to event in forge                                                                           |
 | `CI_PREV_PIPELINE_DEPLOY_TARGET` | previous pipeline deploy target for `deployment` events (ie production)                                            |
@@ -139,27 +142,23 @@ This is the reference list of all environment variables available to your pipeli
 
 If you want specific environment variables to be available in all of your pipelines use the `WOODPECKER_ENVIRONMENT` setting on the Woodpecker server. Note that these can't overwrite any existing, built-in variables.
 
-```diff
-services:
-  woodpecker-server:
-    [...]
-    environment:
-      - [...]
-+     - WOODPECKER_ENVIRONMENT=first_var:value1,second_var:value2
+```ini
+WOODPECKER_ENVIRONMENT=first_var:value1,second_var:value2
 ```
 
 These can be used, for example, to manage the image tag used by multiple projects.
 
+```ini
+WOODPECKER_ENVIRONMENT=GOLANG_VERSION:1.18
+```
+
 ```diff
-steps:
-  build:
--   image: golang:1.18
-+   image: golang:${GOLANG_VERSION}
-    commands:
-      - [...]
-    environment:
-      - [...]
-+     - WOODPECKER_ENVIRONMENT=GOLANG_VERSION:1.18
+ steps:
+   - name: build
+-    image: golang:1.18
++    image: golang:${GOLANG_VERSION}
+     commands:
+       - [...]
 ```
 
 ## String Substitution
@@ -169,21 +168,21 @@ Woodpecker provides the ability to substitute environment variables at runtime. 
 Example commit substitution:
 
 ```diff
-steps:
-  docker:
-    image: plugins/docker
-    settings:
-+     tags: ${CI_COMMIT_SHA}
+ steps:
+   - name: docker
+     image: plugins/docker
+     settings:
++      tags: ${CI_COMMIT_SHA}
 ```
 
 Example tag substitution:
 
 ```diff
-steps:
-  docker:
-    image: plugins/docker
-    settings:
-+     tags: ${CI_COMMIT_TAG}
+ steps:
+   - name: docker
+     image: plugins/docker
+     settings:
++      tags: ${CI_COMMIT_TAG}
 ```
 
 ## String Operations
@@ -207,19 +206,19 @@ Woodpecker also emulates bash string operations. This gives us the ability to ma
 Example variable substitution with substring:
 
 ```diff
-steps:
-  docker:
-    image: plugins/docker
-    settings:
-+     tags: ${CI_COMMIT_SHA:0:8}
+ steps:
+   - name: docker
+     image: plugins/docker
+     settings:
++      tags: ${CI_COMMIT_SHA:0:8}
 ```
 
 Example variable substitution strips `v` prefix from `v.1.0.0`:
 
 ```diff
-steps:
-  docker:
-    image: plugins/docker
-    settings:
-+     tags: ${CI_COMMIT_TAG##v}
+ steps:
+   - name: docker
+     image: plugins/docker
+     settings:
++      tags: ${CI_COMMIT_TAG##v}
 ```

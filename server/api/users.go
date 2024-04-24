@@ -59,7 +59,7 @@ func GetUsers(c *gin.Context) {
 func GetUser(c *gin.Context) {
 	user, err := store.FromContext(c).GetUserLogin(c.Param("login"))
 	if err != nil {
-		handleDbError(c, err)
+		handleDBError(c, err)
 		return
 	}
 	c.JSON(http.StatusOK, user)
@@ -74,8 +74,8 @@ func GetUser(c *gin.Context) {
 //	@Accept			json
 //	@Success		200	{object}	User
 //	@Tags			Users
-//	@Param			Authorization	header	string		true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param			login			path	string		true	"the user's login name"
+//	@Param			Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param			login			path	string	true	"the user's login name"
 //	@Param			user			body	User	true	"the user's data"
 func PatchUser(c *gin.Context) {
 	_store := store.FromContext(c)
@@ -89,7 +89,7 @@ func PatchUser(c *gin.Context) {
 
 	user, err := _store.GetUserLogin(c.Param("login"))
 	if err != nil {
-		handleDbError(c, err)
+		handleDBError(c, err)
 		return
 	}
 
@@ -116,7 +116,7 @@ func PatchUser(c *gin.Context) {
 //	@Produce		json
 //	@Success		200	{object}	User
 //	@Tags			Users
-//	@Param			Authorization	header	string		true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param			Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 //	@Param			user			body	User	true	"the user's data"
 func PostUser(c *gin.Context) {
 	in := &model.User{}
@@ -132,6 +132,8 @@ func PostUser(c *gin.Context) {
 		Hash: base32.StdEncoding.EncodeToString(
 			securecookie.GenerateRandomKey(32),
 		),
+		ForgeID:       1,                        // TODO: replace with forge id when multiple forges are supported
+		ForgeRemoteID: model.ForgeRemoteID("0"), // TODO: search for the user in the forge and get the remote id
 	}
 	if err = user.Validate(); err != nil {
 		c.String(http.StatusBadRequest, err.Error())
@@ -159,11 +161,11 @@ func DeleteUser(c *gin.Context) {
 
 	user, err := _store.GetUserLogin(c.Param("login"))
 	if err != nil {
-		handleDbError(c, err)
+		handleDBError(c, err)
 		return
 	}
 	if err = _store.DeleteUser(user); err != nil {
-		handleDbError(c, err)
+		handleDBError(c, err)
 		return
 	}
 	c.Status(http.StatusNoContent)

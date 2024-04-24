@@ -21,7 +21,7 @@ import (
 )
 
 type Account struct {
-	ID    int64  `json:"id"`
+	UUID  string `json:"uuid"`
 	Login string `json:"username"`
 	Name  string `json:"display_name"`
 	Type  string `json:"type"`
@@ -254,6 +254,7 @@ type RepoPermResp struct {
 
 type RepoPerm struct {
 	Permission string `json:"permission"`
+	Repo       Repo   `json:"repository"`
 }
 
 type BranchResp struct {
@@ -281,7 +282,12 @@ type CommitsResp struct {
 }
 
 type Commit struct {
-	Hash string `json:"hash"`
+	Hash  string `json:"hash"`
+	Links struct {
+		HTML struct {
+			Href string `json:"href"`
+		} `json:"html"`
+	} `json:"links"`
 }
 
 type DirResp struct {

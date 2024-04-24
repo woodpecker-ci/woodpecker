@@ -19,18 +19,17 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
-	"xorm.io/xorm"
-	"xorm.io/xorm/schemas"
-
 	// blank imports to register the sql drivers
 	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/lib/pq"
 	_ "github.com/mattn/go-sqlite3"
+	"github.com/stretchr/testify/assert"
+	"xorm.io/xorm"
+	"xorm.io/xorm/schemas"
 )
 
 const (
-	sqliteDB = "./testfiles/sqlite.db"
+	sqliteDB = "./test-files/sqlite.db"
 )
 
 func testDriver() string {
@@ -42,7 +41,7 @@ func testDriver() string {
 }
 
 func createSQLiteDB(t *testing.T) string {
-	tmpF, err := os.CreateTemp("./testfiles", "tmp_")
+	tmpF, err := os.CreateTemp("./test-files", "tmp_")
 	if !assert.NoError(t, err) {
 		t.FailNow()
 	}

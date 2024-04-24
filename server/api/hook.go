@@ -27,6 +27,7 @@ import (
 	"github.com/rs/zerolog/log"
 
 	"go.woodpecker-ci.org/woodpecker/v2/server"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 	"go.woodpecker-ci.org/woodpecker/v2/server/pipeline"
@@ -36,13 +37,13 @@ import (
 
 // GetQueueInfo
 //
-//	@Summary	Get pipeline queue information
+//	@Summary		Get pipeline queue information
 //	@Description	TODO: link the InfoT response object - this is blocked, until the `swaggo/swag` tool dependency is v1.18.12 or newer
-//	@Router		/queue/info [get]
-//	@Produce	json
-//	@Success	200	{object} map[string]string
-//	@Tags		Pipeline queues
-//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Router			/queue/info [get]
+//	@Produce		json
+//	@Success		200	{object}	map[string]string
+//	@Tags			Pipeline queues
+//	@Param			Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 func GetQueueInfo(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK,
 		server.Config.Services.Queue.Info(c),
@@ -103,13 +104,19 @@ func BlockTilQueueHasRunningItem(c *gin.Context) {
 //	@Param		hook	body	object	true	"the webhook payload; forge is automatically detected"
 func PostHook(c *gin.Context) {
 	_store := store.FromContext(c)
-	forge := server.Config.Services.Forge
+
+	_forge, err := server.Config.Services.Manager.ForgeMain() // TODO: get the forge for the specific repo somehow
+	if err != nil {
+		log.Error().Err(err).Msg("Cannot get main forge")
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
 
 	//
 	// 1. Parse webhook
 	//
 
-	tmpRepo, tmpPipeline, err := forge.Hook(c, c.Request)
+	tmpRepo, tmpPipeline, err := _forge.Hook(c, c.Request)
 	if err != nil {
 		if errors.Is(err, &types.ErrIgnoreEvent{}) {
 			msg := fmt.Sprintf("forge driver: %s", err)
@@ -144,7 +151,7 @@ func PostHook(c *gin.Context) {
 	repo, err := _store.GetRepoNameFallback(tmpRepo.ForgeRemoteID, tmpRepo.FullName)
 	if err != nil {
 		log.Error().Err(err).Msgf("failure to get repo %s from store", tmpRepo.FullName)
-		handleDbError(c, err)
+		handleDBError(c, err)
 		return
 	}
 	if !repo.IsActive {
@@ -159,6 +166,13 @@ func PostHook(c *gin.Context) {
 		c.Status(http.StatusNoContent)
 		return
 	}
+
+	user, err := _store.GetUser(repo.UserID)
+	if err != nil {
+		handleDBError(c, err)
+		return
+	}
+	forge.Refresh(c, _forge, _store, user)
 
 	//
 	// 3. Check if the webhook is a valid and authorized one
@@ -216,7 +230,7 @@ func PostHook(c *gin.Context) {
 	// 5. Check if pull requests are allowed for this repo
 	//
 
-	if tmpPipeline.Event == model.EventPull && !repo.AllowPull {
+	if (tmpPipeline.Event == model.EventPull || tmpPipeline.Event == model.EventPullClosed) && !repo.AllowPull {
 		log.Debug().Str("repo", repo.FullName).Msg("ignoring hook: pull requests are disabled for this repo in woodpecker")
 		c.Status(http.StatusNoContent)
 		return

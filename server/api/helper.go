@@ -19,6 +19,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/rs/zerolog/log"
 
 	"go.woodpecker-ci.org/woodpecker/v2/server"
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
@@ -29,18 +30,21 @@ import (
 )
 
 func handlePipelineErr(c *gin.Context, err error) {
-	if errors.Is(err, &pipeline.ErrNotFound{}) {
+	switch {
+	case errors.Is(err, &pipeline.ErrNotFound{}):
 		c.String(http.StatusNotFound, "%s", err)
-	} else if errors.Is(err, &pipeline.ErrBadRequest{}) {
+	case errors.Is(err, &pipeline.ErrBadRequest{}):
 		c.String(http.StatusBadRequest, "%s", err)
-	} else if errors.Is(err, pipeline.ErrFiltered) {
+	case errors.Is(err, pipeline.ErrFiltered):
+		// for debugging purpose we add a header
+		c.Writer.Header().Add("Pipeline-Filtered", "true")
 		c.Status(http.StatusNoContent)
-	} else {
+	default:
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 	}
 }
 
-func handleDbError(c *gin.Context, err error) {
+func handleDBError(c *gin.Context, err error) {
 	if errors.Is(err, types.RecordNotExist) {
 		c.AbortWithStatus(http.StatusNotFound)
 		return
@@ -51,7 +55,12 @@ func handleDbError(c *gin.Context, err error) {
 // If the forge has a refresh token, the current access token may be stale.
 // Therefore, we should refresh prior to dispatching the job.
 func refreshUserToken(c *gin.Context, user *model.User) {
-	_forge := server.Config.Services.Forge
 	_store := store.FromContext(c)
+	_forge, err := server.Config.Services.Manager.ForgeFromUser(user)
+	if err != nil {
+		log.Error().Err(err).Msg("Cannot get forge from user")
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
 	forge.Refresh(c, _forge, _store, user)
 }

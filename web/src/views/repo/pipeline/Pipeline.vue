@@ -2,7 +2,6 @@
   <Container full-width class="flex flex-col flex-grow-0 md:flex-grow md:min-h-xs md:px-4">
     <div class="flex w-full min-h-0 flex-grow gap-4 flex-wrap-reverse md:flex-nowrap">
       <PipelineStepList
-        v-if="pipeline?.workflows && pipeline?.workflows?.length > 0"
         v-model:selected-step-id="selectedStepId"
         :class="{ 'hidden md:flex': pipeline.status === 'blocked' }"
         :pipeline="pipeline"
@@ -35,13 +34,6 @@
               <Icon name="status-blocked" class="w-16 h-16" />
               <span class="text-xl">{{ $t('repo.pipeline.protected.awaits') }}</span>
               <div v-if="repoPermissions.push" class="flex gap-2 flex-wrap items-center justify-center">
-                <Button
-                  color="blue"
-                  :start-icon="forge ?? 'repo'"
-                  :text="$t('repo.pipeline.protected.review')"
-                  :to="pipeline.forge_url"
-                  :title="message"
-                />
                 <Button
                   color="green"
                   :text="$t('repo.pipeline.protected.approve')"
@@ -91,9 +83,7 @@ import PipelineLog from '~/components/repo/pipeline/PipelineLog.vue';
 import PipelineStepList from '~/components/repo/pipeline/PipelineStepList.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
-import useConfig from '~/compositions/useConfig';
 import useNotifications from '~/compositions/useNotifications';
-import usePipeline from '~/compositions/usePipeline';
 import { Pipeline, PipelineStep, Repo, RepoPermissions } from '~/lib/api/types';
 import { findStep } from '~/utils/helpers';
 
@@ -122,7 +112,13 @@ const selectedStepId = computed({
   get() {
     if (stepId.value !== '' && stepId.value !== null && stepId.value !== undefined) {
       const id = parseInt(stepId.value, 10);
-      const step = pipeline.value?.workflows?.reduce(
+
+      let step = pipeline.value.workflows?.find((workflow) => workflow.pid === id)?.children[0];
+      if (step) {
+        return step.pid;
+      }
+
+      step = pipeline.value?.workflows?.reduce(
         (prev, p) => prev || p.children?.find((c) => c.pid === id),
         undefined as PipelineStep | undefined,
       );
@@ -130,7 +126,7 @@ const selectedStepId = computed({
         return step.pid;
       }
 
-      // return fallback if step-id is provided, but step can not be found
+      // return fallback if step-id is provided, but step cannot be found
       return defaultStepId.value;
     }
 
@@ -150,9 +146,6 @@ const selectedStepId = computed({
     router.replace({ params: { ...route.params, stepId: `${_selectedStepId}` } });
   },
 });
-
-const { forge } = useConfig();
-const { message } = usePipeline(pipeline);
 
 const selectedStep = computed(() => findStep(pipeline.value.workflows || [], selectedStepId.value || -1));
 

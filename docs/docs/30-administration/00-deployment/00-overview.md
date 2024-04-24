@@ -18,6 +18,24 @@ Woodpecker is having two different kinds of releases: **stable** and **next**.
 
 To find out more about the differences between the two releases, please read the [FAQ](/faq#which-version-of-woodpecker-should-i-use).
 
+### Stable releases
+
+We release a new version every four weeks and will release the current state of the `main` branch.
+If there are security fixes or critical bug fixes, we'll release them directly.
+There are no backports or similar.
+
+#### Versioning
+
+We use [Semantic Versioning](https://semver.org/) to be able,
+to communicate when admins have to do manual migration steps and when they can just bump versions up.
+
+#### Breaking changes
+
+As of semver guidelines, breaking changes will be released as a major version. We will hold back
+breaking changes to not release many majors each containing just a few breaking changes.
+Prior to the release of a major version, a release candidate (RC) will be published to allow easy testing,
+the actual release will be about a week later.
+
 ## Hardware Requirements
 
 Below are minimal resources requirements for Woodpecker components itself:
@@ -43,7 +61,7 @@ You can install Woodpecker on multiple ways:
 
 Authentication is done using OAuth and is delegated to your forge which is configured using environment variables.
 
-See the complete reference for all supported forges [here](../11-forges/10-overview.md).
+See the complete reference for all supported forges [here](../11-forges/11-overview.md).
 
 ## Database
 

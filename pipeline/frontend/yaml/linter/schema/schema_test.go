@@ -34,76 +34,86 @@ func TestSchema(t *testing.T) {
 	}{
 		{
 			name:     "Branches",
-			testFile: ".woodpecker/test-branches.yml",
+			testFile: ".woodpecker/test-branches.yaml",
 		},
 		{
 			name:     "Branches Array",
-			testFile: ".woodpecker/test-branches-array.yml",
+			testFile: ".woodpecker/test-branches-array.yaml",
 		},
 		{
 			name:     "Branches exclude & include",
-			testFile: ".woodpecker/test-branches-exclude-include.yml",
+			testFile: ".woodpecker/test-branches-exclude-include.yaml",
 		},
 		{
 			name:     "Clone",
-			testFile: ".woodpecker/test-clone.yml",
+			testFile: ".woodpecker/test-clone.yaml",
 		},
 		{
 			name:     "Clone skip",
-			testFile: ".woodpecker/test-clone-skip.yml",
+			testFile: ".woodpecker/test-clone-skip.yaml",
 		},
 		{
 			name:     "Matrix",
-			testFile: ".woodpecker/test-matrix.yml",
+			testFile: ".woodpecker/test-matrix.yaml",
 		},
 		{
 			name:     "Multi Pipeline",
-			testFile: ".woodpecker/test-multi.yml",
+			testFile: ".woodpecker/test-multi.yaml",
 		},
 		{
 			name:     "Plugin",
-			testFile: ".woodpecker/test-plugin.yml",
+			testFile: ".woodpecker/test-plugin.yaml",
 		},
 		{
 			name:     "Run on",
-			testFile: ".woodpecker/test-run-on.yml",
+			testFile: ".woodpecker/test-run-on.yaml",
 		},
 		{
 			name:     "Service",
-			testFile: ".woodpecker/test-service.yml",
+			testFile: ".woodpecker/test-service.yaml",
 		},
 		{
 			name:     "Step",
-			testFile: ".woodpecker/test-step.yml",
+			testFile: ".woodpecker/test-step.yaml",
 		},
 		{
 			name:     "When",
-			testFile: ".woodpecker/test-when.yml",
+			testFile: ".woodpecker/test-when.yaml",
 		},
 		{
 			name:     "Workspace",
-			testFile: ".woodpecker/test-workspace.yml",
+			testFile: ".woodpecker/test-workspace.yaml",
 		},
 		{
 			name:     "Platform",
-			testFile: ".woodpecker/test-platform.yml",
+			testFile: ".woodpecker/test-platform.yaml",
 		},
 		{
 			name:     "Labels",
-			testFile: ".woodpecker/test-labels.yml",
+			testFile: ".woodpecker/test-labels.yaml",
 		},
 		{
 			name:     "Map and Sequence Merge", // https://woodpecker-ci.org/docs/next/usage/advanced-yaml-syntax
-			testFile: ".woodpecker/test-merge-map-and-sequence.yml",
+			testFile: ".woodpecker/test-merge-map-and-sequence.yaml",
 		},
 		{
 			name:     "Broken Config",
-			testFile: ".woodpecker/test-broken.yml",
+			testFile: ".woodpecker/test-broken.yaml",
 			fail:     true,
 		},
 		{
 			name:     "Array syntax",
-			testFile: ".woodpecker/test-array-syntax.yml",
+			testFile: ".woodpecker/test-array-syntax.yaml",
+			fail:     false,
+		},
+		{
+			name:     "Step DAG syntax",
+			testFile: ".woodpecker/test-dag.yaml",
+			fail:     false,
+		},
+		{
+			name:     "Custom backend",
+			testFile: ".woodpecker/test-custom-backend.yaml",
 			fail:     false,
 		},
 	}

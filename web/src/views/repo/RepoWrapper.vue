@@ -37,7 +37,7 @@
 
     <Tab id="activity" :title="$t('repo.activity')" />
     <Tab id="branches" :title="$t('repo.branches')" />
-    <Tab id="pull_requests" :title="$t('repo.pull_requests')" />
+    <Tab v-if="repo.pr_enabled && repo.allow_pr" id="pull_requests" :title="$t('repo.pull_requests')" />
 
     <router-view />
   </Scaffold>
@@ -77,7 +77,7 @@ const router = useRouter();
 const i18n = useI18n();
 const config = useConfig();
 
-const { forge } = useConfig();
+const { forge } = useConfig(); // TODO: remove this and use the forge type from the corresponding repo
 const repo = repoStore.getRepo(repositoryId);
 const repoPermissions = ref<RepoPermissions>();
 const pipelines = pipelineStore.getRepoPipelines(repositoryId);

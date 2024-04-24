@@ -23,7 +23,6 @@ import (
 
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc/proto"
-	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
 	"go.woodpecker-ci.org/woodpecker/v2/server/logging"
 	"go.woodpecker-ci.org/woodpecker/v2/server/pubsub"
 	"go.woodpecker-ci.org/woodpecker/v2/server/queue"
@@ -37,7 +36,7 @@ type WoodpeckerServer struct {
 	peer RPC
 }
 
-func NewWoodpeckerServer(forge forge.Forge, queue queue.Queue, logger logging.Log, pubsub *pubsub.Publisher, store store.Store) proto.WoodpeckerServer {
+func NewWoodpeckerServer(queue queue.Queue, logger logging.Log, pubsub *pubsub.Publisher, store store.Store) proto.WoodpeckerServer {
 	pipelineTime := promauto.NewGaugeVec(prometheus.GaugeOpts{
 		Namespace: "woodpecker",
 		Name:      "pipeline_time",
@@ -49,7 +48,6 @@ func NewWoodpeckerServer(forge forge.Forge, queue queue.Queue, logger logging.Lo
 		Help:      "Pipeline count.",
 	}, []string{"repo", "branch", "status", "pipeline"})
 	peer := RPC{
-		forge:         forge,
 		store:         store,
 		queue:         queue,
 		pubsub:        pubsub,
@@ -74,17 +72,14 @@ func (s *WoodpeckerServer) Next(c context.Context, req *proto.NextRequest) (*pro
 
 	res := new(proto.NextResponse)
 	pipeline, err := s.peer.Next(c, filter)
-	if err != nil {
-		return res, err
-	}
-	if pipeline == nil {
+	if err != nil || pipeline == nil {
 		return res, err
 	}
 
 	res.Workflow = new(proto.Workflow)
 	res.Workflow.Id = pipeline.ID
 	res.Workflow.Timeout = pipeline.Timeout
-	res.Workflow.Payload, _ = json.Marshal(pipeline.Config)
+	res.Workflow.Payload, err = json.Marshal(pipeline.Config)
 
 	return res, err
 }
@@ -95,7 +90,7 @@ func (s *WoodpeckerServer) Init(c context.Context, req *proto.InitRequest) (*pro
 		ExitCode: int(req.GetState().GetExitCode()),
 		Finished: req.GetState().GetFinished(),
 		Started:  req.GetState().GetStarted(),
-		Step:     req.GetState().GetName(),
+		StepUUID: req.GetState().GetStepUuid(),
 		Exited:   req.GetState().GetExited(),
 	}
 	res := new(proto.Empty)
@@ -109,7 +104,7 @@ func (s *WoodpeckerServer) Update(c context.Context, req *proto.UpdateRequest) (
 		ExitCode: int(req.GetState().GetExitCode()),
 		Finished: req.GetState().GetFinished(),
 		Started:  req.GetState().GetStarted(),
-		Step:     req.GetState().GetName(),
+		StepUUID: req.GetState().GetStepUuid(),
 		Exited:   req.GetState().GetExited(),
 	}
 	res := new(proto.Empty)
@@ -123,7 +118,7 @@ func (s *WoodpeckerServer) Done(c context.Context, req *proto.DoneRequest) (*pro
 		ExitCode: int(req.GetState().GetExitCode()),
 		Finished: req.GetState().GetFinished(),
 		Started:  req.GetState().GetStarted(),
-		Step:     req.GetState().GetName(),
+		StepUUID: req.GetState().GetStepUuid(),
 		Exited:   req.GetState().GetExited(),
 	}
 	res := new(proto.Empty)

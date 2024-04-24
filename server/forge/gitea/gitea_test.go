@@ -57,12 +57,10 @@ func Test_gitea(t *testing.T) {
 					URL:        "http://localhost:8080",
 					SkipVerify: true,
 				})
-				g.Assert(forge.(*Gitea).url).Equal("http://localhost:8080")
-				g.Assert(forge.(*Gitea).SkipVerify).Equal(true)
-			})
-			g.It("Should handle malformed url", func() {
-				_, err := New(Opts{URL: "%gh&%ij"})
-				g.Assert(err).IsNotNil()
+
+				f, _ := forge.(*Gitea)
+				g.Assert(f.url).Equal("http://localhost:8080")
+				g.Assert(f.SkipVerify).Equal(true)
 			})
 		})
 

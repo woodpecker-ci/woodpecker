@@ -20,23 +20,12 @@ import (
 )
 
 var (
-	errEnvironNameInvalid  = errors.New("Invalid Environment Variable Name")
-	errEnvironValueInvalid = errors.New("Invalid Environment Variable Value")
+	errEnvironNameInvalid  = errors.New("invalid Environment Variable Name")
+	errEnvironValueInvalid = errors.New("invalid Environment Variable Value")
 )
-
-// EnvironService defines a service for managing environment variables.
-type EnvironService interface {
-	EnvironList(*Repo) ([]*Environ, error)
-}
-
-// EnvironStore persists environment information to storage.
-type EnvironStore interface {
-	EnvironList(*Repo) ([]*Environ, error)
-}
 
 // Environ represents an environment variable.
 type Environ struct {
-	ID    int64  `json:"id"`
 	Name  string `json:"name"`
 	Value string `json:"value,omitempty"`
 }
@@ -56,7 +45,6 @@ func (e *Environ) Validate() error {
 // Copy makes a copy of the environment variable without the value.
 func (e *Environ) Copy() *Environ {
 	return &Environ{
-		ID:   e.ID,
 		Name: e.Name,
 	}
 }

@@ -20,10 +20,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server/router/middleware/session"
-
 	"go.woodpecker-ci.org/woodpecker/v2/server"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/router/middleware/session"
 )
 
 // GetOrgSecret
@@ -32,7 +31,7 @@ import (
 //	@Router		/orgs/{org_id}/secrets/{secret} [get]
 //	@Produce	json
 //	@Success	200	{object}	Secret
-//	@Tags			Organization secrets
+//	@Tags		Organization secrets
 //	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 //	@Param		org_id			path	string	true	"the org's id"
 //	@Param		secret			path	string	true	"the secret's name"
@@ -45,9 +44,10 @@ func GetOrgSecret(c *gin.Context) {
 		return
 	}
 
-	secret, err := server.Config.Services.Secrets.OrgSecretFind(orgID, name)
+	secretService := server.Config.Services.Manager.SecretService()
+	secret, err := secretService.OrgSecretFind(orgID, name)
 	if err != nil {
-		handleDbError(c, err)
+		handleDBError(c, err)
 		return
 	}
 	c.JSON(http.StatusOK, secret.Copy())
@@ -59,11 +59,11 @@ func GetOrgSecret(c *gin.Context) {
 //	@Router		/orgs/{org_id}/secrets [get]
 //	@Produce	json
 //	@Success	200	{array}	Secret
-//	@Tags			Organization secrets
+//	@Tags		Organization secrets
 //	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param		org_id		path	string	true	"the org's id"
+//	@Param		org_id			path	string	true	"the org's id"
 //	@Param		page			query	int		false	"for response pagination, page offset number"	default(1)
-//	@Param		perPage		query	int		false	"for response pagination, max items per page"	default(50)
+//	@Param		perPage			query	int		false	"for response pagination, max items per page"	default(50)
 func GetOrgSecretList(c *gin.Context) {
 	orgID, err := strconv.ParseInt(c.Param("org_id"), 10, 64)
 	if err != nil {
@@ -71,7 +71,8 @@ func GetOrgSecretList(c *gin.Context) {
 		return
 	}
 
-	list, err := server.Config.Services.Secrets.OrgSecretList(orgID, session.Pagination(c))
+	secretService := server.Config.Services.Manager.SecretService()
+	list, err := secretService.OrgSecretList(orgID, session.Pagination(c))
 	if err != nil {
 		c.String(http.StatusInternalServerError, "Error getting secret list for %q. %s", orgID, err)
 		return
@@ -87,12 +88,12 @@ func GetOrgSecretList(c *gin.Context) {
 // PostOrgSecret
 //
 //	@Summary	Persist/create an organization secret
-//	@Router		/orgs/{owner}/secrets [post]
+//	@Router		/orgs/{org_id}/secrets [post]
 //	@Produce	json
 //	@Success	200	{object}	Secret
-//	@Tags			Organization secrets
-//	@Param		Authorization	header	string			true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param		org_id				path	string	true	"the org's id"
+//	@Tags		Organization secrets
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		org_id			path	string	true	"the org's id"
 //	@Param		secretData		body	Secret	true	"the new secret"
 func PostOrgSecret(c *gin.Context) {
 	orgID, err := strconv.ParseInt(c.Param("org_id"), 10, 64)
@@ -117,7 +118,9 @@ func PostOrgSecret(c *gin.Context) {
 		c.String(http.StatusUnprocessableEntity, "Error inserting org %q secret. %s", orgID, err)
 		return
 	}
-	if err := server.Config.Services.Secrets.OrgSecretCreate(orgID, secret); err != nil {
+
+	secretService := server.Config.Services.Manager.SecretService()
+	if err := secretService.OrgSecretCreate(orgID, secret); err != nil {
 		c.String(http.StatusInternalServerError, "Error inserting org %q secret %q. %s", orgID, in.Name, err)
 		return
 	}
@@ -131,10 +134,10 @@ func PostOrgSecret(c *gin.Context) {
 //	@Produce	json
 //	@Success	200	{object}	Secret
 //	@Tags		Organization secrets
-//	@Param		Authorization	header	string			true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param		org_id			path	string			true	"the org's id"
-//	@Param		secret			path	string			true	"the secret's name"
-//	@Param		secretData	body	Secret	true	"the update secret data"
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		org_id			path	string	true	"the org's id"
+//	@Param		secret			path	string	true	"the secret's name"
+//	@Param		secretData		body	Secret	true	"the update secret data"
 func PatchOrgSecret(c *gin.Context) {
 	name := c.Param("secret")
 	orgID, err := strconv.ParseInt(c.Param("org_id"), 10, 64)
@@ -150,9 +153,10 @@ func PatchOrgSecret(c *gin.Context) {
 		return
 	}
 
-	secret, err := server.Config.Services.Secrets.OrgSecretFind(orgID, name)
+	secretService := server.Config.Services.Manager.SecretService()
+	secret, err := secretService.OrgSecretFind(orgID, name)
 	if err != nil {
-		handleDbError(c, err)
+		handleDBError(c, err)
 		return
 	}
 	if in.Value != "" {
@@ -169,7 +173,8 @@ func PatchOrgSecret(c *gin.Context) {
 		c.String(http.StatusUnprocessableEntity, "Error updating org %q secret. %s", orgID, err)
 		return
 	}
-	if err := server.Config.Services.Secrets.OrgSecretUpdate(orgID, secret); err != nil {
+
+	if err := secretService.OrgSecretUpdate(orgID, secret); err != nil {
 		c.String(http.StatusInternalServerError, "Error updating org %q secret %q. %s", orgID, in.Name, err)
 		return
 	}
@@ -184,8 +189,8 @@ func PatchOrgSecret(c *gin.Context) {
 //	@Success	204
 //	@Tags		Organization secrets
 //	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param		org_id	path	string	true	"the org's id"
-//	@Param		secret	path	string	true	"the secret's name"
+//	@Param		org_id			path	string	true	"the org's id"
+//	@Param		secret			path	string	true	"the secret's name"
 func DeleteOrgSecret(c *gin.Context) {
 	name := c.Param("secret")
 	orgID, err := strconv.ParseInt(c.Param("org_id"), 10, 64)
@@ -194,8 +199,9 @@ func DeleteOrgSecret(c *gin.Context) {
 		return
 	}
 
-	if err := server.Config.Services.Secrets.OrgSecretDelete(orgID, name); err != nil {
-		handleDbError(c, err)
+	secretService := server.Config.Services.Manager.SecretService()
+	if err := secretService.OrgSecretDelete(orgID, name); err != nil {
+		handleDBError(c, err)
 		return
 	}
 	c.Status(http.StatusNoContent)

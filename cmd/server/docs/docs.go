@@ -261,16 +261,9 @@ const docTemplate = `{
                 "summary": "Provide pipeline status information to the CCMenu tool",
                 "parameters": [
                     {
-                        "type": "string",
-                        "description": "the repository owner's name",
-                        "name": "owner",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "the repository name",
-                        "name": "name",
+                        "type": "integer",
+                        "description": "the repository id",
+                        "name": "repo_id",
                         "in": "path",
                         "required": true
                     }
@@ -989,6 +982,49 @@ const docTemplate = `{
                         }
                     }
                 }
+            },
+            "post": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Organization secrets"
+                ],
+                "summary": "Persist/create an organization secret",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cpersonal access token\u003e",
+                        "description": "Insert your personal access token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "the org's id",
+                        "name": "org_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "the new secret",
+                        "name": "secretData",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Secret"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Secret"
+                        }
+                    }
+                }
             }
         },
         "/orgs/{org_id}/secrets/{secret}": {
@@ -1104,51 +1140,6 @@ const docTemplate = `{
                     },
                     {
                         "description": "the update secret data",
-                        "name": "secretData",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/Secret"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/Secret"
-                        }
-                    }
-                }
-            }
-        },
-        "/orgs/{owner}/secrets": {
-            "post": {
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Organization secrets"
-                ],
-                "summary": "Persist/create an organization secret",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "default": "Bearer \u003cpersonal access token\u003e",
-                        "description": "Insert your personal access token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "the org's id",
-                        "name": "org_id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "the new secret",
                         "name": "secretData",
                         "in": "body",
                         "required": true,
@@ -2021,6 +2012,53 @@ const docTemplate = `{
                 }
             }
         },
+        "/repos/{repo_id}/logs/{number}/{stepId}": {
+            "delete": {
+                "produces": [
+                    "text/plain"
+                ],
+                "tags": [
+                    "Pipeline logs"
+                ],
+                "summary": "Deletes step log",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cpersonal access token\u003e",
+                        "description": "Insert your personal access token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "the repository id",
+                        "name": "repo_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "the number of the pipeline",
+                        "name": "number",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "the step id",
+                        "name": "stepId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        },
         "/repos/{repo_id}/move": {
             "post": {
                 "produces": [
@@ -2081,16 +2119,9 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "the repository owner's name",
-                        "name": "owner",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "the repository name",
-                        "name": "name",
+                        "type": "integer",
+                        "description": "the repository id",
+                        "name": "repo_id",
                         "in": "path",
                         "required": true
                     }
@@ -2262,16 +2293,9 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "the repository owner's name",
-                        "name": "owner",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "the repository name",
-                        "name": "name",
+                        "type": "integer",
+                        "description": "the repository id",
+                        "name": "repo_id",
                         "in": "path",
                         "required": true
                     },
@@ -3807,9 +3831,6 @@ const docTemplate = `{
                 "refspec": {
                     "type": "string"
                 },
-                "remote": {
-                    "type": "string"
-                },
                 "repo_id": {
                     "type": "integer"
                 },
@@ -3870,6 +3891,9 @@ const docTemplate = `{
         "Org": {
             "type": "object",
             "properties": {
+                "forge_id": {
+                    "type": "integer"
+                },
                 "id": {
                     "type": "integer"
                 },
@@ -3936,9 +3960,6 @@ const docTemplate = `{
                         "type": "string"
                     }
                 },
-                "clone_url": {
-                    "type": "string"
-                },
                 "commit": {
                     "type": "string"
                 },
@@ -3948,13 +3969,10 @@ const docTemplate = `{
                 "deploy_to": {
                     "type": "string"
                 },
-                "enqueued_at": {
-                    "type": "integer"
-                },
                 "errors": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/errors.PipelineError"
+                        "$ref": "#/definitions/types.PipelineError"
                     }
                 },
                 "event": {
@@ -3968,6 +3986,9 @@ const docTemplate = `{
                 },
                 "id": {
                     "type": "integer"
+                },
+                "is_prerelease": {
+                    "type": "boolean"
                 },
                 "message": {
                     "type": "string"
@@ -4060,16 +4081,10 @@ const docTemplate = `{
                 "address": {
                     "type": "string"
                 },
-                "email": {
-                    "type": "string"
-                },
                 "id": {
                     "type": "integer"
                 },
                 "password": {
-                    "type": "string"
-                },
-                "token": {
                     "type": "string"
                 },
                 "username": {
@@ -4081,6 +4096,9 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "active": {
+                    "type": "boolean"
+                },
+                "allow_deploy": {
                     "type": "boolean"
                 },
                 "allow_pr": {
@@ -4106,6 +4124,9 @@ const docTemplate = `{
                 },
                 "default_branch": {
                     "type": "string"
+                },
+                "forge_id": {
+                    "type": "integer"
                 },
                 "forge_remote_id": {
                     "description": "ForgeRemoteID is the unique identifier for the repository on the forge.",
@@ -4135,6 +4156,9 @@ const docTemplate = `{
                 "owner": {
                     "type": "string"
                 },
+                "pr_enabled": {
+                    "type": "boolean"
+                },
                 "private": {
                     "type": "boolean"
                 },
@@ -4155,6 +4179,9 @@ const docTemplate = `{
         "RepoPatch": {
             "type": "object",
             "properties": {
+                "allow_deploy": {
+                    "type": "boolean"
+                },
                 "allow_pr": {
                     "type": "boolean"
                 },
@@ -4397,6 +4424,9 @@ const docTemplate = `{
                     "description": "Email is the email address for this user.\n\nrequired: true",
                     "type": "string"
                 },
+                "forge_id": {
+                    "type": "integer"
+                },
                 "id": {
                     "description": "the id for this user.\n\nrequired: true",
                     "type": "integer"
@@ -4416,7 +4446,9 @@ const docTemplate = `{
             "enum": [
                 "push",
                 "pull_request",
+                "pull_request_closed",
                 "tag",
+                "release",
                 "deployment",
                 "cron",
                 "manual"
@@ -4424,46 +4456,12 @@ const docTemplate = `{
             "x-enum-varnames": [
                 "EventPush",
                 "EventPull",
+                "EventPullClosed",
                 "EventTag",
+                "EventRelease",
                 "EventDeploy",
                 "EventCron",
                 "EventManual"
-            ]
-        },
-        "errors.PipelineError": {
-            "type": "object",
-            "properties": {
-                "data": {},
-                "is_warning": {
-                    "type": "boolean"
-                },
-                "message": {
-                    "type": "string"
-                },
-                "type": {
-                    "$ref": "#/definitions/errors.PipelineErrorType"
-                }
-            }
-        },
-        "errors.PipelineErrorType": {
-            "type": "string",
-            "enum": [
-                "linter",
-                "deprecation",
-                "compiler",
-                "generic"
-            ],
-            "x-enum-comments": {
-                "PipelineErrorTypeCompiler": "some error with the config semantics",
-                "PipelineErrorTypeDeprecation": "using some deprecated feature",
-                "PipelineErrorTypeGeneric": "some generic error",
-                "PipelineErrorTypeLinter": "some error with the config syntax"
-            },
-            "x-enum-varnames": [
-                "PipelineErrorTypeLinter",
-                "PipelineErrorTypeDeprecation",
-                "PipelineErrorTypeCompiler",
-                "PipelineErrorTypeGeneric"
             ]
         },
         "model.Workflow": {
@@ -4512,6 +4510,45 @@ const docTemplate = `{
                     "$ref": "#/definitions/StatusValue"
                 }
             }
+        },
+        "types.PipelineError": {
+            "type": "object",
+            "properties": {
+                "data": {},
+                "is_warning": {
+                    "type": "boolean"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "type": {
+                    "$ref": "#/definitions/types.PipelineErrorType"
+                }
+            }
+        },
+        "types.PipelineErrorType": {
+            "type": "string",
+            "enum": [
+                "linter",
+                "deprecation",
+                "compiler",
+                "generic",
+                "bad_habit"
+            ],
+            "x-enum-comments": {
+                "PipelineErrorTypeBadHabit": "some bad-habit error",
+                "PipelineErrorTypeCompiler": "some error with the config semantics",
+                "PipelineErrorTypeDeprecation": "using some deprecated feature",
+                "PipelineErrorTypeGeneric": "some generic error",
+                "PipelineErrorTypeLinter": "some error with the config syntax"
+            },
+            "x-enum-varnames": [
+                "PipelineErrorTypeLinter",
+                "PipelineErrorTypeDeprecation",
+                "PipelineErrorTypeCompiler",
+                "PipelineErrorTypeGeneric",
+                "PipelineErrorTypeBadHabit"
+            ]
         }
     }
 }`

@@ -14,7 +14,6 @@
 
 package store
 
-//go:generate go install github.com/vektra/mockery/v2@latest
 //go:generate mockery --name Store --output mocks --case underscore
 
 import (
@@ -61,8 +60,6 @@ type Store interface {
 	DeleteRepo(*model.Repo) error
 
 	// Redirections
-	// GetRedirection returns the redirection for the given full repo name
-	GetRedirection(string) (*model.Redirection, error)
 	// CreateRedirection creates a redirection
 	CreateRedirection(redirection *model.Redirection) error
 	// HasRedirectionForRepo checks if there's a redirection for the given repo and full name
@@ -73,10 +70,6 @@ type Store interface {
 	GetPipeline(int64) (*model.Pipeline, error)
 	// GetPipelineNumber gets a pipeline by number.
 	GetPipelineNumber(*model.Repo, int64) (*model.Pipeline, error)
-	// GetPipelineRef gets a pipeline by its ref.
-	GetPipelineRef(*model.Repo, string) (*model.Pipeline, error)
-	// GetPipelineCommit gets a pipeline by its commit sha.
-	GetPipelineCommit(*model.Repo, string, string) (*model.Pipeline, error)
 	// GetPipelineLast gets the last pipeline for the branch.
 	GetPipelineLast(*model.Repo, string) (*model.Pipeline, error)
 	// GetPipelineLastBefore gets the last pipeline before pipeline number N.
@@ -107,14 +100,10 @@ type Store interface {
 	// Permissions
 	PermFind(user *model.User, repo *model.Repo) (*model.Perm, error)
 	PermUpsert(perm *model.Perm) error
-	PermDelete(perm *model.Perm) error
-	PermFlush(user *model.User, before int64) error
 
 	// Configs
 	ConfigsForPipeline(pipelineID int64) ([]*model.Config, error)
-	ConfigFindIdentical(repoID int64, hash string) (*model.Config, error)
-	ConfigFindApproved(*model.Config) (bool, error)
-	ConfigCreate(*model.Config) error
+	ConfigPersist(*model.Config) (*model.Config, error)
 	PipelineConfigCreate(*model.PipelineConfig) error
 
 	// Secrets
@@ -147,7 +136,6 @@ type Store interface {
 
 	// Logs
 	LogFind(*model.Step) ([]*model.LogEntry, error)
-	LogSave(*model.Step, []*model.LogEntry) error
 	LogAppend(logEntry *model.LogEntry) error
 	LogDelete(*model.Step) error
 
@@ -171,6 +159,13 @@ type Store interface {
 	CronListNextExecute(int64, int64) ([]*model.Cron, error)
 	CronGetLock(*model.Cron, int64) (bool, error)
 
+	// Forge
+	ForgeCreate(*model.Forge) error
+	ForgeGet(int64) (*model.Forge, error)
+	ForgeList(p *model.ListOptions) ([]*model.Forge, error)
+	ForgeUpdate(*model.Forge) error
+	ForgeDelete(*model.Forge) error
+
 	// Agent
 	AgentCreate(*model.Agent) error
 	AgentFind(int64) (*model.Agent, error)
@@ -182,6 +177,7 @@ type Store interface {
 	// Workflow
 	WorkflowGetTree(*model.Pipeline) ([]*model.Workflow, error)
 	WorkflowsCreate([]*model.Workflow) error
+	WorkflowsReplace(*model.Pipeline, []*model.Workflow) error
 	WorkflowLoad(int64) (*model.Workflow, error)
 	WorkflowUpdate(*model.Workflow) error
 

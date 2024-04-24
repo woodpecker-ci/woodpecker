@@ -17,15 +17,8 @@ package main
 
 import (
 	"context"
-	"crypto"
-	"crypto/ed25519"
-	"crypto/rand"
-	"encoding/hex"
-	"errors"
 	"fmt"
-	"net/url"
 	"os"
-	"strings"
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
@@ -36,19 +29,9 @@ import (
 
 	"go.woodpecker-ci.org/woodpecker/v2/server"
 	"go.woodpecker-ci.org/woodpecker/v2/server/cache"
-	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
-	"go.woodpecker-ci.org/woodpecker/v2/server/forge/bitbucket"
-	"go.woodpecker-ci.org/woodpecker/v2/server/forge/gitea"
-	"go.woodpecker-ci.org/woodpecker/v2/server/forge/github"
-	"go.woodpecker-ci.org/woodpecker/v2/server/forge/gitlab"
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
-	"go.woodpecker-ci.org/woodpecker/v2/server/plugins/environments"
-	"go.woodpecker-ci.org/woodpecker/v2/server/plugins/registry"
-	"go.woodpecker-ci.org/woodpecker/v2/server/plugins/secrets"
 	"go.woodpecker-ci.org/woodpecker/v2/server/queue"
 	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 	"go.woodpecker-ci.org/woodpecker/v2/server/store/datastore"
-	"go.woodpecker-ci.org/woodpecker/v2/server/store/types"
 )
 
 func setupStore(c *cli.Context) (store.Store, error) {
@@ -61,19 +44,19 @@ func setupStore(c *cli.Context) (store.Store, error) {
 
 	if driver == "sqlite3" {
 		if datastore.SupportedDriver("sqlite3") {
-			log.Debug().Msgf("server has sqlite3 support")
+			log.Debug().Msg("server has sqlite3 support")
 		} else {
-			log.Debug().Msgf("server was built without sqlite3 support!")
+			log.Debug().Msg("server was built without sqlite3 support!")
 		}
 	}
 
 	if !datastore.SupportedDriver(driver) {
-		log.Fatal().Msgf("database driver '%s' not supported", driver)
+		return nil, fmt.Errorf("database driver '%s' not supported", driver)
 	}
 
 	if driver == "sqlite3" {
 		if err := checkSqliteFileExist(datasource); err != nil {
-			log.Fatal().Err(err).Msg("check sqlite file")
+			return nil, fmt.Errorf("check sqlite file: %w", err)
 		}
 	}
 
@@ -85,11 +68,11 @@ func setupStore(c *cli.Context) (store.Store, error) {
 	log.Trace().Msgf("setup datastore: %#v", *opts)
 	store, err := datastore.NewEngine(opts)
 	if err != nil {
-		log.Fatal().Err(err).Msg("could not open datastore")
+		return nil, fmt.Errorf("could not open datastore: %w", err)
 	}
 
 	if err := store.Migrate(c.Bool("migrations-allow-long")); err != nil {
-		log.Fatal().Err(err).Msg("could not migrate datastore")
+		return nil, fmt.Errorf("could not migrate datastore: %w", err)
 	}
 
 	return store, nil
@@ -108,94 +91,8 @@ func setupQueue(c *cli.Context, s store.Store) queue.Queue {
 	return queue.WithTaskStore(queue.New(c.Context), s)
 }
 
-func setupSecretService(c *cli.Context, s model.SecretStore) model.SecretService {
-	return secrets.New(c.Context, s)
-}
-
-func setupRegistryService(c *cli.Context, s store.Store) model.RegistryService {
-	if c.String("docker-config") != "" {
-		return registry.Combined(
-			registry.New(s),
-			registry.Filesystem(c.String("docker-config")),
-		)
-	}
-	return registry.New(s)
-}
-
-func setupEnvironService(c *cli.Context, _ store.Store) model.EnvironService {
-	return environments.Parse(c.StringSlice("environment"))
-}
-
-func setupMembershipService(_ *cli.Context, r forge.Forge) cache.MembershipService {
-	return cache.NewMembershipService(r)
-}
-
-// setupForge helper function to setup the forge from the CLI arguments.
-func setupForge(c *cli.Context) (forge.Forge, error) {
-	switch {
-	case c.Bool("github"):
-		return setupGitHub(c)
-	case c.Bool("gitlab"):
-		return setupGitLab(c)
-	case c.Bool("bitbucket"):
-		return setupBitbucket(c)
-	case c.Bool("gitea"):
-		return setupGitea(c)
-	default:
-		return nil, fmt.Errorf("version control system not configured")
-	}
-}
-
-// setupBitbucket helper function to setup the Bitbucket forge from the CLI arguments.
-func setupBitbucket(c *cli.Context) (forge.Forge, error) {
-	opts := &bitbucket.Opts{
-		Client: c.String("bitbucket-client"),
-		Secret: c.String("bitbucket-secret"),
-	}
-	log.Trace().Msgf("Forge (bitbucket) opts: %#v", opts)
-	return bitbucket.New(opts)
-}
-
-// setupGitea helper function to setup the Gitea forge from the CLI arguments.
-func setupGitea(c *cli.Context) (forge.Forge, error) {
-	server, err := url.Parse(c.String("gitea-server"))
-	if err != nil {
-		return nil, err
-	}
-	opts := gitea.Opts{
-		URL:        strings.TrimRight(server.String(), "/"),
-		Client:     c.String("gitea-client"),
-		Secret:     c.String("gitea-secret"),
-		SkipVerify: c.Bool("gitea-skip-verify"),
-	}
-	if len(opts.URL) == 0 {
-		log.Fatal().Msg("WOODPECKER_GITEA_URL must be set")
-	}
-	log.Trace().Msgf("Forge (gitea) opts: %#v", opts)
-	return gitea.New(opts)
-}
-
-// setupGitLab helper function to setup the GitLab forge from the CLI arguments.
-func setupGitLab(c *cli.Context) (forge.Forge, error) {
-	return gitlab.New(gitlab.Opts{
-		URL:          c.String("gitlab-server"),
-		ClientID:     c.String("gitlab-client"),
-		ClientSecret: c.String("gitlab-secret"),
-		SkipVerify:   c.Bool("gitlab-skip-verify"),
-	})
-}
-
-// setupGitHub helper function to setup the GitHub forge from the CLI arguments.
-func setupGitHub(c *cli.Context) (forge.Forge, error) {
-	opts := github.Opts{
-		URL:        c.String("github-server"),
-		Client:     c.String("github-client"),
-		Secret:     c.String("github-secret"),
-		SkipVerify: c.Bool("github-skip-verify"),
-		MergeRef:   c.Bool("github-merge-ref"),
-	}
-	log.Trace().Msgf("Forge (github) opts: %#v", opts)
-	return github.New(opts)
+func setupMembershipService(_ *cli.Context, _store store.Store) cache.MembershipService {
+	return cache.NewMembershipService(_store)
 }
 
 func setupMetrics(g *errgroup.Group, _store store.Store) {
@@ -256,35 +153,4 @@ func setupMetrics(g *errgroup.Group, _store store.Store) {
 			time.Sleep(10 * time.Second)
 		}
 	})
-}
-
-// setupSignatureKeys generate or load key pair to sign webhooks requests (i.e. used for extensions)
-func setupSignatureKeys(_store store.Store) (crypto.PrivateKey, crypto.PublicKey) {
-	privKeyID := "signature-private-key"
-
-	privKey, err := _store.ServerConfigGet(privKeyID)
-	if errors.Is(err, types.RecordNotExist) {
-		_, privKey, err := ed25519.GenerateKey(rand.Reader)
-		if err != nil {
-			log.Fatal().Err(err).Msgf("Failed to generate private key")
-			return nil, nil
-		}
-		err = _store.ServerConfigSet(privKeyID, hex.EncodeToString(privKey))
-		if err != nil {
-			log.Fatal().Err(err).Msgf("Failed to generate private key")
-			return nil, nil
-		}
-		log.Debug().Msg("Created private key")
-		return privKey, privKey.Public()
-	} else if err != nil {
-		log.Fatal().Err(err).Msgf("Failed to load private key")
-		return nil, nil
-	}
-	privKeyStr, err := hex.DecodeString(privKey)
-	if err != nil {
-		log.Fatal().Err(err).Msgf("Failed to decode private key")
-		return nil, nil
-	}
-	privateKey := ed25519.PrivateKey(privKeyStr)
-	return privateKey, privateKey.Public()
 }

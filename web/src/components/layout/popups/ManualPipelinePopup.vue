@@ -9,35 +9,29 @@
         <InputField v-slot="{ id }" :label="$t('repo.manual_pipeline.variables.title')">
           <span class="text-sm text-wp-text-alt-100 mb-2">{{ $t('repo.manual_pipeline.variables.desc') }}</span>
           <div class="flex flex-col gap-2">
-            <div v-for="(value, name) in payload.variables" :key="name" class="flex gap-4">
-              <TextField :id="id" :model-value="name" disabled />
-              <TextField :id="id" :model-value="value" disabled />
-              <div class="w-34 flex-shrink-0">
-                <Button color="red" class="ml-auto" @click="deleteVar(name)">
+            <div v-for="(_, i) in payload.variables" :key="i" class="flex gap-4">
+              <TextField
+                :id="id"
+                v-model="payload.variables[i].name"
+                :placeholder="$t('repo.manual_pipeline.variables.name')"
+              />
+              <TextField
+                :id="id"
+                v-model="payload.variables[i].value"
+                :placeholder="$t('repo.manual_pipeline.variables.value')"
+              />
+              <div class="w-10 flex-shrink-0">
+                <Button
+                  v-if="i !== payload.variables.length - 1"
+                  color="red"
+                  class="ml-auto"
+                  :title="$t('repo.manual_pipeline.variables.delete')"
+                  @click="deleteVar(i)"
+                >
                   <i-la-times />
                 </Button>
               </div>
             </div>
-            <form class="flex gap-4" @submit.prevent="addPipelineVariable">
-              <TextField
-                :id="id"
-                v-model="newPipelineVariable.name"
-                :placeholder="$t('repo.manual_pipeline.variables.name')"
-                required
-              />
-              <TextField
-                :id="id"
-                v-model="newPipelineVariable.value"
-                :placeholder="$t('repo.manual_pipeline.variables.value')"
-                required
-              />
-              <Button
-                class="w-34 flex-shrink-0"
-                start-icon="plus"
-                type="submit"
-                :text="$t('repo.manual_pipeline.variables.add')"
-              />
-            </form>
           </div>
         </InputField>
         <Button type="submit" :text="$t('repo.manual_pipeline.trigger')" />
@@ -47,7 +41,7 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 
 import Button from '~/components/atomic/Button.vue';
@@ -74,11 +68,25 @@ const repo = inject('repo');
 
 const router = useRouter();
 const branches = ref<{ text: string; value: string }[]>([]);
-const payload = ref<{ branch: string; variables: Record<string, string> }>({
+const payload = ref<{ branch: string; variables: { name: string; value: string }[] }>({
   branch: 'main',
-  variables: {},
+  variables: [
+    {
+      name: '',
+      value: '',
+    },
+  ],
 });
-const newPipelineVariable = ref<{ name: string; value: string }>({ name: '', value: '' });
+
+const pipelineOptions = computed(() => {
+  const variables = Object.fromEntries(
+    payload.value.variables.filter((e) => e.name !== '').map((item) => [item.name, item.value]),
+  );
+  return {
+    ...payload.value,
+    variables,
+  };
+});
 
 const loading = ref(true);
 onMounted(async () => {
@@ -90,22 +98,26 @@ onMounted(async () => {
   loading.value = false;
 });
 
-function addPipelineVariable() {
-  if (!newPipelineVariable.value.name || !newPipelineVariable.value.value) {
-    return;
-  }
-  payload.value.variables[newPipelineVariable.value.name] = newPipelineVariable.value.value;
-  newPipelineVariable.value.name = '';
-  newPipelineVariable.value.value = '';
-}
+watch(
+  payload,
+  () => {
+    if (payload.value.variables[payload.value.variables.length - 1].name !== '') {
+      payload.value.variables.push({
+        name: '',
+        value: '',
+      });
+    }
+  },
+  { deep: true },
+);
 
-function deleteVar(key: string) {
-  delete payload.value.variables[key];
+function deleteVar(index: number) {
+  payload.value.variables.splice(index, 1);
 }
 
 async function triggerManualPipeline() {
   loading.value = true;
-  const pipeline = await apiClient.createPipeline(repo.value.id, payload.value);
+  const pipeline = await apiClient.createPipeline(repo.value.id, pipelineOptions.value);
 
   emit('close');
 

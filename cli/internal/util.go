@@ -44,16 +44,16 @@ func NewClient(c *cli.Context) (woodpecker.Client, error) {
 	// if no server url is provided we can default
 	// to the hosted Woodpecker service.
 	if len(server) == 0 {
-		return nil, fmt.Errorf("Error: you must provide the Woodpecker server address")
+		return nil, fmt.Errorf("you must provide the Woodpecker server address")
 	}
 	if len(token) == 0 {
-		return nil, fmt.Errorf("Error: you must provide your Woodpecker access token")
+		return nil, fmt.Errorf("you must provide your Woodpecker access token")
 	}
 
 	// attempt to find system CA certs
 	certs, err := x509.SystemCertPool()
 	if err != nil {
-		log.Error().Msgf("failed to find system CA certs: %v", err)
+		log.Error().Err(err).Msg("failed to find system CA certs")
 	}
 	tlsConfig := &tls.Config{
 		RootCAs:            certs,
@@ -107,11 +107,11 @@ func ParseRepo(client woodpecker.Client, str string) (repoID int64, err error) {
 func ParseKeyPair(p []string) map[string]string {
 	params := map[string]string{}
 	for _, i := range p {
-		parts := strings.SplitN(i, "=", 2)
-		if len(parts) != 2 {
+		before, after, ok := strings.Cut(i, "=")
+		if !ok || before == "" {
 			continue
 		}
-		params[parts[0]] = parts[1]
+		params[before] = after
 	}
 	return params
 }
