@@ -118,6 +118,9 @@ type Client interface {
 	// LogsPurge purges the pipeline logs for the specified pipeline.
 	LogsPurge(repoID, pipeline int64) error
 
+	// StepLogsPurge purges the pipeline logs for the specified step.
+	StepLogsPurge(repoID, pipelineNumber, stepID int64) error
+
 	// Registry returns a registry by hostname.
 	Registry(repoID int64, hostname string) (*Registry, error)
 

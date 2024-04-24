@@ -36,11 +36,11 @@ const (
 	pathRepair         = "%s/api/repos/%d/repair"
 	pathPipelines      = "%s/api/repos/%d/pipelines"
 	pathPipeline       = "%s/api/repos/%d/pipelines/%v"
-	pathLogs           = "%s/api/repos/%d/logs/%d/%d"
+	pathPipelineLogs   = "%s/api/repos/%d/logs/%d"
+	pathStepLogs       = "%s/api/repos/%d/logs/%d/%d"
 	pathApprove        = "%s/api/repos/%d/pipelines/%d/approve"
 	pathDecline        = "%s/api/repos/%d/pipelines/%d/decline"
 	pathStop           = "%s/api/repos/%d/pipelines/%d/cancel"
-	pathLogPurge       = "%s/api/repos/%d/logs/%d"
 	pathRepoSecrets    = "%s/api/repos/%d/secrets"
 	pathRepoSecret     = "%s/api/repos/%d/secrets/%s"
 	pathRepoRegistries = "%s/api/repos/%d/registry"
@@ -297,12 +297,26 @@ func (c *client) PipelineKill(repoID, pipeline int64) error {
 	return err
 }
 
-// PipelineLogs returns the pipeline logs for the specified step.
+// LogsPurge purges the pipeline all steps logs for the specified pipeline.
+func (c *client) LogsPurge(repoID, pipeline int64) error {
+	uri := fmt.Sprintf(pathPipelineLogs, c.addr, repoID, pipeline)
+	err := c.delete(uri)
+	return err
+}
+
+// StepLogEntries returns the pipeline logs for the specified step.
 func (c *client) StepLogEntries(repoID, num, step int64) ([]*LogEntry, error) {
-	uri := fmt.Sprintf(pathLogs, c.addr, repoID, num, step)
+	uri := fmt.Sprintf(pathStepLogs, c.addr, repoID, num, step)
 	var out []*LogEntry
 	err := c.get(uri, &out)
 	return out, err
+}
+
+// StepLogsPurge purges the pipeline logs for the specified step.
+func (c *client) StepLogsPurge(repoID, pipelineNumber, stepID int64) error {
+	uri := fmt.Sprintf(pathStepLogs, c.addr, repoID, pipelineNumber, stepID)
+	err := c.delete(uri)
+	return err
 }
 
 // Deploy triggers a deployment for an existing pipeline using the
@@ -315,13 +329,6 @@ func (c *client) Deploy(repoID, pipeline int64, env string, params map[string]st
 	uri := fmt.Sprintf(pathPipeline, c.addr, repoID, pipeline)
 	err := c.post(uri+"?"+val.Encode(), nil, out)
 	return out, err
-}
-
-// LogsPurge purges the pipeline logs for the specified pipeline.
-func (c *client) LogsPurge(repoID, pipeline int64) error {
-	uri := fmt.Sprintf(pathLogPurge, c.addr, repoID, pipeline)
-	err := c.delete(uri)
-	return err
 }
 
 // Registry returns a registry by hostname.
