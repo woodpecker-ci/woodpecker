@@ -89,7 +89,7 @@
         <span v-if="step?.error">{{ step.error }}</span>
         <span v-else-if="step?.state === 'skipped'">{{ $t('repo.pipeline.actions.canceled') }}</span>
         <span v-else-if="!step?.start_time">{{ $t('repo.pipeline.step_not_started') }}</span>
-        <div v-else-if="!loadedLogs">{{ $t('repo.pipeline.loading') }}</div>
+        <div v-else-if="!loadedLogs">{{ $t('loading') }}</div>
       </div>
 
       <div
