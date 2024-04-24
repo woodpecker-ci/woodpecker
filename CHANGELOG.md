@@ -1,6 +1,6 @@
 # Changelog
 
-## [2.5.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/2.5.0) - 2024-04-22
+## [2.5.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.5.0) - 2024-04-24
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -16,6 +16,7 @@
 
 ### 📈 Enhancement
 
+- Deprecate environment filter and improve errors [[#3634](https://github.com/woodpecker-ci/woodpecker/pull/3634)]
 - CLI: remove step logs [[#3458](https://github.com/woodpecker-ci/woodpecker/pull/3458)]
 - Add task details to queue info in woodpecker-go [[#3636](https://github.com/woodpecker-ci/woodpecker/pull/3636)]
 - Use forge from db [[#1417](https://github.com/woodpecker-ci/woodpecker/pull/1417)]
@@ -51,6 +52,8 @@
 
 ### Misc
 
+- chore(deps): update woodpeckerci/plugin-ready-release-go docker tag to v1.1.1 [[#3641](https://github.com/woodpecker-ci/woodpecker/pull/3641)]
+- chore(deps): update web npm deps non-major [[#3640](https://github.com/woodpecker-ci/woodpecker/pull/3640)]
 - chore(deps): update web npm deps non-major [[#3631](https://github.com/woodpecker-ci/woodpecker/pull/3631)]
 - Use our github-release plugin [[#3624](https://github.com/woodpecker-ci/woodpecker/pull/3624)]
 - chore(deps): lock file maintenance [[#3622](https://github.com/woodpecker-ci/woodpecker/pull/3622)]
