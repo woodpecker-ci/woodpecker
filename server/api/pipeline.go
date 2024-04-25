@@ -177,7 +177,7 @@ func DeletePipeline(c *gin.Context) {
 
 	err = store.FromContext(c).DeletePipeline(pl)
 	if err != nil {
-		c.String(http.StatusInternalServerError, "Error deleting pipelines. %s", err)
+		c.String(http.StatusInternalServerError, "Error deleting pipeline. %s", err)
 		return
 	}
 
