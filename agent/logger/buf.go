@@ -76,6 +76,8 @@ func (lb *LogBuffer) Flush() error {
 }
 
 func (lb *LogBuffer) Close() error {
+	lb.Lock()
+	defer lb.Unlock()
 	lb.timer.Stop()
 	close(lb.closeChan)
 	return lb.buffer.Flush()
