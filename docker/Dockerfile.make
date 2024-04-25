@@ -20,6 +20,7 @@ RUN apk add --no-cache --update make=${MAKE_VERSION} gcc=${GCC_VERSION} binutils
 COPY --from=golang_image /usr/local/go /usr/local/go
 COPY Makefile /
 ENV PATH=$PATH:/usr/local/go/bin
+ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0
 
 # Cache tools
 RUN GOBIN=/usr/local/go/bin make install-tools && \
