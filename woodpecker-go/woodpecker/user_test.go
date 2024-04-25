@@ -77,11 +77,11 @@ func TestClient_UserPost(t *testing.T) {
 			name: "success",
 			handler: func(w http.ResponseWriter, _ *http.Request) {
 				w.WriteHeader(http.StatusCreated)
-				_, err := fmt.Fprint(w, `{"id":1,"login":"newuser"}`)
+				_, err := fmt.Fprint(w, `{"id":1,"login":"new_user"}`)
 				assert.NoError(t, err)
 			},
-			input:    &User{Login: "newuser"},
-			expected: &User{ID: 1, Login: "newuser"},
+			input:    &User{Login: "new_user"},
+			expected: &User{ID: 1, Login: "new_user"},
 			wantErr:  false,
 		},
 		{
@@ -98,7 +98,7 @@ func TestClient_UserPost(t *testing.T) {
 			handler: func(w http.ResponseWriter, _ *http.Request) {
 				w.WriteHeader(http.StatusInternalServerError)
 			},
-			input:    &User{Login: "newuser"},
+			input:    &User{Login: "new_user"},
 			expected: nil,
 			wantErr:  true,
 		},
@@ -138,11 +138,11 @@ func TestClient_UserPatch(t *testing.T) {
 					return
 				}
 				w.WriteHeader(http.StatusOK)
-				_, err := fmt.Fprint(w, `{"id":1,"login":"updateduser"}`)
+				_, err := fmt.Fprint(w, `{"id":1,"login":"updated_user"}`)
 				assert.NoError(t, err)
 			},
-			input:    &User{ID: 1, Login: "existinguser"},
-			expected: &User{ID: 1, Login: "updateduser"},
+			input:    &User{ID: 1, Login: "existing_user"},
+			expected: &User{ID: 1, Login: "updated_user"},
 			wantErr:  false,
 		},
 		{
@@ -154,7 +154,7 @@ func TestClient_UserPatch(t *testing.T) {
 				}
 				w.WriteHeader(http.StatusNotFound)
 			},
-			input:    &User{ID: 999, Login: "nonexistentuser"},
+			input:    &User{ID: 999, Login: "nonexistent_user"},
 			expected: nil,
 			wantErr:  true,
 		},
@@ -180,7 +180,7 @@ func TestClient_UserPatch(t *testing.T) {
 				}
 				w.WriteHeader(http.StatusInternalServerError)
 			},
-			input:    &User{ID: 1, Login: "existinguser"},
+			input:    &User{ID: 1, Login: "existing_user"},
 			expected: nil,
 			wantErr:  true,
 		},
@@ -220,7 +220,7 @@ func TestClient_UserDel(t *testing.T) {
 				}
 				w.WriteHeader(http.StatusOK)
 			},
-			login:   "existinguser",
+			login:   "existing_user",
 			wantErr: false,
 		},
 		{
@@ -232,7 +232,7 @@ func TestClient_UserDel(t *testing.T) {
 				}
 				w.WriteHeader(http.StatusNotFound)
 			},
-			login:   "nonexistentuser",
+			login:   "nonexistent_user",
 			wantErr: true,
 		},
 		{
@@ -244,7 +244,7 @@ func TestClient_UserDel(t *testing.T) {
 				}
 				w.WriteHeader(http.StatusInternalServerError)
 			},
-			login:   "existinguser",
+			login:   "existing_user",
 			wantErr: true,
 		},
 	}
