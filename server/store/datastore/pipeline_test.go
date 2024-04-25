@@ -18,6 +18,7 @@ package datastore
 import (
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/franela/goblin"
 	"github.com/stretchr/testify/assert"
@@ -221,12 +222,34 @@ func TestPipelines(t *testing.T) {
 			g.Assert(err1).IsNil()
 			err2 := store.CreatePipeline(pipeline2, []*model.Step{}...)
 			g.Assert(err2).IsNil()
-			pipelines, err3 := store.GetPipelineList(&model.Repo{ID: 1}, &model.ListOptions{Page: 1, PerPage: 50})
+			pipelines, err3 := store.GetPipelineList(&model.Repo{ID: 1}, &model.ListOptions{Page: 1, PerPage: 50}, nil)
 			g.Assert(err3).IsNil()
 			g.Assert(len(pipelines)).Equal(2)
 			g.Assert(pipelines[0].ID).Equal(pipeline2.ID)
 			g.Assert(pipelines[0].RepoID).Equal(pipeline2.RepoID)
 			g.Assert(pipelines[0].Status).Equal(pipeline2.Status)
+		})
+
+		g.It("Should get filtered pipelines", func() {
+			dt1, _ := time.Parse(time.RFC3339, "2023-01-15T15:00:00Z")
+			pipeline1 := &model.Pipeline{
+				RepoID:  repo.ID,
+				Started: dt1.Unix(),
+			}
+			dt2, _ := time.Parse(time.RFC3339, "2023-01-15T16:30:00Z")
+			pipeline2 := &model.Pipeline{
+				RepoID:  repo.ID,
+				Started: dt2.Unix(),
+			}
+			err1 := store.CreatePipeline(pipeline1, []*model.Step{}...)
+			g.Assert(err1).IsNil()
+			err2 := store.CreatePipeline(pipeline2, []*model.Step{}...)
+			g.Assert(err2).IsNil()
+			pipelines, err3 := store.GetPipelineList(&model.Repo{ID: 1}, &model.ListOptions{Page: 1, PerPage: 50}, &model.PipelineFilter{Before: dt2.Unix()})
+			g.Assert(err3).IsNil()
+			g.Assert(len(pipelines)).Equal(1)
+			g.Assert(pipelines[0].ID).Equal(pipeline1.ID)
+			g.Assert(pipelines[0].RepoID).Equal(pipeline1.RepoID)
 		})
 	})
 }
