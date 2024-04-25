@@ -33,7 +33,7 @@ func (lb *LogBuffer) Write(data []byte) (int, error) {
 		return n, err
 	}
 
-	// Reset timer since there's new activity
+	// reset timer since there's new activity
 	if !lb.timer.Stop() {
 		<-lb.timer.C
 	}
@@ -51,10 +51,10 @@ func (lb *LogBuffer) start() {
 }
 
 func (lb *LogBuffer) waitForFlush() bool {
-	// Wait for either a timeout or a manual flush signal
+	// wait for either a timeout or a manual flush signal
 	select {
 	case <-lb.timer.C:
-		// Time limit reached, flush the buffer
+		// time limit reached, flush the buffer
 		lb.Lock()
 		defer lb.Unlock()
 		err := lb.buffer.Flush()
@@ -62,7 +62,7 @@ func (lb *LogBuffer) waitForFlush() bool {
 			return false
 		}
 	case <-lb.closeChan:
-		// Close signal received
+		// close signal received
 		return false
 	}
 
