@@ -2339,6 +2339,44 @@ const docTemplate = `{
                         }
                     }
                 }
+            },
+            "delete": {
+                "produces": [
+                    "text/plain"
+                ],
+                "tags": [
+                    "Pipelines"
+                ],
+                "summary": "Delete pipeline",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cpersonal access token\u003e",
+                        "description": "Insert your personal access token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "the repository id",
+                        "name": "repo_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "the number of the pipeline",
+                        "name": "number",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
             }
         },
         "/repos/{repo_id}/pipelines/{number}/approve": {

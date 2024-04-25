@@ -79,3 +79,51 @@ func TestGetPipelines(t *testing.T) {
 		})
 	})
 }
+
+func TestDeletePipeline(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	g := goblin.Goblin(t)
+	g.Describe("Pipeline", func() {
+		g.It("should delete pipeline", func() {
+			mockStore := mocks.NewStore(t)
+			mockStore.On("GetPipelineNumber", mock.Anything, mock.Anything).Return(fakePipeline, nil)
+			mockStore.On("DeletePipeline", mock.Anything).Return(nil)
+
+			c, _ := gin.CreateTestContext(httptest.NewRecorder())
+			c.Set("store", mockStore)
+			c.Params = gin.Params{{Key: "number", Value: "1"}}
+
+			DeletePipeline(c)
+
+			mockStore.AssertCalled(t, "GetPipelineNumber", mock.Anything, mock.Anything)
+			mockStore.AssertCalled(t, "DeletePipeline", mock.Anything)
+			assert.Equal(t, http.StatusNoContent, c.Writer.Status())
+		})
+
+		g.It("should not delete without pipeline number", func() {
+			c, _ := gin.CreateTestContext(httptest.NewRecorder())
+
+			DeletePipeline(c)
+
+			assert.Equal(t, http.StatusBadRequest, c.Writer.Status())
+		})
+
+		g.It("should not delete pending", func() {
+			fakePipeline.Status = model.StatusPending
+
+			mockStore := mocks.NewStore(t)
+			mockStore.On("GetPipelineNumber", mock.Anything, mock.Anything).Return(fakePipeline, nil)
+
+			c, _ := gin.CreateTestContext(httptest.NewRecorder())
+			c.Set("store", mockStore)
+			c.Params = gin.Params{{Key: "number", Value: "1"}}
+
+			DeletePipeline(c)
+
+			mockStore.AssertCalled(t, "GetPipelineNumber", mock.Anything, mock.Anything)
+			mockStore.AssertNotCalled(t, "DeletePipeline", mock.Anything)
+			assert.Equal(t, http.StatusUnprocessableEntity, c.Writer.Status())
+		})
+	})
+}

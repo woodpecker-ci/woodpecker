@@ -144,6 +144,46 @@ func GetPipelines(c *gin.Context) {
 	c.JSON(http.StatusOK, pipelines)
 }
 
+// DeletePipeline
+//
+//	@Summary	Delete pipeline
+//	@Router		/repos/{repo_id}/pipelines/{number} [delete]
+//	@Produce	plain
+//	@Success	204
+//	@Tags		Pipelines
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		repo_id			path	int		true	"the repository id"
+//	@Param		number			path	int		true	"the number of the pipeline"
+func DeletePipeline(c *gin.Context) {
+	_store := store.FromContext(c)
+
+	repo := session.Repo(c)
+	num, err := strconv.ParseInt(c.Param("number"), 10, 64)
+	if err != nil {
+		_ = c.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+
+	pl, err := _store.GetPipelineNumber(repo, num)
+	if err != nil {
+		handleDBError(c, err)
+		return
+	}
+
+	if ok := pipelineDeleteAllowed(pl); !ok {
+		c.String(http.StatusUnprocessableEntity, "Cannot delete pipeline with status %s", pl.Status)
+		return
+	}
+
+	err = store.FromContext(c).DeletePipeline(pl)
+	if err != nil {
+		c.String(http.StatusInternalServerError, "Error deleting pipeline. %s", err)
+		return
+	}
+
+	c.Status(http.StatusNoContent)
+}
+
 // GetPipeline
 //
 //	@Summary	Pipeline information by number
@@ -574,9 +614,8 @@ func DeletePipelineLogs(c *gin.Context) {
 		return
 	}
 
-	switch pl.Status {
-	case model.StatusRunning, model.StatusPending:
-		c.String(http.StatusUnprocessableEntity, "Cannot delete logs for a pending or running pipeline")
+	if ok := pipelineDeleteAllowed(pl); !ok {
+		c.String(http.StatusUnprocessableEntity, "Cannot delete logs for pipeline with status %s", pl.Status)
 		return
 	}
 
@@ -586,7 +625,7 @@ func DeletePipelineLogs(c *gin.Context) {
 		}
 	}
 	if err != nil {
-		c.String(http.StatusInternalServerError, "There was a problem deleting your logs. %s", err)
+		c.String(http.StatusInternalServerError, "Error deleting pipeline logs. %s", err)
 		return
 	}
 
