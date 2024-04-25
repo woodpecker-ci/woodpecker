@@ -78,16 +78,15 @@ func TestFlushAfterTime(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	// Check if the buffer is empty
-	if len(testBuffer.buf) != 0 {
+	// check if the buffer was not flushed
+	if string(testBuffer.buf) != "" {
 		t.Fatalf("expected 0 bytes, got %d", len(testBuffer.buf))
 	}
 
 	// Wait for the buffer to be flushed
 	time.Sleep(20 * time.Millisecond)
 
-	// Check if the buffer is flushed
-	if len(testBuffer.buf) != 4 {
+	if string(testBuffer.buf) != "1234" {
 		t.Fatalf("expected 4 bytes, got %d", len(testBuffer.buf))
 	}
 }
