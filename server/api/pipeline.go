@@ -121,7 +121,7 @@ func GetPipelines(c *gin.Context) {
 	if before != "" {
 		beforeDt, err := time.Parse(time.RFC3339, before)
 		if err != nil {
-			_ = c.AbortWithError(http.StatusInternalServerError, err)
+			_ = c.AbortWithError(http.StatusBadRequest, err)
 			return
 		}
 		filter.Before = beforeDt.Unix()
@@ -130,7 +130,7 @@ func GetPipelines(c *gin.Context) {
 	if after != "" {
 		afterDt, err := time.Parse(time.RFC3339, after)
 		if err != nil {
-			_ = c.AbortWithError(http.StatusInternalServerError, err)
+			_ = c.AbortWithError(http.StatusBadRequest, err)
 			return
 		}
 		filter.After = afterDt.Unix()
