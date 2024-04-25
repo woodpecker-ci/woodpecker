@@ -39,16 +39,24 @@ func TestGetPipelines(t *testing.T) {
 			assert.Equal(t, http.StatusOK, c.Writer.Status())
 		})
 
+		g.It("should not parse pipeline filter", func() {
+			c, _ := gin.CreateTestContext(httptest.NewRecorder())
+			c.Request, _ = http.NewRequest("DELETE", "/?before=2023-01-16&after=2023-01-15", nil)
+
+			GetPipelines(c)
+
+			assert.Equal(t, http.StatusBadRequest, c.Writer.Status())
+		})
+
 		g.It("should parse pipeline filter", func() {
-			pipelines := make([]*model.Pipeline, 0)
-			pipelines = append(pipelines, fakePipeline)
+			pipelines := []*model.Pipeline{fakePipeline}
 
 			mockStore := mocks.NewStore(t)
 			mockStore.On("GetPipelineList", mock.Anything, mock.Anything, mock.Anything).Return(pipelines, nil)
 
 			c, _ := gin.CreateTestContext(httptest.NewRecorder())
 			c.Set("store", mockStore)
-			c.Params = gin.Params{{Key: "before", Value: "2023-01-16T15:00:00Z"}, {Key: "after", Value: "2023-01-15T15:00:00Z"}}
+			c.Request, _ = http.NewRequest("DELETE", "/?2023-01-16T15:00:00Z&after=2023-01-15T15:00:00Z", nil)
 
 			GetPipelines(c)
 
@@ -56,15 +64,14 @@ func TestGetPipelines(t *testing.T) {
 		})
 
 		g.It("should parse pipeline filter with tz offset", func() {
-			pipelines := make([]*model.Pipeline, 0)
-			pipelines = append(pipelines, fakePipeline)
+			pipelines := []*model.Pipeline{fakePipeline}
 
 			mockStore := mocks.NewStore(t)
 			mockStore.On("GetPipelineList", mock.Anything, mock.Anything, mock.Anything).Return(pipelines, nil)
 
 			c, _ := gin.CreateTestContext(httptest.NewRecorder())
 			c.Set("store", mockStore)
-			c.Params = gin.Params{{Key: "before", Value: "2023-01-16T15:00:00%2B01:00"}, {Key: "after", Value: "2023-01-15T15:00:00%2B01:00"}}
+			c.Request, _ = http.NewRequest("DELETE", "/?before=2023-01-16T15:00:00%2B01:00&after=2023-01-15T15:00:00%2B01:00", nil)
 
 			GetPipelines(c)
 
