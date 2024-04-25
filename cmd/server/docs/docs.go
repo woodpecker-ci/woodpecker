@@ -2174,6 +2174,18 @@ const docTemplate = `{
                         "description": "for response pagination, max items per page",
                         "name": "perPage",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "only return pipelines before this RFC3339 date",
+                        "name": "before",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "only return pipelines after this RFC3339 date",
+                        "name": "after",
+                        "in": "query"
                     }
                 ],
                 "responses": {
