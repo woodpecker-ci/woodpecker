@@ -359,20 +359,6 @@ when:
   - platform: [linux/*, windows/amd64]
 ```
 
-<!-- markdownlint-disable no-duplicate-heading -->
-
-#### `environment`
-
-<!-- markdownlint-enable no-duplicate-heading -->
-
-Execute a step for deployment events matching the target deployment environment:
-
-```yaml
-when:
-  - environment: production
-  - event: deployment
-```
-
 #### `matrix`
 
 Execute a step for a single matrix permutation:
@@ -758,7 +744,7 @@ Workflows that should run even on failure should set the `runs_on` tag. See [her
 Woodpecker gives the ability to configure privileged mode in the YAML. You can use this parameter to launch containers with escalated capabilities.
 
 :::info
-Privileged mode is only available to trusted repositories and for security reasons should only be used in private environments. See [project settings](./71-project-settings.md#trusted) to enable trusted mode.
+Privileged mode is only available to trusted repositories and for security reasons should only be used in private environments. See [project settings](./75-project-settings.md#trusted) to enable trusted mode.
 :::
 
 ```diff

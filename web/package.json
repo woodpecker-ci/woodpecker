@@ -60,7 +60,7 @@
     "prettier": "^3.2.4",
     "replace-in-file": "^7.1.0",
     "tinycolor2": "^1.6.0",
-    "typescript": "5.4.3",
+    "typescript": "5.4.5",
     "typescript-eslint": "^7.6.0",
     "unplugin-icons": "^0.18.2",
     "unplugin-vue-components": "^0.26.0",

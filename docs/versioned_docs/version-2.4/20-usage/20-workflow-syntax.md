@@ -640,7 +640,7 @@ You can manually configure the clone step in your workflow for customization:
 
 ```diff
 +clone:
-+  git:
++  - name: git
 +    image: woodpeckerci/plugin-git
 
  steps:
@@ -666,7 +666,7 @@ Example configuration to use a custom clone plugin:
 
 ```diff
  clone:
-   git:
+   - name: git
 +    image: octocat/custom-git-plugin
 ```
 
