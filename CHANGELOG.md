@@ -1,6 +1,6 @@
 # Changelog
 
-## [2.5.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.5.0) - 2024-04-24
+## [2.5.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.5.0) - 2024-04-25
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -16,6 +16,7 @@
 
 ### 📈 Enhancement
 
+- Add filter options to GetPipelines API [[#3645](https://github.com/woodpecker-ci/woodpecker/pull/3645)]
 - Deprecate environment filter and improve errors [[#3634](https://github.com/woodpecker-ci/woodpecker/pull/3634)]
 - CLI: remove step logs [[#3458](https://github.com/woodpecker-ci/woodpecker/pull/3458)]
 - Add task details to queue info in woodpecker-go [[#3636](https://github.com/woodpecker-ci/woodpecker/pull/3636)]
@@ -31,6 +32,7 @@
 
 ### 📚 Documentation
 
+- Fail on broken anchors [[#3644](https://github.com/woodpecker-ci/woodpecker/pull/3644)]
 - Fix step syntax in docs [[#3635](https://github.com/woodpecker-ci/woodpecker/pull/3635)]
 - chore(deps): update docs npm deps non-major [[#3632](https://github.com/woodpecker-ci/woodpecker/pull/3632)]
 - Add Twine plugin [[#3619](https://github.com/woodpecker-ci/woodpecker/pull/3619)]
