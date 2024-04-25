@@ -543,6 +543,10 @@ func (_m *Store) DeleteUser(_a0 *model.User) error {
 func (_m *Store) ForgeCreate(_a0 *model.Forge) error {
 	ret := _m.Called(_a0)
 
+	if len(ret) == 0 {
+		panic("no return value specified for ForgeCreate")
+	}
+
 	var r0 error
 	if rf, ok := ret.Get(0).(func(*model.Forge) error); ok {
 		r0 = rf(_a0)
@@ -557,6 +561,10 @@ func (_m *Store) ForgeCreate(_a0 *model.Forge) error {
 func (_m *Store) ForgeDelete(_a0 *model.Forge) error {
 	ret := _m.Called(_a0)
 
+	if len(ret) == 0 {
+		panic("no return value specified for ForgeDelete")
+	}
+
 	var r0 error
 	if rf, ok := ret.Get(0).(func(*model.Forge) error); ok {
 		r0 = rf(_a0)
@@ -567,61 +575,13 @@ func (_m *Store) ForgeDelete(_a0 *model.Forge) error {
 	return r0
 }
 
-// ForgeFindByRepo provides a mock function with given fields: _a0
-func (_m *Store) ForgeFindByRepo(_a0 *model.Repo) (*model.Forge, error) {
-	ret := _m.Called(_a0)
-
-	var r0 *model.Forge
-	var r1 error
-	if rf, ok := ret.Get(0).(func(*model.Repo) (*model.Forge, error)); ok {
-		return rf(_a0)
-	}
-	if rf, ok := ret.Get(0).(func(*model.Repo) *model.Forge); ok {
-		r0 = rf(_a0)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*model.Forge)
-		}
-	}
-
-	if rf, ok := ret.Get(1).(func(*model.Repo) error); ok {
-		r1 = rf(_a0)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
-// ForgeFindByUser provides a mock function with given fields: _a0
-func (_m *Store) ForgeFindByUser(_a0 *model.User) (*model.Forge, error) {
-	ret := _m.Called(_a0)
-
-	var r0 *model.Forge
-	var r1 error
-	if rf, ok := ret.Get(0).(func(*model.User) (*model.Forge, error)); ok {
-		return rf(_a0)
-	}
-	if rf, ok := ret.Get(0).(func(*model.User) *model.Forge); ok {
-		r0 = rf(_a0)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*model.Forge)
-		}
-	}
-
-	if rf, ok := ret.Get(1).(func(*model.User) error); ok {
-		r1 = rf(_a0)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
 // ForgeGet provides a mock function with given fields: _a0
 func (_m *Store) ForgeGet(_a0 int64) (*model.Forge, error) {
 	ret := _m.Called(_a0)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ForgeGet")
+	}
 
 	var r0 *model.Forge
 	var r1 error
@@ -649,6 +609,10 @@ func (_m *Store) ForgeGet(_a0 int64) (*model.Forge, error) {
 func (_m *Store) ForgeList(p *model.ListOptions) ([]*model.Forge, error) {
 	ret := _m.Called(p)
 
+	if len(ret) == 0 {
+		panic("no return value specified for ForgeList")
+	}
+
 	var r0 []*model.Forge
 	var r1 error
 	if rf, ok := ret.Get(0).(func(*model.ListOptions) ([]*model.Forge, error)); ok {
@@ -674,6 +638,10 @@ func (_m *Store) ForgeList(p *model.ListOptions) ([]*model.Forge, error) {
 // ForgeUpdate provides a mock function with given fields: _a0
 func (_m *Store) ForgeUpdate(_a0 *model.Forge) error {
 	ret := _m.Called(_a0)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ForgeUpdate")
+	}
 
 	var r0 error
 	if rf, ok := ret.Get(0).(func(*model.Forge) error); ok {
@@ -833,9 +801,9 @@ func (_m *Store) GetPipelineLastBefore(_a0 *model.Repo, _a1 string, _a2 int64) (
 	return r0, r1
 }
 
-// GetPipelineList provides a mock function with given fields: _a0, _a1
-func (_m *Store) GetPipelineList(_a0 *model.Repo, _a1 *model.ListOptions) ([]*model.Pipeline, error) {
-	ret := _m.Called(_a0, _a1)
+// GetPipelineList provides a mock function with given fields: _a0, _a1, _a2
+func (_m *Store) GetPipelineList(_a0 *model.Repo, _a1 *model.ListOptions, _a2 *model.PipelineFilter) ([]*model.Pipeline, error) {
+	ret := _m.Called(_a0, _a1, _a2)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetPipelineList")
@@ -843,19 +811,19 @@ func (_m *Store) GetPipelineList(_a0 *model.Repo, _a1 *model.ListOptions) ([]*mo
 
 	var r0 []*model.Pipeline
 	var r1 error
-	if rf, ok := ret.Get(0).(func(*model.Repo, *model.ListOptions) ([]*model.Pipeline, error)); ok {
-		return rf(_a0, _a1)
+	if rf, ok := ret.Get(0).(func(*model.Repo, *model.ListOptions, *model.PipelineFilter) ([]*model.Pipeline, error)); ok {
+		return rf(_a0, _a1, _a2)
 	}
-	if rf, ok := ret.Get(0).(func(*model.Repo, *model.ListOptions) []*model.Pipeline); ok {
-		r0 = rf(_a0, _a1)
+	if rf, ok := ret.Get(0).(func(*model.Repo, *model.ListOptions, *model.PipelineFilter) []*model.Pipeline); ok {
+		r0 = rf(_a0, _a1, _a2)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]*model.Pipeline)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(*model.Repo, *model.ListOptions) error); ok {
-		r1 = rf(_a0, _a1)
+	if rf, ok := ret.Get(1).(func(*model.Repo, *model.ListOptions, *model.PipelineFilter) error); ok {
+		r1 = rf(_a0, _a1, _a2)
 	} else {
 		r1 = ret.Error(1)
 	}

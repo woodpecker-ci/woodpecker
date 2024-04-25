@@ -183,7 +183,10 @@ type (
 
 	// Info provides queue stats.
 	Info struct {
-		Stats struct {
+		Pending       []Task `json:"pending"`
+		WaitingOnDeps []Task `json:"waiting_on_deps"`
+		Running       []Task `json:"running"`
+		Stats         struct {
 			Workers       int `json:"worker_count"`
 			Pending       int `json:"pending_count"`
 			WaitingOnDeps int `json:"waiting_on_deps_count"`

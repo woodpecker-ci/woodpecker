@@ -11,13 +11,16 @@
           }"
         />
         <span>[{{ error.type }}]</span>
-        <span v-if="isLinterError(error) || isDeprecationError(error)" class="whitespace-nowrap">
+        <span
+          v-if="isLinterError(error) || isDeprecationError(error) || isBadHabitError(error)"
+          class="whitespace-nowrap"
+        >
           <span v-if="error.data?.file" class="font-bold">{{ error.data?.file }}: </span>
           <span>{{ error.data?.field }}</span>
         </span>
         <span v-else />
         <a
-          v-if="isDeprecationError(error)"
+          v-if="isDeprecationError(error) || isBadHabitError(error)"
           :href="error.data?.docs"
           target="_blank"
           class="underline col-span-full col-start-2 md:col-span-auto md:col-start-auto"
@@ -51,6 +54,10 @@ function isDeprecationError(
   error: PipelineError,
 ): error is PipelineError<{ file: string; field: string; docs: string }> {
   return error.type === 'deprecation';
+}
+
+function isBadHabitError(error: PipelineError): error is PipelineError<{ file?: string; field: string; docs: string }> {
+  return error.type === 'bad_habit';
 }
 </script>
 

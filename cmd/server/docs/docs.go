@@ -2174,6 +2174,18 @@ const docTemplate = `{
                         "description": "for response pagination, max items per page",
                         "name": "perPage",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "only return pipelines before this RFC3339 date",
+                        "name": "before",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "only return pipelines after this RFC3339 date",
+                        "name": "after",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -2325,6 +2337,44 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/Pipeline"
                         }
+                    }
+                }
+            },
+            "delete": {
+                "produces": [
+                    "text/plain"
+                ],
+                "tags": [
+                    "Pipelines"
+                ],
+                "summary": "Delete pipeline",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cpersonal access token\u003e",
+                        "description": "Insert your personal access token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "the repository id",
+                        "name": "repo_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "the number of the pipeline",
+                        "name": "number",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
                     }
                 }
             }
