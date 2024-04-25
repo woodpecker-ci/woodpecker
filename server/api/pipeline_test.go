@@ -24,8 +24,7 @@ func TestGetPipelines(t *testing.T) {
 	g := goblin.Goblin(t)
 	g.Describe("Pipeline", func() {
 		g.It("should get pipelines", func() {
-			pipelines := make([]*model.Pipeline, 0)
-			pipelines = append(pipelines, fakePipeline)
+			pipelines := []*model.Pipeline{fakePipeline}
 
 			mockStore := mocks.NewStore(t)
 			mockStore.On("GetPipelineList", mock.Anything, mock.Anything, mock.Anything).Return(pipelines, nil)
