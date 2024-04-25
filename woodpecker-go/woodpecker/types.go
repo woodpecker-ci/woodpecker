@@ -181,19 +181,21 @@ type (
 		Commit  string `json:"commit,omitempty"`
 	}
 
+	QueueStats struct {
+		Workers       int `json:"worker_count"`
+		Pending       int `json:"pending_count"`
+		WaitingOnDeps int `json:"waiting_on_deps_count"`
+		Running       int `json:"running_count"`
+		Complete      int `json:"completed_count"`
+	}
+
 	// Info provides queue stats.
 	Info struct {
-		Pending       []Task `json:"pending"`
-		WaitingOnDeps []Task `json:"waiting_on_deps"`
-		Running       []Task `json:"running"`
-		Stats         struct {
-			Workers       int `json:"worker_count"`
-			Pending       int `json:"pending_count"`
-			WaitingOnDeps int `json:"waiting_on_deps_count"`
-			Running       int `json:"running_count"`
-			Complete      int `json:"completed_count"`
-		} `json:"stats"`
-		Paused bool `json:"paused,omitempty"`
+		Pending       []Task     `json:"pending"`
+		WaitingOnDeps []Task     `json:"waiting_on_deps"`
+		Running       []Task     `json:"running"`
+		Stats         QueueStats `json:"stats"`
+		Paused        bool       `json:"paused,omitempty"`
 	}
 
 	// LogLevel is for checking/setting logging level
