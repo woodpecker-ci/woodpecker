@@ -170,8 +170,8 @@ func DeletePipeline(c *gin.Context) {
 		return
 	}
 
-	if ok, status := pipelineDeleteAllowed(pl); !ok {
-		c.String(http.StatusUnprocessableEntity, "Cannot delete pipeline with status %s", status)
+	if ok := pipelineDeleteAllowed(pl); !ok {
+		c.String(http.StatusUnprocessableEntity, "Cannot delete pipeline with status %s", pl.Status)
 		return
 	}
 
@@ -614,8 +614,8 @@ func DeletePipelineLogs(c *gin.Context) {
 		return
 	}
 
-	if ok, status := pipelineDeleteAllowed(pl); !ok {
-		c.String(http.StatusUnprocessableEntity, "Cannot delete logs for pipeline with status %s", status)
+	if ok := pipelineDeleteAllowed(pl); !ok {
+		c.String(http.StatusUnprocessableEntity, "Cannot delete logs for pipeline with status %s", pl.Status)
 		return
 	}
 
