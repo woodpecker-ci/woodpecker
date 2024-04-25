@@ -29,7 +29,7 @@ func TestFlushAfterSize(t *testing.T) {
 	logBuffer := logger.NewLogBuffer(testBuffer, bufSize, bufTime)
 	defer logBuffer.Close()
 
-	// Write 4 bytes (exact buffer size, so fill buffer)
+	// write 4 bytes (exact buffer size, so fill buffer)
 	if _, err := logBuffer.Write([]byte("123")); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -38,7 +38,7 @@ func TestFlushAfterSize(t *testing.T) {
 		t.Fatalf("expected 0 bytes, got %s", testBuffer.buf)
 	}
 
-	// Write 4 more bytes (buffer should be flushed once)
+	// write 4 more bytes (buffer should be flushed once)
 	if _, err := logBuffer.Write([]byte("4567")); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -47,12 +47,12 @@ func TestFlushAfterSize(t *testing.T) {
 		t.Fatalf("expected 1234, got %s", testBuffer.buf)
 	}
 
-	// Write 2 more bytes (buffer should be flushed again)
+	// write 2 more bytes (buffer should be flushed again)
 	if _, err := logBuffer.Write([]byte("89")); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	// Check if the buffer is flushed
+	// check if the buffer is flushed
 	if testBuffer.flushes != 2 {
 		t.Fatalf("expected 2 flushes, got %d", testBuffer.flushes)
 	}
@@ -73,7 +73,7 @@ func TestFlushAfterTime(t *testing.T) {
 	logBuffer := logger.NewLogBuffer(testBuffer, bufSize, bufTime)
 	defer logBuffer.Close()
 
-	// Write 4 bytes
+	// write 4 bytes
 	if _, err := logBuffer.Write([]byte("1234")); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -83,7 +83,7 @@ func TestFlushAfterTime(t *testing.T) {
 		t.Fatalf("expected 0 bytes, got %d", len(testBuffer.buf))
 	}
 
-	// Wait for the buffer to be flushed
+	// wait for the buffer to be flushed
 	time.Sleep(20 * time.Millisecond)
 
 	if string(testBuffer.buf) != "1234" {
