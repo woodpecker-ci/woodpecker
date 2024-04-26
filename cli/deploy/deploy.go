@@ -87,7 +87,7 @@ func deploy(ctx context.Context, c *cli.Command) error {
 	var number int64
 	if pipelineArg == "last" {
 		// Fetch the pipeline number from the last pipeline
-		pipelines, err := client.PipelineList(repoID)
+		pipelines, err := client.PipelineList(repoID, woodpecker.PipelineListsOptions{})
 		if err != nil {
 			return err
 		}

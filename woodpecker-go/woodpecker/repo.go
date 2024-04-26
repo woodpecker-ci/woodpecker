@@ -1,6 +1,10 @@
 package woodpecker
 
-import "fmt"
+import (
+	"fmt"
+	"net/url"
+	"time"
+)
 
 const (
 	pathRepoPost       = "%s/api/repos?forge_remote_id=%d"
@@ -23,6 +27,24 @@ const (
 	pathRepoCrons      = "%s/api/repos/%d/cron"
 	pathRepoCron       = "%s/api/repos/%d/cron/%d"
 )
+
+type PipelineListsOptions struct {
+	ListOptions
+	Before time.Time
+	After  time.Time
+}
+
+// QueryEncode returns the URL query parameters for the PipelineListsOptions.
+func (opt *PipelineListsOptions) QueryEncode() string {
+	query := opt.getURLQuery()
+	if !opt.Before.IsZero() {
+		query.Add("before", opt.Before.Format(time.RFC3339))
+	}
+	if !opt.After.IsZero() {
+		query.Add("after", opt.After.Format(time.RFC3339))
+	}
+	return query.Encode()
+}
 
 // Repo returns a repository by id.
 func (c *client) Repo(repoID int64) (*Repo, error) {
@@ -215,10 +237,13 @@ func (c *client) PipelineLast(repoID int64, branch string) (*Pipeline, error) {
 
 // PipelineList returns a list of recent pipelines for the
 // the specified repository.
-func (c *client) PipelineList(repoID int64) ([]*Pipeline, error) {
+func (c *client) PipelineList(repoID int64, opt PipelineListsOptions) ([]*Pipeline, error) {
 	var out []*Pipeline
-	uri := fmt.Sprintf(pathPipelines, c.addr, repoID)
-	err := c.get(uri, &out)
+
+	uri, _ := url.Parse(fmt.Sprintf(pathPipelines, c.addr, repoID))
+	uri.RawQuery = opt.QueryEncode()
+
+	err := c.get(uri.String(), &out)
 	return out, err
 }
 

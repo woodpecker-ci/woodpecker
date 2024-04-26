@@ -87,7 +87,7 @@ type Client interface {
 
 	// PipelineList returns a list of recent pipelines for the
 	// the specified repository.
-	PipelineList(repoID int64) ([]*Pipeline, error)
+	PipelineList(repoID int64, opt PipelineListsOptions) ([]*Pipeline, error)
 
 	// PipelineQueue returns a list of enqueued pipelines.
 	PipelineQueue() ([]*Feed, error)
