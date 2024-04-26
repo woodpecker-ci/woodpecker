@@ -1,6 +1,6 @@
 # Changelog
 
-## [2.5.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.5.0) - 2024-04-25
+## [2.5.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.5.0) - 2024-04-26
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -55,6 +55,7 @@
 
 ### Misc
 
+- Add make target for spellcheck [[#3648](https://github.com/woodpecker-ci/woodpecker/pull/3648)]
 - chore(deps): update woodpeckerci/plugin-ready-release-go docker tag to v1.1.1 [[#3641](https://github.com/woodpecker-ci/woodpecker/pull/3641)]
 - chore(deps): update web npm deps non-major [[#3640](https://github.com/woodpecker-ci/woodpecker/pull/3640)]
 - chore(deps): update web npm deps non-major [[#3631](https://github.com/woodpecker-ci/woodpecker/pull/3631)]
