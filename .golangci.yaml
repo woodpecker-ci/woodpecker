@@ -177,8 +177,6 @@ linters:
     - godot
 
 issues:
-  max-issues-per-linter: 0
-  max-same-issues: 0
   exclude-rules:
     - path: 'fixtures|cmd/agent/flags.go|cmd/server/flags.go|pipeline/backend/kubernetes/flags.go|_test.go'
       linters:
