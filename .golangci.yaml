@@ -121,6 +121,13 @@ linters-settings:
       - strings.Split
       - callerName
       - securecookie.GenerateRandomKey
+  godot:
+    scope: toplevel
+    period: true
+    capital: true
+    exclude:
+      - '^cSpell:'
+      - '^TODO:'
 
 linters:
   disable-all: true
@@ -167,8 +174,11 @@ linters:
     - forcetypeassert
     - gci
     - gomnd
+    - godot
 
 issues:
+  max-issues-per-linter: 0
+  max-same-issues: 0
   exclude-rules:
     - path: 'fixtures|cmd/agent/flags.go|cmd/server/flags.go|pipeline/backend/kubernetes/flags.go|_test.go'
       linters:
