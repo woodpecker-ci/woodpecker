@@ -60,7 +60,13 @@ func TestClient_QueueInfo(t *testing.T) {
 						RunOn:        nil,
 					},
 				},
-				Stats: QueueStats{
+				Stats: struct {
+					Workers       int `json:"worker_count"`
+					Pending       int `json:"pending_count"`
+					WaitingOnDeps int `json:"waiting_on_deps_count"`
+					Running       int `json:"running_count"`
+					Complete      int `json:"completed_count"`
+				}{
 					Workers:       2,
 					Pending:       0,
 					WaitingOnDeps: 0,
