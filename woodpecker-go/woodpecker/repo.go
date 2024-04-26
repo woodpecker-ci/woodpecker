@@ -77,7 +77,7 @@ func (c *client) RepoDel(repoID int64) error {
 	return err
 }
 
-// RepoMove moves a repository
+// RepoMove moves a repository.
 func (c *client) RepoMove(repoID int64, newFullName string) error {
 	uri := fmt.Sprintf(pathRepoMove, c.addr, repoID, newFullName)
 	return c.post(uri, nil, nil)
@@ -159,18 +159,21 @@ func (c *client) SecretDelete(repoID int64, secret string) error {
 	return c.delete(uri)
 }
 
+// CronList returns a list of cronjobs for the specified repository.
 func (c *client) CronList(repoID int64) ([]*Cron, error) {
 	out := make([]*Cron, 0, 5)
 	uri := fmt.Sprintf(pathRepoCrons, c.addr, repoID)
 	return out, c.get(uri, &out)
 }
 
+// CronCreate creates a new cron job for the specified repository.
 func (c *client) CronCreate(repoID int64, in *Cron) (*Cron, error) {
 	out := new(Cron)
 	uri := fmt.Sprintf(pathRepoCrons, c.addr, repoID)
 	return out, c.post(uri, in, out)
 }
 
+// CronUpdate updates an existing cron job for the specified repository.
 func (c *client) CronUpdate(repoID int64, in *Cron) (*Cron, error) {
 	out := new(Cron)
 	uri := fmt.Sprintf(pathRepoCron, c.addr, repoID, in.ID)
@@ -178,11 +181,13 @@ func (c *client) CronUpdate(repoID int64, in *Cron) (*Cron, error) {
 	return out, err
 }
 
+// CronDelete deletes a cron job by cron-id for the specified repository.
 func (c *client) CronDelete(repoID, cronID int64) error {
 	uri := fmt.Sprintf(pathRepoCron, c.addr, repoID, cronID)
 	return c.delete(uri)
 }
 
+// CronGet returns a cron job by cron-id for the specified repository.
 func (c *client) CronGet(repoID, cronID int64) (*Cron, error) {
 	out := new(Cron)
 	uri := fmt.Sprintf(pathRepoCron, c.addr, repoID, cronID)
@@ -217,6 +222,7 @@ func (c *client) PipelineList(repoID int64) ([]*Pipeline, error) {
 	return out, err
 }
 
+// PipelineCreate creates a new pipeline for the specified repository.
 func (c *client) PipelineCreate(repoID int64, options *PipelineOptions) (*Pipeline, error) {
 	var out *Pipeline
 	uri := fmt.Sprintf(pathPipelines, c.addr, repoID)

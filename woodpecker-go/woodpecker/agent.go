@@ -36,13 +36,13 @@ func (c *client) AgentUpdate(in *Agent) (*Agent, error) {
 	return out, c.patch(uri, in, out)
 }
 
-// AgentDelete deletes the agent with the given ID.
+// AgentDelete deletes the agent with the given id.
 func (c *client) AgentDelete(agentID int64) error {
 	uri := fmt.Sprintf(pathAgent, c.addr, agentID)
 	return c.delete(uri)
 }
 
-// AgentTasksList returns a list of all tasks for the agent with the given ID.
+// AgentTasksList returns a list of all tasks for the agent with the given id.
 func (c *client) AgentTasksList(agentID int64) ([]*Task, error) {
 	out := make([]*Task, 0, 5)
 	uri := fmt.Sprintf(pathAgentTasks, c.addr, agentID)

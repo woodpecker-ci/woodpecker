@@ -198,7 +198,7 @@ type (
 		Paused        bool       `json:"paused,omitempty"`
 	}
 
-	// LogLevel is for checking/setting logging level
+	// LogLevel is for checking/setting logging level.
 	LogLevel struct {
 		Level string `json:"log-level"`
 	}
@@ -213,7 +213,7 @@ type (
 		Type   LogEntryType `json:"type"`
 	}
 
-	// Cron is the JSON data of a cron job
+	// Cron is the JSON data of a cron job.
 	Cron struct {
 		ID        int64  `json:"id"`
 		Name      string `json:"name"`
@@ -225,13 +225,13 @@ type (
 		Branch    string `json:"branch"`
 	}
 
-	// PipelineOptions is the JSON data for creating a new pipeline
+	// PipelineOptions is the JSON data for creating a new pipeline.
 	PipelineOptions struct {
 		Branch    string            `json:"branch"`
 		Variables map[string]string `json:"variables"`
 	}
 
-	// Agent is the JSON data for an agent
+	// Agent is the JSON data for an agent.
 	Agent struct {
 		ID          int64  `json:"id"`
 		Created     int64  `json:"created"`
@@ -247,7 +247,7 @@ type (
 		NoSchedule  bool   `json:"no_schedule"`
 	}
 
-	// Task is the JSON data for a task
+	// Task is the JSON data for a task.
 	Task struct {
 		ID           string            `json:"id"`
 		Data         []byte            `json:"data"`
@@ -258,7 +258,7 @@ type (
 		AgentID      int64             `json:"agent_id"`
 	}
 
-	// Org is the JSON data for an organization
+	// Org is the JSON data for an organization.
 	Org struct {
 		ID     int64  `json:"id"`
 		Name   string `json:"name"`

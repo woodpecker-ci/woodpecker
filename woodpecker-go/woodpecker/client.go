@@ -78,27 +78,27 @@ func (c *client) SetLogLevel(in *LogLevel) (*LogLevel, error) {
 // http request helper functions
 //
 
-// helper function for making an http GET request.
+// Helper function for making an http GET request.
 func (c *client) get(rawurl string, out any) error {
 	return c.do(rawurl, http.MethodGet, nil, out)
 }
 
-// helper function for making an http POST request.
+// Helper function for making an http POST request.
 func (c *client) post(rawurl string, in, out any) error {
 	return c.do(rawurl, http.MethodPost, in, out)
 }
 
-// helper function for making an http PATCH request.
+// Helper function for making an http PATCH request.
 func (c *client) patch(rawurl string, in, out any) error {
 	return c.do(rawurl, http.MethodPatch, in, out)
 }
 
-// helper function for making an http DELETE request.
+// Helper function for making an http DELETE request.
 func (c *client) delete(rawurl string) error {
 	return c.do(rawurl, http.MethodDelete, nil, nil)
 }
 
-// helper function to make an http request
+// Helper function to make an http request.
 func (c *client) do(rawurl, method string, in, out any) error {
 	body, err := c.open(rawurl, method, in)
 	if err != nil {
@@ -111,7 +111,7 @@ func (c *client) do(rawurl, method string, in, out any) error {
 	return nil
 }
 
-// helper function to open an http request
+// Helper function to open an http request.
 func (c *client) open(rawurl, method string, in any) (io.ReadCloser, error) {
 	uri, err := url.Parse(rawurl)
 	if err != nil {
