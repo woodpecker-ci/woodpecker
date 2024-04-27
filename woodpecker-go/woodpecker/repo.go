@@ -28,14 +28,14 @@ const (
 	pathRepoCron       = "%s/api/repos/%d/cron/%d"
 )
 
-type PipelineListsOptions struct {
+type PipelineListOptions struct {
 	ListOptions
 	Before time.Time
 	After  time.Time
 }
 
-// QueryEncode returns the URL query parameters for the PipelineListsOptions.
-func (opt *PipelineListsOptions) QueryEncode() string {
+// QueryEncode returns the URL query parameters for the PipelineListOptions.
+func (opt *PipelineListOptions) QueryEncode() string {
 	query := opt.getURLQuery()
 	if !opt.Before.IsZero() {
 		query.Add("before", opt.Before.Format(time.RFC3339))
@@ -237,7 +237,7 @@ func (c *client) PipelineLast(repoID int64, branch string) (*Pipeline, error) {
 
 // PipelineList returns a list of recent pipelines for the
 // the specified repository.
-func (c *client) PipelineList(repoID int64, opt PipelineListsOptions) ([]*Pipeline, error) {
+func (c *client) PipelineList(repoID int64, opt PipelineListOptions) ([]*Pipeline, error) {
 	var out []*Pipeline
 
 	uri, _ := url.Parse(fmt.Sprintf(pathPipelines, c.addr, repoID))

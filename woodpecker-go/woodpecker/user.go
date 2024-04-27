@@ -1,6 +1,9 @@
 package woodpecker
 
-import "fmt"
+import (
+	"fmt"
+	"net/url"
+)
 
 const (
 	pathSelf  = "%s/api/user"
@@ -8,6 +11,19 @@ const (
 	pathUsers = "%s/api/users"
 	pathUser  = "%s/api/users/%s"
 )
+
+type RepoListOptions struct {
+	All bool // query all repos, including inactive ones
+}
+
+// QueryEncode returns the URL query parameters for the RepoListOptions.
+func (opt *RepoListOptions) QueryEncode() string {
+	query := make(url.Values)
+	if opt.All {
+		query.Add("all", "true")
+	}
+	return query.Encode()
+}
 
 // Self returns the currently authenticated user.
 func (c *client) Self() (*User, error) {
@@ -58,18 +74,12 @@ func (c *client) UserDel(login string) error {
 
 // RepoList returns a list of all repositories to which
 // the user has explicit access in the host system.
-func (c *client) RepoList() ([]*Repo, error) {
+func (c *client) RepoList(opt RepoListOptions) ([]*Repo, error) {
 	var out []*Repo
-	uri := fmt.Sprintf(pathRepos, c.addr)
-	err := c.get(uri, &out)
-	return out, err
-}
 
-// RepoListOpts returns a list of all repositories to which
-// the user has explicit access in the host system.
-func (c *client) RepoListOpts(all bool) ([]*Repo, error) {
-	var out []*Repo
-	uri := fmt.Sprintf(pathRepos+"?all=%v", c.addr, all)
-	err := c.get(uri, &out)
+	uri, _ := url.Parse(fmt.Sprintf(pathRepos, c.addr))
+	uri.RawQuery = opt.QueryEncode()
+
+	err := c.get(uri.String(), &out)
 	return out, err
 }

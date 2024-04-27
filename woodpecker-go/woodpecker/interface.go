@@ -54,11 +54,7 @@ type Client interface {
 
 	// RepoList returns a list of all repositories to which the user has explicit
 	// access in the host system.
-	RepoList() ([]*Repo, error)
-
-	// RepoListOpts returns a list of all repositories to which the user has
-	// explicit access in the host system.
-	RepoListOpts(bool) ([]*Repo, error)
+	RepoList(opt RepoListOptions) ([]*Repo, error)
 
 	// RepoPost activates a repository.
 	RepoPost(forgeRemoteID int64) (*Repo, error)
@@ -87,7 +83,7 @@ type Client interface {
 
 	// PipelineList returns a list of recent pipelines for the
 	// the specified repository.
-	PipelineList(repoID int64, opt PipelineListsOptions) ([]*Pipeline, error)
+	PipelineList(repoID int64, opt PipelineListOptions) ([]*Pipeline, error)
 
 	// PipelineQueue returns a list of enqueued pipelines.
 	PipelineQueue() ([]*Feed, error)

@@ -14,7 +14,7 @@ func TestPipelineList(t *testing.T) {
 	tests := []struct {
 		name           string
 		fixtureHandler http.HandlerFunc
-		opts           PipelineListsOptions
+		opts           PipelineListOptions
 		wantErr        bool
 		expectedLength int
 		expectedIDs    []int64
@@ -29,7 +29,7 @@ func TestPipelineList(t *testing.T) {
 				_, err := fmt.Fprint(w, `[{"id":1},{"id":2}]`)
 				assert.NoError(t, err)
 			},
-			opts: PipelineListsOptions{
+			opts: PipelineListOptions{
 				ListOptions: ListOptions{
 					Page:    2,
 					PerPage: 10,
@@ -50,7 +50,7 @@ func TestPipelineList(t *testing.T) {
 				_, err := fmt.Fprint(w, `[{"id":1},{"id":2}]`)
 				assert.NoError(t, err)
 			},
-			opts:           PipelineListsOptions{},
+			opts:           PipelineListOptions{},
 			expectedLength: 2,
 			expectedIDs:    []int64{1, 2},
 		},
@@ -59,7 +59,7 @@ func TestPipelineList(t *testing.T) {
 			fixtureHandler: func(w http.ResponseWriter, _ *http.Request) {
 				w.WriteHeader(http.StatusInternalServerError)
 			},
-			opts:    PipelineListsOptions{},
+			opts:    PipelineListOptions{},
 			wantErr: true,
 		},
 	}

@@ -74,7 +74,7 @@ func pipelineList(_ context.Context, c *cli.Command, client woodpecker.Client) (
 		return resources, err
 	}
 
-	pipelines, err := client.PipelineList(repoID, woodpecker.PipelineListsOptions{})
+	pipelines, err := client.PipelineList(repoID, woodpecker.PipelineListOptions{})
 	if err != nil {
 		return resources, err
 	}
