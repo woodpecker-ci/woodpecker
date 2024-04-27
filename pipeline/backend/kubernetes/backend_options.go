@@ -14,6 +14,7 @@ type BackendOptions struct {
 	NodeSelector       map[string]string `mapstructure:"nodeSelector"`
 	Tolerations        []Toleration      `mapstructure:"tolerations"`
 	SecurityContext    *SecurityContext  `mapstructure:"securityContext"`
+	SecretNames        []string          `mapstructure:"secretNames"`
 }
 
 // Resources defines two maps for kubernetes resource definitions

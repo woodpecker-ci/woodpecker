@@ -55,14 +55,15 @@ type kube struct {
 }
 
 type config struct {
-	Namespace            string
-	StorageClass         string
-	VolumeSize           string
-	StorageRwx           bool
-	PodLabels            map[string]string
-	PodAnnotations       map[string]string
-	ImagePullSecretNames []string
-	SecurityContext      SecurityContextConfig
+	Namespace                  string
+	StorageClass               string
+	VolumeSize                 string
+	StorageRwx                 bool
+	PodLabels                  map[string]string
+	PodAnnotations             map[string]string
+	ImagePullSecretNames       []string
+	SecurityContext            SecurityContextConfig
+	NativeSecretsAllowFromStep bool
 }
 type SecurityContextConfig struct {
 	RunAsNonRoot bool
@@ -92,6 +93,7 @@ func configFromCliContext(ctx context.Context) (*config, error) {
 				SecurityContext: SecurityContextConfig{
 					RunAsNonRoot: c.Bool("backend-k8s-secctx-nonroot"),
 				},
+				NativeSecretsAllowFromStep: c.Bool("backend-k8s-native-secrets-allow-from-step"),
 			}
 			// TODO: remove in next major
 			if len(config.ImagePullSecretNames) == 1 && config.ImagePullSecretNames[0] == "regcred" {

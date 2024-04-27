@@ -700,6 +700,12 @@
         "runtimeClassName": {
           "description": "Read more: https://woodpecker-ci.org/docs/administration/backends/kubernetes#runtimeclassname",
           "type": "string"
+        },
+        "secretNames": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         }
       }
     },

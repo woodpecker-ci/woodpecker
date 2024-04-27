@@ -200,6 +200,19 @@ func TestFullPod(t *testing.T) {
 							"protocol": "UDP"
 						}
 					],
+					"envFrom": [
+						"<<UNORDERED>>",
+						{
+							"secretRef": {
+								"name": "ghcr-push-secret"
+							}
+						},
+						{
+							"secretRef": {
+								"name": "aws-ecr"
+							}
+						}
+					],
 					"env": [
 						"<<UNORDERED>>",
 						{
@@ -328,11 +341,12 @@ func TestFullPod(t *testing.T) {
 		ExtraHosts:  hostAliases,
 		Ports:       ports,
 	}, &config{
-		Namespace:            "woodpecker",
-		ImagePullSecretNames: []string{"regcred", "another-pull-secret"},
-		PodLabels:            map[string]string{"app": "test"},
-		PodAnnotations:       map[string]string{"apps.kubernetes.io/pod-index": "0"},
-		SecurityContext:      SecurityContextConfig{RunAsNonRoot: false},
+		Namespace:                  "woodpecker",
+		ImagePullSecretNames:       []string{"regcred", "another-pull-secret"},
+		PodLabels:                  map[string]string{"app": "test"},
+		PodAnnotations:             map[string]string{"apps.kubernetes.io/pod-index": "0"},
+		SecurityContext:            SecurityContextConfig{RunAsNonRoot: false},
+		NativeSecretsAllowFromStep: true,
 	}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{
 		NodeSelector:       map[string]string{"storage": "ssd"},
 		RuntimeClassName:   &runtimeClass,
@@ -343,6 +357,7 @@ func TestFullPod(t *testing.T) {
 			Limits:   map[string]string{"memory": "256Mi", "cpu": "2"},
 		},
 		SecurityContext: &secCtx,
+		SecretNames:     []string{"ghcr-push-secret", "aws-ecr"},
 	})
 	assert.NoError(t, err)
 

@@ -48,7 +48,7 @@ func mkPod(step *types.Step, config *config, podName, goos string, options Backe
 		return nil, err
 	}
 
-	container, err := podContainer(step, podName, goos, options)
+	container, err := podContainer(step, config, podName, goos, options)
 	if err != nil {
 		return nil, err
 	}
@@ -133,7 +133,7 @@ func podSpec(step *types.Step, config *config, options BackendOptions) (v1.PodSp
 	return spec, nil
 }
 
-func podContainer(step *types.Step, podName, goos string, options BackendOptions) (v1.Container, error) {
+func podContainer(step *types.Step, config *config, podName, goos string, options BackendOptions) (v1.Container, error) {
 	var err error
 	container := v1.Container{
 		Name:            podName,
@@ -158,6 +158,14 @@ func podContainer(step *types.Step, podName, goos string, options BackendOptions
 	}
 
 	container.Env = mapToEnvVars(step.Environment)
+
+	if len(options.SecretNames) > 0 {
+		if config.NativeSecretsAllowFromStep {
+			container.EnvFrom = containerSecrets(options.SecretNames)
+		} else {
+			log.Debug().Msg("Secret names were defined in backend options, but its using disallowed by instance configuration ")
+		}
+	}
 
 	container.Resources, err = resourceRequirements(options.Resources)
 	if err != nil {
@@ -236,6 +244,25 @@ func containerPort(port types.Port) v1.ContainerPort {
 	}
 }
 
+func containerSecrets(secretNames []string) []v1.EnvFromSource {
+	if secretNames == nil || len(secretNames) == 0 {
+		return nil
+	}
+	secretRefs := make([]v1.EnvFromSource, len(secretNames))
+	for i, secretName := range secretNames {
+		secretRefs[i] = containerSecret(secretName)
+	}
+	return secretRefs
+}
+
+func containerSecret(secretName string) v1.EnvFromSource {
+	return v1.EnvFromSource{
+		SecretRef: &v1.SecretEnvSource{
+			LocalObjectReference: secretReference(secretName),
+		},
+	}
+}
+
 // Here is the service IPs (placed in /etc/hosts in the Pod)
 func hostAliases(extraHosts []types.HostAlias) []v1.HostAlias {
 	var hostAliases []v1.HostAlias
@@ -258,14 +285,14 @@ func imagePullSecretsReferences(imagePullSecretNames []string) []v1.LocalObjectR
 
 	secretReferences := make([]v1.LocalObjectReference, len(imagePullSecretNames))
 	for i, imagePullSecretName := range imagePullSecretNames {
-		secretReferences[i] = imagePullSecretsReference(imagePullSecretName)
+		secretReferences[i] = secretReference(imagePullSecretName)
 	}
 	return secretReferences
 }
 
-func imagePullSecretsReference(imagePullSecretName string) v1.LocalObjectReference {
+func secretReference(secretName string) v1.LocalObjectReference {
 	return v1.LocalObjectReference{
-		Name: imagePullSecretName,
+		Name: secretName,
 	}
 }
 
