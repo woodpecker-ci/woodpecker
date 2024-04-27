@@ -36,11 +36,15 @@ type PipelineListOptions struct {
 
 type DeployOptions struct {
 	DeployTo string            // override the target deploy value
-	Params   map[string]string // custom parameters to be injected into the step environment. Format: KEY=value
+	Params   map[string]string // custom KEY=value parameters to be injected into the step environment
 }
 
 type PipelineStartOptions struct {
-	Params map[string]string // custom parameters to be injected into the step environment. Format: KEY=value
+	Params map[string]string // custom KEY=value parameters to be injected into the step environment
+}
+
+type PipelineLastOptions struct {
+	Branch string // last pipeline from given branch, an empty branch will result in the default branch
 }
 
 // QueryEncode returns the URL query parameters for the PipelineListOptions.
@@ -68,6 +72,15 @@ func (opt *DeployOptions) QueryEncode() string {
 // QueryEncode returns the URL query parameters for the PipelineStartOptions.
 func (opt *PipelineStartOptions) QueryEncode() string {
 	query := mapValues(opt.Params)
+	return query.Encode()
+}
+
+// QueryEncode returns the URL query parameters for the PipelineLastOptions.
+func (opt *PipelineLastOptions) QueryEncode() string {
+	query := make(url.Values)
+	if opt.Branch != "" {
+		query.Add("branch", opt.Branch)
+	}
 	return query.Encode()
 }
 
@@ -249,14 +262,12 @@ func (c *client) Pipeline(repoID, pipeline int64) (*Pipeline, error) {
 	return out, err
 }
 
-// Pipeline returns the latest repository pipeline by branch.
-func (c *client) PipelineLast(repoID int64, branch string) (*Pipeline, error) {
+// Pipeline returns the latest repository pipeline.
+func (c *client) PipelineLast(repoID int64, opt PipelineLastOptions) (*Pipeline, error) {
 	out := new(Pipeline)
-	uri := fmt.Sprintf(pathPipeline, c.addr, repoID, "latest")
-	if len(branch) != 0 {
-		uri += "?branch=" + branch
-	}
-	err := c.get(uri, out)
+	uri, _ := url.Parse(fmt.Sprintf(pathPipeline, c.addr, repoID, "latest"))
+	uri.RawQuery = opt.QueryEncode()
+	err := c.get(uri.String(), out)
 	return out, err
 }
 

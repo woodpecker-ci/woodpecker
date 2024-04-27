@@ -77,9 +77,8 @@ type Client interface {
 	// Pipeline returns a repository pipeline by number.
 	Pipeline(repoID, pipeline int64) (*Pipeline, error)
 
-	// PipelineLast returns the latest repository pipeline by branch. An empty branch
-	// will result in the default branch.
-	PipelineLast(repoID int64, branch string) (*Pipeline, error)
+	// PipelineLast returns the latest repository pipeline.
+	PipelineLast(repoID int64, opt PipelineLastOptions) (*Pipeline, error)
 
 	// PipelineList returns a list of recent pipelines for the
 	// the specified repository.

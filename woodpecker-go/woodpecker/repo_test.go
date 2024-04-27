@@ -240,3 +240,74 @@ func TestClientPipelineStart(t *testing.T) {
 		})
 	}
 }
+
+func TestClient_PipelineLast(t *testing.T) {
+	tests := []struct {
+		name     string
+		handler  http.HandlerFunc
+		repoID   int64
+		opt      PipelineLastOptions
+		expected *Pipeline
+		wantErr  bool
+	}{
+		{
+			name: "success",
+			handler: func(w http.ResponseWriter, r *http.Request) {
+				assert.Equal(t, "/api/repos/1/pipelines/latest?branch=main", r.URL.Path+"?"+r.URL.RawQuery)
+				w.WriteHeader(http.StatusOK)
+				_, err := fmt.Fprint(w, `{"id":1,"number":1,"status":"success","event":"push","branch":"main"}`)
+				assert.NoError(t, err)
+			},
+			repoID: 1,
+			opt:    PipelineLastOptions{Branch: "main"},
+			expected: &Pipeline{
+				ID:     1,
+				Number: 1,
+				Status: "success",
+				Event:  "push",
+				Branch: "main",
+			},
+			wantErr: false,
+		},
+		{
+			name: "server error",
+			handler: func(w http.ResponseWriter, _ *http.Request) {
+				w.WriteHeader(http.StatusInternalServerError)
+			},
+			repoID:   1,
+			opt:      PipelineLastOptions{},
+			expected: nil,
+			wantErr:  true,
+		},
+		{
+			name: "invalid response",
+			handler: func(w http.ResponseWriter, _ *http.Request) {
+				w.WriteHeader(http.StatusOK)
+				_, err := fmt.Fprint(w, `invalid json`)
+				assert.NoError(t, err)
+			},
+			repoID:   1,
+			opt:      PipelineLastOptions{},
+			expected: nil,
+			wantErr:  true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ts := httptest.NewServer(tt.handler)
+			defer ts.Close()
+
+			client := NewClient(ts.URL, http.DefaultClient)
+			pipeline, err := client.PipelineLast(tt.repoID, tt.opt)
+
+			if tt.wantErr {
+				assert.Error(t, err)
+				return
+			}
+
+			assert.NoError(t, err)
+			assert.Equal(t, tt.expected, pipeline)
+		})
+	}
+}
