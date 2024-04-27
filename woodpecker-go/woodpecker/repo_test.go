@@ -382,3 +382,63 @@ func TestClientRepoPost(t *testing.T) {
 		})
 	}
 }
+
+func TestClientRepoMove(t *testing.T) {
+	tests := []struct {
+		name    string
+		handler http.HandlerFunc
+		repoID  int64
+		opts    RepoMoveOptions
+		wantErr bool
+	}{
+		{
+			name: "success",
+			handler: func(w http.ResponseWriter, r *http.Request) {
+				assert.Equal(t, http.MethodPost, r.Method)
+				assert.Equal(t, "/api/repos/123/move?to=newowner", r.URL.RequestURI())
+				w.WriteHeader(http.StatusOK)
+			},
+			repoID: 123,
+			opts: RepoMoveOptions{
+				To: "newowner",
+			},
+			wantErr: false,
+		},
+		{
+			name: "server error",
+			handler: func(w http.ResponseWriter, _ *http.Request) {
+				w.WriteHeader(http.StatusInternalServerError)
+			},
+			repoID:  123,
+			opts:    RepoMoveOptions{},
+			wantErr: true,
+		},
+		{
+			name: "invalid options",
+			handler: func(w http.ResponseWriter, r *http.Request) {
+				assert.Equal(t, http.MethodPost, r.Method)
+				w.WriteHeader(http.StatusBadRequest)
+			},
+			repoID:  123,
+			opts:    RepoMoveOptions{},
+			wantErr: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ts := httptest.NewServer(tt.handler)
+			defer ts.Close()
+
+			client := NewClient(ts.URL, http.DefaultClient)
+			err := client.RepoMove(tt.repoID, tt.opts)
+
+			if tt.wantErr {
+				assert.Error(t, err)
+				return
+			}
+
+			assert.NoError(t, err)
+		})
+	}
+}

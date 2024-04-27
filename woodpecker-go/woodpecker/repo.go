@@ -11,7 +11,7 @@ const (
 	pathRepoPost       = "%s/api/repos"
 	pathRepo           = "%s/api/repos/%d"
 	pathRepoLookup     = "%s/api/repos/lookup/%s"
-	pathRepoMove       = "%s/api/repos/%d/move?to=%s"
+	pathRepoMove       = "%s/api/repos/%d/move"
 	pathChown          = "%s/api/repos/%d/chown"
 	pathRepair         = "%s/api/repos/%d/repair"
 	pathPipelines      = "%s/api/repos/%d/pipelines"
@@ -50,6 +50,10 @@ type PipelineLastOptions struct {
 
 type RepoPostOptions struct {
 	ForgeRemoteID int64
+}
+
+type RepoMoveOptions struct {
+	To string
 }
 
 // QueryEncode returns the URL query parameters for the PipelineListOptions.
@@ -93,6 +97,13 @@ func (opt *PipelineLastOptions) QueryEncode() string {
 func (opt *RepoPostOptions) QueryEncode() string {
 	query := make(url.Values)
 	query.Add("forge_remote_id", strconv.FormatInt(opt.ForgeRemoteID, 10))
+	return query.Encode()
+}
+
+// QueryEncode returns the URL query parameters for the RepoMoveOptions.
+func (opt *RepoMoveOptions) QueryEncode() string {
+	query := make(url.Values)
+	query.Add("to", opt.To)
 	return query.Encode()
 }
 
@@ -152,9 +163,10 @@ func (c *client) RepoDel(repoID int64) error {
 }
 
 // RepoMove moves a repository.
-func (c *client) RepoMove(repoID int64, newFullName string) error {
-	uri := fmt.Sprintf(pathRepoMove, c.addr, repoID, newFullName)
-	return c.post(uri, nil, nil)
+func (c *client) RepoMove(repoID int64, opt RepoMoveOptions) error {
+	uri, _ := url.Parse(fmt.Sprintf(pathRepoMove, c.addr, repoID))
+	uri.RawQuery = opt.QueryEncode()
+	return c.post(uri.String(), nil, nil)
 }
 
 // Registry returns a registry by hostname.

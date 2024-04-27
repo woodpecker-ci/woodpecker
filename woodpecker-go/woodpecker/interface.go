@@ -63,7 +63,7 @@ type Client interface {
 	RepoPatch(repoID int64, repo *RepoPatch) (*Repo, error)
 
 	// RepoMove moves the repository
-	RepoMove(repoID int64, dst string) error
+	RepoMove(repoID int64, opt RepoMoveOptions) error
 
 	// RepoChown updates a repository owner.
 	RepoChown(repoID int64) (*Repo, error)
