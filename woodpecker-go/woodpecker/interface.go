@@ -57,7 +57,7 @@ type Client interface {
 	RepoList(opt RepoListOptions) ([]*Repo, error)
 
 	// RepoPost activates a repository.
-	RepoPost(forgeRemoteID int64) (*Repo, error)
+	RepoPost(opt RepoPostOptions) (*Repo, error)
 
 	// RepoPatch updates a repository.
 	RepoPatch(repoID int64, repo *RepoPatch) (*Repo, error)

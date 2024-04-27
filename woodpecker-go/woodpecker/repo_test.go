@@ -246,7 +246,7 @@ func TestClient_PipelineLast(t *testing.T) {
 		name     string
 		handler  http.HandlerFunc
 		repoID   int64
-		opt      PipelineLastOptions
+		opts     PipelineLastOptions
 		expected *Pipeline
 		wantErr  bool
 	}{
@@ -259,7 +259,7 @@ func TestClient_PipelineLast(t *testing.T) {
 				assert.NoError(t, err)
 			},
 			repoID: 1,
-			opt:    PipelineLastOptions{Branch: "main"},
+			opts:   PipelineLastOptions{Branch: "main"},
 			expected: &Pipeline{
 				ID:     1,
 				Number: 1,
@@ -275,7 +275,7 @@ func TestClient_PipelineLast(t *testing.T) {
 				w.WriteHeader(http.StatusInternalServerError)
 			},
 			repoID:   1,
-			opt:      PipelineLastOptions{},
+			opts:     PipelineLastOptions{},
 			expected: nil,
 			wantErr:  true,
 		},
@@ -287,7 +287,7 @@ func TestClient_PipelineLast(t *testing.T) {
 				assert.NoError(t, err)
 			},
 			repoID:   1,
-			opt:      PipelineLastOptions{},
+			opts:     PipelineLastOptions{},
 			expected: nil,
 			wantErr:  true,
 		},
@@ -299,7 +299,7 @@ func TestClient_PipelineLast(t *testing.T) {
 			defer ts.Close()
 
 			client := NewClient(ts.URL, http.DefaultClient)
-			pipeline, err := client.PipelineLast(tt.repoID, tt.opt)
+			pipeline, err := client.PipelineLast(tt.repoID, tt.opts)
 
 			if tt.wantErr {
 				assert.Error(t, err)
@@ -308,6 +308,77 @@ func TestClient_PipelineLast(t *testing.T) {
 
 			assert.NoError(t, err)
 			assert.Equal(t, tt.expected, pipeline)
+		})
+	}
+}
+
+func TestClientRepoPost(t *testing.T) {
+	tests := []struct {
+		name     string
+		handler  http.HandlerFunc
+		opts     RepoPostOptions
+		expected *Repo
+		wantErr  bool
+	}{
+		{
+			name: "success",
+			handler: func(w http.ResponseWriter, r *http.Request) {
+				assert.Equal(t, http.MethodPost, r.Method)
+				assert.Equal(t, "/api/repos?forge_remote_id=10", r.URL.RequestURI())
+
+				w.WriteHeader(http.StatusOK)
+				_, err := fmt.Fprint(w, `{"id":1,"name":"test","owner":"owner","full_name":"owner/test","forge_remote_id":"10"}`)
+				assert.NoError(t, err)
+			},
+			opts: RepoPostOptions{
+				ForgeRemoteID: 10,
+			},
+			expected: &Repo{
+				ID:            1,
+				ForgeRemoteID: "10",
+				Name:          "test",
+				Owner:         "owner",
+				FullName:      "owner/test",
+			},
+			wantErr: false,
+		},
+		{
+			name: "server error",
+			handler: func(w http.ResponseWriter, _ *http.Request) {
+				w.WriteHeader(http.StatusInternalServerError)
+			},
+			opts:     RepoPostOptions{},
+			expected: nil,
+			wantErr:  true,
+		},
+		{
+			name: "invalid response",
+			handler: func(w http.ResponseWriter, _ *http.Request) {
+				w.WriteHeader(http.StatusOK)
+				_, err := fmt.Fprint(w, `invalid json`)
+				assert.NoError(t, err)
+			},
+			opts:     RepoPostOptions{},
+			expected: nil,
+			wantErr:  true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ts := httptest.NewServer(tt.handler)
+			defer ts.Close()
+
+			client := NewClient(ts.URL, http.DefaultClient)
+			repo, err := client.RepoPost(tt.opts)
+
+			if tt.wantErr {
+				assert.Error(t, err)
+				return
+			}
+
+			assert.NoError(t, err)
+			assert.Equal(t, tt.expected, repo)
 		})
 	}
 }

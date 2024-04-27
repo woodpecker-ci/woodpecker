@@ -3,11 +3,12 @@ package woodpecker
 import (
 	"fmt"
 	"net/url"
+	"strconv"
 	"time"
 )
 
 const (
-	pathRepoPost       = "%s/api/repos?forge_remote_id=%d"
+	pathRepoPost       = "%s/api/repos"
 	pathRepo           = "%s/api/repos/%d"
 	pathRepoLookup     = "%s/api/repos/lookup/%s"
 	pathRepoMove       = "%s/api/repos/%d/move?to=%s"
@@ -47,6 +48,10 @@ type PipelineLastOptions struct {
 	Branch string // last pipeline from given branch, an empty branch will result in the default branch
 }
 
+type RepoPostOptions struct {
+	ForgeRemoteID int64
+}
+
 // QueryEncode returns the URL query parameters for the PipelineListOptions.
 func (opt *PipelineListOptions) QueryEncode() string {
 	query := opt.getURLQuery()
@@ -84,6 +89,13 @@ func (opt *PipelineLastOptions) QueryEncode() string {
 	return query.Encode()
 }
 
+// QueryEncode returns the URL query parameters for the RepoPostOptions.
+func (opt *RepoPostOptions) QueryEncode() string {
+	query := make(url.Values)
+	query.Add("forge_remote_id", strconv.FormatInt(opt.ForgeRemoteID, 10))
+	return query.Encode()
+}
+
 // Repo returns a repository by id.
 func (c *client) Repo(repoID int64) (*Repo, error) {
 	out := new(Repo)
@@ -101,10 +113,12 @@ func (c *client) RepoLookup(fullName string) (*Repo, error) {
 }
 
 // RepoPost activates a repository.
-func (c *client) RepoPost(forgeRemoteID int64) (*Repo, error) {
+func (c *client) RepoPost(opt RepoPostOptions) (*Repo, error) {
 	out := new(Repo)
-	uri := fmt.Sprintf(pathRepoPost, c.addr, forgeRemoteID)
-	err := c.post(uri, nil, out)
+	uri, _ := url.Parse(fmt.Sprintf(pathRepoPost, c.addr))
+	uri.RawQuery = opt.QueryEncode()
+	fmt.Println("!!!!!!!!!!", uri.String())
+	err := c.post(uri.String(), nil, out)
 	return out, err
 }
 
