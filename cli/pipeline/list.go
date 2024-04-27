@@ -16,6 +16,7 @@ package pipeline
 
 import (
 	"context"
+	"time"
 
 	"github.com/urfave/cli/v3"
 
@@ -24,6 +25,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker"
 )
 
+//nolint:mnd
 func buildPipelineListCmd() *cli.Command {
 	return &cli.Command{
 		Name:      "ls",
@@ -46,8 +48,21 @@ func buildPipelineListCmd() *cli.Command {
 			&cli.IntFlag{
 				Name:  "limit",
 				Usage: "limit the list size",
-				//nolint:mnd
 				Value: 25,
+			},
+			&cli.TimestampFlag{
+				Name:  "before",
+				Usage: "only return pipelines before this RFC3339 date",
+				Config: cli.TimestampConfig{
+					Layout: time.RFC3339,
+				},
+			},
+			&cli.TimestampFlag{
+				Name:  "after",
+				Usage: "only return pipelines after this RFC3339 date",
+				Config: cli.TimestampConfig{
+					Layout: time.RFC3339,
+				},
 			},
 		}...),
 	}
@@ -74,7 +89,18 @@ func pipelineList(_ context.Context, c *cli.Command, client woodpecker.Client) (
 		return resources, err
 	}
 
-	pipelines, err := client.PipelineList(repoID, woodpecker.PipelineListOptions{})
+	opt := woodpecker.PipelineListOptions{}
+	before := c.Timestamp("before")
+	after := c.Timestamp("after")
+
+	if before != nil {
+		opt.Before = *before
+	}
+	if after != nil {
+		opt.After = *after
+	}
+
+	pipelines, err := client.PipelineList(repoID, opt)
 	if err != nil {
 		return resources, err
 	}
