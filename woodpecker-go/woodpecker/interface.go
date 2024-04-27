@@ -92,7 +92,7 @@ type Client interface {
 	PipelineCreate(repoID int64, opts *PipelineOptions) (*Pipeline, error)
 
 	// PipelineStart re-starts a stopped pipeline.
-	PipelineStart(repoID, num int64, params map[string]string) (*Pipeline, error)
+	PipelineStart(repoID, num int64, opt PipelineStartOptions) (*Pipeline, error)
 
 	// PipelineStop stops the given pipeline.
 	PipelineStop(repoID, pipeline int64) error
@@ -114,7 +114,7 @@ type Client interface {
 
 	// Deploy triggers a deployment for an existing pipeline using the specified
 	// target environment.
-	Deploy(repoID, pipeline int64, env string, params map[string]string) (*Pipeline, error)
+	Deploy(repoID, pipeline int64, opt DeployOptions) (*Pipeline, error)
 
 	// LogsPurge purges the pipeline logs for the specified pipeline.
 	LogsPurge(repoID, pipeline int64) error

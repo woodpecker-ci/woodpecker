@@ -34,6 +34,15 @@ type PipelineListOptions struct {
 	After  time.Time
 }
 
+type DeployOptions struct {
+	DeployTo string            // override the target deploy value
+	Params   map[string]string // custom parameters to be injected into the step environment. Format: KEY=value
+}
+
+type PipelineStartOptions struct {
+	Params map[string]string // custom parameters to be injected into the step environment. Format: KEY=value
+}
+
 // QueryEncode returns the URL query parameters for the PipelineListOptions.
 func (opt *PipelineListOptions) QueryEncode() string {
 	query := opt.getURLQuery()
@@ -43,6 +52,22 @@ func (opt *PipelineListOptions) QueryEncode() string {
 	if !opt.After.IsZero() {
 		query.Add("after", opt.After.Format(time.RFC3339))
 	}
+	return query.Encode()
+}
+
+// QueryEncode returns the URL query parameters for the DeployOptions.
+func (opt *DeployOptions) QueryEncode() string {
+	query := mapValues(opt.Params)
+	if opt.DeployTo != "" {
+		query.Add("deploy_to", opt.DeployTo)
+	}
+	query.Add("event", EventDeploy)
+	return query.Encode()
+}
+
+// QueryEncode returns the URL query parameters for the PipelineStartOptions.
+func (opt *PipelineStartOptions) QueryEncode() string {
+	query := mapValues(opt.Params)
 	return query.Encode()
 }
 
@@ -239,10 +264,8 @@ func (c *client) PipelineLast(repoID int64, branch string) (*Pipeline, error) {
 // the specified repository.
 func (c *client) PipelineList(repoID int64, opt PipelineListOptions) ([]*Pipeline, error) {
 	var out []*Pipeline
-
 	uri, _ := url.Parse(fmt.Sprintf(pathPipelines, c.addr, repoID))
 	uri.RawQuery = opt.QueryEncode()
-
 	err := c.get(uri.String(), &out)
 	return out, err
 }
@@ -256,11 +279,11 @@ func (c *client) PipelineCreate(repoID int64, options *PipelineOptions) (*Pipeli
 }
 
 // PipelineStart re-starts a stopped pipeline.
-func (c *client) PipelineStart(repoID, pipeline int64, params map[string]string) (*Pipeline, error) {
+func (c *client) PipelineStart(repoID, pipeline int64, opt PipelineStartOptions) (*Pipeline, error) {
 	out := new(Pipeline)
-	val := mapValues(params)
-	uri := fmt.Sprintf(pathPipeline, c.addr, repoID, pipeline)
-	err := c.post(uri+"?"+val.Encode(), nil, out)
+	uri, _ := url.Parse(fmt.Sprintf(pathPipeline, c.addr, repoID, pipeline))
+	uri.RawQuery = opt.QueryEncode()
+	err := c.post(uri.String(), nil, out)
 	return out, err
 }
 
@@ -303,13 +326,11 @@ func (c *client) LogsPurge(repoID, pipeline int64) error {
 
 // Deploy triggers a deployment for an existing pipeline using the
 // specified target environment.
-func (c *client) Deploy(repoID, pipeline int64, env string, params map[string]string) (*Pipeline, error) {
+func (c *client) Deploy(repoID, pipeline int64, opt DeployOptions) (*Pipeline, error) {
 	out := new(Pipeline)
-	val := mapValues(params)
-	val.Set("event", EventDeploy)
-	val.Set("deploy_to", env)
-	uri := fmt.Sprintf(pathPipeline, c.addr, repoID, pipeline)
-	err := c.post(uri+"?"+val.Encode(), nil, out)
+	uri, _ := url.Parse(fmt.Sprintf(pathPipeline, c.addr, repoID, pipeline))
+	uri.RawQuery = opt.QueryEncode()
+	err := c.post(uri.String(), nil, out)
 	return out, err
 }
 

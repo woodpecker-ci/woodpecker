@@ -121,9 +121,12 @@ func deploy(ctx context.Context, c *cli.Command) error {
 		return fmt.Errorf("please specify the target environment (i.e. production)")
 	}
 
-	params := internal.ParseKeyPair(c.StringSlice("param"))
+	opt := woodpecker.DeployOptions{
+		DeployTo: env,
+		Params:   internal.ParseKeyPair(c.StringSlice("param")),
+	}
 
-	deploy, err := client.Deploy(repoID, number, env, params)
+	deploy, err := client.Deploy(repoID, number, opt)
 	if err != nil {
 		return err
 	}

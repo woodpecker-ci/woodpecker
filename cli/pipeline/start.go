@@ -23,6 +23,7 @@ import (
 	"github.com/urfave/cli/v3"
 
 	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker"
 )
 
 var pipelineStartCmd = &cli.Command{
@@ -69,9 +70,11 @@ func pipelineStart(ctx context.Context, c *cli.Command) (err error) {
 		}
 	}
 
-	params := internal.ParseKeyPair(c.StringSlice("param"))
+	opt := woodpecker.PipelineStartOptions{
+		Params: internal.ParseKeyPair(c.StringSlice("param")),
+	}
 
-	pipeline, err := client.PipelineStart(repoID, number, params)
+	pipeline, err := client.PipelineStart(repoID, number, opt)
 	if err != nil {
 		return err
 	}
