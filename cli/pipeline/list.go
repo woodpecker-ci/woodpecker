@@ -15,28 +15,12 @@
 package pipeline
 
 import (
-	"fmt"
-	"os"
-	"text/template"
-
 	"github.com/urfave/cli/v2"
 
 	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
 	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
-	"go.woodpecker-ci.org/woodpecker/v2/cli/output"
 	"go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker"
 )
-
-// template for pipeline list information
-var tmplPipelineList = "\x1b[33mPipeline #{{ .Number }} \x1b[0m" + `
-Status: {{ .Status }}
-Event: {{ .Event }}
-Commit: {{ .Commit }}
-Branch: {{ .Branch }}
-Ref: {{ .Ref }}
-Author: {{ .Author }} {{ if .Email }}<{{.Email}}>{{ end }}
-Message: {{ .Message }}
-`
 
 //nolint:gomnd
 var pipelineListCmd = &cli.Command{
@@ -85,8 +69,6 @@ func pipelineList(c *cli.Context) error {
 	event := c.String("event")
 	status := c.String("status")
 	limit := c.Int("limit")
-	outfmt, outopt := output.ParseOutputOptions(c.String("output"))
-	noHeader := c.Bool("no-header")
 
 	resources := make([]woodpecker.Pipeline, 0)
 
@@ -108,38 +90,5 @@ func pipelineList(c *cli.Context) error {
 		count++
 	}
 
-	switch outfmt {
-	case "go-template":
-		if len(outopt) < 1 {
-			return fmt.Errorf("%w: missing template", output.ErrOutputOptionRequired)
-		}
-
-		tmpl, err := template.New("_").Parse(outopt[0] + "\n")
-		if err != nil {
-			return err
-		}
-		if err := tmpl.Execute(os.Stdout, resources); err != nil {
-			return err
-		}
-	case "table":
-		fallthrough
-	default:
-		table := output.NewTable()
-		cols := []string{"Number", "Status", "Event", "Branch", "Commit", "Author"}
-
-		if len(outopt) > 0 {
-			cols = outopt
-		}
-		if !noHeader {
-			table.WriteHeader(cols)
-		}
-		for _, resource := range resources {
-			if err := table.Write(cols, resource); err != nil {
-				return err
-			}
-		}
-		table.Flush()
-	}
-
-	return nil
+	return pipelineOutput(c, resources)
 }

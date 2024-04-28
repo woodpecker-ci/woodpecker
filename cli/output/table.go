@@ -177,18 +177,6 @@ func (o *Table) Write(columns []string, obj any) error {
 	return nil
 }
 
-func fieldName(name string) string {
-	r := []rune(name)
-	var out []rune
-	for i := range r {
-		if i > 0 && (unicode.IsUpper(r[i])) && (i+1 < len(r) && unicode.IsLower(r[i+1]) || unicode.IsLower(r[i-1])) {
-			out = append(out, '_')
-		}
-		out = append(out, unicode.ToLower(r[i]))
-	}
-	return string(out)
-}
-
 func NA(s string) string {
 	if s == "" {
 		return "-"
@@ -201,4 +189,16 @@ func YesNo(b bool) string {
 		return "yes"
 	}
 	return "no"
+}
+
+func fieldName(name string) string {
+	r := []rune(name)
+	var out []rune
+	for i := range r {
+		if i > 0 && (unicode.IsUpper(r[i])) && (i+1 < len(r) && unicode.IsLower(r[i+1]) || unicode.IsLower(r[i-1])) {
+			out = append(out, '_')
+		}
+		out = append(out, unicode.ToLower(r[i]))
+	}
+	return string(out)
 }
