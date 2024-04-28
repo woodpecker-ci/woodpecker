@@ -58,6 +58,7 @@
 
 ### Misc
 
+- chore(deps): update node.js to v22 [[#3659](https://github.com/woodpecker-ci/woodpecker/pull/3659)]
 - chore(deps): lock file maintenance [[#3656](https://github.com/woodpecker-ci/woodpecker/pull/3656)]
 - Add make target for spellcheck [[#3648](https://github.com/woodpecker-ci/woodpecker/pull/3648)]
 - chore(deps): update woodpeckerci/plugin-ready-release-go docker tag to v1.1.1 [[#3641](https://github.com/woodpecker-ci/woodpecker/pull/3641)]
