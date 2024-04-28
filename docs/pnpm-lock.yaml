@@ -5,7 +5,7 @@ settings:
   excludeLinksFromLockfile: false
 
 overrides:
-  trim: ^0.0.3
+  trim: ^1.0.0
   got: ^14.0.0
 
 importers:
