@@ -16,6 +16,7 @@
 
 ### 📚 Documentation
 
+- chore(deps): update dependency trim to v1 [[#3658](https://github.com/woodpecker-ci/woodpecker/pull/3658)]
 - chore(deps): update dependency got to v14 [[#3657](https://github.com/woodpecker-ci/woodpecker/pull/3657)]
 - Fail on broken anchors [[#3644](https://github.com/woodpecker-ci/woodpecker/pull/3644)]
 - Fix step syntax in docs [[#3635](https://github.com/woodpecker-ci/woodpecker/pull/3635)]
