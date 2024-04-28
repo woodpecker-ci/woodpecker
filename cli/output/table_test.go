@@ -2,6 +2,7 @@ package output
 
 import (
 	"bytes"
+	"os"
 	"strings"
 	"testing"
 )
@@ -21,7 +22,7 @@ type testFieldsStruct struct {
 
 func TestTableOutput(t *testing.T) {
 	var wfs writerFlusherStub
-	to := NewTable()
+	to := NewTable(os.Stdout)
 	to.w = &wfs
 
 	t.Run("AddAllowedFields", func(t *testing.T) {

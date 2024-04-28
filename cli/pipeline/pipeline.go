@@ -16,6 +16,7 @@ package pipeline
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"text/template"
 
@@ -45,9 +46,19 @@ var Command = &cli.Command{
 	},
 }
 
-func pipelineOutput(c *cli.Context, resources []woodpecker.Pipeline) error {
+func pipelineOutput(c *cli.Context, resources []woodpecker.Pipeline, fd ...io.Writer) error {
 	outfmt, outopt := output.ParseOutputOptions(c.String("output"))
 	noHeader := c.Bool("no-header")
+
+	var out io.Writer
+	switch len(fd) {
+	case 0:
+		out = os.Stdout
+	case 1:
+		out = fd[0]
+	default:
+		out = os.Stdout
+	}
 
 	switch outfmt {
 	case "go-template":
@@ -59,13 +70,13 @@ func pipelineOutput(c *cli.Context, resources []woodpecker.Pipeline) error {
 		if err != nil {
 			return err
 		}
-		if err := tmpl.Execute(os.Stdout, resources); err != nil {
+		if err := tmpl.Execute(out, resources); err != nil {
 			return err
 		}
 	case "table":
 		fallthrough
 	default:
-		table := output.NewTable()
+		table := output.NewTable(out)
 		cols := []string{"Number", "Status", "Event", "Branch", "Commit", "Author"}
 
 		if len(outopt) > 0 {

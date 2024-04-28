@@ -27,7 +27,7 @@ var pipelineListCmd = &cli.Command{
 	Name:      "ls",
 	Usage:     "show pipeline history",
 	ArgsUsage: "<repo-id|repo-full-name>",
-	Action:    pipelineList,
+	Action:    List,
 	Flags: append(common.OutputFlags("table"), []cli.Flag{
 		&cli.StringFlag{
 			Name:  "branch",
@@ -49,28 +49,36 @@ var pipelineListCmd = &cli.Command{
 	}...),
 }
 
-func pipelineList(c *cli.Context) error {
-	repoIDOrFullName := c.Args().First()
+func List(c *cli.Context) error {
 	client, err := internal.NewClient(c)
 	if err != nil {
 		return err
 	}
-	repoID, err := internal.ParseRepo(client, repoIDOrFullName)
+	resources, err := pipelineList(c, client)
 	if err != nil {
 		return err
+	}
+	return pipelineOutput(c, resources)
+}
+
+func pipelineList(c *cli.Context, client woodpecker.Client) ([]woodpecker.Pipeline, error) {
+	resources := make([]woodpecker.Pipeline, 0)
+
+	repoIDOrFullName := c.Args().First()
+	repoID, err := internal.ParseRepo(client, repoIDOrFullName)
+	if err != nil {
+		return resources, err
 	}
 
 	pipelines, err := client.PipelineList(repoID)
 	if err != nil {
-		return err
+		return resources, err
 	}
 
 	branch := c.String("branch")
 	event := c.String("event")
 	status := c.String("status")
 	limit := c.Int("limit")
-
-	resources := make([]woodpecker.Pipeline, 0)
 
 	var count int
 	for _, pipeline := range pipelines {
@@ -90,5 +98,5 @@ func pipelineList(c *cli.Context) error {
 		count++
 	}
 
-	return pipelineOutput(c, resources)
+	return resources, nil
 }
