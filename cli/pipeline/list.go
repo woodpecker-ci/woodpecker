@@ -28,7 +28,7 @@ var pipelineListCmd = &cli.Command{
 	Usage:     "show pipeline history",
 	ArgsUsage: "<repo-id|repo-full-name>",
 	Action:    pipelineList,
-	Flags: append(common.OutputFlag("table"), []cli.Flag{
+	Flags: append(common.OutputFlags("table"), []cli.Flag{
 		&cli.StringFlag{
 			Name:  "branch",
 			Usage: "branch filter",

@@ -29,7 +29,7 @@ var pipelineCreateCmd = &cli.Command{
 	Usage:     "create new pipeline",
 	ArgsUsage: "<repo-id|repo-full-name>",
 	Action:    pipelineCreate,
-	Flags: append(common.OutputFlag("table"), []cli.Flag{
+	Flags: append(common.OutputFlags("table"), []cli.Flag{
 		&cli.StringFlag{
 			Name:     "branch",
 			Usage:    "branch to create pipeline from",

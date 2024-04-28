@@ -75,8 +75,8 @@ func FormatFlag(tmpl string, hidden ...bool) *cli.StringFlag {
 	}
 }
 
-// OutputFlag returns a slice of cli.Flag containing output format options.
-func OutputFlag(def string) []cli.Flag {
+// OutputFlags returns a slice of cli.Flag containing output format options.
+func OutputFlags(def string) []cli.Flag {
 	return []cli.Flag{
 		&cli.StringFlag{
 			Name:  "output",
