@@ -48,7 +48,7 @@ func main() {
 }
 
 func removeHost(jsonIn string) string {
-	m := make(map[string]any{})
+	m := make(map[string]interface{})
 	if err := json.Unmarshal([]byte(jsonIn), &m); err != nil {
 		panic(err)
 	}
