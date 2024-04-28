@@ -93,9 +93,13 @@ func podLabels(step *types.Step, config *config, options BackendOptions) (map[st
 	var err error
 	labels := make(map[string]string)
 
-	if config.PodLabelsAllowFromStep && len(options.Labels) > 0 {
-		log.Trace().Msgf("using labels from the backend options: %v", options.Labels)
-		maps.Copy(labels, options.Labels)
+	if len(options.Labels) > 0 {
+		if config.PodLabelsAllowFromStep {
+			log.Trace().Msgf("using labels from the backend options: %v", options.Labels)
+			maps.Copy(labels, options.Labels)
+		} else {
+			log.Debug().Msg("Pod labels were defined in backend options, but its using disallowed by instance configuration ")
+		}
 	}
 	if len(config.PodLabels) > 0 {
 		log.Trace().Msgf("using labels from the configuration: %v", config.PodLabels)
@@ -119,9 +123,13 @@ func stepLabel(step *types.Step) (string, error) {
 func podAnnotations(config *config, options BackendOptions, podName string) map[string]string {
 	annotations := make(map[string]string)
 
-	if config.PodAnnotationsAllowFromStep && len(options.Annotations) > 0 {
-		log.Trace().Msgf("using annotations from the backend options: %v", options.Annotations)
-		maps.Copy(annotations, options.Annotations)
+	if len(options.Annotations) > 0 {
+		if config.PodAnnotationsAllowFromStep {
+			log.Trace().Msgf("using annotations from the backend options: %v", options.Annotations)
+			maps.Copy(annotations, options.Annotations)
+		} else {
+			log.Debug().Msg("Pod annotations were defined in backend options, but its using disallowed by instance configuration ")
+		}
 	}
 	if len(config.PodAnnotations) > 0 {
 		log.Trace().Msgf("using annotations from the configuration: %v", config.PodAnnotations)
