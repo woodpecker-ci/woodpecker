@@ -93,7 +93,7 @@ func configFromCliContext(ctx context.Context) (*config, error) {
 				SecurityContext: SecurityContextConfig{
 					RunAsNonRoot: c.Bool("backend-k8s-secctx-nonroot"),
 				},
-				NativeSecretsAllowFromStep: c.Bool("backend-k8s-native-secrets-allow-from-step"),
+				NativeSecretsAllowFromStep: c.Bool("backend-k8s-allow-native-secrets"),
 			}
 			// TODO: remove in next major
 			if len(config.ImagePullSecretNames) == 1 && config.ImagePullSecretNames[0] == "regcred" {

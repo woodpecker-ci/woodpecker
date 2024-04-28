@@ -67,9 +67,9 @@ var Flags = []cli.Flag{
 		Value:   cli.NewStringSlice("regcred"),
 	},
 	&cli.BoolFlag{
-		EnvVars: []string{"WOODPECKER_BACKEND_K8S_NATIVE_SECRETS_ALLOW_FROM_STEP"},
-		Name:    "backend-k8s-native-secrets-allow-from-step",
-		Usage:   "whether to allow existing Kubernetes secrets to be referenced from step",
+		EnvVars: []string{"WOODPECKER_BACKEND_K8S_ALLOW_NATIVE_SECRETS"},
+		Name:    "backend-k8s-allow-native-secrets",
+		Usage:   "whether to allow existing Kubernetes secrets to be referenced from steps",
 		Value:   false,
 	},
 }
