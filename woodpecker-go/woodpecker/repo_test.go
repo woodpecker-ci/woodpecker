@@ -395,12 +395,12 @@ func TestClientRepoMove(t *testing.T) {
 			name: "success",
 			handler: func(w http.ResponseWriter, r *http.Request) {
 				assert.Equal(t, http.MethodPost, r.Method)
-				assert.Equal(t, "/api/repos/123/move?to=newowner", r.URL.RequestURI())
+				assert.Equal(t, "/api/repos/123/move?to=new_owner", r.URL.RequestURI())
 				w.WriteHeader(http.StatusOK)
 			},
 			repoID: 123,
 			opts: RepoMoveOptions{
-				To: "newowner",
+				To: "new_owner",
 			},
 			wantErr: false,
 		},
