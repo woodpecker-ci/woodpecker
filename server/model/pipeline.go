@@ -16,8 +16,6 @@
 package model
 
 import (
-	"fmt"
-
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/errors/types"
 )
 
@@ -74,9 +72,3 @@ type PipelineOptions struct {
 	Branch    string            `json:"branch"`
 	Variables map[string]string `json:"variables"`
 } //	@name PipelineOptions
-
-// String returns a string representation of the Pipeline struct
-func (p Pipeline) String() string {
-	return fmt.Sprintf("Pipeline{Author: %s, Parent: %d, Event: %v, Status: %v, Errors: %v, Created: %d, Updated: %d, Started: %d, Finished: %d, Deploy: %s, Commit: %s, Branch: %s, Ref: %s, Refspec: %s, Title: %s, Message: %s, Timestamp: %d, Sender: %s, Avatar: %s, Email: %s, ForgeURL: %s, Reviewer: %s, Reviewed: %d, Workflows: %v, ChangedFiles: %v, AdditionalVariables: %v, PullRequestLabels: %v, IsPrerelease: %v}",
-		p.Author, p.Parent, p.Event, p.Status, p.Errors, p.Created, p.Updated, p.Started, p.Finished, p.Deploy, p.Commit, p.Branch, p.Ref, p.Refspec, p.Title, p.Message, p.Timestamp, p.Sender, p.Avatar, p.Email, p.ForgeURL, p.Reviewer, p.Reviewed, p.Workflows, p.ChangedFiles, p.AdditionalVariables, p.PullRequestLabels, p.IsPrerelease)
-}
