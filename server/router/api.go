@@ -94,6 +94,7 @@ func apiRoutes(e *gin.RouterGroup) {
 
 					repo.GET("/pipelines", api.GetPipelines)
 					repo.POST("/pipelines", session.MustPush, api.CreatePipeline)
+					repo.DELETE("/pipelines/:number", session.MustRepoAdmin(), api.DeletePipeline)
 					repo.GET("/pipelines/:number", api.GetPipeline)
 					repo.GET("/pipelines/:number/config", api.GetPipelineConfig)
 
@@ -104,6 +105,7 @@ func apiRoutes(e *gin.RouterGroup) {
 					repo.POST("/pipelines/:number/decline", session.MustPush, api.PostDecline)
 
 					repo.GET("/logs/:number/:stepId", api.GetStepLogs)
+					repo.DELETE("/logs/:number/:stepId", session.MustPush, api.DeleteStepLogs)
 
 					// requires push permissions
 					repo.DELETE("/logs/:number", session.MustPush, api.DeletePipelineLogs)

@@ -16,11 +16,12 @@ package linter
 
 import (
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/errors"
+	errorTypes "go.woodpecker-ci.org/woodpecker/v2/pipeline/errors/types"
 )
 
-func newLinterError(message, file, field string, isWarning bool) *errors.PipelineError {
-	return &errors.PipelineError{
-		Type:      errors.PipelineErrorTypeLinter,
+func newLinterError(message, file, field string, isWarning bool) *errorTypes.PipelineError {
+	return &errorTypes.PipelineError{
+		Type:      errorTypes.PipelineErrorTypeLinter,
 		Message:   message,
 		Data:      &errors.LinterErrorData{File: file, Field: field},
 		IsWarning: isWarning,

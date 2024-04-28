@@ -3,7 +3,7 @@ when:
 
 variables:
   - &golang_image 'docker.io/golang:1.22.2'
-  - &node_image 'docker.io/node:21-alpine'
+  - &node_image 'docker.io/node:22-alpine'
   - &xgo_image 'docker.io/techknowlogick/xgo:go-1.22.1'
   - &xgo_version 'go-1.21.2'
 
@@ -90,11 +90,10 @@ steps:
   release:
     depends_on:
       - checksums
-    image: docker.io/plugins/github-release
-    secrets:
-      - source: github_token
-        target: github_release_api_key
+    image: woodpeckerci/plugin-github-release:1.1.2
     settings:
+      api_key:
+        from_secret: github_token
       files:
         - dist/*.tar.gz
         - dist/*.deb

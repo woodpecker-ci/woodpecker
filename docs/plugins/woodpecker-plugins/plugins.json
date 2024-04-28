@@ -194,6 +194,11 @@
       "name": "Forge deployments",
       "docs": "https://raw.githubusercontent.com/woodpecker-ci/plugin-deployments/main/docs.md",
       "verified": true
+    },
+    {
+      "name": "Twine",
+      "docs": "https://gitea.elara.ws/music-kraken/plugin-twine/raw/branch/master/docs.md",
+      "verified": false
     }
   ]
 }
