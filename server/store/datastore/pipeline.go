@@ -59,11 +59,11 @@ func (s storage) GetPipelineList(repo *model.Repo, p *model.ListOptions, f *mode
 
 	if f != nil {
 		if f.After != 0 {
-			cond = cond.And(builder.Gt{"pipeline_started": f.After})
+			cond = cond.And(builder.Gt{"pipeline_created": f.After})
 		}
 
 		if f.Before != 0 {
-			cond = cond.And(builder.Lt{"pipeline_started": f.Before})
+			cond = cond.And(builder.Lt{"pipeline_created": f.Before})
 		}
 	}
 
