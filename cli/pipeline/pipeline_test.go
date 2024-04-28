@@ -22,22 +22,22 @@ func TestPipelineOutput(t *testing.T) {
 		{
 			name:     "table output with default columns",
 			args:     []string{},
-			expected: "NUMBER  STATUS   EVENT  BRANCH  COMMIT  AUTHOR\n1       success  push   master  abcdef  John Doe\n",
+			expected: "NUMBER  STATUS   EVENT  BRANCH  COMMIT  AUTHOR\n1       success  push   main  abcdef  John Doe\n",
 		},
 		{
 			name:     "table output with custom columns",
 			args:     []string{"output", "--output", "table=Number,Status,Branch"},
-			expected: "NUMBER  STATUS   BRANCH\n1       success  master\n",
+			expected: "NUMBER  STATUS   BRANCH\n1       success  main\n",
 		},
 		{
 			name:     "table output with no header",
 			args:     []string{"output", "--no-header"},
-			expected: "1  success  push  master  abcdef  John Doe\n",
+			expected: "1  success  push  main  abcdef  John Doe\n",
 		},
 		{
 			name:     "go-template output",
 			args:     []string{"output", "--output", "go-template={{range . }}{{.Number}} {{.Status}} {{.Branch}}{{end}}"},
-			expected: "1 success master\n",
+			expected: "1 success main\n",
 		},
 		{
 			name:    "invalid go-template",
@@ -51,7 +51,7 @@ func TestPipelineOutput(t *testing.T) {
 			Number: 1,
 			Status: "success",
 			Event:  "push",
-			Branch: "master",
+			Branch: "main",
 			Commit: "abcdef",
 			Author: "John Doe",
 		},
