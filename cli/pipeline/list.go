@@ -15,6 +15,7 @@
 package pipeline
 
 import (
+	"fmt"
 	"os"
 	"text/template"
 
@@ -22,7 +23,20 @@ import (
 
 	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
 	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/output"
+	"go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker"
 )
+
+// template for pipeline list information
+var tmplPipelineList = "\x1b[33mPipeline #{{ .Number }} \x1b[0m" + `
+Status: {{ .Status }}
+Event: {{ .Event }}
+Commit: {{ .Commit }}
+Branch: {{ .Branch }}
+Ref: {{ .Ref }}
+Author: {{ .Author }} {{ if .Email }}<{{.Email}}>{{ end }}
+Message: {{ .Message }}
+`
 
 //nolint:gomnd
 var pipelineListCmd = &cli.Command{
@@ -30,8 +44,7 @@ var pipelineListCmd = &cli.Command{
 	Usage:     "show pipeline history",
 	ArgsUsage: "<repo-id|repo-full-name>",
 	Action:    pipelineList,
-	Flags: []cli.Flag{
-		common.FormatFlag(tmplPipelineList),
+	Flags: append(common.OutputFlag("table"), []cli.Flag{
 		&cli.StringFlag{
 			Name:  "branch",
 			Usage: "branch filter",
@@ -49,7 +62,7 @@ var pipelineListCmd = &cli.Command{
 			Usage: "limit the list size",
 			Value: 25,
 		},
-	},
+	}...),
 }
 
 func pipelineList(c *cli.Context) error {
@@ -68,15 +81,14 @@ func pipelineList(c *cli.Context) error {
 		return err
 	}
 
-	tmpl, err := template.New("_").Parse(c.String("format") + "\n")
-	if err != nil {
-		return err
-	}
-
 	branch := c.String("branch")
 	event := c.String("event")
 	status := c.String("status")
 	limit := c.Int("limit")
+	outfmt, outopt := output.ParseOutputOptions(c.String("output"))
+	noHeader := c.Bool("no-header")
+
+	resources := make([]woodpecker.Pipeline, 0)
 
 	var count int
 	for _, pipeline := range pipelines {
@@ -92,21 +104,42 @@ func pipelineList(c *cli.Context) error {
 		if status != "" && pipeline.Status != status {
 			continue
 		}
-		if err := tmpl.Execute(os.Stdout, pipeline); err != nil {
-			return err
-		}
+		resources = append(resources, *pipeline)
 		count++
 	}
+
+	switch outfmt {
+	case "go-template":
+		if len(outopt) < 1 {
+			return fmt.Errorf("%w: missing template", output.ErrOutputOptionRequired)
+		}
+
+		tmpl, err := template.New("_").Parse(outopt[0] + "\n")
+		if err != nil {
+			return err
+		}
+		if err := tmpl.Execute(os.Stdout, resources); err != nil {
+			return err
+		}
+	case "table":
+		fallthrough
+	default:
+		table := output.NewTable()
+		cols := []string{"Number", "Status", "Event", "Branch", "Commit", "Author"}
+
+		if len(outopt) > 0 {
+			cols = outopt
+		}
+		if !noHeader {
+			table.WriteHeader(cols)
+		}
+		for _, resource := range resources {
+			if err := table.Write(cols, resource); err != nil {
+				return err
+			}
+		}
+		table.Flush()
+	}
+
 	return nil
 }
-
-// template for pipeline list information
-var tmplPipelineList = "\x1b[33mPipeline #{{ .Number }} \x1b[0m" + `
-Status: {{ .Status }}
-Event: {{ .Event }}
-Commit: {{ .Commit }}
-Branch: {{ .Branch }}
-Ref: {{ .Ref }}
-Author: {{ .Author }} {{ if .Email }}<{{.Email}}>{{ end }}
-Message: {{ .Message }}
-`
