@@ -18,15 +18,19 @@ export async function usePaginate<T>(getSingle: (page: number) => Promise<T[]>):
 export function usePagination<T, S = unknown>(
   _loadData: (page: number, arg: S) => Promise<T[] | null>,
   isActive: () => boolean = () => true,
-  { scrollElement: _scrollElement, each: _each }: { scrollElement?: Ref<HTMLElement | null>; each?: S[] } = {},
+  {
+    scrollElement: _scrollElement,
+    each: _each,
+    pageSize: _pageSize,
+  }: { scrollElement?: Ref<HTMLElement | null> | null; each?: S[]; pageSize?: number } = {},
 ) {
-  const scrollElement = _scrollElement ?? ref(document.getElementById('scroll-component'));
+  const scrollElement = _scrollElement === null ? null : ref(document.getElementById('scroll-component'));
   const page = ref(1);
-  const pageSize = ref(0);
+  const pageSize = ref(_pageSize ?? 0);
   const hasMore = ref(true);
   const data = ref<T[]>([]) as Ref<T[]>;
   const loading = ref(false);
-  const each = ref(_each ?? []);
+  const each = ref([...(_each ?? [])]);
 
   async function loadData() {
     if (loading.value === true || hasMore.value === false) {
@@ -45,7 +49,7 @@ export function usePagination<T, S = unknown>(
       // use next each element
       each.value.shift();
       page.value = 1;
-      pageSize.value = 0;
+      pageSize.value = _pageSize ?? 0;
       hasMore.value = each.value.length > 0;
       if (hasMore.value) {
         loading.value = false;
@@ -65,15 +69,19 @@ export function usePagination<T, S = unknown>(
     }
   }
 
-  useInfiniteScroll(scrollElement, nextPage, { distance: 10 });
+  if (scrollElement !== null) {
+    useInfiniteScroll(scrollElement, nextPage, { distance: 10 });
+  }
 
   async function resetPage() {
     const _page = page.value;
 
+    page.value = 1;
+    pageSize.value = _pageSize ?? 0;
     hasMore.value = true;
     data.value = [];
-    each.value = (_each ?? []) as UnwrapRef<S[]>;
-    page.value = 1;
+    loading.value = false;
+    each.value = [...(_each ?? [])] as UnwrapRef<S[]>;
 
     if (_page === 1) {
       // we need to reload manually as the page is already 1, so changing won't trigger watcher
