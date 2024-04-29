@@ -26,7 +26,7 @@ import (
 
 // GetRegistry
 //
-//	@Summary	Get a named registry
+//	@Summary	Get a registry by name
 //	@Router		/repos/{repo_id}/registry/{registry} [get]
 //	@Produce	json
 //	@Success	200	{object}	Registry
@@ -49,7 +49,7 @@ func GetRegistry(c *gin.Context) {
 
 // PostRegistry
 //
-//	@Summary	Persist/create a registry
+//	@Summary	Create a registry
 //	@Router		/repos/{repo_id}/registry [post]
 //	@Produce	json
 //	@Success	200	{object}	Registry
@@ -86,7 +86,7 @@ func PostRegistry(c *gin.Context) {
 
 // PatchRegistry
 //
-//	@Summary	Update a named registry
+//	@Summary	Update a registry by name
 //	@Router		/repos/{repo_id}/registry/{registry} [patch]
 //	@Produce	json
 //	@Success	200	{object}	Registry
@@ -134,7 +134,7 @@ func PatchRegistry(c *gin.Context) {
 
 // GetRegistryList
 //
-//	@Summary	Get the registry list
+//	@Summary	List registries
 //	@Router		/repos/{repo_id}/registry [get]
 //	@Produce	json
 //	@Success	200	{array}	Registry
@@ -161,7 +161,7 @@ func GetRegistryList(c *gin.Context) {
 
 // DeleteRegistry
 //
-//	@Summary	Delete a named registry
+//	@Summary	Delete a registry by name
 //	@Router		/repos/{repo_id}/registry/{registry} [delete]
 //	@Produce	plain
 //	@Success	204

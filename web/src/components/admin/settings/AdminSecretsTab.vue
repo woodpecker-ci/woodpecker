@@ -65,7 +65,7 @@ const selectedSecret = ref<Partial<Secret>>();
 const isEditingSecret = computed(() => !!selectedSecret.value?.id);
 
 async function loadSecrets(page: number): Promise<Secret[] | null> {
-  return apiClient.getGlobalSecretList(page);
+  return apiClient.getGlobalSecretList({ page });
 }
 
 const { resetPage, data: secrets } = usePagination(loadSecrets, () => !selectedSecret.value);

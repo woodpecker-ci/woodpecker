@@ -78,7 +78,7 @@ async function loadSecrets(page: number): Promise<Secret[] | null> {
     throw new Error('Unexpected: Unauthenticated');
   }
 
-  return apiClient.getOrgSecretList(user.org_id, page);
+  return apiClient.getOrgSecretList(user.org_id, { page });
 }
 
 const { resetPage, data: secrets } = usePagination(loadSecrets, () => !selectedSecret.value);
