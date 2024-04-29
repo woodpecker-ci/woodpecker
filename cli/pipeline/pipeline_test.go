@@ -22,7 +22,7 @@ func TestPipelineOutput(t *testing.T) {
 		{
 			name:     "table output with default columns",
 			args:     []string{},
-			expected: "NUMBER  STATUS   EVENT  BRANCH  COMMIT  AUTHOR\n1       success  push   main  abcdef  John Doe\n",
+			expected: "NUMBER  STATUS   EVENT  BRANCH  COMMIT  AUTHOR\n1       success  push   main    abcdef  John Doe\n",
 		},
 		{
 			name:     "table output with custom columns",
