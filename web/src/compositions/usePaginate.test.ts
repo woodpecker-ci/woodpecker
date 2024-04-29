@@ -101,8 +101,6 @@ describe('usePaginate', () => {
     usePaginationComposition.nextPage();
     await waitForState(usePaginationComposition.loading, false);
 
-    console.log(usePaginationComposition.data.value);
-
     expect(usePaginationComposition.data.value.length).toBe(9);
     expect(usePaginationComposition.data.value.at(-1)).toStrictEqual(orgSecrets[0][2]);
   });
