@@ -14,19 +14,9 @@
 
 - Step logs removing API and Button [[#3451](https://github.com/woodpecker-ci/woodpecker/pull/3451)]
 
-### 🐛 Bug Fixes
-
-- Fix secret loading [[#3620](https://github.com/woodpecker-ci/woodpecker/pull/3620)]
-- fix cli config loading and correct comment [[#3618](https://github.com/woodpecker-ci/woodpecker/pull/3618)]
-- Handle ImagePullBackOff pod status [[#3580](https://github.com/woodpecker-ci/woodpecker/pull/3580)]
-- Apply skip ci filter only on push events [[#3612](https://github.com/woodpecker-ci/woodpecker/pull/3612)]
-- Fix bitbucket file fetching [[#3604](https://github.com/woodpecker-ci/woodpecker/pull/3604)]
-- agent: Continue to retry indefinitely [[#3599](https://github.com/woodpecker-ci/woodpecker/pull/3599)]
-- Fix cli version comparison and improve setup [[#3518](https://github.com/woodpecker-ci/woodpecker/pull/3518)]
-- Fix flag name [[#3534](https://github.com/woodpecker-ci/woodpecker/pull/3534)]
-
 ### 📚 Documentation
 
+- Add discord plugin [[#3662](https://github.com/woodpecker-ci/woodpecker/pull/3662)]
 - chore(deps): update dependency trim to v1 [[#3658](https://github.com/woodpecker-ci/woodpecker/pull/3658)]
 - chore(deps): update dependency got to v14 [[#3657](https://github.com/woodpecker-ci/woodpecker/pull/3657)]
 - Fail on broken anchors [[#3644](https://github.com/woodpecker-ci/woodpecker/pull/3644)]
@@ -38,6 +28,17 @@
 - Update dependency @types/marked to v6 [[#3544](https://github.com/woodpecker-ci/woodpecker/pull/3544)]
 - Update docs npm deps non-major [[#3485](https://github.com/woodpecker-ci/woodpecker/pull/3485)]
 - Docs updates and fixes [[#3535](https://github.com/woodpecker-ci/woodpecker/pull/3535)]
+
+### 🐛 Bug Fixes
+
+- Fix secret loading [[#3620](https://github.com/woodpecker-ci/woodpecker/pull/3620)]
+- fix cli config loading and correct comment [[#3618](https://github.com/woodpecker-ci/woodpecker/pull/3618)]
+- Handle ImagePullBackOff pod status [[#3580](https://github.com/woodpecker-ci/woodpecker/pull/3580)]
+- Apply skip ci filter only on push events [[#3612](https://github.com/woodpecker-ci/woodpecker/pull/3612)]
+- Fix bitbucket file fetching [[#3604](https://github.com/woodpecker-ci/woodpecker/pull/3604)]
+- agent: Continue to retry indefinitely [[#3599](https://github.com/woodpecker-ci/woodpecker/pull/3599)]
+- Fix cli version comparison and improve setup [[#3518](https://github.com/woodpecker-ci/woodpecker/pull/3518)]
+- Fix flag name [[#3534](https://github.com/woodpecker-ci/woodpecker/pull/3534)]
 
 ### 📈 Enhancement
 
