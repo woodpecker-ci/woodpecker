@@ -132,6 +132,8 @@ func PostUser(c *gin.Context) {
 		Hash: base32.StdEncoding.EncodeToString(
 			securecookie.GenerateRandomKey(32),
 		),
+		ForgeID:       1,                        // TODO: replace with forge id when multiple forges are supported
+		ForgeRemoteID: model.ForgeRemoteID("0"), // TODO: search for the user in the forge and get the remote id
 	}
 	if err = user.Validate(); err != nil {
 		c.String(http.StatusBadRequest, err.Error())
