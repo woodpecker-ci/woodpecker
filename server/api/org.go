@@ -30,7 +30,7 @@ import (
 
 // GetOrg
 //
-//	@Summary	Get organization by id
+//	@Summary	Get an organization
 //	@Router		/orgs/{org_id} [get]
 //	@Produce	json
 //	@Success	200	{array}	Org
@@ -57,7 +57,7 @@ func GetOrg(c *gin.Context) {
 
 // GetOrgPermissions
 //
-//	@Summary	Get the permissions of the current user in the given organization
+//	@Summary	Get the permissions of the currently authenticated user for the given organization
 //	@Router		/orgs/{org_id}/permissions [get]
 //	@Produce	json
 //	@Success	200	{array}	OrgPerm
@@ -114,13 +114,13 @@ func GetOrgPermissions(c *gin.Context) {
 
 // LookupOrg
 //
-//	@Summary	Lookup organization by full-name
+//	@Summary	Lookup an organization by full name
 //	@Router		/org/lookup/{org_full_name} [get]
 //	@Produce	json
 //	@Success	200	{object}	Org
 //	@Tags		Organizations
 //	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param		org_full_name	path	string	true	"the organizations full-name / slug"
+//	@Param		org_full_name	path	string	true	"the organizations full name / slug"
 func LookupOrg(c *gin.Context) {
 	_store := store.FromContext(c)
 	user := session.User(c)
