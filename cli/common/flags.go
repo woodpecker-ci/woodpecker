@@ -84,7 +84,7 @@ func OutputFlags(def string) []cli.Flag {
 			Value: def,
 		},
 		&cli.BoolFlag{
-			Name:  "no-header",
+			Name:  "output-no-headers",
 			Usage: "don't print headers",
 		},
 	}
