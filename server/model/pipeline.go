@@ -54,6 +54,11 @@ type Pipeline struct {
 	IsPrerelease        bool                   `json:"is_prerelease,omitempty"     xorm:"is_prerelease"`
 } //	@name Pipeline
 
+type PipelineFilter struct {
+	Before int64
+	After  int64
+}
+
 // TableName return database table name for xorm
 func (Pipeline) TableName() string {
 	return "pipelines"

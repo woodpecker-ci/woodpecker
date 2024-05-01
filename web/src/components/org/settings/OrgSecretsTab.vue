@@ -69,7 +69,7 @@ async function loadSecrets(page: number): Promise<Secret[] | null> {
     throw new Error("Unexpected: Can't load org");
   }
 
-  return apiClient.getOrgSecretList(org.value.id, page);
+  return apiClient.getOrgSecretList(org.value.id, { page });
 }
 
 const { resetPage, data: secrets } = usePagination(loadSecrets, () => !selectedSecret.value);

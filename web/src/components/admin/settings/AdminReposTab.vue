@@ -56,7 +56,7 @@ const notifications = useNotifications();
 const i18n = useI18n();
 
 async function loadRepos(page: number): Promise<Repo[] | null> {
-  return apiClient.getAllRepos(page);
+  return apiClient.getAllRepos({ page });
 }
 
 const { data: repos } = usePagination(loadRepos);

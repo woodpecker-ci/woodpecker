@@ -26,7 +26,7 @@ import (
 var logPurgeCmd = &cli.Command{
 	Name:      "purge",
 	Usage:     "purge a log",
-	ArgsUsage: "<repo-id|repo-full-name> <pipeline>",
+	ArgsUsage: "<repo-id|repo-full-name> <pipeline> [step]",
 	Action:    logPurge,
 }
 
@@ -45,7 +45,21 @@ func logPurge(c *cli.Context) (err error) {
 		return err
 	}
 
-	err = client.LogsPurge(repoID, number)
+	stepArg := c.Args().Get(2) //nolint: gomnd
+	// TODO: Add lookup by name: stepID, err := internal.ParseStep(client, repoID, stepIDOrName)
+	var stepID int64
+	if len(stepArg) != 0 {
+		stepID, err = strconv.ParseInt(stepArg, 10, 64)
+		if err != nil {
+			return err
+		}
+	}
+
+	if stepID > 0 {
+		err = client.StepLogsPurge(repoID, number, stepID)
+	} else {
+		err = client.LogsPurge(repoID, number)
+	}
 	if err != nil {
 		return err
 	}

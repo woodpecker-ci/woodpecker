@@ -38,7 +38,7 @@ import (
 
 // CreatePipeline
 //
-//	@Summary	Run/trigger a pipelines
+//	@Summary	Trigger a manual pipeline
 //	@Router		/repos/{repo_id}/pipelines [post]
 //	@Produce	json
 //	@Success	200	{object}	Pipeline
@@ -100,7 +100,8 @@ func createTmpPipeline(event model.WebhookEvent, commit *model.Commit, user *mod
 
 // GetPipelines
 //
-//	@Summary	Get pipelines, current running and past ones
+//	@Summary	List repository pipelines
+//	@Description	Get a list of pipelines for a repository.
 //	@Router		/repos/{repo_id}/pipelines [get]
 //	@Produce	json
 //	@Success	200	{array}	Pipeline
@@ -109,10 +110,34 @@ func createTmpPipeline(event model.WebhookEvent, commit *model.Commit, user *mod
 //	@Param		repo_id			path	int		true	"the repository id"
 //	@Param		page			query	int		false	"for response pagination, page offset number"	default(1)
 //	@Param		perPage			query	int		false	"for response pagination, max items per page"	default(50)
+//	@Param		before			query	string	false	"only return pipelines before this RFC3339 date"
+//	@Param		after			query	string	false	"only return pipelines after this RFC3339 date"
 func GetPipelines(c *gin.Context) {
 	repo := session.Repo(c)
+	before := c.Query("before")
+	after := c.Query("after")
 
-	pipelines, err := store.FromContext(c).GetPipelineList(repo, session.Pagination(c))
+	filter := new(model.PipelineFilter)
+
+	if before != "" {
+		beforeDt, err := time.Parse(time.RFC3339, before)
+		if err != nil {
+			_ = c.AbortWithError(http.StatusBadRequest, err)
+			return
+		}
+		filter.Before = beforeDt.Unix()
+	}
+
+	if after != "" {
+		afterDt, err := time.Parse(time.RFC3339, after)
+		if err != nil {
+			_ = c.AbortWithError(http.StatusBadRequest, err)
+			return
+		}
+		filter.After = afterDt.Unix()
+	}
+
+	pipelines, err := store.FromContext(c).GetPipelineList(repo, session.Pagination(c), filter)
 	if err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
@@ -120,9 +145,49 @@ func GetPipelines(c *gin.Context) {
 	c.JSON(http.StatusOK, pipelines)
 }
 
+// DeletePipeline
+//
+//	@Summary	Delete a pipeline
+//	@Router		/repos/{repo_id}/pipelines/{number} [delete]
+//	@Produce	plain
+//	@Success	204
+//	@Tags		Pipelines
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		repo_id			path	int		true	"the repository id"
+//	@Param		number			path	int		true	"the number of the pipeline"
+func DeletePipeline(c *gin.Context) {
+	_store := store.FromContext(c)
+
+	repo := session.Repo(c)
+	num, err := strconv.ParseInt(c.Param("number"), 10, 64)
+	if err != nil {
+		_ = c.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+
+	pl, err := _store.GetPipelineNumber(repo, num)
+	if err != nil {
+		handleDBError(c, err)
+		return
+	}
+
+	if ok := pipelineDeleteAllowed(pl); !ok {
+		c.String(http.StatusUnprocessableEntity, "Cannot delete pipeline with status %s", pl.Status)
+		return
+	}
+
+	err = store.FromContext(c).DeletePipeline(pl)
+	if err != nil {
+		c.String(http.StatusInternalServerError, "Error deleting pipeline. %s", err)
+		return
+	}
+
+	c.Status(http.StatusNoContent)
+}
+
 // GetPipeline
 //
-//	@Summary	Pipeline information by number
+//	@Summary	Get a repositories pipeline
 //	@Router		/repos/{repo_id}/pipelines/{number} [get]
 //	@Produce	json
 //	@Success	200	{object}	Pipeline
@@ -177,7 +242,7 @@ func GetPipelineLast(c *gin.Context) {
 
 // GetStepLogs
 //
-//	@Summary	Log information
+//	@Summary	Get logs for a pipeline step
 //	@Router		/repos/{repo_id}/logs/{number}/{stepID} [get]
 //	@Produce	json
 //	@Success	200	{array}	LogEntry
@@ -233,7 +298,7 @@ func GetStepLogs(c *gin.Context) {
 
 // DeleteStepLogs
 //
-//	@Summary	Deletes step log
+//	@Summary	Delete step logs of a pipeline
 //	@Router		/repos/{repo_id}/logs/{number}/{stepId} [delete]
 //	@Produce	plain
 //	@Success	204
@@ -293,7 +358,7 @@ func DeleteStepLogs(c *gin.Context) {
 
 // GetPipelineConfig
 //
-//	@Summary	Pipeline configuration
+//	@Summary	Get configuration files for a pipeline
 //	@Router		/repos/{repo_id}/pipelines/{number}/config [get]
 //	@Produce	json
 //	@Success	200	{array}	Config
@@ -327,7 +392,7 @@ func GetPipelineConfig(c *gin.Context) {
 
 // CancelPipeline
 //
-//	@Summary	Cancels a pipeline
+//	@Summary	Cancel a pipeline
 //	@Router		/repos/{repo_id}/pipelines/{number}/cancel [post]
 //	@Produce	plain
 //	@Success	200
@@ -363,7 +428,7 @@ func CancelPipeline(c *gin.Context) {
 
 // PostApproval
 //
-//	@Summary	Start pipelines in gated repos
+//	@Summary	Approve and start a pipeline
 //	@Router		/repos/{repo_id}/pipelines/{number}/approve [post]
 //	@Produce	json
 //	@Success	200	{object}	Pipeline
@@ -395,7 +460,7 @@ func PostApproval(c *gin.Context) {
 
 // PostDecline
 //
-//	@Summary	Decline pipelines in gated repos
+//	@Summary	Decline a pipeline
 //	@Router		/repos/{repo_id}/pipelines/{number}/decline [post]
 //	@Produce	json
 //	@Success	200	{object}	Pipeline
@@ -427,7 +492,7 @@ func PostDecline(c *gin.Context) {
 
 // GetPipelineQueue
 //
-//	@Summary	List pipeline queues
+//	@Summary	List pipelines in queue
 //	@Router		/pipelines [get]
 //	@Produce	json
 //	@Success	200	{array}	Feed
@@ -527,7 +592,7 @@ func PostPipeline(c *gin.Context) {
 
 // DeletePipelineLogs
 //
-//	@Summary	Deletes log
+//	@Summary	Deletes all logs of a pipeline
 //	@Router		/repos/{repo_id}/logs/{number} [delete]
 //	@Produce	plain
 //	@Success	204
@@ -553,9 +618,8 @@ func DeletePipelineLogs(c *gin.Context) {
 		return
 	}
 
-	switch pl.Status {
-	case model.StatusRunning, model.StatusPending:
-		c.String(http.StatusUnprocessableEntity, "Cannot delete logs for a pending or running pipeline")
+	if ok := pipelineDeleteAllowed(pl); !ok {
+		c.String(http.StatusUnprocessableEntity, "Cannot delete logs for pipeline with status %s", pl.Status)
 		return
 	}
 
@@ -565,7 +629,7 @@ func DeletePipelineLogs(c *gin.Context) {
 		}
 	}
 	if err != nil {
-		c.String(http.StatusInternalServerError, "There was a problem deleting your logs. %s", err)
+		c.String(http.StatusInternalServerError, "Error deleting pipeline logs. %s", err)
 		return
 	}
 
