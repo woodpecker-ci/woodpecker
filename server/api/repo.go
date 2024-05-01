@@ -296,7 +296,7 @@ func ChownRepo(c *gin.Context) {
 
 // LookupRepo
 //
-//	@Summary	Lookup a repository by full-name
+//	@Summary	Lookup a repository by full name
 //	@Router		/repos/lookup/{repo_full_name} [get]
 //	@Produce	json
 //	@Success	200	{object}	Repo
@@ -547,7 +547,8 @@ func MoveRepo(c *gin.Context) {
 
 // GetAllRepos
 //
-//	@Summary	List all repositories on the server. Requires admin rights
+//	@Summary	List all repositories on the server
+//	@Description	Returns a list of all repositories. Requires admin rights.
 //	@Router		/repos [get]
 //	@Produce	json
 //	@Success	200	{array}	Repo
@@ -572,7 +573,8 @@ func GetAllRepos(c *gin.Context) {
 
 // RepairAllRepos
 //
-//	@Summary	Repair all repositories on the server. Requires admin rights.
+//	@Summary	Repair all repositories on the server
+//	@Description Executes a repair process on all repositories. Requires admin rights.
 //	@Router		/repos/repair [post]
 //	@Produce	plain
 //	@Success	204
