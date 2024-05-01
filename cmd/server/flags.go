@@ -41,11 +41,6 @@ var flags = append([]cli.Flag{
 		Usage:   "server fully qualified url (<scheme>://<host>[/<prefixpath>])",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_WEBHOOK_HOST"},
-		Name:    "server-webhook-host",
-		Usage:   "server fully qualified url for forge's Webhooks (<scheme>://<host>[/<prefixpath>])",
-	},
-	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_SERVER_ADDR"},
 		Name:    "server-addr",
 		Usage:   "server address",
@@ -360,11 +355,6 @@ var flags = append([]cli.Flag{
 		Name:    "gitea",
 		Usage:   "gitea driver is enabled",
 	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_DEV_GITEA_OAUTH_URL"},
-		Name:    "gitea-oauth-server",
-		Usage:   "user-facing gitea server url for oauth",
-	},
 	//
 	// Bitbucket
 	//
@@ -411,11 +401,22 @@ var flags = append([]cli.Flag{
 		Hidden:  true,
 	},
 	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_DEV_WEBHOOK_HOST", "WOODPECKER_WEBHOOK_HOST"}, // TODO: remove WOODPECKER_WEBHOOK_HOST in next major release
+		Name:    "server-webhook-host",
+		Usage:   "server fully qualified url called by forge's webhooks (<scheme>://<host>[/<prefixpath>])",
+	},
+	// TODO: remove in next major release
+	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_DEV_OAUTH_HOST"},
-		Name:    "server-dev-oauth-host",
-		Usage:   "server fully qualified url (<scheme>://<host>[/<prefixpath>]) used for oauth redirect (used for development)",
+		Name:    "server-dev-oauth-host-deprecated",
+		Usage:   "DEPRECATED: use WOODPECKER_HOST & WOODPECKER_WEBHOOK_HOST or WOODPECKER_DEV_FORGE_OAUTH_HOST instead\nfully qualified url (<scheme>://<host>[/<prefixpath>]) used for oauth redirect",
 		Value:   "",
 		Hidden:  true,
+	},
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_DEV_FORGE_OAUTH_HOST", "WOODPECKER_DEV_GITEA_OAUTH_URL"}, // TODO: remove WOODPECKER_DEV_GITEA_OAUTH_URL in next major release
+		Name:    "server-dev-forge-host",
+		Usage:   "fully qualified url (<scheme>://<host>[/<prefixpath>]). use it if your forge url WOODPECKER_FORGE_URL or WOODPECKER_GITEA_URL, ... isn't a public url",
 	},
 	//
 	// secrets encryption in DB

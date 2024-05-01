@@ -41,6 +41,7 @@ var Config = struct {
 		Key                 string
 		Cert                string
 		OAuthHost           string
+		ForgeOAuthHost      string
 		Host                string
 		WebhookHost         string
 		Port                string

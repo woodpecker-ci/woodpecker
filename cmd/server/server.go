@@ -317,10 +317,13 @@ func setupEvilGlobals(c *cli.Context, s store.Store) error {
 	} else {
 		server.Config.Server.WebhookHost = serverHost
 	}
-	if c.IsSet("server-dev-oauth-host") {
-		server.Config.Server.OAuthHost = c.String("server-dev-oauth-host")
+	if c.IsSet("server-dev-oauth-host-deprecated") {
+		server.Config.Server.OAuthHost = c.String("server-dev-oauth-host-deprecated")
 	} else {
 		server.Config.Server.OAuthHost = serverHost
+	}
+	if c.IsSet("server-forge-oauth-host") {
+		server.Config.Server.ForgeOAuthHost = c.String("server-forge-oauth-host")
 	}
 	server.Config.Server.Port = c.String("server-addr")
 	server.Config.Server.PortTLS = c.String("server-addr-tls")
