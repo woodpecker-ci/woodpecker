@@ -1,6 +1,6 @@
 # docker build --rm  -f docker/Dockerfile.make -t woodpecker/make:local .
 FROM docker.io/golang:1.22-alpine3.19 as golang_image
-FROM docker.io/node:21-alpine3.19
+FROM docker.io/node:22-alpine3.19
 
 # renovate: datasource=repology depName=alpine_3_19/make versioning=loose
 ENV MAKE_VERSION="4.4.1-r2"
@@ -20,6 +20,7 @@ RUN apk add --no-cache --update make=${MAKE_VERSION} gcc=${GCC_VERSION} binutils
 COPY --from=golang_image /usr/local/go /usr/local/go
 COPY Makefile /
 ENV PATH=$PATH:/usr/local/go/bin
+ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0
 
 # Cache tools
 RUN GOBIN=/usr/local/go/bin make install-tools && \
