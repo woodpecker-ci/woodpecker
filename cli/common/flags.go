@@ -93,11 +93,11 @@ func OutputFlags(def string) []cli.Flag {
 var RepoFlag = &cli.StringFlag{
 	Name:    "repository",
 	Aliases: []string{"repo"},
-	Usage:   "repository id or full-name (e.g. 134 or octocat/hello-world)",
+	Usage:   "repository id or full name (e.g. 134 or octocat/hello-world)",
 }
 
 var OrgFlag = &cli.StringFlag{
 	Name:    "organization",
 	Aliases: []string{"org"},
-	Usage:   "organization id or full-name (e.g. 123 or octocat)",
+	Usage:   "organization id or full name (e.g. 123 or octocat)",
 }

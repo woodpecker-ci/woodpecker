@@ -52,7 +52,7 @@ const (
 	pathOrgPerms      = "%s/2.0/workspaces/%s/permissions?%s"
 	pathPullRequests  = "%s/2.0/repositories/%s/%s/pullrequests?%s"
 	pathBranchCommits = "%s/2.0/repositories/%s/%s/commits/%s"
-	pathDir           = "%s/2.0/repositories/%s/%s/src/%s%s"
+	pathDir           = "%s/2.0/repositories/%s/%s/src/%s/%s"
 	pageSize          = 100
 )
 

@@ -26,7 +26,7 @@ import (
 
 // GetOrgs
 //
-//	@Summary		Get all orgs
+//	@Summary		List organizations
 //	@Description	Returns all registered orgs in the system. Requires admin rights.
 //	@Router			/orgs [get]
 //	@Produce		json
@@ -46,7 +46,7 @@ func GetOrgs(c *gin.Context) {
 
 // DeleteOrg
 //
-//	@Summary		Delete an org
+//	@Summary		Delete an organization
 //	@Description	Deletes the given org. Requires admin rights.
 //	@Router			/orgs/{id} [delete]
 //	@Produce		plain
