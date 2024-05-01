@@ -50,7 +50,8 @@ git commit -m "updated README [CI SKIP]"
 
 ## Steps
 
-Every step of your workflow executes commands inside a specified container. The defined commands are executed serially.
+Every step of your workflow executes commands inside a specified container.<br>
+The defined steps are executed in sequence by default, if they should run in parallel you can use [`depends_on`](./20-workflow-syntax.md#depends_on).<br>
 The associated commit is checked out with git to a workspace which is mounted to every step of the workflow as the working directory.
 
 ```diff
@@ -358,20 +359,6 @@ when:
   - platform: [linux/*, windows/amd64]
 ```
 
-<!-- markdownlint-disable no-duplicate-heading -->
-
-#### `environment`
-
-<!-- markdownlint-enable no-duplicate-heading -->
-
-Execute a step for deployment events matching the target deployment environment:
-
-```yaml
-when:
-  - environment: production
-  - event: deployment
-```
-
 #### `matrix`
 
 Execute a step for a single matrix permutation:
@@ -483,6 +470,19 @@ Normally steps of a workflow are executed serially in the order in which they ar
      commands:
        - go test
 ```
+
+:::note
+You can define a step to start immediately without dependencies by adding an empty `depends_on: []`. By setting `depends_on` on a single step all other steps will be immediately executed as well if no further dependencies are specified.
+
+```yaml
+steps:
+  - name: check code format
+    image: mstruebing/editorconfig-checker
+    depends_on: [] # enable parallel steps
+  ...
+```
+
+:::
 
 ### `volumes`
 
@@ -744,7 +744,7 @@ Workflows that should run even on failure should set the `runs_on` tag. See [her
 Woodpecker gives the ability to configure privileged mode in the YAML. You can use this parameter to launch containers with escalated capabilities.
 
 :::info
-Privileged mode is only available to trusted repositories and for security reasons should only be used in private environments. See [project settings](./71-project-settings.md#trusted) to enable trusted mode.
+Privileged mode is only available to trusted repositories and for security reasons should only be used in private environments. See [project settings](./75-project-settings.md#trusted) to enable trusted mode.
 :::
 
 ```diff

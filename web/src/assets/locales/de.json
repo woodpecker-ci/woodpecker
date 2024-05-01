@@ -43,10 +43,10 @@
             },
             "not_allowed": "Du darfst nicht auf die Server-Einstellungen zugreifen",
             "orgs": {
-                "delete_confirm": "Möchtest du diese Organisation wirklich löschen? Das wird auch alle Repositories löschen, die dieser Organisation gehören.",
+                "delete_confirm": "Möchtest du diese Organisation wirklich löschen? Das wird auch alle Repositorys löschen, die dieser Organisation gehören.",
                 "delete_org": "Organisation löschen",
                 "deleted": "Organisation gelöscht",
-                "desc": "Organisationen mit Repositories auf diesem Server",
+                "desc": "Organisationen mit Repositorys auf diesem Server",
                 "none": "Es gibt noch keine Organisationen.",
                 "org_settings": "Organisations-Einstellungen",
                 "orgs": "Organisationen",
@@ -74,14 +74,14 @@
                 "waiting_for": "wartet auf"
             },
             "repos": {
-                "desc": "Repositories, die auf dem Server aktiviert sind oder waren",
+                "desc": "Repositorys, die auf dem Server aktiviert sind oder waren",
                 "disabled": "Deaktiviert",
-                "none": "Es gibt noch keine Repositories.",
+                "none": "Es gibt noch keine Repositorys.",
                 "repair": {
                     "repair": "Alle reparieren",
-                    "success": "Repositories repariert"
+                    "success": "Repositorys repariert"
                 },
-                "repos": "Repositories",
+                "repos": "Repositorys",
                 "settings": "Repository-Einstellungen",
                 "view": "Repository anzeigen"
             },
@@ -89,7 +89,7 @@
                 "add": "Geheimnis hinzufügen",
                 "created": "Globales Geheimnis erstellt",
                 "deleted": "Globales Geheimnis gelöscht",
-                "desc": "Globale Geheimnisse können an alle Repositories als Umgebungsvariablen übergeben werden.",
+                "desc": "Globale Geheimnisse können an alle Repositorys als Umgebungsvariablen übergeben werden.",
                 "events": {
                     "events": "Verfügbar für folgende Ereignisse",
                     "pr_warning": "Bitte sei vorsichtig mit dieser Option, da eine böswillige Person über einen Pull-Request deine Geheimnisse erhalten könnte."
@@ -118,7 +118,7 @@
                 "avatar_url": "URL des Profilbilds",
                 "cancel": "Abbrechen",
                 "created": "Benutzer erstellt",
-                "delete_confirm": "Möchtest du diesen Benutzer wirklich löschen? Das wird auch alle Repositories löschen, die diesem Benutzer gehören.",
+                "delete_confirm": "Möchtest du diesen Benutzer wirklich löschen? Das wird auch alle Repositorys löschen, die diesem Benutzer gehören.",
                 "delete_user": "Benutzer löschen",
                 "deleted": "Benutzer gelöscht",
                 "desc": "Auf diesem Server registrierte Benutzer",
@@ -158,7 +158,7 @@
                 "add": "Geheimnis hinzufügen",
                 "created": "Organisations-Geheimnis erstellt",
                 "deleted": "Organisations-Geheimnis gelöscht",
-                "desc": "Organisation-Geheimnisse können an alle Repositories der Organisation als Umgebungsvariablen übergeben werden.",
+                "desc": "Organisation-Geheimnisse können an alle Repositorys der Organisation als Umgebungsvariablen übergeben werden.",
                 "events": {
                     "events": "Verfügbar für folgende Ereignisse",
                     "pr_warning": "Bitte sei vorsichtig mit dieser Option, da eine böswillige Person über einen Pull-Request deine Geheimnisse erhalten könnte."
@@ -204,7 +204,7 @@
             "enable": "Aktivieren",
             "enabled": "Bereits aktiviert",
             "list_reloaded": "Repository-Liste neu geladen",
-            "reload": "Repositories neu laden",
+            "reload": "Repositorys neu laden",
             "success": "Repository aktiviert"
         },
         "manual_pipeline": {
@@ -232,7 +232,8 @@
                 "log_auto_scroll_off": "Schalte automatisches folgen aus",
                 "log_download": "Herunterladen",
                 "restart": "Neustarten",
-                "restart_success": "Pipeline neu gestartet"
+                "restart_success": "Pipeline neu gestartet",
+                "log_delete": "Löschen"
             },
             "config": "Konfiguration",
             "errors": "Fehler ({count})",
@@ -282,7 +283,9 @@
             "step_not_started": "Dieser Schritt hat noch nicht begonnen.",
             "tasks": "Vorgänge",
             "warnings": "Warnungen ({count})",
-            "we_got_some_errors": "Oh nein, es gab einige Fehler!"
+            "we_got_some_errors": "Oh nein, es gab einige Fehler!",
+            "log_delete_confirm": "Möchtest du die Logs diesen Schrittes wirklich löschen?",
+            "log_delete_error": "Es gab einen Fehler beim Löschen der Logs des Schrittes"
         },
         "pull_requests": "Pull-Requests",
         "settings": {
@@ -383,7 +386,7 @@
                         "internal": "Intern"
                     },
                     "private": {
-                        "desc": "Nur du und andere Besitzer des Repositories können dieses Projekt sehen.",
+                        "desc": "Nur du und andere Besitzer des Repositorys können dieses Projekt sehen.",
                         "private": "Privat"
                     },
                     "public": {
@@ -391,9 +394,13 @@
                         "public": "Öffentlich"
                     },
                     "visibility": "Sichtbarkeit des Projekts"
+                },
+                "allow_deploy": {
+                    "allow": "Deployments erlauben",
+                    "desc": "Deployments von erolgreichen Pipelines erlauben. Nur benutzen, wenn du allen Nutzern mit Push-Zugriff vertraust."
                 }
             },
-            "not_allowed": "Zugriff auf die Einstellungen dieses Repositories nicht erlaubt",
+            "not_allowed": "Zugriff auf die Einstellungen dieses Repositorys nicht erlaubt",
             "registries": {
                 "add": "Registry hinzufügen",
                 "address": {
@@ -439,10 +446,10 @@
             },
             "settings": "Einstellungen"
         },
-        "user_none": "Diese Organisation / dieser Benutzer hat noch keine Repositories."
+        "user_none": "Diese Organisation / dieser Benutzer hat noch keine Repositorys."
     },
     "repos": "Repos",
-    "repositories": "Repositories",
+    "repositories": "Repositorys",
     "running_version": "Du verwendest Woodpecker {0}",
     "search": "Suche…",
     "time": {
@@ -488,7 +495,7 @@
                 "add": "Geheimnis hinzufügen",
                 "created": "Benutzer-Geheimnis erstellt",
                 "deleted": "Benutzer-Geheimnis gelöscht",
-                "desc": "Benutzer-Geheimnisse können an alle Repositories des Benutzers als Umgebungsvariablen übergeben werden.",
+                "desc": "Benutzer-Geheimnisse können an alle Repositorys des Benutzers als Umgebungsvariablen übergeben werden.",
                 "events": {
                     "events": "Verfügbar für folgende Ereignisse",
                     "pr_warning": "Bitte sei vorsichtig mit dieser Option, da eine böswillige Person über einen Pull-Request deine Geheimnisse erhalten könnte."

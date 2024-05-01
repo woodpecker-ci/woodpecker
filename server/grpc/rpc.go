@@ -42,7 +42,6 @@ import (
 )
 
 type RPC struct {
-	forge         forge.Forge
 	queue         queue.Queue
 	pubsub        *pubsub.Publisher
 	logger        logging.Log
@@ -419,11 +418,17 @@ func (s *RPC) updateForgeStatus(ctx context.Context, repo *model.Repo, pipeline 
 		return
 	}
 
-	forge.Refresh(ctx, s.forge, s.store, user)
+	_forge, err := server.Config.Services.Manager.ForgeFromRepo(repo)
+	if err != nil {
+		log.Error().Err(err).Msgf("can not get forge for repo '%s'", repo.FullName)
+		return
+	}
+
+	forge.Refresh(ctx, _forge, s.store, user)
 
 	// only do status updates for parent steps
 	if workflow != nil {
-		err = s.forge.Status(ctx, user, repo, pipeline, workflow)
+		err = _forge.Status(ctx, user, repo, pipeline, workflow)
 		if err != nil {
 			log.Error().Err(err).Msgf("error setting commit status for %s/%d", repo.FullName, pipeline.Number)
 		}
