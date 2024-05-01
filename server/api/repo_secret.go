@@ -26,7 +26,7 @@ import (
 
 // GetSecret
 //
-//	@Summary	Get a named secret
+//	@Summary	Get a repository secret by name
 //	@Router		/repos/{repo_id}/secrets/{secretName} [get]
 //	@Produce	json
 //	@Success	200	{object}	Secret
@@ -49,7 +49,7 @@ func GetSecret(c *gin.Context) {
 
 // PostSecret
 //
-//	@Summary	Persist/create a secret
+//	@Summary	Create a repository secret
 //	@Router		/repos/{repo_id}/secrets [post]
 //	@Produce	json
 //	@Success	200	{object}	Secret
@@ -87,7 +87,7 @@ func PostSecret(c *gin.Context) {
 
 // PatchSecret
 //
-//	@Summary	Update a named secret
+//	@Summary	Update a repository secret by name
 //	@Router		/repos/{repo_id}/secrets/{secretName} [patch]
 //	@Produce	json
 //	@Success	200	{object}	Secret
@@ -138,7 +138,7 @@ func PatchSecret(c *gin.Context) {
 
 // GetSecretList
 //
-//	@Summary	Get the secret list
+//	@Summary	List repository secrets
 //	@Router		/repos/{repo_id}/secrets [get]
 //	@Produce	json
 //	@Success	200	{array}	Secret
@@ -165,7 +165,7 @@ func GetSecretList(c *gin.Context) {
 
 // DeleteSecret
 //
-//	@Summary	Delete a named secret
+//	@Summary	Delete a repository secret by name
 //	@Router		/repos/{repo_id}/secrets/{secretName} [delete]
 //	@Produce	plain
 //	@Success	204
