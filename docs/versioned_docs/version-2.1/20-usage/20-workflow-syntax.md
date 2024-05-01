@@ -803,17 +803,6 @@ when:
   event: deployment
 ```
 
-### `task`
-
-Execute a step for deployment events matching the target deployment task:
-
-```diff
-when:
-  task: migration
-  event: deployment
-```
-
-
 ### `instance`
 
 Execute a step only on a certain Woodpecker instance matching the specified hostname:

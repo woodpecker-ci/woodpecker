@@ -76,7 +76,6 @@ steps:
       - echo "test"
     when:
       environment: production
-      task: migration
       event: deployment
 
   when-matrix:
