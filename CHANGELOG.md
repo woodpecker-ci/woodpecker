@@ -1,10 +1,10 @@
 # Changelog
 
-## [2.5.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.5.0) - 2024-04-30
+## [2.5.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.5.0) - 2024-05-01
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @Elara6331, @anbraten, @aumetra, @eliasscosta, @manuelluis, @nemunaire, @qwerty287, @stevapple, @xoxys, @zc-devs
+@6543, @Elara6331, @anbraten, @aumetra, @eliasscosta, @manuelluis, @nemunaire, @pat-s, @qwerty287, @stevapple, @xoxys, @zc-devs
 
 ### 🔒 Security
 
@@ -14,6 +14,25 @@
 
 - Step logs removing API and Button [[#3451](https://github.com/woodpecker-ci/woodpecker/pull/3451)]
 
+### 📈 Enhancement
+
+- Cleanup api docs and ts api-client options [[#3663](https://github.com/woodpecker-ci/woodpecker/pull/3663)]
+- Split client into multiple files and add more tests [[#3647](https://github.com/woodpecker-ci/woodpecker/pull/3647)]
+- Add DeletePipeline API [[#3506](https://github.com/woodpecker-ci/woodpecker/pull/3506)]
+- Add filter options to GetPipelines API [[#3645](https://github.com/woodpecker-ci/woodpecker/pull/3645)]
+- Deprecate environment filter and improve errors [[#3634](https://github.com/woodpecker-ci/woodpecker/pull/3634)]
+- CLI: remove step logs [[#3458](https://github.com/woodpecker-ci/woodpecker/pull/3458)]
+- Add task details to queue info in woodpecker-go [[#3636](https://github.com/woodpecker-ci/woodpecker/pull/3636)]
+- Use forge from db [[#1417](https://github.com/woodpecker-ci/woodpecker/pull/1417)]
+- Remove review button from approval view [[#3617](https://github.com/woodpecker-ci/woodpecker/pull/3617)]
+- Rework addons (use rpc) [[#3268](https://github.com/woodpecker-ci/woodpecker/pull/3268)]
+- Allow to disable deployments [[#3570](https://github.com/woodpecker-ci/woodpecker/pull/3570)]
+- Add flag to only access public repositories on GitHub [[#3566](https://github.com/woodpecker-ci/woodpecker/pull/3566)]
+- Add `runtimeClassName` in Kubernetes backend options [[#3474](https://github.com/woodpecker-ci/woodpecker/pull/3474)]
+- Remove unused cache properties [[#3567](https://github.com/woodpecker-ci/woodpecker/pull/3567)]
+- Allow separate gitea oauth URL  [[#3513](https://github.com/woodpecker-ci/woodpecker/pull/3513)]
+- Add option to set the local repository path to the cli command exec. [[#3524](https://github.com/woodpecker-ci/woodpecker/pull/3524)]
+
 ### 🐛 Bug Fixes
 
 - Sanitize tag ref for gitea/forgejo [[#3664](https://github.com/woodpecker-ci/woodpecker/pull/3664)]
@@ -21,7 +40,6 @@
 - fix cli config loading and correct comment [[#3618](https://github.com/woodpecker-ci/woodpecker/pull/3618)]
 - Handle ImagePullBackOff pod status [[#3580](https://github.com/woodpecker-ci/woodpecker/pull/3580)]
 - Apply skip ci filter only on push events [[#3612](https://github.com/woodpecker-ci/woodpecker/pull/3612)]
-- Fix bitbucket file fetching [[#3604](https://github.com/woodpecker-ci/woodpecker/pull/3604)]
 - agent: Continue to retry indefinitely [[#3599](https://github.com/woodpecker-ci/woodpecker/pull/3599)]
 - Fix cli version comparison and improve setup [[#3518](https://github.com/woodpecker-ci/woodpecker/pull/3518)]
 - Fix flag name [[#3534](https://github.com/woodpecker-ci/woodpecker/pull/3534)]
@@ -41,26 +59,9 @@
 - Update docs npm deps non-major [[#3485](https://github.com/woodpecker-ci/woodpecker/pull/3485)]
 - Docs updates and fixes [[#3535](https://github.com/woodpecker-ci/woodpecker/pull/3535)]
 
-### 📈 Enhancement
-
-- Split client into multiple files and add more tests [[#3647](https://github.com/woodpecker-ci/woodpecker/pull/3647)]
-- Add DeletePipeline API [[#3506](https://github.com/woodpecker-ci/woodpecker/pull/3506)]
-- Add filter options to GetPipelines API [[#3645](https://github.com/woodpecker-ci/woodpecker/pull/3645)]
-- Deprecate environment filter and improve errors [[#3634](https://github.com/woodpecker-ci/woodpecker/pull/3634)]
-- CLI: remove step logs [[#3458](https://github.com/woodpecker-ci/woodpecker/pull/3458)]
-- Add task details to queue info in woodpecker-go [[#3636](https://github.com/woodpecker-ci/woodpecker/pull/3636)]
-- Use forge from db [[#1417](https://github.com/woodpecker-ci/woodpecker/pull/1417)]
-- Remove review button from approval view [[#3617](https://github.com/woodpecker-ci/woodpecker/pull/3617)]
-- Rework addons (use rpc) [[#3268](https://github.com/woodpecker-ci/woodpecker/pull/3268)]
-- Allow to disable deployments [[#3570](https://github.com/woodpecker-ci/woodpecker/pull/3570)]
-- Add flag to only access public repositories on GitHub [[#3566](https://github.com/woodpecker-ci/woodpecker/pull/3566)]
-- Add `runtimeClassName` in Kubernetes backend options [[#3474](https://github.com/woodpecker-ci/woodpecker/pull/3474)]
-- Remove unused cache properties [[#3567](https://github.com/woodpecker-ci/woodpecker/pull/3567)]
-- Allow separate gitea oauth URL  [[#3513](https://github.com/woodpecker-ci/woodpecker/pull/3513)]
-- Add option to set the local repository path to the cli command exec. [[#3524](https://github.com/woodpecker-ci/woodpecker/pull/3524)]
-
 ### Misc
 
+- Allow running tests on arm64 runners [[#2605](https://github.com/woodpecker-ci/woodpecker/pull/2605)]
 - chore(deps): update node.js to v22 [[#3659](https://github.com/woodpecker-ci/woodpecker/pull/3659)]
 - chore(deps): lock file maintenance [[#3656](https://github.com/woodpecker-ci/woodpecker/pull/3656)]
 - Add make target for spellcheck [[#3648](https://github.com/woodpecker-ci/woodpecker/pull/3648)]
