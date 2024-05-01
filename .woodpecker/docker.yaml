@@ -1,7 +1,8 @@
 variables:
   - &golang_image 'docker.io/golang:1.22.2'
-  - &node_image 'docker.io/node:21-alpine'
-  - &xgo_image 'docker.io/techknowlogick/xgo:go-1.22.1'
+  - &node_image 'docker.io/node:22-alpine'
+  # TODO: switch back to upstream image after https://github.com/techknowlogick/xgo/pull/224 got merged
+  - &xgo_image 'docker.io/pats22/xgo:go-1.22.1'
   - &xgo_version 'go-1.21.2'
   - &buildx_plugin 'docker.io/woodpeckerci/plugin-docker-buildx:3.2.1'
   - &platforms_release 'linux/arm/v6,linux/arm/v7,linux/arm64/v8,linux/386,linux/amd64,linux/ppc64le,linux/riscv64,linux/s390x,freebsd/arm64,freebsd/amd64,openbsd/arm64,openbsd/amd64'
