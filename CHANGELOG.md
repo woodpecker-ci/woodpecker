@@ -1,6 +1,6 @@
 # Changelog
 
-## [2.5.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.5.0) - 2024-05-01
+## [2.5.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.5.0) - 2024-05-02
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -14,20 +14,10 @@
 
 - Step logs removing API and Button [[#3451](https://github.com/woodpecker-ci/woodpecker/pull/3451)]
 
-### 🐛 Bug Fixes
-
-- Fix bitbucket dir fetching [[#3668](https://github.com/woodpecker-ci/woodpecker/pull/3668)]
-- Sanitize tag ref for gitea/forgejo [[#3664](https://github.com/woodpecker-ci/woodpecker/pull/3664)]
-- Fix secret loading [[#3620](https://github.com/woodpecker-ci/woodpecker/pull/3620)]
-- fix cli config loading and correct comment [[#3618](https://github.com/woodpecker-ci/woodpecker/pull/3618)]
-- Handle ImagePullBackOff pod status [[#3580](https://github.com/woodpecker-ci/woodpecker/pull/3580)]
-- Apply skip ci filter only on push events [[#3612](https://github.com/woodpecker-ci/woodpecker/pull/3612)]
-- agent: Continue to retry indefinitely [[#3599](https://github.com/woodpecker-ci/woodpecker/pull/3599)]
-- Fix cli version comparison and improve setup [[#3518](https://github.com/woodpecker-ci/woodpecker/pull/3518)]
-- Fix flag name [[#3534](https://github.com/woodpecker-ci/woodpecker/pull/3534)]
-
 ### 📈 Enhancement
 
+- Rework entrypoints [[#3269](https://github.com/woodpecker-ci/woodpecker/pull/3269)]
+- Add cli output handlers [[#3660](https://github.com/woodpecker-ci/woodpecker/pull/3660)]
 - Cleanup api docs and ts api-client options [[#3663](https://github.com/woodpecker-ci/woodpecker/pull/3663)]
 - Split client into multiple files and add more tests [[#3647](https://github.com/woodpecker-ci/woodpecker/pull/3647)]
 - Add DeletePipeline API [[#3506](https://github.com/woodpecker-ci/woodpecker/pull/3506)]
@@ -44,6 +34,18 @@
 - Remove unused cache properties [[#3567](https://github.com/woodpecker-ci/woodpecker/pull/3567)]
 - Allow separate gitea oauth URL  [[#3513](https://github.com/woodpecker-ci/woodpecker/pull/3513)]
 - Add option to set the local repository path to the cli command exec. [[#3524](https://github.com/woodpecker-ci/woodpecker/pull/3524)]
+
+### 🐛 Bug Fixes
+
+- Fix bitbucket dir fetching [[#3668](https://github.com/woodpecker-ci/woodpecker/pull/3668)]
+- Sanitize tag ref for gitea/forgejo [[#3664](https://github.com/woodpecker-ci/woodpecker/pull/3664)]
+- Fix secret loading [[#3620](https://github.com/woodpecker-ci/woodpecker/pull/3620)]
+- fix cli config loading and correct comment [[#3618](https://github.com/woodpecker-ci/woodpecker/pull/3618)]
+- Handle ImagePullBackOff pod status [[#3580](https://github.com/woodpecker-ci/woodpecker/pull/3580)]
+- Apply skip ci filter only on push events [[#3612](https://github.com/woodpecker-ci/woodpecker/pull/3612)]
+- agent: Continue to retry indefinitely [[#3599](https://github.com/woodpecker-ci/woodpecker/pull/3599)]
+- Fix cli version comparison and improve setup [[#3518](https://github.com/woodpecker-ci/woodpecker/pull/3518)]
+- Fix flag name [[#3534](https://github.com/woodpecker-ci/woodpecker/pull/3534)]
 
 ### 📚 Documentation
 
