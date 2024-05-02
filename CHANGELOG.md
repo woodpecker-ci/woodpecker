@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @Elara6331, @anbraten, @aumetra, @eliasscosta, @manuelluis, @nemunaire, @pat-s, @qwerty287, @stevapple, @xoxys, @zc-devs
+@6543, @Elara6331, @anbraten, @aumetra, @eliasscosta, @fernandrone, @manuelluis, @nemunaire, @pat-s, @qwerty287, @stevapple, @xoxys, @zc-devs
 
 ### 🔒 Security
 
@@ -16,6 +16,7 @@
 
 ### 📈 Enhancement
 
+- Support github deploy task [[#3512](https://github.com/woodpecker-ci/woodpecker/pull/3512)]
 - Rework entrypoints [[#3269](https://github.com/woodpecker-ci/woodpecker/pull/3269)]
 - Add cli output handlers [[#3660](https://github.com/woodpecker-ci/woodpecker/pull/3660)]
 - Cleanup api docs and ts api-client options [[#3663](https://github.com/woodpecker-ci/woodpecker/pull/3663)]
