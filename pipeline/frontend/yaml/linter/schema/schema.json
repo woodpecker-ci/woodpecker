@@ -438,10 +438,6 @@
           "description": "Execute a step only for a specific environment. Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#environment",
           "$ref": "#/definitions/constraint_list"
         },
-        "task": {
-          "description": "Execute a step only for a specific task. Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#task",
-          "$ref": "#/definitions/constraint_list"
-        },
         "matrix": {
           "description": "Read more: https://woodpecker-ci.org/docs/usage/matrix-workflows",
           "type": "object",
