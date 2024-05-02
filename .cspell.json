@@ -79,7 +79,8 @@
     "HEALTHCHECK",
     "devx",
     "gomod",
-    "laszlocph"
+    "laszlocph",
+    "lockb"
   ],
   "ignorePaths": [
     "**/node_modules/**/*",
