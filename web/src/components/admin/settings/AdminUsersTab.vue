@@ -107,7 +107,7 @@ const selectedUser = ref<Partial<User>>();
 const isEditingUser = computed(() => !!selectedUser.value?.id);
 
 async function loadUsers(page: number): Promise<User[] | null> {
-  return apiClient.getUsers(page);
+  return apiClient.getUsers({ page });
 }
 
 const { resetPage, data: users } = usePagination(loadUsers, () => !selectedUser.value);

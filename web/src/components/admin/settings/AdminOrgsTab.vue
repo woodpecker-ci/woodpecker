@@ -50,7 +50,7 @@ const notifications = useNotifications();
 const { t } = useI18n();
 
 async function loadOrgs(page: number): Promise<Org[] | null> {
-  return apiClient.getOrgs(page);
+  return apiClient.getOrgs({ page });
 }
 
 const { resetPage, data: orgs } = usePagination(loadOrgs);

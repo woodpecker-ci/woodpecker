@@ -104,7 +104,7 @@ async function loadRegistries(page: number): Promise<Registry[] | null> {
     throw new Error("Unexpected: Can't load repo");
   }
 
-  return apiClient.getRegistryList(repo.value.id, page);
+  return apiClient.getRegistryList(repo.value.id, { page });
 }
 
 const { resetPage, data: registries } = usePagination(loadRegistries, () => !selectedRegistry.value);
