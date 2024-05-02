@@ -18,6 +18,8 @@ import (
 	"net/http"
 )
 
+//go:generate mockery --name Client --output mocks --case underscore
+
 // Client is used to communicate with a Woodpecker server.
 type Client interface {
 	// SetClient sets the http.Client.

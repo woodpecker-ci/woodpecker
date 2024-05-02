@@ -161,6 +161,9 @@ Only build steps can define commands. You cannot use commands with plugins or se
 
 Allows you to specify the entrypoint for containers. Note that this must be a list of the command and its arguments (e.g. `["/bin/sh", "-c"]`).
 
+If you define [`commands`](#commands), the default entrypoint will be `["/bin/sh", "-c", "echo $CI_SCRIPT | base64 -d | /bin/sh -e"]`.
+You can also use a custom shell with `CI_SCRIPT` (Base64-encoded) if you set `commands`.
+
 ### `environment`
 
 Woodpecker provides the ability to pass environment variables to individual steps.
