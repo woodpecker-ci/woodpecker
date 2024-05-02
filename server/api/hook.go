@@ -52,7 +52,7 @@ func GetQueueInfo(c *gin.Context) {
 
 // PauseQueue
 //
-//	@Summary	Pause a pipeline queue
+//	@Summary	Pause the pipeline queue
 //	@Router		/queue/pause [post]
 //	@Produce	plain
 //	@Success	204
@@ -65,7 +65,7 @@ func PauseQueue(c *gin.Context) {
 
 // ResumeQueue
 //
-//	@Summary	Resume a pipeline queue
+//	@Summary	Resume the pipeline queue
 //	@Router		/queue/resume [post]
 //	@Produce	plain
 //	@Success	204
@@ -104,7 +104,13 @@ func BlockTilQueueHasRunningItem(c *gin.Context) {
 //	@Param		hook	body	object	true	"the webhook payload; forge is automatically detected"
 func PostHook(c *gin.Context) {
 	_store := store.FromContext(c)
-	_forge := server.Config.Services.Forge
+
+	_forge, err := server.Config.Services.Manager.ForgeMain() // TODO: get the forge for the specific repo somehow
+	if err != nil {
+		log.Error().Err(err).Msg("Cannot get main forge")
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
 
 	//
 	// 1. Parse webhook

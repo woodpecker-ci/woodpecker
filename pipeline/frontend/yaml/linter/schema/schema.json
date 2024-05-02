@@ -371,6 +371,21 @@
         },
         "backend_options": {
           "$ref": "#/definitions/step_backend_options"
+        },
+        "entrypoint": {
+          "description": "Defines container entrypoint.",
+          "oneOf": [
+            {
+              "type": "array",
+              "minLength": 1,
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "string"
+            }
+          ]
         }
       }
     },

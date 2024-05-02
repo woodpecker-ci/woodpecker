@@ -10,6 +10,7 @@ const config: Config = {
   baseUrl: '/',
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'throw',
+  onBrokenAnchors: 'throw',
   onDuplicateRoutes: 'throw',
   organizationName: 'woodpecker-ci',
   projectName: 'woodpecker-ci.github.io',

@@ -26,7 +26,7 @@ import (
 
 // GetGlobalSecretList
 //
-//	@Summary	Get the global secret list
+//	@Summary	List global secrets
 //	@Router		/secrets [get]
 //	@Produce	json
 //	@Success	200	{array}	Secret
@@ -71,7 +71,7 @@ func GetGlobalSecret(c *gin.Context) {
 
 // PostGlobalSecret
 //
-//	@Summary	Persist/create a global secret
+//	@Summary	Create a global secret
 //	@Router		/secrets [post]
 //	@Produce	json
 //	@Success	200	{object}	Secret

@@ -161,6 +161,9 @@ Only build steps can define commands. You cannot use commands with plugins or se
 
 Allows you to specify the entrypoint for containers. Note that this must be a list of the command and its arguments (e.g. `["/bin/sh", "-c"]`).
 
+If you define [`commands`](#commands), the default entrypoint will be `["/bin/sh", "-c", "echo $CI_SCRIPT | base64 -d | /bin/sh -e"]`.
+You can also use a custom shell with `CI_SCRIPT` (Base64-encoded) if you set `commands`.
+
 ### `environment`
 
 Woodpecker provides the ability to pass environment variables to individual steps.
@@ -357,20 +360,6 @@ Execute a step for a specific platform using wildcards:
 ```yaml
 when:
   - platform: [linux/*, windows/amd64]
-```
-
-<!-- markdownlint-disable no-duplicate-heading -->
-
-#### `environment`
-
-<!-- markdownlint-enable no-duplicate-heading -->
-
-Execute a step for deployment events matching the target deployment environment:
-
-```yaml
-when:
-  - environment: production
-  - event: deployment
 ```
 
 #### `matrix`
@@ -758,7 +747,7 @@ Workflows that should run even on failure should set the `runs_on` tag. See [her
 Woodpecker gives the ability to configure privileged mode in the YAML. You can use this parameter to launch containers with escalated capabilities.
 
 :::info
-Privileged mode is only available to trusted repositories and for security reasons should only be used in private environments. See [project settings](./71-project-settings.md#trusted) to enable trusted mode.
+Privileged mode is only available to trusted repositories and for security reasons should only be used in private environments. See [project settings](./75-project-settings.md#trusted) to enable trusted mode.
 :::
 
 ```diff
