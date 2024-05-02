@@ -27,7 +27,7 @@ import (
 
 // GetOrgSecret
 //
-//	@Summary	Get the named organization secret
+//	@Summary	Get a organization secret by name
 //	@Router		/orgs/{org_id}/secrets/{secret} [get]
 //	@Produce	json
 //	@Success	200	{object}	Secret
@@ -55,7 +55,7 @@ func GetOrgSecret(c *gin.Context) {
 
 // GetOrgSecretList
 //
-//	@Summary	Get the organization secret list
+//	@Summary	List organization secrets
 //	@Router		/orgs/{org_id}/secrets [get]
 //	@Produce	json
 //	@Success	200	{array}	Secret
@@ -87,7 +87,7 @@ func GetOrgSecretList(c *gin.Context) {
 
 // PostOrgSecret
 //
-//	@Summary	Persist/create an organization secret
+//	@Summary	Create an organization secret
 //	@Router		/orgs/{org_id}/secrets [post]
 //	@Produce	json
 //	@Success	200	{object}	Secret
@@ -129,7 +129,7 @@ func PostOrgSecret(c *gin.Context) {
 
 // PatchOrgSecret
 //
-//	@Summary	Update an organization secret
+//	@Summary	Update an organization secret by name
 //	@Router		/orgs/{org_id}/secrets/{secret} [patch]
 //	@Produce	json
 //	@Success	200	{object}	Secret
@@ -183,7 +183,7 @@ func PatchOrgSecret(c *gin.Context) {
 
 // DeleteOrgSecret
 //
-//	@Summary	Delete the named secret from an organization
+//	@Summary	Delete an organization secret by name
 //	@Router		/orgs/{org_id}/secrets/{secret} [delete]
 //	@Produce	plain
 //	@Success	204

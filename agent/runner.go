@@ -50,7 +50,7 @@ func NewRunner(workEngine rpc.Peer, f rpc.Filter, h string, state *State, backen
 	}
 }
 
-func (r *Runner) Run(runnerCtx context.Context) error {
+func (r *Runner) Run(runnerCtx context.Context) error { //nolint:contextcheck
 	log.Debug().Msg("request next execution")
 
 	meta, _ := metadata.FromOutgoingContext(runnerCtx)
@@ -158,7 +158,7 @@ func (r *Runner) Run(runnerCtx context.Context) error {
 
 	if canceled.IsSet() {
 		state.Error = ""
-		state.ExitCode = 137
+		state.ExitCode = pipeline.ExitCodeKilled
 	} else if err != nil {
 		pExitError := &pipeline.ExitError{}
 		switch {
@@ -166,7 +166,7 @@ func (r *Runner) Run(runnerCtx context.Context) error {
 			state.ExitCode = pExitError.Code
 		case errors.Is(err, pipeline.ErrCancel):
 			state.Error = ""
-			state.ExitCode = 137
+			state.ExitCode = pipeline.ExitCodeKilled
 			canceled.SetTo(true)
 		default:
 			state.ExitCode = 1

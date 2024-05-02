@@ -8,6 +8,7 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v2"
 
+	"go.woodpecker-ci.org/woodpecker/v2/cli/internal/config"
 	"go.woodpecker-ci.org/woodpecker/v2/cli/update"
 )
 
@@ -17,7 +18,7 @@ var (
 )
 
 func Before(c *cli.Context) error {
-	if err := SetupGlobalLogger(c); err != nil {
+	if err := setupGlobalLogger(c); err != nil {
 		return err
 	}
 
@@ -36,7 +37,7 @@ func Before(c *cli.Context) error {
 
 		log.Debug().Msg("Checking for updates ...")
 
-		newVersion, err := update.CheckForUpdate(waitForUpdateCheck, true)
+		newVersion, err := update.CheckForUpdate(waitForUpdateCheck, false)
 		if err != nil {
 			log.Error().Err(err).Msgf("Failed to check for updates")
 			return
@@ -49,15 +50,15 @@ func Before(c *cli.Context) error {
 		}
 	}()
 
-	return nil
+	return config.Load(c)
 }
 
 func After(_ *cli.Context) error {
 	if waitForUpdateCheck != nil {
 		select {
 		case <-waitForUpdateCheck.Done():
-		// When the actual command already finished, we still wait 250ms for the update check to finish
-		case <-time.After(time.Millisecond * 250):
+		// When the actual command already finished, we still wait 500ms for the update check to finish
+		case <-time.After(time.Millisecond * 500):
 			log.Debug().Msg("Update check stopped due to timeout")
 			cancelWaitForUpdate(errors.New("update check timeout"))
 		}

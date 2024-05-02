@@ -37,7 +37,7 @@ import (
 
 // GetBadge
 //
-//	@Summary	Get status badge, SVG format
+//	@Summary	Get status of pipeline as SVG badge
 //	@Router		/badges/{repo_id}/status.svg [get]
 //	@Produce	image/svg+xml
 //	@Success	200
@@ -120,7 +120,7 @@ func GetCC(c *gin.Context) {
 		return
 	}
 
-	pipelines, err := _store.GetPipelineList(repo, &model.ListOptions{Page: 1, PerPage: 1})
+	pipelines, err := _store.GetPipelineList(repo, &model.ListOptions{Page: 1, PerPage: 1}, nil)
 	if err != nil && !errors.Is(err, types.RecordNotExist) {
 		log.Warn().Err(err).Msg("could not get pipeline list")
 		c.AbortWithStatus(http.StatusInternalServerError)

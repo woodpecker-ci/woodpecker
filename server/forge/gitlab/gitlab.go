@@ -544,7 +544,7 @@ func (g *GitLab) Deactivate(ctx context.Context, user *model.User, repo *model.R
 
 	hookID := -1
 	listProjectHooksOptions := &gitlab.ListProjectHooksOptions{
-		PerPage: 10,
+		PerPage: perPage,
 		Page:    1,
 	}
 	for {
@@ -685,7 +685,7 @@ func (g *GitLab) OrgMembership(ctx context.Context, u *model.User, owner string)
 	groups, _, err := client.Groups.ListGroups(&gitlab.ListGroupsOptions{
 		ListOptions: gitlab.ListOptions{
 			Page:    1,
-			PerPage: 100,
+			PerPage: perPage,
 		},
 		Search: gitlab.Ptr(owner),
 	}, gitlab.WithContext(ctx))
@@ -706,7 +706,7 @@ func (g *GitLab) OrgMembership(ctx context.Context, u *model.User, owner string)
 	opts := &gitlab.ListGroupMembersOptions{
 		ListOptions: gitlab.ListOptions{
 			Page:    1,
-			PerPage: 100,
+			PerPage: perPage,
 		},
 	}
 
@@ -808,7 +808,7 @@ func (g *GitLab) loadChangedFilesFromMergeRequest(ctx context.Context, tmpRepo *
 	for _, file := range changes {
 		files = append(files, file.NewPath, file.OldPath)
 	}
-	pipeline.ChangedFiles = utils.DedupStrings(files)
+	pipeline.ChangedFiles = utils.DeduplicateStrings(files)
 
 	return pipeline, nil
 }

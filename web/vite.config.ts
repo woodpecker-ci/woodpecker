@@ -7,10 +7,10 @@ import replace from 'replace-in-file';
 import IconsResolver from 'unplugin-icons/resolver';
 import Icons from 'unplugin-icons/vite';
 import Components from 'unplugin-vue-components/vite';
-import { defineConfig } from 'vite';
 import prismjs from 'vite-plugin-prismjs';
 import WindiCSS from 'vite-plugin-windicss';
 import svgLoader from 'vite-svg-loader';
+import { defineConfig } from 'vitest/config';
 
 function woodpeckerInfoPlugin() {
   return {
@@ -132,5 +132,9 @@ export default defineConfig({
   server: {
     host: process.env.VITE_DEV_SERVER_HOST || '127.0.0.1',
     port: 8010,
+  },
+  test: {
+    globals: true,
+    environment: 'jsdom',
   },
 });

@@ -15,22 +15,20 @@
 package pipeline
 
 import (
-	"os"
-	"text/template"
-
 	"github.com/urfave/cli/v2"
 
 	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
 	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker"
 )
 
+//nolint:gomnd
 var pipelineListCmd = &cli.Command{
 	Name:      "ls",
 	Usage:     "show pipeline history",
 	ArgsUsage: "<repo-id|repo-full-name>",
-	Action:    pipelineList,
-	Flags: []cli.Flag{
-		common.FormatFlag(tmplPipelineList),
+	Action:    List,
+	Flags: append(common.OutputFlags("table"), []cli.Flag{
 		&cli.StringFlag{
 			Name:  "branch",
 			Usage: "branch filter",
@@ -48,28 +46,33 @@ var pipelineListCmd = &cli.Command{
 			Usage: "limit the list size",
 			Value: 25,
 		},
-	},
+	}...),
 }
 
-func pipelineList(c *cli.Context) error {
-	repoIDOrFullName := c.Args().First()
+func List(c *cli.Context) error {
 	client, err := internal.NewClient(c)
 	if err != nil {
 		return err
 	}
-	repoID, err := internal.ParseRepo(client, repoIDOrFullName)
+	resources, err := pipelineList(c, client)
 	if err != nil {
 		return err
+	}
+	return pipelineOutput(c, resources)
+}
+
+func pipelineList(c *cli.Context, client woodpecker.Client) ([]woodpecker.Pipeline, error) {
+	resources := make([]woodpecker.Pipeline, 0)
+
+	repoIDOrFullName := c.Args().First()
+	repoID, err := internal.ParseRepo(client, repoIDOrFullName)
+	if err != nil {
+		return resources, err
 	}
 
 	pipelines, err := client.PipelineList(repoID)
 	if err != nil {
-		return err
-	}
-
-	tmpl, err := template.New("_").Parse(c.String("format") + "\n")
-	if err != nil {
-		return err
+		return resources, err
 	}
 
 	branch := c.String("branch")
@@ -91,21 +94,9 @@ func pipelineList(c *cli.Context) error {
 		if status != "" && pipeline.Status != status {
 			continue
 		}
-		if err := tmpl.Execute(os.Stdout, pipeline); err != nil {
-			return err
-		}
+		resources = append(resources, *pipeline)
 		count++
 	}
-	return nil
-}
 
-// template for pipeline list information
-var tmplPipelineList = "\x1b[33mPipeline #{{ .Number }} \x1b[0m" + `
-Status: {{ .Status }}
-Event: {{ .Event }}
-Commit: {{ .Commit }}
-Branch: {{ .Branch }}
-Ref: {{ .Ref }}
-Author: {{ .Author }} {{ if .Email }}<{{.Email}}>{{ end }}
-Message: {{ .Message }}
-`
+	return resources, nil
+}

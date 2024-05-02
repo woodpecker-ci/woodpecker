@@ -80,7 +80,22 @@
     "devx",
     "gomod",
     "laszlocph",
-    "lockb"
+    "lockb",
+    "charmbracelet",
+    "GODEBUG",
+    "netdns",
+    "BUILDPLATFORM",
+    "repology",
+    "WORKDIR",
+    "corepack",
+    "binutils",
+    "nocolor",
+    "logfile",
+    "Keyfunc",
+    "protoc",
+    "PROTOC",
+    "GOBIN",
+    "GOPATH"
   ],
   "ignorePaths": [
     "**/node_modules/**/*",
@@ -105,10 +120,8 @@
     "agent/",
     "cli/",
     "cmd/",
-    "docker/",
     "docs/",
     "pipeline/",
-    "shared/",
     "server/"
   ],
   "enableFiletypes": ["dockercompose"]

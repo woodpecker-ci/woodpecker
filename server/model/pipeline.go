@@ -16,42 +16,48 @@
 package model
 
 import (
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/errors"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/errors/types"
 )
 
 type Pipeline struct {
-	ID                  int64                   `json:"id"                      xorm:"pk autoincr 'pipeline_id'"`
-	RepoID              int64                   `json:"-"                       xorm:"UNIQUE(s) INDEX 'pipeline_repo_id'"`
-	Number              int64                   `json:"number"                  xorm:"UNIQUE(s) 'pipeline_number'"`
-	Author              string                  `json:"author"                  xorm:"INDEX 'pipeline_author'"`
-	Parent              int64                   `json:"parent"                  xorm:"pipeline_parent"`
-	Event               WebhookEvent            `json:"event"                   xorm:"pipeline_event"`
-	Status              StatusValue             `json:"status"                  xorm:"INDEX 'pipeline_status'"`
-	Errors              []*errors.PipelineError `json:"errors"                  xorm:"json 'pipeline_errors'"`
-	Created             int64                   `json:"created_at"              xorm:"pipeline_created"`
-	Updated             int64                   `json:"updated_at"              xorm:"updated NOT NULL DEFAULT 0 'updated'"`
-	Started             int64                   `json:"started_at"              xorm:"pipeline_started"`
-	Finished            int64                   `json:"finished_at"             xorm:"pipeline_finished"`
-	Deploy              string                  `json:"deploy_to"               xorm:"pipeline_deploy"`
-	Commit              string                  `json:"commit"                  xorm:"pipeline_commit"`
-	Branch              string                  `json:"branch"                  xorm:"pipeline_branch"`
-	Ref                 string                  `json:"ref"                     xorm:"pipeline_ref"`
-	Refspec             string                  `json:"refspec"                 xorm:"pipeline_refspec"`
-	Title               string                  `json:"title"                   xorm:"pipeline_title"`
-	Message             string                  `json:"message"                 xorm:"TEXT 'pipeline_message'"`
-	Timestamp           int64                   `json:"timestamp"               xorm:"pipeline_timestamp"`
-	Sender              string                  `json:"sender"                  xorm:"pipeline_sender"` // uses reported user for webhooks and name of cron for cron pipelines
-	Avatar              string                  `json:"author_avatar"           xorm:"pipeline_avatar"`
-	Email               string                  `json:"author_email"            xorm:"pipeline_email"`
-	ForgeURL            string                  `json:"forge_url"                xorm:"pipeline_forge_url"`
-	Reviewer            string                  `json:"reviewed_by"             xorm:"pipeline_reviewer"`
-	Reviewed            int64                   `json:"reviewed_at"             xorm:"pipeline_reviewed"`
-	Workflows           []*Workflow             `json:"workflows,omitempty"     xorm:"-"`
-	ChangedFiles        []string                `json:"changed_files,omitempty" xorm:"LONGTEXT 'changed_files'"`
-	AdditionalVariables map[string]string       `json:"variables,omitempty"     xorm:"json 'additional_variables'"`
-	PullRequestLabels   []string                `json:"pr_labels,omitempty"     xorm:"json 'pr_labels'"`
-	IsPrerelease        bool                    `json:"is_prerelease,omitempty"     xorm:"is_prerelease"`
+	ID                  int64                  `json:"id"                      xorm:"pk autoincr 'pipeline_id'"`
+	RepoID              int64                  `json:"-"                       xorm:"UNIQUE(s) INDEX 'pipeline_repo_id'"`
+	Number              int64                  `json:"number"                  xorm:"UNIQUE(s) 'pipeline_number'"`
+	Author              string                 `json:"author"                  xorm:"INDEX 'pipeline_author'"`
+	Parent              int64                  `json:"parent"                  xorm:"pipeline_parent"`
+	Event               WebhookEvent           `json:"event"                   xorm:"pipeline_event"`
+	Status              StatusValue            `json:"status"                  xorm:"INDEX 'pipeline_status'"`
+	Errors              []*types.PipelineError `json:"errors"                  xorm:"json 'pipeline_errors'"`
+	Created             int64                  `json:"created_at"              xorm:"pipeline_created"`
+	Updated             int64                  `json:"updated_at"              xorm:"updated NOT NULL DEFAULT 0 'updated'"`
+	Started             int64                  `json:"started_at"              xorm:"pipeline_started"`
+	Finished            int64                  `json:"finished_at"             xorm:"pipeline_finished"`
+	Deploy              string                 `json:"deploy_to"               xorm:"pipeline_deploy"`
+	DeployTask          string                 `json:"deploy_task"             xorm:"pipeline_deploy_task"`
+	Commit              string                 `json:"commit"                  xorm:"pipeline_commit"`
+	Branch              string                 `json:"branch"                  xorm:"pipeline_branch"`
+	Ref                 string                 `json:"ref"                     xorm:"pipeline_ref"`
+	Refspec             string                 `json:"refspec"                 xorm:"pipeline_refspec"`
+	Title               string                 `json:"title"                   xorm:"pipeline_title"`
+	Message             string                 `json:"message"                 xorm:"TEXT 'pipeline_message'"`
+	Timestamp           int64                  `json:"timestamp"               xorm:"pipeline_timestamp"`
+	Sender              string                 `json:"sender"                  xorm:"pipeline_sender"` // uses reported user for webhooks and name of cron for cron pipelines
+	Avatar              string                 `json:"author_avatar"           xorm:"pipeline_avatar"`
+	Email               string                 `json:"author_email"            xorm:"pipeline_email"`
+	ForgeURL            string                 `json:"forge_url"                xorm:"pipeline_forge_url"`
+	Reviewer            string                 `json:"reviewed_by"             xorm:"pipeline_reviewer"`
+	Reviewed            int64                  `json:"reviewed_at"             xorm:"pipeline_reviewed"`
+	Workflows           []*Workflow            `json:"workflows,omitempty"     xorm:"-"`
+	ChangedFiles        []string               `json:"changed_files,omitempty" xorm:"LONGTEXT 'changed_files'"`
+	AdditionalVariables map[string]string      `json:"variables,omitempty"     xorm:"json 'additional_variables'"`
+	PullRequestLabels   []string               `json:"pr_labels,omitempty"     xorm:"json 'pr_labels'"`
+	IsPrerelease        bool                   `json:"is_prerelease,omitempty"     xorm:"is_prerelease"`
 } //	@name Pipeline
+
+type PipelineFilter struct {
+	Before int64
+	After  int64
+}
 
 // TableName return database table name for xorm
 func (Pipeline) TableName() string {

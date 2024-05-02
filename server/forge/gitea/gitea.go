@@ -23,9 +23,7 @@ import (
 	"crypto/tls"
 	"errors"
 	"fmt"
-	"net"
 	"net/http"
-	"net/url"
 	"path"
 	"path/filepath"
 	"strconv"
@@ -49,11 +47,12 @@ const (
 	authorizeTokenURL = "%s/login/oauth/authorize"
 	accessTokenURL    = "%s/login/oauth/access_token"
 	defaultPageSize   = 50
-	giteaDevVersion   = "v1.18.0"
+	giteaDevVersion   = "v1.21.0"
 )
 
 type Gitea struct {
 	url          string
+	oauth2URL    string
 	ClientID     string
 	ClientSecret string
 	SkipVerify   bool
@@ -63,6 +62,7 @@ type Gitea struct {
 // Opts defines configuration options.
 type Opts struct {
 	URL        string // Gitea server url.
+	OAuth2URL  string // User-facing Gitea server url for OAuth2.
 	Client     string // OAuth2 Client ID
 	Secret     string // OAuth2 Client Secret
 	SkipVerify bool   // Skip ssl verification.
@@ -71,16 +71,13 @@ type Opts struct {
 // New returns a Forge implementation that integrates with Gitea,
 // an open source Git service written in Go. See https://gitea.io/
 func New(opts Opts) (forge.Forge, error) {
-	u, err := url.Parse(opts.URL)
-	if err != nil {
-		return nil, err
+	if opts.OAuth2URL == "" {
+		opts.OAuth2URL = opts.URL
 	}
-	host, _, err := net.SplitHostPort(u.Host)
-	if err == nil {
-		u.Host = host
-	}
+
 	return &Gitea{
 		url:          opts.URL,
+		oauth2URL:    opts.OAuth2URL,
 		ClientID:     opts.Client,
 		ClientSecret: opts.Secret,
 		SkipVerify:   opts.SkipVerify,
@@ -102,8 +99,8 @@ func (c *Gitea) oauth2Config(ctx context.Context) (*oauth2.Config, context.Conte
 			ClientID:     c.ClientID,
 			ClientSecret: c.ClientSecret,
 			Endpoint: oauth2.Endpoint{
-				AuthURL:  fmt.Sprintf(authorizeTokenURL, c.url),
-				TokenURL: fmt.Sprintf(accessTokenURL, c.url),
+				AuthURL:  fmt.Sprintf(authorizeTokenURL, c.oauth2URL),
+				TokenURL: fmt.Sprintf(accessTokenURL, c.oauth2URL),
 			},
 			RedirectURL: fmt.Sprintf("%s/authorize", server.Config.Server.OAuthHost),
 		},
@@ -399,10 +396,10 @@ func (c *Gitea) Activate(ctx context.Context, u *model.User, r *model.Repo, link
 	_, response, err := client.CreateRepoHook(r.Owner, r.Name, hook)
 	if err != nil {
 		if response != nil {
-			if response.StatusCode == 404 {
+			if response.StatusCode == http.StatusNotFound {
 				return fmt.Errorf("could not find repository")
 			}
-			if response.StatusCode == 200 {
+			if response.StatusCode == http.StatusOK {
 				return fmt.Errorf("could not find repository, repository was probably renamed")
 			}
 		}
