@@ -30,7 +30,7 @@ steps:
     image: *bun_image
     directory: web/
     commands:
-      # - corepack enable
+      - bun install --frozen-lockfile
       - bun lint
     when: *when
 
@@ -40,7 +40,7 @@ steps:
     image: *bun_image
     directory: web/
     commands:
-      # - corepack enable
+      - bun install --frozen-lockfile
       - bun format:check
     when: *when
 
@@ -50,7 +50,7 @@ steps:
     image: *bun_image
     directory: web/
     commands:
-      # - corepack enable
+      - bun install --frozen-lockfile
       - bun typecheck
     when: *when
 
