@@ -6,7 +6,7 @@ when:
       - renovate/*
 
 variables:
-  - &bun_image 'docker.io/oven/bun:1.0-alpine'
+  - &bun_image 'docker.io/oven/bun:1.1-alpine'
   - &when
     path:
       # related config files
@@ -60,6 +60,6 @@ steps:
     image: *bun_image
     directory: web/
     commands:
-      # - corepack enable
+      - bun install --frozen-lockfile
       - bun test
     when: *when
