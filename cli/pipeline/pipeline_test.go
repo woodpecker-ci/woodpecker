@@ -31,7 +31,7 @@ func TestPipelineOutput(t *testing.T) {
 		},
 		{
 			name:     "table output with no header",
-			args:     []string{"output", "--no-header"},
+			args:     []string{"output", "--output-no-headers"},
 			expected: "1  success  push  main  abcdef  John Doe\n",
 		},
 		{

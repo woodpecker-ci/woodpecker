@@ -48,7 +48,7 @@ var Command = &cli.Command{
 
 func pipelineOutput(c *cli.Context, resources []woodpecker.Pipeline, fd ...io.Writer) error {
 	outfmt, outopt := output.ParseOutputOptions(c.String("output"))
-	noHeader := c.Bool("no-header")
+	noHeader := c.Bool("output-no-headers")
 
 	var out io.Writer
 	switch len(fd) {
