@@ -30,7 +30,7 @@ steps:
     image: *bun_image
     directory: web/
     commands:
-      - corepack enable
+      # - corepack enable
       - bun lint
     when: *when
 
@@ -40,7 +40,7 @@ steps:
     image: *bun_image
     directory: web/
     commands:
-      - corepack enable
+      # - corepack enable
       - bun format:check
     when: *when
 
@@ -50,7 +50,7 @@ steps:
     image: *bun_image
     directory: web/
     commands:
-      - corepack enable
+      # - corepack enable
       - bun typecheck
     when: *when
 
@@ -60,6 +60,6 @@ steps:
     image: *bun_image
     directory: web/
     commands:
-      - corepack enable
+      # - corepack enable
       - bun test
     when: *when
