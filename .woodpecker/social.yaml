@@ -29,4 +29,4 @@ steps:
       webhook_id: TODO
       webhook_token:
         from_secret: discord_token
-      message: "**{{ build.tag }}** was released: <https://github.com/woodpecker-ci/woodpecker/releases/tag/{{ build.tag }}>"
+      message: '**{{ build.tag }}** was released: <https://github.com/woodpecker-ci/woodpecker/releases/tag/{{ build.tag }}>'
