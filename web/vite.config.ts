@@ -19,7 +19,7 @@ function woodpeckerInfoPlugin() {
       const info =
         '1) Please add `WOODPECKER_DEV_WWW_PROXY=http://localhost:8010` to your `.env` file.\n' +
         'After starting the woodpecker server as well you should now be able to access the UI at http://localhost:8000/\n\n' +
-        '2) If you want to run the vite dev server (`pnpm start`) within a container please set `VITE_DEV_SERVER_HOST=0.0.0.0`.';
+        '2) If you want to run the vite dev server (`bun start`) within a container please set `VITE_DEV_SERVER_HOST=0.0.0.0`.';
       // eslint-disable-next-line no-console
       console.log(info);
     },

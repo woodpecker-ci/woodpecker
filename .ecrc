@@ -10,6 +10,8 @@
     "server/store/datastore/feed.go",
     "cmd/server/docs/docs.go",
     "_test.go",
-    "Makefile"
+    "Makefile",
+    "docs/bun.lockb",
+    "web/bun.lockb"
   ]
 }

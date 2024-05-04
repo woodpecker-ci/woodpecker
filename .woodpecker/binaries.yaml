@@ -3,19 +3,18 @@ when:
 
 variables:
   - &golang_image 'docker.io/golang:1.22.2'
-  - &node_image 'docker.io/node:22-alpine'
+  - &bun_image 'docker.io/oven/bun:1.0-alpine'
   # TODO: switch back to upstream image after https://github.com/techknowlogick/xgo/pull/224 got merged
   - &xgo_image 'docker.io/pats22/xgo:go-1.22.1'
   - &xgo_version 'go-1.21.2'
 
 steps:
   build-web:
-    image: *node_image
+    image: *bun_image
     directory: web/
     commands:
-      - corepack enable
-      - pnpm install --frozen-lockfile
-      - pnpm build
+      - bun install --frozen-lockfile
+      - bun run build
 
   vendor:
     image: *golang_image

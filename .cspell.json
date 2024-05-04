@@ -80,6 +80,7 @@
     "devx",
     "gomod",
     "laszlocph",
+    "lockb",
     "charmbracelet",
     "GODEBUG",
     "netdns",
@@ -99,6 +100,7 @@
   "ignorePaths": [
     "**/node_modules/**/*",
     "pnpm-lock.yaml",
+    "bun.lockb",
     ".gitignore",
     ".git/**/*",
     ".cspell.json",
