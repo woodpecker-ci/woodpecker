@@ -88,15 +88,15 @@ func (c *Gitea) URL() string {
 }
 
 func (c *Gitea) oauth2Config(ctx context.Context) (*oauth2.Config, context.Context) {
-	publicFacingOAuthURL := server.Config.Server.ForgeOAuthHost
-	if publicFacingOAuthURL == "" {
-		publicFacingOAuthURL = c.url
+	publicOAuthURL := server.Config.Server.ForgeOAuthHost
+	if publicOAuthURL == "" {
+		publicOAuthURL = c.url
 	}
 	return &oauth2.Config{
 			ClientID:     c.ClientID,
 			ClientSecret: c.ClientSecret,
 			Endpoint: oauth2.Endpoint{
-				AuthURL:  fmt.Sprintf(authorizeTokenURL, publicFacingOAuthURL),
+				AuthURL:  fmt.Sprintf(authorizeTokenURL, publicOAuthURL),
 				TokenURL: fmt.Sprintf(accessTokenURL, c.url),
 			},
 			RedirectURL: fmt.Sprintf("%s/authorize", server.Config.Server.OAuthHost),

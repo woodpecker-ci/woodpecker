@@ -400,8 +400,11 @@ var flags = append([]cli.Flag{
 		Usage:   "serve the website by using a proxy (used for development)",
 		Hidden:  true,
 	},
+	//
+	// internal flags
+	//
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_DEV_WEBHOOK_HOST", "WOODPECKER_WEBHOOK_HOST"}, // TODO: remove WOODPECKER_WEBHOOK_HOST in next major release
+		EnvVars: []string{"WOODPECKER_INTERNAL_WEBHOOK_HOST", "WOODPECKER_WEBHOOK_HOST"}, // TODO: remove WOODPECKER_WEBHOOK_HOST in next major release
 		Name:    "server-webhook-host",
 		Usage:   "server fully qualified url called by forge's webhooks (<scheme>://<host>[/<prefixpath>])",
 	},
@@ -409,12 +412,12 @@ var flags = append([]cli.Flag{
 	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_DEV_OAUTH_HOST"},
 		Name:    "server-dev-oauth-host-deprecated",
-		Usage:   "DEPRECATED: use WOODPECKER_HOST & WOODPECKER_WEBHOOK_HOST or WOODPECKER_DEV_FORGE_OAUTH_HOST instead\nfully qualified url (<scheme>://<host>[/<prefixpath>]) used for oauth redirect",
+		Usage:   "DEPRECATED: use WOODPECKER_INTERNAL_OAUTH_HOST instead\nfully qualified url (<scheme>://<host>[/<prefixpath>]) used for oauth redirect",
 		Value:   "",
 		Hidden:  true,
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_DEV_FORGE_OAUTH_HOST", "WOODPECKER_DEV_GITEA_OAUTH_URL"}, // TODO: remove WOODPECKER_DEV_GITEA_OAUTH_URL in next major release
+		EnvVars: []string{"WOODPECKER_INTERNAL_OAUTH_HOST", "WOODPECKER_DEV_GITEA_OAUTH_URL"}, // TODO: remove WOODPECKER_DEV_GITEA_OAUTH_URL in next major release
 		Name:    "server-dev-forge-host",
 		Usage:   "fully qualified url (<scheme>://<host>[/<prefixpath>]). use it if your forge url WOODPECKER_FORGE_URL or WOODPECKER_GITEA_URL, ... isn't a public url",
 	},

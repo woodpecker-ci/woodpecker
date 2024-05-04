@@ -12,10 +12,8 @@ Some versions need some changes to the server configuration or the pipeline conf
 - Deprecated alternative names for secrets, use `environment` with `from_secret`
 - Deprecated slice definition for env vars
 - Deprecated `environment` filter, use `when.evaluate`
-- Use `WOODPECKER_DEV_OAUTH_HOST` instead of `WOODPECKER_DEV_GITEA_OAUTH_URL`
-- Replace `WOODPECKER_DEV_OAUTH_HOST` with `WOODPECKER_HOST` (public facing address) and `WOODPECKER_WEBHOOK_HOST` (internal webhook address)
-- Deprecated `WOODPECKER_WEBHOOK_HOST` in favor of `WOODPECKER_DEV_WEBHOOK_HOST`
-
+- Use `WOODPECKER_INTERNAL` instead of `WOODPECKER_DEV_GITEA_OAUTH_URL` or `WOODPECKER_DEV_OAUTH_HOST`
+- Deprecated `WOODPECKER_WEBHOOK_HOST` in favor of `WOODPECKER_INTERNAL_WEBHOOK_HOST`
 
 ## 2.0.0
 
