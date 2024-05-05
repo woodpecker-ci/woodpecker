@@ -1,11 +1,9 @@
 # Workflow syntax
 
-The workflow section defines a list of steps to build, test and deploy your code. Steps are executed serially, in the order in which they are defined.
-
-If a step returns a non-zero exit code, the workflow and therefore the whole pipeline immediately aborts and returns a failure status.
+The Workflow section defines a list of steps to build, test and deploy your code. The steps are executed serially in the order in which they are defined. If a step returns a non-zero exit code, the workflow and therefore the entire pipeline terminates immediately and returns an error status.
 
 :::note
-An exception to this rule are steps with a [`status: [failure]`](#status) condition, which will execute them on a failed run.
+An exception to this rule are steps with a [`status: [failure]`](#status) condition, which ensures that they are executed in the case of a failed run.
 :::
 
 Example steps:
