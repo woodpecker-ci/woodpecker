@@ -1,6 +1,6 @@
 # Changelog
 
-## [2.5.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.5.0) - 2024-05-03
+## [2.5.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.5.0) - 2024-05-05
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -65,6 +65,7 @@
 
 ### Misc
 
+- Switch back to upstream xgo image [[#3682](https://github.com/woodpecker-ci/woodpecker/pull/3682)]
 - Allow running tests on arm64 runners [[#2605](https://github.com/woodpecker-ci/woodpecker/pull/2605)]
 - chore(deps): update node.js to v22 [[#3659](https://github.com/woodpecker-ci/woodpecker/pull/3659)]
 - chore(deps): lock file maintenance [[#3656](https://github.com/woodpecker-ci/woodpecker/pull/3656)]
