@@ -537,6 +537,18 @@ Enable the Swagger UI for API documentation.
 
 Disable version check in admin web UI.
 
+### `WOODPECKER_LOG_STORE`
+
+> Default: `database`
+
+Where to store logs. Possible values: `database` or `file`.
+
+### `WOODPECKER_LOG_STORE_FILE_BASE`
+
+> Default empty
+
+Directory to store logs if [`WOODPECKER_LOG_STORE`](#woodpecker-log-store) is `file`.
+
 ---
 
 ### `WOODPECKER_GITHUB_...`
