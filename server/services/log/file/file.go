@@ -3,6 +3,7 @@ package file
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -16,6 +17,9 @@ type logStore struct {
 }
 
 func NewLogStore(base string) (log.Service, error) {
+	if base == "" {
+		return nil, fmt.Errorf("file storage base path is required")
+	}
 	if _, err := os.Stat(base); err != nil && os.IsNotExist(err) {
 		err = os.MkdirAll(base, 0600)
 		if err != nil {
