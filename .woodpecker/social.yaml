@@ -18,9 +18,10 @@ steps:
       ai_prompt: |
         We want to present the next version of our app on Mastodon.
         Therefore we want to post a catching text, so users will know why they should
-        update to the newest version. If there is no special feature included
-        just summarize the changes in a few sentences. Use #WoodpeckerCI, #release and
-        additional fitting hashtags and emojis to make the post more appealing.
+        update to the newest version. Highlight the most special features. If there is no special feature 
+        included just summarize the changes in a few sentences. The whole text should not be longer than 240
+        characters. Avoid naming contributors from. Use #WoodpeckerCI, #release and 
+        additional fitting hashtags and emojis to make the post more appealing
 
         The changelog entry: {{ changelog }}
   - name: discord
