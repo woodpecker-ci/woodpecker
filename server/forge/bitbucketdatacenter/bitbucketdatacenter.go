@@ -608,11 +608,16 @@ func (c *client) Org(_ context.Context, _ *model.User, owner string) (*model.Org
 }
 
 func (c *client) newOAuth2Config() *oauth2.Config {
+	publicOAuthURL := server.Config.Server.ForgeOAuthHost
+	if publicOAuthURL == "" {
+		publicOAuthURL = c.urlAPI
+	}
+
 	return &oauth2.Config{
 		ClientID:     c.clientID,
 		ClientSecret: c.clientSecret,
 		Endpoint: oauth2.Endpoint{
-			AuthURL:  fmt.Sprintf("%s/oauth2/latest/authorize", c.urlAPI),
+			AuthURL:  fmt.Sprintf("%s/oauth2/latest/authorize", publicOAuthURL),
 			TokenURL: fmt.Sprintf("%s/oauth2/latest/token", c.urlAPI),
 		},
 		Scopes:      []string{string(bb.PermissionRepoRead), string(bb.PermissionRepoWrite), string(bb.PermissionRepoAdmin)},

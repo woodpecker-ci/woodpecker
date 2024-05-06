@@ -415,12 +415,17 @@ func (c *client) newConfig() *oauth2.Config {
 		scopes = append(scopes, "repo")
 	}
 
+	publicOAuthURL := server.Config.Server.ForgeOAuthHost
+	if publicOAuthURL == "" {
+		publicOAuthURL = c.url
+	}
+
 	return &oauth2.Config{
 		ClientID:     c.Client,
 		ClientSecret: c.Secret,
 		Scopes:       scopes,
 		Endpoint: oauth2.Endpoint{
-			AuthURL:  fmt.Sprintf("%s/login/oauth/authorize", c.url),
+			AuthURL:  fmt.Sprintf("%s/login/oauth/authorize", publicOAuthURL),
 			TokenURL: fmt.Sprintf("%s/login/oauth/access_token", c.url),
 		},
 		RedirectURL: fmt.Sprintf("%s/authorize", server.Config.Server.OAuthHost),

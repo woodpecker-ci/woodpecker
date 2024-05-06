@@ -86,11 +86,16 @@ func (g *GitLab) URL() string {
 }
 
 func (g *GitLab) oauth2Config(ctx context.Context) (*oauth2.Config, context.Context) {
+	publicOAuthURL := server.Config.Server.ForgeOAuthHost
+	if publicOAuthURL == "" {
+		publicOAuthURL = g.url
+	}
+
 	return &oauth2.Config{
 			ClientID:     g.ClientID,
 			ClientSecret: g.ClientSecret,
 			Endpoint: oauth2.Endpoint{
-				AuthURL:  fmt.Sprintf("%s/oauth/authorize", g.url),
+				AuthURL:  fmt.Sprintf("%s/oauth/authorize", publicOAuthURL),
 				TokenURL: fmt.Sprintf("%s/oauth/token", g.url),
 			},
 			Scopes:      []string{defaultScope},
