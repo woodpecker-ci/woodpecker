@@ -7,7 +7,7 @@ const (
 	pathGlobalSecret  = "%s/api/secrets/%s"
 )
 
-// GlobalOrgSecret returns an global secret by name.
+// GlobalSecret returns an global secret by name.
 func (c *client) GlobalSecret(secret string) (*Secret, error) {
 	out := new(Secret)
 	uri := fmt.Sprintf(pathGlobalSecret, c.addr, secret)
