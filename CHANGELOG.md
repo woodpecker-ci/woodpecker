@@ -16,8 +16,22 @@
 - CLI: remove step logs [[#3458](https://github.com/woodpecker-ci/woodpecker/pull/3458)]
 - Step logs removing API and Button [[#3451](https://github.com/woodpecker-ci/woodpecker/pull/3451)]
 
+### 🐛 Bug Fixes
+
+- Fix parent pipeline number env on restarts [[#3683](https://github.com/woodpecker-ci/woodpecker/pull/3683)]
+- Fix bitbucket dir fetching [[#3668](https://github.com/woodpecker-ci/woodpecker/pull/3668)]
+- Sanitize tag ref for gitea/forgejo [[#3664](https://github.com/woodpecker-ci/woodpecker/pull/3664)]
+- Fix secret loading [[#3620](https://github.com/woodpecker-ci/woodpecker/pull/3620)]
+- fix cli config loading and correct comment [[#3618](https://github.com/woodpecker-ci/woodpecker/pull/3618)]
+- Handle ImagePullBackOff pod status [[#3580](https://github.com/woodpecker-ci/woodpecker/pull/3580)]
+- Apply skip ci filter only on push events [[#3612](https://github.com/woodpecker-ci/woodpecker/pull/3612)]
+- agent: Continue to retry indefinitely [[#3599](https://github.com/woodpecker-ci/woodpecker/pull/3599)]
+- Fix cli version comparison and improve setup [[#3518](https://github.com/woodpecker-ci/woodpecker/pull/3518)]
+- Fix flag name [[#3534](https://github.com/woodpecker-ci/woodpecker/pull/3534)]
+
 ### 📚 Documentation
 
+- Add Ansible+Woodpecker blog post [[#3685](https://github.com/woodpecker-ci/woodpecker/pull/3685)]
 - Clarify info on failing workflows/Steps [[#3679](https://github.com/woodpecker-ci/woodpecker/pull/3679)]
 - Add discord plugin [[#3662](https://github.com/woodpecker-ci/woodpecker/pull/3662)]
 - chore(deps): update dependency trim to v1 [[#3658](https://github.com/woodpecker-ci/woodpecker/pull/3658)]
@@ -51,18 +65,6 @@
 - Remove unused cache properties [[#3567](https://github.com/woodpecker-ci/woodpecker/pull/3567)]
 - Allow separate gitea oauth URL  [[#3513](https://github.com/woodpecker-ci/woodpecker/pull/3513)]
 - Add option to set the local repository path to the cli command exec. [[#3524](https://github.com/woodpecker-ci/woodpecker/pull/3524)]
-
-### 🐛 Bug Fixes
-
-- Fix bitbucket dir fetching [[#3668](https://github.com/woodpecker-ci/woodpecker/pull/3668)]
-- Sanitize tag ref for gitea/forgejo [[#3664](https://github.com/woodpecker-ci/woodpecker/pull/3664)]
-- Fix secret loading [[#3620](https://github.com/woodpecker-ci/woodpecker/pull/3620)]
-- fix cli config loading and correct comment [[#3618](https://github.com/woodpecker-ci/woodpecker/pull/3618)]
-- Handle ImagePullBackOff pod status [[#3580](https://github.com/woodpecker-ci/woodpecker/pull/3580)]
-- Apply skip ci filter only on push events [[#3612](https://github.com/woodpecker-ci/woodpecker/pull/3612)]
-- agent: Continue to retry indefinitely [[#3599](https://github.com/woodpecker-ci/woodpecker/pull/3599)]
-- Fix cli version comparison and improve setup [[#3518](https://github.com/woodpecker-ci/woodpecker/pull/3518)]
-- Fix flag name [[#3534](https://github.com/woodpecker-ci/woodpecker/pull/3534)]
 
 ### Misc
 
