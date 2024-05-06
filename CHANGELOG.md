@@ -1,10 +1,10 @@
 # Changelog
 
-## [2.5.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.5.0) - 2024-05-05
+## [2.5.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.5.0) - 2024-05-06
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @Elara6331, @anbraten, @aumetra, @eliasscosta, @fernandrone, @manuelluis, @nemunaire, @pat-s, @qwerty287, @stevapple, @xoxys, @zc-devs
+@6543, @Andre601, @Elara6331, @anbraten, @aumetra, @eliasscosta, @fernandrone, @manuelluis, @nemunaire, @pat-s, @qwerty287, @stevapple, @xoxys, @zc-devs
 
 ### 🔒 Security
 
@@ -12,7 +12,25 @@
 
 ### ✨ Features
 
+- Add DeletePipeline API [[#3506](https://github.com/woodpecker-ci/woodpecker/pull/3506)]
+- CLI: remove step logs [[#3458](https://github.com/woodpecker-ci/woodpecker/pull/3458)]
 - Step logs removing API and Button [[#3451](https://github.com/woodpecker-ci/woodpecker/pull/3451)]
+
+### 📚 Documentation
+
+- Clarify info on failing workflows/Steps [[#3679](https://github.com/woodpecker-ci/woodpecker/pull/3679)]
+- Add discord plugin [[#3662](https://github.com/woodpecker-ci/woodpecker/pull/3662)]
+- chore(deps): update dependency trim to v1 [[#3658](https://github.com/woodpecker-ci/woodpecker/pull/3658)]
+- chore(deps): update dependency got to v14 [[#3657](https://github.com/woodpecker-ci/woodpecker/pull/3657)]
+- Fail on broken anchors [[#3644](https://github.com/woodpecker-ci/woodpecker/pull/3644)]
+- Fix step syntax in docs [[#3635](https://github.com/woodpecker-ci/woodpecker/pull/3635)]
+- chore(deps): update docs npm deps non-major [[#3632](https://github.com/woodpecker-ci/woodpecker/pull/3632)]
+- Add Twine plugin [[#3619](https://github.com/woodpecker-ci/woodpecker/pull/3619)]
+- Fix docs [[#3615](https://github.com/woodpecker-ci/woodpecker/pull/3615)]
+- Document how to enable parallel step exec for all steps [[#3605](https://github.com/woodpecker-ci/woodpecker/pull/3605)]
+- Update dependency @types/marked to v6 [[#3544](https://github.com/woodpecker-ci/woodpecker/pull/3544)]
+- Update docs npm deps non-major [[#3485](https://github.com/woodpecker-ci/woodpecker/pull/3485)]
+- Docs updates and fixes [[#3535](https://github.com/woodpecker-ci/woodpecker/pull/3535)]
 
 ### 📈 Enhancement
 
@@ -21,10 +39,8 @@
 - Add cli output handlers [[#3660](https://github.com/woodpecker-ci/woodpecker/pull/3660)]
 - Cleanup api docs and ts api-client options [[#3663](https://github.com/woodpecker-ci/woodpecker/pull/3663)]
 - Split client into multiple files and add more tests [[#3647](https://github.com/woodpecker-ci/woodpecker/pull/3647)]
-- Add DeletePipeline API [[#3506](https://github.com/woodpecker-ci/woodpecker/pull/3506)]
 - Add filter options to GetPipelines API [[#3645](https://github.com/woodpecker-ci/woodpecker/pull/3645)]
 - Deprecate environment filter and improve errors [[#3634](https://github.com/woodpecker-ci/woodpecker/pull/3634)]
-- CLI: remove step logs [[#3458](https://github.com/woodpecker-ci/woodpecker/pull/3458)]
 - Add task details to queue info in woodpecker-go [[#3636](https://github.com/woodpecker-ci/woodpecker/pull/3636)]
 - Use forge from db [[#1417](https://github.com/woodpecker-ci/woodpecker/pull/1417)]
 - Remove review button from approval view [[#3617](https://github.com/woodpecker-ci/woodpecker/pull/3617)]
@@ -48,23 +64,9 @@
 - Fix cli version comparison and improve setup [[#3518](https://github.com/woodpecker-ci/woodpecker/pull/3518)]
 - Fix flag name [[#3534](https://github.com/woodpecker-ci/woodpecker/pull/3534)]
 
-### 📚 Documentation
-
-- Add discord plugin [[#3662](https://github.com/woodpecker-ci/woodpecker/pull/3662)]
-- chore(deps): update dependency trim to v1 [[#3658](https://github.com/woodpecker-ci/woodpecker/pull/3658)]
-- chore(deps): update dependency got to v14 [[#3657](https://github.com/woodpecker-ci/woodpecker/pull/3657)]
-- Fail on broken anchors [[#3644](https://github.com/woodpecker-ci/woodpecker/pull/3644)]
-- Fix step syntax in docs [[#3635](https://github.com/woodpecker-ci/woodpecker/pull/3635)]
-- chore(deps): update docs npm deps non-major [[#3632](https://github.com/woodpecker-ci/woodpecker/pull/3632)]
-- Add Twine plugin [[#3619](https://github.com/woodpecker-ci/woodpecker/pull/3619)]
-- Fix docs [[#3615](https://github.com/woodpecker-ci/woodpecker/pull/3615)]
-- Document how to enable parallel step exec for all steps [[#3605](https://github.com/woodpecker-ci/woodpecker/pull/3605)]
-- Update dependency @types/marked to v6 [[#3544](https://github.com/woodpecker-ci/woodpecker/pull/3544)]
-- Update docs npm deps non-major [[#3485](https://github.com/woodpecker-ci/woodpecker/pull/3485)]
-- Docs updates and fixes [[#3535](https://github.com/woodpecker-ci/woodpecker/pull/3535)]
-
 ### Misc
 
+- Add discord announcements [[#3678](https://github.com/woodpecker-ci/woodpecker/pull/3678)]
 - Switch back to upstream xgo image [[#3682](https://github.com/woodpecker-ci/woodpecker/pull/3682)]
 - Allow running tests on arm64 runners [[#2605](https://github.com/woodpecker-ci/woodpecker/pull/2605)]
 - chore(deps): update node.js to v22 [[#3659](https://github.com/woodpecker-ci/woodpecker/pull/3659)]
