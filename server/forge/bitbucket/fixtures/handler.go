@@ -114,7 +114,7 @@ func getRepoFile(c *gin.Context) {
 	switch c.Param("file") {
 	case "dir":
 		c.String(http.StatusOK, repoDirPayload)
-	case "dir_not_found/":
+	case "dir_not_found":
 		c.String(http.StatusNotFound, "")
 	case "file_not_found":
 		c.String(http.StatusNotFound, "")

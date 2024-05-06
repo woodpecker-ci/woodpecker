@@ -92,7 +92,7 @@ func (f *forgeFetcherContext) fetch(c context.Context, config string) ([]*types.
 
 		fileMetas, err := f.getFirstAvailableConfig(ctx, configs)
 		if err == nil {
-			return fileMetas, err
+			return fileMetas, nil
 		}
 
 		return nil, fmt.Errorf("user defined config '%s' not found: %w", config, err)
@@ -102,7 +102,7 @@ func (f *forgeFetcherContext) fetch(c context.Context, config string) ([]*types.
 	// for the order see shared/constants/constants.go
 	fileMetas, err := f.getFirstAvailableConfig(ctx, constant.DefaultConfigOrder[:])
 	if err == nil {
-		return fileMetas, err
+		return fileMetas, nil
 	}
 
 	select {
