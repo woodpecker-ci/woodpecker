@@ -195,6 +195,23 @@ backend_options:
 AppArmor syntax follows [KEP-24](https://github.com/kubernetes/enhancements/blob/fddcbb9cbf3df39ded03bad71228265ac6e5215f/keps/sig-node/24-apparmor/README.md).
 :::
 
+### Annotations and labels
+
+You can specify arbitrary `meta.annotations` and `meta.labels` to be set on the Pod definition for a given workflow step using the following configuration:
+
+```yaml
+backend_options:
+  kubernetes:
+    annotations:
+      workflow-group: alpha
+      io.kubernetes.cri-o.Devices: /dev/fuse
+    labels:
+      environment: ci
+      app.kubernetes.io/name: builder
+```
+
+In order to enable this configuration, you need to add the appropriate environment variables to the agent config as shown below.
+
 ## Tips and tricks
 
 ### CRI-O
@@ -260,3 +277,15 @@ Determines if containers must be required to run as non-root users.
 > Default: empty
 
 Secret names to pull images from private repositories. See, how to [Pull an Image from a Private Registry](https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/).
+
+### `WOODPECKER_BACKEND_K8S_POD_LABELS_ALLOW_FROM_STEP`
+
+> Default: `false`
+
+Determines if additional Pod labels can be defined from a step's backend options.
+
+### `WOODPECKER_BACKEND_K8S_POD_ANNOTATIONS_ALLOW_FROM_STEP`
+
+> Default: `false`
+
+Determines if Pod annotations can be defined from a step's backend options.
