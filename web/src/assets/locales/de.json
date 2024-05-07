@@ -197,7 +197,8 @@
                 "title": "Zusätzliche Pipeline-Variablen",
                 "value": "Variablenwert",
                 "delete": "Variable löschen"
-            }
+            },
+            "enter_task": "Aufgabe des Deployments"
         },
         "enable": {
             "disabled": "Deaktiviert",
