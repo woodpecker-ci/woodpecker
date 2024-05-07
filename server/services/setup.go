@@ -137,6 +137,12 @@ func setupForgeService(c *cli.Context, _store store.Store) error {
 		if _forge.URL == "" {
 			_forge.URL = "https://try.gitea.com"
 		}
+	case c.Bool("forgejo"):
+		_forge.Type = model.ForgeTypeGitea
+		_forge.AdditionalOptions["oauth-server"] = c.String("forgejo-oauth-server")
+		if _forge.URL == "" {
+			_forge.URL = "https://next.forgejo.org"
+		}
 	case c.Bool("bitbucket"):
 		_forge.Type = model.ForgeTypeBitbucket
 	case c.Bool("bitbucket-dc"):
