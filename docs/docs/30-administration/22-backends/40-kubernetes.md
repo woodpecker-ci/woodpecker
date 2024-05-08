@@ -197,7 +197,7 @@ AppArmor syntax follows [KEP-24](https://github.com/kubernetes/enhancements/blob
 
 ### Annotations and labels
 
-You can specify arbitrary `meta.annotations` and `meta.labels` to be set on the Pod definition for a given workflow step using the following configuration:
+You can specify arbitrary [annotations](https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/) and [labels](https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/) to be set on the Pod definition for a given workflow step using the following configuration:
 
 ```yaml
 backend_options:
