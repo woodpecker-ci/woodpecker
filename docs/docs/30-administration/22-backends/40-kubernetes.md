@@ -260,11 +260,23 @@ Determines if `RWX` should be used for the pipeline volume's [access mode](https
 
 Additional labels to apply to worker pods. Must be a YAML object, e.g. `{"example.com/test-label":"test-value"}`.
 
+### `WOODPECKER_BACKEND_K8S_POD_LABELS_ALLOW_FROM_STEP`
+
+> Default: `false`
+
+Determines if additional Pod labels can be defined from a step's backend options.
+
 ### `WOODPECKER_BACKEND_K8S_POD_ANNOTATIONS`
 
 > Default: empty
 
 Additional annotations to apply to worker pods. Must be a YAML object, e.g. `{"example.com/test-annotation":"test-value"}`.
+
+### `WOODPECKER_BACKEND_K8S_POD_ANNOTATIONS_ALLOW_FROM_STEP`
+
+> Default: `false`
+
+Determines if Pod annotations can be defined from a step's backend options.
 
 ### `WOODPECKER_BACKEND_K8S_SECCTX_NONROOT`
 
@@ -277,15 +289,3 @@ Determines if containers must be required to run as non-root users.
 > Default: empty
 
 Secret names to pull images from private repositories. See, how to [Pull an Image from a Private Registry](https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/).
-
-### `WOODPECKER_BACKEND_K8S_POD_LABELS_ALLOW_FROM_STEP`
-
-> Default: `false`
-
-Determines if additional Pod labels can be defined from a step's backend options.
-
-### `WOODPECKER_BACKEND_K8S_POD_ANNOTATIONS_ALLOW_FROM_STEP`
-
-> Default: `false`
-
-Determines if Pod annotations can be defined from a step's backend options.
