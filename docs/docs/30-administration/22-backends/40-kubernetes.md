@@ -211,7 +211,7 @@ backend_options:
 ```
 
 In order to enable this configuration you need to set the appropriate environment variables to `true` on the woodpecker agent:
-[WOODPECKER_BACKEND_K8S_POD_ANNOTATIONS_ALLOW_FROM_STEP](#woodpecker_backend_k8s_pod_annotations_allow_from_step) and/or [WOODPECKER_BACKEND_K8S_POD_LABELS_ALLOW_FROM_STEP](woodepcker_backend_k8s_pod_labels_allow_from_step).
+[WOODPECKER_BACKEND_K8S_POD_ANNOTATIONS_ALLOW_FROM_STEP](#woodpecker_backend_k8s_pod_annotations_allow_from_step) and/or [WOODPECKER_BACKEND_K8S_POD_LABELS_ALLOW_FROM_STEP](#woodpecker_backend_k8s_pod_labels_allow_from_step).
 
 ## Tips and tricks
 
