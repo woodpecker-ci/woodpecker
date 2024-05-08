@@ -48,7 +48,7 @@ async function loadPullRequests(page: number): Promise<PullRequest[]> {
     throw new Error('Unexpected: "repo" should be provided at this place');
   }
 
-  return apiClient.getRepoPullRequests(repo.value.id, page);
+  return apiClient.getRepoPullRequests(repo.value.id, { page });
 }
 
 const { resetPage, data: pullRequests, loading } = usePagination(loadPullRequests);

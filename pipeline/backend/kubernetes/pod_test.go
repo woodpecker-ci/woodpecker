@@ -90,9 +90,7 @@ func TestTinyPod(t *testing.T) {
 					"image": "gradle:8.4.0-jdk21",
 					"command": [
 						"/bin/sh",
-						"-c"
-					],
-					"args": [
+						"-c",
 						"echo $CI_SCRIPT | base64 -d | /bin/sh -e"
 					],
 					"workingDir": "/woodpecker/src",
@@ -184,9 +182,6 @@ func TestFullPod(t *testing.T) {
 					"command": [
 						"/bin/sh",
 						"-c"
-					],
-					"args": [
-						"echo $CI_SCRIPT | base64 -d | /bin/sh -e"
 					],
 					"workingDir": "/woodpecker/src",
 					"ports": [
@@ -420,4 +415,50 @@ func TestPodPrivilege(t *testing.T) {
 	pod, err = createTestPod(false, true, secCtx)
 	assert.NoError(t, err)
 	assert.Equal(t, true, *pod.Spec.SecurityContext.RunAsNonRoot)
+}
+
+func TestScratchPod(t *testing.T) {
+	expected := `
+	{
+		"metadata": {
+			"name": "wp-01he8bebctabr3kgk0qj36d2me-0",
+			"namespace": "woodpecker",
+			"creationTimestamp": null,
+			"labels": {
+				"step": "curl-google"
+			}
+		},
+		"spec": {
+			"containers": [
+				{
+					"name": "wp-01he8bebctabr3kgk0qj36d2me-0",
+					"image": "quay.io/curl/curl",
+					"command": [
+						"/usr/bin/curl",
+						"-v",
+						"google.com"
+					],
+					"resources": {}
+				}
+			],
+			"restartPolicy": "Never"
+		},
+		"status": {}
+	}`
+
+	pod, err := mkPod(&types.Step{
+		Name:       "curl-google",
+		Image:      "quay.io/curl/curl",
+		Entrypoint: []string{"/usr/bin/curl", "-v", "google.com"},
+	}, &config{
+		Namespace: "woodpecker",
+	}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{})
+	assert.NoError(t, err)
+
+	podJSON, err := json.Marshal(pod)
+	assert.NoError(t, err)
+
+	ja := jsonassert.New(t)
+	t.Log(string(podJSON))
+	ja.Assertf(string(podJSON), expected)
 }

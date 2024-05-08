@@ -180,14 +180,13 @@ func podContainer(step *types.Step, podName, goos string, options BackendOptions
 		container.ImagePullPolicy = v1.PullAlways
 	}
 
-	if len(step.Commands) != 0 {
-		scriptEnv, command, args := common.GenerateContainerConf(step.Commands, goos)
-		if len(step.Entrypoint) > 0 {
-			command = step.Entrypoint
-		}
+	if len(step.Commands) > 0 {
+		scriptEnv, command := common.GenerateContainerConf(step.Commands, goos)
 		container.Command = command
-		container.Args = []string{args}
 		maps.Copy(step.Environment, scriptEnv)
+	}
+	if len(step.Entrypoint) > 0 {
+		container.Command = step.Entrypoint
 	}
 
 	container.Env = mapToEnvVars(step.Environment)

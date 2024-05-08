@@ -54,6 +54,7 @@ If you have some missing resources, please feel free to [open a pull-request](ht
 - [Installing gitea and woodpecker using binary packages](https://neelex.com/2023/03/26/Installing-gitea-using-binary-packages/)
 - [Deploying mdbook to codeberg pages using woodpecker CI](https://www.markpitblado.me/blog/ci-deployment-of-mdbook)
 - [Deploy a Fly app with Woodpecker CI](https://joeroe.io/2024/01/09/deploy-fly-woodpecker-ci.html)
+- [Ansible - using Woodpecker as an alternative to Semaphore](https://pat-s.me/ansible-using-woodpecker-as-an-alternative-to-semaphore/)
 
 ## Videos
 

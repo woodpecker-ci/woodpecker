@@ -37,7 +37,7 @@ import (
 
 // GetBadge
 //
-//	@Summary	Get status badge, SVG format
+//	@Summary	Get status of pipeline as SVG badge
 //	@Router		/badges/{repo_id}/status.svg [get]
 //	@Produce	image/svg+xml
 //	@Success	200

@@ -71,11 +71,11 @@ async function loadSecrets(page: number, level: 'repo' | 'org' | 'global'): Prom
 
   switch (level) {
     case 'repo':
-      return apiClient.getSecretList(repo.value.id, page);
+      return apiClient.getSecretList(repo.value.id, { page });
     case 'org':
-      return apiClient.getOrgSecretList(repo.value.org_id, page);
+      return apiClient.getOrgSecretList(repo.value.org_id, { page });
     case 'global':
-      return apiClient.getGlobalSecretList(page);
+      return apiClient.getGlobalSecretList({ page });
     default:
       throw new Error(`Unexpected level: ${level}`);
   }
