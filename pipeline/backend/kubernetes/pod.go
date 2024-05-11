@@ -98,7 +98,7 @@ func podLabels(step *types.Step, config *config, options BackendOptions) (map[st
 			log.Trace().Msgf("using labels from the backend options: %v", options.Labels)
 			maps.Copy(labels, options.Labels)
 		} else {
-			log.Debug().Msg("Pod labels were defined in backend options, but its using disallowed by instance configuration ")
+			log.Debug().Msg("Pod labels were defined in backend options, but its using disallowed by instance configuration")
 		}
 	}
 	if len(config.PodLabels) > 0 {
