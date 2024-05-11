@@ -1,6 +1,6 @@
 # Changelog
 
-## [2.5.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.5.0) - 2024-05-09
+## [2.5.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.5.0) - 2024-05-11
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -16,8 +16,30 @@
 - CLI: remove step logs [[#3458](https://github.com/woodpecker-ci/woodpecker/pull/3458)]
 - Step logs removing API and Button [[#3451](https://github.com/woodpecker-ci/woodpecker/pull/3451)]
 
+### 📈 Enhancement
+
+- Ability to set pod annotations and labels from step [[#3609](https://github.com/woodpecker-ci/woodpecker/pull/3609)]
+- Support github deploy task [[#3512](https://github.com/woodpecker-ci/woodpecker/pull/3512)]
+- Rework entrypoints [[#3269](https://github.com/woodpecker-ci/woodpecker/pull/3269)]
+- Add cli output handlers [[#3660](https://github.com/woodpecker-ci/woodpecker/pull/3660)]
+- Cleanup api docs and ts api-client options [[#3663](https://github.com/woodpecker-ci/woodpecker/pull/3663)]
+- Split client into multiple files and add more tests [[#3647](https://github.com/woodpecker-ci/woodpecker/pull/3647)]
+- Add filter options to GetPipelines API [[#3645](https://github.com/woodpecker-ci/woodpecker/pull/3645)]
+- Deprecate environment filter and improve errors [[#3634](https://github.com/woodpecker-ci/woodpecker/pull/3634)]
+- Add task details to queue info in woodpecker-go [[#3636](https://github.com/woodpecker-ci/woodpecker/pull/3636)]
+- Use forge from db [[#1417](https://github.com/woodpecker-ci/woodpecker/pull/1417)]
+- Remove review button from approval view [[#3617](https://github.com/woodpecker-ci/woodpecker/pull/3617)]
+- Rework addons (use rpc) [[#3268](https://github.com/woodpecker-ci/woodpecker/pull/3268)]
+- Allow to disable deployments [[#3570](https://github.com/woodpecker-ci/woodpecker/pull/3570)]
+- Add flag to only access public repositories on GitHub [[#3566](https://github.com/woodpecker-ci/woodpecker/pull/3566)]
+- Add `runtimeClassName` in Kubernetes backend options [[#3474](https://github.com/woodpecker-ci/woodpecker/pull/3474)]
+- Remove unused cache properties [[#3567](https://github.com/woodpecker-ci/woodpecker/pull/3567)]
+- Allow separate gitea oauth URL  [[#3513](https://github.com/woodpecker-ci/woodpecker/pull/3513)]
+- Add option to set the local repository path to the cli command exec. [[#3524](https://github.com/woodpecker-ci/woodpecker/pull/3524)]
+
 ### 📚 Documentation
 
+- Remove broken link to gobook.io [[#3694](https://github.com/woodpecker-ci/woodpecker/pull/3694)]
 - docs: add `Gitea publisher-golang` plugin [[#3691](https://github.com/woodpecker-ci/woodpecker/pull/3691)]
 - Add Ansible+Woodpecker blog post [[#3685](https://github.com/woodpecker-ci/woodpecker/pull/3685)]
 - Clarify info on failing workflows/Steps [[#3679](https://github.com/woodpecker-ci/woodpecker/pull/3679)]
@@ -36,6 +58,7 @@
 
 ### 🐛 Bug Fixes
 
+- Check for error in repo middleware [[#3688](https://github.com/woodpecker-ci/woodpecker/pull/3688)]
 - Fix parent pipeline number env on restarts [[#3683](https://github.com/woodpecker-ci/woodpecker/pull/3683)]
 - Fix bitbucket dir fetching [[#3668](https://github.com/woodpecker-ci/woodpecker/pull/3668)]
 - Sanitize tag ref for gitea/forgejo [[#3664](https://github.com/woodpecker-ci/woodpecker/pull/3664)]
@@ -46,26 +69,6 @@
 - agent: Continue to retry indefinitely [[#3599](https://github.com/woodpecker-ci/woodpecker/pull/3599)]
 - Fix cli version comparison and improve setup [[#3518](https://github.com/woodpecker-ci/woodpecker/pull/3518)]
 - Fix flag name [[#3534](https://github.com/woodpecker-ci/woodpecker/pull/3534)]
-
-### 📈 Enhancement
-
-- Support github deploy task [[#3512](https://github.com/woodpecker-ci/woodpecker/pull/3512)]
-- Rework entrypoints [[#3269](https://github.com/woodpecker-ci/woodpecker/pull/3269)]
-- Add cli output handlers [[#3660](https://github.com/woodpecker-ci/woodpecker/pull/3660)]
-- Cleanup api docs and ts api-client options [[#3663](https://github.com/woodpecker-ci/woodpecker/pull/3663)]
-- Split client into multiple files and add more tests [[#3647](https://github.com/woodpecker-ci/woodpecker/pull/3647)]
-- Add filter options to GetPipelines API [[#3645](https://github.com/woodpecker-ci/woodpecker/pull/3645)]
-- Deprecate environment filter and improve errors [[#3634](https://github.com/woodpecker-ci/woodpecker/pull/3634)]
-- Add task details to queue info in woodpecker-go [[#3636](https://github.com/woodpecker-ci/woodpecker/pull/3636)]
-- Use forge from db [[#1417](https://github.com/woodpecker-ci/woodpecker/pull/1417)]
-- Remove review button from approval view [[#3617](https://github.com/woodpecker-ci/woodpecker/pull/3617)]
-- Rework addons (use rpc) [[#3268](https://github.com/woodpecker-ci/woodpecker/pull/3268)]
-- Allow to disable deployments [[#3570](https://github.com/woodpecker-ci/woodpecker/pull/3570)]
-- Add flag to only access public repositories on GitHub [[#3566](https://github.com/woodpecker-ci/woodpecker/pull/3566)]
-- Add `runtimeClassName` in Kubernetes backend options [[#3474](https://github.com/woodpecker-ci/woodpecker/pull/3474)]
-- Remove unused cache properties [[#3567](https://github.com/woodpecker-ci/woodpecker/pull/3567)]
-- Allow separate gitea oauth URL  [[#3513](https://github.com/woodpecker-ci/woodpecker/pull/3513)]
-- Add option to set the local repository path to the cli command exec. [[#3524](https://github.com/woodpecker-ci/woodpecker/pull/3524)]
 
 ### Misc
 
