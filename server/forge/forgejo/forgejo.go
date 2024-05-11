@@ -45,7 +45,7 @@ const (
 	authorizeTokenURL = "%s/login/oauth/authorize"
 	accessTokenURL    = "%s/login/oauth/access_token"
 	defaultPageSize   = 50
-	forgejoDevVersion   = "v7.0.2"
+	forgejoDevVersion = "v7.0.2"
 )
 
 type Forgejo struct {

@@ -36,15 +36,15 @@ type pushHook struct {
 }
 
 type pullRequestHook struct {
-	Action      string             `json:"action"`
-	Number      int64              `json:"number"`
+	Action      string               `json:"action"`
+	Number      int64                `json:"number"`
 	PullRequest *forgejo.PullRequest `json:"pull_request"`
 	Repo        *forgejo.Repository  `json:"repository"`
 	Sender      *forgejo.User        `json:"sender"`
 }
 
 type releaseHook struct {
-	Action  string            `json:"action"`
+	Action  string              `json:"action"`
 	Repo    *forgejo.Repository `json:"repository"`
 	Sender  *forgejo.User       `json:"sender"`
 	Release *forgejo.Release
