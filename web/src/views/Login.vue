@@ -11,11 +11,7 @@
       </div>
       <div class="flex justify-center items-center flex-col md:w-2/5 min-h-48 gap-4 text-center">
         <h1 class="text-xl text-wp-text-100">{{ $t('welcome') }}</h1>
-        <div class="flex flex-col gap-2">
-          <Button v-for="forge in forges" :key="forge.id" @click="doLogin(forge.id)">{{
-            $t('login_with', { forge: getHostFromUrl(forge) })
-          }}</Button>
-        </div>
+        <Button @click="doLogin">{{ $t('login') }}</Button>
       </div>
     </div>
   </main>
@@ -36,37 +32,9 @@ const authentication = useAuthentication();
 const errorMessage = ref<string>();
 const i18n = useI18n();
 
-type Forge = {
-  id: number;
-  url: string;
-  type: string;
-};
-
-const forges = ref<Forge[]>([
-  {
-    id: 1,
-    url: 'http://localhost:3000/',
-    type: 'gitea',
-  },
-  {
-    id: 2,
-    url: '',
-    type: 'github',
-  },
-]);
-
-function getHostFromUrl(forge: Forge) {
-  if (!forge.url) {
-    return forge.type.charAt(0).toUpperCase() + forge.type.slice(1);
-  }
-
-  const url = new URL(forge.url);
-  return url.hostname;
-}
-
-function doLogin(forgeId?: number) {
+function doLogin() {
   const url = typeof route.query.url === 'string' ? route.query.url : '';
-  authentication.authenticate(url, forgeId);
+  authentication.authenticate(url);
 }
 
 const authErrorMessages = {

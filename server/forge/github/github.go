@@ -97,7 +97,7 @@ func (c *client) URL() string {
 // Login authenticates the session and returns the forge user details.
 func (c *client) Login(ctx context.Context, req *forge_types.OAuthRequest) (*model.User, string, error) {
 	config := c.newConfig()
-	redirectURL := config.AuthCodeURL(req.State)
+	redirectURL := config.AuthCodeURL("woodpecker")
 
 	// check the OAuth errors
 	if req.Error != "" {

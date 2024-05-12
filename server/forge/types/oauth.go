@@ -15,7 +15,6 @@
 package types
 
 type OAuthRequest struct {
-	State            string
 	Error            string
 	ErrorURI         string
 	ErrorDescription string
