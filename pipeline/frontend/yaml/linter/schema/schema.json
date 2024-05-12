@@ -706,8 +706,17 @@
       "description": "Advanced options for the kubernetes agent backends",
       "type": "object",
       "properties": {
-        "resources": {
-          "$ref": "#/definitions/step_backend_kubernetes_resources"
+        "labels": {
+          "type": "object",
+          "additionalProperties": {
+            "type": ["boolean", "string", "number"]
+          }
+        },
+        "annotations": {
+          "type": "object",
+          "additionalProperties": {
+            "type": ["boolean", "string", "number"]
+          }
         },
         "securityContext": {
           "$ref": "#/definitions/step_backend_kubernetes_security_context"
