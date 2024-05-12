@@ -72,6 +72,7 @@
 
 ### Misc
 
+- Skip golangci in pre-commit.ci [[#3692](https://github.com/woodpecker-ci/woodpecker/pull/3692)]
 - chore(deps): update woodpeckerci/plugin-github-release docker tag to v1.2.0 [[#3690](https://github.com/woodpecker-ci/woodpecker/pull/3690)]
 - Add discord announcements [[#3678](https://github.com/woodpecker-ci/woodpecker/pull/3678)]
 - Switch back to upstream xgo image [[#3682](https://github.com/woodpecker-ci/woodpecker/pull/3682)]
