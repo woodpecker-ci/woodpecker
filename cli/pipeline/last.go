@@ -15,13 +15,11 @@
 package pipeline
 
 import (
-	"os"
-	"text/template"
-
 	"github.com/urfave/cli/v2"
 
 	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
 	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker"
 )
 
 var pipelineLastCmd = &cli.Command{
@@ -29,14 +27,13 @@ var pipelineLastCmd = &cli.Command{
 	Usage:     "show latest pipeline details",
 	ArgsUsage: "<repo-id|repo-full-name>",
 	Action:    pipelineLast,
-	Flags: []cli.Flag{
-		common.FormatFlag(tmplPipelineInfo),
+	Flags: append(common.OutputFlags("table"), []cli.Flag{
 		&cli.StringFlag{
 			Name:  "branch",
 			Usage: "branch name",
 			Value: "main",
 		},
-	},
+	}...),
 }
 
 func pipelineLast(c *cli.Context) error {
@@ -55,9 +52,5 @@ func pipelineLast(c *cli.Context) error {
 		return err
 	}
 
-	tmpl, err := template.New("_").Parse(c.String("format"))
-	if err != nil {
-		return err
-	}
-	return tmpl.Execute(os.Stdout, pipeline)
+	return pipelineOutput(c, []woodpecker.Pipeline{*pipeline})
 }

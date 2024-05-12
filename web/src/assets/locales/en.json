@@ -48,6 +48,7 @@
     "deploy_pipeline": {
       "title": "Trigger deployment event for current pipeline #{pipelineId}",
       "enter_target": "Target deployment environment",
+      "enter_task": "Deployment task",
       "trigger": "Deploy",
       "variables": {
         "delete": "Delete variable",

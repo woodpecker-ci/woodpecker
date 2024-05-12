@@ -199,7 +199,7 @@ func PostRepo(c *gin.Context) {
 
 // PatchRepo
 //
-//	@Summary	Change a repository
+//	@Summary	Update a repository
 //	@Router		/repos/{repo_id} [patch]
 //	@Produce	json
 //	@Success	200	{object}	Repo
@@ -273,7 +273,7 @@ func PatchRepo(c *gin.Context) {
 
 // ChownRepo
 //
-//	@Summary	Change a repository's owner, to the one holding the access token
+//	@Summary	Change a repository's owner to the currently authenticated user
 //	@Router		/repos/{repo_id}/chown [post]
 //	@Produce	json
 //	@Success	200	{object}	Repo
@@ -296,20 +296,20 @@ func ChownRepo(c *gin.Context) {
 
 // LookupRepo
 //
-//	@Summary	Get repository by full-name
+//	@Summary	Lookup a repository by full name
 //	@Router		/repos/lookup/{repo_full_name} [get]
 //	@Produce	json
 //	@Success	200	{object}	Repo
 //	@Tags		Repositories
 //	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param		repo_full_name	path	string	true	"the repository full-name / slug"
+//	@Param		repo_full_name	path	string	true	"the repository full name / slug"
 func LookupRepo(c *gin.Context) {
 	c.JSON(http.StatusOK, session.Repo(c))
 }
 
 // GetRepo
 //
-//	@Summary	Get repository information
+//	@Summary	Get a repository
 //	@Router		/repos/{repo_id} [get]
 //	@Produce	json
 //	@Success	200	{object}	Repo
@@ -322,7 +322,7 @@ func GetRepo(c *gin.Context) {
 
 // GetRepoPermissions
 //
-//	@Summary		Repository permission information
+//	@Summary		Check current authenticated users access to the repository
 //	@Description	The repository permission, according to the used access token.
 //	@Router			/repos/{repo_id}/permissions [get]
 //	@Produce		json
@@ -337,7 +337,7 @@ func GetRepoPermissions(c *gin.Context) {
 
 // GetRepoBranches
 //
-//	@Summary	Get repository branches
+//	@Summary	Get branches of a repository
 //	@Router		/repos/{repo_id}/branches [get]
 //	@Produce	json
 //	@Success	200	{array}	string
@@ -367,7 +367,7 @@ func GetRepoBranches(c *gin.Context) {
 
 // GetRepoPullRequests
 //
-//	@Summary	List active pull requests
+//	@Summary	List active pull requests of a repository
 //	@Router		/repos/{repo_id}/pull_requests [get]
 //	@Produce	json
 //	@Success	200	{array}	PullRequest
@@ -547,7 +547,8 @@ func MoveRepo(c *gin.Context) {
 
 // GetAllRepos
 //
-//	@Summary	List all repositories on the server. Requires admin rights.
+//	@Summary	List all repositories on the server
+//	@Description	Returns a list of all repositories. Requires admin rights.
 //	@Router		/repos [get]
 //	@Produce	json
 //	@Success	200	{array}	Repo
@@ -572,7 +573,8 @@ func GetAllRepos(c *gin.Context) {
 
 // RepairAllRepos
 //
-//	@Summary	Repair all repositories on the server. Requires admin rights.
+//	@Summary	Repair all repositories on the server
+//	@Description Executes a repair process on all repositories. Requires admin rights.
 //	@Router		/repos/repair [post]
 //	@Produce	plain
 //	@Success	204
