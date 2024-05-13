@@ -38,7 +38,10 @@ import (
 func getForgeID(c *gin.Context) int64 {
 	_forgeID := c.Query("forge_id")
 	if _forgeID == "" {
-		_forgeID, _ = c.Cookie("forge_id")
+		state, _ := c.Query("state")
+		if state != "" {
+			_forgeID = token.Parse(state, nil).Text
+		}
 	}
 	if _forgeID == "" {
 		return 1
@@ -78,11 +81,17 @@ func HandleAuth(c *gin.Context) {
 	// cannot, however, remember why, so need to revisit this line.
 	c.Writer.Header().Del("Content-Type")
 
-	stateID := "woodpecker-state-123" // TODO: generate a random id
-	// TODO: add selected forgeID to content of the state
+	jwtSecret := "" // TODO set some secret
+	exp := time.Now().Add(time.Minute * 15).Unix()
+	state, err := token.New(token.OAuthStateToken, strconv.FormatInt(forgeID, 10)).SignExpires(jwtSecret, exp)
+	if err != nil {
+		log.Error().Err(err).Msg("cannot create state token")
+		c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=internal_error")
+		return
+	}
 
 	tmpuser, redirectURL, err := _forge.Login(c, &forge_types.OAuthRequest{
-		State:            stateID,
+		State:            state,
 		Error:            c.Request.FormValue("error"),
 		ErrorURI:         c.Request.FormValue("error_uri"),
 		ErrorDescription: c.Request.FormValue("error_description"),
@@ -96,13 +105,9 @@ func HandleAuth(c *gin.Context) {
 
 	// The user is not authorized yet -> redirect
 	if tmpuser == nil {
-		// TODO: set forge-id in state
-		httputil.SetCookie(c.Writer, c.Request, "forge_id", fmt.Sprintf("%d", forgeID))
 		http.Redirect(c.Writer, c.Request, redirectURL, http.StatusSeeOther)
 		return
 	}
-	// TODO: set forge-id in state
-	httputil.DelCookie(c.Writer, c.Request, "forge_id")
 
 	// get the user from the database
 	u, err := _store.GetUserRemoteID(forgeID, tmpuser.ForgeRemoteID)
@@ -217,7 +222,7 @@ func HandleAuth(c *gin.Context) {
 		return
 	}
 
-	exp := time.Now().Add(server.Config.Server.SessionExpires).Unix()
+	exp = time.Now().Add(server.Config.Server.SessionExpires).Unix()
 	tokenString, err := token.New(token.SessToken, strconv.FormatInt(u.ID, 10)).SignExpires(u.Hash, exp)
 	if err != nil {
 		log.Error().Msgf("cannot create token for %s", u.Login)

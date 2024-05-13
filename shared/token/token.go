@@ -25,11 +25,12 @@ import (
 type SecretFunc func(*Token) (string, error)
 
 const (
-	UserToken  = "user"
-	SessToken  = "sess"
-	HookToken  = "hook"
-	CsrfToken  = "csrf"
-	AgentToken = "agent"
+	UserToken       = "user"
+	SessToken       = "sess"
+	HookToken       = "hook"
+	CsrfToken       = "csrf"
+	AgentToken      = "agent"
+	OAuthStateToken = "oauth-state"
 )
 
 // SignerAlgo id default algorithm used to sign JWT tokens.
@@ -37,7 +38,8 @@ const SignerAlgo = "HS256"
 
 type Token struct {
 	Kind string
-	Text string
+	// Text string
+	Data map[string]string
 }
 
 func parse(raw string, fn SecretFunc) (*Token, error) {
@@ -45,7 +47,8 @@ func parse(raw string, fn SecretFunc) (*Token, error) {
 	parsed, err := jwt.Parse(raw, keyFunc(token, fn))
 	if err != nil {
 		return nil, err
-	} else if !parsed.Valid {
+	}
+	if !parsed.Valid {
 		return nil, jwt.ErrTokenUnverifiable
 	}
 	return token, nil
@@ -100,7 +103,7 @@ func CheckCsrf(r *http.Request, fn SecretFunc) error {
 }
 
 func New(kind, text string) *Token {
-	return &Token{Kind: kind, Text: text}
+	return &Token{Kind: kind, Text: text, Data: map[string]string{}}
 }
 
 // Sign signs the token using the given secret hash
@@ -118,11 +121,22 @@ func (t *Token) SignExpires(secret string, exp int64) (string, error) {
 		return "", fmt.Errorf("token claim is not a MapClaims")
 	}
 	claims["type"] = t.Kind
-	claims["text"] = t.Text
+	// claims["text"] = t.Text
 	if exp > 0 {
 		claims["exp"] = float64(exp)
 	}
+	for key, value := range t.Data {
+		claims[key] = value
+	}
 	return token.SignedString([]byte(secret))
+}
+
+func (t *Token) Get(key string) string {
+	return t.Data[key]
+}
+
+func (t *Token) Set(key, value string) {
+	t.Data[key] = value
 }
 
 func keyFunc(token *Token, fn SecretFunc) jwt.Keyfunc {
@@ -152,6 +166,19 @@ func keyFunc(token *Token, fn SecretFunc) jwt.Keyfunc {
 			return nil, jwt.ErrInvalidType
 		}
 		token.Text, _ = text.(string)
+
+		// extract the token data and cast to
+		// expected type.
+		for key, value := range claims {
+			if key == "type" || key == "text" || key == "exp" {
+				continue
+			}
+			data, ok := value.(string)
+			if !ok {
+				return nil, jwt.ErrInvalidType
+			}
+			token.Data[key] = data
+		}
 
 		// invoke the callback function to retrieve
 		// the secret key used to verify
