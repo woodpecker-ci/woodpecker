@@ -276,7 +276,7 @@ var flags = append([]cli.Flag{
 	&cli.UintFlag{
 		EnvVars: []string{"WOODPECKER_FORGE_RETRY"},
 		Name:    "forge-retry",
-		Usage:   "How many retries of fetching the Woodpecker configuration from a Forge are done before we fail",
+		Usage:   "How many retries of fetching the Woodpecker configuration from a forge are done before we fail",
 		Value:   3,
 	},
 	&cli.Int64Flag{
