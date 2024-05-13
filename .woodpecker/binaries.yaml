@@ -4,8 +4,7 @@ when:
 variables:
   - &golang_image 'docker.io/golang:1.22'
   - &node_image 'docker.io/node:22-alpine'
-  - &xgo_image 'docker.io/techknowlogick/xgo:go-1.22'
-  - &xgo_version 'go-1.21.2'
+  - &xgo_image 'docker.io/techknowlogick/xgo:go-1.22.x'
 
 steps:
   build-web:
@@ -34,7 +33,6 @@ steps:
     environment:
       PLATFORMS: linux|arm64/v8;linux|amd64;windows|amd64
       TAGS: bindata sqlite sqlite_unlock_notify netgo
-      XGO_VERSION: *xgo_version
       TARGZ: '1'
 
   build-tarball:
