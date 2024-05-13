@@ -51,6 +51,7 @@ type Opts struct {
 	ClientID     string // Oauth2 client id.
 	ClientSecret string // Oauth2 client secret.
 	SkipVerify   bool   // Skip ssl verification.
+	OAuthHost    string // Public url for oauth if different from url.
 }
 
 // Gitlab implements "Forge" interface
@@ -61,6 +62,7 @@ type GitLab struct {
 	SkipVerify   bool
 	HideArchives bool
 	Search       bool
+	oAuthHost    string
 }
 
 // New returns a Forge implementation that integrates with Gitlab, an open
@@ -86,7 +88,7 @@ func (g *GitLab) URL() string {
 }
 
 func (g *GitLab) oauth2Config(ctx context.Context) (*oauth2.Config, context.Context) {
-	publicOAuthURL := server.Config.Server.ForgeOAuthHost
+	publicOAuthURL := g.oAuthHost
 	if publicOAuthURL == "" {
 		publicOAuthURL = g.url
 	}

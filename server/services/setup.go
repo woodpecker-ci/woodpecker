@@ -114,6 +114,7 @@ func setupForgeService(c *cli.Context, _store store.Store) error {
 	_forge.ClientSecret = c.String("forge-oauth-secret")
 	_forge.URL = c.String("forge-url")
 	_forge.SkipVerify = c.Bool("forge-skip-verify")
+	_forge.OAuthHost = c.String("forge-oauth-host")
 
 	switch {
 	case c.String("addon-forge") != "":

@@ -322,7 +322,6 @@ func setupEvilGlobals(c *cli.Context, s store.Store) error {
 	} else {
 		server.Config.Server.OAuthHost = serverHost
 	}
-	server.Config.Server.ForgeOAuthHost = c.String("server-forge-oauth-host")
 	server.Config.Server.Port = c.String("server-addr")
 	server.Config.Server.PortTLS = c.String("server-addr-tls")
 	server.Config.Server.StatusContext = c.String("status-context")

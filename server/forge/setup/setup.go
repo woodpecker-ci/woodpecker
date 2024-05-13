@@ -56,6 +56,7 @@ func setupGitea(forge *model.Forge) (forge.Forge, error) {
 		Client:     forge.Client,
 		Secret:     forge.ClientSecret,
 		SkipVerify: forge.SkipVerify,
+		OAuthHost:  forge.OAuthHost,
 	}
 	if len(opts.URL) == 0 {
 		return nil, fmt.Errorf("WOODPECKER_GITEA_URL must be set")
@@ -70,6 +71,7 @@ func setupGitLab(forge *model.Forge) (forge.Forge, error) {
 		ClientID:     forge.Client,
 		ClientSecret: forge.ClientSecret,
 		SkipVerify:   forge.SkipVerify,
+		OAuthHost:    forge.OAuthHost,
 	})
 }
 
@@ -91,6 +93,7 @@ func setupGitHub(forge *model.Forge) (forge.Forge, error) {
 		SkipVerify: forge.SkipVerify,
 		MergeRef:   mergeRef,
 		OnlyPublic: publicOnly,
+		OAuthHost:  forge.OAuthHost,
 	}
 	log.Trace().Msgf("Forge (github) opts: %#v", opts)
 	return github.New(opts)
@@ -112,6 +115,7 @@ func setupBitbucketDatacenter(forge *model.Forge) (forge.Forge, error) {
 		ClientSecret: forge.ClientSecret,
 		Username:     gitUsername,
 		Password:     gitPassword,
+		OAuthHost:    forge.OAuthHost,
 	}
 	log.Trace().Msgf("Forge (bitbucketdatacenter) opts: %#v", opts)
 	return bitbucketdatacenter.New(opts)

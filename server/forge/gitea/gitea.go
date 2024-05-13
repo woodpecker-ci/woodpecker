@@ -54,6 +54,7 @@ type Gitea struct {
 	url          string
 	ClientID     string
 	ClientSecret string
+	OAuthHost    string
 	SkipVerify   bool
 	pageSize     int
 }
@@ -63,6 +64,7 @@ type Opts struct {
 	URL        string // Gitea server url.
 	Client     string // OAuth2 Client ID
 	Secret     string // OAuth2 Client Secret
+	OAuthHost  string // OAuth2 Host
 	SkipVerify bool   // Skip ssl verification.
 }
 
@@ -88,7 +90,7 @@ func (c *Gitea) URL() string {
 }
 
 func (c *Gitea) oauth2Config(ctx context.Context) (*oauth2.Config, context.Context) {
-	publicOAuthURL := server.Config.Server.ForgeOAuthHost
+	publicOAuthURL := c.OAuthHost
 	if publicOAuthURL == "" {
 		publicOAuthURL = c.url
 	}

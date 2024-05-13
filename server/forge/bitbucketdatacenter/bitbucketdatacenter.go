@@ -43,6 +43,7 @@ type Opts struct {
 	Password     string // Git machine account password.
 	ClientID     string // OAuth 2.0 client id
 	ClientSecret string // OAuth 2.0 client secret
+	OAuthHost    string // OAuth 2.0 host
 }
 
 type client struct {
@@ -50,6 +51,7 @@ type client struct {
 	urlAPI       string
 	clientID     string
 	clientSecret string
+	oauthHost    string
 	username     string
 	password     string
 }
@@ -608,7 +610,7 @@ func (c *client) Org(_ context.Context, _ *model.User, owner string) (*model.Org
 }
 
 func (c *client) newOAuth2Config() *oauth2.Config {
-	publicOAuthURL := server.Config.Server.ForgeOAuthHost
+	publicOAuthURL := c.oauthHost
 	if publicOAuthURL == "" {
 		publicOAuthURL = c.urlAPI
 	}
