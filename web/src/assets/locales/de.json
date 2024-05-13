@@ -229,8 +229,8 @@
                 "cancel_success": "Pipeline abgebrochen",
                 "canceled": "Dieser Schritt wurde abgebrochen.",
                 "deploy": "Deploy",
-                "log_auto_scroll": "Automatisches folgen",
-                "log_auto_scroll_off": "Schalte automatisches folgen aus",
+                "log_auto_scroll": "Automatisches Folgen",
+                "log_auto_scroll_off": "Schalte automatisches Folgen aus",
                 "log_download": "Herunterladen",
                 "restart": "Neustarten",
                 "restart_success": "Pipeline neu gestartet",
@@ -398,7 +398,7 @@
                 },
                 "allow_deploy": {
                     "allow": "Deployments erlauben",
-                    "desc": "Deployments von erolgreichen Pipelines erlauben. Nur benutzen, wenn du allen Nutzern mit Push-Zugriff vertraust."
+                    "desc": "Deployments von erfolgreichen Pipelines erlauben. Nur benutzen, wenn du allen Nutzern mit Push-Zugriff vertraust."
                 }
             },
             "not_allowed": "Zugriff auf die Einstellungen dieses Repositorys nicht erlaubt",

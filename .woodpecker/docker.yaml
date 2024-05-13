@@ -1,8 +1,7 @@
 variables:
-  - &golang_image 'docker.io/golang:1.22.2'
+  - &golang_image 'docker.io/golang:1.22'
   - &node_image 'docker.io/node:22-alpine'
-  - &xgo_image 'docker.io/techknowlogick/xgo:go-1.22.2'
-  - &xgo_version 'go-1.21.2'
+  - &xgo_image 'docker.io/techknowlogick/xgo:go-1.22.x'
   - &buildx_plugin 'docker.io/woodpeckerci/plugin-docker-buildx:3.2.1'
   - &platforms_release 'linux/arm/v6,linux/arm/v7,linux/arm64/v8,linux/386,linux/amd64,linux/ppc64le,linux/riscv64,linux/s390x,freebsd/arm64,freebsd/amd64,openbsd/arm64,openbsd/amd64'
   - &platforms_server 'linux/arm/v7,linux/arm64/v8,linux/amd64,linux/ppc64le,linux/riscv64'
@@ -98,7 +97,6 @@ steps:
     environment:
       PLATFORMS: linux|amd64
       TAGS: bindata sqlite sqlite_unlock_notify netgo
-      XGO_VERSION: *xgo_version
     when:
       - event: pull_request
         evaluate: 'CI_COMMIT_PULL_REQUEST_LABELS contains "build_pr_images"'
@@ -121,7 +119,6 @@ steps:
     environment:
       PLATFORMS: linux|arm/v7;linux|arm64/v8;linux|amd64;linux|ppc64le;linux|riscv64
       TAGS: bindata sqlite sqlite_unlock_notify netgo
-      XGO_VERSION: *xgo_version
     when:
       branch:
         - ${CI_REPO_DEFAULT_BRANCH}

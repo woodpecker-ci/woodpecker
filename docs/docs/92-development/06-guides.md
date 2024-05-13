@@ -3,7 +3,6 @@
 ## ORM
 
 Woodpecker uses [Xorm](https://xorm.io/) as ORM for the database connection.
-You can find its documentation at [gobook.io/read/gitea.com/xorm](https://gobook.io/read/gitea.com/xorm/manual-en-US/).
 
 ## Add a new migration
 

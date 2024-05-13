@@ -43,7 +43,7 @@ If you have some missing resources, please feel free to [open a pull-request](ht
 
 - [Setup Gitea with Woodpecker CI](https://containers.fan/posts/setup-gitea-with-woodpecker-ci/)
 - [Step-by-step guide to modern, secure and Open-source CI setup](https://devforth.io/blog/step-by-step-guide-to-modern-secure-ci-setup/)
-- [Using Woodpecker CI for my static sites](https://jan.wildeboer.net/2022/07/Woodpecker-CI-Jekyll/)
+- [Using Woodpecker CI for my static sites](https://web.archive.org/web/20240212182516/https://jan.wildeboer.net/2022/07/Woodpecker-CI-Jekyll/)
 - [Woodpecker CI @ Codeberg](https://www.sarkasti.eu/articles/post/woodpecker/)
 - [Deploy Docker/Compose using Woodpecker CI](https://hinty.io/vverenko/deploy-docker-compose-using-woodpecker-ci/)
 - [Installing Woodpecker CI in your personal homelab](https://pwa.io/articles/installing-woodpecker-in-your-homelab/)
@@ -52,7 +52,7 @@ If you have some missing resources, please feel free to [open a pull-request](ht
 - [Quest For CICD - WoodpeckerCI](https://omaramin.me/posts/woodpecker/)
 - [Getting started with Woodpecker CI](https://systeemkabouter.eu/getting-started-with-woodpecker-ci.html)
 - [Installing gitea and woodpecker using binary packages](https://neelex.com/2023/03/26/Installing-gitea-using-binary-packages/)
-- [Deploying mdbook to codeberg pages using woodpecker CI](https://www.markpitblado.me/blog/ci-deployment-of-mdbook)
+- [Deploying mdbook to codeberg pages using woodpecker CI](https://www.markpitblado.me/blog/deploying-mdbook-to-codeberg-pages-using-woodpecker-ci/)
 - [Deploy a Fly app with Woodpecker CI](https://joeroe.io/2024/01/09/deploy-fly-woodpecker-ci.html)
 - [Ansible - using Woodpecker as an alternative to Semaphore](https://pat-s.me/ansible-using-woodpecker-as-an-alternative-to-semaphore/)
 
