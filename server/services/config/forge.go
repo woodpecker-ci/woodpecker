@@ -29,19 +29,12 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/shared/constant"
 )
 
-const (
-	defaultRetryCount uint = 3
-)
-
 type forgeFetcher struct {
 	timeout    time.Duration
 	retryCount uint
 }
 
 func NewForge(timeout time.Duration, retries uint) Service {
-	if retries == 0 {
-		retries = defaultRetryCount
-	}
 	return &forgeFetcher{
 		timeout:    timeout,
 		retryCount: retries,

@@ -56,17 +56,20 @@ func setupSecretService(store store.Store) secret.Service {
 	return secret.NewDB(store)
 }
 
-func setupConfigService(c *cli.Context, privateSignatureKey crypto.PrivateKey) config.Service {
+func setupConfigService(c *cli.Context, privateSignatureKey crypto.PrivateKey) (config.Service, error) {
 	timeout := c.Duration("forge-timeout")
 	retries := c.Uint("forge-retry")
+	if retries == 0 {
+		return nil, fmt.Errorf("WOODPECKER_FORGE_RETRY can not be 0")
+	}
 	configFetcher := config.NewForge(timeout, retries)
 
 	if endpoint := c.String("config-service-endpoint"); endpoint != "" {
 		httpFetcher := config.NewHTTP(endpoint, privateSignatureKey)
-		return config.NewCombined(configFetcher, httpFetcher)
+		return config.NewCombined(configFetcher, httpFetcher), nil
 	}
 
-	return configFetcher
+	return configFetcher, nil
 }
 
 // setupSignatureKeys generate or load key pair to sign webhooks requests (i.e. used for service extensions)
