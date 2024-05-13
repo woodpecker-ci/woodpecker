@@ -16,7 +16,7 @@ package encryption
 
 import "errors"
 
-// common
+// Common.
 const (
 	rawKeyConfigFlag             = "encryption-raw-key"
 	tinkKeysetFilepathConfigFlag = "encryption-tink-keyset"
@@ -39,7 +39,7 @@ var (
 )
 
 const (
-	// error wrapping templates
+	// Error wrapping templates.
 	errTemplateFailedInitializingUnencrypted = "failed initializing server in unencrypted mode: %w"
 	errTemplateFailedInitializing            = "failed initializing encryption service: %w"
 	errTemplateFailedEnablingEncryption      = "failed enabling encryption: %w"
@@ -53,13 +53,13 @@ const (
 	errTemplateBase64DecryptionFailed        = "decryption error: Base64 decryption failed. Cause: %w"
 	errTemplateDecryptionFailed              = "decryption error: %w"
 
-	// error messages
+	// Error messages.
 	errMessageTemplateUnsupportedKeyType = "unsupported encryption key type: %s"
 	errMessageCantUseBothServices        = "cannot use raw encryption key and tink keyset at the same time"
 	errMessageNoKeysProvided             = "encryption enabled but no keys provided"
 	errMessageFailedRotatingEncryption   = "failed rotating encryption"
 
-	// log messages
+	// Log messages.
 	logMessageEncryptionEnabled       = "encryption enabled"
 	logMessageEncryptionDisabled      = "encryption disabled"
 	logMessageEncryptionKeyRegistered = "registered new encryption key"
@@ -69,9 +69,9 @@ const (
 	logMessageClientsDecrypted        = "disabled encryption on registered service"
 )
 
-// tink
+// Tink.
 const (
-	// error wrapping templates
+	// Error wrapping templates.
 	errTemplateTinkFailedLoadingKeyset              = "failed loading encryption keyset: %w"
 	errTemplateTinkFailedValidatingKeyset           = "failed validating encryption keyset: %w"
 	errTemplateTinkFailedInitializeFileWatcher      = "failed initializing keyset file watcher: %w"
@@ -80,18 +80,18 @@ const (
 	errTemplateTinkFailedReadingKeyset              = "failed reading encryption keyset from file: %w"
 	errTemplateTinkFailedInitializingAEAD           = "failed initializing AEAD instance: %w"
 
-	// error messages
+	// Error messages.
 	errMessageTinkKeysetFileWatchFailed = "failed watching encryption keyset file changes"
 
-	// log message templates
+	// Log message templates.
 	logTemplateTinkKeysetFileChanged       = "changes detected in encryption keyset file: '%s'. Encryption service will be reloaded"
 	logTemplateTinkLoadingKeyset           = "loading encryption keyset from file: %s"
 	logTemplateTinkFailedClosingKeysetFile = "could not close keyset file: %s"
 )
 
-// aes
+// AES.
 const (
-	// error wrapping templates
+	// Error wrapping templates.
 	errTemplateAesFailedLoadingCipher   = "failed loading encryption cipher: %w"
 	errTemplateAesFailedCalculatingHash = "failed calculating hash: %w"
 	errTemplateAesFailedGeneratingKey   = "failed generating key from passphrase: %w"

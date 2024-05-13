@@ -83,7 +83,7 @@ func pipelinePs(c *cli.Context) error {
 	return nil
 }
 
-// template for pipeline ps information
+// Template for pipeline ps information.
 var tmplPipelinePs = "\x1b[33mStep #{{ .PID }} \x1b[0m" + `
 Step: {{ .Name }}
 State: {{ .State }}

@@ -30,13 +30,13 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 )
 
-// checkGitCloneCap check if we have the git binary on hand
+// checkGitCloneCap check if we have the git binary on hand.
 func checkGitCloneCap() error {
 	_, err := exec.LookPath("git")
 	return err
 }
 
-// loadClone on backend start determine if there is a global plugin-git binary
+// loadClone on backend start determine if there is a global plugin-git binary.
 func (e *local) loadClone() {
 	binary, err := exec.LookPath("plugin-git")
 	if err != nil || binary == "" {
@@ -46,7 +46,7 @@ func (e *local) loadClone() {
 	e.pluginGitBinary = binary
 }
 
-// setupClone prepare the clone environment before exec
+// setupClone prepare the clone environment before exec.
 func (e *local) setupClone(state *workflowState) error {
 	if e.pluginGitBinary != "" {
 		state.pluginGitBinary = e.pluginGitBinary
@@ -61,7 +61,7 @@ func (e *local) setupClone(state *workflowState) error {
 	return e.downloadLatestGitPluginBinary(state.pluginGitBinary)
 }
 
-// execClone executes a clone-step locally
+// execClone executes a clone-step locally.
 func (e *local) execClone(ctx context.Context, step *types.Step, state *workflowState, env []string) error {
 	if scm := step.Environment["CI_REPO_SCM"]; scm != "git" {
 		return fmt.Errorf("local backend can only clone from git repos, but this repo use '%s'", scm)
@@ -113,7 +113,7 @@ func (e *local) execClone(ctx context.Context, step *types.Step, state *workflow
 	return cmd.Start()
 }
 
-// writeNetRC write a netrc file into the home dir of a given workflow state
+// writeNetRC write a netrc file into the home dir of a given workflow state.
 func (e *local) writeNetRC(step *types.Step, state *workflowState) (string, error) {
 	if step.Environment["CI_NETRC_MACHINE"] == "" {
 		log.Trace().Msg("no netrc to write")
@@ -132,7 +132,7 @@ func (e *local) writeNetRC(step *types.Step, state *workflowState) (string, erro
 }
 
 // downloadLatestGitPluginBinary download the latest plugin-git binary based on runtime OS and Arch
-// and saves it to dest
+// and saves it to dest.
 func (e *local) downloadLatestGitPluginBinary(dest string) error {
 	type asset struct {
 		Name               string

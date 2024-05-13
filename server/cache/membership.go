@@ -41,7 +41,7 @@ type membershipCache struct {
 // NewMembershipService creates a new membership service.
 func NewMembershipService(_store store.Store) MembershipService {
 	return &membershipCache{
-		ttl:   10 * time.Minute, //nolint: gomnd
+		ttl:   10 * time.Minute, //nolint:mnd
 		store: _store,
 		cache: ttlcache.New(ttlcache.WithDisableTouchOnHit[string, *model.OrgPerm]()),
 	}

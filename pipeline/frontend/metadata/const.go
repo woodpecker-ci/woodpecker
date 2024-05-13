@@ -26,9 +26,11 @@ const (
 	EventManual     = "manual"
 )
 
-// Different ways to handle failure states
+// Different ways to handle failure states.
 const (
 	FailureIgnore = "ignore"
 	FailureFail   = "fail"
-	// FailureCancel = "cancel" // Not implemented yet
+	//nolint:godot
+	// TODO: Not implemented yet.
+	// FailureCancel = "cancel"
 )
