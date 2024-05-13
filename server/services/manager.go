@@ -72,13 +72,18 @@ func NewManager(c *cli.Context, store store.Store, setupForge SetupForge) (Manag
 		return nil, err
 	}
 
+	configService, err := setupConfigService(c, signaturePrivateKey)
+	if err != nil {
+		return nil, err
+	}
+
 	return &manager{
 		signaturePrivateKey: signaturePrivateKey,
 		signaturePublicKey:  signaturePublicKey,
 		store:               store,
 		secret:              setupSecretService(store),
 		registry:            setupRegistryService(store, c.String("docker-config")),
-		config:              setupConfigService(c, signaturePrivateKey),
+		config:              configService,
 		environment:         environment.Parse(c.StringSlice("environment")),
 		forgeCache:          ttlcache.New(ttlcache.WithDisableTouchOnHit[int64, forge.Forge]()),
 		setupForge:          setupForge,

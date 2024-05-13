@@ -130,6 +130,8 @@
     "*.excalidraw",
     "*.svg",
     "Makefile",
+    "flake.nix",
+    "flake.lock",
     // TODO: remove the following
     "CHANGELOG.md",
     ".woodpecker/",
