@@ -64,7 +64,7 @@ func Restart(ctx context.Context, store store.Store, lastPipeline *model.Pipelin
 	}
 
 	newPipeline := createNewOutOfOld(lastPipeline)
-	newPipeline.Parent = lastPipeline.ID
+	newPipeline.Parent = lastPipeline.Number
 
 	err = store.CreatePipeline(newPipeline)
 	if err != nil {
