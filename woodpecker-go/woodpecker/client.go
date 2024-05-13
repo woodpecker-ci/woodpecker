@@ -76,7 +76,7 @@ func (c *client) SetLogLevel(in *LogLevel) (*LogLevel, error) {
 }
 
 //
-// GTTP request helper functions.
+// HTTP request helper functions.
 //
 
 // Helper function for making an http GET request.
