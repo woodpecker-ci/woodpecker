@@ -306,7 +306,8 @@ func TestFetch(t *testing.T) {
 			f.On("Dir", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, fmt.Errorf("directory not found"))
 
 			configFetcher := config.NewForge(
-				time.Second * 3,
+				time.Second*3,
+				3,
 			)
 			files, err := configFetcher.Fetch(
 				context.Background(),
