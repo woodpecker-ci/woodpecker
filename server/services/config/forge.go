@@ -38,13 +38,13 @@ type forgeFetcher struct {
 	retryCount uint
 }
 
-func NewForge(timeout time.Duration, retrys uint) Service {
-	if retrys == 0 {
-		retrys = defaultRetryCount
+func NewForge(timeout time.Duration, retries uint) Service {
+	if retries == 0 {
+		retries = defaultRetryCount
 	}
 	return &forgeFetcher{
 		timeout:    timeout,
-		retryCount: retrys,
+		retryCount: retries,
 	}
 }
 
