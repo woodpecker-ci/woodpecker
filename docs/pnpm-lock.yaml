@@ -7,6 +7,7 @@ settings:
 overrides:
   trim: ^1.0.0
   got: ^14.0.0
+  debug: ^4.3.1
 
 importers:
 
@@ -2612,14 +2613,6 @@ packages:
   debounce@1.2.1:
     resolution: {integrity: sha512-XRRe6Glud4rd/ZGQfiV1ruXSfbvfJedlV9Y6zOlP+2K04vBYiJEte6stfFkCP03aMnY5tsipamumUjL14fofug==}
 
-  debug@2.6.9:
-    resolution: {integrity: sha512-bC7ElrdJaJnPbAP+1EotYvqZsb3ecl5wi6Bfi6BJTUcNowp6cvspg0jXznRTKDjm/E7AdgFBVeAPVMNcKGsHMA==}
-    peerDependencies:
-      supports-color: '*'
-    peerDependenciesMeta:
-      supports-color:
-        optional: true
-
   debug@4.3.4:
     resolution: {integrity: sha512-PRWFHuSU3eDtQJPvnNY7Jcket1j0t5OuOsFzPPzsekD52Zl8qUfFIPEiswXqIvHWGVHOgX+7G/vCNNhehwxfkQ==}
     engines: {node: '>=6.0'}
@@ -4058,9 +4051,6 @@ packages:
   mrmime@2.0.0:
     resolution: {integrity: sha512-eu38+hdgojoyq63s+yTpN4XMBdt5l8HhMhc4VKLO9KM5caLIBvUm4thi7fFaxyTmCKeNnXZ5pAlBwCUnhA09uw==}
     engines: {node: '>=10'}
-
-  ms@2.0.0:
-    resolution: {integrity: sha512-Tpp60P6IUJDTuOq/5Z8cdskzJujfwqfOTkrwIwj7IRISpnkJnT6SyJ4PCPnGMoFjC9ddhal5KVIYtAt97ix05A==}
 
   ms@2.1.2:
     resolution: {integrity: sha512-sGkPx+VjMtmA6MX27oA4FBFELFCZZ4S4XqeGOXCv68tT+jb3vk/RyaKWP0PTKyWtmLSM0b+adUTEvbs1PEaH2w==}
@@ -8995,7 +8985,7 @@ snapshots:
     dependencies:
       bytes: 3.1.2
       content-type: 1.0.5
-      debug: 2.6.9
+      debug: 4.3.4
       depd: 2.0.0
       destroy: 1.2.0
       http-errors: 2.0.0
@@ -9256,7 +9246,7 @@ snapshots:
       accepts: 1.3.8
       bytes: 3.0.0
       compressible: 2.0.18
-      debug: 2.6.9
+      debug: 4.3.4
       on-headers: 1.0.2
       safe-buffer: 5.1.2
       vary: 1.1.2
@@ -9587,10 +9577,6 @@ snapshots:
 
   debounce@1.2.1: {}
 
-  debug@2.6.9:
-    dependencies:
-      ms: 2.0.0
-
   debug@4.3.4:
     dependencies:
       ms: 2.1.2
@@ -9657,7 +9643,7 @@ snapshots:
   detect-port-alt@1.1.6:
     dependencies:
       address: 1.2.2
-      debug: 2.6.9
+      debug: 4.3.4
     transitivePeerDependencies:
       - supports-color
 
@@ -9942,7 +9928,7 @@ snapshots:
       content-type: 1.0.5
       cookie: 0.6.0
       cookie-signature: 1.0.6
-      debug: 2.6.9
+      debug: 4.3.4
       depd: 2.0.0
       encodeurl: 1.0.2
       escape-html: 1.0.3
@@ -10023,7 +10009,7 @@ snapshots:
 
   finalhandler@1.2.0:
     dependencies:
-      debug: 2.6.9
+      debug: 4.3.4
       encodeurl: 1.0.2
       escape-html: 1.0.3
       on-finished: 2.4.1
@@ -11417,8 +11403,6 @@ snapshots:
 
   mrmime@2.0.0: {}
 
-  ms@2.0.0: {}
-
   ms@2.1.2: {}
 
   ms@2.1.3: {}
@@ -12669,7 +12653,7 @@ snapshots:
 
   send@0.18.0:
     dependencies:
-      debug: 2.6.9
+      debug: 4.3.4
       depd: 2.0.0
       destroy: 1.2.0
       encodeurl: 1.0.2
@@ -12704,7 +12688,7 @@ snapshots:
     dependencies:
       accepts: 1.3.8
       batch: 0.6.1
-      debug: 2.6.9
+      debug: 4.3.4
       escape-html: 1.0.3
       http-errors: 1.6.3
       mime-types: 2.1.35
