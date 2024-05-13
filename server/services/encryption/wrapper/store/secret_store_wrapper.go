@@ -30,7 +30,7 @@ type EncryptedSecretStore struct {
 	encryption types.EncryptionService
 }
 
-// ensure wrapper match interface
+// Ensure wrapper match interface.
 var _ model.SecretStore = new(EncryptedSecretStore)
 
 func NewSecretStore(secretStore model.SecretStore) *EncryptedSecretStore {

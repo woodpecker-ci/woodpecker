@@ -22,7 +22,7 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-//nolint:gomnd
+//nolint:mnd
 var flags = []cli.Flag{
 	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_SERVER"},

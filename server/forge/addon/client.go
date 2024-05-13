@@ -30,7 +30,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
-// make sure RPC implements forge.Forge
+// make sure RPC implements forge.Forge.
 var _ forge.Forge = new(RPC)
 
 func Load(file string) (forge.Forge, error) {
@@ -44,7 +44,7 @@ func Load(file string) (forge.Forge, error) {
 			logger: log.With().Str("addon", file).Logger(),
 		},
 	})
-	// TODO defer client.Kill()
+	// TODO: defer client.Kill()
 
 	rpcClient, err := client.Client()
 	if err != nil {
