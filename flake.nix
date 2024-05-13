@@ -25,11 +25,13 @@
             # frontend
             nodejs
             nodePackages.pnpm
+            nodePackages.typescript
+            nodePackages.typescript-language-server
 
             # backend
             go
-            golangci-lint
             gofumpt
+            golangci-lint
             go-mockery
             protobuf
           ];
