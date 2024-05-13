@@ -525,6 +525,12 @@ Specify a configuration service endpoint, see [Configuration Extension](./100-ex
 
 Specify timeout when fetching the Woodpecker configuration from forge. See <https://pkg.go.dev/time#ParseDuration> for syntax reference.
 
+### `WOODPECKER_FORGE_RETRY`
+
+> Default: 3
+
+Specify how many retries of fetching the Woodpecker configuration from a forge are done before we fail.
+
 ### `WOODPECKER_ENABLE_SWAGGER`
 
 > Default: true
