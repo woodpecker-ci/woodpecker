@@ -55,7 +55,12 @@
     "overrides": {
       "trim": "^1.0.0",
       "got": "^14.0.0",
-      "debug": "^4.3.1"
+      "debug": "^4.3.1",
+      "express": "^4.19.2",
+      "http-cache-semantics": "^4.1.1",
+      "http-proxy": "^1.18.1",
+      "mime": "^1.4.1",
+      "prismjs": "^1.27.0"
     }
   }
 }
