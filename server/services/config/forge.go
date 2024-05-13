@@ -30,16 +30,21 @@ import (
 )
 
 const (
-	forgeFetchingRetryCount = 3
+	defaultRetryCount uint = 3
 )
 
 type forgeFetcher struct {
-	timeout time.Duration
+	timeout    time.Duration
+	retryCount uint
 }
 
-func NewForge(timeout time.Duration) Service {
+func NewForge(timeout time.Duration, retrys uint) Service {
+	if retrys == 0 {
+		retrys = defaultRetryCount
+	}
 	return &forgeFetcher{
-		timeout: timeout,
+		timeout:    timeout,
+		retryCount: retrys,
 	}
 }
 
@@ -58,7 +63,7 @@ func (f *forgeFetcher) Fetch(ctx context.Context, forge forge.Forge, user *model
 	}
 
 	// try to fetch multiple times
-	for i := 0; i < forgeFetchingRetryCount; i++ {
+	for i := 0; i < int(f.retryCount); i++ {
 		files, err = ffc.fetch(ctx, strings.TrimSpace(repo.Config))
 		if err != nil {
 			log.Trace().Err(err).Msgf("%d. try failed", i+1)

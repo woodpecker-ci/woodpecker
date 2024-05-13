@@ -58,7 +58,8 @@ func setupSecretService(store store.Store) secret.Service {
 
 func setupConfigService(c *cli.Context, privateSignatureKey crypto.PrivateKey) config.Service {
 	timeout := c.Duration("forge-timeout")
-	configFetcher := config.NewForge(timeout)
+	retrys := c.Uint("forge-retry")
+	configFetcher := config.NewForge(timeout, retrys)
 
 	if endpoint := c.String("config-service-endpoint"); endpoint != "" {
 		httpFetcher := config.NewHTTP(endpoint, privateSignatureKey)
