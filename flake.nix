@@ -1,16 +1,13 @@
 {
   # Override nixpkgs to use the latest set of node packages
-  inputs.nixpkgs.url = "github:NixOS/nixpkgs/master";
-  inputs.systems.url = "github:nix-systems/default";
+  inputs = {
+    nixpkgs.url = "github:NixOS/nixpkgs/master";
+    flake-utils.url = "github:numtide/flake-utils";
+  };
 
   outputs =
-    {
-      self,
-      nixpkgs,
-      flake-utils,
-      systems,
-    }:
-    flake-utils.lib.eachSystem (import systems) (
+    { nixpkgs, flake-utils, ... }:
+    flake-utils.lib.eachDefaultSystem (
       system:
       let
         pkgs = import nixpkgs { inherit system; };
