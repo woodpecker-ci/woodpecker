@@ -18,6 +18,7 @@ steps:
     commands:
       - corepack enable
       - pnpx cspell lint --no-progress --gitignore '{**,.*}/{*,.*}'
+      - tree --gitignore -I 012_columns_rename_procs_to_steps.go -I versioned_docs -I '*opensource.svg'| pnpx cspell lint -c .cspell.json stdin
 
   - name: prettier
     image: docker.io/woodpeckerci/plugin-prettier:0.1.0
