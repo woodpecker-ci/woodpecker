@@ -153,6 +153,9 @@ func TestToConfigFull(t *testing.T) {
 		AuthConfig:   backend.Auth{Username: "user", Password: "123456"},
 		NetworkMode:  "bridge",
 		Ports:        []backend.Port{{Number: 21}, {Number: 22}},
+		Workspace: []backend.Workspace{{
+			Tmpfs: []backend.Tmpfs{{Path: "/tmp", Size: 1024}},
+		}},
 	})
 
 	assert.NotNil(t, conf)
