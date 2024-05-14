@@ -35,7 +35,7 @@ steps:
       - pnpm lint
     when: *when
 
-  format check:
+  format_check:
     depends_on:
       - install-dependencies
     image: *node_image
