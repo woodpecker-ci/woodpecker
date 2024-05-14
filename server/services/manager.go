@@ -18,7 +18,7 @@ import (
 	"crypto"
 	"time"
 
-	"github.com/jellydator/ttlcache/v3"
+	"github.com/jellydator/ttlcache/v3" // cspell:disable-line
 	"github.com/urfave/cli/v2"
 
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
@@ -111,7 +111,7 @@ func (m *manager) RegistryService() registry.Service {
 }
 
 func (m *manager) ConfigServiceFromRepo(_ *model.Repo) config.Service {
-	// TODO: decied based on repo property which config service to use
+	// TODO: decide based on repo property which config service to use
 	return m.config
 }
 
