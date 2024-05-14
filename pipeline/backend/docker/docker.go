@@ -25,10 +25,10 @@ import (
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/network"
 	"github.com/docker/docker/api/types/volume"
-	"github.com/docker/go-connections/tlsconfig"
+	"github.com/docker/go-connections/tlsconfig" // cspell:words tlsconfig
 	"github.com/moby/moby/client"
-	"github.com/moby/moby/pkg/jsonmessage"
-	"github.com/moby/moby/pkg/stdcopy"
+	"github.com/moby/moby/pkg/jsonmessage" // cspell:words jsonmessage
+	"github.com/moby/moby/pkg/stdcopy"     // cspell:words stdcopy
 	"github.com/moby/term"
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v2"
@@ -188,16 +188,16 @@ func (e *docker) StartStep(ctx context.Context, step *backend.Step, taskUUID str
 	containerName := toContainerName(step)
 
 	// create pull options with encoded authorization credentials.
-	pullopts := types.ImagePullOptions{}
+	pullOpts := types.ImagePullOptions{}
 	if step.AuthConfig.Username != "" && step.AuthConfig.Password != "" {
-		pullopts.RegistryAuth, _ = encodeAuthToBase64(step.AuthConfig)
+		pullOpts.RegistryAuth, _ = encodeAuthToBase64(step.AuthConfig)
 	}
 
 	// automatically pull the latest version of the image if requested
 	// by the process configuration.
 	if step.Pull {
-		responseBody, perr := e.client.ImagePull(ctx, config.Image, pullopts)
-		if perr == nil {
+		responseBody, pErr := e.client.ImagePull(ctx, config.Image, pullOpts)
+		if pErr == nil {
 			// TODO(1936): show image pull progress in web-ui
 			fd, isTerminal := term.GetFdInfo(os.Stdout)
 			if err := jsonmessage.DisplayJSONMessagesStream(responseBody, os.Stdout, fd, isTerminal, nil); err != nil {
@@ -207,8 +207,8 @@ func (e *docker) StartStep(ctx context.Context, step *backend.Step, taskUUID str
 		}
 		// Fix "Show warning when fail to auth to docker registry"
 		// (https://web.archive.org/web/20201023145804/https://github.com/drone/drone/issues/1917)
-		if perr != nil && step.AuthConfig.Password != "" {
-			return perr
+		if pErr != nil && step.AuthConfig.Password != "" {
+			return pErr
 		}
 	}
 
@@ -219,9 +219,9 @@ func (e *docker) StartStep(ctx context.Context, step *backend.Step, taskUUID str
 	if client.IsErrNotFound(err) {
 		// automatically pull and try to re-create the image if the
 		// failure is caused because the image does not exist.
-		responseBody, perr := e.client.ImagePull(ctx, config.Image, pullopts)
-		if perr != nil {
-			return perr
+		responseBody, pErr := e.client.ImagePull(ctx, config.Image, pullOpts)
+		if pErr != nil {
+			return pErr
 		}
 		// TODO(1936): show image pull progress in web-ui
 		fd, isTerminal := term.GetFdInfo(os.Stdout)
@@ -263,10 +263,10 @@ func (e *docker) WaitStep(ctx context.Context, step *backend.Step, taskUUID stri
 
 	containerName := toContainerName(step)
 
-	wait, errc := e.client.ContainerWait(ctx, containerName, "")
+	wait, errC := e.client.ContainerWait(ctx, containerName, "")
 	select {
 	case <-wait:
-	case <-errc:
+	case <-errC:
 	}
 
 	info, err := e.client.ContainerInspect(ctx, containerName)

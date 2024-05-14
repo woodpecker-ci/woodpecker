@@ -56,5 +56,5 @@ $netrc=[string]::Format("{0}\_netrc",$Env:HOME);
 // to trace a command.
 const traceScriptWin = `
 Write-Output ('+ %s');
-& %s; if ($LASTEXITCODE -ne 0) {exit $LASTEXITCODE}
+& %s; if ($LASTEXITCODE -ne 0) {exit $LASTEXITCODE} // cspell:disable-line
 `
