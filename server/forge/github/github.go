@@ -63,6 +63,7 @@ func New(opts Opts) (forge.Forge, error) {
 		url:        defaultURL,
 		Client:     opts.Client,
 		Secret:     opts.Secret,
+		oAuthHost:  opts.OAuthHost,
 		SkipVerify: opts.SkipVerify,
 		MergeRef:   opts.MergeRef,
 		OnlyPublic: opts.OnlyPublic,

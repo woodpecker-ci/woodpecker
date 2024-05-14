@@ -72,6 +72,7 @@ func New(opts Opts) (forge.Forge, error) {
 		url:          opts.URL,
 		ClientID:     opts.ClientID,
 		ClientSecret: opts.ClientSecret,
+		oAuthHost:    opts.OAuthHost,
 		SkipVerify:   opts.SkipVerify,
 		HideArchives: true,
 	}, nil

@@ -64,6 +64,7 @@ func New(opts Opts) (forge.Forge, error) {
 		urlAPI:       fmt.Sprintf("%s/rest", opts.URL),
 		clientID:     opts.ClientID,
 		clientSecret: opts.ClientSecret,
+		oauthHost:    opts.OAuthHost,
 		username:     opts.Username,
 		password:     opts.Password,
 	}
