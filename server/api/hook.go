@@ -22,6 +22,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
@@ -159,7 +160,7 @@ func PostHook(c *gin.Context) {
 		c.Status(http.StatusNoContent)
 		return
 	}
-	oldFullName := repo.FullName
+	currentRepoFullName := repo.FullName
 
 	if repo.UserID == 0 {
 		log.Warn().Msgf("ignoring hook. repo %s has no owner.", repo.FullName)
@@ -179,7 +180,7 @@ func PostHook(c *gin.Context) {
 	//
 
 	// get the token and verify the hook is authorized
-	parsed, err := token.ParseRequest(c.Request, func(_ *token.Token) (string, error) {
+	parsedToken, err := token.ParseRequest(c.Request, func(_ *token.Token) (string, error) {
 		return repo.Hash, nil
 	})
 	if err != nil {
@@ -188,7 +189,7 @@ func PostHook(c *gin.Context) {
 		c.String(http.StatusBadRequest, msg)
 		return
 	}
-	verifiedKey := parsed.Text == oldFullName
+	verifiedKey := parsedToken.Get("repo-id") == strconv.FormatInt(repo.ID, 10) || parsedToken.Get("text") == currentRepoFullName
 	if !verifiedKey {
 		verifiedKey, err = _store.HasRedirectionForRepo(repo.ID, repo.FullName)
 		if err != nil {
@@ -200,7 +201,7 @@ func PostHook(c *gin.Context) {
 	}
 
 	if !verifiedKey {
-		msg := fmt.Sprintf("failure to verify token from hook. Expected %s, got %s", repo.FullName, parsed.Text)
+		msg := fmt.Sprintf("failure to verify token from hook. Expected %s, got %s", repo.FullName, parsedToken.Get("text"))
 		log.Debug().Msg(msg)
 		c.String(http.StatusForbidden, msg)
 		return
@@ -210,7 +211,7 @@ func PostHook(c *gin.Context) {
 	// 4. Update repo
 	//
 
-	if oldFullName != tmpRepo.FullName {
+	if currentRepoFullName != tmpRepo.FullName {
 		// create a redirection
 		err = _store.CreateRedirection(&model.Redirection{RepoID: repo.ID, FullName: repo.FullName})
 		if err != nil {

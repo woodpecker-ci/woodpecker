@@ -45,7 +45,7 @@ func SetUser() gin.HandlerFunc {
 
 		t, err := token.ParseRequest(c.Request, func(t *token.Token) (string, error) {
 			var err error
-			userID, err := strconv.ParseInt(t.Text, 10, 64)
+			userID, err := strconv.ParseInt(t.Get("user-id"), 10, 64)
 			if err != nil {
 				return "", err
 			}

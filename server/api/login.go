@@ -186,7 +186,9 @@ func HandleAuth(c *gin.Context) {
 	}
 
 	exp := time.Now().Add(server.Config.Server.SessionExpires).Unix()
-	tokenString, err := token.New(token.SessToken, strconv.FormatInt(u.ID, 10)).SignExpires(u.Hash, exp)
+	_token := token.New(token.SessToken)
+	_token.Set("user-id", strconv.FormatInt(u.ID, 10))
+	tokenString, err := _token.SignExpires(u.Hash, exp)
 	if err != nil {
 		log.Error().Msgf("cannot create token for %s", u.Login)
 		c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=internal_error")
@@ -263,7 +265,8 @@ func GetLoginToken(c *gin.Context) {
 	}
 
 	exp := time.Now().Add(server.Config.Server.SessionExpires).Unix()
-	newToken := token.New(token.SessToken, strconv.FormatInt(user.ID, 10))
+	newToken := token.New(token.SessToken)
+	newToken.Set("user-id", strconv.FormatInt(user.ID, 10))
 	tokenStr, err := newToken.SignExpires(user.Hash, exp)
 	if err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)

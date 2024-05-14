@@ -118,7 +118,8 @@ func PostRepo(c *gin.Context) {
 	}
 
 	// creates the jwt token used to verify the repository
-	t := token.New(token.HookToken, strconv.FormatInt(repo.ID, 10))
+	t := token.New(token.HookToken)
+	t.Set("repo-id", strconv.FormatInt(repo.ID, 10))
 	sig, err := t.Sign(repo.Hash)
 	if err != nil {
 		msg := "could not generate new jwt token."
@@ -520,7 +521,8 @@ func MoveRepo(c *gin.Context) {
 	}
 
 	// creates the jwt token used to verify the repository
-	t := token.New(token.HookToken, strconv.FormatInt(repo.ID, 10))
+	t := token.New(token.HookToken)
+	t.Set("repo-id", strconv.FormatInt(repo.ID, 10))
 	sig, err := t.Sign(repo.Hash)
 	if err != nil {
 		c.String(http.StatusInternalServerError, err.Error())
@@ -622,7 +624,8 @@ func repairRepo(c *gin.Context, repo *model.Repo, withPerms, skipOnErr bool) {
 	}
 
 	// creates the jwt token used to verify the repository
-	t := token.New(token.HookToken, strconv.FormatInt(repo.ID, 10))
+	t := token.New(token.HookToken)
+	t.Set("repo-id", strconv.FormatInt(repo.ID, 10))
 	sig, err := t.Sign(repo.Hash)
 	if err != nil {
 		c.String(http.StatusInternalServerError, err.Error())

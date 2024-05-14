@@ -153,7 +153,9 @@ func GetRepos(c *gin.Context) {
 //	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 func PostToken(c *gin.Context) {
 	user := session.User(c)
-	tokenString, err := token.New(token.UserToken, strconv.FormatInt(user.ID, 10)).Sign(user.Hash)
+	t := token.New(token.UserToken)
+	t.Set("user-id", strconv.FormatInt(user.ID, 10))
+	tokenString, err := t.Sign(user.Hash)
 	if err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
@@ -182,7 +184,9 @@ func DeleteToken(c *gin.Context) {
 		return
 	}
 
-	tokenString, err := token.New(token.UserToken, strconv.FormatInt(user.ID, 10)).Sign(user.Hash)
+	t := token.New(token.UserToken)
+	t.Set("user-id", strconv.FormatInt(user.ID, 10))
+	tokenString, err := t.Sign(user.Hash)
 	if err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
