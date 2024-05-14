@@ -44,7 +44,7 @@ If you run the Woodpecker CI server on the same host as the Forgejo instance, yo
 ALLOWED_HOST_LIST=external,loopback
 ```
 
-For reference see [Configuration Cheat Sheet](https://docs.forgejo.io/en-us/config-cheat-sheet/#webhook-webhook).
+For reference see [Configuration Cheat Sheet](https://forgejo.org/docs/latest/admin/config-cheat-sheet/#webhook-webhook).
 
 ![forgejo oauth setup](gitea_oauth.gif)
 
