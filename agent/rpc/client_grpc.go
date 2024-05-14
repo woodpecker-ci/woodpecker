@@ -31,7 +31,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc/proto"
 )
 
-// set grpc version on compile time to compare against server version response
+// Set grpc version on compile time to compare against server version response.
 const ClientGrpcVersion int32 = proto.Version
 
 type client struct {
@@ -54,12 +54,12 @@ func (c *client) Close() error {
 func (c *client) newBackOff() backoff.BackOff {
 	b := backoff.NewExponentialBackOff()
 	b.MaxElapsedTime = 0
-	b.MaxInterval = 10 * time.Second          //nolint: gomnd
-	b.InitialInterval = 10 * time.Millisecond //nolint: gomnd
+	b.MaxInterval = 10 * time.Second          //nolint:mnd
+	b.InitialInterval = 10 * time.Millisecond //nolint:mnd
 	return b
 }
 
-// Version returns the server- & grpc-version
+// Version returns the server- & grpc-version.
 func (c *client) Version(ctx context.Context) (*rpc.Version, error) {
 	res, err := c.client.Version(ctx, &proto.Empty{})
 	if err != nil {
@@ -242,7 +242,7 @@ func (c *client) Done(ctx context.Context, id string, state rpc.State) (err erro
 	return nil
 }
 
-// Extend extends the workflow deadline
+// Extend extends the workflow deadline.
 func (c *client) Extend(ctx context.Context, id string) (err error) {
 	retry := c.newBackOff()
 	req := new(proto.ExtendRequest)

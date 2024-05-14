@@ -40,7 +40,7 @@ func (r *Runner) createTracer(ctxmeta context.Context, logger zerolog.Logger, wo
 			StepUUID: state.Pipeline.Step.UUID,
 			Exited:   state.Process.Exited,
 			ExitCode: state.Process.ExitCode,
-			Started:  time.Now().Unix(), // TODO do not do this
+			Started:  time.Now().Unix(), // TODO: do not do this
 			Finished: time.Now().Unix(),
 		}
 		if state.Process.Error != nil {

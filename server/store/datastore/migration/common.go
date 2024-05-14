@@ -37,7 +37,7 @@ func renameTable(sess *xorm.Session, old, new string) error {
 	}
 }
 
-// WARNING: YOU MUST COMMIT THE SESSION AT THE END
+// WARNING: YOU MUST COMMIT THE SESSION AT THE END.
 func dropTableColumns(sess *xorm.Session, tableName string, columnNames ...string) (err error) {
 	// Copyright 2017 The Gitea Authors. All rights reserved.
 	// Use of this source code is governed by a MIT-style

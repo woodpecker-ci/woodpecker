@@ -64,7 +64,7 @@ function editSecret(secret: Secret) {
 }
 
 function deleteSecret(secret: Secret) {
-  // TODO use proper dialog
+  // TODO: use proper dialog
   // eslint-disable-next-line no-alert, no-restricted-globals
   if (!confirm(i18n.t('repo.settings.secrets.delete_confirm'))) {
     return;

@@ -30,7 +30,7 @@ type Task struct {
 	AgentID      int64                  `json:"agent_id"     xorm:"'agent_id'"`
 } //	@name Task
 
-// TableName return database table name for xorm
+// TableName return database table name for xorm.
 func (Task) TableName() string {
 	return "tasks"
 }
@@ -41,7 +41,7 @@ func (t *Task) String() string {
 	return sb.String()
 }
 
-// ShouldRun tells if a task should be run or skipped, based on dependencies
+// ShouldRun tells if a task should be run or skipped, based on dependencies.
 func (t *Task) ShouldRun() bool {
 	if t.runsOnFailure() && t.runsOnSuccess() {
 		return true

@@ -150,7 +150,7 @@ func WithEnviron(env map[string]string) Option {
 }
 
 // WithNetworks configures the compiler with additional networks
-// to be connected to pipeline containers
+// to be connected to pipeline containers.
 func WithNetworks(networks ...string) Option {
 	return func(compiler *Compiler) {
 		compiler.networks = networks
@@ -178,14 +178,14 @@ func WithDefaultCloneImage(cloneImage string) Option {
 	}
 }
 
-// WithTrusted configures the compiler with the trusted repo option
+// WithTrusted configures the compiler with the trusted repo option.
 func WithTrusted(trusted bool) Option {
 	return func(compiler *Compiler) {
 		compiler.trustedPipeline = trusted
 	}
 }
 
-// WithNetrcOnlyTrusted configures the compiler with the netrcOnlyTrusted repo option
+// WithNetrcOnlyTrusted configures the compiler with the netrcOnlyTrusted repo option.
 func WithNetrcOnlyTrusted(only bool) Option {
 	return func(compiler *Compiler) {
 		compiler.netrcOnlyTrusted = only
