@@ -124,6 +124,7 @@
     ".gitignore",
     ".golangci.yaml",
     ".vscode/extensions.json",
+    "CHANGELOG.md",
     "Makefile",
     "flake.lock",
     "flake.nix",
@@ -135,7 +136,6 @@
     "web/src/assets/locales/**/*",
     // TODO: remove the following
     ".woodpecker/",
-    "CHANGELOG.md",
     "agent/",
     "cli/",
     "cmd/",
