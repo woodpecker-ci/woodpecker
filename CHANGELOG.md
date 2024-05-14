@@ -16,28 +16,9 @@
 - CLI: remove step logs [[#3458](https://github.com/woodpecker-ci/woodpecker/pull/3458)]
 - Step logs removing API and Button [[#3451](https://github.com/woodpecker-ci/woodpecker/pull/3451)]
 
-### 📚 Documentation
-
-- Add documentation for setting Kubernetes labels and annotations [[#3687](https://github.com/woodpecker-ci/woodpecker/pull/3687)]
-- Remove broken link to gobook.io [[#3694](https://github.com/woodpecker-ci/woodpecker/pull/3694)]
-- docs: add `Gitea publisher-golang` plugin [[#3691](https://github.com/woodpecker-ci/woodpecker/pull/3691)]
-- Add Ansible+Woodpecker blog post [[#3685](https://github.com/woodpecker-ci/woodpecker/pull/3685)]
-- Clarify info on failing workflows/Steps [[#3679](https://github.com/woodpecker-ci/woodpecker/pull/3679)]
-- Add discord plugin [[#3662](https://github.com/woodpecker-ci/woodpecker/pull/3662)]
-- chore(deps): update dependency trim to v1 [[#3658](https://github.com/woodpecker-ci/woodpecker/pull/3658)]
-- chore(deps): update dependency got to v14 [[#3657](https://github.com/woodpecker-ci/woodpecker/pull/3657)]
-- Fail on broken anchors [[#3644](https://github.com/woodpecker-ci/woodpecker/pull/3644)]
-- Fix step syntax in docs [[#3635](https://github.com/woodpecker-ci/woodpecker/pull/3635)]
-- chore(deps): update docs npm deps non-major [[#3632](https://github.com/woodpecker-ci/woodpecker/pull/3632)]
-- Add Twine plugin [[#3619](https://github.com/woodpecker-ci/woodpecker/pull/3619)]
-- Fix docs [[#3615](https://github.com/woodpecker-ci/woodpecker/pull/3615)]
-- Document how to enable parallel step exec for all steps [[#3605](https://github.com/woodpecker-ci/woodpecker/pull/3605)]
-- Update dependency @types/marked to v6 [[#3544](https://github.com/woodpecker-ci/woodpecker/pull/3544)]
-- Update docs npm deps non-major [[#3485](https://github.com/woodpecker-ci/woodpecker/pull/3485)]
-- Docs updates and fixes [[#3535](https://github.com/woodpecker-ci/woodpecker/pull/3535)]
-
 ### 📈 Enhancement
 
+- Lint file names and directories via cSpell too [[#3703](https://github.com/woodpecker-ci/woodpecker/pull/3703)]
 - Make retry count of config fetching form forge configure [[#3699](https://github.com/woodpecker-ci/woodpecker/pull/3699)]
 - Ability to set pod annotations and labels from step [[#3609](https://github.com/woodpecker-ci/woodpecker/pull/3609)]
 - Support github deploy task [[#3512](https://github.com/woodpecker-ci/woodpecker/pull/3512)]
@@ -57,6 +38,26 @@
 - Remove unused cache properties [[#3567](https://github.com/woodpecker-ci/woodpecker/pull/3567)]
 - Allow separate gitea oauth URL  [[#3513](https://github.com/woodpecker-ci/woodpecker/pull/3513)]
 - Add option to set the local repository path to the cli command exec. [[#3524](https://github.com/woodpecker-ci/woodpecker/pull/3524)]
+
+### 📚 Documentation
+
+- Add documentation for setting Kubernetes labels and annotations [[#3687](https://github.com/woodpecker-ci/woodpecker/pull/3687)]
+- Remove broken link to gobook.io [[#3694](https://github.com/woodpecker-ci/woodpecker/pull/3694)]
+- docs: add `Gitea publisher-golang` plugin [[#3691](https://github.com/woodpecker-ci/woodpecker/pull/3691)]
+- Add Ansible+Woodpecker blog post [[#3685](https://github.com/woodpecker-ci/woodpecker/pull/3685)]
+- Clarify info on failing workflows/Steps [[#3679](https://github.com/woodpecker-ci/woodpecker/pull/3679)]
+- Add discord plugin [[#3662](https://github.com/woodpecker-ci/woodpecker/pull/3662)]
+- chore(deps): update dependency trim to v1 [[#3658](https://github.com/woodpecker-ci/woodpecker/pull/3658)]
+- chore(deps): update dependency got to v14 [[#3657](https://github.com/woodpecker-ci/woodpecker/pull/3657)]
+- Fail on broken anchors [[#3644](https://github.com/woodpecker-ci/woodpecker/pull/3644)]
+- Fix step syntax in docs [[#3635](https://github.com/woodpecker-ci/woodpecker/pull/3635)]
+- chore(deps): update docs npm deps non-major [[#3632](https://github.com/woodpecker-ci/woodpecker/pull/3632)]
+- Add Twine plugin [[#3619](https://github.com/woodpecker-ci/woodpecker/pull/3619)]
+- Fix docs [[#3615](https://github.com/woodpecker-ci/woodpecker/pull/3615)]
+- Document how to enable parallel step exec for all steps [[#3605](https://github.com/woodpecker-ci/woodpecker/pull/3605)]
+- Update dependency @types/marked to v6 [[#3544](https://github.com/woodpecker-ci/woodpecker/pull/3544)]
+- Update docs npm deps non-major [[#3485](https://github.com/woodpecker-ci/woodpecker/pull/3485)]
+- Docs updates and fixes [[#3535](https://github.com/woodpecker-ci/woodpecker/pull/3535)]
 
 ### 🐛 Bug Fixes
 
