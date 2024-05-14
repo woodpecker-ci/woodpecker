@@ -17,7 +17,7 @@ package linter
 import (
 	"fmt"
 
-	"codeberg.org/6543/xyaml"
+	"codeberg.org/6543/xyaml" // cspell:words xyaml
 	"go.uber.org/multierr"
 
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/errors"

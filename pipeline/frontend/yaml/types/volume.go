@@ -66,24 +66,24 @@ func (v *Volumes) UnmarshalYAML(unmarshal func(any) error) error {
 			if !ok {
 				return fmt.Errorf("cannot unmarshal '%v' to type %T into a string value", name, name)
 			}
-			elts := strings.SplitN(name, ":", 3)
+			elements := strings.SplitN(name, ":", 3)
 			var vol *Volume
 			//nolint:mnd
 			switch {
-			case len(elts) == 1:
+			case len(elements) == 1:
 				vol = &Volume{
-					Destination: elts[0],
+					Destination: elements[0],
 				}
-			case len(elts) == 2:
+			case len(elements) == 2:
 				vol = &Volume{
-					Source:      elts[0],
-					Destination: elts[1],
+					Source:      elements[0],
+					Destination: elements[1],
 				}
-			case len(elts) == 3:
+			case len(elements) == 3:
 				vol = &Volume{
-					Source:      elts[0],
-					Destination: elts[1],
-					AccessMode:  elts[2],
+					Source:      elements[0],
+					Destination: elements[1],
+					AccessMode:  elements[2],
 				}
 			default:
 				// FIXME

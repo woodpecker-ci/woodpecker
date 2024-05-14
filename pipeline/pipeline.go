@@ -21,10 +21,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/oklog/ulid/v2"
+	"github.com/oklog/ulid/v2" // cspell:disable-line
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
-	"golang.org/x/sync/errgroup"
+	"golang.org/x/sync/errgroup" // cspell:words errgroup
 
 	backend "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/metadata"

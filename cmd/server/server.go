@@ -31,7 +31,7 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v2"
-	"golang.org/x/sync/errgroup"
+	"golang.org/x/sync/errgroup" // cspell:words errgroup
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/keepalive"
 

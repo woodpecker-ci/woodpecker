@@ -17,7 +17,7 @@ package matrix
 import (
 	"strings"
 
-	"codeberg.org/6543/xyaml"
+	"codeberg.org/6543/xyaml" // cspell:words xyaml
 
 	errorTypes "go.woodpecker-ci.org/woodpecker/v2/pipeline/errors/types"
 )

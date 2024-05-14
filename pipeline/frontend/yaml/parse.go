@@ -17,7 +17,7 @@ package yaml
 import (
 	"fmt"
 
-	"codeberg.org/6543/xyaml"
+	"codeberg.org/6543/xyaml" // cspell:words xyaml
 
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/constraint"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/types"
