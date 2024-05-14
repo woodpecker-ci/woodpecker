@@ -69,8 +69,8 @@ type (
 	Path struct {
 		Include       []string
 		Exclude       []string
-		IgnoreMessage string `yaml:"ignore_message,omitempty"`
-		FailOnEmpty   bool   `yaml:"fail_on_empty,omitempty"`
+		IgnoreMessage string                 `yaml:"ignore_message,omitempty"`
+		OnEmpty       yamlBaseTypes.BoolTrue `yaml:"on_empty,omitempty"`
 	}
 )
 
@@ -332,7 +332,7 @@ func (c *Path) UnmarshalYAML(value *yaml.Node) error {
 		Include       yamlBaseTypes.StringOrSlice `yaml:"include,omitempty"`
 		Exclude       yamlBaseTypes.StringOrSlice `yaml:"exclude,omitempty"`
 		IgnoreMessage string                      `yaml:"ignore_message,omitempty"`
-		FailOnEmpty   bool                        `yaml:"fail_on_empty,omitempty"`
+		OnEmpty       yamlBaseTypes.BoolTrue      `yaml:"on_empty,omitempty"`
 	}{}
 
 	var out2 yamlBaseTypes.StringOrSlice
@@ -340,11 +340,9 @@ func (c *Path) UnmarshalYAML(value *yaml.Node) error {
 	err1 := value.Decode(&out1)
 	err2 := value.Decode(&out2)
 
-	fmt.Println(out1.FailOnEmpty)
-
 	c.Exclude = out1.Exclude
 	c.IgnoreMessage = out1.IgnoreMessage
-	c.FailOnEmpty = out1.FailOnEmpty
+	c.OnEmpty = out1.OnEmpty
 	c.Include = append( //nolint:gocritic
 		out1.Include,
 		out2...,
@@ -366,9 +364,9 @@ func (c *Path) Match(v []string, message string) bool {
 		return true
 	}
 
-	// return value based on 'fail_on_empty', if there are no commit files (empty commit)
+	// return value based on 'on_empty', if there are no commit files (empty commit)
 	if len(v) == 0 {
-		return !c.FailOnEmpty
+		return c.OnEmpty.Bool()
 	}
 
 	if len(c.Exclude) > 0 && c.Excludes(v) {

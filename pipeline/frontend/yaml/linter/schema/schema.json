@@ -289,7 +289,7 @@
                 "ignore_message": {
                   "type": "string"
                 },
-                "fail_on_empty": {
+                "on_empty": {
                   "type": "boolean"
                 }
               },
@@ -497,7 +497,7 @@
                 "ignore_message": {
                   "type": "string"
                 },
-                "fail_on_empty": {
+                "on_empty": {
                   "type": "boolean"
                 }
               },

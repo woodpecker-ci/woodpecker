@@ -119,7 +119,7 @@ steps:
         include: ['.woodpecker/*.yml', '*.ini']
         exclude: ['*.md', 'docs/**']
         ignore_message: '[ALL]'
-        fail_on_empty: false
+        on_empty: true
 
   when-repo:
     image: alpine

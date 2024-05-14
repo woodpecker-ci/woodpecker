@@ -402,7 +402,7 @@ when:
 
 You can use [glob patterns](https://github.com/bmatcuk/doublestar#patterns) to match the changed files and specify if the step should run if a file matching that pattern has been changed `include` or if some files have **not** been changed `exclude`.
 
-The behavior on an empty commit can be set using `fail_on_empty`. A value of `false`(default) will evaluate this condition to true.
+The behavior on an empty commit can be set using `on_empty`.
 
 ```yaml
 when:
@@ -410,11 +410,11 @@ when:
       include: ['.woodpecker/*.yaml', '*.ini']
       exclude: ['*.md', 'docs/**']
       ignore_message: '[ALL]'
-      fail_on_empty: false
+      on_empty: true
 ```
 
 :::info
-Passing a defined ignore-message like `[ALL]` inside the commit message will ignore all path conditions and the `fail_on_empty` setting.
+Passing a defined ignore-message like `[ALL]` inside the commit message will ignore all path conditions and the `on_empty` setting.
 :::
 
 #### `evaluate`
