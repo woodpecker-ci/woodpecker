@@ -288,6 +288,9 @@
                 },
                 "ignore_message": {
                   "type": "string"
+                },
+                "on_empty": {
+                  "type": "boolean"
                 }
               },
               "additionalProperties": false
@@ -493,6 +496,9 @@
                 },
                 "ignore_message": {
                   "type": "string"
+                },
+                "on_empty": {
+                  "type": "boolean"
                 }
               },
               "additionalProperties": false
