@@ -322,7 +322,7 @@ var flags = append([]cli.Flag{
 	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_INTERNAL_FORGE_OAUTH_HOST", "WOODPECKER_DEV_GITEA_OAUTH_URL"}, // TODO: remove WOODPECKER_DEV_GITEA_OAUTH_URL in next major release
 		Name:    "forge-oauth-host",
-		Usage:   "fully qualified url (<scheme>://<host>[/<prefixpath>]). use it if your forge url WOODPECKER_FORGE_URL or WOODPECKER_GITEA_URL, ... isn't a public url",
+		Usage:   "fully qualified forge url (<scheme>://<host>[/<prefixpath>]). use it if your forge url WOODPECKER_FORGE_URL or WOODPECKER_GITEA_URL, ... isn't a public url",
 	},
 	//
 	// Addon
@@ -411,7 +411,7 @@ var flags = append([]cli.Flag{
 	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_INTERNAL_WEBHOOK_HOST", "WOODPECKER_WEBHOOK_HOST"}, // TODO: remove WOODPECKER_WEBHOOK_HOST in next major release
 		Name:    "server-webhook-host",
-		Usage:   "server fully qualified url called by forge's webhooks (<scheme>://<host>[/<prefixpath>])",
+		Usage:   "fully qualified woodpecker server url called by forge's webhooks (<scheme>://<host>[/<prefixpath>])",
 	},
 	// TODO: remove in next major release
 	&cli.StringFlag{
