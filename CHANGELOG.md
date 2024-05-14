@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @Andre601, @Elara6331, @anbraten, @aumetra, @dominic-p, @eliasscosta, @fernandrone, @manuelluis, @nemunaire, @pat-s, @qwerty287, @sinlov, @stevapple, @xoxys, @zc-devs
+@6543, @Andre601, @Elara6331, @OCram85, @anbraten, @aumetra, @da-Kai, @dominic-p, @eliasscosta, @fernandrone, @manuelluis, @nemunaire, @pat-s, @qwerty287, @sinlov, @stevapple, @xoxys, @zc-devs
 
 ### 🔒 Security
 
@@ -18,6 +18,7 @@
 
 ### 📈 Enhancement
 
+- Setting for empty commits on path condition [[#3708](https://github.com/woodpecker-ci/woodpecker/pull/3708)]
 - Lint file names and directories via cSpell too [[#3703](https://github.com/woodpecker-ci/woodpecker/pull/3703)]
 - Make retry count of config fetching form forge configure [[#3699](https://github.com/woodpecker-ci/woodpecker/pull/3699)]
 - Ability to set pod annotations and labels from step [[#3609](https://github.com/woodpecker-ci/woodpecker/pull/3609)]
@@ -41,6 +42,7 @@
 
 ### 📚 Documentation
 
+- Add Gitea Package plugin [[#3707](https://github.com/woodpecker-ci/woodpecker/pull/3707)]
 - Add documentation for setting Kubernetes labels and annotations [[#3687](https://github.com/woodpecker-ci/woodpecker/pull/3687)]
 - Remove broken link to gobook.io [[#3694](https://github.com/woodpecker-ci/woodpecker/pull/3694)]
 - docs: add `Gitea publisher-golang` plugin [[#3691](https://github.com/woodpecker-ci/woodpecker/pull/3691)]
