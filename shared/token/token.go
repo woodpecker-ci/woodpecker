@@ -161,7 +161,7 @@ func keyFunc(token *Token, fn SecretFunc) jwt.Keyfunc {
 
 		// extract the data claims
 		for k, v := range claims {
-			if k == "type" || k == "exp" {
+			if k == "type" || k == "exp" || k == "nbf" || k == "iat" || k == "aud" || k == "iss" || k == "sub" || k == "jti" {
 				continue
 			}
 
