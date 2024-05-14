@@ -9,7 +9,7 @@ variables:
   - &platforms_alpine 'linux/arm/v6,linux/arm/v7,linux/arm64/v8,linux/amd64,linux/ppc64le'
   - &build_args 'CI_COMMIT_SHA=${CI_COMMIT_SHA},CI_COMMIT_BRANCH=${CI_COMMIT_BRANCH},CI_COMMIT_TAG=${CI_COMMIT_TAG}'
 
-# cspell:words woodpeckerbot bindata netgo TARGZ
+# cspell:words woodpeckerbot netgo TARGZ
 
   # vars used on push / tag events only
   - publish_logins: &publish_logins # Default DockerHub login
@@ -98,7 +98,7 @@ steps:
       - make cross-compile-server
     environment:
       PLATFORMS: linux|amd64
-      TAGS: bindata sqlite sqlite_unlock_notify netgo
+      TAGS: sqlite sqlite_unlock_notify netgo
     when:
       - event: pull_request
         evaluate: 'CI_COMMIT_PULL_REQUEST_LABELS contains "build_pr_images"'
@@ -120,7 +120,7 @@ steps:
       - make cross-compile-server
     environment:
       PLATFORMS: linux|arm/v7;linux|arm64/v8;linux|amd64;linux|ppc64le;linux|riscv64
-      TAGS: bindata sqlite sqlite_unlock_notify netgo
+      TAGS: sqlite sqlite_unlock_notify netgo
     when:
       branch:
         - ${CI_REPO_DEFAULT_BRANCH}
