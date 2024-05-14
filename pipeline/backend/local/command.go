@@ -55,7 +55,8 @@ func (e *local) genCmdByShell(shell string, cmdList []string) (args []string, er
 		}
 		return []string{"-c", script}, nil
 	case "powershell", "pwsh": // cspell:words pwsh
-		return []string{"-noprofile", "-noninteractive", "-c", "$ErrorActionPreference = \"Stop\"; " + script}, nil // cspell:disable-line
+		// cspell:disable-next-line
+		return []string{"-noprofile", "-noninteractive", "-c", "$ErrorActionPreference = \"Stop\"; " + script}, nil
 	default:
 		// normal posix shells
 		return []string{"-e", "-c", script}, nil
