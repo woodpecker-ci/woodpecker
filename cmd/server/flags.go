@@ -379,11 +379,6 @@ var flags = append([]cli.Flag{
 		Name:    "forgejo",
 		Usage:   "forgejo driver is enabled",
 	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_DEV_FORGEJO_OAUTH_URL"},
-		Name:    "forgejo-oauth-server",
-		Usage:   "user-facing forgejo server url for oauth",
-	},
 	//
 	// Bitbucket
 	//

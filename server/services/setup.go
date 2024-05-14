@@ -143,7 +143,7 @@ func setupForgeService(c *cli.Context, _store store.Store) error {
 		}
 	case c.Bool("forgejo"):
 		_forge.Type = model.ForgeTypeForgejo
-		_forge.AdditionalOptions["oauth-server"] = c.String("forgejo-oauth-server")
+		// TODO enable oauth URL with generic config option
 		if _forge.URL == "" {
 			_forge.URL = "https://next.forgejo.org"
 		}

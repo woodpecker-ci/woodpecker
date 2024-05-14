@@ -93,11 +93,3 @@ Read the value for `WOODPECKER_FORGEJO_SECRET` from the specified filepath
 > Default: `false`
 
 Configure if SSL verification should be skipped.
-
-## Advanced options
-
-### `WOODPECKER_DEV_FORGEJO_OAUTH_URL`
-
-> Default: value of `WOODPECKER_FORGEJO_URL`
-
-Configures the user-facing Forgejo server address. Should be used if `WOODPECKER_FORGEJO_URL` points to an internal URL used for API requests.
