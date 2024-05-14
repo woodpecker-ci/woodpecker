@@ -2,9 +2,13 @@
   "version": "0.2",
   "language": "en",
   "dictionaries": [
+    // language
     "en_us",
+    // code
     "go",
-    "node"
+    "node",
+    // package names
+    "npm"
   ],
   "words": [
     "BUILDPLATFORM",
@@ -107,8 +111,6 @@
     "unplugin",
     "urfave",
     "varchar",
-    "vite",
-    "vitejs",
     "vueuse",
     "waivable",
     "windi",
