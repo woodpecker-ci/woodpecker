@@ -22,7 +22,7 @@ type Config struct {
 	Secrets  []*Secret  `json:"secrets"`  // secret definitions
 }
 
-// CliContext is the context key to pass cli context to backends if needed
+// CliContext is the context key to pass cli context to backends if needed.
 var CliContext ContextKey
 
 // ContextKey is just an empty struct. It exists so CliContext can be

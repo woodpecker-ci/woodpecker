@@ -25,7 +25,7 @@ import (
 )
 
 // APPEND NEW MIGRATIONS
-// they are executed in order and if one fails Xormigrate will try to rollback that specific one and quits
+// They are executed in order and if one fails Xormigrate will try to rollback that specific one and quits.
 var migrationTasks = []*xormigrate.Migration{
 	&legacyToXormigrate,
 	&legacy2Xorm,

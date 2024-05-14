@@ -22,7 +22,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker"
 )
 
-//nolint:gomnd
+//nolint:mnd
 var pipelineListCmd = &cli.Command{
 	Name:      "ls",
 	Usage:     "show pipeline history",

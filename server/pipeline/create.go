@@ -32,7 +32,7 @@ import (
 
 var skipPipelineRegex = regexp.MustCompile(`\[(?i:ci *skip|skip *ci)\]`)
 
-// Create a new pipeline and start it
+// Create a new pipeline and start it.
 func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline *model.Pipeline) (*model.Pipeline, error) {
 	repoUser, err := _store.GetUser(repo.UserID)
 	if err != nil {

@@ -16,10 +16,10 @@
 
 package version
 
-// Version of Woodpecker, set with ldflags, from Git tag
+// Version of Woodpecker, set with ldflags, from Git tag.
 var Version string
 
-// String returns the Version set at build time or "dev"
+// String returns the Version set at build time or "dev".
 func String() string {
 	if Version == "" {
 		return "dev"

@@ -24,7 +24,7 @@ type Org struct {
 	Private bool `json:"-"                    xorm:"private"`
 } //	@name Org
 
-// TableName return database table name for xorm
+// TableName return database table name for xorm.
 func (Org) TableName() string {
 	return "orgs"
 }

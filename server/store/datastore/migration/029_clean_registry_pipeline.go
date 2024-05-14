@@ -36,7 +36,7 @@ type oldPipeline029 struct {
 	CloneURL string `json:"clone_url"               xorm:"pipeline_clone_url"`
 }
 
-// TableName return database table name for xorm
+// TableName return database table name for xorm.
 func (oldPipeline029) TableName() string {
 	return "pipelines"
 }
