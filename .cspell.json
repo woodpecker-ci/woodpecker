@@ -41,6 +41,7 @@
     "Rydzewski",
     "TARGETARCH",
     "TARGETOS",
+    "Typeflag",
     "Upsert",
     "WORKDIR",
     "Warnf",
@@ -98,6 +99,7 @@
     "protoc",
     "rawurl",
     "repology",
+    "rundll32",
     "securecookie",
     "sess",
     "stepbuilder",
@@ -107,6 +109,7 @@
     "testdata",
     "tink",
     "tinycolor",
+    "tmpl",
     "typecheck",
     "unplugin",
     "urfave",
@@ -144,10 +147,12 @@
     // TODO: remove the following
     ".woodpecker/",
     "agent/",
-    "cli/",
+    "cmd/cli/main.go",
     "docs/",
     "pipeline/",
     "server/"
   ],
-  "enableFiletypes": ["dockercompose"]
+  "enableFiletypes": [
+    "dockercompose"
+  ]
 }
