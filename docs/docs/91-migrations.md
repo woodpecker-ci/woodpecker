@@ -2,6 +2,13 @@
 
 Some versions need some changes to the server configuration or the pipeline configuration files.
 
+<!--
+## 3.0.0
+
+- Update all webhooks by pressing the "Repair all" button in the admin settings as the webhook token claims have changed
+
+-->
+
 ## `next`
 
 - Deprecated `steps.[name].group` in favor of `steps.[name].depends_on` (see [workflow syntax](./20-usage/20-workflow-syntax.md#depends_on) to learn how to set dependencies)

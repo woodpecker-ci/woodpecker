@@ -189,6 +189,8 @@ func PostHook(c *gin.Context) {
 		c.String(http.StatusBadRequest, msg)
 		return
 	}
+
+	// TODO: remove fallback for text full name in next major release
 	verifiedKey := parsedToken.Get("repo-id") == strconv.FormatInt(repo.ID, 10) || parsedToken.Get("text") == currentRepoFullName
 	if !verifiedKey {
 		verifiedKey, err = _store.HasRedirectionForRepo(repo.ID, repo.FullName)
