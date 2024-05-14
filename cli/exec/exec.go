@@ -263,7 +263,7 @@ func convertPathForWindows(path string) string {
 	base := filepath.VolumeName(path)
 
 	// Check if path is volume name like C:
-	//nolint: gomnd
+	//nolint:mnd
 	if len(base) == 2 {
 		path = strings.TrimPrefix(path, base)
 		base = strings.ToLower(strings.TrimSuffix(base, ":"))

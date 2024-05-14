@@ -268,7 +268,7 @@ func containerPort(port types.Port) v1.ContainerPort {
 	}
 }
 
-// Here is the service IPs (placed in /etc/hosts in the Pod)
+// Here is the service IPs (placed in /etc/hosts in the Pod).
 func hostAliases(extraHosts []types.HostAlias) []v1.HostAlias {
 	var hostAliases []v1.HostAlias
 	for _, extraHost := range extraHosts {

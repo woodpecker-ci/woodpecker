@@ -65,7 +65,7 @@ var GlobalFlags = append([]cli.Flag{
 }, logger.GlobalLoggerFlags...)
 
 // FormatFlag return format flag with value set based on template
-// if hidden value is set, flag will be hidden
+// if hidden value is set, flag will be hidden.
 func FormatFlag(tmpl string, hidden ...bool) *cli.StringFlag {
 	return &cli.StringFlag{
 		Name:   "format",

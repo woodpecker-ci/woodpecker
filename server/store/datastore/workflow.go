@@ -64,7 +64,7 @@ func (s storage) workflowsCreate(sess *xorm.Session, workflows []*model.Workflow
 	return nil
 }
 
-// WorkflowsReplace performs an atomic replacement of workflows and associated steps by deleting all existing workflows and steps and inserting the new ones
+// WorkflowsReplace performs an atomic replacement of workflows and associated steps by deleting all existing workflows and steps and inserting the new ones.
 func (s storage) WorkflowsReplace(pipeline *model.Pipeline, workflows []*model.Workflow) error {
 	sess := s.engine.NewSession()
 	defer sess.Close()
@@ -109,7 +109,7 @@ func (s storage) WorkflowList(pipeline *model.Pipeline) ([]*model.Workflow, erro
 	return s.workflowList(s.engine.NewSession(), pipeline)
 }
 
-// workflowList lists workflows without child steps
+// workflowList lists workflows without child steps.
 func (s storage) workflowList(sess *xorm.Session, pipeline *model.Pipeline) ([]*model.Workflow, error) {
 	var wfList []*model.Workflow
 	err := sess.Where("workflow_pipeline_id = ?", pipeline.ID).

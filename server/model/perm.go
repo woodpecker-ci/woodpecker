@@ -28,7 +28,7 @@ type Perm struct {
 	Updated int64 `json:"updated" xorm:"updated"`
 } //	@name Perm
 
-// TableName return database table name for xorm
+// TableName return database table name for xorm.
 func (Perm) TableName() string {
 	return "perms"
 }
