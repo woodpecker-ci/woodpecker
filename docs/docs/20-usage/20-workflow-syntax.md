@@ -402,7 +402,7 @@ when:
 
 You can use [glob patterns](https://github.com/bmatcuk/doublestar#patterns) to match the changed files and specify if the step should run if a file matching that pattern has been changed `include` or if some files have **not** been changed `exclude`.
 
-For commits without file changes (empty commits), you can use `on_empty` to set whether this condition should be **true** *(default)* or **false** in these cases.
+For commits without file changes (empty commits), you can use `on_empty` to set whether this condition should be **true** _(default)_ or **false** in these cases.
 
 ```yaml
 when:
