@@ -34,7 +34,7 @@ type Step struct {
 	Networks       []Conn            `json:"networks,omitempty"`
 	DNS            []string          `json:"dns,omitempty"`
 	DNSSearch      []string          `json:"dns_search,omitempty"`
-	MemSwapLimit   int64             `json:"memswap_limit,omitempty"` // cspell:disable-line
+	MemSwapLimit   int64             `json:"memswap_limit,omitempty"`
 	MemLimit       int64             `json:"mem_limit,omitempty"`
 	ShmSize        int64             `json:"shm_size,omitempty"`
 	CPUQuota       int64             `json:"cpu_quota,omitempty"`
