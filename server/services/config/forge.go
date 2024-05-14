@@ -77,7 +77,7 @@ type forgeFetcherContext struct {
 	timeout  time.Duration
 }
 
-// fetch config by timeout
+// fetch attempts to fetch the configuration file(s) for the given config string.
 func (f *forgeFetcherContext) fetch(c context.Context, config string) ([]*types.FileMeta, error) {
 	ctx, cancel := context.WithTimeout(c, f.timeout)
 	defer cancel()

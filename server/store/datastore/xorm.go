@@ -29,80 +29,80 @@ func newXORMLogger(level xlog.LogLevel) xlog.Logger {
 	}
 }
 
-// xormLogger custom log implementation for ILogger
+// xormLogger custom log implementation for ILogger.
 type xormLogger struct {
 	logger  zerolog.Logger
 	level   xlog.LogLevel
 	showSQL bool
 }
 
-// Error implement ILogger
+// Error implement ILogger.
 func (x *xormLogger) Error(v ...any) {
 	if x.level <= xlog.LOG_ERR {
 		x.logger.Error().Msg(fmt.Sprintln(v...))
 	}
 }
 
-// Errorf implement ILogger
+// Errorf implement ILogger.
 func (x *xormLogger) Errorf(format string, v ...any) {
 	if x.level <= xlog.LOG_ERR {
 		x.logger.Error().Msg(fmt.Sprintf(format, v...))
 	}
 }
 
-// Debug implement ILogger
+// Debug implement ILogger.
 func (x *xormLogger) Debug(v ...any) {
 	if x.level <= xlog.LOG_DEBUG {
 		x.logger.Debug().Msg(fmt.Sprintln(v...))
 	}
 }
 
-// Debugf implement ILogger
+// Debugf implement ILogger.
 func (x *xormLogger) Debugf(format string, v ...any) {
 	if x.level <= xlog.LOG_DEBUG {
 		x.logger.Debug().Msg(fmt.Sprintf(format, v...))
 	}
 }
 
-// Info implement ILogger
+// Info implement ILogger.
 func (x *xormLogger) Info(v ...any) {
 	if x.level <= xlog.LOG_INFO {
 		x.logger.Info().Msg(fmt.Sprintln(v...))
 	}
 }
 
-// Infof implement ILogger
+// Infof implement ILogger.
 func (x *xormLogger) Infof(format string, v ...any) {
 	if x.level <= xlog.LOG_INFO {
 		x.logger.Info().Msg(fmt.Sprintf(format, v...))
 	}
 }
 
-// Warn implement ILogger
+// Warn implement ILogger.
 func (x *xormLogger) Warn(v ...any) {
 	if x.level <= xlog.LOG_WARNING {
 		x.logger.Warn().Msg(fmt.Sprintln(v...))
 	}
 }
 
-// Warnf implement ILogger
+// Warnf implement ILogger.
 func (x *xormLogger) Warnf(format string, v ...any) {
 	if x.level <= xlog.LOG_WARNING {
 		x.logger.Warn().Msg(fmt.Sprintf(format, v...))
 	}
 }
 
-// Level implement ILogger
+// Level implement ILogger.
 func (x *xormLogger) Level() xlog.LogLevel {
 	return xlog.LOG_INFO
 }
 
-// SetLevel implement ILogger
+// SetLevel implement ILogger.
 func (x *xormLogger) SetLevel(l xlog.LogLevel) {
 	x.level = l
 }
 
-// ShowSQL implement ILogger
+// ShowSQL implement ILogger.
 func (x *xormLogger) ShowSQL(show ...bool) {
 	if len(show) == 0 {
 		x.showSQL = true
@@ -111,7 +111,7 @@ func (x *xormLogger) ShowSQL(show ...bool) {
 	x.showSQL = show[0]
 }
 
-// IsShowSQL implement ILogger
+// IsShowSQL implement ILogger.
 func (x *xormLogger) IsShowSQL() bool {
 	return x.showSQL
 }

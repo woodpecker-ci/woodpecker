@@ -72,7 +72,7 @@ func setupConfigService(c *cli.Context, privateSignatureKey crypto.PrivateKey) (
 	return configFetcher, nil
 }
 
-// setupSignatureKeys generate or load key pair to sign webhooks requests (i.e. used for service extensions)
+// setupSignatureKeys generate or load key pair to sign webhooks requests (i.e. used for service extensions).
 func setupSignatureKeys(_store store.Store) (crypto.PrivateKey, crypto.PublicKey, error) {
 	privKeyID := "signature-private-key"
 

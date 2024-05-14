@@ -6,7 +6,7 @@ import (
 	backend "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 )
 
-// BackendOptions defines all the advanced options for the kubernetes backend
+// BackendOptions defines all the advanced options for the kubernetes backend.
 type BackendOptions struct {
 	Resources          Resources         `mapstructure:"resources"`
 	RuntimeClassName   *string           `mapstructure:"runtimeClassName"`
@@ -18,13 +18,13 @@ type BackendOptions struct {
 	SecurityContext    *SecurityContext  `mapstructure:"securityContext"`
 }
 
-// Resources defines two maps for kubernetes resource definitions
+// Resources defines two maps for kubernetes resource definitions.
 type Resources struct {
 	Requests map[string]string `mapstructure:"requests"`
 	Limits   map[string]string `mapstructure:"limits"`
 }
 
-// Toleration defines Kubernetes toleration
+// Toleration defines Kubernetes toleration.
 type Toleration struct {
 	Key               string             `mapstructure:"key"`
 	Operator          TolerationOperator `mapstructure:"operator"`

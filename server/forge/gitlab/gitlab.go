@@ -53,7 +53,7 @@ type Opts struct {
 	SkipVerify   bool   // Skip ssl verification.
 }
 
-// Gitlab implements "Forge" interface
+// Gitlab implements "Forge" interface.
 type GitLab struct {
 	url          string
 	ClientID     string
@@ -75,12 +75,12 @@ func New(opts Opts) (forge.Forge, error) {
 	}, nil
 }
 
-// Name returns the string name of this driver
+// Name returns the string name of this driver.
 func (g *GitLab) Name() string {
 	return "gitlab"
 }
 
-// URL returns the root url of a configured forge
+// URL returns the root url of a configured forge.
 func (g *GitLab) URL() string {
 	return g.url
 }
@@ -176,7 +176,7 @@ func (g *GitLab) Refresh(ctx context.Context, user *model.User) (bool, error) {
 	return true, nil
 }
 
-// Auth authenticates the session and returns the forge user login for the given token
+// Auth authenticates the session and returns the forge user login for the given token.
 func (g *GitLab) Auth(ctx context.Context, token, _ string) (string, error) {
 	client, err := newClient(g.url, token, g.SkipVerify)
 	if err != nil {
@@ -381,7 +381,7 @@ func (g *GitLab) File(ctx context.Context, user *model.User, repo *model.Repo, p
 	return file, err
 }
 
-// Dir fetches a folder from the forge repository
+// Dir fetches a folder from the forge repository.
 func (g *GitLab) Dir(ctx context.Context, user *model.User, repo *model.Repo, pipeline *model.Pipeline, path string) ([]*forge_types.FileMeta, error) {
 	client, err := newClient(g.url, user.Token, g.SkipVerify)
 	if err != nil {
@@ -605,7 +605,7 @@ func (g *GitLab) Branches(ctx context.Context, user *model.User, repo *model.Rep
 	return branches, nil
 }
 
-// BranchHead returns the sha of the head (latest commit) of the specified branch
+// BranchHead returns the sha of the head (latest commit) of the specified branch.
 func (g *GitLab) BranchHead(ctx context.Context, u *model.User, r *model.Repo, branch string) (*model.Commit, error) {
 	token := common.UserToken(ctx, r, u)
 	client, err := newClient(g.url, token, g.SkipVerify)

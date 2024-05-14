@@ -28,7 +28,7 @@ const (
 	defaultCloneName = "clone"
 )
 
-// Registry represents registry credentials
+// Registry represents registry credentials.
 type Registry struct {
 	Hostname string
 	Username string
@@ -89,7 +89,7 @@ type ResourceLimit struct {
 	CPUSet       string
 }
 
-// Compiler compiles the yaml
+// Compiler compiles the yaml.
 type Compiler struct {
 	local             bool
 	escalated         []string

@@ -101,7 +101,7 @@ export default class ApiClient {
 
     if (!opts.reconnect) {
       events.onerror = (err) => {
-        // TODO check if such events really have a data property
+        // TODO: check if such events really have a data property
         if ((err as Event & { data: string }).data === 'eof') {
           events.close();
         }

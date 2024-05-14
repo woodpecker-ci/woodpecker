@@ -16,7 +16,7 @@ package types
 
 import "sort"
 
-// FileMeta represents a file in version control
+// FileMeta represents a file in version control.
 type FileMeta struct {
 	Name string
 	Data []byte

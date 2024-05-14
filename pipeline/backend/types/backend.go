@@ -56,7 +56,7 @@ type Backend interface {
 	DestroyWorkflow(ctx context.Context, conf *Config, taskUUID string) error
 }
 
-// BackendInfo represents the reported information of a loaded backend
+// BackendInfo represents the reported information of a loaded backend.
 type BackendInfo struct {
 	Platform string
 }
