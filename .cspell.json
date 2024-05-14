@@ -1,6 +1,11 @@
 {
   "version": "0.2",
   "language": "en",
+  "dictionaries": [
+    "en_us",
+    "go",
+    "node"
+  ],
   "words": [
     "BUILDPLATFORM",
     "Codeberg",
@@ -138,7 +143,6 @@
     ".woodpecker/",
     "agent/",
     "cli/",
-    "cmd/",
     "docs/",
     "pipeline/",
     "server/"
