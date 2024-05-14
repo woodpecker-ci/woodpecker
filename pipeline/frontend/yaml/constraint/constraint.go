@@ -49,7 +49,7 @@ type (
 		Local       yamlBaseTypes.BoolTrue
 		Path        Path
 		Evaluate    string `yaml:"evaluate,omitempty"`
-		// TODO change to StringOrSlice in 3.x
+		// TODO: change to StringOrSlice in 3.x
 		Event List
 	}
 
@@ -122,7 +122,7 @@ func (when *When) IncludesStatusSuccess() bool {
 	return false
 }
 
-// False if (any) non local
+// False if (any) non local.
 func (when *When) IsLocal() bool {
 	for _, c := range when.Constraints {
 		if !c.Local.Bool() {
@@ -206,7 +206,7 @@ func (c *Constraint) Match(m metadata.Metadata, global bool, env map[string]stri
 	return match, nil
 }
 
-// IsEmpty return true if a constraint has no conditions
+// IsEmpty return true if a constraint has no conditions.
 func (c List) IsEmpty() bool {
 	return len(c.Include) == 0 && len(c.Exclude) == 0
 }

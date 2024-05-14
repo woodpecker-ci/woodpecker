@@ -38,7 +38,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
-// StepBuilder Takes the hook data and the yaml and returns in internal data model
+// StepBuilder Takes the hook data and the yaml and returns in internal data model.
 type StepBuilder struct {
 	Repo      *model.Repo
 	Curr      *model.Pipeline

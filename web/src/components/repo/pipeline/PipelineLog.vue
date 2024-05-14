@@ -311,7 +311,7 @@ async function deleteLogs() {
     throw new Error('The repository, pipeline or step was undefined');
   }
 
-  // TODO use proper dialog (copy-pasted from web/src/components/secrets/SecretList.vue:deleteSecret)
+  // TODO: use proper dialog (copy-pasted from web/src/components/secrets/SecretList.vue:deleteSecret)
   // eslint-disable-next-line no-alert, no-restricted-globals
   if (!confirm(i18n.t('repo.pipeline.log_delete_confirm'))) {
     return;

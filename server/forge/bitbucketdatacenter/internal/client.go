@@ -40,7 +40,7 @@ func NewClientWithToken(ctx context.Context, ts oauth2.TokenSource, url string) 
 	}
 }
 
-// FindCurrentUser is returning the current user id - however it is not really part of the API so it is not part of the Bitbucket go client
+// FindCurrentUser is returning the current user id - however it is not really part of the API so it is not part of the Bitbucket go client.
 func (c *Client) FindCurrentUser(ctx context.Context) (string, error) {
 	url := fmt.Sprintf(currentUserID, c.base)
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
