@@ -25,7 +25,7 @@ type SecretV008 struct {
 	Name   string `json:"name" xorm:"NOT NULL UNIQUE(s) INDEX 'secret_name'"`
 }
 
-// TableName return database table name for xorm
+// TableName return database table name for xorm.
 func (SecretV008) TableName() string {
 	return "secrets"
 }

@@ -73,7 +73,7 @@ func (s storage) permUpsert(sess *xorm.Session, perm *model.Perm) error {
 }
 
 // userPushOrAdminCondition return condition where user must have push or admin rights
-// if used make sure to have permission table ("perms") joined
+// if used make sure to have permission table ("perms") joined.
 func userPushOrAdminCondition(userID int64) builder.Cond {
 	return builder.Eq{"perms.perm_user_id": userID}.
 		And(builder.Eq{"perms.perm_push": true}.

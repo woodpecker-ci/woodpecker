@@ -198,12 +198,10 @@ func (r *Runner) Run(runnerCtx context.Context) error { //nolint:contextcheck
 	return nil
 }
 
-// extract repository name from the configuration
 func extractRepositoryName(config *backend.Config) string {
 	return config.Stages[0].Steps[0].Environment["CI_REPO"]
 }
 
-// extract pipeline number from the configuration
 func extractPipelineNumber(config *backend.Config) string {
 	return config.Stages[0].Steps[0].Environment["CI_PIPELINE_NUMBER"]
 }
