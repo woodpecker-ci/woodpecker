@@ -94,7 +94,7 @@ func setupForgejo(forge *model.Forge) (forge.Forge, error) {
 	if len(opts.URL) == 0 {
 		return nil, fmt.Errorf("WOODPECKER_GITEA_URL must be set")
 	}
-	log.Trace().Msgf("Forge (gitea) opts: %#v", opts)
+	log.Trace().Msgf("Forge (forgejo) opts: %#v", opts)
 	return forgejo.New(opts)
 }
 
