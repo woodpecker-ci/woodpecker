@@ -18,7 +18,7 @@ import (
 	"os"
 
 	// Load config from .env file.
-	_ "github.com/joho/godotenv/autoload"
+	_ "github.com/joho/godotenv/autoload" // cspell:disable-line
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v2"
 

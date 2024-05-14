@@ -70,6 +70,7 @@
     "evenodd",
     "excalidraw",
     "favicons",
+    "forbidigo",
     "fsnotify",
     "gitea",
     "golangci",
@@ -98,6 +99,7 @@
     "proto",
     "protoc",
     "rawurl",
+    "riscv",
     "repology",
     "rundll32",
     "securecookie",
@@ -145,14 +147,9 @@
     "web/components.d.ts",
     "web/src/assets/locales/**/*",
     // TODO: remove the following
-    ".woodpecker/",
-    "agent/",
-    "cmd/cli/main.go",
     "docs/",
     "pipeline/",
     "server/"
   ],
-  "enableFiletypes": [
-    "dockercompose"
-  ]
+  "enableFiletypes": ["dockercompose"]
 }
