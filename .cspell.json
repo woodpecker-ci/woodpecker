@@ -94,7 +94,8 @@
     "protoc",
     "PROTOC",
     "GOBIN",
-    "GOPATH"
+    "GOPATH",
+    "Forgejo"
   ],
   "ignorePaths": [
     "**/node_modules/**/*",
