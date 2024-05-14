@@ -4,7 +4,7 @@ toc_max_heading_level: 2
 
 # Forgejo
 
-Woodpecker comes with built-in support Forgejo. To enable Forgejo you should configure the Woodpecker container using the following environment variables:
+Woodpecker comes with built-in support for Forgejo. To enable Forgejo you should configure the Woodpecker container using the following environment variables:
 
 ```ini
 WOODPECKER_FORGEJO=true
