@@ -21,7 +21,7 @@ import (
 	errorTypes "go.woodpecker-ci.org/woodpecker/v2/pipeline/errors/types"
 )
 
-// perPage027 set the size of the slice to read per page
+// perPage027 set the size of the slice to read per page.
 var perPage027 = 100
 
 type pipeline027 struct {

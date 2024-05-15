@@ -32,8 +32,7 @@ import (
 	"k8s.io/client-go/informers"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/scheme"
-	// To authenticate to GCP K8s clusters
-	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
+	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp" // To authenticate to GCP K8s clusters
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/cache"
 
@@ -42,7 +41,7 @@ import (
 
 const (
 	EngineName = "kubernetes"
-	// TODO 5 seconds is against best practice, k3s didn't work otherwise
+	// TODO: 5 seconds is against best practice, k3s didn't work otherwise
 	defaultResyncDuration = 5 * time.Second
 )
 
@@ -268,7 +267,7 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 	si.Start(stop)
 	defer close(stop)
 
-	// TODO Cancel on ctx.Done
+	// TODO: Cancel on ctx.Done
 	<-finished
 
 	pod, err := e.client.CoreV1().Pods(e.config.Namespace).Get(ctx, podName, metav1.GetOptions{})

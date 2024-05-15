@@ -159,7 +159,7 @@ func (s storage) RepoList(user *model.User, owned, active bool) ([]*model.Repo, 
 		Find(&repos)
 }
 
-// RepoListAll list all repos
+// RepoListAll list all repos.
 func (s storage) RepoListAll(active bool, p *model.ListOptions) ([]*model.Repo, error) {
 	repos := make([]*model.Repo, 0)
 	sess := s.paginate(p).Table("repos")

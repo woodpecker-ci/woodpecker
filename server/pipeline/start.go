@@ -25,7 +25,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 )
 
-// start a pipeline, make sure it was stored persistent in the store before
+// start a pipeline, make sure it was stored persistent in the store before.
 func start(ctx context.Context, forge forge.Forge, store store.Store, activePipeline *model.Pipeline, user *model.User, repo *model.Repo, pipelineItems []*stepbuilder.Item) (*model.Pipeline, error) {
 	// call to cancel previous pipelines if needed
 	if err := cancelPreviousPipelines(ctx, forge, store, activePipeline, repo, user); err != nil {

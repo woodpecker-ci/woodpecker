@@ -59,12 +59,12 @@ type PipelineFilter struct {
 	After  int64
 }
 
-// TableName return database table name for xorm
+// TableName return database table name for xorm.
 func (Pipeline) TableName() string {
 	return "pipelines"
 }
 
-// IsMultiPipeline checks if step list contain more than one parent step
+// IsMultiPipeline checks if step list contain more than one parent step.
 func (p Pipeline) IsMultiPipeline() bool {
 	return len(p.Workflows) > 1
 }

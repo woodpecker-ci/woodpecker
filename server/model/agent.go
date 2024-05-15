@@ -29,7 +29,7 @@ type Agent struct {
 	NoSchedule  bool   `json:"no_schedule"   xorm:"no_schedule"`
 } //	@name Agent
 
-// TableName return database table name for xorm
+// TableName return database table name for xorm.
 func (Agent) TableName() string {
 	return "agents"
 }

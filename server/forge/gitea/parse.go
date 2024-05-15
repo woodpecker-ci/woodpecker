@@ -72,7 +72,7 @@ func parsePushHook(payload io.Reader) (repo *model.Repo, pipeline *model.Pipelin
 		return nil, nil, nil
 	}
 
-	// TODO is this even needed?
+	// TODO: is this even needed?
 	if push.RefType == refBranch {
 		return nil, nil, nil
 	}
