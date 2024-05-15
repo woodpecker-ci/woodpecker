@@ -87,12 +87,12 @@ type client struct {
 	oAuthHost  string
 }
 
-// Name returns the string name of this driver
+// Name returns the string name of this driver.
 func (c *client) Name() string {
 	return "github"
 }
 
-// URL returns the root url of a configured forge
+// URL returns the root url of a configured forge.
 func (c *client) URL() string {
 	return c.url
 }
@@ -393,7 +393,7 @@ func (c *client) Org(ctx context.Context, u *model.User, owner string) (*model.O
 	}, nil
 }
 
-// helper function to return the GitHub oauth2 context using an HTTPClient that
+// newContext returns the GitHub oauth2 context using an HTTPClient that
 // disables TLS verification if disabled in the forge settings.
 func (c *client) newContext(ctx context.Context) context.Context {
 	if !c.SkipVerify {
@@ -409,7 +409,7 @@ func (c *client) newContext(ctx context.Context) context.Context {
 	})
 }
 
-// helper function to return the GitHub oauth2 config
+// newConfig returns the GitHub oauth2 config.
 func (c *client) newConfig() *oauth2.Config {
 	scopes := []string{"user:email", "read:org"}
 	if c.OnlyPublic {
@@ -435,7 +435,7 @@ func (c *client) newConfig() *oauth2.Config {
 	}
 }
 
-// helper function to return the GitHub oauth2 client
+// newClientToken returns the GitHub oauth2 client.
 func (c *client) newClientToken(ctx context.Context, token string) *github.Client {
 	ts := oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: token},
@@ -455,7 +455,7 @@ func (c *client) newClientToken(ctx context.Context, token string) *github.Clien
 	return client
 }
 
-// helper function to return matching user email.
+// matchingEmail returns matching user email.
 func matchingEmail(emails []*github.UserEmail, rawURL string) *github.UserEmail {
 	for _, email := range emails {
 		if email.Email == nil || email.Primary == nil || email.Verified == nil {
@@ -473,7 +473,7 @@ func matchingEmail(emails []*github.UserEmail, rawURL string) *github.UserEmail 
 	return nil
 }
 
-// helper function to return matching hook.
+// matchingHooks returns matching hook.
 func matchingHooks(hooks []*github.Hook, rawurl string) *github.Hook {
 	link, err := url.Parse(rawurl)
 	if err != nil {
@@ -501,7 +501,7 @@ func (c *client) Status(ctx context.Context, user *model.User, repo *model.Repo,
 	if pipeline.Event == model.EventDeploy {
 		// Get id from url. If not found, skip.
 		matches := reDeploy.FindStringSubmatch(pipeline.ForgeURL)
-		//nolint:gomnd
+		//nolint:mnd
 		if len(matches) != 2 {
 			return nil
 		}
@@ -566,7 +566,7 @@ func (c *client) Branches(ctx context.Context, u *model.User, r *model.Repo, p *
 	return branches, nil
 }
 
-// BranchHead returns the sha of the head (latest commit) of the specified branch
+// BranchHead returns the sha of the head (latest commit) of the specified branch.
 func (c *client) BranchHead(ctx context.Context, u *model.User, r *model.Repo, branch string) (*model.Commit, error) {
 	token := common.UserToken(ctx, r, u)
 	b, _, err := c.newClientToken(ctx, token).Repositories.GetBranch(ctx, r.Owner, r.Name, branch, 1)

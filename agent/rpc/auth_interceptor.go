@@ -23,13 +23,13 @@ import (
 	"google.golang.org/grpc/metadata"
 )
 
-// AuthInterceptor is a client interceptor for authentication
+// AuthInterceptor is a client interceptor for authentication.
 type AuthInterceptor struct {
 	authClient  *AuthClient
 	accessToken string
 }
 
-// NewAuthInterceptor returns a new auth interceptor
+// NewAuthInterceptor returns a new auth interceptor.
 func NewAuthInterceptor(
 	authClient *AuthClient,
 	refreshDuration time.Duration,
@@ -46,7 +46,7 @@ func NewAuthInterceptor(
 	return interceptor, nil
 }
 
-// Unary returns a client interceptor to authenticate unary RPC
+// Unary returns a client interceptor to authenticate unary RPC.
 func (interceptor *AuthInterceptor) Unary() grpc.UnaryClientInterceptor {
 	return func(
 		ctx context.Context,
@@ -60,7 +60,7 @@ func (interceptor *AuthInterceptor) Unary() grpc.UnaryClientInterceptor {
 	}
 }
 
-// Stream returns a client interceptor to authenticate stream RPC
+// Stream returns a client interceptor to authenticate stream RPC.
 func (interceptor *AuthInterceptor) Stream() grpc.StreamClientInterceptor {
 	return func(
 		ctx context.Context,

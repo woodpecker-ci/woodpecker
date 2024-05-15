@@ -213,10 +213,10 @@ func convertPushHook(hook *internal.PushHook, change *internal.Change) *model.Pi
 	return pipeline
 }
 
-// regex for git author fields ("name <name@mail.tld>")
+// regex for git author fields (r.g. "name <name@mail.tld>").
 var reGitMail = regexp.MustCompile("<(.*)>")
 
-// extracts the email from a git commit author string
+// extracts the email from a git commit author string.
 func extractEmail(gitauthor string) (author string) {
 	matches := reGitMail.FindAllStringSubmatch(gitauthor, -1)
 	if len(matches) == 1 {

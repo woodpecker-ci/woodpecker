@@ -24,7 +24,7 @@ type Config struct {
 	Data   []byte `json:"data" xorm:"LONGBLOB 'config_data'"`
 } //	@name Config
 
-// PipelineConfig is the n:n relation between Pipeline and Config
+// PipelineConfig is the n:n relation between Pipeline and Config.
 type PipelineConfig struct {
 	ConfigID   int64 `json:"-"   xorm:"UNIQUE(s) NOT NULL 'config_id'"`
 	PipelineID int64 `json:"-"   xorm:"UNIQUE(s) NOT NULL 'pipeline_id'"`

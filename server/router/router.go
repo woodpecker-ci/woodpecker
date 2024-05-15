@@ -33,7 +33,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server/web"
 )
 
-// Load loads the router
+// Load loads the router.
 func Load(noRouteHandler http.HandlerFunc, middleware ...gin.HandlerFunc) http.Handler {
 	e := gin.New()
 	e.UseRawPath = true
