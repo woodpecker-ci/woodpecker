@@ -46,7 +46,7 @@ func (s *StringOrInt) UnmarshalYAML(unmarshal func(any) error) error {
 }
 
 // MemStringOrInt represents a string or an integer
-// the String supports notations like 10m for then Megabyte of memory
+// the String supports notations like 10m for then Megabyte of memory.
 type MemStringOrInt int64
 
 // UnmarshalYAML implements the Unmarshaler interface.

@@ -81,3 +81,9 @@ Read the value for `WOODPECKER_GITHUB_SECRET` from the specified filepath.
 > Default: `false`
 
 Configure if SSL verification should be skipped.
+
+### `WOODPECKER_GITHUB_PUBLIC_ONLY`
+
+> Default: `false`
+
+Configures the GitHub OAuth client to only obtain a token that can manage public repositories.

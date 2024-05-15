@@ -21,15 +21,17 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
-// TODO (bradrydzewski) writing to subscribers is currently a blocking
+// TODO: (bradrydzewski) writing to subscribers is currently a blocking
 // operation and does not protect against slow clients from locking
 // the stream. This should be resolved.
 
-// TODO (bradrydzewski) implement a mux.Info to fetch information and
+//nolint:godot
+// TODO: (bradrydzewski) implement a mux.Info to fetch information and
 // statistics for the multiplexer. Streams, subscribers, etc
 // mux.Info()
 
-// TODO (bradrydzewski) refactor code to place publisher and subscriber
+//nolint:godot
+// TODO: (bradrydzewski) refactor code to place publisher and subscriber
 // operations in separate files with more encapsulated logic.
 // sub.push()
 // sub.join()

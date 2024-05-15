@@ -22,8 +22,9 @@ import (
 
 // Repo represents a repository.
 type Repo struct {
-	ID     int64 `json:"id,omitempty"                    xorm:"pk autoincr 'repo_id'"`
-	UserID int64 `json:"-"                               xorm:"repo_user_id"`
+	ID      int64 `json:"id,omitempty"                    xorm:"pk autoincr 'repo_id'"`
+	UserID  int64 `json:"-"                               xorm:"repo_user_id"`
+	ForgeID int64 `json:"forge_id,omitempty"              xorm:"forge_id"`
 	// ForgeRemoteID is the unique identifier for the repository on the forge.
 	ForgeRemoteID                ForgeRemoteID  `json:"forge_remote_id"                 xorm:"forge_remote_id"`
 	OrgID                        int64          `json:"org_id"                          xorm:"repo_org_id"`
@@ -44,6 +45,7 @@ type Repo struct {
 	IsGated                      bool           `json:"gated"                           xorm:"repo_gated"`
 	IsActive                     bool           `json:"active"                          xorm:"repo_active"`
 	AllowPull                    bool           `json:"allow_pr"                        xorm:"repo_allow_pr"`
+	AllowDeploy                  bool           `json:"allow_deploy"                    xorm:"repo_allow_deploy"`
 	Config                       string         `json:"config_file"                     xorm:"varchar(500) 'repo_config_path'"`
 	Hash                         string         `json:"-"                               xorm:"varchar(500) 'repo_hash'"`
 	Perm                         *Perm          `json:"-"                               xorm:"-"`
@@ -51,7 +53,7 @@ type Repo struct {
 	NetrcOnlyTrusted             bool           `json:"netrc_only_trusted"              xorm:"NOT NULL DEFAULT true 'netrc_only_trusted'"`
 } //	@name Repo
 
-// TableName return database table name for xorm
+// TableName return database table name for xorm.
 func (Repo) TableName() string {
 	return "repos"
 }
@@ -112,6 +114,7 @@ type RepoPatch struct {
 	Timeout                      *int64          `json:"timeout,omitempty"`
 	Visibility                   *string         `json:"visibility,omitempty"`
 	AllowPull                    *bool           `json:"allow_pr,omitempty"`
+	AllowDeploy                  *bool           `json:"allow_deploy,omitempty"`
 	CancelPreviousPipelineEvents *[]WebhookEvent `json:"cancel_previous_pipeline_events"`
 	NetrcOnlyTrusted             *bool           `json:"netrc_only_trusted"`
 } //	@name RepoPatch

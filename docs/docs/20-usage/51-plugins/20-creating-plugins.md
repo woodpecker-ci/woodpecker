@@ -48,6 +48,23 @@ Secrets should be passed as settings too. Therefore, users should use [`from_sec
 
 For Go, we provide a plugin library you can use to get easy access to internal env vars and your settings. See <https://codeberg.org/woodpecker-plugins/go-plugin>.
 
+## Metadata
+
+In your documentation, you can use a Markdown header to define metadata for your plugin. This data is used by [our plugin index](/plugins).
+
+Supported metadata:
+
+- `name`: The plugin's full name
+- `icon`: URL to your plugin's icon
+- `description`: A short description of what it's doing
+- `author`: Your name
+- `tags`: List of keywords (e.g. `[git, clone]` for the clone plugin)
+- `containerImage`: name of the container image
+- `containerImageUrl`: link to the container image
+- `url`: homepage or repository of your plugin
+
+If you want your plugin to be listed in the index, you should add as many fields as possible, but only `name` is required.
+
 ## Example plugin
 
 This provides a brief tutorial for creating a Woodpecker webhook plugin, using simple shell scripting, to make HTTP requests during the build pipeline.
@@ -118,5 +135,5 @@ docker run --rm \
   These should also be built for different OS/architectures.
 - Use [built-in env vars](../50-environment.md#built-in-environment-variables) where possible.
 - Do not use any configuration except settings (and internal env vars). This means: Don't require using [`environment`](../50-environment.md) and don't require specific secret names.
-- Add a `docs.md` file, listing all your settings and plugin metadata ([example](https://codeberg.org/woodpecker-plugins/plugin-docker-buildx/src/branch/main/docs.md)).
-- Add your plugin to the [plugin index](/plugins) using your `docs.md` ([the example above in the index](https://woodpecker-ci.org/plugins/Docker%20Buildx)).
+- Add a `docs.md` file, listing all your settings and plugin metadata ([example](https://github.com/woodpecker-ci/plugin-git/blob/main/docs.md)).
+- Add your plugin to the [plugin index](/plugins) using your `docs.md` ([the example above in the index](https://woodpecker-ci.org/plugins/Git%20Clone)).

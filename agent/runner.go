@@ -50,7 +50,7 @@ func NewRunner(workEngine rpc.Peer, f rpc.Filter, h string, state *State, backen
 	}
 }
 
-func (r *Runner) Run(runnerCtx context.Context) error {
+func (r *Runner) Run(runnerCtx context.Context) error { //nolint:contextcheck
 	log.Debug().Msg("request next execution")
 
 	meta, _ := metadata.FromOutgoingContext(runnerCtx)
@@ -198,12 +198,10 @@ func (r *Runner) Run(runnerCtx context.Context) error {
 	return nil
 }
 
-// extract repository name from the configuration
 func extractRepositoryName(config *backend.Config) string {
 	return config.Stages[0].Steps[0].Environment["CI_REPO"]
 }
 
-// extract pipeline number from the configuration
 func extractPipelineNumber(config *backend.Config) string {
 	return config.Stages[0].Steps[0].Environment["CI_PIPELINE_NUMBER"]
 }

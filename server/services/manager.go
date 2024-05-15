@@ -16,9 +16,12 @@ package services
 
 import (
 	"crypto"
+	"time"
 
+	"github.com/jellydator/ttlcache/v3"
 	"github.com/urfave/cli/v2"
 
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 	"go.woodpecker-ci.org/woodpecker/v2/server/services/config"
 	"go.woodpecker-ci.org/woodpecker/v2/server/services/environment"
@@ -27,56 +30,124 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 )
 
-type Manager struct {
+//go:generate mockery --name Manager --output mocks --case underscore
+
+const forgeCacheTTL = 10 * time.Minute
+
+type SetupForge func(forge *model.Forge) (forge.Forge, error)
+
+type Manager interface {
+	SignaturePublicKey() crypto.PublicKey
+	SecretServiceFromRepo(repo *model.Repo) secret.Service
+	SecretService() secret.Service
+	RegistryServiceFromRepo(repo *model.Repo) registry.Service
+	RegistryService() registry.Service
+	ConfigServiceFromRepo(repo *model.Repo) config.Service
+	EnvironmentService() environment.Service
+	ForgeFromRepo(repo *model.Repo) (forge.Forge, error)
+	ForgeFromUser(user *model.User) (forge.Forge, error)
+	ForgeMain() (forge.Forge, error)
+}
+
+type manager struct {
+	signaturePrivateKey crypto.PrivateKey
+	signaturePublicKey  crypto.PublicKey
+	store               store.Store
 	secret              secret.Service
 	registry            registry.Service
 	config              config.Service
 	environment         environment.Service
-	signaturePrivateKey crypto.PrivateKey
-	signaturePublicKey  crypto.PublicKey
+	forgeCache          *ttlcache.Cache[int64, forge.Forge]
+	setupForge          SetupForge
 }
 
-func NewManager(c *cli.Context, store store.Store) (*Manager, error) {
+func NewManager(c *cli.Context, store store.Store, setupForge SetupForge) (Manager, error) {
 	signaturePrivateKey, signaturePublicKey, err := setupSignatureKeys(store)
 	if err != nil {
 		return nil, err
 	}
 
-	return &Manager{
+	err = setupForgeService(c, store)
+	if err != nil {
+		return nil, err
+	}
+
+	configService, err := setupConfigService(c, signaturePrivateKey)
+	if err != nil {
+		return nil, err
+	}
+
+	return &manager{
 		signaturePrivateKey: signaturePrivateKey,
 		signaturePublicKey:  signaturePublicKey,
+		store:               store,
 		secret:              setupSecretService(store),
 		registry:            setupRegistryService(store, c.String("docker-config")),
-		config:              setupConfigService(c, signaturePrivateKey),
+		config:              configService,
 		environment:         environment.Parse(c.StringSlice("environment")),
+		forgeCache:          ttlcache.New(ttlcache.WithDisableTouchOnHit[int64, forge.Forge]()),
+		setupForge:          setupForge,
 	}, nil
 }
 
-func (e *Manager) SignaturePublicKey() crypto.PublicKey {
-	return e.signaturePublicKey
+func (m *manager) SignaturePublicKey() crypto.PublicKey {
+	return m.signaturePublicKey
 }
 
-func (e *Manager) SecretServiceFromRepo(_ *model.Repo) secret.Service {
-	return e.SecretService()
+func (m *manager) SecretServiceFromRepo(_ *model.Repo) secret.Service {
+	return m.SecretService()
 }
 
-func (e *Manager) SecretService() secret.Service {
-	return e.secret
+func (m *manager) SecretService() secret.Service {
+	return m.secret
 }
 
-func (e *Manager) RegistryServiceFromRepo(_ *model.Repo) registry.Service {
-	return e.RegistryService()
+func (m *manager) RegistryServiceFromRepo(_ *model.Repo) registry.Service {
+	return m.RegistryService()
 }
 
-func (e *Manager) RegistryService() registry.Service {
-	return e.registry
+func (m *manager) RegistryService() registry.Service {
+	return m.registry
 }
 
-func (e *Manager) ConfigServiceFromRepo(_ *model.Repo) config.Service {
+func (m *manager) ConfigServiceFromRepo(_ *model.Repo) config.Service {
 	// TODO: decied based on repo property which config service to use
-	return e.config
+	return m.config
 }
 
-func (e *Manager) EnvironmentService() environment.Service {
-	return e.environment
+func (m *manager) EnvironmentService() environment.Service {
+	return m.environment
+}
+
+func (m *manager) ForgeFromRepo(repo *model.Repo) (forge.Forge, error) {
+	return m.getForgeByID(repo.ForgeID)
+}
+
+func (m *manager) ForgeFromUser(user *model.User) (forge.Forge, error) {
+	return m.getForgeByID(user.ForgeID)
+}
+
+func (m *manager) ForgeMain() (forge.Forge, error) {
+	return m.getForgeByID(1) // main forge is always 1 and is configured via environment variables
+}
+
+func (m *manager) getForgeByID(id int64) (forge.Forge, error) {
+	item := m.forgeCache.Get(id)
+	if item != nil && !item.IsExpired() {
+		return item.Value(), nil
+	}
+
+	forgeModel, err := m.store.ForgeGet(id)
+	if err != nil {
+		return nil, err
+	}
+
+	forge, err := m.setupForge(forgeModel)
+	if err != nil {
+		return nil, err
+	}
+
+	m.forgeCache.Set(id, forge, forgeCacheTTL)
+
+	return forge, nil
 }

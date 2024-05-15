@@ -1,6 +1,10 @@
 # Workflow syntax
 
-The workflow section defines a list of steps to build, test and deploy your code. Steps are executed serially, in the order in which they are defined. If a step returns a non-zero exit code, the workflow and therefore all other workflows and the pipeline immediately aborts and returns a failure status.
+The Workflow section defines a list of steps to build, test and deploy your code. The steps are executed serially in the order in which they are defined. If a step returns a non-zero exit code, the workflow and therefore the entire pipeline terminates immediately and returns an error status.
+
+:::note
+An exception to this rule are steps with a [`status: [failure]`](#status) condition, which ensures that they are executed in the case of a failed run.
+:::
 
 Example steps:
 
@@ -50,7 +54,8 @@ git commit -m "updated README [CI SKIP]"
 
 ## Steps
 
-Every step of your workflow executes commands inside a specified container. The defined commands are executed serially.
+Every step of your workflow executes commands inside a specified container.<br>
+The defined steps are executed in sequence by default, if they should run in parallel you can use [`depends_on`](./20-workflow-syntax.md#depends_on).<br>
 The associated commit is checked out with git to a workspace which is mounted to every step of the workflow as the working directory.
 
 ```diff
@@ -160,6 +165,9 @@ Only build steps can define commands. You cannot use commands with plugins or se
 
 Allows you to specify the entrypoint for containers. Note that this must be a list of the command and its arguments (e.g. `["/bin/sh", "-c"]`).
 
+If you define [`commands`](#commands), the default entrypoint will be `["/bin/sh", "-c", "echo $CI_SCRIPT | base64 -d | /bin/sh -e"]`.
+You can also use a custom shell with `CI_SCRIPT` (Base64-encoded) if you set `commands`.
+
 ### `environment`
 
 Woodpecker provides the ability to pass environment variables to individual steps.
@@ -188,7 +196,8 @@ Some of the steps may be allowed to fail without causing the whole workflow and 
 
 ### `when` - Conditional Execution
 
-Woodpecker supports defining a list of conditions for a step by using a `when` block. If at least one of the conditions in the `when` block evaluate to true the step is executed, otherwise it is skipped. A condition can be a check like:
+Woodpecker supports defining a list of conditions for a step by using a `when` block. If at least one of the conditions in the `when` block evaluate to true the step is executed, otherwise it is skipped. A condition is evaluated to true if _all_ subconditions are true.
+A condition can be a check like:
 
 ```diff
  steps:
@@ -202,6 +211,11 @@ Woodpecker supports defining a list of conditions for a step by using a `when` b
 +      - event: push
 +        branch: main
 ```
+
+The `slack` step is executed if one of these conditions is met:
+
+1. The pipeline is executed from a pull request in the repo `test/test`
+2. The pipeline is executed from a push to `maiǹ`
 
 #### `repo`
 
@@ -352,20 +366,6 @@ when:
   - platform: [linux/*, windows/amd64]
 ```
 
-<!-- markdownlint-disable no-duplicate-heading -->
-
-#### `environment`
-
-<!-- markdownlint-enable no-duplicate-heading -->
-
-Execute a step for deployment events matching the target deployment environment:
-
-```yaml
-when:
-  - environment: production
-  - event: deployment
-```
-
 #### `matrix`
 
 Execute a step for a single matrix permutation:
@@ -402,16 +402,19 @@ when:
 
 You can use [glob patterns](https://github.com/bmatcuk/doublestar#patterns) to match the changed files and specify if the step should run if a file matching that pattern has been changed `include` or if some files have **not** been changed `exclude`.
 
+For pipelines without file changes (empty commits or on events without file changes like `tag`), you can use `on_empty` to set whether this condition should be **true** _(default)_ or **false** in these cases.
+
 ```yaml
 when:
   - path:
       include: ['.woodpecker/*.yaml', '*.ini']
       exclude: ['*.md', 'docs/**']
       ignore_message: '[ALL]'
+      on_empty: true
 ```
 
 :::info
-Passing a defined ignore-message like `[ALL]` inside the commit message will ignore all path conditions.
+Passing a defined ignore-message like `[ALL]` inside the commit message will ignore all path conditions and the `on_empty` setting.
 :::
 
 #### `evaluate`
@@ -477,6 +480,19 @@ Normally steps of a workflow are executed serially in the order in which they ar
      commands:
        - go test
 ```
+
+:::note
+You can define a step to start immediately without dependencies by adding an empty `depends_on: []`. By setting `depends_on` on a single step all other steps will be immediately executed as well if no further dependencies are specified.
+
+```yaml
+steps:
+  - name: check code format
+    image: mstruebing/editorconfig-checker
+    depends_on: [] # enable parallel steps
+  ...
+```
+
+:::
 
 ### `volumes`
 
@@ -652,7 +668,7 @@ Example configuration to use a custom clone plugin:
 
 ```diff
  clone:
-   git:
+   - name: git
 +    image: octocat/custom-git-plugin
 ```
 
@@ -702,7 +718,7 @@ skip_clone: true
 
 ## `when` - Global workflow conditions
 
-Woodpecker gives the ability to skip whole workflows (not just steps #when---conditional-execution-1) based on certain conditions by a `when` block. If all conditions in the `when` block evaluate to true the workflow is executed, otherwise it is skipped, but treated as successful and other workflows depending on it will still continue.
+Woodpecker gives the ability to skip whole workflows ([not just steps](#when---conditional-execution)) based on certain conditions by a `when` block. If all conditions in the `when` block evaluate to true the workflow is executed, otherwise it is skipped, but treated as successful and other workflows depending on it will still continue.
 
 For more information about the specific filters, take a look at the [step-specific `when` filters](#when---conditional-execution).
 
@@ -738,7 +754,7 @@ Workflows that should run even on failure should set the `runs_on` tag. See [her
 Woodpecker gives the ability to configure privileged mode in the YAML. You can use this parameter to launch containers with escalated capabilities.
 
 :::info
-Privileged mode is only available to trusted repositories and for security reasons should only be used in private environments. See [project settings](./71-project-settings.md#trusted) to enable trusted mode.
+Privileged mode is only available to trusted repositories and for security reasons should only be used in private environments. See [project settings](./75-project-settings.md#trusted) to enable trusted mode.
 :::
 
 ```diff

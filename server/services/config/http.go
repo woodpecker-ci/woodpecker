@@ -31,7 +31,7 @@ type http struct {
 	privateKey crypto.PrivateKey
 }
 
-// configData same as forge.FileMeta but with json tags and string data
+// configData same as forge.FileMeta but with json tags and string data.
 type configData struct {
 	Name string `json:"name"`
 	Data string `json:"data"`

@@ -17,7 +17,7 @@
       <a v-if="badgeUrl" :href="badgeUrl" target="_blank">
         <img :src="badgeUrl" />
       </a>
-      <IconButton :href="repo.forge_url" :title="$t('repo.open_in_forge')" :icon="forge ?? 'repo'" />
+      <IconButton :href="repo.forge_url" :title="$t('repo.open_in_forge')" :icon="forge ?? 'repo'" class="forge" />
       <IconButton
         v-if="repoPermissions.admin"
         :to="{ name: 'repo-settings' }"
@@ -77,7 +77,7 @@ const router = useRouter();
 const i18n = useI18n();
 const config = useConfig();
 
-const { forge } = useConfig();
+const { forge } = useConfig(); // TODO: remove this and use the forge type from the corresponding repo
 const repo = repoStore.getRepo(repositoryId);
 const repoPermissions = ref<RepoPermissions>();
 const pipelines = pipelineStore.getRepoPipelines(repositoryId);

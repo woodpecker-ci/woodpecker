@@ -1,5 +1,5 @@
 variables:
-  - &golang_image 'docker.io/golang:1.21.5'
+  - &golang_image 'docker.io/golang:1.22'
   - &when
     - path: &when_path # related config files
         - '.woodpecker/test.yaml'
@@ -107,7 +107,7 @@ steps:
     image: *golang_image
     environment:
       WOODPECKER_DATABASE_DRIVER: postgres
-      WOODPECKER_DATABASE_DATASOURCE: 'host=sv-postgres user=postgres dbname=postgres sslmode=disable'
+      WOODPECKER_DATABASE_DATASOURCE: 'host=postgres user=postgres dbname=postgres sslmode=disable'
     commands:
       - make test-server-datastore
     when: *when
@@ -118,7 +118,7 @@ steps:
     image: *golang_image
     environment:
       WOODPECKER_DATABASE_DRIVER: mysql
-      WOODPECKER_DATABASE_DATASOURCE: root@tcp(sv-mysql:3306)/test?parseTime=true
+      WOODPECKER_DATABASE_DATASOURCE: root@tcp(mysql:3306)/test?parseTime=true
     commands:
       - make test-server-datastore
     when: *when
@@ -143,7 +143,7 @@ steps:
     failure: ignore
 
 services:
-  sv-postgres:
+  postgres:
     image: docker.io/postgres:16
     ports: ['5432']
     environment:
@@ -151,7 +151,7 @@ services:
       POSTGRES_HOST_AUTH_METHOD: trust
     when: *when
 
-  sv-mysql:
+  mysql:
     image: docker.io/mysql:8.2.0
     ports: ['3306']
     environment:

@@ -15,11 +15,13 @@
 
 package model
 
-// Different ways to handle failure states
+// Different ways to handle failure states.
 const (
 	FailureIgnore = "ignore"
 	FailureFail   = "fail"
-	// FailureCancel = "cancel" // Not implemented yet
+	//nolint:godot
+	// TODO: Not implemented yet.
+	// FailureCancel = "cancel"
 )
 
 // Step represents a process in the pipeline.
@@ -39,7 +41,7 @@ type Step struct {
 	Type       StepType    `json:"type,omitempty"       xorm:"step_type"`
 } //	@name Step
 
-// TableName return database table name for xorm
+// TableName return database table name for xorm.
 func (Step) TableName() string {
 	return "steps"
 }
@@ -54,7 +56,7 @@ func (p *Step) Failing() bool {
 	return p.Failure == FailureFail && (p.State == StatusError || p.State == StatusKilled || p.State == StatusFailure)
 }
 
-// StepType identifies the type of step
+// StepType identifies the type of step.
 type StepType string //	@name StepType
 
 const (

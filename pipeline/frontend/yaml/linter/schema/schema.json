@@ -288,6 +288,9 @@
                 },
                 "ignore_message": {
                   "type": "string"
+                },
+                "on_empty": {
+                  "type": "boolean"
                 }
               },
               "additionalProperties": false
@@ -371,6 +374,21 @@
         },
         "backend_options": {
           "$ref": "#/definitions/step_backend_options"
+        },
+        "entrypoint": {
+          "description": "Defines container entrypoint.",
+          "oneOf": [
+            {
+              "type": "array",
+              "minLength": 1,
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "string"
+            }
+          ]
         }
       }
     },
@@ -478,6 +496,9 @@
                 },
                 "ignore_message": {
                   "type": "string"
+                },
+                "on_empty": {
+                  "type": "boolean"
                 }
               },
               "additionalProperties": false
@@ -630,7 +651,7 @@
         {
           "type": "object",
           "additionalProperties": {
-            "type": ["boolean", "string", "number"]
+            "type": ["boolean", "string", "number", "array", "object"]
           }
         }
       ]
@@ -691,11 +712,24 @@
       "description": "Advanced options for the kubernetes agent backends",
       "type": "object",
       "properties": {
-        "resources": {
-          "$ref": "#/definitions/step_backend_kubernetes_resources"
+        "labels": {
+          "type": "object",
+          "additionalProperties": {
+            "type": ["boolean", "string", "number"]
+          }
+        },
+        "annotations": {
+          "type": "object",
+          "additionalProperties": {
+            "type": ["boolean", "string", "number"]
+          }
         },
         "securityContext": {
           "$ref": "#/definitions/step_backend_kubernetes_security_context"
+        },
+        "runtimeClassName": {
+          "description": "Read more: https://woodpecker-ci.org/docs/administration/backends/kubernetes#runtimeclassname",
+          "type": "string"
         }
       }
     },

@@ -76,47 +76,81 @@ func podName(step *types.Step) (string, error) {
 func podMeta(step *types.Step, config *config, options BackendOptions, podName string) (metav1.ObjectMeta, error) {
 	var err error
 	meta := metav1.ObjectMeta{
-		Name:      podName,
-		Namespace: config.Namespace,
+		Name:        podName,
+		Namespace:   config.Namespace,
+		Annotations: podAnnotations(config, options, podName),
 	}
 
-	meta.Labels = config.PodLabels
-	if meta.Labels == nil {
-		meta.Labels = make(map[string]string, 1)
-	}
-	meta.Labels[StepLabel], err = stepLabel(step)
+	meta.Labels, err = podLabels(step, config, options)
 	if err != nil {
 		return meta, err
 	}
 
-	if step.Type == types.StepTypeService {
-		meta.Labels[ServiceLabel], _ = serviceName(step)
-	}
+	return meta, nil
+}
 
-	meta.Annotations = config.PodAnnotations
-	if meta.Annotations == nil {
-		meta.Annotations = make(map[string]string)
-	}
+func podLabels(step *types.Step, config *config, options BackendOptions) (map[string]string, error) {
+	var err error
+	labels := make(map[string]string)
 
-	securityContext := options.SecurityContext
-	if securityContext != nil {
-		key, value := apparmorAnnotation(podName, securityContext.ApparmorProfile)
-		if key != nil && value != nil {
-			meta.Annotations[*key] = *value
+	if len(options.Labels) > 0 {
+		if config.PodLabelsAllowFromStep {
+			log.Trace().Msgf("using labels from the backend options: %v", options.Labels)
+			maps.Copy(labels, options.Labels)
+		} else {
+			log.Debug().Msg("Pod labels were defined in backend options, but its using disallowed by instance configuration")
 		}
 	}
+	if len(config.PodLabels) > 0 {
+		log.Trace().Msgf("using labels from the configuration: %v", config.PodLabels)
+		maps.Copy(labels, config.PodLabels)
+	}
+	if step.Type == types.StepTypeService {
+		labels[ServiceLabel], _ = serviceName(step)
+	}
+	labels[StepLabel], err = stepLabel(step)
+	if err != nil {
+		return labels, err
+	}
 
-	return meta, nil
+	return labels, nil
 }
 
 func stepLabel(step *types.Step) (string, error) {
 	return toDNSName(step.Name)
 }
 
+func podAnnotations(config *config, options BackendOptions, podName string) map[string]string {
+	annotations := make(map[string]string)
+
+	if len(options.Annotations) > 0 {
+		if config.PodAnnotationsAllowFromStep {
+			log.Trace().Msgf("using annotations from the backend options: %v", options.Annotations)
+			maps.Copy(annotations, options.Annotations)
+		} else {
+			log.Debug().Msg("Pod annotations were defined in backend options, but its using disallowed by instance configuration ")
+		}
+	}
+	if len(config.PodAnnotations) > 0 {
+		log.Trace().Msgf("using annotations from the configuration: %v", config.PodAnnotations)
+		maps.Copy(annotations, config.PodAnnotations)
+	}
+	securityContext := options.SecurityContext
+	if securityContext != nil {
+		key, value := apparmorAnnotation(podName, securityContext.ApparmorProfile)
+		if key != nil && value != nil {
+			annotations[*key] = *value
+		}
+	}
+
+	return annotations
+}
+
 func podSpec(step *types.Step, config *config, options BackendOptions) (v1.PodSpec, error) {
 	var err error
 	spec := v1.PodSpec{
 		RestartPolicy:      v1.RestartPolicyNever,
+		RuntimeClassName:   options.RuntimeClassName,
 		ServiceAccountName: options.ServiceAccountName,
 		ImagePullSecrets:   imagePullSecretsReferences(config.ImagePullSecretNames),
 		HostAliases:        hostAliases(step.ExtraHosts),
@@ -135,28 +169,27 @@ func podSpec(step *types.Step, config *config, options BackendOptions) (v1.PodSp
 func podContainer(step *types.Step, podName, goos string, options BackendOptions) (v1.Container, error) {
 	var err error
 	container := v1.Container{
-		Name:       podName,
-		Image:      step.Image,
-		WorkingDir: step.WorkingDir,
+		Name:            podName,
+		Image:           step.Image,
+		WorkingDir:      step.WorkingDir,
+		Ports:           containerPorts(step.Ports),
+		SecurityContext: containerSecurityContext(options.SecurityContext, step.Privileged),
 	}
 
 	if step.Pull {
 		container.ImagePullPolicy = v1.PullAlways
 	}
 
-	if len(step.Commands) != 0 {
-		scriptEnv, command, args := common.GenerateContainerConf(step.Commands, goos)
-		if len(step.Entrypoint) > 0 {
-			command = step.Entrypoint
-		}
+	if len(step.Commands) > 0 {
+		scriptEnv, command := common.GenerateContainerConf(step.Commands, goos)
 		container.Command = command
-		container.Args = []string{args}
 		maps.Copy(step.Environment, scriptEnv)
+	}
+	if len(step.Entrypoint) > 0 {
+		container.Command = step.Entrypoint
 	}
 
 	container.Env = mapToEnvVars(step.Environment)
-	container.Ports = containerPorts(step.Ports)
-	container.SecurityContext = containerSecurityContext(options.SecurityContext, step.Privileged)
 
 	container.Resources, err = resourceRequirements(options.Resources)
 	if err != nil {
@@ -235,7 +268,7 @@ func containerPort(port types.Port) v1.ContainerPort {
 	}
 }
 
-// Here is the service IPs (placed in /etc/hosts in the Pod)
+// Here is the service IPs (placed in /etc/hosts in the Pod).
 func hostAliases(extraHosts []types.HostAlias) []v1.HostAlias {
 	var hostAliases []v1.HostAlias
 	for _, extraHost := range extraHosts {

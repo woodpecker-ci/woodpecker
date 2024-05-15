@@ -21,6 +21,7 @@ import (
 	"go.uber.org/multierr"
 
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/errors"
+	errorTypes "go.woodpecker-ci.org/woodpecker/v2/pipeline/errors/types"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/linter/schema"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/types"
 )
@@ -210,8 +211,8 @@ func (l *Linter) lintDeprecations(config *WorkflowConfig) (err error) {
 	}
 
 	if parsed.PipelineDoNotUseIt.ContainerList != nil {
-		err = multierr.Append(err, &errors.PipelineError{
-			Type:    errors.PipelineErrorTypeDeprecation,
+		err = multierr.Append(err, &errorTypes.PipelineError{
+			Type:    errorTypes.PipelineErrorTypeDeprecation,
 			Message: "Please use 'steps:' instead of deprecated 'pipeline:' list",
 			Data: errors.DeprecationErrorData{
 				File:  config.File,
@@ -223,8 +224,8 @@ func (l *Linter) lintDeprecations(config *WorkflowConfig) (err error) {
 	}
 
 	if parsed.PlatformDoNotUseIt != "" {
-		err = multierr.Append(err, &errors.PipelineError{
-			Type:    errors.PipelineErrorTypeDeprecation,
+		err = multierr.Append(err, &errorTypes.PipelineError{
+			Type:    errorTypes.PipelineErrorTypeDeprecation,
 			Message: "Please use labels instead of deprecated 'platform' filters",
 			Data: errors.DeprecationErrorData{
 				File:  config.File,
@@ -236,8 +237,8 @@ func (l *Linter) lintDeprecations(config *WorkflowConfig) (err error) {
 	}
 
 	if parsed.BranchesDoNotUseIt != nil {
-		err = multierr.Append(err, &errors.PipelineError{
-			Type:    errors.PipelineErrorTypeDeprecation,
+		err = multierr.Append(err, &errorTypes.PipelineError{
+			Type:    errorTypes.PipelineErrorTypeDeprecation,
 			Message: "Please use global when instead of deprecated 'branches' filter",
 			Data: errors.DeprecationErrorData{
 				File:  config.File,
@@ -250,8 +251,8 @@ func (l *Linter) lintDeprecations(config *WorkflowConfig) (err error) {
 
 	for _, step := range parsed.Steps.ContainerList {
 		if step.Group != "" {
-			err = multierr.Append(err, &errors.PipelineError{
-				Type:    errors.PipelineErrorTypeDeprecation,
+			err = multierr.Append(err, &errorTypes.PipelineError{
+				Type:    errorTypes.PipelineErrorTypeDeprecation,
 				Message: "Please use depends_on instead of deprecated 'group' setting",
 				Data: errors.DeprecationErrorData{
 					File:  config.File,
@@ -265,8 +266,8 @@ func (l *Linter) lintDeprecations(config *WorkflowConfig) (err error) {
 
 	for i, c := range parsed.When.Constraints {
 		if len(c.Event.Exclude) != 0 {
-			err = multierr.Append(err, &errors.PipelineError{
-				Type:    errors.PipelineErrorTypeDeprecation,
+			err = multierr.Append(err, &errorTypes.PipelineError{
+				Type:    errorTypes.PipelineErrorTypeDeprecation,
 				Message: "Please only use allow lists for events",
 				Data: errors.DeprecationErrorData{
 					File:  config.File,
@@ -281,8 +282,8 @@ func (l *Linter) lintDeprecations(config *WorkflowConfig) (err error) {
 	for _, step := range parsed.Steps.ContainerList {
 		for i, c := range step.When.Constraints {
 			if len(c.Event.Exclude) != 0 {
-				err = multierr.Append(err, &errors.PipelineError{
-					Type:    errors.PipelineErrorTypeDeprecation,
+				err = multierr.Append(err, &errorTypes.PipelineError{
+					Type:    errorTypes.PipelineErrorTypeDeprecation,
 					Message: "Please only use allow lists for events",
 					Data: errors.DeprecationErrorData{
 						File:  config.File,
@@ -298,13 +299,45 @@ func (l *Linter) lintDeprecations(config *WorkflowConfig) (err error) {
 	for _, step := range parsed.Steps.ContainerList {
 		for i, c := range step.Secrets.Secrets {
 			if c.Source != c.Target {
-				err = multierr.Append(err, &errors.PipelineError{
-					Type:    errors.PipelineErrorTypeDeprecation,
+				err = multierr.Append(err, &errorTypes.PipelineError{
+					Type:    errorTypes.PipelineErrorTypeDeprecation,
 					Message: "Secrets alternative names are deprecated, use environment with from_secret",
 					Data: errors.DeprecationErrorData{
 						File:  config.File,
 						Field: fmt.Sprintf("steps.%s.secrets[%d]", step.Name, i),
-						Docs:  "https://woodpecker-ci.org/docs/usage/workflow-syntax#event",
+						Docs:  "https://woodpecker-ci.org/docs/usage/secrets#use-secrets-in-settings-and-environment",
+					},
+					IsWarning: true,
+				})
+			}
+		}
+	}
+
+	for i, c := range parsed.When.Constraints {
+		if !c.Environment.IsEmpty() {
+			err = multierr.Append(err, &errorTypes.PipelineError{
+				Type:    errorTypes.PipelineErrorTypeDeprecation,
+				Message: "environment filters are deprecated, use evaluate with CI_PIPELINE_DEPLOY_TARGET",
+				Data: errors.DeprecationErrorData{
+					File:  config.File,
+					Field: fmt.Sprintf("when[%d].environment", i),
+					Docs:  "https://woodpecker-ci.org/docs/usage/workflow-syntax#evaluate",
+				},
+				IsWarning: true,
+			})
+		}
+	}
+
+	for _, step := range parsed.Steps.ContainerList {
+		for i, c := range step.When.Constraints {
+			if !c.Environment.IsEmpty() {
+				err = multierr.Append(err, &errorTypes.PipelineError{
+					Type:    errorTypes.PipelineErrorTypeDeprecation,
+					Message: "environment filters are deprecated, use evaluate with CI_PIPELINE_DEPLOY_TARGET",
+					Data: errors.DeprecationErrorData{
+						File:  config.File,
+						Field: fmt.Sprintf("steps.%s.when[%d].environment", step.Name, i),
+						Docs:  "https://woodpecker-ci.org/docs/usage/workflow-syntax#evaluate",
 					},
 					IsWarning: true,
 				})
@@ -348,12 +381,13 @@ func (l *Linter) lintBadHabits(config *WorkflowConfig) (err error) {
 				}
 			}
 			if field != "" {
-				err = multierr.Append(err, &errors.PipelineError{
-					Type:    errors.PipelineErrorTypeBadHabit,
-					Message: "Please set an event filter on all when branches",
-					Data: errors.LinterErrorData{
+				err = multierr.Append(err, &errorTypes.PipelineError{
+					Type:    errorTypes.PipelineErrorTypeBadHabit,
+					Message: "Please set an event filter for all steps or the whole workflow on all items of the when block",
+					Data: errors.BadHabitErrorData{
 						File:  config.File,
 						Field: field,
+						Docs:  "https://woodpecker-ci.org/docs/usage/linter#event-filter-for-all-steps",
 					},
 					IsWarning: true,
 				})

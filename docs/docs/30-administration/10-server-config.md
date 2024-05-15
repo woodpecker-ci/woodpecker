@@ -6,7 +6,7 @@ toc_max_heading_level: 2
 
 ## User registration
 
-Woodpecker does not have its own user registry; users are provided from your [forge](./11-forges/10-overview.md) (using OAuth2).
+Woodpecker does not have its own user registry; users are provided from your [forge](./11-forges/11-overview.md) (using OAuth2).
 
 Registration is closed by default (`WOODPECKER_OPEN=false`). If registration is open (`WOODPECKER_OPEN=true`) then every user with an account at the configured forge can login to Woodpecker.
 
@@ -69,7 +69,7 @@ To handle sensitive data in docker-compose or docker-swarm configurations there 
 
 For docker-compose you can use a `.env` file next to your compose configuration to store the secrets outside of the compose file. While this separates configuration from secrets it is still not very secure.
 
-Alternatively use docker-secrets. As it may be difficult to use docker secrets for environment variables woodpecker allows to read sensible data from files by providing a `*_FILE` option of all sensible configuration variables. Woodpecker will try to read the value directly from this file. Keep in mind that when the original environment variable gets specified at the same time it will override the value read from the file.
+Alternatively use docker-secrets. As it may be difficult to use docker secrets for environment variables Woodpecker allows to read sensible data from files by providing a `*_FILE` option of all sensible configuration variables. Woodpecker will try to read the value directly from this file. Keep in mind that when the original environment variable gets specified at the same time it will override the value read from the file.
 
 ```diff title="docker-compose.yaml"
  version: '3'
@@ -473,12 +473,6 @@ Supported variables:
 - `owner`: the repo's owner
 - `repo`: the repo's name
 
-### `WOODPECKER_ADDONS`
-
-> Default: empty
-
-List of addon files. See [addons](./75-addons/00-overview.md).
-
 ---
 
 ### `WOODPECKER_LIMIT_MEM_SWAP`
@@ -531,6 +525,12 @@ Specify a configuration service endpoint, see [Configuration Extension](./100-ex
 
 Specify timeout when fetching the Woodpecker configuration from forge. See <https://pkg.go.dev/time#ParseDuration> for syntax reference.
 
+### `WOODPECKER_FORGE_RETRY`
+
+> Default: 3
+
+Specify how many retries of fetching the Woodpecker configuration from a forge are done before we fail.
+
 ### `WOODPECKER_ENABLE_SWAGGER`
 
 > Default: true
@@ -559,4 +559,8 @@ See [Bitbucket configuration](./11-forges/50-bitbucket.md#configuration)
 
 ### `WOODPECKER_GITLAB_...`
 
-See [Gitlab configuration](./11-forges/40-gitlab.md#configuration)
+See [GitLab configuration](./11-forges/40-gitlab.md#configuration)
+
+### `WOODPECKER_ADDON_FORGE`
+
+See [addon forges](./11-forges/100-addon.md).
