@@ -445,7 +445,19 @@ func containerSecurityContext(sc *SecurityContext, stepPrivileged bool) *v1.Secu
 		return nil
 	}
 
+	privileged := false
+
+	// if security context privileged is set explicitly
 	if sc != nil && sc.Privileged != nil && *sc.Privileged {
+		privileged = true
+	}
+
+	// if security context privileged is not set explicitly, but step is privileged
+	if (sc == nil || sc.Privileged == nil) && stepPrivileged {
+		privileged = true
+	}
+
+	if privileged {
 		securityContext := &v1.SecurityContext{
 			Privileged: newBool(true),
 		}
