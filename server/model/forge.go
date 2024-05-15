@@ -32,5 +32,6 @@ type Forge struct {
 	Client            string         `xorm:"VARCHAR(250)"`
 	ClientSecret      string         `xorm:"VARCHAR(250)"`
 	SkipVerify        bool           `xorm:"bool"`
+	OAuthHost         string         `xorm:"VARCHAR(250) 'oauth_host'"` // public url for oauth if different from url
 	AdditionalOptions map[string]any `xorm:"json"`
 }
