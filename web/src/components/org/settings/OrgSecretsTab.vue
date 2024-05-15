@@ -1,16 +1,7 @@
 <template>
-  <Settings
-    :title="$t('secrets.secrets')"
-    :desc="$t('org.settings.secrets.desc')"
-    docs-url="docs/usage/secrets"
-  >
+  <Settings :title="$t('secrets.secrets')" :desc="$t('org.settings.secrets.desc')" docs-url="docs/usage/secrets">
     <template #titleActions>
-      <Button
-        v-if="selectedSecret"
-        :text="$t('secrets.show')"
-        start-icon="back"
-        @click="selectedSecret = undefined"
-      />
+      <Button v-if="selectedSecret" :text="$t('secrets.show')" start-icon="back" @click="selectedSecret = undefined" />
       <Button v-else :text="$t('secrets.add')" start-icon="plus" @click="showAddSecret" />
     </template>
 

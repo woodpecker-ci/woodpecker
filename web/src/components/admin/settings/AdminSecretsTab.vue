@@ -6,12 +6,7 @@
     :warning="$t('admin.settings.secrets.warning')"
   >
     <template #titleActions>
-      <Button
-        v-if="selectedSecret"
-        :text="$t('secrets.show')"
-        start-icon="back"
-        @click="selectedSecret = undefined"
-      />
+      <Button v-if="selectedSecret" :text="$t('secrets.show')" start-icon="back" @click="selectedSecret = undefined" />
       <Button v-else :text="$t('secrets.add')" start-icon="plus" @click="showAddSecret" />
     </template>
 
