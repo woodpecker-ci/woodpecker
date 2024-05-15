@@ -21,7 +21,7 @@
       <IconButton
         v-if="repoPermissions.admin"
         :to="{ name: 'repo-settings' }"
-        :title="$t('repo.settings.settings')"
+        :title="$t('settings')"
         icon="settings"
       />
     </template>
