@@ -38,12 +38,7 @@ var flags = append([]cli.Flag{
 	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_HOST"},
 		Name:    "server-host",
-		Usage:   "server fully qualified url (<scheme>://<host>[/<prefixpath>])",
-	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_WEBHOOK_HOST"},
-		Name:    "server-webhook-host",
-		Usage:   "server fully qualified url for forge's Webhooks (<scheme>://<host>[/<prefixpath>])",
+		Usage:   "server fully qualified url. Format: <scheme>://<host>[/<prefixpath>]",
 	},
 	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_SERVER_ADDR"},
@@ -330,6 +325,11 @@ var flags = append([]cli.Flag{
 		Usage:   "skip ssl verification",
 		EnvVars: []string{"WOODPECKER_FORGE_SKIP_VERIFY", "WOODPECKER_GITHUB_SKIP_VERIFY", "WOODPECKER_GITLAB_SKIP_VERIFY", "WOODPECKER_GITEA_SKIP_VERIFY", "WOODPECKER_BITBUCKET_SKIP_VERIFY"},
 	},
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_EXPERT_FORGE_OAUTH_HOST", "WOODPECKER_DEV_GITEA_OAUTH_URL"}, // TODO: remove WOODPECKER_DEV_GITEA_OAUTH_URL in next major release
+		Name:    "forge-oauth-host",
+		Usage:   "!!!for experts!!! fully qualified public forge url. Use it if your forge url WOODPECKER_FORGE_URL or WOODPECKER_GITEA_URL, ... isn't a public url. Format: <scheme>://<host>[/<prefixpath>]",
+	},
 	//
 	// Addon
 	//
@@ -365,11 +365,6 @@ var flags = append([]cli.Flag{
 		EnvVars: []string{"WOODPECKER_GITEA"},
 		Name:    "gitea",
 		Usage:   "gitea driver is enabled",
-	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_DEV_GITEA_OAUTH_URL"},
-		Name:    "gitea-oauth-server",
-		Usage:   "user-facing gitea server url for oauth",
 	},
 	//
 	// Bitbucket
@@ -416,10 +411,19 @@ var flags = append([]cli.Flag{
 		Usage:   "serve the website by using a proxy (used for development)",
 		Hidden:  true,
 	},
+	//
+	// expert flags
+	//
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_EXPERT_WEBHOOK_HOST", "WOODPECKER_WEBHOOK_HOST"}, // TODO: remove WOODPECKER_WEBHOOK_HOST in next major release
+		Name:    "server-webhook-host",
+		Usage:   "!!!for experts!!! fully qualified woodpecker server url called by forge's webhooks. Format: <scheme>://<host>[/<prefixpath>]",
+	},
+	// TODO: remove in next major release
 	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_DEV_OAUTH_HOST"},
-		Name:    "server-dev-oauth-host",
-		Usage:   "server fully qualified url (<scheme>://<host>[/<prefixpath>]) used for oauth redirect (used for development)",
+		Name:    "server-dev-oauth-host-deprecated",
+		Usage:   "DEPRECATED: use WOODPECKER_EXPERT_FORGE_OAUTH_HOST instead\nfully qualified url used for oauth redirects. Format: <scheme>://<host>[/<prefixpath>]",
 		Value:   "",
 		Hidden:  true,
 	},

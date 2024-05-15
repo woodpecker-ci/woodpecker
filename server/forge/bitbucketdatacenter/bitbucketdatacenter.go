@@ -43,6 +43,7 @@ type Opts struct {
 	Password     string // Git machine account password.
 	ClientID     string // OAuth 2.0 client id
 	ClientSecret string // OAuth 2.0 client secret
+	OAuthHost    string // OAuth 2.0 host
 }
 
 type client struct {
@@ -50,6 +51,7 @@ type client struct {
 	urlAPI       string
 	clientID     string
 	clientSecret string
+	oauthHost    string
 	username     string
 	password     string
 }
@@ -62,6 +64,7 @@ func New(opts Opts) (forge.Forge, error) {
 		urlAPI:       fmt.Sprintf("%s/rest", opts.URL),
 		clientID:     opts.ClientID,
 		clientSecret: opts.ClientSecret,
+		oauthHost:    opts.OAuthHost,
 		username:     opts.Username,
 		password:     opts.Password,
 	}
@@ -608,11 +611,16 @@ func (c *client) Org(_ context.Context, _ *model.User, owner string) (*model.Org
 }
 
 func (c *client) newOAuth2Config() *oauth2.Config {
+	publicOAuthURL := c.oauthHost
+	if publicOAuthURL == "" {
+		publicOAuthURL = c.urlAPI
+	}
+
 	return &oauth2.Config{
 		ClientID:     c.clientID,
 		ClientSecret: c.clientSecret,
 		Endpoint: oauth2.Endpoint{
-			AuthURL:  fmt.Sprintf("%s/oauth2/latest/authorize", c.urlAPI),
+			AuthURL:  fmt.Sprintf("%s/oauth2/latest/authorize", publicOAuthURL),
 			TokenURL: fmt.Sprintf("%s/oauth2/latest/token", c.urlAPI),
 		},
 		Scopes:      []string{string(bb.PermissionRepoRead), string(bb.PermissionRepoWrite), string(bb.PermissionRepoAdmin)},
