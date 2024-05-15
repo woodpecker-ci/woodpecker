@@ -43,7 +43,7 @@ If you have some missing resources, please feel free to [open a pull-request](ht
 
 - [Setup Gitea with Woodpecker CI](https://containers.fan/posts/setup-gitea-with-woodpecker-ci/)
 - [Step-by-step guide to modern, secure and Open-source CI setup](https://devforth.io/blog/step-by-step-guide-to-modern-secure-ci-setup/)
-- [Using Woodpecker CI for my static sites](https://jan.wildeboer.net/2022/07/Woodpecker-CI-Jekyll/)
+- [Using Woodpecker CI for my static sites](https://web.archive.org/web/20240212182516/https://jan.wildeboer.net/2022/07/Woodpecker-CI-Jekyll/)
 - [Woodpecker CI @ Codeberg](https://www.sarkasti.eu/articles/post/woodpecker/)
 - [Deploy Docker/Compose using Woodpecker CI](https://hinty.io/vverenko/deploy-docker-compose-using-woodpecker-ci/)
 - [Installing Woodpecker CI in your personal homelab](https://pwa.io/articles/installing-woodpecker-in-your-homelab/)

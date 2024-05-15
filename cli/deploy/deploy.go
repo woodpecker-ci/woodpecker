@@ -126,7 +126,7 @@ func deploy(c *cli.Context) error {
 	return tmpl.Execute(os.Stdout, deploy)
 }
 
-// template for deployment information
+// Template for deployment information.
 var tmplDeployInfo = `Number: {{ .Number }}
 Status: {{ .Status }}
 Commit: {{ .Commit }}

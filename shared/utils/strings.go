@@ -14,7 +14,7 @@
 
 package utils
 
-// DeduplicateStrings deduplicate string list, empty items are dropped
+// DeduplicateStrings deduplicate string list, empty items are dropped.
 func DeduplicateStrings(src []string) []string {
 	m := make(map[string]struct{}, len(src))
 	dst := make([]string, 0, len(src))

@@ -74,7 +74,7 @@ const { doSubmit: deleteRepo, isLoading: isDeletingRepo } = useAsyncAction(async
     throw new Error('Unexpected: Repo should be set');
   }
 
-  // TODO use proper dialog
+  // TODO: use proper dialog
   // eslint-disable-next-line no-alert, no-restricted-globals
   if (!confirm(i18n.t('repo.settings.actions.delete.confirm'))) {
     return;

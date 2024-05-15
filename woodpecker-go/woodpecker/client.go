@@ -28,6 +28,7 @@ import (
 const (
 	pathLogLevel = "%s/api/log-level"
 
+	//nolint:godot
 	// TODO: implement endpoints
 	// pathFeed           = "%s/api/user/feed"
 	// pathVersion        = "%s/version"
@@ -58,7 +59,7 @@ func (c *client) SetAddress(addr string) {
 	c.addr = addr
 }
 
-// LogLevel returns the current logging level
+// LogLevel returns the current logging level.
 func (c *client) LogLevel() (*LogLevel, error) {
 	out := new(LogLevel)
 	uri := fmt.Sprintf(pathLogLevel, c.addr)
@@ -66,7 +67,7 @@ func (c *client) LogLevel() (*LogLevel, error) {
 	return out, err
 }
 
-// SetLogLevel sets the logging level of the server
+// SetLogLevel sets the logging level of the server.
 func (c *client) SetLogLevel(in *LogLevel) (*LogLevel, error) {
 	out := new(LogLevel)
 	uri := fmt.Sprintf(pathLogLevel, c.addr)
@@ -75,7 +76,7 @@ func (c *client) SetLogLevel(in *LogLevel) (*LogLevel, error) {
 }
 
 //
-// http request helper functions
+// HTTP request helper functions.
 //
 
 // Helper function for making an http GET request.
@@ -144,7 +145,7 @@ func (c *client) open(rawurl, method string, in any) (io.ReadCloser, error) {
 	return resp.Body, nil
 }
 
-// mapValues converts a map to url.Values
+// mapValues converts a map to `url.Values`.
 func mapValues(params map[string]string) url.Values {
 	values := url.Values{}
 	for key, val := range params {

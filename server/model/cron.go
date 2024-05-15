@@ -31,12 +31,12 @@ type Cron struct {
 	Branch    string `json:"branch"`
 } //	@name Cron
 
-// TableName returns the database table name for xorm
+// TableName returns the database table name for xorm.
 func (Cron) TableName() string {
 	return "crons"
 }
 
-// Validate a cron
+// Validate ensures cron has a valid name and schedule.
 func (c *Cron) Validate() error {
 	if c.Name == "" {
 		return fmt.Errorf("name is required")
