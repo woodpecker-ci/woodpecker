@@ -22,7 +22,7 @@
       <div v-if="user?.admin" class="relative">
         <IconButton
           class="navbar-icon"
-          :title="$t('admin.settings.settings')"
+          :title="$t('settings')"
           :to="{ name: 'admin-settings' }"
           icon="settings"
         />

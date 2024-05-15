@@ -1,23 +1,22 @@
 <template>
   <Settings
-    :title="$t('repo.settings.secrets.secrets')"
-    :desc="$t('repo.settings.secrets.desc')"
+    :title="$t('secrets.secrets')"
+    :desc="$t('secrets.desc')"
     docs-url="docs/usage/secrets"
   >
     <template #titleActions>
       <Button
         v-if="selectedSecret"
-        :text="$t('repo.settings.secrets.show')"
+        :text="$t('secrets.show')"
         start-icon="back"
         @click="selectedSecret = undefined"
       />
-      <Button v-else :text="$t('repo.settings.secrets.add')" start-icon="plus" @click="showAddSecret" />
+      <Button v-else :text="$t('secrets.add')" start-icon="plus" @click="showAddSecret" />
     </template>
 
     <SecretList
       v-if="!selectedSecret"
       :model-value="secrets"
-      i18n-prefix="repo.settings.secrets."
       :is-deleting="isDeleting"
       @edit="editSecret"
       @delete="deleteSecret"
@@ -26,7 +25,6 @@
     <SecretEdit
       v-else
       v-model="selectedSecret"
-      i18n-prefix="repo.settings.secrets."
       :is-saving="isSaving"
       @save="createSecret"
       @cancel="selectedSecret = undefined"
@@ -129,7 +127,7 @@ const { doSubmit: createSecret, isLoading: isSaving } = useAsyncAction(async () 
     await apiClient.createSecret(repo.value.id, selectedSecret.value);
   }
   notifications.notify({
-    title: i18n.t(isEditingSecret.value ? 'repo.settings.secrets.saved' : 'repo.settings.secrets.created'),
+    title: i18n.t(isEditingSecret.value ? 'secrets.saved' : 'secrets.created'),
     type: 'success',
   });
   selectedSecret.value = undefined;
@@ -142,7 +140,7 @@ const { doSubmit: deleteSecret, isLoading: isDeleting } = useAsyncAction(async (
   }
 
   await apiClient.deleteSecret(repo.value.id, _secret.name);
-  notifications.notify({ title: i18n.t('repo.settings.secrets.deleted'), type: 'success' });
+  notifications.notify({ title: i18n.t('secrets.deleted'), type: 'success' });
   await resetPage();
 });
 
