@@ -1,6 +1,6 @@
 # Changelog
 
-## [2.5.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.5.0) - 2024-05-14
+## [2.5.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.5.0) - 2024-05-15
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -18,6 +18,7 @@
 
 ### 📈 Enhancement
 
+- Cleanup server env settings [[#3670](https://github.com/woodpecker-ci/woodpecker/pull/3670)]
 - Setting for empty commits on path condition [[#3708](https://github.com/woodpecker-ci/woodpecker/pull/3708)]
 - Lint file names and directories via cSpell too [[#3703](https://github.com/woodpecker-ci/woodpecker/pull/3703)]
 - Make retry count of config fetching form forge configure [[#3699](https://github.com/woodpecker-ci/woodpecker/pull/3699)]
