@@ -1,24 +1,18 @@
 <template>
   <Settings
-    :title="$t('admin.settings.secrets.secrets')"
+    :title="$t('secrets.secrets')"
     :desc="$t('admin.settings.secrets.desc')"
     docs-url="docs/usage/secrets"
     :warning="$t('admin.settings.secrets.warning')"
   >
     <template #titleActions>
-      <Button
-        v-if="selectedSecret"
-        :text="$t('admin.settings.secrets.show')"
-        start-icon="back"
-        @click="selectedSecret = undefined"
-      />
-      <Button v-else :text="$t('admin.settings.secrets.add')" start-icon="plus" @click="showAddSecret" />
+      <Button v-if="selectedSecret" :text="$t('secrets.show')" start-icon="back" @click="selectedSecret = undefined" />
+      <Button v-else :text="$t('secrets.add')" start-icon="plus" @click="showAddSecret" />
     </template>
 
     <SecretList
       v-if="!selectedSecret"
       v-model="secrets"
-      i18n-prefix="admin.settings.secrets."
       :is-deleting="isDeleting"
       @edit="editSecret"
       @delete="deleteSecret"
@@ -27,7 +21,6 @@
     <SecretEdit
       v-else
       v-model="selectedSecret"
-      i18n-prefix="admin.settings.secrets."
       :is-saving="isSaving"
       @save="createSecret"
       @cancel="selectedSecret = undefined"
@@ -81,7 +74,7 @@ const { doSubmit: createSecret, isLoading: isSaving } = useAsyncAction(async () 
     await apiClient.createGlobalSecret(selectedSecret.value);
   }
   notifications.notify({
-    title: i18n.t(isEditingSecret.value ? 'admin.settings.secrets.saved' : 'admin.settings.secrets.created'),
+    title: i18n.t(isEditingSecret.value ? 'secrets.saved' : 'secrets.created'),
     type: 'success',
   });
   selectedSecret.value = undefined;
@@ -90,7 +83,7 @@ const { doSubmit: createSecret, isLoading: isSaving } = useAsyncAction(async () 
 
 const { doSubmit: deleteSecret, isLoading: isDeleting } = useAsyncAction(async (_secret: Secret) => {
   await apiClient.deleteGlobalSecret(_secret.name);
-  notifications.notify({ title: i18n.t('admin.settings.secrets.deleted'), type: 'success' });
+  notifications.notify({ title: i18n.t('secrets.deleted'), type: 'success' });
   resetPage();
 });
 
