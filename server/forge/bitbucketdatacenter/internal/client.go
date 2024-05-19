@@ -21,6 +21,7 @@ import (
 	"net/http"
 	"strings"
 
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"golang.org/x/oauth2"
 )
 
@@ -34,8 +35,11 @@ type Client struct {
 }
 
 func NewClientWithToken(ctx context.Context, ts oauth2.TokenSource, url string) *Client {
+	client := oauth2.NewClient(ctx, ts)
+	client.Transport = otelhttp.NewTransport(client.Transport)
+
 	return &Client{
-		client: oauth2.NewClient(ctx, ts),
+		client: client,
 		base:   url,
 	}
 }

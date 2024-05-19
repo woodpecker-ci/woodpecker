@@ -14,10 +14,24 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge/gitea"
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge/github"
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge/gitlab"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge/traced"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
-func Forge(forge *model.Forge) (forge.Forge, error) {
+func Forge(_forge *model.Forge) (forge.Forge, error) {
+	f, err := new(_forge)
+	if err != nil {
+		return f, err
+	}
+
+	if fr, ok := f.(traced.ForgeRefresher); ok {
+		return traced.NewForgeRefresherWithTracing(fr, string(_forge.Type)), nil
+	}
+
+	return traced.NewForgeWithTracing(f, string(_forge.Type)), nil
+}
+
+func new(forge *model.Forge) (forge.Forge, error) {
 	switch forge.Type {
 	case model.ForgeTypeAddon:
 		return setupAddon(forge)

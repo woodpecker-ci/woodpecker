@@ -29,7 +29,9 @@ import (
 
 	"go.woodpecker-ci.org/woodpecker/v2/server"
 	"go.woodpecker-ci.org/woodpecker/v2/server/cache"
+	tracedcache "go.woodpecker-ci.org/woodpecker/v2/server/cache/traced"
 	"go.woodpecker-ci.org/woodpecker/v2/server/queue"
+	tracedqueue "go.woodpecker-ci.org/woodpecker/v2/server/queue/traced"
 	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 	"go.woodpecker-ci.org/woodpecker/v2/server/store/datastore"
 )
@@ -88,11 +90,17 @@ func checkSqliteFileExist(path string) error {
 }
 
 func setupQueue(c *cli.Context, s store.Store) queue.Queue {
-	return queue.WithTaskStore(queue.New(c.Context), s)
+	return tracedqueue.NewQueueWithTracing(
+		queue.WithTaskStore(queue.New(c.Context), s),
+		"server-queue",
+	)
 }
 
 func setupMembershipService(_ *cli.Context, _store store.Store) cache.MembershipService {
-	return cache.NewMembershipService(_store)
+	return tracedcache.NewMembershipServiceWithTracing(
+		cache.NewMembershipService(_store),
+		"server-membership-service",
+	)
 }
 
 func setupMetrics(g *errgroup.Group, _store store.Store) {

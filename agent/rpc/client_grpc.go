@@ -29,6 +29,7 @@ import (
 	backend "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc/proto"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc/traced"
 )
 
 // Set grpc version on compile time to compare against server version response.
@@ -44,7 +45,7 @@ func NewGrpcClient(conn *grpc.ClientConn) rpc.Peer {
 	client := new(client)
 	client.client = proto.NewWoodpeckerClient(conn)
 	client.conn = conn
-	return client
+	return traced.NewPeerWithTracing(client, "grpc-peer")
 }
 
 func (c *client) Close() error {

@@ -20,6 +20,7 @@ import (
 	"net/http"
 
 	"github.com/xanzy/go-gitlab"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
 
 const (
@@ -30,10 +31,10 @@ const (
 // client using the provided OAuth token.
 func newClient(url, accessToken string, skipVerify bool) (*gitlab.Client, error) {
 	return gitlab.NewOAuthClient(accessToken, gitlab.WithBaseURL(url), gitlab.WithHTTPClient(&http.Client{
-		Transport: &http.Transport{
+		Transport: otelhttp.NewTransport(&http.Transport{
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: skipVerify},
 			Proxy:           http.ProxyFromEnvironment,
-		},
+		}),
 	}))
 }
 

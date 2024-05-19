@@ -19,9 +19,19 @@ import (
 	"fmt"
 
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types/traced"
 )
 
 func FindBackend(ctx context.Context, backends []types.Backend, backendName string) (types.Backend, error) {
+	b, err := findBackend(ctx, backends, backendName)
+	if err != nil {
+		return b, err
+	}
+
+	return traced.NewBackendWithTracing(b, backendName), nil
+}
+
+func findBackend(ctx context.Context, backends []types.Backend, backendName string) (types.Backend, error) {
 	if backendName == "auto-detect" {
 		for _, engine := range backends {
 			if engine.IsAvailable(ctx) {

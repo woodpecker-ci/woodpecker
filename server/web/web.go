@@ -26,6 +26,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
+	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
 
 	"go.woodpecker-ci.org/woodpecker/v2/server"
 	"go.woodpecker-ci.org/woodpecker/v2/web"
@@ -45,6 +46,9 @@ func (f *prefixFS) Open(name string) (http.File, error) {
 // New returns a gin engine to serve the web frontend.
 func New() (*gin.Engine, error) {
 	e := gin.New()
+
+	e.Use(otelgin.Middleware("woodpecker"))
+
 	var err error
 	indexHTML, err = parseIndex()
 	if err != nil {

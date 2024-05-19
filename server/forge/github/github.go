@@ -28,6 +28,7 @@ import (
 
 	"github.com/google/go-github/v61/github"
 	"github.com/rs/zerolog/log"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"golang.org/x/oauth2"
 
 	"go.woodpecker-ci.org/woodpecker/v2/server"
@@ -400,12 +401,12 @@ func (c *client) newContext(ctx context.Context) context.Context {
 		return ctx
 	}
 	return context.WithValue(ctx, oauth2.HTTPClient, &http.Client{
-		Transport: &http.Transport{
+		Transport: otelhttp.NewTransport(&http.Transport{
 			Proxy: http.ProxyFromEnvironment,
 			TLSClientConfig: &tls.Config{
 				InsecureSkipVerify: true,
 			},
-		},
+		}),
 	})
 }
 

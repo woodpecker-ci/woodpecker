@@ -31,6 +31,7 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v2"
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/keepalive"
@@ -117,6 +118,7 @@ func run(c *cli.Context) error {
 
 		authorizer := woodpeckerGrpcServer.NewAuthorizer(jwtManager)
 		grpcServer := grpc.NewServer(
+			grpc.StatsHandler(otelgrpc.NewServerHandler()),
 			grpc.StreamInterceptor(authorizer.StreamInterceptor),
 			grpc.UnaryInterceptor(authorizer.UnaryInterceptor),
 			grpc.KeepaliveEnforcementPolicy(keepalive.EnforcementPolicy{
