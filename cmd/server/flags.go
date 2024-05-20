@@ -101,6 +101,12 @@ var flags = append([]cli.Flag{
 		Usage:   "metrics server address",
 		Value:   "",
 	},
+	&cli.BoolFlag{
+		EnvVars: []string{"OTEL_SDK_DISABLED"},
+		Name:    "otel-sdk-disabled",
+		Usage:   "disable distributing tracing (configured via additional environment variables, see: https://opentelemetry.io/docs/specs/otel/configuration/sdk-environment-variables/#general-sdk-configuration)",
+		Value:   false,
+	},
 	&cli.StringSliceFlag{
 		EnvVars: []string{"WOODPECKER_ADMIN"},
 		Name:    "admin",

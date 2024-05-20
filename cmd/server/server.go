@@ -52,6 +52,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server/web"
 	"go.woodpecker-ci.org/woodpecker/v2/shared/constant"
 	"go.woodpecker-ci.org/woodpecker/v2/shared/logger"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/tracing"
 	"go.woodpecker-ci.org/woodpecker/v2/version"
 )
 
@@ -101,6 +102,15 @@ func run(c *cli.Context) error {
 	var g errgroup.Group
 
 	setupMetrics(&g, _store)
+
+	if !c.Bool("otel-sdk-disabled") {
+		shutdownTracing := tracing.Setup(c.Context, c.App.Name)
+		g.Go(func() error {
+			<-c.Context.Done()
+			shutdownTracing()
+			return nil
+		})
+	}
 
 	g.Go(func() error {
 		return cron.Start(c.Context, _store)
