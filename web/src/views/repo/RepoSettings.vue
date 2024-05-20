@@ -10,14 +10,14 @@
           {{ repo.name }}
         </router-link>
         /
-        {{ $t('repo.settings.settings') }}
+        {{ $t('settings') }}
       </span>
     </template>
 
     <Tab id="general" :title="$t('repo.settings.general.general')">
       <GeneralTab />
     </Tab>
-    <Tab id="secrets" :title="$t('repo.settings.secrets.secrets')">
+    <Tab id="secrets" :title="$t('secrets.secrets')">
       <SecretsTab />
     </Tab>
     <Tab id="registries" :title="$t('repo.settings.registries.registries')">

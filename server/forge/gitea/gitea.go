@@ -50,9 +50,9 @@ const (
 
 type Gitea struct {
 	url          string
-	oauth2URL    string
 	ClientID     string
 	ClientSecret string
+	OAuthHost    string
 	SkipVerify   bool
 	pageSize     int
 }
@@ -60,24 +60,20 @@ type Gitea struct {
 // Opts defines configuration options.
 type Opts struct {
 	URL        string // Gitea server url.
-	OAuth2URL  string // User-facing Gitea server url for OAuth2.
 	Client     string // OAuth2 Client ID
 	Secret     string // OAuth2 Client Secret
+	OAuthHost  string // OAuth2 Host
 	SkipVerify bool   // Skip ssl verification.
 }
 
 // New returns a Forge implementation that integrates with Gitea,
 // an open source Git service written in Go. See https://gitea.io/
 func New(opts Opts) (forge.Forge, error) {
-	if opts.OAuth2URL == "" {
-		opts.OAuth2URL = opts.URL
-	}
-
 	return &Gitea{
 		url:          opts.URL,
-		oauth2URL:    opts.OAuth2URL,
 		ClientID:     opts.Client,
 		ClientSecret: opts.Secret,
+		OAuthHost:    opts.OAuthHost,
 		SkipVerify:   opts.SkipVerify,
 	}, nil
 }
@@ -93,12 +89,16 @@ func (c *Gitea) URL() string {
 }
 
 func (c *Gitea) oauth2Config(ctx context.Context) (*oauth2.Config, context.Context) {
+	publicOAuthURL := c.OAuthHost
+	if publicOAuthURL == "" {
+		publicOAuthURL = c.url
+	}
 	return &oauth2.Config{
 			ClientID:     c.ClientID,
 			ClientSecret: c.ClientSecret,
 			Endpoint: oauth2.Endpoint{
-				AuthURL:  fmt.Sprintf(authorizeTokenURL, c.oauth2URL),
-				TokenURL: fmt.Sprintf(accessTokenURL, c.oauth2URL),
+				AuthURL:  fmt.Sprintf(authorizeTokenURL, publicOAuthURL),
+				TokenURL: fmt.Sprintf(accessTokenURL, c.url),
 			},
 			RedirectURL: fmt.Sprintf("%s/authorize", server.Config.Server.OAuthHost),
 		},

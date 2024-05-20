@@ -52,6 +52,7 @@ type Opts struct {
 	SkipVerify bool   // Skip ssl verification.
 	MergeRef   bool   // Clone pull requests using the merge ref.
 	OnlyPublic bool   // Only obtain OAuth tokens with access to public repos.
+	OAuthHost  string // Public url for oauth if different from url.
 }
 
 // New returns a Forge implementation that integrates with a GitHub Cloud or
@@ -62,6 +63,7 @@ func New(opts Opts) (forge.Forge, error) {
 		url:        defaultURL,
 		Client:     opts.Client,
 		Secret:     opts.Secret,
+		oAuthHost:  opts.OAuthHost,
 		SkipVerify: opts.SkipVerify,
 		MergeRef:   opts.MergeRef,
 		OnlyPublic: opts.OnlyPublic,
@@ -82,6 +84,7 @@ type client struct {
 	SkipVerify bool
 	MergeRef   bool
 	OnlyPublic bool
+	oAuthHost  string
 }
 
 // Name returns the string name of this driver.
@@ -415,12 +418,17 @@ func (c *client) newConfig() *oauth2.Config {
 		scopes = append(scopes, "repo")
 	}
 
+	publicOAuthURL := c.oAuthHost
+	if publicOAuthURL == "" {
+		publicOAuthURL = c.url
+	}
+
 	return &oauth2.Config{
 		ClientID:     c.Client,
 		ClientSecret: c.Secret,
 		Scopes:       scopes,
 		Endpoint: oauth2.Endpoint{
-			AuthURL:  fmt.Sprintf("%s/login/oauth/authorize", c.url),
+			AuthURL:  fmt.Sprintf("%s/login/oauth/authorize", publicOAuthURL),
 			TokenURL: fmt.Sprintf("%s/login/oauth/access_token", c.url),
 		},
 		RedirectURL: fmt.Sprintf("%s/authorize", server.Config.Server.OAuthHost),

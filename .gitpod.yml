@@ -4,6 +4,7 @@ tasks:
       WOODPECKER_OPEN: true
       WOODPECKER_ADMIN: woodpecker
       WOODPECKER_HOST: http://host.docker.internal:8000
+      WOODPECKER_EXPERT_WEBHOOK_HOST: http://host.docker.internal:8000
       WOODPECKER_AGENT_SECRET: '1234'
       WOODPECKER_GITEA: true
       WOODPECKER_DEV_WWW_PROXY: http://localhost:8010
@@ -20,9 +21,9 @@ tasks:
       grep "WOODPECKER_GITEA_URL=" .env \
         && sed "s,^WOODPECKER_GITEA_URL=.*,WOODPECKER_GITEA_URL=$(gp url 3000)," .env \
         || echo WOODPECKER_GITEA_URL=$(gp url 3000) >> .env
-      grep "WOODPECKER_DEV_OAUTH_HOST=" .env \
-        && sed "s,^WOODPECKER_DEV_OAUTH_HOST=.*,WOODPECKER_DEV_OAUTH_HOST=$(gp url 8000)," .env \
-        || echo WOODPECKER_DEV_OAUTH_HOST=$(gp url 8000) >> .env
+      grep "WOODPECKER_HOST=" .env \
+        && sed "s,^WOODPECKER_HOST=.*,WOODPECKER_HOST=$(gp url 8000)," .env \
+        || echo WOODPECKER_HOST=$(gp url 8000) >> .env
       gp sync-await gitea
       gp sync-done woodpecker-server
       go run go.woodpecker-ci.org/woodpecker/v2/cmd/server

@@ -118,6 +118,7 @@ func setupForgeService(c *cli.Context, _store store.Store) error {
 	_forge.ClientSecret = c.String("forge-oauth-secret")
 	_forge.URL = c.String("forge-url")
 	_forge.SkipVerify = c.Bool("forge-skip-verify")
+	_forge.OAuthHost = c.String("forge-oauth-host")
 
 	switch {
 	case c.String("addon-forge") != "":
@@ -137,7 +138,6 @@ func setupForgeService(c *cli.Context, _store store.Store) error {
 		}
 	case c.Bool("gitea"):
 		_forge.Type = model.ForgeTypeGitea
-		_forge.AdditionalOptions["oauth-server"] = c.String("gitea-oauth-server")
 		if _forge.URL == "" {
 			_forge.URL = "https://try.gitea.com"
 		}
