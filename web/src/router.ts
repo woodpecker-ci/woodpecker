@@ -202,7 +202,6 @@ router.beforeEach(async (to, _, next) => {
   if (redirectUrl !== '') {
     config.setUserConfig('redirectUrl', '');
     next(redirectUrl);
-    return;
   }
 
   const authentication = useAuthentication();

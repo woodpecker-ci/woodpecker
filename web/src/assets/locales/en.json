@@ -1,6 +1,6 @@
 {
   "cancel": "Cancel",
-  "login_with": "Login with {forge}",
+  "login": "Login",
   "welcome": "Welcome to Woodpecker",
   "repos": "Repos",
   "repositories": "Repositories",

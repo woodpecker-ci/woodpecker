@@ -15,6 +15,8 @@
 package datastore
 
 import (
+	"xorm.io/xorm"
+
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
@@ -23,17 +25,23 @@ func (s storage) GetUser(id int64) (*model.User, error) {
 	return user, wrapGet(s.engine.ID(id).Get(user))
 }
 
-func (s storage) GetUserRemoteID(forgeID int64, remoteID model.ForgeRemoteID) (*model.User, error) {
+func (s storage) GetUserRemoteID(remoteID model.ForgeRemoteID, login string) (*model.User, error) {
 	sess := s.engine.NewSession()
 	user := new(model.User)
-	err := wrapGet(sess.Where("forge_id=? AND forge_remote_id = ?", forgeID, remoteID).Get(user))
+	err := wrapGet(sess.Where("forge_remote_id = ?", remoteID).Get(user))
+	if err != nil {
+		user, err = s.getUserLogin(sess, login)
+	}
 	return user, err
 }
 
-func (s storage) GetUserLogin(forgeID int64, login string) (*model.User, error) {
-	sess := s.engine.NewSession()
+func (s storage) GetUserLogin(login string) (*model.User, error) {
+	return s.getUserLogin(s.engine.NewSession(), login)
+}
+
+func (s storage) getUserLogin(sess *xorm.Session, login string) (*model.User, error) {
 	user := new(model.User)
-	return user, wrapGet(sess.Where("forge_id=? AND user_login=?", forgeID, login).Get(user))
+	return user, wrapGet(sess.Where("user_login=?", login).Get(user))
 }
 
 func (s storage) GetUserList(p *model.ListOptions) ([]*model.User, error) {

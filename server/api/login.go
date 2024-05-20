@@ -17,7 +17,6 @@ package api
 import (
 	"encoding/base32"
 	"errors"
-	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -54,28 +53,21 @@ func getForgeID(c *gin.Context) int64 {
 }
 
 func HandleLogin(c *gin.Context) {
-	forgeID := getForgeID(c)
-
 	if err := c.Request.FormValue("error"); err != "" {
-		c.Redirect(http.StatusSeeOther, fmt.Sprintf("%s/login/error?code=%s&forge_id=%d", server.Config.Server.RootPath, err, forgeID))
+		c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login/error?code="+err)
 	} else {
-		c.Redirect(http.StatusSeeOther, fmt.Sprintf("%s/authorize?forge_id=%d", server.Config.Server.RootPath, forgeID))
+		c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/authorize")
 	}
 }
 
 func HandleAuth(c *gin.Context) {
 	_store := store.FromContext(c)
-
-	// TODO: get forge-id in state
-	forgeID := getForgeID(c)
-
-	log.Debug().Msgf("trying to login with forge_id: %d", forgeID)
-
-	_forge, err := server.Config.Services.Manager.ForgeByID(forgeID)
+	_forge, err := server.Config.Services.Manager.ForgeMain()
 	if err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
+	forgeID := int64(1) // TODO: replace with forge id when multiple forges are supported
 
 	// when dealing with redirects, we may need to adjust the content type. I
 	// cannot, however, remember why, so need to revisit this line.
@@ -102,7 +94,6 @@ func HandleAuth(c *gin.Context) {
 		c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=oauth_error")
 		return
 	}
-
 	// The user is not authorized yet -> redirect
 	if tmpuser == nil {
 		http.Redirect(c.Writer, c.Request, redirectURL, http.StatusSeeOther)
@@ -110,7 +101,7 @@ func HandleAuth(c *gin.Context) {
 	}
 
 	// get the user from the database
-	u, err := _store.GetUserRemoteID(forgeID, tmpuser.ForgeRemoteID)
+	u, err := _store.GetUserRemoteID(tmpuser.ForgeRemoteID, tmpuser.Login)
 	if err != nil && !errors.Is(err, types.RecordNotExist) {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
@@ -222,8 +213,10 @@ func HandleAuth(c *gin.Context) {
 		return
 	}
 
-	exp = time.Now().Add(server.Config.Server.SessionExpires).Unix()
-	tokenString, err := token.New(token.SessToken, strconv.FormatInt(u.ID, 10)).SignExpires(u.Hash, exp)
+	exp := time.Now().Add(server.Config.Server.SessionExpires).Unix()
+	_token := token.New(token.SessToken)
+	_token.Set("user-id", strconv.FormatInt(u.ID, 10))
+	tokenString, err := _token.SignExpires(u.Hash, exp)
 	if err != nil {
 		log.Error().Msgf("cannot create token for %s", u.Login)
 		c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=internal_error")
@@ -273,18 +266,17 @@ func GetLogout(c *gin.Context) {
 func GetLoginToken(c *gin.Context) {
 	_store := store.FromContext(c)
 
-	in := &tokenPayload{}
-	err := c.Bind(in)
+	_forge, err := server.Config.Services.Manager.ForgeMain() // TODO: get selected forge from auth request
 	if err != nil {
-		_ = c.AbortWithError(http.StatusBadRequest, err)
+		log.Error().Err(err).Msg("Cannot get main forge")
+		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
 
-	forgeID := int64(1) // TODO: use correct forge
-
-	_forge, err := server.Config.Services.Manager.ForgeByID(forgeID)
+	in := &tokenPayload{}
+	err = c.Bind(in)
 	if err != nil {
-		_ = c.AbortWithError(http.StatusInternalServerError, err)
+		_ = c.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
 
@@ -294,14 +286,15 @@ func GetLoginToken(c *gin.Context) {
 		return
 	}
 
-	user, err := _store.GetUserLogin(forgeID, login)
+	user, err := _store.GetUserLogin(login)
 	if err != nil {
 		handleDBError(c, err)
 		return
 	}
 
 	exp := time.Now().Add(server.Config.Server.SessionExpires).Unix()
-	newToken := token.New(token.SessToken, strconv.FormatInt(user.ID, 10))
+	newToken := token.New(token.SessToken)
+	newToken.Set("user-id", strconv.FormatInt(user.ID, 10))
 	tokenStr, err := newToken.SignExpires(user.Hash, exp)
 	if err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)

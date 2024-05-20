@@ -38,12 +38,13 @@ const SignerAlgo = "HS256"
 
 type Token struct {
 	Kind string
-	// Text string
-	Data map[string]string
+	data map[string]string
 }
 
 func parse(raw string, fn SecretFunc) (*Token, error) {
-	token := &Token{}
+	token := &Token{
+		data: map[string]string{},
+	}
 	parsed, err := jwt.Parse(raw, keyFunc(token, fn))
 	if err != nil {
 		return nil, err
@@ -102,8 +103,8 @@ func CheckCsrf(r *http.Request, fn SecretFunc) error {
 	return err
 }
 
-func New(kind, text string) *Token {
-	return &Token{Kind: kind, Text: text, Data: map[string]string{}}
+func New(kind string) *Token {
+	return &Token{Kind: kind, data: map[string]string{}}
 }
 
 // Sign signs the token using the given secret hash
@@ -121,22 +122,23 @@ func (t *Token) SignExpires(secret string, exp int64) (string, error) {
 		return "", fmt.Errorf("token claim is not a MapClaims")
 	}
 	claims["type"] = t.Kind
-	// claims["text"] = t.Text
 	if exp > 0 {
 		claims["exp"] = float64(exp)
 	}
-	for key, value := range t.Data {
-		claims[key] = value
+
+	for k, v := range t.data {
+		claims[k] = v
 	}
+
 	return token.SignedString([]byte(secret))
 }
 
-func (t *Token) Get(key string) string {
-	return t.Data[key]
+func (t *Token) Set(key, value string) {
+	t.data[key] = value
 }
 
-func (t *Token) Set(key, value string) {
-	t.Data[key] = value
+func (t *Token) Get(key string) string {
+	return t.data[key]
 }
 
 func keyFunc(token *Token, fn SecretFunc) jwt.Keyfunc {
@@ -159,13 +161,16 @@ func keyFunc(token *Token, fn SecretFunc) jwt.Keyfunc {
 		}
 		token.Kind, _ = kind.(string)
 
-		// extract the token value and cast to
-		// expected type.
-		text, ok := claims["text"]
-		if !ok {
-			return nil, jwt.ErrInvalidType
+		// extract the data claims
+		for k, v := range claims {
+			if k == "type" || k == "exp" || k == "nbf" || k == "iat" || k == "aud" || k == "iss" || k == "sub" || k == "jti" {
+				continue
+			}
+
+			if str, ok := v.(string); ok {
+				token.data[k] = str
+			}
 		}
-		token.Text, _ = text.(string)
 
 		// extract the token data and cast to
 		// expected type.

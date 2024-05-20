@@ -34,10 +34,9 @@ func Config(c *gin.Context) {
 
 	var csrf string
 	if user != nil {
-		csrf, _ = token.New(
-			token.CsrfToken,
-			strconv.FormatInt(user.ID, 10),
-		).Sign(user.Hash)
+		t := token.New(token.CsrfToken)
+		t.Set("user-id", strconv.FormatInt(user.ID, 10))
+		csrf, _ = t.Sign(user.Hash)
 	}
 
 	// TODO: remove this and use the forge type from the corresponding repo
