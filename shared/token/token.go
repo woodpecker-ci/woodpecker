@@ -172,19 +172,6 @@ func keyFunc(token *Token, fn SecretFunc) jwt.Keyfunc {
 			}
 		}
 
-		// extract the token data and cast to
-		// expected type.
-		for key, value := range claims {
-			if key == "type" || key == "text" || key == "exp" {
-				continue
-			}
-			data, ok := value.(string)
-			if !ok {
-				return nil, jwt.ErrInvalidType
-			}
-			token.Data[key] = data
-		}
-
 		// invoke the callback function to retrieve
 		// the secret key used to verify
 		secret, err := fn(token)

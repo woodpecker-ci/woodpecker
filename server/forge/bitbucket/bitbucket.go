@@ -81,7 +81,7 @@ func (c *config) URL() string {
 // Bitbucket account details are returned when the user is successfully authenticated.
 func (c *config) Login(ctx context.Context, req *forge_types.OAuthRequest) (*model.User, string, error) {
 	config := c.newOAuth2Config()
-	redirectURL := config.AuthCodeURL("woodpecker")
+	redirectURL := config.AuthCodeURL(req.State)
 
 	// get the OAuth errors
 	if req.Error != "" {

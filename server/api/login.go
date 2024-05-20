@@ -75,7 +75,9 @@ func HandleAuth(c *gin.Context) {
 
 	jwtSecret := "" // TODO set some secret
 	exp := time.Now().Add(time.Minute * 15).Unix()
-	state, err := token.New(token.OAuthStateToken, strconv.FormatInt(forgeID, 10)).SignExpires(jwtSecret, exp)
+	_token := token.New(token.OAuthStateToken)
+	_token.Set("forge-id", strconv.FormatInt(forgeID, 10))
+	state, err := _token.SignExpires(jwtSecret, exp)
 	if err != nil {
 		log.Error().Err(err).Msg("cannot create state token")
 		c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=internal_error")
