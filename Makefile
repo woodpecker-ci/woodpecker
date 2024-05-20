@@ -144,6 +144,9 @@ install-tools: ## Install development tools
 	fi ; \
 	hash protoc-gen-go-grpc > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
 		go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest; \
+	fi ; \
+	hash gowrap > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
+		go install github.com/hexdigest/gowrap/cmd/gowrap@latest; \
 	fi
 
 ui-dependencies: ## Install UI dependencies
