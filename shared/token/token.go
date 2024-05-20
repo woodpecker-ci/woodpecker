@@ -36,13 +36,13 @@ const (
 const SignerAlgo = "HS256"
 
 type Token struct {
-	Kind string
-	data map[string]string
+	Kind   string
+	claims jwt.MapClaims
 }
 
 func parse(raw string, fn SecretFunc) (*Token, error) {
 	token := &Token{
-		data: map[string]string{},
+		claims: jwt.MapClaims{},
 	}
 	parsed, err := jwt.Parse(raw, keyFunc(token, fn))
 	if err != nil {
@@ -102,7 +102,7 @@ func CheckCsrf(r *http.Request, fn SecretFunc) error {
 }
 
 func New(kind string) *Token {
-	return &Token{Kind: kind, data: map[string]string{}}
+	return &Token{Kind: kind, claims: jwt.MapClaims{}}
 }
 
 // Sign signs the token using the given secret hash
@@ -119,24 +119,30 @@ func (t *Token) SignExpires(secret string, exp int64) (string, error) {
 	if !ok {
 		return "", fmt.Errorf("token claim is not a MapClaims")
 	}
+
+	for k, v := range t.claims {
+		claims[k] = v
+	}
+
 	claims["type"] = t.Kind
 	if exp > 0 {
 		claims["exp"] = float64(exp)
-	}
-
-	for k, v := range t.data {
-		claims[k] = v
 	}
 
 	return token.SignedString([]byte(secret))
 }
 
 func (t *Token) Set(key, value string) {
-	t.data[key] = value
+	t.claims[key] = value
 }
 
 func (t *Token) Get(key string) string {
-	return t.data[key]
+	claim, ok := t.claims[key].(string)
+	if !ok {
+		return ""
+	}
+
+	return claim
 }
 
 func keyFunc(token *Token, fn SecretFunc) jwt.Keyfunc {
@@ -151,23 +157,25 @@ func keyFunc(token *Token, fn SecretFunc) jwt.Keyfunc {
 			return nil, jwt.ErrSignatureInvalid
 		}
 
-		// extract the token kind and cast to
-		// the expected type.
+		// extract the token kind and cast to the expected type
 		kind, ok := claims["type"]
 		if !ok {
 			return nil, jwt.ErrInvalidType
 		}
 		token.Kind, _ = kind.(string)
 
-		// extract the data claims
+		// copy custom claims
 		for k, v := range claims {
-			if k == "type" || k == "exp" || k == "nbf" || k == "iat" || k == "aud" || k == "iss" || k == "sub" || k == "jti" {
+			// skip the reserved claims https://datatracker.ietf.org/doc/html/rfc7519#section-4.1
+			if k == "iss" || k == "sub" || k == "aud" || k == "exp" || k == "nbf" || k == "iat" || k == "jti" {
 				continue
 			}
 
-			if str, ok := v.(string); ok {
-				token.data[k] = str
+			if k == "type" {
+				continue
 			}
+
+			token.claims[k] = v
 		}
 
 		// invoke the callback function to retrieve
