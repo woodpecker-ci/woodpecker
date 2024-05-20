@@ -20,12 +20,7 @@
     </div>
     <div class="flex ml-auto -m-1.5 items-center space-x-2">
       <div v-if="user?.admin" class="relative">
-        <IconButton
-          class="navbar-icon"
-          :title="$t('admin.settings.settings')"
-          :to="{ name: 'admin-settings' }"
-          icon="settings"
-        />
+        <IconButton class="navbar-icon" :title="$t('settings')" :to="{ name: 'admin-settings' }" icon="settings" />
         <div
           v-if="version?.needsUpdate"
           class="absolute top-2 right-2 bg-int-wp-state-error-100 rounded-full w-3 h-3"

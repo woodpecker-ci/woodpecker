@@ -72,9 +72,8 @@
       "success": "Repository enabled",
       "list_reloaded": "Repository list reloaded"
     },
-    "open_in_forge": "Open Repository in Version Control System",
+    "open_in_forge": "Open repository in forge",
     "settings": {
-      "settings": "Settings",
       "not_allowed": "You are not allowed to access this repository's settings",
       "general": {
         "general": "General",
@@ -130,31 +129,6 @@
           "cancel": "Cancel previous pipelines",
           "desc": "Enable to cancel pending and running pipelines of the same event and context before starting the newly triggered one."
         }
-      },
-      "secrets": {
-        "secrets": "Secrets",
-        "desc": "Secrets can be passed to individual pipeline steps at runtime as environmental variables.",
-        "none": "There are no secrets yet.",
-        "add": "Add secret",
-        "save": "Save secret",
-        "show": "Show secrets",
-        "name": "Name",
-        "value": "Value",
-        "delete_confirm": "Do you really want to delete this secret?",
-        "deleted": "Secret deleted",
-        "created": "Secret created",
-        "saved": "Secret saved",
-        "images": {
-          "images": "Available for following images",
-          "desc": "List of images where this secret is available, leave empty to allow all images"
-        },
-        "events": {
-          "events": "Available at following events",
-          "pr_warning": "Please be careful with this option as a bad actor can submit a malicious pull request that exposes your secrets."
-        },
-        "plugins_only": "Only available for plugins",
-        "edit": "Edit secret",
-        "delete": "Delete secret"
       },
       "registries": {
         "registries": "Registries",
@@ -298,58 +272,18 @@
   },
   "org": {
     "settings": {
-      "settings": "Settings",
       "not_allowed": "You are not allowed to access this organization's settings",
       "secrets": {
-        "secrets": "Secrets",
-        "desc": "Organization secrets can be passed to all organization's repository individual pipeline steps at runtime as environmental variables.",
-        "none": "There are no organization secrets yet.",
-        "add": "Add secret",
-        "save": "Save secret",
-        "show": "Show secrets",
-        "name": "Name",
-        "value": "Value",
-        "deleted": "Organization secret deleted",
-        "created": "Organization secret created",
-        "saved": "Organization secret saved",
-        "images": {
-          "images": "Available for following images",
-          "desc": "List of images where this secret is available, leave empty to allow all images"
-        },
-        "plugins_only": "Only available for plugins",
-        "events": {
-          "events": "Available at following events",
-          "pr_warning": "Please be careful with this option as a bad actor can submit a malicious pull request that exposes your secrets."
-        }
+        "desc": "Organization secrets can be passed to all organization's repository individual pipeline steps at runtime as environmental variables."
       }
     }
   },
   "admin": {
     "settings": {
-      "settings": "Settings",
       "not_allowed": "You are not allowed to access server settings",
       "secrets": {
-        "secrets": "Secrets",
         "desc": "Global secrets can be passed to all repositories individual pipeline steps at runtime as environmental variables.",
-        "warning": "These secrets will be available for all server users.",
-        "none": "There are no global secrets yet.",
-        "add": "Add secret",
-        "save": "Save secret",
-        "show": "Show secrets",
-        "name": "Name",
-        "value": "Value",
-        "deleted": "Global secret deleted",
-        "created": "Global secret created",
-        "saved": "Global secret saved",
-        "images": {
-          "images": "Available for following images",
-          "desc": "List of images where this secret is available, leave empty to allow all images"
-        },
-        "plugins_only": "Only available for plugins",
-        "events": {
-          "events": "Available at following events",
-          "pr_warning": "Please be careful with this option as a bad actor can submit a malicious pull request that exposes your secrets."
-        }
+        "warning": "These secrets will be available for all server users."
       },
       "agents": {
         "agents": "Agents",
@@ -472,26 +406,7 @@
         }
       },
       "secrets": {
-        "secrets": "Secrets",
-        "desc": "User secrets can be passed to all user's repository individual pipeline steps at runtime as environmental variables.",
-        "none": "There are no user secrets yet.",
-        "add": "Add secret",
-        "save": "Save secret",
-        "show": "Show secrets",
-        "name": "Name",
-        "value": "Value",
-        "deleted": "User secret deleted",
-        "created": "User secret created",
-        "saved": "User secret saved",
-        "images": {
-          "images": "Available for following images",
-          "desc": "List of images where this secret is available, leave empty to allow all images"
-        },
-        "plugins_only": "Only available for plugins",
-        "events": {
-          "events": "Available at following events",
-          "pr_warning": "Please be careful with this option as a bad actor can submit a malicious pull request that exposes your secrets."
-        }
+        "desc": "User secrets can be passed to all user's repository individual pipeline steps at runtime as environmental variables."
       },
       "cli_and_api": {
         "cli_and_api": "CLI & API",
@@ -508,6 +423,31 @@
     "internal_error": "Some internal error occurred",
     "access_denied": "You are not allowed to login"
   },
+  "secrets": {
+    "secrets": "Secrets",
+    "desc": "Secrets can be passed to individual pipeline steps at runtime as environmental variables.",
+    "none": "There are no secrets yet.",
+    "add": "Add secret",
+    "save": "Save secret",
+    "show": "Show secrets",
+    "name": "Name",
+    "value": "Value",
+    "delete_confirm": "Do you really want to delete this secret?",
+    "deleted": "Secret deleted",
+    "created": "Secret created",
+    "saved": "Secret saved",
+    "images": {
+      "images": "Available for following images",
+      "desc": "List of images where this secret is available, leave empty to allow all images"
+    },
+    "events": {
+      "events": "Available at following events",
+      "pr_warning": "Please be careful with this option as a bad actor can submit a malicious pull request that exposes your secrets."
+    },
+    "plugins_only": "Only available for plugins",
+    "edit": "Edit secret",
+    "delete": "Delete secret"
+  },
   "default": "default",
   "info": "Info",
   "running_version": "You are running Woodpecker {0}",
@@ -520,5 +460,6 @@
   "cli_login_success": "Login to CLI successful",
   "cli_login_failed": "Login to CLI failed",
   "cli_login_denied": "Login to CLI denied",
-  "return_to_cli": "You can now close this tab and return to the CLI."
+  "return_to_cli": "You can now close this tab and return to the CLI.",
+  "settings": "Settings"
 }

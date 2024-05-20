@@ -55,7 +55,7 @@ func repoInfo(c *cli.Context) error {
 	return tmpl.Execute(os.Stdout, repo)
 }
 
-// template for repo information
+// tTemplate for repo information.
 var tmplRepoInfo = `Owner: {{ .Owner }}
 Repo: {{ .Name }}
 URL: {{ .ForgeURL }}

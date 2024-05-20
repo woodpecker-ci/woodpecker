@@ -32,7 +32,7 @@ func MergeSlices[T any](slices ...[]T) []T {
 	return result
 }
 
-// EqualSliceValues compare two slices if they have equal values independent of how they are sorted
+// EqualSliceValues compare two slices if they have equal values independent of how they are sorted.
 func EqualSliceValues[E comparable](s1, s2 []E) bool {
 	if len(s1) != len(s2) {
 		return false
