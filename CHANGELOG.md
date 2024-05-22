@@ -79,6 +79,8 @@
 
 ### Misc
 
+- chore(deps): update postgres docker tag to v16.3 [[#3719](https://github.com/woodpecker-ci/woodpecker/pull/3719)]
+- chore(deps): update docker.io/appleboy/drone-discord docker tag to v1.3.2 [[#3718](https://github.com/woodpecker-ci/woodpecker/pull/3718)]
 - Added steps to reproduce and expected behavior in bug_report.yaml [[#3714](https://github.com/woodpecker-ci/woodpecker/pull/3714)]
 - flake: add flake-utils import and use eachDefaultSystem [[#3704](https://github.com/woodpecker-ci/woodpecker/pull/3704)]
 - Add nix flake for dev shell [[#3702](https://github.com/woodpecker-ci/woodpecker/pull/3702)]
