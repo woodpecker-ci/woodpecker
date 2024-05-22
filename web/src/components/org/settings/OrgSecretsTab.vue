@@ -1,23 +1,13 @@
 <template>
-  <Settings
-    :title="$t('org.settings.secrets.secrets')"
-    :desc="$t('org.settings.secrets.desc')"
-    docs-url="docs/usage/secrets"
-  >
+  <Settings :title="$t('secrets.secrets')" :desc="$t('org.settings.secrets.desc')" docs-url="docs/usage/secrets">
     <template #titleActions>
-      <Button
-        v-if="selectedSecret"
-        :text="$t('org.settings.secrets.show')"
-        start-icon="back"
-        @click="selectedSecret = undefined"
-      />
-      <Button v-else :text="$t('org.settings.secrets.add')" start-icon="plus" @click="showAddSecret" />
+      <Button v-if="selectedSecret" :text="$t('secrets.show')" start-icon="back" @click="selectedSecret = undefined" />
+      <Button v-else :text="$t('secrets.add')" start-icon="plus" @click="showAddSecret" />
     </template>
 
     <SecretList
       v-if="!selectedSecret"
       v-model="secrets"
-      i18n-prefix="org.settings.secrets."
       :is-deleting="isDeleting"
       @edit="editSecret"
       @delete="deleteSecret"
@@ -26,7 +16,6 @@
     <SecretEdit
       v-else
       v-model="selectedSecret"
-      i18n-prefix="org.settings.secrets."
       :is-saving="isSaving"
       @save="createSecret"
       @cancel="selectedSecret = undefined"
@@ -89,7 +78,7 @@ const { doSubmit: createSecret, isLoading: isSaving } = useAsyncAction(async () 
     await apiClient.createOrgSecret(org.value.id, selectedSecret.value);
   }
   notifications.notify({
-    title: i18n.t(isEditingSecret.value ? 'org.settings.secrets.saved' : 'org.settings.secrets.created'),
+    title: i18n.t(isEditingSecret.value ? 'secrets.saved' : 'secrets.created'),
     type: 'success',
   });
   selectedSecret.value = undefined;
@@ -102,7 +91,7 @@ const { doSubmit: deleteSecret, isLoading: isDeleting } = useAsyncAction(async (
   }
 
   await apiClient.deleteOrgSecret(org.value.id, _secret.name);
-  notifications.notify({ title: i18n.t('org.settings.secrets.deleted'), type: 'success' });
+  notifications.notify({ title: i18n.t('secrets.deleted'), type: 'success' });
   resetPage();
 });
 
