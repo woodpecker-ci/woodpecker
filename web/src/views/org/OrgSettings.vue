@@ -6,11 +6,11 @@
           {{ org.name }}
         </router-link>
         /
-        {{ $t('org.settings.settings') }}
+        {{ $t('settings') }}
       </span>
     </template>
 
-    <Tab id="secrets" :title="$t('org.settings.secrets.secrets')">
+    <Tab id="secrets" :title="$t('secrets.secrets')">
       <OrgSecretsTab />
     </Tab>
   </Scaffold>

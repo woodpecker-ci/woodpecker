@@ -50,6 +50,7 @@ Sometimes there are multiple terms that can be used to describe something. This 
 - Environment variables `*_LINK` should be called `*_URL`. In the code use `URL()` instead of `Link()`
 - Use the term **pipelines** instead of the previous **builds**
 - Use the term **steps** instead of the previous **jobs**
+- Use the prefix `WOODPECKER_EXPERT_` for advanced environment variables that are normally not required to be set by users
 
 <!-- References -->
 

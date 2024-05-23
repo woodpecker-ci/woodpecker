@@ -31,7 +31,7 @@ You must configure Apache to set `X-Forwarded-Proto` when using https.
 
 ## Nginx
 
-This guide provides a basic overview for installing Woodpecker server behind the Nginx web-server. For more advanced configuration options please consult the official Nginx [documentation](https://www.nginx.com/resources/admin-guide/).
+This guide provides a basic overview for installing Woodpecker server behind the Nginx web-server. For more advanced configuration options please consult the official Nginx [documentation](https://docs.nginx.com/nginx/admin-guide).
 
 Example configuration:
 
