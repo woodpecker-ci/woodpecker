@@ -25,7 +25,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v2"
-	"golang.org/x/sync/errgroup" // cspell:words errgroup
+	"golang.org/x/sync/errgroup"
 
 	"go.woodpecker-ci.org/woodpecker/v2/server"
 	"go.woodpecker-ci.org/woodpecker/v2/server/cache"

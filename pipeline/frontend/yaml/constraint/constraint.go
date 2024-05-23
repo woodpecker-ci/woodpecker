@@ -20,7 +20,7 @@ import (
 	"path"
 	"strings"
 
-	"github.com/bmatcuk/doublestar/v4" // cspell:disable-line
+	"github.com/bmatcuk/doublestar/v4"
 	"github.com/expr-lang/expr"
 	"go.uber.org/multierr"
 	"gopkg.in/yaml.v3"

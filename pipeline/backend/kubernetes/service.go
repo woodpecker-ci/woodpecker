@@ -23,7 +23,7 @@ import (
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/util/intstr" // cspell:words intstr
+	int_str "k8s.io/apimachinery/pkg/util/intstr"
 
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 )
@@ -73,7 +73,7 @@ func servicePort(port types.Port) v1.ServicePort {
 		Name:       fmt.Sprintf("port-%d", portNumber),
 		Port:       portNumber,
 		Protocol:   v1.Protocol(portProtocol),
-		TargetPort: intstr.IntOrString{IntVal: portNumber},
+		TargetPort: int_str.IntOrString{IntVal: portNumber},
 	}
 }
 

@@ -9,7 +9,7 @@ import (
 	"text/tabwriter"
 	"unicode"
 
-	"github.com/mitchellh/mapstructure" // cspell:words mitchellh mapstructure
+	"github.com/mitchellh/mapstructure"
 )
 
 // NewTable creates a new Table.

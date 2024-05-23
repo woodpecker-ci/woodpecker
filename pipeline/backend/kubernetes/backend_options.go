@@ -1,7 +1,7 @@
 package kubernetes
 
 import (
-	"github.com/mitchellh/mapstructure" // cspell:disable-line
+	"github.com/mitchellh/mapstructure"
 
 	backend "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 )

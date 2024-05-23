@@ -25,10 +25,10 @@ import (
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/network"
 	"github.com/docker/docker/api/types/volume"
-	"github.com/docker/go-connections/tlsconfig" // cspell:words tlsconfig
+	"github.com/docker/go-connections/tlsconfig"
 	"github.com/moby/moby/client"
-	"github.com/moby/moby/pkg/jsonmessage" // cspell:words jsonmessage
-	"github.com/moby/moby/pkg/stdcopy"     // cspell:words stdcopy
+	"github.com/moby/moby/pkg/jsonmessage"
+	"github.com/moby/moby/pkg/stdcopy"
 	"github.com/moby/term"
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v2"

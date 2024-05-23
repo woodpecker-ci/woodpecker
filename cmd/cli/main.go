@@ -17,7 +17,7 @@ package main
 import (
 	"os"
 
-	_ "github.com/joho/godotenv/autoload" // cspell:disable-line
+	_ "github.com/joho/godotenv/autoload"
 	"github.com/rs/zerolog/log"
 )
 

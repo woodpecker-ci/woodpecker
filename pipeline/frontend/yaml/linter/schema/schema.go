@@ -22,7 +22,7 @@ import (
 
 	"codeberg.org/6543/go-yaml2json"
 	"codeberg.org/6543/xyaml"
-	"github.com/xeipuuv/gojsonschema" // cspell:words xeipuuv gojsonschema
+	"github.com/xeipuuv/gojsonschema"
 	"gopkg.in/yaml.v3"
 )
 

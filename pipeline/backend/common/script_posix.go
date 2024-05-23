@@ -18,7 +18,7 @@ import (
 	"bytes"
 	"fmt"
 
-	"github.com/alessio/shellescape" // cspell:disable-line
+	"github.com/alessio/shellescape"
 )
 
 // generateScriptPosix is a helper function that generates a step script

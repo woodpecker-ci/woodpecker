@@ -6,7 +6,7 @@ import (
 	"os"
 	"slices"
 
-	"github.com/adrg/xdg" // cspell:disable-line
+	"github.com/adrg/xdg"
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v2"
 	"github.com/zalando/go-keyring"

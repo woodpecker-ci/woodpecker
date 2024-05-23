@@ -21,7 +21,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/alessio/shellescape" // cspell:disable-line
+	"github.com/alessio/shellescape"
 )
 
 func (e *local) genCmdByShell(shell string, cmdList []string) (args []string, err error) {

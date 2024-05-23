@@ -21,7 +21,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/oklog/ulid/v2" // cspell:disable-line
+	"github.com/oklog/ulid/v2"
 
 	backend_types "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/metadata"

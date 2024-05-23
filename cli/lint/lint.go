@@ -22,7 +22,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/muesli/termenv" // cspell:words termenv
+	"github.com/muesli/termenv"
 	"github.com/urfave/cli/v2"
 
 	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
