@@ -297,7 +297,7 @@ async function loadLogs() {
     const logs = await apiClient.getLogs(repo.value.id, pipeline.value.number, step.value.id);
     logs?.forEach((line) => writeLog({ index: line.line, text: decode(line.data), time: line.time }));
     flushLogs(false);
-  } else if (step.value.state === 'pending' || isStepRunning(step.value)) {
+  } else if (isStepRunning(step.value)) {
     loadedStepSlug.value = stepSlug.value;
     stream.value = apiClient.streamLogs(repo.value.id, pipeline.value.number, step.value.id, (line) => {
       writeLog({ index: line.line, text: decode(line.data), time: line.time });
@@ -311,7 +311,7 @@ async function deleteLogs() {
     throw new Error('The repository, pipeline or step was undefined');
   }
 
-  // TODO use proper dialog (copy-pasted from web/src/components/secrets/SecretList.vue:deleteSecret)
+  // TODO: use proper dialog (copy-pasted from web/src/components/secrets/SecretList.vue:deleteSecret)
   // eslint-disable-next-line no-alert, no-restricted-globals
   if (!confirm(i18n.t('repo.pipeline.log_delete_confirm'))) {
     return;

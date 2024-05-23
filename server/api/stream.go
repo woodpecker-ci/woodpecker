@@ -36,8 +36,8 @@ import (
 
 // EventStreamSSE
 //
-//	@Summary		Event stream
-//	@Description	event source streaming for compatibility with quic and http2
+//	@Summary		Stream events like pipeline updates
+//	@Description	With quic and http2 support
 //	@Router			/stream/events [get]
 //	@Produce		plain
 //	@Success		200
@@ -124,7 +124,7 @@ func EventStreamSSE(c *gin.Context) {
 
 // LogStreamSSE
 //
-//	@Summary	Log stream
+//	@Summary	Stream logs of a pipeline step
 //	@Router		/stream/logs/{repo_id}/{pipeline}/{stepID} [get]
 //	@Produce	plain
 //	@Success	200
@@ -186,7 +186,7 @@ func LogStreamSSE(c *gin.Context) {
 		return
 	}
 
-	if step.State != model.StatusPending && step.State != model.StatusRunning {
+	if step.State != model.StatusRunning {
 		log.Debug().Msg("step not running (anymore).")
 		logWriteStringErr(io.WriteString(rw, "event: error\ndata: step not running (anymore)\n\n"))
 		return
