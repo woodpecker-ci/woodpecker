@@ -205,6 +205,8 @@ func LogStreamSSE(c *gin.Context) {
 		log.Debug().Msg("log stream: connection closed")
 	}()
 
+	server.Config.Services.Logs.Open(ctx, step.ID)
+
 	go func() {
 		err := server.Config.Services.Logs.Tail(ctx, step.ID, func(entries ...*model.LogEntry) {
 			for _, entry := range entries {
