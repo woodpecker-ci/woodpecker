@@ -29,17 +29,15 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/shared/constant"
 )
 
-const (
-	forgeFetchingRetryCount = 3
-)
-
 type forgeFetcher struct {
-	timeout time.Duration
+	timeout    time.Duration
+	retryCount uint
 }
 
-func NewForge(timeout time.Duration) Service {
+func NewForge(timeout time.Duration, retries uint) Service {
 	return &forgeFetcher{
-		timeout: timeout,
+		timeout:    timeout,
+		retryCount: retries,
 	}
 }
 
@@ -58,7 +56,7 @@ func (f *forgeFetcher) Fetch(ctx context.Context, forge forge.Forge, user *model
 	}
 
 	// try to fetch multiple times
-	for i := 0; i < forgeFetchingRetryCount; i++ {
+	for i := 0; i < int(f.retryCount); i++ {
 		files, err = ffc.fetch(ctx, strings.TrimSpace(repo.Config))
 		if err != nil {
 			log.Trace().Err(err).Msgf("%d. try failed", i+1)
@@ -79,7 +77,7 @@ type forgeFetcherContext struct {
 	timeout  time.Duration
 }
 
-// fetch config by timeout
+// fetch attempts to fetch the configuration file(s) for the given config string.
 func (f *forgeFetcherContext) fetch(c context.Context, config string) ([]*types.FileMeta, error) {
 	ctx, cancel := context.WithTimeout(c, f.timeout)
 	defer cancel()
@@ -92,7 +90,7 @@ func (f *forgeFetcherContext) fetch(c context.Context, config string) ([]*types.
 
 		fileMetas, err := f.getFirstAvailableConfig(ctx, configs)
 		if err == nil {
-			return fileMetas, err
+			return fileMetas, nil
 		}
 
 		return nil, fmt.Errorf("user defined config '%s' not found: %w", config, err)
@@ -102,7 +100,7 @@ func (f *forgeFetcherContext) fetch(c context.Context, config string) ([]*types.
 	// for the order see shared/constants/constants.go
 	fileMetas, err := f.getFirstAvailableConfig(ctx, constant.DefaultConfigOrder[:])
 	if err == nil {
-		return fileMetas, err
+		return fileMetas, nil
 	}
 
 	select {

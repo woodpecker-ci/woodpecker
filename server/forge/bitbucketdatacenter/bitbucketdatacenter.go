@@ -43,6 +43,7 @@ type Opts struct {
 	Password     string // Git machine account password.
 	ClientID     string // OAuth 2.0 client id
 	ClientSecret string // OAuth 2.0 client secret
+	OAuthHost    string // OAuth 2.0 host
 }
 
 type client struct {
@@ -50,6 +51,7 @@ type client struct {
 	urlAPI       string
 	clientID     string
 	clientSecret string
+	oauthHost    string
 	username     string
 	password     string
 }
@@ -62,6 +64,7 @@ func New(opts Opts) (forge.Forge, error) {
 		urlAPI:       fmt.Sprintf("%s/rest", opts.URL),
 		clientID:     opts.ClientID,
 		clientSecret: opts.ClientSecret,
+		oauthHost:    opts.OAuthHost,
 		username:     opts.Username,
 		password:     opts.Password,
 	}
@@ -80,12 +83,12 @@ func New(opts Opts) (forge.Forge, error) {
 	return config, nil
 }
 
-// Name returns the string name of this driver
+// Name returns the string name of this driver.
 func (c *client) Name() string {
 	return "bitbucket_dc"
 }
 
-// URL returns the root url of a configured forge
+// URL returns the root url of a configured forge.
 func (c *client) URL() string {
 	return c.url
 }
@@ -262,8 +265,14 @@ func (c *client) File(ctx context.Context, u *model.User, r *model.Repo, p *mode
 		return nil, fmt.Errorf("unable to create bitbucket client: %w", err)
 	}
 
-	b, _, err := bc.Projects.GetTextFileContent(ctx, r.Owner, r.Name, f, p.Commit)
+	b, resp, err := bc.Projects.GetTextFileContent(ctx, r.Owner, r.Name, f, p.Commit)
 	if err != nil {
+		if resp.StatusCode == http.StatusNotFound {
+			// requested directory might not exist
+			return nil, &forge_types.ErrConfigNotFound{
+				Configs: []string{f},
+			}
+		}
 		return nil, err
 	}
 	return b, nil
@@ -281,7 +290,10 @@ func (c *client) Dir(ctx context.Context, u *model.User, r *model.Repo, p *model
 		list, resp, err := bc.Projects.ListFiles(ctx, r.Owner, r.Name, path, opts)
 		if err != nil {
 			if resp.StatusCode == http.StatusNotFound {
-				break // requested directory might not exist
+				// requested directory might not exist
+				return nil, &forge_types.ErrConfigNotFound{
+					Configs: []string{path},
+				}
 			}
 			return nil, err
 		}
@@ -599,11 +611,16 @@ func (c *client) Org(_ context.Context, _ *model.User, owner string) (*model.Org
 }
 
 func (c *client) newOAuth2Config() *oauth2.Config {
+	publicOAuthURL := c.oauthHost
+	if publicOAuthURL == "" {
+		publicOAuthURL = c.urlAPI
+	}
+
 	return &oauth2.Config{
 		ClientID:     c.clientID,
 		ClientSecret: c.clientSecret,
 		Endpoint: oauth2.Endpoint{
-			AuthURL:  fmt.Sprintf("%s/oauth2/latest/authorize", c.urlAPI),
+			AuthURL:  fmt.Sprintf("%s/oauth2/latest/authorize", publicOAuthURL),
 			TokenURL: fmt.Sprintf("%s/oauth2/latest/token", c.urlAPI),
 		},
 		Scopes:      []string{string(bb.PermissionRepoRead), string(bb.PermissionRepoWrite), string(bb.PermissionRepoAdmin)},

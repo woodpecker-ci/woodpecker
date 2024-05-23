@@ -59,11 +59,11 @@ func (s storage) GetPipelineList(repo *model.Repo, p *model.ListOptions, f *mode
 
 	if f != nil {
 		if f.After != 0 {
-			cond = cond.And(builder.Gt{"pipeline_started": f.After})
+			cond = cond.And(builder.Gt{"pipeline_created": f.After})
 		}
 
 		if f.Before != 0 {
-			cond = cond.And(builder.Lt{"pipeline_started": f.Before})
+			cond = cond.And(builder.Lt{"pipeline_created": f.Before})
 		}
 	}
 
@@ -72,7 +72,7 @@ func (s storage) GetPipelineList(repo *model.Repo, p *model.ListOptions, f *mode
 		Find(&pipelines)
 }
 
-// GetActivePipelineList get all pipelines that are pending, running or blocked
+// GetActivePipelineList get all pipelines that are pending, running or blocked.
 func (s storage) GetActivePipelineList(repo *model.Repo) ([]*model.Pipeline, error) {
 	pipelines := make([]*model.Pipeline, 0)
 	query := s.engine.

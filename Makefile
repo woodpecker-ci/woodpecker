@@ -306,6 +306,14 @@ bundle-cli: bundle-prepare ## Create bundles for cli
 .PHONY: bundle
 bundle: bundle-agent bundle-server bundle-cli ## Create all bundles
 
+.PHONY: spellcheck
+spellcheck:
+	pnpx cspell lint --no-progress --gitignore '{**,.*}/{*,.*}'
+	tree --gitignore \
+	  -I 012_columns_rename_procs_to_steps.go \
+	  -I versioned_docs -I '*opensource.svg' | \
+	  pnpx cspell lint --no-progress stdin
+
 ##@ Docs
 .PHONY: docs
 docs: ## Generate docs (currently only for the cli)

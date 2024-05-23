@@ -72,7 +72,7 @@ func run(c *cli.Context, backends []types.Backend) error {
 		transport = grpc.WithTransportCredentials(insecure.NewCredentials())
 	}
 
-	authConn, err := grpc.Dial(
+	authConn, err := grpc.NewClient(
 		c.String("server"),
 		transport,
 		grpc.WithKeepaliveParams(keepalive.ClientParameters{
@@ -89,12 +89,12 @@ func run(c *cli.Context, backends []types.Backend) error {
 
 	agentToken := c.String("grpc-token")
 	authClient := agentRpc.NewAuthGrpcClient(authConn, agentToken, agentConfig.AgentID)
-	authInterceptor, err := agentRpc.NewAuthInterceptor(authClient, 30*time.Minute) //nolint: gomnd
+	authInterceptor, err := agentRpc.NewAuthInterceptor(authClient, 30*time.Minute) //nolint:mnd
 	if err != nil {
 		return err
 	}
 
-	conn, err := grpc.Dial(
+	conn, err := grpc.NewClient(
 		c.String("server"),
 		transport,
 		grpc.WithKeepaliveParams(keepalive.ClientParameters{

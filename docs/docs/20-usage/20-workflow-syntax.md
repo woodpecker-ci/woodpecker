@@ -1,6 +1,10 @@
 # Workflow syntax
 
-The workflow section defines a list of steps to build, test and deploy your code. Steps are executed serially, in the order in which they are defined. If a step returns a non-zero exit code, the workflow and therefore all other workflows and the pipeline immediately aborts and returns a failure status.
+The Workflow section defines a list of steps to build, test and deploy your code. The steps are executed serially in the order in which they are defined. If a step returns a non-zero exit code, the workflow and therefore the entire pipeline terminates immediately and returns an error status.
+
+:::note
+An exception to this rule are steps with a [`status: [failure]`](#status) condition, which ensures that they are executed in the case of a failed run.
+:::
 
 Example steps:
 
@@ -160,6 +164,9 @@ Only build steps can define commands. You cannot use commands with plugins or se
 ### `entrypoint`
 
 Allows you to specify the entrypoint for containers. Note that this must be a list of the command and its arguments (e.g. `["/bin/sh", "-c"]`).
+
+If you define [`commands`](#commands), the default entrypoint will be `["/bin/sh", "-c", "echo $CI_SCRIPT | base64 -d | /bin/sh -e"]`.
+You can also use a custom shell with `CI_SCRIPT` (Base64-encoded) if you set `commands`.
 
 ### `environment`
 
@@ -395,16 +402,19 @@ when:
 
 You can use [glob patterns](https://github.com/bmatcuk/doublestar#patterns) to match the changed files and specify if the step should run if a file matching that pattern has been changed `include` or if some files have **not** been changed `exclude`.
 
+For pipelines without file changes (empty commits or on events without file changes like `tag`), you can use `on_empty` to set whether this condition should be **true** _(default)_ or **false** in these cases.
+
 ```yaml
 when:
   - path:
       include: ['.woodpecker/*.yaml', '*.ini']
       exclude: ['*.md', 'docs/**']
       ignore_message: '[ALL]'
+      on_empty: true
 ```
 
 :::info
-Passing a defined ignore-message like `[ALL]` inside the commit message will ignore all path conditions.
+Passing a defined ignore-message like `[ALL]` inside the commit message will ignore all path conditions and the `on_empty` setting.
 :::
 
 #### `evaluate`

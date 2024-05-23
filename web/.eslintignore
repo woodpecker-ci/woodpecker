@@ -5,4 +5,5 @@ package.json
 tsconfig.eslint.json
 tsconfig.json
 src/assets/locales/
+src/assets/dayjsLocales/
 components.d.ts

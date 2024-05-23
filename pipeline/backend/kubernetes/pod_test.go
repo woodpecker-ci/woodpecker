@@ -90,9 +90,7 @@ func TestTinyPod(t *testing.T) {
 					"image": "gradle:8.4.0-jdk21",
 					"command": [
 						"/bin/sh",
-						"-c"
-					],
-					"args": [
+						"-c",
 						"echo $CI_SCRIPT | base64 -d | /bin/sh -e"
 					],
 					"workingDir": "/woodpecker/src",
@@ -159,11 +157,13 @@ func TestFullPod(t *testing.T) {
 			"creationTimestamp": null,
 			"labels": {
 				"app": "test",
+				"part-of": "woodpecker-ci",
 				"step": "go-test"
 			},
 			"annotations": {
 				"apps.kubernetes.io/pod-index": "0",
-				"container.apparmor.security.beta.kubernetes.io/wp-01he8bebctabr3kgk0qj36d2me-0": "localhost/k8s-apparmor-example-deny-write"
+				"container.apparmor.security.beta.kubernetes.io/wp-01he8bebctabr3kgk0qj36d2me-0": "localhost/k8s-apparmor-example-deny-write",
+				"kubernetes.io/limit-ranger": "LimitRanger plugin set: cpu, memory request and limit for container"
 			}
 		},
 		"spec": {
@@ -182,9 +182,6 @@ func TestFullPod(t *testing.T) {
 					"command": [
 						"/bin/sh",
 						"-c"
-					],
-					"args": [
-						"echo $CI_SCRIPT | base64 -d | /bin/sh -e"
 					],
 					"workingDir": "/woodpecker/src",
 					"ports": [
@@ -328,12 +325,16 @@ func TestFullPod(t *testing.T) {
 		ExtraHosts:  hostAliases,
 		Ports:       ports,
 	}, &config{
-		Namespace:            "woodpecker",
-		ImagePullSecretNames: []string{"regcred", "another-pull-secret"},
-		PodLabels:            map[string]string{"app": "test"},
-		PodAnnotations:       map[string]string{"apps.kubernetes.io/pod-index": "0"},
-		SecurityContext:      SecurityContextConfig{RunAsNonRoot: false},
+		Namespace:                   "woodpecker",
+		ImagePullSecretNames:        []string{"regcred", "another-pull-secret"},
+		PodLabels:                   map[string]string{"app": "test"},
+		PodLabelsAllowFromStep:      true,
+		PodAnnotations:              map[string]string{"apps.kubernetes.io/pod-index": "0"},
+		PodAnnotationsAllowFromStep: true,
+		SecurityContext:             SecurityContextConfig{RunAsNonRoot: false},
 	}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{
+		Labels:             map[string]string{"part-of": "woodpecker-ci"},
+		Annotations:        map[string]string{"kubernetes.io/limit-ranger": "LimitRanger plugin set: cpu, memory request and limit for container"},
 		NodeSelector:       map[string]string{"storage": "ssd"},
 		RuntimeClassName:   &runtimeClass,
 		ServiceAccountName: "wp-svc-acc",
@@ -414,4 +415,50 @@ func TestPodPrivilege(t *testing.T) {
 	pod, err = createTestPod(false, true, secCtx)
 	assert.NoError(t, err)
 	assert.Equal(t, true, *pod.Spec.SecurityContext.RunAsNonRoot)
+}
+
+func TestScratchPod(t *testing.T) {
+	expected := `
+	{
+		"metadata": {
+			"name": "wp-01he8bebctabr3kgk0qj36d2me-0",
+			"namespace": "woodpecker",
+			"creationTimestamp": null,
+			"labels": {
+				"step": "curl-google"
+			}
+		},
+		"spec": {
+			"containers": [
+				{
+					"name": "wp-01he8bebctabr3kgk0qj36d2me-0",
+					"image": "quay.io/curl/curl",
+					"command": [
+						"/usr/bin/curl",
+						"-v",
+						"google.com"
+					],
+					"resources": {}
+				}
+			],
+			"restartPolicy": "Never"
+		},
+		"status": {}
+	}`
+
+	pod, err := mkPod(&types.Step{
+		Name:       "curl-google",
+		Image:      "quay.io/curl/curl",
+		Entrypoint: []string{"/usr/bin/curl", "-v", "google.com"},
+	}, &config{
+		Namespace: "woodpecker",
+	}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{})
+	assert.NoError(t, err)
+
+	podJSON, err := json.Marshal(pod)
+	assert.NoError(t, err)
+
+	ja := jsonassert.New(t)
+	t.Log(string(podJSON))
+	ja.Assertf(string(podJSON), expected)
 }

@@ -127,7 +127,7 @@ func serveFile(f *prefixFS) func(ctx *gin.Context) {
 	}
 }
 
-// redirect return gin helper to redirect a request
+// redirect return gin helper to redirect a request.
 func redirect(location string, status ...int) func(ctx *gin.Context) {
 	return func(ctx *gin.Context) {
 		code := http.StatusFound

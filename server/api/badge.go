@@ -13,8 +13,6 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-//
-// This file has been modified by Informatyka Boguslawski sp. z o.o. sp.k.
 
 package api
 
@@ -37,7 +35,7 @@ import (
 
 // GetBadge
 //
-//	@Summary	Get status badge, SVG format
+//	@Summary	Get status of pipeline as SVG badge
 //	@Router		/badges/{repo_id}/status.svg [get]
 //	@Produce	image/svg+xml
 //	@Success	200

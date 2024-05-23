@@ -13,8 +13,6 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-//
-// This file has been modified by Informatyka Boguslawski sp. z o.o. sp.k.
 
 package api
 
@@ -52,7 +50,7 @@ func GetQueueInfo(c *gin.Context) {
 
 // PauseQueue
 //
-//	@Summary	Pause a pipeline queue
+//	@Summary	Pause the pipeline queue
 //	@Router		/queue/pause [post]
 //	@Produce	plain
 //	@Success	204
@@ -65,7 +63,7 @@ func PauseQueue(c *gin.Context) {
 
 // ResumeQueue
 //
-//	@Summary	Resume a pipeline queue
+//	@Summary	Resume the pipeline queue
 //	@Router		/queue/resume [post]
 //	@Produce	plain
 //	@Success	204
