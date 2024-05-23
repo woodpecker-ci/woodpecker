@@ -25,10 +25,10 @@ import (
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/network"
 	"github.com/docker/docker/api/types/volume"
-	"github.com/docker/go-connections/tlsconfig"
+	tls_config "github.com/docker/go-connections/tlsconfig"
 	"github.com/moby/moby/client"
-	"github.com/moby/moby/pkg/jsonmessage"
-	"github.com/moby/moby/pkg/stdcopy"
+	json_message "github.com/moby/moby/pkg/jsonmessage"
+	std_copy "github.com/moby/moby/pkg/stdcopy"
 	"github.com/moby/term"
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v2"
@@ -75,13 +75,13 @@ func httpClientOfOpts(dockerCertPath string, verifyTLS bool) *http.Client {
 		return nil
 	}
 
-	options := tlsconfig.Options{
+	options := tls_config.Options{
 		CAFile:             filepath.Join(dockerCertPath, "ca.pem"),
 		CertFile:           filepath.Join(dockerCertPath, "cert.pem"),
 		KeyFile:            filepath.Join(dockerCertPath, "key.pem"),
 		InsecureSkipVerify: !verifyTLS,
 	}
-	tlsConf, err := tlsconfig.Client(options)
+	tlsConf, err := tls_config.Client(options)
 	if err != nil {
 		log.Error().Err(err).Msg("could not create http client out of docker backend options")
 		return nil
@@ -200,7 +200,7 @@ func (e *docker) StartStep(ctx context.Context, step *backend.Step, taskUUID str
 		if pErr == nil {
 			// TODO(1936): show image pull progress in web-ui
 			fd, isTerminal := term.GetFdInfo(os.Stdout)
-			if err := jsonmessage.DisplayJSONMessagesStream(responseBody, os.Stdout, fd, isTerminal, nil); err != nil {
+			if err := json_message.DisplayJSONMessagesStream(responseBody, os.Stdout, fd, isTerminal, nil); err != nil {
 				log.Error().Err(err).Msg("DisplayJSONMessagesStream")
 			}
 			responseBody.Close()
@@ -225,7 +225,7 @@ func (e *docker) StartStep(ctx context.Context, step *backend.Step, taskUUID str
 		}
 		// TODO(1936): show image pull progress in web-ui
 		fd, isTerminal := term.GetFdInfo(os.Stdout)
-		if err := jsonmessage.DisplayJSONMessagesStream(responseBody, os.Stdout, fd, isTerminal, nil); err != nil {
+		if err := json_message.DisplayJSONMessagesStream(responseBody, os.Stdout, fd, isTerminal, nil); err != nil {
 			log.Error().Err(err).Msg("DisplayJSONMessagesStream")
 		}
 		responseBody.Close()
@@ -292,7 +292,7 @@ func (e *docker) TailStep(ctx context.Context, step *backend.Step, taskUUID stri
 
 	// de multiplex 'logs' who contains two streams, previously multiplexed together using StdWriter
 	go func() {
-		_, _ = stdcopy.StdCopy(wc, wc, logs)
+		_, _ = std_copy.StdCopy(wc, wc, logs)
 		_ = logs.Close()
 		_ = wc.Close()
 	}()

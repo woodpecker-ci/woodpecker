@@ -11,6 +11,7 @@
     "npm"
   ],
   "words": [
+    "abool",
     "BUILDPLATFORM",
     "Codeberg",
     "Curr",
@@ -69,6 +70,7 @@
     "doublestar",
     "envsubst",
     "estree",
+    "errgroup",
     "evenodd",
     "excalidraw",
     "favicons",
@@ -170,6 +172,17 @@
     // TODO: remove the following
     "docs/",
     "server/"
+  ],
+  // Exclude imports, because they are also strings.
+  "ignoreRegExpList": [
+    // ignore mulltiline imports
+    "import\\s*\\((.|[\r\n])*?\\)",
+    // ignore single line imports
+    "import\\s*.*\".*?\"",
+    // ignore go generate directive
+    "//\\s*go:generate.*",
+    // ignore nolint directive
+    "//\\s*nolint:.*"
   ],
   "enableFiletypes": ["dockercompose"]
 }
