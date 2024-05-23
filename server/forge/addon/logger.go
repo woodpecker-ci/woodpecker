@@ -146,6 +146,22 @@ func (c *clientLogger) SetLevel(level hclog.Level) {
 	c.logger = c.logger.Level(convertLvl(level))
 }
 
+func (c *clientLogger) GetLevel() hclog.Level {
+	switch c.logger.GetLevel() {
+	case zerolog.ErrorLevel:
+		return hclog.Error
+	case zerolog.WarnLevel:
+		return hclog.Warn
+	case zerolog.InfoLevel:
+		return hclog.Info
+	case zerolog.DebugLevel:
+		return hclog.Debug
+	case zerolog.TraceLevel:
+		return hclog.Trace
+	}
+	return hclog.NoLevel
+}
+
 func (c *clientLogger) StandardLogger(opts *hclog.StandardLoggerOptions) *stdlog.Logger {
 	return stdlog.New(c.StandardWriter(opts), "", 0)
 }
