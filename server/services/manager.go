@@ -18,7 +18,7 @@ import (
 	"crypto"
 	"time"
 
-	"github.com/jellydator/ttlcache/v3" // cspell:disable-line
+	"github.com/jellydator/ttlcache/v3"
 	"github.com/urfave/cli/v2"
 
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
