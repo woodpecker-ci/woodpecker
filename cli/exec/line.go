@@ -19,26 +19,23 @@ import (
 	"os"
 	"strings"
 	"time"
-
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc"
 )
 
 // LineWriter sends logs to the client.
 type LineWriter struct {
-	stepName string
-	stepUUID string
-	num      int
-	now      time.Time
-	rep      *strings.Replacer
-	lines    []*rpc.LogEntry
+	stepName  string
+	stepUUID  string
+	num       int
+	startTime time.Time
+	rep       *strings.Replacer
 }
 
 // NewLineWriter returns a new line reader.
 func NewLineWriter(stepName, stepUUID string) *LineWriter {
 	return &LineWriter{
-		stepName: stepName,
-		stepUUID: stepUUID,
-		now:      time.Now().UTC(),
+		stepName:  stepName,
+		stepUUID:  stepUUID,
+		startTime: time.Now().UTC(),
 	}
 }
 
@@ -48,18 +45,9 @@ func (w *LineWriter) Write(p []byte) (n int, err error) {
 		data = w.rep.Replace(data)
 	}
 
-	line := &rpc.LogEntry{
-		Data:     data,
-		StepUUID: w.stepUUID,
-		Line:     w.num,
-		Time:     int64(time.Since(w.now).Seconds()),
-		Type:     rpc.LogEntryStdout,
-	}
-
-	fmt.Fprintf(os.Stderr, "[%s:L%d:%ds] %s", w.stepName, w.num, int64(time.Since(w.now).Seconds()), data)
+	fmt.Fprintf(os.Stderr, "[%s:L%d:%ds] %s", w.stepName, w.num, int64(time.Since(w.startTime).Seconds()), data)
 
 	w.num++
 
-	w.lines = append(w.lines, line)
 	return len(p), nil
 }
