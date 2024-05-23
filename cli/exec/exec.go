@@ -39,6 +39,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/compiler"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/linter"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/matrix"
+	pipelineLog "go.woodpecker-ci.org/woodpecker/v2/pipeline/log"
 	"go.woodpecker-ci.org/woodpecker/v2/shared/utils"
 )
 
@@ -274,7 +275,6 @@ func convertPathForWindows(path string) string {
 }
 
 var defaultLogger = pipeline.Logger(func(step *backendTypes.Step, rc io.Reader) error {
-	logStream := NewLineWriter(step.Name, step.UUID)
-	_, err := io.Copy(logStream, rc)
-	return err
+	logWriter := NewLineWriter(step.Name, step.UUID)
+	return pipelineLog.CopyLineByLine(logWriter, rc)
 })

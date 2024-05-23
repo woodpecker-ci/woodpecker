@@ -17,6 +17,7 @@ package log
 
 import (
 	"context"
+	"io"
 	"strings"
 	"sync"
 	"time"
@@ -45,7 +46,7 @@ type LineWriter struct {
 }
 
 // NewLineWriter returns a new line reader.
-func NewLineWriter(peer rpc.Peer, stepUUID string, flushInterval time.Duration, secret ...string) *LineWriter {
+func NewLineWriter(peer rpc.Peer, stepUUID string, flushInterval time.Duration, secret ...string) io.WriteCloser {
 	lw := &LineWriter{
 		peer:          peer,
 		stepUUID:      stepUUID,

@@ -16,8 +16,8 @@ package exec
 
 import (
 	"fmt"
+	"io"
 	"os"
-	"strings"
 	"time"
 )
 
@@ -27,11 +27,10 @@ type LineWriter struct {
 	stepUUID  string
 	num       int
 	startTime time.Time
-	rep       *strings.Replacer
 }
 
 // NewLineWriter returns a new line reader.
-func NewLineWriter(stepName, stepUUID string) *LineWriter {
+func NewLineWriter(stepName, stepUUID string) io.WriteCloser {
 	return &LineWriter{
 		stepName:  stepName,
 		stepUUID:  stepUUID,
@@ -40,14 +39,11 @@ func NewLineWriter(stepName, stepUUID string) *LineWriter {
 }
 
 func (w *LineWriter) Write(p []byte) (n int, err error) {
-	data := string(p)
-	if w.rep != nil {
-		data = w.rep.Replace(data)
-	}
-
-	fmt.Fprintf(os.Stderr, "[%s:L%d:%ds] %s", w.stepName, w.num, int64(time.Since(w.startTime).Seconds()), data)
-
+	fmt.Fprintf(os.Stderr, "[%s:L%d:%ds] %s", w.stepName, w.num, int64(time.Since(w.startTime).Seconds()), p)
 	w.num++
-
 	return len(p), nil
+}
+
+func (w *LineWriter) Close() error {
+	return nil
 }
