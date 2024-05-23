@@ -15,23 +15,19 @@
 package agent
 
 import (
+	"bufio"
 	"io"
 	"sync"
-	"time"
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 
-	agentLogger "go.woodpecker-ci.org/woodpecker/v2/agent/logger"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline"
 	backend "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc"
 )
 
-const (
-	writeBufferSize = 10240 // 10kb
-	flushInterval   = 1 * time.Second
-)
+const writeBufferSize = 10240 // 10kb
 
 func (r *Runner) createLogger(logger zerolog.Logger, uploads *sync.WaitGroup, workflow *rpc.Workflow) pipeline.Logger {
 	return func(step *backend.Step, rc io.Reader) error {
@@ -50,9 +46,8 @@ func (r *Runner) createLogger(logger zerolog.Logger, uploads *sync.WaitGroup, wo
 		loglogger.Debug().Msg("log stream opened")
 
 		logStream := rpc.NewLineWriter(r.client, step.UUID, secrets...)
-		logStreamBufferWithTimeout := agentLogger.NewLogBuffer(logStream, writeBufferSize, flushInterval)
-		defer logStreamBufferWithTimeout.Close()
-		if _, err := io.Copy(logStreamBufferWithTimeout, rc); err != nil {
+		buffLogStream := bufio.NewWriterSize(logStream, writeBufferSize)
+		if _, err := io.Copy(buffLogStream, rc); err != nil {
 			log.Error().Err(err).Msg("copy limited logStream part")
 		}
 
