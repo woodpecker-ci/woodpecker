@@ -46,8 +46,8 @@ export const usePipelineStore = defineStore('pipelines', () => {
     setPipeline(repoId, pipeline);
   }
 
-  async function loadRepoPipelines(repoId: number) {
-    const _pipelines = await apiClient.getPipelineList(repoId);
+  async function loadRepoPipelines(repoId: number, page?: number) {
+    const _pipelines = await apiClient.getPipelineList(repoId, { page });
     _pipelines.forEach((pipeline) => {
       setPipeline(repoId, pipeline);
     });

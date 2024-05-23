@@ -30,14 +30,14 @@ import (
 )
 
 const (
-	// checkTime specifies the interval woodpecker checks for new crons to exec
+	// Specifies the interval woodpecker checks for new crons to exec.
 	checkTime = 10 * time.Second
 
-	// checkItems specifies the batch size of crons to retrieve per check from database
+	// Specifies the batch size of crons to retrieve per check from database.
 	checkItems = 10
 )
 
-// Start starts the cron scheduler loop
+// Start starts the cron scheduler loop.
 func Start(ctx context.Context, store store.Store) error {
 	for {
 		select {
@@ -64,7 +64,7 @@ func Start(ctx context.Context, store store.Store) error {
 	}
 }
 
-// CalcNewNext parses a cron string and calculates the next exec time based on it
+// CalcNewNext parses a cron string and calculates the next exec time based on it.
 func CalcNewNext(schedule string, now time.Time) (time.Time, error) {
 	// remove local timezone
 	now = now.UTC()

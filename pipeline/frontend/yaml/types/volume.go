@@ -26,7 +26,7 @@ type Volumes struct {
 	Volumes []*Volume
 }
 
-// Volume represent a service volume
+// Volume represent a service volume.
 type Volume struct {
 	Source      string `yaml:"-"`
 	Destination string `yaml:"-"`
@@ -68,7 +68,7 @@ func (v *Volumes) UnmarshalYAML(unmarshal func(any) error) error {
 			}
 			elts := strings.SplitN(name, ":", 3)
 			var vol *Volume
-			//nolint: gomnd
+			//nolint:mnd
 			switch {
 			case len(elts) == 1:
 				vol = &Volume{

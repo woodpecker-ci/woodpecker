@@ -21,7 +21,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-// Watch keyset file events to detect key rotations and hot reload keys
+// Watch keyset file events to detect key rotations and hot reload keys.
 func (svc *tinkEncryptionService) initFileWatcher() error {
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {

@@ -25,7 +25,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server/pubsub"
 )
 
-// publishToTopic publishes message to UI clients
+// publishToTopic publishes message to UI clients.
 func publishToTopic(pipeline *model.Pipeline, repo *model.Repo) {
 	message := pubsub.Message{
 		Labels: map[string]string{

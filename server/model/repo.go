@@ -53,7 +53,7 @@ type Repo struct {
 	NetrcOnlyTrusted             bool           `json:"netrc_only_trusted"              xorm:"NOT NULL DEFAULT true 'netrc_only_trusted'"`
 } //	@name Repo
 
-// TableName return database table name for xorm
+// TableName return database table name for xorm.
 func (Repo) TableName() string {
 	return "repos"
 }

@@ -136,9 +136,9 @@ type (
 		Username string `json:"username"`
 		Password string `json:"password,omitempty"`
 		// Deprecated
-		Email string `json:"email"` // TODO remove in 3.x
+		Email string `json:"email"` // TODO: remove in 3.x
 		// Deprecated
-		Token string `json:"token"` // TODO remove in 3.x
+		Token string `json:"token"` // TODO: remove in 3.x
 	}
 
 	// Secret represents a secret variable, such as a password or token.
@@ -181,6 +181,8 @@ type (
 		Commit  string `json:"commit,omitempty"`
 	}
 
+	//nolint:godot
+	// TODO: use dedicated struct in 3.x
 	// QueueStats struct {
 	// 	Workers       int `json:"worker_count"`
 	// 	Pending       int `json:"pending_count"`
@@ -194,7 +196,7 @@ type (
 		Pending       []Task `json:"pending"`
 		WaitingOnDeps []Task `json:"waiting_on_deps"`
 		Running       []Task `json:"running"`
-		// TODO use dedicated struct in 3.x
+		// TODO: use dedicated struct in 3.x
 		// Stats         QueueStats `json:"stats"`
 		Stats struct {
 			Workers       int `json:"worker_count"`
@@ -211,7 +213,7 @@ type (
 		Level string `json:"log-level"`
 	}
 
-	// LogEntry is a single log entry
+	// LogEntry is a single log entry.
 	LogEntry struct {
 		ID     int64        `json:"id"`
 		StepID int64        `json:"step_id"`

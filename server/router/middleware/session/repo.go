@@ -66,7 +66,7 @@ func SetRepo() gin.HandlerFunc {
 			repo, err = _store.GetRepoName(fullName)
 		}
 
-		if repo != nil {
+		if repo != nil && err == nil {
 			c.Set("repo", repo)
 			c.Next()
 			return
