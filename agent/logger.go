@@ -15,7 +15,6 @@
 package agent
 
 import (
-	"bufio"
 	"io"
 	"sync"
 	"time"
@@ -29,8 +28,8 @@ import (
 )
 
 const (
-	// writeBufferSize = 4 * 1024 * 1024 // 4mb
-	flushInterval = 250 * time.Millisecond
+	maxLogLineLength = 3 * 1024 * 1024 // 3mb as 4mb is the limit of the grpc message size
+	flushInterval    = 250 * time.Millisecond
 )
 
 func (r *Runner) createLogger(_logger zerolog.Logger, uploads *sync.WaitGroup, workflow *rpc.Workflow) pipeline.Logger {
@@ -49,10 +48,8 @@ func (r *Runner) createLogger(_logger zerolog.Logger, uploads *sync.WaitGroup, w
 
 		logger.Debug().Msg("log stream opened")
 
-		bufReader := bufio.NewReader(rc)
 		logStream := log.NewLineWriter(r.client, step.UUID, flushInterval, secrets...)
-		defer logStream.Close()
-		if _, err := io.Copy(logStream, bufReader); err != nil {
+		if err := log.CopyLineByLine(logStream, rc, maxLogLineLength); err != nil {
 			logger.Error().Err(err).Msg("copy limited logStream part")
 		}
 

@@ -62,32 +62,14 @@ func NewLineWriter(peer rpc.Peer, stepUUID string, flushInterval time.Duration, 
 }
 
 func (w *LineWriter) Write(p []byte) (n int, err error) {
-	s := string(p)
-	v := []string{s}
-
-	// if the string contains a newline character, we split
-	if strings.Contains(strings.TrimSuffix(s, "\n"), "\n") {
-		v = strings.SplitAfter(s, "\n")
-	}
-
-	for _, line := range v {
-		n, err := w.writeLine(line)
-		if err != nil {
-			return n, err
-		}
-	}
-
-	return len(p), nil
-}
-
-func (w *LineWriter) writeLine(data string) (n int, err error) {
+	data := string(p)
 	if w.replacer != nil {
 		data = w.replacer.Replace(data)
 	}
 	log.Trace().Str("step-uuid", w.stepUUID).Msgf("grpc write line: %s", data)
 
 	line := &rpc.LogEntry{
-		Data:     strings.TrimSpace(data),
+		Data:     strings.TrimSpace(data), // remove trailing newline
 		StepUUID: w.stepUUID,
 		Time:     int64(time.Since(w.startTime).Seconds()),
 		Type:     rpc.LogEntryStdout,
@@ -131,6 +113,7 @@ func (w *LineWriter) flush() error {
 	for _, line := range pendingLines {
 		// TODO: send log entries in batch
 		if err := w.peer.Log(context.Background(), line); err != nil {
+			log.Error().Err(err).Msg("failed to send log entry")
 			return err
 		}
 	}
