@@ -58,7 +58,7 @@ func (w *LineWriter) Write(p []byte) (n int, err error) {
 	log.Trace().Str("step-uuid", w.stepUUID).Msgf("grpc write line: %s", data)
 
 	line := &rpc.LogEntry{
-		Data:     strings.TrimSpace(data), // remove trailing newline
+		Data:     strings.TrimSuffix(data, "\n"), // remove trailing newline
 		StepUUID: w.stepUUID,
 		Time:     int64(time.Since(w.startTime).Seconds()),
 		Type:     rpc.LogEntryStdout,
