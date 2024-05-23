@@ -90,7 +90,7 @@ type httpRequest struct {
 	Body   []byte              `json:"body"`
 }
 
-// modelUser is an extension of model.User to marshal all fields to JSON
+// modelUser is an extension of model.User to marshal all fields to JSON.
 type modelUser struct {
 	User *model.User `json:"user"`
 
@@ -129,7 +129,7 @@ func modelUserFromModel(u *model.User) *modelUser {
 	}
 }
 
-// modelRepo is an extension of model.Repo to marshal all fields to JSON
+// modelRepo is an extension of model.Repo to marshal all fields to JSON.
 type modelRepo struct {
 	Repo   *model.Repo `json:"repo"`
 	UserID int64       `json:"user_id"`

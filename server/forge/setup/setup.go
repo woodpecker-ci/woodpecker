@@ -46,22 +46,17 @@ func setupBitbucket(forge *model.Forge) (forge.Forge, error) {
 }
 
 func setupGitea(forge *model.Forge) (forge.Forge, error) {
-	server, err := url.Parse(forge.URL)
+	serverURL, err := url.Parse(forge.URL)
 	if err != nil {
 		return nil, err
 	}
 
-	oauthURL, ok := forge.AdditionalOptions["oauth-server"].(string)
-	if !ok {
-		return nil, fmt.Errorf("missing oauth-server")
-	}
-
 	opts := gitea.Opts{
-		URL:        strings.TrimRight(server.String(), "/"),
+		URL:        strings.TrimRight(serverURL.String(), "/"),
 		Client:     forge.Client,
 		Secret:     forge.ClientSecret,
 		SkipVerify: forge.SkipVerify,
-		OAuth2URL:  oauthURL,
+		OAuthHost:  forge.OAuthHost,
 	}
 	if len(opts.URL) == 0 {
 		return nil, fmt.Errorf("WOODPECKER_GITEA_URL must be set")
@@ -76,6 +71,7 @@ func setupGitLab(forge *model.Forge) (forge.Forge, error) {
 		ClientID:     forge.Client,
 		ClientSecret: forge.ClientSecret,
 		SkipVerify:   forge.SkipVerify,
+		OAuthHost:    forge.OAuthHost,
 	})
 }
 
@@ -97,6 +93,7 @@ func setupGitHub(forge *model.Forge) (forge.Forge, error) {
 		SkipVerify: forge.SkipVerify,
 		MergeRef:   mergeRef,
 		OnlyPublic: publicOnly,
+		OAuthHost:  forge.OAuthHost,
 	}
 	log.Trace().Msgf("Forge (github) opts: %#v", opts)
 	return github.New(opts)
@@ -118,6 +115,7 @@ func setupBitbucketDatacenter(forge *model.Forge) (forge.Forge, error) {
 		ClientSecret: forge.ClientSecret,
 		Username:     gitUsername,
 		Password:     gitPassword,
+		OAuthHost:    forge.OAuthHost,
 	}
 	log.Trace().Msgf("Forge (bitbucketdatacenter) opts: %#v", opts)
 	return bitbucketdatacenter.New(opts)

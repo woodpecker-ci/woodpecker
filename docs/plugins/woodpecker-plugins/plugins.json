@@ -209,6 +209,11 @@
       "name": "Twine",
       "docs": "https://gitea.elara.ws/music-kraken/plugin-twine/raw/branch/master/docs.md",
       "verified": false
+    },
+    {
+      "name": "Gitea Package",
+      "docs": "https://gitea.ocram85.com/plugins/gitea-package/raw/branch/main/docs.md",
+      "verified": false
     }
   ]
 }

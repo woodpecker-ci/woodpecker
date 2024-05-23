@@ -13,8 +13,6 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-//
-// This file has been modified by Informatyka Boguslawski sp. z o.o. sp.k.
 
 package api
 
@@ -551,7 +549,7 @@ func PostPipeline(c *gin.Context) {
 	pl.DeployTask = c.DefaultQuery("deploy_task", pl.DeployTask)
 
 	// make Event overridable to deploy
-	// TODO refactor to use own proper API for deploy
+	// TODO: refactor to use own proper API for deploy
 	if event, ok := c.GetQuery("event"); ok {
 		pl.Event = model.WebhookEvent(event)
 		if pl.Event != model.EventDeploy {
