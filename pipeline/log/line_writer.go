@@ -32,32 +32,21 @@ import (
 type LineWriter struct {
 	sync.Mutex
 
-	peer          rpc.Peer
-	stepUUID      string
-	num           int
-	startTime     time.Time
-	replacer      *strings.Replacer
-	pendingLines  []*rpc.LogEntry
-	size          int
-	bufferSize    int
-	flushInterval time.Duration
-	timer         *time.Timer
-	closeChan     chan struct{}
+	peer      rpc.Peer
+	stepUUID  string
+	num       int
+	startTime time.Time
+	replacer  *strings.Replacer
 }
 
 // NewLineWriter returns a new line reader.
-func NewLineWriter(peer rpc.Peer, stepUUID string, flushInterval time.Duration, secret ...string) io.WriteCloser {
+func NewLineWriter(peer rpc.Peer, stepUUID string, secret ...string) io.WriteCloser {
 	lw := &LineWriter{
-		peer:          peer,
-		stepUUID:      stepUUID,
-		startTime:     time.Now().UTC(),
-		replacer:      shared.NewSecretsReplacer(secret),
-		pendingLines:  nil,
-		flushInterval: flushInterval,
-		timer:         time.NewTimer(flushInterval),
-		closeChan:     make(chan struct{}),
+		peer:      peer,
+		stepUUID:  stepUUID,
+		startTime: time.Now().UTC(),
+		replacer:  shared.NewSecretsReplacer(secret),
 	}
-	go lw.start()
 	return lw
 }
 
@@ -77,52 +66,14 @@ func (w *LineWriter) Write(p []byte) (n int, err error) {
 	}
 
 	w.num++
-	w.size += len(data)
 
-	if w.size > w.bufferSize {
-		if err := w.flush(); err != nil {
-			return 0, err
-		}
+	if err := w.peer.Log(context.Background(), line); err != nil {
+		return 0, err
 	}
 
-	w.pendingLines = append(w.pendingLines, line)
 	return len(data), nil
 }
 
-func (w *LineWriter) start() {
-	for {
-		select {
-		case <-w.closeChan:
-			return
-		case <-time.After(w.flushInterval):
-			if err := w.flush(); err != nil {
-				log.Error().Str("step-uuid", w.stepUUID).Err(err).Msg("flushing log entries")
-			}
-		}
-	}
-}
-
-func (w *LineWriter) flush() error {
-	pendingLines := []*rpc.LogEntry{}
-
-	w.Lock()
-	pendingLines = append(pendingLines, w.pendingLines...)
-	w.pendingLines = nil
-	defer w.Unlock()
-
-	for _, line := range pendingLines {
-		// TODO: send log entries in batch
-		if err := w.peer.Log(context.Background(), line); err != nil {
-			log.Error().Err(err).Msg("failed to send log entry")
-			return err
-		}
-	}
-
-	return nil
-}
-
 func (w *LineWriter) Close() error {
-	w.timer.Stop()
-	close(w.closeChan)
-	return w.flush()
+	return nil
 }

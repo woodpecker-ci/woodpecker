@@ -48,7 +48,7 @@ func (r *Runner) createLogger(_logger zerolog.Logger, uploads *sync.WaitGroup, w
 
 		logger.Debug().Msg("log stream opened")
 
-		logStream := log.NewLineWriter(r.client, step.UUID, flushInterval, secrets...)
+		logStream := log.NewLineWriter(r.client, step.UUID, secrets...)
 		if err := log.CopyLineByLine(logStream, rc, maxLogLineLength); err != nil {
 			logger.Error().Err(err).Msg("copy limited logStream part")
 		}

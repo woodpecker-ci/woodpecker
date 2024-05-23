@@ -16,7 +16,6 @@ package log_test
 
 import (
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/mock"
 
@@ -30,14 +29,11 @@ func TestLineWriter(t *testing.T) {
 	peer.On("Log", mock.Anything, mock.Anything).Return(nil)
 
 	secrets := []string{"world"}
-	lw := log.NewLineWriter(peer, "e9ea76a5-44a1-4059-9c4a-6956c478b26d", 10*time.Millisecond, secrets...)
+	lw := log.NewLineWriter(peer, "e9ea76a5-44a1-4059-9c4a-6956c478b26d", secrets...)
 	defer lw.Close()
 
 	lw.Write([]byte("hello world\n"))
-	lw.Write([]byte("this writes multiple lines\nand should be split"))
 	lw.Write([]byte("the previous line had no newline at the end"))
-
-	time.Sleep(15 * time.Millisecond)
 
 	peer.AssertCalled(t, "Log", mock.Anything, &rpc.LogEntry{
 		StepUUID: "e9ea76a5-44a1-4059-9c4a-6956c478b26d",
@@ -52,22 +48,6 @@ func TestLineWriter(t *testing.T) {
 		Time:     0,
 		Type:     rpc.LogEntryStdout,
 		Line:     1,
-		Data:     "this writes multiple lines",
-	})
-
-	peer.AssertCalled(t, "Log", mock.Anything, &rpc.LogEntry{
-		StepUUID: "e9ea76a5-44a1-4059-9c4a-6956c478b26d",
-		Time:     0,
-		Type:     rpc.LogEntryStdout,
-		Line:     2,
-		Data:     "and should be split",
-	})
-
-	peer.AssertCalled(t, "Log", mock.Anything, &rpc.LogEntry{
-		StepUUID: "e9ea76a5-44a1-4059-9c4a-6956c478b26d",
-		Time:     0,
-		Type:     rpc.LogEntryStdout,
-		Line:     3,
 		Data:     "the previous line had no newline at the end",
 	})
 
