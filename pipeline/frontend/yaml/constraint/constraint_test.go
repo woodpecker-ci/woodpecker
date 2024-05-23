@@ -260,6 +260,16 @@ func TestConstraintList(t *testing.T) {
 			with: []string{},
 			want: true,
 		},
+		{
+			conf: "{ include: [ README.md ], on_empty: false }",
+			with: []string{},
+			want: false,
+		},
+		{
+			conf: "{ include: [ README.md ], on_empty: true }",
+			with: []string{},
+			want: true,
+		},
 	}
 	for _, test := range testdata {
 		c := parseConstraintPath(t, test.conf)
