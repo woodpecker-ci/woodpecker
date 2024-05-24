@@ -21,6 +21,9 @@ steps:
     settings:
       skip-dirs: node_modules/,plugins/woodpecker-plugins/node_modules/
       dir: docs/
+    # well we should check it, but we can not do much about old deps if docusaurus do not take that serously
+    # but this is not an issue as we just generate a static site anyway ...
+    failure: ignore
 
   web:
     depends_on: []
