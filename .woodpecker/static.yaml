@@ -29,7 +29,7 @@ steps:
       version: 3.2.5
 
   - name: links
-    image: lycheeverse/lychee:0.14.3 # cspell:disable-line
+    image: docker.io/lycheeverse/lychee:0.14.3
     depends_on: []
     commands:
       - lychee pipeline/frontend/yaml/linter/schema/schema.json
