@@ -23,7 +23,7 @@ import (
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
-	client_cmd "k8s.io/client-go/tools/clientcmd" // cspell:disable-line
+	client_cmd "k8s.io/client-go/tools/clientcmd"
 )
 
 var (
