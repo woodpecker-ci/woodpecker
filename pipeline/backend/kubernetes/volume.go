@@ -22,7 +22,7 @@ import (
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/resource"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func mkPersistentVolumeClaim(config *config, name string) (*v1.PersistentVolumeClaim, error) {
@@ -45,7 +45,7 @@ func mkPersistentVolumeClaim(config *config, name string) (*v1.PersistentVolumeC
 	}
 
 	pvc := &v1.PersistentVolumeClaim{
-		ObjectMeta: metav1.ObjectMeta{
+		ObjectMeta: meta_v1.ObjectMeta{
 			Name:      volumeName,
 			Namespace: config.Namespace,
 		},
@@ -83,10 +83,10 @@ func startVolume(ctx context.Context, engine *kube, name string) (*v1.Persistent
 	}
 
 	log.Trace().Msgf("creating volume: %s", pvc.Name)
-	return engine.client.CoreV1().PersistentVolumeClaims(engineConfig.Namespace).Create(ctx, pvc, metav1.CreateOptions{})
+	return engine.client.CoreV1().PersistentVolumeClaims(engineConfig.Namespace).Create(ctx, pvc, meta_v1.CreateOptions{})
 }
 
-func stopVolume(ctx context.Context, engine *kube, name string, deleteOpts metav1.DeleteOptions) error {
+func stopVolume(ctx context.Context, engine *kube, name string, deleteOpts meta_v1.DeleteOptions) error {
 	pvcName, err := volumeName(name)
 	if err != nil {
 		return err

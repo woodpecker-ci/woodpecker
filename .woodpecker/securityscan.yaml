@@ -6,8 +6,7 @@ when:
       - renovate/*
 
 variables:
-  - &trivy_image aquasec/trivy:0.46.1
-  - &trivy_plugin woodpeckerci/plugin-trivy:1.0.1
+  - &trivy_plugin docker.io/woodpeckerci/plugin-trivy:1.0.1
 
 steps:
   backend:
@@ -22,7 +21,7 @@ steps:
     settings:
       skip-dirs: node_modules/,plugins/woodpecker-plugins/node_modules/
       dir: docs/
-    # well we should check it, but we can not do much about old deps if docusaurus do not take that serously
+    # well we should check it, but we can not do much about old deps if docusaurus do not take that seriously
     # but this is not an issue as we just generate a static site anyway ...
     failure: ignore
 

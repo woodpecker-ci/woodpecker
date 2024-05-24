@@ -197,6 +197,7 @@ func encodeAuthToBase64(authConfig types.Auth) (string, error) {
 //
 // It handles Windows and Linux style volume paths.
 func splitVolumeParts(volumeParts string) ([]string, error) {
+	// cspell:disable-next-line
 	pattern := `^((?:[\w]\:)?[^\:]*)\:((?:[\w]\:)?[^\:]*)(?:\:([rwom]*))?`
 	r, err := regexp.Compile(pattern)
 	if err != nil {
