@@ -89,7 +89,7 @@ func (e *local) execClone(ctx context.Context, step *types.Step, state *workflow
 	if rmCmd != "" {
 		// if we have a netrc injected we have to make sure it's deleted in any case after clone was attempted
 		if e.os == "windows" {
-			pwsh, err := exec.LookPath("powershell.exe") // cspell:words pwsh
+			pwsh, err := exec.LookPath("powershell.exe")
 			if err != nil {
 				return err
 			}
