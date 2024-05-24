@@ -184,7 +184,9 @@
     // ignore go generate directive
     "//\\s*go:generate.*",
     // ignore nolint directive
-    "//\\s*nolint:.*"
+    "//\\s*nolint:.*",
+    // ignore docker image names
+    "\\s*docker\\.io/.*"
   ],
   "enableFiletypes": ["dockercompose"]
 }

@@ -6,7 +6,7 @@ when:
       - renovate/*
 
 variables:
-  - &trivy_plugin woodpeckerci/plugin-trivy:1.0.1 # cspell:words trivy
+  - &trivy_plugin docker.io/woodpeckerci/plugin-trivy:1.0.1
 
 steps:
   backend:
