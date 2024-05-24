@@ -19,6 +19,8 @@ import (
 	"fmt"
 
 	"github.com/alessio/shellescape"
+
+	backend "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 )
 
 // generateScriptPosix is a helper function that generates a step script
@@ -31,7 +33,7 @@ func generateScriptPosix(commands []string) string {
 	for _, command := range commands {
 		buf.WriteString(fmt.Sprintf(
 			traceScript,
-			shellescape.Quote(command),
+			shellescape.Quote(backend.CommandPrefix+" "+command),
 			command,
 		))
 	}
@@ -58,6 +60,6 @@ unset CI_SCRIPT
 // traceScript is a helper script that is added to the step script
 // to trace a command.
 const traceScript = `
-echo + %s
+echo %s
 %s
 `

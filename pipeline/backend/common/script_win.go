@@ -18,16 +18,16 @@ import (
 	"bytes"
 	"fmt"
 	"strings"
+
+	backend "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 )
 
 func generateScriptWindows(commands []string) string {
 	var buf bytes.Buffer
 	for _, command := range commands {
-		escaped := fmt.Sprintf("%q", command)
-		escaped = strings.ReplaceAll(escaped, "$", `\$`)
 		buf.WriteString(fmt.Sprintf(
 			traceScriptWin,
-			escaped,
+			strings.ReplaceAll(backend.CommandPrefix+" "+command, "'", "''"),
 			command,
 		))
 	}
@@ -55,6 +55,6 @@ $netrc=[string]::Format("{0}\_netrc",$Env:HOME);
 // traceScript is a helper script that is added to the step script
 // to trace a command.
 const traceScriptWin = `
-Write-Output ('+ %s');
+Write-Output ('%s');
 & %s; if ($LASTEXITCODE -ne 0) {exit $LASTEXITCODE}
 `

@@ -21,6 +21,9 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
+// CommandPrefix is the prefix to output before each command
+const CommandPrefix = "⮞"
+
 // Backend defines a container orchestration backend and is used
 // to create and manage container resources.
 type Backend interface {
