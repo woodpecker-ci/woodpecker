@@ -55,7 +55,7 @@ message LogEntry {
   int64  time = 2;
   int32  line = 3;
   int32  type = 4; // 0 = stdout, 1 = stderr, 2 = exit-code, 3 = metadata, 4 = progress
-  string data = 5;
+  bytes  data = 5;
 }
 
 message Filter {

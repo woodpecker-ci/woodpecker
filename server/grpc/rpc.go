@@ -328,7 +328,7 @@ func (s *RPC) Log(c context.Context, _logEntry *rpc.LogEntry) error {
 		StepID: step.ID,
 		Time:   _logEntry.Time,
 		Line:   _logEntry.Line,
-		Data:   []byte(_logEntry.Data),
+		Data:   _logEntry.Data,
 		Type:   model.LogEntryType(_logEntry.Type),
 	}
 	// make sure writes to pubsub are non blocking (https://github.com/woodpecker-ci/woodpecker/blob/c919f32e0b6432a95e1a6d3d0ad662f591adf73f/server/logging/log.go#L9)

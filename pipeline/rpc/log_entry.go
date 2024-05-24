@@ -34,7 +34,7 @@ type LogEntry struct {
 	Time     int64  `json:"time,omitempty"`
 	Type     int    `json:"type,omitempty"`
 	Line     int    `json:"line,omitempty"`
-	Data     string `json:"data,omitempty"`
+	Data     []byte `json:"data,omitempty"`
 }
 
 func (l *LogEntry) String() string {

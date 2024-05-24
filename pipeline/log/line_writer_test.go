@@ -40,7 +40,7 @@ func TestLineWriter(t *testing.T) {
 		Time:     0,
 		Type:     rpc.LogEntryStdout,
 		Line:     0,
-		Data:     "hello ********",
+		Data:     []byte("hello ********"),
 	})
 
 	peer.AssertCalled(t, "Log", mock.Anything, &rpc.LogEntry{
@@ -48,7 +48,7 @@ func TestLineWriter(t *testing.T) {
 		Time:     0,
 		Type:     rpc.LogEntryStdout,
 		Line:     1,
-		Data:     "the previous line had no newline at the end",
+		Data:     []byte("the previous line had no newline at the end"),
 	})
 
 	peer.AssertExpectations(t)
