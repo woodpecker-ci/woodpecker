@@ -171,6 +171,8 @@
     "server/store/datastore/migration/**/*",
     "web/components.d.ts",
     "web/src/assets/locales/**/*",
+    "**/fixtures/**",
+    "**/testdata/**",
     // TODO: remove the following
     "docs/",
     "server/"
