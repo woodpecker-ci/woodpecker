@@ -481,7 +481,7 @@ func apparmorAnnotation(containerName string, scp *SecProfile) (*string, *string
 		return nil, nil
 	}
 
-	key := v1.AppArmorBetaContainerAnnotationKeyPrefix + containerName
+	key := v1.DeprecatedAppArmorBetaContainerAnnotationKeyPrefix + containerName
 	value := profileType + "/" + profilePath
 	return &key, &value
 }

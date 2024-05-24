@@ -72,7 +72,7 @@ func run(c *cli.Context, backends []types.Backend) error {
 		transport = grpc.WithTransportCredentials(insecure.NewCredentials())
 	}
 
-	authConn, err := grpc.Dial(
+	authConn, err := grpc.NewClient(
 		c.String("server"),
 		transport,
 		grpc.WithKeepaliveParams(keepalive.ClientParameters{
@@ -94,7 +94,7 @@ func run(c *cli.Context, backends []types.Backend) error {
 		return err
 	}
 
-	conn, err := grpc.Dial(
+	conn, err := grpc.NewClient(
 		c.String("server"),
 		transport,
 		grpc.WithKeepaliveParams(keepalive.ClientParameters{
