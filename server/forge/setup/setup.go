@@ -74,18 +74,12 @@ func setupForgejo(forge *model.Forge) (forge.Forge, error) {
 		return nil, err
 	}
 
-	// TODO enable oauth url with generic config option
-	//oauthURL, ok := forge.AdditionalOptions["oauth-server"].(string)
-	//if !ok {
-	//	return nil, fmt.Errorf("missing oauth-server")
-	//}
-
 	opts := forgejo.Opts{
 		URL:        strings.TrimRight(server.String(), "/"),
 		Client:     forge.Client,
 		Secret:     forge.ClientSecret,
 		SkipVerify: forge.SkipVerify,
-		//OAuth2URL:  oauthURL,
+		OAuth2URL:  forge.OAuthHost,
 	}
 	if len(opts.URL) == 0 {
 		return nil, fmt.Errorf("WOODPECKER_FORGEJO_URL must be set")
