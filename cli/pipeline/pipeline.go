@@ -47,7 +47,7 @@ var Command = &cli.Command{
 }
 
 func pipelineOutput(c *cli.Context, resources []woodpecker.Pipeline, fd ...io.Writer) error {
-	outfmt, outopt := output.ParseOutputOptions(c.String("output"))
+	outFmt, outOpt := output.ParseOutputOptions(c.String("output"))
 	noHeader := c.Bool("output-no-headers")
 
 	var out io.Writer
@@ -60,13 +60,13 @@ func pipelineOutput(c *cli.Context, resources []woodpecker.Pipeline, fd ...io.Wr
 		out = os.Stdout
 	}
 
-	switch outfmt {
+	switch outFmt {
 	case "go-template":
-		if len(outopt) < 1 {
+		if len(outOpt) < 1 {
 			return fmt.Errorf("%w: missing template", output.ErrOutputOptionRequired)
 		}
 
-		tmpl, err := template.New("_").Parse(outopt[0] + "\n")
+		tmpl, err := template.New("_").Parse(outOpt[0] + "\n")
 		if err != nil {
 			return err
 		}
@@ -79,8 +79,8 @@ func pipelineOutput(c *cli.Context, resources []woodpecker.Pipeline, fd ...io.Wr
 		table := output.NewTable(out)
 		cols := []string{"Number", "Status", "Event", "Branch", "Commit", "Author"}
 
-		if len(outopt) > 0 {
-			cols = outopt
+		if len(outOpt) > 0 {
+			cols = outOpt
 		}
 		if !noHeader {
 			table.WriteHeader(cols)

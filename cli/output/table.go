@@ -64,7 +64,7 @@ func (o *Table) AddFieldFn(field string, fn FieldFn) *Table {
 	return o
 }
 
-// AddAllowedFields reads all first level fieldnames of the struct and allows them to be used.
+// AddAllowedFields reads all first level field names of the struct and allows them to be used.
 func (o *Table) AddAllowedFields(obj any) (*Table, error) {
 	v := reflect.ValueOf(obj)
 	if v.Kind() != reflect.Struct {
