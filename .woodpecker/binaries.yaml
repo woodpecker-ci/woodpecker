@@ -6,6 +6,8 @@ variables:
   - &node_image 'docker.io/node:22-alpine'
   - &xgo_image 'docker.io/techknowlogick/xgo:go-1.22.x'
 
+# cspell:words bindata netgo TARGZ
+
 steps:
   build-web:
     image: *node_image

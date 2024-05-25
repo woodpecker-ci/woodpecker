@@ -24,7 +24,7 @@ import (
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/resource"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/common"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
@@ -73,9 +73,9 @@ func podName(step *types.Step) (string, error) {
 	return dnsName(podPrefix + step.UUID)
 }
 
-func podMeta(step *types.Step, config *config, options BackendOptions, podName string) (metav1.ObjectMeta, error) {
+func podMeta(step *types.Step, config *config, options BackendOptions, podName string) (meta_v1.ObjectMeta, error) {
 	var err error
-	meta := metav1.ObjectMeta{
+	meta := meta_v1.ObjectMeta{
 		Name:        podName,
 		Namespace:   config.Namespace,
 		Annotations: podAnnotations(config, options, podName),
@@ -481,7 +481,7 @@ func apparmorAnnotation(containerName string, scp *SecProfile) (*string, *string
 		return nil, nil
 	}
 
-	key := v1.AppArmorBetaContainerAnnotationKeyPrefix + containerName
+	key := v1.DeprecatedAppArmorBetaContainerAnnotationKeyPrefix + containerName
 	value := profileType + "/" + profilePath
 	return &key, &value
 }
@@ -509,10 +509,10 @@ func startPod(ctx context.Context, engine *kube, step *types.Step, options Backe
 	}
 
 	log.Trace().Msgf("creating pod: %s", pod.Name)
-	return engine.client.CoreV1().Pods(engineConfig.Namespace).Create(ctx, pod, metav1.CreateOptions{})
+	return engine.client.CoreV1().Pods(engineConfig.Namespace).Create(ctx, pod, meta_v1.CreateOptions{})
 }
 
-func stopPod(ctx context.Context, engine *kube, step *types.Step, deleteOpts metav1.DeleteOptions) error {
+func stopPod(ctx context.Context, engine *kube, step *types.Step, deleteOpts meta_v1.DeleteOptions) error {
 	podName, err := stepToPodName(step)
 	if err != nil {
 		return err
