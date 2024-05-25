@@ -26,9 +26,9 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc"
 )
 
-func (r *Runner) createTracer(ctxmeta context.Context, logger zerolog.Logger, workflow *rpc.Workflow) pipeline.TraceFunc {
+func (r *Runner) createTracer(ctxMeta context.Context, logger zerolog.Logger, workflow *rpc.Workflow) pipeline.TraceFunc {
 	return func(state *pipeline.State) error {
-		steplogger := logger.With().
+		stepLogger := logger.With().
 			Str("image", state.Pipeline.Step.Image).
 			Str("workflowID", workflow.ID).
 			Err(state.Process.Error).
@@ -48,15 +48,15 @@ func (r *Runner) createTracer(ctxmeta context.Context, logger zerolog.Logger, wo
 		}
 
 		defer func() {
-			steplogger.Debug().Msg("update step status")
+			stepLogger.Debug().Msg("update step status")
 
-			if uerr := r.client.Update(ctxmeta, workflow.ID, stepState); uerr != nil {
-				steplogger.Debug().
-					Err(uerr).
+			if err := r.client.Update(ctxMeta, workflow.ID, stepState); err != nil {
+				stepLogger.Debug().
+					Err(err).
 					Msg("update step status error")
 			}
 
-			steplogger.Debug().Msg("update step status complete")
+			stepLogger.Debug().Msg("update step status complete")
 		}()
 		if state.Process.Exited {
 			return nil

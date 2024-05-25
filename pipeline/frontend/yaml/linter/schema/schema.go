@@ -22,7 +22,7 @@ import (
 
 	"codeberg.org/6543/go-yaml2json"
 	"codeberg.org/6543/xyaml"
-	"github.com/xeipuuv/gojsonschema"
+	json_schema "github.com/xeipuuv/gojsonschema"
 	"gopkg.in/yaml.v3"
 )
 
@@ -30,8 +30,8 @@ import (
 var schemaDefinition []byte
 
 // Lint lints an io.Reader against the Woodpecker `schema.json`.
-func Lint(r io.Reader) ([]gojsonschema.ResultError, error) {
-	schemaLoader := gojsonschema.NewBytesLoader(schemaDefinition)
+func Lint(r io.Reader) ([]json_schema.ResultError, error) {
+	schemaLoader := json_schema.NewBytesLoader(schemaDefinition)
 
 	// read yaml config
 	rBytes, err := io.ReadAll(r)
@@ -51,8 +51,8 @@ func Lint(r io.Reader) ([]gojsonschema.ResultError, error) {
 		return nil, fmt.Errorf("failed to convert yaml %w", err)
 	}
 
-	documentLoader := gojsonschema.NewBytesLoader(jsonDoc)
-	result, err := gojsonschema.Validate(schemaLoader, documentLoader)
+	documentLoader := json_schema.NewBytesLoader(jsonDoc)
+	result, err := json_schema.Validate(schemaLoader, documentLoader)
 	if err != nil {
 		return nil, fmt.Errorf("validation failed %w", err)
 	}
@@ -64,6 +64,6 @@ func Lint(r io.Reader) ([]gojsonschema.ResultError, error) {
 	return nil, nil
 }
 
-func LintString(s string) ([]gojsonschema.ResultError, error) {
+func LintString(s string) ([]json_schema.ResultError, error) {
 	return Lint(bytes.NewBufferString(s))
 }
