@@ -36,6 +36,11 @@ type Registry struct {
 	Password string
 }
 
+type Variable struct {
+	Name  string
+	Value string
+}
+
 type Secret struct {
 	Name           string
 	Value          string
@@ -104,6 +109,7 @@ type Compiler struct {
 	metadata          metadata.Metadata
 	registries        []Registry
 	secrets           map[string]Secret
+	variables         map[string]Variable
 	reslimit          ResourceLimit
 	defaultCloneImage string
 	trustedPipeline   bool
@@ -113,9 +119,10 @@ type Compiler struct {
 // New creates a new Compiler with options.
 func New(opts ...Option) *Compiler {
 	compiler := &Compiler{
-		env:      map[string]string{},
-		cloneEnv: map[string]string{},
-		secrets:  map[string]Secret{},
+		env:       map[string]string{},
+		cloneEnv:  map[string]string{},
+		secrets:   map[string]Secret{},
+		variables: map[string]Variable{},
 	}
 	for _, opt := range opts {
 		opt(compiler)

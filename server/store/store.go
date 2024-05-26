@@ -108,6 +108,18 @@ type Store interface {
 	ConfigPersist(*model.Config) (*model.Config, error)
 	PipelineConfigCreate(*model.PipelineConfig) error
 
+	// Variables
+	VariableFind(*model.Repo, string) (*model.Variable, error)
+	VariableList(*model.Repo, bool, *model.ListOptions) ([]*model.Variable, error)
+	VariableListAll() ([]*model.Variable, error)
+	VariableCreate(*model.Variable) error
+	VariableUpdate(*model.Variable) error
+	VariableDelete(*model.Variable) error
+	OrgVariableFind(int64, string) (*model.Variable, error)
+	OrgVariableList(int64, *model.ListOptions) ([]*model.Variable, error)
+	GlobalVariableFind(string) (*model.Variable, error)
+	GlobalVariableList(*model.ListOptions) ([]*model.Variable, error)
+
 	// Secrets
 	SecretFind(*model.Repo, string) (*model.Secret, error)
 	SecretList(*model.Repo, bool, *model.ListOptions) ([]*model.Secret, error)

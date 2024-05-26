@@ -255,6 +255,9 @@
       "secrets": {
         "desc": "Organization secrets can be passed to all organization's repository's pipeline steps as environmental variables."
       },
+      "variables": {
+        "desc": "Organization variables can be passed to all organization's repository's pipeline steps as environmental variables."
+      },
       "registries": {
         "desc": "Organization registry credentials can be added to use private images for all pipelines of an organization."
       }
@@ -270,6 +273,10 @@
       "registries": {
         "desc": "Global registry credentials can be added to use private images for all pipelines.",
         "warning": "These registry credentials will be available for all users."
+      },
+      "variables": {
+        "desc": "Global variables can be passed to all repositorie's pipeline steps as environmental variables.",
+        "warning": "These variables will be available for all users."
       },
       "agents": {
         "agents": "Agents",
@@ -394,6 +401,9 @@
       "secrets": {
         "desc": "User secrets can be passed to personal pipeline steps as environmental variables."
       },
+      "variables": {
+        "desc": "User variables can be passed to personal pipeline steps as environmental variables."
+      },
       "registries": {
         "desc": "User registry credentials can be added to use private images for all personal pipelines."
       },
@@ -408,6 +418,22 @@
         "swagger_ui": "Swagger UI"
       }
     }
+  },
+  "variables": {
+    "variables": "Variables",
+    "desc": "Variables can be passed to individual pipeline steps at runtime as environmental variables.",
+    "none": "There are no variables yet.",
+    "add": "Add variable",
+    "save": "Save variable",
+    "show": "Show variables",
+    "name": "Name",
+    "value": "Value",
+    "delete_confirm": "Do you really want to delete this variable?",
+    "deleted": "Variable deleted",
+    "created": "Variable created",
+    "saved": "Variable saved",
+    "edit": "Edit variable",
+    "delete": "Delete variable"
   },
   "secrets": {
     "secrets": "Secrets",
@@ -459,6 +485,8 @@
   "update_woodpecker": "Please update your Woodpecker instance to {0}",
   "global_level_secret": "global secret",
   "org_level_secret": "organization secret",
+  "global_level_variable": "global variable",
+  "org_level_variable": "organization variable",
   "login_to_cli": "Login to CLI",
   "login_to_cli_description": "By continuing you will be logged into the CLI.",
   "abort": "Abort",

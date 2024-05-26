@@ -51,6 +51,8 @@ type (
 
 		// TODO: make []string in 3.x
 		Secrets Secrets `yaml:"secrets,omitempty"`
+		// TODO: make []string in 3.x
+		Variables Variables `yaml:"variables,omitempty"`
 		// TODO: make map[string]any in 3.x
 		Environment base.SliceOrMap `yaml:"environment,omitempty"`
 

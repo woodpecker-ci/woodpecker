@@ -174,6 +174,7 @@ func TestUnmarshalContainers(t *testing.T) {
       dockerfile: docker/Dockerfile.agent
       tag: [next, latest]
     secrets: [docker_username, docker_password]
+    variables: [docker_repository]
     when:
       branch: ${CI_REPO_DEFAULT_BRANCH}
       event: push`,
@@ -188,6 +189,10 @@ func TestUnmarshalContainers(t *testing.T) {
 					}, {
 						Source: "docker_password",
 						Target: "docker_password",
+					}}},
+					Variables: Variables{Variables: []*Variable{{
+						Source: "docker_repository",
+						Target: "docker_repository",
 					}}},
 					Settings: map[string]any{
 						"repo":       "woodpeckerci/woodpecker-agent",

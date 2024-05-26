@@ -60,6 +60,12 @@ func apiRoutes(e *gin.RouterGroup) {
 					org.DELETE("", session.MustAdmin(), api.DeleteOrg)
 					org.GET("", api.GetOrg)
 
+					org.GET("/variables", api.GetOrgVariableList)
+					org.POST("/variables", api.PostOrgVariable)
+					org.GET("/variables/:variables", api.GetOrgVariable)
+					org.PATCH("/variables/:variable", api.PatchOrgVariable)
+					org.DELETE("/variables/:variable", api.DeleteOrgVariable)
+
 					org.GET("/secrets", api.GetOrgSecretList)
 					org.POST("/secrets", api.PostOrgSecret)
 					org.GET("/secrets/:secret", api.GetOrgSecret)
@@ -114,6 +120,13 @@ func apiRoutes(e *gin.RouterGroup) {
 
 					// requires push permissions
 					repo.DELETE("/logs/:number", session.MustPush, api.DeletePipelineLogs)
+
+					// requires push permissions
+					repo.GET("/variables", session.MustPush, api.GetVariableList)
+					repo.POST("/variables", session.MustPush, api.PostVariable)
+					repo.GET("/variables/:variable", session.MustPush, api.GetVariable)
+					repo.PATCH("/variables/:variable", session.MustPush, api.PatchVariable)
+					repo.DELETE("/variables/:variable", session.MustPush, api.DeleteVariable)
 
 					// requires push permissions
 					repo.GET("/secrets", session.MustPush, api.GetSecretList)
@@ -172,6 +185,21 @@ func apiRoutes(e *gin.RouterGroup) {
 			queue.POST("/pause", api.PauseQueue)
 			queue.POST("/resume", api.ResumeQueue)
 			queue.GET("/norunningpipelines", api.BlockTilQueueHasRunningItem)
+		}
+
+		// global variables can be read without actual values by any user
+		readGlobalVariables := apiBase.Group("/variables")
+		{
+			readGlobalVariables.Use(session.MustUser())
+			readGlobalVariables.GET("", api.GetGlobalVariableList)
+			readGlobalVariables.GET("/:variable", api.GetGlobalVariable)
+		}
+		variables := apiBase.Group("/variables")
+		{
+			variables.Use(session.MustAdmin())
+			variables.POST("", api.PostGlobalVariable)
+			variables.PATCH("/:variable", api.PatchGlobalVariable)
+			variables.DELETE("/:variable", api.DeleteGlobalVariable)
 		}
 
 		// global secrets can be read without actual values by any user

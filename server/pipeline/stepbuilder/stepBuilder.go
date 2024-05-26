@@ -45,6 +45,7 @@ type StepBuilder struct {
 	Last      *model.Pipeline
 	Netrc     *model.Netrc
 	Secs      []*model.Secret
+	Vars      []*model.Variable
 	Regs      []*model.Registry
 	Host      string
 	Yamls     []*forge_types.FileMeta
@@ -253,6 +254,13 @@ func (b *StepBuilder) toInternalRepresentation(parsed *yaml_types.Workflow, envi
 			Events:         events,
 		})
 	}
+	var variables []compiler.Variable
+	for _, v := range b.Vars {
+		variables = append(variables, compiler.Variable{
+			Name:  v.Name,
+			Value: v.Value,
+		})
+	}
 
 	var registries []compiler.Registry
 	for _, reg := range b.Regs {
@@ -283,6 +291,7 @@ func (b *StepBuilder) toInternalRepresentation(parsed *yaml_types.Workflow, envi
 		compiler.WithDefaultCloneImage(server.Config.Pipeline.DefaultCloneImage),
 		compiler.WithRegistry(registries...),
 		compiler.WithSecret(secrets...),
+		compiler.WithVariable(variables...),
 		compiler.WithPrefix(
 			fmt.Sprintf(
 				"wp_%s_%d",

@@ -17,6 +17,7 @@ import type {
   RepoSettings,
   Secret,
   User,
+  Variable,
 } from './types';
 
 interface RepoListOptions {
@@ -152,6 +153,25 @@ export default class WoodpeckerClient extends ApiClient {
     return this._delete(`/api/repos/${repoId}/logs/${pipeline}/${step}`);
   }
 
+  async getVariableList(repoId: number, opts?: PaginationOptions): Promise<Variable[] | null> {
+    const query = encodeQueryString(opts);
+    return this._get(`/api/repos/${repoId}/variables?${query}`) as Promise<Variable[] | null>;
+  }
+
+  async createVariable(repoId: number, variable: Partial<Variable>): Promise<unknown> {
+    return this._post(`/api/repos/${repoId}/variables`, variable);
+  }
+
+  async updateVariable(repoId: number, variable: Partial<Variable>): Promise<unknown> {
+    const variableName = encodeURIComponent(variable.name ?? '');
+    return this._patch(`/api/repos/${repoId}/variables/${variableName}`, variable);
+  }
+
+  async deleteVariable(repoId: number, variableName: string): Promise<unknown> {
+    const name = encodeURIComponent(variableName);
+    return this._delete(`/api/repos/${repoId}/variables/${name}`);
+  }
+
   async getSecretList(repoId: number, opts?: PaginationOptions): Promise<Secret[] | null> {
     const query = encodeQueryString(opts);
     return this._get(`/api/repos/${repoId}/secrets?${query}`) as Promise<Secret[] | null>;
@@ -255,6 +275,25 @@ export default class WoodpeckerClient extends ApiClient {
     return this._get(`/api/orgs/${orgId}/permissions`) as Promise<OrgPermissions>;
   }
 
+  async getOrgVariableList(orgId: number, opts?: PaginationOptions): Promise<Variable[] | null> {
+    const query = encodeQueryString(opts);
+    return this._get(`/api/orgs/${orgId}/variables?${query}`) as Promise<Variable[] | null>;
+  }
+
+  async createOrgVariable(orgId: number, variable: Partial<Variable>): Promise<unknown> {
+    return this._post(`/api/orgs/${orgId}/variables`, variable);
+  }
+
+  async updateOrgVariable(orgId: number, variable: Partial<Variable>): Promise<unknown> {
+    const variableName = encodeURIComponent(variable.name ?? '');
+    return this._patch(`/api/orgs/${orgId}/variables/${variableName}`, variable);
+  }
+
+  async deleteOrgVariable(orgId: number, variableName: string): Promise<unknown> {
+    const name = encodeURIComponent(variableName);
+    return this._delete(`/api/orgs/${orgId}/variables/${name}`);
+  }
+
   async getOrgSecretList(orgId: number, opts?: PaginationOptions): Promise<Secret[] | null> {
     const query = encodeQueryString(opts);
     return this._get(`/api/orgs/${orgId}/secrets?${query}`) as Promise<Secret[] | null>;
@@ -272,6 +311,25 @@ export default class WoodpeckerClient extends ApiClient {
   async deleteOrgSecret(orgId: number, secretName: string): Promise<unknown> {
     const name = encodeURIComponent(secretName);
     return this._delete(`/api/orgs/${orgId}/secrets/${name}`);
+  }
+
+  async getGlobalVariableList(opts?: PaginationOptions): Promise<Variable[] | null> {
+    const query = encodeQueryString(opts);
+    return this._get(`/api/variables?${query}`) as Promise<Variable[] | null>;
+  }
+
+  async createGlobalVariable(variable: Partial<Variable>): Promise<unknown> {
+    return this._post(`/api/variables`, variable);
+  }
+
+  async updateGlobalVariable(variable: Partial<Variable>): Promise<unknown> {
+    const variableName = encodeURIComponent(variable.name ?? '');
+    return this._patch(`/api/variables/${variableName}`, variable);
+  }
+
+  async deleteGlobalVariable(variableName: string): Promise<unknown> {
+    const name = encodeURIComponent(variableName);
+    return this._delete(`/api/variables/${name}`);
   }
 
   async getGlobalSecretList(opts?: PaginationOptions): Promise<Secret[] | null> {

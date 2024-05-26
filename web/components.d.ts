@@ -18,6 +18,7 @@ declare module 'vue' {
     AdminReposTab: typeof import('./src/components/admin/settings/AdminReposTab.vue')['default']
     AdminSecretsTab: typeof import('./src/components/admin/settings/AdminSecretsTab.vue')['default']
     AdminUsersTab: typeof import('./src/components/admin/settings/AdminUsersTab.vue')['default']
+    AdminVariablesTab: typeof import('./src/components/admin/settings/AdminVariablesTab.vue')['default']
     Badge: typeof import('./src/components/atomic/Badge.vue')['default']
     BadgeTab: typeof import('./src/components/repo/settings/BadgeTab.vue')['default']
     Button: typeof import('./src/components/atomic/Button.vue')['default']
@@ -118,6 +119,10 @@ declare module 'vue' {
     UserGeneralTab: typeof import('./src/components/user/UserGeneralTab.vue')['default']
     UserRegistriesTab: typeof import('./src/components/user/UserRegistriesTab.vue')['default']
     UserSecretsTab: typeof import('./src/components/user/UserSecretsTab.vue')['default']
+    UserVariablesTab: typeof import('./src/components/user/UserVariablesTab.vue')['default']
+    VariableEdit: typeof import('./src/components/variables/VariableEdit.vue')['default']
+    VariableList: typeof import('./src/components/variables/VariableList.vue')['default']
+    VariablesTab: typeof import('./src/components/repo/settings/VariablesTab.vue')['default']
     Warning: typeof import('./src/components/atomic/Warning.vue')['default']
   }
 }
