@@ -311,14 +311,16 @@ var flags = append([]cli.Flag{
 		EnvVars: []string{"WOODPECKER_FORGE_URL", "WOODPECKER_GITHUB_URL", "WOODPECKER_GITLAB_URL", "WOODPECKER_GITEA_URL", "WOODPECKER_BITBUCKET_URL"},
 	},
 	&cli.StringFlag{
-		Name:    "forge-oauth-client",
-		Usage:   "oauth2 client id",
-		EnvVars: []string{"WOODPECKER_FORGE_CLIENT", "WOODPECKER_GITHUB_CLIENT", "WOODPECKER_GITLAB_CLIENT", "WOODPECKER_GITEA_CLIENT", "WOODPECKER_BITBUCKET_CLIENT", "WOODPECKER_BITBUCKET_DC_CLIENT_ID"},
+		Name:     "forge-oauth-client",
+		Usage:    "oauth2 client id",
+		EnvVars:  []string{"WOODPECKER_FORGE_CLIENT", "WOODPECKER_GITHUB_CLIENT", "WOODPECKER_GITLAB_CLIENT", "WOODPECKER_GITEA_CLIENT", "WOODPECKER_BITBUCKET_CLIENT", "WOODPECKER_BITBUCKET_DC_CLIENT_ID"},
+		FilePath: getFirstNonEmptyEnvVar([]string{"WOODPECKER_FORGE_CLIENT_FILE", "WOODPECKER_GITHUB_CLIENT_FILE", "WOODPECKER_GITLAB_CLIENT_FILE", "WOODPECKER_GITEA_CLIENT_FILE", "WOODPECKER_BITBUCKET_CLIENT_FILE", "WOODPECKER_BITBUCKET_DC_CLIENT_ID_FILE"}),
 	},
 	&cli.StringFlag{
-		Name:    "forge-oauth-secret",
-		Usage:   "oauth2 client secret",
-		EnvVars: []string{"WOODPECKER_FORGE_SECRET", "WOODPECKER_GITHUB_SECRET", "WOODPECKER_GITLAB_SECRET", "WOODPECKER_GITEA_SECRET", "WOODPECKER_BITBUCKET_SECRET", "WOODPECKER_BITBUCKET_DC_CLIENT_SECRET"},
+		Name:     "forge-oauth-secret",
+		Usage:    "oauth2 client secret",
+		EnvVars:  []string{"WOODPECKER_FORGE_SECRET", "WOODPECKER_GITHUB_SECRET", "WOODPECKER_GITLAB_SECRET", "WOODPECKER_GITEA_SECRET", "WOODPECKER_BITBUCKET_SECRET", "WOODPECKER_BITBUCKET_DC_CLIENT_SECRET"},
+		FilePath: getFirstNonEmptyEnvVar([]string{"WOODPECKER_FORGE_SECRET_FILE", "WOODPECKER_GITHUB_SECRET_FILE", "WOODPECKER_GITLAB_SECRET_FILE", "WOODPECKER_GITEA_SECRET_FILE", "WOODPECKER_BITBUCKET_SECRET_FILE", "WOODPECKER_BITBUCKET_DC_CLIENT_SECRET_FILE"}),
 	},
 	&cli.BoolFlag{
 		Name:    "forge-skip-verify",
@@ -456,4 +458,14 @@ func datasourceDefaultValue() string {
 		return "/var/lib/woodpecker/woodpecker.sqlite"
 	}
 	return "woodpecker.sqlite"
+}
+
+func getFirstNonEmptyEnvVar(envVars []string) string {
+	for _, envVar := range envVars {
+		val := os.Getenv(envVar)
+		if val != "" {
+			return val
+		}
+	}
+	return ""
 }
