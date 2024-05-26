@@ -21,6 +21,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v2"
@@ -114,8 +115,8 @@ func setupForgeService(c *cli.Context, _store store.Store) error {
 		_forge.AdditionalOptions = make(map[string]any)
 	}
 
-	_forge.Client = c.String("forge-oauth-client")
-	_forge.ClientSecret = c.String("forge-oauth-secret")
+	_forge.Client = strings.TrimRight(c.String("forge-oauth-client"), "\r\n")
+	_forge.ClientSecret = strings.TrimRight(c.String("forge-oauth-secret"), "\r\n")
 	_forge.URL = c.String("forge-url")
 	_forge.SkipVerify = c.Bool("forge-skip-verify")
 	_forge.OAuthHost = c.String("forge-oauth-host")
