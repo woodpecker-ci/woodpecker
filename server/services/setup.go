@@ -30,6 +30,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server/services/config"
 	"go.woodpecker-ci.org/woodpecker/v2/server/services/registry"
 	"go.woodpecker-ci.org/woodpecker/v2/server/services/secret"
+	"go.woodpecker-ci.org/woodpecker/v2/server/services/variable"
 	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 	"go.woodpecker-ci.org/woodpecker/v2/server/store/types"
 )
@@ -43,6 +44,10 @@ func setupRegistryService(store store.Store, dockerConfig string) registry.Servi
 	}
 
 	return registry.NewDB(store)
+}
+
+func setupVariableService(store store.Store) variable.Service {
+	return variable.NewDB(store)
 }
 
 func setupSecretService(store store.Store) secret.Service {

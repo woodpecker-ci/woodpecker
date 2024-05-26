@@ -19,6 +19,9 @@
     <Tab id="general" :title="$t('repo.settings.general.general')">
       <GeneralTab />
     </Tab>
+    <Tab id="variables" :title="$t('variables.variables')">
+      <VariablesTab />
+    </Tab>
     <Tab id="secrets" :title="$t('secrets.secrets')">
       <SecretsTab />
     </Tab>
@@ -50,6 +53,7 @@ import CronTab from '~/components/repo/settings/CronTab.vue';
 import GeneralTab from '~/components/repo/settings/GeneralTab.vue';
 import RegistriesTab from '~/components/repo/settings/RegistriesTab.vue';
 import SecretsTab from '~/components/repo/settings/SecretsTab.vue';
+import VariablesTab from '~/components/repo/settings/VariablesTab.vue';
 import useNotifications from '~/compositions/useNotifications';
 import { useRouteBack } from '~/compositions/useRouteBack';
 import type { Repo, RepoPermissions } from '~/lib/api/types';
