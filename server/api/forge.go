@@ -77,7 +77,13 @@ func GetForge(c *gin.Context) {
 		handleDBError(c, err)
 		return
 	}
-	c.JSON(http.StatusOK, forge)
+
+	user := session.User(c)
+	if user != nil && user.Admin {
+		c.JSON(http.StatusOK, forge)
+	} else {
+		c.JSON(http.StatusOK, forge.PublicCopy())
+	}
 }
 
 // PatchForge
