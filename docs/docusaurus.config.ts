@@ -35,30 +35,32 @@ const config: Config = {
           position: 'left',
           label: 'Plugins',
         },
-        {
-          to: '/docs/next/migrations', // Always point to newest migration guide
-          activeBaseRegex: 'docs/(next/)?migrations',
-          position: 'left',
-          label: 'Migrations',
-        },
-        {
-          to: '/faq',
-          position: 'left',
-          label: 'FAQ',
-        },
-        {
-          to: '/docs/next/awesome', // Always point to newest awesome list
-          activeBaseRegex: 'docs/(next/)?awesome',
-          position: 'left',
-          label: 'Awesome',
-        },
-        {
-          to: '/api',
-          position: 'left',
-          label: 'API',
-        },
         { to: 'blog', label: 'Blog', position: 'left' },
-        { to: 'cookbook', label: 'Cookbook', position: 'left' },
+        {
+          label: 'More Resources',
+          position: 'left',
+          items: [
+            {
+              to: '/docs/next/migrations', // Always point to newest migration guide
+              activeBaseRegex: 'docs/(next/)?migrations',
+              label: 'Migrations',
+            },
+            {
+              to: '/docs/next/awesome', // Always point to newest awesome list
+              activeBaseRegex: 'docs/(next/)?awesome',
+              label: 'Awesome',
+            },
+            {
+              to: '/faq',
+              label: 'FAQ',
+            },
+            {
+              to: '/api',
+              label: 'API',
+            },
+            { to: 'cookbook', label: 'Cookbook' },
+          ],
+        },
         {
           type: 'docsVersionDropdown',
           position: 'right',
@@ -207,7 +209,7 @@ const config: Config = {
               webSocketURL: 'auto://0.0.0.0:0/ws',
             },
           },
-        };
+        } as any;
       },
     }),
     [

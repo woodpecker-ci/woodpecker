@@ -50,12 +50,10 @@ steps:
   build:
     image: *node_image
     directory: docs/
-    environment:
-      NODE_ENV: production
     commands:
       - corepack enable
       - pnpm install --frozen-lockfile
-      - pnpm build
+      - NODE_ENV=production pnpm build
     when:
       - path: *when_path
         event: [tag, pull_request, push]
