@@ -22,7 +22,7 @@ import "strings"
 // secrets with asterisks. Each secret string is split on newlines to
 // handle multi-line secrets.
 func NewSecretsReplacer(secrets []string) *strings.Replacer {
-	var oldnew []string
+	var oldNew []string
 
 	// Strings shorter than minStringLength are not considered secrets.
 	// Do not sanitize them.
@@ -38,10 +38,10 @@ func NewSecretsReplacer(secrets []string) *strings.Replacer {
 			if len(part) == 0 {
 				continue
 			}
-			oldnew = append(oldnew, part)
-			oldnew = append(oldnew, "********")
+			oldNew = append(oldNew, part)
+			oldNew = append(oldNew, "********")
 		}
 	}
 
-	return strings.NewReplacer(oldnew...)
+	return strings.NewReplacer(oldNew...)
 }

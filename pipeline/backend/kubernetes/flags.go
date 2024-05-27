@@ -68,7 +68,7 @@ var Flags = []cli.Flag{
 		Value:   false,
 	},
 	&cli.BoolFlag{
-		EnvVars: []string{"WOODPECKER_BACKEND_K8S_SECCTX_NONROOT"},
+		EnvVars: []string{"WOODPECKER_BACKEND_K8S_SECCTX_NONROOT"}, // cspell:words secctx nonroot
 		Name:    "backend-k8s-secctx-nonroot",
 		Usage:   "`run as non root` Kubernetes security context option",
 	},

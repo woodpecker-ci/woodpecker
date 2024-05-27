@@ -40,7 +40,7 @@ func newClient(url, accessToken string, skipVerify bool) (*gitlab.Client, error)
 // isRead is a helper function that returns true if the
 // user has Read-only access to the repository.
 func isRead(proj *gitlab.Project, projectMember *gitlab.ProjectMember) bool {
-	return proj.Public || projectMember != nil && projectMember.AccessLevel >= gitlab.ReporterPermissions
+	return proj.Visibility == gitlab.InternalVisibility || proj.Visibility == gitlab.PrivateVisibility || projectMember != nil && projectMember.AccessLevel >= gitlab.ReporterPermissions
 }
 
 // isWrite is a helper function that returns true if the
