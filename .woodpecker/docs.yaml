@@ -53,7 +53,7 @@ steps:
     commands:
       - corepack enable
       - pnpm install --frozen-lockfile
-      - NODE_ENV=production pnpm build
+      - pnpm build
     when:
       - path: *when_path
         event: [tag, pull_request, push]

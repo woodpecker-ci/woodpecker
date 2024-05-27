@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "cd ../ && make docs && cd docs && docusaurus start",
+    "start": "cd ../ && make docs && cd docs && NODE_ENV=development docusaurus start",
     "build": "pnpm build:woodpecker-plugins && docusaurus build",
     "build:woodpecker-plugins": "cd plugins/woodpecker-plugins && pnpm i && pnpm build",
     "swizzle": "docusaurus swizzle",
