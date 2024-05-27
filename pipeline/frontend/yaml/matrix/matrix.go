@@ -86,11 +86,11 @@ func calc(matrix Matrix) []Axis {
 	// for each axis calculate the unique set of values that should be used.
 	for p := 0; p < perm; p++ {
 		axis := map[string]string{}
-		decr := perm
+		decrease := perm
 		for i, tag := range tags {
 			elems := matrix[tag]
-			decr /= len(elems)
-			elem := p / decr % len(elems)
+			decrease /= len(elems)
+			elem := p / decrease % len(elems)
 			axis[tag] = elems[elem]
 
 			// enforce a maximum number of tags in the pipeline matrix.

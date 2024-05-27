@@ -197,11 +197,11 @@ func (c *Constraint) Match(m metadata.Metadata, global bool, env map[string]stri
 		if err != nil {
 			return false, err
 		}
-		bresult, ok := result.(bool)
+		bResult, ok := result.(bool)
 		if !ok {
 			return false, fmt.Errorf("could not parse result: %v", result)
 		}
-		match = match && bresult
+		match = match && bResult
 	}
 
 	return match, nil
@@ -247,7 +247,7 @@ func (c *List) Excludes(v string) bool {
 	return false
 }
 
-// UnmarshalYAML unmarshals the constraint.
+// UnmarshalYAML unmarshal the constraint.
 func (c *List) UnmarshalYAML(value *yaml.Node) error {
 	out1 := struct {
 		Include yamlBaseTypes.StringOrSlice
