@@ -82,6 +82,7 @@
 
 ### Misc
 
+- Remove discord announcements [[#3725](https://github.com/woodpecker-ci/woodpecker/pull/3725)]
 - fix(deps): update module github.com/google/go-github/v61 to v62 [[#3730](https://github.com/woodpecker-ci/woodpecker/pull/3730)]
 - chore(deps): update docker.io/woodpeckerci/plugin-docker-buildx docker tag to v4 [[#3729](https://github.com/woodpecker-ci/woodpecker/pull/3729)]
 - chore(deps): update docker.io/mstruebing/editorconfig-checker docker tag to v3 [[#3728](https://github.com/woodpecker-ci/woodpecker/pull/3728)]
