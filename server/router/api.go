@@ -202,10 +202,10 @@ func apiRoutes(e *gin.RouterGroup) {
 			agentBase.DELETE("/:agent", api.DeleteAgent)
 		}
 
+		apiBase.GET("/forges", api.GetForges)
 		forgeBase := apiBase.Group("/forges")
 		{
 			forgeBase.Use(session.MustAdmin())
-			forgeBase.GET("", api.GetForges)
 			forgeBase.POST("", api.PostForge)
 			forgeBase.GET("/:forgeId", api.GetForge)
 			forgeBase.PATCH("/:forgeId", api.PatchForge)

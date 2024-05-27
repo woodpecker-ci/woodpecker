@@ -41,7 +41,20 @@ func GetForges(c *gin.Context) {
 		c.String(http.StatusInternalServerError, "Error getting forge list. %s", err)
 		return
 	}
-	c.JSON(http.StatusOK, forges)
+
+	user := session.User(c)
+	if user != nil && user.Admin {
+		c.JSON(http.StatusOK, forges)
+		return
+	}
+
+	// copy forges data without sensitive information
+	publicForges := make([]*model.Forge, 0, len(forges))
+	for _, forge := range forges {
+		publicForges = append(publicForges, forge.PublicCopy())
+	}
+
+	c.JSON(http.StatusOK, publicForges)
 }
 
 // GetForge
@@ -102,10 +115,12 @@ func PatchForge(c *gin.Context) {
 	forge.URL = in.URL
 	forge.Type = in.Type
 	forge.Client = in.Client
-	forge.ClientSecret = in.ClientSecret
 	forge.OAuthHost = in.OAuthHost
 	forge.SkipVerify = in.SkipVerify
 	forge.AdditionalOptions = in.AdditionalOptions
+	if in.ClientSecret != "" {
+		forge.ClientSecret = in.ClientSecret
+	}
 
 	err = _store.ForgeUpdate(forge)
 	if err != nil {

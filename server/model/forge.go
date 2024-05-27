@@ -30,8 +30,19 @@ type Forge struct {
 	Type              ForgeType      `xorm:"VARCHAR(250)"`
 	URL               string         `xorm:"VARCHAR(500) 'url'"`
 	Client            string         `xorm:"VARCHAR(250)"`
-	ClientSecret      string         `xorm:"VARCHAR(250)"`
+	ClientSecret      string         `xorm:"VARCHAR(250)" json:"-"` // do not expose client secret
 	SkipVerify        bool           `xorm:"bool"`
 	OAuthHost         string         `xorm:"VARCHAR(250) 'oauth_host'"` // public url for oauth if different from url
 	AdditionalOptions map[string]any `xorm:"json"`
+} //	@name Forge
+
+// PublicCopy returns a copy of the forge without sensitive information and technical details.
+func (f *Forge) PublicCopy() *Forge {
+	forge := &Forge{
+		ID:   f.ID,
+		Type: f.Type,
+		URL:  f.URL,
+	}
+
+	return forge
 }
