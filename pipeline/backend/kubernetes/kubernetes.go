@@ -28,7 +28,7 @@ import (
 	"github.com/urfave/cli/v2"
 	"gopkg.in/yaml.v3"
 	v1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/informers"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/scheme"
@@ -69,11 +69,11 @@ type SecurityContextConfig struct {
 	RunAsNonRoot bool
 }
 
-func newDefaultDeleteOptions() metav1.DeleteOptions {
+func newDefaultDeleteOptions() meta_v1.DeleteOptions {
 	gracePeriodSeconds := int64(0) // immediately
-	propagationPolicy := metav1.DeletePropagationBackground
+	propagationPolicy := meta_v1.DeletePropagationBackground
 
-	return metav1.DeleteOptions{
+	return meta_v1.DeleteOptions{
 		GracePeriodSeconds: &gracePeriodSeconds,
 		PropagationPolicy:  &propagationPolicy,
 	}
@@ -93,7 +93,7 @@ func configFromCliContext(ctx context.Context) (*config, error) {
 				PodAnnotationsAllowFromStep: c.Bool("backend-k8s-pod-annotations-allow-from-step"),
 				ImagePullSecretNames:        c.StringSlice("backend-k8s-pod-image-pull-secret-names"),
 				SecurityContext: SecurityContextConfig{
-					RunAsNonRoot: c.Bool("backend-k8s-secctx-nonroot"),
+					RunAsNonRoot: c.Bool("backend-k8s-secctx-nonroot"), // cspell:words secctx nonroot
 				},
 			}
 			// TODO: remove in next major
@@ -270,7 +270,7 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 	// TODO: Cancel on ctx.Done
 	<-finished
 
-	pod, err := e.client.CoreV1().Pods(e.config.Namespace).Get(ctx, podName, metav1.GetOptions{})
+	pod, err := e.client.CoreV1().Pods(e.config.Namespace).Get(ctx, podName, meta_v1.GetOptions{})
 	if err != nil {
 		return nil, err
 	}

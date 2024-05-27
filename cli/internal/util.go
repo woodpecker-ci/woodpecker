@@ -35,7 +35,7 @@ func NewClient(c *cli.Context) (woodpecker.Client, error) {
 	var (
 		skip     = c.Bool("skip-verify")
 		socks    = c.String("socks-proxy")
-		socksoff = c.Bool("socks-proxy-off")
+		socksOff = c.Bool("socks-proxy-off")
 		token    = c.String("token")
 		server   = c.String("server")
 	)
@@ -70,7 +70,7 @@ func NewClient(c *cli.Context) (woodpecker.Client, error) {
 
 	trans, _ := client.Transport.(*oauth2.Transport)
 
-	if len(socks) != 0 && !socksoff {
+	if len(socks) != 0 && !socksOff {
 		dialer, err := proxy.SOCKS5("tcp", socks, nil, proxy.Direct)
 		if err != nil {
 			return nil, err
