@@ -104,10 +104,6 @@ const config: Config = {
           title: 'Community',
           items: [
             {
-              label: 'Discord',
-              href: 'https://discord.gg/fcMQqSMXJy',
-            },
-            {
               label: 'Matrix',
               href: 'https://matrix.to/#/#woodpecker:matrix.org',
             },

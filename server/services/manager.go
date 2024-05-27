@@ -111,7 +111,7 @@ func (m *manager) RegistryService() registry.Service {
 }
 
 func (m *manager) ConfigServiceFromRepo(_ *model.Repo) config.Service {
-	// TODO: decied based on repo property which config service to use
+	// TODO: decide based on repo property which config service to use
 	return m.config
 }
 
