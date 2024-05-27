@@ -49,12 +49,11 @@ func GetForges(c *gin.Context) {
 	}
 
 	// copy forges data without sensitive information
-	publicForges := make([]*model.Forge, 0, len(forges))
-	for _, forge := range forges {
-		publicForges = append(publicForges, forge.PublicCopy())
+	for i, forge := range forges {
+		forges[i] = forge.PublicCopy()
 	}
 
-	c.JSON(http.StatusOK, publicForges)
+	c.JSON(http.StatusOK, forges)
 }
 
 // GetForge
@@ -94,7 +93,13 @@ func GetForge(c *gin.Context) {
 func PatchForge(c *gin.Context) {
 	_store := store.FromContext(c)
 
-	in := &model.Forge{}
+	// use this struct to allow updating the client secret
+	type ForgeWithClientSecret struct {
+		model.Forge
+		ClientSecret string `json:"client_secret"`
+	}
+
+	in := &ForgeWithClientSecret{}
 	err := c.Bind(in)
 	if err != nil {
 		c.AbortWithStatus(http.StatusBadRequest)

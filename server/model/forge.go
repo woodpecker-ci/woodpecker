@@ -26,14 +26,14 @@ const (
 )
 
 type Forge struct {
-	ID                int64          `xorm:"pk autoincr 'id'"`
-	Type              ForgeType      `xorm:"VARCHAR(250)"`
-	URL               string         `xorm:"VARCHAR(500) 'url'"`
-	Client            string         `xorm:"VARCHAR(250)"`
-	ClientSecret      string         `xorm:"VARCHAR(250)" json:"-"` // do not expose client secret
-	SkipVerify        bool           `xorm:"bool"`
-	OAuthHost         string         `xorm:"VARCHAR(250) 'oauth_host'"` // public url for oauth if different from url
-	AdditionalOptions map[string]any `xorm:"json"`
+	ID                int64          `json:"id"                           xorm:"pk autoincr 'id'"`
+	Type              ForgeType      `json:"type"                         xorm:"VARCHAR(250)"`
+	URL               string         `json:"url"                          xorm:"VARCHAR(500) 'url'"`
+	Client            string         `json:"client,omitempty"             xorm:"VARCHAR(250)"`
+	ClientSecret      string         `json:"-"                            xorm:"VARCHAR(250)"` // do not expose client secret
+	SkipVerify        bool           `json:"skip_verify,omitempty"        xorm:"bool"`
+	OAuthHost         string         `json:"oauth_host,omitempty"         xorm:"VARCHAR(250) 'oauth_host'"` // public url for oauth if different from url
+	AdditionalOptions map[string]any `json:"additional_options,omitempty" xorm:"json"`
 } //	@name Forge
 
 // PublicCopy returns a copy of the forge without sensitive information and technical details.

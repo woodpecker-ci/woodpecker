@@ -4,9 +4,9 @@ export type Forge = {
   id: number;
   type: ForgeType;
   url: string;
-  client: string;
-  clientSecret: string;
-  skipVerify: boolean;
-  oauthHost: string;
-  additionalOptions: Record<string, string>;
+  client?: string;
+  client_secret?: string;
+  skip_verify?: boolean;
+  oauth_host?: string;
+  additional_options?: Record<string, unknown>;
 };
