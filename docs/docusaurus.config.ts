@@ -258,6 +258,7 @@ const config: Config = {
             },
             '2.4': {
               label: '2.4.x',
+              banner: 'unmaintained',
             },
             '2.3': {
               label: '2.3.x',
