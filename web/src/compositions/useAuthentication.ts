@@ -7,11 +7,11 @@ export default () =>
 
     user: useConfig().user,
 
-    authenticate(url?: string) {
+    authenticate(url?: string, forgeId?: number) {
       if (url) {
         const config = useUserConfig();
         config.setUserConfig('redirectUrl', url);
       }
-      window.location.href = `${useConfig().rootPath}/login`;
+      window.location.href = `${useConfig().rootPath}/login?forge_id=${forgeId}`;
     },
   }) as const;

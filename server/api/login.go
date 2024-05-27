@@ -17,6 +17,7 @@ package api
 import (
 	"encoding/base32"
 	"errors"
+	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -34,50 +35,74 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/shared/token"
 )
 
-func getForgeID(c *gin.Context) int64 {
+func getForgeID(c *gin.Context) (int64, error) {
 	_forgeID := c.Query("forge_id")
+
+	// check if forge id is in the state token
 	if _forgeID == "" {
-		state, _ := c.Query("state")
+		state := c.Query("state")
 		if state != "" {
-			_forgeID = token.Parse(state, nil).Text
+			stateToken, err := token.Parse(state, func(t *token.Token) (string, error) {
+				return "1234567890", nil // TODO: set some secret
+			})
+			if err != nil {
+				return 0, err
+			}
+
+			_forgeID = stateToken.Get("forge-id")
 		}
 	}
+
+	// fallback to default forge
 	if _forgeID == "" {
-		return 1
+		return 1, nil
 	}
+
 	forgeID, err := strconv.ParseInt(_forgeID, 10, 64)
 	if err != nil {
-		return 1
+		return 0, err
 	}
-	return forgeID
+	return forgeID, nil
 }
 
 func HandleLogin(c *gin.Context) {
+	forgeID, err := getForgeID(c)
+	if err != nil {
+		log.Error().Err(err).Msg("cannot get forge id")
+		c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=internal_error")
+		return
+	}
+
 	if err := c.Request.FormValue("error"); err != "" {
-		c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login/error?code="+err)
+		c.Redirect(http.StatusSeeOther, fmt.Sprintf("%s/login/error?code=%s&forge_id=%d", server.Config.Server.RootPath, err, forgeID))
 	} else {
-		c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/authorize")
+		c.Redirect(http.StatusSeeOther, fmt.Sprintf("%s/authorize?forge_id=%d", server.Config.Server.RootPath, forgeID))
 	}
 }
 
 func HandleAuth(c *gin.Context) {
 	_store := store.FromContext(c)
-	_forge, err := server.Config.Services.Manager.ForgeMain()
+
+	forgeID, err := getForgeID(c)
+	if err != nil {
+		_ = c.AbortWithError(http.StatusInternalServerError, err)
+	}
+
+	_forge, err := server.Config.Services.Manager.ForgeByID(forgeID)
 	if err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
-	forgeID := int64(1) // TODO: replace with forge id when multiple forges are supported
 
 	// when dealing with redirects, we may need to adjust the content type. I
 	// cannot, however, remember why, so need to revisit this line.
 	c.Writer.Header().Del("Content-Type")
 
-	jwtSecret := "" // TODO set some secret
+	jwtSecret := "1234567890" // TODO set some secret
 	exp := time.Now().Add(time.Minute * 15).Unix()
-	_token := token.New(token.OAuthStateToken)
-	_token.Set("forge-id", strconv.FormatInt(forgeID, 10))
-	state, err := _token.SignExpires(jwtSecret, exp)
+	stateToken := token.New(token.OAuthStateToken)
+	stateToken.Set("forge-id", strconv.FormatInt(forgeID, 10))
+	state, err := stateToken.SignExpires(jwtSecret, exp)
 	if err != nil {
 		log.Error().Err(err).Msg("cannot create state token")
 		c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=internal_error")
@@ -215,7 +240,7 @@ func HandleAuth(c *gin.Context) {
 		return
 	}
 
-	exp := time.Now().Add(server.Config.Server.SessionExpires).Unix()
+	exp = time.Now().Add(server.Config.Server.SessionExpires).Unix()
 	_token := token.New(token.SessToken)
 	_token.Set("user-id", strconv.FormatInt(u.ID, 10))
 	tokenString, err := _token.SignExpires(u.Hash, exp)
@@ -268,7 +293,7 @@ func GetLogout(c *gin.Context) {
 func GetLoginToken(c *gin.Context) {
 	_store := store.FromContext(c)
 
-	_forge, err := server.Config.Services.Manager.ForgeMain() // TODO: get selected forge from auth request
+	_forge, err := server.Config.Services.Manager.ForgeByID(1) // TODO: get selected forge from auth request
 	if err != nil {
 		log.Error().Err(err).Msg("Cannot get main forge")
 		c.AbortWithStatus(http.StatusInternalServerError)

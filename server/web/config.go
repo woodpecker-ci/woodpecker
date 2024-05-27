@@ -40,7 +40,7 @@ func Config(c *gin.Context) {
 	}
 
 	// TODO: remove this and use the forge type from the corresponding repo
-	mainForge, err := server.Config.Services.Manager.ForgeMain()
+	mainForge, err := server.Config.Services.Manager.ForgeByID(1)
 	if err != nil {
 		log.Error().Err(err).Msg("could not get main forge")
 		c.AbortWithStatus(http.StatusInternalServerError)
