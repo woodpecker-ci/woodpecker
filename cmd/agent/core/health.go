@@ -32,8 +32,8 @@ import (
 //   https://github.com/mozilla-services/Dockerflow
 
 func initHealth() {
-	http.HandleFunc("/varz", handleStats)
-	http.HandleFunc("/healthz", handleHeartbeat)
+	http.HandleFunc("/varz", handleStats)        // cspell:words varz
+	http.HandleFunc("/healthz", handleHeartbeat) // cspell:words healthz
 	http.HandleFunc("/version", handleVersion)
 }
 
