@@ -45,7 +45,11 @@ func SetUser() gin.HandlerFunc {
 
 		t, err := token.ParseRequest(c.Request, func(t *token.Token) (string, error) {
 			var err error
-			user, err = store.FromContext(c).GetUserLogin(t.Text)
+			userID, err := strconv.ParseInt(t.Get("user-id"), 10, 64)
+			if err != nil {
+				return "", err
+			}
+			user, err = store.FromContext(c).GetUser(userID)
 			return user.Hash, err
 		})
 		if err == nil {
