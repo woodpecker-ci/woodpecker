@@ -32,7 +32,7 @@ import (
 //	@Produce	json
 //	@Success	200	{array}	Forge
 //	@Tags		Forges
-//	@Param		Authorization	header	string	true	"Insert your personal access token"				default(Bearer <personal access token>)
+//	@Param		Authorization	header	string	false	"Insert your personal access token"				default(Bearer <personal access token>)
 //	@Param		page			query	int		false	"for response pagination, page offset number"	default(1)
 //	@Param		perPage			query	int		false	"for response pagination, max items per page"	default(50)
 func GetForges(c *gin.Context) {
@@ -63,8 +63,8 @@ func GetForges(c *gin.Context) {
 //	@Produce	json
 //	@Success	200	{object}	Forge
 //	@Tags		Forges
-//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param		forge			path	int		true	"the forge's id"
+//	@Param		Authorization	header	string	false	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		forgeId			path	int		true	"the forge's id"
 func GetForge(c *gin.Context) {
 	forgeID, err := strconv.ParseInt(c.Param("forgeId"), 10, 64)
 	if err != nil {
@@ -94,7 +94,7 @@ func GetForge(c *gin.Context) {
 //	@Success	200	{object}	Forge
 //	@Tags		Forges
 //	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param		forge			path	int		true	"the forge's id"
+//	@Param		forgeId			path	int		true	"the forge's id"
 //	@Param		forgeData		body	Forge	true	"the forge's data"
 func PatchForge(c *gin.Context) {
 	_store := store.FromContext(c)
@@ -184,7 +184,7 @@ func PostForge(c *gin.Context) {
 //	@Success	200
 //	@Tags		Forges
 //	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param		forge			path	int		true	"the forge's id"
+//	@Param		forgeId			path	int		true	"the forge's id"
 func DeleteForge(c *gin.Context) {
 	_store := store.FromContext(c)
 

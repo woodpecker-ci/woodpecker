@@ -203,7 +203,7 @@ func apiRoutes(e *gin.RouterGroup) {
 		}
 
 		apiBase.GET("/forges", api.GetForges)
-		apiBase.GET("/:forgeId", api.GetForge)
+		apiBase.GET("/forges/:forgeId", api.GetForge)
 		forgeBase := apiBase.Group("/forges")
 		{
 			forgeBase.Use(session.MustAdmin())

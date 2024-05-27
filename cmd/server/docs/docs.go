@@ -612,8 +612,7 @@ const docTemplate = `{
                         "default": "Bearer \u003cpersonal access token\u003e",
                         "description": "Insert your personal access token",
                         "name": "Authorization",
-                        "in": "header",
-                        "required": true
+                        "in": "header"
                     },
                     {
                         "type": "integer",
@@ -680,7 +679,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/forges/{forge}": {
+        "/forges/{forgeId}": {
             "get": {
                 "produces": [
                     "application/json"
@@ -695,13 +694,12 @@ const docTemplate = `{
                         "default": "Bearer \u003cpersonal access token\u003e",
                         "description": "Insert your personal access token",
                         "name": "Authorization",
-                        "in": "header",
-                        "required": true
+                        "in": "header"
                     },
                     {
                         "type": "integer",
                         "description": "the forge's id",
-                        "name": "forge",
+                        "name": "forgeId",
                         "in": "path",
                         "required": true
                     }
@@ -735,7 +733,7 @@ const docTemplate = `{
                     {
                         "type": "integer",
                         "description": "the forge's id",
-                        "name": "forge",
+                        "name": "forgeId",
                         "in": "path",
                         "required": true
                     }
@@ -766,7 +764,7 @@ const docTemplate = `{
                     {
                         "type": "integer",
                         "description": "the forge's id",
-                        "name": "forge",
+                        "name": "forgeId",
                         "in": "path",
                         "required": true
                     },
@@ -4098,7 +4096,7 @@ const docTemplate = `{
         "Forge": {
             "type": "object",
             "properties": {
-                "additionalOptions": {
+                "additional_options": {
                     "type": "object",
                     "additionalProperties": {}
                 },
@@ -4108,11 +4106,11 @@ const docTemplate = `{
                 "id": {
                     "type": "integer"
                 },
-                "oauthHost": {
+                "oauth_host": {
                     "description": "public url for oauth if different from url",
                     "type": "string"
                 },
-                "skipVerify": {
+                "skip_verify": {
                     "type": "boolean"
                 },
                 "type": {

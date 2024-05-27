@@ -9,6 +9,9 @@ export type Repo = {
   // The id of the repository on the source control management system.
   forge_remote_id: string;
 
+  // The id of the forge that the repository is on.
+  forge_id: number;
+
   // The source control management being used.
   // Currently, this is either 'git' or 'hg' (Mercurial).
   scm: string;
