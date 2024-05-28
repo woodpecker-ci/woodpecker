@@ -534,5 +534,27 @@
     "cli_login_failed": "Connexion en ligne de commande échouée",
     "cli_login_denied": "Connexion à la ligne de commande interdite",
     "return_to_cli": "Vous pouvez fermer cet onglet et revenir à la ligne de commande.",
-    "login_to_cli_description": "En continuant, vous serez connecté via la ligne de commande."
+    "login_to_cli_description": "En continuant, vous serez connecté via la ligne de commande.",
+    "secrets": {
+        "secrets": "Secrets",
+        "desc": "Les secrets peuvent être transmis aux différentes étapes de la pipeline au moment de l'exécution en tant que variables environnementales.",
+        "images": {
+            "desc": "Liste des images pour lesquelles ce secret est disponible, laisser vide pour autoriser toutes les images",
+            "images": "Disponible pour les images suivantes"
+        },
+        "none": "Il n'y a pas encore de secrets.",
+        "add": "Ajouter un secret",
+        "save": "Sauvegarder le secret",
+        "show": "Afficher les secrets",
+        "name": "Nom",
+        "value": "Valeur",
+        "deleted": "Secret supprimé",
+        "created": "Secret créé",
+        "saved": "Secret sauvegardé",
+        "events": {
+            "events": "Disponible lors des événements suivants",
+            "pr_warning": "Soyez prudent avec cette option car un acteur malveillant peut soumettre une pull request qui expose vos secrets."
+        },
+        "plugins_only": "Uniquement disponible pour les plugins"
+    }
 }
