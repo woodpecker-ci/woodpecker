@@ -2,26 +2,25 @@
   <Panel>
     <div class="flex flex-row border-b mb-4 pb-4 items-center dark:border-wp-background-100">
       <div class="ml-2">
-        <h1 class="text-xl text-wp-text-100">{{ $t('user.settings.secrets.secrets') }}</h1>
+        <h1 class="text-xl text-wp-text-100">{{ $t('secrets.secrets') }}</h1>
         <p class="text-sm text-wp-text-alt-100">
-          {{ $t('user.settings.secrets.desc') }}
-          <DocsLink :topic="$t('user.settings.secrets.secrets')" url="docs/usage/secrets" />
+          {{ $t('secrets.desc') }}
+          <DocsLink :topic="$t('secrets.secrets')" url="docs/usage/secrets" />
         </p>
       </div>
       <Button
         v-if="selectedSecret"
         class="ml-auto"
-        :text="$t('user.settings.secrets.show')"
+        :text="$t('secrets.show')"
         start-icon="back"
         @click="selectedSecret = undefined"
       />
-      <Button v-else class="ml-auto" :text="$t('user.settings.secrets.add')" start-icon="plus" @click="showAddSecret" />
+      <Button v-else class="ml-auto" :text="$t('secrets.add')" start-icon="plus" @click="showAddSecret" />
     </div>
 
     <SecretList
       v-if="!selectedSecret"
       v-model="secrets"
-      i18n-prefix="user.settings.secrets."
       :is-deleting="isDeleting"
       @edit="editSecret"
       @delete="deleteSecret"
@@ -30,7 +29,6 @@
     <SecretEdit
       v-else
       v-model="selectedSecret"
-      i18n-prefix="user.settings.secrets."
       :is-saving="isSaving"
       @save="createSecret"
       @cancel="selectedSecret = undefined"
