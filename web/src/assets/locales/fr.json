@@ -537,7 +537,7 @@
     "login_to_cli_description": "En continuant, vous serez connecté via la ligne de commande.",
     "secrets": {
         "secrets": "Secrets",
-        "desc": "Les secrets peuvent être transmis aux différentes étapes de la pipeline au moment de l'exécution en tant que variables environnementales.",
+        "desc": "Les secrets peuvent être transmis aux différentes étapes de la pipeline au moment de l'exécution en tant que variables d'environnement.",
         "images": {
             "desc": "Liste des images pour lesquelles ce secret est disponible, laisser vide pour autoriser toutes les images",
             "images": "Disponible pour les images suivantes"
