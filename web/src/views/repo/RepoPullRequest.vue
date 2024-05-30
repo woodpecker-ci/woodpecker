@@ -6,10 +6,11 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, inject, Ref, toRef } from 'vue';
+import type { Ref} from 'vue';
+import { computed, inject, toRef } from 'vue';
 
 import PipelineList from '~/components/repo/pipeline/PipelineList.vue';
-import { Pipeline, Repo, RepoPermissions } from '~/lib/api/types';
+import type { Pipeline, Repo, RepoPermissions } from '~/lib/api/types';
 
 const props = defineProps<{
   pullRequest: string;

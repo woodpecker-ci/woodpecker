@@ -36,7 +36,8 @@
 </template>
 
 <script lang="ts" setup>
-import { inject, onMounted, Ref } from 'vue';
+import type { Ref } from 'vue';
+import { inject, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 
@@ -50,7 +51,7 @@ import RegistriesTab from '~/components/repo/settings/RegistriesTab.vue';
 import SecretsTab from '~/components/repo/settings/SecretsTab.vue';
 import useNotifications from '~/compositions/useNotifications';
 import { useRouteBack } from '~/compositions/useRouteBack';
-import { Repo, RepoPermissions } from '~/lib/api/types';
+import type { Repo, RepoPermissions } from '~/lib/api/types';
 
 const notifications = useNotifications();
 const router = useRouter();

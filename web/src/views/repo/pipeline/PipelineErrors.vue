@@ -36,7 +36,8 @@
 </template>
 
 <script lang="ts" setup>
-import { inject, Ref } from 'vue';
+import type { Ref } from 'vue';
+import { inject } from 'vue';
 
 import Panel from '~/components/layout/Panel.vue';
 import type { Pipeline, PipelineError } from '~/lib/api/types';

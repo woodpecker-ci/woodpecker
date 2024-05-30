@@ -5,11 +5,11 @@ import { onMounted, ref } from 'vue';
 import useAuthentication from './useAuthentication';
 import useConfig from './useConfig';
 
-type VersionInfo = {
+interface VersionInfo {
   latest: string;
   rc: string;
   next: string;
-};
+}
 
 const version = ref<{
   latest: string | undefined;
@@ -25,7 +25,7 @@ async function fetchVersion(): Promise<VersionInfo | undefined> {
     const json = await resp.json();
     return json;
   } catch (error) {
-    // eslint-disable-next-line no-console
+     
     console.error('Failed to fetch version info', error);
     return undefined;
   }

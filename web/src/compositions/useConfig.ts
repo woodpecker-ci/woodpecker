@@ -1,4 +1,4 @@
-import { User } from '~/lib/api/types';
+import type { User } from '~/lib/api/types';
 
 declare global {
   interface Window {

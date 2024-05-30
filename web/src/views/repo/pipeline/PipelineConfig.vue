@@ -14,12 +14,13 @@
 
 <script lang="ts" setup>
 import { decode } from 'js-base64';
-import { inject, onMounted, Ref, ref, watch } from 'vue';
+import type { Ref} from 'vue';
+import { inject, onMounted, ref, watch } from 'vue';
 
 import SyntaxHighlight from '~/components/atomic/SyntaxHighlight';
 import Panel from '~/components/layout/Panel.vue';
 import useApiClient from '~/compositions/useApiClient';
-import { Pipeline, PipelineConfig, Repo } from '~/lib/api/types';
+import type { Pipeline, PipelineConfig, Repo } from '~/lib/api/types';
 
 const pipeline = inject<Ref<Pipeline>>('pipeline');
 const apiClient = useApiClient();

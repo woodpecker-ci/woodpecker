@@ -1,4 +1,4 @@
-import { Pipeline, PipelineStep, PipelineWorkflow, Repo } from '~/lib/api/types';
+import type { Pipeline, PipelineStep, PipelineWorkflow, Repo } from '~/lib/api/types';
 
 export function findStep(workflows: PipelineWorkflow[], pid: number): PipelineStep | undefined {
   return workflows.reduce(
@@ -26,7 +26,7 @@ export function findStep(workflows: PipelineWorkflow[], pid: number): PipelineSt
 /**
  * Returns true if the process is in a completed state.
  *
- * @param {Object} step - The process object.
+ * @param {object} step - The process object.
  * @returns {boolean}
  */
 export function isStepFinished(step: PipelineStep): boolean {
@@ -36,7 +36,7 @@ export function isStepFinished(step: PipelineStep): boolean {
 /**
  * Returns true if the process is running.
  *
- * @param {Object} step - The process object.
+ * @param {object} step - The process object.
  * @returns {boolean}
  */
 export function isStepRunning(step: PipelineStep): boolean {
@@ -45,8 +45,8 @@ export function isStepRunning(step: PipelineStep): boolean {
 
 /**
  * Compare two pipelines by creation timestamp.
- * @param {Object} a - A pipeline.
- * @param {Object} b - A pipeline.
+ * @param {object} a - A pipeline.
+ * @param {object} b - A pipeline.
  * @returns {number}
  */
 export function comparePipelines(a: Pipeline, b: Pipeline): number {
@@ -56,8 +56,8 @@ export function comparePipelines(a: Pipeline, b: Pipeline): number {
 /**
  * Compare two pipelines by the status.
  * Giving pending, running, or started higher priority than other status
- * @param {Object} a - A pipeline.
- * @param {Object} b - A pipeline.
+ * @param {object} a - A pipeline.
+ * @param {object} b - A pipeline.
  * @returns {number}
  */
 export function comparePipelinesWithStatus(a: Pipeline, b: Pipeline): number {

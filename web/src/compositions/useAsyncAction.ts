@@ -4,9 +4,9 @@ import useNotifications from '~/compositions/useNotifications';
 
 const notifications = useNotifications();
 
-export type UseSubmitOptions = {
+export interface UseSubmitOptions {
   showErrorNotification: false;
-};
+}
 
 export function useAsyncAction<T extends unknown[]>(
   action: (...a: T) => void | Promise<void>,

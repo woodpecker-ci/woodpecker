@@ -2,10 +2,10 @@ import { computed, ref } from 'vue';
 
 const USER_CONFIG_KEY = 'woodpecker-user-config';
 
-type UserConfig = {
+interface UserConfig {
   isPipelineFeedOpen: boolean;
   redirectUrl: string;
-};
+}
 
 const defaultUserConfig: UserConfig = {
   isPipelineFeedOpen: false,

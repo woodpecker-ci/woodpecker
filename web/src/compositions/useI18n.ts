@@ -1,9 +1,9 @@
 import { nextTick } from 'vue';
 import { createI18n } from 'vue-i18n';
 
+import { useDate } from './useDate';
 import { getUserLanguage } from '~/utils/locale';
 
-import { useDate } from './useDate';
 
 const { setDayjsLocale } = useDate();
 const userLanguage = getUserLanguage();

@@ -1,8 +1,8 @@
-/* eslint-disable import/no-extraneous-dependencies */
+ 
+import { copyFile, existsSync, mkdirSync, readdirSync } from 'node:fs';
+import path from 'node:path';
 import VueI18nPlugin from '@intlify/unplugin-vue-i18n/vite';
 import vue from '@vitejs/plugin-vue';
-import { copyFile, existsSync, mkdirSync, readdirSync } from 'fs';
-import path from 'path';
 import replace from 'replace-in-file';
 import IconsResolver from 'unplugin-icons/resolver';
 import Icons from 'unplugin-icons/vite';
@@ -97,13 +97,13 @@ export default defineConfig({
 
       return {
         name: 'vue-i18n-supported-locales',
-        // eslint-disable-next-line consistent-return
+         
         resolveId(id) {
           if (id === virtualModuleId) {
             return resolvedVirtualModuleId;
           }
         },
-        // eslint-disable-next-line consistent-return
+         
         load(id) {
           if (id === resolvedVirtualModuleId) {
             return `export const SUPPORTED_LOCALES = ${JSON.stringify(filenames)}`;

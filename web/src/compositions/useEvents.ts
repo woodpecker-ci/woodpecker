@@ -1,7 +1,7 @@
+import useApiClient from './useApiClient';
 import { usePipelineStore } from '~/store/pipelines';
 import { useRepoStore } from '~/store/repos';
 
-import useApiClient from './useApiClient';
 
 const apiClient = useApiClient();
 let initialized = false;

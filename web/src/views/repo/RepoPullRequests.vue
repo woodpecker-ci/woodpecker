@@ -24,14 +24,15 @@
 </template>
 
 <script lang="ts" setup>
-import { inject, Ref, watch } from 'vue';
+import type { Ref} from 'vue';
+import { inject, watch } from 'vue';
 
 import Icon from '~/components/atomic/Icon.vue';
 import ListItem from '~/components/atomic/ListItem.vue';
 import Panel from '~/components/layout/Panel.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { usePagination } from '~/compositions/usePaginate';
-import { PullRequest, Repo } from '~/lib/api/types';
+import type { PullRequest, Repo } from '~/lib/api/types';
 
 const apiClient = useApiClient();
 

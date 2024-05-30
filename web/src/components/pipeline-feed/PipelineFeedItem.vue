@@ -8,8 +8,9 @@
           params: { repoId: pipeline.repo_id },
         }"
         class="underline"
-        >{{ repo?.owner }} / {{ repo?.name }}</router-link
       >
+        {{ repo?.owner }} / {{ repo?.name }}
+      </router-link>
       <span class="whitespace-nowrap overflow-hidden overflow-ellipsis" :title="message">{{ title }}</span>
       <div class="flex flex-col mt-2">
         <div class="flex space-x-2 items-center" :title="created">
@@ -31,7 +32,7 @@ import { computed, toRef } from 'vue';
 import Icon from '~/components/atomic/Icon.vue';
 import PipelineStatusIcon from '~/components/repo/pipeline/PipelineStatusIcon.vue';
 import usePipeline from '~/compositions/usePipeline';
-import { PipelineFeed } from '~/lib/api/types';
+import type { PipelineFeed } from '~/lib/api/types';
 import { useRepoStore } from '~/store/repos';
 
 const props = defineProps<{

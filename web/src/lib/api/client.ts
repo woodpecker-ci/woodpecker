@@ -1,7 +1,7 @@
-export type ApiError = {
+export interface ApiError {
   status: number;
   message: string;
-};
+}
 
 export function encodeQueryString(_params: Record<string, string | number | boolean | undefined> = {}): string {
   const params: Record<string, string | number | boolean> = {};

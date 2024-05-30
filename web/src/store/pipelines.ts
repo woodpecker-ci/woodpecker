@@ -1,8 +1,9 @@
 import { defineStore } from 'pinia';
-import { computed, reactive, Ref, ref } from 'vue';
+import type { Ref} from 'vue';
+import { computed, reactive, ref } from 'vue';
 
 import useApiClient from '~/compositions/useApiClient';
-import { Pipeline, PipelineFeed, PipelineWorkflow } from '~/lib/api/types';
+import type { Pipeline, PipelineFeed, PipelineWorkflow } from '~/lib/api/types';
 import { useRepoStore } from '~/store/repos';
 import { comparePipelines, comparePipelinesWithStatus, isPipelineActive } from '~/utils/helpers';
 
@@ -27,7 +28,7 @@ export const usePipelineStore = defineStore('pipelines', () => {
 
   function getPipeline(repoId: Ref<number>, _pipelineNumber: Ref<string>) {
     return computed(() => {
-      const pipelineNumber = parseInt(_pipelineNumber.value, 10);
+      const pipelineNumber = Number.parseInt(_pipelineNumber.value, 10);
       return pipelines.get(repoId.value)?.get(pipelineNumber);
     });
   }
