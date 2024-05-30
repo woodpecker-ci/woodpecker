@@ -175,7 +175,7 @@ const { doSubmit: saveAgent, isLoading: isSaving } = useAsyncAction(async () => 
     selectedAgent.value = await apiClient.createAgent(selectedAgent.value);
   }
   notifications.notify({
-    title: t(isEditingAgent.value ? 'admin.settings.agents.saved' : 'admin.settings.agents.created'),
+    title: isEditingAgent.value ? t('admin.settings.agents.saved') : t('admin.settings.agents.created'),
     type: 'success',
   });
   resetPage();

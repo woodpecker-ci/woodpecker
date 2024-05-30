@@ -7,7 +7,9 @@
         class="text-wp-text-100"
         :to="{ name: 'repo-pull-request', params: { pullRequest: pullRequest.index } }"
       >
+        <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
         <span class="text-wp-text-alt-100 <md:hidden">#{{ pullRequest.index }}</span>
+        <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
         <span class="text-wp-text-alt-100 <md:hidden mx-2">-</span>
         <span class="text-wp-text-100 <md:underline whitespace-nowrap overflow-hidden overflow-ellipsis">{{
           pullRequest.title

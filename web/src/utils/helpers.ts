@@ -24,20 +24,16 @@ export function findStep(workflows: PipelineWorkflow[], pid: number): PipelineSt
 }
 
 /**
- * Returns true if the process is in a completed state.
- *
  * @param {object} step - The process object.
- * @returns {boolean}
+ * @returns {boolean} true if the process is in a completed state
  */
 export function isStepFinished(step: PipelineStep): boolean {
   return step.state !== 'running' && step.state !== 'pending';
 }
 
 /**
- * Returns true if the process is running.
- *
  * @param {object} step - The process object.
- * @returns {boolean}
+ * @returns {boolean} true if the process is running
  */
 export function isStepRunning(step: PipelineStep): boolean {
   return step.state === 'running';
@@ -47,7 +43,7 @@ export function isStepRunning(step: PipelineStep): boolean {
  * Compare two pipelines by creation timestamp.
  * @param {object} a - A pipeline.
  * @param {object} b - A pipeline.
- * @returns {number}
+ * @returns {number} 0 if created at the same time, < 0 if b was create before a, > 0 otherwise
  */
 export function comparePipelines(a: Pipeline, b: Pipeline): number {
   return (b.created_at || -1) - (a.created_at || -1);
@@ -58,7 +54,7 @@ export function comparePipelines(a: Pipeline, b: Pipeline): number {
  * Giving pending, running, or started higher priority than other status
  * @param {object} a - A pipeline.
  * @param {object} b - A pipeline.
- * @returns {number}
+ * @returns {number} 0 if status same priority, < 0 if b has higher priority, > 0 otherwise
  */
 export function comparePipelinesWithStatus(a: Pipeline, b: Pipeline): number {
   const bPriority = ['pending', 'running', 'started'].includes(b.status) ? 1 : 0;
@@ -70,8 +66,6 @@ export function isPipelineActive(pipeline: Pipeline): boolean {
   return ['pending', 'running', 'started'].includes(pipeline.status);
 }
 
-export function repoSlug(ownerOrRepo: Repo): string;
-export function repoSlug(ownerOrRepo: string, name: string): string;
 export function repoSlug(ownerOrRepo: string | Repo, name?: string): string {
   if (typeof ownerOrRepo === 'string') {
     if (!name) {

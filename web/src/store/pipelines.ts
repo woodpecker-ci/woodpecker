@@ -14,7 +14,7 @@ export const usePipelineStore = defineStore('pipelines', () => {
   const pipelines: Map<number, Map<number, Pipeline>> = reactive(new Map());
 
   function setPipeline(repoId: number, pipeline: Pipeline) {
-    const repoPipelines = pipelines.get(repoId) || new Map();
+    const repoPipelines = pipelines.get(repoId) || new Map<number, Pipeline>();
     repoPipelines.set(pipeline.number, {
       ...(repoPipelines.get(pipeline.number) || {}),
       ...pipeline,

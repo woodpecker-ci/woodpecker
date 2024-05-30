@@ -22,7 +22,6 @@ import { pipelineStatusColors } from './pipeline-status';
 import Icon from '~/components/atomic/Icon.vue';
 import type { PipelineStatus } from '~/lib/api/types';
 
-
 defineProps<{
   status: PipelineStatus;
   service?: boolean;

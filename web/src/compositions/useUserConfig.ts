@@ -18,7 +18,7 @@ function loadUserConfig(): UserConfig {
     return defaultUserConfig;
   }
 
-  return JSON.parse(lsData);
+  return JSON.parse(lsData) as UserConfig;
 }
 
 const config = ref<UserConfig>(loadUserConfig());

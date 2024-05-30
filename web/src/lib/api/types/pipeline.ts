@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import type { WebhookEvents } from './webhook';
 
 export interface PipelineError<D = unknown> {

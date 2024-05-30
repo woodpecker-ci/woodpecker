@@ -10,11 +10,13 @@
             'text-wp-state-error-100': !error.is_warning,
           }"
         />
+        <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
         <span>[{{ error.type }}]</span>
         <span
           v-if="isLinterError(error) || isDeprecationError(error) || isBadHabitError(error)"
           class="whitespace-nowrap"
         >
+          <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
           <span v-if="error.data?.file" class="font-bold">{{ error.data?.file }}: </span>
           <span>{{ error.data?.field }}</span>
         </span>

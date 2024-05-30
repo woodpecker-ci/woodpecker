@@ -80,7 +80,7 @@ const { doSubmit: createSecret, isLoading: isSaving } = useAsyncAction(async () 
     await apiClient.createOrgSecret(org.value.id, selectedSecret.value);
   }
   notifications.notify({
-    title: i18n.t(isEditingSecret.value ? 'secrets.saved' : 'secrets.created'),
+    title: isEditingSecret.value ? i18n.t('secrets.saved') : i18n.t('secrets.created'),
     type: 'success',
   });
   selectedSecret.value = undefined;

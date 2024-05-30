@@ -1,9 +1,9 @@
 // cSpell:ignore TSES
 // @ts-check
 
-import vueI18n from '@intlify/eslint-plugin-vue-i18n';
 import antfu from '@antfu/eslint-config';
 import js from '@eslint/js';
+import vueI18n from '@intlify/eslint-plugin-vue-i18n';
 import eslintPluginVueScopedCSS from 'eslint-plugin-vue-scoped-css';
 
 export default antfu(
@@ -75,7 +75,7 @@ export default antfu(
       '@intlify/vue-i18n/no-deprecated-i18n-component': 'error',
       '@intlify/vue-i18n/no-deprecated-tc': 'error',
       '@intlify/vue-i18n/no-i18n-t-path-prop': 'error',
-      // '@intlify/vue-i18n/no-missing-keys-in-other-locales': 'error',
+      '@intlify/vue-i18n/no-missing-keys-in-other-locales': 'off',
       '@intlify/vue-i18n/valid-message-syntax': 'error',
       '@intlify/vue-i18n/no-missing-keys': 'error',
       '@intlify/vue-i18n/no-unknown-locale': 'error',

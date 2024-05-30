@@ -18,6 +18,7 @@
       >
         <span>{{ cron.name }}</span>
         <span v-if="cron.next_exec && cron.next_exec > 0" class="ml-auto">
+          <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
           {{ $t('repo.settings.crons.next_exec') }}: {{ date.toLocaleString(new Date(cron.next_exec * 1000)) }}</span>
         <span v-else class="ml-auto">{{ $t('repo.settings.crons.not_executed_yet') }}</span>
         <IconButton icon="play" class="ml-auto w-8 h-8" :title="$t('repo.settings.crons.run')" @click="runCron(cron)" />
@@ -68,6 +69,7 @@
 
         <div v-if="isEditingCron" class="ml-auto mb-4">
           <span v-if="selectedCron.next_exec && selectedCron.next_exec > 0" class="text-wp-text-100">
+            <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
             {{ $t('repo.settings.crons.next_exec') }}:
             {{ date.toLocaleString(new Date(selectedCron.next_exec * 1000)) }}
           </span>
@@ -141,7 +143,7 @@ const { doSubmit: createCron, isLoading: isSaving } = useAsyncAction(async () =>
     await apiClient.createCron(repo.value.id, selectedCron.value);
   }
   notifications.notify({
-    title: i18n.t(isEditingCron.value ? 'repo.settings.crons.saved' : i18n.t('repo.settings.crons.created')),
+    title: isEditingCron.value ? i18n.t('repo.settings.crons.saved') : i18n.t('repo.settings.crons.created'),
     type: 'success',
   });
   selectedCron.value = undefined;

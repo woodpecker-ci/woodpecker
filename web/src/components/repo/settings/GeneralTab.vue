@@ -15,6 +15,7 @@
         <template #description>
           <i18n-t keypath="repo.settings.general.pipeline_path.desc" tag="p" class="text-sm text-wp-text-alt-100">
             <span class="code-box-inline px-1">{{ $t('repo.settings.general.pipeline_path.desc_path_example') }}</span>
+            <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
             <span class="code-box-inline px-1">/</span>
           </i18n-t>
         </template>

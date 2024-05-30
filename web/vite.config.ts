@@ -1,6 +1,7 @@
  
 import { copyFile, existsSync, mkdirSync, readdirSync } from 'node:fs';
 import path from 'node:path';
+import process from 'node:process';
 import VueI18nPlugin from '@intlify/unplugin-vue-i18n/vite';
 import vue from '@vitejs/plugin-vue';
 import replace from 'replace-in-file';
@@ -61,7 +62,7 @@ export default defineConfig({
         mkdirSync('src/assets/dayjsLocales');
       }
 
-      filenames.forEach(async (name) => {
+      filenames.forEach((name) => {
         // English is always directly loaded (compiled by Vite) and thus not copied
         if (name === 'en') {
           return;
@@ -80,7 +81,7 @@ export default defineConfig({
         copyFile(
           `node_modules/dayjs/esm/locale/${langName}.js`,
           `src/assets/dayjsLocales/${name}.js`,
-          // eslint-disable-next-line promise/prefer-await-to-callbacks
+          // TODO enable with eslint-plugin-promise eslint-disable-next-line promise/prefer-await-to-callbacks
           (err) => {
             if (err) {
               throw err;

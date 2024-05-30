@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 // A version control repository.
 export interface Repo {
   // Is the repo currently active or not

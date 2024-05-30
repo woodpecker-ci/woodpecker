@@ -33,7 +33,7 @@
         </div>
       </ListItem>
 
-      <div v-if="repos?.length === 0" class="ml-2">{{ $t('admin.settings.orgs.none') }}</div>
+      <div v-if="repos?.length === 0" class="ml-2">{{ $t('admin.settings.repos.none') }}</div>
     </div>
   </Settings>
 </template>

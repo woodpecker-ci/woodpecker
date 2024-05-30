@@ -125,9 +125,7 @@ const { doSubmit: createRegistry, isLoading: isSaving } = useAsyncAction(async (
     await apiClient.createRegistry(repo.value.id, selectedRegistry.value);
   }
   notifications.notify({
-    title: i18n.t(
-      isEditingRegistry.value ? 'repo.settings.registries.saved' : i18n.t('repo.settings.registries.created'),
-    ),
+    title: isEditingRegistry.value ? i18n.t('repo.settings.registries.saved') : i18n.t('repo.settings.registries.created'),
     type: 'success',
   });
   selectedRegistry.value = undefined;

@@ -12,6 +12,7 @@
       <span>
         <router-link :to="{ name: 'org', params: { orgId: repo.org_id } }" class="hover:underline">
           {{ repo.owner }}
+        <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
         </router-link>
         /
         <router-link :to="{ name: 'repo' }" class="hover:underline">
@@ -25,6 +26,7 @@
         <div class="flex content-start gap-2 min-w-0">
           <PipelineStatusIcon :status="pipeline.status" class="flex flex-shrink-0" />
           <span class="flex-shrink-0 text-center">{{ $t('repo.pipeline.pipeline', { pipelineId }) }}</span>
+          <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
           <span class="hidden md:inline-block">-</span>
           <span class="min-w-0 whitespace-nowrap overflow-hidden overflow-ellipsis" :title="message">{{ title }}</span>
         </div>

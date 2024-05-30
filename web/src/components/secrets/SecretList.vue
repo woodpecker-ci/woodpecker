@@ -65,7 +65,7 @@ function editSecret(secret: Secret) {
 function deleteSecret(secret: Secret) {
   // TODO: use proper dialog
   // eslint-disable-next-line no-alert
-  if (!confirm(i18n.t('repo.settings.secrets.delete_confirm'))) {
+  if (!confirm(i18n.t('secrets.delete_confirm'))) {
     return;
   }
   emit('delete', secret);

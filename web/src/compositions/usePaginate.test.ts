@@ -18,11 +18,11 @@ async function waitForState<T>(ref: Ref<T>, expected: T): Promise<void> {
   });
 }
 
-// eslint-disable-next-line promise/prefer-await-to-callbacks
+// TODO enable again with eslint-plugin-promise eslint-disable-next-line promise/prefer-await-to-callbacks
 export const mountComposition = (cb: () => void) => {
   const wrapper = shallowMount({
     setup() {
-      // eslint-disable-next-line promise/prefer-await-to-callbacks
+      // TODO enable again with eslint-plugin-promise eslint-disable-next-line promise/prefer-await-to-callbacks
       cb();
       return {};
     },
@@ -119,7 +119,7 @@ describe('usePaginate', () => {
     usePaginationComposition.nextPage();
     await waitForState(usePaginationComposition.loading, false);
 
-    usePaginationComposition.resetPage();
+    void usePaginationComposition.resetPage();
     await waitForState(usePaginationComposition.loading, false);
 
     expect(usePaginationComposition.data.value.length).toBe(3);

@@ -29,7 +29,7 @@ export function useDate() {
 
   async function setDayjsLocale(locale: string) {
     if (!addedLocales.includes(locale)) {
-      const l = await import(`~/assets/dayjsLocales/${locale}.js`);
+      const l = await import(`~/assets/dayjsLocales/${locale}.js`) as {default: ILocale};
       dayjs.locale(l.default);
     } else {
       dayjs.locale(locale);

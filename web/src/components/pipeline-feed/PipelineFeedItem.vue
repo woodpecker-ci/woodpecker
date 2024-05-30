@@ -9,6 +9,7 @@
         }"
         class="underline"
       >
+        <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
         {{ repo?.owner }} / {{ repo?.name }}
       </router-link>
       <span class="whitespace-nowrap overflow-hidden overflow-ellipsis" :title="message">{{ title }}</span>
