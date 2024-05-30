@@ -3,10 +3,11 @@
 
 import vueI18n from '@intlify/eslint-plugin-vue-i18n';
 import antfu from '@antfu/eslint-config';
+import js from '@eslint/js';
+import ts from '@typescript-eslint/eslint-plugin';
+import pluginVueScopedCSS from 'eslint-plugin-vue-scoped-css';
 
 export default antfu(
-  // eslint.configs.recommended,
-  // js.configs.recommended,
   // eslintPromise.configs.recommended,
 
   {
@@ -21,30 +22,15 @@ export default antfu(
     jsonc: false,
     yaml: false,
   },
+  js.configs.recommended,
 
-  /// TypeScript
-  // ...tseslint.configs.recommended,
-  // ...tseslint.configs.recommendedTypeChecked,
-  // ...tseslint.configs.strictTypeChecked,
-  // ...tseslint.configs.stylisticTypeChecked,
+  // TypeScript
+  //...tseslint.configs.recommended,
+  //...tseslint.configs.recommendedTypeChecked,
+  //...tseslint.configs.strictTypeChecked,
+  //...tseslint.configs.stylisticTypeChecked,
 
-  /// Vue
-  // ...pluginVue.configs['flat/recommended'],
-  // {
-  //   languageOptions: {
-  //     parser: vueParser,
-  //     parserOptions: {
-  //       ecmaVersion: 'latest',
-  //       project: ['./tsconfig.eslint.json'],
-  //       parser: tsParser,
-  //       sourceType: 'module',
-  //       extraFileExtensions: ['.vue'],
-  //       ecmaFeatures: {
-  //         jsx: true,
-  //       },
-  //     },
-  //   },
-  // },
+  ...eslintPluginVueScopedCSS.configs['flat/recommended'],
 
   {
     files: ['**/*.vue'],
@@ -72,7 +58,7 @@ export default antfu(
     },
   },
 
-  /// Vue I18n
+  // Vue I18n
   ...vueI18n.configs['flat/recommended'],
   {
     rules: {
@@ -110,10 +96,9 @@ export default antfu(
     },
   },
 
-  /// Ignore list
+  // Ignore list
   {
     ignores: [
-      // # don't lint build output (make sure it's set to your correct build folder name)
       'dist',
       'coverage/',
       'package.json',

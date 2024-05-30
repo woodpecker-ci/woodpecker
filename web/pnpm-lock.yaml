@@ -108,9 +108,6 @@ importers:
       eslint-plugin-promise:
         specifier: ^6.2.0
         version: 6.2.0(eslint@9.1.1)
-      eslint-plugin-vue:
-        specifier: ^9.26.0
-        version: 9.26.0(eslint@9.1.1)
       eslint-plugin-vue-scoped-css:
         specifier: ^2.8.0
         version: 2.8.0(eslint@9.1.1)(vue-eslint-parser@9.4.2(eslint@9.1.1))
