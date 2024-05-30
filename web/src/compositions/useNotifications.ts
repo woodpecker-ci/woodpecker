@@ -4,7 +4,7 @@ import Notifications, { notify } from '@kyvg/vue3-notification';
 export const notifications = Notifications;
 
 function notifyError(err: unknown, args: NotificationsOptions | string = {}): void {
-   
+
   console.error(err);
 
   const mArgs = typeof args === 'string' ? { title: args } : args;

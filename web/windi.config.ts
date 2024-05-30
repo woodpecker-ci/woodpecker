@@ -1,5 +1,5 @@
 // cSpell:ignore Segoe Roboto Neue Noto
- 
+
 import tinycolor from 'tinycolor2';
 import colors from 'windicss/colors';
 import { defineConfig } from 'windicss/helpers';

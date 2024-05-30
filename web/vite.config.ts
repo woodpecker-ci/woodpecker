@@ -1,4 +1,4 @@
- 
+
 import { copyFile, existsSync, mkdirSync, readdirSync } from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
@@ -98,13 +98,13 @@ export default defineConfig({
 
       return {
         name: 'vue-i18n-supported-locales',
-         
+
         resolveId(id) {
           if (id === virtualModuleId) {
             return resolvedVirtualModuleId;
           }
         },
-         
+
         load(id) {
           if (id === resolvedVirtualModuleId) {
             return `export const SUPPORTED_LOCALES = ${JSON.stringify(filenames)}`;

@@ -10,7 +10,7 @@ import type { Repo } from '~/lib/api/types';
 function repoCompare(a: Repo, b: Repo) {
   const x = `${a.owner}/${a.name}`;
   const y = `${b.owner}/${b.name}`;
-   
+
   return x === y ? 0 : x > y ? 1 : -1;
 }
 

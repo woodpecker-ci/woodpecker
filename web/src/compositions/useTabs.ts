@@ -30,7 +30,7 @@ export function useTabsProvider({
     }
 
     const hashTab = route.hash.replace(/^#/, '');
-     
+
     activeTab.value = hashTab || tabs.value[0].id;
   });
 }

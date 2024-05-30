@@ -25,7 +25,7 @@ async function fetchVersion(): Promise<VersionInfo | undefined> {
     const json = await resp.json() as VersionInfo;
     return json;
   } catch (error) {
-     
+
     console.error('Failed to fetch version info', error);
     return undefined;
   }

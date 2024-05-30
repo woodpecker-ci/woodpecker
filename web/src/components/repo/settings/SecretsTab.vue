@@ -79,9 +79,9 @@ const { resetPage, data: _secrets } = usePagination(loadSecrets, () => !selected
 const secrets = computed(() => {
   const secretsList: Record<string, Secret & { edit?: boolean; level: 'repo' | 'org' | 'global' }> = {};
 
-   
+
   for (const level of ['repo', 'org', 'global']) {
-     
+
     for (const secret of _secrets.value) {
       if (
         ((level === 'repo' && secret.repo_id !== 0 && secret.org_id === 0) ||
