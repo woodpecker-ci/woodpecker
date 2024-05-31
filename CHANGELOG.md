@@ -18,6 +18,7 @@
 
 ### 📚 Documentation
 
+- Fix spelling in README [[#3741](https://github.com/woodpecker-ci/woodpecker/pull/3741)]
 - chore: fix some comments [[#3740](https://github.com/woodpecker-ci/woodpecker/pull/3740)]
 - Add "Is It Up Yet?" Plugin [[#3731](https://github.com/woodpecker-ci/woodpecker/pull/3731)]
 - Remove discord as official community channel [[#3717](https://github.com/woodpecker-ci/woodpecker/pull/3717)]
@@ -87,7 +88,6 @@
 
 - chore(deps): update pre-commit non-major [[#3736](https://github.com/woodpecker-ci/woodpecker/pull/3736)]
 - chore(deps): update docker.io/alpine docker tag to v3.20 [[#3735](https://github.com/woodpecker-ci/woodpecker/pull/3735)]
-- Remove discord announcements [[#3725](https://github.com/woodpecker-ci/woodpecker/pull/3725)]
 - fix(deps): update module github.com/google/go-github/v61 to v62 [[#3730](https://github.com/woodpecker-ci/woodpecker/pull/3730)]
 - chore(deps): update docker.io/woodpeckerci/plugin-docker-buildx docker tag to v4 [[#3729](https://github.com/woodpecker-ci/woodpecker/pull/3729)]
 - chore(deps): update docker.io/mstruebing/editorconfig-checker docker tag to v3 [[#3728](https://github.com/woodpecker-ci/woodpecker/pull/3728)]
@@ -100,7 +100,6 @@
 - Add nix flake for dev shell [[#3702](https://github.com/woodpecker-ci/woodpecker/pull/3702)]
 - Skip golangci in pre-commit.ci [[#3692](https://github.com/woodpecker-ci/woodpecker/pull/3692)]
 - chore(deps): update woodpeckerci/plugin-github-release docker tag to v1.2.0 [[#3690](https://github.com/woodpecker-ci/woodpecker/pull/3690)]
-- Add discord announcements [[#3678](https://github.com/woodpecker-ci/woodpecker/pull/3678)]
 - Switch back to upstream xgo image [[#3682](https://github.com/woodpecker-ci/woodpecker/pull/3682)]
 - Allow running tests on arm64 runners [[#2605](https://github.com/woodpecker-ci/woodpecker/pull/2605)]
 - chore(deps): update node.js to v22 [[#3659](https://github.com/woodpecker-ci/woodpecker/pull/3659)]
