@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "start": "cd ../ && make docs && cd docs && docusaurus start",
-    "build": "pnpm build:woodpecker-plugins && NODE_ENV=development docusaurus build",
+    "build": "pnpm build:woodpecker-plugins && docusaurus build",
     "build:woodpecker-plugins": "cd plugins/woodpecker-plugins && pnpm i && pnpm build",
     "swizzle": "docusaurus swizzle",
     "deploy": "docusaurus deploy",
