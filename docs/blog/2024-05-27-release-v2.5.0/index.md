@@ -22,7 +22,7 @@ most users will benefit from while they are probably not that visible at first s
 
 The implementation wasn't perfect yet so we improved the way entrypoints work:
 
-If you define [`commands`](../../docs/2.5/usage/workflow-syntax#commands), the default entrypoint will be `["/bin/sh", "-c", "echo $CI_SCRIPT | base64 -d | /bin/sh -e"]`.
+If you define [`commands`](/docs/usage/workflow-syntax#commands), the default entrypoint will be `["/bin/sh", "-c", "echo $CI_SCRIPT | base64 -d | /bin/sh -e"]`.
 
 If you define your own entrypoint, you can completely overwrite the default entrypoint. If you define `entrypoint: ["/bin/my-script", ""]` for example you can run your own binary / script. In this case the commands section will ignord, however you can still access it in your own script by using the base64 encoded string of the `CI_SCRIPT` environment variable.
 
@@ -88,4 +88,4 @@ be removed in the next major release:
 - Use `WOODPECKER_EXPERT_FORGE_OAUTH_HOST` instead of `WOODPECKER_DEV_GITEA_OAUTH_URL` or `WOODPECKER_DEV_OAUTH_HOST`
 - Deprecated `WOODPECKER_WEBHOOK_HOST` in favor of `WOODPECKER_EXPERT_WEBHOOK_HOST`
 
-For a full list of deprecations that will be dropped in the `next` major release `3.0.0` (no eta yet), please check the [migrations](../../docs/2.5/migrations#next) section.
+For a full list of deprecations that will be dropped in the `next` major release `3.0.0` (no eta yet), please check the [migrations](/docs/migrations#next) section.
