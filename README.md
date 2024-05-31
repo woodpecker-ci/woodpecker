@@ -73,7 +73,7 @@ We use an own [Weblate](https://weblate.org/en/) instance at [translate.woodpeck
 
 ## 👋 Who uses Woodpecker?
 
-Woodpecker is used by [itself](https://ci.woodpecker-ci.org/woodpecker/woodpecker-ci/) multiple well-known companies, organizations like [Codeberg](https://codeberg.org), hobbyist and many others.
+Woodpecker is used by [itself](https://ci.woodpecker-ci.org/woodpecker/woodpecker-ci/), multiple well-known companies, organizations like [Codeberg](https://codeberg.org), hobbyists and many others.
 
 Leave a [comment](https://github.com/woodpecker-ci/woodpecker/discussions/2149) if you're using it as well.
 
