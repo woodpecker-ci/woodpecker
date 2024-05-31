@@ -14,7 +14,7 @@
 
 package fixtures
 
-// HookPush is a sample Forgejo push hook
+// HookPush is a sample Forgejo push hook.
 const HookPush = `
 {
   "ref": "refs/heads/main",
@@ -75,7 +75,7 @@ const HookPush = `
 }
 `
 
-// HookPushMulti push multible commits to a branch
+// HookPushMulti push multible commits to a branch.
 const HookPushMulti = `
 {
   "ref": "refs/heads/main",
@@ -272,7 +272,7 @@ const HookPushMulti = `
 }
 `
 
-// HookPushBranch is a sample Forgejo push hook where a new branch was created from an existing commit
+// HookPushBranch is a sample Forgejo push hook where a new branch was created from an existing commit.
 const HookPushBranch = `
 {
   "ref": "refs/heads/fdsafdsa",
