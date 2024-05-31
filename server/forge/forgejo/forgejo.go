@@ -80,12 +80,12 @@ func New(opts Opts) (forge.Forge, error) {
 	}, nil
 }
 
-// Name returns the string name of this driver
+// Name returns the string name of this driver.
 func (c *Forgejo) Name() string {
 	return "forgejo"
 }
 
-// URL returns the root url of a configured forge
+// URL returns the root url of a configured forge.
 func (c *Forgejo) URL() string {
 	return c.url
 }
@@ -454,7 +454,7 @@ func (c *Forgejo) Branches(ctx context.Context, u *model.User, r *model.Repo, p 
 	return result, err
 }
 
-// BranchHead returns the sha of the head (latest commit) of the specified branch
+// BranchHead returns the sha of the head (latest commit) of the specified branch.
 func (c *Forgejo) BranchHead(ctx context.Context, u *model.User, r *model.Repo, branch string) (*model.Commit, error) {
 	token := common.UserToken(ctx, r, u)
 	client, err := c.newClientToken(ctx, token)
@@ -581,7 +581,7 @@ func (c *Forgejo) Org(ctx context.Context, u *model.User, owner string) (*model.
 	}, nil
 }
 
-// helper function to return the Forgejo client with Token
+// newClientToken returns a Forgejo client with token.
 func (c *Forgejo) newClientToken(ctx context.Context, token string) (*forgejo.Client, error) {
 	httpClient := &http.Client{}
 	if c.SkipVerify {
