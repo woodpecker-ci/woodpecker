@@ -406,7 +406,13 @@ func TestPodPrivilege(t *testing.T) {
 	}
 	pod, err = createTestPod(true, false, secCtx)
 	assert.NoError(t, err)
-	assert.Equal(t, true, *pod.Spec.Containers[0].SecurityContext.Privileged)
+	assert.True(t, *pod.Spec.Containers[0].SecurityContext.Privileged)
+
+	// step is privileged and no security context is provided
+	secCtx = SecurityContext{}
+	pod, err = createTestPod(true, false, secCtx)
+	assert.NoError(t, err)
+	assert.True(t, *pod.Spec.Containers[0].SecurityContext.Privileged)
 
 	// global runAsNonRoot is true and override is requested value by security context
 	secCtx = SecurityContext{
@@ -414,7 +420,7 @@ func TestPodPrivilege(t *testing.T) {
 	}
 	pod, err = createTestPod(false, true, secCtx)
 	assert.NoError(t, err)
-	assert.Equal(t, true, *pod.Spec.SecurityContext.RunAsNonRoot)
+	assert.True(t, *pod.Spec.SecurityContext.RunAsNonRoot)
 }
 
 func TestScratchPod(t *testing.T) {
