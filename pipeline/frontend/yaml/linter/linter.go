@@ -148,40 +148,46 @@ func (l *Linter) lintCommands(config *WorkflowConfig, c *types.Container, field 
 
 func (l *Linter) lintTrusted(config *WorkflowConfig, c *types.Container, area string) error {
 	yamlPath := fmt.Sprintf("%s.%s", area, c.Name)
-	err := ""
+	errors := []string{}
 	if c.Privileged {
-		err = "Insufficient privileges to use privileged mode"
+		errors = append(errors, "Insufficient privileges to use privileged mode")
 	}
 	if c.ShmSize != 0 {
-		err = "Insufficient privileges to override shm_size"
+		errors = append(errors, "Insufficient privileges to override shm_size")
 	}
 	if len(c.DNS) != 0 {
-		err = "Insufficient privileges to use custom dns"
+		errors = append(errors, "Insufficient privileges to use custom dns")
 	}
 	if len(c.DNSSearch) != 0 {
-		err = "Insufficient privileges to use dns_search"
+		errors = append(errors, "Insufficient privileges to use dns_search")
 	}
 	if len(c.Devices) != 0 {
-		err = "Insufficient privileges to use devices"
+		errors = append(errors, "Insufficient privileges to use devices")
 	}
 	if len(c.ExtraHosts) != 0 {
-		err = "Insufficient privileges to use extra_hosts"
+		errors = append(errors, "Insufficient privileges to use extra_hosts")
 	}
 	if len(c.NetworkMode) != 0 {
-		err = "Insufficient privileges to use network_mode"
+		errors = append(errors, "Insufficient privileges to use network_mode")
 	}
 	if c.Networks.Networks != nil && len(c.Networks.Networks) != 0 {
-		err = "Insufficient privileges to use networks"
+		errors = append(errors, "Insufficient privileges to use networks")
 	}
 	if c.Volumes.Volumes != nil && len(c.Volumes.Volumes) != 0 {
-		err = "Insufficient privileges to use volumes"
+		errors = append(errors, "Insufficient privileges to use volumes")
 	}
 	if len(c.Tmpfs) != 0 {
-		err = "Insufficient privileges to use tmpfs"
+		errors = append(errors, "Insufficient privileges to use tmpfs")
 	}
 
-	if len(err) != 0 {
-		return newLinterError(err, config.File, yamlPath, false)
+	if len(errors) > 0 {
+		var err error
+
+		for _, e := range errors {
+			err = multierr.Append(err, newLinterError(e, config.File, yamlPath, false))
+		}
+
+		return err
 	}
 
 	return nil
