@@ -16,7 +16,11 @@ You can add more agents to increase the number of parallel workflows or set the 
 
 Woodpecker is having two different kinds of releases: **stable** and **next**.
 
-To find out more about the differences between the two releases, please read the [FAQ](/faq#which-version-of-woodpecker-should-i-use).
+The **stable** releases (currently version 2.5) are stable versions. The stable releases are only getting bugfixes.
+
+The **next** release contains all bugfixes and features from `main` branch. Normally it should be pretty stable, but as its frequently updated, it might contain some bugs from time to time. There are no binaries for this version.
+
+If you want all (new) features of Woodpecker and are willing to accept some possible bugs from time to time, you should use the next release, otherwise use the stable release.
 
 ### Stable releases
 
