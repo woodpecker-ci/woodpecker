@@ -11,6 +11,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge/addon"
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge/bitbucket"
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge/bitbucketdatacenter"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge/forgejo"
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge/gitea"
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge/github"
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge/gitlab"
@@ -29,6 +30,8 @@ func Forge(forge *model.Forge) (forge.Forge, error) {
 		return setupBitbucket(forge)
 	case model.ForgeTypeGitea:
 		return setupGitea(forge)
+	case model.ForgeTypeForgejo:
+		return setupForgejo(forge)
 	case model.ForgeTypeBitbucketDatacenter:
 		return setupBitbucketDatacenter(forge)
 	default:
@@ -63,6 +66,26 @@ func setupGitea(forge *model.Forge) (forge.Forge, error) {
 	}
 	log.Trace().Msgf("Forge (gitea) opts: %#v", opts)
 	return gitea.New(opts)
+}
+
+func setupForgejo(forge *model.Forge) (forge.Forge, error) {
+	server, err := url.Parse(forge.URL)
+	if err != nil {
+		return nil, err
+	}
+
+	opts := forgejo.Opts{
+		URL:        strings.TrimRight(server.String(), "/"),
+		Client:     forge.Client,
+		Secret:     forge.ClientSecret,
+		SkipVerify: forge.SkipVerify,
+		OAuth2URL:  forge.OAuthHost,
+	}
+	if len(opts.URL) == 0 {
+		return nil, fmt.Errorf("WOODPECKER_FORGEJO_URL must be set")
+	}
+	log.Trace().Msgf("Forge (forgejo) opts: %#v", opts)
+	return forgejo.New(opts)
 }
 
 func setupGitLab(forge *model.Forge) (forge.Forge, error) {
