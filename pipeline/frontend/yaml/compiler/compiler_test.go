@@ -342,3 +342,40 @@ func TestSecretMatch(t *testing.T) {
 		})
 	}
 }
+
+func TestCompilerCompilePrivileged(t *testing.T) {
+	compiler := New(
+		WithEscalated("test/image"),
+	)
+
+	fronConf := &yaml_types.Workflow{
+		SkipClone: true,
+		Steps: yaml_types.ContainerList{
+			ContainerList: []*yaml_types.Container{
+				{
+					Name:      "privileged-plugin",
+					Image:     "test/image",
+					DependsOn: []string{}, // no dependencies =>  enable dag mode & all steps are executed in parallel
+				},
+				{
+					Name:     "no-plugin",
+					Image:    "test/image",
+					Commands: []string{"echo 'i am not a plugin anymore'"},
+				},
+				{
+					Name:  "not-privileged-image",
+					Image: "some/other-image",
+				},
+			},
+		},
+	}
+
+	backConf, err := compiler.Compile(fronConf)
+	assert.NoError(t, err)
+
+	assert.Len(t, backConf.Stages, 1)
+	assert.Len(t, backConf.Stages[0].Steps, 3)
+	assert.True(t, backConf.Stages[0].Steps[0].Privileged)
+	assert.False(t, backConf.Stages[0].Steps[1].Privileged)
+	assert.False(t, backConf.Stages[0].Steps[2].Privileged)
+}
