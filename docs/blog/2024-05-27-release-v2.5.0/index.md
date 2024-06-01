@@ -11,7 +11,7 @@ tags: [release, minor]
 hide_table_of_contents: false
 ---
 
-Here is the next minor release 2.5.0 of Woodpecker :woodpecker: :sun:.
+Here is the next minor release 2.5.0 of Woodpecker 🪶 ☀️.
 
 <!--truncate-->
 
