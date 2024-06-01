@@ -264,18 +264,6 @@ const config: Config = {
               label: '2.3.x',
               banner: 'unmaintained',
             },
-            '2.2': {
-              label: '2.2.x',
-              banner: 'unmaintained',
-            },
-            '2.1': {
-              label: '2.1.x',
-              banner: 'unmaintained',
-            },
-            '2.0': {
-              label: '2.0.x',
-              banner: 'unmaintained',
-            },
             '1.0': {
               label: '1.0.x',
               banner: 'unmaintained',
