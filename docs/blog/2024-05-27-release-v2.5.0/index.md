@@ -78,7 +78,6 @@ Woodpecker now supports Github deploy tasks. This allows you to pass the deploy 
 
 [#3512](https://github.com/woodpecker-ci/woodpecker/pull/3512)
 
-
 ## Deprecations
 
 To keep things clean and simple we deprecated some pipeline options, server settings and features which will
