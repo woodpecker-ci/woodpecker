@@ -12,7 +12,6 @@
 
 <script lang="ts" setup>
 import { computed, toRef } from 'vue';
-
 import Checkbox from './Checkbox.vue';
 import type { CheckboxOption } from './form.types';
 

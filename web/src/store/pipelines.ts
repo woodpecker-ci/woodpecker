@@ -1,11 +1,10 @@
-import { defineStore } from 'pinia';
-import type { Ref} from 'vue';
-import { computed, reactive, ref } from 'vue';
-
 import useApiClient from '~/compositions/useApiClient';
 import type { Pipeline, PipelineFeed, PipelineWorkflow } from '~/lib/api/types';
 import { useRepoStore } from '~/store/repos';
 import { comparePipelines, comparePipelinesWithStatus, isPipelineActive } from '~/utils/helpers';
+import { defineStore } from 'pinia';
+import type { Ref } from 'vue';
+import { computed, reactive, ref } from 'vue';
 
 export const usePipelineStore = defineStore('pipelines', () => {
   const apiClient = useApiClient();

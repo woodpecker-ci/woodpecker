@@ -24,11 +24,6 @@
 </template>
 
 <script lang="ts" setup>
-import { cloneDeep } from 'lodash';
-import type { Ref} from 'vue';
-import { computed, inject, ref } from 'vue';
-import { useI18n } from 'vue-i18n';
-
 import Button from '~/components/atomic/Button.vue';
 import Settings from '~/components/layout/Settings.vue';
 import SecretEdit from '~/components/secrets/SecretEdit.vue';
@@ -37,8 +32,12 @@ import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useNotifications from '~/compositions/useNotifications';
 import { usePagination } from '~/compositions/usePaginate';
-import type { Repo, Secret} from '~/lib/api/types';
+import type { Repo, Secret } from '~/lib/api/types';
 import { WebhookEvents } from '~/lib/api/types';
+import { cloneDeep } from 'lodash';
+import type { Ref } from 'vue';
+import { computed, inject, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 const emptySecret: Partial<Secret> = {
   name: '',
@@ -79,9 +78,7 @@ const { resetPage, data: _secrets } = usePagination(loadSecrets, () => !selected
 const secrets = computed(() => {
   const secretsList: Record<string, Secret & { edit?: boolean; level: 'repo' | 'org' | 'global' }> = {};
 
-
   for (const level of ['repo', 'org', 'global']) {
-
     for (const secret of _secrets.value) {
       if (
         ((level === 'repo' && secret.repo_id !== 0 && secret.org_id === 0) ||

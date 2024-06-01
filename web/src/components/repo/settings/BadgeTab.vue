@@ -41,9 +41,6 @@
 
 <script lang="ts" setup>
 import { useStorage } from '@vueuse/core';
-import type { Ref} from 'vue';
-import { computed, inject, onMounted, ref, watch } from 'vue';
-
 import type { SelectOption } from '~/components/form/form.types';
 import InputField from '~/components/form/InputField.vue';
 import SelectField from '~/components/form/SelectField.vue';
@@ -52,6 +49,8 @@ import useApiClient from '~/compositions/useApiClient';
 import useConfig from '~/compositions/useConfig';
 import { usePaginate } from '~/compositions/usePaginate';
 import type { Repo } from '~/lib/api/types';
+import type { Ref } from 'vue';
+import { computed, inject, onMounted, ref, watch } from 'vue';
 
 const apiClient = useApiClient();
 const repo = inject<Ref<Repo>>('repo');

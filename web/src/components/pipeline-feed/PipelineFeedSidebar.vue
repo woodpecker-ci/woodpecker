@@ -23,10 +23,9 @@
 
 <script lang="ts" setup>
 import { onClickOutside } from '@vueuse/core';
-import { ref } from 'vue';
-
 import PipelineFeedItem from '~/components/pipeline-feed/PipelineFeedItem.vue';
 import usePipelineFeed from '~/compositions/usePipelineFeed';
+import { ref } from 'vue';
 
 const pipelineFeed = usePipelineFeed();
 const { close, isOpen, sortedPipelines } = pipelineFeed;

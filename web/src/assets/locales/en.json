@@ -62,7 +62,7 @@
       "enable": "Enable",
       "enabled": "Already enabled",
       "disabled": "Disabled",
-      "success": "Repository enabled",
+      "success": "Repository enabled"
     },
     "open_in_forge": "Open repository in forge",
     "settings": {

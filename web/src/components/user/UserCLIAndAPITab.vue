@@ -23,7 +23,8 @@
           :href="`${address}/swagger/index.html`"
           target="_blank"
           class="ml-4 text-wp-link-100 hover:text-wp-link-200"
-        >{{ $t('user.settings.cli_and_api.swagger_ui') }}</a>
+          >{{ $t('user.settings.cli_and_api.swagger_ui') }}</a
+        >
       </template>
       <pre class="code-box">{{ usageWithCurl }}</pre>
     </InputField>
@@ -31,13 +32,12 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onMounted, ref } from 'vue';
-
 import Button from '~/components/atomic/Button.vue';
 import InputField from '~/components/form/InputField.vue';
 import Settings from '~/components/layout/Settings.vue';
 import useApiClient from '~/compositions/useApiClient';
 import useConfig from '~/compositions/useConfig';
+import { computed, onMounted, ref } from 'vue';
 
 const { rootPath, enableSwagger } = useConfig();
 

@@ -1,4 +1,4 @@
-import type { Ref} from 'vue';
+import type { Ref } from 'vue';
 import { inject, onMounted, provide, ref } from 'vue';
 import { useRoute } from 'vue-router';
 

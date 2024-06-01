@@ -38,11 +38,10 @@
 </template>
 
 <script lang="ts" setup>
-import type { Ref } from 'vue';
-import { inject } from 'vue';
-
 import Panel from '~/components/layout/Panel.vue';
 import type { Pipeline, PipelineError } from '~/lib/api/types';
+import type { Ref } from 'vue';
+import { inject } from 'vue';
 
 const pipeline = inject<Ref<Pipeline>>('pipeline');
 if (!pipeline) {

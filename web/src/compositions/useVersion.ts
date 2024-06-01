@@ -1,7 +1,6 @@
 import semverCoerce from 'semver/functions/coerce';
 import semverGt from 'semver/functions/gt';
 import { onMounted, ref } from 'vue';
-
 import useAuthentication from './useAuthentication';
 import useConfig from './useConfig';
 
@@ -22,10 +21,9 @@ const version = ref<{
 async function fetchVersion(): Promise<VersionInfo | undefined> {
   try {
     const resp = await fetch('https://woodpecker-ci.org/version.json');
-    const json = await resp.json() as VersionInfo;
+    const json = (await resp.json()) as VersionInfo;
     return json;
   } catch (error) {
-
     console.error('Failed to fetch version info', error);
     return undefined;
   }

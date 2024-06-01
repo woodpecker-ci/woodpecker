@@ -1,9 +1,7 @@
+import { getUserLanguage } from '~/utils/locale';
 import { nextTick } from 'vue';
 import { createI18n } from 'vue-i18n';
-
 import { useDate } from './useDate';
-import { getUserLanguage } from '~/utils/locale';
-
 
 const { setDayjsLocale } = useDate();
 const userLanguage = getUserLanguage();
@@ -16,7 +14,7 @@ export const i18n = createI18n({
 });
 
 const loadLocaleMessages = async (locale: string) => {
-  const messages = await import(`~/assets/locales/${locale}.json`) as { default: any };
+  const messages = (await import(`~/assets/locales/${locale}.json`)) as { default: any };
 
   i18n.global.setLocaleMessage(locale, messages.default);
 

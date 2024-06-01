@@ -36,13 +36,12 @@
 </template>
 
 <script lang="ts" setup>
-import { toRef } from 'vue';
-import { useI18n } from 'vue-i18n';
-
 import Badge from '~/components/atomic/Badge.vue';
 import IconButton from '~/components/atomic/IconButton.vue';
 import ListItem from '~/components/atomic/ListItem.vue';
 import type { Secret } from '~/lib/api/types';
+import { toRef } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 const props = defineProps<{
   modelValue: (Secret & { edit?: boolean })[];

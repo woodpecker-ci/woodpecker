@@ -32,10 +32,6 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, ref } from 'vue';
-import { useI18n } from 'vue-i18n';
-import { useRouter } from 'vue-router';
-
 import Badge from '~/components/atomic/Badge.vue';
 import Button from '~/components/atomic/Button.vue';
 import ListItem from '~/components/atomic/ListItem.vue';
@@ -46,6 +42,9 @@ import useNotifications from '~/compositions/useNotifications';
 import { useRepoSearch } from '~/compositions/useRepoSearch';
 import { useRouteBack } from '~/compositions/useRouteBack';
 import type { Repo } from '~/lib/api/types';
+import { onMounted, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { useRouter } from 'vue-router';
 
 const router = useRouter();
 const apiClient = useApiClient();

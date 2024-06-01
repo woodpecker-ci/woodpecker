@@ -4,7 +4,7 @@
       <span>
         <router-link :to="{ name: 'org' }" class="hover:underline">
           {{ org.name }}
-        <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
+          <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
         </router-link>
         /
         {{ $t('settings') }}
@@ -18,15 +18,14 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted } from 'vue';
-import { useI18n } from 'vue-i18n';
-import { useRouter } from 'vue-router';
-
 import Tab from '~/components/layout/scaffold/Tab.vue';
 import OrgSecretsTab from '~/components/org/settings/OrgSecretsTab.vue';
 import { inject } from '~/compositions/useInjectProvide';
 import useNotifications from '~/compositions/useNotifications';
 import { useRouteBack } from '~/compositions/useRouteBack';
+import { onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { useRouter } from 'vue-router';
 
 const notifications = useNotifications();
 const router = useRouter();

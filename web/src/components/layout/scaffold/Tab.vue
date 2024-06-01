@@ -5,11 +5,10 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue';
-
 import type { IconNames } from '~/components/atomic/Icon.vue';
-import type { Tab} from '~/compositions/useTabs';
+import type { Tab } from '~/compositions/useTabs';
 import { useTabsClient } from '~/compositions/useTabs';
+import { computed, onMounted, ref } from 'vue';
 
 const props = defineProps<{
   id?: string;

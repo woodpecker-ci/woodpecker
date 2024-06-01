@@ -37,6 +37,7 @@
   "devDependencies": {
     "@antfu/eslint-config": "^2.19.0",
     "@eslint/js": "^9.3.0",
+    "@ianvs/prettier-plugin-sort-imports": "^4.2.1",
     "@iconify/json": "^2.2.171",
     "@intlify/eslint-plugin-vue-i18n": "^3.0.0-next.13",
     "@types/eslint__js": "^8.42.3",

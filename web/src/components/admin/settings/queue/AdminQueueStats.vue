@@ -51,10 +51,9 @@
 </template>
 
 <script lang="ts" setup>
+import type { QueueStats } from '~/lib/api/types/queue';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-
-import type { QueueStats } from '~/lib/api/types/queue';
 
 const props = defineProps<{
   stats?: QueueStats;

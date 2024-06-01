@@ -3,11 +3,10 @@
 </template>
 
 <script lang="ts" setup>
-import type { Ref } from 'vue';
-import { inject } from 'vue';
-
 import PipelineList from '~/components/repo/pipeline/PipelineList.vue';
 import type { Pipeline, Repo, RepoPermissions } from '~/lib/api/types';
+import type { Ref } from 'vue';
+import { inject } from 'vue';
 
 const repo = inject<Ref<Repo>>('repo');
 const repoPermissions = inject<Ref<RepoPermissions>>('repo-permissions');

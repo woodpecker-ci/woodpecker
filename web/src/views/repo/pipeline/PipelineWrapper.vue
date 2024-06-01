@@ -12,7 +12,7 @@
       <span>
         <router-link :to="{ name: 'org', params: { orgId: repo.org_id } }" class="hover:underline">
           {{ repo.owner }}
-        <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
+          <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
         </router-link>
         /
         <router-link :to="{ name: 'repo' }" class="hover:underline">
@@ -91,8 +91,8 @@
     <Tab
       v-if="
         (pipeline.event === 'push' || pipeline.event === 'pull_request' || pipeline.event === 'pull_request_closed') &&
-          pipeline.changed_files &&
-          pipeline.changed_files.length > 0
+        pipeline.changed_files &&
+        pipeline.changed_files.length > 0
       "
       id="changed-files"
       :title="$t('repo.pipeline.files', { files: pipeline.changed_files?.length })"
@@ -103,11 +103,6 @@
 </template>
 
 <script lang="ts" setup>
-import type { Ref} from 'vue';
-import { computed, inject, onBeforeUnmount, onMounted, provide, ref, toRef, watch } from 'vue';
-import { useI18n } from 'vue-i18n';
-import { useRoute, useRouter } from 'vue-router';
-
 import Button from '~/components/atomic/Button.vue';
 import DeployPipelinePopup from '~/components/layout/popups/DeployPipelinePopup.vue';
 import Scaffold from '~/components/layout/scaffold/Scaffold.vue';
@@ -121,6 +116,10 @@ import usePipeline from '~/compositions/usePipeline';
 import { useRouteBack } from '~/compositions/useRouteBack';
 import type { Repo, RepoPermissions } from '~/lib/api/types';
 import { usePipelineStore } from '~/store/pipelines';
+import type { Ref } from 'vue';
+import { computed, inject, onBeforeUnmount, onMounted, provide, ref, toRef, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { useRoute, useRouter } from 'vue-router';
 
 const props = defineProps<{
   repoId: string;

@@ -1,7 +1,6 @@
 import { shallowMount } from '@vue/test-utils';
 import { describe, expect, it } from 'vitest';
-import { type Ref, watch } from 'vue';
-
+import { watch, type Ref } from 'vue';
 import { usePagination } from './usePaginate';
 
 async function waitForState<T>(ref: Ref<T>, expected: T): Promise<void> {

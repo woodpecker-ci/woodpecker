@@ -34,8 +34,6 @@
 </template>
 
 <script lang="ts" setup>
-import { useI18n } from 'vue-i18n';
-
 import IconButton from '~/components/atomic/IconButton.vue';
 import ListItem from '~/components/atomic/ListItem.vue';
 import Settings from '~/components/layout/Settings.vue';
@@ -44,6 +42,7 @@ import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useNotifications from '~/compositions/useNotifications';
 import { usePagination } from '~/compositions/usePaginate';
 import type { Org } from '~/lib/api/types';
+import { useI18n } from 'vue-i18n';
 
 const apiClient = useApiClient();
 const notifications = useNotifications();
