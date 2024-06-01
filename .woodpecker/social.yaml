@@ -9,7 +9,7 @@ steps:
   - name: mastodon-toot
     image: docker.io/woodpeckerci/plugin-mastodon-post
     settings:
-      server: https://floss.social
+      server_url: https://floss.social
       access_token:
         from_secret: mastodon_token
       visibility: public
