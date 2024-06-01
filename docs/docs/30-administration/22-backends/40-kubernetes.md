@@ -231,6 +231,12 @@ See [this issue](https://github.com/woodpecker-ci/woodpecker/issues/2510) for mo
 
 These env vars can be set in the `env:` sections of the agent.
 
+### `KUBERNETES_SERVICE_HOST`
+
+> Default: empty
+
+Address of the Kubernetes API server to connect to. If running Agent within Kubernetes, this will already be set by Kubernetes and require no further configuration. If not running in a Kubernetes pod, you need to set it.
+
 ### `WOODPECKER_BACKEND_K8S_NAMESPACE`
 
 > Default: `woodpecker`
