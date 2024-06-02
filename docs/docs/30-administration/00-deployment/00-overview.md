@@ -16,7 +16,7 @@ You can add more agents to increase the number of parallel workflows or set the 
 
 Woodpecker is having two different kinds of releases: **stable** and **next**.
 
-The **stable** releases (currently version 2.5) are stable versions. The stable releases are only getting bugfixes.
+The **stable** releases are official versions following [semver](https://semver.org/). By default, only the latest stable release will receive bug fixes. Once a new major or minor release is available, previous minor versions might only receive security patches, but wont be updated with bug fixes anymore (so called backporting) by default.
 
 The **next** release contains all bugfixes and features from `main` branch. Normally it should be pretty stable, but as its frequently updated, it might contain some bugs from time to time. There are no binaries for this version.
 
