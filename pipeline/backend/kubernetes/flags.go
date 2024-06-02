@@ -64,7 +64,7 @@ var Flags = []cli.Flag{
 	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_BACKEND_K8S_POD_NODE_SELECTOR"},
 		Name:    "backend-k8s-pod-node-selector",
-		Usage:   "backend k8s worker pod node selector",
+		Usage:   "backend k8s Agent-wide worker pod node selector",
 		Value:   "",
 	},
 	&cli.BoolFlag{
