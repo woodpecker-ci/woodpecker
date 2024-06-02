@@ -1,28 +1,28 @@
 <template>
   <div v-if="innerValue" class="space-y-4">
     <form @submit.prevent="save">
-      <InputField v-slot="{ id }" :label="$t(i18nPrefix + 'name')">
+      <InputField v-slot="{ id }" :label="$t('secrets.name')">
         <TextField
           :id="id"
           v-model="innerValue.name"
-          :placeholder="$t(i18nPrefix + 'name')"
+          :placeholder="$t('secrets.name')"
           required
           :disabled="isEditingSecret"
         />
       </InputField>
 
-      <InputField v-slot="{ id }" :label="$t(i18nPrefix + 'value')">
+      <InputField v-slot="{ id }" :label="$t('secrets.value')">
         <TextField
           :id="id"
           v-model="innerValue.value"
-          :placeholder="$t(i18nPrefix + 'value')"
+          :placeholder="$t('secrets.value')"
           :lines="5"
           :required="!isEditingSecret"
         />
       </InputField>
 
-      <InputField v-slot="{ id }" :label="$t(i18nPrefix + 'images.images')">
-        <span class="ml-1 mb-2 text-wp-text-alt-100">{{ $t(i18nPrefix + 'images.desc') }}</span>
+      <InputField v-slot="{ id }" :label="$t('secrets.images.images')">
+        <span class="ml-1 mb-2 text-wp-text-alt-100">{{ $t('secrets.images.desc') }}</span>
 
         <div class="flex flex-col gap-2">
           <div v-for="image in innerValue.images" :key="image" class="flex gap-2">
@@ -36,7 +36,7 @@
         </div>
       </InputField>
 
-      <InputField :label="$t(i18nPrefix + 'events.events')">
+      <InputField :label="$t('secrets.events.events')">
         <CheckboxesField v-model="innerValue.events" :options="secretEventsOptions" />
       </InputField>
 
@@ -46,7 +46,7 @@
           type="submit"
           color="green"
           :is-loading="isSaving"
-          :text="isEditingSecret ? $t(i18nPrefix + 'save') : $t(i18nPrefix + 'add')"
+          :text="isEditingSecret ? $t('secrets.save') : $t('secrets.add')"
         />
       </div>
     </form>
@@ -67,7 +67,6 @@ import { Secret, WebhookEvents } from '~/lib/api/types';
 const props = defineProps<{
   modelValue: Partial<Secret>;
   isSaving: boolean;
-  i18nPrefix: string;
 }>();
 
 const emit = defineEmits<{
@@ -106,7 +105,7 @@ const secretEventsOptions: CheckboxOption[] = [
   {
     value: WebhookEvents.PullRequest,
     text: i18n.t('repo.pipeline.event.pr'),
-    description: i18n.t('repo.settings.secrets.events.pr_warning'),
+    description: i18n.t('secrets.events.pr_warning'),
   },
   { value: WebhookEvents.Deploy, text: i18n.t('repo.pipeline.event.deploy') },
   { value: WebhookEvents.Cron, text: i18n.t('repo.pipeline.event.cron') },

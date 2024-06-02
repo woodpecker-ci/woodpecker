@@ -53,7 +53,7 @@ type fifo struct {
 
 // New returns a new fifo queue.
 //
-//nolint:gomnd
+//nolint:mnd
 func New(_ context.Context) Queue {
 	return &fifo{
 		workers:       map[*worker]struct{}{},
@@ -225,7 +225,7 @@ func (q *fifo) Info(_ context.Context) InfoT {
 	return stats
 }
 
-// Pause stops the queue from handing out new work items in Poll
+// Pause stops the queue from handing out new work items in Poll.
 func (q *fifo) Pause() {
 	q.Lock()
 	q.paused = true

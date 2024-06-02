@@ -45,16 +45,15 @@ func (e *docker) toConfig(step *types.Step) *container.Config {
 	configEnv := make(map[string]string)
 	maps.Copy(configEnv, step.Environment)
 
-	if len(step.Commands) != 0 {
-		env, entry, cmd := common.GenerateContainerConf(step.Commands, e.info.OSType)
+	if len(step.Commands) > 0 {
+		env, entry := common.GenerateContainerConf(step.Commands, e.info.OSType)
 		for k, v := range env {
 			configEnv[k] = v
 		}
-		if len(step.Entrypoint) > 0 {
-			entry = step.Entrypoint
-		}
 		config.Entrypoint = entry
-		config.Cmd = []string{cmd}
+	}
+	if len(step.Entrypoint) > 0 {
+		config.Entrypoint = step.Entrypoint
 	}
 
 	if len(configEnv) != 0 {
@@ -198,6 +197,7 @@ func encodeAuthToBase64(authConfig types.Auth) (string, error) {
 //
 // It handles Windows and Linux style volume paths.
 func splitVolumeParts(volumeParts string) ([]string, error) {
+	// cspell:disable-next-line
 	pattern := `^((?:[\w]\:)?[^\:]*)\:((?:[\w]\:)?[^\:]*)(?:\:([rwom]*))?`
 	r, err := regexp.Compile(pattern)
 	if err != nil {

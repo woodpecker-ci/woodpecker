@@ -45,7 +45,11 @@ func SetUser() gin.HandlerFunc {
 
 		t, err := token.ParseRequest(c.Request, func(t *token.Token) (string, error) {
 			var err error
-			user, err = store.FromContext(c).GetUserLogin(t.Text)
+			userID, err := strconv.ParseInt(t.Get("user-id"), 10, 64)
+			if err != nil {
+				return "", err
+			}
+			user, err = store.FromContext(c).GetUser(userID)
 			return user.Hash, err
 		})
 		if err == nil {
@@ -145,7 +149,14 @@ func MustOrgMember(admin bool) gin.HandlerFunc {
 			return
 		}
 
-		perm, err := server.Config.Services.Membership.Get(c, user, org.Name)
+		_forge, err := server.Config.Services.Manager.ForgeFromUser(user)
+		if err != nil {
+			log.Error().Err(err).Msg("Cannot get forge from user")
+			c.AbortWithStatus(http.StatusInternalServerError)
+			return
+		}
+
+		perm, err := server.Config.Services.Membership.Get(c, _forge, user, org.Name)
 		if err != nil {
 			log.Error().Err(err).Msg("failed to check membership")
 			c.String(http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))

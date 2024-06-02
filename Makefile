@@ -58,8 +58,6 @@ ifeq (in_docker,$(firstword $(MAKECMDGOALS)))
 		-e TARGETOS="$(TARGETOS)" \
 		-e TARGETARCH="$(TARGETARCH)" \
 		-e CGO_ENABLED="$(CGO_ENABLED)" \
-		-e GOPATH=/tmp/go \
-		-e HOME=/tmp/home \
 		-v $(PWD):/build --rm woodpecker/make:local make $(MAKE_ARGS)
 else
 
@@ -110,7 +108,7 @@ clean-all: clean ## Clean all artifacts
 	rm -rf docs/docs/40-cli.md docs/swagger.json
 
 .PHONY: generate
-generate: generate-swagger ## Run all code generations
+generate: install-tools generate-swagger ## Run all code generations
 	go generate ./...
 
 generate-swagger: install-tools ## Run swagger code generation
@@ -137,6 +135,15 @@ install-tools: ## Install development tools
 	fi ; \
 	hash addlicense > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
 		go install github.com/google/addlicense@latest; \
+	fi ; \
+	hash mockery > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
+		go install github.com/vektra/mockery/v2@latest; \
+	fi ; \
+	hash protoc-gen-go > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
+		go install google.golang.org/protobuf/cmd/protoc-gen-go@latest; \
+	fi ; \
+	hash protoc-gen-go-grpc > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
+		go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest; \
 	fi
 
 ui-dependencies: ## Install UI dependencies
@@ -298,6 +305,14 @@ bundle-cli: bundle-prepare ## Create bundles for cli
 
 .PHONY: bundle
 bundle: bundle-agent bundle-server bundle-cli ## Create all bundles
+
+.PHONY: spellcheck
+spellcheck:
+	pnpx cspell lint --no-progress --gitignore '{**,.*}/{*,.*}'
+	tree --gitignore \
+	  -I 012_columns_rename_procs_to_steps.go \
+	  -I versioned_docs -I '*opensource.svg' | \
+	  pnpx cspell lint --no-progress stdin
 
 ##@ Docs
 .PHONY: docs

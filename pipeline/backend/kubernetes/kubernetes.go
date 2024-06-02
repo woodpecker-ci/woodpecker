@@ -28,12 +28,11 @@ import (
 	"github.com/urfave/cli/v2"
 	"gopkg.in/yaml.v3"
 	v1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/informers"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/scheme"
-	// To authenticate to GCP K8s clusters
-	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
+	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp" // To authenticate to GCP K8s clusters
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/cache"
 
@@ -42,7 +41,7 @@ import (
 
 const (
 	EngineName = "kubernetes"
-	// TODO 5 seconds is against best practice, k3s didn't work otherwise
+	// TODO: 5 seconds is against best practice, k3s didn't work otherwise
 	defaultResyncDuration = 5 * time.Second
 )
 
@@ -55,25 +54,27 @@ type kube struct {
 }
 
 type config struct {
-	Namespace            string
-	StorageClass         string
-	VolumeSize           string
-	StorageRwx           bool
-	PodLabels            map[string]string
-	PodAnnotations       map[string]string
-	PodNodeSelector      map[string]string
-	ImagePullSecretNames []string
-	SecurityContext      SecurityContextConfig
+	Namespace                   string
+	StorageClass                string
+	VolumeSize                  string
+	StorageRwx                  bool
+	PodLabels                   map[string]string
+	PodLabelsAllowFromStep      bool
+	PodAnnotations              map[string]string
+	PodAnnotationsAllowFromStep bool
+  PodNodeSelector             map[string]string
+	ImagePullSecretNames        []string
+	SecurityContext             SecurityContextConfig
 }
 type SecurityContextConfig struct {
 	RunAsNonRoot bool
 }
 
-func newDefaultDeleteOptions() metav1.DeleteOptions {
+func newDefaultDeleteOptions() meta_v1.DeleteOptions {
 	gracePeriodSeconds := int64(0) // immediately
-	propagationPolicy := metav1.DeletePropagationBackground
+	propagationPolicy := meta_v1.DeletePropagationBackground
 
-	return metav1.DeleteOptions{
+	return meta_v1.DeleteOptions{
 		GracePeriodSeconds: &gracePeriodSeconds,
 		PropagationPolicy:  &propagationPolicy,
 	}
@@ -83,16 +84,18 @@ func configFromCliContext(ctx context.Context) (*config, error) {
 	if ctx != nil {
 		if c, ok := ctx.Value(types.CliContext).(*cli.Context); ok {
 			config := config{
-				Namespace:            c.String("backend-k8s-namespace"),
-				StorageClass:         c.String("backend-k8s-storage-class"),
-				VolumeSize:           c.String("backend-k8s-volume-size"),
-				StorageRwx:           c.Bool("backend-k8s-storage-rwx"),
-				PodLabels:            make(map[string]string), // just init empty map to prevent nil panic
-				PodAnnotations:       make(map[string]string), // just init empty map to prevent nil panic
-				PodNodeSelector:      make(map[string]string), // just init empty map to prevent nil panic
-				ImagePullSecretNames: c.StringSlice("backend-k8s-pod-image-pull-secret-names"),
+				Namespace:                   c.String("backend-k8s-namespace"),
+				StorageClass:                c.String("backend-k8s-storage-class"),
+				VolumeSize:                  c.String("backend-k8s-volume-size"),
+				StorageRwx:                  c.Bool("backend-k8s-storage-rwx"),
+				PodLabels:                   make(map[string]string), // just init empty map to prevent nil panic
+				PodLabelsAllowFromStep:      c.Bool("backend-k8s-pod-labels-allow-from-step"),
+				PodAnnotations:              make(map[string]string), // just init empty map to prevent nil panic
+				PodAnnotationsAllowFromStep: c.Bool("backend-k8s-pod-annotations-allow-from-step"),
+        PodNodeSelector:             make(map[string]string), // just init empty map to prevent nil panic
+				ImagePullSecretNames:        c.StringSlice("backend-k8s-pod-image-pull-secret-names"),
 				SecurityContext: SecurityContextConfig{
-					RunAsNonRoot: c.Bool("backend-k8s-secctx-nonroot"),
+					RunAsNonRoot: c.Bool("backend-k8s-secctx-nonroot"), // cspell:words secctx nonroot
 				},
 			}
 			// TODO: remove in next major
@@ -273,10 +276,10 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 	si.Start(stop)
 	defer close(stop)
 
-	// TODO Cancel on ctx.Done
+	// TODO: Cancel on ctx.Done
 	<-finished
 
-	pod, err := e.client.CoreV1().Pods(e.config.Namespace).Get(ctx, podName, metav1.GetOptions{})
+	pod, err := e.client.CoreV1().Pods(e.config.Namespace).Get(ctx, podName, meta_v1.GetOptions{})
 	if err != nil {
 		return nil, err
 	}
@@ -325,6 +328,9 @@ func (e *kube) TailStep(ctx context.Context, step *types.Step, taskUUID string) 
 		}
 
 		if pod.Name == podName {
+			if isImagePullBackOffState(pod) {
+				up <- true
+			}
 			switch pod.Status.Phase {
 			case v1.PodRunning, v1.PodSucceeded, v1.PodFailed:
 				up <- true

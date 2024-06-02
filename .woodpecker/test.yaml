@@ -1,5 +1,5 @@
 variables:
-  - &golang_image 'docker.io/golang:1.21.5'
+  - &golang_image 'docker.io/golang:1.22'
   - &when
     - path: &when_path # related config files
         - '.woodpecker/test.yaml'
@@ -74,7 +74,7 @@ steps:
   lint-license-header:
     image: *golang_image
     commands:
-      - go install github.com/google/addlicense@latest
+      - go install github.com/google/addlicense@latest # cspell:words addlicense
       - 'addlicense -check -ignore "vendor/**" **/*.go'
     when: *when
 
@@ -107,7 +107,7 @@ steps:
     image: *golang_image
     environment:
       WOODPECKER_DATABASE_DRIVER: postgres
-      WOODPECKER_DATABASE_DATASOURCE: 'host=postgres user=postgres dbname=postgres sslmode=disable'
+      WOODPECKER_DATABASE_DATASOURCE: 'host=postgres user=postgres dbname=postgres sslmode=disable' # cspell:disable-line
     commands:
       - make test-server-datastore
     when: *when

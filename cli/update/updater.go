@@ -122,7 +122,7 @@ func extractNewVersion(tarFilePath string) (string, error) {
 		return "", err
 	}
 
-	err = Untar(tmpDir, tarFile)
+	err = UnTar(tmpDir, tarFile)
 	if err != nil {
 		return "", err
 	}

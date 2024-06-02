@@ -31,7 +31,7 @@ type http struct {
 	privateKey crypto.PrivateKey
 }
 
-// configData same as forge.FileMeta but with json tags and string data
+// configData same as forge.FileMeta but with json tags and string data.
 type configData struct {
 	Name string `json:"name"`
 	Data string `json:"data"`
@@ -80,10 +80,10 @@ func (h *http) Fetch(ctx context.Context, forge forge.Forge, user *model.User, r
 		return oldConfigData, nil
 	}
 
-	fileMetas := make([]*types.FileMeta, len(response.Configs))
+	fileMetaList := make([]*types.FileMeta, len(response.Configs))
 	for i, config := range response.Configs {
-		fileMetas[i] = &types.FileMeta{Name: config.Name, Data: []byte(config.Data)}
+		fileMetaList[i] = &types.FileMeta{Name: config.Name, Data: []byte(config.Data)}
 	}
 
-	return fileMetas, nil
+	return fileMetaList, nil
 }
