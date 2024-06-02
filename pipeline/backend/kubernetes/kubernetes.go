@@ -62,7 +62,7 @@ type config struct {
 	PodLabelsAllowFromStep      bool
 	PodAnnotations              map[string]string
 	PodAnnotationsAllowFromStep bool
-  PodNodeSelector             map[string]string
+	PodNodeSelector             map[string]string
 	ImagePullSecretNames        []string
 	SecurityContext             SecurityContextConfig
 }
@@ -92,7 +92,7 @@ func configFromCliContext(ctx context.Context) (*config, error) {
 				PodLabelsAllowFromStep:      c.Bool("backend-k8s-pod-labels-allow-from-step"),
 				PodAnnotations:              make(map[string]string), // just init empty map to prevent nil panic
 				PodAnnotationsAllowFromStep: c.Bool("backend-k8s-pod-annotations-allow-from-step"),
-        PodNodeSelector:             make(map[string]string), // just init empty map to prevent nil panic
+				PodNodeSelector:             make(map[string]string), // just init empty map to prevent nil panic
 				ImagePullSecretNames:        c.StringSlice("backend-k8s-pod-image-pull-secret-names"),
 				SecurityContext: SecurityContextConfig{
 					RunAsNonRoot: c.Bool("backend-k8s-secctx-nonroot"), // cspell:words secctx nonroot
