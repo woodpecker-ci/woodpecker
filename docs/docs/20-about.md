@@ -1,7 +1,6 @@
 # About
 
-Woodpecker has been originally forked from Drone 0.8.
-The Drone CI license was changed after the 0.8 release from Apache 2 to a proprietary license. Woodpecker is based on this latest freely available version.
+Woodpecker has been originally forked from Drone 0.8 as the Drone CI license was changed after the 0.8 release from Apache 2.0 to a proprietary license. Woodpecker is based on this latest freely available version.
 
 ## History
 
