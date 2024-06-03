@@ -10,7 +10,7 @@ A few important time points:
 
 - [`2fbaa56`](https://github.com/woodpecker-ci/woodpecker/commit/2fbaa56eee0f4be7a3ca4be03dbd00c1bf5d1274) is the first commit of the fork, made on Apr 3, 2019.
 - The first release [v0.8.91](https://github.com/woodpecker-ci/woodpecker/releases/tag/v0.8.91) was published on Apr 6, 2019.
-- On Aug 27, 2019, the project was renamed to "Woodpecker" ([`630c383`](https://github.com/woodpecker-ci/woodpecker/commit/630c383181b10c4ec375e500c812c4b76b3c52b8))
+- On Aug 27, 2019, the project was renamed to "Woodpecker" ([`630c383`](https://github.com/woodpecker-ci/woodpecker/commit/630c383181b10c4ec375e500c812c4b76b3c52b8)).
 - The first release under the name "Woodpecker" was published on Sep 9, 2019 ([v0.8.104](https://github.com/woodpecker-ci/woodpecker/releases/tag/v0.8.104)).
 
 ## Differences to Drone
