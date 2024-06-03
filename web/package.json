@@ -14,6 +14,7 @@
     "format": "prettier --write .",
     "format:check": "prettier -c .",
     "typecheck": "vue-tsc --noEmit",
+    "generate-swagger-client": "tsx ./contrib/generate-swagger-client.ts",
     "test": "vitest"
   },
   "dependencies": {
