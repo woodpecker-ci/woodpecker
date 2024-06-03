@@ -58,7 +58,7 @@ func NewAuthorizer(jwtManager *JWTManager) *Authorizer {
 	return &Authorizer{jwtManager: jwtManager}
 }
 
-func (a *Authorizer) StreamInterceptor(srv interface{}, stream grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
+func (a *Authorizer) StreamInterceptor(srv any, stream grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
 	_stream := newStreamContextWrapper(stream)
 
 	newCtx, err := a.authorize(stream.Context(), info.FullMethod)
@@ -71,7 +71,7 @@ func (a *Authorizer) StreamInterceptor(srv interface{}, stream grpc.ServerStream
 	return handler(srv, _stream)
 }
 
-func (a *Authorizer) UnaryInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
+func (a *Authorizer) UnaryInterceptor(ctx context.Context, req any, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp any, err error) {
 	newCtx, err := a.authorize(ctx, info.FullMethod)
 	if err != nil {
 		return nil, err

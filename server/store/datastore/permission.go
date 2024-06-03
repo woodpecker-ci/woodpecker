@@ -20,7 +20,7 @@ import (
 	"xorm.io/builder"
 	"xorm.io/xorm"
 
-	"github.com/woodpecker-ci/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
 func (s storage) PermFind(user *model.User, repo *model.Repo) (*model.Perm, error) {
@@ -72,19 +72,8 @@ func (s storage) permUpsert(sess *xorm.Session, perm *model.Perm) error {
 	return err
 }
 
-func (s storage) PermDelete(perm *model.Perm) error {
-	return wrapDelete(s.engine.Where(userIDAndRepoIDCond(perm)).Delete(new(model.Perm)))
-}
-
-func (s storage) PermFlush(user *model.User, before int64) error {
-	_, err := s.engine.
-		Where("perm_user_id = ? AND perm_synced < ?", user.ID, before).
-		Delete(new(model.Perm))
-	return err
-}
-
 // userPushOrAdminCondition return condition where user must have push or admin rights
-// if used make sure to have permission table ("perms") joined
+// if used make sure to have permission table ("perms") joined.
 func userPushOrAdminCondition(userID int64) builder.Cond {
 	return builder.Eq{"perms.perm_user_id": userID}.
 		And(builder.Eq{"perms.perm_push": true}.

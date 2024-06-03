@@ -3,13 +3,14 @@ import VueI18nPlugin from '@intlify/unplugin-vue-i18n/vite';
 import vue from '@vitejs/plugin-vue';
 import { copyFile, existsSync, mkdirSync, readdirSync } from 'fs';
 import path from 'path';
+import replace from 'replace-in-file';
 import IconsResolver from 'unplugin-icons/resolver';
 import Icons from 'unplugin-icons/vite';
 import Components from 'unplugin-vue-components/vite';
-import { defineConfig } from 'vite';
 import prismjs from 'vite-plugin-prismjs';
 import WindiCSS from 'vite-plugin-windicss';
 import svgLoader from 'vite-svg-loader';
+import { defineConfig } from 'vitest/config';
 
 function woodpeckerInfoPlugin() {
   return {
@@ -21,6 +22,24 @@ function woodpeckerInfoPlugin() {
         '2) If you want to run the vite dev server (`pnpm start`) within a container please set `VITE_DEV_SERVER_HOST=0.0.0.0`.';
       // eslint-disable-next-line no-console
       console.log(info);
+    },
+  };
+}
+
+function externalCSSPlugin() {
+  return {
+    name: 'external-css',
+    transformIndexHtml: {
+      order: 'post',
+      handler() {
+        return [
+          {
+            tag: 'link',
+            attrs: { rel: 'stylesheet', type: 'text/css', href: '/assets/custom.css' },
+            injectTo: 'head',
+          },
+        ];
+      },
     },
   };
 }
@@ -38,37 +57,42 @@ export default defineConfig({
 
       const filenames = readdirSync('src/assets/locales/').map((filename) => filename.replace('.json', ''));
 
-      if (!existsSync('src/assets/timeAgoLocales')) {
-        mkdirSync('src/assets/timeAgoLocales');
+      if (!existsSync('src/assets/dayjsLocales')) {
+        mkdirSync('src/assets/dayjsLocales');
       }
 
-      filenames.forEach((name) => {
-        // copy timeAgo language
-        if (name === 'zh-Hans') {
-          // zh-Hans is called zh in javascript-time-ago, so we need to rename this
-          copyFile(
-            'node_modules/javascript-time-ago/locale/zh.json.js',
-            'src/assets/timeAgoLocales/zh-Hans.js',
-            // eslint-disable-next-line promise/prefer-await-to-callbacks
-            (err) => {
-              if (err) {
-                throw err;
-              }
-            },
-          );
-        } else if (name !== 'en') {
-          // English is always directly loaded (compiled by Vite) and thus not copied
-          copyFile(
-            `node_modules/javascript-time-ago/locale/${name}.json.js`,
-            `src/assets/timeAgoLocales/${name}.js`,
-            // eslint-disable-next-line promise/prefer-await-to-callbacks
-            (err) => {
-              if (err) {
-                throw err;
-              }
-            },
-          );
+      filenames.forEach(async (name) => {
+        // English is always directly loaded (compiled by Vite) and thus not copied
+        if (name === 'en') {
+          return;
         }
+        let langName = name;
+
+        // copy dayjs language
+        if (name === 'zh-Hans') {
+          // zh-Hans is called zh in dayjs
+          langName = 'zh';
+        } else if (name === 'zh-Hant') {
+          // zh-Hant is called zh-cn in dayjs
+          langName = 'zh-cn';
+        }
+
+        copyFile(
+          `node_modules/dayjs/esm/locale/${langName}.js`,
+          `src/assets/dayjsLocales/${name}.js`,
+          // eslint-disable-next-line promise/prefer-await-to-callbacks
+          (err) => {
+            if (err) {
+              throw err;
+            }
+          },
+        );
+      });
+      replace.sync({
+        files: 'src/assets/dayjsLocales/*.js',
+        // remove any dayjs import and any dayjs.locale call
+        from: /(?:import dayjs.*'|dayjs\.locale.*);/g,
+        to: '',
       });
 
       return {
@@ -93,6 +117,7 @@ export default defineConfig({
     Components({
       resolvers: [IconsResolver()],
     }),
+    externalCSSPlugin(),
     woodpeckerInfoPlugin(),
     prismjs({
       languages: ['yaml'],
@@ -107,5 +132,9 @@ export default defineConfig({
   server: {
     host: process.env.VITE_DEV_SERVER_HOST || '127.0.0.1',
     port: 8010,
+  },
+  test: {
+    globals: true,
+    environment: 'jsdom',
   },
 });

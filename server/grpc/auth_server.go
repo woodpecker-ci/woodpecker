@@ -21,10 +21,10 @@ import (
 
 	"github.com/rs/zerolog/log"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline/rpc/proto"
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/store"
-	"github.com/woodpecker-ci/woodpecker/server/store/types"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc/proto"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store/types"
 )
 
 type WoodpeckerAuthServer struct {
@@ -41,7 +41,7 @@ func NewWoodpeckerAuthServer(jwtManager *JWTManager, agentMasterToken string, st
 func (s *WoodpeckerAuthServer) Auth(_ context.Context, req *proto.AuthRequest) (*proto.AuthResponse, error) {
 	agent, err := s.getAgent(req.AgentId, req.AgentToken)
 	if err != nil {
-		return nil, fmt.Errorf("Agent could not auth: %w", err)
+		return nil, fmt.Errorf("agent could not auth: %w", err)
 	}
 
 	accessToken, err := s.jwtManager.Generate(agent.ID)
@@ -69,7 +69,7 @@ func (s *WoodpeckerAuthServer) getAgent(agentID int64, agentToken string) (*mode
 			agent.Capacity = -1
 			err := s.store.AgentCreate(agent)
 			if err != nil {
-				log.Err(err).Msgf("Error creating system agent: %s", err)
+				log.Error().Err(err).Msg("error creating system agent")
 				return nil, err
 			}
 			return agent, nil

@@ -16,7 +16,7 @@
   >
     <slot>
       <Icon v-if="startIcon" :name="startIcon" class="!w-6 !h-6" :class="{ invisible: isLoading, 'mr-1': text }" />
-      <span :class="{ invisible: isLoading }">{{ text }}</span>
+      <span :class="{ invisible: isLoading }" class="flex-shrink-0">{{ text }}</span>
       <Icon v-if="endIcon" :name="endIcon" class="ml-2 w-6 h-6" :class="{ invisible: isLoading }" />
       <div
         v-if="isLoading"

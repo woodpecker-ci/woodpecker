@@ -23,8 +23,8 @@ import (
 
 	"golang.org/x/oauth2"
 
-	"github.com/woodpecker-ci/woodpecker/server/forge/bitbucket/internal"
-	"github.com/woodpecker-ci/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge/bitbucket/internal"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
 const (
@@ -56,12 +56,13 @@ func convertRepo(from *internal.Repo, perm *internal.RepoPerm) *model.Repo {
 		Owner:         strings.Split(from.FullName, "/")[0],
 		Name:          strings.Split(from.FullName, "/")[1],
 		FullName:      from.FullName,
-		Link:          from.Links.HTML.Href,
+		ForgeURL:      from.Links.HTML.Href,
 		IsSCMPrivate:  from.IsPrivate,
 		Avatar:        from.Owner.Links.Avatar.Href,
 		SCMKind:       model.SCMKind(from.Scm),
 		Branch:        from.Mainbranch.Name,
 		Perm:          convertPerm(perm),
+		PREnabled:     true,
 	}
 	if repo.SCMKind == model.RepoHg {
 		repo.Branch = "default"
@@ -136,11 +137,11 @@ func convertUser(from *internal.Account, token *oauth2.Token) *model.User {
 		Secret:        token.RefreshToken,
 		Expiry:        token.Expiry.UTC().Unix(),
 		Avatar:        from.Links.Avatar.Href,
-		ForgeRemoteID: model.ForgeRemoteID(fmt.Sprint(from.ID)),
+		ForgeRemoteID: model.ForgeRemoteID(fmt.Sprint(from.UUID)),
 	}
 }
 
-// convertTeamList is a helper function used to convert a Bitbucket team list
+// convertWorkspaceList is a helper function used to convert a Bitbucket team list
 // structure to the Woodpecker Team structure.
 func convertWorkspaceList(from []*internal.Workspace) []*model.Team {
 	var teams []*model.Team
@@ -150,7 +151,7 @@ func convertWorkspaceList(from []*internal.Workspace) []*model.Team {
 	return teams
 }
 
-// convertTeam is a helper function used to convert a Bitbucket team account
+// convertWorkspace is a helper function used to convert a Bitbucket team account
 // structure to the Woodpecker Team structure.
 func convertWorkspace(from *internal.Workspace) *model.Team {
 	return &model.Team{
@@ -162,16 +163,20 @@ func convertWorkspace(from *internal.Workspace) *model.Team {
 // convertPullHook is a helper function used to convert a Bitbucket pull request
 // hook to the Woodpecker pipeline struct holding commit information.
 func convertPullHook(from *internal.PullRequestHook) *model.Pipeline {
+	event := model.EventPull
+	if from.PullRequest.State == stateClosed || from.PullRequest.State == stateDeclined {
+		event = model.EventPullClosed
+	}
+
 	return &model.Pipeline{
-		Event:  model.EventPull,
+		Event:  event,
 		Commit: from.PullRequest.Dest.Commit.Hash,
 		Ref:    fmt.Sprintf("refs/heads/%s", from.PullRequest.Dest.Branch.Name),
 		Refspec: fmt.Sprintf("%s:%s",
 			from.PullRequest.Source.Branch.Name,
 			from.PullRequest.Dest.Branch.Name,
 		),
-		CloneURL:  fmt.Sprintf("https://bitbucket.org/%s", from.PullRequest.Source.Repo.FullName),
-		Link:      from.PullRequest.Links.HTML.Href,
+		ForgeURL:  from.PullRequest.Links.HTML.Href,
 		Branch:    from.PullRequest.Dest.Branch.Name,
 		Message:   from.PullRequest.Desc,
 		Avatar:    from.Actor.Links.Avatar.Href,
@@ -186,7 +191,7 @@ func convertPullHook(from *internal.PullRequestHook) *model.Pipeline {
 func convertPushHook(hook *internal.PushHook, change *internal.Change) *model.Pipeline {
 	pipeline := &model.Pipeline{
 		Commit:    change.New.Target.Hash,
-		Link:      change.New.Target.Links.HTML.Href,
+		ForgeURL:  change.New.Target.Links.HTML.Href,
 		Branch:    change.New.Name,
 		Message:   change.New.Target.Message,
 		Avatar:    hook.Actor.Links.Avatar.Href,
@@ -208,10 +213,10 @@ func convertPushHook(hook *internal.PushHook, change *internal.Change) *model.Pi
 	return pipeline
 }
 
-// regex for git author fields ("name <name@mail.tld>")
+// regex for git author fields (r.g. "name <name@mail.tld>").
 var reGitMail = regexp.MustCompile("<(.*)>")
 
-// extracts the email from a git commit author string
+// extracts the email from a git commit author string.
 func extractEmail(gitauthor string) (author string) {
 	matches := reGitMail.FindAllStringSubmatch(gitauthor, -1)
 	if len(matches) == 1 {

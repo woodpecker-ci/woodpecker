@@ -88,6 +88,12 @@ const routes: RouteRecordRaw[] = [
                 component: (): Component => import('~/views/repo/pipeline/PipelineConfig.vue'),
                 props: true,
               },
+              {
+                path: 'errors',
+                name: 'repo-pipeline-errors',
+                component: (): Component => import('~/views/repo/pipeline/PipelineErrors.vue'),
+                props: true,
+              },
             ],
           },
           {
@@ -159,6 +165,11 @@ const routes: RouteRecordRaw[] = [
     component: (): Component => import('~/views/Login.vue'),
     meta: { blank: true },
     props: true,
+  },
+  {
+    path: `${rootPath}/cli/auth`,
+    component: () => import('~/views/cli/Auth.vue'),
+    meta: { authentication: 'required' },
   },
 
   // TODO: deprecated routes => remove after some time

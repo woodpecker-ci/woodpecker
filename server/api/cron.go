@@ -20,18 +20,19 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/rs/zerolog/log"
 
-	"github.com/woodpecker-ci/woodpecker/server"
-	cronScheduler "github.com/woodpecker-ci/woodpecker/server/cron"
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/pipeline"
-	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
-	"github.com/woodpecker-ci/woodpecker/server/store"
+	"go.woodpecker-ci.org/woodpecker/v2/server"
+	cronScheduler "go.woodpecker-ci.org/woodpecker/v2/server/cron"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/pipeline"
+	"go.woodpecker-ci.org/woodpecker/v2/server/router/middleware/session"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 )
 
 // GetCron
 //
-//	@Summary	Get a cron job by id
+//	@Summary	Get a cron job
 //	@Router		/repos/{repo_id}/cron/{cron} [get]
 //	@Produce	json
 //	@Success	200	{object}	Cron
@@ -49,7 +50,7 @@ func GetCron(c *gin.Context) {
 
 	cron, err := store.FromContext(c).CronFind(repo, id)
 	if err != nil {
-		handleDbError(c, err)
+		handleDBError(c, err)
 		return
 	}
 	c.JSON(http.StatusOK, cron)
@@ -76,11 +77,11 @@ func RunCron(c *gin.Context) {
 
 	cron, err := _store.CronFind(repo, id)
 	if err != nil {
-		handleDbError(c, err)
+		handleDBError(c, err)
 		return
 	}
 
-	repo, newPipeline, err := cronScheduler.CreatePipeline(c, _store, server.Config.Services.Forge, cron)
+	repo, newPipeline, err := cronScheduler.CreatePipeline(c, _store, cron)
 	if err != nil {
 		c.String(http.StatusInternalServerError, "Error creating pipeline for cron %q. %s", id, err)
 		return
@@ -97,19 +98,24 @@ func RunCron(c *gin.Context) {
 
 // PostCron
 //
-//	@Summary	Persist/creat a cron job
+//	@Summary	Create a cron job
 //	@Router		/repos/{repo_id}/cron [post]
 //	@Produce	json
 //	@Success	200	{object}	Cron
 //	@Tags		Repository cron jobs
-//	@Param		Authorization	header	string		true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 //	@Param		repo_id			path	int		true	"the repository id"
 //	@Param		cronJob			body	Cron	true	"the new cron job"
 func PostCron(c *gin.Context) {
 	repo := session.Repo(c)
 	user := session.User(c)
 	_store := store.FromContext(c)
-	forge := server.Config.Services.Forge
+	_forge, err := server.Config.Services.Manager.ForgeFromRepo(repo)
+	if err != nil {
+		log.Error().Err(err).Msg("Cannot get forge from repo")
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
 
 	in := new(model.Cron)
 	if err := c.Bind(in); err != nil {
@@ -137,7 +143,7 @@ func PostCron(c *gin.Context) {
 
 	if in.Branch != "" {
 		// check if branch exists on forge
-		_, err := forge.BranchHead(c, user, repo, in.Branch)
+		_, err := _forge.BranchHead(c, user, repo, in.Branch)
 		if err != nil {
 			c.String(http.StatusBadRequest, "Error inserting cron. branch not resolved: %s", err)
 			return
@@ -158,15 +164,20 @@ func PostCron(c *gin.Context) {
 //	@Produce	json
 //	@Success	200	{object}	Cron
 //	@Tags		Repository cron jobs
-//	@Param		Authorization	header	string		true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 //	@Param		repo_id			path	int		true	"the repository id"
-//	@Param		cron			path	string		true	"the cron job id"
+//	@Param		cron			path	string	true	"the cron job id"
 //	@Param		cronJob			body	Cron	true	"the cron job data"
 func PatchCron(c *gin.Context) {
 	repo := session.Repo(c)
 	user := session.User(c)
 	_store := store.FromContext(c)
-	forge := server.Config.Services.Forge
+	_forge, err := server.Config.Services.Manager.ForgeFromRepo(repo)
+	if err != nil {
+		log.Error().Err(err).Msg("Cannot get forge from repo")
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
 
 	id, err := strconv.ParseInt(c.Param("cron"), 10, 64)
 	if err != nil {
@@ -183,12 +194,12 @@ func PatchCron(c *gin.Context) {
 
 	cron, err := _store.CronFind(repo, id)
 	if err != nil {
-		handleDbError(c, err)
+		handleDBError(c, err)
 		return
 	}
 	if in.Branch != "" {
 		// check if branch exists on forge
-		_, err := forge.BranchHead(c, user, repo, in.Branch)
+		_, err := _forge.BranchHead(c, user, repo, in.Branch)
 		if err != nil {
 			c.String(http.StatusBadRequest, "Error inserting cron. branch not resolved: %s", err)
 			return
@@ -222,7 +233,7 @@ func PatchCron(c *gin.Context) {
 
 // GetCronList
 //
-//	@Summary	Get the cron job list
+//	@Summary	List cron jobs
 //	@Router		/repos/{repo_id}/cron [get]
 //	@Produce	json
 //	@Success	200	{array}	Cron
@@ -243,7 +254,7 @@ func GetCronList(c *gin.Context) {
 
 // DeleteCron
 //
-//	@Summary	Delete a cron job by id
+//	@Summary	Delete a cron job
 //	@Router		/repos/{repo_id}/cron/{cron} [delete]
 //	@Produce	plain
 //	@Success	204
@@ -259,7 +270,7 @@ func DeleteCron(c *gin.Context) {
 		return
 	}
 	if err := store.FromContext(c).CronDelete(repo, id); err != nil {
-		handleDbError(c, err)
+		handleDBError(c, err)
 		return
 	}
 	c.Status(http.StatusNoContent)

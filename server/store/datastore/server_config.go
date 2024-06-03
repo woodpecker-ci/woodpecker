@@ -14,7 +14,7 @@
 
 package datastore
 
-import "github.com/woodpecker-ci/woodpecker/server/model"
+import "go.woodpecker-ci.org/woodpecker/v2/server/model"
 
 func (s storage) ServerConfigGet(key string) (string, error) {
 	config := new(model.ServerConfig)
@@ -43,10 +43,7 @@ func (s storage) ServerConfigSet(key, value string) error {
 		return err
 	}
 
-	// TODO change to Where() when https://gitea.com/xorm/xorm/issues/2358 is solved
-	_, err = s.engine.Cols("value").Update(config, &model.ServerConfig{
-		Key: key,
-	})
+	_, err = s.engine.Where("`key` = ?", config.Key).Cols("value").Update(config)
 	return err
 }
 

@@ -26,7 +26,10 @@ function HomepageHeader() {
 export default function Home() {
   const { siteConfig } = useDocusaurusContext();
   return (
-    <Layout title={`${siteConfig.title}`} description="Woodpecker is a simple CI engine with great extensibility.">
+    <Layout
+      title={`${siteConfig.title}`}
+      description="Woodpecker is a simple yet powerful CI/CD engine with great extensibility."
+    >
       <HomepageHeader />
       <main>
         <HomepageFeatures />

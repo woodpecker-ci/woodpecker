@@ -17,7 +17,7 @@ package datastore
 import (
 	"xorm.io/builder"
 
-	"github.com/woodpecker-ci/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
 var feedItemSelect = `repos.repo_id as feed_repo_id,
@@ -32,7 +32,6 @@ pipelines.pipeline_commit as feed_pipeline_commit,
 pipelines.pipeline_branch as feed_pipeline_branch,
 pipelines.pipeline_ref as feed_pipeline_ref,
 pipelines.pipeline_refspec as feed_pipeline_refspec,
-pipelines.pipeline_clone_url as feed_pipeline_clone_url,
 pipelines.pipeline_title as feed_pipeline_title,
 pipelines.pipeline_message as feed_pipeline_message,
 pipelines.pipeline_author as feed_pipeline_author,

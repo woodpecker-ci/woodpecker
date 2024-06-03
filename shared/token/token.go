@@ -36,12 +36,14 @@ const (
 const SignerAlgo = "HS256"
 
 type Token struct {
-	Kind string
-	Text string
+	Kind   string
+	claims jwt.MapClaims
 }
 
 func parse(raw string, fn SecretFunc) (*Token, error) {
-	token := &Token{}
+	token := &Token{
+		claims: jwt.MapClaims{},
+	}
 	parsed, err := jwt.Parse(raw, keyFunc(token, fn))
 	if err != nil {
 		return nil, err
@@ -99,8 +101,8 @@ func CheckCsrf(r *http.Request, fn SecretFunc) error {
 	return err
 }
 
-func New(kind, text string) *Token {
-	return &Token{Kind: kind, Text: text}
+func New(kind string) *Token {
+	return &Token{Kind: kind, claims: jwt.MapClaims{}}
 }
 
 // Sign signs the token using the given secret hash
@@ -117,16 +119,34 @@ func (t *Token) SignExpires(secret string, exp int64) (string, error) {
 	if !ok {
 		return "", fmt.Errorf("token claim is not a MapClaims")
 	}
+
+	for k, v := range t.claims {
+		claims[k] = v
+	}
+
 	claims["type"] = t.Kind
-	claims["text"] = t.Text
 	if exp > 0 {
 		claims["exp"] = float64(exp)
 	}
+
 	return token.SignedString([]byte(secret))
 }
 
+func (t *Token) Set(key, value string) {
+	t.claims[key] = value
+}
+
+func (t *Token) Get(key string) string {
+	claim, ok := t.claims[key].(string)
+	if !ok {
+		return ""
+	}
+
+	return claim
+}
+
 func keyFunc(token *Token, fn SecretFunc) jwt.Keyfunc {
-	return func(t *jwt.Token) (interface{}, error) {
+	return func(t *jwt.Token) (any, error) {
 		claims, ok := t.Claims.(jwt.MapClaims)
 		if !ok {
 			return nil, fmt.Errorf("token claim is not a MapClaims")
@@ -137,21 +157,26 @@ func keyFunc(token *Token, fn SecretFunc) jwt.Keyfunc {
 			return nil, jwt.ErrSignatureInvalid
 		}
 
-		// extract the token kind and cast to
-		// the expected type.
-		kindv, ok := claims["type"]
+		// extract the token kind and cast to the expected type
+		kind, ok := claims["type"]
 		if !ok {
 			return nil, jwt.ErrInvalidType
 		}
-		token.Kind, _ = kindv.(string)
+		token.Kind, _ = kind.(string)
 
-		// extract the token value and cast to
-		// expected type.
-		textv, ok := claims["text"]
-		if !ok {
-			return nil, jwt.ErrInvalidType
+		// copy custom claims
+		for k, v := range claims {
+			// skip the reserved claims https://datatracker.ietf.org/doc/html/rfc7519#section-4.1
+			if k == "iss" || k == "sub" || k == "aud" || k == "exp" || k == "nbf" || k == "iat" || k == "jti" {
+				continue
+			}
+
+			if k == "type" {
+				continue
+			}
+
+			token.claims[k] = v
 		}
-		token.Text, _ = textv.(string)
 
 		// invoke the callback function to retrieve
 		// the secret key used to verify

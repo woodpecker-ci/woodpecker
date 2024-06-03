@@ -42,6 +42,7 @@
       "runtimeArgs": ["start"],
       "cwd": "${workspaceFolder}/web",
       "resolveSourceMapLocations": ["${workspaceFolder}/web/**", "!**/node_modules/**"],
+      "envFile": "${workspaceFolder}/.env",
       "skipFiles": ["<node_internals>/**"]
     }
   ]

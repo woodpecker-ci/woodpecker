@@ -1,6 +1,6 @@
 <template>
   <Settings
-    :title="$t('repo.settings.registries.creds')"
+    :title="$t('repo.settings.registries.credentials')"
     :desc="$t('repo.settings.registries.desc')"
     docs-url="docs/usage/registries"
   >
@@ -41,9 +41,10 @@
 
     <div v-else class="space-y-4">
       <form @submit.prevent="createRegistry">
-        <InputField :label="$t('repo.settings.registries.address.address')">
+        <InputField v-slot="{ id }" :label="$t('repo.settings.registries.address.address')">
           <!-- TODO: check input field Address is a valid address -->
           <TextField
+            :id="id"
             v-model="selectedRegistry.address"
             :placeholder="$t('repo.settings.registries.address.placeholder')"
             required
@@ -51,12 +52,12 @@
           />
         </InputField>
 
-        <InputField :label="$t('username')">
-          <TextField v-model="selectedRegistry.username" :placeholder="$t('username')" required />
+        <InputField v-slot="{ id }" :label="$t('username')">
+          <TextField :id="id" v-model="selectedRegistry.username" :placeholder="$t('username')" required />
         </InputField>
 
-        <InputField :label="$t('password')">
-          <TextField v-model="selectedRegistry.password" :placeholder="$t('password')" required />
+        <InputField v-slot="{ id }" :label="$t('password')">
+          <TextField :id="id" v-model="selectedRegistry.password" :placeholder="$t('password')" required />
         </InputField>
 
         <div class="flex gap-2">
@@ -103,7 +104,7 @@ async function loadRegistries(page: number): Promise<Registry[] | null> {
     throw new Error("Unexpected: Can't load repo");
   }
 
-  return apiClient.getRegistryList(repo.value.id, page);
+  return apiClient.getRegistryList(repo.value.id, { page });
 }
 
 const { resetPage, data: registries } = usePagination(loadRegistries, () => !selectedRegistry.value);

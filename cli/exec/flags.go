@@ -19,7 +19,7 @@ import (
 
 	"github.com/urfave/cli/v2"
 
-	"github.com/woodpecker-ci/woodpecker/shared/constant"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/constant"
 )
 
 var flags = []cli.Flag{
@@ -28,6 +28,11 @@ var flags = []cli.Flag{
 		Name:    "local",
 		Usage:   "run from local directory",
 		Value:   true,
+	},
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_REPO_PATH"},
+		Name:    "repo-path",
+		Usage:   "path to local repository",
 	},
 	&cli.DurationFlag{
 		EnvVars: []string{"WOODPECKER_TIMEOUT"},
@@ -130,7 +135,7 @@ var flags = []cli.Flag{
 	},
 	&cli.StringFlag{
 		EnvVars: []string{"CI_SYSTEM_URL"},
-		Name:    "system-link",
+		Name:    "system-url",
 		Value:   "https://github.com/woodpecker-ci/woodpecker",
 	},
 	&cli.StringFlag{
@@ -144,7 +149,7 @@ var flags = []cli.Flag{
 	},
 	&cli.StringFlag{
 		EnvVars: []string{"CI_REPO_URL"},
-		Name:    "repo-link",
+		Name:    "repo-url",
 	},
 	&cli.StringFlag{
 		EnvVars: []string{"CI_REPO_CLONE_URL"},
@@ -193,11 +198,15 @@ var flags = []cli.Flag{
 	},
 	&cli.StringFlag{
 		EnvVars: []string{"CI_PIPELINE_URL"},
-		Name:    "pipeline-link",
+		Name:    "pipeline-url",
 	},
 	&cli.StringFlag{
 		EnvVars: []string{"CI_PIPELINE_TARGET"},
 		Name:    "pipeline-target",
+	},
+	&cli.StringFlag{
+		EnvVars: []string{"CI_PIPELINE_TASK"},
+		Name:    "pipeline-task",
 	},
 	&cli.StringFlag{
 		EnvVars: []string{"CI_COMMIT_SHA"},
@@ -257,7 +266,7 @@ var flags = []cli.Flag{
 	},
 	&cli.StringFlag{
 		EnvVars: []string{"CI_PREV_PIPELINE_URL"},
-		Name:    "prev-pipeline-link",
+		Name:    "prev-pipeline-url",
 	},
 	&cli.StringFlag{
 		EnvVars: []string{"CI_PREV_COMMIT_SHA"},

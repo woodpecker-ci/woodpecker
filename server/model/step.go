@@ -15,21 +15,13 @@
 
 package model
 
-// StepStore persists process information to storage.
-type StepStore interface {
-	StepLoad(int64) (*Step, error)
-	StepFind(*Pipeline, int) (*Step, error)
-	StepChild(*Pipeline, int, string) (*Step, error)
-	StepList(*Pipeline) ([]*Step, error)
-	StepCreate([]*Step) error
-	StepUpdate(*Step) error
-}
-
-// Different ways to handle failure states
+// Different ways to handle failure states.
 const (
 	FailureIgnore = "ignore"
 	FailureFail   = "fail"
-	// FailureCancel = "cancel" // Not implemented yet
+	//nolint:godot
+	// TODO: Not implemented yet.
+	// FailureCancel = "cancel"
 )
 
 // Step represents a process in the pipeline.
@@ -49,11 +41,7 @@ type Step struct {
 	Type       StepType    `json:"type,omitempty"       xorm:"step_type"`
 } //	@name Step
 
-type UpdateStepStore interface {
-	StepUpdate(*Step) error
-}
-
-// TableName return database table name for xorm
+// TableName return database table name for xorm.
 func (Step) TableName() string {
 	return "steps"
 }
@@ -68,7 +56,7 @@ func (p *Step) Failing() bool {
 	return p.Failure == FailureFail && (p.State == StatusError || p.State == StatusKilled || p.State == StatusFailure)
 }
 
-// StepType identifies the type of step
+// StepType identifies the type of step.
 type StepType string //	@name StepType
 
 const (

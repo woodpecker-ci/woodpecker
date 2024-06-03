@@ -3,7 +3,7 @@
     v-if="repo && repoPermissions && $route.meta.repoHeader"
     v-model:activeTab="activeTab"
     enable-tabs
-    disable-hash-mode
+    disable-tab-url-hash-mode
   >
     <template #title>
       <span class="flex">
@@ -17,11 +17,11 @@
       <a v-if="badgeUrl" :href="badgeUrl" target="_blank">
         <img :src="badgeUrl" />
       </a>
-      <IconButton :href="repo.link_url" :title="$t('repo.open_in_forge')" :icon="forge ?? 'repo'" />
+      <IconButton :href="repo.forge_url" :title="$t('repo.open_in_forge')" :icon="forge ?? 'repo'" class="forge" />
       <IconButton
         v-if="repoPermissions.admin"
         :to="{ name: 'repo-settings' }"
-        :title="$t('repo.settings.settings')"
+        :title="$t('settings')"
         icon="settings"
       />
     </template>
@@ -37,7 +37,7 @@
 
     <Tab id="activity" :title="$t('repo.activity')" />
     <Tab id="branches" :title="$t('repo.branches')" />
-    <Tab id="pull_requests" :title="$t('repo.pull_requests')" />
+    <Tab v-if="repo.pr_enabled && repo.allow_pr" id="pull_requests" :title="$t('repo.pull_requests')" />
 
     <router-view />
   </Scaffold>
@@ -77,7 +77,7 @@ const router = useRouter();
 const i18n = useI18n();
 const config = useConfig();
 
-const { forge } = useConfig();
+const { forge } = useConfig(); // TODO: remove this and use the forge type from the corresponding repo
 const repo = repoStore.getRepo(repositoryId);
 const repoPermissions = ref<RepoPermissions>();
 const pipelines = pipelineStore.getRepoPipelines(repositoryId);

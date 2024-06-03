@@ -2,18 +2,38 @@
 
 Some versions need some changes to the server configuration or the pipeline configuration files.
 
-## next (2.0.0)
+<!--
+## 3.0.0
+
+- Update all webhooks by pressing the "Repair all" button in the admin settings as the webhook token claims have changed
+
+-->
+
+## `next`
+
+- Deprecated `steps.[name].group` in favor of `steps.[name].depends_on` (see [workflow syntax](./20-usage/20-workflow-syntax.md#depends_on) to learn how to set dependencies)
+- Removed `WOODPECKER_ROOT_PATH` and `WOODPECKER_ROOT_URL` config variables. Use `WOODPECKER_HOST` with a path instead
+- Pipelines without a config file will now be skipped instead of failing
+- Deprecated `includes` and `excludes` support from **event** filter
+- Deprecated uppercasing all secret env vars, instead, the value of the `secrets` property is used. [Read more](./20-usage/40-secrets.md#use-secrets-in-commands)
+- Deprecated alternative names for secrets, use `environment` with `from_secret`
+- Deprecated slice definition for env vars
+- Deprecated `environment` filter, use `when.evaluate`
+- Use `WOODPECKER_EXPERT_FORGE_OAUTH_HOST` instead of `WOODPECKER_DEV_GITEA_OAUTH_URL` or `WOODPECKER_DEV_OAUTH_HOST`
+- Deprecated `WOODPECKER_WEBHOOK_HOST` in favor of `WOODPECKER_EXPERT_WEBHOOK_HOST`
+
+## 2.0.0
 
 - Dropped deprecated `CI_BUILD_*`, `CI_PREV_BUILD_*`, `CI_JOB_*`, `*_LINK`, `CI_SYSTEM_ARCH`, `CI_REPO_REMOTE` built-in environment variables
-- Dropped deprecated `pipeline:` keyword in favor of `steps:` in pipeline config
-- Dropped deprecated `branches:` filter in favor of global [`when.branch`](./20-usage/20-workflow-syntax.md#branch-1) filter
 - Deprecated `platform:` filter in favor of `labels:`, [read more](./20-usage/20-workflow-syntax.md#filter-by-platform)
-- Secrets `event` property was renamed to `events` and `image` to `images` as both are lists. The new property `events` / `images` has to be used in the api and as cli argument. The old properties `event` and `image` were removed.
+- Secrets `event` property was renamed to `events` and `image` to `images` as both are lists. The new property `events` / `images` has to be used in the api. The old properties `event` and `image` were removed.
 - The secrets `plugin_only` option was removed. Secrets with images are now always only available for plugins using listed by the `images` property. Existing secrets with a list of `images` will now only be available to the listed images if they are used as a plugin.
 - Removed `build` alias for `pipeline` command in CLI
 - Removed `ssh` backend. Use an agent directly on the SSH machine using the `local` backend.
 - Removed `/hook` and `/stream` API paths in favor of `/api/(hook|stream)`. You may need to use the "Repair repository" button in the repo settings or "Repair all" in the admin settings to recreate the forge hook.
 - Removed `WOODPECKER_DOCS` config variable
+- Renamed `link` to `url` (including all API fields)
+- Deprecated `CI_COMMIT_URL` env var, use `CI_PIPELINE_FORGE_URL`
 
 ## 1.0.0
 
@@ -56,7 +76,7 @@ Some versions need some changes to the server configuration or the pipeline conf
 
   Only projects created after updating will have an empty value by default. Existing projects will stick to the current pipeline path which is `.drone.yml` in most cases.
 
-  Read more about it at the [Project Settings](./20-usage/71-project-settings.md#pipeline-path)
+  Read more about it at the [Project Settings](./20-usage/75-project-settings.md#pipeline-path)
 
 - From version `0.15.0` ongoing there will be three types of docker images: `latest`, `next` and `x.x.x` with an alpine variant for each type like `latest-alpine`.
   If you used `latest` before to try pre-release features you should switch to `next` after this release.

@@ -20,8 +20,8 @@ import (
 
 	"github.com/rs/zerolog/log"
 
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/store"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 )
 
 // Refresher refreshes an oauth token and expiration for the given user. It
@@ -32,11 +32,14 @@ type Refresher interface {
 }
 
 func Refresh(c context.Context, forge Forge, _store store.Store, user *model.User) {
+	// Remaining ttl of 30 minutes (1800 seconds) until a token is refreshed.
+	const tokenMinTTL = 1800
+
 	if refresher, ok := forge.(Refresher); ok {
 		// Check to see if the user token is expired or
 		// will expire within the next 30 minutes (1800 seconds).
 		// If not, there is nothing we really need to do here.
-		if time.Now().UTC().Unix() < (user.Expiry - 1800) {
+		if time.Now().UTC().Unix() < (user.Expiry - tokenMinTTL) {
 			return
 		}
 

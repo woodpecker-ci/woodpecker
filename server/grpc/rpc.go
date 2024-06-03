@@ -13,8 +13,6 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-//
-// This file has been modified by Informatyka Boguslawski sp. z o.o. sp.k.
 
 package grpc
 
@@ -30,18 +28,18 @@ import (
 	"github.com/rs/zerolog/log"
 	grpcMetadata "google.golang.org/grpc/metadata"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline/rpc"
-	"github.com/woodpecker-ci/woodpecker/server/forge"
-	"github.com/woodpecker-ci/woodpecker/server/logging"
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/pipeline"
-	"github.com/woodpecker-ci/woodpecker/server/pubsub"
-	"github.com/woodpecker-ci/woodpecker/server/queue"
-	"github.com/woodpecker-ci/woodpecker/server/store"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc"
+	"go.woodpecker-ci.org/woodpecker/v2/server"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
+	"go.woodpecker-ci.org/woodpecker/v2/server/logging"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/pipeline"
+	"go.woodpecker-ci.org/woodpecker/v2/server/pubsub"
+	"go.woodpecker-ci.org/woodpecker/v2/server/queue"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 )
 
 type RPC struct {
-	forge         forge.Forge
 	queue         queue.Queue
 	pubsub        *pubsub.Publisher
 	logger        logging.Log
@@ -50,33 +48,29 @@ type RPC struct {
 	pipelineCount *prometheus.CounterVec
 }
 
-// Next implements the rpc.Next function
+// Next implements the rpc.Next function.
 func (s *RPC) Next(c context.Context, agentFilter rpc.Filter) (*rpc.Workflow, error) {
-	metadata, ok := grpcMetadata.FromIncomingContext(c)
-	if ok {
-		hostname, ok := metadata["hostname"]
-		if ok && len(hostname) != 0 {
-			log.Debug().Msgf("agent connected: %s: polling", hostname[0])
-		}
+	if hostname, err := s.getHostnameFromContext(c); err == nil {
+		log.Debug().Msgf("agent connected: %s: polling", hostname)
 	}
 
-	fn, err := createFilterFunc(agentFilter)
+	filterFn := createFilterFunc(agentFilter)
+
+	agent, err := s.getAgentFromContext(c)
 	if err != nil {
 		return nil, err
 	}
-	for {
-		agent, err := s.getAgentFromContext(c)
-		if err != nil {
-			return nil, err
-		} else if agent.NoSchedule {
-			return nil, nil
-		}
 
-		task, err := s.queue.Poll(c, agent.ID, fn)
-		if err != nil {
+	if agent.NoSchedule {
+		time.Sleep(1 * time.Second)
+		return nil, nil
+	}
+
+	for {
+		// poll blocks until a task is available or the context is canceled / worker is kicked
+		task, err := s.queue.Poll(c, agent.ID, filterFn)
+		if err != nil || task == nil {
 			return nil, err
-		} else if task == nil {
-			return nil, nil
 		}
 
 		if task.ShouldRun() {
@@ -85,23 +79,24 @@ func (s *RPC) Next(c context.Context, agentFilter rpc.Filter) (*rpc.Workflow, er
 			return workflow, err
 		}
 
+		// task should not run, so mark it as done
 		if err := s.Done(c, task.ID, rpc.State{}); err != nil {
 			log.Error().Err(err).Msgf("mark task '%s' done failed", task.ID)
 		}
 	}
 }
 
-// Wait implements the rpc.Wait function
+// Wait implements the rpc.Wait function.
 func (s *RPC) Wait(c context.Context, id string) error {
 	return s.queue.Wait(c, id)
 }
 
-// Extend implements the rpc.Extend function
+// Extend implements the rpc.Extend function.
 func (s *RPC) Extend(c context.Context, id string) error {
 	return s.queue.Extend(c, id)
 }
 
-// Update implements the rpc.Update function
+// Update implements the rpc.Update function.
 func (s *RPC) Update(_ context.Context, id string, state rpc.State) error {
 	workflowID, err := strconv.ParseInt(id, 10, 64)
 	if err != nil {
@@ -110,34 +105,43 @@ func (s *RPC) Update(_ context.Context, id string, state rpc.State) error {
 
 	workflow, err := s.store.WorkflowLoad(workflowID)
 	if err != nil {
-		log.Error().Msgf("error: rpc.update: cannot find workflow with id %d: %s", workflowID, err)
+		log.Error().Err(err).Msgf("rpc.update: cannot find workflow with id %d", workflowID)
 		return err
 	}
 
 	currentPipeline, err := s.store.GetPipeline(workflow.PipelineID)
 	if err != nil {
-		log.Error().Msgf("error: cannot find pipeline with id %d: %s", workflow.PipelineID, err)
+		log.Error().Err(err).Msgf("cannot find pipeline with id %d", workflow.PipelineID)
 		return err
 	}
 
-	step, err := s.store.StepChild(currentPipeline, workflow.PID, state.Step)
+	step, err := s.store.StepByUUID(state.StepUUID)
 	if err != nil {
-		log.Error().Msgf("error: cannot find step with name %s: %s", state.Step, err)
+		log.Error().Err(err).Msgf("cannot find step with uuid %s", state.StepUUID)
 		return err
+	}
+
+	if step.PipelineID != currentPipeline.ID {
+		msg := fmt.Sprintf("agent returned status with step uuid '%s' which does not belong to current pipeline", state.StepUUID)
+		log.Error().
+			Int64("stepPipelineID", step.PipelineID).
+			Int64("currentPipelineID", currentPipeline.ID).
+			Msg(msg)
+		return fmt.Errorf(msg)
 	}
 
 	repo, err := s.store.GetRepo(currentPipeline.RepoID)
 	if err != nil {
-		log.Error().Msgf("error: cannot find repo with id %d: %s", currentPipeline.RepoID, err)
+		log.Error().Err(err).Msgf("cannot find repo with id %d", currentPipeline.RepoID)
 		return err
 	}
 
-	if err := pipeline.UpdateStepStatus(s.store, step, state, currentPipeline.Started); err != nil {
+	if err := pipeline.UpdateStepStatus(s.store, step, state); err != nil {
 		log.Error().Err(err).Msg("rpc.update: cannot update step")
 	}
 
 	if currentPipeline.Workflows, err = s.store.WorkflowGetTree(currentPipeline); err != nil {
-		log.Error().Err(err).Msg("can not build tree from step list")
+		log.Error().Err(err).Msg("cannot build tree from step list")
 		return err
 	}
 	message := pubsub.Message{
@@ -146,16 +150,19 @@ func (s *RPC) Update(_ context.Context, id string, state rpc.State) error {
 			"private": strconv.FormatBool(repo.IsSCMPrivate),
 		},
 	}
-	message.Data, _ = json.Marshal(model.Event{
+	message.Data, err = json.Marshal(model.Event{
 		Repo:     *repo,
 		Pipeline: *currentPipeline,
 	})
+	if err != nil {
+		return err
+	}
 	s.pubsub.Publish(message)
 
 	return nil
 }
 
-// Init implements the rpc.Init function
+// Init implements the rpc.Init function.
 func (s *RPC) Init(c context.Context, id string, state rpc.State) error {
 	stepID, err := strconv.ParseInt(id, 10, 64)
 	if err != nil {
@@ -164,7 +171,7 @@ func (s *RPC) Init(c context.Context, id string, state rpc.State) error {
 
 	workflow, err := s.store.WorkflowLoad(stepID)
 	if err != nil {
-		log.Error().Msgf("error: cannot find step with id %d: %s", stepID, err)
+		log.Error().Err(err).Msgf("cannot find step with id %d", stepID)
 		return err
 	}
 
@@ -176,19 +183,19 @@ func (s *RPC) Init(c context.Context, id string, state rpc.State) error {
 
 	currentPipeline, err := s.store.GetPipeline(workflow.PipelineID)
 	if err != nil {
-		log.Error().Msgf("error: cannot find pipeline with id %d: %s", workflow.PipelineID, err)
+		log.Error().Err(err).Msgf("cannot find pipeline with id %d", workflow.PipelineID)
 		return err
 	}
 
 	repo, err := s.store.GetRepo(currentPipeline.RepoID)
 	if err != nil {
-		log.Error().Msgf("error: cannot find repo with id %d: %s", currentPipeline.RepoID, err)
+		log.Error().Err(err).Msgf("cannot find repo with id %d", currentPipeline.RepoID)
 		return err
 	}
 
 	if currentPipeline.Status == model.StatusPending {
 		if currentPipeline, err = pipeline.UpdateToStatusRunning(s.store, *currentPipeline, state.Started); err != nil {
-			log.Error().Msgf("error: init: cannot update build_id %d state: %s", currentPipeline.ID, err)
+			log.Error().Err(err).Msgf("init: cannot update build_id %d state", currentPipeline.ID)
 		}
 	}
 
@@ -202,10 +209,14 @@ func (s *RPC) Init(c context.Context, id string, state rpc.State) error {
 				"private": strconv.FormatBool(repo.IsSCMPrivate),
 			},
 		}
-		message.Data, _ = json.Marshal(model.Event{
+		message.Data, err = json.Marshal(model.Event{
 			Repo:     *repo,
 			Pipeline: *currentPipeline,
 		})
+		if err != nil {
+			log.Error().Err(err).Msg("could not marshal JSON")
+			return
+		}
 		s.pubsub.Publish(message)
 	}()
 
@@ -217,7 +228,7 @@ func (s *RPC) Init(c context.Context, id string, state rpc.State) error {
 	return nil
 }
 
-// Done implements the rpc.Done function
+// Done implements the rpc.Done function.
 func (s *RPC) Done(c context.Context, id string, state rpc.State) error {
 	workflowID, err := strconv.ParseInt(id, 10, 64)
 	if err != nil {
@@ -260,7 +271,7 @@ func (s *RPC) Done(c context.Context, id string, state rpc.State) error {
 
 	var queueErr error
 	if workflow.Failing() {
-		queueErr = s.queue.Error(c, id, fmt.Errorf("Step finished with exit code %d, %s", state.ExitCode, state.Error))
+		queueErr = s.queue.Error(c, id, fmt.Errorf("step finished with exit code %d, %s", state.ExitCode, state.Error))
 	} else {
 		queueErr = s.queue.Done(c, id, workflow.State)
 	}
@@ -306,7 +317,7 @@ func (s *RPC) Done(c context.Context, id string, state rpc.State) error {
 	return nil
 }
 
-// Log implements the rpc.Log function
+// Log implements the rpc.Log function.
 func (s *RPC) Log(c context.Context, _logEntry *rpc.LogEntry) error {
 	// convert rpc log_entry to model.log_entry
 	step, err := s.store.StepByUUID(_logEntry.StepUUID)
@@ -337,6 +348,12 @@ func (s *RPC) RegisterAgent(ctx context.Context, platform, backend, version stri
 		return -1, err
 	}
 
+	if agent.Name == "" {
+		if hostname, err := s.getHostnameFromContext(ctx); err == nil {
+			agent.Name = hostname
+		}
+	}
+
 	agent.Backend = backend
 	agent.Platform = platform
 	agent.Capacity = capacity
@@ -350,6 +367,22 @@ func (s *RPC) RegisterAgent(ctx context.Context, platform, backend, version stri
 	return agent.ID, nil
 }
 
+func (s *RPC) UnregisterAgent(ctx context.Context) error {
+	agent, err := s.getAgentFromContext(ctx)
+	if !agent.IsSystemAgent() {
+		// registered with individual agent token -> do not unregister
+		return nil
+	}
+	log.Debug().Msgf("unregistering agent with ID %d", agent.ID)
+	if err != nil {
+		return err
+	}
+
+	err = s.store.AgentDelete(agent)
+
+	return err
+}
+
 func (s *RPC) ReportHealth(ctx context.Context, status string) error {
 	agent, err := s.getAgentFromContext(ctx)
 	if err != nil {
@@ -357,6 +390,7 @@ func (s *RPC) ReportHealth(ctx context.Context, status string) error {
 	}
 
 	if status != "I am alive!" {
+		//nolint:stylecheck
 		return errors.New("Are you alive?")
 	}
 
@@ -369,7 +403,7 @@ func (s *RPC) completeChildrenIfParentCompleted(completedWorkflow *model.Workflo
 	for _, c := range completedWorkflow.Children {
 		if c.Running() {
 			if _, err := pipeline.UpdateStepToStatusSkipped(s.store, *c, completedWorkflow.Stopped); err != nil {
-				log.Error().Msgf("error: done: cannot update step_id %d child state: %s", c.ID, err)
+				log.Error().Err(err).Msgf("done: cannot update step_id %d child state", c.ID)
 			}
 		}
 	}
@@ -378,15 +412,21 @@ func (s *RPC) completeChildrenIfParentCompleted(completedWorkflow *model.Workflo
 func (s *RPC) updateForgeStatus(ctx context.Context, repo *model.Repo, pipeline *model.Pipeline, workflow *model.Workflow) {
 	user, err := s.store.GetUser(repo.UserID)
 	if err != nil {
-		log.Error().Err(err).Msgf("can not get user with id '%d'", repo.UserID)
+		log.Error().Err(err).Msgf("cannot get user with id '%d'", repo.UserID)
 		return
 	}
 
-	forge.Refresh(ctx, s.forge, s.store, user)
+	_forge, err := server.Config.Services.Manager.ForgeFromRepo(repo)
+	if err != nil {
+		log.Error().Err(err).Msgf("can not get forge for repo '%s'", repo.FullName)
+		return
+	}
+
+	forge.Refresh(ctx, _forge, s.store, user)
 
 	// only do status updates for parent steps
 	if workflow != nil {
-		err = s.forge.Status(ctx, user, repo, pipeline, workflow)
+		err = _forge.Status(ctx, user, repo, pipeline, workflow)
 		if err != nil {
 			log.Error().Err(err).Msgf("error setting commit status for %s/%d", repo.FullName, pipeline.Number)
 		}
@@ -400,10 +440,13 @@ func (s *RPC) notify(repo *model.Repo, pipeline *model.Pipeline) (err error) {
 			"private": strconv.FormatBool(repo.IsSCMPrivate),
 		},
 	}
-	message.Data, _ = json.Marshal(model.Event{
+	message.Data, err = json.Marshal(model.Event{
 		Repo:     *repo,
 		Pipeline: *pipeline,
 	})
+	if err != nil {
+		return err
+	}
 	s.pubsub.Publish(message)
 	return nil
 }
@@ -426,4 +469,15 @@ func (s *RPC) getAgentFromContext(ctx context.Context) (*model.Agent, error) {
 	}
 
 	return s.store.AgentFind(agentID)
+}
+
+func (s *RPC) getHostnameFromContext(ctx context.Context) (string, error) {
+	metadata, ok := grpcMetadata.FromIncomingContext(ctx)
+	if ok {
+		hostname, ok := metadata["hostname"]
+		if ok && len(hostname) != 0 {
+			return hostname[0], nil
+		}
+	}
+	return "", errors.New("no hostname in metadata")
 }

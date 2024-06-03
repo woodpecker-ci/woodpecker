@@ -20,18 +20,22 @@ const repoPermissions = inject<Ref<RepoPermissions>>('repo-permissions');
 if (!repo || !repoPermissions) {
   throw new Error('Unexpected: "repo" and "repoPermissions" should be provided at this place');
 }
+if (!repo.value.pr_enabled || !repo.value.allow_pr) {
+  throw new Error('Unexpected: pull requests are disabled for repo');
+}
 
 const allPipelines = inject<Ref<Pipeline[]>>('pipelines');
-const pipelines = computed(
-  () =>
-    allPipelines?.value.filter(
-      (b) =>
-        b.event === 'pull_request' &&
-        b.ref
-          .replaceAll('refs/pull/', '')
-          .replaceAll('refs/merge-requests/', '')
-          .replaceAll('/merge', '')
-          .replaceAll('/head', '') === pullRequest.value,
-    ),
+const pipelines = computed(() =>
+  allPipelines?.value.filter(
+    (b) =>
+      (b.event === 'pull_request' || b.event === 'pull_request_closed') &&
+      b.ref
+        .replaceAll('refs/pull/', '')
+        .replaceAll('refs/merge-requests/', '')
+        .replaceAll('refs/pull-requests/', '')
+        .replaceAll('/from', '')
+        .replaceAll('/merge', '')
+        .replaceAll('/head', '') === pullRequest.value,
+  ),
 );
 </script>

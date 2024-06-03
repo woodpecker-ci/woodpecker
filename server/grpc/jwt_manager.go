@@ -22,13 +22,13 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-// JWTManager is a JSON web token manager
+// JWTManager is a JSON web token manager.
 type JWTManager struct {
 	secretKey     string
 	tokenDuration time.Duration
 }
 
-// UserClaims is a custom JWT claims that contains some user's information
+// UserClaims is a custom JWT claims that contains some user's information.
 type AgentTokenClaims struct {
 	jwt.RegisteredClaims
 	AgentID int64 `json:"agent_id"`
@@ -36,12 +36,12 @@ type AgentTokenClaims struct {
 
 const jwtTokenDuration = 1 * time.Hour
 
-// NewJWTManager returns a new JWT manager
+// NewJWTManager returns a new JWT manager.
 func NewJWTManager(secretKey string) *JWTManager {
 	return &JWTManager{secretKey, jwtTokenDuration}
 }
 
-// Generate generates and signs a new token for a user
+// Generate generates and signs a new token for a user.
 func (manager *JWTManager) Generate(agentID int64) (string, error) {
 	claims := AgentTokenClaims{
 		RegisteredClaims: jwt.RegisteredClaims{
@@ -60,12 +60,12 @@ func (manager *JWTManager) Generate(agentID int64) (string, error) {
 	return token.SignedString([]byte(manager.secretKey))
 }
 
-// Verify verifies the access token string and return a user claim if the token is valid
+// Verify verifies the access token string and return a user claim if the token is valid.
 func (manager *JWTManager) Verify(accessToken string) (*AgentTokenClaims, error) {
 	token, err := jwt.ParseWithClaims(
 		accessToken,
 		&AgentTokenClaims{},
-		func(token *jwt.Token) (interface{}, error) {
+		func(token *jwt.Token) (any, error) {
 			_, ok := token.Method.(*jwt.SigningMethodHMAC)
 			if !ok {
 				return nil, errors.New("unexpected token signing method")

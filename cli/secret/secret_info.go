@@ -20,9 +20,9 @@ import (
 
 	"github.com/urfave/cli/v2"
 
-	"github.com/woodpecker-ci/woodpecker/cli/common"
-	"github.com/woodpecker-ci/woodpecker/cli/internal"
-	"github.com/woodpecker-ci/woodpecker/woodpecker-go/woodpecker"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker"
 )
 
 var secretInfoCmd = &cli.Command{
@@ -30,7 +30,7 @@ var secretInfoCmd = &cli.Command{
 	Usage:     "display secret info",
 	ArgsUsage: "[repo-id|repo-full-name]",
 	Action:    secretInfo,
-	Flags: append(common.GlobalFlags,
+	Flags: []cli.Flag{
 		&cli.BoolFlag{
 			Name:  "global",
 			Usage: "global secret",
@@ -42,7 +42,7 @@ var secretInfoCmd = &cli.Command{
 			Usage: "secret name",
 		},
 		common.FormatFlag(tmplSecretList, true),
-	),
+	},
 }
 
 func secretInfo(c *cli.Context) error {
@@ -61,17 +61,18 @@ func secretInfo(c *cli.Context) error {
 	}
 
 	var secret *woodpecker.Secret
-	if global {
+	switch {
+	case global:
 		secret, err = client.GlobalSecret(secretName)
 		if err != nil {
 			return err
 		}
-	} else if orgID != -1 {
+	case orgID != -1:
 		secret, err = client.OrgSecret(orgID, secretName)
 		if err != nil {
 			return err
 		}
-	} else {
+	default:
 		secret, err = client.Secret(repoID, secretName)
 		if err != nil {
 			return err

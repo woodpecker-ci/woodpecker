@@ -20,7 +20,7 @@ import (
 	"xorm.io/builder"
 	"xorm.io/xorm"
 
-	"github.com/woodpecker-ci/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
 func (s storage) GetPipeline(id int64) (*model.Pipeline, error) {
@@ -32,20 +32,6 @@ func (s storage) GetPipelineNumber(repo *model.Repo, num int64) (*model.Pipeline
 	pipeline := new(model.Pipeline)
 	return pipeline, wrapGet(s.engine.Where(
 		builder.Eq{"pipeline_repo_id": repo.ID, "pipeline_number": num},
-	).Get(pipeline))
-}
-
-func (s storage) GetPipelineRef(repo *model.Repo, ref string) (*model.Pipeline, error) {
-	pipeline := new(model.Pipeline)
-	return pipeline, wrapGet(s.engine.Where(
-		builder.Eq{"pipeline_repo_id": repo.ID, "pipeline_ref": ref},
-	).Get(pipeline))
-}
-
-func (s storage) GetPipelineCommit(repo *model.Repo, sha, branch string) (*model.Pipeline, error) {
-	pipeline := new(model.Pipeline)
-	return pipeline, wrapGet(s.engine.Where(
-		builder.Eq{"pipeline_repo_id": repo.ID, "pipeline_branch": branch, "pipeline_commit": sha},
 	).Get(pipeline))
 }
 
@@ -66,14 +52,27 @@ func (s storage) GetPipelineLastBefore(repo *model.Repo, branch string, num int6
 		Get(pipeline))
 }
 
-func (s storage) GetPipelineList(repo *model.Repo, p *model.ListOptions) ([]*model.Pipeline, error) {
+func (s storage) GetPipelineList(repo *model.Repo, p *model.ListOptions, f *model.PipelineFilter) ([]*model.Pipeline, error) {
 	pipelines := make([]*model.Pipeline, 0, 16)
-	return pipelines, s.paginate(p).Where("pipeline_repo_id = ?", repo.ID).
+
+	cond := builder.NewCond().And(builder.Eq{"pipeline_repo_id": repo.ID})
+
+	if f != nil {
+		if f.After != 0 {
+			cond = cond.And(builder.Gt{"pipeline_created": f.After})
+		}
+
+		if f.Before != 0 {
+			cond = cond.And(builder.Lt{"pipeline_created": f.Before})
+		}
+	}
+
+	return pipelines, s.paginate(p).Where(cond).
 		Desc("pipeline_number").
 		Find(&pipelines)
 }
 
-// GetActivePipelineList get all pipelines that are pending, running or blocked
+// GetActivePipelineList get all pipelines that are pending, running or blocked.
 func (s storage) GetActivePipelineList(repo *model.Repo) ([]*model.Pipeline, error) {
 	pipelines := make([]*model.Pipeline, 0)
 	query := s.engine.
@@ -114,7 +113,6 @@ func (s storage) CreatePipeline(pipeline *model.Pipeline, stepList ...*model.Ste
 	pipeline.Number = number + 1
 
 	pipeline.Created = time.Now().UTC().Unix()
-	pipeline.Enqueued = pipeline.Created
 	// only Insert set auto created ID back to object
 	if _, err := sess.Insert(pipeline); err != nil {
 		return err
@@ -136,23 +134,32 @@ func (s storage) UpdatePipeline(pipeline *model.Pipeline) error {
 	return err
 }
 
-func deletePipeline(sess *xorm.Session, pipelineID int64) error {
-	// delete related steps
-	for startSteps := 0; ; startSteps += perPage {
-		stepIDs := make([]int64, 0, perPage)
-		if err := sess.Limit(perPage, startSteps).Table("steps").Cols("step_id").Where("step_pipeline_id = ?", pipelineID).Find(&stepIDs); err != nil {
+func (s storage) DeletePipeline(pipeline *model.Pipeline) error {
+	return s.deletePipeline(s.engine.NewSession(), pipeline.ID)
+}
+
+func (s storage) deletePipeline(sess *xorm.Session, pipelineID int64) error {
+	if err := s.workflowsDelete(sess, pipelineID); err != nil {
+		return err
+	}
+
+	var confIDs []int64
+	if err := sess.Table(new(model.PipelineConfig)).Select("config_id").Where("pipeline_id = ?", pipelineID).Find(&confIDs); err != nil {
+		return err
+	}
+	for _, confID := range confIDs {
+		exist, err := sess.Where(builder.Eq{"config_id": confID}.And(builder.Neq{"pipeline_id": pipelineID})).Exist(new(model.PipelineConfig))
+		if err != nil {
 			return err
 		}
-		if len(stepIDs) == 0 {
-			break
-		}
-
-		for i := range stepIDs {
-			if err := deleteStep(sess, stepIDs[i]); err != nil {
+		if !exist {
+			// this config is only used for this pipeline. so delete it
+			if _, err := sess.Where(builder.Eq{"config_id": confID}).Delete(new(model.Config)); err != nil {
 				return err
 			}
 		}
 	}
+
 	if _, err := sess.Where("pipeline_id = ?", pipelineID).Delete(new(model.PipelineConfig)); err != nil {
 		return err
 	}

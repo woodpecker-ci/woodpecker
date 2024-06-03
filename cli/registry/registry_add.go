@@ -20,9 +20,9 @@ import (
 
 	"github.com/urfave/cli/v2"
 
-	"github.com/woodpecker-ci/woodpecker/cli/common"
-	"github.com/woodpecker-ci/woodpecker/cli/internal"
-	"github.com/woodpecker-ci/woodpecker/woodpecker-go/woodpecker"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker"
 )
 
 var registryCreateCmd = &cli.Command{
@@ -30,7 +30,7 @@ var registryCreateCmd = &cli.Command{
 	Usage:     "adds a registry",
 	ArgsUsage: "[repo-id|repo-full-name]",
 	Action:    registryCreate,
-	Flags: append(common.GlobalFlags,
+	Flags: []cli.Flag{
 		common.RepoFlag,
 		&cli.StringFlag{
 			Name:  "hostname",
@@ -45,7 +45,7 @@ var registryCreateCmd = &cli.Command{
 			Name:  "password",
 			Usage: "registry password",
 		},
-	),
+	},
 }
 
 func registryCreate(c *cli.Context) error {
@@ -73,14 +73,13 @@ func registryCreate(c *cli.Context) error {
 	}
 	if strings.HasPrefix(registry.Password, "@") {
 		path := strings.TrimPrefix(registry.Password, "@")
-		out, ferr := os.ReadFile(path)
-		if ferr != nil {
-			return ferr
+		out, err := os.ReadFile(path)
+		if err != nil {
+			return err
 		}
 		registry.Password = string(out)
 	}
-	_, err = client.RegistryCreate(repoID, registry)
-	if err != nil {
+	if _, err := client.RegistryCreate(repoID, registry); err != nil {
 		return err
 	}
 	return nil

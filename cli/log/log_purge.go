@@ -20,16 +20,14 @@ import (
 
 	"github.com/urfave/cli/v2"
 
-	"github.com/woodpecker-ci/woodpecker/cli/common"
-	"github.com/woodpecker-ci/woodpecker/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
 )
 
 var logPurgeCmd = &cli.Command{
 	Name:      "purge",
 	Usage:     "purge a log",
-	ArgsUsage: "<repo-id|repo-full-name> <pipeline>",
+	ArgsUsage: "<repo-id|repo-full-name> <pipeline> [step]",
 	Action:    logPurge,
-	Flags:     common.GlobalFlags,
 }
 
 func logPurge(c *cli.Context) (err error) {
@@ -42,12 +40,26 @@ func logPurge(c *cli.Context) (err error) {
 	if err != nil {
 		return err
 	}
-	number, err := strconv.Atoi(c.Args().Get(1))
+	number, err := strconv.ParseInt(c.Args().Get(1), 10, 64)
 	if err != nil {
 		return err
 	}
 
-	err = client.LogsPurge(repoID, number)
+	stepArg := c.Args().Get(2) //nolint:mnd
+	// TODO: Add lookup by name: stepID, err := internal.ParseStep(client, repoID, stepIDOrName)
+	var stepID int64
+	if len(stepArg) != 0 {
+		stepID, err = strconv.ParseInt(stepArg, 10, 64)
+		if err != nil {
+			return err
+		}
+	}
+
+	if stepID > 0 {
+		err = client.StepLogsPurge(repoID, number, stepID)
+	} else {
+		err = client.LogsPurge(repoID, number)
+	}
 	if err != nil {
 		return err
 	}

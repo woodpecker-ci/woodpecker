@@ -20,8 +20,8 @@ import (
 
 	"github.com/urfave/cli/v2"
 
-	"github.com/woodpecker-ci/woodpecker/cli/common"
-	"github.com/woodpecker-ci/woodpecker/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
 )
 
 var registryListCmd = &cli.Command{
@@ -29,10 +29,10 @@ var registryListCmd = &cli.Command{
 	Usage:     "list registries",
 	ArgsUsage: "[repo-id|repo-full-name]",
 	Action:    registryList,
-	Flags: append(common.GlobalFlags,
+	Flags: []cli.Flag{
 		common.RepoFlag,
 		common.FormatFlag(tmplRegistryList, true),
-	),
+	},
 }
 
 func registryList(c *cli.Context) error {
@@ -67,7 +67,7 @@ func registryList(c *cli.Context) error {
 	return nil
 }
 
-// template for registry list information
+// Template for registry list information.
 var tmplRegistryList = "\x1b[33m{{ .Address }} \x1b[0m" + `
 Username: {{ .Username }}
 Email: {{ .Email }}

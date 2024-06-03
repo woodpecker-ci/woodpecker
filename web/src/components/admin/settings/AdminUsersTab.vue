@@ -43,18 +43,18 @@
     </div>
     <div v-else>
       <form @submit.prevent="saveUser">
-        <InputField :label="$t('admin.settings.users.login')">
-          <TextField v-model="selectedUser.login" :disabled="isEditingUser" />
+        <InputField v-slot="{ id }" :label="$t('admin.settings.users.login')">
+          <TextField :id="id" v-model="selectedUser.login" :disabled="isEditingUser" />
         </InputField>
 
-        <InputField :label="$t('admin.settings.users.email')">
-          <TextField v-model="selectedUser.email" />
+        <InputField v-slot="{ id }" :label="$t('admin.settings.users.email')">
+          <TextField :id="id" v-model="selectedUser.email" />
         </InputField>
 
-        <InputField :label="$t('admin.settings.users.avatar_url')">
+        <InputField v-slot="{ id }" :label="$t('admin.settings.users.avatar_url')">
           <div class="flex gap-2">
             <img v-if="selectedUser.avatar_url" class="rounded-md h-8 w-8" :src="selectedUser.avatar_url" />
-            <TextField v-model="selectedUser.avatar_url" />
+            <TextField :id="id" v-model="selectedUser.avatar_url" />
           </div>
         </InputField>
 
@@ -107,7 +107,7 @@ const selectedUser = ref<Partial<User>>();
 const isEditingUser = computed(() => !!selectedUser.value?.id);
 
 async function loadUsers(page: number): Promise<User[] | null> {
-  return apiClient.getUsers(page);
+  return apiClient.getUsers({ page });
 }
 
 const { resetPage, data: users } = usePagination(loadUsers, () => !selectedUser.value);

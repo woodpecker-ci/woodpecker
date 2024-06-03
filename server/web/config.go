@@ -17,15 +17,16 @@ package web
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 	"text/template"
 
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
 
-	"github.com/woodpecker-ci/woodpecker/server"
-	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
-	"github.com/woodpecker-ci/woodpecker/shared/token"
-	"github.com/woodpecker-ci/woodpecker/version"
+	"go.woodpecker-ci.org/woodpecker/v2/server"
+	"go.woodpecker-ci.org/woodpecker/v2/server/router/middleware/session"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/token"
+	"go.woodpecker-ci.org/woodpecker/v2/version"
 )
 
 func Config(c *gin.Context) {
@@ -33,25 +34,37 @@ func Config(c *gin.Context) {
 
 	var csrf string
 	if user != nil {
-		csrf, _ = token.New(
-			token.CsrfToken,
-			user.Login,
-		).Sign(user.Hash)
+		t := token.New(token.CsrfToken)
+		t.Set("user-id", strconv.FormatInt(user.ID, 10))
+		csrf, _ = t.Sign(user.Hash)
 	}
 
-	configData := map[string]interface{}{
-		"user":           user,
-		"csrf":           csrf,
-		"version":        version.String(),
-		"forge":          server.Config.Services.Forge.Name(),
-		"root_path":      server.Config.Server.RootPath,
-		"enable_swagger": server.Config.Server.EnableSwagger,
+	// TODO: remove this and use the forge type from the corresponding repo
+	mainForge, err := server.Config.Services.Manager.ForgeMain()
+	if err != nil {
+		log.Error().Err(err).Msg("could not get main forge")
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	configData := map[string]any{
+		"user":               user,
+		"csrf":               csrf,
+		"version":            version.String(),
+		"skip_version_check": server.Config.WebUI.SkipVersionCheck,
+		"forge":              mainForge.Name(),
+		"root_path":          server.Config.Server.RootPath,
+		"enable_swagger":     server.Config.WebUI.EnableSwagger,
 	}
 
 	// default func map with json parser.
 	funcMap := template.FuncMap{
-		"json": func(v interface{}) string {
-			a, _ := json.Marshal(v)
+		"json": func(v any) string {
+			a, err := json.Marshal(v)
+			if err != nil {
+				log.Error().Err(err).Msg("could not marshal JSON")
+				return ""
+			}
 			return string(a)
 		},
 	}
@@ -60,7 +73,7 @@ func Config(c *gin.Context) {
 	tmpl := template.Must(template.New("").Funcs(funcMap).Parse(configTemplate))
 
 	if err := tmpl.Execute(c.Writer, configData); err != nil {
-		log.Error().Err(err).Msgf("could not execute template")
+		log.Error().Err(err).Msg("could not execute template")
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
@@ -75,4 +88,5 @@ window.WOODPECKER_VERSION = "{{ .version }}";
 window.WOODPECKER_FORGE = "{{ .forge }}";
 window.WOODPECKER_ROOT_PATH = "{{ .root_path }}";
 window.WOODPECKER_ENABLE_SWAGGER = {{ .enable_swagger }};
+window.WOODPECKER_SKIP_VERSION_CHECK = {{ .skip_version_check }}
 `

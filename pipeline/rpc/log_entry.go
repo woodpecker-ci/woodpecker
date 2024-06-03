@@ -23,7 +23,7 @@ import (
 
 	"github.com/rs/zerolog/log"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline/shared"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/shared"
 )
 
 // Identifies the type of line in the logs.
@@ -97,12 +97,12 @@ func (w *LineWriter) Write(p []byte) (n int, err error) {
 	return len(p), nil
 }
 
-// Lines returns the line history
+// Lines returns the line history.
 func (w *LineWriter) Lines() []*LogEntry {
 	return w.lines
 }
 
-// Clear clears the line history
+// Clear clears the line history.
 func (w *LineWriter) Clear() {
 	w.lines = w.lines[:0]
 }
