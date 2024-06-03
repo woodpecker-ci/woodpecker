@@ -731,11 +731,13 @@
           "description": "Read more: https://woodpecker-ci.org/docs/administration/backends/kubernetes#runtimeclassname",
           "type": "string"
         },
-        "secretNames": {
+        "secrets": {
+          "description": "The secrets section defines a list of references to the native Kubernetes secrets",
           "type": "array",
           "items": {
-            "type": "string"
-          }
+            "$ref": "#/definitions/step_kubernetes_secret"
+          },
+          "minLength": 1
         }
       }
     },
@@ -814,6 +816,36 @@
       "type": "object",
       "additionalProperties": {
         "type": "string"
+      }
+    },
+    "step_kubernetes_secret_list": {
+      "description": "The secrets section defines a list of references to the native Kubernetes secrets",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/step_kubernetes_secret"
+          },
+          "minProperties": 1
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/step_kubernetes_secret"
+          },
+          "minLength": 1
+        }
+      ]
+    },
+    "step_kubernetes_secret": {
+      "description": "A reference to a native Kubernetes secret",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "description": "The name of the secret. Can be used if using the array style secrets list.",
+          "type": "string"
+        }
       }
     },
     "services": {

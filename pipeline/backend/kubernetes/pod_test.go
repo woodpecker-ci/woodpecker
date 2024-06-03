@@ -360,7 +360,10 @@ func TestFullPod(t *testing.T) {
 			Limits:   map[string]string{"memory": "256Mi", "cpu": "2"},
 		},
 		SecurityContext: &secCtx,
-		SecretNames:     []string{"ghcr-push-secret", "aws-ecr"},
+		Secrets: []SecretRef{
+			{Name: "ghcr-push-secret"},
+			{Name: "aws-ecr"},
+		},
 	})
 	assert.NoError(t, err)
 

@@ -16,7 +16,7 @@ type BackendOptions struct {
 	NodeSelector       map[string]string `mapstructure:"nodeSelector"`
 	Tolerations        []Toleration      `mapstructure:"tolerations"`
 	SecurityContext    *SecurityContext  `mapstructure:"securityContext"`
-	SecretNames        []string          `mapstructure:"secretNames"`
+	Secrets            []SecretRef       `mapstructure:"secrets"`
 }
 
 // Resources defines two maps for kubernetes resource definitions.
@@ -65,6 +65,11 @@ type SecProfile struct {
 }
 
 type SecProfileType string
+
+// SecretRef defines Kubernetes secret reference.
+type SecretRef struct {
+	Name string `mapstructure:"name"`
+}
 
 const (
 	SecProfileTypeRuntimeDefault SecProfileType = "RuntimeDefault"

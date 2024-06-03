@@ -191,11 +191,11 @@ func podContainer(step *types.Step, config *config, podName, goos string, option
 
 	container.Env = mapToEnvVars(step.Environment)
 
-	if len(options.SecretNames) > 0 {
+	if len(options.Secrets) > 0 {
 		if config.NativeSecretsAllowFromStep {
-			container.EnvFrom = containerSecrets(options.SecretNames)
+			container.EnvFrom = containerSecrets(options.Secrets)
 		} else {
-			log.Debug().Msg("Secret names were defined in backend options, but its using disallowed by instance configuration ")
+			log.Debug().Msg("Secret names were defined in backend options, but secret access is disallowed by instance configuration.")
 		}
 	}
 
@@ -276,21 +276,21 @@ func containerPort(port types.Port) v1.ContainerPort {
 	}
 }
 
-func containerSecrets(secretNames []string) []v1.EnvFromSource {
-	if secretNames == nil || len(secretNames) == 0 {
+func containerSecrets(secrets []SecretRef) []v1.EnvFromSource {
+	if len(secrets) == 0 {
 		return nil
 	}
-	secretRefs := make([]v1.EnvFromSource, len(secretNames))
-	for i, secretName := range secretNames {
+	secretRefs := make([]v1.EnvFromSource, len(secrets))
+	for i, secretName := range secrets {
 		secretRefs[i] = containerSecret(secretName)
 	}
 	return secretRefs
 }
 
-func containerSecret(secretName string) v1.EnvFromSource {
+func containerSecret(secret SecretRef) v1.EnvFromSource {
 	return v1.EnvFromSource{
 		SecretRef: &v1.SecretEnvSource{
-			LocalObjectReference: secretReference(secretName),
+			LocalObjectReference: secretReference(secret.Name),
 		},
 	}
 }

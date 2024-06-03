@@ -44,8 +44,8 @@ func Test_parseBackendOptions(t *testing.T) {
 						"localhostProfile": "k8s-apparmor-example-deny-write",
 					},
 				},
-				"secretNames": []string{
-					"test-secret",
+				"secrets": []map[string]any{
+					{"name": "test-secret"},
 				},
 			},
 		},
@@ -76,8 +76,8 @@ func Test_parseBackendOptions(t *testing.T) {
 				LocalhostProfile: "k8s-apparmor-example-deny-write",
 			},
 		},
-		SecretNames: []string{
-			"test-secret",
+		Secrets: []SecretRef{
+			{Name: "test-secret"},
 		},
 	}, got)
 }
