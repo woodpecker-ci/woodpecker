@@ -12,6 +12,7 @@
 
 ### 📚 Documentation
 
+- Merge release plugins [[#3752](https://github.com/woodpecker-ci/woodpecker/pull/3752)]
 - Split FAQ [[#3746](https://github.com/woodpecker-ci/woodpecker/pull/3746)]
 
 ### Misc
