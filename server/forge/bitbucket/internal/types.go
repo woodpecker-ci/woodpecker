@@ -113,7 +113,7 @@ type Repo struct {
 	MainBranch struct {
 		Type string `json:"type"`
 		Name string `json:"name"`
-	} `json:"mainbranch"` // cspell:ignore-next mainbranch
+	} `json:"mainbranch"` // cspell:ignore mainbranch
 }
 
 type RepoResp struct {
