@@ -1,4 +1,4 @@
-// Copyright 2023 Woodpecker Authors
+// Copyright 2024 Woodpecker Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package proto
+package woodpeckergo
 
-//go:generate oapi-codegen -package woodpeckergo ../docs/swagger.json > woodpecker/woodpeckergo.gen.go
+//go:generate swagger generate client -f ../docs/swagger.json --target client/
 
-// install oapi-codegen: https://github.com/deepmap/oapi-codegen?tab=readme-ov-file#overview
-// go install github.com/deepmap/oapi-codegen/cmd/oapi-codegen@latest
+// install https://goswagger.io/go-swagger/install/install-source/
+// go install github.com/go-swagger/go-swagger/cmd/swagger@latest
