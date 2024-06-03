@@ -1,5 +1,25 @@
 # Changelog
 
+## [2.6.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.6.0) - 2024-06-03
+
+### ❤️ Thanks to all contributors! ❤️
+
+@qwerty287
+
+### ✨ Features
+
+- Native forgejo support [[#3684](https://github.com/woodpecker-ci/woodpecker/pull/3684)]
+
+### 📚 Documentation
+
+- Split FAQ [[#3746](https://github.com/woodpecker-ci/woodpecker/pull/3746)]
+
+### Misc
+
+- chore(deps): lock file maintenance [[#3750](https://github.com/woodpecker-ci/woodpecker/pull/3750)]
+- chore(deps): update gitea/gitea docker tag to v1.22 [[#3749](https://github.com/woodpecker-ci/woodpecker/pull/3749)]
+- Fix setting name [[#3744](https://github.com/woodpecker-ci/woodpecker/pull/3744)]
+
 ## [2.5.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.5.0) - 2024-06-01
 
 ### ❤️ Thanks to all contributors! ❤️
