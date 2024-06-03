@@ -141,7 +141,7 @@ func convertUser(from *internal.Account, token *oauth2.Token) *model.User {
 	}
 }
 
-// convertTeamList is a helper function used to convert a Bitbucket team list
+// convertWorkspaceList is a helper function used to convert a Bitbucket team list
 // structure to the Woodpecker Team structure.
 func convertWorkspaceList(from []*internal.Workspace) []*model.Team {
 	var teams []*model.Team
@@ -151,7 +151,7 @@ func convertWorkspaceList(from []*internal.Workspace) []*model.Team {
 	return teams
 }
 
-// convertTeam is a helper function used to convert a Bitbucket team account
+// convertWorkspace is a helper function used to convert a Bitbucket team account
 // structure to the Woodpecker Team structure.
 func convertWorkspace(from *internal.Workspace) *model.Team {
 	return &model.Team{
@@ -215,10 +215,10 @@ func convertPushHook(hook *internal.PushHook, change *internal.Change) *model.Pi
 	return pipeline
 }
 
-// regex for git author fields ("name <name@mail.tld>")
+// regex for git author fields (r.g. "name <name@mail.tld>").
 var reGitMail = regexp.MustCompile("<(.*)>")
 
-// extracts the email from a git commit author string
+// extracts the email from a git commit author string.
 func extractEmail(gitauthor string) (author string) {
 	matches := reGitMail.FindAllStringSubmatch(gitauthor, -1)
 	if len(matches) == 1 {

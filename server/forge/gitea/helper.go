@@ -29,7 +29,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/shared/utils"
 )
 
-// helper function that converts a Gitea repository to a Woodpecker repository.
+// toRepo converts a Gitea repository to a Woodpecker repository.
 func toRepo(from *gitea.Repository) *model.Repo {
 	name := strings.Split(from.FullName, "/")[1]
 	avatar := expandAvatar(
@@ -53,7 +53,7 @@ func toRepo(from *gitea.Repository) *model.Repo {
 	}
 }
 
-// helper function that converts a Gitea permission to a Woodpecker permission.
+// toPerm converts a Gitea permission to a Woodpecker permission.
 func toPerm(from *gitea.Permission) *model.Perm {
 	return &model.Perm{
 		Pull:  from.Pull,
@@ -62,7 +62,7 @@ func toPerm(from *gitea.Permission) *model.Perm {
 	}
 }
 
-// helper function that converts a Gitea team to a Woodpecker team.
+// toTeam converts a Gitea team to a Woodpecker team.
 func toTeam(from *gitea.Organization, link string) *model.Team {
 	return &model.Team{
 		Login:  from.UserName,
@@ -70,7 +70,7 @@ func toTeam(from *gitea.Organization, link string) *model.Team {
 	}
 }
 
-// helper function that extracts the Pipeline data from a Gitea push hook
+// pipelineFromPush extracts the Pipeline data from a Gitea push hook.
 func pipelineFromPush(hook *pushHook) *model.Pipeline {
 	avatar := expandAvatar(
 		hook.Repo.HTMLURL,
@@ -121,22 +121,23 @@ func getChangedFilesFromPushHook(hook *pushHook) []string {
 	files = append(files, hook.HeadCommit.Removed...)
 	files = append(files, hook.HeadCommit.Modified...)
 
-	return utils.DedupStrings(files)
+	return utils.DeduplicateStrings(files)
 }
 
-// helper function that extracts the Pipeline data from a Gitea tag hook
+// pipelineFromTag extracts the Pipeline data from a Gitea tag hook.
 func pipelineFromTag(hook *pushHook) *model.Pipeline {
 	avatar := expandAvatar(
 		hook.Repo.HTMLURL,
 		fixMalformedAvatar(hook.Sender.AvatarURL),
 	)
+	ref := strings.TrimPrefix(hook.Ref, "refs/tags/")
 
 	return &model.Pipeline{
 		Event:    model.EventTag,
 		Commit:   hook.Sha,
-		Ref:      fmt.Sprintf("refs/tags/%s", hook.Ref),
-		ForgeURL: fmt.Sprintf("%s/src/tag/%s", hook.Repo.HTMLURL, hook.Ref),
-		Title:    fmt.Sprintf("created tag %s", hook.Ref),
+		Ref:      fmt.Sprintf("refs/tags/%s", ref),
+		ForgeURL: fmt.Sprintf("%s/src/tag/%s", hook.Repo.HTMLURL, ref),
+		Title:    fmt.Sprintf("created tag %s", ref),
 		// TODO: get tag message and title via webhook (gitea change needed)
 		Message:   "", // if empty api will be asked
 		Avatar:    avatar,
@@ -147,7 +148,7 @@ func pipelineFromTag(hook *pushHook) *model.Pipeline {
 	}
 }
 
-// helper function that extracts the Pipeline data from a Gitea pull_request hook
+// pipelineFromPullRequest extracts the Pipeline data from a Gitea pull_request hook.
 func pipelineFromPullRequest(hook *pullRequestHook) *model.Pipeline {
 	avatar := expandAvatar(
 		hook.Repo.HTMLURL,
@@ -202,7 +203,7 @@ func pipelineFromRelease(hook *releaseHook) *model.Pipeline {
 	}
 }
 
-// helper function that parses a push hook from a read closer.
+// parsePush parses a push hook from a read closer.
 func parsePush(r io.Reader) (*pushHook, error) {
 	push := new(pushHook)
 	err := json.NewDecoder(r).Decode(push)
@@ -221,8 +222,7 @@ func parseRelease(r io.Reader) (*releaseHook, error) {
 	return pr, err
 }
 
-// fixMalformedAvatar is a helper function that fixes an avatar url if malformed
-// (currently a known bug with gitea)
+// fixMalformedAvatar fixes an avatar url if malformed (currently a known bug with gitea).
 func fixMalformedAvatar(url string) string {
 	index := strings.Index(url, "///")
 	if index != -1 {
@@ -235,8 +235,7 @@ func fixMalformedAvatar(url string) string {
 	return url
 }
 
-// expandAvatar is a helper function that converts a relative avatar URL to the
-// absolute url.
+// expandAvatar converts a relative avatar URL to the absolute url.
 func expandAvatar(repo, rawurl string) string {
 	aurl, err := url.Parse(rawurl)
 	if err != nil {
@@ -257,7 +256,7 @@ func expandAvatar(repo, rawurl string) string {
 	return aurl.String()
 }
 
-// helper function to return matching hooks.
+// matchingHooks return matching hooks.
 func matchingHooks(hooks []*gitea.Hook, rawurl string) *gitea.Hook {
 	link, err := url.Parse(rawurl)
 	if err != nil {

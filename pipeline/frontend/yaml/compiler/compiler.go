@@ -16,7 +16,6 @@ package compiler
 
 import (
 	"fmt"
-	"path"
 
 	backend_types "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/metadata"
@@ -29,12 +28,11 @@ const (
 	defaultCloneName = "clone"
 )
 
-// Registry represents registry credentials
+// Registry represents registry credentials.
 type Registry struct {
 	Hostname string
 	Username string
 	Password string
-	Token    string
 }
 
 type Secret struct {
@@ -68,7 +66,7 @@ func (s *Secret) Match(event string) bool {
 	if len(s.Events) == 0 {
 		return true
 	}
-	// tread all pull events the same way
+	// treat all pull events the same way
 	if event == "pull_request_closed" {
 		event = "pull_request"
 	}
@@ -82,8 +80,6 @@ func (s *Secret) Match(event string) bool {
 	return false
 }
 
-type secretMap map[string]Secret
-
 type ResourceLimit struct {
 	MemSwapLimit int64
 	MemLimit     int64
@@ -93,7 +89,7 @@ type ResourceLimit struct {
 	CPUSet       string
 }
 
-// Compiler compiles the yaml
+// Compiler compiles the yaml.
 type Compiler struct {
 	local             bool
 	escalated         []string
@@ -106,8 +102,7 @@ type Compiler struct {
 	path              string
 	metadata          metadata.Metadata
 	registries        []Registry
-	secrets           secretMap
-	cacher            Cacher
+	secrets           map[string]Secret
 	reslimit          ResourceLimit
 	defaultCloneImage string
 	trustedPipeline   bool
@@ -179,9 +174,10 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 			cloneSettings["tags"] = "true"
 		}
 		container := &yaml_types.Container{
-			Name:     defaultCloneName,
-			Image:    cloneImage,
-			Settings: cloneSettings,
+			Name:        defaultCloneName,
+			Image:       cloneImage,
+			Settings:    cloneSettings,
+			Environment: make(map[string]any),
 		}
 		for k, v := range c.cloneEnv {
 			container.Environment[k] = v
@@ -221,11 +217,6 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 
 			config.Stages = append(config.Stages, stage)
 		}
-	}
-
-	err := c.setupCache(conf, config)
-	if err != nil {
-		return nil, err
 	}
 
 	// add services steps
@@ -296,48 +287,5 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 
 	config.Stages = append(config.Stages, stepStages...)
 
-	err = c.setupCacheRebuild(conf, config)
-	if err != nil {
-		return nil, err
-	}
-
 	return config, nil
-}
-
-func (c *Compiler) setupCache(conf *yaml_types.Workflow, ir *backend_types.Config) error {
-	if c.local || len(conf.Cache) == 0 || c.cacher == nil {
-		return nil
-	}
-
-	container := c.cacher.Restore(path.Join(c.metadata.Repo.Owner, c.metadata.Repo.Name), c.metadata.Curr.Commit.Branch, conf.Cache)
-	step, err := c.createProcess(container, backend_types.StepTypeCache)
-	if err != nil {
-		return err
-	}
-
-	stage := new(backend_types.Stage)
-	stage.Steps = append(stage.Steps, step)
-
-	ir.Stages = append(ir.Stages, stage)
-
-	return nil
-}
-
-func (c *Compiler) setupCacheRebuild(conf *yaml_types.Workflow, ir *backend_types.Config) error {
-	if c.local || len(conf.Cache) == 0 || c.metadata.Curr.Event != metadata.EventPush || c.cacher == nil {
-		return nil
-	}
-	container := c.cacher.Rebuild(path.Join(c.metadata.Repo.Owner, c.metadata.Repo.Name), c.metadata.Curr.Commit.Branch, conf.Cache)
-
-	step, err := c.createProcess(container, backend_types.StepTypeCache)
-	if err != nil {
-		return err
-	}
-
-	stage := new(backend_types.Stage)
-	stage.Steps = append(stage.Steps, step)
-
-	ir.Stages = append(ir.Stages, stage)
-
-	return nil
 }

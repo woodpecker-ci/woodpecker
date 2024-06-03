@@ -53,7 +53,7 @@ func (s storage) Ping() error {
 	return s.engine.Ping()
 }
 
-// Migrate old storage or init new one
+// Migrate old storage or init new one.
 func (s storage) Migrate(allowLong bool) error {
 	return migration.Migrate(s.engine, allowLong)
 }

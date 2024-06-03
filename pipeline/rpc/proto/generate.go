@@ -16,8 +16,3 @@ package proto
 
 //go:generate protoc --go_out=paths=source_relative:. woodpecker.proto
 //go:generate protoc --go-grpc_out=paths=source_relative:. woodpecker.proto
-
-// install protoc: https://grpc.io/docs/protoc-installation/
-// and get needed binary's:
-// go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
-// go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest

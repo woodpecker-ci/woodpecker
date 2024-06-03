@@ -49,9 +49,9 @@ type (
 		Ports          []string           `yaml:"ports,omitempty"`
 		DependsOn      base.StringOrSlice `yaml:"depends_on,omitempty"`
 
-		// TODO make []string in 3.x
+		// TODO: make []string in 3.x
 		Secrets Secrets `yaml:"secrets,omitempty"`
-		// TODO make map[string]any in 3.x
+		// TODO: make map[string]any in 3.x
 		Environment base.SliceOrMap `yaml:"environment,omitempty"`
 
 		// Docker and Kubernetes Specific

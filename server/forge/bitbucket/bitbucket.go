@@ -17,6 +17,7 @@ package bitbucket
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -38,9 +39,10 @@ import (
 const (
 	DefaultAPI = "https://api.bitbucket.org"
 	DefaultURL = "https://bitbucket.org"
+	pageSize   = 100
 )
 
-// Opts are forge options for bitbucket
+// Opts are forge options for bitbucket.
 type Opts struct {
 	Client string
 	Secret string
@@ -65,12 +67,12 @@ func New(opts *Opts) (forge.Forge, error) {
 	// TODO: add checks
 }
 
-// Name returns the string name of this driver
+// Name returns the string name of this driver.
 func (c *config) Name() string {
 	return "bitbucket"
 }
 
-// URL returns the root url of a configured forge
+// URL returns the root url of a configured forge.
 func (c *config) URL() string {
 	return c.url
 }
@@ -141,7 +143,7 @@ func (c *config) Refresh(ctx context.Context, user *model.User) (bool, error) {
 func (c *config) Teams(ctx context.Context, u *model.User) ([]*model.Team, error) {
 	return shared_utils.Paginate(func(page int) ([]*model.Team, error) {
 		opts := &internal.ListWorkspacesOpts{
-			PageLen: 100,
+			PageLen: pageSize,
 			Page:    page,
 			Role:    "member",
 		}
@@ -190,7 +192,7 @@ func (c *config) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error
 	workspaces, err := shared_utils.Paginate(func(page int) ([]*internal.Workspace, error) {
 		resp, err := client.ListWorkspaces(&internal.ListWorkspacesOpts{
 			Page:    page,
-			PageLen: 100,
+			PageLen: pageSize,
 			Role:    "member",
 		})
 		if err != nil {
@@ -231,12 +233,18 @@ func (c *config) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error
 func (c *config) File(ctx context.Context, u *model.User, r *model.Repo, p *model.Pipeline, f string) ([]byte, error) {
 	config, err := c.newClient(ctx, u).FindSource(r.Owner, r.Name, p.Commit, f)
 	if err != nil {
+		var rspErr internal.Error
+		if ok := errors.As(err, &rspErr); ok && rspErr.Status == http.StatusNotFound {
+			return nil, &forge_types.ErrConfigNotFound{
+				Configs: []string{f},
+			}
+		}
 		return nil, err
 	}
-	return []byte(*config), err
+	return []byte(*config), nil
 }
 
-// Dir fetches a folder from the bitbucket repository
+// Dir fetches a folder from the bitbucket repository.
 func (c *config) Dir(ctx context.Context, u *model.User, r *model.Repo, p *model.Pipeline, f string) ([]*forge_types.FileMeta, error) {
 	var page *string
 	repoPathFiles := []*forge_types.FileMeta{}
@@ -244,6 +252,12 @@ func (c *config) Dir(ctx context.Context, u *model.User, r *model.Repo, p *model
 	for {
 		filesResp, err := client.GetRepoFiles(r.Owner, r.Name, p.Commit, f, page)
 		if err != nil {
+			var rspErr internal.Error
+			if ok := errors.As(err, &rspErr); ok && rspErr.Status == http.StatusNotFound {
+				return nil, &forge_types.ErrConfigNotFound{
+					Configs: []string{f},
+				}
+			}
 			return nil, err
 		}
 		for _, file := range filesResp.Values {
@@ -361,7 +375,7 @@ func (c *config) Branches(ctx context.Context, u *model.User, r *model.Repo, p *
 	return branches, nil
 }
 
-// BranchHead returns the sha of the head (latest commit) of the specified branch
+// BranchHead returns the sha of the head (latest commit) of the specified branch.
 func (c *config) BranchHead(ctx context.Context, u *model.User, r *model.Repo, branch string) (*model.Commit, error) {
 	commit, err := c.newClient(ctx, u).GetBranchHead(r.Owner, r.Name, branch)
 	if err != nil {
@@ -418,7 +432,7 @@ func (c *config) Org(ctx context.Context, u *model.User, owner string) (*model.O
 	}, nil
 }
 
-// helper function to return the bitbucket oauth2 client
+// helper function to return the bitbucket oauth2 client.
 func (c *config) newClient(ctx context.Context, u *model.User) *internal.Client {
 	if u == nil {
 		return c.newClientToken(ctx, "", "")
@@ -426,7 +440,7 @@ func (c *config) newClient(ctx context.Context, u *model.User) *internal.Client 
 	return c.newClientToken(ctx, u.Token, u.Secret)
 }
 
-// helper function to return the bitbucket oauth2 client
+// helper function to return the bitbucket oauth2 client.
 func (c *config) newClientToken(ctx context.Context, token, secret string) *internal.Client {
 	return internal.NewClientToken(
 		ctx,
@@ -440,7 +454,7 @@ func (c *config) newClientToken(ctx context.Context, token, secret string) *inte
 	)
 }
 
-// helper function to return the bitbucket oauth2 config
+// helper function to return the bitbucket oauth2 config.
 func (c *config) newOAuth2Config() *oauth2.Config {
 	return &oauth2.Config{
 		ClientID:     c.Client,

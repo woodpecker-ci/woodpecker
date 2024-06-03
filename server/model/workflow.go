@@ -32,11 +32,7 @@ type Workflow struct {
 	Children   []*Step           `json:"children,omitempty"   xorm:"-"`
 }
 
-type UpdateWorkflowStore interface {
-	WorkflowUpdate(*Workflow) error
-}
-
-// TableName return database table name for xorm
+// TableName return database table name for xorm.
 func (Workflow) TableName() string {
 	return "workflows"
 }
@@ -51,7 +47,7 @@ func (p *Workflow) Failing() bool {
 	return p.State == StatusError || p.State == StatusKilled || p.State == StatusFailure
 }
 
-// IsThereRunningStage determine if it contains workflows running or pending to run
+// IsThereRunningStage determine if it contains workflows running or pending to run.
 // TODO: return false based on depends_on (https://github.com/woodpecker-ci/woodpecker/pull/730#discussion_r795681697)
 func IsThereRunningStage(workflows []*Workflow) bool {
 	for _, p := range workflows {
@@ -62,7 +58,7 @@ func IsThereRunningStage(workflows []*Workflow) bool {
 	return false
 }
 
-// PipelineStatus determine pipeline status based on corresponding workflow list
+// PipelineStatus determine pipeline status based on corresponding workflow list.
 func PipelineStatus(workflows []*Workflow) StatusValue {
 	status := StatusSuccess
 
@@ -75,7 +71,7 @@ func PipelineStatus(workflows []*Workflow) StatusValue {
 	return status
 }
 
-// WorkflowStatus determine workflow status based on corresponding step list
+// WorkflowStatus determine workflow status based on corresponding step list.
 func WorkflowStatus(steps []*Step) StatusValue {
 	status := StatusSuccess
 

@@ -27,26 +27,26 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/version"
 )
 
-// the file implements some basic healthcheck logic based on the
+// The file implements some basic healthcheck logic based on the
 // following specification:
 //   https://github.com/mozilla-services/Dockerflow
 
 func initHealth() {
-	http.HandleFunc("/varz", handleStats)
-	http.HandleFunc("/healthz", handleHeartbeat)
+	http.HandleFunc("/varz", handleStats)        // cspell:words varz
+	http.HandleFunc("/healthz", handleHeartbeat) // cspell:words healthz
 	http.HandleFunc("/version", handleVersion)
 }
 
 func handleHeartbeat(w http.ResponseWriter, _ *http.Request) {
 	if counter.Healthy() {
-		w.WriteHeader(200)
+		w.WriteHeader(http.StatusOK)
 	} else {
-		w.WriteHeader(500)
+		w.WriteHeader(http.StatusInternalServerError)
 	}
 }
 
 func handleVersion(w http.ResponseWriter, _ *http.Request) {
-	w.WriteHeader(200)
+	w.WriteHeader(http.StatusOK)
 	w.Header().Add("Content-Type", "text/json")
 	err := json.NewEncoder(w).Encode(versionResp{
 		Source:  "https://github.com/woodpecker-ci/woodpecker",
@@ -59,9 +59,9 @@ func handleVersion(w http.ResponseWriter, _ *http.Request) {
 
 func handleStats(w http.ResponseWriter, _ *http.Request) {
 	if counter.Healthy() {
-		w.WriteHeader(200)
+		w.WriteHeader(http.StatusOK)
 	} else {
-		w.WriteHeader(500)
+		w.WriteHeader(http.StatusInternalServerError)
 	}
 	w.Header().Add("Content-Type", "text/json")
 	if _, err := counter.WriteTo(w); err != nil {
@@ -74,7 +74,7 @@ type versionResp struct {
 	Source  string `json:"source"`
 }
 
-// default statistics counter
+// Default statistics counter.
 var counter = &agent.State{
 	Metadata: map[string]agent.Info{},
 }
@@ -92,8 +92,8 @@ func pinger(c *cli.Context) error {
 		return err
 	}
 	defer resp.Body.Close()
-	if resp.StatusCode != 200 {
-		return fmt.Errorf("agent returned non-200 status code")
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("agent returned non-http.StatusOK status code")
 	}
 	return nil
 }

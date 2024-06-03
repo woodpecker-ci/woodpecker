@@ -18,7 +18,7 @@ package github
 import (
 	"fmt"
 
-	"github.com/google/go-github/v59/github"
+	"github.com/google/go-github/v62/github"
 
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
@@ -161,7 +161,7 @@ func convertRepoHook(eventRepo *github.PushEventRepository) *model.Repo {
 	return repo
 }
 
-// covertLabels is a helper function used to convert a GitHub label list to
+// convertLabels is a helper function used to convert a GitHub label list to
 // the common Woodpecker label structure.
 func convertLabels(from []*github.Label) []string {
 	labels := make([]string, len(from))

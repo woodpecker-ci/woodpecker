@@ -15,8 +15,6 @@
 package kubernetes
 
 import (
-	"time"
-
 	"github.com/urfave/cli/v2"
 )
 
@@ -48,31 +46,31 @@ var Flags = []cli.Flag{
 	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_BACKEND_K8S_POD_LABELS"},
 		Name:    "backend-k8s-pod-labels",
-		Usage:   "backend k8s additional worker pod labels",
+		Usage:   "backend k8s additional Agent-wide worker pod labels",
 		Value:   "",
+	},
+	&cli.BoolFlag{
+		EnvVars: []string{"WOODPECKER_BACKEND_K8S_POD_LABELS_ALLOW_FROM_STEP"},
+		Name:    "backend-k8s-pod-labels-allow-from-step",
+		Usage:   "whether to allow using labels from step's backend options",
+		Value:   false,
 	},
 	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_BACKEND_K8S_POD_ANNOTATIONS"},
 		Name:    "backend-k8s-pod-annotations",
-		Usage:   "backend k8s additional worker pod annotations",
+		Usage:   "backend k8s additional Agent-wide worker pod annotations",
 		Value:   "",
 	},
 	&cli.BoolFlag{
-		EnvVars: []string{"WOODPECKER_BACKEND_K8S_SECCTX_NONROOT"},
+		EnvVars: []string{"WOODPECKER_BACKEND_K8S_POD_ANNOTATIONS_ALLOW_FROM_STEP"},
+		Name:    "backend-k8s-pod-annotations-allow-from-step",
+		Usage:   "whether to allow using annotations from step's backend options",
+		Value:   false,
+	},
+	&cli.BoolFlag{
+		EnvVars: []string{"WOODPECKER_BACKEND_K8S_SECCTX_NONROOT"}, // cspell:words secctx nonroot
 		Name:    "backend-k8s-secctx-nonroot",
 		Usage:   "`run as non root` Kubernetes security context option",
-	},
-	&cli.IntFlag{
-		EnvVars: []string{"WOODPECKER_CONNECT_RETRY_COUNT"},
-		Name:    "connect-retry-count",
-		Usage:   "number of times to retry connecting to the server",
-		Value:   5,
-	},
-	&cli.DurationFlag{
-		EnvVars: []string{"WOODPECKER_CONNECT_RETRY_DELAY"},
-		Name:    "connect-retry-delay",
-		Usage:   "duration to wait before retrying to connect to the server",
-		Value:   time.Second * 2,
 	},
 	&cli.StringSliceFlag{
 		EnvVars: []string{"WOODPECKER_BACKEND_K8S_PULL_SECRET_NAMES"},

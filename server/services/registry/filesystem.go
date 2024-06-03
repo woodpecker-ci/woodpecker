@@ -97,7 +97,7 @@ func (f *filesystem) RegistryList(_ *model.Repo, p *model.ListOptions) ([]*model
 	return model.ApplyPagination(p, regs), nil
 }
 
-// decodeAuth decodes a base64 encoded string and returns username and password
+// decodeAuth decodes a base64 encoded string and returns username and password.
 func decodeAuth(authStr string) (string, string, error) {
 	if authStr == "" {
 		return "", "", nil
@@ -113,10 +113,10 @@ func decodeAuth(authStr string) (string, string, error) {
 	if n > decLen {
 		return "", "", fmt.Errorf("something went wrong decoding auth config")
 	}
-	arr := strings.SplitN(string(decoded), ":", 2)
-	if len(arr) != 2 {
+	before, after, _ := strings.Cut(string(decoded), ":")
+	if before == "" || after == "" {
 		return "", "", fmt.Errorf("invalid auth configuration file")
 	}
-	password := strings.Trim(arr[1], "\x00")
-	return arr[0], password, nil
+	password := strings.Trim(after, "\x00")
+	return before, password, nil
 }
