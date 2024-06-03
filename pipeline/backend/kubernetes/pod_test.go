@@ -332,7 +332,7 @@ func TestFullPod(t *testing.T) {
 		PodLabelsAllowFromStep:      true,
 		PodAnnotations:              map[string]string{"apps.kubernetes.io/pod-index": "0"},
 		PodAnnotationsAllowFromStep: true,
-    PodNodeSelector:             map[string]string{"topology.kubernetes.io/region": "eu-central-1"},
+		PodNodeSelector:             map[string]string{"topology.kubernetes.io/region": "eu-central-1"},
 		SecurityContext:             SecurityContextConfig{RunAsNonRoot: false},
 	}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{
 		Labels:             map[string]string{"part-of": "woodpecker-ci"},

@@ -331,7 +331,7 @@ func resourceList(resources map[string]string) (v1.ResourceList, error) {
 	return requestResources, nil
 }
 
-func nodeSelector(backendNodeSelector map[string]string, configNodeSelector map[string]string, platform string) map[string]string {
+func nodeSelector(backendNodeSelector, configNodeSelector map[string]string, platform string) map[string]string {
 	nodeSelector := make(map[string]string)
 
 	if platform != "" {
