@@ -16,9 +16,6 @@
   <a href="https://translate.woodpecker-ci.org/engage/woodpecker-ci/">
     <img src="https://translate.woodpecker-ci.org/widgets/woodpecker-ci/-/ui/svg-badge.svg" alt="Translation status" />
   </a>
-  <a href="https://discord.gg/fcMQqSMXJy" title="Join the Discord chat at https://discord.gg/fcMQqSMXJy">
-    <img src="https://img.shields.io/discord/838698813463724034.svg?label=discord" alt="Discord chat">
-  </a>
   <a href="https://matrix.to/#/#woodpecker:matrix.org" title="Join the Matrix space at https://matrix.to/#/#woodpecker:matrix.org">
     <img src="https://img.shields.io/matrix/woodpecker:matrix.org?label=matrix" alt="Matrix space">
   </a>
@@ -76,7 +73,7 @@ We use an own [Weblate](https://weblate.org/en/) instance at [translate.woodpeck
 
 ## 👋 Who uses Woodpecker?
 
-Woodpecker is used by [itself](https://ci.woodpecker-ci.org/woodpecker/woodpecker-ci/) multiple well-known companies, organizations like [Codeberg](https://codeberg.org), hobbyist and many others.
+Woodpecker is used by [itself](https://ci.woodpecker-ci.org/woodpecker/woodpecker-ci/), multiple well-known companies, organizations like [Codeberg](https://codeberg.org), hobbyists and many others.
 
 Leave a [comment](https://github.com/woodpecker-ci/woodpecker/discussions/2149) if you're using it as well.
 

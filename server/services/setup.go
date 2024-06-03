@@ -21,6 +21,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v2"
@@ -56,19 +57,23 @@ func setupSecretService(store store.Store) secret.Service {
 	return secret.NewDB(store)
 }
 
-func setupConfigService(c *cli.Context, privateSignatureKey crypto.PrivateKey) config.Service {
+func setupConfigService(c *cli.Context, privateSignatureKey crypto.PrivateKey) (config.Service, error) {
 	timeout := c.Duration("forge-timeout")
-	configFetcher := config.NewForge(timeout)
+	retries := c.Uint("forge-retry")
+	if retries == 0 {
+		return nil, fmt.Errorf("WOODPECKER_FORGE_RETRY can not be 0")
+	}
+	configFetcher := config.NewForge(timeout, retries)
 
 	if endpoint := c.String("config-service-endpoint"); endpoint != "" {
 		httpFetcher := config.NewHTTP(endpoint, privateSignatureKey)
-		return config.NewCombined(configFetcher, httpFetcher)
+		return config.NewCombined(configFetcher, httpFetcher), nil
 	}
 
-	return configFetcher
+	return configFetcher, nil
 }
 
-// setupSignatureKeys generate or load key pair to sign webhooks requests (i.e. used for service extensions)
+// setupSignatureKeys generate or load key pair to sign webhooks requests (i.e. used for service extensions).
 func setupSignatureKeys(_store store.Store) (crypto.PrivateKey, crypto.PublicKey, error) {
 	privKeyID := "signature-private-key"
 
@@ -110,10 +115,11 @@ func setupForgeService(c *cli.Context, _store store.Store) error {
 		_forge.AdditionalOptions = make(map[string]any)
 	}
 
-	_forge.Client = c.String("forge-oauth-client")
-	_forge.ClientSecret = c.String("forge-oauth-secret")
+	_forge.Client = strings.TrimSpace(c.String("forge-oauth-client"))
+	_forge.ClientSecret = strings.TrimSpace(c.String("forge-oauth-secret"))
 	_forge.URL = c.String("forge-url")
 	_forge.SkipVerify = c.Bool("forge-skip-verify")
+	_forge.OAuthHost = c.String("forge-oauth-host")
 
 	switch {
 	case c.String("addon-forge") != "":
@@ -133,9 +139,14 @@ func setupForgeService(c *cli.Context, _store store.Store) error {
 		}
 	case c.Bool("gitea"):
 		_forge.Type = model.ForgeTypeGitea
-		_forge.AdditionalOptions["oauth-server"] = c.String("gitea-oauth-server")
 		if _forge.URL == "" {
 			_forge.URL = "https://try.gitea.com"
+		}
+	case c.Bool("forgejo"):
+		_forge.Type = model.ForgeTypeForgejo
+		// TODO enable oauth URL with generic config option
+		if _forge.URL == "" {
+			_forge.URL = "https://next.forgejo.org"
 		}
 	case c.Bool("bitbucket"):
 		_forge.Type = model.ForgeTypeBitbucket

@@ -38,12 +38,7 @@ var flags = append([]cli.Flag{
 	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_HOST"},
 		Name:    "server-host",
-		Usage:   "server fully qualified url (<scheme>://<host>[/<prefixpath>])",
-	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_WEBHOOK_HOST"},
-		Name:    "server-webhook-host",
-		Usage:   "server fully qualified url for forge's Webhooks (<scheme>://<host>[/<prefixpath>])",
+		Usage:   "server fully qualified url. Format: <scheme>://<host>[/<prefixpath>]",
 	},
 	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_SERVER_ADDR"},
@@ -273,6 +268,12 @@ var flags = append([]cli.Flag{
 		Usage:   "how many seconds before timeout when fetching the Woodpecker configuration from a Forge",
 		Value:   time.Second * 3,
 	},
+	&cli.UintFlag{
+		EnvVars: []string{"WOODPECKER_FORGE_RETRY"},
+		Name:    "forge-retry",
+		Usage:   "How many retries of fetching the Woodpecker configuration from a forge are done before we fail",
+		Value:   3,
+	},
 	&cli.Int64Flag{
 		EnvVars: []string{"WOODPECKER_LIMIT_MEM_SWAP"},
 		Name:    "limit-mem-swap",
@@ -307,22 +308,29 @@ var flags = append([]cli.Flag{
 	&cli.StringFlag{
 		Name:    "forge-url",
 		Usage:   "url of the forge",
-		EnvVars: []string{"WOODPECKER_FORGE_URL", "WOODPECKER_GITHUB_URL", "WOODPECKER_GITLAB_URL", "WOODPECKER_GITEA_URL", "WOODPECKER_BITBUCKET_URL"},
+		EnvVars: []string{"WOODPECKER_FORGE_URL", "WOODPECKER_GITHUB_URL", "WOODPECKER_GITLAB_URL", "WOODPECKER_GITEA_URL", "WOODPECKER_FORGEJO_URL", "WOODPECKER_BITBUCKET_URL"},
 	},
 	&cli.StringFlag{
-		Name:    "forge-oauth-client",
-		Usage:   "oauth2 client id",
-		EnvVars: []string{"WOODPECKER_FORGE_CLIENT", "WOODPECKER_GITHUB_CLIENT", "WOODPECKER_GITLAB_CLIENT", "WOODPECKER_GITEA_CLIENT", "WOODPECKER_BITBUCKET_CLIENT", "WOODPECKER_BITBUCKET_DC_CLIENT_ID"},
+		Name:     "forge-oauth-client",
+		Usage:    "oauth2 client id",
+		EnvVars:  []string{"WOODPECKER_FORGE_CLIENT", "WOODPECKER_GITHUB_CLIENT", "WOODPECKER_GITLAB_CLIENT", "WOODPECKER_GITEA_CLIENT", "WOODPECKER_FORGEJO_CLIENT", "WOODPECKER_BITBUCKET_CLIENT", "WOODPECKER_BITBUCKET_DC_CLIENT_ID"},
+		FilePath: getFirstNonEmptyEnvVar([]string{"WOODPECKER_FORGE_CLIENT_FILE", "WOODPECKER_GITHUB_CLIENT_FILE", "WOODPECKER_GITLAB_CLIENT_FILE", "WOODPECKER_GITEA_CLIENT_FILE", "WOODPECKER_FORGEJO_CLIENT_FILE", "WOODPECKER_BITBUCKET_CLIENT_FILE", "WOODPECKER_BITBUCKET_DC_CLIENT_ID_FILE"}),
 	},
 	&cli.StringFlag{
-		Name:    "forge-oauth-secret",
-		Usage:   "oauth2 client secret",
-		EnvVars: []string{"WOODPECKER_FORGE_SECRET", "WOODPECKER_GITHUB_SECRET", "WOODPECKER_GITLAB_SECRET", "WOODPECKER_GITEA_SECRET", "WOODPECKER_BITBUCKET_SECRET", "WOODPECKER_BITBUCKET_DC_CLIENT_SECRET"},
+		Name:     "forge-oauth-secret",
+		Usage:    "oauth2 client secret",
+		EnvVars:  []string{"WOODPECKER_FORGE_SECRET", "WOODPECKER_GITHUB_SECRET", "WOODPECKER_GITLAB_SECRET", "WOODPECKER_GITEA_SECRET", "WOODPECKER_FORGEJO_SECRET", "WOODPECKER_BITBUCKET_SECRET", "WOODPECKER_BITBUCKET_DC_CLIENT_SECRET"},
+		FilePath: getFirstNonEmptyEnvVar([]string{"WOODPECKER_FORGE_SECRET_FILE", "WOODPECKER_GITHUB_SECRET_FILE", "WOODPECKER_GITLAB_SECRET_FILE", "WOODPECKER_GITEA_SECRET_FILE", "WOODPECKER_FORGEJO_SECRET_FILE", "WOODPECKER_BITBUCKET_SECRET_FILE", "WOODPECKER_BITBUCKET_DC_CLIENT_SECRET_FILE"}),
 	},
 	&cli.BoolFlag{
 		Name:    "forge-skip-verify",
 		Usage:   "skip ssl verification",
-		EnvVars: []string{"WOODPECKER_FORGE_SKIP_VERIFY", "WOODPECKER_GITHUB_SKIP_VERIFY", "WOODPECKER_GITLAB_SKIP_VERIFY", "WOODPECKER_GITEA_SKIP_VERIFY", "WOODPECKER_BITBUCKET_SKIP_VERIFY"},
+		EnvVars: []string{"WOODPECKER_FORGE_SKIP_VERIFY", "WOODPECKER_GITHUB_SKIP_VERIFY", "WOODPECKER_GITLAB_SKIP_VERIFY", "WOODPECKER_GITEA_SKIP_VERIFY", "WOODPECKER_FORGEJO_SKIP_VERIFY", "WOODPECKER_BITBUCKET_SKIP_VERIFY"},
+	},
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_EXPERT_FORGE_OAUTH_HOST", "WOODPECKER_DEV_GITEA_OAUTH_URL"}, // TODO: remove WOODPECKER_DEV_GITEA_OAUTH_URL in next major release
+		Name:    "forge-oauth-host",
+		Usage:   "!!!for experts!!! fully qualified public forge url. Use it if your forge url WOODPECKER_FORGE_URL or WOODPECKER_GITEA_URL, ... isn't a public url. Format: <scheme>://<host>[/<prefixpath>]",
 	},
 	//
 	// Addon
@@ -360,10 +368,13 @@ var flags = append([]cli.Flag{
 		Name:    "gitea",
 		Usage:   "gitea driver is enabled",
 	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_DEV_GITEA_OAUTH_URL"},
-		Name:    "gitea-oauth-server",
-		Usage:   "user-facing gitea server url for oauth",
+	//
+	// Forgejo
+	//
+	&cli.BoolFlag{
+		EnvVars: []string{"WOODPECKER_FORGEJO"},
+		Name:    "forgejo",
+		Usage:   "forgejo driver is enabled",
 	},
 	//
 	// Bitbucket
@@ -410,10 +421,19 @@ var flags = append([]cli.Flag{
 		Usage:   "serve the website by using a proxy (used for development)",
 		Hidden:  true,
 	},
+	//
+	// expert flags
+	//
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_EXPERT_WEBHOOK_HOST", "WOODPECKER_WEBHOOK_HOST"}, // TODO: remove WOODPECKER_WEBHOOK_HOST in next major release
+		Name:    "server-webhook-host",
+		Usage:   "!!!for experts!!! fully qualified woodpecker server url called by forge's webhooks. Format: <scheme>://<host>[/<prefixpath>]",
+	},
+	// TODO: remove in next major release
 	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_DEV_OAUTH_HOST"},
-		Name:    "server-dev-oauth-host",
-		Usage:   "server fully qualified url (<scheme>://<host>[/<prefixpath>]) used for oauth redirect (used for development)",
+		Name:    "server-dev-oauth-host-deprecated",
+		Usage:   "DEPRECATED: use WOODPECKER_EXPERT_FORGE_OAUTH_HOST instead\nfully qualified url used for oauth redirects. Format: <scheme>://<host>[/<prefixpath>]",
 		Value:   "",
 		Hidden:  true,
 	},
@@ -446,4 +466,14 @@ func datasourceDefaultValue() string {
 		return "/var/lib/woodpecker/woodpecker.sqlite"
 	}
 	return "woodpecker.sqlite"
+}
+
+func getFirstNonEmptyEnvVar(envVars []string) string {
+	for _, envVar := range envVars {
+		val := os.Getenv(envVar)
+		if val != "" {
+			return val
+		}
+	}
+	return ""
 }

@@ -32,7 +32,7 @@ import (
 
 // GetSelf
 //
-//	@Summary	Returns the currently authenticated user.
+//	@Summary	Get the currently authenticated user
 //	@Router		/user [get]
 //	@Produce	json
 //	@Success	200	{object}	User
@@ -44,11 +44,11 @@ func GetSelf(c *gin.Context) {
 
 // GetFeed
 //
-//	@Summary		A feed entry for a build.
-//	@Description	Feed entries can be used to display information on the latest builds.
+//	@Summary		Get the currently authenticated users pipeline feed
+//	@Description	The feed lists the most recent pipeline for the currently authenticated user.
 //	@Router			/user/feed [get]
 //	@Produce		json
-//	@Success		200	{object}	Feed
+//	@Success		200	{array}	Feed
 //	@Tags			User
 //	@Param			Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 func GetFeed(c *gin.Context) {
@@ -77,7 +77,7 @@ func GetFeed(c *gin.Context) {
 
 // GetRepos
 //
-//	@Summary		Get user's repos
+//	@Summary		Get user's repositories
 //	@Description	Retrieve the currently authenticated User's Repository list
 //	@Router			/user/repos [get]
 //	@Produce		json
@@ -153,7 +153,9 @@ func GetRepos(c *gin.Context) {
 //	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 func PostToken(c *gin.Context) {
 	user := session.User(c)
-	tokenString, err := token.New(token.UserToken, user.Login).Sign(user.Hash)
+	t := token.New(token.UserToken)
+	t.Set("user-id", strconv.FormatInt(user.ID, 10))
+	tokenString, err := t.Sign(user.Hash)
 	if err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
@@ -182,7 +184,9 @@ func DeleteToken(c *gin.Context) {
 		return
 	}
 
-	tokenString, err := token.New(token.UserToken, user.Login).Sign(user.Hash)
+	t := token.New(token.UserToken)
+	t.Set("user-id", strconv.FormatInt(user.ID, 10))
+	tokenString, err := t.Sign(user.Hash)
 	if err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return

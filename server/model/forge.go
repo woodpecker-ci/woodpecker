@@ -20,6 +20,7 @@ const (
 	ForgeTypeGithub              ForgeType = "github"
 	ForgeTypeGitlab              ForgeType = "gitlab"
 	ForgeTypeGitea               ForgeType = "gitea"
+	ForgeTypeForgejo             ForgeType = "forgejo"
 	ForgeTypeBitbucket           ForgeType = "bitbucket"
 	ForgeTypeBitbucketDatacenter ForgeType = "bitbucket-dc"
 	ForgeTypeAddon               ForgeType = "addon"
@@ -32,5 +33,6 @@ type Forge struct {
 	Client            string         `xorm:"VARCHAR(250)"`
 	ClientSecret      string         `xorm:"VARCHAR(250)"`
 	SkipVerify        bool           `xorm:"bool"`
+	OAuthHost         string         `xorm:"VARCHAR(250) 'oauth_host'"` // public url for oauth if different from url
 	AdditionalOptions map[string]any `xorm:"json"`
 }

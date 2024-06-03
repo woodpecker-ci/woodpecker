@@ -11,7 +11,7 @@ import (
 
 const tarDirectoryMode fs.FileMode = 0x755
 
-func Untar(dst string, r io.Reader) error {
+func UnTar(dst string, r io.Reader) error {
 	gzr, err := gzip.NewReader(r)
 	if err != nil {
 		return err

@@ -20,6 +20,8 @@ func Test_parseBackendOptions(t *testing.T) {
 			"kubernetes": map[string]any{
 				"nodeSelector":       map[string]string{"storage": "ssd"},
 				"serviceAccountName": "wp-svc-acc",
+				"labels":             map[string]string{"app": "test"},
+				"annotations":        map[string]string{"apps.kubernetes.io/pod-index": "0"},
 				"tolerations": []map[string]any{
 					{"key": "net-port", "value": "100Mbit", "effect": TaintEffectNoSchedule},
 				},
@@ -52,6 +54,8 @@ func Test_parseBackendOptions(t *testing.T) {
 	assert.Equal(t, BackendOptions{
 		NodeSelector:       map[string]string{"storage": "ssd"},
 		ServiceAccountName: "wp-svc-acc",
+		Labels:             map[string]string{"app": "test"},
+		Annotations:        map[string]string{"apps.kubernetes.io/pod-index": "0"},
 		Tolerations:        []Toleration{{Key: "net-port", Value: "100Mbit", Effect: TaintEffectNoSchedule}},
 		Resources: Resources{
 			Requests: map[string]string{"memory": "128Mi", "cpu": "1000m"},
