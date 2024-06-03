@@ -1,0 +1,155 @@
+// Copyright 2022 Woodpecker Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+package woodpecker
+
+import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"io"
+	"net/http"
+	"net/url"
+	"strconv"
+	"strings"
+)
+
+const (
+	pathLogLevel = "%s/api/log-level"
+
+	//nolint:godot
+	// TODO: implement endpoints
+	// pathFeed           = "%s/api/user/feed"
+	// pathVersion        = "%s/version"
+)
+
+type client struct {
+	client *http.Client
+	addr   string
+}
+
+// New returns a client at the specified url.
+func New(uri string) Client {
+	return &client{http.DefaultClient, strings.TrimSuffix(uri, "/")}
+}
+
+// NewClient returns a client at the specified url.
+func NewClient(uri string, cli *http.Client) Client {
+	return &client{cli, strings.TrimSuffix(uri, "/")}
+}
+
+// SetClient sets the http.Client.
+func (c *client) SetClient(client *http.Client) {
+	c.client = client
+}
+
+// SetAddress sets the server address.
+func (c *client) SetAddress(addr string) {
+	c.addr = addr
+}
+
+// LogLevel returns the current logging level.
+func (c *client) LogLevel() (*LogLevel, error) {
+	out := new(LogLevel)
+	uri := fmt.Sprintf(pathLogLevel, c.addr)
+	err := c.get(uri, out)
+	return out, err
+}
+
+// SetLogLevel sets the logging level of the server.
+func (c *client) SetLogLevel(in *LogLevel) (*LogLevel, error) {
+	out := new(LogLevel)
+	uri := fmt.Sprintf(pathLogLevel, c.addr)
+	err := c.post(uri, in, out)
+	return out, err
+}
+
+//
+// HTTP request helper functions.
+//
+
+// Helper function for making an http GET request.
+func (c *client) get(rawurl string, out any) error {
+	return c.do(rawurl, http.MethodGet, nil, out)
+}
+
+// Helper function for making an http POST request.
+func (c *client) post(rawurl string, in, out any) error {
+	return c.do(rawurl, http.MethodPost, in, out)
+}
+
+// Helper function for making an http PATCH request.
+func (c *client) patch(rawurl string, in, out any) error {
+	return c.do(rawurl, http.MethodPatch, in, out)
+}
+
+// Helper function for making an http DELETE request.
+func (c *client) delete(rawurl string) error {
+	return c.do(rawurl, http.MethodDelete, nil, nil)
+}
+
+// Helper function to make an http request.
+func (c *client) do(rawurl, method string, in, out any) error {
+	body, err := c.open(rawurl, method, in)
+	if err != nil {
+		return err
+	}
+	defer body.Close()
+	if out != nil {
+		return json.NewDecoder(body).Decode(out)
+	}
+	return nil
+}
+
+// Helper function to open an http request.
+func (c *client) open(rawurl, method string, in any) (io.ReadCloser, error) {
+	uri, err := url.Parse(rawurl)
+	if err != nil {
+		return nil, err
+	}
+	req, err := http.NewRequest(method, uri.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+	if in != nil {
+		decoded, decodeErr := json.Marshal(in)
+		if decodeErr != nil {
+			return nil, decodeErr
+		}
+		buf := bytes.NewBuffer(decoded)
+		req.Body = io.NopCloser(buf)
+		req.ContentLength = int64(len(decoded))
+		req.Header.Set("Content-Length", strconv.Itoa(len(decoded)))
+		req.Header.Set("Content-Type", "application/json")
+	}
+	resp, err := c.client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	if resp.StatusCode > http.StatusPartialContent {
+		defer resp.Body.Close()
+		out, _ := io.ReadAll(resp.Body)
+		return nil, fmt.Errorf("client error %d: %s", resp.StatusCode, string(out))
+	}
+	return resp.Body, nil
+}
+
+// mapValues converts a map to `url.Values`.
+func mapValues(params map[string]string) url.Values {
+	values := url.Values{}
+	for key, val := range params {
+		values.Add(key, val)
+	}
+	return values
+}
