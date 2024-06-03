@@ -118,7 +118,7 @@ type Repo struct {
 
 type RepoResp struct {
 	Page   int     `json:"page"`
-	Pages  int     `json:"pagelen"` // cspell:disable-line
+	Pages  int     `json:"pagelen"`
 	Size   int     `json:"size"`
 	Next   string  `json:"next"`
 	Values []*Repo `json:"values"`
