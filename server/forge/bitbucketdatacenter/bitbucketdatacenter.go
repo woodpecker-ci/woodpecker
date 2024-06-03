@@ -96,7 +96,7 @@ func (c *client) URL() string {
 func (c *client) Login(ctx context.Context, req *forge_types.OAuthRequest) (*model.User, string, error) {
 	config := c.newOAuth2Config()
 
-	// TODO: Add proper state and pkce... // cspell:disable-line // TODO: what is "pkce?!?"
+	// TODO: Add proper state and pkce (https://oauth.net/2/pkce/) ...
 	redirectURL := config.AuthCodeURL("woodpecker")
 
 	if req.Error != "" {
