@@ -16,8 +16,6 @@ You can add more agents to increase the number of parallel workflows or set the 
 
 Woodpecker is having two different kinds of releases: **stable** and **next**.
 
-To find out more about the differences between the two releases, please read the [FAQ](/faq#which-version-of-woodpecker-should-i-use).
-
 ## Hardware Requirements
 
 Below are minimal resources requirements for Woodpecker components itself:
