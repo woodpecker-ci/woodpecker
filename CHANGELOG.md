@@ -4,11 +4,15 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@qwerty287
+@qwerty287, @zc-devs
 
 ### ✨ Features
 
 - Native forgejo support [[#3684](https://github.com/woodpecker-ci/woodpecker/pull/3684)]
+
+### 📈 Enhancement
+
+- Agent-wide node selector [[#3608](https://github.com/woodpecker-ci/woodpecker/pull/3608)]
 
 ### 📚 Documentation
 
