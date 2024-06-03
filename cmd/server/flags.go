@@ -114,7 +114,7 @@ var flags = append([]cli.Flag{
 	&cli.StringSliceFlag{
 		EnvVars: []string{"WOODPECKER_REPO_OWNERS"},
 		Name:    "repo-owners",
-		Usage:   "List of sync capable repo owners",
+		Usage:   "Repositories by those owners will be allowed to be used in woodpecker",
 	},
 	&cli.BoolFlag{
 		EnvVars: []string{"WOODPECKER_OPEN"},
@@ -277,7 +277,7 @@ var flags = append([]cli.Flag{
 	&cli.Int64Flag{
 		EnvVars: []string{"WOODPECKER_LIMIT_MEM_SWAP"},
 		Name:    "limit-mem-swap",
-		Usage:   "maximum memory allowed to swap in bytes",
+		Usage:   "maximum memory used for swap in bytes",
 	},
 	&cli.Int64Flag{
 		EnvVars: []string{"WOODPECKER_LIMIT_MEM"},
