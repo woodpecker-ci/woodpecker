@@ -3598,7 +3598,7 @@ const docTemplate = `{
                 "tags": [
                     "User"
                 ],
-                "summary": "Get the currently authenticaed users pipeline feed",
+                "summary": "Get the currently authenticated users pipeline feed",
                 "parameters": [
                     {
                         "type": "string",

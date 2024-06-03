@@ -35,30 +35,28 @@ const config: Config = {
           position: 'left',
           label: 'Plugins',
         },
-        {
-          to: '/docs/next/migrations', // Always point to newest migration guide
-          activeBaseRegex: 'docs/(next/)?migrations',
-          position: 'left',
-          label: 'Migrations',
-        },
-        {
-          to: '/faq',
-          position: 'left',
-          label: 'FAQ',
-        },
-        {
-          to: '/docs/next/awesome', // Always point to newest awesome list
-          activeBaseRegex: 'docs/(next/)?awesome',
-          position: 'left',
-          label: 'Awesome',
-        },
-        {
-          to: '/api',
-          position: 'left',
-          label: 'API',
-        },
         { to: 'blog', label: 'Blog', position: 'left' },
-        { to: 'cookbook', label: 'Cookbook', position: 'left' },
+        {
+          label: 'More Resources',
+          position: 'left',
+          items: [
+            {
+              to: '/docs/next/migrations', // Always point to newest migration guide
+              activeBaseRegex: 'docs/(next/)?migrations',
+              label: 'Migrations',
+            },
+            {
+              to: '/docs/next/awesome', // Always point to newest awesome list
+              activeBaseRegex: 'docs/(next/)?awesome',
+              label: 'Awesome',
+            },
+            {
+              to: '/api',
+              label: 'API',
+            },
+            { to: 'cookbook', label: 'Cookbook' },
+          ],
+        },
         {
           type: 'docsVersionDropdown',
           position: 'right',
@@ -93,10 +91,6 @@ const config: Config = {
             {
               label: 'Server setup',
               to: '/docs/administration/deployment/overview',
-            },
-            {
-              label: 'FAQ',
-              to: '/faq',
             },
           ],
         },
@@ -207,7 +201,7 @@ const config: Config = {
               webSocketURL: 'auto://0.0.0.0:0/ws',
             },
           },
-        };
+        } as any;
       },
     }),
     [
@@ -243,14 +237,20 @@ const config: Config = {
           sidebarPath: require.resolve('./sidebars.js'),
           editUrl: 'https://github.com/woodpecker-ci/woodpecker/edit/main/docs/',
           includeCurrentVersion: true,
-          lastVersion: '2.4',
+          lastVersion: '2.5',
+          onlyIncludeVersions:
+            process.env.NODE_ENV === 'development' ? ['current', '2.5'] : ['current', '2.5', '2.4', '2.3', '1.0'],
           versions: {
             current: {
               label: 'Next',
               banner: 'unreleased',
             },
+            '2.5': {
+              label: '2.5.x',
+            },
             '2.4': {
               label: '2.4.x',
+              banner: 'unmaintained',
             },
             '2.3': {
               label: '2.3.x',
