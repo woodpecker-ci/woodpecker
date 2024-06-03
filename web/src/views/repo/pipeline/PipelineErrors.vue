@@ -1,7 +1,7 @@
 <template>
   <Panel>
     <div class="grid justify-center gap-x-4 text-left grid-3-1">
-      <template v-for="(error, i) in pipeline.errors" :key="i">
+      <template v-for="(error, i) in pipeline!.errors" :key="i">
         <Icon
           name="attention"
           class="flex-shrink-0 my-1"
