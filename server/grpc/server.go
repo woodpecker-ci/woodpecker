@@ -19,7 +19,7 @@ import (
 	"encoding/json"
 
 	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promauto"
+	prometheus_auto "github.com/prometheus/client_golang/prometheus/promauto"
 
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc/proto"
@@ -37,12 +37,12 @@ type WoodpeckerServer struct {
 }
 
 func NewWoodpeckerServer(queue queue.Queue, logger logging.Log, pubsub *pubsub.Publisher, store store.Store) proto.WoodpeckerServer {
-	pipelineTime := promauto.NewGaugeVec(prometheus.GaugeOpts{
+	pipelineTime := prometheus_auto.NewGaugeVec(prometheus.GaugeOpts{
 		Namespace: "woodpecker",
 		Name:      "pipeline_time",
 		Help:      "Pipeline time.",
 	}, []string{"repo", "branch", "status", "pipeline"})
-	pipelineCount := promauto.NewCounterVec(prometheus.CounterOpts{
+	pipelineCount := prometheus_auto.NewCounterVec(prometheus.CounterOpts{
 		Namespace: "woodpecker",
 		Name:      "pipeline_count",
 		Help:      "Pipeline count.",

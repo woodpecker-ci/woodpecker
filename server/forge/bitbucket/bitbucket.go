@@ -204,13 +204,13 @@ func (c *config) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error
 		return nil, err
 	}
 
-	userPermisions, err := client.ListPermissionsAll()
+	userPermissions, err := client.ListPermissionsAll()
 	if err != nil {
 		return nil, err
 	}
 
 	userPermissionsByRepo := make(map[string]*internal.RepoPerm)
-	for _, permission := range userPermisions {
+	for _, permission := range userPermissions {
 		userPermissionsByRepo[permission.Repo.FullName] = permission
 	}
 
@@ -313,7 +313,7 @@ func (c *config) Status(ctx context.Context, user *model.User, repo *model.Repo,
 // the Bitbucket repository. Prior to registering hook, previously created hooks
 // are deleted.
 func (c *config) Activate(ctx context.Context, u *model.User, r *model.Repo, link string) error {
-	rawurl, err := url.Parse(link)
+	rawURL, err := url.Parse(link)
 	if err != nil {
 		return err
 	}
@@ -321,7 +321,7 @@ func (c *config) Activate(ctx context.Context, u *model.User, r *model.Repo, lin
 
 	return c.newClient(ctx, u).CreateHook(r.Owner, r.Name, &internal.Hook{
 		Active: true,
-		Desc:   rawurl.Host,
+		Desc:   rawURL.Host,
 		Events: []string{"repo:push", "pullrequest:created"},
 		URL:    link,
 	})
@@ -468,14 +468,14 @@ func (c *config) newOAuth2Config() *oauth2.Config {
 }
 
 // helper function to return matching hooks.
-func matchingHooks(hooks []*internal.Hook, rawurl string) *internal.Hook {
-	link, err := url.Parse(rawurl)
+func matchingHooks(hooks []*internal.Hook, rawURL string) *internal.Hook {
+	link, err := url.Parse(rawURL)
 	if err != nil {
 		return nil
 	}
 	for _, hook := range hooks {
-		hookurl, err := url.Parse(hook.URL)
-		if err == nil && hookurl.Host == link.Host {
+		hookURL, err := url.Parse(hook.URL)
+		if err == nil && hookURL.Host == link.Host {
 			return hook
 		}
 	}

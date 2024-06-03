@@ -20,6 +20,8 @@ import (
 	"time"
 )
 
+// cspell:words pagelen
+
 type Account struct {
 	UUID  string `json:"uuid"`
 	Login string `json:"username"`
@@ -108,15 +110,15 @@ type Repo struct {
 	Scm        string  `json:"scm"`
 	Desc       string  `json:"desc"`
 	Links      Links   `json:"links"`
-	Mainbranch struct {
+	MainBranch struct {
 		Type string `json:"type"`
 		Name string `json:"name"`
-	} `json:"mainbranch"`
+	} `json:"mainbranch"` // cspell:disable-line
 }
 
 type RepoResp struct {
 	Page   int     `json:"page"`
-	Pages  int     `json:"pagelen"`
+	Pages  int     `json:"pagelen"` // cspell:disable-line
 	Size   int     `json:"size"`
 	Next   string  `json:"next"`
 	Values []*Repo `json:"values"`

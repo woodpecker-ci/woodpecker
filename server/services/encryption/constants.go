@@ -28,8 +28,8 @@ const (
 	keyTypeRaw  = "raw"
 	keyTypeNone = "none"
 
-	keyIDAssociatedData = "Primary key id"
-	AESGCMSIVNonceSize  = 12
+	keyIDAssociatedData  = "Primary key id"
+	AES_GCM_SIVNonceSize = 12
 )
 
 var (
