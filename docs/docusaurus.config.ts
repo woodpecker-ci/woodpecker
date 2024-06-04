@@ -51,10 +51,6 @@ const config: Config = {
               label: 'Awesome',
             },
             {
-              to: '/faq',
-              label: 'FAQ',
-            },
-            {
               to: '/api',
               label: 'API',
             },
@@ -95,10 +91,6 @@ const config: Config = {
             {
               label: 'Server setup',
               to: '/docs/administration/deployment/overview',
-            },
-            {
-              label: 'FAQ',
-              to: '/faq',
             },
           ],
         },
