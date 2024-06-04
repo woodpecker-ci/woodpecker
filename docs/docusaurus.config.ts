@@ -60,6 +60,16 @@ const config: Config = {
         {
           type: 'docsVersionDropdown',
           position: 'right',
+          dropdownItemsAfter: [
+            {
+              type: 'html',
+              value: '<hr class="dropdown-separator">',
+            },
+            {
+              to: '/versions',
+              label: 'All versions',
+            },
+          ],
         },
         {
           href: 'https://github.com/woodpecker-ci/woodpecker',
@@ -242,7 +252,7 @@ const config: Config = {
             process.env.NODE_ENV === 'development' ? ['current', '2.5'] : ['current', '2.5', '2.4', '2.3', '1.0'],
           versions: {
             current: {
-              label: 'Next',
+              label: 'Next 🚧',
               banner: 'unreleased',
             },
             '2.5': {
