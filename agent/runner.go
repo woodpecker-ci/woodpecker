@@ -54,7 +54,7 @@ func (r *Runner) Run(runnerCtx context.Context) error { //nolint:contextcheck
 	log.Debug().Msg("request next execution")
 
 	meta, _ := metadata.FromOutgoingContext(runnerCtx)
-	ctxmeta := metadata.NewOutgoingContext(context.Background(), meta)
+	ctxMeta := metadata.NewOutgoingContext(context.Background(), meta)
 
 	// get the next workflow from the queue
 	work, err := r.client.Next(runnerCtx, r.filter)
@@ -89,7 +89,7 @@ func (r *Runner) Run(runnerCtx context.Context) error { //nolint:contextcheck
 
 	logger.Debug().Msg("received execution")
 
-	workflowCtx, cancel := context.WithTimeout(ctxmeta, timeout)
+	workflowCtx, cancel := context.WithTimeout(ctxMeta, timeout)
 	defer cancel()
 
 	// Add sigterm support for internal context.
@@ -103,9 +103,9 @@ func (r *Runner) Run(runnerCtx context.Context) error { //nolint:contextcheck
 	go func() {
 		logger.Debug().Msg("listen for cancel signal")
 
-		if werr := r.client.Wait(workflowCtx, work.ID); werr != nil {
+		if err := r.client.Wait(workflowCtx, work.ID); err != nil {
 			canceled.SetTo(true)
-			logger.Warn().Err(werr).Msg("cancel signal received")
+			logger.Warn().Err(err).Msg("cancel signal received")
 
 			cancel()
 		} else {
@@ -144,7 +144,7 @@ func (r *Runner) Run(runnerCtx context.Context) error { //nolint:contextcheck
 		pipeline.WithContext(workflowCtx),
 		pipeline.WithTaskUUID(fmt.Sprint(work.ID)),
 		pipeline.WithLogger(r.createLogger(logger, &uploads, work)),
-		pipeline.WithTracer(r.createTracer(ctxmeta, logger, work)),
+		pipeline.WithTracer(r.createTracer(ctxMeta, logger, work)),
 		pipeline.WithBackend(*r.backend),
 		pipeline.WithDescription(map[string]string{
 			"ID":       work.ID,

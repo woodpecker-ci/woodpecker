@@ -5,7 +5,7 @@ when:
 
 steps:
   - name: lint-editorconfig
-    image: docker.io/mstruebing/editorconfig-checker:2.7.2
+    image: docker.io/mstruebing/editorconfig-checker:v3.0.1
     depends_on: []
     when:
       - event: pull_request
@@ -18,7 +18,8 @@ steps:
     commands:
       - corepack enable
       - pnpx cspell lint --no-progress --gitignore '{**,.*}/{*,.*}'
-      - apk add --no-cache -U tree # busybox tree dont understand "-I"
+      - apk add --no-cache -U tree # busybox tree don't understand "-I"
+      # cspell:disable-next-line
       - tree --gitignore -I 012_columns_rename_procs_to_steps.go -I versioned_docs -I '*opensource.svg'| pnpx cspell lint --no-progress stdin
 
   - name: prettier
@@ -28,7 +29,7 @@ steps:
       version: 3.2.5
 
   - name: links
-    image: lycheeverse/lychee:0.14.3
+    image: docker.io/lycheeverse/lychee:0.14.3
     depends_on: []
     commands:
       - lychee pipeline/frontend/yaml/linter/schema/schema.json

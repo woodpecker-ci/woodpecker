@@ -22,7 +22,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/google/go-github/v61/github"
+	"github.com/google/go-github/v62/github"
 
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
@@ -197,7 +197,7 @@ func parseReleaseHook(hook *github.ReleaseEvent) (*model.Repo, *model.Pipeline) 
 		Event:        model.EventRelease,
 		ForgeURL:     hook.GetRelease().GetHTMLURL(),
 		Ref:          fmt.Sprintf("refs/tags/%s", hook.GetRelease().GetTagName()),
-		Branch:       hook.GetRelease().GetTargetCommitish(),
+		Branch:       hook.GetRelease().GetTargetCommitish(), // cspell:disable-line
 		Message:      fmt.Sprintf("created release %s", name),
 		Author:       hook.GetRelease().GetAuthor().GetLogin(),
 		Avatar:       hook.GetRelease().GetAuthor().GetAvatarURL(),

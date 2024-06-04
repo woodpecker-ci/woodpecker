@@ -6,6 +6,8 @@ variables:
   - &node_image 'docker.io/node:22-alpine'
   - &xgo_image 'docker.io/techknowlogick/xgo:go-1.22.x'
 
+# cspell:words bindata netgo TARGZ
+
 steps:
   build-web:
     image: *node_image
@@ -88,7 +90,7 @@ steps:
   release:
     depends_on:
       - checksums
-    image: woodpeckerci/plugin-github-release:1.2.0
+    image: woodpeckerci/plugin-release:0.1.0
     settings:
       api_key:
         from_secret: github_token

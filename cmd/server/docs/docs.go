@@ -874,7 +874,7 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "the organziation's id",
+                        "description": "the organization's id",
                         "name": "org_id",
                         "in": "path",
                         "required": true
@@ -913,7 +913,7 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "the organziation's id",
+                        "description": "the organization's id",
                         "name": "org_id",
                         "in": "path",
                         "required": true
@@ -3407,7 +3407,7 @@ const docTemplate = `{
                 "tags": [
                     "User"
                 ],
-                "summary": "Get the currently authenticaed users pipeline feed",
+                "summary": "Get the currently authenticated users pipeline feed",
                 "parameters": [
                     {
                         "type": "string",

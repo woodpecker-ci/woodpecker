@@ -9,7 +9,7 @@ steps:
   - name: mastodon-toot
     image: docker.io/woodpeckerci/plugin-mastodon-post
     settings:
-      server: https://floss.social
+      server_url: https://floss.social
       access_token:
         from_secret: mastodon_token
       visibility: public
@@ -24,10 +24,3 @@ steps:
         additional fitting hashtags and emojis to make the post more appealing
 
         The changelog entry: {{ changelog }}
-  - name: discord
-    image: docker.io/appleboy/drone-discord:1.3.2
-    settings:
-      webhook_id: 1236558396820295711
-      webhook_token:
-        from_secret: discord_token
-      message: '**{{ build.tag }}** was released: <https://github.com/woodpecker-ci/woodpecker/releases/tag/{{ build.tag }}>'

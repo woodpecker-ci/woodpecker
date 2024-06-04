@@ -21,6 +21,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v2"
@@ -114,8 +115,8 @@ func setupForgeService(c *cli.Context, _store store.Store) error {
 		_forge.AdditionalOptions = make(map[string]any)
 	}
 
-	_forge.Client = c.String("forge-oauth-client")
-	_forge.ClientSecret = c.String("forge-oauth-secret")
+	_forge.Client = strings.TrimSpace(c.String("forge-oauth-client"))
+	_forge.ClientSecret = strings.TrimSpace(c.String("forge-oauth-secret"))
 	_forge.URL = c.String("forge-url")
 	_forge.SkipVerify = c.Bool("forge-skip-verify")
 	_forge.OAuthHost = c.String("forge-oauth-host")
@@ -140,6 +141,12 @@ func setupForgeService(c *cli.Context, _store store.Store) error {
 		_forge.Type = model.ForgeTypeGitea
 		if _forge.URL == "" {
 			_forge.URL = "https://try.gitea.com"
+		}
+	case c.Bool("forgejo"):
+		_forge.Type = model.ForgeTypeForgejo
+		// TODO enable oauth URL with generic config option
+		if _forge.URL == "" {
+			_forge.URL = "https://next.forgejo.org"
 		}
 	case c.Bool("bitbucket"):
 		_forge.Type = model.ForgeTypeBitbucket

@@ -28,7 +28,7 @@ import (
 	"github.com/urfave/cli/v2"
 	"gopkg.in/yaml.v3"
 	v1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/informers"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/scheme"
@@ -62,6 +62,7 @@ type config struct {
 	PodLabelsAllowFromStep      bool
 	PodAnnotations              map[string]string
 	PodAnnotationsAllowFromStep bool
+	PodNodeSelector             map[string]string
 	ImagePullSecretNames        []string
 	SecurityContext             SecurityContextConfig
 }
@@ -69,11 +70,11 @@ type SecurityContextConfig struct {
 	RunAsNonRoot bool
 }
 
-func newDefaultDeleteOptions() metav1.DeleteOptions {
+func newDefaultDeleteOptions() meta_v1.DeleteOptions {
 	gracePeriodSeconds := int64(0) // immediately
-	propagationPolicy := metav1.DeletePropagationBackground
+	propagationPolicy := meta_v1.DeletePropagationBackground
 
-	return metav1.DeleteOptions{
+	return meta_v1.DeleteOptions{
 		GracePeriodSeconds: &gracePeriodSeconds,
 		PropagationPolicy:  &propagationPolicy,
 	}
@@ -91,9 +92,10 @@ func configFromCliContext(ctx context.Context) (*config, error) {
 				PodLabelsAllowFromStep:      c.Bool("backend-k8s-pod-labels-allow-from-step"),
 				PodAnnotations:              make(map[string]string), // just init empty map to prevent nil panic
 				PodAnnotationsAllowFromStep: c.Bool("backend-k8s-pod-annotations-allow-from-step"),
+				PodNodeSelector:             make(map[string]string), // just init empty map to prevent nil panic
 				ImagePullSecretNames:        c.StringSlice("backend-k8s-pod-image-pull-secret-names"),
 				SecurityContext: SecurityContextConfig{
-					RunAsNonRoot: c.Bool("backend-k8s-secctx-nonroot"),
+					RunAsNonRoot: c.Bool("backend-k8s-secctx-nonroot"), // cspell:words secctx nonroot
 				},
 			}
 			// TODO: remove in next major
@@ -110,6 +112,12 @@ func configFromCliContext(ctx context.Context) (*config, error) {
 			if annotations := c.String("backend-k8s-pod-annotations"); annotations != "" {
 				if err := yaml.Unmarshal([]byte(c.String("backend-k8s-pod-annotations")), &config.PodAnnotations); err != nil {
 					log.Error().Err(err).Msgf("could not unmarshal pod annotations '%s'", c.String("backend-k8s-pod-annotations"))
+					return nil, err
+				}
+			}
+			if nodeSelector := c.String("backend-k8s-pod-node-selector"); nodeSelector != "" {
+				if err := yaml.Unmarshal([]byte(nodeSelector), &config.PodNodeSelector); err != nil {
+					log.Error().Err(err).Msgf("could not unmarshal pod node selector '%s'", nodeSelector)
 					return nil, err
 				}
 			}
@@ -173,6 +181,7 @@ func (e *kube) getConfig() *config {
 	c := *e.config
 	c.PodLabels = maps.Clone(e.config.PodLabels)
 	c.PodAnnotations = maps.Clone(e.config.PodAnnotations)
+	c.PodNodeSelector = maps.Clone(e.config.PodNodeSelector)
 	c.ImagePullSecretNames = slices.Clone(e.config.ImagePullSecretNames)
 	return &c
 }
@@ -270,7 +279,7 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 	// TODO: Cancel on ctx.Done
 	<-finished
 
-	pod, err := e.client.CoreV1().Pods(e.config.Namespace).Get(ctx, podName, metav1.GetOptions{})
+	pod, err := e.client.CoreV1().Pods(e.config.Namespace).Get(ctx, podName, meta_v1.GetOptions{})
 	if err != nil {
 		return nil, err
 	}

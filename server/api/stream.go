@@ -71,14 +71,14 @@ func EventStreamSSE(c *gin.Context) {
 		}
 	}
 
-	eventc := make(chan []byte, 10)
+	eventChan := make(chan []byte, 10)
 	ctx, cancel := context.WithCancelCause(
 		context.Background(),
 	)
 
 	defer func() {
 		cancel(nil)
-		close(eventc)
+		close(eventChan)
 		log.Debug().Msg("user feed: connection closed")
 	}()
 
@@ -95,7 +95,7 @@ func EventStreamSSE(c *gin.Context) {
 				case <-ctx.Done():
 					return
 				default:
-					eventc <- m.Data
+					eventChan <- m.Data
 				}
 			}
 		})
@@ -111,7 +111,7 @@ func EventStreamSSE(c *gin.Context) {
 		case <-time.After(time.Second * 30):
 			logWriteStringErr(io.WriteString(rw, ": ping\n\n"))
 			flusher.Flush()
-		case buf, ok := <-eventc:
+		case buf, ok := <-eventChan:
 			if ok {
 				logWriteStringErr(io.WriteString(rw, "data: "))
 				logWriteStringErr(rw.Write(buf))
@@ -192,7 +192,7 @@ func LogStreamSSE(c *gin.Context) {
 		return
 	}
 
-	logc := make(chan []byte, 10)
+	logChan := make(chan []byte, 10)
 	ctx, cancel := context.WithCancelCause(
 		context.Background(),
 	)
@@ -201,7 +201,7 @@ func LogStreamSSE(c *gin.Context) {
 
 	defer func() {
 		cancel(nil)
-		close(logc)
+		close(logChan)
 		log.Debug().Msg("log stream: connection closed")
 	}()
 
@@ -213,7 +213,7 @@ func LogStreamSSE(c *gin.Context) {
 					return
 				default:
 					ee, _ := json.Marshal(entry)
-					logc <- ee
+					logChan <- ee
 				}
 			}
 		})
@@ -250,7 +250,7 @@ func LogStreamSSE(c *gin.Context) {
 		case <-time.After(time.Second * 30):
 			logWriteStringErr(io.WriteString(rw, ": ping\n\n"))
 			flusher.Flush()
-		case buf, ok := <-logc:
+		case buf, ok := <-logChan:
 			if ok {
 				if id > last {
 					logWriteStringErr(io.WriteString(rw, "id: "+strconv.Itoa(id)))

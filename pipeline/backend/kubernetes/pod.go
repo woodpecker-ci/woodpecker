@@ -24,7 +24,7 @@ import (
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/resource"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/common"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
@@ -73,9 +73,9 @@ func podName(step *types.Step) (string, error) {
 	return dnsName(podPrefix + step.UUID)
 }
 
-func podMeta(step *types.Step, config *config, options BackendOptions, podName string) (metav1.ObjectMeta, error) {
+func podMeta(step *types.Step, config *config, options BackendOptions, podName string) (meta_v1.ObjectMeta, error) {
 	var err error
-	meta := metav1.ObjectMeta{
+	meta := meta_v1.ObjectMeta{
 		Name:        podName,
 		Namespace:   config.Namespace,
 		Annotations: podAnnotations(config, options, podName),
@@ -154,7 +154,7 @@ func podSpec(step *types.Step, config *config, options BackendOptions) (v1.PodSp
 		ServiceAccountName: options.ServiceAccountName,
 		ImagePullSecrets:   imagePullSecretsReferences(config.ImagePullSecretNames),
 		HostAliases:        hostAliases(step.ExtraHosts),
-		NodeSelector:       nodeSelector(options.NodeSelector, step.Environment["CI_SYSTEM_PLATFORM"]),
+		NodeSelector:       nodeSelector(options.NodeSelector, config.PodNodeSelector, step.Environment["CI_SYSTEM_PLATFORM"]),
 		Tolerations:        tolerations(options.Tolerations),
 		SecurityContext:    podSecurityContext(options.SecurityContext, config.SecurityContext, step.Privileged),
 	}
@@ -331,13 +331,18 @@ func resourceList(resources map[string]string) (v1.ResourceList, error) {
 	return requestResources, nil
 }
 
-func nodeSelector(backendNodeSelector map[string]string, platform string) map[string]string {
+func nodeSelector(backendNodeSelector, configNodeSelector map[string]string, platform string) map[string]string {
 	nodeSelector := make(map[string]string)
 
 	if platform != "" {
 		arch := strings.Split(platform, "/")[1]
 		nodeSelector[v1.LabelArchStable] = arch
 		log.Trace().Msgf("using the node selector from the Agent's platform: %v", nodeSelector)
+	}
+
+	if len(configNodeSelector) > 0 {
+		log.Trace().Msgf("appending labels to the node selector from the configuration: %v", configNodeSelector)
+		maps.Copy(nodeSelector, configNodeSelector)
 	}
 
 	if len(backendNodeSelector) > 0 {
@@ -445,7 +450,19 @@ func containerSecurityContext(sc *SecurityContext, stepPrivileged bool) *v1.Secu
 		return nil
 	}
 
+	privileged := false
+
+	// if security context privileged is set explicitly
 	if sc != nil && sc.Privileged != nil && *sc.Privileged {
+		privileged = true
+	}
+
+	// if security context privileged is not set explicitly, but step is privileged
+	if (sc == nil || sc.Privileged == nil) && stepPrivileged {
+		privileged = true
+	}
+
+	if privileged {
 		securityContext := &v1.SecurityContext{
 			Privileged: newBool(true),
 		}
@@ -509,10 +526,10 @@ func startPod(ctx context.Context, engine *kube, step *types.Step, options Backe
 	}
 
 	log.Trace().Msgf("creating pod: %s", pod.Name)
-	return engine.client.CoreV1().Pods(engineConfig.Namespace).Create(ctx, pod, metav1.CreateOptions{})
+	return engine.client.CoreV1().Pods(engineConfig.Namespace).Create(ctx, pod, meta_v1.CreateOptions{})
 }
 
-func stopPod(ctx context.Context, engine *kube, step *types.Step, deleteOpts metav1.DeleteOptions) error {
+func stopPod(ctx context.Context, engine *kube, step *types.Step, deleteOpts meta_v1.DeleteOptions) error {
 	podName, err := stepToPodName(step)
 	if err != nil {
 		return err

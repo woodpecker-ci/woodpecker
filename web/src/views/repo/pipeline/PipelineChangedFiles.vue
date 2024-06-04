@@ -1,7 +1,7 @@
 <template>
   <Panel>
     <ul class="list-disc list-inside w-full">
-      <li v-for="file in pipeline.changed_files" :key="file">{{ file }}</li>
+      <li v-for="file in pipeline!.changed_files" :key="file">{{ file }}</li>
     </ul>
   </Panel>
 </template>

@@ -26,7 +26,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/google/go-github/v61/github"
+	"github.com/google/go-github/v62/github"
 	"github.com/rs/zerolog/log"
 	"golang.org/x/oauth2"
 
@@ -260,7 +260,7 @@ func (c *client) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model
 	}
 
 	fc := make(chan *forge_types.FileMeta)
-	errc := make(chan error)
+	errChan := make(chan error)
 
 	for _, file := range data {
 		go func(path string) {
@@ -269,7 +269,7 @@ func (c *client) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model
 				if errors.Is(err, &forge_types.ErrConfigNotFound{}) {
 					err = fmt.Errorf("git tree reported existence of file but we got: %s", err.Error())
 				}
-				errc <- err
+				errChan <- err
 			} else {
 				fc <- &forge_types.FileMeta{
 					Name: path,
@@ -283,7 +283,7 @@ func (c *client) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model
 
 	for i := 0; i < len(data); i++ {
 		select {
-		case err := <-errc:
+		case err := <-errChan:
 			return nil, err
 		case fileMeta := <-fc:
 			files = append(files, fileMeta)
@@ -291,7 +291,7 @@ func (c *client) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model
 	}
 
 	close(fc)
-	close(errc)
+	close(errChan)
 
 	return files, nil
 }
@@ -474,8 +474,8 @@ func matchingEmail(emails []*github.UserEmail, rawURL string) *github.UserEmail 
 }
 
 // matchingHooks returns matching hook.
-func matchingHooks(hooks []*github.Hook, rawurl string) *github.Hook {
-	link, err := url.Parse(rawurl)
+func matchingHooks(hooks []*github.Hook, rawURL string) *github.Hook {
+	link, err := url.Parse(rawURL)
 	if err != nil {
 		return nil
 	}
