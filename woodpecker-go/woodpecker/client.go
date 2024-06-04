@@ -80,28 +80,28 @@ func (c *client) SetLogLevel(in *LogLevel) (*LogLevel, error) {
 //
 
 // Helper function for making an http GET request.
-func (c *client) get(rawurl string, out any) error {
-	return c.do(rawurl, http.MethodGet, nil, out)
+func (c *client) get(rawURL string, out any) error {
+	return c.do(rawURL, http.MethodGet, nil, out)
 }
 
 // Helper function for making an http POST request.
-func (c *client) post(rawurl string, in, out any) error {
-	return c.do(rawurl, http.MethodPost, in, out)
+func (c *client) post(rawURL string, in, out any) error {
+	return c.do(rawURL, http.MethodPost, in, out)
 }
 
 // Helper function for making an http PATCH request.
-func (c *client) patch(rawurl string, in, out any) error {
-	return c.do(rawurl, http.MethodPatch, in, out)
+func (c *client) patch(rawURL string, in, out any) error {
+	return c.do(rawURL, http.MethodPatch, in, out)
 }
 
 // Helper function for making an http DELETE request.
-func (c *client) delete(rawurl string) error {
-	return c.do(rawurl, http.MethodDelete, nil, nil)
+func (c *client) delete(rawURL string) error {
+	return c.do(rawURL, http.MethodDelete, nil, nil)
 }
 
 // Helper function to make an http request.
-func (c *client) do(rawurl, method string, in, out any) error {
-	body, err := c.open(rawurl, method, in)
+func (c *client) do(rawURL, method string, in, out any) error {
+	body, err := c.open(rawURL, method, in)
 	if err != nil {
 		return err
 	}
@@ -113,8 +113,8 @@ func (c *client) do(rawurl, method string, in, out any) error {
 }
 
 // Helper function to open an http request.
-func (c *client) open(rawurl, method string, in any) (io.ReadCloser, error) {
-	uri, err := url.Parse(rawurl)
+func (c *client) open(rawURL, method string, in any) (io.ReadCloser, error) {
+	uri, err := url.Parse(rawURL)
 	if err != nil {
 		return nil, err
 	}
