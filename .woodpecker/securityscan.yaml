@@ -6,8 +6,7 @@ when:
       - renovate/*
 
 variables:
-  - &trivy_image aquasec/trivy:0.46.1
-  - &trivy_plugin woodpeckerci/plugin-trivy:1.0.1
+  - &trivy_plugin woodpeckerci/plugin-trivy:1.1.0
 
 steps:
   backend:
