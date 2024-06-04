@@ -19,6 +19,10 @@ breaking changes to not release many majors each containing just a few breaking 
 Prior to the release of a major version, a release candidate (RC) will be published to allow easy testing,
 the actual release will be about a week later.
 
+### Deprecations & migrations
+
+All deprecations and migrations for Woodpecker users and instance admins are documented in the [migration guide](/docs/next/migrations).
+
 ## Next version (current state of the `main` branch)
 
 The **next** version contains all bugfixes and features from `main` branch. Normally it should be pretty stable, but as its frequently updated, it might contain some bugs from time to time. There are no binaries for this version.
@@ -31,7 +35,6 @@ Here you can find documentation for previous versions of Woodpecker.
 
 |         |            |                                                                                       |
 | ------- | ---------- | ------------------------------------------------------------------------------------- |
-| 2.5.0   | 2024-06-01 | [Documentation](https://github.com/woodpecker-ci/woodpecker/tree/v2.5.0/docs/docs/)   |
 | 2.4.1   | 2024-03-20 | [Documentation](https://github.com/woodpecker-ci/woodpecker/tree/v2.4.1/docs/docs/)   |
 | 2.4.0   | 2024-03-19 | [Documentation](https://github.com/woodpecker-ci/woodpecker/tree/v2.4.0/docs/docs/)   |
 | 2.3.0   | 2024-01-31 | [Documentation](https://github.com/woodpecker-ci/woodpecker/tree/v2.3.0/docs/docs/)   |

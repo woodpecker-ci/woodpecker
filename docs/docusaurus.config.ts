@@ -62,10 +62,6 @@ const config: Config = {
           position: 'right',
           dropdownItemsAfter: [
             {
-              type: 'html',
-              value: '<hr class="dropdown-separator">',
-            },
-            {
               to: '/versions',
               label: 'All versions',
             },
@@ -259,15 +255,15 @@ const config: Config = {
               label: '2.5.x',
             },
             '2.4': {
-              label: '2.4.x',
+              label: '2.4.x 💀',
               banner: 'unmaintained',
             },
             '2.3': {
-              label: '2.3.x',
+              label: '2.3.x 💀',
               banner: 'unmaintained',
             },
             '1.0': {
-              label: '1.0.x',
+              label: '1.0.x 💀',
               banner: 'unmaintained',
             },
           },
