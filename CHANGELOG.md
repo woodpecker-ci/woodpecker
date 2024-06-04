@@ -1,23 +1,29 @@
 # Changelog
 
-## [2.6.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.6.0) - 2024-06-03
+## [2.6.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.6.0) - 2024-06-04
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@qwerty287, @zc-devs
+@6543, @qwerty287, @s00500, @zc-devs
 
 ### ✨ Features
 
 - Native forgejo support [[#3684](https://github.com/woodpecker-ci/woodpecker/pull/3684)]
 
-### 📈 Enhancement
-
-- Agent-wide node selector [[#3608](https://github.com/woodpecker-ci/woodpecker/pull/3608)]
-
 ### 📚 Documentation
 
+- Remove old docs versions [[#3743](https://github.com/woodpecker-ci/woodpecker/pull/3743)]
 - Merge release plugins [[#3752](https://github.com/woodpecker-ci/woodpecker/pull/3752)]
 - Split FAQ [[#3746](https://github.com/woodpecker-ci/woodpecker/pull/3746)]
+
+### 📈 Enhancement
+
+- Spellcheck "server/*" [[#3753](https://github.com/woodpecker-ci/woodpecker/pull/3753)]
+- Agent-wide node selector [[#3608](https://github.com/woodpecker-ci/woodpecker/pull/3608)]
+
+### 🐛 Bug Fixes
+
+- Correct repo repair success message in cli [[#3757](https://github.com/woodpecker-ci/woodpecker/pull/3757)]
 
 ### Misc
 
