@@ -36,7 +36,7 @@ import (
 //	@Success	200	{array}	Org
 //	@Tags		Organization
 //	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param		org_id			path	string	true	"the organziation's id"
+//	@Param		org_id			path	string	true	"the organization's id"
 func GetOrg(c *gin.Context) {
 	_store := store.FromContext(c)
 
@@ -63,7 +63,7 @@ func GetOrg(c *gin.Context) {
 //	@Success	200	{array}	OrgPerm
 //	@Tags		Organization permissions
 //	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param		org_id			path	string	true	"the organziation's id"
+//	@Param		org_id			path	string	true	"the organization's id"
 func GetOrgPermissions(c *gin.Context) {
 	user := session.User(c)
 	_store := store.FromContext(c)
