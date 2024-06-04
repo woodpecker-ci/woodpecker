@@ -8,7 +8,7 @@ We plan to release a new version every four weeks and will release the next vers
 
 ## Stable version
 
-The current version of Woodpecker is [2.5.0](/docs).
+The current version of Woodpecker is [2.5.0](/docs/intro).
 
 The **stable** releases are official versions following [semver](https://semver.org/). By default, only the latest stable release will receive bug fixes. Once a new major or minor release is available, previous minor versions might receive security patches, but wont be updated with bug fixes anymore (so called backporting) by default.
 
