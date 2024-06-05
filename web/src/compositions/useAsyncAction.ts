@@ -3,14 +3,7 @@ import { computed, ref } from 'vue';
 
 const notifications = useNotifications();
 
-export interface UseSubmitOptions {
-  showErrorNotification: false;
-}
-
-export function useAsyncAction<T extends unknown[]>(
-  action: (...a: T) => void | Promise<void>,
-  options?: UseSubmitOptions,
-) {
+export function useAsyncAction<T extends unknown[]>(action: (...a: T) => void | Promise<void>) {
   const isLoading = ref(false);
 
   async function doSubmit(...a: T) {
@@ -22,9 +15,7 @@ export function useAsyncAction<T extends unknown[]>(
     try {
       await action(...a);
     } catch (error) {
-      if (options?.showErrorNotification) {
-        notifications.notify({ title: (error as Error).message, type: 'error' });
-      }
+      notifications.notify({ title: (error as Error).message, type: 'error' });
     }
     isLoading.value = false;
   }

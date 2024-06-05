@@ -13,15 +13,13 @@ export function encodeQueryString(_params: Record<string, string | number | bool
     }
   });
 
-  return params
-    ? Object.keys(params)
-        .sort()
-        .map((key) => {
-          const val = params[key];
-          return `${encodeURIComponent(key)}=${encodeURIComponent(val)}`;
-        })
-        .join('&')
-    : '';
+  return Object.keys(params)
+    .sort()
+    .map((key) => {
+      const val = params[key];
+      return `${encodeURIComponent(key)}=${encodeURIComponent(val)}`;
+    })
+    .join('&');
 }
 
 export default class ApiClient {
@@ -45,9 +43,9 @@ export default class ApiClient {
       headers: {
         ...(method !== 'GET' && this.csrf ? { 'X-CSRF-TOKEN': this.csrf } : {}),
         ...(this.token ? { Authorization: `Bearer ${this.token}` } : {}),
-        ...(data ? { 'Content-Type': 'application/json' } : {}),
+        ...(data !== undefined ? { 'Content-Type': 'application/json' } : {}),
       },
-      body: data ? JSON.stringify(data) : undefined,
+      body: data !== undefined ? JSON.stringify(data) : undefined,
     });
 
     if (!res.ok) {

@@ -43,7 +43,7 @@ export function useVersion() {
   const usesNext = current.startsWith('next');
 
   const { user } = useAuthentication();
-  if (config.skipVersionCheck || !user?.admin) {
+  if (config.skipVersionCheck || user?.admin !== true) {
     version.value = {
       latest: undefined,
       current,
