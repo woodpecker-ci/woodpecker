@@ -29,7 +29,7 @@
     <Tab id="badge" :title="$t('repo.settings.badge.badge')">
       <BadgeTab />
     </Tab>
-    <Tab id="extensions" :title="$t('repo.settings.extensions.extensions')">
+    <Tab id="extensions" :title="$t('extensions')">
       <ExtensionsTab />
     </Tab>
     <Tab id="actions" :title="$t('repo.settings.actions.actions')">

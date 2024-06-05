@@ -1,38 +1,35 @@
 <template>
   <Panel>
     <div class="flex flex-row border-b mb-4 pb-4 items-center dark:border-gray-600">
-      <h1 class="text-xl ml-2 text-color">{{ $t('repo.settings.extensions.extensions') }}</h1>
+      <h1 class="text-xl ml-2 text-color">{{ $t('extensions') }}</h1>
     </div>
 
     <div class="flex flex-col">
-      <span class="text-color font-bold">{{ $t('repo.settings.extensions.signatures_public_key') }}</span>
-      <span class="text-color">{{ $t('repo.settings.extensions.signatures_public_key_desc') }}</span>
+      <span class="text-color font-bold">{{ $t('extensions_signatures_public_key') }}</span>
+      <span class="text-color">{{ $t('extensions_signatures_public_key_description') }}</span>
       <CodeBox>{{ signaturePublicKey }}</CodeBox>
     </div>
 
     <div class="flex flex-col mt-4 border-t-1 dark:border-gray-600">
       <form @submit.prevent="saveExtensions">
-        <InputField
-          :label="$t('repo.settings.extensions.secrets_endpoint')"
-          docs-url="docs/usage/extensions/secret-extension"
-        >
+        <InputField :label="$t('secrets_extension_endpoint')" docs-url="docs/usage/extensions/secrets-extension">
           <TextField
             v-model="extensions.secret_extension_endpoint"
-            :placeholder="$t('repo.settings.extensions.secrets_endpoint_placeholder')"
+            :placeholder="$t('secrets_extension_endpoint_placeholder')"
           />
+          <template #description>
+            <p class="text-sm">{{ $t('secrets_extension_alpha_state') }}</p>
+          </template>
         </InputField>
 
-        <InputField
-          :label="$t('repo.settings.extensions.config_endpoint')"
-          docs-url="docs/usage/extensions/configuration-extension"
-        >
+        <InputField :label="$t('config_extension_endpoint')" docs-url="docs/usage/extensions/configuration-extension">
           <TextField
             v-model="extensions.config_extension_endpoint"
-            :placeholder="$t('repo.settings.extensions.config_endpoint_placeholder')"
+            :placeholder="$t('extension_endpoint_placeholder')"
           />
         </InputField>
 
-        <Button :is-loading="isSaving" type="submit" :text="$t('repo.settings.extensions.save_extensions')" />
+        <Button :is-loading="isSaving" color="green" type="submit" :text="$t('save')" />
       </form>
     </div>
   </Panel>
@@ -76,6 +73,6 @@ const { doSubmit: saveExtensions, isLoading: isSaving } = useAsyncAction(async (
   await apiClient.updateRepo(repo.value.id, extensions.value);
 
   // await loadRepo();
-  notifications.notify({ title: i18n.t('repo.settings.extensions.success'), type: 'success' });
+  notifications.notify({ title: i18n.t('extensions_configuration_saved'), type: 'success' });
 });
 </script>

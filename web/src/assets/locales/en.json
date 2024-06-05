@@ -203,21 +203,6 @@
           "confirm": "All data will be lost after this action!!!\n\nDo you really want to proceed?",
           "success": "Repository deleted"
         }
-      },
-
-      "extensions": {
-        "extensions": "Extensions",
-        "extensions_desc": "Extensions are HTTP services that can be called by Woodpecker instead of using the builtin ones.",
-        "secrets_endpoint": "Secrets extension endpoint",
-        "secrets_endpoint_placeholder": "e.g. https://my.secret.service/api/v1/secrets",
-        "registries_endpoint": "Registries extension endpoint",
-        "registries_endpoint_placeholder": "e.g. https://my.registry.service/api/v1/registries",
-        "config_endpoint": "Config extension endpoint",
-        "config_endpoint_placeholder": "e.g. https://my.config.service/api/v1/config",
-        "save_extensions": "Save extensions configuration",
-        "signatures_public_key": "Public key for signatures",
-        "signatures_public_key_desc": "This public key should be used by your extensions to verify webhook calls from Woodpecker.",
-        "success": "Extensions configuration saved"
       }
     },
     "pipeline": {
@@ -476,5 +461,15 @@
   "cli_login_failed": "Login to CLI failed",
   "cli_login_denied": "Login to CLI denied",
   "return_to_cli": "You can now close this tab and return to the CLI.",
-  "settings": "Settings"
+  "save": "Save",
+  "settings": "Settings",
+  "extensions": "Extensions",
+  "extensions_description": "Extensions are HTTP services that can be called by Woodpecker instead of using the builtin ones.",
+  "secrets_extension_endpoint": "Secrets extension endpoint",
+  "secrets_extension_alpha_state": "The secret extension is in alpha state and might change in the future.",
+  "extension_endpoint_placeholder": "e.g. https://my-extension-endpint.tld/api",
+  "config_extension_endpoint": "Config extension endpoint",
+  "extensions_signatures_public_key": "Public key for signatures",
+  "extensions_signatures_public_key_description": "This public key should be used by your extensions to verify webhook calls from Woodpecker.",
+  "extensions_configuration_saved": "Extensions configuration saved"
 }
