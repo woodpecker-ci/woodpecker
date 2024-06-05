@@ -19,13 +19,13 @@
 
 <script lang="ts" setup>
 import { useLocalStorage } from '@vueuse/core';
-import { SUPPORTED_LOCALES } from 'virtual:vue-i18n-supported-locales';
-import { computed } from 'vue';
-import { useI18n } from 'vue-i18n';
 import SelectField from '~/components/form/SelectField.vue';
 import Settings from '~/components/layout/Settings.vue';
 import { setI18nLanguage } from '~/compositions/useI18n';
 import { useTheme } from '~/compositions/useTheme';
+import { SUPPORTED_LOCALES } from 'virtual:vue-i18n-supported-locales';
+import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 const { locale } = useI18n();
 const { storeTheme } = useTheme();

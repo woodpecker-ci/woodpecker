@@ -1,7 +1,7 @@
+import type { Repo } from '~/lib/api/types';
 import Fuse from 'fuse.js';
 import type { Ref } from 'vue';
 import { computed } from 'vue';
-import type { Repo } from '~/lib/api/types';
 
 /*
  * Compares Repos lexicographically using owner/name .

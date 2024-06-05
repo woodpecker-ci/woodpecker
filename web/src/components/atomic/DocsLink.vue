@@ -4,12 +4,13 @@
     :title="$t('documentation_for', { topic })"
     target="_blank"
     class="text-wp-link-100 hover:text-wp-link-200 cursor-pointer mt-1"
-  ><Icon name="question" class="!w-4 !h-4" /></a>
+    ><Icon name="question" class="!w-4 !h-4"
+  /></a>
 </template>
 
 <script lang="ts" setup>
-import { computed, toRef } from 'vue';
 import Icon from '~/components/atomic/Icon.vue';
+import { computed, toRef } from 'vue';
 
 const props = defineProps<{
   url: string;

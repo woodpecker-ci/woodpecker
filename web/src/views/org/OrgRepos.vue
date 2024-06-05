@@ -25,13 +25,13 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onMounted, ref } from 'vue';
 import IconButton from '~/components/atomic/IconButton.vue';
 import ListItem from '~/components/atomic/ListItem.vue';
 import Scaffold from '~/components/layout/scaffold/Scaffold.vue';
 import { inject } from '~/compositions/useInjectProvide';
 import { useRepoSearch } from '~/compositions/useRepoSearch';
 import { useRepoStore } from '~/store/repos';
+import { computed, onMounted, ref } from 'vue';
 
 const repoStore = useRepoStore();
 

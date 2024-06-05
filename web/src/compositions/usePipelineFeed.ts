@@ -1,7 +1,7 @@
-import { computed, toRef } from 'vue';
-import useAuthentication from './useAuthentication';
 import useUserConfig from '~/compositions/useUserConfig';
 import { usePipelineStore } from '~/store/pipelines';
+import { computed, toRef } from 'vue';
+import useAuthentication from './useAuthentication';
 
 const { userConfig, setUserConfig } = useUserConfig();
 

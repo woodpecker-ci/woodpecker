@@ -15,7 +15,8 @@
             target="_blank"
             rel="noopener noreferrer"
             class="underline"
-          >{{ version.latest }}</a>
+            >{{ version.latest }}</a
+          >
           <span v-else>
             {{ version.latest }}
           </span>

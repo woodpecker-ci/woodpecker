@@ -3,9 +3,9 @@
 </template>
 
 <script setup lang="ts">
+import useApiClient from '~/compositions/useApiClient';
 import { onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import useApiClient from '~/compositions/useApiClient';
 
 const props = defineProps<{
   orgName: string;

@@ -60,7 +60,8 @@
               'bg-opacity-30 bg-blue-600': isSelected(line),
               underline: isSelected(line),
             }"
-          >{{ line.number }}</a>
+            >{{ line.number }}</a
+          >
           <!-- eslint-disable vue/no-v-html -->
           <span
             class="align-top whitespace-pre-wrap break-words"
@@ -79,7 +80,8 @@
               'bg-opacity-40 dark:bg-opacity-50 bg-yellow-600 dark:bg-yellow-800': line.type === 'warning',
               'bg-opacity-30 bg-blue-600': isSelected(line),
             }"
-          >{{ formatTime(line.time) }}</span>
+            >{{ formatTime(line.time) }}</span
+          >
         </div>
       </div>
 
@@ -104,6 +106,12 @@
 <script lang="ts" setup>
 import '~/style/console.css';
 import { useStorage } from '@vueuse/core';
+import IconButton from '~/components/atomic/IconButton.vue';
+import PipelineStatusIcon from '~/components/repo/pipeline/PipelineStatusIcon.vue';
+import useApiClient from '~/compositions/useApiClient';
+import useNotifications from '~/compositions/useNotifications';
+import type { Pipeline, Repo, RepoPermissions } from '~/lib/api/types';
+import { findStep, isStepFinished, isStepRunning } from '~/utils/helpers';
 import { AnsiUp } from 'ansi_up';
 import { decode } from 'js-base64';
 import { debounce } from 'lodash';
@@ -111,12 +119,6 @@ import type { Ref } from 'vue';
 import { computed, inject, nextTick, onMounted, ref, toRef, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
-import { findStep, isStepFinished, isStepRunning } from '~/utils/helpers';
-import type { Pipeline, Repo, RepoPermissions } from '~/lib/api/types';
-import useNotifications from '~/compositions/useNotifications';
-import useApiClient from '~/compositions/useApiClient';
-import PipelineStatusIcon from '~/components/repo/pipeline/PipelineStatusIcon.vue';
-import IconButton from '~/components/atomic/IconButton.vue';
 
 interface LogLine {
   index: number;

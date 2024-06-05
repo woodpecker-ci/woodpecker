@@ -28,9 +28,6 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted } from 'vue';
-import { useI18n } from 'vue-i18n';
-import { useRouter } from 'vue-router';
 import AdminAgentsTab from '~/components/admin/settings/AdminAgentsTab.vue';
 import AdminInfoTab from '~/components/admin/settings/AdminInfoTab.vue';
 import AdminOrgsTab from '~/components/admin/settings/AdminOrgsTab.vue';
@@ -42,6 +39,9 @@ import Scaffold from '~/components/layout/scaffold/Scaffold.vue';
 import Tab from '~/components/layout/scaffold/Tab.vue';
 import useAuthentication from '~/compositions/useAuthentication';
 import useNotifications from '~/compositions/useNotifications';
+import { onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { useRouter } from 'vue-router';
 
 const notifications = useNotifications();
 const router = useRouter();

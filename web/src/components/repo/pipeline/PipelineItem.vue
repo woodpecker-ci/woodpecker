@@ -31,7 +31,8 @@
         <span
           class="text-wp-text-100 <md:underline whitespace-nowrap overflow-hidden overflow-ellipsis"
           :title="message"
-        >{{ title }}</span>
+          >{{ title }}</span
+        >
       </div>
 
       <div
@@ -68,7 +69,6 @@
 </template>
 
 <script lang="ts" setup>
-import { toRef } from 'vue';
 import Icon from '~/components/atomic/Icon.vue';
 import ListItem from '~/components/atomic/ListItem.vue';
 import { pipelineStatusColors } from '~/components/repo/pipeline/pipeline-status';
@@ -76,6 +76,7 @@ import PipelineRunningIcon from '~/components/repo/pipeline/PipelineRunningIcon.
 import PipelineStatusIcon from '~/components/repo/pipeline/PipelineStatusIcon.vue';
 import usePipeline from '~/compositions/usePipeline';
 import type { Pipeline } from '~/lib/api/types';
+import { toRef } from 'vue';
 
 const props = defineProps<{
   pipeline: Pipeline;
