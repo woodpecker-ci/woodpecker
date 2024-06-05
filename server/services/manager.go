@@ -94,9 +94,9 @@ func (m *manager) SignaturePublicKey() crypto.PublicKey {
 	return m.signaturePublicKey
 }
 
-func (m *Manager) SecretServiceFromRepo(repo *model.Repo) secret.Service {
+func (m *manager) SecretServiceFromRepo(repo *model.Repo) secret.Service {
 	if repo.SecretExtensionEndpoint != "" {
-		return secret.NewHTTP(e.SecretService(), repo.SecretExtensionEndpoint, m.signaturePrivateKey)
+		return secret.NewHTTP(m.SecretService(), repo.SecretExtensionEndpoint, m.signaturePrivateKey)
 	}
 
 	return m.SecretService()
@@ -114,12 +114,12 @@ func (m *manager) RegistryService() registry.Service {
 	return m.registry
 }
 
-func (m *Manager) ConfigServiceFromRepo(repo *model.Repo) config.Service {
+func (m *manager) ConfigServiceFromRepo(repo *model.Repo) config.Service {
 	if repo.ConfigExtensionEndpoint != "" {
-		return config.NewHTTP(repo.ConfigExtensionEndpoint, e.signaturePrivateKey)
+		return config.NewHTTP(repo.ConfigExtensionEndpoint, m.signaturePrivateKey)
 	}
 
-	return e.config
+	return m.config
 }
 
 func (m *manager) EnvironmentService() environment.Service {

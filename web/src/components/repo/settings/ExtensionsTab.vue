@@ -17,18 +17,8 @@
           docs-url="docs/usage/extensions/secret-extension"
         >
           <TextField
-            v-model="extensions.secret_endpoint"
+            v-model="extensions.secret_extension_endpoint"
             :placeholder="$t('repo.settings.extensions.secrets_endpoint_placeholder')"
-          />
-        </InputField>
-
-        <InputField
-          :label="$t('repo.settings.extensions.registries_endpoint')"
-          docs-url="docs/usage/extensions/registry-extension"
-        >
-          <TextField
-            v-model="extensions.registry_endpoint"
-            :placeholder="$t('repo.settings.extensions.registries_endpoint_placeholder')"
           />
         </InputField>
 
@@ -37,7 +27,7 @@
           docs-url="docs/usage/extensions/configuration-extension"
         >
           <TextField
-            v-model="extensions.config_endpoint"
+            v-model="extensions.config_extension_endpoint"
             :placeholder="$t('repo.settings.extensions.config_endpoint_placeholder')"
           />
         </InputField>
@@ -78,13 +68,12 @@ onMounted(async () => {
 });
 
 const extensions = ref<ExtensionSettings>({
-  secret_endpoint: repo.value.secret_endpoint,
-  registry_endpoint: repo.value.registry_endpoint,
-  config_endpoint: repo.value.config_endpoint,
+  secret_extension_endpoint: repo.value.secret_extension_endpoint,
+  config_extension_endpoint: repo.value.config_extension_endpoint,
 });
 
 const { doSubmit: saveExtensions, isLoading: isSaving } = useAsyncAction(async () => {
-  await apiClient.updateRepo(repo.value.owner, repo.value.name, extensions.value);
+  await apiClient.updateRepo(repo.value.id, extensions.value);
 
   // await loadRepo();
   notifications.notify({ title: i18n.t('repo.settings.extensions.success'), type: 'success' });

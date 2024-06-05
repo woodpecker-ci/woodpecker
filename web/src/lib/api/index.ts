@@ -73,7 +73,7 @@ export default class WoodpeckerClient extends ApiClient {
     return this._post(`/api/repos?forge_remote_id=${forgeRemoteId}`) as Promise<Repo>;
   }
 
-  updateRepo(repoId: number, repoSettings: RepoSettings & ExtensionSettings): Promise<unknown> {
+  updateRepo(repoId: number, repoSettings: Partial<RepoSettings & ExtensionSettings>): Promise<unknown> {
     return this._patch(`/api/repos/${repoId}`, repoSettings);
   }
 

@@ -72,13 +72,10 @@ export type Repo = {
   netrc_only_trusted: boolean;
 
   // Endpoint for secrets extensions
-  secret_endpoint: string;
-
-  // Endpoint for registries extensions
-  registry_endpoint: string;
+  secret_extension_endpoint: string;
 
   // Endpoint for config extensions
-  config_endpoint: string;
+  config_extension_endpoint: string;
 };
 
 export enum RepoVisibility {
@@ -100,7 +97,7 @@ export type RepoSettings = Pick<
   | 'netrc_only_trusted'
 >;
 
-export type ExtensionSettings = Pick<Repo, 'config_endpoint' | 'secret_endpoint' | 'registry_endpoint'>;
+export type ExtensionSettings = Pick<Repo, 'config_extension_endpoint' | 'secret_extension_endpoint'>;
 
 export type RepoPermissions = {
   pull: boolean;

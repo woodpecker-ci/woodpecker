@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -263,10 +264,10 @@ func PatchRepo(c *gin.Context) {
 		}
 	}
 	if in.ConfigExtensionEndpoint != nil {
-		repo.ConfigExtensionEndpoint = *in.ConfigExtensionEndpoint
+		repo.ConfigExtensionEndpoint = strings.TrimRight(*in.ConfigExtensionEndpoint, "/")
 	}
 	if in.SecretExtensionEndpoint != nil {
-		repo.SecretExtensionEndpoint = *in.SecretExtensionEndpoint
+		repo.SecretExtensionEndpoint = strings.TrimRight(*in.SecretExtensionEndpoint, "/")
 	}
 
 	err := _store.UpdateRepo(repo)
