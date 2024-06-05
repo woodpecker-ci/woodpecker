@@ -21,7 +21,7 @@ import (
 	"strconv"
 
 	"github.com/google/tink/go/aead"
-	"github.com/google/tink/go/insecurecleartextkeyset"
+	insecure_clear_text_keyset "github.com/google/tink/go/insecurecleartextkeyset"
 	"github.com/google/tink/go/keyset"
 	"github.com/rs/zerolog/log"
 
@@ -42,7 +42,7 @@ func (svc *tinkEncryptionService) loadKeyset() error {
 	}(file)
 
 	jsonKeyset := keyset.NewJSONReader(file)
-	keysetHandle, err := insecurecleartextkeyset.Read(jsonKeyset)
+	keysetHandle, err := insecure_clear_text_keyset.Read(jsonKeyset)
 	if err != nil {
 		return fmt.Errorf(errTemplateTinkFailedReadingKeyset, err)
 	}

@@ -16,25 +16,7 @@ You can add more agents to increase the number of parallel workflows or set the 
 
 Woodpecker is having two different kinds of releases: **stable** and **next**.
 
-To find out more about the differences between the two releases, please read the [FAQ](/faq#which-version-of-woodpecker-should-i-use).
-
-### Stable releases
-
-We release a new version every four weeks and will release the current state of the `main` branch.
-If there are security fixes or critical bug fixes, we'll release them directly.
-There are no backports or similar.
-
-#### Versioning
-
-We use [Semantic Versioning](https://semver.org/) to be able,
-to communicate when admins have to do manual migration steps and when they can just bump versions up.
-
-#### Breaking changes
-
-As of semver guidelines, breaking changes will be released as a major version. We will hold back
-breaking changes to not release many majors each containing just a few breaking changes.
-Prior to the release of a major version, a release candidate (RC) will be published to allow easy testing,
-the actual release will be about a week later.
+Find more information about the different versions [here](/versions).
 
 ## Hardware Requirements
 
@@ -87,6 +69,8 @@ In the case you need to use Woodpecker with a URL path prefix (like: <https://ex
 These installation methods are not officially supported. If you experience issues with them, please open issues in the specific repositories.
 :::
 
-- Using [NixOS](./30-nixos.md) via the [NixOS module](https://search.nixos.org/options?channel=unstable&size=200&sort=relevance&query=woodpecker)
+- [Using NixOS](./30-nixos.md) via the [NixOS module](https://search.nixos.org/options?channel=unstable&size=200&sort=relevance&query=woodpecker)
+- [On Alpine Edge](https://pkgs.alpinelinux.org/packages?name=woodpecker&branch=edge&repo=&arch=&maintainer=)
+- [On Arch Linux](https://archlinux.org/packages/?q=woodpecker)
 - [Using YunoHost](https://apps.yunohost.org/app/woodpecker)
 - [On Cloudron](https://www.cloudron.io/store/org.woodpecker_ci.cloudronapp.html)
