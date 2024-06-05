@@ -17,7 +17,7 @@ package addon
 import (
 	"bytes"
 	"io"
-	stdlog "log"
+	std_log "log"
 
 	"github.com/hashicorp/go-hclog"
 	"github.com/rs/zerolog"
@@ -29,6 +29,8 @@ type clientLogger struct {
 	name     string
 	withArgs []any
 }
+
+// cspell:words hclog
 
 func convertLvl(level hclog.Level) zerolog.Level {
 	switch level {
@@ -162,8 +164,8 @@ func (c *clientLogger) GetLevel() hclog.Level {
 	return hclog.NoLevel
 }
 
-func (c *clientLogger) StandardLogger(opts *hclog.StandardLoggerOptions) *stdlog.Logger {
-	return stdlog.New(c.StandardWriter(opts), "", 0)
+func (c *clientLogger) StandardLogger(opts *hclog.StandardLoggerOptions) *std_log.Logger {
+	return std_log.New(c.StandardWriter(opts), "", 0)
 }
 
 func (c *clientLogger) StandardWriter(*hclog.StandardLoggerOptions) io.Writer {
