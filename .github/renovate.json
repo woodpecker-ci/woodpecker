@@ -3,33 +3,51 @@
   "extends": ["github>woodpecker-ci/renovate-config"],
   "packageRules": [
     {
+      "matchCurrentVersion": "<1.0.0",
+      "matchPackageNames": ["github.com/distribution/reference"],
+      "matchUpdateTypes": ["major", "minor"],
+      "dependencyDashboardApproval": true
+    },
+    {
+      "matchPackageNames": ["github.com/charmbracelet/huh/spinner"],
+      "enabled": false
+    },
+    {
       "matchManagers": ["docker-compose"],
-      "matchFileNames": ["docker-compose.gitpod.yml"],
+      "matchFileNames": ["docker-compose.gitpod.yaml"],
       "addLabels": ["devx"]
     },
     {
-      "groupName": "golang (lang)",
+      "groupName": "golang-lang",
       "matchPackagePatterns": ["^golang$", "xgo"],
       "matchUpdateTypes": ["minor", "patch"]
     },
     {
-      "groupName": "golang (packages)",
+      "groupName": "golang-packages",
       "matchManagers": ["gomod"],
       "matchUpdateTypes": ["minor", "patch"]
+    },
+    {
+      "matchManagers": ["npm"],
+      "matchFileNames": ["web/package.json"],
+      "addLabels": ["ui"]
+    },
+    {
+      "matchManagers": ["npm"],
+      "matchFileNames": ["docs/**/package.json"],
+      "addLabels": ["documentation"]
     },
     {
       "groupName": "web npm deps non-major",
       "matchManagers": ["npm"],
       "matchUpdateTypes": ["minor", "patch"],
-      "matchFileNames": ["web/package.json"],
-      "addLabels": ["ui"]
+      "matchFileNames": ["web/package.json"]
     },
     {
       "groupName": "docs npm deps non-major",
       "matchManagers": ["npm"],
       "matchUpdateTypes": ["minor", "patch"],
-      "matchFileNames": ["docs/**/package.json"],
-      "addLabels": ["documentation"]
+      "matchFileNames": ["docs/**/package.json"]
     },
     {
       "matchDatasources": ["docker"],

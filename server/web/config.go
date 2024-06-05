@@ -17,6 +17,7 @@ package web
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 	"text/template"
 
 	"github.com/gin-gonic/gin"
@@ -33,10 +34,17 @@ func Config(c *gin.Context) {
 
 	var csrf string
 	if user != nil {
-		csrf, _ = token.New(
-			token.CsrfToken,
-			user.Login,
-		).Sign(user.Hash)
+		t := token.New(token.CsrfToken)
+		t.Set("user-id", strconv.FormatInt(user.ID, 10))
+		csrf, _ = t.Sign(user.Hash)
+	}
+
+	// TODO: remove this and use the forge type from the corresponding repo
+	mainForge, err := server.Config.Services.Manager.ForgeMain()
+	if err != nil {
+		log.Error().Err(err).Msg("could not get main forge")
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
 	}
 
 	configData := map[string]any{
@@ -44,7 +52,7 @@ func Config(c *gin.Context) {
 		"csrf":               csrf,
 		"version":            version.String(),
 		"skip_version_check": server.Config.WebUI.SkipVersionCheck,
-		"forge":              server.Config.Services.Forge.Name(),
+		"forge":              mainForge.Name(),
 		"root_path":          server.Config.Server.RootPath,
 		"enable_swagger":     server.Config.WebUI.EnableSwagger,
 	}

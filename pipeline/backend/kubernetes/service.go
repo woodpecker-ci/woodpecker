@@ -22,14 +22,15 @@ import (
 	"github.com/rs/zerolog/log"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/util/intstr"
+	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	int_str "k8s.io/apimachinery/pkg/util/intstr"
 
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 )
 
 const (
-	ServiceLabel = "service"
+	ServiceLabel  = "service"
+	servicePrefix = "wp-svc-"
 )
 
 func mkService(step *types.Step, config *config) (*v1.Service, error) {
@@ -49,7 +50,7 @@ func mkService(step *types.Step, config *config) (*v1.Service, error) {
 
 	log.Trace().Str("name", name).Interface("selector", selector).Interface("ports", svcPorts).Msg("creating service")
 	return &v1.Service{
-		ObjectMeta: metav1.ObjectMeta{
+		ObjectMeta: meta_v1.ObjectMeta{
 			Name:      name,
 			Namespace: config.Namespace,
 		},
@@ -62,7 +63,7 @@ func mkService(step *types.Step, config *config) (*v1.Service, error) {
 }
 
 func serviceName(step *types.Step) (string, error) {
-	return dnsName(step.Name)
+	return dnsName(servicePrefix + step.UUID + "-" + step.Name)
 }
 
 func servicePort(port types.Port) v1.ServicePort {
@@ -72,7 +73,7 @@ func servicePort(port types.Port) v1.ServicePort {
 		Name:       fmt.Sprintf("port-%d", portNumber),
 		Port:       portNumber,
 		Protocol:   v1.Protocol(portProtocol),
-		TargetPort: intstr.IntOrString{IntVal: portNumber},
+		TargetPort: int_str.IntOrString{IntVal: portNumber},
 	}
 }
 
@@ -84,10 +85,10 @@ func startService(ctx context.Context, engine *kube, step *types.Step) (*v1.Serv
 	}
 
 	log.Trace().Str("name", svc.Name).Interface("selector", svc.Spec.Selector).Interface("ports", svc.Spec.Ports).Msg("creating service")
-	return engine.client.CoreV1().Services(engineConfig.Namespace).Create(ctx, svc, metav1.CreateOptions{})
+	return engine.client.CoreV1().Services(engineConfig.Namespace).Create(ctx, svc, meta_v1.CreateOptions{})
 }
 
-func stopService(ctx context.Context, engine *kube, step *types.Step, deleteOpts metav1.DeleteOptions) error {
+func stopService(ctx context.Context, engine *kube, step *types.Step, deleteOpts meta_v1.DeleteOptions) error {
 	svcName, err := serviceName(step)
 	if err != nil {
 		return err

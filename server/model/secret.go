@@ -55,12 +55,12 @@ type Secret struct {
 	Events []WebhookEvent `json:"events"          xorm:"json 'secret_events'"`
 } //	@name Secret
 
-// TableName return database table name for xorm
+// TableName return database table name for xorm.
 func (Secret) TableName() string {
 	return "secrets"
 }
 
-// BeforeInsert will sort events before inserted into database
+// BeforeInsert will sort events before inserted into database.
 func (s *Secret) BeforeInsert() {
 	s.Events = sortEvents(s.Events)
 }

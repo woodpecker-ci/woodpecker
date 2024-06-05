@@ -86,7 +86,7 @@ func secretList(c *cli.Context) error {
 	return nil
 }
 
-// template for secret list items
+// Template for secret list items.
 var tmplSecretList = "\x1b[33m{{ .Name }} \x1b[0m" + `
 Events: {{ list .Events }}
 {{- if .Images }}

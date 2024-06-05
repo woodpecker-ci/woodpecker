@@ -24,14 +24,15 @@ import (
 	pipeline_errors "go.woodpecker-ci.org/woodpecker/v2/pipeline/errors"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/compiler"
 	"go.woodpecker-ci.org/woodpecker/v2/server"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
 	forge_types "go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 	"go.woodpecker-ci.org/woodpecker/v2/server/pipeline/stepbuilder"
 	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 )
 
-func parsePipeline(store store.Store, currentPipeline *model.Pipeline, user *model.User, repo *model.Repo, yamls []*forge_types.FileMeta, envs map[string]string) ([]*stepbuilder.Item, error) {
-	netrc, err := server.Config.Services.Forge.Netrc(user, repo)
+func parsePipeline(forge forge.Forge, store store.Store, currentPipeline *model.Pipeline, user *model.User, repo *model.Repo, yamls []*forge_types.FileMeta, envs map[string]string) ([]*stepbuilder.Item, error) {
+	netrc, err := forge.Netrc(user, repo)
 	if err != nil {
 		log.Error().Err(err).Msg("failed to generate netrc file")
 	}
@@ -81,7 +82,7 @@ func parsePipeline(store store.Store, currentPipeline *model.Pipeline, user *mod
 		Envs:  envs,
 		Host:  server.Config.Server.Host,
 		Yamls: yamls,
-		Forge: server.Config.Services.Forge,
+		Forge: forge,
 		ProxyOpts: compiler.ProxyOptions{
 			NoProxy:    server.Config.Pipeline.Proxy.No,
 			HTTPProxy:  server.Config.Pipeline.Proxy.HTTP,
@@ -91,23 +92,23 @@ func parsePipeline(store store.Store, currentPipeline *model.Pipeline, user *mod
 	return b.Build()
 }
 
-func createPipelineItems(c context.Context, store store.Store,
+func createPipelineItems(c context.Context, forge forge.Forge, store store.Store,
 	currentPipeline *model.Pipeline, user *model.User, repo *model.Repo,
 	yamls []*forge_types.FileMeta, envs map[string]string,
 ) (*model.Pipeline, []*stepbuilder.Item, error) {
-	pipelineItems, err := parsePipeline(store, currentPipeline, user, repo, yamls, envs)
+	pipelineItems, err := parsePipeline(forge, store, currentPipeline, user, repo, yamls, envs)
 	if pipeline_errors.HasBlockingErrors(err) {
-		currentPipeline, uerr := UpdateToStatusError(store, *currentPipeline, err)
-		if uerr != nil {
-			log.Error().Err(uerr).Msgf("error setting error status of pipeline for %s#%d", repo.FullName, currentPipeline.Number)
+		currentPipeline, uErr := UpdateToStatusError(store, *currentPipeline, err)
+		if uErr != nil {
+			log.Error().Err(uErr).Msgf("error setting error status of pipeline for %s#%d", repo.FullName, currentPipeline.Number)
 		} else {
-			updatePipelineStatus(c, currentPipeline, repo, user)
+			updatePipelineStatus(c, forge, currentPipeline, repo, user)
 		}
 
 		return currentPipeline, nil, err
 	} else if err != nil {
 		currentPipeline.Errors = pipeline_errors.GetPipelineErrors(err)
-		err = updatePipelinePending(c, store, currentPipeline, repo, user)
+		err = updatePipelinePending(c, forge, store, currentPipeline, repo, user)
 	}
 
 	currentPipeline = setPipelineStepsOnPipeline(currentPipeline, pipelineItems)
@@ -117,7 +118,7 @@ func createPipelineItems(c context.Context, store store.Store,
 
 // setPipelineStepsOnPipeline is the link between pipeline representation in "pipeline package" and server
 // to be specific this func currently is used to convert the pipeline.Item list (crafted by StepBuilder.Build()) into
-// a pipeline that can be stored in the database by the server
+// a pipeline that can be stored in the database by the server.
 func setPipelineStepsOnPipeline(pipeline *model.Pipeline, pipelineItems []*stepbuilder.Item) *model.Pipeline {
 	var pidSequence int
 	for _, item := range pipelineItems {
@@ -126,14 +127,13 @@ func setPipelineStepsOnPipeline(pipeline *model.Pipeline, pipelineItems []*stepb
 		}
 	}
 
+	// the workflows in the pipeline should be empty as only we do populate them,
+	// but if a pipeline was already loaded form database it might contain things, so we just clean it
+	pipeline.Workflows = nil
 	for _, item := range pipelineItems {
 		for _, stage := range item.Config.Stages {
-			var gid int
 			for _, step := range stage.Steps {
 				pidSequence++
-				if gid == 0 {
-					gid = pidSequence
-				}
 				step := &model.Step{
 					Name:       step.Name,
 					UUID:       step.UUID,
@@ -147,8 +147,14 @@ func setPipelineStepsOnPipeline(pipeline *model.Pipeline, pipelineItems []*stepb
 				if item.Workflow.State == model.StatusSkipped {
 					step.State = model.StatusSkipped
 				}
+				if pipeline.Status == model.StatusBlocked {
+					step.State = model.StatusBlocked
+				}
 				item.Workflow.Children = append(item.Workflow.Children, step)
 			}
+		}
+		if pipeline.Status == model.StatusBlocked {
+			item.Workflow.State = model.StatusBlocked
 		}
 		item.Workflow.PipelineID = pipeline.ID
 		pipeline.Workflows = append(pipeline.Workflows, item.Workflow)

@@ -25,7 +25,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server/store/types"
 )
 
-// wrapGet return error if err not nil or if requested entry do not exist
+// wrapGet return error if err not nil or if requested entry do not exist.
 func wrapGet(exist bool, err error) error {
 	if !exist {
 		return types.RecordNotExist
@@ -38,7 +38,7 @@ func wrapGet(exist bool, err error) error {
 	return nil
 }
 
-// wrapDelete return error if err not nil or if requested entry do not exist
+// wrapDelete return error if err not nil or if requested entry do not exist.
 func wrapDelete(c int64, err error) error {
 	if c == 0 {
 		return types.RecordNotExist

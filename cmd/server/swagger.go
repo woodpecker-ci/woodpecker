@@ -19,7 +19,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/version"
 )
 
-// generate docs/swagger.json via:
+// Generate docs/swagger.json via:
 //go:generate go run woodpecker_docs_gen.go swagger.go
 //go:generate go run github.com/go-swagger/go-swagger/cmd/swagger@latest validate ../../docs/swagger.json
 

@@ -18,14 +18,15 @@ import (
 	"context"
 
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 )
 
 type db struct {
-	store model.SecretStore
+	store store.Store
 }
 
 // NewDB returns a new local secret service.
-func NewDB(store model.SecretStore) Service {
+func NewDB(store store.Store) Service {
 	return &db{store: store}
 }
 

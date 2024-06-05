@@ -56,6 +56,8 @@ export type Repo = {
   // Whether pull requests should trigger a pipeline.
   allow_pr: boolean;
 
+  allow_deploy: boolean;
+
   config_file: string;
 
   visibility: RepoVisibility;
@@ -93,6 +95,7 @@ export type RepoSettings = Pick<
   | 'trusted'
   | 'gated'
   | 'allow_pr'
+  | 'allow_deploy'
   | 'cancel_previous_pipeline_events'
   | 'netrc_only_trusted'
 >;
