@@ -1,7 +1,15 @@
 # Configuration extension
 
 The configuration extension can be used to modify or generate Woodpeckers pipeline configurations. You can configure a HTTP
-endpoint in the repository settings in the extensions tab. This can be used to do some preprocessing like using go templating, converting custom attributes, adding defaults or to even convert configuration files in a totally different format like Gitlab CI config, Starlark, Jsonnet, ...
+endpoint in the repository settings in the extensions tab.
+
+Using such an extension can be useful if you want to:
+
+- Preprocess the original configuration file with something like go templating
+- Convert custom attributes to Woodpecker attributes
+- Add defaults to the configuration like default steps
+- Convert configuration files from a totally different format like Gitlab CI config, Starlark, Jsonnet, ...
+- Centralize configuration for multiple repositories in one place
 
 ## Security
 
@@ -23,6 +31,10 @@ WOODPECKER_CONFIG_SERVICE_ENDPOINT=https://example.com/ciconfig
 ## How it works
 
 When a pipline is triggered Woodpecker will fetch the pipeline configuration from the repository, then make a HTTP POST request to the configured extension with a JSON payload containing some data like the repository, pipeline information and the current config files retrieved from the repository. The extension can then send back modified or even new pipeline configurations following Woodpeckers offical yaml format that should be used.
+
+:::tip
+The netrc data is pretty powerful as it contains credentials to access the repository. You can use this to clone the repository or even use the forge (Github or Gitlab, ...) api to get more information about the repository.
+:::
 
 ### Request
 
@@ -122,7 +134,7 @@ Example request:
 ### Response
 
 The extension should respond with a JSON payload containing the new configuration files in Woodpeckers official yaml format.
-If the extension wants to keep the existing configuration files, it can respond with `HTTP 204`.
+If the extension wants to keep the existing configuration files, it can respond with **HTTP 204**.
 
 ```ts
 class Response {

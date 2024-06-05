@@ -14,7 +14,14 @@ As Woodpecker will pass private information like tokens and will execute the ret
 
 ## How it works
 
-When a pipeline is triggered Woodpecker will fetch the pipeline configuration from the repository, then make a HTTP POST request to the configured extension with a JSON payload containing some data like the repository, pipeline information and the current config files retrieved from the repository. The extension can then send back modified or even new pipeline configurations following Woodpeckers official yaml format that should be used.
+For example if you open the secrets list in the repository settings, the following will happen:
+
+- Woodpecker will send a HTTP GET request to the `<this-server-url>/repo/<repo-id>/secrets` endpoint of your extension
+- The extension will first verify the request is coming from the actual Woodpecker instance and wasn't modified in transit
+  using a http signature. This is pretty important so no one can just send a request to this server and get all your
+  secrets for example.
+- The extension server will then return a list of secrets that are available for this repository.
+- The secrets will be displayed in the UI.
 
 ### Endpoints
 
