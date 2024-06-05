@@ -25,7 +25,7 @@ import (
 )
 
 const (
-	currentUserID = "%s/plugins/servlet/applinks/whoami"
+	currentUserID = "%s/plugins/servlet/applinks/whoami" // cspell:disable-line
 )
 
 type Client struct {

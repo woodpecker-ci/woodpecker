@@ -580,11 +580,11 @@ func PostPipeline(c *gin.Context) {
 		}
 	}
 
-	newpipeline, err := pipeline.Restart(c, _store, pl, user, repo, envs)
+	newPipeline, err := pipeline.Restart(c, _store, pl, user, repo, envs)
 	if err != nil {
 		handlePipelineErr(c, err)
 	} else {
-		c.JSON(http.StatusOK, newpipeline)
+		c.JSON(http.StatusOK, newPipeline)
 	}
 }
 
