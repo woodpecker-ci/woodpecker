@@ -21,7 +21,6 @@ steps:
     settings:
       skip-dirs: node_modules/,plugins/woodpecker-plugins/node_modules/
       dir: docs/
-    failure: ignore
 
   web:
     depends_on: []
