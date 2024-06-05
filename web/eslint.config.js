@@ -29,6 +29,13 @@ export default antfu(
   //...tseslint.configs.strictTypeChecked,
   //...tseslint.configs.stylisticTypeChecked,
 
+  {
+    rules: {
+      'import/order': 'off',
+      'sort-imports': 'off',
+    },
+  },
+
   ...eslintPluginVueScopedCSS.configs['flat/recommended'],
 
   {

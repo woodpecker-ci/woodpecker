@@ -60,8 +60,9 @@
               'bg-opacity-30 bg-blue-600': isSelected(line),
               underline: isSelected(line),
             }"
-            >{{ line.number }}</a
           >
+            {{ line.number }}
+          </a>
           <!-- eslint-disable vue/no-v-html -->
           <span
             class="align-top whitespace-pre-wrap break-words"
@@ -80,8 +81,9 @@
               'bg-opacity-40 dark:bg-opacity-50 bg-yellow-600 dark:bg-yellow-800': line.type === 'warning',
               'bg-opacity-30 bg-blue-600': isSelected(line),
             }"
-            >{{ formatTime(line.time) }}</span
           >
+            {{ formatTime(line.time) }}
+          </span>
         </div>
       </div>
 

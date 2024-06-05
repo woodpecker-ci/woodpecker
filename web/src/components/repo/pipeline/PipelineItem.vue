@@ -31,8 +31,9 @@
         <span
           class="text-wp-text-100 <md:underline whitespace-nowrap overflow-hidden overflow-ellipsis"
           :title="message"
-          >{{ title }}</span
         >
+          {{ title }}
+        </span>
       </div>
 
       <div

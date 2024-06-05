@@ -89,11 +89,7 @@
     />
     <Tab id="config" :title="$t('repo.pipeline.config')" />
     <Tab
-      v-if="
-        (pipeline.event === 'push' || pipeline.event === 'pull_request' || pipeline.event === 'pull_request_closed') &&
-        pipeline.changed_files &&
-        pipeline.changed_files.length > 0
-      "
+      v-if="pipeline.changed_files && pipeline.changed_files.length > 0"
       id="changed-files"
       :title="$t('repo.pipeline.files', { files: pipeline.changed_files?.length })"
     />
