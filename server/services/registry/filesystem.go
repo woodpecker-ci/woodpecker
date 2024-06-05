@@ -21,7 +21,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/docker/cli/cli/config/configfile"
+	config_file "github.com/docker/cli/cli/config/configfile"
 	"github.com/docker/cli/cli/config/types"
 
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
@@ -46,7 +46,7 @@ func parseDockerConfig(path string) ([]*model.Registry, error) {
 	}
 	defer f.Close()
 
-	configFile := configfile.ConfigFile{
+	configFile := config_file.ConfigFile{
 		AuthConfigs: make(map[string]types.AuthConfig),
 	}
 
@@ -73,16 +73,16 @@ func parseDockerConfig(path string) ([]*model.Registry, error) {
 		}
 	}
 
-	var auths []*model.Registry
+	var registries []*model.Registry
 	for key, auth := range configFile.AuthConfigs {
-		auths = append(auths, &model.Registry{
+		registries = append(registries, &model.Registry{
 			Address:  key,
 			Username: auth.Username,
 			Password: auth.Password,
 		})
 	}
 
-	return auths, nil
+	return registries, nil
 }
 
 func (f *filesystem) RegistryFind(*model.Repo, string) (*model.Registry, error) {

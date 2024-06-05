@@ -55,7 +55,7 @@ func HandleAuth(c *gin.Context) {
 	// cannot, however, remember why, so need to revisit this line.
 	c.Writer.Header().Del("Content-Type")
 
-	tmpuser, redirectURL, err := _forge.Login(c, &forge_types.OAuthRequest{
+	tmpUser, redirectURL, err := _forge.Login(c, &forge_types.OAuthRequest{
 		Error:            c.Request.FormValue("error"),
 		ErrorURI:         c.Request.FormValue("error_uri"),
 		ErrorDescription: c.Request.FormValue("error_description"),
@@ -67,13 +67,13 @@ func HandleAuth(c *gin.Context) {
 		return
 	}
 	// The user is not authorized yet -> redirect
-	if tmpuser == nil {
+	if tmpUser == nil {
 		http.Redirect(c.Writer, c.Request, redirectURL, http.StatusSeeOther)
 		return
 	}
 
 	// get the user from the database
-	u, err := _store.GetUserRemoteID(tmpuser.ForgeRemoteID, tmpuser.Login)
+	u, err := _store.GetUserRemoteID(tmpUser.ForgeRemoteID, tmpUser.Login)
 	if err != nil && !errors.Is(err, types.RecordNotExist) {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
@@ -81,8 +81,8 @@ func HandleAuth(c *gin.Context) {
 
 	if errors.Is(err, types.RecordNotExist) {
 		// if self-registration is disabled we should return a not authorized error
-		if !server.Config.Permissions.Open && !server.Config.Permissions.Admins.IsAdmin(tmpuser) {
-			log.Error().Msgf("cannot register %s. registration closed", tmpuser.Login)
+		if !server.Config.Permissions.Open && !server.Config.Permissions.Admins.IsAdmin(tmpUser) {
+			log.Error().Msgf("cannot register %s. registration closed", tmpUser.Login)
 			c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=access_denied")
 			return
 		}
@@ -90,7 +90,7 @@ func HandleAuth(c *gin.Context) {
 		// if self-registration is enabled for allowed organizations we need to
 		// check the user's organization membership.
 		if server.Config.Permissions.Orgs.IsConfigured {
-			teams, terr := _forge.Teams(c, tmpuser)
+			teams, terr := _forge.Teams(c, tmpUser)
 			if terr != nil || !server.Config.Permissions.Orgs.IsMember(teams) {
 				log.Error().Err(terr).Msgf("cannot verify team membership for %s.", u.Login)
 				c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=access_denied")
@@ -100,12 +100,12 @@ func HandleAuth(c *gin.Context) {
 
 		// create the user account
 		u = &model.User{
-			Login:         tmpuser.Login,
-			ForgeRemoteID: tmpuser.ForgeRemoteID,
-			Token:         tmpuser.Token,
-			Secret:        tmpuser.Secret,
-			Email:         tmpuser.Email,
-			Avatar:        tmpuser.Avatar,
+			Login:         tmpUser.Login,
+			ForgeRemoteID: tmpUser.ForgeRemoteID,
+			Token:         tmpUser.Token,
+			Secret:        tmpUser.Secret,
+			Email:         tmpUser.Email,
+			Avatar:        tmpUser.Avatar,
 			ForgeID:       forgeID,
 			Hash: base32.StdEncoding.EncodeToString(
 				securecookie.GenerateRandomKey(32),
@@ -146,7 +146,7 @@ func HandleAuth(c *gin.Context) {
 	}
 
 	// update org name
-	if u.Login != tmpuser.Login {
+	if u.Login != tmpUser.Login {
 		org, err := _store.OrgGet(u.OrgID)
 		if err != nil {
 			log.Error().Err(err).Msgf("cannot get org %s", u.Login)
@@ -160,13 +160,13 @@ func HandleAuth(c *gin.Context) {
 	}
 
 	// update the user meta data and authorization data.
-	u.Token = tmpuser.Token
-	u.Secret = tmpuser.Secret
-	u.Email = tmpuser.Email
-	u.Avatar = tmpuser.Avatar
-	u.ForgeRemoteID = tmpuser.ForgeRemoteID
-	u.Login = tmpuser.Login
-	u.Admin = u.Admin || server.Config.Permissions.Admins.IsAdmin(tmpuser)
+	u.Token = tmpUser.Token
+	u.Secret = tmpUser.Secret
+	u.Email = tmpUser.Email
+	u.Avatar = tmpUser.Avatar
+	u.ForgeRemoteID = tmpUser.ForgeRemoteID
+	u.Login = tmpUser.Login
+	u.Admin = u.Admin || server.Config.Permissions.Admins.IsAdmin(tmpUser)
 
 	// if self-registration is enabled for allowed organizations we need to
 	// check the user's organization membership.

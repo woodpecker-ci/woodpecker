@@ -231,36 +231,36 @@ func fixMalformedAvatar(url string) string {
 
 // expandAvatar is a helper function that converts a relative avatar URL to the
 // absolute url.
-func expandAvatar(repo, rawurl string) string {
-	aurl, err := url.Parse(rawurl)
+func expandAvatar(repo, rawURL string) string {
+	aURL, err := url.Parse(rawURL)
 	if err != nil {
-		return rawurl
+		return rawURL
 	}
-	if aurl.IsAbs() {
+	if aURL.IsAbs() {
 		// Url is already absolute
-		return aurl.String()
+		return aURL.String()
 	}
 
 	// Resolve to base
 	burl, err := url.Parse(repo)
 	if err != nil {
-		return rawurl
+		return rawURL
 	}
-	aurl = burl.ResolveReference(aurl)
+	aURL = burl.ResolveReference(aURL)
 
-	return aurl.String()
+	return aURL.String()
 }
 
 // helper function to return matching hooks.
-func matchingHooks(hooks []*forgejo.Hook, rawurl string) *forgejo.Hook {
-	link, err := url.Parse(rawurl)
+func matchingHooks(hooks []*forgejo.Hook, rawURL string) *forgejo.Hook {
+	link, err := url.Parse(rawURL)
 	if err != nil {
 		return nil
 	}
 	for _, hook := range hooks {
 		if val, ok := hook.Config["url"]; ok {
-			hookurl, err := url.Parse(val)
-			if err == nil && hookurl.Host == link.Host {
+			hookURL, err := url.Parse(val)
+			if err == nil && hookURL.Host == link.Host {
 				return hook
 			}
 		}
