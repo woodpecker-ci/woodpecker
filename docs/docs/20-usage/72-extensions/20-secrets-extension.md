@@ -33,13 +33,13 @@ The secret json object should look like this:
 
 ```ts
 class Secret {
-  id: number
-  org_id: number // has to be 0 for repository secrets
-  repo_id: number
-  name: string
-  value: string
-  images: string[] // a list of docker images this secret can be used with
-  events: string[] // a list of pipeline events this secret can be used with
+  id: number;
+  org_id: number; // has to be 0 for repository secrets
+  repo_id: number;
+  name: string;
+  value: string;
+  images: string[]; // a list of docker images this secret can be used with
+  events: string[]; // a list of pipeline events this secret can be used with
 }
 ```
 
