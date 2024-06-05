@@ -52,9 +52,9 @@
 </template>
 
 <script setup lang="ts">
+import Tabs from './Tabs.vue';
 import TextField from '~/components/form/TextField.vue';
 import Container from '~/components/layout/Container.vue';
-import Tabs from './Tabs.vue';
 
 const props = defineProps<{
   goBack?: () => void;

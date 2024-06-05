@@ -18,10 +18,10 @@
 </template>
 
 <script setup lang="ts">
-import Container from '~/components/layout/Container.vue';
-import { useTabsProvider } from '~/compositions/useTabs';
 import { computed, ref, watch } from 'vue';
 import Header from './Header.vue';
+import Container from '~/components/layout/Container.vue';
+import { useTabsProvider } from '~/compositions/useTabs';
 
 const props = defineProps<{
   // Header

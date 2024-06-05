@@ -1,7 +1,7 @@
+import { computed, ref, watch } from 'vue';
 import useConfig from '~/compositions/useConfig';
 import { useTheme } from '~/compositions/useTheme';
 import type { PipelineStatus } from '~/lib/api/types';
-import { computed, ref, watch } from 'vue';
 
 const { theme } = useTheme();
 const darkMode = computed(() => theme.value);

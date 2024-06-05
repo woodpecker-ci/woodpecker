@@ -32,8 +32,8 @@
 </template>
 
 <script lang="ts" setup>
-import Icon from '~/components/atomic/Icon.vue';
 import { computed, ref } from 'vue';
+import Icon from '~/components/atomic/Icon.vue';
 
 const props = defineProps<{
   title?: string;

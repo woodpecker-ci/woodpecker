@@ -1,9 +1,9 @@
-import useAuthentication from '~/compositions/useAuthentication';
-import useConfig from '~/compositions/useConfig';
-import useUserConfig from '~/compositions/useUserConfig';
 import type { Component } from 'vue';
 import type { RouteRecordRaw } from 'vue-router';
 import { createRouter, createWebHistory } from 'vue-router';
+import useAuthentication from '~/compositions/useAuthentication';
+import useConfig from '~/compositions/useConfig';
+import useUserConfig from '~/compositions/useUserConfig';
 
 const { rootPath } = useConfig();
 const routes: RouteRecordRaw[] = [

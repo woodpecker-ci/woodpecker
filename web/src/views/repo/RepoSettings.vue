@@ -38,6 +38,10 @@
 </template>
 
 <script lang="ts" setup>
+import type { Ref } from 'vue';
+import { inject, onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { useRouter } from 'vue-router';
 import Scaffold from '~/components/layout/scaffold/Scaffold.vue';
 import Tab from '~/components/layout/scaffold/Tab.vue';
 import ActionsTab from '~/components/repo/settings/ActionsTab.vue';
@@ -49,10 +53,6 @@ import SecretsTab from '~/components/repo/settings/SecretsTab.vue';
 import useNotifications from '~/compositions/useNotifications';
 import { useRouteBack } from '~/compositions/useRouteBack';
 import type { Repo, RepoPermissions } from '~/lib/api/types';
-import type { Ref } from 'vue';
-import { inject, onMounted } from 'vue';
-import { useI18n } from 'vue-i18n';
-import { useRouter } from 'vue-router';
 
 const notifications = useNotifications();
 const router = useRouter();

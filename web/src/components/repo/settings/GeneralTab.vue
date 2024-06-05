@@ -98,6 +98,9 @@
 </template>
 
 <script lang="ts" setup>
+import type { Ref } from 'vue';
+import { inject, onMounted, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import Button from '~/components/atomic/Button.vue';
 import Checkbox from '~/components/form/Checkbox.vue';
 import CheckboxesField from '~/components/form/CheckboxesField.vue';
@@ -114,9 +117,6 @@ import useNotifications from '~/compositions/useNotifications';
 import type { Repo, RepoSettings } from '~/lib/api/types';
 import { RepoVisibility, WebhookEvents } from '~/lib/api/types';
 import { useRepoStore } from '~/store/repos';
-import type { Ref } from 'vue';
-import { inject, onMounted, ref } from 'vue';
-import { useI18n } from 'vue-i18n';
 
 const apiClient = useApiClient();
 const notifications = useNotifications();

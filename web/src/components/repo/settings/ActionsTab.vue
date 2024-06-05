@@ -42,16 +42,16 @@
 </template>
 
 <script lang="ts" setup>
+import type { Ref } from 'vue';
+import { computed, inject } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { useRouter } from 'vue-router';
 import Button from '~/components/atomic/Button.vue';
 import Settings from '~/components/layout/Settings.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useNotifications from '~/compositions/useNotifications';
 import type { Repo } from '~/lib/api/types';
-import type { Ref } from 'vue';
-import { computed, inject } from 'vue';
-import { useI18n } from 'vue-i18n';
-import { useRouter } from 'vue-router';
 
 const apiClient = useApiClient();
 const router = useRouter();

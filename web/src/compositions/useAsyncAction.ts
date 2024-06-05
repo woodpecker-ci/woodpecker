@@ -1,5 +1,5 @@
-import useNotifications from '~/compositions/useNotifications';
 import { computed, ref } from 'vue';
+import useNotifications from '~/compositions/useNotifications';
 
 const notifications = useNotifications();
 

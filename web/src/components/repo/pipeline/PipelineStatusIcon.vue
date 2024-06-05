@@ -18,9 +18,9 @@
 </template>
 
 <script lang="ts" setup>
+import { pipelineStatusColors } from './pipeline-status';
 import Icon from '~/components/atomic/Icon.vue';
 import type { PipelineStatus } from '~/lib/api/types';
-import { pipelineStatusColors } from './pipeline-status';
 
 defineProps<{
   status: PipelineStatus;

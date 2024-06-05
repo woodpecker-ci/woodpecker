@@ -37,6 +37,9 @@
 </template>
 
 <script lang="ts" setup>
+import { cloneDeep } from 'lodash';
+import { computed, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import Button from '~/components/atomic/Button.vue';
 import DocsLink from '~/components/atomic/DocsLink.vue';
 import Panel from '~/components/layout/Panel.vue';
@@ -49,9 +52,6 @@ import useNotifications from '~/compositions/useNotifications';
 import { usePagination } from '~/compositions/usePaginate';
 import type { Secret } from '~/lib/api/types';
 import { WebhookEvents } from '~/lib/api/types';
-import { cloneDeep } from 'lodash';
-import { computed, ref } from 'vue';
-import { useI18n } from 'vue-i18n';
 
 const emptySecret: Partial<Secret> = {
   name: '',

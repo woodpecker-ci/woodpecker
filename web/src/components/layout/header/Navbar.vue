@@ -37,14 +37,14 @@
 </template>
 
 <script lang="ts" setup>
+import { useRoute } from 'vue-router';
+import ActivePipelines from './ActivePipelines.vue';
 import WoodpeckerLogo from '~/assets/logo.svg?component';
 import Button from '~/components/atomic/Button.vue';
 import IconButton from '~/components/atomic/IconButton.vue';
 import useAuthentication from '~/compositions/useAuthentication';
 import useConfig from '~/compositions/useConfig';
 import { useVersion } from '~/compositions/useVersion';
-import { useRoute } from 'vue-router';
-import ActivePipelines from './ActivePipelines.vue';
 
 const version = useVersion();
 const config = useConfig();

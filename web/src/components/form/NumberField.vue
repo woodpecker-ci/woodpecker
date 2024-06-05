@@ -3,8 +3,8 @@
 </template>
 
 <script lang="ts" setup>
-import TextField from '~/components/form/TextField.vue';
 import { computed, toRef } from 'vue';
+import TextField from '~/components/form/TextField.vue';
 
 const props = defineProps<{
   modelValue: number;

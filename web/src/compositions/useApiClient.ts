@@ -1,5 +1,5 @@
-import WoodpeckerClient from '~/lib/api';
 import useConfig from './useConfig';
+import WoodpeckerClient from '~/lib/api';
 
 let apiClient: WoodpeckerClient | undefined;
 
