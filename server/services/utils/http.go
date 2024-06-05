@@ -18,18 +18,51 @@ import (
 	"bytes"
 	"context"
 	"crypto"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 	"net/url"
+	"time"
 
 	"github.com/go-ap/httpsig"
+
+	"go.woodpecker-ci.org/woodpecker/v2/server/services/utils/hostmatcher"
 )
+
+type Client struct {
+	*http.Client
+	privateKey crypto.PrivateKey
+}
+
+func getHttpClient(allowedHostListValue string) *http.Client {
+	timeout := time.Duration(10 * time.Second)
+
+	if allowedHostListValue == "" {
+		allowedHostListValue = hostmatcher.MatchBuiltinExternal
+	}
+	allowedHostMatcher := hostmatcher.ParseHostMatchList("WOODPECKER_ALLOWED_EXTENSIONS_HOSTS", allowedHostListValue)
+
+	return &http.Client{
+		Timeout: timeout,
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: false},
+			DialContext:     hostmatcher.NewDialContext("extensions", allowedHostMatcher, nil),
+		},
+	}
+}
+
+func NewHTTPClient(privateKey crypto.PrivateKey, allowedHostList string) *Client {
+	return &Client{
+		Client:     getHttpClient(allowedHostList),
+		privateKey: privateKey,
+	}
+}
 
 // Send makes an http request to the given endpoint, writing the input
 // to the request body and un-marshaling the output from the response body.
-func Send(ctx context.Context, method, path string, privateKey crypto.PrivateKey, in, out any) (int, error) {
+func (e *Client) Send(ctx context.Context, method, path string, in, out any) (int, error) {
 	uri, err := url.Parse(path)
 	if err != nil {
 		return 0, err
@@ -54,12 +87,12 @@ func Send(ctx context.Context, method, path string, privateKey crypto.PrivateKey
 		req.Header.Set("Content-Type", "application/json")
 	}
 
-	err = SignHTTPRequest(privateKey, req)
+	err = SignHTTPRequest(e.privateKey, req)
 	if err != nil {
 		return 0, err
 	}
 
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := e.Do(req)
 	if err != nil {
 		return 0, err
 	}

@@ -16,7 +16,6 @@ package config
 
 import (
 	"context"
-	"crypto"
 	"fmt"
 	net_http "net/http"
 
@@ -27,8 +26,8 @@ import (
 )
 
 type http struct {
-	endpoint   string
-	privateKey crypto.PrivateKey
+	endpoint string
+	client   *utils.Client
 }
 
 // configData same as forge.FileMeta but with json tags and string data.
@@ -48,8 +47,8 @@ type responseStructure struct {
 	Configs []*configData `json:"configs"`
 }
 
-func NewHTTP(endpoint string, privateKey crypto.PrivateKey) Service {
-	return &http{endpoint, privateKey}
+func NewHTTP(endpoint string, client *utils.Client) Service {
+	return &http{endpoint, client}
 }
 
 func (h *http) Fetch(ctx context.Context, forge forge.Forge, user *model.User, repo *model.Repo, pipeline *model.Pipeline, oldConfigData []*types.FileMeta, _ bool) ([]*types.FileMeta, error) {
@@ -71,7 +70,7 @@ func (h *http) Fetch(ctx context.Context, forge forge.Forge, user *model.User, r
 		Netrc:         netrc,
 	}
 
-	status, err := utils.Send(ctx, "POST", h.endpoint, h.privateKey, body, response)
+	status, err := h.client.Send(ctx, "POST", h.endpoint, body, response)
 	if err != nil && status != 204 {
 		return nil, fmt.Errorf("failed to fetch config via http (%d) %w", status, err)
 	}

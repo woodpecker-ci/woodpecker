@@ -42,13 +42,13 @@ The extension receives an HTTP POST request with the following JSON payload:
 
 ```ts
 class Request {
-  repo: Repo
-  pipeline: Pipeline
-  netrc: Netrc
+  repo: Repo;
+  pipeline: Pipeline;
+  netrc: Netrc;
   configuration: {
-    name: string // filename of the configuration file
-    data: string // content of the configuration file
-  }[]
+    name: string; // filename of the configuration file
+    data: string; // content of the configuration file
+  }[];
 }
 ```
 
@@ -139,9 +139,9 @@ If the extension wants to keep the existing configuration files, it can respond 
 ```ts
 class Response {
   configs: {
-    name: string // filename of the configuration file
-    data: string // content of the configuration file
-  }[]
+    name: string; // filename of the configuration file
+    data: string; // content of the configuration file
+  }[];
 }
 ```
 

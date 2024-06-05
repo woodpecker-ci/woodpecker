@@ -28,6 +28,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server/services/environment"
 	"go.woodpecker-ci.org/woodpecker/v2/server/services/registry"
 	"go.woodpecker-ci.org/woodpecker/v2/server/services/secret"
+	"go.woodpecker-ci.org/woodpecker/v2/server/services/utils"
 	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 )
 
@@ -60,6 +61,7 @@ type manager struct {
 	environment         environment.Service
 	forgeCache          *ttlcache.Cache[int64, forge.Forge]
 	setupForge          SetupForge
+	client              *utils.Client
 }
 
 func NewManager(c *cli.Context, store store.Store, setupForge SetupForge) (Manager, error) {
@@ -73,7 +75,9 @@ func NewManager(c *cli.Context, store store.Store, setupForge SetupForge) (Manag
 		return nil, err
 	}
 
-	configService, err := setupConfigService(c, signaturePrivateKey)
+	client := utils.NewHTTPClient(signaturePrivateKey, c.String("allowed-extensions-hosts"))
+
+	configService, err := setupConfigService(c, client)
 	if err != nil {
 		return nil, err
 	}
@@ -88,6 +92,7 @@ func NewManager(c *cli.Context, store store.Store, setupForge SetupForge) (Manag
 		environment:         environment.Parse(c.StringSlice("environment")),
 		forgeCache:          ttlcache.New(ttlcache.WithDisableTouchOnHit[int64, forge.Forge]()),
 		setupForge:          setupForge,
+		client:              client,
 	}, nil
 }
 
@@ -97,7 +102,7 @@ func (m *manager) SignaturePublicKey() crypto.PublicKey {
 
 func (m *manager) SecretServiceFromRepo(repo *model.Repo) secret.Service {
 	if repo.SecretExtensionEndpoint != "" {
-		return secret.NewHTTP(m.SecretService(), strings.TrimRight(repo.SecretExtensionEndpoint, "/"), m.signaturePrivateKey)
+		return secret.NewHTTP(m.SecretService(), strings.TrimRight(repo.SecretExtensionEndpoint, "/"), m.client)
 	}
 
 	return m.SecretService()
@@ -117,7 +122,7 @@ func (m *manager) RegistryService() registry.Service {
 
 func (m *manager) ConfigServiceFromRepo(repo *model.Repo) config.Service {
 	if repo.ConfigExtensionEndpoint != "" {
-		return config.NewCombined(m.config, config.NewHTTP(strings.TrimRight(repo.ConfigExtensionEndpoint, "/"), m.signaturePrivateKey))
+		return config.NewCombined(m.config, config.NewHTTP(strings.TrimRight(repo.ConfigExtensionEndpoint, "/"), m.client))
 	}
 
 	return m.config
