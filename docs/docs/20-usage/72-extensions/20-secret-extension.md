@@ -1,3 +1,0 @@
-# Secret extensions
-
-TODO

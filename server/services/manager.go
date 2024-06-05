@@ -16,6 +16,7 @@ package services
 
 import (
 	"crypto"
+	"strings"
 	"time"
 
 	"github.com/jellydator/ttlcache/v3"
@@ -96,7 +97,7 @@ func (m *manager) SignaturePublicKey() crypto.PublicKey {
 
 func (m *manager) SecretServiceFromRepo(repo *model.Repo) secret.Service {
 	if repo.SecretExtensionEndpoint != "" {
-		return secret.NewHTTP(m.SecretService(), repo.SecretExtensionEndpoint, m.signaturePrivateKey)
+		return secret.NewHTTP(m.SecretService(), strings.TrimRight(repo.SecretExtensionEndpoint, "/"), m.signaturePrivateKey)
 	}
 
 	return m.SecretService()
@@ -116,7 +117,7 @@ func (m *manager) RegistryService() registry.Service {
 
 func (m *manager) ConfigServiceFromRepo(repo *model.Repo) config.Service {
 	if repo.ConfigExtensionEndpoint != "" {
-		return config.NewHTTP(repo.ConfigExtensionEndpoint, m.signaturePrivateKey)
+		return config.NewCombined(m.config, config.NewHTTP(strings.TrimRight(repo.ConfigExtensionEndpoint, "/"), m.signaturePrivateKey))
 	}
 
 	return m.config

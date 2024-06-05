@@ -1,23 +1,52 @@
 # Configuration extension
 
-To provide additional management and preprocessing capabilities for pipeline configurations Woodpecker supports an HTTP API which can be enabled to call an external config extension.
-Before the run or restart of any pipeline Woodpecker will make a POST request to an external HTTP API sending the current repository, pipeline information and all current config files retrieved from the repository. The external API can then send back new pipeline configurations that will be used immediately or respond with `HTTP 204` to tell the system to use the existing configuration.
+The configuration extension can be used to modify or generate Woodpeckers pipeline configurations. You can configure a HTTP
+endpoint in the repository settings in the extensions tab. This can be used to do some preprocessing like using go templating, converting custom attributes, adding defaults or to even convert configuration files in a totally different format like Gitlab CI config, Starlark, Jsonnet, ...
 
-Every request sent by Woodpecker is signed using a [http-signature](https://datatracker.ietf.org/doc/html/draft-cavage-http-signatures) by a private key (ed25519) generated on the first start of the Woodpecker server. You can get the public key for the verification of the http-signature from `http(s)://your-woodpecker-server/api/signature/public-key`.
-
-A simplistic example configuration extension can be found here: [https://github.com/woodpecker-ci/example-config-service](https://github.com/woodpecker-ci/example-config-service)
+## Security
 
 :::warning
-You need to trust the external config service as it is getting secret information about the repository and pipeline and has the ability to change pipeline configs that could run malicious tasks.
+As Woodpecker will pass private information like tokens and will execute the returned configuration, it is extremely important to secure the external extension. Therefore Woodpecker signs every request. Read more about it in the [security section](./10-extensions.md#security).
 :::
 
-## Config
+## Global configuration
+
+In addition to the ability to configure the extension per repository, you can also configure a global endpoint in the Woodpecker server configuration. This can be useful if you want to use the extension for all repositories. Be careful if
+you share your Woodpecker server with others as they will also use your configuration extension.
+
+The global configuration will be called before the repository specific configuration extension if both are configured.
 
 ```ini title="Server"
 WOODPECKER_CONFIG_SERVICE_ENDPOINT=https://example.com/ciconfig
 ```
 
-### Example request made by Woodpecker
+## How it works
+
+When a pipline is triggered Woodpecker will fetch the pipeline configuration from the repository, then make a HTTP POST request to the configured extension with a JSON payload containing some data like the repository, pipeline information and the current config files retrieved from the repository. The extension can then send back modified or even new pipeline configurations following Woodpeckers offical yaml format that should be used.
+
+### Request
+
+The extension receives an HTTP POST request with the following JSON payload:
+
+```ts
+class Request {
+  repo: Repo
+  pipeline: Pipeline
+  netrc: Netrc
+  configuration: {
+    name: string // filename of the configuration file
+    data: string // content of the configuration file
+  }[]
+}
+```
+
+Checkout the following models for more information:
+
+- [repo model](https://github.com/woodpecker-ci/woodpecker/blob/main/server/model/repo.go)
+- [pipeline model](https://github.com/woodpecker-ci/woodpecker/blob/main/server/model/pipeline.go)
+- [netrc model](https://github.com/woodpecker-ci/woodpecker/blob/main/server/model/netrc.go)
+
+Example request:
 
 ```json
 {
@@ -90,7 +119,21 @@ WOODPECKER_CONFIG_SERVICE_ENDPOINT=https://example.com/ciconfig
 }
 ```
 
-### Example response structure
+### Response
+
+The extension should respond with a JSON payload containing the new configuration files in Woodpeckers official yaml format.
+If the extension wants to keep the existing configuration files, it can respond with `HTTP 204`.
+
+```ts
+class Response {
+  configs: {
+    name: string // filename of the configuration file
+    data: string // content of the configuration file
+  }[]
+}
+```
+
+Example response:
 
 ```json
 {
