@@ -58,6 +58,10 @@ Checkout the following models for more information:
 - [pipeline model](https://github.com/woodpecker-ci/woodpecker/blob/main/server/model/pipeline.go)
 - [netrc model](https://github.com/woodpecker-ci/woodpecker/blob/main/server/model/netrc.go)
 
+:::tip
+The `netrc` data is pretty powerful as it contains credentials to access the repository. You can use this to clone the repository or even use the forge (Github or Gitlab, ...) api to get more information about the repository.
+:::
+
 Example request:
 
 ```json
