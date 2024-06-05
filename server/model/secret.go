@@ -43,7 +43,6 @@ type SecretStore interface {
 	SecretListAll() ([]*Secret, error)
 }
 
-// TODO: rename to environment_variable and make it a secret by setting conceal=true
 // Secret represents a secret variable, such as a password or token.
 type Secret struct {
 	ID     int64          `json:"id"              xorm:"pk autoincr 'secret_id'"`
