@@ -549,7 +549,7 @@ Disable version check in admin web UI.
 
 Where to store logs. Possible values: `database` or `file`.
 
-### `WOODPECKER_LOG_STORE_FILE_BASE`
+### `WOODPECKER_LOG_STORE_FILE_PATH`
 
 > Default empty
 
