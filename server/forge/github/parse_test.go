@@ -40,7 +40,7 @@ const (
 
 func testHookRequest(payload []byte, event string) *http.Request {
 	buf := bytes.NewBuffer(payload)
-	req, _ := http.NewRequest("POST", "/hook", buf)
+	req, _ := http.NewRequest(http.MethodPost, "/hook", buf)
 	req.Header = http.Header{}
 	req.Header.Set(hookEvent, event)
 	return req
