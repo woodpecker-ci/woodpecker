@@ -3,10 +3,11 @@
 </template>
 
 <script lang="ts" setup>
+import { computed, toRef } from 'vue';
+
 import { useDate } from '~/compositions/useDate';
 import { useElapsedTime } from '~/compositions/useElapsedTime';
 import type { PipelineStep, PipelineWorkflow } from '~/lib/api/types';
-import { computed, toRef } from 'vue';
 
 const props = defineProps<{
   step?: PipelineStep;

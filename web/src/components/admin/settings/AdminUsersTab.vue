@@ -82,6 +82,10 @@
 </template>
 
 <script lang="ts" setup>
+import { cloneDeep } from 'lodash';
+import { computed, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
+
 import Badge from '~/components/atomic/Badge.vue';
 import Button from '~/components/atomic/Button.vue';
 import IconButton from '~/components/atomic/IconButton.vue';
@@ -94,9 +98,6 @@ import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useNotifications from '~/compositions/useNotifications';
 import { usePagination } from '~/compositions/usePaginate';
 import type { User } from '~/lib/api/types';
-import { cloneDeep } from 'lodash';
-import { computed, ref } from 'vue';
-import { useI18n } from 'vue-i18n';
 
 const apiClient = useApiClient();
 const notifications = useNotifications();

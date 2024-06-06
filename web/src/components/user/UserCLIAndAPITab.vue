@@ -33,12 +33,13 @@
 </template>
 
 <script lang="ts" setup>
+import { computed, onMounted, ref } from 'vue';
+
 import Button from '~/components/atomic/Button.vue';
 import InputField from '~/components/form/InputField.vue';
 import Settings from '~/components/layout/Settings.vue';
 import useApiClient from '~/compositions/useApiClient';
 import useConfig from '~/compositions/useConfig';
-import { computed, onMounted, ref } from 'vue';
 
 const { rootPath, enableSwagger } = useConfig();
 

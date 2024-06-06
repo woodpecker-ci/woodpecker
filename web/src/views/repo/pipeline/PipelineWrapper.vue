@@ -99,6 +99,11 @@
 </template>
 
 <script lang="ts" setup>
+import type { Ref } from 'vue';
+import { computed, inject, onBeforeUnmount, onMounted, provide, ref, toRef, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { useRoute, useRouter } from 'vue-router';
+
 import Button from '~/components/atomic/Button.vue';
 import DeployPipelinePopup from '~/components/layout/popups/DeployPipelinePopup.vue';
 import Scaffold from '~/components/layout/scaffold/Scaffold.vue';
@@ -112,10 +117,6 @@ import usePipeline from '~/compositions/usePipeline';
 import { useRouteBack } from '~/compositions/useRouteBack';
 import type { PipelineConfig, Repo, RepoPermissions } from '~/lib/api/types';
 import { usePipelineStore } from '~/store/pipelines';
-import type { Ref } from 'vue';
-import { computed, inject, onBeforeUnmount, onMounted, provide, ref, toRef, watch } from 'vue';
-import { useI18n } from 'vue-i18n';
-import { useRoute, useRouter } from 'vue-router';
 
 const props = defineProps<{
   repoId: string;

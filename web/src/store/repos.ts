@@ -1,8 +1,9 @@
-import useApiClient from '~/compositions/useApiClient';
-import type { Repo } from '~/lib/api/types';
 import { defineStore } from 'pinia';
 import type { Ref } from 'vue';
 import { computed, reactive, ref } from 'vue';
+
+import useApiClient from '~/compositions/useApiClient';
+import type { Repo } from '~/lib/api/types';
 
 export const useRepoStore = defineStore('repos', () => {
   const apiClient = useApiClient();

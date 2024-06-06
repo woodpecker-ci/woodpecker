@@ -18,9 +18,11 @@
 </template>
 
 <script lang="ts" setup>
+import { useI18n } from 'vue-i18n';
+
 import Icon from '~/components/atomic/Icon.vue';
 import type { PipelineStatus } from '~/lib/api/types';
-import { useI18n } from 'vue-i18n';
+
 import { pipelineStatusColors } from './pipeline-status';
 
 defineProps<{

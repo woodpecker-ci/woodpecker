@@ -15,9 +15,10 @@
 </template>
 
 <script lang="ts" setup>
+import { onMounted, toRef } from 'vue';
+
 import IconButton from '~/components/atomic/IconButton.vue';
 import usePipelineFeed from '~/compositions/usePipelineFeed';
-import { onMounted, toRef } from 'vue';
 
 const pipelineFeed = usePipelineFeed();
 const activePipelines = toRef(pipelineFeed, 'activePipelines');

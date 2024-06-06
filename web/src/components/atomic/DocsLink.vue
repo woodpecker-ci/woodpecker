@@ -10,8 +10,9 @@
 </template>
 
 <script lang="ts" setup>
-import Icon from '~/components/atomic/Icon.vue';
 import { computed, toRef } from 'vue';
+
+import Icon from '~/components/atomic/Icon.vue';
 
 const props = defineProps<{
   url: string;

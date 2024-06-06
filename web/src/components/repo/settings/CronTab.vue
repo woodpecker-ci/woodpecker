@@ -92,6 +92,10 @@
 </template>
 
 <script lang="ts" setup>
+import type { Ref } from 'vue';
+import { computed, inject, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
+
 import Button from '~/components/atomic/Button.vue';
 import IconButton from '~/components/atomic/IconButton.vue';
 import ListItem from '~/components/atomic/ListItem.vue';
@@ -105,9 +109,6 @@ import useNotifications from '~/compositions/useNotifications';
 import { usePagination } from '~/compositions/usePaginate';
 import type { Cron, Repo } from '~/lib/api/types';
 import router from '~/router';
-import type { Ref } from 'vue';
-import { computed, inject, ref } from 'vue';
-import { useI18n } from 'vue-i18n';
 
 const apiClient = useApiClient();
 const notifications = useNotifications();
