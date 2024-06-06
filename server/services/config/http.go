@@ -71,7 +71,7 @@ func (h *http) Fetch(ctx context.Context, forge forge.Forge, user *model.User, r
 		Netrc:         netrc,
 	}
 
-	status, err := utils.Send(ctx, "POST", h.endpoint, h.privateKey, body, response)
+	status, err := utils.Send(ctx, net_http.MethodPost, h.endpoint, h.privateKey, body, response)
 	if err != nil && status != 204 {
 		return nil, fmt.Errorf("failed to fetch config via http (%d) %w", status, err)
 	}
