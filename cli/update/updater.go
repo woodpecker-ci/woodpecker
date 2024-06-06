@@ -29,7 +29,7 @@ func checkForUpdate(ctx context.Context, versionURL string, force bool) (*NewVer
 		return nil, nil
 	}
 
-	req, err := http.NewRequestWithContext(ctx, "GET", versionURL, nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, versionURL, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -77,7 +77,7 @@ func checkForUpdate(ctx context.Context, versionURL string, force bool) (*NewVer
 func downloadNewVersion(ctx context.Context, downloadURL string) (string, error) {
 	log.Debug().Msgf("Downloading new version from %s ...", downloadURL)
 
-	req, err := http.NewRequestWithContext(ctx, "GET", downloadURL, nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, downloadURL, nil)
 	if err != nil {
 		return "", err
 	}
