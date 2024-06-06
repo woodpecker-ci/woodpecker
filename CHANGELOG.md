@@ -15,6 +15,14 @@
 - Allow to store logs in files [[#3568](https://github.com/woodpecker-ci/woodpecker/pull/3568)]
 - Native forgejo support [[#3684](https://github.com/woodpecker-ci/woodpecker/pull/3684)]
 
+### 📚 Documentation
+
+- Serve plugin icons locally [[#3768](https://github.com/woodpecker-ci/woodpecker/pull/3768)]
+- Docs: update local backend page [[#3765](https://github.com/woodpecker-ci/woodpecker/pull/3765)]
+- Remove old docs versions [[#3743](https://github.com/woodpecker-ci/woodpecker/pull/3743)]
+- Merge release plugins [[#3752](https://github.com/woodpecker-ci/woodpecker/pull/3752)]
+- Split FAQ [[#3746](https://github.com/woodpecker-ci/woodpecker/pull/3746)]
+
 ### 📈 Enhancement
 
 - chore(deps): update dependency eslint to v9 [[#3594](https://github.com/woodpecker-ci/woodpecker/pull/3594)]
@@ -28,13 +36,6 @@
 - Fix config loading of cli [[#3764](https://github.com/woodpecker-ci/woodpecker/pull/3764)]
 - Fix missing WOODPECKER_BITBUCKET_DC_URL [[#3761](https://github.com/woodpecker-ci/woodpecker/pull/3761)]
 - Correct repo repair success message in cli [[#3757](https://github.com/woodpecker-ci/woodpecker/pull/3757)]
-
-### 📚 Documentation
-
-- Docs: update local backend page [[#3765](https://github.com/woodpecker-ci/woodpecker/pull/3765)]
-- Remove old docs versions [[#3743](https://github.com/woodpecker-ci/woodpecker/pull/3743)]
-- Merge release plugins [[#3752](https://github.com/woodpecker-ci/woodpecker/pull/3752)]
-- Split FAQ [[#3746](https://github.com/woodpecker-ci/woodpecker/pull/3746)]
 
 ### Misc
 
