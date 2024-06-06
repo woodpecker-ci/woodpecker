@@ -9,7 +9,7 @@ The local backend executes pipelines on the local system without any isolation.
 :::
 
 :::note
-Currently we do not support [services](../../usage/60-services.d) for this backend.
+Currently we do not support [services](../../usage/60-services.md) for this backend.
 [Read more here](https://github.com/woodpecker-ci/woodpecker/issues/3095).
 :::
 
