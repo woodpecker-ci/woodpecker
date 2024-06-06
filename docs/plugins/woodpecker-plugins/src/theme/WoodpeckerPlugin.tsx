@@ -4,8 +4,6 @@ import { WoodpeckerPlugin as WoodpeckerPluginType } from '../types';
 import { IconContainer, IconPlugin, IconVerified, IconWebsite } from './Icons';
 
 export function WoodpeckerPlugin({ plugin }: { plugin: WoodpeckerPluginType }) {
-  const iconSrc = `data:${plugin.iconType};base64,${plugin.iconContent}`;
-
   return (
     <Layout title="Woodpecker CI plugins" description="List of Woodpecker-CI plugins">
       <main className="container margin-vert--lg">
@@ -63,7 +61,7 @@ export function WoodpeckerPlugin({ plugin }: { plugin: WoodpeckerPluginType }) {
                 <p style={{ marginTop: '2rem', marginBottom: '1rem' }}>{plugin.description}</p>
               </div>
               <div className="col col--2">
-                {plugin.iconContent ? <img src={iconSrc} width="150" /> : IconPlugin(150)}
+                {plugin.iconDataUrl ? <img src={plugin.iconDataUrl} width="150" /> : IconPlugin(150)}
               </div>
             </div>
             <hr style={{ margin: '1rem 0' }} />

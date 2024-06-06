@@ -12,7 +12,7 @@ async function loadContent(): Promise<Content> {
 
   const plugins = (
     await Promise.all(
-      pluginsIndex.plugins.map(async (i) => {
+      pluginsIndex.plugins.map(async (i): Promise<WoodpeckerPlugin | undefined> => {
         let docsContent: string;
         try {
           const response = await axios(i.docs);
@@ -29,24 +29,22 @@ async function loadContent(): Promise<Content> {
           return undefined;
         }
 
-        let pluginIcon: string | undefined;
-        let pluginIconType: string | undefined;
+        let pluginIconDataUrl: string | undefined;
         if (docsHeader.icon) {
           try {
             const response = await axios(docsHeader.icon, {
               responseType: 'arraybuffer',
             });
-            pluginIcon = Buffer.from(response.data, 'binary').toString('base64');
-            const typeHeader = response.headers['content-type'];
-            if (typeHeader) {
-              pluginIconType = typeHeader.toString();
-            }
+            pluginIconDataUrl = `data:${response.headers['content-type'].toString()};base64,${Buffer.from(
+              response.data,
+              'binary',
+            ).toString('base64')}`;
           } catch (e) {
             console.error("Can't fetch plugin icon", docsHeader.icon, (e as AxiosError).message);
           }
         }
 
-        return <WoodpeckerPlugin>{
+        return {
           name: docsHeader.name,
           url: docsHeader.url,
           icon: docsHeader.icon,
@@ -57,9 +55,8 @@ async function loadContent(): Promise<Content> {
           containerImage: docsHeader.containerImage,
           containerImageUrl: docsHeader.containerImageUrl,
           verified: i.verified || false,
-          iconContent: pluginIcon,
-          iconType: pluginIconType,
-        };
+          iconDataUrl: pluginIconDataUrl,
+        } satisfies WoodpeckerPlugin;
       }),
     )
   ).filter<WoodpeckerPlugin>((plugin): plugin is WoodpeckerPlugin => plugin !== undefined);

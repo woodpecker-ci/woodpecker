@@ -7,13 +7,12 @@ import { IconPlugin, IconVerified } from './Icons';
 
 function PluginPanel({ plugin }: { plugin: WoodpeckerPlugin }) {
   const pluginUrl = `/plugins/${plugin.name}`;
-  const iconSrc = `data:${plugin.iconType};base64,${plugin.iconContent}`;
 
   return (
     <a href={pluginUrl} className="card shadow--md wp-plugin-card">
       <div className="card__header row">
         <div className="col col--2 text--left">
-          {plugin.iconContent ? <img src={iconSrc} width="50" /> : IconPlugin()}
+          {plugin.iconDataUrl ? <img src={plugin.iconDataUrl} width="50" /> : IconPlugin()}
         </div>
         <div className="col col--10">
           <h3>{plugin.name}</h3>
