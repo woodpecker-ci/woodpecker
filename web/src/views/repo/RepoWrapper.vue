@@ -57,7 +57,7 @@ import useApiClient from '~/compositions/useApiClient';
 import useAuthentication from '~/compositions/useAuthentication';
 import useConfig from '~/compositions/useConfig';
 import useNotifications from '~/compositions/useNotifications';
-import { RepoPermissions } from '~/lib/api/types';
+import type { RepoPermissions } from '~/lib/api/types';
 import { usePipelineStore } from '~/store/pipelines';
 import { useRepoStore } from '~/store/repos';
 
@@ -66,7 +66,7 @@ const props = defineProps<{
 }>();
 
 const _repoId = toRef(props, 'repoId');
-const repositoryId = computed(() => parseInt(_repoId.value, 10));
+const repositoryId = computed(() => Number.parseInt(_repoId.value, 10));
 const repoStore = useRepoStore();
 const pipelineStore = usePipelineStore();
 const apiClient = useApiClient();
