@@ -15,6 +15,7 @@
 package secret_test
 
 import (
+	"context"
 	"testing"
 
 	"github.com/franela/goblin"
@@ -28,6 +29,7 @@ import (
 func TestSecretListPipeline(t *testing.T) {
 	g := goblin.Goblin(t)
 	mockStore := mocks_store.NewStore(t)
+	ctx := context.Background()
 
 	// global secret
 	globalSecret := &model.Secret{
@@ -64,7 +66,7 @@ func TestSecretListPipeline(t *testing.T) {
 				repoSecret,
 			}, nil)
 
-			s, err := secret.NewDB(mockStore).SecretListPipeline(&model.Repo{}, &model.Pipeline{}, &model.ListOptions{})
+			s, err := secret.NewDB(mockStore).SecretListPipeline(ctx, &model.Repo{}, &model.Pipeline{}, &model.ListOptions{})
 			g.Assert(err).IsNil()
 
 			g.Assert(len(s)).Equal(1)
@@ -77,7 +79,7 @@ func TestSecretListPipeline(t *testing.T) {
 				orgSecret,
 			}, nil)
 
-			s, err := secret.NewDB(mockStore).SecretListPipeline(&model.Repo{}, &model.Pipeline{}, &model.ListOptions{})
+			s, err := secret.NewDB(mockStore).SecretListPipeline(ctx, &model.Repo{}, &model.Pipeline{}, &model.ListOptions{})
 			g.Assert(err).IsNil()
 
 			g.Assert(len(s)).Equal(1)
@@ -89,7 +91,7 @@ func TestSecretListPipeline(t *testing.T) {
 				globalSecret,
 			}, nil)
 
-			s, err := secret.NewDB(mockStore).SecretListPipeline(&model.Repo{}, &model.Pipeline{}, &model.ListOptions{})
+			s, err := secret.NewDB(mockStore).SecretListPipeline(ctx, &model.Repo{}, &model.Pipeline{}, &model.ListOptions{})
 			g.Assert(err).IsNil()
 
 			g.Assert(len(s)).Equal(1)

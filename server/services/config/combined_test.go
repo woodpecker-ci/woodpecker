@@ -35,6 +35,7 @@ import (
 	forge_types "go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 	"go.woodpecker-ci.org/woodpecker/v2/server/services/config"
+	"go.woodpecker-ci.org/woodpecker/v2/server/services/utils"
 )
 
 func TestFetchFromConfigService(t *testing.T) {
@@ -192,7 +193,9 @@ func TestFetchFromConfigService(t *testing.T) {
 
 	ts := httptest.NewServer(http.HandlerFunc(fixtureHandler))
 	defer ts.Close()
-	httpFetcher := config.NewHTTP(ts.URL, privEd25519Key)
+
+	client := utils.NewHTTPClient(privEd25519Key, "loopback")
+	httpFetcher := config.NewHTTP(ts.URL, client)
 
 	for _, tt := range testTable {
 		t.Run(tt.name, func(t *testing.T) {

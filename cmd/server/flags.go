@@ -195,6 +195,11 @@ var flags = append([]cli.Flag{
 		Usage:   "url used for calling configuration service endpoint",
 	},
 	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_ALLOWED_EXTENSIONS_HOSTS"},
+		Name:    "allowed-extensions-hosts",
+		Usage:   "Hosts that are allowed to be used by extensions",
+	},
+	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_DATABASE_DRIVER"},
 		Name:    "driver",
 		Usage:   "database driver",

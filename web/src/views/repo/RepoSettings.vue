@@ -29,6 +29,9 @@
     <Tab id="badge" :title="$t('repo.settings.badge.badge')">
       <BadgeTab />
     </Tab>
+    <Tab id="extensions" :title="$t('extensions')">
+      <ExtensionsTab />
+    </Tab>
     <Tab id="actions" :title="$t('repo.settings.actions.actions')">
       <ActionsTab />
     </Tab>
@@ -45,6 +48,7 @@ import Tab from '~/components/layout/scaffold/Tab.vue';
 import ActionsTab from '~/components/repo/settings/ActionsTab.vue';
 import BadgeTab from '~/components/repo/settings/BadgeTab.vue';
 import CronTab from '~/components/repo/settings/CronTab.vue';
+import ExtensionsTab from '~/components/repo/settings/ExtensionsTab.vue';
 import GeneralTab from '~/components/repo/settings/GeneralTab.vue';
 import RegistriesTab from '~/components/repo/settings/RegistriesTab.vue';
 import SecretsTab from '~/components/repo/settings/SecretsTab.vue';

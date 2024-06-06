@@ -4179,6 +4179,9 @@ const docTemplate = `{
                 "clone_url_ssh": {
                     "type": "string"
                 },
+                "config_extension_endpoint": {
+                    "type": "string"
+                },
                 "config_file": {
                     "type": "string"
                 },
@@ -4225,6 +4228,9 @@ const docTemplate = `{
                 "scm": {
                     "$ref": "#/definitions/SCMKind"
                 },
+                "secret_extension_endpoint": {
+                    "type": "string"
+                },
                 "timeout": {
                     "type": "integer"
                 },
@@ -4251,6 +4257,9 @@ const docTemplate = `{
                         "$ref": "#/definitions/WebhookEvent"
                     }
                 },
+                "config_extension_endpoint": {
+                    "type": "string"
+                },
                 "config_file": {
                     "type": "string"
                 },
@@ -4259,6 +4268,9 @@ const docTemplate = `{
                 },
                 "netrc_only_trusted": {
                     "type": "boolean"
+                },
+                "secret_extension_endpoint": {
+                    "type": "string"
                 },
                 "timeout": {
                     "type": "integer"

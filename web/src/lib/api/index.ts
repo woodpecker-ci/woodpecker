@@ -2,6 +2,7 @@ import ApiClient, { encodeQueryString } from './client';
 import {
   Agent,
   Cron,
+  ExtensionSettings,
   Org,
   OrgPermissions,
   Pipeline,
@@ -72,7 +73,7 @@ export default class WoodpeckerClient extends ApiClient {
     return this._post(`/api/repos?forge_remote_id=${forgeRemoteId}`) as Promise<Repo>;
   }
 
-  updateRepo(repoId: number, repoSettings: RepoSettings): Promise<unknown> {
+  updateRepo(repoId: number, repoSettings: Partial<RepoSettings & ExtensionSettings>): Promise<unknown> {
     return this._patch(`/api/repos/${repoId}`, repoSettings);
   }
 
@@ -261,6 +262,10 @@ export default class WoodpeckerClient extends ApiClient {
 
   getToken(): Promise<string> {
     return this._post('/api/user/token') as Promise<string>;
+  }
+
+  getSignaturePublicKey(): Promise<string> {
+    return this._get('/api/signature/public-key') as Promise<string>;
   }
 
   getAgents(opts?: PaginationOptions): Promise<Agent[] | null> {
