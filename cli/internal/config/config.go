@@ -95,19 +95,22 @@ func Get(ctx *cli.Context, _configPath string) (*Config, error) {
 	log.Debug().Str("configPath", configPath).Msg("Checking for config file")
 
 	content, err := os.ReadFile(configPath)
-	if err != nil && !os.IsNotExist(err) {
+	switch {
+	case err != nil && !os.IsNotExist(err):
 		log.Debug().Err(err).Msg("Failed to read the config file")
 		return nil, err
-	} else if err != nil && os.IsNotExist(err) {
+
+	case err != nil && os.IsNotExist(err):
 		log.Debug().Msg("The config file does not exist")
-	} else {
+
+	default:
 		configFromFile := &Config{}
-		log.Debug().Msg("Reading the config file")
 		err = json.Unmarshal(content, configFromFile)
 		if err != nil {
 			return nil, err
 		}
 		c.MergeIfNotSet(configFromFile)
+		log.Debug().Msg("Loaded config from file")
 	}
 
 	// if server or token are explicitly set, use them
