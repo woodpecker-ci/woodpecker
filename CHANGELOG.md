@@ -14,21 +14,23 @@
 
 - Native forgejo support [[#3684](https://github.com/woodpecker-ci/woodpecker/pull/3684)]
 
-### 🐛 Bug Fixes
+### 📈 Enhancement
 
-- Fix missing WOODPECKER_BITBUCKET_DC_URL [[#3761](https://github.com/woodpecker-ci/woodpecker/pull/3761)]
-- Correct repo repair success message in cli [[#3757](https://github.com/woodpecker-ci/woodpecker/pull/3757)]
+- Use http constants [[#3766](https://github.com/woodpecker-ci/woodpecker/pull/3766)]
+- Spellcheck "server/*" [[#3753](https://github.com/woodpecker-ci/woodpecker/pull/3753)]
+- Agent-wide node selector [[#3608](https://github.com/woodpecker-ci/woodpecker/pull/3608)]
 
 ### 📚 Documentation
 
+- Docs: update local backend page [[#3765](https://github.com/woodpecker-ci/woodpecker/pull/3765)]
 - Remove old docs versions [[#3743](https://github.com/woodpecker-ci/woodpecker/pull/3743)]
 - Merge release plugins [[#3752](https://github.com/woodpecker-ci/woodpecker/pull/3752)]
 - Split FAQ [[#3746](https://github.com/woodpecker-ci/woodpecker/pull/3746)]
 
-### 📈 Enhancement
+### 🐛 Bug Fixes
 
-- Spellcheck "server/*" [[#3753](https://github.com/woodpecker-ci/woodpecker/pull/3753)]
-- Agent-wide node selector [[#3608](https://github.com/woodpecker-ci/woodpecker/pull/3608)]
+- Fix missing WOODPECKER_BITBUCKET_DC_URL [[#3761](https://github.com/woodpecker-ci/woodpecker/pull/3761)]
+- Correct repo repair success message in cli [[#3757](https://github.com/woodpecker-ci/woodpecker/pull/3757)]
 
 ### Misc
 
