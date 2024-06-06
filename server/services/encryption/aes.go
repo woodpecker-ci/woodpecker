@@ -36,10 +36,10 @@ func (svc *aesEncryptionService) Encrypt(plaintext, associatedData string) (stri
 	msg := []byte(plaintext)
 	aad := []byte(associatedData)
 
-	nonce := random.GetRandomBytes(uint32(AESGCMSIVNonceSize))
+	nonce := random.GetRandomBytes(uint32(AES_GCM_SIV_NonceSize))
 	ciphertext := svc.cipher.Seal(nil, nonce, msg, aad)
 
-	result := make([]byte, 0, AESGCMSIVNonceSize+len(ciphertext))
+	result := make([]byte, 0, AES_GCM_SIV_NonceSize+len(ciphertext))
 	result = append(result, nonce...)
 	result = append(result, ciphertext...)
 
@@ -52,8 +52,8 @@ func (svc *aesEncryptionService) Decrypt(ciphertext, associatedData string) (str
 		return "", fmt.Errorf(errTemplateBase64DecryptionFailed, err)
 	}
 
-	nonce := bytes[:AESGCMSIVNonceSize]
-	message := bytes[AESGCMSIVNonceSize:]
+	nonce := bytes[:AES_GCM_SIV_NonceSize]
+	message := bytes[AES_GCM_SIV_NonceSize:]
 
 	plaintext, err := svc.cipher.Open(nil, nonce, message, []byte(associatedData))
 	if err != nil {

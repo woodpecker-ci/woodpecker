@@ -240,7 +240,8 @@ func TestFullPod(t *testing.T) {
 			],
 			"restartPolicy": "Never",
 			"nodeSelector": {
-				"storage": "ssd"
+				"storage": "ssd",
+				"topology.kubernetes.io/region": "eu-central-1"
 			},
 			"runtimeClassName": "runc",
 			"serviceAccountName": "wp-svc-acc",
@@ -331,6 +332,7 @@ func TestFullPod(t *testing.T) {
 		PodLabelsAllowFromStep:      true,
 		PodAnnotations:              map[string]string{"apps.kubernetes.io/pod-index": "0"},
 		PodAnnotationsAllowFromStep: true,
+		PodNodeSelector:             map[string]string{"topology.kubernetes.io/region": "eu-central-1"},
 		SecurityContext:             SecurityContextConfig{RunAsNonRoot: false},
 	}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{
 		Labels:             map[string]string{"part-of": "woodpecker-ci"},
@@ -406,7 +408,13 @@ func TestPodPrivilege(t *testing.T) {
 	}
 	pod, err = createTestPod(true, false, secCtx)
 	assert.NoError(t, err)
-	assert.Equal(t, true, *pod.Spec.Containers[0].SecurityContext.Privileged)
+	assert.True(t, *pod.Spec.Containers[0].SecurityContext.Privileged)
+
+	// step is privileged and no security context is provided
+	secCtx = SecurityContext{}
+	pod, err = createTestPod(true, false, secCtx)
+	assert.NoError(t, err)
+	assert.True(t, *pod.Spec.Containers[0].SecurityContext.Privileged)
 
 	// global runAsNonRoot is true and override is requested value by security context
 	secCtx = SecurityContext{
@@ -414,7 +422,7 @@ func TestPodPrivilege(t *testing.T) {
 	}
 	pod, err = createTestPod(false, true, secCtx)
 	assert.NoError(t, err)
-	assert.Equal(t, true, *pod.Spec.SecurityContext.RunAsNonRoot)
+	assert.True(t, *pod.Spec.SecurityContext.RunAsNonRoot)
 }
 
 func TestScratchPod(t *testing.T) {
