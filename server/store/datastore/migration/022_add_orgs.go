@@ -41,7 +41,7 @@ type syncRepo022 struct {
 	OrgID int64 `json:"org_id" xorm:"repo_org_id"`
 }
 
-// TableName return database table name for xorm
+// TableName return database table name for xorm.
 func (syncRepo022) TableName() string {
 	return "repos"
 }
@@ -52,7 +52,7 @@ type repo022 struct {
 	Owner string `json:"owner"        xorm:"UNIQUE(name) 'repo_owner'"`
 }
 
-// TableName return database table name for xorm
+// TableName return database table name for xorm.
 func (repo022) TableName() string {
 	return "repos"
 }

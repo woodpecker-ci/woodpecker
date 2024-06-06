@@ -26,7 +26,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/google/go-github/v60/github"
+	"github.com/google/go-github/v62/github"
 	"github.com/rs/zerolog/log"
 	"golang.org/x/oauth2"
 
@@ -51,6 +51,8 @@ type Opts struct {
 	Secret     string // GitHub oauth client secret.
 	SkipVerify bool   // Skip ssl verification.
 	MergeRef   bool   // Clone pull requests using the merge ref.
+	OnlyPublic bool   // Only obtain OAuth tokens with access to public repos.
+	OAuthHost  string // Public url for oauth if different from url.
 }
 
 // New returns a Forge implementation that integrates with a GitHub Cloud or
@@ -61,8 +63,10 @@ func New(opts Opts) (forge.Forge, error) {
 		url:        defaultURL,
 		Client:     opts.Client,
 		Secret:     opts.Secret,
+		oAuthHost:  opts.OAuthHost,
 		SkipVerify: opts.SkipVerify,
 		MergeRef:   opts.MergeRef,
+		OnlyPublic: opts.OnlyPublic,
 	}
 	if opts.URL != defaultURL {
 		r.url = strings.TrimSuffix(opts.URL, "/")
@@ -79,14 +83,16 @@ type client struct {
 	Secret     string
 	SkipVerify bool
 	MergeRef   bool
+	OnlyPublic bool
+	oAuthHost  string
 }
 
-// Name returns the string name of this driver
+// Name returns the string name of this driver.
 func (c *client) Name() string {
 	return "github"
 }
 
-// URL returns the root url of a configured forge
+// URL returns the root url of a configured forge.
 func (c *client) URL() string {
 	return c.url
 }
@@ -387,7 +393,7 @@ func (c *client) Org(ctx context.Context, u *model.User, owner string) (*model.O
 	}, nil
 }
 
-// helper function to return the GitHub oauth2 context using an HTTPClient that
+// newContext returns the GitHub oauth2 context using an HTTPClient that
 // disables TLS verification if disabled in the forge settings.
 func (c *client) newContext(ctx context.Context) context.Context {
 	if !c.SkipVerify {
@@ -403,21 +409,33 @@ func (c *client) newContext(ctx context.Context) context.Context {
 	})
 }
 
-// helper function to return the GitHub oauth2 config
+// newConfig returns the GitHub oauth2 config.
 func (c *client) newConfig() *oauth2.Config {
+	scopes := []string{"user:email", "read:org"}
+	if c.OnlyPublic {
+		scopes = append(scopes, []string{"admin:repo_hook", "repo:status"}...)
+	} else {
+		scopes = append(scopes, "repo")
+	}
+
+	publicOAuthURL := c.oAuthHost
+	if publicOAuthURL == "" {
+		publicOAuthURL = c.url
+	}
+
 	return &oauth2.Config{
 		ClientID:     c.Client,
 		ClientSecret: c.Secret,
-		Scopes:       []string{"repo", "user:email", "read:org"},
+		Scopes:       scopes,
 		Endpoint: oauth2.Endpoint{
-			AuthURL:  fmt.Sprintf("%s/login/oauth/authorize", c.url),
+			AuthURL:  fmt.Sprintf("%s/login/oauth/authorize", publicOAuthURL),
 			TokenURL: fmt.Sprintf("%s/login/oauth/access_token", c.url),
 		},
 		RedirectURL: fmt.Sprintf("%s/authorize", server.Config.Server.OAuthHost),
 	}
 }
 
-// helper function to return the GitHub oauth2 client
+// newClientToken returns the GitHub oauth2 client.
 func (c *client) newClientToken(ctx context.Context, token string) *github.Client {
 	ts := oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: token},
@@ -437,7 +455,7 @@ func (c *client) newClientToken(ctx context.Context, token string) *github.Clien
 	return client
 }
 
-// helper function to return matching user email.
+// matchingEmail returns matching user email.
 func matchingEmail(emails []*github.UserEmail, rawURL string) *github.UserEmail {
 	for _, email := range emails {
 		if email.Email == nil || email.Primary == nil || email.Verified == nil {
@@ -455,7 +473,7 @@ func matchingEmail(emails []*github.UserEmail, rawURL string) *github.UserEmail 
 	return nil
 }
 
-// helper function to return matching hook.
+// matchingHooks returns matching hook.
 func matchingHooks(hooks []*github.Hook, rawurl string) *github.Hook {
 	link, err := url.Parse(rawurl)
 	if err != nil {
@@ -483,7 +501,7 @@ func (c *client) Status(ctx context.Context, user *model.User, repo *model.Repo,
 	if pipeline.Event == model.EventDeploy {
 		// Get id from url. If not found, skip.
 		matches := reDeploy.FindStringSubmatch(pipeline.ForgeURL)
-		//nolint:gomnd
+		//nolint:mnd
 		if len(matches) != 2 {
 			return nil
 		}
@@ -548,7 +566,7 @@ func (c *client) Branches(ctx context.Context, u *model.User, r *model.Repo, p *
 	return branches, nil
 }
 
-// BranchHead returns the sha of the head (latest commit) of the specified branch
+// BranchHead returns the sha of the head (latest commit) of the specified branch.
 func (c *client) BranchHead(ctx context.Context, u *model.User, r *model.Repo, branch string) (*model.Commit, error) {
 	token := common.UserToken(ctx, r, u)
 	b, _, err := c.newClientToken(ctx, token).Repositories.GetBranch(ctx, r.Owner, r.Name, branch, 1)
@@ -620,7 +638,7 @@ func (c *client) loadChangedFilesFromPullRequest(ctx context.Context, pull *gith
 
 			opts.Page = resp.NextPage
 		}
-		return utils.DedupStrings(fileList), nil
+		return utils.DeduplicateStrings(fileList), nil
 	})
 
 	return pipeline, err

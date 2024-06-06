@@ -62,7 +62,7 @@ func pipelineQueue(c *cli.Context) error {
 	return nil
 }
 
-// template for pipeline list information
+// Template for pipeline list information.
 var tmplPipelineQueue = "\x1b[33m{{ .FullName }} #{{ .Number }} \x1b[0m" + `
 Status: {{ .Status }}
 Event: {{ .Event }}

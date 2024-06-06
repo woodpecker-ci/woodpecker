@@ -51,9 +51,10 @@ type Opts struct {
 	ClientID     string // Oauth2 client id.
 	ClientSecret string // Oauth2 client secret.
 	SkipVerify   bool   // Skip ssl verification.
+	OAuthHost    string // Public url for oauth if different from url.
 }
 
-// Gitlab implements "Forge" interface
+// Gitlab implements "Forge" interface.
 type GitLab struct {
 	url          string
 	ClientID     string
@@ -61,6 +62,7 @@ type GitLab struct {
 	SkipVerify   bool
 	HideArchives bool
 	Search       bool
+	oAuthHost    string
 }
 
 // New returns a Forge implementation that integrates with Gitlab, an open
@@ -70,27 +72,33 @@ func New(opts Opts) (forge.Forge, error) {
 		url:          opts.URL,
 		ClientID:     opts.ClientID,
 		ClientSecret: opts.ClientSecret,
+		oAuthHost:    opts.OAuthHost,
 		SkipVerify:   opts.SkipVerify,
 		HideArchives: true,
 	}, nil
 }
 
-// Name returns the string name of this driver
+// Name returns the string name of this driver.
 func (g *GitLab) Name() string {
 	return "gitlab"
 }
 
-// URL returns the root url of a configured forge
+// URL returns the root url of a configured forge.
 func (g *GitLab) URL() string {
 	return g.url
 }
 
 func (g *GitLab) oauth2Config(ctx context.Context) (*oauth2.Config, context.Context) {
+	publicOAuthURL := g.oAuthHost
+	if publicOAuthURL == "" {
+		publicOAuthURL = g.url
+	}
+
 	return &oauth2.Config{
 			ClientID:     g.ClientID,
 			ClientSecret: g.ClientSecret,
 			Endpoint: oauth2.Endpoint{
-				AuthURL:  fmt.Sprintf("%s/oauth/authorize", g.url),
+				AuthURL:  fmt.Sprintf("%s/oauth/authorize", publicOAuthURL),
 				TokenURL: fmt.Sprintf("%s/oauth/token", g.url),
 			},
 			Scopes:      []string{defaultScope},
@@ -176,7 +184,7 @@ func (g *GitLab) Refresh(ctx context.Context, user *model.User) (bool, error) {
 	return true, nil
 }
 
-// Auth authenticates the session and returns the forge user login for the given token
+// Auth authenticates the session and returns the forge user login for the given token.
 func (g *GitLab) Auth(ctx context.Context, token, _ string) (string, error) {
 	client, err := newClient(g.url, token, g.SkipVerify)
 	if err != nil {
@@ -381,7 +389,7 @@ func (g *GitLab) File(ctx context.Context, user *model.User, repo *model.Repo, p
 	return file, err
 }
 
-// Dir fetches a folder from the forge repository
+// Dir fetches a folder from the forge repository.
 func (g *GitLab) Dir(ctx context.Context, user *model.User, repo *model.Repo, pipeline *model.Pipeline, path string) ([]*forge_types.FileMeta, error) {
 	client, err := newClient(g.url, user.Token, g.SkipVerify)
 	if err != nil {
@@ -605,7 +613,7 @@ func (g *GitLab) Branches(ctx context.Context, user *model.User, repo *model.Rep
 	return branches, nil
 }
 
-// BranchHead returns the sha of the head (latest commit) of the specified branch
+// BranchHead returns the sha of the head (latest commit) of the specified branch.
 func (g *GitLab) BranchHead(ctx context.Context, u *model.User, r *model.Repo, branch string) (*model.Commit, error) {
 	token := common.UserToken(ctx, r, u)
 	client, err := newClient(g.url, token, g.SkipVerify)
@@ -808,7 +816,7 @@ func (g *GitLab) loadChangedFilesFromMergeRequest(ctx context.Context, tmpRepo *
 	for _, file := range changes {
 		files = append(files, file.NewPath, file.OldPath)
 	}
-	pipeline.ChangedFiles = utils.DedupStrings(files)
+	pipeline.ChangedFiles = utils.DeduplicateStrings(files)
 
 	return pipeline, nil
 }

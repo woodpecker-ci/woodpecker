@@ -49,7 +49,7 @@ type (
 		Local       yamlBaseTypes.BoolTrue
 		Path        Path
 		Evaluate    string `yaml:"evaluate,omitempty"`
-		// TODO change to StringOrSlice in 3.x
+		// TODO: change to StringOrSlice in 3.x
 		Event List
 	}
 
@@ -69,7 +69,8 @@ type (
 	Path struct {
 		Include       []string
 		Exclude       []string
-		IgnoreMessage string `yaml:"ignore_message,omitempty"`
+		IgnoreMessage string                 `yaml:"ignore_message,omitempty"`
+		OnEmpty       yamlBaseTypes.BoolTrue `yaml:"on_empty,omitempty"`
 	}
 )
 
@@ -122,7 +123,7 @@ func (when *When) IncludesStatusSuccess() bool {
 	return false
 }
 
-// False if (any) non local
+// False if (any) non local.
 func (when *When) IsLocal() bool {
 	for _, c := range when.Constraints {
 		if !c.Local.Bool() {
@@ -196,17 +197,17 @@ func (c *Constraint) Match(m metadata.Metadata, global bool, env map[string]stri
 		if err != nil {
 			return false, err
 		}
-		bresult, ok := result.(bool)
+		bResult, ok := result.(bool)
 		if !ok {
 			return false, fmt.Errorf("could not parse result: %v", result)
 		}
-		match = match && bresult
+		match = match && bResult
 	}
 
 	return match, nil
 }
 
-// IsEmpty return true if a constraint has no conditions
+// IsEmpty return true if a constraint has no conditions.
 func (c List) IsEmpty() bool {
 	return len(c.Include) == 0 && len(c.Exclude) == 0
 }
@@ -246,7 +247,7 @@ func (c *List) Excludes(v string) bool {
 	return false
 }
 
-// UnmarshalYAML unmarshals the constraint.
+// UnmarshalYAML unmarshal the constraint.
 func (c *List) UnmarshalYAML(value *yaml.Node) error {
 	out1 := struct {
 		Include yamlBaseTypes.StringOrSlice
@@ -331,6 +332,7 @@ func (c *Path) UnmarshalYAML(value *yaml.Node) error {
 		Include       yamlBaseTypes.StringOrSlice `yaml:"include,omitempty"`
 		Exclude       yamlBaseTypes.StringOrSlice `yaml:"exclude,omitempty"`
 		IgnoreMessage string                      `yaml:"ignore_message,omitempty"`
+		OnEmpty       yamlBaseTypes.BoolTrue      `yaml:"on_empty,omitempty"`
 	}{}
 
 	var out2 yamlBaseTypes.StringOrSlice
@@ -340,6 +342,7 @@ func (c *Path) UnmarshalYAML(value *yaml.Node) error {
 
 	c.Exclude = out1.Exclude
 	c.IgnoreMessage = out1.IgnoreMessage
+	c.OnEmpty = out1.OnEmpty
 	c.Include = append( //nolint:gocritic
 		out1.Include,
 		out2...,
@@ -361,9 +364,9 @@ func (c *Path) Match(v []string, message string) bool {
 		return true
 	}
 
-	// always match if there are no commit files (empty commit)
+	// return value based on 'on_empty', if there are no commit files (empty commit)
 	if len(v) == 0 {
-		return true
+		return c.OnEmpty.Bool()
 	}
 
 	if len(c.Exclude) > 0 && c.Excludes(v) {

@@ -88,7 +88,7 @@ func (r *Runtime) MakeLogger() zerolog.Logger {
 	return logCtx.Logger()
 }
 
-// Run starts the execution of a workflow and waits for it to complete
+// Run starts the execution of a workflow and waits for it to complete.
 func (r *Runtime) Run(runnerCtx context.Context) error {
 	logger := r.MakeLogger()
 	logger.Debug().Msgf("executing %d stages, in order of:", len(r.spec.Stages))
@@ -129,7 +129,7 @@ func (r *Runtime) Run(runnerCtx context.Context) error {
 	return r.err
 }
 
-// Updates the current status of a step
+// Updates the current status of a step.
 func (r *Runtime) traceStep(processState *backend.State, err error, step *backend.Step) error {
 	if r.tracer == nil {
 		// no tracer nothing to trace :)
@@ -158,7 +158,7 @@ func (r *Runtime) traceStep(processState *backend.State, err error, step *backen
 	return err
 }
 
-// Executes a set of parallel steps
+// Executes a set of parallel steps.
 func (r *Runtime) execAll(steps []*backend.Step) <-chan error {
 	var g errgroup.Group
 	done := make(chan error)

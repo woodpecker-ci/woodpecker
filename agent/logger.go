@@ -28,7 +28,7 @@ import (
 
 func (r *Runner) createLogger(logger zerolog.Logger, uploads *sync.WaitGroup, workflow *rpc.Workflow) pipeline.Logger {
 	return func(step *backend.Step, rc io.Reader) error {
-		loglogger := logger.With().
+		logLogger := logger.With().
 			Str("image", step.Image).
 			Str("workflowID", workflow.ID).
 			Logger()
@@ -40,14 +40,14 @@ func (r *Runner) createLogger(logger zerolog.Logger, uploads *sync.WaitGroup, wo
 			secrets = append(secrets, secret.Value)
 		}
 
-		loglogger.Debug().Msg("log stream opened")
+		logLogger.Debug().Msg("log stream opened")
 
 		logStream := rpc.NewLineWriter(r.client, step.UUID, secrets...)
 		if _, err := io.Copy(logStream, rc); err != nil {
 			log.Error().Err(err).Msg("copy limited logStream part")
 		}
 
-		loglogger.Debug().Msg("log stream copied, close ...")
+		logLogger.Debug().Msg("log stream copied, close ...")
 		uploads.Done()
 
 		return nil

@@ -70,7 +70,7 @@ async function loadBranches() {
     throw new Error('Unexpected: "repo" should be provided at this place');
   }
 
-  branches.value = (await usePaginate((page) => apiClient.getRepoBranches(repo.value.id, page)))
+  branches.value = (await usePaginate((page) => apiClient.getRepoBranches(repo.value.id, { page })))
     .map((b) => ({
       value: b,
       text: b,

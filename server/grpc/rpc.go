@@ -13,8 +13,6 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-//
-// This file has been modified by Informatyka Boguslawski sp. z o.o. sp.k.
 
 package grpc
 
@@ -31,6 +29,7 @@ import (
 	grpcMetadata "google.golang.org/grpc/metadata"
 
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc"
+	"go.woodpecker-ci.org/woodpecker/v2/server"
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
 	"go.woodpecker-ci.org/woodpecker/v2/server/logging"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
@@ -41,7 +40,6 @@ import (
 )
 
 type RPC struct {
-	forge         forge.Forge
 	queue         queue.Queue
 	pubsub        *pubsub.Publisher
 	logger        logging.Log
@@ -50,7 +48,7 @@ type RPC struct {
 	pipelineCount *prometheus.CounterVec
 }
 
-// Next implements the rpc.Next function
+// Next implements the rpc.Next function.
 func (s *RPC) Next(c context.Context, agentFilter rpc.Filter) (*rpc.Workflow, error) {
 	if hostname, err := s.getHostnameFromContext(c); err == nil {
 		log.Debug().Msgf("agent connected: %s: polling", hostname)
@@ -88,17 +86,17 @@ func (s *RPC) Next(c context.Context, agentFilter rpc.Filter) (*rpc.Workflow, er
 	}
 }
 
-// Wait implements the rpc.Wait function
+// Wait implements the rpc.Wait function.
 func (s *RPC) Wait(c context.Context, id string) error {
 	return s.queue.Wait(c, id)
 }
 
-// Extend implements the rpc.Extend function
+// Extend implements the rpc.Extend function.
 func (s *RPC) Extend(c context.Context, id string) error {
 	return s.queue.Extend(c, id)
 }
 
-// Update implements the rpc.Update function
+// Update implements the rpc.Update function.
 func (s *RPC) Update(_ context.Context, id string, state rpc.State) error {
 	workflowID, err := strconv.ParseInt(id, 10, 64)
 	if err != nil {
@@ -164,7 +162,7 @@ func (s *RPC) Update(_ context.Context, id string, state rpc.State) error {
 	return nil
 }
 
-// Init implements the rpc.Init function
+// Init implements the rpc.Init function.
 func (s *RPC) Init(c context.Context, id string, state rpc.State) error {
 	stepID, err := strconv.ParseInt(id, 10, 64)
 	if err != nil {
@@ -230,7 +228,7 @@ func (s *RPC) Init(c context.Context, id string, state rpc.State) error {
 	return nil
 }
 
-// Done implements the rpc.Done function
+// Done implements the rpc.Done function.
 func (s *RPC) Done(c context.Context, id string, state rpc.State) error {
 	workflowID, err := strconv.ParseInt(id, 10, 64)
 	if err != nil {
@@ -319,7 +317,7 @@ func (s *RPC) Done(c context.Context, id string, state rpc.State) error {
 	return nil
 }
 
-// Log implements the rpc.Log function
+// Log implements the rpc.Log function.
 func (s *RPC) Log(c context.Context, _logEntry *rpc.LogEntry) error {
 	// convert rpc log_entry to model.log_entry
 	step, err := s.store.StepByUUID(_logEntry.StepUUID)
@@ -418,11 +416,17 @@ func (s *RPC) updateForgeStatus(ctx context.Context, repo *model.Repo, pipeline 
 		return
 	}
 
-	forge.Refresh(ctx, s.forge, s.store, user)
+	_forge, err := server.Config.Services.Manager.ForgeFromRepo(repo)
+	if err != nil {
+		log.Error().Err(err).Msgf("can not get forge for repo '%s'", repo.FullName)
+		return
+	}
+
+	forge.Refresh(ctx, _forge, s.store, user)
 
 	// only do status updates for parent steps
 	if workflow != nil {
-		err = s.forge.Status(ctx, user, repo, pipeline, workflow)
+		err = _forge.Status(ctx, user, repo, pipeline, workflow)
 		if err != nil {
 			log.Error().Err(err).Msgf("error setting commit status for %s/%d", repo.FullName, pipeline.Number)
 		}

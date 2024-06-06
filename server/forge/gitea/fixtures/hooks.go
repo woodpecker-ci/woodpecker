@@ -14,7 +14,7 @@
 
 package fixtures
 
-// HookPush is a sample Gitea push hook
+// HookPush is a sample Gitea push hook.
 const HookPush = `
 {
   "ref": "refs/heads/main",
@@ -75,7 +75,7 @@ const HookPush = `
 }
 `
 
-// HookPushMulti push multible commits to a branch
+// HookPushMulti push multible commits to a branch.
 const HookPushMulti = `
 {
   "ref": "refs/heads/main",
@@ -272,7 +272,7 @@ const HookPushMulti = `
 }
 `
 
-// HookPushBranch is a sample Gitea push hook where a new branch was created from an existing commit
+// HookPushBranch is a sample Gitea push hook where a new branch was created from an existing commit.
 const HookPushBranch = `
 {
   "ref": "refs/heads/fdsafdsa",
@@ -425,7 +425,7 @@ const HookPushBranch = `
   }
 }`
 
-// HookTag is a sample Gitea tag hook
+// HookTag is a sample Gitea tag hook.
 const HookTag = `{
   "sha": "ef98532add3b2feb7a137426bba1248724367df5",
   "secret": "l26Un7G7HXogLAvsyf2hOA4EMARSTsR3",
@@ -468,7 +468,7 @@ const HookTag = `{
   }
 }`
 
-// HookPullRequest is a sample pull_request webhook payload
+// HookPullRequest is a sample pull_request webhook payload.
 const HookPullRequest = `{
   "action": "opened",
   "number": 1,

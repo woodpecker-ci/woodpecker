@@ -158,7 +158,7 @@ const selectedAgent = ref<Partial<Agent>>();
 const isEditingAgent = computed(() => !!selectedAgent.value?.id);
 
 async function loadAgents(page: number): Promise<Agent[] | null> {
-  return apiClient.getAgents(page);
+  return apiClient.getAgents({ page });
 }
 
 const { resetPage, data: agents } = usePagination(loadAgents, () => !selectedAgent.value);
