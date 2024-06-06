@@ -29,6 +29,23 @@ async function loadContent(): Promise<Content> {
           return undefined;
         }
 
+        let pluginIcon: string | undefined;
+        let pluginIconType: string | undefined;
+        if (docsHeader.icon) {
+          try {
+            const response = await axios(docsHeader.icon, {
+              responseType: 'arraybuffer',
+            });
+            pluginIcon = Buffer.from(response.data, 'binary').toString('base64');
+            const typeHeader = response.headers['content-type'];
+            if (typeHeader) {
+              pluginIconType = typeHeader.toString();
+            }
+          } catch (e) {
+            console.error("Can't fetch plugin icon", docsHeader.icon, (e as AxiosError).message);
+          }
+        }
+
         return <WoodpeckerPlugin>{
           name: docsHeader.name,
           url: docsHeader.url,
@@ -40,6 +57,8 @@ async function loadContent(): Promise<Content> {
           containerImage: docsHeader.containerImage,
           containerImageUrl: docsHeader.containerImageUrl,
           verified: i.verified || false,
+          iconContent: pluginIcon,
+          iconType: pluginIconType,
         };
       }),
     )
