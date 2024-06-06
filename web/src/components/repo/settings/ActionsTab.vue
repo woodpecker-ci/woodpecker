@@ -42,16 +42,16 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, inject, Ref } from 'vue';
-import { useI18n } from 'vue-i18n';
-import { useRouter } from 'vue-router';
-
 import Button from '~/components/atomic/Button.vue';
 import Settings from '~/components/layout/Settings.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useNotifications from '~/compositions/useNotifications';
-import { Repo } from '~/lib/api/types';
+import type { Repo } from '~/lib/api/types';
+import type { Ref } from 'vue';
+import { computed, inject } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { useRouter } from 'vue-router';
 
 const apiClient = useApiClient();
 const router = useRouter();
@@ -75,7 +75,7 @@ const { doSubmit: deleteRepo, isLoading: isDeletingRepo } = useAsyncAction(async
   }
 
   // TODO: use proper dialog
-  // eslint-disable-next-line no-alert, no-restricted-globals
+  // eslint-disable-next-line no-alert
   if (!confirm(i18n.t('repo.settings.actions.delete.confirm'))) {
     return;
   }

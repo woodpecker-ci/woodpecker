@@ -1,12 +1,12 @@
 // cSpell:ignore TSES
 // @ts-check
 
-import vueI18n from '@intlify/eslint-plugin-vue-i18n';
 import antfu from '@antfu/eslint-config';
+import js from '@eslint/js';
+import vueI18n from '@intlify/eslint-plugin-vue-i18n';
+import eslintPluginVueScopedCSS from 'eslint-plugin-vue-scoped-css';
 
 export default antfu(
-  // eslint.configs.recommended,
-  // js.configs.recommended,
   // eslintPromise.configs.recommended,
 
   {
@@ -21,30 +21,22 @@ export default antfu(
     jsonc: false,
     yaml: false,
   },
+  js.configs.recommended,
 
-  /// TypeScript
-  // ...tseslint.configs.recommended,
-  // ...tseslint.configs.recommendedTypeChecked,
-  // ...tseslint.configs.strictTypeChecked,
-  // ...tseslint.configs.stylisticTypeChecked,
+  // TypeScript
+  //...tseslint.configs.recommended,
+  //...tseslint.configs.recommendedTypeChecked,
+  //...tseslint.configs.strictTypeChecked,
+  //...tseslint.configs.stylisticTypeChecked,
 
-  /// Vue
-  // ...pluginVue.configs['flat/recommended'],
-  // {
-  //   languageOptions: {
-  //     parser: vueParser,
-  //     parserOptions: {
-  //       ecmaVersion: 'latest',
-  //       project: ['./tsconfig.eslint.json'],
-  //       parser: tsParser,
-  //       sourceType: 'module',
-  //       extraFileExtensions: ['.vue'],
-  //       ecmaFeatures: {
-  //         jsx: true,
-  //       },
-  //     },
-  //   },
-  // },
+  {
+    rules: {
+      'import/order': 'off',
+      'sort-imports': 'off',
+    },
+  },
+
+  ...eslintPluginVueScopedCSS.configs['flat/recommended'],
 
   {
     files: ['**/*.vue'],
@@ -72,7 +64,7 @@ export default antfu(
     },
   },
 
-  /// Vue I18n
+  // Vue I18n
   ...vueI18n.configs['flat/recommended'],
   {
     rules: {
@@ -90,7 +82,7 @@ export default antfu(
       '@intlify/vue-i18n/no-deprecated-i18n-component': 'error',
       '@intlify/vue-i18n/no-deprecated-tc': 'error',
       '@intlify/vue-i18n/no-i18n-t-path-prop': 'error',
-      // '@intlify/vue-i18n/no-missing-keys-in-other-locales': 'error',
+      '@intlify/vue-i18n/no-missing-keys-in-other-locales': 'off',
       '@intlify/vue-i18n/valid-message-syntax': 'error',
       '@intlify/vue-i18n/no-missing-keys': 'error',
       '@intlify/vue-i18n/no-unknown-locale': 'error',
@@ -110,10 +102,9 @@ export default antfu(
     },
   },
 
-  /// Ignore list
+  // Ignore list
   {
     ignores: [
-      // # don't lint build output (make sure it's set to your correct build folder name)
       'dist',
       'coverage/',
       'package.json',

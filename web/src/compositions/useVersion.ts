@@ -1,15 +1,14 @@
 import semverCoerce from 'semver/functions/coerce';
 import semverGt from 'semver/functions/gt';
 import { onMounted, ref } from 'vue';
-
 import useAuthentication from './useAuthentication';
 import useConfig from './useConfig';
 
-type VersionInfo = {
+interface VersionInfo {
   latest: string;
   rc: string;
   next: string;
-};
+}
 
 const version = ref<{
   latest: string | undefined;
@@ -22,10 +21,9 @@ const version = ref<{
 async function fetchVersion(): Promise<VersionInfo | undefined> {
   try {
     const resp = await fetch('https://woodpecker-ci.org/version.json');
-    const json = await resp.json();
+    const json = (await resp.json()) as VersionInfo;
     return json;
   } catch (error) {
-    // eslint-disable-next-line no-console
     console.error('Failed to fetch version info', error);
     return undefined;
   }
@@ -45,7 +43,7 @@ export function useVersion() {
   const usesNext = current.startsWith('next');
 
   const { user } = useAuthentication();
-  if (config.skipVersionCheck || !user?.admin) {
+  if (config.skipVersionCheck || user?.admin !== true) {
     version.value = {
       latest: undefined,
       current,

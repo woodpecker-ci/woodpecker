@@ -19,19 +19,18 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onMounted, ref, watch } from 'vue';
-
 import IconButton from '~/components/atomic/IconButton.vue';
 import Scaffold from '~/components/layout/scaffold/Scaffold.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { provide } from '~/compositions/useInjectProvide';
-import { Org, OrgPermissions } from '~/lib/api/types';
+import type { Org, OrgPermissions } from '~/lib/api/types';
+import { computed, onMounted, ref, watch } from 'vue';
 
 const props = defineProps<{
   orgId: string;
 }>();
 
-const orgId = computed(() => parseInt(props.orgId, 10));
+const orgId = computed(() => Number.parseInt(props.orgId, 10));
 const apiClient = useApiClient();
 
 const org = ref<Org>();

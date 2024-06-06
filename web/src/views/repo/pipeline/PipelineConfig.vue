@@ -13,12 +13,12 @@
 </template>
 
 <script lang="ts" setup>
-import { decode } from 'js-base64';
-import { computed, inject, Ref } from 'vue';
-
 import SyntaxHighlight from '~/components/atomic/SyntaxHighlight';
 import Panel from '~/components/layout/Panel.vue';
-import { PipelineConfig } from '~/lib/api/types';
+import type { PipelineConfig } from '~/lib/api/types';
+import { decode } from 'js-base64';
+import type { Ref } from 'vue';
+import { computed, inject } from 'vue';
 
 const pipelineConfigs = inject<Ref<PipelineConfig[]>>('pipeline-configs');
 if (!pipelineConfigs) {

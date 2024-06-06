@@ -1,8 +1,8 @@
-/* eslint-disable import/no-extraneous-dependencies */
+import { copyFile, existsSync, mkdirSync, readdirSync } from 'node:fs';
+import path from 'node:path';
+import process from 'node:process';
 import VueI18nPlugin from '@intlify/unplugin-vue-i18n/vite';
 import vue from '@vitejs/plugin-vue';
-import { copyFile, existsSync, mkdirSync, readdirSync } from 'fs';
-import path from 'path';
 import replace from 'replace-in-file';
 import IconsResolver from 'unplugin-icons/resolver';
 import Icons from 'unplugin-icons/vite';
@@ -61,7 +61,7 @@ export default defineConfig({
         mkdirSync('src/assets/dayjsLocales');
       }
 
-      filenames.forEach(async (name) => {
+      filenames.forEach((name) => {
         // English is always directly loaded (compiled by Vite) and thus not copied
         if (name === 'en') {
           return;
@@ -80,7 +80,7 @@ export default defineConfig({
         copyFile(
           `node_modules/dayjs/esm/locale/${langName}.js`,
           `src/assets/dayjsLocales/${name}.js`,
-          // eslint-disable-next-line promise/prefer-await-to-callbacks
+          // TODO enable with eslint-plugin-promise eslint-disable-next-line promise/prefer-await-to-callbacks
           (err) => {
             if (err) {
               throw err;
@@ -97,13 +97,13 @@ export default defineConfig({
 
       return {
         name: 'vue-i18n-supported-locales',
-        // eslint-disable-next-line consistent-return
+
         resolveId(id) {
           if (id === virtualModuleId) {
             return resolvedVirtualModuleId;
           }
         },
-        // eslint-disable-next-line consistent-return
+
         load(id) {
           if (id === resolvedVirtualModuleId) {
             return `export const SUPPORTED_LOCALES = ${JSON.stringify(filenames)}`;

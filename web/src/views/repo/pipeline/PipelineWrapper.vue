@@ -12,6 +12,7 @@
       <span>
         <router-link :to="{ name: 'org', params: { orgId: repo.org_id } }" class="hover:underline">
           {{ repo.owner }}
+          <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
         </router-link>
         /
         <router-link :to="{ name: 'repo' }" class="hover:underline">
@@ -25,6 +26,7 @@
         <div class="flex content-start gap-2 min-w-0">
           <PipelineStatusIcon :status="pipeline.status" class="flex flex-shrink-0" />
           <span class="flex-shrink-0 text-center">{{ $t('repo.pipeline.pipeline', { pipelineId }) }}</span>
+          <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
           <span class="hidden md:inline-block">-</span>
           <span class="min-w-0 whitespace-nowrap overflow-hidden overflow-ellipsis" :title="message">{{ title }}</span>
         </div>
@@ -87,11 +89,7 @@
     />
     <Tab id="config" :title="$t('repo.pipeline.config')" />
     <Tab
-      v-if="
-        (pipeline.event === 'push' || pipeline.event === 'pull_request' || pipeline.event === 'pull_request_closed') &&
-        pipeline.changed_files &&
-        pipeline.changed_files.length > 0
-      "
+      v-if="pipeline.changed_files && pipeline.changed_files.length > 0"
       id="changed-files"
       :title="$t('repo.pipeline.files', { files: pipeline.changed_files?.length })"
     />
@@ -101,10 +99,6 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, inject, onBeforeUnmount, onMounted, provide, Ref, ref, toRef, watch } from 'vue';
-import { useI18n } from 'vue-i18n';
-import { useRoute, useRouter } from 'vue-router';
-
 import Button from '~/components/atomic/Button.vue';
 import DeployPipelinePopup from '~/components/layout/popups/DeployPipelinePopup.vue';
 import Scaffold from '~/components/layout/scaffold/Scaffold.vue';
@@ -116,8 +110,12 @@ import { useFavicon } from '~/compositions/useFavicon';
 import useNotifications from '~/compositions/useNotifications';
 import usePipeline from '~/compositions/usePipeline';
 import { useRouteBack } from '~/compositions/useRouteBack';
-import { PipelineConfig, Repo, RepoPermissions } from '~/lib/api/types';
+import type { PipelineConfig, Repo, RepoPermissions } from '~/lib/api/types';
 import { usePipelineStore } from '~/store/pipelines';
+import type { Ref } from 'vue';
+import { computed, inject, onBeforeUnmount, onMounted, provide, ref, toRef, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { useRoute, useRouter } from 'vue-router';
 
 const props = defineProps<{
   repoId: string;
@@ -134,7 +132,7 @@ const i18n = useI18n();
 const pipelineStore = usePipelineStore();
 const pipelineId = toRef(props, 'pipelineId');
 const _repoId = toRef(props, 'repoId');
-const repositoryId = computed(() => parseInt(_repoId.value, 10));
+const repositoryId = computed(() => Number.parseInt(_repoId.value, 10));
 const repo = inject<Ref<Repo>>('repo');
 const repoPermissions = inject<Ref<RepoPermissions>>('repo-permissions');
 if (!repo || !repoPermissions) {
@@ -163,7 +161,7 @@ async function loadPipeline(): Promise<void> {
     throw new Error('Unexpected: Repo is undefined');
   }
 
-  await pipelineStore.loadPipeline(repo.value.id, parseInt(pipelineId.value, 10));
+  await pipelineStore.loadPipeline(repo.value.id, Number.parseInt(pipelineId.value, 10));
 
   if (!pipeline.value?.number) {
     throw new Error('Unexpected: Pipeline number not found');

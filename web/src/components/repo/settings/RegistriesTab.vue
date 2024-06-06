@@ -75,9 +75,6 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, inject, Ref, ref } from 'vue';
-import { useI18n } from 'vue-i18n';
-
 import Button from '~/components/atomic/Button.vue';
 import IconButton from '~/components/atomic/IconButton.vue';
 import ListItem from '~/components/atomic/ListItem.vue';
@@ -88,8 +85,11 @@ import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useNotifications from '~/compositions/useNotifications';
 import { usePagination } from '~/compositions/usePaginate';
-import { Repo } from '~/lib/api/types';
-import { Registry } from '~/lib/api/types/registry';
+import type { Repo } from '~/lib/api/types';
+import type { Registry } from '~/lib/api/types/registry';
+import type { Ref } from 'vue';
+import { computed, inject, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 const apiClient = useApiClient();
 const notifications = useNotifications();
@@ -124,9 +124,9 @@ const { doSubmit: createRegistry, isLoading: isSaving } = useAsyncAction(async (
     await apiClient.createRegistry(repo.value.id, selectedRegistry.value);
   }
   notifications.notify({
-    title: i18n.t(
-      isEditingRegistry.value ? 'repo.settings.registries.saved' : i18n.t('repo.settings.registries.created'),
-    ),
+    title: isEditingRegistry.value
+      ? i18n.t('repo.settings.registries.saved')
+      : i18n.t('repo.settings.registries.created'),
     type: 'success',
   });
   selectedRegistry.value = undefined;

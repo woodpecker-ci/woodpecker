@@ -22,9 +22,9 @@
 </template>
 
 <script setup lang="ts">
+import type { Tab } from '~/compositions/useTabs';
+import { useTabsClient } from '~/compositions/useTabs';
 import { useRoute, useRouter } from 'vue-router';
-
-import { Tab, useTabsClient } from '~/compositions/useTabs';
 
 const router = useRouter();
 const route = useRoute();

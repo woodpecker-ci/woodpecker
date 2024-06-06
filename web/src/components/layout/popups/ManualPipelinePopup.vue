@@ -41,9 +41,6 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onMounted, ref, watch } from 'vue';
-import { useRouter } from 'vue-router';
-
 import Button from '~/components/atomic/Button.vue';
 import InputField from '~/components/form/InputField.vue';
 import SelectField from '~/components/form/SelectField.vue';
@@ -53,6 +50,8 @@ import Popup from '~/components/layout/Popup.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { inject } from '~/compositions/useInjectProvide';
 import { usePaginate } from '~/compositions/usePaginate';
+import { computed, onMounted, ref, watch } from 'vue';
+import { useRouter } from 'vue-router';
 
 defineProps<{
   open: boolean;

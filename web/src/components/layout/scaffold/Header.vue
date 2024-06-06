@@ -54,7 +54,6 @@
 <script setup lang="ts">
 import TextField from '~/components/form/TextField.vue';
 import Container from '~/components/layout/Container.vue';
-
 import Tabs from './Tabs.vue';
 
 const props = defineProps<{

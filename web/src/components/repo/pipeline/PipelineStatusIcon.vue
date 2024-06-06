@@ -19,8 +19,7 @@
 
 <script lang="ts" setup>
 import Icon from '~/components/atomic/Icon.vue';
-import { PipelineStatus } from '~/lib/api/types';
-
+import type { PipelineStatus } from '~/lib/api/types';
 import { pipelineStatusColors } from './pipeline-status';
 
 defineProps<{

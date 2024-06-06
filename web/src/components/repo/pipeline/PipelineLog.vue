@@ -60,8 +60,9 @@
               'bg-opacity-30 bg-blue-600': isSelected(line),
               underline: isSelected(line),
             }"
-            >{{ line.number }}</a
           >
+            {{ line.number }}
+          </a>
           <!-- eslint-disable vue/no-v-html -->
           <span
             class="align-top whitespace-pre-wrap break-words"
@@ -80,8 +81,9 @@
               'bg-opacity-40 dark:bg-opacity-50 bg-yellow-600 dark:bg-yellow-800': line.type === 'warning',
               'bg-opacity-30 bg-blue-600': isSelected(line),
             }"
-            >{{ formatTime(line.time) }}</span
           >
+            {{ formatTime(line.time) }}
+          </span>
         </div>
       </div>
 
@@ -105,29 +107,28 @@
 
 <script lang="ts" setup>
 import '~/style/console.css';
-
 import { useStorage } from '@vueuse/core';
-import { AnsiUp } from 'ansi_up';
-import { decode } from 'js-base64';
-import { debounce } from 'lodash';
-import { computed, inject, nextTick, onMounted, Ref, ref, toRef, watch } from 'vue';
-import { useI18n } from 'vue-i18n';
-import { useRoute } from 'vue-router';
-
 import IconButton from '~/components/atomic/IconButton.vue';
 import PipelineStatusIcon from '~/components/repo/pipeline/PipelineStatusIcon.vue';
 import useApiClient from '~/compositions/useApiClient';
 import useNotifications from '~/compositions/useNotifications';
-import { Pipeline, Repo, RepoPermissions } from '~/lib/api/types';
+import type { Pipeline, Repo, RepoPermissions } from '~/lib/api/types';
 import { findStep, isStepFinished, isStepRunning } from '~/utils/helpers';
+import { AnsiUp } from 'ansi_up';
+import { decode } from 'js-base64';
+import { debounce } from 'lodash';
+import type { Ref } from 'vue';
+import { computed, inject, nextTick, onMounted, ref, toRef, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { useRoute } from 'vue-router';
 
-type LogLine = {
+interface LogLine {
   index: number;
   number: number;
   text: string;
   time?: number;
   type: 'error' | 'warning' | null;
-};
+}
 
 const props = defineProps<{
   pipeline: Pipeline;
@@ -312,7 +313,7 @@ async function deleteLogs() {
   }
 
   // TODO: use proper dialog (copy-pasted from web/src/components/secrets/SecretList.vue:deleteSecret)
-  // eslint-disable-next-line no-alert, no-restricted-globals
+  // eslint-disable-next-line no-alert
   if (!confirm(i18n.t('repo.pipeline.log_delete_confirm'))) {
     return;
   }

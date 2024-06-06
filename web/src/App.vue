@@ -17,21 +17,20 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, watch } from 'vue';
-import { useI18n } from 'vue-i18n';
-import { useRoute } from 'vue-router';
-
 import Navbar from '~/components/layout/header/Navbar.vue';
 import PipelineFeedSidebar from '~/components/pipeline-feed/PipelineFeedSidebar.vue';
 import useApiClient from '~/compositions/useApiClient';
 import useNotifications from '~/compositions/useNotifications';
+import { computed, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { useRoute } from 'vue-router';
 
 const route = useRoute();
 const apiClient = useApiClient();
 const { notify } = useNotifications();
 const i18n = useI18n();
 
-// eslint-disable-next-line promise/prefer-await-to-callbacks
+// TODO reenable with eslint-plugin-promise eslint-disable-next-line promise/prefer-await-to-callbacks
 apiClient.setErrorHandler((err) => {
   if (err.status === 404) {
     notify({ title: i18n.t('errors.not_found'), type: 'error' });

@@ -4,10 +4,12 @@
       <span>
         <router-link :to="{ name: 'org', params: { orgId: repo!.org_id } }" class="hover:underline">
           {{ repo!.owner }}
+          <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
         </router-link>
         /
         <router-link :to="{ name: 'repo' }" class="hover:underline">
           {{ repo!.name }}
+          <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
         </router-link>
         /
         {{ $t('settings') }}
@@ -36,10 +38,6 @@
 </template>
 
 <script lang="ts" setup>
-import { inject, onMounted, Ref } from 'vue';
-import { useI18n } from 'vue-i18n';
-import { useRouter } from 'vue-router';
-
 import Scaffold from '~/components/layout/scaffold/Scaffold.vue';
 import Tab from '~/components/layout/scaffold/Tab.vue';
 import ActionsTab from '~/components/repo/settings/ActionsTab.vue';
@@ -50,7 +48,11 @@ import RegistriesTab from '~/components/repo/settings/RegistriesTab.vue';
 import SecretsTab from '~/components/repo/settings/SecretsTab.vue';
 import useNotifications from '~/compositions/useNotifications';
 import { useRouteBack } from '~/compositions/useRouteBack';
-import { Repo, RepoPermissions } from '~/lib/api/types';
+import type { Repo, RepoPermissions } from '~/lib/api/types';
+import type { Ref } from 'vue';
+import { inject, onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { useRouter } from 'vue-router';
 
 const notifications = useNotifications();
 const router = useRouter();

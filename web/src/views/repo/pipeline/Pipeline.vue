@@ -72,10 +72,6 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, inject, Ref, toRef } from 'vue';
-import { useI18n } from 'vue-i18n';
-import { useRoute, useRouter } from 'vue-router';
-
 import Button from '~/components/atomic/Button.vue';
 import Icon from '~/components/atomic/Icon.vue';
 import Container from '~/components/layout/Container.vue';
@@ -84,8 +80,12 @@ import PipelineStepList from '~/components/repo/pipeline/PipelineStepList.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useNotifications from '~/compositions/useNotifications';
-import { Pipeline, PipelineStep, Repo, RepoPermissions } from '~/lib/api/types';
+import type { Pipeline, PipelineStep, Repo, RepoPermissions } from '~/lib/api/types';
 import { findStep } from '~/utils/helpers';
+import type { Ref } from 'vue';
+import { computed, inject, toRef } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { useRoute, useRouter } from 'vue-router';
 
 const props = defineProps<{
   stepId?: string | null;
@@ -111,7 +111,7 @@ const defaultStepId = computed(() => pipeline.value?.workflows?.[0].children?.[0
 const selectedStepId = computed({
   get() {
     if (stepId.value !== '' && stepId.value !== null && stepId.value !== undefined) {
-      const id = parseInt(stepId.value, 10);
+      const id = Number.parseInt(stepId.value, 10);
 
       let step = pipeline.value.workflows?.find((workflow) => workflow.pid === id)?.children[0];
       if (step) {

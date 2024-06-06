@@ -15,6 +15,7 @@
         <template #description>
           <i18n-t keypath="repo.settings.general.pipeline_path.desc" tag="p" class="text-sm text-wp-text-alt-100">
             <span class="code-box-inline px-1">{{ $t('repo.settings.general.pipeline_path.desc_path_example') }}</span>
+            <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
             <span class="code-box-inline px-1">/</span>
           </i18n-t>
         </template>
@@ -97,13 +98,10 @@
 </template>
 
 <script lang="ts" setup>
-import { inject, onMounted, Ref, ref } from 'vue';
-import { useI18n } from 'vue-i18n';
-
 import Button from '~/components/atomic/Button.vue';
 import Checkbox from '~/components/form/Checkbox.vue';
 import CheckboxesField from '~/components/form/CheckboxesField.vue';
-import { CheckboxOption, RadioOption } from '~/components/form/form.types';
+import type { CheckboxOption, RadioOption } from '~/components/form/form.types';
 import InputField from '~/components/form/InputField.vue';
 import NumberField from '~/components/form/NumberField.vue';
 import RadioField from '~/components/form/RadioField.vue';
@@ -113,8 +111,12 @@ import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useAuthentication from '~/compositions/useAuthentication';
 import useNotifications from '~/compositions/useNotifications';
-import { Repo, RepoSettings, RepoVisibility, WebhookEvents } from '~/lib/api/types';
+import type { Repo, RepoSettings } from '~/lib/api/types';
+import { RepoVisibility, WebhookEvents } from '~/lib/api/types';
 import { useRepoStore } from '~/store/repos';
+import type { Ref } from 'vue';
+import { inject, onMounted, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 const apiClient = useApiClient();
 const notifications = useNotifications();
