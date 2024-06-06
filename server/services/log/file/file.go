@@ -21,7 +21,7 @@ func NewLogStore(base string) (log.Service, error) {
 		return nil, fmt.Errorf("file storage base path is required")
 	}
 	if _, err := os.Stat(base); err != nil && os.IsNotExist(err) {
-		err = os.MkdirAll(base, 0600)
+		err = os.MkdirAll(base, 0o600)
 		if err != nil {
 			return nil, err
 		}
@@ -62,7 +62,7 @@ func (l logStore) LogFind(step *model.Step) ([]*model.LogEntry, error) {
 }
 
 func (l logStore) LogAppend(logEntry *model.LogEntry) error {
-	file, err := os.OpenFile(l.filePath(logEntry.StepID), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0600)
+	file, err := os.OpenFile(l.filePath(logEntry.StepID), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o600)
 	if err != nil {
 		return err
 	}
