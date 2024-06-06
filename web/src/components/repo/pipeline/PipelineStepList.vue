@@ -119,7 +119,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, inject, ref, Ref, toRef } from 'vue';
+import { computed, inject, Ref, ref, toRef } from 'vue';
 
 import Badge from '~/components/atomic/Badge.vue';
 import Icon from '~/components/atomic/Icon.vue';
