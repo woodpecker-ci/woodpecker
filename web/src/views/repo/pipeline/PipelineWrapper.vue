@@ -116,7 +116,7 @@ import { useFavicon } from '~/compositions/useFavicon';
 import useNotifications from '~/compositions/useNotifications';
 import usePipeline from '~/compositions/usePipeline';
 import { useRouteBack } from '~/compositions/useRouteBack';
-import { Repo, RepoPermissions } from '~/lib/api/types';
+import { PipelineConfig, Repo, RepoPermissions } from '~/lib/api/types';
 import { usePipelineStore } from '~/store/pipelines';
 
 const props = defineProps<{
@@ -145,6 +145,9 @@ const pipeline = pipelineStore.getPipeline(repositoryId, pipelineId);
 const { since, duration, created, message, title } = usePipeline(pipeline);
 provide('pipeline', pipeline);
 
+const pipelineConfigs = ref<PipelineConfig[]>();
+provide('pipeline-configs', pipelineConfigs);
+
 watch(
   pipeline,
   () => {
@@ -161,6 +164,12 @@ async function loadPipeline(): Promise<void> {
   }
 
   await pipelineStore.loadPipeline(repo.value.id, parseInt(pipelineId.value, 10));
+
+  if (!pipeline.value?.number) {
+    throw new Error('Unexpected: Pipeline number not found');
+  }
+
+  pipelineConfigs.value = await apiClient.getPipelineConfig(repo.value.id, pipeline.value.number);
 }
 
 const { doSubmit: cancelPipeline, isLoading: isCancelingPipeline } = useAsyncAction(async () => {
