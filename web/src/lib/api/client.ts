@@ -1,27 +1,28 @@
-export type ApiError = {
+export interface ApiError {
   status: number;
   message: string;
-};
+}
 
-export function encodeQueryString(_params: Record<string, string | number | boolean | undefined> = {}): string {
-  const params: Record<string, string | number | boolean> = {};
+type QueryParams = Record<string, string | number | boolean>;
 
-  Object.keys(_params).forEach((key) => {
-    const val = _params[key];
+export function encodeQueryString(_params: unknown = {}): string {
+  const __params = _params as QueryParams;
+  const params: QueryParams = {};
+
+  Object.keys(__params).forEach((key) => {
+    const val = __params[key];
     if (val !== undefined) {
       params[key] = val;
     }
   });
 
-  return params
-    ? Object.keys(params)
-        .sort()
-        .map((key) => {
-          const val = params[key];
-          return `${encodeURIComponent(key)}=${encodeURIComponent(val)}`;
-        })
-        .join('&')
-    : '';
+  return Object.keys(params)
+    .sort()
+    .map((key) => {
+      const val = params[key];
+      return `${encodeURIComponent(key)}=${encodeURIComponent(val)}`;
+    })
+    .join('&');
 }
 
 export default class ApiClient {
@@ -43,11 +44,11 @@ export default class ApiClient {
     const res = await fetch(`${this.server}${path}`, {
       method,
       headers: {
-        ...(method !== 'GET' && this.csrf ? { 'X-CSRF-TOKEN': this.csrf } : {}),
-        ...(this.token ? { Authorization: `Bearer ${this.token}` } : {}),
-        ...(data ? { 'Content-Type': 'application/json' } : {}),
+        ...(method !== 'GET' && this.csrf !== null ? { 'X-CSRF-TOKEN': this.csrf } : {}),
+        ...(this.token !== null ? { Authorization: `Bearer ${this.token}` } : {}),
+        ...(data !== undefined ? { 'Content-Type': 'application/json' } : {}),
       },
-      body: data ? JSON.stringify(data) : undefined,
+      body: data !== undefined ? JSON.stringify(data) : undefined,
     });
 
     if (!res.ok) {
@@ -62,7 +63,7 @@ export default class ApiClient {
     }
 
     const contentType = res.headers.get('Content-Type');
-    if (contentType && contentType.startsWith('application/json')) {
+    if (contentType !== null && contentType.startsWith('application/json')) {
       return res.json();
     }
 
@@ -87,15 +88,15 @@ export default class ApiClient {
 
   _subscribe<T>(path: string, callback: (data: T) => void, opts = { reconnect: true }) {
     const query = encodeQueryString({
-      access_token: this.token || undefined,
+      access_token: this.token ?? undefined,
     });
     let _path = this.server ? this.server + path : path;
-    _path = this.token ? `${_path}?${query}` : _path;
+    _path = this.token !== null ? `${_path}?${query}` : _path;
 
     const events = new EventSource(_path);
     events.onmessage = (event) => {
-      const data = JSON.parse(event.data) as T;
-      // eslint-disable-next-line promise/prefer-await-to-callbacks
+      const data = JSON.parse(event.data as string) as T;
+      // TODO enable again with eslint-plugin-promise eslint-disable-next-line promise/prefer-await-to-callbacks
       callback(data);
     };
 

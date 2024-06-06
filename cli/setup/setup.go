@@ -16,10 +16,10 @@ var Command = &cli.Command{
 	Name:      "setup",
 	Usage:     "setup the woodpecker-cli for the first time",
 	Args:      true,
-	ArgsUsage: "[server-url]",
+	ArgsUsage: "[server]",
 	Flags: []cli.Flag{
 		&cli.StringFlag{
-			Name:  "server-url",
+			Name:  "server",
 			Usage: "The URL of the woodpecker server",
 		},
 		&cli.StringFlag{
@@ -46,7 +46,7 @@ func setup(c *cli.Context) error {
 		}
 	}
 
-	serverURL := c.String("server-url")
+	serverURL := c.String("server")
 	if serverURL == "" {
 		serverURL = c.Args().First()
 	}

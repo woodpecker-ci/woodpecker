@@ -1,5 +1,5 @@
 // The user account.
-export type User = {
+export interface User {
   id: number;
   // The unique identifier for the account.
 
@@ -20,4 +20,4 @@ export type User = {
 
   org_id: number;
   // The ID of the org assigned to the user.
-};
+}

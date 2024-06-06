@@ -1,5 +1,5 @@
-import { Component } from 'vue';
-import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router';
+import type { Component } from 'vue';
+import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router';
 
 import useAuthentication from '~/compositions/useAuthentication';
 import useConfig from '~/compositions/useConfig';
