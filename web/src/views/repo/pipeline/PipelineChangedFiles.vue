@@ -7,10 +7,10 @@
 </template>
 
 <script lang="ts" setup>
-import { inject, Ref } from 'vue';
+import { inject, type Ref } from 'vue';
 
 import Panel from '~/components/layout/Panel.vue';
-import { Pipeline } from '~/lib/api/types';
+import type { Pipeline } from '~/lib/api/types';
 
 const pipeline = inject<Ref<Pipeline>>('pipeline');
 if (!pipeline) {

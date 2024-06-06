@@ -14,7 +14,7 @@
 import { computed, toRef } from 'vue';
 
 import Checkbox from './Checkbox.vue';
-import { CheckboxOption } from './form.types';
+import type { CheckboxOption } from './form.types';
 
 const props = defineProps<{
   modelValue?: CheckboxOption['value'][];

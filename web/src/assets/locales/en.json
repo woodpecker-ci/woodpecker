@@ -10,7 +10,6 @@
   "search": "Search…",
   "username": "Username",
   "password": "Password",
-  "url": "URL",
   "back": "Back",
   "unknown_error": "An unknown error occurred",
   "documentation_for": "Documentation for \"{topic}\"",
@@ -25,11 +24,6 @@
   },
   "time": {
     "template": "MMM D, YYYY, HH:mm z",
-    "weeks_short": "w",
-    "days_short": "d",
-    "hours_short": "h",
-    "min_short": "min",
-    "sec_short": "sec",
     "not_started": "not started yet"
   },
   "repo": {
@@ -65,12 +59,10 @@
     "user_none": "This organization / user does not have any projects yet.",
     "not_allowed": "You are not allowed to access this repository",
     "enable": {
-      "reload": "Reload repositories",
       "enable": "Enable",
       "enabled": "Already enabled",
       "disabled": "Disabled",
-      "success": "Repository enabled",
-      "list_reloaded": "Repository list reloaded"
+      "success": "Repository enabled"
     },
     "open_in_forge": "Open repository in forge",
     "settings": {
@@ -209,7 +201,6 @@
       "tasks": "Tasks",
       "config": "Config",
       "files": "Changed files ({files})",
-      "no_files": "No files have been changed.",
       "no_pipelines": "No pipelines have been started yet.",
       "no_pipeline_steps": "No pipeline steps available!",
       "step_not_started": "This step hasn't started yet.",
@@ -444,7 +435,6 @@
       "events": "Available at following events",
       "pr_warning": "Please be careful with this option as a bad actor can submit a malicious pull request that exposes your secrets."
     },
-    "plugins_only": "Only available for plugins",
     "edit": "Edit secret",
     "delete": "Delete secret"
   },
