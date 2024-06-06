@@ -1,14 +1,23 @@
 # Changelog
 
-## [2.6.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.6.0) - 2024-06-04
+## [2.6.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.6.0) - 2024-06-06
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @qwerty287, @s00500, @zc-devs
+@6543, @pat-s, @qwerty287, @s00500, @zc-devs
+
+### 🔒 Security
+
+- Bump trivy plugin version and remove unused variable [[#3759](https://github.com/woodpecker-ci/woodpecker/pull/3759)]
 
 ### ✨ Features
 
 - Native forgejo support [[#3684](https://github.com/woodpecker-ci/woodpecker/pull/3684)]
+
+### 🐛 Bug Fixes
+
+- Fix missing WOODPECKER_BITBUCKET_DC_URL [[#3761](https://github.com/woodpecker-ci/woodpecker/pull/3761)]
+- Correct repo repair success message in cli [[#3757](https://github.com/woodpecker-ci/woodpecker/pull/3757)]
 
 ### 📚 Documentation
 
@@ -20,10 +29,6 @@
 
 - Spellcheck "server/*" [[#3753](https://github.com/woodpecker-ci/woodpecker/pull/3753)]
 - Agent-wide node selector [[#3608](https://github.com/woodpecker-ci/woodpecker/pull/3608)]
-
-### 🐛 Bug Fixes
-
-- Correct repo repair success message in cli [[#3757](https://github.com/woodpecker-ci/woodpecker/pull/3757)]
 
 ### Misc
 
