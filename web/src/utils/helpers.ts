@@ -68,7 +68,7 @@ export function isPipelineActive(pipeline: Pipeline): boolean {
 
 export function repoSlug(ownerOrRepo: string | Repo, name?: string): string {
   if (typeof ownerOrRepo === 'string') {
-    if (!name) {
+    if (name === undefined) {
       throw new Error('Please provide a name as well');
     }
 

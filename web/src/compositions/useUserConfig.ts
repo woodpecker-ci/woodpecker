@@ -14,7 +14,7 @@ const defaultUserConfig: UserConfig = {
 
 function loadUserConfig(): UserConfig {
   const lsData = localStorage.getItem(USER_CONFIG_KEY);
-  if (!lsData) {
+  if (lsData === null) {
     return defaultUserConfig;
   }
 

@@ -130,7 +130,7 @@ export default defineConfig({
   },
   logLevel: 'warn',
   server: {
-    host: process.env.VITE_DEV_SERVER_HOST || '127.0.0.1',
+    host: process.env.VITE_DEV_SERVER_HOST ?? '127.0.0.1',
     port: 8010,
   },
   test: {

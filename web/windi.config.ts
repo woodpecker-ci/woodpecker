@@ -208,7 +208,9 @@ export default defineConfig({
       transitionProperty: {
         height: 'max-height',
       },
+      // eslint-disable-next-line ts/no-unsafe-return
       stroke: (theme) => theme('colors'),
+      // eslint-disable-next-line ts/no-unsafe-return
       fill: (theme) => theme('colors'),
       fontFamily: [
         'system-ui',

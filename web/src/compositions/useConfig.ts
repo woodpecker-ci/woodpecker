@@ -13,11 +13,11 @@ declare global {
 }
 
 export default () => ({
-  user: window.WOODPECKER_USER || null,
+  user: window.WOODPECKER_USER ?? null,
   version: window.WOODPECKER_VERSION,
   skipVersionCheck: window.WOODPECKER_SKIP_VERSION_CHECK === true || false,
-  csrf: window.WOODPECKER_CSRF || null,
-  forge: window.WOODPECKER_FORGE || null,
-  rootPath: window.WOODPECKER_ROOT_PATH || '',
+  csrf: window.WOODPECKER_CSRF ?? null,
+  forge: window.WOODPECKER_FORGE ?? null,
+  rootPath: window.WOODPECKER_ROOT_PATH ?? '',
   enableSwagger: window.WOODPECKER_ENABLE_SWAGGER === true || false,
 });

@@ -1,4 +1,4 @@
-// cSpell:ignore TSES
+// cSpell:ignore tseslint
 // @ts-check
 
 import antfu from '@antfu/eslint-config';
@@ -7,11 +7,8 @@ import vueI18n from '@intlify/eslint-plugin-vue-i18n';
 import eslintPluginVueScopedCSS from 'eslint-plugin-vue-scoped-css';
 
 export default antfu(
-  // eslintPromise.configs.recommended,
-
   {
     stylistic: false,
-
     typescript: {
       tsconfigPath: './tsconfig.eslint.json',
     },
@@ -21,7 +18,9 @@ export default antfu(
     jsonc: false,
     yaml: false,
   },
+
   js.configs.recommended,
+  // eslintPromise.configs.recommended,
 
   // TypeScript
   //...tseslint.configs.recommended,
@@ -38,6 +37,7 @@ export default antfu(
 
   ...eslintPluginVueScopedCSS.configs['flat/recommended'],
 
+  // Vue
   {
     files: ['**/*.vue'],
     rules: {
@@ -110,7 +110,8 @@ export default antfu(
       'package.json',
       'tsconfig.eslint.json',
       'tsconfig.json',
-      // 'src/assets/locales/',
+      'src/assets/locales/**/*',
+      '!src/assets/locales/en.json',
       'src/assets/dayjsLocales/',
       'components.d.ts',
     ],

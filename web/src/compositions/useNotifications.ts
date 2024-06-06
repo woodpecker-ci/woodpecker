@@ -3,11 +3,11 @@ import Notifications, { notify } from '@kyvg/vue3-notification';
 
 export const notifications = Notifications;
 
-function notifyError(err: unknown, args: NotificationsOptions | string = {}): void {
+function notifyError(err: Error, args: NotificationsOptions | string = {}): void {
   console.error(err);
 
   const mArgs = typeof args === 'string' ? { title: args } : args;
-  const title = mArgs?.title || (err as Error)?.message || `${err}`;
+  const title = mArgs?.title ?? err?.message ?? err?.toString();
 
   notify({ type: 'error', ...mArgs, title });
 }

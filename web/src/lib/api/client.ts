@@ -41,8 +41,8 @@ export default class ApiClient {
     const res = await fetch(`${this.server}${path}`, {
       method,
       headers: {
-        ...(method !== 'GET' && this.csrf ? { 'X-CSRF-TOKEN': this.csrf } : {}),
-        ...(this.token ? { Authorization: `Bearer ${this.token}` } : {}),
+        ...(method !== 'GET' && this.csrf !== null ? { 'X-CSRF-TOKEN': this.csrf } : {}),
+        ...(this.token !== null ? { Authorization: `Bearer ${this.token}` } : {}),
         ...(data !== undefined ? { 'Content-Type': 'application/json' } : {}),
       },
       body: data !== undefined ? JSON.stringify(data) : undefined,
@@ -60,7 +60,7 @@ export default class ApiClient {
     }
 
     const contentType = res.headers.get('Content-Type');
-    if (contentType && contentType.startsWith('application/json')) {
+    if (contentType !== null && contentType.startsWith('application/json')) {
       return res.json();
     }
 
@@ -85,10 +85,10 @@ export default class ApiClient {
 
   _subscribe<T>(path: string, callback: (data: T) => void, opts = { reconnect: true }) {
     const query = encodeQueryString({
-      access_token: this.token || undefined,
+      access_token: this.token ?? undefined,
     });
     let _path = this.server ? this.server + path : path;
-    _path = this.token ? `${_path}?${query}` : _path;
+    _path = this.token !== null ? `${_path}?${query}` : _path;
 
     const events = new EventSource(_path);
     events.onmessage = (event) => {
