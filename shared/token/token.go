@@ -91,7 +91,7 @@ func CheckCsrf(r *http.Request, fn SecretFunc) error {
 	// get and options requests are always
 	// enabled, without CSRF checks.
 	switch r.Method {
-	case "GET", "OPTIONS":
+	case http.MethodGet, http.MethodOptions:
 		return nil
 	}
 

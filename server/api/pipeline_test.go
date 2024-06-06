@@ -41,7 +41,7 @@ func TestGetPipelines(t *testing.T) {
 
 		g.It("should not parse pipeline filter", func() {
 			c, _ := gin.CreateTestContext(httptest.NewRecorder())
-			c.Request, _ = http.NewRequest("DELETE", "/?before=2023-01-16&after=2023-01-15", nil)
+			c.Request, _ = http.NewRequest(http.MethodDelete, "/?before=2023-01-16&after=2023-01-15", nil)
 
 			GetPipelines(c)
 
@@ -56,7 +56,7 @@ func TestGetPipelines(t *testing.T) {
 
 			c, _ := gin.CreateTestContext(httptest.NewRecorder())
 			c.Set("store", mockStore)
-			c.Request, _ = http.NewRequest("DELETE", "/?2023-01-16T15:00:00Z&after=2023-01-15T15:00:00Z", nil)
+			c.Request, _ = http.NewRequest(http.MethodDelete, "/?2023-01-16T15:00:00Z&after=2023-01-15T15:00:00Z", nil)
 
 			GetPipelines(c)
 
@@ -71,7 +71,7 @@ func TestGetPipelines(t *testing.T) {
 
 			c, _ := gin.CreateTestContext(httptest.NewRecorder())
 			c.Set("store", mockStore)
-			c.Request, _ = http.NewRequest("DELETE", "/?before=2023-01-16T15:00:00%2B01:00&after=2023-01-15T15:00:00%2B01:00", nil)
+			c.Request, _ = http.NewRequest(http.MethodDelete, "/?before=2023-01-16T15:00:00%2B01:00&after=2023-01-15T15:00:00%2B01:00", nil)
 
 			GetPipelines(c)
 
