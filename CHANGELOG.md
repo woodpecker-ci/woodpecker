@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @pat-s, @qwerty287, @s00500, @zc-devs
+@6543, @anbraten, @pat-s, @qwerty287, @s00500, @zc-devs
 
 ### 🔒 Security
 
@@ -14,8 +14,15 @@
 
 - Native forgejo support [[#3684](https://github.com/woodpecker-ci/woodpecker/pull/3684)]
 
+### 🐛 Bug Fixes
+
+- Fix config loading of cli [[#3764](https://github.com/woodpecker-ci/woodpecker/pull/3764)]
+- Fix missing WOODPECKER_BITBUCKET_DC_URL [[#3761](https://github.com/woodpecker-ci/woodpecker/pull/3761)]
+- Correct repo repair success message in cli [[#3757](https://github.com/woodpecker-ci/woodpecker/pull/3757)]
+
 ### 📈 Enhancement
 
+- Show workflow names if there are multiple configs [[#3767](https://github.com/woodpecker-ci/woodpecker/pull/3767)]
 - Use http constants [[#3766](https://github.com/woodpecker-ci/woodpecker/pull/3766)]
 - Spellcheck "server/*" [[#3753](https://github.com/woodpecker-ci/woodpecker/pull/3753)]
 - Agent-wide node selector [[#3608](https://github.com/woodpecker-ci/woodpecker/pull/3608)]
@@ -26,11 +33,6 @@
 - Remove old docs versions [[#3743](https://github.com/woodpecker-ci/woodpecker/pull/3743)]
 - Merge release plugins [[#3752](https://github.com/woodpecker-ci/woodpecker/pull/3752)]
 - Split FAQ [[#3746](https://github.com/woodpecker-ci/woodpecker/pull/3746)]
-
-### 🐛 Bug Fixes
-
-- Fix missing WOODPECKER_BITBUCKET_DC_URL [[#3761](https://github.com/woodpecker-ci/woodpecker/pull/3761)]
-- Correct repo repair success message in cli [[#3757](https://github.com/woodpecker-ci/woodpecker/pull/3757)]
 
 ### Misc
 
