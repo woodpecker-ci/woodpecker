@@ -1,12 +1,12 @@
 package file
 
 import (
-	"bytes"
+	"bufio"
 	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
-	"strconv"
+	"strings"
 
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 	"go.woodpecker-ci.org/woodpecker/v2/server/services/log"
@@ -34,7 +34,8 @@ func (l logStore) filePath(id int64) string {
 }
 
 func (l logStore) LogFind(step *model.Step) ([]*model.LogEntry, error) {
-	file, err := os.ReadFile(l.filePath(step.ID))
+	filename := l.filePath(step.ID)
+	file, err := os.Open(filename)
 	if err != nil {
 		if os.IsNotExist(err) {
 			return nil, nil
@@ -42,13 +43,15 @@ func (l logStore) LogFind(step *model.Step) ([]*model.LogEntry, error) {
 		return nil, err
 	}
 
+	s := bufio.NewScanner(file)
 	var entries []*model.LogEntry
-	for _, j := range bytes.Split(file, []byte("\n")) {
-		if len(bytes.TrimSpace(j)) == 0 {
+	for s.Scan() {
+		j := s.Text()
+		if len(strings.TrimSpace(j)) == 0 {
 			continue
 		}
 		entry := &model.LogEntry{}
-		err = json.Unmarshal(j, entry)
+		err = json.Unmarshal([]byte(j), entry)
 		if err != nil {
 			return nil, err
 		}
