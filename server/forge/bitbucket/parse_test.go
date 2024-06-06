@@ -32,7 +32,7 @@ func Test_parser(t *testing.T) {
 	g.Describe("Bitbucket parser", func() {
 		g.It("should ignore unsupported hook", func() {
 			buf := bytes.NewBufferString(fixtures.HookPush)
-			req, _ := http.NewRequest("POST", "/hook", buf)
+			req, _ := http.NewRequest(http.MethodPost, "/hook", buf)
 			req.Header = http.Header{}
 			req.Header.Set(hookEvent, "issue:created")
 
@@ -45,7 +45,7 @@ func Test_parser(t *testing.T) {
 		g.Describe("Given a pull-request hook payload", func() {
 			g.It("should return err when malformed", func() {
 				buf := bytes.NewBufferString("[]")
-				req, _ := http.NewRequest("POST", "/hook", buf)
+				req, _ := http.NewRequest(http.MethodPost, "/hook", buf)
 				req.Header = http.Header{}
 				req.Header.Set(hookEvent, hookPullCreated)
 
@@ -55,7 +55,7 @@ func Test_parser(t *testing.T) {
 
 			g.It("should return pull-request details", func() {
 				buf := bytes.NewBufferString(fixtures.HookPull)
-				req, _ := http.NewRequest("POST", "/hook", buf)
+				req, _ := http.NewRequest(http.MethodPost, "/hook", buf)
 				req.Header = http.Header{}
 				req.Header.Set(hookEvent, hookPullCreated)
 
@@ -68,7 +68,7 @@ func Test_parser(t *testing.T) {
 
 			g.It("should return pull-request details for a pull-request merged payload", func() {
 				buf := bytes.NewBufferString(fixtures.HookPullRequestMerged)
-				req, _ := http.NewRequest("POST", "/hook", buf)
+				req, _ := http.NewRequest(http.MethodPost, "/hook", buf)
 				req.Header = http.Header{}
 				req.Header.Set(hookEvent, hookPullMerged)
 
@@ -81,7 +81,7 @@ func Test_parser(t *testing.T) {
 
 			g.It("should return pull-request details for a pull-request closed payload", func() {
 				buf := bytes.NewBufferString(fixtures.HookPullRequestDeclined)
-				req, _ := http.NewRequest("POST", "/hook", buf)
+				req, _ := http.NewRequest(http.MethodPost, "/hook", buf)
 				req.Header = http.Header{}
 				req.Header.Set(hookEvent, hookPullDeclined)
 
@@ -96,7 +96,7 @@ func Test_parser(t *testing.T) {
 		g.Describe("Given a push hook payload", func() {
 			g.It("should return err when malformed", func() {
 				buf := bytes.NewBufferString("[]")
-				req, _ := http.NewRequest("POST", "/hook", buf)
+				req, _ := http.NewRequest(http.MethodPost, "/hook", buf)
 				req.Header = http.Header{}
 				req.Header.Set(hookEvent, hookPush)
 
@@ -106,7 +106,7 @@ func Test_parser(t *testing.T) {
 
 			g.It("should return nil if missing commit sha", func() {
 				buf := bytes.NewBufferString(fixtures.HookPushEmptyHash)
-				req, _ := http.NewRequest("POST", "/hook", buf)
+				req, _ := http.NewRequest(http.MethodPost, "/hook", buf)
 				req.Header = http.Header{}
 				req.Header.Set(hookEvent, hookPush)
 
@@ -118,7 +118,7 @@ func Test_parser(t *testing.T) {
 
 			g.It("should return push details", func() {
 				buf := bytes.NewBufferString(fixtures.HookPush)
-				req, _ := http.NewRequest("POST", "/hook", buf)
+				req, _ := http.NewRequest(http.MethodPost, "/hook", buf)
 				req.Header = http.Header{}
 				req.Header.Set(hookEvent, hookPush)
 
