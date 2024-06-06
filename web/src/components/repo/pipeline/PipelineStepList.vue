@@ -119,8 +119,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed } from 'vue';
-import { inject, ref, Ref, toRef } from 'vue';
+import { computed, inject, ref, Ref, toRef } from 'vue';
 
 import Badge from '~/components/atomic/Badge.vue';
 import Icon from '~/components/atomic/Icon.vue';
@@ -159,6 +158,6 @@ const workflowsCollapsed = ref<Record<PipelineStep['id'], boolean>>(
 );
 
 const singleConfig = computed(
-  () => pipelineConfigs?.value?.length === 1 && pipeline.value.workflows && pipeline.value.workflows.length == 1,
+  () => pipelineConfigs?.value?.length === 1 && pipeline.value.workflows && pipeline.value.workflows.length === 1,
 );
 </script>

@@ -169,7 +169,7 @@ async function loadPipeline(): Promise<void> {
     throw new Error('Unexpected: Pipeline number not found');
   }
 
-  pipelineConfigs.value = await apiClient.getPipelineConfig(repo.value.id, pipeline.value!.number);
+  pipelineConfigs.value = await apiClient.getPipelineConfig(repo.value.id, pipeline.value.number);
 }
 
 const { doSubmit: cancelPipeline, isLoading: isCancelingPipeline } = useAsyncAction(async () => {
