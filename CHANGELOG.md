@@ -15,18 +15,19 @@
 - Allow to store logs in files [[#3568](https://github.com/woodpecker-ci/woodpecker/pull/3568)]
 - Native forgejo support [[#3684](https://github.com/woodpecker-ci/woodpecker/pull/3684)]
 
+### 📈 Enhancement
+
+- chore(deps): update dependency eslint to v9 [[#3594](https://github.com/woodpecker-ci/woodpecker/pull/3594)]
+- Show workflow names if there are multiple configs [[#3767](https://github.com/woodpecker-ci/woodpecker/pull/3767)]
+- Use http constants [[#3766](https://github.com/woodpecker-ci/woodpecker/pull/3766)]
+- Spellcheck "server/*" [[#3753](https://github.com/woodpecker-ci/woodpecker/pull/3753)]
+- Agent-wide node selector [[#3608](https://github.com/woodpecker-ci/woodpecker/pull/3608)]
+
 ### 🐛 Bug Fixes
 
 - Fix config loading of cli [[#3764](https://github.com/woodpecker-ci/woodpecker/pull/3764)]
 - Fix missing WOODPECKER_BITBUCKET_DC_URL [[#3761](https://github.com/woodpecker-ci/woodpecker/pull/3761)]
 - Correct repo repair success message in cli [[#3757](https://github.com/woodpecker-ci/woodpecker/pull/3757)]
-
-### 📈 Enhancement
-
-- Show workflow names if there are multiple configs [[#3767](https://github.com/woodpecker-ci/woodpecker/pull/3767)]
-- Use http constants [[#3766](https://github.com/woodpecker-ci/woodpecker/pull/3766)]
-- Spellcheck "server/*" [[#3753](https://github.com/woodpecker-ci/woodpecker/pull/3753)]
-- Agent-wide node selector [[#3608](https://github.com/woodpecker-ci/woodpecker/pull/3608)]
 
 ### 📚 Documentation
 
