@@ -338,7 +338,6 @@ func (s *RPC) Log(c context.Context, _logEntry *rpc.LogEntry) error {
 			log.Error().Err(err).Msgf("rpc server could not write to logger")
 		}
 	}()
-	// store line
 	return server.Config.Services.LogStore.LogAppend(logEntry)
 }
 

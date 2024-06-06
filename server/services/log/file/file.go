@@ -30,7 +30,7 @@ func NewLogStore(base string) (log.Service, error) {
 }
 
 func (l logStore) filePath(id int64) string {
-	return filepath.Join(l.base, strconv.Itoa(int(id))+".json")
+	return filepath.Join(l.base, fmt.Sprintf("%d.json", id))
 }
 
 func (l logStore) LogFind(step *model.Step) ([]*model.LogEntry, error) {

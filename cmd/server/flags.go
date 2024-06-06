@@ -248,9 +248,9 @@ var flags = append([]cli.Flag{
 		Value:   "database",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_LOG_STORE_FILE_BASE"},
-		Name:    "log-store-file-base",
-		Usage:   "base directory for file log storage",
+		EnvVars: []string{"WOODPECKER_LOG_STORE_FILE_PATH"},
+		Name:    "log-store-file-path",
+		Usage:   "directory used for file based log storage",
 	},
 	//
 	// backend options for pipeline compiler
