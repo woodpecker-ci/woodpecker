@@ -205,7 +205,12 @@ func LogStreamSSE(c *gin.Context) {
 		log.Debug().Msg("log stream: connection closed")
 	}()
 
-	server.Config.Services.Logs.Open(ctx, step.ID)
+	err = server.Config.Services.Logs.Open(ctx, step.ID)
+	if err != nil {
+		log.Error().Err(err).Msg("log stream: open failed")
+		logWriteStringErr(io.WriteString(rw, "event: error\ndata: can't open stream\n\n"))
+		return
+	}
 
 	go func() {
 		err := server.Config.Services.Logs.Tail(ctx, step.ID, func(entries ...*model.LogEntry) {

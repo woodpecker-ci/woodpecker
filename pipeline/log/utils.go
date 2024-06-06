@@ -16,26 +16,29 @@ package log
 
 import (
 	"bufio"
+	"errors"
 	"io"
 )
 
-func writeChunks(dst io.WriteCloser, data []byte, size int) (int, error) {
+func writeChunks(dst io.WriteCloser, data []byte, size int) error {
 	if len(data) <= size {
-		return dst.Write(data)
+		_, err := dst.Write(data)
+		return err
 	}
 
 	for len(data) > size {
 		if _, err := dst.Write(data[:size]); err != nil {
-			return 0, err
+			return err
 		}
 		data = data[size:]
 	}
 
 	if len(data) > 0 {
-		return dst.Write(data)
+		_, err := dst.Write(data)
+		return err
 	}
 
-	return 0, nil
+	return nil
 }
 
 func CopyLineByLine(dst io.WriteCloser, src io.Reader, maxSize int) error {
@@ -45,14 +48,13 @@ func CopyLineByLine(dst io.WriteCloser, src io.Reader, maxSize int) error {
 	for {
 		// TODO: read til newline or maxSize directly
 		line, err := r.ReadBytes('\n')
-		if err == io.EOF {
-			_, err = writeChunks(dst, line, maxSize)
-			return err
+		if errors.Is(err, io.EOF) {
+			return writeChunks(dst, line, maxSize)
 		} else if err != nil {
 			return err
 		}
 
-		_, err = writeChunks(dst, line, maxSize)
+		err = writeChunks(dst, line, maxSize)
 		if err != nil {
 			return err
 		}

@@ -17,6 +17,7 @@ package log_test
 import (
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/log"
@@ -32,8 +33,10 @@ func TestLineWriter(t *testing.T) {
 	lw := log.NewLineWriter(peer, "e9ea76a5-44a1-4059-9c4a-6956c478b26d", secrets...)
 	defer lw.Close()
 
-	lw.Write([]byte("hello world\n"))
-	lw.Write([]byte("the previous line had no newline at the end"))
+	_, err := lw.Write([]byte("hello world\n"))
+	assert.NoError(t, err)
+	_, err = lw.Write([]byte("the previous line had no newline at the end"))
+	assert.NoError(t, err)
 
 	peer.AssertCalled(t, "Log", mock.Anything, &rpc.LogEntry{
 		StepUUID: "e9ea76a5-44a1-4059-9c4a-6956c478b26d",
