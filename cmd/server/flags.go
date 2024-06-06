@@ -308,7 +308,7 @@ var flags = append([]cli.Flag{
 	&cli.StringFlag{
 		Name:    "forge-url",
 		Usage:   "url of the forge",
-		EnvVars: []string{"WOODPECKER_FORGE_URL", "WOODPECKER_GITHUB_URL", "WOODPECKER_GITLAB_URL", "WOODPECKER_GITEA_URL", "WOODPECKER_FORGEJO_URL", "WOODPECKER_BITBUCKET_URL"},
+		EnvVars: []string{"WOODPECKER_FORGE_URL", "WOODPECKER_GITHUB_URL", "WOODPECKER_GITLAB_URL", "WOODPECKER_GITEA_URL", "WOODPECKER_FORGEJO_URL", "WOODPECKER_BITBUCKET_URL", "WOODPECKER_BITBUCKET_DC_URL"},
 	},
 	&cli.StringFlag{
 		Name:     "forge-oauth-client",
