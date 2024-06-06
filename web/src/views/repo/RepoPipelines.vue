@@ -3,8 +3,7 @@
 </template>
 
 <script lang="ts" setup>
-import type { Ref } from 'vue';
-import { inject } from 'vue';
+import { inject, type Ref } from 'vue';
 
 import PipelineList from '~/components/repo/pipeline/PipelineList.vue';
 import type { Pipeline, Repo, RepoPermissions } from '~/lib/api/types';

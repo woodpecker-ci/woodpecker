@@ -41,8 +41,7 @@
 
 <script lang="ts" setup>
 import { useStorage } from '@vueuse/core';
-import type { Ref } from 'vue';
-import { computed, inject, onMounted, ref, watch } from 'vue';
+import { computed, inject, onMounted, ref, watch, type Ref } from 'vue';
 
 import type { SelectOption } from '~/components/form/form.types';
 import InputField from '~/components/form/InputField.vue';

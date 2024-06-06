@@ -1,5 +1,4 @@
-import type { Ref } from 'vue';
-import { inject, onMounted, provide, ref } from 'vue';
+import { inject, onMounted, provide, ref, type Ref } from 'vue';
 import { useRoute } from 'vue-router';
 
 export interface Tab {

@@ -62,8 +62,7 @@ import CheckboxesField from '~/components/form/CheckboxesField.vue';
 import type { CheckboxOption } from '~/components/form/form.types';
 import InputField from '~/components/form/InputField.vue';
 import TextField from '~/components/form/TextField.vue';
-import type { Secret } from '~/lib/api/types';
-import { WebhookEvents } from '~/lib/api/types';
+import { WebhookEvents, type Secret } from '~/lib/api/types';
 
 const props = defineProps<{
   modelValue: Partial<Secret>;

@@ -9,3 +9,4 @@ export enum WebhookEvents {
   Cron = 'cron',
   Manual = 'manual',
 }
+/* eslint-enable */

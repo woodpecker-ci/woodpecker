@@ -24,8 +24,7 @@
 <script setup lang="ts">
 import { useRoute, useRouter } from 'vue-router';
 
-import type { Tab } from '~/compositions/useTabs';
-import { useTabsClient } from '~/compositions/useTabs';
+import { useTabsClient, type Tab } from '~/compositions/useTabs';
 
 const router = useRouter();
 const route = useRoute();

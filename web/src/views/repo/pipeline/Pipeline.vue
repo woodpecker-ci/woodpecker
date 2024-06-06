@@ -72,8 +72,7 @@
 </template>
 
 <script lang="ts" setup>
-import type { Ref } from 'vue';
-import { computed, inject, toRef } from 'vue';
+import { computed, inject, toRef, type Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 

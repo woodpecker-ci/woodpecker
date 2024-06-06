@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import type { WebhookEvents } from './webhook';
 
 export interface PipelineError<D = unknown> {
@@ -146,6 +145,7 @@ export type PipelineFeed = Pipeline & {
   repo_id: number;
 };
 
+/* eslint-disable no-unused-vars */
 export enum StepType {
   Clone = 'clone',
   Service = 'service',
@@ -153,3 +153,4 @@ export enum StepType {
   Commands = 'commands',
   Cache = 'cache',
 }
+/* eslint-enable */

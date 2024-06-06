@@ -21,8 +21,7 @@
 </template>
 
 <script lang="ts" setup>
-import type { Ref } from 'vue';
-import { computed, inject, watch } from 'vue';
+import { computed, inject, watch, type Ref } from 'vue';
 
 import Badge from '~/components/atomic/Badge.vue';
 import ListItem from '~/components/atomic/ListItem.vue';

@@ -1,6 +1,5 @@
 import { useInfiniteScroll } from '@vueuse/core';
-import type { Ref, UnwrapRef } from 'vue';
-import { onMounted, ref, watch } from 'vue';
+import { onMounted, ref, watch, type Ref, type UnwrapRef } from 'vue';
 
 export async function usePaginate<T>(getSingle: (page: number) => Promise<T[]>): Promise<T[]> {
   let hasMore = true;

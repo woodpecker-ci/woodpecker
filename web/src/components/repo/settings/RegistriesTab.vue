@@ -75,8 +75,7 @@
 </template>
 
 <script lang="ts" setup>
-import type { Ref } from 'vue';
-import { computed, inject, ref } from 'vue';
+import { computed, inject, ref, type Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import Button from '~/components/atomic/Button.vue';
@@ -89,8 +88,7 @@ import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useNotifications from '~/compositions/useNotifications';
 import { usePagination } from '~/compositions/usePaginate';
-import type { Repo } from '~/lib/api/types';
-import type { Registry } from '~/lib/api/types/registry';
+import type { Registry, Repo } from '~/lib/api/types';
 
 const apiClient = useApiClient();
 const notifications = useNotifications();

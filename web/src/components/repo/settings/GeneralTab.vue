@@ -98,8 +98,7 @@
 </template>
 
 <script lang="ts" setup>
-import type { Ref } from 'vue';
-import { inject, onMounted, ref } from 'vue';
+import { inject, onMounted, ref, type Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import Button from '~/components/atomic/Button.vue';
@@ -115,8 +114,7 @@ import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useAuthentication from '~/compositions/useAuthentication';
 import useNotifications from '~/compositions/useNotifications';
-import type { Repo, RepoSettings } from '~/lib/api/types';
-import { RepoVisibility, WebhookEvents } from '~/lib/api/types';
+import { RepoVisibility, WebhookEvents, type Repo, type RepoSettings } from '~/lib/api/types';
 import { useRepoStore } from '~/store/repos';
 
 const apiClient = useApiClient();

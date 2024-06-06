@@ -112,8 +112,7 @@ import { useStorage } from '@vueuse/core';
 import { AnsiUp } from 'ansi_up';
 import { decode } from 'js-base64';
 import { debounce } from 'lodash';
-import type { Ref } from 'vue';
-import { computed, inject, nextTick, onMounted, ref, toRef, watch } from 'vue';
+import { computed, inject, nextTick, onMounted, ref, toRef, watch, type Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
 

@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 // A version control repository.
 export interface Repo {
   // Is the repo currently active or not
@@ -73,11 +72,13 @@ export interface Repo {
   netrc_only_trusted: boolean;
 }
 
+/* eslint-disable no-unused-vars */
 export enum RepoVisibility {
   Public = 'public',
   Private = 'private',
   Internal = 'internal',
 }
+/* eslint-enable */
 
 export type RepoSettings = Pick<
   Repo,
