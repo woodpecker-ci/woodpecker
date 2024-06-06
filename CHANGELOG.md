@@ -12,6 +12,7 @@
 
 ### ✨ Features
 
+- Allow to store logs in files [[#3568](https://github.com/woodpecker-ci/woodpecker/pull/3568)]
 - Native forgejo support [[#3684](https://github.com/woodpecker-ci/woodpecker/pull/3684)]
 
 ### 🐛 Bug Fixes
