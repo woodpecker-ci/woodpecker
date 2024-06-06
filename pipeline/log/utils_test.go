@@ -17,6 +17,7 @@ package log_test
 import (
 	"io"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -26,10 +27,13 @@ import (
 )
 
 type testWriter struct {
+	*sync.Mutex
 	writes []string
 }
 
 func (b *testWriter) Write(p []byte) (n int, err error) {
+	b.Lock()
+	defer b.Unlock()
 	b.writes = append(b.writes, string(p))
 	return len(p), nil
 }
@@ -38,10 +42,19 @@ func (b *testWriter) Close() error {
 	return nil
 }
 
+func (b *testWriter) GetWrites() []string {
+	b.Lock()
+	defer b.Unlock()
+	w := make([]string, len(b.writes))
+	copy(w, b.writes)
+	return w
+}
+
 func TestCopyLineByLine(t *testing.T) {
 	r, w := io.Pipe()
 
 	testWriter := &testWriter{
+		Mutex:  &sync.Mutex{},
 		writes: make([]string, 0),
 	}
 
@@ -58,19 +71,21 @@ func TestCopyLineByLine(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	assert.Lenf(t, testWriter.writes, 0, "expected 0 writes, got: %v", testWriter.writes)
+	writes := testWriter.GetWrites()
+	assert.Lenf(t, writes, 0, "expected 0 writes, got: %v", writes)
 
 	// write more bytes with newlines
 	if _, err := w.Write([]byte("5\n678\n90")); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
+	writes = testWriter.GetWrites()
+	assert.Lenf(t, writes, 2, "expected 2 writes, got: %v", writes)
+
 	// wait for the goroutine to write the data
 	time.Sleep(time.Millisecond)
 
-	assert.Lenf(t, testWriter.writes, 2, "expected 2 writes, got: %v", testWriter.writes)
-
-	writtenData := strings.Join(testWriter.writes, "-")
+	writtenData := strings.Join(writes, "-")
 	assert.Equal(t, "12345\n-678\n", writtenData, "unexpected writtenData: %s", writtenData)
 
 	// closing the writer should flush the remaining data
@@ -80,7 +95,7 @@ func TestCopyLineByLine(t *testing.T) {
 	time.Sleep(10 * time.Millisecond)
 
 	// the written data contains all the data we wrote
-	writtenData = strings.Join(testWriter.writes, "-")
+	writtenData = strings.Join(testWriter.GetWrites(), "-")
 	assert.Equal(t, "12345\n-678\n-90", writtenData, "unexpected writtenData: %s", writtenData)
 }
 
@@ -88,10 +103,15 @@ func TestCopyLineByLineSizeLimit(t *testing.T) {
 	r, w := io.Pipe()
 
 	testWriter := &testWriter{
+		Mutex:  &sync.Mutex{},
 		writes: make([]string, 0),
 	}
 
+	wg := sync.WaitGroup{}
+	wg.Add(1)
+
 	go func() {
+		defer wg.Done()
 		err := log.CopyLineByLine(testWriter, r, 4)
 		assert.NoError(t, err)
 	}()
@@ -104,18 +124,23 @@ func TestCopyLineByLineSizeLimit(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	assert.Lenf(t, testWriter.writes, 0, "expected 0 writes, got: %v", testWriter.writes)
+	writes := testWriter.GetWrites()
+	assert.Lenf(t, testWriter.GetWrites(), 0, "expected 0 writes, got: %v", writes)
 
 	// write more bytes
 	if _, err := w.Write([]byte("67\n89")); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	// wait for the goroutine to write the data
-	time.Sleep(time.Millisecond)
+	writes = testWriter.GetWrites()
+	assert.Lenf(t, testWriter.GetWrites(), 2, "expected 2 writes, got: %v", writes)
 
-	assert.Lenf(t, testWriter.writes, 2, "expected 2 writes, got: %v", testWriter.writes)
-
-	writtenData := strings.Join(testWriter.writes, "-")
+	writes = testWriter.GetWrites()
+	writtenData := strings.Join(writes, "-")
 	assert.Equal(t, "1234-567\n", writtenData, "unexpected writtenData: %s", writtenData)
+
+	// closing the writer should flush the remaining data
+	w.Close()
+
+	wg.Wait()
 }
