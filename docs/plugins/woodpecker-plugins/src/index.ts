@@ -30,7 +30,7 @@ async function loadContent(): Promise<Content> {
         }
 
         return <WoodpeckerPlugin>{
-          name: docsHeader.name || i.name,
+          name: docsHeader.name,
           url: docsHeader.url,
           icon: docsHeader.icon,
           description: docsHeader.description,

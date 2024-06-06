@@ -121,7 +121,7 @@ async function loadCrons(page: number): Promise<Cron[] | null> {
     throw new Error("Unexpected: Can't load repo");
   }
 
-  return apiClient.getCronList(repo.value.id, page);
+  return apiClient.getCronList(repo.value.id, { page });
 }
 
 const { resetPage, data: crons } = usePagination(loadCrons, () => !selectedCron.value);

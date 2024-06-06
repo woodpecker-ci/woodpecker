@@ -31,7 +31,13 @@ type PipelineOptions = {
 type DeploymentOptions = {
   id: string;
   environment: string;
+  task: string;
   variables: Record<string, string>;
+};
+
+type PaginationOptions = {
+  page?: number;
+  perPage?: number;
 };
 
 export default class WoodpeckerClient extends ApiClient {
@@ -52,12 +58,14 @@ export default class WoodpeckerClient extends ApiClient {
     return this._get(`/api/repos/${repoId}/permissions`) as Promise<RepoPermissions>;
   }
 
-  getRepoBranches(repoId: number, page: number): Promise<string[]> {
-    return this._get(`/api/repos/${repoId}/branches?page=${page}`) as Promise<string[]>;
+  getRepoBranches(repoId: number, opts?: PaginationOptions): Promise<string[]> {
+    const query = encodeQueryString(opts);
+    return this._get(`/api/repos/${repoId}/branches?${query}`) as Promise<string[]>;
   }
 
-  getRepoPullRequests(repoId: number, page: number): Promise<PullRequest[]> {
-    return this._get(`/api/repos/${repoId}/pull_requests?page=${page}`) as Promise<PullRequest[]>;
+  getRepoPullRequests(repoId: number, opts?: PaginationOptions): Promise<PullRequest[]> {
+    const query = encodeQueryString(opts);
+    return this._get(`/api/repos/${repoId}/pull_requests?${query}`) as Promise<PullRequest[]>;
   }
 
   activateRepo(forgeRemoteId: string): Promise<Repo> {
@@ -82,18 +90,19 @@ export default class WoodpeckerClient extends ApiClient {
   }
 
   // Deploy triggers a deployment for an existing pipeline using the
-  // specified target environment.
+  // specified target environment and task.
   deployPipeline(repoId: number, pipelineNumber: string, options: DeploymentOptions): Promise<Pipeline> {
     const vars = {
       ...options.variables,
       event: 'deployment',
       deploy_to: options.environment,
+      deploy_task: options.task,
     };
     const query = encodeQueryString(vars);
     return this._post(`/api/repos/${repoId}/pipelines/${pipelineNumber}?${query}`) as Promise<Pipeline>;
   }
 
-  getPipelineList(repoId: number, opts?: Record<string, string | number | boolean>): Promise<Pipeline[]> {
+  getPipelineList(repoId: number, opts?: PaginationOptions & { before?: string; after?: string }): Promise<Pipeline[]> {
     const query = encodeQueryString(opts);
     return this._get(`/api/repos/${repoId}/pipelines?${query}`) as Promise<Pipeline[]>;
   }
@@ -106,9 +115,8 @@ export default class WoodpeckerClient extends ApiClient {
     return this._get(`/api/repos/${repoId}/pipelines/${pipelineNumber}/config`) as Promise<PipelineConfig[]>;
   }
 
-  getPipelineFeed(opts?: Record<string, string | number | boolean>): Promise<PipelineFeed[]> {
-    const query = encodeQueryString(opts);
-    return this._get(`/api/user/feed?${query}`) as Promise<PipelineFeed[]>;
+  getPipelineFeed(): Promise<PipelineFeed[]> {
+    return this._get(`/api/user/feed`) as Promise<PipelineFeed[]>;
   }
 
   cancelPipeline(repoId: number, pipelineNumber: number): Promise<unknown> {
@@ -126,7 +134,7 @@ export default class WoodpeckerClient extends ApiClient {
   restartPipeline(
     repoId: number,
     pipeline: string,
-    opts?: Record<string, string | number | boolean>,
+    opts?: { event?: string; deploy_to?: string; fork?: boolean },
   ): Promise<Pipeline> {
     const query = encodeQueryString(opts);
     return this._post(`/api/repos/${repoId}/pipelines/${pipeline}?${query}`) as Promise<Pipeline>;
@@ -136,8 +144,13 @@ export default class WoodpeckerClient extends ApiClient {
     return this._get(`/api/repos/${repoId}/logs/${pipeline}/${step}`) as Promise<PipelineLog[]>;
   }
 
-  getSecretList(repoId: number, page: number): Promise<Secret[] | null> {
-    return this._get(`/api/repos/${repoId}/secrets?page=${page}`) as Promise<Secret[] | null>;
+  deleteLogs(repoId: number, pipeline: number, step: number): Promise<unknown> {
+    return this._delete(`/api/repos/${repoId}/logs/${pipeline}/${step}`);
+  }
+
+  getSecretList(repoId: number, opts?: PaginationOptions): Promise<Secret[] | null> {
+    const query = encodeQueryString(opts);
+    return this._get(`/api/repos/${repoId}/secrets?${query}`) as Promise<Secret[] | null>;
   }
 
   createSecret(repoId: number, secret: Partial<Secret>): Promise<unknown> {
@@ -154,8 +167,9 @@ export default class WoodpeckerClient extends ApiClient {
     return this._delete(`/api/repos/${repoId}/secrets/${name}`);
   }
 
-  getRegistryList(repoId: number, page: number): Promise<Registry[] | null> {
-    return this._get(`/api/repos/${repoId}/registry?page=${page}`) as Promise<Registry[] | null>;
+  getRegistryList(repoId: number, opts?: PaginationOptions): Promise<Registry[] | null> {
+    const query = encodeQueryString(opts);
+    return this._get(`/api/repos/${repoId}/registry?${query}`) as Promise<Registry[] | null>;
   }
 
   createRegistry(repoId: number, registry: Partial<Registry>): Promise<unknown> {
@@ -170,8 +184,9 @@ export default class WoodpeckerClient extends ApiClient {
     return this._delete(`/api/repos/${repoId}/registry/${registryAddress}`);
   }
 
-  getCronList(repoId: number, page: number): Promise<Cron[] | null> {
-    return this._get(`/api/repos/${repoId}/cron?page=${page}`) as Promise<Cron[] | null>;
+  getCronList(repoId: number, opts?: PaginationOptions): Promise<Cron[] | null> {
+    const query = encodeQueryString(opts);
+    return this._get(`/api/repos/${repoId}/cron?${query}`) as Promise<Cron[] | null>;
   }
 
   createCron(repoId: number, cron: Partial<Cron>): Promise<unknown> {
@@ -202,8 +217,9 @@ export default class WoodpeckerClient extends ApiClient {
     return this._get(`/api/orgs/${orgId}/permissions`) as Promise<OrgPermissions>;
   }
 
-  getOrgSecretList(orgId: number, page: number): Promise<Secret[] | null> {
-    return this._get(`/api/orgs/${orgId}/secrets?page=${page}`) as Promise<Secret[] | null>;
+  getOrgSecretList(orgId: number, opts?: PaginationOptions): Promise<Secret[] | null> {
+    const query = encodeQueryString(opts);
+    return this._get(`/api/orgs/${orgId}/secrets?${query}`) as Promise<Secret[] | null>;
   }
 
   createOrgSecret(orgId: number, secret: Partial<Secret>): Promise<unknown> {
@@ -220,8 +236,9 @@ export default class WoodpeckerClient extends ApiClient {
     return this._delete(`/api/orgs/${orgId}/secrets/${name}`);
   }
 
-  getGlobalSecretList(page: number): Promise<Secret[] | null> {
-    return this._get(`/api/secrets?page=${page}`) as Promise<Secret[] | null>;
+  getGlobalSecretList(opts?: PaginationOptions): Promise<Secret[] | null> {
+    const query = encodeQueryString(opts);
+    return this._get(`/api/secrets?${query}`) as Promise<Secret[] | null>;
   }
 
   createGlobalSecret(secret: Partial<Secret>): Promise<unknown> {
@@ -246,8 +263,9 @@ export default class WoodpeckerClient extends ApiClient {
     return this._post('/api/user/token') as Promise<string>;
   }
 
-  getAgents(page: number): Promise<Agent[] | null> {
-    return this._get(`/api/agents?page=${page}`) as Promise<Agent[] | null>;
+  getAgents(opts?: PaginationOptions): Promise<Agent[] | null> {
+    const query = encodeQueryString(opts);
+    return this._get(`/api/agents?${query}`) as Promise<Agent[] | null>;
   }
 
   getAgent(agentId: Agent['id']): Promise<Agent> {
@@ -278,8 +296,9 @@ export default class WoodpeckerClient extends ApiClient {
     return this._post('/api/queue/resume');
   }
 
-  getUsers(page: number): Promise<User[] | null> {
-    return this._get(`/api/users?page=${page}`) as Promise<User[] | null>;
+  getUsers(opts?: PaginationOptions): Promise<User[] | null> {
+    const query = encodeQueryString(opts);
+    return this._get(`/api/users?${query}`) as Promise<User[] | null>;
   }
 
   getUser(username: string): Promise<User> {
@@ -302,16 +321,18 @@ export default class WoodpeckerClient extends ApiClient {
     return this._delete('/api/user/token') as Promise<string>;
   }
 
-  getOrgs(page: number): Promise<Org[] | null> {
-    return this._get(`/api/orgs?page=${page}`) as Promise<Org[] | null>;
+  getOrgs(opts?: PaginationOptions): Promise<Org[] | null> {
+    const query = encodeQueryString(opts);
+    return this._get(`/api/orgs?${query}`) as Promise<Org[] | null>;
   }
 
   deleteOrg(org: Org): Promise<unknown> {
     return this._delete(`/api/orgs/${org.id}`);
   }
 
-  getAllRepos(page: number): Promise<Repo[] | null> {
-    return this._get(`/api/repos?page=${page}`) as Promise<Repo[] | null>;
+  getAllRepos(opts?: PaginationOptions): Promise<Repo[] | null> {
+    const query = encodeQueryString(opts);
+    return this._get(`/api/repos?${query}`) as Promise<Repo[] | null>;
   }
 
   repairAllRepos(): Promise<unknown> {

@@ -5,26 +5,26 @@ repos:
       - id: check-hooks-apply
       - id: check-useless-excludes
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.5.0
+    rev: v4.6.0
     hooks:
       - id: end-of-file-fixer
       - id: trailing-whitespace
   - repo: https://github.com/golangci/golangci-lint
-    rev: v1.55.2
+    rev: v1.59.0
     hooks:
       - id: golangci-lint
   - repo: https://github.com/igorshubovych/markdownlint-cli
-    rev: v0.38.0
+    rev: v0.41.0
     hooks:
       - id: markdownlint
-        exclude: '^docs/versioned_docs/.*$'
+        exclude: '^(docs/versioned_docs/.*|CHANGELOG.md)$'
   - repo: https://github.com/mrtazz/checkmake
     rev: 0.2.2
     hooks:
       - id: checkmake
         exclude: '^docker/Dockerfile.make$' # actually a Dockerfile and not a makefile
   - repo: https://github.com/hadolint/hadolint
-    rev: v2.12.1-beta
+    rev: v2.12.0
     hooks:
       - id: hadolint
   - repo: https://github.com/pre-commit/mirrors-prettier
@@ -32,7 +32,7 @@ repos:
     hooks:
       - id: prettier
   - repo: https://github.com/adrienverge/yamllint.git
-    rev: v1.33.0
+    rev: v1.35.1
     hooks:
       - id: yamllint
         args: [--strict, -c=.yamllint.yaml]
@@ -53,7 +53,7 @@ ci:
   autofix_prs: true
   autoupdate_branch: ''
   autoupdate_commit_msg: '[pre-commit.ci] pre-commit autoupdate'
-  autoupdate_schedule: monthly
+  autoupdate_schedule: quarterly
   # NB: hadolint not included in pre-commit.ci
-  skip: [check-hooks-apply, check-useless-excludes, hadolint, prettier]
+  skip: [check-hooks-apply, check-useless-excludes, hadolint, prettier, golangci-lint]
   submodules: false

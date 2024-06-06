@@ -16,26 +16,24 @@ package types
 
 import (
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/constraint"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/types/base"
 )
 
 type (
 	// Workflow defines a workflow configuration.
 	Workflow struct {
-		When      constraint.When `yaml:"when,omitempty"`
-		Workspace Workspace       `yaml:"workspace,omitempty"`
-		Clone     ContainerList   `yaml:"clone,omitempty"`
-		Steps     ContainerList   `yaml:"steps,omitempty"`
-		Services  ContainerList   `yaml:"services,omitempty"`
-		Labels    base.SliceOrMap `yaml:"labels,omitempty"`
-		DependsOn []string        `yaml:"depends_on,omitempty"`
-		RunsOn    []string        `yaml:"runs_on,omitempty"`
-		SkipClone bool            `yaml:"skip_clone"`
+		When      constraint.When   `yaml:"when,omitempty"`
+		Workspace Workspace         `yaml:"workspace,omitempty"`
+		Clone     ContainerList     `yaml:"clone,omitempty"`
+		Steps     ContainerList     `yaml:"steps,omitempty"`
+		Services  ContainerList     `yaml:"services,omitempty"`
+		Labels    map[string]string `yaml:"labels,omitempty"`
+		DependsOn []string          `yaml:"depends_on,omitempty"`
+		RunsOn    []string          `yaml:"runs_on,omitempty"`
+		SkipClone bool              `yaml:"skip_clone"`
 
 		// Undocumented
-		Cache    base.StringOrSlice `yaml:"cache,omitempty"`
-		Networks WorkflowNetworks   `yaml:"networks,omitempty"`
-		Volumes  WorkflowVolumes    `yaml:"volumes,omitempty"`
+		Networks WorkflowNetworks `yaml:"networks,omitempty"`
+		Volumes  WorkflowVolumes  `yaml:"volumes,omitempty"`
 
 		// Deprecated
 		PlatformDoNotUseIt string `yaml:"platform,omitempty"` // TODO: remove in next major version

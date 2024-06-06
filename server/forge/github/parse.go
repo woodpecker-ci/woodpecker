@@ -22,7 +22,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/google/go-github/v58/github"
+	"github.com/google/go-github/v62/github"
 
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
@@ -120,16 +120,17 @@ func parsePushHook(hook *github.PushEvent) (*model.Repo, *model.Pipeline) {
 // If the commit type is unsupported nil values are returned.
 func parseDeployHook(hook *github.DeploymentEvent) (*model.Repo, *model.Pipeline) {
 	pipeline := &model.Pipeline{
-		Event:    model.EventDeploy,
-		Commit:   hook.GetDeployment().GetSHA(),
-		ForgeURL: hook.GetDeployment().GetURL(),
-		Message:  hook.GetDeployment().GetDescription(),
-		Ref:      hook.GetDeployment().GetRef(),
-		Branch:   hook.GetDeployment().GetRef(),
-		Deploy:   hook.GetDeployment().GetEnvironment(),
-		Avatar:   hook.GetSender().GetAvatarURL(),
-		Author:   hook.GetSender().GetLogin(),
-		Sender:   hook.GetSender().GetLogin(),
+		Event:      model.EventDeploy,
+		Commit:     hook.GetDeployment().GetSHA(),
+		ForgeURL:   hook.GetDeployment().GetURL(),
+		Message:    hook.GetDeployment().GetDescription(),
+		Ref:        hook.GetDeployment().GetRef(),
+		Branch:     hook.GetDeployment().GetRef(),
+		Deploy:     hook.GetDeployment().GetEnvironment(),
+		Avatar:     hook.GetSender().GetAvatarURL(),
+		Author:     hook.GetSender().GetLogin(),
+		Sender:     hook.GetSender().GetLogin(),
+		DeployTask: hook.GetDeployment().GetTask(),
 	}
 	// if the ref is a sha or short sha we need to manually construct the ref.
 	if strings.HasPrefix(pipeline.Commit, pipeline.Ref) || pipeline.Commit == pipeline.Ref {
@@ -196,7 +197,7 @@ func parseReleaseHook(hook *github.ReleaseEvent) (*model.Repo, *model.Pipeline) 
 		Event:        model.EventRelease,
 		ForgeURL:     hook.GetRelease().GetHTMLURL(),
 		Ref:          fmt.Sprintf("refs/tags/%s", hook.GetRelease().GetTagName()),
-		Branch:       hook.GetRelease().GetTargetCommitish(),
+		Branch:       hook.GetRelease().GetTargetCommitish(), // cspell:disable-line
 		Message:      fmt.Sprintf("created release %s", name),
 		Author:       hook.GetRelease().GetAuthor().GetLogin(),
 		Avatar:       hook.GetRelease().GetAuthor().GetAvatarURL(),
@@ -215,5 +216,5 @@ func getChangedFilesFromCommits(commits []*github.HeadCommit) []string {
 		files = append(files, cm.Removed...)
 		files = append(files, cm.Modified...)
 	}
-	return utils.DedupStrings(files)
+	return utils.DeduplicateStrings(files)
 }

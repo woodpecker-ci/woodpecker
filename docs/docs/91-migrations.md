@@ -2,11 +2,25 @@
 
 Some versions need some changes to the server configuration or the pipeline configuration files.
 
+<!--
+## 3.0.0
+
+- Update all webhooks by pressing the "Repair all" button in the admin settings as the webhook token claims have changed
+
+-->
+
 ## `next`
 
 - Deprecated `steps.[name].group` in favor of `steps.[name].depends_on` (see [workflow syntax](./20-usage/20-workflow-syntax.md#depends_on) to learn how to set dependencies)
 - Removed `WOODPECKER_ROOT_PATH` and `WOODPECKER_ROOT_URL` config variables. Use `WOODPECKER_HOST` with a path instead
 - Pipelines without a config file will now be skipped instead of failing
+- Deprecated `includes` and `excludes` support from **event** filter
+- Deprecated uppercasing all secret env vars, instead, the value of the `secrets` property is used. [Read more](./20-usage/40-secrets.md#use-secrets-in-commands)
+- Deprecated alternative names for secrets, use `environment` with `from_secret`
+- Deprecated slice definition for env vars
+- Deprecated `environment` filter, use `when.evaluate`
+- Use `WOODPECKER_EXPERT_FORGE_OAUTH_HOST` instead of `WOODPECKER_DEV_GITEA_OAUTH_URL` or `WOODPECKER_DEV_OAUTH_HOST`
+- Deprecated `WOODPECKER_WEBHOOK_HOST` in favor of `WOODPECKER_EXPERT_WEBHOOK_HOST`
 
 ## 2.0.0
 
@@ -62,7 +76,7 @@ Some versions need some changes to the server configuration or the pipeline conf
 
   Only projects created after updating will have an empty value by default. Existing projects will stick to the current pipeline path which is `.drone.yml` in most cases.
 
-  Read more about it at the [Project Settings](./20-usage/71-project-settings.md#pipeline-path)
+  Read more about it at the [Project Settings](./20-usage/75-project-settings.md#pipeline-path)
 
 - From version `0.15.0` ongoing there will be three types of docker images: `latest`, `next` and `x.x.x` with an alpine variant for each type like `latest-alpine`.
   If you used `latest` before to try pre-release features you should switch to `next` after this release.

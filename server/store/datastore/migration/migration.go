@@ -25,7 +25,7 @@ import (
 )
 
 // APPEND NEW MIGRATIONS
-// they are executed in order and if one fails Xormigrate will try to rollback that specific one and quits
+// They are executed in order and if one fails Xormigrate will try to rollback that specific one and quits.
 var migrationTasks = []*xormigrate.Migration{
 	&legacyToXormigrate,
 	&legacy2Xorm,
@@ -59,6 +59,7 @@ var migrationTasks = []*xormigrate.Migration{
 	&convertToNewPipelineErrorFormat,
 	&renameLinkToURL,
 	&cleanRegistryPipeline,
+	&setForgeID,
 }
 
 var allBeans = []any{
@@ -77,6 +78,7 @@ var allBeans = []any{
 	new(model.ServerConfig),
 	new(model.Cron),
 	new(model.Redirection),
+	new(model.Forge),
 	new(model.Workflow),
 	new(model.Org),
 }
@@ -90,7 +92,7 @@ func Migrate(e *xorm.Engine, allowLong bool) error {
 	if oldCount < 1 || err != nil {
 		// allow new schema initialization if old migrations table is empty or it does not exist (err != nil)
 		// schema initialization will always run if we call `InitSchema`
-		m.InitSchema(func(engine *xorm.Engine) error {
+		m.InitSchema(func(_ *xorm.Engine) error {
 			// do nothing on schema init, models are synced in any case below
 			return nil
 		})
