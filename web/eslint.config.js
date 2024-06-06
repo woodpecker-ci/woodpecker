@@ -10,7 +10,7 @@ export default antfu(
   {
     stylistic: false,
     typescript: {
-      tsconfigPath: './tsconfig.eslint.json',
+      tsconfigPath: './tsconfig.json',
     },
     vue: true,
 

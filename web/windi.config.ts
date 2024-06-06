@@ -1,4 +1,7 @@
-// cSpell:ignore Segoe Roboto Neue Noto
+// cSpell:ignore Segoe Roboto Neue Noto nocheck
+/* eslint-disable ts/no-unsafe-member-access, ts/no-unsafe-assignment, ts/no-unsafe-argument, ts/no-unsafe-return */
+// eslint-disable-next-line ts/ban-ts-comment
+// @ts-nocheck
 
 import tinycolor from 'tinycolor2';
 import colors from 'windicss/colors';
@@ -25,6 +28,7 @@ const customColors = {
   },
 };
 
+/* eslint-disable ts/no-unsafe-call */
 export default defineConfig({
   darkMode: 'class',
   theme: {
@@ -208,9 +212,7 @@ export default defineConfig({
       transitionProperty: {
         height: 'max-height',
       },
-      // eslint-disable-next-line ts/no-unsafe-return
       stroke: (theme) => theme('colors'),
-      // eslint-disable-next-line ts/no-unsafe-return
       fill: (theme) => theme('colors'),
       fontFamily: [
         'system-ui',

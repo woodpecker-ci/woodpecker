@@ -248,7 +248,7 @@ async function download() {
     downloadInProgress.value = true;
     logs = await apiClient.getLogs(repo.value.id, pipeline.value.number, step.value.id);
   } catch (e) {
-    notifications.notifyError(e, i18n.t('repo.pipeline.log_download_error'));
+    notifications.notifyError(e as Error, i18n.t('repo.pipeline.log_download_error'));
     return;
   } finally {
     downloadInProgress.value = false;
@@ -323,7 +323,7 @@ async function deleteLogs() {
     await apiClient.deleteLogs(repo.value.id, pipeline.value.number, step.value.id);
     log.value = [];
   } catch (e) {
-    notifications.notifyError(e, i18n.t('repo.pipeline.log_delete_error'));
+    notifications.notifyError(e as Error, i18n.t('repo.pipeline.log_delete_error'));
   }
 }
 

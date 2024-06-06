@@ -3,11 +3,14 @@ export interface ApiError {
   message: string;
 }
 
-export function encodeQueryString(_params: Record<string, string | number | boolean | undefined> = {}): string {
-  const params: Record<string, string | number | boolean> = {};
+type QueryParams = Record<string, string | number | boolean>;
 
-  Object.keys(_params).forEach((key) => {
-    const val = _params[key];
+export function encodeQueryString(_params: unknown = {}): string {
+  const __params = _params as QueryParams;
+  const params: QueryParams = {};
+
+  Object.keys(__params).forEach((key) => {
+    const val = __params[key];
     if (val !== undefined) {
       params[key] = val;
     }

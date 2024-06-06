@@ -7,12 +7,13 @@ import replace from 'replace-in-file';
 import IconsResolver from 'unplugin-icons/resolver';
 import Icons from 'unplugin-icons/vite';
 import Components from 'unplugin-vue-components/vite';
+import type { Plugin } from 'vite';
 import prismjs from 'vite-plugin-prismjs';
 import WindiCSS from 'vite-plugin-windicss';
 import svgLoader from 'vite-svg-loader';
 import { defineConfig } from 'vitest/config';
 
-function woodpeckerInfoPlugin() {
+function woodpeckerInfoPlugin(): Plugin {
   return {
     name: 'woodpecker-info',
     configureServer() {
@@ -26,7 +27,7 @@ function woodpeckerInfoPlugin() {
   };
 }
 
-function externalCSSPlugin() {
+function externalCSSPlugin(): Plugin {
   return {
     name: 'external-css',
     transformIndexHtml: {
