@@ -278,7 +278,7 @@ func setupEvilGlobals(c *cli.Context, s store.Store) error {
 
 	server.Config.Services.LogStore, err = setupLogStore(c, s)
 	if err != nil {
-		return fmt.Errorf("could not setup log store manager: %w", err)
+		return fmt.Errorf("could not setup log store: %w", err)
 	}
 
 	// authentication

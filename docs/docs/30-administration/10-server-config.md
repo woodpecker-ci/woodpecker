@@ -553,7 +553,7 @@ Where to store logs. Possible values: `database` or `file`.
 
 > Default empty
 
-Directory to store logs if [`WOODPECKER_LOG_STORE`](#woodpecker_log_store) is `file`.
+Directory to store logs in if [`WOODPECKER_LOG_STORE`](#woodpecker_log_store) is `file`.
 
 ---
 
