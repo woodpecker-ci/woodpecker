@@ -30,6 +30,8 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server"
 	"go.woodpecker-ci.org/woodpecker/v2/server/cache"
 	"go.woodpecker-ci.org/woodpecker/v2/server/queue"
+	logService "go.woodpecker-ci.org/woodpecker/v2/server/services/log"
+	"go.woodpecker-ci.org/woodpecker/v2/server/services/log/file"
 	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 	"go.woodpecker-ci.org/woodpecker/v2/server/store/datastore"
 )
@@ -153,4 +155,13 @@ func setupMetrics(g *errgroup.Group, _store store.Store) {
 			time.Sleep(10 * time.Second)
 		}
 	})
+}
+
+func setupLogStore(c *cli.Context, s store.Store) (logService.Service, error) {
+	switch c.String("log-store") {
+	case "file":
+		return file.NewLogStore(c.String("log-store-file-path"))
+	default:
+		return s, nil
+	}
 }
