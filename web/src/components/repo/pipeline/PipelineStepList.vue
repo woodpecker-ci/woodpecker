@@ -89,7 +89,7 @@
             </button>
           </div>
           <div
-            class="ml-6 transition-height duration-150 overflow-hidden"
+            class="transition-height duration-150 overflow-hidden"
             :class="{
               'max-h-0': workflowsCollapsed[workflow.id],
               'ml-6': !singleConfig,
@@ -119,15 +119,14 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, ref, toRef, watch } from 'vue';
+import { computed } from 'vue';
+import { inject, ref, Ref, toRef } from 'vue';
 
 import Badge from '~/components/atomic/Badge.vue';
 import Icon from '~/components/atomic/Icon.vue';
 import Panel from '~/components/layout/Panel.vue';
 import PipelineStatusIcon from '~/components/repo/pipeline/PipelineStatusIcon.vue';
 import PipelineStepDuration from '~/components/repo/pipeline/PipelineStepDuration.vue';
-import useApiClient from '~/compositions/useApiClient';
-import { inject } from '~/compositions/useInjectProvide';
 import usePipeline from '~/compositions/usePipeline';
 import { Pipeline, PipelineConfig, PipelineStep, StepType } from '~/lib/api/types';
 
@@ -143,8 +142,7 @@ defineEmits<{
 const pipeline = toRef(props, 'pipeline');
 const selectedStepId = toRef(props, 'selectedStepId');
 const { prettyRef } = usePipeline(pipeline);
-const apiClient = useApiClient();
-const repo = inject('repo');
+const pipelineConfigs = inject<Ref<PipelineConfig[]>>('pipeline-configs');
 
 const workflowsCollapsed = ref<Record<PipelineStep['id'], boolean>>(
   pipeline.value.workflows && pipeline.value.workflows.length > 1
@@ -160,21 +158,7 @@ const workflowsCollapsed = ref<Record<PipelineStep['id'], boolean>>(
     : {},
 );
 
-const singleConfig = ref(false);
-const pipelineConfigs = ref<PipelineConfig[]>();
-async function loadPipelineConfig() {
-  if (!repo.value || !pipeline.value) {
-    throw new Error('Unexpected: "repo" & "pipeline" should be provided at this place');
-  }
-
-  pipelineConfigs.value = await apiClient.getPipelineConfig(repo.value.id, pipeline.value.number);
-}
-
-onMounted(() => {
-  loadPipelineConfig();
-});
-
-watch(pipeline, () => {
-  loadPipelineConfig();
-});
+const singleConfig = computed(
+  () => pipelineConfigs?.value?.length === 1 && pipeline.value.workflows && pipeline.value.workflows.length == 1,
+);
 </script>
