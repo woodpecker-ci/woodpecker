@@ -4,7 +4,7 @@
       <div class="ml-2">
         <h1 class="text-xl text-wp-text-100">{{ $t('secrets.secrets') }}</h1>
         <p class="text-sm text-wp-text-alt-100">
-          {{ $t('secrets.desc') }}
+          {{ $t('user.settings.secrets.desc') }}
           <DocsLink :topic="$t('secrets.secrets')" url="docs/usage/secrets" />
         </p>
       </div>
@@ -51,7 +51,7 @@ import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useAuthentication from '~/compositions/useAuthentication';
 import useNotifications from '~/compositions/useNotifications';
 import { usePagination } from '~/compositions/usePaginate';
-import { Secret, WebhookEvents } from '~/lib/api/types';
+import { WebhookEvents, type Secret } from '~/lib/api/types';
 
 const emptySecret: Partial<Secret> = {
   name: '',
@@ -92,7 +92,7 @@ const { doSubmit: createSecret, isLoading: isSaving } = useAsyncAction(async () 
     await apiClient.createOrgSecret(user.org_id, selectedSecret.value);
   }
   notifications.notify({
-    title: i18n.t(isEditingSecret.value ? 'user.settings.secrets.saved' : 'user.settings.secrets.created'),
+    title: isEditingSecret.value ? i18n.t('secrets.saved') : i18n.t('secrets.created'),
     type: 'success',
   });
   selectedSecret.value = undefined;
@@ -101,7 +101,7 @@ const { doSubmit: createSecret, isLoading: isSaving } = useAsyncAction(async () 
 
 const { doSubmit: deleteSecret, isLoading: isDeleting } = useAsyncAction(async (_secret: Secret) => {
   await apiClient.deleteOrgSecret(user.org_id, _secret.name);
-  notifications.notify({ title: i18n.t('user.settings.secrets.deleted'), type: 'success' });
+  notifications.notify({ title: i18n.t('secrets.deleted'), type: 'success' });
   resetPage();
 });
 

@@ -33,7 +33,7 @@
         </div>
       </ListItem>
 
-      <div v-if="repos?.length === 0" class="ml-2">{{ $t('admin.settings.orgs.none') }}</div>
+      <div v-if="repos?.length === 0" class="ml-2">{{ $t('admin.settings.repos.none') }}</div>
     </div>
   </Settings>
 </template>
@@ -49,7 +49,7 @@ import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useNotifications from '~/compositions/useNotifications';
 import { usePagination } from '~/compositions/usePaginate';
-import { Repo } from '~/lib/api/types';
+import type { Repo } from '~/lib/api/types';
 
 const apiClient = useApiClient();
 const notifications = useNotifications();
