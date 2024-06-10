@@ -1,7 +1,7 @@
 {
   # Override nixpkgs to use the latest set of node packages
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/master";
+    nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
   };
 
@@ -20,13 +20,13 @@
             gnutar
 
             # frontend
-            nodejs
+            nodejs_20
             nodePackages.pnpm
             nodePackages.typescript
             nodePackages.typescript-language-server
 
             # backend
-            go
+            go_1_22
             gofumpt
             golangci-lint
             go-mockery
