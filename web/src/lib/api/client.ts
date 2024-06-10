@@ -40,7 +40,7 @@ export default class ApiClient {
     this.csrf = csrf;
   }
 
-  private async _request(method: string, path: string, data: unknown): Promise<unknown> {
+  private async _request(method: string, path: string, data?: unknown): Promise<unknown> {
     const res = await fetch(`${this.server}${path}`, {
       method,
       headers: {
@@ -71,7 +71,7 @@ export default class ApiClient {
   }
 
   _get(path: string) {
-    return this._request('GET', path, null);
+    return this._request('GET', path);
   }
 
   _post(path: string, data?: unknown) {
@@ -83,7 +83,7 @@ export default class ApiClient {
   }
 
   _delete(path: string) {
-    return this._request('DELETE', path, null);
+    return this._request('DELETE', path);
   }
 
   _subscribe<T>(path: string, callback: (data: T) => void, opts = { reconnect: true }) {
