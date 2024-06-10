@@ -25,7 +25,7 @@
 
 <script lang="ts" setup>
 import { cloneDeep } from 'lodash';
-import { computed, inject, Ref, ref } from 'vue';
+import { computed, inject, ref, type Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import Button from '~/components/atomic/Button.vue';
@@ -36,7 +36,7 @@ import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useNotifications from '~/compositions/useNotifications';
 import { usePagination } from '~/compositions/usePaginate';
-import { Repo, Secret, WebhookEvents } from '~/lib/api/types';
+import { WebhookEvents, type Repo, type Secret } from '~/lib/api/types';
 
 const emptySecret: Partial<Secret> = {
   name: '',
@@ -77,9 +77,7 @@ const { resetPage, data: _secrets } = usePagination(loadSecrets, () => !selected
 const secrets = computed(() => {
   const secretsList: Record<string, Secret & { edit?: boolean; level: 'repo' | 'org' | 'global' }> = {};
 
-  // eslint-disable-next-line no-restricted-syntax
   for (const level of ['repo', 'org', 'global']) {
-    // eslint-disable-next-line no-restricted-syntax
     for (const secret of _secrets.value) {
       if (
         ((level === 'repo' && secret.repo_id !== 0 && secret.org_id === 0) ||
@@ -118,7 +116,7 @@ const { doSubmit: createSecret, isLoading: isSaving } = useAsyncAction(async () 
     await apiClient.createSecret(repo.value.id, selectedSecret.value);
   }
   notifications.notify({
-    title: i18n.t(isEditingSecret.value ? 'secrets.saved' : 'secrets.created'),
+    title: isEditingSecret.value ? i18n.t('secrets.saved') : i18n.t('secrets.created'),
     type: 'success',
   });
   selectedSecret.value = undefined;

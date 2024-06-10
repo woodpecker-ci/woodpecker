@@ -28,7 +28,7 @@ import (
 )
 
 const (
-	statusPending = "INPROGRESS"
+	statusPending = "INPROGRESS" // cspell:disable-line
 	statusSuccess = "SUCCESSFUL"
 	statusFailure = "FAILED"
 )
@@ -60,7 +60,7 @@ func convertRepo(from *internal.Repo, perm *internal.RepoPerm) *model.Repo {
 		IsSCMPrivate:  from.IsPrivate,
 		Avatar:        from.Owner.Links.Avatar.Href,
 		SCMKind:       model.SCMKind(from.Scm),
-		Branch:        from.Mainbranch.Name,
+		Branch:        from.MainBranch.Name,
 		Perm:          convertPerm(perm),
 		PREnabled:     true,
 	}
@@ -107,10 +107,10 @@ func cloneLink(repo *internal.Repo) string {
 
 	// if bitbucket tries to automatically populate the user in the url we must
 	// strip it out.
-	cloneurl, err := url.Parse(clone)
+	cloneURL, err := url.Parse(clone)
 	if err == nil {
-		cloneurl.User = nil
-		clone = cloneurl.String()
+		cloneURL.User = nil
+		clone = cloneURL.String()
 	}
 
 	return clone
@@ -217,8 +217,8 @@ func convertPushHook(hook *internal.PushHook, change *internal.Change) *model.Pi
 var reGitMail = regexp.MustCompile("<(.*)>")
 
 // extracts the email from a git commit author string.
-func extractEmail(gitauthor string) (author string) {
-	matches := reGitMail.FindAllStringSubmatch(gitauthor, -1)
+func extractEmail(gitAuthor string) (author string) {
+	matches := reGitMail.FindAllStringSubmatch(gitAuthor, -1)
 	if len(matches) == 1 {
 		author = matches[0][1]
 	}

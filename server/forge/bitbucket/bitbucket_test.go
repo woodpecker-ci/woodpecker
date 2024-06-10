@@ -285,7 +285,7 @@ func Test_bitbucket(t *testing.T) {
 
 		g.It("Should parse the hook", func() {
 			buf := bytes.NewBufferString(fixtures.HookPush)
-			req, _ := http.NewRequest("POST", "/hook", buf)
+			req, _ := http.NewRequest(http.MethodPost, "/hook", buf)
 			req.Header = http.Header{}
 			req.Header.Set(hookEvent, hookPush)
 
