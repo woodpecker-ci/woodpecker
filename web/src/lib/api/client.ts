@@ -48,7 +48,7 @@ export default class ApiClient {
         ...(this.token !== null ? { Authorization: `Bearer ${this.token}` } : {}),
         ...(data !== undefined ? { 'Content-Type': 'application/json' } : {}),
       },
-      body: data !== undefined ? JSON.stringify(data) : undefined,
+      body: data !== undefined && data !== null ? JSON.stringify(data) : undefined,
     });
 
     if (!res.ok) {
