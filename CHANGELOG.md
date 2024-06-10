@@ -1,6 +1,6 @@
 # Changelog
 
-## [2.6.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.6.0) - 2024-06-06
+## [2.6.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.6.0) - 2024-06-10
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -14,6 +14,14 @@
 
 - Allow to store logs in files [[#3568](https://github.com/woodpecker-ci/woodpecker/pull/3568)]
 - Native forgejo support [[#3684](https://github.com/woodpecker-ci/woodpecker/pull/3684)]
+
+### 🐛 Bug Fixes
+
+- Respect cli argument when checking docker backend availability [[#3770](https://github.com/woodpecker-ci/woodpecker/pull/3770)]
+- Fix repo creation [[#3756](https://github.com/woodpecker-ci/woodpecker/pull/3756)]
+- Fix config loading of cli [[#3764](https://github.com/woodpecker-ci/woodpecker/pull/3764)]
+- Fix missing WOODPECKER_BITBUCKET_DC_URL [[#3761](https://github.com/woodpecker-ci/woodpecker/pull/3761)]
+- Correct repo repair success message in cli [[#3757](https://github.com/woodpecker-ci/woodpecker/pull/3757)]
 
 ### 📚 Documentation
 
@@ -31,14 +39,10 @@
 - Spellcheck "server/*" [[#3753](https://github.com/woodpecker-ci/woodpecker/pull/3753)]
 - Agent-wide node selector [[#3608](https://github.com/woodpecker-ci/woodpecker/pull/3608)]
 
-### 🐛 Bug Fixes
-
-- Fix config loading of cli [[#3764](https://github.com/woodpecker-ci/woodpecker/pull/3764)]
-- Fix missing WOODPECKER_BITBUCKET_DC_URL [[#3761](https://github.com/woodpecker-ci/woodpecker/pull/3761)]
-- Correct repo repair success message in cli [[#3757](https://github.com/woodpecker-ci/woodpecker/pull/3757)]
-
 ### Misc
 
+- fix(deps): update codeberg.org/mvdkleijn/forgejo-sdk/forgejo digest to 168c988 [[#3776](https://github.com/woodpecker-ci/woodpecker/pull/3776)]
+- Remove web.archive.org workaround in docs [[#3771](https://github.com/woodpecker-ci/woodpecker/pull/3771)]
 - chore(deps): lock file maintenance [[#3750](https://github.com/woodpecker-ci/woodpecker/pull/3750)]
 - chore(deps): update gitea/gitea docker tag to v1.22 [[#3749](https://github.com/woodpecker-ci/woodpecker/pull/3749)]
 - Fix setting name [[#3744](https://github.com/woodpecker-ci/woodpecker/pull/3744)]
