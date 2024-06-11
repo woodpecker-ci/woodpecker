@@ -9,7 +9,7 @@
     flake-utils.lib.eachDefaultSystem (
       system:
       let
-        pkgs = import nixpkgs { inherit system; };
+        pkgs = nixpkgs.legacyPackages.${system};
       in
       {
         devShells.default = pkgs.mkShell {
@@ -26,11 +26,14 @@
 
             # backend
             go_1_22
+            glibc.static
             gofumpt
             golangci-lint
             go-mockery
             protobuf
           ];
+          CFLAGS = "-I${pkgs.glibc.dev}/include";
+          LDFLAGS = "-L${pkgs.glibc}/lib";
         };
       }
     );
