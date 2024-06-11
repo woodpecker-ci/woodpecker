@@ -21,7 +21,7 @@
 
             # frontend
             nodejs_20
-            nodePackages.pnpm
+            pnpm
             nodePackages.typescript
             nodePackages.typescript-language-server
 
