@@ -41,7 +41,7 @@ services:
   - name: postgres
     image: postgres:9.4.5
     environment:
-      - POSTGRES_USER=myapp
+      - POSTGRES_USER=app
 ```
 
 Example pipeline configuration with multiple, serial steps:

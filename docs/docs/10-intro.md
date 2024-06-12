@@ -34,7 +34,7 @@ steps:
  steps:
    - name: build
 -    image: debian
-+    image: mycompany/image-with-awscli
++    image: my-company/image-with-aws-cli
      commands:
        - aws help
 ```
@@ -76,7 +76,7 @@ kubectl apply -f $PLUGIN_TEMPLATE
 ```yaml title=".woodpecker.yaml"
 steps:
   - name: deploy-to-k8s
-    image: laszlocloud/my-k8s-plugin
+    image: cloud/my-k8s-plugin
     settings:
       template: config/k8s/service.yaml
 ```
