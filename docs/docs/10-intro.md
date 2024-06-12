@@ -64,7 +64,7 @@ steps:
 - Plugins are Docker images with your script as an entrypoint
 
 ```dockerfile title="Dockerfile"
-FROM laszlocloud/kubectl
+FROM cloud/kubectl
 COPY deploy /usr/local/deploy
 ENTRYPOINT ["/usr/local/deploy"]
 ```

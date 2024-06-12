@@ -7,7 +7,7 @@ and then being using on the community's website documentation.
 
 It's paramount important to keep the gin handler function's godoc documentation up-to-date,
 to always have accurate API documentation.
-Whenever you change, add or enhance an API endpoint, please update the godocs.
+Whenever you change, add or enhance an API endpoint, please update the godoc.
 
 You don't require any extra tools on your machine, all Swagger tooling is automatically fetched by standard Go tools.
 
