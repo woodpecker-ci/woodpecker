@@ -1,4 +1,5 @@
 // Copyright 2022 Woodpecker Authors
+// Copyright 2011 Drone.IO Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,36 +13,65 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package exec
+package log
 
 import (
-	"fmt"
+	"context"
 	"io"
-	"os"
+	"strings"
+	"sync"
 	"time"
+
+	"github.com/rs/zerolog/log"
+
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/shared"
 )
 
 // LineWriter sends logs to the client.
 type LineWriter struct {
-	stepName  string
+	sync.Mutex
+
+	peer      rpc.Peer
 	stepUUID  string
 	num       int
 	startTime time.Time
+	replacer  *strings.Replacer
 }
 
 // NewLineWriter returns a new line reader.
-func NewLineWriter(stepName, stepUUID string) io.WriteCloser {
-	return &LineWriter{
-		stepName:  stepName,
+func NewLineWriter(peer rpc.Peer, stepUUID string, secret ...string) io.WriteCloser {
+	lw := &LineWriter{
+		peer:      peer,
 		stepUUID:  stepUUID,
 		startTime: time.Now().UTC(),
+		replacer:  shared.NewSecretsReplacer(secret),
 	}
+	return lw
 }
 
 func (w *LineWriter) Write(p []byte) (n int, err error) {
-	fmt.Fprintf(os.Stderr, "[%s:L%d:%ds] %s", w.stepName, w.num, int64(time.Since(w.startTime).Seconds()), p)
+	data := string(p)
+	if w.replacer != nil {
+		data = w.replacer.Replace(data)
+	}
+	log.Trace().Str("step-uuid", w.stepUUID).Msgf("grpc write line: %s", data)
+
+	line := &rpc.LogEntry{
+		Data:     []byte(strings.TrimSuffix(data, "\n")), // remove trailing newline
+		StepUUID: w.stepUUID,
+		Time:     int64(time.Since(w.startTime).Seconds()),
+		Type:     rpc.LogEntryStdout,
+		Line:     w.num,
+	}
+
 	w.num++
-	return len(p), nil
+
+	if err := w.peer.Log(context.Background(), line); err != nil {
+		return 0, err
+	}
+
+	return len(data), nil
 }
 
 func (w *LineWriter) Close() error {

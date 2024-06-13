@@ -228,6 +228,12 @@ workspace:
 
 See [this issue](https://github.com/woodpecker-ci/woodpecker/issues/2510) for more details.
 
+### `KUBERNETES_SERVICE_HOST` environment variable
+
+Like the below env vars used for configuration, this can be set in the environment fonfiguration of the agent. It configures the address of the Kubernetes API server to connect to.
+
+If running the agent within Kubernetes, this will already be set and you don't have to add it manually.
+
 ## Configuration
 
 These env vars can be set in the `env:` sections of the agent.
