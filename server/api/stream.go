@@ -186,7 +186,7 @@ func LogStreamSSE(c *gin.Context) {
 		return
 	}
 
-	if step.State != model.StatusRunning {
+	if step.State != model.StatusPending && step.State != model.StatusRunning {
 		log.Debug().Msg("step not running (anymore).")
 		logWriteStringErr(io.WriteString(rw, "event: error\ndata: step not running (anymore)\n\n"))
 		return
@@ -204,6 +204,13 @@ func LogStreamSSE(c *gin.Context) {
 		close(logChan)
 		log.Debug().Msg("log stream: connection closed")
 	}()
+
+	err = server.Config.Services.Logs.Open(ctx, step.ID)
+	if err != nil {
+		log.Error().Err(err).Msg("log stream: open failed")
+		logWriteStringErr(io.WriteString(rw, "event: error\ndata: can't open stream\n\n"))
+		return
+	}
 
 	go func() {
 		err := server.Config.Services.Logs.Tail(ctx, step.ID, func(entries ...*model.LogEntry) {
