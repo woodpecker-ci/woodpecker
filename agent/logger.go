@@ -17,7 +17,6 @@ package agent
 import (
 	"io"
 	"sync"
-	"time"
 
 	"github.com/rs/zerolog"
 
