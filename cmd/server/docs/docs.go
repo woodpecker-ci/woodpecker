@@ -1065,7 +1065,7 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "the organziation's id",
+                        "description": "the organization's id",
                         "name": "org_id",
                         "in": "path",
                         "required": true
@@ -1104,7 +1104,7 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "the organziation's id",
+                        "description": "the organization's id",
                         "name": "org_id",
                         "in": "path",
                         "required": true

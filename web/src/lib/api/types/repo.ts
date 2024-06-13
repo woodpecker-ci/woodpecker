@@ -1,5 +1,5 @@
 // A version control repository.
-export type Repo = {
+export interface Repo {
   // Is the repo currently active or not
   active: boolean;
 
@@ -73,13 +73,15 @@ export type Repo = {
   cancel_previous_pipeline_events: string[];
 
   netrc_only_trusted: boolean;
-};
+}
 
+/* eslint-disable no-unused-vars */
 export enum RepoVisibility {
   Public = 'public',
   Private = 'private',
   Internal = 'internal',
 }
+/* eslint-enable */
 
 export type RepoSettings = Pick<
   Repo,
@@ -94,9 +96,9 @@ export type RepoSettings = Pick<
   | 'netrc_only_trusted'
 >;
 
-export type RepoPermissions = {
+export interface RepoPermissions {
   pull: boolean;
   push: boolean;
   admin: boolean;
   synced: number;
-};
+}

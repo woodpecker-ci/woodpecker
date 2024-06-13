@@ -109,11 +109,11 @@ clean-all: clean ## Clean all artifacts
 
 .PHONY: generate
 generate: install-tools generate-swagger ## Run all code generations
-	go generate ./...
+	CGO_ENABLED=0 go generate ./...
 
 generate-swagger: install-tools ## Run swagger code generation
 	swag init -g server/api/ -g cmd/server/swagger.go --outputTypes go -output cmd/server/docs
-	go generate cmd/server/swagger.go
+	CGO_ENABLED=0 go generate cmd/server/swagger.go
 
 generate-license-header: install-tools
 	addlicense -c "Woodpecker Authors" -ignore "vendor/**" **/*.go
@@ -173,7 +173,7 @@ test-server-datastore: ## Test server datastore
 	go test -race -timeout 30s -skip TestMigrate go.woodpecker-ci.org/woodpecker/v2/server/store/...
 
 test-server-datastore-coverage: ## Test server datastore with coverage report
-	go test -race -cover -coverprofile datastore-coverage.out -timeout 120s go.woodpecker-ci.org/woodpecker/v2/server/store/...
+	go test -race -cover -coverprofile datastore-coverage.out -timeout 180s go.woodpecker-ci.org/woodpecker/v2/server/store/...
 
 test-ui: ui-dependencies ## Test UI code
 	(cd web/; pnpm run lint)
@@ -317,7 +317,7 @@ spellcheck:
 ##@ Docs
 .PHONY: docs
 docs: ## Generate docs (currently only for the cli)
-	go generate cmd/cli/app.go
-	go generate cmd/server/swagger.go
+	CGO_ENABLED=0 go generate cmd/cli/app.go
+	CGO_ENABLED=0 go generate cmd/server/swagger.go
 
 endif

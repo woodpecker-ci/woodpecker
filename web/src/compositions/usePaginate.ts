@@ -1,12 +1,11 @@
 import { useInfiniteScroll } from '@vueuse/core';
-import { onMounted, Ref, ref, UnwrapRef, watch } from 'vue';
+import { onMounted, ref, watch, type Ref, type UnwrapRef } from 'vue';
 
 export async function usePaginate<T>(getSingle: (page: number) => Promise<T[]>): Promise<T[]> {
   let hasMore = true;
   let page = 1;
   const result: T[] = [];
   while (hasMore) {
-    // eslint-disable-next-line no-await-in-loop
     const singleRes = await getSingle(page);
     result.push(...singleRes);
     hasMore = singleRes.length !== 0;
