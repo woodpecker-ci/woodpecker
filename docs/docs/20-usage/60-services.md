@@ -37,6 +37,8 @@ services:
       - 51820/udp
 ```
 
+You can use any step property, including `depends_on`. Services can depend on other services and steps.
+
 ## Configuration
 
 Service containers generally expose environment variables to customize service startup such as default usernames, passwords and ports. Please see the official image documentation to learn more.
