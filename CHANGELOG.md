@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @anbraten, @jcgl17, @pat-s, @qwerty287, @s00500, @zc-devs
+@6543, @anbraten, @jcgl17, @pat-s, @qwerty287, @s00500, @wez, @zc-devs
 
 ### 🔒 Security
 
@@ -15,18 +15,9 @@
 - Allow to store logs in files [[#3568](https://github.com/woodpecker-ci/woodpecker/pull/3568)]
 - Native forgejo support [[#3684](https://github.com/woodpecker-ci/woodpecker/pull/3684)]
 
-### 📚 Documentation
-
-- Add documentation for KUBERNETES_SERVICE_HOST in Agent [[#3747](https://github.com/woodpecker-ci/woodpecker/pull/3747)]
-- Remove web.archive.org workaround in docs [[#3771](https://github.com/woodpecker-ci/woodpecker/pull/3771)]
-- Serve plugin icons locally [[#3768](https://github.com/woodpecker-ci/woodpecker/pull/3768)]
-- Docs: update local backend page [[#3765](https://github.com/woodpecker-ci/woodpecker/pull/3765)]
-- Remove old docs versions [[#3743](https://github.com/woodpecker-ci/woodpecker/pull/3743)]
-- Merge release plugins [[#3752](https://github.com/woodpecker-ci/woodpecker/pull/3752)]
-- Split FAQ [[#3746](https://github.com/woodpecker-ci/woodpecker/pull/3746)]
-
 ### 🐛 Bug Fixes
 
+- Add release event to webhooks [[#3784](https://github.com/woodpecker-ci/woodpecker/pull/3784)]
 - Respect cli argument when checking docker backend availability [[#3770](https://github.com/woodpecker-ci/woodpecker/pull/3770)]
 - Fix repo creation [[#3756](https://github.com/woodpecker-ci/woodpecker/pull/3756)]
 - Fix config loading of cli [[#3764](https://github.com/woodpecker-ci/woodpecker/pull/3764)]
@@ -35,11 +26,23 @@
 
 ### 📈 Enhancement
 
+- Improve step logging [[#3722](https://github.com/woodpecker-ci/woodpecker/pull/3722)]
 - chore(deps): update dependency eslint to v9 [[#3594](https://github.com/woodpecker-ci/woodpecker/pull/3594)]
 - Show workflow names if there are multiple configs [[#3767](https://github.com/woodpecker-ci/woodpecker/pull/3767)]
 - Use http constants [[#3766](https://github.com/woodpecker-ci/woodpecker/pull/3766)]
 - Spellcheck "server/*" [[#3753](https://github.com/woodpecker-ci/woodpecker/pull/3753)]
 - Agent-wide node selector [[#3608](https://github.com/woodpecker-ci/woodpecker/pull/3608)]
+
+### 📚 Documentation
+
+- Remove misleading crontab guru suggestion from docs [[#3781](https://github.com/woodpecker-ci/woodpecker/pull/3781)]
+- Add documentation for KUBERNETES_SERVICE_HOST in Agent [[#3747](https://github.com/woodpecker-ci/woodpecker/pull/3747)]
+- Remove web.archive.org workaround in docs [[#3771](https://github.com/woodpecker-ci/woodpecker/pull/3771)]
+- Serve plugin icons locally [[#3768](https://github.com/woodpecker-ci/woodpecker/pull/3768)]
+- Docs: update local backend page [[#3765](https://github.com/woodpecker-ci/woodpecker/pull/3765)]
+- Remove old docs versions [[#3743](https://github.com/woodpecker-ci/woodpecker/pull/3743)]
+- Merge release plugins [[#3752](https://github.com/woodpecker-ci/woodpecker/pull/3752)]
+- Split FAQ [[#3746](https://github.com/woodpecker-ci/woodpecker/pull/3746)]
 
 ### Misc
 
