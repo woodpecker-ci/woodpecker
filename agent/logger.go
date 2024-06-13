@@ -31,7 +31,6 @@ const (
 	// Store not more than 1mb in a log-line as 4mb is the limit of a grpc message
 	// and log-lines needs to be parsed by the browsers later on.
 	maxLogLineLength = 1024 * 1024 // 1mb
-	flushInterval    = 250 * time.Millisecond
 )
 
 func (r *Runner) createLogger(_logger zerolog.Logger, uploads *sync.WaitGroup, workflow *rpc.Workflow) pipeline.Logger {
