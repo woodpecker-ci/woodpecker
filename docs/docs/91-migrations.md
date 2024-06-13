@@ -21,6 +21,7 @@ Some versions need some changes to the server configuration or the pipeline conf
 - Deprecated `environment` filter, use `when.evaluate`
 - Use `WOODPECKER_EXPERT_FORGE_OAUTH_HOST` instead of `WOODPECKER_DEV_GITEA_OAUTH_URL` or `WOODPECKER_DEV_OAUTH_HOST`
 - Deprecated `WOODPECKER_WEBHOOK_HOST` in favor of `WOODPECKER_EXPERT_WEBHOOK_HOST`
+- Deprecated `detached` in favor of services
 
 ## 2.0.0
 

@@ -278,6 +278,79 @@ func TestCompilerCompile(t *testing.T) {
 			backConf:    nil,
 			expectedErr: "step 'dummy' depends on unknown step 'not exist'",
 		},
+				{
+			name: "workflow with steps, services and depends_on",
+			fronConf: &yaml_types.Workflow{Steps: yaml_types.ContainerList{ContainerList: []*yaml_types.Container{{
+				Name:     "echo env",
+				Image:    "bash",
+				Commands: []string{"env"},
+			}}}, Services: yaml_types.ContainerList{ContainerList: []*yaml_types.Container{{
+				Name:     "service",
+				Image:    "bash",
+				Commands: []string{"env"},
+			}, {
+				Name:      "service-depend",
+				Image:     "bash",
+				Commands:  []string{"echo 1"},
+				DependsOn: []string{"echo env"},
+			}, {
+				Name:      "service-depend-on-service",
+				Image:     "bash",
+				Commands:  []string{"echo 1"},
+				DependsOn: []string{"service-depend"},
+			}}}},
+			backConf: &backend_types.Config{
+				Networks: defaultNetworks,
+				Volumes:  defaultVolumes,
+				Stages: []*backend_types.Stage{defaultCloneStage, {
+					Steps: []*backend_types.Step{{
+						Name:       "service",
+						Type:       backend_types.StepTypeService,
+						Image:      "bash",
+						Commands:   []string{"env"},
+						OnSuccess:  true,
+						Failure:    "fail",
+						Volumes:    []string{defaultVolumes[0].Name + ":"},
+						Networks:   []backend_types.Conn{{Name: "test_default", Aliases: []string{"service"}}},
+						ExtraHosts: []backend_types.HostAlias{},
+					}, {
+						Name:       "echo env",
+						Type:       backend_types.StepTypeCommands,
+						Image:      "bash",
+						Commands:   []string{"env"},
+						OnSuccess:  true,
+						Failure:    "fail",
+						Volumes:    []string{defaultVolumes[0].Name + ":"},
+						Networks:   []backend_types.Conn{{Name: "test_default", Aliases: []string{"echo env"}}},
+						ExtraHosts: []backend_types.HostAlias{},
+					}},
+				}, {
+					Steps: []*backend_types.Step{{
+						Name:       "service-depend",
+						Type:       backend_types.StepTypeService,
+						Image:      "bash",
+						Commands:   []string{"echo 1"},
+						OnSuccess:  true,
+						Failure:    "fail",
+						Volumes:    []string{defaultVolumes[0].Name + ":"},
+						Networks:   []backend_types.Conn{{Name: "test_default", Aliases: []string{"service-depend"}}},
+						ExtraHosts: []backend_types.HostAlias{},
+					}},
+				}, {
+					Steps: []*backend_types.Step{{
+						Name:       "service-depend-on-service",
+						Type:       backend_types.StepTypeService,
+						Image:      "bash",
+						Commands:   []string{"echo 1"},
+						OnSuccess:  true,
+						Failure:    "fail",
+						Volumes:    []string{defaultVolumes[0].Name + ":"},
+						Networks:   []backend_types.Conn{{Name: "test_default", Aliases: []string{"service-depend-on-service"}}},
+						ExtraHosts: []backend_types.HostAlias{},
+					}},
+				}},
+			},
+		},
 	}
 
 	for _, test := range tests {
