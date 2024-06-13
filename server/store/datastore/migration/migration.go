@@ -60,6 +60,7 @@ var migrationTasks = []*xormigrate.Migration{
 	&renameLinkToURL,
 	&cleanRegistryPipeline,
 	&setForgeID,
+	&cronWithoutSec,
 }
 
 var allBeans = []any{

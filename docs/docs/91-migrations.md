@@ -6,6 +6,7 @@ Some versions need some changes to the server configuration or the pipeline conf
 ## 3.0.0
 
 - Update all webhooks by pressing the "Repair all" button in the admin settings as the webhook token claims have changed
+- Crons now use standard Linux syntax without seconds
 
 -->
 
