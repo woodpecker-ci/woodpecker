@@ -25,7 +25,7 @@
 
 <script lang="ts" setup>
 import { cloneDeep } from 'lodash';
-import { computed, inject, Ref, ref } from 'vue';
+import { computed, inject, ref, type Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import Button from '~/components/atomic/Button.vue';
@@ -36,7 +36,7 @@ import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useNotifications from '~/compositions/useNotifications';
 import { usePagination } from '~/compositions/usePaginate';
-import { Org, Secret, WebhookEvents } from '~/lib/api/types';
+import { WebhookEvents, type Org, type Secret } from '~/lib/api/types';
 
 const emptySecret: Partial<Secret> = {
   name: '',
@@ -78,7 +78,7 @@ const { doSubmit: createSecret, isLoading: isSaving } = useAsyncAction(async () 
     await apiClient.createOrgSecret(org.value.id, selectedSecret.value);
   }
   notifications.notify({
-    title: i18n.t(isEditingSecret.value ? 'secrets.saved' : 'secrets.created'),
+    title: isEditingSecret.value ? i18n.t('secrets.saved') : i18n.t('secrets.created'),
     type: 'success',
   });
   selectedSecret.value = undefined;

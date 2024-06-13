@@ -27,7 +27,7 @@ import (
 
 	"github.com/caddyserver/certmagic"
 	"github.com/gin-gonic/gin"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
+	prometheus_http "github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v2"
@@ -250,7 +250,7 @@ func run(c *cli.Context) error {
 	if metricsServerAddr := c.String("metrics-server-addr"); metricsServerAddr != "" {
 		g.Go(func() error {
 			metricsRouter := gin.New()
-			metricsRouter.GET("/metrics", gin.WrapH(promhttp.Handler()))
+			metricsRouter.GET("/metrics", gin.WrapH(prometheus_http.Handler()))
 			err := http.ListenAndServe(metricsServerAddr, metricsRouter)
 			if err != nil && !errors.Is(err, http.ErrServerClosed) {
 				log.Fatal().Err(err).Msg("could not start metrics server") //nolint:forbidigo
@@ -270,11 +270,16 @@ func setupEvilGlobals(c *cli.Context, s store.Store) error {
 	server.Config.Services.Logs = logging.New()
 	server.Config.Services.Pubsub = pubsub.New()
 	server.Config.Services.Membership = setupMembershipService(c, s)
-	serviceMangager, err := services.NewManager(c, s, setup.Forge)
+	serviceManager, err := services.NewManager(c, s, setup.Forge)
 	if err != nil {
 		return fmt.Errorf("could not setup service manager: %w", err)
 	}
-	server.Config.Services.Manager = serviceMangager
+	server.Config.Services.Manager = serviceManager
+
+	server.Config.Services.LogStore, err = setupLogStore(c, s)
+	if err != nil {
+		return fmt.Errorf("could not setup log store: %w", err)
+	}
 
 	// authentication
 	server.Config.Pipeline.AuthenticatePublicRepos = c.Bool("authenticate-public-repos")

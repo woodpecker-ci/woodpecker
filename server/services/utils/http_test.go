@@ -38,7 +38,7 @@ func TestSign(t *testing.T) {
 
 	body := []byte("{\"foo\":\"bar\"}")
 
-	req, err := http.NewRequest("GET", "http://example.com", bytes.NewBuffer(body))
+	req, err := http.NewRequest(http.MethodGet, "http://example.com", bytes.NewBuffer(body))
 	if err != nil {
 		t.Fatal(err)
 	}

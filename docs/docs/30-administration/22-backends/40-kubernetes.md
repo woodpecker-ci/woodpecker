@@ -79,7 +79,8 @@ And then overwrite the `nodeSelector` in the `backend_options` section of the st
           kubernetes.io/arch: "${ARCH}"
 ```
 
-You can use [PodNodeSelector](https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#podnodeselector) admission controller if you want to set the node selector by per-namespace basis.
+You can use [WOODPECKER_BACKEND_K8S_POD_NODE_SELECTOR](#woodpecker_backend_k8s_pod_node_selector) if you want to set the node selector per Agent
+or [PodNodeSelector](https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#podnodeselector) admission controller if you want to set the node selector by per-namespace basis.
 
 ### Tolerations
 
@@ -284,6 +285,12 @@ Additional annotations to apply to worker Pods. Must be a YAML object, e.g. `{"e
 > Default: `false`
 
 Determines if Pod annotations can be defined from a step's backend options.
+
+### `WOODPECKER_BACKEND_K8S_POD_NODE_SELECTOR`
+
+> Default: empty
+
+Additional node selector to apply to worker pods. Must be a YAML object, e.g. `{"topology.kubernetes.io/region":"eu-central-1"}`.
 
 ### `WOODPECKER_BACKEND_K8S_SECCTX_NONROOT`
 

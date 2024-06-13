@@ -22,7 +22,7 @@ import (
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promauto"
+	prometheus_auto "github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v2"
 	"golang.org/x/sync/errgroup"
@@ -30,6 +30,8 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server"
 	"go.woodpecker-ci.org/woodpecker/v2/server/cache"
 	"go.woodpecker-ci.org/woodpecker/v2/server/queue"
+	logService "go.woodpecker-ci.org/woodpecker/v2/server/services/log"
+	"go.woodpecker-ci.org/woodpecker/v2/server/services/log/file"
 	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 	"go.woodpecker-ci.org/woodpecker/v2/server/store/datastore"
 )
@@ -96,37 +98,37 @@ func setupMembershipService(_ *cli.Context, _store store.Store) cache.Membership
 }
 
 func setupMetrics(g *errgroup.Group, _store store.Store) {
-	pendingSteps := promauto.NewGauge(prometheus.GaugeOpts{
+	pendingSteps := prometheus_auto.NewGauge(prometheus.GaugeOpts{
 		Namespace: "woodpecker",
 		Name:      "pending_steps",
 		Help:      "Total number of pending pipeline steps.",
 	})
-	waitingSteps := promauto.NewGauge(prometheus.GaugeOpts{
+	waitingSteps := prometheus_auto.NewGauge(prometheus.GaugeOpts{
 		Namespace: "woodpecker",
 		Name:      "waiting_steps",
 		Help:      "Total number of pipeline waiting on deps.",
 	})
-	runningSteps := promauto.NewGauge(prometheus.GaugeOpts{
+	runningSteps := prometheus_auto.NewGauge(prometheus.GaugeOpts{
 		Namespace: "woodpecker",
 		Name:      "running_steps",
 		Help:      "Total number of running pipeline steps.",
 	})
-	workers := promauto.NewGauge(prometheus.GaugeOpts{
+	workers := prometheus_auto.NewGauge(prometheus.GaugeOpts{
 		Namespace: "woodpecker",
 		Name:      "worker_count",
 		Help:      "Total number of workers.",
 	})
-	pipelines := promauto.NewGauge(prometheus.GaugeOpts{
+	pipelines := prometheus_auto.NewGauge(prometheus.GaugeOpts{
 		Namespace: "woodpecker",
 		Name:      "pipeline_total_count",
 		Help:      "Total number of pipelines.",
 	})
-	users := promauto.NewGauge(prometheus.GaugeOpts{
+	users := prometheus_auto.NewGauge(prometheus.GaugeOpts{
 		Namespace: "woodpecker",
 		Name:      "user_count",
 		Help:      "Total number of users.",
 	})
-	repos := promauto.NewGauge(prometheus.GaugeOpts{
+	repos := prometheus_auto.NewGauge(prometheus.GaugeOpts{
 		Namespace: "woodpecker",
 		Name:      "repo_count",
 		Help:      "Total number of repos.",
@@ -153,4 +155,13 @@ func setupMetrics(g *errgroup.Group, _store store.Store) {
 			time.Sleep(10 * time.Second)
 		}
 	})
+}
+
+func setupLogStore(c *cli.Context, s store.Store) (logService.Service, error) {
+	switch c.String("log-store") {
+	case "file":
+		return file.NewLogStore(c.String("log-store-file-path"))
+	default:
+		return s, nil
+	}
 }

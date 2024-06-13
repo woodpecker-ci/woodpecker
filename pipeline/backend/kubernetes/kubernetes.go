@@ -62,6 +62,7 @@ type config struct {
 	PodLabelsAllowFromStep      bool
 	PodAnnotations              map[string]string
 	PodAnnotationsAllowFromStep bool
+	PodNodeSelector             map[string]string
 	ImagePullSecretNames        []string
 	SecurityContext             SecurityContextConfig
 }
@@ -91,6 +92,7 @@ func configFromCliContext(ctx context.Context) (*config, error) {
 				PodLabelsAllowFromStep:      c.Bool("backend-k8s-pod-labels-allow-from-step"),
 				PodAnnotations:              make(map[string]string), // just init empty map to prevent nil panic
 				PodAnnotationsAllowFromStep: c.Bool("backend-k8s-pod-annotations-allow-from-step"),
+				PodNodeSelector:             make(map[string]string), // just init empty map to prevent nil panic
 				ImagePullSecretNames:        c.StringSlice("backend-k8s-pod-image-pull-secret-names"),
 				SecurityContext: SecurityContextConfig{
 					RunAsNonRoot: c.Bool("backend-k8s-secctx-nonroot"), // cspell:words secctx nonroot
@@ -110,6 +112,12 @@ func configFromCliContext(ctx context.Context) (*config, error) {
 			if annotations := c.String("backend-k8s-pod-annotations"); annotations != "" {
 				if err := yaml.Unmarshal([]byte(c.String("backend-k8s-pod-annotations")), &config.PodAnnotations); err != nil {
 					log.Error().Err(err).Msgf("could not unmarshal pod annotations '%s'", c.String("backend-k8s-pod-annotations"))
+					return nil, err
+				}
+			}
+			if nodeSelector := c.String("backend-k8s-pod-node-selector"); nodeSelector != "" {
+				if err := yaml.Unmarshal([]byte(nodeSelector), &config.PodNodeSelector); err != nil {
+					log.Error().Err(err).Msgf("could not unmarshal pod node selector '%s'", nodeSelector)
 					return nil, err
 				}
 			}
@@ -173,6 +181,7 @@ func (e *kube) getConfig() *config {
 	c := *e.config
 	c.PodLabels = maps.Clone(e.config.PodLabels)
 	c.PodAnnotations = maps.Clone(e.config.PodAnnotations)
+	c.PodNodeSelector = maps.Clone(e.config.PodNodeSelector)
 	c.ImagePullSecretNames = slices.Clone(e.config.ImagePullSecretNames)
 	return &c
 }

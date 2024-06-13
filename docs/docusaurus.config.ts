@@ -51,10 +51,6 @@ const config: Config = {
               label: 'Awesome',
             },
             {
-              to: '/faq',
-              label: 'FAQ',
-            },
-            {
               to: '/api',
               label: 'API',
             },
@@ -64,6 +60,12 @@ const config: Config = {
         {
           type: 'docsVersionDropdown',
           position: 'right',
+          dropdownItemsAfter: [
+            {
+              to: '/versions',
+              label: 'All versions',
+            },
+          ],
         },
         {
           href: 'https://github.com/woodpecker-ci/woodpecker',
@@ -95,10 +97,6 @@ const config: Config = {
             {
               label: 'Server setup',
               to: '/docs/administration/deployment/overview',
-            },
-            {
-              label: 'FAQ',
-              to: '/faq',
             },
           ],
         },
@@ -250,34 +248,22 @@ const config: Config = {
             process.env.NODE_ENV === 'development' ? ['current', '2.5'] : ['current', '2.5', '2.4', '2.3', '1.0'],
           versions: {
             current: {
-              label: 'Next',
+              label: 'Next 🚧',
               banner: 'unreleased',
             },
             '2.5': {
               label: '2.5.x',
             },
             '2.4': {
-              label: '2.4.x',
+              label: '2.4.x 💀',
               banner: 'unmaintained',
             },
             '2.3': {
-              label: '2.3.x',
-              banner: 'unmaintained',
-            },
-            '2.2': {
-              label: '2.2.x',
-              banner: 'unmaintained',
-            },
-            '2.1': {
-              label: '2.1.x',
-              banner: 'unmaintained',
-            },
-            '2.0': {
-              label: '2.0.x',
+              label: '2.3.x 💀',
               banner: 'unmaintained',
             },
             '1.0': {
-              label: '1.0.x',
+              label: '1.0.x 💀',
               banner: 'unmaintained',
             },
           },

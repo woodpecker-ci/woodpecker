@@ -1,4 +1,4 @@
-export type Agent = {
+export interface Agent {
   id: number;
   name: string;
   token: string;
@@ -10,4 +10,4 @@ export type Agent = {
   capacity: number;
   version: string;
   no_schedule: boolean;
-};
+}
