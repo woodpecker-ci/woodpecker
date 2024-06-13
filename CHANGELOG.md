@@ -1,10 +1,10 @@
 # Changelog
 
-## [2.6.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.6.0) - 2024-06-10
+## [2.6.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.6.0) - 2024-06-13
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @anbraten, @pat-s, @qwerty287, @s00500, @zc-devs
+@6543, @anbraten, @jcgl17, @pat-s, @qwerty287, @s00500, @zc-devs
 
 ### 🔒 Security
 
@@ -15,6 +15,16 @@
 - Allow to store logs in files [[#3568](https://github.com/woodpecker-ci/woodpecker/pull/3568)]
 - Native forgejo support [[#3684](https://github.com/woodpecker-ci/woodpecker/pull/3684)]
 
+### 📚 Documentation
+
+- Add documentation for KUBERNETES_SERVICE_HOST in Agent [[#3747](https://github.com/woodpecker-ci/woodpecker/pull/3747)]
+- Remove web.archive.org workaround in docs [[#3771](https://github.com/woodpecker-ci/woodpecker/pull/3771)]
+- Serve plugin icons locally [[#3768](https://github.com/woodpecker-ci/woodpecker/pull/3768)]
+- Docs: update local backend page [[#3765](https://github.com/woodpecker-ci/woodpecker/pull/3765)]
+- Remove old docs versions [[#3743](https://github.com/woodpecker-ci/woodpecker/pull/3743)]
+- Merge release plugins [[#3752](https://github.com/woodpecker-ci/woodpecker/pull/3752)]
+- Split FAQ [[#3746](https://github.com/woodpecker-ci/woodpecker/pull/3746)]
+
 ### 🐛 Bug Fixes
 
 - Respect cli argument when checking docker backend availability [[#3770](https://github.com/woodpecker-ci/woodpecker/pull/3770)]
@@ -22,14 +32,6 @@
 - Fix config loading of cli [[#3764](https://github.com/woodpecker-ci/woodpecker/pull/3764)]
 - Fix missing WOODPECKER_BITBUCKET_DC_URL [[#3761](https://github.com/woodpecker-ci/woodpecker/pull/3761)]
 - Correct repo repair success message in cli [[#3757](https://github.com/woodpecker-ci/woodpecker/pull/3757)]
-
-### 📚 Documentation
-
-- Serve plugin icons locally [[#3768](https://github.com/woodpecker-ci/woodpecker/pull/3768)]
-- Docs: update local backend page [[#3765](https://github.com/woodpecker-ci/woodpecker/pull/3765)]
-- Remove old docs versions [[#3743](https://github.com/woodpecker-ci/woodpecker/pull/3743)]
-- Merge release plugins [[#3752](https://github.com/woodpecker-ci/woodpecker/pull/3752)]
-- Split FAQ [[#3746](https://github.com/woodpecker-ci/woodpecker/pull/3746)]
 
 ### 📈 Enhancement
 
@@ -41,8 +43,10 @@
 
 ### Misc
 
+- Update nix flake [[#3780](https://github.com/woodpecker-ci/woodpecker/pull/3780)]
+- chore(deps): lock file maintenance [[#3783](https://github.com/woodpecker-ci/woodpecker/pull/3783)]
+- chore(deps): update pre-commit hook golangci/golangci-lint to v1.59.1 [[#3782](https://github.com/woodpecker-ci/woodpecker/pull/3782)]
 - fix(deps): update codeberg.org/mvdkleijn/forgejo-sdk/forgejo digest to 168c988 [[#3776](https://github.com/woodpecker-ci/woodpecker/pull/3776)]
-- Remove web.archive.org workaround in docs [[#3771](https://github.com/woodpecker-ci/woodpecker/pull/3771)]
 - chore(deps): lock file maintenance [[#3750](https://github.com/woodpecker-ci/woodpecker/pull/3750)]
 - chore(deps): update gitea/gitea docker tag to v1.22 [[#3749](https://github.com/woodpecker-ci/woodpecker/pull/3749)]
 - Fix setting name [[#3744](https://github.com/woodpecker-ci/woodpecker/pull/3744)]
