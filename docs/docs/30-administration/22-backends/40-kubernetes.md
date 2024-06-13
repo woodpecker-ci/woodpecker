@@ -229,11 +229,9 @@ See [this issue](https://github.com/woodpecker-ci/woodpecker/issues/2510) for mo
 
 ### `KUBERNETES_SERVICE_HOST` environment variable
 
-Like the below env vars used for configuration, this can be set in the `env:` sections of the agent.
+Like the below env vars used for configuration, this can be set in the environment fonfiguration of the agent. It configures the address of the Kubernetes API server to connect to.
 
-> Default: empty
-
-Address of the Kubernetes API server to connect to. If running Agent within Kubernetes, this will already be set by Kubernetes and require no further configuration. If not running in a Kubernetes pod, you need to set it.
+If running the agent within Kubernetes, this will already be set and you don't have to add it manually.
 
 ## Configuration
 
