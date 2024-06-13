@@ -62,9 +62,11 @@ func (e *docker) Name() string {
 	return "docker"
 }
 
-func (e *docker) IsAvailable(context.Context) bool {
-	if os.Getenv("DOCKER_HOST") != "" {
-		return true
+func (e *docker) IsAvailable(ctx context.Context) bool {
+	if c, ok := ctx.Value(backend.CliContext).(*cli.Context); ok {
+		if c.IsSet("backend-docker-host") {
+			return true
+		}
 	}
 	_, err := os.Stat("/var/run/docker.sock")
 	return err == nil
