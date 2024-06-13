@@ -1,4 +1,4 @@
-import { RouteLocationRaw, useRouter } from 'vue-router';
+import { useRouter, type RouteLocationRaw } from 'vue-router';
 
 export function useRouteBack(to: RouteLocationRaw) {
   const router = useRouter();
