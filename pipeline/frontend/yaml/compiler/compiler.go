@@ -279,7 +279,7 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 
 		steps = append(steps, &dagCompilerStep{
 			step:      step,
-			position:  pos+posServices, // services should be shown on top
+			position:  pos + posServices, // services should be shown on top
 			name:      container.Name,
 			group:     container.Group,
 			dependsOn: container.DependsOn,

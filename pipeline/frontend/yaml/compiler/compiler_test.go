@@ -278,7 +278,7 @@ func TestCompilerCompile(t *testing.T) {
 			backConf:    nil,
 			expectedErr: "step 'dummy' depends on unknown step 'not exist'",
 		},
-				{
+		{
 			name: "workflow with steps, services and depends_on",
 			fronConf: &yaml_types.Workflow{Steps: yaml_types.ContainerList{ContainerList: []*yaml_types.Container{{
 				Name:     "echo env",
