@@ -112,7 +112,7 @@ import { useStorage } from '@vueuse/core';
 import { AnsiUp } from 'ansi_up';
 import { decode } from 'js-base64';
 import { debounce } from 'lodash';
-import { computed, inject, nextTick, onMounted, ref, toRef, watch, type Ref } from 'vue';
+import { computed, inject, nextTick, onBeforeUnmount, onMounted, ref, toRef, watch, type Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
 
@@ -126,7 +126,7 @@ import { findStep, isStepFinished, isStepRunning } from '~/utils/helpers';
 interface LogLine {
   index: number;
   number: number;
-  text: string;
+  text?: string;
   time?: number;
   type: 'error' | 'warning' | null;
 }
@@ -184,7 +184,7 @@ function writeLog(line: Partial<LogLine>) {
   logBuffer.value.push({
     index: line.index ?? 0,
     number: (line.index ?? 0) + 1,
-    text: ansiUp.value.ansi_to_html(line.text ?? ''),
+    text: ansiUp.value.ansi_to_html(decode(line.text ?? '')),
     time: line.time ?? 0,
     type: null, // TODO: implement way to detect errors and warnings
   });
@@ -277,18 +277,16 @@ async function loadLogs() {
     return;
   }
 
+  if (!repo) {
+    throw new Error('Unexpected: "repo" should be provided at this place');
+  }
+
   log.value = undefined;
   logBuffer.value = [];
   ansiUp.value = new AnsiUp();
   ansiUp.value.use_classes = true;
 
-  if (!repo) {
-    throw new Error('Unexpected: "repo" should be provided at this place');
-  }
-
-  if (stream.value) {
-    stream.value.close();
-  }
+  stream.value?.close();
 
   if (!hasLogs.value || !step.value) {
     return;
@@ -297,12 +295,12 @@ async function loadLogs() {
   if (isStepFinished(step.value)) {
     loadedStepSlug.value = stepSlug.value;
     const logs = await apiClient.getLogs(repo.value.id, pipeline.value.number, step.value.id);
-    logs?.forEach((line) => writeLog({ index: line.line, text: decode(line.data), time: line.time }));
+    logs?.forEach((line) => writeLog({ index: line.line, text: line.data, time: line.time }));
     flushLogs(false);
-  } else if (isStepRunning(step.value)) {
+  } else if (step.value.state === 'pending' || isStepRunning(step.value)) {
     loadedStepSlug.value = stepSlug.value;
     stream.value = apiClient.streamLogs(repo.value.id, pipeline.value.number, step.value.id, (line) => {
-      writeLog({ index: line.line, text: decode(line.data), time: line.time });
+      writeLog({ index: line.line, text: line.data, time: line.time });
       flushLogs(true);
     });
   }
@@ -329,6 +327,10 @@ async function deleteLogs() {
 
 onMounted(async () => {
   await loadLogs();
+});
+
+onBeforeUnmount(() => {
+  stream.value?.close();
 });
 
 watch(stepSlug, async () => {
