@@ -23,6 +23,6 @@ To configure cron jobs you need at least push access to the repository.
 
    ![cron settings](./cron-settings.png)
 
-   The supported schedule syntax can be found at <https://pkg.go.dev/github.com/gdgvda/cron#hdr-CRON_Expression_Format>. If you need general understanding of the cron syntax <https://crontab.guru/> is a good place to start and experiment.
+   The supported schedule syntax can be found at <https://pkg.go.dev/github.com/gdgvda/cron#hdr-CRON_Expression_Format>. If you need general understanding of the cron syntax <https://it-tools.tech/crontab-generator> is a good place to start and experiment.
 
    Examples: `@every 5m`, `@daily`, `30 * * * *` ...
