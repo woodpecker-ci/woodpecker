@@ -158,9 +158,19 @@ func podSpec(step *types.Step, config *config, options BackendOptions) (v1.PodSp
 		Tolerations:        tolerations(options.Tolerations),
 		SecurityContext:    podSecurityContext(options.SecurityContext, config.SecurityContext, step.Privileged),
 	}
-	spec.Volumes, err = volumes(step.Volumes)
+	spec.Volumes, err = pvcVolumes(step.Volumes)
 	if err != nil {
 		return spec, err
+	}
+
+	if len(options.Secrets) > 0 {
+		if config.NativeSecretsAllowFromStep {
+			secretVolumes, err := fileSecretVolumes(options.Secrets)
+			if err != nil {
+				return spec, err
+			}
+			spec.Volumes = append(spec.Volumes, secretVolumes...)
+		}
 	}
 
 	return spec, nil
@@ -191,19 +201,6 @@ func podContainer(step *types.Step, config *config, podName, goos string, option
 
 	container.Env = mapToEnvVars(step.Environment)
 
-	if len(options.Secrets) > 0 {
-		if config.NativeSecretsAllowFromStep {
-			env, envVars, err := containerEnvSecrets(options.Secrets)
-			if err != nil {
-				return container, err
-			}
-			container.EnvFrom = env
-			copy(container.Env, envVars)
-		} else {
-			log.Debug().Msg("Secret names were defined in backend options, but secret access is disallowed by instance configuration.")
-		}
-	}
-
 	container.Resources, err = resourceRequirements(options.Resources)
 	if err != nil {
 		return container, err
@@ -214,10 +211,29 @@ func podContainer(step *types.Step, config *config, podName, goos string, option
 		return container, err
 	}
 
+	if len(options.Secrets) > 0 {
+		if config.NativeSecretsAllowFromStep {
+			env, envVars, err := containerEnvSecrets(options.Secrets)
+			if err != nil {
+				return container, err
+			}
+			container.EnvFrom = env
+			container.Env = append(container.Env, envVars...)
+
+			mounts, err := fileSecretMounts(options.Secrets)
+			if err != nil {
+				return container, err
+			}
+			container.VolumeMounts = append(container.VolumeMounts, mounts...)
+		} else {
+			log.Debug().Msg("Secret names were defined in backend options, but secret access is disallowed by instance configuration.")
+		}
+	}
+
 	return container, nil
 }
 
-func volumes(volumes []string) ([]v1.Volume, error) {
+func pvcVolumes(volumes []string) ([]v1.Volume, error) {
 	var vols []v1.Volume
 
 	for _, v := range volumes {
@@ -225,13 +241,13 @@ func volumes(volumes []string) ([]v1.Volume, error) {
 		if err != nil {
 			return nil, err
 		}
-		vols = append(vols, volume(volumeName))
+		vols = append(vols, pvcVolume(volumeName))
 	}
 
 	return vols, nil
 }
 
-func volume(name string) v1.Volume {
+func pvcVolume(name string) v1.Volume {
 	pvcSource := v1.PersistentVolumeClaimVolumeSource{
 		ClaimName: name,
 		ReadOnly:  false,
@@ -244,6 +260,43 @@ func volume(name string) v1.Volume {
 	}
 }
 
+func fileSecretVolumes(secrets []SecretRef) ([]v1.Volume, error) {
+	var vols []v1.Volume
+
+	for _, secret := range secrets {
+		if secret.isFile() {
+			vol, err := fileSecretVolume(secret)
+			if err != nil {
+				return nil, err
+			}
+			vols = append(vols, vol)
+
+		}
+	}
+
+	return vols, nil
+}
+
+func fileSecretVolume(secret SecretRef) (v1.Volume, error) {
+	var err error
+	volume := v1.Volume{}
+
+	if !secret.isFile() {
+		return volume, fmt.Errorf("secret '%s' is not file reference", secret.Name)
+	}
+
+	volume.Name, err = volumeName(secret.Name)
+	if err != nil {
+		return volume, err
+	}
+
+	volume.Secret = &v1.SecretVolumeSource{
+		SecretName: secret.Name,
+	}
+
+	return volume, nil
+}
+
 func volumeMounts(volumes []string) ([]v1.VolumeMount, error) {
 	var mounts []v1.VolumeMount
 
@@ -253,16 +306,30 @@ func volumeMounts(volumes []string) ([]v1.VolumeMount, error) {
 			return nil, err
 		}
 
-		mount := volumeMount(volumeName, volumeMountPath(v))
+		mount := volumeMount(volumeName, volumeMountPath(v), "")
 		mounts = append(mounts, mount)
 	}
 	return mounts, nil
 }
 
-func volumeMount(name, path string) v1.VolumeMount {
+func fileSecretMounts(secrets []SecretRef) ([]v1.VolumeMount, error) {
+	var mounts []v1.VolumeMount
+
+	for _, secret := range secrets {
+		if secret.isFile() {
+			mount := volumeMount(secret.Name, volumeMountPath(secret.Target.File), secret.Key)
+			mounts = append(mounts, mount)
+		}
+	}
+
+	return mounts, nil
+}
+
+func volumeMount(name, path, subPath string) v1.VolumeMount {
 	return v1.VolumeMount{
 		Name:      name,
 		MountPath: path,
+		SubPath:   subPath,
 	}
 }
 
@@ -285,8 +352,10 @@ func containerEnvSecrets(secrets []SecretRef) ([]v1.EnvFromSource, []v1.EnvVar, 
 	if len(secrets) == 0 {
 		return nil, nil, nil
 	}
-	simpleSecretRefs := make([]v1.EnvFromSource, len(secrets))
-	advancedSecretRefs := make([]v1.EnvVar, len(secrets))
+
+	var simpleSecretRefs []v1.EnvFromSource
+	var advancedSecretRefs []v1.EnvVar
+
 	for _, secret := range secrets {
 		if secret.isSimple() {
 			simpleSecret, err := envFromSimpleSecret(secret)
@@ -294,7 +363,8 @@ func containerEnvSecrets(secrets []SecretRef) ([]v1.EnvFromSource, []v1.EnvVar, 
 				return nil, nil, err
 			}
 			simpleSecretRefs = append(simpleSecretRefs, simpleSecret)
-		} else {
+		}
+		if secret.isAdvanced() {
 			advancedSecret, err := envVarFromAdvancedSecret(secret)
 			if err != nil {
 				return nil, nil, err
