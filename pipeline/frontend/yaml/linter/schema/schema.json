@@ -818,25 +818,6 @@
         "type": "string"
       }
     },
-    "step_kubernetes_secret_list": {
-      "description": "The secrets section defines a list of references to the native Kubernetes secrets",
-      "oneOf": [
-        {
-          "type": "object",
-          "additionalProperties": {
-            "$ref": "#/definitions/step_kubernetes_secret"
-          },
-          "minProperties": 1
-        },
-        {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/step_kubernetes_secret"
-          },
-          "minLength": 1
-        }
-      ]
-    },
     "step_kubernetes_secret": {
       "description": "A reference to a native Kubernetes secret",
       "type": "object",

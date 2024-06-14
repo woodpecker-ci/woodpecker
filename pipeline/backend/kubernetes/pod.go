@@ -254,17 +254,16 @@ func volumeMounts(volumes []string) ([]v1.VolumeMount, error) {
 			return nil, err
 		}
 
-		mount := volumeMount(volumeName, volumeMountPath(v), "")
+		mount := volumeMount(volumeName, volumeMountPath(v))
 		mounts = append(mounts, mount)
 	}
 	return mounts, nil
 }
 
-func volumeMount(name, path, subPath string) v1.VolumeMount {
+func volumeMount(name, path string) v1.VolumeMount {
 	return v1.VolumeMount{
 		Name:      name,
 		MountPath: path,
-		SubPath:   subPath,
 	}
 }
 
