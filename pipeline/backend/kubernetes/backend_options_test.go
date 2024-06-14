@@ -45,7 +45,20 @@ func Test_parseBackendOptions(t *testing.T) {
 					},
 				},
 				"secrets": []map[string]any{
-					{"name": "test-secret"},
+					{
+						"name": "aws",
+						"key":  "access-key",
+						"target": map[string]any{
+							"env": "AWS_SECRET_ACCESS_KEY",
+						},
+					},
+					{
+						"name": "reg-cred",
+						"key":  ".dockerconfigjson",
+						"target": map[string]any{
+							"file": "~/.docker/config.json",
+						},
+					},
 				},
 			},
 		},
@@ -77,7 +90,16 @@ func Test_parseBackendOptions(t *testing.T) {
 			},
 		},
 		Secrets: []SecretRef{
-			{Name: "test-secret"},
+			{
+				Name:   "aws",
+				Key:    "access-key",
+				Target: SecretTarget{Env: "AWS_SECRET_ACCESS_KEY"},
+			},
+			{
+				Name:   "reg-cred",
+				Key:    ".dockerconfigjson",
+				Target: SecretTarget{File: "~/.docker/config.json"},
+			},
 		},
 	}, got)
 }

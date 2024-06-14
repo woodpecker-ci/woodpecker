@@ -68,7 +68,15 @@ type SecProfileType string
 
 // SecretRef defines Kubernetes secret reference.
 type SecretRef struct {
-	Name string `mapstructure:"name"`
+	Name   string       `mapstructure:"name"`
+	Key    string       `mapstructure:"key"`
+	Target SecretTarget `mapstructure:"target"`
+}
+
+// SecretTarget defines secret mount target.
+type SecretTarget struct {
+	Env  string `mapstructure:"env"`
+	File string `mapstructure:"file"`
 }
 
 const (
