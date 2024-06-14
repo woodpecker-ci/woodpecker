@@ -540,7 +540,8 @@ func TestSecrets(t *testing.T) {
 						{
 							"name": "reg-cred",
 							"mountPath": "~/.docker/config.json",
-							"subPath": ".dockerconfigjson"
+							"subPath": ".dockerconfigjson",
+							"readOnly": true
 						}
 					]
 				}

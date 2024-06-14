@@ -38,17 +38,23 @@ const (
 func mkPod(step *types.Step, config *config, podName, goos string, options BackendOptions) (*v1.Pod, error) {
 	var err error
 
+	nsp := newNativeSecretsProceesor(config, options.Secrets)
+	err = nsp.process()
+	if err != nil {
+		return nil, err
+	}
+
 	meta, err := podMeta(step, config, options, podName)
 	if err != nil {
 		return nil, err
 	}
 
-	spec, err := podSpec(step, config, options)
+	spec, err := podSpec(step, config, options, nsp)
 	if err != nil {
 		return nil, err
 	}
 
-	container, err := podContainer(step, config, podName, goos, options)
+	container, err := podContainer(step, podName, goos, options, nsp)
 	if err != nil {
 		return nil, err
 	}
@@ -146,13 +152,12 @@ func podAnnotations(config *config, options BackendOptions, podName string) map[
 	return annotations
 }
 
-func podSpec(step *types.Step, config *config, options BackendOptions) (v1.PodSpec, error) {
+func podSpec(step *types.Step, config *config, options BackendOptions, nsp nativeSecretsProceesor) (v1.PodSpec, error) {
 	var err error
 	spec := v1.PodSpec{
 		RestartPolicy:      v1.RestartPolicyNever,
 		RuntimeClassName:   options.RuntimeClassName,
 		ServiceAccountName: options.ServiceAccountName,
-		ImagePullSecrets:   imagePullSecretsReferences(config.ImagePullSecretNames),
 		HostAliases:        hostAliases(step.ExtraHosts),
 		NodeSelector:       nodeSelector(options.NodeSelector, config.PodNodeSelector, step.Environment["CI_SYSTEM_PLATFORM"]),
 		Tolerations:        tolerations(options.Tolerations),
@@ -163,20 +168,15 @@ func podSpec(step *types.Step, config *config, options BackendOptions) (v1.PodSp
 		return spec, err
 	}
 
-	if len(options.Secrets) > 0 {
-		if config.NativeSecretsAllowFromStep {
-			secretVolumes, err := fileSecretVolumes(options.Secrets)
-			if err != nil {
-				return spec, err
-			}
-			spec.Volumes = append(spec.Volumes, secretVolumes...)
-		}
-	}
+	log.Trace().Msgf("using the image pull secrets: %v", config.ImagePullSecretNames)
+	spec.ImagePullSecrets = secretsReferences(config.ImagePullSecretNames)
+
+	spec.Volumes = append(spec.Volumes, nsp.volumes...)
 
 	return spec, nil
 }
 
-func podContainer(step *types.Step, config *config, podName, goos string, options BackendOptions) (v1.Container, error) {
+func podContainer(step *types.Step, podName, goos string, options BackendOptions, nsp nativeSecretsProceesor) (v1.Container, error) {
 	var err error
 	container := v1.Container{
 		Name:            podName,
@@ -211,24 +211,9 @@ func podContainer(step *types.Step, config *config, podName, goos string, option
 		return container, err
 	}
 
-	if len(options.Secrets) > 0 {
-		if config.NativeSecretsAllowFromStep {
-			env, envVars, err := containerEnvSecrets(options.Secrets)
-			if err != nil {
-				return container, err
-			}
-			container.EnvFrom = env
-			container.Env = append(container.Env, envVars...)
-
-			mounts, err := fileSecretMounts(options.Secrets)
-			if err != nil {
-				return container, err
-			}
-			container.VolumeMounts = append(container.VolumeMounts, mounts...)
-		} else {
-			log.Debug().Msg("Secret names were defined in backend options, but secret access is disallowed by instance configuration.")
-		}
-	}
+	container.EnvFrom = append(container.EnvFrom, nsp.envFromSources...)
+	container.Env = append(container.Env, nsp.envVars...)
+	container.VolumeMounts = append(container.VolumeMounts, nsp.mounts...)
 
 	return container, nil
 }
@@ -260,43 +245,6 @@ func pvcVolume(name string) v1.Volume {
 	}
 }
 
-func fileSecretVolumes(secrets []SecretRef) ([]v1.Volume, error) {
-	var vols []v1.Volume
-
-	for _, secret := range secrets {
-		if secret.isFile() {
-			vol, err := fileSecretVolume(secret)
-			if err != nil {
-				return nil, err
-			}
-			vols = append(vols, vol)
-
-		}
-	}
-
-	return vols, nil
-}
-
-func fileSecretVolume(secret SecretRef) (v1.Volume, error) {
-	var err error
-	volume := v1.Volume{}
-
-	if !secret.isFile() {
-		return volume, fmt.Errorf("secret '%s' is not file reference", secret.Name)
-	}
-
-	volume.Name, err = volumeName(secret.Name)
-	if err != nil {
-		return volume, err
-	}
-
-	volume.Secret = &v1.SecretVolumeSource{
-		SecretName: secret.Name,
-	}
-
-	return volume, nil
-}
-
 func volumeMounts(volumes []string) ([]v1.VolumeMount, error) {
 	var mounts []v1.VolumeMount
 
@@ -309,19 +257,6 @@ func volumeMounts(volumes []string) ([]v1.VolumeMount, error) {
 		mount := volumeMount(volumeName, volumeMountPath(v), "")
 		mounts = append(mounts, mount)
 	}
-	return mounts, nil
-}
-
-func fileSecretMounts(secrets []SecretRef) ([]v1.VolumeMount, error) {
-	var mounts []v1.VolumeMount
-
-	for _, secret := range secrets {
-		if secret.isFile() {
-			mount := volumeMount(secret.Name, volumeMountPath(secret.Target.File), secret.Key)
-			mounts = append(mounts, mount)
-		}
-	}
-
 	return mounts, nil
 }
 
@@ -348,72 +283,6 @@ func containerPort(port types.Port) v1.ContainerPort {
 	}
 }
 
-func containerEnvSecrets(secrets []SecretRef) ([]v1.EnvFromSource, []v1.EnvVar, error) {
-	if len(secrets) == 0 {
-		return nil, nil, nil
-	}
-
-	var simpleSecretRefs []v1.EnvFromSource
-	var advancedSecretRefs []v1.EnvVar
-
-	for _, secret := range secrets {
-		if secret.isSimple() {
-			simpleSecret, err := envFromSimpleSecret(secret)
-			if err != nil {
-				return nil, nil, err
-			}
-			simpleSecretRefs = append(simpleSecretRefs, simpleSecret)
-		}
-		if secret.isAdvanced() {
-			advancedSecret, err := envVarFromAdvancedSecret(secret)
-			if err != nil {
-				return nil, nil, err
-			}
-			advancedSecretRefs = append(advancedSecretRefs, advancedSecret)
-		}
-	}
-	return simpleSecretRefs, advancedSecretRefs, nil
-}
-
-func envFromSimpleSecret(secret SecretRef) (v1.EnvFromSource, error) {
-	env := v1.EnvFromSource{}
-
-	if !secret.isSimple() {
-		return env, fmt.Errorf("secret '%s' is not simple reference", secret.Name)
-	}
-
-	env = v1.EnvFromSource{
-		SecretRef: &v1.SecretEnvSource{
-			LocalObjectReference: secretReference(secret.Name),
-		},
-	}
-
-	return env, nil
-}
-
-func envVarFromAdvancedSecret(secret SecretRef) (v1.EnvVar, error) {
-	envVar := v1.EnvVar{}
-
-	if !secret.isAdvanced() {
-		return envVar, fmt.Errorf("secret '%s' is not advanced reference", secret.Name)
-	}
-
-	envVar.ValueFrom = &v1.EnvVarSource{
-		SecretKeyRef: &v1.SecretKeySelector{
-			LocalObjectReference: secretReference(secret.Name),
-			Key:                  secret.Key,
-		},
-	}
-
-	if len(secret.Target.Env) > 0 {
-		envVar.Name = secret.Target.Env
-	} else {
-		envVar.Name = strings.ToUpper(secret.Key)
-	}
-
-	return envVar, nil
-}
-
 // Here is the service IPs (placed in /etc/hosts in the Pod).
 func hostAliases(extraHosts []types.HostAlias) []v1.HostAlias {
 	var hostAliases []v1.HostAlias
@@ -428,22 +297,6 @@ func hostAlias(extraHost types.HostAlias) v1.HostAlias {
 	return v1.HostAlias{
 		IP:        extraHost.IP,
 		Hostnames: []string{extraHost.Name},
-	}
-}
-
-func imagePullSecretsReferences(imagePullSecretNames []string) []v1.LocalObjectReference {
-	log.Trace().Msgf("using the image pull secrets: %v", imagePullSecretNames)
-
-	secretReferences := make([]v1.LocalObjectReference, len(imagePullSecretNames))
-	for i, imagePullSecretName := range imagePullSecretNames {
-		secretReferences[i] = secretReference(imagePullSecretName)
-	}
-	return secretReferences
-}
-
-func secretReference(secretName string) v1.LocalObjectReference {
-	return v1.LocalObjectReference{
-		Name: secretName,
 	}
 }
 
