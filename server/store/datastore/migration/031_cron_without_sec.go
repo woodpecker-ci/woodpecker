@@ -37,7 +37,12 @@ var cronWithoutSec = xormigrate.Migration{
 		}
 
 		for _, c := range crons {
-			c.Schedule = strings.SplitN(c.Schedule, " ", 2)[1]
+			if strings.HasPrefix(strings.TrimSpace(c.Schedule), "@") {
+				// something like "@daily"
+				continue
+			}
+
+			c.Schedule = strings.SplitN(strings.TrimSpace(c.Schedule), " ", 2)[1]
 			if _, err := sess.Update(c); err != nil {
 				return err
 			}
