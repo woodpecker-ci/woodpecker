@@ -193,7 +193,12 @@ func podContainer(step *types.Step, config *config, podName, goos string, option
 
 	if len(options.Secrets) > 0 {
 		if config.NativeSecretsAllowFromStep {
-			container.EnvFrom = containerSecrets(options.Secrets)
+			env, envVars, err := containerEnvSecrets(options.Secrets)
+			if err != nil {
+				return container, err
+			}
+			container.EnvFrom = env
+			copy(container.Env, envVars)
 		} else {
 			log.Debug().Msg("Secret names were defined in backend options, but secret access is disallowed by instance configuration.")
 		}
@@ -276,23 +281,67 @@ func containerPort(port types.Port) v1.ContainerPort {
 	}
 }
 
-func containerSecrets(secrets []SecretRef) []v1.EnvFromSource {
+func containerEnvSecrets(secrets []SecretRef) ([]v1.EnvFromSource, []v1.EnvVar, error) {
 	if len(secrets) == 0 {
-		return nil
+		return nil, nil, nil
 	}
-	secretRefs := make([]v1.EnvFromSource, len(secrets))
-	for i, secretName := range secrets {
-		secretRefs[i] = containerSecret(secretName)
+	simpleSecretRefs := make([]v1.EnvFromSource, len(secrets))
+	advancedSecretRefs := make([]v1.EnvVar, len(secrets))
+	for _, secret := range secrets {
+		if secret.isSimple() {
+			simpleSecret, err := envFromSimpleSecret(secret)
+			if err != nil {
+				return nil, nil, err
+			}
+			simpleSecretRefs = append(simpleSecretRefs, simpleSecret)
+		} else {
+			advancedSecret, err := envVarFromAdvancedSecret(secret)
+			if err != nil {
+				return nil, nil, err
+			}
+			advancedSecretRefs = append(advancedSecretRefs, advancedSecret)
+		}
 	}
-	return secretRefs
+	return simpleSecretRefs, advancedSecretRefs, nil
 }
 
-func containerSecret(secret SecretRef) v1.EnvFromSource {
-	return v1.EnvFromSource{
+func envFromSimpleSecret(secret SecretRef) (v1.EnvFromSource, error) {
+	env := v1.EnvFromSource{}
+
+	if !secret.isSimple() {
+		return env, fmt.Errorf("secret '%s' is not simple reference", secret.Name)
+	}
+
+	env = v1.EnvFromSource{
 		SecretRef: &v1.SecretEnvSource{
 			LocalObjectReference: secretReference(secret.Name),
 		},
 	}
+
+	return env, nil
+}
+
+func envVarFromAdvancedSecret(secret SecretRef) (v1.EnvVar, error) {
+	envVar := v1.EnvVar{}
+
+	if !secret.isAdvanced() {
+		return envVar, fmt.Errorf("secret '%s' is not advanced reference", secret.Name)
+	}
+
+	envVar.ValueFrom = &v1.EnvVarSource{
+		SecretKeyRef: &v1.SecretKeySelector{
+			LocalObjectReference: secretReference(secret.Name),
+			Key:                  secret.Key,
+		},
+	}
+
+	if len(secret.Target.Env) > 0 {
+		envVar.Name = secret.Target.Env
+	} else {
+		envVar.Name = strings.ToUpper(secret.Key)
+	}
+
+	return envVar, nil
 }
 
 // Here is the service IPs (placed in /etc/hosts in the Pod).

@@ -92,3 +92,15 @@ func parseBackendOptions(step *backend.Step) (BackendOptions, error) {
 	err := mapstructure.Decode(step.BackendOptions[EngineName], &result)
 	return result, err
 }
+
+func (sr SecretRef) isSimple() bool {
+	return len(sr.Key) == 0 && len(sr.Target.Env) == 0 && !sr.isFile()
+}
+
+func (sr SecretRef) isAdvanced() bool {
+	return (len(sr.Key) > 0 || len(sr.Target.Env) > 0) && !sr.isFile()
+}
+
+func (sr SecretRef) isFile() bool {
+	return len(sr.Target.File) > 0
+}
