@@ -22,11 +22,24 @@ import (
 )
 
 func EnvVarSubst(yaml string, environ map[string]string) (string, error) {
-	return envsubst.Eval(yaml, func(name string) string {
-		env := environ[name]
+	var missingEnvs []string
+	out, err := envsubst.Eval(yaml, func(name string) string {
+		env, has := environ[name]
+		if !has {
+			missingEnvs = append(missingEnvs, name)
+		}
 		if strings.Contains(env, "\n") {
 			env = fmt.Sprintf("%q", env)
 		}
 		return env
 	})
+	if err != nil {
+		return "", err
+	}
+
+	if len(missingEnvs) > 0 {
+		return "", fmt.Errorf("missing env vars for substitution: %s", strings.Join(missingEnvs, ", "))
+	}
+
+	return out, nil
 }

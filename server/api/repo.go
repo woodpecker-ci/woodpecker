@@ -78,7 +78,7 @@ func PostRepo(c *gin.Context) {
 		return
 	}
 	if !from.Perm.Admin {
-		c.String(http.StatusForbidden, "User has to be a admin of this repository")
+		c.String(http.StatusForbidden, "User has to be an admin of this repository")
 		return
 	}
 	if !server.Config.Permissions.OwnersAllowlist.IsAllowed(from) {
