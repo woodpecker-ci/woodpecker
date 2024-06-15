@@ -22,15 +22,14 @@ import (
 )
 
 func TestNativeSecretsEnabled(t *testing.T) {
-	nsp := newNativeSecretsProceesor(&config{
+	nsp := newNativeSecretsProcessor(&config{
 		NativeSecretsAllowFromStep: true,
 	}, nil)
 	assert.Equal(t, true, nsp.isEnabled())
-	assert.Equal(t, false, nsp.isDisabled())
 }
 
 func TestNativeSecretsDisabled(t *testing.T) {
-	nsp := newNativeSecretsProceesor(&config{
+	nsp := newNativeSecretsProcessor(&config{
 		NativeSecretsAllowFromStep: false,
 	}, []SecretRef{
 		{
@@ -52,7 +51,6 @@ func TestNativeSecretsDisabled(t *testing.T) {
 		},
 	})
 	assert.Equal(t, false, nsp.isEnabled())
-	assert.Equal(t, true, nsp.isDisabled())
 
 	err := nsp.process()
 	assert.NoError(t, err)
@@ -63,7 +61,7 @@ func TestNativeSecretsDisabled(t *testing.T) {
 }
 
 func TestSimpleSecret(t *testing.T) {
-	nsp := newNativeSecretsProceesor(&config{
+	nsp := newNativeSecretsProcessor(&config{
 		NativeSecretsAllowFromStep: true,
 	}, []SecretRef{
 		{
@@ -86,7 +84,7 @@ func TestSimpleSecret(t *testing.T) {
 }
 
 func TestSecretWithKey(t *testing.T) {
-	nsp := newNativeSecretsProceesor(&config{
+	nsp := newNativeSecretsProcessor(&config{
 		NativeSecretsAllowFromStep: true,
 	}, []SecretRef{
 		{
@@ -114,7 +112,7 @@ func TestSecretWithKey(t *testing.T) {
 }
 
 func TestSecretWithKeyMapping(t *testing.T) {
-	nsp := newNativeSecretsProceesor(&config{
+	nsp := newNativeSecretsProcessor(&config{
 		NativeSecretsAllowFromStep: true,
 	}, []SecretRef{
 		{
@@ -145,7 +143,7 @@ func TestSecretWithKeyMapping(t *testing.T) {
 }
 
 func TestFileSecret(t *testing.T) {
-	nsp := newNativeSecretsProceesor(&config{
+	nsp := newNativeSecretsProcessor(&config{
 		NativeSecretsAllowFromStep: true,
 	}, []SecretRef{
 		{

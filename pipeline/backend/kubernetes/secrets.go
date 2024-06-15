@@ -22,7 +22,7 @@ import (
 	v1 "k8s.io/api/core/v1"
 )
 
-type nativeSecretsProceesor struct {
+type nativeSecretsProcessor struct {
 	config         *config
 	secrets        []SecretRef
 	envFromSources []v1.EnvFromSource
@@ -31,24 +31,20 @@ type nativeSecretsProceesor struct {
 	mounts         []v1.VolumeMount
 }
 
-func newNativeSecretsProceesor(config *config, secrets []SecretRef) nativeSecretsProceesor {
-	return nativeSecretsProceesor{
+func newNativeSecretsProcessor(config *config, secrets []SecretRef) nativeSecretsProcessor {
+	return nativeSecretsProcessor{
 		config:  config,
 		secrets: secrets,
 	}
 }
 
-func (nsp *nativeSecretsProceesor) isEnabled() bool {
+func (nsp *nativeSecretsProcessor) isEnabled() bool {
 	return nsp.config.NativeSecretsAllowFromStep
 }
 
-func (nsp *nativeSecretsProceesor) isDisabled() bool {
-	return !nsp.isEnabled()
-}
-
-func (nsp *nativeSecretsProceesor) process() error {
+func (nsp *nativeSecretsProcessor) process() error {
 	if len(nsp.secrets) > 0 {
-		if nsp.isDisabled() {
+		if !nsp.isEnabled() {
 			log.Debug().Msg("Secret names were defined in backend options, but secret access is disallowed by instance configuration.")
 			return nil
 		}
@@ -82,7 +78,6 @@ func (nsp *nativeSecretsProceesor) process() error {
 			if err != nil {
 				return err
 			}
-
 			nsp.mounts = append(nsp.mounts, mount)
 		}
 	}

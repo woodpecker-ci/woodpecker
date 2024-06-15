@@ -38,7 +38,7 @@ const (
 func mkPod(step *types.Step, config *config, podName, goos string, options BackendOptions) (*v1.Pod, error) {
 	var err error
 
-	nsp := newNativeSecretsProceesor(config, options.Secrets)
+	nsp := newNativeSecretsProcessor(config, options.Secrets)
 	err = nsp.process()
 	if err != nil {
 		return nil, err
@@ -152,7 +152,7 @@ func podAnnotations(config *config, options BackendOptions, podName string) map[
 	return annotations
 }
 
-func podSpec(step *types.Step, config *config, options BackendOptions, nsp nativeSecretsProceesor) (v1.PodSpec, error) {
+func podSpec(step *types.Step, config *config, options BackendOptions, nsp nativeSecretsProcessor) (v1.PodSpec, error) {
 	var err error
 	spec := v1.PodSpec{
 		RestartPolicy:      v1.RestartPolicyNever,
@@ -176,7 +176,7 @@ func podSpec(step *types.Step, config *config, options BackendOptions, nsp nativ
 	return spec, nil
 }
 
-func podContainer(step *types.Step, podName, goos string, options BackendOptions, nsp nativeSecretsProceesor) (v1.Container, error) {
+func podContainer(step *types.Step, podName, goos string, options BackendOptions, nsp nativeSecretsProcessor) (v1.Container, error) {
 	var err error
 	container := v1.Container{
 		Name:            podName,
