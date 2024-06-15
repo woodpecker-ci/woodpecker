@@ -147,11 +147,22 @@ func execWithAxis(c *cli.Context, file, repoPath string, axis matrix.Axis) error
 	if err != nil {
 		return err
 	}
+	var missingEnvs []string
 	confStr, err := tmpl.Execute(func(name string) string {
-		return environ[name]
+		env, has := environ[name]
+		if !has {
+			missingEnvs = append(missingEnvs, name)
+		}
+		if strings.Contains(env, "\n") {
+			env = fmt.Sprintf("%q", env)
+		}
+		return env
 	})
 	if err != nil {
 		return err
+	}
+	if len(missingEnvs) > 0 {
+		return fmt.Errorf("missing env vars for substitution: %s", strings.Join(missingEnvs, ", "))
 	}
 
 	conf, err := yaml.ParseString(confStr)

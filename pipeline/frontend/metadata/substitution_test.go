@@ -45,3 +45,12 @@ func TestEnvVarSubst(t *testing.T) {
 		})
 	}
 }
+
+func TestEnvVarSubstMissing(t *testing.T) {
+	result, err := EnvVarSubst(`steps:
+		step1:
+			image: ${HELLO_IMAGE}`, map[string]string{})
+	assert.Error(t, err)
+	assert.Empty(t, result)
+	assert.Equal(t, "missing env vars for substitution: HELLO_IMAGE", err.Error())
+}
