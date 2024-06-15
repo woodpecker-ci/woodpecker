@@ -32,12 +32,6 @@ type nativeSecretsProceesor struct {
 }
 
 func newNativeSecretsProceesor(config *config, secrets []SecretRef) nativeSecretsProceesor {
-	if len(secrets) > 0 {
-		if !config.NativeSecretsAllowFromStep {
-			log.Debug().Msg("Secret names were defined in backend options, but secret access is disallowed by instance configuration.")
-		}
-	}
-
 	return nativeSecretsProceesor{
 		config:  config,
 		secrets: secrets,
