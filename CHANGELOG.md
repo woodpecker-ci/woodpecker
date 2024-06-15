@@ -1,5 +1,16 @@
 # Changelog
 
+## [2.6.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.6.1) - 2024-06-15
+
+### ❤️ Thanks to all contributors! ❤️
+
+@tongjicoder
+
+### 📚 Documentation
+
+- chore(deps): update dependency marked to v13 [[#3792](https://github.com/woodpecker-ci/woodpecker/pull/3792)]
+- chore: fix some comments [[#3788](https://github.com/woodpecker-ci/woodpecker/pull/3788)]
+
 ## [2.6.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.6.0) - 2024-06-13
 
 ### ❤️ Thanks to all contributors! ❤️
