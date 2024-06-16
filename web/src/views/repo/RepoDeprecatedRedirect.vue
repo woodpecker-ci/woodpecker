@@ -8,14 +8,13 @@ import { useRoute, useRouter } from 'vue-router';
 
 import useApiClient from '~/compositions/useApiClient';
 
-const apiClient = useApiClient();
-const route = useRoute();
-const router = useRouter();
-
 const props = defineProps<{
   repoOwner: string;
   repoName: string;
 }>();
+const apiClient = useApiClient();
+const route = useRoute();
+const router = useRouter();
 
 onMounted(async () => {
   const repo = await apiClient.lookupRepo(props.repoOwner, props.repoName);

@@ -241,6 +241,17 @@ var flags = append([]cli.Flag{
 		Usage:   "Disable version check in admin web ui.",
 		Name:    "skip-version-check",
 	},
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_LOG_STORE"},
+		Name:    "log-store",
+		Usage:   "log store to use ('database' or 'file')",
+		Value:   "database",
+	},
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_LOG_STORE_FILE_PATH"},
+		Name:    "log-store-file-path",
+		Usage:   "directory used for file based log storage",
+	},
 	//
 	// backend options for pipeline compiler
 	//

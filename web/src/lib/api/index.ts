@@ -1,5 +1,5 @@
 import ApiClient, { encodeQueryString } from './client';
-import {
+import type {
   Agent,
   Cron,
   Org,
@@ -18,27 +18,27 @@ import {
   User,
 } from './types';
 
-type RepoListOptions = {
+interface RepoListOptions {
   all?: boolean;
-};
+}
 
 // PipelineOptions is the data for creating a new pipeline
-type PipelineOptions = {
+interface PipelineOptions {
   branch: string;
   variables: Record<string, string>;
-};
+}
 
-type DeploymentOptions = {
+interface DeploymentOptions {
   id: string;
   environment: string;
   task: string;
   variables: Record<string, string>;
-};
+}
 
-type PaginationOptions = {
+interface PaginationOptions {
   page?: number;
   perPage?: number;
-};
+}
 
 export default class WoodpeckerClient extends ApiClient {
   getRepoList(opts?: RepoListOptions): Promise<Repo[]> {
@@ -336,10 +336,10 @@ export default class WoodpeckerClient extends ApiClient {
   }
 
   repairAllRepos(): Promise<unknown> {
-    return this._post(`/api/repos/repair`) as Promise<unknown>;
+    return this._post(`/api/repos/repair`);
   }
 
-  // eslint-disable-next-line promise/prefer-await-to-callbacks
+  // TODO enable again with eslint-plugin-promise eslint-disable-next-line promise/prefer-await-to-callbacks
   on(callback: (data: { pipeline?: Pipeline; repo?: Repo }) => void): EventSource {
     return this._subscribe('/api/stream/events', callback, {
       reconnect: true,
@@ -350,7 +350,7 @@ export default class WoodpeckerClient extends ApiClient {
     repoId: number,
     pipeline: number,
     step: number,
-    // eslint-disable-next-line promise/prefer-await-to-callbacks
+    // TODO enable again with eslint-plugin-promise eslint-disable-next-line promise/prefer-await-to-callbacks
     callback: (data: PipelineLog) => void,
   ): EventSource {
     return this._subscribe(`/api/stream/logs/${repoId}/${pipeline}/${step}`, callback, {

@@ -8,7 +8,7 @@ We plan to release a new version every four weeks and will release the next vers
 
 ## Stable version
 
-The **stable** releases are official versions following [semver](https://semver.org/). By default, only the latest stable release will receive bug fixes. Once a new major or minor release is available, previous minor versions might receive security patches, but wont be updated with bug fixes anymore (so called backporting) by default.
+The **stable** releases are official versions following [semver](https://semver.org/). By default, only the latest stable release will receive bug fixes. Once a new major or minor release is available, previous minor versions might receive security patches, but won't be updated with bug fixes anymore (so called backporting) by default.
 
 ### Breaking changes
 
@@ -33,6 +33,7 @@ Here you can find documentation for previous versions of Woodpecker.
 
 |         |            |                                                                                       |
 | ------- | ---------- | ------------------------------------------------------------------------------------- |
+| 2.5.0   | 2024-06-01 | [Documentation](https://github.com/woodpecker-ci/woodpecker/tree/v2.5.0/docs/docs/)   |
 | 2.4.1   | 2024-03-20 | [Documentation](https://github.com/woodpecker-ci/woodpecker/tree/v2.4.1/docs/docs/)   |
 | 2.4.0   | 2024-03-19 | [Documentation](https://github.com/woodpecker-ci/woodpecker/tree/v2.4.0/docs/docs/)   |
 | 2.3.0   | 2024-01-31 | [Documentation](https://github.com/woodpecker-ci/woodpecker/tree/v2.3.0/docs/docs/)   |
