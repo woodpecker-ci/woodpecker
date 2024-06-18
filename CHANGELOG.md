@@ -1,13 +1,14 @@
 # Changelog
 
-## [2.6.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.6.1) - 2024-06-17
+## [2.6.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.6.1) - 2024-06-18
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@dvjn, @tongjicoder
+@dvjn, @qwerty287, @tongjicoder
 
 ### 📚 Documentation
 
+- Add openSUSE package [[#3800](https://github.com/woodpecker-ci/woodpecker/pull/3800)]
 - chore(deps): update docs npm deps non-major [[#3798](https://github.com/woodpecker-ci/woodpecker/pull/3798)]
 - Add "Docker Tags" Plugin [[#3796](https://github.com/woodpecker-ci/woodpecker/pull/3796)]
 - chore(deps): update dependency marked to v13 [[#3792](https://github.com/woodpecker-ci/woodpecker/pull/3792)]
