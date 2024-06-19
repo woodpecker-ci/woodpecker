@@ -29,7 +29,8 @@ import (
 )
 
 var Config = struct {
-	Services struct {
+	JWTSecret string
+	Services  struct {
 		Pubsub     *pubsub.Publisher
 		Queue      queue.Queue
 		Logs       logging.Log

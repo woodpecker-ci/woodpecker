@@ -17,6 +17,9 @@ package main
 
 import (
 	"context"
+	"crypto/rand"
+	"encoding/base64"
+	"errors"
 	"fmt"
 	"os"
 	"time"
@@ -34,6 +37,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server/services/log/file"
 	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 	"go.woodpecker-ci.org/woodpecker/v2/server/store/datastore"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store/types"
 )
 
 func setupStore(c *cli.Context) (store.Store, error) {
@@ -164,4 +168,34 @@ func setupLogStore(c *cli.Context, s store.Store) (logService.Service, error) {
 	default:
 		return s, nil
 	}
+}
+
+const jwtSecretID = "jwt-secret"
+
+func randToken() (string, error) {
+	b := make([]byte, 32)
+	if _, err := rand.Read(b); err != nil {
+		return "", err
+	}
+	return base64.StdEncoding.EncodeToString(b), nil
+}
+
+func setupJWTSecret(_store store.Store) (string, error) {
+	jwtSecret, err := _store.ServerConfigGet(jwtSecretID)
+	if errors.Is(err, types.RecordNotExist) {
+		jwtSecret, err := randToken()
+		if err != nil {
+			return "", err
+		}
+		err = _store.ServerConfigSet(jwtSecretID, jwtSecret)
+		if err != nil {
+			return "", err
+		}
+		log.Debug().Msg("created jwt secret")
+		return jwtSecret, nil
+	} else if err != nil {
+		return "", err
+	}
+
+	return jwtSecret, nil
 }

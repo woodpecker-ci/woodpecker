@@ -25,11 +25,12 @@ import (
 type SecretFunc func(*Token) (string, error)
 
 const (
-	UserToken  = "user"
-	SessToken  = "sess"
-	HookToken  = "hook"
-	CsrfToken  = "csrf"
-	AgentToken = "agent"
+	UserToken       = "user"
+	SessToken       = "sess"
+	HookToken       = "hook"
+	CsrfToken       = "csrf"
+	AgentToken      = "agent"
+	OAuthStateToken = "oauth-state"
 )
 
 // SignerAlgo id default algorithm used to sign JWT tokens.

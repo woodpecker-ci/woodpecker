@@ -265,6 +265,13 @@ func run(c *cli.Context) error {
 }
 
 func setupEvilGlobals(c *cli.Context, s store.Store) error {
+	// secrets
+	var err error
+	server.Config.JWTSecret, err = setupJWTSecret(s)
+	if err != nil {
+		return fmt.Errorf("could not setup jwt secret: %w", err)
+	}
+
 	// services
 	server.Config.Services.Queue = setupQueue(c, s)
 	server.Config.Services.Logs = logging.New()
