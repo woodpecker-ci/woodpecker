@@ -54,7 +54,6 @@ const config: Config = {
               to: '/api',
               label: 'API',
             },
-            { to: 'cookbook', label: 'Cookbook' },
           ],
         },
         {
