@@ -1,4 +1,4 @@
-# Getting started
+# Your first pipeline
 
 Let's get started and create your first pipeline.
 
@@ -6,7 +6,7 @@ Let's get started and create your first pipeline.
 
 To activate your repository in Woodpecker navigate to the repository list and `New repository`. You will see a list of repositories from your forge (GitHub, Gitlab, ...) which can be activated with a simple click.
 
-![repository list](repo-list.png)
+![new repository list](repo-new.png)
 
 To enable a repository in Woodpecker you must have `Admin` rights on that repository, so that Woodpecker can add something
 that is called a webhook (Woodpecker needs it to know about actions like pushes, pull requests, tags, etc.).
@@ -70,7 +70,7 @@ If you push this file to your repository now, Woodpecker will already execute yo
 
 You can check the pipeline execution in the Woodpecker UI by navigating to the `Pipelines` section of your repository.
 
-TODO image
+![pipeline view](./pipeline.png)
 
 As you probably noticed, there is another step in called `clone` which is executed before your steps. This step clones your repository into a folder called `workspace` which is available throughout all steps.
 
@@ -99,8 +99,10 @@ If you want to get a Slack notification after your pipeline has finished, you ca
 
 To configure a plugin you can use the `settings` section.
 
-Sometime you need to provide secrets to the plugin. You can do this by using the `from_secret` key. The secret must be defined in the Woodpecker UI. You can find more information about secrets [here](./40-secrets/40-overview.md).
+Sometime you need to provide secrets to the plugin. You can do this by using the `from_secret` key. The secret must be defined in the Woodpecker UI. You can find more information about secrets [here](./40-secrets.md).
 
 Similar to the `when` section at the top of the file which is for the complete workflow, you can use the `when` section for each step to define when a step should be executed.
 
 Learn more about [plugins](./51-plugins/51-overview.md).
+
+As you now have a basic understanding of how to create a pipeline, you can dive deeper into the [workflow syntax](./20-workflow-syntax.md) and [plugins](./51-plugins/51-overview.md).
