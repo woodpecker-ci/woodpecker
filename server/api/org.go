@@ -28,6 +28,26 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 )
 
+// GetOrgs
+//
+//	@Summary		List organizations
+//	@Description	Returns all registered orgs in the system. Requires admin rights.
+//	@Router			/orgs [get]
+//	@Produce		json
+//	@Success		200	{array}	Org
+//	@Tags			Orgs
+//	@Param			Authorization	header	string	true	"Insert your personal access token"				default(Bearer <personal access token>)
+//	@Param			page			query	int		false	"for response pagination, page offset number"	default(1)
+//	@Param			perPage			query	int		false	"for response pagination, max items per page"	default(50)
+func GetOrgs(c *gin.Context) {
+	orgs, err := store.FromContext(c).OrgList(session.Pagination(c))
+	if err != nil {
+		c.String(http.StatusInternalServerError, "Error getting user list. %s", err)
+		return
+	}
+	c.JSON(http.StatusOK, orgs)
+}
+
 // GetOrg
 //
 //	@Summary	Get an organization
@@ -166,4 +186,32 @@ func LookupOrg(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, org)
+}
+
+// DeleteOrg
+//
+//	@Summary		Delete an organization
+//	@Description	Deletes the given org. Requires admin rights.
+//	@Router			/orgs/{id} [delete]
+//	@Produce		plain
+//	@Success		204
+//	@Tags			Orgs
+//	@Param			Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param			id				path	string	true	"the org's id"
+func DeleteOrg(c *gin.Context) {
+	_store := store.FromContext(c)
+
+	orgID, err := strconv.ParseInt(c.Param("org_id"), 10, 64)
+	if err != nil {
+		c.String(http.StatusBadRequest, "Error parsing org id. %s", err)
+		return
+	}
+
+	err = _store.OrgDelete(orgID)
+	if err != nil {
+		handleDBError(c, err)
+		return
+	}
+
+	c.Status(http.StatusNoContent)
 }

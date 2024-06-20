@@ -383,7 +383,7 @@ func (c *Gitea) Activate(ctx context.Context, u *model.User, r *model.Repo, link
 	hook := gitea.CreateHookOption{
 		Type:   gitea.HookTypeGitea,
 		Config: config,
-		Events: []string{"push", "create", "pull_request"},
+		Events: []string{"push", "create", "pull_request", "release"},
 		Active: true,
 	}
 

@@ -597,6 +597,197 @@ const docTemplate = `{
                 }
             }
         },
+        "/forges": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Forges"
+                ],
+                "summary": "List forges",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cpersonal access token\u003e",
+                        "description": "Insert your personal access token",
+                        "name": "Authorization",
+                        "in": "header"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "for response pagination, page offset number",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 50,
+                        "description": "for response pagination, max items per page",
+                        "name": "perPage",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Forge"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Creates a new forge with a random token",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Forges"
+                ],
+                "summary": "Create a new forge",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cpersonal access token\u003e",
+                        "description": "Insert your personal access token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "the forge's data (only 'name' and 'no_schedule' are read)",
+                        "name": "forge",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Forge"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Forge"
+                        }
+                    }
+                }
+            }
+        },
+        "/forges/{forgeId}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Forges"
+                ],
+                "summary": "Get a forge",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cpersonal access token\u003e",
+                        "description": "Insert your personal access token",
+                        "name": "Authorization",
+                        "in": "header"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "the forge's id",
+                        "name": "forgeId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Forge"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "produces": [
+                    "text/plain"
+                ],
+                "tags": [
+                    "Forges"
+                ],
+                "summary": "Delete a forge",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cpersonal access token\u003e",
+                        "description": "Insert your personal access token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "the forge's id",
+                        "name": "forgeId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            },
+            "patch": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Forges"
+                ],
+                "summary": "Update a forge",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cpersonal access token\u003e",
+                        "description": "Insert your personal access token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "the forge's id",
+                        "name": "forgeId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "the forge's data",
+                        "name": "forgeData",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Forge"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Forge"
+                        }
+                    }
+                }
+            }
+        },
         "/healthz": {
             "get": {
                 "description": "If everything is fine, just a 204 will be returned, a 500 signals server state is unhealthy.",
@@ -3902,6 +4093,34 @@ const docTemplate = `{
                 }
             }
         },
+        "Forge": {
+            "type": "object",
+            "properties": {
+                "additional_options": {
+                    "type": "object",
+                    "additionalProperties": {}
+                },
+                "client": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "oauth_host": {
+                    "description": "public url for oauth if different from url",
+                    "type": "string"
+                },
+                "skip_verify": {
+                    "type": "boolean"
+                },
+                "type": {
+                    "$ref": "#/definitions/model.ForgeType"
+                },
+                "url": {
+                    "type": "string"
+                }
+            }
+        },
         "LogEntry": {
             "type": "object",
             "properties": {
@@ -4522,6 +4741,27 @@ const docTemplate = `{
                 "EventDeploy",
                 "EventCron",
                 "EventManual"
+            ]
+        },
+        "model.ForgeType": {
+            "type": "string",
+            "enum": [
+                "github",
+                "gitlab",
+                "gitea",
+                "forgejo",
+                "bitbucket",
+                "bitbucket-dc",
+                "addon"
+            ],
+            "x-enum-varnames": [
+                "ForgeTypeGithub",
+                "ForgeTypeGitlab",
+                "ForgeTypeGitea",
+                "ForgeTypeForgejo",
+                "ForgeTypeBitbucket",
+                "ForgeTypeBitbucketDatacenter",
+                "ForgeTypeAddon"
             ]
         },
         "model.Workflow": {
