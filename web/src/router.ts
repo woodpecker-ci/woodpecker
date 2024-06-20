@@ -160,7 +160,7 @@ const routes: RouteRecordRaw[] = [
     props: true,
   },
   {
-    path: `${rootPath}/do-login`,
+    path: `${rootPath}/login`,
     name: 'login',
     component: (): Component => import('~/views/Login.vue'),
     meta: { blank: true },

@@ -41,7 +41,7 @@ type Token struct {
 	claims jwt.MapClaims
 }
 
-func parse(raw string, fn SecretFunc) (*Token, error) {
+func Parse(raw string, fn SecretFunc) (*Token, error) {
 	token := &Token{
 		claims: jwt.MapClaims{},
 	}
@@ -64,19 +64,19 @@ func ParseRequest(r *http.Request, fn SecretFunc) (*Token, error) {
 		if _, err := fmt.Sscanf(token, "Bearer %s", &bearer); err != nil {
 			return nil, err
 		}
-		return parse(bearer, fn)
+		return Parse(bearer, fn)
 	}
 
 	token = r.Header.Get("X-Gitlab-Token")
 	if len(token) != 0 {
-		return parse(token, fn)
+		return Parse(token, fn)
 	}
 
 	// then we attempt to get the token from the
 	// access_token url query parameter
 	token = r.FormValue("access_token")
 	if len(token) != 0 {
-		return parse(token, fn)
+		return Parse(token, fn)
 	}
 
 	// and finally we attempt to get the token from
@@ -85,7 +85,7 @@ func ParseRequest(r *http.Request, fn SecretFunc) (*Token, error) {
 	if err != nil {
 		return nil, err
 	}
-	return parse(cookie.Value, fn)
+	return Parse(cookie.Value, fn)
 }
 
 func CheckCsrf(r *http.Request, fn SecretFunc) error {
@@ -98,7 +98,7 @@ func CheckCsrf(r *http.Request, fn SecretFunc) error {
 
 	// parse the raw CSRF token value and validate
 	raw := r.Header.Get("X-CSRF-TOKEN")
-	_, err := parse(raw, fn)
+	_, err := Parse(raw, fn)
 	return err
 }
 
