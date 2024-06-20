@@ -19,6 +19,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"net/url"
 	"strconv"
 	"time"
 
@@ -41,10 +42,17 @@ func HandleAuth(c *gin.Context) {
 	c.Writer.Header().Del("Content-Type")
 
 	// redirect when getting oauth error from forge to login page
-	if err := c.Request.FormValue("error"); err != "" {
-		errorURI := c.Request.FormValue("error_uri")
-		errorDescription := c.Request.FormValue("error_description")
-		c.Redirect(http.StatusSeeOther, fmt.Sprintf("%s/login?error=oauth_error&error_msg=%s&error_uri=%s&error_description=%s", server.Config.Server.RootPath, err, errorURI, errorDescription))
+	if errMsg := c.Request.FormValue("error"); errMsg != "" {
+		query := url.Values{}
+		query.Set("error", "oauth_error")
+		query.Set("error_msg", errMsg)
+		if errorDescription := c.Request.FormValue("error_description"); errorDescription != "" {
+			query.Set("error_description", errorDescription)
+		}
+		if errorURI := c.Request.FormValue("error_uri"); errorURI != "" {
+			query.Set("error_uri", errorURI)
+		}
+		c.Redirect(http.StatusSeeOther, fmt.Sprintf("%s/login?%s", server.Config.Server.RootPath, query.Encode()))
 		return
 	}
 
