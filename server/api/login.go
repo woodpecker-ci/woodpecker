@@ -17,6 +17,7 @@ package api
 import (
 	"encoding/base32"
 	"errors"
+	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -41,7 +42,9 @@ func HandleAuth(c *gin.Context) {
 
 	// redirect when getting oauth error from forge to login page
 	if err := c.Request.FormValue("error"); err != "" {
-		c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error="+err)
+		errorURI := c.Request.FormValue("error_uri")
+		errorDescription := c.Request.FormValue("error_description")
+		c.Redirect(http.StatusSeeOther, fmt.Sprintf("%s/login?error=oauth_error&error_msg=%s&error_uri=%s&error_description=%s", server.Config.Server.RootPath, err, errorURI, errorDescription))
 		return
 	}
 
@@ -54,11 +57,8 @@ func HandleAuth(c *gin.Context) {
 	forgeID := int64(1) // TODO: replace with forge id when multiple forges are supported
 
 	userFromForge, redirectURL, err := _forge.Login(c, &forge_types.OAuthRequest{
-		Error:            c.Request.FormValue("error"),
-		ErrorURI:         c.Request.FormValue("error_uri"),
-		ErrorDescription: c.Request.FormValue("error_description"),
-		Code:             c.Request.FormValue("code"),
-		State:            "woodpecker", // TODO: use proper state
+		Code:  c.Request.FormValue("code"),
+		State: "woodpecker", // TODO: use proper state
 	})
 	if err != nil {
 		log.Error().Err(err).Msg("cannot authenticate user")

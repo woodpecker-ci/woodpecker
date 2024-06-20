@@ -99,14 +99,6 @@ func (c *client) Login(ctx context.Context, req *forge_types.OAuthRequest) (*mod
 	// TODO: Use pkce flow (https://oauth.net/2/pkce/) ...
 	redirectURL := config.AuthCodeURL(req.State)
 
-	if req.Error != "" {
-		return nil, redirectURL, &forge_types.AuthError{
-			Err:         req.Error,
-			Description: req.ErrorDescription,
-			URI:         req.ErrorURI,
-		}
-	}
-
 	if len(req.Code) == 0 {
 		return nil, redirectURL, nil
 	}
