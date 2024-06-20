@@ -1,10 +1,14 @@
 # Changelog
 
-## [2.6.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.6.1) - 2024-06-20
+## [2.7.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.7.0) - 2024-06-20
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@dvjn, @qwerty287, @tongjicoder
+@anbraten, @dvjn, @qwerty287, @tongjicoder
+
+### ✨ Features
+
+- Add api for forges [[#3733](https://github.com/woodpecker-ci/woodpecker/pull/3733)]
 
 ### 📚 Documentation
 
