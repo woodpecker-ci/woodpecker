@@ -27,17 +27,28 @@ const (
 )
 
 type Forge struct {
-	ID                int64          `xorm:"pk autoincr 'id'"`
-	Type              ForgeType      `xorm:"VARCHAR(250) 'type'"`
-	URL               string         `xorm:"VARCHAR(500) 'url'"`
-	Client            string         `xorm:"VARCHAR(250) 'client'"`
-	ClientSecret      string         `xorm:"VARCHAR(250) 'client_secret'"`
-	SkipVerify        bool           `xorm:"bool 'skip_verify'"`
-	OAuthHost         string         `xorm:"VARCHAR(250) 'oauth_host'"` // public url for oauth if different from url
-	AdditionalOptions map[string]any `xorm:"json 'additional_options'"`
-}
+	ID                int64          `json:"id"                           xorm:"pk autoincr 'id'"`
+	Type              ForgeType      `json:"type"                         xorm:"VARCHAR(250)"`
+	URL               string         `json:"url"                          xorm:"VARCHAR(500) 'url'"`
+	Client            string         `json:"client,omitempty"             xorm:"VARCHAR(250)"`
+	ClientSecret      string         `json:"-"                            xorm:"VARCHAR(250)"` // do not expose client secret
+	SkipVerify        bool           `json:"skip_verify,omitempty"        xorm:"bool"`
+	OAuthHost         string         `json:"oauth_host,omitempty"         xorm:"VARCHAR(250) 'oauth_host'"` // public url for oauth if different from url
+	AdditionalOptions map[string]any `json:"additional_options,omitempty" xorm:"json"`
+} //	@name Forge
 
 // TableName returns the database table name for xorm.
 func (Forge) TableName() string {
 	return "forges"
+}
+
+// PublicCopy returns a copy of the forge without sensitive information and technical details.
+func (f *Forge) PublicCopy() *Forge {
+	forge := &Forge{
+		ID:   f.ID,
+		Type: f.Type,
+		URL:  f.URL,
+	}
+
+	return forge
 }
