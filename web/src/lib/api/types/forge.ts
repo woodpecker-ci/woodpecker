@@ -1,6 +1,6 @@
 export type ForgeType = 'github' | 'gitlab' | 'gitea' | 'bitbucket' | 'bitbucket-dc' | 'addon';
 
-export type Forge = {
+export interface Forge {
   id: number;
   type: ForgeType;
   url: string;
@@ -9,4 +9,4 @@ export type Forge = {
   skip_verify?: boolean;
   oauth_host?: string;
   additional_options?: Record<string, unknown>;
-};
+}
