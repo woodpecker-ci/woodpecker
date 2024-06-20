@@ -28,11 +28,16 @@ const (
 
 type Forge struct {
 	ID                int64          `xorm:"pk autoincr 'id'"`
-	Type              ForgeType      `xorm:"VARCHAR(250)"`
+	Type              ForgeType      `xorm:"VARCHAR(250) 'type'"`
 	URL               string         `xorm:"VARCHAR(500) 'url'"`
-	Client            string         `xorm:"VARCHAR(250)"`
-	ClientSecret      string         `xorm:"VARCHAR(250)"`
-	SkipVerify        bool           `xorm:"bool"`
+	Client            string         `xorm:"VARCHAR(250) 'client'"`
+	ClientSecret      string         `xorm:"VARCHAR(250) 'client_secret'"`
+	SkipVerify        bool           `xorm:"bool 'skip_verify'"`
 	OAuthHost         string         `xorm:"VARCHAR(250) 'oauth_host'"` // public url for oauth if different from url
-	AdditionalOptions map[string]any `xorm:"json"`
+	AdditionalOptions map[string]any `xorm:"json 'additional_options'"`
+}
+
+// TableName returns the database table name for xorm.
+func (Forge) TableName() string {
+	return "forges"
 }
