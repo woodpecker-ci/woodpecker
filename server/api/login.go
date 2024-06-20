@@ -303,7 +303,7 @@ func GetLogout(c *gin.Context) {
 func DeprecatedGetLoginToken(c *gin.Context) {
 	_store := store.FromContext(c)
 
-	_forge, err := server.Config.Services.Manager.ForgeByID(1) // TODO: get selected forge from auth request
+	_forge, err := server.Config.Services.Manager.ForgeByID(1)
 	if err != nil {
 		log.Error().Err(err).Msg("Cannot get main forge")
 		c.AbortWithStatus(http.StatusInternalServerError)
