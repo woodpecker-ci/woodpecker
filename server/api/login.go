@@ -78,6 +78,17 @@ func HandleAuth(c *gin.Context) {
 		return
 	}
 
+	// if organization filter is enabled, we need to check if the user is a member of one
+	// of the configured organizations
+	if server.Config.Permissions.Orgs.IsConfigured {
+		teams, terr := _forge.Teams(c, userFromForge)
+		if terr != nil || !server.Config.Permissions.Orgs.IsMember(teams) {
+			log.Error().Err(terr).Msgf("cannot verify team membership for %s", userFromForge.Login)
+			c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=org_access_denied")
+			return
+		}
+	}
+
 	// get the user from the database
 	user, err := _store.GetUserRemoteID(userFromForge.ForgeRemoteID, userFromForge.Login)
 	if err != nil && !errors.Is(err, types.RecordNotExist) {
@@ -85,23 +96,12 @@ func HandleAuth(c *gin.Context) {
 		return
 	}
 
-	if errors.Is(err, types.RecordNotExist) {
+	if user == nil || errors.Is(err, types.RecordNotExist) {
 		// if self-registration is disabled we should return a not authorized error
 		if !server.Config.Permissions.Open && !server.Config.Permissions.Admins.IsAdmin(userFromForge) {
 			log.Error().Msgf("cannot register %s. registration closed", userFromForge.Login)
 			c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=registration_closed")
 			return
-		}
-
-		// if self-registration is enabled for allowed organizations we need to
-		// check the user's organization membership.
-		if server.Config.Permissions.Orgs.IsConfigured {
-			teams, terr := _forge.Teams(c, userFromForge)
-			if terr != nil || !server.Config.Permissions.Orgs.IsMember(teams) {
-				log.Error().Err(terr).Msgf("cannot verify team membership for %s.", user.Login)
-				c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=org_access_denied")
-				return
-			}
 		}
 
 		// create the user account
@@ -125,7 +125,7 @@ func HandleAuth(c *gin.Context) {
 			return
 		}
 
-		// if another user already have activated repos on behave of that user,
+		// if another user already has activated repos on behave of that user,
 		// the user was stored as org. now we adopt it to the user.
 		if org, err := _store.OrgFindByName(user.Login); err == nil && org != nil {
 			org.IsUser = true
@@ -173,17 +173,6 @@ func HandleAuth(c *gin.Context) {
 	user.ForgeRemoteID = userFromForge.ForgeRemoteID
 	user.Login = userFromForge.Login
 	user.Admin = user.Admin || server.Config.Permissions.Admins.IsAdmin(userFromForge)
-
-	// if self-registration is enabled for allowed organizations we need to
-	// check the user's organization membership.
-	if server.Config.Permissions.Orgs.IsConfigured {
-		teams, terr := _forge.Teams(c, user)
-		if terr != nil || !server.Config.Permissions.Orgs.IsMember(teams) {
-			log.Error().Err(terr).Msgf("cannot verify team membership for %s", user.Login)
-			c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=org_access_denied")
-			return
-		}
-	}
 
 	if err := _store.UpdateUser(user); err != nil {
 		log.Error().Err(err).Msgf("cannot update %s", user.Login)
