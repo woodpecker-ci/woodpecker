@@ -99,7 +99,7 @@ func HandleAuth(c *gin.Context) {
 			teams, terr := _forge.Teams(c, userFromForge)
 			if terr != nil || !server.Config.Permissions.Orgs.IsMember(teams) {
 				log.Error().Err(terr).Msgf("cannot verify team membership for %s.", user.Login)
-				c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=org_access_denied")
+				c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=access_denied")
 				return
 			}
 		}
@@ -180,7 +180,7 @@ func HandleAuth(c *gin.Context) {
 		teams, terr := _forge.Teams(c, user)
 		if terr != nil || !server.Config.Permissions.Orgs.IsMember(teams) {
 			log.Error().Err(terr).Msgf("cannot verify team membership for %s", user.Login)
-			c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=org_access_denied")
+			c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=access_denied")
 			return
 		}
 	}

@@ -41,7 +41,7 @@ const authErrorMessages = {
   oauth_error: i18n.t('oauth_error'),
   internal_error: i18n.t('internal_error'),
   registration_closed: i18n.t('auth_registration_closed'),
-  org_access_denied: i18n.t('auth_org_access_denied'),
+  access_denied: i18n.t('auth_access_denied'),
 };
 
 onMounted(async () => {
