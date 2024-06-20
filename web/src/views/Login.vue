@@ -40,8 +40,8 @@ function doLogin() {
 const authErrorMessages = {
   oauth_error: i18n.t('oauth_error'),
   internal_error: i18n.t('internal_error'),
-  registration_closed: i18n.t('auth_registration_closed'),
-  access_denied: i18n.t('auth_access_denied'),
+  registration_closed: i18n.t('registration_closed'),
+  access_denied: i18n.t('access_denied'),
 };
 
 onMounted(async () => {
