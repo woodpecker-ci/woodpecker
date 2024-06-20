@@ -36,6 +36,14 @@ import (
 )
 
 func HandleAuth(c *gin.Context) {
+	// oauth flow
+	// 1. send user to forge: https://forge/oauth/authorize?client_id=...&redirect_uri=...&state=...
+	// 2. user comes back from forge
+	//   2a) with ?error=...: redirect to login?error=... (UI route. It will handle error and show message)
+	//   2b) with ?code=...:  check state and continue to exchange code for token, following the flow
+	// 3. exchange code for token: POST https://forge/oauth/token?client_id=...&client_secret=...&code
+	// 4. redirect user to UI /
+
 	_store := store.FromContext(c)
 	forgeID := int64(1) // TODO: replace with forge id when multiple forges are supported
 	_forge, err := server.Config.Services.Manager.ForgeMain()
@@ -43,13 +51,6 @@ func HandleAuth(c *gin.Context) {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
-
-	// oauth flow
-	// 1. send user to forge: https://forge/oauth/authorize?client_id=...&redirect_uri=...&state=...
-	// 2. user comes back from forge
-	//   2a) with ?error=...: redirect to login?error=... (UI route. It will handle error and show message)
-	//   2b) with ?code=...:  check state and continue to exchange code for token
-	// 3. exchange code for token: POST https://forge/oauth/token?client_id=...&client_secret=...&code
 
 	// when dealing with redirects, we may need to adjust the content type. I
 	// cannot, however, remember why, so need to revisit this line.
