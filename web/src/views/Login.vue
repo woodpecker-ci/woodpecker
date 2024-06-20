@@ -11,9 +11,9 @@
       <div class="flex justify-center items-center flex-col md:w-2/5 min-h-48 gap-4 text-center">
         <h1 class="text-xl text-wp-text-100">{{ $t('welcome') }}</h1>
         <div class="flex flex-col gap-2">
-          <Button v-for="forge in forges" :key="forge.id" @click="doLogin(forge.id)">{{
-            $t('login_with', { forge: getHostFromUrl(forge) })
-          }}</Button>
+          <Button v-for="forge in forges" :key="forge.id" @click="doLogin(forge.id)">
+            {{ $t('login_with', { forge: getHostFromUrl(forge) }) }}
+          </Button>
         </div>
       </div>
     </div>
@@ -28,32 +28,18 @@ import { useRoute, useRouter } from 'vue-router';
 import WoodpeckerLogo from '~/assets/logo.svg?component';
 import Button from '~/components/atomic/Button.vue';
 import Error from '~/components/atomic/Error.vue';
+import useApiClient from '~/compositions/useApiClient';
 import useAuthentication from '~/compositions/useAuthentication';
+import type { Forge } from '~/lib/api/types';
 
 const route = useRoute();
 const router = useRouter();
 const authentication = useAuthentication();
 const errorMessage = ref<string>();
 const i18n = useI18n();
+const apiClient = useApiClient();
 
-type Forge = {
-  id: number;
-  url: string;
-  type: string;
-};
-
-const forges = ref<Forge[]>([
-  {
-    id: 1,
-    url: 'http://localhost:3000/',
-    type: 'gitea',
-  },
-  {
-    id: 2,
-    url: '',
-    type: 'github',
-  },
-]);
+const forges = ref<Forge[]>([]);
 
 function getHostFromUrl(forge: Forge) {
   if (!forge.url) {
@@ -81,6 +67,8 @@ onMounted(async () => {
     await router.replace({ name: 'home' });
     return;
   }
+
+  forges.value = (await apiClient.getForges()) ?? [];
 
   if (route.query.error) {
     const error = route.query.error as keyof typeof authErrorMessages;
