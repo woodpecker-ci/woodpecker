@@ -1,6 +1,6 @@
 <template>
   <main class="flex flex-col w-full h-full justify-center items-center">
-    <Error v-if="errorMessage" text-only :text="errorMessage" class="w-full md:w-3xl" />
+    <Error v-if="errorMessage" :text="errorMessage" class="w-full md:w-3xl" />
 
     <div
       class="flex flex-col w-full overflow-hidden bg-wp-background-100 shadow border border-wp-background-400 dark:bg-wp-background-200 md:m-8 md:rounded-md md:flex-row md:w-3xl md:h-sm"
@@ -53,6 +53,18 @@ onMounted(async () => {
   if (route.query.error) {
     const error = route.query.error as keyof typeof authErrorMessages;
     errorMessage.value = authErrorMessages[error] ?? i18n.t('unknown_auth_error', { error });
+
+    if (route.query.error_msg) {
+      errorMessage.value += `\n${route.query.error_msg}`;
+    }
+
+    if (route.query.error_description) {
+      errorMessage.value += `\n${route.query.error_description}`;
+    }
+
+    if (route.query.error_uri) {
+      errorMessage.value += `\n${route.query.error_uri}`;
+    }
   }
 });
 </script>
