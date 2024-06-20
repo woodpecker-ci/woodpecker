@@ -59,14 +59,12 @@ func (nsp *nativeSecretsProcessor) process() error {
 				return err
 			}
 			nsp.envFromSources = append(nsp.envFromSources, simpleSecret)
-
 		} else if secret.isAdvanced() {
 			advancedSecret, err := secret.toEnvVar()
 			if err != nil {
 				return err
 			}
 			nsp.envVars = append(nsp.envVars, advancedSecret)
-
 		} else if secret.isFile() {
 			volume, err := secret.toVolume()
 			if err != nil {
