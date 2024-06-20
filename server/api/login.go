@@ -28,7 +28,6 @@ import (
 	"github.com/rs/zerolog/log"
 
 	"go.woodpecker-ci.org/woodpecker/v2/server"
-	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
 	forge_types "go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 	"go.woodpecker-ci.org/woodpecker/v2/server/store"
@@ -57,16 +56,18 @@ func HandleAuth(c *gin.Context) {
 	}
 
 	_store := store.FromContext(c)
-	forgeID := int64(1) // TODO: replace with forge id when multiple forges are supported
 	_forge, err := server.Config.Services.Manager.ForgeMain()
 	if err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
+	forgeID := int64(1) // TODO: replace with forge id when multiple forges are supported
 
 	userFromForge, redirectURL, err := _forge.Login(c, &forge_types.OAuthRequest{
-		Code:  c.Request.FormValue("code"),
-		State: "woodpecker", // TODO: use proper state
+		Error:            c.Request.FormValue("error"),
+		ErrorURI:         c.Request.FormValue("error_uri"),
+		ErrorDescription: c.Request.FormValue("error_description"),
+		Code:             c.Request.FormValue("code"),
 	})
 	if err != nil {
 		log.Error().Err(err).Msg("cannot authenticate user")
@@ -79,17 +80,6 @@ func HandleAuth(c *gin.Context) {
 		return
 	}
 
-	// if organization filter is enabled, we need to check if the user is a member of one
-	// of the configured organizations
-	if server.Config.Permissions.Orgs.IsConfigured {
-		teams, terr := _forge.Teams(c, userFromForge)
-		if terr != nil || !server.Config.Permissions.Orgs.IsMember(teams) {
-			log.Error().Err(terr).Msgf("cannot verify team membership for %s", userFromForge.Login)
-			c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=org_access_denied")
-			return
-		}
-	}
-
 	// get the user from the database
 	user, err := _store.GetUserRemoteID(userFromForge.ForgeRemoteID, userFromForge.Login)
 	if err != nil && !errors.Is(err, types.RecordNotExist) {
@@ -97,12 +87,23 @@ func HandleAuth(c *gin.Context) {
 		return
 	}
 
-	if user == nil || errors.Is(err, types.RecordNotExist) {
+	if errors.Is(err, types.RecordNotExist) {
 		// if self-registration is disabled we should return a not authorized error
 		if !server.Config.Permissions.Open && !server.Config.Permissions.Admins.IsAdmin(userFromForge) {
 			log.Error().Msgf("cannot register %s. registration closed", userFromForge.Login)
 			c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=registration_closed")
 			return
+		}
+
+		// if self-registration is enabled for allowed organizations we need to
+		// check the user's organization membership.
+		if server.Config.Permissions.Orgs.IsConfigured {
+			teams, terr := _forge.Teams(c, userFromForge)
+			if terr != nil || !server.Config.Permissions.Orgs.IsMember(teams) {
+				log.Error().Err(terr).Msgf("cannot verify team membership for %s.", user.Login)
+				c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=org_access_denied")
+				return
+			}
 		}
 
 		// create the user account
@@ -125,26 +126,21 @@ func HandleAuth(c *gin.Context) {
 			c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=internal_error")
 			return
 		}
-	}
 
-	// create or set the user's organization if it isn't linked yet
-	if user.OrgID == 0 {
-		// check if an org with the same name exists already and assign it to the user if it does
+		// if another user already have activated repos on behave of that user,
+		// the user was stored as org. now we adopt it to the user.
 		if org, err := _store.OrgFindByName(user.Login); err == nil && org != nil {
 			org.IsUser = true
 			user.OrgID = org.ID
-
 			if err := _store.OrgUpdate(org); err != nil {
 				log.Error().Err(err).Msgf("on user creation, could not mark org as user")
 			}
-		}
-		if err != nil && !errors.Is(err, types.RecordNotExist) {
-			_ = c.AbortWithError(http.StatusInternalServerError, err)
-			return
-		}
-
-		if user.OrgID == 0 {
-			org := &model.Org{
+		} else {
+			if err != nil && !errors.Is(err, types.RecordNotExist) {
+				_ = c.AbortWithError(http.StatusInternalServerError, err)
+				return
+			}
+			org = &model.Org{
 				Name:    user.Login,
 				IsUser:  true,
 				Private: false,
@@ -155,19 +151,19 @@ func HandleAuth(c *gin.Context) {
 			}
 			user.OrgID = org.ID
 		}
-	} else {
-		// update org name if necessary
+	}
+
+	// update org name
+	if user.Login != userFromForge.Login {
 		org, err := _store.OrgGet(user.OrgID)
 		if err != nil {
 			log.Error().Err(err).Msgf("cannot get org %s", user.Login)
 			c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=internal_error")
 			return
 		}
-		if org != nil && org.Name != user.Login {
-			org.Name = user.Login
-			if err := _store.OrgUpdate(org); err != nil {
-				log.Error().Err(err).Msgf("on user creation, could not mark org as user")
-			}
+		org.Name = user.Login
+		if err := _store.OrgUpdate(org); err != nil {
+			log.Error().Err(err).Msgf("on user creation, could not mark org as user")
 		}
 	}
 
@@ -179,6 +175,17 @@ func HandleAuth(c *gin.Context) {
 	user.ForgeRemoteID = userFromForge.ForgeRemoteID
 	user.Login = userFromForge.Login
 	user.Admin = user.Admin || server.Config.Permissions.Admins.IsAdmin(userFromForge)
+
+	// if self-registration is enabled for allowed organizations we need to
+	// check the user's organization membership.
+	if server.Config.Permissions.Orgs.IsConfigured {
+		teams, terr := _forge.Teams(c, user)
+		if terr != nil || !server.Config.Permissions.Orgs.IsMember(teams) {
+			log.Error().Err(terr).Msgf("cannot verify team membership for %s", user.Login)
+			c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=org_access_denied")
+			return
+		}
+	}
 
 	if err := _store.UpdateUser(user); err != nil {
 		log.Error().Err(err).Msgf("cannot update %s", user.Login)
@@ -196,14 +203,6 @@ func HandleAuth(c *gin.Context) {
 		return
 	}
 
-	updateRepoPermissions(c, user, _store, _forge)
-
-	httputil.SetCookie(c.Writer, c.Request, "user_sess", tokenString)
-
-	c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/")
-}
-
-func updateRepoPermissions(c *gin.Context, user *model.User, _store store.Store, _forge forge.Forge) {
 	repos, _ := _forge.Repos(c, user)
 	for _, forgeRepo := range repos {
 		dbRepo, err := _store.GetRepoForgeID(forgeRepo.ForgeRemoteID)
@@ -232,6 +231,10 @@ func updateRepoPermissions(c *gin.Context, user *model.User, _store store.Store,
 			return
 		}
 	}
+
+	httputil.SetCookie(c.Writer, c.Request, "user_sess", tokenString)
+
+	c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/")
 }
 
 func GetLogout(c *gin.Context) {
