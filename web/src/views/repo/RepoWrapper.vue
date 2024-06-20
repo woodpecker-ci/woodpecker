@@ -57,6 +57,7 @@ import Tab from '~/components/layout/scaffold/Tab.vue';
 import useApiClient from '~/compositions/useApiClient';
 import useAuthentication from '~/compositions/useAuthentication';
 import useConfig from '~/compositions/useConfig';
+import { useForgeStore } from '~/compositions/useForgeStore';
 import useNotifications from '~/compositions/useNotifications';
 import type { Forge, RepoPermissions } from '~/lib/api/types';
 import { usePipelineStore } from '~/store/pipelines';
@@ -77,6 +78,7 @@ const route = useRoute();
 const router = useRouter();
 const i18n = useI18n();
 const config = useConfig();
+const forgeStore = useForgeStore();
 
 const repo = repoStore.getRepo(repositoryId);
 const repoPermissions = ref<RepoPermissions>();
@@ -111,7 +113,7 @@ async function loadRepo() {
   await pipelineStore.loadRepoPipelines(repositoryId.value);
 
   if (repo.value) {
-    forge.value = await apiClient.getForge(repo.value?.forge_id);
+    forge.value = (await forgeStore.getForge(repo.value?.forge_id)).value;
   }
 }
 
