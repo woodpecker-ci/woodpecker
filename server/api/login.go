@@ -37,21 +37,24 @@ import (
 )
 
 func getForgeID(c *gin.Context) (int64, error) {
-	_forgeID := c.Query("forge_id")
+	var _forgeID string
 
-	// check if forge id is in the state token
-	if _forgeID == "" {
-		state := c.Query("state")
-		if state != "" {
-			stateToken, err := token.Parse(state, func(t *token.Token) (string, error) {
-				return "1234567890", nil // TODO: set some secret
-			})
-			if err != nil {
-				return 0, err
-			}
-
-			_forgeID = stateToken.Get("forge-id")
+	// if a state token is provided it has to be correct
+	state := c.Query("state")
+	if state != "" {
+		stateToken, err := token.Parse(state, func(t *token.Token) (string, error) {
+			return server.Config.Server.JWTSecret, nil // TODO: set some secret
+		})
+		if err != nil {
+			return 0, err
 		}
+
+		_forgeID = stateToken.Get("forge-id")
+	}
+
+	// use forge_id query parameter
+	if _forgeID == "" {
+		_forgeID = c.Query("forge_id")
 	}
 
 	// fallback to default forge
@@ -63,6 +66,7 @@ func getForgeID(c *gin.Context) (int64, error) {
 	if err != nil {
 		return 0, err
 	}
+
 	return forgeID, nil
 }
 
@@ -98,20 +102,27 @@ func HandleAuth(c *gin.Context) {
 		return
 	}
 
-	jwtSecret := "1234567890" // TODO set some secret
-	exp := time.Now().Add(time.Minute * 15).Unix()
-	stateToken := token.New(token.OAuthStateToken)
-	stateToken.Set("forge-id", strconv.FormatInt(forgeID, 10))
-	state, err := stateToken.SignExpires(jwtSecret, exp)
-	if err != nil {
-		log.Error().Err(err).Msg("cannot create state token")
-		c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=internal_error")
-		return
+	code := c.Request.FormValue("code")
+	state := ""
+	isCallback := code != ""
+
+	// only generate a state token if not a callback
+	if !isCallback {
+		jwtSecret := server.Config.Server.JWTSecret
+		exp := time.Now().Add(time.Minute * 15).Unix()
+		stateToken := token.New(token.OAuthStateToken)
+		stateToken.Set("forge-id", strconv.FormatInt(forgeID, 10))
+		state, err = stateToken.SignExpires(jwtSecret, exp)
+		if err != nil {
+			log.Error().Err(err).Msg("cannot create state token")
+			c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=internal_error")
+			return
+		}
 	}
 
 	userFromForge, redirectURL, err := _forge.Login(c, &forge_types.OAuthRequest{
 		Code:  c.Request.FormValue("code"),
-		State: state, // TODO: use proper state
+		State: state,
 	})
 	if err != nil {
 		log.Error().Err(err).Msg("cannot authenticate user")
@@ -238,7 +249,7 @@ func HandleAuth(c *gin.Context) {
 		return
 	}
 
-	exp = time.Now().Add(server.Config.Server.SessionExpires).Unix()
+	exp := time.Now().Add(server.Config.Server.SessionExpires).Unix()
 	_token := token.New(token.SessToken)
 	_token.Set("user-id", strconv.FormatInt(user.ID, 10))
 	tokenString, err := _token.SignExpires(user.Hash, exp)

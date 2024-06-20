@@ -312,6 +312,10 @@ func setupEvilGlobals(c *cli.Context, s store.Store) error {
 	server.Config.Pipeline.Proxy.HTTPS = c.String("backend-https-proxy")
 
 	// server configuration
+	server.Config.Server.JWTSecret, err = setupJWTSecret(s)
+	if err != nil {
+		return fmt.Errorf("could not setup jwt secret: %w", err)
+	}
 	server.Config.Server.Cert = c.String("server-cert")
 	server.Config.Server.Key = c.String("server-key")
 	server.Config.Server.AgentToken = c.String("agent-secret")
