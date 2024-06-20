@@ -42,10 +42,9 @@ func HandleAuth(c *gin.Context) {
 	c.Writer.Header().Del("Content-Type")
 
 	// redirect when getting oauth error from forge to login page
-	if errMsg := c.Request.FormValue("error"); errMsg != "" {
+	if err := c.Request.FormValue("error"); err != "" {
 		query := url.Values{}
-		query.Set("error", "oauth_error")
-		query.Set("error_msg", errMsg)
+		query.Set("error", err)
 		if errorDescription := c.Request.FormValue("error_description"); errorDescription != "" {
 			query.Set("error_description", errorDescription)
 		}

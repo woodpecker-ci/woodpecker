@@ -25,7 +25,7 @@ func TestHandleAuth(t *testing.T) {
 
 	g := goblin.Goblin(t)
 	g.Describe("Login", func() {
-		g.It("should handle the error", func() {
+		g.It("should handle errors from the callback", func() {
 			w := httptest.NewRecorder()
 			c, _ := gin.CreateTestContext(w)
 
@@ -45,24 +45,20 @@ func TestHandleAuth(t *testing.T) {
 
 			api.HandleAuth(c)
 
-			query.Set("error", "oauth_error")
-			query.Set("error_msg", "invalid_scope")
-
-			// check if we get redirected to /login?error=access_denied
 			assert.Equal(t, http.StatusSeeOther, c.Writer.Status())
 			assert.Equal(t, fmt.Sprintf("/login?%s", query.Encode()), c.Writer.Header().Get("Location"))
 		})
 
 		g.It("should fail if a code was provided, but no state", func() {
-			// TODO
+			// TODO: implement
 		})
 
 		g.It("should fail if a code was provided, but the state is wrong", func() {
-			// TODO
+			// TODO: implement
 		})
 
 		g.It("should fail if a code was provided, but the state is wrong", func() {
-			// TODO
+			// TODO: implement
 		})
 
 		g.It("should redirect to forge login page", func() {

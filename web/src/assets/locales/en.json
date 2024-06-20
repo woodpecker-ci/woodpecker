@@ -452,6 +452,5 @@
   "oauth_error": "Error while authenticating against OAuth provider",
   "internal_error": "Some internal error occurred",
   "auth_registration_closed": "The registration is closed",
-  "auth_org_access_denied": "You are not part of the required organization to access this instance",
-  "unknown_auth_error": "An unknown authentication error occurred: {error}"
+  "auth_org_access_denied": "You are not part of the required organization to access this instance"
 }

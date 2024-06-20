@@ -52,11 +52,7 @@ onMounted(async () => {
 
   if (route.query.error) {
     const error = route.query.error as keyof typeof authErrorMessages;
-    errorMessage.value = authErrorMessages[error] ?? i18n.t('unknown_auth_error', { error });
-
-    if (route.query.error_msg) {
-      errorMessage.value += `\n${route.query.error_msg}`;
-    }
+    errorMessage.value = authErrorMessages[error] ?? error;
 
     if (route.query.error_description) {
       errorMessage.value += `\n${route.query.error_description}`;
