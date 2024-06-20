@@ -15,12 +15,9 @@
 package datastore
 
 import (
-	"errors"
-
 	"xorm.io/xorm"
 
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
-	"go.woodpecker-ci.org/woodpecker/v2/server/store/types"
 )
 
 func (s storage) GetUser(id int64) (*model.User, error) {
@@ -32,7 +29,7 @@ func (s storage) GetUserRemoteID(remoteID model.ForgeRemoteID, login string) (*m
 	sess := s.engine.NewSession()
 	user := new(model.User)
 	err := wrapGet(sess.Where("forge_remote_id = ?", remoteID).Get(user))
-	if err != nil && errors.Is(err, types.RecordNotExist) {
+	if err != nil {
 		return s.getUserLogin(sess, login)
 	}
 	return user, err
