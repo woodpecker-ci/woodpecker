@@ -65,6 +65,36 @@ func (_m *Manager) EnvironmentService() environment.Service {
 	return r0
 }
 
+// ForgeByID provides a mock function with given fields: id
+func (_m *Manager) ForgeByID(id int64) (forge.Forge, error) {
+	ret := _m.Called(id)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ForgeByID")
+	}
+
+	var r0 forge.Forge
+	var r1 error
+	if rf, ok := ret.Get(0).(func(int64) (forge.Forge, error)); ok {
+		return rf(id)
+	}
+	if rf, ok := ret.Get(0).(func(int64) forge.Forge); ok {
+		r0 = rf(id)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(forge.Forge)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(int64) error); ok {
+		r1 = rf(id)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // ForgeFromRepo provides a mock function with given fields: repo
 func (_m *Manager) ForgeFromRepo(repo *model.Repo) (forge.Forge, error) {
 	ret := _m.Called(repo)
