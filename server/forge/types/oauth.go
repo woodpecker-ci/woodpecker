@@ -19,4 +19,5 @@ type OAuthRequest struct {
 	ErrorURI         string
 	ErrorDescription string
 	Code             string
+	State            string
 }
