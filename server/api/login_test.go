@@ -31,12 +31,19 @@ func TestHandleAuth(t *testing.T) {
 	g.Describe("Login", func() {
 		user := &model.User{
 			ID:            1,
+			OrgID:         1,
 			ForgeID:       1,
 			ForgeRemoteID: "remote-id-1",
 			Login:         "test",
 			Email:         "test@example.com",
 			Admin:         false,
 		}
+		org := &model.Org{
+			ID:   1,
+			Name: user.Login,
+		}
+
+		server.Config.Server.SessionExpires = time.Hour
 
 		g.It("should handle errors from the callback", func() {
 			w := httptest.NewRecorder()
@@ -51,6 +58,7 @@ func TestHandleAuth(t *testing.T) {
 				Header: make(http.Header),
 				Method: http.MethodGet,
 				URL: &url.URL{
+					Scheme:   "https",
 					Path:     "/authorize",
 					RawQuery: query.Encode(),
 				},
@@ -58,19 +66,15 @@ func TestHandleAuth(t *testing.T) {
 
 			api.HandleAuth(c)
 
-			assert.Equal(t, http.StatusSeeOther, c.Writer.Status())
-			assert.Equal(t, fmt.Sprintf("/login?%s", query.Encode()), c.Writer.Header().Get("Location"))
+			assert.Equal(g, http.StatusSeeOther, c.Writer.Status())
+			assert.Equal(g, fmt.Sprintf("/login?%s", query.Encode()), c.Writer.Header().Get("Location"))
 		})
 
-		g.It("should fail if a code was provided, but no state", func() {
+		g.It("should fail if a code was provided and no state", func() {
 			// TODO: implement
 		})
 
-		g.It("should fail if a code was provided, but the state is wrong", func() {
-			// TODO: implement
-		})
-
-		g.It("should fail if a code was provided, but the state is wrong", func() {
+		g.It("should fail if the state is wrong", func() {
 			// TODO: implement
 		})
 
@@ -78,84 +82,73 @@ func TestHandleAuth(t *testing.T) {
 			_manager := mocks_services.NewManager(t)
 			_forge := mocks_forge.NewForge(t)
 			_store := mocks_store.NewStore(t)
+			server.Config.Services.Manager = _manager
+			server.Config.Permissions.Open = true
+			server.Config.Permissions.Orgs = permissions.NewOrgs(nil)
+			server.Config.Permissions.Admins = permissions.NewAdmins(nil)
+			w := httptest.NewRecorder()
+			c, _ := gin.CreateTestContext(w)
+			c.Set("store", _store)
+			c.Request = &http.Request{
+				Header: make(http.Header),
+				URL: &url.URL{
+					Scheme: "https",
+				},
+			}
 
 			forgeRedirectURL := "https://my-awesome-forge.com/oauth/authorize?client_id=client-id"
 
+			_manager.On("ForgeMain").Return(_forge, nil)
 			_forge.On("Login", mock.Anything, mock.Anything).Return(nil, forgeRedirectURL, nil)
-			_manager.On("ForgeMain").Return(_forge, nil)
-			server.Config.Services.Manager = _manager
 
+			api.HandleAuth(c)
+
+			assert.Equal(g, http.StatusSeeOther, c.Writer.Status())
+			assert.Equal(g, forgeRedirectURL, c.Writer.Header().Get("Location"))
+		})
+
+		g.It("should register a new user", func() {
+			_manager := mocks_services.NewManager(t)
+			_forge := mocks_forge.NewForge(t)
+			_store := mocks_store.NewStore(t)
+			server.Config.Services.Manager = _manager
+			server.Config.Permissions.Open = true
+			server.Config.Permissions.Orgs = permissions.NewOrgs(nil)
+			server.Config.Permissions.Admins = permissions.NewAdmins(nil)
 			w := httptest.NewRecorder()
 			c, _ := gin.CreateTestContext(w)
 			c.Set("store", _store)
 			c.Request = &http.Request{
 				Header: make(http.Header),
+				URL: &url.URL{
+					Scheme: "https",
+				},
 			}
 
-			api.HandleAuth(c)
-
-			assert.Equal(t, http.StatusSeeOther, c.Writer.Status())
-			assert.Equal(t, forgeRedirectURL, c.Writer.Header().Get("Location"))
-		})
-
-		g.It("should handle the callback and register a new user", func() {
-			_manager := mocks_services.NewManager(t)
-			_forge := mocks_forge.NewForge(t)
-			_store := mocks_store.NewStore(t)
-
-			_forge.On("Login", mock.Anything, mock.Anything).Return(user, "", nil)
-			_forge.On("Repos", mock.Anything, mock.Anything).Return(nil, nil)
 			_manager.On("ForgeMain").Return(_forge, nil)
-			server.Config.Services.Manager = _manager
-
+			_forge.On("Login", mock.Anything, mock.Anything).Return(user, "", nil)
 			_store.On("GetUserRemoteID", user.ForgeRemoteID, user.Login).Return(nil, types.RecordNotExist)
-
-			server.Config.Permissions.Open = true
-			server.Config.Permissions.Orgs = permissions.NewOrgs(nil)
-
 			_store.On("CreateUser", mock.Anything).Return(nil)
-
 			_store.On("OrgFindByName", user.Login).Return(nil, nil)
-
 			_store.On("OrgCreate", mock.Anything).Return(nil)
-
-			w := httptest.NewRecorder()
-			c, _ := gin.CreateTestContext(w)
-			c.Set("store", _store)
-			c.Request = &http.Request{
-				Header: make(http.Header),
-				URL: &url.URL{
-					Scheme: "https",
-				},
-			}
-
-			server.Config.Server.SessionExpires = time.Hour
-			server.Config.Permissions.Admins = permissions.NewAdmins([]string{})
-
 			_store.On("UpdateUser", mock.Anything).Return(nil)
+			_forge.On("Repos", mock.Anything, mock.Anything).Return(nil, nil)
 
 			api.HandleAuth(c)
 
-			assert.Equal(t, http.StatusSeeOther, c.Writer.Status())
-			assert.Equal(t, "/", c.Writer.Header().Get("Location"))
-			assert.NotEmpty(t, c.Writer.Header().Get("Set-Cookie"))
+			assert.Equal(g, http.StatusSeeOther, c.Writer.Status())
+			assert.Equal(g, "/", c.Writer.Header().Get("Location"))
+			assert.NotEmpty(g, c.Writer.Header().Get("Set-Cookie"))
 		})
 
-		g.It("should handle the callback and login an existing user", func() {
+		g.It("should login an existing user", func() {
 			_manager := mocks_services.NewManager(t)
 			_forge := mocks_forge.NewForge(t)
 			_store := mocks_store.NewStore(t)
-
-			_forge.On("Login", mock.Anything, mock.Anything).Return(user, "", nil)
-			_forge.On("Repos", mock.Anything, mock.Anything).Return(nil, nil)
-			_manager.On("ForgeMain").Return(_forge, nil)
 			server.Config.Services.Manager = _manager
-
-			_store.On("GetUserRemoteID", user.ForgeRemoteID, user.Login).Return(user, nil)
-
 			server.Config.Permissions.Open = true
 			server.Config.Permissions.Orgs = permissions.NewOrgs(nil)
-
+			server.Config.Permissions.Admins = permissions.NewAdmins(nil)
 			w := httptest.NewRecorder()
 			c, _ := gin.CreateTestContext(w)
 			c.Set("store", _store)
@@ -166,79 +159,182 @@ func TestHandleAuth(t *testing.T) {
 				},
 			}
 
-			server.Config.Server.SessionExpires = time.Hour
-			server.Config.Permissions.Admins = permissions.NewAdmins([]string{})
-
+			_manager.On("ForgeMain").Return(_forge, nil)
+			_forge.On("Login", mock.Anything, mock.Anything).Return(user, "", nil)
+			_store.On("GetUserRemoteID", user.ForgeRemoteID, user.Login).Return(user, nil)
+			_store.On("OrgGet", org.ID).Return(org, nil)
 			_store.On("UpdateUser", mock.Anything).Return(nil)
+			_forge.On("Repos", mock.Anything, mock.Anything).Return(nil, nil)
 
 			api.HandleAuth(c)
 
-			assert.Equal(t, http.StatusSeeOther, c.Writer.Status())
-			assert.Equal(t, "/", c.Writer.Header().Get("Location"))
-			assert.NotEmpty(t, c.Writer.Header().Get("Set-Cookie"))
+			assert.Equal(g, http.StatusSeeOther, c.Writer.Status())
+			assert.Equal(g, "/", c.Writer.Header().Get("Location"))
+			assert.NotEmpty(g, c.Writer.Header().Get("Set-Cookie"))
 		})
 
-		g.It("should handle the callback and deny a new user to register", func() {
+		g.It("should deny a new user if registration is closed", func() {
 			_manager := mocks_services.NewManager(t)
 			_forge := mocks_forge.NewForge(t)
 			_store := mocks_store.NewStore(t)
-
-			_forge.On("Login", mock.Anything, mock.Anything).Return(user, "", nil)
-			_manager.On("ForgeMain").Return(_forge, nil)
 			server.Config.Services.Manager = _manager
+			server.Config.Permissions.Open = false
+			server.Config.Permissions.Orgs = permissions.NewOrgs(nil)
+			server.Config.Permissions.Admins = permissions.NewAdmins(nil)
+			w := httptest.NewRecorder()
+			c, _ := gin.CreateTestContext(w)
+			c.Set("store", _store)
+			c.Request = &http.Request{
+				Header: make(http.Header),
+				URL: &url.URL{
+					Scheme: "https",
+				},
+			}
 
+			_manager.On("ForgeMain").Return(_forge, nil)
+			_forge.On("Login", mock.Anything, mock.Anything).Return(user, "", nil)
 			_store.On("GetUserRemoteID", user.ForgeRemoteID, user.Login).Return(nil, types.RecordNotExist)
 
-			server.Config.Permissions.Open = false
-
-			w := httptest.NewRecorder()
-			c, _ := gin.CreateTestContext(w)
-			c.Set("store", _store)
-			c.Request = &http.Request{
-				Header: make(http.Header),
-				URL: &url.URL{
-					Scheme: "https",
-				},
-			}
-
 			api.HandleAuth(c)
 
-			assert.Equal(t, http.StatusSeeOther, c.Writer.Status())
-			assert.Equal(t, "/login?error=registration_closed", c.Writer.Header().Get("Location"))
+			assert.Equal(g, http.StatusSeeOther, c.Writer.Status())
+			assert.Equal(g, "/login?error=registration_closed", c.Writer.Header().Get("Location"))
 		})
 
-		g.It("should handle the callback and deny a user with missing org access", func() {
+		g.It("should deny a user with missing org access", func() {
 			_manager := mocks_services.NewManager(t)
 			_forge := mocks_forge.NewForge(t)
 			_store := mocks_store.NewStore(t)
-
-			_forge.On("Login", mock.Anything, mock.Anything).Return(user, "", nil)
-			_manager.On("ForgeMain").Return(_forge, nil)
 			server.Config.Services.Manager = _manager
-
 			server.Config.Permissions.Open = true
 			server.Config.Permissions.Orgs = permissions.NewOrgs([]string{"org1"})
+			server.Config.Permissions.Admins = permissions.NewAdmins(nil)
+			w := httptest.NewRecorder()
+			c, _ := gin.CreateTestContext(w)
+			c.Set("store", _store)
+			c.Request = &http.Request{
+				Header: make(http.Header),
+				URL: &url.URL{
+					Scheme: "https",
+				},
+			}
 
+			_manager.On("ForgeMain").Return(_forge, nil)
+			_forge.On("Login", mock.Anything, mock.Anything).Return(user, "", nil)
 			_forge.On("Teams", mock.Anything, user).Return([]*model.Team{
 				{
 					Login: "org2",
 				},
 			}, nil)
 
-			w := httptest.NewRecorder()
-			c, _ := gin.CreateTestContext(w)
-			c.Set("store", _store)
-			c.Request = &http.Request{
-				Header: make(http.Header),
-				URL: &url.URL{
-					Scheme: "https",
-				},
-			}
-
 			api.HandleAuth(c)
 
-			assert.Equal(t, http.StatusSeeOther, c.Writer.Status())
-			assert.Equal(t, "/login?error=org_access_denied", c.Writer.Header().Get("Location"))
+			assert.Equal(g, http.StatusSeeOther, c.Writer.Status())
+			assert.Equal(g, "/login?error=org_access_denied", c.Writer.Header().Get("Location"))
+		})
+
+		g.Describe("User org", func() {
+			g.It("should be created if it does not exists", func() {
+				_manager := mocks_services.NewManager(t)
+				_forge := mocks_forge.NewForge(t)
+				_store := mocks_store.NewStore(t)
+				server.Config.Services.Manager = _manager
+				server.Config.Permissions.Open = true
+				server.Config.Permissions.Orgs = permissions.NewOrgs(nil)
+				server.Config.Permissions.Admins = permissions.NewAdmins(nil)
+				w := httptest.NewRecorder()
+				c, _ := gin.CreateTestContext(w)
+				c.Set("store", _store)
+				c.Request = &http.Request{
+					Header: make(http.Header),
+					URL: &url.URL{
+						Scheme: "https",
+					},
+				}
+				user.OrgID = 0
+
+				_manager.On("ForgeMain").Return(_forge, nil)
+				_forge.On("Login", mock.Anything, mock.Anything).Return(user, "", nil)
+				_store.On("GetUserRemoteID", user.ForgeRemoteID, user.Login).Return(user, nil)
+				_store.On("OrgFindByName", user.Login).Return(nil, types.RecordNotExist)
+				_store.On("OrgCreate", mock.Anything).Return(nil)
+				_store.On("UpdateUser", mock.Anything).Return(nil)
+				_forge.On("Repos", mock.Anything, mock.Anything).Return(nil, nil)
+
+				api.HandleAuth(c)
+
+				assert.Equal(g, http.StatusSeeOther, c.Writer.Status())
+				assert.Equal(g, "/", c.Writer.Header().Get("Location"))
+				assert.NotEmpty(g, c.Writer.Header().Get("Set-Cookie"))
+			})
+
+			g.It("should be linked if it has the same name as the user", func() {
+				_manager := mocks_services.NewManager(t)
+				_forge := mocks_forge.NewForge(t)
+				_store := mocks_store.NewStore(t)
+				server.Config.Services.Manager = _manager
+				server.Config.Permissions.Open = true
+				server.Config.Permissions.Orgs = permissions.NewOrgs(nil)
+				server.Config.Permissions.Admins = permissions.NewAdmins(nil)
+				w := httptest.NewRecorder()
+				c, _ := gin.CreateTestContext(w)
+				c.Set("store", _store)
+				c.Request = &http.Request{
+					Header: make(http.Header),
+					URL: &url.URL{
+						Scheme: "https",
+					},
+				}
+				user.OrgID = 0
+
+				_manager.On("ForgeMain").Return(_forge, nil)
+				_forge.On("Login", mock.Anything, mock.Anything).Return(user, "", nil)
+				_store.On("GetUserRemoteID", user.ForgeRemoteID, user.Login).Return(user, nil)
+				_store.On("OrgFindByName", user.Login).Return(org, nil)
+				_store.On("OrgUpdate", mock.Anything).Return(nil)
+				_store.On("UpdateUser", mock.Anything).Return(nil)
+				_forge.On("Repos", mock.Anything, mock.Anything).Return(nil, nil)
+
+				api.HandleAuth(c)
+
+				assert.Equal(g, http.StatusSeeOther, c.Writer.Status())
+				assert.Equal(g, "/", c.Writer.Header().Get("Location"))
+				assert.NotEmpty(g, c.Writer.Header().Get("Set-Cookie"))
+			})
+
+			g.It("should be updated if the user name was changed", func() {
+				_manager := mocks_services.NewManager(t)
+				_forge := mocks_forge.NewForge(t)
+				_store := mocks_store.NewStore(t)
+				server.Config.Services.Manager = _manager
+				server.Config.Permissions.Open = true
+				server.Config.Permissions.Orgs = permissions.NewOrgs(nil)
+				server.Config.Permissions.Admins = permissions.NewAdmins(nil)
+				w := httptest.NewRecorder()
+				c, _ := gin.CreateTestContext(w)
+				c.Set("store", _store)
+				c.Request = &http.Request{
+					Header: make(http.Header),
+					URL: &url.URL{
+						Scheme: "https",
+					},
+				}
+				org.Name = "not-the-user-name"
+
+				_manager.On("ForgeMain").Return(_forge, nil)
+				_forge.On("Login", mock.Anything, mock.Anything).Return(user, "", nil)
+				_store.On("GetUserRemoteID", user.ForgeRemoteID, user.Login).Return(user, nil)
+				_store.On("OrgGet", user.OrgID).Return(org, nil)
+				_store.On("OrgUpdate", mock.Anything).Return(nil)
+				_store.On("UpdateUser", mock.Anything).Return(nil)
+				_forge.On("Repos", mock.Anything, mock.Anything).Return(nil, nil)
+
+				api.HandleAuth(c)
+
+				assert.Equal(g, http.StatusSeeOther, c.Writer.Status())
+				assert.Equal(g, "/", c.Writer.Header().Get("Location"))
+				assert.NotEmpty(g, c.Writer.Header().Get("Set-Cookie"))
+			})
 		})
 	})
 }
