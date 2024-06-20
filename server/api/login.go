@@ -64,10 +64,8 @@ func HandleAuth(c *gin.Context) {
 	forgeID := int64(1) // TODO: replace with forge id when multiple forges are supported
 
 	userFromForge, redirectURL, err := _forge.Login(c, &forge_types.OAuthRequest{
-		Error:            c.Request.FormValue("error"),
-		ErrorURI:         c.Request.FormValue("error_uri"),
-		ErrorDescription: c.Request.FormValue("error_description"),
-		Code:             c.Request.FormValue("code"),
+		Code:  c.Request.FormValue("code"),
+		State: "woodpecker", // TODO: use proper state
 	})
 	if err != nil {
 		log.Error().Err(err).Msg("cannot authenticate user")
