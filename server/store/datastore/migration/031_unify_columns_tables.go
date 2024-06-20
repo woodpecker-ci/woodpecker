@@ -263,16 +263,6 @@ var unifyColumnsTables = xormigrate.Migration{
 		}
 
 		// Cron
-		// if err := renameTable(sess, "crons", "crons_old"); err != nil {
-		// 	return err
-		// }
-		// if err := sess.Sync(new(model.Cron)); err != nil {
-		// 	return fmt.Errorf("sync models failed: %w", err)
-		// }
-		// sess.SQL("INSERT INTO crons SELECT i_d as id, name, repo_id, creator_id, next_exec, schedule, created, branch FROM crons_old;")
-		// if err := sess.DropTable("crons_old"); err != nil {
-		// 	return err
-		// }
 		if err := renameColumn(sess, "crons", "i_d", "id"); err != nil {
 			return err
 		}
