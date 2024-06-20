@@ -12,6 +12,6 @@
 <script lang="ts" setup>
 defineProps<{
   textOnly?: boolean;
-  text: string;
+  text?: string;
 }>();
 </script>

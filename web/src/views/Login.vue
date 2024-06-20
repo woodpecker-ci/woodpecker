@@ -1,6 +1,5 @@
 <template>
   <main class="flex flex-col w-full h-full justify-center items-center">
-    <!-- TODO: Should use vue notifications. -->
     <Error v-if="errorMessage" text-only :text="errorMessage" class="w-full md:w-3xl" />
 
     <div
@@ -24,6 +23,7 @@ import { useRoute, useRouter } from 'vue-router';
 
 import WoodpeckerLogo from '~/assets/logo.svg?component';
 import Button from '~/components/atomic/Button.vue';
+import Error from '~/components/atomic/Error.vue';
 import useAuthentication from '~/compositions/useAuthentication';
 
 const route = useRoute();
@@ -49,9 +49,9 @@ onMounted(async () => {
     return;
   }
 
-  if (route.query.code) {
-    const code = route.query.code as keyof typeof authErrorMessages;
-    errorMessage.value = authErrorMessages[code];
+  if (route.query.error) {
+    const error = route.query.error as keyof typeof authErrorMessages;
+    errorMessage.value = authErrorMessages[error] ?? i18n.t('unknown_auth_error', { error });
   }
 });
 </script>

@@ -451,5 +451,6 @@
   "cli_login_failed": "Login to CLI failed",
   "cli_login_denied": "Login to CLI denied",
   "return_to_cli": "You can now close this tab and return to the CLI.",
-  "settings": "Settings"
+  "settings": "Settings",
+  "unknown_auth_error": "An unknown authentication error occurred: {error}"
 }
