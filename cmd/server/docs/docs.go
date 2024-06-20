@@ -4749,6 +4749,7 @@ const docTemplate = `{
                 "github",
                 "gitlab",
                 "gitea",
+                "forgejo",
                 "bitbucket",
                 "bitbucket-dc",
                 "addon"
@@ -4757,6 +4758,7 @@ const docTemplate = `{
                 "ForgeTypeGithub",
                 "ForgeTypeGitlab",
                 "ForgeTypeGitea",
+                "ForgeTypeForgejo",
                 "ForgeTypeBitbucket",
                 "ForgeTypeBitbucketDatacenter",
                 "ForgeTypeAddon"
