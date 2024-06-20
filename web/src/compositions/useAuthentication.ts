@@ -12,6 +12,6 @@ export default () =>
         const config = useUserConfig();
         config.setUserConfig('redirectUrl', url);
       }
-      window.location.href = `${useConfig().rootPath}/login?forge_id=${forgeId}`;
+      window.location.href = `${useConfig().rootPath}/authorize?forge_id=${forgeId}`;
     },
   }) as const;

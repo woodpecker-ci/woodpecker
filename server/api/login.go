@@ -19,6 +19,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"net/url"
 	"strconv"
 	"time"
 
@@ -65,22 +66,25 @@ func getForgeID(c *gin.Context) (int64, error) {
 	return forgeID, nil
 }
 
-func HandleLogin(c *gin.Context) {
-	forgeID, err := getForgeID(c)
-	if err != nil {
-		log.Error().Err(err).Msg("cannot get forge id")
-		c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=internal_error")
+func HandleAuth(c *gin.Context) {
+	// when dealing with redirects, we may need to adjust the content type. I
+	// cannot, however, remember why, so need to revisit this line.
+	c.Writer.Header().Del("Content-Type")
+
+	// redirect when getting oauth error from forge to login page
+	if err := c.Request.FormValue("error"); err != "" {
+		query := url.Values{}
+		query.Set("error", err)
+		if errorDescription := c.Request.FormValue("error_description"); errorDescription != "" {
+			query.Set("error_description", errorDescription)
+		}
+		if errorURI := c.Request.FormValue("error_uri"); errorURI != "" {
+			query.Set("error_uri", errorURI)
+		}
+		c.Redirect(http.StatusSeeOther, fmt.Sprintf("%s/login?%s", server.Config.Server.RootPath, query.Encode()))
 		return
 	}
 
-	if err := c.Request.FormValue("error"); err != "" {
-		c.Redirect(http.StatusSeeOther, fmt.Sprintf("%s/login/error?code=%s&forge_id=%d", server.Config.Server.RootPath, err, forgeID))
-	} else {
-		c.Redirect(http.StatusSeeOther, fmt.Sprintf("%s/authorize?forge_id=%d", server.Config.Server.RootPath, forgeID))
-	}
-}
-
-func HandleAuth(c *gin.Context) {
 	_store := store.FromContext(c)
 
 	forgeID, err := getForgeID(c)
@@ -94,10 +98,6 @@ func HandleAuth(c *gin.Context) {
 		return
 	}
 
-	// when dealing with redirects, we may need to adjust the content type. I
-	// cannot, however, remember why, so need to revisit this line.
-	c.Writer.Header().Del("Content-Type")
-
 	jwtSecret := "1234567890" // TODO set some secret
 	exp := time.Now().Add(time.Minute * 15).Unix()
 	stateToken := token.New(token.OAuthStateToken)
@@ -110,11 +110,8 @@ func HandleAuth(c *gin.Context) {
 	}
 
 	userFromForge, redirectURL, err := _forge.Login(c, &forge_types.OAuthRequest{
-		State:            state,
-		Error:            c.Request.FormValue("error"),
-		ErrorURI:         c.Request.FormValue("error_uri"),
-		ErrorDescription: c.Request.FormValue("error_description"),
-		Code:             c.Request.FormValue("code"),
+		Code:  c.Request.FormValue("code"),
+		State: state, // TODO: use proper state
 	})
 	if err != nil {
 		log.Error().Err(err).Msg("cannot authenticate user")
@@ -138,7 +135,7 @@ func HandleAuth(c *gin.Context) {
 		// if self-registration is disabled we should return a not authorized error
 		if !server.Config.Permissions.Open && !server.Config.Permissions.Admins.IsAdmin(userFromForge) {
 			log.Error().Msgf("cannot register %s. registration closed", userFromForge.Login)
-			c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=access_denied")
+			c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=registration_closed")
 			return
 		}
 
@@ -291,7 +288,8 @@ func GetLogout(c *gin.Context) {
 	c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/")
 }
 
-func GetLoginToken(c *gin.Context) {
+// TODO: remove in 3.0
+func DeprecatedGetLoginToken(c *gin.Context) {
 	_store := store.FromContext(c)
 
 	_forge, err := server.Config.Services.Manager.ForgeByID(1) // TODO: get selected forge from auth request

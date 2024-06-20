@@ -410,10 +410,7 @@
         "reset_token": "Reset token",
         "swagger_ui": "Swagger UI"
       }
-    },
-    "oauth_error": "Error while authenticating against OAuth provider",
-    "internal_error": "Some internal error occurred",
-    "access_denied": "You are not allowed to login"
+    }
   },
   "secrets": {
     "secrets": "Secrets",
@@ -452,5 +449,9 @@
   "cli_login_failed": "Login to CLI failed",
   "cli_login_denied": "Login to CLI denied",
   "return_to_cli": "You can now close this tab and return to the CLI.",
-  "settings": "Settings"
+  "settings": "Settings",
+  "oauth_error": "Error while authenticating against OAuth provider",
+  "internal_error": "Some internal error occurred",
+  "registration_closed": "The registration is closed",
+  "access_denied": "You are not allowed to access this instance"
 }
