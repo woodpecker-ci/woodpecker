@@ -44,70 +44,71 @@ func HandleAuth(c *gin.Context) {
 	// 3. exchange code for token: POST https://forge/oauth/token?client_id=...&client_secret=...&code
 	// 4. redirect user to UI /
 
+	// TODO: when dealing with redirects, we may need to adjust the content type. I
+	// cannot, however, remember why, so need to revisit this line.
+	c.Writer.Header().Del("Content-Type")
+
+	// check for OAuth errors and redirect to the login page and show error
+	if err := c.Request.FormValue("error"); err != "" {
+		c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error="+err)
+		return
+	}
+
 	_store := store.FromContext(c)
 	forgeID := int64(1) // TODO: replace with forge id when multiple forges are supported
+
+	// if we have an oauth code we need to check the state token
+	oauthCode := c.Request.FormValue("code")
+	if oauthCode != "" {
+		state := c.Request.FormValue("state")
+		if len(state) == 0 {
+			log.Error().Msg("missing state token")
+			c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=missing_state")
+			return
+		}
+
+		// check the OAuth state token
+		stateToken, err := token.Parse(state, func(t *token.Token) (string, error) {
+			if t.Kind != token.OAuthStateToken {
+				return "", fmt.Errorf("invalid token type")
+			}
+			return server.Config.JWTSecret, nil
+		})
+		if err != nil {
+			log.Error().Err(err).Msg("cannot parse state token")
+			c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=oauth_error")
+			return
+		}
+		forgeID, err = strconv.ParseInt(stateToken.Get("forge-id"), 10, 64)
+		if err != nil {
+			log.Error().Err(err).Msg("cannot parse forge id")
+			c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=oauth_error")
+			return
+		}
+	}
+
+	state := ""
+	// if we don't have an oauth code yet we create a state token
+	if oauthCode == "" {
+		exp := time.Now().Add(time.Minute * 15).Unix()
+		stateToken := token.New(token.OAuthStateToken)
+		stateToken.Set("forge-id", fmt.Sprintf("%d", forgeID))
+		var err error
+		state, err = stateToken.SignExpires(server.Config.JWTSecret, exp)
+		if err != nil {
+			log.Error().Err(err).Msg("cannot create state token")
+			c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=internal_error")
+			return
+		}
+	}
+
 	_forge, err := server.Config.Services.Manager.ForgeMain()
 	if err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
 
-	// when dealing with redirects, we may need to adjust the content type. I
-	// cannot, however, remember why, so need to revisit this line.
-	c.Writer.Header().Del("Content-Type")
-
-	// check the OAuth errors
-	if c.Request.FormValue("error") != "" {
-		redirectURL := _forge.GetRedirectURL(c, forgeID)
-
-		http.Redirect(c.Writer, c.Request, redirectURL, http.StatusSeeOther)
-		return
-	}
-
-	// check the OAuth code
-	code := c.Request.FormValue("code")
-	if len(code) == 0 {
-		exp := time.Now().Add(time.Minute * 15).Unix()
-		stateToken := token.New(token.OAuthStateToken)
-		stateToken.Set("forge-id", fmt.Sprintf("%d", forgeID))
-		state, err := stateToken.SignExpires(server.Config.JWTSecret, exp)
-		if err != nil {
-			log.Error().Err(err).Msg("cannot create state token")
-			c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=internal_error")
-			return
-		}
-
-		redirectURL := _forge.GetRedirectURL(c, &forge_types.OAuthRequest{
-			State: state,
-			Code:  c.Request.FormValue("code"),
-		})
-
-		http.Redirect(c.Writer, c.Request, redirectURL, http.StatusSeeOther)
-		return
-	}
-
-	// check the OAuth state
-	state := c.Request.FormValue("state")
-	if len(state) == 0 {
-		log.Error().Msg("missing state token")
-		c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=oauth_error")
-		return
-	}
-
-	// check the OAuth state token
-	_token, err := token.Parse(state, func(t *token.Token) (string, error) {
-		if t.Kind != token.OAuthStateToken {
-			return "", fmt.Errorf("invalid token type")
-		}
-		return server.Config.JWTSecret, nil
-	})
-	if err != nil {
-		log.Error().Err(err).Msg("cannot parse state token")
-		c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=oauth_error")
-		return
-	}
-
-	userFromForge, err := _forge.Login(c, &forge_types.OAuthRequest{
+	userFromForge, redirectURL, err := _forge.Login(c, &forge_types.OAuthRequest{
 		State:            state,
 		Error:            c.Request.FormValue("error"),
 		ErrorURI:         c.Request.FormValue("error_uri"),
@@ -117,6 +118,12 @@ func HandleAuth(c *gin.Context) {
 	if err != nil {
 		log.Error().Err(err).Msg("cannot authenticate user")
 		c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=oauth_error")
+		return
+	}
+
+	// The user is not authorized yet -> redirect
+	if userFromForge == nil {
+		http.Redirect(c.Writer, c.Request, redirectURL, http.StatusSeeOther)
 		return
 	}
 
@@ -234,7 +241,7 @@ func HandleAuth(c *gin.Context) {
 	}
 
 	exp := time.Now().Add(server.Config.Server.SessionExpires).Unix()
-	_token = token.New(token.SessToken)
+	_token := token.New(token.SessToken)
 	_token.Set("user-id", strconv.FormatInt(user.ID, 10))
 	tokenString, err := _token.SignExpires(user.Hash, exp)
 	if err != nil {

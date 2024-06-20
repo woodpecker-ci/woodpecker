@@ -40,7 +40,7 @@ func TestHandleAuth(t *testing.T) {
 			api.HandleAuth(c)
 
 			// mockStore.AssertCalled(t, "GetPipelineList", mock.Anything, mock.Anything, mock.Anything)
-			assert.Equal(t, http.StatusOK, c.Writer.Status())
+			assert.Equal(t, http.StatusSeeOther, c.Writer.Status())
 		})
 
 		g.It("should handle the error", func() {
@@ -60,7 +60,7 @@ func TestHandleAuth(t *testing.T) {
 			api.HandleAuth(c)
 
 			// check if we get redirected to /login?error=access_denied
-			assert.Equal(t, http.StatusFound, c.Writer.Status())
+			assert.Equal(t, http.StatusSeeOther, c.Writer.Status())
 			assert.Equal(t, "/login?error=access_denied", c.Writer.Header().Get("Location"))
 		})
 	})
