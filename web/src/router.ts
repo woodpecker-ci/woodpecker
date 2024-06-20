@@ -192,7 +192,7 @@ const router = createRouter({
 router.beforeEach(async (to, _, next) => {
   const config = useUserConfig();
   const { redirectUrl } = config.userConfig.value;
-  if (redirectUrl !== '') {
+  if (redirectUrl !== '' && to.name !== 'login') {
     config.setUserConfig('redirectUrl', '');
     next(redirectUrl);
   }
