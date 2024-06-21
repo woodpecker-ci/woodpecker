@@ -15,9 +15,8 @@ import (
 
 	"go.woodpecker-ci.org/woodpecker/v2/server"
 	"go.woodpecker-ci.org/woodpecker/v2/server/api"
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
-
 	mocks_forge "go.woodpecker-ci.org/woodpecker/v2/server/forge/mocks"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 	mocks_services "go.woodpecker-ci.org/woodpecker/v2/server/services/mocks"
 	"go.woodpecker-ci.org/woodpecker/v2/server/services/permissions"
 	mocks_store "go.woodpecker-ci.org/woodpecker/v2/server/store/mocks"
