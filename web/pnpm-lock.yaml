@@ -14,9 +14,15 @@ importers:
       '@intlify/unplugin-vue-i18n':
         specifier: ^4.0.0
         version: 4.0.0(rollup@4.18.0)(vue-i18n@9.13.1(vue@3.4.29(typescript@5.4.5)))
+      '@jamescoyle/vue-icon':
+        specifier: ^0.1.2
+        version: 0.1.2
       '@kyvg/vue3-notification':
         specifier: ^3.2.1
         version: 3.2.1(vue@3.4.29(typescript@5.4.5))
+      '@mdi/js':
+        specifier: ^7.4.47
+        version: 7.4.47
       '@vueuse/core':
         specifier: ^10.10.0
         version: 10.11.0(vue@3.4.29(typescript@5.4.5))
@@ -47,6 +53,9 @@ importers:
       semver:
         specifier: ^7.6.2
         version: 7.6.2
+      simple-icons:
+        specifier: ^12.3.0
+        version: 12.3.0
       vue:
         specifier: ^3.4.27
         version: 3.4.29(typescript@5.4.5)
@@ -554,6 +563,9 @@ packages:
     resolution: {integrity: sha512-O8jcjabXaleOG9DQ0+ARXWZBTfnP4WNAqzuiJK7ll44AmxGKv/J2M4TPjxjY3znBCfvBXFzucm1twdyFybFqEA==}
     engines: {node: '>=12'}
 
+  '@jamescoyle/vue-icon@0.1.2':
+    resolution: {integrity: sha512-KFrImXx5TKIi6iQXlnyLEBl4rNosNKbTeRnr70ucTdUaciVmd9qK9d/pZAaKt1Ob/8xNnX2GMp8LisyHdKtEgw==}
+
   '@jest/schemas@29.6.3':
     resolution: {integrity: sha512-mo5j5X+jIZmJQveBKeS/clAueipV7KgiX1vMgCxam1RNYiqE1w62n0/tJJnHtjW8ZHcQco5gY85jA3mi0L+nSA==}
     engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
@@ -584,6 +596,9 @@ packages:
     resolution: {integrity: sha512-qn4bCBBCxW0Ya+RmHXu2SYBVwGXWsAGdlDKqCqyLryaZTbtFXi32iSSLnuKjSUVxFqQRToFc6g1zp1XLTyHrvw==}
     peerDependencies:
       vue: ^3.0.0
+
+  '@mdi/js@7.4.47':
+    resolution: {integrity: sha512-KPnNOtm5i2pMabqZxpUz7iQf+mfrYZyKCZ8QNz85czgEt7cuHcGorWfdzUMWYA0SD+a6Hn4FmJ+YhzzzjkTZrQ==}
 
   '@nodelib/fs.scandir@2.1.5':
     resolution: {integrity: sha512-vq24Bq3ym5HEQm2NKCr3yXDwjc7vTsEThRDnkp2DK9p1uqLR+DHurm/NOTo0KG7HYHU7eppKZj3MyqYuMBf62g==}
@@ -2360,6 +2375,10 @@ packages:
     resolution: {integrity: sha512-bzyZ1e88w9O1iNJbKnOlvYTrWPDl46O1bG0D3XInv+9tkPrxrN8jUUTiFlDkkmKWgn1M6CfIA13SuGqOa9Korw==}
     engines: {node: '>=14'}
 
+  simple-icons@12.3.0:
+    resolution: {integrity: sha512-sJNnw4t1/dsPy9KBQhR/DWrVP5sd0b1GO2axdxn4kZU4xUa53kdc3dzXNrxwbgdJfD+R7dpY2mPaBfZ+cvAPrg==}
+    engines: {node: '>=0.12.18'}
+
   sisteransi@1.0.5:
     resolution: {integrity: sha512-bLGGlR1QxBcynn2d5YmDX4MGjlZvy2MRBDRNHLJ8VI6l6+9FUiyTFNJ0IveOSP0bcXgVDPRcfGqA0pjaqUpfVg==}
 
@@ -3301,6 +3320,8 @@ snapshots:
       wrap-ansi: 8.1.0
       wrap-ansi-cjs: wrap-ansi@7.0.0
 
+  '@jamescoyle/vue-icon@0.1.2': {}
+
   '@jest/schemas@29.6.3':
     dependencies:
       '@sinclair/typebox': 0.27.8
@@ -3332,6 +3353,8 @@ snapshots:
   '@kyvg/vue3-notification@3.2.1(vue@3.4.29(typescript@5.4.5))':
     dependencies:
       vue: 3.4.29(typescript@5.4.5)
+
+  '@mdi/js@7.4.47': {}
 
   '@nodelib/fs.scandir@2.1.5':
     dependencies:
@@ -5233,6 +5256,8 @@ snapshots:
   signal-exit@3.0.7: {}
 
   signal-exit@4.1.0: {}
+
+  simple-icons@12.3.0: {}
 
   sisteransi@1.0.5: {}
 
