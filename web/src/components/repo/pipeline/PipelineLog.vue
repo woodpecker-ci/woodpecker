@@ -184,7 +184,7 @@ function writeLog(line: Partial<LogLine>) {
   logBuffer.value.push({
     index: line.index ?? 0,
     number: (line.index ?? 0) + 1,
-    text: ansiUp.value.ansi_to_html(decode(line.text ?? '') + '\n'),
+    text: ansiUp.value.ansi_to_html(`${decode(line.text ?? '')  }\n`),
     time: line.time ?? 0,
     type: null, // TODO: implement way to detect errors and warnings
   });
