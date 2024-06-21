@@ -31,6 +31,10 @@ type configV031 struct {
 	Data   []byte `xorm:"LONGBLOB 'config_data'"`
 }
 
+func (cronV031) TableName() string {
+	return "config"
+}
+
 type cronV031 struct {
 	ID        int64  `xorm:"pk autoincr 'i_d'"`
 	Name      string `xorm:"name UNIQUE(s) INDEX"`
