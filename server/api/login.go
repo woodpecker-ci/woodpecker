@@ -198,24 +198,28 @@ func HandleAuth(c *gin.Context) {
 		return
 	}
 
-	updateRepoPermissions(c, user, _store, _forge)
+	err = updateRepoPermissions(c, user, _store, _forge)
+	if err != nil {
+		log.Error().Err(err).Msgf("cannot update repo permissions for %s", user.Login)
+		c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=internal_error")
+		return
+	}
 
 	httputil.SetCookie(c.Writer, c.Request, "user_sess", tokenString)
 
 	c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/")
 }
 
-func updateRepoPermissions(c *gin.Context, user *model.User, _store store.Store, _forge forge.Forge) {
+func updateRepoPermissions(c *gin.Context, user *model.User, _store store.Store, _forge forge.Forge) error {
 	repos, _ := _forge.Repos(c, user)
+
 	for _, forgeRepo := range repos {
 		dbRepo, err := _store.GetRepoForgeID(forgeRepo.ForgeRemoteID)
 		if err != nil && errors.Is(err, types.RecordNotExist) {
 			continue
 		}
 		if err != nil {
-			log.Error().Err(err).Msgf("cannot list repos for %s", user.Login)
-			c.Redirect(http.StatusSeeOther, "/login?error=internal_error")
-			return
+			return err
 		}
 
 		if !dbRepo.IsActive {
@@ -229,11 +233,11 @@ func updateRepoPermissions(c *gin.Context, user *model.User, _store store.Store,
 		perm.UserID = user.ID
 		perm.Synced = time.Now().Unix()
 		if err := _store.PermUpsert(perm); err != nil {
-			log.Error().Err(err).Msgf("cannot update permissions for %s", user.Login)
-			c.Redirect(http.StatusSeeOther, "/login?error=internal_error")
-			return
+			return err
 		}
 	}
+
+	return nil
 }
 
 func GetLogout(c *gin.Context) {
