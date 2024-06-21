@@ -37,8 +37,7 @@ import (
 )
 
 func HandleAuth(c *gin.Context) {
-	// when dealing with redirects, we may need to adjust the content type. I
-	// cannot, however, remember why, so need to revisit this line.
+	// TODO: check if this is really needed
 	c.Writer.Header().Del("Content-Type")
 
 	// redirect when getting oauth error from forge to login page
