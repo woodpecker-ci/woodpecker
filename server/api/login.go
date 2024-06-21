@@ -59,7 +59,8 @@ func HandleAuth(c *gin.Context) {
 	forgeID := int64(1) // TODO: replace with forge id when multiple forges are supported
 	_forge, err := server.Config.Services.Manager.ForgeMain()
 	if err != nil {
-		_ = c.AbortWithError(http.StatusInternalServerError, err)
+		log.Error().Err(err).Msg("Cannot get main forge")
+		c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=internal_error")
 		return
 	}
 
@@ -92,7 +93,8 @@ func HandleAuth(c *gin.Context) {
 	// get the user from the database
 	user, err := _store.GetUserRemoteID(userFromForge.ForgeRemoteID, userFromForge.Login)
 	if err != nil && !errors.Is(err, types.RecordNotExist) {
-		_ = c.AbortWithError(http.StatusInternalServerError, err)
+		log.Error().Err(err).Msgf("cannot get user %s", userFromForge.Login)
+		c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=internal_error")
 		return
 	}
 
@@ -138,7 +140,8 @@ func HandleAuth(c *gin.Context) {
 			}
 		}
 		if err != nil && !errors.Is(err, types.RecordNotExist) {
-			_ = c.AbortWithError(http.StatusInternalServerError, err)
+			log.Error().Err(err).Msgf("cannot get org %s", user.Login)
+			c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=internal_error")
 			return
 		}
 
