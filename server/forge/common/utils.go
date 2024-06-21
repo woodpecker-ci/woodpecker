@@ -46,7 +46,7 @@ func ExtractHostFromCloneURL(cloneURL string) (string, error) {
 
 func UserToken(ctx context.Context, r *model.Repo, u *model.User) string {
 	if u != nil {
-		return u.Token
+		return u.AccessToken
 	}
 
 	_store, ok := store.TryFromContext(ctx)
@@ -62,5 +62,5 @@ func UserToken(ctx context.Context, r *model.Repo, u *model.User) string {
 	if err != nil {
 		return ""
 	}
-	return user.Token
+	return user.AccessToken
 }

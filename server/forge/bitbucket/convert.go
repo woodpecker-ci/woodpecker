@@ -133,8 +133,8 @@ func sshCloneLink(repo *internal.Repo) string {
 func convertUser(from *internal.Account, token *oauth2.Token) *model.User {
 	return &model.User{
 		Login:         from.Login,
-		Token:         token.AccessToken,
-		Secret:        token.RefreshToken,
+		AccessToken:   token.AccessToken,
+		RefreshToken:  token.RefreshToken,
 		Expiry:        token.Expiry.UTC().Unix(),
 		Avatar:        from.Links.Avatar.Href,
 		ForgeRemoteID: model.ForgeRemoteID(fmt.Sprint(from.UUID)),

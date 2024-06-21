@@ -105,13 +105,14 @@ func HandleAuth(c *gin.Context) {
 
 		// create the user account
 		user = &model.User{
-			Login:         userFromForge.Login,
+			ForgeID:       forgeID,
 			ForgeRemoteID: userFromForge.ForgeRemoteID,
-			Token:         userFromForge.Token,
-			Secret:        userFromForge.Secret,
+			Login:         userFromForge.Login,
+			AccessToken:   userFromForge.AccessToken,
+			RefreshToken:  userFromForge.RefreshToken,
+			Expiry:        userFromForge.Expiry,
 			Email:         userFromForge.Email,
 			Avatar:        userFromForge.Avatar,
-			ForgeID:       forgeID,
 			Hash: base32.StdEncoding.EncodeToString(
 				securecookie.GenerateRandomKey(32),
 			),
@@ -165,8 +166,8 @@ func HandleAuth(c *gin.Context) {
 	}
 
 	// update the user meta data and authorization data.
-	user.Token = userFromForge.Token
-	user.Secret = userFromForge.Secret
+	user.AccessToken = userFromForge.AccessToken
+	user.RefreshToken = userFromForge.RefreshToken
 	user.Email = userFromForge.Email
 	user.Avatar = userFromForge.Avatar
 	user.ForgeRemoteID = userFromForge.ForgeRemoteID
