@@ -16,8 +16,9 @@ package kubernetes
 
 import (
 	"fmt"
-	"github.com/rs/zerolog/log"
 	"strings"
+
+	"github.com/rs/zerolog/log"
 
 	v1 "k8s.io/api/core/v1"
 )
@@ -53,19 +54,20 @@ func (nsp *nativeSecretsProcessor) process() error {
 	}
 
 	for _, secret := range nsp.secrets {
-		if secret.isSimple() {
+		switch {
+		case secret.isSimple():
 			simpleSecret, err := secret.toEnvFromSource()
 			if err != nil {
 				return err
 			}
 			nsp.envFromSources = append(nsp.envFromSources, simpleSecret)
-		} else if secret.isAdvanced() {
+		case secret.isAdvanced():
 			advancedSecret, err := secret.toEnvVar()
 			if err != nil {
 				return err
 			}
 			nsp.envVars = append(nsp.envVars, advancedSecret)
-		} else if secret.isFile() {
+		case secret.isFile():
 			volume, err := secret.toVolume()
 			if err != nil {
 				return err
