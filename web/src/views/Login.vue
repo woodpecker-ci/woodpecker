@@ -67,14 +67,6 @@ onMounted(async () => {
   if (route.query.error) {
     const error = route.query.error as keyof typeof authErrorMessages;
     errorMessage.value = authErrorMessages[error] ?? error;
-
-    if (route.query.error_description) {
-      errorMessage.value += `\n${route.query.error_description}`;
-    }
-
-    if (route.query.error_uri) {
-      errorMessage.value += `\n${route.query.error_uri}`;
-    }
   }
 });
 </script>
