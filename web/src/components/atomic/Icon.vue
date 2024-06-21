@@ -25,13 +25,11 @@
     v-else-if="name === 'status-running' || name === 'status-started'"
     class="h-6 w-6"
   />
-  <IBiSlashCircleFill v-else-if="name === 'status-skipped'" class="h-6 w-6" />
+  <IMdiMinusCircle v-else-if="name === 'status-skipped'" class="h-6 w-6" />
   <IMdiCheckCircle v-else-if="name === 'status-success'" class="h-6 w-6" />
-  <IClarityExclamationTriangleSolid v-else-if="name === 'attention'" class="h-6 w-6" />
-  <IClarityExclamationTriangleLine v-else-if="name === 'warning'" class="h-6 w-6" />
+  <IMdiWarning v-else-if="name === 'attention'" class="h-5 w-5" />
+  <IMdiWarningOutline v-else-if="name === 'warning'" class="h-5 w-5" />
   <IMdiErrorOutline v-else-if="name === 'error'" class="h-5 w-5" />
-  <ISimpleIconsGitea v-else-if="name === 'gitea'" class="h-8 w-8" />
-  <ISimpleIconsForgejo v-else-if="name === 'forgejo'" class="h-8 w-8" />
   <IMdiGitlab v-else-if="name === 'gitlab'" class="h-8 w-8" />
   <IMdiBitbucket v-else-if="name === 'bitbucket' || name === 'bitbucket-dc'" class="h-8 w-8" />
   <IMdiQuestionMarkCircleOutline v-else-if="name === 'question'" class="h-6 w-6" />
@@ -48,16 +46,14 @@
   <IMdiDownloadOff v-else-if="name === 'auto-scroll-off'" class="h-6 w-6" />
   <IMdiPlayArrow v-else-if="name === 'play'" class="h-6 w-6" />
   <IMdiPause v-else-if="name === 'pause'" class="h-6 w-6" />
-  <ISvgSpinners180RingWithBg v-else-if="name === 'spinner'" class="h-6 w-6" />
   <IMdiClose v-else-if="name === 'times'" class="h-6 w-6" />
+  <ISimpleIconsGitea v-else-if="name === 'gitea'" class="h-8 w-8" />
+  <ISimpleIconsForgejo v-else-if="name === 'forgejo'" class="h-8 w-8" />
+  <ISvgSpinners180RingWithBg v-else-if="name === 'spinner'" class="h-6 w-6" />
   <div v-else-if="name === 'blank'" class="h-6 w-6" />
 </template>
 
 <script lang="ts" setup>
-import IBiSlashCircleFill from '~icons/bi/slash-circle-fill';
-import IMdiPackageVariant from '~icons/mdi/package-variant';
-import IClarityExclamationTriangleLine from '~icons/clarity/exclamation-triangle-line';
-import IClarityExclamationTriangleSolid from '~icons/clarity/exclamation-triangle-solid';
 import IMdiAdd from '~icons/mdi/add';
 import IMdiAlarmClock from '~icons/mdi/alarm-clock';
 import IMdiArrowLeft from '~icons/mdi/arrow-left';
@@ -78,6 +74,8 @@ import IMdiGestureTap from '~icons/mdi/gesture-tap';
 import IMdiGit from '~icons/mdi/git';
 import IMdiGithub from '~icons/mdi/github';
 import IMdiGitlab from '~icons/mdi/gitlab';
+import IMdiMinusCircle from '~icons/mdi/minus-circle';
+import IMdiPackageVariant from '~icons/mdi/package-variant';
 import IMdiPause from '~icons/mdi/pause';
 import IMdiPlaster from '~icons/mdi/plaster';
 import IMdiPlay from '~icons/mdi/play';
@@ -95,6 +93,8 @@ import IMdiStop from '~icons/mdi/stop';
 import IMdiTagOutline from '~icons/mdi/tag-outline';
 import IMdiTimelapse from '~icons/mdi/timelapse';
 import IMdiTrashCanOutline from '~icons/mdi/trash-can-outline';
+import IMdiWarning from '~icons/mdi/warning';
+import IMdiWarningOutline from '~icons/mdi/warning-outline';
 import ISimpleIconsForgejo from '~icons/simple-icons/forgejo';
 import ISimpleIconsGitea from '~icons/simple-icons/gitea';
 import ISvgSpinners180RingWithBg from '~icons/svg-spinners/180-ring-with-bg';
