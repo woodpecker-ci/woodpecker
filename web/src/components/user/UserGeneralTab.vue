@@ -28,6 +28,8 @@ import Settings from '~/components/layout/Settings.vue';
 import { setI18nLanguage } from '~/compositions/useI18n';
 import { useTheme } from '~/compositions/useTheme';
 
+import InputField from '../form/InputField.vue';
+
 const { locale } = useI18n();
 const { storeTheme } = useTheme();
 

@@ -49,6 +49,7 @@ import { computed, onMounted, provide, ref, toRef, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 
+import Button from '~/components/atomic/Button.vue';
 import type { IconNames } from '~/components/atomic/Icon.vue';
 import IconButton from '~/components/atomic/IconButton.vue';
 import ManualPipelinePopup from '~/components/layout/popups/ManualPipelinePopup.vue';

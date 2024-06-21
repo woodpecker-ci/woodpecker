@@ -104,6 +104,7 @@ import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 
 import Button from '~/components/atomic/Button.vue';
+import Icon from '~/components/atomic/Icon.vue';
 import DeployPipelinePopup from '~/components/layout/popups/DeployPipelinePopup.vue';
 import Scaffold from '~/components/layout/scaffold/Scaffold.vue';
 import Tab from '~/components/layout/scaffold/Tab.vue';
