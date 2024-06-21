@@ -557,7 +557,7 @@ var unifyColumnsTables = xormigrate.Migration{
 		if err := renameColumn(sess, "tasks", "task_run_on", "run_on"); err != nil {
 			return err
 		}
-		if err := renameColumn(sess, "tasks", "task_dep_status", "dep_status"); err != nil {
+		if err := renameColumn(sess, "tasks", "task_dep_status", "dependencies_status"); err != nil {
 			return err
 		}
 
