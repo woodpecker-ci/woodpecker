@@ -172,11 +172,11 @@ steps:
       - event: [manual, tag]
 
   - name: upload cache
-    image: anbraten/s3cache
+    image: plugins/s3-cache
     pull: true
     settings:
-      mode: upload
-      paths:
+      mode: rebuild
+      mount:
         - docs/node_modules
         - docs/.docusaurus
         - docs/build
@@ -188,5 +188,7 @@ steps:
         from_secret: s3_access_key
       secret_key:
         from_secret: s3_secret_key
+      restore: true
+      filename: cache-${CI_REPO}.tar
     when:
-      - event: pull_request
+      - event: push
