@@ -1,6 +1,6 @@
 # Changelog
 
-## [2.7.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.7.0) - 2024-06-20
+## [2.7.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.7.0) - 2024-06-22
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -9,6 +9,12 @@
 ### ✨ Features
 
 - Add api for forges [[#3733](https://github.com/woodpecker-ci/woodpecker/pull/3733)]
+
+### 🐛 Bug Fixes
+
+- Cleanup of the login flow and tests [[#3810](https://github.com/woodpecker-ci/woodpecker/pull/3810)]
+- Fix newlines in logs [[#3808](https://github.com/woodpecker-ci/woodpecker/pull/3808)]
+- Fix authentication error handling [[#3807](https://github.com/woodpecker-ci/woodpecker/pull/3807)]
 
 ### 📚 Documentation
 
