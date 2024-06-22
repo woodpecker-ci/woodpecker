@@ -30,7 +30,7 @@ func TestHook(t *testing.T) {
 
 	g := goblin.Goblin(t)
 	g.Describe("Hook", func() {
-		g.It("should handle errors from the callback", func() {
+		g.It("should handle a correct webhook payload", func() {
 			_manager := mocks_services.NewManager(t)
 			_forge := mocks_forge.NewForge(t)
 			_store := mocks_store.NewStore(t)
