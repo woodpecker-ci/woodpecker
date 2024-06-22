@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package mock_test
+package dummy_test
 
 import (
 	"context"
@@ -21,33 +21,33 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/mock"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/dummy"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 )
 
-func TestSmalPipelineMockRun(t *testing.T) {
-	mockEngine := mock.New()
+func TestSmalPipelineDummyRun(t *testing.T) {
+	dummyEngine := dummy.New()
 	ctx := context.Background()
 
-	assert.True(t, mockEngine.IsAvailable(ctx))
-	assert.EqualValues(t, "mock", mockEngine.Name())
-	_, err := mockEngine.Load(ctx)
+	assert.True(t, dummyEngine.IsAvailable(ctx))
+	assert.EqualValues(t, "dummy", dummyEngine.Name())
+	_, err := dummyEngine.Load(ctx)
 	assert.NoError(t, err)
 
 	t.Run("expect fail of step func with non setup workflow", func(t *testing.T) {
 		step := &types.Step{Name: "step1", UUID: "SID_1"}
 		nonExistWorkflowID := "WID_NONE"
 
-		err := mockEngine.StartStep(ctx, step, nonExistWorkflowID)
+		err := dummyEngine.StartStep(ctx, step, nonExistWorkflowID)
 		assert.Error(t, err)
 
-		_, err = mockEngine.TailStep(ctx, step, nonExistWorkflowID)
+		_, err = dummyEngine.TailStep(ctx, step, nonExistWorkflowID)
 		assert.Error(t, err)
 
-		_, err = mockEngine.WaitStep(ctx, step, nonExistWorkflowID)
+		_, err = dummyEngine.WaitStep(ctx, step, nonExistWorkflowID)
 		assert.Error(t, err)
 
-		err = mockEngine.DestroyStep(ctx, step, nonExistWorkflowID)
+		err = dummyEngine.DestroyStep(ctx, step, nonExistWorkflowID)
 		assert.Error(t, err)
 	})
 
@@ -60,75 +60,75 @@ func TestSmalPipelineMockRun(t *testing.T) {
 		}
 		workflowUUID := "WID_1"
 
-		assert.NoError(t, mockEngine.SetupWorkflow(ctx, nil, workflowUUID))
+		assert.NoError(t, dummyEngine.SetupWorkflow(ctx, nil, workflowUUID))
 
-		assert.NoError(t, mockEngine.StartStep(ctx, step, workflowUUID))
+		assert.NoError(t, dummyEngine.StartStep(ctx, step, workflowUUID))
 
-		reader, err := mockEngine.TailStep(ctx, step, workflowUUID)
+		reader, err := dummyEngine.TailStep(ctx, step, workflowUUID)
 		assert.NoError(t, err)
 		log, err := io.ReadAll(reader)
 		assert.NoError(t, err)
 		assert.EqualValues(t, "StepName: step1\nStepType: \nStepUUID: SID_1StepCommands:\n\necho ja\necho nein\n", string(log))
 
-		state, err := mockEngine.WaitStep(ctx, step, workflowUUID)
+		state, err := dummyEngine.WaitStep(ctx, step, workflowUUID)
 		assert.NoError(t, err)
 		assert.NoError(t, state.Error)
 		assert.EqualValues(t, 0, state.ExitCode)
 
-		assert.NoError(t, mockEngine.DestroyStep(ctx, step, workflowUUID))
+		assert.NoError(t, dummyEngine.DestroyStep(ctx, step, workflowUUID))
 
-		assert.NoError(t, mockEngine.DestroyWorkflow(ctx, nil, workflowUUID))
+		assert.NoError(t, dummyEngine.DestroyWorkflow(ctx, nil, workflowUUID))
 	})
 
 	t.Run("step exec error", func(t *testing.T) {
 		step := &types.Step{
-			Name:        mock.StepExecError,
+			Name:        dummy.StepExecError,
 			UUID:        "SID_2",
 			Type:        types.StepTypePlugin,
-			Environment: map[string]string{mock.EnvKeyStepType: "plugin"},
+			Environment: map[string]string{dummy.EnvKeyStepType: "plugin"},
 		}
 		workflowUUID := "WID_1"
 
-		assert.NoError(t, mockEngine.SetupWorkflow(ctx, nil, workflowUUID))
+		assert.NoError(t, dummyEngine.SetupWorkflow(ctx, nil, workflowUUID))
 
-		assert.NoError(t, mockEngine.StartStep(ctx, step, workflowUUID))
+		assert.NoError(t, dummyEngine.StartStep(ctx, step, workflowUUID))
 
-		_, err := mockEngine.TailStep(ctx, step, workflowUUID)
+		_, err := dummyEngine.TailStep(ctx, step, workflowUUID)
 		assert.NoError(t, err)
 
-		state, err := mockEngine.WaitStep(ctx, step, workflowUUID)
+		state, err := dummyEngine.WaitStep(ctx, step, workflowUUID)
 		assert.NoError(t, err)
 		assert.NoError(t, state.Error)
 		assert.EqualValues(t, 1, state.ExitCode)
 
-		assert.NoError(t, mockEngine.DestroyStep(ctx, step, workflowUUID))
+		assert.NoError(t, dummyEngine.DestroyStep(ctx, step, workflowUUID))
 
-		assert.NoError(t, mockEngine.DestroyWorkflow(ctx, nil, workflowUUID))
+		assert.NoError(t, dummyEngine.DestroyWorkflow(ctx, nil, workflowUUID))
 	})
 
 	t.Run("step start fail", func(t *testing.T) {
 		step := &types.Step{
-			Name:        mock.StepStartFail,
+			Name:        dummy.StepStartFail,
 			UUID:        "SID_2",
 			Type:        types.StepTypeService,
-			Environment: map[string]string{mock.EnvKeyStepType: "service"},
+			Environment: map[string]string{dummy.EnvKeyStepType: "service"},
 		}
 		workflowUUID := "WID_1"
 
-		assert.NoError(t, mockEngine.SetupWorkflow(ctx, nil, workflowUUID))
+		assert.NoError(t, dummyEngine.SetupWorkflow(ctx, nil, workflowUUID))
 
-		assert.Error(t, mockEngine.StartStep(ctx, step, workflowUUID))
+		assert.Error(t, dummyEngine.StartStep(ctx, step, workflowUUID))
 
-		_, err := mockEngine.TailStep(ctx, step, workflowUUID)
+		_, err := dummyEngine.TailStep(ctx, step, workflowUUID)
 		assert.Error(t, err)
 
-		state, err := mockEngine.WaitStep(ctx, step, workflowUUID)
+		state, err := dummyEngine.WaitStep(ctx, step, workflowUUID)
 		assert.Error(t, err)
 		assert.Error(t, state.Error)
 		assert.EqualValues(t, 0, state.ExitCode)
 
-		assert.Error(t, mockEngine.DestroyStep(ctx, step, workflowUUID))
+		assert.Error(t, dummyEngine.DestroyStep(ctx, step, workflowUUID))
 
-		assert.NoError(t, mockEngine.DestroyWorkflow(ctx, nil, workflowUUID))
+		assert.NoError(t, dummyEngine.DestroyWorkflow(ctx, nil, workflowUUID))
 	})
 }

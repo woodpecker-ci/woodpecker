@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package mock
+package dummy
 
 import (
 	"context"
@@ -28,12 +28,12 @@ import (
 	backend "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 )
 
-type mock struct {
+type dummy struct {
 	kv sync.Map
 }
 
 const (
-	// Step names to control mock behavior.
+	// Step names to control step behavior of dummy backend.
 	StepStartFail   = "step_start_fail"
 	StepExecError   = "step_exec_error"
 	EnvKeyStepSleep = "SLEEP"
@@ -45,39 +45,39 @@ const (
 	testServiceTimeout = 1 * time.Second
 )
 
-// New returns a new Docker Backend.
+// New returns a dummy backend.
 func New() backend.Backend {
-	return &mock{
+	return &dummy{
 		kv: sync.Map{},
 	}
 }
 
-func (e *mock) Name() string {
-	return "mock"
+func (e *dummy) Name() string {
+	return "dummy"
 }
 
-func (e *mock) IsAvailable(_ context.Context) bool {
+func (e *dummy) IsAvailable(_ context.Context) bool {
 	return true
 }
 
-func (e *mock) Flags() []cli.Flag {
+func (e *dummy) Flags() []cli.Flag {
 	return nil
 }
 
 // Load new client for Docker Backend using environment variables.
-func (e *mock) Load(_ context.Context) (*backend.BackendInfo, error) {
+func (e *dummy) Load(_ context.Context) (*backend.BackendInfo, error) {
 	return &backend.BackendInfo{
-		Platform: "mock",
+		Platform: "dummy",
 	}, nil
 }
 
-func (e *mock) SetupWorkflow(_ context.Context, _ *backend.Config, taskUUID string) error {
+func (e *dummy) SetupWorkflow(_ context.Context, _ *backend.Config, taskUUID string) error {
 	log.Trace().Str("taskUUID", taskUUID).Msg("create workflow environment")
 	e.kv.Store("task_"+taskUUID, "setup")
 	return nil
 }
 
-func (e *mock) StartStep(_ context.Context, step *backend.Step, taskUUID string) error {
+func (e *dummy) StartStep(_ context.Context, step *backend.Step, taskUUID string) error {
 	log.Trace().Str("taskUUID", taskUUID).Msgf("start step %s", step.Name)
 
 	// internal state checks
@@ -104,7 +104,7 @@ func (e *mock) StartStep(_ context.Context, step *backend.Step, taskUUID string)
 	return nil
 }
 
-func (e *mock) WaitStep(ctx context.Context, step *backend.Step, taskUUID string) (*backend.State, error) {
+func (e *dummy) WaitStep(ctx context.Context, step *backend.Step, taskUUID string) (*backend.State, error) {
 	log.Trace().Str("taskUUID", taskUUID).Msgf("wait for step %s", step.Name)
 
 	_, exist := e.kv.Load("task_" + taskUUID)
@@ -163,7 +163,7 @@ func (e *mock) WaitStep(ctx context.Context, step *backend.Step, taskUUID string
 	}, nil
 }
 
-func (e *mock) TailStep(_ context.Context, step *backend.Step, taskUUID string) (io.ReadCloser, error) {
+func (e *dummy) TailStep(_ context.Context, step *backend.Step, taskUUID string) (io.ReadCloser, error) {
 	log.Trace().Str("taskUUID", taskUUID).Msgf("tail logs of step %s", step.Name)
 
 	_, exist := e.kv.Load("task_" + taskUUID)
@@ -185,7 +185,7 @@ func (e *mock) TailStep(_ context.Context, step *backend.Step, taskUUID string) 
 	)), nil
 }
 
-func (e *mock) DestroyStep(_ context.Context, step *backend.Step, taskUUID string) error {
+func (e *dummy) DestroyStep(_ context.Context, step *backend.Step, taskUUID string) error {
 	log.Trace().Str("taskUUID", taskUUID).Msgf("stop step %s", step.Name)
 
 	_, exist := e.kv.Load("task_" + taskUUID)
@@ -206,7 +206,7 @@ func (e *mock) DestroyStep(_ context.Context, step *backend.Step, taskUUID strin
 	return nil
 }
 
-func (e *mock) DestroyWorkflow(_ context.Context, _ *backend.Config, taskUUID string) error {
+func (e *dummy) DestroyWorkflow(_ context.Context, _ *backend.Config, taskUUID string) error {
 	log.Trace().Str("taskUUID", taskUUID).Msgf("delete workflow environment")
 
 	_, exist := e.kv.Load("task_" + taskUUID)
