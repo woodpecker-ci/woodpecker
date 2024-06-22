@@ -8,7 +8,7 @@ ifeq ($(TARGETOS),windows)
 	BIN_SUFFIX := .exe
 endif
 
-DESTDIR ?= dist
+DIST_DIR ?= dist
 
 VERSION ?= next
 VERSION_NUMBER ?= 0.0.0
@@ -105,7 +105,7 @@ clean: ## Clean build artifacts
 
 .PHONY: clean-all
 clean-all: clean ## Clean all artifacts
-	rm -rf ${DESTDIR} web/dist docs/build docs/node_modules web/node_modules
+	rm -rf ${DIST_DIR} web/dist docs/build docs/node_modules web/node_modules
 	# delete generated
 	rm -rf docs/docs/40-cli.md docs/swagger.json
 
@@ -195,16 +195,16 @@ build-ui: ## Build UI
 	(cd web/; pnpm install --frozen-lockfile; pnpm build)
 
 build-server: build-ui generate-swagger ## Build server
-	CGO_ENABLED=${CGO_ENABLED} GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -ldflags '${LDFLAGS}' -o ${DESTDIR}/woodpecker-server${BIN_SUFFIX} go.woodpecker-ci.org/woodpecker/v2/cmd/server
+	CGO_ENABLED=${CGO_ENABLED} GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -ldflags '${LDFLAGS}' -o ${DIST_DIR}/woodpecker-server${BIN_SUFFIX} go.woodpecker-ci.org/woodpecker/v2/cmd/server
 
 build-agent: ## Build agent
-	CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -ldflags '${LDFLAGS}' -o ${DESTDIR}/woodpecker-agent${BIN_SUFFIX} go.woodpecker-ci.org/woodpecker/v2/cmd/agent
+	CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -ldflags '${LDFLAGS}' -o ${DIST_DIR}/woodpecker-agent${BIN_SUFFIX} go.woodpecker-ci.org/woodpecker/v2/cmd/agent
 
 build-cli: ## Build cli
-	CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -ldflags '${LDFLAGS}' -o ${DESTDIR}/woodpecker-cli${BIN_SUFFIX} go.woodpecker-ci.org/woodpecker/v2/cmd/cli
+	CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -ldflags '${LDFLAGS}' -o ${DIST_DIR}/woodpecker-cli${BIN_SUFFIX} go.woodpecker-ci.org/woodpecker/v2/cmd/cli
 
 build-tarball: ## Build tar archive
-	mkdir -p ${DESTDIR} && tar chzvf ${DESTDIR}/woodpecker-src.tar.gz \
+	mkdir -p ${DIST_DIR} && tar chzvf ${DIST_DIR}/woodpecker-src.tar.gz \
 	  --exclude="*.exe" \
 	  --exclude="./.pnpm-store" \
 	  --exclude="node_modules" \
@@ -226,7 +226,7 @@ cross-compile-server: ## Cross compile the server
 		TARGETARCH_BUILDX=$(subst arm64/v8,arm64,$(subst arm/v7,arm,$(word 2,$(subst |, ,$(platform))))) \
 		make release-server-xgo || exit 1; \
 	)
-	tree ${DESTDIR}
+	tree ${DIST_DIR}
 
 release-server-xgo: check-xgo ## Create server binaries for release using xgo
 	@echo "Building for:"
@@ -235,57 +235,57 @@ release-server-xgo: check-xgo ## Create server binaries for release using xgo
 	@echo "arch (xgo):$(TARGETARCH_XGO)"
 	@echo "arch (buildx):$(TARGETARCH_BUILDX)"
 
-	CGO_CFLAGS="$(CGO_CFLAGS)" xgo -go $(XGO_VERSION) -dest ${DESTDIR}/server/$(TARGETOS)_$(TARGETARCH_BUILDX) -tags 'netgo osusergo grpcnotrace $(TAGS)' -ldflags '-linkmode external $(LDFLAGS)' -targets '$(TARGETOS)/$(TARGETARCH_XGO)' -out woodpecker-server -pkg cmd/server .
+	CGO_CFLAGS="$(CGO_CFLAGS)" xgo -go $(XGO_VERSION) -dest ${DIST_DIR}/server/$(TARGETOS)_$(TARGETARCH_BUILDX) -tags 'netgo osusergo grpcnotrace $(TAGS)' -ldflags '-linkmode external $(LDFLAGS)' -targets '$(TARGETOS)/$(TARGETARCH_XGO)' -out woodpecker-server -pkg cmd/server .
 	@if [ "$${XGO_IN_XGO:-0}" -eq "1" ]; then echo "inside xgo image"; \
-	  mkdir -p ${DESTDIR}/server/$(TARGETOS)_$(TARGETARCH_BUILDX); \
-	  mv -vf /build/woodpecker-server* ${DESTDIR}/server/$(TARGETOS)_$(TARGETARCH_BUILDX)/woodpecker-server$(BIN_SUFFIX); \
+	  mkdir -p ${DIST_DIR}/server/$(TARGETOS)_$(TARGETARCH_BUILDX); \
+	  mv -vf /build/woodpecker-server* ${DIST_DIR}/server/$(TARGETOS)_$(TARGETARCH_BUILDX)/woodpecker-server$(BIN_SUFFIX); \
 	else echo "outside xgo image"; \
-	  [ -f "${DESTDIR}/server/$(TARGETOS)_$(TARGETARCH_BUILDX)/woodpecker-server$(BIN_SUFFIX)" ] && rm -v ${DESTDIR}/server/$(TARGETOS)_$(TARGETARCH_BUILDX)/woodpecker-server$(BIN_SUFFIX); \
-	  mv -v ${DESTDIR}/server/$(TARGETOS)_$(TARGETARCH_XGO)/woodpecker-server* ${DESTDIR}/server/$(TARGETOS)_$(TARGETARCH_BUILDX)/woodpecker-server$(BIN_SUFFIX); \
+	  [ -f "${DIST_DIR}/server/$(TARGETOS)_$(TARGETARCH_BUILDX)/woodpecker-server$(BIN_SUFFIX)" ] && rm -v ${DIST_DIR}/server/$(TARGETOS)_$(TARGETARCH_BUILDX)/woodpecker-server$(BIN_SUFFIX); \
+	  mv -v ${DIST_DIR}/server/$(TARGETOS)_$(TARGETARCH_XGO)/woodpecker-server* ${DIST_DIR}/server/$(TARGETOS)_$(TARGETARCH_BUILDX)/woodpecker-server$(BIN_SUFFIX); \
 	fi
-	@[ "$${TARGZ:-0}" -eq "1" ] && tar -cvzf ${DESTDIR}/woodpecker-server_$(TARGETOS)_$(TARGETARCH_BUILDX).tar.gz -C ${DESTDIR}/server/$(TARGETOS)_$(TARGETARCH_BUILDX) woodpecker-server$(BIN_SUFFIX) || echo "skip creating '${DESTDIR}/woodpecker-server_$(TARGETOS)_$(TARGETARCH_BUILDX).tar.gz'"
+	@[ "$${TARGZ:-0}" -eq "1" ] && tar -cvzf ${DIST_DIR}/woodpecker-server_$(TARGETOS)_$(TARGETARCH_BUILDX).tar.gz -C ${DIST_DIR}/server/$(TARGETOS)_$(TARGETARCH_BUILDX) woodpecker-server$(BIN_SUFFIX) || echo "skip creating '${DIST_DIR}/woodpecker-server_$(TARGETOS)_$(TARGETARCH_BUILDX).tar.gz'"
 
 release-server: ## Create server binaries for release
 	# compile
-	GOOS=$(TARGETOS) GOARCH=$(TARGETARCH) CGO_ENABLED=${CGO_ENABLED} go build -ldflags '${LDFLAGS}' -tags 'grpcnotrace $(TAGS)' -o ${DESTDIR}/server/$(TARGETOS)_$(TARGETARCH)/woodpecker-server$(BIN_SUFFIX) go.woodpecker-ci.org/woodpecker/v2/cmd/server
+	GOOS=$(TARGETOS) GOARCH=$(TARGETARCH) CGO_ENABLED=${CGO_ENABLED} go build -ldflags '${LDFLAGS}' -tags 'grpcnotrace $(TAGS)' -o ${DIST_DIR}/server/$(TARGETOS)_$(TARGETARCH)/woodpecker-server$(BIN_SUFFIX) go.woodpecker-ci.org/woodpecker/v2/cmd/server
 	# tar binary files
-	tar -cvzf ${DESTDIR}/woodpecker-server_$(TARGETOS)_$(TARGETARCH).tar.gz -C ${DESTDIR}/server/$(TARGETOS)_$(TARGETARCH) woodpecker-server$(BIN_SUFFIX)
+	tar -cvzf ${DIST_DIR}/woodpecker-server_$(TARGETOS)_$(TARGETARCH).tar.gz -C ${DIST_DIR}/server/$(TARGETOS)_$(TARGETARCH) woodpecker-server$(BIN_SUFFIX)
 
 release-agent: ## Create agent binaries for release
 	# compile
-	GOOS=linux   GOARCH=amd64 CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -tags 'grpcnotrace $(TAGS)' -o ${DESTDIR}/agent/linux_amd64/woodpecker-agent       go.woodpecker-ci.org/woodpecker/v2/cmd/agent
-	GOOS=linux   GOARCH=arm64 CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -tags 'grpcnotrace $(TAGS)' -o ${DESTDIR}/agent/linux_arm64/woodpecker-agent       go.woodpecker-ci.org/woodpecker/v2/cmd/agent
-	GOOS=linux   GOARCH=arm   CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -tags 'grpcnotrace $(TAGS)' -o ${DESTDIR}/agent/linux_arm/woodpecker-agent         go.woodpecker-ci.org/woodpecker/v2/cmd/agent
-	GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -tags 'grpcnotrace $(TAGS)' -o ${DESTDIR}/agent/windows_amd64/woodpecker-agent.exe go.woodpecker-ci.org/woodpecker/v2/cmd/agent
-	GOOS=darwin  GOARCH=amd64 CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -tags 'grpcnotrace $(TAGS)' -o ${DESTDIR}/agent/darwin_amd64/woodpecker-agent      go.woodpecker-ci.org/woodpecker/v2/cmd/agent
-	GOOS=darwin  GOARCH=arm64 CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -tags 'grpcnotrace $(TAGS)' -o ${DESTDIR}/agent/darwin_arm64/woodpecker-agent      go.woodpecker-ci.org/woodpecker/v2/cmd/agent
+	GOOS=linux   GOARCH=amd64 CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -tags 'grpcnotrace $(TAGS)' -o ${DIST_DIR}/agent/linux_amd64/woodpecker-agent       go.woodpecker-ci.org/woodpecker/v2/cmd/agent
+	GOOS=linux   GOARCH=arm64 CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -tags 'grpcnotrace $(TAGS)' -o ${DIST_DIR}/agent/linux_arm64/woodpecker-agent       go.woodpecker-ci.org/woodpecker/v2/cmd/agent
+	GOOS=linux   GOARCH=arm   CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -tags 'grpcnotrace $(TAGS)' -o ${DIST_DIR}/agent/linux_arm/woodpecker-agent         go.woodpecker-ci.org/woodpecker/v2/cmd/agent
+	GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -tags 'grpcnotrace $(TAGS)' -o ${DIST_DIR}/agent/windows_amd64/woodpecker-agent.exe go.woodpecker-ci.org/woodpecker/v2/cmd/agent
+	GOOS=darwin  GOARCH=amd64 CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -tags 'grpcnotrace $(TAGS)' -o ${DIST_DIR}/agent/darwin_amd64/woodpecker-agent      go.woodpecker-ci.org/woodpecker/v2/cmd/agent
+	GOOS=darwin  GOARCH=arm64 CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -tags 'grpcnotrace $(TAGS)' -o ${DIST_DIR}/agent/darwin_arm64/woodpecker-agent      go.woodpecker-ci.org/woodpecker/v2/cmd/agent
 	# tar binary files
-	tar -cvzf ${DESTDIR}/woodpecker-agent_linux_amd64.tar.gz   -C ${DESTDIR}/agent/linux_amd64   woodpecker-agent
-	tar -cvzf ${DESTDIR}/woodpecker-agent_linux_arm64.tar.gz   -C ${DESTDIR}/agent/linux_arm64   woodpecker-agent
-	tar -cvzf ${DESTDIR}/woodpecker-agent_linux_arm.tar.gz     -C ${DESTDIR}/agent/linux_arm     woodpecker-agent
-	tar -cvzf ${DESTDIR}/woodpecker-agent_windows_amd64.tar.gz -C ${DESTDIR}/agent/windows_amd64 woodpecker-agent.exe
-	tar -cvzf ${DESTDIR}/woodpecker-agent_darwin_amd64.tar.gz  -C ${DESTDIR}/agent/darwin_amd64  woodpecker-agent
-	tar -cvzf ${DESTDIR}/woodpecker-agent_darwin_arm64.tar.gz  -C ${DESTDIR}/agent/darwin_arm64  woodpecker-agent
+	tar -cvzf ${DIST_DIR}/woodpecker-agent_linux_amd64.tar.gz   -C ${DIST_DIR}/agent/linux_amd64   woodpecker-agent
+	tar -cvzf ${DIST_DIR}/woodpecker-agent_linux_arm64.tar.gz   -C ${DIST_DIR}/agent/linux_arm64   woodpecker-agent
+	tar -cvzf ${DIST_DIR}/woodpecker-agent_linux_arm.tar.gz     -C ${DIST_DIR}/agent/linux_arm     woodpecker-agent
+	tar -cvzf ${DIST_DIR}/woodpecker-agent_windows_amd64.tar.gz -C ${DIST_DIR}/agent/windows_amd64 woodpecker-agent.exe
+	tar -cvzf ${DIST_DIR}/woodpecker-agent_darwin_amd64.tar.gz  -C ${DIST_DIR}/agent/darwin_amd64  woodpecker-agent
+	tar -cvzf ${DIST_DIR}/woodpecker-agent_darwin_arm64.tar.gz  -C ${DIST_DIR}/agent/darwin_arm64  woodpecker-agent
 
 release-cli: ## Create cli binaries for release
 	# compile
-	GOOS=linux   GOARCH=amd64 CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -o ${DESTDIR}/cli/linux_amd64/woodpecker-cli       go.woodpecker-ci.org/woodpecker/v2/cmd/cli
-	GOOS=linux   GOARCH=arm64 CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -o ${DESTDIR}/cli/linux_arm64/woodpecker-cli       go.woodpecker-ci.org/woodpecker/v2/cmd/cli
-	GOOS=linux   GOARCH=arm   CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -o ${DESTDIR}/cli/linux_arm/woodpecker-cli         go.woodpecker-ci.org/woodpecker/v2/cmd/cli
-	GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -o ${DESTDIR}/cli/windows_amd64/woodpecker-cli.exe go.woodpecker-ci.org/woodpecker/v2/cmd/cli
-	GOOS=darwin  GOARCH=amd64 CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -o ${DESTDIR}/cli/darwin_amd64/woodpecker-cli      go.woodpecker-ci.org/woodpecker/v2/cmd/cli
-	GOOS=darwin  GOARCH=arm64 CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -o ${DESTDIR}/cli/darwin_arm64/woodpecker-cli      go.woodpecker-ci.org/woodpecker/v2/cmd/cli
+	GOOS=linux   GOARCH=amd64 CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -o ${DIST_DIR}/cli/linux_amd64/woodpecker-cli       go.woodpecker-ci.org/woodpecker/v2/cmd/cli
+	GOOS=linux   GOARCH=arm64 CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -o ${DIST_DIR}/cli/linux_arm64/woodpecker-cli       go.woodpecker-ci.org/woodpecker/v2/cmd/cli
+	GOOS=linux   GOARCH=arm   CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -o ${DIST_DIR}/cli/linux_arm/woodpecker-cli         go.woodpecker-ci.org/woodpecker/v2/cmd/cli
+	GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -o ${DIST_DIR}/cli/windows_amd64/woodpecker-cli.exe go.woodpecker-ci.org/woodpecker/v2/cmd/cli
+	GOOS=darwin  GOARCH=amd64 CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -o ${DIST_DIR}/cli/darwin_amd64/woodpecker-cli      go.woodpecker-ci.org/woodpecker/v2/cmd/cli
+	GOOS=darwin  GOARCH=arm64 CGO_ENABLED=0 go build -ldflags '${LDFLAGS}' -o ${DIST_DIR}/cli/darwin_arm64/woodpecker-cli      go.woodpecker-ci.org/woodpecker/v2/cmd/cli
 	# tar binary files
-	tar -cvzf ${DESTDIR}/woodpecker-cli_linux_amd64.tar.gz   -C ${DESTDIR}/cli/linux_amd64   woodpecker-cli
-	tar -cvzf ${DESTDIR}/woodpecker-cli_linux_arm64.tar.gz   -C ${DESTDIR}/cli/linux_arm64   woodpecker-cli
-	tar -cvzf ${DESTDIR}/woodpecker-cli_linux_arm.tar.gz     -C ${DESTDIR}/cli/linux_arm     woodpecker-cli
-	tar -cvzf ${DESTDIR}/woodpecker-cli_windows_amd64.tar.gz -C ${DESTDIR}/cli/windows_amd64 woodpecker-cli.exe
-	tar -cvzf ${DESTDIR}/woodpecker-cli_darwin_amd64.tar.gz  -C ${DESTDIR}/cli/darwin_amd64  woodpecker-cli
-	tar -cvzf ${DESTDIR}/woodpecker-cli_darwin_arm64.tar.gz  -C ${DESTDIR}/cli/darwin_arm64  woodpecker-cli
+	tar -cvzf ${DIST_DIR}/woodpecker-cli_linux_amd64.tar.gz   -C ${DIST_DIR}/cli/linux_amd64   woodpecker-cli
+	tar -cvzf ${DIST_DIR}/woodpecker-cli_linux_arm64.tar.gz   -C ${DIST_DIR}/cli/linux_arm64   woodpecker-cli
+	tar -cvzf ${DIST_DIR}/woodpecker-cli_linux_arm.tar.gz     -C ${DIST_DIR}/cli/linux_arm     woodpecker-cli
+	tar -cvzf ${DIST_DIR}/woodpecker-cli_windows_amd64.tar.gz -C ${DIST_DIR}/cli/windows_amd64 woodpecker-cli.exe
+	tar -cvzf ${DIST_DIR}/woodpecker-cli_darwin_amd64.tar.gz  -C ${DIST_DIR}/cli/darwin_amd64  woodpecker-cli
+	tar -cvzf ${DIST_DIR}/woodpecker-cli_darwin_arm64.tar.gz  -C ${DIST_DIR}/cli/darwin_arm64  woodpecker-cli
 
 release-checksums: ## Create checksums for all release files
 	# generate shas for tar files
-	(cd ${DESTDIR}/; sha256sum *.* > checksums.txt)
+	(cd ${DIST_DIR}/; sha256sum *.* > checksums.txt)
 
 .PHONY: release
 release: release-frontend release-server release-agent release-cli ## Release all binaries
@@ -294,16 +294,16 @@ bundle-prepare: ## Prepare the bundles
 	go install github.com/goreleaser/nfpm/v2/cmd/nfpm@v2.6.0
 
 bundle-agent: bundle-prepare ## Create bundles for agent
-	VERSION_NUMBER=$(VERSION_NUMBER) nfpm package --config ./nfpm/agent.yaml --target ${DESTDIR} --packager deb
-	VERSION_NUMBER=$(VERSION_NUMBER) nfpm package --config ./nfpm/agent.yaml --target ${DESTDIR} --packager rpm
+	VERSION_NUMBER=$(VERSION_NUMBER) nfpm package --config ./nfpm/agent.yaml --target ${DIST_DIR} --packager deb
+	VERSION_NUMBER=$(VERSION_NUMBER) nfpm package --config ./nfpm/agent.yaml --target ${DIST_DIR} --packager rpm
 
 bundle-server: bundle-prepare ## Create bundles for server
-	VERSION_NUMBER=$(VERSION_NUMBER) nfpm package --config ./nfpm/server.yaml --target ${DESTDIR} --packager deb
-	VERSION_NUMBER=$(VERSION_NUMBER) nfpm package --config ./nfpm/server.yaml --target ${DESTDIR} --packager rpm
+	VERSION_NUMBER=$(VERSION_NUMBER) nfpm package --config ./nfpm/server.yaml --target ${DIST_DIR} --packager deb
+	VERSION_NUMBER=$(VERSION_NUMBER) nfpm package --config ./nfpm/server.yaml --target ${DIST_DIR} --packager rpm
 
 bundle-cli: bundle-prepare ## Create bundles for cli
-	VERSION_NUMBER=$(VERSION_NUMBER) nfpm package --config ./nfpm/cli.yaml --target ${DESTDIR} --packager deb
-	VERSION_NUMBER=$(VERSION_NUMBER) nfpm package --config ./nfpm/cli.yaml --target ${DESTDIR} --packager rpm
+	VERSION_NUMBER=$(VERSION_NUMBER) nfpm package --config ./nfpm/cli.yaml --target ${DIST_DIR} --packager deb
+	VERSION_NUMBER=$(VERSION_NUMBER) nfpm package --config ./nfpm/cli.yaml --target ${DIST_DIR} --packager rpm
 
 .PHONY: bundle
 bundle: bundle-agent bundle-server bundle-cli ## Create all bundles
