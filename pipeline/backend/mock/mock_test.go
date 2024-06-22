@@ -80,7 +80,7 @@ func TestSmalPipelineMockRun(t *testing.T) {
 		assert.NoError(t, mockEngine.DestroyWorkflow(ctx, nil, workflowUUID))
 	})
 
-	t.Run("step exec fail", func(t *testing.T) {
+	t.Run("step exec error", func(t *testing.T) {
 		step := &types.Step{
 			Name:        mock.StepExecError,
 			UUID:        "SID_2",
@@ -102,6 +102,32 @@ func TestSmalPipelineMockRun(t *testing.T) {
 		assert.EqualValues(t, 1, state.ExitCode)
 
 		assert.NoError(t, mockEngine.DestroyStep(ctx, step, workflowUUID))
+
+		assert.NoError(t, mockEngine.DestroyWorkflow(ctx, nil, workflowUUID))
+	})
+
+	t.Run("step start fail", func(t *testing.T) {
+		step := &types.Step{
+			Name:        mock.StepStartFail,
+			UUID:        "SID_2",
+			Type:        types.StepTypeService,
+			Environment: map[string]string{mock.EnvKeyStepType: "service"},
+		}
+		workflowUUID := "WID_1"
+
+		assert.NoError(t, mockEngine.SetupWorkflow(ctx, nil, workflowUUID))
+
+		assert.Error(t, mockEngine.StartStep(ctx, step, workflowUUID))
+
+		_, err := mockEngine.TailStep(ctx, step, workflowUUID)
+		assert.Error(t, err)
+
+		state, err := mockEngine.WaitStep(ctx, step, workflowUUID)
+		assert.Error(t, err)
+		assert.Error(t, state.Error)
+		assert.EqualValues(t, 0, state.ExitCode)
+
+		assert.Error(t, mockEngine.DestroyStep(ctx, step, workflowUUID))
 
 		assert.NoError(t, mockEngine.DestroyWorkflow(ctx, nil, workflowUUID))
 	})
