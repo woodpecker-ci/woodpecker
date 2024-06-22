@@ -43,6 +43,12 @@ steps:
     pull: true
     settings:
       mode: download
+      paths:
+        - docs/node_modules
+        - docs/.docusaurus
+        - docs/build
+        - docs/plugins/woodpecker-plugins/dist
+        - docs/plugins/woodpecker-plugins/node_modules
       endpoint: s3.ju60.de
       bucket: test
       access_key:
@@ -170,6 +176,12 @@ steps:
     pull: true
     settings:
       mode: upload
+      paths:
+        - docs/node_modules
+        - docs/.docusaurus
+        - docs/build
+        - docs/plugins/woodpecker-plugins/dist
+        - docs/plugins/woodpecker-plugins/node_modules
       endpoint: s3.ju60.de
       bucket: test
       access_key:
