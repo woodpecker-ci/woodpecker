@@ -17,7 +17,6 @@ package mock_test
 import (
 	"context"
 	"io"
-	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -69,7 +68,7 @@ func TestSmalPipelineMockRun(t *testing.T) {
 		assert.NoError(t, err)
 		log, err := io.ReadAll(reader)
 		assert.NoError(t, err)
-		assert.EqualValues(t, strings.Join(step.Commands, "\n"), string(log))
+		assert.EqualValues(t, "StepName: step1\nStepType: \nStepUUID: SID_1StepCommands:\n\necho ja\necho nein\n", string(log))
 
 		state, err := mockEngine.WaitStep(ctx, step, workflowUUID)
 		assert.NoError(t, err)

@@ -40,8 +40,9 @@ const (
 	EnvKeyStepType  = "EXPECT_TYPE"
 
 	// Internal const.
-	stepStateStarted = "started"
-	stepStateDone    = "done"
+	stepStateStarted   = "started"
+	stepStateDone      = "done"
+	testServiceTimeout = 1 * time.Second
 )
 
 // New returns a new Docker Backend.
@@ -97,7 +98,7 @@ func (e *mock) StartStep(_ context.Context, step *backend.Step, taskUUID string)
 	return nil
 }
 
-func (e *mock) WaitStep(_ context.Context, step *backend.Step, taskUUID string) (*backend.State, error) {
+func (e *mock) WaitStep(ctx context.Context, step *backend.Step, taskUUID string) (*backend.State, error) {
 	log.Trace().Str("taskUUID", taskUUID).Msgf("wait for step %s", step.Name)
 
 	_, exist := e.kv.Load("task_" + taskUUID)
@@ -126,7 +127,17 @@ func (e *mock) WaitStep(_ context.Context, step *backend.Step, taskUUID string) 
 		}
 		time.Sleep(toSleep)
 	} else {
-		time.Sleep(time.Nanosecond)
+		if step.Type == backend.StepTypeService {
+			select {
+			case <-time.NewTimer(testServiceTimeout).C:
+				err := fmt.Errorf("WaitStep fail due to timeout of service after 1 second")
+				return &backend.State{Error: err}, err
+			case <-ctx.Done():
+				// context for service closed ... we can move forward
+			}
+		} else {
+			time.Sleep(time.Nanosecond)
+		}
 	}
 
 	e.kv.Store(fmt.Sprintf("task_%s_step_%s", taskUUID, step.UUID), stepStateDone)
@@ -163,7 +174,9 @@ func (e *mock) TailStep(_ context.Context, step *backend.Step, taskUUID string) 
 		return nil, fmt.Errorf("WaitStep expect step '%s' (%s) to be '%s' but it is: %s", step.Name, step.UUID, stepStateStarted, stepState)
 	}
 
-	return io.NopCloser(strings.NewReader(strings.Join(step.Commands, "\n"))), nil
+	return io.NopCloser(strings.NewReader(
+		fmt.Sprintf("StepName: %s\nStepType: %s\nStepUUID: %sStepCommands:\n\n%s\n", step.Name, step.Type, step.UUID, strings.Join(step.Commands, "\n")),
+	)), nil
 }
 
 func (e *mock) DestroyStep(_ context.Context, step *backend.Step, taskUUID string) error {
