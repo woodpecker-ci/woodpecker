@@ -38,7 +38,21 @@ when:
     evaluate: 'TASK == "docs"'
 
 steps:
-  build-cli:
+  - name: download cache
+    image: anbraten/s3cache
+    pull: true
+    settings:
+      mode: download
+      endpoint: s3.ju60.de
+      bucket: test
+      access_key:
+        from_secret: s3_access_key
+      secret_key:
+        from_secret: s3_secret_key
+    when:
+      - event: pull_request
+
+  - name: build-cli
     image: *golang_image
     commands:
       - make docs
@@ -47,7 +61,7 @@ steps:
         event: [tag, pull_request, push]
       - event: manual
 
-  build:
+  - name: build
     image: *node_image
     directory: docs/
     commands:
@@ -59,7 +73,7 @@ steps:
         event: [tag, pull_request, push]
       - event: manual
 
-  deploy-preview:
+  - name: deploy-preview
     image: docker.io/woodpeckerci/plugin-surge-preview:1.3.0
     settings:
       path: 'docs/build/'
@@ -72,7 +86,7 @@ steps:
       event: [pull_request, pull_request_closed]
       path: *when_path
 
-  deploy-prepare:
+  - name: deploy-prepare
     image: *alpine_image
     secrets:
       - BOT_PRIVATE_KEY
@@ -92,7 +106,7 @@ steps:
       - event: [manual, tag]
 
   # update latest and next version
-  version-next:
+  - name: version-next
     image: *alpine_image
     commands:
       - apk add jq
@@ -103,7 +117,7 @@ steps:
         path: *docker_path
         branch: ${CI_REPO_DEFAULT_BRANCH}
 
-  version-release:
+  - name: version-release
     image: *alpine_image
     commands:
       - apk add jq
@@ -113,7 +127,7 @@ steps:
     when:
       - event: tag
 
-  copy-files:
+  - name: copy-files
     image: *alpine_image
     commands:
       - apk add rsync
@@ -125,7 +139,7 @@ steps:
         branch: ${CI_REPO_DEFAULT_BRANCH}
       - event: manual
 
-  deploy:
+  - name: deploy
     image: *alpine_image
     secrets:
       - BOT_PRIVATE_KEY
@@ -150,3 +164,17 @@ steps:
           - <<: *docker_path
         branch: ${CI_REPO_DEFAULT_BRANCH}
       - event: [manual, tag]
+
+  - name: upload cache
+    image: anbraten/s3cache
+    pull: true
+    settings:
+      mode: upload
+      endpoint: s3.ju60.de
+      bucket: test
+      access_key:
+        from_secret: s3_access_key
+      secret_key:
+        from_secret: s3_secret_key
+    when:
+      - event: pull_request
