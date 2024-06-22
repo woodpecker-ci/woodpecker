@@ -55,6 +55,7 @@ func TestSmalPipelineDummyRun(t *testing.T) {
 		step := &types.Step{
 			Name:        "step1",
 			UUID:        "SID_1",
+			Type:        types.StepTypeCommands,
 			Environment: map[string]string{},
 			Commands:    []string{"echo ja", "echo nein"},
 		}
@@ -68,7 +69,15 @@ func TestSmalPipelineDummyRun(t *testing.T) {
 		assert.NoError(t, err)
 		log, err := io.ReadAll(reader)
 		assert.NoError(t, err)
-		assert.EqualValues(t, "StepName: step1\nStepType: \nStepUUID: SID_1StepCommands:\n\necho ja\necho nein\n", string(log))
+		assert.EqualValues(t, `StepName: step1
+StepType: commands
+StepUUID: SID_1
+StepCommands:
+------------------
+echo ja
+echo nein
+------------------
+`, string(log))
 
 		state, err := dummyEngine.WaitStep(ctx, step, workflowUUID)
 		assert.NoError(t, err)

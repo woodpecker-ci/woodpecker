@@ -180,9 +180,7 @@ func (e *dummy) TailStep(_ context.Context, step *backend.Step, taskUUID string)
 		return nil, fmt.Errorf("WaitStep expect step '%s' (%s) to be '%s' but it is: %s", step.Name, step.UUID, stepStateStarted, stepState)
 	}
 
-	return io.NopCloser(strings.NewReader(
-		fmt.Sprintf("StepName: %s\nStepType: %s\nStepUUID: %sStepCommands:\n\n%s\n", step.Name, step.Type, step.UUID, strings.Join(step.Commands, "\n")),
-	)), nil
+	return io.NopCloser(strings.NewReader(dummyExecStepOutput(step))), nil
 }
 
 func (e *dummy) DestroyStep(_ context.Context, step *backend.Step, taskUUID string) error {
@@ -215,4 +213,15 @@ func (e *dummy) DestroyWorkflow(_ context.Context, _ *backend.Config, taskUUID s
 	}
 	e.kv.Delete("task_" + taskUUID)
 	return nil
+}
+
+func dummyExecStepOutput(step *backend.Step) string {
+	return fmt.Sprintf(`StepName: %s
+StepType: %s
+StepUUID: %s
+StepCommands:
+------------------
+%s
+------------------
+`, step.Name, step.Type, step.UUID, strings.Join(step.Commands, "\n"))
 }
