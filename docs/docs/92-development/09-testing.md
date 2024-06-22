@@ -24,7 +24,7 @@ steps:
     image: dummy
     commands: echo ja
     environment:
-      SLEEP: "1s"
+      SLEEP: '1s'
 
 services:
   echo:
