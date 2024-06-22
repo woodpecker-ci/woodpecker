@@ -178,16 +178,15 @@ func setupJWTSecret(_store store.Store) (string, error) {
 		jwtSecret := base32.StdEncoding.EncodeToString(
 			securecookie.GenerateRandomKey(32),
 		)
-		if err != nil {
-			return "", err
-		}
 		err = _store.ServerConfigSet(jwtSecretID, jwtSecret)
 		if err != nil {
 			return "", err
 		}
 		log.Debug().Msg("created jwt secret")
 		return jwtSecret, nil
-	} else if err != nil {
+	}
+
+	if err != nil {
 		return "", err
 	}
 
