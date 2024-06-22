@@ -173,7 +173,7 @@ func PostHook(c *gin.Context) {
 	//
 
 	if repo.ForgeRemoteID != repoFromForge.ForgeRemoteID {
-		log.Debug().Msgf("ignoring hook: repo %s does not match the repo from the token", repo.FullName)
+		log.Warn().Msgf("ignoring hook: repo %s does not match the repo from the token", repo.FullName)
 		c.String(http.StatusBadRequest, "failure to parse token from hook")
 		return
 	}
