@@ -43,7 +43,7 @@ func getForgeID(c *gin.Context) (int64, error) {
 	// if a state token is provided it has to be correct
 	state := c.Query("state")
 	if state != "" {
-		stateToken, err := token.Parse(state, func(t *token.Token) (string, error) {
+		stateToken, err := token.Parse(token.OAuthStateToken, state, func(t *token.Token) (string, error) {
 			return server.Config.Server.JWTSecret, nil // TODO: set some secret
 		})
 		if err != nil {

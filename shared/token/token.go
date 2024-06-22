@@ -41,7 +41,7 @@ type Token struct {
 	claims jwt.MapClaims
 }
 
-func Parse(raw string, fn SecretFunc) (*Token, error) {
+func Parse(kind, raw string, fn SecretFunc) (*Token, error) {
 	token := &Token{
 		claims: jwt.MapClaims{},
 	}
@@ -52,10 +52,13 @@ func Parse(raw string, fn SecretFunc) (*Token, error) {
 	if !parsed.Valid {
 		return nil, jwt.ErrTokenUnverifiable
 	}
+	if token.Kind != kind {
+		return nil, jwt.ErrInvalidType
+	}
 	return token, nil
 }
 
-func ParseRequest(r *http.Request, fn SecretFunc) (*Token, error) {
+func ParseRequest(kind string, r *http.Request, fn SecretFunc) (*Token, error) {
 	// first we attempt to get the token from the
 	// authorization header.
 	token := r.Header.Get("Authorization")
@@ -65,19 +68,19 @@ func ParseRequest(r *http.Request, fn SecretFunc) (*Token, error) {
 		if _, err := fmt.Sscanf(token, "Bearer %s", &bearer); err != nil {
 			return nil, err
 		}
-		return Parse(bearer, fn)
+		return Parse(kind, bearer, fn)
 	}
 
 	token = r.Header.Get("X-Gitlab-Token")
 	if len(token) != 0 {
-		return Parse(token, fn)
+		return Parse(kind, token, fn)
 	}
 
 	// then we attempt to get the token from the
 	// access_token url query parameter
 	token = r.FormValue("access_token")
 	if len(token) != 0 {
-		return Parse(token, fn)
+		return Parse(kind, token, fn)
 	}
 
 	// and finally we attempt to get the token from
@@ -86,7 +89,7 @@ func ParseRequest(r *http.Request, fn SecretFunc) (*Token, error) {
 	if err != nil {
 		return nil, err
 	}
-	return Parse(cookie.Value, fn)
+	return Parse(kind, cookie.Value, fn)
 }
 
 func CheckCsrf(r *http.Request, fn SecretFunc) error {
@@ -99,7 +102,7 @@ func CheckCsrf(r *http.Request, fn SecretFunc) error {
 
 	// parse the raw CSRF token value and validate
 	raw := r.Header.Get("X-CSRF-TOKEN")
-	_, err := Parse(raw, fn)
+	_, err := Parse(CsrfToken, raw, fn)
 	return err
 }
 

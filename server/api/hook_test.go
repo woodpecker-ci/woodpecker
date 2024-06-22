@@ -98,6 +98,7 @@ func TestHook(t *testing.T) {
 			api.PostHook(c)
 
 			assert.Equal(g, http.StatusNoContent, c.Writer.Status())
+			assert.Equal(g, "true", w.Header().Get("Pipeline-Filtered"))
 		})
 	})
 }

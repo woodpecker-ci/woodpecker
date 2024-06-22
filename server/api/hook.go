@@ -108,7 +108,7 @@ func PostHook(c *gin.Context) {
 	// 1. Check if the webhook is valid and authorized
 	//
 
-	parsedToken, err := token.ParseRequest(c.Request, func(t *token.Token) (string, error) {
+	parsedToken, err := token.ParseRequest(token.HookToken, c.Request, func(t *token.Token) (string, error) {
 		repo, err := getRepoFromToken(_store, t)
 		if err != nil {
 			return "", err
