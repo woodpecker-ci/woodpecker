@@ -80,9 +80,15 @@ func (e *mock) SetupWorkflow(_ context.Context, _ *backend.Config, taskUUID stri
 func (e *mock) StartStep(_ context.Context, step *backend.Step, taskUUID string) error {
 	log.Trace().Str("taskUUID", taskUUID).Msgf("start step %s", step.Name)
 
+	// internal state checks
 	_, exist := e.kv.Load("task_" + taskUUID)
 	if !exist {
 		return fmt.Errorf("expect env of workflow %s to exist but found none to destroy", taskUUID)
+	}
+	stepState, stepExist := e.kv.Load(fmt.Sprintf("task_%s_step_%s", taskUUID, step.UUID))
+	if stepExist {
+		// Detect issues like https://github.com/woodpecker-ci/woodpecker/issues/3494
+		return fmt.Errorf("StartStep detect already started step '%s' (%s) in state: %s", step.Name, step.UUID, stepState)
 	}
 
 	if step.Name == StepStartFail {
