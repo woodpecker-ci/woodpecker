@@ -24,3 +24,13 @@ A new forge must support these features:
 
 - OAuth2
 - Webhooks
+
+## New functionality proposals
+
+If you are not an maintainer (witch chat via an closed matrix group about such things),
+you still can pitch us ideas!
+
+If it's a ...
+- ... a smal extension just create a pull and get feedback by reviews.
+- ... concrete idea witch is already worked out, open an issue.
+- ... anything else or you are not sure, open a new discussion [here](https://github.com/woodpecker-ci/woodpecker/discussions/new/choose) first.
