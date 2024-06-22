@@ -34,6 +34,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/docker"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/kubernetes"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/local"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/mock"
 	backendTypes "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/compiler"
@@ -228,6 +229,7 @@ func execWithAxis(c *cli.Context, file, repoPath string, axis matrix.Axis) error
 		kubernetes.New(),
 		docker.New(),
 		local.New(),
+		mock.New(),
 	}
 	backendEngine, err := backend.FindBackend(backendCtx, backends, c.String("backend-engine"))
 	if err != nil {

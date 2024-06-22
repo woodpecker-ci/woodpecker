@@ -19,6 +19,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/docker"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/kubernetes"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/local"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/mock"
 	backendTypes "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 )
 
@@ -27,5 +28,6 @@ func main() {
 		kubernetes.New(),
 		docker.New(),
 		local.New(),
+		mock.New(),
 	})
 }
