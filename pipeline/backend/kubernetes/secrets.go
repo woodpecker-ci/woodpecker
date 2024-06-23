@@ -19,7 +19,6 @@ import (
 	"strings"
 
 	"github.com/rs/zerolog/log"
-
 	v1 "k8s.io/api/core/v1"
 )
 

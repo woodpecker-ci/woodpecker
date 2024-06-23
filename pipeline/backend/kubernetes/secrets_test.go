@@ -17,9 +17,8 @@ package kubernetes
 import (
 	"testing"
 
-	v1 "k8s.io/api/core/v1"
-
 	"github.com/stretchr/testify/assert"
+	v1 "k8s.io/api/core/v1"
 )
 
 func TestNativeSecretsEnabled(t *testing.T) {
