@@ -467,6 +467,124 @@ func TestScratchPod(t *testing.T) {
 	assert.NoError(t, err)
 
 	ja := jsonassert.New(t)
-	t.Log(string(podJSON))
+	ja.Assertf(string(podJSON), expected)
+}
+
+func TestSecrets(t *testing.T) {
+	expected := `
+	{
+		"metadata": {
+			"name": "wp-3kgk0qj36d2me01he8bebctabr-0",
+			"namespace": "woodpecker",
+			"creationTimestamp": null,
+			"labels": {
+				"step": "test-secrets"
+			}
+		},
+		"spec": {
+			"volumes": [
+				{
+					"name": "workspace",
+					"persistentVolumeClaim": {
+						"claimName": "workspace"
+					}
+				},
+				{
+					"name": "reg-cred",
+					"secret": {
+						"secretName": "reg-cred"
+					}
+				}
+			],
+			"containers": [
+				{
+					"name": "wp-3kgk0qj36d2me01he8bebctabr-0",
+					"image": "alpine",
+					"envFrom": [
+						{
+							"secretRef": {
+								"name": "ghcr-push-secret"
+							}
+						}
+					],
+					"env": [
+						{
+							"name": "CGO",
+							"value": "0"
+						},
+						{
+							"name": "AWS_ACCESS_KEY_ID",
+							"valueFrom": {
+								"secretKeyRef": {
+									"name": "aws-ecr",
+									"key": "AWS_ACCESS_KEY_ID"
+								}
+							}
+						},
+						{
+							"name": "AWS_SECRET_ACCESS_KEY",
+							"valueFrom": {
+								"secretKeyRef": {
+									"name": "aws-ecr",
+									"key": "access-key"
+								}
+							}
+						}
+					],
+					"resources": {},
+					"volumeMounts": [
+						{
+							"name": "workspace",
+							"mountPath": "/woodpecker/src"
+						},
+						{
+							"name": "reg-cred",
+							"mountPath": "~/.docker/config.json",
+							"subPath": ".dockerconfigjson",
+							"readOnly": true
+						}
+					]
+				}
+			],
+			"restartPolicy": "Never"
+		},
+		"status": {}
+	}`
+
+	pod, err := mkPod(&types.Step{
+		Name:        "test-secrets",
+		Image:       "alpine",
+		Environment: map[string]string{"CGO": "0"},
+		Volumes:     []string{"workspace:/woodpecker/src"},
+	}, &config{
+		Namespace:                  "woodpecker",
+		NativeSecretsAllowFromStep: true,
+	}, "wp-3kgk0qj36d2me01he8bebctabr-0", "linux/amd64", BackendOptions{
+		Secrets: []SecretRef{
+			{
+				Name: "ghcr-push-secret",
+			},
+			{
+				Name: "aws-ecr",
+				Key:  "AWS_ACCESS_KEY_ID",
+			},
+			{
+				Name:   "aws-ecr",
+				Key:    "access-key",
+				Target: SecretTarget{Env: "AWS_SECRET_ACCESS_KEY"},
+			},
+			{
+				Name:   "reg-cred",
+				Key:    ".dockerconfigjson",
+				Target: SecretTarget{File: "~/.docker/config.json"},
+			},
+		},
+	})
+	assert.NoError(t, err)
+
+	podJSON, err := json.Marshal(pod)
+	assert.NoError(t, err)
+
+	ja := jsonassert.New(t)
 	ja.Assertf(string(podJSON), expected)
 }
