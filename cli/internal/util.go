@@ -93,8 +93,6 @@ func NewClient(c *cli.Context) (woodpecker.Client, error) {
 }
 
 func getRepoFromGit(remoteName string) (string, error) {
-	repoFullName := ""
-
 	cmd := exec.Command("git", "remote", "get-url", remoteName)
 	stdout, err := cmd.Output()
 	if err != nil {
@@ -114,7 +112,7 @@ func getRepoFromGit(remoteName string) (string, error) {
 		return "", fmt.Errorf("could not parse git remote url: %w", err)
 	}
 
-	repoFullName = u.FullName
+	repoFullName := u.FullName
 	log.Debug().Str("repo", repoFullName).Msg("extracted repository from remote url")
 
 	return repoFullName, nil
