@@ -125,10 +125,14 @@ func ParseRepo(client woodpecker.Client, str string) (repoID int64, err error) {
 	if str == "" {
 		str, err = getRepoFromGit("upstream")
 		if err != nil {
-			str, err = getRepoFromGit("origin")
-			if err != nil {
-				return 0, err
-			}
+			log.Debug().Err(err).Msg("could not get repository from git upstream remote")
+		}
+	}
+
+	if str == "" {
+		str, err = getRepoFromGit("origin")
+		if err != nil {
+			log.Debug().Err(err).Msg("could not get repository from git origin remote")
 		}
 	}
 
