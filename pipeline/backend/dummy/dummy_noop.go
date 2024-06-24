@@ -40,7 +40,7 @@ func (e *noop) Name() string {
 	return "dummy"
 }
 
-func (e *noop) IsAvailable(_ context.Context) bool {
+func (e *noop) IsAvailable(context.Context) bool {
 	return false
 }
 
@@ -49,30 +49,30 @@ func (e *noop) Flags() []cli.Flag {
 }
 
 // Load new client for Docker Backend using environment variables.
-func (e *noop) Load(_ context.Context) (*types.BackendInfo, error) {
+func (e *noop) Load(context.Context) (*types.BackendInfo, error) {
 	return nil, ErrOnCompileExcluded
 }
 
-func (e *noop) SetupWorkflow(_ context.Context, _ *types.Config, taskUUID string) error {
+func (e *noop) SetupWorkflow(context.Context, *types.Config, string) error {
 	return ErrOnCompileExcluded
 }
 
-func (e *noop) StartStep(_ context.Context, step *types.Step, taskUUID string) error {
+func (e *noop) StartStep(context.Context, *types.Step, string) error {
 	return ErrOnCompileExcluded
 }
 
-func (e *noop) WaitStep(ctx context.Context, step *types.Step, taskUUID string) (*types.State, error) {
+func (e *noop) WaitStep(context.Context, *types.Step, string) (*types.State, error) {
 	return nil, ErrOnCompileExcluded
 }
 
-func (e *noop) TailStep(_ context.Context, step *types.Step, taskUUID string) (io.ReadCloser, error) {
+func (e *noop) TailStep(context.Context, *types.Step, string) (io.ReadCloser, error) {
 	return nil, ErrOnCompileExcluded
 }
 
-func (e *noop) DestroyStep(_ context.Context, step *types.Step, taskUUID string) error {
+func (e *noop) DestroyStep(context.Context, *types.Step, string) error {
 	return ErrOnCompileExcluded
 }
 
-func (e *noop) DestroyWorkflow(_ context.Context, _ *types.Config, taskUUID string) error {
+func (e *noop) DestroyWorkflow(context.Context, *types.Config, string) error {
 	return ErrOnCompileExcluded
 }
