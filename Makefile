@@ -163,20 +163,20 @@ lint-ui: ui-dependencies ## Lint UI code
 	(cd web/; pnpm lint --quiet)
 
 test-agent: ## Test agent code
-	go test -race -cover -coverprofile agent-coverage.out -timeout 30s go.woodpecker-ci.org/woodpecker/v2/cmd/agent go.woodpecker-ci.org/woodpecker/v2/agent/...
+	go test -race -cover -coverprofile agent-coverage.out -timeout 30s -tags 'test $(TAGS)' go.woodpecker-ci.org/woodpecker/v2/cmd/agent go.woodpecker-ci.org/woodpecker/v2/agent/...
 
 test-server: ## Test server code
-	go test -race -cover -coverprofile server-coverage.out -timeout 30s go.woodpecker-ci.org/woodpecker/v2/cmd/server $(shell go list go.woodpecker-ci.org/woodpecker/v2/server/... | grep -v '/store')
+	go test -race -cover -coverprofile server-coverage.out -timeout 30s -tags 'test $(TAGS)' go.woodpecker-ci.org/woodpecker/v2/cmd/server $(shell go list go.woodpecker-ci.org/woodpecker/v2/server/... | grep -v '/store')
 
 test-cli: ## Test cli code
-	go test -race -cover -coverprofile cli-coverage.out -timeout 30s go.woodpecker-ci.org/woodpecker/v2/cmd/cli go.woodpecker-ci.org/woodpecker/v2/cli/...
+	go test -race -cover -coverprofile cli-coverage.out -timeout 30s -tags 'test $(TAGS)' go.woodpecker-ci.org/woodpecker/v2/cmd/cli go.woodpecker-ci.org/woodpecker/v2/cli/...
 
 test-server-datastore: ## Test server datastore
-	go test -timeout 120s -run TestMigrate go.woodpecker-ci.org/woodpecker/v2/server/store/...
-	go test -race -timeout 30s -skip TestMigrate go.woodpecker-ci.org/woodpecker/v2/server/store/...
+	go test -timeout 120s -tags 'test $(TAGS)' -run TestMigrate go.woodpecker-ci.org/woodpecker/v2/server/store/...
+	go test -race -timeout 30s -tags 'test $(TAGS)' -skip TestMigrate go.woodpecker-ci.org/woodpecker/v2/server/store/...
 
 test-server-datastore-coverage: ## Test server datastore with coverage report
-	go test -race -cover -coverprofile datastore-coverage.out -timeout 180s go.woodpecker-ci.org/woodpecker/v2/server/store/...
+	go test -race -cover -coverprofile datastore-coverage.out -timeout 180s -tags 'test $(TAGS)' go.woodpecker-ci.org/woodpecker/v2/server/store/...
 
 test-ui: ui-dependencies ## Test UI code
 	(cd web/; pnpm run lint)
@@ -185,7 +185,7 @@ test-ui: ui-dependencies ## Test UI code
 	(cd web/; pnpm run test)
 
 test-lib: ## Test lib code
-	go test -race -cover -coverprofile coverage.out -timeout 30s $(shell go list ./... | grep -v '/cmd\|/agent\|/cli\|/server')
+	go test -race -cover -coverprofile coverage.out -timeout 30s -tags 'test $(TAGS)' $(shell go list ./... | grep -v '/cmd\|/agent\|/cli\|/server')
 
 .PHONY: test
 test: test-agent test-server test-server-datastore test-cli test-lib ## Run all tests
