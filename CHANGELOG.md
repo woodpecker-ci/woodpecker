@@ -1,28 +1,33 @@
 # Changelog
 
-## [2.7.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.7.0) - 2024-06-22
+## [2.7.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.7.0) - 2024-06-24
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@anbraten, @dvjn, @qwerty287, @tongjicoder
+@anbraten, @dvjn, @qwerty287, @tongjicoder, @zc-devs
 
 ### ✨ Features
 
 - Add api for forges [[#3733](https://github.com/woodpecker-ci/woodpecker/pull/3733)]
+
+### 📈 Enhancement
+
+- K8s secrets reference from step [[#3655](https://github.com/woodpecker-ci/woodpecker/pull/3655)]
+
+### 📚 Documentation
+
+- fix(deps): update docs npm deps non-major [[#3824](https://github.com/woodpecker-ci/woodpecker/pull/3824)]
+- Add openSUSE package [[#3800](https://github.com/woodpecker-ci/woodpecker/pull/3800)]
+- chore(deps): update docs npm deps non-major [[#3798](https://github.com/woodpecker-ci/woodpecker/pull/3798)]
+- Add "Docker Tags" Plugin [[#3796](https://github.com/woodpecker-ci/woodpecker/pull/3796)]
+- chore(deps): update dependency marked to v13 [[#3792](https://github.com/woodpecker-ci/woodpecker/pull/3792)]
+- chore: fix some comments [[#3788](https://github.com/woodpecker-ci/woodpecker/pull/3788)]
 
 ### 🐛 Bug Fixes
 
 - Cleanup of the login flow and tests [[#3810](https://github.com/woodpecker-ci/woodpecker/pull/3810)]
 - Fix newlines in logs [[#3808](https://github.com/woodpecker-ci/woodpecker/pull/3808)]
 - Fix authentication error handling [[#3807](https://github.com/woodpecker-ci/woodpecker/pull/3807)]
-
-### 📚 Documentation
-
-- Add openSUSE package [[#3800](https://github.com/woodpecker-ci/woodpecker/pull/3800)]
-- chore(deps): update docs npm deps non-major [[#3798](https://github.com/woodpecker-ci/woodpecker/pull/3798)]
-- Add "Docker Tags" Plugin [[#3796](https://github.com/woodpecker-ci/woodpecker/pull/3796)]
-- chore(deps): update dependency marked to v13 [[#3792](https://github.com/woodpecker-ci/woodpecker/pull/3792)]
-- chore: fix some comments [[#3788](https://github.com/woodpecker-ci/woodpecker/pull/3788)]
 
 ### Misc
 
