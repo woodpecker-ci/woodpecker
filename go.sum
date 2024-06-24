@@ -128,6 +128,8 @@ github.com/gin-contrib/sse v0.1.0 h1:Y/yl/+YNO8GZSjAhjMsSuLt29uWRFHdHYUb5lYOV9qE
 github.com/gin-contrib/sse v0.1.0/go.mod h1:RHrZQHXnP2xjPF+u1gW/2HnVO7nvIa9PG3Gm+fLHvGI=
 github.com/gin-gonic/gin v1.10.0 h1:nTuyha1TYqgedzytsKYqna+DfLos46nTv2ygFy86HFU=
 github.com/gin-gonic/gin v1.10.0/go.mod h1:4PMNQiOhvDRa013RKVbsiNwoyezlm2rm0uX/T7kzp5Y=
+github.com/gitsight/go-vcsurl v1.0.1 h1:wkijKsbVg9R2IBP97U7wOANeIW9WJJKkBwS9XqllzWo=
+github.com/gitsight/go-vcsurl v1.0.1/go.mod h1:qRFdKDa/0Lh9MT0xE+qQBYZ/01+mY1H40rZUHR24X9U=
 github.com/go-ap/httpsig v0.0.0-20221203064646-3647b4d88fdf h1:Ab5yBsD/dXhFmgf2hX7T/YYr+VK0Df7SrIxyNztT9YE=
 github.com/go-ap/httpsig v0.0.0-20221203064646-3647b4d88fdf/go.mod h1:+4SUDMvPlRMUPW5PlMTbxj3U5a4fWasBIbakUw7Kp6c=
 github.com/go-fed/httpsig v1.1.0 h1:9M+hb0jkEICD8/cAiNqEB66R87tTINszBRTjwjQzWcI=
