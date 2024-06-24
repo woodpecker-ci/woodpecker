@@ -44,6 +44,22 @@ func Test_parseBackendOptions(t *testing.T) {
 						"localhostProfile": "k8s-apparmor-example-deny-write",
 					},
 				},
+				"secrets": []map[string]any{
+					{
+						"name": "aws",
+						"key":  "access-key",
+						"target": map[string]any{
+							"env": "AWS_SECRET_ACCESS_KEY",
+						},
+					},
+					{
+						"name": "reg-cred",
+						"key":  ".dockerconfigjson",
+						"target": map[string]any{
+							"file": "~/.docker/config.json",
+						},
+					},
+				},
 			},
 		},
 	})
@@ -71,6 +87,18 @@ func Test_parseBackendOptions(t *testing.T) {
 			ApparmorProfile: &SecProfile{
 				Type:             "Localhost",
 				LocalhostProfile: "k8s-apparmor-example-deny-write",
+			},
+		},
+		Secrets: []SecretRef{
+			{
+				Name:   "aws",
+				Key:    "access-key",
+				Target: SecretTarget{Env: "AWS_SECRET_ACCESS_KEY"},
+			},
+			{
+				Name:   "reg-cred",
+				Key:    ".dockerconfigjson",
+				Target: SecretTarget{File: "~/.docker/config.json"},
 			},
 		},
 	}, got)
