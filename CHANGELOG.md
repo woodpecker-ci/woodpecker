@@ -8,6 +8,7 @@
 
 ### ✨ Features
 
+- Cli get repo from git remote [[#3830](https://github.com/woodpecker-ci/woodpecker/pull/3830)]
 - Add api for forges [[#3733](https://github.com/woodpecker-ci/woodpecker/pull/3733)]
 
 ### 📈 Enhancement
