@@ -60,7 +60,7 @@ const usageWithCurl = computed(() => {
   return usage;
 });
 
-const usageWithCli = `# woodpecker setup --server-url ${address}`;
+const usageWithCli = `# woodpecker setup --server ${address}`;
 
 const cliDownload = 'https://github.com/woodpecker-ci/woodpecker/releases';
 
