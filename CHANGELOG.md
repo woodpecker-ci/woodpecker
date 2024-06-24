@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@anbraten, @dvjn, @qwerty287, @tongjicoder, @zc-devs
+@6543, @anbraten, @dvjn, @qwerty287, @tongjicoder, @zc-devs
 
 ### ✨ Features
 
@@ -31,6 +31,7 @@
 
 ### Misc
 
+- Allow to set dist dir using env var [[#3814](https://github.com/woodpecker-ci/woodpecker/pull/3814)]
 - chore(deps): lock file maintenance [[#3805](https://github.com/woodpecker-ci/woodpecker/pull/3805)]
 - chore(deps): update docker.io/lycheeverse/lychee docker tag to v0.15.1 [[#3797](https://github.com/woodpecker-ci/woodpecker/pull/3797)]
 
