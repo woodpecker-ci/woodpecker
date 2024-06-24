@@ -38,17 +38,23 @@ const (
 func mkPod(step *types.Step, config *config, podName, goos string, options BackendOptions) (*v1.Pod, error) {
 	var err error
 
+	nsp := newNativeSecretsProcessor(config, options.Secrets)
+	err = nsp.process()
+	if err != nil {
+		return nil, err
+	}
+
 	meta, err := podMeta(step, config, options, podName)
 	if err != nil {
 		return nil, err
 	}
 
-	spec, err := podSpec(step, config, options)
+	spec, err := podSpec(step, config, options, nsp)
 	if err != nil {
 		return nil, err
 	}
 
-	container, err := podContainer(step, podName, goos, options)
+	container, err := podContainer(step, podName, goos, options, nsp)
 	if err != nil {
 		return nil, err
 	}
@@ -146,27 +152,31 @@ func podAnnotations(config *config, options BackendOptions, podName string) map[
 	return annotations
 }
 
-func podSpec(step *types.Step, config *config, options BackendOptions) (v1.PodSpec, error) {
+func podSpec(step *types.Step, config *config, options BackendOptions, nsp nativeSecretsProcessor) (v1.PodSpec, error) {
 	var err error
 	spec := v1.PodSpec{
 		RestartPolicy:      v1.RestartPolicyNever,
 		RuntimeClassName:   options.RuntimeClassName,
 		ServiceAccountName: options.ServiceAccountName,
-		ImagePullSecrets:   imagePullSecretsReferences(config.ImagePullSecretNames),
 		HostAliases:        hostAliases(step.ExtraHosts),
 		NodeSelector:       nodeSelector(options.NodeSelector, config.PodNodeSelector, step.Environment["CI_SYSTEM_PLATFORM"]),
 		Tolerations:        tolerations(options.Tolerations),
 		SecurityContext:    podSecurityContext(options.SecurityContext, config.SecurityContext, step.Privileged),
 	}
-	spec.Volumes, err = volumes(step.Volumes)
+	spec.Volumes, err = pvcVolumes(step.Volumes)
 	if err != nil {
 		return spec, err
 	}
 
+	log.Trace().Msgf("using the image pull secrets: %v", config.ImagePullSecretNames)
+	spec.ImagePullSecrets = secretsReferences(config.ImagePullSecretNames)
+
+	spec.Volumes = append(spec.Volumes, nsp.volumes...)
+
 	return spec, nil
 }
 
-func podContainer(step *types.Step, podName, goos string, options BackendOptions) (v1.Container, error) {
+func podContainer(step *types.Step, podName, goos string, options BackendOptions, nsp nativeSecretsProcessor) (v1.Container, error) {
 	var err error
 	container := v1.Container{
 		Name:            podName,
@@ -201,10 +211,14 @@ func podContainer(step *types.Step, podName, goos string, options BackendOptions
 		return container, err
 	}
 
+	container.EnvFrom = append(container.EnvFrom, nsp.envFromSources...)
+	container.Env = append(container.Env, nsp.envVars...)
+	container.VolumeMounts = append(container.VolumeMounts, nsp.mounts...)
+
 	return container, nil
 }
 
-func volumes(volumes []string) ([]v1.Volume, error) {
+func pvcVolumes(volumes []string) ([]v1.Volume, error) {
 	var vols []v1.Volume
 
 	for _, v := range volumes {
@@ -212,13 +226,13 @@ func volumes(volumes []string) ([]v1.Volume, error) {
 		if err != nil {
 			return nil, err
 		}
-		vols = append(vols, volume(volumeName))
+		vols = append(vols, pvcVolume(volumeName))
 	}
 
 	return vols, nil
 }
 
-func volume(name string) v1.Volume {
+func pvcVolume(name string) v1.Volume {
 	pvcSource := v1.PersistentVolumeClaimVolumeSource{
 		ClaimName: name,
 		ReadOnly:  false,
@@ -282,22 +296,6 @@ func hostAlias(extraHost types.HostAlias) v1.HostAlias {
 	return v1.HostAlias{
 		IP:        extraHost.IP,
 		Hostnames: []string{extraHost.Name},
-	}
-}
-
-func imagePullSecretsReferences(imagePullSecretNames []string) []v1.LocalObjectReference {
-	log.Trace().Msgf("using the image pull secrets: %v", imagePullSecretNames)
-
-	secretReferences := make([]v1.LocalObjectReference, len(imagePullSecretNames))
-	for i, imagePullSecretName := range imagePullSecretNames {
-		secretReferences[i] = imagePullSecretsReference(imagePullSecretName)
-	}
-	return secretReferences
-}
-
-func imagePullSecretsReference(imagePullSecretName string) v1.LocalObjectReference {
-	return v1.LocalObjectReference{
-		Name: imagePullSecretName,
 	}
 }
 
