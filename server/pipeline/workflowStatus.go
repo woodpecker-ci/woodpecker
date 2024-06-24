@@ -17,20 +17,21 @@ package pipeline
 import (
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 )
 
-func UpdateWorkflowToStatusStarted(store model.UpdateWorkflowStore, workflow model.Workflow, state rpc.State) (*model.Workflow, error) {
+func UpdateWorkflowToStatusStarted(store store.Store, workflow model.Workflow, state rpc.State) (*model.Workflow, error) {
 	workflow.Started = state.Started
 	workflow.State = model.StatusRunning
 	return &workflow, store.WorkflowUpdate(&workflow)
 }
 
-func UpdateWorkflowToStatusSkipped(store model.UpdateWorkflowStore, workflow model.Workflow) (*model.Workflow, error) {
+func UpdateWorkflowToStatusSkipped(store store.Store, workflow model.Workflow) (*model.Workflow, error) {
 	workflow.State = model.StatusSkipped
 	return &workflow, store.WorkflowUpdate(&workflow)
 }
 
-func UpdateWorkflowStatusToDone(store model.UpdateWorkflowStore, workflow model.Workflow, state rpc.State) (*model.Workflow, error) {
+func UpdateWorkflowStatusToDone(store store.Store, workflow model.Workflow, state rpc.State) (*model.Workflow, error) {
 	workflow.Stopped = state.Finished
 	workflow.Error = state.Error
 	if state.Started == 0 {

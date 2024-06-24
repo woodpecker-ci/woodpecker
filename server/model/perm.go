@@ -15,14 +15,6 @@
 
 package model
 
-// PermStore persists repository permissions information to storage.
-type PermStore interface {
-	PermFind(user *User, repo *Repo) (*Perm, error)
-	PermUpsert(perm *Perm) error
-	PermDelete(perm *Perm) error
-	PermFlush(user *User, before int64) error
-}
-
 // Perm defines a repository permission for an individual user.
 type Perm struct {
 	UserID  int64 `json:"-"       xorm:"UNIQUE(s) INDEX NOT NULL 'perm_user_id'"`
@@ -36,7 +28,7 @@ type Perm struct {
 	Updated int64 `json:"updated" xorm:"updated"`
 } //	@name Perm
 
-// TableName return database table name for xorm
+// TableName return database table name for xorm.
 func (Perm) TableName() string {
 	return "perms"
 }

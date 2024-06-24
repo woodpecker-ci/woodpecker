@@ -41,16 +41,16 @@
 
 <script lang="ts" setup>
 import { useStorage } from '@vueuse/core';
-import { computed, inject, onMounted, Ref, ref, watch } from 'vue';
+import { computed, inject, onMounted, ref, watch, type Ref } from 'vue';
 
-import { SelectOption } from '~/components/form/form.types';
+import type { SelectOption } from '~/components/form/form.types';
 import InputField from '~/components/form/InputField.vue';
 import SelectField from '~/components/form/SelectField.vue';
 import Settings from '~/components/layout/Settings.vue';
 import useApiClient from '~/compositions/useApiClient';
 import useConfig from '~/compositions/useConfig';
 import { usePaginate } from '~/compositions/usePaginate';
-import { Repo } from '~/lib/api/types';
+import type { Repo } from '~/lib/api/types';
 
 const apiClient = useApiClient();
 const repo = inject<Ref<Repo>>('repo');
@@ -70,7 +70,7 @@ async function loadBranches() {
     throw new Error('Unexpected: "repo" should be provided at this place');
   }
 
-  branches.value = (await usePaginate((page) => apiClient.getRepoBranches(repo.value.id, page)))
+  branches.value = (await usePaginate((page) => apiClient.getRepoBranches(repo.value.id, { page })))
     .map((b) => ({
       value: b,
       text: b,

@@ -18,20 +18,20 @@
         <IconButton
           icon="edit"
           class="ml-2 <md:ml-auto w-8 h-8"
-          :title="$t('repo.settings.secrets.edit')"
+          :title="$t('secrets.edit')"
           @click="editSecret(secret)"
         />
         <IconButton
           icon="trash"
           class="ml-2 w-8 h-8 hover:text-wp-control-error-100"
           :is-loading="isDeleting"
-          :title="$t('repo.settings.secrets.delete')"
+          :title="$t('secrets.delete')"
           @click="deleteSecret(secret)"
         />
       </template>
     </ListItem>
 
-    <div v-if="secrets?.length === 0" class="ml-2">{{ $t(i18nPrefix + 'none') }}</div>
+    <div v-if="secrets?.length === 0" class="ml-2">{{ $t('secrets.none') }}</div>
   </div>
 </template>
 
@@ -42,12 +42,11 @@ import { useI18n } from 'vue-i18n';
 import Badge from '~/components/atomic/Badge.vue';
 import IconButton from '~/components/atomic/IconButton.vue';
 import ListItem from '~/components/atomic/ListItem.vue';
-import { Secret } from '~/lib/api/types';
+import type { Secret } from '~/lib/api/types';
 
 const props = defineProps<{
   modelValue: (Secret & { edit?: boolean })[];
   isDeleting: boolean;
-  i18nPrefix: string;
 }>();
 
 const emit = defineEmits<{
@@ -64,9 +63,9 @@ function editSecret(secret: Secret) {
 }
 
 function deleteSecret(secret: Secret) {
-  // TODO use proper dialog
-  // eslint-disable-next-line no-alert, no-restricted-globals
-  if (!confirm(i18n.t('repo.settings.secrets.delete_confirm'))) {
+  // TODO: use proper dialog
+  // eslint-disable-next-line no-alert
+  if (!confirm(i18n.t('secrets.delete_confirm'))) {
     return;
   }
   emit('delete', secret);

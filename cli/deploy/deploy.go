@@ -78,9 +78,9 @@ func deploy(c *cli.Context) error {
 	var number int64
 	if pipelineArg == "last" {
 		// Fetch the pipeline number from the last pipeline
-		pipelines, berr := client.PipelineList(repoID)
-		if berr != nil {
-			return berr
+		pipelines, err := client.PipelineList(repoID)
+		if err != nil {
+			return err
 		}
 		for _, pipeline := range pipelines {
 			if branch != "" && pipeline.Branch != branch {
@@ -106,7 +106,8 @@ func deploy(c *cli.Context) error {
 		}
 	}
 
-	env := c.Args().Get(2)
+	envArgIndex := 2
+	env := c.Args().Get(envArgIndex)
 	if env == "" {
 		return fmt.Errorf("please specify the target environment (i.e. production)")
 	}
@@ -125,7 +126,7 @@ func deploy(c *cli.Context) error {
 	return tmpl.Execute(os.Stdout, deploy)
 }
 
-// template for deployment information
+// Template for deployment information.
 var tmplDeployInfo = `Number: {{ .Number }}
 Status: {{ .Status }}
 Commit: {{ .Commit }}

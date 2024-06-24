@@ -15,9 +15,7 @@
 package pipeline
 
 import (
-	"os"
 	"strings"
-	"text/template"
 
 	"github.com/urfave/cli/v2"
 
@@ -31,8 +29,7 @@ var pipelineCreateCmd = &cli.Command{
 	Usage:     "create new pipeline",
 	ArgsUsage: "<repo-id|repo-full-name>",
 	Action:    pipelineCreate,
-	Flags: []cli.Flag{
-		common.FormatFlag(tmplPipelineList),
+	Flags: append(common.OutputFlags("table"), []cli.Flag{
 		&cli.StringFlag{
 			Name:     "branch",
 			Usage:    "branch to create pipeline from",
@@ -42,7 +39,7 @@ var pipelineCreateCmd = &cli.Command{
 			Name:  "var",
 			Usage: "key=value",
 		},
-	},
+	}...),
 }
 
 func pipelineCreate(c *cli.Context) error {
@@ -60,9 +57,9 @@ func pipelineCreate(c *cli.Context) error {
 	variables := make(map[string]string)
 
 	for _, vaz := range c.StringSlice("var") {
-		sp := strings.SplitN(vaz, "=", 2)
-		if len(sp) == 2 {
-			variables[sp[0]] = sp[1]
+		before, after, _ := strings.Cut(vaz, "=")
+		if before != "" && after != "" {
+			variables[before] = after
 		}
 	}
 
@@ -76,10 +73,5 @@ func pipelineCreate(c *cli.Context) error {
 		return err
 	}
 
-	tmpl, err := template.New("_").Parse(c.String("format") + "\n")
-	if err != nil {
-		return err
-	}
-
-	return tmpl.Execute(os.Stdout, pipeline)
+	return pipelineOutput(c, []woodpecker.Pipeline{*pipeline})
 }

@@ -39,6 +39,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/compiler"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/linter"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/matrix"
+	pipelineLog "go.woodpecker-ci.org/woodpecker/v2/pipeline/log"
 	"go.woodpecker-ci.org/woodpecker/v2/shared/utils"
 )
 
@@ -57,7 +58,12 @@ func run(c *cli.Context) error {
 
 func execDir(c *cli.Context, dir string) error {
 	// TODO: respect pipeline dependency
-	repoPath, _ := filepath.Abs(filepath.Dir(dir))
+	repoPath := c.String("repo-path")
+	if repoPath != "" {
+		repoPath, _ = filepath.Abs(repoPath)
+	} else {
+		repoPath, _ = filepath.Abs(filepath.Dir(dir))
+	}
 	if runtime.GOOS == "windows" {
 		repoPath = convertPathForWindows(repoPath)
 	}
@@ -79,7 +85,12 @@ func execDir(c *cli.Context, dir string) error {
 }
 
 func execFile(c *cli.Context, file string) error {
-	repoPath, _ := filepath.Abs(filepath.Dir(file))
+	repoPath := c.String("repo-path")
+	if repoPath != "" {
+		repoPath, _ = filepath.Abs(repoPath)
+	} else {
+		repoPath, _ = filepath.Abs(filepath.Dir(file))
+	}
 	if runtime.GOOS == "windows" {
 		repoPath = convertPathForWindows(repoPath)
 	}
@@ -123,27 +134,27 @@ func execWithAxis(c *cli.Context, file, repoPath string, axis matrix.Axis) error
 
 	pipelineEnv := make(map[string]string)
 	for _, env := range c.StringSlice("env") {
-		envs := strings.SplitN(env, "=", 2)
-		pipelineEnv[envs[0]] = envs[1]
-		if oldVar, exists := environ[envs[0]]; exists {
+		before, after, _ := strings.Cut(env, "=")
+		pipelineEnv[before] = after
+		if oldVar, exists := environ[before]; exists {
 			// override existing values, but print a warning
-			log.Warn().Msgf("environment variable '%s' had value '%s', but got overwritten", envs[0], oldVar)
+			log.Warn().Msgf("environment variable '%s' had value '%s', but got overwritten", before, oldVar)
 		}
-		environ[envs[0]] = envs[1]
+		environ[before] = after
 	}
 
 	tmpl, err := envsubst.ParseFile(file)
 	if err != nil {
 		return err
 	}
-	confstr, err := tmpl.Execute(func(name string) string {
+	confStr, err := tmpl.Execute(func(name string) string {
 		return environ[name]
 	})
 	if err != nil {
 		return err
 	}
 
-	conf, err := yaml.ParseString(confstr)
+	conf, err := yaml.ParseString(confStr)
 	if err != nil {
 		return err
 	}
@@ -167,12 +178,12 @@ func execWithAxis(c *cli.Context, file, repoPath string, axis matrix.Axis) error
 	}
 
 	// lint the yaml file
-	if lerr := linter.New(linter.WithTrusted(true)).Lint([]*linter.WorkflowConfig{{
+	if err := linter.New(linter.WithTrusted(true)).Lint([]*linter.WorkflowConfig{{
 		File:      path.Base(file),
-		RawConfig: confstr,
+		RawConfig: confStr,
 		Workflow:  conf,
-	}}); lerr != nil {
-		return lerr
+	}}); err != nil {
+		return err
 	}
 
 	// compiles the yaml file
@@ -244,8 +255,16 @@ func execWithAxis(c *cli.Context, file, repoPath string, axis matrix.Axis) error
 	).Run(c.Context)
 }
 
+// convertPathForWindows converts a path to use slash separators
+// for Windows. If the path is a Windows volume name like C:, it
+// converts it to an absolute root path starting with slash (e.g.
+// C: -> /c). Otherwise it just converts backslash separators to
+// slashes.
 func convertPathForWindows(path string) string {
 	base := filepath.VolumeName(path)
+
+	// Check if path is volume name like C:
+	//nolint:mnd
 	if len(base) == 2 {
 		path = strings.TrimPrefix(path, base)
 		base = strings.ToLower(strings.TrimSuffix(base, ":"))
@@ -255,8 +274,8 @@ func convertPathForWindows(path string) string {
 	return filepath.ToSlash(path)
 }
 
+const maxLogLineLength = 1024 * 1024 // 1mb
 var defaultLogger = pipeline.Logger(func(step *backendTypes.Step, rc io.Reader) error {
-	logStream := NewLineWriter(step.Name, step.UUID)
-	_, err := io.Copy(logStream, rc)
-	return err
+	logWriter := NewLineWriter(step.Name, step.UUID)
+	return pipelineLog.CopyLineByLine(logWriter, rc, maxLogLineLength)
 })

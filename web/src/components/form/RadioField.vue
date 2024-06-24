@@ -18,7 +18,7 @@
 <script lang="ts" setup>
 import { computed, toRef } from 'vue';
 
-import { RadioOption } from './form.types';
+import type { RadioOption } from './form.types';
 
 const props = defineProps<{
   modelValue: string;

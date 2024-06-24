@@ -24,9 +24,9 @@ import (
 	"github.com/alessio/shellescape"
 )
 
-func (e *local) genCmdByShell(shell string, cmds []string) (args []string, err error) {
+func (e *local) genCmdByShell(shell string, cmdList []string) (args []string, err error) {
 	script := ""
-	for _, cmd := range cmds {
+	for _, cmd := range cmdList {
 		script += fmt.Sprintf("echo %s\n%s\n", strings.TrimSpace(shellescape.Quote("+ "+cmd)), cmd)
 	}
 	script = strings.TrimSpace(script)
@@ -34,7 +34,7 @@ func (e *local) genCmdByShell(shell string, cmds []string) (args []string, err e
 	switch strings.TrimSuffix(strings.ToLower(shell), ".exe") {
 	case "cmd":
 		script := "@SET PROMPT=$\n"
-		for _, cmd := range cmds {
+		for _, cmd := range cmdList {
 			script += fmt.Sprintf("@echo + %s\n", strings.TrimSpace(shellescape.Quote(cmd)))
 			script += fmt.Sprintf("@%s\n", cmd)
 			script += "@IF NOT %ERRORLEVEL% == 0 exit %ERRORLEVEL%\n"
@@ -50,11 +50,12 @@ func (e *local) genCmdByShell(shell string, cmds []string) (args []string, err e
 		return []string{"/c", cmd.Name()}, nil
 	case "fish":
 		script := ""
-		for _, cmd := range cmds {
+		for _, cmd := range cmdList {
 			script += fmt.Sprintf("echo %s\n%s || exit $status\n", strings.TrimSpace(shellescape.Quote("+ "+cmd)), cmd)
 		}
 		return []string{"-c", script}, nil
 	case "powershell", "pwsh":
+		// cspell:disable-next-line
 		return []string{"-noprofile", "-noninteractive", "-c", "$ErrorActionPreference = \"Stop\"; " + script}, nil
 	default:
 		// normal posix shells

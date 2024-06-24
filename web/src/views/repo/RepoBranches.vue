@@ -21,13 +21,13 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, inject, Ref, watch } from 'vue';
+import { computed, inject, watch, type Ref } from 'vue';
 
 import Badge from '~/components/atomic/Badge.vue';
 import ListItem from '~/components/atomic/ListItem.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { usePagination } from '~/compositions/usePaginate';
-import { Repo } from '~/lib/api/types';
+import type { Repo } from '~/lib/api/types';
 
 const apiClient = useApiClient();
 
@@ -41,7 +41,7 @@ async function loadBranches(page: number): Promise<string[]> {
     throw new Error('Unexpected: "repo" should be provided at this place');
   }
 
-  return apiClient.getRepoBranches(repo.value.id, page);
+  return apiClient.getRepoBranches(repo.value.id, { page });
 }
 
 const { resetPage, data: branches, loading } = usePagination(loadBranches);

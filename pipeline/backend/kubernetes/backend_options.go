@@ -6,22 +6,26 @@ import (
 	backend "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 )
 
-// BackendOptions defines all the advanced options for the kubernetes backend
+// BackendOptions defines all the advanced options for the kubernetes backend.
 type BackendOptions struct {
 	Resources          Resources         `mapstructure:"resources"`
+	RuntimeClassName   *string           `mapstructure:"runtimeClassName"`
 	ServiceAccountName string            `mapstructure:"serviceAccountName"`
+	Labels             map[string]string `mapstructure:"labels"`
+	Annotations        map[string]string `mapstructure:"annotations"`
 	NodeSelector       map[string]string `mapstructure:"nodeSelector"`
 	Tolerations        []Toleration      `mapstructure:"tolerations"`
 	SecurityContext    *SecurityContext  `mapstructure:"securityContext"`
+	Secrets            []SecretRef       `mapstructure:"secrets"`
 }
 
-// Resources defines two maps for kubernetes resource definitions
+// Resources defines two maps for kubernetes resource definitions.
 type Resources struct {
 	Requests map[string]string `mapstructure:"requests"`
 	Limits   map[string]string `mapstructure:"limits"`
 }
 
-// Toleration defines Kubernetes toleration
+// Toleration defines Kubernetes toleration.
 type Toleration struct {
 	Key               string             `mapstructure:"key"`
 	Operator          TolerationOperator `mapstructure:"operator"`
@@ -61,6 +65,19 @@ type SecProfile struct {
 }
 
 type SecProfileType string
+
+// SecretRef defines Kubernetes secret reference.
+type SecretRef struct {
+	Name   string       `mapstructure:"name"`
+	Key    string       `mapstructure:"key"`
+	Target SecretTarget `mapstructure:"target"`
+}
+
+// SecretTarget defines secret mount target.
+type SecretTarget struct {
+	Env  string `mapstructure:"env"`
+	File string `mapstructure:"file"`
+}
 
 const (
 	SecProfileTypeRuntimeDefault SecProfileType = "RuntimeDefault"

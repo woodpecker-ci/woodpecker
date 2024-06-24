@@ -27,7 +27,8 @@
         <span
           class="text-wp-text-100 <md:underline whitespace-nowrap overflow-hidden overflow-ellipsis"
           :title="message"
-          >{{ title }}
+        >
+          {{ title }}
         </span>
       </div>
 
@@ -44,7 +45,9 @@
         </div>
 
         <div class="flex items-center gap-1 min-w-0">
-          <span class="text-wp-text-100 truncate overflow-ellipsis gap-1 flex">{{ since }} by {{ pipeline.author }}</span>
+          <span class="text-wp-text-100 truncate overflow-ellipsis gap-1 flex"
+            >{{ since }} by {{ pipeline.author }}</span
+          >
 
           <Icon v-if="pipeline.event === 'cron'" name="stopwatch" class="text-wp-text-100" />
           <img v-else class="rounded-md w-5" :src="pipeline.author_avatar" :title="pipeline.author" />
@@ -93,7 +96,7 @@ import { pipelineStatusColors } from '~/components/repo/pipeline/pipeline-status
 import PipelineRunningIcon from '~/components/repo/pipeline/PipelineRunningIcon.vue';
 import PipelineStatusIcon from '~/components/repo/pipeline/PipelineStatusIcon.vue';
 import usePipeline from '~/compositions/usePipeline';
-import { Pipeline } from '~/lib/api/types';
+import type { Pipeline } from '~/lib/api/types';
 
 const props = defineProps<{
   pipeline: Pipeline;

@@ -31,14 +31,14 @@ import (
 	"github.com/urfave/cli/v2"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
-	grpccredentials "google.golang.org/grpc/credentials"
+	grpc_credentials "google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/keepalive"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 
 	"go.woodpecker-ci.org/woodpecker/v2/agent"
-	agentRpc "go.woodpecker-ci.org/woodpecker/v2/agent/rpc"
+	agent_rpc "go.woodpecker-ci.org/woodpecker/v2/agent/rpc"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc"
@@ -67,12 +67,12 @@ func run(c *cli.Context, backends []types.Backend) error {
 
 	var transport grpc.DialOption
 	if c.Bool("grpc-secure") {
-		transport = grpc.WithTransportCredentials(grpccredentials.NewTLS(&tls.Config{InsecureSkipVerify: c.Bool("grpc-skip-insecure")}))
+		transport = grpc.WithTransportCredentials(grpc_credentials.NewTLS(&tls.Config{InsecureSkipVerify: c.Bool("grpc-skip-insecure")}))
 	} else {
 		transport = grpc.WithTransportCredentials(insecure.NewCredentials())
 	}
 
-	authConn, err := grpc.Dial(
+	authConn, err := grpc.NewClient(
 		c.String("server"),
 		transport,
 		grpc.WithKeepaliveParams(keepalive.ClientParameters{
@@ -88,13 +88,13 @@ func run(c *cli.Context, backends []types.Backend) error {
 	agentConfig := readAgentConfig(agentConfigPath)
 
 	agentToken := c.String("grpc-token")
-	authClient := agentRpc.NewAuthGrpcClient(authConn, agentToken, agentConfig.AgentID)
-	authInterceptor, err := agentRpc.NewAuthInterceptor(authClient, 30*time.Minute)
+	authClient := agent_rpc.NewAuthGrpcClient(authConn, agentToken, agentConfig.AgentID)
+	authInterceptor, err := agent_rpc.NewAuthInterceptor(authClient, 30*time.Minute) //nolint:mnd
 	if err != nil {
 		return err
 	}
 
-	conn, err := grpc.Dial(
+	conn, err := grpc.NewClient(
 		c.String("server"),
 		transport,
 		grpc.WithKeepaliveParams(keepalive.ClientParameters{
@@ -109,7 +109,7 @@ func run(c *cli.Context, backends []types.Backend) error {
 	}
 	defer conn.Close()
 
-	client := agentRpc.NewGrpcClient(conn)
+	client := agent_rpc.NewGrpcClient(conn)
 
 	sigterm := abool.New()
 	ctx := metadata.NewOutgoingContext(
@@ -138,12 +138,12 @@ func run(c *cli.Context, backends []types.Backend) error {
 		log.Error().Err(err).Msg("could not get grpc server version")
 		return err
 	}
-	if grpcServerVersion.GrpcVersion != agentRpc.ClientGrpcVersion {
+	if grpcServerVersion.GrpcVersion != agent_rpc.ClientGrpcVersion {
 		err := errors.New("GRPC version mismatch")
 		log.Error().Err(err).Msgf("server version %s does report grpc version %d but we only understand %d",
 			grpcServerVersion.ServerVersion,
 			grpcServerVersion.GrpcVersion,
-			agentRpc.ClientGrpcVersion)
+			agent_rpc.ClientGrpcVersion)
 		return err
 	}
 
@@ -275,13 +275,13 @@ func stringSliceAddToMap(sl []string, m map[string]string) error {
 	if m == nil {
 		m = make(map[string]string)
 	}
-	for _, v := range sl {
-		parts := strings.SplitN(v, "=", 2)
-		switch len(parts) {
-		case 2:
-			m[parts[0]] = parts[1]
-		case 1:
-			return fmt.Errorf("key '%s' does not have a value assigned", parts[0])
+	for _, v := range utils.StringSliceDeleteEmpty(sl) {
+		before, after, _ := strings.Cut(v, "=")
+		switch {
+		case before != "" && after != "":
+			m[before] = after
+		case before != "":
+			return fmt.Errorf("key '%s' does not have a value assigned", before)
 		default:
 			return fmt.Errorf("empty string in slice")
 		}

@@ -13,8 +13,6 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-//
-// This file has been modified by Informatyka Boguslawski sp. z o.o. sp.k.
 
 package grpc
 
@@ -31,6 +29,7 @@ import (
 	grpcMetadata "google.golang.org/grpc/metadata"
 
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc"
+	"go.woodpecker-ci.org/woodpecker/v2/server"
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
 	"go.woodpecker-ci.org/woodpecker/v2/server/logging"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
@@ -41,7 +40,6 @@ import (
 )
 
 type RPC struct {
-	forge         forge.Forge
 	queue         queue.Queue
 	pubsub        *pubsub.Publisher
 	logger        logging.Log
@@ -50,26 +48,29 @@ type RPC struct {
 	pipelineCount *prometheus.CounterVec
 }
 
-// Next implements the rpc.Next function
+// Next implements the rpc.Next function.
 func (s *RPC) Next(c context.Context, agentFilter rpc.Filter) (*rpc.Workflow, error) {
 	if hostname, err := s.getHostnameFromContext(c); err == nil {
 		log.Debug().Msgf("agent connected: %s: polling", hostname)
 	}
 
-	fn := createFilterFunc(agentFilter)
-	for {
-		agent, err := s.getAgentFromContext(c)
-		if err != nil {
-			return nil, err
-		} else if agent.NoSchedule {
-			return nil, nil
-		}
+	filterFn := createFilterFunc(agentFilter)
 
-		task, err := s.queue.Poll(c, agent.ID, fn)
-		if err != nil {
+	agent, err := s.getAgentFromContext(c)
+	if err != nil {
+		return nil, err
+	}
+
+	if agent.NoSchedule {
+		time.Sleep(1 * time.Second)
+		return nil, nil
+	}
+
+	for {
+		// poll blocks until a task is available or the context is canceled / worker is kicked
+		task, err := s.queue.Poll(c, agent.ID, filterFn)
+		if err != nil || task == nil {
 			return nil, err
-		} else if task == nil {
-			return nil, nil
 		}
 
 		if task.ShouldRun() {
@@ -78,23 +79,24 @@ func (s *RPC) Next(c context.Context, agentFilter rpc.Filter) (*rpc.Workflow, er
 			return workflow, err
 		}
 
+		// task should not run, so mark it as done
 		if err := s.Done(c, task.ID, rpc.State{}); err != nil {
 			log.Error().Err(err).Msgf("mark task '%s' done failed", task.ID)
 		}
 	}
 }
 
-// Wait implements the rpc.Wait function
+// Wait implements the rpc.Wait function.
 func (s *RPC) Wait(c context.Context, id string) error {
 	return s.queue.Wait(c, id)
 }
 
-// Extend implements the rpc.Extend function
+// Extend implements the rpc.Extend function.
 func (s *RPC) Extend(c context.Context, id string) error {
 	return s.queue.Extend(c, id)
 }
 
-// Update implements the rpc.Update function
+// Update implements the rpc.Update function.
 func (s *RPC) Update(_ context.Context, id string, state rpc.State) error {
 	workflowID, err := strconv.ParseInt(id, 10, 64)
 	if err != nil {
@@ -160,7 +162,7 @@ func (s *RPC) Update(_ context.Context, id string, state rpc.State) error {
 	return nil
 }
 
-// Init implements the rpc.Init function
+// Init implements the rpc.Init function.
 func (s *RPC) Init(c context.Context, id string, state rpc.State) error {
 	stepID, err := strconv.ParseInt(id, 10, 64)
 	if err != nil {
@@ -226,7 +228,7 @@ func (s *RPC) Init(c context.Context, id string, state rpc.State) error {
 	return nil
 }
 
-// Done implements the rpc.Done function
+// Done implements the rpc.Done function.
 func (s *RPC) Done(c context.Context, id string, state rpc.State) error {
 	workflowID, err := strconv.ParseInt(id, 10, 64)
 	if err != nil {
@@ -315,7 +317,7 @@ func (s *RPC) Done(c context.Context, id string, state rpc.State) error {
 	return nil
 }
 
-// Log implements the rpc.Log function
+// Log implements the rpc.Log function.
 func (s *RPC) Log(c context.Context, _logEntry *rpc.LogEntry) error {
 	// convert rpc log_entry to model.log_entry
 	step, err := s.store.StepByUUID(_logEntry.StepUUID)
@@ -326,7 +328,7 @@ func (s *RPC) Log(c context.Context, _logEntry *rpc.LogEntry) error {
 		StepID: step.ID,
 		Time:   _logEntry.Time,
 		Line:   _logEntry.Line,
-		Data:   []byte(_logEntry.Data),
+		Data:   _logEntry.Data,
 		Type:   model.LogEntryType(_logEntry.Type),
 	}
 	// make sure writes to pubsub are non blocking (https://github.com/woodpecker-ci/woodpecker/blob/c919f32e0b6432a95e1a6d3d0ad662f591adf73f/server/logging/log.go#L9)
@@ -336,8 +338,7 @@ func (s *RPC) Log(c context.Context, _logEntry *rpc.LogEntry) error {
 			log.Error().Err(err).Msgf("rpc server could not write to logger")
 		}
 	}()
-	// make line persistent in database
-	return s.store.LogAppend(logEntry)
+	return server.Config.Services.LogStore.LogAppend(logEntry)
 }
 
 func (s *RPC) RegisterAgent(ctx context.Context, platform, backend, version string, capacity int32) (int64, error) {
@@ -414,11 +415,17 @@ func (s *RPC) updateForgeStatus(ctx context.Context, repo *model.Repo, pipeline 
 		return
 	}
 
-	forge.Refresh(ctx, s.forge, s.store, user)
+	_forge, err := server.Config.Services.Manager.ForgeFromRepo(repo)
+	if err != nil {
+		log.Error().Err(err).Msgf("can not get forge for repo '%s'", repo.FullName)
+		return
+	}
+
+	forge.Refresh(ctx, _forge, s.store, user)
 
 	// only do status updates for parent steps
 	if workflow != nil {
-		err = s.forge.Status(ctx, user, repo, pipeline, workflow)
+		err = _forge.Status(ctx, user, repo, pipeline, workflow)
 		if err != nil {
 			log.Error().Err(err).Msgf("error setting commit status for %s/%d", repo.FullName, pipeline.Number)
 		}

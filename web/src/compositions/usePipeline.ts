@@ -1,9 +1,9 @@
-import { computed, Ref } from 'vue';
+import { computed, type Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import { useDate } from '~/compositions/useDate';
 import { useElapsedTime } from '~/compositions/useElapsedTime';
-import { Pipeline } from '~/lib/api/types';
+import type { Pipeline } from '~/lib/api/types';
 import { convertEmojis } from '~/utils/emoji';
 
 const { toLocaleString, timeAgo, prettyDuration } = useDate();
@@ -35,7 +35,7 @@ export default (pipeline: Ref<Pipeline | undefined>) => {
       return null;
     }
 
-    // TODO check whether elapsed works
+    // TODO: check whether elapsed works
     return timeAgo(sinceElapsed.value);
   });
 
