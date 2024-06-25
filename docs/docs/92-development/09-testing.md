@@ -12,6 +12,7 @@ With [`"github.com/stretchr/testify/assert"`](https://pkg.go.dev/github.com/stre
 #### Pipeline Engine
 
 The pipeline engine has a special backend called **`dummy`** witch does not exec but emulate how a typical backend should behave.
+To have it available you need to build the agent or cli with the `integration` tag.
 
 An example pipeline config would be:
 
