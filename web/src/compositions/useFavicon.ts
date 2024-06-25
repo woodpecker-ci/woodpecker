@@ -39,7 +39,7 @@ function convertStatus(status: PipelineStatus): Status {
     return 'pending';
   }
 
-  if (['success'].includes(status)) {
+  if (status === 'success') {
     return 'success';
   }
 
