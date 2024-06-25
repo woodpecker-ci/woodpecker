@@ -31,15 +31,15 @@ watch(
 );
 
 function convertStatus(status: PipelineStatus): Status {
-  if (['blocked', 'declined', 'error', 'failure', 'killed'].includes(status)) {
+  if (['declined', 'error', 'failure', 'killed'].includes(status)) {
     return 'error';
   }
 
-  if (['started', 'running', 'pending'].includes(status)) {
+  if (['blocked', 'started', 'running', 'pending'].includes(status)) {
     return 'pending';
   }
 
-  if (['success', 'declined', 'error', 'failure', 'killed'].includes(status)) {
+  if (status === 'success') {
     return 'success';
   }
 
