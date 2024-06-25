@@ -68,8 +68,7 @@ export default (pipeline: Ref<Pipeline | undefined>) => {
     }
 
     if (durationRaw.value === 0) {
-      return '-';
-      // return i18n.t('time.not_started');
+      return i18n.t('time.not_started');
     }
 
     return prettyDuration(durationElapsed.value);
@@ -83,7 +82,7 @@ export default (pipeline: Ref<Pipeline | undefined>) => {
     return convertEmojis(pipeline.value.message);
   });
 
-  const title = computed(() => message.value.split('\n')[0]);
+  const shortMessage = computed(() => message.value.split('\n')[0]);
 
   const prettyRef = computed(() => {
     if (pipeline.value?.event === 'push' || pipeline.value?.event === 'deployment') {
@@ -119,5 +118,5 @@ export default (pipeline: Ref<Pipeline | undefined>) => {
     return toLocaleString(new Date(start * 1000));
   });
 
-  return { since, duration, message, title, prettyRef, created };
+  return { since, duration, message, shortMessage, prettyRef, created };
 };
