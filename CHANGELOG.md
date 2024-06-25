@@ -6,6 +6,10 @@
 
 @6543, @anbraten, @dvjn, @qwerty287, @tongjicoder, @zc-devs
 
+### 🔒 Security
+
+- Bump github.com/hashicorp/go-retryablehttp v0.7.5 -> v0.7.7 [[#3834](https://github.com/woodpecker-ci/woodpecker/pull/3834)]
+
 ### ✨ Features
 
 - Cli get repo from git remote [[#3830](https://github.com/woodpecker-ci/woodpecker/pull/3830)]
