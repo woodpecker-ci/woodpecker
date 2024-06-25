@@ -11,16 +11,17 @@
 - Cli get repo from git remote [[#3830](https://github.com/woodpecker-ci/woodpecker/pull/3830)]
 - Add api for forges [[#3733](https://github.com/woodpecker-ci/woodpecker/pull/3733)]
 
+### 📈 Enhancement
+
+- Exclude mocks from release build [[#3831](https://github.com/woodpecker-ci/woodpecker/pull/3831)]
+- K8s secrets reference from step [[#3655](https://github.com/woodpecker-ci/woodpecker/pull/3655)]
+
 ### 🐛 Bug Fixes
 
 - Correct favicon states [[#3832](https://github.com/woodpecker-ci/woodpecker/pull/3832)]
 - Cleanup of the login flow and tests [[#3810](https://github.com/woodpecker-ci/woodpecker/pull/3810)]
 - Fix newlines in logs [[#3808](https://github.com/woodpecker-ci/woodpecker/pull/3808)]
 - Fix authentication error handling [[#3807](https://github.com/woodpecker-ci/woodpecker/pull/3807)]
-
-### 📈 Enhancement
-
-- K8s secrets reference from step [[#3655](https://github.com/woodpecker-ci/woodpecker/pull/3655)]
 
 ### 📚 Documentation
 
