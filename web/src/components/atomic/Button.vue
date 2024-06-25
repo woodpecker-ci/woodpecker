@@ -36,9 +36,10 @@
 
 <script lang="ts" setup>
 import { computed, useAttrs } from 'vue';
-import { RouteLocationRaw } from 'vue-router';
+import type { RouteLocationRaw } from 'vue-router';
 
-import Icon, { IconNames } from '~/components/atomic/Icon.vue';
+import type { IconNames } from '~/components/atomic/Icon.vue';
+import Icon from '~/components/atomic/Icon.vue';
 
 const props = withDefaults(
   defineProps<{

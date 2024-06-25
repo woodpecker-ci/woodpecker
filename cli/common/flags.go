@@ -28,16 +28,16 @@ var GlobalFlags = append([]cli.Flag{
 		Usage:   "path to config file",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_TOKEN"},
-		Name:    "token",
-		Aliases: []string{"t"},
-		Usage:   "server auth token",
-	},
-	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_SERVER"},
 		Name:    "server",
 		Aliases: []string{"s"},
 		Usage:   "server address",
+	},
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_TOKEN"},
+		Name:    "token",
+		Aliases: []string{"t"},
+		Usage:   "server auth token",
 	},
 	&cli.BoolFlag{
 		EnvVars: []string{"WOODPECKER_DISABLE_UPDATE_CHECK"},

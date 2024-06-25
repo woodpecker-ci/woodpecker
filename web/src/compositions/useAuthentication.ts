@@ -8,10 +8,10 @@ export default () =>
     user: useConfig().user,
 
     authenticate(url?: string) {
-      if (url) {
+      if (url !== undefined) {
         const config = useUserConfig();
         config.setUserConfig('redirectUrl', url);
       }
-      window.location.href = `${useConfig().rootPath}/login`;
+      window.location.href = `${useConfig().rootPath}/authorize`;
     },
   }) as const;

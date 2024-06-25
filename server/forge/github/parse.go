@@ -202,10 +202,10 @@ func parseReleaseHook(hook *github.ReleaseEvent) (*model.Repo, *model.Pipeline) 
 	pipeline := &model.Pipeline{
 		Event:        model.EventRelease,
 		ForgeURL:     hook.GetRelease().GetHTMLURL(),
-		Ref:          fmt.Sprintf("%s%s", tagRefPrefix, hook.GetRelease().GetTagName()),
-		Branch:       hook.GetRelease().GetTargetCommitish(),
+		Ref:          fmt.Sprintf("refs/tags/%s", hook.GetRelease().GetTagName()),
+		Branch:       hook.GetRelease().GetTargetCommitish(), // cspell:disable-line
 		Title:        fmt.Sprintf("created release %s", name),
-		Message:      hook.GetRelease().GetBody(),
+		Message:      fmt.Sprintf("created release %s", name),
 		Author:       hook.GetRelease().GetAuthor().GetLogin(),
 		Avatar:       hook.GetRelease().GetAuthor().GetAvatarURL(),
 		Sender:       hook.GetSender().GetLogin(),

@@ -117,23 +117,6 @@ func PostRepo(c *gin.Context) {
 		)
 	}
 
-	// creates the jwt token used to verify the repository
-	t := token.New(token.HookToken)
-	t.Set("repo-id", strconv.FormatInt(repo.ID, 10))
-	sig, err := t.Sign(repo.Hash)
-	if err != nil {
-		msg := "could not generate new jwt token."
-		log.Error().Err(err).Msg(msg)
-		c.String(http.StatusInternalServerError, msg)
-		return
-	}
-
-	hookURL := fmt.Sprintf(
-		"%s/api/hook?access_token=%s",
-		server.Config.Server.WebhookHost,
-		sig,
-	)
-
 	// find org of repo
 	var org *model.Org
 	org, err = _store.OrgFindByName(repo.Owner)
@@ -164,14 +147,6 @@ func PostRepo(c *gin.Context) {
 
 	repo.OrgID = org.ID
 
-	err = _forge.Activate(c, user, repo, hookURL)
-	if err != nil {
-		msg := "could not create webhook in forge."
-		log.Error().Err(err).Msg(msg)
-		c.String(http.StatusInternalServerError, msg)
-		return
-	}
-
 	if enabledOnce {
 		err = _store.UpdateRepo(repo)
 	} else {
@@ -184,6 +159,32 @@ func PostRepo(c *gin.Context) {
 		c.String(http.StatusInternalServerError, msg)
 		return
 	}
+
+	// creates the jwt token used to verify the repository
+	t := token.New(token.HookToken)
+	t.Set("repo-id", strconv.FormatInt(repo.ID, 10))
+	sig, err := t.Sign(repo.Hash)
+	if err != nil {
+		msg := "could not generate new jwt token."
+		log.Error().Err(err).Msg(msg)
+		c.String(http.StatusInternalServerError, msg)
+		return
+	}
+
+	hookURL := fmt.Sprintf(
+		"%s/api/hook?access_token=%s",
+		server.Config.Server.WebhookHost,
+		sig,
+	)
+
+	err = _forge.Activate(c, user, repo, hookURL)
+	if err != nil {
+		msg := "could not create webhook in forge."
+		log.Error().Err(err).Msg(msg)
+		c.String(http.StatusInternalServerError, msg)
+		return
+	}
+
 	repo.Perm = from.Perm
 	repo.Perm.Synced = time.Now().Unix()
 	repo.Perm.UserID = user.ID
@@ -220,7 +221,7 @@ func PatchRepo(c *gin.Context) {
 	}
 
 	if in.Timeout != nil && *in.Timeout > server.Config.Pipeline.MaxTimeout && !user.Admin {
-		c.String(http.StatusForbidden, fmt.Sprintf("Timeout is not allowed to be higher than max timeout (%dmin)", server.Config.Pipeline.MaxTimeout))
+		c.String(http.StatusForbidden, fmt.Sprintf("Timeout is not allowed to be higher than max timeout (%d min)", server.Config.Pipeline.MaxTimeout))
 		return
 	}
 	if in.IsTrusted != nil && *in.IsTrusted != repo.IsTrusted && !user.Admin {
