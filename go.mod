@@ -9,6 +9,7 @@ require (
 	codeberg.org/6543/go-yaml2json v1.0.0
 	codeberg.org/6543/xyaml v1.1.0
 	codeberg.org/mvdkleijn/forgejo-sdk/forgejo v0.0.0-20240607215151-168c988b82c1
+	github.com/6543/cicd_feedback v0.0.0-20240625213231-0f894fa6f0f9
 	github.com/6543/logfile-open v1.2.1
 	github.com/adrg/xdg v0.4.0
 	github.com/alessio/shellescape v1.4.2

@@ -26,6 +26,7 @@ import (
 	"github.com/rs/zerolog/log"
 
 	"go.woodpecker-ci.org/woodpecker/v2/server"
+	"go.woodpecker-ci.org/woodpecker/v2/server/feedback"
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
@@ -242,6 +243,9 @@ func PostHook(c *gin.Context) {
 	//
 
 	pl, err := pipeline.Create(c, _store, repo, tmpPipeline)
+	if pl != nil {
+		c.Writer.Header().Set("CICD-Feedback", feedback.PipelineURL(pl))
+	}
 	if err != nil {
 		handlePipelineErr(c, err)
 	} else {

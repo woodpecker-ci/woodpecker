@@ -22,12 +22,32 @@ import (
 
 	"go.woodpecker-ci.org/woodpecker/v2/server/api"
 	"go.woodpecker-ci.org/woodpecker/v2/server/api/debug"
+	"go.woodpecker-ci.org/woodpecker/v2/server/feedback"
 	"go.woodpecker-ci.org/woodpecker/v2/server/router/middleware/session"
 )
 
 func apiRoutes(e *gin.RouterGroup) {
+	wellKnown := e.Group("/.well-known")
+	{
+		wellKnown.GET("/cicd-feedback", func(c *gin.Context) {
+			c.JSON(http.StatusOK, feedback.WellKnownResponse())
+		})
+	}
+
 	apiBase := e.Group("/api")
 	{
+		// TODO: auth
+		feedbackBase := apiBase.Group("/feedback")
+		{
+			repoBase := feedbackBase.Group("/:repo_id")
+			{
+				repoBase.Use(session.SetRepo())
+				repoBase.Use(session.SetPerm()) // TODO: alter it as soon as we have dedicated auth token implemented (CICD-Authorization Header)
+				repoBase.GET("/:number", feedback.Get)
+				repoBase.GET("/:number/:stepId", feedback.GetStepLog)
+			}
+		}
+
 		user := apiBase.Group("/user")
 		{
 			user.Use(session.MustUser())
