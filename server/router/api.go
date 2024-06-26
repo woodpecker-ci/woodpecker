@@ -30,9 +30,11 @@ import (
 func apiRoutes(e *gin.RouterGroup) {
 	wellKnown := e.Group("/.well-known")
 	{
-		wellKnown.GET("/cicd-feedback", func(c *gin.Context) {
-			c.JSON(http.StatusOK, feedback.WellKnownResponse())
-		})
+		if server.Config.Server.CICDFeedback {
+			wellKnown.GET("/cicd-feedback", func(c *gin.Context) {
+				c.JSON(http.StatusOK, feedback.WellKnownResponse())
+			})
+		}
 	}
 
 	apiBase := e.Group("/api")
