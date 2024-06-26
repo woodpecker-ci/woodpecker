@@ -184,7 +184,7 @@ function writeLog(line: Partial<LogLine>) {
   logBuffer.value.push({
     index: line.index ?? 0,
     number: (line.index ?? 0) + 1,
-    text: ansiUp.value.ansi_to_html(decode(line.text ?? '')),
+    text: ansiUp.value.ansi_to_html(`${decode(line.text ?? '')}\n`),
     time: line.time ?? 0,
     type: null, // TODO: implement way to detect errors and warnings
   });
@@ -254,7 +254,7 @@ async function download() {
     downloadInProgress.value = false;
   }
   const fileURL = window.URL.createObjectURL(
-    new Blob([logs.map((line) => decode(line.data)).join('')], {
+    new Blob([logs.map((line) => decode(line.data ?? '')).join('\n')], {
       type: 'text/plain',
     }),
   );

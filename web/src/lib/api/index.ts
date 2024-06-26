@@ -2,6 +2,7 @@ import ApiClient, { encodeQueryString } from './client';
 import type {
   Agent,
   Cron,
+  Forge,
   Org,
   OrgPermissions,
   Pipeline,
@@ -282,6 +283,27 @@ export default class WoodpeckerClient extends ApiClient {
 
   deleteAgent(agent: Agent): Promise<unknown> {
     return this._delete(`/api/agents/${agent.id}`);
+  }
+
+  getForges(opts?: PaginationOptions): Promise<Forge[] | null> {
+    const query = encodeQueryString(opts);
+    return this._get(`/api/forges?${query}`) as Promise<Forge[] | null>;
+  }
+
+  getForge(forgeId: Forge['id']): Promise<Forge> {
+    return this._get(`/api/forges/${forgeId}`) as Promise<Forge>;
+  }
+
+  createForge(forge: Partial<Forge>): Promise<Forge> {
+    return this._post('/api/forges', forge) as Promise<Forge>;
+  }
+
+  updateForge(forge: Partial<Forge>): Promise<unknown> {
+    return this._patch(`/api/forges/${forge.id}`, forge);
+  }
+
+  deleteForge(forge: Forge): Promise<unknown> {
+    return this._delete(`/api/forges/${forge.id}`);
   }
 
   getQueueInfo(): Promise<QueueInfo> {
