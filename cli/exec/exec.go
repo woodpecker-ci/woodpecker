@@ -39,6 +39,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/compiler"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/linter"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/matrix"
+	pipelineLog "go.woodpecker-ci.org/woodpecker/v2/pipeline/log"
 	"go.woodpecker-ci.org/woodpecker/v2/shared/utils"
 )
 
@@ -146,14 +147,14 @@ func execWithAxis(c *cli.Context, file, repoPath string, axis matrix.Axis) error
 	if err != nil {
 		return err
 	}
-	confstr, err := tmpl.Execute(func(name string) string {
+	confStr, err := tmpl.Execute(func(name string) string {
 		return environ[name]
 	})
 	if err != nil {
 		return err
 	}
 
-	conf, err := yaml.ParseString(confstr)
+	conf, err := yaml.ParseString(confStr)
 	if err != nil {
 		return err
 	}
@@ -177,12 +178,12 @@ func execWithAxis(c *cli.Context, file, repoPath string, axis matrix.Axis) error
 	}
 
 	// lint the yaml file
-	if lerr := linter.New(linter.WithTrusted(true)).Lint([]*linter.WorkflowConfig{{
+	if err := linter.New(linter.WithTrusted(true)).Lint([]*linter.WorkflowConfig{{
 		File:      path.Base(file),
-		RawConfig: confstr,
+		RawConfig: confStr,
 		Workflow:  conf,
-	}}); lerr != nil {
-		return lerr
+	}}); err != nil {
+		return err
 	}
 
 	// compiles the yaml file
@@ -263,7 +264,7 @@ func convertPathForWindows(path string) string {
 	base := filepath.VolumeName(path)
 
 	// Check if path is volume name like C:
-	//nolint: gomnd
+	//nolint:mnd
 	if len(base) == 2 {
 		path = strings.TrimPrefix(path, base)
 		base = strings.ToLower(strings.TrimSuffix(base, ":"))
@@ -273,8 +274,8 @@ func convertPathForWindows(path string) string {
 	return filepath.ToSlash(path)
 }
 
+const maxLogLineLength = 1024 * 1024 // 1mb
 var defaultLogger = pipeline.Logger(func(step *backendTypes.Step, rc io.Reader) error {
-	logStream := NewLineWriter(step.Name, step.UUID)
-	_, err := io.Copy(logStream, rc)
-	return err
+	logWriter := NewLineWriter(step.Name, step.UUID)
+	return pipelineLog.CopyLineByLine(logWriter, rc, maxLogLineLength)
 })

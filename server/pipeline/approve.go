@@ -20,16 +20,24 @@ import (
 
 	"github.com/rs/zerolog/log"
 
+	"go.woodpecker-ci.org/woodpecker/v2/server"
 	forge_types "go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 )
 
 // Approve update the status to pending for a blocked pipeline because of a gated repo
-// and start them afterward
+// and start them afterward.
 func Approve(ctx context.Context, store store.Store, currentPipeline *model.Pipeline, user *model.User, repo *model.Repo) (*model.Pipeline, error) {
 	if currentPipeline.Status != model.StatusBlocked {
 		return nil, ErrBadRequest{Msg: fmt.Sprintf("cannot approve a pipeline with status %s", currentPipeline.Status)}
+	}
+
+	forge, err := server.Config.Services.Manager.ForgeFromRepo(repo)
+	if err != nil {
+		msg := fmt.Sprintf("failure to load forge for repo '%s'", repo.FullName)
+		log.Error().Err(err).Str("repo", repo.FullName).Msg(msg)
+		return nil, fmt.Errorf(msg)
 	}
 
 	// fetch the pipeline file from the database
@@ -72,7 +80,7 @@ func Approve(ctx context.Context, store store.Store, currentPipeline *model.Pipe
 		}
 	}
 
-	currentPipeline, pipelineItems, err := createPipelineItems(ctx, store, currentPipeline, user, repo, yamls, nil)
+	currentPipeline, pipelineItems, err := createPipelineItems(ctx, forge, store, currentPipeline, user, repo, yamls, nil)
 	if err != nil {
 		msg := fmt.Sprintf("failure to createPipelineItems for %s", repo.FullName)
 		log.Error().Err(err).Msg(msg)
@@ -86,9 +94,9 @@ func Approve(ctx context.Context, store store.Store, currentPipeline *model.Pipe
 		return nil, err
 	}
 
-	publishPipeline(ctx, currentPipeline, repo, user)
+	publishPipeline(ctx, forge, currentPipeline, repo, user)
 
-	currentPipeline, err = start(ctx, store, currentPipeline, user, repo, pipelineItems)
+	currentPipeline, err = start(ctx, forge, store, currentPipeline, user, repo, pipelineItems)
 	if err != nil {
 		msg := fmt.Sprintf("failure to start pipeline for %s: %v", repo.FullName, err)
 		log.Error().Err(err).Msg(msg)

@@ -149,7 +149,7 @@ func Test_gitea(t *testing.T) {
 
 		g.It("Given a PR hook", func() {
 			buf := bytes.NewBufferString(fixtures.HookPullRequest)
-			req, _ := http.NewRequest("POST", "/hook", buf)
+			req, _ := http.NewRequest(http.MethodPost, "/hook", buf)
 			req.Header = http.Header{}
 			req.Header.Set(hookEvent, hookPullRequest)
 			mockStore.On("GetRepoNameFallback", mock.Anything, mock.Anything).Return(fakeRepo, nil)

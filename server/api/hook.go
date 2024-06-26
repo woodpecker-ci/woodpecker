@@ -13,8 +13,6 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-//
-// This file has been modified by Informatyka Boguslawski sp. z o.o. sp.k.
 
 package api
 
@@ -22,6 +20,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
@@ -52,7 +51,7 @@ func GetQueueInfo(c *gin.Context) {
 
 // PauseQueue
 //
-//	@Summary	Pause a pipeline queue
+//	@Summary	Pause the pipeline queue
 //	@Router		/queue/pause [post]
 //	@Produce	plain
 //	@Success	204
@@ -65,7 +64,7 @@ func PauseQueue(c *gin.Context) {
 
 // ResumeQueue
 //
-//	@Summary	Resume a pipeline queue
+//	@Summary	Resume the pipeline queue
 //	@Router		/queue/resume [post]
 //	@Produce	plain
 //	@Success	204
@@ -104,7 +103,13 @@ func BlockTilQueueHasRunningItem(c *gin.Context) {
 //	@Param		hook	body	object	true	"the webhook payload; forge is automatically detected"
 func PostHook(c *gin.Context) {
 	_store := store.FromContext(c)
-	_forge := server.Config.Services.Forge
+
+	_forge, err := server.Config.Services.Manager.ForgeMain() // TODO: get the forge for the specific repo somehow
+	if err != nil {
+		log.Error().Err(err).Msg("Cannot get main forge")
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
 
 	//
 	// 1. Parse webhook
@@ -153,7 +158,7 @@ func PostHook(c *gin.Context) {
 		c.Status(http.StatusNoContent)
 		return
 	}
-	oldFullName := repo.FullName
+	currentRepoFullName := repo.FullName
 
 	if repo.UserID == 0 {
 		log.Warn().Msgf("ignoring hook. repo %s has no owner.", repo.FullName)
@@ -173,7 +178,7 @@ func PostHook(c *gin.Context) {
 	//
 
 	// get the token and verify the hook is authorized
-	parsed, err := token.ParseRequest(c.Request, func(_ *token.Token) (string, error) {
+	parsedToken, err := token.ParseRequest(c.Request, func(_ *token.Token) (string, error) {
 		return repo.Hash, nil
 	})
 	if err != nil {
@@ -182,7 +187,9 @@ func PostHook(c *gin.Context) {
 		c.String(http.StatusBadRequest, msg)
 		return
 	}
-	verifiedKey := parsed.Text == oldFullName
+
+	// TODO: remove fallback for text full name in next major release
+	verifiedKey := parsedToken.Get("repo-id") == strconv.FormatInt(repo.ID, 10) || parsedToken.Get("text") == currentRepoFullName
 	if !verifiedKey {
 		verifiedKey, err = _store.HasRedirectionForRepo(repo.ID, repo.FullName)
 		if err != nil {
@@ -194,7 +201,7 @@ func PostHook(c *gin.Context) {
 	}
 
 	if !verifiedKey {
-		msg := fmt.Sprintf("failure to verify token from hook. Expected %s, got %s", repo.FullName, parsed.Text)
+		msg := fmt.Sprintf("failure to verify token from hook. Expected %s, got %s", repo.FullName, parsedToken.Get("text"))
 		log.Debug().Msg(msg)
 		c.String(http.StatusForbidden, msg)
 		return
@@ -204,7 +211,7 @@ func PostHook(c *gin.Context) {
 	// 4. Update repo
 	//
 
-	if oldFullName != tmpRepo.FullName {
+	if currentRepoFullName != tmpRepo.FullName {
 		// create a redirection
 		err = _store.CreateRedirection(&model.Redirection{RepoID: repo.ID, FullName: repo.FullName})
 		if err != nil {

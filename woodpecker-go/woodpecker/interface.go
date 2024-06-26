@@ -18,6 +18,8 @@ import (
 	"net/http"
 )
 
+//go:generate mockery --name Client --output mocks --case underscore --note "+build test"
+
 // Client is used to communicate with a Woodpecker server.
 type Client interface {
 	// SetClient sets the http.Client.
@@ -118,6 +120,9 @@ type Client interface {
 	// LogsPurge purges the pipeline logs for the specified pipeline.
 	LogsPurge(repoID, pipeline int64) error
 
+	// StepLogsPurge purges the pipeline logs for the specified step.
+	StepLogsPurge(repoID, pipelineNumber, stepID int64) error
+
 	// Registry returns a registry by hostname.
 	Registry(repoID int64, hostname string) (*Registry, error)
 
@@ -187,42 +192,42 @@ type Client interface {
 	// QueueInfo returns the queue state.
 	QueueInfo() (*Info, error)
 
-	// LogLevel returns the current logging level
+	// LogLevel returns the current logging level.
 	LogLevel() (*LogLevel, error)
 
-	// SetLogLevel sets the server's logging level
+	// SetLogLevel sets the server's logging level.
 	SetLogLevel(logLevel *LogLevel) (*LogLevel, error)
 
-	// CronList list all cron jobs of a repo
+	// CronList list all cron jobs of a repo.
 	CronList(repoID int64) ([]*Cron, error)
 
-	// CronGet get a specific cron job of a repo by id
+	// CronGet get a specific cron job of a repo by id.
 	CronGet(repoID, cronID int64) (*Cron, error)
 
-	// CronDelete delete a specific cron job of a repo by id
+	// CronDelete delete a specific cron job of a repo by id.
 	CronDelete(repoID, cronID int64) error
 
-	// CronCreate create a new cron job in a repo
+	// CronCreate create a new cron job in a repo.
 	CronCreate(repoID int64, cron *Cron) (*Cron, error)
 
-	// CronUpdate update an existing cron job of a repo
+	// CronUpdate update an existing cron job of a repo.
 	CronUpdate(repoID int64, cron *Cron) (*Cron, error)
 
-	// AgentList returns a list of all registered agents
+	// AgentList returns a list of all registered agents.
 	AgentList() ([]*Agent, error)
 
-	// Agent returns an agent by id
+	// Agent returns an agent by id.
 	Agent(int64) (*Agent, error)
 
-	// AgentCreate creates a new agent
+	// AgentCreate creates a new agent.
 	AgentCreate(*Agent) (*Agent, error)
 
-	// AgentUpdate updates an existing agent
+	// AgentUpdate updates an existing agent.
 	AgentUpdate(*Agent) (*Agent, error)
 
-	// AgentDelete deletes an agent
+	// AgentDelete deletes an agent.
 	AgentDelete(int64) error
 
-	// AgentTasksList returns a list of all tasks executed by an agent
+	// AgentTasksList returns a list of all tasks executed by an agent.
 	AgentTasksList(int64) ([]*Task, error)
 }

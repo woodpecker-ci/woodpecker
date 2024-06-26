@@ -47,7 +47,7 @@ func (g *GitLab) convertGitLabRepo(_repo *gitlab.Project, projectMember *gitlab.
 		CloneSSH:      _repo.SSHURLToRepo,
 		Branch:        _repo.DefaultBranch,
 		Visibility:    model.RepoVisibility(_repo.Visibility),
-		IsSCMPrivate:  !_repo.Public,
+		IsSCMPrivate:  _repo.Visibility == gitlab.InternalVisibility || _repo.Visibility == gitlab.PrivateVisibility,
 		Perm: &model.Perm{
 			Pull:  isRead(_repo, projectMember),
 			Push:  isWrite(projectMember),
@@ -189,7 +189,7 @@ func convertPushHook(hook *gitlab.PushEvent) (*model.Repo, *model.Pipeline, erro
 		files = append(files, cm.Removed...)
 		files = append(files, cm.Modified...)
 	}
-	pipeline.ChangedFiles = utils.DedupStrings(files)
+	pipeline.ChangedFiles = utils.DeduplicateStrings(files)
 
 	return repo, pipeline, nil
 }

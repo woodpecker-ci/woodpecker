@@ -14,9 +14,7 @@
 
 package kubernetes
 
-import (
-	"github.com/urfave/cli/v2"
-)
+import "github.com/urfave/cli/v2"
 
 var Flags = []cli.Flag{
 	&cli.StringFlag{
@@ -46,17 +44,35 @@ var Flags = []cli.Flag{
 	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_BACKEND_K8S_POD_LABELS"},
 		Name:    "backend-k8s-pod-labels",
-		Usage:   "backend k8s additional worker pod labels",
+		Usage:   "backend k8s additional Agent-wide worker pod labels",
 		Value:   "",
+	},
+	&cli.BoolFlag{
+		EnvVars: []string{"WOODPECKER_BACKEND_K8S_POD_LABELS_ALLOW_FROM_STEP"},
+		Name:    "backend-k8s-pod-labels-allow-from-step",
+		Usage:   "whether to allow using labels from step's backend options",
+		Value:   false,
 	},
 	&cli.StringFlag{
 		EnvVars: []string{"WOODPECKER_BACKEND_K8S_POD_ANNOTATIONS"},
 		Name:    "backend-k8s-pod-annotations",
-		Usage:   "backend k8s additional worker pod annotations",
+		Usage:   "backend k8s additional Agent-wide worker pod annotations",
+		Value:   "",
+	},
+	&cli.StringFlag{
+		EnvVars: []string{"WOODPECKER_BACKEND_K8S_POD_NODE_SELECTOR"},
+		Name:    "backend-k8s-pod-node-selector",
+		Usage:   "backend k8s Agent-wide worker pod node selector",
 		Value:   "",
 	},
 	&cli.BoolFlag{
-		EnvVars: []string{"WOODPECKER_BACKEND_K8S_SECCTX_NONROOT"},
+		EnvVars: []string{"WOODPECKER_BACKEND_K8S_POD_ANNOTATIONS_ALLOW_FROM_STEP"},
+		Name:    "backend-k8s-pod-annotations-allow-from-step",
+		Usage:   "whether to allow using annotations from step's backend options",
+		Value:   false,
+	},
+	&cli.BoolFlag{
+		EnvVars: []string{"WOODPECKER_BACKEND_K8S_SECCTX_NONROOT"}, // cspell:words secctx nonroot
 		Name:    "backend-k8s-secctx-nonroot",
 		Usage:   "`run as non root` Kubernetes security context option",
 	},
@@ -65,5 +81,11 @@ var Flags = []cli.Flag{
 		Name:    "backend-k8s-pod-image-pull-secret-names",
 		Usage:   "backend k8s pull secret names for private registries",
 		Value:   cli.NewStringSlice("regcred"),
+	},
+	&cli.BoolFlag{
+		EnvVars: []string{"WOODPECKER_BACKEND_K8S_ALLOW_NATIVE_SECRETS"},
+		Name:    "backend-k8s-allow-native-secrets",
+		Usage:   "whether to allow existing Kubernetes secrets to be referenced from steps",
+		Value:   false,
 	},
 }

@@ -97,7 +97,7 @@ import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useNotifications from '~/compositions/useNotifications';
 import { usePagination } from '~/compositions/usePaginate';
-import { User } from '~/lib/api/types';
+import type { User } from '~/lib/api/types';
 
 const apiClient = useApiClient();
 const notifications = useNotifications();
@@ -107,7 +107,7 @@ const selectedUser = ref<Partial<User>>();
 const isEditingUser = computed(() => !!selectedUser.value?.id);
 
 async function loadUsers(page: number): Promise<User[] | null> {
-  return apiClient.getUsers(page);
+  return apiClient.getUsers({ page });
 }
 
 const { resetPage, data: users } = usePagination(loadUsers, () => !selectedUser.value);
@@ -135,7 +135,7 @@ const { doSubmit: saveUser, isLoading: isSaving } = useAsyncAction(async () => {
 });
 
 const { doSubmit: deleteUser, isLoading: isDeleting } = useAsyncAction(async (_user: User) => {
-  // eslint-disable-next-line no-restricted-globals, no-alert
+  // eslint-disable-next-line no-alert
   if (!confirm(t('admin.settings.users.delete_confirm'))) {
     return;
   }

@@ -215,7 +215,7 @@ func TestFetchFromConfigService(t *testing.T) {
 
 			f.On("Netrc", mock.Anything, mock.Anything).Return(&model.Netrc{Machine: "mock", Login: "mock", Password: "mock"}, nil)
 
-			forgeFetcher := config.NewForge(time.Second * 3)
+			forgeFetcher := config.NewForge(time.Second*3, 3)
 			configFetcher := config.NewCombined(forgeFetcher, httpFetcher)
 			files, err := configFetcher.Fetch(
 				context.Background(),

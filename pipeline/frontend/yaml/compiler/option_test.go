@@ -166,30 +166,9 @@ func TestWithEnviron(t *testing.T) {
 	assert.Equal(t, "true", compiler.env["SHOW"])
 }
 
-func TestWithVolumeCacher(t *testing.T) {
-	compiler := New(
-		WithVolumeCacher("/cache"),
-	)
-	cacher, ok := compiler.cacher.(*volumeCacher)
-	assert.True(t, ok)
-	assert.Equal(t, "/cache", cacher.base)
-}
-
 func TestWithDefaultCloneImage(t *testing.T) {
 	compiler := New(
 		WithDefaultCloneImage("not-an-image"),
 	)
 	assert.Equal(t, "not-an-image", compiler.defaultCloneImage)
-}
-
-func TestWithS3Cacher(t *testing.T) {
-	compiler := New(
-		WithS3Cacher("some-access-key", "some-secret-key", "some-region", "some-bucket"),
-	)
-	cacher, ok := compiler.cacher.(*s3Cacher)
-	assert.True(t, ok)
-	assert.Equal(t, "some-bucket", cacher.bucket)
-	assert.Equal(t, "some-access-key", cacher.access)
-	assert.Equal(t, "some-region", cacher.region)
-	assert.Equal(t, "some-secret-key", cacher.secret)
 }
