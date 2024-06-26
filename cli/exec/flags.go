@@ -183,14 +183,6 @@ var flags = []cli.Flag{
 		EnvVars: []string{"CI_PIPELINE_STARTED"},
 		Name:    "pipeline-started",
 	},
-	&cli.Int64Flag{
-		EnvVars: []string{"CI_PIPELINE_FINISHED"},
-		Name:    "pipeline-finished",
-	},
-	&cli.StringFlag{
-		EnvVars: []string{"CI_PIPELINE_STATUS"},
-		Name:    "pipeline-status",
-	},
 	&cli.StringFlag{
 		EnvVars: []string{"CI_PIPELINE_EVENT"},
 		Name:    "pipeline-event",

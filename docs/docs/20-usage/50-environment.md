@@ -89,16 +89,13 @@ This is the reference list of all environment variables available to your pipeli
 | `CI_PIPELINE_STATUS`             | pipeline status (success, failure)                                                                                 |
 | `CI_PIPELINE_CREATED`            | pipeline created UNIX timestamp                                                                                    |
 | `CI_PIPELINE_STARTED`            | pipeline started UNIX timestamp                                                                                    |
-| `CI_PIPELINE_FINISHED`           | pipeline finished UNIX timestamp                                                                                   |
 | `CI_PIPELINE_FILES`              | changed files (empty if event is not `push` or `pull_request`), it is undefined if more than 500 files are touched |
 |                                  | **Current workflow**                                                                                               |
 | `CI_WORKFLOW_NAME`               | workflow name                                                                                                      |
 |                                  | **Current step**                                                                                                   |
 | `CI_STEP_NAME`                   | step name                                                                                                          |
 | `CI_STEP_NUMBER`                 | step number                                                                                                        |
-| `CI_STEP_STATUS`                 | step status (success, failure)                                                                                     |
 | `CI_STEP_STARTED`                | step started UNIX timestamp                                                                                        |
-| `CI_STEP_FINISHED`               | step finished UNIX timestamp                                                                                       |
 | `CI_STEP_URL`                    | URL to step in UI                                                                                                  |
 |                                  | **Previous commit**                                                                                                |
 | `CI_PREV_COMMIT_SHA`             | previous commit SHA                                                                                                |
