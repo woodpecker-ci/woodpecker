@@ -117,15 +117,15 @@ func (c *config) Auth(ctx context.Context, token, secret string) (string, error)
 func (c *config) Refresh(ctx context.Context, user *model.User) (bool, error) {
 	config := c.newOAuth2Config()
 	source := config.TokenSource(
-		ctx, &oauth2.Token{RefreshToken: user.Secret})
+		ctx, &oauth2.Token{RefreshToken: user.RefreshToken})
 
 	token, err := source.Token()
 	if err != nil || len(token.AccessToken) == 0 {
 		return false, err
 	}
 
-	user.Token = token.AccessToken
-	user.Secret = token.RefreshToken
+	user.AccessToken = token.AccessToken
+	user.RefreshToken = token.RefreshToken
 	user.Expiry = token.Expiry.UTC().Unix()
 	return true, nil
 }
@@ -348,7 +348,7 @@ func (c *config) Netrc(u *model.User, _ *model.Repo) (*model.Netrc, error) {
 	return &model.Netrc{
 		Machine:  "bitbucket.org",
 		Login:    "x-token-auth",
-		Password: u.Token,
+		Password: u.AccessToken,
 	}, nil
 }
 
@@ -428,7 +428,7 @@ func (c *config) newClient(ctx context.Context, u *model.User) *internal.Client 
 	if u == nil {
 		return c.newClientToken(ctx, "", "")
 	}
-	return c.newClientToken(ctx, u.Token, u.Secret)
+	return c.newClientToken(ctx, u.AccessToken, u.RefreshToken)
 }
 
 // helper function to return the bitbucket oauth2 client.

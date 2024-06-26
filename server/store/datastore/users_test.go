@@ -46,9 +46,9 @@ func TestUsers(t *testing.T) {
 
 		g.It("Should Update a User", func() {
 			user := model.User{
-				Login: "joe",
-				Email: "foo@bar.com",
-				Token: "e42080dddf012c718e476da161d21ad5",
+				Login:       "joe",
+				Email:       "foo@bar.com",
+				AccessToken: "e42080dddf012c718e476da161d21ad5",
 			}
 			err1 := store.CreateUser(&user)
 			err2 := store.UpdateUser(&user)
@@ -61,9 +61,9 @@ func TestUsers(t *testing.T) {
 
 		g.It("Should Add a new User", func() {
 			user := model.User{
-				Login: "joe",
-				Email: "foo@bar.com",
-				Token: "e42080dddf012c718e476da161d21ad5",
+				Login:       "joe",
+				Email:       "foo@bar.com",
+				AccessToken: "e42080dddf012c718e476da161d21ad5",
 			}
 			err := store.CreateUser(&user)
 			g.Assert(err).IsNil()
@@ -72,11 +72,11 @@ func TestUsers(t *testing.T) {
 
 		g.It("Should Get a User", func() {
 			user := &model.User{
-				Login:  "joe",
-				Token:  "f0b461ca586c27872b43a0685cbc2847",
-				Secret: "976f22a5eef7caacb7e678d6c52f49b1",
-				Email:  "foo@bar.com",
-				Avatar: "b9015b0857e16ac4d94a0ffd9a0b79c8",
+				Login:        "joe",
+				AccessToken:  "f0b461ca586c27872b43a0685cbc2847",
+				RefreshToken: "976f22a5eef7caacb7e678d6c52f49b1",
+				Email:        "foo@bar.com",
+				Avatar:       "b9015b0857e16ac4d94a0ffd9a0b79c8",
 			}
 
 			g.Assert(store.CreateUser(user)).IsNil()
@@ -84,17 +84,17 @@ func TestUsers(t *testing.T) {
 			g.Assert(err).IsNil()
 			g.Assert(user.ID).Equal(getUser.ID)
 			g.Assert(user.Login).Equal(getUser.Login)
-			g.Assert(user.Token).Equal(getUser.Token)
-			g.Assert(user.Secret).Equal(getUser.Secret)
+			g.Assert(user.AccessToken).Equal(getUser.AccessToken)
+			g.Assert(user.RefreshToken).Equal(getUser.RefreshToken)
 			g.Assert(user.Email).Equal(getUser.Email)
 			g.Assert(user.Avatar).Equal(getUser.Avatar)
 		})
 
 		g.It("Should Get a User By Login", func() {
 			user := &model.User{
-				Login: "joe",
-				Email: "foo@bar.com",
-				Token: "e42080dddf012c718e476da161d21ad5",
+				Login:       "joe",
+				Email:       "foo@bar.com",
+				AccessToken: "e42080dddf012c718e476da161d21ad5",
 			}
 			g.Assert(store.CreateUser(user))
 			getUser, err := store.GetUserLogin(user.Login)
@@ -105,14 +105,14 @@ func TestUsers(t *testing.T) {
 
 		g.It("Should Enforce Unique User Login", func() {
 			user1 := model.User{
-				Login: "joe",
-				Email: "foo@bar.com",
-				Token: "e42080dddf012c718e476da161d21ad5",
+				Login:       "joe",
+				Email:       "foo@bar.com",
+				AccessToken: "e42080dddf012c718e476da161d21ad5",
 			}
 			user2 := model.User{
-				Login: "joe",
-				Email: "foo@bar.com",
-				Token: "ab20g0ddaf012c744e136da16aa21ad9",
+				Login:       "joe",
+				Email:       "foo@bar.com",
+				AccessToken: "ab20g0ddaf012c744e136da16aa21ad9",
 			}
 			err1 := store.CreateUser(&user1)
 			err2 := store.CreateUser(&user2)
@@ -122,15 +122,15 @@ func TestUsers(t *testing.T) {
 
 		g.It("Should Get a User List", func() {
 			user1 := model.User{
-				Login: "jane",
-				Email: "foo@bar.com",
-				Token: "ab20g0ddaf012c744e136da16aa21ad9",
-				Hash:  "A",
+				Login:       "jane",
+				Email:       "foo@bar.com",
+				AccessToken: "ab20g0ddaf012c744e136da16aa21ad9",
+				Hash:        "A",
 			}
 			user2 := model.User{
-				Login: "joe",
-				Email: "foo@bar.com",
-				Token: "e42080dddf012c718e476da161d21ad5",
+				Login:       "joe",
+				Email:       "foo@bar.com",
+				AccessToken: "e42080dddf012c718e476da161d21ad5",
 			}
 			g.Assert(store.CreateUser(&user1)).IsNil()
 			g.Assert(store.CreateUser(&user2)).IsNil()
@@ -139,21 +139,21 @@ func TestUsers(t *testing.T) {
 			g.Assert(len(users)).Equal(2)
 			g.Assert(users[0].Login).Equal(user1.Login)
 			g.Assert(users[0].Email).Equal(user1.Email)
-			g.Assert(users[0].Token).Equal(user1.Token)
+			g.Assert(users[0].AccessToken).Equal(user1.AccessToken)
 		})
 
 		g.It("Should Get a User Count", func() {
 			user1 := model.User{
-				Login: "jane",
-				Email: "foo@bar.com",
-				Token: "ab20g0ddaf012c744e136da16aa21ad9",
-				Hash:  "A",
+				Login:       "jane",
+				Email:       "foo@bar.com",
+				AccessToken: "ab20g0ddaf012c744e136da16aa21ad9",
+				Hash:        "A",
 			}
 			user2 := model.User{
-				Login: "joe",
-				Email: "foo@bar.com",
-				Token: "e42080dddf012c718e476da161d21ad5",
-				Hash:  "B",
+				Login:       "joe",
+				Email:       "foo@bar.com",
+				AccessToken: "e42080dddf012c718e476da161d21ad5",
+				Hash:        "B",
 			}
 			g.Assert(store.CreateUser(&user1)).IsNil()
 			g.Assert(store.CreateUser(&user2)).IsNil()
@@ -170,9 +170,9 @@ func TestUsers(t *testing.T) {
 
 		g.It("Should Del a User", func() {
 			user := &model.User{
-				Login: "joe",
-				Email: "foo@bar.com",
-				Token: "e42080dddf012c718e476da161d21ad5",
+				Login:       "joe",
+				Email:       "foo@bar.com",
+				AccessToken: "e42080dddf012c718e476da161d21ad5",
 			}
 			g.Assert(store.CreateUser(user)).IsNil()
 			user, err1 := store.GetUser(user.ID)
@@ -185,9 +185,9 @@ func TestUsers(t *testing.T) {
 
 		g.It("Should get the Pipeline feed for a User", func() {
 			user := &model.User{
-				Login: "joe",
-				Email: "foo@bar.com",
-				Token: "e42080dddf012c718e476da161d21ad5",
+				Login:       "joe",
+				Email:       "foo@bar.com",
+				AccessToken: "e42080dddf012c718e476da161d21ad5",
 			}
 			g.Assert(store.CreateUser(user)).IsNil()
 

@@ -165,9 +165,9 @@ func TestRepoList(t *testing.T) {
 	defer closer()
 
 	user := &model.User{
-		Login: "joe",
-		Email: "foo@bar.com",
-		Token: "e42080dddf012c718e476da161d21ad5",
+		Login:       "joe",
+		Email:       "foo@bar.com",
+		AccessToken: "e42080dddf012c718e476da161d21ad5",
 	}
 	assert.NoError(t, store.CreateUser(user))
 
@@ -212,9 +212,9 @@ func TestOwnedRepoList(t *testing.T) {
 	defer closer()
 
 	user := &model.User{
-		Login: "joe",
-		Email: "foo@bar.com",
-		Token: "e42080dddf012c718e476da161d21ad5",
+		Login:       "joe",
+		Email:       "foo@bar.com",
+		AccessToken: "e42080dddf012c718e476da161d21ad5",
 	}
 	assert.NoError(t, store.CreateUser(user))
 
