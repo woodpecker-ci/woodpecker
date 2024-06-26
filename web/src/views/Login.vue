@@ -22,7 +22,12 @@
       <div class="flex justify-center items-center flex-col md:w-2/5 min-h-48 gap-4 text-center">
         <h1 class="text-xl text-wp-text-100">{{ $t('welcome') }}</h1>
         <div class="flex flex-col gap-2">
-          <Button v-for="forge in forges" :key="forge.id" @click="doLogin(forge.id)">
+          <Button
+            v-for="forge in forges"
+            :key="forge.id"
+            :start-icon="forge.type === 'addon' ? 'repo' : forge.type"
+            @click="doLogin(forge.id)"
+          >
             {{ $t('login_with', { forge: getHostFromUrl(forge) }) }}
           </Button>
         </div>
