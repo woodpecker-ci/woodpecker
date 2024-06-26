@@ -108,8 +108,11 @@ func PostHook(c *gin.Context) {
 	// 1. Check if the webhook is valid and authorized
 	//
 
-	parsedToken, err := token.ParseRequest(token.HookToken, c.Request, func(t *token.Token) (string, error) {
-		repo, err := getRepoFromToken(_store, t)
+	var repo *model.Repo
+
+	parsedToken, err := token.ParseRequest([]token.Type{token.HookToken}, c.Request, func(t *token.Token) (string, error) {
+		var err error
+		repo, err = getRepoFromToken(_store, t)
 		if err != nil {
 			return "", err
 		}
@@ -123,15 +126,16 @@ func PostHook(c *gin.Context) {
 		return
 	}
 
-	repo, err := getRepoFromToken(_store, parsedToken)
-	if err != nil {
-		log.Error().Err(err).Msg("Cannot get repo")
-		c.AbortWithStatus(http.StatusInternalServerError)
+	if repo == nil {
+		msg := "failure to get repo from token"
+		log.Error().Msg(msg)
+		c.String(http.StatusBadRequest, msg)
+		return
 	}
 
 	_forge, err := server.Config.Services.Manager.ForgeFromRepo(repo)
 	if err != nil {
-		log.Error().Err(err).Msg("Cannot get main forge")
+		log.Error().Err(err).Int64("repo-id", repo.ID).Msgf("Cannot get forge with id: %d", repo.ForgeID)
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}

@@ -196,7 +196,8 @@
                 "title": "Variables additionnelles du pipeline",
                 "value": "Valeur de la variable",
                 "delete": "Supprimer la variable"
-            }
+            },
+            "enter_task": "Tâche de déploiement"
         },
         "enable": {
             "disabled": "Désactivé",
@@ -220,7 +221,7 @@
             }
         },
         "not_allowed": "Vous n'êtes pas autorisé à accéder à ce dépôt",
-        "open_in_forge": "Ouvrir le dépôt dans un système de contrôle de version",
+        "open_in_forge": "Ouvrir le dépôt dans la forge",
         "pipeline": {
             "actions": {
                 "cancel": "Annuler",
@@ -555,6 +556,14 @@
             "events": "Disponible lors des événements suivants",
             "pr_warning": "Soyez prudent avec cette option car un acteur malveillant peut soumettre une pull request qui expose vos secrets."
         },
-        "plugins_only": "Uniquement disponible pour les plugins"
-    }
+        "plugins_only": "Uniquement disponible pour les plugins",
+        "edit": "Modifier le secret",
+        "delete": "Supprimer le secret",
+        "delete_confirm": "Voulez vous vraiment supprimer ce secret ?"
+    },
+    "internal_error": "Une erreur interne est survenue",
+    "access_denied": "Vous n'êtes pas autorisé à accéder à cette instance",
+    "oauth_error": "Erreur lors de l'authentification auprès du fournisseur OAuth",
+    "registration_closed": "Les inscriptions sont fermés",
+    "settings": "Réglages"
 }
