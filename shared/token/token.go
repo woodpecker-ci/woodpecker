@@ -24,25 +24,25 @@ import (
 
 type SecretFunc func(*Token) (string, error)
 
-type TokenType string
+type Type string
 
 const (
-	UserToken  TokenType = "user" // user token (exp cli)
-	SessToken  TokenType = "sess" // session token (ui token requires csrf check)
-	HookToken  TokenType = "hook" // repo hook token
-	CsrfToken  TokenType = "csrf"
-	AgentToken TokenType = "agent"
+	UserToken  Type = "user" // user token (exp cli)
+	SessToken  Type = "sess" // session token (ui token requires csrf check)
+	HookToken  Type = "hook" // repo hook token
+	CsrfToken  Type = "csrf"
+	AgentToken Type = "agent"
 )
 
 // SignerAlgo id default algorithm used to sign JWT tokens.
 const SignerAlgo = "HS256"
 
 type Token struct {
-	Type   TokenType
+	Type   Type
 	claims jwt.MapClaims
 }
 
-func Parse(allowedTypes []TokenType, raw string, fn SecretFunc) (*Token, error) {
+func Parse(allowedTypes []Type, raw string, fn SecretFunc) (*Token, error) {
 	token := &Token{
 		claims: jwt.MapClaims{},
 	}
@@ -69,7 +69,7 @@ func Parse(allowedTypes []TokenType, raw string, fn SecretFunc) (*Token, error) 
 	return token, nil
 }
 
-func ParseRequest(allowedTypes []TokenType, r *http.Request, fn SecretFunc) (*Token, error) {
+func ParseRequest(allowedTypes []Type, r *http.Request, fn SecretFunc) (*Token, error) {
 	// first we attempt to get the token from the
 	// authorization header.
 	token := r.Header.Get("Authorization")
@@ -113,11 +113,11 @@ func CheckCsrf(r *http.Request, fn SecretFunc) error {
 
 	// parse the raw CSRF token value and validate
 	raw := r.Header.Get("X-CSRF-TOKEN")
-	_, err := Parse([]TokenType{CsrfToken}, raw, fn)
+	_, err := Parse([]Type{CsrfToken}, raw, fn)
 	return err
 }
 
-func New(tokenType TokenType) *Token {
+func New(tokenType Type) *Token {
 	return &Token{Type: tokenType, claims: jwt.MapClaims{}}
 }
 
@@ -178,7 +178,7 @@ func keyFunc(token *Token, fn SecretFunc) jwt.Keyfunc {
 		if !ok {
 			return nil, jwt.ErrInvalidType
 		}
-		token.Type = TokenType(tokenType)
+		token.Type = Type(tokenType)
 
 		// copy custom claims
 		for k, v := range claims {

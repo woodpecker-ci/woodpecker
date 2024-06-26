@@ -31,7 +31,7 @@ func AuthorizeAgent(c *gin.Context) {
 		return
 	}
 
-	_, err := token.ParseRequest([]token.TokenType{token.AgentToken}, c.Request, func(_ *token.Token) (string, error) {
+	_, err := token.ParseRequest([]token.Type{token.AgentToken}, c.Request, func(_ *token.Token) (string, error) {
 		return secret, nil
 	})
 	if err != nil {

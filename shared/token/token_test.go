@@ -24,7 +24,7 @@ func TestToken(t *testing.T) {
 			signedToken, err := _token.Sign(jwtSecret)
 			assert.NoError(g, err)
 
-			parsed, err := token.Parse([]token.TokenType{token.UserToken}, signedToken, func(_ *token.Token) (string, error) {
+			parsed, err := token.Parse([]token.Type{token.UserToken}, signedToken, func(_ *token.Token) (string, error) {
 				return jwtSecret, nil
 			})
 
@@ -39,7 +39,7 @@ func TestToken(t *testing.T) {
 			signedToken, err := _token.Sign(jwtSecret)
 			assert.NoError(g, err)
 
-			_, err = token.Parse([]token.TokenType{token.AgentToken}, signedToken, func(_ *token.Token) (string, error) {
+			_, err = token.Parse([]token.Type{token.AgentToken}, signedToken, func(_ *token.Token) (string, error) {
 				return jwtSecret, nil
 			})
 
@@ -52,7 +52,7 @@ func TestToken(t *testing.T) {
 			signedToken, err := _token.Sign(jwtSecret)
 			assert.NoError(g, err)
 
-			_, err = token.Parse([]token.TokenType{token.UserToken}, signedToken, func(_ *token.Token) (string, error) {
+			_, err = token.Parse([]token.Type{token.UserToken}, signedToken, func(_ *token.Token) (string, error) {
 				return "this-is-a-wrong-secret", nil
 			})
 

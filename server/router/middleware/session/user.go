@@ -43,7 +43,7 @@ func SetUser() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var user *model.User
 
-		t, err := token.ParseRequest([]token.TokenType{token.UserToken, token.SessToken}, c.Request, func(t *token.Token) (string, error) {
+		t, err := token.ParseRequest([]token.Type{token.UserToken, token.SessToken}, c.Request, func(t *token.Token) (string, error) {
 			var err error
 			userID, err := strconv.ParseInt(t.Get("user-id"), 10, 64)
 			if err != nil {
