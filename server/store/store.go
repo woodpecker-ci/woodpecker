@@ -14,7 +14,7 @@
 
 package store
 
-//go:generate mockery --name Store --output mocks --case underscore
+//go:generate mockery --name Store --output mocks --case underscore --note "+build test"
 
 import (
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
