@@ -28,7 +28,7 @@
                   :title="$t('repo.manual_pipeline.variables.delete')"
                   @click="deleteVar(i)"
                 >
-                  <Icon name="times" />
+                  <Icon name="remove" />
                 </Button>
               </div>
             </div>

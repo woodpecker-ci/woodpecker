@@ -49,7 +49,7 @@
   <SvgIcon v-else-if="name === 'auto-scroll'" :path="mdiDownload" size="24" />
   <SvgIcon v-else-if="name === 'auto-scroll-off'" :path="mdiDownloadOff" size="24" />
   <SvgIcon v-else-if="name === 'pause'" :path="mdiPause" size="24" />
-  <SvgIcon v-else-if="name === 'times'" :path="mdiClose" size="24" />
+  <SvgIcon v-else-if="name === 'remove'" :path="mdiClose" size="24" />
 
   <SvgIcon v-else-if="name === 'forgejo'" :path="siForgejo.path" size="32" />
   <SvgIcon v-else-if="name === 'gitea'" :path="siGitea.path" size="32" />
@@ -175,7 +175,7 @@ export type IconNames =
   | 'attention'
   | 'spinner'
   | 'error'
-  | 'times';
+  | 'remove';
 
 defineProps<{
   name: IconNames;

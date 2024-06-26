@@ -1,5 +1,5 @@
 <template>
-  <svg :width="size" :height="size" viewBox="0 0 24 24">
+  <svg fill="currentColor" :width="size" :height="size" viewBox="0 0 24 24">
     <path :d="path" />
   </svg>
 </template>
@@ -10,9 +10,3 @@ defineProps<{
   size: number | string;
 }>();
 </script>
-
-<style scoped>
-path {
-  fill: currentColor;
-}
-</style>
