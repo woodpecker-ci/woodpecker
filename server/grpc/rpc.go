@@ -93,6 +93,17 @@ func (s *RPC) Wait(c context.Context, id string) error {
 
 // Extend implements the rpc.Extend function.
 func (s *RPC) Extend(c context.Context, id string) error {
+	agent, err := s.getAgentFromContext(c)
+	if err != nil {
+		return err
+	}
+
+	agent.LastWork = time.Now().Unix()
+	err = s.store.AgentUpdate(agent)
+	if err != nil {
+		return err
+	}
+
 	return s.queue.Extend(c, id)
 }
 
@@ -225,7 +236,9 @@ func (s *RPC) Init(c context.Context, id string, state rpc.State) error {
 		return err
 	}
 	s.updateForgeStatus(c, repo, currentPipeline, workflow)
-	return nil
+
+	agent.LastWork = time.Now().Unix()
+	return s.store.AgentUpdate(agent)
 }
 
 // Done implements the rpc.Done function.
@@ -314,7 +327,12 @@ func (s *RPC) Done(c context.Context, id string, state rpc.State) error {
 		s.pipelineTime.WithLabelValues(repo.FullName, currentPipeline.Branch, string(workflow.State), workflow.Name).Set(float64(workflow.Stopped - workflow.Started))
 	}
 
-	return nil
+	agent, err := s.getAgentFromContext(c)
+	if err != nil {
+		return err
+	}
+	agent.LastWork = time.Now().Unix()
+	return s.store.AgentUpdate(agent)
 }
 
 // Log implements the rpc.Log function.
@@ -331,6 +349,7 @@ func (s *RPC) Log(c context.Context, _logEntry *rpc.LogEntry) error {
 		Data:   _logEntry.Data,
 		Type:   model.LogEntryType(_logEntry.Type),
 	}
+
 	// make sure writes to pubsub are non blocking (https://github.com/woodpecker-ci/woodpecker/blob/c919f32e0b6432a95e1a6d3d0ad662f591adf73f/server/logging/log.go#L9)
 	go func() {
 		// write line to listening web clients
@@ -338,6 +357,16 @@ func (s *RPC) Log(c context.Context, _logEntry *rpc.LogEntry) error {
 			log.Error().Err(err).Msgf("rpc server could not write to logger")
 		}
 	}()
+
+	agent, err := s.getAgentFromContext(c)
+	if err != nil {
+		return err
+	}
+	agent.LastWork = time.Now().Unix()
+	if err := s.store.AgentUpdate(agent); err != nil {
+		return err
+	}
+
 	return server.Config.Services.LogStore.LogAppend(logEntry)
 }
 
