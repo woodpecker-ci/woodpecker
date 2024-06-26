@@ -15,7 +15,7 @@
 
 package forge
 
-//go:generate mockery --name Forge --output mocks --case underscore
+//go:generate mockery --name Forge --output mocks --case underscore --note "+build test"
 
 import (
 	"context"

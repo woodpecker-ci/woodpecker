@@ -29,6 +29,7 @@
 
 <script lang="ts" setup>
 import WoodpeckerLogo from '~/assets/logo.svg?component';
+import Error from '~/components/atomic/Error.vue';
 import Settings from '~/components/layout/Settings.vue';
 import { useVersion } from '~/compositions/useVersion';
 
