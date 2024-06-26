@@ -80,7 +80,7 @@ func Send(ctx context.Context, method, path string, privateKey ed25519.PrivateKe
 }
 
 func signClient(privateKey ed25519.PrivateKey) (*httpsign.Client, error) {
-	pubKeyID := "woodpecker-ci-plugins" // TODO change to woodpecker-ci-extensions
+	pubKeyID := "woodpecker-ci-extensions"
 
 	signer, err := httpsign.NewEd25519Signer(pubKeyID, privateKey,
 		httpsign.NewSignConfig(),

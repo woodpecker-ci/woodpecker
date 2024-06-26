@@ -28,7 +28,7 @@ import (
 )
 
 func TestSignClient(t *testing.T) {
-	pubKeyID := "woodpecker-ci-plugins"
+	pubKeyID := "woodpecker-ci-extensions"
 
 	pubEd25519Key, privEd25519Key, err := ed25519.GenerateKey(rand.Reader)
 	if !assert.NoError(t, err) {
