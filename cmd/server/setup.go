@@ -17,13 +17,13 @@ package main
 
 import (
 	"context"
-	"crypto/rand"
-	"encoding/base64"
+	"encoding/base32"
 	"errors"
 	"fmt"
 	"os"
 	"time"
 
+	"github.com/gorilla/securecookie"
 	"github.com/prometheus/client_golang/prometheus"
 	prometheus_auto "github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/rs/zerolog/log"
@@ -172,28 +172,21 @@ func setupLogStore(c *cli.Context, s store.Store) (logService.Service, error) {
 
 const jwtSecretID = "jwt-secret"
 
-func randToken() (string, error) {
-	b := make([]byte, 32)
-	if _, err := rand.Read(b); err != nil {
-		return "", err
-	}
-	return base64.StdEncoding.EncodeToString(b), nil
-}
-
 func setupJWTSecret(_store store.Store) (string, error) {
 	jwtSecret, err := _store.ServerConfigGet(jwtSecretID)
 	if errors.Is(err, types.RecordNotExist) {
-		jwtSecret, err := randToken()
-		if err != nil {
-			return "", err
-		}
+		jwtSecret := base32.StdEncoding.EncodeToString(
+			securecookie.GenerateRandomKey(32),
+		)
 		err = _store.ServerConfigSet(jwtSecretID, jwtSecret)
 		if err != nil {
 			return "", err
 		}
 		log.Debug().Msg("created jwt secret")
 		return jwtSecret, nil
-	} else if err != nil {
+	}
+
+	if err != nil {
 		return "", err
 	}
 
