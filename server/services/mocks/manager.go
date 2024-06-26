@@ -158,36 +158,6 @@ func (_m *Manager) ForgeFromUser(user *model.User) (forge.Forge, error) {
 	return r0, r1
 }
 
-// ForgeMain provides a mock function with given fields:
-func (_m *Manager) ForgeMain() (forge.Forge, error) {
-	ret := _m.Called()
-
-	if len(ret) == 0 {
-		panic("no return value specified for ForgeMain")
-	}
-
-	var r0 forge.Forge
-	var r1 error
-	if rf, ok := ret.Get(0).(func() (forge.Forge, error)); ok {
-		return rf()
-	}
-	if rf, ok := ret.Get(0).(func() forge.Forge); ok {
-		r0 = rf()
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(forge.Forge)
-		}
-	}
-
-	if rf, ok := ret.Get(1).(func() error); ok {
-		r1 = rf()
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
 // RegistryService provides a mock function with given fields:
 func (_m *Manager) RegistryService() registry.Service {
 	ret := _m.Called()
