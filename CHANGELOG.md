@@ -1,6 +1,6 @@
 # Changelog
 
-## [2.7.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.7.0) - 2024-06-25
+## [2.7.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.7.0) - 2024-06-26
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -15,6 +15,16 @@
 - Cli get repo from git remote [[#3830](https://github.com/woodpecker-ci/woodpecker/pull/3830)]
 - Add api for forges [[#3733](https://github.com/woodpecker-ci/woodpecker/pull/3733)]
 
+### 📚 Documentation
+
+- chore(deps): update docs npm deps non-major [[#3837](https://github.com/woodpecker-ci/woodpecker/pull/3837)]
+- fix(deps): update docs npm deps non-major [[#3824](https://github.com/woodpecker-ci/woodpecker/pull/3824)]
+- Add openSUSE package [[#3800](https://github.com/woodpecker-ci/woodpecker/pull/3800)]
+- chore(deps): update docs npm deps non-major [[#3798](https://github.com/woodpecker-ci/woodpecker/pull/3798)]
+- Add "Docker Tags" Plugin [[#3796](https://github.com/woodpecker-ci/woodpecker/pull/3796)]
+- chore(deps): update dependency marked to v13 [[#3792](https://github.com/woodpecker-ci/woodpecker/pull/3792)]
+- chore: fix some comments [[#3788](https://github.com/woodpecker-ci/woodpecker/pull/3788)]
+
 ### 📈 Enhancement
 
 - Exclude mocks from release build [[#3831](https://github.com/woodpecker-ci/woodpecker/pull/3831)]
@@ -27,17 +37,9 @@
 - Fix newlines in logs [[#3808](https://github.com/woodpecker-ci/woodpecker/pull/3808)]
 - Fix authentication error handling [[#3807](https://github.com/woodpecker-ci/woodpecker/pull/3807)]
 
-### 📚 Documentation
-
-- fix(deps): update docs npm deps non-major [[#3824](https://github.com/woodpecker-ci/woodpecker/pull/3824)]
-- Add openSUSE package [[#3800](https://github.com/woodpecker-ci/woodpecker/pull/3800)]
-- chore(deps): update docs npm deps non-major [[#3798](https://github.com/woodpecker-ci/woodpecker/pull/3798)]
-- Add "Docker Tags" Plugin [[#3796](https://github.com/woodpecker-ci/woodpecker/pull/3796)]
-- chore(deps): update dependency marked to v13 [[#3792](https://github.com/woodpecker-ci/woodpecker/pull/3792)]
-- chore: fix some comments [[#3788](https://github.com/woodpecker-ci/woodpecker/pull/3788)]
-
 ### Misc
 
+- chore(deps): lock file maintenance [[#3838](https://github.com/woodpecker-ci/woodpecker/pull/3838)]
 - Allow to set dist dir using env var [[#3814](https://github.com/woodpecker-ci/woodpecker/pull/3814)]
 - chore(deps): lock file maintenance [[#3805](https://github.com/woodpecker-ci/woodpecker/pull/3805)]
 - chore(deps): update docker.io/lycheeverse/lychee docker tag to v0.15.1 [[#3797](https://github.com/woodpecker-ci/woodpecker/pull/3797)]
