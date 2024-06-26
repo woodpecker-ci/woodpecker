@@ -96,16 +96,8 @@ func (c *client) URL() string {
 func (c *client) Login(ctx context.Context, req *forge_types.OAuthRequest) (*model.User, string, error) {
 	config := c.newOAuth2Config()
 
-	// TODO: Use proper pkce (https://oauth.net/2/pkce/) ...
+	// TODO: Use pkce flow (https://oauth.net/2/pkce/) ...
 	redirectURL := config.AuthCodeURL(req.State)
-
-	if req.Error != "" {
-		return nil, redirectURL, &forge_types.AuthError{
-			Err:         req.Error,
-			Description: req.ErrorDescription,
-			URI:         req.ErrorURI,
-		}
-	}
 
 	if len(req.Code) == 0 {
 		return nil, redirectURL, nil

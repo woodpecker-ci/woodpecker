@@ -113,15 +113,6 @@ func (c *Forgejo) Login(ctx context.Context, req *forge_types.OAuthRequest) (*mo
 	config, oauth2Ctx := c.oauth2Config(ctx)
 	redirectURL := config.AuthCodeURL(req.State)
 
-	// check the OAuth errors
-	if req.Error != "" {
-		return nil, redirectURL, &forge_types.AuthError{
-			Err:         req.Error,
-			Description: req.ErrorDescription,
-			URI:         req.ErrorURI,
-		}
-	}
-
 	// check the OAuth code
 	if len(req.Code) == 0 {
 		return nil, redirectURL, nil

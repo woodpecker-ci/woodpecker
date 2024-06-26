@@ -561,5 +561,9 @@
         "edit": "Geheimnis bearbeiten",
         "delete": "Geheimnis löschen"
     },
-    "settings": "Einstellungen"
+    "settings": "Einstellungen",
+    "oauth_error": "Fehler bei der Authentifizierung mit OAuth-Anbieter",
+    "internal_error": "Ein interner Fehler ist aufgetreten",
+    "registration_closed": "Die Registrierung ist geschlossen",
+    "access_denied": "Du darfst nicht auf diese Instanz zugreifen"
 }

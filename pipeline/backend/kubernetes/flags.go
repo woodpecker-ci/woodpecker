@@ -14,9 +14,7 @@
 
 package kubernetes
 
-import (
-	"github.com/urfave/cli/v2"
-)
+import "github.com/urfave/cli/v2"
 
 var Flags = []cli.Flag{
 	&cli.StringFlag{
@@ -83,5 +81,11 @@ var Flags = []cli.Flag{
 		Name:    "backend-k8s-pod-image-pull-secret-names",
 		Usage:   "backend k8s pull secret names for private registries",
 		Value:   cli.NewStringSlice("regcred"),
+	},
+	&cli.BoolFlag{
+		EnvVars: []string{"WOODPECKER_BACKEND_K8S_ALLOW_NATIVE_SECRETS"},
+		Name:    "backend-k8s-allow-native-secrets",
+		Usage:   "whether to allow existing Kubernetes secrets to be referenced from steps",
+		Value:   false,
 	},
 }

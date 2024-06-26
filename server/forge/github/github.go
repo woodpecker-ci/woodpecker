@@ -102,15 +102,6 @@ func (c *client) Login(ctx context.Context, req *forge_types.OAuthRequest) (*mod
 	config := c.newConfig()
 	redirectURL := config.AuthCodeURL(req.State)
 
-	// check the OAuth errors
-	if req.Error != "" {
-		return nil, redirectURL, &forge_types.AuthError{
-			Err:         req.Error,
-			Description: req.ErrorDescription,
-			URI:         req.ErrorURI,
-		}
-	}
-
 	// check the OAuth code
 	if len(req.Code) == 0 {
 		// TODO(bradrydzewski) we really should be using a random value here and
@@ -662,9 +653,6 @@ func (c *client) getTagCommitSHA(ctx context.Context, repo *model.Repo, tagName 
 	}
 
 	gh := c.newClientToken(ctx, user.Token)
-	if err != nil {
-		return "", err
-	}
 
 	page := 1
 	var tag *github.RepositoryTag
