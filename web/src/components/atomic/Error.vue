@@ -4,7 +4,7 @@
   >
     <Icon v-if="!textOnly" name="error" />
     <slot>
-      <span>{{ text }}</span>
+      <span class="whitespace-pre">{{ text }}</span>
     </slot>
   </div>
 </template>
@@ -14,6 +14,6 @@ import Icon from './Icon.vue';
 
 defineProps<{
   textOnly?: boolean;
-  text: string;
+  text?: string;
 }>();
 </script>

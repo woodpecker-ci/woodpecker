@@ -96,16 +96,8 @@ func (c *client) URL() string {
 func (c *client) Login(ctx context.Context, req *forge_types.OAuthRequest) (*model.User, string, error) {
 	config := c.newOAuth2Config()
 
-	// TODO: Add proper state and pkce (https://oauth.net/2/pkce/) ...
-	redirectURL := config.AuthCodeURL("woodpecker")
-
-	if req.Error != "" {
-		return nil, redirectURL, &forge_types.AuthError{
-			Err:         req.Error,
-			Description: req.ErrorDescription,
-			URI:         req.ErrorURI,
-		}
-	}
+	// TODO: Use pkce flow (https://oauth.net/2/pkce/) ...
+	redirectURL := config.AuthCodeURL(req.State)
 
 	if len(req.Code) == 0 {
 		return nil, redirectURL, nil
