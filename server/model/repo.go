@@ -51,6 +51,7 @@ type Repo struct {
 	Perm                         *Perm          `json:"-"                               xorm:"-"`
 	CancelPreviousPipelineEvents []WebhookEvent `json:"cancel_previous_pipeline_events" xorm:"json 'cancel_previous_pipeline_events'"`
 	NetrcOnlyTrusted             bool           `json:"netrc_only_trusted"              xorm:"NOT NULL DEFAULT true 'netrc_only_trusted'"`
+	CICDFeedback                 bool           `json:"cicd_feedback"                   xorm:"NOT NULL DEFAULT true 'cicd_feedback'"`
 } //	@name Repo
 
 // TableName return database table name for xorm.

@@ -243,7 +243,7 @@ func PostHook(c *gin.Context) {
 	//
 
 	pl, err := pipeline.Create(c, _store, repo, tmpPipeline)
-	if pl != nil {
+	if server.Config.Server.CICDFeedback && repo.CICDFeedback && pl != nil {
 		c.Writer.Header().Set("CICD-Feedback", feedback.PipelineURL(pl))
 	}
 	if err != nil {

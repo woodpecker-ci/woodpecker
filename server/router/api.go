@@ -20,6 +20,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog"
 
+	"go.woodpecker-ci.org/woodpecker/v2/server"
 	"go.woodpecker-ci.org/woodpecker/v2/server/api"
 	"go.woodpecker-ci.org/woodpecker/v2/server/api/debug"
 	"go.woodpecker-ci.org/woodpecker/v2/server/feedback"
@@ -36,15 +37,16 @@ func apiRoutes(e *gin.RouterGroup) {
 
 	apiBase := e.Group("/api")
 	{
-		// TODO: auth
-		feedbackBase := apiBase.Group("/feedback")
-		{
-			repoBase := feedbackBase.Group("/:repo_id")
+		if server.Config.Server.CICDFeedback {
+			feedbackBase := apiBase.Group("/feedback")
 			{
-				repoBase.Use(session.SetRepo())
-				repoBase.Use(session.SetPerm()) // TODO: alter it as soon as we have dedicated auth token implemented (CICD-Authorization Header)
-				repoBase.GET("/:number", feedback.Get)
-				repoBase.GET("/:number/:stepId", feedback.GetStepLog)
+				repoBase := feedbackBase.Group("/:repo_id")
+				{
+					repoBase.Use(session.SetRepo())
+					repoBase.Use(session.SetPerm()) // TODO: alter it as soon as we have dedicated auth token implemented (CICD-Authorization Header)
+					repoBase.GET("/:number", feedback.Get)
+					repoBase.GET("/:number/:stepId", feedback.GetStepLog)
+				}
 			}
 		}
 

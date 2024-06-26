@@ -340,6 +340,7 @@ func setupEvilGlobals(c *cli.Context, s store.Store) error {
 	server.Config.Server.RootPath = rootPath
 	server.Config.Server.CustomCSSFile = strings.TrimSpace(c.String("custom-css-file"))
 	server.Config.Server.CustomJsFile = strings.TrimSpace(c.String("custom-js-file"))
+	server.Config.Server.CICDFeedback = c.Bool("cicd-feedback")
 	server.Config.Pipeline.Networks = c.StringSlice("network")
 	server.Config.Pipeline.Volumes = c.StringSlice("volume")
 	server.Config.Pipeline.Privileged = c.StringSlice("escalate")

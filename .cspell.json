@@ -26,6 +26,7 @@
     "ccmenu",
     "certmagic",
     "charmbracelet",
+    "CICD",
     "ciphertext",
     "Codeberg",
     "compatiblelicenses",
@@ -212,5 +213,7 @@
     // ignore docker image names
     "\\s*docker\\.io/.*"
   ],
-  "enableFiletypes": ["dockercompose"]
+  "enableFiletypes": [
+    "dockercompose"
+  ]
 }
