@@ -57,7 +57,7 @@ func HandleAuth(c *gin.Context) {
 
 	_store := store.FromContext(c)
 	forgeID := int64(1) // TODO: replace with forge id when multiple forges are supported
-	_forge, err := server.Config.Services.Manager.ForgeMain()
+	_forge, err := server.Config.Services.Manager.ForgeByID(forgeID)
 	if err != nil {
 		log.Error().Err(err).Msg("Cannot get main forge")
 		c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=internal_error")
@@ -268,7 +268,7 @@ func GetLogout(c *gin.Context) {
 func DeprecatedGetLoginToken(c *gin.Context) {
 	_store := store.FromContext(c)
 
-	_forge, err := server.Config.Services.Manager.ForgeMain() // TODO: get selected forge from auth request
+	_forge, err := server.Config.Services.Manager.ForgeByID(1) // TODO: get selected forge from auth request
 	if err != nil {
 		log.Error().Err(err).Msg("Cannot get main forge")
 		c.AbortWithStatus(http.StatusInternalServerError)

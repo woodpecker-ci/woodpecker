@@ -47,7 +47,6 @@ type Manager interface {
 	ForgeFromRepo(repo *model.Repo) (forge.Forge, error)
 	ForgeFromUser(user *model.User) (forge.Forge, error)
 	ForgeByID(id int64) (forge.Forge, error)
-	ForgeMain() (forge.Forge, error)
 }
 
 type manager struct {
@@ -147,8 +146,4 @@ func (m *manager) ForgeByID(id int64) (forge.Forge, error) {
 	m.forgeCache.Set(id, forge, forgeCacheTTL)
 
 	return forge, nil
-}
-
-func (m *manager) ForgeMain() (forge.Forge, error) {
-	return m.ForgeByID(1) // main forge is always 1 and is configured via environment variables
 }
