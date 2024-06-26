@@ -1,5 +1,16 @@
 # Changelog
 
+## [2.6.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.6.0) - 2024-06-26
+
+### 🔒 Security
+
+- Bump trivy plugin version and remove unused variable [[#3833](https://github.com/woodpecker-ci/woodpecker/pull/3833)]
+
+### 🐛 Bug Fixes
+
+- Let webhook pass on pipeline parsion error [[#3829](https://github.com/woodpecker-ci/woodpecker/pull/3829)]
+- Fix newlines in logs [[#3808](https://github.com/woodpecker-ci/woodpecker/pull/3808)]
+
 ## [2.6.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.6.0) - 2024-06-13
 
 ### ❤️ Thanks to all contributors! ❤️
