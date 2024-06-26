@@ -41,5 +41,4 @@ func AuthorizeAgent(c *gin.Context) {
 	}
 
 	c.Next()
-
 }
