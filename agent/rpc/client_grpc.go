@@ -271,10 +271,10 @@ func (c *client) Extend(ctx context.Context, workflowID string) (err error) {
 }
 
 // Update updates the state of a step.
-func (c *client) Update(ctx context.Context, stepID string, state rpc.StepState) (err error) {
+func (c *client) Update(ctx context.Context, workflowID string, state rpc.StepState) (err error) {
 	retry := c.newBackOff()
 	req := new(proto.UpdateRequest)
-	req.Id = stepID
+	req.Id = workflowID
 	req.State = new(proto.StepState)
 	req.State.Error = state.Error
 	req.State.ExitCode = int32(state.ExitCode)
