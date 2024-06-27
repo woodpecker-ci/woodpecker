@@ -31,7 +31,7 @@ type configV031 struct {
 	Data   []byte `xorm:"LONGBLOB 'config_data'"`
 }
 
-func (cronV031) TableName() string {
+func (configV031) TableName() string {
 	return "config"
 }
 
