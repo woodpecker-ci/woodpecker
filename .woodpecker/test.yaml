@@ -26,7 +26,7 @@ steps:
   - name: vendor
     image: *golang_image
     environment:
-      GOPATH: .go
+      GOPATH: ${CI_WORKSPACE}/.go
     commands:
       - mkdir -p .go
       - go mod vendor
@@ -40,7 +40,7 @@ steps:
     depends_on:
       - vendor
     environment:
-      GOPATH: .go
+      GOPATH: ${CI_WORKSPACE}/.go
       WOODPECKER_DISABLE_UPDATE_CHECK: true
     commands:
       - go run go.woodpecker-ci.org/woodpecker/v2/cmd/cli lint
@@ -62,7 +62,7 @@ steps:
     depends_on:
       - vendor
     environment:
-      GOPATH: .go
+      GOPATH: ${CI_WORKSPACE}/.go
     commands:
       - make lint
     when: *when
@@ -72,7 +72,7 @@ steps:
     depends_on:
       - vendor
     environment:
-      GOPATH: .go
+      GOPATH: ${CI_WORKSPACE}/.go
     commands:
       - 'make generate-swagger'
       - 'DIFF=$(git diff | head)'
@@ -82,7 +82,7 @@ steps:
   - name: lint-license-header
     image: *golang_image
     environment:
-      GOPATH: .go
+      GOPATH: ${CI_WORKSPACE}/.go
     commands:
       - go install github.com/google/addlicense@latest # cspell:words addlicense
       - 'addlicense -check -ignore "vendor/**" **/*.go'
@@ -93,7 +93,7 @@ steps:
     depends_on:
       - vendor
     environment:
-      GOPATH: .go
+      GOPATH: ${CI_WORKSPACE}/.go
     commands:
       - make test-agent
       - make test-server
@@ -107,7 +107,7 @@ steps:
     depends_on:
       - vendor
     environment:
-      GOPATH: .go
+      GOPATH: ${CI_WORKSPACE}/.go
       WOODPECKER_DATABASE_DRIVER: sqlite3
     commands:
       - make test-server-datastore-coverage
@@ -119,7 +119,7 @@ steps:
     depends_on:
       - vendor
     environment:
-      GOPATH: .go
+      GOPATH: ${CI_WORKSPACE}/.go
       WOODPECKER_DATABASE_DRIVER: postgres
       WOODPECKER_DATABASE_DATASOURCE: 'host=postgres user=postgres dbname=postgres sslmode=disable' # cspell:disable-line
     commands:
@@ -131,7 +131,7 @@ steps:
     depends_on:
       - vendor
     environment:
-      GOPATH: .go
+      GOPATH: ${CI_WORKSPACE}/.go
       WOODPECKER_DATABASE_DRIVER: mysql
       WOODPECKER_DATABASE_DATASOURCE: root@tcp(mysql:3306)/test?parseTime=true
     commands:
