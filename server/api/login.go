@@ -60,10 +60,10 @@ func HandleAuth(c *gin.Context) {
 	code := c.Request.FormValue("code")
 	state := c.Request.FormValue("state")
 	isCallback := code != "" && state != ""
-	forgeID := int64(-1) // we use -1 to fail if no forge-id was found
+	forgeID := int64(1) // TODO: replace with forge id when multiple forges are supported
 
 	if isCallback { // validate the state token
-		stateToken, err := token.Parse([]token.Type{token.OAuthStateToken}, state, func(t *token.Token) (string, error) {
+		_, err := token.Parse([]token.Type{token.OAuthStateToken}, state, func(t *token.Token) (string, error) {
 			return server.Config.Server.JWTSecret, nil
 		})
 		if err != nil {
@@ -71,29 +71,8 @@ func HandleAuth(c *gin.Context) {
 			c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=invalid_state")
 			return
 		}
-
-		_forgeID := stateToken.Get("forge-id")
-		forgeID, err = strconv.ParseInt(_forgeID, 10, 64)
-		if err != nil {
-			log.Error().Err(err).Msg("forge-id of state token invalid")
-			c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=invalid_state")
-			return
-		}
 	} else { // only generate a state token if not a callback
 		var err error
-
-		_forgeID := c.Request.FormValue("forge_id")
-		if _forgeID == "" {
-			forgeID = 1 // fallback to main forge
-		} else {
-			forgeID, err = strconv.ParseInt(_forgeID, 10, 64)
-			if err != nil {
-				log.Error().Err(err).Msg("forge-id of state token invalid")
-				c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=invalid_state")
-				return
-			}
-		}
-
 		jwtSecret := server.Config.Server.JWTSecret
 		exp := time.Now().Add(time.Minute * 15).Unix()
 		stateToken := token.New(token.OAuthStateToken)
