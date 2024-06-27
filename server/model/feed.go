@@ -22,7 +22,7 @@ type Feed struct {
 	Number   int64  `json:"number,omitempty"        xorm:"pipeline_number"`
 	Event    string `json:"event,omitempty"         xorm:"pipeline_event"`
 	Status   string `json:"status,omitempty"        xorm:"pipeline_status"`
-	Created  int64  `json:"created_at,omitempty"    xorm:"pipeline_created"`
+	Created  int64  `json:"created_at,omitempty"    xorm:"pipeline_created"` // TODO change JSON field to "created" in 3.0
 	Started  int64  `json:"started_at,omitempty"    xorm:"pipeline_started"`
 	Finished int64  `json:"finished_at,omitempty"   xorm:"pipeline_finished"`
 	Commit   string `json:"commit,omitempty"        xorm:"pipeline_commit"`
