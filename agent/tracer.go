@@ -42,8 +42,10 @@ func (r *Runner) createTracer(ctxMeta context.Context, uploads *sync.WaitGroup, 
 		stepState := rpc.StepState{
 			StepUUID: state.Pipeline.Step.UUID,
 			ExitCode: state.Process.ExitCode,
-			Started:  time.Now().Unix(), // TODO: do not do this
-			Finished: time.Now().Unix(),
+			Started:  time.Now().Unix(), // TODO: do not do this (UpdateStepStatus currently takes care that this is not overwritten)
+		}
+		if state.Process.Exited {
+			stepState.Finished = time.Now().Unix()
 		}
 		if state.Process.Error != nil {
 			stepState.Error = state.Process.Error.Error()

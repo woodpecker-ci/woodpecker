@@ -136,8 +136,14 @@ func (s *RPC) Update(_ context.Context, _workflowID string, state rpc.StepState)
 		return err
 	}
 
-	if err := pipeline.UpdateStepStatus(s.store, step, state); err != nil {
-		log.Error().Err(err).Msg("rpc.update: cannot update step")
+	if state.Finished == 0 {
+		if _, err := pipeline.UpdateStepStatusToRunning(s.store, *step, state); err != nil {
+			log.Error().Err(err).Msg("rpc.update: cannot update step")
+		}
+	} else {
+		if _, err := pipeline.UpdateStepStatusToDone(s.store, *step, state); err != nil {
+			log.Error().Err(err).Msg("rpc.update: cannot update step")
+		}
 	}
 
 	if currentPipeline.Workflows, err = s.store.WorkflowGetTree(currentPipeline); err != nil {
@@ -405,7 +411,7 @@ func (s *RPC) ReportHealth(ctx context.Context, status string) error {
 func (s *RPC) completeChildrenIfParentCompleted(completedWorkflow *model.Workflow) {
 	for _, c := range completedWorkflow.Children {
 		if c.Running() {
-			if _, err := pipeline.UpdateStepToStatusSkipped(s.store, *c, completedWorkflow.Stopped); err != nil {
+			if _, err := pipeline.UpdateStepStatusToSkipped(s.store, *c, completedWorkflow.Stopped); err != nil {
 				log.Error().Err(err).Msgf("done: cannot update step_id %d child state", c.ID)
 			}
 		}

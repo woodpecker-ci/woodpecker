@@ -76,7 +76,7 @@ func Cancel(ctx context.Context, _forge forge.Forge, store store.Store, repo *mo
 		}
 		for _, step := range workflow.Children {
 			if step.State == model.StatusPending {
-				if _, err = UpdateStepToStatusSkipped(store, *step, 0); err != nil {
+				if _, err = UpdateStepStatusToSkipped(store, *step, 0); err != nil {
 					log.Error().Err(err).Msgf("cannot update workflow with id %d state", workflow.ID)
 				}
 			}
