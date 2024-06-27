@@ -23,29 +23,33 @@ when:
     path: *when_path
 
 steps:
-  vendor:
+  - name: vendor
     image: *golang_image
+    environment:
+      GOPATH: .go
     commands:
+      - mkdir -p .go
       - go mod vendor
     when:
       path:
         - <<: *when_path
         - '.woodpecker/**'
 
-  lint-pipeline:
+  - name: lint-pipeline
+    image: *golang_image
     depends_on:
       - vendor
-    image: *golang_image
+    environment:
+      GOPATH: .go
+      WOODPECKER_DISABLE_UPDATE_CHECK: true
     commands:
       - go run go.woodpecker-ci.org/woodpecker/v2/cmd/cli lint
-    environment:
-      WOODPECKER_DISABLE_UPDATE_CHECK: true
     when:
       - event: pull_request
         path:
           - '.woodpecker/**'
 
-  dummy-web:
+  - name: dummy-web
     image: *golang_image
     commands:
       - mkdir -p web/dist/
@@ -53,35 +57,43 @@ steps:
     when:
       - path: *when_path
 
-  lint:
+  - name: lint
+    image: *golang_image
     depends_on:
       - vendor
-    image: *golang_image
+    environment:
+      GOPATH: .go
     commands:
       - make lint
     when: *when
 
-  check-swagger:
+  - name: check-swagger
+    image: *golang_image
     depends_on:
       - vendor
-    image: *golang_image
+    environment:
+      GOPATH: .go
     commands:
       - 'make generate-swagger'
       - 'DIFF=$(git diff | head)'
       - '[ -n "$DIFF" ] && { echo "swagger not up to date, exec `make generate-swagger` and commit"; exit 1; } || true'
     when: *when
 
-  lint-license-header:
+  - name: lint-license-header
     image: *golang_image
+    environment:
+      GOPATH: .go
     commands:
       - go install github.com/google/addlicense@latest # cspell:words addlicense
       - 'addlicense -check -ignore "vendor/**" **/*.go'
     when: *when
 
-  test:
+  - name: test
+    image: *golang_image
     depends_on:
       - vendor
-    image: *golang_image
+    environment:
+      GOPATH: .go
     commands:
       - make test-agent
       - make test-server
@@ -90,45 +102,48 @@ steps:
     when:
       - path: *when_path
 
-  sqlite:
+  - name: sqlite
+    image: *golang_image
     depends_on:
       - vendor
-    image: *golang_image
     environment:
+      GOPATH: .go
       WOODPECKER_DATABASE_DRIVER: sqlite3
     commands:
       - make test-server-datastore-coverage
     when:
       - path: *when_path
 
-  postgres:
+  - name: postgres
+    image: *golang_image
     depends_on:
       - vendor
-    image: *golang_image
     environment:
+      GOPATH: .go
       WOODPECKER_DATABASE_DRIVER: postgres
       WOODPECKER_DATABASE_DATASOURCE: 'host=postgres user=postgres dbname=postgres sslmode=disable' # cspell:disable-line
     commands:
       - make test-server-datastore
     when: *when
 
-  mysql:
+  - name: mysql
+    image: *golang_image
     depends_on:
       - vendor
-    image: *golang_image
     environment:
+      GOPATH: .go
       WOODPECKER_DATABASE_DRIVER: mysql
       WOODPECKER_DATABASE_DATASOURCE: root@tcp(mysql:3306)/test?parseTime=true
     commands:
       - make test-server-datastore
     when: *when
 
-  codecov:
+  - name: codecov
+    image: docker.io/woodpeckerci/plugin-codecov:2.1.2
     depends_on:
       - test
       - sqlite
     pull: true
-    image: docker.io/woodpeckerci/plugin-codecov:2.1.2
     settings:
       files:
         - agent-coverage.out
@@ -143,7 +158,7 @@ steps:
     failure: ignore
 
 services:
-  postgres:
+  - name: postgres
     image: docker.io/postgres:16
     ports: ['5432']
     environment:
@@ -151,7 +166,7 @@ services:
       POSTGRES_HOST_AUTH_METHOD: trust
     when: *when
 
-  mysql:
+  - name: mysql
     image: docker.io/mysql:8.2.0
     ports: ['3306']
     environment:
