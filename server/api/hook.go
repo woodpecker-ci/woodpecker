@@ -110,7 +110,7 @@ func PostHook(c *gin.Context) {
 
 	var repo *model.Repo
 
-	parsedToken, err := token.ParseRequest([]token.Type{token.HookToken}, c.Request, func(t *token.Token) (string, error) {
+	_, err := token.ParseRequest([]token.Type{token.HookToken}, c.Request, func(t *token.Token) (string, error) {
 		var err error
 		repo, err = getRepoFromToken(_store, t)
 		if err != nil {

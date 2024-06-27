@@ -75,6 +75,7 @@ const authErrorMessages = {
   internal_error: i18n.t('internal_error'),
   registration_closed: i18n.t('registration_closed'),
   access_denied: i18n.t('access_denied'),
+  invalid_state: i18n.t('invalid_state'),
 };
 
 const errorMessage = ref<string>();

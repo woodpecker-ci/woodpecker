@@ -4014,6 +4014,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "created_at": {
+                    "description": "TODO change JSON field to \"created\" in 3.0",
                     "type": "integer"
                 },
                 "creator_id": {
@@ -4056,12 +4057,14 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "created_at": {
+                    "description": "TODO change JSON field to \"created\" in 3.0",
                     "type": "integer"
                 },
                 "event": {
                     "type": "string"
                 },
                 "finished_at": {
+                    "description": "TODO change JSON field to \"finished\" in 3.0",
                     "type": "integer"
                 },
                 "id": {
@@ -4083,6 +4086,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "started_at": {
+                    "description": "TODO change JSON field to \"started\" in 3.0",
                     "type": "integer"
                 },
                 "status": {
@@ -4240,6 +4244,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "created_at": {
+                    "description": "TODO change JSON field to \"created\" in 3.0",
                     "type": "integer"
                 },
                 "deploy_task": {
@@ -4258,6 +4263,7 @@ const docTemplate = `{
                     "$ref": "#/definitions/WebhookEvent"
                 },
                 "finished_at": {
+                    "description": "TODO change JSON field to \"finished\" in 3.0",
                     "type": "integer"
                 },
                 "forge_url": {
@@ -4291,6 +4297,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "reviewed_at": {
+                    "description": "TODO change JSON field to \"reviewed\" in 3.0",
                     "type": "integer"
                 },
                 "reviewed_by": {
@@ -4301,6 +4308,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "started_at": {
+                    "description": "TODO change JSON field to \"started\" in 3.0",
                     "type": "integer"
                 },
                 "status": {
@@ -4313,6 +4321,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "updated_at": {
+                    "description": "TODO change JSON field to \"updated\" in 3.0",
                     "type": "integer"
                 },
                 "variables": {
