@@ -30,9 +30,9 @@ type (
 	// StepState defines the step state.
 	StepState struct {
 		StepUUID string `json:"step_uuid"`
-		ExitCode int    `json:"exit_code"`
 		Started  int64  `json:"started"`
 		Finished int64  `json:"finished"`
+		ExitCode int    `json:"exit_code"`
 		Error    string `json:"error"`
 	}
 

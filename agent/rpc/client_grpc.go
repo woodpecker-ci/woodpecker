@@ -166,9 +166,9 @@ func (c *client) Init(ctx context.Context, workflowID string, state rpc.Workflow
 	req := new(proto.InitRequest)
 	req.Id = workflowID
 	req.State = new(proto.WorkflowState)
-	req.State.Error = state.Error
-	req.State.Finished = state.Finished
 	req.State.Started = state.Started
+	req.State.Finished = state.Finished
+	req.State.Error = state.Error
 	for {
 		_, err = c.client.Init(ctx, req)
 		if err == nil {
@@ -204,9 +204,9 @@ func (c *client) Done(ctx context.Context, workflowID string, state rpc.Workflow
 	req := new(proto.DoneRequest)
 	req.Id = workflowID
 	req.State = new(proto.WorkflowState)
-	req.State.Error = state.Error
-	req.State.Finished = state.Finished
 	req.State.Started = state.Started
+	req.State.Finished = state.Finished
+	req.State.Error = state.Error
 	for {
 		_, err = c.client.Done(ctx, req)
 		if err == nil {
@@ -276,11 +276,11 @@ func (c *client) Update(ctx context.Context, workflowID string, state rpc.StepSt
 	req := new(proto.UpdateRequest)
 	req.Id = workflowID
 	req.State = new(proto.StepState)
-	req.State.Error = state.Error
-	req.State.ExitCode = int32(state.ExitCode)
-	req.State.Finished = state.Finished
-	req.State.Started = state.Started
 	req.State.StepUuid = state.StepUUID
+	req.State.Started = state.Started
+	req.State.Finished = state.Finished
+	req.State.ExitCode = int32(state.ExitCode)
+	req.State.Error = state.Error
 	for {
 		_, err = c.client.Update(ctx, req)
 		if err == nil {
