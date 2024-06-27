@@ -81,6 +81,8 @@ steps:
 
   - name: lint-license-header
     image: *golang_image
+    depends_on:
+      - vendor
     environment:
       GOPATH: ${CI_WORKSPACE}/.go
     commands:
