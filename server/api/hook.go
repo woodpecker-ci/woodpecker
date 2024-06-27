@@ -178,7 +178,7 @@ func PostHook(c *gin.Context) {
 	//
 
 	// get the token and verify the hook is authorized
-	parsedToken, err := token.ParseRequest(c.Request, func(_ *token.Token) (string, error) {
+	parsedToken, err := token.ParseRequest([]token.Type{token.HookToken}, c.Request, func(_ *token.Token) (string, error) {
 		return repo.Hash, nil
 	})
 	if err != nil {
