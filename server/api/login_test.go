@@ -1,6 +1,7 @@
 package api_test
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -16,11 +17,13 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server"
 	"go.woodpecker-ci.org/woodpecker/v2/server/api"
 	mocks_forge "go.woodpecker-ci.org/woodpecker/v2/server/forge/mocks"
+	forge_types "go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 	mocks_services "go.woodpecker-ci.org/woodpecker/v2/server/services/mocks"
 	"go.woodpecker-ci.org/woodpecker/v2/server/services/permissions"
 	mocks_store "go.woodpecker-ci.org/woodpecker/v2/server/store/mocks"
 	"go.woodpecker-ci.org/woodpecker/v2/server/store/types"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/token"
 )
 
 func TestHandleAuth(t *testing.T) {
@@ -69,12 +72,37 @@ func TestHandleAuth(t *testing.T) {
 			assert.Equal(g, fmt.Sprintf("/login?%s", query.Encode()), c.Writer.Header().Get("Location"))
 		})
 
-		g.It("should fail if a code was provided and no state", func() {
-			// TODO: implement
-		})
-
 		g.It("should fail if the state is wrong", func() {
-			// TODO: implement
+			_manager := mocks_services.NewManager(t)
+			_store := mocks_store.NewStore(t)
+			server.Config.Services.Manager = _manager
+			server.Config.Permissions.Open = true
+			server.Config.Permissions.Orgs = permissions.NewOrgs(nil)
+			server.Config.Permissions.Admins = permissions.NewAdmins(nil)
+			w := httptest.NewRecorder()
+			c, _ := gin.CreateTestContext(w)
+			c.Set("store", _store)
+
+			query := url.Values{}
+			query.Set("code", "assumed_to_be_valid_code")
+
+			wrongToken := token.New(token.OAuthStateToken)
+			wrongToken.Set("forge_id", "1")
+			signedWrongToken, _ := wrongToken.Sign("wrong_secret")
+			query.Set("state", signedWrongToken)
+
+			c.Request = &http.Request{
+				Header: make(http.Header),
+				URL: &url.URL{
+					Scheme:   "https",
+					RawQuery: query.Encode(),
+				},
+			}
+
+			api.HandleAuth(c)
+
+			assert.Equal(g, http.StatusSeeOther, c.Writer.Status())
+			assert.Equal(g, "/login?error=invalid_state", c.Writer.Header().Get("Location"))
 		})
 
 		g.It("should redirect to forge login page", func() {
@@ -95,10 +123,15 @@ func TestHandleAuth(t *testing.T) {
 				},
 			}
 
-			forgeRedirectURL := "https://my-awesome-forge.com/oauth/authorize?client_id=client-id"
+			_manager.On("ForgeByID", int64(1)).Return(_forge, nil)
 
-			_manager.On("ForgeMain").Return(_forge, nil)
-			_forge.On("Login", mock.Anything, mock.Anything).Return(nil, forgeRedirectURL, nil)
+			forgeRedirectURL := ""
+			_forge.On("Login", mock.Anything, mock.Anything).Run(func(args mock.Arguments) {
+				state := args.Get(1).(*forge_types.OAuthRequest)
+				forgeRedirectURL = fmt.Sprintf("https://my-awesome-forge.com/oauth/authorize?client_id=client-id&state=%s", state.State)
+			}).Return(nil, func(context.Context, *forge_types.OAuthRequest) string {
+				return forgeRedirectURL
+			}, nil)
 
 			api.HandleAuth(c)
 
@@ -124,7 +157,7 @@ func TestHandleAuth(t *testing.T) {
 				},
 			}
 
-			_manager.On("ForgeMain").Return(_forge, nil)
+			_manager.On("ForgeByID", int64(1)).Return(_forge, nil)
 			_forge.On("Login", mock.Anything, mock.Anything).Return(user, "", nil)
 			_store.On("GetUserRemoteID", user.ForgeRemoteID, user.Login).Return(nil, types.RecordNotExist)
 			_store.On("CreateUser", mock.Anything).Return(nil)
@@ -158,7 +191,7 @@ func TestHandleAuth(t *testing.T) {
 				},
 			}
 
-			_manager.On("ForgeMain").Return(_forge, nil)
+			_manager.On("ForgeByID", int64(1)).Return(_forge, nil)
 			_forge.On("Login", mock.Anything, mock.Anything).Return(user, "", nil)
 			_store.On("GetUserRemoteID", user.ForgeRemoteID, user.Login).Return(user, nil)
 			_store.On("OrgGet", org.ID).Return(org, nil)
@@ -190,7 +223,7 @@ func TestHandleAuth(t *testing.T) {
 				},
 			}
 
-			_manager.On("ForgeMain").Return(_forge, nil)
+			_manager.On("ForgeByID", int64(1)).Return(_forge, nil)
 			_forge.On("Login", mock.Anything, mock.Anything).Return(user, "", nil)
 			_store.On("GetUserRemoteID", user.ForgeRemoteID, user.Login).Return(nil, types.RecordNotExist)
 
@@ -218,7 +251,7 @@ func TestHandleAuth(t *testing.T) {
 				},
 			}
 
-			_manager.On("ForgeMain").Return(_forge, nil)
+			_manager.On("ForgeByID", int64(1)).Return(_forge, nil)
 			_forge.On("Login", mock.Anything, mock.Anything).Return(user, "", nil)
 			_forge.On("Teams", mock.Anything, user).Return([]*model.Team{
 				{
@@ -252,7 +285,7 @@ func TestHandleAuth(t *testing.T) {
 				}
 				user.OrgID = 0
 
-				_manager.On("ForgeMain").Return(_forge, nil)
+				_manager.On("ForgeByID", int64(1)).Return(_forge, nil)
 				_forge.On("Login", mock.Anything, mock.Anything).Return(user, "", nil)
 				_store.On("GetUserRemoteID", user.ForgeRemoteID, user.Login).Return(user, nil)
 				_store.On("OrgFindByName", user.Login).Return(nil, types.RecordNotExist)
@@ -286,7 +319,7 @@ func TestHandleAuth(t *testing.T) {
 				}
 				user.OrgID = 0
 
-				_manager.On("ForgeMain").Return(_forge, nil)
+				_manager.On("ForgeByID", int64(1)).Return(_forge, nil)
 				_forge.On("Login", mock.Anything, mock.Anything).Return(user, "", nil)
 				_store.On("GetUserRemoteID", user.ForgeRemoteID, user.Login).Return(user, nil)
 				_store.On("OrgFindByName", user.Login).Return(org, nil)
@@ -320,7 +353,7 @@ func TestHandleAuth(t *testing.T) {
 				}
 				org.Name = "not-the-user-name"
 
-				_manager.On("ForgeMain").Return(_forge, nil)
+				_manager.On("ForgeByID", int64(1)).Return(_forge, nil)
 				_forge.On("Login", mock.Anything, mock.Anything).Return(user, "", nil)
 				_store.On("GetUserRemoteID", user.ForgeRemoteID, user.Login).Return(user, nil)
 				_store.On("OrgGet", user.OrgID).Return(org, nil)
