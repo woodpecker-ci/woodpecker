@@ -37,6 +37,8 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/shared/token"
 )
 
+const stateTokenDuration = time.Minute * 5
+
 func HandleAuth(c *gin.Context) {
 	// TODO: check if this is really needed
 	c.Writer.Header().Del("Content-Type")
@@ -56,17 +58,45 @@ func HandleAuth(c *gin.Context) {
 	}
 
 	_store := store.FromContext(c)
+
+	code := c.Request.FormValue("code")
+	state := c.Request.FormValue("state")
+	isCallback := code != "" && state != ""
 	forgeID := int64(1) // TODO: replace with forge id when multiple forges are supported
-	_forge, err := server.Config.Services.Manager.ForgeMain()
+
+	if isCallback { // validate the state token
+		_, err := token.Parse([]token.Type{token.OAuthStateToken}, state, func(_ *token.Token) (string, error) {
+			return server.Config.Server.JWTSecret, nil
+		})
+		if err != nil {
+			log.Error().Err(err).Msg("cannot verify state token")
+			c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=invalid_state")
+			return
+		}
+	} else { // only generate a state token if not a callback
+		var err error
+		jwtSecret := server.Config.Server.JWTSecret
+		exp := time.Now().Add(stateTokenDuration).Unix()
+		stateToken := token.New(token.OAuthStateToken)
+		stateToken.Set("forge-id", strconv.FormatInt(forgeID, 10))
+		state, err = stateToken.SignExpires(jwtSecret, exp)
+		if err != nil {
+			log.Error().Err(err).Msg("cannot create state token")
+			c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=internal_error")
+			return
+		}
+	}
+
+	_forge, err := server.Config.Services.Manager.ForgeByID(forgeID)
 	if err != nil {
-		log.Error().Err(err).Msg("Cannot get main forge")
+		log.Error().Err(err).Msgf("Cannot get forge by id %d", forgeID)
 		c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=internal_error")
 		return
 	}
 
 	userFromForge, redirectURL, err := _forge.Login(c, &forge_types.OAuthRequest{
 		Code:  c.Request.FormValue("code"),
-		State: "woodpecker", // TODO: use proper state
+		State: state,
 	})
 	if err != nil {
 		log.Error().Err(err).Msg("cannot authenticate user")
@@ -250,7 +280,7 @@ func GetLogout(c *gin.Context) {
 func DeprecatedGetLoginToken(c *gin.Context) {
 	_store := store.FromContext(c)
 
-	_forge, err := server.Config.Services.Manager.ForgeMain() // TODO: get selected forge from auth request
+	_forge, err := server.Config.Services.Manager.ForgeByID(1) // TODO: get selected forge from auth request
 	if err != nil {
 		log.Error().Err(err).Msg("Cannot get main forge")
 		c.AbortWithStatus(http.StatusInternalServerError)
