@@ -59,7 +59,7 @@ func HandleAuth(c *gin.Context) {
 
 	code := c.Request.FormValue("code")
 	state := c.Request.FormValue("state")
-	isCallback := code != ""
+	isCallback := code != "" && state != ""
 	forgeID := int64(-1) // we use -1 to fail if no forge-id was found
 
 	if isCallback { // validate the state token
@@ -82,7 +82,7 @@ func HandleAuth(c *gin.Context) {
 	} else { // only generate a state token if not a callback
 		var err error
 
-		_forgeID := c.Request.FormValue("state")
+		_forgeID := c.Request.FormValue("forge_id")
 		if _forgeID == "" {
 			forgeID = 1 // fallback to main forge
 		} else {
