@@ -30,6 +30,7 @@ steps:
     commands:
       - mkdir -p .go
       - go mod vendor
+      - ls -la vendor
     when:
       path:
         - <<: *when_path
