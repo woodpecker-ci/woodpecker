@@ -78,7 +78,7 @@ type Peer interface {
 	// Extend extends the workflow deadline
 	Extend(c context.Context, workflowID string) error
 
-	// Update updates the step state
+	// Update updates the state of a step
 	Update(c context.Context, stepID string, state StepState) error
 
 	// Log writes the step log entry

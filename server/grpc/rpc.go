@@ -48,7 +48,7 @@ type RPC struct {
 	pipelineCount *prometheus.CounterVec
 }
 
-// Next implements the rpc.Next function.
+// Next returns the next workflow to execute from the queue and blocks until one is available.
 func (s *RPC) Next(c context.Context, agentFilter rpc.Filter) (*rpc.Workflow, error) {
 	if hostname, err := s.getHostnameFromContext(c); err == nil {
 		log.Debug().Msgf("agent connected: %s: polling", hostname)
@@ -86,19 +86,19 @@ func (s *RPC) Next(c context.Context, agentFilter rpc.Filter) (*rpc.Workflow, er
 	}
 }
 
-// Wait implements the rpc.Wait function.
+// Wait blocks until the workflow with the given ID is done.
 func (s *RPC) Wait(c context.Context, id string) error {
 	return s.queue.Wait(c, id)
 }
 
-// Extend implements the rpc.Extend function.
+// Extend extends the timeout of the workflow with the given ID.
 func (s *RPC) Extend(c context.Context, id string) error {
 	return s.queue.Extend(c, id)
 }
 
-// Update implements the rpc.Update function.
-func (s *RPC) Update(_ context.Context, id string, state rpc.StepState) error {
-	workflowID, err := strconv.ParseInt(id, 10, 64)
+// Update updates the state of a step
+func (s *RPC) Update(_ context.Context, _workflowID string, state rpc.StepState) error {
+	workflowID, err := strconv.ParseInt(_workflowID, 10, 64)
 	if err != nil {
 		return err
 	}
@@ -162,7 +162,7 @@ func (s *RPC) Update(_ context.Context, id string, state rpc.StepState) error {
 	return nil
 }
 
-// Init implements the rpc.Init function.
+// Init initializes the workflow with the given ID.
 func (s *RPC) Init(c context.Context, _workflowID string, state rpc.WorkflowState) error {
 	workflowID, err := strconv.ParseInt(_workflowID, 10, 64)
 	if err != nil {
@@ -193,10 +193,19 @@ func (s *RPC) Init(c context.Context, _workflowID string, state rpc.WorkflowStat
 		return err
 	}
 
-	if currentPipeline.Status == model.StatusPending {
-		if currentPipeline, err = pipeline.UpdateToStatusRunning(s.store, *currentPipeline, state.Started); err != nil {
-			log.Error().Err(err).Msgf("init: cannot update build_id %d state", currentPipeline.ID)
-		}
+	// Init should only be called on pending pipelines
+	if currentPipeline.Status != model.StatusPending {
+		log.Error().Msgf("pipeline %d is not pending", currentPipeline.ID)
+		return errors.New("pipeline is not pending")
+	}
+
+	if currentPipeline, err = pipeline.UpdateToStatusRunning(s.store, *currentPipeline, state.Started); err != nil {
+		log.Error().Err(err).Msgf("init: cannot update build_id %d state", currentPipeline.ID)
+	}
+
+	workflow, err = pipeline.UpdateWorkflowToStatusRunning(s.store, *workflow, state)
+	if err != nil {
+		return err
 	}
 
 	s.updateForgeStatus(c, repo, currentPipeline, workflow)
@@ -220,17 +229,12 @@ func (s *RPC) Init(c context.Context, _workflowID string, state rpc.WorkflowStat
 		s.pubsub.Publish(message)
 	}()
 
-	workflow, err = pipeline.UpdateWorkflowToStatusStarted(s.store, *workflow, state)
-	if err != nil {
-		return err
-	}
-	s.updateForgeStatus(c, repo, currentPipeline, workflow)
 	return nil
 }
 
-// Done implements the rpc.Done function.
-func (s *RPC) Done(c context.Context, id string, state rpc.WorkflowState) error {
-	workflowID, err := strconv.ParseInt(id, 10, 64)
+// Done marks the workflow with the given ID as done.
+func (s *RPC) Done(c context.Context, _workflowID string, state rpc.WorkflowState) error {
+	workflowID, err := strconv.ParseInt(_workflowID, 10, 64)
 	if err != nil {
 		return err
 	}
@@ -261,7 +265,7 @@ func (s *RPC) Done(c context.Context, id string, state rpc.WorkflowState) error 
 	logger := log.With().
 		Str("repo_id", fmt.Sprint(repo.ID)).
 		Str("pipeline_id", fmt.Sprint(currentPipeline.ID)).
-		Str("workflow_id", id).Logger()
+		Str("workflow_id", _workflowID).Logger()
 
 	logger.Trace().Msgf("gRPC Done with state: %#v", state)
 
@@ -271,9 +275,9 @@ func (s *RPC) Done(c context.Context, id string, state rpc.WorkflowState) error 
 
 	var queueErr error
 	if workflow.Failing() {
-		queueErr = s.queue.Error(c, id, fmt.Errorf("workflow finished with error %s", state.Error))
+		queueErr = s.queue.Error(c, _workflowID, fmt.Errorf("workflow finished with error %s", state.Error))
 	} else {
-		queueErr = s.queue.Done(c, id, workflow.State)
+		queueErr = s.queue.Done(c, _workflowID, workflow.State)
 	}
 	if queueErr != nil {
 		logger.Error().Err(queueErr).Msg("queue.Done: cannot ack workflow")

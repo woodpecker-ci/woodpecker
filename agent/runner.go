@@ -56,34 +56,34 @@ func (r *Runner) Run(runnerCtx context.Context) error { //nolint:contextcheck
 	ctxMeta := metadata.NewOutgoingContext(context.Background(), meta)
 
 	// get the next workflow from the queue
-	work, err := r.client.Next(runnerCtx, r.filter)
+	workflow, err := r.client.Next(runnerCtx, r.filter)
 	if err != nil {
 		return err
 	}
-	if work == nil {
+	if workflow == nil {
 		return nil
 	}
 
 	timeout := time.Hour
-	if minutes := work.Timeout; minutes != 0 {
+	if minutes := workflow.Timeout; minutes != 0 {
 		timeout = time.Duration(minutes) * time.Minute
 	}
 
-	repoName := extractRepositoryName(work.Config)       // hack
-	pipelineNumber := extractPipelineNumber(work.Config) // hack
+	repoName := extractRepositoryName(workflow.Config)       // hack
+	pipelineNumber := extractPipelineNumber(workflow.Config) // hack
 
 	r.counter.Add(
-		work.ID,
+		workflow.ID,
 		timeout,
 		repoName,
 		pipelineNumber,
 	)
-	defer r.counter.Done(work.ID)
+	defer r.counter.Done(workflow.ID)
 
 	logger := log.With().
 		Str("repo", repoName).
 		Str("pipeline", pipelineNumber).
-		Str("id", work.ID).
+		Str("workflow_id", workflow.ID).
 		Logger()
 
 	logger.Debug().Msg("received execution")
@@ -102,12 +102,12 @@ func (r *Runner) Run(runnerCtx context.Context) error { //nolint:contextcheck
 	go func() {
 		logger.Debug().Msg("listen for cancel signal")
 
-		if err := r.client.Wait(workflowCtx, work.ID); err != nil {
+		if err := r.client.Wait(workflowCtx, workflow.ID); err != nil {
 			canceled = true
 			logger.Warn().Err(err).Msg("cancel signal received")
 			cancel()
 		} else {
-			logger.Debug().Msg("stop listening for cancel signal")
+			logger.Debug().Msg("done listening for cancel signal")
 		}
 	}()
 
@@ -116,12 +116,11 @@ func (r *Runner) Run(runnerCtx context.Context) error { //nolint:contextcheck
 			select {
 			case <-workflowCtx.Done():
 				logger.Debug().Msg("pipeline done")
-
 				return
+
 			case <-time.After(time.Minute):
 				logger.Debug().Msg("pipeline lease renewed")
-
-				if err := r.client.Extend(workflowCtx, work.ID); err != nil {
+				if err := r.client.Extend(workflowCtx, workflow.ID); err != nil {
 					log.Error().Err(err).Msg("extending pipeline deadline failed")
 				}
 			}
@@ -131,21 +130,21 @@ func (r *Runner) Run(runnerCtx context.Context) error { //nolint:contextcheck
 	state := rpc.WorkflowState{}
 	state.Started = time.Now().Unix()
 
-	err = r.client.Init(runnerCtx, work.ID, state)
+	err = r.client.Init(runnerCtx, workflow.ID, state)
 	if err != nil {
 		logger.Error().Err(err).Msg("pipeline initialization failed")
 	}
 
 	var uploads sync.WaitGroup
 	//nolint:contextcheck
-	err = pipeline.New(work.Config,
+	err = pipeline.New(workflow.Config,
 		pipeline.WithContext(workflowCtx),
-		pipeline.WithTaskUUID(fmt.Sprint(work.ID)),
-		pipeline.WithLogger(r.createLogger(logger, &uploads, work)),
-		pipeline.WithTracer(r.createTracer(ctxMeta, logger, work)),
+		pipeline.WithTaskUUID(fmt.Sprint(workflow.ID)),
+		pipeline.WithLogger(r.createLogger(logger, &uploads, workflow)),
+		pipeline.WithTracer(r.createTracer(ctxMeta, logger, workflow)),
 		pipeline.WithBackend(*r.backend),
 		pipeline.WithDescription(map[string]string{
-			"ID":       work.ID,
+			"ID":       workflow.ID,
 			"Repo":     repoName,
 			"Pipeline": pipelineNumber,
 		}),
@@ -153,12 +152,10 @@ func (r *Runner) Run(runnerCtx context.Context) error { //nolint:contextcheck
 
 	state.Finished = time.Now().Unix()
 
-	if canceled {
-		err = errors.Join(err, pipeline.ErrCancel)
-	}
-
 	if errors.Is(err, pipeline.ErrCancel) {
 		canceled = true
+	} else if canceled {
+		err = errors.Join(err, pipeline.ErrCancel)
 	}
 
 	if err != nil {
@@ -168,20 +165,20 @@ func (r *Runner) Run(runnerCtx context.Context) error { //nolint:contextcheck
 	logger.Debug().
 		Str("error", state.Error).
 		Bool("canceled", canceled).
-		Msg("pipeline complete")
+		Msg("workflow finished")
 
 	logger.Debug().Msg("uploading logs")
 	uploads.Wait()
-	logger.Debug().Msg("uploading logs complete")
+	logger.Debug().Msg("uploaded logs")
 
 	logger.Debug().
 		Str("error", state.Error).
-		Msg("updating pipeline status")
+		Msg("updating workflow status")
 
-	if err := r.client.Done(runnerCtx, work.ID, state); err != nil {
-		logger.Error().Err(err).Msg("updating pipeline status failed")
+	if err := r.client.Done(runnerCtx, workflow.ID, state); err != nil {
+		logger.Error().Err(err).Msg("updating workflow status failed")
 	} else {
-		logger.Debug().Msg("updating pipeline status complete")
+		logger.Debug().Msg("updating workflow status complete")
 	}
 
 	return nil

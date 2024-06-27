@@ -97,11 +97,11 @@ func (s *WoodpeckerServer) Init(c context.Context, req *proto.InitRequest) (*pro
 
 func (s *WoodpeckerServer) Update(c context.Context, req *proto.UpdateRequest) (*proto.Empty, error) {
 	state := rpc.StepState{
-		Error:    req.GetState().GetError(),
-		ExitCode: int(req.GetState().GetExitCode()),
-		Finished: req.GetState().GetFinished(),
-		Started:  req.GetState().GetStarted(),
 		StepUUID: req.GetState().GetStepUuid(),
+		ExitCode: int(req.GetState().GetExitCode()),
+		Started:  req.GetState().GetStarted(),
+		Finished: req.GetState().GetFinished(),
+		Error:    req.GetState().GetError(),
 	}
 	res := new(proto.Empty)
 	err := s.peer.Update(c, req.GetId(), state)

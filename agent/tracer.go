@@ -30,7 +30,7 @@ func (r *Runner) createTracer(ctxMeta context.Context, logger zerolog.Logger, wo
 	return func(state *pipeline.State) error {
 		stepLogger := logger.With().
 			Str("image", state.Pipeline.Step.Image).
-			Str("workflowID", workflow.ID).
+			Str("workflow_id", workflow.ID).
 			Err(state.Process.Error).
 			Int("exit_code", state.Process.ExitCode).
 			Bool("exited", state.Process.Exited).

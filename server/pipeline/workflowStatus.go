@@ -20,7 +20,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 )
 
-func UpdateWorkflowToStatusStarted(store store.Store, workflow model.Workflow, state rpc.WorkflowState) (*model.Workflow, error) {
+func UpdateWorkflowToStatusRunning(store store.Store, workflow model.Workflow, state rpc.WorkflowState) (*model.Workflow, error) {
 	workflow.Started = state.Started
 	workflow.State = model.StatusRunning
 	return &workflow, store.WorkflowUpdate(&workflow)
