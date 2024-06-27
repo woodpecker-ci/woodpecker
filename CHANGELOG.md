@@ -8,6 +8,7 @@
 
 ### 🔒 Security
 
+- Use proper oauth state [[#3847](https://github.com/woodpecker-ci/woodpecker/pull/3847)]
 - Enhance token checking [[#3842](https://github.com/woodpecker-ci/woodpecker/pull/3842)]
 - Bump github.com/hashicorp/go-retryablehttp v0.7.5 -> v0.7.7 [[#3834](https://github.com/woodpecker-ci/woodpecker/pull/3834)]
 
