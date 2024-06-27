@@ -37,6 +37,8 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/shared/token"
 )
 
+const stateTokenDuration = time.Minute * 5
+
 func HandleAuth(c *gin.Context) {
 	// TODO: check if this is really needed
 	c.Writer.Header().Del("Content-Type")
@@ -74,7 +76,7 @@ func HandleAuth(c *gin.Context) {
 	} else { // only generate a state token if not a callback
 		var err error
 		jwtSecret := server.Config.Server.JWTSecret
-		exp := time.Now().Add(time.Minute * 15).Unix()
+		exp := time.Now().Add(stateTokenDuration).Unix()
 		stateToken := token.New(token.OAuthStateToken)
 		stateToken.Set("forge-id", strconv.FormatInt(forgeID, 10))
 		state, err = stateToken.SignExpires(jwtSecret, exp)
