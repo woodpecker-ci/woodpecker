@@ -30,8 +30,8 @@ type Pipeline struct {
 	Errors              []*types.PipelineError `json:"errors"                  xorm:"json 'errors'"`
 	Created             int64                  `json:"created_at"              xorm:"'created' NOT NULL DEFAULT 0 created"` // TODO change JSON field to "created" in 3.0
 	Updated             int64                  `json:"updated_at"              xorm:"'updated' NOT NULL DEFAULT 0 updated"` // TODO change JSON field to "updated" in 3.0
-	Started             int64                  `json:"started_at"              xorm:"started"` // TODO change JSON field to "started" in 3.0
-	Finished            int64                  `json:"finished_at"             xorm:"finished"` // TODO change JSON field to "finished" in 3.0
+	Started             int64                  `json:"started_at"              xorm:"started"`                              // TODO change JSON field to "started" in 3.0
+	Finished            int64                  `json:"finished_at"             xorm:"finished"`                             // TODO change JSON field to "finished" in 3.0
 	Deploy              string                 `json:"deploy_to"               xorm:"deploy"`
 	DeployTask          string                 `json:"deploy_task"             xorm:"deploy_task"`
 	Commit              string                 `json:"commit"                  xorm:"commit"`

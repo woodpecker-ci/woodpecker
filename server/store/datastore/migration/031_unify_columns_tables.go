@@ -17,10 +17,11 @@ package migration
 import (
 	"fmt"
 
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/errors/types"
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 	"src.techknowlogick.com/xormigrate"
 	"xorm.io/xorm"
+
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/errors/types"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
 type configV031 struct {
@@ -51,12 +52,12 @@ func (cronV031) TableName() string {
 }
 
 type permV031 struct {
-	UserID  int64 `xorm:"UNIQUE(s) INDEX NOT NULL 'perm_user_id'"`
-	RepoID  int64 `xorm:"UNIQUE(s) INDEX NOT NULL 'perm_repo_id'"`
-	Pull    bool  `xorm:"perm_pull"`
-	Push    bool  `xorm:"perm_push"`
-	Admin   bool  `xorm:"perm_admin"`
-	Synced  int64 `xorm:"perm_synced"`
+	UserID int64 `xorm:"UNIQUE(s) INDEX NOT NULL 'perm_user_id'"`
+	RepoID int64 `xorm:"UNIQUE(s) INDEX NOT NULL 'perm_repo_id'"`
+	Pull   bool  `xorm:"perm_pull"`
+	Push   bool  `xorm:"perm_push"`
+	Admin  bool  `xorm:"perm_admin"`
+	Synced int64 `xorm:"perm_synced"`
 }
 
 func (permV031) TableName() string {

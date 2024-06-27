@@ -78,14 +78,14 @@ func (repoV030) TableName() string {
 }
 
 type forgeV030 struct {
-	ID                int64          `xorm:"pk autoincr 'id'"`
-	Type              model.ForgeType      `xorm:"VARCHAR(250) 'type'"`
-	URL               string         `xorm:"VARCHAR(500) 'url'"`
-	Client            string         `xorm:"VARCHAR(250) 'client'"`
-	ClientSecret      string         `xorm:"VARCHAR(250) 'client_secret'"`
-	SkipVerify        bool           `xorm:"bool 'skip_verify'"`
-	OAuthHost         string         `xorm:"VARCHAR(250) 'oauth_host'"` // public url for oauth if different from url
-	AdditionalOptions map[string]any `xorm:"json 'additional_options'"`
+	ID                int64           `xorm:"pk autoincr 'id'"`
+	Type              model.ForgeType `xorm:"VARCHAR(250) 'type'"`
+	URL               string          `xorm:"VARCHAR(500) 'url'"`
+	Client            string          `xorm:"VARCHAR(250) 'client'"`
+	ClientSecret      string          `xorm:"VARCHAR(250) 'client_secret'"`
+	SkipVerify        bool            `xorm:"bool 'skip_verify'"`
+	OAuthHost         string          `xorm:"VARCHAR(250) 'oauth_host'"` // public url for oauth if different from url
+	AdditionalOptions map[string]any  `xorm:"json 'additional_options'"`
 }
 
 func (forgeV030) TableName() string {
