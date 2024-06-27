@@ -200,7 +200,7 @@ func (s *RPC) Init(c context.Context, _workflowID string, state rpc.WorkflowStat
 	}
 
 	if currentPipeline, err = pipeline.UpdateToStatusRunning(s.store, *currentPipeline, state.Started); err != nil {
-		log.Error().Err(err).Msgf("init: cannot update build_id %d state", currentPipeline.ID)
+		log.Error().Err(err).Msgf("init: cannot update pipeline %d state", currentPipeline.ID)
 	}
 
 	workflow, err = pipeline.UpdateWorkflowToStatusRunning(s.store, *workflow, state)
@@ -270,7 +270,7 @@ func (s *RPC) Done(c context.Context, _workflowID string, state rpc.WorkflowStat
 	logger.Trace().Msgf("gRPC Done with state: %#v", state)
 
 	if workflow, err = pipeline.UpdateWorkflowStatusToDone(s.store, *workflow, state); err != nil {
-		logger.Error().Err(err).Msgf("pipeline.UpdateStepStatusToDone: cannot update workflow state: %s", err)
+		logger.Error().Err(err).Msgf("pipeline.UpdateWorkflowStatusToDone: cannot update workflow state: %s", err)
 	}
 
 	var queueErr error

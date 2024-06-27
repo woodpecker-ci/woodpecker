@@ -18,6 +18,7 @@ import (
 	"context"
 	"runtime"
 	"strconv"
+	"sync"
 	"time"
 
 	"github.com/rs/zerolog"
@@ -26,8 +27,10 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc"
 )
 
-func (r *Runner) createTracer(ctxMeta context.Context, logger zerolog.Logger, workflow *rpc.Workflow) pipeline.TraceFunc {
+func (r *Runner) createTracer(ctxMeta context.Context, uploads *sync.WaitGroup, logger zerolog.Logger, workflow *rpc.Workflow) pipeline.TraceFunc {
 	return func(state *pipeline.State) error {
+		uploads.Add(1)
+
 		stepLogger := logger.With().
 			Str("image", state.Pipeline.Step.Image).
 			Str("workflow_id", workflow.ID).
@@ -56,6 +59,7 @@ func (r *Runner) createTracer(ctxMeta context.Context, logger zerolog.Logger, wo
 			}
 
 			stepLogger.Debug().Msg("update step status complete")
+			uploads.Done()
 		}()
 		if state.Process.Exited {
 			return nil

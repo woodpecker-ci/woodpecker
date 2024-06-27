@@ -141,7 +141,7 @@ func (r *Runner) Run(runnerCtx context.Context) error { //nolint:contextcheck
 		pipeline.WithContext(workflowCtx),
 		pipeline.WithTaskUUID(fmt.Sprint(workflow.ID)),
 		pipeline.WithLogger(r.createLogger(logger, &uploads, workflow)),
-		pipeline.WithTracer(r.createTracer(ctxMeta, logger, workflow)),
+		pipeline.WithTracer(r.createTracer(ctxMeta, &uploads, logger, workflow)),
 		pipeline.WithBackend(*r.backend),
 		pipeline.WithDescription(map[string]string{
 			"ID":       workflow.ID,
@@ -167,9 +167,9 @@ func (r *Runner) Run(runnerCtx context.Context) error { //nolint:contextcheck
 		Bool("canceled", canceled).
 		Msg("workflow finished")
 
-	logger.Debug().Msg("uploading logs")
+	logger.Debug().Msg("uploading logs and traces / states ...")
 	uploads.Wait()
-	logger.Debug().Msg("uploaded logs")
+	logger.Debug().Msg("uploaded logs and traces / states")
 
 	logger.Debug().
 		Str("error", state.Error).
