@@ -23,7 +23,6 @@ import (
 	"time"
 
 	"github.com/rs/zerolog/log"
-	"github.com/tevino/abool/v2"
 	"google.golang.org/grpc/metadata"
 
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline"
@@ -99,14 +98,13 @@ func (r *Runner) Run(runnerCtx context.Context) error { //nolint:contextcheck
 		logger.Error().Msg("Received sigterm termination signal")
 	})
 
-	canceled := abool.New()
+	canceled := false
 	go func() {
 		logger.Debug().Msg("listen for cancel signal")
 
 		if err := r.client.Wait(workflowCtx, work.ID); err != nil {
-			canceled.SetTo(true)
+			canceled = true
 			logger.Warn().Err(err).Msg("cancel signal received")
-
 			cancel()
 		} else {
 			logger.Debug().Msg("stop listening for cancel signal")
@@ -130,7 +128,7 @@ func (r *Runner) Run(runnerCtx context.Context) error { //nolint:contextcheck
 		}
 	}()
 
-	state := rpc.State{}
+	state := rpc.WorkflowState{}
 	state.Started = time.Now().Unix()
 
 	err = r.client.Init(runnerCtx, work.ID, state)
@@ -154,30 +152,22 @@ func (r *Runner) Run(runnerCtx context.Context) error { //nolint:contextcheck
 	).Run(runnerCtx)
 
 	state.Finished = time.Now().Unix()
-	state.Exited = true
 
-	if canceled.IsSet() {
-		state.Error = ""
-		state.ExitCode = pipeline.ExitCodeKilled
-	} else if err != nil {
-		pExitError := &pipeline.ExitError{}
-		switch {
-		case errors.As(err, &pExitError):
-			state.ExitCode = pExitError.Code
-		case errors.Is(err, pipeline.ErrCancel):
-			state.Error = ""
-			state.ExitCode = pipeline.ExitCodeKilled
-			canceled.SetTo(true)
-		default:
-			state.ExitCode = 1
-			state.Error = err.Error()
-		}
+	if canceled {
+		err = errors.Join(err, pipeline.ErrCancel)
+	}
+
+	if errors.Is(err, pipeline.ErrCancel) {
+		canceled = true
+	}
+
+	if err != nil {
+		state.Error = err.Error()
 	}
 
 	logger.Debug().
 		Str("error", state.Error).
-		Int("exit_code", state.ExitCode).
-		Bool("canceled", canceled.IsSet()).
+		Bool("canceled", canceled).
 		Msg("pipeline complete")
 
 	logger.Debug().Msg("uploading logs")
@@ -186,7 +176,6 @@ func (r *Runner) Run(runnerCtx context.Context) error { //nolint:contextcheck
 
 	logger.Debug().
 		Str("error", state.Error).
-		Int("exit_code", state.ExitCode).
 		Msg("updating pipeline status")
 
 	if err := r.client.Done(runnerCtx, work.ID, state); err != nil {

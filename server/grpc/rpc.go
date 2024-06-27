@@ -80,7 +80,7 @@ func (s *RPC) Next(c context.Context, agentFilter rpc.Filter) (*rpc.Workflow, er
 		}
 
 		// task should not run, so mark it as done
-		if err := s.Done(c, task.ID, rpc.State{}); err != nil {
+		if err := s.Done(c, task.ID, rpc.WorkflowState{}); err != nil {
 			log.Error().Err(err).Msgf("mark task '%s' done failed", task.ID)
 		}
 	}
@@ -97,7 +97,7 @@ func (s *RPC) Extend(c context.Context, id string) error {
 }
 
 // Update implements the rpc.Update function.
-func (s *RPC) Update(_ context.Context, id string, state rpc.State) error {
+func (s *RPC) Update(_ context.Context, id string, state rpc.StepState) error {
 	workflowID, err := strconv.ParseInt(id, 10, 64)
 	if err != nil {
 		return err
@@ -163,15 +163,15 @@ func (s *RPC) Update(_ context.Context, id string, state rpc.State) error {
 }
 
 // Init implements the rpc.Init function.
-func (s *RPC) Init(c context.Context, id string, state rpc.State) error {
-	stepID, err := strconv.ParseInt(id, 10, 64)
+func (s *RPC) Init(c context.Context, _workflowID string, state rpc.WorkflowState) error {
+	workflowID, err := strconv.ParseInt(_workflowID, 10, 64)
 	if err != nil {
 		return err
 	}
 
-	workflow, err := s.store.WorkflowLoad(stepID)
+	workflow, err := s.store.WorkflowLoad(workflowID)
 	if err != nil {
-		log.Error().Err(err).Msgf("cannot find step with id %d", stepID)
+		log.Error().Err(err).Msgf("cannot find workflow with id %d", workflowID)
 		return err
 	}
 
@@ -229,7 +229,7 @@ func (s *RPC) Init(c context.Context, id string, state rpc.State) error {
 }
 
 // Done implements the rpc.Done function.
-func (s *RPC) Done(c context.Context, id string, state rpc.State) error {
+func (s *RPC) Done(c context.Context, id string, state rpc.WorkflowState) error {
 	workflowID, err := strconv.ParseInt(id, 10, 64)
 	if err != nil {
 		return err
@@ -271,7 +271,7 @@ func (s *RPC) Done(c context.Context, id string, state rpc.State) error {
 
 	var queueErr error
 	if workflow.Failing() {
-		queueErr = s.queue.Error(c, id, fmt.Errorf("step finished with exit code %d, %s", state.ExitCode, state.Error))
+		queueErr = s.queue.Error(c, id, fmt.Errorf("workflow finished with error %s", state.Error))
 	} else {
 		queueErr = s.queue.Done(c, id, workflow.State)
 	}

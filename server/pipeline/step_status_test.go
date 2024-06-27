@@ -41,9 +41,8 @@ func TestUpdateStepStatusNotExited(t *testing.T) {
 	step := &model.Step{}
 
 	// advertised step status
-	state := rpc.State{
+	state := rpc.StepState{
 		Started: int64(42),
-		Exited:  false,
 		// Dummy data
 		Finished: int64(1),
 		ExitCode: pipeline.ExitCodeKilled,
@@ -66,8 +65,7 @@ func TestUpdateStepStatusNotExitedButStopped(t *testing.T) {
 	step := &model.Step{Started: 42, Stopped: 64, State: model.StatusKilled}
 
 	// advertised step status
-	state := rpc.State{
-		Exited: false,
+	state := rpc.StepState{
 		// Dummy data
 		Finished: int64(1),
 		ExitCode: pipeline.ExitCodeKilled,
@@ -90,9 +88,8 @@ func TestUpdateStepStatusExited(t *testing.T) {
 	step := &model.Step{Started: 42}
 
 	// advertised step status
-	state := rpc.State{
+	state := rpc.StepState{
 		Started:  int64(42),
-		Exited:   true,
 		Finished: int64(34),
 		ExitCode: pipeline.ExitCodeKilled,
 		Error:    "an error",
@@ -114,9 +111,8 @@ func TestUpdateStepStatusExitedButNot137(t *testing.T) {
 	step := &model.Step{Started: 42}
 
 	// advertised step status
-	state := rpc.State{
+	state := rpc.StepState{
 		Started:  int64(42),
-		Exited:   true,
 		Finished: int64(34),
 		Error:    "an error",
 	}
@@ -134,9 +130,8 @@ func TestUpdateStepStatusExitedWithCode(t *testing.T) {
 	t.Parallel()
 
 	// advertised step status
-	state := rpc.State{
+	state := rpc.StepState{
 		Started:  int64(42),
-		Exited:   true,
 		Finished: int64(34),
 		ExitCode: 1,
 		Error:    "an error",
@@ -152,7 +147,7 @@ func TestUpdateStepStatusExitedWithCode(t *testing.T) {
 func TestUpdateStepPToStatusStarted(t *testing.T) {
 	t.Parallel()
 
-	state := rpc.State{Started: int64(42)}
+	state := rpc.StepState{Started: int64(42)}
 	step, _ := UpdateStepToStatusStarted(mockStoreStep(t), model.Step{}, state)
 
 	assert.Equal(t, model.StatusRunning, step.State)
@@ -184,7 +179,7 @@ func TestUpdateStepToStatusSkippedButStarted(t *testing.T) {
 func TestUpdateStepStatusToDoneSkipped(t *testing.T) {
 	t.Parallel()
 
-	state := rpc.State{
+	state := rpc.StepState{
 		Finished: int64(34),
 	}
 
@@ -199,7 +194,7 @@ func TestUpdateStepStatusToDoneSkipped(t *testing.T) {
 func TestUpdateStepStatusToDoneSuccess(t *testing.T) {
 	t.Parallel()
 
-	state := rpc.State{
+	state := rpc.StepState{
 		Started:  int64(42),
 		Finished: int64(34),
 	}
@@ -215,7 +210,7 @@ func TestUpdateStepStatusToDoneSuccess(t *testing.T) {
 func TestUpdateStepStatusToDoneFailureWithError(t *testing.T) {
 	t.Parallel()
 
-	state := rpc.State{Error: "an error"}
+	state := rpc.StepState{Error: "an error"}
 
 	step, _ := UpdateStepStatusToDone(mockStoreStep(t), model.Step{}, state)
 
@@ -225,7 +220,7 @@ func TestUpdateStepStatusToDoneFailureWithError(t *testing.T) {
 func TestUpdateStepStatusToDoneFailureWithExitCode(t *testing.T) {
 	t.Parallel()
 
-	state := rpc.State{ExitCode: 43}
+	state := rpc.StepState{ExitCode: 43}
 
 	step, _ := UpdateStepStatusToDone(mockStoreStep(t), model.Step{}, state)
 

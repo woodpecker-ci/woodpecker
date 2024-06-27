@@ -127,10 +127,10 @@ func (c *client) Next(ctx context.Context, f rpc.Filter) (*rpc.Workflow, error) 
 }
 
 // Wait blocks until the workflow is complete.
-func (c *client) Wait(ctx context.Context, id string) (err error) {
+func (c *client) Wait(ctx context.Context, workflowID string) (err error) {
 	retry := c.newBackOff()
 	req := new(proto.WaitRequest)
-	req.Id = id
+	req.Id = workflowID
 	for {
 		_, err = c.client.Wait(ctx, req)
 		if err == nil {
@@ -161,17 +161,14 @@ func (c *client) Wait(ctx context.Context, id string) (err error) {
 }
 
 // Init signals the workflow is initialized.
-func (c *client) Init(ctx context.Context, id string, state rpc.State) (err error) {
+func (c *client) Init(ctx context.Context, workflowID string, state rpc.WorkflowState) (err error) {
 	retry := c.newBackOff()
 	req := new(proto.InitRequest)
-	req.Id = id
+	req.Id = workflowID
 	req.State = new(proto.State)
 	req.State.Error = state.Error
-	req.State.ExitCode = int32(state.ExitCode)
-	req.State.Exited = state.Exited
 	req.State.Finished = state.Finished
 	req.State.Started = state.Started
-	req.State.StepUuid = state.StepUUID
 	for {
 		_, err = c.client.Init(ctx, req)
 		if err == nil {
@@ -202,17 +199,14 @@ func (c *client) Init(ctx context.Context, id string, state rpc.State) (err erro
 }
 
 // Done signals the work is complete.
-func (c *client) Done(ctx context.Context, id string, state rpc.State) (err error) {
+func (c *client) Done(ctx context.Context, workflowID string, state rpc.WorkflowState) (err error) {
 	retry := c.newBackOff()
 	req := new(proto.DoneRequest)
-	req.Id = id
+	req.Id = workflowID
 	req.State = new(proto.State)
 	req.State.Error = state.Error
-	req.State.ExitCode = int32(state.ExitCode)
-	req.State.Exited = state.Exited
 	req.State.Finished = state.Finished
 	req.State.Started = state.Started
-	req.State.StepUuid = state.StepUUID
 	for {
 		_, err = c.client.Done(ctx, req)
 		if err == nil {
@@ -243,10 +237,10 @@ func (c *client) Done(ctx context.Context, id string, state rpc.State) (err erro
 }
 
 // Extend extends the workflow deadline.
-func (c *client) Extend(ctx context.Context, id string) (err error) {
+func (c *client) Extend(ctx context.Context, workflowID string) (err error) {
 	retry := c.newBackOff()
 	req := new(proto.ExtendRequest)
-	req.Id = id
+	req.Id = workflowID
 	for {
 		_, err = c.client.Extend(ctx, req)
 		if err == nil {
@@ -277,14 +271,13 @@ func (c *client) Extend(ctx context.Context, id string) (err error) {
 }
 
 // Update updates the workflow state.
-func (c *client) Update(ctx context.Context, id string, state rpc.State) (err error) {
+func (c *client) Update(ctx context.Context, stepID string, state rpc.StepState) (err error) {
 	retry := c.newBackOff()
 	req := new(proto.UpdateRequest)
-	req.Id = id
+	req.Id = stepID
 	req.State = new(proto.State)
 	req.State.Error = state.Error
 	req.State.ExitCode = int32(state.ExitCode)
-	req.State.Exited = state.Exited
 	req.State.Finished = state.Finished
 	req.State.Started = state.Started
 	req.State.StepUuid = state.StepUUID
@@ -317,7 +310,7 @@ func (c *client) Update(ctx context.Context, id string, state rpc.State) (err er
 	return nil
 }
 
-// Log writes the workflow log entry.
+// Log writes the step log entry.
 func (c *client) Log(ctx context.Context, logEntry *rpc.LogEntry) (err error) {
 	retry := c.newBackOff()
 	req := new(proto.LogRequest)
