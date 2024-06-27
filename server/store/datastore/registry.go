@@ -23,13 +23,13 @@ import (
 func (s storage) RegistryFind(repo *model.Repo, addr string) (*model.Registry, error) {
 	reg := new(model.Registry)
 	return reg, wrapGet(s.engine.Where(
-		builder.Eq{"registry_repo_id": repo.ID, "registry_addr": addr},
+		builder.Eq{"repo_id": repo.ID, "address": addr},
 	).Get(reg))
 }
 
 func (s storage) RegistryList(repo *model.Repo, p *model.ListOptions) ([]*model.Registry, error) {
 	var regs []*model.Registry
-	return regs, s.paginate(p).OrderBy("registry_id").Where("registry_repo_id = ?", repo.ID).Find(&regs)
+	return regs, s.paginate(p).OrderBy("id").Where("repo_id = ?", repo.ID).Find(&regs)
 }
 
 func (s storage) RegistryCreate(registry *model.Registry) error {

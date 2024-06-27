@@ -28,12 +28,16 @@ var (
 
 // Registry represents a docker registry with credentials.
 type Registry struct {
-	ID       int64  `json:"id"       xorm:"pk autoincr 'registry_id'"`
-	RepoID   int64  `json:"-"        xorm:"UNIQUE(s) INDEX 'registry_repo_id'"`
-	Address  string `json:"address"  xorm:"UNIQUE(s) INDEX 'registry_addr'"`
-	Username string `json:"username" xorm:"varchar(2000) 'registry_username'"`
-	Password string `json:"password" xorm:"TEXT 'registry_password'"`
+	ID       int64  `json:"id"       xorm:"pk autoincr 'id'"`
+	RepoID   int64  `json:"-"        xorm:"UNIQUE(s) INDEX 'repo_id'"`
+	Address  string `json:"address"  xorm:"UNIQUE(s) INDEX 'address'"`
+	Username string `json:"username" xorm:"varchar(2000) 'username'"`
+	Password string `json:"password" xorm:"TEXT 'password'"`
 } //	@name Registry
+
+func (r Registry) TableName() string {
+	return "registries"
+}
 
 // Validate validates the registry information.
 func (r *Registry) Validate() error {
