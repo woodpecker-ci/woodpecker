@@ -127,8 +127,10 @@ func TestHandleAuth(t *testing.T) {
 
 			forgeRedirectURL := ""
 			_forge.On("Login", mock.Anything, mock.Anything).Run(func(args mock.Arguments) {
-				state := args.Get(1).(*forge_types.OAuthRequest)
-				forgeRedirectURL = fmt.Sprintf("https://my-awesome-forge.com/oauth/authorize?client_id=client-id&state=%s", state.State)
+				state, ok := args.Get(1).(*forge_types.OAuthRequest)
+				if ok {
+					forgeRedirectURL = fmt.Sprintf("https://my-awesome-forge.com/oauth/authorize?client_id=client-id&state=%s", state.State)
+				}
 			}).Return(nil, func(context.Context, *forge_types.OAuthRequest) string {
 				return forgeRedirectURL
 			}, nil)

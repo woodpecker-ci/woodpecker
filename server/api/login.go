@@ -65,7 +65,7 @@ func HandleAuth(c *gin.Context) {
 	forgeID := int64(1) // TODO: replace with forge id when multiple forges are supported
 
 	if isCallback { // validate the state token
-		_, err := token.Parse([]token.Type{token.OAuthStateToken}, state, func(t *token.Token) (string, error) {
+		_, err := token.Parse([]token.Type{token.OAuthStateToken}, state, func(_ *token.Token) (string, error) {
 			return server.Config.Server.JWTSecret, nil
 		})
 		if err != nil {
