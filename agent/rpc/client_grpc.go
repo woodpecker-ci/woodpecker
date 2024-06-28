@@ -204,8 +204,8 @@ func (c *client) Done(ctx context.Context, workflowID string, state rpc.Workflow
 	req := new(proto.DoneRequest)
 	req.Id = workflowID
 	req.State = new(proto.WorkflowState)
-	req.State.Finished = state.Finished
 	req.State.Started = state.Started
+	req.State.Finished = state.Finished
 	req.State.Error = state.Error
 	for {
 		_, err = c.client.Done(ctx, req)
