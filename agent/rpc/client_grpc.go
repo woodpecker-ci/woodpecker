@@ -161,17 +161,14 @@ func (c *client) Wait(ctx context.Context, id string) (err error) {
 }
 
 // Init signals the workflow is initialized.
-func (c *client) Init(ctx context.Context, id string, state rpc.State) (err error) {
+func (c *client) Init(ctx context.Context, workflowID string, state rpc.WorkflowState) (err error) {
 	retry := c.newBackOff()
 	req := new(proto.InitRequest)
-	req.Id = id
-	req.State = new(proto.State)
-	req.State.Error = state.Error
-	req.State.ExitCode = int32(state.ExitCode)
-	req.State.Exited = state.Exited
-	req.State.Finished = state.Finished
+	req.Id = workflowID
+	req.State = new(proto.WorkflowState)
 	req.State.Started = state.Started
-	req.State.StepUuid = state.StepUUID
+	req.State.Finished = state.Finished
+	req.State.Error = state.Error
 	for {
 		_, err = c.client.Init(ctx, req)
 		if err == nil {
@@ -201,18 +198,15 @@ func (c *client) Init(ctx context.Context, id string, state rpc.State) (err erro
 	return nil
 }
 
-// Done signals the work is complete.
-func (c *client) Done(ctx context.Context, id string, state rpc.State) (err error) {
+// Done signals the workflow is complete.
+func (c *client) Done(ctx context.Context, workflowID string, state rpc.WorkflowState) (err error) {
 	retry := c.newBackOff()
 	req := new(proto.DoneRequest)
-	req.Id = id
-	req.State = new(proto.State)
-	req.State.Error = state.Error
-	req.State.ExitCode = int32(state.ExitCode)
-	req.State.Exited = state.Exited
+	req.Id = workflowID
+	req.State = new(proto.WorkflowState)
 	req.State.Finished = state.Finished
 	req.State.Started = state.Started
-	req.State.StepUuid = state.StepUUID
+	req.State.Error = state.Error
 	for {
 		_, err = c.client.Done(ctx, req)
 		if err == nil {
@@ -277,17 +271,16 @@ func (c *client) Extend(ctx context.Context, id string) (err error) {
 }
 
 // Update updates the workflow state.
-func (c *client) Update(ctx context.Context, id string, state rpc.State) (err error) {
+func (c *client) Update(ctx context.Context, id string, state rpc.StepState) (err error) {
 	retry := c.newBackOff()
 	req := new(proto.UpdateRequest)
 	req.Id = id
-	req.State = new(proto.State)
-	req.State.Error = state.Error
-	req.State.ExitCode = int32(state.ExitCode)
-	req.State.Exited = state.Exited
-	req.State.Finished = state.Finished
-	req.State.Started = state.Started
+	req.State = new(proto.StepState)
 	req.State.StepUuid = state.StepUUID
+	req.State.Started = state.Started
+	req.State.Finished = state.Finished
+	req.State.ExitCode = int32(state.ExitCode)
+	req.State.Error = state.Error
 	for {
 		_, err = c.client.Update(ctx, req)
 		if err == nil {
