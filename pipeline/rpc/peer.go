@@ -37,7 +37,7 @@ type (
 		Error    string `json:"error"`
 	}
 
-	// WorkflowState
+	// WorkflowState defines the workflow state.
 	WorkflowState struct {
 		Started  int64  `json:"started"`
 		Finished int64  `json:"finished"`

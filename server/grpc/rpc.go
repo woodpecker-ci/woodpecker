@@ -48,7 +48,7 @@ type RPC struct {
 	pipelineCount *prometheus.CounterVec
 }
 
-// Next blocks until it provides the next workflow to execute
+// Next blocks until it provides the next workflow to execute.
 func (s *RPC) Next(c context.Context, agentFilter rpc.Filter) (*rpc.Workflow, error) {
 	if hostname, err := s.getHostnameFromContext(c); err == nil {
 		log.Debug().Msgf("agent connected: %s: polling", hostname)
@@ -86,17 +86,17 @@ func (s *RPC) Next(c context.Context, agentFilter rpc.Filter) (*rpc.Workflow, er
 	}
 }
 
-// Wait blocks until the workflow with the given ID is done
+// Wait blocks until the workflow with the given ID is done.
 func (s *RPC) Wait(c context.Context, workflowID string) error {
 	return s.queue.Wait(c, workflowID)
 }
 
-// Extend extends the lease for the workflow with the given ID
+// Extend extends the lease for the workflow with the given ID.
 func (s *RPC) Extend(c context.Context, workflowID string) error {
 	return s.queue.Extend(c, workflowID)
 }
 
-// Update updates the state of a step
+// Update updates the state of a step.
 func (s *RPC) Update(_ context.Context, _workflowID string, state rpc.StepState) error {
 	workflowID, err := strconv.ParseInt(_workflowID, 10, 64)
 	if err != nil {
@@ -318,7 +318,7 @@ func (s *RPC) Done(c context.Context, _workflowID string, state rpc.WorkflowStat
 	return nil
 }
 
-// Log writes a log entry to the database and publishes it to the pubsub
+// Log writes a log entry to the database and publishes it to the pubsub.
 func (s *RPC) Log(c context.Context, _logEntry *rpc.LogEntry) error {
 	// convert rpc log_entry to model.log_entry
 	step, err := s.store.StepByUUID(_logEntry.StepUUID)
@@ -367,6 +367,7 @@ func (s *RPC) RegisterAgent(ctx context.Context, platform, backend, version stri
 	return agent.ID, nil
 }
 
+// UnregisterAgent removes the agent from the database.
 func (s *RPC) UnregisterAgent(ctx context.Context) error {
 	agent, err := s.getAgentFromContext(ctx)
 	if !agent.IsSystemAgent() {
