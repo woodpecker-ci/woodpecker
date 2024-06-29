@@ -279,6 +279,7 @@ func (c *client) Update(ctx context.Context, id string, state rpc.StepState) (er
 	req.State.StepUuid = state.StepUUID
 	req.State.Started = state.Started
 	req.State.Finished = state.Finished
+	req.State.Exited = state.Exited
 	req.State.ExitCode = int32(state.ExitCode)
 	req.State.Error = state.Error
 	for {
