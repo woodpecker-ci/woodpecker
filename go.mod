@@ -42,7 +42,7 @@ require (
 	github.com/lib/pq v1.10.9
 	github.com/mattn/go-sqlite3 v1.14.22
 	github.com/mitchellh/mapstructure v1.5.0
-	github.com/moby/moby v24.0.9+incompatible
+	github.com/moby/moby v27.0.2+incompatible
 	github.com/moby/term v0.5.0
 	github.com/muesli/termenv v0.15.2
 	github.com/neticdk/go-bitbucket v1.0.0
