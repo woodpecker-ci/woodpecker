@@ -147,9 +147,9 @@ func (r *Runner) Run(runnerCtx context.Context) error { //nolint:contextcheck
 		pipeline.WithTracer(r.createTracer(ctxMeta, logger, workflow)),
 		pipeline.WithBackend(*r.backend),
 		pipeline.WithDescription(map[string]string{
-			"ID":       workflow.ID,
-			"Repo":     repoName,
-			"Pipeline": pipelineNumber,
+			"workflow_id":     workflow.ID,
+			"repo":            repoName,
+			"pipeline_number": pipelineNumber,
 		}),
 	).Run(runnerCtx)
 

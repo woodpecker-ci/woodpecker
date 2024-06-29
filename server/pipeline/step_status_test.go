@@ -149,7 +149,7 @@ func TestUpdateStepStatusExitedWithCode(t *testing.T) {
 	assert.Equal(t, 1, step.ExitCode)
 }
 
-func TestUpdateStepPToStatusStarted(t *testing.T) {
+func TestUpdateStepToStatusStarted(t *testing.T) {
 	t.Parallel()
 
 	state := rpc.StepState{Started: int64(42)}
