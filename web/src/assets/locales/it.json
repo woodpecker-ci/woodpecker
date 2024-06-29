@@ -18,7 +18,7 @@
                 "tasks": "Task",
                 "task_running": "Task in esecuzione",
                 "task_waiting_on_deps": "Task in attesa delle dipendenze",
-                "desc": "Task in attesa di essere eseguite dagli agenti",
+                "desc": "Task in attesa di essere eseguiti dagli agenti",
                 "queue": "Coda",
                 "task_pending": "Task in attesa"
             },
@@ -30,8 +30,8 @@
                 },
                 "created": "Utente creato",
                 "delete_confirm": "Vuoi davvero eliminare questo utente? Ciò eliminerà anche tutti i repository di proprietà di questo utente.",
-                "delete_user": "Cancella utente",
-                "deleted": "Utente cancellato",
+                "delete_user": "Elimina utente",
+                "deleted": "Utente eliminato",
                 "edit_user": "Modifica utente",
                 "none": "Non ci sono ancora utenti.",
                 "saved": "Utente salvato",
@@ -118,23 +118,23 @@
     "docs": "Documentazione",
     "documentation_for": "Documentazione per \"{topic}\"",
     "errors": {
-        "not_found": "Il server non riesce a trovare l'oggetto richiesto"
+        "not_found": "Il server non è riuscito a trovare l'oggetto richiesto"
     },
     "login": "Accedi",
     "logout": "Esci",
     "not_found": {
         "back_home": "Torna alla pagina principale",
-        "not_found": "Ahia 404, o abbiamo rotto qualcosa o hai scritto male qualcosa :-/"
+        "not_found": "Diamine 404, o qualcosa si è rotto o hai scritto male qualcosa :-/"
     },
     "password": "Password",
-    "pipeline_feed": "Alimentazione pipeline",
+    "pipeline_feed": "Dettagli pipeline",
     "repo": {
         "activity": "Attività",
         "add": "Aggiungi repository",
         "branches": "Rami",
         "deploy_pipeline": {
-            "enter_target": "Ambiente di deploy destinazione",
-            "title": "Azione l'evento di deploy per la pipeline corrente #{pipelineId}",
+            "enter_target": "Ambiente di destinazione del deploy",
+            "title": "Avvia evento di deploy per la pipeline corrente #{pipelineId}",
             "trigger": "Deploy",
             "variables": {
                 "add": "Aggiungi variabile",
@@ -167,7 +167,7 @@
                 "delete": "Elimina variabile"
             }
         },
-        "not_allowed": "Non è permesso accedere a questo repository",
+        "not_allowed": "Non ti è consentito accedere a questo repository",
         "open_in_forge": "Apri pagina web del repository",
         "pipeline": {
             "actions": {
@@ -285,36 +285,36 @@
             "general": {
                 "general": "Generale",
                 "pipeline_path": {
-                    "default": "Predefinito: .woodpecker/*.yml -> .woodpecker.yml",
+                    "default": "Predefinito: .woodpecker/*.{'{yaml,yml}'} -> .woodpecker.yaml -> .woodpecker.yml",
                     "path": "Percorso della pipeline",
                     "desc": "Percorso per la configurazione della pipeline (ad esempio {0}). Le cartelle devono terminare con {1}.",
                     "desc_path_example": "mio/percorso/"
                 },
-                "project": "Impostazioni del progetto",
+                "project": "Impostazioni progetto",
                 "protected": {
                     "protected": "Protetto",
                     "desc": "Ogni pipeline deve essere approvata prima di essere eseguita."
                 },
-                "save": "Salva le impostazioni",
-                "success": "Le impostazioni del repository sono state aggiornate",
+                "save": "Salva impostazioni",
+                "success": "Impostazioni del repository aggiornate",
                 "timeout": {
                     "minutes": "minuti",
                     "timeout": "Scadenza"
                 },
                 "visibility": {
                     "internal": {
-                        "desc": "Solo gli utenti dell'istanza Woodpecker che hanno effettuato l'accesso possono vedere questo progetto.",
+                        "desc": "Solo gli utenti autenticati dell'istanza Woodpecker possono vedere questo progetto.",
                         "internal": "Interno"
                     },
                     "private": {
-                        "desc": "Soltanto tu e gli altri proprietari del repository possono vedere questo progetto.",
+                        "desc": "Solo tu e gli altri proprietari del repository potete vedere questo progetto.",
                         "private": "Privato"
                     },
                     "public": {
-                        "desc": "Qualunque utente può vedere il tuo progetto senza la necessità di accedere.",
+                        "desc": "Ogni utente può vedere il tuo progetto senza aver effettuato l'accesso.",
                         "public": "Pubblico"
                     },
-                    "visibility": "Visibilità del progetto"
+                    "visibility": "Visibilità progetto"
                 },
                 "cancel_prev": {
                     "desc": "Consente di annullare le pipeline in sospeso e in esecuzione dello stesso evento e contesto prima di avviare quella appena attivata.",
@@ -334,10 +334,10 @@
                 },
                 "netrc_only_trusted": {
                     "netrc_only_trusted": "Inietta le credenziali netrc solo nei container attendibili",
-                    "desc": "Iniettare le credenziali netrc solo nei contenitori attendibili (consigliato)."
+                    "desc": "Inietta le credenziali netrc solo nei contenitori attendibili (consigliato)."
                 }
             },
-            "not_allowed": "Non è permesso accedere alle impostazioni di questo repository",
+            "not_allowed": "Non ti è consentito accedere alle impostazioni di questo repository",
             "secrets": {
                 "name": "Nome",
                 "value": "Valore"
@@ -370,7 +370,7 @@
                 "branch": "Ramo"
             }
         },
-        "user_none": "L'organizzazione/utente non ha ancora alcun progetto."
+        "user_none": "L'organizzazione / utente non ha ancora alcun progetto."
     },
     "repos": "Repository",
     "repositories": "Repository",
