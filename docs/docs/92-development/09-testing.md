@@ -4,14 +4,14 @@
 
 ### Unit Tests
 
-[We use default golang unit tests.](https://go.dev/doc/tutorial/add-a-test)
-With [`"github.com/stretchr/testify/assert"`](https://pkg.go.dev/github.com/stretchr/testify@v1.9.0/assert) to simplify testing.
+[We use default golang unit tests](https://go.dev/doc/tutorial/add-a-test)
+with [`"github.com/stretchr/testify/assert"`](https://pkg.go.dev/github.com/stretchr/testify@v1.9.0/assert) to simplify testing.
 
 ### Integration Tests
 
-#### Pipeline Engine
+### Dummy backend
 
-The pipeline engine has a special backend called **`dummy`** which does not execute any commands, but emulates how a typical backend should behave.
+There is a special backend called **`dummy`** which does not execute any commands, but emulates how a typical backend should behave.
 To enable it you need to build the agent or cli with the `integration` build tag.
 
 An example pipeline config would be:
@@ -77,4 +77,4 @@ You can control the step behavior via its name:
 There are also environment variables to alter step behaviour:
 
 - `SLEEP: 10` will let the step wait 10 seconds
-- `EXPECT_TYPE` allows to check if a step is a `step` or `service`
+- `EXPECT_TYPE` allows to check if a step is a `clone`, `service`, `plugin` or `commands`
