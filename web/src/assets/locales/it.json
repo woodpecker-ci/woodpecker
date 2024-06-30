@@ -33,7 +33,7 @@
                 "delete_user": "Elimina utente",
                 "deleted": "Utente eliminato",
                 "edit_user": "Modifica utente",
-                "none": "Non ci sono ancora utenti.",
+                "none": "Ancora nessun utente.",
                 "saved": "Utente salvato",
                 "show": "Mostra utenti",
                 "users": "Utenti",
@@ -47,7 +47,7 @@
             "agents": {
                 "agents": "Agenti",
                 "desc": "Agenti registrati per questo server",
-                "none": "Non ci sono ancora agenti.",
+                "none": "Ancora nessun agente.",
                 "id": "ID",
                 "add": "Aggiungi agente",
                 "save": "Salva agente",
@@ -86,7 +86,7 @@
             },
             "orgs": {
                 "desc": "Organizzazioni che possiedono repository su questo server",
-                "none": "Non ci sono ancora organizzazioni.",
+                "none": "Ancora nessuna organizzazione.",
                 "delete_org": "Elimina organizzazione",
                 "deleted": "Organizzazione eliminata",
                 "org_settings": "Impostazioni organizzazione",
@@ -102,7 +102,7 @@
                 "settings": "Impostazioni repository",
                 "repos": "Repository",
                 "desc": "Repository che sono o sono stati abilitati su questo server",
-                "none": "Non ci sono ancora repository.",
+                "none": "Ancora nessun repository.",
                 "view": "Mostra repository",
                 "disabled": "Disabilitato",
                 "repair": {
@@ -261,7 +261,7 @@
                 },
                 "next_exec": "Prossima esecuzione",
                 "not_executed_yet": "Non ancora eseguito",
-                "none": "Non ci sono ancora cron.",
+                "none": "Ancora nessun cron.",
                 "branch": {
                     "placeholder": "Ramo (utilizza ramo predefinito se vuoto)",
                     "title": "Ramo"
@@ -353,7 +353,7 @@
                 "credentials": "Credenziali di registro",
                 "show": "Mostra registri",
                 "add": "Aggiungi registro",
-                "none": "Non ci sono ancora credenziali di registro.",
+                "none": "Ancora nessuna credenziale di registro.",
                 "save": "Salva registro",
                 "created": "Credenziali di registro create",
                 "saved": "Credenziali di registro salvate",
@@ -423,7 +423,7 @@
         },
         "value": "Valore",
         "delete_confirm": "Vuoi davvero eliminare questo segreto?",
-        "none": "Non ci sono ancora segreti.",
+        "none": "Ancora nessun segreto.",
         "add": "Aggiungi segreto",
         "save": "Salva segreto",
         "show": "Mostra segreti",
