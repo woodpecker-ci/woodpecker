@@ -96,10 +96,10 @@ echo nein
 
 	t.Run("step exec error", func(t *testing.T) {
 		step := &types.Step{
-			Name:        dummy.StepExecError,
+			Name:        "dummy",
 			UUID:        "SID_2",
 			Type:        types.StepTypePlugin,
-			Environment: map[string]string{dummy.EnvKeyStepType: "plugin"},
+			Environment: map[string]string{dummy.EnvKeyStepType: "plugin", dummy.EnvKeyStepExitCode: "1"},
 		}
 		workflowUUID := "WID_1"
 
@@ -122,10 +122,10 @@ echo nein
 
 	t.Run("step start fail", func(t *testing.T) {
 		step := &types.Step{
-			Name:        dummy.StepStartFail,
+			Name:        "dummy",
 			UUID:        "SID_2",
 			Type:        types.StepTypeService,
-			Environment: map[string]string{dummy.EnvKeyStepType: "service"},
+			Environment: map[string]string{dummy.EnvKeyStepType: "service", dummy.EnvKeyStepStartFail: "true"},
 		}
 		workflowUUID := "WID_1"
 

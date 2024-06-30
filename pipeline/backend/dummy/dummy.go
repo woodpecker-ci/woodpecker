@@ -21,6 +21,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -37,11 +38,12 @@ type dummy struct {
 
 const (
 	// Step names to control behavior of dummy backend.
-	WorkflowSetupFailUUID = "123456"
-	StepStartFail         = "step_start_fail"
-	StepExecError         = "step_exec_error"
+	WorkflowSetupFailUUID = "WorkflowSetupShouldFail"
 	EnvKeyStepSleep       = "SLEEP"
 	EnvKeyStepType        = "EXPECT_TYPE"
+	EnvKeyStepStartFail   = "STEP_START_FAIL"
+	EnvKeyStepExitCode    = "STEP_EXIT_CODE"
+	EnvKeyStepOOMKilled   = "STEP_OOM_KILLED"
 
 	// Internal const.
 	stepStateStarted   = "started"
@@ -98,7 +100,7 @@ func (e *dummy) StartStep(_ context.Context, step *backend.Step, taskUUID string
 		return fmt.Errorf("StartStep detected already started step '%s' (%s) in state: %s", step.Name, step.UUID, stepState)
 	}
 
-	if step.Name == StepStartFail {
+	if stepStartFail, _ := strconv.ParseBool(step.Environment[EnvKeyStepStartFail]); stepStartFail {
 		return fmt.Errorf("expected fail to start step")
 	}
 
@@ -155,18 +157,17 @@ func (e *dummy) WaitStep(ctx context.Context, step *backend.Step, taskUUID strin
 
 	e.kv.Store(fmt.Sprintf("task_%s_step_%s", taskUUID, step.UUID), stepStateDone)
 
-	if step.Name == StepExecError {
-		return &backend.State{
-			ExitCode:  1,
-			Exited:    true,
-			OOMKilled: false,
-		}, nil
+	oomKilled, _ := strconv.ParseBool(step.Environment[EnvKeyStepOOMKilled])
+	exitCode := 0
+
+	if code, exist := step.Environment[EnvKeyStepExitCode]; exist {
+		exitCode, _ = strconv.Atoi(strings.TrimSpace(code))
 	}
 
 	return &backend.State{
-		ExitCode:  0,
+		ExitCode:  exitCode,
 		Exited:    true,
-		OOMKilled: false,
+		OOMKilled: oomKilled,
 	}, nil
 }
 

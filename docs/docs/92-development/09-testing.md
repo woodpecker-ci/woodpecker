@@ -69,12 +69,12 @@ This could be executed via `woodpecker-cli --log-level trace exec --backend-engi
 9:18PM TRC pipeline/backend/dummy/dummy.go:208 > delete workflow environment taskUUID=01J10P578JQE6E25VV1EQF0745
 ```
 
-You can control the step behavior via its name:
-
-- If you name the step `step_start_fail` the engine will simulate a step to fail before actually started (e.g. happens when the container image can not be pulled).
-- If you name the step `step_exec_error` the engine will simulate a command which executes with status code **1**.
-
 There are also environment variables to alter step behaviour:
 
 - `SLEEP: 10` will let the step wait 10 seconds
 - `EXPECT_TYPE` allows to check if a step is a `clone`, `service`, `plugin` or `commands`
+- `STEP_START_FAIL: true` if set will simulate a step to fail before actually started (e.g. happens when the container image can not be pulled)
+- `STEP_EXIT_CODE: 2` if set will be used as exit code, default is 0
+- `STEP_OOM_KILLED: true` simulate a step who got killed because of memory constrains
+
+Also for the whole workflow if you set it's UUID ot `WorkflowSetupShouldFail`, you can fail a workflow setup fail.
