@@ -55,7 +55,7 @@
     "eslint-plugin-vue-scoped-css": "^2.8.0",
     "jsdom": "^24.1.0",
     "prettier": "^3.3.0",
-    "replace-in-file": "^7.2.0",
+    "replace-in-file": "^8.0.0",
     "tinycolor2": "^1.6.0",
     "typescript": "5.4.5",
     "typescript-eslint": "^7.12.0",

@@ -20,30 +20,30 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
-var feedItemSelect = `repos.repo_id as feed_repo_id,
-pipelines.pipeline_id as feed_pipeline_id,
-pipelines.pipeline_number as feed_pipeline_number,
-pipelines.pipeline_event as feed_pipeline_event,
-pipelines.pipeline_status as feed_pipeline_status,
-pipelines.pipeline_created as feed_pipeline_created,
-pipelines.pipeline_started as feed_pipeline_started,
-pipelines.pipeline_finished as feed_pipeline_finished,
-pipelines.pipeline_commit as feed_pipeline_commit,
-pipelines.pipeline_branch as feed_pipeline_branch,
-pipelines.pipeline_ref as feed_pipeline_ref,
-pipelines.pipeline_refspec as feed_pipeline_refspec,
-pipelines.pipeline_title as feed_pipeline_title,
-pipelines.pipeline_message as feed_pipeline_message,
-pipelines.pipeline_author as feed_pipeline_author,
-pipelines.pipeline_email as feed_pipeline_email,
-pipelines.pipeline_avatar as feed_pipeline_avatar`
+var feedItemSelect = `repos.id as repo_id,
+pipelines.id as pipeline_id,
+pipelines.number as pipeline_number,
+pipelines.event as pipeline_event,
+pipelines.status as pipeline_status,
+pipelines.created as pipeline_created,
+pipelines.started as pipeline_started,
+pipelines.finished as pipeline_finished,
+'pipelines.commit' as pipeline_commit,
+pipelines.branch as pipeline_branch,
+pipelines.ref as pipeline_ref,
+pipelines.refspec as pipeline_refspec,
+pipelines.title as pipeline_title,
+pipelines.message as pipeline_message,
+pipelines.author as pipeline_author,
+pipelines.email as pipeline_email,
+pipelines.avatar as pipeline_avatar`
 
 func (s storage) GetPipelineQueue() ([]*model.Feed, error) {
 	feed := make([]*model.Feed, 0, perPage)
 	err := s.engine.Table("pipelines").
 		Select(feedItemSelect).
-		Join("INNER", "repos", "pipelines.pipeline_repo_id = repos.repo_id").
-		In("pipelines.pipeline_status", model.StatusPending, model.StatusRunning).
+		Join("INNER", "repos", "pipelines.repo_id = repos.id").
+		In("pipelines.status", model.StatusPending, model.StatusRunning).
 		Find(&feed)
 	return feed, err
 }
@@ -52,10 +52,10 @@ func (s storage) UserFeed(user *model.User) ([]*model.Feed, error) {
 	feed := make([]*model.Feed, 0, perPage)
 	err := s.engine.Table("repos").
 		Select(feedItemSelect).
-		Join("INNER", "perms", "repos.repo_id = perms.perm_repo_id").
-		Join("INNER", "pipelines", "repos.repo_id = pipelines.pipeline_repo_id").
+		Join("INNER", "perms", "repos.id = perms.repo_id").
+		Join("INNER", "pipelines", "repos.id = pipelines.repo_id").
 		Where(userPushOrAdminCondition(user.ID)).
-		Desc("pipelines.pipeline_id").
+		Desc("pipelines.id").
 		Limit(perPage).
 		Find(&feed)
 
@@ -67,16 +67,16 @@ func (s storage) RepoListLatest(user *model.User) ([]*model.Feed, error) {
 
 	err := s.engine.Table("repos").
 		Select(feedItemSelect).
-		Join("INNER", "perms", "repos.repo_id = perms.perm_repo_id").
-		Join("LEFT", "pipelines", "pipelines.pipeline_id = "+`(
-			SELECT pipelines.pipeline_id FROM pipelines
-			WHERE pipelines.pipeline_repo_id = repos.repo_id
-			ORDER BY pipelines.pipeline_id DESC
+		Join("INNER", "perms", "repos.id = perms.repo_id").
+		Join("LEFT", "pipelines", "pipelines.id = "+`(
+			SELECT pipelines.id FROM pipelines
+			WHERE pipelines.repo_id = repos.id
+			ORDER BY pipelines.id DESC
 			LIMIT 1
 			)`).
 		Where(userPushOrAdminCondition(user.ID)).
-		And(builder.Eq{"repos.repo_active": true}).
-		Asc("repos.repo_full_name").
+		And(builder.Eq{"repos.active": true}).
+		Asc("repos.full_name").
 		Find(&feed)
 
 	return feed, err
