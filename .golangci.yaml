@@ -186,4 +186,3 @@ run:
   timeout: 15m
   build-tags:
     - test
-    - integration

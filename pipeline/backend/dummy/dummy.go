@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//go:build integration || test
-// +build integration test
+//go:build test
+// +build test
 
 package dummy
 
