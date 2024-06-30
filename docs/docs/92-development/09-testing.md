@@ -5,14 +5,14 @@
 ### Unit Tests
 
 [We use default golang unit tests.](https://go.dev/doc/tutorial/add-a-test)
-With [`"github.com/stretchr/testify/assert"`](https://pkg.go.dev/github.com/stretchr/testify@v1.9.0/assert) to simplify the test code.
+With [`"github.com/stretchr/testify/assert"`](https://pkg.go.dev/github.com/stretchr/testify@v1.9.0/assert) to simplify testing.
 
 ### Integration Tests
 
 #### Pipeline Engine
 
-The pipeline engine has a special backend called **`dummy`** witch does not exec but emulate how a typical backend should behave.
-To have it available you need to build the agent or cli with the `integration` tag.
+The pipeline engine has a special backend called **`dummy`** which does not execute any commands, but emulates how a typical backend should behave.
+To enable it you need to build the agent or cli with the `integration` build tag.
 
 An example pipeline config would be:
 
@@ -23,17 +23,17 @@ when:
 steps:
   - name: echo
     image: dummy
-    commands: echo ja
+    commands: echo "hello woodpecker"
     environment:
       SLEEP: '1s'
 
 services:
   echo:
     image: dummy
-    commands: echo ja
+    commands: echo "i am a sevice"
 ```
 
-witch could be executed via `woodpecker-cli --log-level trace exec --backend-engine dummy example.yaml`:
+This could be executed via `woodpecker-cli --log-level trace exec --backend-engine dummy example.yaml`:
 
 ```none
 9:18PM DBG pipeline/pipeline.go:94 > executing 2 stages, in order of: CLI=exec
@@ -71,10 +71,10 @@ witch could be executed via `woodpecker-cli --log-level trace exec --backend-eng
 
 You can control the step behavior via its name:
 
-- If you name it `step_start_fail` the engine will simulate a step start who fail (e.g. happens when the container image can not be pulled).
-- If you name it `step_exec_error` the engine will simulate a command who executes with status code **1**.
+- If you name the step `step_start_fail` the engine will simulate a step to fail before actually started (e.g. happens when the container image can not be pulled).
+- If you name the step `step_exec_error` the engine will simulate a command which executes with status code **1**.
 
-There are also environment variables to alter things:
+There are also environment variables to alter step behaviour:
 
-- `SLEEP` witch will simulate a given time duration as command execution time.
-- `EXPECT_TYPE` witch let the backend error if set and the step is not the expected step-type.
+- `SLEEP: 10` will let the step wait 10 seconds
+- `EXPECT_TYPE` allows to check if a step is a `step` or `service`
