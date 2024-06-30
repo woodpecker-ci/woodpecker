@@ -97,8 +97,8 @@ func (s *RPC) Extend(c context.Context, workflowID string) error {
 }
 
 // Update updates the state of a step.
-func (s *RPC) Update(_ context.Context, _workflowID string, state rpc.StepState) error {
-	workflowID, err := strconv.ParseInt(_workflowID, 10, 64)
+func (s *RPC) Update(_ context.Context, strWorkflowID string, state rpc.StepState) error {
+	workflowID, err := strconv.ParseInt(strWorkflowID, 10, 64)
 	if err != nil {
 		return err
 	}
@@ -163,8 +163,8 @@ func (s *RPC) Update(_ context.Context, _workflowID string, state rpc.StepState)
 }
 
 // Init implements the rpc.Init function.
-func (s *RPC) Init(c context.Context, _workflowID string, state rpc.WorkflowState) error {
-	workflowID, err := strconv.ParseInt(_workflowID, 10, 64)
+func (s *RPC) Init(c context.Context, strWorkflowID string, state rpc.WorkflowState) error {
+	workflowID, err := strconv.ParseInt(strWorkflowID, 10, 64)
 	if err != nil {
 		return err
 	}
@@ -230,8 +230,8 @@ func (s *RPC) Init(c context.Context, _workflowID string, state rpc.WorkflowStat
 }
 
 // Done marks the workflow with the given ID as done.
-func (s *RPC) Done(c context.Context, _workflowID string, state rpc.WorkflowState) error {
-	workflowID, err := strconv.ParseInt(_workflowID, 10, 64)
+func (s *RPC) Done(c context.Context, strWorkflowID string, state rpc.WorkflowState) error {
+	workflowID, err := strconv.ParseInt(strWorkflowID, 10, 64)
 	if err != nil {
 		return err
 	}
@@ -262,7 +262,7 @@ func (s *RPC) Done(c context.Context, _workflowID string, state rpc.WorkflowStat
 	logger := log.With().
 		Str("repo_id", fmt.Sprint(repo.ID)).
 		Str("pipeline_id", fmt.Sprint(currentPipeline.ID)).
-		Str("workflow_id", _workflowID).Logger()
+		Str("workflow_id", strWorkflowID).Logger()
 
 	logger.Trace().Msgf("gRPC Done with state: %#v", state)
 
@@ -272,9 +272,9 @@ func (s *RPC) Done(c context.Context, _workflowID string, state rpc.WorkflowStat
 
 	var queueErr error
 	if workflow.Failing() {
-		queueErr = s.queue.Error(c, _workflowID, fmt.Errorf("workflow finished with error %s", state.Error))
+		queueErr = s.queue.Error(c, strWorkflowID, fmt.Errorf("workflow finished with error %s", state.Error))
 	} else {
-		queueErr = s.queue.Done(c, _workflowID, workflow.State)
+		queueErr = s.queue.Done(c, strWorkflowID, workflow.State)
 	}
 	if queueErr != nil {
 		logger.Error().Err(queueErr).Msg("queue.Done: cannot ack workflow")
@@ -319,18 +319,18 @@ func (s *RPC) Done(c context.Context, _workflowID string, state rpc.WorkflowStat
 }
 
 // Log writes a log entry to the database and publishes it to the pubsub.
-func (s *RPC) Log(c context.Context, _logEntry *rpc.LogEntry) error {
+func (s *RPC) Log(c context.Context, rpcLogEntry *rpc.LogEntry) error {
 	// convert rpc log_entry to model.log_entry
-	step, err := s.store.StepByUUID(_logEntry.StepUUID)
+	step, err := s.store.StepByUUID(rpcLogEntry.StepUUID)
 	if err != nil {
-		return fmt.Errorf("could not find step with uuid %s in store: %w", _logEntry.StepUUID, err)
+		return fmt.Errorf("could not find step with uuid %s in store: %w", rpcLogEntry.StepUUID, err)
 	}
 	logEntry := &model.LogEntry{
 		StepID: step.ID,
-		Time:   _logEntry.Time,
-		Line:   _logEntry.Line,
-		Data:   _logEntry.Data,
-		Type:   model.LogEntryType(_logEntry.Type),
+		Time:   rpcLogEntry.Time,
+		Line:   rpcLogEntry.Line,
+		Data:   rpcLogEntry.Data,
+		Type:   model.LogEntryType(rpcLogEntry.Type),
 	}
 	// make sure writes to pubsub are non blocking (https://github.com/woodpecker-ci/woodpecker/blob/c919f32e0b6432a95e1a6d3d0ad662f591adf73f/server/logging/log.go#L9)
 	go func() {
