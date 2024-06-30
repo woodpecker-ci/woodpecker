@@ -37,10 +37,11 @@ type dummy struct {
 
 const (
 	// Step names to control behavior of dummy backend.
-	StepStartFail   = "step_start_fail"
-	StepExecError   = "step_exec_error"
-	EnvKeyStepSleep = "SLEEP"
-	EnvKeyStepType  = "EXPECT_TYPE"
+	WorkflowSetupFailUUID = "123456"
+	StepStartFail         = "step_start_fail"
+	StepExecError         = "step_exec_error"
+	EnvKeyStepSleep       = "SLEEP"
+	EnvKeyStepType        = "EXPECT_TYPE"
 
 	// Internal const.
 	stepStateStarted   = "started"
@@ -75,6 +76,9 @@ func (e *dummy) Load(_ context.Context) (*backend.BackendInfo, error) {
 }
 
 func (e *dummy) SetupWorkflow(_ context.Context, _ *backend.Config, taskUUID string) error {
+	if taskUUID == WorkflowSetupFailUUID {
+		return fmt.Errorf("expected fail to setup workflow")
+	}
 	log.Trace().Str("taskUUID", taskUUID).Msg("create workflow environment")
 	e.kv.Store("task_"+taskUUID, "setup")
 	return nil

@@ -37,6 +37,8 @@ func TestSmalPipelineDummyRun(t *testing.T) {
 	_, err := dummyEngine.Load(ctx)
 	assert.NoError(t, err)
 
+	assert.Error(t, dummyEngine.SetupWorkflow(ctx, nil, dummy.WorkflowSetupFailUUID))
+
 	t.Run("expect fail of step func with non setup workflow", func(t *testing.T) {
 		step := &types.Step{Name: "step1", UUID: "SID_1"}
 		nonExistWorkflowID := "WID_NONE"
