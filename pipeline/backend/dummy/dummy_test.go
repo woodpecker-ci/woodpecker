@@ -120,6 +120,29 @@ echo nein
 		assert.NoError(t, dummyEngine.DestroyWorkflow(ctx, nil, workflowUUID))
 	})
 
+	t.Run("step tail error", func(t *testing.T) {
+		step := &types.Step{
+			Name:        "dummy",
+			UUID:        "SID_2",
+			Environment: map[string]string{dummy.EnvKeyStepTailFail: "true"},
+		}
+		workflowUUID := "WID_1"
+
+		assert.NoError(t, dummyEngine.SetupWorkflow(ctx, nil, workflowUUID))
+
+		assert.NoError(t, dummyEngine.StartStep(ctx, step, workflowUUID))
+
+		_, err := dummyEngine.TailStep(ctx, step, workflowUUID)
+		assert.Error(t, err)
+
+		_, err = dummyEngine.WaitStep(ctx, step, workflowUUID)
+		assert.NoError(t, err)
+
+		assert.NoError(t, dummyEngine.DestroyStep(ctx, step, workflowUUID))
+
+		assert.NoError(t, dummyEngine.DestroyWorkflow(ctx, nil, workflowUUID))
+	})
+
 	t.Run("step start fail", func(t *testing.T) {
 		step := &types.Step{
 			Name:        "dummy",
