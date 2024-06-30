@@ -36,7 +36,7 @@ type dummy struct {
 }
 
 const (
-	// Step names to control step behavior of dummy backend.
+	// Step names to control behavior of dummy backend.
 	StepStartFail   = "step_start_fail"
 	StepExecError   = "step_exec_error"
 	EnvKeyStepSleep = "SLEEP"
