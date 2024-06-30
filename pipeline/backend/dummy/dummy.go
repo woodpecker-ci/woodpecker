@@ -43,6 +43,7 @@ const (
 	EnvKeyStepType        = "EXPECT_TYPE"
 	EnvKeyStepStartFail   = "STEP_START_FAIL"
 	EnvKeyStepExitCode    = "STEP_EXIT_CODE"
+	EnvKeyStepTailFail    = "STEP_TAIL_FAIL"
 	EnvKeyStepOOMKilled   = "STEP_OOM_KILLED"
 
 	// Internal const.
@@ -186,6 +187,10 @@ func (e *dummy) TailStep(_ context.Context, step *backend.Step, taskUUID string)
 	}
 	if stepState != stepStateStarted {
 		return nil, fmt.Errorf("WaitStep expect step '%s' (%s) to be '%s' but it is: %s", step.Name, step.UUID, stepStateStarted, stepState)
+	}
+
+	if tailShouldFail, _ := strconv.ParseBool(step.Environment[EnvKeyStepTailFail]); tailShouldFail {
+		return nil, fmt.Errorf("expected fail to read stdout of step")
 	}
 
 	return io.NopCloser(strings.NewReader(dummyExecStepOutput(step))), nil
