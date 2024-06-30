@@ -9,6 +9,9 @@
   "go.lintTool": "golangci-lint",
   "go.lintFlags": ["--fast"],
   "go.buildTags": "test",
+  "gopls": {
+    "buildFlags": ["-tags=test"]
+  },
   "eslint.workingDirectories": ["./web"],
   "prettier.ignorePath": "./web/.prettierignore",
   // Enable the ESlint flat config support
