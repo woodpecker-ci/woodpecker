@@ -19,7 +19,7 @@ type peery struct {
 	*mocks.Peer
 }
 
-func (p *peery) Done(ctx context.Context, id string, state rpc.State) error {
+func (p *peery) Done(context.Context, string, rpc.State) error {
 	return nil
 }
 
