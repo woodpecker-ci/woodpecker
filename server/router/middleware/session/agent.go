@@ -31,17 +31,14 @@ func AuthorizeAgent(c *gin.Context) {
 		return
 	}
 
-	parsed, err := token.ParseRequest(c.Request, func(_ *token.Token) (string, error) {
+	_, err := token.ParseRequest([]token.Type{token.AgentToken}, c.Request, func(_ *token.Token) (string, error) {
 		return secret, nil
 	})
-	switch {
-	case err != nil:
+	if err != nil {
 		c.String(http.StatusInternalServerError, "invalid or empty token. %s", err)
 		c.Abort()
-	case parsed.Kind != token.AgentToken:
-		c.String(http.StatusForbidden, "invalid token. please use an agent token")
-		c.Abort()
-	default:
-		c.Next()
+		return
 	}
+
+	c.Next()
 }
