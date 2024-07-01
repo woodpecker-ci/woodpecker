@@ -198,7 +198,7 @@ func (c *client) Init(ctx context.Context, workflowID string, state rpc.Workflow
 	return nil
 }
 
-// Done signals the work is complete.
+// Done signals the workflow is complete.
 func (c *client) Done(ctx context.Context, workflowID string, state rpc.WorkflowState) (err error) {
 	retry := c.newBackOff()
 	req := new(proto.DoneRequest)
@@ -270,7 +270,7 @@ func (c *client) Extend(ctx context.Context, workflowID string) (err error) {
 	return nil
 }
 
-// Update updates the state of a step.
+// Update updates the workflow state.
 func (c *client) Update(ctx context.Context, workflowID string, state rpc.StepState) (err error) {
 	retry := c.newBackOff()
 	req := new(proto.UpdateRequest)
@@ -279,6 +279,7 @@ func (c *client) Update(ctx context.Context, workflowID string, state rpc.StepSt
 	req.State.StepUuid = state.StepUUID
 	req.State.Started = state.Started
 	req.State.Finished = state.Finished
+	req.State.Exited = state.Exited
 	req.State.ExitCode = int32(state.ExitCode)
 	req.State.Error = state.Error
 	for {

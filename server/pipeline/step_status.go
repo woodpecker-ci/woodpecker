@@ -16,21 +16,40 @@
 package pipeline
 
 import (
+	"time"
+
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 )
 
-func UpdateStepStatusToRunning(store store.Store, step model.Step, state rpc.StepState) (*model.Step, error) {
-	if step.Finished == 0 && state.Finished == 0 {
+func UpdateStepStatus(store store.Store, step *model.Step, state rpc.StepState) error {
+	if state.Exited {
+		step.Finished = state.Finished
+		step.ExitCode = state.ExitCode
+		step.Error = state.Error
+		step.State = model.StatusSuccess
+		if state.ExitCode != 0 || state.Error != "" {
+			step.State = model.StatusFailure
+		}
+		if state.ExitCode == pipeline.ExitCodeKilled {
+			step.State = model.StatusKilled
+		}
+	} else if step.Finished == 0 {
 		step.Started = state.Started
 		step.State = model.StatusRunning
 	}
+	return store.StepUpdate(step)
+}
+
+func UpdateStepToStatusStarted(store store.Store, step model.Step, state rpc.StepState) (*model.Step, error) {
+	step.Started = state.Started
+	step.State = model.StatusRunning
 	return &step, store.StepUpdate(&step)
 }
 
-func UpdateStepStatusToSkipped(store store.Store, step model.Step, finished int64) (*model.Step, error) {
+func UpdateStepToStatusSkipped(store store.Store, step model.Step, finished int64) (*model.Step, error) {
 	step.State = model.StatusSkipped
 	if step.Started != 0 {
 		step.State = model.StatusSuccess // for daemons that are killed
@@ -50,8 +69,14 @@ func UpdateStepStatusToDone(store store.Store, step model.Step, state rpc.StepSt
 	if state.ExitCode != 0 || state.Error != "" {
 		step.State = model.StatusFailure
 	}
-	if state.ExitCode == pipeline.ExitCodeKilled {
-		step.State = model.StatusKilled
+	return &step, store.StepUpdate(&step)
+}
+
+func UpdateStepToStatusKilled(store store.Store, step model.Step) (*model.Step, error) {
+	step.State = model.StatusKilled
+	step.Finished = time.Now().Unix()
+	if step.Started == 0 {
+		step.Started = step.Finished
 	}
 
 	return &step, store.StepUpdate(&step)

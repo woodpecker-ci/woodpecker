@@ -17,6 +17,7 @@ package pipeline
 
 import (
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -65,6 +66,7 @@ func TestUpdateStepStatusNotExitedButStopped(t *testing.T) {
 
 	// advertised step status
 	state := rpc.StepState{
+		Exited: false,
 		// Dummy data
 		Finished: int64(1),
 		ExitCode: pipeline.ExitCodeKilled,
@@ -143,11 +145,11 @@ func TestUpdateStepStatusExitedWithCode(t *testing.T) {
 	assert.Equal(t, 1, step.ExitCode)
 }
 
-func TestUpdateStepPToStatusStarted(t *testing.T) {
+func TestUpdateStepToStatusStarted(t *testing.T) {
 	t.Parallel()
 
 	state := rpc.StepState{Started: int64(42)}
-	step, _ := UpdateStepStatusToRunning(mockStoreStep(t), model.Step{}, state)
+	step, _ := UpdateStepToStatusStarted(mockStoreStep(t), model.Step{}, state)
 
 	assert.Equal(t, model.StatusRunning, step.State)
 	assert.EqualValues(t, 42, step.Started)
@@ -224,4 +226,25 @@ func TestUpdateStepStatusToDoneFailureWithExitCode(t *testing.T) {
 	step, _ := UpdateStepStatusToDone(mockStoreStep(t), model.Step{}, state)
 
 	assert.Equal(t, model.StatusFailure, step.State)
+}
+
+func TestUpdateStepToStatusKilledStarted(t *testing.T) {
+	t.Parallel()
+
+	now := time.Now().Unix()
+
+	step, _ := UpdateStepToStatusKilled(mockStoreStep(t), model.Step{})
+
+	assert.Equal(t, model.StatusKilled, step.State)
+	assert.LessOrEqual(t, now, step.Finished)
+	assert.Equal(t, step.Finished, step.Started)
+	assert.Equal(t, 137, step.ExitCode)
+}
+
+func TestUpdateStepToStatusKilledNotStarted(t *testing.T) {
+	t.Parallel()
+
+	step, _ := UpdateStepToStatusKilled(mockStoreStep(t), model.Step{Started: int64(1)})
+
+	assert.EqualValues(t, 1, step.Started)
 }

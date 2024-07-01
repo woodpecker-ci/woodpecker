@@ -86,9 +86,9 @@ func (s *WoodpeckerServer) Next(c context.Context, req *proto.NextRequest) (*pro
 
 func (s *WoodpeckerServer) Init(c context.Context, req *proto.InitRequest) (*proto.Empty, error) {
 	state := rpc.WorkflowState{
-		Error:    req.GetState().GetError(),
-		Finished: req.GetState().GetFinished(),
 		Started:  req.GetState().GetStarted(),
+		Finished: req.GetState().GetFinished(),
+		Error:    req.GetState().GetError(),
 	}
 	res := new(proto.Empty)
 	err := s.peer.Init(c, req.GetId(), state)
@@ -98,10 +98,11 @@ func (s *WoodpeckerServer) Init(c context.Context, req *proto.InitRequest) (*pro
 func (s *WoodpeckerServer) Update(c context.Context, req *proto.UpdateRequest) (*proto.Empty, error) {
 	state := rpc.StepState{
 		StepUUID: req.GetState().GetStepUuid(),
-		ExitCode: int(req.GetState().GetExitCode()),
 		Started:  req.GetState().GetStarted(),
 		Finished: req.GetState().GetFinished(),
+		Exited:   req.GetState().GetExited(),
 		Error:    req.GetState().GetError(),
+		ExitCode: int(req.GetState().GetExitCode()),
 	}
 	res := new(proto.Empty)
 	err := s.peer.Update(c, req.GetId(), state)
@@ -110,9 +111,9 @@ func (s *WoodpeckerServer) Update(c context.Context, req *proto.UpdateRequest) (
 
 func (s *WoodpeckerServer) Done(c context.Context, req *proto.DoneRequest) (*proto.Empty, error) {
 	state := rpc.WorkflowState{
-		Error:    req.GetState().GetError(),
-		Finished: req.GetState().GetFinished(),
 		Started:  req.GetState().GetStarted(),
+		Finished: req.GetState().GetFinished(),
+		Error:    req.GetState().GetError(),
 	}
 	res := new(proto.Empty)
 	err := s.peer.Done(c, req.GetId(), state)

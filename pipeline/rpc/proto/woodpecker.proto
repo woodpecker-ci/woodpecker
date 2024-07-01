@@ -43,10 +43,11 @@ service Woodpecker {
 
 message StepState {
   string step_uuid = 1;
-  int32  exit_code = 2;
-  int64  started = 3;
-  int64  finished = 4;
-  string error = 5;
+  int64  started = 2;
+  int64  finished = 3;
+  bool   exited = 4;
+  int32  exit_code = 5;
+  string error = 6;
 }
 
 message WorkflowState {

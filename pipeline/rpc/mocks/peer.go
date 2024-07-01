@@ -183,9 +183,9 @@ func (_m *Peer) UnregisterAgent(ctx context.Context) error {
 	return r0
 }
 
-// Update provides a mock function with given fields: c, stepID, state
-func (_m *Peer) Update(c context.Context, stepID string, state rpc.StepState) error {
-	ret := _m.Called(c, stepID, state)
+// Update provides a mock function with given fields: c, workflowID, state
+func (_m *Peer) Update(c context.Context, workflowID string, state rpc.StepState) error {
+	ret := _m.Called(c, workflowID, state)
 
 	if len(ret) == 0 {
 		panic("no return value specified for Update")
@@ -193,7 +193,7 @@ func (_m *Peer) Update(c context.Context, stepID string, state rpc.StepState) er
 
 	var r0 error
 	if rf, ok := ret.Get(0).(func(context.Context, string, rpc.StepState) error); ok {
-		r0 = rf(c, stepID, state)
+		r0 = rf(c, workflowID, state)
 	} else {
 		r0 = ret.Error(0)
 	}

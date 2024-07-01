@@ -120,6 +120,10 @@ func (r *Runner) Run(runnerCtx context.Context) error { //nolint:contextcheck
 
 			case <-time.After(time.Minute):
 				logger.Debug().Msg("pipeline lease renewed")
+<<<<<<< HEAD
+=======
+
+>>>>>>> upstream/main
 				if err := r.client.Extend(workflowCtx, workflow.ID); err != nil {
 					log.Error().Err(err).Msg("extending pipeline deadline failed")
 				}
@@ -132,7 +136,8 @@ func (r *Runner) Run(runnerCtx context.Context) error { //nolint:contextcheck
 
 	err = r.client.Init(runnerCtx, workflow.ID, state)
 	if err != nil {
-		logger.Error().Err(err).Msg("pipeline initialization failed")
+		logger.Error().Err(err).Msg("workflow initialization failed")
+		// TODO: should we return here?
 	}
 
 	var uploads sync.WaitGroup
@@ -144,9 +149,9 @@ func (r *Runner) Run(runnerCtx context.Context) error { //nolint:contextcheck
 		pipeline.WithTracer(r.createTracer(ctxMeta, &uploads, logger, workflow)),
 		pipeline.WithBackend(*r.backend),
 		pipeline.WithDescription(map[string]string{
-			"ID":       workflow.ID,
-			"Repo":     repoName,
-			"Pipeline": pipelineNumber,
+			"workflow_id":     workflow.ID,
+			"repo":            repoName,
+			"pipeline_number": pipelineNumber,
 		}),
 	).Run(runnerCtx)
 

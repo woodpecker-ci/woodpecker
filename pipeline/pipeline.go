@@ -38,7 +38,7 @@ type (
 		// Global state of the pipeline.
 		Pipeline struct {
 			// Pipeline time started
-			Time int64 `json:"time"`
+			Started int64 `json:"time"`
 			// Current pipeline step
 			Step *backend.Step `json:"step"`
 			// Current pipeline error state
@@ -147,7 +147,7 @@ func (r *Runtime) traceStep(processState *backend.State, err error, step *backen
 	}
 
 	state := new(State)
-	state.Pipeline.Time = r.started
+	state.Pipeline.Started = r.started
 	state.Pipeline.Step = step
 	state.Process = processState // empty
 	state.Pipeline.Error = r.err

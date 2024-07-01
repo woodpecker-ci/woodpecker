@@ -32,11 +32,12 @@ type (
 		StepUUID string `json:"step_uuid"`
 		Started  int64  `json:"started"`
 		Finished int64  `json:"finished"`
+		Exited   bool   `json:"exited"`
 		ExitCode int    `json:"exit_code"`
 		Error    string `json:"error"`
 	}
 
-	// WorkflowState
+	// WorkflowState defines the workflow state.
 	WorkflowState struct {
 		Started  int64  `json:"started"`
 		Finished int64  `json:"finished"`
@@ -78,8 +79,8 @@ type Peer interface {
 	// Extend extends the workflow deadline
 	Extend(c context.Context, workflowID string) error
 
-	// Update updates the state of a step
-	Update(c context.Context, stepID string, state StepState) error
+	// Update updates the step state
+	Update(c context.Context, workflowID string, state StepState) error
 
 	// Log writes the step log entry
 	Log(c context.Context, logEntry *LogEntry) error

@@ -36,7 +36,7 @@ func (r *Runner) createLogger(_logger zerolog.Logger, uploads *sync.WaitGroup, w
 	return func(step *backend.Step, rc io.Reader) error {
 		logger := _logger.With().
 			Str("image", step.Image).
-			Str("workflowID", workflow.ID).
+			Str("workflow_id", workflow.ID).
 			Logger()
 
 		uploads.Add(1)
