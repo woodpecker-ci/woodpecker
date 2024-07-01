@@ -277,7 +277,7 @@ func convertPathForWindows(path string) string {
 }
 
 const maxLogLineLength = 1024 * 1024 // 1mb
-var defaultLogger = pipeline.Logger(func(step *backendTypes.Step, rc io.Reader) error {
+var defaultLogger = pipeline.Logger(func(step *backendTypes.Step, rc io.ReadCloser) error {
 	logWriter := NewLineWriter(step.Name, step.UUID)
 	return pipelineLog.CopyLineByLine(logWriter, rc, maxLogLineLength)
 })
