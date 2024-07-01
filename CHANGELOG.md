@@ -1,6 +1,6 @@
 # Changelog
 
-## [2.7.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.7.0) - 2024-06-29
+## [2.7.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.7.0) - 2024-07-01
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -44,6 +44,7 @@
 
 ### Misc
 
+- Add dummy backend [[#3820](https://github.com/woodpecker-ci/woodpecker/pull/3820)]
 - chore(deps): update dependency replace-in-file to v8 [[#3852](https://github.com/woodpecker-ci/woodpecker/pull/3852)]
 - Update forgejo sdk [[#3840](https://github.com/woodpecker-ci/woodpecker/pull/3840)]
 - chore(deps): lock file maintenance [[#3838](https://github.com/woodpecker-ci/woodpecker/pull/3838)]
