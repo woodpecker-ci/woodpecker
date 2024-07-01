@@ -26,7 +26,7 @@ import (
 func (s storage) PermFind(user *model.User, repo *model.Repo) (*model.Perm, error) {
 	perm := new(model.Perm)
 	return perm, wrapGet(s.engine.
-		Where(builder.Eq{"perm_user_id": user.ID, "perm_repo_id": repo.ID}).
+		Where(builder.Eq{"user_id": user.ID, "repo_id": repo.ID}).
 		Get(perm))
 }
 
@@ -75,11 +75,11 @@ func (s storage) permUpsert(sess *xorm.Session, perm *model.Perm) error {
 // userPushOrAdminCondition return condition where user must have push or admin rights
 // if used make sure to have permission table ("perms") joined.
 func userPushOrAdminCondition(userID int64) builder.Cond {
-	return builder.Eq{"perms.perm_user_id": userID}.
-		And(builder.Eq{"perms.perm_push": true}.
-			Or(builder.Eq{"perms.perm_admin": true}))
+	return builder.Eq{"perms.user_id": userID}.
+		And(builder.Eq{"perms.push": true}.
+			Or(builder.Eq{"perms.admin": true}))
 }
 
 func userIDAndRepoIDCond(perm *model.Perm) builder.Cond {
-	return builder.Eq{"perm_user_id": perm.UserID, "perm_repo_id": perm.RepoID}
+	return builder.Eq{"user_id": perm.UserID, "repo_id": perm.RepoID}
 }

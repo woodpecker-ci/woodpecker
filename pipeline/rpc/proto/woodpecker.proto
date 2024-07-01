@@ -41,10 +41,16 @@ service Woodpecker {
 // Basic Types
 //
 
-message State {
+message StepState {
   string step_uuid = 1;
-  bool   exited = 2;
-  int32  exit_code = 3;
+  int64  started = 2;
+  int64  finished = 3;
+  bool   exited = 4;
+  int32  exit_code = 5;
+  string error = 6;
+}
+
+message WorkflowState {
   int64  started = 4;
   int64  finished = 5;
   string error = 6;
@@ -78,7 +84,7 @@ message NextRequest {
 
 message InitRequest {
   string id = 1;
-  State  state = 2;
+  WorkflowState state = 2;
 }
 
 message WaitRequest {
@@ -87,7 +93,7 @@ message WaitRequest {
 
 message DoneRequest {
   string id = 1;
-  State  state = 2;
+  WorkflowState state = 2;
 }
 
 message ExtendRequest {
@@ -96,7 +102,7 @@ message ExtendRequest {
 
 message UpdateRequest {
   string id = 1;
-  State  state = 2;
+  StepState state = 2;
 }
 
 message LogRequest {

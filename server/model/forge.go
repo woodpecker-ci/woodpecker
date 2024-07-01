@@ -37,6 +37,11 @@ type Forge struct {
 	AdditionalOptions map[string]any `json:"additional_options,omitempty" xorm:"json"`
 } //	@name Forge
 
+// TableName returns the database table name for xorm.
+func (Forge) TableName() string {
+	return "forges"
+}
+
 // PublicCopy returns a copy of the forge without sensitive information and technical details.
 func (f *Forge) PublicCopy() *Forge {
 	forge := &Forge{

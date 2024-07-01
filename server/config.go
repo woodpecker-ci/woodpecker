@@ -38,6 +38,7 @@ var Config = struct {
 		LogStore   log.Service
 	}
 	Server struct {
+		JWTSecret           string
 		Key                 string
 		Cert                string
 		OAuthHost           string

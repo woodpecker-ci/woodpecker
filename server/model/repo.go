@@ -22,32 +22,32 @@ import (
 
 // Repo represents a repository.
 type Repo struct {
-	ID      int64 `json:"id,omitempty"                    xorm:"pk autoincr 'repo_id'"`
-	UserID  int64 `json:"-"                               xorm:"repo_user_id"`
+	ID      int64 `json:"id,omitempty"                    xorm:"pk autoincr 'id'"`
+	UserID  int64 `json:"-"                               xorm:"user_id"`
 	ForgeID int64 `json:"forge_id,omitempty"              xorm:"forge_id"`
 	// ForgeRemoteID is the unique identifier for the repository on the forge.
 	ForgeRemoteID                ForgeRemoteID  `json:"forge_remote_id"                 xorm:"forge_remote_id"`
-	OrgID                        int64          `json:"org_id"                          xorm:"repo_org_id"`
-	Owner                        string         `json:"owner"                           xorm:"UNIQUE(name) 'repo_owner'"`
-	Name                         string         `json:"name"                            xorm:"UNIQUE(name) 'repo_name'"`
-	FullName                     string         `json:"full_name"                       xorm:"UNIQUE 'repo_full_name'"`
-	Avatar                       string         `json:"avatar_url,omitempty"            xorm:"varchar(500) 'repo_avatar'"`
-	ForgeURL                     string         `json:"forge_url,omitempty"             xorm:"varchar(1000) 'repo_forge_url'"`
-	Clone                        string         `json:"clone_url,omitempty"             xorm:"varchar(1000) 'repo_clone'"`
-	CloneSSH                     string         `json:"clone_url_ssh"                   xorm:"varchar(1000) 'repo_clone_ssh'"`
-	Branch                       string         `json:"default_branch,omitempty"        xorm:"varchar(500) 'repo_branch'"`
-	SCMKind                      SCMKind        `json:"scm,omitempty"                   xorm:"varchar(50) 'repo_scm'"`
-	PREnabled                    bool           `json:"pr_enabled"                      xorm:"DEFAULT TRUE 'repo_pr_enabled'"`
-	Timeout                      int64          `json:"timeout,omitempty"               xorm:"repo_timeout"`
-	Visibility                   RepoVisibility `json:"visibility"                      xorm:"varchar(10) 'repo_visibility'"`
-	IsSCMPrivate                 bool           `json:"private"                         xorm:"repo_private"`
-	IsTrusted                    bool           `json:"trusted"                         xorm:"repo_trusted"`
-	IsGated                      bool           `json:"gated"                           xorm:"repo_gated"`
-	IsActive                     bool           `json:"active"                          xorm:"repo_active"`
-	AllowPull                    bool           `json:"allow_pr"                        xorm:"repo_allow_pr"`
-	AllowDeploy                  bool           `json:"allow_deploy"                    xorm:"repo_allow_deploy"`
-	Config                       string         `json:"config_file"                     xorm:"varchar(500) 'repo_config_path'"`
-	Hash                         string         `json:"-"                               xorm:"varchar(500) 'repo_hash'"`
+	OrgID                        int64          `json:"org_id"                          xorm:"org_id"`
+	Owner                        string         `json:"owner"                           xorm:"UNIQUE(name) 'owner'"`
+	Name                         string         `json:"name"                            xorm:"UNIQUE(name) 'name'"`
+	FullName                     string         `json:"full_name"                       xorm:"UNIQUE 'full_name'"`
+	Avatar                       string         `json:"avatar_url,omitempty"            xorm:"varchar(500) 'avatar'"`
+	ForgeURL                     string         `json:"forge_url,omitempty"             xorm:"varchar(1000) 'forge_url'"`
+	Clone                        string         `json:"clone_url,omitempty"             xorm:"varchar(1000) 'clone'"`
+	CloneSSH                     string         `json:"clone_url_ssh"                   xorm:"varchar(1000) 'clone_ssh'"`
+	Branch                       string         `json:"default_branch,omitempty"        xorm:"varchar(500) 'branch'"`
+	SCMKind                      SCMKind        `json:"scm,omitempty"                   xorm:"varchar(50) 'scm'"`
+	PREnabled                    bool           `json:"pr_enabled"                      xorm:"DEFAULT TRUE 'pr_enabled'"`
+	Timeout                      int64          `json:"timeout,omitempty"               xorm:"timeout"`
+	Visibility                   RepoVisibility `json:"visibility"                      xorm:"varchar(10) 'visibility'"`
+	IsSCMPrivate                 bool           `json:"private"                         xorm:"private"`
+	IsTrusted                    bool           `json:"trusted"                         xorm:"trusted"`
+	IsGated                      bool           `json:"gated"                           xorm:"gated"`
+	IsActive                     bool           `json:"active"                          xorm:"active"`
+	AllowPull                    bool           `json:"allow_pr"                        xorm:"allow_pr"`
+	AllowDeploy                  bool           `json:"allow_deploy"                    xorm:"allow_deploy"`
+	Config                       string         `json:"config_file"                     xorm:"varchar(500) 'config_path'"`
+	Hash                         string         `json:"-"                               xorm:"varchar(500) 'hash'"`
 	Perm                         *Perm          `json:"-"                               xorm:"-"`
 	CancelPreviousPipelineEvents []WebhookEvent `json:"cancel_previous_pipeline_events" xorm:"json 'cancel_previous_pipeline_events'"`
 	NetrcOnlyTrusted             bool           `json:"netrc_only_trusted"              xorm:"NOT NULL DEFAULT true 'netrc_only_trusted'"`

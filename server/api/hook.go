@@ -105,7 +105,7 @@ func BlockTilQueueHasRunningItem(c *gin.Context) {
 func PostHook(c *gin.Context) {
 	_store := store.FromContext(c)
 
-	_forge, err := server.Config.Services.Manager.ForgeMain() // TODO: get the forge for the specific repo somehow
+	_forge, err := server.Config.Services.Manager.ForgeByID(1) // TODO: get the forge for the specific repo somehow
 	if err != nil {
 		log.Error().Err(err).Msg("Cannot get main forge")
 		c.AbortWithStatus(http.StatusInternalServerError)
@@ -179,7 +179,7 @@ func PostHook(c *gin.Context) {
 	//
 
 	// get the token and verify the hook is authorized
-	parsedToken, err := token.ParseRequest(c.Request, func(_ *token.Token) (string, error) {
+	parsedToken, err := token.ParseRequest([]token.Type{token.HookToken}, c.Request, func(_ *token.Token) (string, error) {
 		return repo.Hash, nil
 	})
 	if err != nil {
