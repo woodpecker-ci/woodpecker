@@ -20,7 +20,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 )
 
-func UpdateWorkflowToStatusStarted(store store.Store, workflow model.Workflow, state rpc.State) (*model.Workflow, error) {
+func UpdateWorkflowStatusToRunning(store store.Store, workflow model.Workflow, state rpc.WorkflowState) (*model.Workflow, error) {
 	workflow.Started = state.Started
 	workflow.State = model.StatusRunning
 	return &workflow, store.WorkflowUpdate(&workflow)
@@ -31,8 +31,8 @@ func UpdateWorkflowToStatusSkipped(store store.Store, workflow model.Workflow) (
 	return &workflow, store.WorkflowUpdate(&workflow)
 }
 
-func UpdateWorkflowStatusToDone(store store.Store, workflow model.Workflow, state rpc.State) (*model.Workflow, error) {
-	workflow.Stopped = state.Finished
+func UpdateWorkflowStatusToDone(store store.Store, workflow model.Workflow, state rpc.WorkflowState) (*model.Workflow, error) {
+	workflow.Finished = state.Finished
 	workflow.Error = state.Error
 	if state.Started == 0 {
 		workflow.State = model.StatusSkipped
