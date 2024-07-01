@@ -73,9 +73,9 @@ There are also environment variables to alter step behaviour:
 
 - `SLEEP: 10` will let the step wait 10 seconds
 - `EXPECT_TYPE` allows to check if a step is a `clone`, `service`, `plugin` or `commands`
-- `STEP_START_FAIL: true` if set will simulate a step to fail before actually started (e.g. happens when the container image can not be pulled)
+- `STEP_START_FAIL: true` if set will simulate a step to fail before actually being started (e.g. happens when the container image can not be pulled)
 - `STEP_TAIL_FAIL: true` if set will error when we simulate to read from stdout for logs
 - `STEP_EXIT_CODE: 2` if set will be used as exit code, default is 0
-- `STEP_OOM_KILLED: true` simulate a step who got killed because of memory constrains
+- `STEP_OOM_KILLED: true` simulates a step being killed by memory constrains
 
-Also for the whole workflow if you set it's UUID ot `WorkflowSetupShouldFail`, you can fail a workflow setup fail.
+You can let the setup of a whole workflow fail by setting it's UUID to `WorkflowSetupShouldFail`.
