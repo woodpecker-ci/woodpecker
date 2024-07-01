@@ -9,7 +9,7 @@
   "go.lintTool": "golangci-lint",
   "go.lintFlags": ["--fast"],
   "go.buildTags": "test",
-  "gopls": {
+  "gopls": { // cspell:words gopls
     "buildFlags": ["-tags=test"]
   },
   "eslint.workingDirectories": ["./web"],
