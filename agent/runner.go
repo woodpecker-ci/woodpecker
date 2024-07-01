@@ -120,10 +120,6 @@ func (r *Runner) Run(runnerCtx context.Context) error { //nolint:contextcheck
 
 			case <-time.After(time.Minute):
 				logger.Debug().Msg("pipeline lease renewed")
-<<<<<<< HEAD
-=======
-
->>>>>>> upstream/main
 				if err := r.client.Extend(workflowCtx, workflow.ID); err != nil {
 					log.Error().Err(err).Msg("extending pipeline deadline failed")
 				}
