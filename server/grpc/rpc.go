@@ -93,6 +93,17 @@ func (s *RPC) Wait(c context.Context, workflowID string) error {
 
 // Extend extends the lease for the workflow with the given ID.
 func (s *RPC) Extend(c context.Context, workflowID string) error {
+	agent, err := s.getAgentFromContext(c)
+	if err != nil {
+		return err
+	}
+
+	agent.LastWork = time.Now().Unix()
+	err = s.store.AgentUpdate(agent)
+	if err != nil {
+		return err
+	}
+
 	return s.queue.Extend(c, workflowID)
 }
 
@@ -226,7 +237,8 @@ func (s *RPC) Init(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 	}
 	s.updateForgeStatus(c, repo, currentPipeline, workflow)
 
-	return nil
+	agent.LastWork = time.Now().Unix()
+	return s.store.AgentUpdate(agent)
 }
 
 // Done marks the workflow with the given ID as done.
@@ -315,7 +327,12 @@ func (s *RPC) Done(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 		s.pipelineTime.WithLabelValues(repo.FullName, currentPipeline.Branch, string(workflow.State), workflow.Name).Set(float64(workflow.Finished - workflow.Started))
 	}
 
-	return nil
+	agent, err := s.getAgentFromContext(c)
+	if err != nil {
+		return err
+	}
+	agent.LastWork = time.Now().Unix()
+	return s.store.AgentUpdate(agent)
 }
 
 // Log writes a log entry to the database and publishes it to the pubsub.
@@ -332,6 +349,7 @@ func (s *RPC) Log(c context.Context, rpcLogEntry *rpc.LogEntry) error {
 		Data:   rpcLogEntry.Data,
 		Type:   model.LogEntryType(rpcLogEntry.Type),
 	}
+
 	// make sure writes to pubsub are non blocking (https://github.com/woodpecker-ci/woodpecker/blob/c919f32e0b6432a95e1a6d3d0ad662f591adf73f/server/logging/log.go#L9)
 	go func() {
 		// write line to listening web clients
@@ -339,6 +357,16 @@ func (s *RPC) Log(c context.Context, rpcLogEntry *rpc.LogEntry) error {
 			log.Error().Err(err).Msgf("rpc server could not write to logger")
 		}
 	}()
+
+	agent, err := s.getAgentFromContext(c)
+	if err != nil {
+		return err
+	}
+	agent.LastWork = time.Now().Unix()
+	if err := s.store.AgentUpdate(agent); err != nil {
+		return err
+	}
+
 	return server.Config.Services.LogStore.LogAppend(logEntry)
 }
 

@@ -144,3 +144,18 @@ func TestCopyLineByLineSizeLimit(t *testing.T) {
 
 	wg.Wait()
 }
+
+func TestStringReader(t *testing.T) {
+	r := io.NopCloser(strings.NewReader("123\n4567\n890"))
+
+	testWriter := &testWriter{
+		Mutex:  &sync.Mutex{},
+		writes: make([]string, 0),
+	}
+
+	err := log.CopyLineByLine(testWriter, r, 1024)
+	assert.NoError(t, err)
+
+	writes := testWriter.GetWrites()
+	assert.Lenf(t, writes, 3, "expected 3 writes, got: %v", writes)
+}
