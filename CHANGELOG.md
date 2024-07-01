@@ -19,6 +19,8 @@
 
 ### 📈 Enhancement
 
+- Add timestamp for last work done by agent [[#3844](https://github.com/woodpecker-ci/woodpecker/pull/3844)]
+- Adjust logger types [[#3859](https://github.com/woodpecker-ci/woodpecker/pull/3859)]
 - Cleanup state reporting [[#3850](https://github.com/woodpecker-ci/woodpecker/pull/3850)]
 - Unify DB tables/columns [[#3806](https://github.com/woodpecker-ci/woodpecker/pull/3806)]
 - Let webhook pass on pipeline parsion error [[#3829](https://github.com/woodpecker-ci/woodpecker/pull/3829)]
