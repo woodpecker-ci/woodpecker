@@ -22,6 +22,7 @@ import (
 
 	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
 	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker"
 )
 
 var registryInfoCmd = &cli.Command{
@@ -30,6 +31,11 @@ var registryInfoCmd = &cli.Command{
 	ArgsUsage: "[repo-id|repo-full-name]",
 	Action:    registryInfo,
 	Flags: []cli.Flag{
+		&cli.BoolFlag{
+			Name:  "global",
+			Usage: "global registry",
+		},
+		common.OrgFlag,
 		common.RepoFlag,
 		&cli.StringFlag{
 			Name:  "hostname",
@@ -42,25 +48,39 @@ var registryInfoCmd = &cli.Command{
 
 func registryInfo(c *cli.Context) error {
 	var (
-		hostname         = c.String("hostname")
-		repoIDOrFullName = c.String("repository")
-		format           = c.String("format") + "\n"
+		hostname = c.String("hostname")
+		format   = c.String("format") + "\n"
 	)
-	if repoIDOrFullName == "" {
-		repoIDOrFullName = c.Args().First()
-	}
+
 	client, err := internal.NewClient(c)
 	if err != nil {
 		return err
 	}
-	repoID, err := internal.ParseRepo(client, repoIDOrFullName)
+
+	global, orgID, repoID, err := parseTargetArgs(client, c)
 	if err != nil {
 		return err
 	}
-	registry, err := client.Registry(repoID, hostname)
-	if err != nil {
-		return err
+
+	var registry *woodpecker.Registry
+	switch {
+	case global:
+		registry, err = client.GlobalRegistry(hostname)
+		if err != nil {
+			return err
+		}
+	case orgID != -1:
+		registry, err = client.Registry(orgID, hostname)
+		if err != nil {
+			return err
+		}
+	default:
+		registry, err = client.Registry(repoID, hostname)
+		if err != nil {
+			return err
+		}
 	}
+
 	tmpl, err := template.New("_").Parse(format)
 	if err != nil {
 		return err

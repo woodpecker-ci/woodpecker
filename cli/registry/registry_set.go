@@ -31,6 +31,11 @@ var registryUpdateCmd = &cli.Command{
 	ArgsUsage: "[repo-id|repo-full-name]",
 	Action:    registryUpdate,
 	Flags: []cli.Flag{
+		&cli.BoolFlag{
+			Name:  "global",
+			Usage: "global registry",
+		},
+		common.OrgFlag,
 		common.RepoFlag,
 		&cli.StringFlag{
 			Name:  "hostname",
@@ -50,22 +55,16 @@ var registryUpdateCmd = &cli.Command{
 
 func registryUpdate(c *cli.Context) error {
 	var (
-		hostname         = c.String("hostname")
-		username         = c.String("username")
-		password         = c.String("password")
-		repoIDOrFullName = c.String("repository")
+		hostname = c.String("hostname")
+		username = c.String("username")
+		password = c.String("password")
 	)
-	if repoIDOrFullName == "" {
-		repoIDOrFullName = c.Args().First()
-	}
+
 	client, err := internal.NewClient(c)
 	if err != nil {
 		return err
 	}
-	repoID, err := internal.ParseRepo(client, repoIDOrFullName)
-	if err != nil {
-		return err
-	}
+
 	registry := &woodpecker.Registry{
 		Address:  hostname,
 		Username: username,
@@ -78,6 +77,20 @@ func registryUpdate(c *cli.Context) error {
 			return err
 		}
 		registry.Password = string(out)
+	}
+
+	global, orgID, repoID, err := parseTargetArgs(client, c)
+	if err != nil {
+		return err
+	}
+
+	if global {
+		_, err = client.GlobalRegistryUpdate(registry)
+		return err
+	}
+	if orgID != -1 {
+		_, err = client.OrgRegistryUpdate(orgID, registry)
+		return err
 	}
 	_, err = client.RegistryUpdate(repoID, registry)
 	return err

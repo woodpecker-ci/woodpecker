@@ -27,6 +27,11 @@ var registryDeleteCmd = &cli.Command{
 	ArgsUsage: "[repo-id|repo-full-name]",
 	Action:    registryDelete,
 	Flags: []cli.Flag{
+		&cli.BoolFlag{
+			Name:  "global",
+			Usage: "global registry",
+		},
+		common.OrgFlag,
 		common.RepoFlag,
 		&cli.StringFlag{
 			Name:  "hostname",
@@ -37,20 +42,23 @@ var registryDeleteCmd = &cli.Command{
 }
 
 func registryDelete(c *cli.Context) error {
-	var (
-		hostname         = c.String("hostname")
-		repoIDOrFullName = c.String("repository")
-	)
-	if repoIDOrFullName == "" {
-		repoIDOrFullName = c.Args().First()
-	}
+	hostname := c.String("hostname")
+
 	client, err := internal.NewClient(c)
 	if err != nil {
 		return err
 	}
-	repoID, err := internal.ParseRepo(client, repoIDOrFullName)
+
+	global, orgID, repoID, err := parseTargetArgs(client, c)
 	if err != nil {
 		return err
+	}
+
+	if global {
+		return client.GlobalRegistryDelete(hostname)
+	}
+	if orgID != -1 {
+		return client.OrgRegistryDelete(orgID, hostname)
 	}
 	return client.RegistryDelete(repoID, hostname)
 }

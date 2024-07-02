@@ -31,6 +31,11 @@ var registryCreateCmd = &cli.Command{
 	ArgsUsage: "[repo-id|repo-full-name]",
 	Action:    registryCreate,
 	Flags: []cli.Flag{
+		&cli.BoolFlag{
+			Name:  "global",
+			Usage: "global registry",
+		},
+		common.OrgFlag,
 		common.RepoFlag,
 		&cli.StringFlag{
 			Name:  "hostname",
@@ -62,10 +67,6 @@ func registryCreate(c *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	repoID, err := internal.ParseRepo(client, repoIDOrFullName)
-	if err != nil {
-		return err
-	}
 	registry := &woodpecker.Registry{
 		Address:  hostname,
 		Username: username,
@@ -79,6 +80,22 @@ func registryCreate(c *cli.Context) error {
 		}
 		registry.Password = string(out)
 	}
+
+	global, orgID, repoID, err := parseTargetArgs(client, c)
+	if err != nil {
+		return err
+	}
+
+	if global {
+		_, err = client.GlobalRegistryCreate(registry)
+		return err
+	}
+
+	if orgID != -1 {
+		_, err = client.OrgRegistryCreate(orgID, registry)
+		return err
+	}
+
 	if _, err := client.RegistryCreate(repoID, registry); err != nil {
 		return err
 	}
