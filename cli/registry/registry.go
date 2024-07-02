@@ -20,6 +20,7 @@ import (
 	"strings"
 
 	"github.com/urfave/cli/v2"
+
 	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
 	"go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker"
 )

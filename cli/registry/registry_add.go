@@ -55,14 +55,11 @@ var registryCreateCmd = &cli.Command{
 
 func registryCreate(c *cli.Context) error {
 	var (
-		hostname         = c.String("hostname")
-		username         = c.String("username")
-		password         = c.String("password")
-		repoIDOrFullName = c.String("repository")
+		hostname = c.String("hostname")
+		username = c.String("username")
+		password = c.String("password")
 	)
-	if repoIDOrFullName == "" {
-		repoIDOrFullName = c.Args().First()
-	}
+
 	client, err := internal.NewClient(c)
 	if err != nil {
 		return err
