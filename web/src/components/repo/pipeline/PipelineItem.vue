@@ -40,10 +40,14 @@
             <Badge :label="pipeline.commit.slice(0, 7)" />
           </a>
 
-          <span>pushed to</span>
-          <Badge :label="prettyRef" />
-          <span class="truncate">by {{ pipeline.author }}</span>
-          <span v-if="title" class="truncate">({{ title }})</span>
+          <span v-if="pipeline.event === 'pull_request' || pipeline.event === 'push'">{{ $t('pushed_to') }}</span>
+          <span v-if="pipeline.event === 'pull_request_closed'">{{ $t('closed') }}</span>
+          <span v-if="pipeline.event === 'deployment'">{{ $t('deployed_to') }}</span>
+          <span v-if="pipeline.event === 'tag' || pipeline.event === 'release'">{{ $t('created') }}</span>
+          <span v-if="pipeline.event === 'cron' || pipeline.event === 'manual'">{{ $t('triggered') }}</span>
+          <span v-else>{{ $t('triggered') }}</span>
+          <Badge v-if="prettyRef" :title="title" :label="title ? `${prettyRef} (${truncate(title, 30)})` : prettyRef " />
+          <span class="truncate">{{ $t('by_user', { user: pipeline.author }) }}</span>
         </div>
       </div>
 
@@ -78,6 +82,7 @@ import PipelineRunningIcon from '~/components/repo/pipeline/PipelineRunningIcon.
 import PipelineStatusIcon from '~/components/repo/pipeline/PipelineStatusIcon.vue';
 import usePipeline from '~/compositions/usePipeline';
 import type { Pipeline } from '~/lib/api/types';
+import { truncate } from '~/utils/locale';
 
 const props = defineProps<{
   pipeline: Pipeline;
