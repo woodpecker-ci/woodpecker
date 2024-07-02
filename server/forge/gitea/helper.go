@@ -163,17 +163,17 @@ func pipelineFromPullRequest(hook *pullRequestHook) *model.Pipeline {
 	}
 
 	pipeline := &model.Pipeline{
-		Event:     event,
-		Commit:    hook.PullRequest.Head.Sha,
-		ForgeURL:  hook.PullRequest.HTMLURL,
-		Ref:       fmt.Sprintf("refs/pull/%d/head", hook.Number),
-		Branch:    hook.PullRequest.Base.Ref,
-		PRContext: hook.PullRequest.Title + "\n" + hook.PullRequest.Body,
-		Message:   "", // TODO: get commit message from last commit
-		Author:    hook.PullRequest.Poster.UserName,
-		Avatar:    avatar,
-		Sender:    hook.Sender.UserName,
-		Email:     hook.Sender.Email,
+		Event:              event,
+		Commit:             hook.PullRequest.Head.Sha,
+		ForgeURL:           hook.PullRequest.HTMLURL,
+		Ref:                fmt.Sprintf("refs/pull/%d/head", hook.Number),
+		Branch:             hook.PullRequest.Base.Ref,
+		PRTitleDescription: hook.PullRequest.Title + "\n" + hook.PullRequest.Body,
+		Message:            "", // TODO: get commit message from last commit
+		Author:             hook.PullRequest.Poster.UserName,
+		Avatar:             avatar,
+		Sender:             hook.Sender.UserName,
+		Email:              hook.Sender.Email,
 		Refspec: fmt.Sprintf("%s:%s",
 			hook.PullRequest.Head.Ref,
 			hook.PullRequest.Base.Ref,

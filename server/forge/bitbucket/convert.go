@@ -176,14 +176,14 @@ func convertPullHook(from *internal.PullRequestHook) *model.Pipeline {
 			from.PullRequest.Source.Branch.Name,
 			from.PullRequest.Dest.Branch.Name,
 		),
-		ForgeURL:  from.PullRequest.Links.HTML.Href,
-		Branch:    from.PullRequest.Dest.Branch.Name,
-		PRContext: from.PullRequest.Title + "\n" + from.PullRequest.Desc,
-		Message:   "", // TODO: get last commit message
-		Avatar:    from.Actor.Links.Avatar.Href,
-		Author:    from.Actor.Login,
-		Sender:    from.Actor.Login,
-		Timestamp: from.PullRequest.Updated.UTC().Unix(),
+		ForgeURL:           from.PullRequest.Links.HTML.Href,
+		Branch:             from.PullRequest.Dest.Branch.Name,
+		PRTitleDescription: from.PullRequest.Title + "\n" + from.PullRequest.Desc,
+		Message:            "", // TODO: get last commit message
+		Avatar:             from.Actor.Links.Avatar.Href,
+		Author:             from.Actor.Login,
+		Sender:             from.Actor.Login,
+		Timestamp:          from.PullRequest.Updated.UTC().Unix(),
 	}
 }
 

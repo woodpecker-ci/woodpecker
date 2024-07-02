@@ -28,7 +28,7 @@
           <span class="flex-shrink-0 text-center">{{ $t('repo.pipeline.pipeline', { pipelineId }) }}</span>
           <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
           <span class="hidden md:inline-block">-</span>
-          <span class="min-w-0 whitespace-nowrap overflow-hidden overflow-ellipsis" :title="message">{{ title }}</span>
+          <span class="min-w-0 whitespace-nowrap overflow-hidden overflow-ellipsis" :title="message">{{ shortMessage }}</span>
         </div>
 
         <template v-if="repoPermissions!.push && pipeline.status !== 'declined' && pipeline.status !== 'blocked'">
@@ -140,7 +140,7 @@ if (!repo || !repoPermissions) {
 }
 
 const pipeline = pipelineStore.getPipeline(repositoryId, pipelineId);
-const { since, duration, created, message, title } = usePipeline(pipeline);
+const { since, duration, created, message, shortMessage } = usePipeline(pipeline);
 provide('pipeline', pipeline);
 
 const pipelineConfigs = ref<PipelineConfig[]>();

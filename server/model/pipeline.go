@@ -38,7 +38,7 @@ type Pipeline struct {
 	Branch              string                 `json:"branch"                  xorm:"branch"`
 	Ref                 string                 `json:"ref"                     xorm:"ref"`
 	Refspec             string                 `json:"refspec"                 xorm:"refspec"`
-	PRContext           string                 `json:"title"                   xorm:"title"`
+	PRTitleDescription  string                 `json:"title"                   xorm:"title"`
 	Message             string                 `json:"message"                 xorm:"TEXT 'message'"`
 	Timestamp           int64                  `json:"timestamp"               xorm:"'timestamp'"`
 	Sender              string                 `json:"sender"                  xorm:"sender"` // uses reported user for webhooks and name of cron for cron pipelines

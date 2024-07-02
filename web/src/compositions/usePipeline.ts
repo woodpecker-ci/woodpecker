@@ -77,7 +77,8 @@ export default (pipeline: Ref<Pipeline | undefined>) => {
   const message = computed(() => convertEmojis(pipeline.value?.message ?? ''));
   const shortMessage = computed(() => message.value.split('\n')[0]);
 
-  const title = computed(() => convertEmojis(pipeline.value?.title ?? ''));
+  const prTitleWithDescription = computed(() => convertEmojis(pipeline.value?.title ?? ''));
+  const prTitle = computed(() => prTitleWithDescription.value.split('\n')[0]);
 
   const prettyRef = computed(() => {
     if (pipeline.value?.event === 'push' || pipeline.value?.event === 'deployment') {
@@ -113,5 +114,5 @@ export default (pipeline: Ref<Pipeline | undefined>) => {
     return toLocaleString(new Date(start * 1000));
   });
 
-  return { since, duration, message, shortMessage, title, prettyRef, created };
+  return { since, duration, message, shortMessage, prTitle, prTitleWithDescription, prettyRef, created };
 };

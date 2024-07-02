@@ -119,17 +119,17 @@ func convertRepositoryPushEvent(ev *bb.RepositoryPushEvent, baseURL string) *mod
 
 func convertPullRequestEvent(ev *bb.PullRequestEvent, baseURL string) *model.Pipeline {
 	pipeline := &model.Pipeline{
-		Commit:    ev.PullRequest.Source.Latest,
-		Branch:    ev.PullRequest.Source.DisplayID,
-		PRContext: ev.PullRequest.Title,
-		Message:   "", // TODO: get message from last commit to pr
-		Avatar:    bitbucketAvatarURL(baseURL, ev.Actor.Slug),
-		Author:    authorLabel(ev.Actor.Name),
-		Email:     ev.Actor.Email,
-		Timestamp: time.Time(ev.Date).UTC().Unix(),
-		Ref:       fmt.Sprintf("refs/pull-requests/%d/from", ev.PullRequest.ID),
-		ForgeURL:  fmt.Sprintf("%s/projects/%s/repos/%s/commits/%s", baseURL, ev.PullRequest.Source.Repository.Project.Key, ev.PullRequest.Source.Repository.Slug, ev.PullRequest.Source.Latest),
-		Refspec:   fmt.Sprintf("%s:%s", ev.PullRequest.Source.DisplayID, ev.PullRequest.Target.DisplayID),
+		Commit:             ev.PullRequest.Source.Latest,
+		Branch:             ev.PullRequest.Source.DisplayID,
+		PRTitleDescription: ev.PullRequest.Title,
+		Message:            "", // TODO: get message from last commit to pr
+		Avatar:             bitbucketAvatarURL(baseURL, ev.Actor.Slug),
+		Author:             authorLabel(ev.Actor.Name),
+		Email:              ev.Actor.Email,
+		Timestamp:          time.Time(ev.Date).UTC().Unix(),
+		Ref:                fmt.Sprintf("refs/pull-requests/%d/from", ev.PullRequest.ID),
+		ForgeURL:           fmt.Sprintf("%s/projects/%s/repos/%s/commits/%s", baseURL, ev.PullRequest.Source.Repository.Project.Key, ev.PullRequest.Source.Repository.Slug, ev.PullRequest.Source.Latest),
+		Refspec:            fmt.Sprintf("%s:%s", ev.PullRequest.Source.DisplayID, ev.PullRequest.Target.DisplayID),
 	}
 
 	if ev.EventKey == bb.EventKeyPullRequestMerged || ev.EventKey == bb.EventKeyPullRequestDeclined || ev.EventKey == bb.EventKeyPullRequestDeleted {

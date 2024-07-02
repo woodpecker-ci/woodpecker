@@ -134,7 +134,7 @@ func convertMergeRequestHook(hook *gitlab.MergeEvent, req *http.Request) (int, *
 		pipeline.Avatar = getUserAvatar(pipeline.Email)
 	}
 
-	pipeline.PRContext = obj.Title + "\n" + obj.Description
+	pipeline.PRTitleDescription = obj.Title + "\n" + obj.Description
 	pipeline.ForgeURL = obj.URL
 	pipeline.PullRequestLabels = convertLabels(hook.Labels)
 

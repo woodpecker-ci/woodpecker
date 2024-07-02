@@ -46,7 +46,7 @@
           <span v-if="pipeline.event === 'tag' || pipeline.event === 'release'">{{ $t('created') }}</span>
           <span v-if="pipeline.event === 'cron' || pipeline.event === 'manual'">{{ $t('triggered') }}</span>
           <span v-else>{{ $t('triggered') }}</span>
-          <Badge v-if="prettyRef" :title="title" :label="title ? `${prettyRef} (${truncate(title, 30)})` : prettyRef " />
+          <Badge v-if="prettyRef" :title="prTitleWithDescription" :label="prTitle ? `${prettyRef} (${truncate(prTitle, 30)})` : prettyRef " />
           <span class="truncate">{{ $t('by_user', { user: pipeline.author }) }}</span>
         </div>
       </div>
@@ -89,7 +89,7 @@ const props = defineProps<{
 }>();
 
 const pipeline = toRef(props, 'pipeline');
-const { since, duration, message, shortMessage, title, prettyRef, created } = usePipeline(pipeline);
+const { since, duration, message, shortMessage, prTitle, prTitleWithDescription, prettyRef, created } = usePipeline(pipeline);
 
 const pipelineEventTitle = computed(() => {
   switch (pipeline.value.event) {
