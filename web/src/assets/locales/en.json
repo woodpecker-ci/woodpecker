@@ -122,24 +122,6 @@
           "desc": "Enable to cancel pending and running pipelines of the same event and context before starting the newly triggered one."
         }
       },
-      "registries": {
-        "registries": "Registries",
-        "credentials": "Registry credentials",
-        "desc": "Registries credentials can be added to use private images for your pipeline.",
-        "show": "Show registries",
-        "add": "Add registry",
-        "none": "There are no registry credentials yet.",
-        "save": "Save registry",
-        "created": "Registry credentials created",
-        "saved": "Registry credentials saved",
-        "deleted": "Registry credentials deleted",
-        "address": {
-          "address": "Address",
-          "placeholder": "Registry Address (e.g. docker.io)"
-        },
-        "edit": "Edit registry",
-        "delete": "Delete registry"
-      },
       "crons": {
         "crons": "Crons",
         "desc": "Cron jobs can be used to trigger pipelines on a regular basis.",
@@ -435,6 +417,25 @@
     "edit": "Edit secret",
     "delete": "Delete secret"
   },
+  "registries": {
+    "registries": "Registries",
+    "credentials": "Registry credentials",
+    "desc": "Registries credentials can be added to use private images for your pipeline.",
+    "none": "There are no registry credentials yet.",
+    "address": {
+      "address": "Address",
+      "desc": "Registry Address (e.g. docker.io)"
+    },
+    "show": "Show registries",
+    "save": "Save registry",
+    "add": "Add registry",
+    "edit": "Edit registry",
+    "delete": "Delete registry",
+    "delete_confirm": "Do you really want to delete this registry?",
+    "created": "Registry credentials created",
+    "saved": "Registry credentials saved",
+    "deleted": "Registry credentials deleted"
+},
   "default": "default",
   "info": "Info",
   "running_version": "You are running Woodpecker {0}",
