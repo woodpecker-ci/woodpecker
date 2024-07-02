@@ -62,7 +62,7 @@ func (s storage) RegistryDelete(registry *model.Registry) error {
 func (s storage) OrgRegistryFind(orgID int64, name string) (*model.Registry, error) {
 	registry := new(model.Registry)
 	return registry, wrapGet(s.engine.Where(
-		builder.Eq{"org_id": orgID, "name": name},
+		builder.Eq{"org_id": orgID, "address": name},
 	).Get(registry))
 }
 
@@ -74,7 +74,7 @@ func (s storage) OrgRegistryList(orgID int64, p *model.ListOptions) ([]*model.Re
 func (s storage) GlobalRegistryFind(name string) (*model.Registry, error) {
 	registry := new(model.Registry)
 	return registry, wrapGet(s.engine.Where(
-		builder.Eq{"org_id": 0, "repo_id": 0, "name": name},
+		builder.Eq{"org_id": 0, "repo_id": 0, "address": name},
 	).Get(registry))
 }
 

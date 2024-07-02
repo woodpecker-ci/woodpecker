@@ -18,6 +18,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 	"go.woodpecker-ci.org/woodpecker/v2/server/store/types"
@@ -163,11 +164,11 @@ func TestOrgRegistryList(t *testing.T) {
 	store, closer := newTestStore(t, new(model.Registry))
 	defer closer()
 
-	createTestSecrets(t, store)
+	createTestRegistries(t, store)
 
 	list, err := store.OrgRegistryList(12, &model.ListOptions{All: true})
 	assert.NoError(t, err)
-	assert.Len(t, list, 1)
+	require.Len(t, list, 1)
 
 	assert.True(t, list[0].IsOrganization())
 }
@@ -194,7 +195,7 @@ func TestGlobalRegistryList(t *testing.T) {
 	store, closer := newTestStore(t, new(model.Registry))
 	defer closer()
 
-	createTestSecrets(t, store)
+	createTestRegistries(t, store)
 
 	list, err := store.GlobalRegistryList(&model.ListOptions{All: true})
 	assert.NoError(t, err)
