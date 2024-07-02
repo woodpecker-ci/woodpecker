@@ -71,8 +71,8 @@ func GetGlobalRegistry(c *gin.Context) {
 
 // PostGlobalRegistry
 //
-//	@Summary	Create a global regisry
-//	@Router		/regisry [post]
+//	@Summary	Create a global registry
+//	@Router		/registry [post]
 //	@Produce	json
 //	@Success	200	{object}	Registry
 //	@Tags		Registries

@@ -1720,44 +1720,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/regisry": {
-            "post": {
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Registries"
-                ],
-                "summary": "Create a global regisry",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "default": "Bearer \u003cpersonal access token\u003e",
-                        "description": "Insert your personal access token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "description": "the registry object data",
-                        "name": "registry",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/Registry"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/Registry"
-                        }
-                    }
-                }
-            }
-        },
         "/registry": {
             "get": {
                 "produces": [
@@ -1799,6 +1761,42 @@ const docTemplate = `{
                             "items": {
                                 "$ref": "#/definitions/Registry"
                             }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Registries"
+                ],
+                "summary": "Create a global registry",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cpersonal access token\u003e",
+                        "description": "Insert your personal access token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "the registry object data",
+                        "name": "registry",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Registry"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Registry"
                         }
                     }
                 }

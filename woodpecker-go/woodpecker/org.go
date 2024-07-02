@@ -8,7 +8,7 @@ const (
 	pathOrgSecrets    = "%s/api/orgs/%d/secrets"
 	pathOrgSecret     = "%s/api/orgs/%d/secrets/%s"
 	pathOrgRegistries = "%s/api/orgs/%d/registry"
-	pathOrgRegisry    = "%s/api/orgs/%d/registry/%s"
+	pathOrgRegistry   = "%s/api/orgs/%d/registry/%s"
 )
 
 // Org returns an organization by id.
@@ -65,10 +65,10 @@ func (c *client) OrgSecretDelete(orgID int64, secret string) error {
 	return c.delete(uri)
 }
 
-// OrgRegisry returns an organization registry by address.
-func (c *client) OrgRegisry(orgID int64, regisry string) (*Registry, error) {
+// OrgRegistry returns an organization registry by address.
+func (c *client) OrgRegistry(orgID int64, registry string) (*Registry, error) {
 	out := new(Registry)
-	uri := fmt.Sprintf(pathOrgRegisry, c.addr, orgID, regisry)
+	uri := fmt.Sprintf(pathOrgRegistry, c.addr, orgID, registry)
 	err := c.get(uri, out)
 	return out, err
 }
@@ -92,13 +92,13 @@ func (c *client) OrgRegistryCreate(orgID int64, in *Registry) (*Registry, error)
 // OrgRegistryUpdate updates an organization registry.
 func (c *client) OrgRegistryUpdate(orgID int64, in *Registry) (*Registry, error) {
 	out := new(Registry)
-	uri := fmt.Sprintf(pathOrgRegisry, c.addr, orgID, in.Address)
+	uri := fmt.Sprintf(pathOrgRegistry, c.addr, orgID, in.Address)
 	err := c.patch(uri, in, out)
 	return out, err
 }
 
 // OrgRegistryDelete deletes an organization registry.
 func (c *client) OrgRegistryDelete(orgID int64, registry string) error {
-	uri := fmt.Sprintf(pathOrgRegisry, c.addr, orgID, registry)
+	uri := fmt.Sprintf(pathOrgRegistry, c.addr, orgID, registry)
 	return c.delete(uri)
 }
