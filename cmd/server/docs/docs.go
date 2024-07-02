@@ -4376,8 +4376,14 @@ const docTemplate = `{
                 "id": {
                     "type": "integer"
                 },
+                "org_id": {
+                    "type": "integer"
+                },
                 "password": {
                     "type": "string"
+                },
+                "repo_id": {
+                    "type": "integer"
                 },
                 "username": {
                     "type": "string"

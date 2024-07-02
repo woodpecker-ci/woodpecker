@@ -29,14 +29,30 @@ var (
 // Registry represents a docker registry with credentials.
 type Registry struct {
 	ID       int64  `json:"id"       xorm:"pk autoincr 'id'"`
-	RepoID   int64  `json:"-"        xorm:"UNIQUE(s) INDEX 'repo_id'"`
-	Address  string `json:"address"  xorm:"UNIQUE(s) INDEX 'address'"`
+	OrgID    int64  `json:"org_id"   xorm:"NOT NULL DEFAULT 0 UNIQUE(s) INDEX 'org_id'"`
+	RepoID   int64  `json:"repo_id"  xorm:"NOT NULL DEFAULT 0 UNIQUE(s) INDEX 'repo_id'"`
+	Address  string `json:"address"  xorm:"NOT NULL UNIQUE(s) INDEX 'address'"`
 	Username string `json:"username" xorm:"varchar(2000) 'username'"`
 	Password string `json:"password" xorm:"TEXT 'password'"`
 } //	@name Registry
 
 func (r Registry) TableName() string {
 	return "registries"
+}
+
+// Global secret.
+func (r Registry) IsGlobal() bool {
+	return r.RepoID == 0 && r.OrgID == 0
+}
+
+// Organization secret.
+func (r Registry) IsOrganization() bool {
+	return r.RepoID == 0 && r.OrgID != 0
+}
+
+// Repository secret.
+func (r Registry) IsRepository() bool {
+	return r.RepoID != 0 && r.OrgID == 0
 }
 
 // Validate validates the registry information.
@@ -58,6 +74,7 @@ func (r *Registry) Validate() error {
 func (r *Registry) Copy() *Registry {
 	return &Registry{
 		ID:       r.ID,
+		OrgID:    r.OrgID,
 		RepoID:   r.RepoID,
 		Address:  r.Address,
 		Username: r.Username,
