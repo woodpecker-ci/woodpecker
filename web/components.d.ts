@@ -85,6 +85,7 @@ declare module 'vue' {
     ManualPipelinePopup: typeof import('./src/components/layout/popups/ManualPipelinePopup.vue')['default']
     Navbar: typeof import('./src/components/layout/header/Navbar.vue')['default']
     NumberField: typeof import('./src/components/form/NumberField.vue')['default']
+    OrgRegistriesTab: typeof import('./src/components/org/settings/OrgRegistriesTab.vue')['default']
     OrgSecretsTab: typeof import('./src/components/org/settings/OrgSecretsTab.vue')['default']
     Panel: typeof import('./src/components/layout/Panel.vue')['default']
     PipelineFeedItem: typeof import('./src/components/pipeline-feed/PipelineFeedItem.vue')['default']
