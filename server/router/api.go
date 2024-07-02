@@ -61,11 +61,18 @@ func apiRoutes(e *gin.RouterGroup) {
 					org.Use(session.MustOrgMember(true))
 					org.DELETE("", session.MustAdmin(), api.DeleteOrg)
 					org.GET("", api.GetOrg)
+
 					org.GET("/secrets", api.GetOrgSecretList)
 					org.POST("/secrets", api.PostOrgSecret)
 					org.GET("/secrets/:secret", api.GetOrgSecret)
 					org.PATCH("/secrets/:secret", api.PatchOrgSecret)
 					org.DELETE("/secrets/:secret", api.DeleteOrgSecret)
+
+					org.GET("/registry", api.GetOrgRegistryList)
+					org.POST("/registry", api.PostOrgRegistry)
+					org.GET("/registry/:registry", api.GetOrgRegistry)
+					org.PATCH("/registry/:registry", api.PatchOrgRegistry)
+					org.DELETE("/registry/:registry", api.DeleteOrgRegistry)
 				}
 			}
 		}
@@ -182,6 +189,21 @@ func apiRoutes(e *gin.RouterGroup) {
 			secrets.POST("", api.PostGlobalSecret)
 			secrets.PATCH("/:secret", api.PatchGlobalSecret)
 			secrets.DELETE("/:secret", api.DeleteGlobalSecret)
+		}
+
+		// global registries can be read without actual values by any user
+		readGlobalRegistries := apiBase.Group("/registry")
+		{
+			readGlobalRegistries.Use(session.MustUser())
+			readGlobalRegistries.GET("", api.GetGlobalRegistryList)
+			readGlobalRegistries.GET("/:registry", api.GetGlobalRegistry)
+		}
+		registries := apiBase.Group("/registry")
+		{
+			registries.Use(session.MustAdmin())
+			registries.POST("", api.PostGlobalRegistry)
+			registries.PATCH("/:registry", api.PatchGlobalRegistry)
+			registries.DELETE("/:registry", api.DeleteGlobalRegistry)
 		}
 
 		logLevel := apiBase.Group("/log-level")
