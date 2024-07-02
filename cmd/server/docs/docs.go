@@ -3967,6 +3967,10 @@ const docTemplate = `{
                 "last_contact": {
                     "type": "integer"
                 },
+                "last_work": {
+                    "description": "last time the agent did something, this value is used to determine if the agent is still doing work used by the autoscaler",
+                    "type": "integer"
+                },
                 "name": {
                     "type": "string"
                 },
