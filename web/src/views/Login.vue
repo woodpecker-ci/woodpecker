@@ -1,7 +1,17 @@
 <template>
   <main class="flex flex-col w-full h-full justify-center items-center">
-    <!-- TODO: Should use vue notifications. -->
-    <Error v-if="errorMessage" text-only :text="errorMessage" class="w-full md:w-3xl" />
+    <Error v-if="errorMessage" class="w-full md:w-3xl">
+      <span class="whitespace-pre">{{ errorMessage }}</span>
+      <span v-if="errorDescription" class="whitespace-pre mt-1">{{ errorDescription }}</span>
+      <a
+        v-if="errorUri"
+        :href="errorUri"
+        target="_blank"
+        class="text-wp-link-100 hover:text-wp-link-200 cursor-pointer mt-1"
+      >
+        <span>{{ errorUri }}</span>
+      </a>
+    </Error>
 
     <div
       class="flex flex-col w-full overflow-hidden bg-wp-background-100 shadow border border-wp-background-400 dark:bg-wp-background-200 md:m-8 md:rounded-md md:flex-row md:w-3xl md:h-sm"
@@ -24,12 +34,12 @@ import { useRoute, useRouter } from 'vue-router';
 
 import WoodpeckerLogo from '~/assets/logo.svg?component';
 import Button from '~/components/atomic/Button.vue';
+import Error from '~/components/atomic/Error.vue';
 import useAuthentication from '~/compositions/useAuthentication';
 
 const route = useRoute();
 const router = useRouter();
 const authentication = useAuthentication();
-const errorMessage = ref<string>();
 const i18n = useI18n();
 
 function doLogin() {
@@ -38,10 +48,16 @@ function doLogin() {
 }
 
 const authErrorMessages = {
-  oauth_error: i18n.t('user.oauth_error'),
-  internal_error: i18n.t('user.internal_error'),
-  access_denied: i18n.t('user.access_denied'),
+  oauth_error: i18n.t('oauth_error'),
+  internal_error: i18n.t('internal_error'),
+  registration_closed: i18n.t('registration_closed'),
+  access_denied: i18n.t('access_denied'),
+  invalid_state: i18n.t('invalid_state'),
 };
+
+const errorMessage = ref<string>();
+const errorDescription = ref<string>(route.query.error_description as string);
+const errorUri = ref<string>(route.query.error_uri as string);
 
 onMounted(async () => {
   if (authentication.isAuthenticated) {
@@ -49,9 +65,9 @@ onMounted(async () => {
     return;
   }
 
-  if (route.query.code) {
-    const code = route.query.code as keyof typeof authErrorMessages;
-    errorMessage.value = authErrorMessages[code];
+  if (route.query.error) {
+    const error = route.query.error as keyof typeof authErrorMessages;
+    errorMessage.value = authErrorMessages[error] ?? error;
   }
 });
 </script>

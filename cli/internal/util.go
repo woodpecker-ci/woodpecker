@@ -19,9 +19,11 @@ import (
 	"crypto/x509"
 	"fmt"
 	"net/http"
+	"os/exec"
 	"strconv"
 	"strings"
 
+	vsc_url "github.com/gitsight/go-vcsurl"
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v2"
 	"golang.org/x/net/proxy"
@@ -90,8 +92,52 @@ func NewClient(c *cli.Context) (woodpecker.Client, error) {
 	return woodpecker.NewClient(server, client), nil
 }
 
+func getRepoFromGit(remoteName string) (string, error) {
+	cmd := exec.Command("git", "remote", "get-url", remoteName)
+	stdout, err := cmd.Output()
+	if err != nil {
+		return "", fmt.Errorf("could not get remote url: %w", err)
+	}
+
+	gitRemote := strings.TrimSpace(string(stdout))
+
+	log.Debug().Str("git-remote", gitRemote).Msg("extracted remote url from git")
+
+	if len(gitRemote) == 0 {
+		return "", fmt.Errorf("no repository provided")
+	}
+
+	u, err := vsc_url.Parse(gitRemote)
+	if err != nil {
+		return "", fmt.Errorf("could not parse git remote url: %w", err)
+	}
+
+	repoFullName := u.FullName
+	log.Debug().Str("repo", repoFullName).Msg("extracted repository from remote url")
+
+	return repoFullName, nil
+}
+
 // ParseRepo parses the repository owner and name from a string.
 func ParseRepo(client woodpecker.Client, str string) (repoID int64, err error) {
+	if str == "" {
+		str, err = getRepoFromGit("upstream")
+		if err != nil {
+			log.Debug().Err(err).Msg("could not get repository from git upstream remote")
+		}
+	}
+
+	if str == "" {
+		str, err = getRepoFromGit("origin")
+		if err != nil {
+			log.Debug().Err(err).Msg("could not get repository from git origin remote")
+		}
+	}
+
+	if str == "" {
+		return 0, fmt.Errorf("no repository provided")
+	}
+
 	if strings.Contains(str, "/") {
 		repo, err := client.RepoLookup(str)
 		if err != nil {

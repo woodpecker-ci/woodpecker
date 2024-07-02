@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 export enum WebhookEvents {
   Push = 'push',
   Tag = 'tag',
@@ -8,3 +9,4 @@ export enum WebhookEvents {
   Cron = 'cron',
   Manual = 'manual',
 }
+/* eslint-enable */

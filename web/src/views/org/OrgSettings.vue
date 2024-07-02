@@ -4,6 +4,7 @@
       <span>
         <router-link :to="{ name: 'org' }" class="hover:underline">
           {{ org.name }}
+          <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
         </router-link>
         /
         {{ $t('settings') }}

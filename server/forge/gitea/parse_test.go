@@ -382,7 +382,7 @@ func TestGiteaParser(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			req, _ := http.NewRequest("POST", "/api/hook", bytes.NewBufferString(tc.data))
+			req, _ := http.NewRequest(http.MethodPost, "/api/hook", bytes.NewBufferString(tc.data))
 			req.Header = http.Header{}
 			req.Header.Set(hookEvent, tc.event)
 			r, p, err := parseHook(req)

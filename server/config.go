@@ -24,6 +24,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server/pubsub"
 	"go.woodpecker-ci.org/woodpecker/v2/server/queue"
 	"go.woodpecker-ci.org/woodpecker/v2/server/services"
+	"go.woodpecker-ci.org/woodpecker/v2/server/services/log"
 	"go.woodpecker-ci.org/woodpecker/v2/server/services/permissions"
 )
 
@@ -34,8 +35,10 @@ var Config = struct {
 		Logs       logging.Log
 		Membership cache.MembershipService
 		Manager    services.Manager
+		LogStore   log.Service
 	}
 	Server struct {
+		JWTSecret           string
 		Key                 string
 		Cert                string
 		OAuthHost           string

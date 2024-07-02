@@ -24,7 +24,7 @@ The implementation wasn't perfect yet so we improved the way entrypoints work:
 
 If you define [`commands`](/docs/usage/workflow-syntax#commands), the default entrypoint will be `["/bin/sh", "-c", "echo $CI_SCRIPT | base64 -d | /bin/sh -e"]`.
 
-If you define your own entrypoint, you can completely overwrite the default entrypoint. If you define `entrypoint: ["/bin/my-script", ""]` for example you can run your own binary / script. In this case the commands section will ignord, however you can still access it in your own script by using the base64 encoded string of the `CI_SCRIPT` environment variable.
+If you define your own entrypoint, you can completely overwrite the default entrypoint. If you define `entrypoint: ["/bin/my-script", ""]` for example you can run your own binary / script. In this case the commands section will ignored, however you can still access it in your own script by using the base64 encoded string of the `CI_SCRIPT` environment variable.
 
 [#3269](https://github.com/woodpecker-ci/woodpecker/pull/3269)
 
@@ -66,7 +66,7 @@ Commit:473761d8b26b20f7c206408563d54cf998410329
 
 ## Deleting logs or complete pipelines
 
-If you accidentially exposed some secret to the public in your logs or you simply want to cleanup some logs you can now delete logs or complete pipelines using the api and the cli.
+If you accidentally exposed some secret to the public in your logs or you simply want to cleanup some logs you can now delete logs or complete pipelines using the api and the cli.
 
 [#3451](https://github.com/woodpecker-ci/woodpecker/pull/3451)
 [#3506](https://github.com/woodpecker-ci/woodpecker/pull/3506)

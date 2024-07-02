@@ -1,5 +1,5 @@
-import { Component } from 'vue';
-import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router';
+import type { Component } from 'vue';
+import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router';
 
 import useAuthentication from '~/compositions/useAuthentication';
 import useConfig from '~/compositions/useConfig';
@@ -153,14 +153,7 @@ const routes: RouteRecordRaw[] = [
     props: true,
   },
   {
-    path: `${rootPath}/login/error`,
-    name: 'login-error',
-    component: (): Component => import('~/views/Login.vue'),
-    meta: { blank: true },
-    props: true,
-  },
-  {
-    path: `${rootPath}/do-login`,
+    path: `${rootPath}/login`,
     name: 'login',
     component: (): Component => import('~/views/Login.vue'),
     meta: { blank: true },
@@ -199,7 +192,7 @@ const router = createRouter({
 router.beforeEach(async (to, _, next) => {
   const config = useUserConfig();
   const { redirectUrl } = config.userConfig.value;
-  if (redirectUrl !== '') {
+  if (redirectUrl !== '' && to.name !== 'login') {
     config.setUserConfig('redirectUrl', '');
     next(redirectUrl);
   }

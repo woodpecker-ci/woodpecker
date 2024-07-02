@@ -15,6 +15,15 @@ const config: Config = {
   organizationName: 'woodpecker-ci',
   projectName: 'woodpecker-ci.github.io',
   trailingSlash: false,
+  headTags: [
+    {
+      tagName: 'link',
+      attributes: {
+        href: 'https://floss.social/@WoodpeckerCI',
+        rel: 'me',
+      },
+    },
+  ],
   themeConfig: {
     navbar: {
       title: 'Woodpecker',
@@ -60,6 +69,12 @@ const config: Config = {
         {
           type: 'docsVersionDropdown',
           position: 'right',
+          dropdownItemsAfter: [
+            {
+              to: '/versions',
+              label: 'All versions',
+            },
+          ],
         },
         {
           href: 'https://github.com/woodpecker-ci/woodpecker',
@@ -237,39 +252,27 @@ const config: Config = {
           sidebarPath: require.resolve('./sidebars.js'),
           editUrl: 'https://github.com/woodpecker-ci/woodpecker/edit/main/docs/',
           includeCurrentVersion: true,
-          lastVersion: '2.5',
+          lastVersion: '2.6',
           onlyIncludeVersions:
-            process.env.NODE_ENV === 'development' ? ['current', '2.5'] : ['current', '2.5', '2.4', '2.3', '1.0'],
+            process.env.NODE_ENV === 'development' ? ['current', '2.6'] : ['current', '2.6', '2.5', '2.4', '1.0'],
           versions: {
             current: {
-              label: 'Next',
+              label: 'Next 🚧',
               banner: 'unreleased',
             },
+            '2.6': {
+              label: '2.6.x',
+            },
             '2.5': {
-              label: '2.5.x',
+              label: '2.5.x 💀',
+              banner: 'unmaintained',
             },
             '2.4': {
-              label: '2.4.x',
-              banner: 'unmaintained',
-            },
-            '2.3': {
-              label: '2.3.x',
-              banner: 'unmaintained',
-            },
-            '2.2': {
-              label: '2.2.x',
-              banner: 'unmaintained',
-            },
-            '2.1': {
-              label: '2.1.x',
-              banner: 'unmaintained',
-            },
-            '2.0': {
-              label: '2.0.x',
+              label: '2.4.x 💀',
               banner: 'unmaintained',
             },
             '1.0': {
-              label: '1.0.x',
+              label: '1.0.x 💀',
               banner: 'unmaintained',
             },
           },

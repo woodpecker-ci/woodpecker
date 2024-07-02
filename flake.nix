@@ -1,7 +1,6 @@
 {
-  # Override nixpkgs to use the latest set of node packages
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/master";
+    nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
   };
 
@@ -10,7 +9,7 @@
     flake-utils.lib.eachDefaultSystem (
       system:
       let
-        pkgs = import nixpkgs { inherit system; };
+        pkgs = nixpkgs.legacyPackages.${system};
       in
       {
         devShells.default = pkgs.mkShell {
@@ -20,18 +19,21 @@
             gnutar
 
             # frontend
-            nodejs
-            nodePackages.pnpm
+            nodejs_20
+            pnpm
             nodePackages.typescript
             nodePackages.typescript-language-server
 
             # backend
-            go
+            go_1_22
+            glibc.static
             gofumpt
             golangci-lint
             go-mockery
             protobuf
           ];
+          CFLAGS = "-I${pkgs.glibc.dev}/include";
+          LDFLAGS = "-L${pkgs.glibc}/lib";
         };
       }
     );

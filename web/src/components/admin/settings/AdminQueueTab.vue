@@ -85,7 +85,7 @@ import ListItem from '~/components/atomic/ListItem.vue';
 import Settings from '~/components/layout/Settings.vue';
 import useApiClient from '~/compositions/useApiClient';
 import useNotifications from '~/compositions/useNotifications';
-import { QueueInfo } from '~/lib/api/types/queue';
+import type { QueueInfo } from '~/lib/api/types';
 
 import AdminQueueStats from './queue/AdminQueueStats.vue';
 

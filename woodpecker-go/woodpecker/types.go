@@ -250,6 +250,7 @@ type (
 		OwnerID     int64  `json:"owner_id"`
 		Token       string `json:"token"`
 		LastContact int64  `json:"last_contact"`
+		LastWork    int64  `json:"last_work"`
 		Platform    string `json:"platform"`
 		Backend     string `json:"backend"`
 		Capacity    int32  `json:"capacity"`

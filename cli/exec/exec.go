@@ -32,6 +32,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/docker"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/dummy"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/kubernetes"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/local"
 	backendTypes "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
@@ -39,6 +40,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/compiler"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/linter"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/matrix"
+	pipelineLog "go.woodpecker-ci.org/woodpecker/v2/pipeline/log"
 	"go.woodpecker-ci.org/woodpecker/v2/shared/utils"
 )
 
@@ -227,6 +229,7 @@ func execWithAxis(c *cli.Context, file, repoPath string, axis matrix.Axis) error
 		kubernetes.New(),
 		docker.New(),
 		local.New(),
+		dummy.New(),
 	}
 	backendEngine, err := backend.FindBackend(backendCtx, backends, c.String("backend-engine"))
 	if err != nil {
@@ -273,8 +276,8 @@ func convertPathForWindows(path string) string {
 	return filepath.ToSlash(path)
 }
 
-var defaultLogger = pipeline.Logger(func(step *backendTypes.Step, rc io.Reader) error {
-	logStream := NewLineWriter(step.Name, step.UUID)
-	_, err := io.Copy(logStream, rc)
-	return err
+const maxLogLineLength = 1024 * 1024 // 1mb
+var defaultLogger = pipeline.Logger(func(step *backendTypes.Step, rc io.ReadCloser) error {
+	logWriter := NewLineWriter(step.Name, step.UUID)
+	return pipelineLog.CopyLineByLine(logWriter, rc, maxLogLineLength)
 })

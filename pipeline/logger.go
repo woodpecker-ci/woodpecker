@@ -21,4 +21,4 @@ import (
 )
 
 // Logger handles the process logging.
-type Logger func(*backend.Step, io.Reader) error
+type Logger func(*backend.Step, io.ReadCloser) error

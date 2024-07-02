@@ -10,11 +10,13 @@
             'text-wp-state-error-100': !error.is_warning,
           }"
         />
+        <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
         <span>[{{ error.type }}]</span>
         <span
           v-if="isLinterError(error) || isDeprecationError(error) || isBadHabitError(error)"
           class="whitespace-nowrap"
         >
+          <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
           <span v-if="error.data?.file" class="font-bold">{{ error.data?.file }}: </span>
           <span>{{ error.data?.field }}</span>
         </span>
@@ -36,7 +38,7 @@
 </template>
 
 <script lang="ts" setup>
-import { inject, Ref } from 'vue';
+import { inject, type Ref } from 'vue';
 
 import Panel from '~/components/layout/Panel.vue';
 import type { Pipeline, PipelineError } from '~/lib/api/types';
