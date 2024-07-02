@@ -84,7 +84,7 @@ func createTmpPipeline(event model.WebhookEvent, commit *model.Commit, user *mod
 		Timestamp: time.Now().UTC().Unix(),
 
 		Avatar:  user.Avatar,
-		Message: "MANUAL PIPELINE @ " + opts.Branch,
+		Message: "manual pipeline @" + opts.Branch,
 
 		Ref:                 opts.Branch,
 		AdditionalVariables: opts.Variables,

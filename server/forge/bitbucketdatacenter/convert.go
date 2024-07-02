@@ -95,12 +95,10 @@ func convertRepositoryPushEvent(ev *bb.RepositoryPushEvent, baseURL string) *mod
 	} else if len(ev.Commits) > 0 {
 		message = ev.Commits[0].Message
 	}
-	title, _, _ := strings.Cut(message, "\n")
 
 	pipeline := &model.Pipeline{
 		Commit:    change.ToHash,
 		Branch:    change.Ref.DisplayID,
-		Title:     title,
 		Message:   message,
 		Avatar:    bitbucketAvatarURL(baseURL, ev.Actor.Slug),
 		Author:    authorLabel(ev.Actor.Name),
@@ -123,7 +121,8 @@ func convertPullRequestEvent(ev *bb.PullRequestEvent, baseURL string) *model.Pip
 	pipeline := &model.Pipeline{
 		Commit:    ev.PullRequest.Source.Latest,
 		Branch:    ev.PullRequest.Source.DisplayID,
-		Title:     ev.PullRequest.Title,
+		PRContext: ev.PullRequest.Title,
+		Message:   "", // TODO: get message from last commit to pr
 		Avatar:    bitbucketAvatarURL(baseURL, ev.Actor.Slug),
 		Author:    authorLabel(ev.Actor.Name),
 		Email:     ev.Actor.Email,

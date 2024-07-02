@@ -89,15 +89,12 @@ func pipelineFromPush(hook *pushHook) *model.Pipeline {
 		link = hook.HeadCommit.URL
 	}
 
-	title, _, _ := strings.Cut(message, "\n")
-
 	return &model.Pipeline{
 		Event:        model.EventPush,
 		Commit:       hook.After,
 		Ref:          hook.Ref,
 		ForgeURL:     link,
 		Branch:       strings.TrimPrefix(hook.Ref, "refs/heads/"),
-		Title:        title,
 		Message:      message,
 		Avatar:       avatar,
 		Author:       hook.Sender.UserName,
@@ -132,14 +129,19 @@ func pipelineFromTag(hook *pushHook) *model.Pipeline {
 	)
 	ref := strings.TrimPrefix(hook.Ref, "refs/tags/")
 
+	var message string
+	if len(hook.Commits) > 0 {
+		message = hook.Commits[0].Message
+	} else {
+		message = hook.HeadCommit.Message
+	}
+
 	return &model.Pipeline{
-		Event:    model.EventTag,
-		Commit:   hook.Sha,
-		Ref:      fmt.Sprintf("refs/tags/%s", ref),
-		ForgeURL: fmt.Sprintf("%s/src/tag/%s", hook.Repo.HTMLURL, ref),
-		Title:    fmt.Sprintf("created tag %s", ref),
-		// TODO: get tag message and title via webhook (gitea change needed)
-		Message:   "", // if empty api will be asked
+		Event:     model.EventTag,
+		Commit:    hook.Sha,
+		Ref:       fmt.Sprintf("refs/tags/%s", ref),
+		ForgeURL:  fmt.Sprintf("%s/src/tag/%s", hook.Repo.HTMLURL, ref),
+		Message:   message,
 		Avatar:    avatar,
 		Author:    hook.Sender.UserName,
 		Sender:    hook.Sender.UserName,
@@ -161,17 +163,17 @@ func pipelineFromPullRequest(hook *pullRequestHook) *model.Pipeline {
 	}
 
 	pipeline := &model.Pipeline{
-		Event:    event,
-		Commit:   hook.PullRequest.Head.Sha,
-		ForgeURL: hook.PullRequest.HTMLURL,
-		Ref:      fmt.Sprintf("refs/pull/%d/head", hook.Number),
-		Branch:   hook.PullRequest.Base.Ref,
-		Title:    hook.PullRequest.Title,
-		Message:  hook.PullRequest.Body,
-		Author:   hook.PullRequest.Poster.UserName,
-		Avatar:   avatar,
-		Sender:   hook.Sender.UserName,
-		Email:    hook.Sender.Email,
+		Event:     event,
+		Commit:    hook.PullRequest.Head.Sha,
+		ForgeURL:  hook.PullRequest.HTMLURL,
+		Ref:       fmt.Sprintf("refs/pull/%d/head", hook.Number),
+		Branch:    hook.PullRequest.Base.Ref,
+		PRContext: hook.PullRequest.Title + "\n" + hook.PullRequest.Body,
+		Message:   "", // TODO: get commit message from last commit
+		Author:    hook.PullRequest.Poster.UserName,
+		Avatar:    avatar,
+		Sender:    hook.Sender.UserName,
+		Email:     hook.Sender.Email,
 		Refspec: fmt.Sprintf("%s:%s",
 			hook.PullRequest.Head.Ref,
 			hook.PullRequest.Base.Ref,
@@ -193,8 +195,7 @@ func pipelineFromRelease(hook *releaseHook) *model.Pipeline {
 		Ref:          fmt.Sprintf("refs/tags/%s", hook.Release.TagName),
 		ForgeURL:     hook.Release.HTMLURL,
 		Branch:       hook.Release.Target,
-		Title:        fmt.Sprintf("created release %s", hook.Release.Title),
-		Message:      hook.Release.Note,
+		Message:      hook.Release.Title + "\n" + hook.Release.Note,
 		Avatar:       avatar,
 		Author:       hook.Sender.UserName,
 		Sender:       hook.Sender.UserName,
