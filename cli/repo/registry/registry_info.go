@@ -15,17 +15,20 @@
 package registry
 
 import (
+	"html/template"
+	"os"
+
 	"github.com/urfave/cli/v2"
 
 	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
 	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
 )
 
-var registryDeleteCmd = &cli.Command{
-	Name:      "rm",
-	Usage:     "remove a registry",
+var registryInfoCmd = &cli.Command{
+	Name:      "info",
+	Usage:     "display registry info",
 	ArgsUsage: "[repo-id|repo-full-name]",
-	Action:    registryDelete,
+	Action:    registryInfo,
 	Flags: []cli.Flag{
 		common.RepoFlag,
 		&cli.StringFlag{
@@ -33,24 +36,34 @@ var registryDeleteCmd = &cli.Command{
 			Usage: "registry hostname",
 			Value: "docker.io",
 		},
+		common.FormatFlag(tmplRegistryList, true),
 	},
 }
 
-func registryDelete(c *cli.Context) error {
+func registryInfo(c *cli.Context) error {
 	var (
-		hostname         = c.String("hostname")
-		repoIDOrFullName = c.String("repository")
+		hostname = c.String("hostname")
+		format   = c.String("format") + "\n"
 	)
-	if repoIDOrFullName == "" {
-		repoIDOrFullName = c.Args().First()
-	}
+
 	client, err := internal.NewClient(c)
 	if err != nil {
 		return err
 	}
-	repoID, err := internal.ParseRepo(client, repoIDOrFullName)
+
+	repoID, err := parseTargetArgs(client, c)
 	if err != nil {
 		return err
 	}
-	return client.RegistryDelete(repoID, hostname)
+
+	registry, err := client.Registry(repoID, hostname)
+	if err != nil {
+		return err
+	}
+
+	tmpl, err := template.New("_").Parse(format)
+	if err != nil {
+		return err
+	}
+	return tmpl.Execute(os.Stdout, registry)
 }

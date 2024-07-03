@@ -50,22 +50,16 @@ var registryUpdateCmd = &cli.Command{
 
 func registryUpdate(c *cli.Context) error {
 	var (
-		hostname         = c.String("hostname")
-		username         = c.String("username")
-		password         = c.String("password")
-		repoIDOrFullName = c.String("repository")
+		hostname = c.String("hostname")
+		username = c.String("username")
+		password = c.String("password")
 	)
-	if repoIDOrFullName == "" {
-		repoIDOrFullName = c.Args().First()
-	}
+
 	client, err := internal.NewClient(c)
 	if err != nil {
 		return err
 	}
-	repoID, err := internal.ParseRepo(client, repoIDOrFullName)
-	if err != nil {
-		return err
-	}
+
 	registry := &woodpecker.Registry{
 		Address:  hostname,
 		Username: username,
@@ -79,6 +73,12 @@ func registryUpdate(c *cli.Context) error {
 		}
 		registry.Password = string(out)
 	}
+
+	repoID, err := parseTargetArgs(client, c)
+	if err != nil {
+		return err
+	}
+
 	_, err = client.RegistryUpdate(repoID, registry)
 	return err
 }

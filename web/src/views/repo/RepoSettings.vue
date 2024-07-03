@@ -2,15 +2,15 @@
   <Scaffold enable-tabs :go-back="goBack">
     <template #title>
       <span>
-        <router-link :to="{ name: 'org', params: { orgId: repo!.org_id } }" class="hover:underline">
-          {{ repo!.owner }}
-          <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
-        </router-link>
+        <router-link :to="{ name: 'org', params: { orgId: repo!.org_id } }" class="hover:underline">{{
+          repo!.owner
+          /* eslint-disable-next-line @intlify/vue-i18n/no-raw-text */
+        }}</router-link>
         /
-        <router-link :to="{ name: 'repo' }" class="hover:underline">
-          {{ repo!.name }}
-          <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
-        </router-link>
+        <router-link :to="{ name: 'repo' }" class="hover:underline">{{
+          repo!.name
+          /* eslint-disable-next-line @intlify/vue-i18n/no-raw-text */
+        }}</router-link>
         /
         {{ $t('settings') }}
       </span>
@@ -22,7 +22,7 @@
     <Tab id="secrets" :title="$t('secrets.secrets')">
       <SecretsTab />
     </Tab>
-    <Tab id="registries" :title="$t('repo.settings.registries.registries')">
+    <Tab id="registries" :title="$t('registries.registries')">
       <RegistriesTab />
     </Tab>
     <Tab id="crons" :title="$t('repo.settings.crons.crons')">
