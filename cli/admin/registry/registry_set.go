@@ -1,4 +1,4 @@
-// Copyright 2023 Woodpecker Authors
+// Copyright 2024 Woodpecker Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -25,13 +25,12 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker"
 )
 
-var registryCreateCmd = &cli.Command{
-	Name:      "add",
-	Usage:     "adds a registry",
-	ArgsUsage: "[repo-id|repo-full-name]",
-	Action:    registryCreate,
+var registryUpdateCmd = &cli.Command{
+	Name:   "update",
+	Usage:  "update a registry",
+	Action: registryUpdate,
 	Flags: []cli.Flag{
-		common.RepoFlag,
+		common.OrgFlag,
 		&cli.StringFlag{
 			Name:  "hostname",
 			Usage: "registry hostname",
@@ -48,24 +47,18 @@ var registryCreateCmd = &cli.Command{
 	},
 }
 
-func registryCreate(c *cli.Context) error {
+func registryUpdate(c *cli.Context) error {
 	var (
-		hostname         = c.String("hostname")
-		username         = c.String("username")
-		password         = c.String("password")
-		repoIDOrFullName = c.String("repository")
+		hostname = c.String("hostname")
+		username = c.String("username")
+		password = c.String("password")
 	)
-	if repoIDOrFullName == "" {
-		repoIDOrFullName = c.Args().First()
-	}
+
 	client, err := internal.NewClient(c)
 	if err != nil {
 		return err
 	}
-	repoID, err := internal.ParseRepo(client, repoIDOrFullName)
-	if err != nil {
-		return err
-	}
+
 	registry := &woodpecker.Registry{
 		Address:  hostname,
 		Username: username,
@@ -79,8 +72,7 @@ func registryCreate(c *cli.Context) error {
 		}
 		registry.Password = string(out)
 	}
-	if _, err := client.RegistryCreate(repoID, registry); err != nil {
-		return err
-	}
-	return nil
+
+	_, err = client.GlobalRegistryUpdate(registry)
+	return err
 }

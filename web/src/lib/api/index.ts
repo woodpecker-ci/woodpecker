@@ -170,19 +170,53 @@ export default class WoodpeckerClient extends ApiClient {
 
   getRegistryList(repoId: number, opts?: PaginationOptions): Promise<Registry[] | null> {
     const query = encodeQueryString(opts);
-    return this._get(`/api/repos/${repoId}/registry?${query}`) as Promise<Registry[] | null>;
+    return this._get(`/api/repos/${repoId}/registries?${query}`) as Promise<Registry[] | null>;
   }
 
   createRegistry(repoId: number, registry: Partial<Registry>): Promise<unknown> {
-    return this._post(`/api/repos/${repoId}/registry`, registry);
+    return this._post(`/api/repos/${repoId}/registries`, registry);
   }
 
   updateRegistry(repoId: number, registry: Partial<Registry>): Promise<unknown> {
-    return this._patch(`/api/repos/${repoId}/registry/${registry.address}`, registry);
+    return this._patch(`/api/repos/${repoId}/registries/${registry.address}`, registry);
   }
 
   deleteRegistry(repoId: number, registryAddress: string): Promise<unknown> {
-    return this._delete(`/api/repos/${repoId}/registry/${registryAddress}`);
+    return this._delete(`/api/repos/${repoId}/registries/${registryAddress}`);
+  }
+
+  getOrgRegistryList(orgId: number, opts?: PaginationOptions): Promise<Registry[] | null> {
+    const query = encodeQueryString(opts);
+    return this._get(`/api/orgs/${orgId}/registries?${query}`) as Promise<Registry[] | null>;
+  }
+
+  createOrgRegistry(orgId: number, registry: Partial<Registry>): Promise<unknown> {
+    return this._post(`/api/orgs/${orgId}/registries`, registry);
+  }
+
+  updateOrgRegistry(orgId: number, registry: Partial<Registry>): Promise<unknown> {
+    return this._patch(`/api/orgs/${orgId}/registries/${registry.address}`, registry);
+  }
+
+  deleteOrgRegistry(orgId: number, registryAddress: string): Promise<unknown> {
+    return this._delete(`/api/orgs/${orgId}/registries/${registryAddress}`);
+  }
+
+  getGlobalRegistryList(opts?: PaginationOptions): Promise<Registry[] | null> {
+    const query = encodeQueryString(opts);
+    return this._get(`/api/registries?${query}`) as Promise<Registry[] | null>;
+  }
+
+  createGlobalRegistry(registry: Partial<Registry>): Promise<unknown> {
+    return this._post(`/api/registries`, registry);
+  }
+
+  updateGlobalRegistry(registry: Partial<Registry>): Promise<unknown> {
+    return this._patch(`/api/registries/${registry.address}`, registry);
+  }
+
+  deleteGlobalRegistry(registryAddress: string): Promise<unknown> {
+    return this._delete(`/api/registries/${registryAddress}`);
   }
 
   getCronList(repoId: number, opts?: PaginationOptions): Promise<Cron[] | null> {
