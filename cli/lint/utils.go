@@ -6,6 +6,7 @@ import (
 	"os"
 
 	term_env "github.com/muesli/termenv"
+
 	pipeline_errors "go.woodpecker-ci.org/woodpecker/v2/pipeline/errors"
 )
 
