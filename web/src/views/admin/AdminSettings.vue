@@ -39,6 +39,7 @@ import AdminAgentsTab from '~/components/admin/settings/AdminAgentsTab.vue';
 import AdminInfoTab from '~/components/admin/settings/AdminInfoTab.vue';
 import AdminOrgsTab from '~/components/admin/settings/AdminOrgsTab.vue';
 import AdminQueueTab from '~/components/admin/settings/AdminQueueTab.vue';
+import AdminRegistriesTab from '~/components/admin/settings/AdminRegistriesTab.vue';
 import AdminReposTab from '~/components/admin/settings/AdminReposTab.vue';
 import AdminSecretsTab from '~/components/admin/settings/AdminSecretsTab.vue';
 import AdminUsersTab from '~/components/admin/settings/AdminUsersTab.vue';
