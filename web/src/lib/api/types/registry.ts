@@ -3,4 +3,5 @@ export interface Registry {
   address: string;
   username: string;
   password: string;
+  readonly: boolean;
 }

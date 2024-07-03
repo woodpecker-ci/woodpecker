@@ -80,6 +80,7 @@ func parseDockerConfig(path string) ([]*model.Registry, error) {
 			Address:  key,
 			Username: auth.Username,
 			Password: auth.Password,
+			ReadOnly: true,
 		})
 	}
 

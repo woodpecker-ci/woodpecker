@@ -14,6 +14,7 @@ declare module 'vue' {
     AdminOrgsTab: typeof import('./src/components/admin/settings/AdminOrgsTab.vue')['default']
     AdminQueueStats: typeof import('./src/components/admin/settings/queue/AdminQueueStats.vue')['default']
     AdminQueueTab: typeof import('./src/components/admin/settings/AdminQueueTab.vue')['default']
+    AdminRegistriesTab: typeof import('./src/components/admin/settings/AdminRegistriesTab.vue')['default']
     AdminReposTab: typeof import('./src/components/admin/settings/AdminReposTab.vue')['default']
     AdminSecretsTab: typeof import('./src/components/admin/settings/AdminSecretsTab.vue')['default']
     AdminUsersTab: typeof import('./src/components/admin/settings/AdminUsersTab.vue')['default']

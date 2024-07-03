@@ -34,6 +34,7 @@ type Registry struct {
 	Address  string `json:"address"  xorm:"NOT NULL UNIQUE(s) INDEX 'address'"`
 	Username string `json:"username" xorm:"varchar(2000) 'username'"`
 	Password string `json:"password" xorm:"TEXT 'password'"`
+	ReadOnly bool   `json:"readonly" xorm:"-"`
 } //	@name Registry
 
 func (r Registry) TableName() string {
@@ -78,5 +79,6 @@ func (r *Registry) Copy() *Registry {
 		RepoID:   r.RepoID,
 		Address:  r.Address,
 		Username: r.Username,
+		ReadOnly: r.ReadOnly,
 	}
 }

@@ -261,6 +261,10 @@
         "desc": "Global secrets can be passed to all repositories individual pipeline steps at runtime as environmental variables.",
         "warning": "These secrets will be available for all server users."
       },
+      "registries": {
+        "desc": "Global registry credentials can be added to use private images for all server's pipelines.",
+        "warning": "These registry creditentials will be available for all server users."
+      },
       "agents": {
         "agents": "Agents",
         "desc": "Agents registered for this server",
@@ -432,6 +436,7 @@
     "show": "Show registries",
     "save": "Save registry",
     "add": "Add registry",
+    "view": "View registry",
     "edit": "Edit registry",
     "delete": "Delete registry",
     "delete_confirm": "Do you really want to delete this registry?",

@@ -202,6 +202,23 @@ export default class WoodpeckerClient extends ApiClient {
     return this._delete(`/api/orgs/${orgId}/registry/${registryAddress}`);
   }
 
+  getGlobalRegistryList(opts?: PaginationOptions): Promise<Registry[] | null> {
+    const query = encodeQueryString(opts);
+    return this._get(`/api/registry?${query}`) as Promise<Registry[] | null>;
+  }
+
+  createGlobalRegistry(registry: Partial<Registry>): Promise<unknown> {
+    return this._post(`/api/registry`, registry);
+  }
+
+  updateGlobalRegistry(registry: Partial<Registry>): Promise<unknown> {
+    return this._patch(`/api/registry/${registry.address}`, registry);
+  }
+
+  deleteGlobalRegistry(registryAddress: string): Promise<unknown> {
+    return this._delete(`/api/registry/${registryAddress}`);
+  }
+
   getCronList(repoId: number, opts?: PaginationOptions): Promise<Cron[] | null> {
     const query = encodeQueryString(opts);
     return this._get(`/api/repos/${repoId}/cron?${query}`) as Promise<Cron[] | null>;

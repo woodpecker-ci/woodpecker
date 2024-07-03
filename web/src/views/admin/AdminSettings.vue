@@ -9,6 +9,9 @@
     <Tab id="secrets" :title="$t('secrets.secrets')">
       <AdminSecretsTab />
     </Tab>
+    <Tab id="registries" :title="$t('registries.registries')">
+      <AdminRegistriesTab />
+    </Tab>
     <Tab id="repos" :title="$t('admin.settings.repos.repos')">
       <AdminReposTab />
     </Tab>

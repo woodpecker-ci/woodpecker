@@ -8,19 +8,19 @@
           v-model="innerValue.address"
           :placeholder="$t('registries.address.desc')"
           required
-          :disabled="isEditing"
+          :disabled="isEditing || isReadOnly"
         />
       </InputField>
 
       <InputField v-slot="{ id }" :label="$t('username')">
-        <TextField :id="id" v-model="innerValue.username" :placeholder="$t('username')" required />
+        <TextField :id="id" v-model="innerValue.username" :placeholder="$t('username')" required :disabled="isReadOnly" />
       </InputField>
 
-      <InputField v-slot="{ id }" :label="$t('password')">
+      <InputField v-if="!isReadOnly" v-slot="{ id }" :label="$t('password')">
         <TextField :id="id" v-model="innerValue.password" :placeholder="$t('password')" :required="!isEditing" />
       </InputField>
 
-      <div class="flex gap-2">
+      <div v-if="!isReadOnly" class="flex gap-2">
         <Button type="button" color="gray" :text="$t('cancel')" @click="$emit('cancel')" />
         <Button
           type="submit"
@@ -60,6 +60,7 @@ const innerValue = computed({
   },
 });
 const isEditing = computed(() => !!innerValue.value?.id);
+const isReadOnly = computed(() => !!innerValue.value?.readonly);
 
 function save() {
   if (!innerValue.value) {

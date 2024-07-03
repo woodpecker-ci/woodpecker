@@ -4801,6 +4801,9 @@ const docTemplate = `{
                 "password": {
                     "type": "string"
                 },
+                "readonly": {
+                    "type": "boolean"
+                },
                 "repo_id": {
                     "type": "integer"
                 },
