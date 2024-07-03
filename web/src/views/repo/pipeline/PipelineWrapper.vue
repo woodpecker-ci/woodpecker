@@ -10,14 +10,12 @@
   >
     <template #title>
       <span>
-        <router-link :to="{ name: 'org', params: { orgId: repo.org_id } }" class="hover:underline">
-          {{ repo.owner }}
-          <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
-        </router-link>
+        <router-link :to="{ name: 'org', params: { orgId: repo.org_id } }" class="hover:underline">{{
+          repo.owner
+          /* eslint-disable-next-line @intlify/vue-i18n/no-raw-text */
+        }}</router-link>
         /
-        <router-link :to="{ name: 'repo' }" class="hover:underline">
-          {{ repo.name }}
-        </router-link>
+        <router-link :to="{ name: 'repo' }" class="hover:underline">{{ repo.name }}</router-link>
       </span>
     </template>
 

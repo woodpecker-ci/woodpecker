@@ -132,6 +132,8 @@ type (
 	// Registry represents a docker registry with credentials.
 	Registry struct {
 		ID       int64  `json:"id"`
+		OrgID    int64  `json:"org_id"`
+		RepoID   int64  `json:"repo_id"`
 		Address  string `json:"address"`
 		Username string `json:"username"`
 		Password string `json:"password,omitempty"`
