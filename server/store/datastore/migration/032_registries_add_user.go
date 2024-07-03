@@ -19,26 +19,9 @@ import (
 	"xorm.io/xorm"
 )
 
-// Registry represents a docker registry with credentials.
-type RegistryV032 struct {
-	ID       int64  `json:"id"       xorm:"pk autoincr 'id'"`
-	OrgID    int64  `json:"org_id"   xorm:"NOT NULL DEFAULT 0 UNIQUE(s) INDEX 'org_id'"`
-	RepoID   int64  `json:"repo_id"  xorm:"NOT NULL DEFAULT 0 UNIQUE(s) INDEX 'repo_id'"`
-	Address  string `json:"address"  xorm:"NOT NULL UNIQUE(s) INDEX 'address'"`
-	Username string `json:"username" xorm:"varchar(2000) 'username'"`
-	Password string `json:"password" xorm:"TEXT 'password'"`
-} //	@name Registry
-
-func (r RegistryV032) TableName() string {
-	return "registries"
-}
-
-var alterTableRegistriesAddOrgIDCol = xormigrate.Migration{
-	ID: "alter-table-add-registries-org-id",
+var alterTableRegistriesFixRequiredFields = xormigrate.Migration{
+	ID: "alter-table-registries-fix-required-fields",
 	MigrateSession: func(sess *xorm.Session) error {
-		if err := sess.Sync2(new(RegistryV032)); err != nil {
-			return err
-		}
 		if err := alterColumnDefault(sess, "registries", "repo_id", "0"); err != nil {
 			return err
 		}
