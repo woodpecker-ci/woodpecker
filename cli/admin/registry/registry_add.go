@@ -71,5 +71,5 @@ func registryCreate(c *cli.Context) error {
 	}
 
 	_, err = client.GlobalRegistryCreate(registry)
-	return nil
+	return err
 }
