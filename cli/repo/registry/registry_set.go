@@ -15,50 +15,70 @@
 package registry
 
 import (
+	"os"
+	"strings"
+
 	"github.com/urfave/cli/v2"
 
 	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
 	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker"
 )
 
-var registryDeleteCmd = &cli.Command{
-	Name:      "rm",
-	Usage:     "remove a registry",
+var registryUpdateCmd = &cli.Command{
+	Name:      "update",
+	Usage:     "update a registry",
 	ArgsUsage: "[repo-id|repo-full-name]",
-	Action:    registryDelete,
+	Action:    registryUpdate,
 	Flags: []cli.Flag{
-		&cli.BoolFlag{
-			Name:  "global",
-			Usage: "global registry",
-		},
-		common.OrgFlag,
 		common.RepoFlag,
 		&cli.StringFlag{
 			Name:  "hostname",
 			Usage: "registry hostname",
 			Value: "docker.io",
 		},
+		&cli.StringFlag{
+			Name:  "username",
+			Usage: "registry username",
+		},
+		&cli.StringFlag{
+			Name:  "password",
+			Usage: "registry password",
+		},
 	},
 }
 
-func registryDelete(c *cli.Context) error {
-	hostname := c.String("hostname")
+func registryUpdate(c *cli.Context) error {
+	var (
+		hostname = c.String("hostname")
+		username = c.String("username")
+		password = c.String("password")
+	)
 
 	client, err := internal.NewClient(c)
 	if err != nil {
 		return err
 	}
 
-	global, orgID, repoID, err := parseTargetArgs(client, c)
+	registry := &woodpecker.Registry{
+		Address:  hostname,
+		Username: username,
+		Password: password,
+	}
+	if strings.HasPrefix(registry.Password, "@") {
+		path := strings.TrimPrefix(registry.Password, "@")
+		out, err := os.ReadFile(path)
+		if err != nil {
+			return err
+		}
+		registry.Password = string(out)
+	}
+
+	repoID, err := parseTargetArgs(client, c)
 	if err != nil {
 		return err
 	}
 
-	if global {
-		return client.GlobalRegistryDelete(hostname)
-	}
-	if orgID != -1 {
-		return client.OrgRegistryDelete(orgID, hostname)
-	}
-	return client.RegistryDelete(repoID, hostname)
+	_, err = client.RegistryUpdate(repoID, registry)
+	return err
 }

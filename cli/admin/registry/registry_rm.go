@@ -1,4 +1,4 @@
-// Copyright 2023 Woodpecker Authors
+// Copyright 2024 Woodpecker Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,27 +12,34 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package repo
+package registry
 
 import (
 	"github.com/urfave/cli/v2"
 
-	"go.woodpecker-ci.org/woodpecker/v2/cli/repo/registry"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
 )
 
-// Command exports the repository command.
-var Command = &cli.Command{
-	Name:  "repo",
-	Usage: "manage repositories",
-	Subcommands: []*cli.Command{
-		repoListCmd,
-		repoInfoCmd,
-		repoAddCmd,
-		repoUpdateCmd,
-		repoRemoveCmd,
-		repoRepairCmd,
-		repoChownCmd,
-		repoSyncCmd,
-		registry.Command,
+var registryDeleteCmd = &cli.Command{
+	Name:   "rm",
+	Usage:  "remove a registry",
+	Action: registryDelete,
+	Flags: []cli.Flag{
+		&cli.StringFlag{
+			Name:  "hostname",
+			Usage: "registry hostname",
+			Value: "docker.io",
+		},
 	},
+}
+
+func registryDelete(c *cli.Context) error {
+	hostname := c.String("hostname")
+
+	client, err := internal.NewClient(c)
+	if err != nil {
+		return err
+	}
+
+	return client.GlobalRegistryDelete(hostname)
 }

@@ -1,4 +1,4 @@
-// Copyright 2022 Woodpecker Authors
+// Copyright 2024 Woodpecker Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -22,21 +22,15 @@ import (
 
 	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
 	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
-	"go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker"
 )
 
 var registryListCmd = &cli.Command{
 	Name:      "ls",
 	Usage:     "list registries",
-	ArgsUsage: "[repo-id|repo-full-name]",
+	ArgsUsage: "[org-id|org-full-name]",
 	Action:    registryList,
 	Flags: []cli.Flag{
-		&cli.BoolFlag{
-			Name:  "global",
-			Usage: "global registry",
-		},
 		common.OrgFlag,
-		common.RepoFlag,
 		common.FormatFlag(tmplRegistryList, true),
 	},
 }
@@ -49,28 +43,14 @@ func registryList(c *cli.Context) error {
 		return err
 	}
 
-	global, orgID, repoID, err := parseTargetArgs(client, c)
+	orgID, err := parseTargetArgs(client, c)
 	if err != nil {
 		return err
 	}
 
-	var list []*woodpecker.Registry
-	switch {
-	case global:
-		list, err = client.GlobalRegistryList()
-		if err != nil {
-			return err
-		}
-	case orgID != -1:
-		list, err = client.OrgRegistryList(orgID)
-		if err != nil {
-			return err
-		}
-	default:
-		list, err = client.RegistryList(repoID)
-		if err != nil {
-			return err
-		}
+	list, err := client.OrgRegistryList(orgID)
+	if err != nil {
+		return err
 	}
 
 	tmpl, err := template.New("_").Parse(format)
