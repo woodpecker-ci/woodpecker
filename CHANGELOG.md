@@ -1,10 +1,10 @@
 # Changelog
 
-## [2.7.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.7.0) - 2024-07-02
+## [2.7.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.7.0) - 2024-07-03
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @anbraten, @dvjn, @qwerty287, @tongjicoder, @zc-devs
+@6543, @anbraten, @dvjn, @lafriks, @qwerty287, @tongjicoder, @zc-devs
 
 ### 🔒 Security
 
@@ -14,6 +14,7 @@
 
 ### ✨ Features
 
+- Global and organization registries [[#1672](https://github.com/woodpecker-ci/woodpecker/pull/1672)]
 - Cli get repo from git remote [[#3830](https://github.com/woodpecker-ci/woodpecker/pull/3830)]
 - Add api for forges [[#3733](https://github.com/woodpecker-ci/woodpecker/pull/3733)]
 
