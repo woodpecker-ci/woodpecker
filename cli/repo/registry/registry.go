@@ -15,8 +15,6 @@
 package registry
 
 import (
-	"fmt"
-
 	"github.com/urfave/cli/v2"
 
 	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
@@ -42,18 +40,5 @@ func parseTargetArgs(client woodpecker.Client, c *cli.Context) (repoID int64, er
 		repoIDOrFullName = c.Args().First()
 	}
 
-	if repoIDOrFullName == "" {
-		if err := cli.ShowSubcommandHelp(c); err != nil {
-			return -1, err
-		}
-
-		return -1, fmt.Errorf("missing arguments")
-	}
-
-	repoID, err = internal.ParseRepo(client, repoIDOrFullName)
-	if err != nil {
-		return -1, err
-	}
-
-	return repoID, nil
+	return internal.ParseRepo(client, repoIDOrFullName)
 }
