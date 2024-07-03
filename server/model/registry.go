@@ -41,17 +41,17 @@ func (r Registry) TableName() string {
 	return "registries"
 }
 
-// Global secret.
+// Global registry.
 func (r Registry) IsGlobal() bool {
 	return r.RepoID == 0 && r.OrgID == 0
 }
 
-// Organization secret.
+// Organization registry.
 func (r Registry) IsOrganization() bool {
 	return r.RepoID == 0 && r.OrgID != 0
 }
 
-// Repository secret.
+// Repository registry.
 func (r Registry) IsRepository() bool {
 	return r.RepoID != 0 && r.OrgID == 0
 }
