@@ -36,8 +36,8 @@ func (d *db) RegistryList(repo *model.Repo, p *model.ListOptions) ([]*model.Regi
 	return d.store.RegistryList(repo, false, p)
 }
 
-func (b *db) RegistryListPipeline(repo *model.Repo, _ *model.Pipeline) ([]*model.Registry, error) {
-	r, err := b.store.RegistryList(repo, true, &model.ListOptions{All: true})
+func (d *db) RegistryListPipeline(repo *model.Repo, _ *model.Pipeline) ([]*model.Registry, error) {
+	r, err := d.store.RegistryList(repo, true, &model.ListOptions{All: true})
 	if err != nil {
 		return nil, err
 	}
