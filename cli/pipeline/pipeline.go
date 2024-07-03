@@ -77,7 +77,7 @@ func pipelineOutput(c *cli.Context, resources []woodpecker.Pipeline, fd ...io.Wr
 		fallthrough
 	default:
 		table := output.NewTable(out)
-		cols := []string{"Number", "Status", "Event", "Branch", "Commit", "Author"}
+		cols := []string{"Number", "Status", "Event", "Branch", "Message", "Author"}
 
 		if len(outOpt) > 0 {
 			cols = outOpt
