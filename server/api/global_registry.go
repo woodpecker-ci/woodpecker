@@ -27,7 +27,7 @@ import (
 // GetGlobalRegistryList
 //
 //	@Summary	List global registries
-//	@Router		/registry [get]
+//	@Router		/registries [get]
 //	@Produce	json
 //	@Success	200	{array}	Registry
 //	@Tags		Registries
@@ -52,7 +52,7 @@ func GetGlobalRegistryList(c *gin.Context) {
 // GetGlobalRegistry
 //
 //	@Summary	Get a global registry by name
-//	@Router		/registry/{registry} [get]
+//	@Router		/registries/{registry} [get]
 //	@Produce	json
 //	@Success	200	{object}	Registry
 //	@Tags		Registries
@@ -72,7 +72,7 @@ func GetGlobalRegistry(c *gin.Context) {
 // PostGlobalRegistry
 //
 //	@Summary	Create a global registry
-//	@Router		/registry [post]
+//	@Router		/registries [post]
 //	@Produce	json
 //	@Success	200	{object}	Registry
 //	@Tags		Registries
@@ -105,7 +105,7 @@ func PostGlobalRegistry(c *gin.Context) {
 // PatchGlobalRegistry
 //
 //	@Summary	Update a global registry by name
-//	@Router		/registry/{registry} [patch]
+//	@Router		/registries/{registry} [patch]
 //	@Produce	json
 //	@Success	200	{object}	Registry
 //	@Tags		Registries
@@ -153,7 +153,7 @@ func PatchGlobalRegistry(c *gin.Context) {
 // DeleteGlobalRegistry
 //
 //	@Summary	Delete a global registry by name
-//	@Router		/registry/{registry} [delete]
+//	@Router		/registries/{registry} [delete]
 //	@Produce	plain
 //	@Success	204
 //	@Tags		Registries

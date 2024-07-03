@@ -7,8 +7,8 @@ const (
 	pathOrgLookup     = "%s/api/orgs/lookup/%s"
 	pathOrgSecrets    = "%s/api/orgs/%d/secrets"
 	pathOrgSecret     = "%s/api/orgs/%d/secrets/%s"
-	pathOrgRegistries = "%s/api/orgs/%d/registry"
-	pathOrgRegistry   = "%s/api/orgs/%d/registry/%s"
+	pathOrgRegistries = "%s/api/orgs/%d/registries"
+	pathOrgRegistry   = "%s/api/orgs/%d/registries/%s"
 )
 
 // Org returns an organization by id.

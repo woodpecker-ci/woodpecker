@@ -68,11 +68,11 @@ func apiRoutes(e *gin.RouterGroup) {
 					org.PATCH("/secrets/:secret", api.PatchOrgSecret)
 					org.DELETE("/secrets/:secret", api.DeleteOrgSecret)
 
-					org.GET("/registry", api.GetOrgRegistryList)
-					org.POST("/registry", api.PostOrgRegistry)
-					org.GET("/registry/:registry", api.GetOrgRegistry)
-					org.PATCH("/registry/:registry", api.PatchOrgRegistry)
-					org.DELETE("/registry/:registry", api.DeleteOrgRegistry)
+					org.GET("/registries", api.GetOrgRegistryList)
+					org.POST("/registries", api.PostOrgRegistry)
+					org.GET("/registries/:registry", api.GetOrgRegistry)
+					org.PATCH("/registries/:registry", api.PatchOrgRegistry)
+					org.DELETE("/registries/:registry", api.DeleteOrgRegistry)
 				}
 			}
 		}
@@ -125,11 +125,11 @@ func apiRoutes(e *gin.RouterGroup) {
 					repo.DELETE("/secrets/:secret", session.MustPush, api.DeleteSecret)
 
 					// requires push permissions
-					repo.GET("/registry", session.MustPush, api.GetRegistryList)
-					repo.POST("/registry", session.MustPush, api.PostRegistry)
-					repo.GET("/registry/:registry", session.MustPush, api.GetRegistry)
-					repo.PATCH("/registry/:registry", session.MustPush, api.PatchRegistry)
-					repo.DELETE("/registry/:registry", session.MustPush, api.DeleteRegistry)
+					repo.GET("/registries", session.MustPush, api.GetRegistryList)
+					repo.POST("/registries", session.MustPush, api.PostRegistry)
+					repo.GET("/registries/:registry", session.MustPush, api.GetRegistry)
+					repo.PATCH("/registries/:registry", session.MustPush, api.PatchRegistry)
+					repo.DELETE("/registries/:registry", session.MustPush, api.DeleteRegistry)
 
 					// requires push permissions
 					repo.GET("/cron", session.MustPush, api.GetCronList)
@@ -192,13 +192,13 @@ func apiRoutes(e *gin.RouterGroup) {
 		}
 
 		// global registries can be read without actual values by any user
-		readGlobalRegistries := apiBase.Group("/registry")
+		readGlobalRegistries := apiBase.Group("/registries")
 		{
 			readGlobalRegistries.Use(session.MustUser())
 			readGlobalRegistries.GET("", api.GetGlobalRegistryList)
 			readGlobalRegistries.GET("/:registry", api.GetGlobalRegistry)
 		}
-		registries := apiBase.Group("/registry")
+		registries := apiBase.Group("/registries")
 		{
 			registries.Use(session.MustAdmin())
 			registries.POST("", api.PostGlobalRegistry)

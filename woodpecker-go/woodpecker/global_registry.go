@@ -3,8 +3,8 @@ package woodpecker
 import "fmt"
 
 const (
-	pathGlobalRegistries = "%s/api/registry"
-	pathGlobalRegistry   = "%s/api/registry/%s"
+	pathGlobalRegistries = "%s/api/registries"
+	pathGlobalRegistry   = "%s/api/registries/%s"
 )
 
 // GlobalRegistry returns an global registry by name.

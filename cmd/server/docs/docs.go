@@ -1123,7 +1123,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/orgs/{org_id}/registry": {
+        "/orgs/{org_id}/registries": {
             "get": {
                 "produces": [
                     "application/json"
@@ -1219,7 +1219,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/orgs/{org_id}/registry/{registry}": {
+        "/orgs/{org_id}/registries/{registry}": {
             "get": {
                 "produces": [
                     "application/json"
@@ -1720,7 +1720,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/registry": {
+        "/registries": {
             "get": {
                 "produces": [
                     "application/json"
@@ -1802,7 +1802,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/registry/{registry}": {
+        "/registries/{registry}": {
             "get": {
                 "produces": [
                     "application/json"
@@ -3218,7 +3218,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/repos/{repo_id}/registry": {
+        "/repos/{repo_id}/registries": {
             "get": {
                 "produces": [
                     "application/json"
@@ -3314,7 +3314,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/repos/{repo_id}/registry/{registry}": {
+        "/repos/{repo_id}/registries/{registry}": {
             "get": {
                 "produces": [
                     "application/json"

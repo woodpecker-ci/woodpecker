@@ -28,7 +28,7 @@ import (
 // GetOrgRegistry
 //
 //	@Summary	Get a organization registry by address
-//	@Router		/orgs/{org_id}/registry/{registry} [get]
+//	@Router		/orgs/{org_id}/registries/{registry} [get]
 //	@Produce	json
 //	@Success	200	{object}	Registry
 //	@Tags		Organization registries
@@ -56,7 +56,7 @@ func GetOrgRegistry(c *gin.Context) {
 // GetOrgRegistryList
 //
 //	@Summary	List organization registries
-//	@Router		/orgs/{org_id}/registry [get]
+//	@Router		/orgs/{org_id}/registries [get]
 //	@Produce	json
 //	@Success	200	{array}	Registry
 //	@Tags		Organization registries
@@ -88,7 +88,7 @@ func GetOrgRegistryList(c *gin.Context) {
 // PostOrgRegistry
 //
 //	@Summary	Create an organization registry
-//	@Router		/orgs/{org_id}/registry [post]
+//	@Router		/orgs/{org_id}/registries [post]
 //	@Produce	json
 //	@Success	200	{object}	Registry
 //	@Tags		Organization registries
@@ -129,7 +129,7 @@ func PostOrgRegistry(c *gin.Context) {
 // PatchOrgRegistry
 //
 //	@Summary	Update an organization registry by name
-//	@Router		/orgs/{org_id}/registry/{registry} [patch]
+//	@Router		/orgs/{org_id}/registries/{registry} [patch]
 //	@Produce	json
 //	@Success	200	{object}	Registry
 //	@Tags		Organization registries
@@ -138,7 +138,7 @@ func PostOrgRegistry(c *gin.Context) {
 //	@Param		registry			path	string		true	"the registry's name"
 //	@Param		registryData	body	Registry	true	"the update registry data"
 func PatchOrgRegistry(c *gin.Context) {
-	name := c.Param("registry")
+	addr := c.Param("registry")
 	orgID, err := strconv.ParseInt(c.Param("org_id"), 10, 64)
 	if err != nil {
 		c.String(http.StatusBadRequest, "Error parsing org id. %s", err)
@@ -153,7 +153,7 @@ func PatchOrgRegistry(c *gin.Context) {
 	}
 
 	registryService := server.Config.Services.Manager.RegistryService()
-	registry, err := registryService.OrgRegistryFind(orgID, name)
+	registry, err := registryService.OrgRegistryFind(orgID, addr)
 	if err != nil {
 		handleDBError(c, err)
 		return
@@ -183,7 +183,7 @@ func PatchOrgRegistry(c *gin.Context) {
 // DeleteOrgRegistry
 //
 //	@Summary	Delete an organization registry by name
-//	@Router		/orgs/{org_id}/registry/{registry} [delete]
+//	@Router		/orgs/{org_id}/registries/{registry} [delete]
 //	@Produce	plain
 //	@Success	204
 //	@Tags		Organization registries
@@ -191,7 +191,7 @@ func PatchOrgRegistry(c *gin.Context) {
 //	@Param		org_id			path	string	true	"the org's id"
 //	@Param		registry		path	string	true	"the registry's name"
 func DeleteOrgRegistry(c *gin.Context) {
-	name := c.Param("registry")
+	addr := c.Param("registry")
 	orgID, err := strconv.ParseInt(c.Param("org_id"), 10, 64)
 	if err != nil {
 		c.String(http.StatusBadRequest, "Error parsing org id. %s", err)
@@ -199,7 +199,7 @@ func DeleteOrgRegistry(c *gin.Context) {
 	}
 
 	registryService := server.Config.Services.Manager.RegistryService()
-	if err := registryService.OrgRegistryDelete(orgID, name); err != nil {
+	if err := registryService.OrgRegistryDelete(orgID, addr); err != nil {
 		handleDBError(c, err)
 		return
 	}
