@@ -13,7 +13,13 @@
       </InputField>
 
       <InputField v-slot="{ id }" :label="$t('username')">
-        <TextField :id="id" v-model="innerValue.username" :placeholder="$t('username')" required :disabled="isReadOnly" />
+        <TextField
+          :id="id"
+          v-model="innerValue.username"
+          :placeholder="$t('username')"
+          required
+          :disabled="isReadOnly"
+        />
       </InputField>
 
       <InputField v-if="!isReadOnly" v-slot="{ id }" :label="$t('password')">

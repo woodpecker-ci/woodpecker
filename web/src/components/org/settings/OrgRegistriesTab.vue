@@ -1,7 +1,16 @@
 <template>
-  <Settings :title="$t('registries.registries')" :desc="$t('org.settings.registries.desc')" docs-url="docs/usage/registries">
+  <Settings
+    :title="$t('registries.registries')"
+    :desc="$t('org.settings.registries.desc')"
+    docs-url="docs/usage/registries"
+  >
     <template #titleActions>
-      <Button v-if="selectedRegistry" :text="$t('registries.show')" start-icon="back" @click="selectedRegistry = undefined" />
+      <Button
+        v-if="selectedRegistry"
+        :text="$t('registries.show')"
+        start-icon="back"
+        @click="selectedRegistry = undefined"
+      />
       <Button v-else :text="$t('registries.add')" start-icon="plus" @click="showAddRegistry" />
     </template>
 

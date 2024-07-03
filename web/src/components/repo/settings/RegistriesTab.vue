@@ -1,11 +1,12 @@
 <template>
-  <Settings
-    :title="$t('registries.credentials')"
-    :desc="$t('registries.desc')"
-    docs-url="docs/usage/registries"
-  >
+  <Settings :title="$t('registries.credentials')" :desc="$t('registries.desc')" docs-url="docs/usage/registries">
     <template #titleActions>
-      <Button v-if="selectedRegistry" :text="$t('registries.show')" start-icon="back" @click="selectedRegistry = undefined" />
+      <Button
+        v-if="selectedRegistry"
+        :text="$t('registries.show')"
+        start-icon="back"
+        @click="selectedRegistry = undefined"
+      />
       <Button v-else :text="$t('registries.add')" start-icon="plus" @click="showAddRegistry" />
     </template>
 
@@ -81,9 +82,7 @@ const { doSubmit: createRegistry, isLoading: isSaving } = useAsyncAction(async (
     await apiClient.createRegistry(repo.value.id, selectedRegistry.value);
   }
   notifications.notify({
-    title: isEditingRegistry.value
-      ? i18n.t('registries.saved')
-      : i18n.t('registries.created'),
+    title: isEditingRegistry.value ? i18n.t('registries.saved') : i18n.t('registries.created'),
     type: 'success',
   });
   selectedRegistry.value = undefined;

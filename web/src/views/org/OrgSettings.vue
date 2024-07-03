@@ -27,8 +27,8 @@ import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 
 import Tab from '~/components/layout/scaffold/Tab.vue';
-import OrgSecretsTab from '~/components/org/settings/OrgSecretsTab.vue';
 import OrgRegistriesTab from '~/components/org/settings/OrgRegistriesTab.vue';
+import OrgSecretsTab from '~/components/org/settings/OrgSecretsTab.vue';
 import { inject } from '~/compositions/useInjectProvide';
 import useNotifications from '~/compositions/useNotifications';
 import { useRouteBack } from '~/compositions/useRouteBack';

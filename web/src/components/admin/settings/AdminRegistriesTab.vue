@@ -6,7 +6,12 @@
     :warning="$t('admin.settings.registries.warning')"
   >
     <template #titleActions>
-      <Button v-if="selectedRegistry" :text="$t('registries.show')" start-icon="back" @click="selectedRegistry = undefined" />
+      <Button
+        v-if="selectedRegistry"
+        :text="$t('registries.show')"
+        start-icon="back"
+        @click="selectedRegistry = undefined"
+      />
       <Button v-else :text="$t('registries.add')" start-icon="plus" @click="showAddRegistry" />
     </template>
 

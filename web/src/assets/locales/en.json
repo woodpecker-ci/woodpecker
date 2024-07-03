@@ -443,7 +443,7 @@
     "created": "Registry credentials created",
     "saved": "Registry credentials saved",
     "deleted": "Registry credentials deleted"
-},
+  },
   "default": "default",
   "info": "Info",
   "running_version": "You are running Woodpecker {0}",
