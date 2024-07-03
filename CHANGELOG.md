@@ -18,8 +18,17 @@
 - Cli get repo from git remote [[#3830](https://github.com/woodpecker-ci/woodpecker/pull/3830)]
 - Add api for forges [[#3733](https://github.com/woodpecker-ci/woodpecker/pull/3733)]
 
+### 🐛 Bug Fixes
+
+- Ignore warnings for cli exec [[#3868](https://github.com/woodpecker-ci/woodpecker/pull/3868)]
+- Correct favicon states [[#3832](https://github.com/woodpecker-ci/woodpecker/pull/3832)]
+- Cleanup of the login flow and tests [[#3810](https://github.com/woodpecker-ci/woodpecker/pull/3810)]
+- Fix newlines in logs [[#3808](https://github.com/woodpecker-ci/woodpecker/pull/3808)]
+- Fix authentication error handling [[#3807](https://github.com/woodpecker-ci/woodpecker/pull/3807)]
+
 ### 📈 Enhancement
 
+- Get default branch and show message in pipeline list [[#3867](https://github.com/woodpecker-ci/woodpecker/pull/3867)]
 - Add timestamp for last work done by agent [[#3844](https://github.com/woodpecker-ci/woodpecker/pull/3844)]
 - Adjust logger types [[#3859](https://github.com/woodpecker-ci/woodpecker/pull/3859)]
 - Cleanup state reporting [[#3850](https://github.com/woodpecker-ci/woodpecker/pull/3850)]
@@ -38,13 +47,6 @@
 - Add "Docker Tags" Plugin [[#3796](https://github.com/woodpecker-ci/woodpecker/pull/3796)]
 - chore(deps): update dependency marked to v13 [[#3792](https://github.com/woodpecker-ci/woodpecker/pull/3792)]
 - chore: fix some comments [[#3788](https://github.com/woodpecker-ci/woodpecker/pull/3788)]
-
-### 🐛 Bug Fixes
-
-- Correct favicon states [[#3832](https://github.com/woodpecker-ci/woodpecker/pull/3832)]
-- Cleanup of the login flow and tests [[#3810](https://github.com/woodpecker-ci/woodpecker/pull/3810)]
-- Fix newlines in logs [[#3808](https://github.com/woodpecker-ci/woodpecker/pull/3808)]
-- Fix authentication error handling [[#3807](https://github.com/woodpecker-ci/woodpecker/pull/3807)]
 
 ### Misc
 
