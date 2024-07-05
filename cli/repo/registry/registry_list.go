@@ -37,25 +37,23 @@ var registryListCmd = &cli.Command{
 }
 
 func registryList(ctx context.Context, c *cli.Command) error {
-	var (
-		format           = c.String("format") + "\n"
-		repoIDOrFullName = c.String("repository")
-	)
-	if repoIDOrFullName == "" {
-		repoIDOrFullName = c.Args().First()
-	}
+	format := c.String("format") + "\n"
+
 	client, err := internal.NewClient(ctx, c)
 	if err != nil {
 		return err
 	}
-	repoID, err := internal.ParseRepo(client, repoIDOrFullName)
+
+	repoID, err := parseTargetArgs(client, c)
 	if err != nil {
 		return err
 	}
+
 	list, err := client.RegistryList(repoID)
 	if err != nil {
 		return err
 	}
+
 	tmpl, err := template.New("_").Parse(format)
 	if err != nil {
 		return err

@@ -22,7 +22,7 @@ func TestPipelineOutput(t *testing.T) {
 		{
 			name:     "table output with default columns",
 			args:     []string{},
-			expected: "NUMBER  STATUS   EVENT  BRANCH  COMMIT  AUTHOR\n1       success  push   main    abcdef  John Doe\n",
+			expected: "NUMBER  STATUS   EVENT  BRANCH  MESSAGE  AUTHOR\n1       success  push   main    message  John Doe\n",
 		},
 		{
 			name:     "table output with custom columns",
@@ -32,7 +32,7 @@ func TestPipelineOutput(t *testing.T) {
 		{
 			name:     "table output with no header",
 			args:     []string{"output", "--output-no-headers"},
-			expected: "1  success  push  main  abcdef  John Doe\n",
+			expected: "1  success  push  main  message  John Doe\n",
 		},
 		{
 			name:     "go-template output",
@@ -48,12 +48,12 @@ func TestPipelineOutput(t *testing.T) {
 
 	pipelines := []woodpecker.Pipeline{
 		{
-			Number: 1,
-			Status: "success",
-			Event:  "push",
-			Branch: "main",
-			Commit: "abcdef",
-			Author: "John Doe",
+			Number:  1,
+			Status:  "success",
+			Event:   "push",
+			Branch:  "main",
+			Message: "message",
+			Author:  "John Doe",
 		},
 	}
 

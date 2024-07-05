@@ -31,7 +31,7 @@ import (
 // Command exports the deploy command.
 var Command = &cli.Command{
 	Name:      "deploy",
-	Usage:     "deploy code",
+	Usage:     "trigger a pipeline with the 'deployment' event",
 	ArgsUsage: "<repo-id|repo-full-name> <pipeline> <environment>",
 	Action:    deploy,
 	Flags: []cli.Flag{
@@ -39,7 +39,6 @@ var Command = &cli.Command{
 		&cli.StringFlag{
 			Name:  "branch",
 			Usage: "branch filter",
-			Value: "main",
 		},
 		&cli.StringFlag{
 			Name:  "event",
@@ -74,6 +73,15 @@ func deploy(ctx context.Context, c *cli.Command) error {
 	branch := c.String("branch")
 	event := c.String("event")
 	status := c.String("status")
+
+	if branch == "" {
+		repo, err := client.Repo(repoID)
+		if err != nil {
+			return err
+		}
+
+		branch = repo.DefaultBranch
+	}
 
 	pipelineArg := c.Args().Get(1)
 	var number int64

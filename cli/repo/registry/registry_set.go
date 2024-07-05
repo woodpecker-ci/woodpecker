@@ -26,11 +26,11 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker"
 )
 
-var registryCreateCmd = &cli.Command{
-	Name:      "add",
-	Usage:     "adds a registry",
+var registryUpdateCmd = &cli.Command{
+	Name:      "update",
+	Usage:     "update a registry",
 	ArgsUsage: "[repo-id|repo-full-name]",
-	Action:    registryCreate,
+	Action:    registryUpdate,
 	Flags: []cli.Flag{
 		common.RepoFlag,
 		&cli.StringFlag{
@@ -49,24 +49,18 @@ var registryCreateCmd = &cli.Command{
 	},
 }
 
-func registryCreate(ctx context.Context, c *cli.Command) error {
+func registryUpdate(ctx context.Context, c *cli.Command) error {
 	var (
-		hostname         = c.String("hostname")
-		username         = c.String("username")
-		password         = c.String("password")
-		repoIDOrFullName = c.String("repository")
+		hostname = c.String("hostname")
+		username = c.String("username")
+		password = c.String("password")
 	)
-	if repoIDOrFullName == "" {
-		repoIDOrFullName = c.Args().First()
-	}
+
 	client, err := internal.NewClient(ctx, c)
 	if err != nil {
 		return err
 	}
-	repoID, err := internal.ParseRepo(client, repoIDOrFullName)
-	if err != nil {
-		return err
-	}
+
 	registry := &woodpecker.Registry{
 		Address:  hostname,
 		Username: username,
@@ -80,8 +74,12 @@ func registryCreate(ctx context.Context, c *cli.Command) error {
 		}
 		registry.Password = string(out)
 	}
-	if _, err := client.RegistryCreate(repoID, registry); err != nil {
+
+	repoID, err := parseTargetArgs(client, c)
+	if err != nil {
 		return err
 	}
-	return nil
+
+	_, err = client.RegistryUpdate(repoID, registry)
+	return err
 }

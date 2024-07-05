@@ -1,4 +1,4 @@
-// Copyright 2023 Woodpecker Authors
+// Copyright 2024 Woodpecker Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,17 +19,14 @@ import (
 
 	"github.com/urfave/cli/v3"
 
-	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
 	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
 )
 
 var registryDeleteCmd = &cli.Command{
-	Name:      "rm",
-	Usage:     "remove a registry",
-	ArgsUsage: "[repo-id|repo-full-name]",
-	Action:    registryDelete,
+	Name:   "rm",
+	Usage:  "remove a registry",
+	Action: registryDelete,
 	Flags: []cli.Flag{
-		common.RepoFlag,
 		&cli.StringFlag{
 			Name:  "hostname",
 			Usage: "registry hostname",
@@ -39,20 +36,12 @@ var registryDeleteCmd = &cli.Command{
 }
 
 func registryDelete(ctx context.Context, c *cli.Command) error {
-	var (
-		hostname         = c.String("hostname")
-		repoIDOrFullName = c.String("repository")
-	)
-	if repoIDOrFullName == "" {
-		repoIDOrFullName = c.Args().First()
-	}
+	hostname := c.String("hostname")
+
 	client, err := internal.NewClient(ctx, c)
 	if err != nil {
 		return err
 	}
-	repoID, err := internal.ParseRepo(client, repoIDOrFullName)
-	if err != nil {
-		return err
-	}
-	return client.RegistryDelete(repoID, hostname)
+
+	return client.GlobalRegistryDelete(hostname)
 }

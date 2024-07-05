@@ -1,4 +1,4 @@
-// Copyright 2023 Woodpecker Authors
+// Copyright 2024 Woodpecker Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,21 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package registry
+package admin
 
 import (
 	"github.com/urfave/cli/v3"
+
+	"go.woodpecker-ci.org/woodpecker/v2/cli/admin/registry"
 )
 
-// Command exports the registry command set.
+// Command exports the admin command set.
 var Command = &cli.Command{
-	Name:  "registry",
-	Usage: "manage registries",
+	Name:  "admin",
+	Usage: "administer server settings",
 	Commands: []*cli.Command{
-		registryCreateCmd,
-		registryDeleteCmd,
-		registryUpdateCmd,
-		registryInfoCmd,
-		registryListCmd,
+		registry.Command,
 	},
 }
