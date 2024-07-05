@@ -58,6 +58,7 @@ Then the new database is initialized and all data copied.
 If you don't want to start the server afterwards set `WOODPECKER_OLD_DATABASE_IMPORT_ONLY` to **true**.  
 If the new database already contains data the server will just error and exit.
 :::
+
 ## Database Backups
 
 Woodpecker does not perform database backups. This should be handled by separate third party tools provided by your database vendor of choice.
