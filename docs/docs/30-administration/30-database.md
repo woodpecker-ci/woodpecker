@@ -55,7 +55,7 @@ On next start, a schema migration will run on the **old** database.
 Then the new database is initialized and all data copied.
 
 :::info
-If you don't want to start the server afterwards set `WOODPECKER_OLD_DATABASE_IMPORT_ONLY` to **true**.  
+If you don't want to start the server afterwards set `WOODPECKER_OLD_DATABASE_IMPORT_ONLY` to **true**.
 If the new database already contains data the server will just error and exit.
 :::
 
