@@ -7,7 +7,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
 	"go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker"
 	"go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker/mocks"

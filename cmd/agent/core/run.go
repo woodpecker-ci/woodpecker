@@ -20,7 +20,7 @@ import (
 	// Load config from .env file.
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/rs/zerolog/log"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
 	backend "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 	"go.woodpecker-ci.org/woodpecker/v2/shared/logger"

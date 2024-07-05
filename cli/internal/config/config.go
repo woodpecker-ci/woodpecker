@@ -8,7 +8,7 @@ import (
 
 	"github.com/adrg/xdg"
 	"github.com/rs/zerolog/log"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 	"github.com/zalando/go-keyring"
 )
 
