@@ -26,8 +26,8 @@ import (
 
 // GetRegistry
 //
-//	@Summary	Get a named registry
-//	@Router		/repos/{repo_id}/registry/{registry} [get]
+//	@Summary	Get a registry by name
+//	@Router		/repos/{repo_id}/registries/{registry} [get]
 //	@Produce	json
 //	@Success	200	{object}	Registry
 //	@Tags		Repository registries
@@ -36,10 +36,10 @@ import (
 //	@Param		registry		path	string	true	"the registry name"
 func GetRegistry(c *gin.Context) {
 	repo := session.Repo(c)
-	name := c.Param("registry")
+	addr := c.Param("registry")
 
 	registryService := server.Config.Services.Manager.RegistryServiceFromRepo(repo)
-	registry, err := registryService.RegistryFind(repo, name)
+	registry, err := registryService.RegistryFind(repo, addr)
 	if err != nil {
 		handleDBError(c, err)
 		return
@@ -49,8 +49,8 @@ func GetRegistry(c *gin.Context) {
 
 // PostRegistry
 //
-//	@Summary	Persist/create a registry
-//	@Router		/repos/{repo_id}/registry [post]
+//	@Summary	Create a registry
+//	@Router		/repos/{repo_id}/registries [post]
 //	@Produce	json
 //	@Success	200	{object}	Registry
 //	@Tags		Repository registries
@@ -86,8 +86,8 @@ func PostRegistry(c *gin.Context) {
 
 // PatchRegistry
 //
-//	@Summary	Update a named registry
-//	@Router		/repos/{repo_id}/registry/{registry} [patch]
+//	@Summary	Update a registry by name
+//	@Router		/repos/{repo_id}/registries/{registry} [patch]
 //	@Produce	json
 //	@Success	200	{object}	Registry
 //	@Tags		Repository registries
@@ -96,10 +96,8 @@ func PostRegistry(c *gin.Context) {
 //	@Param		registry		path	string		true	"the registry name"
 //	@Param		registryData	body	Registry	true	"the attributes for the registry"
 func PatchRegistry(c *gin.Context) {
-	var (
-		repo = session.Repo(c)
-		name = c.Param("registry")
-	)
+	repo := session.Repo(c)
+	addr := c.Param("registry")
 
 	in := new(model.Registry)
 	err := c.Bind(in)
@@ -109,7 +107,7 @@ func PatchRegistry(c *gin.Context) {
 	}
 
 	registryService := server.Config.Services.Manager.RegistryServiceFromRepo(repo)
-	registry, err := registryService.RegistryFind(repo, name)
+	registry, err := registryService.RegistryFind(repo, addr)
 	if err != nil {
 		handleDBError(c, err)
 		return
@@ -134,8 +132,8 @@ func PatchRegistry(c *gin.Context) {
 
 // GetRegistryList
 //
-//	@Summary	Get the registry list
-//	@Router		/repos/{repo_id}/registry [get]
+//	@Summary	List registries
+//	@Router		/repos/{repo_id}/registries [get]
 //	@Produce	json
 //	@Success	200	{array}	Registry
 //	@Tags		Repository registries
@@ -161,8 +159,8 @@ func GetRegistryList(c *gin.Context) {
 
 // DeleteRegistry
 //
-//	@Summary	Delete a named registry
-//	@Router		/repos/{repo_id}/registry/{registry} [delete]
+//	@Summary	Delete a registry by name
+//	@Router		/repos/{repo_id}/registries/{registry} [delete]
 //	@Produce	plain
 //	@Success	204
 //	@Tags		Repository registries
@@ -171,10 +169,10 @@ func GetRegistryList(c *gin.Context) {
 //	@Param		registry		path	string	true	"the registry name"
 func DeleteRegistry(c *gin.Context) {
 	repo := session.Repo(c)
-	name := c.Param("registry")
+	addr := c.Param("registry")
 
 	registryService := server.Config.Services.Manager.RegistryServiceFromRepo(repo)
-	err := registryService.RegistryDelete(repo, name)
+	err := registryService.RegistryDelete(repo, addr)
 	if err != nil {
 		handleDBError(c, err)
 		return

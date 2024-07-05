@@ -18,8 +18,9 @@
       >
         <span>{{ cron.name }}</span>
         <span v-if="cron.next_exec && cron.next_exec > 0" class="ml-auto">
-          {{ $t('repo.settings.crons.next_exec') }}: {{ date.toLocaleString(new Date(cron.next_exec * 1000)) }}</span
-        >
+          <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
+          {{ $t('repo.settings.crons.next_exec') }}: {{ date.toLocaleString(new Date(cron.next_exec * 1000)) }}
+        </span>
         <span v-else class="ml-auto">{{ $t('repo.settings.crons.not_executed_yet') }}</span>
         <IconButton icon="play" class="ml-auto w-8 h-8" :title="$t('repo.settings.crons.run')" @click="runCron(cron)" />
         <IconButton icon="edit" class="w-8 h-8" :title="$t('repo.settings.crons.edit')" @click="selectedCron = cron" />
@@ -69,6 +70,7 @@
 
         <div v-if="isEditingCron" class="ml-auto mb-4">
           <span v-if="selectedCron.next_exec && selectedCron.next_exec > 0" class="text-wp-text-100">
+            <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
             {{ $t('repo.settings.crons.next_exec') }}:
             {{ date.toLocaleString(new Date(selectedCron.next_exec * 1000)) }}
           </span>
@@ -90,7 +92,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, inject, Ref, ref } from 'vue';
+import { computed, inject, ref, type Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import Button from '~/components/atomic/Button.vue';
@@ -104,7 +106,7 @@ import { useAsyncAction } from '~/compositions/useAsyncAction';
 import { useDate } from '~/compositions/useDate';
 import useNotifications from '~/compositions/useNotifications';
 import { usePagination } from '~/compositions/usePaginate';
-import { Cron, Repo } from '~/lib/api/types';
+import type { Cron, Repo } from '~/lib/api/types';
 import router from '~/router';
 
 const apiClient = useApiClient();
@@ -121,7 +123,7 @@ async function loadCrons(page: number): Promise<Cron[] | null> {
     throw new Error("Unexpected: Can't load repo");
   }
 
-  return apiClient.getCronList(repo.value.id, page);
+  return apiClient.getCronList(repo.value.id, { page });
 }
 
 const { resetPage, data: crons } = usePagination(loadCrons, () => !selectedCron.value);
@@ -141,7 +143,7 @@ const { doSubmit: createCron, isLoading: isSaving } = useAsyncAction(async () =>
     await apiClient.createCron(repo.value.id, selectedCron.value);
   }
   notifications.notify({
-    title: i18n.t(isEditingCron.value ? 'repo.settings.crons.saved' : i18n.t('repo.settings.crons.created')),
+    title: isEditingCron.value ? i18n.t('repo.settings.crons.saved') : i18n.t('repo.settings.crons.created'),
     type: 'success',
   });
   selectedCron.value = undefined;

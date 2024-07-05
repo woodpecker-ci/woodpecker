@@ -18,7 +18,7 @@ import (
 	"context"
 	"crypto"
 	"fmt"
-	nethttp "net/http"
+	net_http "net/http"
 
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
@@ -31,7 +31,7 @@ type http struct {
 	privateKey crypto.PrivateKey
 }
 
-// configData same as forge.FileMeta but with json tags and string data
+// configData same as forge.FileMeta but with json tags and string data.
 type configData struct {
 	Name string `json:"name"`
 	Data string `json:"data"`
@@ -71,19 +71,19 @@ func (h *http) Fetch(ctx context.Context, forge forge.Forge, user *model.User, r
 		Netrc:         netrc,
 	}
 
-	status, err := utils.Send(ctx, "POST", h.endpoint, h.privateKey, body, response)
+	status, err := utils.Send(ctx, net_http.MethodPost, h.endpoint, h.privateKey, body, response)
 	if err != nil && status != 204 {
 		return nil, fmt.Errorf("failed to fetch config via http (%d) %w", status, err)
 	}
 
-	if status != nethttp.StatusOK {
+	if status != net_http.StatusOK {
 		return oldConfigData, nil
 	}
 
-	fileMetas := make([]*types.FileMeta, len(response.Configs))
+	fileMetaList := make([]*types.FileMeta, len(response.Configs))
 	for i, config := range response.Configs {
-		fileMetas[i] = &types.FileMeta{Name: config.Name, Data: []byte(config.Data)}
+		fileMetaList[i] = &types.FileMeta{Name: config.Name, Data: []byte(config.Data)}
 	}
 
-	return fileMetas, nil
+	return fileMetaList, nil
 }

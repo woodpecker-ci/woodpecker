@@ -64,7 +64,7 @@ func (s storage) workflowsCreate(sess *xorm.Session, workflows []*model.Workflow
 	return nil
 }
 
-// WorkflowsReplace performs an atomic replacement of workflows and associated steps by deleting all existing workflows and steps and inserting the new ones
+// WorkflowsReplace performs an atomic replacement of workflows and associated steps by deleting all existing workflows and steps and inserting the new ones.
 func (s storage) WorkflowsReplace(pipeline *model.Pipeline, workflows []*model.Workflow) error {
 	sess := s.engine.NewSession()
 	defer sess.Close()
@@ -87,7 +87,7 @@ func (s storage) workflowsDelete(sess *xorm.Session, pipelineID int64) error {
 	// delete related steps
 	for startSteps := 0; ; startSteps += perPage {
 		stepIDs := make([]int64, 0, perPage)
-		if err := sess.Limit(perPage, startSteps).Table("steps").Cols("step_id").Where("step_pipeline_id = ?", pipelineID).Find(&stepIDs); err != nil {
+		if err := sess.Limit(perPage, startSteps).Table("steps").Cols("id").Where("pipeline_id = ?", pipelineID).Find(&stepIDs); err != nil {
 			return err
 		}
 		if len(stepIDs) == 0 {
@@ -101,7 +101,7 @@ func (s storage) workflowsDelete(sess *xorm.Session, pipelineID int64) error {
 		}
 	}
 
-	_, err := sess.Where("workflow_pipeline_id = ?", pipelineID).Delete(new(model.Workflow))
+	_, err := sess.Where("pipeline_id = ?", pipelineID).Delete(new(model.Workflow))
 	return err
 }
 
@@ -109,11 +109,11 @@ func (s storage) WorkflowList(pipeline *model.Pipeline) ([]*model.Workflow, erro
 	return s.workflowList(s.engine.NewSession(), pipeline)
 }
 
-// workflowList lists workflows without child steps
+// workflowList lists workflows without child steps.
 func (s storage) workflowList(sess *xorm.Session, pipeline *model.Pipeline) ([]*model.Workflow, error) {
 	var wfList []*model.Workflow
-	err := sess.Where("workflow_pipeline_id = ?", pipeline.ID).
-		OrderBy("workflow_pid").
+	err := sess.Where("pipeline_id = ?", pipeline.ID).
+		OrderBy("pid").
 		Find(&wfList)
 	if err != nil {
 		return nil, err

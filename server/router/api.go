@@ -61,11 +61,18 @@ func apiRoutes(e *gin.RouterGroup) {
 					org.Use(session.MustOrgMember(true))
 					org.DELETE("", session.MustAdmin(), api.DeleteOrg)
 					org.GET("", api.GetOrg)
+
 					org.GET("/secrets", api.GetOrgSecretList)
 					org.POST("/secrets", api.PostOrgSecret)
 					org.GET("/secrets/:secret", api.GetOrgSecret)
 					org.PATCH("/secrets/:secret", api.PatchOrgSecret)
 					org.DELETE("/secrets/:secret", api.DeleteOrgSecret)
+
+					org.GET("/registries", api.GetOrgRegistryList)
+					org.POST("/registries", api.PostOrgRegistry)
+					org.GET("/registries/:registry", api.GetOrgRegistry)
+					org.PATCH("/registries/:registry", api.PatchOrgRegistry)
+					org.DELETE("/registries/:registry", api.DeleteOrgRegistry)
 				}
 			}
 		}
@@ -94,6 +101,7 @@ func apiRoutes(e *gin.RouterGroup) {
 
 					repo.GET("/pipelines", api.GetPipelines)
 					repo.POST("/pipelines", session.MustPush, api.CreatePipeline)
+					repo.DELETE("/pipelines/:number", session.MustRepoAdmin(), api.DeletePipeline)
 					repo.GET("/pipelines/:number", api.GetPipeline)
 					repo.GET("/pipelines/:number/config", api.GetPipelineConfig)
 
@@ -104,6 +112,7 @@ func apiRoutes(e *gin.RouterGroup) {
 					repo.POST("/pipelines/:number/decline", session.MustPush, api.PostDecline)
 
 					repo.GET("/logs/:number/:stepId", api.GetStepLogs)
+					repo.DELETE("/logs/:number/:stepId", session.MustPush, api.DeleteStepLogs)
 
 					// requires push permissions
 					repo.DELETE("/logs/:number", session.MustPush, api.DeletePipelineLogs)
@@ -116,6 +125,13 @@ func apiRoutes(e *gin.RouterGroup) {
 					repo.DELETE("/secrets/:secret", session.MustPush, api.DeleteSecret)
 
 					// requires push permissions
+					repo.GET("/registries", session.MustPush, api.GetRegistryList)
+					repo.POST("/registries", session.MustPush, api.PostRegistry)
+					repo.GET("/registries/:registry", session.MustPush, api.GetRegistry)
+					repo.PATCH("/registries/:registry", session.MustPush, api.PatchRegistry)
+					repo.DELETE("/registries/:registry", session.MustPush, api.DeleteRegistry)
+
+					// TODO: remove with 3.x
 					repo.GET("/registry", session.MustPush, api.GetRegistryList)
 					repo.POST("/registry", session.MustPush, api.PostRegistry)
 					repo.GET("/registry/:registry", session.MustPush, api.GetRegistry)
@@ -167,14 +183,34 @@ func apiRoutes(e *gin.RouterGroup) {
 			queue.GET("/norunningpipelines", api.BlockTilQueueHasRunningItem)
 		}
 
+		// global secrets can be read without actual values by any user
+		readGlobalSecrets := apiBase.Group("/secrets")
+		{
+			readGlobalSecrets.Use(session.MustUser())
+			readGlobalSecrets.GET("", api.GetGlobalSecretList)
+			readGlobalSecrets.GET("/:secret", api.GetGlobalSecret)
+		}
 		secrets := apiBase.Group("/secrets")
 		{
 			secrets.Use(session.MustAdmin())
-			secrets.GET("", api.GetGlobalSecretList)
 			secrets.POST("", api.PostGlobalSecret)
-			secrets.GET("/:secret", api.GetGlobalSecret)
 			secrets.PATCH("/:secret", api.PatchGlobalSecret)
 			secrets.DELETE("/:secret", api.DeleteGlobalSecret)
+		}
+
+		// global registries can be read without actual values by any user
+		readGlobalRegistries := apiBase.Group("/registries")
+		{
+			readGlobalRegistries.Use(session.MustUser())
+			readGlobalRegistries.GET("", api.GetGlobalRegistryList)
+			readGlobalRegistries.GET("/:registry", api.GetGlobalRegistry)
+		}
+		registries := apiBase.Group("/registries")
+		{
+			registries.Use(session.MustAdmin())
+			registries.POST("", api.PostGlobalRegistry)
+			registries.PATCH("/:registry", api.PatchGlobalRegistry)
+			registries.DELETE("/:registry", api.DeleteGlobalRegistry)
 		}
 
 		logLevel := apiBase.Group("/log-level")
@@ -193,6 +229,16 @@ func apiRoutes(e *gin.RouterGroup) {
 			agentBase.GET("/:agent/tasks", api.GetAgentTasks)
 			agentBase.PATCH("/:agent", api.PatchAgent)
 			agentBase.DELETE("/:agent", api.DeleteAgent)
+		}
+
+		apiBase.GET("/forges", api.GetForges)
+		apiBase.GET("/forges/:forgeId", api.GetForge)
+		forgeBase := apiBase.Group("/forges")
+		{
+			forgeBase.Use(session.MustAdmin())
+			forgeBase.POST("", api.PostForge)
+			forgeBase.PATCH("/:forgeId", api.PatchForge)
+			forgeBase.DELETE("/:forgeId", api.DeleteForge)
 		}
 
 		apiBase.GET("/signature/public-key", session.MustUser(), api.GetSignaturePublicKey)

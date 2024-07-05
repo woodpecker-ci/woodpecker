@@ -20,16 +20,28 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
+const orderRegistriesBy = "id"
+
 func (s storage) RegistryFind(repo *model.Repo, addr string) (*model.Registry, error) {
 	reg := new(model.Registry)
 	return reg, wrapGet(s.engine.Where(
-		builder.Eq{"registry_repo_id": repo.ID, "registry_addr": addr},
+		builder.Eq{"repo_id": repo.ID, "address": addr},
 	).Get(reg))
 }
 
-func (s storage) RegistryList(repo *model.Repo, p *model.ListOptions) ([]*model.Registry, error) {
+func (s storage) RegistryList(repo *model.Repo, includeGlobalAndOrg bool, p *model.ListOptions) ([]*model.Registry, error) {
 	var regs []*model.Registry
-	return regs, s.paginate(p).OrderBy("registry_id").Where("registry_repo_id = ?", repo.ID).Find(&regs)
+	var cond builder.Cond = builder.Eq{"repo_id": repo.ID}
+	if includeGlobalAndOrg {
+		cond = cond.Or(builder.Eq{"org_id": repo.OrgID}).
+			Or(builder.And(builder.Eq{"org_id": 0}, builder.Eq{"repo_id": 0}))
+	}
+	return regs, s.paginate(p).Where(cond).OrderBy(orderRegistriesBy).Find(&regs)
+}
+
+func (s storage) RegistryListAll() ([]*model.Registry, error) {
+	var registries []*model.Registry
+	return registries, s.engine.Find(&registries)
 }
 
 func (s storage) RegistryCreate(registry *model.Registry) error {
@@ -43,10 +55,32 @@ func (s storage) RegistryUpdate(registry *model.Registry) error {
 	return err
 }
 
-func (s storage) RegistryDelete(repo *model.Repo, addr string) error {
-	registry, err := s.RegistryFind(repo, addr)
-	if err != nil {
-		return err
-	}
+func (s storage) RegistryDelete(registry *model.Registry) error {
 	return wrapDelete(s.engine.ID(registry.ID).Delete(new(model.Registry)))
+}
+
+func (s storage) OrgRegistryFind(orgID int64, name string) (*model.Registry, error) {
+	registry := new(model.Registry)
+	return registry, wrapGet(s.engine.Where(
+		builder.Eq{"org_id": orgID, "address": name},
+	).Get(registry))
+}
+
+func (s storage) OrgRegistryList(orgID int64, p *model.ListOptions) ([]*model.Registry, error) {
+	registries := make([]*model.Registry, 0)
+	return registries, s.paginate(p).Where("org_id = ?", orgID).OrderBy(orderRegistriesBy).Find(&registries)
+}
+
+func (s storage) GlobalRegistryFind(name string) (*model.Registry, error) {
+	registry := new(model.Registry)
+	return registry, wrapGet(s.engine.Where(
+		builder.Eq{"org_id": 0, "repo_id": 0, "address": name},
+	).Get(registry))
+}
+
+func (s storage) GlobalRegistryList(p *model.ListOptions) ([]*model.Registry, error) {
+	registries := make([]*model.Registry, 0)
+	return registries, s.paginate(p).Where(
+		builder.Eq{"org_id": 0, "repo_id": 0},
+	).OrderBy(orderRegistriesBy).Find(&registries)
 }

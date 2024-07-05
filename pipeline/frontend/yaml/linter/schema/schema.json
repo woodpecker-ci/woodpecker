@@ -288,6 +288,9 @@
                 },
                 "ignore_message": {
                   "type": "string"
+                },
+                "on_empty": {
+                  "type": "boolean"
                 }
               },
               "additionalProperties": false
@@ -371,6 +374,21 @@
         },
         "backend_options": {
           "$ref": "#/definitions/step_backend_options"
+        },
+        "entrypoint": {
+          "description": "Defines container entrypoint.",
+          "oneOf": [
+            {
+              "type": "array",
+              "minLength": 1,
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "string"
+            }
+          ]
         }
       }
     },
@@ -478,6 +496,9 @@
                 },
                 "ignore_message": {
                   "type": "string"
+                },
+                "on_empty": {
+                  "type": "boolean"
                 }
               },
               "additionalProperties": false
@@ -691,11 +712,32 @@
       "description": "Advanced options for the kubernetes agent backends",
       "type": "object",
       "properties": {
-        "resources": {
-          "$ref": "#/definitions/step_backend_kubernetes_resources"
+        "labels": {
+          "type": "object",
+          "additionalProperties": {
+            "type": ["boolean", "string", "number"]
+          }
+        },
+        "annotations": {
+          "type": "object",
+          "additionalProperties": {
+            "type": ["boolean", "string", "number"]
+          }
         },
         "securityContext": {
           "$ref": "#/definitions/step_backend_kubernetes_security_context"
+        },
+        "runtimeClassName": {
+          "description": "Read more: https://woodpecker-ci.org/docs/administration/backends/kubernetes#runtimeclassname",
+          "type": "string"
+        },
+        "secrets": {
+          "description": "The secrets section defines a list of references to the native Kubernetes secrets",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/step_kubernetes_secret"
+          },
+          "minLength": 1
         }
       }
     },
@@ -775,6 +817,41 @@
       "additionalProperties": {
         "type": "string"
       }
+    },
+    "step_kubernetes_secret": {
+      "description": "A reference to a native Kubernetes secret",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "description": "The name of the secret. Can be used if using the array style secrets list.",
+          "type": "string"
+        },
+        "key": {
+          "description": "The key of the secret to select from.",
+          "type": "string"
+        },
+        "target": {
+          "$ref": "#/definitions/step_kubernetes_secret_target"
+        }
+      }
+    },
+    "step_kubernetes_secret_target": {
+      "description": "A target which a native Kubernetes secret maps to.",
+      "oneOf": [
+        {
+          "env": {
+            "description": "The name of the environment variable which secret maps to.",
+            "type": "string"
+          }
+        },
+        {
+          "file": {
+            "description": "The filename (path) which secret maps to.",
+            "type": "string"
+          }
+        }
+      ]
     },
     "services": {
       "description": "Read more: https://woodpecker-ci.org/docs/usage/services",

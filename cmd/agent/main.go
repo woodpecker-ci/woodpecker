@@ -17,6 +17,7 @@ package main
 import (
 	"go.woodpecker-ci.org/woodpecker/v2/cmd/agent/core"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/docker"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/dummy"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/kubernetes"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/local"
 	backendTypes "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
@@ -27,5 +28,6 @@ func main() {
 		kubernetes.New(),
 		docker.New(),
 		local.New(),
+		dummy.New(),
 	})
 }

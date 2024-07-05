@@ -1,4 +1,4 @@
-import { PipelineStatus } from '~/lib/api/types';
+import type { PipelineStatus } from '~/lib/api/types';
 
 export const pipelineStatusColors: Record<PipelineStatus, 'green' | 'gray' | 'red' | 'blue' | 'orange'> = {
   blocked: 'gray',

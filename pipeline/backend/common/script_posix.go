@@ -22,7 +22,7 @@ import (
 )
 
 // generateScriptPosix is a helper function that generates a step script
-// for a linux container using the given
+// for a linux container using the given.
 func generateScriptPosix(commands []string) string {
 	var buf bytes.Buffer
 

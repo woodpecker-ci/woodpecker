@@ -27,7 +27,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/version"
 )
 
-// the file implements some basic healthcheck logic based on the
+// The file implements some basic healthcheck logic based on the
 // following specification:
 //   https://github.com/mozilla-services/Dockerflow
 
@@ -74,7 +74,7 @@ type versionResp struct {
 	Source  string `json:"source"`
 }
 
-// default statistics counter
+// Default statistics counter.
 var counter = &agent.State{
 	Metadata: map[string]agent.Info{},
 }

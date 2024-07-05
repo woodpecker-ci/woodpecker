@@ -19,18 +19,26 @@ import (
 	"sync"
 
 	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
 
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline"
 	backend "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/log"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc"
 )
 
-func (r *Runner) createLogger(logger zerolog.Logger, uploads *sync.WaitGroup, workflow *rpc.Workflow) pipeline.Logger {
-	return func(step *backend.Step, rc io.Reader) error {
-		loglogger := logger.With().
+const (
+	// Store not more than 1mb in a log-line as 4mb is the limit of a grpc message
+	// and log-lines needs to be parsed by the browsers later on.
+	maxLogLineLength = 1024 * 1024 // 1mb
+)
+
+func (r *Runner) createLogger(_logger zerolog.Logger, uploads *sync.WaitGroup, workflow *rpc.Workflow) pipeline.Logger {
+	return func(step *backend.Step, rc io.ReadCloser) error {
+		defer rc.Close()
+
+		logger := _logger.With().
 			Str("image", step.Image).
-			Str("workflowID", workflow.ID).
+			Str("workflow_id", workflow.ID).
 			Logger()
 
 		uploads.Add(1)
@@ -40,14 +48,14 @@ func (r *Runner) createLogger(logger zerolog.Logger, uploads *sync.WaitGroup, wo
 			secrets = append(secrets, secret.Value)
 		}
 
-		loglogger.Debug().Msg("log stream opened")
+		logger.Debug().Msg("log stream opened")
 
-		logStream := rpc.NewLineWriter(r.client, step.UUID, secrets...)
-		if _, err := io.Copy(logStream, rc); err != nil {
-			log.Error().Err(err).Msg("copy limited logStream part")
+		logStream := log.NewLineWriter(r.client, step.UUID, secrets...)
+		if err := log.CopyLineByLine(logStream, rc, maxLogLineLength); err != nil {
+			logger.Error().Err(err).Msg("copy limited logStream part")
 		}
 
-		loglogger.Debug().Msg("log stream copied, close ...")
+		logger.Debug().Msg("log stream copied, close ...")
 		uploads.Done()
 
 		return nil

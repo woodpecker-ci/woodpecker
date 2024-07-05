@@ -54,13 +54,13 @@
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
-import { QueueStats } from '~/lib/api/types/queue';
-
-const { t } = useI18n();
+import type { QueueStats } from '~/lib/api/types/queue';
 
 const props = defineProps<{
   stats?: QueueStats;
 }>();
+
+const { t } = useI18n();
 
 const total = computed(() => {
   if (!props.stats) {

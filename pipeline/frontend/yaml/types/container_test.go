@@ -141,7 +141,7 @@ func TestUnmarshalContainer(t *testing.T) {
 	assert.EqualValues(t, want, got, "problem parsing container")
 }
 
-// TestUnmarshalContainersErr unmarshals a map of containers. The order is
+// TestUnmarshalContainers unmarshals a map of containers. The order is
 // retained and the container key may be used as the container name if a
 // name is not explicitly provided.
 func TestUnmarshalContainers(t *testing.T) {

@@ -19,7 +19,7 @@ import (
 	"testing"
 	"time"
 
-	// blank imports to register the sql drivers
+	// Blank imports to register the sql drivers.
 	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/lib/pq"
 	_ "github.com/mattn/go-sqlite3"

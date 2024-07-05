@@ -32,9 +32,8 @@ import (
 
 var skipPipelineRegex = regexp.MustCompile(`\[(?i:ci *skip|skip *ci)\]`)
 
-// Create a new pipeline and start it
+// Create a new pipeline and start it.
 func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline *model.Pipeline) (*model.Pipeline, error) {
-	_forge := server.Config.Services.Forge
 	repoUser, err := _store.GetUser(repo.UserID)
 	if err != nil {
 		msg := fmt.Sprintf("failure to find repo owner via id '%d'", repo.UserID)
@@ -42,14 +41,23 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 		return nil, fmt.Errorf(msg)
 	}
 
-	skipMatch := skipPipelineRegex.FindString(pipeline.Message)
-	if len(skipMatch) > 0 {
-		ref := pipeline.Commit
-		if len(ref) == 0 {
-			ref = pipeline.Ref
+	if pipeline.Event == model.EventPush || pipeline.Event == model.EventPull || pipeline.Event == model.EventPullClosed {
+		skipMatch := skipPipelineRegex.FindString(pipeline.Message)
+		if len(skipMatch) > 0 {
+			ref := pipeline.Commit
+			if len(ref) == 0 {
+				ref = pipeline.Ref
+			}
+			log.Debug().Str("repo", repo.FullName).Msgf("ignoring pipeline as skip-ci was found in the commit (%s) message '%s'", ref, pipeline.Message)
+			return nil, ErrFiltered
 		}
-		log.Debug().Str("repo", repo.FullName).Msgf("ignoring pipeline as skip-ci was found in the commit (%s) message '%s'", ref, pipeline.Message)
-		return nil, ErrFiltered
+	}
+
+	_forge, err := server.Config.Services.Manager.ForgeFromRepo(repo)
+	if err != nil {
+		msg := fmt.Sprintf("failure to load forge for repo '%s'", repo.FullName)
+		log.Error().Err(err).Str("repo", repo.FullName).Msg(msg)
+		return nil, fmt.Errorf(msg)
 	}
 
 	// If the forge has a refresh token, the current access token
@@ -80,13 +88,13 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 		return nil, ErrFiltered
 	} else if configFetchErr != nil {
 		log.Debug().Str("repo", repo.FullName).Err(configFetchErr).Msgf("error while fetching config '%s' in '%s' with user: '%s'", repo.Config, pipeline.Ref, repoUser.Login)
-		return nil, updatePipelineWithErr(ctx, _store, pipeline, repo, repoUser, fmt.Errorf("pipeline definition not found in %s", repo.FullName))
+		return nil, updatePipelineWithErr(ctx, _forge, _store, pipeline, repo, repoUser, fmt.Errorf("pipeline definition not found in %s", repo.FullName))
 	}
 
-	pipelineItems, parseErr := parsePipeline(_store, pipeline, repoUser, repo, forgeYamlConfigs, nil)
+	pipelineItems, parseErr := parsePipeline(_forge, _store, pipeline, repoUser, repo, forgeYamlConfigs, nil)
 	if pipeline_errors.HasBlockingErrors(parseErr) {
 		log.Debug().Str("repo", repo.FullName).Err(parseErr).Msg("failed to parse yaml")
-		return nil, updatePipelineWithErr(ctx, _store, pipeline, repo, repoUser, parseErr)
+		return pipeline, updatePipelineWithErr(ctx, _forge, _store, pipeline, repo, repoUser, parseErr)
 	} else if parseErr != nil {
 		pipeline.Errors = pipeline_errors.GetPipelineErrors(parseErr)
 	}
@@ -120,7 +128,7 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 		return nil, fmt.Errorf(msg)
 	}
 
-	if err := prepareStart(ctx, _store, pipeline, repoUser, repo); err != nil {
+	if err := prepareStart(ctx, _forge, _store, pipeline, repoUser, repo); err != nil {
 		log.Error().Err(err).Str("repo", repo.FullName).Msgf("error preparing pipeline for %s#%d", repo.FullName, pipeline.Number)
 		return nil, err
 	}
@@ -129,11 +137,11 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 		return pipeline, nil
 	}
 
-	if err := updatePipelinePending(ctx, _store, pipeline, repo, repoUser); err != nil {
+	if err := updatePipelinePending(ctx, _forge, _store, pipeline, repo, repoUser); err != nil {
 		return nil, err
 	}
 
-	pipeline, err = start(ctx, _store, pipeline, repoUser, repo, pipelineItems)
+	pipeline, err = start(ctx, _forge, _store, pipeline, repoUser, repo, pipelineItems)
 	if err != nil {
 		msg := fmt.Sprintf("failed to start pipeline for %s", repo.FullName)
 		log.Error().Err(err).Msg(msg)
@@ -143,7 +151,7 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 	return pipeline, nil
 }
 
-func updatePipelineWithErr(ctx context.Context, _store store.Store, pipeline *model.Pipeline, repo *model.Repo, repoUser *model.User, err error) error {
+func updatePipelineWithErr(ctx context.Context, _forge forge.Forge, _store store.Store, pipeline *model.Pipeline, repo *model.Repo, repoUser *model.User, err error) error {
 	_pipeline, err := UpdateToStatusError(_store, *pipeline, err)
 	if err != nil {
 		return err
@@ -151,12 +159,12 @@ func updatePipelineWithErr(ctx context.Context, _store store.Store, pipeline *mo
 	// update value in ref
 	*pipeline = *_pipeline
 
-	publishPipeline(ctx, pipeline, repo, repoUser)
+	publishPipeline(ctx, _forge, pipeline, repo, repoUser)
 
 	return nil
 }
 
-func updatePipelinePending(ctx context.Context, _store store.Store, pipeline *model.Pipeline, repo *model.Repo, repoUser *model.User) error {
+func updatePipelinePending(ctx context.Context, _forge forge.Forge, _store store.Store, pipeline *model.Pipeline, repo *model.Repo, repoUser *model.User) error {
 	_pipeline, err := UpdateToStatusPending(_store, *pipeline, "")
 	if err != nil {
 		return err
@@ -164,7 +172,7 @@ func updatePipelinePending(ctx context.Context, _store store.Store, pipeline *mo
 	// update value in ref
 	*pipeline = *_pipeline
 
-	publishPipeline(ctx, pipeline, repo, repoUser)
+	publishPipeline(ctx, _forge, pipeline, repo, repoUser)
 
 	return nil
 }

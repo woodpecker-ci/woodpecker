@@ -49,7 +49,7 @@ type Step struct {
 	BackendOptions map[string]any    `json:"backend_options,omitempty"`
 }
 
-// StepType identifies the type of step
+// StepType identifies the type of step.
 type StepType string
 
 const (

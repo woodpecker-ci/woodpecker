@@ -18,6 +18,18 @@ type Config struct {
 	LogLevel  string `json:"log_level"`
 }
 
+func (c *Config) MergeIfNotSet(c2 *Config) {
+	if c.ServerURL == "" {
+		c.ServerURL = c2.ServerURL
+	}
+	if c.Token == "" {
+		c.Token = c2.Token
+	}
+	if c.LogLevel == "" {
+		c.LogLevel = c2.LogLevel
+	}
+}
+
 var skipSetupForCommands = []string{"setup", "help", "h", "version", "update", "lint", "exec", ""}
 
 func Load(c *cli.Context) error {
@@ -30,31 +42,27 @@ func Load(c *cli.Context) error {
 		return err
 	}
 
-	if config == nil && !c.IsSet("server-url") && !c.IsSet("token") {
-		log.Info().Msg("The woodpecker-cli is not yet set up. Please run `woodpecker-cli setup`")
-		return errors.New("woodpecker-cli is not setup")
+	if config.ServerURL == "" || config.Token == "" {
+		log.Info().Msg("The woodpecker-cli is not yet set up. Please run `woodpecker-cli setup` or provide the required environment variables / flags.")
+		return errors.New("woodpecker-cli is not configured")
 	}
 
-	if !c.IsSet("server") {
-		err = c.Set("server", config.ServerURL)
-		if err != nil {
-			return err
-		}
+	err = c.Set("server", config.ServerURL)
+	if err != nil {
+		return err
 	}
 
-	if !c.IsSet("token") {
-		err = c.Set("token", config.Token)
-		if err != nil {
-			return err
-		}
+	err = c.Set("token", config.Token)
+	if err != nil {
+		return err
 	}
 
-	if !c.IsSet("log-level") {
-		err = c.Set("log-level", config.LogLevel)
-		if err != nil {
-			return err
-		}
+	err = c.Set("log-level", config.LogLevel)
+	if err != nil {
+		return err
 	}
+
+	log.Debug().Any("config", config).Msg("Loaded config")
 
 	return nil
 }
@@ -73,35 +81,55 @@ func getConfigPath(configPath string) (string, error) {
 }
 
 func Get(ctx *cli.Context, _configPath string) (*Config, error) {
+	c := &Config{
+		LogLevel:  ctx.String("log-level"),
+		Token:     ctx.String("token"),
+		ServerURL: ctx.String("server"),
+	}
+
 	configPath, err := getConfigPath(_configPath)
 	if err != nil {
 		return nil, err
 	}
 
+	log.Debug().Str("configPath", configPath).Msg("Checking for config file")
+
 	content, err := os.ReadFile(configPath)
-	if err != nil && !os.IsNotExist(err) {
+	switch {
+	case err != nil && !os.IsNotExist(err):
 		log.Debug().Err(err).Msg("Failed to read the config file")
 		return nil, err
-	} else if err != nil && os.IsNotExist(err) {
+
+	case err != nil && os.IsNotExist(err):
 		log.Debug().Msg("The config file does not exist")
-		return nil, nil
+
+	default:
+		configFromFile := &Config{}
+		err = json.Unmarshal(content, configFromFile)
+		if err != nil {
+			return nil, err
+		}
+		c.MergeIfNotSet(configFromFile)
+		log.Debug().Msg("Loaded config from file")
 	}
 
-	c := &Config{}
-	err = json.Unmarshal(content, c)
-	if err != nil {
-		return nil, err
+	// if server or token are explicitly set, use them
+	if ctx.IsSet("server") || ctx.IsSet("token") {
+		return c, nil
 	}
 
 	// load token from keyring
 	service := ctx.App.Name
 	secret, err := keyring.Get(service, c.ServerURL)
-	if err != nil && !errors.Is(err, keyring.ErrNotFound) {
-		return nil, err
+	if errors.Is(err, keyring.ErrUnsupportedPlatform) {
+		log.Warn().Msg("Keyring is not supported on this platform")
+		return c, nil
 	}
-	if err == nil {
-		c.Token = secret
+	if errors.Is(err, keyring.ErrNotFound) {
+		log.Warn().Msg("Token not found in keyring")
+		return c, nil
 	}
+	c.Token = secret
 
 	return c, nil
 }

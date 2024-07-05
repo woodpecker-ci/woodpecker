@@ -14,8 +14,7 @@
 
 package store
 
-//go:generate go install github.com/vektra/mockery/v2@latest
-//go:generate mockery --name Store --output mocks --case underscore
+//go:generate mockery --name Store --output mocks --case underscore --note "+build test"
 
 import (
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
@@ -76,7 +75,7 @@ type Store interface {
 	// GetPipelineLastBefore gets the last pipeline before pipeline number N.
 	GetPipelineLastBefore(*model.Repo, string, int64) (*model.Pipeline, error)
 	// GetPipelineList gets a list of pipelines for the repository
-	GetPipelineList(*model.Repo, *model.ListOptions) ([]*model.Pipeline, error)
+	GetPipelineList(*model.Repo, *model.ListOptions, *model.PipelineFilter) ([]*model.Pipeline, error)
 	// GetActivePipelineList gets a list of the active pipelines for the repository
 	GetActivePipelineList(repo *model.Repo) ([]*model.Pipeline, error)
 	// GetPipelineQueue gets a list of pipelines in queue.
@@ -121,10 +120,15 @@ type Store interface {
 
 	// Registries
 	RegistryFind(*model.Repo, string) (*model.Registry, error)
-	RegistryList(*model.Repo, *model.ListOptions) ([]*model.Registry, error)
+	RegistryList(*model.Repo, bool, *model.ListOptions) ([]*model.Registry, error)
+	RegistryListAll() ([]*model.Registry, error)
 	RegistryCreate(*model.Registry) error
 	RegistryUpdate(*model.Registry) error
-	RegistryDelete(repo *model.Repo, addr string) error
+	RegistryDelete(*model.Registry) error
+	OrgRegistryFind(int64, string) (*model.Registry, error)
+	OrgRegistryList(int64, *model.ListOptions) ([]*model.Registry, error)
+	GlobalRegistryFind(string) (*model.Registry, error)
+	GlobalRegistryList(*model.ListOptions) ([]*model.Registry, error)
 
 	// Steps
 	StepLoad(int64) (*model.Step, error)
@@ -159,6 +163,13 @@ type Store interface {
 	CronDelete(*model.Repo, int64) error
 	CronListNextExecute(int64, int64) ([]*model.Cron, error)
 	CronGetLock(*model.Cron, int64) (bool, error)
+
+	// Forge
+	ForgeCreate(*model.Forge) error
+	ForgeGet(int64) (*model.Forge, error)
+	ForgeList(p *model.ListOptions) ([]*model.Forge, error)
+	ForgeUpdate(*model.Forge) error
+	ForgeDelete(*model.Forge) error
 
 	// Agent
 	AgentCreate(*model.Agent) error

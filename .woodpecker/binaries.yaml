@@ -2,10 +2,11 @@ when:
   event: tag
 
 variables:
-  - &golang_image 'docker.io/golang:1.22.1'
-  - &node_image 'docker.io/node:21-alpine'
-  - &xgo_image 'docker.io/techknowlogick/xgo:go-1.22.1'
-  - &xgo_version 'go-1.21.2'
+  - &golang_image 'docker.io/golang:1.22'
+  - &node_image 'docker.io/node:22-alpine'
+  - &xgo_image 'docker.io/techknowlogick/xgo:go-1.22.x'
+
+# cspell:words bindata netgo TARGZ
 
 steps:
   build-web:
@@ -34,7 +35,6 @@ steps:
     environment:
       PLATFORMS: linux|arm64/v8;linux|amd64;windows|amd64
       TAGS: bindata sqlite sqlite_unlock_notify netgo
-      XGO_VERSION: *xgo_version
       TARGZ: '1'
 
   build-tarball:
@@ -90,11 +90,10 @@ steps:
   release:
     depends_on:
       - checksums
-    image: docker.io/plugins/github-release
-    secrets:
-      - source: github_token
-        target: github_release_api_key
+    image: woodpeckerci/plugin-release:0.1.0
     settings:
+      api_key:
+        from_secret: github_token
       files:
         - dist/*.tar.gz
         - dist/*.deb
