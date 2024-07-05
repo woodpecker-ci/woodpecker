@@ -23,11 +23,12 @@ import (
 
 	pipeline_errors "go.woodpecker-ci.org/woodpecker/v2/pipeline/errors"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/compiler"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/stepbuilder"
 	"go.woodpecker-ci.org/woodpecker/v2/server"
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
 	forge_types "go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
-	"go.woodpecker-ci.org/woodpecker/v2/server/pipeline/stepbuilder"
+	"go.woodpecker-ci.org/woodpecker/v2/server/pipeline/metadata"
 	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 )
 
@@ -70,6 +71,8 @@ func parsePipeline(forge forge.Forge, store store.Store, currentPipeline *model.
 	for k, v := range currentPipeline.AdditionalVariables {
 		envs[k] = v
 	}
+
+	meta := metadata.NewMetadataServerForge(forge, repo, currentPipeline, last, nil, server.Config.Server.Host)
 
 	b := stepbuilder.StepBuilder{
 		Repo:  repo,

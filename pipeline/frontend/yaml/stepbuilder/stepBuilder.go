@@ -40,17 +40,16 @@ import (
 
 // StepBuilder Takes the hook data and the yaml and returns in internal data model.
 type StepBuilder struct {
-	Repo      *model.Repo
-	Curr      *model.Pipeline
-	Last      *model.Pipeline
-	Netrc     *model.Netrc
-	Secs      []*model.Secret
-	Regs      []*model.Registry
-	Host      string
-	Yamls     []*forge_types.FileMeta
-	Envs      map[string]string
-	Forge     metadata.ServerForge
-	ProxyOpts compiler.ProxyOptions
+	Repo                    *model.Repo                                      // TODO: get rid of server type in this package
+	Netrc                   *model.Netrc                                     // TODO: get rid of server type in this package
+	GetWorkflowMetadataData func(workflow *model.Workflow) metadata.Metadata // TODO: get rid of server type in this package
+	GetSecrets              func() []*model.Secret                           // TODO: get rid of server type in this package
+	GetRegistries           func() []*model.Registry                         // TODO: get rid of server type in this package
+	RepoIsTrusted           bool
+	Host                    string
+	Yamls                   []*forge_types.FileMeta
+	Envs                    map[string]string
+	ProxyOpts               compiler.ProxyOptions
 }
 
 type Item struct {
@@ -115,7 +114,7 @@ func (b *StepBuilder) Build() (items []*Item, errorsAndWarnings error) {
 }
 
 func (b *StepBuilder) genItemForWorkflow(workflow *model.Workflow, axis matrix.Axis, data string) (item *Item, errorsAndWarnings error) {
-	workflowMetadata := MetadataFromStruct(b.Forge, b.Repo, b.Curr, b.Last, workflow, b.Host)
+	workflowMetadata := b.GetWorkflowMetadataData(workflow)
 	environ := b.environmentVariables(workflowMetadata, axis)
 
 	// add global environment variables for substituting
@@ -141,7 +140,7 @@ func (b *StepBuilder) genItemForWorkflow(workflow *model.Workflow, axis matrix.A
 
 	// lint pipeline
 	errorsAndWarnings = multierr.Append(errorsAndWarnings, linter.New(
-		linter.WithTrusted(b.Repo.IsTrusted),
+		linter.WithTrusted(b.RepoIsTrusted),
 	).Lint([]*linter.WorkflowConfig{{
 		Workflow:  parsed,
 		File:      workflow.Name,
@@ -240,7 +239,7 @@ func (b *StepBuilder) environmentVariables(metadata metadata.Metadata, axis matr
 
 func (b *StepBuilder) toInternalRepresentation(parsed *yaml_types.Workflow, environ map[string]string, metadata metadata.Metadata, workflowID int64) (*backend_types.Config, error) {
 	var secrets []compiler.Secret
-	for _, sec := range b.Secs {
+	for _, sec := range b.GetSecrets() {
 		var events []string
 		for _, event := range sec.Events {
 			events = append(events, string(event))
@@ -255,7 +254,7 @@ func (b *StepBuilder) toInternalRepresentation(parsed *yaml_types.Workflow, envi
 	}
 
 	var registries []compiler.Registry
-	for _, reg := range b.Regs {
+	for _, reg := range b.GetRegistries() {
 		registries = append(registries, compiler.Registry{
 			Hostname: reg.Address,
 			Username: reg.Username,

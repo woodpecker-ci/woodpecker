@@ -32,21 +32,21 @@ func TestGlobalEnvsubst(t *testing.T) {
 	t.Parallel()
 
 	b := StepBuilder{
-		Forge: getMockForge(t),
 		Envs: map[string]string{
 			"KEY_K": "VALUE_V",
 			"IMAGE": "scratch",
 		},
-		Repo: &model.Repo{},
-		Curr: &model.Pipeline{
-			Message: "aaa",
-			Event:   model.EventPush,
-		},
-		Last:  &model.Pipeline{},
-		Netrc: &model.Netrc{},
-		Secs:  []*model.Secret{},
-		Regs:  []*model.Registry{},
-		Host:  "",
+		// Forge: getMockForge(t),
+		// Repo: &model.Repo{},
+		// Curr: &model.Pipeline{
+		// 	Message: "aaa",
+		// 	Event:   model.EventPush,
+		// },
+		// Last:  &model.Pipeline{},
+		// Netrc: &model.Netrc{},
+		// Secs:  []*model.Secret{},
+		// Regs:  []*model.Registry{},
+		Host: "",
 		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
 when:

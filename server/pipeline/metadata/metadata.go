@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package stepbuilder
+package metadata
 
 import (
 	"fmt"
@@ -24,43 +24,70 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/version"
 )
 
+type MetadataServerForge struct {
+	// Repo     *model.Repo
+	// Curr     *model.Pipeline
+	// Last     *model.Pipeline
+	// Netrc    *model.Netrc
+	// Secs     []*model.Secret
+	// Regs     []*model.Registry
+	// Forge    metadata.ServerForge
+	forge    metadata.ServerForge
+	repo     *model.Repo
+	pipeline *model.Pipeline
+	last     *model.Pipeline
+	workflow *model.Workflow
+	sysURL   string
+}
+
+func NewMetadataServerForge(forge metadata.ServerForge, repo *model.Repo, pipeline *model.Pipeline, last *model.Pipeline, workflow *model.Workflow, sysURL string) *MetadataServerForge {
+	return &MetadataServerForge{
+		forge:    forge,
+		repo:     repo,
+		pipeline: pipeline,
+		last:     last,
+		workflow: workflow,
+		sysURL:   sysURL,
+	}
+}
+
 // MetadataFromStruct return the metadata from a pipeline will run with.
-func MetadataFromStruct(forge metadata.ServerForge, repo *model.Repo, pipeline, last *model.Pipeline, workflow *model.Workflow, sysURL string) metadata.Metadata {
-	host := sysURL
-	uri, err := url.Parse(sysURL)
+func (m *MetadataServerForge) MetadataFromStruct(workflow *model.Workflow) metadata.Metadata {
+	host := m.sysURL
+	uri, err := url.Parse(m.sysURL)
 	if err == nil {
 		host = uri.Host
 	}
 
 	fForge := metadata.Forge{}
-	if forge != nil {
+	if m.forge != nil {
 		fForge = metadata.Forge{
-			Type: forge.Name(),
-			URL:  forge.URL(),
+			Type: m.forge.Name(),
+			URL:  m.forge.URL(),
 		}
 	}
 
 	fRepo := metadata.Repo{}
-	if repo != nil {
+	if m.repo != nil {
 		fRepo = metadata.Repo{
-			ID:          repo.ID,
-			Name:        repo.Name,
-			Owner:       repo.Owner,
-			RemoteID:    fmt.Sprint(repo.ForgeRemoteID),
-			ForgeURL:    repo.ForgeURL,
-			CloneURL:    repo.Clone,
-			CloneSSHURL: repo.CloneSSH,
-			Private:     repo.IsSCMPrivate,
-			Branch:      repo.Branch,
-			Trusted:     repo.IsTrusted,
+			ID:          m.repo.ID,
+			Name:        m.repo.Name,
+			Owner:       m.repo.Owner,
+			RemoteID:    fmt.Sprint(m.repo.ForgeRemoteID),
+			ForgeURL:    m.repo.ForgeURL,
+			CloneURL:    m.repo.Clone,
+			CloneSSHURL: m.repo.CloneSSH,
+			Private:     m.repo.IsSCMPrivate,
+			Branch:      m.repo.Branch,
+			Trusted:     m.repo.IsTrusted,
 		}
 
-		if idx := strings.LastIndex(repo.FullName, "/"); idx != -1 {
-			if fRepo.Name == "" && repo.FullName != "" {
-				fRepo.Name = repo.FullName[idx+1:]
+		if idx := strings.LastIndex(m.repo.FullName, "/"); idx != -1 {
+			if fRepo.Name == "" && m.repo.FullName != "" {
+				fRepo.Name = m.repo.FullName[idx+1:]
 			}
-			if fRepo.Owner == "" && repo.FullName != "" {
-				fRepo.Owner = repo.FullName[:idx]
+			if fRepo.Owner == "" && m.repo.FullName != "" {
+				fRepo.Owner = m.repo.FullName[:idx]
 			}
 		}
 	}
@@ -76,13 +103,13 @@ func MetadataFromStruct(forge metadata.ServerForge, repo *model.Repo, pipeline, 
 
 	return metadata.Metadata{
 		Repo:     fRepo,
-		Curr:     metadataPipelineFromModelPipeline(pipeline, true),
-		Prev:     metadataPipelineFromModelPipeline(last, false),
+		Curr:     metadataPipelineFromModelPipeline(m.pipeline, true),
+		Prev:     metadataPipelineFromModelPipeline(m.last, false),
 		Workflow: fWorkflow,
 		Step:     metadata.Step{},
 		Sys: metadata.System{
 			Name:     "woodpecker",
-			URL:      sysURL,
+			URL:      m.sysURL,
 			Host:     host,
 			Platform: "", // will be set by pipeline platform option or by agent
 			Version:  version.Version,
