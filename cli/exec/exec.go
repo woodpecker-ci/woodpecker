@@ -32,6 +32,8 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/kubernetes"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/local"
 	backend_types "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/metadata"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/compiler"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/stepbuilder"
 	pipelineLog "go.woodpecker-ci.org/woodpecker/v2/pipeline/log"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
@@ -73,7 +75,7 @@ func run(c *cli.Context) error {
 	}
 
 	// configure volumes for local execution
-	// volumes := c.StringSlice("volumes")
+	volumes := c.StringSlice("volumes")
 	// if c.Bool("local") {
 	// 	var (
 	// 		workspaceBase = conf.Workspace.Base
@@ -90,45 +92,45 @@ func run(c *cli.Context) error {
 	// 	volumes = append(volumes, repoPath+":"+path.Join(workspaceBase, workspacePath))
 	// }
 
-	// compiles the yaml file
-	// compiled, err := compiler.New(
-	// 	compiler.WithEscalated(
-	// 		c.StringSlice("privileged")...,
-	// 	),
-	// 	compiler.WithVolumes(volumes...),
-	// 	compiler.WithWorkspace(
-	// 		c.String("workspace-base"),
-	// 		c.String("workspace-path"),
-	// 	),
-	// 	compiler.WithNetworks(
-	// 		c.StringSlice("network")...,
-	// 	),
-	// 	compiler.WithPrefix(
-	// 		c.String("prefix"),
-	// 	),
-	// 	compiler.WithProxy(compiler.ProxyOptions{
-	// 		NoProxy:    c.String("backend-no-proxy"),
-	// 		HTTPProxy:  c.String("backend-http-proxy"),
-	// 		HTTPSProxy: c.String("backend-https-proxy"),
-	// 	}),
-	// 	compiler.WithLocal(
-	// 		c.Bool("local"),
-	// 	),
-	// 	compiler.WithNetrc(
-	// 		c.String("netrc-username"),
-	// 		c.String("netrc-password"),
-	// 		c.String("netrc-machine"),
-	// 	),
-	// 	compiler.WithMetadata(metadata),
-	// 	compiler.WithSecret(secrets...),
-	// 	compiler.WithEnviron(pipelineEnv),
-	// ).Compile(conf)
-
-	b := stepbuilder.StepBuilder{
-		Envs:  envs,
-		Host:  "localhost",
-		Yamls: yamls,
+	getWorkflowMetadata := func(workflow *model.Workflow) metadata.Metadata {
+		return metadata.Metadata{} // TODO: metadata
 	}
+
+	repoIsTrusted := false
+	host := "localhost"
+
+	b := stepbuilder.NewStepBuilder(yamls, getWorkflowMetadata, repoIsTrusted, host, envs,
+		compiler.WithEscalated(
+			c.StringSlice("privileged")...,
+		),
+		compiler.WithVolumes(volumes...),
+		compiler.WithWorkspace(
+			c.String("workspace-base"),
+			c.String("workspace-path"),
+		),
+		compiler.WithNetworks(
+			c.StringSlice("network")...,
+		),
+		compiler.WithPrefix(
+			c.String("prefix"),
+		),
+		compiler.WithProxy(compiler.ProxyOptions{
+			NoProxy:    c.String("backend-no-proxy"),
+			HTTPProxy:  c.String("backend-http-proxy"),
+			HTTPSProxy: c.String("backend-https-proxy"),
+		}),
+		compiler.WithLocal(
+			c.Bool("local"),
+		),
+		compiler.WithNetrc(
+			c.String("netrc-username"),
+			c.String("netrc-password"),
+			c.String("netrc-machine"),
+		),
+		// compiler.WithMetadata(metadata),
+		// compiler.WithSecret(secrets...), // TODO: secrets
+		// compiler.WithEnviron(pipelineEnv), // TODO: pipelineEnv
+	)
 	items, err := b.Build()
 	if err != nil {
 		return err

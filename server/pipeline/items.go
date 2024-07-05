@@ -49,11 +49,33 @@ func parsePipeline(forge forge.Forge, store store.Store, currentPipeline *model.
 	if err != nil {
 		log.Error().Err(err).Msgf("error getting secrets for %s#%d", repo.FullName, currentPipeline.Number)
 	}
+	var secrets []compiler.Secret
+	for _, sec := range secs {
+		var events []string
+		for _, event := range sec.Events {
+			events = append(events, string(event))
+		}
+
+		secrets = append(secrets, compiler.Secret{
+			Name:           sec.Name,
+			Value:          sec.Value,
+			AllowedPlugins: sec.Images,
+			Events:         events,
+		})
+	}
 
 	registryService := server.Config.Services.Manager.RegistryServiceFromRepo(repo)
 	regs, err := registryService.RegistryListPipeline(repo, currentPipeline)
 	if err != nil {
 		log.Error().Err(err).Msgf("error getting registry credentials for %s#%d", repo.FullName, currentPipeline.Number)
+	}
+	var registries []compiler.Registry
+	for _, reg := range regs {
+		registries = append(registries, compiler.Registry{
+			Hostname: reg.Address,
+			Username: reg.Username,
+			Password: reg.Password,
+		})
 	}
 
 	if envs == nil {
@@ -74,21 +96,32 @@ func parsePipeline(forge forge.Forge, store store.Store, currentPipeline *model.
 
 	meta := metadata.NewMetadataServerForge(forge, repo, currentPipeline, last, server.Config.Server.Host)
 
-	b := stepbuilder.StepBuilder{
-		Repo:                    repo,
-		GetWorkflowMetadataData: meta.MetadataFromStruct,
-		Netrc:                   netrc,
-		Secrets:                 secs,
-		Registries:              regs,
-		Envs:                    envs,
-		Host:                    server.Config.Server.Host,
-		Yamls:                   yamls,
-		ProxyOpts: compiler.ProxyOptions{
+	b := stepbuilder.NewStepBuilder(yamls, meta.MetadataFromStruct, repo.IsTrusted, server.Config.Server.Host, envs,
+		compiler.WithEscalated(server.Config.Pipeline.Privileged...),
+		compiler.WithResourceLimit(server.Config.Pipeline.Limits.MemSwapLimit, server.Config.Pipeline.Limits.MemLimit, server.Config.Pipeline.Limits.ShmSize, server.Config.Pipeline.Limits.CPUQuota, server.Config.Pipeline.Limits.CPUShares, server.Config.Pipeline.Limits.CPUSet),
+		compiler.WithVolumes(server.Config.Pipeline.Volumes...),
+		compiler.WithNetworks(server.Config.Pipeline.Networks...),
+		compiler.WithLocal(false),
+		compiler.WithOption(
+			compiler.WithNetrc(
+				netrc.Login,
+				netrc.Password,
+				netrc.Machine,
+			),
+			repo.IsSCMPrivate || server.Config.Pipeline.AuthenticatePublicRepos,
+		),
+		compiler.WithDefaultCloneImage(server.Config.Pipeline.DefaultCloneImage),
+		compiler.WithRegistry(registries...),
+		compiler.WithSecret(secrets...),
+		compiler.WithProxy(compiler.ProxyOptions{
 			NoProxy:    server.Config.Pipeline.Proxy.No,
 			HTTPProxy:  server.Config.Pipeline.Proxy.HTTP,
 			HTTPSProxy: server.Config.Pipeline.Proxy.HTTPS,
-		},
-	}
+		}),
+		compiler.WithWorkspaceFromURL("/woodpecker", repo.ForgeURL),
+		compiler.WithTrusted(repo.IsTrusted),
+		compiler.WithNetrcOnlyTrusted(repo.NetrcOnlyTrusted),
+	)
 	return b.Build()
 }
 

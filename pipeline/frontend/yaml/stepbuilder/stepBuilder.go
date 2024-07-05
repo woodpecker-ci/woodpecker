@@ -17,7 +17,6 @@ package stepbuilder
 
 import (
 	"fmt"
-	"path/filepath"
 	"strings"
 
 	"github.com/oklog/ulid/v2"
@@ -33,39 +32,37 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/linter"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/matrix"
 	yaml_types "go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/types"
-	"go.woodpecker-ci.org/woodpecker/v2/server"
 	forge_types "go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
 // StepBuilder Takes the hook data and the yaml and returns in internal data model.
 type StepBuilder struct {
-	Repo                    *model.Repo                                      // TODO: get rid of server type in this package
-	Netrc                   *model.Netrc                                     // TODO: get rid of server type in this package
-	GetWorkflowMetadataData func(workflow *model.Workflow) metadata.Metadata // TODO: get rid of server type in this package
-	Secrets                 []*model.Secret                                  // TODO: get rid of server type in this package
-	Registries              []*model.Registry                                // TODO: get rid of server type in this package
-	RepoIsTrusted           bool
-	Host                    string
-	Yamls                   []*forge_types.FileMeta
-	Envs                    map[string]string
-	ProxyOpts               compiler.ProxyOptions
+	yamls                   []*forge_types.FileMeta // TODO: get rid of server type in this package
+	compilerOptions         []compiler.Option
+	getWorkflowMetadataData func(workflow *model.Workflow) metadata.Metadata // TODO: get rid of server type in this package
+	repoIsTrusted           bool
+	host                    string
+	envs                    map[string]string
 }
 
-type Item struct {
-	Workflow  *model.Workflow
-	Labels    map[string]string
-	DependsOn []string
-	RunsOn    []string
-	Config    *backend_types.Config
+func NewStepBuilder(yamls []*forge_types.FileMeta, getWorkflowMetadataData func(workflow *model.Workflow) metadata.Metadata, repoIsTrusted bool, host string, envs map[string]string, compilerOptions ...compiler.Option) *StepBuilder {
+	return &StepBuilder{
+		yamls:                   yamls,
+		compilerOptions:         compilerOptions,
+		getWorkflowMetadataData: getWorkflowMetadataData,
+		repoIsTrusted:           repoIsTrusted,
+		host:                    host,
+		envs:                    envs,
+	}
 }
 
 func (b *StepBuilder) Build() (items []*Item, errorsAndWarnings error) {
-	b.Yamls = forge_types.SortByName(b.Yamls)
+	b.yamls = forge_types.SortByName(b.yamls)
 
 	pidSequence := 1
 
-	for _, y := range b.Yamls {
+	for _, y := range b.yamls {
 		// matrix axes
 		axes, err := matrix.ParseString(string(y.Data))
 		if err != nil {
@@ -114,14 +111,14 @@ func (b *StepBuilder) Build() (items []*Item, errorsAndWarnings error) {
 }
 
 func (b *StepBuilder) genItemForWorkflow(workflow *model.Workflow, axis matrix.Axis, data string) (item *Item, errorsAndWarnings error) {
-	workflowMetadata := b.GetWorkflowMetadataData(workflow)
+	workflowMetadata := b.getWorkflowMetadataData(workflow)
 	environ := workflowMetadata.Environ()
 	for k, v := range axis {
 		environ[k] = v
 	}
 
 	// add global environment variables for substituting
-	for k, v := range b.Envs {
+	for k, v := range b.envs {
 		if _, exists := environ[k]; exists {
 			// don't override existing values
 			continue
@@ -143,7 +140,7 @@ func (b *StepBuilder) genItemForWorkflow(workflow *model.Workflow, axis matrix.A
 
 	// lint pipeline
 	errorsAndWarnings = multierr.Append(errorsAndWarnings, linter.New(
-		linter.WithTrusted(b.RepoIsTrusted),
+		linter.WithTrusted(b.repoIsTrusted),
 	).Lint([]*linter.WorkflowConfig{{
 		Workflow:  parsed,
 		File:      workflow.Name,
@@ -166,7 +163,7 @@ func (b *StepBuilder) genItemForWorkflow(workflow *model.Workflow, axis matrix.A
 		return nil, multierr.Append(errorsAndWarnings, err)
 	}
 
-	ir, err := b.toInternalRepresentation(parsed, environ, workflowMetadata, workflow.ID)
+	ir, err := b.compileWorkflow(parsed, environ, workflowMetadata, workflow.ID)
 	if err != nil {
 		return nil, multierr.Append(errorsAndWarnings, err)
 	}
@@ -189,94 +186,11 @@ func (b *StepBuilder) genItemForWorkflow(workflow *model.Workflow, axis matrix.A
 	return item, errorsAndWarnings
 }
 
-func stepListContainsItemsToRun(items []*Item) bool {
-	for i := range items {
-		if items[i].Workflow.State == model.StatusPending {
-			return true
-		}
-	}
-	return false
-}
-
-func filterItemsWithMissingDependencies(items []*Item) []*Item {
-	itemsToRemove := make([]*Item, 0)
-
-	for _, item := range items {
-		for _, dep := range item.DependsOn {
-			if !containsItemWithName(dep, items) {
-				itemsToRemove = append(itemsToRemove, item)
-			}
-		}
-	}
-
-	if len(itemsToRemove) > 0 {
-		filtered := make([]*Item, 0)
-		for _, item := range items {
-			if !containsItemWithName(item.Workflow.Name, itemsToRemove) {
-				filtered = append(filtered, item)
-			}
-		}
-		// Recursive to handle transitive deps
-		return filterItemsWithMissingDependencies(filtered)
-	}
-
-	return items
-}
-
-func containsItemWithName(name string, items []*Item) bool {
-	for _, item := range items {
-		if name == item.Workflow.Name {
-			return true
-		}
-	}
-	return false
-}
-
-func (b *StepBuilder) toInternalRepresentation(parsed *yaml_types.Workflow, environ map[string]string, metadata metadata.Metadata, workflowID int64) (*backend_types.Config, error) {
-	var secrets []compiler.Secret
-	for _, sec := range b.Secrets {
-		var events []string
-		for _, event := range sec.Events {
-			events = append(events, string(event))
-		}
-
-		secrets = append(secrets, compiler.Secret{
-			Name:           sec.Name,
-			Value:          sec.Value,
-			AllowedPlugins: sec.Images,
-			Events:         events,
-		})
-	}
-
-	var registries []compiler.Registry
-	for _, reg := range b.Registries {
-		registries = append(registries, compiler.Registry{
-			Hostname: reg.Address,
-			Username: reg.Username,
-			Password: reg.Password,
-		})
-	}
-
-	return compiler.New(
+func (b *StepBuilder) compileWorkflow(parsed *yaml_types.Workflow, environ map[string]string, metadata metadata.Metadata, workflowID int64) (*backend_types.Config, error) {
+	options := []compiler.Option{}
+	options = append(options,
 		compiler.WithEnviron(environ),
-		compiler.WithEnviron(b.Envs),
-		// TODO: server deps should be moved into StepBuilder fields and set on StepBuilder creation
-		compiler.WithEscalated(server.Config.Pipeline.Privileged...),
-		compiler.WithResourceLimit(server.Config.Pipeline.Limits.MemSwapLimit, server.Config.Pipeline.Limits.MemLimit, server.Config.Pipeline.Limits.ShmSize, server.Config.Pipeline.Limits.CPUQuota, server.Config.Pipeline.Limits.CPUShares, server.Config.Pipeline.Limits.CPUSet),
-		compiler.WithVolumes(server.Config.Pipeline.Volumes...),
-		compiler.WithNetworks(server.Config.Pipeline.Networks...),
-		compiler.WithLocal(false),
-		compiler.WithOption(
-			compiler.WithNetrc(
-				b.Netrc.Login,
-				b.Netrc.Password,
-				b.Netrc.Machine,
-			),
-			b.Repo.IsSCMPrivate || server.Config.Pipeline.AuthenticatePublicRepos,
-		),
-		compiler.WithDefaultCloneImage(server.Config.Pipeline.DefaultCloneImage),
-		compiler.WithRegistry(registries...),
-		compiler.WithSecret(secrets...),
+		compiler.WithEnviron(b.envs),
 		compiler.WithPrefix(
 			fmt.Sprintf(
 				"wp_%s_%d",
@@ -284,18 +198,10 @@ func (b *StepBuilder) toInternalRepresentation(parsed *yaml_types.Workflow, envi
 				workflowID,
 			),
 		),
-		compiler.WithProxy(b.ProxyOpts),
-		compiler.WithWorkspaceFromURL("/woodpecker", b.Repo.ForgeURL),
+		compiler.WithTrusted(b.repoIsTrusted),
 		compiler.WithMetadata(metadata),
-		compiler.WithTrusted(b.Repo.IsTrusted),
-		compiler.WithNetrcOnlyTrusted(b.Repo.NetrcOnlyTrusted),
-	).Compile(parsed)
-}
+	)
+	options = append(options, b.compilerOptions...)
 
-func SanitizePath(path string) string {
-	path = filepath.Base(path)
-	path = strings.TrimSuffix(path, ".yml")
-	path = strings.TrimSuffix(path, ".yaml")
-	path = strings.TrimPrefix(path, ".")
-	return path
+	return compiler.New(options...).Compile(parsed)
 }
