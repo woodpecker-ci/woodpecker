@@ -36,17 +36,15 @@ type MetadataServerForge struct {
 	repo     *model.Repo
 	pipeline *model.Pipeline
 	last     *model.Pipeline
-	workflow *model.Workflow
 	sysURL   string
 }
 
-func NewMetadataServerForge(forge metadata.ServerForge, repo *model.Repo, pipeline *model.Pipeline, last *model.Pipeline, workflow *model.Workflow, sysURL string) *MetadataServerForge {
+func NewMetadataServerForge(forge metadata.ServerForge, repo *model.Repo, pipeline *model.Pipeline, last *model.Pipeline, sysURL string) *MetadataServerForge {
 	return &MetadataServerForge{
 		forge:    forge,
 		repo:     repo,
 		pipeline: pipeline,
 		last:     last,
-		workflow: workflow,
 		sysURL:   sysURL,
 	}
 }

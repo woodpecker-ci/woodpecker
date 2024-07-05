@@ -43,8 +43,8 @@ type StepBuilder struct {
 	Repo                    *model.Repo                                      // TODO: get rid of server type in this package
 	Netrc                   *model.Netrc                                     // TODO: get rid of server type in this package
 	GetWorkflowMetadataData func(workflow *model.Workflow) metadata.Metadata // TODO: get rid of server type in this package
-	GetSecrets              func() []*model.Secret                           // TODO: get rid of server type in this package
-	GetRegistries           func() []*model.Registry                         // TODO: get rid of server type in this package
+	Secrets                 []*model.Secret                                  // TODO: get rid of server type in this package
+	Registries              []*model.Registry                                // TODO: get rid of server type in this package
 	RepoIsTrusted           bool
 	Host                    string
 	Yamls                   []*forge_types.FileMeta
@@ -115,7 +115,10 @@ func (b *StepBuilder) Build() (items []*Item, errorsAndWarnings error) {
 
 func (b *StepBuilder) genItemForWorkflow(workflow *model.Workflow, axis matrix.Axis, data string) (item *Item, errorsAndWarnings error) {
 	workflowMetadata := b.GetWorkflowMetadataData(workflow)
-	environ := b.environmentVariables(workflowMetadata, axis)
+	environ := workflowMetadata.Environ()
+	for k, v := range axis {
+		environ[k] = v
+	}
 
 	// add global environment variables for substituting
 	for k, v := range b.Envs {
@@ -229,17 +232,9 @@ func containsItemWithName(name string, items []*Item) bool {
 	return false
 }
 
-func (b *StepBuilder) environmentVariables(metadata metadata.Metadata, axis matrix.Axis) map[string]string {
-	environ := metadata.Environ()
-	for k, v := range axis {
-		environ[k] = v
-	}
-	return environ
-}
-
 func (b *StepBuilder) toInternalRepresentation(parsed *yaml_types.Workflow, environ map[string]string, metadata metadata.Metadata, workflowID int64) (*backend_types.Config, error) {
 	var secrets []compiler.Secret
-	for _, sec := range b.GetSecrets() {
+	for _, sec := range b.Secrets {
 		var events []string
 		for _, event := range sec.Events {
 			events = append(events, string(event))
@@ -254,7 +249,7 @@ func (b *StepBuilder) toInternalRepresentation(parsed *yaml_types.Workflow, envi
 	}
 
 	var registries []compiler.Registry
-	for _, reg := range b.GetRegistries() {
+	for _, reg := range b.Registries {
 		registries = append(registries, compiler.Registry{
 			Hostname: reg.Address,
 			Username: reg.Username,
