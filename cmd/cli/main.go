@@ -28,6 +28,6 @@ func main() {
 
 	app := newApp()
 	if err := app.Run(ctx, os.Args); err != nil {
-		log.Fatal().Err(err).Msg("error running cli")
+		log.Fatal().Err(err).Msg("error running cli") //nolint:forbidigo
 	}
 }

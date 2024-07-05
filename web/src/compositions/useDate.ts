@@ -14,7 +14,7 @@ dayjs.extend(duration);
 
 export function useDate() {
   function toLocaleString(date: Date) {
-    return dayjs(date).format(useI18n().t('time.tmpl'));
+    return dayjs(date).format(useI18n().t('time.template'));
   }
 
   function timeAgo(date: Date | string | number) {
@@ -29,7 +29,7 @@ export function useDate() {
 
   async function setDayjsLocale(locale: string) {
     if (!addedLocales.includes(locale)) {
-      const l = await import(`~/assets/dayjsLocales/${locale}.js`);
+      const l = (await import(`~/assets/dayjsLocales/${locale}.js`)) as { default: string };
       dayjs.locale(l.default);
     } else {
       dayjs.locale(locale);

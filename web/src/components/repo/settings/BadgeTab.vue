@@ -6,8 +6,9 @@
       </a>
     </template>
 
-    <InputField :label="$t('repo.settings.badge.type')">
+    <InputField v-slot="{ id }" :label="$t('repo.settings.badge.type')">
       <SelectField
+        :id="id"
         v-model="badgeType"
         :options="[
           {
@@ -26,8 +27,8 @@
         required
       />
     </InputField>
-    <InputField :label="$t('repo.settings.badge.branch')">
-      <SelectField v-model="branch" :options="branches" required />
+    <InputField v-slot="{ id }" :label="$t('repo.settings.badge.branch')">
+      <SelectField :id="id" v-model="branch" :options="branches" required />
     </InputField>
 
     <div v-if="badgeContent" class="flex flex-col space-y-4">
@@ -40,16 +41,16 @@
 
 <script lang="ts" setup>
 import { useStorage } from '@vueuse/core';
-import { computed, inject, onMounted, Ref, ref, watch } from 'vue';
+import { computed, inject, onMounted, ref, watch, type Ref } from 'vue';
 
-import { SelectOption } from '~/components/form/form.types';
+import type { SelectOption } from '~/components/form/form.types';
 import InputField from '~/components/form/InputField.vue';
 import SelectField from '~/components/form/SelectField.vue';
 import Settings from '~/components/layout/Settings.vue';
 import useApiClient from '~/compositions/useApiClient';
 import useConfig from '~/compositions/useConfig';
 import { usePaginate } from '~/compositions/usePaginate';
-import { Repo } from '~/lib/api/types';
+import type { Repo } from '~/lib/api/types';
 
 const apiClient = useApiClient();
 const repo = inject<Ref<Repo>>('repo');
@@ -69,7 +70,7 @@ async function loadBranches() {
     throw new Error('Unexpected: "repo" should be provided at this place');
   }
 
-  branches.value = (await usePaginate((page) => apiClient.getRepoBranches(repo.value.id, page)))
+  branches.value = (await usePaginate((page) => apiClient.getRepoBranches(repo.value.id, { page })))
     .map((b) => ({
       value: b,
       text: b,
@@ -83,12 +84,14 @@ async function loadBranches() {
 
 const baseUrl = `${window.location.protocol}//${window.location.hostname}${
   window.location.port ? `:${window.location.port}` : ''
-}${useConfig().rootPath}`;
+}`;
+const { rootPath } = useConfig();
 const badgeUrl = computed(
-  () => `/api/badges/${repo.value.id}/status.svg${branch.value !== '' ? `?branch=${branch.value}` : ''}`,
+  () => `${rootPath}/api/badges/${repo.value.id}/status.svg${branch.value !== '' ? `?branch=${branch.value}` : ''}`,
 );
 const repoUrl = computed(
-  () => `/repos/${repo.value.id}${branch.value !== '' ? `/branches/${encodeURIComponent(branch.value)}` : ''}`,
+  () =>
+    `${rootPath}/repos/${repo.value.id}${branch.value !== '' ? `/branches/${encodeURIComponent(branch.value)}` : ''}`,
 );
 
 const badgeContent = computed(() => {

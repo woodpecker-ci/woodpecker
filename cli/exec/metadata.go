@@ -62,6 +62,7 @@ func metadataFromContext(ctx context.Context, c *cli.Command, axis matrix.Axis) 
 			Event:    c.String("pipeline-event"),
 			ForgeURL: c.String("pipeline-url"),
 			Target:   c.String("pipeline-target"),
+			Task:     c.String("pipeline-task"),
 			Commit: metadata.Commit{
 				Sha:     c.String("commit-sha"),
 				Ref:     c.String("commit-ref"),

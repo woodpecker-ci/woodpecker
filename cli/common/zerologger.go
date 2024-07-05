@@ -19,10 +19,9 @@ import (
 
 	"github.com/urfave/cli/v3"
 
-	"go.woodpecker-ci.org/woodpecker/v2/cmd/common"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/logger"
 )
 
-func SetupGlobalLogger(ctx context.Context, c *cli.Command) error {
-	common.SetupGlobalLogger(ctx, c, false)
-	return nil
+func setupGlobalLogger(ctx context.Context, c *cli.Command) error {
+	return logger.SetupGlobalLogger(ctx, c, false)
 }

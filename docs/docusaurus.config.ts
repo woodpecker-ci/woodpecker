@@ -5,15 +5,25 @@ import * as path from 'path';
 
 const config: Config = {
   title: 'Woodpecker CI',
-  tagline: 'Woodpecker is a simple CI engine with great extensibility.',
+  tagline: 'Woodpecker is a simple yet powerful CI/CD engine with great extensibility.',
   url: 'https://woodpecker-ci.org',
   baseUrl: '/',
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'throw',
+  onBrokenAnchors: 'throw',
   onDuplicateRoutes: 'throw',
   organizationName: 'woodpecker-ci',
   projectName: 'woodpecker-ci.github.io',
   trailingSlash: false,
+  headTags: [
+    {
+      tagName: 'link',
+      attributes: {
+        href: 'https://floss.social/@WoodpeckerCI',
+        rel: 'me',
+      },
+    },
+  ],
   themeConfig: {
     navbar: {
       title: 'Woodpecker',
@@ -34,32 +44,37 @@ const config: Config = {
           position: 'left',
           label: 'Plugins',
         },
-        {
-          to: '/docs/next/migrations', // Always point to newest migration guide
-          activeBaseRegex: 'docs/(next/)?migrations',
-          position: 'left',
-          label: 'Migrations',
-        },
-        {
-          to: '/faq',
-          position: 'left',
-          label: 'FAQ',
-        },
-        {
-          to: '/docs/next/awesome', // Always point to newest awesome list
-          activeBaseRegex: 'docs/(next/)?awesome',
-          position: 'left',
-          label: 'Awesome',
-        },
-        {
-          to: '/api',
-          position: 'left',
-          label: 'API',
-        },
         { to: 'blog', label: 'Blog', position: 'left' },
+        {
+          label: 'More Resources',
+          position: 'left',
+          items: [
+            {
+              to: '/docs/next/migrations', // Always point to newest migration guide
+              activeBaseRegex: 'docs/(next/)?migrations',
+              label: 'Migrations',
+            },
+            {
+              to: '/docs/next/awesome', // Always point to newest awesome list
+              activeBaseRegex: 'docs/(next/)?awesome',
+              label: 'Awesome',
+            },
+            {
+              to: '/api',
+              label: 'API',
+            },
+            { to: 'cookbook', label: 'Cookbook' },
+          ],
+        },
         {
           type: 'docsVersionDropdown',
           position: 'right',
+          dropdownItemsAfter: [
+            {
+              to: '/versions',
+              label: 'All versions',
+            },
+          ],
         },
         {
           href: 'https://github.com/woodpecker-ci/woodpecker',
@@ -92,19 +107,11 @@ const config: Config = {
               label: 'Server setup',
               to: '/docs/administration/deployment/overview',
             },
-            {
-              label: 'FAQ',
-              to: '/faq',
-            },
           ],
         },
         {
           title: 'Community',
           items: [
-            {
-              label: 'Discord',
-              href: 'https://discord.gg/fcMQqSMXJy',
-            },
             {
               label: 'Matrix',
               href: 'https://matrix.to/#/#woodpecker:matrix.org',
@@ -112,6 +119,10 @@ const config: Config = {
             {
               label: 'Mastodon',
               href: 'https://floss.social/@WoodpeckerCI',
+            },
+            {
+              label: 'X',
+              href: 'https://twitter.com/woodpeckerci',
             },
           ],
         },
@@ -127,8 +138,12 @@ const config: Config = {
               href: 'https://github.com/woodpecker-ci/woodpecker',
             },
             {
-              href: 'https://ci.woodpecker-ci.org/woodpecker-ci/woodpecker',
+              href: 'https://ci.woodpecker-ci.org/repos/3780',
               label: 'CI',
+            },
+            {
+              href: 'https://opencollective.com/woodpecker-ci',
+              label: 'Open Collective',
             },
           ],
         },
@@ -138,7 +153,19 @@ const config: Config = {
     prism: {
       theme: themes.github,
       darkTheme: themes.dracula,
-      additionalLanguages: ['diff', 'json', 'docker', 'javascript', 'css', 'bash', 'nginx', 'apacheconf', 'ini', 'nix'],
+      additionalLanguages: [
+        'diff',
+        'json',
+        'docker',
+        'javascript',
+        'css',
+        'bash',
+        'nginx',
+        'apacheconf',
+        'ini',
+        'nix',
+        'uri',
+      ],
     },
     announcementBar: {
       id: 'github-star',
@@ -189,9 +216,24 @@ const config: Config = {
               webSocketURL: 'auto://0.0.0.0:0/ws',
             },
           },
-        };
+        } as any;
       },
     }),
+    [
+      '@docusaurus/plugin-content-blog',
+      {
+        id: 'cookbook-blog',
+        /**
+         * URL route for the blog section of your site.
+         * *DO NOT* include a trailing slash.
+         */
+        routeBasePath: 'cookbook',
+        /**
+         * Path to data on filesystem relative to site dir.
+         */
+        path: './cookbook',
+      },
+    ],
   ],
   themes: [
     path.resolve(__dirname, 'plugins', 'woodpecker-plugins', 'dist'),
@@ -210,21 +252,27 @@ const config: Config = {
           sidebarPath: require.resolve('./sidebars.js'),
           editUrl: 'https://github.com/woodpecker-ci/woodpecker/edit/main/docs/',
           includeCurrentVersion: true,
-          lastVersion: '2.0',
+          lastVersion: '2.6',
+          onlyIncludeVersions:
+            process.env.NODE_ENV === 'development' ? ['current', '2.6'] : ['current', '2.6', '2.5', '2.4', '1.0'],
           versions: {
             current: {
-              label: 'Next',
+              label: 'Next 🚧',
               banner: 'unreleased',
             },
-            '2.0': {
-              label: '2.0.x',
+            '2.6': {
+              label: '2.6.x',
             },
-            '1.0': {
-              label: '1.0.x',
+            '2.5': {
+              label: '2.5.x 💀',
               banner: 'unmaintained',
             },
-            0.15: {
-              label: '0.15.x',
+            '2.4': {
+              label: '2.4.x 💀',
+              banner: 'unmaintained',
+            },
+            '1.0': {
+              label: '1.0.x 💀',
               banner: 'unmaintained',
             },
           },
@@ -264,6 +312,7 @@ const config: Config = {
       options: {
         loader: 'tsx',
         target: isServer ? 'node12' : 'es2017',
+        supported: { 'dynamic-import': false },
       },
     }),
   },

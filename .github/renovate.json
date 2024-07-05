@@ -1,30 +1,41 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": ["github>woodpecker-ci/renovate-config"],
-  "prConcurrentLimit": 5,
   "packageRules": [
     {
+      "matchCurrentVersion": "<1.0.0",
+      "matchPackageNames": ["github.com/distribution/reference"],
+      "matchUpdateTypes": ["major", "minor"],
+      "dependencyDashboardApproval": true
+    },
+    {
+      "matchPackageNames": ["github.com/charmbracelet/huh/spinner"],
+      "enabled": false
+    },
+    {
       "matchManagers": ["docker-compose"],
-      "matchFileNames": ["docker-compose.gitpod.yml"],
-      "labels": ["devx"]
+      "matchFileNames": ["docker-compose.gitpod.yaml"],
+      "addLabels": ["devx"]
     },
     {
-      "matchManagers": ["gomod", "npm", "dockerfile"],
-      "labels": ["dependencies"]
-    },
-    {
-      "matchManagers": ["woodpecker"],
-      "labels": ["build"]
-    },
-    {
-      "groupName": "golang (lang)",
+      "groupName": "golang-lang",
       "matchPackagePatterns": ["^golang$", "xgo"],
       "matchUpdateTypes": ["minor", "patch"]
     },
     {
-      "groupName": "golang (packages)",
+      "groupName": "golang-packages",
       "matchManagers": ["gomod"],
       "matchUpdateTypes": ["minor", "patch"]
+    },
+    {
+      "matchManagers": ["npm"],
+      "matchFileNames": ["web/package.json"],
+      "addLabels": ["ui"]
+    },
+    {
+      "matchManagers": ["npm"],
+      "matchFileNames": ["docs/**/package.json"],
+      "addLabels": ["documentation"]
     },
     {
       "groupName": "web npm deps non-major",

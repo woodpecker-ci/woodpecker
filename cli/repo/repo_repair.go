@@ -45,6 +45,6 @@ func repoRepair(ctx context.Context, c *cli.Command) error {
 		return err
 	}
 
-	fmt.Printf("Successfully removed repository %s\n", repoIDOrFullName)
+	fmt.Printf("Successfully repaired repository %s\n", repoIDOrFullName)
 	return nil
 }

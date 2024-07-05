@@ -56,5 +56,5 @@ func userList(ctx context.Context, c *cli.Command) error {
 	return nil
 }
 
-// template for user list items
+// Template for user list items.
 var tmplUserList = `{{ .Login }}`

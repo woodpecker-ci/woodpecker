@@ -1,14 +1,14 @@
-import { WebhookEvents } from './webhook';
+import type { WebhookEvents } from './webhook';
 
-export type PipelineError<D = unknown> = {
+export interface PipelineError<D = unknown> {
   type: string;
   message: string;
   data?: D;
   is_warning: boolean;
-};
+}
 
 // A pipeline for a repository.
-export type Pipeline = {
+export interface Pipeline {
   id: number;
 
   // The pipeline number.
@@ -29,9 +29,6 @@ export type Pipeline = {
 
   // When the pipeline was updated last time in database.
   updated_at: number;
-
-  // When the pipeline was enqueued.
-  enqueued_at: number;
 
   // When the pipeline began execution.
   started_at: number;
@@ -92,7 +89,7 @@ export type Pipeline = {
   workflows?: PipelineWorkflow[];
 
   changed_files?: string[];
-};
+}
 
 export type PipelineStatus =
   | 'blocked'
@@ -106,7 +103,7 @@ export type PipelineStatus =
   | 'started'
   | 'success';
 
-export type PipelineWorkflow = {
+export interface PipelineWorkflow {
   id: number;
   pipeline_id: number;
   pid: number;
@@ -118,9 +115,9 @@ export type PipelineWorkflow = {
   agent_id?: number;
   error?: string;
   children: PipelineStep[];
-};
+}
 
-export type PipelineStep = {
+export interface PipelineStep {
   id: number;
   uuid: string;
   pipeline_id: number;
@@ -133,25 +130,27 @@ export type PipelineStep = {
   end_time?: number;
   error?: string;
   type?: StepType;
-};
+}
 
-export type PipelineLog = {
+export interface PipelineLog {
   id: number;
   step_id: number;
   time: number;
   line: number;
   data: string; // base64 encoded
   type: number;
-};
+}
 
 export type PipelineFeed = Pipeline & {
   repo_id: number;
 };
 
+/* eslint-disable no-unused-vars */
 export enum StepType {
-  Clone = 1,
-  Service,
-  Plugin,
-  Commands,
-  Cache,
+  Clone = 'clone',
+  Service = 'service',
+  Plugin = 'plugin',
+  Commands = 'commands',
+  Cache = 'cache',
 }
+/* eslint-enable */

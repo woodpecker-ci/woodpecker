@@ -57,17 +57,18 @@ func secretList(ctx context.Context, c *cli.Command) error {
 	}
 
 	var list []*woodpecker.Secret
-	if global {
+	switch {
+	case global:
 		list, err = client.GlobalSecretList()
 		if err != nil {
 			return err
 		}
-	} else if orgID != -1 {
+	case orgID != -1:
 		list, err = client.OrgSecretList(orgID)
 		if err != nil {
 			return err
 		}
-	} else {
+	default:
 		list, err = client.SecretList(repoID)
 		if err != nil {
 			return err
@@ -86,7 +87,7 @@ func secretList(ctx context.Context, c *cli.Command) error {
 	return nil
 }
 
-// template for secret list items
+// Template for secret list items.
 var tmplSecretList = "\x1b[33m{{ .Name }} \x1b[0m" + `
 Events: {{ list .Events }}
 {{- if .Images }}

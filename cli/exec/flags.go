@@ -29,6 +29,11 @@ var flags = []cli.Flag{
 		Usage:   "run from local directory",
 		Value:   true,
 	},
+	&cli.StringFlag{
+		Sources: cli.EnvVars("WOODPECKER_REPO_PATH"),
+		Name:    "repo-path",
+		Usage:   "path to local repository",
+	},
 	&cli.DurationFlag{
 		Sources: cli.EnvVars("WOODPECKER_TIMEOUT"),
 		Name:    "timeout",
@@ -198,6 +203,10 @@ var flags = []cli.Flag{
 	&cli.StringFlag{
 		Sources: cli.EnvVars("CI_PIPELINE_TARGET"),
 		Name:    "pipeline-target",
+	},
+	&cli.StringFlag{
+		Sources: cli.EnvVars("CI_PIPELINE_TASK"),
+		Name:    "pipeline-task",
 	},
 	&cli.StringFlag{
 		Sources: cli.EnvVars("CI_COMMIT_SHA"),

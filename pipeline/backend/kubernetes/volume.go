@@ -15,47 +15,89 @@
 package kubernetes
 
 import (
+	"context"
 	"strings"
 
+	"github.com/rs/zerolog/log"
 	v1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/resource"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func PersistentVolumeClaim(namespace, name, storageClass, size string, storageRwx bool) (*v1.PersistentVolumeClaim, error) {
-	_storageClass := &storageClass
-	if storageClass == "" {
+func mkPersistentVolumeClaim(config *config, name string) (*v1.PersistentVolumeClaim, error) {
+	_storageClass := &config.StorageClass
+	if config.StorageClass == "" {
 		_storageClass = nil
 	}
 
 	var accessMode v1.PersistentVolumeAccessMode
 
-	if storageRwx {
+	if config.StorageRwx {
 		accessMode = v1.ReadWriteMany
 	} else {
 		accessMode = v1.ReadWriteOnce
 	}
 
-	volumeName, err := dnsName(strings.Split(name, ":")[0])
+	volumeName, err := volumeName(name)
 	if err != nil {
 		return nil, err
 	}
 
 	pvc := &v1.PersistentVolumeClaim{
-		ObjectMeta: metav1.ObjectMeta{
+		ObjectMeta: meta_v1.ObjectMeta{
 			Name:      volumeName,
-			Namespace: namespace,
+			Namespace: config.Namespace,
 		},
 		Spec: v1.PersistentVolumeClaimSpec{
 			AccessModes:      []v1.PersistentVolumeAccessMode{accessMode},
 			StorageClassName: _storageClass,
-			Resources: v1.ResourceRequirements{
+			Resources: v1.VolumeResourceRequirements{
 				Requests: v1.ResourceList{
-					v1.ResourceStorage: resource.MustParse(size),
+					v1.ResourceStorage: resource.MustParse(config.VolumeSize),
 				},
 			},
 		},
 	}
 
 	return pvc, nil
+}
+
+func volumeName(name string) (string, error) {
+	return dnsName(strings.Split(name, ":")[0])
+}
+
+func volumeMountPath(name string) string {
+	s := strings.Split(name, ":")
+	if len(s) > 1 {
+		return s[1]
+	}
+	return s[0]
+}
+
+func startVolume(ctx context.Context, engine *kube, name string) (*v1.PersistentVolumeClaim, error) {
+	engineConfig := engine.getConfig()
+	pvc, err := mkPersistentVolumeClaim(engineConfig, name)
+	if err != nil {
+		return nil, err
+	}
+
+	log.Trace().Msgf("creating volume: %s", pvc.Name)
+	return engine.client.CoreV1().PersistentVolumeClaims(engineConfig.Namespace).Create(ctx, pvc, meta_v1.CreateOptions{})
+}
+
+func stopVolume(ctx context.Context, engine *kube, name string, deleteOpts meta_v1.DeleteOptions) error {
+	pvcName, err := volumeName(name)
+	if err != nil {
+		return err
+	}
+	log.Trace().Str("name", pvcName).Msg("deleting volume")
+
+	err = engine.client.CoreV1().PersistentVolumeClaims(engine.config.Namespace).Delete(ctx, pvcName, deleteOpts)
+	if errors.IsNotFound(err) {
+		// Don't abort on 404 errors from k8s, they most likely mean that the pod hasn't been created yet, usually because pipeline was canceled before running all steps.
+		log.Trace().Err(err).Msgf("unable to delete service %s", pvcName)
+		return nil
+	}
+	return err
 }

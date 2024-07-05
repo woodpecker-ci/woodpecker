@@ -46,8 +46,9 @@
     </div>
     <div v-else>
       <form @submit.prevent="saveAgent">
-        <InputField :label="$t('admin.settings.agents.name.name')">
+        <InputField v-slot="{ id }" :label="$t('admin.settings.agents.name.name')">
           <TextField
+            :id="id"
             v-model="selectedAgent.name"
             :placeholder="$t('admin.settings.agents.name.placeholder')"
             required
@@ -63,39 +64,47 @@
         </InputField>
 
         <template v-if="isEditingAgent">
-          <InputField :label="$t('admin.settings.agents.token')">
-            <TextField v-model="selectedAgent.token" :placeholder="$t('admin.settings.agents.token')" disabled />
+          <InputField v-slot="{ id }" :label="$t('admin.settings.agents.token')">
+            <TextField
+              :id="id"
+              v-model="selectedAgent.token"
+              :placeholder="$t('admin.settings.agents.token')"
+              disabled
+            />
           </InputField>
 
-          <InputField :label="$t('admin.settings.agents.id')">
-            <TextField :model-value="selectedAgent.id?.toString()" disabled />
+          <InputField v-slot="{ id }" :label="$t('admin.settings.agents.id')">
+            <TextField :id="id" :model-value="selectedAgent.id?.toString()" disabled />
           </InputField>
 
           <InputField
+            v-slot="{ id }"
             :label="$t('admin.settings.agents.backend.backend')"
             docs-url="docs/next/administration/backends/docker"
           >
-            <TextField v-model="selectedAgent.backend" disabled />
+            <TextField :id="id" v-model="selectedAgent.backend" disabled />
           </InputField>
 
-          <InputField :label="$t('admin.settings.agents.platform.platform')">
-            <TextField v-model="selectedAgent.platform" disabled />
+          <InputField v-slot="{ id }" :label="$t('admin.settings.agents.platform.platform')">
+            <TextField :id="id" v-model="selectedAgent.platform" disabled />
           </InputField>
 
           <InputField
+            v-slot="{ id }"
             :label="$t('admin.settings.agents.capacity.capacity')"
-            docs-url="docs/next/administration/agent-config#woodpecker_max_procs"
+            docs-url="docs/next/administration/agent-config#woodpecker_max_workflows"
           >
             <span class="text-wp-text-alt-100">{{ $t('admin.settings.agents.capacity.desc') }}</span>
-            <TextField :model-value="selectedAgent.capacity?.toString()" disabled />
+            <TextField :id="id" :model-value="selectedAgent.capacity?.toString()" disabled />
           </InputField>
 
-          <InputField :label="$t('admin.settings.agents.version')">
-            <TextField :model-value="selectedAgent.version" disabled />
+          <InputField v-slot="{ id }" :label="$t('admin.settings.agents.version')">
+            <TextField :id="id" :model-value="selectedAgent.version" disabled />
           </InputField>
 
-          <InputField :label="$t('admin.settings.agents.last_contact')">
+          <InputField v-slot="{ id }" :label="$t('admin.settings.agents.last_contact')">
             <TextField
+              :id="id"
               :model-value="
                 selectedAgent.last_contact
                   ? date.timeAgo(selectedAgent.last_contact * 1000)
@@ -138,7 +147,7 @@ import { useAsyncAction } from '~/compositions/useAsyncAction';
 import { useDate } from '~/compositions/useDate';
 import useNotifications from '~/compositions/useNotifications';
 import { usePagination } from '~/compositions/usePaginate';
-import { Agent } from '~/lib/api/types';
+import type { Agent } from '~/lib/api/types';
 
 const apiClient = useApiClient();
 const notifications = useNotifications();
@@ -149,7 +158,7 @@ const selectedAgent = ref<Partial<Agent>>();
 const isEditingAgent = computed(() => !!selectedAgent.value?.id);
 
 async function loadAgents(page: number): Promise<Agent[] | null> {
-  return apiClient.getAgents(page);
+  return apiClient.getAgents({ page });
 }
 
 const { resetPage, data: agents } = usePagination(loadAgents, () => !selectedAgent.value);
@@ -166,14 +175,14 @@ const { doSubmit: saveAgent, isLoading: isSaving } = useAsyncAction(async () => 
     selectedAgent.value = await apiClient.createAgent(selectedAgent.value);
   }
   notifications.notify({
-    title: t(isEditingAgent.value ? 'admin.settings.agents.saved' : 'admin.settings.agents.created'),
+    title: isEditingAgent.value ? t('admin.settings.agents.saved') : t('admin.settings.agents.created'),
     type: 'success',
   });
   resetPage();
 });
 
 const { doSubmit: deleteAgent, isLoading: isDeleting } = useAsyncAction(async (_agent: Agent) => {
-  // eslint-disable-next-line no-restricted-globals, no-alert
+  // eslint-disable-next-line no-alert
   if (!confirm(t('admin.settings.agents.delete_confirm'))) {
     return;
   }

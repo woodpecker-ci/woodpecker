@@ -16,9 +16,9 @@ export const i18n = createI18n({
 });
 
 const loadLocaleMessages = async (locale: string) => {
-  const { default: messages } = await import(`~/assets/locales/${locale}.json`);
+  const messages = (await import(`~/assets/locales/${locale}.json`)) as { default: any };
 
-  i18n.global.setLocaleMessage(locale, messages);
+  i18n.global.setLocaleMessage(locale, messages.default);
 
   return nextTick();
 };
@@ -31,6 +31,6 @@ export const setI18nLanguage = async (lang: string): Promise<void> => {
   await setDayjsLocale(lang);
 };
 
-loadLocaleMessages(fallbackLocale);
-loadLocaleMessages(userLanguage);
-setDayjsLocale(userLanguage);
+loadLocaleMessages(fallbackLocale).catch(console.error);
+loadLocaleMessages(userLanguage).catch(console.error);
+setDayjsLocale(userLanguage).catch(console.error);

@@ -41,7 +41,7 @@ type syncRepo022 struct {
 	OrgID int64 `json:"org_id" xorm:"repo_org_id"`
 }
 
-// TableName return database table name for xorm
+// TableName return database table name for xorm.
 func (syncRepo022) TableName() string {
 	return "repos"
 }
@@ -52,7 +52,7 @@ type repo022 struct {
 	Owner string `json:"owner"        xorm:"UNIQUE(name) 'repo_owner'"`
 }
 
-// TableName return database table name for xorm
+// TableName return database table name for xorm.
 func (repo022) TableName() string {
 	return "repos"
 }
@@ -66,7 +66,7 @@ var addOrgs = xormigrate.Migration{
 			}
 		}
 
-		if err := sess.Sync(new(model.Org), new(syncRepo022), new(model.User)); err != nil {
+		if err := sess.Sync(new(model.Org), new(syncRepo022), new(userV031)); err != nil {
 			return fmt.Errorf("sync new models failed: %w", err)
 		}
 
@@ -88,7 +88,7 @@ var addOrgs = xormigrate.Migration{
 
 			// check if it's a registered user
 			if _, ok := users[orgName]; !ok {
-				exist, err := sess.Where("user_login = ?", orgName).Exist(new(model.User))
+				exist, err := sess.Where("user_login = ?", orgName).Exist(new(userV031))
 				if err != nil {
 					return fmt.Errorf("check if user '%s' exist failed: %w", orgName, err)
 				}

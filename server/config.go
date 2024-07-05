@@ -12,50 +12,33 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-//
-// This file has been modified by Informatyka Boguslawski sp. z o.o. sp.k.
 
 package server
 
 import (
-	"crypto"
 	"time"
 
 	"go.woodpecker-ci.org/woodpecker/v2/server/cache"
-	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
 	"go.woodpecker-ci.org/woodpecker/v2/server/logging"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
-	"go.woodpecker-ci.org/woodpecker/v2/server/plugins/config"
-	"go.woodpecker-ci.org/woodpecker/v2/server/plugins/permissions"
 	"go.woodpecker-ci.org/woodpecker/v2/server/pubsub"
 	"go.woodpecker-ci.org/woodpecker/v2/server/queue"
+	"go.woodpecker-ci.org/woodpecker/v2/server/services"
+	"go.woodpecker-ci.org/woodpecker/v2/server/services/log"
+	"go.woodpecker-ci.org/woodpecker/v2/server/services/permissions"
 )
 
 var Config = struct {
 	Services struct {
-		Pubsub              *pubsub.Publisher
-		Queue               queue.Queue
-		Logs                logging.Log
-		Secrets             model.SecretService
-		Registries          model.RegistryService
-		Environ             model.EnvironService
-		Forge               forge.Forge
-		Timeout             time.Duration
-		Membership          cache.MembershipService
-		ConfigService       config.Extension
-		SignaturePrivateKey crypto.PrivateKey
-		SignaturePublicKey  crypto.PublicKey
-	}
-	Storage struct {
-		// Users  model.UserStore
-		// Repos  model.RepoStore
-		// Builds model.BuildStore
-		// Logs   model.LogStore
-		Steps model.StepStore
-		// Registries model.RegistryStore
-		// Secrets model.SecretStore
+		Pubsub     *pubsub.Publisher
+		Queue      queue.Queue
+		Logs       logging.Log
+		Membership cache.MembershipService
+		Manager    services.Manager
+		LogStore   log.Service
 	}
 	Server struct {
+		JWTSecret           string
 		Key                 string
 		Cert                string
 		OAuthHost           string
@@ -70,7 +53,10 @@ var Config = struct {
 		RootPath            string
 		CustomCSSFile       string
 		CustomJsFile        string
-		EnableSwagger       bool
+	}
+	WebUI struct {
+		EnableSwagger    bool
+		SkipVersionCheck bool
 	}
 	Prometheus struct {
 		AuthToken string

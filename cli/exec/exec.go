@@ -25,6 +25,7 @@ import (
 	"strings"
 
 	"github.com/drone/envsubst"
+	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v3"
 
 	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
@@ -38,7 +39,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/compiler"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/linter"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/matrix"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/multipart"
+	pipelineLog "go.woodpecker-ci.org/woodpecker/v2/pipeline/log"
 	"go.woodpecker-ci.org/woodpecker/v2/shared/utils"
 )
 
@@ -57,7 +58,12 @@ func run(ctx context.Context, c *cli.Command) error {
 
 func execDir(ctx context.Context, c *cli.Command, dir string) error {
 	// TODO: respect pipeline dependency
-	repoPath, _ := filepath.Abs(filepath.Dir(dir))
+	repoPath := c.String("repo-path")
+	if repoPath != "" {
+		repoPath, _ = filepath.Abs(repoPath)
+	} else {
+		repoPath, _ = filepath.Abs(filepath.Dir(dir))
+	}
 	if runtime.GOOS == "windows" {
 		repoPath = convertPathForWindows(repoPath)
 	}
@@ -79,7 +85,12 @@ func execDir(ctx context.Context, c *cli.Command, dir string) error {
 }
 
 func execFile(ctx context.Context, c *cli.Command, file string) error {
-	repoPath, _ := filepath.Abs(filepath.Dir(file))
+	repoPath := c.String("repo-path")
+	if repoPath != "" {
+		repoPath, _ = filepath.Abs(repoPath)
+	} else {
+		repoPath, _ = filepath.Abs(filepath.Dir(file))
+	}
 	if runtime.GOOS == "windows" {
 		repoPath = convertPathForWindows(repoPath)
 	}
@@ -94,7 +105,7 @@ func runExec(ctx context.Context, c *cli.Command, file, repoPath string) error {
 
 	axes, err := matrix.ParseString(string(dat))
 	if err != nil {
-		return fmt.Errorf("Parse matrix fail")
+		return fmt.Errorf("parse matrix fail")
 	}
 
 	if len(axes) == 0 {
@@ -121,29 +132,29 @@ func execWithAxis(ctx context.Context, c *cli.Command, file, repoPath string, ax
 		})
 	}
 
-	droneEnv := make(map[string]string)
+	pipelineEnv := make(map[string]string)
 	for _, env := range c.StringSlice("env") {
-		envs := strings.SplitN(env, "=", 2)
-		droneEnv[envs[0]] = envs[1]
-		if _, exists := environ[envs[0]]; exists {
-			// don't override existing values
-			continue
+		before, after, _ := strings.Cut(env, "=")
+		pipelineEnv[before] = after
+		if oldVar, exists := environ[before]; exists {
+			// override existing values, but print a warning
+			log.Warn().Msgf("environment variable '%s' had value '%s', but got overwritten", before, oldVar)
 		}
-		environ[envs[0]] = envs[1]
+		environ[before] = after
 	}
 
 	tmpl, err := envsubst.ParseFile(file)
 	if err != nil {
 		return err
 	}
-	confstr, err := tmpl.Execute(func(name string) string {
+	confStr, err := tmpl.Execute(func(name string) string {
 		return environ[name]
 	})
 	if err != nil {
 		return err
 	}
 
-	conf, err := yaml.ParseString(confstr)
+	conf, err := yaml.ParseString(confStr)
 	if err != nil {
 		return err
 	}
@@ -167,12 +178,12 @@ func execWithAxis(ctx context.Context, c *cli.Command, file, repoPath string, ax
 	}
 
 	// lint the yaml file
-	if lerr := linter.New(linter.WithTrusted(true)).Lint([]*linter.WorkflowConfig{{
+	if err := linter.New(linter.WithTrusted(true)).Lint([]*linter.WorkflowConfig{{
 		File:      path.Base(file),
-		RawConfig: confstr,
+		RawConfig: confStr,
 		Workflow:  conf,
-	}}); lerr != nil {
-		return lerr
+	}}); err != nil {
+		return err
 	}
 
 	// compiles the yaml file
@@ -206,16 +217,19 @@ func execWithAxis(ctx context.Context, c *cli.Command, file, repoPath string, ax
 		),
 		compiler.WithMetadata(metadata),
 		compiler.WithSecret(secrets...),
-		compiler.WithEnviron(droneEnv),
+		compiler.WithEnviron(pipelineEnv),
 	).Compile(conf)
 	if err != nil {
 		return err
 	}
 
 	backendCtx := context.WithValue(ctx, backendTypes.CliContext, c)
-	backend.Init(backendCtx)
-
-	backendEngine, err := backend.FindBackend(backendCtx, c.String("backend-engine"))
+	backends := []backendTypes.Backend{
+		kubernetes.New(),
+		docker.New(),
+		local.New(),
+	}
+	backendEngine, err := backend.FindBackend(backendCtx, backends, c.String("backend-engine"))
 	if err != nil {
 		return err
 	}
@@ -241,8 +255,16 @@ func execWithAxis(ctx context.Context, c *cli.Command, file, repoPath string, ax
 	).Run(ctx)
 }
 
+// convertPathForWindows converts a path to use slash separators
+// for Windows. If the path is a Windows volume name like C:, it
+// converts it to an absolute root path starting with slash (e.g.
+// C: -> /c). Otherwise it just converts backslash separators to
+// slashes.
 func convertPathForWindows(path string) string {
 	base := filepath.VolumeName(path)
+
+	// Check if path is volume name like C:
+	//nolint:mnd
 	if len(base) == 2 {
 		path = strings.TrimPrefix(path, base)
 		base = strings.ToLower(strings.TrimSuffix(base, ":"))
@@ -252,13 +274,8 @@ func convertPathForWindows(path string) string {
 	return filepath.ToSlash(path)
 }
 
-var defaultLogger = pipeline.LogFunc(func(step *backendTypes.Step, rc multipart.Reader) error {
-	part, err := rc.NextPart()
-	if err != nil {
-		return err
-	}
-
-	logStream := NewLineWriter(step.Alias, step.UUID)
-	_, err = io.Copy(logStream, part)
-	return err
+const maxLogLineLength = 1024 * 1024 // 1mb
+var defaultLogger = pipeline.Logger(func(step *backendTypes.Step, rc io.Reader) error {
+	logWriter := NewLineWriter(step.Name, step.UUID)
+	return pipelineLog.CopyLineByLine(logWriter, rc, maxLogLineLength)
 })

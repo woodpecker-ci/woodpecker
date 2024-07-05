@@ -8,6 +8,7 @@ import (
 	"go.uber.org/multierr"
 
 	pipeline_errors "go.woodpecker-ci.org/woodpecker/v2/pipeline/errors"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/errors/types"
 )
 
 func TestGetPipelineErrors(t *testing.T) {
@@ -16,7 +17,7 @@ func TestGetPipelineErrors(t *testing.T) {
 	tests := []struct {
 		title    string
 		err      error
-		expected []*pipeline_errors.PipelineError
+		expected []*types.PipelineError
 	}{
 		{
 			title:    "nil error",
@@ -25,10 +26,10 @@ func TestGetPipelineErrors(t *testing.T) {
 		},
 		{
 			title: "warning",
-			err: &pipeline_errors.PipelineError{
+			err: &types.PipelineError{
 				IsWarning: true,
 			},
-			expected: []*pipeline_errors.PipelineError{
+			expected: []*types.PipelineError{
 				{
 					IsWarning: true,
 				},
@@ -36,10 +37,10 @@ func TestGetPipelineErrors(t *testing.T) {
 		},
 		{
 			title: "pipeline error",
-			err: &pipeline_errors.PipelineError{
+			err: &types.PipelineError{
 				IsWarning: false,
 			},
-			expected: []*pipeline_errors.PipelineError{
+			expected: []*types.PipelineError{
 				{
 					IsWarning: false,
 				},
@@ -48,14 +49,14 @@ func TestGetPipelineErrors(t *testing.T) {
 		{
 			title: "multiple warnings",
 			err: multierr.Combine(
-				&pipeline_errors.PipelineError{
+				&types.PipelineError{
 					IsWarning: true,
 				},
-				&pipeline_errors.PipelineError{
+				&types.PipelineError{
 					IsWarning: true,
 				},
 			),
-			expected: []*pipeline_errors.PipelineError{
+			expected: []*types.PipelineError{
 				{
 					IsWarning: true,
 				},
@@ -67,15 +68,15 @@ func TestGetPipelineErrors(t *testing.T) {
 		{
 			title: "multiple errors and warnings",
 			err: multierr.Combine(
-				&pipeline_errors.PipelineError{
+				&types.PipelineError{
 					IsWarning: true,
 				},
-				&pipeline_errors.PipelineError{
+				&types.PipelineError{
 					IsWarning: false,
 				},
 				errors.New("some error"),
 			),
-			expected: []*pipeline_errors.PipelineError{
+			expected: []*types.PipelineError{
 				{
 					IsWarning: true,
 				},
@@ -83,7 +84,7 @@ func TestGetPipelineErrors(t *testing.T) {
 					IsWarning: false,
 				},
 				{
-					Type:      pipeline_errors.PipelineErrorTypeGeneric,
+					Type:      types.PipelineErrorTypeGeneric,
 					IsWarning: false,
 					Message:   "some error",
 				},
@@ -111,14 +112,14 @@ func TestHasBlockingErrors(t *testing.T) {
 		},
 		{
 			title: "warning",
-			err: &pipeline_errors.PipelineError{
+			err: &types.PipelineError{
 				IsWarning: true,
 			},
 			expected: false,
 		},
 		{
 			title: "pipeline error",
-			err: &pipeline_errors.PipelineError{
+			err: &types.PipelineError{
 				IsWarning: false,
 			},
 			expected: true,
@@ -126,10 +127,10 @@ func TestHasBlockingErrors(t *testing.T) {
 		{
 			title: "multiple warnings",
 			err: multierr.Combine(
-				&pipeline_errors.PipelineError{
+				&types.PipelineError{
 					IsWarning: true,
 				},
-				&pipeline_errors.PipelineError{
+				&types.PipelineError{
 					IsWarning: true,
 				},
 			),
@@ -138,10 +139,10 @@ func TestHasBlockingErrors(t *testing.T) {
 		{
 			title: "multiple errors and warnings",
 			err: multierr.Combine(
-				&pipeline_errors.PipelineError{
+				&types.PipelineError{
 					IsWarning: true,
 				},
-				&pipeline_errors.PipelineError{
+				&types.PipelineError{
 					IsWarning: false,
 				},
 				errors.New("some error"),
@@ -151,8 +152,6 @@ func TestHasBlockingErrors(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		if pipeline_errors.HasBlockingErrors(test.err) != test.expected {
-			t.Error("Should only return true if there are blocking errors")
-		}
+		assert.Equal(t, test.expected, pipeline_errors.HasBlockingErrors(test.err))
 	}
 }

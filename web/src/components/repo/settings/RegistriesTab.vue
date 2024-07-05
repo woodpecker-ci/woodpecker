@@ -1,6 +1,6 @@
 <template>
   <Settings
-    :title="$t('repo.settings.registries.creds')"
+    :title="$t('repo.settings.registries.credentials')"
     :desc="$t('repo.settings.registries.desc')"
     docs-url="docs/usage/registries"
   >
@@ -41,9 +41,10 @@
 
     <div v-else class="space-y-4">
       <form @submit.prevent="createRegistry">
-        <InputField :label="$t('repo.settings.registries.address.address')">
+        <InputField v-slot="{ id }" :label="$t('repo.settings.registries.address.address')">
           <!-- TODO: check input field Address is a valid address -->
           <TextField
+            :id="id"
             v-model="selectedRegistry.address"
             :placeholder="$t('repo.settings.registries.address.placeholder')"
             required
@@ -51,12 +52,12 @@
           />
         </InputField>
 
-        <InputField :label="$t('username')">
-          <TextField v-model="selectedRegistry.username" :placeholder="$t('username')" required />
+        <InputField v-slot="{ id }" :label="$t('username')">
+          <TextField :id="id" v-model="selectedRegistry.username" :placeholder="$t('username')" required />
         </InputField>
 
-        <InputField :label="$t('password')">
-          <TextField v-model="selectedRegistry.password" :placeholder="$t('password')" required />
+        <InputField v-slot="{ id }" :label="$t('password')">
+          <TextField :id="id" v-model="selectedRegistry.password" :placeholder="$t('password')" required />
         </InputField>
 
         <div class="flex gap-2">
@@ -74,7 +75,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, inject, Ref, ref } from 'vue';
+import { computed, inject, ref, type Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import Button from '~/components/atomic/Button.vue';
@@ -87,8 +88,7 @@ import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useNotifications from '~/compositions/useNotifications';
 import { usePagination } from '~/compositions/usePaginate';
-import { Repo } from '~/lib/api/types';
-import { Registry } from '~/lib/api/types/registry';
+import type { Registry, Repo } from '~/lib/api/types';
 
 const apiClient = useApiClient();
 const notifications = useNotifications();
@@ -103,7 +103,7 @@ async function loadRegistries(page: number): Promise<Registry[] | null> {
     throw new Error("Unexpected: Can't load repo");
   }
 
-  return apiClient.getRegistryList(repo.value.id, page);
+  return apiClient.getRegistryList(repo.value.id, { page });
 }
 
 const { resetPage, data: registries } = usePagination(loadRegistries, () => !selectedRegistry.value);
@@ -123,9 +123,9 @@ const { doSubmit: createRegistry, isLoading: isSaving } = useAsyncAction(async (
     await apiClient.createRegistry(repo.value.id, selectedRegistry.value);
   }
   notifications.notify({
-    title: i18n.t(
-      isEditingRegistry.value ? 'repo.settings.registries.saved' : i18n.t('repo.settings.registries.created'),
-    ),
+    title: isEditingRegistry.value
+      ? i18n.t('repo.settings.registries.saved')
+      : i18n.t('repo.settings.registries.created'),
     type: 'success',
   });
   selectedRegistry.value = undefined;

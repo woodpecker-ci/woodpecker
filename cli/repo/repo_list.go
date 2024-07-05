@@ -67,5 +67,5 @@ func repoList(ctx context.Context, c *cli.Command) error {
 	return nil
 }
 
-// template for repository list items
+// Template for repository list items.
 var tmplRepoList = "\x1b[33m{{ .FullName }}\x1b[0m (id: {{ .ID }}, forgeRemoteID: {{ .ForgeRemoteID }})"

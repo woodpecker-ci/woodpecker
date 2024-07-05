@@ -42,7 +42,7 @@ service Woodpecker {
 //
 
 message State {
-  string name = 1;
+  string step_uuid = 1;
   bool   exited = 2;
   int32  exit_code = 3;
   int64  started = 4;
@@ -55,7 +55,7 @@ message LogEntry {
   int64  time = 2;
   int32  line = 3;
   int32  type = 4; // 0 = stdout, 1 = stderr, 2 = exit-code, 3 = metadata, 4 = progress
-  string data = 5;
+  bytes  data = 5;
 }
 
 message Filter {
@@ -134,7 +134,7 @@ message RegisterAgentResponse {
   int64 agent_id = 1;
 }
 
-// Woodpecker auth service is a simple service to authenticate agents and aquire a token
+// Woodpecker auth service is a simple service to authenticate agents and acquire a token
 
 service WoodpeckerAuth {
   rpc Auth          (AuthRequest)          returns (AuthResponse) {}

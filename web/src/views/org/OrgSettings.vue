@@ -4,13 +4,14 @@
       <span>
         <router-link :to="{ name: 'org' }" class="hover:underline">
           {{ org.name }}
+          <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
         </router-link>
         /
-        {{ $t('org.settings.settings') }}
+        {{ $t('settings') }}
       </span>
     </template>
 
-    <Tab id="secrets" :title="$t('org.settings.secrets.secrets')">
+    <Tab id="secrets" :title="$t('secrets.secrets')">
       <OrgSecretsTab />
     </Tab>
   </Scaffold>

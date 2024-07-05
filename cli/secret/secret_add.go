@@ -103,5 +103,6 @@ func secretCreate(ctx context.Context, c *cli.Command) error {
 var defaultSecretEvents = []string{
 	woodpecker.EventPush,
 	woodpecker.EventTag,
+	woodpecker.EventRelease,
 	woodpecker.EventDeploy,
 }

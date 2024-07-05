@@ -18,6 +18,7 @@ import (
 	"context"
 	"crypto/tls"
 	"errors"
+	"fmt"
 	"net"
 	"net/http"
 	"net/http/httputil"
@@ -27,7 +28,7 @@ import (
 
 	"github.com/caddyserver/certmagic"
 	"github.com/gin-gonic/gin"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
+	prometheus_http "github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v3"
@@ -35,29 +36,29 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/keepalive"
 
-	"go.woodpecker-ci.org/woodpecker/v2/cmd/common"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc/proto"
 	"go.woodpecker-ci.org/woodpecker/v2/server"
 	"go.woodpecker-ci.org/woodpecker/v2/server/cron"
-	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge/setup"
 	woodpeckerGrpcServer "go.woodpecker-ci.org/woodpecker/v2/server/grpc"
 	"go.woodpecker-ci.org/woodpecker/v2/server/logging"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
-	"go.woodpecker-ci.org/woodpecker/v2/server/plugins/config"
-	"go.woodpecker-ci.org/woodpecker/v2/server/plugins/permissions"
 	"go.woodpecker-ci.org/woodpecker/v2/server/pubsub"
 	"go.woodpecker-ci.org/woodpecker/v2/server/router"
 	"go.woodpecker-ci.org/woodpecker/v2/server/router/middleware"
+	"go.woodpecker-ci.org/woodpecker/v2/server/services"
+	"go.woodpecker-ci.org/woodpecker/v2/server/services/permissions"
 	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 	"go.woodpecker-ci.org/woodpecker/v2/server/web"
 	"go.woodpecker-ci.org/woodpecker/v2/shared/constant"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/logger"
 	"go.woodpecker-ci.org/woodpecker/v2/version"
-	// "go.woodpecker-ci.org/woodpecker/v2/server/plugins/encryption"
-	// encryptedStore "go.woodpecker-ci.org/woodpecker/v2/server/plugins/encryption/wrapper/store"
 )
 
 func run(ctx context.Context, c *cli.Command) error {
-	common.SetupGlobalLogger(ctx, c, true)
+	if err := logger.SetupGlobalLogger(ctx, c, true); err != nil {
+		return err
+	}
 
 	// set gin mode based on log level
 	if zerolog.GlobalLevel() > zerolog.DebugLevel {
@@ -65,17 +66,15 @@ func run(ctx context.Context, c *cli.Command) error {
 	}
 
 	if c.String("server-host") == "" {
-		log.Fatal().Msg("WOODPECKER_HOST is not properly configured")
+		return fmt.Errorf("WOODPECKER_HOST is not properly configured")
 	}
 
 	if !strings.Contains(c.String("server-host"), "://") {
-		log.Fatal().Msg(
-			"WOODPECKER_HOST must be <scheme>://<hostname> format",
-		)
+		return fmt.Errorf("WOODPECKER_HOST must be <scheme>://<hostname> format")
 	}
 
 	if _, err := url.Parse(c.String("server-host")); err != nil {
-		log.Fatal().Err(err).Msg("could not parse WOODPECKER_HOST")
+		return fmt.Errorf("could not parse WOODPECKER_HOST: %w", err)
 	}
 
 	if strings.Contains(c.String("server-host"), "://localhost") {
@@ -84,14 +83,9 @@ func run(ctx context.Context, c *cli.Command) error {
 		)
 	}
 
-	_forge, err := setupForge(c)
-	if err != nil {
-		log.Fatal().Err(err).Msg("can't setup forge")
-	}
-
 	_store, err := setupStore(c)
 	if err != nil {
-		log.Fatal().Err(err).Msg("cant't setup database store")
+		return fmt.Errorf("can't setup store: %w", err)
 	}
 	defer func() {
 		if err := _store.Close(); err != nil {
@@ -99,21 +93,24 @@ func run(ctx context.Context, c *cli.Command) error {
 		}
 	}()
 
-	setupEvilGlobals(ctx, c, _store, _forge)
+	err = setupEvilGlobals(ctx, c, _store)
+	if err != nil {
+		return fmt.Errorf("can't setup globals: %w", err)
+	}
 
 	var g errgroup.Group
 
 	setupMetrics(&g, _store)
 
 	g.Go(func() error {
-		return cron.Start(ctx, _store, _forge)
+		return cron.Start(ctx, _store)
 	})
 
 	// start the grpc server
 	g.Go(func() error {
 		lis, err := net.Listen("tcp", c.String("grpc-addr"))
 		if err != nil {
-			log.Fatal().Err(err).Msg("failed to listen on grpc-addr")
+			log.Fatal().Err(err).Msg("failed to listen on grpc-addr") //nolint:forbidigo
 		}
 
 		jwtSecret := c.String("grpc-secret")
@@ -129,7 +126,6 @@ func run(ctx context.Context, c *cli.Command) error {
 		)
 
 		woodpeckerServer := woodpeckerGrpcServer.NewWoodpeckerServer(
-			_forge,
 			server.Config.Services.Queue,
 			server.Config.Services.Logs,
 			server.Config.Services.Pubsub,
@@ -146,7 +142,7 @@ func run(ctx context.Context, c *cli.Command) error {
 
 		err = grpcServer.Serve(lis)
 		if err != nil {
-			log.Fatal().Err(err).Msg("failed to serve grpc server")
+			log.Fatal().Err(err).Msg("failed to serve grpc server") //nolint:forbidigo
 		}
 		return nil
 	})
@@ -157,7 +153,8 @@ func run(ctx context.Context, c *cli.Command) error {
 	if proxyWebUI == "" {
 		webEngine, err := web.New()
 		if err != nil {
-			log.Fatal().Err(err).Msg("failed to create web engine")
+			log.Error().Err(err).Msg("failed to create web engine")
+			return err
 		}
 		webUIServe = webEngine.ServeHTTP
 	} else {
@@ -182,7 +179,8 @@ func run(ctx context.Context, c *cli.Command) error {
 		middleware.Store(_store),
 	)
 
-	if c.String("server-cert") != "" {
+	switch {
+	case c.String("server-cert") != "":
 		// start the server with tls enabled
 		g.Go(func() error {
 			serve := &http.Server{
@@ -197,7 +195,7 @@ func run(ctx context.Context, c *cli.Command) error {
 				c.String("server-key"),
 			)
 			if err != nil && !errors.Is(err, http.ErrServerClosed) {
-				log.Fatal().Err(err).Msg("failed to start server with tls")
+				log.Fatal().Err(err).Msg("failed to start server with tls") //nolint:forbidigo
 			}
 			return err
 		})
@@ -216,11 +214,11 @@ func run(ctx context.Context, c *cli.Command) error {
 		g.Go(func() error {
 			err := http.ListenAndServe(server.Config.Server.Port, http.HandlerFunc(redirect))
 			if err != nil && !errors.Is(err, http.ErrServerClosed) {
-				log.Fatal().Err(err).Msg("unable to start server to redirect from http to https")
+				log.Fatal().Err(err).Msg("unable to start server to redirect from http to https") //nolint:forbidigo
 			}
 			return err
 		})
-	} else if c.Bool("lets-encrypt") {
+	case c.Bool("lets-encrypt"):
 		// start the server with lets-encrypt
 		certmagic.DefaultACME.Email = c.String("lets-encrypt-email")
 		certmagic.DefaultACME.Agreed = true
@@ -232,11 +230,11 @@ func run(ctx context.Context, c *cli.Command) error {
 
 		g.Go(func() error {
 			if err := certmagic.HTTPS([]string{address.Host}, handler); err != nil {
-				log.Fatal().Err(err).Msg("certmagic does not work")
+				log.Fatal().Err(err).Msg("certmagic does not work") //nolint:forbidigo
 			}
 			return nil
 		})
-	} else {
+	default:
 		// start the server without tls
 		g.Go(func() error {
 			err := http.ListenAndServe(
@@ -244,7 +242,7 @@ func run(ctx context.Context, c *cli.Command) error {
 				handler,
 			)
 			if err != nil && !errors.Is(err, http.ErrServerClosed) {
-				log.Fatal().Err(err).Msg("could not start server")
+				log.Fatal().Err(err).Msg("could not start server") //nolint:forbidigo
 			}
 			return err
 		})
@@ -253,48 +251,42 @@ func run(ctx context.Context, c *cli.Command) error {
 	if metricsServerAddr := c.String("metrics-server-addr"); metricsServerAddr != "" {
 		g.Go(func() error {
 			metricsRouter := gin.New()
-			metricsRouter.GET("/metrics", gin.WrapH(promhttp.Handler()))
+			metricsRouter.GET("/metrics", gin.WrapH(prometheus_http.Handler()))
 			err := http.ListenAndServe(metricsServerAddr, metricsRouter)
 			if err != nil && !errors.Is(err, http.ErrServerClosed) {
-				log.Fatal().Err(err).Msg("could not start metrics server")
+				log.Fatal().Err(err).Msg("could not start metrics server") //nolint:forbidigo
 			}
 			return err
 		})
 	}
 
-	log.Info().Msgf("Starting Woodpecker server with version '%s'", version.String())
+	log.Info().Msgf("starting Woodpecker server with version '%s'", version.String())
 
 	return g.Wait()
 }
 
-func setupEvilGlobals(ctx context.Context, c *cli.Command, v store.Store, f forge.Forge) {
-	// forge
-	server.Config.Services.Forge = f
-	server.Config.Services.Timeout = c.Duration("forge-timeout")
+func setupEvilGlobals(ctx context.Context, c *cli.Command, s store.Store) error {
+	// secrets
+	var err error
+	server.Config.Server.JWTSecret, err = setupJWTSecret(s)
+	if err != nil {
+		return fmt.Errorf("could not setup jwt secret: %w", err)
+	}
 
 	// services
-	server.Config.Services.Queue = setupQueue(ctx, v)
+	server.Config.Services.Queue = setupQueue(ctx, s)
 	server.Config.Services.Logs = logging.New()
 	server.Config.Services.Pubsub = pubsub.New()
-	server.Config.Services.Registries = setupRegistryService(ctx, c, v)
+	server.Config.Services.Membership = setupMembershipService(ctx, s)
+	serviceManager, err := services.NewManager(c, s, setup.Forge)
+	if err != nil {
+		return fmt.Errorf("could not setup service manager: %w", err)
+	}
+	server.Config.Services.Manager = serviceManager
 
-	// TODO(1544): fix encrypted store
-	// // encryption
-	// encryptedSecretStore := encryptedStore.NewSecretStore(v)
-	// err := encryption.Encryption(c, v).WithClient(encryptedSecretStore).Build()
-	// if err != nil {
-	// 	log.Fatal().Err(err).Msg("could not create encryption service")
-	// }
-	// server.Config.Services.Secrets = setupSecretService(c, encryptedSecretStore)
-	server.Config.Services.Secrets = setupSecretService(ctx, v)
-
-	server.Config.Services.Environ = setupEnvironService(c, v)
-	server.Config.Services.Membership = setupMembershipService(c, f)
-
-	server.Config.Services.SignaturePrivateKey, server.Config.Services.SignaturePublicKey = setupSignatureKeys(v)
-
-	if endpoint := c.String("config-service-endpoint"); endpoint != "" {
-		server.Config.Services.ConfigService = config.NewHTTP(endpoint, server.Config.Services.SignaturePrivateKey)
+	server.Config.Services.LogStore, err = setupLogStore(c, s)
+	if err != nil {
+		return fmt.Errorf("could not setup log store: %w", err)
 	}
 
 	// authentication
@@ -306,7 +298,7 @@ func setupEvilGlobals(ctx context.Context, c *cli.Command, v store.Store, f forg
 
 	// Execution
 	_events := c.StringSlice("default-cancel-previous-pipeline-events")
-	events := make([]model.WebhookEvent, len(_events))
+	events := make([]model.WebhookEvent, 0, len(_events))
 	for _, v := range _events {
 		events = append(events, model.WebhookEvent(v))
 	}
@@ -338,8 +330,8 @@ func setupEvilGlobals(ctx context.Context, c *cli.Command, v store.Store, f forg
 	} else {
 		server.Config.Server.WebhookHost = serverHost
 	}
-	if c.IsSet("server-dev-oauth-host") {
-		server.Config.Server.OAuthHost = c.String("server-dev-oauth-host")
+	if c.IsSet("server-dev-oauth-host-deprecated") {
+		server.Config.Server.OAuthHost = c.String("server-dev-oauth-host-deprecated")
 	} else {
 		server.Config.Server.OAuthHost = serverHost
 	}
@@ -359,7 +351,8 @@ func setupEvilGlobals(ctx context.Context, c *cli.Command, v store.Store, f forg
 	server.Config.Pipeline.Networks = c.StringSlice("network")
 	server.Config.Pipeline.Volumes = c.StringSlice("volume")
 	server.Config.Pipeline.Privileged = c.StringSlice("escalate")
-	server.Config.Server.EnableSwagger = c.Bool("enable-swagger")
+	server.Config.WebUI.EnableSwagger = c.Bool("enable-swagger")
+	server.Config.WebUI.SkipVersionCheck = c.Bool("skip-version-check")
 
 	// prometheus
 	server.Config.Prometheus.AuthToken = c.String("prometheus-auth-token")
@@ -369,4 +362,5 @@ func setupEvilGlobals(ctx context.Context, c *cli.Command, v store.Store, f forg
 	server.Config.Permissions.Admins = permissions.NewAdmins(c.StringSlice("admin"))
 	server.Config.Permissions.Orgs = permissions.NewOrgs(c.StringSlice("orgs"))
 	server.Config.Permissions.OwnersAllowlist = permissions.NewOwnersAllowlist(c.StringSlice("repo-owners"))
+	return nil
 }

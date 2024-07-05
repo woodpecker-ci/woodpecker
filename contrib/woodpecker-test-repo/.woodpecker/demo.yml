@@ -1,6 +1,0 @@
-version: 1
-steps:
-  demo:
-    image: 'alpine'
-    commands:
-      - echo 'Demo'

@@ -74,9 +74,9 @@ func registryUpdate(ctx context.Context, c *cli.Command) error {
 	}
 	if strings.HasPrefix(registry.Password, "@") {
 		path := strings.TrimPrefix(registry.Password, "@")
-		out, ferr := os.ReadFile(path)
-		if ferr != nil {
-			return ferr
+		out, err := os.ReadFile(path)
+		if err != nil {
+			return err
 		}
 		registry.Password = string(out)
 	}

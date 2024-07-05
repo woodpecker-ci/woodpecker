@@ -17,21 +17,32 @@ package common
 import (
 	"github.com/urfave/cli/v3"
 
-	"go.woodpecker-ci.org/woodpecker/v2/cmd/common"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/logger"
 )
 
 var GlobalFlags = append([]cli.Flag{
 	&cli.StringFlag{
-		Sources: cli.EnvVars("WOODPECKER_TOKEN"),
-		Name:    "token",
-		Aliases: []string{"t"},
-		Usage:   "server auth token",
+		Sources: cli.EnvVars("WOODPECKER_CONFIG"),
+		Name:    "config",
+		Aliases: []string{"c"},
+		Usage:   "path to config file",
 	},
 	&cli.StringFlag{
 		Sources: cli.EnvVars("WOODPECKER_SERVER"),
 		Name:    "server",
 		Aliases: []string{"s"},
 		Usage:   "server address",
+	},
+	&cli.StringFlag{
+		Sources: cli.EnvVars("WOODPECKER_TOKEN"),
+		Name:    "token",
+		Aliases: []string{"t"},
+		Usage:   "server auth token",
+	},
+	&cli.BoolFlag{
+		Sources: cli.EnvVars("WOODPECKER_DISABLE_UPDATE_CHECK"),
+		Name:    "disable-update-check",
+		Usage:   "disable update check",
 	},
 	&cli.BoolFlag{
 		Sources: cli.EnvVars("WOODPECKER_SKIP_VERIFY"),
@@ -51,10 +62,10 @@ var GlobalFlags = append([]cli.Flag{
 		Usage:   "socks proxy ignored",
 		Hidden:  true,
 	},
-}, common.GlobalLoggerFlags...)
+}, logger.GlobalLoggerFlags...)
 
 // FormatFlag return format flag with value set based on template
-// if hidden value is set, flag will be hidden
+// if hidden value is set, flag will be hidden.
 func FormatFlag(tmpl string, hidden ...bool) *cli.StringFlag {
 	return &cli.StringFlag{
 		Name:   "format",
@@ -64,15 +75,29 @@ func FormatFlag(tmpl string, hidden ...bool) *cli.StringFlag {
 	}
 }
 
-// specify repository
+// OutputFlags returns a slice of cli.Flag containing output format options.
+func OutputFlags(def string) []cli.Flag {
+	return []cli.Flag{
+		&cli.StringFlag{
+			Name:  "output",
+			Usage: "output format",
+			Value: def,
+		},
+		&cli.BoolFlag{
+			Name:  "output-no-headers",
+			Usage: "don't print headers",
+		},
+	}
+}
+
 var RepoFlag = &cli.StringFlag{
 	Name:    "repository",
 	Aliases: []string{"repo"},
-	Usage:   "repository id or full-name (e.g. 134 or octocat/hello-world)",
+	Usage:   "repository id or full name (e.g. 134 or octocat/hello-world)",
 }
 
 var OrgFlag = &cli.StringFlag{
 	Name:    "organization",
 	Aliases: []string{"org"},
-	Usage:   "organization id or full-name (e.g. 123 or octocat)",
+	Usage:   "organization id or full name (e.g. 123 or octocat)",
 }

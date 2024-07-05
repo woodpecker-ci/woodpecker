@@ -2,10 +2,10 @@ import { computed, ref } from 'vue';
 
 const USER_CONFIG_KEY = 'woodpecker-user-config';
 
-type UserConfig = {
+interface UserConfig {
   isPipelineFeedOpen: boolean;
   redirectUrl: string;
-};
+}
 
 const defaultUserConfig: UserConfig = {
   isPipelineFeedOpen: false,
@@ -14,11 +14,11 @@ const defaultUserConfig: UserConfig = {
 
 function loadUserConfig(): UserConfig {
   const lsData = localStorage.getItem(USER_CONFIG_KEY);
-  if (!lsData) {
+  if (lsData === null) {
     return defaultUserConfig;
   }
 
-  return JSON.parse(lsData);
+  return JSON.parse(lsData) as UserConfig;
 }
 
 const config = ref<UserConfig>(loadUserConfig());

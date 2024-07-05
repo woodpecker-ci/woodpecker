@@ -50,11 +50,11 @@ func NewRunner(workEngine rpc.Peer, f rpc.Filter, h string, state *State, backen
 	}
 }
 
-func (r *Runner) Run(runnerCtx context.Context) error {
+func (r *Runner) Run(runnerCtx context.Context) error { //nolint:contextcheck
 	log.Debug().Msg("request next execution")
 
 	meta, _ := metadata.FromOutgoingContext(runnerCtx)
-	ctxmeta := metadata.NewOutgoingContext(context.Background(), meta)
+	ctxMeta := metadata.NewOutgoingContext(context.Background(), meta)
 
 	// get the next workflow from the queue
 	work, err := r.client.Next(runnerCtx, r.filter)
@@ -89,7 +89,7 @@ func (r *Runner) Run(runnerCtx context.Context) error {
 
 	logger.Debug().Msg("received execution")
 
-	workflowCtx, cancel := context.WithTimeout(ctxmeta, timeout)
+	workflowCtx, cancel := context.WithTimeout(ctxMeta, timeout)
 	defer cancel()
 
 	// Add sigterm support for internal context.
@@ -103,9 +103,9 @@ func (r *Runner) Run(runnerCtx context.Context) error {
 	go func() {
 		logger.Debug().Msg("listen for cancel signal")
 
-		if werr := r.client.Wait(workflowCtx, work.ID); werr != nil {
+		if err := r.client.Wait(workflowCtx, work.ID); err != nil {
 			canceled.SetTo(true)
-			logger.Warn().Err(werr).Msg("cancel signal received")
+			logger.Warn().Err(err).Msg("cancel signal received")
 
 			cancel()
 		} else {
@@ -133,17 +133,18 @@ func (r *Runner) Run(runnerCtx context.Context) error {
 	state := rpc.State{}
 	state.Started = time.Now().Unix()
 
-	err = r.client.Init(ctxmeta, work.ID, state)
+	err = r.client.Init(runnerCtx, work.ID, state)
 	if err != nil {
 		logger.Error().Err(err).Msg("pipeline initialization failed")
 	}
 
 	var uploads sync.WaitGroup
+	//nolint:contextcheck
 	err = pipeline.New(work.Config,
 		pipeline.WithContext(workflowCtx),
 		pipeline.WithTaskUUID(fmt.Sprint(work.ID)),
 		pipeline.WithLogger(r.createLogger(logger, &uploads, work)),
-		pipeline.WithTracer(r.createTracer(ctxmeta, logger, work)),
+		pipeline.WithTracer(r.createTracer(ctxMeta, logger, work)),
 		pipeline.WithBackend(*r.backend),
 		pipeline.WithDescription(map[string]string{
 			"ID":       work.ID,
@@ -157,16 +158,17 @@ func (r *Runner) Run(runnerCtx context.Context) error {
 
 	if canceled.IsSet() {
 		state.Error = ""
-		state.ExitCode = 137
+		state.ExitCode = pipeline.ExitCodeKilled
 	} else if err != nil {
 		pExitError := &pipeline.ExitError{}
-		if errors.As(err, &pExitError) {
+		switch {
+		case errors.As(err, &pExitError):
 			state.ExitCode = pExitError.Code
-		} else if errors.Is(err, pipeline.ErrCancel) {
+		case errors.Is(err, pipeline.ErrCancel):
 			state.Error = ""
-			state.ExitCode = 137
+			state.ExitCode = pipeline.ExitCodeKilled
 			canceled.SetTo(true)
-		} else {
+		default:
 			state.ExitCode = 1
 			state.Error = err.Error()
 		}
@@ -187,7 +189,7 @@ func (r *Runner) Run(runnerCtx context.Context) error {
 		Int("exit_code", state.ExitCode).
 		Msg("updating pipeline status")
 
-	if err := r.client.Done(ctxmeta, work.ID, state); err != nil {
+	if err := r.client.Done(runnerCtx, work.ID, state); err != nil {
 		logger.Error().Err(err).Msg("updating pipeline status failed")
 	} else {
 		logger.Debug().Msg("updating pipeline status complete")
@@ -196,12 +198,10 @@ func (r *Runner) Run(runnerCtx context.Context) error {
 	return nil
 }
 
-// extract repository name from the configuration
 func extractRepositoryName(config *backend.Config) string {
 	return config.Stages[0].Steps[0].Environment["CI_REPO"]
 }
 
-// extract pipeline number from the configuration
 func extractPipelineNumber(config *backend.Config) string {
 	return config.Stages[0].Steps[0].Environment["CI_PIPELINE_NUMBER"]
 }

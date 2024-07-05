@@ -42,7 +42,7 @@ func userInfo(ctx context.Context, c *cli.Command) error {
 
 	login := c.Args().First()
 	if len(login) == 0 {
-		return fmt.Errorf("Missing or invalid user login")
+		return fmt.Errorf("missing or invalid user login")
 	}
 
 	user, err := client.User(login)
@@ -57,6 +57,6 @@ func userInfo(ctx context.Context, c *cli.Command) error {
 	return tmpl.Execute(os.Stdout, user)
 }
 
-// template for user information
+// Template for user information.
 var tmplUserInfo = `User: {{ .Login }}
 Email: {{ .Email }}`

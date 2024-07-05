@@ -79,9 +79,9 @@ func deploy(ctx context.Context, c *cli.Command) error {
 	var number int64
 	if pipelineArg == "last" {
 		// Fetch the pipeline number from the last pipeline
-		pipelines, berr := client.PipelineList(repoID)
-		if berr != nil {
-			return berr
+		pipelines, err := client.PipelineList(repoID)
+		if err != nil {
+			return err
 		}
 		for _, pipeline := range pipelines {
 			if branch != "" && pipeline.Branch != branch {
@@ -98,7 +98,7 @@ func deploy(ctx context.Context, c *cli.Command) error {
 			}
 		}
 		if number == 0 {
-			return fmt.Errorf("Cannot deploy failure pipeline")
+			return fmt.Errorf("cannot deploy failure pipeline")
 		}
 	} else {
 		number, err = strconv.ParseInt(pipelineArg, 10, 64)
@@ -107,9 +107,10 @@ func deploy(ctx context.Context, c *cli.Command) error {
 		}
 	}
 
-	env := c.Args().Get(2)
+	envArgIndex := 2
+	env := c.Args().Get(envArgIndex)
 	if env == "" {
-		return fmt.Errorf("Please specify the target environment (ie production)")
+		return fmt.Errorf("please specify the target environment (i.e. production)")
 	}
 
 	params := internal.ParseKeyPair(c.StringSlice("param"))
@@ -126,7 +127,7 @@ func deploy(ctx context.Context, c *cli.Command) error {
 	return tmpl.Execute(os.Stdout, deploy)
 }
 
-// template for deployment information
+// Template for deployment information.
 var tmplDeployInfo = `Number: {{ .Number }}
 Status: {{ .Status }}
 Commit: {{ .Commit }}

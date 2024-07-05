@@ -69,34 +69,35 @@ type (
 
 	// Pipeline defines a pipeline object.
 	Pipeline struct {
-		ID        int64         `json:"id"`
-		Number    int64         `json:"number"`
-		Parent    int64         `json:"parent"`
-		Event     string        `json:"event"`
-		Status    string        `json:"status"`
-		Errors    PipelineError `json:"errors"`
-		Enqueued  int64         `json:"enqueued_at"`
-		Created   int64         `json:"created_at"`
-		Updated   int64         `json:"updated_at"`
-		Started   int64         `json:"started_at"`
-		Finished  int64         `json:"finished_at"`
-		Deploy    string        `json:"deploy_to"`
-		Commit    string        `json:"commit"`
-		Branch    string        `json:"branch"`
-		Ref       string        `json:"ref"`
-		Refspec   string        `json:"refspec"`
-		CloneURL  string        `json:"clone_url"`
-		Title     string        `json:"title"`
-		Message   string        `json:"message"`
-		Timestamp int64         `json:"timestamp"`
-		Sender    string        `json:"sender"`
-		Author    string        `json:"author"`
-		Avatar    string        `json:"author_avatar"`
-		Email     string        `json:"author_email"`
-		ForgeURL  string        `json:"forge_url"`
-		Reviewer  string        `json:"reviewed_by"`
-		Reviewed  int64         `json:"reviewed_at"`
-		Workflows []*Workflow   `json:"workflows,omitempty"`
+		ID     int64            `json:"id"`
+		Number int64            `json:"number"`
+		Parent int64            `json:"parent"`
+		Event  string           `json:"event"`
+		Status string           `json:"status"`
+		Errors []*PipelineError `json:"errors"`
+		// Deprecated TODO remove in 3.x
+		Enqueued  int64       `json:"enqueued_at"`
+		Created   int64       `json:"created_at"`
+		Updated   int64       `json:"updated_at"`
+		Started   int64       `json:"started_at"`
+		Finished  int64       `json:"finished_at"`
+		Deploy    string      `json:"deploy_to"`
+		Commit    string      `json:"commit"`
+		Branch    string      `json:"branch"`
+		Ref       string      `json:"ref"`
+		Refspec   string      `json:"refspec"`
+		CloneURL  string      `json:"clone_url"`
+		Title     string      `json:"title"`
+		Message   string      `json:"message"`
+		Timestamp int64       `json:"timestamp"`
+		Sender    string      `json:"sender"`
+		Author    string      `json:"author"`
+		Avatar    string      `json:"author_avatar"`
+		Email     string      `json:"author_email"`
+		ForgeURL  string      `json:"forge_url"`
+		Reviewer  string      `json:"reviewed_by"`
+		Reviewed  int64       `json:"reviewed_at"`
+		Workflows []*Workflow `json:"workflows,omitempty"`
 	}
 
 	// Workflow represents a workflow in the pipeline.
@@ -134,13 +135,17 @@ type (
 		Address  string `json:"address"`
 		Username string `json:"username"`
 		Password string `json:"password,omitempty"`
-		Email    string `json:"email"`
-		Token    string `json:"token"`
+		// Deprecated
+		Email string `json:"email"` // TODO: remove in 3.x
+		// Deprecated
+		Token string `json:"token"` // TODO: remove in 3.x
 	}
 
 	// Secret represents a secret variable, such as a password or token.
 	Secret struct {
 		ID     int64    `json:"id"`
+		OrgID  int64    `json:"org_id"`
+		RepoID int64    `json:"repo_id"`
 		Name   string   `json:"name"`
 		Value  string   `json:"value,omitempty"`
 		Images []string `json:"images"`
@@ -176,8 +181,23 @@ type (
 		Commit  string `json:"commit,omitempty"`
 	}
 
+	//nolint:godot
+	// TODO: use dedicated struct in 3.x
+	// QueueStats struct {
+	// 	Workers       int `json:"worker_count"`
+	// 	Pending       int `json:"pending_count"`
+	// 	WaitingOnDeps int `json:"waiting_on_deps_count"`
+	// 	Running       int `json:"running_count"`
+	// 	Complete      int `json:"completed_count"`
+	// }
+
 	// Info provides queue stats.
 	Info struct {
+		Pending       []Task `json:"pending"`
+		WaitingOnDeps []Task `json:"waiting_on_deps"`
+		Running       []Task `json:"running"`
+		// TODO: use dedicated struct in 3.x
+		// Stats         QueueStats `json:"stats"`
 		Stats struct {
 			Workers       int `json:"worker_count"`
 			Pending       int `json:"pending_count"`
@@ -188,12 +208,12 @@ type (
 		Paused bool `json:"paused,omitempty"`
 	}
 
-	// LogLevel is for checking/setting logging level
+	// LogLevel is for checking/setting logging level.
 	LogLevel struct {
 		Level string `json:"log-level"`
 	}
 
-	// LogEntry is a single log entry
+	// LogEntry is a single log entry.
 	LogEntry struct {
 		ID     int64        `json:"id"`
 		StepID int64        `json:"step_id"`
@@ -203,7 +223,7 @@ type (
 		Type   LogEntryType `json:"type"`
 	}
 
-	// Cron is the JSON data of a cron job
+	// Cron is the JSON data of a cron job.
 	Cron struct {
 		ID        int64  `json:"id"`
 		Name      string `json:"name"`
@@ -215,13 +235,13 @@ type (
 		Branch    string `json:"branch"`
 	}
 
-	// PipelineOptions is the JSON data for creating a new pipeline
+	// PipelineOptions is the JSON data for creating a new pipeline.
 	PipelineOptions struct {
 		Branch    string            `json:"branch"`
 		Variables map[string]string `json:"variables"`
 	}
 
-	// Agent is the JSON data for an agent
+	// Agent is the JSON data for an agent.
 	Agent struct {
 		ID          int64  `json:"id"`
 		Created     int64  `json:"created"`
@@ -237,7 +257,7 @@ type (
 		NoSchedule  bool   `json:"no_schedule"`
 	}
 
-	// Task is the JSON data for a task
+	// Task is the JSON data for a task.
 	Task struct {
 		ID           string            `json:"id"`
 		Data         []byte            `json:"data"`
@@ -248,7 +268,7 @@ type (
 		AgentID      int64             `json:"agent_id"`
 	}
 
-	// Org is the JSON data for an organization
+	// Org is the JSON data for an organization.
 	Org struct {
 		ID     int64  `json:"id"`
 		Name   string `json:"name"`

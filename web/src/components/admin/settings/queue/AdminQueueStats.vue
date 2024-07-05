@@ -15,14 +15,14 @@
               {{ stats.completed_count }}
             </h4>
           </div>
-          <div class="pb-4 lg:pb-6">
+          <div v-if="total > 0" class="pb-4 lg:pb-6">
             <div class="overflow-hidden rounded-full h-3 flex transition-all duration-500">
               <div
                 v-for="item in data"
                 :key="item.key"
                 class="h-full"
                 :class="`${item.color}`"
-                :style="{ width: `${item.perc}%` }"
+                :style="{ width: `${item.percentage}%` }"
               >
                 &nbsp;
               </div>
@@ -54,13 +54,13 @@
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
-import { QueueStats } from '~/lib/api/types/queue';
-
-const { t } = useI18n();
+import type { QueueStats } from '~/lib/api/types/queue';
 
 const props = defineProps<{
   stats?: QueueStats;
 }>();
+
+const { t } = useI18n();
 
 const total = computed(() => {
   if (!props.stats) {
@@ -82,28 +82,28 @@ const data = computed(() => {
       key: 'worker_count',
       label: t('admin.settings.queue.stats.worker_count'),
       value: props.stats.worker_count,
-      perc: total.value > 0 ? (props.stats.worker_count / total.value) * 100 : 0,
+      percentage: total.value > 0 ? (props.stats.worker_count / total.value) * 100 : 0,
       color: 'bg-wp-state-ok-100',
     },
     {
       key: 'running_count',
       label: t('admin.settings.queue.stats.running_count'),
       value: props.stats.running_count,
-      perc: total.value > 0 ? (props.stats.running_count / total.value) * 100 : 100,
+      percentage: total.value > 0 ? (props.stats.running_count / total.value) * 100 : 100,
       color: 'bg-wp-state-info-100',
     },
     {
       key: 'pending_count',
       label: t('admin.settings.queue.stats.pending_count'),
       value: props.stats.pending_count,
-      perc: total.value > 0 ? (props.stats.pending_count / total.value) * 100 : 0,
+      percentage: total.value > 0 ? (props.stats.pending_count / total.value) * 100 : 0,
       color: 'bg-wp-state-neutral-100',
     },
     {
       key: 'waiting_on_deps_count',
       label: t('admin.settings.queue.stats.waiting_on_deps_count'),
       value: props.stats.waiting_on_deps_count,
-      perc: total.value > 0 ? (props.stats.waiting_on_deps_count / total.value) * 100 : 0,
+      percentage: total.value > 0 ? (props.stats.waiting_on_deps_count / total.value) * 100 : 0,
       color: 'bg-wp-state-error-100',
     },
   ];

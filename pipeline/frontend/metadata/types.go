@@ -53,6 +53,7 @@ type (
 		Event    string `json:"event,omitempty"`
 		ForgeURL string `json:"forge_url,omitempty"`
 		Target   string `json:"target,omitempty"`
+		Task     string `json:"task,omitempty"`
 		Trusted  bool   `json:"trusted,omitempty"`
 		Commit   Commit `json:"commit,omitempty"`
 		Parent   int64  `json:"parent,omitempty"`
@@ -69,6 +70,7 @@ type (
 		Author            Author   `json:"author,omitempty"`
 		ChangedFiles      []string `json:"changed_files,omitempty"`
 		PullRequestLabels []string `json:"labels,omitempty"`
+		IsPrerelease      bool     `json:"is_prerelease,omitempty"`
 	}
 
 	// Author defines runtime metadata for a commit author.
@@ -91,7 +93,7 @@ type (
 		Number int    `json:"number,omitempty"`
 	}
 
-	// Secret defines a runtime secret
+	// Secret defines a runtime secret.
 	Secret struct {
 		Name  string `json:"name,omitempty"`
 		Value string `json:"value,omitempty"`
@@ -108,13 +110,13 @@ type (
 		Version  string `json:"version,omitempty"`
 	}
 
-	// Forge defines runtime metadata about the forge that host the repo
+	// Forge defines runtime metadata about the forge that host the repo.
 	Forge struct {
 		Type string `json:"type,omitempty"`
 		URL  string `json:"url,omitempty"`
 	}
 
-	// ServerForge represent the needed func of a server forge to get its metadata
+	// ServerForge represent the needed func of a server forge to get its metadata.
 	ServerForge interface {
 		// Name returns the string name of this driver
 		Name() string

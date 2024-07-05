@@ -23,7 +23,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/muesli/termenv"
+	term_env "github.com/muesli/termenv"
 	"github.com/urfave/cli/v3"
 
 	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
@@ -73,7 +73,7 @@ func lintDir(ctx context.Context, c *cli.Command, dir string) error {
 }
 
 func lintFile(_ context.Context, _ *cli.Command, file string) error {
-	output := termenv.NewOutput(os.Stdout)
+	output := term_env.NewOutput(os.Stdout)
 
 	fi, err := os.Open(file)
 	if err != nil {
@@ -102,9 +102,9 @@ func lintFile(_ context.Context, _ *cli.Command, file string) error {
 	// TODO: lint multiple files at once to allow checks for sth like "depends_on" to work
 	err = linter.New(linter.WithTrusted(true)).Lint([]*linter.WorkflowConfig{config})
 	if err != nil {
-		fmt.Printf("🔥 %s has errors:\n", output.String(config.File).Underline())
+		fmt.Printf("🔥 %s has warnings / errors:\n", output.String(config.File).Underline())
 
-		hasErrors := true
+		hasErrors := false
 		for _, err := range pipeline_errors.GetPipelineErrors(err) {
 			line := "  "
 
@@ -115,7 +115,7 @@ func lintFile(_ context.Context, _ *cli.Command, file string) error {
 				hasErrors = true
 			}
 
-			if data := err.GetLinterData(); data != nil {
+			if data := pipeline_errors.GetLinterData(err); data != nil {
 				line = fmt.Sprintf("%s %s\t%s", line, output.String(data.Field).Bold(), err.Message)
 			} else {
 				line = fmt.Sprintf("%s %s", line, err.Message)

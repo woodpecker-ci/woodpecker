@@ -68,7 +68,7 @@ func registryList(ctx context.Context, c *cli.Command) error {
 	return nil
 }
 
-// template for registry list information
+// Template for registry list information.
 var tmplRegistryList = "\x1b[33m{{ .Address }} \x1b[0m" + `
 Username: {{ .Username }}
 Email: {{ .Email }}

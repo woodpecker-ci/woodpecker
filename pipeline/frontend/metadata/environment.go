@@ -15,14 +15,20 @@
 package metadata
 
 import (
+	"encoding/json"
 	"fmt"
 	"path"
 	"regexp"
 	"strconv"
 	"strings"
+
+	"github.com/rs/zerolog/log"
 )
 
-var pullRegexp = regexp.MustCompile(`\d+`)
+var (
+	pullRegexp      = regexp.MustCompile(`\d+`)
+	maxChangedFiles = 500
+)
 
 // Environ returns the metadata as a map of environment variables.
 func (m *Metadata) Environ() map[string]string {
@@ -32,7 +38,7 @@ func (m *Metadata) Environ() map[string]string {
 	)
 
 	branchParts := strings.Split(m.Curr.Commit.Refspec, ":")
-	if len(branchParts) == 2 {
+	if len(branchParts) == 2 { //nolint:mnd
 		sourceBranch = branchParts[0]
 		targetBranch = branchParts[1]
 	}
@@ -62,8 +68,8 @@ func (m *Metadata) Environ() map[string]string {
 		"CI_COMMIT_AUTHOR_EMAIL":        m.Curr.Commit.Author.Email,
 		"CI_COMMIT_AUTHOR_AVATAR":       m.Curr.Commit.Author.Avatar,
 		"CI_COMMIT_TAG":                 "", // will be set if event is tag
-		"CI_COMMIT_PULL_REQUEST":        "", // will be set if event is pr
-		"CI_COMMIT_PULL_REQUEST_LABELS": "", // will be set if event is pr
+		"CI_COMMIT_PULL_REQUEST":        "", // will be set if event is pull_request or pull_request_closed
+		"CI_COMMIT_PULL_REQUEST_LABELS": "", // will be set if event is pull_request or pull_request_closed
 
 		"CI_PIPELINE_NUMBER":        strconv.FormatInt(m.Curr.Number, 10),
 		"CI_PIPELINE_PARENT":        strconv.FormatInt(m.Curr.Parent, 10),
@@ -71,6 +77,7 @@ func (m *Metadata) Environ() map[string]string {
 		"CI_PIPELINE_URL":           m.getPipelineWebURL(m.Curr, 0),
 		"CI_PIPELINE_FORGE_URL":     m.Curr.ForgeURL,
 		"CI_PIPELINE_DEPLOY_TARGET": m.Curr.Target,
+		"CI_PIPELINE_DEPLOY_TASK":   m.Curr.Task,
 		"CI_PIPELINE_STATUS":        m.Curr.Status,
 		"CI_PIPELINE_CREATED":       strconv.FormatInt(m.Curr.Created, 10),
 		"CI_PIPELINE_STARTED":       strconv.FormatInt(m.Curr.Started, 10),
@@ -102,6 +109,7 @@ func (m *Metadata) Environ() map[string]string {
 		"CI_PREV_PIPELINE_URL":           m.getPipelineWebURL(m.Prev, 0),
 		"CI_PREV_PIPELINE_FORGE_URL":     m.Prev.ForgeURL,
 		"CI_PREV_PIPELINE_DEPLOY_TARGET": m.Prev.Target,
+		"CI_PREV_PIPELINE_DEPLOY_TASK":   m.Prev.Task,
 		"CI_PREV_PIPELINE_STATUS":        m.Prev.Status,
 		"CI_PREV_PIPELINE_CREATED":       strconv.FormatInt(m.Prev.Created, 10),
 		"CI_PREV_PIPELINE_STARTED":       strconv.FormatInt(m.Prev.Started, 10),
@@ -116,15 +124,30 @@ func (m *Metadata) Environ() map[string]string {
 		"CI_FORGE_TYPE": m.Forge.Type,
 		"CI_FORGE_URL":  m.Forge.URL,
 
-		// TODO Deprecated, remove in 3.x
+		// TODO: Deprecated, remove in 3.x
 		"CI_COMMIT_URL": m.Curr.ForgeURL,
 	}
-	if m.Curr.Event == EventTag || strings.HasPrefix(m.Curr.Commit.Ref, "refs/tags/") {
+	if m.Curr.Event == EventTag || m.Curr.Event == EventRelease || strings.HasPrefix(m.Curr.Commit.Ref, "refs/tags/") {
 		params["CI_COMMIT_TAG"] = strings.TrimPrefix(m.Curr.Commit.Ref, "refs/tags/")
 	}
-	if m.Curr.Event == EventPull {
+	if m.Curr.Event == EventRelease {
+		params["CI_COMMIT_PRERELEASE"] = strconv.FormatBool(m.Curr.Commit.IsPrerelease)
+	}
+	if m.Curr.Event == EventPull || m.Curr.Event == EventPullClosed {
 		params["CI_COMMIT_PULL_REQUEST"] = pullRegexp.FindString(m.Curr.Commit.Ref)
 		params["CI_COMMIT_PULL_REQUEST_LABELS"] = strings.Join(m.Curr.Commit.PullRequestLabels, ",")
+	}
+
+	// Only export changed files if maxChangedFiles is not exceeded
+	if len(m.Curr.Commit.ChangedFiles) == 0 {
+		params["CI_PIPELINE_FILES"] = "[]"
+	} else if len(m.Curr.Commit.ChangedFiles) <= maxChangedFiles {
+		// we have to use json, as other separators like ;, or space are valid filename chars
+		changedFiles, err := json.Marshal(m.Curr.Commit.ChangedFiles)
+		if err != nil {
+			log.Error().Err(err).Msg("marshal changed files")
+		}
+		params["CI_PIPELINE_FILES"] = string(changedFiles)
 	}
 
 	return params

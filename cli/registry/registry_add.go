@@ -74,14 +74,13 @@ func registryCreate(ctx context.Context, c *cli.Command) error {
 	}
 	if strings.HasPrefix(registry.Password, "@") {
 		path := strings.TrimPrefix(registry.Password, "@")
-		out, ferr := os.ReadFile(path)
-		if ferr != nil {
-			return ferr
+		out, err := os.ReadFile(path)
+		if err != nil {
+			return err
 		}
 		registry.Password = string(out)
 	}
-	_, err = client.RegistryCreate(repoID, registry)
-	if err != nil {
+	if _, err := client.RegistryCreate(repoID, registry); err != nil {
 		return err
 	}
 	return nil

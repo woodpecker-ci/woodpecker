@@ -42,12 +42,14 @@ func pipelineLogs(ctx context.Context, c *cli.Command) error {
 		return err
 	}
 
-	number, err := strconv.ParseInt(c.Args().Get(1), 10, 64)
+	numberArgIndex := 1
+	number, err := strconv.ParseInt(c.Args().Get(numberArgIndex), 10, 64)
 	if err != nil {
 		return err
 	}
 
-	step, err := strconv.ParseInt(c.Args().Get(2), 10, 64)
+	stepArgIndex := 2
+	step, err := strconv.ParseInt(c.Args().Get(stepArgIndex), 10, 64)
 	if err != nil {
 		return err
 	}

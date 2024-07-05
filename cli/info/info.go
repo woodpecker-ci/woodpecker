@@ -53,6 +53,6 @@ func info(ctx context.Context, c *cli.Command) error {
 	return tmpl.Execute(os.Stdout, user)
 }
 
-// template for user information
+// Template for user information.
 var tmplInfo = `User: {{ .Login }}
 Email: {{ .Email }}`

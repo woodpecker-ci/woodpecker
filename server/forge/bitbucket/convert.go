@@ -28,7 +28,7 @@ import (
 )
 
 const (
-	statusPending = "INPROGRESS"
+	statusPending = "INPROGRESS" // cspell:disable-line
 	statusSuccess = "SUCCESSFUL"
 	statusFailure = "FAILED"
 )
@@ -60,8 +60,9 @@ func convertRepo(from *internal.Repo, perm *internal.RepoPerm) *model.Repo {
 		IsSCMPrivate:  from.IsPrivate,
 		Avatar:        from.Owner.Links.Avatar.Href,
 		SCMKind:       model.SCMKind(from.Scm),
-		Branch:        from.Mainbranch.Name,
+		Branch:        from.MainBranch.Name,
 		Perm:          convertPerm(perm),
+		PREnabled:     true,
 	}
 	if repo.SCMKind == model.RepoHg {
 		repo.Branch = "default"
@@ -106,10 +107,10 @@ func cloneLink(repo *internal.Repo) string {
 
 	// if bitbucket tries to automatically populate the user in the url we must
 	// strip it out.
-	cloneurl, err := url.Parse(clone)
+	cloneURL, err := url.Parse(clone)
 	if err == nil {
-		cloneurl.User = nil
-		clone = cloneurl.String()
+		cloneURL.User = nil
+		clone = cloneURL.String()
 	}
 
 	return clone
@@ -136,11 +137,11 @@ func convertUser(from *internal.Account, token *oauth2.Token) *model.User {
 		Secret:        token.RefreshToken,
 		Expiry:        token.Expiry.UTC().Unix(),
 		Avatar:        from.Links.Avatar.Href,
-		ForgeRemoteID: model.ForgeRemoteID(fmt.Sprint(from.ID)),
+		ForgeRemoteID: model.ForgeRemoteID(fmt.Sprint(from.UUID)),
 	}
 }
 
-// convertTeamList is a helper function used to convert a Bitbucket team list
+// convertWorkspaceList is a helper function used to convert a Bitbucket team list
 // structure to the Woodpecker Team structure.
 func convertWorkspaceList(from []*internal.Workspace) []*model.Team {
 	var teams []*model.Team
@@ -150,7 +151,7 @@ func convertWorkspaceList(from []*internal.Workspace) []*model.Team {
 	return teams
 }
 
-// convertTeam is a helper function used to convert a Bitbucket team account
+// convertWorkspace is a helper function used to convert a Bitbucket team account
 // structure to the Woodpecker Team structure.
 func convertWorkspace(from *internal.Workspace) *model.Team {
 	return &model.Team{
@@ -162,15 +163,19 @@ func convertWorkspace(from *internal.Workspace) *model.Team {
 // convertPullHook is a helper function used to convert a Bitbucket pull request
 // hook to the Woodpecker pipeline struct holding commit information.
 func convertPullHook(from *internal.PullRequestHook) *model.Pipeline {
+	event := model.EventPull
+	if from.PullRequest.State == stateClosed || from.PullRequest.State == stateDeclined {
+		event = model.EventPullClosed
+	}
+
 	return &model.Pipeline{
-		Event:  model.EventPull,
+		Event:  event,
 		Commit: from.PullRequest.Dest.Commit.Hash,
 		Ref:    fmt.Sprintf("refs/heads/%s", from.PullRequest.Dest.Branch.Name),
 		Refspec: fmt.Sprintf("%s:%s",
 			from.PullRequest.Source.Branch.Name,
 			from.PullRequest.Dest.Branch.Name,
 		),
-		CloneURL:  fmt.Sprintf("https://bitbucket.org/%s", from.PullRequest.Source.Repo.FullName),
 		ForgeURL:  from.PullRequest.Links.HTML.Href,
 		Branch:    from.PullRequest.Dest.Branch.Name,
 		Message:   from.PullRequest.Desc,
@@ -208,12 +213,12 @@ func convertPushHook(hook *internal.PushHook, change *internal.Change) *model.Pi
 	return pipeline
 }
 
-// regex for git author fields ("name <name@mail.tld>")
+// regex for git author fields (r.g. "name <name@mail.tld>").
 var reGitMail = regexp.MustCompile("<(.*)>")
 
-// extracts the email from a git commit author string
-func extractEmail(gitauthor string) (author string) {
-	matches := reGitMail.FindAllStringSubmatch(gitauthor, -1)
+// extracts the email from a git commit author string.
+func extractEmail(gitAuthor string) (author string) {
+	matches := reGitMail.FindAllStringSubmatch(gitAuthor, -1)
 	if len(matches) == 1 {
 		author = matches[0][1]
 	}

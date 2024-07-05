@@ -51,7 +51,7 @@ func Test_parse(t *testing.T) {
 		})
 
 		g.It("Should parse tag hook payload", func() {
-			buf := bytes.NewBufferString(fixtures.HookPushTag)
+			buf := bytes.NewBufferString(fixtures.HookTag)
 			hook, err := parsePush(buf)
 			g.Assert(err).IsNil()
 			g.Assert(hook.Ref).Equal("v1.0.0")
@@ -118,13 +118,13 @@ func Test_parse(t *testing.T) {
 		})
 
 		g.It("Should return a Pipeline struct from a tag hook", func() {
-			buf := bytes.NewBufferString(fixtures.HookPushTag)
+			buf := bytes.NewBufferString(fixtures.HookTag)
 			hook, _ := parsePush(buf)
 			pipeline := pipelineFromTag(hook)
 			g.Assert(pipeline.Event).Equal(model.EventTag)
 			g.Assert(pipeline.Commit).Equal(hook.Sha)
 			g.Assert(pipeline.Ref).Equal("refs/tags/v1.0.0")
-			g.Assert(pipeline.Branch).Equal("refs/tags/v1.0.0")
+			g.Assert(pipeline.Branch).Equal("")
 			g.Assert(pipeline.ForgeURL).Equal("http://gitea.golang.org/gordon/hello-world/src/tag/v1.0.0")
 			g.Assert(pipeline.Message).Equal("created tag v1.0.0")
 		})
@@ -136,7 +136,7 @@ func Test_parse(t *testing.T) {
 			g.Assert(pipeline.Event).Equal(model.EventPull)
 			g.Assert(pipeline.Commit).Equal(hook.PullRequest.Head.Sha)
 			g.Assert(pipeline.Ref).Equal("refs/pull/1/head")
-			g.Assert(pipeline.ForgeURL).Equal(hook.PullRequest.URL)
+			g.Assert(pipeline.ForgeURL).Equal("http://gitea.golang.org/gordon/hello-world/pull/1")
 			g.Assert(pipeline.Branch).Equal("main")
 			g.Assert(pipeline.Refspec).Equal("feature/changes:main")
 			g.Assert(pipeline.Message).Equal(hook.PullRequest.Title)
