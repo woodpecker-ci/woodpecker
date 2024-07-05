@@ -17,8 +17,8 @@ var (
 	cancelWaitForUpdate context.CancelCauseFunc
 )
 
-func Before(c *cli.Context) error {
-	if err := setupGlobalLogger(c); err != nil {
+func Before(ctx context.Context, c *cli.Command) error {
+	if err := setupGlobalLogger(ctx, c); err != nil {
 		return err
 	}
 
@@ -44,16 +44,16 @@ func Before(c *cli.Context) error {
 		}
 
 		if newVersion != nil {
-			log.Warn().Msgf("A new version of woodpecker-cli is available: %s. Update by running: %s update", newVersion.Version, c.App.Name)
+			log.Warn().Msgf("A new version of woodpecker-cli is available: %s. Update by running: %s update", newVersion.Version, c.Root().Name)
 		} else {
 			log.Debug().Msgf("No update required")
 		}
 	}()
 
-	return config.Load(c)
+	return config.Load(ctx, c)
 }
 
-func After(_ *cli.Context) error {
+func After(_ context.Context, _ *cli.Command) error {
 	if waitForUpdateCheck != nil {
 		select {
 		case <-waitForUpdateCheck.Done():

@@ -1,6 +1,7 @@
 package setup
 
 import (
+	"context"
 	"errors"
 	"strings"
 
@@ -15,7 +16,6 @@ import (
 var Command = &cli.Command{
 	Name:      "setup",
 	Usage:     "setup the woodpecker-cli for the first time",
-	Args:      true,
 	ArgsUsage: "[server]",
 	Flags: []cli.Flag{
 		&cli.StringFlag{
@@ -30,8 +30,8 @@ var Command = &cli.Command{
 	Action: setup,
 }
 
-func setup(c *cli.Context) error {
-	_config, err := config.Get(c, c.String("config"))
+func setup(ctx context.Context, c *cli.Command) error {
+	_config, err := config.Get(ctx, c, c.String("config"))
 	if err != nil {
 		return err
 	} else if _config != nil {
@@ -68,7 +68,7 @@ func setup(c *cli.Context) error {
 
 	token := c.String("token")
 	if token == "" {
-		token, err = receiveTokenFromUI(c.Context, serverURL)
+		token, err = receiveTokenFromUI(ctx, serverURL)
 		if err != nil {
 			return err
 		}
@@ -78,7 +78,7 @@ func setup(c *cli.Context) error {
 		}
 	}
 
-	err = config.Save(c, c.String("config"), &config.Config{
+	err = config.Save(ctx, c, c.String("config"), &config.Config{
 		ServerURL: serverURL,
 		Token:     token,
 		LogLevel:  "info",

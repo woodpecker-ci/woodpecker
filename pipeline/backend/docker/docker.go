@@ -63,7 +63,7 @@ func (e *docker) Name() string {
 }
 
 func (e *docker) IsAvailable(ctx context.Context) bool {
-	if c, ok := ctx.Value(backend.CliContext).(*cli.Context); ok {
+	if c, ok := ctx.Value(backend.CliContext).(*cli.Command); ok {
 		if c.IsSet("backend-docker-host") {
 			return true
 		}
