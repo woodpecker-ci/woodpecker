@@ -49,21 +49,13 @@ var Command = &cli.Command{
 	Flags:     utils.MergeSlices(flags, docker.Flags, kubernetes.Flags, local.Flags),
 }
 
-type Item struct {
-	Workflow  *model.Workflow
-	Labels    map[string]string
-	DependsOn []string
-	RunsOn    []string
-	Config    *backend_types.Config
-}
-
 func run(c *cli.Context) error {
-	dir := c.Args().First()
-	if dir == "" {
-		dir = "."
+	repoPath := c.Args().First()
+	if repoPath == "" {
+		repoPath = "."
 	}
 
-	yamls, err := common.GetConfigs(c, path.Join(dir, ".woodpecker"))
+	yamls, err := common.GetConfigs(c, path.Join(repoPath, ".woodpecker"))
 	if err != nil {
 		return err
 	}
@@ -76,24 +68,15 @@ func run(c *cli.Context) error {
 
 	// configure volumes for local execution
 	volumes := c.StringSlice("volumes")
-	// if c.Bool("local") {
-	// 	var (
-	// 		workspaceBase = conf.Workspace.Base
-	// 		workspacePath = conf.Workspace.Path
-	// 	)
-	// 	if workspaceBase == "" {
-	// 		workspaceBase = c.String("workspace-base")
-	// 	}
-	// 	if workspacePath == "" {
-	// 		workspacePath = c.String("workspace-path")
-	// 	}
-
-	// 	volumes = append(volumes, c.String("prefix")+"_default:"+workspaceBase)
-	// 	volumes = append(volumes, repoPath+":"+path.Join(workspaceBase, workspacePath))
-	// }
+	workspaceBase := c.String("workspace-base")
+	workspacePath := c.String("workspace-path")
+	if c.Bool("local") {
+		volumes = append(volumes, c.String("prefix")+"_default:"+workspaceBase)
+		volumes = append(volumes, repoPath+":"+path.Join(workspaceBase, workspacePath))
+	}
 
 	getWorkflowMetadata := func(workflow *model.Workflow) metadata.Metadata {
-		return metadata.Metadata{} // TODO: metadata
+		return metadataFromContext(c, workflow)
 	}
 
 	repoIsTrusted := false
@@ -105,8 +88,8 @@ func run(c *cli.Context) error {
 		),
 		compiler.WithVolumes(volumes...),
 		compiler.WithWorkspace(
-			c.String("workspace-base"),
-			c.String("workspace-path"),
+			workspaceBase,
+			workspacePath,
 		),
 		compiler.WithNetworks(
 			c.StringSlice("network")...,
@@ -138,10 +121,11 @@ func run(c *cli.Context) error {
 
 	for _, item := range items {
 		// TODO: check dependencies
-		err := runWorkflow(c, item.Config)
-		if err != nil {
-			return err
-		}
+		// err := runWorkflow(c, item.Config)
+		// if err != nil {
+		// 	return err
+		// }
+		fmt.Println("#", item.Workflow.Name)
 	}
 
 	return nil

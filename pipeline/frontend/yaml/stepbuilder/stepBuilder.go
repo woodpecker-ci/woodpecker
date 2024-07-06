@@ -78,6 +78,10 @@ func (b *StepBuilder) Build() (items []*Item, errorsAndWarnings error) {
 				State:   model.StatusPending,
 				Environ: axis,
 				Name:    SanitizePath(y.Name),
+
+				// Name:   workflow.Name,
+				// Number: workflow.PID,
+				// Matrix: workflow.Environ,
 			}
 			if len(axes) > 1 {
 				workflow.AxisID = i + 1
