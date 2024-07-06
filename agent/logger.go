@@ -33,10 +33,12 @@ const (
 )
 
 func (r *Runner) createLogger(_logger zerolog.Logger, uploads *sync.WaitGroup, workflow *rpc.Workflow) pipeline.Logger {
-	return func(step *backend.Step, rc io.Reader) error {
+	return func(step *backend.Step, rc io.ReadCloser) error {
+		defer rc.Close()
+
 		logger := _logger.With().
 			Str("image", step.Image).
-			Str("workflowID", workflow.ID).
+			Str("workflow_id", workflow.ID).
 			Logger()
 
 		uploads.Add(1)

@@ -17,10 +17,13 @@ package main
 
 import (
 	"context"
+	"encoding/base32"
+	"errors"
 	"fmt"
 	"os"
 	"time"
 
+	"github.com/gorilla/securecookie"
 	"github.com/prometheus/client_golang/prometheus"
 	prometheus_auto "github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/rs/zerolog/log"
@@ -34,6 +37,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server/services/log/file"
 	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 	"go.woodpecker-ci.org/woodpecker/v2/server/store/datastore"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store/types"
 )
 
 func setupStore(c *cli.Context) (store.Store, error) {
@@ -164,4 +168,27 @@ func setupLogStore(c *cli.Context, s store.Store) (logService.Service, error) {
 	default:
 		return s, nil
 	}
+}
+
+const jwtSecretID = "jwt-secret"
+
+func setupJWTSecret(_store store.Store) (string, error) {
+	jwtSecret, err := _store.ServerConfigGet(jwtSecretID)
+	if errors.Is(err, types.RecordNotExist) {
+		jwtSecret := base32.StdEncoding.EncodeToString(
+			securecookie.GenerateRandomKey(32),
+		)
+		err = _store.ServerConfigSet(jwtSecretID, jwtSecret)
+		if err != nil {
+			return "", err
+		}
+		log.Debug().Msg("created jwt secret")
+		return jwtSecret, nil
+	}
+
+	if err != nil {
+		return "", err
+	}
+
+	return jwtSecret, nil
 }

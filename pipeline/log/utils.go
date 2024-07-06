@@ -20,7 +20,7 @@ import (
 	"io"
 )
 
-func writeChunks(dst io.WriteCloser, data []byte, size int) error {
+func writeChunks(dst io.Writer, data []byte, size int) error {
 	if len(data) <= size {
 		_, err := dst.Write(data)
 		return err
@@ -41,9 +41,8 @@ func writeChunks(dst io.WriteCloser, data []byte, size int) error {
 	return nil
 }
 
-func CopyLineByLine(dst io.WriteCloser, src io.Reader, maxSize int) error {
+func CopyLineByLine(dst io.Writer, src io.Reader, maxSize int) error {
 	r := bufio.NewReader(src)
-	defer dst.Close()
 
 	for {
 		// TODO: read til newline or maxSize directly

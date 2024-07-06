@@ -15,6 +15,15 @@ const config: Config = {
   organizationName: 'woodpecker-ci',
   projectName: 'woodpecker-ci.github.io',
   trailingSlash: false,
+  headTags: [
+    {
+      tagName: 'link',
+      attributes: {
+        href: 'https://floss.social/@WoodpeckerCI',
+        rel: 'me',
+      },
+    },
+  ],
   themeConfig: {
     navbar: {
       title: 'Woodpecker',
