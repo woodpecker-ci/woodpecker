@@ -110,7 +110,11 @@
                     "success": "Repository riparati"
                 }
             },
-            "not_allowed": "Non ti è consentito accedere alle impostazioni del server"
+            "not_allowed": "Non ti è consentito accedere alle impostazioni del server",
+            "registries": {
+                "desc": "È possibile aggiungere credenziali di registro globale per utilizzare immagini private per tutte le pipeline del server.",
+                "warning": "Questi credenziali di registro saranno disponibili per tutti gli utenti del server."
+            }
         }
     },
     "back": "Indietro",
@@ -463,8 +467,31 @@
             "not_allowed": "Non ti è consentito accedere alle impostazioni di questa organizzazione",
             "secrets": {
                 "desc": "I segreti dell'organizzazione possono essere passati ad ogni step della pipeline del repository dell'organizzazione, come variabili d'ambiente."
+            },
+            "registries": {
+                "desc": "È possibile aggiungere le credenziali di registro dell'organizzazione per utilizzare immagini private per tutte le pipeline dell'organizzazione."
             }
         }
     },
-    "running_version": "Stai eseguendo Woodpecker {0}"
+    "running_version": "Stai eseguendo Woodpecker {0}",
+    "registries": {
+        "delete_confirm": "Vuoi davvero eliminare questo registro?",
+        "registries": "Registri",
+        "credentials": "Credenziali di registro",
+        "desc": "È possibile aggiungere le credenziali dei registri per utilizzare immagini private per la pipeline.",
+        "none": "Ancora nessune credenziali di registro.",
+        "address": {
+            "address": "Indirizzo",
+            "desc": "Indirizzo di Registro (es. docker.io)"
+        },
+        "show": "Mostra registri",
+        "save": "Salva registro",
+        "add": "Aggiungi registro",
+        "view": "Mostra registro",
+        "edit": "Modifica registro",
+        "delete": "Elimina registro",
+        "created": "Credenziali del registro create",
+        "saved": "Credenziali di registro salvate",
+        "deleted": "Credenziali di registro eliminate"
+    }
 }
