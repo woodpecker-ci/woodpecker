@@ -149,7 +149,7 @@ func run(cliCtx context.Context, c *cli.Command, backends []types.Backend) error
 	wg.Add(parallel)
 
 	// new engine
-	backendCtx := context.WithValue(ctx, types.CliContext, c)
+	backendCtx := context.WithValue(ctx, types.CliCommand, c)
 	backendName := c.String("backend-engine")
 	backendEngine, err := backend.FindBackend(backendCtx, backends, backendName)
 	if err != nil {

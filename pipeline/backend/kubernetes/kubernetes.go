@@ -83,7 +83,7 @@ func newDefaultDeleteOptions() meta_v1.DeleteOptions {
 
 func configFromCliContext(ctx context.Context) (*config, error) {
 	if ctx != nil {
-		if c, ok := ctx.Value(types.CliContext).(*cli.Command); ok {
+		if c, ok := ctx.Value(types.CliCommand).(*cli.Command); ok {
 			config := config{
 				Namespace:                   c.String("backend-k8s-namespace"),
 				StorageClass:                c.String("backend-k8s-storage-class"),

@@ -71,7 +71,7 @@ func (e *local) Flags() []cli.Flag {
 }
 
 func (e *local) Load(ctx context.Context) (*types.BackendInfo, error) {
-	c, ok := ctx.Value(types.CliContext).(*cli.Command)
+	c, ok := ctx.Value(types.CliCommand).(*cli.Command)
 	if ok {
 		e.tempDir = c.String("backend-local-temp-dir")
 	}

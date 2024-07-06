@@ -230,7 +230,7 @@ func execWithAxis(ctx context.Context, c *cli.Command, file, repoPath string, ax
 		return err
 	}
 
-	backendCtx := context.WithValue(ctx, backend_types.CliContext, c)
+	backendCtx := context.WithValue(ctx, backend_types.CliCommand, c)
 	backends := []backend_types.Backend{
 		kubernetes.New(),
 		docker.New(),

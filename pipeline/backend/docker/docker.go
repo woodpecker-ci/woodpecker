@@ -63,7 +63,7 @@ func (e *docker) Name() string {
 }
 
 func (e *docker) IsAvailable(ctx context.Context) bool {
-	if c, ok := ctx.Value(backend.CliContext).(*cli.Command); ok {
+	if c, ok := ctx.Value(backend.CliCommand).(*cli.Command); ok {
 		if c.IsSet("backend-docker-host") {
 			return true
 		}
@@ -101,7 +101,7 @@ func (e *docker) Flags() []cli.Flag {
 
 // Load new client for Docker Backend using environment variables.
 func (e *docker) Load(ctx context.Context) (*backend.BackendInfo, error) {
-	c, ok := ctx.Value(backend.CliContext).(*cli.Command)
+	c, ok := ctx.Value(backend.CliCommand).(*cli.Command)
 	if !ok {
 		return nil, backend.ErrNoCliContextFound
 	}
