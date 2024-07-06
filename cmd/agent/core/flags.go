@@ -31,9 +31,11 @@ var flags = []cli.Flag{
 		Value:   "localhost:9000",
 	},
 	&cli.StringFlag{
-		Name:    "grpc-token",
-		Usage:   "server-agent shared token",
-		Sources: cli.ValueSourceChain{Chain: []cli.ValueSource{cli.Files(os.Getenv("WOODPECKER_AGENT_SECRET_FILE")).Chain[0], cli.EnvVars("WOODPECKER_AGENT_SECRET").Chain[0]}},
+		Name:  "grpc-token",
+		Usage: "server-agent shared token",
+		Sources: cli.NewValueSourceChain(
+			cli.File(os.Getenv("WOODPECKER_AGENT_SECRET_FILE")),
+			cli.EnvVar("WOODPECKER_AGENT_SECRET")),
 	},
 	&cli.BoolFlag{
 		Sources: cli.EnvVars("WOODPECKER_GRPC_SECURE"),
