@@ -29,9 +29,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/version"
 )
 
-func RunAgent(backends []backend.Backend) {
-	ctx := context.Background()
-
+func RunAgent(ctx context.Context, backends []backend.Backend) {
 	app := &cli.Command{}
 	app.Name = "woodpecker-agent"
 	app.Version = version.String()

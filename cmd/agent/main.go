@@ -15,6 +15,8 @@
 package main
 
 import (
+	"context"
+
 	"go.woodpecker-ci.org/woodpecker/v2/cmd/agent/core"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/docker"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/dummy"
@@ -24,7 +26,7 @@ import (
 )
 
 func main() {
-	core.RunAgent([]backendTypes.Backend{
+	core.RunAgent(context.Background(), []backendTypes.Backend{
 		kubernetes.New(),
 		docker.New(),
 		local.New(),
