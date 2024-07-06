@@ -53,7 +53,7 @@ var cronCreateCmd = &cli.Command{
 
 func cronCreate(ctx context.Context, c *cli.Command) error {
 	var (
-		jobName          = c.String("name")
+		cronName         = c.String("name")
 		branch           = c.String("branch")
 		schedule         = c.String("schedule")
 		repoIDOrFullName = c.String("repository")
@@ -74,7 +74,7 @@ func cronCreate(ctx context.Context, c *cli.Command) error {
 	}
 
 	cron := &woodpecker.Cron{
-		Name:     jobName,
+		Name:     cronName,
 		Branch:   branch,
 		Schedule: schedule,
 	}

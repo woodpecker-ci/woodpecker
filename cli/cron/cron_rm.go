@@ -41,7 +41,7 @@ var cronDeleteCmd = &cli.Command{
 
 func cronDelete(ctx context.Context, c *cli.Command) error {
 	var (
-		jobID            = c.Int("id")
+		cronID           = c.Int("id")
 		repoIDOrFullName = c.String("repository")
 	)
 	if repoIDOrFullName == "" {
@@ -55,7 +55,7 @@ func cronDelete(ctx context.Context, c *cli.Command) error {
 	if err != nil {
 		return err
 	}
-	err = client.CronDelete(repoID, jobID)
+	err = client.CronDelete(repoID, cronID)
 	if err != nil {
 		return err
 	}
