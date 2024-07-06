@@ -43,7 +43,7 @@ var cronInfoCmd = &cli.Command{
 
 func cronInfo(ctx context.Context, c *cli.Command) error {
 	var (
-		jobID            = c.Int("id")
+		cronID           = c.Int("id")
 		repoIDOrFullName = c.String("repository")
 		format           = c.String("format") + "\n"
 	)
@@ -59,7 +59,7 @@ func cronInfo(ctx context.Context, c *cli.Command) error {
 		return err
 	}
 
-	cron, err := client.CronGet(repoID, jobID)
+	cron, err := client.CronGet(repoID, cronID)
 	if err != nil {
 		return err
 	}
