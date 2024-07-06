@@ -202,11 +202,12 @@ var flags = append([]cli.Flag{
 		Value:   "sqlite3",
 	},
 	&cli.StringFlag{
-		EnvVars:  []string{"WOODPECKER_DATABASE_DATASOURCE"},
-		Name:     "datasource",
-		Usage:    "database driver configuration string",
-		Value:    datasourceDefaultValue(),
-		FilePath: os.Getenv("WOODPECKER_DATABASE_DATASOURCE_FILE"),
+		Sources: cli.NewValueSourceChain(
+			cli.File(os.Getenv("WOODPECKER_DATABASE_DATASOURCE_FILE")),
+			cli.EnvVar("WOODPECKER_DATABASE_DATASOURCE")),
+		Name:  "datasource",
+		Usage: "database driver configuration string",
+		Value: datasourceDefaultValue(),
 	},
 	&cli.StringFlag{
 		Sources: cli.EnvVars("WOODPECKER_PROMETHEUS_AUTH_TOKEN"),
@@ -286,7 +287,7 @@ var flags = append([]cli.Flag{
 		Usage:   "How many retries of fetching the Woodpecker configuration from a forge are done before we fail",
 		Value:   3,
 	},
-	&cli.Int64Flag{
+	&cli.IntFlag{
 		Sources: cli.EnvVars("WOODPECKER_LIMIT_MEM_SWAP"),
 		Name:    "limit-mem-swap",
 		Usage:   "maximum memory used for swap in bytes",
@@ -323,21 +324,56 @@ var flags = append([]cli.Flag{
 		Sources: cli.EnvVars("WOODPECKER_FORGE_URL", "WOODPECKER_GITHUB_URL", "WOODPECKER_GITLAB_URL", "WOODPECKER_GITEA_URL", "WOODPECKER_FORGEJO_URL", "WOODPECKER_BITBUCKET_URL", "WOODPECKER_BITBUCKET_DC_URL"),
 	},
 	&cli.StringFlag{
-		Name:     "forge-oauth-client",
-		Usage:    "oauth2 client id",
-		EnvVars:  []string{"WOODPECKER_FORGE_CLIENT", "WOODPECKER_GITHUB_CLIENT", "WOODPECKER_GITLAB_CLIENT", "WOODPECKER_GITEA_CLIENT", "WOODPECKER_FORGEJO_CLIENT", "WOODPECKER_BITBUCKET_CLIENT", "WOODPECKER_BITBUCKET_DC_CLIENT_ID"},
-		FilePath: getFirstNonEmptyEnvVar([]string{"WOODPECKER_FORGE_CLIENT_FILE", "WOODPECKER_GITHUB_CLIENT_FILE", "WOODPECKER_GITLAB_CLIENT_FILE", "WOODPECKER_GITEA_CLIENT_FILE", "WOODPECKER_FORGEJO_CLIENT_FILE", "WOODPECKER_BITBUCKET_CLIENT_FILE", "WOODPECKER_BITBUCKET_DC_CLIENT_ID_FILE"}),
+		Sources: cli.NewValueSourceChain(
+			cli.File(getFirstNonEmptyEnvVar(
+				"WOODPECKER_FORGE_CLIENT_FILE",
+				"WOODPECKER_GITHUB_CLIENT_FILE",
+				"WOODPECKER_GITLAB_CLIENT_FILE",
+				"WOODPECKER_GITEA_CLIENT_FILE",
+				"WOODPECKER_FORGEJO_CLIENT_FILE",
+				"WOODPECKER_BITBUCKET_CLIENT_FILE",
+				"WOODPECKER_BITBUCKET_DC_CLIENT_ID_FILE")),
+			cli.EnvVar("WOODPECKER_FORGE_CLIENT"),
+			cli.EnvVar("WOODPECKER_GITHUB_CLIENT"),
+			cli.EnvVar("WOODPECKER_GITLAB_CLIENT"),
+			cli.EnvVar("WOODPECKER_GITEA_CLIENT"),
+			cli.EnvVar("WOODPECKER_FORGEJO_CLIENT"),
+			cli.EnvVar("WOODPECKER_BITBUCKET_CLIENT"),
+			cli.EnvVar("WOODPECKER_BITBUCKET_DC_CLIENT_ID")),
+		Name:  "forge-oauth-client",
+		Usage: "oauth2 client id",
 	},
 	&cli.StringFlag{
-		Name:     "forge-oauth-secret",
-		Usage:    "oauth2 client secret",
-		EnvVars:  []string{"WOODPECKER_FORGE_SECRET", "WOODPECKER_GITHUB_SECRET", "WOODPECKER_GITLAB_SECRET", "WOODPECKER_GITEA_SECRET", "WOODPECKER_FORGEJO_SECRET", "WOODPECKER_BITBUCKET_SECRET", "WOODPECKER_BITBUCKET_DC_CLIENT_SECRET"},
-		FilePath: getFirstNonEmptyEnvVar([]string{"WOODPECKER_FORGE_SECRET_FILE", "WOODPECKER_GITHUB_SECRET_FILE", "WOODPECKER_GITLAB_SECRET_FILE", "WOODPECKER_GITEA_SECRET_FILE", "WOODPECKER_FORGEJO_SECRET_FILE", "WOODPECKER_BITBUCKET_SECRET_FILE", "WOODPECKER_BITBUCKET_DC_CLIENT_SECRET_FILE"}),
+		Sources: cli.NewValueSourceChain(
+			cli.File(getFirstNonEmptyEnvVar(
+				"WOODPECKER_FORGE_SECRET_FILE",
+				"WOODPECKER_GITHUB_SECRET_FILE",
+				"WOODPECKER_GITLAB_SECRET_FILE",
+				"WOODPECKER_GITEA_SECRET_FILE",
+				"WOODPECKER_FORGEJO_SECRET_FILE",
+				"WOODPECKER_BITBUCKET_SECRET_FILE",
+				"WOODPECKER_BITBUCKET_DC_CLIENT_SECRET_FILE",
+			)),
+			cli.EnvVar("WOODPECKER_FORGE_SECRET"),
+			cli.EnvVar("WOODPECKER_GITHUB_SECRET"),
+			cli.EnvVar("WOODPECKER_GITLAB_SECRET"),
+			cli.EnvVar("WOODPECKER_GITEA_SECRET"),
+			cli.EnvVar("WOODPECKER_FORGEJO_SECRET"),
+			cli.EnvVar("WOODPECKER_BITBUCKET_SECRET"),
+			cli.EnvVar("WOODPECKER_BITBUCKET_DC_CLIENT_SECRET")),
+		Name:  "forge-oauth-secret",
+		Usage: "oauth2 client secret",
 	},
 	&cli.BoolFlag{
-		Name:    "forge-skip-verify",
-		Usage:   "skip ssl verification",
-		Sources: cli.EnvVars("WOODPECKER_FORGE_SKIP_VERIFY", "WOODPECKER_GITHUB_SKIP_VERIFY", "WOODPECKER_GITLAB_SKIP_VERIFY", "WOODPECKER_GITEA_SKIP_VERIFY", "WOODPECKER_FORGEJO_SKIP_VERIFY", "WOODPECKER_BITBUCKET_SKIP_VERIFY"),
+		Name:  "forge-skip-verify",
+		Usage: "skip ssl verification",
+		Sources: cli.EnvVars(
+			"WOODPECKER_FORGE_SKIP_VERIFY",
+			"WOODPECKER_GITHUB_SKIP_VERIFY",
+			"WOODPECKER_GITLAB_SKIP_VERIFY",
+			"WOODPECKER_GITEA_SKIP_VERIFY",
+			"WOODPECKER_FORGEJO_SKIP_VERIFY",
+			"WOODPECKER_BITBUCKET_SKIP_VERIFY"),
 	},
 	&cli.StringFlag{
 		Sources: cli.EnvVars("WOODPECKER_EXPERT_FORGE_OAUTH_HOST", "WOODPECKER_DEV_GITEA_OAUTH_URL"), // TODO: remove WOODPECKER_DEV_GITEA_OAUTH_URL in next major release
@@ -415,15 +451,16 @@ var flags = append([]cli.Flag{
 	&cli.StringFlag{
 		Sources: cli.NewValueSourceChain(
 			cli.File(os.Getenv("WOODPECKER_BITBUCKET_DC_GIT_USERNAME_FILE")),
-			cli.EnvVars("WOODPECKER_BITBUCKET_DC_GIT_USERNAME")),
+			cli.EnvVar("WOODPECKER_BITBUCKET_DC_GIT_USERNAME")),
 		Name:  "bitbucket-dc-git-username",
 		Usage: "Bitbucket DataCenter/Server service account username",
 	},
 	&cli.StringFlag{
-		EnvVars:  []string{"WOODPECKER_BITBUCKET_DC_GIT_PASSWORD"},
-		Name:     "bitbucket-dc-git-password",
-		Usage:    "Bitbucket DataCenter/Server service account password",
-		FilePath: os.Getenv("WOODPECKER_BITBUCKET_DC_GIT_PASSWORD_FILE"),
+		Sources: cli.NewValueSourceChain(
+			cli.File(os.Getenv("WOODPECKER_BITBUCKET_DC_GIT_PASSWORD_FILE")),
+			cli.EnvVar("WOODPECKER_BITBUCKET_DC_GIT_PASSWORD")),
+		Name:  "bitbucket-dc-git-password",
+		Usage: "Bitbucket DataCenter/Server service account password",
 	},
 	//
 	// development flags
@@ -481,7 +518,7 @@ func datasourceDefaultValue() string {
 	return "woodpecker.sqlite"
 }
 
-func getFirstNonEmptyEnvVar(envVars []string) string {
+func getFirstNonEmptyEnvVar(envVars ...string) string {
 	for _, envVar := range envVars {
 		val := os.Getenv(envVar)
 		if val != "" {
