@@ -40,7 +40,7 @@ import (
 type StepBuilder struct {
 	yamls                   []*forge_types.FileMeta // TODO: get rid of server type in this package
 	compilerOptions         []compiler.Option
-	getWorkflowMetadataData func(workflow *model.Workflow) metadata.Metadata // TODO: get rid of server type in this package
+	getWorkflowMetadataData func(*model.Workflow) metadata.Metadata
 	repoIsTrusted           bool
 	host                    string
 	envs                    map[string]string
