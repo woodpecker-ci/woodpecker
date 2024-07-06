@@ -23,4 +23,3 @@ The [autoscaler](./30-autoscaler.md) can be used to deploy new agents to a cloud
 ## Configuration service
 
 Sometime the normal yaml configuration compiler isn't enough. You can use the [configuration service](./100-external-configuration-api.md) to process your configuration files by your own.
-
