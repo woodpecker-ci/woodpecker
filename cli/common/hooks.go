@@ -22,7 +22,7 @@ func Before(ctx context.Context, c *cli.Command) error {
 		return err
 	}
 
-	go func() {
+	go func(context.Context) {
 		if c.Bool("disable-update-check") {
 			return
 		}
@@ -37,7 +37,7 @@ func Before(ctx context.Context, c *cli.Command) error {
 
 		log.Debug().Msg("Checking for updates ...")
 
-		newVersion, err := update.CheckForUpdate(waitForUpdateCheck, false)
+		newVersion, err := update.CheckForUpdate(waitForUpdateCheck, false) //nolint:contextcheck
 		if err != nil {
 			log.Error().Err(err).Msgf("Failed to check for updates")
 			return
@@ -48,7 +48,7 @@ func Before(ctx context.Context, c *cli.Command) error {
 		} else {
 			log.Debug().Msgf("No update required")
 		}
-	}()
+	}(ctx)
 
 	return config.Load(ctx, c)
 }

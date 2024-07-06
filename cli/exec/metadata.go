@@ -27,7 +27,7 @@ import (
 )
 
 // return the metadata from the cli context.
-func metadataFromContext(ctx context.Context, c *cli.Command, axis matrix.Axis) metadata.Metadata {
+func metadataFromContext(_ context.Context, c *cli.Command, axis matrix.Axis) metadata.Metadata {
 	platform := c.String("system-platform")
 	if platform == "" {
 		platform = runtime.GOOS + "/" + runtime.GOARCH

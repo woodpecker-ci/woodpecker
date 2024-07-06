@@ -155,7 +155,7 @@ linters:
     - errchkjson
     - gochecknoinits
     - goheader
-    - gomoddirectives
+#   - gomoddirectives # TODO: enable once https://github.com/urfave/cli/pull/1945 merged
     - gomodguard
     - goprintffuncname
     - importas

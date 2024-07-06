@@ -1,6 +1,7 @@
 package pipeline
 
 import (
+	"context"
 	"errors"
 	"io"
 	"testing"
@@ -109,12 +110,10 @@ func TestPipelineList(t *testing.T) {
 			mockClient.On("PipelineList", mock.Anything).Return(tt.pipelines, tt.pipelineErr)
 			mockClient.On("RepoLookup", mock.Anything).Return(&woodpecker.Repo{ID: tt.repoID}, nil)
 
-			app := &cli.App{Writer: io.Discard}
-			c := cli.NewContext(app, nil, nil)
-
 			command := pipelineListCmd
-			command.Action = func(c *cli.Context) error {
-				pipelines, err := pipelineList(c, mockClient)
+			command.Writer = io.Discard
+			command.Action = func(ctx context.Context, c *cli.Command) error {
+				pipelines, err := pipelineList(ctx, c, mockClient)
 				if tt.wantErr != nil {
 					assert.EqualError(t, err, tt.wantErr.Error())
 					return nil
@@ -126,7 +125,7 @@ func TestPipelineList(t *testing.T) {
 				return nil
 			}
 
-			_ = command.Run(c, tt.args...)
+			_ = command.Run(context.Background(), tt.args)
 		})
 	}
 }

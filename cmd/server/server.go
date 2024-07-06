@@ -100,7 +100,7 @@ func run(ctx context.Context, c *cli.Command) error {
 
 	var g errgroup.Group
 
-	setupMetrics(&g, _store)
+	setupMetrics(ctx, &g, _store)
 
 	g.Go(func() error {
 		return cron.Start(ctx, _store)

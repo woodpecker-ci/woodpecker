@@ -30,8 +30,8 @@ type aesConfiguration struct {
 	clients  []types.EncryptionClient
 }
 
-func newAES(ctx *cli.Context, s store.Store) types.EncryptionServiceBuilder {
-	key := ctx.String(rawKeyConfigFlag)
+func newAES(c *cli.Command, s store.Store) types.EncryptionServiceBuilder {
+	key := c.String(rawKeyConfigFlag)
 	return &aesConfiguration{key, s, nil}
 }
 

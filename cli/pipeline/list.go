@@ -63,7 +63,7 @@ func List(ctx context.Context, c *cli.Command) error {
 	return pipelineOutput(c, resources)
 }
 
-func pipelineList(ctx context.Context, c *cli.Command, client woodpecker.Client) ([]woodpecker.Pipeline, error) {
+func pipelineList(_ context.Context, c *cli.Command, client woodpecker.Client) ([]woodpecker.Pipeline, error) {
 	resources := make([]woodpecker.Pipeline, 0)
 
 	repoIDOrFullName := c.Args().First()

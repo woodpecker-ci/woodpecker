@@ -30,8 +30,8 @@ type tinkConfiguration struct {
 	clients        []types.EncryptionClient
 }
 
-func newTink(ctx *cli.Context, s store.Store) types.EncryptionServiceBuilder {
-	filepath := ctx.String(tinkKeysetFilepathConfigFlag)
+func newTink(c *cli.Command, s store.Store) types.EncryptionServiceBuilder {
+	filepath := c.String(tinkKeysetFilepathConfigFlag)
 	return &tinkConfiguration{filepath, s, nil}
 }
 

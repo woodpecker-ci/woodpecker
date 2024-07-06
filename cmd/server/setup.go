@@ -94,14 +94,14 @@ func checkSqliteFileExist(path string) error {
 }
 
 func setupQueue(ctx context.Context, s store.Store) queue.Queue {
-	return queue.WithTaskStore(queue.New(ctx), s)
+	return queue.WithTaskStore(ctx, queue.New(ctx), s)
 }
 
 func setupMembershipService(_ context.Context, _store store.Store) cache.MembershipService {
 	return cache.NewMembershipService(_store)
 }
 
-func setupMetrics(g *errgroup.Group, _store store.Store) {
+func setupMetrics(ctx context.Context, g *errgroup.Group, _store store.Store) {
 	pendingSteps := prometheus_auto.NewGauge(prometheus.GaugeOpts{
 		Namespace: "woodpecker",
 		Name:      "pending_steps",
@@ -140,7 +140,7 @@ func setupMetrics(g *errgroup.Group, _store store.Store) {
 
 	g.Go(func() error {
 		for {
-			stats := server.Config.Services.Queue.Info(context.TODO())
+			stats := server.Config.Services.Queue.Info(ctx)
 			pendingSteps.Set(float64(stats.Stats.Pending))
 			waitingSteps.Set(float64(stats.Stats.WaitingOnDeps))
 			runningSteps.Set(float64(stats.Stats.Running))
