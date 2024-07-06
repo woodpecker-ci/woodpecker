@@ -90,11 +90,12 @@ var flags = append([]cli.Flag{
 		Value:   ":9000",
 	},
 	&cli.StringFlag{
-		Sources: cli.EnvVars("WOODPECKER_GRPC_SECRET"),
-		Name:    "grpc-secret",
-		Usage:   "grpc jwt secret",
-		Value:   "secret",
-		// TODO: FilePath: os.Getenv("WOODPECKER_GRPC_SECRET_FILE"),
+		Sources: cli.NewValueSourceChain(
+			cli.File(os.Getenv("WOODPECKER_GRPC_SECRET_FILE")),
+			cli.EnvVar("WOODPECKER_GRPC_SECRET")),
+		Name:  "grpc-secret",
+		Usage: "grpc jwt secret",
+		Value: "secret",
 	},
 	&cli.StringFlag{
 		Sources: cli.EnvVars("WOODPECKER_METRICS_SERVER_ADDR"),
@@ -180,10 +181,11 @@ var flags = append([]cli.Flag{
 		Name:    "network",
 	},
 	&cli.StringFlag{
-		Sources: cli.EnvVars("WOODPECKER_AGENT_SECRET"),
-		Name:    "agent-secret",
-		Usage:   "server-agent shared password",
-		// TODO: FilePath: os.Getenv("WOODPECKER_AGENT_SECRET_FILE"),
+		Sources: cli.NewValueSourceChain(
+			cli.File(os.Getenv("WOODPECKER_AGENT_SECRET_FILE")),
+			cli.EnvVar("WOODPECKER_AGENT_SECRET")),
+		Name:  "agent-secret",
+		Usage: "server-agent shared password",
 	},
 	&cli.DurationFlag{
 		Sources: cli.EnvVars("WOODPECKER_KEEPALIVE_MIN_TIME"),
@@ -210,11 +212,11 @@ var flags = append([]cli.Flag{
 		Value: datasourceDefaultValue(),
 	},
 	&cli.StringFlag{
-		Sources: cli.EnvVars("WOODPECKER_PROMETHEUS_AUTH_TOKEN"),
-		Name:    "prometheus-auth-token",
-		Usage:   "token to secure prometheus metrics endpoint",
-		Value:   "",
-		// TODO: FilePath: os.Getenv("WOODPECKER_PROMETHEUS_AUTH_TOKEN_FILE"),
+		Sources: cli.NewValueSourceChain(
+			cli.File(os.Getenv("WOODPECKER_PROMETHEUS_AUTH_TOKEN_FILE")),
+			cli.EnvVar("WOODPECKER_PROMETHEUS_AUTH_TOKEN")),
+		Name:  "prometheus-auth-token",
+		Usage: "token to secure prometheus metrics endpoint",
 	},
 	&cli.StringFlag{
 		Sources: cli.EnvVars("WOODPECKER_STATUS_CONTEXT", "WOODPECKER_GITHUB_CONTEXT", "WOODPECKER_GITEA_CONTEXT"),
@@ -491,10 +493,11 @@ var flags = append([]cli.Flag{
 	// secrets encryption in DB
 	//
 	&cli.StringFlag{
-		Sources: cli.EnvVars("WOODPECKER_ENCRYPTION_KEY"),
-		Name:    "encryption-raw-key",
-		Usage:   "Raw encryption key",
-		// TODO: FilePath: os.Getenv("WOODPECKER_ENCRYPTION_KEY_FILE"),
+		Sources: cli.NewValueSourceChain(
+			cli.File(os.Getenv("WOODPECKER_ENCRYPTION_KEY_FILE")),
+			cli.EnvVar("WOODPECKER_ENCRYPTION_KEY")),
+		Name:  "encryption-raw-key",
+		Usage: "Raw encryption key",
 	},
 	&cli.StringFlag{
 		Sources: cli.EnvVars("WOODPECKER_ENCRYPTION_TINK_KEYSET_FILE"),
