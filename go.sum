@@ -11,6 +11,8 @@ filippo.io/edwards25519 v1.1.0/go.mod h1:BxyFTGdWcka3PhytdK4V28tE5sGfRvvvRV7EaN4
 gitea.com/xorm/sqlfiddle v0.0.0-20180821085327-62ce714f951a h1:lSA0F4e9A2NcQSqGqTOXqu2aRi/XEQxDCBwM8yJtE6s=
 gitea.com/xorm/sqlfiddle v0.0.0-20180821085327-62ce714f951a/go.mod h1:EXuID2Zs0pAQhH8yz+DNjUbjppKQzKFAn28TMYPB6IU=
 gitee.com/travelliu/dm v1.8.11192/go.mod h1:DHTzyhCrM843x9VdKVbZ+GKXGRbKM2sJ4LxihRxShkE=
+github.com/6543-forks/cli/v3 v3.0.0-20240705231757-a11a8ad606e1 h1:NwFQJkc7U6rt9U1uhjI5HUDib0jvujtQFvR9OtcXjKw=
+github.com/6543-forks/cli/v3 v3.0.0-20240705231757-a11a8ad606e1/go.mod h1:Z1ItyMma7t6I7zHG9OpbExhHQOSkFf/96n+mAZ9MtVI=
 github.com/6543/logfile-open v1.2.1 h1:az+TtNHclTAKaHfFCTSbuduMllANox1gM9qLQr7LV5I=
 github.com/6543/logfile-open v1.2.1/go.mod h1:ZoEy7pW2mexmQxiZIqPCeh8vUxVuiHYXmSZNbvEb51g=
 github.com/Azure/azure-sdk-for-go/sdk/azcore v0.19.0/go.mod h1:h6H6c8enJmmocHUbLiiGY6sx7f9i+X3m1CHdd5c6Rdw=
@@ -462,8 +464,6 @@ github.com/twitchyliquid64/golang-asm v0.15.1 h1:SU5vSMR7hnwNxj24w34ZyCi/FmDZTkS
 github.com/twitchyliquid64/golang-asm v0.15.1/go.mod h1:a1lVb/DtPvCB8fslRZhAngC2+aY1QWCk3Cedj/Gdt08=
 github.com/ugorji/go/codec v1.2.12 h1:9LC83zGrHhuUA9l16C9AHXAqEV/2wBQ4nkvumAE65EE=
 github.com/ugorji/go/codec v1.2.12/go.mod h1:UNopzCgEMSXjBc6AOMqYvWC1ktqTAfzJZUZgYf6w6lg=
-github.com/urfave/cli/v3 v3.0.0-alpha9.0.20240705042349-c25f5632d713 h1:Myyz0xiChXNIAX4ZYux/it3b4a/1JP5hI48YtPaHXDE=
-github.com/urfave/cli/v3 v3.0.0-alpha9.0.20240705042349-c25f5632d713/go.mod h1:Z1ItyMma7t6I7zHG9OpbExhHQOSkFf/96n+mAZ9MtVI=
 github.com/xanzy/go-gitlab v0.105.0 h1:3nyLq0ESez0crcaM19o5S//SvezOQguuIHZ3wgX64hM=
 github.com/xanzy/go-gitlab v0.105.0/go.mod h1:ETg8tcj4OhrB84UEgeE8dSuV/0h4BBL1uOV/qK0vlyI=
 github.com/xeipuuv/gojsonpointer v0.0.0-20180127040702-4e3ac2762d5f/go.mod h1:N2zxlSyiKSe5eX1tZViRH5QA0qijqEDrYZiPEAiq3wU=

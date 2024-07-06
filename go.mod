@@ -188,6 +188,4 @@ require (
 	sigs.k8s.io/yaml v1.4.0 // indirect
 )
 
-// replace (
-//     github.com/urfave/cli/v3 => github.com/6543-forks/cli/v3 v3.0.0
-// )
+replace github.com/urfave/cli/v3 => github.com/6543-forks/cli/v3 v3.0.0-20240705231757-a11a8ad606e1
