@@ -22,11 +22,25 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/errors"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/metadata"
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge/mocks"
 	forge_types "go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	server_metadata "go.woodpecker-ci.org/woodpecker/v2/server/pipeline/metadata"
 )
+
+func getMockMetadata(t *testing.T) func(*model.Workflow) metadata.Metadata {
+	repo := &model.Repo{}
+	curr := &model.Pipeline{
+		Message: "aaa",
+		Event:   model.EventPush,
+	}
+	last := &model.Pipeline{}
+	host := ""
+	meta := server_metadata.NewMetadataServerForge(getMockForge(t), repo, curr, last, host)
+	return meta.MetadataFromStruct
+}
 
 func TestGlobalEnvsubst(t *testing.T) {
 	t.Parallel()
@@ -36,17 +50,8 @@ func TestGlobalEnvsubst(t *testing.T) {
 			"KEY_K": "VALUE_V",
 			"IMAGE": "scratch",
 		},
-		// Forge: getMockForge(t),
-		// Repo: &model.Repo{},
-		// Curr: &model.Pipeline{
-		// 	Message: "aaa",
-		// 	Event:   model.EventPush,
-		// },
-		// Last:  &model.Pipeline{},
-		// Netrc: &model.Netrc{},
-		// Secs:  []*model.Secret{},
-		// Regs:  []*model.Registry{},
-		Host: "",
+		GetWorkflowMetadataData: getMockMetadata(t),
+		Host:                    "",
 		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
 when:
@@ -71,21 +76,12 @@ func TestMissingGlobalEnvsubst(t *testing.T) {
 	t.Parallel()
 
 	b := StepBuilder{
-		Forge: getMockForge(t),
 		Envs: map[string]string{
 			"KEY_K":    "VALUE_V",
 			"NO_IMAGE": "scratch",
 		},
-		Repo: &model.Repo{},
-		Curr: &model.Pipeline{
-			Message: "aaa",
-			Event:   model.EventPush,
-		},
-		Last:  &model.Pipeline{},
-		Netrc: &model.Netrc{},
-		Secs:  []*model.Secret{},
-		Regs:  []*model.Registry{},
-		Host:  "",
+		GetWorkflowMetadataData: getMockMetadata(t),
+		Host:                    "",
 		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
 when:
@@ -110,17 +106,8 @@ func TestMultilineEnvsubst(t *testing.T) {
 	t.Parallel()
 
 	b := StepBuilder{
-		Forge: getMockForge(t),
-		Repo:  &model.Repo{},
-		Curr: &model.Pipeline{
-			Message: `aaa
-bbb`,
-		},
-		Last:  &model.Pipeline{},
-		Netrc: &model.Netrc{},
-		Secs:  []*model.Secret{},
-		Regs:  []*model.Registry{},
-		Host:  "",
+		GetWorkflowMetadataData: getMockMetadata(t),
+		Host:                    "",
 		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
 when:
@@ -154,16 +141,8 @@ func TestMultiPipeline(t *testing.T) {
 	t.Parallel()
 
 	b := StepBuilder{
-		Forge: getMockForge(t),
-		Repo:  &model.Repo{},
-		Curr: &model.Pipeline{
-			Event: model.EventPush,
-		},
-		Last:  &model.Pipeline{},
-		Netrc: &model.Netrc{},
-		Secs:  []*model.Secret{},
-		Regs:  []*model.Registry{},
-		Host:  "",
+		GetWorkflowMetadataData: getMockMetadata(t),
+		Host:                    "",
 		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
 when:
@@ -195,16 +174,8 @@ func TestDependsOn(t *testing.T) {
 	t.Parallel()
 
 	b := StepBuilder{
-		Forge: getMockForge(t),
-		Repo:  &model.Repo{},
-		Curr: &model.Pipeline{
-			Event: model.EventPush,
-		},
-		Last:  &model.Pipeline{},
-		Netrc: &model.Netrc{},
-		Secs:  []*model.Secret{},
-		Regs:  []*model.Registry{},
-		Host:  "",
+		GetWorkflowMetadataData: getMockMetadata(t),
+		Host:                    "",
 		Yamls: []*forge_types.FileMeta{
 			{Name: "lint", Data: []byte(`
 when:
@@ -250,16 +221,8 @@ func TestRunsOn(t *testing.T) {
 	t.Parallel()
 
 	b := StepBuilder{
-		Forge: getMockForge(t),
-		Repo:  &model.Repo{},
-		Curr: &model.Pipeline{
-			Event: model.EventPush,
-		},
-		Last:  &model.Pipeline{},
-		Netrc: &model.Netrc{},
-		Secs:  []*model.Secret{},
-		Regs:  []*model.Registry{},
-		Host:  "",
+		GetWorkflowMetadataData: getMockMetadata(t),
+		Host:                    "",
 		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
 when:
@@ -291,16 +254,8 @@ func TestPipelineName(t *testing.T) {
 	t.Parallel()
 
 	b := StepBuilder{
-		Forge: getMockForge(t),
-		Repo:  &model.Repo{Config: ".woodpecker"},
-		Curr: &model.Pipeline{
-			Event: model.EventPush,
-		},
-		Last:  &model.Pipeline{},
-		Netrc: &model.Netrc{},
-		Secs:  []*model.Secret{},
-		Regs:  []*model.Registry{},
-		Host:  "",
+		GetWorkflowMetadataData: getMockMetadata(t),
+		Host:                    "",
 		Yamls: []*forge_types.FileMeta{
 			{Name: ".woodpecker/lint.yml", Data: []byte(`
 when:
@@ -333,17 +288,8 @@ func TestBranchFilter(t *testing.T) {
 	t.Parallel()
 
 	b := StepBuilder{
-		Forge: getMockForge(t),
-		Repo:  &model.Repo{},
-		Curr: &model.Pipeline{
-			Branch: "dev",
-			Event:  model.EventPush,
-		},
-		Last:  &model.Pipeline{},
-		Netrc: &model.Netrc{},
-		Secs:  []*model.Secret{},
-		Regs:  []*model.Registry{},
-		Host:  "",
+		GetWorkflowMetadataData: getMockMetadata(t),
+		Host:                    "",
 		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
 when:
@@ -379,14 +325,8 @@ func TestRootWhenFilter(t *testing.T) {
 	t.Parallel()
 
 	b := StepBuilder{
-		Forge: getMockForge(t),
-		Repo:  &model.Repo{},
-		Curr:  &model.Pipeline{Event: "tag"},
-		Last:  &model.Pipeline{},
-		Netrc: &model.Netrc{},
-		Secs:  []*model.Secret{},
-		Regs:  []*model.Registry{},
-		Host:  "",
+		GetWorkflowMetadataData: getMockMetadata(t),
+		Host:                    "",
 		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
 when:
@@ -423,20 +363,9 @@ steps:
 func TestZeroSteps(t *testing.T) {
 	t.Parallel()
 
-	pipeline := &model.Pipeline{
-		Branch: "dev",
-		Event:  model.EventPush,
-	}
-
 	b := StepBuilder{
-		Forge: getMockForge(t),
-		Repo:  &model.Repo{},
-		Curr:  pipeline,
-		Last:  &model.Pipeline{},
-		Netrc: &model.Netrc{},
-		Secs:  []*model.Secret{},
-		Regs:  []*model.Registry{},
-		Host:  "",
+		GetWorkflowMetadataData: getMockMetadata(t),
+		Host:                    "",
 		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
 when:
@@ -463,20 +392,9 @@ steps:
 func TestZeroStepsAsMultiPipelineDeps(t *testing.T) {
 	t.Parallel()
 
-	pipeline := &model.Pipeline{
-		Branch: "dev",
-		Event:  model.EventPush,
-	}
-
 	b := StepBuilder{
-		Forge: getMockForge(t),
-		Repo:  &model.Repo{},
-		Curr:  pipeline,
-		Last:  &model.Pipeline{},
-		Netrc: &model.Netrc{},
-		Secs:  []*model.Secret{},
-		Regs:  []*model.Registry{},
-		Host:  "",
+		GetWorkflowMetadataData: getMockMetadata(t),
+		Host:                    "",
 		Yamls: []*forge_types.FileMeta{
 			{Name: "zerostep", Data: []byte(`
 when:
@@ -521,20 +439,9 @@ depends_on: [ zerostep ]
 func TestZeroStepsAsMultiPipelineTransitiveDeps(t *testing.T) {
 	t.Parallel()
 
-	pipeline := &model.Pipeline{
-		Branch: "dev",
-		Event:  model.EventPush,
-	}
-
 	b := StepBuilder{
-		Forge: getMockForge(t),
-		Repo:  &model.Repo{},
-		Curr:  pipeline,
-		Last:  &model.Pipeline{},
-		Netrc: &model.Netrc{},
-		Secs:  []*model.Secret{},
-		Regs:  []*model.Registry{},
-		Host:  "",
+		GetWorkflowMetadataData: getMockMetadata(t),
+		Host:                    "",
 		Yamls: []*forge_types.FileMeta{
 			{Name: "zerostep", Data: []byte(`
 when:

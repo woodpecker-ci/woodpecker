@@ -38,31 +38,31 @@ import (
 
 // StepBuilder Takes the hook data and the yaml and returns in internal data model.
 type StepBuilder struct {
-	yamls                   []*forge_types.FileMeta // TODO: get rid of server type in this package
-	compilerOptions         []compiler.Option
-	getWorkflowMetadataData func(*model.Workflow) metadata.Metadata
-	repoIsTrusted           bool
-	host                    string
-	envs                    map[string]string
+	Yamls                   []*forge_types.FileMeta // TODO: get rid of server type in this package
+	CompilerOptions         []compiler.Option
+	GetWorkflowMetadataData func(*model.Workflow) metadata.Metadata
+	RepoIsTrusted           bool
+	Host                    string
+	Envs                    map[string]string
 }
 
 func NewStepBuilder(yamls []*forge_types.FileMeta, getWorkflowMetadataData func(workflow *model.Workflow) metadata.Metadata, repoIsTrusted bool, host string, envs map[string]string, compilerOptions ...compiler.Option) *StepBuilder {
 	return &StepBuilder{
-		yamls:                   yamls,
-		compilerOptions:         compilerOptions,
-		getWorkflowMetadataData: getWorkflowMetadataData,
-		repoIsTrusted:           repoIsTrusted,
-		host:                    host,
-		envs:                    envs,
+		Yamls:                   yamls,
+		CompilerOptions:         compilerOptions,
+		GetWorkflowMetadataData: getWorkflowMetadataData,
+		RepoIsTrusted:           repoIsTrusted,
+		Host:                    host,
+		Envs:                    envs,
 	}
 }
 
 func (b *StepBuilder) Build() (items []*Item, errorsAndWarnings error) {
-	b.yamls = forge_types.SortByName(b.yamls)
+	b.Yamls = forge_types.SortByName(b.Yamls)
 
 	pidSequence := 1
 
-	for _, y := range b.yamls {
+	for _, y := range b.Yamls {
 		// matrix axes
 		axes, err := matrix.ParseString(string(y.Data))
 		if err != nil {
@@ -115,14 +115,14 @@ func (b *StepBuilder) Build() (items []*Item, errorsAndWarnings error) {
 }
 
 func (b *StepBuilder) genItemForWorkflow(workflow *model.Workflow, axis matrix.Axis, data string) (item *Item, errorsAndWarnings error) {
-	workflowMetadata := b.getWorkflowMetadataData(workflow)
+	workflowMetadata := b.GetWorkflowMetadataData(workflow)
 	environ := workflowMetadata.Environ()
 	for k, v := range axis {
 		environ[k] = v
 	}
 
 	// add global environment variables for substituting
-	for k, v := range b.envs {
+	for k, v := range b.Envs {
 		if _, exists := environ[k]; exists {
 			// don't override existing values
 			continue
@@ -144,7 +144,7 @@ func (b *StepBuilder) genItemForWorkflow(workflow *model.Workflow, axis matrix.A
 
 	// lint pipeline
 	errorsAndWarnings = multierr.Append(errorsAndWarnings, linter.New(
-		linter.WithTrusted(b.repoIsTrusted),
+		linter.WithTrusted(b.RepoIsTrusted),
 	).Lint([]*linter.WorkflowConfig{{
 		Workflow:  parsed,
 		File:      workflow.Name,
@@ -194,7 +194,7 @@ func (b *StepBuilder) compileWorkflow(parsed *yaml_types.Workflow, environ map[s
 	options := []compiler.Option{}
 	options = append(options,
 		compiler.WithEnviron(environ),
-		compiler.WithEnviron(b.envs),
+		compiler.WithEnviron(b.Envs),
 		compiler.WithPrefix(
 			fmt.Sprintf(
 				"wp_%s_%d",
@@ -202,10 +202,10 @@ func (b *StepBuilder) compileWorkflow(parsed *yaml_types.Workflow, environ map[s
 				workflowID,
 			),
 		),
-		compiler.WithTrusted(b.repoIsTrusted),
+		compiler.WithTrusted(b.RepoIsTrusted),
 		compiler.WithMetadata(metadata),
 	)
-	options = append(options, b.compilerOptions...)
+	options = append(options, b.CompilerOptions...)
 
 	return compiler.New(options...).Compile(parsed)
 }
