@@ -48,7 +48,6 @@ type (
 		Created    int64  `json:"created,omitempty"`
 		Started    int64  `json:"started,omitempty"`
 		Finished   int64  `json:"finished,omitempty"`
-		Timeout    int64  `json:"timeout,omitempty"`
 		Status     string `json:"status,omitempty"`
 		Event      string `json:"event,omitempty"`
 		ForgeURL   string `json:"forge_url,omitempty"`
