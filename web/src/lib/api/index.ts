@@ -103,7 +103,10 @@ export default class WoodpeckerClient extends ApiClient {
     return this._post(`/api/repos/${repoId}/pipelines/${pipelineNumber}?${query}`) as Promise<Pipeline>;
   }
 
-  async getPipelineList(repoId: number, opts?: PaginationOptions & { before?: string; after?: string }): Promise<Pipeline[]> {
+  async getPipelineList(
+    repoId: number,
+    opts?: PaginationOptions & { before?: string; after?: string },
+  ): Promise<Pipeline[]> {
     const query = encodeQueryString(opts);
     return this._get(`/api/repos/${repoId}/pipelines?${query}`) as Promise<Pipeline[]>;
   }
