@@ -10,12 +10,16 @@ Some versions need some changes to the server configuration or the pipeline conf
 -->
 
 ## 2.6.0
-- No deprecations since `2.5.0`
+
+No deprecations since `2.5.0`  
+For more info see [release notes](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.6.0)
 
 ## 2.5.0
 - Deprecated `environment` filter, use `when.evaluate`
 - Use `WOODPECKER_EXPERT_FORGE_OAUTH_HOST` instead of `WOODPECKER_DEV_GITEA_OAUTH_URL` or `WOODPECKER_DEV_OAUTH_HOST`
 - Deprecated `WOODPECKER_WEBHOOK_HOST` in favor of `WOODPECKER_EXPERT_WEBHOOK_HOST`
+
+For more info see [release notes](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.5.0)
 
 ## 2.4.0
 - Deprecated `includes` and `excludes` support from **event** filter
@@ -23,11 +27,15 @@ Some versions need some changes to the server configuration or the pipeline conf
 - Deprecated alternative names for secrets, use `environment` with `from_secret`
 - Deprecated slice definition for env vars
 
+For more info see [release notes](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.4.0)
+
 ## 2.1.0
 - Deprecated `steps.[name].group` in favor of `steps.[name].depends_on` (see [workflow syntax](./20-usage/20-workflow-syntax.md#depends_on) to learn how to set dependencies)
 - Removed `WOODPECKER_ROOT_PATH` and `WOODPECKER_ROOT_URL` config variables. Use `WOODPECKER_HOST` with a path instead
 - Pipelines without a config file will now be skipped instead of failing
 - Deprecated implicitly defined `regcred` image pull secret. Set it explicitly via `WOODPECKER_BACKEND_K8S_PULL_SECRET_NAMES`
+
+For more info see [release notes](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.1.0)
 
 ## 2.0.0
 
@@ -41,6 +49,8 @@ Some versions need some changes to the server configuration or the pipeline conf
 - Removed `WOODPECKER_DOCS` config variable
 - Renamed `link` to `url` (including all API fields)
 - Deprecated `CI_COMMIT_URL` env var, use `CI_PIPELINE_FORGE_URL`
+
+For more info see [release notes](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.0.0)
 
 ## 1.0.0
 
