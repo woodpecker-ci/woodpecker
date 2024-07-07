@@ -9,18 +9,24 @@ Some versions need some changes to the server configuration or the pipeline conf
 
 -->
 
-## `next`
+## 2.6.0
+- No deprecations since `2.5.0`
 
-- Deprecated `steps.[name].group` in favor of `steps.[name].depends_on` (see [workflow syntax](./20-usage/20-workflow-syntax.md#depends_on) to learn how to set dependencies)
-- Removed `WOODPECKER_ROOT_PATH` and `WOODPECKER_ROOT_URL` config variables. Use `WOODPECKER_HOST` with a path instead
-- Pipelines without a config file will now be skipped instead of failing
+## 2.5.0
+- Deprecated `environment` filter, use `when.evaluate`
+- Use `WOODPECKER_EXPERT_FORGE_OAUTH_HOST` instead of `WOODPECKER_DEV_GITEA_OAUTH_URL` or `WOODPECKER_DEV_OAUTH_HOST`
+- Deprecated `WOODPECKER_WEBHOOK_HOST` in favor of `WOODPECKER_EXPERT_WEBHOOK_HOST`
+
+## 2.4.0
 - Deprecated `includes` and `excludes` support from **event** filter
 - Deprecated uppercasing all secret env vars, instead, the value of the `secrets` property is used. [Read more](./20-usage/40-secrets.md#use-secrets-in-commands)
 - Deprecated alternative names for secrets, use `environment` with `from_secret`
 - Deprecated slice definition for env vars
-- Deprecated `environment` filter, use `when.evaluate`
-- Use `WOODPECKER_EXPERT_FORGE_OAUTH_HOST` instead of `WOODPECKER_DEV_GITEA_OAUTH_URL` or `WOODPECKER_DEV_OAUTH_HOST`
-- Deprecated `WOODPECKER_WEBHOOK_HOST` in favor of `WOODPECKER_EXPERT_WEBHOOK_HOST`
+
+## 2.1.0
+- Deprecated `steps.[name].group` in favor of `steps.[name].depends_on` (see [workflow syntax](./20-usage/20-workflow-syntax.md#depends_on) to learn how to set dependencies)
+- Removed `WOODPECKER_ROOT_PATH` and `WOODPECKER_ROOT_URL` config variables. Use `WOODPECKER_HOST` with a path instead
+- Pipelines without a config file will now be skipped instead of failing
 
 ## 2.0.0
 
