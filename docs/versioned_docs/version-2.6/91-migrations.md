@@ -11,7 +11,7 @@ Some versions need some changes to the server configuration or the pipeline conf
 
 ## 2.6.0
 
-No deprecations since `2.5.0`  
+No deprecations since `2.5.0`
 For more info see [release notes](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.6.0)
 
 ## 2.5.0
