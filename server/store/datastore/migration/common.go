@@ -192,13 +192,13 @@ func alterColumnDefault(sess *xorm.Session, table, column, defValue string) erro
 			return err
 		}
 
-		if len(res) == 0 || len(res[0]["type"]) == 0 {
+		if len(res) == 0 || len(res[0]["Type"]) == 0 {
 			return fmt.Errorf("column %s data type in table %s can not be detected", column, table)
 		}
 
-		dataType := string(res[0]["type"])
+		dataType := string(res[0]["Type"])
 		var nullable string
-		if string(res[0]["null"]) == "NO" {
+		if string(res[0]["Null"]) == "NO" {
 			nullable = "NOT NULL"
 		}
 
@@ -229,12 +229,12 @@ func alterColumnNull(sess *xorm.Session, table, column string, null bool) error 
 			return err
 		}
 
-		if len(res) == 0 || len(res[0]["type"]) == 0 {
+		if len(res) == 0 || len(res[0]["Type"]) == 0 {
 			return fmt.Errorf("column %s data type in table %s can not be detected", column, table)
 		}
 
-		dataType := string(res[0]["type"])
-		defValue := string(res[0]["default"])
+		dataType := string(res[0]["Type"])
+		defValue := string(res[0]["Default"])
 
 		if defValue != "NULL" && defValue != "" {
 			defValue = fmt.Sprintf("DEFAULT '%s'", defValue)
