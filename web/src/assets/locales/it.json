@@ -113,7 +113,7 @@
             "not_allowed": "Non ti è consentito accedere alle impostazioni del server",
             "registries": {
                 "desc": "È possibile aggiungere credenziali di registro globale per utilizzare immagini private per tutte le pipeline del server.",
-                "warning": "Questi credenziali di registro saranno disponibili per tutti gli utenti del server."
+                "warning": "Queste credenziali di registro saranno disponibili per tutti gli utenti del server."
             }
         }
     },
@@ -490,7 +490,7 @@
         "view": "Mostra registro",
         "edit": "Modifica registro",
         "delete": "Elimina registro",
-        "created": "Credenziali del registro create",
+        "created": "Credenziali di registro create",
         "saved": "Credenziali di registro salvate",
         "deleted": "Credenziali di registro eliminate"
     }
