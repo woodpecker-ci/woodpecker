@@ -4,13 +4,13 @@ Why should we be happy with a default setup? We should not! Woodpecker offers a 
 
 ## Behind a proxy
 
-See the [proxy guide](./70-proxy.md) if you want to see a setup behind Apache, Nginx, Caddy or ngrok.
+See the [proxy guide](./10-proxy.md) if you want to see a setup behind Apache, Nginx, Caddy or ngrok.
 
 In the case you need to use Woodpecker with a URL path prefix (like: <https://example.org/woodpecker/>), add the root path to [`WOODPECKER_HOST`](../10-server-config.md#woodpecker_host).
 
 ## SSL
 
-Woodpecker supports SSL configuration by using Let's encrypt or by using own certificates. See the [SSL guide](./60-ssl.md). You can also put it behind a [reverse proxy](#behind-a-proxy)
+Woodpecker supports SSL configuration by using Let's encrypt or by using own certificates. See the [SSL guide](./20-ssl.md).
 
 ## Metrics
 

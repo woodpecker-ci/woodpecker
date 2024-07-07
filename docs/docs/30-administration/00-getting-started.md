@@ -32,9 +32,9 @@ In addition you need at least some kind of database which requires additional re
 
 ## Installation
 
-You can install Woodpecker on multiple ways. If you are not sure which one to choose, we recommend using the [Docker Compose](./05-deployment-methods/10-docker-compose.md) method for the beginning:
+You can install Woodpecker on multiple ways. If you are not sure which one to choose, we recommend using the [docker-compose](./05-deployment-methods/10-docker-compose.md) method for the beginning:
 
-- Using [docker-compose](./05-deployment-methods/10-docker-compose.md) with the official [container images](./10-docker-compose.md#docker-images)
+- Using [docker-compose](./05-deployment-methods/10-docker-compose.md) with the official [container images](./05-deployment-methods/10-docker-compose.md#docker-images)
 - Using [Kubernetes](./05-deployment-methods/20-kubernetes.md) via the Woodpecker Helm chart
 - Using binaries, DEBs or RPMs you can download from [latest release](https://github.com/woodpecker-ci/woodpecker/releases/latest)
 - Or using a [third-party installation method](./05-deployment-methods/30-third-party.md)
