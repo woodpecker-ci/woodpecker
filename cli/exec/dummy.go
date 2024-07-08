@@ -19,6 +19,6 @@ package exec
 
 import "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/dummy"
 
-func init() {
+func init() { //nolint:gochecknoinits
 	backends = append(backends, dummy.New())
 }
