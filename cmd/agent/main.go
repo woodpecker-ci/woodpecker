@@ -23,10 +23,10 @@ import (
 )
 
 var backends = []backendTypes.Backend{
-		kubernetes.New(),
-		docker.New(),
-		local.New(),
-	}
+	kubernetes.New(),
+	docker.New(),
+	local.New(),
+}
 
 func main() {
 	core.RunAgent(backends)
