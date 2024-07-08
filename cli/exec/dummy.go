@@ -1,4 +1,4 @@
-// Copyright 2018 Drone.IO Inc.
+// Copyright 2024 Woodpecker Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,22 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+//go:build test
+// +build test
 
-import (
-	"go.woodpecker-ci.org/woodpecker/v2/cmd/agent/core"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/docker"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/kubernetes"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/local"
-	backendTypes "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
-)
+package exec
 
-var backends = []backendTypes.Backend{
-	kubernetes.New(),
-	docker.New(),
-	local.New(),
-}
+import "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/dummy"
 
-func main() {
-	core.RunAgent(backends)
+func init() { //nolint:gochecknoinits
+	backends = append(backends, dummy.New())
 }
