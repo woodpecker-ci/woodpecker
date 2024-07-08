@@ -70,19 +70,19 @@ export default class ApiClient {
     return res.text();
   }
 
-  _get(path: string) {
+  async _get(path: string) {
     return this._request('GET', path);
   }
 
-  _post(path: string, data?: unknown) {
+  async _post(path: string, data?: unknown) {
     return this._request('POST', path, data);
   }
 
-  _patch(path: string, data?: unknown) {
+  async _patch(path: string, data?: unknown) {
     return this._request('PATCH', path, data);
   }
 
-  _delete(path: string) {
+  async _delete(path: string) {
     return this._request('DELETE', path);
   }
 
