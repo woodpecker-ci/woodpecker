@@ -562,7 +562,7 @@ func PostPipeline(c *gin.Context) {
 			return
 		}
 
-		pl.Deploy = c.DefaultQuery("deploy_to", pl.Deploy)
+		pl.DeployTo = c.DefaultQuery("deploy_to", pl.DeployTo)
 	}
 
 	// Read query string parameters into pipelineParams, exclude reserved params
