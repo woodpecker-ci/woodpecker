@@ -4833,6 +4833,9 @@ const docTemplate = `{
                         "$ref": "#/definitions/WebhookEvent"
                     }
                 },
+                "cicd_feedback": {
+                    "type": "boolean"
+                },
                 "clone_url": {
                     "type": "string"
                 },

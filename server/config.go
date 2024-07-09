@@ -53,6 +53,7 @@ var Config = struct {
 		RootPath            string
 		CustomCSSFile       string
 		CustomJsFile        string
+		CICDFeedback        bool
 	}
 	WebUI struct {
 		EnableSwagger    bool

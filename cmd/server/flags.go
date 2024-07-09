@@ -252,6 +252,12 @@ var flags = append([]cli.Flag{
 		Name:    "log-store-file-path",
 		Usage:   "directory used for file based log storage",
 	},
+	&cli.BoolFlag{
+		EnvVars: []string{"WOODPECKER_CICD_FEEDBACK"},
+		Name:    "cicd-feedback",
+		Usage:   "woodpecker cicd-feedback protocol support",
+		Value:   true,
+	},
 	//
 	// backend options for pipeline compiler
 	//
