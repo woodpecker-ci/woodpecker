@@ -33,7 +33,6 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/docker"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/dummy"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/kubernetes"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/local"
 	backend_types "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
@@ -52,6 +51,12 @@ var Command = &cli.Command{
 	ArgsUsage: "[path/to/.woodpecker.yaml]",
 	Action:    run,
 	Flags:     utils.MergeSlices(flags, docker.Flags, kubernetes.Flags, local.Flags),
+}
+
+var backends = []backend_types.Backend{
+	kubernetes.New(),
+	docker.New(),
+	local.New(),
 }
 
 func run(c *cli.Context) error {
@@ -231,12 +236,6 @@ func execWithAxis(c *cli.Context, file, repoPath string, axis matrix.Axis) error
 	}
 
 	backendCtx := context.WithValue(c.Context, backend_types.CliContext, c)
-	backends := []backend_types.Backend{
-		kubernetes.New(),
-		docker.New(),
-		local.New(),
-		dummy.New(),
-	}
 	backendEngine, err := backend.FindBackend(backendCtx, backends, c.String("backend-engine"))
 	if err != nil {
 		return err
