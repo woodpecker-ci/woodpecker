@@ -44,20 +44,18 @@ type (
 
 	// Pipeline defines runtime metadata for a pipeline.
 	Pipeline struct {
-		Number   int64  `json:"number,omitempty"`
-		Created  int64  `json:"created,omitempty"`
-		Started  int64  `json:"started,omitempty"`
-		Finished int64  `json:"finished,omitempty"`
-		Timeout  int64  `json:"timeout,omitempty"`
-		Status   string `json:"status,omitempty"`
-		Event    string `json:"event,omitempty"`
-		ForgeURL string `json:"forge_url,omitempty"`
-		Target   string `json:"target,omitempty"`
-		Task     string `json:"task,omitempty"`
-		Trusted  bool   `json:"trusted,omitempty"`
-		Commit   Commit `json:"commit,omitempty"`
-		Parent   int64  `json:"parent,omitempty"`
-		Cron     string `json:"cron,omitempty"`
+		Number     int64  `json:"number,omitempty"`
+		Created    int64  `json:"created,omitempty"`
+		Started    int64  `json:"started,omitempty"`
+		Finished   int64  `json:"finished,omitempty"`
+		Status     string `json:"status,omitempty"`
+		Event      string `json:"event,omitempty"`
+		ForgeURL   string `json:"forge_url,omitempty"`
+		DeployTo   string `json:"target,omitempty"`
+		DeployTask string `json:"task,omitempty"`
+		Commit     Commit `json:"commit,omitempty"`
+		Parent     int64  `json:"parent,omitempty"`
+		Cron       string `json:"cron,omitempty"`
 	}
 
 	// Commit defines runtime metadata for a commit.
