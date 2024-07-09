@@ -1,6 +1,6 @@
 # Changelog
 
-## [2.7.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.7.0) - 2024-07-08
+## [2.7.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.7.0) - 2024-07-09
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -18,6 +18,15 @@
 - Cli get repo from git remote [[#3830](https://github.com/woodpecker-ci/woodpecker/pull/3830)]
 - Add api for forges [[#3733](https://github.com/woodpecker-ci/woodpecker/pull/3733)]
 
+### 🐛 Bug Fixes
+
+- Fix vscode settings [[#3880](https://github.com/woodpecker-ci/woodpecker/pull/3880)]
+- Ignore warnings for cli exec [[#3868](https://github.com/woodpecker-ci/woodpecker/pull/3868)]
+- Correct favicon states [[#3832](https://github.com/woodpecker-ci/woodpecker/pull/3832)]
+- Cleanup of the login flow and tests [[#3810](https://github.com/woodpecker-ci/woodpecker/pull/3810)]
+- Fix newlines in logs [[#3808](https://github.com/woodpecker-ci/woodpecker/pull/3808)]
+- Fix authentication error handling [[#3807](https://github.com/woodpecker-ci/woodpecker/pull/3807)]
+
 ### 📈 Enhancement
 
 - Exclude dummy backend in production [[#3877](https://github.com/woodpecker-ci/woodpecker/pull/3877)]
@@ -30,14 +39,6 @@
 - Let webhook pass on pipeline parsion error [[#3829](https://github.com/woodpecker-ci/woodpecker/pull/3829)]
 - Exclude mocks from release build [[#3831](https://github.com/woodpecker-ci/woodpecker/pull/3831)]
 - K8s secrets reference from step [[#3655](https://github.com/woodpecker-ci/woodpecker/pull/3655)]
-
-### 🐛 Bug Fixes
-
-- Ignore warnings for cli exec [[#3868](https://github.com/woodpecker-ci/woodpecker/pull/3868)]
-- Correct favicon states [[#3832](https://github.com/woodpecker-ci/woodpecker/pull/3832)]
-- Cleanup of the login flow and tests [[#3810](https://github.com/woodpecker-ci/woodpecker/pull/3810)]
-- Fix newlines in logs [[#3808](https://github.com/woodpecker-ci/woodpecker/pull/3808)]
-- Fix authentication error handling [[#3807](https://github.com/woodpecker-ci/woodpecker/pull/3807)]
 
 ### 📚 Documentation
 
