@@ -37,9 +37,10 @@ func main() {
 	setupSwaggerStaticConfig()
 
 	basePath := path.Join("..", "..")
+	filePath := path.Join(basePath, "docs", "swagger.json")
 
 	// generate swagger file
-	f, err := os.Create(path.Join(basePath, "docs", "swagger.json"))
+	f, err := os.Create(filePath)
 	if err != nil {
 		panic(err)
 	}
@@ -55,7 +56,7 @@ func main() {
 	}
 
 	// convert to OpenApi3
-	if err := toOpenApi3(basePath); err != nil {
+	if err := toOpenApi3(filePath, filePath); err != nil {
 		panic(err)
 	}
 }
@@ -73,8 +74,8 @@ func removeHost(jsonIn string) (string, error) {
 	return string(raw), nil
 }
 
-func toOpenApi3(basePath string) error {
-	data2, err := os.ReadFile(path.Join(basePath, "docs", "swagger.json"))
+func toOpenApi3(input, output string) error {
+	data2, err := os.ReadFile(input)
 	if err != nil {
 		return err
 	}
@@ -99,5 +100,5 @@ func toOpenApi3(basePath string) error {
 		return err
 	}
 
-	return os.WriteFile(path.Join(basePath, "docs", "swagger.json"), data, 0644)
+	return os.WriteFile(output, data, 0644)
 }
