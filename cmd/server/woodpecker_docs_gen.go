@@ -22,10 +22,13 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"os"
 	"path"
 
+	"github.com/getkin/kin-openapi/openapi2"
+	"github.com/getkin/kin-openapi/openapi2conv"
 	"go.woodpecker-ci.org/woodpecker/v2/cmd/server/docs"
 )
 
@@ -33,29 +36,68 @@ func main() {
 	// set swagger infos
 	setupSwaggerStaticConfig()
 
+	basePath := path.Join("..", "..")
+
 	// generate swagger file
-	f, err := os.Create(path.Join("..", "..", "docs", "swagger.json"))
+	f, err := os.Create(path.Join(basePath, "docs", "swagger.json"))
 	if err != nil {
 		panic(err)
 	}
 	defer f.Close()
 	doc := docs.SwaggerInfo.ReadDoc()
-	doc = removeHost(doc)
+	doc, err = removeHost(doc)
+	if err != nil {
+		panic(err)
+	}
 	_, err = f.WriteString(doc)
 	if err != nil {
 		panic(err)
 	}
+
+	// convert to OpenApi3
+	if err := toOpenApi3(basePath); err != nil {
+		panic(err)
+	}
 }
 
-func removeHost(jsonIn string) string {
+func removeHost(jsonIn string) (string, error) {
 	m := make(map[string]interface{})
 	if err := json.Unmarshal([]byte(jsonIn), &m); err != nil {
-		panic(err)
+		return "", err
 	}
 	delete(m, "host")
 	raw, err := json.Marshal(m)
 	if err != nil {
-		panic(err)
+		return "", err
 	}
-	return string(raw)
+	return string(raw), nil
+}
+
+func toOpenApi3(basePath string) error {
+	data2, err := os.ReadFile(path.Join(basePath, "docs", "swagger.json"))
+	if err != nil {
+		return err
+	}
+
+	var doc2 openapi2.T
+	err = json.Unmarshal(data2, &doc2)
+	if err != nil {
+		return err
+	}
+
+	doc3, err := openapi2conv.ToV3(&doc2)
+	if err != nil {
+		return err
+	}
+	err = doc3.Validate(context.Background())
+	if err != nil {
+		return err
+	}
+
+	data, err := json.Marshal(doc3)
+	if err != nil {
+		return err
+	}
+
+	return os.WriteFile(path.Join(basePath, "docs", "swagger.json"), data, 0644)
 }
