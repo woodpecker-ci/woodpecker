@@ -43,7 +43,7 @@ import (
 //	@Tags		Pipelines
 //	@Param		Authorization	header	string			true	"Insert your personal access token"	default(Bearer <personal access token>)
 //	@Param		repo_id			path	int				true	"the repository id"
-//	@Param		options			body	PipelineOptions	true	"the options for the pipeline to run"
+//	@Param		pipeline_options			body	PipelineOptions	true	"the options for the pipeline to run"
 func CreatePipeline(c *gin.Context) {
 	_store := store.FromContext(c)
 	repo := session.Repo(c)
