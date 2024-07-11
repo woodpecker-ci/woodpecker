@@ -96,16 +96,8 @@ func (c *client) URL() string {
 func (c *client) Login(ctx context.Context, req *forge_types.OAuthRequest) (*model.User, string, error) {
 	config := c.newOAuth2Config()
 
-	// TODO: Add proper state and pkce...
-	redirectURL := config.AuthCodeURL("woodpecker")
-
-	if req.Error != "" {
-		return nil, redirectURL, &forge_types.AuthError{
-			Err:         req.Error,
-			Description: req.ErrorDescription,
-			URI:         req.ErrorURI,
-		}
-	}
+	// TODO: Use pkce flow (https://oauth.net/2/pkce/) ...
+	redirectURL := config.AuthCodeURL(req.State)
 
 	if len(req.Code) == 0 {
 		return nil, redirectURL, nil
@@ -298,12 +290,12 @@ func (c *client) Dir(ctx context.Context, u *model.User, r *model.Repo, p *model
 			return nil, err
 		}
 		for _, f := range list {
-			fullpath := fmt.Sprintf("%s/%s", path, f)
-			data, err := c.File(ctx, u, r, p, fullpath)
+			fullPath := fmt.Sprintf("%s/%s", path, f)
+			data, err := c.File(ctx, u, r, p, fullPath)
 			if err != nil {
 				return nil, err
 			}
-			all = append(all, &forge_types.FileMeta{Name: fullpath, Data: data})
+			all = append(all, &forge_types.FileMeta{Name: fullPath, Data: data})
 		}
 		if resp.LastPage {
 			break
@@ -423,7 +415,7 @@ func (c *client) Activate(ctx context.Context, u *model.User, r *model.Repo, lin
 
 	err = c.Deactivate(ctx, u, r, link)
 	if err != nil {
-		return fmt.Errorf("unable to deactive old webhooks: %w", err)
+		return fmt.Errorf("unable to deactivate old webhooks: %w", err)
 	}
 
 	webhook := &bb.Webhook{

@@ -29,16 +29,18 @@ import (
 	"github.com/urfave/cli/v2"
 
 	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/lint"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/docker"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/kubernetes"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/local"
-	backendTypes "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
+	backend_types "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/compiler"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/linter"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/matrix"
+	pipelineLog "go.woodpecker-ci.org/woodpecker/v2/pipeline/log"
 	"go.woodpecker-ci.org/woodpecker/v2/shared/utils"
 )
 
@@ -49,6 +51,12 @@ var Command = &cli.Command{
 	ArgsUsage: "[path/to/.woodpecker.yaml]",
 	Action:    run,
 	Flags:     utils.MergeSlices(flags, docker.Flags, kubernetes.Flags, local.Flags),
+}
+
+var backends = []backend_types.Backend{
+	kubernetes.New(),
+	docker.New(),
+	local.New(),
 }
 
 func run(c *cli.Context) error {
@@ -177,12 +185,17 @@ func execWithAxis(c *cli.Context, file, repoPath string, axis matrix.Axis) error
 	}
 
 	// lint the yaml file
-	if err := linter.New(linter.WithTrusted(true)).Lint([]*linter.WorkflowConfig{{
+	err = linter.New(linter.WithTrusted(true)).Lint([]*linter.WorkflowConfig{{
 		File:      path.Base(file),
 		RawConfig: confStr,
 		Workflow:  conf,
-	}}); err != nil {
-		return err
+	}})
+	if err != nil {
+		str, err := lint.FormatLintError(file, err)
+		fmt.Print(str)
+		if err != nil {
+			return err
+		}
 	}
 
 	// compiles the yaml file
@@ -222,12 +235,7 @@ func execWithAxis(c *cli.Context, file, repoPath string, axis matrix.Axis) error
 		return err
 	}
 
-	backendCtx := context.WithValue(c.Context, backendTypes.CliContext, c)
-	backends := []backendTypes.Backend{
-		kubernetes.New(),
-		docker.New(),
-		local.New(),
-	}
+	backendCtx := context.WithValue(c.Context, backend_types.CliContext, c)
 	backendEngine, err := backend.FindBackend(backendCtx, backends, c.String("backend-engine"))
 	if err != nil {
 		return err
@@ -273,8 +281,8 @@ func convertPathForWindows(path string) string {
 	return filepath.ToSlash(path)
 }
 
-var defaultLogger = pipeline.Logger(func(step *backendTypes.Step, rc io.Reader) error {
-	logStream := NewLineWriter(step.Name, step.UUID)
-	_, err := io.Copy(logStream, rc)
-	return err
+const maxLogLineLength = 1024 * 1024 // 1mb
+var defaultLogger = pipeline.Logger(func(step *backend_types.Step, rc io.ReadCloser) error {
+	logWriter := NewLineWriter(step.Name, step.UUID)
+	return pipelineLog.CopyLineByLine(logWriter, rc, maxLogLineLength)
 })

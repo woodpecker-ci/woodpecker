@@ -130,6 +130,10 @@
                 "saved": "Compte utilisateur enregistré",
                 "show": "Afficher les comptes utilisateurs",
                 "users": "Utilisateurs"
+            },
+            "registries": {
+                "warning": "Ces codes d’accès au registre seront disponibles pour tout les utilisateurs du serveur.",
+                "desc": "Les codes d'accès aux registres globaux peuvent être ajouter pour utiliser les images privées sur tout les pipelines du serveur."
             }
         }
     },
@@ -175,7 +179,10 @@
                 "show": "Afficher les secrets",
                 "value": "Valeur"
             },
-            "settings": "Réglages"
+            "settings": "Réglages",
+            "registries": {
+                "desc": "Les codes d'accès aux registres de l'organisation peuvent être ajouté pour utiliser les images privées sur tout les pipelines de l'organisation."
+            }
         }
     },
     "org_level_secret": "Secret d'organisation",
@@ -196,7 +203,8 @@
                 "title": "Variables additionnelles du pipeline",
                 "value": "Valeur de la variable",
                 "delete": "Supprimer la variable"
-            }
+            },
+            "enter_task": "Tâche de déploiement"
         },
         "enable": {
             "disabled": "Désactivé",
@@ -220,7 +228,7 @@
             }
         },
         "not_allowed": "Vous n'êtes pas autorisé à accéder à ce dépôt",
-        "open_in_forge": "Ouvrir le dépôt dans un système de contrôle de version",
+        "open_in_forge": "Ouvrir le dépôt dans la forge",
         "pipeline": {
             "actions": {
                 "cancel": "Annuler",
@@ -555,6 +563,35 @@
             "events": "Disponible lors des événements suivants",
             "pr_warning": "Soyez prudent avec cette option car un acteur malveillant peut soumettre une pull request qui expose vos secrets."
         },
-        "plugins_only": "Uniquement disponible pour les plugins"
-    }
+        "plugins_only": "Uniquement disponible pour les plugins",
+        "edit": "Modifier le secret",
+        "delete": "Supprimer le secret",
+        "delete_confirm": "Voulez vous vraiment supprimer ce secret ?"
+    },
+    "internal_error": "Une erreur interne est survenue",
+    "access_denied": "Vous n'êtes pas autorisé à accéder à cette instance",
+    "oauth_error": "Erreur lors de l'authentification auprès du fournisseur OAuth",
+    "registration_closed": "Les inscriptions sont fermés",
+    "settings": "Réglages",
+    "registries": {
+        "registries": "Registres",
+        "delete_confirm": "Voulez vous vraiment supprimer ce registre ?",
+        "deleted": "Codes d'accès aux registres supprimés",
+        "desc": "Les codes d'accès aux registres peuvent être ajouter pour utiliser des images privées sur votre pipeline.",
+        "credentials": "Codes d’accès aux registres",
+        "edit": "Éditer le registre",
+        "delete": "Supprimer le registre",
+        "add": "Ajouter un registre",
+        "view": "Voir le registre",
+        "save": "Enregistrer le registre",
+        "show": "Afficher les registres",
+        "address": {
+            "address": "Adresse",
+            "desc": "Adresse du registre (e.g. docker.io)"
+        },
+        "saved": "Codes d'accès aux registres enregistrés",
+        "created": "Codes d’accès aux registres crées",
+        "none": "Il n'y a pas de code d’accès aux registres."
+    },
+    "invalid_state": "L'état OAuth est invalide"
 }

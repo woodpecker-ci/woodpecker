@@ -43,7 +43,7 @@ func SetUser() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var user *model.User
 
-		t, err := token.ParseRequest(c.Request, func(t *token.Token) (string, error) {
+		t, err := token.ParseRequest([]token.Type{token.UserToken, token.SessToken}, c.Request, func(t *token.Token) (string, error) {
 			var err error
 			userID, err := strconv.ParseInt(t.Get("user-id"), 10, 64)
 			if err != nil {
@@ -58,7 +58,7 @@ func SetUser() gin.HandlerFunc {
 			// if this is a session token (ie not the API token)
 			// this means the user is accessing with a web browser,
 			// so we should implement CSRF protection measures.
-			if t.Kind == token.SessToken {
+			if t.Type == token.SessToken {
 				err = token.CheckCsrf(c.Request, func(_ *token.Token) (string, error) {
 					return user.Hash, nil
 				})

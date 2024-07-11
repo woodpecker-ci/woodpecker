@@ -15,8 +15,9 @@
             target="_blank"
             rel="noopener noreferrer"
             class="underline"
-            >{{ version.latest }}</a
           >
+            {{ version.latest }}
+          </a>
           <span v-else>
             {{ version.latest }}
           </span>
@@ -28,6 +29,7 @@
 
 <script lang="ts" setup>
 import WoodpeckerLogo from '~/assets/logo.svg?component';
+import Error from '~/components/atomic/Error.vue';
 import Settings from '~/components/layout/Settings.vue';
 import { useVersion } from '~/compositions/useVersion';
 

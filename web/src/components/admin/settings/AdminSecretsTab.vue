@@ -41,7 +41,8 @@ import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useNotifications from '~/compositions/useNotifications';
 import { usePagination } from '~/compositions/usePaginate';
-import { Secret, WebhookEvents } from '~/lib/api/types';
+import type { Secret } from '~/lib/api/types';
+import { WebhookEvents } from '~/lib/api/types';
 
 const emptySecret: Partial<Secret> = {
   name: '',
@@ -74,7 +75,7 @@ const { doSubmit: createSecret, isLoading: isSaving } = useAsyncAction(async () 
     await apiClient.createGlobalSecret(selectedSecret.value);
   }
   notifications.notify({
-    title: i18n.t(isEditingSecret.value ? 'secrets.saved' : 'secrets.created'),
+    title: isEditingSecret.value ? i18n.t('secrets.saved') : i18n.t('secrets.created'),
     type: 'success',
   });
   selectedSecret.value = undefined;

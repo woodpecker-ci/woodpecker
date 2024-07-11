@@ -19,7 +19,7 @@ import (
 	"encoding/json"
 
 	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promauto"
+	prometheus_auto "github.com/prometheus/client_golang/prometheus/promauto"
 
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc/proto"
@@ -37,12 +37,12 @@ type WoodpeckerServer struct {
 }
 
 func NewWoodpeckerServer(queue queue.Queue, logger logging.Log, pubsub *pubsub.Publisher, store store.Store) proto.WoodpeckerServer {
-	pipelineTime := promauto.NewGaugeVec(prometheus.GaugeOpts{
+	pipelineTime := prometheus_auto.NewGaugeVec(prometheus.GaugeOpts{
 		Namespace: "woodpecker",
 		Name:      "pipeline_time",
 		Help:      "Pipeline time.",
 	}, []string{"repo", "branch", "status", "pipeline"})
-	pipelineCount := promauto.NewCounterVec(prometheus.CounterOpts{
+	pipelineCount := prometheus_auto.NewCounterVec(prometheus.CounterOpts{
 		Namespace: "woodpecker",
 		Name:      "pipeline_count",
 		Help:      "Pipeline count.",
@@ -85,13 +85,10 @@ func (s *WoodpeckerServer) Next(c context.Context, req *proto.NextRequest) (*pro
 }
 
 func (s *WoodpeckerServer) Init(c context.Context, req *proto.InitRequest) (*proto.Empty, error) {
-	state := rpc.State{
-		Error:    req.GetState().GetError(),
-		ExitCode: int(req.GetState().GetExitCode()),
-		Finished: req.GetState().GetFinished(),
+	state := rpc.WorkflowState{
 		Started:  req.GetState().GetStarted(),
-		StepUUID: req.GetState().GetStepUuid(),
-		Exited:   req.GetState().GetExited(),
+		Finished: req.GetState().GetFinished(),
+		Error:    req.GetState().GetError(),
 	}
 	res := new(proto.Empty)
 	err := s.peer.Init(c, req.GetId(), state)
@@ -99,13 +96,13 @@ func (s *WoodpeckerServer) Init(c context.Context, req *proto.InitRequest) (*pro
 }
 
 func (s *WoodpeckerServer) Update(c context.Context, req *proto.UpdateRequest) (*proto.Empty, error) {
-	state := rpc.State{
+	state := rpc.StepState{
+		StepUUID: req.GetState().GetStepUuid(),
+		Started:  req.GetState().GetStarted(),
+		Finished: req.GetState().GetFinished(),
+		Exited:   req.GetState().GetExited(),
 		Error:    req.GetState().GetError(),
 		ExitCode: int(req.GetState().GetExitCode()),
-		Finished: req.GetState().GetFinished(),
-		Started:  req.GetState().GetStarted(),
-		StepUUID: req.GetState().GetStepUuid(),
-		Exited:   req.GetState().GetExited(),
 	}
 	res := new(proto.Empty)
 	err := s.peer.Update(c, req.GetId(), state)
@@ -113,13 +110,10 @@ func (s *WoodpeckerServer) Update(c context.Context, req *proto.UpdateRequest) (
 }
 
 func (s *WoodpeckerServer) Done(c context.Context, req *proto.DoneRequest) (*proto.Empty, error) {
-	state := rpc.State{
-		Error:    req.GetState().GetError(),
-		ExitCode: int(req.GetState().GetExitCode()),
-		Finished: req.GetState().GetFinished(),
+	state := rpc.WorkflowState{
 		Started:  req.GetState().GetStarted(),
-		StepUUID: req.GetState().GetStepUuid(),
-		Exited:   req.GetState().GetExited(),
+		Finished: req.GetState().GetFinished(),
+		Error:    req.GetState().GetError(),
 	}
 	res := new(proto.Empty)
 	err := s.peer.Done(c, req.GetId(), state)

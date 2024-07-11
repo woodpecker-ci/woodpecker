@@ -63,8 +63,9 @@ steps:
 
   - name: notify
     image: plugins/slack
-    channel: developers
-    username: woodpecker
+    settings:
+      channel: developers
+      username: woodpecker
 ```
 
 ## Execution

@@ -60,6 +60,8 @@ var migrationTasks = []*xormigrate.Migration{
 	&renameLinkToURL,
 	&cleanRegistryPipeline,
 	&setForgeID,
+	&unifyColumnsTables,
+	&alterTableRegistriesFixRequiredFields,
 }
 
 var allBeans = []any{

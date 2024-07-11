@@ -18,7 +18,7 @@ import (
 	"net/http"
 )
 
-//go:generate mockery --name Client --output mocks --case underscore
+//go:generate mockery --name Client --output mocks --case underscore --note "+build test"
 
 // Client is used to communicate with a Woodpecker server.
 type Client interface {
@@ -137,6 +137,36 @@ type Client interface {
 
 	// RegistryDelete deletes a registry.
 	RegistryDelete(repoID int64, hostname string) error
+
+	// OrgRegistry returns an organization registry by address.
+	OrgRegistry(orgID int64, registry string) (*Registry, error)
+
+	// OrgRegistryList returns a list of all organization registries.
+	OrgRegistryList(orgID int64) ([]*Registry, error)
+
+	// OrgRegistryCreate creates an organization registry.
+	OrgRegistryCreate(orgID int64, registry *Registry) (*Registry, error)
+
+	// OrgRegistryUpdate updates an organization registry.
+	OrgRegistryUpdate(orgID int64, registry *Registry) (*Registry, error)
+
+	// OrgRegistryDelete deletes an organization registry.
+	OrgRegistryDelete(orgID int64, registry string) error
+
+	// GlobalRegistry returns an global registry by address.
+	GlobalRegistry(registry string) (*Registry, error)
+
+	// GlobalRegistryList returns a list of all global registries.
+	GlobalRegistryList() ([]*Registry, error)
+
+	// GlobalRegistryCreate creates a global registry.
+	GlobalRegistryCreate(registry *Registry) (*Registry, error)
+
+	// GlobalRegistryUpdate updates a global registry.
+	GlobalRegistryUpdate(registry *Registry) (*Registry, error)
+
+	// GlobalRegistryDelete deletes a global registry.
+	GlobalRegistryDelete(registry string) error
 
 	// Secret returns a secret by name.
 	Secret(repoID int64, secret string) (*Secret, error)
