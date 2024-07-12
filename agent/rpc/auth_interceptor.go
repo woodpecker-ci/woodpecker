@@ -75,21 +75,26 @@ func (interceptor *AuthInterceptor) attachToken(ctx context.Context) context.Con
 	return metadata.AppendToOutgoingContext(ctx, "token", interceptor.accessToken)
 }
 
-func (interceptor *AuthInterceptor) scheduleRefreshToken(ctx context.Context, refreshDuration time.Duration) error {
+func (interceptor *AuthInterceptor) scheduleRefreshToken(ctx context.Context, refreshInterval time.Duration) error {
 	err := interceptor.refreshToken(ctx)
 	if err != nil {
 		return err
 	}
 
 	go func() {
-		wait := refreshDuration
+		wait := refreshInterval
+
 		for {
-			time.Sleep(wait)
-			err := interceptor.refreshToken(ctx)
-			if err != nil {
-				wait = time.Second
-			} else {
-				wait = refreshDuration
+			select {
+			case <-ctx.Done():
+				return
+			case <-time.After(wait):
+				err := interceptor.refreshToken(ctx)
+				if err != nil {
+					wait = time.Second
+				} else {
+					wait = refreshInterval
+				}
 			}
 		}
 	}()

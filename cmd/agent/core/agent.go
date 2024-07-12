@@ -47,7 +47,10 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/version"
 )
 
-const reportHealthInterval = time.Second * 10
+const (
+	reportHealthInterval           = time.Second * 10
+	authInterceptorRefreshInterval = time.Minute * 30
+)
 
 func run(cliCtx context.Context, c *cli.Command, backends []types.Backend) error {
 	agentConfigPath := c.String("agent-config")
@@ -91,7 +94,7 @@ func run(cliCtx context.Context, c *cli.Command, backends []types.Backend) error
 
 	agentToken := c.String("grpc-token")
 	authClient := agent_rpc.NewAuthGrpcClient(authConn, agentToken, agentConfig.AgentID)
-	authInterceptor, err := agent_rpc.NewAuthInterceptor(cliCtx, authClient, 30*time.Minute)
+	authInterceptor, err := agent_rpc.NewAuthInterceptor(cliCtx, authClient, authInterceptorRefreshInterval)
 	if err != nil {
 		return err
 	}
