@@ -24,10 +24,10 @@ import (
 	"os"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/rs/zerolog/log"
-	"github.com/tevino/abool/v2"
 	"github.com/urfave/cli/v3"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -115,27 +115,25 @@ func run(cliCtx context.Context, c *cli.Command, backends []types.Backend) error
 	defer conn.Close()
 
 	client := agent_rpc.NewGrpcClient(conn)
+	agentConfigPersisted := atomic.Bool{}
 
-	sigterm := abool.New()
-	ctx := metadata.NewOutgoingContext(cliCtx, metadata.Pairs("hostname", hostname))
-
-	agentConfigPersisted := abool.New()
-	ctx = utils.WithContextSigtermCallback(ctx, func() {
-		log.Info().Msg("termination signal is received, shutting down")
-		sigterm.Set()
-
+	go func() {
+		<-cliCtx.Done()
 		// Remove stateless agents from server
-		if agentConfigPersisted.IsNotSet() {
+		if agentConfigPersisted.Load() {
 			log.Debug().Msg("unregistering agent from server")
-			err := client.UnregisterAgent(ctx)
+			// we want to run it explicit run when context got canceled so run it in background
+			err := client.UnregisterAgent(context.Background()) //nolint:contextcheck
 			if err != nil {
 				log.Err(err).Msg("failed to unregister agent from server")
 			}
 		}
-	})
+	}()
+
+	grpcCtx := metadata.NewOutgoingContext(cliCtx, metadata.Pairs("hostname", hostname))
 
 	// check if grpc server version is compatible with agent
-	grpcServerVersion, err := client.Version(ctx)
+	grpcServerVersion, err := client.Version(grpcCtx)
 	if err != nil {
 		log.Error().Err(err).Msg("could not get grpc server version")
 		return err
@@ -154,7 +152,7 @@ func run(cliCtx context.Context, c *cli.Command, backends []types.Backend) error
 	wg.Add(parallel)
 
 	// new engine
-	backendCtx := context.WithValue(ctx, types.CliCommand, c)
+	backendCtx := context.WithValue(cliCtx, types.CliCommand, c)
 	backendName := c.String("backend-engine")
 	backendEngine, err := backend.FindBackend(backendCtx, backends, backendName)
 	if err != nil {
@@ -174,14 +172,14 @@ func run(cliCtx context.Context, c *cli.Command, backends []types.Backend) error
 	}
 	log.Debug().Msgf("loaded %s backend engine", backendEngine.Name())
 
-	agentConfig.AgentID, err = client.RegisterAgent(ctx, engInfo.Platform, backendEngine.Name(), version.String(), parallel)
+	agentConfig.AgentID, err = client.RegisterAgent(grpcCtx, engInfo.Platform, backendEngine.Name(), version.String(), parallel)
 	if err != nil {
 		return err
 	}
 
 	if agentConfigPath != "" {
 		if err := writeAgentConfig(agentConfig, agentConfigPath); err == nil {
-			agentConfigPersisted.Set()
+			agentConfigPersisted.Store(true)
 		}
 	}
 
@@ -204,19 +202,17 @@ func run(cliCtx context.Context, c *cli.Command, backends []types.Backend) error
 
 	go func() {
 		for {
-			err := client.ReportHealth(ctx)
+			err := client.ReportHealth(grpcCtx)
 			if err != nil {
 				log.Err(err).Msg("failed to report health")
 				return
 			}
 
-			// we check in 1000 times if we got terminated while waiting for the next health report
-			for i := 0; i <= 999; i++ {
-				if sigterm.IsSet() {
-					log.Debug().Msg("terminating health reporting")
-					return
-				}
-				time.Sleep(reportHealthInterval / 1000)
+			select {
+			case <-cliCtx.Done():
+				log.Debug().Msg("terminating health reporting")
+				return
+			case <-time.After(reportHealthInterval):
 			}
 		}
 	}()
@@ -230,13 +226,12 @@ func run(cliCtx context.Context, c *cli.Command, backends []types.Backend) error
 			log.Debug().Msgf("created new runner %d", i)
 
 			for {
-				if sigterm.IsSet() {
-					log.Debug().Msgf("terminating runner %d", i)
+				if cliCtx.Err() != nil {
 					return
 				}
 
 				log.Debug().Msg("polling new steps")
-				if err := runner.Run(ctx); err != nil {
+				if err := runner.Run(cliCtx); err != nil {
 					log.Error().Err(err).Msg("pipeline done with error")
 					return
 				}
