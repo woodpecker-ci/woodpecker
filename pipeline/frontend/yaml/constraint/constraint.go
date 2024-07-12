@@ -164,7 +164,7 @@ func (c *Constraint) Match(m metadata.Metadata, global bool, env map[string]stri
 	}
 
 	match = match && c.Platform.Match(m.Sys.Platform) &&
-		c.Environment.Match(m.Curr.Target) &&
+		c.Environment.Match(m.Curr.DeployTo) &&
 		c.Event.Match(m.Curr.Event) &&
 		c.Repo.Match(path.Join(m.Repo.Owner, m.Repo.Name)) &&
 		c.Ref.Match(m.Curr.Commit.Ref) &&

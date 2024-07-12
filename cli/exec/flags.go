@@ -201,12 +201,12 @@ var flags = []cli.Flag{
 		Name:    "pipeline-url",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"CI_PIPELINE_TARGET"},
-		Name:    "pipeline-target",
+		EnvVars: []string{"CI_PIPELINE_DEPLOY_TARGET", "CI_PIPELINE_TARGET"}, // TODO: remove CI_PIPELINE_TARGET in 3.x
+		Name:    "pipeline-deploy-to",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"CI_PIPELINE_TASK"},
-		Name:    "pipeline-task",
+		EnvVars: []string{"CI_PIPELINE_DEPLOY_TASK", "CI_PIPELINE_TASK"}, // TODO: remove CI_PIPELINE_TASK in 3.x
+		Name:    "pipeline-deploy-task",
 	},
 	&cli.StringFlag{
 		EnvVars: []string{"CI_COMMIT_SHA"},

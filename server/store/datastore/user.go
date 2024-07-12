@@ -46,7 +46,7 @@ func (s storage) getUserLogin(sess *xorm.Session, login string) (*model.User, er
 
 func (s storage) GetUserList(p *model.ListOptions) ([]*model.User, error) {
 	var users []*model.User
-	return users, s.paginate(p).OrderBy("id").Find(&users)
+	return users, s.paginate(p).OrderBy("login").Find(&users)
 }
 
 func (s storage) GetUserCount() (int64, error) {
