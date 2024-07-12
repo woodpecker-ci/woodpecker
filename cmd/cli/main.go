@@ -20,11 +20,13 @@ import (
 
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/rs/zerolog/log"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/utils"
 )
 
 func main() {
-	// TODO: test if we have to register signals for STRG-C ...
-	ctx := context.Background()
+	ctx := utils.WithContextSigtermCallback(context.Background(), func() {
+		log.Info().Msg("termination signal is received, terminate cli")
+	})
 
 	app := newApp()
 	if err := app.Run(ctx, os.Args); err != nil {
