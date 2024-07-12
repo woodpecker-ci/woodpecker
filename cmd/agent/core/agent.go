@@ -120,7 +120,7 @@ func run(cliCtx context.Context, c *cli.Command, backends []types.Backend) error
 	go func() {
 		<-cliCtx.Done()
 		// Remove stateless agents from server
-		if agentConfigPersisted.Load() {
+		if !agentConfigPersisted.Load() {
 			log.Debug().Msg("unregistering agent from server")
 			// we want to run it explicit run when context got canceled so run it in background
 			err := client.UnregisterAgent(context.Background()) //nolint:contextcheck
