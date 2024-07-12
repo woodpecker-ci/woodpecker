@@ -20,6 +20,7 @@ import (
 
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/rs/zerolog/log"
+
 	"go.woodpecker-ci.org/woodpecker/v2/shared/utils"
 )
 

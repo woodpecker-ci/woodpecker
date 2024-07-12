@@ -83,7 +83,7 @@ func run(ctx context.Context, c *cli.Command) error {
 		)
 	}
 
-	_store, err := setupStore(c)
+	_store, err := setupStore(ctx, c)
 	if err != nil {
 		return fmt.Errorf("can't setup store: %w", err)
 	}

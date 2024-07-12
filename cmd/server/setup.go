@@ -40,7 +40,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server/store/types"
 )
 
-func setupStore(c *cli.Command) (store.Store, error) {
+func setupStore(ctx context.Context, c *cli.Command) (store.Store, error) {
 	datasource := c.String("datasource")
 	driver := c.String("driver")
 	xorm := store.XORM{
@@ -77,7 +77,7 @@ func setupStore(c *cli.Command) (store.Store, error) {
 		return nil, fmt.Errorf("could not open datastore: %w", err)
 	}
 
-	if err := store.Migrate(c.Bool("migrations-allow-long")); err != nil {
+	if err := store.Migrate(ctx, c.Bool("migrations-allow-long")); err != nil {
 		return nil, fmt.Errorf("could not migrate datastore: %w", err)
 	}
 
