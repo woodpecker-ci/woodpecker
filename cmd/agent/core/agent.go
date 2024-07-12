@@ -205,7 +205,6 @@ func run(cliCtx context.Context, c *cli.Command, backends []types.Backend) error
 			err := client.ReportHealth(grpcCtx)
 			if err != nil {
 				log.Err(err).Msg("failed to report health")
-				return
 			}
 
 			select {
