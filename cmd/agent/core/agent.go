@@ -223,7 +223,7 @@ func run(cliCtx context.Context, c *cli.Command, backends []types.Backend) error
 		go func() {
 			defer wg.Done()
 
-			r := agent.NewRunner(client, filter, hostname, counter, &backendEngine)
+			runner := agent.NewRunner(client, filter, hostname, counter, &backendEngine)
 			log.Debug().Msgf("created new runner %d", i)
 
 			for {
@@ -233,7 +233,7 @@ func run(cliCtx context.Context, c *cli.Command, backends []types.Backend) error
 				}
 
 				log.Debug().Msg("polling new steps")
-				if err := r.Run(ctx); err != nil {
+				if err := runner.Run(ctx); err != nil {
 					log.Error().Err(err).Msg("pipeline done with error")
 					return
 				}
