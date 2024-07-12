@@ -55,7 +55,6 @@ require (
 	github.com/swaggo/files v1.0.1
 	github.com/swaggo/gin-swagger v1.6.0
 	github.com/swaggo/swag v1.16.3
-	github.com/tevino/abool/v2 v2.1.0
 	github.com/urfave/cli/v3 v3.0.0-alpha9.0.20240707153112-6d6416e1c313
 	github.com/xanzy/go-gitlab v0.106.0
 	github.com/xeipuuv/gojsonschema v1.2.0
