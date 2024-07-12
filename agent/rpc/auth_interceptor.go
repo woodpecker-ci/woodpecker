@@ -30,15 +30,12 @@ type AuthInterceptor struct {
 }
 
 // NewAuthInterceptor returns a new auth interceptor.
-func NewAuthInterceptor(
-	authClient *AuthClient,
-	refreshDuration time.Duration,
-) (*AuthInterceptor, error) {
+func NewAuthInterceptor(ctx context.Context, authClient *AuthClient, refreshDuration time.Duration) (*AuthInterceptor, error) {
 	interceptor := &AuthInterceptor{
 		authClient: authClient,
 	}
 
-	err := interceptor.scheduleRefreshToken(refreshDuration)
+	err := interceptor.scheduleRefreshToken(ctx, refreshDuration)
 	if err != nil {
 		return nil, err
 	}
@@ -78,8 +75,8 @@ func (interceptor *AuthInterceptor) attachToken(ctx context.Context) context.Con
 	return metadata.AppendToOutgoingContext(ctx, "token", interceptor.accessToken)
 }
 
-func (interceptor *AuthInterceptor) scheduleRefreshToken(refreshDuration time.Duration) error {
-	err := interceptor.refreshToken()
+func (interceptor *AuthInterceptor) scheduleRefreshToken(ctx context.Context, refreshDuration time.Duration) error {
+	err := interceptor.refreshToken(ctx)
 	if err != nil {
 		return err
 	}
@@ -88,7 +85,7 @@ func (interceptor *AuthInterceptor) scheduleRefreshToken(refreshDuration time.Du
 		wait := refreshDuration
 		for {
 			time.Sleep(wait)
-			err := interceptor.refreshToken()
+			err := interceptor.refreshToken(ctx)
 			if err != nil {
 				wait = time.Second
 			} else {
@@ -100,8 +97,8 @@ func (interceptor *AuthInterceptor) scheduleRefreshToken(refreshDuration time.Du
 	return nil
 }
 
-func (interceptor *AuthInterceptor) refreshToken() error {
-	accessToken, _, err := interceptor.authClient.Auth()
+func (interceptor *AuthInterceptor) refreshToken(ctx context.Context) error {
+	accessToken, _, err := interceptor.authClient.Auth(ctx)
 	if err != nil {
 		return err
 	}

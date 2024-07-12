@@ -91,7 +91,7 @@ func run(cliCtx context.Context, c *cli.Command, backends []types.Backend) error
 
 	agentToken := c.String("grpc-token")
 	authClient := agent_rpc.NewAuthGrpcClient(authConn, agentToken, agentConfig.AgentID)
-	authInterceptor, err := agent_rpc.NewAuthInterceptor(authClient, 30*time.Minute) //nolint:mnd,contextcheck
+	authInterceptor, err := agent_rpc.NewAuthInterceptor(cliCtx, authClient, 30*time.Minute)
 	if err != nil {
 		return err
 	}
