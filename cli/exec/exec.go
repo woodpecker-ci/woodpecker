@@ -248,7 +248,7 @@ func execWithAxis(ctx context.Context, c *cli.Command, file, repoPath string, ax
 	pipelineCtx, cancel := context.WithTimeout(context.Background(), c.Duration("timeout"))
 	defer cancel()
 	pipelineCtx = utils.WithContextSigtermCallback(pipelineCtx, func() {
-		fmt.Println("ctrl+c received, terminating process")
+		fmt.Printf("ctrl+c received, terminating current pipeline '%s'\n", confStr)
 	})
 
 	return pipeline.New(compiled,
