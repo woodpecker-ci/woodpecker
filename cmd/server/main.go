@@ -23,12 +23,14 @@ import (
 	"github.com/urfave/cli/v3"
 
 	_ "go.woodpecker-ci.org/woodpecker/v2/cmd/server/docs"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/utils"
 	"go.woodpecker-ci.org/woodpecker/v2/version"
 )
 
 func main() {
-	// TODO: test if we have to register signals for STRG-C ...
-	ctx := context.Background()
+	ctx := utils.WithContextSigtermCallback(context.Background(), func() {
+		log.Info().Msg("termination signal is received, shutting down server")
+	})
 
 	app := cli.Command{}
 	app.Name = "woodpecker-server"
