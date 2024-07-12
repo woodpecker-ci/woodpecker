@@ -80,6 +80,10 @@ func (c *client) Next(ctx context.Context, f rpc.Filter) (*rpc.Workflow, error) 
 	req.Filter = new(proto.Filter)
 	req.Filter.Labels = f.Labels
 	for {
+		if ctx.Err() != nil {
+			return nil, ctx.Err()
+		}
+
 		res, err = c.client.Next(ctx, req)
 		if err == nil {
 			break
