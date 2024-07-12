@@ -80,24 +80,18 @@ func (c *client) Next(ctx context.Context, f rpc.Filter) (*rpc.Workflow, error) 
 	req.Filter = new(proto.Filter)
 	req.Filter.Labels = f.Labels
 	for {
-		if ctx.Err() != nil {
-			return nil, ctx.Err()
-		}
-
 		res, err = c.client.Next(ctx, req)
 		if err == nil {
 			break
 		}
 
-		// TODO: remove after adding continuous data exchange by something like #536
-		if strings.Contains(err.Error(), "\"too_many_pings\"") {
-			// https://github.com/woodpecker-ci/woodpecker/issues/717#issuecomment-1049365104
-			log.Trace().Err(err).Msg("grpc: to many keepalive pings without sending data")
-		} else {
-			log.Error().Err(err).Msgf("grpc error: done(): code: %v", status.Code(err))
-		}
-
 		switch status.Code(err) {
+		case codes.Canceled:
+			if ctx.Err() != nil {
+				// expected as context was canceled
+				return nil, nil
+			}
+			return nil, err
 		case
 			codes.Aborted,
 			codes.DataLoss,
@@ -109,10 +103,18 @@ func (c *client) Next(ctx context.Context, f rpc.Filter) (*rpc.Workflow, error) 
 			return nil, err
 		}
 
+		// TODO: remove after adding continuous data exchange by something like #536
+		if strings.Contains(err.Error(), "\"too_many_pings\"") {
+			// https://github.com/woodpecker-ci/woodpecker/issues/717#issuecomment-1049365104
+			log.Trace().Err(err).Msg("grpc: to many keepalive pings without sending data")
+		} else {
+			log.Error().Err(err).Msgf("grpc error: done(): code: %v", status.Code(err))
+		}
+
 		select {
 		case <-time.After(retry.NextBackOff()):
 		case <-ctx.Done():
-			return nil, ctx.Err()
+			return nil, nil
 		}
 	}
 
