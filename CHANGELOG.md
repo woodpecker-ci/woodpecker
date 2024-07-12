@@ -20,6 +20,7 @@
 
 ### 📈 Enhancement
 
+- Sort users by login [[#3891](https://github.com/woodpecker-ci/woodpecker/pull/3891)]
 - Exclude dummy backend in production [[#3877](https://github.com/woodpecker-ci/woodpecker/pull/3877)]
 - Fix deploy task env [[#3878](https://github.com/woodpecker-ci/woodpecker/pull/3878)]
 - Get default branch and show message in pipeline list [[#3867](https://github.com/woodpecker-ci/woodpecker/pull/3867)]
