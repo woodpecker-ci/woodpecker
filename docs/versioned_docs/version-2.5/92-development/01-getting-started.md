@@ -44,9 +44,9 @@ For dependency installation (`node_modules`) of UI and documentation of Woodpeck
 Woodpecker uses [`pre-commit`](https://pre-commit.com/) to allow you to easily autofix your code.
 To apply it during local development, take a look at [`pre-commit`s documentation](https://pre-commit.com/#usage).
 
-### Create an `.env` file with your development configuration
+### Create a `.env` file with your development configuration
 
-Similar to the environment variables you can set for your production setup of Woodpecker, you can create an `.env` file in the root of the Woodpecker project and add any needed config to it.
+Similar to the environment variables you can set for your production setup of Woodpecker, you can create a `.env` file in the root of the Woodpecker project and add any needed config to it.
 
 A common config for debugging would look like this:
 
