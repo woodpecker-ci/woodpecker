@@ -22,8 +22,8 @@ import Scaffold from '~/components/layout/scaffold/Scaffold.vue';
 import Tab from '~/components/layout/scaffold/Tab.vue';
 import UserCLIAndAPITab from '~/components/user/UserCLIAndAPITab.vue';
 import UserGeneralTab from '~/components/user/UserGeneralTab.vue';
-import UserSecretsTab from '~/components/user/UserSecretsTab.vue';
 import UserRegistriesTab from '~/components/user/UserRegistriesTab.vue';
+import UserSecretsTab from '~/components/user/UserSecretsTab.vue';
 import useConfig from '~/compositions/useConfig';
 
 const address = `${window.location.protocol}//${window.location.host}${useConfig().rootPath}`; // port is included in location.host

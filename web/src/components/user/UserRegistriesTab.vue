@@ -59,7 +59,6 @@ const emptyRegistry: Partial<Registry> = {
   password: '',
 };
 
-
 const apiClient = useApiClient();
 const notifications = useNotifications();
 const i18n = useI18n();
