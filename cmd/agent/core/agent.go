@@ -47,6 +47,8 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/version"
 )
 
+const reportHealthInterval = time.Second * 10
+
 func run(cliCtx context.Context, c *cli.Command, backends []types.Backend) error {
 	agentConfigPath := c.String("agent-config")
 	hostname := c.String("hostname")
@@ -199,18 +201,20 @@ func run(cliCtx context.Context, c *cli.Command, backends []types.Backend) error
 
 	go func() {
 		for {
-			if sigterm.IsSet() {
-				log.Debug().Msg("terminating health reporting")
-				return
-			}
-
 			err := client.ReportHealth(ctx)
 			if err != nil {
 				log.Err(err).Msg("failed to report health")
 				return
 			}
 
-			<-time.After(time.Second * 10)
+			// we check in 1000 times if we got terminated while waiting for the next health report
+			for i := 0; i <= 999; i++ {
+				if sigterm.IsSet() {
+					log.Debug().Msg("terminating health reporting")
+					return
+				}
+				time.Sleep(reportHealthInterval / 1000)
+			}
 		}
 	}()
 
