@@ -23,6 +23,8 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc/proto"
 )
 
+const authClientTimeout = time.Second * 5
+
 type AuthClient struct {
 	client     proto.WoodpeckerAuthClient
 	conn       *grpc.ClientConn
@@ -40,7 +42,7 @@ func NewAuthGrpcClient(conn *grpc.ClientConn, agentToken string, agentID int64) 
 }
 
 func (c *AuthClient) Auth(ctx context.Context) (string, int64, error) {
-	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	ctx, cancel := context.WithTimeout(ctx, authClientTimeout)
 	defer cancel()
 
 	req := &proto.AuthRequest{
