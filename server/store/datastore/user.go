@@ -30,7 +30,7 @@ func (s storage) GetUserRemoteID(remoteID model.ForgeRemoteID, login string) (*m
 	user := new(model.User)
 	err := wrapGet(sess.Where("forge_remote_id = ?", remoteID).Get(user))
 	if err != nil {
-		user, err = s.getUserLogin(sess, login)
+		return s.getUserLogin(sess, login)
 	}
 	return user, err
 }
