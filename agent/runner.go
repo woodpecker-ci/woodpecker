@@ -49,7 +49,7 @@ func NewRunner(workEngine rpc.Peer, f rpc.Filter, h string, state *State, backen
 	}
 }
 
-func (r *Runner) Run(runnerCtx context.Context) error { //nolint:contextcheck
+func (r *Runner) Run(runnerCtx, shutdownCtx context.Context) error { //nolint:contextcheck
 	log.Debug().Msg("request next execution")
 
 	meta, _ := metadata.FromOutgoingContext(runnerCtx)
@@ -178,7 +178,11 @@ func (r *Runner) Run(runnerCtx context.Context) error { //nolint:contextcheck
 		Str("error", state.Error).
 		Msg("updating workflow status")
 
-	if err := r.client.Done(runnerCtx, workflow.ID, state); err != nil {
+	doneCtx := runnerCtx
+	if doneCtx.Err() != nil {
+		doneCtx = shutdownCtx
+	}
+	if err := r.client.Done(doneCtx, workflow.ID, state); err != nil {
 		logger.Error().Err(err).Msg("updating workflow status failed")
 	} else {
 		logger.Debug().Msg("updating workflow status complete")

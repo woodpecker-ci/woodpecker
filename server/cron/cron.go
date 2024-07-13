@@ -37,8 +37,8 @@ const (
 	checkItems = 10
 )
 
-// Start starts the cron scheduler loop.
-func Start(ctx context.Context, store store.Store) error {
+// Run starts the cron scheduler loop.
+func Run(ctx context.Context, store store.Store) error {
 	for {
 		select {
 		case <-ctx.Done():
