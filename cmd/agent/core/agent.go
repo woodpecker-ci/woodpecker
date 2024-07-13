@@ -213,11 +213,13 @@ func run(c *cli.Context, backends []types.Backend) error {
 		<-agentCtx.Done()
 		// Remove stateless agents from server
 		if !agentConfigPersisted.Load() {
-			log.Debug().Msg("unregistering agent from server")
+			log.Debug().Msg("unregistering agent from server ...")
 			// we want to run it explicit run when context got canceled so run it in background
 			err := client.UnregisterAgent(grpcClientCtx)
 			if err != nil {
 				log.Err(err).Msg("failed to unregister agent from server")
+			} else {
+				log.Info().Msg("agent unregistered from server")
 			}
 		}
 		return nil
