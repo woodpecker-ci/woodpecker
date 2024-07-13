@@ -83,9 +83,9 @@ func startMetricsCollector(ctx context.Context, _store store.Store) {
 		}
 	}()
 	go func() {
-		for {
-			log.Info().Msg("store metric collector started")
+		log.Info().Msg("store metric collector started")
 
+		for {
 			repoCount, repoErr := _store.GetRepoCount()
 			userCount, userErr := _store.GetUserCount()
 			pipelineCount, pipelineErr := _store.GetPipelineCount()
