@@ -23,6 +23,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 	"path"
 
@@ -45,6 +46,8 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
+	fmt.Println("generated swagger.json")
 }
 
 func removeHost(jsonIn string) string {

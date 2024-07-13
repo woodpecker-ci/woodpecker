@@ -117,6 +117,10 @@ generate: install-tools generate-swagger ## Run all code generations
 generate-swagger: install-tools ## Run swagger code generation
 	swag init -g server/api/ -g cmd/server/swagger.go --outputTypes go -output cmd/server/docs
 	CGO_ENABLED=0 go generate cmd/server/swagger.go
+	go generate cmd/server/woodpecker_docs_gen.go
+
+generate-client:
+	go generate cmd/cli/app.go
 
 generate-license-header: install-tools
 	addlicense -c "Woodpecker Authors" -ignore "vendor/**" **/*.go
@@ -147,6 +151,9 @@ install-tools: ## Install development tools
 	fi ; \
 	hash protoc-gen-go-grpc > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
 		go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest; \
+	fi
+	hash swagger > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
+		go install github.com/go-swagger/go-swagger/cmd/swagger@latest; \
 	fi
 
 ui-dependencies: ## Install UI dependencies
