@@ -53,7 +53,10 @@ const (
 )
 
 func run(c *cli.Context, backends []types.Backend) error {
-	cliCtx := c.Context
+	cliCtx := utils.WithContextSigtermCallback(c.Context, func() {
+		log.Info().Msg("termination signal is received, shutting down agent")
+	})
+
 	agentConfigPath := c.String("agent-config")
 	hostname := c.String("hostname")
 	if len(hostname) == 0 {
