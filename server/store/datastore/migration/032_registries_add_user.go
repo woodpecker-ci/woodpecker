@@ -15,32 +15,13 @@
 package migration
 
 import (
-	"fmt"
-
 	"src.techknowlogick.com/xormigrate"
 	"xorm.io/xorm"
 )
 
-type registryV032 struct {
-	ID       int64  `json:"id"       xorm:"pk autoincr 'id'"`
-	RepoID   int64  `json:"-"        xorm:"UNIQUE(s) INDEX 'repo_id'"`
-	Address  string `json:"address"  xorm:"UNIQUE(s) INDEX 'address'"`
-	Username string `json:"username" xorm:"varchar(2000) 'username'"`
-	Password string `json:"password" xorm:"TEXT 'password'"`
-}
-
-func (r registryV032) TableName() string {
-	return "registries"
-}
-
 var alterTableRegistriesFixRequiredFields = xormigrate.Migration{
 	ID: "alter-table-registries-fix-required-fields",
 	MigrateSession: func(sess *xorm.Session) error {
-		// make sure old registry exists
-		if err := sess.Sync(new(registryV032)); err != nil {
-			return fmt.Errorf("sync models failed: %w", err)
-		}
-
 		if err := alterColumnDefault(sess, "registries", "repo_id", "0"); err != nil {
 			return err
 		}
