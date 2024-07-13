@@ -21,6 +21,7 @@
 
 ### 📈 Enhancement
 
+- Convert to openapi 3.0 [[#3897](https://github.com/woodpecker-ci/woodpecker/pull/3897)]
 - Enhance pipeline list [[#3898](https://github.com/woodpecker-ci/woodpecker/pull/3898)]
 - Move setupEvilGlobals from server.go into setup.go [[#3899](https://github.com/woodpecker-ci/woodpecker/pull/3899)]
 - Add user registries UI [[#3888](https://github.com/woodpecker-ci/woodpecker/pull/3888)]
