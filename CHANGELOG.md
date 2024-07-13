@@ -14,6 +14,7 @@
 
 ### ✨ Features
 
+- Allow login using multiple forges [[#3822](https://github.com/woodpecker-ci/woodpecker/pull/3822)]
 - Global and organization registries [[#1672](https://github.com/woodpecker-ci/woodpecker/pull/1672)]
 - Cli get repo from git remote [[#3830](https://github.com/woodpecker-ci/woodpecker/pull/3830)]
 - Add api for forges [[#3733](https://github.com/woodpecker-ci/woodpecker/pull/3733)]
@@ -35,7 +36,7 @@
 
 ### 🐛 Bug Fixes
 
-- agent dont report error if terminated gracefully [[#3894](https://github.com/woodpecker-ci/woodpecker/pull/3894)]
+- Don't report error if agent was terminated gracefully [[#3894](https://github.com/woodpecker-ci/woodpecker/pull/3894)]
 - Let agents continuously report their health [[#3893](https://github.com/woodpecker-ci/woodpecker/pull/3893)]
 - Ignore warnings for cli exec [[#3868](https://github.com/woodpecker-ci/woodpecker/pull/3868)]
 - Correct favicon states [[#3832](https://github.com/woodpecker-ci/woodpecker/pull/3832)]
