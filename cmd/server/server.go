@@ -65,7 +65,7 @@ func run(ctx context.Context, c *cli.Command) error {
 		} else {
 			log.Info().Msg(msg)
 		}
-		stopServerFunc == func(error) {}
+		stopServerFunc = func(error) {}
 		shutdownCtx, shutdownCancelFunc = context.WithTimeout(shutdownCtx, shutdownTimeout)
 		ctxCancel(err)
 	}

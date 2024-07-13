@@ -23,12 +23,12 @@ import (
 	"net/http"
 	"os"
 	"strings"
-	"sync"
 	"sync/atomic"
 	"time"
 
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v3"
+	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	grpc_credentials "google.golang.org/grpc/credentials"
@@ -52,7 +52,34 @@ const (
 	authInterceptorRefreshInterval = time.Minute * 30
 )
 
-func run(cliCtx context.Context, c *cli.Command, backends []types.Backend) error {
+const (
+	shutdownTimeout = time.Second * 5
+)
+
+var (
+	stopAgentFunc      context.CancelCauseFunc = func(error) {}
+	shutdownCancelFunc context.CancelFunc      = func() {}
+	shutdownCtx                                = context.Background()
+)
+
+func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
+	agentCtx, ctxCancel := context.WithCancelCause(ctx)
+	stopAgentFunc = func(err error) {
+		msg := "Start shutdown of whole agent"
+		if err != nil {
+			log.Error().Err(err).Msg(msg)
+		} else {
+			log.Info().Msg(msg)
+		}
+		stopAgentFunc = func(error) {}
+		shutdownCtx, shutdownCancelFunc = context.WithTimeout(shutdownCtx, shutdownTimeout)
+		ctxCancel(err)
+	}
+	defer stopAgentFunc(nil)
+	defer shutdownCancelFunc()
+
+	serviceWaitingGroup := errgroup.Group{}
+
 	agentConfigPath := c.String("agent-config")
 	hostname := c.String("hostname")
 	if len(hostname) == 0 {
@@ -63,11 +90,23 @@ func run(cliCtx context.Context, c *cli.Command, backends []types.Backend) error
 	counter.Running = 0
 
 	if c.Bool("healthcheck") {
-		go func() {
-			if err := http.ListenAndServe(c.String("healthcheck-addr"), nil); err != nil {
-				log.Error().Err(err).Msgf("cannot listen on address %s", c.String("healthcheck-addr"))
-			}
-		}()
+		serviceWaitingGroup.Go(
+			func() error {
+				server := &http.Server{Addr: c.String("healthcheck-addr")}
+				go func() {
+					<-agentCtx.Done()
+					log.Info().Msg("shutdown healthcheck server ...")
+					if err := server.Shutdown(shutdownCtx); err != nil { //nolint:contextcheck
+						log.Error().Err(err).Msg("shutdown healthcheck server failed")
+					} else {
+						log.Info().Msg("healthcheck server stopped")
+					}
+				}()
+				if err := server.ListenAndServe(); err != nil {
+					log.Error().Err(err).Msgf("cannot listen on address %s", c.String("healthcheck-addr"))
+				}
+				return nil
+			})
 	}
 
 	var transport grpc.DialOption
@@ -93,8 +132,10 @@ func run(cliCtx context.Context, c *cli.Command, backends []types.Backend) error
 	agentConfig := readAgentConfig(agentConfigPath)
 
 	agentToken := c.String("grpc-token")
+	grpcClientCtx, grpcClientCtxCancel := context.WithCancelCause(context.Background())
+	defer grpcClientCtxCancel(nil)
 	authClient := agent_rpc.NewAuthGrpcClient(authConn, agentToken, agentConfig.AgentID)
-	authInterceptor, err := agent_rpc.NewAuthInterceptor(cliCtx, authClient, authInterceptorRefreshInterval)
+	authInterceptor, err := agent_rpc.NewAuthInterceptor(grpcClientCtx, authClient, authInterceptorRefreshInterval)
 	if err != nil {
 		return err
 	}
@@ -117,20 +158,7 @@ func run(cliCtx context.Context, c *cli.Command, backends []types.Backend) error
 	client := agent_rpc.NewGrpcClient(conn)
 	agentConfigPersisted := atomic.Bool{}
 
-	go func() {
-		<-cliCtx.Done()
-		// Remove stateless agents from server
-		if !agentConfigPersisted.Load() {
-			log.Debug().Msg("unregistering agent from server")
-			// we want to run it explicit run when context got canceled so run it in background
-			err := client.UnregisterAgent(context.Background()) //nolint:contextcheck
-			if err != nil {
-				log.Err(err).Msg("failed to unregister agent from server")
-			}
-		}
-	}()
-
-	grpcCtx := metadata.NewOutgoingContext(cliCtx, metadata.Pairs("hostname", hostname))
+	grpcCtx := metadata.NewOutgoingContext(grpcClientCtx, metadata.Pairs("hostname", hostname))
 
 	// check if grpc server version is compatible with agent
 	grpcServerVersion, err := client.Version(grpcCtx)
@@ -147,12 +175,8 @@ func run(cliCtx context.Context, c *cli.Command, backends []types.Backend) error
 		return err
 	}
 
-	var wg sync.WaitGroup
-	parallel := int(c.Int("max-workflows"))
-	wg.Add(parallel)
-
 	// new engine
-	backendCtx := context.WithValue(cliCtx, types.CliCommand, c)
+	backendCtx := context.WithValue(agentCtx, types.CliCommand, c)
 	backendName := c.String("backend-engine")
 	backendEngine, err := backend.FindBackend(backendCtx, backends, backendName)
 	if err != nil {
@@ -172,10 +196,30 @@ func run(cliCtx context.Context, c *cli.Command, backends []types.Backend) error
 	}
 	log.Debug().Msgf("loaded %s backend engine", backendEngine.Name())
 
-	agentConfig.AgentID, err = client.RegisterAgent(grpcCtx, engInfo.Platform, backendEngine.Name(), version.String(), parallel)
+	maxWorkflows := int(c.Int("max-workflows"))
+	agentConfig.AgentID, err = client.RegisterAgent(grpcCtx, engInfo.Platform, backendEngine.Name(), version.String(), maxWorkflows)
 	if err != nil {
 		return err
 	}
+
+	serviceWaitingGroup.Go(func() error {
+		// we close grpc client context once unregister was handled
+		defer grpcClientCtxCancel(nil)
+		// we wait till agent context is done
+		<-agentCtx.Done()
+		// Remove stateless agents from server
+		if !agentConfigPersisted.Load() {
+			log.Debug().Msg("unregistering agent from server ...")
+			// we want to run it explicit run when context got canceled so run it in background
+			err := client.UnregisterAgent(grpcClientCtx)
+			if err != nil {
+				log.Err(err).Msg("failed to unregister agent from server")
+			} else {
+				log.Info().Msg("agent unregistered from server")
+			}
+		}
+		return nil
+	})
 
 	if agentConfigPath != "" {
 		if err := writeAgentConfig(agentConfig, agentConfigPath); err == nil {
@@ -200,7 +244,7 @@ func run(cliCtx context.Context, c *cli.Command, backends []types.Backend) error
 
 	log.Debug().Msgf("agent registered with ID %d", agentConfig.AgentID)
 
-	go func() {
+	serviceWaitingGroup.Go(func() error {
 		for {
 			err := client.ReportHealth(grpcCtx)
 			if err != nil {
@@ -208,42 +252,39 @@ func run(cliCtx context.Context, c *cli.Command, backends []types.Backend) error
 			}
 
 			select {
-			case <-cliCtx.Done():
+			case <-agentCtx.Done():
 				log.Debug().Msg("terminating health reporting")
-				return
+				return nil
 			case <-time.After(reportHealthInterval):
 			}
 		}
-	}()
+	})
 
-	for i := 0; i < parallel; i++ {
+	for i := 0; i < maxWorkflows; i++ {
 		i := i
-		go func() {
-			defer wg.Done()
-
+		serviceWaitingGroup.Go(func() error {
 			runner := agent.NewRunner(client, filter, hostname, counter, &backendEngine)
 			log.Debug().Msgf("created new runner %d", i)
 
 			for {
-				if cliCtx.Err() != nil {
-					return
+				if agentCtx.Err() != nil {
+					return nil
 				}
 
 				log.Debug().Msg("polling new steps")
-				if err := runner.Run(cliCtx); err != nil {
-					log.Error().Err(err).Msg("pipeline done with error")
-					return
+				if err := runner.Run(agentCtx); err != nil {
+					log.Error().Err(err).Msg("runner done with error")
+					return err
 				}
 			}
-		}()
+		})
 	}
 
 	log.Info().Msgf(
 		"starting Woodpecker agent with version '%s' and backend '%s' using platform '%s' running up to %d pipelines in parallel",
-		version.String(), backendEngine.Name(), engInfo.Platform, parallel)
+		version.String(), backendEngine.Name(), engInfo.Platform, maxWorkflows)
 
-	wg.Wait()
-	return nil
+	return serviceWaitingGroup.Wait()
 }
 
 func runWithRetry(backendEngines []types.Backend) func(ctx context.Context, c *cli.Command) error {
