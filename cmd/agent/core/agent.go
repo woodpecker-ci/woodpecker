@@ -276,7 +276,7 @@ func run(c *cli.Context, backends []types.Backend) error {
 				}
 
 				log.Debug().Msg("polling new steps")
-				if err := runner.Run(agentCtx); err != nil {
+				if err := runner.Run(agentCtx, shutdownCtx); err != nil {
 					log.Error().Err(err).Msg("runner done with error")
 					return err
 				}
