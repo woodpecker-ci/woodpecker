@@ -17,15 +17,13 @@
       </div>
     </div>
 
-    <div class="flex py-2 px-4 flex-grow min-w-0 <md:flex-wrap">
+    <div class="flex py-2 px-4 flex-grow min-w-0 <md:flex-wrap gap-2">
       <div class="flex flex-col min-w-0 justify-center gap-2">
-        <span
-          class="text-wp-text-100 text-lg <md:underline whitespace-nowrap overflow-hidden overflow-ellipsis"
-          :title="message"
-        >
+        <span class="text-wp-text-100 text-lg whitespace-nowrap overflow-hidden overflow-ellipsis" :title="message">
           {{ shortMessage }}
         </span>
-        <div class="flex gap-1 text-wp-text-alt-100">
+
+        <div class="flex <md:flex-wrap gap-1 text-wp-text-alt-100">
           <div class="flex items-center" :title="pipelineEventTitle">
             <Icon v-if="pipeline.event === 'pull_request'" name="pull-request" />
             <Icon v-else-if="pipeline.event === 'pull_request_closed'" name="pull-request-closed" />
@@ -46,13 +44,17 @@
           <span v-if="pipeline.event === 'tag' || pipeline.event === 'release'">{{ $t('created') }}</span>
           <span v-if="pipeline.event === 'cron' || pipeline.event === 'manual'">{{ $t('triggered') }}</span>
           <span v-else>{{ $t('triggered') }}</span>
-          <Badge v-if="prettyRef" :title="prTitleWithDescription" :label="prTitle ? `${prettyRef} (${truncate(prTitle, 30)})` : prettyRef " />
+          <Badge
+            v-if="prettyRef"
+            :title="prTitleWithDescription"
+            :label="prTitle ? `${prettyRef} (${truncate(prTitle, 30)})` : prettyRef"
+          />
           <span class="truncate">{{ $t('by_user', { user: pipeline.author }) }}</span>
         </div>
       </div>
 
-      <div class="flex <md:flex-col min-w-0 gap-2 justify-between items-center ml-auto">
-        <div class="flex flex-col gap-2 text-wp-text-alt-100 mr-4">
+      <div class="flex min-w-0 <md:w-full gap-2 justify-between items-center md:ml-auto relative">
+        <div class="flex flex-col gap-2 text-wp-text-alt-100">
           <div class="flex gap-2 items-center min-w-0" :title="$t('pipeline_duration')">
             <Icon name="duration" />
             <span class="truncate">{{ duration }}</span>
@@ -66,6 +68,11 @@
 
         <Icon v-if="pipeline.event === 'cron'" name="stopwatch" class="text-wp-text-100" />
         <img v-else class="rounded-md w-8 flex-shrink-0" :src="pipeline.author_avatar" :title="pipeline.author" />
+
+        <div v-if="pipeline.errors" class="flex items-center absolute -top-1 -right-2">
+          <Icon v-if="hasErrors" name="attention" class="text-wp-state-error-100" :title="$t('pipeline_has_errors')" />
+          <Icon v-else name="warning" class="text-wp-state-warn-100" :title="$t('pipeline_has_warnings')" />
+        </div>
       </div>
     </div>
   </ListItem>
@@ -73,6 +80,7 @@
 
 <script lang="ts" setup>
 import { computed, toRef } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 import Badge from '~/components/atomic/Badge.vue';
 import Icon from '~/components/atomic/Icon.vue';
@@ -88,26 +96,32 @@ const props = defineProps<{
   pipeline: Pipeline;
 }>();
 
+const { t } = useI18n();
+
 const pipeline = toRef(props, 'pipeline');
-const { since, duration, message, shortMessage, prTitle, prTitleWithDescription, prettyRef, created } = usePipeline(pipeline);
+const { since, duration, message, shortMessage, prTitle, prTitleWithDescription, prettyRef, created } =
+  usePipeline(pipeline);
+
+const hasErrors = computed(() => pipeline.value.errors?.some((e) => !e.is_warning));
 
 const pipelineEventTitle = computed(() => {
   switch (pipeline.value.event) {
     case 'pull_request':
-      return 'Pull request'; // TODO: translate
+      return t('repo.pipeline.event.pr');
     case 'pull_request_closed':
-      return 'Pull request closed / merged';
+      return t('repo.pipeline.event.pr_closed');
     case 'deployment':
-      return 'Deployment';
+      return t('repo.pipeline.event.deploy');
     case 'tag':
+      return t('repo.pipeline.event.tag');
     case 'release':
-      return 'Tag';
+      return t('repo.pipeline.event.release');
     case 'cron':
-      return 'Cron';
+      return t('repo.pipeline.event.cron');
     case 'manual':
-      return 'Manual';
+      return t('repo.pipeline.event.manual');
     default:
-      return 'Push';
+      return t('repo.pipeline.event.push');
   }
 });
 </script>
