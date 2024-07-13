@@ -68,7 +68,6 @@ func run(c *cli.Context, backends []types.Backend) error {
 	})
 
 	agentCtx, ctxCancel := context.WithCancelCause(ctx)
-	defer stopAgentFunc(nil)
 	stopAgentFunc = func(err error) {
 		msg := "Start shutdown of whole agent"
 		if err != nil {
@@ -76,10 +75,13 @@ func run(c *cli.Context, backends []types.Backend) error {
 		} else {
 			log.Info().Msg(msg)
 		}
+		stopAgentFunc = func(error) {}
 		shutdownCtx, shutdownCancelFunc = context.WithTimeout(shutdownCtx, shutdownTimeout)
 		ctxCancel(err)
 	}
+	defer stopAgentFunc(nil)
 	defer shutdownCancelFunc()
+
 	serviceWaitingGroup := errgroup.Group{}
 
 	agentConfigPath := c.String("agent-config")
