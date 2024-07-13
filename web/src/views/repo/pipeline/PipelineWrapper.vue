@@ -26,7 +26,9 @@
           <span class="flex-shrink-0 text-center">{{ $t('repo.pipeline.pipeline', { pipelineId }) }}</span>
           <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
           <span class="hidden md:inline-block">-</span>
-          <span class="min-w-0 whitespace-nowrap overflow-hidden overflow-ellipsis" :title="message">{{ shortMessage }}</span>
+          <span class="min-w-0 whitespace-nowrap overflow-hidden overflow-ellipsis" :title="message">{{
+            shortMessage
+          }}</span>
         </div>
 
         <template v-if="repoPermissions!.push && pipeline.status !== 'declined' && pipeline.status !== 'blocked'">
