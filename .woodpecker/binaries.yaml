@@ -9,7 +9,7 @@ variables:
   - &node_image 'docker.io/node:22-alpine'
   - &xgo_image 'docker.io/techknowlogick/xgo:go-1.22.x'
 
-# cspell:words bindata netgo TARGZ
+# cspell:words bindata netgo
 
 steps:
   build-web:
@@ -38,7 +38,7 @@ steps:
     environment:
       PLATFORMS: linux|arm64/v8;linux|amd64;windows|amd64
       TAGS: bindata sqlite sqlite_unlock_notify netgo
-      TARGZ: '1'
+      ARCHIVE_IT: '1'
 
   build-tarball:
     depends_on:
