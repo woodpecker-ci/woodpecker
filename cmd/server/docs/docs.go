@@ -849,19 +849,12 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "allOf": [
-                                {
+                            "type": "object",
+                            "properties": {
+                                "log-level": {
                                     "type": "string"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "log-level": {
-                                            "type": "string"
-                                        }
-                                    }
                                 }
-                            ]
+                            }
                         }
                     }
                 }
@@ -890,19 +883,12 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "allOf": [
-                                {
+                            "type": "object",
+                            "properties": {
+                                "log-level": {
                                     "type": "string"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "log-level": {
-                                            "type": "string"
-                                        }
-                                    }
                                 }
-                            ]
+                            }
                         }
                     }
                 ],
@@ -910,19 +896,12 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "allOf": [
-                                {
+                            "type": "object",
+                            "properties": {
+                                "log-level": {
                                     "type": "string"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "log-level": {
-                                            "type": "string"
-                                        }
-                                    }
                                 }
-                            ]
+                            }
                         }
                     }
                 }
