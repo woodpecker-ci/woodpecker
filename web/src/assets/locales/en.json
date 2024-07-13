@@ -1,5 +1,6 @@
 {
   "cancel": "Cancel",
+  "login_with": "Login with {forge}",
   "login": "Login",
   "welcome": "Welcome to Woodpecker",
   "repos": "Repos",
@@ -387,6 +388,9 @@
       },
       "secrets": {
         "desc": "User secrets can be passed to all user's repository individual pipeline steps at runtime as environmental variables."
+      },
+      "registries": {
+        "desc": "User registries credentials can be added to use private images for all individual pipelines."
       },
       "cli_and_api": {
         "cli_and_api": "CLI & API",
