@@ -14,6 +14,7 @@
 
 ### ✨ Features
 
+- Gracefully shutdown server [[#3896](https://github.com/woodpecker-ci/woodpecker/pull/3896)]
 - Gracefully shutdown agent [[#3895](https://github.com/woodpecker-ci/woodpecker/pull/3895)]
 - Convert urls in logs to links  [[#3904](https://github.com/woodpecker-ci/woodpecker/pull/3904)]
 - Allow login using multiple forges [[#3822](https://github.com/woodpecker-ci/woodpecker/pull/3822)]
