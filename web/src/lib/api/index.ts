@@ -1,3 +1,5 @@
+import createClient from 'openapi-fetch';
+
 import ApiClient, { encodeQueryString } from './client';
 import type {
   Agent,
@@ -18,6 +20,7 @@ import type {
   Secret,
   User,
 } from './types';
+import type { paths } from './v1';
 
 interface RepoListOptions {
   all?: boolean;
@@ -328,7 +331,10 @@ export default class WoodpeckerClient extends ApiClient {
   }
 
   async getForge(forgeId: Forge['id']): Promise<Forge> {
-    return this._get(`/api/forges/${forgeId}`) as Promise<Forge>;
+    // return this._get(`/api/forges/${forgeId}`) as Promise<Forge>;
+    const client = createClient<paths>({ baseUrl: 'https://myapi.dev/v1/' });
+    const response = await client.GET('/forges/{forgeId}', { params: { path: { forgeId } } });
+    return response.data;
   }
 
   async createForge(forge: Partial<Forge>): Promise<Forge> {
