@@ -112,6 +112,7 @@ func run(ctx context.Context, c *cli.Command) error {
 	startMetricsCollector(ctx, _store)
 
 	serviceWaitingGroup.Go(func() error {
+		log.Info().Msg("starting cron service ...")
 		if err := cron.Run(ctx, _store); err != nil {
 			go stopServerFunc(err)
 			return err
@@ -121,6 +122,7 @@ func run(ctx context.Context, c *cli.Command) error {
 
 	// start the grpc server
 	serviceWaitingGroup.Go(func() error {
+		log.Info().Msg("starting grpc server ...")
 		if err := runGrpcServer(ctx, c, _store); err != nil {
 			// stop whole server as grpc is essential
 			go stopServerFunc(err)
@@ -183,6 +185,7 @@ func run(ctx context.Context, c *cli.Command) error {
 				}
 			}()
 
+			log.Info().Msg("starting tls server ...")
 			err := tlsServer.ListenAndServeTLS(
 				c.String("server-cert"),
 				c.String("server-key"),
@@ -220,7 +223,7 @@ func run(ctx context.Context, c *cli.Command) error {
 				}
 			}()
 
-			log.Info().Msg("start server to redirect from http to https")
+			log.Info().Msg("starting redirect server ...")
 			if err := redirectServer.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 				log.Error().Err(err).Msg("redirect server failed")
 				stopServerFunc(fmt.Errorf("redirect server failed: %w", err))
@@ -245,6 +248,7 @@ func run(ctx context.Context, c *cli.Command) error {
 				log.Fatal().Msg("we kill certmagic by fail") //nolint:forbidigo
 			}()
 
+			log.Info().Msg("starting certmagic server ...")
 			if err := certmagic.HTTPS([]string{address.Host}, handler); err != nil {
 				log.Error().Err(err).Msg("certmagic does not work")
 				stopServerFunc(fmt.Errorf("certmagic failed: %w", err))
@@ -269,6 +273,7 @@ func run(ctx context.Context, c *cli.Command) error {
 				}
 			}()
 
+			log.Info().Msg("starting http server ...")
 			if err := httpServer.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 				log.Error().Err(err).Msg("http server failed")
 				stopServerFunc(fmt.Errorf("http server failed: %w", err))
@@ -281,8 +286,24 @@ func run(ctx context.Context, c *cli.Command) error {
 		serviceWaitingGroup.Go(func() error {
 			metricsRouter := gin.New()
 			metricsRouter.GET("/metrics", gin.WrapH(prometheus_http.Handler()))
-			err := http.ListenAndServe(metricsServerAddr, metricsRouter)
-			if err != nil && !errors.Is(err, http.ErrServerClosed) {
+
+			metricsServer := &http.Server{
+				Addr:    metricsServerAddr,
+				Handler: metricsRouter,
+			}
+
+			go func() {
+				<-ctx.Done()
+				log.Info().Msg("shutdown metrics server ...")
+				if err := metricsServer.Shutdown(shutdownCtx); err != nil { //nolint:contextcheck
+					log.Error().Err(err).Msg("shutdown metrics server failed")
+				} else {
+					log.Info().Msg("metrics server stopped")
+				}
+			}()
+
+			log.Info().Msg("starting metrics server ...")
+			if err := metricsServer.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 				log.Error().Err(err).Msg("metrics server failed")
 				stopServerFunc(fmt.Errorf("metrics server failed: %w", err))
 			}
