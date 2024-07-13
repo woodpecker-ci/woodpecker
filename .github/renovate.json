@@ -6,7 +6,7 @@
       "customType": "regex",
       "fileMatch": ["shared/constant/constant.go"],
       "matchStrings": [
-        "//\\s*renovate:\\s*datasource=(?<datasource>.*?) depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?\\sDefaultCloneImage = docker.io/woodpeckerci/plugin-git:\"(?<currentValue>.*)\"\\s"
+        "//\\s*renovate:\\s*datasource=(?<datasource>.*?) depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?\\s+DefaultCloneImage = \"docker.io/woodpeckerci/plugin-git:(?<currentValue>.*)\""
       ],
       "versioningTemplate": "{{#if versioning}}{{{versioning}}}{{else}}semver{{/if}}"
     }
