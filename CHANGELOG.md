@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @anbraten, @dvjn, @lafriks, @qwerty287, @tongjicoder, @zc-devs
+@6543, @anbraten, @dvjn, @lafriks, @pat-s, @qwerty287, @tongjicoder, @zc-devs
 
 ### 🔒 Security
 
@@ -60,6 +60,7 @@
 
 ### Misc
 
+- Update plugin-git and add renovate trigger [[#3901](https://github.com/woodpecker-ci/woodpecker/pull/3901)]
 - chore(deps): update docker.io/mstruebing/editorconfig-checker docker tag to v3.0.3 [[#3903](https://github.com/woodpecker-ci/woodpecker/pull/3903)]
 - fix(deps): update golang-packages [[#3875](https://github.com/woodpecker-ci/woodpecker/pull/3875)]
 - chore(deps): lock file maintenance [[#3876](https://github.com/woodpecker-ci/woodpecker/pull/3876)]
