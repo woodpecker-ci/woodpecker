@@ -21,6 +21,7 @@
 
 ### 📈 Enhancement
 
+- Move setupEvilGlobals from server.go into setup.go [[#3899](https://github.com/woodpecker-ci/woodpecker/pull/3899)]
 - Add user registries UI [[#3888](https://github.com/woodpecker-ci/woodpecker/pull/3888)]
 - Sort users by login [[#3891](https://github.com/woodpecker-ci/woodpecker/pull/3891)]
 - Exclude dummy backend in production [[#3877](https://github.com/woodpecker-ci/woodpecker/pull/3877)]
