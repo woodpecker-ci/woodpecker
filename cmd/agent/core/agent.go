@@ -210,7 +210,6 @@ func run(c *cli.Context, backends []types.Backend) error {
 			err := client.ReportHealth(ctx)
 			if err != nil {
 				log.Err(err).Msg("failed to report health")
-				return
 			}
 
 			<-time.After(time.Second * 10)

@@ -12,13 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package environment
+//go:build test
+// +build test
 
-import "go.woodpecker-ci.org/woodpecker/v2/server/model"
+package exec
 
-//go:generate mockery --name Service --output mocks --case underscore
+import "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/dummy"
 
-// Service defines a service for managing environment variables.
-type Service interface {
-	EnvironList(*model.Repo) ([]*model.Environ, error)
+func init() { //nolint:gochecknoinits
+	backends = append(backends, dummy.New())
 }

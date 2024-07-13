@@ -30,7 +30,7 @@ func (s storage) GetUserRemoteID(remoteID model.ForgeRemoteID, login string) (*m
 	user := new(model.User)
 	err := wrapGet(sess.Where("forge_remote_id = ?", remoteID).Get(user))
 	if err != nil {
-		user, err = s.getUserLogin(sess, login)
+		return s.getUserLogin(sess, login)
 	}
 	return user, err
 }
@@ -46,7 +46,7 @@ func (s storage) getUserLogin(sess *xorm.Session, login string) (*model.User, er
 
 func (s storage) GetUserList(p *model.ListOptions) ([]*model.User, error) {
 	var users []*model.User
-	return users, s.paginate(p).OrderBy("id").Find(&users)
+	return users, s.paginate(p).OrderBy("login").Find(&users)
 }
 
 func (s storage) GetUserCount() (int64, error) {
