@@ -14,6 +14,7 @@
 
 ### ✨ Features
 
+- Convert urls in logs to links  [[#3904](https://github.com/woodpecker-ci/woodpecker/pull/3904)]
 - Allow login using multiple forges [[#3822](https://github.com/woodpecker-ci/woodpecker/pull/3822)]
 - Global and organization registries [[#1672](https://github.com/woodpecker-ci/woodpecker/pull/1672)]
 - Cli get repo from git remote [[#3830](https://github.com/woodpecker-ci/woodpecker/pull/3830)]
@@ -32,7 +33,7 @@
 - Adjust logger types [[#3859](https://github.com/woodpecker-ci/woodpecker/pull/3859)]
 - Cleanup state reporting [[#3850](https://github.com/woodpecker-ci/woodpecker/pull/3850)]
 - Unify DB tables/columns [[#3806](https://github.com/woodpecker-ci/woodpecker/pull/3806)]
-- Let webhook pass on pipeline parsion error [[#3829](https://github.com/woodpecker-ci/woodpecker/pull/3829)]
+- Let webhook pass on pipeline parsing error [[#3829](https://github.com/woodpecker-ci/woodpecker/pull/3829)]
 - Exclude mocks from release build [[#3831](https://github.com/woodpecker-ci/woodpecker/pull/3831)]
 - K8s secrets reference from step [[#3655](https://github.com/woodpecker-ci/woodpecker/pull/3655)]
 
@@ -59,6 +60,7 @@
 
 ### Misc
 
+- chore(deps): update docker.io/mstruebing/editorconfig-checker docker tag to v3.0.3 [[#3903](https://github.com/woodpecker-ci/woodpecker/pull/3903)]
 - fix(deps): update golang-packages [[#3875](https://github.com/woodpecker-ci/woodpecker/pull/3875)]
 - chore(deps): lock file maintenance [[#3876](https://github.com/woodpecker-ci/woodpecker/pull/3876)]
 - [pre-commit.ci] pre-commit autoupdate [[#3862](https://github.com/woodpecker-ci/woodpecker/pull/3862)]
