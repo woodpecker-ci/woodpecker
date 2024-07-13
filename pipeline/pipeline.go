@@ -105,7 +105,11 @@ func (r *Runtime) Run(runnerCtx context.Context) error {
 	}
 
 	defer func() {
-		if err := r.engine.DestroyWorkflow(runnerCtx, r.spec, r.taskUUID); err != nil {
+		ctx := runnerCtx //nolint:contextcheck
+		if ctx.Err() != nil {
+			ctx = GetShutdownCtx()
+		}
+		if err := r.engine.DestroyWorkflow(ctx, r.spec, r.taskUUID); err != nil {
 			logger.Error().Err(err).Msg("could not destroy engine")
 		}
 	}()
