@@ -47,9 +47,9 @@ const (
 )
 
 var (
-	stopServerFunc     context.CancelCauseFunc
-	shutdownCancelFunc context.CancelFunc
-	shutdownCtx        = context.Background()
+	stopServerFunc     context.CancelCauseFunc = func(error) {}
+	shutdownCancelFunc context.CancelFunc      = func() {}
+	shutdownCtx                                = context.Background()
 )
 
 func run(ctx context.Context, c *cli.Command) error {
@@ -58,7 +58,6 @@ func run(ctx context.Context, c *cli.Command) error {
 	}
 
 	ctx, ctxCancel := context.WithCancelCause(ctx)
-	defer ctxCancel(nil)
 	stopServerFunc = func(err error) {
 		msg := "Start shutdown of whole server"
 		if err != nil {
@@ -66,9 +65,11 @@ func run(ctx context.Context, c *cli.Command) error {
 		} else {
 			log.Info().Msg(msg)
 		}
+		stopServerFunc == func(error) {}
 		shutdownCtx, shutdownCancelFunc = context.WithTimeout(shutdownCtx, shutdownTimeout)
 		ctxCancel(err)
 	}
+	defer stopServerFunc(nil)
 	defer shutdownCancelFunc()
 
 	// set gin mode based on log level
