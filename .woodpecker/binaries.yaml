@@ -103,6 +103,7 @@ steps:
         from_secret: github_token
       files:
         - dist/*.tar.gz
+        - dist/*.zip
         - dist/*.deb
         - dist/*.rpm
         - dist/checksums.txt
