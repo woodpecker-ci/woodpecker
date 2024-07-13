@@ -12,6 +12,234 @@ type Service struct {
 	mock.Mock
 }
 
+// GlobalRegistryCreate provides a mock function with given fields: _a0
+func (_m *Service) GlobalRegistryCreate(_a0 *model.Registry) error {
+	ret := _m.Called(_a0)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GlobalRegistryCreate")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(*model.Registry) error); ok {
+		r0 = rf(_a0)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// GlobalRegistryDelete provides a mock function with given fields: _a0
+func (_m *Service) GlobalRegistryDelete(_a0 string) error {
+	ret := _m.Called(_a0)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GlobalRegistryDelete")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(string) error); ok {
+		r0 = rf(_a0)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// GlobalRegistryFind provides a mock function with given fields: _a0
+func (_m *Service) GlobalRegistryFind(_a0 string) (*model.Registry, error) {
+	ret := _m.Called(_a0)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GlobalRegistryFind")
+	}
+
+	var r0 *model.Registry
+	var r1 error
+	if rf, ok := ret.Get(0).(func(string) (*model.Registry, error)); ok {
+		return rf(_a0)
+	}
+	if rf, ok := ret.Get(0).(func(string) *model.Registry); ok {
+		r0 = rf(_a0)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.Registry)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(_a0)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GlobalRegistryList provides a mock function with given fields: _a0
+func (_m *Service) GlobalRegistryList(_a0 *model.ListOptions) ([]*model.Registry, error) {
+	ret := _m.Called(_a0)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GlobalRegistryList")
+	}
+
+	var r0 []*model.Registry
+	var r1 error
+	if rf, ok := ret.Get(0).(func(*model.ListOptions) ([]*model.Registry, error)); ok {
+		return rf(_a0)
+	}
+	if rf, ok := ret.Get(0).(func(*model.ListOptions) []*model.Registry); ok {
+		r0 = rf(_a0)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*model.Registry)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(*model.ListOptions) error); ok {
+		r1 = rf(_a0)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GlobalRegistryUpdate provides a mock function with given fields: _a0
+func (_m *Service) GlobalRegistryUpdate(_a0 *model.Registry) error {
+	ret := _m.Called(_a0)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GlobalRegistryUpdate")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(*model.Registry) error); ok {
+		r0 = rf(_a0)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// OrgRegistryCreate provides a mock function with given fields: _a0, _a1
+func (_m *Service) OrgRegistryCreate(_a0 int64, _a1 *model.Registry) error {
+	ret := _m.Called(_a0, _a1)
+
+	if len(ret) == 0 {
+		panic("no return value specified for OrgRegistryCreate")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(int64, *model.Registry) error); ok {
+		r0 = rf(_a0, _a1)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// OrgRegistryDelete provides a mock function with given fields: _a0, _a1
+func (_m *Service) OrgRegistryDelete(_a0 int64, _a1 string) error {
+	ret := _m.Called(_a0, _a1)
+
+	if len(ret) == 0 {
+		panic("no return value specified for OrgRegistryDelete")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(int64, string) error); ok {
+		r0 = rf(_a0, _a1)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// OrgRegistryFind provides a mock function with given fields: _a0, _a1
+func (_m *Service) OrgRegistryFind(_a0 int64, _a1 string) (*model.Registry, error) {
+	ret := _m.Called(_a0, _a1)
+
+	if len(ret) == 0 {
+		panic("no return value specified for OrgRegistryFind")
+	}
+
+	var r0 *model.Registry
+	var r1 error
+	if rf, ok := ret.Get(0).(func(int64, string) (*model.Registry, error)); ok {
+		return rf(_a0, _a1)
+	}
+	if rf, ok := ret.Get(0).(func(int64, string) *model.Registry); ok {
+		r0 = rf(_a0, _a1)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.Registry)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(int64, string) error); ok {
+		r1 = rf(_a0, _a1)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// OrgRegistryList provides a mock function with given fields: _a0, _a1
+func (_m *Service) OrgRegistryList(_a0 int64, _a1 *model.ListOptions) ([]*model.Registry, error) {
+	ret := _m.Called(_a0, _a1)
+
+	if len(ret) == 0 {
+		panic("no return value specified for OrgRegistryList")
+	}
+
+	var r0 []*model.Registry
+	var r1 error
+	if rf, ok := ret.Get(0).(func(int64, *model.ListOptions) ([]*model.Registry, error)); ok {
+		return rf(_a0, _a1)
+	}
+	if rf, ok := ret.Get(0).(func(int64, *model.ListOptions) []*model.Registry); ok {
+		r0 = rf(_a0, _a1)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*model.Registry)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(int64, *model.ListOptions) error); ok {
+		r1 = rf(_a0, _a1)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// OrgRegistryUpdate provides a mock function with given fields: _a0, _a1
+func (_m *Service) OrgRegistryUpdate(_a0 int64, _a1 *model.Registry) error {
+	ret := _m.Called(_a0, _a1)
+
+	if len(ret) == 0 {
+		panic("no return value specified for OrgRegistryUpdate")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(int64, *model.Registry) error); ok {
+		r0 = rf(_a0, _a1)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // RegistryCreate provides a mock function with given fields: _a0, _a1
 func (_m *Service) RegistryCreate(_a0 *model.Repo, _a1 *model.Registry) error {
 	ret := _m.Called(_a0, _a1)
@@ -100,6 +328,36 @@ func (_m *Service) RegistryList(_a0 *model.Repo, _a1 *model.ListOptions) ([]*mod
 	}
 
 	if rf, ok := ret.Get(1).(func(*model.Repo, *model.ListOptions) error); ok {
+		r1 = rf(_a0, _a1)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// RegistryListPipeline provides a mock function with given fields: _a0, _a1
+func (_m *Service) RegistryListPipeline(_a0 *model.Repo, _a1 *model.Pipeline) ([]*model.Registry, error) {
+	ret := _m.Called(_a0, _a1)
+
+	if len(ret) == 0 {
+		panic("no return value specified for RegistryListPipeline")
+	}
+
+	var r0 []*model.Registry
+	var r1 error
+	if rf, ok := ret.Get(0).(func(*model.Repo, *model.Pipeline) ([]*model.Registry, error)); ok {
+		return rf(_a0, _a1)
+	}
+	if rf, ok := ret.Get(0).(func(*model.Repo, *model.Pipeline) []*model.Registry); ok {
+		r0 = rf(_a0, _a1)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*model.Registry)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(*model.Repo, *model.Pipeline) error); ok {
 		r1 = rf(_a0, _a1)
 	} else {
 		r1 = ret.Error(1)

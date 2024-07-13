@@ -336,9 +336,9 @@ func (_m *Service) SecretList(_a0 *model.Repo, _a1 *model.ListOptions) ([]*model
 	return r0, r1
 }
 
-// SecretListPipeline provides a mock function with given fields: _a0, _a1, _a2
-func (_m *Service) SecretListPipeline(_a0 *model.Repo, _a1 *model.Pipeline, _a2 *model.ListOptions) ([]*model.Secret, error) {
-	ret := _m.Called(_a0, _a1, _a2)
+// SecretListPipeline provides a mock function with given fields: _a0, _a1
+func (_m *Service) SecretListPipeline(_a0 *model.Repo, _a1 *model.Pipeline) ([]*model.Secret, error) {
+	ret := _m.Called(_a0, _a1)
 
 	if len(ret) == 0 {
 		panic("no return value specified for SecretListPipeline")
@@ -346,19 +346,19 @@ func (_m *Service) SecretListPipeline(_a0 *model.Repo, _a1 *model.Pipeline, _a2 
 
 	var r0 []*model.Secret
 	var r1 error
-	if rf, ok := ret.Get(0).(func(*model.Repo, *model.Pipeline, *model.ListOptions) ([]*model.Secret, error)); ok {
-		return rf(_a0, _a1, _a2)
+	if rf, ok := ret.Get(0).(func(*model.Repo, *model.Pipeline) ([]*model.Secret, error)); ok {
+		return rf(_a0, _a1)
 	}
-	if rf, ok := ret.Get(0).(func(*model.Repo, *model.Pipeline, *model.ListOptions) []*model.Secret); ok {
-		r0 = rf(_a0, _a1, _a2)
+	if rf, ok := ret.Get(0).(func(*model.Repo, *model.Pipeline) []*model.Secret); ok {
+		r0 = rf(_a0, _a1)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]*model.Secret)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(*model.Repo, *model.Pipeline, *model.ListOptions) error); ok {
-		r1 = rf(_a0, _a1, _a2)
+	if rf, ok := ret.Get(1).(func(*model.Repo, *model.Pipeline) error); ok {
+		r1 = rf(_a0, _a1)
 	} else {
 		r1 = ret.Error(1)
 	}
