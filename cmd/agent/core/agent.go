@@ -135,7 +135,7 @@ func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 	grpcClientCtx, grpcClientCtxCancel := context.WithCancelCause(context.Background())
 	defer grpcClientCtxCancel(nil)
 	authClient := agent_rpc.NewAuthGrpcClient(authConn, agentToken, agentConfig.AgentID)
-	authInterceptor, err := agent_rpc.NewAuthInterceptor(grpcClientCtx, authClient, authInterceptorRefreshInterval)
+	authInterceptor, err := agent_rpc.NewAuthInterceptor(grpcClientCtx, authClient, authInterceptorRefreshInterval) //nolint:contextcheck
 	if err != nil {
 		return err
 	}
@@ -161,7 +161,7 @@ func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 	grpcCtx := metadata.NewOutgoingContext(grpcClientCtx, metadata.Pairs("hostname", hostname))
 
 	// check if grpc server version is compatible with agent
-	grpcServerVersion, err := client.Version(grpcCtx)
+	grpcServerVersion, err := client.Version(grpcCtx) //nolint:contextcheck
 	if err != nil {
 		log.Error().Err(err).Msg("could not get grpc server version")
 		return err
@@ -197,7 +197,7 @@ func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 	log.Debug().Msgf("loaded %s backend engine", backendEngine.Name())
 
 	maxWorkflows := int(c.Int("max-workflows"))
-	agentConfig.AgentID, err = client.RegisterAgent(grpcCtx, engInfo.Platform, backendEngine.Name(), version.String(), maxWorkflows)
+	agentConfig.AgentID, err = client.RegisterAgent(grpcCtx, engInfo.Platform, backendEngine.Name(), version.String(), maxWorkflows) //nolint:contextcheck
 	if err != nil {
 		return err
 	}
