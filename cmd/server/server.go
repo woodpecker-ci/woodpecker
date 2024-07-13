@@ -60,7 +60,12 @@ func run(ctx context.Context, c *cli.Command) error {
 	ctx, ctxCancel := context.WithCancelCause(ctx)
 	defer ctxCancel(nil)
 	stopServerFunc = func(err error) {
-		log.Info().Msg("Start shutdown of whole server")
+		msg := "Start shutdown of whole server"
+		if err != nil {
+			log.Error().Err(err).Msg(msg)
+		} else {
+			log.Info().Msg(msg)
+		}
 		shutdownCtx, shutdownCancelFunc = context.WithTimeout(shutdownCtx, shutdownTimeout)
 		ctxCancel(err)
 	}
@@ -105,7 +110,7 @@ func run(ctx context.Context, c *cli.Command) error {
 	}
 
 	// wait for all services until one do stops with an error
-	serviceWaitingGroup := &errgroup.Group{}
+	serviceWaitingGroup := errgroup.Group{}
 
 	log.Info().Msgf("starting Woodpecker server with version '%s'", version.String())
 
@@ -117,6 +122,7 @@ func run(ctx context.Context, c *cli.Command) error {
 			go stopServerFunc(err)
 			return err
 		}
+		log.Info().Msg("cron service stopped")
 		return nil
 	})
 
