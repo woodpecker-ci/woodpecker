@@ -1414,7 +1414,7 @@ const HookRelease = `
     "tag_name": "0.0.5",
     "target_commitish": "main",
     "name": "Version 0.0.5",
-    "body": "release notes",
+    "body": "",
     "url": "https://git.xxx/api/v1/repos/anbraten/demo/releases/48",
     "html_url": "https://git.xxx/anbraten/demo/releases/tag/0.0.5",
     "tarball_url": "https://git.xxx/anbraten/demo/archive/0.0.5.tar.gz",

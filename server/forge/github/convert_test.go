@@ -214,7 +214,7 @@ func Test_helper(t *testing.T) {
 			g.Assert(pipeline.Refspec).Equal("changes:main")
 			g.Assert(pipeline.Commit).Equal(*from.PullRequest.Head.SHA)
 			g.Assert(pipeline.Message).Equal(*from.PullRequest.Title)
-			g.Assert(pipeline.PRTitleDescription).Equal(*from.PullRequest.Title)
+			g.Assert(pipeline.Title).Equal(*from.PullRequest.Title)
 			g.Assert(pipeline.Author).Equal(*from.PullRequest.User.Login)
 			g.Assert(pipeline.Avatar).Equal(*from.PullRequest.User.AvatarURL)
 			g.Assert(pipeline.Sender).Equal(*from.Sender.Login)

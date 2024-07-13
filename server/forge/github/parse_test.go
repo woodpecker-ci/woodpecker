@@ -75,8 +75,6 @@ func Test_parser(t *testing.T) {
 				g.Assert(r).IsNotNil()
 				g.Assert(b).IsNotNil()
 				g.Assert(b.Event).Equal(model.EventPush)
-				assert.EqualValues(t, "Fix multiline secrets replacer (#700)", b.PRTitleDescription)
-				assert.EqualValues(t, "Fix multiline secrets replacer (#700)\n\n* Fix multiline secrets replacer\r\n\r\n* Add tests", b.Message)
 				sort.Strings(b.ChangedFiles)
 				g.Assert(b.ChangedFiles).Equal([]string{"pipeline/shared/replace_secrets.go", "pipeline/shared/replace_secrets_test.go"})
 			})
