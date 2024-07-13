@@ -91,7 +91,7 @@ func TestHook(t *testing.T) {
 			_manager.On("SecretServiceFromRepo", repo).Return(_secretService)
 			_secretService.On("SecretListPipeline", repo, mock.Anything, mock.Anything).Return(nil, nil)
 			_manager.On("RegistryServiceFromRepo", repo).Return(_registryService)
-			_registryService.On("RegistryList", repo, mock.Anything).Return(nil, nil)
+			_registryService.On("RegistryListPipeline", repo, mock.Anything).Return(nil, nil)
 			_manager.On("EnvironmentService").Return(nil)
 			_store.On("DeletePipeline", mock.Anything).Return(nil)
 
