@@ -26,19 +26,19 @@ const (
 
 // Step represents a process in the pipeline.
 type Step struct {
-	ID         int64       `json:"id"                   xorm:"pk autoincr 'step_id'"`
-	UUID       string      `json:"uuid"                 xorm:"INDEX 'step_uuid'"`
-	PipelineID int64       `json:"pipeline_id"          xorm:"UNIQUE(s) INDEX 'step_pipeline_id'"`
-	PID        int         `json:"pid"                  xorm:"UNIQUE(s) 'step_pid'"`
-	PPID       int         `json:"ppid"                 xorm:"step_ppid"`
-	Name       string      `json:"name"                 xorm:"step_name"`
-	State      StatusValue `json:"state"                xorm:"step_state"`
-	Error      string      `json:"error,omitempty"      xorm:"TEXT 'step_error'"`
-	Failure    string      `json:"-"                    xorm:"step_failure"`
-	ExitCode   int         `json:"exit_code"            xorm:"step_exit_code"`
-	Started    int64       `json:"start_time,omitempty" xorm:"step_started"`
-	Stopped    int64       `json:"end_time,omitempty"   xorm:"step_stopped"`
-	Type       StepType    `json:"type,omitempty"       xorm:"step_type"`
+	ID         int64       `json:"id"                   xorm:"pk autoincr 'id'"`
+	UUID       string      `json:"uuid"                 xorm:"INDEX 'uuid'"`
+	PipelineID int64       `json:"pipeline_id"          xorm:"UNIQUE(s) INDEX 'pipeline_id'"`
+	PID        int         `json:"pid"                  xorm:"UNIQUE(s) 'pid'"`
+	PPID       int         `json:"ppid"                 xorm:"ppid"`
+	Name       string      `json:"name"                 xorm:"name"`
+	State      StatusValue `json:"state"                xorm:"state"`
+	Error      string      `json:"error,omitempty"      xorm:"TEXT 'error'"`
+	Failure    string      `json:"-"                    xorm:"failure"`
+	ExitCode   int         `json:"exit_code"            xorm:"exit_code"`
+	Started    int64       `json:"start_time,omitempty" xorm:"started"`
+	Finished   int64       `json:"end_time,omitempty"   xorm:"stopped"`
+	Type       StepType    `json:"type,omitempty"       xorm:"type"`
 } //	@name Step
 
 // TableName return database table name for xorm.

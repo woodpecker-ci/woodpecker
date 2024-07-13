@@ -130,6 +130,10 @@
                 "saved": "Benutzer gespeichert",
                 "show": "Benutzer anzeigen",
                 "users": "Benutzer"
+            },
+            "registries": {
+                "desc": "Globale Register-Zugangsdaten können für private Images aller Pipelines des Servers verwendet werden.",
+                "warning": "Diese Register-Zugangsdaten sind für alle Benutzer des Servers verfügbar."
             }
         }
     },
@@ -176,7 +180,10 @@
                 "show": "Geheimnisse anzeigen",
                 "value": "Wert"
             },
-            "settings": "Einstellungen"
+            "settings": "Einstellungen",
+            "registries": {
+                "desc": "Register-Zugangsdaten der Organisation können für private Images aller Organisation-Pipelines verwendet werden."
+            }
         }
     },
     "org_level_secret": "Organisationsgeheimnis",
@@ -335,7 +342,7 @@
                     "placeholder": "Name des Cron"
                 },
                 "next_exec": "Nächste Ausführung",
-                "none": "Derzeit existieren keine Crons.",
+                "none": "Es gibt noch keine Crons.",
                 "not_executed_yet": "Noch nicht ausgeführt",
                 "run": "Jetzt ausführen",
                 "save": "Cron speichern",
@@ -561,5 +568,30 @@
         "edit": "Geheimnis bearbeiten",
         "delete": "Geheimnis löschen"
     },
-    "settings": "Einstellungen"
+    "settings": "Einstellungen",
+    "oauth_error": "Fehler bei der Authentifizierung mit OAuth-Anbieter",
+    "internal_error": "Ein interner Fehler ist aufgetreten",
+    "registration_closed": "Die Registrierung ist geschlossen",
+    "access_denied": "Du darfst nicht auf diese Instanz zugreifen",
+    "registries": {
+        "delete_confirm": "Möchtest du dieses Register wirklich löschen?",
+        "address": {
+            "desc": "Register-Adresse (z. B. docker.io)",
+            "address": "Adresse"
+        },
+        "credentials": "Register-Zugangsdaten",
+        "none": "Es gibt noch keine Register-Zugangsdaten.",
+        "registries": "Register",
+        "desc": "Register-Zugangsdaten können für private Images in deiner Pipelines verwendet werden.",
+        "deleted": "Register-Zugangsdaten gelöscht",
+        "save": "Register speichern",
+        "add": "Register hinzufügen",
+        "view": "Register anzeigen",
+        "edit": "Register bearbeiten",
+        "delete": "Register löschen",
+        "created": "Register-Zugangsdaten erstellt",
+        "saved": "Register-Zugangsdaten gespeichert",
+        "show": "Register anzeigen"
+    },
+    "invalid_state": "Der OAuth-Status ist ungültig."
 }

@@ -44,13 +44,13 @@ func parsePipeline(forge forge.Forge, store store.Store, currentPipeline *model.
 	}
 
 	secretService := server.Config.Services.Manager.SecretServiceFromRepo(repo)
-	secs, err := secretService.SecretListPipeline(repo, currentPipeline, &model.ListOptions{All: true})
+	secs, err := secretService.SecretListPipeline(repo, currentPipeline)
 	if err != nil {
 		log.Error().Err(err).Msgf("error getting secrets for %s#%d", repo.FullName, currentPipeline.Number)
 	}
 
 	registryService := server.Config.Services.Manager.RegistryServiceFromRepo(repo)
-	regs, err := registryService.RegistryList(repo, &model.ListOptions{All: true})
+	regs, err := registryService.RegistryListPipeline(repo, currentPipeline)
 	if err != nil {
 		log.Error().Err(err).Msgf("error getting registry credentials for %s#%d", repo.FullName, currentPipeline.Number)
 	}
@@ -97,9 +97,9 @@ func createPipelineItems(c context.Context, forge forge.Forge, store store.Store
 ) (*model.Pipeline, []*stepbuilder.Item, error) {
 	pipelineItems, err := parsePipeline(forge, store, currentPipeline, user, repo, yamls, envs)
 	if pipeline_errors.HasBlockingErrors(err) {
-		currentPipeline, uerr := UpdateToStatusError(store, *currentPipeline, err)
-		if uerr != nil {
-			log.Error().Err(uerr).Msgf("error setting error status of pipeline for %s#%d", repo.FullName, currentPipeline.Number)
+		currentPipeline, uErr := UpdateToStatusError(store, *currentPipeline, err)
+		if uErr != nil {
+			log.Error().Err(uErr).Msgf("error setting error status of pipeline for %s#%d", repo.FullName, currentPipeline.Number)
 		} else {
 			updatePipelineStatus(c, forge, currentPipeline, repo, user)
 		}

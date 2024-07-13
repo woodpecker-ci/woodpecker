@@ -10,7 +10,6 @@
   "search": "Search…",
   "username": "Username",
   "password": "Password",
-  "url": "URL",
   "back": "Back",
   "unknown_error": "An unknown error occurred",
   "documentation_for": "Documentation for \"{topic}\"",
@@ -25,11 +24,6 @@
   },
   "time": {
     "template": "MMM D, YYYY, HH:mm z",
-    "weeks_short": "w",
-    "days_short": "d",
-    "hours_short": "h",
-    "min_short": "min",
-    "sec_short": "sec",
     "not_started": "not started yet"
   },
   "repo": {
@@ -65,12 +59,10 @@
     "user_none": "This organization / user does not have any projects yet.",
     "not_allowed": "You are not allowed to access this repository",
     "enable": {
-      "reload": "Reload repositories",
       "enable": "Enable",
       "enabled": "Already enabled",
       "disabled": "Disabled",
-      "success": "Repository enabled",
-      "list_reloaded": "Repository list reloaded"
+      "success": "Repository enabled"
     },
     "open_in_forge": "Open repository in forge",
     "settings": {
@@ -129,24 +121,6 @@
           "cancel": "Cancel previous pipelines",
           "desc": "Enable to cancel pending and running pipelines of the same event and context before starting the newly triggered one."
         }
-      },
-      "registries": {
-        "registries": "Registries",
-        "credentials": "Registry credentials",
-        "desc": "Registries credentials can be added to use private images for your pipeline.",
-        "show": "Show registries",
-        "add": "Add registry",
-        "none": "There are no registry credentials yet.",
-        "save": "Save registry",
-        "created": "Registry credentials created",
-        "saved": "Registry credentials saved",
-        "deleted": "Registry credentials deleted",
-        "address": {
-          "address": "Address",
-          "placeholder": "Registry Address (e.g. docker.io)"
-        },
-        "edit": "Edit registry",
-        "delete": "Delete registry"
       },
       "crons": {
         "crons": "Crons",
@@ -209,7 +183,6 @@
       "tasks": "Tasks",
       "config": "Config",
       "files": "Changed files ({files})",
-      "no_files": "No files have been changed.",
       "no_pipelines": "No pipelines have been started yet.",
       "no_pipeline_steps": "No pipeline steps available!",
       "step_not_started": "This step hasn't started yet.",
@@ -275,6 +248,9 @@
       "not_allowed": "You are not allowed to access this organization's settings",
       "secrets": {
         "desc": "Organization secrets can be passed to all organization's repository individual pipeline steps at runtime as environmental variables."
+      },
+      "registries": {
+        "desc": "Organization registry credentials can be added to use private images for all organization's pipelines."
       }
     }
   },
@@ -284,6 +260,10 @@
       "secrets": {
         "desc": "Global secrets can be passed to all repositories individual pipeline steps at runtime as environmental variables.",
         "warning": "These secrets will be available for all server users."
+      },
+      "registries": {
+        "desc": "Global registry credentials can be added to use private images for all server's pipelines.",
+        "warning": "These registry creditentials will be available for all server users."
       },
       "agents": {
         "agents": "Agents",
@@ -408,6 +388,9 @@
       "secrets": {
         "desc": "User secrets can be passed to all user's repository individual pipeline steps at runtime as environmental variables."
       },
+      "registries": {
+        "desc": "User registries credentials can be added to use private images for all individual pipelines."
+      },
       "cli_and_api": {
         "cli_and_api": "CLI & API",
         "desc": "Personal Access Token, CLI and API usage",
@@ -418,10 +401,7 @@
         "reset_token": "Reset token",
         "swagger_ui": "Swagger UI"
       }
-    },
-    "oauth_error": "Error while authenticating against OAuth provider",
-    "internal_error": "Some internal error occurred",
-    "access_denied": "You are not allowed to login"
+    }
   },
   "secrets": {
     "secrets": "Secrets",
@@ -444,9 +424,28 @@
       "events": "Available at following events",
       "pr_warning": "Please be careful with this option as a bad actor can submit a malicious pull request that exposes your secrets."
     },
-    "plugins_only": "Only available for plugins",
     "edit": "Edit secret",
     "delete": "Delete secret"
+  },
+  "registries": {
+    "registries": "Registries",
+    "credentials": "Registry credentials",
+    "desc": "Registries credentials can be added to use private images for your pipeline.",
+    "none": "There are no registry credentials yet.",
+    "address": {
+      "address": "Address",
+      "desc": "Registry Address (e.g. docker.io)"
+    },
+    "show": "Show registries",
+    "save": "Save registry",
+    "add": "Add registry",
+    "view": "View registry",
+    "edit": "Edit registry",
+    "delete": "Delete registry",
+    "delete_confirm": "Do you really want to delete this registry?",
+    "created": "Registry credentials created",
+    "saved": "Registry credentials saved",
+    "deleted": "Registry credentials deleted"
   },
   "default": "default",
   "info": "Info",
@@ -461,5 +460,10 @@
   "cli_login_failed": "Login to CLI failed",
   "cli_login_denied": "Login to CLI denied",
   "return_to_cli": "You can now close this tab and return to the CLI.",
-  "settings": "Settings"
+  "settings": "Settings",
+  "oauth_error": "Error while authenticating against OAuth provider",
+  "internal_error": "Some internal error occurred",
+  "registration_closed": "The registration is closed",
+  "access_denied": "You are not allowed to access this instance",
+  "invalid_state": "The OAuth state is invalid"
 }

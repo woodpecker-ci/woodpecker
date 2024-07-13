@@ -185,7 +185,26 @@ func dropTableColumns(sess *xorm.Session, tableName string, columnNames ...strin
 func alterColumnDefault(sess *xorm.Session, table, column, defValue string) error {
 	dialect := sess.Engine().Dialect().URI().DBType
 	switch dialect {
-	case schemas.MYSQL, schemas.POSTGRES:
+	case schemas.MYSQL:
+		sql := fmt.Sprintf("SHOW COLUMNS FROM `%s` WHERE lower(field) = '%s'", table, strings.ToLower(column))
+		res, err := sess.Query(sql)
+		if err != nil {
+			return err
+		}
+
+		if len(res) == 0 || len(res[0]["Type"]) == 0 {
+			return fmt.Errorf("column %s data type in table %s can not be detected", column, table)
+		}
+
+		dataType := string(res[0]["Type"])
+		var nullable string
+		if string(res[0]["Null"]) == "NO" {
+			nullable = "NOT NULL"
+		}
+
+		_, err = sess.Exec(fmt.Sprintf("ALTER TABLE `%s` MODIFY `%s` %s %s DEFAULT %s;", table, column, dataType, nullable, defValue))
+		return err
+	case schemas.POSTGRES:
 		_, err := sess.Exec(fmt.Sprintf("ALTER TABLE `%s` ALTER COLUMN `%s` SET DEFAULT %s;", table, column, defValue))
 		return err
 	case schemas.SQLITE:
@@ -195,6 +214,7 @@ func alterColumnDefault(sess *xorm.Session, table, column, defValue string) erro
 	}
 }
 
+//nolint:unparam
 func alterColumnNull(sess *xorm.Session, table, column string, null bool) error {
 	val := "NULL"
 	if !null {
@@ -203,7 +223,26 @@ func alterColumnNull(sess *xorm.Session, table, column string, null bool) error 
 	dialect := sess.Engine().Dialect().URI().DBType
 	switch dialect {
 	case schemas.MYSQL:
-		_, err := sess.Exec(fmt.Sprintf("ALTER TABLE `%s` COLUMN `%s` SET %s;", table, column, val))
+		sql := fmt.Sprintf("SHOW COLUMNS FROM `%s` WHERE lower(field) = '%s'", table, strings.ToLower(column))
+		res, err := sess.Query(sql)
+		if err != nil {
+			return err
+		}
+
+		if len(res) == 0 || len(res[0]["Type"]) == 0 {
+			return fmt.Errorf("column %s data type in table %s can not be detected", column, table)
+		}
+
+		dataType := string(res[0]["Type"])
+		defValue := string(res[0]["Default"])
+
+		if defValue != "NULL" && defValue != "" {
+			defValue = fmt.Sprintf("DEFAULT '%s'", defValue)
+		} else {
+			defValue = ""
+		}
+
+		_, err = sess.Exec(fmt.Sprintf("ALTER TABLE `%s` MODIFY `%s` %s %s %s;", table, column, dataType, val, defValue))
 		return err
 	case schemas.POSTGRES:
 		_, err := sess.Exec(fmt.Sprintf("ALTER TABLE `%s` ALTER COLUMN `%s` SET %s;", table, column, val))

@@ -100,16 +100,7 @@ func (c *client) URL() string {
 // Login authenticates the session and returns the forge user details.
 func (c *client) Login(ctx context.Context, req *forge_types.OAuthRequest) (*model.User, string, error) {
 	config := c.newConfig()
-	redirectURL := config.AuthCodeURL("woodpecker")
-
-	// check the OAuth errors
-	if req.Error != "" {
-		return nil, redirectURL, &forge_types.AuthError{
-			Err:         req.Error,
-			Description: req.ErrorDescription,
-			URI:         req.ErrorURI,
-		}
-	}
+	redirectURL := config.AuthCodeURL(req.State)
 
 	// check the OAuth code
 	if len(req.Code) == 0 {
@@ -260,7 +251,7 @@ func (c *client) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model
 	}
 
 	fc := make(chan *forge_types.FileMeta)
-	errc := make(chan error)
+	errChan := make(chan error)
 
 	for _, file := range data {
 		go func(path string) {
@@ -269,7 +260,7 @@ func (c *client) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model
 				if errors.Is(err, &forge_types.ErrConfigNotFound{}) {
 					err = fmt.Errorf("git tree reported existence of file but we got: %s", err.Error())
 				}
-				errc <- err
+				errChan <- err
 			} else {
 				fc <- &forge_types.FileMeta{
 					Name: path,
@@ -283,7 +274,7 @@ func (c *client) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model
 
 	for i := 0; i < len(data); i++ {
 		select {
-		case err := <-errc:
+		case err := <-errChan:
 			return nil, err
 		case fileMeta := <-fc:
 			files = append(files, fileMeta)
@@ -291,7 +282,7 @@ func (c *client) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model
 	}
 
 	close(fc)
-	close(errc)
+	close(errChan)
 
 	return files, nil
 }
@@ -474,8 +465,8 @@ func matchingEmail(emails []*github.UserEmail, rawURL string) *github.UserEmail 
 }
 
 // matchingHooks returns matching hook.
-func matchingHooks(hooks []*github.Hook, rawurl string) *github.Hook {
-	link, err := url.Parse(rawurl)
+func matchingHooks(hooks []*github.Hook, rawURL string) *github.Hook {
+	link, err := url.Parse(rawURL)
 	if err != nil {
 		return nil
 	}
@@ -662,9 +653,6 @@ func (c *client) getTagCommitSHA(ctx context.Context, repo *model.Repo, tagName 
 	}
 
 	gh := c.newClientToken(ctx, user.Token)
-	if err != nil {
-		return "", err
-	}
 
 	page := 1
 	var tag *github.RepositoryTag

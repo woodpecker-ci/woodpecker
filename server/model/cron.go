@@ -21,14 +21,14 @@ import (
 )
 
 type Cron struct {
-	ID        int64  `json:"id"                  xorm:"pk autoincr"`
-	Name      string `json:"name"                xorm:"UNIQUE(s) INDEX"`
+	ID        int64  `json:"id"                  xorm:"pk autoincr 'id'"`
+	Name      string `json:"name"                xorm:"name UNIQUE(s) INDEX"`
 	RepoID    int64  `json:"repo_id"             xorm:"repo_id UNIQUE(s) INDEX"`
 	CreatorID int64  `json:"creator_id"          xorm:"creator_id INDEX"`
-	NextExec  int64  `json:"next_exec"`
-	Schedule  string `json:"schedule"            xorm:"NOT NULL"` //	@weekly,	3min, ...
-	Created   int64  `json:"created_at"          xorm:"created NOT NULL DEFAULT 0"`
-	Branch    string `json:"branch"`
+	NextExec  int64  `json:"next_exec"           xorm:"next_exec"`
+	Schedule  string `json:"schedule"            xorm:"schedule NOT NULL"`          //	@weekly,	3min, ...
+	Created   int64  `json:"created_at"          xorm:"created NOT NULL DEFAULT 0"` // TODO change JSON field to "created" in 3.0
+	Branch    string `json:"branch"              xorm:"branch"`
 } //	@name Cron
 
 // TableName returns the database table name for xorm.

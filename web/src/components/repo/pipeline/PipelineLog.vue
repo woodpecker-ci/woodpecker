@@ -60,8 +60,9 @@
               'bg-opacity-30 bg-blue-600': isSelected(line),
               underline: isSelected(line),
             }"
-            >{{ line.number }}</a
           >
+            {{ line.number }}
+          </a>
           <!-- eslint-disable vue/no-v-html -->
           <span
             class="align-top whitespace-pre-wrap break-words"
@@ -80,8 +81,9 @@
               'bg-opacity-40 dark:bg-opacity-50 bg-yellow-600 dark:bg-yellow-800': line.type === 'warning',
               'bg-opacity-30 bg-blue-600': isSelected(line),
             }"
-            >{{ formatTime(line.time) }}</span
           >
+            {{ formatTime(line.time) }}
+          </span>
         </div>
       </div>
 
@@ -110,7 +112,7 @@ import { useStorage } from '@vueuse/core';
 import { AnsiUp } from 'ansi_up';
 import { decode } from 'js-base64';
 import { debounce } from 'lodash';
-import { computed, inject, nextTick, onMounted, Ref, ref, toRef, watch } from 'vue';
+import { computed, inject, nextTick, onBeforeUnmount, onMounted, ref, toRef, watch, type Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
 
@@ -118,16 +120,16 @@ import IconButton from '~/components/atomic/IconButton.vue';
 import PipelineStatusIcon from '~/components/repo/pipeline/PipelineStatusIcon.vue';
 import useApiClient from '~/compositions/useApiClient';
 import useNotifications from '~/compositions/useNotifications';
-import { Pipeline, Repo, RepoPermissions } from '~/lib/api/types';
+import type { Pipeline, Repo, RepoPermissions } from '~/lib/api/types';
 import { findStep, isStepFinished, isStepRunning } from '~/utils/helpers';
 
-type LogLine = {
+interface LogLine {
   index: number;
   number: number;
-  text: string;
+  text?: string;
   time?: number;
   type: 'error' | 'warning' | null;
-};
+}
 
 const props = defineProps<{
   pipeline: Pipeline;
@@ -182,7 +184,7 @@ function writeLog(line: Partial<LogLine>) {
   logBuffer.value.push({
     index: line.index ?? 0,
     number: (line.index ?? 0) + 1,
-    text: ansiUp.value.ansi_to_html(line.text ?? ''),
+    text: ansiUp.value.ansi_to_html(`${decode(line.text ?? '')}\n`),
     time: line.time ?? 0,
     type: null, // TODO: implement way to detect errors and warnings
   });
@@ -246,13 +248,13 @@ async function download() {
     downloadInProgress.value = true;
     logs = await apiClient.getLogs(repo.value.id, pipeline.value.number, step.value.id);
   } catch (e) {
-    notifications.notifyError(e, i18n.t('repo.pipeline.log_download_error'));
+    notifications.notifyError(e as Error, i18n.t('repo.pipeline.log_download_error'));
     return;
   } finally {
     downloadInProgress.value = false;
   }
   const fileURL = window.URL.createObjectURL(
-    new Blob([logs.map((line) => decode(line.data)).join('')], {
+    new Blob([logs.map((line) => decode(line.data ?? '')).join('\n')], {
       type: 'text/plain',
     }),
   );
@@ -275,18 +277,16 @@ async function loadLogs() {
     return;
   }
 
+  if (!repo) {
+    throw new Error('Unexpected: "repo" should be provided at this place');
+  }
+
   log.value = undefined;
   logBuffer.value = [];
   ansiUp.value = new AnsiUp();
   ansiUp.value.use_classes = true;
 
-  if (!repo) {
-    throw new Error('Unexpected: "repo" should be provided at this place');
-  }
-
-  if (stream.value) {
-    stream.value.close();
-  }
+  stream.value?.close();
 
   if (!hasLogs.value || !step.value) {
     return;
@@ -295,12 +295,12 @@ async function loadLogs() {
   if (isStepFinished(step.value)) {
     loadedStepSlug.value = stepSlug.value;
     const logs = await apiClient.getLogs(repo.value.id, pipeline.value.number, step.value.id);
-    logs?.forEach((line) => writeLog({ index: line.line, text: decode(line.data), time: line.time }));
+    logs?.forEach((line) => writeLog({ index: line.line, text: line.data, time: line.time }));
     flushLogs(false);
-  } else if (isStepRunning(step.value)) {
+  } else if (step.value.state === 'pending' || isStepRunning(step.value)) {
     loadedStepSlug.value = stepSlug.value;
     stream.value = apiClient.streamLogs(repo.value.id, pipeline.value.number, step.value.id, (line) => {
-      writeLog({ index: line.line, text: decode(line.data), time: line.time });
+      writeLog({ index: line.line, text: line.data, time: line.time });
       flushLogs(true);
     });
   }
@@ -312,7 +312,7 @@ async function deleteLogs() {
   }
 
   // TODO: use proper dialog (copy-pasted from web/src/components/secrets/SecretList.vue:deleteSecret)
-  // eslint-disable-next-line no-alert, no-restricted-globals
+  // eslint-disable-next-line no-alert
   if (!confirm(i18n.t('repo.pipeline.log_delete_confirm'))) {
     return;
   }
@@ -321,12 +321,16 @@ async function deleteLogs() {
     await apiClient.deleteLogs(repo.value.id, pipeline.value.number, step.value.id);
     log.value = [];
   } catch (e) {
-    notifications.notifyError(e, i18n.t('repo.pipeline.log_delete_error'));
+    notifications.notifyError(e as Error, i18n.t('repo.pipeline.log_delete_error'));
   }
 }
 
 onMounted(async () => {
   await loadLogs();
+});
+
+onBeforeUnmount(() => {
+  stream.value?.close();
 });
 
 watch(stepSlug, async () => {

@@ -1,7 +1,7 @@
 <template>
   <div
     class="flex items-center justify-center"
-    :title="$t('repo.pipeline.status.status', { status: $t(`repo.pipeline.status.${status}`) })"
+    :title="$t('repo.pipeline.status.status', { status: statusDescriptions[status] })"
   >
     <Icon
       :name="service ? 'settings' : `status-${status}`"
@@ -18,8 +18,10 @@
 </template>
 
 <script lang="ts" setup>
+import { useI18n } from 'vue-i18n';
+
 import Icon from '~/components/atomic/Icon.vue';
-import { PipelineStatus } from '~/lib/api/types';
+import type { PipelineStatus } from '~/lib/api/types';
 
 import { pipelineStatusColors } from './pipeline-status';
 
@@ -27,4 +29,22 @@ defineProps<{
   status: PipelineStatus;
   service?: boolean;
 }>();
+
+const { t } = useI18n();
+
+const statusDescriptions = {
+  blocked: t('repo.pipeline.status.blocked'),
+  declined: t('repo.pipeline.status.declined'),
+  error: t('repo.pipeline.status.error'),
+  failure: t('repo.pipeline.status.failure'),
+  killed: t('repo.pipeline.status.killed'),
+  pending: t('repo.pipeline.status.pending'),
+  running: t('repo.pipeline.status.running'),
+  skipped: t('repo.pipeline.status.skipped'),
+  started: t('repo.pipeline.status.started'),
+  success: t('repo.pipeline.status.success'),
+} satisfies {
+  // eslint-disable-next-line no-unused-vars
+  [_ in PipelineStatus]: string;
+};
 </script>
