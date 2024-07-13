@@ -64,11 +64,8 @@ func run(c *cli.Context) error {
 
 	ctx, ctxCancel := context.WithCancelCause(ctx)
 	stopServerFunc = func(err error) {
-		msg := "Start shutdown of whole server"
 		if err != nil {
-			log.Error().Err(err).Msg(msg)
-		} else {
-			log.Info().Msg(msg)
+			log.Error().Err(err).Msg("shutdown of whole server")
 		}
 		stopServerFunc = func(error) {}
 		shutdownCtx, shutdownCancelFunc = context.WithTimeout(shutdownCtx, shutdownTimeout)
