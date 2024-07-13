@@ -42,7 +42,7 @@ func main() {
 
 	setupSwaggerStaticConfig()
 
-	if err := app.Run(ctx, os.Args); err != nil {
+	if err := app.Run(os.Args); err != nil {
 		log.Error().Err(err).Msgf("error running server")
 	}
 }

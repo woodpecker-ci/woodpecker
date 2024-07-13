@@ -19,7 +19,6 @@ import (
 	"crypto/tls"
 	"errors"
 	"fmt"
-	"net"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
@@ -31,7 +30,7 @@ import (
 	prometheus_http "github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
-	"github.com/urfave/cli/v3"
+	"github.com/urfave/cli/v2"
 	"golang.org/x/sync/errgroup"
 
 	"go.woodpecker-ci.org/woodpecker/v2/server"
@@ -54,14 +53,14 @@ var (
 	shutdownCtx                                = context.Background()
 )
 
-func run(c *cli.Context) {
-	ctx := utils.WithContextSigtermCallback(c.Content, func() {
-		log.Info().Msg("termination signal is received, terminate cli")
-	})
-
-	if err := logger.SetupGlobalLogger(ctx, c, true); err != nil {
+func run(c *cli.Context) error {
+	if err := logger.SetupGlobalLogger(c, true); err != nil {
 		return err
 	}
+
+	ctx := utils.WithContextSigtermCallback(c.Context, func() {
+		log.Info().Msg("termination signal is received, terminate cli")
+	})
 
 	ctx, ctxCancel := context.WithCancelCause(ctx)
 	stopServerFunc = func(err error) {
@@ -101,7 +100,7 @@ func run(c *cli.Context) {
 		)
 	}
 
-	_store, err := setupStore(c)
+	_store, err := setupStore(ctx, c)
 	if err != nil {
 		return fmt.Errorf("can't setup store: %w", err)
 	}

@@ -6,6 +6,8 @@
 package mocks
 
 import (
+	context "context"
+
 	mock "github.com/stretchr/testify/mock"
 	model "go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
@@ -1404,17 +1406,17 @@ func (_m *Store) LogFind(_a0 *model.Step) ([]*model.LogEntry, error) {
 	return r0, r1
 }
 
-// Migrate provides a mock function with given fields: _a0
-func (_m *Store) Migrate(_a0 bool) error {
-	ret := _m.Called(_a0)
+// Migrate provides a mock function with given fields: _a0, _a1
+func (_m *Store) Migrate(_a0 context.Context, _a1 bool) error {
+	ret := _m.Called(_a0, _a1)
 
 	if len(ret) == 0 {
 		panic("no return value specified for Migrate")
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(bool) error); ok {
-		r0 = rf(_a0)
+	if rf, ok := ret.Get(0).(func(context.Context, bool) error); ok {
+		r0 = rf(_a0, _a1)
 	} else {
 		r0 = ret.Error(0)
 	}
