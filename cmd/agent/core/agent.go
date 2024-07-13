@@ -24,10 +24,10 @@ import (
 	"os"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/rs/zerolog/log"
-	"github.com/tevino/abool/v2"
 	"github.com/urfave/cli/v2"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -47,7 +47,13 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/version"
 )
 
+const (
+	reportHealthInterval           = time.Second * 10
+	authInterceptorRefreshInterval = time.Minute * 30
+)
+
 func run(c *cli.Context, backends []types.Backend) error {
+	cliCtx := c.Context
 	agentConfigPath := c.String("agent-config")
 	hostname := c.String("hostname")
 	if len(hostname) == 0 {
@@ -89,7 +95,7 @@ func run(c *cli.Context, backends []types.Backend) error {
 
 	agentToken := c.String("grpc-token")
 	authClient := agent_rpc.NewAuthGrpcClient(authConn, agentToken, agentConfig.AgentID)
-	authInterceptor, err := agent_rpc.NewAuthInterceptor(authClient, 30*time.Minute) //nolint:mnd
+	authInterceptor, err := agent_rpc.NewAuthInterceptor(cliCtx, authClient, authInterceptorRefreshInterval)
 	if err != nil {
 		return err
 	}
@@ -110,30 +116,25 @@ func run(c *cli.Context, backends []types.Backend) error {
 	defer conn.Close()
 
 	client := agent_rpc.NewGrpcClient(conn)
+	agentConfigPersisted := atomic.Bool{}
 
-	sigterm := abool.New()
-	ctx := metadata.NewOutgoingContext(
-		context.Background(),
-		metadata.Pairs("hostname", hostname),
-	)
-
-	agentConfigPersisted := abool.New()
-	ctx = utils.WithContextSigtermCallback(ctx, func() {
-		log.Info().Msg("termination signal is received, shutting down")
-		sigterm.Set()
-
+	go func() {
+		<-cliCtx.Done()
 		// Remove stateless agents from server
-		if agentConfigPersisted.IsNotSet() {
+		if !agentConfigPersisted.Load() {
 			log.Debug().Msg("unregistering agent from server")
-			err := client.UnregisterAgent(ctx)
+			// we want to run it explicit run when context got canceled so run it in background
+			err := client.UnregisterAgent(context.Background()) //nolint:contextcheck
 			if err != nil {
 				log.Err(err).Msg("failed to unregister agent from server")
 			}
 		}
-	})
+	}()
+
+	grpcCtx := metadata.NewOutgoingContext(cliCtx, metadata.Pairs("hostname", hostname))
 
 	// check if grpc server version is compatible with agent
-	grpcServerVersion, err := client.Version(ctx)
+	grpcServerVersion, err := client.Version(grpcCtx)
 	if err != nil {
 		log.Error().Err(err).Msg("could not get grpc server version")
 		return err
@@ -152,7 +153,7 @@ func run(c *cli.Context, backends []types.Backend) error {
 	wg.Add(parallel)
 
 	// new engine
-	backendCtx := context.WithValue(ctx, types.CliContext, c)
+	backendCtx := context.WithValue(cliCtx, types.CliContext, c)
 	backendName := c.String("backend-engine")
 	backendEngine, err := backend.FindBackend(backendCtx, backends, backendName)
 	if err != nil {
@@ -172,14 +173,14 @@ func run(c *cli.Context, backends []types.Backend) error {
 	}
 	log.Debug().Msgf("loaded %s backend engine", backendEngine.Name())
 
-	agentConfig.AgentID, err = client.RegisterAgent(ctx, engInfo.Platform, backendEngine.Name(), version.String(), parallel)
+	agentConfig.AgentID, err = client.RegisterAgent(grpcCtx, engInfo.Platform, backendEngine.Name(), version.String(), parallel)
 	if err != nil {
 		return err
 	}
 
 	if agentConfigPath != "" {
 		if err := writeAgentConfig(agentConfig, agentConfigPath); err == nil {
-			agentConfigPersisted.Set()
+			agentConfigPersisted.Store(true)
 		}
 	}
 
@@ -202,17 +203,17 @@ func run(c *cli.Context, backends []types.Backend) error {
 
 	go func() {
 		for {
-			if sigterm.IsSet() {
-				log.Debug().Msg("terminating health reporting")
-				return
-			}
-
-			err := client.ReportHealth(ctx)
+			err := client.ReportHealth(grpcCtx)
 			if err != nil {
 				log.Err(err).Msg("failed to report health")
 			}
 
-			<-time.After(time.Second * 10)
+			select {
+			case <-cliCtx.Done():
+				log.Debug().Msg("terminating health reporting")
+				return
+			case <-time.After(reportHealthInterval):
+			}
 		}
 	}()
 
@@ -221,17 +222,16 @@ func run(c *cli.Context, backends []types.Backend) error {
 		go func() {
 			defer wg.Done()
 
-			r := agent.NewRunner(client, filter, hostname, counter, &backendEngine)
+			runner := agent.NewRunner(client, filter, hostname, counter, &backendEngine)
 			log.Debug().Msgf("created new runner %d", i)
 
 			for {
-				if sigterm.IsSet() {
-					log.Debug().Msgf("terminating runner %d", i)
+				if cliCtx.Err() != nil {
 					return
 				}
 
 				log.Debug().Msg("polling new steps")
-				if err := r.Run(ctx); err != nil {
+				if err := runner.Run(cliCtx); err != nil {
 					log.Error().Err(err).Msg("pipeline done with error")
 					return
 				}
@@ -247,19 +247,19 @@ func run(c *cli.Context, backends []types.Backend) error {
 	return nil
 }
 
-func runWithRetry(backendEngines []types.Backend) func(context *cli.Context) error {
-	return func(context *cli.Context) error {
-		if err := logger.SetupGlobalLogger(context, true); err != nil {
+func runWithRetry(backendEngines []types.Backend) func(c *cli.Context) error {
+	return func(c *cli.Context) error {
+		if err := logger.SetupGlobalLogger(c, true); err != nil {
 			return err
 		}
 
 		initHealth()
 
-		retryCount := context.Int("connect-retry-count")
-		retryDelay := context.Duration("connect-retry-delay")
+		retryCount := int(c.Int("connect-retry-count"))
+		retryDelay := c.Duration("connect-retry-delay")
 		var err error
 		for i := 0; i < retryCount; i++ {
-			if err = run(context, backendEngines); status.Code(err) == codes.Unavailable {
+			if err = run(c, backendEngines); status.Code(err) == codes.Unavailable {
 				log.Warn().Err(err).Msg(fmt.Sprintf("cannot connect to server, retrying in %v", retryDelay))
 				time.Sleep(retryDelay)
 			} else {
