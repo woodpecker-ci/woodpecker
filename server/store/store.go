@@ -17,6 +17,8 @@ package store
 //go:generate mockery --name Store --output mocks --case underscore --note "+build test"
 
 import (
+	"context"
+
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
@@ -200,5 +202,5 @@ type Store interface {
 	// Store operations
 	Ping() error
 	Close() error
-	Migrate(bool) error
+	Migrate(context.Context, bool) error
 }
