@@ -69,7 +69,7 @@ func run(c *cli.Context, backends []types.Backend) error {
 
 	agentCtx, ctxCancel := context.WithCancelCause(ctx)
 	stopAgentFunc = func(err error) {
-		msg := "Start shutdown of whole agent"
+		msg := "shutdown of whole agent"
 		if err != nil {
 			log.Error().Err(err).Msg(msg)
 		} else {
