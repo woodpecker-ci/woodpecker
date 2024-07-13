@@ -43,6 +43,6 @@ func main() {
 	setupSwaggerStaticConfig()
 
 	if err := app.Run(os.Args); err != nil {
-		log.Fatal().Err(err).Msgf("error running server") //nolint:forbidigo
+		log.Error().Err(err).Msgf("error running server")
 	}
 }
