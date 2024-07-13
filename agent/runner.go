@@ -28,6 +28,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline"
 	backend "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/utils"
 )
 
 type Runner struct {
@@ -89,6 +90,13 @@ func (r *Runner) Run(runnerCtx, shutdownCtx context.Context) error { //nolint:co
 
 	workflowCtx, cancel := context.WithTimeout(ctxMeta, timeout)
 	defer cancel()
+
+	// Add sigterm support for internal context.
+	// Required when the pipeline is terminated by external signals
+	// like kubernetes.
+	workflowCtx = utils.WithContextSigtermCallback(workflowCtx, func() {
+		logger.Error().Msg("Received sigterm termination signal")
+	})
 
 	canceled := false
 	go func() {
