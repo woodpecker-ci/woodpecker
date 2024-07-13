@@ -1,5 +1,8 @@
 when:
-  event: tag
+  - event: tag
+  - event: pull_request
+    branch: ${CI_REPO_DEFAULT_BRANCH}
+    path: Makefile
 
 variables:
   - &golang_image 'docker.io/golang:1.22'
@@ -100,3 +103,5 @@ steps:
         - dist/*.rpm
         - dist/checksums.txt
       title: ${CI_COMMIT_TAG##v}
+    when:
+      event: tag
