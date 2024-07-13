@@ -180,11 +180,21 @@ function formatTime(time?: number): string {
   return time === undefined ? '' : `${time}s`;
 }
 
+function processText(text: string): string {
+  const urlRegex = /https?:\/\/\S+/g;
+  let txt = ansiUp.value.ansi_to_html(`${decode(text)}\n`);
+  txt = txt.replace(
+    urlRegex,
+    (url) => `<a href="${url}" target="_blank" rel="noopener noreferrer" class="underline">${url}</a>`,
+  );
+  return txt;
+}
+
 function writeLog(line: Partial<LogLine>) {
   logBuffer.value.push({
     index: line.index ?? 0,
     number: (line.index ?? 0) + 1,
-    text: ansiUp.value.ansi_to_html(`${decode(line.text ?? '')}\n`),
+    text: processText(line.text ?? ''),
     time: line.time ?? 0,
     type: null, // TODO: implement way to detect errors and warnings
   });
