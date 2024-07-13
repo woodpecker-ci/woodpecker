@@ -65,7 +65,7 @@ var (
 func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 	agentCtx, ctxCancel := context.WithCancelCause(ctx)
 	stopAgentFunc = func(err error) {
-		msg := "Start shutdown of whole agent"
+		msg := "shutdown of whole agent"
 		if err != nil {
 			log.Error().Err(err).Msg(msg)
 		} else {
@@ -272,7 +272,7 @@ func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 				}
 
 				log.Debug().Msg("polling new steps")
-				if err := runner.Run(agentCtx); err != nil {
+				if err := runner.Run(agentCtx, shutdownCtx); err != nil {
 					log.Error().Err(err).Msg("runner done with error")
 					return err
 				}
