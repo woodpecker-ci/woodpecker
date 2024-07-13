@@ -46,7 +46,7 @@ type Manager interface {
 	EnvironmentService() environment.Service
 	ForgeFromRepo(repo *model.Repo) (forge.Forge, error)
 	ForgeFromUser(user *model.User) (forge.Forge, error)
-	ForgeByID(id int64) (forge.Forge, error)
+	ForgeByID(forgeID int64) (forge.Forge, error)
 }
 
 type manager struct {

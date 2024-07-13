@@ -1,5 +1,6 @@
 {
   "cancel": "Cancel",
+  "login_with": "Login with {forge}",
   "login": "Login",
   "welcome": "Welcome to Woodpecker",
   "repos": "Repos",
@@ -219,6 +220,7 @@
         "push": "Push",
         "tag": "Tag",
         "pr": "Pull Request",
+        "pr_closed": "Pull Request merged / closed",
         "deploy": "Deploy",
         "cron": "Cron",
         "manual": "Manual",
@@ -388,6 +390,9 @@
       "secrets": {
         "desc": "User secrets can be passed to all user's repository individual pipeline steps at runtime as environmental variables."
       },
+      "registries": {
+        "desc": "User registries credentials can be added to use private images for all individual pipelines."
+      },
       "cli_and_api": {
         "cli_and_api": "CLI & API",
         "desc": "Personal Access Token, CLI and API usage",
@@ -462,5 +467,15 @@
   "internal_error": "Some internal error occurred",
   "registration_closed": "The registration is closed",
   "access_denied": "You are not allowed to access this instance",
-  "invalid_state": "The OAuth state is invalid"
+  "invalid_state": "The OAuth state is invalid",
+  "by_user": "by {user}",
+  "pushed_to": "pushed to",
+  "closed": "closed",
+  "deployed_to": "deployed to",
+  "created": "created",
+  "triggered": "triggered",
+  "pipeline_duration": "Pipeline duration",
+  "pipeline_since": "Pipeline was created {created} minutes ago",
+  "pipeline_has_warnings": "The pipeline has warnings",
+  "pipeline_has_errors": "The pipeline has errors"
 }

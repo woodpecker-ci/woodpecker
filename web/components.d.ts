@@ -116,6 +116,7 @@ declare module 'vue' {
     TextField: typeof import('./src/components/form/TextField.vue')['default']
     UserCLIAndAPITab: typeof import('./src/components/user/UserCLIAndAPITab.vue')['default']
     UserGeneralTab: typeof import('./src/components/user/UserGeneralTab.vue')['default']
+    UserRegistriesTab: typeof import('./src/components/user/UserRegistriesTab.vue')['default']
     UserSecretsTab: typeof import('./src/components/user/UserSecretsTab.vue')['default']
     Warning: typeof import('./src/components/atomic/Warning.vue')['default']
   }
