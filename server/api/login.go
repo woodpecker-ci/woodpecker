@@ -62,7 +62,7 @@ func HandleAuth(c *gin.Context) {
 	code := c.Request.FormValue("code")
 	state := c.Request.FormValue("state")
 	isCallback := code != "" && state != ""
-	forgeID := int64(-1) // we use -1 to fail if no forge-id was found
+	var forgeID int64
 
 	if isCallback { // validate the state token
 		stateToken, err := token.Parse([]token.Type{token.OAuthStateToken}, state, func(_ *token.Token) (string, error) {
