@@ -53,6 +53,8 @@ steps:
       - vendor
     image: *golang_image
     commands:
+      - apt update
+      - apt install -y zip
       - make release-agent
 
   build-cli:
@@ -60,6 +62,8 @@ steps:
       - vendor
     image: *golang_image
     commands:
+      - apt update
+      - apt install -y zip
       - make release-cli
 
   build-deb-rpm:
