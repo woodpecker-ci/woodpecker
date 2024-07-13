@@ -255,7 +255,7 @@ func runWithRetry(backendEngines []types.Backend) func(c *cli.Context) error {
 
 		initHealth()
 
-		retryCount := int(c.Int("connect-retry-count"))
+		retryCount := c.Int("connect-retry-count")
 		retryDelay := c.Duration("connect-retry-delay")
 		var err error
 		for i := 0; i < retryCount; i++ {
