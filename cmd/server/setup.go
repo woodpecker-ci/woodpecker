@@ -145,18 +145,11 @@ func setupJWTSecret(_store store.Store) (string, error) {
 }
 
 func setupEvilGlobals(ctx context.Context, c *cli.Context, s store.Store) error {
-	// secrets
-	var err error
-	server.Config.Server.JWTSecret, err = setupJWTSecret(s)
-	if err != nil {
-		return fmt.Errorf("could not setup jwt secret: %w", err)
-	}
-
 	// services
-	server.Config.Services.Queue = setupQueue(ctx, s)
+	server.Config.Services.Queue = setupQueue(c, s)
 	server.Config.Services.Logs = logging.New()
 	server.Config.Services.Pubsub = pubsub.New()
-	server.Config.Services.Membership = setupMembershipService(ctx, s)
+	server.Config.Services.Membership = setupMembershipService(c, s)
 	serviceManager, err := services.NewManager(c, s, setup.Forge)
 	if err != nil {
 		return fmt.Errorf("could not setup service manager: %w", err)
@@ -199,6 +192,10 @@ func setupEvilGlobals(ctx context.Context, c *cli.Context, s store.Store) error 
 	server.Config.Pipeline.Proxy.HTTPS = c.String("backend-https-proxy")
 
 	// server configuration
+	server.Config.Server.JWTSecret, err = setupJWTSecret(s)
+	if err != nil {
+		return fmt.Errorf("could not setup jwt secret: %w", err)
+	}
 	server.Config.Server.Cert = c.String("server-cert")
 	server.Config.Server.Key = c.String("server-key")
 	server.Config.Server.AgentToken = c.String("agent-secret")
