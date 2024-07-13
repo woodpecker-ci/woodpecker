@@ -107,7 +107,7 @@ const routes: RouteRecordRaw[] = [
       },
       {
         path: ':repoOwner/:repoName/:pathMatch(.*)*',
-        component: () => import('~/views/repo/RepoDeprecatedRedirect.vue'),
+        component: async () => import('~/views/repo/RepoDeprecatedRedirect.vue'),
         props: true,
       },
     ],
@@ -161,7 +161,7 @@ const routes: RouteRecordRaw[] = [
   },
   {
     path: `${rootPath}/cli/auth`,
-    component: () => import('~/views/cli/Auth.vue'),
+    component: async () => import('~/views/cli/Auth.vue'),
     meta: { authentication: 'required' },
   },
 
@@ -172,7 +172,7 @@ const routes: RouteRecordRaw[] = [
   },
   {
     path: `${rootPath}/:repoOwner/:repoName/:pathMatch(.*)*`,
-    component: () => import('~/views/repo/RepoDeprecatedRedirect.vue'),
+    component: async () => import('~/views/repo/RepoDeprecatedRedirect.vue'),
     props: true,
   },
 
