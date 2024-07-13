@@ -59,7 +59,7 @@ func run(c *cli.Context) error {
 	}
 
 	ctx := utils.WithContextSigtermCallback(c.Context, func() {
-		log.Info().Msg("termination signal is received, terminate cli")
+		log.Info().Msg("termination signal is received, shutting down server")
 	})
 
 	ctx, ctxCancel := context.WithCancelCause(ctx)
