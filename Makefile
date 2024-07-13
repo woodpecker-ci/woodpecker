@@ -257,7 +257,7 @@ release-server: ## Create server binaries for release
 	GOOS=$(TARGETOS) GOARCH=$(TARGETARCH) CGO_ENABLED=${CGO_ENABLED} go build -ldflags '${LDFLAGS}' -tags 'grpcnotrace $(TAGS)' -o ${DIST_DIR}/server/$(TARGETOS)_$(TARGETARCH)/woodpecker-server$(BIN_SUFFIX) go.woodpecker-ci.org/woodpecker/v2/cmd/server
 	# tar binary files
 	if [ "$(BIN_SUFFIX)" == ".exe" ]; then \
-	  zip ${DIST_DIR}/woodpecker-server_$(TARGETOS)_$(TARGETARCH).zip ${DIST_DIR}/server/$(TARGETOS)_$(TARGETARCH)/woodpecker-server.exe; \
+	  zip -j ${DIST_DIR}/woodpecker-server_$(TARGETOS)_$(TARGETARCH).zip ${DIST_DIR}/server/$(TARGETOS)_$(TARGETARCH)/woodpecker-server.exe; \
 	else \
 	  tar -cvzf ${DIST_DIR}/woodpecker-server_$(TARGETOS)_$(TARGETARCH).tar.gz -C ${DIST_DIR}/server/$(TARGETOS)_$(TARGETARCH) woodpecker-server; \
 	fi
