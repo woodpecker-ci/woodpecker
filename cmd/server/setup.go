@@ -146,10 +146,10 @@ func setupJWTSecret(_store store.Store) (string, error) {
 
 func setupEvilGlobals(ctx context.Context, c *cli.Context, s store.Store) error {
 	// services
-	server.Config.Services.Queue = setupQueue(c, s)
+	server.Config.Services.Queue = setupQueue(ctx, s)
 	server.Config.Services.Logs = logging.New()
 	server.Config.Services.Pubsub = pubsub.New()
-	server.Config.Services.Membership = setupMembershipService(c, s)
+	server.Config.Services.Membership = setupMembershipService(ctx, s)
 	serviceManager, err := services.NewManager(c, s, setup.Forge)
 	if err != nil {
 		return fmt.Errorf("could not setup service manager: %w", err)
