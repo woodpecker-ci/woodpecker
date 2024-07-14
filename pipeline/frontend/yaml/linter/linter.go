@@ -140,7 +140,7 @@ func (l *Linter) lintCommands(config *WorkflowConfig, c *types.Container, field 
 		return newLinterError("Cannot configure both commands and settings", config.File, fmt.Sprintf("%s.%s", field, c.Name), false)
 	}
 	if len(c.Settings) != 0 && len(c.Environment) != 0 {
-		return newLinterError("Cannot configure both commands and settings", config.File, fmt.Sprintf("%s.%s", field, c.Name), false)
+		return newLinterError("Cannot configure both environment and settings", config.File, fmt.Sprintf("%s.%s", field, c.Name), false)
 	}
 	return nil
 }
