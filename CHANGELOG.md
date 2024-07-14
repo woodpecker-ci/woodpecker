@@ -1,6 +1,6 @@
 # Changelog
 
-## [2.7.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.7.0) - 2024-07-13
+## [2.7.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.7.0) - 2024-07-14
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -62,6 +62,8 @@
 
 ### Misc
 
+- fix(deps): update module github.com/google/go-github/v62 to v63 [[#3910](https://github.com/woodpecker-ci/woodpecker/pull/3910)]
+- chore(deps): update docker.io/woodpeckerci/plugin-docker-buildx docker tag to v4.1.0 [[#3908](https://github.com/woodpecker-ci/woodpecker/pull/3908)]
 - Update plugin-git and add renovate trigger [[#3901](https://github.com/woodpecker-ci/woodpecker/pull/3901)]
 - chore(deps): update docker.io/mstruebing/editorconfig-checker docker tag to v3.0.3 [[#3903](https://github.com/woodpecker-ci/woodpecker/pull/3903)]
 - fix(deps): update golang-packages [[#3875](https://github.com/woodpecker-ci/woodpecker/pull/3875)]
