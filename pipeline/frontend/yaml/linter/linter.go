@@ -117,7 +117,7 @@ func (l *Linter) lintContainers(config *WorkflowConfig, area string) error {
 				linterErr = multierr.Append(linterErr, err)
 			}
 		}
-		if err := l.lintCommands(config, container, area); err != nil {
+		if err := l.lintSettings(config, container, area); err != nil {
 			linterErr = multierr.Append(linterErr, err)
 		}
 	}
@@ -132,14 +132,17 @@ func (l *Linter) lintImage(config *WorkflowConfig, c *types.Container, area stri
 	return nil
 }
 
-func (l *Linter) lintCommands(config *WorkflowConfig, c *types.Container, field string) error {
-	if len(c.Commands) == 0 && len(c.Environment) == 0 {
+func (l *Linter) lintSettings(config *WorkflowConfig, c *types.Container, field string) error {
+	if len(c.Settings) == 0 {
 		return nil
 	}
-	if len(c.Settings) != 0 && len(c.Commands) != 0 {
+	if len(c.Commands) != 0 {
 		return newLinterError("Cannot configure both commands and settings", config.File, fmt.Sprintf("%s.%s", field, c.Name), false)
 	}
-	if len(c.Settings) != 0 && len(c.Environment) != 0 {
+	if len(c.Entrypoint) != 0 {
+		return newLinterError("Cannot configure both entrypoint and settings", config.File, fmt.Sprintf("%s.%s", field, c.Name), false)
+	}
+	if len(c.Environment) != 0 {
 		return newLinterError("Cannot configure both environment and settings", config.File, fmt.Sprintf("%s.%s", field, c.Name), false)
 	}
 	return nil
