@@ -17,6 +17,7 @@
             # generic
             gnumake
             gnutar
+            zip
 
             # frontend
             nodejs_20
