@@ -133,15 +133,14 @@ func (l *Linter) lintImage(config *WorkflowConfig, c *types.Container, area stri
 }
 
 func (l *Linter) lintCommands(config *WorkflowConfig, c *types.Container, field string) error {
-	if len(c.Commands) == 0 {
+	if len(c.Commands) == 0 && len(c.Environment) == 0 {
 		return nil
 	}
-	if len(c.Settings) != 0 {
-		var keys []string
-		for key := range c.Settings {
-			keys = append(keys, key)
-		}
-		return newLinterError(fmt.Sprintf("Cannot configure both commands and custom attributes %v", keys), config.File, fmt.Sprintf("%s.%s", field, c.Name), false)
+	if len(c.Settings) != 0 && len(c.Commands) != 0 {
+		return newLinterError("Cannot configure both commands and settings", config.File, fmt.Sprintf("%s.%s", field, c.Name), false)
+	}
+	if len(c.Settings) != 0 && len(c.Environment) != 0 {
+		return newLinterError("Cannot configure both commands and settings", config.File, fmt.Sprintf("%s.%s", field, c.Name), false)
 	}
 	return nil
 }
