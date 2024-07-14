@@ -252,7 +252,8 @@
                 "pr": "Pull-Request",
                 "push": "Push",
                 "tag": "Tag",
-                "release": "Release"
+                "release": "Release",
+                "pr_closed": "Pull-Request zusammengeführt/geschlossen"
             },
             "exit_code": "Exit-Code {exitCode}",
             "files": "Geänderte Dateien ({files})",
@@ -531,6 +532,9 @@
                 "swagger_ui": "Swagger-UI",
                 "cli_and_api": "CLI/API",
                 "cli_usage": "Beispiel zur Nutzung des CLI"
+            },
+            "registries": {
+                "desc": "Register-Zugangsdaten des Benitzers können für alle Pipelines des Benutzers verwendet werden."
             }
         }
     },
@@ -593,5 +597,16 @@
         "saved": "Register-Zugangsdaten gespeichert",
         "show": "Register anzeigen"
     },
-    "invalid_state": "Der OAuth-Status ist ungültig."
+    "invalid_state": "Der OAuth-Status ist ungültig.",
+    "by_user": "von {user}",
+    "pushed_to": "gepusht auf",
+    "closed": "geschlossen",
+    "deployed_to": "Deployment ausgeführt auf",
+    "created": "erstellt",
+    "triggered": "ausgelöst",
+    "pipeline_duration": "Pipeline-Dauer",
+    "pipeline_since": "Die Pipeline wurde vor {created} Minuten erstellt",
+    "pipeline_has_warnings": "Die Pipeline hat Warnungen",
+    "pipeline_has_errors": "Die Pipeline hat Fehler",
+    "login_with": "Anmelden mit {forge}"
 }
