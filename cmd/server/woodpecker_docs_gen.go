@@ -100,5 +100,5 @@ func toOpenApi3(input, output string) error {
 		return err
 	}
 
-	return os.WriteFile(output, data, 0644)
+	return os.WriteFile(output, data, 0o644)
 }
