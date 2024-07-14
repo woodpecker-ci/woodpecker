@@ -39,7 +39,6 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server/router/middleware"
 	"go.woodpecker-ci.org/woodpecker/v2/server/web"
 	"go.woodpecker-ci.org/woodpecker/v2/shared/logger"
-	"go.woodpecker-ci.org/woodpecker/v2/shared/utils"
 	"go.woodpecker-ci.org/woodpecker/v2/version"
 )
 
@@ -57,10 +56,6 @@ func run(ctx context.Context, c *cli.Command) error {
 	if err := logger.SetupGlobalLogger(ctx, c, true); err != nil {
 		return err
 	}
-
-	ctx = utils.WithContextSigtermCallback(ctx, func() {
-		log.Info().Msg("termination signal is received, shutting down server")
-	})
 
 	ctx, ctxCancel := context.WithCancelCause(ctx)
 	stopServerFunc = func(err error) {
