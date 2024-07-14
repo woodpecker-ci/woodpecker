@@ -304,7 +304,7 @@
       }
     },
     "step": {
-      "description": "An step of your workflow executes either arbitrary commands or uses an plugin. Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#steps",
+      "description": "A step of your workflow executes either arbitrary commands or uses a plugin. Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#steps",
       "oneOf": [
         {
           "$ref": "#/definitions/commands_step"
