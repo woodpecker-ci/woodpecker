@@ -131,6 +131,8 @@ func TestCopyLineByLineSizeLimit(t *testing.T) {
 	if _, err := w.Write([]byte("67\n89")); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
+	// wait for writer to write
+	time.Sleep(time.Millisecond)
 
 	writes = testWriter.GetWrites()
 	assert.Lenf(t, testWriter.GetWrites(), 2, "expected 2 writes, got: %v", writes)
@@ -143,4 +145,19 @@ func TestCopyLineByLineSizeLimit(t *testing.T) {
 	w.Close()
 
 	wg.Wait()
+}
+
+func TestStringReader(t *testing.T) {
+	r := io.NopCloser(strings.NewReader("123\n4567\n890"))
+
+	testWriter := &testWriter{
+		Mutex:  &sync.Mutex{},
+		writes: make([]string, 0),
+	}
+
+	err := log.CopyLineByLine(testWriter, r, 1024)
+	assert.NoError(t, err)
+
+	writes := testWriter.GetWrites()
+	assert.Lenf(t, writes, 3, "expected 3 writes, got: %v", writes)
 }

@@ -22,10 +22,12 @@ import (
 	backendTypes "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 )
 
+var backends = []backendTypes.Backend{
+	kubernetes.New(),
+	docker.New(),
+	local.New(),
+}
+
 func main() {
-	core.RunAgent([]backendTypes.Backend{
-		kubernetes.New(),
-		docker.New(),
-		local.New(),
-	})
+	core.RunAgent(backends)
 }

@@ -157,6 +157,18 @@ func TestLintErrors(t *testing.T) {
 			from: "steps: { build: { image: golang, network_mode: 'container:name' }  }",
 			want: "Insufficient privileges to use network_mode",
 		},
+		{
+			from: "steps: { build: { image: golang, settings: { test: 'true' }, commands: [ 'echo ja', 'echo nein' ] } }",
+			want: "Cannot configure both commands and settings",
+		},
+		{
+			from: "steps: { build: { image: golang, settings: { test: 'true' }, entrypoint: [ '/bin/fish' ] } }",
+			want: "Cannot configure both entrypoint and settings",
+		},
+		{
+			from: "steps: { build: { image: golang, settings: { test: 'true' }, environment: [ 'TEST=true' ] } }",
+			want: "Cannot configure both environment and settings",
+		},
 	}
 
 	for _, test := range testdata {

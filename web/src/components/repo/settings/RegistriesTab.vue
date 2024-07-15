@@ -1,94 +1,53 @@
 <template>
-  <Settings
-    :title="$t('repo.settings.registries.credentials')"
-    :desc="$t('repo.settings.registries.desc')"
-    docs-url="docs/usage/registries"
-  >
+  <Settings :title="$t('registries.credentials')" :desc="$t('registries.desc')" docs-url="docs/usage/registries">
     <template #titleActions>
       <Button
         v-if="selectedRegistry"
+        :text="$t('registries.show')"
         start-icon="back"
-        :text="$t('repo.settings.registries.show')"
         @click="selectedRegistry = undefined"
       />
-      <Button v-else start-icon="plus" :text="$t('repo.settings.registries.add')" @click="selectedRegistry = {}" />
+      <Button v-else :text="$t('registries.add')" start-icon="plus" @click="showAddRegistry" />
     </template>
 
-    <div v-if="!selectedRegistry" class="space-y-4 text-wp-text-100">
-      <ListItem
-        v-for="registry in registries"
-        :key="registry.id"
-        class="items-center !bg-wp-background-200 !dark:bg-wp-background-100"
-      >
-        <span>{{ registry.address }}</span>
-        <IconButton
-          icon="edit"
-          class="ml-auto w-8 h-8"
-          :title="$t('repo.settings.registries.edit')"
-          @click="selectedRegistry = registry"
-        />
-        <IconButton
-          icon="trash"
-          class="w-8 h-8 hover:text-wp-control-error-100"
-          :is-loading="isDeleting"
-          :title="$t('repo.settings.registries.delete')"
-          @click="deleteRegistry(registry)"
-        />
-      </ListItem>
+    <RegistryList
+      v-if="!selectedRegistry"
+      v-model="registries"
+      :is-deleting="isDeleting"
+      @edit="editRegistry"
+      @delete="deleteRegistry"
+    />
 
-      <div v-if="registries?.length === 0" class="ml-2">{{ $t('repo.settings.registries.none') }}</div>
-    </div>
-
-    <div v-else class="space-y-4">
-      <form @submit.prevent="createRegistry">
-        <InputField v-slot="{ id }" :label="$t('repo.settings.registries.address.address')">
-          <!-- TODO: check input field Address is a valid address -->
-          <TextField
-            :id="id"
-            v-model="selectedRegistry.address"
-            :placeholder="$t('repo.settings.registries.address.placeholder')"
-            required
-            :disabled="isEditingRegistry"
-          />
-        </InputField>
-
-        <InputField v-slot="{ id }" :label="$t('username')">
-          <TextField :id="id" v-model="selectedRegistry.username" :placeholder="$t('username')" required />
-        </InputField>
-
-        <InputField v-slot="{ id }" :label="$t('password')">
-          <TextField :id="id" v-model="selectedRegistry.password" :placeholder="$t('password')" required />
-        </InputField>
-
-        <div class="flex gap-2">
-          <Button type="button" color="gray" :text="$t('cancel')" @click="selectedRegistry = undefined" />
-          <Button
-            type="submit"
-            color="green"
-            :is-loading="isSaving"
-            :text="isEditingRegistry ? $t('repo.settings.registries.save') : $t('repo.settings.registries.add')"
-          />
-        </div>
-      </form>
-    </div>
+    <RegistryEdit
+      v-else
+      v-model="selectedRegistry"
+      :is-saving="isSaving"
+      @save="createRegistry"
+      @cancel="selectedRegistry = undefined"
+    />
   </Settings>
 </template>
 
 <script lang="ts" setup>
+import { cloneDeep } from 'lodash';
 import { computed, inject, ref, type Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import Button from '~/components/atomic/Button.vue';
-import IconButton from '~/components/atomic/IconButton.vue';
-import ListItem from '~/components/atomic/ListItem.vue';
-import InputField from '~/components/form/InputField.vue';
-import TextField from '~/components/form/TextField.vue';
 import Settings from '~/components/layout/Settings.vue';
+import RegistryEdit from '~/components/registry/RegistryEdit.vue';
+import RegistryList from '~/components/registry/RegistryList.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useNotifications from '~/compositions/useNotifications';
 import { usePagination } from '~/compositions/usePaginate';
 import type { Registry, Repo } from '~/lib/api/types';
+
+const emptyRegistry: Partial<Registry> = {
+  address: '',
+  username: '',
+  password: '',
+};
 
 const apiClient = useApiClient();
 const notifications = useNotifications();
@@ -123,9 +82,7 @@ const { doSubmit: createRegistry, isLoading: isSaving } = useAsyncAction(async (
     await apiClient.createRegistry(repo.value.id, selectedRegistry.value);
   }
   notifications.notify({
-    title: isEditingRegistry.value
-      ? i18n.t('repo.settings.registries.saved')
-      : i18n.t('repo.settings.registries.created'),
+    title: isEditingRegistry.value ? i18n.t('registries.saved') : i18n.t('registries.created'),
     type: 'success',
   });
   selectedRegistry.value = undefined;
@@ -139,7 +96,15 @@ const { doSubmit: deleteRegistry, isLoading: isDeleting } = useAsyncAction(async
 
   const registryAddress = encodeURIComponent(_registry.address);
   await apiClient.deleteRegistry(repo.value.id, registryAddress);
-  notifications.notify({ title: i18n.t('repo.settings.registries.deleted'), type: 'success' });
+  notifications.notify({ title: i18n.t('registries.deleted'), type: 'success' });
   resetPage();
 });
+
+function editRegistry(registry: Registry) {
+  selectedRegistry.value = cloneDeep(registry);
+}
+
+function showAddRegistry() {
+  selectedRegistry.value = cloneDeep(emptyRegistry);
+}
 </script>

@@ -17,6 +17,8 @@ package store
 //go:generate mockery --name Store --output mocks --case underscore --note "+build test"
 
 import (
+	"context"
+
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
@@ -120,10 +122,15 @@ type Store interface {
 
 	// Registries
 	RegistryFind(*model.Repo, string) (*model.Registry, error)
-	RegistryList(*model.Repo, *model.ListOptions) ([]*model.Registry, error)
+	RegistryList(*model.Repo, bool, *model.ListOptions) ([]*model.Registry, error)
+	RegistryListAll() ([]*model.Registry, error)
 	RegistryCreate(*model.Registry) error
 	RegistryUpdate(*model.Registry) error
-	RegistryDelete(repo *model.Repo, addr string) error
+	RegistryDelete(*model.Registry) error
+	OrgRegistryFind(int64, string) (*model.Registry, error)
+	OrgRegistryList(int64, *model.ListOptions) ([]*model.Registry, error)
+	GlobalRegistryFind(string) (*model.Registry, error)
+	GlobalRegistryList(*model.ListOptions) ([]*model.Registry, error)
 
 	// Steps
 	StepLoad(int64) (*model.Step, error)
@@ -195,5 +202,5 @@ type Store interface {
 	// Store operations
 	Ping() error
 	Close() error
-	Migrate(bool) error
+	Migrate(context.Context, bool) error
 }
