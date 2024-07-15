@@ -59,7 +59,7 @@ func pipelineLogs(c *cli.Context) error {
 	}
 
 	for _, log := range logs {
-		fmt.Print(string(log.Data))
+		fmt.Println(string(log.Data))
 	}
 
 	return nil
