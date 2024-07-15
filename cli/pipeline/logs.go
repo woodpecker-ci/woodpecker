@@ -36,17 +36,26 @@ func pipelineLogs(c *cli.Context) error {
 	if err != nil {
 		return err
 	}
+	if len(repoIDOrFullName) == 0 {
+		return fmt.Errorf("missing required argument repo-id / repo-full-name")
+	}
 	repoID, err := internal.ParseRepo(client, repoIDOrFullName)
 	if err != nil {
-		return err
+		return fmt.Errorf("invalid repo-id or repo-full-name: '%s'", repoIDOrFullName)
 	}
 
-	numberArgIndex := 1
-	number, err := strconv.ParseInt(c.Args().Get(numberArgIndex), 10, 64)
+	pipelineArg := c.Args().Get(1)
+	if len(pipelineArg) == 0 {
+		return fmt.Errorf("missing required argument pipeline")
+	}
+	number, err := strconv.ParseInt(pipelineArg, 10, 64)
 	if err != nil {
-		return err
+		return fmt.Errorf("invalid pipeline '%s'", pipelineArg)
 	}
 
+	if err != nil {
+		return fmt.Errorf("invalid stepId '%s'", stepArg)
+	}
 	stepArgIndex := 2
 	step, err := strconv.ParseInt(c.Args().Get(stepArgIndex), 10, 64)
 	if err != nil {
