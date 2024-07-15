@@ -21,7 +21,16 @@
       </div>
       <div class="flex justify-center items-center flex-col md:w-2/5 min-h-48 gap-4 text-center">
         <h1 class="text-xl text-wp-text-100">{{ $t('welcome') }}</h1>
-        <Button @click="doLogin">{{ $t('login') }}</Button>
+        <div class="flex flex-col gap-2">
+          <Button
+            v-for="forge in forges"
+            :key="forge.id"
+            :start-icon="forge.type === 'addon' ? 'repo' : forge.type"
+            @click="doLogin(forge.id)"
+          >
+            {{ $t('login_with', { forge: getHostFromUrl(forge) }) }}
+          </Button>
+        </div>
       </div>
     </div>
   </main>
@@ -35,16 +44,30 @@ import { useRoute, useRouter } from 'vue-router';
 import WoodpeckerLogo from '~/assets/logo.svg?component';
 import Button from '~/components/atomic/Button.vue';
 import Error from '~/components/atomic/Error.vue';
+import useApiClient from '~/compositions/useApiClient';
 import useAuthentication from '~/compositions/useAuthentication';
+import type { Forge } from '~/lib/api/types';
 
 const route = useRoute();
 const router = useRouter();
 const authentication = useAuthentication();
 const i18n = useI18n();
+const apiClient = useApiClient();
 
-function doLogin() {
+const forges = ref<Forge[]>([]);
+
+function getHostFromUrl(forge: Forge) {
+  if (!forge.url) {
+    return forge.type.charAt(0).toUpperCase() + forge.type.slice(1);
+  }
+
+  const url = new URL(forge.url);
+  return url.hostname;
+}
+
+function doLogin(forgeId?: number) {
   const url = typeof route.query.url === 'string' ? route.query.url : '';
-  authentication.authenticate(url);
+  authentication.authenticate(url, forgeId);
 }
 
 const authErrorMessages = {
@@ -52,6 +75,7 @@ const authErrorMessages = {
   internal_error: i18n.t('internal_error'),
   registration_closed: i18n.t('registration_closed'),
   access_denied: i18n.t('access_denied'),
+  invalid_state: i18n.t('invalid_state'),
 };
 
 const errorMessage = ref<string>();
@@ -63,6 +87,8 @@ onMounted(async () => {
     await router.replace({ name: 'home' });
     return;
   }
+
+  forges.value = (await apiClient.getForges()) ?? [];
 
   if (route.query.error) {
     const error = route.query.error as keyof typeof authErrorMessages;

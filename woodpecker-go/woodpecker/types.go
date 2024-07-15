@@ -132,6 +132,8 @@ type (
 	// Registry represents a docker registry with credentials.
 	Registry struct {
 		ID       int64  `json:"id"`
+		OrgID    int64  `json:"org_id"`
+		RepoID   int64  `json:"repo_id"`
 		Address  string `json:"address"`
 		Username string `json:"username"`
 		Password string `json:"password,omitempty"`
@@ -250,6 +252,7 @@ type (
 		OwnerID     int64  `json:"owner_id"`
 		Token       string `json:"token"`
 		LastContact int64  `json:"last_contact"`
+		LastWork    int64  `json:"last_work"`
 		Platform    string `json:"platform"`
 		Backend     string `json:"backend"`
 		Capacity    int32  `json:"capacity"`

@@ -37,6 +37,8 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/shared/token"
 )
 
+const stateTokenDuration = time.Minute * 5
+
 func HandleAuth(c *gin.Context) {
 	// TODO: check if this is really needed
 	c.Writer.Header().Del("Content-Type")
@@ -56,17 +58,66 @@ func HandleAuth(c *gin.Context) {
 	}
 
 	_store := store.FromContext(c)
-	forgeID := int64(1) // TODO: replace with forge id when multiple forges are supported
-	_forge, err := server.Config.Services.Manager.ForgeMain()
+
+	code := c.Request.FormValue("code")
+	state := c.Request.FormValue("state")
+	isCallback := code != "" && state != ""
+	var forgeID int64
+
+	if isCallback { // validate the state token
+		stateToken, err := token.Parse([]token.Type{token.OAuthStateToken}, state, func(_ *token.Token) (string, error) {
+			return server.Config.Server.JWTSecret, nil
+		})
+		if err != nil {
+			log.Error().Err(err).Msg("cannot verify state token")
+			c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=invalid_state")
+			return
+		}
+
+		_forgeID := stateToken.Get("forge-id")
+		forgeID, err = strconv.ParseInt(_forgeID, 10, 64)
+		if err != nil {
+			log.Error().Err(err).Msg("forge-id of state token invalid")
+			c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=invalid_state")
+			return
+		}
+	} else { // only generate a state token if not a callback
+		var err error
+
+		_forgeID := c.Request.FormValue("forge_id")
+		if _forgeID == "" {
+			forgeID = 1 // fallback to main forge
+		} else {
+			forgeID, err = strconv.ParseInt(_forgeID, 10, 64)
+			if err != nil {
+				log.Error().Err(err).Msg("forge-id of state token invalid")
+				c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=invalid_state")
+				return
+			}
+		}
+
+		jwtSecret := server.Config.Server.JWTSecret
+		exp := time.Now().Add(stateTokenDuration).Unix()
+		stateToken := token.New(token.OAuthStateToken)
+		stateToken.Set("forge-id", strconv.FormatInt(forgeID, 10))
+		state, err = stateToken.SignExpires(jwtSecret, exp)
+		if err != nil {
+			log.Error().Err(err).Msg("cannot create state token")
+			c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=internal_error")
+			return
+		}
+	}
+
+	_forge, err := server.Config.Services.Manager.ForgeByID(forgeID)
 	if err != nil {
-		log.Error().Err(err).Msg("Cannot get main forge")
+		log.Error().Err(err).Msgf("Cannot get forge by id %d", forgeID)
 		c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=internal_error")
 		return
 	}
 
 	userFromForge, redirectURL, err := _forge.Login(c, &forge_types.OAuthRequest{
 		Code:  c.Request.FormValue("code"),
-		State: "woodpecker", // TODO: use proper state
+		State: state,
 	})
 	if err != nil {
 		log.Error().Err(err).Msg("cannot authenticate user")
@@ -178,6 +229,7 @@ func HandleAuth(c *gin.Context) {
 	user.Secret = userFromForge.Secret
 	user.Email = userFromForge.Email
 	user.Avatar = userFromForge.Avatar
+	user.ForgeID = forgeID
 	user.ForgeRemoteID = userFromForge.ForgeRemoteID
 	user.Login = userFromForge.Login
 	user.Admin = user.Admin || server.Config.Permissions.Admins.IsAdmin(userFromForge)
@@ -250,7 +302,7 @@ func GetLogout(c *gin.Context) {
 func DeprecatedGetLoginToken(c *gin.Context) {
 	_store := store.FromContext(c)
 
-	_forge, err := server.Config.Services.Manager.ForgeMain() // TODO: get selected forge from auth request
+	_forge, err := server.Config.Services.Manager.ForgeByID(1)
 	if err != nil {
 		log.Error().Err(err).Msg("Cannot get main forge")
 		c.AbortWithStatus(http.StatusInternalServerError)

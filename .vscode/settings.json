@@ -8,11 +8,9 @@
   },
   "go.lintTool": "golangci-lint",
   "go.lintFlags": ["--fast"],
+  "go.buildTags": "test",
   "eslint.workingDirectories": ["./web"],
   "prettier.ignorePath": "./web/.prettierignore",
-  // Enable the ESlint flat config support
-  // (remove this if your ESLint extension above v3.0.5)
-  "eslint.experimental.useFlatConfig": true,
   // Auto fix
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "explicit",
