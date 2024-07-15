@@ -32,6 +32,7 @@ func ParseBytes(b []byte) (*types.Workflow, error) {
 	}
 
 	// support deprecated branch filter
+	// TODO: remove this in 3.0
 	if out.BranchesDoNotUseIt != nil {
 		switch {
 		case out.When.Constraints == nil:
@@ -45,11 +46,13 @@ func ParseBytes(b []byte) (*types.Workflow, error) {
 	}
 
 	// support deprecated pipeline keyword
+	// TODO: remove this in 3.0
 	if len(out.PipelineDoNotUseIt.ContainerList) != 0 && len(out.Steps.ContainerList) == 0 {
 		out.Steps.ContainerList = out.PipelineDoNotUseIt.ContainerList
 	}
 
 	// support deprecated platform filter
+	// TODO: remove this in 3.0
 	if out.PlatformDoNotUseIt != "" {
 		if out.Labels == nil {
 			out.Labels = make(map[string]string)
