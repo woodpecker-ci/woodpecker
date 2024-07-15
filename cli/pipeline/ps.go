@@ -15,6 +15,7 @@
 package pipeline
 
 import (
+	"fmt"
 	"os"
 	"strconv"
 	"text/template"
@@ -23,7 +24,13 @@ import (
 
 	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
 	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker"
 )
+
+type workflowStep struct {
+	Workflow *woodpecker.Workflow
+	Step     *woodpecker.Step
+}
 
 var pipelinePsCmd = &cli.Command{
 	Name:      "ps",
@@ -41,7 +48,7 @@ func pipelinePs(c *cli.Context) error {
 	}
 	repoID, err := internal.ParseRepo(client, repoIDOrFullName)
 	if err != nil {
-		return err
+		return fmt.Errorf("invalid repo-id or repo-full-name: '%s'", repoIDOrFullName)
 	}
 
 	pipelineArg := c.Args().Get(1)
@@ -72,9 +79,9 @@ func pipelinePs(c *cli.Context) error {
 		return err
 	}
 
-	for _, step := range pipeline.Workflows {
-		for _, child := range step.Children {
-			if err := tmpl.Execute(os.Stdout, child); err != nil {
+	for _, workflow := range pipeline.Workflows {
+		for _, step := range workflow.Children {
+			if err := tmpl.Execute(os.Stdout, workflowStep{workflow, step}); err != nil {
 				return err
 			}
 		}
@@ -83,8 +90,9 @@ func pipelinePs(c *cli.Context) error {
 	return nil
 }
 
-// Template for pipeline ps information.
-var tmplPipelinePs = "\x1b[33mStep #{{ .PID }} \x1b[0m" + `
-Step: {{ .Name }}
-State: {{ .State }}
+// template for pipeline ps information
+var tmplPipelinePs = "\x1b[33mWorkflow #{{ .Workflow.ID }} ({{ .Workflow.Name }}), Step #{{ .Step.PID }} \x1b[0m" + `
+Id: {{ .Step.ID }}
+Step: {{ .Step.Name }}
+State: {{ .Step.State }}
 `
