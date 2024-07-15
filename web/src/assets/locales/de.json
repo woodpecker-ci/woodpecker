@@ -608,5 +608,5 @@
     "pipeline_since": "Die Pipeline wurde vor {created} Minuten erstellt",
     "pipeline_has_warnings": "Die Pipeline hat Warnungen",
     "pipeline_has_errors": "Die Pipeline hat Fehler",
-    "login_with": "Anmelden mit {forge}"
+    "login_with": "Mit {forge} anmelden"
 }
