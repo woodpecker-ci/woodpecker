@@ -26,7 +26,7 @@ import (
 var pipelineLogsCmd = &cli.Command{
 	Name:      "logs",
 	Usage:     "show pipeline logs",
-	ArgsUsage: "<repo-id|repo-full-name> [pipeline] [stepID]",
+	ArgsUsage: "<repo-id|repo-full-name> <pipeline> [stepID]",
 	Action:    pipelineLogs,
 }
 

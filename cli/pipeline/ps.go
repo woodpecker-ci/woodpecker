@@ -28,7 +28,7 @@ import (
 var pipelinePsCmd = &cli.Command{
 	Name:      "ps",
 	Usage:     "show pipeline steps",
-	ArgsUsage: "<repo-id|repo-full-name> [pipeline]",
+	ArgsUsage: "<repo-id|repo-full-name> <pipeline>",
 	Action:    pipelinePs,
 	Flags:     []cli.Flag{common.FormatFlag(tmplPipelinePs)},
 }
