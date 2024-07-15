@@ -21,6 +21,7 @@ import (
 	"github.com/urfave/cli/v2"
 
 	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker"
 )
 
 var pipelineLogsCmd = &cli.Command{
@@ -53,15 +54,38 @@ func pipelineLogs(c *cli.Context) error {
 		return fmt.Errorf("invalid pipeline '%s'", pipelineArg)
 	}
 
+	stepArg := c.Args().Get(2)
+	if len(stepArg) == 0 {
+		return showPipelineLog(client, repoID, number)
+	}
+
+	step, err := strconv.ParseInt(stepArg, 10, 64)
 	if err != nil {
 		return fmt.Errorf("invalid stepId '%s'", stepArg)
 	}
-	stepArgIndex := 2
-	step, err := strconv.ParseInt(c.Args().Get(stepArgIndex), 10, 64)
+	return showStepLog(client, repoID, number, step)
+}
+
+func showPipelineLog(client woodpecker.Client, repoID, number int64) error {
+	pipeline, err := client.Pipeline(repoID, number)
 	if err != nil {
 		return err
 	}
 
+	for _, workflow := range pipeline.Workflows {
+		for _, step := range workflow.Children {
+			fmt.Printf("\x1b[33mWorflow #%d\x1b[0m ('%s'), \x1b[33mStep #%d\x1b[0m ('%s'):\n", workflow.PID, workflow.Name, step.PID, step.Name)
+			err := showStepLog(client, repoID, number, step.ID)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+
+func showStepLog(client woodpecker.Client, repoID, number, step int64) error {
 	logs, err := client.StepLogEntries(repoID, number, step)
 	if err != nil {
 		return err
