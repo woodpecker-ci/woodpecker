@@ -1,6 +1,6 @@
 # Changelog
 
-## [2.7.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.7.0) - 2024-07-14
+## [2.7.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.7.0) - 2024-07-15
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -8,7 +8,7 @@
 
 ### 🔒 Security
 
-- Disalow to set arbitrary environments for plugins [[#3909](https://github.com/woodpecker-ci/woodpecker/pull/3909)]
+- Disallow to set arbitrary environments for plugins [[#3909](https://github.com/woodpecker-ci/woodpecker/pull/3909)]
 - Use proper oauth state [[#3847](https://github.com/woodpecker-ci/woodpecker/pull/3847)]
 - Enhance token checking [[#3842](https://github.com/woodpecker-ci/woodpecker/pull/3842)]
 - Bump github.com/hashicorp/go-retryablehttp v0.7.5 -> v0.7.7 [[#3834](https://github.com/woodpecker-ci/woodpecker/pull/3834)]
@@ -64,6 +64,7 @@
 
 ### Misc
 
+- chore(deps): update dependency vitest to v2 [[#3905](https://github.com/woodpecker-ci/woodpecker/pull/3905)]
 - fix(deps): update module github.com/google/go-github/v62 to v63 [[#3910](https://github.com/woodpecker-ci/woodpecker/pull/3910)]
 - chore(deps): update docker.io/woodpeckerci/plugin-docker-buildx docker tag to v4.1.0 [[#3908](https://github.com/woodpecker-ci/woodpecker/pull/3908)]
 - Update plugin-git and add renovate trigger [[#3901](https://github.com/woodpecker-ci/woodpecker/pull/3901)]
