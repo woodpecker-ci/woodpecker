@@ -15,6 +15,7 @@
 package migration
 
 import (
+	"context"
 	"fmt"
 	"reflect"
 
@@ -61,6 +62,7 @@ var migrationTasks = []*xormigrate.Migration{
 	&cleanRegistryPipeline,
 	&setForgeID,
 	&unifyColumnsTables,
+	&alterTableRegistriesFixRequiredFields,
 }
 
 var allBeans = []any{
@@ -84,7 +86,8 @@ var allBeans = []any{
 	new(model.Org),
 }
 
-func Migrate(e *xorm.Engine, allowLong bool) error {
+// TODO: make xormigrate context aware
+func Migrate(_ context.Context, e *xorm.Engine, allowLong bool) error {
 	e.SetDisableGlobalCache(true)
 
 	m := xormigrate.New(e, migrationTasks)

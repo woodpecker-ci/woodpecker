@@ -18,7 +18,7 @@ steps:
     image: alpine
     entrypoint: ['some_entry', '--some-flag']
 
-  singla-entrypoint:
+  single-entrypoint:
     image: alpine
     entrypoint: some_entry
 

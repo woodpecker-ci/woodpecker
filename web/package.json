@@ -55,7 +55,7 @@
     "eslint-plugin-vue-scoped-css": "^2.8.0",
     "jsdom": "^24.1.0",
     "prettier": "^3.3.0",
-    "replace-in-file": "^7.2.0",
+    "replace-in-file": "^8.0.0",
     "tinycolor2": "^1.6.0",
     "typescript": "5.4.5",
     "typescript-eslint": "^7.12.0",
@@ -65,7 +65,7 @@
     "vite-plugin-prismjs": "^0.0.11",
     "vite-plugin-windicss": "^1.9.3",
     "vite-svg-loader": "^5.1.0",
-    "vitest": "^1.6.0",
+    "vitest": "^2.0.0",
     "vue-tsc": "^2.0.19",
     "windicss": "^3.5.6"
   },
