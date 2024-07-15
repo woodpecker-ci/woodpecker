@@ -31,44 +31,44 @@ func (s storage) GetPipeline(id int64) (*model.Pipeline, error) {
 func (s storage) GetPipelineNumber(repo *model.Repo, num int64) (*model.Pipeline, error) {
 	pipeline := new(model.Pipeline)
 	return pipeline, wrapGet(s.engine.Where(
-		builder.Eq{"pipeline_repo_id": repo.ID, "pipeline_number": num},
+		builder.Eq{"repo_id": repo.ID, "number": num},
 	).Get(pipeline))
 }
 
 func (s storage) GetPipelineLast(repo *model.Repo, branch string) (*model.Pipeline, error) {
 	pipeline := new(model.Pipeline)
 	return pipeline, wrapGet(s.engine.
-		Desc("pipeline_number").
-		Where(builder.Eq{"pipeline_repo_id": repo.ID, "pipeline_branch": branch, "pipeline_event": model.EventPush}).
+		Desc("number").
+		Where(builder.Eq{"repo_id": repo.ID, "branch": branch, "event": model.EventPush}).
 		Get(pipeline))
 }
 
 func (s storage) GetPipelineLastBefore(repo *model.Repo, branch string, num int64) (*model.Pipeline, error) {
 	pipeline := new(model.Pipeline)
 	return pipeline, wrapGet(s.engine.
-		Desc("pipeline_number").
-		Where(builder.Lt{"pipeline_id": num}.
-			And(builder.Eq{"pipeline_repo_id": repo.ID, "pipeline_branch": branch})).
+		Desc("number").
+		Where(builder.Lt{"id": num}.
+			And(builder.Eq{"repo_id": repo.ID, "branch": branch})).
 		Get(pipeline))
 }
 
 func (s storage) GetPipelineList(repo *model.Repo, p *model.ListOptions, f *model.PipelineFilter) ([]*model.Pipeline, error) {
 	pipelines := make([]*model.Pipeline, 0, 16)
 
-	cond := builder.NewCond().And(builder.Eq{"pipeline_repo_id": repo.ID})
+	cond := builder.NewCond().And(builder.Eq{"repo_id": repo.ID})
 
 	if f != nil {
 		if f.After != 0 {
-			cond = cond.And(builder.Gt{"pipeline_created": f.After})
+			cond = cond.And(builder.Gt{"created": f.After})
 		}
 
 		if f.Before != 0 {
-			cond = cond.And(builder.Lt{"pipeline_created": f.Before})
+			cond = cond.And(builder.Lt{"created": f.Before})
 		}
 	}
 
 	return pipelines, s.paginate(p).Where(cond).
-		Desc("pipeline_number").
+		Desc("number").
 		Find(&pipelines)
 }
 
@@ -76,9 +76,9 @@ func (s storage) GetPipelineList(repo *model.Repo, p *model.ListOptions, f *mode
 func (s storage) GetActivePipelineList(repo *model.Repo) ([]*model.Pipeline, error) {
 	pipelines := make([]*model.Pipeline, 0)
 	query := s.engine.
-		Where("pipeline_repo_id = ?", repo.ID).
-		In("pipeline_status", model.StatusPending, model.StatusRunning, model.StatusBlocked).
-		Desc("pipeline_number")
+		Where("repo_id = ?", repo.ID).
+		In("status", model.StatusPending, model.StatusRunning, model.StatusBlocked).
+		Desc("number")
 	return pipelines, query.Find(&pipelines)
 }
 
@@ -93,7 +93,7 @@ func (s storage) CreatePipeline(pipeline *model.Pipeline, stepList ...*model.Ste
 		return err
 	}
 
-	repoExist, err := sess.Where("repo_id = ?", pipeline.RepoID).Exist(&model.Repo{})
+	repoExist, err := sess.Where("id = ?", pipeline.RepoID).Exist(&model.Repo{})
 	if err != nil {
 		return err
 	}
@@ -104,9 +104,9 @@ func (s storage) CreatePipeline(pipeline *model.Pipeline, stepList ...*model.Ste
 
 	// calc pipeline number
 	var number int64
-	if _, err := sess.Select("MAX(pipeline_number)").
+	if _, err := sess.Select("MAX(number)").
 		Table(new(model.Pipeline)).
-		Where("pipeline_repo_id = ?", pipeline.RepoID).
+		Where("repo_id = ?", pipeline.RepoID).
 		Get(&number); err != nil {
 		return err
 	}
@@ -154,7 +154,7 @@ func (s storage) deletePipeline(sess *xorm.Session, pipelineID int64) error {
 		}
 		if !exist {
 			// this config is only used for this pipeline. so delete it
-			if _, err := sess.Where(builder.Eq{"config_id": confID}).Delete(new(model.Config)); err != nil {
+			if _, err := sess.Where(builder.Eq{"id": confID}).Delete(new(model.Config)); err != nil {
 				return err
 			}
 		}

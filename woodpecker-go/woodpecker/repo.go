@@ -18,8 +18,8 @@ const (
 	pathStop           = "%s/api/repos/%d/pipelines/%d/cancel"
 	pathRepoSecrets    = "%s/api/repos/%d/secrets"
 	pathRepoSecret     = "%s/api/repos/%d/secrets/%s"
-	pathRepoRegistries = "%s/api/repos/%d/registry"
-	pathRepoRegistry   = "%s/api/repos/%d/registry/%s"
+	pathRepoRegistries = "%s/api/repos/%d/registries"
+	pathRepoRegistry   = "%s/api/repos/%d/registries/%s"
 	pathRepoCrons      = "%s/api/repos/%d/cron"
 	pathRepoCron       = "%s/api/repos/%d/cron/%d"
 )

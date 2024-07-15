@@ -15,18 +15,15 @@
 package lint
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"path"
 	"path/filepath"
 	"strings"
 
-	term_env "github.com/muesli/termenv"
 	"github.com/urfave/cli/v2"
 
 	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
-	pipeline_errors "go.woodpecker-ci.org/woodpecker/v2/pipeline/errors"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/linter"
 )
@@ -72,8 +69,6 @@ func lintDir(c *cli.Context, dir string) error {
 }
 
 func lintFile(_ *cli.Context, file string) error {
-	output := term_env.NewOutput(os.Stdout)
-
 	fi, err := os.Open(file)
 	if err != nil {
 		return err
@@ -101,34 +96,13 @@ func lintFile(_ *cli.Context, file string) error {
 	// TODO: lint multiple files at once to allow checks for sth like "depends_on" to work
 	err = linter.New(linter.WithTrusted(true)).Lint([]*linter.WorkflowConfig{config})
 	if err != nil {
-		fmt.Printf("🔥 %s has warnings / errors:\n", output.String(config.File).Underline())
+		str, err := FormatLintError(config.File, err)
 
-		hasErrors := false
-		for _, err := range pipeline_errors.GetPipelineErrors(err) {
-			line := "  "
-
-			if err.IsWarning {
-				line = fmt.Sprintf("%s ⚠️ ", line)
-			} else {
-				line = fmt.Sprintf("%s ❌", line)
-				hasErrors = true
-			}
-
-			if data := pipeline_errors.GetLinterData(err); data != nil {
-				line = fmt.Sprintf("%s %s\t%s", line, output.String(data.Field).Bold(), err.Message)
-			} else {
-				line = fmt.Sprintf("%s %s", line, err.Message)
-			}
-
-			// TODO: use table output
-			fmt.Printf("%s\n", line)
+		if str != "" {
+			fmt.Print(str)
 		}
 
-		if hasErrors {
-			return errors.New("config has errors")
-		}
-
-		return nil
+		return err
 	}
 
 	fmt.Println("✅ Config is valid")

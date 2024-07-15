@@ -9,8 +9,10 @@
       <span class="flex">
         <router-link :to="{ name: 'org', params: { orgId: repo.org_id } }" class="hover:underline">{{
           repo.owner
+          /* eslint-disable-next-line @intlify/vue-i18n/no-raw-text */
         }}</router-link>
-        {{ `&nbsp;/&nbsp;${repo.name}` }}
+        &nbsp;/
+        {{ repo.name }}
       </span>
     </template>
     <template #titleActions>

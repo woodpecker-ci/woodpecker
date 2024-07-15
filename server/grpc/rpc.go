@@ -48,7 +48,7 @@ type RPC struct {
 	pipelineCount *prometheus.CounterVec
 }
 
-// Next implements the rpc.Next function.
+// Next blocks until it provides the next workflow to execute.
 func (s *RPC) Next(c context.Context, agentFilter rpc.Filter) (*rpc.Workflow, error) {
 	if hostname, err := s.getHostnameFromContext(c); err == nil {
 		log.Debug().Msgf("agent connected: %s: polling", hostname)
@@ -80,25 +80,36 @@ func (s *RPC) Next(c context.Context, agentFilter rpc.Filter) (*rpc.Workflow, er
 		}
 
 		// task should not run, so mark it as done
-		if err := s.Done(c, task.ID, rpc.State{}); err != nil {
-			log.Error().Err(err).Msgf("mark task '%s' done failed", task.ID)
+		if err := s.Done(c, task.ID, rpc.WorkflowState{}); err != nil {
+			log.Error().Err(err).Msgf("marking workflow task '%s' as done failed", task.ID)
 		}
 	}
 }
 
-// Wait implements the rpc.Wait function.
-func (s *RPC) Wait(c context.Context, id string) error {
-	return s.queue.Wait(c, id)
+// Wait blocks until the workflow with the given ID is done.
+func (s *RPC) Wait(c context.Context, workflowID string) error {
+	return s.queue.Wait(c, workflowID)
 }
 
-// Extend implements the rpc.Extend function.
-func (s *RPC) Extend(c context.Context, id string) error {
-	return s.queue.Extend(c, id)
+// Extend extends the lease for the workflow with the given ID.
+func (s *RPC) Extend(c context.Context, workflowID string) error {
+	agent, err := s.getAgentFromContext(c)
+	if err != nil {
+		return err
+	}
+
+	agent.LastWork = time.Now().Unix()
+	err = s.store.AgentUpdate(agent)
+	if err != nil {
+		return err
+	}
+
+	return s.queue.Extend(c, workflowID)
 }
 
-// Update implements the rpc.Update function.
-func (s *RPC) Update(_ context.Context, id string, state rpc.State) error {
-	workflowID, err := strconv.ParseInt(id, 10, 64)
+// Update updates the state of a step.
+func (s *RPC) Update(_ context.Context, strWorkflowID string, state rpc.StepState) error {
+	workflowID, err := strconv.ParseInt(strWorkflowID, 10, 64)
 	if err != nil {
 		return err
 	}
@@ -163,15 +174,15 @@ func (s *RPC) Update(_ context.Context, id string, state rpc.State) error {
 }
 
 // Init implements the rpc.Init function.
-func (s *RPC) Init(c context.Context, id string, state rpc.State) error {
-	stepID, err := strconv.ParseInt(id, 10, 64)
+func (s *RPC) Init(c context.Context, strWorkflowID string, state rpc.WorkflowState) error {
+	workflowID, err := strconv.ParseInt(strWorkflowID, 10, 64)
 	if err != nil {
 		return err
 	}
 
-	workflow, err := s.store.WorkflowLoad(stepID)
+	workflow, err := s.store.WorkflowLoad(workflowID)
 	if err != nil {
-		log.Error().Err(err).Msgf("cannot find step with id %d", stepID)
+		log.Error().Err(err).Msgf("cannot find workflow with id %d", workflowID)
 		return err
 	}
 
@@ -195,7 +206,7 @@ func (s *RPC) Init(c context.Context, id string, state rpc.State) error {
 
 	if currentPipeline.Status == model.StatusPending {
 		if currentPipeline, err = pipeline.UpdateToStatusRunning(s.store, *currentPipeline, state.Started); err != nil {
-			log.Error().Err(err).Msgf("init: cannot update build_id %d state", currentPipeline.ID)
+			log.Error().Err(err).Msgf("init: cannot update pipeline %d state", currentPipeline.ID)
 		}
 	}
 
@@ -220,24 +231,26 @@ func (s *RPC) Init(c context.Context, id string, state rpc.State) error {
 		s.pubsub.Publish(message)
 	}()
 
-	workflow, err = pipeline.UpdateWorkflowToStatusStarted(s.store, *workflow, state)
+	workflow, err = pipeline.UpdateWorkflowStatusToRunning(s.store, *workflow, state)
 	if err != nil {
 		return err
 	}
 	s.updateForgeStatus(c, repo, currentPipeline, workflow)
-	return nil
+
+	agent.LastWork = time.Now().Unix()
+	return s.store.AgentUpdate(agent)
 }
 
-// Done implements the rpc.Done function.
-func (s *RPC) Done(c context.Context, id string, state rpc.State) error {
-	workflowID, err := strconv.ParseInt(id, 10, 64)
+// Done marks the workflow with the given ID as done.
+func (s *RPC) Done(c context.Context, strWorkflowID string, state rpc.WorkflowState) error {
+	workflowID, err := strconv.ParseInt(strWorkflowID, 10, 64)
 	if err != nil {
 		return err
 	}
 
 	workflow, err := s.store.WorkflowLoad(workflowID)
 	if err != nil {
-		log.Error().Err(err).Msgf("cannot find step with id %d", workflowID)
+		log.Error().Err(err).Msgf("cannot find workflow with id %d", workflowID)
 		return err
 	}
 
@@ -261,19 +274,19 @@ func (s *RPC) Done(c context.Context, id string, state rpc.State) error {
 	logger := log.With().
 		Str("repo_id", fmt.Sprint(repo.ID)).
 		Str("pipeline_id", fmt.Sprint(currentPipeline.ID)).
-		Str("workflow_id", id).Logger()
+		Str("workflow_id", strWorkflowID).Logger()
 
 	logger.Trace().Msgf("gRPC Done with state: %#v", state)
 
 	if workflow, err = pipeline.UpdateWorkflowStatusToDone(s.store, *workflow, state); err != nil {
-		logger.Error().Err(err).Msgf("pipeline.UpdateStepStatusToDone: cannot update workflow state: %s", err)
+		logger.Error().Err(err).Msgf("pipeline.UpdateWorkflowStatusToDone: cannot update workflow state: %s", err)
 	}
 
 	var queueErr error
 	if workflow.Failing() {
-		queueErr = s.queue.Error(c, id, fmt.Errorf("step finished with exit code %d, %s", state.ExitCode, state.Error))
+		queueErr = s.queue.Error(c, strWorkflowID, fmt.Errorf("workflow finished with error %s", state.Error))
 	} else {
-		queueErr = s.queue.Done(c, id, workflow.State)
+		queueErr = s.queue.Done(c, strWorkflowID, workflow.State)
 	}
 	if queueErr != nil {
 		logger.Error().Err(queueErr).Msg("queue.Done: cannot ack workflow")
@@ -286,8 +299,8 @@ func (s *RPC) Done(c context.Context, id string, state rpc.State) error {
 	s.completeChildrenIfParentCompleted(workflow)
 
 	if !model.IsThereRunningStage(currentPipeline.Workflows) {
-		if currentPipeline, err = pipeline.UpdateStatusToDone(s.store, *currentPipeline, model.PipelineStatus(currentPipeline.Workflows), workflow.Stopped); err != nil {
-			logger.Error().Err(err).Msgf("pipeline.UpdateStatusToDone: cannot update workflow final state")
+		if currentPipeline, err = pipeline.UpdateStatusToDone(s.store, *currentPipeline, model.PipelineStatus(currentPipeline.Workflows), workflow.Finished); err != nil {
+			logger.Error().Err(err).Msgf("pipeline.UpdateStatusToDone: cannot update workflows final state")
 		}
 	}
 
@@ -311,26 +324,32 @@ func (s *RPC) Done(c context.Context, id string, state rpc.State) error {
 		s.pipelineTime.WithLabelValues(repo.FullName, currentPipeline.Branch, string(currentPipeline.Status), "total").Set(float64(currentPipeline.Finished - currentPipeline.Started))
 	}
 	if currentPipeline.IsMultiPipeline() {
-		s.pipelineTime.WithLabelValues(repo.FullName, currentPipeline.Branch, string(workflow.State), workflow.Name).Set(float64(workflow.Stopped - workflow.Started))
+		s.pipelineTime.WithLabelValues(repo.FullName, currentPipeline.Branch, string(workflow.State), workflow.Name).Set(float64(workflow.Finished - workflow.Started))
 	}
 
-	return nil
+	agent, err := s.getAgentFromContext(c)
+	if err != nil {
+		return err
+	}
+	agent.LastWork = time.Now().Unix()
+	return s.store.AgentUpdate(agent)
 }
 
-// Log implements the rpc.Log function.
-func (s *RPC) Log(c context.Context, _logEntry *rpc.LogEntry) error {
+// Log writes a log entry to the database and publishes it to the pubsub.
+func (s *RPC) Log(c context.Context, rpcLogEntry *rpc.LogEntry) error {
 	// convert rpc log_entry to model.log_entry
-	step, err := s.store.StepByUUID(_logEntry.StepUUID)
+	step, err := s.store.StepByUUID(rpcLogEntry.StepUUID)
 	if err != nil {
-		return fmt.Errorf("could not find step with uuid %s in store: %w", _logEntry.StepUUID, err)
+		return fmt.Errorf("could not find step with uuid %s in store: %w", rpcLogEntry.StepUUID, err)
 	}
 	logEntry := &model.LogEntry{
 		StepID: step.ID,
-		Time:   _logEntry.Time,
-		Line:   _logEntry.Line,
-		Data:   _logEntry.Data,
-		Type:   model.LogEntryType(_logEntry.Type),
+		Time:   rpcLogEntry.Time,
+		Line:   rpcLogEntry.Line,
+		Data:   rpcLogEntry.Data,
+		Type:   model.LogEntryType(rpcLogEntry.Type),
 	}
+
 	// make sure writes to pubsub are non blocking (https://github.com/woodpecker-ci/woodpecker/blob/c919f32e0b6432a95e1a6d3d0ad662f591adf73f/server/logging/log.go#L9)
 	go func() {
 		// write line to listening web clients
@@ -338,6 +357,16 @@ func (s *RPC) Log(c context.Context, _logEntry *rpc.LogEntry) error {
 			log.Error().Err(err).Msgf("rpc server could not write to logger")
 		}
 	}()
+
+	agent, err := s.getAgentFromContext(c)
+	if err != nil {
+		return err
+	}
+	agent.LastWork = time.Now().Unix()
+	if err := s.store.AgentUpdate(agent); err != nil {
+		return err
+	}
+
 	return server.Config.Services.LogStore.LogAppend(logEntry)
 }
 
@@ -366,13 +395,14 @@ func (s *RPC) RegisterAgent(ctx context.Context, platform, backend, version stri
 	return agent.ID, nil
 }
 
+// UnregisterAgent removes the agent from the database.
 func (s *RPC) UnregisterAgent(ctx context.Context) error {
 	agent, err := s.getAgentFromContext(ctx)
 	if !agent.IsSystemAgent() {
 		// registered with individual agent token -> do not unregister
 		return nil
 	}
-	log.Debug().Msgf("unregistering agent with ID %d", agent.ID)
+	log.Debug().Msgf("un-registering agent with ID %d", agent.ID)
 	if err != nil {
 		return err
 	}
@@ -401,7 +431,7 @@ func (s *RPC) ReportHealth(ctx context.Context, status string) error {
 func (s *RPC) completeChildrenIfParentCompleted(completedWorkflow *model.Workflow) {
 	for _, c := range completedWorkflow.Children {
 		if c.Running() {
-			if _, err := pipeline.UpdateStepToStatusSkipped(s.store, *c, completedWorkflow.Stopped); err != nil {
+			if _, err := pipeline.UpdateStepToStatusSkipped(s.store, *c, completedWorkflow.Finished); err != nil {
 				log.Error().Err(err).Msgf("done: cannot update step_id %d child state", c.ID)
 			}
 		}

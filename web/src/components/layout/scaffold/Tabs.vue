@@ -3,7 +3,7 @@
     <button
       v-for="tab in tabs"
       :key="tab.id"
-      class="w-full py-1 md:py-2 md:w-auto md:px-8 flex cursor-pointer md:border-b-2 text-wp-text-100 hover:text-wp-text-200 items-center"
+      class="w-full py-1 md:py-2 md:w-auto md:px-6 flex cursor-pointer md:border-b-2 text-wp-text-100 hover:text-wp-text-200 items-center"
       :class="{
         'border-wp-text-100': activeTab === tab.id,
         'border-transparent': activeTab !== tab.id,

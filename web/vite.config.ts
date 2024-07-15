@@ -3,7 +3,7 @@ import path from 'node:path';
 import process from 'node:process';
 import VueI18nPlugin from '@intlify/unplugin-vue-i18n/vite';
 import vue from '@vitejs/plugin-vue';
-import replace from 'replace-in-file';
+import { replaceInFileSync } from 'replace-in-file';
 import type { Plugin } from 'vite';
 import prismjs from 'vite-plugin-prismjs';
 import WindiCSS from 'vite-plugin-windicss';
@@ -86,7 +86,7 @@ export default defineConfig({
           },
         );
       });
-      replace.sync({
+      replaceInFileSync({
         files: 'src/assets/dayjsLocales/*.js',
         // remove any dayjs import and any dayjs.locale call
         from: /(?:import dayjs.*'|dayjs\.locale.*);/g,

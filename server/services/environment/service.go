@@ -16,6 +16,8 @@ package environment
 
 import "go.woodpecker-ci.org/woodpecker/v2/server/model"
 
+//go:generate mockery --name Service --output mocks --case underscore
+
 // Service defines a service for managing environment variables.
 type Service interface {
 	EnvironList(*model.Repo) ([]*model.Environ, error)

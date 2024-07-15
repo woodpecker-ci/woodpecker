@@ -66,7 +66,7 @@ var addOrgs = xormigrate.Migration{
 			}
 		}
 
-		if err := sess.Sync(new(model.Org), new(syncRepo022), new(model.User)); err != nil {
+		if err := sess.Sync(new(model.Org), new(syncRepo022), new(userV031)); err != nil {
 			return fmt.Errorf("sync new models failed: %w", err)
 		}
 
@@ -88,7 +88,7 @@ var addOrgs = xormigrate.Migration{
 
 			// check if it's a registered user
 			if _, ok := users[orgName]; !ok {
-				exist, err := sess.Where("user_login = ?", orgName).Exist(new(model.User))
+				exist, err := sess.Where("user_login = ?", orgName).Exist(new(userV031))
 				if err != nil {
 					return fmt.Errorf("check if user '%s' exist failed: %w", orgName, err)
 				}

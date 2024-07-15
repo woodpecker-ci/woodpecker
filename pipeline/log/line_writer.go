@@ -40,7 +40,7 @@ type LineWriter struct {
 }
 
 // NewLineWriter returns a new line reader.
-func NewLineWriter(peer rpc.Peer, stepUUID string, secret ...string) io.WriteCloser {
+func NewLineWriter(peer rpc.Peer, stepUUID string, secret ...string) io.Writer {
 	lw := &LineWriter{
 		peer:      peer,
 		stepUUID:  stepUUID,
@@ -72,8 +72,4 @@ func (w *LineWriter) Write(p []byte) (n int, err error) {
 	}
 
 	return len(data), nil
-}
-
-func (w *LineWriter) Close() error {
-	return nil
 }
