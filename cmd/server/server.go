@@ -15,10 +15,10 @@
 package main
 
 import (
+	"context"
 	"crypto/tls"
 	"errors"
 	"fmt"
-	"net"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
@@ -32,24 +32,47 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v2"
 	"golang.org/x/sync/errgroup"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/keepalive"
 
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc/proto"
 	"go.woodpecker-ci.org/woodpecker/v2/server"
 	"go.woodpecker-ci.org/woodpecker/v2/server/cron"
-	woodpeckerGrpcServer "go.woodpecker-ci.org/woodpecker/v2/server/grpc"
 	"go.woodpecker-ci.org/woodpecker/v2/server/router"
 	"go.woodpecker-ci.org/woodpecker/v2/server/router/middleware"
 	"go.woodpecker-ci.org/woodpecker/v2/server/web"
 	"go.woodpecker-ci.org/woodpecker/v2/shared/logger"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/utils"
 	"go.woodpecker-ci.org/woodpecker/v2/version"
+)
+
+const (
+	shutdownTimeout = time.Second * 5
+)
+
+var (
+	stopServerFunc     context.CancelCauseFunc = func(error) {}
+	shutdownCancelFunc context.CancelFunc      = func() {}
+	shutdownCtx                                = context.Background()
 )
 
 func run(c *cli.Context) error {
 	if err := logger.SetupGlobalLogger(c, true); err != nil {
 		return err
 	}
+
+	ctx := utils.WithContextSigtermCallback(c.Context, func() {
+		log.Info().Msg("termination signal is received, shutting down server")
+	})
+
+	ctx, ctxCancel := context.WithCancelCause(ctx)
+	stopServerFunc = func(err error) {
+		if err != nil {
+			log.Error().Err(err).Msg("shutdown of whole server")
+		}
+		stopServerFunc = func(error) {}
+		shutdownCtx, shutdownCancelFunc = context.WithTimeout(shutdownCtx, shutdownTimeout)
+		ctxCancel(err)
+	}
+	defer stopServerFunc(nil)
+	defer shutdownCancelFunc()
 
 	// set gin mode based on log level
 	if zerolog.GlobalLevel() > zerolog.DebugLevel {
@@ -74,7 +97,7 @@ func run(c *cli.Context) error {
 		)
 	}
 
-	_store, err := setupStore(c)
+	_store, err := setupStore(ctx, c)
 	if err != nil {
 		return fmt.Errorf("can't setup store: %w", err)
 	}
@@ -84,56 +107,35 @@ func run(c *cli.Context) error {
 		}
 	}()
 
-	err = setupEvilGlobals(c, _store)
+	err = setupEvilGlobals(ctx, c, _store)
 	if err != nil {
 		return fmt.Errorf("can't setup globals: %w", err)
 	}
 
-	var g errgroup.Group
+	// wait for all services until one do stops with an error
+	serviceWaitingGroup := errgroup.Group{}
 
-	setupMetrics(&g, _store)
+	log.Info().Msgf("starting Woodpecker server with version '%s'", version.String())
 
-	g.Go(func() error {
-		return cron.Start(c.Context, _store)
+	startMetricsCollector(ctx, _store)
+
+	serviceWaitingGroup.Go(func() error {
+		log.Info().Msg("starting cron service ...")
+		if err := cron.Run(ctx, _store); err != nil {
+			go stopServerFunc(err)
+			return err
+		}
+		log.Info().Msg("cron service stopped")
+		return nil
 	})
 
 	// start the grpc server
-	g.Go(func() error {
-		lis, err := net.Listen("tcp", c.String("grpc-addr"))
-		if err != nil {
-			log.Fatal().Err(err).Msg("failed to listen on grpc-addr") //nolint:forbidigo
-		}
-
-		jwtSecret := c.String("grpc-secret")
-		jwtManager := woodpeckerGrpcServer.NewJWTManager(jwtSecret)
-
-		authorizer := woodpeckerGrpcServer.NewAuthorizer(jwtManager)
-		grpcServer := grpc.NewServer(
-			grpc.StreamInterceptor(authorizer.StreamInterceptor),
-			grpc.UnaryInterceptor(authorizer.UnaryInterceptor),
-			grpc.KeepaliveEnforcementPolicy(keepalive.EnforcementPolicy{
-				MinTime: c.Duration("keepalive-min-time"),
-			}),
-		)
-
-		woodpeckerServer := woodpeckerGrpcServer.NewWoodpeckerServer(
-			server.Config.Services.Queue,
-			server.Config.Services.Logs,
-			server.Config.Services.Pubsub,
-			_store,
-		)
-		proto.RegisterWoodpeckerServer(grpcServer, woodpeckerServer)
-
-		woodpeckerAuthServer := woodpeckerGrpcServer.NewWoodpeckerAuthServer(
-			jwtManager,
-			server.Config.Server.AgentToken,
-			_store,
-		)
-		proto.RegisterWoodpeckerAuthServer(grpcServer, woodpeckerAuthServer)
-
-		err = grpcServer.Serve(lis)
-		if err != nil {
-			log.Fatal().Err(err).Msg("failed to serve grpc server") //nolint:forbidigo
+	serviceWaitingGroup.Go(func() error {
+		log.Info().Msg("starting grpc server ...")
+		if err := runGrpcServer(ctx, c, _store); err != nil {
+			// stop whole server as grpc is essential
+			go stopServerFunc(err)
+			return err
 		}
 		return nil
 	})
@@ -173,20 +175,33 @@ func run(c *cli.Context) error {
 	switch {
 	case c.String("server-cert") != "":
 		// start the server with tls enabled
-		g.Go(func() error {
-			serve := &http.Server{
+		serviceWaitingGroup.Go(func() error {
+			tlsServer := &http.Server{
 				Addr:    server.Config.Server.PortTLS,
 				Handler: handler,
 				TLSConfig: &tls.Config{
 					NextProtos: []string{"h2", "http/1.1"},
 				},
 			}
-			err = serve.ListenAndServeTLS(
+
+			go func() {
+				<-ctx.Done()
+				log.Info().Msg("shutdown tls server ...")
+				if err := tlsServer.Shutdown(shutdownCtx); err != nil { //nolint:contextcheck
+					log.Error().Err(err).Msg("shutdown tls server failed")
+				} else {
+					log.Info().Msg("tls server stopped")
+				}
+			}()
+
+			log.Info().Msg("starting tls server ...")
+			err := tlsServer.ListenAndServeTLS(
 				c.String("server-cert"),
 				c.String("server-key"),
 			)
 			if err != nil && !errors.Is(err, http.ErrServerClosed) {
-				log.Fatal().Err(err).Msg("failed to start server with tls") //nolint:forbidigo
+				log.Error().Err(err).Msg("TLS server failed")
+				stopServerFunc(fmt.Errorf("TLS server failed: %w", err))
 			}
 			return err
 		})
@@ -202,12 +217,27 @@ func run(c *cli.Context) error {
 			http.Redirect(w, req, req.URL.String(), http.StatusMovedPermanently)
 		}
 
-		g.Go(func() error {
-			err := http.ListenAndServe(server.Config.Server.Port, http.HandlerFunc(redirect))
-			if err != nil && !errors.Is(err, http.ErrServerClosed) {
-				log.Fatal().Err(err).Msg("unable to start server to redirect from http to https") //nolint:forbidigo
+		serviceWaitingGroup.Go(func() error {
+			redirectServer := &http.Server{
+				Addr:    server.Config.Server.Port,
+				Handler: http.HandlerFunc(redirect),
 			}
-			return err
+			go func() {
+				<-ctx.Done()
+				log.Info().Msg("shutdown redirect server ...")
+				if err := redirectServer.Shutdown(shutdownCtx); err != nil { //nolint:contextcheck
+					log.Error().Err(err).Msg("shutdown redirect server failed")
+				} else {
+					log.Info().Msg("redirect server stopped")
+				}
+			}()
+
+			log.Info().Msg("starting redirect server ...")
+			if err := redirectServer.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+				log.Error().Err(err).Msg("redirect server failed")
+				stopServerFunc(fmt.Errorf("redirect server failed: %w", err))
+			}
+			return nil
 		})
 	case c.Bool("lets-encrypt"):
 		// start the server with lets-encrypt
@@ -219,39 +249,76 @@ func run(c *cli.Context) error {
 			return err
 		}
 
-		g.Go(func() error {
+		serviceWaitingGroup.Go(func() error {
+			go func() {
+				<-ctx.Done()
+				log.Error().Msg("there is no certmagic.HTTPS alternative who is context aware we will fail in 2 seconds")
+				time.Sleep(time.Second * 2)
+				log.Fatal().Msg("we kill certmagic by fail") //nolint:forbidigo
+			}()
+
+			log.Info().Msg("starting certmagic server ...")
 			if err := certmagic.HTTPS([]string{address.Host}, handler); err != nil {
-				log.Fatal().Err(err).Msg("certmagic does not work") //nolint:forbidigo
+				log.Error().Err(err).Msg("certmagic does not work")
+				stopServerFunc(fmt.Errorf("certmagic failed: %w", err))
 			}
 			return nil
 		})
 	default:
 		// start the server without tls
-		g.Go(func() error {
-			err := http.ListenAndServe(
-				c.String("server-addr"),
-				handler,
-			)
-			if err != nil && !errors.Is(err, http.ErrServerClosed) {
-				log.Fatal().Err(err).Msg("could not start server") //nolint:forbidigo
+		serviceWaitingGroup.Go(func() error {
+			httpServer := &http.Server{
+				Addr:    c.String("server-addr"),
+				Handler: handler,
+			}
+
+			go func() {
+				<-ctx.Done()
+				log.Info().Msg("shutdown http server ...")
+				if err := httpServer.Shutdown(shutdownCtx); err != nil { //nolint:contextcheck
+					log.Error().Err(err).Msg("shutdown http server failed")
+				} else {
+					log.Info().Msg("http server stopped")
+				}
+			}()
+
+			log.Info().Msg("starting http server ...")
+			if err := httpServer.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+				log.Error().Err(err).Msg("http server failed")
+				stopServerFunc(fmt.Errorf("http server failed: %w", err))
 			}
 			return err
 		})
 	}
 
 	if metricsServerAddr := c.String("metrics-server-addr"); metricsServerAddr != "" {
-		g.Go(func() error {
+		serviceWaitingGroup.Go(func() error {
 			metricsRouter := gin.New()
 			metricsRouter.GET("/metrics", gin.WrapH(prometheus_http.Handler()))
-			err := http.ListenAndServe(metricsServerAddr, metricsRouter)
-			if err != nil && !errors.Is(err, http.ErrServerClosed) {
-				log.Fatal().Err(err).Msg("could not start metrics server") //nolint:forbidigo
+
+			metricsServer := &http.Server{
+				Addr:    metricsServerAddr,
+				Handler: metricsRouter,
+			}
+
+			go func() {
+				<-ctx.Done()
+				log.Info().Msg("shutdown metrics server ...")
+				if err := metricsServer.Shutdown(shutdownCtx); err != nil { //nolint:contextcheck
+					log.Error().Err(err).Msg("shutdown metrics server failed")
+				} else {
+					log.Info().Msg("metrics server stopped")
+				}
+			}()
+
+			log.Info().Msg("starting metrics server ...")
+			if err := metricsServer.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+				log.Error().Err(err).Msg("metrics server failed")
+				stopServerFunc(fmt.Errorf("metrics server failed: %w", err))
 			}
 			return err
 		})
 	}
 
-	log.Info().Msgf("starting Woodpecker server with version '%s'", version.String())
-
-	return g.Wait()
+	return serviceWaitingGroup.Wait()
 }
