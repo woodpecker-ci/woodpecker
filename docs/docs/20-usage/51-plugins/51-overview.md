@@ -29,6 +29,8 @@ steps:
 ## Plugin Isolation
 
 Plugins are just pipeline steps. They share the build workspace, mounted as a volume, and therefore have access to your source tree.
+While normal steps are all about arbitrary code execution, plugins should only allow the functions intendet by the plugin author.
+So there are a few limitations, like the workspace base is always mounted at `/woodpecker/src`.
 
 ## Finding Plugins
 
