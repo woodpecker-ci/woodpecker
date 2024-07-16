@@ -139,6 +139,7 @@ func TestCompilerCompile(t *testing.T) {
 						OnSuccess:  true,
 						Failure:    "fail",
 						Volumes:    []string{defaultVolumes[0].Name + ":/woodpecker/src"},
+						WorkingDir: "/woodpecker/src",
 						Networks:   []backend_types.Conn{{Name: "test_default", Aliases: []string{"dummy"}}},
 						ExtraHosts: []backend_types.HostAlias{},
 					}},
