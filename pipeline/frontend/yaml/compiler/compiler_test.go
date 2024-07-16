@@ -61,13 +61,14 @@ func TestSecretAvailable(t *testing.T) {
 }
 
 func TestCompilerCompile(t *testing.T) {
+	repoURL := "https://github.com/octocat/hello-world"
 	compiler := New(
 		WithMetadata(metadata.Metadata{
 			Repo: metadata.Repo{
 				Owner:    "octacat",
 				Name:     "hello-world",
 				Private:  true,
-				ForgeURL: "https://github.com/octocat/hello-world",
+				ForgeURL: repoURL,
 				CloneURL: "https://github.com/octocat/hello-world.git",
 			},
 		}),
@@ -76,6 +77,7 @@ func TestCompilerCompile(t *testing.T) {
 			"COLORED": "true",
 		}),
 		WithPrefix("test"),
+		WithWorkspaceFromURL("/test", repoURL),
 	)
 
 	defaultNetworks := []*backend_types.Network{{
@@ -92,8 +94,8 @@ func TestCompilerCompile(t *testing.T) {
 			Image:      constant.DefaultCloneImage,
 			OnSuccess:  true,
 			Failure:    "fail",
-			Volumes:    []string{defaultVolumes[0].Name + ":/woodpecker/src"},
-			WorkingDir: "/woodpecker/src",
+			Volumes:    []string{defaultVolumes[0].Name + ":/woodpecker"},
+			WorkingDir: "/woodpecker/src/github.com/octocat/hello-world",
 			Networks:   []backend_types.Conn{{Name: "test_default", Aliases: []string{"clone"}}},
 			ExtraHosts: []backend_types.HostAlias{},
 		}},
@@ -138,8 +140,8 @@ func TestCompilerCompile(t *testing.T) {
 						Image:      "dummy_img",
 						OnSuccess:  true,
 						Failure:    "fail",
-						Volumes:    []string{defaultVolumes[0].Name + ":/woodpecker/src"},
-						WorkingDir: "/woodpecker/src",
+						Volumes:    []string{defaultVolumes[0].Name + ":/woodpecker"},
+						WorkingDir: "/woodpecker/src/github.com/octocat/hello-world",
 						Networks:   []backend_types.Conn{{Name: "test_default", Aliases: []string{"dummy"}}},
 						ExtraHosts: []backend_types.HostAlias{},
 					}},
@@ -174,7 +176,8 @@ func TestCompilerCompile(t *testing.T) {
 						Commands:   []string{"env"},
 						OnSuccess:  true,
 						Failure:    "fail",
-						Volumes:    []string{defaultVolumes[0].Name + ":"},
+						Volumes:    []string{defaultVolumes[0].Name + ":/test"},
+						WorkingDir: "/test/src/github.com/octocat/hello-world",
 						Networks:   []backend_types.Conn{{Name: "test_default", Aliases: []string{"echo env"}}},
 						ExtraHosts: []backend_types.HostAlias{},
 					}},
@@ -186,7 +189,8 @@ func TestCompilerCompile(t *testing.T) {
 						Commands:   []string{"echo 1"},
 						OnSuccess:  true,
 						Failure:    "fail",
-						Volumes:    []string{defaultVolumes[0].Name + ":"},
+						Volumes:    []string{defaultVolumes[0].Name + ":/test"},
+						WorkingDir: "/test/src/github.com/octocat/hello-world",
 						Networks:   []backend_types.Conn{{Name: "test_default", Aliases: []string{"parallel echo 1"}}},
 						ExtraHosts: []backend_types.HostAlias{},
 					}, {
@@ -196,7 +200,8 @@ func TestCompilerCompile(t *testing.T) {
 						Commands:   []string{"echo 2"},
 						OnSuccess:  true,
 						Failure:    "fail",
-						Volumes:    []string{defaultVolumes[0].Name + ":"},
+						Volumes:    []string{defaultVolumes[0].Name + ":/test"},
+						WorkingDir: "/test/src/github.com/octocat/hello-world",
 						Networks:   []backend_types.Conn{{Name: "test_default", Aliases: []string{"parallel echo 2"}}},
 						ExtraHosts: []backend_types.HostAlias{},
 					}},
@@ -230,7 +235,8 @@ func TestCompilerCompile(t *testing.T) {
 						Commands:   []string{"env"},
 						OnSuccess:  true,
 						Failure:    "fail",
-						Volumes:    []string{defaultVolumes[0].Name + ":"},
+						Volumes:    []string{defaultVolumes[0].Name + ":/test"},
+						WorkingDir: "/test/src/github.com/octocat/hello-world",
 						Networks:   []backend_types.Conn{{Name: "test_default", Aliases: []string{"echo env"}}},
 						ExtraHosts: []backend_types.HostAlias{},
 					}, {
@@ -240,7 +246,8 @@ func TestCompilerCompile(t *testing.T) {
 						Commands:   []string{"echo 2"},
 						OnSuccess:  true,
 						Failure:    "fail",
-						Volumes:    []string{defaultVolumes[0].Name + ":"},
+						Volumes:    []string{defaultVolumes[0].Name + ":/test"},
+						WorkingDir: "/test/src/github.com/octocat/hello-world",
 						Networks:   []backend_types.Conn{{Name: "test_default", Aliases: []string{"echo 2"}}},
 						ExtraHosts: []backend_types.HostAlias{},
 					}},
@@ -252,7 +259,8 @@ func TestCompilerCompile(t *testing.T) {
 						Commands:   []string{"echo 1"},
 						OnSuccess:  true,
 						Failure:    "fail",
-						Volumes:    []string{defaultVolumes[0].Name + ":"},
+						Volumes:    []string{defaultVolumes[0].Name + ":/test"},
+						WorkingDir: "/test/src/github.com/octocat/hello-world",
 						Networks:   []backend_types.Conn{{Name: "test_default", Aliases: []string{"echo 1"}}},
 						ExtraHosts: []backend_types.HostAlias{},
 					}},
