@@ -42,7 +42,7 @@ func pipelineLogs(c *cli.Context) error {
 	}
 	repoID, err := internal.ParseRepo(client, repoIDOrFullName)
 	if err != nil {
-		return fmt.Errorf("invalid repo-id or repo-full-name: '%s'", repoIDOrFullName)
+		return fmt.Errorf("invalid repo '%s': %w ", repoIDOrFullName, err)
 	}
 
 	pipelineArg := c.Args().Get(1)
@@ -51,7 +51,7 @@ func pipelineLogs(c *cli.Context) error {
 	}
 	number, err := strconv.ParseInt(pipelineArg, 10, 64)
 	if err != nil {
-		return fmt.Errorf("invalid pipeline '%s'", pipelineArg)
+		return fmt.Errorf("invalid pipeline '%s': %w", pipelineArg, err)
 	}
 
 	stepArg := c.Args().Get(2)
@@ -61,7 +61,7 @@ func pipelineLogs(c *cli.Context) error {
 
 	step, err := strconv.ParseInt(stepArg, 10, 64)
 	if err != nil {
-		return fmt.Errorf("invalid stepId '%s'", stepArg)
+		return fmt.Errorf("invalid stepId '%s': %w", stepArg, err)
 	}
 	return showStepLog(client, repoID, number, step)
 }
