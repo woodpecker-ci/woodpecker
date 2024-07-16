@@ -16,7 +16,9 @@ package pipeline
 
 import (
 	"fmt"
+	"os"
 	"strconv"
+	"text/template"
 
 	"github.com/urfave/cli/v2"
 
@@ -27,7 +29,7 @@ import (
 var pipelineLogsCmd = &cli.Command{
 	Name:      "logs",
 	Usage:     "show pipeline logs",
-	ArgsUsage: "<repo-id|repo-full-name> <pipeline> [stepID]",
+	ArgsUsage: "<repo-id|repo-full-name> <pipeline> [step-number|step-name]",
 	Action:    pipelineLogs,
 }
 
@@ -59,11 +61,46 @@ func pipelineLogs(c *cli.Context) error {
 		return showPipelineLog(client, repoID, number)
 	}
 
-	step, err := strconv.ParseInt(stepArg, 10, 64)
+	step, err := ParseStep(client, repoID, number, stepArg)
 	if err != nil {
-		return fmt.Errorf("invalid stepId '%s': %w", stepArg, err)
+		return fmt.Errorf("invalid step '%s': %w", stepArg, err)
 	}
 	return showStepLog(client, repoID, number, step)
+}
+
+/*
+Parse stepArg into a steps ID for a given pipeline in a repo. Argument stepArg may either be the
+name of a step or the PID of a step. Step PID take precedence over step name when searching for a match.
+First match is used, is there are multiple steps with the same name.
+*/
+func ParseStep(client woodpecker.Client, repoID, number int64, stepArg string) (int64, error) {
+	pipeline, err := client.Pipeline(repoID, number)
+	if err != nil {
+		return 0, err
+	}
+
+	stepPID, err := strconv.ParseInt(stepArg, 10, 64)
+	if err != nil {
+		stepPID = -1
+	}
+
+	for _, wf := range pipeline.Workflows {
+		for _, step := range wf.Children {
+			if int64(step.PID) == stepPID {
+				return step.ID, nil
+			}
+		}
+	}
+
+	for _, wf := range pipeline.Workflows {
+		for _, step := range wf.Children {
+			if step.Name == stepArg {
+				return step.ID, nil
+			}
+		}
+	}
+
+	return 0, fmt.Errorf("no step with number or name '%s' found", stepArg)
 }
 
 func showPipelineLog(client woodpecker.Client, repoID, number int64) error {
@@ -72,9 +109,16 @@ func showPipelineLog(client woodpecker.Client, repoID, number int64) error {
 		return err
 	}
 
+	tmpl, err := template.New("_").Parse(tmplPipelineLogs + "\n")
+	if err != nil {
+		return err
+	}
+
 	for _, workflow := range pipeline.Workflows {
 		for _, step := range workflow.Children {
-			fmt.Printf("\x1b[33mWorflow #%d\x1b[0m ('%s'), \x1b[33mStep #%d\x1b[0m ('%s'):\n", workflow.PID, workflow.Name, step.PID, step.Name)
+			if err := tmpl.Execute(os.Stdout, workflowStep{workflow, step}); err != nil {
+				return err
+			}
 			err := showStepLog(client, repoID, number, step.ID)
 			if err != nil {
 				return err
