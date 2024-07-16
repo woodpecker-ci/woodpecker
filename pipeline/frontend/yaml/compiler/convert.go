@@ -30,7 +30,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/utils"
 )
 
-const pluginWorkspaceBase = "/woodpecker/src"
+const pluginWorkspaceBase = "/woodpecker"
 
 func (c *Compiler) createProcess(container *yaml_types.Container, stepType backend_types.StepType) (*backend_types.Step, error) {
 	var (
