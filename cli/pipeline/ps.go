@@ -91,8 +91,10 @@ func pipelinePs(c *cli.Context) error {
 }
 
 // template for pipeline ps information
-var tmplPipelinePs = "\x1b[33mWorkflow #{{ .Workflow.ID }} ({{ .Workflow.Name }}), Step #{{ .Step.PID }} \x1b[0m" + `
-Id: {{ .Step.ID }}
+var tmplPipelinePs = "\x1b[33m{{ .Workflow.Name }} > {{ .Step.Name }} (#{{ .Step.PID }}):\x1b[0m" + `
 Step: {{ .Step.Name }}
+Started: {{ .Step.Started }}
+Started: {{ .Step.Stopped }}
+Type: {{ .Step.Type }}
 State: {{ .Step.State }}
 `

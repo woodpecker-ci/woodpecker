@@ -97,3 +97,6 @@ func showStepLog(client woodpecker.Client, repoID, number, step int64) error {
 
 	return nil
 }
+
+// template for pipeline ps information
+var tmplPipelineLogs = "\x1b[33m{{ .Workflow.Name }} > {{ .Step.Name }} (#{{ .Step.PID }}):\x1b[0m"
