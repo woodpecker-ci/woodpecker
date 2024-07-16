@@ -218,42 +218,42 @@ func (l *Linter) lintDeprecations(config *WorkflowConfig) (err error) {
 		return err
 	}
 
-	if parsed.PipelineDoNotUseIt.ContainerList != nil {
+	if parsed.PipelineDoNotUseIt != nil {
 		err = multierr.Append(err, &errorTypes.PipelineError{
 			Type:    errorTypes.PipelineErrorTypeDeprecation,
-			Message: "Please use 'steps:' instead of deprecated 'pipeline:' list",
+			Message: "Please use 'steps:' instead of removed 'pipeline:' list",
 			Data: errors.DeprecationErrorData{
 				File:  config.File,
 				Field: "pipeline",
 				Docs:  "https://woodpecker-ci.org/docs/next/migrations#next-200",
 			},
-			IsWarning: true,
+			IsWarning: false,
 		})
 	}
 
 	if parsed.PlatformDoNotUseIt != "" {
 		err = multierr.Append(err, &errorTypes.PipelineError{
 			Type:    errorTypes.PipelineErrorTypeDeprecation,
-			Message: "Please use labels instead of deprecated 'platform' filters",
+			Message: "Please use labels instead of removed 'platform' filters",
 			Data: errors.DeprecationErrorData{
 				File:  config.File,
 				Field: "platform",
 				Docs:  "https://woodpecker-ci.org/docs/next/migrations#next-200",
 			},
-			IsWarning: true,
+			IsWarning: false,
 		})
 	}
 
 	if parsed.BranchesDoNotUseIt != nil {
 		err = multierr.Append(err, &errorTypes.PipelineError{
 			Type:    errorTypes.PipelineErrorTypeDeprecation,
-			Message: "Please use global when instead of deprecated 'branches' filter",
+			Message: "Please use global when instead of removed 'branches' filter",
 			Data: errors.DeprecationErrorData{
 				File:  config.File,
 				Field: "branches",
 				Docs:  "https://woodpecker-ci.org/docs/next/migrations#next-200",
 			},
-			IsWarning: true,
+			IsWarning: false,
 		})
 	}
 
