@@ -92,7 +92,6 @@ func (c *Compiler) createProcess(container *yaml_types.Container, stepType backe
 		detached = true
 	}
 
-	// TODO: we do not need to limit this to container steps ...
 	if !detached || len(container.Commands) != 0 {
 		workingDir = c.stepWorkingDir(container)
 	}
