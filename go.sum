@@ -85,8 +85,8 @@ github.com/cockroachdb/apd v1.1.0/go.mod h1:8Sl8LxpKi29FqWXR16WEFZRNSz3SoPzUzeMe
 github.com/coreos/go-systemd v0.0.0-20190321100706-95778dfbb74e/go.mod h1:F5haX7vjVVG0kc13fIWeqUViNPyEJxv/OmvnBo0Yme4=
 github.com/coreos/go-systemd v0.0.0-20190719114852-fd7a80b32e1f/go.mod h1:F5haX7vjVVG0kc13fIWeqUViNPyEJxv/OmvnBo0Yme4=
 github.com/coreos/go-systemd/v22 v22.5.0/go.mod h1:Y58oyj3AT4RCenI/lSvhwexgC+NSVTIJ3seZv2GcEnc=
-github.com/cpuguy83/go-md2man/v2 v2.0.2 h1:p1EgwI/C7NhT0JmVkwCD2ZBK8j4aeHQX2pMHHBfMQ6w=
-github.com/cpuguy83/go-md2man/v2 v2.0.2/go.mod h1:tgQtvFlXSQOSOSIRvRPT7W67SCa46tRHOmNcaadrF8o=
+github.com/cpuguy83/go-md2man/v2 v2.0.4 h1:wfIWP927BUkWJb2NmU/kNDYIBTh/ziUX91+lVfRxZq4=
+github.com/cpuguy83/go-md2man/v2 v2.0.4/go.mod h1:tgQtvFlXSQOSOSIRvRPT7W67SCa46tRHOmNcaadrF8o=
 github.com/creack/pty v1.1.7/go.mod h1:lj5s0c3V2DBrqTV7llrYr5NG6My20zk30Fl46Y7DoTY=
 github.com/creack/pty v1.1.21 h1:1/QdRyBaHHJP61QkWMXlOIBfsgdDeeKfK8SYVUWJKf0=
 github.com/creack/pty v1.1.21/go.mod h1:MOBLtS5ELjhRRrroQr9kyvTxUAFNvYEK993ew/Vr4O4=
@@ -482,10 +482,10 @@ github.com/twitchyliquid64/golang-asm v0.15.1 h1:SU5vSMR7hnwNxj24w34ZyCi/FmDZTkS
 github.com/twitchyliquid64/golang-asm v0.15.1/go.mod h1:a1lVb/DtPvCB8fslRZhAngC2+aY1QWCk3Cedj/Gdt08=
 github.com/ugorji/go/codec v1.2.12 h1:9LC83zGrHhuUA9l16C9AHXAqEV/2wBQ4nkvumAE65EE=
 github.com/ugorji/go/codec v1.2.12/go.mod h1:UNopzCgEMSXjBc6AOMqYvWC1ktqTAfzJZUZgYf6w6lg=
-github.com/urfave/cli-docs/v3 v3.0.0-alpha5.0.20230626143951-07c2cad18cff h1:f1SL2eufG55ZJ+IagejiMz/nxcaTcUFqg8jtGIsWloU=
-github.com/urfave/cli-docs/v3 v3.0.0-alpha5.0.20230626143951-07c2cad18cff/go.mod h1:AIqom6Q60U4tiqHp41i7+/AB2XHgi1WvQ7jOFlccmZ4=
-github.com/urfave/cli/v3 v3.0.0-alpha9.0.20240707153112-6d6416e1c313 h1:vWiwl/qlk5/rwtKlnSrlBjHkZa2W+Xom8yMCqqRlSHU=
-github.com/urfave/cli/v3 v3.0.0-alpha9.0.20240707153112-6d6416e1c313/go.mod h1:Z1ItyMma7t6I7zHG9OpbExhHQOSkFf/96n+mAZ9MtVI=
+github.com/urfave/cli-docs/v3 v3.0.0-alpha5.0.20240714105325-1da00919bcb4 h1:exFN/ZOxXslYr9t2AjrniP7wPjp/VLLAJhgazj92EBg=
+github.com/urfave/cli-docs/v3 v3.0.0-alpha5.0.20240714105325-1da00919bcb4/go.mod h1:AIqom6Q60U4tiqHp41i7+/AB2XHgi1WvQ7jOFlccmZ4=
+github.com/urfave/cli/v3 v3.0.0-alpha9.0.20240711030030-937cfe918cb1 h1:oxO/Jem1QPy4lxbDtX8PMiFbL79dNMA6CNAfbC06rn4=
+github.com/urfave/cli/v3 v3.0.0-alpha9.0.20240711030030-937cfe918cb1/go.mod h1:Z1ItyMma7t6I7zHG9OpbExhHQOSkFf/96n+mAZ9MtVI=
 github.com/xanzy/go-gitlab v0.106.0 h1:EDfD03K74cIlQo2EducfiupVrip+Oj02bq9ofw5F8sA=
 github.com/xanzy/go-gitlab v0.106.0/go.mod h1:ETg8tcj4OhrB84UEgeE8dSuV/0h4BBL1uOV/qK0vlyI=
 github.com/xeipuuv/gojsonpointer v0.0.0-20180127040702-4e3ac2762d5f/go.mod h1:N2zxlSyiKSe5eX1tZViRH5QA0qijqEDrYZiPEAiq3wU=

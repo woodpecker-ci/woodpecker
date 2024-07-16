@@ -56,8 +56,8 @@ require (
 	github.com/swaggo/files v1.0.1
 	github.com/swaggo/gin-swagger v1.6.0
 	github.com/swaggo/swag v1.16.3
-	github.com/urfave/cli-docs/v3 v3.0.0-alpha5.0.20230626143951-07c2cad18cff
-	github.com/urfave/cli/v3 v3.0.0-alpha9.0.20240707153112-6d6416e1c313
+	github.com/urfave/cli-docs/v3 v3.0.0-alpha5.0.20240714105325-1da00919bcb4
+	github.com/urfave/cli/v3 v3.0.0-alpha9.0.20240711030030-937cfe918cb1
 	github.com/xanzy/go-gitlab v0.106.0
 	github.com/xeipuuv/gojsonschema v1.2.0
 	github.com/zalando/go-keyring v0.2.5
@@ -102,7 +102,7 @@ require (
 	github.com/charmbracelet/x/windows v0.1.2 // indirect
 	github.com/cloudwego/base64x v0.1.4 // indirect
 	github.com/cloudwego/iasm v0.2.0 // indirect
-	github.com/cpuguy83/go-md2man/v2 v2.0.2 // indirect
+	github.com/cpuguy83/go-md2man/v2 v2.0.4 // indirect
 	github.com/danieljoos/wincred v1.2.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/davidmz/go-pageant v1.0.2 // indirect
