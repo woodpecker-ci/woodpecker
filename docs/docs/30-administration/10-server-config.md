@@ -517,7 +517,7 @@ Example: `WOODPECKER_LIMIT_CPU_SET=1,2`
 
 > Default: empty
 
-Specify a configuration service endpoint, see [Configuration Extension](./100-external-configuration-api.md)
+Specify a configuration service endpoint, see [Configuration Extension](./40-advanced/100-external-configuration-api.md)
 
 ### `WOODPECKER_FORGE_TIMEOUT`
 

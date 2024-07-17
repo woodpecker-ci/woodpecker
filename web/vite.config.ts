@@ -4,9 +4,6 @@ import process from 'node:process';
 import VueI18nPlugin from '@intlify/unplugin-vue-i18n/vite';
 import vue from '@vitejs/plugin-vue';
 import { replaceInFileSync } from 'replace-in-file';
-import IconsResolver from 'unplugin-icons/resolver';
-import Icons from 'unplugin-icons/vite';
-import Components from 'unplugin-vue-components/vite';
 import type { Plugin } from 'vite';
 import prismjs from 'vite-plugin-prismjs';
 import WindiCSS from 'vite-plugin-windicss';
@@ -113,11 +110,7 @@ export default defineConfig({
       };
     })(),
     WindiCSS(),
-    Icons({}),
     svgLoader(),
-    Components({
-      resolvers: [IconsResolver()],
-    }),
     externalCSSPlugin(),
     woodpeckerInfoPlugin(),
     prismjs({

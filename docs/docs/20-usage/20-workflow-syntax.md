@@ -6,6 +6,11 @@ The Workflow section defines a list of steps to build, test and deploy your code
 An exception to this rule are steps with a [`status: [failure]`](#status) condition, which ensures that they are executed in the case of a failed run.
 :::
 
+:::note
+We support most of YAML 1.2, but preserve some behavior from 1.1 for backward compatibility.
+Read more at: [https://github.com/go-yaml/yaml](https://github.com/go-yaml/yaml/tree/v3)
+:::
+
 Example steps:
 
 ```yaml

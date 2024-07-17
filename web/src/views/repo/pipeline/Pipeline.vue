@@ -79,6 +79,7 @@ import { useRoute, useRouter } from 'vue-router';
 import Button from '~/components/atomic/Button.vue';
 import Icon from '~/components/atomic/Icon.vue';
 import Container from '~/components/layout/Container.vue';
+import Panel from '~/components/layout/Panel.vue';
 import PipelineLog from '~/components/repo/pipeline/PipelineLog.vue';
 import PipelineStepList from '~/components/repo/pipeline/PipelineStepList.vue';
 import useApiClient from '~/compositions/useApiClient';
