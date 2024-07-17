@@ -4,6 +4,24 @@ Plugins are pipeline steps that perform pre-defined tasks and are configured as 
 
 They are automatically pulled from the default container registry the agent's have configured.
 
+```dockerfile title="Dockerfile"
+FROM laszlocloud/kubectl
+COPY deploy /usr/local/deploy
+ENTRYPOINT ["/usr/local/deploy"]
+```
+
+```bash title="deploy"
+kubectl apply -f $PLUGIN_TEMPLATE
+```
+
+```yaml title=".woodpecker.yaml"
+steps:
+  - name: deploy-to-k8s
+    image: laszlocloud/my-k8s-plugin
+    settings:
+      template: config/k8s/service.yaml
+```
+
 Example pipeline using the Docker and Slack plugins:
 
 ```yaml
