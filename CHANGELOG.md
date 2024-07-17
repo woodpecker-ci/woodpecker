@@ -25,6 +25,7 @@
 
 ### 📈 Enhancement
 
+- Allow to change the working directory also plugins and services [[#3914](https://github.com/woodpecker-ci/woodpecker/pull/3914)]
 - Remove `unplugin-icons` [[#3809](https://github.com/woodpecker-ci/woodpecker/pull/3809)]
 - Release windows binaries as zip file [[#3906](https://github.com/woodpecker-ci/woodpecker/pull/3906)]
 - Convert to openapi 3.0 [[#3897](https://github.com/woodpecker-ci/woodpecker/pull/3897)]
