@@ -15,7 +15,7 @@
 package repo
 
 import (
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
 	"go.woodpecker-ci.org/woodpecker/v2/cli/repo/registry"
 )
@@ -24,7 +24,7 @@ import (
 var Command = &cli.Command{
 	Name:  "repo",
 	Usage: "manage repositories",
-	Subcommands: []*cli.Command{
+	Commands: []*cli.Command{
 		repoListCmd,
 		repoInfoCmd,
 		repoAddCmd,
