@@ -19,7 +19,7 @@ import (
 	"time"
 
 	"github.com/jellydator/ttlcache/v3"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
@@ -61,7 +61,7 @@ type manager struct {
 	setupForge          SetupForge
 }
 
-func NewManager(c *cli.Context, store store.Store, setupForge SetupForge) (Manager, error) {
+func NewManager(c *cli.Command, store store.Store, setupForge SetupForge) (Manager, error) {
 	signaturePrivateKey, signaturePublicKey, err := setupSignatureKeys(store)
 	if err != nil {
 		return nil, err
