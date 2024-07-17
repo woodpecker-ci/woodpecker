@@ -2,7 +2,7 @@
 
 # NAME
 
-woodpecker-cli - A new cli application
+woodpecker-cli - command line utility
 
 # SYNOPSIS
 
@@ -26,7 +26,7 @@ Woodpecker command line utility
 **Usage**:
 
 ```
-woodpecker-cli [GLOBAL OPTIONS] command [COMMAND OPTIONS] [ARGUMENTS...]
+woodpecker-cli [GLOBAL OPTIONS] [command [COMMAND OPTIONS]] [ARGUMENTS...]
 ```
 
 # GLOBAL OPTIONS
@@ -35,9 +35,9 @@ woodpecker-cli [GLOBAL OPTIONS] command [COMMAND OPTIONS] [ARGUMENTS...]
 
 **--disable-update-check**: disable update check
 
-**--log-file**="": Output destination for logs. 'stdout' and 'stderr' can be used as special keywords. (default: "stderr")
+**--log-file**="": Output destination for logs. 'stdout' and 'stderr' can be used as special keywords. (default: stderr)
 
-**--log-level**="": set logging level (default: "info")
+**--log-level**="": set logging level (default: info)
 
 **--nocolor**: disable colored debug output, only has effect if pretty output is set too
 
@@ -61,7 +61,7 @@ manage global registries
 
 adds a registry
 
-**--hostname**="": registry hostname (default: "docker.io")
+**--hostname**="": registry hostname (default: docker.io)
 
 **--password**="": registry password
 
@@ -71,13 +71,13 @@ adds a registry
 
 remove a registry
 
-**--hostname**="": registry hostname (default: "docker.io")
+**--hostname**="": registry hostname (default: docker.io)
 
 #### update
 
 update a registry
 
-**--hostname**="": registry hostname (default: "docker.io")
+**--hostname**="": registry hostname (default: docker.io)
 
 **--organization, --org**="": organization id or full name (e.g. 123 or octocat)
 
@@ -89,7 +89,7 @@ update a registry
 
 display registry info
 
-**--hostname**="": registry hostname (default: "docker.io")
+**--hostname**="": registry hostname (default: docker.io)
 
 #### ls
 
@@ -107,7 +107,7 @@ manage organization registries
 
 adds a registry
 
-**--hostname**="": registry hostname (default: "docker.io")
+**--hostname**="": registry hostname (default: docker.io)
 
 **--organization, --org**="": organization id or full name (e.g. 123 or octocat)
 
@@ -119,7 +119,7 @@ adds a registry
 
 remove a registry
 
-**--hostname**="": registry hostname (default: "docker.io")
+**--hostname**="": registry hostname (default: docker.io)
 
 **--organization, --org**="": organization id or full name (e.g. 123 or octocat)
 
@@ -127,7 +127,7 @@ remove a registry
 
 update a registry
 
-**--hostname**="": registry hostname (default: "docker.io")
+**--hostname**="": registry hostname (default: docker.io)
 
 **--organization, --org**="": organization id or full name (e.g. 123 or octocat)
 
@@ -139,7 +139,7 @@ update a registry
 
 display registry info
 
-**--hostname**="": registry hostname (default: "docker.io")
+**--hostname**="": registry hostname (default: docker.io)
 
 **--organization, --org**="": organization id or full name (e.g. 123 or octocat)
 
@@ -157,7 +157,7 @@ manage repositories
 
 list all repos
 
-**--format**="": format output (default: "\x1b[33m{{ .FullName }}\x1b[0m (id: {{ .ID }}, forgeRemoteID: {{ .ForgeRemoteID }})")
+**--format**="": format output (default: [33m{{ .FullName }}[0m (id: {{ .ID }}, forgeRemoteID: {{ .ForgeRemoteID }}))
 
 **--org**="": filter by organization
 
@@ -165,7 +165,17 @@ list all repos
 
 show repository details
 
-**--format**="": format output (default: "Owner: {{ .Owner }}\nRepo: {{ .Name }}\nURL: {{ .ForgeURL }}\nConfig path: {{ .Config }}\nVisibility: {{ .Visibility }}\nPrivate: {{ .IsSCMPrivate }}\nTrusted: {{ .IsTrusted }}\nGated: {{ .IsGated }}\nClone url: {{ .Clone }}\nAllow pull-requests: {{ .AllowPullRequests }}\n")
+**--format**="": format output (default: Owner: {{ .Owner }}
+Repo: {{ .Name }}
+URL: {{ .ForgeURL }}
+Config path: {{ .Config }}
+Visibility: {{ .Visibility }}
+Private: {{ .IsSCMPrivate }}
+Trusted: {{ .IsTrusted }}
+Gated: {{ .IsGated }}
+Clone url: {{ .Clone }}
+Allow pull-requests: {{ .AllowPullRequests }}
+)
 
 ### add
 
@@ -205,7 +215,7 @@ assume ownership of a repository
 
 synchronize the repository list
 
-**--format**="": format output (default: "\x1b[33m{{ .FullName }}\x1b[0m (id: {{ .ID }}, forgeRemoteID: {{ .ForgeRemoteID }})")
+**--format**="": format output (default: [33m{{ .FullName }}[0m (id: {{ .ID }}, forgeRemoteID: {{ .ForgeRemoteID }}))
 
 ### registry
 
@@ -215,7 +225,7 @@ manage registries
 
 adds a registry
 
-**--hostname**="": registry hostname (default: "docker.io")
+**--hostname**="": registry hostname (default: docker.io)
 
 **--password**="": registry password
 
@@ -227,7 +237,7 @@ adds a registry
 
 remove a registry
 
-**--hostname**="": registry hostname (default: "docker.io")
+**--hostname**="": registry hostname (default: docker.io)
 
 **--repository, --repo**="": repository id or full name (e.g. 134 or octocat/hello-world)
 
@@ -235,7 +245,7 @@ remove a registry
 
 update a registry
 
-**--hostname**="": registry hostname (default: "docker.io")
+**--hostname**="": registry hostname (default: docker.io)
 
 **--password**="": registry password
 
@@ -247,7 +257,7 @@ update a registry
 
 display registry info
 
-**--hostname**="": registry hostname (default: "docker.io")
+**--hostname**="": registry hostname (default: docker.io)
 
 **--repository, --repo**="": repository id or full name (e.g. 134 or octocat/hello-world)
 
@@ -271,7 +281,7 @@ show pipeline history
 
 **--limit**="": limit the list size (default: 25)
 
-**--output**="": output format (default: "table")
+**--output**="": output format (default: table)
 
 **--output-no-headers**: don't print headers
 
@@ -281,9 +291,9 @@ show pipeline history
 
 show latest pipeline details
 
-**--branch**="": branch name (default: "main")
+**--branch**="": branch name (default: main)
 
-**--output**="": output format (default: "table")
+**--output**="": output format (default: table)
 
 **--output-no-headers**: don't print headers
 
@@ -295,7 +305,7 @@ show pipeline logs
 
 show pipeline details
 
-**--output**="": output format (default: "table")
+**--output**="": output format (default: table)
 
 **--output-no-headers**: don't print headers
 
@@ -307,7 +317,7 @@ stop a pipeline
 
 start a pipeline
 
-**--param, -p**="": custom parameters to be injected into the step environment. Format: KEY=value
+**--param, -p**="": custom parameters to be injected into the step environment. Format: KEY=value (default: [])
 
 ### approve
 
@@ -321,13 +331,24 @@ decline a pipeline
 
 show pipeline queue
 
-**--format**="": format output (default: "\x1b[33m{{ .FullName }} #{{ .Number }} \x1b[0m\nStatus: {{ .Status }}\nEvent: {{ .Event }}\nCommit: {{ .Commit }}\nBranch: {{ .Branch }}\nRef: {{ .Ref }}\nAuthor: {{ .Author }} {{ if .Email }}<{{.Email}}>{{ end }}\nMessage: {{ .Message }}\n")
+**--format**="": format output (default: [33m{{ .FullName }} #{{ .Number }} [0m
+Status: {{ .Status }}
+Event: {{ .Event }}
+Commit: {{ .Commit }}
+Branch: {{ .Branch }}
+Ref: {{ .Ref }}
+Author: {{ .Author }} {{ if .Email }}<{{.Email}}>{{ end }}
+Message: {{ .Message }}
+)
 
 ### ps
 
 show pipeline steps
 
-**--format**="": format output (default: "\x1b[33mStep #{{ .PID }} \x1b[0m\nStep: {{ .Name }}\nState: {{ .State }}\n")
+**--format**="": format output (default: [33mStep #{{ .PID }} [0m
+Step: {{ .Name }}
+State: {{ .State }}
+)
 
 ### create
 
@@ -335,11 +356,11 @@ create new pipeline
 
 **--branch**="": branch to create pipeline from
 
-**--output**="": output format (default: "table")
+**--output**="": output format (default: table)
 
 **--output-no-headers**: don't print headers
 
-**--var**="": key=value
+**--var**="": key=value (default: [])
 
 ## log
 
@@ -355,13 +376,21 @@ trigger a pipeline with the 'deployment' event
 
 **--branch**="": branch filter
 
-**--event**="": event filter (default: "push")
+**--event**="": event filter (default: push)
 
-**--format**="": format output (default: "Number: {{ .Number }}\nStatus: {{ .Status }}\nCommit: {{ .Commit }}\nBranch: {{ .Branch }}\nRef: {{ .Ref }}\nMessage: {{ .Message }}\nAuthor: {{ .Author }}\nTarget: {{ .Deploy }}\n")
+**--format**="": format output (default: Number: {{ .Number }}
+Status: {{ .Status }}
+Commit: {{ .Commit }}
+Branch: {{ .Branch }}
+Ref: {{ .Ref }}
+Message: {{ .Message }}
+Author: {{ .Author }}
+Target: {{ .Deploy }}
+)
 
-**--param, -p**="": custom parameters to be injected into the step environment. Format: KEY=value
+**--param, -p**="": custom parameters to be injected into the step environment. Format: KEY=value (default: [])
 
-**--status**="": status filter (default: "success")
+**--status**="": status filter (default: success)
 
 ## exec
 
@@ -381,7 +410,7 @@ execute a local pipeline
 
 **--backend-docker-volumes**="": backend docker volumes (comma separated)
 
-**--backend-engine**="": backend engine to run pipelines on (default: "auto-detect")
+**--backend-engine**="": backend engine to run pipelines on (default: auto-detect)
 
 **--backend-http-proxy**="": if set, pass the environment variable down as "HTTP_PROXY" to steps
 
@@ -389,13 +418,13 @@ execute a local pipeline
 
 **--backend-k8s-allow-native-secrets**: whether to allow existing Kubernetes secrets to be referenced from steps
 
-**--backend-k8s-namespace**="": backend k8s namespace (default: "woodpecker")
+**--backend-k8s-namespace**="": backend k8s namespace (default: woodpecker)
 
 **--backend-k8s-pod-annotations**="": backend k8s additional Agent-wide worker pod annotations
 
 **--backend-k8s-pod-annotations-allow-from-step**: whether to allow using annotations from step's backend options
 
-**--backend-k8s-pod-image-pull-secret-names**="": backend k8s pull secret names for private registries (default: "regcred")
+**--backend-k8s-pod-image-pull-secret-names**="": backend k8s pull secret names for private registries (default: [regcred])
 
 **--backend-k8s-pod-labels**="": backend k8s additional Agent-wide worker pod labels
 
@@ -409,9 +438,9 @@ execute a local pipeline
 
 **--backend-k8s-storage-rwx**: backend k8s storage access mode, should ReadWriteMany (RWX) instead of ReadWriteOnce (RWO) be used? (default: true)
 
-**--backend-k8s-volume-size**="": backend k8s volume size (default 10G) (default: "10G")
+**--backend-k8s-volume-size**="": backend k8s volume size (default 10G) (default: 10G)
 
-**--backend-local-temp-dir**="": set a different temp dir to clone workflows into (default: "/tmp/nix-shell.RzJZ1f")
+**--backend-local-temp-dir**="": set a different temp dir to clone workflows into (default: /tmp/nix-shell.kGX6ZV)
 
 **--backend-no-proxy**="": if set, pass the environment variable down as "NO_PROXY" to steps
 
@@ -431,7 +460,7 @@ execute a local pipeline
 
 **--commit-sha**="":
 
-**--env**="":
+**--env**="": (default: [])
 
 **--forge-type**="":
 
@@ -445,7 +474,7 @@ execute a local pipeline
 
 **--netrc-username**="":
 
-**--network**="": external networks
+**--network**="": external networks (default: [])
 
 **--pipeline-created**="": (default: 0)
 
@@ -453,7 +482,7 @@ execute a local pipeline
 
 **--pipeline-deploy-to**="":
 
-**--pipeline-event**="": (default: "manual")
+**--pipeline-event**="": (default: manual)
 
 **--pipeline-finished**="": (default: 0)
 
@@ -497,7 +526,7 @@ execute a local pipeline
 
 **--prev-pipeline-url**="":
 
-**--privileged**="": privileged plugins (default: "plugins/docker", "plugins/gcr", "plugins/ecr", "woodpeckerci/plugin-docker-buildx", "codeberg.org/woodpecker-plugins/docker-buildx")
+**--privileged**="": privileged plugins (default: [plugins/docker plugins/gcr plugins/ecr woodpeckerci/plugin-docker-buildx codeberg.org/woodpecker-plugins/docker-buildx])
 
 **--repo**="": full repo name
 
@@ -517,23 +546,23 @@ execute a local pipeline
 
 **--step-name**="": (default: 0)
 
-**--system-name**="": (default: "woodpecker")
+**--system-name**="": (default: woodpecker)
 
 **--system-platform**="":
 
-**--system-url**="": (default: "https://github.com/woodpecker-ci/woodpecker")
+**--system-url**="": (default: https://github.com/woodpecker-ci/woodpecker)
 
 **--timeout**="": pipeline timeout (default: 1h0m0s)
 
-**--volumes**="": pipeline volumes
+**--volumes**="": pipeline volumes (default: [])
 
 **--workflow-name**="": (default: 0)
 
 **--workflow-number**="": (default: 0)
 
-**--workspace-base**="": (default: "/woodpecker")
+**--workspace-base**="": (default: /woodpecker)
 
-**--workspace-path**="": (default: "src")
+**--workspace-path**="": (default: src)
 
 ## info
 
@@ -547,7 +576,7 @@ manage registries
 
 adds a registry
 
-**--hostname**="": registry hostname (default: "docker.io")
+**--hostname**="": registry hostname (default: docker.io)
 
 **--password**="": registry password
 
@@ -559,7 +588,7 @@ adds a registry
 
 remove a registry
 
-**--hostname**="": registry hostname (default: "docker.io")
+**--hostname**="": registry hostname (default: docker.io)
 
 **--repository, --repo**="": repository id or full name (e.g. 134 or octocat/hello-world)
 
@@ -567,7 +596,7 @@ remove a registry
 
 update a registry
 
-**--hostname**="": registry hostname (default: "docker.io")
+**--hostname**="": registry hostname (default: docker.io)
 
 **--password**="": registry password
 
@@ -579,7 +608,7 @@ update a registry
 
 display registry info
 
-**--hostname**="": registry hostname (default: "docker.io")
+**--hostname**="": registry hostname (default: docker.io)
 
 **--repository, --repo**="": repository id or full name (e.g. 134 or octocat/hello-world)
 
@@ -597,11 +626,11 @@ manage secrets
 
 adds a secret
 
-**--event**="": secret limited to these events
+**--event**="": secret limited to these events (default: [])
 
 **--global**: global secret
 
-**--image**="": secret limited to these images
+**--image**="": secret limited to these images (default: [])
 
 **--name**="": secret name
 
@@ -627,11 +656,11 @@ remove a secret
 
 update a secret
 
-**--event**="": secret limited to these events
+**--event**="": secret limited to these events (default: [])
 
 **--global**: global secret
 
-**--image**="": secret limited to these images
+**--image**="": secret limited to these images (default: [])
 
 **--name**="": secret name
 
@@ -671,13 +700,14 @@ manage users
 
 list all users
 
-**--format**="": format output (default: "{{ .Login }}")
+**--format**="": format output (default: {{ .Login }})
 
 ### info
 
 show user details
 
-**--format**="": format output (default: "User: {{ .Login }}\nEmail: {{ .Email }}")
+**--format**="": format output (default: User: {{ .Login }}
+Email: {{ .Email }})
 
 ### add
 
