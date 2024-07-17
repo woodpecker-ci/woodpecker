@@ -40,6 +40,7 @@
 <script lang="ts" setup>
 import { inject, type Ref } from 'vue';
 
+import Icon from '~/components/atomic/Icon.vue';
 import Panel from '~/components/layout/Panel.vue';
 import type { Pipeline, PipelineError } from '~/lib/api/types';
 
