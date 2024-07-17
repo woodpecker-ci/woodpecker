@@ -23,6 +23,18 @@
 - Cli get repo from git remote [[#3830](https://github.com/woodpecker-ci/woodpecker/pull/3830)]
 - Add api for forges [[#3733](https://github.com/woodpecker-ci/woodpecker/pull/3733)]
 
+### 📚 Documentation
+
+- Streamline docs for new users [[#3803](https://github.com/woodpecker-ci/woodpecker/pull/3803)]
+- Add mastodon verification [[#3843](https://github.com/woodpecker-ci/woodpecker/pull/3843)]
+- chore(deps): update docs npm deps non-major [[#3837](https://github.com/woodpecker-ci/woodpecker/pull/3837)]
+- fix(deps): update docs npm deps non-major [[#3824](https://github.com/woodpecker-ci/woodpecker/pull/3824)]
+- Add openSUSE package [[#3800](https://github.com/woodpecker-ci/woodpecker/pull/3800)]
+- chore(deps): update docs npm deps non-major [[#3798](https://github.com/woodpecker-ci/woodpecker/pull/3798)]
+- Add "Docker Tags" Plugin [[#3796](https://github.com/woodpecker-ci/woodpecker/pull/3796)]
+- chore(deps): update dependency marked to v13 [[#3792](https://github.com/woodpecker-ci/woodpecker/pull/3792)]
+- chore: fix some comments [[#3788](https://github.com/woodpecker-ci/woodpecker/pull/3788)]
+
 ### 🐛 Bug Fixes
 
 - Update alpine package dep for docker images [[#3917](https://github.com/woodpecker-ci/woodpecker/pull/3917)]
@@ -51,17 +63,6 @@
 - Let webhook pass on pipeline parsing error [[#3829](https://github.com/woodpecker-ci/woodpecker/pull/3829)]
 - Exclude mocks from release build [[#3831](https://github.com/woodpecker-ci/woodpecker/pull/3831)]
 - K8s secrets reference from step [[#3655](https://github.com/woodpecker-ci/woodpecker/pull/3655)]
-
-### 📚 Documentation
-
-- Add mastodon verification [[#3843](https://github.com/woodpecker-ci/woodpecker/pull/3843)]
-- chore(deps): update docs npm deps non-major [[#3837](https://github.com/woodpecker-ci/woodpecker/pull/3837)]
-- fix(deps): update docs npm deps non-major [[#3824](https://github.com/woodpecker-ci/woodpecker/pull/3824)]
-- Add openSUSE package [[#3800](https://github.com/woodpecker-ci/woodpecker/pull/3800)]
-- chore(deps): update docs npm deps non-major [[#3798](https://github.com/woodpecker-ci/woodpecker/pull/3798)]
-- Add "Docker Tags" Plugin [[#3796](https://github.com/woodpecker-ci/woodpecker/pull/3796)]
-- chore(deps): update dependency marked to v13 [[#3792](https://github.com/woodpecker-ci/woodpecker/pull/3792)]
-- chore: fix some comments [[#3788](https://github.com/woodpecker-ci/woodpecker/pull/3788)]
 
 ### Misc
 
