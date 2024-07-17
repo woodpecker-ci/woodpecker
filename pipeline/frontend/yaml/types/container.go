@@ -123,7 +123,9 @@ func (c *ContainerList) UnmarshalYAML(value *yaml.Node) error {
 }
 
 func (c *Container) IsPlugin() bool {
-	return len(c.Commands) == 0 && len(c.Entrypoint) == 0
+	return len(c.Commands) == 0 &&
+		len(c.Entrypoint) == 0 &&
+		len(c.Environment) == 0
 }
 
 func (c *Container) IsTrustedCloneImage() bool {
