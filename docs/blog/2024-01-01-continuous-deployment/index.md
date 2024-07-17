@@ -1,5 +1,5 @@
 ---
-title: "[Community] Continuous Deployment"
+title: '[Community] Continuous Deployment'
 description: Deploy your artifacts to an app server
 slug: continuous-deployment
 authors:
@@ -7,7 +7,7 @@ authors:
     url: https://github.com/lonix1
     image_url: https://github.com/lonix1.png
 hide_table_of_contents: false
-tags: [community,cd,deployment]
+tags: [community, cd, deployment]
 ---
 
 A typical CI pipeline contains steps such as: _clone_, _build_, _test_, _package_ and _push_. The final build product may be artifacts pushed to a git repository or a docker container pushed to a container registry.

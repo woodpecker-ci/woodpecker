@@ -22,7 +22,6 @@ steps:
       template: config/k8s/service.yaml
 ```
 
-
 Example pipeline using the Docker and Slack plugins:
 
 ```yaml

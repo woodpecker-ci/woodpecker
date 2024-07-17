@@ -1,6 +1,5 @@
 # Terminology
 
-
 ## Glossary
 
 - **Woodpecker CI**: The project name around Woodpecker.

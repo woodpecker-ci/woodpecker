@@ -33,11 +33,12 @@ steps:
       - ./executable
 ```
 
-__So what did we do here?__
+**So what did we do here?**
 
 1. We defined your first workflow file `my-first-workflow.yaml`.
 2. This workflow will be executed when a push event happens on the `main` branch,
    because we added a filter using the `when` section:
+
    ```diff
    + when:
    +   - event: push
@@ -45,7 +46,8 @@ __So what did we do here?__
 
    ...
    ```
-1. We defined two steps: `build` and `a-test-step`
+
+3. We defined two steps: `build` and `a-test-step`
 
 The steps are executed in the order they are defined, so `build` will be executed first and then `a-test-step`.
 
@@ -84,17 +86,17 @@ Sometimes you have some tasks that you need to do in every project. For example,
 If you want to get a Slack notification after your pipeline has finished, you can add a Slack plugin to your pipeline:
 
 ```yaml
-...
 
-  - name: notify me on Slack
-    image: plugins/slack
-    settings:
-      channel: developers
-      username: woodpecker
-      password:
-        from_secret: slack_token
-    when:
-      status: [ success, failure ] # This will execute the step on success and failure
+---
+- name: notify me on Slack
+  image: plugins/slack
+  settings:
+    channel: developers
+    username: woodpecker
+    password:
+      from_secret: slack_token
+  when:
+    status: [success, failure] # This will execute the step on success and failure
 ```
 
 To configure a plugin you can use the `settings` section.
