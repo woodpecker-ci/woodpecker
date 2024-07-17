@@ -250,7 +250,7 @@ const config: Config = {
               label: '2.7.x',
             },
             '2.6': {
-              label: '2.6.x',
+              label: '2.6.x 💀',
               banner: 'unmaintained',
             },
             '2.5': {
