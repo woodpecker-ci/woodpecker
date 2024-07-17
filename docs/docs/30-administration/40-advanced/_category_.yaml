@@ -1,6 +1,6 @@
-label: 'Deployment'
+label: 'Advanced'
 collapsible: true
 collapsed: true
 link:
   type: 'doc'
-  id: 'overview'
+  id: 'advanced'
