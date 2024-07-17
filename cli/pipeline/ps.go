@@ -94,7 +94,7 @@ func pipelinePs(c *cli.Context) error {
 var tmplPipelinePs = "\x1b[33m{{ .Workflow.Name }} > {{ .Step.Name }} (#{{ .Step.PID }}):\x1b[0m" + `
 Step: {{ .Step.Name }}
 Started: {{ .Step.Started }}
-Started: {{ .Step.Stopped }}
+Stopped: {{ .Step.Stopped }}
 Type: {{ .Step.Type }}
 State: {{ .Step.State }}
 `
