@@ -24,7 +24,9 @@
 import { computed, inject, watch, type Ref } from 'vue';
 
 import Badge from '~/components/atomic/Badge.vue';
+import Icon from '~/components/atomic/Icon.vue';
 import ListItem from '~/components/atomic/ListItem.vue';
+import Panel from '~/components/layout/Panel.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { usePagination } from '~/compositions/usePaginate';
 import type { Repo } from '~/lib/api/types';
