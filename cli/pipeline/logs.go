@@ -61,46 +61,11 @@ func pipelineLogs(c *cli.Context) error {
 		return showPipelineLog(client, repoID, number)
 	}
 
-	step, err := ParseStep(client, repoID, number, stepArg)
+	step, err := internal.ParseStep(client, repoID, number, stepArg)
 	if err != nil {
 		return fmt.Errorf("invalid step '%s': %w", stepArg, err)
 	}
 	return showStepLog(client, repoID, number, step)
-}
-
-/*
-Parse stepArg into a steps ID for a given pipeline in a repo. Argument stepArg may either be the
-name of a step or the PID of a step. Step PID take precedence over step name when searching for a match.
-First match is used, is there are multiple steps with the same name.
-*/
-func ParseStep(client woodpecker.Client, repoID, number int64, stepArg string) (int64, error) {
-	pipeline, err := client.Pipeline(repoID, number)
-	if err != nil {
-		return 0, err
-	}
-
-	stepPID, err := strconv.ParseInt(stepArg, 10, 64)
-	if err != nil {
-		stepPID = -1
-	}
-
-	for _, wf := range pipeline.Workflows {
-		for _, step := range wf.Children {
-			if int64(step.PID) == stepPID {
-				return step.ID, nil
-			}
-		}
-	}
-
-	for _, wf := range pipeline.Workflows {
-		for _, step := range wf.Children {
-			if step.Name == stepArg {
-				return step.ID, nil
-			}
-		}
-	}
-
-	return 0, fmt.Errorf("no step with number or name '%s' found", stepArg)
 }
 
 func showPipelineLog(client woodpecker.Client, repoID, number int64) error {
