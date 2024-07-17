@@ -23,6 +23,25 @@
 - Cli get repo from git remote [[#3830](https://github.com/woodpecker-ci/woodpecker/pull/3830)]
 - Add api for forges [[#3733](https://github.com/woodpecker-ci/woodpecker/pull/3733)]
 
+### 📈 Enhancement
+
+- Remove `unplugin-icons` [[#3809](https://github.com/woodpecker-ci/woodpecker/pull/3809)]
+- Release windows binaries as zip file [[#3906](https://github.com/woodpecker-ci/woodpecker/pull/3906)]
+- Convert to openapi 3.0 [[#3897](https://github.com/woodpecker-ci/woodpecker/pull/3897)]
+- Enhance pipeline list [[#3898](https://github.com/woodpecker-ci/woodpecker/pull/3898)]
+- Add user registries UI [[#3888](https://github.com/woodpecker-ci/woodpecker/pull/3888)]
+- Sort users by login [[#3891](https://github.com/woodpecker-ci/woodpecker/pull/3891)]
+- Exclude dummy backend in production [[#3877](https://github.com/woodpecker-ci/woodpecker/pull/3877)]
+- Fix deploy task env [[#3878](https://github.com/woodpecker-ci/woodpecker/pull/3878)]
+- Get default branch and show message in pipeline list [[#3867](https://github.com/woodpecker-ci/woodpecker/pull/3867)]
+- Add timestamp for last work done by agent [[#3844](https://github.com/woodpecker-ci/woodpecker/pull/3844)]
+- Adjust logger types [[#3859](https://github.com/woodpecker-ci/woodpecker/pull/3859)]
+- Cleanup state reporting [[#3850](https://github.com/woodpecker-ci/woodpecker/pull/3850)]
+- Unify DB tables/columns [[#3806](https://github.com/woodpecker-ci/woodpecker/pull/3806)]
+- Let webhook pass on pipeline parsing error [[#3829](https://github.com/woodpecker-ci/woodpecker/pull/3829)]
+- Exclude mocks from release build [[#3831](https://github.com/woodpecker-ci/woodpecker/pull/3831)]
+- K8s secrets reference from step [[#3655](https://github.com/woodpecker-ci/woodpecker/pull/3655)]
+
 ### 📚 Documentation
 
 - Streamline docs for new users [[#3803](https://github.com/woodpecker-ci/woodpecker/pull/3803)]
@@ -45,24 +64,6 @@
 - Cleanup of the login flow and tests [[#3810](https://github.com/woodpecker-ci/woodpecker/pull/3810)]
 - Fix newlines in logs [[#3808](https://github.com/woodpecker-ci/woodpecker/pull/3808)]
 - Fix authentication error handling [[#3807](https://github.com/woodpecker-ci/woodpecker/pull/3807)]
-
-### 📈 Enhancement
-
-- Release windows binaries as zip file [[#3906](https://github.com/woodpecker-ci/woodpecker/pull/3906)]
-- Convert to openapi 3.0 [[#3897](https://github.com/woodpecker-ci/woodpecker/pull/3897)]
-- Enhance pipeline list [[#3898](https://github.com/woodpecker-ci/woodpecker/pull/3898)]
-- Add user registries UI [[#3888](https://github.com/woodpecker-ci/woodpecker/pull/3888)]
-- Sort users by login [[#3891](https://github.com/woodpecker-ci/woodpecker/pull/3891)]
-- Exclude dummy backend in production [[#3877](https://github.com/woodpecker-ci/woodpecker/pull/3877)]
-- Fix deploy task env [[#3878](https://github.com/woodpecker-ci/woodpecker/pull/3878)]
-- Get default branch and show message in pipeline list [[#3867](https://github.com/woodpecker-ci/woodpecker/pull/3867)]
-- Add timestamp for last work done by agent [[#3844](https://github.com/woodpecker-ci/woodpecker/pull/3844)]
-- Adjust logger types [[#3859](https://github.com/woodpecker-ci/woodpecker/pull/3859)]
-- Cleanup state reporting [[#3850](https://github.com/woodpecker-ci/woodpecker/pull/3850)]
-- Unify DB tables/columns [[#3806](https://github.com/woodpecker-ci/woodpecker/pull/3806)]
-- Let webhook pass on pipeline parsing error [[#3829](https://github.com/woodpecker-ci/woodpecker/pull/3829)]
-- Exclude mocks from release build [[#3831](https://github.com/woodpecker-ci/woodpecker/pull/3831)]
-- K8s secrets reference from step [[#3655](https://github.com/woodpecker-ci/woodpecker/pull/3655)]
 
 ### Misc
 
