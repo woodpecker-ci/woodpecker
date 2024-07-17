@@ -236,16 +236,20 @@ const config: Config = {
           sidebarPath: require.resolve('./sidebars.js'),
           editUrl: 'https://github.com/woodpecker-ci/woodpecker/edit/main/docs/',
           includeCurrentVersion: true,
-          lastVersion: '2.6',
+          lastVersion: '2.7',
           onlyIncludeVersions:
-            process.env.NODE_ENV === 'development' ? ['current', '2.6'] : ['current', '2.6', '2.5', '2.4', '1.0'],
+            process.env.NODE_ENV === 'development' ? ['current', '2.7'] : ['current', '2.7', '2.6', '2.5', '2.4', '1.0'],
           versions: {
             current: {
               label: 'Next 🚧',
               banner: 'unreleased',
             },
+            '2.7': {
+              label: '2.7.x',
+            },
             '2.6': {
               label: '2.6.x',
+              banner: 'unmaintained',
             },
             '2.5': {
               label: '2.5.x 💀',
