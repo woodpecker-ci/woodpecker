@@ -25,7 +25,7 @@ type Config struct {
 // CliCommand is the context key to pass cli context to backends if needed.
 var CliCommand contextKey
 
-// ContextKey is just an empty struct. It exists so CliCommand can be
+// contextKey is just an empty struct. It exists so CliCommand can be
 // an immutable public variable with a unique type. It's immutable
 // because nobody else can create a ContextKey, being unexported.
 type contextKey struct{}
