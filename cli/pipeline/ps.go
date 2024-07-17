@@ -24,13 +24,7 @@ import (
 
 	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
 	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
-	"go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker"
 )
-
-type workflowStep struct {
-	Workflow *woodpecker.Workflow
-	Step     *woodpecker.Step
-}
 
 var pipelinePsCmd = &cli.Command{
 	Name:      "ps",
@@ -81,7 +75,7 @@ func pipelinePs(c *cli.Context) error {
 
 	for _, workflow := range pipeline.Workflows {
 		for _, step := range workflow.Children {
-			if err := tmpl.Execute(os.Stdout, workflowStep{workflow, step}); err != nil {
+			if err := tmpl.Execute(os.Stdout, map[string]any{"workflow": workflow, "step": step}); err != nil {
 				return err
 			}
 		}
@@ -91,10 +85,10 @@ func pipelinePs(c *cli.Context) error {
 }
 
 // template for pipeline ps information
-var tmplPipelinePs = "\x1b[33m{{ .Workflow.Name }} > {{ .Step.Name }} (#{{ .Step.PID }}):\x1b[0m" + `
-Step: {{ .Step.Name }}
-Started: {{ .Step.Started }}
-Stopped: {{ .Step.Stopped }}
-Type: {{ .Step.Type }}
-State: {{ .Step.State }}
+var tmplPipelinePs = "\x1b[33m{{ .workflow.Name }} > {{ .step.Name }} (#{{ .step.PID }}):\x1b[0m" + `
+Step: {{ .step.Name }}
+Started: {{ .step.Started }}
+Stopped: {{ .step.Stopped }}
+Type: {{ .step.Type }}
+State: {{ .step.State }}
 `

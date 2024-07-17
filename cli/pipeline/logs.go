@@ -81,7 +81,7 @@ func showPipelineLog(client woodpecker.Client, repoID, number int64) error {
 
 	for _, workflow := range pipeline.Workflows {
 		for _, step := range workflow.Children {
-			if err := tmpl.Execute(os.Stdout, workflowStep{workflow, step}); err != nil {
+			if err := tmpl.Execute(os.Stdout, map[string]any{"workflow": workflow, "step": step}); err != nil {
 				return err
 			}
 			err := showStepLog(client, repoID, number, step.ID)
@@ -108,4 +108,4 @@ func showStepLog(client woodpecker.Client, repoID, number, step int64) error {
 }
 
 // template for pipeline ps information
-var tmplPipelineLogs = "\x1b[33m{{ .Workflow.Name }} > {{ .Step.Name }} (#{{ .Step.PID }}):\x1b[0m"
+var tmplPipelineLogs = "\x1b[33m{{ .workflow.Name }} > {{ .step.Name }} (#{{ .step.PID }}):\x1b[0m"
