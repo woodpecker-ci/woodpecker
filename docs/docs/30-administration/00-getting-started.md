@@ -53,4 +53,7 @@ Check the [server configuration](./10-server-config.md) and [agent configuration
 
 ## Agent
 
-The agent is the worker which executes the [workflows](../20-usage/15-terminology/index.md). Woodpecker agents can execute work using a [backend](../20-usage/15-terminology/index.md) like [docker](./22-backends/10-docker.md) or [kubernetes](./22-backends/40-kubernetes.md). By default if you choose to deploy an agent using [docker-compose](./05-deployment-methods/10-docker-compose.md) the agent simply use docker for the backend as well. So nothing to worry about here. If you still prefer to adjust the agent to your needs, check the [agent configuration](./15-agent-config.md) page.
+The agent is the worker which executes the [workflows](../20-usage/15-terminology/index.md).
+Woodpecker agents can execute work using a [backend](../20-usage/15-terminology/index.md) like [docker](./22-backends/10-docker.md) or [kubernetes](./22-backends/40-kubernetes.md).
+By default if you choose to deploy an agent using [docker-compose](./05-deployment-methods/10-docker-compose.md) the agent simply use docker for the backend as well.
+So nothing to worry about here. If you still prefer to adjust the agent to your needs, check the [agent configuration](./15-agent-config.md) page.
