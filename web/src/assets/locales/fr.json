@@ -251,7 +251,8 @@
                 "pr": "Pull Request",
                 "push": "Push",
                 "tag": "Tag",
-                "release": "Release"
+                "release": "Release",
+                "pr_closed": "Pull Request fusionnée / fermée"
             },
             "exit_code": "Code de retour {exitCode}",
             "files": "Fichiers changés ({files})",
@@ -593,5 +594,16 @@
         "created": "Codes d’accès aux registres crées",
         "none": "Il n'y a pas de code d’accès aux registres."
     },
-    "invalid_state": "L'état OAuth est invalide"
+    "invalid_state": "L'état OAuth est invalide",
+    "by_user": "par {user}",
+    "pushed_to": "poussé vers",
+    "closed": "fermé",
+    "deployed_to": "déployé vers",
+    "created": "crée",
+    "triggered": "déclenché",
+    "pipeline_duration": "Durée du pipeline",
+    "pipeline_since": "Pipeline crée {created} minutes ago",
+    "pipeline_has_warnings": "Le pipeline a des alertes",
+    "pipeline_has_errors": "Le pipeline a des erreurs",
+    "login_with": "Se connecter avec {forge}"
 }
