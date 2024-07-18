@@ -70,7 +70,6 @@ type (
 		MemLimit     base.MemStringOrInt `yaml:"mem_limit,omitempty"`
 		MemSwapLimit base.MemStringOrInt `yaml:"memswap_limit,omitempty"`
 		NetworkMode  string              `yaml:"network_mode,omitempty"`
-		Networks     Networks            `yaml:"networks,omitempty"`
 		ShmSize      base.MemStringOrInt `yaml:"shm_size,omitempty"`
 		Tmpfs        []string            `yaml:"tmpfs,omitempty"`
 	}

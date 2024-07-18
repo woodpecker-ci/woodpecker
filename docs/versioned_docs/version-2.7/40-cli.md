@@ -345,9 +345,12 @@ Message: {{ .Message }}
 
 show pipeline steps
 
-**--format**="": format output (default: [33mStep #{{ .PID }} [0m
-Step: {{ .Name }}
-State: {{ .State }}
+**--format**="": format output (default: [33m{{ .workflow.Name }} > {{ .step.Name }} (#{{ .step.PID }}):[0m
+Step: {{ .step.Name }}
+Started: {{ .step.Started }}
+Stopped: {{ .step.Stopped }}
+Type: {{ .step.Type }}
+State: {{ .step.State }}
 )
 
 ### create
