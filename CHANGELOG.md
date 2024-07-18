@@ -4,10 +4,12 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @anbraten, @dvjn, @hhamalai, @lafriks, @pat-s, @qwerty287, @tongjicoder, @zc-devs
+@6543, @anbraten, @dvjn, @hhamalai, @lafriks, @pat-s, @qwerty287, @smainz, @tongjicoder, @zc-devs
 
 ### 🔒 Security
 
+- Add blocklist of environment variables who could alter execution of plugins [[#3934](https://github.com/woodpecker-ci/woodpecker/pull/3934)]
+- Make sure plugins only mount the workspace base in a predefinde location [[#3933](https://github.com/woodpecker-ci/woodpecker/pull/3933)]
 - Disallow to set arbitrary environments for plugins [[#3909](https://github.com/woodpecker-ci/woodpecker/pull/3909)]
 - Use proper oauth state [[#3847](https://github.com/woodpecker-ci/woodpecker/pull/3847)]
 - Enhance token checking [[#3842](https://github.com/woodpecker-ci/woodpecker/pull/3842)]
@@ -23,20 +25,9 @@
 - Cli get repo from git remote [[#3830](https://github.com/woodpecker-ci/woodpecker/pull/3830)]
 - Add api for forges [[#3733](https://github.com/woodpecker-ci/woodpecker/pull/3733)]
 
-### 🐛 Bug Fixes
-
-- Handle empty repositories in gitea when listing PRs [[#3925](https://github.com/woodpecker-ci/woodpecker/pull/3925)]
-- Update alpine package dep for docker images [[#3917](https://github.com/woodpecker-ci/woodpecker/pull/3917)]
-- Don't report error if agent was terminated gracefully [[#3894](https://github.com/woodpecker-ci/woodpecker/pull/3894)]
-- Let agents continuously report their health [[#3893](https://github.com/woodpecker-ci/woodpecker/pull/3893)]
-- Ignore warnings for cli exec [[#3868](https://github.com/woodpecker-ci/woodpecker/pull/3868)]
-- Correct favicon states [[#3832](https://github.com/woodpecker-ci/woodpecker/pull/3832)]
-- Cleanup of the login flow and tests [[#3810](https://github.com/woodpecker-ci/woodpecker/pull/3810)]
-- Fix newlines in logs [[#3808](https://github.com/woodpecker-ci/woodpecker/pull/3808)]
-- Fix authentication error handling [[#3807](https://github.com/woodpecker-ci/woodpecker/pull/3807)]
-
 ### 📈 Enhancement
 
+- Cli fix pipeline logs [[#3913](https://github.com/woodpecker-ci/woodpecker/pull/3913)]
 - Migrate to github.com/urfave/cli/v3 [[#2951](https://github.com/woodpecker-ci/woodpecker/pull/2951)]
 - Allow to change the working directory also for plugins and services [[#3914](https://github.com/woodpecker-ci/woodpecker/pull/3914)]
 - Remove `unplugin-icons` [[#3809](https://github.com/woodpecker-ci/woodpecker/pull/3809)]
@@ -56,6 +47,18 @@
 - Exclude mocks from release build [[#3831](https://github.com/woodpecker-ci/woodpecker/pull/3831)]
 - K8s secrets reference from step [[#3655](https://github.com/woodpecker-ci/woodpecker/pull/3655)]
 
+### 🐛 Bug Fixes
+
+- Handle empty repositories in gitea when listing PRs [[#3925](https://github.com/woodpecker-ci/woodpecker/pull/3925)]
+- Update alpine package dep for docker images [[#3917](https://github.com/woodpecker-ci/woodpecker/pull/3917)]
+- Don't report error if agent was terminated gracefully [[#3894](https://github.com/woodpecker-ci/woodpecker/pull/3894)]
+- Let agents continuously report their health [[#3893](https://github.com/woodpecker-ci/woodpecker/pull/3893)]
+- Ignore warnings for cli exec [[#3868](https://github.com/woodpecker-ci/woodpecker/pull/3868)]
+- Correct favicon states [[#3832](https://github.com/woodpecker-ci/woodpecker/pull/3832)]
+- Cleanup of the login flow and tests [[#3810](https://github.com/woodpecker-ci/woodpecker/pull/3810)]
+- Fix newlines in logs [[#3808](https://github.com/woodpecker-ci/woodpecker/pull/3808)]
+- Fix authentication error handling [[#3807](https://github.com/woodpecker-ci/woodpecker/pull/3807)]
+
 ### 📚 Documentation
 
 - Streamline docs for new users [[#3803](https://github.com/woodpecker-ci/woodpecker/pull/3803)]
@@ -70,6 +73,7 @@
 
 ### Misc
 
+- chore(deps): update web npm deps non-major [[#3930](https://github.com/woodpecker-ci/woodpecker/pull/3930)]
 - chore(deps): update dependency vitest to v2 [[#3905](https://github.com/woodpecker-ci/woodpecker/pull/3905)]
 - fix(deps): update module github.com/google/go-github/v62 to v63 [[#3910](https://github.com/woodpecker-ci/woodpecker/pull/3910)]
 - chore(deps): update docker.io/woodpeckerci/plugin-docker-buildx docker tag to v4.1.0 [[#3908](https://github.com/woodpecker-ci/woodpecker/pull/3908)]
