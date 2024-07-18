@@ -104,7 +104,7 @@ const config: Config = {
             },
             {
               label: 'Server setup',
-              to: '/docs/administration/deployment/overview',
+              to: '/docs/administration/getting-started',
             },
           ],
         },
