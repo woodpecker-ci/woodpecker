@@ -24,7 +24,7 @@ import (
 	"strings"
 
 	"github.com/rs/zerolog/log"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 	"go.woodpecker-ci.org/woodpecker/v2/server/services/config"
@@ -57,13 +57,13 @@ func setupSecretService(store store.Store) secret.Service {
 	return secret.NewDB(store)
 }
 
-func setupConfigService(c *cli.Context, privateSignatureKey crypto.PrivateKey) (config.Service, error) {
+func setupConfigService(c *cli.Command, privateSignatureKey crypto.PrivateKey) (config.Service, error) {
 	timeout := c.Duration("forge-timeout")
 	retries := c.Uint("forge-retry")
 	if retries == 0 {
 		return nil, fmt.Errorf("WOODPECKER_FORGE_RETRY can not be 0")
 	}
-	configFetcher := config.NewForge(timeout, retries)
+	configFetcher := config.NewForge(timeout, uint(retries))
 
 	if endpoint := c.String("config-service-endpoint"); endpoint != "" {
 		httpFetcher := config.NewHTTP(endpoint, privateSignatureKey)
@@ -100,7 +100,7 @@ func setupSignatureKeys(_store store.Store) (crypto.PrivateKey, crypto.PublicKey
 	return privateKey, privateKey.Public(), nil
 }
 
-func setupForgeService(c *cli.Context, _store store.Store) error {
+func setupForgeService(c *cli.Command, _store store.Store) error {
 	_forge, err := _store.ForgeGet(1)
 	if err != nil && !errors.Is(err, types.RecordNotExist) {
 		return err
