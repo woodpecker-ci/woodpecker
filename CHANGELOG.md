@@ -4,7 +4,9 @@
 
 ### 🔒 Security
 
-- Disalow to set arbitrary environments for plugins [[#3909)(https://github.com/woodpecker-ci/woodpecker/pull/3909)]
+- Add blocklist of environment variables who could alter execution of plugins [[#3934](https://github.com/woodpecker-ci/woodpecker/pull/3934)]
+- Make sure plugins only mount the workspace base in a predefinde location [[#3933](https://github.com/woodpecker-ci/woodpecker/pull/3933)]
+- Disalow to set arbitrary environments for plugins [[#3909](https://github.com/woodpecker-ci/woodpecker/pull/3909)]
 - Bump trivy plugin version and remove unused variable [[#3833](https://github.com/woodpecker-ci/woodpecker/pull/3833)]
 
 ### 🐛 Bug Fixes
