@@ -38,8 +38,6 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
-const defaultWorkspaceBase = "/woodpecker"
-
 // StepBuilder Takes the hook data and the yaml and returns in internal data model.
 type StepBuilder struct {
 	Repo      *model.Repo
@@ -293,7 +291,7 @@ func (b *StepBuilder) toInternalRepresentation(parsed *yaml_types.Workflow, envi
 			),
 		),
 		compiler.WithProxy(b.ProxyOpts),
-		compiler.WithWorkspaceFromURL(defaultWorkspaceBase, b.Repo.ForgeURL),
+		compiler.WithWorkspaceFromURL(compiler.DefaultWorkspaceBase, b.Repo.ForgeURL),
 		compiler.WithMetadata(metadata),
 		compiler.WithTrusted(b.Repo.IsTrusted),
 		compiler.WithNetrcOnlyTrusted(b.Repo.NetrcOnlyTrusted),
