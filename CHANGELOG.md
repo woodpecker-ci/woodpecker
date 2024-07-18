@@ -4,6 +4,7 @@
 
 ### 🔒 Security
 
+- Disalow to set arbitrary environments for plugins [[#3909)(https://github.com/woodpecker-ci/woodpecker/pull/3909)]
 - Bump trivy plugin version and remove unused variable [[#3833](https://github.com/woodpecker-ci/woodpecker/pull/3833)]
 
 ### 🐛 Bug Fixes
