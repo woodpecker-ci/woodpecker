@@ -10,7 +10,7 @@
                     "waiting_on_deps_count": "In attesa delle dipendenze",
                     "pending_count": "In attesa"
                 },
-                "waiting_for": "in attesa",
+                "waiting_for": "in attesa di",
                 "pause": "Sospendi",
                 "resume": "Riprendi",
                 "resumed": "Coda ripresa",
@@ -222,19 +222,22 @@
             "we_got_some_errors": "Oh no, si sono verificati degli errori!",
             "event": {
                 "tag": "Tag",
-                "cron": "Cron",
+                "cron": "Attività pianificata",
                 "manual": "Manuale",
                 "release": "Rilascio",
                 "push": "Invia",
                 "pr": "Richiesta di Modifica",
-                "deploy": "Deploy"
+                "deploy": "Deploy",
+                "pr_closed": "Richiesta di Modifica unita / chiusa"
             },
             "exit_code": "Codice di Uscita {exitCode}",
             "loading": "Caricamento…",
             "pipeline": "Pipeline #{pipelineId}",
             "log_download_error": "Si è verificato un errore durante il download del registro attività",
             "log_title": "Registro Attività di Step",
-            "pipelines_for_pr": "Pipeline per richiesta di modifica #{index}"
+            "pipelines_for_pr": "Pipeline per richiesta di modifica #{index}",
+            "duration": "Durata pipeline",
+            "created": "Creata: {created}"
         },
         "pull_requests": "Richieste di modifica",
         "settings": {
@@ -261,30 +264,30 @@
             "crons": {
                 "name": {
                     "name": "Nome",
-                    "placeholder": "Nome del cron job"
+                    "placeholder": "Nome attività pianificata"
                 },
                 "next_exec": "Prossima esecuzione",
-                "not_executed_yet": "Non ancora eseguito",
-                "none": "Ancora nessun cron.",
+                "not_executed_yet": "Non ancora eseguita",
+                "none": "Ancora nessuna attività pianificata.",
                 "branch": {
                     "placeholder": "Ramo (utilizza ramo predefinito se vuoto)",
                     "title": "Ramo"
                 },
-                "add": "Aggiungi cron",
-                "save": "Salva cron",
-                "created": "Cron creato",
-                "saved": "Cron salvato",
-                "deleted": "Cron eliminato",
+                "add": "Aggiungi attività pianificata",
+                "save": "Salva attività pianificata",
+                "created": "Attività pianificata creata",
+                "saved": "Attività pianificata salvata",
+                "deleted": "Attività pianificata eliminata",
                 "run": "Esegui ora",
                 "schedule": {
-                    "title": "Pianificazione (basato su UTC)",
-                    "placeholder": "Pianificazione"
+                    "title": "Programma (basato su UTC)",
+                    "placeholder": "Programma"
                 },
-                "edit": "Modifica cron",
-                "delete": "Elimina cron",
-                "desc": "I cron job sono utilizzati per la pianificazione automatica delle pipeline.",
-                "show": "Mostra cron",
-                "crons": "Cron"
+                "edit": "Modifica attività pianificata",
+                "delete": "Elimina attività pianificata",
+                "desc": "Le attività pianificate possono attivare pipeline a intervalli regolari.",
+                "show": "Mostra attività pianificate",
+                "crons": "Attività pianificate"
             },
             "general": {
                 "general": "Generale",
@@ -413,6 +416,9 @@
                     "dark": "Scuro",
                     "auto": "Auto"
                 }
+            },
+            "registries": {
+                "desc": "È possibile aggiungere le credenziali dei registri per utilizzare immagini private per tutte le singole pipeline."
             }
         }
     },
@@ -493,5 +499,6 @@
         "created": "Credenziali di registro create",
         "saved": "Credenziali di registro salvate",
         "deleted": "Credenziali di registro eliminate"
-    }
+    },
+    "login_with": "Accedi con {forge}"
 }
