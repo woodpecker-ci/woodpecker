@@ -16,6 +16,8 @@ package compiler
 
 import backend_types "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 
+/* cSpell:disable */
+
 var binaryVars = []string{
 	"PATH",                         // Specifies directories to search for executable files
 	"PATH_SEPARATOR",               // Defines the separator used in the PATH variable
@@ -34,6 +36,8 @@ var libraryVars = []string{
 	"DYLD_INSERT_LIBRARIES", // (macOS): Similar to LD_PRELOAD on macOS
 	"DYLD_LIBRARY_PATH",     // (macOS): Similar to LD_LIBRARY_PATH on macOS
 }
+
+/* cSpell:enable */
 
 func environmentAllowed(envKey string, stepType backend_types.StepType) bool {
 	switch stepType {
