@@ -18,6 +18,7 @@
 </template>
 
 <script lang="ts" setup>
+import Button from '~/components/atomic/Button.vue';
 import Scaffold from '~/components/layout/scaffold/Scaffold.vue';
 import Tab from '~/components/layout/scaffold/Tab.vue';
 import UserCLIAndAPITab from '~/components/user/UserCLIAndAPITab.vue';

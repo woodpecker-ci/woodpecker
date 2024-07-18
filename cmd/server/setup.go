@@ -27,7 +27,7 @@ import (
 
 	"github.com/gorilla/securecookie"
 	"github.com/rs/zerolog/log"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
 	"go.woodpecker-ci.org/woodpecker/v2/server"
 	"go.woodpecker-ci.org/woodpecker/v2/server/cache"
@@ -51,7 +51,7 @@ const (
 	storeInfoRefreshInterval = 10 * time.Second
 )
 
-func setupStore(ctx context.Context, c *cli.Context) (store.Store, error) {
+func setupStore(ctx context.Context, c *cli.Command) (store.Store, error) {
 	datasource := c.String("datasource")
 	driver := c.String("driver")
 	xorm := store.XORM{
@@ -112,7 +112,7 @@ func setupMembershipService(_ context.Context, _store store.Store) cache.Members
 	return cache.NewMembershipService(_store)
 }
 
-func setupLogStore(c *cli.Context, s store.Store) (logService.Service, error) {
+func setupLogStore(c *cli.Command, s store.Store) (logService.Service, error) {
 	switch c.String("log-store") {
 	case "file":
 		return file.NewLogStore(c.String("log-store-file-path"))
@@ -144,7 +144,7 @@ func setupJWTSecret(_store store.Store) (string, error) {
 	return jwtSecret, nil
 }
 
-func setupEvilGlobals(ctx context.Context, c *cli.Context, s store.Store) error {
+func setupEvilGlobals(ctx context.Context, c *cli.Command, s store.Store) error {
 	// services
 	server.Config.Services.Queue = setupQueue(ctx, s)
 	server.Config.Services.Logs = logging.New()
@@ -175,15 +175,15 @@ func setupEvilGlobals(ctx context.Context, c *cli.Context, s store.Store) error 
 		events = append(events, model.WebhookEvent(v))
 	}
 	server.Config.Pipeline.DefaultCancelPreviousPipelineEvents = events
-	server.Config.Pipeline.DefaultTimeout = c.Int64("default-pipeline-timeout")
-	server.Config.Pipeline.MaxTimeout = c.Int64("max-pipeline-timeout")
+	server.Config.Pipeline.DefaultTimeout = c.Int("default-pipeline-timeout")
+	server.Config.Pipeline.MaxTimeout = c.Int("max-pipeline-timeout")
 
 	// limits
-	server.Config.Pipeline.Limits.MemSwapLimit = c.Int64("limit-mem-swap")
-	server.Config.Pipeline.Limits.MemLimit = c.Int64("limit-mem")
-	server.Config.Pipeline.Limits.ShmSize = c.Int64("limit-shm-size")
-	server.Config.Pipeline.Limits.CPUQuota = c.Int64("limit-cpu-quota")
-	server.Config.Pipeline.Limits.CPUShares = c.Int64("limit-cpu-shares")
+	server.Config.Pipeline.Limits.MemSwapLimit = c.Int("limit-mem-swap")
+	server.Config.Pipeline.Limits.MemLimit = c.Int("limit-mem")
+	server.Config.Pipeline.Limits.ShmSize = c.Int("limit-shm-size")
+	server.Config.Pipeline.Limits.CPUQuota = c.Int("limit-cpu-quota")
+	server.Config.Pipeline.Limits.CPUShares = c.Int("limit-cpu-shares")
 	server.Config.Pipeline.Limits.CPUSet = c.String("limit-cpu-set")
 
 	// backend options for pipeline compiler
