@@ -469,5 +469,5 @@
   "internal_error": "Some internal error occurred",
   "registration_closed": "The registration is closed",
   "access_denied": "You are not allowed to access this instance",
-  "invalid_state": "The OAuth state is invalid",
+  "invalid_state": "The OAuth state is invalid"
 }
