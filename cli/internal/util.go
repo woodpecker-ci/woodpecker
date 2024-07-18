@@ -170,6 +170,8 @@ These rules apply:
 - First match is used, when there are multiple steps with the same name.
 
 Strictly speaking, this is not parsing, but a lookup.
+
+TODO: Use PID instead of StepID
 */
 func ParseStep(client woodpecker.Client, repoID, number int64, stepArg string) (stepID int64, err error) {
 	pipeline, err := client.Pipeline(repoID, number)
@@ -177,15 +179,20 @@ func ParseStep(client woodpecker.Client, repoID, number int64, stepArg string) (
 		return 0, err
 	}
 
-	stepPID, err := strconv.ParseInt(stepArg, 10, 64)
+	stepID, err = strconv.ParseInt(stepArg, 10, 64)
+	// TODO: for 3.0 do "stepPID, err := strconv.ParseInt(stepArg, 10, 64)"
 	if err == nil {
-		for _, wf := range pipeline.Workflows {
-			for _, step := range wf.Children {
-				if int64(step.PID) == stepPID {
-					return step.ID, nil
+		return stepID, nil
+		/*
+			// TODO: for 3.0
+			for _, wf := range pipeline.Workflows {
+				for _, step := range wf.Children {
+					if int64(step.PID) == stepPID {
+						return step.ID, nil
+					}
 				}
 			}
-		}
+		*/
 	}
 
 	for _, wf := range pipeline.Workflows {

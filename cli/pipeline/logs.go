@@ -30,8 +30,9 @@ import (
 var pipelineLogsCmd = &cli.Command{
 	Name:      "logs",
 	Usage:     "show pipeline logs",
-	ArgsUsage: "<repo-id|repo-full-name> <pipeline> [step-number|step-name]",
-	Action:    pipelineLogs,
+	ArgsUsage: "<repo-id|repo-full-name> <pipeline> [step-id|step-name]",
+	// TODO: for v3.0 do `ArgsUsage: "<repo-id|repo-full-name> <pipeline> [step-number|step-name]",`
+	Action: pipelineLogs,
 }
 
 func pipelineLogs(ctx context.Context, c *cli.Command) error {
