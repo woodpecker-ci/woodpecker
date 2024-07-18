@@ -26,21 +26,29 @@ type dagCompilerStep struct {
 	name      string
 	group     string
 	dependsOn []string
+	needs []string
 }
 
 type dagCompiler struct {
 	steps []*dagCompilerStep
+	services []*dagCompilerStep
 }
 
-func newDAGCompiler(steps []*dagCompilerStep) dagCompiler {
+func newDAGCompiler(steps []*dagCompilerStep, services []*dagCompilerStep) dagCompiler {
 	return dagCompiler{
 		steps: steps,
+		services: services,
 	}
 }
 
 func (c dagCompiler) isDAG() bool {
 	for _, v := range c.steps {
-		if v.dependsOn != nil {
+		if v.dependsOn != nil || v.needs != nil {
+			return true
+		}
+	}
+	for _, v := range c.services {
+		if v.dependsOn != nil || v.needs != nil {
 			return true
 		}
 	}
@@ -56,6 +64,15 @@ func (c dagCompiler) compile() ([]*backend_types.Stage, error) {
 
 func (c dagCompiler) compileByGroup() ([]*backend_types.Stage, error) {
 	stages := make([]*backend_types.Stage, 0, len(c.steps))
+
+	if len(c.services) > 0 {
+		servicesStage := new(backend_types.Stage)
+		for _, s := range c.services {
+			servicesStage.Steps = append(servicesStage.Steps, s.step)
+		}
+		stages = append(stages, servicesStage)
+	}
+
 	var currentStage *backend_types.Stage
 	var currentGroup string
 
@@ -80,19 +97,40 @@ func (c dagCompiler) compileByDependsOn() ([]*backend_types.Stage, error) {
 	for _, s := range c.steps {
 		stepMap[s.name] = s
 	}
-	return convertDAGToStages(stepMap)
+	servicesMap := make(map[string]*dagCompilerStep, len(c.services))
+	for _, s := range c.services {
+		servicesMap[s.name] = s
+	}
+	return convertDAGToStages(stepMap, servicesMap)
 }
 
-func dfsVisit(steps map[string]*dagCompilerStep, name string, visited map[string]struct{}, path []string) error {
-	if _, ok := visited[name]; ok {
+func dfsVisit(steps map[string]*dagCompilerStep, services map[string]*dagCompilerStep, name string, visited map[string]struct{}, visitedServices map[string]struct{}, path []string, isService bool) error {
+	if _, ok := visited[name]; ok && !isService {
+		return &ErrStepDependencyCycle{path: path}
+	}
+	if _, ok := visitedServices[name]; ok && isService {
 		return &ErrStepDependencyCycle{path: path}
 	}
 
-	visited[name] = struct{}{}
+	var step *dagCompilerStep
+	if isService {
+		visitedServices[name] = struct{}{}
+		step = services[name]
+	} else {
+		visited[name] = struct{}{}
+		step = steps[name]
+	}
+
 	path = append(path, name)
 
-	for _, dep := range steps[name].dependsOn {
-		if err := dfsVisit(steps, dep, visited, path); err != nil {
+	for _, dep := range step.dependsOn {
+		if err := dfsVisit(steps, services, dep, visited, visitedServices, path, false); err != nil {
+			return err
+		}
+	}
+
+	for _, dep := range step.needs {
+		if err := dfsVisit(steps, services, dep, visited, visitedServices, path, true); err != nil {
 			return err
 		}
 	}
@@ -102,10 +140,7 @@ func dfsVisit(steps map[string]*dagCompilerStep, name string, visited map[string
 	return nil
 }
 
-func convertDAGToStages(steps map[string]*dagCompilerStep) ([]*backend_types.Stage, error) {
-	addedSteps := make(map[string]struct{})
-	stages := make([]*backend_types.Stage, 0)
-
+func convertDAGToStages(steps map[string]*dagCompilerStep, services map[string]*dagCompilerStep) ([]*backend_types.Stage, error) {
 	for name, step := range steps {
 		// check if all depends_on are valid
 		for _, dep := range step.dependsOn {
@@ -113,29 +148,69 @@ func convertDAGToStages(steps map[string]*dagCompilerStep) ([]*backend_types.Sta
 				return nil, &ErrStepMissingDependency{name: name, dep: dep}
 			}
 		}
+		for _, dep := range step.needs {
+			if _, ok := services[dep]; !ok {
+				return nil, &ErrStepMissingDependency{name: name, dep: dep}
+			}
+		}
 
 		// check if there are cycles
 		visited := make(map[string]struct{})
-		if err := dfsVisit(steps, name, visited, []string{}); err != nil {
+		visitedServices := make(map[string]struct{})
+		if err := dfsVisit(steps, services, name, visited, visitedServices, []string{}, false); err != nil {
 			return nil, err
 		}
 	}
 
-	for len(steps) > 0 {
+	for name, step := range services {
+		// check if all depends_on are valid
+		for _, dep := range step.dependsOn {
+			if _, ok := steps[dep]; !ok {
+				return nil, &ErrStepMissingDependency{name: name, dep: dep}
+			}
+		}
+		for _, dep := range step.needs {
+			if _, ok := services[dep]; !ok {
+				return nil, &ErrStepMissingDependency{name: name, dep: dep}
+			}
+		}
+
+		// check if there are cycles
+		visited := make(map[string]struct{})
+		visitedServices := make(map[string]struct{})
+		if err := dfsVisit(steps, services, name, visited, visitedServices, []string{}, true); err != nil {
+			return nil, err
+		}
+	}
+
+	addedSteps := make(map[string]struct{})
+	addedServices := make(map[string]struct{})
+	stages := make([]*backend_types.Stage, 0)
+
+	for len(steps) > 0 || len(services) > 0 {
 		addedNodesThisLevel := make(map[string]struct{})
+		addedServicesThisLevel := make(map[string]struct{})
 		stage := new(backend_types.Stage)
 
 		var stepsToAdd []*dagCompilerStep
 		for name, step := range steps {
-			if allDependenciesSatisfied(step, addedSteps) {
+			if allDependenciesSatisfied(step, addedSteps, addedServices) {
 				stepsToAdd = append(stepsToAdd, step)
 				addedNodesThisLevel[name] = struct{}{}
 				delete(steps, name)
 			}
 		}
+		for name, step := range services {
+			if allDependenciesSatisfied(step, addedSteps, addedServices) {
+				stepsToAdd = append(stepsToAdd, step)
+				addedServicesThisLevel[name] = struct{}{}
+				delete(services, name)
+			}
+		}
 
 		// as steps are from a map that has no deterministic order,
 		// we sort the steps by original config position to make the order similar between pipelines
+		// Services should appear on top of steps.
 		sort.Slice(stepsToAdd, func(i, j int) bool {
 			return stepsToAdd[i].position < stepsToAdd[j].position
 		})
@@ -148,15 +223,25 @@ func convertDAGToStages(steps map[string]*dagCompilerStep) ([]*backend_types.Sta
 			addedSteps[name] = struct{}{}
 		}
 
+		for name := range addedServicesThisLevel {
+			addedServices[name] = struct{}{}
+		}
+
 		stages = append(stages, stage)
 	}
 
 	return stages, nil
 }
 
-func allDependenciesSatisfied(step *dagCompilerStep, addedSteps map[string]struct{}) bool {
+func allDependenciesSatisfied(step *dagCompilerStep, addedSteps map[string]struct{}, addedServices map[string]struct{}) bool {
 	for _, childName := range step.dependsOn {
 		_, ok := addedSteps[childName]
+		if !ok {
+			return false
+		}
+	}
+	for _, childName := range step.needs {
+		_, ok := addedServices[childName]
 		if !ok {
 			return false
 		}

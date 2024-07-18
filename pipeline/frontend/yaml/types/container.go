@@ -47,6 +47,7 @@ type (
 		When      constraint.When    `yaml:"when,omitempty"`
 		Ports     []string           `yaml:"ports,omitempty"`
 		DependsOn base.StringOrSlice `yaml:"depends_on,omitempty"`
+		Needs base.StringOrSlice `yaml:"needs,omitempty"`
 
 		// TODO deprecated remove in 3.0
 		Detached  bool               `yaml:"detach,omitempty"`

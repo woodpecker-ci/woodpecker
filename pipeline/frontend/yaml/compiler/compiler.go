@@ -219,7 +219,8 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 		}
 	}
 
-	steps := make([]*dagCompilerStep, 0, len(conf.Steps.ContainerList)+len(conf.Services.ContainerList))
+	services := make([]*dagCompilerStep, 0, len(conf.Services.ContainerList))
+	steps := make([]*dagCompilerStep, 0, len(conf.Steps.ContainerList))
 
 	// add services steps
 	for pos, container := range conf.Services.ContainerList {
@@ -239,11 +240,12 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 			return nil, err
 		}
 
-		steps = append(steps, &dagCompilerStep{
+		services = append(services, &dagCompilerStep{
 			step:      step,
 			position:  pos,
 			name:      container.Name,
 			dependsOn: container.DependsOn,
+			needs: container.Needs,
 		})
 	}
 
@@ -283,11 +285,12 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 			name:      container.Name,
 			group:     container.Group,
 			dependsOn: container.DependsOn,
+			needs: container.Needs,
 		})
 	}
 
 	// generate stages out of steps
-	stepStages, err := newDAGCompiler(steps).compile()
+	stepStages, err := newDAGCompiler(steps, services).compile()
 	if err != nil {
 		return nil, err
 	}
