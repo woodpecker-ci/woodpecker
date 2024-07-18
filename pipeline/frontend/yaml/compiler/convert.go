@@ -30,6 +30,13 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/utils"
 )
 
+const (
+	// The pluginWorkspaceBase should not be changed, only if you are sure what you do.
+	pluginWorkspaceBase = "/woodpecker"
+	// DefaultWorkspaceBase is set if not altered by the user.
+	DefaultWorkspaceBase = pluginWorkspaceBase
+)
+
 func (c *Compiler) createProcess(container *yaml_types.Container, stepType backend_types.StepType) (*backend_types.Step, error) {
 	var (
 		uuid = ulid.Make()
@@ -37,10 +44,16 @@ func (c *Compiler) createProcess(container *yaml_types.Container, stepType backe
 		detached   bool
 		workingDir string
 
-		workspace   = fmt.Sprintf("%s_default:%s", c.prefix, c.base)
 		privileged  = container.Privileged
 		networkMode = container.NetworkMode
 	)
+
+	workspaceBase := c.workspaceBase
+	if container.IsPlugin() {
+		// plugins have a predefined workspace base to not tamper with entrypoint executables
+		workspaceBase = pluginWorkspaceBase
+	}
+	workspaceVolume := fmt.Sprintf("%s_default:%s", c.prefix, workspaceBase)
 
 	networks := []backend_types.Conn{
 		{
@@ -66,7 +79,7 @@ func (c *Compiler) createProcess(container *yaml_types.Container, stepType backe
 
 	var volumes []string
 	if !c.local {
-		volumes = append(volumes, workspace)
+		volumes = append(volumes, workspaceVolume)
 	}
 	volumes = append(volumes, c.volumes...)
 	for _, volume := range container.Volumes.Volumes {
@@ -77,7 +90,7 @@ func (c *Compiler) createProcess(container *yaml_types.Container, stepType backe
 	environment := map[string]string{}
 	maps.Copy(environment, c.env)
 
-	environment["CI_WORKSPACE"] = path.Join(c.base, c.path)
+	environment["CI_WORKSPACE"] = path.Join(workspaceBase, c.workspacePath)
 
 	if stepType == backend_types.StepTypeService || container.Detached {
 		detached = true
@@ -118,9 +131,14 @@ func (c *Compiler) createProcess(container *yaml_types.Container, stepType backe
 			return nil, err
 		}
 
+		toUpperTarget := strings.ToUpper(requested.Target)
+		if !environmentAllowed(toUpperTarget, stepType) {
+			continue
+		}
+
 		environment[requested.Target] = secretValue
 		// TODO: deprecated, remove in 3.x
-		environment[strings.ToUpper(requested.Target)] = secretValue
+		environment[toUpperTarget] = secretValue
 	}
 
 	if utils.MatchImage(container.Image, c.escalated...) && container.IsPlugin() {
@@ -219,7 +237,11 @@ func (c *Compiler) stepWorkingDir(container *yaml_types.Container) string {
 	if path.IsAbs(container.Directory) {
 		return container.Directory
 	}
-	return path.Join(c.base, c.path, container.Directory)
+	base := c.workspaceBase
+	if container.IsPlugin() {
+		base = pluginWorkspaceBase
+	}
+	return path.Join(base, c.workspacePath, container.Directory)
 }
 
 func convertPort(portDef string) (backend_types.Port, error) {
