@@ -15,10 +15,11 @@
 package cron
 
 import (
+	"context"
 	"html/template"
 	"os"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
 	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
 	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
@@ -40,16 +41,16 @@ var cronInfoCmd = &cli.Command{
 	},
 }
 
-func cronInfo(c *cli.Context) error {
+func cronInfo(ctx context.Context, c *cli.Command) error {
 	var (
-		jobID            = c.Int64("id")
+		cronID           = c.Int("id")
 		repoIDOrFullName = c.String("repository")
 		format           = c.String("format") + "\n"
 	)
 	if repoIDOrFullName == "" {
 		repoIDOrFullName = c.Args().First()
 	}
-	client, err := internal.NewClient(c)
+	client, err := internal.NewClient(ctx, c)
 	if err != nil {
 		return err
 	}
@@ -58,7 +59,7 @@ func cronInfo(c *cli.Context) error {
 		return err
 	}
 
-	cron, err := client.CronGet(repoID, jobID)
+	cron, err := client.CronGet(repoID, cronID)
 	if err != nil {
 		return err
 	}

@@ -40,7 +40,6 @@ func (c *Compiler) createProcess(container *yaml_types.Container, stepType backe
 		workspace   = fmt.Sprintf("%s_default:%s", c.prefix, c.base)
 		privileged  = container.Privileged
 		networkMode = container.NetworkMode
-		// network    = container.Network
 	)
 
 	networks := []backend_types.Conn{
@@ -84,9 +83,7 @@ func (c *Compiler) createProcess(container *yaml_types.Container, stepType backe
 		detached = true
 	}
 
-	if !detached || len(container.Commands) != 0 {
-		workingDir = c.stepWorkingDir(container)
-	}
+	workingDir = c.stepWorkingDir(container)
 
 	getSecretValue := func(name string) (string, error) {
 		name = strings.ToLower(name)

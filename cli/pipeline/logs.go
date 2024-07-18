@@ -15,12 +15,13 @@
 package pipeline
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"strconv"
 	"text/template"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
 	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
 	"go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker"
@@ -33,9 +34,9 @@ var pipelineLogsCmd = &cli.Command{
 	Action:    pipelineLogs,
 }
 
-func pipelineLogs(c *cli.Context) error {
+func pipelineLogs(ctx context.Context, c *cli.Command) error {
 	repoIDOrFullName := c.Args().First()
-	client, err := internal.NewClient(c)
+	client, err := internal.NewClient(ctx, c)
 	if err != nil {
 		return err
 	}
