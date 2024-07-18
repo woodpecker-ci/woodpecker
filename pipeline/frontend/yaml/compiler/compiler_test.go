@@ -77,7 +77,7 @@ func TestCompilerCompile(t *testing.T) {
 			"COLORED": "true",
 		}),
 		WithPrefix("test"),
-		// we use "/test" as custom workspace base to ensure the enforcement of the pluginWorkspaceBase is applyed
+		// we use "/test" as custom workspace base to ensure the enforcement of the pluginWorkspaceBase is applied
 		WithWorkspaceFromURL("/test", repoURL),
 	)
 
