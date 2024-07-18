@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @anbraten, @dvjn, @lafriks, @pat-s, @qwerty287, @tongjicoder, @zc-devs
+@6543, @anbraten, @dvjn, @hhamalai, @lafriks, @pat-s, @qwerty287, @tongjicoder, @zc-devs
 
 ### 🔒 Security
 
@@ -23,10 +23,22 @@
 - Cli get repo from git remote [[#3830](https://github.com/woodpecker-ci/woodpecker/pull/3830)]
 - Add api for forges [[#3733](https://github.com/woodpecker-ci/woodpecker/pull/3733)]
 
+### 🐛 Bug Fixes
+
+- Handle empty repositories in gitea when listing PRs [[#3925](https://github.com/woodpecker-ci/woodpecker/pull/3925)]
+- Update alpine package dep for docker images [[#3917](https://github.com/woodpecker-ci/woodpecker/pull/3917)]
+- Don't report error if agent was terminated gracefully [[#3894](https://github.com/woodpecker-ci/woodpecker/pull/3894)]
+- Let agents continuously report their health [[#3893](https://github.com/woodpecker-ci/woodpecker/pull/3893)]
+- Ignore warnings for cli exec [[#3868](https://github.com/woodpecker-ci/woodpecker/pull/3868)]
+- Correct favicon states [[#3832](https://github.com/woodpecker-ci/woodpecker/pull/3832)]
+- Cleanup of the login flow and tests [[#3810](https://github.com/woodpecker-ci/woodpecker/pull/3810)]
+- Fix newlines in logs [[#3808](https://github.com/woodpecker-ci/woodpecker/pull/3808)]
+- Fix authentication error handling [[#3807](https://github.com/woodpecker-ci/woodpecker/pull/3807)]
+
 ### 📈 Enhancement
 
 - Migrate to github.com/urfave/cli/v3 [[#2951](https://github.com/woodpecker-ci/woodpecker/pull/2951)]
-- Allow to change the working directory also plugins and services [[#3914](https://github.com/woodpecker-ci/woodpecker/pull/3914)]
+- Allow to change the working directory also for plugins and services [[#3914](https://github.com/woodpecker-ci/woodpecker/pull/3914)]
 - Remove `unplugin-icons` [[#3809](https://github.com/woodpecker-ci/woodpecker/pull/3809)]
 - Release windows binaries as zip file [[#3906](https://github.com/woodpecker-ci/woodpecker/pull/3906)]
 - Convert to openapi 3.0 [[#3897](https://github.com/woodpecker-ci/woodpecker/pull/3897)]
@@ -55,17 +67,6 @@
 - Add "Docker Tags" Plugin [[#3796](https://github.com/woodpecker-ci/woodpecker/pull/3796)]
 - chore(deps): update dependency marked to v13 [[#3792](https://github.com/woodpecker-ci/woodpecker/pull/3792)]
 - chore: fix some comments [[#3788](https://github.com/woodpecker-ci/woodpecker/pull/3788)]
-
-### 🐛 Bug Fixes
-
-- Update alpine package dep for docker images [[#3917](https://github.com/woodpecker-ci/woodpecker/pull/3917)]
-- Don't report error if agent was terminated gracefully [[#3894](https://github.com/woodpecker-ci/woodpecker/pull/3894)]
-- Let agents continuously report their health [[#3893](https://github.com/woodpecker-ci/woodpecker/pull/3893)]
-- Ignore warnings for cli exec [[#3868](https://github.com/woodpecker-ci/woodpecker/pull/3868)]
-- Correct favicon states [[#3832](https://github.com/woodpecker-ci/woodpecker/pull/3832)]
-- Cleanup of the login flow and tests [[#3810](https://github.com/woodpecker-ci/woodpecker/pull/3810)]
-- Fix newlines in logs [[#3808](https://github.com/woodpecker-ci/woodpecker/pull/3808)]
-- Fix authentication error handling [[#3807](https://github.com/woodpecker-ci/woodpecker/pull/3807)]
 
 ### Misc
 
