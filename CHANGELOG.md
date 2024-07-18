@@ -1,5 +1,19 @@
 # Changelog
 
+## [2.6.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.6.0) - 2024-06-26
+
+### 🔒 Security
+
+- Add blocklist of environment variables who could alter execution of plugins [[#3934](https://github.com/woodpecker-ci/woodpecker/pull/3934)]
+- Make sure plugins only mount the workspace base in a predefinde location [[#3933](https://github.com/woodpecker-ci/woodpecker/pull/3933)]
+- Disalow to set arbitrary environments for plugins [[#3909](https://github.com/woodpecker-ci/woodpecker/pull/3909)]
+- Bump trivy plugin version and remove unused variable [[#3833](https://github.com/woodpecker-ci/woodpecker/pull/3833)]
+
+### 🐛 Bug Fixes
+
+- Let webhook pass on pipeline parsion error [[#3829](https://github.com/woodpecker-ci/woodpecker/pull/3829)]
+- Fix newlines in logs [[#3808](https://github.com/woodpecker-ci/woodpecker/pull/3808)]
+
 ## [2.6.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.6.0) - 2024-06-13
 
 ### ❤️ Thanks to all contributors! ❤️
