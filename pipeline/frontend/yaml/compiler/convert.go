@@ -41,7 +41,6 @@ func (c *Compiler) createProcess(container *yaml_types.Container, stepType backe
 
 		privileged  = container.Privileged
 		networkMode = container.NetworkMode
-		// network    = container.Network
 	)
 
 	workspaceBase := c.workspaceBase
