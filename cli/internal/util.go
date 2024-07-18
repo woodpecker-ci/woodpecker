@@ -163,11 +163,11 @@ func ParseKeyPair(p []string) map[string]string {
 }
 
 /*
-ParseStep parses the step id form a string which may eigher be the step PID (step number) or a step name.
+ParseStep parses the step id form a string which may either be the step PID (step number) or a step name.
 These rules apply:
 
-  - Step PID take precedence over step name when searching for a match.
-  - First match is used, when there are multiple steps with the same name.
+- Step PID take precedence over step name when searching for a match.
+- First match is used, when there are multiple steps with the same name.
 
 Strictly speaking, this is not parsing, but a lookup.
 */

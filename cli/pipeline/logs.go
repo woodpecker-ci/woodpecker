@@ -57,7 +57,7 @@ func pipelineLogs(ctx context.Context, c *cli.Command) error {
 		return fmt.Errorf("invalid pipeline '%s': %w", pipelineArg, err)
 	}
 
-	stepArg := c.Args().Get(2)
+	stepArg := c.Args().Get(2) //nolint:mnd
 	if len(stepArg) == 0 {
 		return showPipelineLog(client, repoID, number)
 	}
@@ -108,5 +108,5 @@ func showStepLog(client woodpecker.Client, repoID, number, step int64) error {
 	return nil
 }
 
-// template for pipeline ps information
+// template for pipeline ps information.
 var tmplPipelineLogs = "\x1b[33m{{ .workflow.Name }} > {{ .step.Name }} (#{{ .step.PID }}):\x1b[0m"

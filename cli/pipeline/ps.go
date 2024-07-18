@@ -85,7 +85,7 @@ func pipelinePs(ctx context.Context, c *cli.Command) error {
 	return nil
 }
 
-// template for pipeline ps information
+// template for pipeline ps information.
 var tmplPipelinePs = "\x1b[33m{{ .workflow.Name }} > {{ .step.Name }} (#{{ .step.PID }}):\x1b[0m" + `
 Step: {{ .step.Name }}
 Started: {{ .step.Started }}
