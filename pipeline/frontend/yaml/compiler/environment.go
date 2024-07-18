@@ -44,7 +44,6 @@ func environmentAllowed(envKey string, stepType backend_types.StepType) bool {
 				return false
 			}
 		}
-	default:
-		return true
 	}
+	return true
 }
