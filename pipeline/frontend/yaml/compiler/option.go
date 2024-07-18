@@ -97,8 +97,8 @@ func WithNetrc(username, password, machine string) Option {
 // plugin steps in the pipeline.
 func WithWorkspace(base, path string) Option {
 	return func(compiler *Compiler) {
-		compiler.base = base
-		compiler.path = path
+		compiler.workspaceBase = base
+		compiler.workspacePath = path
 	}
 }
 

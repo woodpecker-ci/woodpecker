@@ -29,8 +29,8 @@ func TestWithWorkspace(t *testing.T) {
 			"src/github.com/octocat/hello-world",
 		),
 	)
-	assert.Equal(t, "/pipeline", compiler.base)
-	assert.Equal(t, "src/github.com/octocat/hello-world", compiler.path)
+	assert.Equal(t, "/pipeline", compiler.workspaceBase)
+	assert.Equal(t, "src/github.com/octocat/hello-world", compiler.workspacePath)
 }
 
 func TestWithEscalated(t *testing.T) {

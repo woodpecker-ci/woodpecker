@@ -518,7 +518,9 @@ For more details check the [services docs](./60-services.md).
 
 ## `workspace`
 
-The workspace defines the shared volume and working directory shared by all workflow steps. The default workspace matches the pattern `/woodpecker/src/github.com/octocat/hello-world`, based on your repository URL.
+The workspace defines the shared volume and working directory shared by all workflow steps.
+The default workspace base is `/woodpecker` and the path is extended with the repository URL (`src/{url-without-schema}`).
+So an example would be `/woodpecker/src/github.com/octocat/hello-world`.
 
 The workspace can be customized using the workspace block in the YAML file:
 
@@ -534,6 +536,10 @@ The workspace can be customized using the workspace block in the YAML file:
        - go get
        - go test
 ```
+
+:::note
+Plugins will always have the workspace base at `/woodpecker`
+:::
 
 The base attribute defines a shared base volume available to all steps. This ensures your source code, dependencies and compiled binaries are persisted and shared between steps.
 
