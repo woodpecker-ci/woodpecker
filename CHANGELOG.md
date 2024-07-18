@@ -1,6 +1,6 @@
 # Changelog
 
-## [2.6.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.6.0) - 2024-06-26
+## [2.6.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.6.1) - 2024-07-18
 
 ### 🔒 Security
 
