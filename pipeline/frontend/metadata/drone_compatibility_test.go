@@ -99,7 +99,8 @@ DRONE_REPO_OWNER=Epsilon_02
 DRONE_REPO_SCM=git
 DRONE_SOURCE_BRANCH=fix_fail-on-err
 DRONE_SYSTEM_HOST=ci.codeberg.org
-DRONE_TARGET_BRANCH=main`
+DRONE_TARGET_BRANCH=main
+PULLREQUEST_DRONE_PULL_REQUEST=9`
 
 	env := convertListToEnvMap(t, woodpeckerVars)
 	metadata.SetDroneEnviron(env)
