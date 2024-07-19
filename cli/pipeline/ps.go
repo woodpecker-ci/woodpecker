@@ -16,6 +16,7 @@ package pipeline
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"strconv"
 	"text/template"
@@ -29,7 +30,7 @@ import (
 var pipelinePsCmd = &cli.Command{
 	Name:      "ps",
 	Usage:     "show pipeline steps",
-	ArgsUsage: "<repo-id|repo-full-name> [pipeline]",
+	ArgsUsage: "<repo-id|repo-full-name> <pipeline>",
 	Action:    pipelinePs,
 	Flags:     []cli.Flag{common.FormatFlag(tmplPipelinePs)},
 }
@@ -42,7 +43,7 @@ func pipelinePs(ctx context.Context, c *cli.Command) error {
 	}
 	repoID, err := internal.ParseRepo(client, repoIDOrFullName)
 	if err != nil {
-		return err
+		return fmt.Errorf("invalid repo '%s': %w", repoIDOrFullName, err)
 	}
 
 	pipelineArg := c.Args().Get(1)
@@ -59,7 +60,7 @@ func pipelinePs(ctx context.Context, c *cli.Command) error {
 	} else {
 		number, err = strconv.ParseInt(pipelineArg, 10, 64)
 		if err != nil {
-			return err
+			return fmt.Errorf("invalid pipeline '%s': %w", pipelineArg, err)
 		}
 	}
 
@@ -73,9 +74,9 @@ func pipelinePs(ctx context.Context, c *cli.Command) error {
 		return err
 	}
 
-	for _, step := range pipeline.Workflows {
-		for _, child := range step.Children {
-			if err := tmpl.Execute(os.Stdout, child); err != nil {
+	for _, workflow := range pipeline.Workflows {
+		for _, step := range workflow.Children {
+			if err := tmpl.Execute(os.Stdout, map[string]any{"workflow": workflow, "step": step}); err != nil {
 				return err
 			}
 		}
@@ -84,8 +85,11 @@ func pipelinePs(ctx context.Context, c *cli.Command) error {
 	return nil
 }
 
-// Template for pipeline ps information.
-var tmplPipelinePs = "\x1b[33mStep #{{ .PID }} \x1b[0m" + `
-Step: {{ .Name }}
-State: {{ .State }}
+// template for pipeline ps information.
+var tmplPipelinePs = "\x1b[33m{{ .workflow.Name }} > {{ .step.Name }} (#{{ .step.PID }}):\x1b[0m" + `
+Step: {{ .step.Name }}
+Started: {{ .step.Started }}
+Stopped: {{ .step.Stopped }}
+Type: {{ .step.Type }}
+State: {{ .step.State }}
 `

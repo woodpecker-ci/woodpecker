@@ -161,3 +161,40 @@ func ParseKeyPair(p []string) map[string]string {
 	}
 	return params
 }
+
+/*
+ParseStep parses the step id form a string which may either be the step PID (step number) or a step name.
+These rules apply:
+
+- Step PID take precedence over step name when searching for a match.
+- First match is used, when there are multiple steps with the same name.
+
+Strictly speaking, this is not parsing, but a lookup.
+*/
+func ParseStep(client woodpecker.Client, repoID, number int64, stepArg string) (stepID int64, err error) {
+	pipeline, err := client.Pipeline(repoID, number)
+	if err != nil {
+		return 0, err
+	}
+
+	stepPID, err := strconv.ParseInt(stepArg, 10, 64)
+	if err == nil {
+		for _, wf := range pipeline.Workflows {
+			for _, step := range wf.Children {
+				if int64(step.PID) == stepPID {
+					return step.ID, nil
+				}
+			}
+		}
+	}
+
+	for _, wf := range pipeline.Workflows {
+		for _, step := range wf.Children {
+			if step.Name == stepArg {
+				return step.ID, nil
+			}
+		}
+	}
+
+	return 0, fmt.Errorf("no step with number or name '%s' found", stepArg)
+}
