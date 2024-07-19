@@ -97,7 +97,7 @@
         },
         "trusted": {
           "trusted": "Trusted",
-          "desc": "Underlying pipeline containers get access to escalated capabilities like mounting volumes."
+          "desc": "Underlying pipeline containers get access to escalated capabilities (like mounting volumes)."
         },
         "visibility": {
           "visibility": "Project visibility",
@@ -251,27 +251,27 @@
     "settings": {
       "not_allowed": "You are not allowed to access this organization's settings",
       "secrets": {
-        "desc": "Organization secrets can be passed to all organization's repository individual pipeline steps at runtime as environmental variables."
+        "desc": "Organization secrets can be passed to all organization's repository personal pipeline steps as environmental variables."
       },
       "registries": {
-        "desc": "Organization registry credentials can be added to use private images for all organization's pipelines."
+        "desc": "Organization registry credentials can be added to use private images for all pipelines of an organization."
       }
     }
   },
   "admin": {
     "settings": {
-      "not_allowed": "You are not allowed to access server settings",
+      "not_allowed": "You are not allowed to access server settings.",
       "secrets": {
-        "desc": "Global secrets can be passed to all repositories individual pipeline steps at runtime as environmental variables.",
-        "warning": "These secrets will be available for all server users."
+        "desc": "Global secrets can be passed to all repositories personal pipeline steps as environmental variables.",
+        "warning": "These secrets will be available for all users."
       },
       "registries": {
-        "desc": "Global registry credentials can be added to use private images for all server's pipelines.",
-        "warning": "These registry credentials will be available for all server users."
+        "desc": "Global registry credentials can be added to use private images for all pipelines.",
+        "warning": "These registry credentials will be available for all users."
       },
       "agents": {
         "agents": "Agents",
-        "desc": "Agents registered for this server",
+        "desc": "Agents registered on this server.",
         "none": "There are no agents yet.",
         "id": "ID",
         "add": "Add agent",
@@ -305,7 +305,7 @@
         "version": "Version",
         "last_contact": "Last contact",
         "never": "Never",
-        "delete_confirm": "Do you really want to delete this agent? It wont be able to connected to the server anymore.",
+        "delete_confirm": "Do you really want to delete this agent? It will not be able to connect to the server anymore.",
         "edit_agent": "Edit agent",
         "delete_agent": "Delete agent"
       },
@@ -354,7 +354,7 @@
       },
       "orgs": {
         "orgs": "Organizations",
-        "desc": "Organizations owning repositories on this server",
+        "desc": "Organizations owning repositories on this server.",
         "none": "There are no organizations yet.",
         "org_settings": "Organization settings",
         "delete_org": "Delete organization",
@@ -364,7 +364,7 @@
       },
       "repos": {
         "repos": "Repositories",
-        "desc": "Repositories that are or were enabled on this server",
+        "desc": "Repositories that are or have been enabled on this server",
         "none": "There are no repositories yet.",
         "view": "View repository",
         "settings": "Repository settings",
@@ -390,10 +390,10 @@
         }
       },
       "secrets": {
-        "desc": "User secrets can be passed to all user's repository individual pipeline steps at runtime as environmental variables."
+        "desc": "User secrets can be passed to personal pipeline steps as environmental variables."
       },
       "registries": {
-        "desc": "User registries credentials can be added to use private images for all individual pipelines."
+        "desc": "User registry credentials can be added to use private images for all personal pipelines."
       },
       "cli_and_api": {
         "cli_and_api": "CLI & API",
@@ -409,7 +409,7 @@
   },
   "secrets": {
     "secrets": "Secrets",
-    "desc": "Secrets can be passed to individual pipeline steps at runtime as environmental variables.",
+    "desc": "Secrets can be passed to individual pipeline steps as environmental variables.",
     "none": "There are no secrets yet.",
     "add": "Add secret",
     "save": "Save secret",
@@ -421,12 +421,12 @@
     "created": "Secret created",
     "saved": "Secret saved",
     "images": {
-      "images": "Available for following images",
-      "desc": "List of images where this secret is available, leave empty to allow all images"
+      "images": "Available for the following images",
+      "desc": "List of images where this secret is available, leave empty to allow for all images."
     },
     "events": {
-      "events": "Available at following events",
-      "pr_warning": "Please be careful with this option as a bad actor can submit a malicious pull request that exposes your secrets."
+      "events": "Available at the following events",
+      "pr_warning": "Please be careful with this option: a bad actor can submit a malicious pull request that exposes your secrets."
     },
     "edit": "Edit secret",
     "delete": "Delete secret"
@@ -434,7 +434,7 @@
   "registries": {
     "registries": "Registries",
     "credentials": "Registry credentials",
-    "desc": "Registries credentials can be added to use private images for your pipeline.",
+    "desc": "Registry credentials can be added to use private images for perosnal pipelines.",
     "none": "There are no registry credentials yet.",
     "address": {
       "address": "Address",
@@ -458,7 +458,7 @@
   "global_level_secret": "global secret",
   "org_level_secret": "organization secret",
   "login_to_cli": "Login to CLI",
-  "login_to_cli_description": "By continuing you will be logged in to the CLI.",
+  "login_to_cli_description": "By continuing you will be logged into the CLI.",
   "abort": "Abort",
   "cli_login_success": "Login to CLI successful",
   "cli_login_failed": "Login to CLI failed",
