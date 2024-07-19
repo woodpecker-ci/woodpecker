@@ -15,10 +15,11 @@
 package log
 
 import (
+	"context"
 	"fmt"
 	"strconv"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
 	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
 )
@@ -30,8 +31,8 @@ var logPurgeCmd = &cli.Command{
 	Action:    logPurge,
 }
 
-func logPurge(c *cli.Context) (err error) {
-	client, err := internal.NewClient(c)
+func logPurge(ctx context.Context, c *cli.Command) (err error) {
+	client, err := internal.NewClient(ctx, c)
 	if err != nil {
 		return err
 	}

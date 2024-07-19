@@ -15,7 +15,7 @@
 package main
 
 import (
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
 	"go.woodpecker-ci.org/woodpecker/v2/cli/admin"
 	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
@@ -38,12 +38,12 @@ import (
 )
 
 //go:generate go run docs.go app.go
-func newApp() *cli.App {
-	app := cli.NewApp()
+func newApp() *cli.Command {
+	app := &cli.Command{}
 	app.Name = "woodpecker-cli"
 	app.Description = "Woodpecker command line utility"
 	app.Version = version.String()
-	app.EnableBashCompletion = true
+	app.Usage = "command line utility"
 	app.Flags = common.GlobalFlags
 	app.Before = common.Before
 	app.After = common.After

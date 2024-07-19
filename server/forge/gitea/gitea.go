@@ -472,12 +472,17 @@ func (c *Gitea) PullRequests(ctx context.Context, u *model.User, r *model.Repo, 
 		return nil, err
 	}
 
-	pullRequests, _, err := client.ListRepoPullRequests(r.Owner, r.Name, gitea.ListPullRequestsOptions{
+	pullRequests, resp, err := client.ListRepoPullRequests(r.Owner, r.Name, gitea.ListPullRequestsOptions{
 		ListOptions: gitea.ListOptions{Page: p.Page, PageSize: p.PerPage},
 		State:       gitea.StateOpen,
 	})
 	if err != nil {
-		return nil, err
+		// Repositories without commits return empty list with status code 404
+		if pullRequests != nil && resp != nil && resp.StatusCode == http.StatusNotFound {
+			err = nil
+		} else {
+			return nil, err
+		}
 	}
 
 	result := make([]*model.PullRequest, len(pullRequests))

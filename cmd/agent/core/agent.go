@@ -27,7 +27,7 @@ import (
 	"time"
 
 	"github.com/rs/zerolog/log"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -62,11 +62,7 @@ var (
 	shutdownCtx                                = context.Background()
 )
 
-func run(c *cli.Context, backends []types.Backend) error {
-	ctx := utils.WithContextSigtermCallback(c.Context, func() {
-		log.Info().Msg("termination signal is received, shutting down agent")
-	})
-
+func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 	agentCtx, ctxCancel := context.WithCancelCause(ctx)
 	stopAgentFunc = func(err error) {
 		msg := "shutdown of whole agent"
@@ -90,7 +86,7 @@ func run(c *cli.Context, backends []types.Backend) error {
 		hostname, _ = os.Hostname()
 	}
 
-	counter.Polling = c.Int("max-workflows")
+	counter.Polling = int(c.Int("max-workflows"))
 	counter.Running = 0
 
 	if c.Bool("healthcheck") {
@@ -115,6 +111,7 @@ func run(c *cli.Context, backends []types.Backend) error {
 
 	var transport grpc.DialOption
 	if c.Bool("grpc-secure") {
+		log.Trace().Msg("use ssl for grpc")
 		transport = grpc.WithTransportCredentials(grpc_credentials.NewTLS(&tls.Config{InsecureSkipVerify: c.Bool("grpc-skip-insecure")}))
 	} else {
 		transport = grpc.WithTransportCredentials(insecure.NewCredentials())
@@ -129,7 +126,7 @@ func run(c *cli.Context, backends []types.Backend) error {
 		}),
 	)
 	if err != nil {
-		return err
+		return fmt.Errorf("could not create new gRPC 'channel' for authentication: %w", err)
 	}
 	defer authConn.Close()
 
@@ -139,9 +136,9 @@ func run(c *cli.Context, backends []types.Backend) error {
 	grpcClientCtx, grpcClientCtxCancel := context.WithCancelCause(context.Background())
 	defer grpcClientCtxCancel(nil)
 	authClient := agent_rpc.NewAuthGrpcClient(authConn, agentToken, agentConfig.AgentID)
-	authInterceptor, err := agent_rpc.NewAuthInterceptor(grpcClientCtx, authClient, authInterceptorRefreshInterval)
+	authInterceptor, err := agent_rpc.NewAuthInterceptor(grpcClientCtx, authClient, authInterceptorRefreshInterval) //nolint:contextcheck
 	if err != nil {
-		return err
+		return fmt.Errorf("could not create new auth interceptor: %w", err)
 	}
 
 	conn, err := grpc.NewClient(
@@ -155,7 +152,7 @@ func run(c *cli.Context, backends []types.Backend) error {
 		grpc.WithStreamInterceptor(authInterceptor.Stream()),
 	)
 	if err != nil {
-		return err
+		return fmt.Errorf("could not create new gRPC 'channel' for normal orchestration: %w", err)
 	}
 	defer conn.Close()
 
@@ -165,7 +162,7 @@ func run(c *cli.Context, backends []types.Backend) error {
 	grpcCtx := metadata.NewOutgoingContext(grpcClientCtx, metadata.Pairs("hostname", hostname))
 
 	// check if grpc server version is compatible with agent
-	grpcServerVersion, err := client.Version(grpcCtx)
+	grpcServerVersion, err := client.Version(grpcCtx) //nolint:contextcheck
 	if err != nil {
 		log.Error().Err(err).Msg("could not get grpc server version")
 		return err
@@ -180,7 +177,7 @@ func run(c *cli.Context, backends []types.Backend) error {
 	}
 
 	// new engine
-	backendCtx := context.WithValue(agentCtx, types.CliContext, c)
+	backendCtx := context.WithValue(agentCtx, types.CliCommand, c)
 	backendName := c.String("backend-engine")
 	backendEngine, err := backend.FindBackend(backendCtx, backends, backendName)
 	if err != nil {
@@ -200,8 +197,8 @@ func run(c *cli.Context, backends []types.Backend) error {
 	}
 	log.Debug().Msgf("loaded %s backend engine", backendEngine.Name())
 
-	maxWorkflows := c.Int("max-workflows")
-	agentConfig.AgentID, err = client.RegisterAgent(grpcCtx, engInfo.Platform, backendEngine.Name(), version.String(), maxWorkflows)
+	maxWorkflows := int(c.Int("max-workflows"))
+	agentConfig.AgentID, err = client.RegisterAgent(grpcCtx, engInfo.Platform, backendEngine.Name(), version.String(), maxWorkflows) //nolint:contextcheck
 	if err != nil {
 		return err
 	}
@@ -291,19 +288,19 @@ func run(c *cli.Context, backends []types.Backend) error {
 	return serviceWaitingGroup.Wait()
 }
 
-func runWithRetry(backendEngines []types.Backend) func(c *cli.Context) error {
-	return func(c *cli.Context) error {
-		if err := logger.SetupGlobalLogger(c, true); err != nil {
+func runWithRetry(backendEngines []types.Backend) func(ctx context.Context, c *cli.Command) error {
+	return func(ctx context.Context, c *cli.Command) error {
+		if err := logger.SetupGlobalLogger(ctx, c, true); err != nil {
 			return err
 		}
 
 		initHealth()
 
-		retryCount := c.Int("connect-retry-count")
+		retryCount := int(c.Int("connect-retry-count"))
 		retryDelay := c.Duration("connect-retry-delay")
 		var err error
 		for i := 0; i < retryCount; i++ {
-			if err = run(c, backendEngines); status.Code(err) == codes.Unavailable {
+			if err = run(ctx, c, backendEngines); status.Code(err) == codes.Unavailable {
 				log.Warn().Err(err).Msg(fmt.Sprintf("cannot connect to server, retrying in %v", retryDelay))
 				time.Sleep(retryDelay)
 			} else {

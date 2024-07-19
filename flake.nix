@@ -18,6 +18,7 @@
             gnumake
             gnutar
             zip
+            tree
 
             # frontend
             nodejs_20
