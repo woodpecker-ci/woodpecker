@@ -267,7 +267,7 @@
       },
       "registries": {
         "desc": "Global registry credentials can be added to use private images for all server's pipelines.",
-        "warning": "These registry creditentials will be available for all server users."
+        "warning": "These registry credentials will be available for all server users."
       },
       "agents": {
         "agents": "Agents",
