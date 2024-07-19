@@ -9,8 +9,10 @@
       <span class="flex">
         <router-link :to="{ name: 'org', params: { orgId: repo.org_id } }" class="hover:underline">{{
           repo.owner
+          /* eslint-disable-next-line @intlify/vue-i18n/no-raw-text */
         }}</router-link>
-        {{ `&nbsp;/&nbsp;${repo.name}` }}
+        &nbsp;/
+        {{ repo.name }}
       </span>
     </template>
     <template #titleActions>
@@ -49,6 +51,7 @@ import { computed, onMounted, provide, ref, toRef, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 
+import Button from '~/components/atomic/Button.vue';
 import type { IconNames } from '~/components/atomic/Icon.vue';
 import IconButton from '~/components/atomic/IconButton.vue';
 import ManualPipelinePopup from '~/components/layout/popups/ManualPipelinePopup.vue';
