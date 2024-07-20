@@ -294,10 +294,10 @@ func TestCompilerCompile(t *testing.T) {
 				Commands:  []string{"echo 1"},
 				DependsOn: []string{"echo env"},
 			}, {
-				Name:      "service-depend-on-service",
-				Image:     "bash",
-				Commands:  []string{"echo 1"},
-				Needs: []string{"service-depend"},
+				Name:     "service-depend-on-service",
+				Image:    "bash",
+				Commands: []string{"echo 1"},
+				Needs:    []string{"service-depend"},
 			}}}},
 			backConf: &backend_types.Config{
 				Networks: defaultNetworks,

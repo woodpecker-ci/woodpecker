@@ -42,7 +42,7 @@ func TestConvertDAGToStages(t *testing.T) {
 
 	steps = map[string]*dagCompilerStep{
 		"step1": {
-			step:      &backend_types.Step{},
+			step:  &backend_types.Step{},
 			needs: []string{"service1"},
 		},
 	}
@@ -98,7 +98,7 @@ func TestConvertDAGToStages(t *testing.T) {
 
 	steps = map[string]*dagCompilerStep{
 		"step1": {
-			step:      &backend_types.Step{},
+			step:  &backend_types.Step{},
 			needs: []string{"not-existing-service"},
 		},
 	}
@@ -170,15 +170,15 @@ func TestConvertDAGToStages(t *testing.T) {
 			name:     "echo env",
 			group:    "",
 			step: &backend_types.Step{
-				Name:  "echo env",
+				Name: "echo env",
 			},
 		},
 		"echo 2": {
 			position: 4,
 			name:     "echo 2",
-			needs: []string{"service 2"},
+			needs:    []string{"service 2"},
 			step: &backend_types.Step{
-				Name:  "echo 2",
+				Name: "echo 2",
 			},
 		},
 	}
@@ -189,26 +189,26 @@ func TestConvertDAGToStages(t *testing.T) {
 			group:     "",
 			dependsOn: []string{"echo env"},
 			step: &backend_types.Step{
-				Name:  "service 1",
+				Name: "service 1",
 			},
 		},
 		"service 2": {
 			position: 1,
 			name:     "service 2",
-			needs: 		[]string{"service 1"},
+			needs:    []string{"service 1"},
 			group:    "",
 			step: &backend_types.Step{
-				Name:  "service 2",
+				Name: "service 2",
 			},
 		},
 		"service 3": {
-			position: 2,
-			name:     "service 3",
-			needs: 		[]string{"service 1"},
+			position:  2,
+			name:      "service 3",
+			needs:     []string{"service 1"},
 			dependsOn: []string{"echo env"},
-			group:    "",
+			group:     "",
 			step: &backend_types.Step{
-				Name:  "service 3",
+				Name: "service 3",
 			},
 		},
 	}
@@ -216,21 +216,21 @@ func TestConvertDAGToStages(t *testing.T) {
 	assert.NoError(t, err)
 	assert.EqualValues(t, []*backend_types.Stage{{
 		Steps: []*backend_types.Step{{
-			Name:  "echo env",
+			Name: "echo env",
 		}},
 	}, {
 		Steps: []*backend_types.Step{{
-			Name:  "service 1",
+			Name: "service 1",
 		}},
 	}, {
 		Steps: []*backend_types.Step{{
-			Name:  "service 2",
+			Name: "service 2",
 		}, {
-			Name:  "service 3",
+			Name: "service 3",
 		}},
 	}, {
 		Steps: []*backend_types.Step{{
-			Name:  "echo 2",
+			Name: "echo 2",
 		}},
 	}}, stages)
 
@@ -238,51 +238,50 @@ func TestConvertDAGToStages(t *testing.T) {
 		"echo env": {
 			position: 3,
 			name:     "echo env",
-			step: &backend_types.Step{Name: "echo env"},
+			step:     &backend_types.Step{Name: "echo env"},
 		},
 	}
 	services = map[string]*dagCompilerStep{
 		"service": {
-				name:     "service",
-				position: 0,
-				step: &backend_types.Step{
-					Name: "service",
-				},
+			name:     "service",
+			position: 0,
+			step: &backend_types.Step{
+				Name: "service",
 			},
-			"service-depend": {
-				name:      "service-depend",
-				step: &backend_types.Step{
-					Name:      "service-depend",
-				},
-				dependsOn: []string{"echo env"},
-				position: 1,
+		},
+		"service-depend": {
+			name: "service-depend",
+			step: &backend_types.Step{
+				Name: "service-depend",
 			},
+			dependsOn: []string{"echo env"},
+			position:  1,
+		},
 
-			"service-depend-on-service": {
-				name:      "service-depend-on-service",
-				step: &backend_types.Step{
-					Name:      "service-depend-on-service",
-				},
-				needs: []string{"service-depend"},
-				position: 2,
+		"service-depend-on-service": {
+			name: "service-depend-on-service",
+			step: &backend_types.Step{
+				Name: "service-depend-on-service",
 			},
-
+			needs:    []string{"service-depend"},
+			position: 2,
+		},
 	}
 	stages, err = convertDAGToStages(steps, services)
 	assert.NoError(t, err)
 	assert.EqualValues(t, []*backend_types.Stage{{
 		Steps: []*backend_types.Step{{
-			Name:  "service",
+			Name: "service",
 		}, {
-			Name:  "echo env",
+			Name: "echo env",
 		}},
 	}, {
 		Steps: []*backend_types.Step{{
-			Name:  "service-depend",
+			Name: "service-depend",
 		}},
 	}, {
 		Steps: []*backend_types.Step{{
-			Name:  "service-depend-on-service",
+			Name: "service-depend-on-service",
 		}},
 	}}, stages)
 }
@@ -293,27 +292,27 @@ func TestCompileByDependsOn(t *testing.T) {
 		{
 			position: 3,
 			name:     "echo env",
-			step: &backend_types.Step{Name: "echo env"},
+			step:     &backend_types.Step{Name: "echo env"},
 		},
 	}
 	services := []*dagCompilerStep{
 		{
-				name:     "service",
-				position: 0,
-				step: &backend_types.Step{
-					Name: "service",
-				},
+			name:     "service",
+			position: 0,
+			step: &backend_types.Step{
+				Name: "service",
 			},
+		},
 	}
 	stages, err := newDAGCompiler(steps, services).compileByDependsOn()
 	assert.NoError(t, err)
 	assert.EqualValues(t, []*backend_types.Stage{{
 		Steps: []*backend_types.Step{{
-			Name:  "service",
+			Name: "service",
 		}},
 	}, {
 		Steps: []*backend_types.Step{{
-			Name:  "echo env",
+			Name: "echo env",
 		}},
 	}}, stages)
 }

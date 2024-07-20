@@ -36,21 +36,21 @@ type (
 		BackendOptions map[string]any     `yaml:"backend_options,omitempty"`
 		Commands       base.StringOrSlice `yaml:"commands,omitempty"`
 		Entrypoint     base.StringOrSlice `yaml:"entrypoint,omitempty"`
-		Directory string             `yaml:"directory,omitempty"`
-		Failure   string             `yaml:"failure,omitempty"`
-		Group     string             `yaml:"group,omitempty"`
-		Image     string             `yaml:"image,omitempty"`
-		Name      string             `yaml:"name,omitempty"`
-		Pull      bool               `yaml:"pull,omitempty"`
-		Settings  map[string]any     `yaml:"settings"`
-		Volumes   Volumes            `yaml:"volumes,omitempty"`
-		When      constraint.When    `yaml:"when,omitempty"`
-		Ports     []string           `yaml:"ports,omitempty"`
-		DependsOn base.StringOrSlice `yaml:"depends_on,omitempty"`
-		Needs base.StringOrSlice `yaml:"needs,omitempty"`
+		Directory      string             `yaml:"directory,omitempty"`
+		Failure        string             `yaml:"failure,omitempty"`
+		Group          string             `yaml:"group,omitempty"`
+		Image          string             `yaml:"image,omitempty"`
+		Name           string             `yaml:"name,omitempty"`
+		Pull           bool               `yaml:"pull,omitempty"`
+		Settings       map[string]any     `yaml:"settings"`
+		Volumes        Volumes            `yaml:"volumes,omitempty"`
+		When           constraint.When    `yaml:"when,omitempty"`
+		Ports          []string           `yaml:"ports,omitempty"`
+		DependsOn      base.StringOrSlice `yaml:"depends_on,omitempty"`
+		Needs          base.StringOrSlice `yaml:"needs,omitempty"`
 
 		// TODO deprecated remove in 3.0
-		Detached  bool               `yaml:"detach,omitempty"`
+		Detached bool `yaml:"detach,omitempty"`
 		// TODO: make []string in 3.x
 		Secrets Secrets `yaml:"secrets,omitempty"`
 		// TODO: make map[string]any in 3.x
