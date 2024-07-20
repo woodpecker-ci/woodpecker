@@ -43,12 +43,26 @@ func newDAGCompiler(steps []*dagCompilerStep, services []*dagCompilerStep) dagCo
 
 func (c dagCompiler) isDAG() bool {
 	for _, v := range c.steps {
-		if v.dependsOn != nil || v.needs != nil {
+		if v.dependsOn != nil {
 			return true
 		}
 	}
 	for _, v := range c.services {
-		if v.dependsOn != nil || v.needs != nil {
+		if v.dependsOn != nil {
+			return true
+		}
+	}
+	return c.hasNeeds()
+}
+
+func (c dagCompiler) hasNeeds() bool {
+	for _, v := range c.steps {
+		if v.needs != nil {
+			return true
+		}
+	}
+	for _, v := range c.services {
+		if v.needs != nil {
 			return true
 		}
 	}
@@ -98,10 +112,25 @@ func (c dagCompiler) compileByDependsOn() ([]*backend_types.Stage, error) {
 		stepMap[s.name] = s
 	}
 	servicesMap := make(map[string]*dagCompilerStep, len(c.services))
-	for _, s := range c.services {
-		servicesMap[s.name] = s
+	// if no needs -> call with empty services map
+	if c.hasNeeds() {
+		for _, s := range c.services {
+			servicesMap[s.name] = s
+		}
 	}
-	return convertDAGToStages(stepMap, servicesMap)
+	stages, err := convertDAGToStages(stepMap, servicesMap)
+	if err != nil {
+		return nil, err
+	}
+	if !c.hasNeeds() && len(c.services) > 0 {
+		// add services before steps
+		stage := new(backend_types.Stage)
+		for _, s := range c.services {
+			stage.Steps = append(stage.Steps, s.step)
+		}
+		stages = append([]*backend_types.Stage{stage}, stages...)
+	}
+	return stages, nil
 }
 
 func dfsVisit(steps map[string]*dagCompilerStep, services map[string]*dagCompilerStep, name string, visited map[string]struct{}, visitedServices map[string]struct{}, path []string, isService bool) error {

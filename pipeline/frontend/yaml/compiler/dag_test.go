@@ -287,6 +287,37 @@ func TestConvertDAGToStages(t *testing.T) {
 	}}, stages)
 }
 
+func TestCompileByDependsOn(t *testing.T) {
+	// test without "needs"
+	steps := []*dagCompilerStep{
+		{
+			position: 3,
+			name:     "echo env",
+			step: &backend_types.Step{Name: "echo env"},
+		},
+	}
+	services := []*dagCompilerStep{
+		{
+				name:     "service",
+				position: 0,
+				step: &backend_types.Step{
+					Name: "service",
+				},
+			},
+	}
+	stages, err := newDAGCompiler(steps, services).compileByDependsOn()
+	assert.NoError(t, err)
+	assert.EqualValues(t, []*backend_types.Stage{{
+		Steps: []*backend_types.Step{{
+			Name:  "service",
+		}},
+	}, {
+		Steps: []*backend_types.Step{{
+			Name:  "echo env",
+		}},
+	}}, stages)
+}
+
 func TestIsDag(t *testing.T) {
 	steps := []*dagCompilerStep{
 		{
