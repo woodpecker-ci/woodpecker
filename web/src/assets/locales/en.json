@@ -251,7 +251,7 @@
     "settings": {
       "not_allowed": "You are not allowed to access this organization's settings",
       "secrets": {
-        "desc": "Organization secrets can be passed to all organization's repository personal pipeline steps as environmental variables."
+        "desc": "Organization secrets can be passed to all organization's repository's pipeline steps as environmental variables."
       },
       "registries": {
         "desc": "Organization registry credentials can be added to use private images for all pipelines of an organization."
