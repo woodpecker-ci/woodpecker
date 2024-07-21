@@ -14,18 +14,19 @@
 
 - Update Forgejo SDK [[#3948](https://github.com/woodpecker-ci/woodpecker/pull/3948)]
 
-### 🐛 Bug Fixes
-
-- Truncate creation in list [[#3952](https://github.com/woodpecker-ci/woodpecker/pull/3952)]
-- Fix panic if forge is unreachable [[#3944](https://github.com/woodpecker-ci/woodpecker/pull/3944)]
-
 ### 📈 Enhancement
 
+- Refactor docker backend and add more test coverage [[#2700](https://github.com/woodpecker-ci/woodpecker/pull/2700)]
 - Make cli plugin log purge recognize steps by name [[#3953](https://github.com/woodpecker-ci/woodpecker/pull/3953)]
 - Pin page size [[#3946](https://github.com/woodpecker-ci/woodpecker/pull/3946)]
 - Improve cron list [[#3947](https://github.com/woodpecker-ci/woodpecker/pull/3947)]
 - Add PULLREQUEST_DRONE_PULL_REQUEST drone env [[#3939](https://github.com/woodpecker-ci/woodpecker/pull/3939)]
 - Make agent gRPC errors distinguishable [[#3936](https://github.com/woodpecker-ci/woodpecker/pull/3936)]
+
+### 🐛 Bug Fixes
+
+- Truncate creation in list [[#3952](https://github.com/woodpecker-ci/woodpecker/pull/3952)]
+- Fix panic if forge is unreachable [[#3944](https://github.com/woodpecker-ci/woodpecker/pull/3944)]
 
 ### Misc
 
