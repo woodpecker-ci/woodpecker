@@ -282,7 +282,7 @@ func TestSlice(t *testing.T) {
 
 	g.Describe("Parser", func() {
 		g.It("should marshal a not set slice to nil", func() {
-			out, err := ParseString(sampleSliceYaml)
+			out, err := ParseString(sampleYaml)
 			if err != nil {
 				g.Fail(err)
 			}
@@ -292,7 +292,7 @@ func TestSlice(t *testing.T) {
 		})
 
 		g.It("should marshal an empty slice", func() {
-			out, err := ParseString(sampleSliceYaml)
+			out, err := ParseString(sampleYaml)
 			if err != nil {
 				g.Fail(err)
 			}
