@@ -15,47 +15,46 @@
 package pipeline
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"strconv"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
-	"github.com/woodpecker-ci/woodpecker/cli/common"
-	"github.com/woodpecker-ci/woodpecker/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
 )
 
 var pipelineStartCmd = &cli.Command{
 	Name:      "start",
 	Usage:     "start a pipeline",
-	ArgsUsage: "<repo/name> [pipeline]",
+	ArgsUsage: "<repo-id|repo-full-name> [pipeline]",
 	Action:    pipelineStart,
-	Flags: append(common.GlobalFlags,
+	Flags: []cli.Flag{
 		&cli.StringSliceFlag{
 			Name:    "param",
 			Aliases: []string{"p"},
 			Usage:   "custom parameters to be injected into the step environment. Format: KEY=value",
 		},
-	),
+	},
 }
 
-func pipelineStart(c *cli.Context) (err error) {
-	repo := c.Args().First()
-	owner, name, err := internal.ParseRepo(repo)
+func pipelineStart(ctx context.Context, c *cli.Command) (err error) {
+	repoIDOrFullName := c.Args().First()
+	client, err := internal.NewClient(ctx, c)
 	if err != nil {
 		return err
 	}
-
-	client, err := internal.NewClient(c)
+	repoID, err := internal.ParseRepo(client, repoIDOrFullName)
 	if err != nil {
 		return err
 	}
 
 	pipelineArg := c.Args().Get(1)
-	var number int
+	var number int64
 	if pipelineArg == "last" {
 		// Fetch the pipeline number from the last pipeline
-		pipeline, err := client.PipelineLast(owner, name, "")
+		pipeline, err := client.PipelineLast(repoID, "")
 		if err != nil {
 			return err
 		}
@@ -64,7 +63,7 @@ func pipelineStart(c *cli.Context) (err error) {
 		if len(pipelineArg) == 0 {
 			return errors.New("missing step number")
 		}
-		number, err = strconv.Atoi(pipelineArg)
+		number, err = strconv.ParseInt(pipelineArg, 10, 64)
 		if err != nil {
 			return err
 		}
@@ -72,11 +71,11 @@ func pipelineStart(c *cli.Context) (err error) {
 
 	params := internal.ParseKeyPair(c.StringSlice("param"))
 
-	pipeline, err := client.PipelineStart(owner, name, number, params)
+	pipeline, err := client.PipelineStart(repoID, number, params)
 	if err != nil {
 		return err
 	}
 
-	fmt.Printf("Starting pipeline %s/%s#%d\n", owner, name, pipeline.Number)
+	fmt.Printf("Starting pipeline %s#%d\n", repoIDOrFullName, pipeline.Number)
 	return nil
 }

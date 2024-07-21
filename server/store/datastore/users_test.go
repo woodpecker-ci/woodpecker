@@ -20,11 +20,11 @@ import (
 
 	"github.com/franela/goblin"
 
-	"github.com/woodpecker-ci/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
 func TestUsers(t *testing.T) {
-	store, closer := newTestStore(t, new(model.User), new(model.Repo), new(model.Pipeline), new(model.Step), new(model.Perm))
+	store, closer := newTestStore(t, new(model.User), new(model.Repo), new(model.Pipeline), new(model.Step), new(model.Perm), new(model.Org), new(model.Secret))
 	defer closer()
 
 	g := goblin.Goblin(t)
@@ -40,6 +40,8 @@ func TestUsers(t *testing.T) {
 			g.Assert(err).IsNil()
 			_, err = store.engine.Exec("DELETE FROM steps")
 			g.Assert(err).IsNil()
+			_, err = store.engine.Exec("DELETE FROM orgs")
+			g.Assert(err).IsNil()
 		})
 
 		g.It("Should Update a User", func() {
@@ -50,11 +52,11 @@ func TestUsers(t *testing.T) {
 			}
 			err1 := store.CreateUser(&user)
 			err2 := store.UpdateUser(&user)
-			getuser, err3 := store.GetUser(user.ID)
+			getUser, err3 := store.GetUser(user.ID)
 			g.Assert(err1).IsNil()
 			g.Assert(err2).IsNil()
 			g.Assert(err3).IsNil()
-			g.Assert(user.ID).Equal(getuser.ID)
+			g.Assert(user.ID).Equal(getUser.ID)
 		})
 
 		g.It("Should Add a new User", func() {
@@ -75,19 +77,17 @@ func TestUsers(t *testing.T) {
 				Secret: "976f22a5eef7caacb7e678d6c52f49b1",
 				Email:  "foo@bar.com",
 				Avatar: "b9015b0857e16ac4d94a0ffd9a0b79c8",
-				Active: true,
 			}
 
 			g.Assert(store.CreateUser(user)).IsNil()
-			getuser, err := store.GetUser(user.ID)
+			getUser, err := store.GetUser(user.ID)
 			g.Assert(err).IsNil()
-			g.Assert(user.ID).Equal(getuser.ID)
-			g.Assert(user.Login).Equal(getuser.Login)
-			g.Assert(user.Token).Equal(getuser.Token)
-			g.Assert(user.Secret).Equal(getuser.Secret)
-			g.Assert(user.Email).Equal(getuser.Email)
-			g.Assert(user.Avatar).Equal(getuser.Avatar)
-			g.Assert(user.Active).Equal(getuser.Active)
+			g.Assert(user.ID).Equal(getUser.ID)
+			g.Assert(user.Login).Equal(getUser.Login)
+			g.Assert(user.Token).Equal(getUser.Token)
+			g.Assert(user.Secret).Equal(getUser.Secret)
+			g.Assert(user.Email).Equal(getUser.Email)
+			g.Assert(user.Avatar).Equal(getUser.Avatar)
 		})
 
 		g.It("Should Get a User By Login", func() {
@@ -97,10 +97,10 @@ func TestUsers(t *testing.T) {
 				Token: "e42080dddf012c718e476da161d21ad5",
 			}
 			g.Assert(store.CreateUser(user))
-			getuser, err := store.GetUserLogin(user.Login)
+			getUser, err := store.GetUserLogin(user.Login)
 			g.Assert(err).IsNil()
-			g.Assert(user.ID).Equal(getuser.ID)
-			g.Assert(user.Login).Equal(getuser.Login)
+			g.Assert(user.ID).Equal(getUser.ID)
+			g.Assert(user.Login).Equal(getUser.Login)
 		})
 
 		g.It("Should Enforce Unique User Login", func() {
@@ -134,7 +134,7 @@ func TestUsers(t *testing.T) {
 			}
 			g.Assert(store.CreateUser(&user1)).IsNil()
 			g.Assert(store.CreateUser(&user2)).IsNil()
-			users, err := store.GetUserList()
+			users, err := store.GetUserList(&model.ListOptions{Page: 1, PerPage: 50})
 			g.Assert(err).IsNil()
 			g.Assert(len(users)).Equal(2)
 			g.Assert(users[0].Login).Equal(user1.Login)
@@ -247,9 +247,9 @@ func TestUsers(t *testing.T) {
 			pipelines, err := store.UserFeed(user)
 			g.Assert(err).IsNil()
 			g.Assert(len(pipelines)).Equal(3)
-			g.Assert(pipelines[0].FullName).Equal(repo2.FullName)
-			g.Assert(pipelines[1].FullName).Equal(repo1.FullName)
-			g.Assert(pipelines[2].FullName).Equal(repo1.FullName)
+			g.Assert(pipelines[0].RepoID).Equal(repo2.ID)
+			g.Assert(pipelines[1].RepoID).Equal(repo1.ID)
+			g.Assert(pipelines[2].RepoID).Equal(repo1.ID)
 		})
 	})
 }

@@ -19,11 +19,11 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/woodpecker-ci/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
 func TestGetPipelineQueue(t *testing.T) {
-	store, closer := newTestStore(t, new(model.Repo), new(model.User), new(model.Perm), new(model.Pipeline))
+	store, closer := newTestStore(t, new(model.Repo), new(model.User), new(model.Perm), new(model.Pipeline), new(model.Org))
 	defer closer()
 
 	user := &model.User{
@@ -54,17 +54,12 @@ func TestGetPipelineQueue(t *testing.T) {
 	assert.NoError(t, store.CreatePipeline(pipeline1))
 
 	feed, err := store.GetPipelineQueue()
-	if err != nil {
-		t.Errorf("Unexpected error: repository list with latest pipeline: %s", err)
-		return
-	}
-	if got, want := len(feed), 1; got != want {
-		t.Errorf("Want %d repositories, got %d", want, got)
-	}
+	assert.NoError(t, err)
+	assert.Len(t, feed, 1)
 }
 
 func TestUserFeed(t *testing.T) {
-	store, closer := newTestStore(t, new(model.Repo), new(model.User), new(model.Perm), new(model.Pipeline))
+	store, closer := newTestStore(t, new(model.Repo), new(model.User), new(model.Perm), new(model.Pipeline), new(model.Org))
 	defer closer()
 
 	user := &model.User{
@@ -105,17 +100,12 @@ func TestUserFeed(t *testing.T) {
 
 	assert.NoError(t, store.CreatePipeline(pipeline1))
 	feed, err := store.UserFeed(user)
-	if err != nil {
-		t.Errorf("Unexpected error: repository list with latest pipeline: %s", err)
-		return
-	}
-	if got, want := len(feed), 1; got != want {
-		t.Errorf("Want %d repositories, got %d", want, got)
-	}
+	assert.NoError(t, err)
+	assert.Len(t, feed, 1)
 }
 
 func TestRepoListLatest(t *testing.T) {
-	store, closer := newTestStore(t, new(model.Repo), new(model.User), new(model.Perm), new(model.Pipeline))
+	store, closer := newTestStore(t, new(model.Repo), new(model.User), new(model.Perm), new(model.Pipeline), new(model.Org))
 	defer closer()
 
 	user := &model.User{
@@ -126,6 +116,7 @@ func TestRepoListLatest(t *testing.T) {
 	assert.NoError(t, store.CreateUser(user))
 
 	repo1 := &model.Repo{
+		ID:            1,
 		Owner:         "bradrydzewski",
 		Name:          "test",
 		FullName:      "bradrydzewski/test",
@@ -133,6 +124,7 @@ func TestRepoListLatest(t *testing.T) {
 		IsActive:      true,
 	}
 	repo2 := &model.Repo{
+		ID:            2,
 		Owner:         "test",
 		Name:          "test",
 		FullName:      "test/test",
@@ -140,6 +132,7 @@ func TestRepoListLatest(t *testing.T) {
 		IsActive:      true,
 	}
 	repo3 := &model.Repo{
+		ID:            3,
 		Owner:         "octocat",
 		Name:          "hello-world",
 		FullName:      "octocat/hello-world",
@@ -179,23 +172,10 @@ func TestRepoListLatest(t *testing.T) {
 	assert.NoError(t, store.CreatePipeline(pipeline4))
 
 	pipelines, err := store.RepoListLatest(user)
-	if err != nil {
-		t.Errorf("Unexpected error: repository list with latest pipeline: %s", err)
-		return
-	}
-	if got, want := len(pipelines), 2; got != want {
-		t.Errorf("Want %d repositories, got %d", want, got)
-	}
-	if got, want := pipelines[0].Status, string(model.StatusRunning); want != got {
-		t.Errorf("Want repository status %s, got %s", want, got)
-	}
-	if got, want := pipelines[0].FullName, repo1.FullName; want != got {
-		t.Errorf("Want repository name %s, got %s", want, got)
-	}
-	if got, want := pipelines[1].Status, string(model.StatusKilled); want != got {
-		t.Errorf("Want repository status %s, got %s", want, got)
-	}
-	if got, want := pipelines[1].FullName, repo2.FullName; want != got {
-		t.Errorf("Want repository name %s, got %s", want, got)
-	}
+	assert.NoError(t, err)
+	assert.Len(t, pipelines, 2)
+	assert.EqualValues(t, model.StatusRunning, pipelines[0].Status)
+	assert.Equal(t, repo1.ID, pipelines[0].RepoID)
+	assert.EqualValues(t, model.StatusKilled, pipelines[1].Status)
+	assert.Equal(t, repo2.ID, pipelines[1].RepoID)
 }

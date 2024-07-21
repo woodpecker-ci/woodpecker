@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import Fuse from 'fuse.js';
 import Layout from '@theme/Layout';
 import './style.css';
@@ -11,7 +11,9 @@ function PluginPanel({ plugin }: { plugin: WoodpeckerPlugin }) {
   return (
     <a href={pluginUrl} className="card shadow--md wp-plugin-card">
       <div className="card__header row">
-        <div className="col col--2 text--left">{plugin.icon ? <img src={plugin.icon} width="50" /> : IconPlugin()}</div>
+        <div className="col col--2 text--left">
+          {plugin.iconDataUrl ? <img src={plugin.iconDataUrl} width="50" /> : IconPlugin()}
+        </div>
         <div className="col col--10">
           <h3>{plugin.name}</h3>
           <p>{plugin.description}</p>
@@ -33,35 +35,18 @@ function PluginPanel({ plugin }: { plugin: WoodpeckerPlugin }) {
 
 export function WoodpeckerPluginList({ plugins }: { plugins: WoodpeckerPlugin[] }) {
   const applyForIndexUrl =
-    'https://github.com/woodpecker-ci/woodpecker/edit/master/docs/plugins/woodpecker-plugins/plugins.json';
-
-  const NewPluginPanel = () => (
-    <a href={applyForIndexUrl} target="_blank" rel="noopener noreferrer" className="card shadow--md wp-plugin-card">
-      <div className="card__header row">
-        <div className="col col--2">
-          <svg width="50" height="50" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path
-              d="M88.2357 38.0952H61.9048V11.7643C61.9048 5.29524 56.4714 0 50 0C43.5286 0 38.0952 5.29524 38.0952 11.7643V38.0952H11.7643C5.29524 38.0952 0 43.5286 0 50C0 56.4714 5.29524 61.9048 11.7643 61.9048H38.0952V88.2357C38.0952 94.7048 43.5286 100 50 100C56.4714 100 61.9048 94.7048 61.9048 88.2357V61.9048H88.2357C94.7048 61.9048 100 56.4714 100 50C100 43.5286 94.7048 38.0952 88.2357 38.0952Z"
-              fill="#4CAF50"
-            />
-          </svg>
-        </div>
-        <div className="col col--10">
-          <h3>Add your own plugin</h3>
-          <p>You can simply add your own plugin to this index.</p>
-        </div>
-      </div>
-    </a>
-  );
-
-  const fuse = new Fuse(plugins, {
-    keys: ['name', 'description'],
-    threshold: 0.3,
-  });
+    'https://github.com/woodpecker-ci/woodpecker/edit/main/docs/plugins/woodpecker-plugins/plugins.json';
 
   const [query, setQuery] = useState('');
 
-  const searchedPlugins = query.length >= 1 ? fuse.search(query) : plugins.map((p) => ({ item: p }));
+  const fuse = useRef(
+    new Fuse(plugins, {
+      keys: ['name', 'description'],
+      threshold: 0.3,
+    }),
+  );
+
+  const searchedPlugins = query.length >= 1 ? fuse.current.search(query).map((p) => p.item) : plugins;
 
   return (
     <Layout title="Woodpecker CI plugins" description="List of all Woodpecker-CI plugins">
@@ -84,9 +69,8 @@ export function WoodpeckerPluginList({ plugins }: { plugins: WoodpeckerPlugin[] 
               className="wp-plugin-search"
             />
             <div className="wp-plugins-list">
-              {/* {query.length == 0 && <NewPluginPanel />} */}
-              {searchedPlugins.map((plugin, idx) => (
-                <PluginPanel key={idx} plugin={plugin.item} />
+              {searchedPlugins.map((plugin) => (
+                <PluginPanel key={plugin.name} plugin={plugin} />
               ))}
             </div>
           </div>

@@ -1,34 +1,18 @@
 <template>
-  <Panel>
-    <div class="flex flex-row border-b mb-4 pb-4 items-center dark:border-gray-600">
-      <div class="ml-2">
-        <h1 class="text-xl text-color">{{ $t('admin.settings.secrets.secrets') }}</h1>
-        <p class="text-sm text-color-alt">
-          {{ $t('admin.settings.secrets.desc') }}
-          <DocsLink :topic="$t('admin.settings.secrets.secrets')" url="docs/usage/secrets" />
-        </p>
-        <Warning :text="$t('admin.settings.secrets.warning')" />
-      </div>
-      <Button
-        v-if="selectedSecret"
-        class="ml-auto"
-        :text="$t('admin.settings.secrets.show')"
-        start-icon="back"
-        @click="selectedSecret = undefined"
-      />
-      <Button
-        v-else
-        class="ml-auto"
-        :text="$t('admin.settings.secrets.add')"
-        start-icon="plus"
-        @click="showAddSecret"
-      />
-    </div>
+  <Settings
+    :title="$t('secrets.secrets')"
+    :desc="$t('admin.settings.secrets.desc')"
+    docs-url="docs/usage/secrets"
+    :warning="$t('admin.settings.secrets.warning')"
+  >
+    <template #titleActions>
+      <Button v-if="selectedSecret" :text="$t('secrets.show')" start-icon="back" @click="selectedSecret = undefined" />
+      <Button v-else :text="$t('secrets.add')" start-icon="plus" @click="showAddSecret" />
+    </template>
 
     <SecretList
       v-if="!selectedSecret"
       v-model="secrets"
-      i18n-prefix="admin.settings.secrets."
       :is-deleting="isDeleting"
       @edit="editSecret"
       @delete="deleteSecret"
@@ -37,107 +21,78 @@
     <SecretEdit
       v-else
       v-model="selectedSecret"
-      i18n-prefix="admin.settings.secrets."
       :is-saving="isSaving"
       @save="createSecret"
+      @cancel="selectedSecret = undefined"
     />
-  </Panel>
+  </Settings>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import { cloneDeep } from 'lodash';
-import { computed, defineComponent, onMounted, ref } from 'vue';
+import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import Button from '~/components/atomic/Button.vue';
-import DocsLink from '~/components/atomic/DocsLink.vue';
-import Warning from '~/components/atomic/Warning.vue';
-import Panel from '~/components/layout/Panel.vue';
+import Settings from '~/components/layout/Settings.vue';
 import SecretEdit from '~/components/secrets/SecretEdit.vue';
 import SecretList from '~/components/secrets/SecretList.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useNotifications from '~/compositions/useNotifications';
-import { Secret, WebhookEvents } from '~/lib/api/types';
+import { usePagination } from '~/compositions/usePaginate';
+import type { Secret } from '~/lib/api/types';
+import { WebhookEvents } from '~/lib/api/types';
 
-const emptySecret = {
+const emptySecret: Partial<Secret> = {
   name: '',
   value: '',
-  image: [],
-  event: [WebhookEvents.Push],
+  images: [],
+  events: [WebhookEvents.Push],
 };
 
-export default defineComponent({
-  name: 'AdminSecretsTab',
+const apiClient = useApiClient();
+const notifications = useNotifications();
+const i18n = useI18n();
 
-  components: {
-    Button,
-    Panel,
-    DocsLink,
-    SecretList,
-    SecretEdit,
-    Warning,
-  },
+const selectedSecret = ref<Partial<Secret>>();
+const isEditingSecret = computed(() => !!selectedSecret.value?.id);
 
-  setup() {
-    const apiClient = useApiClient();
-    const notifications = useNotifications();
-    const i18n = useI18n();
+async function loadSecrets(page: number): Promise<Secret[] | null> {
+  return apiClient.getGlobalSecretList({ page });
+}
 
-    const secrets = ref<Secret[]>([]);
-    const selectedSecret = ref<Partial<Secret>>();
-    const isEditingSecret = computed(() => !!selectedSecret.value?.id);
+const { resetPage, data: secrets } = usePagination(loadSecrets, () => !selectedSecret.value);
 
-    async function loadSecrets() {
-      secrets.value = await apiClient.getGlobalSecretList();
-    }
+const { doSubmit: createSecret, isLoading: isSaving } = useAsyncAction(async () => {
+  if (!selectedSecret.value) {
+    throw new Error("Unexpected: Can't get secret");
+  }
 
-    const { doSubmit: createSecret, isLoading: isSaving } = useAsyncAction(async () => {
-      if (!selectedSecret.value) {
-        throw new Error("Unexpected: Can't get secret");
-      }
-
-      if (isEditingSecret.value) {
-        await apiClient.updateGlobalSecret(selectedSecret.value);
-      } else {
-        await apiClient.createGlobalSecret(selectedSecret.value);
-      }
-      notifications.notify({
-        title: i18n.t(isEditingSecret.value ? 'admin.settings.secrets.saved' : 'admin.settings.secrets.created'),
-        type: 'success',
-      });
-      selectedSecret.value = undefined;
-      await loadSecrets();
-    });
-
-    const { doSubmit: deleteSecret, isLoading: isDeleting } = useAsyncAction(async (_secret: Secret) => {
-      await apiClient.deleteGlobalSecret(_secret.name);
-      notifications.notify({ title: i18n.t('admin.settings.secrets.deleted'), type: 'success' });
-      await loadSecrets();
-    });
-
-    function editSecret(secret: Secret) {
-      selectedSecret.value = cloneDeep(secret);
-    }
-
-    function showAddSecret() {
-      selectedSecret.value = cloneDeep(emptySecret);
-    }
-
-    onMounted(async () => {
-      await loadSecrets();
-    });
-
-    return {
-      selectedSecret,
-      secrets,
-      isDeleting,
-      isSaving,
-      showAddSecret,
-      createSecret,
-      editSecret,
-      deleteSecret,
-    };
-  },
+  if (isEditingSecret.value) {
+    await apiClient.updateGlobalSecret(selectedSecret.value);
+  } else {
+    await apiClient.createGlobalSecret(selectedSecret.value);
+  }
+  notifications.notify({
+    title: isEditingSecret.value ? i18n.t('secrets.saved') : i18n.t('secrets.created'),
+    type: 'success',
+  });
+  selectedSecret.value = undefined;
+  resetPage();
 });
+
+const { doSubmit: deleteSecret, isLoading: isDeleting } = useAsyncAction(async (_secret: Secret) => {
+  await apiClient.deleteGlobalSecret(_secret.name);
+  notifications.notify({ title: i18n.t('secrets.deleted'), type: 'success' });
+  resetPage();
+});
+
+function editSecret(secret: Secret) {
+  selectedSecret.value = cloneDeep(secret);
+}
+
+function showAddSecret() {
+  selectedSecret.value = cloneDeep(emptySecret);
+}
 </script>

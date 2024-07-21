@@ -15,44 +15,43 @@
 package pipeline
 
 import (
+	"context"
 	"fmt"
 	"strconv"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
-	"github.com/woodpecker-ci/woodpecker/cli/common"
-	"github.com/woodpecker-ci/woodpecker/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
 )
 
 var pipelineDeclineCmd = &cli.Command{
 	Name:      "decline",
 	Usage:     "decline a pipeline",
-	ArgsUsage: "<repo/name> <pipeline>",
+	ArgsUsage: "<repo-id|repo-full-name> <pipeline>",
 	Action:    pipelineDecline,
-	Flags:     common.GlobalFlags,
 }
 
-func pipelineDecline(c *cli.Context) (err error) {
-	repo := c.Args().First()
-	owner, name, err := internal.ParseRepo(repo)
+func pipelineDecline(ctx context.Context, c *cli.Command) (err error) {
+	repoIDOrFullName := c.Args().First()
+	client, err := internal.NewClient(ctx, c)
 	if err != nil {
 		return err
 	}
-	number, err := strconv.Atoi(c.Args().Get(1))
-	if err != nil {
-		return err
-	}
-
-	client, err := internal.NewClient(c)
+	repoID, err := internal.ParseRepo(client, repoIDOrFullName)
 	if err != nil {
 		return err
 	}
 
-	_, err = client.PipelineDecline(owner, name, number)
+	number, err := strconv.ParseInt(c.Args().Get(1), 10, 64)
 	if err != nil {
 		return err
 	}
 
-	fmt.Printf("Declining pipeline %s/%s#%d\n", owner, name, number)
+	_, err = client.PipelineDecline(repoID, number)
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("Declining pipeline %s#%d\n", repoIDOrFullName, number)
 	return nil
 }

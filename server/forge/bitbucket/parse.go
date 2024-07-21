@@ -19,30 +19,40 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/woodpecker-ci/woodpecker/server/forge/bitbucket/internal"
-	"github.com/woodpecker-ci/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge/bitbucket/internal"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
 const (
-	hookEvent       = "X-Event-Key"
-	hookPush        = "repo:push"
-	hookPullCreated = "pullrequest:created"
-	hookPullUpdated = "pullrequest:updated"
-	stateOpen       = "OPEN"
+	hookEvent        = "X-Event-Key"
+	hookPush         = "repo:push"
+	hookPullCreated  = "pullrequest:created"
+	hookPullUpdated  = "pullrequest:updated"
+	hookPullMerged   = "pullrequest:fulfilled"
+	hookPullDeclined = "pullrequest:rejected"
+	stateOpen        = "OPEN"
+	stateClosed      = "MERGED"
+	stateDeclined    = "DECLINED"
 )
 
 // parseHook parses a Bitbucket hook from an http.Request request and returns
 // Repo and Pipeline detail. If a hook type is unsupported nil values are returned.
 func parseHook(r *http.Request) (*model.Repo, *model.Pipeline, error) {
-	payload, _ := io.ReadAll(r.Body)
+	payload, err := io.ReadAll(r.Body)
+	if err != nil {
+		return nil, nil, err
+	}
 
-	switch r.Header.Get(hookEvent) {
+	hookType := r.Header.Get(hookEvent)
+	switch hookType {
 	case hookPush:
 		return parsePushHook(payload)
-	case hookPullCreated, hookPullUpdated:
+	case hookPullCreated, hookPullUpdated, hookPullMerged, hookPullDeclined:
 		return parsePullHook(payload)
+	default:
+		return nil, nil, &types.ErrIgnoreEvent{Event: hookType}
 	}
-	return nil, nil, nil
 }
 
 // parsePushHook parses a push hook and returns the Repo and Pipeline details.
@@ -59,21 +69,19 @@ func parsePushHook(payload []byte) (*model.Repo, *model.Pipeline, error) {
 		if change.New.Target.Hash == "" {
 			continue
 		}
-		return convertRepo(&hook.Repo), convertPushHook(&hook, &change), nil
+		return convertRepo(&hook.Repo, &internal.RepoPerm{}), convertPushHook(&hook, &change), nil
 	}
 	return nil, nil, nil
 }
 
 // parsePullHook parses a pull request hook and returns the Repo and Pipeline
-// details. If the pull request is closed nil values are returned.
+// details.
 func parsePullHook(payload []byte) (*model.Repo, *model.Pipeline, error) {
 	hook := internal.PullRequestHook{}
 
 	if err := json.Unmarshal(payload, &hook); err != nil {
 		return nil, nil, err
 	}
-	if hook.PullRequest.State != stateOpen {
-		return nil, nil, nil
-	}
-	return convertRepo(&hook.Repo), convertPullHook(&hook), nil
+
+	return convertRepo(&hook.Repo, &internal.RepoPerm{}), convertPullHook(&hook), nil
 }

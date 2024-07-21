@@ -15,28 +15,37 @@
 
 package types
 
-import "errors"
+import (
+	"errors"
+	"fmt"
+	"strings"
+)
 
-// AuthError represents forge authentication error.
-type AuthError struct {
-	Err         string
-	Description string
-	URI         string
+var ErrNotImplemented = errors.New("not implemented")
+
+type ErrIgnoreEvent struct {
+	Event  string
+	Reason string
 }
 
-// Error implements error interface.
-func (ae *AuthError) Error() string {
-	err := ae.Err
-	if ae.Description != "" {
-		err += " " + ae.Description
-	}
-	if ae.URI != "" {
-		err += " " + ae.URI
-	}
-	return err
+func (err *ErrIgnoreEvent) Error() string {
+	return fmt.Sprintf("explicit ignored event '%s', reason: %s", err.Event, err.Reason)
 }
 
-// check interface
-var _ error = new(AuthError)
+func (*ErrIgnoreEvent) Is(target error) bool {
+	_, ok := target.(*ErrIgnoreEvent)
+	return ok
+}
 
-var ErrNotImplemented = errors.New("Not implemented")
+type ErrConfigNotFound struct {
+	Configs []string
+}
+
+func (m *ErrConfigNotFound) Error() string {
+	return fmt.Sprintf("configs not found: %s", strings.Join(m.Configs, ", "))
+}
+
+func (*ErrConfigNotFound) Is(target error) bool {
+	_, ok := target.(*ErrConfigNotFound)
+	return ok
+}

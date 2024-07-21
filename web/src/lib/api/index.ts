@@ -1,250 +1,418 @@
 import ApiClient, { encodeQueryString } from './client';
-import {
+import type {
+  Agent,
+  Cron,
+  Forge,
+  Org,
   OrgPermissions,
   Pipeline,
   PipelineConfig,
   PipelineFeed,
   PipelineLog,
-  PipelineStep,
+  PullRequest,
+  QueueInfo,
   Registry,
   Repo,
   RepoPermissions,
   RepoSettings,
   Secret,
+  User,
 } from './types';
-import { Cron } from './types/cron';
 
-type RepoListOptions = {
+interface RepoListOptions {
   all?: boolean;
-  flush?: boolean;
-};
+}
 
-type PipelineOptions = {
+// PipelineOptions is the data for creating a new pipeline
+interface PipelineOptions {
   branch: string;
   variables: Record<string, string>;
-};
+}
 
-type DeploymentOptions = {
+interface DeploymentOptions {
   id: string;
   environment: string;
+  task: string;
   variables: Record<string, string>;
-};
+}
+
+interface PaginationOptions {
+  page?: number;
+  perPage?: number;
+}
 
 export default class WoodpeckerClient extends ApiClient {
-  getRepoList(opts?: RepoListOptions): Promise<Repo[]> {
+  async getRepoList(opts?: RepoListOptions): Promise<Repo[]> {
     const query = encodeQueryString(opts);
     return this._get(`/api/user/repos?${query}`) as Promise<Repo[]>;
   }
 
-  getRepo(owner: string, repo: string): Promise<Repo> {
-    return this._get(`/api/repos/${owner}/${repo}`) as Promise<Repo>;
+  async lookupRepo(owner: string, name: string): Promise<Repo | undefined> {
+    return this._get(`/api/repos/lookup/${owner}/${name}`) as Promise<Repo | undefined>;
   }
 
-  getRepoPermissions(owner: string, repo: string): Promise<RepoPermissions> {
-    return this._get(`/api/repos/${owner}/${repo}/permissions`) as Promise<RepoPermissions>;
+  async getRepo(repoId: number): Promise<Repo> {
+    return this._get(`/api/repos/${repoId}`) as Promise<Repo>;
   }
 
-  getRepoBranches(owner: string, repo: string): Promise<string[]> {
-    return this._get(`/api/repos/${owner}/${repo}/branches`) as Promise<string[]>;
+  async getRepoPermissions(repoId: number): Promise<RepoPermissions> {
+    return this._get(`/api/repos/${repoId}/permissions`) as Promise<RepoPermissions>;
   }
 
-  activateRepo(owner: string, repo: string): Promise<unknown> {
-    return this._post(`/api/repos/${owner}/${repo}`);
+  async getRepoBranches(repoId: number, opts?: PaginationOptions): Promise<string[]> {
+    const query = encodeQueryString(opts);
+    return this._get(`/api/repos/${repoId}/branches?${query}`) as Promise<string[]>;
   }
 
-  updateRepo(owner: string, repo: string, repoSettings: RepoSettings): Promise<unknown> {
-    return this._patch(`/api/repos/${owner}/${repo}`, repoSettings);
+  async getRepoPullRequests(repoId: number, opts?: PaginationOptions): Promise<PullRequest[]> {
+    const query = encodeQueryString(opts);
+    return this._get(`/api/repos/${repoId}/pull_requests?${query}`) as Promise<PullRequest[]>;
   }
 
-  deleteRepo(owner: string, repo: string, remove = true): Promise<unknown> {
+  async activateRepo(forgeRemoteId: string): Promise<Repo> {
+    return this._post(`/api/repos?forge_remote_id=${forgeRemoteId}`) as Promise<Repo>;
+  }
+
+  async updateRepo(repoId: number, repoSettings: RepoSettings): Promise<unknown> {
+    return this._patch(`/api/repos/${repoId}`, repoSettings);
+  }
+
+  async deleteRepo(repoId: number, remove = true): Promise<unknown> {
     const query = encodeQueryString({ remove });
-    return this._delete(`/api/repos/${owner}/${repo}?${query}`);
+    return this._delete(`/api/repos/${repoId}?${query}`);
   }
 
-  repairRepo(owner: string, repo: string): Promise<unknown> {
-    return this._post(`/api/repos/${owner}/${repo}/repair`);
+  async repairRepo(repoId: number): Promise<unknown> {
+    return this._post(`/api/repos/${repoId}/repair`);
   }
 
-  createPipeline(owner: string, repo: string, options: PipelineOptions): Promise<Pipeline> {
-    return this._post(`/api/repos/${owner}/${repo}/pipelines`, options) as Promise<Pipeline>;
+  async createPipeline(repoId: number, options: PipelineOptions): Promise<Pipeline> {
+    return this._post(`/api/repos/${repoId}/pipelines`, options) as Promise<Pipeline>;
   }
 
   // Deploy triggers a deployment for an existing pipeline using the
-  // specified target environment.
-  deployPipeline(owner: string, repo: string, number: number, options: DeploymentOptions): Promise<Pipeline> {
+  // specified target environment and task.
+  async deployPipeline(repoId: number, pipelineNumber: string, options: DeploymentOptions): Promise<Pipeline> {
     const vars = {
       ...options.variables,
       event: 'deployment',
       deploy_to: options.environment,
+      deploy_task: options.task,
     };
     const query = encodeQueryString(vars);
-    return this._post(`/api/repos/${owner}/${repo}/pipelines/${number}?${query}`) as Promise<Pipeline>;
+    return this._post(`/api/repos/${repoId}/pipelines/${pipelineNumber}?${query}`) as Promise<Pipeline>;
   }
 
-  getPipelineList(owner: string, repo: string, opts?: Record<string, string | number | boolean>): Promise<Pipeline[]> {
+  async getPipelineList(
+    repoId: number,
+    opts?: PaginationOptions & { before?: string; after?: string },
+  ): Promise<Pipeline[]> {
     const query = encodeQueryString(opts);
-    return this._get(`/api/repos/${owner}/${repo}/pipelines?${query}`) as Promise<Pipeline[]>;
+    return this._get(`/api/repos/${repoId}/pipelines?${query}`) as Promise<Pipeline[]>;
   }
 
-  getPipeline(owner: string, repo: string, number: number | 'latest'): Promise<Pipeline> {
-    return this._get(`/api/repos/${owner}/${repo}/pipelines/${number}`) as Promise<Pipeline>;
+  async getPipeline(repoId: number, pipelineNumber: number | 'latest'): Promise<Pipeline> {
+    return this._get(`/api/repos/${repoId}/pipelines/${pipelineNumber}`) as Promise<Pipeline>;
   }
 
-  getPipelineConfig(owner: string, repo: string, number: number): Promise<PipelineConfig[]> {
-    return this._get(`/api/repos/${owner}/${repo}/pipelines/${number}/config`) as Promise<PipelineConfig[]>;
+  async getPipelineConfig(repoId: number, pipelineNumber: number): Promise<PipelineConfig[]> {
+    return this._get(`/api/repos/${repoId}/pipelines/${pipelineNumber}/config`) as Promise<PipelineConfig[]>;
   }
 
-  getPipelineFeed(opts?: Record<string, string | number | boolean>): Promise<PipelineFeed[]> {
-    const query = encodeQueryString(opts);
-    return this._get(`/api/user/feed?${query}`) as Promise<PipelineFeed[]>;
+  async getPipelineFeed(): Promise<PipelineFeed[]> {
+    return this._get(`/api/user/feed`) as Promise<PipelineFeed[]>;
   }
 
-  cancelPipeline(owner: string, repo: string, number: number): Promise<unknown> {
-    return this._post(`/api/repos/${owner}/${repo}/pipelines/${number}/cancel`);
+  async cancelPipeline(repoId: number, pipelineNumber: number): Promise<unknown> {
+    return this._post(`/api/repos/${repoId}/pipelines/${pipelineNumber}/cancel`);
   }
 
-  approvePipeline(owner: string, repo: string, pipeline: string): Promise<unknown> {
-    return this._post(`/api/repos/${owner}/${repo}/pipelines/${pipeline}/approve`);
+  async approvePipeline(repoId: number, pipelineNumber: string): Promise<unknown> {
+    return this._post(`/api/repos/${repoId}/pipelines/${pipelineNumber}/approve`);
   }
 
-  declinePipeline(owner: string, repo: string, pipeline: string): Promise<unknown> {
-    return this._post(`/api/repos/${owner}/${repo}/pipelines/${pipeline}/decline`);
+  async declinePipeline(repoId: number, pipelineNumber: string): Promise<unknown> {
+    return this._post(`/api/repos/${repoId}/pipelines/${pipelineNumber}/decline`);
   }
 
-  restartPipeline(
-    owner: string,
-    repo: string,
+  async restartPipeline(
+    repoId: number,
     pipeline: string,
-    opts?: Record<string, string | number | boolean>,
-  ): Promise<unknown> {
+    opts?: { event?: string; deploy_to?: string; fork?: boolean },
+  ): Promise<Pipeline> {
     const query = encodeQueryString(opts);
-    return this._post(`/api/repos/${owner}/${repo}/pipelines/${pipeline}?${query}`);
+    return this._post(`/api/repos/${repoId}/pipelines/${pipeline}?${query}`) as Promise<Pipeline>;
   }
 
-  getLogs(owner: string, repo: string, pipeline: number, step: number): Promise<PipelineLog[]> {
-    return this._get(`/api/repos/${owner}/${repo}/logs/${pipeline}/${step}`) as Promise<PipelineLog[]>;
+  async getLogs(repoId: number, pipeline: number, step: number): Promise<PipelineLog[]> {
+    return this._get(`/api/repos/${repoId}/logs/${pipeline}/${step}`) as Promise<PipelineLog[]>;
   }
 
-  getArtifact(owner: string, repo: string, pipeline: string, step: string, file: string): Promise<unknown> {
-    return this._get(`/api/repos/${owner}/${repo}/files/${pipeline}/${step}/${file}?raw=true`);
+  async deleteLogs(repoId: number, pipeline: number, step: number): Promise<unknown> {
+    return this._delete(`/api/repos/${repoId}/logs/${pipeline}/${step}`);
   }
 
-  getArtifactList(owner: string, repo: string, pipeline: string): Promise<unknown> {
-    return this._get(`/api/repos/${owner}/${repo}/files/${pipeline}`);
+  async getSecretList(repoId: number, opts?: PaginationOptions): Promise<Secret[] | null> {
+    const query = encodeQueryString(opts);
+    return this._get(`/api/repos/${repoId}/secrets?${query}`) as Promise<Secret[] | null>;
   }
 
-  getSecretList(owner: string, repo: string): Promise<Secret[]> {
-    return this._get(`/api/repos/${owner}/${repo}/secrets`) as Promise<Secret[]>;
+  async createSecret(repoId: number, secret: Partial<Secret>): Promise<unknown> {
+    return this._post(`/api/repos/${repoId}/secrets`, secret);
   }
 
-  createSecret(owner: string, repo: string, secret: Partial<Secret>): Promise<unknown> {
-    return this._post(`/api/repos/${owner}/${repo}/secrets`, secret);
+  async updateSecret(repoId: number, secret: Partial<Secret>): Promise<unknown> {
+    const secretName = encodeURIComponent(secret.name ?? '');
+    return this._patch(`/api/repos/${repoId}/secrets/${secretName}`, secret);
   }
 
-  updateSecret(owner: string, repo: string, secret: Partial<Secret>): Promise<unknown> {
-    return this._patch(`/api/repos/${owner}/${repo}/secrets/${secret.name}`, secret);
+  async deleteSecret(repoId: number, secretName: string): Promise<unknown> {
+    const name = encodeURIComponent(secretName);
+    return this._delete(`/api/repos/${repoId}/secrets/${name}`);
   }
 
-  deleteSecret(owner: string, repo: string, secretName: string): Promise<unknown> {
-    return this._delete(`/api/repos/${owner}/${repo}/secrets/${secretName}`);
+  async getRegistryList(repoId: number, opts?: PaginationOptions): Promise<Registry[] | null> {
+    const query = encodeQueryString(opts);
+    return this._get(`/api/repos/${repoId}/registries?${query}`) as Promise<Registry[] | null>;
   }
 
-  getRegistryList(owner: string, repo: string): Promise<Registry[]> {
-    return this._get(`/api/repos/${owner}/${repo}/registry`) as Promise<Registry[]>;
+  async createRegistry(repoId: number, registry: Partial<Registry>): Promise<unknown> {
+    return this._post(`/api/repos/${repoId}/registries`, registry);
   }
 
-  createRegistry(owner: string, repo: string, registry: Partial<Registry>): Promise<unknown> {
-    return this._post(`/api/repos/${owner}/${repo}/registry`, registry);
+  async updateRegistry(repoId: number, registry: Partial<Registry>): Promise<unknown> {
+    return this._patch(`/api/repos/${repoId}/registries/${registry.address}`, registry);
   }
 
-  updateRegistry(owner: string, repo: string, registry: Partial<Registry>): Promise<unknown> {
-    return this._patch(`/api/repos/${owner}/${repo}/registry/${registry.address}`, registry);
+  async deleteRegistry(repoId: number, registryAddress: string): Promise<unknown> {
+    return this._delete(`/api/repos/${repoId}/registries/${registryAddress}`);
   }
 
-  deleteRegistry(owner: string, repo: string, registryAddress: string): Promise<unknown> {
-    return this._delete(`/api/repos/${owner}/${repo}/registry/${registryAddress}`);
+  async getOrgRegistryList(orgId: number, opts?: PaginationOptions): Promise<Registry[] | null> {
+    const query = encodeQueryString(opts);
+    return this._get(`/api/orgs/${orgId}/registries?${query}`) as Promise<Registry[] | null>;
   }
 
-  getCronList(owner: string, repo: string): Promise<Cron[]> {
-    return this._get(`/api/repos/${owner}/${repo}/cron`) as Promise<Cron[]>;
+  async createOrgRegistry(orgId: number, registry: Partial<Registry>): Promise<unknown> {
+    return this._post(`/api/orgs/${orgId}/registries`, registry);
   }
 
-  createCron(owner: string, repo: string, cron: Partial<Cron>): Promise<unknown> {
-    return this._post(`/api/repos/${owner}/${repo}/cron`, cron);
+  async updateOrgRegistry(orgId: number, registry: Partial<Registry>): Promise<unknown> {
+    return this._patch(`/api/orgs/${orgId}/registries/${registry.address}`, registry);
   }
 
-  updateCron(owner: string, repo: string, cron: Partial<Cron>): Promise<unknown> {
-    return this._patch(`/api/repos/${owner}/${repo}/cron/${cron.id}`, cron);
+  async deleteOrgRegistry(orgId: number, registryAddress: string): Promise<unknown> {
+    return this._delete(`/api/orgs/${orgId}/registries/${registryAddress}`);
   }
 
-  deleteCron(owner: string, repo: string, cronId: number): Promise<unknown> {
-    return this._delete(`/api/repos/${owner}/${repo}/cron/${cronId}`);
+  async getGlobalRegistryList(opts?: PaginationOptions): Promise<Registry[] | null> {
+    const query = encodeQueryString(opts);
+    return this._get(`/api/registries?${query}`) as Promise<Registry[] | null>;
   }
 
-  runCron(owner: string, repo: string, cronId: number): Promise<Pipeline> {
-    return this._post(`/api/repos/${owner}/${repo}/cron/${cronId}`) as Promise<Pipeline>;
+  async createGlobalRegistry(registry: Partial<Registry>): Promise<unknown> {
+    return this._post(`/api/registries`, registry);
   }
 
-  getOrgPermissions(owner: string): Promise<OrgPermissions> {
-    return this._get(`/api/orgs/${owner}/permissions`) as Promise<OrgPermissions>;
+  async updateGlobalRegistry(registry: Partial<Registry>): Promise<unknown> {
+    return this._patch(`/api/registries/${registry.address}`, registry);
   }
 
-  getOrgSecretList(owner: string): Promise<Secret[]> {
-    return this._get(`/api/orgs/${owner}/secrets`) as Promise<Secret[]>;
+  async deleteGlobalRegistry(registryAddress: string): Promise<unknown> {
+    return this._delete(`/api/registries/${registryAddress}`);
   }
 
-  createOrgSecret(owner: string, secret: Partial<Secret>): Promise<unknown> {
-    return this._post(`/api/orgs/${owner}/secrets`, secret);
+  async getCronList(repoId: number, opts?: PaginationOptions): Promise<Cron[] | null> {
+    const query = encodeQueryString(opts);
+    return this._get(`/api/repos/${repoId}/cron?${query}`) as Promise<Cron[] | null>;
   }
 
-  updateOrgSecret(owner: string, secret: Partial<Secret>): Promise<unknown> {
-    return this._patch(`/api/orgs/${owner}/secrets/${secret.name}`, secret);
+  async createCron(repoId: number, cron: Partial<Cron>): Promise<unknown> {
+    return this._post(`/api/repos/${repoId}/cron`, cron);
   }
 
-  deleteOrgSecret(owner: string, secretName: string): Promise<unknown> {
-    return this._delete(`/api/orgs/${owner}/secrets/${secretName}`);
+  async updateCron(repoId: number, cron: Partial<Cron>): Promise<unknown> {
+    return this._patch(`/api/repos/${repoId}/cron/${cron.id}`, cron);
   }
 
-  getGlobalSecretList(): Promise<Secret[]> {
-    return this._get(`/api/secrets`) as Promise<Secret[]>;
+  async deleteCron(repoId: number, cronId: number): Promise<unknown> {
+    return this._delete(`/api/repos/${repoId}/cron/${cronId}`);
   }
 
-  createGlobalSecret(secret: Partial<Secret>): Promise<unknown> {
+  async runCron(repoId: number, cronId: number): Promise<Pipeline> {
+    return this._post(`/api/repos/${repoId}/cron/${cronId}`) as Promise<Pipeline>;
+  }
+
+  async getOrg(orgId: number): Promise<Org> {
+    return this._get(`/api/orgs/${orgId}`) as Promise<Org>;
+  }
+
+  async lookupOrg(name: string): Promise<Org> {
+    return this._get(`/api/orgs/lookup/${name}`) as Promise<Org>;
+  }
+
+  async getOrgPermissions(orgId: number): Promise<OrgPermissions> {
+    return this._get(`/api/orgs/${orgId}/permissions`) as Promise<OrgPermissions>;
+  }
+
+  async getOrgSecretList(orgId: number, opts?: PaginationOptions): Promise<Secret[] | null> {
+    const query = encodeQueryString(opts);
+    return this._get(`/api/orgs/${orgId}/secrets?${query}`) as Promise<Secret[] | null>;
+  }
+
+  async createOrgSecret(orgId: number, secret: Partial<Secret>): Promise<unknown> {
+    return this._post(`/api/orgs/${orgId}/secrets`, secret);
+  }
+
+  async updateOrgSecret(orgId: number, secret: Partial<Secret>): Promise<unknown> {
+    const secretName = encodeURIComponent(secret.name ?? '');
+    return this._patch(`/api/orgs/${orgId}/secrets/${secretName}`, secret);
+  }
+
+  async deleteOrgSecret(orgId: number, secretName: string): Promise<unknown> {
+    const name = encodeURIComponent(secretName);
+    return this._delete(`/api/orgs/${orgId}/secrets/${name}`);
+  }
+
+  async getGlobalSecretList(opts?: PaginationOptions): Promise<Secret[] | null> {
+    const query = encodeQueryString(opts);
+    return this._get(`/api/secrets?${query}`) as Promise<Secret[] | null>;
+  }
+
+  async createGlobalSecret(secret: Partial<Secret>): Promise<unknown> {
     return this._post(`/api/secrets`, secret);
   }
 
-  updateGlobalSecret(secret: Partial<Secret>): Promise<unknown> {
-    return this._patch(`/api/secrets/${secret.name}`, secret);
+  async updateGlobalSecret(secret: Partial<Secret>): Promise<unknown> {
+    const secretName = encodeURIComponent(secret.name ?? '');
+    return this._patch(`/api/secrets/${secretName}`, secret);
   }
 
-  deleteGlobalSecret(secretName: string): Promise<unknown> {
-    return this._delete(`/api/secrets/${secretName}`);
+  async deleteGlobalSecret(secretName: string): Promise<unknown> {
+    const name = encodeURIComponent(secretName);
+    return this._delete(`/api/secrets/${name}`);
   }
 
-  getSelf(): Promise<unknown> {
+  async getSelf(): Promise<unknown> {
     return this._get('/api/user');
   }
 
-  getToken(): Promise<string> {
+  async getToken(): Promise<string> {
     return this._post('/api/user/token') as Promise<string>;
   }
 
-  // eslint-disable-next-line promise/prefer-await-to-callbacks
-  on(callback: (data: { pipeline?: Pipeline; repo?: Repo; step?: PipelineStep }) => void): EventSource {
-    return this._subscribe('/stream/events', callback, {
+  async getAgents(opts?: PaginationOptions): Promise<Agent[] | null> {
+    const query = encodeQueryString(opts);
+    return this._get(`/api/agents?${query}`) as Promise<Agent[] | null>;
+  }
+
+  async getAgent(agentId: Agent['id']): Promise<Agent> {
+    return this._get(`/api/agents/${agentId}`) as Promise<Agent>;
+  }
+
+  async createAgent(agent: Partial<Agent>): Promise<Agent> {
+    return this._post('/api/agents', agent) as Promise<Agent>;
+  }
+
+  async updateAgent(agent: Partial<Agent>): Promise<unknown> {
+    return this._patch(`/api/agents/${agent.id}`, agent);
+  }
+
+  async deleteAgent(agent: Agent): Promise<unknown> {
+    return this._delete(`/api/agents/${agent.id}`);
+  }
+
+  async getForges(opts?: PaginationOptions): Promise<Forge[] | null> {
+    const query = encodeQueryString(opts);
+    return this._get(`/api/forges?${query}`) as Promise<Forge[] | null>;
+  }
+
+  async getForge(forgeId: Forge['id']): Promise<Forge> {
+    return this._get(`/api/forges/${forgeId}`) as Promise<Forge>;
+  }
+
+  async createForge(forge: Partial<Forge>): Promise<Forge> {
+    return this._post('/api/forges', forge) as Promise<Forge>;
+  }
+
+  async updateForge(forge: Partial<Forge>): Promise<unknown> {
+    return this._patch(`/api/forges/${forge.id}`, forge);
+  }
+
+  async deleteForge(forge: Forge): Promise<unknown> {
+    return this._delete(`/api/forges/${forge.id}`);
+  }
+
+  async getQueueInfo(): Promise<QueueInfo> {
+    return this._get('/api/queue/info') as Promise<QueueInfo>;
+  }
+
+  async pauseQueue(): Promise<unknown> {
+    return this._post('/api/queue/pause');
+  }
+
+  async resumeQueue(): Promise<unknown> {
+    return this._post('/api/queue/resume');
+  }
+
+  async getUsers(opts?: PaginationOptions): Promise<User[] | null> {
+    const query = encodeQueryString(opts);
+    return this._get(`/api/users?${query}`) as Promise<User[] | null>;
+  }
+
+  async getUser(username: string): Promise<User> {
+    return this._get(`/api/users/${username}`) as Promise<User>;
+  }
+
+  async createUser(user: Partial<User>): Promise<User> {
+    return this._post('/api/users', user) as Promise<User>;
+  }
+
+  async updateUser(user: Partial<User>): Promise<unknown> {
+    return this._patch(`/api/users/${user.login}`, user);
+  }
+
+  async deleteUser(user: User): Promise<unknown> {
+    return this._delete(`/api/users/${user.login}`);
+  }
+
+  async resetToken(): Promise<string> {
+    return this._delete('/api/user/token') as Promise<string>;
+  }
+
+  async getOrgs(opts?: PaginationOptions): Promise<Org[] | null> {
+    const query = encodeQueryString(opts);
+    return this._get(`/api/orgs?${query}`) as Promise<Org[] | null>;
+  }
+
+  async deleteOrg(org: Org): Promise<unknown> {
+    return this._delete(`/api/orgs/${org.id}`);
+  }
+
+  async getAllRepos(opts?: PaginationOptions): Promise<Repo[] | null> {
+    const query = encodeQueryString(opts);
+    return this._get(`/api/repos?${query}`) as Promise<Repo[] | null>;
+  }
+
+  async repairAllRepos(): Promise<unknown> {
+    return this._post(`/api/repos/repair`);
+  }
+
+  // TODO enable again with eslint-plugin-promise eslint-disable-next-line promise/prefer-await-to-callbacks
+  on(callback: (data: { pipeline?: Pipeline; repo?: Repo }) => void): EventSource {
+    return this._subscribe('/api/stream/events', callback, {
       reconnect: true,
     });
   }
 
   streamLogs(
-    owner: string,
-    repo: string,
+    repoId: number,
     pipeline: number,
     step: number,
-    // eslint-disable-next-line promise/prefer-await-to-callbacks
+    // TODO enable again with eslint-plugin-promise eslint-disable-next-line promise/prefer-await-to-callbacks
     callback: (data: PipelineLog) => void,
   ): EventSource {
-    return this._subscribe(`/stream/logs/${owner}/${repo}/${pipeline}/${step}`, callback, {
+    return this._subscribe(`/api/stream/logs/${repoId}/${pipeline}/${step}`, callback, {
       reconnect: true,
     });
   }

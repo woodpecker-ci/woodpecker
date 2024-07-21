@@ -1,22 +1,37 @@
+// Copyright 2023 Woodpecker Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package cron
 
 import (
+	"context"
 	"html/template"
 	"os"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
-	"github.com/woodpecker-ci/woodpecker/cli/common"
-	"github.com/woodpecker-ci/woodpecker/cli/internal"
-	"github.com/woodpecker-ci/woodpecker/woodpecker-go/woodpecker"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker"
 )
 
 var cronUpdateCmd = &cli.Command{
 	Name:      "update",
 	Usage:     "update a cron job",
-	ArgsUsage: "[repo/name]",
+	ArgsUsage: "[repo-id|repo-full-name]",
 	Action:    cronUpdate,
-	Flags: append(common.GlobalFlags,
+	Flags: []cli.Flag{
 		common.RepoFlag,
 		&cli.StringFlag{
 			Name:     "id",
@@ -36,36 +51,36 @@ var cronUpdateCmd = &cli.Command{
 			Usage: "cron schedule",
 		},
 		common.FormatFlag(tmplCronList, true),
-	),
+	},
 }
 
-func cronUpdate(c *cli.Context) error {
+func cronUpdate(ctx context.Context, c *cli.Command) error {
 	var (
-		reponame = c.String("repository")
-		jobID    = c.Int64("id")
-		jobName  = c.String("name")
-		branch   = c.String("branch")
-		schedule = c.String("schedule")
-		format   = c.String("format") + "\n"
+		repoIDOrFullName = c.String("repository")
+		cronID           = c.Int("id")
+		jobName          = c.String("name")
+		branch           = c.String("branch")
+		schedule         = c.String("schedule")
+		format           = c.String("format") + "\n"
 	)
-	if reponame == "" {
-		reponame = c.Args().First()
+	if repoIDOrFullName == "" {
+		repoIDOrFullName = c.Args().First()
 	}
-	owner, name, err := internal.ParseRepo(reponame)
+	client, err := internal.NewClient(ctx, c)
 	if err != nil {
 		return err
 	}
-	client, err := internal.NewClient(c)
+	repoID, err := internal.ParseRepo(client, repoIDOrFullName)
 	if err != nil {
 		return err
 	}
 	cron := &woodpecker.Cron{
-		ID:       jobID,
+		ID:       cronID,
 		Name:     jobName,
 		Branch:   branch,
 		Schedule: schedule,
 	}
-	cron, err = client.CronUpdate(owner, name, cron)
+	cron, err = client.CronUpdate(repoID, cron)
 	if err != nil {
 		return err
 	}

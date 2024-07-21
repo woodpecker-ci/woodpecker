@@ -1,27 +1,13 @@
 <template>
-  <Panel>
-    <div class="flex flex-row border-b mb-4 pb-4 items-center dark:border-gray-600">
-      <div class="ml-2">
-        <h1 class="text-xl text-color">{{ $t('repo.settings.secrets.secrets') }}</h1>
-        <p class="text-sm text-color-alt">
-          {{ $t('repo.settings.secrets.desc') }}
-          <DocsLink :topic="$t('repo.settings.secrets.secrets')" url="docs/usage/secrets" />
-        </p>
-      </div>
-      <Button
-        v-if="selectedSecret"
-        class="ml-auto"
-        :text="$t('repo.settings.secrets.show')"
-        start-icon="back"
-        @click="selectedSecret = undefined"
-      />
-      <Button v-else class="ml-auto" :text="$t('repo.settings.secrets.add')" start-icon="plus" @click="showAddSecret" />
-    </div>
+  <Settings :title="$t('secrets.secrets')" :desc="$t('secrets.desc')" docs-url="docs/usage/secrets">
+    <template #titleActions>
+      <Button v-if="selectedSecret" :text="$t('secrets.show')" start-icon="back" @click="selectedSecret = undefined" />
+      <Button v-else :text="$t('secrets.add')" start-icon="plus" @click="showAddSecret" />
+    </template>
 
     <SecretList
       v-if="!selectedSecret"
-      v-model="secrets"
-      i18n-prefix="repo.settings.secrets."
+      :model-value="secrets"
       :is-deleting="isDeleting"
       @edit="editSecret"
       @delete="deleteSecret"
@@ -30,118 +16,127 @@
     <SecretEdit
       v-else
       v-model="selectedSecret"
-      i18n-prefix="repo.settings.secrets."
       :is-saving="isSaving"
       @save="createSecret"
+      @cancel="selectedSecret = undefined"
     />
-  </Panel>
+  </Settings>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import { cloneDeep } from 'lodash';
-import { computed, defineComponent, inject, onMounted, Ref, ref } from 'vue';
+import { computed, inject, ref, type Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import Button from '~/components/atomic/Button.vue';
-import DocsLink from '~/components/atomic/DocsLink.vue';
-import Panel from '~/components/layout/Panel.vue';
+import Settings from '~/components/layout/Settings.vue';
 import SecretEdit from '~/components/secrets/SecretEdit.vue';
 import SecretList from '~/components/secrets/SecretList.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useNotifications from '~/compositions/useNotifications';
-import { Repo, Secret, WebhookEvents } from '~/lib/api/types';
+import { usePagination } from '~/compositions/usePaginate';
+import { WebhookEvents, type Repo, type Secret } from '~/lib/api/types';
 
-const emptySecret = {
+const emptySecret: Partial<Secret> = {
   name: '',
   value: '',
-  image: [],
-  event: [WebhookEvents.Push],
+  images: [],
+  events: [WebhookEvents.Push],
 };
 
-export default defineComponent({
-  name: 'SecretsTab',
+const apiClient = useApiClient();
+const notifications = useNotifications();
+const i18n = useI18n();
 
-  components: {
-    Button,
-    Panel,
-    DocsLink,
-    SecretList,
-    SecretEdit,
-  },
+const repo = inject<Ref<Repo>>('repo');
+const selectedSecret = ref<Partial<Secret>>();
+const isEditingSecret = computed(() => !!selectedSecret.value?.id);
 
-  setup() {
-    const apiClient = useApiClient();
-    const notifications = useNotifications();
-    const i18n = useI18n();
+async function loadSecrets(page: number, level: 'repo' | 'org' | 'global'): Promise<Secret[] | null> {
+  if (!repo?.value) {
+    throw new Error("Unexpected: Can't load repo");
+  }
 
-    const repo = inject<Ref<Repo>>('repo');
-    const secrets = ref<Secret[]>([]);
-    const selectedSecret = ref<Partial<Secret>>();
-    const isEditingSecret = computed(() => !!selectedSecret.value?.id);
+  switch (level) {
+    case 'repo':
+      return apiClient.getSecretList(repo.value.id, { page });
+    case 'org':
+      return apiClient.getOrgSecretList(repo.value.org_id, { page });
+    case 'global':
+      return apiClient.getGlobalSecretList({ page });
+    default:
+      throw new Error(`Unexpected level: ${level}`);
+  }
+}
 
-    async function loadSecrets() {
-      if (!repo?.value) {
-        throw new Error("Unexpected: Can't load repo");
-      }
-
-      secrets.value = await apiClient.getSecretList(repo.value.owner, repo.value.name);
-    }
-
-    const { doSubmit: createSecret, isLoading: isSaving } = useAsyncAction(async () => {
-      if (!repo?.value) {
-        throw new Error("Unexpected: Can't load repo");
-      }
-
-      if (!selectedSecret.value) {
-        throw new Error("Unexpected: Can't get secret");
-      }
-
-      if (isEditingSecret.value) {
-        await apiClient.updateSecret(repo.value.owner, repo.value.name, selectedSecret.value);
-      } else {
-        await apiClient.createSecret(repo.value.owner, repo.value.name, selectedSecret.value);
-      }
-      notifications.notify({
-        title: i18n.t(isEditingSecret.value ? 'repo.settings.secrets.saved' : 'repo.settings.secrets.created'),
-        type: 'success',
-      });
-      selectedSecret.value = undefined;
-      await loadSecrets();
-    });
-
-    const { doSubmit: deleteSecret, isLoading: isDeleting } = useAsyncAction(async (_secret: Secret) => {
-      if (!repo?.value) {
-        throw new Error("Unexpected: Can't load repo");
-      }
-
-      await apiClient.deleteSecret(repo.value.owner, repo.value.name, _secret.name);
-      notifications.notify({ title: i18n.t('repo.settings.secrets.deleted'), type: 'success' });
-      await loadSecrets();
-    });
-
-    function editSecret(secret: Secret) {
-      selectedSecret.value = cloneDeep(secret);
-    }
-
-    function showAddSecret() {
-      selectedSecret.value = cloneDeep(emptySecret);
-    }
-
-    onMounted(async () => {
-      await loadSecrets();
-    });
-
-    return {
-      selectedSecret,
-      secrets,
-      isDeleting,
-      isSaving,
-      showAddSecret,
-      createSecret,
-      editSecret,
-      deleteSecret,
-    };
-  },
+const { resetPage, data: _secrets } = usePagination(loadSecrets, () => !selectedSecret.value, {
+  each: ['repo', 'org', 'global'],
 });
+const secrets = computed(() => {
+  const secretsList: Record<string, Secret & { edit?: boolean; level: 'repo' | 'org' | 'global' }> = {};
+
+  for (const level of ['repo', 'org', 'global']) {
+    for (const secret of _secrets.value) {
+      if (
+        ((level === 'repo' && secret.repo_id !== 0 && secret.org_id === 0) ||
+          (level === 'org' && secret.repo_id === 0 && secret.org_id !== 0) ||
+          (level === 'global' && secret.repo_id === 0 && secret.org_id === 0)) &&
+        !secretsList[secret.name]
+      ) {
+        secretsList[secret.name] = { ...secret, edit: secret.repo_id !== 0, level };
+      }
+    }
+  }
+
+  const levelsOrder = {
+    global: 0,
+    org: 1,
+    repo: 2,
+  };
+
+  return Object.values(secretsList)
+    .toSorted((a, b) => a.name.localeCompare(b.name))
+    .toSorted((a, b) => levelsOrder[b.level] - levelsOrder[a.level]);
+});
+
+const { doSubmit: createSecret, isLoading: isSaving } = useAsyncAction(async () => {
+  if (!repo?.value) {
+    throw new Error("Unexpected: Can't load repo");
+  }
+
+  if (!selectedSecret.value) {
+    throw new Error("Unexpected: Can't get secret");
+  }
+
+  if (isEditingSecret.value) {
+    await apiClient.updateSecret(repo.value.id, selectedSecret.value);
+  } else {
+    await apiClient.createSecret(repo.value.id, selectedSecret.value);
+  }
+  notifications.notify({
+    title: isEditingSecret.value ? i18n.t('secrets.saved') : i18n.t('secrets.created'),
+    type: 'success',
+  });
+  selectedSecret.value = undefined;
+  await resetPage();
+});
+
+const { doSubmit: deleteSecret, isLoading: isDeleting } = useAsyncAction(async (_secret: Secret) => {
+  if (!repo?.value) {
+    throw new Error("Unexpected: Can't load repo");
+  }
+
+  await apiClient.deleteSecret(repo.value.id, _secret.name);
+  notifications.notify({ title: i18n.t('secrets.deleted'), type: 'success' });
+  await resetPage();
+});
+
+function editSecret(secret: Secret) {
+  selectedSecret.value = cloneDeep(secret);
+}
+
+function showAddSecret() {
+  selectedSecret.value = cloneDeep(emptySecret);
+}
 </script>

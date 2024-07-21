@@ -13,30 +13,54 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-//
-// This file has been modified by Informatyka Boguslawski sp. z o.o. sp.k.
 
 package api
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
-
-	"github.com/rs/zerolog/log"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/rs/zerolog/log"
 
-	"github.com/woodpecker-ci/woodpecker/server"
-	"github.com/woodpecker-ci/woodpecker/server/badges"
-	"github.com/woodpecker-ci/woodpecker/server/ccmenu"
-	"github.com/woodpecker-ci/woodpecker/server/store"
+	"go.woodpecker-ci.org/woodpecker/v2/server"
+	"go.woodpecker-ci.org/woodpecker/v2/server/badges"
+	"go.woodpecker-ci.org/woodpecker/v2/server/ccmenu"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store/types"
 )
 
+// GetBadge
+//
+//	@Summary	Get status of pipeline as SVG badge
+//	@Router		/badges/{repo_id}/status.svg [get]
+//	@Produce	image/svg+xml
+//	@Success	200
+//	@Tags		Badges
+//	@Param		repo_id	path	int	true	"the repository id"
 func GetBadge(c *gin.Context) {
 	_store := store.FromContext(c)
-	repo, err := _store.GetRepoName(c.Param("owner") + "/" + c.Param("name"))
+
+	var repo *model.Repo
+	var err error
+
+	if c.Param("repo_name") != "" {
+		repo, err = _store.GetRepoName(c.Param("repo_id_or_owner") + "/" + c.Param("repo_name"))
+	} else {
+		var repoID int64
+		repoID, err = strconv.ParseInt(c.Param("repo_id_or_owner"), 10, 64)
+		if err != nil {
+			c.AbortWithStatus(http.StatusBadRequest)
+			return
+		}
+		repo, err = _store.GetRepo(repoID)
+	}
+
 	if err != nil {
-		c.AbortWithStatus(404)
+		handleDBError(c, err)
 		return
 	}
 
@@ -50,7 +74,9 @@ func GetBadge(c *gin.Context) {
 
 	pipeline, err := _store.GetPipelineLast(repo, branch)
 	if err != nil {
-		log.Warn().Err(err).Msg("")
+		if !errors.Is(err, types.RecordNotExist) {
+			log.Warn().Err(err).Msg("could not get last pipeline for badge")
+		}
 		pipeline = nil
 	}
 
@@ -59,21 +85,51 @@ func GetBadge(c *gin.Context) {
 	c.String(http.StatusOK, badges.Generate(pipeline))
 }
 
+// GetCC
+//
+//	@Summary		Provide pipeline status information to the CCMenu tool
+//	@Description	CCMenu displays the pipeline status of projects on a CI server as an item in the Mac's menu bar.
+//	@Description	More details on how to install, you can find at http://ccmenu.org/
+//	@Description	The response format adheres to CCTray v1 Specification, https://cctray.org/v1/
+//	@Router			/badges/{repo_id}/cc.xml [get]
+//	@Produce		xml
+//	@Success		200
+//	@Tags			Badges
+//	@Param			repo_id	path	int	true	"the repository id"
 func GetCC(c *gin.Context) {
 	_store := store.FromContext(c)
-	repo, err := _store.GetRepoName(c.Param("owner") + "/" + c.Param("name"))
+	var repo *model.Repo
+	var err error
+
+	if c.Param("repo_name") != "" {
+		repo, err = _store.GetRepoName(c.Param("repo_id_or_owner") + "/" + c.Param("repo_name"))
+	} else {
+		var repoID int64
+		repoID, err = strconv.ParseInt(c.Param("repo_id_or_owner"), 10, 64)
+		if err != nil {
+			c.AbortWithStatus(http.StatusBadRequest)
+			return
+		}
+		repo, err = _store.GetRepo(repoID)
+	}
+
 	if err != nil {
-		c.AbortWithStatus(404)
+		handleDBError(c, err)
 		return
 	}
 
-	pipelines, err := _store.GetPipelineList(repo, 1)
-	if err != nil || len(pipelines) == 0 {
-		c.AbortWithStatus(404)
+	pipelines, err := _store.GetPipelineList(repo, &model.ListOptions{Page: 1, PerPage: 1}, nil)
+	if err != nil && !errors.Is(err, types.RecordNotExist) {
+		log.Warn().Err(err).Msg("could not get pipeline list")
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+	if len(pipelines) == 0 {
+		c.AbortWithStatus(http.StatusNotFound)
 		return
 	}
 
-	url := fmt.Sprintf("%s/%s/%d", server.Config.Server.Host, repo.FullName, pipelines[0].Number)
+	url := fmt.Sprintf("%s/repos/%d/pipeline/%d", server.Config.Server.Host, repo.ID, pipelines[0].Number)
 	cc := ccmenu.New(repo, pipelines[0], url)
-	c.XML(200, cc)
+	c.XML(http.StatusOK, cc)
 }

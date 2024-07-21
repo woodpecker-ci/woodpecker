@@ -15,73 +15,55 @@
 package pipeline
 
 import (
-	"os"
+	"context"
 	"strconv"
-	"text/template"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
-	"github.com/woodpecker-ci/woodpecker/cli/common"
-	"github.com/woodpecker-ci/woodpecker/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker"
 )
 
 var pipelineInfoCmd = &cli.Command{
 	Name:      "info",
 	Usage:     "show pipeline details",
-	ArgsUsage: "<repo/name> [pipeline]",
+	ArgsUsage: "<repo-id|repo-full-name> [pipeline]",
 	Action:    pipelineInfo,
-	Flags: append(common.GlobalFlags,
-		common.FormatFlag(tmplPipelineInfo),
-	),
+	Flags:     common.OutputFlags("table"),
 }
 
-func pipelineInfo(c *cli.Context) error {
-	repo := c.Args().First()
-	owner, name, err := internal.ParseRepo(repo)
+func pipelineInfo(ctx context.Context, c *cli.Command) error {
+	repoIDOrFullName := c.Args().First()
+	client, err := internal.NewClient(ctx, c)
+	if err != nil {
+		return err
+	}
+	repoID, err := internal.ParseRepo(client, repoIDOrFullName)
 	if err != nil {
 		return err
 	}
 	pipelineArg := c.Args().Get(1)
 
-	client, err := internal.NewClient(c)
-	if err != nil {
-		return err
-	}
-
-	var number int
+	var number int64
 	if pipelineArg == "last" || len(pipelineArg) == 0 {
 		// Fetch the pipeline number from the last pipeline
-		pipeline, err := client.PipelineLast(owner, name, "")
+		pipeline, err := client.PipelineLast(repoID, "")
 		if err != nil {
 			return err
 		}
 		number = pipeline.Number
 	} else {
-		number, err = strconv.Atoi(pipelineArg)
+		number, err = strconv.ParseInt(pipelineArg, 10, 64)
 		if err != nil {
 			return err
 		}
 	}
 
-	pipeline, err := client.Pipeline(owner, name, number)
+	pipeline, err := client.Pipeline(repoID, number)
 	if err != nil {
 		return err
 	}
 
-	tmpl, err := template.New("_").Parse(c.String("format"))
-	if err != nil {
-		return err
-	}
-	return tmpl.Execute(os.Stdout, pipeline)
+	return pipelineOutput(c, []woodpecker.Pipeline{*pipeline})
 }
-
-// template for pipeline information
-var tmplPipelineInfo = `Number: {{ .Number }}
-Status: {{ .Status }}
-Event: {{ .Event }}
-Commit: {{ .Commit }}
-Branch: {{ .Branch }}
-Ref: {{ .Ref }}
-Message: {{ .Message }}
-Author: {{ .Author }}
-`

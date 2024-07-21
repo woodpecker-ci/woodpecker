@@ -16,66 +16,34 @@ package exec
 
 import (
 	"fmt"
+	"io"
 	"os"
-	"strings"
 	"time"
 )
 
-// Identifies the type of line in the logs.
-const (
-	LineStdout int = iota
-	LineStderr
-	LineExitCode
-	LineMetadata
-	LineProgress
-)
-
-// Line is a line of console output.
-type Line struct {
-	Step string `json:"step,omitempty"`
-	Time int64  `json:"time,omitempty"`
-	Type int    `json:"type,omitempty"`
-	Pos  int    `json:"pos,omitempty"`
-	Out  string `json:"out,omitempty"`
-}
-
 // LineWriter sends logs to the client.
 type LineWriter struct {
-	name  string
-	num   int
-	now   time.Time
-	rep   *strings.Replacer
-	lines []*Line
+	stepName  string
+	stepUUID  string
+	num       int
+	startTime time.Time
 }
 
 // NewLineWriter returns a new line reader.
-func NewLineWriter(name string) *LineWriter {
-	w := new(LineWriter)
-	w.name = name
-	w.num = 0
-	w.now = time.Now().UTC()
-
-	return w
+func NewLineWriter(stepName, stepUUID string) io.WriteCloser {
+	return &LineWriter{
+		stepName:  stepName,
+		stepUUID:  stepUUID,
+		startTime: time.Now().UTC(),
+	}
 }
 
 func (w *LineWriter) Write(p []byte) (n int, err error) {
-	out := string(p)
-	if w.rep != nil {
-		out = w.rep.Replace(out)
-	}
-
-	line := &Line{
-		Out:  out,
-		Step: w.name,
-		Pos:  w.num,
-		Time: int64(time.Since(w.now).Seconds()),
-		Type: LineStdout,
-	}
-
-	fmt.Fprintf(os.Stderr, "[%s:L%d:%ds] %s", w.name, w.num, int64(time.Since(w.now).Seconds()), out)
-
+	fmt.Fprintf(os.Stderr, "[%s:L%d:%ds] %s", w.stepName, w.num, int64(time.Since(w.startTime).Seconds()), p)
 	w.num++
-
-	w.lines = append(w.lines, line)
 	return len(p), nil
+}
+
+func (w *LineWriter) Close() error {
+	return nil
 }

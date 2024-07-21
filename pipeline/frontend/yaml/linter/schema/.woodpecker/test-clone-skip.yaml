@@ -1,0 +1,7 @@
+steps:
+  test:
+    image: alpine
+    commands:
+      - echo "test"
+
+skip_clone: true

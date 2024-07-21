@@ -16,19 +16,23 @@ package pipeline
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"time"
+	"regexp"
 
 	"github.com/rs/zerolog/log"
 
-	"github.com/woodpecker-ci/woodpecker/server"
-	"github.com/woodpecker-ci/woodpecker/server/forge"
-	"github.com/woodpecker-ci/woodpecker/server/forge/types"
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/store"
+	pipeline_errors "go.woodpecker-ci.org/woodpecker/v2/pipeline/errors"
+	"go.woodpecker-ci.org/woodpecker/v2/server"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
+	forge_types "go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 )
 
-// Create a new pipeline and start it
+var skipPipelineRegex = regexp.MustCompile(`\[(?i:ci *skip|skip *ci)\]`)
+
+// Create a new pipeline and start it.
 func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline *model.Pipeline) (*model.Pipeline, error) {
 	repoUser, err := _store.GetUser(repo.UserID)
 	if err != nil {
@@ -37,124 +41,138 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 		return nil, fmt.Errorf(msg)
 	}
 
-	// if the forge has a refresh token, the current access token
+	if pipeline.Event == model.EventPush || pipeline.Event == model.EventPull || pipeline.Event == model.EventPullClosed {
+		skipMatch := skipPipelineRegex.FindString(pipeline.Message)
+		if len(skipMatch) > 0 {
+			ref := pipeline.Commit
+			if len(ref) == 0 {
+				ref = pipeline.Ref
+			}
+			log.Debug().Str("repo", repo.FullName).Msgf("ignoring pipeline as skip-ci was found in the commit (%s) message '%s'", ref, pipeline.Message)
+			return nil, ErrFiltered
+		}
+	}
+
+	_forge, err := server.Config.Services.Manager.ForgeFromRepo(repo)
+	if err != nil {
+		msg := fmt.Sprintf("failure to load forge for repo '%s'", repo.FullName)
+		log.Error().Err(err).Str("repo", repo.FullName).Msg(msg)
+		return nil, fmt.Errorf(msg)
+	}
+
+	// If the forge has a refresh token, the current access token
 	// may be stale. Therefore, we should refresh prior to dispatching
 	// the pipeline.
-	if refresher, ok := server.Config.Services.Forge.(forge.Refresher); ok {
-		refreshed, err := refresher.Refresh(ctx, repoUser)
-		if err != nil {
-			log.Error().Err(err).Msgf("failed to refresh oauth2 token for repoUser: %s", repoUser.Login)
-		} else if refreshed {
-			if err := _store.UpdateUser(repoUser); err != nil {
-				log.Error().Err(err).Msgf("error while updating repoUser: %s", repoUser.Login)
-				// move forward
-			}
-		}
-	}
-
-	var (
-		forgeYamlConfigs []*types.FileMeta
-		configFetchErr   error
-		filtered         bool
-		parseErr         error
-	)
-
-	// fetch the pipeline file from the forge
-	configFetcher := forge.NewConfigFetcher(server.Config.Services.Forge, server.Config.Services.ConfigService, repoUser, repo, pipeline)
-	forgeYamlConfigs, configFetchErr = configFetcher.Fetch(ctx)
-	if configFetchErr == nil {
-		filtered, parseErr = checkIfFiltered(pipeline, forgeYamlConfigs)
-		if parseErr == nil {
-			if filtered {
-				err := ErrFiltered{Msg: "branch does not match restrictions defined in yaml"}
-				log.Debug().Str("repo", repo.FullName).Msgf("%v", err)
-				return nil, err
-			}
-
-			if zeroSteps(pipeline, forgeYamlConfigs) {
-				err := ErrFiltered{Msg: "step conditions yield zero runnable steps"}
-				log.Debug().Str("repo", repo.FullName).Msgf("%v", err)
-				return nil, err
-			}
-		}
-	}
+	forge.Refresh(ctx, _forge, _store, repoUser)
 
 	// update some pipeline fields
 	pipeline.RepoID = repo.ID
-	pipeline.Verified = true
-	pipeline.Status = model.StatusPending
-
-	if configFetchErr != nil {
-		log.Debug().Str("repo", repo.FullName).Err(configFetchErr).Msgf("cannot find config '%s' in '%s' with user: '%s'", repo.Config, pipeline.Ref, repoUser.Login)
-		pipeline.Started = time.Now().Unix()
-		pipeline.Finished = pipeline.Started
-		pipeline.Status = model.StatusError
-		pipeline.Error = fmt.Sprintf("pipeline definition not found in %s", repo.FullName)
-	} else if parseErr != nil {
-		log.Debug().Str("repo", repo.FullName).Err(parseErr).Msg("failed to parse yaml")
-		pipeline.Started = time.Now().Unix()
-		pipeline.Finished = pipeline.Started
-		pipeline.Status = model.StatusError
-		pipeline.Error = fmt.Sprintf("failed to parse pipeline: %s", parseErr.Error())
-	} else if repo.IsGated {
-		// TODO(336) extend gated feature with an allow/block List
-		pipeline.Status = model.StatusBlocked
-	}
-
-	err = _store.CreatePipeline(pipeline, pipeline.Steps...)
+	pipeline.Status = model.StatusCreated
+	setGatedState(repo, pipeline)
+	err = _store.CreatePipeline(pipeline)
 	if err != nil {
-		msg := fmt.Sprintf("failure to save pipeline for %s", repo.FullName)
-		log.Error().Err(err).Msg(msg)
-		return nil, fmt.Errorf(msg)
+		msg := fmt.Errorf("failed to save pipeline for %s", repo.FullName)
+		log.Error().Str("repo", repo.FullName).Err(err).Msg(msg.Error())
+		return nil, msg
 	}
+
+	// fetch the pipeline file from the forge
+	configService := server.Config.Services.Manager.ConfigServiceFromRepo(repo)
+	forgeYamlConfigs, configFetchErr := configService.Fetch(ctx, _forge, repoUser, repo, pipeline, nil, false)
+	if errors.Is(configFetchErr, &forge_types.ErrConfigNotFound{}) {
+		log.Debug().Str("repo", repo.FullName).Err(configFetchErr).Msgf("cannot find config '%s' in '%s' with user: '%s'", repo.Config, pipeline.Ref, repoUser.Login)
+		if err := _store.DeletePipeline(pipeline); err != nil {
+			log.Error().Str("repo", repo.FullName).Err(err).Msg("failed to delete pipeline without config")
+		}
+
+		return nil, ErrFiltered
+	} else if configFetchErr != nil {
+		log.Debug().Str("repo", repo.FullName).Err(configFetchErr).Msgf("error while fetching config '%s' in '%s' with user: '%s'", repo.Config, pipeline.Ref, repoUser.Login)
+		return nil, updatePipelineWithErr(ctx, _forge, _store, pipeline, repo, repoUser, fmt.Errorf("pipeline definition not found in %s", repo.FullName))
+	}
+
+	pipelineItems, parseErr := parsePipeline(_forge, _store, pipeline, repoUser, repo, forgeYamlConfigs, nil)
+	if pipeline_errors.HasBlockingErrors(parseErr) {
+		log.Debug().Str("repo", repo.FullName).Err(parseErr).Msg("failed to parse yaml")
+		return pipeline, updatePipelineWithErr(ctx, _forge, _store, pipeline, repo, repoUser, parseErr)
+	} else if parseErr != nil {
+		pipeline.Errors = pipeline_errors.GetPipelineErrors(parseErr)
+	}
+
+	if len(pipelineItems) == 0 {
+		log.Debug().Str("repo", repo.FullName).Msg(ErrFiltered.Error())
+		if err := _store.DeletePipeline(pipeline); err != nil {
+			log.Error().Str("repo", repo.FullName).Err(err).Msg("failed to delete empty pipeline")
+		}
+
+		return nil, ErrFiltered
+	}
+
+	pipeline = setPipelineStepsOnPipeline(pipeline, pipelineItems)
 
 	// persist the pipeline config for historical correctness, restarts, etc
+	var configs []*model.Config
 	for _, forgeYamlConfig := range forgeYamlConfigs {
-		_, err := findOrPersistPipelineConfig(_store, pipeline, forgeYamlConfig)
+		config, err := findOrPersistPipelineConfig(_store, pipeline, forgeYamlConfig)
 		if err != nil {
-			msg := fmt.Sprintf("failure to find or persist pipeline config for %s", repo.FullName)
+			msg := fmt.Sprintf("failed to find or persist pipeline config for %s", repo.FullName)
 			log.Error().Err(err).Msg(msg)
 			return nil, fmt.Errorf(msg)
 		}
+		configs = append(configs, config)
 	}
-
-	if pipeline.Status == model.StatusError {
-		if err := publishToTopic(ctx, pipeline, repo); err != nil {
-			log.Error().Err(err).Msg("publishToTopic")
-		}
-
-		if err := updatePipelineStatus(ctx, pipeline, repo, repoUser); err != nil {
-			log.Error().Err(err).Msg("updatePipelineStatus")
-		}
-
-		return pipeline, nil
-	}
-
-	pipeline, pipelineItems, err := createPipelineItems(ctx, _store, pipeline, repoUser, repo, forgeYamlConfigs, nil)
-	if err != nil {
-		msg := fmt.Sprintf("failure to createPipelineItems for %s", repo.FullName)
+	// link pipeline to persisted configs
+	if err := linkPipelineConfigs(_store, configs, pipeline.ID); err != nil {
+		msg := fmt.Sprintf("failed to find or persist pipeline config for %s", repo.FullName)
 		log.Error().Err(err).Msg(msg)
 		return nil, fmt.Errorf(msg)
 	}
 
+	if err := prepareStart(ctx, _forge, _store, pipeline, repoUser, repo); err != nil {
+		log.Error().Err(err).Str("repo", repo.FullName).Msgf("error preparing pipeline for %s#%d", repo.FullName, pipeline.Number)
+		return nil, err
+	}
+
 	if pipeline.Status == model.StatusBlocked {
-		if err := publishToTopic(ctx, pipeline, repo); err != nil {
-			log.Error().Err(err).Msg("publishToTopic")
-		}
-
-		if err := updatePipelineStatus(ctx, pipeline, repo, repoUser); err != nil {
-			log.Error().Err(err).Msg("updatePipelineStatus")
-		}
-
 		return pipeline, nil
 	}
 
-	pipeline, err = start(ctx, _store, pipeline, repoUser, repo, pipelineItems)
+	if err := updatePipelinePending(ctx, _forge, _store, pipeline, repo, repoUser); err != nil {
+		return nil, err
+	}
+
+	pipeline, err = start(ctx, _forge, _store, pipeline, repoUser, repo, pipelineItems)
 	if err != nil {
-		msg := fmt.Sprintf("failure to start pipeline for %s", repo.FullName)
+		msg := fmt.Sprintf("failed to start pipeline for %s", repo.FullName)
 		log.Error().Err(err).Msg(msg)
 		return nil, fmt.Errorf(msg)
 	}
 
 	return pipeline, nil
+}
+
+func updatePipelineWithErr(ctx context.Context, _forge forge.Forge, _store store.Store, pipeline *model.Pipeline, repo *model.Repo, repoUser *model.User, err error) error {
+	_pipeline, err := UpdateToStatusError(_store, *pipeline, err)
+	if err != nil {
+		return err
+	}
+	// update value in ref
+	*pipeline = *_pipeline
+
+	publishPipeline(ctx, _forge, pipeline, repo, repoUser)
+
+	return nil
+}
+
+func updatePipelinePending(ctx context.Context, _forge forge.Forge, _store store.Store, pipeline *model.Pipeline, repo *model.Repo, repoUser *model.User) error {
+	_pipeline, err := UpdateToStatusPending(_store, *pipeline, "")
+	if err != nil {
+		return err
+	}
+	// update value in ref
+	*pipeline = *_pipeline
+
+	publishPipeline(ctx, _forge, pipeline, repo, repoUser)
+
+	return nil
 }

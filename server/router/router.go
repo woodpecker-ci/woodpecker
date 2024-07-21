@@ -16,19 +16,24 @@ package router
 
 import (
 	"net/http"
+	"net/url"
 
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
+	swagger_files "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 
-	"github.com/woodpecker-ci/woodpecker/server/api"
-	"github.com/woodpecker-ci/woodpecker/server/api/metrics"
-	"github.com/woodpecker-ci/woodpecker/server/router/middleware/header"
-	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
-	"github.com/woodpecker-ci/woodpecker/server/router/middleware/token"
-	"github.com/woodpecker-ci/woodpecker/server/web"
+	"go.woodpecker-ci.org/woodpecker/v2/cmd/server/docs"
+	"go.woodpecker-ci.org/woodpecker/v2/server"
+	"go.woodpecker-ci.org/woodpecker/v2/server/api"
+	"go.woodpecker-ci.org/woodpecker/v2/server/api/metrics"
+	"go.woodpecker-ci.org/woodpecker/v2/server/router/middleware/header"
+	"go.woodpecker-ci.org/woodpecker/v2/server/router/middleware/session"
+	"go.woodpecker-ci.org/woodpecker/v2/server/router/middleware/token"
+	"go.woodpecker-ci.org/woodpecker/v2/server/web"
 )
 
-// Load loads the router
+// Load loads the router.
 func Load(noRouteHandler http.HandlerFunc, middleware ...gin.HandlerFunc) http.Handler {
 	e := gin.New()
 	e.UseRawPath = true
@@ -48,22 +53,38 @@ func Load(noRouteHandler http.HandlerFunc, middleware ...gin.HandlerFunc) http.H
 
 	e.NoRoute(gin.WrapF(noRouteHandler))
 
-	e.GET("/web-config.js", web.Config)
-
-	e.GET("/logout", api.GetLogout)
-	e.GET("/login", api.HandleLogin)
-	auth := e.Group("/authorize")
+	base := e.Group(server.Config.Server.RootPath)
 	{
-		auth.GET("", api.HandleAuth)
-		auth.POST("", api.HandleAuth)
-		auth.POST("/token", api.GetLoginToken)
+		base.GET("/web-config.js", web.Config)
+
+		base.GET("/logout", api.GetLogout)
+		auth := base.Group("/authorize")
+		{
+			auth.GET("", api.HandleAuth)
+			auth.POST("", api.HandleAuth)
+			auth.POST("/token", api.DeprecatedGetLoginToken)
+		}
+
+		base.GET("/metrics", metrics.PromHandler())
+		base.GET("/version", api.Version)
+		base.GET("/healthz", api.Health)
 	}
 
-	e.GET("/metrics", metrics.PromHandler())
-	e.GET("/version", api.Version)
-	e.GET("/healthz", api.Health)
-
-	apiRoutes(e)
+	apiRoutes(base)
+	if server.Config.WebUI.EnableSwagger {
+		setupSwaggerConfigAndRoutes(e)
+	}
 
 	return e
+}
+
+func setupSwaggerConfigAndRoutes(e *gin.Engine) {
+	docs.SwaggerInfo.Host = getHost(server.Config.Server.Host)
+	docs.SwaggerInfo.BasePath = server.Config.Server.RootPath + "/api"
+	e.GET(server.Config.Server.RootPath+"/swagger/*any", ginSwagger.WrapHandler(swagger_files.Handler))
+}
+
+func getHost(s string) string {
+	parse, _ := url.Parse(s)
+	return parse.Host
 }

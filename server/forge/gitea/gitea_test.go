@@ -25,12 +25,12 @@ import (
 	"github.com/franela/goblin"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/mock"
-	"github.com/woodpecker-ci/woodpecker/shared/utils"
 
-	"github.com/woodpecker-ci/woodpecker/server/forge/gitea/fixtures"
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/store"
-	mocks_store "github.com/woodpecker-ci/woodpecker/server/store/mocks"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge/gitea/fixtures"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store"
+	mocks_store "go.woodpecker-ci.org/woodpecker/v2/server/store/mocks"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/utils"
 )
 
 func Test_gitea(t *testing.T) {
@@ -57,12 +57,10 @@ func Test_gitea(t *testing.T) {
 					URL:        "http://localhost:8080",
 					SkipVerify: true,
 				})
-				g.Assert(forge.(*Gitea).URL).Equal("http://localhost:8080")
-				g.Assert(forge.(*Gitea).SkipVerify).Equal(true)
-			})
-			g.It("Should handle malformed url", func() {
-				_, err := New(Opts{URL: "%gh&%ij"})
-				g.Assert(err).IsNotNil()
+
+				f, _ := forge.(*Gitea)
+				g.Assert(f.url).Equal("http://localhost:8080")
+				g.Assert(f.SkipVerify).Equal(true)
 			})
 		})
 
@@ -92,24 +90,10 @@ func Test_gitea(t *testing.T) {
 				g.Assert(repo.FullName).Equal(fakeRepo.Owner + "/" + fakeRepo.Name)
 				g.Assert(repo.IsSCMPrivate).IsTrue()
 				g.Assert(repo.Clone).Equal("http://localhost/test_name/repo_name.git")
-				g.Assert(repo.Link).Equal("http://localhost/test_name/repo_name")
+				g.Assert(repo.ForgeURL).Equal("http://localhost/test_name/repo_name")
 			})
 			g.It("Should handle a not found error", func() {
 				_, err := c.Repo(ctx, fakeUser, "0", fakeRepoNotFound.Owner, fakeRepoNotFound.Name)
-				g.Assert(err).IsNotNil()
-			})
-		})
-
-		g.Describe("Requesting repository permissions", func() {
-			g.It("Should return the permission details", func() {
-				perm, err := c.Perm(ctx, fakeUser, fakeRepo)
-				g.Assert(err).IsNil()
-				g.Assert(perm.Admin).IsTrue()
-				g.Assert(perm.Push).IsTrue()
-				g.Assert(perm.Pull).IsTrue()
-			})
-			g.It("Should handle a not found error", func() {
-				_, err := c.Perm(ctx, fakeUser, fakeRepoNotFound)
 				g.Assert(err).IsNotNil()
 			})
 		})
@@ -146,7 +130,7 @@ func Test_gitea(t *testing.T) {
 		})
 
 		g.It("Should return nil from send pipeline status", func() {
-			err := c.Status(ctx, fakeUser, fakeRepo, fakePipeline, fakeStep)
+			err := c.Status(ctx, fakeUser, fakeRepo, fakePipeline, fakeWorkflow)
 			g.Assert(err).IsNil()
 		})
 
@@ -165,7 +149,7 @@ func Test_gitea(t *testing.T) {
 
 		g.It("Given a PR hook", func() {
 			buf := bytes.NewBufferString(fixtures.HookPullRequest)
-			req, _ := http.NewRequest("POST", "/hook", buf)
+			req, _ := http.NewRequest(http.MethodPost, "/hook", buf)
 			req.Header = http.Header{}
 			req.Header.Set(hookEvent, hookPullRequest)
 			mockStore.On("GetRepoNameFallback", mock.Anything, mock.Anything).Return(fakeRepo, nil)
@@ -175,7 +159,7 @@ func Test_gitea(t *testing.T) {
 			g.Assert(b).IsNotNil()
 			g.Assert(err).IsNil()
 			g.Assert(b.Event).Equal(model.EventPull)
-			g.Assert(utils.EqualStringSlice(b.ChangedFiles, []string{"README.md"})).IsTrue()
+			g.Assert(utils.EqualSliceValues(b.ChangedFiles, []string{"README.md"})).IsTrue()
 		})
 	})
 }
@@ -209,7 +193,7 @@ var (
 		Commit: "9ecad50",
 	}
 
-	fakeStep = &model.Step{
+	fakeWorkflow = &model.Workflow{
 		Name:  "test",
 		State: model.StatusSuccess,
 	}

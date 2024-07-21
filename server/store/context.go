@@ -16,18 +16,16 @@ package store
 
 import (
 	"context"
+
+	"github.com/gin-gonic/gin"
 )
 
 const key = "store"
 
-// Setter defines a context that enables setting values.
-type Setter interface {
-	Set(string, interface{})
-}
-
 // FromContext returns the Store associated with this context.
 func FromContext(c context.Context) Store {
-	return c.Value(key).(Store)
+	store, _ := c.Value(key).(Store)
+	return store
 }
 
 // TryFromContext try to return the Store associated with this context.
@@ -36,12 +34,11 @@ func TryFromContext(c context.Context) (Store, bool) {
 	return store, ok
 }
 
-// ToContext adds the Store to this context if it supports
-// the Setter interface.
-func ToContext(c Setter, store Store) {
+// ToContext adds the Store to this context.
+func ToContext(c *gin.Context, store Store) {
 	c.Set(key, store)
 }
 
 func InjectToContext(ctx context.Context, store Store) context.Context {
-	return context.WithValue(ctx, key, store)
+	return context.WithValue(ctx, key, store) //nolint:revive,staticcheck
 }

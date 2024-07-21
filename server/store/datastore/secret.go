@@ -15,29 +15,33 @@
 package datastore
 
 import (
-	"github.com/woodpecker-ci/woodpecker/server/model"
-
 	"xorm.io/builder"
+
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
-const orderSecretsBy = "secret_name"
+const orderSecretsBy = "name"
 
 func (s storage) SecretFind(repo *model.Repo, name string) (*model.Secret, error) {
-	secret := &model.Secret{
-		RepoID: repo.ID,
-		Name:   name,
-	}
-	return secret, wrapGet(s.engine.Get(secret))
+	secret := new(model.Secret)
+	return secret, wrapGet(s.engine.Where(
+		builder.Eq{"repo_id": repo.ID, "name": name},
+	).Get(secret))
 }
 
-func (s storage) SecretList(repo *model.Repo, includeGlobalAndOrgSecrets bool) ([]*model.Secret, error) {
-	secrets := make([]*model.Secret, 0, perPage)
-	var cond builder.Cond = builder.Eq{"secret_repo_id": repo.ID}
+func (s storage) SecretList(repo *model.Repo, includeGlobalAndOrgSecrets bool, p *model.ListOptions) ([]*model.Secret, error) {
+	var secrets []*model.Secret
+	var cond builder.Cond = builder.Eq{"repo_id": repo.ID}
 	if includeGlobalAndOrgSecrets {
-		cond = cond.Or(builder.Eq{"secret_owner": repo.Owner}).
-			Or(builder.And(builder.Eq{"secret_owner": ""}, builder.Eq{"secret_repo_id": 0}))
+		cond = cond.Or(builder.Eq{"org_id": repo.OrgID}).
+			Or(builder.And(builder.Eq{"org_id": 0}, builder.Eq{"repo_id": 0}))
 	}
-	return secrets, s.engine.Where(cond).OrderBy(orderSecretsBy).Find(&secrets)
+	return secrets, s.paginate(p).Where(cond).OrderBy(orderSecretsBy).Find(&secrets)
+}
+
+func (s storage) SecretListAll() ([]*model.Secret, error) {
+	var secrets []*model.Secret
+	return secrets, s.engine.Find(&secrets)
 }
 
 func (s storage) SecretCreate(secret *model.Secret) error {
@@ -52,31 +56,31 @@ func (s storage) SecretUpdate(secret *model.Secret) error {
 }
 
 func (s storage) SecretDelete(secret *model.Secret) error {
-	_, err := s.engine.ID(secret.ID).Delete(new(model.Secret))
-	return err
+	return wrapDelete(s.engine.ID(secret.ID).Delete(new(model.Secret)))
 }
 
-func (s storage) OrgSecretFind(owner, name string) (*model.Secret, error) {
-	secret := &model.Secret{
-		Owner: owner,
-		Name:  name,
-	}
-	return secret, wrapGet(s.engine.Get(secret))
+func (s storage) OrgSecretFind(orgID int64, name string) (*model.Secret, error) {
+	secret := new(model.Secret)
+	return secret, wrapGet(s.engine.Where(
+		builder.Eq{"org_id": orgID, "name": name},
+	).Get(secret))
 }
 
-func (s storage) OrgSecretList(owner string) ([]*model.Secret, error) {
-	secrets := make([]*model.Secret, 0, perPage)
-	return secrets, s.engine.Where("secret_owner = ?", owner).Find(&secrets)
+func (s storage) OrgSecretList(orgID int64, p *model.ListOptions) ([]*model.Secret, error) {
+	secrets := make([]*model.Secret, 0)
+	return secrets, s.paginate(p).Where("org_id = ?", orgID).OrderBy(orderSecretsBy).Find(&secrets)
 }
 
 func (s storage) GlobalSecretFind(name string) (*model.Secret, error) {
-	secret := &model.Secret{
-		Name: name,
-	}
-	return secret, wrapGet(s.engine.Where(builder.And(builder.Eq{"secret_owner": ""}, builder.Eq{"secret_repo_id": 0})).Get(secret))
+	secret := new(model.Secret)
+	return secret, wrapGet(s.engine.Where(
+		builder.Eq{"org_id": 0, "repo_id": 0, "name": name},
+	).Get(secret))
 }
 
-func (s storage) GlobalSecretList() ([]*model.Secret, error) {
-	secrets := make([]*model.Secret, 0, perPage)
-	return secrets, s.engine.Where(builder.And(builder.Eq{"secret_owner": ""}, builder.Eq{"secret_repo_id": 0})).OrderBy(orderSecretsBy).Find(&secrets)
+func (s storage) GlobalSecretList(p *model.ListOptions) ([]*model.Secret, error) {
+	secrets := make([]*model.Secret, 0)
+	return secrets, s.paginate(p).Where(
+		builder.Eq{"org_id": 0, "repo_id": 0},
+	).OrderBy(orderSecretsBy).Find(&secrets)
 }

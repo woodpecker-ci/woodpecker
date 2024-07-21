@@ -15,22 +15,22 @@
 package repo
 
 import (
+	"context"
 	"fmt"
 	"time"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
-	"github.com/woodpecker-ci/woodpecker/cli/common"
-	"github.com/woodpecker-ci/woodpecker/cli/internal"
-	"github.com/woodpecker-ci/woodpecker/woodpecker-go/woodpecker"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker"
 )
 
 var repoUpdateCmd = &cli.Command{
 	Name:      "update",
 	Usage:     "update a repository",
-	ArgsUsage: "<repo/name>",
+	ArgsUsage: "<repo-id|repo-full-name>",
 	Action:    repoUpdate,
-	Flags: append(common.GlobalFlags,
+	Flags: []cli.Flag{
 		&cli.BoolFlag{
 			Name:  "trusted",
 			Usage: "repository is trusted",
@@ -59,17 +59,16 @@ var repoUpdateCmd = &cli.Command{
 			Name:  "unsafe",
 			Usage: "validate updating the pipeline-counter is unsafe",
 		},
-	),
+	},
 }
 
-func repoUpdate(c *cli.Context) error {
-	repo := c.Args().First()
-	owner, name, err := internal.ParseRepo(repo)
+func repoUpdate(ctx context.Context, c *cli.Command) error {
+	repoIDOrFullName := c.Args().First()
+	client, err := internal.NewClient(ctx, c)
 	if err != nil {
 		return err
 	}
-
-	client, err := internal.NewClient(c)
+	repoID, err := internal.ParseRepo(client, repoIDOrFullName)
 	if err != nil {
 		return err
 	}
@@ -80,7 +79,7 @@ func repoUpdate(c *cli.Context) error {
 		timeout         = c.Duration("timeout")
 		trusted         = c.Bool("trusted")
 		gated           = c.Bool("gated")
-		pipelineCounter = c.Int("pipeline-counter")
+		pipelineCounter = int(c.Int("pipeline-counter"))
 		unsafe          = c.Bool("unsafe")
 	)
 
@@ -111,9 +110,11 @@ func repoUpdate(c *cli.Context) error {
 		patch.PipelineCounter = &pipelineCounter
 	}
 
-	if _, err := client.RepoPatch(owner, name, patch); err != nil {
+	repo, err := client.RepoPatch(repoID, patch)
+	if err != nil {
 		return err
 	}
-	fmt.Printf("Successfully updated repository %s/%s\n", owner, name)
+
+	fmt.Printf("Successfully updated repository %s\n", repo.FullName)
 	return nil
 }

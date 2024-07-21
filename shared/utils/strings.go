@@ -14,45 +14,23 @@
 
 package utils
 
-// DedupStrings deduplicate string list, empty items are dropped
-func DedupStrings(list []string) []string {
-	m := make(map[string]struct{}, len(list))
+// DeduplicateStrings deduplicate string list, empty items are dropped.
+func DeduplicateStrings(src []string) []string {
+	m := make(map[string]struct{}, len(src))
+	dst := make([]string, 0, len(src))
 
-	for i := range list {
-		if s := list[i]; len(s) > 0 {
-			m[list[i]] = struct{}{}
+	for _, v := range src {
+		// Skip empty items
+		if len(v) == 0 {
+			continue
 		}
-	}
-
-	newList := make([]string, 0, len(m))
-	for k := range m {
-		newList = append(newList, k)
-	}
-	return newList
-}
-
-// EqualStringSlice compare two string slices if they have equal values independent of how they are sorted
-func EqualStringSlice(l1, l2 []string) bool {
-	if len(l1) != len(l2) {
-		return false
-	}
-
-	m1 := sliceToCountMap(l1)
-	m2 := sliceToCountMap(l2)
-
-	for k, v := range m1 {
-		if m2[k] != v {
-			return false
+		// Skip duplicates
+		if _, ok := m[v]; ok {
+			continue
 		}
+		m[v] = struct{}{}
+		dst = append(dst, v)
 	}
 
-	return true
-}
-
-func sliceToCountMap(list []string) map[string]int {
-	m := make(map[string]int)
-	for i := range list {
-		m[list[i]]++
-	}
-	return m
+	return dst
 }

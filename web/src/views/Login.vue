@@ -1,72 +1,98 @@
 <template>
   <main class="flex flex-col w-full h-full justify-center items-center">
-    <div v-if="errorMessage" class="bg-red-400 text-white dark:text-gray-500 p-4 rounded-md text-lg">
-      {{ errorMessage }}
-    </div>
+    <Error v-if="errorMessage" class="w-full md:w-3xl">
+      <span class="whitespace-pre">{{ errorMessage }}</span>
+      <span v-if="errorDescription" class="whitespace-pre mt-1">{{ errorDescription }}</span>
+      <a
+        v-if="errorUri"
+        :href="errorUri"
+        target="_blank"
+        class="text-wp-link-100 hover:text-wp-link-200 cursor-pointer mt-1"
+      >
+        <span>{{ errorUri }}</span>
+      </a>
+    </Error>
 
     <div
-      class="flex flex-col w-full overflow-hidden md:m-8 md:rounded-md md:shadow md:border md:bg-white md:dark:bg-dark-gray-700 dark:border-dark-200 md:flex-row md:w-3xl md:h-sm justify-center"
+      class="flex flex-col w-full overflow-hidden bg-wp-background-100 shadow border border-wp-background-400 dark:bg-wp-background-200 md:m-8 md:rounded-md md:flex-row md:w-3xl md:h-sm"
     >
-      <div class="flex md:bg-lime-500 md:dark:bg-lime-900 md:w-3/5 justify-center items-center">
-        <img class="w-48 h-48" src="../assets/logo.svg?url" />
+      <div class="flex justify-center items-center bg-wp-primary-200 dark:bg-wp-primary-300 min-h-48 md:w-3/5">
+        <WoodpeckerLogo preserveAspectRatio="xMinYMin slice" class="w-30 h-30 md:w-48 md:h-48" />
       </div>
-      <div class="flex flex-col my-8 md:w-2/5 p-4 items-center justify-center">
-        <h1 class="text-xl text-color">{{ $t('welcome') }}</h1>
-        <Button class="mt-4" @click="doLogin">{{ $t('login') }}</Button>
+      <div class="flex justify-center items-center flex-col md:w-2/5 min-h-48 gap-4 text-center">
+        <h1 class="text-xl text-wp-text-100">{{ $t('welcome') }}</h1>
+        <div class="flex flex-col gap-2">
+          <Button
+            v-for="forge in forges"
+            :key="forge.id"
+            :start-icon="forge.type === 'addon' ? 'repo' : forge.type"
+            @click="doLogin(forge.id)"
+          >
+            {{ $t('login_with', { forge: getHostFromUrl(forge) }) }}
+          </Button>
+        </div>
       </div>
     </div>
   </main>
 </template>
 
-<script lang="ts">
-import { defineComponent, onMounted, ref } from 'vue';
+<script lang="ts" setup>
+import { onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 
+import WoodpeckerLogo from '~/assets/logo.svg?component';
 import Button from '~/components/atomic/Button.vue';
+import Error from '~/components/atomic/Error.vue';
+import useApiClient from '~/compositions/useApiClient';
 import useAuthentication from '~/compositions/useAuthentication';
+import type { Forge } from '~/lib/api/types';
 
-export default defineComponent({
-  name: 'Login',
+const route = useRoute();
+const router = useRouter();
+const authentication = useAuthentication();
+const i18n = useI18n();
+const apiClient = useApiClient();
 
-  components: {
-    Button,
-  },
+const forges = ref<Forge[]>([]);
 
-  setup() {
-    const route = useRoute();
-    const router = useRouter();
-    const authentication = useAuthentication();
-    const errorMessage = ref<string>();
-    const i18n = useI18n();
+function getHostFromUrl(forge: Forge) {
+  if (!forge.url) {
+    return forge.type.charAt(0).toUpperCase() + forge.type.slice(1);
+  }
 
-    function doLogin() {
-      const url = typeof route.query.url === 'string' ? route.query.url : '';
-      authentication.authenticate(url);
-    }
+  const url = new URL(forge.url);
+  return url.hostname;
+}
 
-    const authErrorMessages = {
-      oauth_error: i18n.t('user.oauth_error'),
-      internal_error: i18n.t('user.internal_error'),
-      access_denied: i18n.t('user.access_denied'),
-    };
+function doLogin(forgeId?: number) {
+  const url = typeof route.query.url === 'string' ? route.query.url : '';
+  authentication.authenticate(url, forgeId);
+}
 
-    onMounted(async () => {
-      if (authentication.isAuthenticated) {
-        await router.replace({ name: 'home' });
-        return;
-      }
+const authErrorMessages = {
+  oauth_error: i18n.t('oauth_error'),
+  internal_error: i18n.t('internal_error'),
+  registration_closed: i18n.t('registration_closed'),
+  access_denied: i18n.t('access_denied'),
+  invalid_state: i18n.t('invalid_state'),
+};
 
-      if (route.query.code) {
-        const code = route.query.code as keyof typeof authErrorMessages;
-        errorMessage.value = authErrorMessages[code];
-      }
-    });
+const errorMessage = ref<string>();
+const errorDescription = ref<string>(route.query.error_description as string);
+const errorUri = ref<string>(route.query.error_uri as string);
 
-    return {
-      doLogin,
-      errorMessage,
-    };
-  },
+onMounted(async () => {
+  if (authentication.isAuthenticated) {
+    await router.replace({ name: 'home' });
+    return;
+  }
+
+  forges.value = (await apiClient.getForges()) ?? [];
+
+  if (route.query.error) {
+    const error = route.query.error as keyof typeof authErrorMessages;
+    errorMessage.value = authErrorMessages[error] ?? error;
+  }
 });
 </script>

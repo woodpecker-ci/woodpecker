@@ -1,20 +1,51 @@
 variables:
-  - &golang_image 'golang:1.18.7'
-  - &node_image 'node:18-alpine'
-  - &when_path
-    - "docs/**"
-    - ".woodpecker/docs.yml"
-    # since we generate docs for cli tool we have to watch this too
-    - "cli/**"
-    - "cmd/cli/**"
+  - &golang_image 'docker.io/golang:1.22'
+  - &node_image 'docker.io/node:21-alpine'
+  - &alpine_image 'docker.io/alpine:3.19'
+  - path: &when_path
+      - 'docs/**'
+      - '.woodpecker/docs.yaml'
+      # since we generate docs for cli tool we have to watch this too
+      - 'cli/**'
+      - 'cmd/cli/**'
+      # api docs
+      - 'server/api/**'
+  - path: &docker_path # web source code
+      - 'web/**'
+      # api source code
+      - 'server/api/**'
+      # go source code
+      - '**/*.go'
+      - 'go.*'
+      # schema changes
+      - 'pipeline/schema/**'
+      # Dockerfile changes
+      - 'docker/**'
 
-pipeline:
+when:
+  - event: tag
+  - event: pull_request
+  - event: push
+    path:
+      - <<: *when_path
+      - <<: *docker_path
+    branch:
+      - ${CI_REPO_DEFAULT_BRANCH}
+      - renovate/*
+  - event: pull_request_closed
+    path: *when_path
+  - event: manual
+    evaluate: 'TASK == "docs"'
+
+steps:
   build-cli:
     image: *golang_image
     commands:
       - make docs
     when:
-      path: *when_path
+      - path: *when_path
+        event: [tag, pull_request, push]
+      - event: manual
 
   build:
     image: *node_image
@@ -24,47 +55,79 @@ pipeline:
       - pnpm install --frozen-lockfile
       - pnpm build
     when:
-      path: *when_path
-
-  securitycheck:
-    image: aquasec/trivy:latest
-    commands:
-      - trivy fs --exit-code 0 --skip-dirs node_modules/ --skip-dirs plugins/woodpecker-plugins/node_modules --severity UNKNOWN,LOW docs/
-      # TODO currently it is not fixable so just do not block currently
-      - trivy fs --exit-code 0 --skip-dirs node_modules/ --skip-dirs plugins/woodpecker-plugins/node_modules --severity MEDIUM,HIGH,CRITICAL docs/
-    when:
-      path: *when_path
+      - path: *when_path
+        event: [tag, pull_request, push]
+      - event: manual
 
   deploy-preview:
-    image: woodpeckerci/plugin-surge-preview:next
+    image: docker.io/woodpeckerci/plugin-surge-preview:1.3.0
     settings:
-      path: "docs/build/"
+      path: 'docs/build/'
       surge_token:
         from_secret: SURGE_TOKEN
-      forge_type: github
-      forge_url: "https://github.com"
       forge_repo_token:
         from_secret: GITHUB_TOKEN_SURGE
+    failure: ignore
     when:
-      event: pull_request
+      event: [pull_request, pull_request_closed]
       path: *when_path
-
-  # TODO: add step to remove preview again after PR is closed (waiting for #286)
 
   deploy-prepare:
-    image: alpine
+    image: *alpine_image
+    secrets:
+      - BOT_PRIVATE_KEY
     commands:
-      - apk add --no-cache git rsync
-      # copy all docs files and delete all old ones, but leave CNAME and index.yaml untouched
-      - git clone -b ${CI_REPO_DEFAULT_BRANCH} --single-branch https://github.com/woodpecker-ci/woodpecker-ci.github.io pages_repo
-      - rsync -r --exclude .git --exclude CNAME --exclude index.yaml --exclude README.md --delete docs/build/ pages_repo
+      - apk add openssh-client git
+      - mkdir -p $HOME/.ssh
+      - ssh-keyscan -t rsa github.com >> $HOME/.ssh/known_hosts
+      - echo "$BOT_PRIVATE_KEY" > $HOME/.ssh/id_rsa
+      - chmod 0600 $HOME/.ssh/id_rsa
+      - git clone --depth 1 --single-branch git@github.com:woodpecker-ci/woodpecker-ci.github.io.git ./docs_repo
     when:
-      event: push
-      branch: ${CI_REPO_DEFAULT_BRANCH}
-      path: *when_path
+      - event: push
+        path:
+          - <<: *when_path
+          - <<: *docker_path
+        branch: ${CI_REPO_DEFAULT_BRANCH}
+      - event: [manual, tag]
+
+  # update latest and next version
+  version-next:
+    image: *alpine_image
+    commands:
+      - apk add jq
+      - jq '.next = "next-${CI_COMMIT_SHA:0:10}"' ./docs_repo/version.json > ./docs_repo/version.json.tmp
+      - mv ./docs_repo/version.json.tmp ./docs_repo/version.json
+    when:
+      - event: push
+        path: *docker_path
+        branch: ${CI_REPO_DEFAULT_BRANCH}
+
+  version-release:
+    image: *alpine_image
+    commands:
+      - apk add jq
+      - if [[ "${CI_COMMIT_TAG}" != *"rc"* ]] ; then jq '.latest = "${CI_COMMIT_TAG}"' ./docs_repo/version.json > ./docs_repo/version.json.tmp && mv ./docs_repo/version.json.tmp ./docs_repo/version.json ; fi
+      - jq '.rc = "${CI_COMMIT_TAG}"' ./docs_repo/version.json > ./docs_repo/version.json.tmp
+      - mv ./docs_repo/version.json.tmp ./docs_repo/version.json
+    when:
+      - event: tag
+
+  copy-files:
+    image: *alpine_image
+    commands:
+      - apk add rsync
+      # copy all docs files and delete all old ones, but leave CNAME, index.yaml and version.json untouched
+      - rsync -r --exclude .git --exclude CNAME --exclude index.yaml --exclude README.md --exclude version.json --delete docs/build/ ./docs_repo
+    when:
+      - event: push
+        path: *when_path
+        branch: ${CI_REPO_DEFAULT_BRANCH}
+      - event: manual
 
   deploy:
     image: appleboy/drone-git-push
+    directory: docs_repo
     settings:
       branch: ${CI_REPO_DEFAULT_BRANCH}
       ssh_key:
@@ -75,6 +138,9 @@ pipeline:
       commit_message: Deploy website - based on ${CI_COMMIT_SHA}
       path: pages_repo
     when:
-      event: push
-      branch: ${CI_REPO_DEFAULT_BRANCH}
-      path: *when_path
+      - event: push
+        path:
+          - <<: *when_path
+          - <<: *docker_path
+        branch: ${CI_REPO_DEFAULT_BRANCH}
+      - event: [manual, tag]

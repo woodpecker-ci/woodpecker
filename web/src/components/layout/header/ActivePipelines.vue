@@ -1,39 +1,31 @@
 <template>
-  <IconButton :title="$t('pipeline_feed')" class="!p-1.5 relative text-current" @click="toggle">
-    <div v-if="activePipelines.length > 0" class="spinner">
+  <IconButton :title="$t('pipeline_feed')" class="!p-1.5 relative text-current active-pipelines-toggle" @click="toggle">
+    <div v-if="activePipelines.length > 0" class="spinner m-1">
       <div class="spinner-ring ring1" />
       <div class="spinner-ring ring2" />
       <div class="spinner-ring ring3" />
       <div class="spinner-ring ring4" />
     </div>
     <div
-      class="flex items-center justify-center h-full w-full font-bold bg-white bg-opacity-15 dark:bg-black dark:bg-opacity-10 rounded-full"
+      class="flex items-center justify-center h-full w-full font-bold bg-white bg-opacity-15 dark:bg-black dark:bg-opacity-10 rounded-md"
     >
       {{ activePipelines.length || 0 }}
     </div>
   </IconButton>
 </template>
 
-<script lang="ts">
-import { defineComponent, onMounted } from 'vue';
+<script lang="ts" setup>
+import { onMounted, toRef } from 'vue';
 
 import IconButton from '~/components/atomic/IconButton.vue';
 import usePipelineFeed from '~/compositions/usePipelineFeed';
 
-export default defineComponent({
-  name: 'ActivePipelines',
+const pipelineFeed = usePipelineFeed();
+const activePipelines = toRef(pipelineFeed, 'activePipelines');
+const { toggle } = pipelineFeed;
 
-  components: { IconButton },
-
-  setup() {
-    const pipelineFeed = usePipelineFeed();
-
-    onMounted(() => {
-      pipelineFeed.load();
-    });
-
-    return pipelineFeed;
-  },
+onMounted(async () => {
+  await pipelineFeed.load();
 });
 </script>
 

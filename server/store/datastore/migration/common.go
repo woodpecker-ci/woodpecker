@@ -37,7 +37,7 @@ func renameTable(sess *xorm.Session, old, new string) error {
 	}
 }
 
-// WARNING: YOU MUST COMMIT THE SESSION AT THE END
+// WARNING: YOU MUST COMMIT THE SESSION AT THE END.
 func dropTableColumns(sess *xorm.Session, tableName string, columnNames ...string) (err error) {
 	// Copyright 2017 The Gitea Authors. All rights reserved.
 	// Use of this source code is governed by a MIT-style
@@ -85,7 +85,11 @@ func dropTableColumns(sess *xorm.Session, tableName string, columnNames ...strin
 		tableSQL := normalizeSQLiteTableSchema(string(res[0]["sql"]))
 
 		// Separate out the column definitions
-		tableSQL = tableSQL[strings.Index(tableSQL, "("):]
+		sqlIndex := strings.Index(tableSQL, "(")
+		if sqlIndex < 0 {
+			return fmt.Errorf("could not separate column definitions")
+		}
+		tableSQL = tableSQL[sqlIndex:]
 
 		// Remove the required columnNames
 		tableSQL = removeColumnFromSQLITETableSchema(tableSQL, columnNames...)
@@ -141,7 +145,7 @@ func dropTableColumns(sess *xorm.Session, tableName string, columnNames ...strin
 			cols += "DROP COLUMN `" + col + "` CASCADE"
 		}
 		if _, err := sess.Exec(fmt.Sprintf("ALTER TABLE `%s` %s", tableName, cols)); err != nil {
-			return fmt.Errorf("drop table `%s` columns %v: %v", tableName, columnNames, err)
+			return fmt.Errorf("drop table `%s` columns %v: %w", tableName, columnNames, err)
 		}
 	case schemas.MYSQL:
 		// Drop indexes on columns first
@@ -169,41 +173,7 @@ func dropTableColumns(sess *xorm.Session, tableName string, columnNames ...strin
 			cols += "DROP COLUMN `" + col + "`"
 		}
 		if _, err := sess.Exec(fmt.Sprintf("ALTER TABLE `%s` %s", tableName, cols)); err != nil {
-			return fmt.Errorf("drop table `%s` columns %v: %v", tableName, columnNames, err)
-		}
-	case schemas.MSSQL:
-		cols := ""
-		for _, col := range columnNames {
-			if cols != "" {
-				cols += ", "
-			}
-			cols += "`" + strings.ToLower(col) + "`"
-		}
-		sql := fmt.Sprintf("SELECT Name FROM sys.default_constraints WHERE parent_object_id = OBJECT_ID('%[1]s') AND parent_column_id IN (SELECT column_id FROM sys.columns WHERE LOWER(name) IN (%[2]s) AND object_id = OBJECT_ID('%[1]s'))",
-			tableName, strings.ReplaceAll(cols, "`", "'"))
-		constraints := make([]string, 0)
-		if err := sess.SQL(sql).Find(&constraints); err != nil {
-			return fmt.Errorf("find constraints: %v", err)
-		}
-		for _, constraint := range constraints {
-			if _, err := sess.Exec(fmt.Sprintf("ALTER TABLE `%s` DROP CONSTRAINT `%s`", tableName, constraint)); err != nil {
-				return fmt.Errorf("drop table `%s` default constraint `%s`: %v", tableName, constraint, err)
-			}
-		}
-		sql = fmt.Sprintf("SELECT DISTINCT Name FROM sys.indexes INNER JOIN sys.index_columns ON indexes.index_id = index_columns.index_id AND indexes.object_id = index_columns.object_id WHERE indexes.object_id = OBJECT_ID('%[1]s') AND index_columns.column_id IN (SELECT column_id FROM sys.columns WHERE LOWER(name) IN (%[2]s) AND object_id = OBJECT_ID('%[1]s'))",
-			tableName, strings.ReplaceAll(cols, "`", "'"))
-		constraints = make([]string, 0)
-		if err := sess.SQL(sql).Find(&constraints); err != nil {
-			return fmt.Errorf("find constraints: %v", err)
-		}
-		for _, constraint := range constraints {
-			if _, err := sess.Exec(fmt.Sprintf("DROP INDEX `%[2]s` ON `%[1]s`", tableName, constraint)); err != nil {
-				return fmt.Errorf("drop index `%[2]s` on `%[1]s`: %v", tableName, constraint, err)
-			}
-		}
-
-		if _, err := sess.Exec(fmt.Sprintf("ALTER TABLE `%s` DROP COLUMN %s", tableName, cols)); err != nil {
-			return fmt.Errorf("drop table `%s` columns %v: %v", tableName, columnNames, err)
+			return fmt.Errorf("drop table `%s` columns %v: %w", tableName, columnNames, err)
 		}
 	default:
 		return fmt.Errorf("dialect '%s' not supported", dialect)
@@ -216,7 +186,23 @@ func alterColumnDefault(sess *xorm.Session, table, column, defValue string) erro
 	dialect := sess.Engine().Dialect().URI().DBType
 	switch dialect {
 	case schemas.MYSQL:
-		_, err := sess.Exec(fmt.Sprintf("ALTER TABLE `%s` COLUMN `%s` SET DEFAULT %s;", table, column, defValue))
+		sql := fmt.Sprintf("SHOW COLUMNS FROM `%s` WHERE lower(field) = '%s'", table, strings.ToLower(column))
+		res, err := sess.Query(sql)
+		if err != nil {
+			return err
+		}
+
+		if len(res) == 0 || len(res[0]["Type"]) == 0 {
+			return fmt.Errorf("column %s data type in table %s can not be detected", column, table)
+		}
+
+		dataType := string(res[0]["Type"])
+		var nullable string
+		if string(res[0]["Null"]) == "NO" {
+			nullable = "NOT NULL"
+		}
+
+		_, err = sess.Exec(fmt.Sprintf("ALTER TABLE `%s` MODIFY `%s` %s %s DEFAULT %s;", table, column, dataType, nullable, defValue))
 		return err
 	case schemas.POSTGRES:
 		_, err := sess.Exec(fmt.Sprintf("ALTER TABLE `%s` ALTER COLUMN `%s` SET DEFAULT %s;", table, column, defValue))
@@ -228,6 +214,7 @@ func alterColumnDefault(sess *xorm.Session, table, column, defValue string) erro
 	}
 }
 
+//nolint:unparam
 func alterColumnNull(sess *xorm.Session, table, column string, null bool) error {
 	val := "NULL"
 	if !null {
@@ -236,7 +223,26 @@ func alterColumnNull(sess *xorm.Session, table, column string, null bool) error 
 	dialect := sess.Engine().Dialect().URI().DBType
 	switch dialect {
 	case schemas.MYSQL:
-		_, err := sess.Exec(fmt.Sprintf("ALTER TABLE `%s` COLUMN `%s` SET %s;", table, column, val))
+		sql := fmt.Sprintf("SHOW COLUMNS FROM `%s` WHERE lower(field) = '%s'", table, strings.ToLower(column))
+		res, err := sess.Query(sql)
+		if err != nil {
+			return err
+		}
+
+		if len(res) == 0 || len(res[0]["Type"]) == 0 {
+			return fmt.Errorf("column %s data type in table %s can not be detected", column, table)
+		}
+
+		dataType := string(res[0]["Type"])
+		defValue := string(res[0]["Default"])
+
+		if defValue != "NULL" && defValue != "" {
+			defValue = fmt.Sprintf("DEFAULT '%s'", defValue)
+		} else {
+			defValue = ""
+		}
+
+		_, err = sess.Exec(fmt.Sprintf("ALTER TABLE `%s` MODIFY `%s` %s %s %s;", table, column, dataType, val, defValue))
 		return err
 	case schemas.POSTGRES:
 		_, err := sess.Exec(fmt.Sprintf("ALTER TABLE `%s` ALTER COLUMN `%s` SET %s;", table, column, val))

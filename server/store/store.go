@@ -14,13 +14,12 @@
 
 package store
 
-//go:generate go install github.com/vektra/mockery/v2@latest
-//go:generate mockery --name Store --output mocks --case underscore
+//go:generate mockery --name Store --output mocks --case underscore --note "+build test"
 
 import (
-	"io"
+	"context"
 
-	"github.com/woodpecker-ci/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
 // TODO: CreateX func should return new object to not indirect let storage change an existing object (alter ID etc...)
@@ -29,11 +28,12 @@ type Store interface {
 	// Users
 	// GetUser gets a user by unique ID.
 	GetUser(int64) (*model.User, error)
+	// GetUserRemoteID gets a user by remote ID with fallback to login name.
+	GetUserRemoteID(model.ForgeRemoteID, string) (*model.User, error)
 	// GetUserLogin gets a user by unique Login name.
 	GetUserLogin(string) (*model.User, error)
 	// GetUserList gets a list of all users in the system.
-	// TODO: paginate
-	GetUserList() ([]*model.User, error)
+	GetUserList(p *model.ListOptions) ([]*model.User, error)
 	// GetUserCount gets a count of all users in the system.
 	GetUserCount() (int64, error)
 	// CreateUser creates a new user account.
@@ -62,8 +62,6 @@ type Store interface {
 	DeleteRepo(*model.Repo) error
 
 	// Redirections
-	// GetRedirection returns the redirection for the given full repo name
-	GetRedirection(string) (*model.Redirection, error)
 	// CreateRedirection creates a redirection
 	CreateRedirection(redirection *model.Redirection) error
 	// HasRedirectionForRepo checks if there's a redirection for the given repo and full name
@@ -74,19 +72,14 @@ type Store interface {
 	GetPipeline(int64) (*model.Pipeline, error)
 	// GetPipelineNumber gets a pipeline by number.
 	GetPipelineNumber(*model.Repo, int64) (*model.Pipeline, error)
-	// GetPipelineRef gets a pipeline by its ref.
-	GetPipelineRef(*model.Repo, string) (*model.Pipeline, error)
-	// GetPipelineCommit gets a pipeline by its commit sha.
-	GetPipelineCommit(*model.Repo, string, string) (*model.Pipeline, error)
 	// GetPipelineLast gets the last pipeline for the branch.
 	GetPipelineLast(*model.Repo, string) (*model.Pipeline, error)
 	// GetPipelineLastBefore gets the last pipeline before pipeline number N.
 	GetPipelineLastBefore(*model.Repo, string, int64) (*model.Pipeline, error)
 	// GetPipelineList gets a list of pipelines for the repository
-	// TODO: paginate
-	GetPipelineList(*model.Repo, int) ([]*model.Pipeline, error)
-	// GetPipelineList gets a list of the active pipelines for the repository
-	GetActivePipelineList(repo *model.Repo, page int) ([]*model.Pipeline, error)
+	GetPipelineList(*model.Repo, *model.ListOptions, *model.PipelineFilter) ([]*model.Pipeline, error)
+	// GetActivePipelineList gets a list of the active pipelines for the repository
+	GetActivePipelineList(repo *model.Repo) ([]*model.Pipeline, error)
 	// GetPipelineQueue gets a list of pipelines in queue.
 	GetPipelineQueue() ([]*model.Feed, error)
 	// GetPipelineCount gets a count of all pipelines in the system.
@@ -95,68 +88,63 @@ type Store interface {
 	CreatePipeline(*model.Pipeline, ...*model.Step) error
 	// UpdatePipeline updates a pipeline.
 	UpdatePipeline(*model.Pipeline) error
+	// DeletePipeline deletes a pipeline.
+	DeletePipeline(*model.Pipeline) error
 
 	// Feeds
 	UserFeed(*model.User) ([]*model.Feed, error)
 
 	// Repositories
-	// RepoList TODO: paginate
-	RepoList(user *model.User, owned bool) ([]*model.Repo, error)
+	RepoList(user *model.User, owned, active bool) ([]*model.Repo, error)
 	RepoListLatest(*model.User) ([]*model.Feed, error)
-	// RepoBatch Sync batch of repos from SCM (with permissions) to store (create if not exist else update)
-	RepoBatch([]*model.Repo) error
+	RepoListAll(active bool, p *model.ListOptions) ([]*model.Repo, error)
 
 	// Permissions
 	PermFind(user *model.User, repo *model.Repo) (*model.Perm, error)
 	PermUpsert(perm *model.Perm) error
-	PermDelete(perm *model.Perm) error
-	PermFlush(user *model.User, before int64) error
 
 	// Configs
 	ConfigsForPipeline(pipelineID int64) ([]*model.Config, error)
-	ConfigFindIdentical(repoID int64, hash string) (*model.Config, error)
-	ConfigFindApproved(*model.Config) (bool, error)
-	ConfigCreate(*model.Config) error
+	ConfigPersist(*model.Config) (*model.Config, error)
 	PipelineConfigCreate(*model.PipelineConfig) error
 
 	// Secrets
 	SecretFind(*model.Repo, string) (*model.Secret, error)
-	SecretList(*model.Repo, bool) ([]*model.Secret, error)
+	SecretList(*model.Repo, bool, *model.ListOptions) ([]*model.Secret, error)
+	SecretListAll() ([]*model.Secret, error)
 	SecretCreate(*model.Secret) error
 	SecretUpdate(*model.Secret) error
 	SecretDelete(*model.Secret) error
-	OrgSecretFind(string, string) (*model.Secret, error)
-	OrgSecretList(string) ([]*model.Secret, error)
+	OrgSecretFind(int64, string) (*model.Secret, error)
+	OrgSecretList(int64, *model.ListOptions) ([]*model.Secret, error)
 	GlobalSecretFind(string) (*model.Secret, error)
-	GlobalSecretList() ([]*model.Secret, error)
+	GlobalSecretList(*model.ListOptions) ([]*model.Secret, error)
 
 	// Registries
 	RegistryFind(*model.Repo, string) (*model.Registry, error)
-	RegistryList(*model.Repo) ([]*model.Registry, error)
+	RegistryList(*model.Repo, bool, *model.ListOptions) ([]*model.Registry, error)
+	RegistryListAll() ([]*model.Registry, error)
 	RegistryCreate(*model.Registry) error
 	RegistryUpdate(*model.Registry) error
-	RegistryDelete(repo *model.Repo, addr string) error
+	RegistryDelete(*model.Registry) error
+	OrgRegistryFind(int64, string) (*model.Registry, error)
+	OrgRegistryList(int64, *model.ListOptions) ([]*model.Registry, error)
+	GlobalRegistryFind(string) (*model.Registry, error)
+	GlobalRegistryList(*model.ListOptions) ([]*model.Registry, error)
 
 	// Steps
 	StepLoad(int64) (*model.Step, error)
 	StepFind(*model.Pipeline, int) (*model.Step, error)
+	StepByUUID(string) (*model.Step, error)
 	StepChild(*model.Pipeline, int, string) (*model.Step, error)
 	StepList(*model.Pipeline) ([]*model.Step, error)
-	StepCreate([]*model.Step) error
 	StepUpdate(*model.Step) error
-	StepClear(*model.Pipeline) error
+	StepListFromWorkflowFind(*model.Workflow) ([]*model.Step, error)
 
 	// Logs
-	LogFind(*model.Step) (io.ReadCloser, error)
-	// TODO: since we do ReadAll in any case a ioReader is not the best idea
-	// so either find a way to write log in chunks by xorm ...
-	LogSave(*model.Step, io.Reader) error
-
-	// Files
-	FileList(*model.Pipeline) ([]*model.File, error)
-	FileFind(*model.Step, string) (*model.File, error)
-	FileRead(*model.Step, string) (io.ReadCloser, error)
-	FileCreate(*model.File, io.Reader) error
+	LogFind(*model.Step) ([]*model.LogEntry, error)
+	LogAppend(logEntry *model.LogEntry) error
+	LogDelete(*model.Step) error
 
 	// Tasks
 	// TaskList TODO: paginate & opt filter
@@ -167,18 +155,52 @@ type Store interface {
 	// ServerConfig
 	ServerConfigGet(string) (string, error)
 	ServerConfigSet(string, string) error
+	ServerConfigDelete(string) error
 
 	// Cron
 	CronCreate(*model.Cron) error
 	CronFind(*model.Repo, int64) (*model.Cron, error)
-	CronList(*model.Repo) ([]*model.Cron, error)
+	CronList(*model.Repo, *model.ListOptions) ([]*model.Cron, error)
 	CronUpdate(*model.Repo, *model.Cron) error
 	CronDelete(*model.Repo, int64) error
 	CronListNextExecute(int64, int64) ([]*model.Cron, error)
 	CronGetLock(*model.Cron, int64) (bool, error)
 
+	// Forge
+	ForgeCreate(*model.Forge) error
+	ForgeGet(int64) (*model.Forge, error)
+	ForgeList(p *model.ListOptions) ([]*model.Forge, error)
+	ForgeUpdate(*model.Forge) error
+	ForgeDelete(*model.Forge) error
+
+	// Agent
+	AgentCreate(*model.Agent) error
+	AgentFind(int64) (*model.Agent, error)
+	AgentFindByToken(string) (*model.Agent, error)
+	AgentList(p *model.ListOptions) ([]*model.Agent, error)
+	AgentUpdate(*model.Agent) error
+	AgentDelete(*model.Agent) error
+
+	// Workflow
+	WorkflowGetTree(*model.Pipeline) ([]*model.Workflow, error)
+	WorkflowsCreate([]*model.Workflow) error
+	WorkflowsReplace(*model.Pipeline, []*model.Workflow) error
+	WorkflowLoad(int64) (*model.Workflow, error)
+	WorkflowUpdate(*model.Workflow) error
+
+	// Org
+	OrgCreate(*model.Org) error
+	OrgGet(int64) (*model.Org, error)
+	OrgFindByName(string) (*model.Org, error)
+	OrgUpdate(*model.Org) error
+	OrgDelete(int64) error
+	OrgList(*model.ListOptions) ([]*model.Org, error)
+
+	// Org repos
+	OrgRepoList(*model.Org, *model.ListOptions) ([]*model.Repo, error)
+
 	// Store operations
 	Ping() error
 	Close() error
-	Migrate() error
+	Migrate(context.Context, bool) error
 }

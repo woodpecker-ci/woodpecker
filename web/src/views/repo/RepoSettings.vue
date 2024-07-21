@@ -2,28 +2,27 @@
   <Scaffold enable-tabs :go-back="goBack">
     <template #title>
       <span>
-        <router-link :to="{ name: 'repos-owner', params: { repoOwner: repo.owner } }" class="hover:underline">
-          {{ repo.owner }}
-        </router-link>
+        <router-link :to="{ name: 'org', params: { orgId: repo!.org_id } }" class="hover:underline">{{
+          repo!.owner
+          /* eslint-disable-next-line @intlify/vue-i18n/no-raw-text */
+        }}</router-link>
         /
-        <router-link
-          :to="{ name: 'repo', params: { repoOwner: repo.owner, repoName: repo.name } }"
-          class="hover:underline"
-        >
-          {{ repo.name }}
-        </router-link>
+        <router-link :to="{ name: 'repo' }" class="hover:underline">{{
+          repo!.name
+          /* eslint-disable-next-line @intlify/vue-i18n/no-raw-text */
+        }}</router-link>
         /
-        {{ $t('repo.settings.settings') }}
+        {{ $t('settings') }}
       </span>
     </template>
 
     <Tab id="general" :title="$t('repo.settings.general.general')">
       <GeneralTab />
     </Tab>
-    <Tab id="secrets" :title="$t('repo.settings.secrets.secrets')">
+    <Tab id="secrets" :title="$t('secrets.secrets')">
       <SecretsTab />
     </Tab>
-    <Tab id="registries" :title="$t('repo.settings.registries.registries')">
+    <Tab id="registries" :title="$t('registries.registries')">
       <RegistriesTab />
     </Tab>
     <Tab id="crons" :title="$t('repo.settings.crons.crons')">
@@ -39,7 +38,7 @@
 </template>
 
 <script lang="ts" setup>
-import { inject, onMounted, Ref } from 'vue';
+import { inject, onMounted, type Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 
@@ -52,8 +51,8 @@ import GeneralTab from '~/components/repo/settings/GeneralTab.vue';
 import RegistriesTab from '~/components/repo/settings/RegistriesTab.vue';
 import SecretsTab from '~/components/repo/settings/SecretsTab.vue';
 import useNotifications from '~/compositions/useNotifications';
-import { useRouteBackOrDefault } from '~/compositions/useRouteBackOrDefault';
-import { Repo, RepoPermissions } from '~/lib/api/types';
+import { useRouteBack } from '~/compositions/useRouteBack';
+import type { Repo, RepoPermissions } from '~/lib/api/types';
 
 const notifications = useNotifications();
 const router = useRouter();
@@ -76,5 +75,5 @@ onMounted(async () => {
   }
 });
 
-const goBack = useRouteBackOrDefault({ name: 'repo' });
+const goBack = useRouteBack({ name: 'repo' });
 </script>

@@ -1,0 +1,105 @@
+// Copyright 2018 Drone.IO Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+package core
+
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"net/http"
+	"strings"
+
+	"github.com/rs/zerolog/log"
+	"github.com/urfave/cli/v3"
+
+	"go.woodpecker-ci.org/woodpecker/v2/agent"
+	"go.woodpecker-ci.org/woodpecker/v2/version"
+)
+
+// The file implements some basic healthcheck logic based on the
+// following specification:
+//   https://github.com/mozilla-services/Dockerflow
+
+func initHealth() {
+	http.HandleFunc("/varz", handleStats)
+	http.HandleFunc("/healthz", handleHeartbeat)
+	http.HandleFunc("/version", handleVersion)
+}
+
+func handleHeartbeat(w http.ResponseWriter, _ *http.Request) {
+	if counter.Healthy() {
+		w.WriteHeader(http.StatusOK)
+	} else {
+		w.WriteHeader(http.StatusInternalServerError)
+	}
+}
+
+func handleVersion(w http.ResponseWriter, _ *http.Request) {
+	w.WriteHeader(http.StatusOK)
+	w.Header().Add("Content-Type", "text/json")
+	err := json.NewEncoder(w).Encode(versionResp{
+		Source:  "https://github.com/woodpecker-ci/woodpecker",
+		Version: version.String(),
+	})
+	if err != nil {
+		log.Error().Err(err).Msg("handleVersion")
+	}
+}
+
+func handleStats(w http.ResponseWriter, _ *http.Request) {
+	if counter.Healthy() {
+		w.WriteHeader(http.StatusOK)
+	} else {
+		w.WriteHeader(http.StatusInternalServerError)
+	}
+	w.Header().Add("Content-Type", "text/json")
+	if _, err := counter.WriteTo(w); err != nil {
+		log.Error().Err(err).Msg("handleStats")
+	}
+}
+
+type versionResp struct {
+	Version string `json:"version"`
+	Source  string `json:"source"`
+}
+
+// Default statistics counter.
+var counter = &agent.State{
+	Metadata: map[string]agent.Info{},
+}
+
+// handles pinging the endpoint and returns an error if the
+// agent is in an unhealthy state.
+func pinger(ctx context.Context, c *cli.Command) error {
+	healthcheckAddress := c.String("healthcheck-addr")
+	if strings.HasPrefix(healthcheckAddress, ":") {
+		// this seems sufficient according to https://pkg.go.dev/net#Dial
+		healthcheckAddress = "localhost" + healthcheckAddress
+	}
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, "http://"+healthcheckAddress+"/healthz", nil)
+	if err != nil {
+		return err
+	}
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("agent returned non-http.StatusOK status code")
+	}
+	return nil
+}

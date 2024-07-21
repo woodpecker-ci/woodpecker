@@ -15,32 +15,27 @@
 package main
 
 import (
-	"fmt"
-	"os"
+	"context"
 
-	_ "github.com/joho/godotenv/autoload"
-	"github.com/urfave/cli/v2"
+	"github.com/rs/zerolog/log"
 
-	"github.com/woodpecker-ci/woodpecker/version"
+	"go.woodpecker-ci.org/woodpecker/v2/cmd/agent/core"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/docker"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/kubernetes"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/local"
+	backendTypes "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/utils"
 )
 
-func main() {
-	app := cli.NewApp()
-	app.Name = "woodpecker-agent"
-	app.Version = version.String()
-	app.Usage = "woodpecker agent"
-	app.Action = loop
-	app.Commands = []*cli.Command{
-		{
-			Name:   "ping",
-			Usage:  "ping the agent",
-			Action: pinger,
-		},
-	}
-	app.Flags = flags
+var backends = []backendTypes.Backend{
+	kubernetes.New(),
+	docker.New(),
+	local.New(),
+}
 
-	if err := app.Run(os.Args); err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
-	}
+func main() {
+	ctx := utils.WithContextSigtermCallback(context.Background(), func() {
+		log.Info().Msg("termination signal is received, shutting down agent")
+	})
+	core.RunAgent(ctx, backends)
 }

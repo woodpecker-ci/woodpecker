@@ -15,44 +15,42 @@
 package pipeline
 
 import (
+	"context"
 	"fmt"
 	"strconv"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
-	"github.com/woodpecker-ci/woodpecker/cli/common"
-	"github.com/woodpecker-ci/woodpecker/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
 )
 
 var pipelineStopCmd = &cli.Command{
 	Name:      "stop",
 	Usage:     "stop a pipeline",
-	ArgsUsage: "<repo/name> [pipeline]",
-	Flags:     common.GlobalFlags,
+	ArgsUsage: "<repo-id|repo-full-name> [pipeline]",
 	Action:    pipelineStop,
 }
 
-func pipelineStop(c *cli.Context) (err error) {
-	repo := c.Args().First()
-	owner, name, err := internal.ParseRepo(repo)
+func pipelineStop(ctx context.Context, c *cli.Command) (err error) {
+	repoIDOrFullName := c.Args().First()
+	client, err := internal.NewClient(ctx, c)
 	if err != nil {
 		return err
 	}
-	number, err := strconv.Atoi(c.Args().Get(1))
+	repoID, err := internal.ParseRepo(client, repoIDOrFullName)
 	if err != nil {
 		return err
 	}
-
-	client, err := internal.NewClient(c)
-	if err != nil {
-		return err
-	}
-
-	err = client.PipelineStop(owner, name, number)
+	number, err := strconv.ParseInt(c.Args().Get(1), 10, 64)
 	if err != nil {
 		return err
 	}
 
-	fmt.Printf("Stopping pipeline %s/%s#%d\n", owner, name, number)
+	err = client.PipelineStop(repoID, number)
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("Stopping pipeline %s#%d\n", repoIDOrFullName, number)
 	return nil
 }
