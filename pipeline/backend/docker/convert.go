@@ -17,6 +17,7 @@ package docker
 import (
 	"encoding/base64"
 	"encoding/json"
+	"maps"
 	"regexp"
 	"strings"
 
@@ -26,28 +27,38 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 )
 
+// Valid container volumes must have at least two components, source and destination.
+const minVolumeComponents = 2
+
 // returns a container configuration.
 func (e *docker) toConfig(step *types.Step) *container.Config {
 	config := &container.Config{
-		Image:        step.Image,
-		Labels:       map[string]string{"wp_uuid": step.UUID},
+		Image: step.Image,
+		Labels: map[string]string{
+			"wp_uuid": step.UUID,
+			"wp_step": step.Name,
+		},
 		WorkingDir:   step.WorkingDir,
 		AttachStdout: true,
 		AttachStderr: true,
 		Volumes:      toVol(step.Volumes),
 	}
+	configEnv := make(map[string]string)
+	maps.Copy(configEnv, step.Environment)
 
-	if len(step.Commands) != 0 {
-		env, entry, cmd := common.GenerateContainerConf(step.Commands, e.info.OSType)
+	if len(step.Commands) > 0 {
+		env, entry := common.GenerateContainerConf(step.Commands, e.info.OSType)
 		for k, v := range env {
-			step.Environment[k] = v
+			configEnv[k] = v
 		}
 		config.Entrypoint = entry
-		config.Cmd = cmd
+	}
+	if len(step.Entrypoint) > 0 {
+		config.Entrypoint = step.Entrypoint
 	}
 
-	if len(step.Environment) != 0 {
-		config.Env = toEnv(step.Environment)
+	if len(configEnv) != 0 {
+		config.Env = toEnv(configEnv)
 	}
 	return config
 }
@@ -71,14 +82,10 @@ func toHostConfig(step *types.Step) *container.HostConfig {
 		},
 		Privileged: step.Privileged,
 		ShmSize:    step.ShmSize,
-		Sysctls:    step.Sysctls,
 	}
 
 	if len(step.NetworkMode) != 0 {
 		config.NetworkMode = container.NetworkMode(step.NetworkMode)
-	}
-	if len(step.IpcMode) != 0 {
-		config.IpcMode = container.IpcMode(step.IpcMode)
 	}
 	if len(step.DNS) != 0 {
 		config.DNS = step.DNS
@@ -127,7 +134,7 @@ func toVol(paths []string) map[string]struct{} {
 		if err != nil {
 			continue
 		}
-		if len(parts) < 2 {
+		if len(parts) < minVolumeComponents {
 			continue
 		}
 		set[parts[1]] = struct{}{}
@@ -147,16 +154,18 @@ func toEnv(env map[string]string) []string {
 	return envs
 }
 
-// helper function that converts a slice of device paths to a slice of
-// container.DeviceMapping.
+// toDev converts a slice of volume paths to a set of device mappings for
+// use in a Docker container config. It handles splitting the volume paths
+// into host and container paths, and setting default permissions.
 func toDev(paths []string) []container.DeviceMapping {
 	var devices []container.DeviceMapping
+
 	for _, path := range paths {
 		parts, err := splitVolumeParts(path)
 		if err != nil {
 			continue
 		}
-		if len(parts) < 2 {
+		if len(parts) < minVolumeComponents {
 			continue
 		}
 		if strings.HasSuffix(parts[1], ":ro") || strings.HasSuffix(parts[1], ":rw") {
@@ -181,8 +190,17 @@ func encodeAuthToBase64(authConfig types.Auth) (string, error) {
 	return base64.URLEncoding.EncodeToString(buf), nil
 }
 
-// helper function that split volume path
+// splitVolumeParts splits a volume string into its constituent parts.
+//
+// The parts are:
+//
+//  1. The path on the host machine
+//  2. The path inside the container
+//  3. The read/write mode
+//
+// It handles Windows and Linux style volume paths.
 func splitVolumeParts(volumeParts string) ([]string, error) {
+	// cspell:disable-next-line
 	pattern := `^((?:[\w]\:)?[^\:]*)\:((?:[\w]\:)?[^\:]*)(?:\:([rwom]*))?`
 	r, err := regexp.Compile(pattern)
 	if err != nil {

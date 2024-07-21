@@ -19,7 +19,6 @@ type Step struct {
 	Name           string            `json:"name"`
 	UUID           string            `json:"uuid"`
 	Type           StepType          `json:"type,omitempty"`
-	Alias          string            `json:"alias,omitempty"`
 	Image          string            `json:"image,omitempty"`
 	Pull           bool              `json:"pull,omitempty"`
 	Detached       bool              `json:"detach,omitempty"`
@@ -46,13 +45,11 @@ type Step struct {
 	Failure        string            `json:"failure,omitempty"`
 	AuthConfig     Auth              `json:"auth_config,omitempty"`
 	NetworkMode    string            `json:"network_mode,omitempty"`
-	IpcMode        string            `json:"ipc_mode,omitempty"`
-	Sysctls        map[string]string `json:"sysctls,omitempty"`
-	Ports          []uint16          `json:"ports,omitempty"`
-	BackendOptions BackendOptions    `json:"backend_options,omitempty"`
+	Ports          []Port            `json:"ports,omitempty"`
+	BackendOptions map[string]any    `json:"backend_options,omitempty"`
 }
 
-// StepType identifies the type of step
+// StepType identifies the type of step.
 type StepType string
 
 const (

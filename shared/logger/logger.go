@@ -15,43 +15,45 @@
 package logger
 
 import (
+	"context"
+	"fmt"
 	"io"
 	"os"
 
 	"github.com/6543/logfile-open"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 var GlobalLoggerFlags = []cli.Flag{
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_LOG_LEVEL"},
+		Sources: cli.EnvVars("WOODPECKER_LOG_LEVEL"),
 		Name:    "log-level",
 		Usage:   "set logging level",
 		Value:   "info",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_LOG_FILE"},
+		Sources: cli.EnvVars("WOODPECKER_LOG_FILE"),
 		Name:    "log-file",
 		Usage:   "Output destination for logs. 'stdout' and 'stderr' can be used as special keywords.",
 		Value:   "stderr",
 	},
 	&cli.BoolFlag{
-		EnvVars: []string{"WOODPECKER_DEBUG_PRETTY"},
+		Sources: cli.EnvVars("WOODPECKER_DEBUG_PRETTY"),
 		Name:    "pretty",
 		Usage:   "enable pretty-printed debug output",
 		Value:   isInteractiveTerminal(), // make pretty on interactive terminal by default
 	},
 	&cli.BoolFlag{
-		EnvVars: []string{"WOODPECKER_DEBUG_NOCOLOR"},
+		Sources: cli.EnvVars("WOODPECKER_DEBUG_NOCOLOR"),
 		Name:    "nocolor",
 		Usage:   "disable colored debug output, only has effect if pretty output is set too",
 		Value:   !isInteractiveTerminal(), // do color on interactive terminal by default
 	},
 }
 
-func SetupGlobalLogger(c *cli.Context, printLvl bool) {
+func SetupGlobalLogger(ctx context.Context, c *cli.Command, outputLvl bool) error {
 	logLevel := c.String("log-level")
 	pretty := c.Bool("pretty")
 	noColor := c.Bool("nocolor")
@@ -64,9 +66,9 @@ func SetupGlobalLogger(c *cli.Context, printLvl bool) {
 	case "stdout":
 		file = os.Stdout
 	default: // a file was set
-		openFile, err := logfile.OpenFileWithContext(c.Context, logFile, 0o660)
+		openFile, err := logfile.OpenFileWithContext(ctx, logFile, 0o660)
 		if err != nil {
-			log.Fatal().Err(err).Msgf("could not open log file '%s'", logFile)
+			return fmt.Errorf("could not open log file '%s': %w", logFile, err)
 		}
 		file = openFile
 		noColor = true
@@ -87,7 +89,7 @@ func SetupGlobalLogger(c *cli.Context, printLvl bool) {
 
 	lvl, err := zerolog.ParseLevel(logLevel)
 	if err != nil {
-		log.Fatal().Msgf("unknown logging level: %s", logLevel)
+		return fmt.Errorf("unknown logging level: %s", logLevel)
 	}
 	zerolog.SetGlobalLevel(lvl)
 
@@ -96,7 +98,9 @@ func SetupGlobalLogger(c *cli.Context, printLvl bool) {
 		log.Logger = log.With().Caller().Logger()
 	}
 
-	if printLvl {
-		log.Info().Msgf("LogLevel = %s", zerolog.GlobalLevel().String())
+	if outputLvl {
+		log.Info().Msgf("log level: %s", zerolog.GlobalLevel().String())
 	}
+
+	return nil
 }

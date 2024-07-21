@@ -15,11 +15,12 @@
 package secret
 
 import (
+	"context"
 	"html/template"
 	"os"
 	"strings"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
 	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
 	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
@@ -42,10 +43,10 @@ var secretListCmd = &cli.Command{
 	},
 }
 
-func secretList(c *cli.Context) error {
+func secretList(ctx context.Context, c *cli.Command) error {
 	format := c.String("format") + "\n"
 
-	client, err := internal.NewClient(c)
+	client, err := internal.NewClient(ctx, c)
 	if err != nil {
 		return err
 	}
@@ -56,17 +57,18 @@ func secretList(c *cli.Context) error {
 	}
 
 	var list []*woodpecker.Secret
-	if global {
+	switch {
+	case global:
 		list, err = client.GlobalSecretList()
 		if err != nil {
 			return err
 		}
-	} else if orgID != -1 {
+	case orgID != -1:
 		list, err = client.OrgSecretList(orgID)
 		if err != nil {
 			return err
 		}
-	} else {
+	default:
 		list, err = client.SecretList(repoID)
 		if err != nil {
 			return err
@@ -85,7 +87,7 @@ func secretList(c *cli.Context) error {
 	return nil
 }
 
-// template for secret list items
+// Template for secret list items.
 var tmplSecretList = "\x1b[33m{{ .Name }} \x1b[0m" + `
 Events: {{ list .Events }}
 {{- if .Images }}

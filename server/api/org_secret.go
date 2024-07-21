@@ -20,15 +20,14 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server/router/middleware/session"
-
 	"go.woodpecker-ci.org/woodpecker/v2/server"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/router/middleware/session"
 )
 
 // GetOrgSecret
 //
-//	@Summary	Get the named organization secret
+//	@Summary	Get a organization secret by name
 //	@Router		/orgs/{org_id}/secrets/{secret} [get]
 //	@Produce	json
 //	@Success	200	{object}	Secret
@@ -45,9 +44,10 @@ func GetOrgSecret(c *gin.Context) {
 		return
 	}
 
-	secret, err := server.Config.Services.Secrets.OrgSecretFind(orgID, name)
+	secretService := server.Config.Services.Manager.SecretService()
+	secret, err := secretService.OrgSecretFind(orgID, name)
 	if err != nil {
-		handleDbError(c, err)
+		handleDBError(c, err)
 		return
 	}
 	c.JSON(http.StatusOK, secret.Copy())
@@ -55,7 +55,7 @@ func GetOrgSecret(c *gin.Context) {
 
 // GetOrgSecretList
 //
-//	@Summary	Get the organization secret list
+//	@Summary	List organization secrets
 //	@Router		/orgs/{org_id}/secrets [get]
 //	@Produce	json
 //	@Success	200	{array}	Secret
@@ -71,7 +71,8 @@ func GetOrgSecretList(c *gin.Context) {
 		return
 	}
 
-	list, err := server.Config.Services.Secrets.OrgSecretList(orgID, session.Pagination(c))
+	secretService := server.Config.Services.Manager.SecretService()
+	list, err := secretService.OrgSecretList(orgID, session.Pagination(c))
 	if err != nil {
 		c.String(http.StatusInternalServerError, "Error getting secret list for %q. %s", orgID, err)
 		return
@@ -86,7 +87,7 @@ func GetOrgSecretList(c *gin.Context) {
 
 // PostOrgSecret
 //
-//	@Summary	Persist/create an organization secret
+//	@Summary	Create an organization secret
 //	@Router		/orgs/{org_id}/secrets [post]
 //	@Produce	json
 //	@Success	200	{object}	Secret
@@ -117,7 +118,9 @@ func PostOrgSecret(c *gin.Context) {
 		c.String(http.StatusUnprocessableEntity, "Error inserting org %q secret. %s", orgID, err)
 		return
 	}
-	if err := server.Config.Services.Secrets.OrgSecretCreate(orgID, secret); err != nil {
+
+	secretService := server.Config.Services.Manager.SecretService()
+	if err := secretService.OrgSecretCreate(orgID, secret); err != nil {
 		c.String(http.StatusInternalServerError, "Error inserting org %q secret %q. %s", orgID, in.Name, err)
 		return
 	}
@@ -126,7 +129,7 @@ func PostOrgSecret(c *gin.Context) {
 
 // PatchOrgSecret
 //
-//	@Summary	Update an organization secret
+//	@Summary	Update an organization secret by name
 //	@Router		/orgs/{org_id}/secrets/{secret} [patch]
 //	@Produce	json
 //	@Success	200	{object}	Secret
@@ -150,9 +153,10 @@ func PatchOrgSecret(c *gin.Context) {
 		return
 	}
 
-	secret, err := server.Config.Services.Secrets.OrgSecretFind(orgID, name)
+	secretService := server.Config.Services.Manager.SecretService()
+	secret, err := secretService.OrgSecretFind(orgID, name)
 	if err != nil {
-		handleDbError(c, err)
+		handleDBError(c, err)
 		return
 	}
 	if in.Value != "" {
@@ -169,7 +173,8 @@ func PatchOrgSecret(c *gin.Context) {
 		c.String(http.StatusUnprocessableEntity, "Error updating org %q secret. %s", orgID, err)
 		return
 	}
-	if err := server.Config.Services.Secrets.OrgSecretUpdate(orgID, secret); err != nil {
+
+	if err := secretService.OrgSecretUpdate(orgID, secret); err != nil {
 		c.String(http.StatusInternalServerError, "Error updating org %q secret %q. %s", orgID, in.Name, err)
 		return
 	}
@@ -178,7 +183,7 @@ func PatchOrgSecret(c *gin.Context) {
 
 // DeleteOrgSecret
 //
-//	@Summary	Delete the named secret from an organization
+//	@Summary	Delete an organization secret by name
 //	@Router		/orgs/{org_id}/secrets/{secret} [delete]
 //	@Produce	plain
 //	@Success	204
@@ -194,8 +199,9 @@ func DeleteOrgSecret(c *gin.Context) {
 		return
 	}
 
-	if err := server.Config.Services.Secrets.OrgSecretDelete(orgID, name); err != nil {
-		handleDbError(c, err)
+	secretService := server.Config.Services.Manager.SecretService()
+	if err := secretService.OrgSecretDelete(orgID, name); err != nil {
+		handleDBError(c, err)
 		return
 	}
 	c.Status(http.StatusNoContent)

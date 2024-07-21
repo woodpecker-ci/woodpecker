@@ -44,19 +44,18 @@ type (
 
 	// Pipeline defines runtime metadata for a pipeline.
 	Pipeline struct {
-		Number   int64  `json:"number,omitempty"`
-		Created  int64  `json:"created,omitempty"`
-		Started  int64  `json:"started,omitempty"`
-		Finished int64  `json:"finished,omitempty"`
-		Timeout  int64  `json:"timeout,omitempty"`
-		Status   string `json:"status,omitempty"`
-		Event    string `json:"event,omitempty"`
-		ForgeURL string `json:"forge_url,omitempty"`
-		Target   string `json:"target,omitempty"`
-		Trusted  bool   `json:"trusted,omitempty"`
-		Commit   Commit `json:"commit,omitempty"`
-		Parent   int64  `json:"parent,omitempty"`
-		Cron     string `json:"cron,omitempty"`
+		Number     int64  `json:"number,omitempty"`
+		Created    int64  `json:"created,omitempty"`
+		Started    int64  `json:"started,omitempty"`
+		Finished   int64  `json:"finished,omitempty"`
+		Status     string `json:"status,omitempty"`
+		Event      string `json:"event,omitempty"`
+		ForgeURL   string `json:"forge_url,omitempty"`
+		DeployTo   string `json:"target,omitempty"`
+		DeployTask string `json:"task,omitempty"`
+		Commit     Commit `json:"commit,omitempty"`
+		Parent     int64  `json:"parent,omitempty"`
+		Cron       string `json:"cron,omitempty"`
 	}
 
 	// Commit defines runtime metadata for a commit.
@@ -69,6 +68,7 @@ type (
 		Author            Author   `json:"author,omitempty"`
 		ChangedFiles      []string `json:"changed_files,omitempty"`
 		PullRequestLabels []string `json:"labels,omitempty"`
+		IsPrerelease      bool     `json:"is_prerelease,omitempty"`
 	}
 
 	// Author defines runtime metadata for a commit author.
@@ -91,7 +91,7 @@ type (
 		Number int    `json:"number,omitempty"`
 	}
 
-	// Secret defines a runtime secret
+	// Secret defines a runtime secret.
 	Secret struct {
 		Name  string `json:"name,omitempty"`
 		Value string `json:"value,omitempty"`
@@ -108,13 +108,13 @@ type (
 		Version  string `json:"version,omitempty"`
 	}
 
-	// Forge defines runtime metadata about the forge that host the repo
+	// Forge defines runtime metadata about the forge that host the repo.
 	Forge struct {
 		Type string `json:"type,omitempty"`
 		URL  string `json:"url,omitempty"`
 	}
 
-	// ServerForge represent the needed func of a server forge to get its metadata
+	// ServerForge represent the needed func of a server forge to get its metadata.
 	ServerForge interface {
 		// Name returns the string name of this driver
 		Name() string

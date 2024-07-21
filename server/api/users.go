@@ -28,7 +28,7 @@ import (
 
 // GetUsers
 //
-//	@Summary		Get all users
+//	@Summary		List users
 //	@Description	Returns all registered, active users in the system. Requires admin rights.
 //	@Router			/users [get]
 //	@Produce		json
@@ -59,7 +59,7 @@ func GetUsers(c *gin.Context) {
 func GetUser(c *gin.Context) {
 	user, err := store.FromContext(c).GetUserLogin(c.Param("login"))
 	if err != nil {
-		handleDbError(c, err)
+		handleDBError(c, err)
 		return
 	}
 	c.JSON(http.StatusOK, user)
@@ -67,7 +67,7 @@ func GetUser(c *gin.Context) {
 
 // PatchUser
 //
-//	@Summary		Change a user
+//	@Summary		Update a user
 //	@Description	Changes the data of an existing user. Requires admin rights.
 //	@Router			/users/{login} [patch]
 //	@Produce		json
@@ -89,7 +89,7 @@ func PatchUser(c *gin.Context) {
 
 	user, err := _store.GetUserLogin(c.Param("login"))
 	if err != nil {
-		handleDbError(c, err)
+		handleDBError(c, err)
 		return
 	}
 
@@ -132,6 +132,8 @@ func PostUser(c *gin.Context) {
 		Hash: base32.StdEncoding.EncodeToString(
 			securecookie.GenerateRandomKey(32),
 		),
+		ForgeID:       1,                        // TODO: replace with forge id when multiple forges are supported
+		ForgeRemoteID: model.ForgeRemoteID("0"), // TODO: search for the user in the forge and get the remote id
 	}
 	if err = user.Validate(); err != nil {
 		c.String(http.StatusBadRequest, err.Error())
@@ -159,11 +161,11 @@ func DeleteUser(c *gin.Context) {
 
 	user, err := _store.GetUserLogin(c.Param("login"))
 	if err != nil {
-		handleDbError(c, err)
+		handleDBError(c, err)
 		return
 	}
 	if err = _store.DeleteUser(user); err != nil {
-		handleDbError(c, err)
+		handleDBError(c, err)
 		return
 	}
 	c.Status(http.StatusNoContent)

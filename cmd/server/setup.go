@@ -17,10 +17,7 @@ package main
 
 import (
 	"context"
-	"crypto"
-	"crypto/ed25519"
-	"crypto/rand"
-	"encoding/hex"
+	"encoding/base32"
 	"errors"
 	"fmt"
 	"net/url"
@@ -28,33 +25,33 @@ import (
 	"strings"
 	"time"
 
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promauto"
+	"github.com/gorilla/securecookie"
 	"github.com/rs/zerolog/log"
-	"github.com/urfave/cli/v2"
-	"golang.org/x/sync/errgroup"
+	"github.com/urfave/cli/v3"
 
 	"go.woodpecker-ci.org/woodpecker/v2/server"
 	"go.woodpecker-ci.org/woodpecker/v2/server/cache"
-	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
-	"go.woodpecker-ci.org/woodpecker/v2/server/forge/bitbucket"
-	"go.woodpecker-ci.org/woodpecker/v2/server/forge/gitea"
-	"go.woodpecker-ci.org/woodpecker/v2/server/forge/github"
-	"go.woodpecker-ci.org/woodpecker/v2/server/forge/gitlab"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge/setup"
+	"go.woodpecker-ci.org/woodpecker/v2/server/logging"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
-	"go.woodpecker-ci.org/woodpecker/v2/server/plugins/config"
-	"go.woodpecker-ci.org/woodpecker/v2/server/plugins/environments"
-	"go.woodpecker-ci.org/woodpecker/v2/server/plugins/registry"
-	"go.woodpecker-ci.org/woodpecker/v2/server/plugins/secrets"
+	"go.woodpecker-ci.org/woodpecker/v2/server/pubsub"
 	"go.woodpecker-ci.org/woodpecker/v2/server/queue"
+	"go.woodpecker-ci.org/woodpecker/v2/server/services"
+	logService "go.woodpecker-ci.org/woodpecker/v2/server/services/log"
+	"go.woodpecker-ci.org/woodpecker/v2/server/services/log/file"
+	"go.woodpecker-ci.org/woodpecker/v2/server/services/permissions"
 	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 	"go.woodpecker-ci.org/woodpecker/v2/server/store/datastore"
 	"go.woodpecker-ci.org/woodpecker/v2/server/store/types"
-	"go.woodpecker-ci.org/woodpecker/v2/shared/addon"
-	addonTypes "go.woodpecker-ci.org/woodpecker/v2/shared/addon/types"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/constant"
 )
 
-func setupStore(c *cli.Context) (store.Store, error) {
+const (
+	queueInfoRefreshInterval = 500 * time.Millisecond
+	storeInfoRefreshInterval = 10 * time.Second
+)
+
+func setupStore(ctx context.Context, c *cli.Command) (store.Store, error) {
 	datasource := c.String("datasource")
 	driver := c.String("driver")
 	xorm := store.XORM{
@@ -64,19 +61,19 @@ func setupStore(c *cli.Context) (store.Store, error) {
 
 	if driver == "sqlite3" {
 		if datastore.SupportedDriver("sqlite3") {
-			log.Debug().Msgf("server has sqlite3 support")
+			log.Debug().Msg("server has sqlite3 support")
 		} else {
-			log.Debug().Msgf("server was built without sqlite3 support!")
+			log.Debug().Msg("server was built without sqlite3 support!")
 		}
 	}
 
 	if !datastore.SupportedDriver(driver) {
-		log.Fatal().Msgf("database driver '%s' not supported", driver)
+		return nil, fmt.Errorf("database driver '%s' not supported", driver)
 	}
 
 	if driver == "sqlite3" {
 		if err := checkSqliteFileExist(datasource); err != nil {
-			log.Fatal().Err(err).Msg("check sqlite file")
+			return nil, fmt.Errorf("check sqlite file: %w", err)
 		}
 	}
 
@@ -88,11 +85,11 @@ func setupStore(c *cli.Context) (store.Store, error) {
 	log.Trace().Msgf("setup datastore: %#v", *opts)
 	store, err := datastore.NewEngine(opts)
 	if err != nil {
-		log.Fatal().Err(err).Msg("could not open datastore")
+		return nil, fmt.Errorf("could not open datastore: %w", err)
 	}
 
-	if err := store.Migrate(c.Bool("migrations-allow-long")); err != nil {
-		log.Fatal().Err(err).Msg("could not migrate datastore")
+	if err := store.Migrate(ctx, c.Bool("migrations-allow-long")); err != nil {
+		return nil, fmt.Errorf("could not migrate datastore: %w", err)
 	}
 
 	return store, nil
@@ -107,235 +104,139 @@ func checkSqliteFileExist(path string) error {
 	return err
 }
 
-func setupQueue(c *cli.Context, s store.Store) queue.Queue {
-	return queue.WithTaskStore(queue.New(c.Context), s)
+func setupQueue(ctx context.Context, s store.Store) queue.Queue {
+	return queue.WithTaskStore(ctx, queue.New(ctx), s)
 }
 
-func setupSecretService(c *cli.Context, s model.SecretStore) (model.SecretService, error) {
-	addonService, err := addon.Load[model.SecretService](c.StringSlice("addons"), addonTypes.TypeSecretService)
-	if err != nil {
-		return nil, err
-	}
-	if addonService != nil {
-		return addonService.Value, nil
-	}
-
-	return secrets.New(c.Context, s), nil
+func setupMembershipService(_ context.Context, _store store.Store) cache.MembershipService {
+	return cache.NewMembershipService(_store)
 }
 
-func setupRegistryService(c *cli.Context, s store.Store) (model.RegistryService, error) {
-	addonService, err := addon.Load[model.RegistryService](c.StringSlice("addons"), addonTypes.TypeRegistryService)
-	if err != nil {
-		return nil, err
-	}
-	if addonService != nil {
-		return addonService.Value, nil
-	}
-
-	if c.String("docker-config") != "" {
-		return registry.Combined(
-			registry.New(s),
-			registry.Filesystem(c.String("docker-config")),
-		), nil
-	}
-	return registry.New(s), nil
-}
-
-func setupEnvironService(c *cli.Context, _ store.Store) (model.EnvironService, error) {
-	addonService, err := addon.Load[model.EnvironService](c.StringSlice("addons"), addonTypes.TypeEnvironmentService)
-	if err != nil {
-		return nil, err
-	}
-	if addonService != nil {
-		return addonService.Value, nil
-	}
-
-	return environments.Parse(c.StringSlice("environment")), nil
-}
-
-func setupMembershipService(_ *cli.Context, r forge.Forge) cache.MembershipService {
-	return cache.NewMembershipService(r)
-}
-
-// setupForge helper function to set up the forge from the CLI arguments.
-func setupForge(c *cli.Context) (forge.Forge, error) {
-	addonForge, err := addon.Load[forge.Forge](c.StringSlice("addons"), addonTypes.TypeForge)
-	if err != nil {
-		return nil, err
-	}
-	if addonForge != nil {
-		return addonForge.Value, nil
-	}
-
-	switch {
-	case c.Bool("github"):
-		return setupGitHub(c)
-	case c.Bool("gitlab"):
-		return setupGitLab(c)
-	case c.Bool("bitbucket"):
-		return setupBitbucket(c)
-	case c.Bool("gitea"):
-		return setupGitea(c)
+func setupLogStore(c *cli.Command, s store.Store) (logService.Service, error) {
+	switch c.String("log-store") {
+	case "file":
+		return file.NewLogStore(c.String("log-store-file-path"))
 	default:
-		return nil, fmt.Errorf("version control system not configured")
+		return s, nil
 	}
 }
 
-// setupBitbucket helper function to setup the Bitbucket forge from the CLI arguments.
-func setupBitbucket(c *cli.Context) (forge.Forge, error) {
-	opts := &bitbucket.Opts{
-		Client: c.String("bitbucket-client"),
-		Secret: c.String("bitbucket-secret"),
-	}
-	log.Trace().Msgf("Forge (bitbucket) opts: %#v", opts)
-	return bitbucket.New(opts)
-}
+const jwtSecretID = "jwt-secret"
 
-// setupGitea helper function to setup the Gitea forge from the CLI arguments.
-func setupGitea(c *cli.Context) (forge.Forge, error) {
-	server, err := url.Parse(c.String("gitea-server"))
-	if err != nil {
-		return nil, err
-	}
-	opts := gitea.Opts{
-		URL:        strings.TrimRight(server.String(), "/"),
-		Client:     c.String("gitea-client"),
-		Secret:     c.String("gitea-secret"),
-		SkipVerify: c.Bool("gitea-skip-verify"),
-	}
-	if len(opts.URL) == 0 {
-		log.Fatal().Msg("WOODPECKER_GITEA_URL must be set")
-	}
-	log.Trace().Msgf("Forge (gitea) opts: %#v", opts)
-	return gitea.New(opts)
-}
-
-// setupGitLab helper function to setup the GitLab forge from the CLI arguments.
-func setupGitLab(c *cli.Context) (forge.Forge, error) {
-	return gitlab.New(gitlab.Opts{
-		URL:          c.String("gitlab-server"),
-		ClientID:     c.String("gitlab-client"),
-		ClientSecret: c.String("gitlab-secret"),
-		SkipVerify:   c.Bool("gitlab-skip-verify"),
-	})
-}
-
-// setupGitHub helper function to setup the GitHub forge from the CLI arguments.
-func setupGitHub(c *cli.Context) (forge.Forge, error) {
-	opts := github.Opts{
-		URL:        c.String("github-server"),
-		Client:     c.String("github-client"),
-		Secret:     c.String("github-secret"),
-		SkipVerify: c.Bool("github-skip-verify"),
-		MergeRef:   c.Bool("github-merge-ref"),
-	}
-	log.Trace().Msgf("Forge (github) opts: %#v", opts)
-	return github.New(opts)
-}
-
-func setupMetrics(g *errgroup.Group, _store store.Store) {
-	pendingSteps := promauto.NewGauge(prometheus.GaugeOpts{
-		Namespace: "woodpecker",
-		Name:      "pending_steps",
-		Help:      "Total number of pending pipeline steps.",
-	})
-	waitingSteps := promauto.NewGauge(prometheus.GaugeOpts{
-		Namespace: "woodpecker",
-		Name:      "waiting_steps",
-		Help:      "Total number of pipeline waiting on deps.",
-	})
-	runningSteps := promauto.NewGauge(prometheus.GaugeOpts{
-		Namespace: "woodpecker",
-		Name:      "running_steps",
-		Help:      "Total number of running pipeline steps.",
-	})
-	workers := promauto.NewGauge(prometheus.GaugeOpts{
-		Namespace: "woodpecker",
-		Name:      "worker_count",
-		Help:      "Total number of workers.",
-	})
-	pipelines := promauto.NewGauge(prometheus.GaugeOpts{
-		Namespace: "woodpecker",
-		Name:      "pipeline_total_count",
-		Help:      "Total number of pipelines.",
-	})
-	users := promauto.NewGauge(prometheus.GaugeOpts{
-		Namespace: "woodpecker",
-		Name:      "user_count",
-		Help:      "Total number of users.",
-	})
-	repos := promauto.NewGauge(prometheus.GaugeOpts{
-		Namespace: "woodpecker",
-		Name:      "repo_count",
-		Help:      "Total number of repos.",
-	})
-
-	g.Go(func() error {
-		for {
-			stats := server.Config.Services.Queue.Info(context.TODO())
-			pendingSteps.Set(float64(stats.Stats.Pending))
-			waitingSteps.Set(float64(stats.Stats.WaitingOnDeps))
-			runningSteps.Set(float64(stats.Stats.Running))
-			workers.Set(float64(stats.Stats.Workers))
-			time.Sleep(500 * time.Millisecond)
-		}
-	})
-	g.Go(func() error {
-		for {
-			repoCount, _ := _store.GetRepoCount()
-			userCount, _ := _store.GetUserCount()
-			pipelineCount, _ := _store.GetPipelineCount()
-			pipelines.Set(float64(pipelineCount))
-			users.Set(float64(userCount))
-			repos.Set(float64(repoCount))
-			time.Sleep(10 * time.Second)
-		}
-	})
-}
-
-// setupSignatureKeys generate or load key pair to sign webhooks requests (i.e. used for extensions)
-func setupSignatureKeys(_store store.Store) (crypto.PrivateKey, crypto.PublicKey) {
-	privKeyID := "signature-private-key"
-
-	privKey, err := _store.ServerConfigGet(privKeyID)
+func setupJWTSecret(_store store.Store) (string, error) {
+	jwtSecret, err := _store.ServerConfigGet(jwtSecretID)
 	if errors.Is(err, types.RecordNotExist) {
-		_, privKey, err := ed25519.GenerateKey(rand.Reader)
+		jwtSecret := base32.StdEncoding.EncodeToString(
+			securecookie.GenerateRandomKey(32),
+		)
+		err = _store.ServerConfigSet(jwtSecretID, jwtSecret)
 		if err != nil {
-			log.Fatal().Err(err).Msgf("Failed to generate private key")
-			return nil, nil
+			return "", err
 		}
-		err = _store.ServerConfigSet(privKeyID, hex.EncodeToString(privKey))
-		if err != nil {
-			log.Fatal().Err(err).Msgf("Failed to generate private key")
-			return nil, nil
-		}
-		log.Debug().Msg("Created private key")
-		return privKey, privKey.Public()
-	} else if err != nil {
-		log.Fatal().Err(err).Msgf("Failed to load private key")
-		return nil, nil
+		log.Debug().Msg("created jwt secret")
+		return jwtSecret, nil
 	}
-	privKeyStr, err := hex.DecodeString(privKey)
+
 	if err != nil {
-		log.Fatal().Err(err).Msgf("Failed to decode private key")
-		return nil, nil
+		return "", err
 	}
-	privateKey := ed25519.PrivateKey(privKeyStr)
-	return privateKey, privateKey.Public()
+
+	return jwtSecret, nil
 }
 
-func setupConfigService(c *cli.Context) (config.Extension, error) {
-	addonExt, err := addon.Load[config.Extension](c.StringSlice("addons"), addonTypes.TypeConfigService)
+func setupEvilGlobals(ctx context.Context, c *cli.Command, s store.Store) error {
+	// services
+	server.Config.Services.Queue = setupQueue(ctx, s)
+	server.Config.Services.Logs = logging.New()
+	server.Config.Services.Pubsub = pubsub.New()
+	server.Config.Services.Membership = setupMembershipService(ctx, s)
+	serviceManager, err := services.NewManager(c, s, setup.Forge)
 	if err != nil {
-		return nil, err
+		return fmt.Errorf("could not setup service manager: %w", err)
 	}
-	if addonExt != nil {
-		return addonExt.Value, nil
+	server.Config.Services.Manager = serviceManager
+
+	server.Config.Services.LogStore, err = setupLogStore(c, s)
+	if err != nil {
+		return fmt.Errorf("could not setup log store: %w", err)
 	}
 
-	if endpoint := c.String("config-service-endpoint"); endpoint != "" {
-		return config.NewHTTP(endpoint, server.Config.Services.SignaturePrivateKey), nil
-	}
+	// authentication
+	server.Config.Pipeline.AuthenticatePublicRepos = c.Bool("authenticate-public-repos")
 
-	return nil, nil
+	// Cloning
+	server.Config.Pipeline.DefaultCloneImage = c.String("default-clone-image")
+	constant.TrustedCloneImages = append(constant.TrustedCloneImages, server.Config.Pipeline.DefaultCloneImage)
+
+	// Execution
+	_events := c.StringSlice("default-cancel-previous-pipeline-events")
+	events := make([]model.WebhookEvent, 0, len(_events))
+	for _, v := range _events {
+		events = append(events, model.WebhookEvent(v))
+	}
+	server.Config.Pipeline.DefaultCancelPreviousPipelineEvents = events
+	server.Config.Pipeline.DefaultTimeout = c.Int("default-pipeline-timeout")
+	server.Config.Pipeline.MaxTimeout = c.Int("max-pipeline-timeout")
+
+	// limits
+	server.Config.Pipeline.Limits.MemSwapLimit = c.Int("limit-mem-swap")
+	server.Config.Pipeline.Limits.MemLimit = c.Int("limit-mem")
+	server.Config.Pipeline.Limits.ShmSize = c.Int("limit-shm-size")
+	server.Config.Pipeline.Limits.CPUQuota = c.Int("limit-cpu-quota")
+	server.Config.Pipeline.Limits.CPUShares = c.Int("limit-cpu-shares")
+	server.Config.Pipeline.Limits.CPUSet = c.String("limit-cpu-set")
+
+	// backend options for pipeline compiler
+	server.Config.Pipeline.Proxy.No = c.String("backend-no-proxy")
+	server.Config.Pipeline.Proxy.HTTP = c.String("backend-http-proxy")
+	server.Config.Pipeline.Proxy.HTTPS = c.String("backend-https-proxy")
+
+	// server configuration
+	server.Config.Server.JWTSecret, err = setupJWTSecret(s)
+	if err != nil {
+		return fmt.Errorf("could not setup jwt secret: %w", err)
+	}
+	server.Config.Server.Cert = c.String("server-cert")
+	server.Config.Server.Key = c.String("server-key")
+	server.Config.Server.AgentToken = c.String("agent-secret")
+	serverHost := strings.TrimSuffix(c.String("server-host"), "/")
+	server.Config.Server.Host = serverHost
+	if c.IsSet("server-webhook-host") {
+		server.Config.Server.WebhookHost = c.String("server-webhook-host")
+	} else {
+		server.Config.Server.WebhookHost = serverHost
+	}
+	if c.IsSet("server-dev-oauth-host-deprecated") {
+		server.Config.Server.OAuthHost = c.String("server-dev-oauth-host-deprecated")
+	} else {
+		server.Config.Server.OAuthHost = serverHost
+	}
+	server.Config.Server.Port = c.String("server-addr")
+	server.Config.Server.PortTLS = c.String("server-addr-tls")
+	server.Config.Server.StatusContext = c.String("status-context")
+	server.Config.Server.StatusContextFormat = c.String("status-context-format")
+	server.Config.Server.SessionExpires = c.Duration("session-expires")
+	u, _ := url.Parse(server.Config.Server.Host)
+	rootPath := strings.TrimSuffix(u.Path, "/")
+	if rootPath != "" && !strings.HasPrefix(rootPath, "/") {
+		rootPath = "/" + rootPath
+	}
+	server.Config.Server.RootPath = rootPath
+	server.Config.Server.CustomCSSFile = strings.TrimSpace(c.String("custom-css-file"))
+	server.Config.Server.CustomJsFile = strings.TrimSpace(c.String("custom-js-file"))
+	server.Config.Pipeline.Networks = c.StringSlice("network")
+	server.Config.Pipeline.Volumes = c.StringSlice("volume")
+	server.Config.Pipeline.Privileged = c.StringSlice("escalate")
+	server.Config.WebUI.EnableSwagger = c.Bool("enable-swagger")
+	server.Config.WebUI.SkipVersionCheck = c.Bool("skip-version-check")
+
+	// prometheus
+	server.Config.Prometheus.AuthToken = c.String("prometheus-auth-token")
+
+	// permissions
+	server.Config.Permissions.Open = c.Bool("open")
+	server.Config.Permissions.Admins = permissions.NewAdmins(c.StringSlice("admin"))
+	server.Config.Permissions.Orgs = permissions.NewOrgs(c.StringSlice("orgs"))
+	server.Config.Permissions.OwnersAllowlist = permissions.NewOwnersAllowlist(c.StringSlice("repo-owners"))
+	return nil
 }

@@ -21,14 +21,13 @@ import (
 	"runtime"
 
 	"github.com/rs/zerolog/log"
-	"github.com/tevino/abool/v2"
 	"src.techknowlogick.com/xormigrate"
 	"xorm.io/xorm"
 
 	"go.woodpecker-ci.org/woodpecker/v2/shared/utils"
 )
 
-// perPage020 sets the size of the slice to read per page
+// perPage020 sets the size of the slice to read per page.
 var perPage020 = 100
 
 type oldLogs020 struct {
@@ -90,16 +89,14 @@ var migrateLogs2LogEntries = xormigrate.Migration{
 		logs := make([]*oldLogs020, 0, perPage020)
 		logEntries := make([]*oldLogEntry020, 0, 50)
 
-		sigterm := abool.New()
 		ctx, cancelCtx := context.WithCancelCause(context.Background())
 		defer cancelCtx(nil)
-		_ = utils.WithContextSigtermCallback(ctx, func() {
+		sigtermCtx := utils.WithContextSigtermCallback(ctx, func() {
 			log.Info().Msg("ctrl+c received, stopping current migration")
-			sigterm.Set()
 		})
 
 		for {
-			if sigterm.IsSet() {
+			if sigtermCtx.Err() != nil {
 				return fmt.Errorf("migration 'migrate-logs-to-log_entries' gracefully aborted")
 			}
 

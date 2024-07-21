@@ -26,16 +26,14 @@ const (
 )
 
 func TestGenerateContainerConf(t *testing.T) {
-	gotEnv, gotEntry, gotCmd := GenerateContainerConf([]string{"echo hello world"}, "windows")
+	gotEnv, gotEntry := GenerateContainerConf([]string{"echo hello world"}, "windows")
 	assert.Equal(t, windowsScriptBase64, gotEnv["CI_SCRIPT"])
 	assert.Equal(t, "c:\\root", gotEnv["HOME"])
 	assert.Equal(t, "powershell.exe", gotEnv["SHELL"])
-	assert.Equal(t, []string{"powershell", "-noprofile", "-noninteractive", "-command"}, gotEntry)
-	assert.Equal(t, []string{"[System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($Env:CI_SCRIPT)) | iex"}, gotCmd)
-	gotEnv, gotEntry, gotCmd = GenerateContainerConf([]string{"echo hello world"}, "linux")
+	assert.Equal(t, []string{"powershell", "-noprofile", "-noninteractive", "-command", "[System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($Env:CI_SCRIPT)) | iex"}, gotEntry)
+	gotEnv, gotEntry = GenerateContainerConf([]string{"echo hello world"}, "linux")
 	assert.Equal(t, posixScriptBase64, gotEnv["CI_SCRIPT"])
 	assert.Equal(t, "/root", gotEnv["HOME"])
 	assert.Equal(t, "/bin/sh", gotEnv["SHELL"])
-	assert.Equal(t, []string{"/bin/sh", "-c"}, gotEntry)
-	assert.Equal(t, []string{"echo $CI_SCRIPT | base64 -d | /bin/sh -e"}, gotCmd)
+	assert.Equal(t, []string{"/bin/sh", "-c", "echo $CI_SCRIPT | base64 -d | /bin/sh -e"}, gotEntry)
 }

@@ -31,7 +31,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc/proto"
 )
 
-// set grpc version on compile time to compare against server version response
+// Set grpc version on compile time to compare against server version response.
 const ClientGrpcVersion int32 = proto.Version
 
 type client struct {
@@ -53,12 +53,13 @@ func (c *client) Close() error {
 
 func (c *client) newBackOff() backoff.BackOff {
 	b := backoff.NewExponentialBackOff()
-	b.MaxInterval = 10 * time.Second
-	b.InitialInterval = 10 * time.Millisecond
+	b.MaxElapsedTime = 0
+	b.MaxInterval = 10 * time.Second          //nolint:mnd
+	b.InitialInterval = 10 * time.Millisecond //nolint:mnd
 	return b
 }
 
-// Version returns the server- & grpc-version
+// Version returns the server- & grpc-version.
 func (c *client) Version(ctx context.Context) (*rpc.Version, error) {
 	res, err := c.client.Version(ctx, &proto.Empty{})
 	if err != nil {
@@ -84,15 +85,15 @@ func (c *client) Next(ctx context.Context, f rpc.Filter) (*rpc.Workflow, error) 
 			break
 		}
 
-		// TODO: remove after adding continuous data exchange by something like #536
-		if strings.Contains(err.Error(), "\"too_many_pings\"") {
-			// https://github.com/woodpecker-ci/woodpecker/issues/717#issuecomment-1049365104
-			log.Trace().Err(err).Msg("grpc: to many keepalive pings without sending data")
-		} else {
-			log.Err(err).Msgf("grpc error: done(): code: %v: %s", status.Code(err), err)
-		}
-
 		switch status.Code(err) {
+		case codes.Canceled:
+			if ctx.Err() != nil {
+				// expected as context was canceled
+				log.Debug().Err(err).Msgf("grpc error: next(): context canceled")
+				return nil, nil
+			}
+			log.Error().Err(err).Msgf("grpc error: next(): code: %v", status.Code(err))
+			return nil, err
 		case
 			codes.Aborted,
 			codes.DataLoss,
@@ -100,14 +101,22 @@ func (c *client) Next(ctx context.Context, f rpc.Filter) (*rpc.Workflow, error) 
 			codes.Internal,
 			codes.Unavailable:
 			// non-fatal errors
+			// TODO: remove after adding continuous data exchange by something like #536
+			if strings.Contains(err.Error(), "\"too_many_pings\"") {
+				// https://github.com/woodpecker-ci/woodpecker/issues/717#issuecomment-1049365104
+				log.Trace().Err(err).Msg("grpc: to many keepalive pings without sending data")
+			} else {
+				log.Warn().Err(err).Msgf("grpc error: next(): code: %v", status.Code(err))
+			}
 		default:
+			log.Error().Err(err).Msgf("grpc error: next(): code: %v", status.Code(err))
 			return nil, err
 		}
 
 		select {
 		case <-time.After(retry.NextBackOff()):
 		case <-ctx.Done():
-			return nil, ctx.Err()
+			return nil, nil
 		}
 	}
 
@@ -136,9 +145,15 @@ func (c *client) Wait(ctx context.Context, id string) (err error) {
 			break
 		}
 
-		log.Err(err).Msgf("grpc error: wait(): code: %v: %s", status.Code(err), err)
-
 		switch status.Code(err) {
+		case codes.Canceled:
+			if ctx.Err() != nil {
+				// expected as context was canceled
+				log.Debug().Err(err).Msgf("grpc error: wait(): context canceled")
+				return nil
+			}
+			log.Error().Err(err).Msgf("grpc error: wait(): code: %v", status.Code(err))
+			return err
 		case
 			codes.Aborted,
 			codes.DataLoss,
@@ -146,7 +161,9 @@ func (c *client) Wait(ctx context.Context, id string) (err error) {
 			codes.Internal,
 			codes.Unavailable:
 			// non-fatal errors
+			log.Warn().Err(err).Msgf("grpc error: wait(): code: %v", status.Code(err))
 		default:
+			log.Error().Err(err).Msgf("grpc error: wait(): code: %v", status.Code(err))
 			return err
 		}
 
@@ -160,26 +177,31 @@ func (c *client) Wait(ctx context.Context, id string) (err error) {
 }
 
 // Init signals the workflow is initialized.
-func (c *client) Init(ctx context.Context, id string, state rpc.State) (err error) {
+func (c *client) Init(ctx context.Context, workflowID string, state rpc.WorkflowState) (err error) {
 	retry := c.newBackOff()
 	req := new(proto.InitRequest)
-	req.Id = id
-	req.State = new(proto.State)
-	req.State.Error = state.Error
-	req.State.ExitCode = int32(state.ExitCode)
-	req.State.Exited = state.Exited
-	req.State.Finished = state.Finished
+	req.Id = workflowID
+	req.State = new(proto.WorkflowState)
 	req.State.Started = state.Started
-	req.State.Name = state.Step
+	req.State.Finished = state.Finished
+	req.State.Error = state.Error
 	for {
 		_, err = c.client.Init(ctx, req)
 		if err == nil {
 			break
 		}
 
-		log.Err(err).Msgf("grpc error: init(): code: %v: %s", status.Code(err), err)
+		log.Error().Err(err).Msgf("grpc error: init(): code: %v", status.Code(err))
 
 		switch status.Code(err) {
+		case codes.Canceled:
+			if ctx.Err() != nil {
+				// expected as context was canceled
+				log.Debug().Err(err).Msgf("grpc error: init(): context canceled")
+				return nil
+			}
+			log.Error().Err(err).Msgf("grpc error: init(): code: %v", status.Code(err))
+			return err
 		case
 			codes.Aborted,
 			codes.DataLoss,
@@ -187,7 +209,9 @@ func (c *client) Init(ctx context.Context, id string, state rpc.State) (err erro
 			codes.Internal,
 			codes.Unavailable:
 			// non-fatal errors
+			log.Warn().Err(err).Msgf("grpc error: init(): code: %v", status.Code(err))
 		default:
+			log.Error().Err(err).Msgf("grpc error: init(): code: %v", status.Code(err))
 			return err
 		}
 
@@ -200,27 +224,32 @@ func (c *client) Init(ctx context.Context, id string, state rpc.State) (err erro
 	return nil
 }
 
-// Done signals the work is complete.
-func (c *client) Done(ctx context.Context, id string, state rpc.State) (err error) {
+// Done signals the workflow is complete.
+func (c *client) Done(ctx context.Context, workflowID string, state rpc.WorkflowState) (err error) {
 	retry := c.newBackOff()
 	req := new(proto.DoneRequest)
-	req.Id = id
-	req.State = new(proto.State)
-	req.State.Error = state.Error
-	req.State.ExitCode = int32(state.ExitCode)
-	req.State.Exited = state.Exited
-	req.State.Finished = state.Finished
+	req.Id = workflowID
+	req.State = new(proto.WorkflowState)
 	req.State.Started = state.Started
-	req.State.Name = state.Step
+	req.State.Finished = state.Finished
+	req.State.Error = state.Error
 	for {
 		_, err = c.client.Done(ctx, req)
 		if err == nil {
 			break
 		}
 
-		log.Err(err).Msgf("grpc error: done(): code: %v: %s", status.Code(err), err)
+		log.Error().Err(err).Msgf("grpc error: done(): code: %v", status.Code(err))
 
 		switch status.Code(err) {
+		case codes.Canceled:
+			if ctx.Err() != nil {
+				// expected as context was canceled
+				log.Debug().Err(err).Msgf("grpc error: done(): context canceled")
+				return nil
+			}
+			log.Error().Err(err).Msgf("grpc error: done(): code: %v", status.Code(err))
+			return err
 		case
 			codes.Aborted,
 			codes.DataLoss,
@@ -228,7 +257,9 @@ func (c *client) Done(ctx context.Context, id string, state rpc.State) (err erro
 			codes.Internal,
 			codes.Unavailable:
 			// non-fatal errors
+			log.Warn().Err(err).Msgf("grpc error: done(): code: %v", status.Code(err))
 		default:
+			log.Error().Err(err).Msgf("grpc error: done(): code: %v", status.Code(err))
 			return err
 		}
 
@@ -241,7 +272,7 @@ func (c *client) Done(ctx context.Context, id string, state rpc.State) (err erro
 	return nil
 }
 
-// Extend extends the workflow deadline
+// Extend extends the workflow deadline.
 func (c *client) Extend(ctx context.Context, id string) (err error) {
 	retry := c.newBackOff()
 	req := new(proto.ExtendRequest)
@@ -252,9 +283,17 @@ func (c *client) Extend(ctx context.Context, id string) (err error) {
 			break
 		}
 
-		log.Err(err).Msgf("grpc error: extend(): code: %v: %s", status.Code(err), err)
+		log.Error().Err(err).Msgf("grpc error: extend(): code: %v", status.Code(err))
 
 		switch status.Code(err) {
+		case codes.Canceled:
+			if ctx.Err() != nil {
+				// expected as context was canceled
+				log.Debug().Err(err).Msgf("grpc error: extend(): context canceled")
+				return nil
+			}
+			log.Error().Err(err).Msgf("grpc error: extend(): code: %v", status.Code(err))
+			return err
 		case
 			codes.Aborted,
 			codes.DataLoss,
@@ -262,7 +301,9 @@ func (c *client) Extend(ctx context.Context, id string) (err error) {
 			codes.Internal,
 			codes.Unavailable:
 			// non-fatal errors
+			log.Warn().Err(err).Msgf("grpc error: extend(): code: %v", status.Code(err))
 		default:
+			log.Error().Err(err).Msgf("grpc error: extend(): code: %v", status.Code(err))
 			return err
 		}
 
@@ -276,26 +317,34 @@ func (c *client) Extend(ctx context.Context, id string) (err error) {
 }
 
 // Update updates the workflow state.
-func (c *client) Update(ctx context.Context, id string, state rpc.State) (err error) {
+func (c *client) Update(ctx context.Context, id string, state rpc.StepState) (err error) {
 	retry := c.newBackOff()
 	req := new(proto.UpdateRequest)
 	req.Id = id
-	req.State = new(proto.State)
-	req.State.Error = state.Error
-	req.State.ExitCode = int32(state.ExitCode)
-	req.State.Exited = state.Exited
-	req.State.Finished = state.Finished
+	req.State = new(proto.StepState)
+	req.State.StepUuid = state.StepUUID
 	req.State.Started = state.Started
-	req.State.Name = state.Step
+	req.State.Finished = state.Finished
+	req.State.Exited = state.Exited
+	req.State.ExitCode = int32(state.ExitCode)
+	req.State.Error = state.Error
 	for {
 		_, err = c.client.Update(ctx, req)
 		if err == nil {
 			break
 		}
 
-		log.Err(err).Msgf("grpc error: update(): code: %v: %s", status.Code(err), err)
+		log.Error().Err(err).Msgf("grpc error: update(): code: %v", status.Code(err))
 
 		switch status.Code(err) {
+		case codes.Canceled:
+			if ctx.Err() != nil {
+				// expected as context was canceled
+				log.Debug().Err(err).Msgf("grpc error: update(): context canceled")
+				return nil
+			}
+			log.Error().Err(err).Msgf("grpc error: update(): code: %v", status.Code(err))
+			return err
 		case
 			codes.Aborted,
 			codes.DataLoss,
@@ -303,7 +352,9 @@ func (c *client) Update(ctx context.Context, id string, state rpc.State) (err er
 			codes.Internal,
 			codes.Unavailable:
 			// non-fatal errors
+			log.Warn().Err(err).Msgf("grpc error: update(): code: %v", status.Code(err))
 		default:
+			log.Error().Err(err).Msgf("grpc error: update(): code: %v", status.Code(err))
 			return err
 		}
 
@@ -332,9 +383,15 @@ func (c *client) Log(ctx context.Context, logEntry *rpc.LogEntry) (err error) {
 			break
 		}
 
-		log.Err(err).Msgf("grpc error: log(): code: %v: %s", status.Code(err), err)
-
 		switch status.Code(err) {
+		case codes.Canceled:
+			if ctx.Err() != nil {
+				// expected as context was canceled
+				log.Debug().Err(err).Msgf("grpc error: log(): context canceled")
+				return nil
+			}
+			log.Error().Err(err).Msgf("grpc error: log(): code: %v", status.Code(err))
+			return err
 		case
 			codes.Aborted,
 			codes.DataLoss,
@@ -342,7 +399,9 @@ func (c *client) Log(ctx context.Context, logEntry *rpc.LogEntry) (err error) {
 			codes.Internal,
 			codes.Unavailable:
 			// non-fatal errors
+			log.Warn().Err(err).Msgf("grpc error: log(): code: %v", status.Code(err))
 		default:
+			log.Error().Err(err).Msgf("grpc error: log(): code: %v", status.Code(err))
 			return err
 		}
 
@@ -382,6 +441,14 @@ func (c *client) ReportHealth(ctx context.Context) (err error) {
 			return nil
 		}
 		switch status.Code(err) {
+		case codes.Canceled:
+			if ctx.Err() != nil {
+				// expected as context was canceled
+				log.Debug().Err(err).Msgf("grpc error: report_health(): context canceled")
+				return nil
+			}
+			log.Error().Err(err).Msgf("grpc error: report_health(): code: %v", status.Code(err))
+			return err
 		case
 			codes.Aborted,
 			codes.DataLoss,
@@ -389,7 +456,9 @@ func (c *client) ReportHealth(ctx context.Context) (err error) {
 			codes.Internal,
 			codes.Unavailable:
 			// non-fatal errors
+			log.Warn().Err(err).Msgf("grpc error: report_health(): code: %v", status.Code(err))
 		default:
+			log.Error().Err(err).Msgf("grpc error: report_health(): code: %v", status.Code(err))
 			return err
 		}
 

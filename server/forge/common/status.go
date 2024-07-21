@@ -27,8 +27,7 @@ import (
 
 func GetPipelineStatusContext(repo *model.Repo, pipeline *model.Pipeline, workflow *model.Workflow) string {
 	event := string(pipeline.Event)
-	switch pipeline.Event {
-	case model.EventPull:
+	if pipeline.Event == model.EventPull {
 		event = "pr"
 	}
 

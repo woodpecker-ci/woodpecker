@@ -30,7 +30,7 @@ import (
 
 // GetAgents
 //
-//	@Summary	Get agent list
+//	@Summary	List agents
 //	@Router		/agents [get]
 //	@Produce	json
 //	@Success	200	{array}	Agent
@@ -49,7 +49,7 @@ func GetAgents(c *gin.Context) {
 
 // GetAgent
 //
-//	@Summary	Get agent information
+//	@Summary	Get an agent
 //	@Router		/agents/{agent} [get]
 //	@Produce	json
 //	@Success	200	{object}	Agent
@@ -65,7 +65,7 @@ func GetAgent(c *gin.Context) {
 
 	agent, err := store.FromContext(c).AgentFind(agentID)
 	if err != nil {
-		handleDbError(c, err)
+		handleDBError(c, err)
 		return
 	}
 	c.JSON(http.StatusOK, agent)
@@ -73,7 +73,7 @@ func GetAgent(c *gin.Context) {
 
 // GetAgentTasks
 //
-//	@Summary	Get agent tasks
+//	@Summary	List agent tasks
 //	@Router		/agents/{agent}/tasks [get]
 //	@Produce	json
 //	@Success	200	{array}	Task
@@ -89,7 +89,7 @@ func GetAgentTasks(c *gin.Context) {
 
 	agent, err := store.FromContext(c).AgentFind(agentID)
 	if err != nil {
-		handleDbError(c, err)
+		handleDBError(c, err)
 		return
 	}
 
@@ -106,7 +106,7 @@ func GetAgentTasks(c *gin.Context) {
 
 // PatchAgent
 //
-//	@Summary	Update agent information
+//	@Summary	Update an agent
 //	@Router		/agents/{agent} [patch]
 //	@Produce	json
 //	@Success	200	{object}	Agent
@@ -132,11 +132,14 @@ func PatchAgent(c *gin.Context) {
 
 	agent, err := _store.AgentFind(agentID)
 	if err != nil {
-		handleDbError(c, err)
+		handleDBError(c, err)
 		return
 	}
 	agent.Name = in.Name
 	agent.NoSchedule = in.NoSchedule
+	if agent.NoSchedule {
+		server.Config.Services.Queue.KickAgentWorkers(agent.ID)
+	}
 
 	err = _store.AgentUpdate(agent)
 	if err != nil {
@@ -149,7 +152,8 @@ func PatchAgent(c *gin.Context) {
 
 // PostAgent
 //
-//	@Summary	Create a new agent with a random token so a new agent can connect to the server
+//	@Summary	Create a new agent
+//	@Description Creates a new agent with a random token
 //	@Router		/agents [post]
 //	@Produce	json
 //	@Success	200	{object}	Agent
@@ -201,9 +205,22 @@ func DeleteAgent(c *gin.Context) {
 
 	agent, err := _store.AgentFind(agentID)
 	if err != nil {
-		handleDbError(c, err)
+		handleDBError(c, err)
 		return
 	}
+
+	// prevent deletion of agents with running tasks
+	info := server.Config.Services.Queue.Info(c)
+	for _, task := range info.Running {
+		if task.AgentID == agent.ID {
+			c.String(http.StatusConflict, "Agent has running tasks")
+			return
+		}
+	}
+
+	// kick workers to remove the agent from the queue
+	server.Config.Services.Queue.KickAgentWorkers(agent.ID)
+
 	if err = _store.AgentDelete(agent); err != nil {
 		c.String(http.StatusInternalServerError, "Error deleting user. %s", err)
 		return

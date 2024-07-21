@@ -24,7 +24,7 @@ import (
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/resource"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/common"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
@@ -32,27 +32,29 @@ import (
 
 const (
 	StepLabel = "step"
+	podPrefix = "wp-"
 )
 
-func mkPod(namespace, name, image, workDir, goos, serviceAccountName string,
-	pool, privileged bool,
-	commands, vols, pullSecretNames []string,
-	labels, annotations, env, nodeSelector map[string]string,
-	extraHosts []types.HostAlias, tolerations []types.Toleration, resources types.Resources,
-	securityContext *types.SecurityContext, securityContextConfig SecurityContextConfig,
-) (*v1.Pod, error) {
+func mkPod(step *types.Step, config *config, podName, goos string, options BackendOptions) (*v1.Pod, error) {
 	var err error
 
-	meta := podMeta(name, namespace, labels, annotations)
-
-	spec, err := podSpec(serviceAccountName, vols, pullSecretNames, env, nodeSelector, extraHosts, tolerations,
-		securityContext, securityContextConfig)
+	nsp := newNativeSecretsProcessor(config, options.Secrets)
+	err = nsp.process()
 	if err != nil {
 		return nil, err
 	}
 
-	container, err := podContainer(name, image, workDir, goos, pool, privileged, commands, vols, env,
-		resources, securityContext)
+	meta, err := podMeta(step, config, options, podName)
+	if err != nil {
+		return nil, err
+	}
+
+	spec, err := podSpec(step, config, options, nsp)
+	if err != nil {
+		return nil, err
+	}
+
+	container, err := podContainer(step, podName, goos, options, nsp)
 	if err != nil {
 		return nil, err
 	}
@@ -74,86 +76,149 @@ func stepToPodName(step *types.Step) (name string, err error) {
 }
 
 func podName(step *types.Step) (string, error) {
-	return dnsName(step.Name)
+	return dnsName(podPrefix + step.UUID)
 }
 
-func podMeta(name, namespace string, labels, annotations map[string]string) metav1.ObjectMeta {
-	meta := metav1.ObjectMeta{
-		Name:        name,
-		Namespace:   namespace,
-		Annotations: annotations,
+func podMeta(step *types.Step, config *config, options BackendOptions, podName string) (meta_v1.ObjectMeta, error) {
+	var err error
+	meta := meta_v1.ObjectMeta{
+		Name:        podName,
+		Namespace:   config.Namespace,
+		Annotations: podAnnotations(config, options, podName),
 	}
 
-	if labels == nil {
-		labels = make(map[string]string, 1)
+	meta.Labels, err = podLabels(step, config, options)
+	if err != nil {
+		return meta, err
 	}
-	labels[StepLabel] = name
-	meta.Labels = labels
 
-	return meta
+	return meta, nil
 }
 
-func podSpec(serviceAccountName string, vols, pullSecretNames []string, env, backendNodeSelector map[string]string,
-	extraHosts []types.HostAlias, backendTolerations []types.Toleration,
-	securityContext *types.SecurityContext, securityContextConfig SecurityContextConfig,
-) (v1.PodSpec, error) {
+func podLabels(step *types.Step, config *config, options BackendOptions) (map[string]string, error) {
+	var err error
+	labels := make(map[string]string)
+
+	if len(options.Labels) > 0 {
+		if config.PodLabelsAllowFromStep {
+			log.Trace().Msgf("using labels from the backend options: %v", options.Labels)
+			maps.Copy(labels, options.Labels)
+		} else {
+			log.Debug().Msg("Pod labels were defined in backend options, but its using disallowed by instance configuration")
+		}
+	}
+	if len(config.PodLabels) > 0 {
+		log.Trace().Msgf("using labels from the configuration: %v", config.PodLabels)
+		maps.Copy(labels, config.PodLabels)
+	}
+	if step.Type == types.StepTypeService {
+		labels[ServiceLabel], _ = serviceName(step)
+	}
+	labels[StepLabel], err = stepLabel(step)
+	if err != nil {
+		return labels, err
+	}
+
+	return labels, nil
+}
+
+func stepLabel(step *types.Step) (string, error) {
+	return toDNSName(step.Name)
+}
+
+func podAnnotations(config *config, options BackendOptions, podName string) map[string]string {
+	annotations := make(map[string]string)
+
+	if len(options.Annotations) > 0 {
+		if config.PodAnnotationsAllowFromStep {
+			log.Trace().Msgf("using annotations from the backend options: %v", options.Annotations)
+			maps.Copy(annotations, options.Annotations)
+		} else {
+			log.Debug().Msg("Pod annotations were defined in backend options, but its using disallowed by instance configuration ")
+		}
+	}
+	if len(config.PodAnnotations) > 0 {
+		log.Trace().Msgf("using annotations from the configuration: %v", config.PodAnnotations)
+		maps.Copy(annotations, config.PodAnnotations)
+	}
+	securityContext := options.SecurityContext
+	if securityContext != nil {
+		key, value := apparmorAnnotation(podName, securityContext.ApparmorProfile)
+		if key != nil && value != nil {
+			annotations[*key] = *value
+		}
+	}
+
+	return annotations
+}
+
+func podSpec(step *types.Step, config *config, options BackendOptions, nsp nativeSecretsProcessor) (v1.PodSpec, error) {
 	var err error
 	spec := v1.PodSpec{
 		RestartPolicy:      v1.RestartPolicyNever,
-		ServiceAccountName: serviceAccountName,
-		ImagePullSecrets:   imagePullSecretsReferences(pullSecretNames),
+		RuntimeClassName:   options.RuntimeClassName,
+		ServiceAccountName: options.ServiceAccountName,
+		HostAliases:        hostAliases(step.ExtraHosts),
+		NodeSelector:       nodeSelector(options.NodeSelector, config.PodNodeSelector, step.Environment["CI_SYSTEM_PLATFORM"]),
+		Tolerations:        tolerations(options.Tolerations),
+		SecurityContext:    podSecurityContext(options.SecurityContext, config.SecurityContext, step.Privileged),
 	}
-
-	spec.HostAliases = hostAliases(extraHosts)
-	spec.NodeSelector = nodeSelector(backendNodeSelector, env["CI_SYSTEM_PLATFORM"])
-	spec.Tolerations = tolerations(backendTolerations)
-	spec.SecurityContext = podSecurityContext(securityContext, securityContextConfig)
-	spec.Volumes, err = volumes(vols)
+	spec.Volumes, err = pvcVolumes(step.Volumes)
 	if err != nil {
 		return spec, err
 	}
 
+	log.Trace().Msgf("using the image pull secrets: %v", config.ImagePullSecretNames)
+	spec.ImagePullSecrets = secretsReferences(config.ImagePullSecretNames)
+
+	spec.Volumes = append(spec.Volumes, nsp.volumes...)
+
 	return spec, nil
 }
 
-func podContainer(name, image, workDir, goos string, pull, privileged bool, commands, volumes []string, env map[string]string, resources types.Resources,
-	securityContext *types.SecurityContext,
-) (v1.Container, error) {
+func podContainer(step *types.Step, podName, goos string, options BackendOptions, nsp nativeSecretsProcessor) (v1.Container, error) {
 	var err error
 	container := v1.Container{
-		Name:       name,
-		Image:      image,
-		WorkingDir: workDir,
+		Name:            podName,
+		Image:           step.Image,
+		WorkingDir:      step.WorkingDir,
+		Ports:           containerPorts(step.Ports),
+		SecurityContext: containerSecurityContext(options.SecurityContext, step.Privileged),
 	}
 
-	if pull {
+	if step.Pull {
 		container.ImagePullPolicy = v1.PullAlways
 	}
 
-	if len(commands) != 0 {
-		scriptEnv, command, args := common.GenerateContainerConf(commands, goos)
+	if len(step.Commands) > 0 {
+		scriptEnv, command := common.GenerateContainerConf(step.Commands, goos)
 		container.Command = command
-		container.Args = args
-		maps.Copy(env, scriptEnv)
+		maps.Copy(step.Environment, scriptEnv)
+	}
+	if len(step.Entrypoint) > 0 {
+		container.Command = step.Entrypoint
 	}
 
-	container.Env = mapToEnvVars(env)
-	container.SecurityContext = containerSecurityContext(securityContext, privileged)
+	container.Env = mapToEnvVars(step.Environment)
 
-	container.Resources, err = resourceRequirements(resources)
+	container.Resources, err = resourceRequirements(options.Resources)
 	if err != nil {
 		return container, err
 	}
 
-	container.VolumeMounts, err = volumeMounts(volumes)
+	container.VolumeMounts, err = volumeMounts(step.Volumes)
 	if err != nil {
 		return container, err
 	}
+
+	container.EnvFrom = append(container.EnvFrom, nsp.envFromSources...)
+	container.Env = append(container.Env, nsp.envVars...)
+	container.VolumeMounts = append(container.VolumeMounts, nsp.mounts...)
 
 	return container, nil
 }
 
-func volumes(volumes []string) ([]v1.Volume, error) {
+func pvcVolumes(volumes []string) ([]v1.Volume, error) {
 	var vols []v1.Volume
 
 	for _, v := range volumes {
@@ -161,13 +226,13 @@ func volumes(volumes []string) ([]v1.Volume, error) {
 		if err != nil {
 			return nil, err
 		}
-		vols = append(vols, volume(volumeName))
+		vols = append(vols, pvcVolume(volumeName))
 	}
 
 	return vols, nil
 }
 
-func volume(name string) v1.Volume {
+func pvcVolume(name string) v1.Volume {
 	pvcSource := v1.PersistentVolumeClaimVolumeSource{
 		ClaimName: name,
 		ReadOnly:  false,
@@ -202,9 +267,24 @@ func volumeMount(name, path string) v1.VolumeMount {
 	}
 }
 
-// Here is the service IPs (placed in /etc/hosts in the Pod)
+func containerPorts(ports []types.Port) []v1.ContainerPort {
+	containerPorts := make([]v1.ContainerPort, len(ports))
+	for i, port := range ports {
+		containerPorts[i] = containerPort(port)
+	}
+	return containerPorts
+}
+
+func containerPort(port types.Port) v1.ContainerPort {
+	return v1.ContainerPort{
+		ContainerPort: int32(port.Number),
+		Protocol:      v1.Protocol(strings.ToUpper(port.Protocol)),
+	}
+}
+
+// Here is the service IPs (placed in /etc/hosts in the Pod).
 func hostAliases(extraHosts []types.HostAlias) []v1.HostAlias {
-	hostAliases := []v1.HostAlias{}
+	var hostAliases []v1.HostAlias
 	for _, extraHost := range extraHosts {
 		hostAlias := hostAlias(extraHost)
 		hostAliases = append(hostAliases, hostAlias)
@@ -219,23 +299,7 @@ func hostAlias(extraHost types.HostAlias) v1.HostAlias {
 	}
 }
 
-func imagePullSecretsReferences(imagePullSecretNames []string) []v1.LocalObjectReference {
-	log.Trace().Msgf("Using the image pull secrets: %v", imagePullSecretNames)
-
-	secretReferences := make([]v1.LocalObjectReference, len(imagePullSecretNames))
-	for i, imagePullSecretName := range imagePullSecretNames {
-		secretReferences[i] = imagePullSecretsReference(imagePullSecretName)
-	}
-	return secretReferences
-}
-
-func imagePullSecretsReference(imagePullSecretName string) v1.LocalObjectReference {
-	return v1.LocalObjectReference{
-		Name: imagePullSecretName,
-	}
-}
-
-func resourceRequirements(resources types.Resources) (v1.ResourceRequirements, error) {
+func resourceRequirements(resources Resources) (v1.ResourceRequirements, error) {
 	var err error
 	requirements := v1.ResourceRequirements{}
 
@@ -258,35 +322,40 @@ func resourceList(resources map[string]string) (v1.ResourceList, error) {
 		resName := v1.ResourceName(key)
 		resVal, err := resource.ParseQuantity(val)
 		if err != nil {
-			return nil, fmt.Errorf("resource request '%v' quantity '%v': %w", key, val, err)
+			return nil, fmt.Errorf("resource request '%s' quantity '%s': %w", key, val, err)
 		}
 		requestResources[resName] = resVal
 	}
 	return requestResources, nil
 }
 
-func nodeSelector(backendNodeSelector map[string]string, platform string) map[string]string {
+func nodeSelector(backendNodeSelector, configNodeSelector map[string]string, platform string) map[string]string {
 	nodeSelector := make(map[string]string)
 
 	if platform != "" {
 		arch := strings.Split(platform, "/")[1]
 		nodeSelector[v1.LabelArchStable] = arch
-		log.Trace().Msgf("Using the node selector from the Agent's platform: %v", nodeSelector)
+		log.Trace().Msgf("using the node selector from the Agent's platform: %v", nodeSelector)
+	}
+
+	if len(configNodeSelector) > 0 {
+		log.Trace().Msgf("appending labels to the node selector from the configuration: %v", configNodeSelector)
+		maps.Copy(nodeSelector, configNodeSelector)
 	}
 
 	if len(backendNodeSelector) > 0 {
-		log.Trace().Msgf("Appending labels to the node selector from the backend options: %v", backendNodeSelector)
+		log.Trace().Msgf("appending labels to the node selector from the backend options: %v", backendNodeSelector)
 		maps.Copy(nodeSelector, backendNodeSelector)
 	}
 
 	return nodeSelector
 }
 
-func tolerations(backendTolerations []types.Toleration) []v1.Toleration {
+func tolerations(backendTolerations []Toleration) []v1.Toleration {
 	var tolerations []v1.Toleration
 
 	if len(backendTolerations) > 0 {
-		log.Trace().Msgf("Tolerations that will be used in the backend options: %v", backendTolerations)
+		log.Trace().Msgf("tolerations that will be used in the backend options: %v", backendTolerations)
 		for _, backendToleration := range backendTolerations {
 			toleration := toleration(backendToleration)
 			tolerations = append(tolerations, toleration)
@@ -296,7 +365,7 @@ func tolerations(backendTolerations []types.Toleration) []v1.Toleration {
 	return tolerations
 }
 
-func toleration(backendToleration types.Toleration) v1.Toleration {
+func toleration(backendToleration Toleration) v1.Toleration {
 	return v1.Toleration{
 		Key:               backendToleration.Key,
 		Operator:          v1.TolerationOperator(backendToleration.Operator),
@@ -306,60 +375,130 @@ func toleration(backendToleration types.Toleration) v1.Toleration {
 	}
 }
 
-func podSecurityContext(sc *types.SecurityContext, secCtxConf SecurityContextConfig) *v1.PodSecurityContext {
+func podSecurityContext(sc *SecurityContext, secCtxConf SecurityContextConfig, stepPrivileged bool) *v1.PodSecurityContext {
 	var (
 		nonRoot *bool
 		user    *int64
 		group   *int64
 		fsGroup *int64
+		seccomp *v1.SeccompProfile
 	)
 
-	if sc != nil && sc.RunAsNonRoot != nil {
-		if *sc.RunAsNonRoot {
-			nonRoot = sc.RunAsNonRoot // true
-		}
-	} else if secCtxConf.RunAsNonRoot {
-		nonRoot = &secCtxConf.RunAsNonRoot // true
+	if secCtxConf.RunAsNonRoot {
+		nonRoot = newBool(true)
 	}
 
 	if sc != nil {
-		user = sc.RunAsUser
-		group = sc.RunAsGroup
-		fsGroup = sc.FSGroup
+		// only allow to set user if its not root or step is privileged
+		if sc.RunAsUser != nil && (*sc.RunAsUser != 0 || stepPrivileged) {
+			user = sc.RunAsUser
+		}
+
+		// only allow to set group if its not root or step is privileged
+		if sc.RunAsGroup != nil && (*sc.RunAsGroup != 0 || stepPrivileged) {
+			group = sc.RunAsGroup
+		}
+
+		// only allow to set fsGroup if its not root or step is privileged
+		if sc.FSGroup != nil && (*sc.FSGroup != 0 || stepPrivileged) {
+			fsGroup = sc.FSGroup
+		}
+
+		// only allow to set nonRoot if it's not set globally already
+		if nonRoot == nil && sc.RunAsNonRoot != nil {
+			nonRoot = sc.RunAsNonRoot
+		}
+
+		seccomp = seccompProfile(sc.SeccompProfile)
 	}
 
-	if nonRoot == nil && user == nil && group == nil && fsGroup == nil {
+	if nonRoot == nil && user == nil && group == nil && fsGroup == nil && seccomp == nil {
 		return nil
 	}
 
 	securityContext := &v1.PodSecurityContext{
-		RunAsNonRoot: nonRoot,
-		RunAsUser:    user,
-		RunAsGroup:   group,
-		FSGroup:      fsGroup,
+		RunAsNonRoot:   nonRoot,
+		RunAsUser:      user,
+		RunAsGroup:     group,
+		FSGroup:        fsGroup,
+		SeccompProfile: seccomp,
 	}
-	log.Trace().Msgf("Pod security context that will be used: %v", securityContext)
+	log.Trace().Msgf("pod security context that will be used: %v", securityContext)
 	return securityContext
 }
 
-func containerSecurityContext(sc *types.SecurityContext, stepPrivileged bool) *v1.SecurityContext {
-	var privileged *bool
+func seccompProfile(scp *SecProfile) *v1.SeccompProfile {
+	if scp == nil || len(scp.Type) == 0 {
+		return nil
+	}
+	log.Trace().Msgf("using seccomp profile: %v", scp)
 
-	if sc != nil && sc.Privileged != nil && *sc.Privileged {
-		privileged = sc.Privileged // true
-	} else if stepPrivileged {
-		privileged = &stepPrivileged // true
+	seccompProfile := &v1.SeccompProfile{
+		Type: v1.SeccompProfileType(scp.Type),
+	}
+	if len(scp.LocalhostProfile) > 0 {
+		seccompProfile.LocalhostProfile = &scp.LocalhostProfile
 	}
 
-	if privileged == nil {
+	return seccompProfile
+}
+
+func containerSecurityContext(sc *SecurityContext, stepPrivileged bool) *v1.SecurityContext {
+	if !stepPrivileged {
 		return nil
 	}
 
-	securityContext := &v1.SecurityContext{
-		Privileged: privileged,
+	privileged := false
+
+	// if security context privileged is set explicitly
+	if sc != nil && sc.Privileged != nil && *sc.Privileged {
+		privileged = true
 	}
-	log.Trace().Msgf("Container security context that will be used: %v", securityContext)
-	return securityContext
+
+	// if security context privileged is not set explicitly, but step is privileged
+	if (sc == nil || sc.Privileged == nil) && stepPrivileged {
+		privileged = true
+	}
+
+	if privileged {
+		securityContext := &v1.SecurityContext{
+			Privileged: newBool(true),
+		}
+		log.Trace().Msgf("container security context that will be used: %v", securityContext)
+		return securityContext
+	}
+
+	return nil
+}
+
+func apparmorAnnotation(containerName string, scp *SecProfile) (*string, *string) {
+	if scp == nil {
+		return nil, nil
+	}
+	log.Trace().Msgf("using AppArmor profile: %v", scp)
+
+	var (
+		profileType string
+		profilePath string
+	)
+
+	if scp.Type == SecProfileTypeRuntimeDefault {
+		profileType = "runtime"
+		profilePath = "default"
+	}
+
+	if scp.Type == SecProfileTypeLocalhost {
+		profileType = "localhost"
+		profilePath = scp.LocalhostProfile
+	}
+
+	if len(profileType) == 0 {
+		return nil, nil
+	}
+
+	key := v1.DeprecatedAppArmorBetaContainerAnnotationKeyPrefix + containerName
+	value := profileType + "/" + profilePath
+	return &key, &value
 }
 
 func mapToEnvVars(m map[string]string) []v1.EnvVar {
@@ -373,31 +512,27 @@ func mapToEnvVars(m map[string]string) []v1.EnvVar {
 	return ev
 }
 
-func startPod(ctx context.Context, engine *kube, step *types.Step) (*v1.Pod, error) {
-	podName, err := podName(step)
+func startPod(ctx context.Context, engine *kube, step *types.Step, options BackendOptions) (*v1.Pod, error) {
+	podName, err := stepToPodName(step)
+	if err != nil {
+		return nil, err
+	}
+	engineConfig := engine.getConfig()
+	pod, err := mkPod(step, engineConfig, podName, engine.goos, options)
 	if err != nil {
 		return nil, err
 	}
 
-	pod, err := mkPod(engine.config.Namespace, podName, step.Image, step.WorkingDir, engine.goos, step.BackendOptions.Kubernetes.ServiceAccountName,
-		step.Pull, step.Privileged,
-		step.Commands, step.Volumes, engine.config.ImagePullSecretNames,
-		engine.config.PodLabels, engine.config.PodAnnotations, step.Environment, step.BackendOptions.Kubernetes.NodeSelector,
-		step.ExtraHosts, step.BackendOptions.Kubernetes.Tolerations, step.BackendOptions.Kubernetes.Resources, step.BackendOptions.Kubernetes.SecurityContext, engine.config.SecurityContext)
-	if err != nil {
-		return nil, err
-	}
-
-	log.Trace().Msgf("Creating pod: %s", pod.Name)
-	return engine.client.CoreV1().Pods(engine.config.Namespace).Create(ctx, pod, metav1.CreateOptions{})
+	log.Trace().Msgf("creating pod: %s", pod.Name)
+	return engine.client.CoreV1().Pods(engineConfig.Namespace).Create(ctx, pod, meta_v1.CreateOptions{})
 }
 
-func stopPod(ctx context.Context, engine *kube, step *types.Step, deleteOpts metav1.DeleteOptions) error {
-	podName, err := podName(step)
+func stopPod(ctx context.Context, engine *kube, step *types.Step, deleteOpts meta_v1.DeleteOptions) error {
+	podName, err := stepToPodName(step)
 	if err != nil {
 		return err
 	}
-	log.Trace().Str("name", podName).Msg("Deleting pod")
+	log.Trace().Str("name", podName).Msg("deleting pod")
 
 	err = engine.client.CoreV1().Pods(engine.config.Namespace).Delete(ctx, podName, deleteOpts)
 	if errors.IsNotFound(err) {

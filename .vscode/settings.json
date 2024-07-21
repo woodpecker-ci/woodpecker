@@ -8,8 +8,12 @@
   },
   "go.lintTool": "golangci-lint",
   "go.lintFlags": ["--fast"],
+  "go.buildTags": "test",
   "eslint.workingDirectories": ["./web"],
-  "prettier.configPath": "./web/.prettierrc.js",
   "prettier.ignorePath": "./web/.prettierignore",
-  "cSpell.words": ["Curr", "doublestar", "ERRORLEVEL", "multierr"]
+  // Auto fix
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit",
+    "source.organizeImports": "never"
+  }
 }

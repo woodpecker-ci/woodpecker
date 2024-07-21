@@ -19,11 +19,10 @@ import (
 	"encoding/json"
 
 	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promauto"
+	prometheus_auto "github.com/prometheus/client_golang/prometheus/promauto"
 
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc/proto"
-	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
 	"go.woodpecker-ci.org/woodpecker/v2/server/logging"
 	"go.woodpecker-ci.org/woodpecker/v2/server/pubsub"
 	"go.woodpecker-ci.org/woodpecker/v2/server/queue"
@@ -37,19 +36,18 @@ type WoodpeckerServer struct {
 	peer RPC
 }
 
-func NewWoodpeckerServer(forge forge.Forge, queue queue.Queue, logger logging.Log, pubsub *pubsub.Publisher, store store.Store) proto.WoodpeckerServer {
-	pipelineTime := promauto.NewGaugeVec(prometheus.GaugeOpts{
+func NewWoodpeckerServer(queue queue.Queue, logger logging.Log, pubsub *pubsub.Publisher, store store.Store) proto.WoodpeckerServer {
+	pipelineTime := prometheus_auto.NewGaugeVec(prometheus.GaugeOpts{
 		Namespace: "woodpecker",
 		Name:      "pipeline_time",
 		Help:      "Pipeline time.",
 	}, []string{"repo", "branch", "status", "pipeline"})
-	pipelineCount := promauto.NewCounterVec(prometheus.CounterOpts{
+	pipelineCount := prometheus_auto.NewCounterVec(prometheus.CounterOpts{
 		Namespace: "woodpecker",
 		Name:      "pipeline_count",
 		Help:      "Pipeline count.",
 	}, []string{"repo", "branch", "status", "pipeline"})
 	peer := RPC{
-		forge:         forge,
 		store:         store,
 		queue:         queue,
 		pubsub:        pubsub,
@@ -74,29 +72,23 @@ func (s *WoodpeckerServer) Next(c context.Context, req *proto.NextRequest) (*pro
 
 	res := new(proto.NextResponse)
 	pipeline, err := s.peer.Next(c, filter)
-	if err != nil {
-		return res, err
-	}
-	if pipeline == nil {
+	if err != nil || pipeline == nil {
 		return res, err
 	}
 
 	res.Workflow = new(proto.Workflow)
 	res.Workflow.Id = pipeline.ID
 	res.Workflow.Timeout = pipeline.Timeout
-	res.Workflow.Payload, _ = json.Marshal(pipeline.Config)
+	res.Workflow.Payload, err = json.Marshal(pipeline.Config)
 
 	return res, err
 }
 
 func (s *WoodpeckerServer) Init(c context.Context, req *proto.InitRequest) (*proto.Empty, error) {
-	state := rpc.State{
-		Error:    req.GetState().GetError(),
-		ExitCode: int(req.GetState().GetExitCode()),
-		Finished: req.GetState().GetFinished(),
+	state := rpc.WorkflowState{
 		Started:  req.GetState().GetStarted(),
-		Step:     req.GetState().GetName(),
-		Exited:   req.GetState().GetExited(),
+		Finished: req.GetState().GetFinished(),
+		Error:    req.GetState().GetError(),
 	}
 	res := new(proto.Empty)
 	err := s.peer.Init(c, req.GetId(), state)
@@ -104,13 +96,13 @@ func (s *WoodpeckerServer) Init(c context.Context, req *proto.InitRequest) (*pro
 }
 
 func (s *WoodpeckerServer) Update(c context.Context, req *proto.UpdateRequest) (*proto.Empty, error) {
-	state := rpc.State{
+	state := rpc.StepState{
+		StepUUID: req.GetState().GetStepUuid(),
+		Started:  req.GetState().GetStarted(),
+		Finished: req.GetState().GetFinished(),
+		Exited:   req.GetState().GetExited(),
 		Error:    req.GetState().GetError(),
 		ExitCode: int(req.GetState().GetExitCode()),
-		Finished: req.GetState().GetFinished(),
-		Started:  req.GetState().GetStarted(),
-		Step:     req.GetState().GetName(),
-		Exited:   req.GetState().GetExited(),
 	}
 	res := new(proto.Empty)
 	err := s.peer.Update(c, req.GetId(), state)
@@ -118,13 +110,10 @@ func (s *WoodpeckerServer) Update(c context.Context, req *proto.UpdateRequest) (
 }
 
 func (s *WoodpeckerServer) Done(c context.Context, req *proto.DoneRequest) (*proto.Empty, error) {
-	state := rpc.State{
-		Error:    req.GetState().GetError(),
-		ExitCode: int(req.GetState().GetExitCode()),
-		Finished: req.GetState().GetFinished(),
+	state := rpc.WorkflowState{
 		Started:  req.GetState().GetStarted(),
-		Step:     req.GetState().GetName(),
-		Exited:   req.GetState().GetExited(),
+		Finished: req.GetState().GetFinished(),
+		Error:    req.GetState().GetError(),
 	}
 	res := new(proto.Empty)
 	err := s.peer.Done(c, req.GetId(), state)

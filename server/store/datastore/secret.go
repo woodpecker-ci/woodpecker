@@ -20,21 +20,21 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
-const orderSecretsBy = "secret_name"
+const orderSecretsBy = "name"
 
 func (s storage) SecretFind(repo *model.Repo, name string) (*model.Secret, error) {
 	secret := new(model.Secret)
 	return secret, wrapGet(s.engine.Where(
-		builder.Eq{"secret_repo_id": repo.ID, "secret_name": name},
+		builder.Eq{"repo_id": repo.ID, "name": name},
 	).Get(secret))
 }
 
 func (s storage) SecretList(repo *model.Repo, includeGlobalAndOrgSecrets bool, p *model.ListOptions) ([]*model.Secret, error) {
 	var secrets []*model.Secret
-	var cond builder.Cond = builder.Eq{"secret_repo_id": repo.ID}
+	var cond builder.Cond = builder.Eq{"repo_id": repo.ID}
 	if includeGlobalAndOrgSecrets {
-		cond = cond.Or(builder.Eq{"secret_org_id": repo.OrgID}).
-			Or(builder.And(builder.Eq{"secret_org_id": 0}, builder.Eq{"secret_repo_id": 0}))
+		cond = cond.Or(builder.Eq{"org_id": repo.OrgID}).
+			Or(builder.And(builder.Eq{"org_id": 0}, builder.Eq{"repo_id": 0}))
 	}
 	return secrets, s.paginate(p).Where(cond).OrderBy(orderSecretsBy).Find(&secrets)
 }
@@ -62,25 +62,25 @@ func (s storage) SecretDelete(secret *model.Secret) error {
 func (s storage) OrgSecretFind(orgID int64, name string) (*model.Secret, error) {
 	secret := new(model.Secret)
 	return secret, wrapGet(s.engine.Where(
-		builder.Eq{"secret_org_id": orgID, "secret_name": name},
+		builder.Eq{"org_id": orgID, "name": name},
 	).Get(secret))
 }
 
 func (s storage) OrgSecretList(orgID int64, p *model.ListOptions) ([]*model.Secret, error) {
 	secrets := make([]*model.Secret, 0)
-	return secrets, s.paginate(p).Where("secret_org_id = ?", orgID).OrderBy(orderSecretsBy).Find(&secrets)
+	return secrets, s.paginate(p).Where("org_id = ?", orgID).OrderBy(orderSecretsBy).Find(&secrets)
 }
 
 func (s storage) GlobalSecretFind(name string) (*model.Secret, error) {
 	secret := new(model.Secret)
 	return secret, wrapGet(s.engine.Where(
-		builder.Eq{"secret_org_id": 0, "secret_repo_id": 0, "secret_name": name},
+		builder.Eq{"org_id": 0, "repo_id": 0, "name": name},
 	).Get(secret))
 }
 
 func (s storage) GlobalSecretList(p *model.ListOptions) ([]*model.Secret, error) {
 	secrets := make([]*model.Secret, 0)
 	return secrets, s.paginate(p).Where(
-		builder.Eq{"secret_org_id": 0, "secret_repo_id": 0},
+		builder.Eq{"org_id": 0, "repo_id": 0},
 	).OrderBy(orderSecretsBy).Find(&secrets)
 }

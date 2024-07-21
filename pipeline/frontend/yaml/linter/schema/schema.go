@@ -22,48 +22,48 @@ import (
 
 	"codeberg.org/6543/go-yaml2json"
 	"codeberg.org/6543/xyaml"
-	"github.com/xeipuuv/gojsonschema"
+	json_schema "github.com/xeipuuv/gojsonschema"
 	"gopkg.in/yaml.v3"
 )
 
 //go:embed schema.json
 var schemaDefinition []byte
 
-// Lint lints an io.Reader against the Woodpecker schema.json
-func Lint(r io.Reader) ([]gojsonschema.ResultError, error) {
-	schemaLoader := gojsonschema.NewBytesLoader(schemaDefinition)
+// Lint lints an io.Reader against the Woodpecker `schema.json`.
+func Lint(r io.Reader) ([]json_schema.ResultError, error) {
+	schemaLoader := json_schema.NewBytesLoader(schemaDefinition)
 
 	// read yaml config
 	rBytes, err := io.ReadAll(r)
 	if err != nil {
-		return nil, fmt.Errorf("Failed to load yml file %w", err)
+		return nil, fmt.Errorf("failed to load yml file %w", err)
 	}
 
 	// resolve sequence merges
 	yamlDoc := new(yaml.Node)
 	if err := xyaml.Unmarshal(rBytes, yamlDoc); err != nil {
-		return nil, fmt.Errorf("Failed to parse yml file %w", err)
+		return nil, fmt.Errorf("failed to parse yml file %w", err)
 	}
 
 	// convert to json
 	jsonDoc, err := yaml2json.ConvertNode(yamlDoc)
 	if err != nil {
-		return nil, fmt.Errorf("Failed to convert yaml %w", err)
+		return nil, fmt.Errorf("failed to convert yaml %w", err)
 	}
 
-	documentLoader := gojsonschema.NewBytesLoader(jsonDoc)
-	result, err := gojsonschema.Validate(schemaLoader, documentLoader)
+	documentLoader := json_schema.NewBytesLoader(jsonDoc)
+	result, err := json_schema.Validate(schemaLoader, documentLoader)
 	if err != nil {
-		return nil, fmt.Errorf("Validation failed %w", err)
+		return nil, fmt.Errorf("validation failed %w", err)
 	}
 
 	if !result.Valid() {
-		return result.Errors(), fmt.Errorf("Config not valid")
+		return result.Errors(), fmt.Errorf("config not valid")
 	}
 
 	return nil, nil
 }
 
-func LintString(s string) ([]gojsonschema.ResultError, error) {
+func LintString(s string) ([]json_schema.ResultError, error) {
 	return Lint(bytes.NewBufferString(s))
 }
