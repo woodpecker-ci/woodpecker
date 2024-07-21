@@ -6,7 +6,7 @@ when:
       - renovate/*
 
 labels:
-  platform: linux/arm64
+  platform: linux/aarch64
 
 variables:
   - &node_image 'docker.io/node:22-alpine'

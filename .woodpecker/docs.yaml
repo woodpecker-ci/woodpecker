@@ -1,5 +1,5 @@
 labels:
-  platform: linux/arm64
+  platform: linux/aarch64
 
 variables:
   - &golang_image 'docker.io/golang:1.22'

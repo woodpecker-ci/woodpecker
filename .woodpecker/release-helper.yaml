@@ -1,5 +1,5 @@
 labels:
-  platform: linux/arm64
+  platform: linux/aarch64
 
 steps:
   release-helper:

@@ -6,7 +6,7 @@ when:
   - event: tag
 
 labels:
-  platform: linux/arm64
+  platform: linux/aarch64
 
 steps:
   - name: mastodon-toot
