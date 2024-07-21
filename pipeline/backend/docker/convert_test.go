@@ -131,7 +131,8 @@ func TestStepToConfig(t *testing.T) {
 	// StepTypeCommands
 	conf := testEngine.toConfig(testCmdStep)
 	if assert.NotNil(t, conf) {
-		assert.EqualValues(t, []string{"echo $CI_SCRIPT | base64 -d | /bin/sh -e"}, conf.Cmd)
+		assert.EqualValues(t, []string{"/bin/sh", "-c", "echo $CI_SCRIPT | base64 -d | /bin/sh -e"}, conf.Entrypoint)
+		assert.Nil(t, conf.Cmd)
 		assert.EqualValues(t, testCmdStep.UUID, conf.Labels["wp_uuid"])
 	}
 
@@ -161,7 +162,7 @@ func TestEncodeAuthToBase64(t *testing.T) {
 
 	res, err = encodeAuthToBase64(backend.Auth{Username: "user", Password: "pwd"})
 	assert.NoError(t, err)
-	assert.EqualValues(t, "eyJ1c2VybmFtZSI6InVzZXIiLCJwYXNzd29yZCI6InB3ZCIsImVtYWlsIjoibUBpbC5jb20ifQ==", res)
+	assert.EqualValues(t, "eyJ1c2VybmFtZSI6InVzZXIiLCJwYXNzd29yZCI6InB3ZCJ9", res)
 }
 
 func TestToConfigSmall(t *testing.T) {
