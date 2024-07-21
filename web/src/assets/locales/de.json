@@ -74,7 +74,7 @@
                 "waiting_for": "wartet auf"
             },
             "repos": {
-                "desc": "Repositorys, die auf dem Server aktiviert sind oder waren",
+                "desc": "Repositorys, die auf dem Server aktiviert sind oder waren.",
                 "disabled": "Deaktiviert",
                 "none": "Es gibt noch keine Repositorys.",
                 "repair": {
@@ -89,7 +89,7 @@
                 "add": "Geheimnis hinzufügen",
                 "created": "Globales Geheimnis erstellt",
                 "deleted": "Globales Geheimnis gelöscht",
-                "desc": "Globale Geheimnisse können an Pipelineschritte alle Repositorys als Umgebungsvariablen übergeben werden.",
+                "desc": "Globale Geheimnisse können an Pipelineschritte aller Repositorys als Umgebungsvariablen übergeben werden.",
                 "events": {
                     "events": "Verfügbar für folgende Ereignisse",
                     "pr_warning": "Bitte sei vorsichtig mit dieser Option, da eine böswillige Person über einen Pull-Request deine Geheimnisse erhalten könnte."
@@ -588,7 +588,7 @@
         "credentials": "Register-Zugangsdaten",
         "none": "Es gibt noch keine Register-Zugangsdaten.",
         "registries": "Register",
-        "desc": "Register-Zugangsdaten können für private Images in persönlichen Pipelines verwendet werden.",
+        "desc": "Register-Zugangsdaten können für private Images in Pipelines verwendet werden.",
         "deleted": "Register-Zugangsdaten gelöscht",
         "save": "Register speichern",
         "add": "Register hinzufügen",
