@@ -4,7 +4,7 @@
             "queue": {
                 "agent": "agente",
                 "stats": {
-                    "completed_count": "Task Completati",
+                    "completed_count": "Attività Completate",
                     "worker_count": "Liberi",
                     "running_count": "In esecuzione",
                     "waiting_on_deps_count": "In attesa delle dipendenze",
@@ -15,12 +15,12 @@
                 "resume": "Riprendi",
                 "resumed": "Coda ripresa",
                 "paused": "Coda sospesa",
-                "tasks": "Task",
-                "task_running": "Task in esecuzione",
-                "task_waiting_on_deps": "Task in attesa delle dipendenze",
-                "desc": "Task in attesa di essere eseguiti dagli agenti",
+                "tasks": "Attività",
+                "task_running": "Attività in esecuzione",
+                "task_waiting_on_deps": "Attività in attesa delle dipendenze",
+                "desc": "Attività in attesa di essere eseguiti dagli agenti",
                 "queue": "Coda",
-                "task_pending": "Task in attesa"
+                "task_pending": "Attività in attesa"
             },
             "users": {
                 "add": "Aggiungi utente",
@@ -61,7 +61,7 @@
                 },
                 "no_schedule": {
                     "name": "Disabilita agente",
-                    "placeholder": "Impedisci all'agente di accettare nuovi task"
+                    "placeholder": "Impedisci all'agente di accettare nuove attività"
                 },
                 "token": "Token",
                 "platform": {
@@ -139,7 +139,7 @@
         "deploy_pipeline": {
             "enter_target": "Ambiente di destinazione del deploy",
             "title": "Avvia evento di deploy per la pipeline corrente #{pipelineId}",
-            "trigger": "Deploy",
+            "trigger": "Distribuzione",
             "variables": {
                 "add": "Aggiungi variabile",
                 "desc": "Specifica variabili addizionali da usare nella pipeline. Le variabili con lo stesso nome saranno sovrascritte.",
@@ -148,7 +148,7 @@
                 "value": "Valore variabile",
                 "delete": "Elimina variabile"
             },
-            "enter_task": "Task di Deploy"
+            "enter_task": "Attività di distribuzione"
         },
         "enable": {
             "enable": "Abilita",
@@ -184,7 +184,7 @@
                 "cancel_success": "Pipeline annullata",
                 "restart_success": "Pipeline riavviata",
                 "log_download": "Scarica",
-                "deploy": "Deploy"
+                "deploy": "Distribuzione"
             },
             "no_pipelines": "Non è ancora stata attivata alcuna pipeline.",
             "pipelines_for": "Pipeline per ramo \"{branch}\"",
@@ -192,7 +192,7 @@
             "no_pipeline_steps": "Nessuno step disponibile nella pipeline!",
             "step_not_started": "Questo step non è ancora iniziato.",
             "config": "Configurazione",
-            "tasks": "Task",
+            "tasks": "Attività",
             "log_delete_confirm": "Vuoi davvero eliminare i registri attività di questo step?",
             "errors": "Errori ({count})",
             "protected": {
@@ -227,7 +227,7 @@
                 "release": "Rilascio",
                 "push": "Invia",
                 "pr": "Richiesta di Modifica",
-                "deploy": "Deploy",
+                "deploy": "Distribuzione",
                 "pr_closed": "Richiesta di Modifica unita / chiusa"
             },
             "exit_code": "Codice di Uscita {exitCode}",
@@ -383,7 +383,7 @@
     "repositories": "Repository",
     "search": "Cerca…",
     "time": {
-        "not_started": "non ancora avviato",
+        "not_started": "non ancora iniziato",
         "template": "MMM D, YYYY, HH:mm z"
     },
     "unknown_error": "Si è verificato un errore sconosciuto",
@@ -418,7 +418,7 @@
                 }
             },
             "registries": {
-                "desc": "È possibile aggiungere le credenziali dei registri per utilizzare immagini private per tutte le pipeline personali."
+                "desc": "È possibile aggiungere le credenziali di registro per utilizzare immagini private in tutte le pipeline personali."
             }
         }
     },
@@ -443,7 +443,7 @@
         "deleted": "Segreto eliminato",
         "images": {
             "images": "Disponibile per le seguenti immagini",
-            "desc": "Elenco di immagini in cui questo segreto è disponibile, lascia vuoto per consentire tutte le immagini."
+            "desc": "Elenco di immagini in cui questo segreto è disponibile, lascia vuoto per consentire a tutte le immagini."
         },
         "secrets": "Segreti",
         "desc": "I segreti possono essere passati ad ogni step della pipeline, come variabili d'ambiente."
@@ -484,7 +484,7 @@
         "delete_confirm": "Vuoi davvero eliminare questo registro?",
         "registries": "Registri",
         "credentials": "Credenziali di registro",
-        "desc": "È possibile aggiungere le credenziali dei registri per utilizzare immagini private per le pipeline.",
+        "desc": "È possibile aggiungere le credenziali di registro per utilizzare immagini private nelle pipeline.",
         "none": "Ancora nessune credenziali di registro.",
         "address": {
             "address": "Indirizzo",
