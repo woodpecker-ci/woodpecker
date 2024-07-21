@@ -3,6 +3,9 @@ when:
   - event: push
     branch: renovate/*
 
+labels:
+  platform: linux/arm64
+
 steps:
   - name: lint-editorconfig
     image: docker.io/mstruebing/editorconfig-checker:v3.0.3

@@ -1,3 +1,6 @@
+labels:
+  platform: linux/arm64
+
 variables:
   - &golang_image 'docker.io/golang:1.22'
   - &node_image 'docker.io/node:22-alpine'

@@ -5,6 +5,9 @@ depends_on:
 when:
   - event: tag
 
+labels:
+  platform: linux/arm64
+
 steps:
   - name: mastodon-toot
     image: docker.io/woodpeckerci/plugin-mastodon-post

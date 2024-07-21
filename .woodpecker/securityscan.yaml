@@ -5,6 +5,9 @@ when:
       - ${CI_REPO_DEFAULT_BRANCH}
       - renovate/*
 
+labels:
+  platform: linux/arm64
+
 variables:
   - &trivy_plugin docker.io/woodpeckerci/plugin-trivy:1.1.0
 

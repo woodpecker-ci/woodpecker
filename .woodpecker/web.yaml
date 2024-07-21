@@ -5,6 +5,9 @@ when:
       - release/*
       - renovate/*
 
+labels:
+  platform: linux/arm64
+
 variables:
   - &node_image 'docker.io/node:22-alpine'
   - &when

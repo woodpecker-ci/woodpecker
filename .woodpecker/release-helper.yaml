@@ -1,3 +1,6 @@
+labels:
+  platform: linux/arm64
+
 steps:
   release-helper:
     image: woodpeckerci/plugin-ready-release-go:1.2.0
