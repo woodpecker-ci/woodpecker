@@ -262,7 +262,7 @@
     "settings": {
       "not_allowed": "You are not allowed to access server settings.",
       "secrets": {
-        "desc": "Global secrets can be passed to all repositories personal pipeline steps as environmental variables.",
+        "desc": "Global secrets can be passed to all repository's pipeline steps as environmental variables.",
         "warning": "These secrets will be available for all users."
       },
       "registries": {
