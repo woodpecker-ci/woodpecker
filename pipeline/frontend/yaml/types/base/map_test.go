@@ -15,6 +15,7 @@
 package base
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -55,4 +56,17 @@ func TestStr2SliceOrMapPtrMap(t *testing.T) {
 	assert.NoError(t, yaml.Unmarshal(d, &s2))
 
 	assert.Equal(t, s, s2)
+}
+
+var sampleStructSliceOrMap = `
+foos:
+  io.rancher.os.bar: baz
+  io.rancher.os.far: true
+bars: []
+`
+
+func TestUnmarshalSliceOrMap(t *testing.T) {
+	s := StructSliceOrMap{}
+	err := yaml.Unmarshal([]byte(sampleStructSliceOrMap), &s)
+	assert.Equal(t, fmt.Errorf("Cannot unmarshal 'true' of type bool into a string value"), err)
 }
