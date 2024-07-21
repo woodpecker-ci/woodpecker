@@ -74,15 +74,9 @@ steps:
 
   deploy-prepare:
     image: *alpine_image
-    secrets:
-      - BOT_PRIVATE_KEY
     commands:
-      - apk add openssh-client git
-      - mkdir -p $HOME/.ssh
-      - ssh-keyscan -t rsa github.com >> $HOME/.ssh/known_hosts
-      - echo "$BOT_PRIVATE_KEY" > $HOME/.ssh/id_rsa
-      - chmod 0600 $HOME/.ssh/id_rsa
-      - git clone --depth 1 --single-branch git@github.com:woodpecker-ci/woodpecker-ci.github.io.git ./docs_repo
+      - apk add git
+      - git clone --depth 1 --single-branch https://github.com/woodpecker-ci/woodpecker-ci.github.io.git ./docs_repo
     when:
       - event: push
         path:
