@@ -91,7 +91,7 @@ func TestSplitVolumeParts(t *testing.T) {
 	}
 }
 
-// dummy vars to test against
+// dummy vars to test against.
 var (
 	testCmdStep = &backend.Step{
 		Name:        "hello",
