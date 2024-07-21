@@ -364,7 +364,7 @@
       },
       "repos": {
         "repos": "Repositories",
-        "desc": "Repositories that are or have been enabled on this server",
+        "desc": "Repositories that are or have been enabled on this server.",
         "none": "There are no repositories yet.",
         "view": "View repository",
         "settings": "Repository settings",
