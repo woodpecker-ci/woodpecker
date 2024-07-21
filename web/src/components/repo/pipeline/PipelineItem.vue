@@ -64,7 +64,7 @@
 
         <div class="flex space-x-2 items-center min-w-0" :title="$t('repo.pipeline.created', { created })">
           <Icon name="since" />
-          <span>{{ since }}</span>
+          <span class="truncate">{{ since }}</span>
         </div>
       </div>
     </div>
