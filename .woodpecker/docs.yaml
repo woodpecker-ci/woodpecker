@@ -120,7 +120,7 @@ steps:
       - event: manual
 
   deploy:
-    image: appleboy/drone-git-push
+    image: appleboy/drone-git-push # cspell:words appleboy
     directory: docs_repo
     settings:
       branch: ${CI_REPO_DEFAULT_BRANCH}
