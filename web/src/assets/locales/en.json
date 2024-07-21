@@ -434,7 +434,7 @@
   "registries": {
     "registries": "Registries",
     "credentials": "Registry credentials",
-    "desc": "Registry credentials can be added to use private images for personal pipelines.",
+    "desc": "Registry credentials can be added to use private images for pipelines.",
     "none": "There are no registry credentials yet.",
     "address": {
       "address": "Address",
