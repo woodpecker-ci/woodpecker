@@ -130,7 +130,6 @@ steps:
       author_name: woodpecker-bot
       author_email: woodpecker-bot@obermui.de
       commit_message: Deploy website - based on ${CI_COMMIT_SHA}
-      path: pages_repo
     when:
       - event: push
         path:
