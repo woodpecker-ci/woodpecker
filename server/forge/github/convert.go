@@ -18,12 +18,10 @@ package github
 import (
 	"fmt"
 
-	"github.com/google/go-github/v39/github"
+	"github.com/google/go-github/v63/github"
 
-	"github.com/woodpecker-ci/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
-
-const defaultBranch = "master"
 
 const (
 	statusPending = "pending"
@@ -88,17 +86,16 @@ func convertRepo(from *github.Repository) *model.Repo {
 		ForgeRemoteID: model.ForgeRemoteID(fmt.Sprint(from.GetID())),
 		Name:          from.GetName(),
 		FullName:      from.GetFullName(),
-		Link:          from.GetHTMLURL(),
+		ForgeURL:      from.GetHTMLURL(),
 		IsSCMPrivate:  from.GetPrivate(),
 		Clone:         from.GetCloneURL(),
+		CloneSSH:      from.GetSSHURL(),
 		Branch:        from.GetDefaultBranch(),
 		Owner:         from.GetOwner().GetLogin(),
 		Avatar:        from.GetOwner().GetAvatarURL(),
 		Perm:          convertPerm(from.GetPermissions()),
 		SCMKind:       model.RepoGit,
-	}
-	if len(repo.Branch) == 0 {
-		repo.Branch = defaultBranch
+		PREnabled:     true,
 	}
 	return repo
 }
@@ -150,14 +147,13 @@ func convertRepoHook(eventRepo *github.PushEventRepository) *model.Repo {
 		Owner:         eventRepo.GetOwner().GetLogin(),
 		Name:          eventRepo.GetName(),
 		FullName:      eventRepo.GetFullName(),
-		Link:          eventRepo.GetHTMLURL(),
+		ForgeURL:      eventRepo.GetHTMLURL(),
 		IsSCMPrivate:  eventRepo.GetPrivate(),
 		Clone:         eventRepo.GetCloneURL(),
+		CloneSSH:      eventRepo.GetSSHURL(),
 		Branch:        eventRepo.GetDefaultBranch(),
 		SCMKind:       model.RepoGit,
-	}
-	if repo.Branch == "" {
-		repo.Branch = defaultBranch
+		PREnabled:     true,
 	}
 	if repo.FullName == "" {
 		repo.FullName = repo.Owner + "/" + repo.Name
@@ -165,7 +161,7 @@ func convertRepoHook(eventRepo *github.PushEventRepository) *model.Repo {
 	return repo
 }
 
-// covertLabels is a helper function used to convert a GitHub label list to
+// convertLabels is a helper function used to convert a GitHub label list to
 // the common Woodpecker label structure.
 func convertLabels(from []*github.Label) []string {
 	labels := make([]string, len(from))

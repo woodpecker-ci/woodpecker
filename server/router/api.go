@@ -15,15 +15,17 @@
 package router
 
 import (
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog"
 
-	"github.com/woodpecker-ci/woodpecker/server/api"
-	"github.com/woodpecker-ci/woodpecker/server/api/debug"
-	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
+	"go.woodpecker-ci.org/woodpecker/v2/server/api"
+	"go.woodpecker-ci.org/woodpecker/v2/server/api/debug"
+	"go.woodpecker-ci.org/woodpecker/v2/server/router/middleware/session"
 )
 
-func apiRoutes(e *gin.Engine) {
+func apiRoutes(e *gin.RouterGroup) {
 	apiBase := e.Group("/api")
 	{
 		user := apiBase.Group("/user")
@@ -46,89 +48,124 @@ func apiRoutes(e *gin.Engine) {
 			users.DELETE("/:login", api.DeleteUser)
 		}
 
-		orgBase := apiBase.Group("/orgs/:owner")
+		orgs := apiBase.Group("/orgs")
 		{
-			orgBase.GET("/permissions", api.GetOrgPermissions)
-
-			org := orgBase.Group("")
+			orgs.GET("", session.MustAdmin(), api.GetOrgs)
+			orgs.GET("/lookup/*org_full_name", api.LookupOrg)
+			orgBase := orgs.Group("/:org_id")
 			{
-				org.Use(session.MustOrgMember(true))
-				org.GET("/secrets", api.GetOrgSecretList)
-				org.POST("/secrets", api.PostOrgSecret)
-				org.GET("/secrets/:secret", api.GetOrgSecret)
-				org.PATCH("/secrets/:secret", api.PatchOrgSecret)
-				org.DELETE("/secrets/:secret", api.DeleteOrgSecret)
+				orgBase.GET("/permissions", api.GetOrgPermissions)
+
+				org := orgBase.Group("")
+				{
+					org.Use(session.MustOrgMember(true))
+					org.DELETE("", session.MustAdmin(), api.DeleteOrg)
+					org.GET("", api.GetOrg)
+
+					org.GET("/secrets", api.GetOrgSecretList)
+					org.POST("/secrets", api.PostOrgSecret)
+					org.GET("/secrets/:secret", api.GetOrgSecret)
+					org.PATCH("/secrets/:secret", api.PatchOrgSecret)
+					org.DELETE("/secrets/:secret", api.DeleteOrgSecret)
+
+					org.GET("/registries", api.GetOrgRegistryList)
+					org.POST("/registries", api.PostOrgRegistry)
+					org.GET("/registries/:registry", api.GetOrgRegistry)
+					org.PATCH("/registries/:registry", api.PatchOrgRegistry)
+					org.DELETE("/registries/:registry", api.DeleteOrgRegistry)
+				}
 			}
 		}
 
-		apiBase.POST("/repos/:owner/:name", session.MustUser(), api.PostRepo)
-		repoBase := apiBase.Group("/repos/:owner/:name")
+		repo := apiBase.Group("/repos")
 		{
-			repoBase.Use(session.SetRepo())
-			repoBase.Use(session.SetPerm())
-
-			repoBase.GET("/permissions", api.GetRepoPermissions)
-
-			repo := repoBase.Group("")
+			repo.GET("/lookup/*repo_full_name", session.SetRepo(), session.SetPerm(), session.MustPull, api.LookupRepo)
+			repo.POST("", session.MustUser(), api.PostRepo)
+			repo.GET("", session.MustAdmin(), api.GetAllRepos)
+			repo.POST("/repair", session.MustAdmin(), api.RepairAllRepos)
+			repoBase := repo.Group("/:repo_id")
 			{
-				repo.Use(session.MustPull)
+				repoBase.Use(session.SetRepo())
+				repoBase.Use(session.SetPerm())
 
-				repo.GET("", api.GetRepo)
+				repoBase.GET("/permissions", api.GetRepoPermissions)
 
-				repo.GET("/branches", api.GetRepoBranches)
-				repo.GET("/pull_requests", api.GetRepoPullRequests)
+				repo := repoBase.Group("")
+				{
+					repo.Use(session.MustPull)
 
-				repo.GET("/pipelines", api.GetPipelines)
-				repo.POST("/pipelines", session.MustPush, api.CreatePipeline)
-				repo.GET("/pipelines/:number", api.GetPipeline)
-				repo.GET("/pipelines/:number/config", api.GetPipelineConfig)
+					repo.GET("", api.GetRepo)
 
-				// requires push permissions
-				repo.POST("/pipelines/:number", session.MustPush, api.PostPipeline)
-				repo.POST("/pipelines/:number/cancel", session.MustPush, api.CancelPipeline)
-				repo.POST("/pipelines/:number/approve", session.MustPush, api.PostApproval)
-				repo.POST("/pipelines/:number/decline", session.MustPush, api.PostDecline)
+					repo.GET("/branches", api.GetRepoBranches)
+					repo.GET("/pull_requests", api.GetRepoPullRequests)
 
-				repo.GET("/logs/:number/:stepId", api.GetStepLogs)
+					repo.GET("/pipelines", api.GetPipelines)
+					repo.POST("/pipelines", session.MustPush, api.CreatePipeline)
+					repo.DELETE("/pipelines/:number", session.MustRepoAdmin(), api.DeletePipeline)
+					repo.GET("/pipelines/:number", api.GetPipeline)
+					repo.GET("/pipelines/:number/config", api.GetPipelineConfig)
 
-				// requires push permissions
-				repo.DELETE("/logs/:number", session.MustPush, api.DeletePipelineLogs)
+					// requires push permissions
+					repo.POST("/pipelines/:number", session.MustPush, api.PostPipeline)
+					repo.POST("/pipelines/:number/cancel", session.MustPush, api.CancelPipeline)
+					repo.POST("/pipelines/:number/approve", session.MustPush, api.PostApproval)
+					repo.POST("/pipelines/:number/decline", session.MustPush, api.PostDecline)
 
-				// requires push permissions
-				repo.GET("/secrets", session.MustPush, api.GetSecretList)
-				repo.POST("/secrets", session.MustPush, api.PostSecret)
-				repo.GET("/secrets/:secret", session.MustPush, api.GetSecret)
-				repo.PATCH("/secrets/:secret", session.MustPush, api.PatchSecret)
-				repo.DELETE("/secrets/:secret", session.MustPush, api.DeleteSecret)
+					repo.GET("/logs/:number/:stepId", api.GetStepLogs)
+					repo.DELETE("/logs/:number/:stepId", session.MustPush, api.DeleteStepLogs)
 
-				// requires push permissions
-				repo.GET("/registry", session.MustPush, api.GetRegistryList)
-				repo.POST("/registry", session.MustPush, api.PostRegistry)
-				repo.GET("/registry/:registry", session.MustPush, api.GetRegistry)
-				repo.PATCH("/registry/:registry", session.MustPush, api.PatchRegistry)
-				repo.DELETE("/registry/:registry", session.MustPush, api.DeleteRegistry)
+					// requires push permissions
+					repo.DELETE("/logs/:number", session.MustPush, api.DeletePipelineLogs)
 
-				// requires push permissions
-				repo.GET("/cron", session.MustPush, api.GetCronList)
-				repo.POST("/cron", session.MustPush, api.PostCron)
-				repo.GET("/cron/:cron", session.MustPush, api.GetCron)
-				repo.POST("/cron/:cron", session.MustPush, api.RunCron)
-				repo.PATCH("/cron/:cron", session.MustPush, api.PatchCron)
-				repo.DELETE("/cron/:cron", session.MustPush, api.DeleteCron)
+					// requires push permissions
+					repo.GET("/secrets", session.MustPush, api.GetSecretList)
+					repo.POST("/secrets", session.MustPush, api.PostSecret)
+					repo.GET("/secrets/:secret", session.MustPush, api.GetSecret)
+					repo.PATCH("/secrets/:secret", session.MustPush, api.PatchSecret)
+					repo.DELETE("/secrets/:secret", session.MustPush, api.DeleteSecret)
 
-				// requires admin permissions
-				repo.PATCH("", session.MustRepoAdmin(), api.PatchRepo)
-				repo.DELETE("", session.MustRepoAdmin(), api.DeleteRepo)
-				repo.POST("/chown", session.MustRepoAdmin(), api.ChownRepo)
-				repo.POST("/repair", session.MustRepoAdmin(), api.RepairRepo)
-				repo.POST("/move", session.MustRepoAdmin(), api.MoveRepo)
+					// requires push permissions
+					repo.GET("/registries", session.MustPush, api.GetRegistryList)
+					repo.POST("/registries", session.MustPush, api.PostRegistry)
+					repo.GET("/registries/:registry", session.MustPush, api.GetRegistry)
+					repo.PATCH("/registries/:registry", session.MustPush, api.PatchRegistry)
+					repo.DELETE("/registries/:registry", session.MustPush, api.DeleteRegistry)
+
+					// TODO: remove with 3.x
+					repo.GET("/registry", session.MustPush, api.GetRegistryList)
+					repo.POST("/registry", session.MustPush, api.PostRegistry)
+					repo.GET("/registry/:registry", session.MustPush, api.GetRegistry)
+					repo.PATCH("/registry/:registry", session.MustPush, api.PatchRegistry)
+					repo.DELETE("/registry/:registry", session.MustPush, api.DeleteRegistry)
+
+					// requires push permissions
+					repo.GET("/cron", session.MustPush, api.GetCronList)
+					repo.POST("/cron", session.MustPush, api.PostCron)
+					repo.GET("/cron/:cron", session.MustPush, api.GetCron)
+					repo.POST("/cron/:cron", session.MustPush, api.RunCron)
+					repo.PATCH("/cron/:cron", session.MustPush, api.PatchCron)
+					repo.DELETE("/cron/:cron", session.MustPush, api.DeleteCron)
+
+					// requires admin permissions
+					repo.PATCH("", session.MustRepoAdmin(), api.PatchRepo)
+					repo.DELETE("", session.MustRepoAdmin(), api.DeleteRepo)
+					repo.POST("/chown", session.MustRepoAdmin(), api.ChownRepo)
+					repo.POST("/repair", session.MustRepoAdmin(), api.RepairRepo)
+					repo.POST("/move", session.MustRepoAdmin(), api.MoveRepo)
+				}
 			}
 		}
 
-		badges := apiBase.Group("/badges/:owner/:name")
+		badges := apiBase.Group("/badges/:repo_id_or_owner")
 		{
 			badges.GET("/status.svg", api.GetBadge)
 			badges.GET("/cc.xml", api.GetCC)
+		}
+
+		_badges := apiBase.Group("/badges/:repo_id_or_owner/:repo_name")
+		{
+			_badges.GET("/status.svg", api.GetBadge)
+			_badges.GET("/cc.xml", api.GetCC)
 		}
 
 		pipelines := apiBase.Group("/pipelines")
@@ -146,14 +183,34 @@ func apiRoutes(e *gin.Engine) {
 			queue.GET("/norunningpipelines", api.BlockTilQueueHasRunningItem)
 		}
 
+		// global secrets can be read without actual values by any user
+		readGlobalSecrets := apiBase.Group("/secrets")
+		{
+			readGlobalSecrets.Use(session.MustUser())
+			readGlobalSecrets.GET("", api.GetGlobalSecretList)
+			readGlobalSecrets.GET("/:secret", api.GetGlobalSecret)
+		}
 		secrets := apiBase.Group("/secrets")
 		{
 			secrets.Use(session.MustAdmin())
-			secrets.GET("", api.GetGlobalSecretList)
 			secrets.POST("", api.PostGlobalSecret)
-			secrets.GET("/:secret", api.GetGlobalSecret)
 			secrets.PATCH("/:secret", api.PatchGlobalSecret)
 			secrets.DELETE("/:secret", api.DeleteGlobalSecret)
+		}
+
+		// global registries can be read without actual values by any user
+		readGlobalRegistries := apiBase.Group("/registries")
+		{
+			readGlobalRegistries.Use(session.MustUser())
+			readGlobalRegistries.GET("", api.GetGlobalRegistryList)
+			readGlobalRegistries.GET("/:registry", api.GetGlobalRegistry)
+		}
+		registries := apiBase.Group("/registries")
+		{
+			registries.Use(session.MustAdmin())
+			registries.POST("", api.PostGlobalRegistry)
+			registries.PATCH("/:registry", api.PatchGlobalRegistry)
+			registries.DELETE("/:registry", api.DeleteGlobalRegistry)
 		}
 
 		logLevel := apiBase.Group("/log-level")
@@ -174,17 +231,28 @@ func apiRoutes(e *gin.Engine) {
 			agentBase.DELETE("/:agent", api.DeleteAgent)
 		}
 
+		apiBase.GET("/forges", api.GetForges)
+		apiBase.GET("/forges/:forgeId", api.GetForge)
+		forgeBase := apiBase.Group("/forges")
+		{
+			forgeBase.Use(session.MustAdmin())
+			forgeBase.POST("", api.PostForge)
+			forgeBase.PATCH("/:forgeId", api.PatchForge)
+			forgeBase.DELETE("/:forgeId", api.DeleteForge)
+		}
+
 		apiBase.GET("/signature/public-key", session.MustUser(), api.GetSignaturePublicKey)
 
 		apiBase.POST("/hook", api.PostHook)
 
 		stream := apiBase.Group("/stream")
 		{
-			stream.GET("/logs/:owner/:name/:pipeline/:stepId",
+			stream.GET("/logs/:repo_id/:pipeline/:stepId",
 				session.SetRepo(),
 				session.SetPerm(),
 				session.MustPull,
 				api.LogStreamSSE)
+			stream.GET("/events", api.EventStreamSSE)
 		}
 
 		if zerolog.GlobalLevel() <= zerolog.DebugLevel {
@@ -205,12 +273,11 @@ func apiRoutes(e *gin.Engine) {
 		}
 	}
 
-	// TODO: remove /hook in favor of /api/hook
-	e.POST("/hook", api.PostHook)
-
-	// TODO: move to /api/stream
-	sse := e.Group("/stream")
-	{
-		sse.GET("/events", api.EventStreamSSE)
-	}
+	// TODO: remove with 3.x
+	e.Any("/hook", func(c *gin.Context) {
+		c.String(http.StatusGone, "use /api/hook")
+	})
+	e.Any("/stream/events", func(c *gin.Context) {
+		c.String(http.StatusGone, "use /api/stream/events")
+	})
 }

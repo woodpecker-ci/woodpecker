@@ -19,8 +19,8 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/woodpecker-ci/woodpecker/server"
-	"github.com/woodpecker-ci/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
 func TestGetPipelineStatusContext(t *testing.T) {
@@ -33,17 +33,17 @@ func TestGetPipelineStatusContext(t *testing.T) {
 
 	repo := &model.Repo{Owner: "user1", Name: "repo1"}
 	pipeline := &model.Pipeline{Event: model.EventPull}
-	step := &model.Step{Name: "lint"}
+	workflow := &model.Workflow{Name: "lint"}
 
-	assert.EqualValues(t, "", GetPipelineStatusContext(repo, pipeline, step))
+	assert.EqualValues(t, "", GetPipelineStatusContext(repo, pipeline, workflow))
 
 	server.Config.Server.StatusContext = "ci/woodpecker"
-	server.Config.Server.StatusContextFormat = "{{ .context }}/{{ .event }}/{{ .pipeline }}"
-	assert.EqualValues(t, "ci/woodpecker/pr/lint", GetPipelineStatusContext(repo, pipeline, step))
+	server.Config.Server.StatusContextFormat = "{{ .context }}/{{ .event }}/{{ .workflow }}"
+	assert.EqualValues(t, "ci/woodpecker/pr/lint", GetPipelineStatusContext(repo, pipeline, workflow))
 	pipeline.Event = model.EventPush
-	assert.EqualValues(t, "ci/woodpecker/push/lint", GetPipelineStatusContext(repo, pipeline, step))
+	assert.EqualValues(t, "ci/woodpecker/push/lint", GetPipelineStatusContext(repo, pipeline, workflow))
 
 	server.Config.Server.StatusContext = "ci"
-	server.Config.Server.StatusContextFormat = "{{ .context }}:{{ .owner }}/{{ .repo }}:{{ .event }}:{{ .pipeline }}"
-	assert.EqualValues(t, "ci:user1/repo1:push:lint", GetPipelineStatusContext(repo, pipeline, step))
+	server.Config.Server.StatusContextFormat = "{{ .context }}:{{ .owner }}/{{ .repo }}:{{ .event }}:{{ .workflow }}"
+	assert.EqualValues(t, "ci:user1/repo1:push:lint", GetPipelineStatusContext(repo, pipeline, workflow))
 }

@@ -15,7 +15,7 @@
 package datastore
 
 import (
-	"github.com/woodpecker-ci/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
 func (s storage) TaskList() ([]*model.Task, error) {
@@ -30,5 +30,5 @@ func (s storage) TaskInsert(task *model.Task) error {
 }
 
 func (s storage) TaskDelete(id string) error {
-	return wrapDelete(s.engine.Where("task_id = ?", id).Delete(new(model.Task)))
+	return wrapDelete(s.engine.Where("id = ?", id).Delete(new(model.Task)))
 }

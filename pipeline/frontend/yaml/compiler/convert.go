@@ -1,33 +1,59 @@
+// Copyright 2023 Woodpecker Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package compiler
 
 import (
 	"fmt"
+	"maps"
 	"path"
-	"path/filepath"
+	"strconv"
 	"strings"
 
-	"github.com/google/uuid"
-	"github.com/rs/zerolog/log"
+	"github.com/oklog/ulid/v2"
 
-	backend_types "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/metadata"
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/compiler/settings"
-	yaml_types "github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types"
+	backend_types "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/metadata"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/compiler/settings"
+	yaml_types "go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/types"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/utils"
 )
 
-func (c *Compiler) createProcess(name string, container *yaml_types.Container, section string) *backend_types.Step {
+const (
+	// The pluginWorkspaceBase should not be changed, only if you are sure what you do.
+	pluginWorkspaceBase = "/woodpecker"
+	// DefaultWorkspaceBase is set if not altered by the user.
+	DefaultWorkspaceBase = pluginWorkspaceBase
+)
+
+func (c *Compiler) createProcess(container *yaml_types.Container, stepType backend_types.StepType) (*backend_types.Step, error) {
 	var (
-		uuid = uuid.New()
+		uuid = ulid.Make()
 
 		detached   bool
-		workingdir string
+		workingDir string
 
-		workspace   = fmt.Sprintf("%s_default:%s", c.prefix, c.base)
 		privileged  = container.Privileged
 		networkMode = container.NetworkMode
-		ipcMode     = container.IpcMode
-		// network    = container.Network
 	)
+
+	workspaceBase := c.workspaceBase
+	if container.IsPlugin() {
+		// plugins have a predefined workspace base to not tamper with entrypoint executables
+		workspaceBase = pluginWorkspaceBase
+	}
+	workspaceVolume := fmt.Sprintf("%s_default:%s", c.prefix, workspaceBase)
 
 	networks := []backend_types.Conn{
 		{
@@ -41,9 +67,19 @@ func (c *Compiler) createProcess(name string, container *yaml_types.Container, s
 		})
 	}
 
+	extraHosts := make([]backend_types.HostAlias, len(container.ExtraHosts))
+	for i, extraHost := range container.ExtraHosts {
+		name, ip, ok := strings.Cut(extraHost, ":")
+		if !ok {
+			return nil, &ErrExtraHostFormat{host: extraHost}
+		}
+		extraHosts[i].Name = name
+		extraHosts[i].IP = ip
+	}
+
 	var volumes []string
 	if !c.local {
-		volumes = append(volumes, workspace)
+		volumes = append(volumes, workspaceVolume)
 	}
 	volumes = append(volumes, c.volumes...)
 	for _, volume := range container.Volumes.Volumes {
@@ -52,71 +88,70 @@ func (c *Compiler) createProcess(name string, container *yaml_types.Container, s
 
 	// append default environment variables
 	environment := map[string]string{}
-	for k, v := range container.Environment {
-		environment[k] = v
-	}
-	for k, v := range c.env {
-		switch v {
-		case "", "0", "false":
-			continue
-		default:
-			environment[k] = v
-		}
-	}
+	maps.Copy(environment, c.env)
 
-	environment["CI_WORKSPACE"] = path.Join(c.base, c.path)
-	environment["CI_STEP_NAME"] = name
+	environment["CI_WORKSPACE"] = path.Join(workspaceBase, c.workspacePath)
 
-	if section == "services" || container.Detached {
+	if stepType == backend_types.StepTypeService || container.Detached {
 		detached = true
 	}
 
-	if !detached || len(container.Commands) != 0 {
-		workingdir = c.stepWorkdir(container)
+	workingDir = c.stepWorkingDir(container)
+
+	getSecretValue := func(name string) (string, error) {
+		name = strings.ToLower(name)
+		secret, ok := c.secrets[name]
+		if !ok {
+			return "", fmt.Errorf("secret %q not found", name)
+		}
+
+		event := c.metadata.Curr.Event
+		err := secret.Available(event, container)
+		if err != nil {
+			return "", err
+		}
+
+		return secret.Value, nil
 	}
 
+	// TODO: why don't we pass secrets to detached steps?
 	if !detached {
-		pluginSecrets := secretMap{}
-		for name, secret := range c.secrets {
-			if secret.Available(container) {
-				pluginSecrets[name] = secret
-			}
-		}
-
-		if err := settings.ParamsToEnv(container.Settings, environment, pluginSecrets.toStringMap()); err != nil {
-			log.Error().Err(err).Msg("paramsToEnv")
+		if err := settings.ParamsToEnv(container.Settings, environment, "PLUGIN_", true, getSecretValue); err != nil {
+			return nil, err
 		}
 	}
 
-	if matchImage(container.Image, c.escalated...) && container.IsPlugin() {
+	if err := settings.ParamsToEnv(container.Environment, environment, "", false, getSecretValue); err != nil {
+		return nil, err
+	}
+
+	for _, requested := range container.Secrets.Secrets {
+		secretValue, err := getSecretValue(requested.Source)
+		if err != nil {
+			return nil, err
+		}
+
+		toUpperTarget := strings.ToUpper(requested.Target)
+		if !environmentAllowed(toUpperTarget, stepType) {
+			continue
+		}
+
+		environment[requested.Target] = secretValue
+		// TODO: deprecated, remove in 3.x
+		environment[toUpperTarget] = secretValue
+	}
+
+	if utils.MatchImage(container.Image, c.escalated...) && container.IsPlugin() {
 		privileged = true
 	}
 
 	authConfig := backend_types.Auth{}
 	for _, registry := range c.registries {
-		if matchHostname(container.Image, registry.Hostname) {
+		if utils.MatchHostname(container.Image, registry.Hostname) {
 			authConfig.Username = registry.Username
 			authConfig.Password = registry.Password
-			authConfig.Email = registry.Email
 			break
 		}
-	}
-
-	for _, requested := range container.Secrets.Secrets {
-		secret, ok := c.secrets[strings.ToLower(requested.Source)]
-		if ok && secret.Available(container) {
-			environment[strings.ToUpper(requested.Target)] = secret.Value
-		}
-	}
-
-	// Kubernetes advanced settings
-	backendOptions := backend_types.BackendOptions{
-		Kubernetes: backend_types.KubernetesBackendOptions{
-			Resources: backend_types.Resources{
-				Limits:   container.BackendOptions.Kubernetes.Resources.Limits,
-				Requests: container.BackendOptions.Kubernetes.Resources.Requests,
-			},
-		},
 	}
 
 	memSwapLimit := int64(container.MemSwapLimit)
@@ -144,6 +179,15 @@ func (c *Compiler) createProcess(name string, container *yaml_types.Container, s
 		cpuSet = c.reslimit.CPUSet
 	}
 
+	var ports []backend_types.Port
+	for _, portDef := range container.Ports {
+		port, err := convertPort(portDef)
+		if err != nil {
+			return nil, err
+		}
+		ports = append(ports, port)
+	}
+
 	// at least one constraint contain status success, or all constraints have no status set
 	onSuccess := container.When.IncludesStatusSuccess()
 	// at least one constraint must include the status failure.
@@ -155,17 +199,18 @@ func (c *Compiler) createProcess(name string, container *yaml_types.Container, s
 	}
 
 	return &backend_types.Step{
-		Name:           name,
+		Name:           container.Name,
 		UUID:           uuid.String(),
-		Alias:          container.Name,
+		Type:           stepType,
 		Image:          container.Image,
 		Pull:           container.Pull,
 		Detached:       detached,
 		Privileged:     privileged,
-		WorkingDir:     workingdir,
+		WorkingDir:     workingDir,
 		Environment:    environment,
 		Commands:       container.Commands,
-		ExtraHosts:     container.ExtraHosts,
+		Entrypoint:     container.Entrypoint,
+		ExtraHosts:     extraHosts,
 		Volumes:        volumes,
 		Tmpfs:          container.Tmpfs,
 		Devices:        container.Devices,
@@ -175,7 +220,6 @@ func (c *Compiler) createProcess(name string, container *yaml_types.Container, s
 		MemSwapLimit:   memSwapLimit,
 		MemLimit:       memLimit,
 		ShmSize:        shmSize,
-		Sysctls:        container.Sysctls,
 		CPUQuota:       cpuQuota,
 		CPUShares:      cpuShares,
 		CPUSet:         cpuSet,
@@ -184,14 +228,34 @@ func (c *Compiler) createProcess(name string, container *yaml_types.Container, s
 		OnFailure:      onFailure,
 		Failure:        failure,
 		NetworkMode:    networkMode,
-		IpcMode:        ipcMode,
-		BackendOptions: backendOptions,
-	}
+		Ports:          ports,
+		BackendOptions: container.BackendOptions,
+	}, nil
 }
 
-func (c *Compiler) stepWorkdir(container *yaml_types.Container) string {
-	if filepath.IsAbs(container.Directory) {
+func (c *Compiler) stepWorkingDir(container *yaml_types.Container) string {
+	if path.IsAbs(container.Directory) {
 		return container.Directory
 	}
-	return filepath.Join(c.base, c.path, container.Directory)
+	base := c.workspaceBase
+	if container.IsPlugin() {
+		base = pluginWorkspaceBase
+	}
+	return path.Join(base, c.workspacePath, container.Directory)
+}
+
+func convertPort(portDef string) (backend_types.Port, error) {
+	var err error
+	var port backend_types.Port
+
+	number, protocol, _ := strings.Cut(portDef, "/")
+	port.Protocol = protocol
+
+	portNumber, err := strconv.ParseUint(number, 10, 16)
+	if err != nil {
+		return port, err
+	}
+	port.Number = uint16(portNumber)
+
+	return port, nil
 }

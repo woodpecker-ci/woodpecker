@@ -1,3 +1,17 @@
+// Copyright 2023 Woodpecker Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package constraint
 
 import (
@@ -6,8 +20,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v3"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend"
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/metadata"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/metadata"
 )
 
 func TestConstraint(t *testing.T) {
@@ -18,13 +31,13 @@ func TestConstraint(t *testing.T) {
 	}{
 		// string value
 		{
-			conf: "master",
+			conf: "main",
 			with: "develop",
 			want: false,
 		},
 		{
-			conf: "master",
-			with: "master",
+			conf: "main",
+			with: "main",
 			want: true,
 		},
 		{
@@ -34,34 +47,34 @@ func TestConstraint(t *testing.T) {
 		},
 		// slice value
 		{
-			conf: "[ master, feature/* ]",
+			conf: "[ main, feature/* ]",
 			with: "develop",
 			want: false,
 		},
 		{
-			conf: "[ master, feature/* ]",
-			with: "master",
+			conf: "[ main, feature/* ]",
+			with: "main",
 			want: true,
 		},
 		{
-			conf: "[ master, feature/* ]",
+			conf: "[ main, feature/* ]",
 			with: "feature/foo",
 			want: true,
 		},
 		// includes block
 		{
-			conf: "include: master",
+			conf: "include: main",
 			with: "develop",
 			want: false,
 		},
 		{
-			conf: "include: master",
-			with: "master",
+			conf: "include: main",
+			with: "main",
 			want: true,
 		},
 		{
 			conf: "include: feature/*",
-			with: "master",
+			with: "main",
 			want: false,
 		},
 		{
@@ -70,34 +83,34 @@ func TestConstraint(t *testing.T) {
 			want: true,
 		},
 		{
-			conf: "include: [ master, feature/* ]",
+			conf: "include: [ main, feature/* ]",
 			with: "develop",
 			want: false,
 		},
 		{
-			conf: "include: [ master, feature/* ]",
-			with: "master",
+			conf: "include: [ main, feature/* ]",
+			with: "main",
 			want: true,
 		},
 		{
-			conf: "include: [ master, feature/* ]",
+			conf: "include: [ main, feature/* ]",
 			with: "feature/foo",
 			want: true,
 		},
 		// excludes block
 		{
-			conf: "exclude: master",
+			conf: "exclude: main",
 			with: "develop",
 			want: true,
 		},
 		{
-			conf: "exclude: master",
-			with: "master",
+			conf: "exclude: main",
+			with: "main",
 			want: false,
 		},
 		{
 			conf: "exclude: feature/*",
-			with: "master",
+			with: "main",
 			want: true,
 		},
 		{
@@ -106,13 +119,13 @@ func TestConstraint(t *testing.T) {
 			want: false,
 		},
 		{
-			conf: "exclude: [ master, develop ]",
-			with: "master",
+			conf: "exclude: [ main, develop ]",
+			with: "main",
 			want: false,
 		},
 		{
 			conf: "exclude: [ feature/*, bar ]",
-			with: "master",
+			with: "main",
 			want: true,
 		},
 		{
@@ -122,33 +135,30 @@ func TestConstraint(t *testing.T) {
 		},
 		// include and exclude blocks
 		{
-			conf: "{ include: [ master, feature/* ], exclude: [ develop ] }",
-			with: "master",
+			conf: "{ include: [ main, feature/* ], exclude: [ develop ] }",
+			with: "main",
 			want: true,
 		},
 		{
-			conf: "{ include: [ master, feature/* ], exclude: [ feature/bar ] }",
+			conf: "{ include: [ main, feature/* ], exclude: [ feature/bar ] }",
 			with: "feature/bar",
 			want: false,
 		},
 		{
-			conf: "{ include: [ master, feature/* ], exclude: [ master, develop ] }",
-			with: "master",
+			conf: "{ include: [ main, feature/* ], exclude: [ main, develop ] }",
+			with: "main",
 			want: false,
 		},
 		// empty blocks
 		{
 			conf: "",
-			with: "master",
+			with: "main",
 			want: true,
 		},
 	}
 	for _, test := range testdata {
 		c := parseConstraint(t, test.conf)
-		got, want := c.Match(test.with), test.want
-		if got != want {
-			t.Errorf("Expect %q matches %q is %v", test.with, test.conf, want)
-		}
+		assert.Equal(t, test.want, c.Match(test.with))
 	}
 }
 
@@ -250,13 +260,20 @@ func TestConstraintList(t *testing.T) {
 			with: []string{},
 			want: true,
 		},
+		{
+			conf: "{ include: [ README.md ], on_empty: false }",
+			with: []string{},
+			want: false,
+		},
+		{
+			conf: "{ include: [ README.md ], on_empty: true }",
+			with: []string{},
+			want: true,
+		},
 	}
 	for _, test := range testdata {
 		c := parseConstraintPath(t, test.conf)
-		got, want := c.Match(test.with, test.message), test.want
-		if got != want {
-			t.Errorf("Expect %q matches %q should be %v got %v", test.with, test.conf, want, got)
-		}
+		assert.Equal(t, test.want, c.Match(test.with, test.message))
 	}
 }
 
@@ -405,6 +422,7 @@ func TestConstraints(t *testing.T) {
 		desc string
 		conf string
 		with metadata.Metadata
+		env  map[string]string
 		want bool
 	}{
 		{
@@ -420,13 +438,13 @@ func TestConstraints(t *testing.T) {
 		{
 			desc: "global branch filter",
 			conf: "{ branch: develop }",
-			with: metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventPush, Commit: metadata.Commit{Branch: "master"}}},
+			with: metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventPush, Commit: metadata.Commit{Branch: "main"}}},
 			want: false,
 		},
 		{
 			desc: "global branch filter",
-			conf: "{ branch: master }",
-			with: metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventPush, Commit: metadata.Commit{Branch: "master"}}},
+			conf: "{ branch: main }",
+			with: metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventPush, Commit: metadata.Commit{Branch: "main"}}},
 			want: true,
 		},
 		{
@@ -450,7 +468,7 @@ func TestConstraints(t *testing.T) {
 		{
 			desc: "ref constraint",
 			conf: "{ ref: refs/tags/* }",
-			with: metadata.Metadata{Curr: metadata.Pipeline{Commit: metadata.Commit{Ref: "refs/heads/master"}, Event: metadata.EventPush}},
+			with: metadata.Metadata{Curr: metadata.Pipeline{Commit: metadata.Commit{Ref: "refs/heads/main"}, Event: metadata.EventPush}},
 			want: false,
 		},
 		{
@@ -478,12 +496,6 @@ func TestConstraints(t *testing.T) {
 			want: false,
 		},
 		{
-			desc: "filter cron by default constraint",
-			conf: "{}",
-			with: metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventCron}},
-			want: false,
-		},
-		{
 			desc: "filter cron by matching name",
 			conf: "{ event: cron, cron: job1 }",
 			with: metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventCron, Cron: "job1"}},
@@ -493,14 +505,6 @@ func TestConstraints(t *testing.T) {
 			desc: "filter cron by name",
 			conf: "{ event: cron, cron: job2 }",
 			with: metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventCron, Cron: "job1"}},
-			want: false,
-		},
-		{
-			desc: "no constraints, event gets filtered by default event filter",
-			conf: "",
-			with: metadata.Metadata{
-				Curr: metadata.Pipeline{Event: "non-default"},
-			},
 			want: false,
 		},
 		{
@@ -524,20 +528,30 @@ func TestConstraints(t *testing.T) {
 			with: metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventPush}, Repo: metadata.Repo{Owner: "owner", Name: "repo"}},
 			want: true,
 		},
+		{
+			desc: "filter by eval based on custom variable",
+			conf: `{ evaluate: 'TESTVAR == "testval"' }`,
+			with: metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventManual}},
+			env:  map[string]string{"TESTVAR": "testval"},
+			want: true,
+		},
+		{
+			desc: "filter by eval based on custom variable",
+			conf: `{ evaluate: 'TESTVAR == "testval"' }`,
+			with: metadata.Metadata{Curr: metadata.Pipeline{Event: metadata.EventManual}},
+			env:  map[string]string{"TESTVAR": "qwe"},
+			want: false,
+		},
 	}
 
 	for _, test := range testdata {
 		t.Run(test.desc, func(t *testing.T) {
-			conf, err := frontend.EnvVarSubst(test.conf, test.with.Environ())
+			conf, err := metadata.EnvVarSubst(test.conf, test.with.Environ())
 			assert.NoError(t, err)
 			c := parseConstraints(t, conf)
-			got, err := c.Match(test.with, false)
-			if err != nil {
-				t.Errorf("Match returned error: %v", err)
-			}
-			if got != test.want {
-				t.Errorf("Expect %+v matches %q is %v", test.with, test.conf, test.want)
-			}
+			got, err := c.Match(test.with, false, test.env)
+			assert.NoError(t, err)
+			assert.Equal(t, test.want, got)
 		})
 	}
 }

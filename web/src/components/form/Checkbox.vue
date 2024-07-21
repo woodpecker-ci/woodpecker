@@ -3,62 +3,39 @@
     <input
       :id="`checkbox-${id}`"
       type="checkbox"
-      class="checkbox flex-shrink-0 relative border border-gray-400 cursor-pointer rounded-md transition-colors duration-150 w-5 h-5 checked:bg-lime-600 checked:border-lime-600 focus-visible:border-gray-600 dark:(border-gray-600 checked:bg-lime-700 checked:border-lime-700 focus-visible:border-gray-300 checked:focus-visible:border-gray-300)"
+      class="checkbox flex-shrink-0 relative border bg-wp-control-neutral-100 border-wp-control-neutral-200 cursor-pointer rounded-md transition-colors duration-150 w-5 h-5 checked:bg-wp-control-ok-200 checked:border-wp-control-ok-200 focus-visible:border-wp-control-neutral-300 checked:focus-visible:border-wp-control-ok-300"
       :checked="innerValue"
       @click="innerValue = !innerValue"
     />
     <div class="flex flex-col ml-4">
-      <label v-if="label" class="cursor-pointer text-color" :for="`checkbox-${id}`">{{ label }}</label>
-      <span v-if="description" class="text-sm text-color-alt">{{ description }}</span>
+      <label class="cursor-pointer text-wp-text-100" :for="`checkbox-${id}`">{{ label }}</label>
+      <span v-if="description" class="text-sm text-wp-text-alt-100">{{ description }}</span>
     </div>
   </div>
 </template>
 
-<script lang="ts">
-import { computed, defineComponent, toRef } from 'vue';
+<script lang="ts" setup>
+import { computed, toRef } from 'vue';
 
-export default defineComponent({
-  name: 'Checkbox',
+const props = defineProps<{
+  modelValue: boolean;
+  label: string;
+  description?: string;
+}>();
 
-  props: {
-    modelValue: {
-      type: Boolean,
-      required: true,
-    },
+const emit = defineEmits<{
+  (event: 'update:modelValue', value: boolean): void;
+}>();
 
-    label: {
-      type: String,
-      default: null,
-    },
-
-    description: {
-      type: String,
-      default: null,
-    },
-  },
-
-  emits: {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    'update:modelValue': (_value: boolean): boolean => true,
-  },
-
-  setup: (props, ctx) => {
-    const modelValue = toRef(props, 'modelValue');
-    const innerValue = computed({
-      get: () => modelValue.value,
-      set: (value) => {
-        ctx.emit('update:modelValue', value);
-      },
-    });
-
-    const id = (Math.random() + 1).toString(36).substring(7);
-
-    return {
-      id,
-      innerValue,
-    };
+const modelValue = toRef(props, 'modelValue');
+const innerValue = computed({
+  get: () => modelValue.value,
+  set: (value) => {
+    emit('update:modelValue', value);
   },
 });
+
+const id = (Math.random() + 1).toString(36).substring(7);
 </script>
 
 <style scoped>
@@ -82,7 +59,7 @@ export default defineComponent({
   border-width: 0 2px 2px 0;
   transform: translate(-50%, -60%) rotate(45deg);
   opacity: 0;
-  @apply dark:border-gray-300;
+  @apply dark:border-white;
 }
 
 .checkbox:checked::before {

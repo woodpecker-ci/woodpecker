@@ -1,3 +1,17 @@
+// Copyright 2023 Woodpecker Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package yaml
 
 import (
@@ -7,8 +21,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v3"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/metadata"
-	yaml_base_types "github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types/base"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/metadata"
+	yaml_base_types "go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/types/base"
 )
 
 func TestParse(t *testing.T) {
@@ -85,7 +99,7 @@ func TestParse(t *testing.T) {
 					Curr: metadata.Pipeline{
 						Event: "tester",
 					},
-				}, false)
+				}, false, nil)
 				g.Assert(match).Equal(true)
 				g.Assert(err).IsNil()
 			})
@@ -95,7 +109,7 @@ func TestParse(t *testing.T) {
 					Curr: metadata.Pipeline{
 						Event: "tester2",
 					},
-				}, false)
+				}, false, nil)
 				g.Assert(match).Equal(true)
 				g.Assert(err).IsNil()
 			})
@@ -107,7 +121,7 @@ func TestParse(t *testing.T) {
 							Branch: "tester",
 						},
 					},
-				}, true)
+				}, true, nil)
 				g.Assert(match).Equal(true)
 				g.Assert(err).IsNil()
 			})
@@ -117,7 +131,7 @@ func TestParse(t *testing.T) {
 					Curr: metadata.Pipeline{
 						Event: "push",
 					},
-				}, false)
+				}, false, nil)
 				g.Assert(match).Equal(false)
 				g.Assert(err).IsNil()
 			})
@@ -126,14 +140,20 @@ func TestParse(t *testing.T) {
 }
 
 func TestParseLegacy(t *testing.T) {
-	var sampleYamlPipelineLegacy = `
+	sampleYamlPipelineLegacy := `
+platform: linux/amd64
+
 pipeline:
   say hello:
     image: bash
     commands: echo hello
 `
 
-	var sampleYamlPipelineLegacyIgnore = `
+	sampleYamlPipelineLegacyIgnore := `
+platform: windows/amd64
+labels:
+  platform: linux/amd64
+
 steps:
   say hello:
     image: bash
@@ -147,12 +167,12 @@ pipeline:
 
 	workflow1, err := ParseString(sampleYamlPipelineLegacy)
 	if !assert.NoError(t, err) {
-		t.Fail()
+		return
 	}
 
 	workflow2, err := ParseString(sampleYamlPipelineLegacyIgnore)
 	if !assert.NoError(t, err) {
-		t.Fail()
+		return
 	}
 
 	assert.EqualValues(t, workflow1, workflow2)
@@ -255,4 +275,30 @@ func TestReSerialize(t *testing.T) {
         					include: []
         					exclude: []
 skip_clone: false`, string(workBin))
+}
+
+func TestSlice(t *testing.T) {
+	g := goblin.Goblin(t)
+
+	g.Describe("Parser", func() {
+		g.It("should marshal a not set slice to nil", func() {
+			out, err := ParseString(sampleSliceYaml)
+			if err != nil {
+				g.Fail(err)
+			}
+
+			g.Assert(out.Steps.ContainerList[0].DependsOn).IsNil()
+			g.Assert(len(out.Steps.ContainerList[0].DependsOn)).Equal(0)
+		})
+
+		g.It("should marshal an empty slice", func() {
+			out, err := ParseString(sampleSliceYaml)
+			if err != nil {
+				g.Fail(err)
+			}
+
+			g.Assert(out.Steps.ContainerList[1].DependsOn).IsNotNil()
+			g.Assert(len(out.Steps.ContainerList[1].DependsOn)).Equal(0)
+		})
+	})
 }

@@ -3,31 +3,27 @@
     v-if="repo && repoPermissions && $route.meta.repoHeader"
     v-model:activeTab="activeTab"
     enable-tabs
-    disable-hash-mode
+    disable-tab-url-hash-mode
   >
     <template #title>
       <span class="flex">
-        <router-link :to="{ name: 'repos-owner', params: { repoOwner } }" class="hover:underline">{{
-          repoOwner
+        <router-link :to="{ name: 'org', params: { orgId: repo.org_id } }" class="hover:underline">{{
+          repo.owner
+          /* eslint-disable-next-line @intlify/vue-i18n/no-raw-text */
         }}</router-link>
-        {{ `&nbsp;/&nbsp;${repo.name}` }}
+        &nbsp;/
+        {{ repo.name }}
       </span>
     </template>
     <template #titleActions>
-      <a v-if="badgeUrl" :href="badgeUrl" target="_blank" class="ml-2">
+      <a v-if="badgeUrl" :href="badgeUrl" target="_blank">
         <img :src="badgeUrl" />
       </a>
-      <IconButton :href="repo.link_url" :title="$t('repo.open_in_forge')">
-        <Icon v-if="forge === 'github'" name="github" />
-        <Icon v-else-if="forge === 'gitea'" name="gitea" />
-        <Icon v-else-if="forge === 'gitlab'" name="gitlab" />
-        <Icon v-else-if="forge === 'bitbucket' || forge === 'stash'" name="bitbucket" />
-        <Icon v-else name="repo" />
-      </IconButton>
+      <IconButton :href="repo.forge_url" :title="$t('repo.open_in_forge')" :icon="forgeIcon" class="forge" />
       <IconButton
         v-if="repoPermissions.admin"
         :to="{ name: 'repo-settings' }"
-        :title="$t('repo.settings.settings')"
+        :title="$t('settings')"
         icon="settings"
       />
     </template>
@@ -43,11 +39,7 @@
 
     <Tab id="activity" :title="$t('repo.activity')" />
     <Tab id="branches" :title="$t('repo.branches')" />
-    <Tab
-      v-if="config.forge === 'gitea' || config.forge === 'github' || config.forge === 'gitlab'"
-      id="pull_requests"
-      :title="$t('repo.pull_requests')"
-    />
+    <Tab v-if="repo.pr_enabled && repo.allow_pr" id="pull_requests" :title="$t('repo.pull_requests')" />
 
     <router-view />
   </Scaffold>
@@ -59,7 +51,8 @@ import { computed, onMounted, provide, ref, toRef, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 
-import Icon from '~/components/atomic/Icon.vue';
+import Button from '~/components/atomic/Button.vue';
+import type { IconNames } from '~/components/atomic/Icon.vue';
 import IconButton from '~/components/atomic/IconButton.vue';
 import ManualPipelinePopup from '~/components/layout/popups/ManualPipelinePopup.vue';
 import Scaffold from '~/components/layout/scaffold/Scaffold.vue';
@@ -67,25 +60,18 @@ import Tab from '~/components/layout/scaffold/Tab.vue';
 import useApiClient from '~/compositions/useApiClient';
 import useAuthentication from '~/compositions/useAuthentication';
 import useConfig from '~/compositions/useConfig';
+import { useForgeStore } from '~/compositions/useForgeStore';
 import useNotifications from '~/compositions/useNotifications';
-import { RepoPermissions } from '~/lib/api/types';
+import type { Forge, RepoPermissions } from '~/lib/api/types';
 import { usePipelineStore } from '~/store/pipelines';
 import { useRepoStore } from '~/store/repos';
 
-const props = defineProps({
-  repoOwner: {
-    type: String,
-    required: true,
-  },
+const props = defineProps<{
+  repoId: string;
+}>();
 
-  repoName: {
-    type: String,
-    required: true,
-  },
-});
-
-const repoOwner = toRef(props, 'repoOwner');
-const repoName = toRef(props, 'repoName');
+const _repoId = toRef(props, 'repoId');
+const repositoryId = computed(() => Number.parseInt(_repoId.value, 10));
 const repoStore = useRepoStore();
 const pipelineStore = usePipelineStore();
 const apiClient = useApiClient();
@@ -95,19 +81,26 @@ const route = useRoute();
 const router = useRouter();
 const i18n = useI18n();
 const config = useConfig();
+const forgeStore = useForgeStore();
 
-const { forge } = useConfig();
-const repo = repoStore.getRepo(repoOwner, repoName);
+const repo = repoStore.getRepo(repositoryId);
 const repoPermissions = ref<RepoPermissions>();
-const pipelines = pipelineStore.getRepoPipelines(repoOwner, repoName);
+const pipelines = pipelineStore.getRepoPipelines(repositoryId);
 provide('repo', repo);
 provide('repo-permissions', repoPermissions);
 provide('pipelines', pipelines);
+const forge = ref<Forge>();
+const forgeIcon = computed<IconNames>(() => {
+  if (forge.value && forge.value.type !== 'addon') {
+    return forge.value.type;
+  }
+  return 'repo';
+});
 
 const showManualPipelinePopup = ref(false);
 
 async function loadRepo() {
-  repoPermissions.value = await apiClient.getRepoPermissions(repoOwner.value, repoName.value);
+  repoPermissions.value = await apiClient.getRepoPermissions(repositoryId.value);
   if (!repoPermissions.value.pull) {
     notifications.notify({ type: 'error', title: i18n.t('repo.not_allowed') });
     // no access and not authenticated, redirect to login
@@ -119,26 +112,23 @@ async function loadRepo() {
     return;
   }
 
-  const apiRepo = await repoStore.loadRepo(repoOwner.value, repoName.value);
-  if (apiRepo.full_name !== `${repoOwner.value}/${repoName.value}`) {
-    await router.replace({
-      name: route.name ? route.name : 'repo',
-      params: { repoOwner: apiRepo.owner, repoName: apiRepo.name },
-    });
-    return;
+  await repoStore.loadRepo(repositoryId.value);
+  await pipelineStore.loadRepoPipelines(repositoryId.value);
+
+  if (repo.value) {
+    forge.value = (await forgeStore.getForge(repo.value?.forge_id)).value;
   }
-  await pipelineStore.loadRepoPipelines(repoOwner.value, repoName.value);
 }
 
 onMounted(() => {
   loadRepo();
 });
 
-watch([repoOwner, repoName], () => {
+watch([repositoryId], () => {
   loadRepo();
 });
 
-const badgeUrl = computed(() => repo.value && `/api/badges/${repo.value.owner}/${repo.value.name}/status.svg`);
+const badgeUrl = computed(() => repo.value && `${config.rootPath}/api/badges/${repo.value.id}/status.svg`);
 
 const activeTab = computed({
   get() {

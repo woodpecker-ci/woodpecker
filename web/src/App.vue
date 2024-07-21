@@ -1,5 +1,5 @@
 <template>
-  <div class="app flex flex-col m-auto w-full h-full bg-gray-100 dark:bg-dark-gray-600">
+  <div class="app flex flex-col m-auto w-full h-full bg-wp-background-200 dark:bg-wp-background-100">
     <router-view v-if="blank" />
     <template v-else>
       <Navbar />
@@ -31,7 +31,7 @@ const apiClient = useApiClient();
 const { notify } = useNotifications();
 const i18n = useI18n();
 
-// eslint-disable-next-line promise/prefer-await-to-callbacks
+// TODO reenable with eslint-plugin-promise eslint-disable-next-line promise/prefer-await-to-callbacks
 apiClient.setErrorHandler((err) => {
   if (err.status === 404) {
     notify({ title: i18n.t('errors.not_found'), type: 'error' });

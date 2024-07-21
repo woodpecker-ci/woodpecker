@@ -1,3 +1,17 @@
+// Copyright 2023 Woodpecker Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package types
 
 import (
@@ -7,14 +21,12 @@ import (
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v3"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/constraint"
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types/base"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/constraint"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/types/base"
 )
 
 var containerYaml = []byte(`
 image: golang:latest
-cap_add: [ ALL ]
-cap_drop: [ NET_ADMIN, SYS_ADMIN ]
 commands:
   - go build
   - go test
@@ -27,13 +39,14 @@ devices:
 directory: example/
 dns: 8.8.8.8
 dns_search: example.com
+entrypoint: [/bin/sh, -c]
 environment:
   - RACK_ENV=development
   - SHOW=true
 extra_hosts:
  - somehost:162.242.195.82
  - otherhost:50.31.209.229
-isolation: hyperv
+ - ipv6:2001:db8::10
 name: my-build-container
 network_mode: bridge
 networks:
@@ -44,7 +57,6 @@ privileged: true
 shm_size: 1kb
 mem_limit: 1kb
 memswap_limit: 1kb
-mem_swappiness: 1kb
 volumes:
   - /var/lib/mysql
   - /opt/data:/var/lib/mysql
@@ -52,46 +64,41 @@ volumes:
 tmpfs:
   - /var/lib/test
 when:
-  - branch: master
+  - branch: main
   - event: cron
     cron: job1
 settings:
   foo: bar
   baz: false
+ports:
+  - 8080
+  - 4443/tcp
+  - 51820/udp
 `)
 
 func TestUnmarshalContainer(t *testing.T) {
 	want := Container{
-		CapAdd:        []string{"ALL"},
-		CapDrop:       []string{"NET_ADMIN", "SYS_ADMIN"},
-		Commands:      base.StringOrSlice{"go build", "go test"},
-		CPUQuota:      base.StringOrInt(11),
-		CPUSet:        "1,2",
-		CPUShares:     base.StringOrInt(99),
-		Detached:      true,
-		Devices:       []string{"/dev/ttyUSB0:/dev/ttyUSB0"},
-		Directory:     "example/",
-		DNS:           base.StringOrSlice{"8.8.8.8"},
-		DNSSearch:     base.StringOrSlice{"example.com"},
-		Environment:   base.SliceOrMap{"RACK_ENV": "development", "SHOW": "true"},
-		ExtraHosts:    []string{"somehost:162.242.195.82", "otherhost:50.31.209.229"},
-		Image:         "golang:latest",
-		Isolation:     "hyperv",
-		MemLimit:      base.MemStringOrInt(1024),
-		MemSwapLimit:  base.MemStringOrInt(1024),
-		MemSwappiness: base.MemStringOrInt(1024),
-		Name:          "my-build-container",
-		Networks: Networks{
-			Networks: []*Network{
-				{Name: "some-network"},
-				{Name: "other-network"},
-			},
-		},
-		NetworkMode: "bridge",
-		Pull:        true,
-		Privileged:  true,
-		ShmSize:     base.MemStringOrInt(1024),
-		Tmpfs:       base.StringOrSlice{"/var/lib/test"},
+		Commands:     base.StringOrSlice{"go build", "go test"},
+		CPUQuota:     base.StringOrInt(11),
+		CPUSet:       "1,2",
+		CPUShares:    base.StringOrInt(99),
+		Detached:     true,
+		Devices:      []string{"/dev/ttyUSB0:/dev/ttyUSB0"},
+		Directory:    "example/",
+		DNS:          base.StringOrSlice{"8.8.8.8"},
+		DNSSearch:    base.StringOrSlice{"example.com"},
+		Entrypoint:   []string{"/bin/sh", "-c"},
+		Environment:  base.SliceOrMap{"RACK_ENV": "development", "SHOW": "true"},
+		ExtraHosts:   []string{"somehost:162.242.195.82", "otherhost:50.31.209.229", "ipv6:2001:db8::10"},
+		Image:        "golang:latest",
+		MemLimit:     base.MemStringOrInt(1024),
+		MemSwapLimit: base.MemStringOrInt(1024),
+		Name:         "my-build-container",
+		NetworkMode:  "bridge",
+		Pull:         true,
+		Privileged:   true,
+		ShmSize:      base.MemStringOrInt(1024),
+		Tmpfs:        base.StringOrSlice{"/var/lib/test"},
 		Volumes: Volumes{
 			Volumes: []*Volume{
 				{Source: "", Destination: "/var/lib/mysql"},
@@ -103,7 +110,7 @@ func TestUnmarshalContainer(t *testing.T) {
 			Constraints: []constraint.Constraint{
 				{
 					Branch: constraint.List{
-						Include: []string{"master"},
+						Include: []string{"main"},
 					},
 				},
 				{
@@ -116,10 +123,11 @@ func TestUnmarshalContainer(t *testing.T) {
 				},
 			},
 		},
-		Settings: map[string]interface{}{
+		Settings: map[string]any{
 			"foo": "bar",
 			"baz": false,
 		},
+		Ports: []string{"8080", "4443/tcp", "51820/udp"},
 	}
 	got := Container{}
 	err := yaml.Unmarshal(containerYaml, &got)
@@ -127,7 +135,7 @@ func TestUnmarshalContainer(t *testing.T) {
 	assert.EqualValues(t, want, got, "problem parsing container")
 }
 
-// TestUnmarshalContainersErr unmarshals a map of containers. The order is
+// TestUnmarshalContainers unmarshals a map of containers. The order is
 // retained and the container key may be used as the container name if a
 // name is not explicitly provided.
 func TestUnmarshalContainers(t *testing.T) {
@@ -150,7 +158,7 @@ func TestUnmarshalContainers(t *testing.T) {
 				{
 					Name:  "unit_test",
 					Image: "node",
-					Settings: map[string]interface{}{
+					Settings: map[string]any{
 						"normal_setting": true,
 					},
 				},
@@ -181,7 +189,7 @@ func TestUnmarshalContainers(t *testing.T) {
 						Source: "docker_password",
 						Target: "docker_password",
 					}}},
-					Settings: map[string]interface{}{
+					Settings: map[string]any{
 						"repo":       "woodpeckerci/woodpecker-agent",
 						"dockerfile": "docker/Dockerfile.agent",
 						"tag":        stringsToInterface("next", "latest"),
@@ -214,7 +222,7 @@ func TestUnmarshalContainers(t *testing.T) {
 					Name:  "publish-cli",
 					Image: "print/env",
 					Group: "docker",
-					Settings: map[string]interface{}{
+					Settings: map[string]any{
 						"repo":       "woodpeckerci/woodpecker-cli",
 						"dockerfile": "docker/Dockerfile.cli",
 						"tag":        stringsToInterface("next"),
@@ -280,8 +288,8 @@ func TestUnmarshalContainersErr(t *testing.T) {
 	}
 }
 
-func stringsToInterface(val ...string) []interface{} {
-	res := make([]interface{}, len(val))
+func stringsToInterface(val ...string) []any {
+	res := make([]any, len(val))
 	for i := range val {
 		res[i] = val[i]
 	}
@@ -295,5 +303,11 @@ func TestIsPlugin(t *testing.T) {
 	}).IsPlugin())
 	assert.False(t, (&Container{
 		Commands: base.StringOrSlice(strslice.StrSlice{"echo 'this is not a plugin'"}),
+	}).IsPlugin())
+	assert.True(t, (&Container{
+		Entrypoint: base.StringOrSlice(strslice.StrSlice{}),
+	}).IsPlugin())
+	assert.False(t, (&Container{
+		Entrypoint: base.StringOrSlice(strslice.StrSlice{"echo 'this is not a plugin'"}),
 	}).IsPlugin())
 }

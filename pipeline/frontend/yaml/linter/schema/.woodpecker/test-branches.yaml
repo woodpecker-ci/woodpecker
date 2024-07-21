@@ -1,0 +1,7 @@
+branches: main
+
+steps:
+  build:
+    image: golang
+    commands:
+      - go test

@@ -1,11 +1,12 @@
 <template>
   <a
     :href="`${docsUrl}`"
-    :title="$t('documentation_for', { topic: topic })"
+    :title="$t('documentation_for', { topic })"
     target="_blank"
-    class="text-blue-500 hover:text-blue-600 cursor-pointer mt-1"
-    ><Icon name="question" class="!w-4 !h-4"
-  /></a>
+    class="text-wp-link-100 hover:text-wp-link-200 cursor-pointer mt-1"
+  >
+    <Icon name="question" class="!w-4 !h-4" />
+  </a>
 </template>
 
 <script lang="ts" setup>
@@ -18,8 +19,7 @@ const props = defineProps<{
   topic: string;
 }>();
 
-const docsBaseUrl = window.WOODPECKER_DOCS;
 const url = toRef(props, 'url');
 const topic = toRef(props, 'topic');
-const docsUrl = computed(() => (url.value.startsWith('http') ? url.value : `${docsBaseUrl}${url.value}`));
+const docsUrl = computed(() => (url.value.startsWith('http') ? url.value : `https://woodpecker-ci.org/${url.value}`));
 </script>

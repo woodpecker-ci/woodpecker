@@ -13,7 +13,7 @@
 *.so
 *.dylib
 vendor/
-__debug_bin
+__debug_bin*
 
 # Test binary, built with `go test -c`
 *.test
@@ -27,6 +27,7 @@ web/dist/**
 web/node_modules/
 web/*.log
 web/.env
+.pnpm-store
 
 ### Docker ###
 docker-compose.yml
@@ -39,6 +40,8 @@ docker-compose.yml
 extras/
 /build/
 /dist/
+/data/
+datastore/migration/testfiles/
 
 docs/venv
 

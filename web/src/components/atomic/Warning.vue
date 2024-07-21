@@ -1,22 +1,19 @@
 <template>
   <div
-    class="text-sm text-gray-600 font-bold rounded-md border border-solid p-2 border-yellow-500 bg-yellow-200 dark:bg-yellow-600 dark:border-yellow-800 dark:text-light-100"
+    class="flex gap-2 items-center text-gray-700 font-bold rounded-md p-2 border border-solid border-l-6 border-wp-hint-warn-200 bg-wp-hint-warn-100"
   >
-    ⚠ {{ text }}
+    <Icon v-if="!textOnly" name="warning" />
+    <slot>
+      <span class="whitespace-pre">{{ text }}</span>
+    </slot>
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script lang="ts" setup>
+import Icon from './Icon.vue';
 
-export default defineComponent({
-  name: 'Warning',
-
-  props: {
-    text: {
-      type: String,
-      required: true,
-    },
-  },
-});
+defineProps<{
+  textOnly?: boolean;
+  text?: string;
+}>();
 </script>

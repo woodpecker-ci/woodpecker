@@ -1,4 +1,4 @@
-// Copyright 2018 Drone.IO Inc.
+// Copyright 2023 Woodpecker Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,7 +18,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/woodpecker-ci/woodpecker/server/model"
+
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
 func TestLogCreateFindDelete(t *testing.T) {
@@ -44,8 +45,9 @@ func TestLogCreateFindDelete(t *testing.T) {
 		},
 	}
 
-	// first insert should just work
-	assert.NoError(t, store.LogSave(&step, logEntries))
+	for _, logEntry := range logEntries {
+		assert.NoError(t, store.LogAppend(logEntry))
+	}
 
 	// we want to find our inserted logs
 	_logEntries, err := store.LogFind(&step)
@@ -81,7 +83,9 @@ func TestLogAppend(t *testing.T) {
 		},
 	}
 
-	assert.NoError(t, store.LogSave(&step, logEntries))
+	for _, logEntry := range logEntries {
+		assert.NoError(t, store.LogAppend(logEntry))
+	}
 
 	logEntry := &model.LogEntry{
 		StepID: step.ID,

@@ -15,30 +15,30 @@
 package deploy
 
 import (
+	"context"
 	"fmt"
 	"html/template"
 	"os"
 	"strconv"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
-	"github.com/woodpecker-ci/woodpecker/cli/common"
-	"github.com/woodpecker-ci/woodpecker/cli/internal"
-	"github.com/woodpecker-ci/woodpecker/woodpecker-go/woodpecker"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker"
 )
 
 // Command exports the deploy command.
 var Command = &cli.Command{
 	Name:      "deploy",
-	Usage:     "deploy code",
-	ArgsUsage: "<repo/name> <pipeline> <environment>",
+	Usage:     "trigger a pipeline with the 'deployment' event",
+	ArgsUsage: "<repo-id|repo-full-name> <pipeline> <environment>",
 	Action:    deploy,
-	Flags: append(common.GlobalFlags,
+	Flags: []cli.Flag{
 		common.FormatFlag(tmplDeployInfo),
 		&cli.StringFlag{
 			Name:  "branch",
 			Usage: "branch filter",
-			Value: "master",
 		},
 		&cli.StringFlag{
 			Name:  "event",
@@ -55,17 +55,17 @@ var Command = &cli.Command{
 			Aliases: []string{"p"},
 			Usage:   "custom parameters to be injected into the step environment. Format: KEY=value",
 		},
-	),
+	},
 }
 
-func deploy(c *cli.Context) error {
-	repo := c.Args().First()
-	owner, name, err := internal.ParseRepo(repo)
+func deploy(ctx context.Context, c *cli.Command) error {
+	client, err := internal.NewClient(ctx, c)
 	if err != nil {
 		return err
 	}
 
-	client, err := internal.NewClient(c)
+	repo := c.Args().First()
+	repoID, err := internal.ParseRepo(client, repo)
 	if err != nil {
 		return err
 	}
@@ -74,13 +74,22 @@ func deploy(c *cli.Context) error {
 	event := c.String("event")
 	status := c.String("status")
 
+	if branch == "" {
+		repo, err := client.Repo(repoID)
+		if err != nil {
+			return err
+		}
+
+		branch = repo.DefaultBranch
+	}
+
 	pipelineArg := c.Args().Get(1)
-	var number int
+	var number int64
 	if pipelineArg == "last" {
 		// Fetch the pipeline number from the last pipeline
-		pipelines, berr := client.PipelineList(owner, name)
-		if berr != nil {
-			return berr
+		pipelines, err := client.PipelineList(repoID)
+		if err != nil {
+			return err
 		}
 		for _, pipeline := range pipelines {
 			if branch != "" && pipeline.Branch != branch {
@@ -97,23 +106,24 @@ func deploy(c *cli.Context) error {
 			}
 		}
 		if number == 0 {
-			return fmt.Errorf("Cannot deploy failure pipeline")
+			return fmt.Errorf("cannot deploy failure pipeline")
 		}
 	} else {
-		number, err = strconv.Atoi(pipelineArg)
+		number, err = strconv.ParseInt(pipelineArg, 10, 64)
 		if err != nil {
 			return err
 		}
 	}
 
-	env := c.Args().Get(2)
+	envArgIndex := 2
+	env := c.Args().Get(envArgIndex)
 	if env == "" {
-		return fmt.Errorf("Please specify the target environment (ie production)")
+		return fmt.Errorf("please specify the target environment (i.e. production)")
 	}
 
 	params := internal.ParseKeyPair(c.StringSlice("param"))
 
-	deploy, err := client.Deploy(owner, name, number, env, params)
+	deploy, err := client.Deploy(repoID, number, env, params)
 	if err != nil {
 		return err
 	}
@@ -125,7 +135,7 @@ func deploy(c *cli.Context) error {
 	return tmpl.Execute(os.Stdout, deploy)
 }
 
-// template for deployment information
+// Template for deployment information.
 var tmplDeployInfo = `Number: {{ .Number }}
 Status: {{ .Status }}
 Commit: {{ .Commit }}

@@ -20,9 +20,9 @@ var allProjectsPayload = []byte(`
 	{
 		"id": 4,
 		"description": null,
-		"default_branch": "master",
+		"default_branch": "main",
 		"public": false,
-		"visibility_level": 0,
+		"visibility": "private",
 		"ssh_url_to_repo": "git@example.com:diaspora/diaspora-client.git",
 		"http_url_to_repo": "http://example.com/diaspora/diaspora-client.git",
 		"web_url": "http://example.com/diaspora/diaspora-client",
@@ -66,9 +66,9 @@ var allProjectsPayload = []byte(`
 	{
 		"id": 6,
 		"description": null,
-		"default_branch": "master",
+		"default_branch": "main",
 		"public": false,
-		"visibility_level": 0,
+		"visibility": "private",
 		"ssh_url_to_repo": "git@example.com:brightbox/puppet.git",
 		"http_url_to_repo": "http://example.com/brightbox/puppet.git",
 		"web_url": "http://example.com/brightbox/puppet",
@@ -117,9 +117,9 @@ var notArchivedProjectsPayload = []byte(`
 	{
 		"id": 4,
 		"description": null,
-		"default_branch": "master",
+		"default_branch": "main",
 		"public": false,
-		"visibility_level": 0,
+		"visibility": "private",
 		"ssh_url_to_repo": "git@example.com:diaspora/diaspora-client.git",
 		"http_url_to_repo": "http://example.com/diaspora/diaspora-client.git",
 		"web_url": "http://example.com/diaspora/diaspora-client",
@@ -167,9 +167,9 @@ var project4Payload = []byte(`
 {
 	"id": 4,
 	"description": null,
-	"default_branch": "master",
+	"default_branch": "main",
 	"public": false,
-	"visibility_level": 0,
+	"visibility": "private",
 	"ssh_url_to_repo": "git@example.com:diaspora/diaspora-client.git",
 	"http_url_to_repo": "http://example.com/diaspora/diaspora-client.git",
 	"web_url": "http://example.com/diaspora/diaspora-client",
@@ -216,9 +216,9 @@ var project6Payload = []byte(`
 {
 	"id": 6,
 	"description": null,
-	"default_branch": "master",
+	"default_branch": "main",
 	"public": false,
-	"visibility_level": 0,
+	"visibility": "private",
 	"ssh_url_to_repo": "git@example.com:brightbox/puppet.git",
 	"http_url_to_repo": "http://example.com/brightbox/puppet.git",
 	"web_url": "http://example.com/brightbox/puppet",
@@ -303,4 +303,34 @@ var project4PayloadHooks = []byte(`
     "push_events_branch_filter": null
   }
 ]
+`)
+
+var project4PayloadMembers = []byte(`
+{
+  "id": 3,
+  "username": "some_user",
+  "name": "Diaspora",
+  "state": "active",
+  "locked": false,
+  "avatar_url": "https://example.com/uploads/-/system/user/avatar/3/avatar.png",
+  "web_url": "https://example.com/some_user",
+  "access_level": 50,
+  "created_at": "2024-01-16T12:39:58.912Z",
+  "expires_at": null
+}
+`)
+
+var project6PayloadMembers = []byte(`
+{
+  "id": 3,
+  "username": "some_user",
+  "name": "Diaspora",
+  "state": "active",
+  "locked": false,
+  "avatar_url": "https://example.com/uploads/-/system/user/avatar/3/avatar.png",
+  "web_url": "https://example.com/some_user",
+  "access_level": 30,
+  "created_at": "2024-01-16T12:39:58.912Z",
+  "expires_at": null
+}
 `)

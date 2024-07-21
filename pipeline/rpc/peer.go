@@ -18,7 +18,7 @@ package rpc
 import (
 	"context"
 
-	backend "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
+	backend "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 )
 
 type (
@@ -27,18 +27,25 @@ type (
 		Labels map[string]string `json:"labels"`
 	}
 
-	// State defines the pipeline state.
-	State struct {
-		Step     string `json:"step"`
+	// StepState defines the step state.
+	StepState struct {
+		StepUUID string `json:"step_uuid"`
+		Started  int64  `json:"started"`
+		Finished int64  `json:"finished"`
 		Exited   bool   `json:"exited"`
 		ExitCode int    `json:"exit_code"`
+		Error    string `json:"error"`
+	}
+
+	// WorkflowState defines the workflow state.
+	WorkflowState struct {
 		Started  int64  `json:"started"`
 		Finished int64  `json:"finished"`
 		Error    string `json:"error"`
 	}
 
-	// Pipeline defines the pipeline execution details.
-	Pipeline struct {
+	// Workflow defines the workflow execution details.
+	Workflow struct {
 		ID      string          `json:"id"`
 		Config  *backend.Config `json:"config"`
 		Timeout int64           `json:"timeout"`
@@ -50,34 +57,39 @@ type (
 	}
 )
 
+//go:generate mockery --name Peer --output mocks --case underscore --note "+build test"
+
 // Peer defines a peer-to-peer connection.
 type Peer interface {
 	// Version returns the server- & grpc-version
 	Version(c context.Context) (*Version, error)
 
-	// Next returns the next pipeline in the queue.
-	Next(c context.Context, f Filter) (*Pipeline, error)
+	// Next returns the next workflow in the queue
+	Next(c context.Context, f Filter) (*Workflow, error)
 
-	// Wait blocks until the pipeline is complete.
-	Wait(c context.Context, id string) error
+	// Wait blocks until the workflow is complete
+	Wait(c context.Context, workflowID string) error
 
-	// Init signals the pipeline is initialized.
-	Init(c context.Context, id string, state State) error
+	// Init signals the workflow is initialized
+	Init(c context.Context, workflowID string, state WorkflowState) error
 
-	// Done signals the pipeline is complete.
-	Done(c context.Context, id string, state State) error
+	// Done signals the workflow is complete
+	Done(c context.Context, workflowID string, state WorkflowState) error
 
-	// Extend extends the pipeline deadline
-	Extend(c context.Context, id string) error
+	// Extend extends the workflow deadline
+	Extend(c context.Context, workflowID string) error
 
-	// Update updates the pipeline state.
-	Update(c context.Context, id string, state State) error
+	// Update updates the step state
+	Update(c context.Context, workflowID string, state StepState) error
 
-	// Log writes the pipeline log entry.
+	// Log writes the step log entry
 	Log(c context.Context, logEntry *LogEntry) error
 
 	// RegisterAgent register our agent to the server
 	RegisterAgent(ctx context.Context, platform, backend, version string, capacity int) (int64, error)
+
+	// UnregisterAgent unregister our agent from the server
+	UnregisterAgent(ctx context.Context) error
 
 	// ReportHealth reports health status of the agent to the server
 	ReportHealth(c context.Context) error

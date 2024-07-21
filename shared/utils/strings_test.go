@@ -21,7 +21,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestDedupStrings(t *testing.T) {
+func TestDeduplicateStrings(t *testing.T) {
 	tests := []struct {
 		in  []string
 		out []string
@@ -37,40 +37,12 @@ func TestDedupStrings(t *testing.T) {
 	}}
 
 	for _, tc := range tests {
-		result := DedupStrings(tc.in)
+		result := DeduplicateStrings(tc.in)
 		sort.Strings(result)
 		if len(tc.out) == 0 {
 			assert.Len(t, result, 0)
 		} else {
 			assert.EqualValues(t, tc.out, result, "could not correctly process input '%#v'", tc.in)
 		}
-	}
-}
-
-func TestEqualStringSlice(t *testing.T) {
-	tests := []struct {
-		in1 []string
-		in2 []string
-		out bool
-	}{{
-		in1: []string{"", "ab", "12", "ab"},
-		in2: []string{"12", "ab"},
-		out: false,
-	}, {
-		in1: nil,
-		in2: nil,
-		out: true,
-	}, {
-		in1: []string{"AA", "AA", "2", " "},
-		in2: []string{"2", "AA", " ", "AA"},
-		out: true,
-	}, {
-		in1: []string{"AA", "AA", "2", " "},
-		in2: []string{"2", "2", " ", "AA"},
-		out: false,
-	}}
-
-	for _, tc := range tests {
-		assert.EqualValues(t, tc.out, EqualStringSlice(tc.in1, tc.in2), "could not correctly process input: '%#v', %#v", tc.in1, tc.in2)
 	}
 }

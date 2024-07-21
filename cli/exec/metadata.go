@@ -15,18 +15,19 @@
 package exec
 
 import (
+	"context"
 	"runtime"
 	"strings"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/metadata"
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/matrix"
-	"github.com/woodpecker-ci/woodpecker/version"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/metadata"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/matrix"
+	"go.woodpecker-ci.org/woodpecker/v2/version"
 )
 
 // return the metadata from the cli context.
-func metadataFromContext(c *cli.Context, axis matrix.Axis) metadata.Metadata {
+func metadataFromContext(_ context.Context, c *cli.Command, axis matrix.Axis) metadata.Metadata {
 	platform := c.String("system-platform")
 	if platform == "" {
 		platform = runtime.GOOS + "/" + runtime.GOARCH
@@ -42,24 +43,26 @@ func metadataFromContext(c *cli.Context, axis matrix.Axis) metadata.Metadata {
 
 	return metadata.Metadata{
 		Repo: metadata.Repo{
-			Name:     repoName,
-			Owner:    repoOwner,
-			RemoteID: c.String("repo-remote-id"),
-			Link:     c.String("repo-link"),
-			CloneURL: c.String("repo-clone-url"),
-			Private:  c.Bool("repo-private"),
-			Trusted:  c.Bool("repo-trusted"),
+			Name:        repoName,
+			Owner:       repoOwner,
+			RemoteID:    c.String("repo-remote-id"),
+			ForgeURL:    c.String("repo-url"),
+			CloneURL:    c.String("repo-clone-url"),
+			CloneSSHURL: c.String("repo-clone-ssh-url"),
+			Private:     c.Bool("repo-private"),
+			Trusted:     c.Bool("repo-trusted"),
 		},
 		Curr: metadata.Pipeline{
-			Number:   c.Int64("pipeline-number"),
-			Parent:   c.Int64("pipeline-parent"),
-			Created:  c.Int64("pipeline-created"),
-			Started:  c.Int64("pipeline-started"),
-			Finished: c.Int64("pipeline-finished"),
-			Status:   c.String("pipeline-status"),
-			Event:    c.String("pipeline-event"),
-			Link:     c.String("pipeline-link"),
-			Target:   c.String("pipeline-target"),
+			Number:     c.Int("pipeline-number"),
+			Parent:     c.Int("pipeline-parent"),
+			Created:    c.Int("pipeline-created"),
+			Started:    c.Int("pipeline-started"),
+			Finished:   c.Int("pipeline-finished"),
+			Status:     c.String("pipeline-status"),
+			Event:      c.String("pipeline-event"),
+			ForgeURL:   c.String("pipeline-url"),
+			DeployTo:   c.String("pipeline-deploy-to"),
+			DeployTask: c.String("pipeline-deploy-task"),
 			Commit: metadata.Commit{
 				Sha:     c.String("commit-sha"),
 				Ref:     c.String("commit-ref"),
@@ -74,13 +77,13 @@ func metadataFromContext(c *cli.Context, axis matrix.Axis) metadata.Metadata {
 			},
 		},
 		Prev: metadata.Pipeline{
-			Number:   c.Int64("prev-pipeline-number"),
-			Created:  c.Int64("prev-pipeline-created"),
-			Started:  c.Int64("prev-pipeline-started"),
-			Finished: c.Int64("prev-pipeline-finished"),
+			Number:   c.Int("prev-pipeline-number"),
+			Created:  c.Int("prev-pipeline-created"),
+			Started:  c.Int("prev-pipeline-started"),
+			Finished: c.Int("prev-pipeline-finished"),
 			Status:   c.String("prev-pipeline-status"),
 			Event:    c.String("prev-pipeline-event"),
-			Link:     c.String("prev-pipeline-link"),
+			ForgeURL: c.String("prev-pipeline-url"),
 			Commit: metadata.Commit{
 				Sha:     c.String("prev-commit-sha"),
 				Ref:     c.String("prev-commit-ref"),
@@ -96,16 +99,16 @@ func metadataFromContext(c *cli.Context, axis matrix.Axis) metadata.Metadata {
 		},
 		Workflow: metadata.Workflow{
 			Name:   c.String("workflow-name"),
-			Number: c.Int("workflow-number"),
+			Number: int(c.Int("workflow-number")),
 			Matrix: axis,
 		},
 		Step: metadata.Step{
 			Name:   c.String("step-name"),
-			Number: c.Int("step-number"),
+			Number: int(c.Int("step-number")),
 		},
 		Sys: metadata.System{
 			Name:     c.String("system-name"),
-			Link:     c.String("system-link"),
+			URL:      c.String("system-url"),
 			Platform: platform,
 			Version:  version.Version,
 		},

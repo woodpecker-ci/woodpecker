@@ -1,46 +1,61 @@
+// Copyright 2023 Woodpecker Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package cron
 
 import (
+	"context"
 	"fmt"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
-	"github.com/woodpecker-ci/woodpecker/cli/common"
-	"github.com/woodpecker-ci/woodpecker/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
 )
 
 var cronDeleteCmd = &cli.Command{
 	Name:      "rm",
 	Usage:     "remove a cron job",
-	ArgsUsage: "[repo/name]",
+	ArgsUsage: "[repo-id|repo-full-name]",
 	Action:    cronDelete,
-	Flags: append(common.GlobalFlags,
+	Flags: []cli.Flag{
 		common.RepoFlag,
 		&cli.StringFlag{
 			Name:     "id",
 			Usage:    "cron id",
 			Required: true,
 		},
-	),
+	},
 }
 
-func cronDelete(c *cli.Context) error {
+func cronDelete(ctx context.Context, c *cli.Command) error {
 	var (
-		jobID    = c.Int64("id")
-		reponame = c.String("repository")
+		cronID           = c.Int("id")
+		repoIDOrFullName = c.String("repository")
 	)
-	if reponame == "" {
-		reponame = c.Args().First()
+	if repoIDOrFullName == "" {
+		repoIDOrFullName = c.Args().First()
 	}
-	owner, name, err := internal.ParseRepo(reponame)
+	client, err := internal.NewClient(ctx, c)
 	if err != nil {
 		return err
 	}
-	client, err := internal.NewClient(c)
+	repoID, err := internal.ParseRepo(client, repoIDOrFullName)
 	if err != nil {
 		return err
 	}
-	err = client.CronDelete(owner, name, jobID)
+	err = client.CronDelete(repoID, cronID)
 	if err != nil {
 		return err
 	}

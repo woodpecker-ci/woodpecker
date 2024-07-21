@@ -1,10 +1,13 @@
-import { inject as vueInject, provide as vueProvide, Ref } from 'vue';
+import type { InjectionKey, Ref } from 'vue';
+import { inject as vueInject, provide as vueProvide } from 'vue';
 
-import { Repo } from '~/lib/api/types';
+import type { Org, OrgPermissions, Repo } from '~/lib/api/types';
 
-export type InjectKeys = {
+export interface InjectKeys {
   repo: Ref<Repo>;
-};
+  org: Ref<Org | undefined>;
+  'org-permissions': Ref<OrgPermissions | undefined>;
+}
 
 export function inject<T extends keyof InjectKeys>(key: T): InjectKeys[T] {
   const value = vueInject<InjectKeys[T]>(key);
@@ -15,5 +18,5 @@ export function inject<T extends keyof InjectKeys>(key: T): InjectKeys[T] {
 }
 
 export function provide<T extends keyof InjectKeys>(key: T, value: InjectKeys[T]): void {
-  return vueProvide(key, value);
+  return vueProvide(key, value as T extends InjectionKey<infer V> ? V : InjectKeys[T]);
 }

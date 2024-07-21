@@ -15,19 +15,20 @@
 package migration
 
 import (
-	"errors"
+	"context"
 	"fmt"
 	"reflect"
 
-	"github.com/rs/zerolog/log"
+	"src.techknowlogick.com/xormigrate"
 	"xorm.io/xorm"
 
-	"github.com/woodpecker-ci/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
 // APPEND NEW MIGRATIONS
-// they are executed in order and if one fails woodpecker will try to rollback that specific one and quits
-var migrationTasks = []*task{
+// They are executed in order and if one fails Xormigrate will try to rollback that specific one and quits.
+var migrationTasks = []*xormigrate.Migration{
+	&legacyToXormigrate,
 	&legacy2Xorm,
 	&alterTableReposDropFallback,
 	&alterTableReposDropAllowDeploysAllowTags,
@@ -47,9 +48,24 @@ var migrationTasks = []*task{
 	&removeInactiveRepos,
 	&dropFiles,
 	&removeMachineCol,
+	&dropOldCols,
+	&initLogsEntriesTable,
+	&migrateLogs2LogEntries,
+	&parentStepsToWorkflows,
+	&addOrgs,
+	&addOrgID,
+	&alterTableTasksUpdateColumnTaskDataType,
+	&alterTableConfigUpdateColumnConfigDataType,
+	&removePluginOnlyOptionFromSecretsTable,
+	&convertToNewPipelineErrorFormat,
+	&renameLinkToURL,
+	&cleanRegistryPipeline,
+	&setForgeID,
+	&unifyColumnsTables,
+	&alterTableRegistriesFixRequiredFields,
 }
 
-var allBeans = []interface{}{
+var allBeans = []any{
 	new(model.Agent),
 	new(model.Pipeline),
 	new(model.PipelineConfig),
@@ -65,134 +81,46 @@ var allBeans = []interface{}{
 	new(model.ServerConfig),
 	new(model.Cron),
 	new(model.Redirection),
+	new(model.Forge),
+	new(model.Workflow),
+	new(model.Org),
 }
 
-type migrations struct {
-	Name string `xorm:"UNIQUE"`
-}
-
-type task struct {
-	name     string
-	required bool
-	fn       func(sess *xorm.Session) error
-}
-
-// initNew create tables for new instance
-func initNew(sess *xorm.Session) error {
-	if err := syncAll(sess); err != nil {
-		return err
-	}
-
-	// dummy run migrations
-	for _, task := range migrationTasks {
-		if _, err := sess.Insert(&migrations{task.name}); err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-func Migrate(e *xorm.Engine) error {
+// TODO: make xormigrate context aware
+func Migrate(_ context.Context, e *xorm.Engine, allowLong bool) error {
 	e.SetDisableGlobalCache(true)
 
-	if err := e.Sync(new(migrations)); err != nil {
-		return err
+	m := xormigrate.New(e, migrationTasks)
+	m.AllowLong(allowLong)
+	oldCount, err := e.Table("migrations").Count()
+	if oldCount < 1 || err != nil {
+		// allow new schema initialization if old migrations table is empty or it does not exist (err != nil)
+		// schema initialization will always run if we call `InitSchema`
+		m.InitSchema(func(_ *xorm.Engine) error {
+			// do nothing on schema init, models are synced in any case below
+			return nil
+		})
 	}
 
-	sess := e.NewSession()
-	defer sess.Close()
-	if err := sess.Begin(); err != nil {
-		return err
-	}
+	m.SetLogger(&xormigrateLogger{})
 
-	// check if we have a fresh installation or need to check for migrations
-	c, err := sess.Count(new(migrations))
-	if err != nil {
-		return err
-	}
-
-	if c == 0 {
-		if err := initNew(sess); err != nil {
-			return err
-		}
-		return sess.Commit()
-	}
-
-	if err := sess.Commit(); err != nil {
-		return err
-	}
-
-	if err := runTasks(e, migrationTasks); err != nil {
+	if err := m.Migrate(); err != nil {
 		return err
 	}
 
 	e.SetDisableGlobalCache(false)
 
-	return syncAll(e)
-}
-
-func runTasks(e *xorm.Engine, tasks []*task) error {
-	// cache migrations in db
-	migCache := make(map[string]bool)
-	var migList []*migrations
-	if err := e.Find(&migList); err != nil {
-		return err
-	}
-	for i := range migList {
-		migCache[migList[i].Name] = true
+	if err := syncAll(e); err != nil {
+		return fmt.Errorf("msg: %w", err)
 	}
 
-	for _, task := range tasks {
-		if migCache[task.name] {
-			log.Trace().Msgf("migration task '%s' already applied", task.name)
-			continue
-		}
-
-		log.Trace().Msgf("start migration task '%s'", task.name)
-		sess := e.NewSession().NoCache()
-		defer sess.Close()
-		if err := sess.Begin(); err != nil {
-			return err
-		}
-
-		if task.fn != nil {
-			if err := task.fn(sess); err != nil {
-				if err2 := sess.Rollback(); err2 != nil {
-					err = errors.Join(err, err2)
-				}
-
-				if task.required {
-					return err
-				}
-				log.Error().Err(err).Msgf("migration task '%s' failed but is not required", task.name)
-				continue
-			}
-			log.Debug().Msgf("migration task '%s' done", task.name)
-		} else {
-			log.Trace().Msgf("skip migration task '%s'", task.name)
-		}
-
-		if _, err := sess.Insert(&migrations{task.name}); err != nil {
-			return err
-		}
-		if err := sess.Commit(); err != nil {
-			return err
-		}
-
-		migCache[task.name] = true
-	}
 	return nil
 }
 
-type syncEngine interface {
-	Sync(beans ...interface{}) error
-}
-
-func syncAll(sess syncEngine) error {
+func syncAll(sess *xorm.Engine) error {
 	for _, bean := range allBeans {
 		if err := sess.Sync(bean); err != nil {
-			return fmt.Errorf("Sync error '%s': %w", reflect.TypeOf(bean), err)
+			return fmt.Errorf("sync error '%s': %w", reflect.TypeOf(bean), err)
 		}
 	}
 	return nil

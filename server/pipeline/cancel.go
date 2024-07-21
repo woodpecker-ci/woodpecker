@@ -20,19 +20,20 @@ import (
 
 	"github.com/rs/zerolog/log"
 
-	"github.com/woodpecker-ci/woodpecker/server"
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/queue"
-	"github.com/woodpecker-ci/woodpecker/server/store"
+	"go.woodpecker-ci.org/woodpecker/v2/server"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/queue"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 )
 
 // Cancel the pipeline and returns the status.
-func Cancel(ctx context.Context, store store.Store, repo *model.Repo, user *model.User, pipeline *model.Pipeline) error {
+func Cancel(ctx context.Context, _forge forge.Forge, store store.Store, repo *model.Repo, user *model.User, pipeline *model.Pipeline) error {
 	if pipeline.Status != model.StatusRunning && pipeline.Status != model.StatusPending && pipeline.Status != model.StatusBlocked {
 		return &ErrBadRequest{Msg: "Cannot cancel a non-running or non-pending or non-blocked pipeline"}
 	}
 
-	steps, err := store.StepList(pipeline)
+	workflows, err := store.WorkflowGetTree(pipeline)
 	if err != nil {
 		return &ErrNotFound{Msg: err.Error()}
 	}
@@ -42,15 +43,12 @@ func Cancel(ctx context.Context, store store.Store, repo *model.Repo, user *mode
 		stepsToCancel []string
 		stepsToEvict  []string
 	)
-	for _, step := range steps {
-		if step.PPID != 0 {
-			continue
+	for _, workflow := range workflows {
+		if workflow.State == model.StatusRunning {
+			stepsToCancel = append(stepsToCancel, fmt.Sprint(workflow.ID))
 		}
-		if step.State == model.StatusRunning {
-			stepsToCancel = append(stepsToCancel, fmt.Sprint(step.ID))
-		}
-		if step.State == model.StatusPending {
-			stepsToEvict = append(stepsToEvict, fmt.Sprint(step.ID))
+		if workflow.State == model.StatusPending {
+			stepsToEvict = append(stepsToEvict, fmt.Sprint(workflow.ID))
 		}
 	}
 
@@ -70,15 +68,16 @@ func Cancel(ctx context.Context, store store.Store, repo *model.Repo, user *mode
 
 	// Then update the DB status for pending pipelines
 	// Running ones will be set when the agents stop on the cancel signal
-	for _, step := range steps {
-		if step.State == model.StatusPending {
-			if step.PPID != 0 {
+	for _, workflow := range workflows {
+		if workflow.State == model.StatusPending {
+			if _, err = UpdateWorkflowToStatusSkipped(store, *workflow); err != nil {
+				log.Error().Err(err).Msgf("cannot update workflow with id %d state", workflow.ID)
+			}
+		}
+		for _, step := range workflow.Children {
+			if step.State == model.StatusPending {
 				if _, err = UpdateStepToStatusSkipped(store, *step, 0); err != nil {
-					log.Error().Msgf("error: done: cannot update step_id %d state: %s", step.ID, err)
-				}
-			} else {
-				if _, err = UpdateStepToStatusKilled(store, *step); err != nil {
-					log.Error().Msgf("error: done: cannot update step_id %d state: %s", step.ID, err)
+					log.Error().Err(err).Msgf("cannot update workflow with id %d state", workflow.ID)
 				}
 			}
 		}
@@ -90,24 +89,19 @@ func Cancel(ctx context.Context, store store.Store, repo *model.Repo, user *mode
 		return err
 	}
 
-	updatePipelineStatus(ctx, killedPipeline, repo, user)
+	updatePipelineStatus(ctx, _forge, killedPipeline, repo, user)
 
-	steps, err = store.StepList(killedPipeline)
-	if err != nil {
-		return &ErrNotFound{Msg: err.Error()}
-	}
-	if killedPipeline.Steps, err = model.Tree(steps); err != nil {
+	if killedPipeline.Workflows, err = store.WorkflowGetTree(killedPipeline); err != nil {
 		return err
 	}
-	if err := publishToTopic(ctx, killedPipeline, repo); err != nil {
-		log.Error().Err(err).Msg("publishToTopic")
-	}
+	publishToTopic(killedPipeline, repo)
 
 	return nil
 }
 
 func cancelPreviousPipelines(
 	ctx context.Context,
+	_forge forge.Forge,
 	_store store.Store,
 	pipeline *model.Pipeline,
 	repo *model.Repo,
@@ -158,12 +152,12 @@ func cancelPreviousPipelines(
 			continue
 		}
 
-		if err = Cancel(ctx, _store, repo, user, active); err != nil {
+		if err = Cancel(ctx, _forge, _store, repo, user, active); err != nil {
 			log.Error().
 				Err(err).
-				Str("Ref", active.Ref).
-				Int64("ID", active.ID).
-				Msg("Failed to cancel pipeline")
+				Str("ref", active.Ref).
+				Int64("id", active.ID).
+				Msg("failed to cancel pipeline")
 		}
 	}
 

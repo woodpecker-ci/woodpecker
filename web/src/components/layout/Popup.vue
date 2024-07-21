@@ -6,11 +6,14 @@
     @click="$emit('close')"
   />
   <!-- overlay end -->
-  <transition class="print:hidden fixed flex top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-    <div v-if="open" class="m-auto flex flex-col shadow-all z-1000 max-w-3/5 max-h-3/5 h-auto">
+  <div
+    v-if="open"
+    class="print:hidden fixed flex max-w-1/3 <md:max-w-4/5 max-h-3/5 top-1/2 left-1/2 transform z-1000 -translate-x-1/2 -translate-y-1/2"
+  >
+    <div class="m-auto flex flex-col shadow-all h-auto">
       <slot />
     </div>
-  </transition>
+  </div>
 </template>
 
 <script lang="ts" setup>

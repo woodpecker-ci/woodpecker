@@ -16,15 +16,18 @@ package compiler
 
 import (
 	"net/url"
-	"os"
-	"path/filepath"
+	"path"
 	"strings"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/metadata"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/metadata"
 )
 
 // Option configures a compiler option.
 type Option func(*Compiler)
+
+func noopOption() Option {
+	return func(*Compiler) {}
+}
 
 // WithOption configures the compiler with the given option if
 // boolean b evaluates to true.
@@ -33,7 +36,7 @@ func WithOption(option Option, b bool) Option {
 	case b:
 		return option
 	default:
-		return func(compiler *Compiler) {}
+		return func(_ *Compiler) {}
 	}
 }
 
@@ -94,20 +97,20 @@ func WithNetrc(username, password, machine string) Option {
 // plugin steps in the pipeline.
 func WithWorkspace(base, path string) Option {
 	return func(compiler *Compiler) {
-		compiler.base = base
-		compiler.path = path
+		compiler.workspaceBase = base
+		compiler.workspacePath = path
 	}
 }
 
 // WithWorkspaceFromURL configures the compiler with the workspace
 // base and path based on the repository url.
-func WithWorkspaceFromURL(base, link string) Option {
-	path := "src"
-	parsed, err := url.Parse(link)
+func WithWorkspaceFromURL(base, u string) Option {
+	srcPath := "src"
+	parsed, err := url.Parse(u)
 	if err == nil {
-		path = filepath.Join(path, parsed.Hostname(), parsed.Path)
+		srcPath = path.Join(srcPath, parsed.Hostname(), parsed.Path)
 	}
-	return WithWorkspace(base, path)
+	return WithWorkspace(base, srcPath)
 }
 
 // WithEscalated configures the compiler to automatically execute
@@ -146,52 +149,8 @@ func WithEnviron(env map[string]string) Option {
 	}
 }
 
-// WithCacher configures the compiler with default cache settings.
-func WithCacher(cacher Cacher) Option {
-	return func(compiler *Compiler) {
-		compiler.cacher = cacher
-	}
-}
-
-// WithVolumeCacher configures the compiler with default local volume
-// caching enabled.
-func WithVolumeCacher(base string) Option {
-	return func(compiler *Compiler) {
-		compiler.cacher = &volumeCacher{base: base}
-	}
-}
-
-// WithS3Cacher configures the compiler with default amazon s3
-// caching enabled.
-func WithS3Cacher(access, secret, region, bucket string) Option {
-	return func(compiler *Compiler) {
-		compiler.cacher = &s3Cacher{
-			access: access,
-			secret: secret,
-			bucket: bucket,
-			region: region,
-		}
-	}
-}
-
-// WithProxy configures the compiler with HTTP_PROXY, HTTPS_PROXY,
-// and NO_PROXY environment variables added by default to every
-// container in the pipeline.
-func WithProxy() Option {
-	return WithEnviron(
-		map[string]string{
-			"no_proxy":    noProxy,
-			"NO_PROXY":    noProxy,
-			"http_proxy":  httpProxy,
-			"HTTP_PROXY":  httpProxy,
-			"HTTPS_PROXY": httpsProxy,
-			"https_proxy": httpsProxy,
-		},
-	)
-}
-
 // WithNetworks configures the compiler with additional networks
-// to be connected to pipeline containers
+// to be connected to pipeline containers.
 func WithNetworks(networks ...string) Option {
 	return func(compiler *Compiler) {
 		compiler.networks = networks
@@ -200,12 +159,12 @@ func WithNetworks(networks ...string) Option {
 
 // WithResourceLimit configures the compiler with default resource limits that
 // are applied each container in the pipeline.
-func WithResourceLimit(swap, mem, shmsize, cpuQuota, cpuShares int64, cpuSet string) Option {
+func WithResourceLimit(swap, mem, shmSize, cpuQuota, cpuShares int64, cpuSet string) Option {
 	return func(compiler *Compiler) {
 		compiler.reslimit = ResourceLimit{
 			MemSwapLimit: swap,
 			MemLimit:     mem,
-			ShmSize:      shmsize,
+			ShmSize:      shmSize,
 			CPUQuota:     cpuQuota,
 			CPUShares:    cpuShares,
 			CPUSet:       cpuSet,
@@ -219,52 +178,43 @@ func WithDefaultCloneImage(cloneImage string) Option {
 	}
 }
 
-// WithTrusted configures the compiler with the trusted repo option
+// WithTrusted configures the compiler with the trusted repo option.
 func WithTrusted(trusted bool) Option {
 	return func(compiler *Compiler) {
 		compiler.trustedPipeline = trusted
 	}
 }
 
-// WithNetrcOnlyTrusted configures the compiler with the netrcOnlyTrusted repo option
+// WithNetrcOnlyTrusted configures the compiler with the netrcOnlyTrusted repo option.
 func WithNetrcOnlyTrusted(only bool) Option {
 	return func(compiler *Compiler) {
 		compiler.netrcOnlyTrusted = only
 	}
 }
 
-// TODO(bradrydzewski) consider an alternate approach to
-// WithProxy where the proxy strings are passed directly
-// to the function as named parameters.
+type ProxyOptions struct {
+	NoProxy    string
+	HTTPProxy  string
+	HTTPSProxy string
+}
 
-// func WithProxy2(http, https, none string) Option {
-// 	return WithEnviron(
-// 		map[string]string{
-// 			"no_proxy":    none,
-// 			"NO_PROXY":    none,
-// 			"http_proxy":  http,
-// 			"HTTP_PROXY":  http,
-// 			"HTTPS_PROXY": https,
-// 			"https_proxy": https,
-// 		},
-// 	)
-// }
-
-var (
-	noProxy    = getenv("no_proxy")
-	httpProxy  = getenv("https_proxy")
-	httpsProxy = getenv("https_proxy")
-)
-
-// getenv returns the named environment variable.
-func getenv(name string) (value string) {
-	name = strings.ToUpper(name)
-	if value := os.Getenv(name); value != "" {
-		return value
+// WithProxy configures the compiler with HTTP_PROXY, HTTPS_PROXY,
+// and NO_PROXY environment variables added by default to every
+// container in the pipeline.
+func WithProxy(opt ProxyOptions) Option {
+	if opt.HTTPProxy == "" &&
+		opt.HTTPSProxy == "" &&
+		opt.NoProxy == "" {
+		return noopOption()
 	}
-	name = strings.ToLower(name)
-	if value := os.Getenv(name); value != "" {
-		return value
-	}
-	return
+	return WithEnviron(
+		map[string]string{
+			"no_proxy":    opt.NoProxy,
+			"NO_PROXY":    opt.NoProxy,
+			"http_proxy":  opt.HTTPProxy,
+			"HTTP_PROXY":  opt.HTTPProxy,
+			"HTTPS_PROXY": opt.HTTPSProxy,
+			"https_proxy": opt.HTTPSProxy,
+		},
+	)
 }

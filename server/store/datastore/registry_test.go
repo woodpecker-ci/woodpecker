@@ -18,9 +18,10 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/store/types"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store/types"
 )
 
 func TestRegistryFind(t *testing.T) {
@@ -32,37 +33,15 @@ func TestRegistryFind(t *testing.T) {
 		Address:  "index.docker.io",
 		Username: "foo",
 		Password: "bar",
-		Email:    "foo@bar.com",
-		Token:    "12345",
 	})
-	if err != nil {
-		t.Errorf("Unexpected error: insert registry: %s", err)
-		return
-	}
+	assert.NoError(t, err)
 
 	registry, err := store.RegistryFind(&model.Repo{ID: 1}, "index.docker.io")
-	if err != nil {
-		t.Error(err)
-		return
-	}
-	if got, want := registry.RepoID, int64(1); got != want {
-		t.Errorf("Want repo id %d, got %d", want, got)
-	}
-	if got, want := registry.Address, "index.docker.io"; got != want {
-		t.Errorf("Want registry address %s, got %s", want, got)
-	}
-	if got, want := registry.Username, "foo"; got != want {
-		t.Errorf("Want registry username %s, got %s", want, got)
-	}
-	if got, want := registry.Password, "bar"; got != want {
-		t.Errorf("Want registry password %s, got %s", want, got)
-	}
-	if got, want := registry.Email, "foo@bar.com"; got != want {
-		t.Errorf("Want registry email %s, got %s", want, got)
-	}
-	if got, want := registry.Token, "12345"; got != want {
-		t.Errorf("Want registry token %s, got %s", want, got)
-	}
+	assert.NoError(t, err)
+	assert.EqualValues(t, 1, registry.RepoID)
+	assert.Equal(t, "index.docker.io", registry.Address)
+	assert.Equal(t, "foo", registry.Username)
+	assert.Equal(t, "bar", registry.Password)
 }
 
 func TestRegistryList(t *testing.T) {
@@ -82,14 +61,9 @@ func TestRegistryList(t *testing.T) {
 		Password: "bar",
 	}))
 
-	list, err := store.RegistryList(&model.Repo{ID: 1}, &model.ListOptions{Page: 1, PerPage: 50})
-	if err != nil {
-		t.Error(err)
-		return
-	}
-	if got, want := len(list), 2; got != want {
-		t.Errorf("Want %d registries, got %d", want, got)
-	}
+	list, err := store.RegistryList(&model.Repo{ID: 1}, false, &model.ListOptions{Page: 1, PerPage: 50})
+	assert.NoError(t, err)
+	assert.Len(t, list, 2)
 }
 
 func TestRegistryUpdate(t *testing.T) {
@@ -102,48 +76,32 @@ func TestRegistryUpdate(t *testing.T) {
 		Username: "foo",
 		Password: "bar",
 	}
-	if err := store.RegistryCreate(registry); err != nil {
-		t.Errorf("Unexpected error: insert registry: %s", err)
-		return
-	}
+	assert.NoError(t, store.RegistryCreate(registry))
 	registry.Password = "qux"
-	if err := store.RegistryUpdate(registry); err != nil {
-		t.Errorf("Unexpected error: update registry: %s", err)
-		return
-	}
+	assert.NoError(t, store.RegistryUpdate(registry))
 	updated, err := store.RegistryFind(&model.Repo{ID: 1}, "index.docker.io")
-	if err != nil {
-		t.Error(err)
-		return
-	}
-	if got, want := updated.Password, "qux"; got != want {
-		t.Errorf("Want registry password %s, got %s", want, got)
-	}
+	assert.NoError(t, err)
+	assert.Equal(t, "qux", updated.Password)
 }
 
 func TestRegistryIndexes(t *testing.T) {
 	store, closer := newTestStore(t, new(model.Registry))
 	defer closer()
 
-	if err := store.RegistryCreate(&model.Registry{
+	assert.NoError(t, store.RegistryCreate(&model.Registry{
 		RepoID:   1,
 		Address:  "index.docker.io",
 		Username: "foo",
 		Password: "bar",
-	}); err != nil {
-		t.Errorf("Unexpected error: insert registry: %s", err)
-		return
-	}
+	}))
 
 	// fail due to duplicate addr
-	if err := store.RegistryCreate(&model.Registry{
+	assert.Error(t, store.RegistryCreate(&model.Registry{
 		RepoID:   1,
 		Address:  "index.docker.io",
 		Username: "baz",
 		Password: "qux",
-	}); err == nil {
-		t.Errorf("Unexpected error: duplicate address")
-	}
+	}))
 }
 
 func TestRegistryDelete(t *testing.T) {
@@ -157,9 +115,91 @@ func TestRegistryDelete(t *testing.T) {
 		Password: "bar",
 	}
 	if !assert.NoError(t, store.RegistryCreate(reg1)) {
-		t.FailNow()
+		return
 	}
 
-	assert.NoError(t, store.RegistryDelete(&model.Repo{ID: 1}, "index.docker.io"))
-	assert.ErrorIs(t, store.RegistryDelete(&model.Repo{ID: 1}, "index.docker.io"), types.RecordNotExist)
+	assert.NoError(t, store.RegistryDelete(reg1))
+	assert.ErrorIs(t, store.RegistryDelete(reg1), types.RecordNotExist)
+}
+
+func createTestRegistries(t *testing.T, store *storage) {
+	assert.NoError(t, store.RegistryCreate(&model.Registry{
+		OrgID:   12,
+		Address: "my.regsitry.local",
+	}))
+	assert.NoError(t, store.RegistryCreate(&model.Registry{
+		RepoID:  1,
+		Address: "private.registry.local",
+	}))
+	assert.NoError(t, store.RegistryCreate(&model.Registry{
+		RepoID:  1,
+		Address: "very-private.registry.local",
+	}))
+	assert.NoError(t, store.RegistryCreate(&model.Registry{
+		Address: "index.docker.io",
+	}))
+}
+
+func TestOrgRegistryFind(t *testing.T) {
+	store, closer := newTestStore(t, new(model.Registry))
+	defer closer()
+
+	err := store.RegistryCreate(&model.Registry{
+		OrgID:    12,
+		Address:  "my.regsitry.local",
+		Username: "username",
+		Password: "password",
+	})
+	assert.NoError(t, err)
+
+	registry, err := store.OrgRegistryFind(12, "my.regsitry.local")
+	assert.NoError(t, err)
+	assert.EqualValues(t, 12, registry.OrgID)
+	assert.Equal(t, "my.regsitry.local", registry.Address)
+	assert.Equal(t, "username", registry.Username)
+	assert.Equal(t, "password", registry.Password)
+}
+
+func TestOrgRegistryList(t *testing.T) {
+	store, closer := newTestStore(t, new(model.Registry))
+	defer closer()
+
+	createTestRegistries(t, store)
+
+	list, err := store.OrgRegistryList(12, &model.ListOptions{All: true})
+	assert.NoError(t, err)
+	require.Len(t, list, 1)
+
+	assert.True(t, list[0].IsOrganization())
+}
+
+func TestGlobalRegistryFind(t *testing.T) {
+	store, closer := newTestStore(t, new(model.Registry))
+	defer closer()
+
+	err := store.RegistryCreate(&model.Registry{
+		Address:  "my.regsitry.local",
+		Username: "username",
+		Password: "password",
+	})
+	assert.NoError(t, err)
+
+	registry, err := store.GlobalRegistryFind("my.regsitry.local")
+	assert.NoError(t, err)
+	assert.Equal(t, "my.regsitry.local", registry.Address)
+	assert.Equal(t, "username", registry.Username)
+	assert.Equal(t, "password", registry.Password)
+}
+
+func TestGlobalRegistryList(t *testing.T) {
+	store, closer := newTestStore(t, new(model.Registry))
+	defer closer()
+
+	createTestRegistries(t, store)
+
+	list, err := store.GlobalRegistryList(&model.ListOptions{All: true})
+	assert.NoError(t, err)
+	assert.Len(t, list, 1)
+
+	assert.True(t, list[0].IsGlobal())
 }

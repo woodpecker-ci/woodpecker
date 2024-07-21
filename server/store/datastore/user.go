@@ -15,8 +15,9 @@
 package datastore
 
 import (
-	"github.com/woodpecker-ci/woodpecker/server/model"
 	"xorm.io/xorm"
+
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
 func (s storage) GetUser(id int64) (*model.User, error) {
@@ -29,7 +30,7 @@ func (s storage) GetUserRemoteID(remoteID model.ForgeRemoteID, login string) (*m
 	user := new(model.User)
 	err := wrapGet(sess.Where("forge_remote_id = ?", remoteID).Get(user))
 	if err != nil {
-		user, err = s.getUserLogin(sess, login)
+		return s.getUserLogin(sess, login)
 	}
 	return user, err
 }
@@ -40,12 +41,12 @@ func (s storage) GetUserLogin(login string) (*model.User, error) {
 
 func (s storage) getUserLogin(sess *xorm.Session, login string) (*model.User, error) {
 	user := new(model.User)
-	return user, wrapGet(sess.Where("user_login=?", login).Get(user))
+	return user, wrapGet(sess.Where("login=?", login).Get(user))
 }
 
 func (s storage) GetUserList(p *model.ListOptions) ([]*model.User, error) {
 	var users []*model.User
-	return users, s.paginate(p).OrderBy("user_id").Find(&users)
+	return users, s.paginate(p).OrderBy("login").Find(&users)
 }
 
 func (s storage) GetUserCount() (int64, error) {
@@ -53,8 +54,18 @@ func (s storage) GetUserCount() (int64, error) {
 }
 
 func (s storage) CreateUser(user *model.User) error {
+	sess := s.engine.NewSession()
+	org := &model.Org{
+		Name:   user.Login,
+		IsUser: true,
+	}
+	err := s.orgCreate(org, sess)
+	if err != nil {
+		return err
+	}
+	user.OrgID = org.ID
 	// only Insert set auto created ID back to object
-	_, err := s.engine.Insert(user)
+	_, err = sess.Insert(user)
 	return err
 }
 
@@ -70,11 +81,15 @@ func (s storage) DeleteUser(user *model.User) error {
 		return err
 	}
 
+	if err := s.orgDelete(sess, user.OrgID); err != nil {
+		return err
+	}
+
 	if err := wrapDelete(sess.ID(user.ID).Delete(new(model.User))); err != nil {
 		return err
 	}
 
-	if _, err := sess.Where("perm_user_id = ?", user.ID).Delete(new(model.Perm)); err != nil {
+	if _, err := sess.Where("user_id = ?", user.ID).Delete(new(model.Perm)); err != nil {
 		return err
 	}
 

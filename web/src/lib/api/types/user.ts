@@ -1,5 +1,5 @@
 // The user account.
-export type User = {
+export interface User {
   id: number;
   // The unique identifier for the account.
 
@@ -17,4 +17,7 @@ export type User = {
 
   active: boolean;
   // Whether the account is currently active.
-};
+
+  org_id: number;
+  // The ID of the org assigned to the user.
+}

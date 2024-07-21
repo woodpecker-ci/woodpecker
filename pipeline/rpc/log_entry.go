@@ -16,14 +16,7 @@
 package rpc
 
 import (
-	"context"
 	"fmt"
-	"strings"
-	"time"
-
-	"github.com/rs/zerolog/log"
-
-	"github.com/woodpecker-ci/woodpecker/pipeline/shared"
 )
 
 // Identifies the type of line in the logs.
@@ -41,7 +34,7 @@ type LogEntry struct {
 	Time     int64  `json:"time,omitempty"`
 	Type     int    `json:"type,omitempty"`
 	Line     int    `json:"line,omitempty"`
-	Data     string `json:"data,omitempty"`
+	Data     []byte `json:"data,omitempty"`
 }
 
 func (l *LogEntry) String() string {
@@ -51,58 +44,4 @@ func (l *LogEntry) String() string {
 	default:
 		return fmt.Sprintf("[%s:L%v:%vs] %s", l.StepUUID, l.Line, l.Time, l.Data)
 	}
-}
-
-// LineWriter sends logs to the client.
-type LineWriter struct {
-	peer     Peer
-	stepUUID string
-	num      int
-	now      time.Time
-	rep      *strings.Replacer
-	lines    []*LogEntry
-}
-
-// NewLineWriter returns a new line reader.
-func NewLineWriter(peer Peer, stepUUID string, secret ...string) *LineWriter {
-	return &LineWriter{
-		peer:     peer,
-		stepUUID: stepUUID,
-		now:      time.Now().UTC(),
-		rep:      shared.NewSecretsReplacer(secret),
-		lines:    nil,
-	}
-}
-
-func (w *LineWriter) Write(p []byte) (n int, err error) {
-	data := string(p)
-	if w.rep != nil {
-		data = w.rep.Replace(data)
-	}
-	log.Trace().Str("step-uuid", w.stepUUID).Msgf("grpc write line: %s", data)
-
-	line := &LogEntry{
-		Data:     data,
-		StepUUID: w.stepUUID,
-		Time:     int64(time.Since(w.now).Seconds()),
-		Type:     LogEntryStdout,
-		Line:     w.num,
-	}
-	if err := w.peer.Log(context.Background(), line); err != nil {
-		log.Error().Err(err).Str("step-uuid", w.stepUUID).Msg("fail to write pipeline log to peer")
-	}
-	w.num++
-
-	w.lines = append(w.lines, line)
-	return len(p), nil
-}
-
-// Lines returns the line history
-func (w *LineWriter) Lines() []*LogEntry {
-	return w.lines
-}
-
-// Clear clears the line history
-func (w *LineWriter) Clear() {
-	w.lines = w.lines[:0]
 }

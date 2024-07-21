@@ -1,5 +1,4 @@
 import 'windi.css';
-import 'floating-vue/dist/style.css'; // eslint-disable-line no-restricted-imports
 import '~/compositions/useFavicon';
 import '~/style.css';
 
@@ -12,6 +11,7 @@ import { i18n } from '~/compositions/useI18n';
 import { notifications } from '~/compositions/useNotifications';
 import router from '~/router';
 
+// eslint-disable-next-line ts/no-unsafe-argument
 const app = createApp(App);
 
 app.use(router);

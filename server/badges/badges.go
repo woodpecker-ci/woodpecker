@@ -14,7 +14,9 @@
 
 package badges
 
-import "github.com/woodpecker-ci/woodpecker/server/model"
+import "go.woodpecker-ci.org/woodpecker/v2/server/model"
+
+// cspell:words Verdana
 
 var (
 	badgeSuccess = `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="106" height="20" role="img" aria-label="pipeline: success"><title>pipeline: success</title><linearGradient id="s" x2="0" y2="100%"><stop offset="0" stop-color="#bbb" stop-opacity=".1"/><stop offset="1" stop-opacity=".1"/></linearGradient><clipPath id="r"><rect width="106" height="20" rx="3" fill="#fff"/></clipPath><g clip-path="url(#r)"><rect width="53" height="20" fill="#555"/><rect x="53" width="53" height="20" fill="#44cc11"/><rect width="106" height="20" fill="url(#s)"/></g><g fill="#fff" text-anchor="middle" font-family="Verdana,Geneva,DejaVu Sans,sans-serif" text-rendering="geometricPrecision" font-size="110"><text aria-hidden="true" x="275" y="150" fill="#010101" fill-opacity=".3" transform="scale(.1)" textLength="430">pipeline</text><text x="275" y="140" transform="scale(.1)" fill="#fff" textLength="430">pipeline</text><text aria-hidden="true" x="785" y="150" fill="#010101" fill-opacity=".3" transform="scale(.1)" textLength="430">success</text><text x="785" y="140" transform="scale(.1)" fill="#fff" textLength="430">success</text></g></svg>`
@@ -24,7 +26,7 @@ var (
 	badgeNone    = `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="90" height="20" role="img" aria-label="pipeline: none"><title>pipeline: none</title><linearGradient id="s" x2="0" y2="100%"><stop offset="0" stop-color="#bbb" stop-opacity=".1"/><stop offset="1" stop-opacity=".1"/></linearGradient><clipPath id="r"><rect width="90" height="20" rx="3" fill="#fff"/></clipPath><g clip-path="url(#r)"><rect width="53" height="20" fill="#555"/><rect x="53" width="37" height="20" fill="#9f9f9f"/><rect width="90" height="20" fill="url(#s)"/></g><g fill="#fff" text-anchor="middle" font-family="Verdana,Geneva,DejaVu Sans,sans-serif" text-rendering="geometricPrecision" font-size="110"><text aria-hidden="true" x="275" y="150" fill="#010101" fill-opacity=".3" transform="scale(.1)" textLength="430">pipeline</text><text x="275" y="140" transform="scale(.1)" fill="#fff" textLength="430">pipeline</text><text aria-hidden="true" x="705" y="150" fill="#010101" fill-opacity=".3" transform="scale(.1)" textLength="270">none</text><text x="705" y="140" transform="scale(.1)" fill="#fff" textLength="270">none</text></g></svg>`
 )
 
-// Generate an SVG badge based on a pipeline
+// Generate an SVG badge based on a pipeline.
 func Generate(pipeline *model.Pipeline) string {
 	if pipeline == nil {
 		return badgeNone
