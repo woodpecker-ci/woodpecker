@@ -24,9 +24,9 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 )
 
-func UpdateStepStatus(store store.Store, step *model.Step, state rpc.State) error {
+func UpdateStepStatus(store store.Store, step *model.Step, state rpc.StepState) error {
 	if state.Exited {
-		step.Stopped = state.Finished
+		step.Finished = state.Finished
 		step.ExitCode = state.ExitCode
 		step.Error = state.Error
 		step.State = model.StatusSuccess
@@ -36,30 +36,30 @@ func UpdateStepStatus(store store.Store, step *model.Step, state rpc.State) erro
 		if state.ExitCode == pipeline.ExitCodeKilled {
 			step.State = model.StatusKilled
 		}
-	} else if step.Stopped == 0 {
+	} else if step.Finished == 0 {
 		step.Started = state.Started
 		step.State = model.StatusRunning
 	}
 	return store.StepUpdate(step)
 }
 
-func UpdateStepToStatusStarted(store store.Store, step model.Step, state rpc.State) (*model.Step, error) {
+func UpdateStepToStatusStarted(store store.Store, step model.Step, state rpc.StepState) (*model.Step, error) {
 	step.Started = state.Started
 	step.State = model.StatusRunning
 	return &step, store.StepUpdate(&step)
 }
 
-func UpdateStepToStatusSkipped(store store.Store, step model.Step, stopped int64) (*model.Step, error) {
+func UpdateStepToStatusSkipped(store store.Store, step model.Step, finished int64) (*model.Step, error) {
 	step.State = model.StatusSkipped
 	if step.Started != 0 {
 		step.State = model.StatusSuccess // for daemons that are killed
-		step.Stopped = stopped
+		step.Finished = finished
 	}
 	return &step, store.StepUpdate(&step)
 }
 
-func UpdateStepStatusToDone(store store.Store, step model.Step, state rpc.State) (*model.Step, error) {
-	step.Stopped = state.Finished
+func UpdateStepStatusToDone(store store.Store, step model.Step, state rpc.StepState) (*model.Step, error) {
+	step.Finished = state.Finished
 	step.Error = state.Error
 	step.ExitCode = state.ExitCode
 	if state.Started == 0 {
@@ -75,9 +75,9 @@ func UpdateStepStatusToDone(store store.Store, step model.Step, state rpc.State)
 
 func UpdateStepToStatusKilled(store store.Store, step model.Step) (*model.Step, error) {
 	step.State = model.StatusKilled
-	step.Stopped = time.Now().Unix()
+	step.Finished = time.Now().Unix()
 	if step.Started == 0 {
-		step.Started = step.Stopped
+		step.Started = step.Finished
 	}
 	step.ExitCode = pipeline.ExitCodeKilled
 	return &step, store.StepUpdate(&step)

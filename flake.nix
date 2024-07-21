@@ -17,6 +17,8 @@
             # generic
             gnumake
             gnutar
+            zip
+            tree
 
             # frontend
             nodejs_20
@@ -31,6 +33,7 @@
             golangci-lint
             go-mockery
             protobuf
+            sqlite
           ];
           CFLAGS = "-I${pkgs.glibc.dev}/include";
           LDFLAGS = "-L${pkgs.glibc}/lib";

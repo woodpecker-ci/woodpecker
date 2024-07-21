@@ -25,6 +25,7 @@ import (
 	"github.com/docker/cli/cli/config/types"
 
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	model_types "go.woodpecker-ci.org/woodpecker/v2/server/store/types"
 )
 
 type filesystem struct {
@@ -79,17 +80,29 @@ func parseDockerConfig(path string) ([]*model.Registry, error) {
 			Address:  key,
 			Username: auth.Username,
 			Password: auth.Password,
+			ReadOnly: true,
 		})
 	}
 
 	return registries, nil
 }
 
-func (f *filesystem) RegistryFind(*model.Repo, string) (*model.Registry, error) {
-	return nil, nil
+func (f *filesystem) GlobalRegistryFind(addr string) (*model.Registry, error) {
+	registries, err := f.GlobalRegistryList(&model.ListOptions{All: true})
+	if err != nil {
+		return nil, err
+	}
+
+	for _, reg := range registries {
+		if reg.Address == addr {
+			return reg, nil
+		}
+	}
+
+	return nil, model_types.RecordNotExist
 }
 
-func (f *filesystem) RegistryList(_ *model.Repo, p *model.ListOptions) ([]*model.Registry, error) {
+func (f *filesystem) GlobalRegistryList(p *model.ListOptions) ([]*model.Registry, error) {
 	regs, err := parseDockerConfig(f.path)
 	if err != nil {
 		return nil, err

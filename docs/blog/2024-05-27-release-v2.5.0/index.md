@@ -66,7 +66,7 @@ Commit:473761d8b26b20f7c206408563d54cf998410329
 
 ## Deleting logs or complete pipelines
 
-If you accidental exposed some secret to the public in your logs or you simply want to cleanup some logs you can now delete logs or complete pipelines using the api and the cli.
+If you accidentally exposed some secret to the public in your logs or you simply want to cleanup some logs you can now delete logs or complete pipelines using the api and the cli.
 
 [#3451](https://github.com/woodpecker-ci/woodpecker/pull/3451)
 [#3506](https://github.com/woodpecker-ci/woodpecker/pull/3506)

@@ -1,10 +1,12 @@
 import { inject, onMounted, provide, ref, type Ref } from 'vue';
 import { useRoute } from 'vue-router';
 
+import type { IconNames } from '~/components/atomic/Icon.vue';
+
 export interface Tab {
   id: string;
   title: string;
-  icon?: string;
+  icon?: IconNames;
   iconClass?: string;
 }
 

@@ -16,6 +16,11 @@ package model
 
 // ServerConfig represents a key-value pair for storing server configurations.
 type ServerConfig struct {
-	Key   string `json:"key"   xorm:"pk"`
-	Value string `json:"value" xorm:""`
+	Key   string `json:"key"   xorm:"pk 'key'"`
+	Value string `json:"value" xorm:"value"`
+}
+
+// TableName return database table name for xorm.
+func (ServerConfig) TableName() string {
+	return "server_configs"
 }
