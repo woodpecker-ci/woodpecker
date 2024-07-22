@@ -159,11 +159,11 @@ func (e *lxc) SetupWorkflow(ctx context.Context, config *types.Config, taskUUID 
 		return err
 	}
 	for _, stage := range config.Stages {
-		if stage.Alias != "services" {
-			continue
-		}
 		for _, step := range stage.Steps {
-			if _, err := f.WriteString(fmt.Sprintf("%s %s\n", e.containerName(step.Name), step.Alias)); err != nil {
+			if step.Type != types.StepTypeService {
+				continue
+			}
+			if _, err := f.WriteString(fmt.Sprintf("%s %s\n", e.containerName(step.UUID), step.Name)); err != nil {
 				log.Error().Err(err).Msg("writing service-alias")
 				return err
 			}
@@ -213,7 +213,7 @@ func (e *lxc) StartStep(ctx context.Context, step *types.Step, taskUUID string) 
 		template := image[0]
 		release := image[1]
 		log.Debug().Msgf("template %s release %s", template, release)
-		script := e.rundir + "/" + step.Name
+		script := e.rundir + "/" + step.UUID
 		if err := writeScript(scriptTemplate, struct {
 			Name      string
 			Template  string
@@ -223,13 +223,13 @@ func (e *lxc) StartStep(ctx context.Context, step *types.Step, taskUUID string) 
 			RunDir    string
 			Script    string
 		}{
-			Name:      e.containerName(step.Name),
+			Name:      e.containerName(step.UUID),
 			Template:  template,
 			Release:   release,
 			Repo:      step.Environment["CI_REPO"],
 			Workspace: e.workspace,
 			RunDir:    e.rundir,
-			Script:    "commands-" + step.Name,
+			Script:    "commands-" + step.UUID,
 		}, script); err != nil {
 			log.Error().Err(err).Msg("scriptTemplate")
 			return err
@@ -237,7 +237,7 @@ func (e *lxc) StartStep(ctx context.Context, step *types.Step, taskUUID string) 
 		var command []string
 		command = append(command, script)
 
-		if err := os.WriteFile(e.rundir+"/"+"commands-"+step.Name, []byte(strings.Join(step.Commands, "\n")), 0o755); err != nil {
+		if err := os.WriteFile(e.rundir+"/"+"commands-"+step.UUID, []byte(strings.Join(step.Commands, "\n")), 0o755); err != nil {
 			log.Error().Err(err).Msg("writing script")
 			return err
 		}
