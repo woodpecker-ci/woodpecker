@@ -64,3 +64,41 @@ Enable IPv6 for the networks used by pipeline containers (steps). Make sure you 
 
 List of default volumes separated by comma to be mounted to all pipeline containers (steps). For example to use custom CA
 certificates installed on host and host timezone use `/etc/ssl/certs:/etc/ssl/certs:ro,/etc/timezone:/etc/timezone`.
+
+### `WOODPECKER_BACKEND_DOCKER_LIMIT_MEM_SWAP`
+
+> Default: `0`
+
+The maximum amount of memory a single pipeline container is allowed to swap to disk, configured in bytes. There is no limit if `0`.
+
+### `WOODPECKER_BACKEND_DOCKER_LIMIT_MEM`
+
+> Default: `0`
+
+The maximum amount of memory a single pipeline container can use, configured in bytes. There is no limit if `0`.
+
+### `WOODPECKER_BACKEND_DOCKER_LIMIT_SHM_SIZE`
+
+> Default: `0`
+
+The maximum amount of memory of `/dev/shm` allowed in bytes. There is no limit if `0`.
+
+### `WOODPECKER_BACKEND_DOCKER_LIMIT_CPU_QUOTA`
+
+> Default: `0`
+
+The number of microseconds per CPU period that the container is limited to before throttled. There is no limit if `0`.
+
+### `WOODPECKER_BACKEND_DOCKER_LIMIT_CPU_SHARES`
+
+> Default: `0`
+
+The relative weight vs. other containers.
+
+### `WOODPECKER_BACKEND_DOCKER_LIMIT_CPU_SET`
+
+> Default: empty
+
+Comma-separated list to limit the specific CPUs or cores a pipeline container can use.
+
+Example: `WOODPECKER_BACKEND_DOCKER_LIMIT_CPU_SET=1,2`

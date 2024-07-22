@@ -178,14 +178,6 @@ func setupEvilGlobals(ctx context.Context, c *cli.Command, s store.Store) error 
 	server.Config.Pipeline.DefaultTimeout = c.Int("default-pipeline-timeout")
 	server.Config.Pipeline.MaxTimeout = c.Int("max-pipeline-timeout")
 
-	// limits
-	server.Config.Pipeline.Limits.MemSwapLimit = c.Int("limit-mem-swap")
-	server.Config.Pipeline.Limits.MemLimit = c.Int("limit-mem")
-	server.Config.Pipeline.Limits.ShmSize = c.Int("limit-shm-size")
-	server.Config.Pipeline.Limits.CPUQuota = c.Int("limit-cpu-quota")
-	server.Config.Pipeline.Limits.CPUShares = c.Int("limit-cpu-shares")
-	server.Config.Pipeline.Limits.CPUSet = c.String("limit-cpu-set")
-
 	// backend options for pipeline compiler
 	server.Config.Pipeline.Proxy.No = c.String("backend-no-proxy")
 	server.Config.Pipeline.Proxy.HTTP = c.String("backend-http-proxy")
