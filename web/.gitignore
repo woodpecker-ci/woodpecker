@@ -3,4 +3,4 @@ node_modules
 dist
 dist-ssr
 *.local
-src/assets/timeAgoLocales
+src/assets/dayjsLocales

@@ -1,7 +1,7 @@
 <template>
   <div v-if="pipeline" class="flex flex-col pt-10 md:pt-0">
     <div
-      class="flex flex-grow flex-col code-box shadow !p-0 !rounded-none md:m-4 md:mt-0 !md:rounded-md overflow-hidden"
+      class="flex flex-grow flex-col code-box shadow !p-0 !rounded-none md:mt-0 !md:rounded-md overflow-hidden"
       @mouseover="showActions = true"
       @mouseleave="showActions = false"
     >
@@ -19,6 +19,13 @@
             class="!hover:bg-white !hover:bg-opacity-10"
             icon="download"
             @click="download"
+          />
+          <IconButton
+            v-if="step?.end_time !== undefined && hasLogs && hasPushPermission"
+            :title="$t('repo.pipeline.actions.log_delete')"
+            class="!hover:bg-white !hover:bg-opacity-10"
+            icon="trash"
+            @click="deleteLogs"
           />
           <IconButton
             v-if="step?.end_time === undefined"
@@ -53,8 +60,9 @@
               'bg-opacity-30 bg-blue-600': isSelected(line),
               underline: isSelected(line),
             }"
-            >{{ line.number }}</a
           >
+            {{ line.number }}
+          </a>
           <!-- eslint-disable vue/no-v-html -->
           <span
             class="align-top whitespace-pre-wrap break-words"
@@ -73,8 +81,9 @@
               'bg-opacity-40 dark:bg-opacity-50 bg-yellow-600 dark:bg-yellow-800': line.type === 'warning',
               'bg-opacity-30 bg-blue-600': isSelected(line),
             }"
-            >{{ formatTime(line.time) }}</span
           >
+            {{ formatTime(line.time) }}
+          </span>
         </div>
       </div>
 
@@ -100,9 +109,10 @@
 import '~/style/console.css';
 
 import { useStorage } from '@vueuse/core';
-import AnsiUp from 'ansi_up';
+import { AnsiUp } from 'ansi_up';
+import { decode } from 'js-base64';
 import { debounce } from 'lodash';
-import { computed, inject, nextTick, onMounted, Ref, ref, toRef, watch } from 'vue';
+import { computed, inject, nextTick, onBeforeUnmount, onMounted, ref, toRef, watch, type Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
 
@@ -110,16 +120,16 @@ import IconButton from '~/components/atomic/IconButton.vue';
 import PipelineStatusIcon from '~/components/repo/pipeline/PipelineStatusIcon.vue';
 import useApiClient from '~/compositions/useApiClient';
 import useNotifications from '~/compositions/useNotifications';
-import { Pipeline, Repo } from '~/lib/api/types';
+import type { Pipeline, Repo, RepoPermissions } from '~/lib/api/types';
 import { findStep, isStepFinished, isStepRunning } from '~/utils/helpers';
 
-type LogLine = {
+interface LogLine {
   index: number;
   number: number;
-  text: string;
+  text?: string;
   time?: number;
   type: 'error' | 'warning' | null;
-};
+}
 
 const props = defineProps<{
   pipeline: Pipeline;
@@ -135,6 +145,7 @@ const i18n = useI18n();
 const pipeline = toRef(props, 'pipeline');
 const stepId = toRef(props, 'stepId');
 const repo = inject<Ref<Repo>>('repo');
+const repoPermissions = inject<Ref<RepoPermissions>>('repo-permissions');
 const apiClient = useApiClient();
 const route = useRoute();
 
@@ -158,7 +169,8 @@ const ansiUp = ref(new AnsiUp());
 ansiUp.value.use_classes = true;
 const logBuffer = ref<LogLine[]>([]);
 
-const maxLineCount = 500; // TODO: think about way to support lazy-loading more than last 300 logs (#776)
+const maxLineCount = 5000; // TODO(2653): set back to 500 and implement lazy-loading support
+const hasPushPermission = computed(() => repoPermissions?.value?.push);
 
 function isSelected(line: LogLine): boolean {
   return route.hash === `#L${line.number}`;
@@ -168,25 +180,24 @@ function formatTime(time?: number): string {
   return time === undefined ? '' : `${time}s`;
 }
 
+function processText(text: string): string {
+  const urlRegex = /https?:\/\/\S+/g;
+  let txt = ansiUp.value.ansi_to_html(`${decode(text)}\n`);
+  txt = txt.replace(
+    urlRegex,
+    (url) => `<a href="${url}" target="_blank" rel="noopener noreferrer" class="underline">${url}</a>`,
+  );
+  return txt;
+}
+
 function writeLog(line: Partial<LogLine>) {
   logBuffer.value.push({
     index: line.index ?? 0,
     number: (line.index ?? 0) + 1,
-    text: ansiUp.value.ansi_to_html(line.text ?? ''),
+    text: processText(line.text ?? ''),
     time: line.time ?? 0,
     type: null, // TODO: implement way to detect errors and warnings
   });
-}
-
-// SOURCE: https://stackoverflow.com/questions/30106476/using-javascripts-atob-to-decode-base64-doesnt-properly-decode-utf-8-strings
-function b64DecodeUnicode(str: string) {
-  return decodeURIComponent(
-    window
-      .atob(str)
-      .split('')
-      .map((c) => `%${`00${c.charCodeAt(0).toString(16)}`.slice(-2)}`)
-      .join(''),
-  );
 }
 
 function scrollDown() {
@@ -247,13 +258,13 @@ async function download() {
     downloadInProgress.value = true;
     logs = await apiClient.getLogs(repo.value.id, pipeline.value.number, step.value.id);
   } catch (e) {
-    notifications.notifyError(e, i18n.t('repo.pipeline.log_download_error'));
+    notifications.notifyError(e as Error, i18n.t('repo.pipeline.log_download_error'));
     return;
   } finally {
     downloadInProgress.value = false;
   }
   const fileURL = window.URL.createObjectURL(
-    new Blob([logs.map((line) => b64DecodeUnicode(line.data)).join('')], {
+    new Blob([logs.map((line) => decode(line.data ?? '')).join('\n')], {
       type: 'text/plain',
     }),
   );
@@ -275,50 +286,75 @@ async function loadLogs() {
   if (loadedStepSlug.value === stepSlug.value) {
     return;
   }
-  loadedStepSlug.value = stepSlug.value;
-  log.value = undefined;
-  logBuffer.value = [];
-  ansiUp.value = new AnsiUp();
-  ansiUp.value.use_classes = true;
 
   if (!repo) {
     throw new Error('Unexpected: "repo" should be provided at this place');
   }
 
-  if (stream.value) {
-    stream.value.close();
-  }
+  log.value = undefined;
+  logBuffer.value = [];
+  ansiUp.value = new AnsiUp();
+  ansiUp.value.use_classes = true;
+
+  stream.value?.close();
 
   if (!hasLogs.value || !step.value) {
     return;
   }
 
   if (isStepFinished(step.value)) {
+    loadedStepSlug.value = stepSlug.value;
     const logs = await apiClient.getLogs(repo.value.id, pipeline.value.number, step.value.id);
-    logs?.forEach((line) => writeLog({ index: line.line, text: b64DecodeUnicode(line.data), time: line.time }));
+    logs?.forEach((line) => writeLog({ index: line.line, text: line.data, time: line.time }));
     flushLogs(false);
-  }
-
-  if (isStepRunning(step.value)) {
+  } else if (step.value.state === 'pending' || isStepRunning(step.value)) {
+    loadedStepSlug.value = stepSlug.value;
     stream.value = apiClient.streamLogs(repo.value.id, pipeline.value.number, step.value.id, (line) => {
-      writeLog({ index: line.line, text: b64DecodeUnicode(line.data), time: line.time });
+      writeLog({ index: line.line, text: line.data, time: line.time });
       flushLogs(true);
     });
   }
 }
 
+async function deleteLogs() {
+  if (!repo?.value || !pipeline.value || !step.value) {
+    throw new Error('The repository, pipeline or step was undefined');
+  }
+
+  // TODO: use proper dialog (copy-pasted from web/src/components/secrets/SecretList.vue:deleteSecret)
+  // eslint-disable-next-line no-alert
+  if (!confirm(i18n.t('repo.pipeline.log_delete_confirm'))) {
+    return;
+  }
+
+  try {
+    await apiClient.deleteLogs(repo.value.id, pipeline.value.number, step.value.id);
+    log.value = [];
+  } catch (e) {
+    notifications.notifyError(e as Error, i18n.t('repo.pipeline.log_delete_error'));
+  }
+}
+
 onMounted(async () => {
-  loadLogs();
+  await loadLogs();
 });
 
-watch(stepSlug, () => {
-  loadLogs();
+onBeforeUnmount(() => {
+  stream.value?.close();
 });
 
-watch(step, (oldStep, newStep) => {
-  if (oldStep && oldStep.name === newStep?.name && oldStep?.end_time !== newStep?.end_time) {
-    if (autoScroll.value) {
+watch(stepSlug, async () => {
+  await loadLogs();
+});
+
+watch(step, async (newStep, oldStep) => {
+  if (oldStep?.name === newStep?.name) {
+    if (oldStep?.end_time !== newStep?.end_time && autoScroll.value) {
       scrollDown();
+    }
+
+    if (oldStep?.state !== newStep?.state) {
+      await loadLogs();
     }
   }
 });

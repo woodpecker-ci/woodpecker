@@ -14,7 +14,7 @@
 
 package utils
 
-import "github.com/docker/distribution/reference"
+import "github.com/distribution/reference"
 
 // trimImage returns the short image name without tag.
 func trimImage(name string) string {

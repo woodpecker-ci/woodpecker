@@ -15,12 +15,12 @@
 package repo
 
 import (
+	"context"
 	"fmt"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
-	"github.com/woodpecker-ci/woodpecker/cli/common"
-	"github.com/woodpecker-ci/woodpecker/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
 )
 
 var repoRepairCmd = &cli.Command{
@@ -28,12 +28,11 @@ var repoRepairCmd = &cli.Command{
 	Usage:     "repair repository webhooks",
 	ArgsUsage: "<repo-id|repo-full-name>",
 	Action:    repoRepair,
-	Flags:     common.GlobalFlags,
 }
 
-func repoRepair(c *cli.Context) error {
+func repoRepair(ctx context.Context, c *cli.Command) error {
 	repoIDOrFullName := c.Args().First()
-	client, err := internal.NewClient(c)
+	client, err := internal.NewClient(ctx, c)
 	if err != nil {
 		return err
 	}
@@ -46,6 +45,6 @@ func repoRepair(c *cli.Context) error {
 		return err
 	}
 
-	fmt.Printf("Successfully removed repository %s\n", repoIDOrFullName)
+	fmt.Printf("Successfully repaired repository %s\n", repoIDOrFullName)
 	return nil
 }

@@ -20,8 +20,8 @@ import (
 	"github.com/franela/goblin"
 	"github.com/stretchr/testify/assert"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/metadata"
-	yaml_base_types "github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types/base"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/metadata"
+	yaml_base_types "go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/types/base"
 )
 
 func TestParse(t *testing.T) {
@@ -142,7 +142,7 @@ func TestParseLegacy(t *testing.T) {
 	sampleYamlPipelineLegacy := `
 platform: linux/amd64
 
-steps:
+pipeline:
   say hello:
     image: bash
     commands: echo hello
@@ -157,16 +157,21 @@ steps:
   say hello:
     image: bash
     commands: echo hello
+
+pipeline:
+  old crap:
+    image: bash
+    commands: meh!
 `
 
 	workflow1, err := ParseString(sampleYamlPipelineLegacy)
 	if !assert.NoError(t, err) {
-		t.Fail()
+		return
 	}
 
 	workflow2, err := ParseString(sampleYamlPipelineLegacyIgnore)
 	if !assert.NoError(t, err) {
-		t.Fail()
+		return
 	}
 
 	assert.EqualValues(t, workflow1, workflow2)
@@ -244,3 +249,38 @@ steps:
     when:
       event: success
 `
+
+var sampleSliceYaml = `
+steps:
+  nil_slice:
+    image: plugins/slack
+  empty_slice:
+    image: plugins/slack
+    depends_on: []
+`
+
+func TestSlice(t *testing.T) {
+	g := goblin.Goblin(t)
+
+	g.Describe("Parser", func() {
+		g.It("should marshal a not set slice to nil", func() {
+			out, err := ParseString(sampleSliceYaml)
+			if err != nil {
+				g.Fail(err)
+			}
+
+			g.Assert(out.Steps.ContainerList[0].DependsOn).IsNil()
+			g.Assert(len(out.Steps.ContainerList[0].DependsOn)).Equal(0)
+		})
+
+		g.It("should marshal an empty slice", func() {
+			out, err := ParseString(sampleSliceYaml)
+			if err != nil {
+				g.Fail(err)
+			}
+
+			g.Assert(out.Steps.ContainerList[1].DependsOn).IsNotNil()
+			g.Assert(len(out.Steps.ContainerList[1].DependsOn)).Equal(0)
+		})
+	})
+}

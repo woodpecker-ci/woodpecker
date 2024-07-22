@@ -3,25 +3,27 @@
     v-if="repo && repoPermissions && $route.meta.repoHeader"
     v-model:activeTab="activeTab"
     enable-tabs
-    disable-hash-mode
+    disable-tab-url-hash-mode
   >
     <template #title>
       <span class="flex">
         <router-link :to="{ name: 'org', params: { orgId: repo.org_id } }" class="hover:underline">{{
           repo.owner
+          /* eslint-disable-next-line @intlify/vue-i18n/no-raw-text */
         }}</router-link>
-        {{ `&nbsp;/&nbsp;${repo.name}` }}
+        &nbsp;/
+        {{ repo.name }}
       </span>
     </template>
     <template #titleActions>
       <a v-if="badgeUrl" :href="badgeUrl" target="_blank">
         <img :src="badgeUrl" />
       </a>
-      <IconButton :href="repo.link_url" :title="$t('repo.open_in_forge')" :icon="forge ?? 'repo'" />
+      <IconButton :href="repo.forge_url" :title="$t('repo.open_in_forge')" :icon="forgeIcon" class="forge" />
       <IconButton
         v-if="repoPermissions.admin"
         :to="{ name: 'repo-settings' }"
-        :title="$t('repo.settings.settings')"
+        :title="$t('settings')"
         icon="settings"
       />
     </template>
@@ -37,11 +39,7 @@
 
     <Tab id="activity" :title="$t('repo.activity')" />
     <Tab id="branches" :title="$t('repo.branches')" />
-    <Tab
-      v-if="config.forge === 'gitea' || config.forge === 'github' || config.forge === 'gitlab'"
-      id="pull_requests"
-      :title="$t('repo.pull_requests')"
-    />
+    <Tab v-if="repo.pr_enabled && repo.allow_pr" id="pull_requests" :title="$t('repo.pull_requests')" />
 
     <router-view />
   </Scaffold>
@@ -53,6 +51,8 @@ import { computed, onMounted, provide, ref, toRef, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 
+import Button from '~/components/atomic/Button.vue';
+import type { IconNames } from '~/components/atomic/Icon.vue';
 import IconButton from '~/components/atomic/IconButton.vue';
 import ManualPipelinePopup from '~/components/layout/popups/ManualPipelinePopup.vue';
 import Scaffold from '~/components/layout/scaffold/Scaffold.vue';
@@ -60,8 +60,9 @@ import Tab from '~/components/layout/scaffold/Tab.vue';
 import useApiClient from '~/compositions/useApiClient';
 import useAuthentication from '~/compositions/useAuthentication';
 import useConfig from '~/compositions/useConfig';
+import { useForgeStore } from '~/compositions/useForgeStore';
 import useNotifications from '~/compositions/useNotifications';
-import { RepoPermissions } from '~/lib/api/types';
+import type { Forge, RepoPermissions } from '~/lib/api/types';
 import { usePipelineStore } from '~/store/pipelines';
 import { useRepoStore } from '~/store/repos';
 
@@ -70,7 +71,7 @@ const props = defineProps<{
 }>();
 
 const _repoId = toRef(props, 'repoId');
-const repositoryId = computed(() => parseInt(_repoId.value, 10));
+const repositoryId = computed(() => Number.parseInt(_repoId.value, 10));
 const repoStore = useRepoStore();
 const pipelineStore = usePipelineStore();
 const apiClient = useApiClient();
@@ -80,14 +81,21 @@ const route = useRoute();
 const router = useRouter();
 const i18n = useI18n();
 const config = useConfig();
+const forgeStore = useForgeStore();
 
-const { forge } = useConfig();
 const repo = repoStore.getRepo(repositoryId);
 const repoPermissions = ref<RepoPermissions>();
 const pipelines = pipelineStore.getRepoPipelines(repositoryId);
 provide('repo', repo);
 provide('repo-permissions', repoPermissions);
 provide('pipelines', pipelines);
+const forge = ref<Forge>();
+const forgeIcon = computed<IconNames>(() => {
+  if (forge.value && forge.value.type !== 'addon') {
+    return forge.value.type;
+  }
+  return 'repo';
+});
 
 const showManualPipelinePopup = ref(false);
 
@@ -106,6 +114,10 @@ async function loadRepo() {
 
   await repoStore.loadRepo(repositoryId.value);
   await pipelineStore.loadRepoPipelines(repositoryId.value);
+
+  if (repo.value) {
+    forge.value = (await forgeStore.getForge(repo.value?.forge_id)).value;
+  }
 }
 
 onMounted(() => {

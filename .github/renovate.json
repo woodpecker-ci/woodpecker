@@ -1,35 +1,68 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["config:recommended", ":maintainLockFilesWeekly"],
-  "prConcurrentLimit": 5,
+  "extends": ["github>woodpecker-ci/renovate-config"],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "fileMatch": ["shared/constant/constant.go"],
+      "matchStrings": [
+        "//\\s*renovate:\\s*datasource=(?<datasource>.*?) depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?\\s+DefaultCloneImage = \"docker.io/woodpeckerci/plugin-git:(?<currentValue>.*)\""
+      ],
+      "versioningTemplate": "{{#if versioning}}{{{versioning}}}{{else}}semver{{/if}}"
+    }
+  ],
   "packageRules": [
     {
-      "matchManagers": ["gomod", "npm", "dockerfile"],
-      "labels": ["dependencies"]
+      "matchCurrentVersion": "<1.0.0",
+      "matchPackageNames": ["github.com/distribution/reference"],
+      "matchUpdateTypes": ["major", "minor"],
+      "dependencyDashboardApproval": true
     },
     {
-      "matchManagers": ["woodpecker"],
-      "labels": ["build"]
+      "matchPackageNames": ["github.com/charmbracelet/huh/spinner"],
+      "enabled": false
     },
     {
-      "groupName": "golang deps non-major",
+      "matchManagers": ["docker-compose"],
+      "matchFileNames": ["docker-compose.gitpod.yaml"],
+      "addLabels": ["devx"]
+    },
+    {
+      "groupName": "golang-lang",
+      "matchPackagePatterns": ["^golang$", "xgo"],
+      "matchUpdateTypes": ["minor", "patch"]
+    },
+    {
+      "groupName": "golang-packages",
       "matchManagers": ["gomod"],
-      "matchUpdateTypes": ["minor", "patch"],
-      "extends": ["schedule:daily"]
+      "matchUpdateTypes": ["minor", "patch"]
+    },
+    {
+      "matchManagers": ["npm"],
+      "matchFileNames": ["web/package.json"],
+      "addLabels": ["ui"]
+    },
+    {
+      "matchManagers": ["npm"],
+      "matchFileNames": ["docs/**/package.json"],
+      "addLabels": ["documentation"]
     },
     {
       "groupName": "web npm deps non-major",
       "matchManagers": ["npm"],
       "matchUpdateTypes": ["minor", "patch"],
-      "matchFileNames": ["web/package.json"],
-      "extends": ["schedule:daily"]
+      "matchFileNames": ["web/package.json"]
     },
     {
       "groupName": "docs npm deps non-major",
       "matchManagers": ["npm"],
       "matchUpdateTypes": ["minor", "patch"],
-      "matchFileNames": ["docs/**/package.json"],
-      "extends": ["schedule:daily"]
+      "matchFileNames": ["docs/**/package.json"]
+    },
+    {
+      "matchDatasources": ["docker"],
+      "matchPackagePatterns": ["xgo"],
+      "versioning": "regex:^go-(?<major>\\d+)?(\\.(?<minor>\\d+))?(\\.(?<patch>\\d+))$"
     }
   ]
 }

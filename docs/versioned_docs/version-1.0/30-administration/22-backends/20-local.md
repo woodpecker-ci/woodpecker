@@ -5,7 +5,7 @@ The local backend will execute the pipelines on the local system without any iso
 :::
 
 :::note
-This backend is still pretty new and can not be treated as stable. Its
+This backend is still pretty new and cannot be treated as stable. Its
 implementation and configuration can change at any time.
 :::
 
@@ -90,9 +90,8 @@ steps:
 
 ### Using labels to filter tasks
 
-You can use the [agent configuration
-options](../15-agent-config.md#woodpecker_filter_labels) and the
-[pipeline syntax](../../20-usage/20-pipeline-syntax.md#labels) to only run certain
+You can use the [agent configuration options](../15-agent-config.md#woodpecker_filter_labels)
+and the [pipeline syntax](../../20-usage/20-pipeline-syntax.md#labels) to only run certain
 pipelines on certain agents. Example:
 
 Define a `label` `type` with value `exec` for a particular agent:
@@ -115,4 +114,3 @@ labels:
 steps:
   [...]
 ```
-

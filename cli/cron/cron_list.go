@@ -15,13 +15,14 @@
 package cron
 
 import (
+	"context"
 	"html/template"
 	"os"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
-	"github.com/woodpecker-ci/woodpecker/cli/common"
-	"github.com/woodpecker-ci/woodpecker/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
 )
 
 var cronListCmd = &cli.Command{
@@ -29,13 +30,13 @@ var cronListCmd = &cli.Command{
 	Usage:     "list cron jobs",
 	ArgsUsage: "[repo-id|repo-full-name]",
 	Action:    cronList,
-	Flags: append(common.GlobalFlags,
+	Flags: []cli.Flag{
 		common.RepoFlag,
 		common.FormatFlag(tmplCronList, true),
-	),
+	},
 }
 
-func cronList(c *cli.Context) error {
+func cronList(ctx context.Context, c *cli.Command) error {
 	var (
 		format           = c.String("format") + "\n"
 		repoIDOrFullName = c.String("repository")
@@ -43,7 +44,7 @@ func cronList(c *cli.Context) error {
 	if repoIDOrFullName == "" {
 		repoIDOrFullName = c.Args().First()
 	}
-	client, err := internal.NewClient(c)
+	client, err := internal.NewClient(ctx, c)
 	if err != nil {
 		return err
 	}
@@ -67,7 +68,7 @@ func cronList(c *cli.Context) error {
 	return nil
 }
 
-// template for pipeline list information
+// tTemplate for pipeline list information.
 var tmplCronList = "\x1b[33m{{ .Name }} \x1b[0m" + `
 ID: {{ .ID }}
 Branch: {{ .Branch }}

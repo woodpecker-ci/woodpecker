@@ -13,19 +13,13 @@
 <script lang="ts" setup>
 import { computed, toRef } from 'vue';
 
-import { SelectOption } from './form.types';
+import type { SelectOption } from './form.types';
 
-const props = withDefaults(
-  defineProps<{
-    modelValue: string;
-    placeholder: string;
-    options: SelectOption[];
-  }>(),
-  {
-    placeholder: '',
-    options: undefined,
-  },
-);
+const props = defineProps<{
+  modelValue: string;
+  placeholder?: string;
+  options: SelectOption[];
+}>();
 
 const emit = defineEmits<{
   (event: 'update:modelValue', value: string): void;

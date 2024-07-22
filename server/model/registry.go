@@ -21,45 +21,40 @@ import (
 )
 
 var (
-	errRegistryAddressInvalid  = errors.New("Invalid Registry Address")
-	errRegistryUsernameInvalid = errors.New("Invalid Registry Username")
-	errRegistryPasswordInvalid = errors.New("Invalid Registry Password")
+	errRegistryAddressInvalid  = errors.New("invalid registry address")
+	errRegistryUsernameInvalid = errors.New("invalid registry username")
+	errRegistryPasswordInvalid = errors.New("invalid registry password")
 )
-
-// RegistryService defines a service for managing registries.
-type RegistryService interface {
-	RegistryFind(*Repo, string) (*Registry, error)
-	RegistryList(*Repo, *ListOptions) ([]*Registry, error)
-	RegistryCreate(*Repo, *Registry) error
-	RegistryUpdate(*Repo, *Registry) error
-	RegistryDelete(*Repo, string) error
-}
-
-// ReadOnlyRegistryService defines a service for managing registries.
-type ReadOnlyRegistryService interface {
-	RegistryFind(*Repo, string) (*Registry, error)
-	RegistryList(*Repo, *ListOptions) ([]*Registry, error)
-}
-
-// RegistryStore persists registry information to storage.
-type RegistryStore interface {
-	RegistryFind(*Repo, string) (*Registry, error)
-	RegistryList(*Repo, *ListOptions) ([]*Registry, error)
-	RegistryCreate(*Registry) error
-	RegistryUpdate(*Registry) error
-	RegistryDelete(repo *Repo, addr string) error
-}
 
 // Registry represents a docker registry with credentials.
 type Registry struct {
-	ID       int64  `json:"id"       xorm:"pk autoincr 'registry_id'"`
-	RepoID   int64  `json:"-"        xorm:"UNIQUE(s) INDEX 'registry_repo_id'"`
-	Address  string `json:"address"  xorm:"UNIQUE(s) INDEX 'registry_addr'"`
-	Username string `json:"username" xorm:"varchar(2000) 'registry_username'"`
-	Password string `json:"password" xorm:"TEXT 'registry_password'"`
-	Token    string `json:"token"    xorm:"TEXT 'registry_token'"`
-	Email    string `json:"email"    xorm:"varchar(500) 'registry_email'"`
+	ID       int64  `json:"id"       xorm:"pk autoincr 'id'"`
+	OrgID    int64  `json:"org_id"   xorm:"NOT NULL DEFAULT 0 UNIQUE(s) INDEX 'org_id'"`
+	RepoID   int64  `json:"repo_id"  xorm:"NOT NULL DEFAULT 0 UNIQUE(s) INDEX 'repo_id'"`
+	Address  string `json:"address"  xorm:"NOT NULL UNIQUE(s) INDEX 'address'"`
+	Username string `json:"username" xorm:"varchar(2000) 'username'"`
+	Password string `json:"password" xorm:"TEXT 'password'"`
+	ReadOnly bool   `json:"readonly" xorm:"-"`
 } //	@name Registry
+
+func (r Registry) TableName() string {
+	return "registries"
+}
+
+// Global registry.
+func (r Registry) IsGlobal() bool {
+	return r.RepoID == 0 && r.OrgID == 0
+}
+
+// Organization registry.
+func (r Registry) IsOrganization() bool {
+	return r.RepoID == 0 && r.OrgID != 0
+}
+
+// Repository registry.
+func (r Registry) IsRepository() bool {
+	return r.RepoID != 0 && r.OrgID == 0
+}
 
 // Validate validates the registry information.
 func (r *Registry) Validate() error {
@@ -80,10 +75,10 @@ func (r *Registry) Validate() error {
 func (r *Registry) Copy() *Registry {
 	return &Registry{
 		ID:       r.ID,
+		OrgID:    r.OrgID,
 		RepoID:   r.RepoID,
 		Address:  r.Address,
 		Username: r.Username,
-		Email:    r.Email,
-		Token:    r.Token,
+		ReadOnly: r.ReadOnly,
 	}
 }

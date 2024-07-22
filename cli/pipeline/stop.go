@@ -15,26 +15,25 @@
 package pipeline
 
 import (
+	"context"
 	"fmt"
 	"strconv"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
-	"github.com/woodpecker-ci/woodpecker/cli/common"
-	"github.com/woodpecker-ci/woodpecker/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
 )
 
 var pipelineStopCmd = &cli.Command{
 	Name:      "stop",
 	Usage:     "stop a pipeline",
 	ArgsUsage: "<repo-id|repo-full-name> [pipeline]",
-	Flags:     common.GlobalFlags,
 	Action:    pipelineStop,
 }
 
-func pipelineStop(c *cli.Context) (err error) {
+func pipelineStop(ctx context.Context, c *cli.Command) (err error) {
 	repoIDOrFullName := c.Args().First()
-	client, err := internal.NewClient(c)
+	client, err := internal.NewClient(ctx, c)
 	if err != nil {
 		return err
 	}
@@ -42,7 +41,7 @@ func pipelineStop(c *cli.Context) (err error) {
 	if err != nil {
 		return err
 	}
-	number, err := strconv.Atoi(c.Args().Get(1))
+	number, err := strconv.ParseInt(c.Args().Get(1), 10, 64)
 	if err != nil {
 		return err
 	}

@@ -16,14 +16,15 @@ package model
 
 // Org represents an organization.
 type Org struct {
-	ID     int64  `json:"id,omitempty"   xorm:"pk autoincr 'id'"`
-	Name   string `json:"name"           xorm:"UNIQUE 'name'"`
-	IsUser bool   `json:"is_user"        xorm:"is_user"`
+	ID      int64  `json:"id,omitempty"       xorm:"pk autoincr 'id'"`
+	ForgeID int64  `json:"forge_id,omitempty" xorm:"forge_id"`
+	Name    string `json:"name"               xorm:"UNIQUE 'name'"`
+	IsUser  bool   `json:"is_user"            xorm:"is_user"`
 	// if name lookup has to check for membership or not
-	Private bool `json:"-"              xorm:"private"`
+	Private bool `json:"-"                    xorm:"private"`
 } //	@name Org
 
-// TableName return database table name for xorm
+// TableName return database table name for xorm.
 func (Org) TableName() string {
 	return "orgs"
 }

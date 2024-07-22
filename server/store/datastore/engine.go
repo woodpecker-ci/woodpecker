@@ -15,12 +15,14 @@
 package datastore
 
 import (
-	"github.com/rs/zerolog"
-	"github.com/woodpecker-ci/woodpecker/server/store"
-	"github.com/woodpecker-ci/woodpecker/server/store/datastore/migration"
+	"context"
 
+	"github.com/rs/zerolog"
 	"xorm.io/xorm"
 	xlog "xorm.io/xorm/log"
+
+	"go.woodpecker-ci.org/woodpecker/v2/server/store"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store/datastore/migration"
 )
 
 type storage struct {
@@ -53,9 +55,9 @@ func (s storage) Ping() error {
 	return s.engine.Ping()
 }
 
-// Migrate old storage or init new one
-func (s storage) Migrate() error {
-	return migration.Migrate(s.engine)
+// Migrate old storage or init new one.
+func (s storage) Migrate(ctx context.Context, allowLong bool) error {
+	return migration.Migrate(ctx, s.engine, allowLong)
 }
 
 func (s storage) Close() error {

@@ -15,12 +15,13 @@
 package cron
 
 import (
+	"context"
 	"fmt"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
-	"github.com/woodpecker-ci/woodpecker/cli/common"
-	"github.com/woodpecker-ci/woodpecker/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
 )
 
 var cronDeleteCmd = &cli.Command{
@@ -28,25 +29,25 @@ var cronDeleteCmd = &cli.Command{
 	Usage:     "remove a cron job",
 	ArgsUsage: "[repo-id|repo-full-name]",
 	Action:    cronDelete,
-	Flags: append(common.GlobalFlags,
+	Flags: []cli.Flag{
 		common.RepoFlag,
 		&cli.StringFlag{
 			Name:     "id",
 			Usage:    "cron id",
 			Required: true,
 		},
-	),
+	},
 }
 
-func cronDelete(c *cli.Context) error {
+func cronDelete(ctx context.Context, c *cli.Command) error {
 	var (
-		jobID            = c.Int64("id")
+		cronID           = c.Int("id")
 		repoIDOrFullName = c.String("repository")
 	)
 	if repoIDOrFullName == "" {
 		repoIDOrFullName = c.Args().First()
 	}
-	client, err := internal.NewClient(c)
+	client, err := internal.NewClient(ctx, c)
 	if err != nil {
 		return err
 	}
@@ -54,7 +55,7 @@ func cronDelete(c *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	err = client.CronDelete(repoID, jobID)
+	err = client.CronDelete(repoID, cronID)
 	if err != nil {
 		return err
 	}

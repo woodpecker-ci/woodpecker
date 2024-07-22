@@ -18,7 +18,7 @@
 <script lang="ts" setup>
 import { computed, toRef } from 'vue';
 
-import { RadioOption } from './form.types';
+import type { RadioOption } from './form.types';
 
 const props = defineProps<{
   modelValue: string;
@@ -54,8 +54,8 @@ const id = (Math.random() + 1).toString(36).substring(7);
   display: block;
   top: 50%;
   left: 50%;
-  width: 7px;
-  height: 7px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   background: white;
   transform: translate(-50%, -50%);

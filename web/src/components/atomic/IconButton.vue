@@ -28,26 +28,18 @@
 </template>
 
 <script lang="ts" setup>
-import { RouteLocationRaw } from 'vue-router';
+import type { RouteLocationRaw } from 'vue-router';
 
-import Icon, { IconNames } from '~/components/atomic/Icon.vue';
+import Icon, { type IconNames } from '~/components/atomic/Icon.vue';
 
-withDefaults(
-  defineProps<{
-    icon: IconNames | null;
-    disabled?: boolean;
-    to: RouteLocationRaw | null;
-    isLoading?: boolean;
-    title: string;
-    href?: string;
-  }>(),
-  {
-    icon: null,
-    to: null,
-    title: undefined,
-    href: '',
-  },
-);
+defineProps<{
+  icon?: IconNames;
+  disabled?: boolean;
+  to?: RouteLocationRaw;
+  isLoading?: boolean;
+  title?: string;
+  href?: string;
+}>();
 </script>
 
 <style scoped>

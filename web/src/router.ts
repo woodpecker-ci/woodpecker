@@ -1,5 +1,5 @@
-import { Component } from 'vue';
-import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router';
+import type { Component } from 'vue';
+import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router';
 
 import useAuthentication from '~/compositions/useAuthentication';
 import useConfig from '~/compositions/useConfig';
@@ -88,6 +88,12 @@ const routes: RouteRecordRaw[] = [
                 component: (): Component => import('~/views/repo/pipeline/PipelineConfig.vue'),
                 props: true,
               },
+              {
+                path: 'errors',
+                name: 'repo-pipeline-errors',
+                component: (): Component => import('~/views/repo/pipeline/PipelineErrors.vue'),
+                props: true,
+              },
             ],
           },
           {
@@ -101,7 +107,7 @@ const routes: RouteRecordRaw[] = [
       },
       {
         path: ':repoOwner/:repoName/:pathMatch(.*)*',
-        component: () => import('~/views/repo/RepoDeprecatedRedirect.vue'),
+        component: async () => import('~/views/repo/RepoDeprecatedRedirect.vue'),
         props: true,
       },
     ],
@@ -147,18 +153,16 @@ const routes: RouteRecordRaw[] = [
     props: true,
   },
   {
-    path: `${rootPath}/login/error`,
-    name: 'login-error',
+    path: `${rootPath}/login`,
+    name: 'login',
     component: (): Component => import('~/views/Login.vue'),
     meta: { blank: true },
     props: true,
   },
   {
-    path: `${rootPath}/do-login`,
-    name: 'login',
-    component: (): Component => import('~/views/Login.vue'),
-    meta: { blank: true },
-    props: true,
+    path: `${rootPath}/cli/auth`,
+    component: async () => import('~/views/cli/Auth.vue'),
+    meta: { authentication: 'required' },
   },
 
   // TODO: deprecated routes => remove after some time
@@ -168,7 +172,7 @@ const routes: RouteRecordRaw[] = [
   },
   {
     path: `${rootPath}/:repoOwner/:repoName/:pathMatch(.*)*`,
-    component: () => import('~/views/repo/RepoDeprecatedRedirect.vue'),
+    component: async () => import('~/views/repo/RepoDeprecatedRedirect.vue'),
     props: true,
   },
 
@@ -188,7 +192,7 @@ const router = createRouter({
 router.beforeEach(async (to, _, next) => {
   const config = useUserConfig();
   const { redirectUrl } = config.userConfig.value;
-  if (redirectUrl !== '') {
+  if (redirectUrl !== '' && to.name !== 'login') {
     config.setUserConfig('redirectUrl', '');
     next(redirectUrl);
   }

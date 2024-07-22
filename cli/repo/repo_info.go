@@ -15,13 +15,14 @@
 package repo
 
 import (
+	"context"
 	"os"
 	"text/template"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
-	"github.com/woodpecker-ci/woodpecker/cli/common"
-	"github.com/woodpecker-ci/woodpecker/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
 )
 
 var repoInfoCmd = &cli.Command{
@@ -29,14 +30,12 @@ var repoInfoCmd = &cli.Command{
 	Usage:     "show repository details",
 	ArgsUsage: "<repo-id|repo-full-name>",
 	Action:    repoInfo,
-	Flags: append(common.GlobalFlags,
-		common.FormatFlag(tmplRepoInfo),
-	),
+	Flags:     []cli.Flag{common.FormatFlag(tmplRepoInfo)},
 }
 
-func repoInfo(c *cli.Context) error {
+func repoInfo(ctx context.Context, c *cli.Command) error {
 	repoIDOrFullName := c.Args().First()
-	client, err := internal.NewClient(c)
+	client, err := internal.NewClient(ctx, c)
 	if err != nil {
 		return err
 	}
@@ -57,10 +56,10 @@ func repoInfo(c *cli.Context) error {
 	return tmpl.Execute(os.Stdout, repo)
 }
 
-// template for repo information
+// tTemplate for repo information.
 var tmplRepoInfo = `Owner: {{ .Owner }}
 Repo: {{ .Name }}
-Link: {{ .Link }}
+URL: {{ .ForgeURL }}
 Config path: {{ .Config }}
 Visibility: {{ .Visibility }}
 Private: {{ .IsSCMPrivate }}

@@ -15,12 +15,12 @@
 package user
 
 import (
+	"context"
 	"fmt"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
-	"github.com/woodpecker-ci/woodpecker/cli/common"
-	"github.com/woodpecker-ci/woodpecker/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
 )
 
 var userRemoveCmd = &cli.Command{
@@ -28,13 +28,12 @@ var userRemoveCmd = &cli.Command{
 	Usage:     "remove a user",
 	ArgsUsage: "<username>",
 	Action:    userRemove,
-	Flags:     common.GlobalFlags,
 }
 
-func userRemove(c *cli.Context) error {
+func userRemove(ctx context.Context, c *cli.Command) error {
 	login := c.Args().First()
 
-	client, err := internal.NewClient(c)
+	client, err := internal.NewClient(ctx, c)
 	if err != nil {
 		return err
 	}

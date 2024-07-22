@@ -15,7 +15,16 @@
 package local
 
 import (
-	"github.com/urfave/cli/v2"
+	"os"
+
+	"github.com/urfave/cli/v3"
 )
 
-var Flags = []cli.Flag{}
+var Flags = []cli.Flag{
+	&cli.StringFlag{
+		Name:    "backend-local-temp-dir",
+		Sources: cli.EnvVars("WOODPECKER_BACKEND_LOCAL_TEMP_DIR"),
+		Usage:   "set a different temp dir to clone workflows into",
+		Value:   os.TempDir(),
+	},
+}

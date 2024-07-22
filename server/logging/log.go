@@ -18,18 +18,20 @@ import (
 	"context"
 	"sync"
 
-	"github.com/woodpecker-ci/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
-// TODO (bradrydzewski) writing to subscribers is currently a blocking
+// TODO: (bradrydzewski) writing to subscribers is currently a blocking
 // operation and does not protect against slow clients from locking
 // the stream. This should be resolved.
 
-// TODO (bradrydzewski) implement a mux.Info to fetch information and
+//nolint:godot
+// TODO: (bradrydzewski) implement a mux.Info to fetch information and
 // statistics for the multiplexer. Streams, subscribers, etc
 // mux.Info()
 
-// TODO (bradrydzewski) refactor code to place publisher and subscriber
+//nolint:godot
+// TODO: (bradrydzewski) refactor code to place publisher and subscriber
 // operations in separate files with more encapsulated logic.
 // sub.push()
 // sub.join()
@@ -79,9 +81,16 @@ func (l *log) Write(ctx context.Context, stepID int64, logEntry *model.LogEntry)
 	l.Lock()
 	s, ok := l.streams[stepID]
 	l.Unlock()
+
+	// auto open the stream if it does not exist
 	if !ok {
-		return l.Open(ctx, stepID)
+		err := l.Open(ctx, stepID)
+		if err != nil {
+			return err
+		}
+		s = l.streams[stepID]
 	}
+
 	s.Lock()
 	s.list = append(s.list, logEntry)
 	for sub := range s.subs {

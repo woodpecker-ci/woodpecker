@@ -3,7 +3,7 @@
     class="bg-wp-background-100 border-b-1 border-wp-background-400 dark:border-wp-background-100 dark:bg-wp-background-300 text-wp-text-100"
     :class="{ 'md:px-4': fullWidth }"
   >
-    <FluidContainer :full-width="fullWidth" class="!py-0">
+    <Container :full-width="fullWidth" class="!py-0">
       <div class="flex w-full md:items-center flex-col py-3 gap-2 md:gap-10 md:flex-row md:justify-between">
         <div
           class="flex items-center content-start"
@@ -25,6 +25,7 @@
         <TextField
           v-if="searchBoxPresent"
           class="w-auto <md:w-full <md:order-3"
+          :aria-label="$t('search')"
           :placeholder="$t('search')"
           :model-value="search"
           @update:model-value="(value: string) => $emit('update:search', value)"
@@ -46,13 +47,14 @@
           <slot name="tabActions" />
         </div>
       </div>
-    </FluidContainer>
+    </Container>
   </header>
 </template>
 
 <script setup lang="ts">
+import IconButton from '~/components/atomic/IconButton.vue';
 import TextField from '~/components/form/TextField.vue';
-import FluidContainer from '~/components/layout/FluidContainer.vue';
+import Container from '~/components/layout/Container.vue';
 
 import Tabs from './Tabs.vue';
 
@@ -62,7 +64,10 @@ const props = defineProps<{
   search?: string;
   fullWidth?: boolean;
 }>();
-defineEmits(['update:search']);
+
+defineEmits<{
+  (event: 'update:search', query: string): void;
+}>();
 
 const searchBoxPresent = props.search !== undefined;
 </script>

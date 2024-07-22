@@ -15,43 +15,91 @@
 package kubernetes
 
 import (
+	"context"
 	"fmt"
-	"strconv"
+	"strings"
 
+	"github.com/rs/zerolog/log"
 	v1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/util/intstr"
+	"k8s.io/apimachinery/pkg/api/errors"
+	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	int_str "k8s.io/apimachinery/pkg/util/intstr"
+
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 )
 
-func Service(namespace, name, podName string, ports []string) (*v1.Service, error) {
-	var svcPorts []v1.ServicePort
-	for _, p := range ports {
-		i, err := strconv.Atoi(p)
-		if err != nil {
-			return nil, fmt.Errorf("Could not parse service port %s as integer", p)
-		}
-		svcPorts = append(svcPorts, v1.ServicePort{
-			Port:       int32(i),
-			TargetPort: intstr.IntOrString{IntVal: int32(i)},
-		})
-	}
+const (
+	ServiceLabel  = "service"
+	servicePrefix = "wp-svc-"
+)
 
-	dnsName, err := dnsName(name)
+func mkService(step *types.Step, config *config) (*v1.Service, error) {
+	name, err := serviceName(step)
 	if err != nil {
 		return nil, err
 	}
 
+	selector := map[string]string{
+		ServiceLabel: name,
+	}
+
+	var svcPorts []v1.ServicePort
+	for _, port := range step.Ports {
+		svcPorts = append(svcPorts, servicePort(port))
+	}
+
+	log.Trace().Str("name", name).Interface("selector", selector).Interface("ports", svcPorts).Msg("creating service")
 	return &v1.Service{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      dnsName,
-			Namespace: namespace,
+		ObjectMeta: meta_v1.ObjectMeta{
+			Name:      name,
+			Namespace: config.Namespace,
 		},
 		Spec: v1.ServiceSpec{
-			Type: v1.ServiceTypeClusterIP,
-			Selector: map[string]string{
-				"step": podName,
-			},
-			Ports: svcPorts,
+			Type:     v1.ServiceTypeClusterIP,
+			Selector: selector,
+			Ports:    svcPorts,
 		},
 	}, nil
+}
+
+func serviceName(step *types.Step) (string, error) {
+	return dnsName(servicePrefix + step.UUID + "-" + step.Name)
+}
+
+func servicePort(port types.Port) v1.ServicePort {
+	portNumber := int32(port.Number)
+	portProtocol := strings.ToUpper(port.Protocol)
+	return v1.ServicePort{
+		Name:       fmt.Sprintf("port-%d", portNumber),
+		Port:       portNumber,
+		Protocol:   v1.Protocol(portProtocol),
+		TargetPort: int_str.IntOrString{IntVal: portNumber},
+	}
+}
+
+func startService(ctx context.Context, engine *kube, step *types.Step) (*v1.Service, error) {
+	engineConfig := engine.getConfig()
+	svc, err := mkService(step, engineConfig)
+	if err != nil {
+		return nil, err
+	}
+
+	log.Trace().Str("name", svc.Name).Interface("selector", svc.Spec.Selector).Interface("ports", svc.Spec.Ports).Msg("creating service")
+	return engine.client.CoreV1().Services(engineConfig.Namespace).Create(ctx, svc, meta_v1.CreateOptions{})
+}
+
+func stopService(ctx context.Context, engine *kube, step *types.Step, deleteOpts meta_v1.DeleteOptions) error {
+	svcName, err := serviceName(step)
+	if err != nil {
+		return err
+	}
+	log.Trace().Str("name", svcName).Msg("deleting service")
+
+	err = engine.client.CoreV1().Services(engine.config.Namespace).Delete(ctx, svcName, deleteOpts)
+	if errors.IsNotFound(err) {
+		// Don't abort on 404 errors from k8s, they most likely mean that the pod hasn't been created yet, usually because pipeline was canceled before running all steps.
+		log.Trace().Err(err).Msgf("unable to delete service %s", svcName)
+		return nil
+	}
+	return err
 }

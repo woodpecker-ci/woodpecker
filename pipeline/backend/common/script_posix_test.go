@@ -48,7 +48,6 @@ go build
 
 echo + 'go test'
 go test
-
 `,
 		},
 	}

@@ -15,13 +15,14 @@
 package user
 
 import (
+	"context"
 	"os"
 	"text/template"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
-	"github.com/woodpecker-ci/woodpecker/cli/common"
-	"github.com/woodpecker-ci/woodpecker/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
 )
 
 var userListCmd = &cli.Command{
@@ -29,13 +30,11 @@ var userListCmd = &cli.Command{
 	Usage:     "list all users",
 	ArgsUsage: " ",
 	Action:    userList,
-	Flags: append(common.GlobalFlags,
-		common.FormatFlag(tmplUserList),
-	),
+	Flags:     []cli.Flag{common.FormatFlag(tmplUserList)},
 }
 
-func userList(c *cli.Context) error {
-	client, err := internal.NewClient(c)
+func userList(ctx context.Context, c *cli.Command) error {
+	client, err := internal.NewClient(ctx, c)
 	if err != nil {
 		return err
 	}
@@ -57,5 +56,5 @@ func userList(c *cli.Context) error {
 	return nil
 }
 
-// template for user list items
+// Template for user list items.
 var tmplUserList = `{{ .Login }}`

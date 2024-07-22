@@ -1,5 +1,5 @@
 <template>
-  <IconButton :title="$t('pipeline_feed')" class="!p-1.5 relative text-current" @click="toggle">
+  <IconButton :title="$t('pipeline_feed')" class="!p-1.5 relative text-current active-pipelines-toggle" @click="toggle">
     <div v-if="activePipelines.length > 0" class="spinner m-1">
       <div class="spinner-ring ring1" />
       <div class="spinner-ring ring2" />

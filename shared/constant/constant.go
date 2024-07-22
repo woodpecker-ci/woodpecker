@@ -14,7 +14,7 @@
 
 package constant
 
-// PrivilegedPlugins can be changed by 'WOODPECKER_ESCALATE' at runtime
+// PrivilegedPlugins can be changed by 'WOODPECKER_ESCALATE' at runtime.
 var PrivilegedPlugins = []string{
 	"plugins/docker",
 	"plugins/gcr",
@@ -24,7 +24,7 @@ var PrivilegedPlugins = []string{
 }
 
 // DefaultConfigOrder represent the priority in witch woodpecker search for a pipeline config by default
-// folders are indicated by supplying a trailing /
+// folders are indicated by supplying a trailing slash.
 var DefaultConfigOrder = [...]string{
 	".woodpecker/",
 	".woodpecker.yaml",
@@ -32,8 +32,9 @@ var DefaultConfigOrder = [...]string{
 }
 
 const (
-	// DefaultCloneImage can be changed by 'WOODPECKER_DEFAULT_CLONE_IMAGE' at runtime
-	DefaultCloneImage = "docker.io/woodpeckerci/plugin-git:2.1.1"
+	// DefaultCloneImage can be changed by 'WOODPECKER_DEFAULT_CLONE_IMAGE' at runtime.
+	// renovate: datasource=docker depName=woodpeckerci/plugin-git
+	DefaultCloneImage = "docker.io/woodpeckerci/plugin-git:2.5.1"
 )
 
 var TrustedCloneImages = []string{

@@ -6,10 +6,10 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, inject, Ref, toRef } from 'vue';
+import { computed, inject, toRef, type Ref } from 'vue';
 
 import PipelineList from '~/components/repo/pipeline/PipelineList.vue';
-import { Pipeline, Repo, RepoPermissions } from '~/lib/api/types';
+import type { Pipeline, Repo, RepoPermissions } from '~/lib/api/types';
 
 const props = defineProps<{
   branch: string;
@@ -23,7 +23,9 @@ if (!repo || !repoPermissions) {
 }
 
 const allPipelines = inject<Ref<Pipeline[]>>('pipelines');
-const pipelines = computed(
-  () => allPipelines?.value.filter((b) => b.branch === branch.value && b.event !== 'pull_request'),
+const pipelines = computed(() =>
+  allPipelines?.value.filter(
+    (b) => b.branch === branch.value && b.event !== 'pull_request' && b.event !== 'pull_request_closed',
+  ),
 );
 </script>

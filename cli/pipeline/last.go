@@ -15,13 +15,13 @@
 package pipeline
 
 import (
-	"os"
-	"text/template"
+	"context"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
-	"github.com/woodpecker-ci/woodpecker/cli/common"
-	"github.com/woodpecker-ci/woodpecker/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker"
 )
 
 var pipelineLastCmd = &cli.Command{
@@ -29,19 +29,18 @@ var pipelineLastCmd = &cli.Command{
 	Usage:     "show latest pipeline details",
 	ArgsUsage: "<repo-id|repo-full-name>",
 	Action:    pipelineLast,
-	Flags: append(common.GlobalFlags,
-		common.FormatFlag(tmplPipelineInfo),
+	Flags: append(common.OutputFlags("table"), []cli.Flag{
 		&cli.StringFlag{
 			Name:  "branch",
 			Usage: "branch name",
 			Value: "main",
 		},
-	),
+	}...),
 }
 
-func pipelineLast(c *cli.Context) error {
+func pipelineLast(ctx context.Context, c *cli.Command) error {
 	repoIDOrFullName := c.Args().First()
-	client, err := internal.NewClient(c)
+	client, err := internal.NewClient(ctx, c)
 	if err != nil {
 		return err
 	}
@@ -55,9 +54,5 @@ func pipelineLast(c *cli.Context) error {
 		return err
 	}
 
-	tmpl, err := template.New("_").Parse(c.String("format"))
-	if err != nil {
-		return err
-	}
-	return tmpl.Execute(os.Stdout, pipeline)
+	return pipelineOutput(c, []woodpecker.Pipeline{*pipeline})
 }

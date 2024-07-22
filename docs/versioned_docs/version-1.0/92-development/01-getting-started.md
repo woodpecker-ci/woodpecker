@@ -39,7 +39,7 @@ For dependencies installation (node_modules) for the UI and documentation of Woo
 
 ### Create a `.env` file with your development configuration
 
-Similar to the environment variables you can set for your production setup of Woodpecker, you can create a `.env` in the root of the Woodpecker project and add any need config to it.
+Similar to the environment variables you can set for your production setup of Woodpecker, you can create a `.env` file in the root of the Woodpecker project and add any needed config to it.
 
 A common config for debugging would look like this:
 
@@ -57,7 +57,7 @@ WOODPECKER_GITHUB_SECRET=<redacted>
 
 # agent
 WOODPECKER_SERVER=localhost:9000
-WOODPECKER_SECRET=a-long-and-secure-password-used-for-the-local-development-system
+WOODPECKER_AGENT_SECRET=a-long-and-secure-password-used-for-the-local-development-system
 WOODPECKER_MAX_WORKFLOWS=1
 
 # enable if you want to develop the UI

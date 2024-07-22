@@ -15,23 +15,19 @@
 package constraint
 
 import (
-	"errors"
 	"fmt"
+	"maps"
 	"path"
-	"regexp"
 	"strings"
 
-	"github.com/antonmedv/expr"
 	"github.com/bmatcuk/doublestar/v4"
-	"github.com/rs/zerolog/log"
-	"golang.org/x/exp/maps"
+	"github.com/expr-lang/expr"
+	"go.uber.org/multierr"
 	"gopkg.in/yaml.v3"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/metadata"
-	yaml_base_types "github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types/base"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/metadata"
+	yamlBaseTypes "go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/types/base"
 )
-
-var skipRe = regexp.MustCompile(`\[(?i:ci *skip|skip *ci)\]`)
 
 type (
 	// When defines a set of runtime constraints.
@@ -46,14 +42,15 @@ type (
 		Instance    List
 		Platform    List
 		Environment List
-		Event       List
 		Branch      List
 		Cron        List
 		Status      List
 		Matrix      Map
-		Local       yaml_base_types.BoolTrue
+		Local       yamlBaseTypes.BoolTrue
 		Path        Path
 		Evaluate    string `yaml:"evaluate,omitempty"`
+		// TODO: change to StringOrSlice in 3.x
+		Event List
 	}
 
 	// List defines a runtime constraint for exclude & include string slices.
@@ -72,7 +69,8 @@ type (
 	Path struct {
 		Include       []string
 		Exclude       []string
-		IgnoreMessage string `yaml:"ignore_message,omitempty"`
+		IgnoreMessage string                 `yaml:"ignore_message,omitempty"`
+		OnEmpty       yamlBaseTypes.BoolTrue `yaml:"on_empty,omitempty"`
 	}
 )
 
@@ -82,16 +80,6 @@ func (when *When) IsEmpty() bool {
 
 // Returns true if at least one of the internal constraints is true.
 func (when *When) Match(metadata metadata.Metadata, global bool, env map[string]string) (bool, error) {
-	if global {
-		// skip the whole workflow if any case-insensitive combination of the words "skip" and "ci"
-		// wrapped in square brackets appear in the commit message
-		skipMatch := skipRe.FindString(metadata.Curr.Commit.Message)
-		if len(skipMatch) > 0 {
-			log.Debug().Msgf("skip workflow as keyword to do so was detected in commit message '%s'", metadata.Curr.Commit.Message)
-			return false, nil
-		}
-	}
-
 	for _, c := range when.Constraints {
 		match, err := c.Match(metadata, global, env)
 		if err != nil {
@@ -135,7 +123,7 @@ func (when *When) IncludesStatusSuccess() bool {
 	return false
 }
 
-// False if (any) non local
+// False if (any) non local.
 func (when *When) IsLocal() bool {
 	for _, c := range when.Constraints {
 		if !c.Local.Bool() {
@@ -176,7 +164,7 @@ func (c *Constraint) Match(m metadata.Metadata, global bool, env map[string]stri
 	}
 
 	match = match && c.Platform.Match(m.Sys.Platform) &&
-		c.Environment.Match(m.Curr.Target) &&
+		c.Environment.Match(m.Curr.DeployTo) &&
 		c.Event.Match(m.Curr.Event) &&
 		c.Repo.Match(path.Join(m.Repo.Owner, m.Repo.Name)) &&
 		c.Ref.Match(m.Curr.Commit.Ref) &&
@@ -209,13 +197,17 @@ func (c *Constraint) Match(m metadata.Metadata, global bool, env map[string]stri
 		if err != nil {
 			return false, err
 		}
-		match = match && result.(bool)
+		bResult, ok := result.(bool)
+		if !ok {
+			return false, fmt.Errorf("could not parse result: %v", result)
+		}
+		match = match && bResult
 	}
 
 	return match, nil
 }
 
-// IsEmpty return true if a constraint has no conditions
+// IsEmpty return true if a constraint has no conditions.
 func (c List) IsEmpty() bool {
 	return len(c.Include) == 0 && len(c.Exclude) == 0
 }
@@ -255,27 +247,27 @@ func (c *List) Excludes(v string) bool {
 	return false
 }
 
-// UnmarshalYAML unmarshals the constraint.
+// UnmarshalYAML unmarshal the constraint.
 func (c *List) UnmarshalYAML(value *yaml.Node) error {
 	out1 := struct {
-		Include yaml_base_types.StringOrSlice
-		Exclude yaml_base_types.StringOrSlice
+		Include yamlBaseTypes.StringOrSlice
+		Exclude yamlBaseTypes.StringOrSlice
 	}{}
 
-	var out2 yaml_base_types.StringOrSlice
+	var out2 yamlBaseTypes.StringOrSlice
 
 	err1 := value.Decode(&out1)
 	err2 := value.Decode(&out2)
 
 	c.Exclude = out1.Exclude
-	c.Include = append(
+	c.Include = append( //nolint:gocritic
 		out1.Include,
 		out2...,
 	)
 
 	if err1 != nil && err2 != nil {
 		y, _ := yaml.Marshal(value)
-		return fmt.Errorf("Could not parse condition: %s: %w", y, errors.Join(err1, err2))
+		return fmt.Errorf("could not parse condition: %s: %w", y, multierr.Append(err1, err2))
 	}
 
 	return nil
@@ -289,7 +281,7 @@ func (c *Map) Match(params map[string]string) bool {
 		return true
 	}
 
-	// exclusions are processed first. So we can include everything and then
+	// Exclusions are processed first. So we can include everything and then
 	// selectively include others.
 	if len(c.Exclude) != 0 {
 		var matches int
@@ -312,7 +304,7 @@ func (c *Map) Match(params map[string]string) bool {
 }
 
 // UnmarshalYAML unmarshal the constraint map.
-func (c *Map) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (c *Map) UnmarshalYAML(unmarshal func(any) error) error {
 	out1 := struct {
 		Include map[string]string
 		Exclude map[string]string
@@ -337,26 +329,28 @@ func (c *Map) UnmarshalYAML(unmarshal func(interface{}) error) error {
 // UnmarshalYAML unmarshal the constraint.
 func (c *Path) UnmarshalYAML(value *yaml.Node) error {
 	out1 := struct {
-		Include       yaml_base_types.StringOrSlice `yaml:"include,omitempty"`
-		Exclude       yaml_base_types.StringOrSlice `yaml:"exclude,omitempty"`
-		IgnoreMessage string                        `yaml:"ignore_message,omitempty"`
+		Include       yamlBaseTypes.StringOrSlice `yaml:"include,omitempty"`
+		Exclude       yamlBaseTypes.StringOrSlice `yaml:"exclude,omitempty"`
+		IgnoreMessage string                      `yaml:"ignore_message,omitempty"`
+		OnEmpty       yamlBaseTypes.BoolTrue      `yaml:"on_empty,omitempty"`
 	}{}
 
-	var out2 yaml_base_types.StringOrSlice
+	var out2 yamlBaseTypes.StringOrSlice
 
 	err1 := value.Decode(&out1)
 	err2 := value.Decode(&out2)
 
 	c.Exclude = out1.Exclude
 	c.IgnoreMessage = out1.IgnoreMessage
-	c.Include = append(
+	c.OnEmpty = out1.OnEmpty
+	c.Include = append( //nolint:gocritic
 		out1.Include,
 		out2...,
 	)
 
 	if err1 != nil && err2 != nil {
 		y, _ := yaml.Marshal(value)
-		return fmt.Errorf("Could not parse condition: %s", y)
+		return fmt.Errorf("could not parse condition: %s", y)
 	}
 
 	return nil
@@ -370,9 +364,9 @@ func (c *Path) Match(v []string, message string) bool {
 		return true
 	}
 
-	// always match if there are no commit files (empty commit)
+	// return value based on 'on_empty', if there are no commit files (empty commit)
 	if len(v) == 0 {
-		return true
+		return c.OnEmpty.Bool()
 	}
 
 	if len(c.Exclude) > 0 && c.Excludes(v) {

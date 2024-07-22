@@ -18,6 +18,7 @@ package bitbucket
 import (
 	"bytes"
 	"context"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -25,9 +26,10 @@ import (
 	"github.com/franela/goblin"
 	"github.com/gin-gonic/gin"
 
-	"github.com/woodpecker-ci/woodpecker/server/forge/bitbucket/fixtures"
-	"github.com/woodpecker-ci/woodpecker/server/forge/bitbucket/internal"
-	"github.com/woodpecker-ci/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge/bitbucket/fixtures"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge/bitbucket/internal"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
 func Test_bitbucket(t *testing.T) {
@@ -45,10 +47,12 @@ func Test_bitbucket(t *testing.T) {
 
 		g.It("Should return client with default endpoint", func() {
 			forge, _ := New(&Opts{Client: "4vyW6b49Z", Secret: "a5012f6c6"})
-			g.Assert(forge.(*config).url).Equal(DefaultURL)
-			g.Assert(forge.(*config).API).Equal(DefaultAPI)
-			g.Assert(forge.(*config).Client).Equal("4vyW6b49Z")
-			g.Assert(forge.(*config).Secret).Equal("a5012f6c6")
+
+			f, _ := forge.(*config)
+			g.Assert(f.url).Equal(DefaultURL)
+			g.Assert(f.API).Equal(DefaultAPI)
+			g.Assert(f.Client).Equal("4vyW6b49Z")
+			g.Assert(f.Secret).Equal("a5012f6c6")
 		})
 
 		g.It("Should return the netrc file", func() {
@@ -61,34 +65,29 @@ func Test_bitbucket(t *testing.T) {
 
 		g.Describe("Given an authorization request", func() {
 			g.It("Should redirect to authorize", func() {
-				w := httptest.NewRecorder()
-				r, _ := http.NewRequest("GET", "", nil)
-				_, err := c.Login(ctx, w, r)
+				user, _, err := c.Login(ctx, &types.OAuthRequest{})
 				g.Assert(err).IsNil()
-				g.Assert(w.Code).Equal(http.StatusSeeOther)
+				g.Assert(user).IsNil()
 			})
 			g.It("Should return authenticated user", func() {
-				r, _ := http.NewRequest("GET", "?code=code", nil)
-				u, err := c.Login(ctx, nil, r)
+				u, _, err := c.Login(ctx, &types.OAuthRequest{
+					Code: "code",
+				})
 				g.Assert(err).IsNil()
 				g.Assert(u.Login).Equal(fakeUser.Login)
 				g.Assert(u.Token).Equal("2YotnFZFEjr1zCsicMWpAA")
 				g.Assert(u.Secret).Equal("tGzv3JOkF0XG5Qx2TlKWIA")
 			})
 			g.It("Should handle failure to exchange code", func() {
-				w := httptest.NewRecorder()
-				r, _ := http.NewRequest("GET", "?code=code_bad_request", nil)
-				_, err := c.Login(ctx, w, r)
+				_, _, err := c.Login(ctx, &types.OAuthRequest{
+					Code: "code_bad_request",
+				})
 				g.Assert(err).IsNotNil()
 			})
 			g.It("Should handle failure to resolve user", func() {
-				r, _ := http.NewRequest("GET", "?code=code_user_not_found", nil)
-				_, err := c.Login(ctx, nil, r)
-				g.Assert(err).IsNotNil()
-			})
-			g.It("Should handle authentication errors", func() {
-				r, _ := http.NewRequest("GET", "?error=invalid_scope", nil)
-				_, err := c.Login(ctx, nil, r)
+				_, _, err := c.Login(ctx, &types.OAuthRequest{
+					Code: "code_user_not_found",
+				})
 				g.Assert(err).IsNotNil()
 			})
 		})
@@ -175,6 +174,7 @@ func Test_bitbucket(t *testing.T) {
 			g.It("Should handle not found error", func() {
 				_, err := c.File(ctx, fakeUser, fakeRepo, fakePipeline, "file_not_found")
 				g.Assert(err).IsNotNil()
+				g.Assert(errors.Is(err, &types.ErrConfigNotFound{})).IsTrue()
 			})
 		})
 
@@ -182,7 +182,8 @@ func Test_bitbucket(t *testing.T) {
 			g.It("Should return the details", func() {
 				branchHead, err := c.BranchHead(ctx, fakeUser, fakeRepo, "branch_name")
 				g.Assert(err).IsNil()
-				g.Assert(branchHead).Equal("branch_head_name")
+				g.Assert(branchHead.SHA).Equal("branch_head_name")
+				g.Assert(branchHead.ForgeURL).Equal("https://bitbucket.org/commitlink")
 			})
 			g.It("Should handle not found errors", func() {
 				_, err := c.BranchHead(ctx, fakeUser, fakeRepo, "branch_not_found")
@@ -200,7 +201,7 @@ func Test_bitbucket(t *testing.T) {
 				repoPRs, err := c.PullRequests(ctx, fakeUser, fakeRepo, &listOpts)
 				g.Assert(err).IsNil()
 				g.Assert(repoPRs[0].Title).Equal("PRs title")
-				g.Assert(repoPRs[0].Index).Equal(int64(123))
+				g.Assert(repoPRs[0].Index).Equal(model.ForgeRemoteID("123"))
 			})
 			g.It("Should handle not found errors", func() {
 				_, err := c.PullRequests(ctx, fakeUser, fakeRepoNotFound, &listOpts)
@@ -210,15 +211,16 @@ func Test_bitbucket(t *testing.T) {
 
 		g.Describe("When requesting repo directory contents", func() {
 			g.It("Should return the details", func() {
-				files, err := c.Dir(ctx, fakeUser, fakeRepo, fakePipeline, "/dir")
+				files, err := c.Dir(ctx, fakeUser, fakeRepo, fakePipeline, "dir")
 				g.Assert(err).IsNil()
 				g.Assert(len(files)).Equal(3)
 				g.Assert(files[0].Name).Equal("README.md")
 				g.Assert(string(files[0].Data)).Equal("dummy payload")
 			})
 			g.It("Should handle not found errors", func() {
-				_, err := c.Dir(ctx, fakeUser, fakeRepo, fakePipeline, "/dir_not_found")
+				_, err := c.Dir(ctx, fakeUser, fakeRepo, fakePipeline, "dir_not_found")
 				g.Assert(err).IsNotNil()
+				g.Assert(errors.Is(err, &types.ErrConfigNotFound{})).IsTrue()
 			})
 		})
 
@@ -277,7 +279,7 @@ func Test_bitbucket(t *testing.T) {
 
 		g.It("Should parse the hook", func() {
 			buf := bytes.NewBufferString(fixtures.HookPush)
-			req, _ := http.NewRequest("POST", "/hook", buf)
+			req, _ := http.NewRequest(http.MethodPost, "/hook", buf)
 			req.Header = http.Header{}
 			req.Header.Set(hookEvent, hookPush)
 
