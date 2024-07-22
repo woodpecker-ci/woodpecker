@@ -15,6 +15,10 @@
 
 - Update Forgejo SDK [[#3948](https://github.com/woodpecker-ci/woodpecker/pull/3948)]
 
+### 📚 Documentation
+
+- cspell lint docs [[#3787](https://github.com/woodpecker-ci/woodpecker/pull/3787)]
+
 ### 📈 Enhancement
 
 - Refactor docker backend and add more test coverage [[#2700](https://github.com/woodpecker-ci/woodpecker/pull/2700)]
@@ -31,6 +35,7 @@
 
 ### Misc
 
+- fix(deps): update golang-packages [[#3958](https://github.com/woodpecker-ci/woodpecker/pull/3958)]
 - Improve wording [[#3951](https://github.com/woodpecker-ci/woodpecker/pull/3951)]
 - Fix typos and optimize wording [[#3940](https://github.com/woodpecker-ci/woodpecker/pull/3940)]
 
