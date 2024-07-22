@@ -220,7 +220,7 @@ A condition can be a check like:
 The `slack` step is executed if one of these conditions is met:
 
 1. The pipeline is executed from a pull request in the repo `test/test`
-2. The pipeline is executed from a push to `maiǹ`
+2. The pipeline is executed from a push to `main`
 
 #### `repo`
 

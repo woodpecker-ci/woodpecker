@@ -61,7 +61,7 @@ You can use any image from registries like the [Docker Hub](https://hub.docker.c
  steps:
    - name: build
 -    image: debian
-+    image: mycompany/image-with-awscli
++    image: my-company/image-with-aws_cli
      commands:
        - aws help
 ```
