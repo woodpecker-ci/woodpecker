@@ -31,7 +31,6 @@ func SetDroneEnviron(env map[string]string) {
 	copyEnv("CI_PIPELINE_URL", "DRONE_BUILD_LINK", env)
 	copyEnv("CI_PIPELINE_CREATED", "DRONE_BUILD_CREATED", env)
 	copyEnv("CI_PIPELINE_STARTED", "DRONE_BUILD_STARTED", env)
-	copyEnv("CI_PIPELINE_FINISHED", "DRONE_BUILD_FINISHED", env)
 	// commit
 	copyEnv("CI_COMMIT_SHA", "DRONE_COMMIT", env)
 	copyEnv("CI_COMMIT_SHA", "DRONE_COMMIT_SHA", env)

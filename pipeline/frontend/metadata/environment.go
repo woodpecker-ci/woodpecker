@@ -80,7 +80,6 @@ func (m *Metadata) Environ() map[string]string {
 		"CI_PIPELINE_DEPLOY_TASK":   m.Curr.DeployTask,
 		"CI_PIPELINE_CREATED":       strconv.FormatInt(m.Curr.Created, 10),
 		"CI_PIPELINE_STARTED":       strconv.FormatInt(m.Curr.Started, 10),
-		"CI_PIPELINE_FINISHED":      strconv.FormatInt(m.Curr.Finished, 10),
 
 		"CI_WORKFLOW_NAME":   m.Workflow.Name,
 		"CI_WORKFLOW_NUMBER": strconv.Itoa(m.Workflow.Number),

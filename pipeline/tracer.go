@@ -16,7 +16,6 @@ package pipeline
 
 import (
 	"strconv"
-	"time"
 )
 
 // Tracer handles process tracing.
@@ -44,10 +43,8 @@ var DefaultTracer = TraceFunc(func(state *State) error {
 		return nil
 	}
 	state.Pipeline.Step.Environment["CI_PIPELINE_STARTED"] = strconv.FormatInt(state.Pipeline.Started, 10)
-	state.Pipeline.Step.Environment["CI_PIPELINE_FINISHED"] = strconv.FormatInt(time.Now().Unix(), 10)
 
 	state.Pipeline.Step.Environment["CI_STEP_STARTED"] = strconv.FormatInt(state.Pipeline.Started, 10)
-	state.Pipeline.Step.Environment["CI_STEP_FINISHED"] = strconv.FormatInt(time.Now().Unix(), 10)
 
 	return nil
 })
