@@ -19,7 +19,7 @@ import (
 	"strings"
 
 	"github.com/rs/zerolog/log"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 type config struct {
@@ -38,16 +38,16 @@ type resourceLimit struct {
 	CPUSet       string
 }
 
-func configFromCli(c *cli.Context) (config, error) {
+func configFromCli(c *cli.Command) (config, error) {
 	conf := config{
 		enableIPv6: c.Bool("backend-docker-ipv6"),
 		network:    c.String("backend-docker-network"),
 		resourceLimit: resourceLimit{
-			MemSwapLimit: c.Int64("backend-docker-limit-mem-swap"),
-			MemLimit:     c.Int64("backend-docker-limit-mem"),
-			ShmSize:      c.Int64("backend-docker-limit-shm-size"),
-			CPUQuota:     c.Int64("backend-docker-limit-cpu-quota"),
-			CPUShares:    c.Int64("backend-docker-limit-cpu-shares"),
+			MemSwapLimit: c.Int("backend-docker-limit-mem-swap"),
+			MemLimit:     c.Int("backend-docker-limit-mem"),
+			ShmSize:      c.Int("backend-docker-limit-shm-size"),
+			CPUQuota:     c.Int("backend-docker-limit-cpu-quota"),
+			CPUShares:    c.Int("backend-docker-limit-cpu-shares"),
 			CPUSet:       c.String("backend-docker-limit-cpu-set"),
 		},
 	}
