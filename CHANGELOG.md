@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-07-21
+## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-07-22
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -8,6 +8,7 @@
 
 ### 💥 Breaking changes
 
+- server: remove old unused routes [[#3845](https://github.com/woodpecker-ci/woodpecker/pull/3845)]
 - CLI: remove step-id and add step-number as option to logs [[#3927](https://github.com/woodpecker-ci/woodpecker/pull/3927)]
 
 ### 🔒 Security
