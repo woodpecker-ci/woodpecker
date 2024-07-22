@@ -4,7 +4,7 @@
 
 This guide provides a brief overview for installing Woodpecker server behind the Apache2 web-server. This is an example configuration:
 
-```apache
+```apacheconf
 ProxyPreserveHost On
 
 RequestHeader set X-Forwarded-Proto "https"
