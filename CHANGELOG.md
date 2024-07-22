@@ -17,7 +17,7 @@
 
 ### 📚 Documentation
 
-- cspell lint docs [[#3787](https://github.com/woodpecker-ci/woodpecker/pull/3787)]
+- Add spellchecking for docs [[#3787](https://github.com/woodpecker-ci/woodpecker/pull/3787)]
 
 ### 📈 Enhancement
 
