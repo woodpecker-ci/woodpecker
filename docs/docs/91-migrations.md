@@ -11,7 +11,7 @@ Some versions need some changes to the server configuration or the pipeline conf
 
 ## `next`
 
-- Removed build-in environment variables:
+- Removed built-in environment variables:
   - `CI_COMMIT_URL` use `CI_PIPELINE_FORGE_URL`
   - `CI_STEP_FINISHED` as empty durring execution
   - `CI_PIPELINE_FINISHED` as empty durring execution
