@@ -34,13 +34,6 @@ type (
 		// Undocumented
 		Networks WorkflowNetworks `yaml:"networks,omitempty"`
 		Volumes  WorkflowVolumes  `yaml:"volumes,omitempty"`
-
-		// Deprecated
-		PlatformDoNotUseIt string `yaml:"platform,omitempty"` // TODO: remove in next minor version
-		// Deprecated
-		BranchesDoNotUseIt interface{} `yaml:"branches,omitempty"` // TODO: remove in next minor version
-		// Deprecated
-		PipelineDoNotUseIt interface{} `yaml:"pipeline,omitempty"` // TODO: remove in next minor version
 	}
 
 	// Workspace defines a pipeline workspace.

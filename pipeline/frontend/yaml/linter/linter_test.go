@@ -165,6 +165,10 @@ func TestLintErrors(t *testing.T) {
 			from: "steps: { build: { image: golang, settings: { test: 'true' }, environment: [ 'TEST=true' ] } }",
 			want: "Cannot configure both environment and settings",
 		},
+		{
+			from: "{pipeline: { build: { image: golang, settings: { test: 'true' } } }, when: { branch: main, event: push } }",
+			want: "Additional property pipeline is not allowed",
+		},
 	}
 
 	for _, test := range testdata {
