@@ -40,9 +40,9 @@ These guidelines aim to have consistent wording in the swagger doc:
 
 - first word after `@Summary` and `@Summary` are always uppercase
 - `@Summary` has no `.` (dot) at the end of the line
-- model structs shall use custom short names, to ease life for API consumers, using `@name`
-- `@Success` object or array declarations shall be short, this means the actual `model.User` struct must have a `@name` annotation, so that the model can be renderend in Swagger
-- when pagination is used, `@Parame page` and `@Parame perPage` must be added manually
+- model struct's shall use custom short names, to ease life for API consumers, using `@name`
+- `@Success` object or array declarations shall be short, this means the actual `model.User` struct must have a `@name` annotation, so that the model can be rendered in Swagger
+- when pagination is used, `@Param page` and `@Param perPage` must be added manually
 - `@Param Authorization` is almost always present, there are just a few un-protected endpoints
 
 There are many examples in the `server/api` package, which you can use a blueprint.

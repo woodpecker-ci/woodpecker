@@ -4,7 +4,7 @@
 
 This guide provides a brief overview for installing Woodpecker server behind the Apache2 web-server. This is an example configuration:
 
-```apacheconf
+```apache
 ProxyPreserveHost On
 
 RequestHeader set X-Forwarded-Proto "https"
@@ -87,7 +87,7 @@ woodpecker.example.com {
 }
 
 # expose gRPC
-woodpeckeragent.example.com {
+woodpecker-agent.example.com {
   reverse_proxy h2c://woodpecker-server:9000
 }
 ```
@@ -132,6 +132,8 @@ Set `WOODPECKER_HOST` to the ngrok URL (usually xxx.ngrok.io) and start the serv
 
 To install the Woodpecker server behind a [Traefik](https://traefik.io/) load balancer, you must expose both the `http` and the `gRPC` ports. Here is a comprehensive example, considering you are running Traefik with docker swarm and want to do TLS termination and automatic redirection from http to https.
 
+<!-- cspell:words redirectscheme certresolver  -->
+
 ```yaml
 version: '3.8'
 
@@ -155,13 +157,13 @@ services:
         # web server
         - traefik.http.services.woodpecker-service.loadbalancer.server.port=8000
 
-        - traefik.http.routers.woodpecker-secure.rule=Host(`cd.yourdomain.com`)
+        - traefik.http.routers.woodpecker-secure.rule=Host(`cd.your-domain.com`)
         - traefik.http.routers.woodpecker-secure.tls=true
         - traefik.http.routers.woodpecker-secure.tls.certresolver=letsencrypt
-        - traefik.http.routers.woodpecker-secure.entrypoints=websecure
+        - traefik.http.routers.woodpecker-secure.entrypoints=web-secure
         - traefik.http.routers.woodpecker-secure.service=woodpecker-service
 
-        - traefik.http.routers.woodpecker.rule=Host(`cd.yourdomain.com`)
+        - traefik.http.routers.woodpecker.rule=Host(`cd.your-domain.com`)
         - traefik.http.routers.woodpecker.entrypoints=web
         - traefik.http.routers.woodpecker.service=woodpecker-service
 
@@ -173,13 +175,13 @@ services:
         - traefik.http.services.woodpecker-grpc.loadbalancer.server.port=9000
         - traefik.http.services.woodpecker-grpc.loadbalancer.server.scheme=h2c
 
-        - traefik.http.routers.woodpecker-grpc-secure.rule=Host(`woodpecker-grpc.yourdomain.com`)
+        - traefik.http.routers.woodpecker-grpc-secure.rule=Host(`woodpecker-grpc.your-domain.com`)
         - traefik.http.routers.woodpecker-grpc-secure.tls=true
         - traefik.http.routers.woodpecker-grpc-secure.tls.certresolver=letsencrypt
-        - traefik.http.routers.woodpecker-grpc-secure.entrypoints=websecure
+        - traefik.http.routers.woodpecker-grpc-secure.entrypoints=web-secure
         - traefik.http.routers.woodpecker-grpc-secure.service=woodpecker-grpc
 
-        - traefik.http.routers.woodpecker-grpc.rule=Host(`woodpecker-grpc.yourdomain.com`)
+        - traefik.http.routers.woodpecker-grpc.rule=Host(`woodpecker-grpc.your-domain.com`)
         - traefik.http.routers.woodpecker-grpc.entrypoints=web
         - traefik.http.routers.woodpecker-grpc.service=woodpecker-grpc
 

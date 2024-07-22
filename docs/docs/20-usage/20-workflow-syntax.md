@@ -201,7 +201,7 @@ Some of the steps may be allowed to fail without causing the whole workflow and 
 
 ### `when` - Conditional Execution
 
-Woodpecker supports defining a list of conditions for a step by using a `when` block. If at least one of the conditions in the `when` block evaluate to true the step is executed, otherwise it is skipped. A condition is evaluated to true if _all_ subconditions are true.
+Woodpecker supports defining a list of conditions for a step by using a `when` block. If at least one of the conditions in the `when` block evaluate to true the step is executed, otherwise it is skipped. A condition is evaluated to true if _all_ sub-conditions are true.
 A condition can be a check like:
 
 ```diff

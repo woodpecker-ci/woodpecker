@@ -1,6 +1,6 @@
 # Custom backends
 
-If none of our backends fits your usecases, you can write your own.
+If none of our backends fits your use case, you can write your own.
 
 Therefore, implement the interface `"go.woodpecker-ci.org/woodpecker/woodpecker/v2/pipeline/backend/types".Backend` and
 build a custom agent using your backend with this `main.go`:
