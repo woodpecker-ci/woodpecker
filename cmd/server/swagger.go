@@ -19,9 +19,9 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/version"
 )
 
-// generate docs/swagger.json via:
+// Generate docs/swagger.json via:
 //go:generate go run woodpecker_docs_gen.go swagger.go
-//go:generate go run github.com/go-swagger/go-swagger/cmd/swagger@latest validate ../../docs/swagger.json
+//go:generate go run github.com/getkin/kin-openapi/cmd/validate@latest ../../docs/swagger.json
 
 // setupSwaggerStaticConfig initializes static content only (contacts, title and description)
 // for dynamic configuration of e.g. hostname, etc. see router.setupSwaggerConfigAndRoutes

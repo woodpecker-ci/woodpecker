@@ -68,3 +68,24 @@ func TestSliceToBoolMap(t *testing.T) {
 	assert.Equal(t, map[string]bool{}, SliceToBoolMap([]string{}))
 	assert.Equal(t, map[string]bool{}, SliceToBoolMap([]string{""}))
 }
+
+func TestStringSliceDeleteEmpty(t *testing.T) {
+	tests := []struct {
+		in  []string
+		out []string
+	}{{
+		in:  []string{"", "ab", "ab"},
+		out: []string{"ab", "ab"},
+	}, {
+		in:  []string{"", "ab", ""},
+		out: []string{"ab"},
+	}, {
+		in:  []string{""},
+		out: []string{},
+	}}
+
+	for _, tc := range tests {
+		exp := StringSliceDeleteEmpty(tc.in)
+		assert.EqualValues(t, tc.out, exp, "got '%#v', expects %#v", exp, tc.out)
+	}
+}

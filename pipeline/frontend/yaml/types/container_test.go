@@ -36,6 +36,7 @@ devices:
 directory: example/
 dns: 8.8.8.8
 dns_search: example.com
+entrypoint: [/bin/sh, -c]
 environment:
   - RACK_ENV=development
   - SHOW=true
@@ -65,6 +66,8 @@ settings:
   baz: false
 ports:
   - 8080
+  - 4443/tcp
+  - 51820/udp
 `)
 
 func TestUnmarshalContainer(t *testing.T) {
@@ -75,16 +78,11 @@ func TestUnmarshalContainer(t *testing.T) {
 		Directory:   "example/",
 		DNS:         base.StringOrSlice{"8.8.8.8"},
 		DNSSearch:   base.StringOrSlice{"example.com"},
+		Entrypoint:  []string{"/bin/sh", "-c"},
 		Environment: base.SliceOrMap{"RACK_ENV": "development", "SHOW": "true"},
 		ExtraHosts:  []string{"somehost:162.242.195.82", "otherhost:50.31.209.229", "ipv6:2001:db8::10"},
 		Image:       "golang:latest",
 		Name:        "my-build-container",
-		Networks: Networks{
-			Networks: []*Network{
-				{Name: "some-network"},
-				{Name: "other-network"},
-			},
-		},
 		NetworkMode: "bridge",
 		Pull:        true,
 		Privileged:  true,
@@ -117,7 +115,7 @@ func TestUnmarshalContainer(t *testing.T) {
 			"foo": "bar",
 			"baz": false,
 		},
-		Ports: []base.StringOrInt{8080},
+		Ports: []string{"8080", "4443/tcp", "51820/udp"},
 	}
 	got := Container{}
 	err := yaml.Unmarshal(containerYaml, &got)
@@ -125,7 +123,7 @@ func TestUnmarshalContainer(t *testing.T) {
 	assert.EqualValues(t, want, got, "problem parsing container")
 }
 
-// TestUnmarshalContainersErr unmarshals a map of containers. The order is
+// TestUnmarshalContainers unmarshals a map of containers. The order is
 // retained and the container key may be used as the container name if a
 // name is not explicitly provided.
 func TestUnmarshalContainers(t *testing.T) {
@@ -293,5 +291,11 @@ func TestIsPlugin(t *testing.T) {
 	}).IsPlugin())
 	assert.False(t, (&Container{
 		Commands: base.StringOrSlice(strslice.StrSlice{"echo 'this is not a plugin'"}),
+	}).IsPlugin())
+	assert.True(t, (&Container{
+		Entrypoint: base.StringOrSlice(strslice.StrSlice{}),
+	}).IsPlugin())
+	assert.False(t, (&Container{
+		Entrypoint: base.StringOrSlice(strslice.StrSlice{"echo 'this is not a plugin'"}),
 	}).IsPlugin())
 }

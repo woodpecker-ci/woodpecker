@@ -23,7 +23,7 @@ import (
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
-	"k8s.io/client-go/tools/clientcmd"
+	client_cmd "k8s.io/client-go/tools/clientcmd"
 )
 
 var (
@@ -31,7 +31,8 @@ var (
 		`([-a-z0-9]*[a-z0-9])?` + // inside can als contain -
 		`(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$`, // allow the same pattern as before with dots in between but only one dot
 	)
-	ErrDNSPatternInvalid = errors.New("name is not a valid kubernetes DNS name")
+	dnsDisallowedCharacters = regexp.MustCompile(`[^-^.a-z0-9]+`)
+	ErrDNSPatternInvalid    = errors.New("name is not a valid kubernetes DNS name")
 )
 
 func dnsName(i string) (string, error) {
@@ -42,6 +43,14 @@ func dnsName(i string) (string, error) {
 	}
 
 	return res, nil
+}
+
+func toDNSName(in string) (string, error) {
+	lower := strings.ToLower(in)
+	withoutUnderscores := strings.ReplaceAll(lower, "_", "-")
+	withoutSpaces := strings.ReplaceAll(withoutUnderscores, " ", "-")
+	almostDNS := dnsDisallowedCharacters.ReplaceAllString(withoutSpaces, "")
+	return dnsName(almostDNS)
 }
 
 func isImagePullBackOffState(pod *v1.Pod) bool {
@@ -56,15 +65,15 @@ func isImagePullBackOffState(pod *v1.Pod) bool {
 	return false
 }
 
-// getClientOutOfCluster returns a k8s clientset to the request from outside of cluster
+// getClientOutOfCluster returns a k8s client set to the request from outside of cluster.
 func getClientOutOfCluster() (kubernetes.Interface, error) {
-	kubeConfigPath := os.Getenv("KUBECONFIG")
+	kubeConfigPath := os.Getenv("KUBECONFIG") // cspell:words KUBECONFIG
 	if kubeConfigPath == "" {
 		kubeConfigPath = os.Getenv("HOME") + "/.kube/config"
 	}
 
-	// use the current context in kubeconfig
-	config, err := clientcmd.BuildConfigFromFlags("", kubeConfigPath)
+	// use the current context in kube config
+	config, err := client_cmd.BuildConfigFromFlags("", kubeConfigPath)
 	if err != nil {
 		return nil, err
 	}
@@ -72,7 +81,7 @@ func getClientOutOfCluster() (kubernetes.Interface, error) {
 	return kubernetes.NewForConfig(config)
 }
 
-// getClient returns a k8s clientset to the request from inside of cluster
+// getClient returns a k8s client set to the request from inside of cluster.
 func getClientInsideOfCluster() (kubernetes.Interface, error) {
 	config, err := rest.InClusterConfig()
 	if err != nil {

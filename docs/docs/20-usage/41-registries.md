@@ -12,7 +12,7 @@ Example configuration using a private image:
 
 ```diff
  steps:
-   build:
+   - name: build
 +    image: gcr.io/custom/golang
      commands:
        - go build
@@ -32,8 +32,12 @@ Example registry hostname matching logic:
 - Hostname `gcr.io` matches image `gcr.io/foo/bar`
 - Hostname `docker.io` matches `golang`
 - Hostname `docker.io` matches `library/golang`
-- Hostname `docker.io` matches `bradyrydzewski/golang`
-- Hostname `docker.io` matches `bradyrydzewski/golang:latest`
+- Hostname `docker.io` matches `bradrydzewski/golang`
+- Hostname `docker.io` matches `bradrydzewski/golang:latest`
+
+:::note
+The flow above doesn't work in Kubernetes. There is [workaround](../30-administration/22-backends/40-kubernetes.md#images-from-private-registries).
+:::
 
 ## Global registry support
 
@@ -55,14 +59,14 @@ With a `Dockerfile` at the root of the project:
 
 ```yaml
 steps:
-  build-image:
+  - name: build-image
     image: docker
     commands:
       - docker build --rm -t local/project-image .
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
 
-  build-project:
+  - name: build-project
     image: local/project-image
     commands:
       - ./build.sh

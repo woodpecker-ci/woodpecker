@@ -15,14 +15,14 @@
 package pipeline
 
 import (
-	"os"
+	"context"
 	"strconv"
-	"text/template"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
 	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
 	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker"
 )
 
 var pipelineInfoCmd = &cli.Command{
@@ -30,12 +30,12 @@ var pipelineInfoCmd = &cli.Command{
 	Usage:     "show pipeline details",
 	ArgsUsage: "<repo-id|repo-full-name> [pipeline]",
 	Action:    pipelineInfo,
-	Flags:     []cli.Flag{common.FormatFlag(tmplPipelineInfo)},
+	Flags:     common.OutputFlags("table"),
 }
 
-func pipelineInfo(c *cli.Context) error {
+func pipelineInfo(ctx context.Context, c *cli.Command) error {
 	repoIDOrFullName := c.Args().First()
-	client, err := internal.NewClient(c)
+	client, err := internal.NewClient(ctx, c)
 	if err != nil {
 		return err
 	}
@@ -65,20 +65,5 @@ func pipelineInfo(c *cli.Context) error {
 		return err
 	}
 
-	tmpl, err := template.New("_").Parse(c.String("format"))
-	if err != nil {
-		return err
-	}
-	return tmpl.Execute(os.Stdout, pipeline)
+	return pipelineOutput(c, []woodpecker.Pipeline{*pipeline})
 }
-
-// template for pipeline information
-var tmplPipelineInfo = `Number: {{ .Number }}
-Status: {{ .Status }}
-Event: {{ .Event }}
-Commit: {{ .Commit }}
-Branch: {{ .Branch }}
-Ref: {{ .Ref }}
-Message: {{ .Message }}
-Author: {{ .Author }}
-`

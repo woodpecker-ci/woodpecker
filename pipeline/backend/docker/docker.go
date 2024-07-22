@@ -25,13 +25,13 @@ import (
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/network"
 	"github.com/docker/docker/api/types/volume"
-	"github.com/docker/go-connections/tlsconfig"
+	tls_config "github.com/docker/go-connections/tlsconfig"
 	"github.com/moby/moby/client"
-	"github.com/moby/moby/pkg/jsonmessage"
-	"github.com/moby/moby/pkg/stdcopy"
+	json_message "github.com/moby/moby/pkg/jsonmessage"
+	std_copy "github.com/moby/moby/pkg/stdcopy"
 	"github.com/moby/term"
 	"github.com/rs/zerolog/log"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
 	backend "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 	"go.woodpecker-ci.org/woodpecker/v2/shared/utils"
@@ -60,9 +60,11 @@ func (e *docker) Name() string {
 	return "docker"
 }
 
-func (e *docker) IsAvailable(context.Context) bool {
-	if os.Getenv("DOCKER_HOST") != "" {
-		return true
+func (e *docker) IsAvailable(ctx context.Context) bool {
+	if c, ok := ctx.Value(backend.CliCommand).(*cli.Command); ok {
+		if c.IsSet("backend-docker-host") {
+			return true
+		}
 	}
 	_, err := os.Stat("/var/run/docker.sock")
 	return err == nil
@@ -73,13 +75,13 @@ func httpClientOfOpts(dockerCertPath string, verifyTLS bool) *http.Client {
 		return nil
 	}
 
-	options := tlsconfig.Options{
+	options := tls_config.Options{
 		CAFile:             filepath.Join(dockerCertPath, "ca.pem"),
 		CertFile:           filepath.Join(dockerCertPath, "cert.pem"),
 		KeyFile:            filepath.Join(dockerCertPath, "key.pem"),
 		InsecureSkipVerify: !verifyTLS,
 	}
-	tlsConf, err := tlsconfig.Client(options)
+	tlsConf, err := tls_config.Client(options)
 	if err != nil {
 		log.Error().Err(err).Msg("could not create http client out of docker backend options")
 		return nil
@@ -91,9 +93,13 @@ func httpClientOfOpts(dockerCertPath string, verifyTLS bool) *http.Client {
 	}
 }
 
+func (e *docker) Flags() []cli.Flag {
+	return Flags
+}
+
 // Load new client for Docker Backend using environment variables.
 func (e *docker) Load(ctx context.Context) (*backend.BackendInfo, error) {
-	c, ok := ctx.Value(backend.CliContext).(*cli.Context)
+	c, ok := ctx.Value(backend.CliCommand).(*cli.Command)
 	if !ok {
 		return nil, backend.ErrNoCliContextFound
 	}
@@ -169,44 +175,44 @@ func (e *docker) StartStep(ctx context.Context, step *backend.Step, taskUUID str
 	containerName := toContainerName(step)
 
 	// create pull options with encoded authorization credentials.
-	pullopts := types.ImagePullOptions{}
+	pullOpts := types.ImagePullOptions{}
 	if step.AuthConfig.Username != "" && step.AuthConfig.Password != "" {
-		pullopts.RegistryAuth, _ = encodeAuthToBase64(step.AuthConfig)
+		pullOpts.RegistryAuth, _ = encodeAuthToBase64(step.AuthConfig)
 	}
 
 	// automatically pull the latest version of the image if requested
 	// by the process configuration.
 	if step.Pull {
-		responseBody, perr := e.client.ImagePull(ctx, config.Image, pullopts)
-		if perr == nil {
+		responseBody, pErr := e.client.ImagePull(ctx, config.Image, pullOpts)
+		if pErr == nil {
 			// TODO(1936): show image pull progress in web-ui
 			fd, isTerminal := term.GetFdInfo(os.Stdout)
-			if err := jsonmessage.DisplayJSONMessagesStream(responseBody, os.Stdout, fd, isTerminal, nil); err != nil {
+			if err := json_message.DisplayJSONMessagesStream(responseBody, os.Stdout, fd, isTerminal, nil); err != nil {
 				log.Error().Err(err).Msg("DisplayJSONMessagesStream")
 			}
 			responseBody.Close()
 		}
 		// Fix "Show warning when fail to auth to docker registry"
 		// (https://web.archive.org/web/20201023145804/https://github.com/drone/drone/issues/1917)
-		if perr != nil && step.AuthConfig.Password != "" {
-			return perr
+		if pErr != nil && step.AuthConfig.Password != "" {
+			return pErr
 		}
 	}
 
 	// add default volumes to the host configuration
-	hostConfig.Binds = utils.DedupStrings(append(hostConfig.Binds, e.config.volumes...))
+	hostConfig.Binds = utils.DeduplicateStrings(append(hostConfig.Binds, e.config.volumes...))
 
 	_, err := e.client.ContainerCreate(ctx, config, hostConfig, nil, nil, containerName)
 	if client.IsErrNotFound(err) {
 		// automatically pull and try to re-create the image if the
 		// failure is caused because the image does not exist.
-		responseBody, perr := e.client.ImagePull(ctx, config.Image, pullopts)
-		if perr != nil {
-			return perr
+		responseBody, pErr := e.client.ImagePull(ctx, config.Image, pullOpts)
+		if pErr != nil {
+			return pErr
 		}
 		// TODO(1936): show image pull progress in web-ui
 		fd, isTerminal := term.GetFdInfo(os.Stdout)
-		if err := jsonmessage.DisplayJSONMessagesStream(responseBody, os.Stdout, fd, isTerminal, nil); err != nil {
+		if err := json_message.DisplayJSONMessagesStream(responseBody, os.Stdout, fd, isTerminal, nil); err != nil {
 			log.Error().Err(err).Msg("DisplayJSONMessagesStream")
 		}
 		responseBody.Close()
@@ -236,7 +242,7 @@ func (e *docker) StartStep(ctx context.Context, step *backend.Step, taskUUID str
 		}
 	}
 
-	return e.client.ContainerStart(ctx, containerName, startOpts)
+	return e.client.ContainerStart(ctx, containerName, types.ContainerStartOptions{})
 }
 
 func (e *docker) WaitStep(ctx context.Context, step *backend.Step, taskUUID string) (*backend.State, error) {
@@ -244,10 +250,10 @@ func (e *docker) WaitStep(ctx context.Context, step *backend.Step, taskUUID stri
 
 	containerName := toContainerName(step)
 
-	wait, errc := e.client.ContainerWait(ctx, containerName, "")
+	wait, errC := e.client.ContainerWait(ctx, containerName, "")
 	select {
 	case <-wait:
-	case <-errc:
+	case <-errC:
 	}
 
 	info, err := e.client.ContainerInspect(ctx, containerName)
@@ -265,7 +271,13 @@ func (e *docker) WaitStep(ctx context.Context, step *backend.Step, taskUUID stri
 func (e *docker) TailStep(ctx context.Context, step *backend.Step, taskUUID string) (io.ReadCloser, error) {
 	log.Trace().Str("taskUUID", taskUUID).Msgf("tail logs of step %s", step.Name)
 
-	logs, err := e.client.ContainerLogs(ctx, toContainerName(step), logsOpts)
+	logs, err := e.client.ContainerLogs(ctx, toContainerName(step), types.ContainerLogsOptions{
+		Follow:     true,
+		ShowStdout: true,
+		ShowStderr: true,
+		Details:    false,
+		Timestamps: false,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -273,7 +285,7 @@ func (e *docker) TailStep(ctx context.Context, step *backend.Step, taskUUID stri
 
 	// de multiplex 'logs' who contains two streams, previously multiplexed together using StdWriter
 	go func() {
-		_, _ = stdcopy.StdCopy(wc, wc, logs)
+		_, _ = std_copy.StdCopy(wc, wc, logs)
 		_ = logs.Close()
 		_ = wc.Close()
 	}()
@@ -323,23 +335,11 @@ func (e *docker) DestroyWorkflow(ctx context.Context, conf *backend.Config, task
 	return nil
 }
 
-var (
-	startOpts = types.ContainerStartOptions{}
-
-	removeOpts = types.ContainerRemoveOptions{
-		RemoveVolumes: true,
-		RemoveLinks:   false,
-		Force:         false,
-	}
-
-	logsOpts = types.ContainerLogsOptions{
-		Follow:     true,
-		ShowStdout: true,
-		ShowStderr: true,
-		Details:    false,
-		Timestamps: false,
-	}
-)
+var removeOpts = types.ContainerRemoveOptions{
+	RemoveVolumes: true,
+	RemoveLinks:   false,
+	Force:         false,
+}
 
 func isErrContainerNotFoundOrNotRunning(err error) bool {
 	// Error response from daemon: Cannot kill container: ...: No such container: ...

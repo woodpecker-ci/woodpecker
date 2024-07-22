@@ -18,26 +18,30 @@ once their usage is declared in the `secrets` section:
 
 ```diff
  steps:
-   docker:
+   - name: docker
      image: docker
      commands:
-+      - echo $DOCKER_USERNAME
++      - echo $docker_username
 +      - echo $DOCKER_PASSWORD
-+    secrets: [ docker_username, docker_password ]
++    secrets: [ docker_username, DOCKER_PASSWORD ]
 ```
 
-### Use secrets in settings
+The case of the environment variables is not changed, but secret matching is done case-insensitively. In the example above, `DOCKER_PASSWORD` would also match if the secret is called `docker_password`.
 
-Alternatively, you can get a `setting` from secrets using the `from_secret` syntax.
-In this example, the secret named `secret_token` would be passed to the setting named `token`, which will be available in the plugin as environment variable named `PLUGIN_TOKEN`. See [Plugins](./51-plugins/20-creating-plugins.md#settings) for details.
+### Use secrets in settings and environment
 
-**NOTE:** the `from_secret` syntax only works with the newer `settings` block.
+You can set an setting or environment value from secrets using the `from_secret` syntax.
+
+In this example, the secret named `secret_token` would be passed to the setting named `token`,which will be available in the plugin as environment variable named `PLUGIN_TOKEN` (See [plugins](./51-plugins/20-creating-plugins.md#settings) for details), and to the environment variable `TOKEN_ENV`.
 
 ```diff
  steps:
-   docker:
+   - name: docker
      image: my-plugin
-     settings:
++    environment:
++      TOKEN_ENV:
++        from_secret: secret_token
++    settings:
 +      token:
 +        from_secret: secret_token
 ```
@@ -48,36 +52,23 @@ Please note parameter expressions are subject to pre-processing. When using secr
 
 ```diff
  steps:
-   docker:
+   - name: docker
      image: docker
      commands:
--      - echo ${DOCKER_USERNAME}
+-      - echo ${docker_username}
 -      - echo ${DOCKER_PASSWORD}
-+      - echo $${DOCKER_USERNAME}
++      - echo $${docker_username}
 +      - echo $${DOCKER_PASSWORD}
-     secrets: [ docker_username, docker_password ]
-```
-
-### Alternate Names
-
-There may be scenarios where you are required to store secrets using alternate names. You can map the alternate secret name to the expected name using the below syntax:
-
-```diff
- steps:
-   docker:
-     image: plugins/docker
-     repo: octocat/hello-world
-     tags: latest
-+    secrets:
-+      - source: docker_prod_password
-+        target: docker_password
+     secrets: [ docker_username, DOCKER_PASSWORD ]
 ```
 
 ### Use in Pull Requests events
 
 Secrets are not exposed to pull requests by default. You can override this behavior by creating the secret and enabling the `pull_request` event type, either in UI or by CLI, see below.
 
-**NOTE:** Please be careful when exposing secrets to pull requests. If your repository is open source and accepts pull requests your secrets are not safe. A bad actor can submit a malicious pull request that exposes your secrets.
+:::note
+Please be careful when exposing secrets to pull requests. If your repository is open source and accepts pull requests your secrets are not safe. A bad actor can submit a malicious pull request that exposes your secrets.
+:::
 
 ## Image filter
 
@@ -114,7 +105,7 @@ Create the secrets and limit to a set of images:
  woodpecker-cli secret add \
    -repository octocat/hello-world \
 +  -image plugins/s3 \
-+  -image peloton/woodpecker-ecs \
++  -image woodpeckerci/plugin-ecs \
    -name aws_access_key_id \
    -value <value>
 ```

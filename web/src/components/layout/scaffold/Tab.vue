@@ -7,8 +7,8 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
 
-import { IconNames } from '~/components/atomic/Icon.vue';
-import { Tab, useTabsClient } from '~/compositions/useTabs';
+import type { IconNames } from '~/components/atomic/Icon.vue';
+import { useTabsClient, type Tab } from '~/compositions/useTabs';
 
 const props = defineProps<{
   id?: string;

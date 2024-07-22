@@ -15,36 +15,27 @@
 package main
 
 import (
-	"os"
+	"context"
 
-	_ "github.com/joho/godotenv/autoload"
 	"github.com/rs/zerolog/log"
-	"github.com/urfave/cli/v2"
 
+	"go.woodpecker-ci.org/woodpecker/v2/cmd/agent/core"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/docker"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/kubernetes"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/local"
-	"go.woodpecker-ci.org/woodpecker/v2/shared/logger"
+	backendTypes "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 	"go.woodpecker-ci.org/woodpecker/v2/shared/utils"
-	"go.woodpecker-ci.org/woodpecker/v2/version"
 )
 
-func main() {
-	app := cli.NewApp()
-	app.Name = "woodpecker-agent"
-	app.Version = version.String()
-	app.Usage = "woodpecker agent"
-	app.Action = runWithRetry
-	app.Commands = []*cli.Command{
-		{
-			Name:   "ping",
-			Usage:  "ping the agent",
-			Action: pinger,
-		},
-	}
-	app.Flags = utils.MergeSlices(flags, logger.GlobalLoggerFlags, docker.Flags, kubernetes.Flags, local.Flags)
+var backends = []backendTypes.Backend{
+	kubernetes.New(),
+	docker.New(),
+	local.New(),
+}
 
-	if err := app.Run(os.Args); err != nil {
-		log.Fatal().Err(err).Msg("error running agent") //nolint:forbidigo
-	}
+func main() {
+	ctx := utils.WithContextSigtermCallback(context.Background(), func() {
+		log.Info().Msg("termination signal is received, shutting down agent")
+	})
+	core.RunAgent(ctx, backends)
 }

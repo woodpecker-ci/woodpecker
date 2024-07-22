@@ -29,36 +29,59 @@ const (
 	defaultCloneName = "clone"
 )
 
-// Registry represents registry credentials
+// Registry represents registry credentials.
 type Registry struct {
 	Hostname string
 	Username string
 	Password string
-	Email    string
-	Token    string
 }
 
 type Secret struct {
 	Name           string
 	Value          string
 	AllowedPlugins []string
+	Events         []string
 }
 
-func (s *Secret) Available(container *yaml_types.Container) bool {
-	return (len(s.AllowedPlugins) == 0 || utils.MatchImage(container.Image, s.AllowedPlugins...)) && (len(s.AllowedPlugins) == 0 || container.IsPlugin())
-}
-
-type secretMap map[string]Secret
-
-func (sm secretMap) toStringMap() map[string]string {
-	m := make(map[string]string, len(sm))
-	for k, v := range sm {
-		m[k] = v.Value
+func (s *Secret) Available(event string, container *yaml_types.Container) error {
+	onlyAllowSecretForPlugins := len(s.AllowedPlugins) > 0
+	if onlyAllowSecretForPlugins && !container.IsPlugin() {
+		return fmt.Errorf("secret %q only allowed to be used by plugins by step %q", s.Name, container.Name)
 	}
-	return m
+
+	if onlyAllowSecretForPlugins && !utils.MatchImage(container.Image, s.AllowedPlugins...) {
+		return fmt.Errorf("secret %q is not allowed to be used with image %q by step %q", s.Name, container.Image, container.Name)
+	}
+
+	if !s.Match(event) {
+		return fmt.Errorf("secret %q is not allowed to be used with pipeline event %q", s.Name, event)
+	}
+
+	return nil
 }
 
-// Compiler compiles the yaml
+// Match returns true if an image and event match the restricted list.
+// Note that EventPullClosed are treated as EventPull.
+func (s *Secret) Match(event string) bool {
+	// if there is no filter set secret matches all webhook events
+	if len(s.Events) == 0 {
+		return true
+	}
+	// treat all pull events the same way
+	if event == "pull_request_closed" {
+		event = "pull_request"
+	}
+	// one match is enough
+	for _, e := range s.Events {
+		if e == event {
+			return true
+		}
+	}
+	// a filter is set but the webhook did not match it
+	return false
+}
+
+// Compiler compiles the yaml.
 type Compiler struct {
 	local             bool
 	escalated         []string
@@ -67,12 +90,11 @@ type Compiler struct {
 	networks          []string
 	env               map[string]string
 	cloneEnv          map[string]string
-	base              string
-	path              string
+	workspaceBase     string
+	workspacePath     string
 	metadata          metadata.Metadata
 	registries        []Registry
-	secrets           secretMap
-	cacher            Cacher
+	secrets           map[string]Secret
 	defaultCloneImage string
 	trustedPipeline   bool
 	netrcOnlyTrusted  bool
@@ -119,17 +141,16 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 		config.Secrets = append(config.Secrets, &backend_types.Secret{
 			Name:  sec.Name,
 			Value: sec.Value,
-			Mask:  true,
 		})
 	}
 
 	// overrides the default workspace paths when specified
 	// in the YAML file.
 	if len(conf.Workspace.Base) != 0 {
-		c.base = conf.Workspace.Base
+		c.workspaceBase = path.Clean(conf.Workspace.Base)
 	}
 	if len(conf.Workspace.Path) != 0 {
-		c.path = conf.Workspace.Path
+		c.workspacePath = path.Clean(conf.Workspace.Path)
 	}
 
 	cloneImage := constant.DefaultCloneImage
@@ -147,7 +168,10 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 			Name:        defaultCloneName,
 			Image:       cloneImage,
 			Settings:    cloneSettings,
-			Environment: c.cloneEnv,
+			Environment: make(map[string]any),
+		}
+		for k, v := range c.cloneEnv {
+			container.Environment[k] = v
 		}
 		step, err := c.createProcess(container, backend_types.StepTypeClone)
 		if err != nil {
@@ -184,11 +208,6 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 
 			config.Stages = append(config.Stages, stage)
 		}
-	}
-
-	err := c.setupCache(conf, config)
-	if err != nil {
-		return nil, err
 	}
 
 	// add services steps
@@ -259,48 +278,5 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 
 	config.Stages = append(config.Stages, stepStages...)
 
-	err = c.setupCacheRebuild(conf, config)
-	if err != nil {
-		return nil, err
-	}
-
 	return config, nil
-}
-
-func (c *Compiler) setupCache(conf *yaml_types.Workflow, ir *backend_types.Config) error {
-	if c.local || len(conf.Cache) == 0 || c.cacher == nil {
-		return nil
-	}
-
-	container := c.cacher.Restore(path.Join(c.metadata.Repo.Owner, c.metadata.Repo.Name), c.metadata.Curr.Commit.Branch, conf.Cache)
-	step, err := c.createProcess(container, backend_types.StepTypeCache)
-	if err != nil {
-		return err
-	}
-
-	stage := new(backend_types.Stage)
-	stage.Steps = append(stage.Steps, step)
-
-	ir.Stages = append(ir.Stages, stage)
-
-	return nil
-}
-
-func (c *Compiler) setupCacheRebuild(conf *yaml_types.Workflow, ir *backend_types.Config) error {
-	if c.local || len(conf.Cache) == 0 || c.metadata.Curr.Event != metadata.EventPush || c.cacher == nil {
-		return nil
-	}
-	container := c.cacher.Rebuild(path.Join(c.metadata.Repo.Owner, c.metadata.Repo.Name), c.metadata.Curr.Commit.Branch, conf.Cache)
-
-	step, err := c.createProcess(container, backend_types.StepTypeCache)
-	if err != nil {
-		return err
-	}
-
-	stage := new(backend_types.Stage)
-	stage.Steps = append(stage.Steps, step)
-
-	ir.Stages = append(ir.Stages, stage)
-
-	return nil
 }

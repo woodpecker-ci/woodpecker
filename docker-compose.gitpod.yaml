@@ -1,8 +1,9 @@
+# cSpell:ignore pgdata pgsql localtime
 version: '3'
 
 services:
   gitea-database:
-    image: postgres:16.1-alpine
+    image: postgres:16.3-alpine
     environment:
       POSTGRES_USER: gitea
       POSTGRES_PASSWORD: 123456
@@ -12,7 +13,7 @@ services:
       - pgsql:/var/lib/postgresql/data/pgdata
 
   gitea:
-    image: gitea/gitea:1.21
+    image: gitea/gitea:1.22
     ports:
       - 3000:3000
     volumes:

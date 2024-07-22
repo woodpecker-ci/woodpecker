@@ -6,10 +6,10 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, inject, Ref, toRef } from 'vue';
+import { computed, inject, toRef, type Ref } from 'vue';
 
 import PipelineList from '~/components/repo/pipeline/PipelineList.vue';
-import { Pipeline, Repo, RepoPermissions } from '~/lib/api/types';
+import type { Pipeline, Repo, RepoPermissions } from '~/lib/api/types';
 
 const props = defineProps<{
   pullRequest: string;
@@ -25,16 +25,17 @@ if (!repo.value.pr_enabled || !repo.value.allow_pr) {
 }
 
 const allPipelines = inject<Ref<Pipeline[]>>('pipelines');
-const pipelines = computed(
-  () =>
-    allPipelines?.value.filter(
-      (b) =>
-        (b.event === 'pull_request' || b.event === 'pull_request_closed') &&
-        b.ref
-          .replaceAll('refs/pull/', '')
-          .replaceAll('refs/merge-requests/', '')
-          .replaceAll('/merge', '')
-          .replaceAll('/head', '') === pullRequest.value,
-    ),
+const pipelines = computed(() =>
+  allPipelines?.value.filter(
+    (b) =>
+      (b.event === 'pull_request' || b.event === 'pull_request_closed') &&
+      b.ref
+        .replaceAll('refs/pull/', '')
+        .replaceAll('refs/merge-requests/', '')
+        .replaceAll('refs/pull-requests/', '')
+        .replaceAll('/from', '')
+        .replaceAll('/merge', '')
+        .replaceAll('/head', '') === pullRequest.value,
+  ),
 );
 </script>

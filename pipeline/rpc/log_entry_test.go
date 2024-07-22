@@ -16,6 +16,8 @@ package rpc
 
 import (
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestLogEntry(t *testing.T) {
@@ -23,10 +25,7 @@ func TestLogEntry(t *testing.T) {
 		StepUUID: "e9ea76a5-44a1-4059-9c4a-6956c478b26d",
 		Time:     60,
 		Line:     1,
-		Data:     "starting redis server",
+		Data:     []byte("starting redis server"),
 	}
-	got, want := line.String(), "[e9ea76a5-44a1-4059-9c4a-6956c478b26d:L1:60s] starting redis server"
-	if got != want {
-		t.Errorf("Wanted line string %q, got %q", want, got)
-	}
+	assert.Equal(t, "[e9ea76a5-44a1-4059-9c4a-6956c478b26d:L1:60s] starting redis server", line.String())
 }

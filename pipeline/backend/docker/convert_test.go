@@ -86,11 +86,83 @@ func TestSplitVolumeParts(t *testing.T) {
 	for _, test := range testdata {
 		results, err := splitVolumeParts(test.from)
 		if test.success != (err == nil) {
-			if reflect.DeepEqual(results, test.to) != test.success {
-				t.Errorf("Expect %q matches %q is %v", test.from, results, test.to)
-			}
+			assert.Equal(t, test.success, reflect.DeepEqual(results, test.to))
 		}
 	}
+}
+
+// dummy vars to test against.
+var (
+	testCmdStep = &backend.Step{
+		Name:        "hello",
+		UUID:        "f51821af-4cb8-435e-a3c2-3a684185d828",
+		Type:        backend.StepTypeCommands,
+		Commands:    []string{"echo \"hello world\"", "ls"},
+		Image:       "alpine",
+		Environment: map[string]string{"SHELL": "/bin/zsh"},
+	}
+
+	testPluginStep = &backend.Step{
+		Name:        "lint",
+		UUID:        "d841ee40-e66e-4275-bb3f-55bf89744b21",
+		Type:        backend.StepTypePlugin,
+		Image:       "mstruebing/editorconfig-checker",
+		Environment: make(map[string]string),
+	}
+
+	testEngine = &docker{
+		info: types.Info{
+			Architecture:    "x86_64",
+			OSType:          "linux",
+			DefaultRuntime:  "runc",
+			DockerRootDir:   "/var/lib/docker",
+			OperatingSystem: "Archlinux",
+			Name:            "SOME_HOSTNAME",
+		},
+	}
+)
+
+func TestToContainerName(t *testing.T) {
+	assert.EqualValues(t, "wp_f51821af-4cb8-435e-a3c2-3a684185d828", toContainerName(testCmdStep))
+	assert.EqualValues(t, "wp_d841ee40-e66e-4275-bb3f-55bf89744b21", toContainerName(testPluginStep))
+}
+
+func TestStepToConfig(t *testing.T) {
+	// StepTypeCommands
+	conf := testEngine.toConfig(testCmdStep)
+	if assert.NotNil(t, conf) {
+		assert.EqualValues(t, []string{"/bin/sh", "-c", "echo $CI_SCRIPT | base64 -d | /bin/sh -e"}, conf.Entrypoint)
+		assert.Nil(t, conf.Cmd)
+		assert.EqualValues(t, testCmdStep.UUID, conf.Labels["wp_uuid"])
+	}
+
+	// StepTypePlugin
+	conf = testEngine.toConfig(testPluginStep)
+	if assert.NotNil(t, conf) {
+		assert.Nil(t, conf.Cmd)
+		assert.EqualValues(t, testPluginStep.UUID, conf.Labels["wp_uuid"])
+	}
+}
+
+func TestToEnv(t *testing.T) {
+	assert.Nil(t, toEnv(nil))
+	assert.EqualValues(t, []string{"A=B"}, toEnv(map[string]string{"A": "B"}))
+	assert.ElementsMatch(t, []string{"A=B=C", "T=T"}, toEnv(map[string]string{"A": "B=C", "": "Z", "T": "T"}))
+}
+
+func TestToVol(t *testing.T) {
+	assert.Nil(t, toVol(nil))
+	assert.EqualValues(t, map[string]struct{}{"/test": {}}, toVol([]string{"test:/test"}))
+}
+
+func TestEncodeAuthToBase64(t *testing.T) {
+	res, err := encodeAuthToBase64(backend.Auth{})
+	assert.NoError(t, err)
+	assert.EqualValues(t, "e30=", res)
+
+	res, err = encodeAuthToBase64(backend.Auth{Username: "user", Password: "pwd"})
+	assert.NoError(t, err)
+	assert.EqualValues(t, "eyJ1c2VybmFtZSI6InVzZXIiLCJwYXNzd29yZCI6InB3ZCJ9", res)
 }
 
 func TestToConfigSmall(t *testing.T) {
@@ -107,8 +179,7 @@ func TestToConfigSmall(t *testing.T) {
 	assert.EqualValues(t, &container.Config{
 		AttachStdout: true,
 		AttachStderr: true,
-		Cmd:          []string{"echo $CI_SCRIPT | base64 -d | /bin/sh -e"},
-		Entrypoint:   []string{"/bin/sh", "-c"},
+		Entrypoint:   []string{"/bin/sh", "-c", "echo $CI_SCRIPT | base64 -d | /bin/sh -e"},
 		Labels: map[string]string{
 			"wp_step": "test",
 			"wp_uuid": "09238932",
@@ -160,9 +231,9 @@ func TestToConfigFull(t *testing.T) {
 		OnFailure:   true,
 		OnSuccess:   true,
 		Failure:     "fail",
-		AuthConfig:  backend.Auth{Username: "user", Password: "123456", Email: "user@example.com"},
+		AuthConfig:  backend.Auth{Username: "user", Password: "123456"},
 		NetworkMode: "bridge",
-		Ports:       []uint16{21, 22},
+		Ports:       []backend.Port{{Number: 21}, {Number: 22}},
 	})
 
 	assert.NotNil(t, conf)
@@ -172,8 +243,7 @@ func TestToConfigFull(t *testing.T) {
 		WorkingDir:   "/src/abc",
 		AttachStdout: true,
 		AttachStderr: true,
-		Cmd:          []string{"echo $CI_SCRIPT | base64 -d | /bin/sh -e"},
-		Entrypoint:   []string{"/bin/sh", "-c"},
+		Entrypoint:   []string{"/bin/sh", "-c", "echo $CI_SCRIPT | base64 -d | /bin/sh -e"},
 		Labels: map[string]string{
 			"wp_step": "test",
 			"wp_uuid": "09238932",

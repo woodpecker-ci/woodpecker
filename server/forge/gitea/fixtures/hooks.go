@@ -14,7 +14,7 @@
 
 package fixtures
 
-// HookPush is a sample Gitea push hook
+// HookPush is a sample Gitea push hook.
 const HookPush = `
 {
   "ref": "refs/heads/main",
@@ -75,7 +75,204 @@ const HookPush = `
 }
 `
 
-// HookPushBranch is a sample Gitea push hook where a new branch was created from an existing commit
+// HookPushMulti push multible commits to a branch.
+const HookPushMulti = `
+{
+  "ref": "refs/heads/main",
+  "before": "6efcf5b7c98f3e7a491675164b7a2e7acac27941",
+  "after": "29be01c073851cf0db0c6a466e396b725a670453",
+  "compare_url": "http://127.0.0.1:3000/Test-CI/multi-line-secrets/compare/6efcf5b7c98f3e7a491675164b7a2e7acac27941...29be01c073851cf0db0c6a466e396b725a670453",
+  "commits": [
+    {
+      "id": "29be01c073851cf0db0c6a466e396b725a670453",
+      "message": "add some text\n",
+      "url": "http://127.0.0.1:3000/Test-CI/multi-line-secrets/commit/29be01c073851cf0db0c6a466e396b725a670453",
+      "author": {
+        "name": "6543",
+        "email": "6543@obermui.de",
+        "username": "test-user"
+      },
+      "committer": {
+        "name": "6543",
+        "email": "6543@obermui.de",
+        "username": "test-user"
+      },
+      "verification": null,
+      "timestamp": "2024-02-22T00:18:07+01:00",
+      "added": [],
+      "removed": [],
+      "modified": [
+        "aaa"
+      ]
+    },
+    {
+      "id": "29cd95250404bd007c13b03eabe521196bab98a5",
+      "message": "rm a a file\n",
+      "url": "http://127.0.0.1:3000/Test-CI/multi-line-secrets/commit/29cd95250404bd007c13b03eabe521196bab98a5",
+      "author": {
+        "name": "6543",
+        "email": "6543@obermui.de",
+        "username": "test-user"
+      },
+      "committer": {
+        "name": "6543",
+        "email": "6543@obermui.de",
+        "username": "test-user"
+      },
+      "verification": null,
+      "timestamp": "2024-02-22T00:17:49+01:00",
+      "added": [],
+      "removed": [
+        "aa"
+      ],
+      "modified": []
+    },
+    {
+      "id": "93787b87b3134d0d62c7a24c1ea5b1b6fd17ca91",
+      "message": "add some a files\n",
+      "url": "http://127.0.0.1:3000/Test-CI/multi-line-secrets/commit/93787b87b3134d0d62c7a24c1ea5b1b6fd17ca91",
+      "author": {
+        "name": "6543",
+        "email": "6543@obermui.de",
+        "username": "test-user"
+      },
+      "committer": {
+        "name": "6543",
+        "email": "6543@obermui.de",
+        "username": "test-user"
+      },
+      "verification": null,
+      "timestamp": "2024-02-22T00:17:33+01:00",
+      "added": [
+        "aa",
+        "aaa"
+      ],
+      "removed": [],
+      "modified": []
+    }
+  ],
+  "total_commits": 3,
+  "head_commit": {
+    "id": "29be01c073851cf0db0c6a466e396b725a670453",
+    "message": "add some text\n",
+    "url": "http://127.0.0.1:3000/Test-CI/multi-line-secrets/commit/29be01c073851cf0db0c6a466e396b725a670453",
+    "author": {
+      "name": "6543",
+      "email": "6543@obermui.de",
+      "username": "test-user"
+    },
+    "committer": {
+      "name": "6543",
+      "email": "6543@obermui.de",
+      "username": "test-user"
+    },
+    "verification": null,
+    "timestamp": "2024-02-22T00:18:07+01:00",
+    "added": [],
+    "removed": [],
+    "modified": [
+      "aaa"
+    ]
+  },
+  "repository": {
+    "id": 6,
+    "owner": {
+      "id": 2,
+      "login": "Test-CI",
+      "login_name": "",
+      "full_name": "",
+      "email": "",
+      "avatar_url": "http://127.0.0.1:3000/avatars/5b0a83c2185b3cb1ebceb11062d6c2eb",
+      "language": "",
+      "is_admin": false,
+      "last_login": "0001-01-01T00:00:00Z",
+      "created": "2023-07-31T19:13:48+02:00",
+      "restricted": false,
+      "active": false,
+      "prohibit_login": false,
+      "location": "",
+      "website": "",
+      "description": "",
+      "visibility": "public",
+      "followers_count": 0,
+      "following_count": 0,
+      "starred_repos_count": 0,
+      "username": "Test-CI"
+    },
+    "name": "multi-line-secrets",
+    "full_name": "Test-CI/multi-line-secrets",
+    "description": "",
+    "empty": false,
+    "private": false,
+    "fork": false,
+    "template": false,
+    "parent": null,
+    "mirror": false,
+    "size": 35,
+    "language": "",
+    "languages_url": "http://127.0.0.1:3000/api/v1/repos/Test-CI/multi-line-secrets/languages",
+    "html_url": "http://127.0.0.1:3000/Test-CI/multi-line-secrets",
+    "url": "http://127.0.0.1:3000/api/v1/repos/Test-CI/multi-line-secrets",
+    "link": "",
+    "ssh_url": "ssh://git@127.0.0.1:2200/Test-CI/multi-line-secrets.git",
+    "clone_url": "http://127.0.0.1:3000/Test-CI/multi-line-secrets.git",
+    "original_url": "",
+    "website": "",
+    "watchers_count": 2,
+    "open_issues_count": 1,
+    "default_branch": "main",
+    "archived": false,
+    "created_at": "2023-10-31T19:53:15+01:00",
+    "updated_at": "2023-11-02T06:16:34+01:00",
+    "archived_at": "1970-01-01T01:00:00+01:00",
+    "permissions": {
+      "admin": true,
+      "push": true,
+      "pull": true
+    },
+    "has_issues": true,
+    "internal_tracker": {
+      "enable_time_tracker": true,
+      "allow_only_contributors_to_track_time": true,
+      "enable_issue_dependencies": true
+    },
+    "avatar_url": "",
+    "object_format_name": ""
+  },
+  "pusher": {
+    "id": 1,
+    "login": "test-user",
+    "login_name": "",
+    "full_name": "",
+    "email": "test@noreply.localhost",
+    "avatar_url": "http://127.0.0.1:3000/avatars/dd46a756faad4727fb679320751f6dea",
+    "is_admin": false,
+    "last_login": "0001-01-01T00:00:00Z",
+    "created": "2023-07-31T19:13:05+02:00",
+    "prohibit_login": false,
+    "description": "",
+    "visibility": "public",
+    "username": "test-user"
+  },
+  "sender": {
+    "id": 1,
+    "login": "test-user",
+    "login_name": "",
+    "full_name": "",
+    "email": "test@noreply.localhost",
+    "avatar_url": "http://127.0.0.1:3000/avatars/dd46a756faad4727fb679320751f6dea",
+    "is_admin": false,
+    "last_login": "0001-01-01T00:00:00Z",
+    "created": "2023-07-31T19:13:05+02:00",
+    "prohibit_login": false,
+    "description": "",
+    "visibility": "public",
+    "username": "test-user"
+  }
+}
+`
+
+// HookPushBranch is a sample Gitea push hook where a new branch was created from an existing commit.
 const HookPushBranch = `
 {
   "ref": "refs/heads/fdsafdsa",
@@ -226,19 +423,18 @@ const HookPushBranch = `
     "starred_repos_count": 55,
     "username": "6543"
   }
-}
-`
+}`
 
-// HookTag is a sample Gitea tag hook
+// HookTag is a sample Gitea tag hook.
 const HookTag = `{
   "sha": "ef98532add3b2feb7a137426bba1248724367df5",
   "secret": "l26Un7G7HXogLAvsyf2hOA4EMARSTsR3",
   "ref": "v1.0.0",
   "ref_type": "tag",
   "repository": {
-    "id": 1,
+    "id": 12,
     "owner": {
-      "id": 1,
+      "id": 4,
       "username": "gordon",
       "login": "gordon",
       "full_name": "Gordon the Gopher",
@@ -247,7 +443,7 @@ const HookTag = `{
     },
     "name": "hello-world",
     "full_name": "gordon/hello-world",
-    "description": "",
+    "description": "a hello world example",
     "private": true,
     "fork": false,
     "html_url": "http://gitea.golang.org/gordon/hello-world",
@@ -272,7 +468,7 @@ const HookTag = `{
   }
 }`
 
-// HookPullRequest is a sample pull_request webhook payload
+// HookPullRequest is a sample pull_request webhook payload.
 const HookPullRequest = `{
   "action": "opened",
   "number": 1,
@@ -330,6 +526,144 @@ const HookPullRequest = `{
       "email": "gordon@golang.org",
       "avatar_url": "https://secure.gravatar.com/avatar/8c58a0be77ee441bb8f8595b7f1b4e87"
     }
+}`
+
+const HookPullRequestUpdated = `{
+  "action": "synchronized",
+  "number": 2,
+  "pull_request": {
+    "id": 2,
+    "url": "http://127.0.0.1:3000/Test-CI/multi-line-secrets/pulls/2",
+    "number": 2,
+    "user": {
+      "id": 1,
+      "login": "test",
+      "login_name": "",
+      "full_name": "",
+      "email": "test@noreply.localhost",
+      "avatar_url": "http://127.0.0.1:3000/avatars/dd46a756faad4727fb679320751f6dea",
+      "is_admin": false,
+      "last_login": "0001-01-01T00:00:00Z",
+      "created": "2023-07-31T19:13:05+02:00",
+      "visibility": "public",
+      "username": "test"
+    },
+    "title": "New Pull",
+    "body": "create an awesome pull",
+    "labels": [
+      {
+        "id": 8,
+        "name": "Kind/Bug",
+        "exclusive": false,
+        "is_archived": false,
+        "color": "ee0701",
+        "description": "Something is not working",
+        "url": "http://100.106.226.9:3000/api/v1/repos/Test-CI/multi-line-secrets/labels/8"
+      },
+      {
+        "id": 11,
+        "name": "Kind/Security",
+        "exclusive": false,
+        "is_archived": false,
+        "color": "9c27b0",
+        "description": "This is security issue",
+        "url": "http://100.106.226.9:3000/api/v1/repos/Test-CI/multi-line-secrets/labels/11"
+      }
+    ],
+    "milestone": null,
+    "assignees": null,
+    "requested_reviewers": null,
+    "state": "open",
+    "is_locked": false,
+    "html_url": "http://127.0.0.1:3000/Test-CI/multi-line-secrets/pulls/2",
+    "diff_url": "http://127.0.0.1:3000/Test-CI/multi-line-secrets/pulls/2.diff",
+    "patch_url": "http://127.0.0.1:3000/Test-CI/multi-line-secrets/pulls/2.patch",
+    "mergeable": true,
+    "merged": false,
+    "merged_at": null,
+    "merge_commit_sha": null,
+    "merged_by": null,
+    "base": {
+      "label": "main",
+      "ref": "main",
+      "sha": "29be01c073851cf0db0c6a466e396b725a670453",
+      "repo_id": 6
+    },
+    "head": {
+      "label": "test-patch-1",
+      "ref": "test-patch-1",
+      "sha": "788ed8d02d3b7fcfcf6386dbcbca696aa1d4dc25",
+      "repo_id": 6
+    },
+    "merge_base": "29be01c073851cf0db0c6a466e396b725a670453",
+    "due_date": null,
+    "created_at": "2024-02-22T01:38:39+01:00",
+    "updated_at": "2024-02-22T01:42:03+01:00",
+    "closed_at": null,
+    "pin_order": 0
+  },
+  "requested_reviewer": null,
+  "repository": {
+    "id": 6,
+    "owner": {
+      "id": 2,
+      "login": "Test-CI",
+      "login_name": "",
+      "full_name": "",
+      "email": "",
+      "avatar_url": "http://127.0.0.1:3000/avatars/5b0a83c2185b3cb1ebceb11062d6c2eb",
+      "language": "",
+      "is_admin": false,
+      "last_login": "0001-01-01T00:00:00Z",
+      "created": "2023-07-31T19:13:48+02:00",
+      "prohibit_login": false,
+      "visibility": "public",
+      "username": "Test-CI"
+    },
+    "name": "multi-line-secrets",
+    "full_name": "Test-CI/multi-line-secrets",
+    "description": "",
+    "private": false,
+    "languages_url": "http://127.0.0.1:3000/api/v1/repos/Test-CI/multi-line-secrets/languages",
+    "html_url": "http://127.0.0.1:3000/Test-CI/multi-line-secrets",
+    "url": "http://127.0.0.1:3000/api/v1/repos/Test-CI/multi-line-secrets",
+    "link": "",
+    "ssh_url": "ssh://git@127.0.0.1:2200/Test-CI/multi-line-secrets.git",
+    "clone_url": "http://127.0.0.1:3000/Test-CI/multi-line-secrets.git",
+    "original_url": "",
+    "default_branch": "main",
+    "permissions": {
+      "admin": true,
+      "push": true,
+      "pull": true
+    },
+    "has_issues": true,
+    "internal_tracker": {
+      "enable_time_tracker": true,
+      "allow_only_contributors_to_track_time": true,
+      "enable_issue_dependencies": true
+    },
+    "has_pull_requests": true,
+    "avatar_url": "",
+    "internal": false,
+    "mirror_interval": "",
+    "object_format_name": ""
+  },
+  "sender": {
+    "id": 1,
+    "login": "test",
+    "login_name": "",
+    "full_name": "",
+    "email": "test@noreply.localhost",
+    "avatar_url": "http://127.0.0.1:3000/avatars/dd46a756faad4727fb679320751f6dea",
+    "is_admin": false,
+    "last_login": "0001-01-01T00:00:00Z",
+    "created": "2023-07-31T19:13:05+02:00",
+    "visibility": "public",
+    "username": "test"
+  },
+  "commit_id": "",
+  "review": null
 }`
 
 const HookPullRequestMerged = `
@@ -726,7 +1060,7 @@ const HookPullRequestClosed = `
       "login": "anbraten",
       "login_name": "",
       "full_name": "",
-      "email": "anbraten@noreply.gitea.com",
+      "email": "anbraten@gitea.com",
       "avatar_url": "https://seccdn.libravatar.org/avatar/fc9b6fe77c6b732a02925a62a81f05a0?d=identicon",
       "language": "",
       "is_admin": false,
@@ -964,7 +1298,7 @@ const HookPullRequestClosed = `
       "login": "anbraten",
       "login_name": "",
       "full_name": "",
-      "email": "anbraten@noreply.gitea.com",
+      "email": "anbraten@repo.gitea.com",
       "avatar_url": "https://seccdn.libravatar.org/avatar/fc9b6fe77c6b732a02925a62a81f05a0?d=identicon",
       "language": "",
       "is_admin": false,
@@ -1049,7 +1383,7 @@ const HookPullRequestClosed = `
     "login": "anbraten",
     "login_name": "",
     "full_name": "",
-    "email": "anbraten@noreply.gitea.com",
+    "email": "anbraten@sender.gitea.com",
     "avatar_url": "https://seccdn.libravatar.org/avatar/fc9b6fe77c6b732a02925a62a81f05a0?d=identicon",
     "language": "",
     "is_admin": false,
@@ -1069,5 +1403,81 @@ const HookPullRequestClosed = `
   },
   "commit_id": "",
   "review": null
+}
+`
+
+const HookRelease = `
+{
+  "action": "published",
+  "release": {
+    "id": 48,
+    "tag_name": "0.0.5",
+    "target_commitish": "main",
+    "name": "Version 0.0.5",
+    "body": "",
+    "url": "https://git.xxx/api/v1/repos/anbraten/demo/releases/48",
+    "html_url": "https://git.xxx/anbraten/demo/releases/tag/0.0.5",
+    "tarball_url": "https://git.xxx/anbraten/demo/archive/0.0.5.tar.gz",
+    "zipball_url": "https://git.xxx/anbraten/demo/archive/0.0.5.zip",
+    "draft": false,
+    "prerelease": false,
+    "created_at": "2022-02-09T20:23:05Z",
+    "published_at": "2022-02-09T20:23:05Z",
+    "author": {"id":1,"login":"anbraten","full_name":"Anton Bracke","email":"anbraten@noreply.xxx","avatar_url":"https://git.xxx/user/avatar/anbraten/-1","language":"","is_admin":false,"last_login":"0001-01-01T00:00:00Z","created":"2018-03-21T10:04:48Z","restricted":false,"active":false,"prohibit_login":false,"location":"world","website":"https://xxx","description":"","visibility":"public","followers_count":1,"following_count":1,"starred_repos_count":1,"username":"anbraten"},
+    "assets": []
+  },
+  "repository": {
+    "id": 77,
+    "owner": {"id":1,"login":"anbraten","full_name":"Anton Bracke","email":"anbraten@noreply.xxx","avatar_url":"https://git.xxx/user/avatar/anbraten/-1","language":"","is_admin":false,"last_login":"0001-01-01T00:00:00Z","created":"2018-03-21T10:04:48Z","restricted":false,"active":false,"prohibit_login":false,"location":"world","website":"https://xxx","description":"","visibility":"public","followers_count":1,"following_count":1,"starred_repos_count":1,"username":"anbraten"},
+    "name": "demo",
+    "full_name": "anbraten/demo",
+    "description": "",
+    "empty": false,
+    "private": true,
+    "fork": false,
+    "template": false,
+    "parent": null,
+    "mirror": false,
+    "size": 59,
+    "html_url": "https://git.xxx/anbraten/demo",
+    "ssh_url": "ssh://git@git.xxx:22/anbraten/demo.git",
+    "clone_url": "https://git.xxx/anbraten/demo.git",
+    "original_url": "",
+    "website": "",
+    "stars_count": 0,
+    "forks_count": 1,
+    "watchers_count": 1,
+    "open_issues_count": 2,
+    "open_pr_counter": 2,
+    "release_counter": 4,
+    "default_branch": "main",
+    "archived": false,
+    "created_at": "2021-08-30T20:54:13Z",
+    "updated_at": "2022-01-09T01:29:23Z",
+    "permissions": {
+      "admin": true,
+      "push": true,
+      "pull": true
+    },
+    "has_issues": true,
+    "internal_tracker": {
+      "enable_time_tracker": true,
+      "allow_only_contributors_to_track_time": true,
+      "enable_issue_dependencies": true
+    },
+    "has_wiki": false,
+    "has_pull_requests": true,
+    "has_projects": true,
+    "ignore_whitespace_conflicts": false,
+    "allow_merge_commits": true,
+    "allow_rebase": true,
+    "allow_rebase_explicit": true,
+    "allow_squash_merge": true,
+    "default_merge_style": "squash",
+    "avatar_url": "",
+    "internal": false,
+    "mirror_interval": ""
+  },
+  "sender": {"id":1,"login":"anbraten","full_name":"Anbraten","email":"anbraten@noreply.xxx","avatar_url":"https://git.xxx/user/avatar/anbraten/-1","language":"","is_admin":false,"last_login":"0001-01-01T00:00:00Z","created":"2018-03-21T10:04:48Z","restricted":false,"active":false,"prohibit_login":false,"location":"World","website":"https://xxx","description":"","visibility":"public","followers_count":1,"following_count":1,"starred_repos_count":1,"username":"anbraten"}
 }
 `

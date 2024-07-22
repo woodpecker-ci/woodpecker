@@ -1,27 +1,17 @@
 # Workflow syntax
 
-The workflow section defines a list of steps to build, test and deploy your code. Steps are executed serially, in the order in which they are defined. If a step returns a non-zero exit code, the workflow and therefore all other workflows and the pipeline immediately aborts and returns a failure status.
+The Workflow section defines a list of steps to build, test and deploy your code. The steps are executed serially in the order in which they are defined. If a step returns a non-zero exit code, the workflow and therefore the entire pipeline terminates immediately and returns an error status.
+
+:::note
+An exception to this rule are steps with a [`status: [failure]`](#status) condition, which ensures that they are executed in the case of a failed run.
+:::
+
+:::note
+We support most of YAML 1.2, but preserve some behavior from 1.1 for backward compatibility.
+Read more at: [https://github.com/go-yaml/yaml](https://github.com/go-yaml/yaml/tree/v3)
+:::
 
 Example steps:
-
-```yaml
-steps:
-  backend:
-    image: golang
-    commands:
-      - go build
-      - go test
-  frontend:
-    image: node
-    commands:
-      - npm install
-      - npm run test
-      - npm run build
-```
-
-In the above example we define two steps, `frontend` and `backend`. The names of these steps are completely arbitrary.
-
-Another way to name a step is by using the name keyword:
 
 ```yaml
 steps:
@@ -38,7 +28,26 @@ steps:
       - npm run build
 ```
 
-Keep in mind the name is optional, if not added the steps will be numerated.
+In the above example we define two steps, `frontend` and `backend`. The names of these steps are completely arbitrary.
+
+The name is optional, if not added the steps will be numerated.
+
+Another way to name a step is by using dictionaries:
+
+```yaml
+steps:
+  backend:
+    image: golang
+    commands:
+      - go build
+      - go test
+  frontend:
+    image: node
+    commands:
+      - npm install
+      - npm run test
+      - npm run build
+```
 
 ## Skip Commits
 
@@ -50,12 +59,13 @@ git commit -m "updated README [CI SKIP]"
 
 ## Steps
 
-Every step of your workflow executes commands inside a specified container. The defined commands are executed serially.
+Every step of your workflow executes commands inside a specified container.<br>
+The defined steps are executed in sequence by default, if they should run in parallel you can use [`depends_on`](./20-workflow-syntax.md#depends_on).<br>
 The associated commit is checked out with git to a workspace which is mounted to every step of the workflow as the working directory.
 
 ```diff
  steps:
-   backend:
+   - name: backend
      image: golang
      commands:
 +      - go build
@@ -69,11 +79,11 @@ The associated commit is checked out with git to a workspace which is mounted to
 
 ```yaml title=".woodpecker.yaml"
 steps:
-  build:
+  - name: build
     image: debian
     commands:
       - echo "test content" > myfile
-  a-test-step:
+  - name: a-test-step
     image: debian
     commands:
       - cat myfile
@@ -87,18 +97,18 @@ When using the `local` backend, the `image` entry is used to specify the shell, 
 
 ```diff
  steps:
-   build:
+   - name: build
 +    image: golang:1.6
      commands:
        - go build
        - go test
 
-   publish:
+   - name: publish
 +    image: plugins/docker
      repo: foo/bar
 
  services:
-   database:
+   - name: database
 +    image: mysql
 ```
 
@@ -116,7 +126,7 @@ Woodpecker does not automatically upgrade container images. Example configuratio
 
 ```diff
  steps:
-   build:
+   - name: build
      image: golang:latest
 +    pull: true
 ```
@@ -129,7 +139,7 @@ Commands of every step are executed serially as if you would enter them into you
 
 ```diff
  steps:
-   backend:
+   - name: backend
      image: golang
      commands:
 +      - go build
@@ -156,17 +166,24 @@ docker run --entrypoint=build.sh golang
 Only build steps can define commands. You cannot use commands with plugins or services.
 :::
 
+### `entrypoint`
+
+Allows you to specify the entrypoint for containers. Note that this must be a list of the command and its arguments (e.g. `["/bin/sh", "-c"]`).
+
+If you define [`commands`](#commands), the default entrypoint will be `["/bin/sh", "-c", "echo $CI_SCRIPT | base64 -d | /bin/sh -e"]`.
+You can also use a custom shell with `CI_SCRIPT` (Base64-encoded) if you set `commands`.
+
 ### `environment`
 
 Woodpecker provides the ability to pass environment variables to individual steps.
 
-For more details check the [environment docs](./50-environment.md).
+For more details, check the [environment docs](./50-environment.md).
 
 ### `secrets`
 
 Woodpecker provides the ability to store named parameters external to the YAML configuration file, in a central secret store. These secrets can be passed to individual steps of the workflow at runtime.
 
-For more details check the [secrets docs](./40-secrets.md).
+For more details, check the [secrets docs](./40-secrets.md).
 
 ### `failure`
 
@@ -174,7 +191,7 @@ Some of the steps may be allowed to fail without causing the whole workflow and 
 
 ```diff
  steps:
-   backend:
+   - name: backend
      image: golang
      commands:
        - go build
@@ -184,11 +201,12 @@ Some of the steps may be allowed to fail without causing the whole workflow and 
 
 ### `when` - Conditional Execution
 
-Woodpecker supports defining a list of conditions for a step by using a `when` block. If at least one of the conditions in the `when` block evaluate to true the step is executed, otherwise it is skipped. A condition can be a check like:
+Woodpecker supports defining a list of conditions for a step by using a `when` block. If at least one of the conditions in the `when` block evaluate to true the step is executed, otherwise it is skipped. A condition is evaluated to true if _all_ sub-conditions are true.
+A condition can be a check like:
 
 ```diff
  steps:
-   slack:
+   - name: slack
      image: plugins/slack
      settings:
        channel: dev
@@ -199,13 +217,18 @@ Woodpecker supports defining a list of conditions for a step by using a `when` b
 +        branch: main
 ```
 
+The `slack` step is executed if one of these conditions is met:
+
+1. The pipeline is executed from a pull request in the repo `test/test`
+2. The pipeline is executed from a push to `main`
+
 #### `repo`
 
 Example conditional execution by repository:
 
 ```diff
  steps:
-   slack:
+   - name: slack
      image: plugins/slack
      settings:
        channel: dev
@@ -223,7 +246,7 @@ Example conditional execution by branch:
 
 ```diff
  steps:
-   slack:
+   - name: slack
      image: plugins/slack
      settings:
        channel: dev
@@ -265,7 +288,7 @@ when:
 
 #### `event`
 
-Available events: `push`, `pull_request`, `pull_request_closed`, `tag`, `deployment`, `cron`, `manual`
+Available events: `push`, `pull_request`, `pull_request_closed`, `tag`, `release`, `deployment`, `cron`, `manual`
 
 Execute a step if the build event is a `tag`:
 
@@ -320,7 +343,7 @@ There are use cases for executing steps on failure, such as sending notification
 
 ```diff
  steps:
-   slack:
+   - name: slack
      image: plugins/slack
      settings:
        channel: dev
@@ -346,16 +369,6 @@ Execute a step for a specific platform using wildcards:
 ```yaml
 when:
   - platform: [linux/*, windows/amd64]
-```
-
-#### `environment`
-
-Execute a step for deployment events matching the target deployment environment:
-
-```yaml
-when:
-  - environment: production
-  - event: deployment
 ```
 
 #### `matrix`
@@ -394,23 +407,26 @@ when:
 
 You can use [glob patterns](https://github.com/bmatcuk/doublestar#patterns) to match the changed files and specify if the step should run if a file matching that pattern has been changed `include` or if some files have **not** been changed `exclude`.
 
+For pipelines without file changes (empty commits or on events without file changes like `tag`), you can use `on_empty` to set whether this condition should be **true** _(default)_ or **false** in these cases.
+
 ```yaml
 when:
   - path:
       include: ['.woodpecker/*.yaml', '*.ini']
       exclude: ['*.md', 'docs/**']
       ignore_message: '[ALL]'
+      on_empty: true
 ```
 
 :::info
-Passing a defined ignore-message like `[ALL]` inside the commit message will ignore all path conditions.
+Passing a defined ignore-message like `[ALL]` inside the commit message will ignore all path conditions and the `on_empty` setting.
 :::
 
 #### `evaluate`
 
 Execute a step only if the provided evaluate expression is equal to true. Both built-in [`CI_`](./50-environment.md#built-in-environment-variables) and custom variables can be used inside the expression.
 
-The expression syntax can be found in [the docs](https://github.com/expr-lang/expr/blob/master/docs/Language-Definition.md) of the underlying library.
+The expression syntax can be found in [the docs](https://github.com/expr-lang/expr/blob/master/docs/language-definition.md) of the underlying library.
 
 Run on pushes to the default branch for the repository `owner/repo`:
 
@@ -453,22 +469,35 @@ Normally steps of a workflow are executed serially in the order in which they ar
 
 ```diff
  steps:
-   build: # build will be executed immediately
+   - name: build # build will be executed immediately
      image: golang
      commands:
        - go build
 
-   deploy:
+   - name: deploy
      image: plugins/docker
      settings:
        repo: foo/bar
 +    depends_on: [build, test] # deploy will be executed after build and test finished
 
-   test: # test will be executed immediately as no dependencies are set
+   - name: test # test will be executed immediately as no dependencies are set
      image: golang
      commands:
        - go test
 ```
+
+:::note
+You can define a step to start immediately without dependencies by adding an empty `depends_on: []`. By setting `depends_on` on a single step all other steps will be immediately executed as well if no further dependencies are specified.
+
+```yaml
+steps:
+  - name: check code format
+    image: mstruebing/editorconfig-checker
+    depends_on: [] # enable parallel steps
+  ...
+```
+
+:::
 
 ### `volumes`
 
@@ -494,7 +523,9 @@ For more details check the [services docs](./60-services.md).
 
 ## `workspace`
 
-The workspace defines the shared volume and working directory shared by all workflow steps. The default workspace matches the pattern `/woodpecker/src/github.com/octocat/hello-world`, based on your repository URL.
+The workspace defines the shared volume and working directory shared by all workflow steps.
+The default workspace base is `/woodpecker` and the path is extended with the repository URL (`src/{url-without-schema}`).
+So an example would be `/woodpecker/src/github.com/octocat/hello-world`.
 
 The workspace can be customized using the workspace block in the YAML file:
 
@@ -504,12 +535,16 @@ The workspace can be customized using the workspace block in the YAML file:
 +  path: src/github.com/octocat/hello-world
 
  steps:
-   build:
+   - name: build
      image: golang:latest
      commands:
        - go get
        - go test
 ```
+
+:::note
+Plugins will always have the workspace base at `/woodpecker`
+:::
 
 The base attribute defines a shared base volume available to all steps. This ensures your source code, dependencies and compiled binaries are persisted and shared between steps.
 
@@ -519,12 +554,12 @@ The base attribute defines a shared base volume available to all steps. This ens
    path: src/github.com/octocat/hello-world
 
  steps:
-   deps:
+   - name: deps
      image: golang:latest
      commands:
        - go get
        - go test
-   build:
+   - name: build
      image: node:latest
      commands:
        - go build
@@ -552,7 +587,11 @@ git clone https://github.com/octocat/hello-world \
   /go/src/github.com/octocat/hello-world
 ```
 
+<!-- markdownlint-disable no-duplicate-heading -->
+
 ## `matrix`
+
+<!-- markdownlint-enable no-duplicate-heading -->
 
 Woodpecker has integrated support for matrix builds. Woodpecker executes a separate build task for each combination in the matrix, allowing you to build and test a single commit against multiple configurations.
 
@@ -562,10 +601,10 @@ For more details check the [matrix build docs](./30-matrix-workflows.md).
 
 You can set labels for your workflow to select an agent to execute the workflow on. An agent will pick up and run a workflow when **every** label assigned to it matches the agents labels.
 
-To set additional agent labels check the [agent configuration options](../30-administration/15-agent-config.md#woodpecker_filter_labels). Agents will have at least four default labels: `platform=agent-os/agent-arch`, `hostname=my-agent`, `backend=docker` (type of the agent backend) and `repo=*`. Agents can use a `*` as a wildcard for a label. For example `repo=*` will match every repo.
+To set additional agent labels, check the [agent configuration options](../30-administration/15-agent-config.md#woodpecker_filter_labels). Agents will have at least four default labels: `platform=agent-os/agent-arch`, `hostname=my-agent`, `backend=docker` (type of the agent backend) and `repo=*`. Agents can use a `*` as a wildcard for a label. For example `repo=*` will match every repo.
 
 Workflow labels with an empty value will be ignored.
-By default each workflow has at least the `repo=your-user/your-repo-name` label. If you have set the [platform attribute](#platform) for your workflow it will have a label like `platform=your-os/your-arch` as well.
+By default, each workflow has at least the `repo=your-user/your-repo-name` label. If you have set the [platform attribute](#platform) for your workflow it will have a label like `platform=your-os/your-arch` as well.
 
 You can add additional labels as a key value map:
 
@@ -576,7 +615,7 @@ You can add additional labels as a key value map:
 +  hostname: "" # this label will be ignored as it is empty
 
  steps:
-   build:
+   - name: build
      image: golang
      commands:
        - go build
@@ -618,7 +657,7 @@ You can manually configure the clone step in your workflow for customization:
 +    image: woodpeckerci/plugin-git
 
  steps:
-   build:
+   - name: build
      image: golang
      commands:
        - go build
@@ -629,7 +668,7 @@ Example configuration to override depth:
 
 ```diff
  clone:
-   git:
+   - name: git
      image: woodpeckerci/plugin-git
 +    settings:
 +      partial: false
@@ -640,7 +679,7 @@ Example configuration to use a custom clone plugin:
 
 ```diff
  clone:
-   git:
+   - name: git
 +    image: octocat/custom-git-plugin
 ```
 
@@ -648,7 +687,7 @@ Example configuration to clone Mercurial repository:
 
 ```diff
  clone:
-   hg:
+   - name: hg
 +    image: plugins/hg
 +    settings:
 +      path: bitbucket.org/foo/bar
@@ -669,7 +708,7 @@ To use the ssh git url in `.gitmodules` for users cloning with ssh, and also use
 
 ```diff
  clone:
-   git:
+   - name: git
      image: woodpeckerci/plugin-git
      settings:
        recursive: true
@@ -690,28 +729,9 @@ skip_clone: true
 
 ## `when` - Global workflow conditions
 
-Woodpecker gives the ability to skip whole workflows (not just steps #when---conditional-execution-1) based on certain conditions by a `when` block. If all conditions in the `when` block evaluate to true the workflow is executed, otherwise it is skipped, but treated as successful and other workflows depending on it will still continue.
+Woodpecker gives the ability to skip whole workflows ([not just steps](#when---conditional-execution)) based on certain conditions by a `when` block. If all conditions in the `when` block evaluate to true the workflow is executed, otherwise it is skipped, but treated as successful and other workflows depending on it will still continue.
 
-### `repo`
-
-Example conditional execution by repository:
-
-```diff
-+when:
-+  repo: test/test
-+
- steps:
-   slack:
-     image: plugins/slack
-     settings:
-       channel: dev
-```
-
-### `branch`
-
-:::note
-Branch conditions are not applied to tags.
-:::
+For more information about the specific filters, take a look at the [step-specific `when` filters](#when---conditional-execution).
 
 Example conditional execution by branch:
 
@@ -720,127 +740,19 @@ Example conditional execution by branch:
 +  branch: main
 +
  steps:
-   slack:
+   - name: slack
      image: plugins/slack
      settings:
        channel: dev
 ```
 
-The step now triggers on `main`, but also if the target branch of a pull request is `main`. Add an event condition to limit it further to pushes on main only.
+The workflow now triggers on `main`, but also if the target branch of a pull request is `main`.
 
-Execute a step if the branch is `main` or `develop`:
-
-```yaml
-when:
-  branch: [main, develop]
-```
-
-Execute a step if the branch starts with `prefix/*`:
-
-```yaml
-when:
-  branch: prefix/*
-```
-
-Execute a step using custom include and exclude logic:
-
-```yaml
-when:
-  branch:
-    include: [main, release/*]
-    exclude: [release/1.0.0, release/1.1.*]
-```
-
-### `event`
-
-Execute a step if the build event is a `tag`:
-
-```yaml
-when:
-  event: tag
-```
-
-Execute a step if the pipeline event is a `push` to a specified branch:
-
-```diff
- when:
-   event: push
-+  branch: main
-```
-
-Execute a step for all non-pull request events:
-
-```yaml
-when:
-  event: [push, tag, deployment]
-```
-
-Execute a step for all build events:
-
-```yaml
-when:
-  event: [push, pull_request, tag, deployment]
-```
-
-### `ref`
-
-The `ref` filter compares the git reference against which the pipeline is executed.
-This allows you to filter, for example, tags that must start with **v**:
-
-```yaml
-when:
-  event: tag
-  ref: refs/tags/v*
-```
-
-### `environment`
-
-Execute a step for deployment events matching the target deployment environment:
-
-```yaml
-when:
-  environment: production
-  event: deployment
-```
-
-### `instance`
-
-Execute a step only on a certain Woodpecker instance matching the specified hostname:
-
-```yaml
-when:
-  instance: stage.woodpecker.company.com
-```
-
-### `path`
-
-:::info
-Path conditions are applied only to **push** and **pull_request** events.
-It is currently **only available** for GitHub, GitLab and Gitea (version 1.18.0 and newer)
-:::
-
-Execute a step only on a pipeline with certain files being changed:
-
-```yaml
-when:
-  path: 'src/*'
-```
-
-You can use [glob patterns](https://github.com/bmatcuk/doublestar#patterns) to match the changed files and specify if the step should run if a file matching that pattern has been changed `include` or if some files have **not** been changed `exclude`.
-
-```yaml
-when:
-  path:
-    include: ['.woodpecker/*.yaml', '*.ini']
-    exclude: ['*.md', 'docs/**']
-    ignore_message: '[ALL]'
-```
-
-:::info
-Passing a defined ignore-message like `[ALL]` inside the commit message will ignore all path conditions.
-:::
+<!-- markdownlint-disable no-duplicate-heading -->
 
 ## `depends_on`
+
+<!-- markdownlint-enable no-duplicate-heading -->
 
 Woodpecker supports to define multiple workflows for a repository. Those workflows will run independent from each other. To depend them on each other you can use the [`depends_on`](./25-workflows.md#flow-control) keyword.
 
@@ -853,19 +765,19 @@ Workflows that should run even on failure should set the `runs_on` tag. See [her
 Woodpecker gives the ability to configure privileged mode in the YAML. You can use this parameter to launch containers with escalated capabilities.
 
 :::info
-Privileged mode is only available to trusted repositories and for security reasons should only be used in private environments. See [project settings](./71-project-settings.md#trusted) to enable trusted mode.
+Privileged mode is only available to trusted repositories and for security reasons should only be used in private environments. See [project settings](./75-project-settings.md#trusted) to enable trusted mode.
 :::
 
 ```diff
  steps:
-   build:
+   - name: build
      image: docker
      environment:
        - DOCKER_HOST=tcp://docker:2375
      commands:
        - docker --tls=false ps
 
- services:
+ - name: services
    docker:
      image: docker:dind
      commands: dockerd-entrypoint.sh --storage-driver=vfs --tls=false

@@ -19,7 +19,7 @@ import (
 	"testing"
 
 	"github.com/franela/goblin"
-	"github.com/google/go-github/v57/github"
+	"github.com/google/go-github/v63/github"
 
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
@@ -212,7 +212,6 @@ func Test_helper(t *testing.T) {
 			g.Assert(pipeline.Branch).Equal(*from.PullRequest.Base.Ref)
 			g.Assert(pipeline.Ref).Equal("refs/pull/42/merge")
 			g.Assert(pipeline.Refspec).Equal("changes:main")
-			g.Assert(pipeline.CloneURL).Equal("https://github.com/octocat/hello-world-fork")
 			g.Assert(pipeline.Commit).Equal(*from.PullRequest.Head.SHA)
 			g.Assert(pipeline.Message).Equal(*from.PullRequest.Title)
 			g.Assert(pipeline.Title).Equal(*from.PullRequest.Title)
@@ -225,6 +224,7 @@ func Test_helper(t *testing.T) {
 			from := &github.DeploymentEvent{Deployment: &github.Deployment{}, Sender: &github.User{}}
 			from.Deployment.Description = github.String(":shipit:")
 			from.Deployment.Environment = github.String("production")
+			from.Deployment.Task = github.String("deploy")
 			from.Deployment.ID = github.Int64(42)
 			from.Deployment.Ref = github.String("main")
 			from.Deployment.SHA = github.String("f72fc19")
@@ -264,7 +264,6 @@ func Test_helper(t *testing.T) {
 			g.Assert(pipeline.Author).Equal(*from.Sender.Login)
 			g.Assert(pipeline.Avatar).Equal(*from.Sender.AvatarURL)
 			g.Assert(pipeline.Email).Equal(*from.HeadCommit.Author.Email)
-			g.Assert(pipeline.CloneURL).Equal(*from.Repo.CloneURL)
 		})
 
 		g.It("should convert a tag from webhook", func() {

@@ -41,7 +41,7 @@ As an alternative, you can install an agent running the local backend directly o
 
 ### Deprecated `platform` filter
 
-The `platform` filter has been removed. Use the more advanced labels instead ([read more](./docs/usage/workflow-syntax#filter-by-platform)).
+The `platform` filter has been removed. Use the more advanced labels instead ([read more](../docs/usage/workflow-syntax#filter-by-platform)).
 
 ### Update Docker to v24
 

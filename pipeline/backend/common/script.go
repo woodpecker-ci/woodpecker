@@ -18,21 +18,20 @@ import (
 	"encoding/base64"
 )
 
-func GenerateContainerConf(commands []string, goos string) (env map[string]string, entry, cmd []string) {
+func GenerateContainerConf(commands []string, goos string) (env map[string]string, entry []string) {
 	env = make(map[string]string)
 	if goos == "windows" {
 		env["CI_SCRIPT"] = base64.StdEncoding.EncodeToString([]byte(generateScriptWindows(commands)))
 		env["HOME"] = "c:\\root"
 		env["SHELL"] = "powershell.exe"
-		entry = []string{"powershell", "-noprofile", "-noninteractive", "-command"}
-		cmd = []string{"[System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($Env:CI_SCRIPT)) | iex"}
+		// cspell:disable-next-line
+		entry = []string{"powershell", "-noprofile", "-noninteractive", "-command", "[System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($Env:CI_SCRIPT)) | iex"}
 	} else {
 		env["CI_SCRIPT"] = base64.StdEncoding.EncodeToString([]byte(generateScriptPosix(commands)))
 		env["HOME"] = "/root"
 		env["SHELL"] = "/bin/sh"
-		entry = []string{"/bin/sh", "-c"}
-		cmd = []string{"echo $CI_SCRIPT | base64 -d | /bin/sh -e"}
+		entry = []string{"/bin/sh", "-c", "echo $CI_SCRIPT | base64 -d | /bin/sh -e"}
 	}
 
-	return env, entry, cmd
+	return env, entry
 }

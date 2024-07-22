@@ -20,6 +20,8 @@ import (
 
 	"github.com/kinbiko/jsonassert"
 	"github.com/stretchr/testify/assert"
+	v1 "k8s.io/api/core/v1"
+
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 )
 
@@ -39,18 +41,27 @@ func TestStepToPodName(t *testing.T) {
 	name, err := stepToPodName(&types.Step{UUID: "01he8bebctabr3kg", Name: "clone", Type: types.StepTypeClone})
 	assert.NoError(t, err)
 	assert.EqualValues(t, "wp-01he8bebctabr3kg", name)
-	name, err = stepToPodName(&types.Step{UUID: "01he8bebctabr3kg", Name: "clone", Type: types.StepTypeCache})
+	name, err = stepToPodName(&types.Step{UUID: "01he8bebctabr3kg", Name: "cache", Type: types.StepTypeCache})
 	assert.NoError(t, err)
 	assert.EqualValues(t, "wp-01he8bebctabr3kg", name)
-	name, err = stepToPodName(&types.Step{UUID: "01he8bebctabr3kg", Name: "clone", Type: types.StepTypePlugin})
+	name, err = stepToPodName(&types.Step{UUID: "01he8bebctabr3kg", Name: "release", Type: types.StepTypePlugin})
 	assert.NoError(t, err)
 	assert.EqualValues(t, "wp-01he8bebctabr3kg", name)
-	name, err = stepToPodName(&types.Step{UUID: "01he8bebctabr3kg", Name: "clone", Type: types.StepTypeCommands})
+	name, err = stepToPodName(&types.Step{UUID: "01he8bebctabr3kg", Name: "prepare-env", Type: types.StepTypeCommands})
 	assert.NoError(t, err)
 	assert.EqualValues(t, "wp-01he8bebctabr3kg", name)
-	name, err = stepToPodName(&types.Step{UUID: "01he8bebctabr3kg", Name: "clone", Type: types.StepTypeService})
+	name, err = stepToPodName(&types.Step{UUID: "01he8bebctabr3kg", Name: "postgres", Type: types.StepTypeService})
 	assert.NoError(t, err)
-	assert.EqualValues(t, "clone", name)
+	assert.EqualValues(t, "wp-svc-01he8bebctabr3kg-postgres", name)
+}
+
+func TestStepLabel(t *testing.T) {
+	name, err := stepLabel(&types.Step{Name: "Build image"})
+	assert.NoError(t, err)
+	assert.EqualValues(t, "build-image", name)
+
+	_, err = stepLabel(&types.Step{Name: ".build.image"})
+	assert.ErrorIs(t, err, ErrDNSPatternInvalid)
 }
 
 func TestTinyPod(t *testing.T) {
@@ -79,9 +90,7 @@ func TestTinyPod(t *testing.T) {
 					"image": "gradle:8.4.0-jdk21",
 					"command": [
 						"/bin/sh",
-						"-c"
-					],
-					"args": [
+						"-c",
 						"echo $CI_SCRIPT | base64 -d | /bin/sh -e"
 					],
 					"workingDir": "/woodpecker/src",
@@ -129,14 +138,14 @@ func TestTinyPod(t *testing.T) {
 		Environment: map[string]string{"CI": "woodpecker"},
 	}, &config{
 		Namespace: "woodpecker",
-	}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64")
+	}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{})
 	assert.NoError(t, err)
 
-	json, err := json.Marshal(pod)
+	podJSON, err := json.Marshal(pod)
 	assert.NoError(t, err)
 
 	ja := jsonassert.New(t)
-	ja.Assertf(string(json), expected)
+	ja.Assertf(string(podJSON), expected)
 }
 
 func TestFullPod(t *testing.T) {
@@ -148,10 +157,13 @@ func TestFullPod(t *testing.T) {
 			"creationTimestamp": null,
 			"labels": {
 				"app": "test",
+				"part-of": "woodpecker-ci",
 				"step": "go-test"
 			},
 			"annotations": {
-				"apparmor.security": "runtime/default"
+				"apps.kubernetes.io/pod-index": "0",
+				"container.apparmor.security.beta.kubernetes.io/wp-01he8bebctabr3kgk0qj36d2me-0": "localhost/k8s-apparmor-example-deny-write",
+				"kubernetes.io/limit-ranger": "LimitRanger plugin set: cpu, memory request and limit for container"
 			}
 		},
 		"spec": {
@@ -171,10 +183,20 @@ func TestFullPod(t *testing.T) {
 						"/bin/sh",
 						"-c"
 					],
-					"args": [
-						"echo $CI_SCRIPT | base64 -d | /bin/sh -e"
-					],
 					"workingDir": "/woodpecker/src",
+					"ports": [
+						{
+							"containerPort": 1234
+						},
+						{
+							"containerPort": 2345,
+							"protocol": "TCP"
+						},
+						{
+							"containerPort": 3456,
+							"protocol": "UDP"
+						}
+					],
 					"env": [
 						"<<UNORDERED>>",
 						{
@@ -218,14 +240,20 @@ func TestFullPod(t *testing.T) {
 			],
 			"restartPolicy": "Never",
 			"nodeSelector": {
-				"storage": "ssd"
+				"storage": "ssd",
+				"topology.kubernetes.io/region": "eu-central-1"
 			},
+			"runtimeClassName": "runc",
 			"serviceAccountName": "wp-svc-acc",
 			"securityContext": {
 				"runAsUser": 101,
 				"runAsGroup": 101,
 				"runAsNonRoot": true,
-				"fsGroup": 101
+				"fsGroup": 101,
+				"seccompProfile": {
+        	"type": "Localhost",
+          "localhostProfile": "profiles/audit.json"
+				}
 			},
 			"imagePullSecrets": [
 				{
@@ -260,9 +288,30 @@ func TestFullPod(t *testing.T) {
 		"status": {}
 	}`
 
+	runtimeClass := "runc"
 	hostAliases := []types.HostAlias{
 		{Name: "cloudflare", IP: "1.1.1.1"},
 		{Name: "cf.v6", IP: "2606:4700:4700::64"},
+	}
+	ports := []types.Port{
+		{Number: 1234},
+		{Number: 2345, Protocol: "tcp"},
+		{Number: 3456, Protocol: "udp"},
+	}
+	secCtx := SecurityContext{
+		Privileged:   newBool(true),
+		RunAsNonRoot: newBool(true),
+		RunAsUser:    newInt64(101),
+		RunAsGroup:   newInt64(101),
+		FSGroup:      newInt64(101),
+		SeccompProfile: &SecProfile{
+			Type:             "Localhost",
+			LocalhostProfile: "profiles/audit.json",
+		},
+		ApparmorProfile: &SecProfile{
+			Type:             "Localhost",
+			LocalhostProfile: "k8s-apparmor-example-deny-write",
+		},
 	}
 	pod, err := mkPod(&types.Step{
 		Name:        "go-test",
@@ -271,39 +320,271 @@ func TestFullPod(t *testing.T) {
 		Pull:        true,
 		Privileged:  true,
 		Commands:    []string{"go get", "go test"},
+		Entrypoint:  []string{"/bin/sh", "-c"},
 		Volumes:     []string{"woodpecker-cache:/woodpecker/src/cache"},
 		Environment: map[string]string{"CGO": "0"},
 		ExtraHosts:  hostAliases,
-		BackendOptions: types.BackendOptions{
-			Kubernetes: types.KubernetesBackendOptions{
-				NodeSelector:       map[string]string{"storage": "ssd"},
-				ServiceAccountName: "wp-svc-acc",
-				Tolerations:        []types.Toleration{{Key: "net-port", Value: "100Mbit", Effect: types.TaintEffectNoSchedule}},
-				Resources: types.Resources{
-					Requests: map[string]string{"memory": "128Mi", "cpu": "1000m"},
-					Limits:   map[string]string{"memory": "256Mi", "cpu": "2"},
-				},
-				SecurityContext: &types.SecurityContext{
-					Privileged:   newBool(true),
-					RunAsNonRoot: newBool(true),
-					RunAsUser:    newInt64(101),
-					RunAsGroup:   newInt64(101),
-					FSGroup:      newInt64(101),
-				},
-			},
-		},
+		Ports:       ports,
 	}, &config{
-		Namespace:            "woodpecker",
-		ImagePullSecretNames: []string{"regcred", "another-pull-secret"},
-		PodLabels:            map[string]string{"app": "test"},
-		PodAnnotations:       map[string]string{"apparmor.security": "runtime/default"},
-		SecurityContext:      SecurityContextConfig{RunAsNonRoot: false},
-	}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64")
+		Namespace:                   "woodpecker",
+		ImagePullSecretNames:        []string{"regcred", "another-pull-secret"},
+		PodLabels:                   map[string]string{"app": "test"},
+		PodLabelsAllowFromStep:      true,
+		PodAnnotations:              map[string]string{"apps.kubernetes.io/pod-index": "0"},
+		PodAnnotationsAllowFromStep: true,
+		PodNodeSelector:             map[string]string{"topology.kubernetes.io/region": "eu-central-1"},
+		SecurityContext:             SecurityContextConfig{RunAsNonRoot: false},
+	}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{
+		Labels:             map[string]string{"part-of": "woodpecker-ci"},
+		Annotations:        map[string]string{"kubernetes.io/limit-ranger": "LimitRanger plugin set: cpu, memory request and limit for container"},
+		NodeSelector:       map[string]string{"storage": "ssd"},
+		RuntimeClassName:   &runtimeClass,
+		ServiceAccountName: "wp-svc-acc",
+		Tolerations:        []Toleration{{Key: "net-port", Value: "100Mbit", Effect: TaintEffectNoSchedule}},
+		Resources: Resources{
+			Requests: map[string]string{"memory": "128Mi", "cpu": "1000m"},
+			Limits:   map[string]string{"memory": "256Mi", "cpu": "2"},
+		},
+		SecurityContext: &secCtx,
+	})
 	assert.NoError(t, err)
 
-	json, err := json.Marshal(pod)
+	podJSON, err := json.Marshal(pod)
 	assert.NoError(t, err)
 
 	ja := jsonassert.New(t)
-	ja.Assertf(string(json), expected)
+	ja.Assertf(string(podJSON), expected)
+}
+
+func TestPodPrivilege(t *testing.T) {
+	createTestPod := func(stepPrivileged, globalRunAsRoot bool, secCtx SecurityContext) (*v1.Pod, error) {
+		return mkPod(&types.Step{
+			Name:       "go-test",
+			Image:      "golang:1.16",
+			Privileged: stepPrivileged,
+		}, &config{
+			Namespace:       "woodpecker",
+			SecurityContext: SecurityContextConfig{RunAsNonRoot: globalRunAsRoot},
+		}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{
+			SecurityContext: &secCtx,
+		})
+	}
+
+	// securty context is requesting user and group 101 (non-root)
+	secCtx := SecurityContext{
+		RunAsUser:  newInt64(101),
+		RunAsGroup: newInt64(101),
+		FSGroup:    newInt64(101),
+	}
+	pod, err := createTestPod(false, false, secCtx)
+	assert.NoError(t, err)
+	assert.Equal(t, int64(101), *pod.Spec.SecurityContext.RunAsUser)
+	assert.Equal(t, int64(101), *pod.Spec.SecurityContext.RunAsGroup)
+	assert.Equal(t, int64(101), *pod.Spec.SecurityContext.FSGroup)
+
+	// securty context is requesting root, but step is not privileged
+	secCtx = SecurityContext{
+		RunAsUser:  newInt64(0),
+		RunAsGroup: newInt64(0),
+		FSGroup:    newInt64(0),
+	}
+	pod, err = createTestPod(false, false, secCtx)
+	assert.NoError(t, err)
+	assert.Nil(t, pod.Spec.SecurityContext)
+	assert.Nil(t, pod.Spec.Containers[0].SecurityContext)
+
+	// step is not privileged, but security context is requesting privileged
+	secCtx = SecurityContext{
+		Privileged: newBool(true),
+	}
+	pod, err = createTestPod(false, false, secCtx)
+	assert.NoError(t, err)
+	assert.Nil(t, pod.Spec.SecurityContext)
+	assert.Nil(t, pod.Spec.Containers[0].SecurityContext)
+
+	// step is privileged and security context is requesting privileged
+	secCtx = SecurityContext{
+		Privileged: newBool(true),
+	}
+	pod, err = createTestPod(true, false, secCtx)
+	assert.NoError(t, err)
+	assert.True(t, *pod.Spec.Containers[0].SecurityContext.Privileged)
+
+	// step is privileged and no security context is provided
+	secCtx = SecurityContext{}
+	pod, err = createTestPod(true, false, secCtx)
+	assert.NoError(t, err)
+	assert.True(t, *pod.Spec.Containers[0].SecurityContext.Privileged)
+
+	// global runAsNonRoot is true and override is requested value by security context
+	secCtx = SecurityContext{
+		RunAsNonRoot: newBool(false),
+	}
+	pod, err = createTestPod(false, true, secCtx)
+	assert.NoError(t, err)
+	assert.True(t, *pod.Spec.SecurityContext.RunAsNonRoot)
+}
+
+func TestScratchPod(t *testing.T) {
+	expected := `
+	{
+		"metadata": {
+			"name": "wp-01he8bebctabr3kgk0qj36d2me-0",
+			"namespace": "woodpecker",
+			"creationTimestamp": null,
+			"labels": {
+				"step": "curl-google"
+			}
+		},
+		"spec": {
+			"containers": [
+				{
+					"name": "wp-01he8bebctabr3kgk0qj36d2me-0",
+					"image": "quay.io/curl/curl",
+					"command": [
+						"/usr/bin/curl",
+						"-v",
+						"google.com"
+					],
+					"resources": {}
+				}
+			],
+			"restartPolicy": "Never"
+		},
+		"status": {}
+	}`
+
+	pod, err := mkPod(&types.Step{
+		Name:       "curl-google",
+		Image:      "quay.io/curl/curl",
+		Entrypoint: []string{"/usr/bin/curl", "-v", "google.com"},
+	}, &config{
+		Namespace: "woodpecker",
+	}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{})
+	assert.NoError(t, err)
+
+	podJSON, err := json.Marshal(pod)
+	assert.NoError(t, err)
+
+	ja := jsonassert.New(t)
+	ja.Assertf(string(podJSON), expected)
+}
+
+func TestSecrets(t *testing.T) {
+	expected := `
+	{
+		"metadata": {
+			"name": "wp-3kgk0qj36d2me01he8bebctabr-0",
+			"namespace": "woodpecker",
+			"creationTimestamp": null,
+			"labels": {
+				"step": "test-secrets"
+			}
+		},
+		"spec": {
+			"volumes": [
+				{
+					"name": "workspace",
+					"persistentVolumeClaim": {
+						"claimName": "workspace"
+					}
+				},
+				{
+					"name": "reg-cred",
+					"secret": {
+						"secretName": "reg-cred"
+					}
+				}
+			],
+			"containers": [
+				{
+					"name": "wp-3kgk0qj36d2me01he8bebctabr-0",
+					"image": "alpine",
+					"envFrom": [
+						{
+							"secretRef": {
+								"name": "ghcr-push-secret"
+							}
+						}
+					],
+					"env": [
+						{
+							"name": "CGO",
+							"value": "0"
+						},
+						{
+							"name": "AWS_ACCESS_KEY_ID",
+							"valueFrom": {
+								"secretKeyRef": {
+									"name": "aws-ecr",
+									"key": "AWS_ACCESS_KEY_ID"
+								}
+							}
+						},
+						{
+							"name": "AWS_SECRET_ACCESS_KEY",
+							"valueFrom": {
+								"secretKeyRef": {
+									"name": "aws-ecr",
+									"key": "access-key"
+								}
+							}
+						}
+					],
+					"resources": {},
+					"volumeMounts": [
+						{
+							"name": "workspace",
+							"mountPath": "/woodpecker/src"
+						},
+						{
+							"name": "reg-cred",
+							"mountPath": "~/.docker/config.json",
+							"subPath": ".dockerconfigjson",
+							"readOnly": true
+						}
+					]
+				}
+			],
+			"restartPolicy": "Never"
+		},
+		"status": {}
+	}`
+
+	pod, err := mkPod(&types.Step{
+		Name:        "test-secrets",
+		Image:       "alpine",
+		Environment: map[string]string{"CGO": "0"},
+		Volumes:     []string{"workspace:/woodpecker/src"},
+	}, &config{
+		Namespace:                  "woodpecker",
+		NativeSecretsAllowFromStep: true,
+	}, "wp-3kgk0qj36d2me01he8bebctabr-0", "linux/amd64", BackendOptions{
+		Secrets: []SecretRef{
+			{
+				Name: "ghcr-push-secret",
+			},
+			{
+				Name: "aws-ecr",
+				Key:  "AWS_ACCESS_KEY_ID",
+			},
+			{
+				Name:   "aws-ecr",
+				Key:    "access-key",
+				Target: SecretTarget{Env: "AWS_SECRET_ACCESS_KEY"},
+			},
+			{
+				Name:   "reg-cred",
+				Key:    ".dockerconfigjson",
+				Target: SecretTarget{File: "~/.docker/config.json"},
+			},
+		},
+	})
+	assert.NoError(t, err)
+
+	podJSON, err := json.Marshal(pod)
+	assert.NoError(t, err)
+
+	ja := jsonassert.New(t)
+	ja.Assertf(string(podJSON), expected)
 }

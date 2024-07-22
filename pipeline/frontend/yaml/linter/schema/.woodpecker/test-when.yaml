@@ -25,7 +25,14 @@ steps:
     commands:
       - echo "test"
     when:
-      event: [push, pull_request, tag, deployment]
+      event:
+        - manual
+        - push
+        - pull_request
+        - pull_request_closed
+        - tag
+        - deployment
+        - release
 
   when-event-exclude-pull_request_closed:
     image: alpine
@@ -112,6 +119,7 @@ steps:
         include: ['.woodpecker/*.yml', '*.ini']
         exclude: ['*.md', 'docs/**']
         ignore_message: '[ALL]'
+        on_empty: true
 
   when-repo:
     image: alpine

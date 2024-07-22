@@ -21,36 +21,15 @@ import (
 	"strings"
 )
 
-// AuthError represents forge authentication error.
-type AuthError struct {
-	Err         string
-	Description string
-	URI         string
-}
-
-// Error implements error interface.
-func (ae *AuthError) Error() string {
-	err := ae.Err
-	if ae.Description != "" {
-		err += " " + ae.Description
-	}
-	if ae.URI != "" {
-		err += " " + ae.URI
-	}
-	return err
-}
-
-// check interface
-var _ error = new(AuthError)
-
 var ErrNotImplemented = errors.New("not implemented")
 
 type ErrIgnoreEvent struct {
-	Event string
+	Event  string
+	Reason string
 }
 
 func (err *ErrIgnoreEvent) Error() string {
-	return fmt.Sprintf("explicit ignored event '%s'", err.Event)
+	return fmt.Sprintf("explicit ignored event '%s', reason: %s", err.Event, err.Reason)
 }
 
 func (*ErrIgnoreEvent) Is(target error) bool {

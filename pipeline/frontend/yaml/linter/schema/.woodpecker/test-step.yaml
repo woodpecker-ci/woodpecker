@@ -14,6 +14,14 @@ steps:
     image: golang
     commands: go test
 
+  entrypoint:
+    image: alpine
+    entrypoint: ['some_entry', '--some-flag']
+
+  single-entrypoint:
+    image: alpine
+    entrypoint: some_entry
+
   commands:
     privileged: true
     image: golang

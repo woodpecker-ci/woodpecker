@@ -1,25 +1,15 @@
-when:
-  - event: [pull_request, tag]
-  - event: push
-    branch:
-      - ${CI_REPO_DEFAULT_BRANCH}
-      - renovate/*
-
-depends_on:
-  - test
-  - web
-
 variables:
-  - &golang_image 'docker.io/golang:1.21.5'
-  - &node_image 'docker.io/node:21-alpine'
-  - &xgo_image 'docker.io/techknowlogick/xgo:go-1.21.5'
-  - &xgo_version 'go-1.21.2'
-  - &buildx_plugin 'docker.io/woodpeckerci/plugin-docker-buildx:2.2.1'
+  - &golang_image 'docker.io/golang:1.22'
+  - &node_image 'docker.io/node:22-alpine'
+  - &xgo_image 'docker.io/techknowlogick/xgo:go-1.22.x'
+  - &buildx_plugin 'docker.io/woodpeckerci/plugin-docker-buildx:4.1.0'
   - &platforms_release 'linux/arm/v6,linux/arm/v7,linux/arm64/v8,linux/386,linux/amd64,linux/ppc64le,linux/riscv64,linux/s390x,freebsd/arm64,freebsd/amd64,openbsd/arm64,openbsd/amd64'
   - &platforms_server 'linux/arm/v7,linux/arm64/v8,linux/amd64,linux/ppc64le,linux/riscv64'
   - &platforms_preview 'linux/amd64'
   - &platforms_alpine 'linux/arm/v6,linux/arm/v7,linux/arm64/v8,linux/amd64,linux/ppc64le'
   - &build_args 'CI_COMMIT_SHA=${CI_COMMIT_SHA},CI_COMMIT_BRANCH=${CI_COMMIT_BRANCH},CI_COMMIT_TAG=${CI_COMMIT_TAG}'
+
+  # cspell:words woodpeckerbot netgo
 
   # vars used on push / tag events only
   - publish_logins: &publish_logins # Default DockerHub login
@@ -46,6 +36,17 @@ variables:
       - 'pipeline/schema/**'
       # Dockerfile changes
       - 'docker/**'
+      # pipeline config changes
+      - '.woodpecker/docker.yaml'
+
+when:
+  - event: [pull_request, tag]
+  - event: push
+    branch:
+      - renovate/*
+  - event: push
+    branch: ${CI_REPO_DEFAULT_BRANCH}
+    path: *when_path
 
 steps:
   vendor:
@@ -97,16 +98,15 @@ steps:
       - make cross-compile-server
     environment:
       PLATFORMS: linux|amd64
-      TAGS: bindata sqlite sqlite_unlock_notify netgo
-      XGO_VERSION: *xgo_version
+      TAGS: sqlite sqlite_unlock_notify netgo
     when:
       - event: pull_request
         evaluate: 'CI_COMMIT_PULL_REQUEST_LABELS contains "build_pr_images"'
       - event: pull_request
         path: *when_path
       - event: push
-        branch: renovate/*
         path: *when_path
+        branch: renovate/*
 
   cross-compile-server:
     depends_on:
@@ -120,8 +120,7 @@ steps:
       - make cross-compile-server
     environment:
       PLATFORMS: linux|arm/v7;linux|arm64/v8;linux|amd64;linux|ppc64le;linux|riscv64
-      TAGS: bindata sqlite sqlite_unlock_notify netgo
-      XGO_VERSION: *xgo_version
+      TAGS: sqlite sqlite_unlock_notify netgo
     when:
       branch:
         - ${CI_REPO_DEFAULT_BRANCH}
@@ -138,7 +137,7 @@ steps:
       platforms: *platforms_preview
       tag: pull_${CI_COMMIT_PULL_REQUEST}
       logins: *publish_logins
-    when:
+    when: &when-preview
       evaluate: 'CI_COMMIT_PULL_REQUEST_LABELS contains "build_pr_images"'
       event: pull_request
 
@@ -152,11 +151,9 @@ steps:
       platforms: *platforms_preview
       tag: pull_${CI_COMMIT_PULL_REQUEST}-alpine
       logins: *publish_logins
-    when:
-      evaluate: 'CI_COMMIT_PULL_REQUEST_LABELS contains "build_pr_images"'
-      event: pull_request
+    when: *when-preview
 
-  build-server:
+  build-server-dryrun:
     depends_on:
       - vendor
       - build-web
@@ -168,13 +165,13 @@ steps:
       dockerfile: docker/Dockerfile.server.multiarch
       platforms: *platforms_preview
       tag: pull_${CI_COMMIT_PULL_REQUEST}
-    when:
+    when: &when-dryrun
       - evaluate: 'not (CI_COMMIT_PULL_REQUEST_LABELS contains "build_pr_images")'
         event: pull_request
         path: *when_path
       - event: push
-        branch: renovate/*
         path: *when_path
+        branch: renovate/*
 
   publish-next-server:
     depends_on:
@@ -186,7 +183,7 @@ steps:
       platforms: *platforms_server
       tag: [next, 'next-${CI_COMMIT_SHA:0:10}']
       logins: *publish_logins
-    when:
+    when: &when-publish-next
       branch: ${CI_REPO_DEFAULT_BRANCH}
       event: push
       path: *when_path
@@ -201,10 +198,7 @@ steps:
       platforms: *platforms_alpine
       tag: [next-alpine, 'next-${CI_COMMIT_SHA:0:10}-alpine']
       logins: *publish_logins
-    when:
-      branch: ${CI_REPO_DEFAULT_BRANCH}
-      event: push
-      path: *when_path
+    when: *when-publish-next
 
   release-server:
     depends_on:
@@ -217,7 +211,7 @@ steps:
       # remove 'latest' on older version branches to avoid accidental downgrade
       tag: [latest, '${CI_COMMIT_TAG}']
       logins: *publish_logins
-    when:
+    when: &when-release
       event: tag
 
   release-server-alpine:
@@ -231,8 +225,7 @@ steps:
       # remove 'latest-alpine' on older version branches to avoid accidental downgrade
       tag: [latest-alpine, '${CI_COMMIT_TAG}-alpine']
       logins: *publish_logins
-    when:
-      event: tag
+    when: *when-release
 
   #############
   # A g e n t #
@@ -249,11 +242,9 @@ steps:
       tag: pull_${CI_COMMIT_PULL_REQUEST}
       build_args: *build_args
       logins: *publish_logins
-    when:
-      evaluate: 'CI_COMMIT_PULL_REQUEST_LABELS contains "build_pr_images"'
-      event: pull_request
+    when: *when-preview
 
-  build-agent:
+  build-agent-dryrun:
     depends_on:
       - vendor
     image: *buildx_plugin
@@ -264,13 +255,7 @@ steps:
       platforms: *platforms_preview
       tag: pull_${CI_COMMIT_PULL_REQUEST}
       build_args: *build_args
-    when:
-      - evaluate: 'not (CI_COMMIT_PULL_REQUEST_LABELS contains "build_pr_images")'
-        event: pull_request
-        path: *when_path
-      - event: push
-        branch: renovate/*
-        path: *when_path
+    when: *when-dryrun
 
   publish-next-agent:
     depends_on:
@@ -305,10 +290,7 @@ steps:
       tag: [next-alpine, 'next-${CI_COMMIT_SHA:0:10}-alpine']
       logins: *publish_logins
       build_args: *build_args
-    when:
-      branch: ${CI_REPO_DEFAULT_BRANCH}
-      event: push
-      path: *when_path
+    when: *when-publish-next
 
   release-agent:
     depends_on:
@@ -325,8 +307,7 @@ steps:
       tag: [latest, '${CI_COMMIT_TAG}']
       logins: *publish_logins
       build_args: *build_args
-    when:
-      event: tag
+    when: *when-release
 
   release-agent-alpine:
     depends_on:
@@ -343,8 +324,7 @@ steps:
       tag: [latest-alpine, '${CI_COMMIT_TAG}-alpine']
       logins: *publish_logins
       build_args: *build_args
-    when:
-      event: tag
+    when: *when-release
 
   #########
   # C L I #
@@ -361,11 +341,9 @@ steps:
       tag: pull_${CI_COMMIT_PULL_REQUEST}
       build_args: *build_args
       logins: *publish_logins
-    when:
-      evaluate: 'CI_COMMIT_PULL_REQUEST_LABELS contains "build_pr_images"'
-      event: pull_request
+    when: *when-preview
 
-  build-cli:
+  build-cli-dryrun:
     depends_on:
       - vendor
     image: *buildx_plugin
@@ -376,13 +354,7 @@ steps:
       platforms: *platforms_preview
       tag: pull_${CI_COMMIT_PULL_REQUEST}
       build_args: *build_args
-    when:
-      - evaluate: 'not (CI_COMMIT_PULL_REQUEST_LABELS contains "build_pr_images")'
-        event: pull_request
-        path: *when_path
-      - event: push
-        branch: renovate/*
-        path: *when_path
+    when: *when-dryrun
 
   publish-next-cli:
     depends_on:
@@ -398,10 +370,7 @@ steps:
       tag: [next, 'next-${CI_COMMIT_SHA:0:10}']
       logins: *publish_logins
       build_args: *build_args
-    when:
-      branch: ${CI_REPO_DEFAULT_BRANCH}
-      event: push
-      path: *when_path
+    when: *when-publish-next
 
   publish-next-cli-alpine:
     depends_on:
@@ -417,10 +386,7 @@ steps:
       tag: [next-alpine, 'next-${CI_COMMIT_SHA:0:10}-alpine']
       logins: *publish_logins
       build_args: *build_args
-    when:
-      branch: ${CI_REPO_DEFAULT_BRANCH}
-      event: push
-      path: *when_path
+    when: *when-publish-next
 
   release-cli:
     depends_on:
@@ -437,8 +403,7 @@ steps:
       tag: [latest, '${CI_COMMIT_TAG}']
       logins: *publish_logins
       build_args: *build_args
-    when:
-      event: tag
+    when: *when-release
 
   release-cli-alpine:
     depends_on:
@@ -455,5 +420,4 @@ steps:
       tag: [latest-alpine, '${CI_COMMIT_TAG}-alpine']
       logins: *publish_logins
       build_args: *build_args
-    when:
-      event: tag
+    when: *when-release

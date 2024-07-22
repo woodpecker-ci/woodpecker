@@ -103,11 +103,12 @@ linters-settings:
           - pkg: 'go.woodpecker-ci.org/woodpecker/v2/cmd/cli'
           - pkg: 'go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker'
   gci:
+    custom-order: true
     sections:
       - standard
       - default
       - prefix(go.woodpecker-ci.org/woodpecker)
-  gomnd:
+  mnd:
     ignored-numbers:
       - '0o600'
       - '0o660'
@@ -120,6 +121,13 @@ linters-settings:
       - strings.Split
       - callerName
       - securecookie.GenerateRandomKey
+  godot:
+    scope: toplevel
+    period: true
+    capital: true
+    exclude:
+      - '^\s*cSpell:'
+      - '^\s*TODO:'
 
 linters:
   disable-all: true
@@ -127,7 +135,6 @@ linters:
     - bidichk
     - errcheck
     - gofmt
-    - goimports
     - gosimple
     - govet
     - ineffassign
@@ -164,6 +171,18 @@ linters:
     - nolintlint
     - stylecheck
     - contextcheck
+    - forcetypeassert
+    - gci
+    - mnd
+    - godot
+
+issues:
+  exclude-rules:
+    - path: 'fixtures|cmd/agent/flags.go|cmd/server/flags.go|pipeline/backend/kubernetes/flags.go|_test.go'
+      linters:
+        - mnd
 
 run:
   timeout: 15m
+  build-tags:
+    - test

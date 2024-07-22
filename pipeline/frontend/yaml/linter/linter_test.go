@@ -27,6 +27,9 @@ import (
 func TestLint(t *testing.T) {
 	testdatas := []struct{ Title, Data string }{{
 		Title: "map", Data: `
+when:
+  event: push
+
 steps:
   build:
     image: docker
@@ -46,6 +49,9 @@ services:
 `,
 	}, {
 		Title: "list", Data: `
+when:
+  event: push
+
 steps:
   - name: build
     image: docker
@@ -65,6 +71,9 @@ services:
 `,
 	}, {
 		Title: "merge maps", Data: `
+when:
+  event: push
+
 variables:
   step_template: &base-step
     image: golang:1.19
@@ -83,17 +92,13 @@ steps:
 	for _, testd := range testdatas {
 		t.Run(testd.Title, func(t *testing.T) {
 			conf, err := yaml.ParseString(testd.Data)
-			if err != nil {
-				t.Fatalf("Cannot unmarshal yaml %q. Error: %s", testd.Title, err)
-			}
+			assert.NoError(t, err)
 
-			if err := linter.New(linter.WithTrusted(true)).Lint([]*linter.WorkflowConfig{{
+			assert.NoError(t, linter.New(linter.WithTrusted(true)).Lint([]*linter.WorkflowConfig{{
 				File:      testd.Title,
 				RawConfig: testd.Data,
 				Workflow:  conf,
-			}}); err != nil {
-				t.Errorf("Expected lint returns no errors, got %q", err)
-			}
+			}}), "expected lint returns no errors")
 		})
 	}
 }
@@ -137,10 +142,6 @@ func TestLintErrors(t *testing.T) {
 			want: "Insufficient privileges to use network_mode",
 		},
 		{
-			from: "steps: { build: { image: golang, networks: [ outside, default ] }  }",
-			want: "Insufficient privileges to use networks",
-		},
-		{
 			from: "steps: { build: { image: golang, volumes: [ '/opt/data:/var/lib/mysql' ] }  }",
 			want: "Insufficient privileges to use volumes",
 		},
@@ -148,22 +149,68 @@ func TestLintErrors(t *testing.T) {
 			from: "steps: { build: { image: golang, network_mode: 'container:name' }  }",
 			want: "Insufficient privileges to use network_mode",
 		},
+		{
+			from: "steps: { build: { image: golang, settings: { test: 'true' }, commands: [ 'echo ja', 'echo nein' ] } }",
+			want: "Cannot configure both commands and settings",
+		},
+		{
+			from: "steps: { build: { image: golang, settings: { test: 'true' }, entrypoint: [ '/bin/fish' ] } }",
+			want: "Cannot configure both entrypoint and settings",
+		},
+		{
+			from: "steps: { build: { image: golang, settings: { test: 'true' }, environment: [ 'TEST=true' ] } }",
+			want: "Cannot configure both environment and settings",
+		},
 	}
 
 	for _, test := range testdata {
 		conf, err := yaml.ParseString(test.from)
-		if err != nil {
-			t.Fatalf("Cannot unmarshal yaml %q. Error: %s", test.from, err)
-		}
+		assert.NoError(t, err)
 
 		lerr := linter.New().Lint([]*linter.WorkflowConfig{{
 			File:      test.from,
 			RawConfig: test.from,
 			Workflow:  conf,
 		}})
-		if lerr == nil {
-			t.Errorf("Expected lint error for configuration %q", test.from)
+		assert.Error(t, lerr, "expected lint error for configuration", test.from)
+
+		lerrors := errors.GetPipelineErrors(lerr)
+		found := false
+		for _, lerr := range lerrors {
+			if lerr.Message == test.want {
+				found = true
+				break
+			}
 		}
+		assert.True(t, found, "Expected error %q, got %q", test.want, lerrors)
+	}
+}
+
+func TestBadHabits(t *testing.T) {
+	testdata := []struct {
+		from string
+		want string
+	}{
+		{
+			from: "steps: { build: { image: golang } }",
+			want: "Please set an event filter for all steps or the whole workflow on all items of the when block",
+		},
+		{
+			from: "when: [{branch: xyz}, {event: push}]\nsteps: { build: { image: golang } }",
+			want: "Please set an event filter for all steps or the whole workflow on all items of the when block",
+		},
+	}
+
+	for _, test := range testdata {
+		conf, err := yaml.ParseString(test.from)
+		assert.NoError(t, err)
+
+		lerr := linter.New().Lint([]*linter.WorkflowConfig{{
+			File:      test.from,
+			RawConfig: test.from,
+			Workflow:  conf,
+		}})
+		assert.Error(t, lerr, "expected lint error for configuration", test.from)
 
 		lerrors := errors.GetPipelineErrors(lerr)
 		found := false

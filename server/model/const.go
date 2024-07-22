@@ -27,6 +27,7 @@ const (
 	EventPull       WebhookEvent = "pull_request"
 	EventPullClosed WebhookEvent = "pull_request_closed"
 	EventTag        WebhookEvent = "tag"
+	EventRelease    WebhookEvent = "release"
 	EventDeploy     WebhookEvent = "deployment"
 	EventCron       WebhookEvent = "cron"
 	EventManual     WebhookEvent = "manual"
@@ -40,16 +41,16 @@ func (wel WebhookEventList) Less(i, j int) bool { return wel[i] < wel[j] }
 
 var ErrInvalidWebhookEvent = errors.New("invalid webhook event")
 
-func ValidateWebhookEvent(s WebhookEvent) error {
+func (s WebhookEvent) Validate() error {
 	switch s {
-	case EventPush, EventPull, EventTag, EventDeploy, EventCron, EventManual:
+	case EventPush, EventPull, EventPullClosed, EventTag, EventRelease, EventDeploy, EventCron, EventManual:
 		return nil
 	default:
 		return fmt.Errorf("%w: %s", ErrInvalidWebhookEvent, s)
 	}
 }
 
-// StatusValue represent pipeline states woodpecker know
+// StatusValue represent pipeline states woodpecker know.
 type StatusValue string //	@name StatusValue
 
 const (
@@ -65,7 +66,7 @@ const (
 	StatusCreated  StatusValue = "created"  // created / internal use only
 )
 
-// SCMKind represent different version control systems
+// SCMKind represent different version control systems.
 type SCMKind string //	@name SCMKind
 
 const (
@@ -75,7 +76,7 @@ const (
 	RepoPerforce SCMKind = "perforce"
 )
 
-// RepoVisibility represent to wat state a repo in woodpecker is visible to others
+// RepoVisibility represent to what state a repo in woodpecker is visible to others.
 type RepoVisibility string //	@name RepoVisibility
 
 const (

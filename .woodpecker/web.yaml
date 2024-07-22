@@ -1,10 +1,12 @@
 when:
   - event: pull_request
   - event: push
-    branch: renovate/*
+    branch:
+      - release/*
+      - renovate/*
 
 variables:
-  - &node_image 'docker.io/node:21-alpine'
+  - &node_image 'docker.io/node:22-alpine'
   - &when
     path:
       # related config files
@@ -33,7 +35,7 @@ steps:
       - pnpm lint
     when: *when
 
-  formatcheck:
+  format-check:
     depends_on:
       - install-dependencies
     image: *node_image

@@ -18,30 +18,31 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"maps"
 	"os"
 	"runtime"
+	"slices"
 	"time"
 
 	"github.com/rs/zerolog/log"
+	"github.com/urfave/cli/v3"
 	"gopkg.in/yaml.v3"
-
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
-
-	"github.com/urfave/cli/v2"
 	v1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/informers"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/scheme"
+	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp" // To authenticate to GCP K8s clusters
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/cache"
 
-	// To authenticate to GCP K8s clusters
-	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 )
 
 const (
 	EngineName = "kubernetes"
+	// TODO: 5 seconds is against best practice, k3s didn't work otherwise
+	defaultResyncDuration = 5 * time.Second
 )
 
 var defaultDeleteOptions = newDefaultDeleteOptions()
@@ -53,24 +54,28 @@ type kube struct {
 }
 
 type config struct {
-	Namespace            string
-	StorageClass         string
-	VolumeSize           string
-	StorageRwx           bool
-	PodLabels            map[string]string
-	PodAnnotations       map[string]string
-	ImagePullSecretNames []string
-	SecurityContext      SecurityContextConfig
+	Namespace                   string
+	StorageClass                string
+	VolumeSize                  string
+	StorageRwx                  bool
+	PodLabels                   map[string]string
+	PodLabelsAllowFromStep      bool
+	PodAnnotations              map[string]string
+	PodAnnotationsAllowFromStep bool
+	PodNodeSelector             map[string]string
+	ImagePullSecretNames        []string
+	SecurityContext             SecurityContextConfig
+	NativeSecretsAllowFromStep  bool
 }
 type SecurityContextConfig struct {
 	RunAsNonRoot bool
 }
 
-func newDefaultDeleteOptions() metav1.DeleteOptions {
+func newDefaultDeleteOptions() meta_v1.DeleteOptions {
 	gracePeriodSeconds := int64(0) // immediately
-	propagationPolicy := metav1.DeletePropagationBackground
+	propagationPolicy := meta_v1.DeletePropagationBackground
 
-	return metav1.DeleteOptions{
+	return meta_v1.DeleteOptions{
 		GracePeriodSeconds: &gracePeriodSeconds,
 		PropagationPolicy:  &propagationPolicy,
 	}
@@ -78,18 +83,22 @@ func newDefaultDeleteOptions() metav1.DeleteOptions {
 
 func configFromCliContext(ctx context.Context) (*config, error) {
 	if ctx != nil {
-		if c, ok := ctx.Value(types.CliContext).(*cli.Context); ok {
+		if c, ok := ctx.Value(types.CliCommand).(*cli.Command); ok {
 			config := config{
-				Namespace:            c.String("backend-k8s-namespace"),
-				StorageClass:         c.String("backend-k8s-storage-class"),
-				VolumeSize:           c.String("backend-k8s-volume-size"),
-				StorageRwx:           c.Bool("backend-k8s-storage-rwx"),
-				PodLabels:            make(map[string]string), // just init empty map to prevent nil panic
-				PodAnnotations:       make(map[string]string), // just init empty map to prevent nil panic
-				ImagePullSecretNames: c.StringSlice("backend-k8s-pod-image-pull-secret-names"),
+				Namespace:                   c.String("backend-k8s-namespace"),
+				StorageClass:                c.String("backend-k8s-storage-class"),
+				VolumeSize:                  c.String("backend-k8s-volume-size"),
+				StorageRwx:                  c.Bool("backend-k8s-storage-rwx"),
+				PodLabels:                   make(map[string]string), // just init empty map to prevent nil panic
+				PodLabelsAllowFromStep:      c.Bool("backend-k8s-pod-labels-allow-from-step"),
+				PodAnnotations:              make(map[string]string), // just init empty map to prevent nil panic
+				PodAnnotationsAllowFromStep: c.Bool("backend-k8s-pod-annotations-allow-from-step"),
+				PodNodeSelector:             make(map[string]string), // just init empty map to prevent nil panic
+				ImagePullSecretNames:        c.StringSlice("backend-k8s-pod-image-pull-secret-names"),
 				SecurityContext: SecurityContextConfig{
-					RunAsNonRoot: c.Bool("backend-k8s-secctx-nonroot"),
+					RunAsNonRoot: c.Bool("backend-k8s-secctx-nonroot"), // cspell:words secctx nonroot
 				},
+				NativeSecretsAllowFromStep: c.Bool("backend-k8s-allow-native-secrets"),
 			}
 			// TODO: remove in next major
 			if len(config.ImagePullSecretNames) == 1 && config.ImagePullSecretNames[0] == "regcred" {
@@ -105,6 +114,12 @@ func configFromCliContext(ctx context.Context) (*config, error) {
 			if annotations := c.String("backend-k8s-pod-annotations"); annotations != "" {
 				if err := yaml.Unmarshal([]byte(c.String("backend-k8s-pod-annotations")), &config.PodAnnotations); err != nil {
 					log.Error().Err(err).Msgf("could not unmarshal pod annotations '%s'", c.String("backend-k8s-pod-annotations"))
+					return nil, err
+				}
+			}
+			if nodeSelector := c.String("backend-k8s-pod-node-selector"); nodeSelector != "" {
+				if err := yaml.Unmarshal([]byte(nodeSelector), &config.PodNodeSelector); err != nil {
+					log.Error().Err(err).Msgf("could not unmarshal pod node selector '%s'", nodeSelector)
 					return nil, err
 				}
 			}
@@ -127,6 +142,10 @@ func (e *kube) Name() string {
 func (e *kube) IsAvailable(context.Context) bool {
 	host := os.Getenv("KUBERNETES_SERVICE_HOST")
 	return len(host) > 0
+}
+
+func (e *kube) Flags() []cli.Flag {
+	return Flags
 }
 
 func (e *kube) Load(ctx context.Context) (*types.BackendInfo, error) {
@@ -157,7 +176,19 @@ func (e *kube) Load(ctx context.Context) (*types.BackendInfo, error) {
 	}, nil
 }
 
-// Setup the pipeline environment.
+func (e *kube) getConfig() *config {
+	if e.config == nil {
+		return nil
+	}
+	c := *e.config
+	c.PodLabels = maps.Clone(e.config.PodLabels)
+	c.PodAnnotations = maps.Clone(e.config.PodAnnotations)
+	c.PodNodeSelector = maps.Clone(e.config.PodNodeSelector)
+	c.ImagePullSecretNames = slices.Clone(e.config.ImagePullSecretNames)
+	return &c
+}
+
+// SetupWorkflow sets up the pipeline environment.
 func (e *kube) SetupWorkflow(ctx context.Context, conf *types.Config, taskUUID string) error {
 	log.Trace().Str("taskUUID", taskUUID).Msgf("Setting up Kubernetes primitives")
 
@@ -168,7 +199,7 @@ func (e *kube) SetupWorkflow(ctx context.Context, conf *types.Config, taskUUID s
 		}
 	}
 
-	extraHosts := []types.HostAlias{}
+	var extraHosts []types.HostAlias
 	for _, stage := range conf.Stages {
 		for _, step := range stage.Steps {
 			if step.Type == types.StepTypeService {
@@ -191,19 +222,19 @@ func (e *kube) SetupWorkflow(ctx context.Context, conf *types.Config, taskUUID s
 	return nil
 }
 
-// Start the pipeline step.
+// StartStep starts the pipeline step.
 func (e *kube) StartStep(ctx context.Context, step *types.Step, taskUUID string) error {
-	if step.Type == types.StepTypeService {
-		// a service should be started by SetupWorkflow so we can ignore it
-		log.Trace().Msgf("StartStep got service '%s', ignoring it.", step.Name)
-		return nil
+	options, err := parseBackendOptions(step)
+	if err != nil {
+		log.Error().Err(err).Msg("could not parse backend options")
 	}
+
 	log.Trace().Str("taskUUID", taskUUID).Msgf("starting step: %s", step.Name)
-	_, err := startPod(ctx, e, step)
+	_, err = startPod(ctx, e, step, options)
 	return err
 }
 
-// Wait for the pipeline step to complete and returns
+// WaitStep waits for the pipeline step to complete and returns
 // the completion results.
 func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) (*types.State, error) {
 	podName, err := stepToPodName(step)
@@ -215,8 +246,13 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 
 	finished := make(chan bool)
 
-	podUpdated := func(old, new any) {
-		pod := new.(*v1.Pod)
+	podUpdated := func(_, new any) {
+		pod, ok := new.(*v1.Pod)
+		if !ok {
+			log.Error().Msgf("could not parse pod: %v", new)
+			return
+		}
+
 		if pod.Name == podName {
 			if isImagePullBackOffState(pod) {
 				finished <- true
@@ -229,8 +265,7 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 		}
 	}
 
-	// TODO 5 seconds is against best practice, k3s didn't work otherwise
-	si := informers.NewSharedInformerFactoryWithOptions(e.client, 5*time.Second, informers.WithNamespace(e.config.Namespace))
+	si := informers.NewSharedInformerFactoryWithOptions(e.client, defaultResyncDuration, informers.WithNamespace(e.config.Namespace))
 	if _, err := si.Core().V1().Pods().Informer().AddEventHandler(
 		cache.ResourceEventHandlerFuncs{
 			UpdateFunc: podUpdated,
@@ -243,20 +278,32 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 	si.Start(stop)
 	defer close(stop)
 
-	// TODO Cancel on ctx.Done
+	// TODO: Cancel on ctx.Done
 	<-finished
 
-	pod, err := e.client.CoreV1().Pods(e.config.Namespace).Get(ctx, podName, metav1.GetOptions{})
+	pod, err := e.client.CoreV1().Pods(e.config.Namespace).Get(ctx, podName, meta_v1.GetOptions{})
 	if err != nil {
 		return nil, err
 	}
 
 	if isImagePullBackOffState(pod) {
-		return nil, fmt.Errorf("could not pull image for pod %s", pod.Name)
+		return nil, fmt.Errorf("could not pull image for pod %s", podName)
+	}
+
+	if len(pod.Status.ContainerStatuses) == 0 {
+		return nil, fmt.Errorf("no container statuses found for pod %s", podName)
+	}
+
+	cs := pod.Status.ContainerStatuses[0]
+
+	if cs.State.Terminated == nil {
+		err := fmt.Errorf("no terminated state found for container %s/%s", podName, cs.Name)
+		log.Error().Str("taskUUID", taskUUID).Str("pod", podName).Str("container", cs.Name).Interface("state", cs.State).Msg(err.Error())
+		return nil, err
 	}
 
 	bs := &types.State{
-		ExitCode:  int(pod.Status.ContainerStatuses[0].State.Terminated.ExitCode),
+		ExitCode:  int(cs.State.Terminated.ExitCode),
 		Exited:    true,
 		OOMKilled: false,
 	}
@@ -264,7 +311,7 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 	return bs, nil
 }
 
-// Tail the pipeline step logs.
+// TailStep tails the pipeline step logs.
 func (e *kube) TailStep(ctx context.Context, step *types.Step, taskUUID string) (io.ReadCloser, error) {
 	podName, err := stepToPodName(step)
 	if err != nil {
@@ -275,9 +322,17 @@ func (e *kube) TailStep(ctx context.Context, step *types.Step, taskUUID string) 
 
 	up := make(chan bool)
 
-	podUpdated := func(old, new any) {
-		pod := new.(*v1.Pod)
+	podUpdated := func(_, new any) {
+		pod, ok := new.(*v1.Pod)
+		if !ok {
+			log.Error().Msgf("could not parse pod: %v", new)
+			return
+		}
+
 		if pod.Name == podName {
+			if isImagePullBackOffState(pod) {
+				up <- true
+			}
 			switch pod.Status.Phase {
 			case v1.PodRunning, v1.PodSucceeded, v1.PodFailed:
 				up <- true
@@ -285,8 +340,7 @@ func (e *kube) TailStep(ctx context.Context, step *types.Step, taskUUID string) 
 		}
 	}
 
-	// TODO 5 seconds is against best practice, k3s didn't work otherwise
-	si := informers.NewSharedInformerFactoryWithOptions(e.client, 5*time.Second, informers.WithNamespace(e.config.Namespace))
+	si := informers.NewSharedInformerFactoryWithOptions(e.client, defaultResyncDuration, informers.WithNamespace(e.config.Namespace))
 	if _, err := si.Core().V1().Pods().Informer().AddEventHandler(
 		cache.ResourceEventHandlerFuncs{
 			UpdateFunc: podUpdated,
@@ -332,21 +386,15 @@ func (e *kube) TailStep(ctx context.Context, step *types.Step, taskUUID string) 
 }
 
 func (e *kube) DestroyStep(ctx context.Context, step *types.Step, taskUUID string) error {
-	if step.Type == types.StepTypeService {
-		// a service should be stopped by DestroyWorkflow so we can ignore it
-		log.Trace().Msgf("destroyStep got service '%s', ignoring it.", step.Name)
-		return nil
-	}
 	log.Trace().Str("taskUUID", taskUUID).Msgf("Stopping step: %s", step.Name)
 	err := stopPod(ctx, e, step, defaultDeleteOptions)
 	return err
 }
 
-// Destroy the pipeline environment.
+// DestroyWorkflow destroys the pipeline environment.
 func (e *kube) DestroyWorkflow(ctx context.Context, conf *types.Config, taskUUID string) error {
 	log.Trace().Str("taskUUID", taskUUID).Msg("deleting Kubernetes primitives")
 
-	// Use noContext because the ctx sent to this function will be canceled/done in case of error or canceled by user.
 	for _, stage := range conf.Stages {
 		for _, step := range stage.Steps {
 			err := stopPod(ctx, e, step, defaultDeleteOptions)

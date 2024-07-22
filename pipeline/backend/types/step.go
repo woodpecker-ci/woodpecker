@@ -39,11 +39,11 @@ type Step struct {
 	Failure        string            `json:"failure,omitempty"`
 	AuthConfig     Auth              `json:"auth_config,omitempty"`
 	NetworkMode    string            `json:"network_mode,omitempty"`
-	Ports          []uint16          `json:"ports,omitempty"`
-	BackendOptions BackendOptions    `json:"backend_options,omitempty"`
+	Ports          []Port            `json:"ports,omitempty"`
+	BackendOptions map[string]any    `json:"backend_options,omitempty"`
 }
 
-// StepType identifies the type of step
+// StepType identifies the type of step.
 type StepType string
 
 const (
