@@ -6,9 +6,7 @@
     "en_us",
     // code
     "go",
-    "node",
-    // package names
-    "npm"
+    "node"
   ],
   "words": [
     "abool",
@@ -134,6 +132,7 @@
     "picus",
     "Pinia",
     "pkce",
+    "pnpx",
     "Polyform",
     "posix",
     "ppid",
@@ -193,6 +192,7 @@
     "varchar",
     "varz",
     "Vieter",
+    "vite",
     "virtualisation",
     "vueuse",
     "waivable",
