@@ -36,7 +36,7 @@ func (r *Runner) createTracer(ctxMeta context.Context, logger zerolog.Logger, wo
 			Bool("exited", state.Process.Exited).
 			Logger()
 
-		stepState := rpc.State{
+		stepState := rpc.StepState{
 			StepUUID: state.Pipeline.Step.UUID,
 			Exited:   state.Process.Exited,
 			ExitCode: state.Process.ExitCode,
@@ -67,8 +67,13 @@ func (r *Runner) createTracer(ctxMeta context.Context, logger zerolog.Logger, wo
 
 		// TODO: find better way to update this state and move it to pipeline to have the same env in cli-exec
 		state.Pipeline.Step.Environment["CI_MACHINE"] = r.hostname
-		state.Pipeline.Step.Environment["CI_PIPELINE_STARTED"] = strconv.FormatInt(state.Pipeline.Time, 10)
-		state.Pipeline.Step.Environment["CI_STEP_STARTED"] = strconv.FormatInt(state.Pipeline.Time, 10)
+
+		state.Pipeline.Step.Environment["CI_PIPELINE_STARTED"] = strconv.FormatInt(state.Pipeline.Started, 10)
+		state.Pipeline.Step.Environment["CI_PIPELINE_FINISHED"] = strconv.FormatInt(time.Now().Unix(), 10)
+
+		state.Pipeline.Step.Environment["CI_STEP_STARTED"] = strconv.FormatInt(state.Pipeline.Started, 10)
+		state.Pipeline.Step.Environment["CI_STEP_FINISHED"] = strconv.FormatInt(time.Now().Unix(), 10)
+
 		state.Pipeline.Step.Environment["CI_SYSTEM_PLATFORM"] = runtime.GOOS + "/" + runtime.GOARCH
 
 		return nil

@@ -43,7 +43,7 @@ func (oldStep021) TableName() string {
 var parentStepsToWorkflows = xormigrate.Migration{
 	ID: "parent-steps-to-workflows",
 	MigrateSession: func(sess *xorm.Session) error {
-		if err := sess.Sync(new(model.Workflow)); err != nil {
+		if err := sess.Sync(new(workflowV031)); err != nil {
 			return err
 		}
 		// make sure the columns exist before removing them
@@ -58,7 +58,7 @@ var parentStepsToWorkflows = xormigrate.Migration{
 		}
 
 		for _, p := range parentSteps {
-			asWorkflow := &model.Workflow{
+			asWorkflow := &workflowV031{
 				PipelineID: p.PipelineID,
 				PID:        p.PID,
 				Name:       p.Name,

@@ -48,6 +48,10 @@ For reference see [Configuration Cheat Sheet](https://docs.gitea.io/en-us/config
 
 ![gitea oauth setup](gitea_oauth.gif)
 
+:::warning
+Make sure your Gitea configuration allows requesting the API with a fixed page length of 50. The default value for the maximum page size is 50, but if you set a value lower than 50, some Woodpecker features will not work properly. Also see the [Configuration Cheat Sheet](https://docs.gitea.com/administration/config-cheat-sheet#api-api).
+:::
+
 ## Configuration
 
 This is a full list of configuration options. Please note that many of these options use default configuration values that should work for the majority of installations.

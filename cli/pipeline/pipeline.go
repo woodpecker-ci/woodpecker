@@ -20,7 +20,7 @@ import (
 	"os"
 	"text/template"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
 	"go.woodpecker-ci.org/woodpecker/v2/cli/output"
 	"go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker"
@@ -30,7 +30,7 @@ import (
 var Command = &cli.Command{
 	Name:  "pipeline",
 	Usage: "manage pipelines",
-	Subcommands: []*cli.Command{
+	Commands: []*cli.Command{
 		pipelineListCmd,
 		pipelineLastCmd,
 		pipelineLogsCmd,
@@ -46,7 +46,7 @@ var Command = &cli.Command{
 	},
 }
 
-func pipelineOutput(c *cli.Context, resources []woodpecker.Pipeline, fd ...io.Writer) error {
+func pipelineOutput(c *cli.Command, resources []woodpecker.Pipeline, fd ...io.Writer) error {
 	outFmt, outOpt := output.ParseOutputOptions(c.String("output"))
 	noHeader := c.Bool("output-no-headers")
 
@@ -77,7 +77,7 @@ func pipelineOutput(c *cli.Context, resources []woodpecker.Pipeline, fd ...io.Wr
 		fallthrough
 	default:
 		table := output.NewTable(out)
-		cols := []string{"Number", "Status", "Event", "Branch", "Commit", "Author"}
+		cols := []string{"Number", "Status", "Event", "Branch", "Message", "Author"}
 
 		if len(outOpt) > 0 {
 			cols = outOpt

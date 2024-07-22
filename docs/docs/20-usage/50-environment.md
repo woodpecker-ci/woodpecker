@@ -86,7 +86,6 @@ This is the reference list of all environment variables available to your pipeli
 | `CI_PIPELINE_FORGE_URL`          | link to the forge's web UI for the commit(s) or tag that triggered the pipeline                                    |
 | `CI_PIPELINE_DEPLOY_TARGET`      | pipeline deploy target for `deployment` events (i.e. production)                                                   |
 | `CI_PIPELINE_DEPLOY_TASK`        | pipeline deploy task for `deployment` events (i.e. migration)                                                      |
-| `CI_PIPELINE_STATUS`             | pipeline status (success, failure)                                                                                 |
 | `CI_PIPELINE_CREATED`            | pipeline created UNIX timestamp                                                                                    |
 | `CI_PIPELINE_STARTED`            | pipeline started UNIX timestamp                                                                                    |
 | `CI_PIPELINE_FILES`              | changed files (empty if event is not `push` or `pull_request`), it is undefined if more than 500 files are touched |

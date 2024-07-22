@@ -18,6 +18,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 	"go.woodpecker-ci.org/woodpecker/v2/server/store/types"
@@ -60,7 +61,7 @@ func TestRegistryList(t *testing.T) {
 		Password: "bar",
 	}))
 
-	list, err := store.RegistryList(&model.Repo{ID: 1}, &model.ListOptions{Page: 1, PerPage: 50})
+	list, err := store.RegistryList(&model.Repo{ID: 1}, false, &model.ListOptions{Page: 1, PerPage: 50})
 	assert.NoError(t, err)
 	assert.Len(t, list, 2)
 }
@@ -117,6 +118,88 @@ func TestRegistryDelete(t *testing.T) {
 		return
 	}
 
-	assert.NoError(t, store.RegistryDelete(&model.Repo{ID: 1}, "index.docker.io"))
-	assert.ErrorIs(t, store.RegistryDelete(&model.Repo{ID: 1}, "index.docker.io"), types.RecordNotExist)
+	assert.NoError(t, store.RegistryDelete(reg1))
+	assert.ErrorIs(t, store.RegistryDelete(reg1), types.RecordNotExist)
+}
+
+func createTestRegistries(t *testing.T, store *storage) {
+	assert.NoError(t, store.RegistryCreate(&model.Registry{
+		OrgID:   12,
+		Address: "my.regsitry.local",
+	}))
+	assert.NoError(t, store.RegistryCreate(&model.Registry{
+		RepoID:  1,
+		Address: "private.registry.local",
+	}))
+	assert.NoError(t, store.RegistryCreate(&model.Registry{
+		RepoID:  1,
+		Address: "very-private.registry.local",
+	}))
+	assert.NoError(t, store.RegistryCreate(&model.Registry{
+		Address: "index.docker.io",
+	}))
+}
+
+func TestOrgRegistryFind(t *testing.T) {
+	store, closer := newTestStore(t, new(model.Registry))
+	defer closer()
+
+	err := store.RegistryCreate(&model.Registry{
+		OrgID:    12,
+		Address:  "my.regsitry.local",
+		Username: "username",
+		Password: "password",
+	})
+	assert.NoError(t, err)
+
+	registry, err := store.OrgRegistryFind(12, "my.regsitry.local")
+	assert.NoError(t, err)
+	assert.EqualValues(t, 12, registry.OrgID)
+	assert.Equal(t, "my.regsitry.local", registry.Address)
+	assert.Equal(t, "username", registry.Username)
+	assert.Equal(t, "password", registry.Password)
+}
+
+func TestOrgRegistryList(t *testing.T) {
+	store, closer := newTestStore(t, new(model.Registry))
+	defer closer()
+
+	createTestRegistries(t, store)
+
+	list, err := store.OrgRegistryList(12, &model.ListOptions{All: true})
+	assert.NoError(t, err)
+	require.Len(t, list, 1)
+
+	assert.True(t, list[0].IsOrganization())
+}
+
+func TestGlobalRegistryFind(t *testing.T) {
+	store, closer := newTestStore(t, new(model.Registry))
+	defer closer()
+
+	err := store.RegistryCreate(&model.Registry{
+		Address:  "my.regsitry.local",
+		Username: "username",
+		Password: "password",
+	})
+	assert.NoError(t, err)
+
+	registry, err := store.GlobalRegistryFind("my.regsitry.local")
+	assert.NoError(t, err)
+	assert.Equal(t, "my.regsitry.local", registry.Address)
+	assert.Equal(t, "username", registry.Username)
+	assert.Equal(t, "password", registry.Password)
+}
+
+func TestGlobalRegistryList(t *testing.T) {
+	store, closer := newTestStore(t, new(model.Registry))
+	defer closer()
+
+	createTestRegistries(t, store)
+
+	list, err := store.GlobalRegistryList(&model.ListOptions{All: true})
+	assert.NoError(t, err)
+	assert.Len(t, list, 1)
+
+	assert.True(t, list[0].IsGlobal())
 }

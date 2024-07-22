@@ -87,7 +87,7 @@ func (s storage) workflowsDelete(sess *xorm.Session, pipelineID int64) error {
 	// delete related steps
 	for startSteps := 0; ; startSteps += perPage {
 		stepIDs := make([]int64, 0, perPage)
-		if err := sess.Limit(perPage, startSteps).Table("steps").Cols("step_id").Where("step_pipeline_id = ?", pipelineID).Find(&stepIDs); err != nil {
+		if err := sess.Limit(perPage, startSteps).Table("steps").Cols("id").Where("pipeline_id = ?", pipelineID).Find(&stepIDs); err != nil {
 			return err
 		}
 		if len(stepIDs) == 0 {
@@ -101,7 +101,7 @@ func (s storage) workflowsDelete(sess *xorm.Session, pipelineID int64) error {
 		}
 	}
 
-	_, err := sess.Where("workflow_pipeline_id = ?", pipelineID).Delete(new(model.Workflow))
+	_, err := sess.Where("pipeline_id = ?", pipelineID).Delete(new(model.Workflow))
 	return err
 }
 
@@ -112,8 +112,8 @@ func (s storage) WorkflowList(pipeline *model.Pipeline) ([]*model.Workflow, erro
 // workflowList lists workflows without child steps.
 func (s storage) workflowList(sess *xorm.Session, pipeline *model.Pipeline) ([]*model.Workflow, error) {
 	var wfList []*model.Workflow
-	err := sess.Where("workflow_pipeline_id = ?", pipeline.ID).
-		OrderBy("workflow_pid").
+	err := sess.Where("pipeline_id = ?", pipeline.ID).
+		OrderBy("pid").
 		Find(&wfList)
 	if err != nil {
 		return nil, err

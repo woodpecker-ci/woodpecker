@@ -20,6 +20,7 @@ func SetDroneEnviron(env map[string]string) {
 	// webhook
 	copyEnv("CI_COMMIT_BRANCH", "DRONE_BRANCH", env)
 	copyEnv("CI_COMMIT_PULL_REQUEST", "DRONE_PULL_REQUEST", env)
+	copyEnv("CI_COMMIT_PULL_REQUEST", "PULLREQUEST_DRONE_PULL_REQUEST", env)
 	copyEnv("CI_COMMIT_TAG", "DRONE_TAG", env)
 	copyEnv("CI_COMMIT_SOURCE_BRANCH", "DRONE_SOURCE_BRANCH", env)
 	copyEnv("CI_COMMIT_TARGET_BRANCH", "DRONE_TARGET_BRANCH", env)
@@ -27,7 +28,6 @@ func SetDroneEnviron(env map[string]string) {
 	copyEnv("CI_PIPELINE_NUMBER", "DRONE_BUILD_NUMBER", env)
 	copyEnv("CI_PIPELINE_PARENT", "DRONE_BUILD_PARENT", env)
 	copyEnv("CI_PIPELINE_EVENT", "DRONE_BUILD_EVENT", env)
-	copyEnv("CI_PIPELINE_STATUS", "DRONE_BUILD_STATUS", env)
 	copyEnv("CI_PIPELINE_URL", "DRONE_BUILD_LINK", env)
 	copyEnv("CI_PIPELINE_CREATED", "DRONE_BUILD_CREATED", env)
 	copyEnv("CI_PIPELINE_STARTED", "DRONE_BUILD_STARTED", env)
@@ -58,6 +58,18 @@ func SetDroneEnviron(env map[string]string) {
 	// misc
 	copyEnv("CI_SYSTEM_HOST", "DRONE_SYSTEM_HOST", env)
 	copyEnv("CI_STEP_NUMBER", "DRONE_STEP_NUMBER", env)
+
+	env["DRONE_BUILD_STATUS"] = "success"
+
+	// some quirks
+
+	// Legacy env var to prevent the plugin from throwing an error
+	// when converting an empty string to a number
+	//
+	// plugins affected: "plugins/manifest"
+	if env["CI_COMMIT_PULL_REQUEST"] == "" {
+		env["PULLREQUEST_DRONE_PULL_REQUEST"] = "0"
+	}
 }
 
 func copyEnv(woodpecker, drone string, env map[string]string) {

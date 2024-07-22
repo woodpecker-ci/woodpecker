@@ -31,7 +31,6 @@ func TestLineWriter(t *testing.T) {
 
 	secrets := []string{"world"}
 	lw := log.NewLineWriter(peer, "e9ea76a5-44a1-4059-9c4a-6956c478b26d", secrets...)
-	defer lw.Close()
 
 	_, err := lw.Write([]byte("hello world\n"))
 	assert.NoError(t, err)

@@ -31,7 +31,7 @@ import (
 	std_copy "github.com/moby/moby/pkg/stdcopy"
 	"github.com/moby/term"
 	"github.com/rs/zerolog/log"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
 	backend "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 	"go.woodpecker-ci.org/woodpecker/v2/shared/utils"
@@ -63,7 +63,7 @@ func (e *docker) Name() string {
 }
 
 func (e *docker) IsAvailable(ctx context.Context) bool {
-	if c, ok := ctx.Value(backend.CliContext).(*cli.Context); ok {
+	if c, ok := ctx.Value(backend.CliCommand).(*cli.Command); ok {
 		if c.IsSet("backend-docker-host") {
 			return true
 		}
@@ -101,7 +101,7 @@ func (e *docker) Flags() []cli.Flag {
 
 // Load new client for Docker Backend using environment variables.
 func (e *docker) Load(ctx context.Context) (*backend.BackendInfo, error) {
-	c, ok := ctx.Value(backend.CliContext).(*cli.Context)
+	c, ok := ctx.Value(backend.CliCommand).(*cli.Command)
 	if !ok {
 		return nil, backend.ErrNoCliContextFound
 	}
@@ -257,7 +257,7 @@ func (e *docker) StartStep(ctx context.Context, step *backend.Step, taskUUID str
 		}
 	}
 
-	return e.client.ContainerStart(ctx, containerName, startOpts)
+	return e.client.ContainerStart(ctx, containerName, types.ContainerStartOptions{})
 }
 
 func (e *docker) WaitStep(ctx context.Context, step *backend.Step, taskUUID string) (*backend.State, error) {
@@ -286,7 +286,13 @@ func (e *docker) WaitStep(ctx context.Context, step *backend.Step, taskUUID stri
 func (e *docker) TailStep(ctx context.Context, step *backend.Step, taskUUID string) (io.ReadCloser, error) {
 	log.Trace().Str("taskUUID", taskUUID).Msgf("tail logs of step %s", step.Name)
 
-	logs, err := e.client.ContainerLogs(ctx, toContainerName(step), logsOpts)
+	logs, err := e.client.ContainerLogs(ctx, toContainerName(step), types.ContainerLogsOptions{
+		Follow:     true,
+		ShowStdout: true,
+		ShowStderr: true,
+		Details:    false,
+		Timestamps: false,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -344,23 +350,11 @@ func (e *docker) DestroyWorkflow(ctx context.Context, conf *backend.Config, task
 	return nil
 }
 
-var (
-	startOpts = types.ContainerStartOptions{}
-
-	removeOpts = types.ContainerRemoveOptions{
-		RemoveVolumes: true,
-		RemoveLinks:   false,
-		Force:         false,
-	}
-
-	logsOpts = types.ContainerLogsOptions{
-		Follow:     true,
-		ShowStdout: true,
-		ShowStderr: true,
-		Details:    false,
-		Timestamps: false,
-	}
-)
+var removeOpts = types.ContainerRemoveOptions{
+	RemoveVolumes: true,
+	RemoveLinks:   false,
+	Force:         false,
+}
 
 func isErrContainerNotFoundOrNotRunning(err error) bool {
 	// Error response from daemon: Cannot kill container: ...: No such container: ...
