@@ -64,7 +64,11 @@ func CreatePipeline(c *gin.Context) {
 
 	user := session.User(c)
 
-	lastCommit, _ := _forge.BranchHead(c, user, repo, opts.Branch)
+	lastCommit, err := _forge.BranchHead(c, user, repo, opts.Branch)
+	if err != nil {
+		_ = c.AbortWithError(http.StatusInternalServerError, fmt.Errorf("could not fetch branch head: %w", err))
+		return
+	}
 
 	tmpPipeline := createTmpPipeline(model.EventManual, lastCommit, user, &opts)
 
