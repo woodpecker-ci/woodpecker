@@ -23,13 +23,15 @@ import (
 	"os/exec"
 	"path"
 	"regexp"
+	"runtime"
 	"strings"
 	"text/template"
 
 	"github.com/rs/zerolog/log"
+	"github.com/urfave/cli/v3"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
-	"github.com/woodpecker-ci/woodpecker/shared/constant"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/constant"
 )
 
 var scriptTemplate = template.Must(template.New("script").Parse(`#!/bin/sh -xe
@@ -75,30 +77,40 @@ type lxc struct {
 	rundir    string
 	workspace string
 	name      string
+	os, arch  string
 }
 
 // make sure lxc implements Engine
-var _ types.Engine = &lxc{}
+var _ types.Backend = &lxc{}
 
 // New returns a new lxc Engine.
-func New() types.Engine {
-	return &lxc{}
+func New() types.Backend {
+	return &lxc{
+		os:   runtime.GOOS,
+		arch: runtime.GOARCH,
+	}
 }
 
 func (e *lxc) Name() string {
 	return "lxc"
 }
 
-func (e *lxc) IsAvailable(ctx context.Context) bool {
-	// TODO: deteckt lxc binary
-	return true
+func (e *lxc) IsAvailable(context.Context) bool {
+	binary, err := exec.LookPath("lxc-copy")
+	return err != nil && binary != ""
 }
 
-func (e *lxc) Load(ctx context.Context) error {
+func (e *lxc) Flags() []cli.Flag {
+	return []cli.Flag{}
+}
+
+func (e *lxc) Load(ctx context.Context) (*types.BackendInfo, error) {
 	dir, err := os.MkdirTemp("", "woodpecker-lxc-*")
 	e.rundir = dir
 	e.name = path.Base(dir)
-	return err
+	return &types.BackendInfo{
+		Platform: e.os + "/" + e.arch,
+	}, err
 }
 
 var serviceHostnameTemplate = template.Must(template.New("hostnames").Parse(`#!/bin/sh -ex
@@ -122,7 +134,7 @@ done
 getent hosts {{.Host}}
 `))
 
-func (e *lxc) ContainerName(name string) string {
+func (e *lxc) containerName(name string) string {
 	return e.name + "-" + strings.ReplaceAll(name, "_", "")
 }
 
@@ -151,7 +163,7 @@ func (e *lxc) SetupWorkflow(ctx context.Context, config *types.Config, taskUUID 
 			continue
 		}
 		for _, step := range stage.Steps {
-			if _, err := f.WriteString(fmt.Sprintf("%s %s\n", e.ContainerName(step.Name), step.Alias)); err != nil {
+			if _, err := f.WriteString(fmt.Sprintf("%s %s\n", e.containerName(step.Name), step.Alias)); err != nil {
 				log.Error().Err(err).Msg("writing service-alias")
 				return err
 			}
@@ -211,7 +223,7 @@ func (e *lxc) StartStep(ctx context.Context, step *types.Step, taskUUID string) 
 			RunDir    string
 			Script    string
 		}{
-			Name:      e.ContainerName(step.Name),
+			Name:      e.containerName(step.Name),
 			Template:  template,
 			Release:   release,
 			Repo:      step.Environment["CI_REPO"],
@@ -274,6 +286,11 @@ lxc-ls -1 --filter="^{{.Name}}" | while read container ; do
 	lxc-destroy --force --name="$container"
 done
 `))
+
+func (e *lxc) DestroyStep(_ context.Context, _ *types.Step, _ string) error {
+	// TODO: figure out how to cleanup
+	return nil
+}
 
 func (e *lxc) DestroyWorkflow(ctx context.Context, conf *types.Config, taskUUID string) error {
 	script := e.rundir + "/destroy.sh"
