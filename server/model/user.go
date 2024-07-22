@@ -20,56 +20,60 @@ import (
 	"regexp"
 )
 
-// validate a username (e.g. from github)
+// Validate a username (e.g. from github).
 var reUsername = regexp.MustCompile("^[a-zA-Z0-9-_.]+$")
 
 var errUserLoginInvalid = errors.New("invalid user login")
+
+const maxLoginLen = 250
 
 // User represents a registered user.
 type User struct {
 	// the id for this user.
 	//
 	// required: true
-	ID int64 `json:"id" xorm:"pk autoincr 'user_id'"`
+	ID int64 `json:"id" xorm:"pk autoincr 'id'"`
+
+	ForgeID int64 `json:"forge_id,omitempty" xorm:"forge_id"`
 
 	ForgeRemoteID ForgeRemoteID `json:"-" xorm:"forge_remote_id"`
 
 	// Login is the username for this user.
 	//
 	// required: true
-	Login string `json:"login"  xorm:"UNIQUE 'user_login'"`
+	Login string `json:"login"  xorm:"UNIQUE 'login'"`
 
 	// Token is the oauth2 token.
-	Token string `json:"-"  xorm:"TEXT 'user_token'"`
+	Token string `json:"-"  xorm:"TEXT 'token'"`
 
 	// Secret is the oauth2 token secret.
-	Secret string `json:"-" xorm:"TEXT 'user_secret'"`
+	Secret string `json:"-" xorm:"TEXT 'secret'"`
 
 	// Expiry is the token and secret expiration timestamp.
-	Expiry int64 `json:"-" xorm:"user_expiry"`
+	Expiry int64 `json:"-" xorm:"expiry"`
 
 	// Email is the email address for this user.
 	//
 	// required: true
-	Email string `json:"email" xorm:" varchar(500) 'user_email'"`
+	Email string `json:"email" xorm:" varchar(500) 'email'"`
 
 	// the avatar url for this user.
-	Avatar string `json:"avatar_url" xorm:" varchar(500) 'user_avatar'"`
+	Avatar string `json:"avatar_url" xorm:" varchar(500) 'avatar'"`
 
 	// Admin indicates the user is a system administrator.
 	//
 	// NOTE: If the username is part of the WOODPECKER_ADMIN
 	// environment variable, this value will be set to true on login.
-	Admin bool `json:"admin,omitempty" xorm:"user_admin"`
+	Admin bool `json:"admin,omitempty" xorm:"admin"`
 
 	// Hash is a unique token used to sign tokens.
-	Hash string `json:"-" xorm:"UNIQUE varchar(500) 'user_hash'"`
+	Hash string `json:"-" xorm:"UNIQUE varchar(500) 'hash'"`
 
 	// OrgID is the of the user as model.Org.
-	OrgID int64 `json:"org_id" xorm:"user_org_id"`
+	OrgID int64 `json:"org_id" xorm:"org_id"`
 } //	@name User
 
-// TableName return database table name for xorm
+// TableName return database table name for xorm.
 func (User) TableName() string {
 	return "users"
 }
@@ -79,7 +83,7 @@ func (u *User) Validate() error {
 	switch {
 	case len(u.Login) == 0:
 		return errUserLoginInvalid
-	case len(u.Login) > 250:
+	case len(u.Login) > maxLoginLen:
 		return errUserLoginInvalid
 	case !reUsername.MatchString(u.Login):
 		return errUserLoginInvalid

@@ -15,12 +15,13 @@
 package deploy
 
 import (
+	"context"
 	"fmt"
 	"html/template"
 	"os"
 	"strconv"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
 	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
 	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
@@ -30,7 +31,7 @@ import (
 // Command exports the deploy command.
 var Command = &cli.Command{
 	Name:      "deploy",
-	Usage:     "deploy code",
+	Usage:     "trigger a pipeline with the 'deployment' event",
 	ArgsUsage: "<repo-id|repo-full-name> <pipeline> <environment>",
 	Action:    deploy,
 	Flags: []cli.Flag{
@@ -38,7 +39,6 @@ var Command = &cli.Command{
 		&cli.StringFlag{
 			Name:  "branch",
 			Usage: "branch filter",
-			Value: "main",
 		},
 		&cli.StringFlag{
 			Name:  "event",
@@ -58,8 +58,8 @@ var Command = &cli.Command{
 	},
 }
 
-func deploy(c *cli.Context) error {
-	client, err := internal.NewClient(c)
+func deploy(ctx context.Context, c *cli.Command) error {
+	client, err := internal.NewClient(ctx, c)
 	if err != nil {
 		return err
 	}
@@ -74,13 +74,22 @@ func deploy(c *cli.Context) error {
 	event := c.String("event")
 	status := c.String("status")
 
+	if branch == "" {
+		repo, err := client.Repo(repoID)
+		if err != nil {
+			return err
+		}
+
+		branch = repo.DefaultBranch
+	}
+
 	pipelineArg := c.Args().Get(1)
 	var number int64
 	if pipelineArg == "last" {
 		// Fetch the pipeline number from the last pipeline
-		pipelines, berr := client.PipelineList(repoID)
-		if berr != nil {
-			return berr
+		pipelines, err := client.PipelineList(repoID)
+		if err != nil {
+			return err
 		}
 		for _, pipeline := range pipelines {
 			if branch != "" && pipeline.Branch != branch {
@@ -106,7 +115,8 @@ func deploy(c *cli.Context) error {
 		}
 	}
 
-	env := c.Args().Get(2)
+	envArgIndex := 2
+	env := c.Args().Get(envArgIndex)
 	if env == "" {
 		return fmt.Errorf("please specify the target environment (i.e. production)")
 	}
@@ -125,7 +135,7 @@ func deploy(c *cli.Context) error {
 	return tmpl.Execute(os.Stdout, deploy)
 }
 
-// template for deployment information
+// Template for deployment information.
 var tmplDeployInfo = `Number: {{ .Number }}
 Status: {{ .Status }}
 Commit: {{ .Commit }}

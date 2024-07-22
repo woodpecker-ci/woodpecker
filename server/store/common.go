@@ -19,7 +19,7 @@ type XORM struct {
 	ShowSQL bool
 }
 
-// Opts are options for a new database connection
+// Opts are options for a new database connection.
 type Opts struct {
 	Driver string
 	Config string

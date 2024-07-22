@@ -15,6 +15,7 @@
 package migration
 
 import (
+	"context"
 	"fmt"
 	"reflect"
 
@@ -25,7 +26,7 @@ import (
 )
 
 // APPEND NEW MIGRATIONS
-// they are executed in order and if one fails Xormigrate will try to rollback that specific one and quits
+// They are executed in order and if one fails Xormigrate will try to rollback that specific one and quits.
 var migrationTasks = []*xormigrate.Migration{
 	&legacyToXormigrate,
 	&legacy2Xorm,
@@ -59,6 +60,9 @@ var migrationTasks = []*xormigrate.Migration{
 	&convertToNewPipelineErrorFormat,
 	&renameLinkToURL,
 	&cleanRegistryPipeline,
+	&setForgeID,
+	&unifyColumnsTables,
+	&alterTableRegistriesFixRequiredFields,
 }
 
 var allBeans = []any{
@@ -77,11 +81,13 @@ var allBeans = []any{
 	new(model.ServerConfig),
 	new(model.Cron),
 	new(model.Redirection),
+	new(model.Forge),
 	new(model.Workflow),
 	new(model.Org),
 }
 
-func Migrate(e *xorm.Engine, allowLong bool) error {
+// TODO: make xormigrate context aware
+func Migrate(_ context.Context, e *xorm.Engine, allowLong bool) error {
 	e.SetDisableGlobalCache(true)
 
 	m := xormigrate.New(e, migrationTasks)

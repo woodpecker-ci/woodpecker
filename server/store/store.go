@@ -14,10 +14,11 @@
 
 package store
 
-//go:generate go install github.com/vektra/mockery/v2@latest
-//go:generate mockery --name Store --output mocks --case underscore
+//go:generate mockery --name Store --output mocks --case underscore --note "+build test"
 
 import (
+	"context"
+
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
@@ -61,8 +62,6 @@ type Store interface {
 	DeleteRepo(*model.Repo) error
 
 	// Redirections
-	// GetRedirection returns the redirection for the given full repo name
-	GetRedirection(string) (*model.Redirection, error)
 	// CreateRedirection creates a redirection
 	CreateRedirection(redirection *model.Redirection) error
 	// HasRedirectionForRepo checks if there's a redirection for the given repo and full name
@@ -73,16 +72,12 @@ type Store interface {
 	GetPipeline(int64) (*model.Pipeline, error)
 	// GetPipelineNumber gets a pipeline by number.
 	GetPipelineNumber(*model.Repo, int64) (*model.Pipeline, error)
-	// GetPipelineRef gets a pipeline by its ref.
-	GetPipelineRef(*model.Repo, string) (*model.Pipeline, error)
-	// GetPipelineCommit gets a pipeline by its commit sha.
-	GetPipelineCommit(*model.Repo, string, string) (*model.Pipeline, error)
 	// GetPipelineLast gets the last pipeline for the branch.
 	GetPipelineLast(*model.Repo, string) (*model.Pipeline, error)
 	// GetPipelineLastBefore gets the last pipeline before pipeline number N.
 	GetPipelineLastBefore(*model.Repo, string, int64) (*model.Pipeline, error)
 	// GetPipelineList gets a list of pipelines for the repository
-	GetPipelineList(*model.Repo, *model.ListOptions) ([]*model.Pipeline, error)
+	GetPipelineList(*model.Repo, *model.ListOptions, *model.PipelineFilter) ([]*model.Pipeline, error)
 	// GetActivePipelineList gets a list of the active pipelines for the repository
 	GetActivePipelineList(repo *model.Repo) ([]*model.Pipeline, error)
 	// GetPipelineQueue gets a list of pipelines in queue.
@@ -107,14 +102,10 @@ type Store interface {
 	// Permissions
 	PermFind(user *model.User, repo *model.Repo) (*model.Perm, error)
 	PermUpsert(perm *model.Perm) error
-	PermDelete(perm *model.Perm) error
-	PermFlush(user *model.User, before int64) error
 
 	// Configs
 	ConfigsForPipeline(pipelineID int64) ([]*model.Config, error)
 	ConfigPersist(*model.Config) (*model.Config, error)
-	ConfigFindApproved(*model.Config) (bool, error)
-	ConfigCreate(*model.Config) error
 	PipelineConfigCreate(*model.PipelineConfig) error
 
 	// Secrets
@@ -131,10 +122,15 @@ type Store interface {
 
 	// Registries
 	RegistryFind(*model.Repo, string) (*model.Registry, error)
-	RegistryList(*model.Repo, *model.ListOptions) ([]*model.Registry, error)
+	RegistryList(*model.Repo, bool, *model.ListOptions) ([]*model.Registry, error)
+	RegistryListAll() ([]*model.Registry, error)
 	RegistryCreate(*model.Registry) error
 	RegistryUpdate(*model.Registry) error
-	RegistryDelete(repo *model.Repo, addr string) error
+	RegistryDelete(*model.Registry) error
+	OrgRegistryFind(int64, string) (*model.Registry, error)
+	OrgRegistryList(int64, *model.ListOptions) ([]*model.Registry, error)
+	GlobalRegistryFind(string) (*model.Registry, error)
+	GlobalRegistryList(*model.ListOptions) ([]*model.Registry, error)
 
 	// Steps
 	StepLoad(int64) (*model.Step, error)
@@ -147,7 +143,6 @@ type Store interface {
 
 	// Logs
 	LogFind(*model.Step) ([]*model.LogEntry, error)
-	LogSave(*model.Step, []*model.LogEntry) error
 	LogAppend(logEntry *model.LogEntry) error
 	LogDelete(*model.Step) error
 
@@ -171,6 +166,13 @@ type Store interface {
 	CronListNextExecute(int64, int64) ([]*model.Cron, error)
 	CronGetLock(*model.Cron, int64) (bool, error)
 
+	// Forge
+	ForgeCreate(*model.Forge) error
+	ForgeGet(int64) (*model.Forge, error)
+	ForgeList(p *model.ListOptions) ([]*model.Forge, error)
+	ForgeUpdate(*model.Forge) error
+	ForgeDelete(*model.Forge) error
+
 	// Agent
 	AgentCreate(*model.Agent) error
 	AgentFind(int64) (*model.Agent, error)
@@ -182,6 +184,7 @@ type Store interface {
 	// Workflow
 	WorkflowGetTree(*model.Pipeline) ([]*model.Workflow, error)
 	WorkflowsCreate([]*model.Workflow) error
+	WorkflowsReplace(*model.Pipeline, []*model.Workflow) error
 	WorkflowLoad(int64) (*model.Workflow, error)
 	WorkflowUpdate(*model.Workflow) error
 
@@ -199,5 +202,5 @@ type Store interface {
 	// Store operations
 	Ping() error
 	Close() error
-	Migrate(bool) error
+	Migrate(context.Context, bool) error
 }

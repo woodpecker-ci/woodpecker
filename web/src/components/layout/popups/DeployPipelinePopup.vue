@@ -8,6 +8,9 @@
         <InputField v-slot="{ id }" :label="$t('repo.deploy_pipeline.enter_target')">
           <TextField :id="id" v-model="payload.environment" required />
         </InputField>
+        <InputField v-slot="{ id }" :label="$t('repo.deploy_pipeline.enter_task')">
+          <TextField :id="id" v-model="payload.task" />
+        </InputField>
         <InputField v-slot="{ id }" :label="$t('repo.deploy_pipeline.variables.title')">
           <span class="text-sm text-wp-text-alt-100 mb-2">{{ $t('repo.deploy_pipeline.variables.desc') }}</span>
           <div class="flex flex-col gap-2">
@@ -30,7 +33,7 @@
                   :title="$t('repo.deploy_pipeline.variables.delete')"
                   @click="deleteVar(i)"
                 >
-                  <i-la-times />
+                  <Icon name="remove" />
                 </Button>
               </div>
             </div>
@@ -47,6 +50,7 @@ import { computed, onMounted, ref, toRef, watch } from 'vue';
 import { useRouter } from 'vue-router';
 
 import Button from '~/components/atomic/Button.vue';
+import Icon from '~/components/atomic/Icon.vue';
 import InputField from '~/components/form/InputField.vue';
 import TextField from '~/components/form/TextField.vue';
 import Panel from '~/components/layout/Panel.vue';
@@ -69,9 +73,10 @@ const repo = inject('repo');
 
 const router = useRouter();
 
-const payload = ref<{ id: string; environment: string; variables: { name: string; value: string }[] }>({
+const payload = ref<{ id: string; environment: string; task: string; variables: { name: string; value: string }[] }>({
   id: '',
   environment: '',
+  task: '',
   variables: [
     {
       name: '',

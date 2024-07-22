@@ -18,7 +18,7 @@ import (
 	"context"
 	"io"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 // Backend defines a container orchestration backend and is used
@@ -56,7 +56,7 @@ type Backend interface {
 	DestroyWorkflow(ctx context.Context, conf *Config, taskUUID string) error
 }
 
-// BackendInfo represents the reported information of a loaded backend
+// BackendInfo represents the reported information of a loaded backend.
 type BackendInfo struct {
 	Platform string
 }

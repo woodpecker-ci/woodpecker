@@ -1,6 +1,6 @@
-import { WebhookEvents } from './webhook';
+import type { WebhookEvents } from './webhook';
 
-export type Secret = {
+export interface Secret {
   id: string;
   repo_id: number;
   org_id: number;
@@ -8,4 +8,4 @@ export type Secret = {
   value: string;
   events: WebhookEvents[];
   images: string[];
-};
+}

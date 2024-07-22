@@ -14,7 +14,7 @@
 
 package model
 
-// ResourceLimit is the resource limit to set on pipeline steps
+// ResourceLimit is the resource limit to set on pipeline steps.
 type ResourceLimit struct {
 	MemSwapLimit int64
 	MemLimit     int64

@@ -288,6 +288,9 @@
                 },
                 "ignore_message": {
                   "type": "string"
+                },
+                "on_empty": {
+                  "type": "boolean"
                 }
               },
               "additionalProperties": false
@@ -301,10 +304,24 @@
       }
     },
     "step": {
+      "description": "A step of your workflow executes either arbitrary commands or uses a plugin. Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#steps",
+      "oneOf": [
+        {
+          "$ref": "#/definitions/commands_step"
+        },
+        {
+          "$ref": "#/definitions/entrypoint_step"
+        },
+        {
+          "$ref": "#/definitions/plugin_step"
+        }
+      ]
+    },
+    "commands_step": {
       "description": "Every step of your pipeline executes arbitrary commands inside a specified docker container. Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#steps",
       "type": "object",
       "additionalProperties": false,
-      "required": ["image"],
+      "required": ["image", "commands"],
       "properties": {
         "name": {
           "description": "The name of the step. Can be used if using the array style steps list.",
@@ -324,6 +341,172 @@
         },
         "environment": {
           "$ref": "#/definitions/step_environment"
+        },
+        "directory": {
+          "$ref": "#/definitions/step_directory"
+        },
+        "secrets": {
+          "$ref": "#/definitions/step_secrets"
+        },
+        "when": {
+          "$ref": "#/definitions/step_when"
+        },
+        "volumes": {
+          "$ref": "#/definitions/step_volumes"
+        },
+        "group": {
+          "description": "deprecated, use depends_on",
+          "type": "string"
+        },
+        "depends_on": {
+          "description": "Execute a step after another step has finished.",
+          "oneOf": [
+            {
+              "type": "array",
+              "minLength": 1,
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "detach": {
+          "description": "Detach a step to run in background until pipeline finishes. Read more: https://woodpecker-ci.org/docs/usage/services#detachment",
+          "type": "boolean"
+        },
+        "failure": {
+          "description": "How to handle the failure of this step. Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#failure",
+          "type": "string",
+          "enum": ["fail", "ignore"],
+          "default": "fail"
+        },
+        "backend_options": {
+          "$ref": "#/definitions/step_backend_options"
+        },
+        "entrypoint": {
+          "description": "Defines container entrypoint.",
+          "oneOf": [
+            {
+              "type": "array",
+              "minLength": 1,
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "string"
+            }
+          ]
+        }
+      }
+    },
+    "entrypoint_step": {
+      "description": "Every step of your pipeline executes arbitrary commands inside a specified docker container. Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#steps",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["image", "entrypoint"],
+      "properties": {
+        "name": {
+          "description": "The name of the step. Can be used if using the array style steps list.",
+          "type": "string"
+        },
+        "image": {
+          "$ref": "#/definitions/step_image"
+        },
+        "privileged": {
+          "$ref": "#/definitions/step_privileged"
+        },
+        "pull": {
+          "$ref": "#/definitions/step_pull"
+        },
+        "commands": {
+          "$ref": "#/definitions/step_commands"
+        },
+        "environment": {
+          "$ref": "#/definitions/step_environment"
+        },
+        "directory": {
+          "$ref": "#/definitions/step_directory"
+        },
+        "secrets": {
+          "$ref": "#/definitions/step_secrets"
+        },
+        "when": {
+          "$ref": "#/definitions/step_when"
+        },
+        "volumes": {
+          "$ref": "#/definitions/step_volumes"
+        },
+        "group": {
+          "description": "deprecated, use depends_on",
+          "type": "string"
+        },
+        "depends_on": {
+          "description": "Execute a step after another step has finished.",
+          "oneOf": [
+            {
+              "type": "array",
+              "minLength": 1,
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "detach": {
+          "description": "Detach a step to run in background until pipeline finishes. Read more: https://woodpecker-ci.org/docs/usage/services#detachment",
+          "type": "boolean"
+        },
+        "failure": {
+          "description": "How to handle the failure of this step. Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#failure",
+          "type": "string",
+          "enum": ["fail", "ignore"],
+          "default": "fail"
+        },
+        "backend_options": {
+          "$ref": "#/definitions/step_backend_options"
+        },
+        "entrypoint": {
+          "description": "Defines container entrypoint.",
+          "oneOf": [
+            {
+              "type": "array",
+              "minLength": 1,
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "string"
+            }
+          ]
+        }
+      }
+    },
+    "plugin_step": {
+      "description": "Plugins let you execute predefined functions in a more secure context. Read more: https://woodpecker-ci.org/docs/usage/plugins/overview",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["image"],
+      "properties": {
+        "name": {
+          "description": "The name of the step. Can be used if using the array style steps list.",
+          "type": "string"
+        },
+        "image": {
+          "$ref": "#/definitions/step_image"
+        },
+        "privileged": {
+          "$ref": "#/definitions/step_privileged"
+        },
+        "pull": {
+          "$ref": "#/definitions/step_pull"
         },
         "directory": {
           "$ref": "#/definitions/step_directory"
@@ -478,6 +661,9 @@
                 },
                 "ignore_message": {
                   "type": "string"
+                },
+                "on_empty": {
+                  "type": "boolean"
                 }
               },
               "additionalProperties": false
@@ -630,7 +816,7 @@
         {
           "type": "object",
           "additionalProperties": {
-            "type": ["boolean", "string", "number"]
+            "type": ["boolean", "string", "number", "array", "object"]
           }
         }
       ]
@@ -691,11 +877,32 @@
       "description": "Advanced options for the kubernetes agent backends",
       "type": "object",
       "properties": {
-        "resources": {
-          "$ref": "#/definitions/step_backend_kubernetes_resources"
+        "labels": {
+          "type": "object",
+          "additionalProperties": {
+            "type": ["boolean", "string", "number"]
+          }
+        },
+        "annotations": {
+          "type": "object",
+          "additionalProperties": {
+            "type": ["boolean", "string", "number"]
+          }
         },
         "securityContext": {
           "$ref": "#/definitions/step_backend_kubernetes_security_context"
+        },
+        "runtimeClassName": {
+          "description": "Read more: https://woodpecker-ci.org/docs/administration/backends/kubernetes#runtimeclassname",
+          "type": "string"
+        },
+        "secrets": {
+          "description": "The secrets section defines a list of references to the native Kubernetes secrets",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/step_kubernetes_secret"
+          },
+          "minLength": 1
         }
       }
     },
@@ -775,6 +982,41 @@
       "additionalProperties": {
         "type": "string"
       }
+    },
+    "step_kubernetes_secret": {
+      "description": "A reference to a native Kubernetes secret",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "description": "The name of the secret. Can be used if using the array style secrets list.",
+          "type": "string"
+        },
+        "key": {
+          "description": "The key of the secret to select from.",
+          "type": "string"
+        },
+        "target": {
+          "$ref": "#/definitions/step_kubernetes_secret_target"
+        }
+      }
+    },
+    "step_kubernetes_secret_target": {
+      "description": "A target which a native Kubernetes secret maps to.",
+      "oneOf": [
+        {
+          "env": {
+            "description": "The name of the environment variable which secret maps to.",
+            "type": "string"
+          }
+        },
+        {
+          "file": {
+            "description": "The filename (path) which secret maps to.",
+            "type": "string"
+          }
+        }
+      ]
     },
     "services": {
       "description": "Read more: https://woodpecker-ci.org/docs/usage/services",

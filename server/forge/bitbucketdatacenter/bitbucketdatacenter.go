@@ -34,6 +34,8 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 )
 
+const listLimit = 250
+
 // Opts defines configuration options.
 type Opts struct {
 	URL          string // Bitbucket server url for API access.
@@ -41,6 +43,7 @@ type Opts struct {
 	Password     string // Git machine account password.
 	ClientID     string // OAuth 2.0 client id
 	ClientSecret string // OAuth 2.0 client secret
+	OAuthHost    string // OAuth 2.0 host
 }
 
 type client struct {
@@ -48,6 +51,7 @@ type client struct {
 	urlAPI       string
 	clientID     string
 	clientSecret string
+	oauthHost    string
 	username     string
 	password     string
 }
@@ -60,6 +64,7 @@ func New(opts Opts) (forge.Forge, error) {
 		urlAPI:       fmt.Sprintf("%s/rest", opts.URL),
 		clientID:     opts.ClientID,
 		clientSecret: opts.ClientSecret,
+		oauthHost:    opts.OAuthHost,
 		username:     opts.Username,
 		password:     opts.Password,
 	}
@@ -78,12 +83,12 @@ func New(opts Opts) (forge.Forge, error) {
 	return config, nil
 }
 
-// Name returns the string name of this driver
+// Name returns the string name of this driver.
 func (c *client) Name() string {
 	return "bitbucket_dc"
 }
 
-// URL returns the root url of a configured forge
+// URL returns the root url of a configured forge.
 func (c *client) URL() string {
 	return c.url
 }
@@ -91,16 +96,8 @@ func (c *client) URL() string {
 func (c *client) Login(ctx context.Context, req *forge_types.OAuthRequest) (*model.User, string, error) {
 	config := c.newOAuth2Config()
 
-	// TODO: Add proper state and pkce...
-	redirectURL := config.AuthCodeURL("woodpecker")
-
-	if req.Error != "" {
-		return nil, redirectURL, &forge_types.AuthError{
-			Err:         req.Error,
-			Description: req.ErrorDescription,
-			URI:         req.ErrorURI,
-		}
-	}
+	// TODO: Use pkce flow (https://oauth.net/2/pkce/) ...
+	redirectURL := config.AuthCodeURL(req.State)
 
 	if len(req.Code) == 0 {
 		return nil, redirectURL, nil
@@ -166,7 +163,7 @@ func (c *client) Repo(ctx context.Context, u *model.User, rID model.ForgeRemoteI
 
 	var repo *bb.Repository
 	if rID.IsValid() {
-		opts := &bb.RepositorySearchOptions{Permission: bb.PermissionRepoWrite, ListOptions: bb.ListOptions{Limit: 250}}
+		opts := &bb.RepositorySearchOptions{Permission: bb.PermissionRepoWrite, ListOptions: bb.ListOptions{Limit: listLimit}}
 		for {
 			repos, resp, err := bc.Projects.SearchRepositories(ctx, opts)
 			if err != nil {
@@ -213,7 +210,7 @@ func (c *client) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error
 		return nil, fmt.Errorf("unable to create bitbucket client: %w", err)
 	}
 
-	opts := &bb.RepositorySearchOptions{Permission: bb.PermissionRepoWrite, ListOptions: bb.ListOptions{Limit: 250}}
+	opts := &bb.RepositorySearchOptions{Permission: bb.PermissionRepoWrite, ListOptions: bb.ListOptions{Limit: listLimit}}
 	var all []*model.Repo
 	for {
 		repos, resp, err := bc.Projects.SearchRepositories(ctx, opts)
@@ -231,7 +228,7 @@ func (c *client) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error
 	}
 
 	// Add admin permissions to relevant repositories
-	opts = &bb.RepositorySearchOptions{Permission: bb.PermissionRepoAdmin, ListOptions: bb.ListOptions{Limit: 250}}
+	opts = &bb.RepositorySearchOptions{Permission: bb.PermissionRepoAdmin, ListOptions: bb.ListOptions{Limit: listLimit}}
 	for {
 		repos, resp, err := bc.Projects.SearchRepositories(ctx, opts)
 		if err != nil {
@@ -260,8 +257,14 @@ func (c *client) File(ctx context.Context, u *model.User, r *model.Repo, p *mode
 		return nil, fmt.Errorf("unable to create bitbucket client: %w", err)
 	}
 
-	b, _, err := bc.Projects.GetTextFileContent(ctx, r.Owner, r.Name, f, p.Commit)
+	b, resp, err := bc.Projects.GetTextFileContent(ctx, r.Owner, r.Name, f, p.Commit)
 	if err != nil {
+		if resp.StatusCode == http.StatusNotFound {
+			// requested directory might not exist
+			return nil, &forge_types.ErrConfigNotFound{
+				Configs: []string{f},
+			}
+		}
 		return nil, err
 	}
 	return b, nil
@@ -279,17 +282,20 @@ func (c *client) Dir(ctx context.Context, u *model.User, r *model.Repo, p *model
 		list, resp, err := bc.Projects.ListFiles(ctx, r.Owner, r.Name, path, opts)
 		if err != nil {
 			if resp.StatusCode == http.StatusNotFound {
-				break // requested directory might not exist
+				// requested directory might not exist
+				return nil, &forge_types.ErrConfigNotFound{
+					Configs: []string{path},
+				}
 			}
 			return nil, err
 		}
 		for _, f := range list {
-			fullpath := fmt.Sprintf("%s/%s", path, f)
-			data, err := c.File(ctx, u, r, p, fullpath)
+			fullPath := fmt.Sprintf("%s/%s", path, f)
+			data, err := c.File(ctx, u, r, p, fullPath)
 			if err != nil {
 				return nil, err
 			}
-			all = append(all, &forge_types.FileMeta{Name: fullpath, Data: data})
+			all = append(all, &forge_types.FileMeta{Name: fullPath, Data: data})
 		}
 		if resp.LastPage {
 			break
@@ -409,7 +415,7 @@ func (c *client) Activate(ctx context.Context, u *model.User, r *model.Repo, lin
 
 	err = c.Deactivate(ctx, u, r, link)
 	if err != nil {
-		return fmt.Errorf("unable to deactive old webhooks: %w", err)
+		return fmt.Errorf("unable to deactivate old webhooks: %w", err)
 	}
 
 	webhook := &bb.Webhook{
@@ -525,6 +531,8 @@ func (c *client) getUserAndRepo(ctx context.Context, r *model.Repo) (*model.User
 	}
 	log.Trace().Any("user", user).Msg("got user")
 
+	forge.Refresh(ctx, c, _store, user)
+
 	return user, repo, nil
 }
 
@@ -595,11 +603,16 @@ func (c *client) Org(_ context.Context, _ *model.User, owner string) (*model.Org
 }
 
 func (c *client) newOAuth2Config() *oauth2.Config {
+	publicOAuthURL := c.oauthHost
+	if publicOAuthURL == "" {
+		publicOAuthURL = c.urlAPI
+	}
+
 	return &oauth2.Config{
 		ClientID:     c.clientID,
 		ClientSecret: c.clientSecret,
 		Endpoint: oauth2.Endpoint{
-			AuthURL:  fmt.Sprintf("%s/oauth2/latest/authorize", c.urlAPI),
+			AuthURL:  fmt.Sprintf("%s/oauth2/latest/authorize", publicOAuthURL),
 			TokenURL: fmt.Sprintf("%s/oauth2/latest/token", c.urlAPI),
 		},
 		Scopes:      []string{string(bb.PermissionRepoRead), string(bb.PermissionRepoWrite), string(bb.PermissionRepoAdmin)},

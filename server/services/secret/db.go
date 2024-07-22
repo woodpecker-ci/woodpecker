@@ -16,14 +16,15 @@ package secret
 
 import (
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 )
 
 type db struct {
-	store model.SecretStore
+	store store.Store
 }
 
 // NewDB returns a new local secret service.
-func NewDB(store model.SecretStore) Service {
+func NewDB(store store.Store) Service {
 	return &db{store: store}
 }
 
@@ -35,8 +36,8 @@ func (d *db) SecretList(repo *model.Repo, p *model.ListOptions) ([]*model.Secret
 	return d.store.SecretList(repo, false, p)
 }
 
-func (d *db) SecretListPipeline(repo *model.Repo, _ *model.Pipeline, p *model.ListOptions) ([]*model.Secret, error) {
-	s, err := d.store.SecretList(repo, true, p)
+func (d *db) SecretListPipeline(repo *model.Repo, _ *model.Pipeline) ([]*model.Secret, error) {
+	s, err := d.store.SecretList(repo, true, &model.ListOptions{All: true})
 	if err != nil {
 		return nil, err
 	}

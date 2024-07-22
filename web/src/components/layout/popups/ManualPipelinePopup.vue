@@ -28,7 +28,7 @@
                   :title="$t('repo.manual_pipeline.variables.delete')"
                   @click="deleteVar(i)"
                 >
-                  <i-la-times />
+                  <Icon name="remove" />
                 </Button>
               </div>
             </div>
@@ -45,6 +45,7 @@ import { computed, onMounted, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 
 import Button from '~/components/atomic/Button.vue';
+import Icon from '~/components/atomic/Icon.vue';
 import InputField from '~/components/form/InputField.vue';
 import SelectField from '~/components/form/SelectField.vue';
 import TextField from '~/components/form/TextField.vue';
@@ -90,7 +91,7 @@ const pipelineOptions = computed(() => {
 
 const loading = ref(true);
 onMounted(async () => {
-  const data = await usePaginate((page) => apiClient.getRepoBranches(repo.value.id, page));
+  const data = await usePaginate((page) => apiClient.getRepoBranches(repo.value.id, { page }));
   branches.value = data.map((e) => ({
     text: e,
     value: e,

@@ -49,9 +49,9 @@ type (
 		Ports          []string           `yaml:"ports,omitempty"`
 		DependsOn      base.StringOrSlice `yaml:"depends_on,omitempty"`
 
-		// TODO make []string in 3.x
+		// TODO: make []string in 3.x
 		Secrets Secrets `yaml:"secrets,omitempty"`
-		// TODO make map[string]any in 3.x
+		// TODO: make map[string]any in 3.x
 		Environment base.SliceOrMap `yaml:"environment,omitempty"`
 
 		// Docker and Kubernetes Specific
@@ -68,7 +68,6 @@ type (
 		MemLimit     base.MemStringOrInt `yaml:"mem_limit,omitempty"`
 		MemSwapLimit base.MemStringOrInt `yaml:"memswap_limit,omitempty"`
 		NetworkMode  string              `yaml:"network_mode,omitempty"`
-		Networks     Networks            `yaml:"networks,omitempty"`
 		ShmSize      base.MemStringOrInt `yaml:"shm_size,omitempty"`
 		Tmpfs        []string            `yaml:"tmpfs,omitempty"`
 	}
@@ -123,7 +122,9 @@ func (c *ContainerList) UnmarshalYAML(value *yaml.Node) error {
 }
 
 func (c *Container) IsPlugin() bool {
-	return len(c.Commands) == 0 && len(c.Entrypoint) == 0
+	return len(c.Commands) == 0 &&
+		len(c.Entrypoint) == 0 &&
+		len(c.Environment) == 0
 }
 
 func (c *Container) IsTrustedCloneImage() bool {

@@ -1,19 +1,39 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": ["github>woodpecker-ci/renovate-config"],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "fileMatch": ["shared/constant/constant.go"],
+      "matchStrings": [
+        "//\\s*renovate:\\s*datasource=(?<datasource>.*?) depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?\\s+DefaultCloneImage = \"docker.io/woodpeckerci/plugin-git:(?<currentValue>.*)\""
+      ],
+      "versioningTemplate": "{{#if versioning}}{{{versioning}}}{{else}}semver{{/if}}"
+    }
+  ],
   "packageRules": [
     {
+      "matchCurrentVersion": "<1.0.0",
+      "matchPackageNames": ["github.com/distribution/reference"],
+      "matchUpdateTypes": ["major", "minor"],
+      "dependencyDashboardApproval": true
+    },
+    {
+      "matchPackageNames": ["github.com/charmbracelet/huh/spinner"],
+      "enabled": false
+    },
+    {
       "matchManagers": ["docker-compose"],
-      "matchFileNames": ["docker-compose.gitpod.yml"],
+      "matchFileNames": ["docker-compose.gitpod.yaml"],
       "addLabels": ["devx"]
     },
     {
-      "groupName": "golang (lang)",
+      "groupName": "golang-lang",
       "matchPackagePatterns": ["^golang$", "xgo"],
       "matchUpdateTypes": ["minor", "patch"]
     },
     {
-      "groupName": "golang (packages)",
+      "groupName": "golang-packages",
       "matchManagers": ["gomod"],
       "matchUpdateTypes": ["minor", "patch"]
     },
