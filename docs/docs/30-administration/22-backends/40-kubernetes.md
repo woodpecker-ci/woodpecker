@@ -174,7 +174,7 @@ spec:
 
 <!-- cspell:enable -->
 
-You can also restrict a syscall's of container's with [seccomp](https://kubernetes.io/docs/tutorials/security/seccomp/) profile
+You can also restrict a syscalls of containers with [seccomp](https://kubernetes.io/docs/tutorials/security/seccomp/) profile.
 
 ```yaml
 backend_options:

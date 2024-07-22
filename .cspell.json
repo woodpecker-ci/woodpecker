@@ -170,6 +170,7 @@
     "structs",
     "sublicensable",
     "swaggo",
+    "syscalls",
     "TARGETARCH",
     "TARGETOS",
     "techknowlogick",
