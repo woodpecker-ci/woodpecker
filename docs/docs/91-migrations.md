@@ -11,6 +11,12 @@ Some versions need some changes to the server configuration or the pipeline conf
 
 ## `next`
 
+- Removed built-in environment variables:
+  - `CI_COMMIT_URL` use `CI_PIPELINE_FORGE_URL`
+  - `CI_STEP_FINISHED` as empty durring execution
+  - `CI_PIPELINE_FINISHED` as empty durring execution
+  - `CI_PIPELINE_STATUS` was always `success`
+  - `CI_STEP_STATUS` was always `success`
 - Deprecated `steps.[name].group` in favor of `steps.[name].depends_on` (see [workflow syntax](./20-usage/20-workflow-syntax.md#depends_on) to learn how to set dependencies)
 - Removed `WOODPECKER_ROOT_PATH` and `WOODPECKER_ROOT_URL` config variables. Use `WOODPECKER_HOST` with a path instead
 - Pipelines without a config file will now be skipped instead of failing

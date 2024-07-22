@@ -28,18 +28,16 @@ func SetDroneEnviron(env map[string]string) {
 	copyEnv("CI_PIPELINE_NUMBER", "DRONE_BUILD_NUMBER", env)
 	copyEnv("CI_PIPELINE_PARENT", "DRONE_BUILD_PARENT", env)
 	copyEnv("CI_PIPELINE_EVENT", "DRONE_BUILD_EVENT", env)
-	copyEnv("CI_PIPELINE_STATUS", "DRONE_BUILD_STATUS", env)
 	copyEnv("CI_PIPELINE_URL", "DRONE_BUILD_LINK", env)
 	copyEnv("CI_PIPELINE_CREATED", "DRONE_BUILD_CREATED", env)
 	copyEnv("CI_PIPELINE_STARTED", "DRONE_BUILD_STARTED", env)
-	copyEnv("CI_PIPELINE_FINISHED", "DRONE_BUILD_FINISHED", env)
 	// commit
 	copyEnv("CI_COMMIT_SHA", "DRONE_COMMIT", env)
 	copyEnv("CI_COMMIT_SHA", "DRONE_COMMIT_SHA", env)
 	copyEnv("CI_PREV_COMMIT_SHA", "DRONE_COMMIT_BEFORE", env)
 	copyEnv("CI_COMMIT_REF", "DRONE_COMMIT_REF", env)
 	copyEnv("CI_COMMIT_BRANCH", "DRONE_COMMIT_BRANCH", env)
-	copyEnv("CI_COMMIT_URL", "DRONE_COMMIT_LINK", env)
+	copyEnv("CI_PIPELINE_FORGE_URL", "DRONE_COMMIT_LINK", env)
 	copyEnv("CI_COMMIT_MESSAGE", "DRONE_COMMIT_MESSAGE", env)
 	copyEnv("CI_COMMIT_AUTHOR", "DRONE_COMMIT_AUTHOR", env)
 	copyEnv("CI_COMMIT_AUTHOR", "DRONE_COMMIT_AUTHOR_NAME", env)
@@ -59,6 +57,8 @@ func SetDroneEnviron(env map[string]string) {
 	// misc
 	copyEnv("CI_SYSTEM_HOST", "DRONE_SYSTEM_HOST", env)
 	copyEnv("CI_STEP_NUMBER", "DRONE_STEP_NUMBER", env)
+
+	env["DRONE_BUILD_STATUS"] = "success"
 
 	// some quirks
 
