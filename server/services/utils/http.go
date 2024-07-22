@@ -82,7 +82,7 @@ func Send(ctx context.Context, method, path string, privateKey ed25519.PrivateKe
 func signClient(privateKey ed25519.PrivateKey) (*httpsign.Client, error) {
 	pubKeyID := "woodpecker-ci-extensions"
 
-	signer, err := httpsign.NewEd25519Signer(pubKeyID, privateKey,
+	signer, err := httpsign.NewEd25519Signer(privateKey,
 		httpsign.NewSignConfig(),
 		httpsign.Headers("@request-target", "content-digest")) // The Content-Digest header will be auto-generated
 	if err != nil {

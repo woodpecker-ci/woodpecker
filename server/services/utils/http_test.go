@@ -38,7 +38,7 @@ func TestSignClient(t *testing.T) {
 	body := []byte("{\"foo\":\"bar\"}")
 
 	verifyHandler := func(w http.ResponseWriter, r *http.Request) {
-		verifier, err := httpsign.NewEd25519Verifier(pubKeyID, pubEd25519Key,
+		verifier, err := httpsign.NewEd25519Verifier(pubEd25519Key,
 			httpsign.NewVerifyConfig(),
 			httpsign.Headers("@request-target", "content-digest")) // The Content-Digest header will be auto-generated
 		assert.NoError(t, err)
