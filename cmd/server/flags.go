@@ -283,6 +283,12 @@ var flags = append([]cli.Flag{
 		Usage:   "how many seconds before timeout when fetching the Woodpecker configuration from a Forge",
 		Value:   time.Second * 3,
 	},
+	&cli.UintFlag{
+		Sources: cli.EnvVars("WOODPECKER_FORGE_RETRY"),
+		Name:    "forge-retry",
+		Usage:   "How many retries of fetching the Woodpecker configuration from a forge are done before we fail",
+		Value:   3,
+	},
 	//
 	// generic forge settings
 	//
