@@ -62,7 +62,7 @@ var Flags = []cli.Flag{
 	&cli.IntFlag{
 		Sources: cli.EnvVars("WOODPECKER_BACKEND_DOCKER_LIMIT_MEM_SWAP", "WOODPECKER_LIMIT_MEM_SWAP"),
 		Name:    "backend-docker-limit-mem-swap",
-		Usage:   "maximum swappable memory allowed in bytes",
+		Usage:   "maximum memory used for swap in bytes",
 	},
 	&cli.IntFlag{
 		Sources: cli.EnvVars("WOODPECKER_BACKEND_DOCKER_LIMIT_MEM", "WOODPECKER_LIMIT_MEM"),
