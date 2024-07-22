@@ -1,4 +1,4 @@
-pipeline:
+steps:
   one:
     image: debian:bullseye
     commands: echo ONE > /woodpecker/FILE

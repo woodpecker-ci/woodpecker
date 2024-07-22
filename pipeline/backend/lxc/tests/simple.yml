@@ -1,4 +1,4 @@
-pipeline:
+steps:
   job:
     image: debian:bullseye
     commands: |

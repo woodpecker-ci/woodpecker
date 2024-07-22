@@ -2,7 +2,7 @@ clone:
   git:
     image: docker.io/woodpeckerci/plugin-git
 
-pipeline:
+steps:
   job:
     image: debian:bullseye
     commands: |
