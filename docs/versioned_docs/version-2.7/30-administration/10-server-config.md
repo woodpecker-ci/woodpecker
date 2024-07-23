@@ -305,7 +305,7 @@ Example: `org1,org2`
 
 > Default: empty
 
-Comma-separated list of syncable repo owners. ???
+Repositories by those owners will be allowed to be used in woodpecker.
 
 Example: `user1,user2`
 

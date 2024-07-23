@@ -10,6 +10,8 @@ In practice, the settings are specified declaratively in the NixOS configuration
 
 ## General Configuration
 
+<!-- cspell:words Optimisation -->
+
 ```nix
 { config
 , ...

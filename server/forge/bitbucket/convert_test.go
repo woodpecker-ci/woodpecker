@@ -129,6 +129,7 @@ func Test_helper(t *testing.T) {
 			hook.PullRequest.Dest.Repo.Links.HTML.Href = "https://bitbucket.org/foo/bar"
 			hook.PullRequest.Source.Branch.Name = "change"
 			hook.PullRequest.Source.Repo.FullName = "baz/bar"
+			hook.PullRequest.Source.Commit.Hash = "c8411d7"
 			hook.PullRequest.Links.HTML.Href = "https://bitbucket.org/foo/bar/pulls/5"
 			hook.PullRequest.Desc = "updated README"
 			hook.PullRequest.Updated = time.Now()
@@ -137,10 +138,10 @@ func Test_helper(t *testing.T) {
 			g.Assert(pipeline.Event).Equal(model.EventPull)
 			g.Assert(pipeline.Author).Equal(hook.Actor.Login)
 			g.Assert(pipeline.Avatar).Equal(hook.Actor.Links.Avatar.Href)
-			g.Assert(pipeline.Commit).Equal(hook.PullRequest.Dest.Commit.Hash)
-			g.Assert(pipeline.Branch).Equal(hook.PullRequest.Dest.Branch.Name)
+			g.Assert(pipeline.Commit).Equal(hook.PullRequest.Source.Commit.Hash)
+			g.Assert(pipeline.Branch).Equal(hook.PullRequest.Source.Branch.Name)
 			g.Assert(pipeline.ForgeURL).Equal(hook.PullRequest.Links.HTML.Href)
-			g.Assert(pipeline.Ref).Equal("refs/heads/main")
+			g.Assert(pipeline.Ref).Equal("refs/heads/change")
 			g.Assert(pipeline.Refspec).Equal("change:main")
 			g.Assert(pipeline.Message).Equal(hook.PullRequest.Desc)
 			g.Assert(pipeline.Timestamp).Equal(hook.PullRequest.Updated.Unix())

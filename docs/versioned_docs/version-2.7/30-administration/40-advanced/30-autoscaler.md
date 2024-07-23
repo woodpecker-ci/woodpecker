@@ -29,8 +29,8 @@ services:
       - WOODPECKER_MIN_AGENTS=0
       - WOODPECKER_MAX_AGENTS=3
       - WOODPECKER_WORKFLOWS_PER_AGENT=2 # the number of workflows each agent can run at the same time
-      - WOODEPCKER_GRPC_ADDR=https://grpc.your-woodpecker-server.tld # the grpc address of your woodpecker server, publicly accessible from the agents
-      - WOODEPCKER_GRPC_SECURE=true
+      - WOODPECKER_GRPC_ADDR=https://grpc.your-woodpecker-server.tld # the grpc address of your woodpecker server, publicly accessible from the agents
+      - WOODPECKER_GRPC_SECURE=true
       - WOODPECKER_AGENT_ENV= # optional environment variables to pass to the agents
       - WOODPECKER_PROVIDER=hetznercloud # set the provider, you can find all the available ones down below
       - WOODPECKER_HETZNERCLOUD_API_TOKEN=${WOODPECKER_HETZNERCLOUD_API_TOKEN} # your api token for the Hetzner cloud
