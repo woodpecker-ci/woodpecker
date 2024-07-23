@@ -168,22 +168,30 @@ func convertPullHook(from *internal.PullRequestHook) *model.Pipeline {
 		event = model.EventPullClosed
 	}
 
-	return &model.Pipeline{
+	pipeline := &model.Pipeline{
 		Event:  event,
-		Commit: from.PullRequest.Dest.Commit.Hash,
-		Ref:    fmt.Sprintf("refs/heads/%s", from.PullRequest.Dest.Branch.Name),
+		Commit: from.PullRequest.Source.Commit.Hash,
+		Ref:    fmt.Sprintf("refs/heads/%s", from.PullRequest.Source.Branch.Name),
 		Refspec: fmt.Sprintf("%s:%s",
 			from.PullRequest.Source.Branch.Name,
 			from.PullRequest.Dest.Branch.Name,
 		),
 		ForgeURL:  from.PullRequest.Links.HTML.Href,
-		Branch:    from.PullRequest.Dest.Branch.Name,
+		Branch:    from.PullRequest.Source.Branch.Name,
 		Message:   from.PullRequest.Desc,
 		Avatar:    from.Actor.Links.Avatar.Href,
 		Author:    from.Actor.Login,
 		Sender:    from.Actor.Login,
 		Timestamp: from.PullRequest.Updated.UTC().Unix(),
 	}
+
+	if from.PullRequest.State == stateClosed {
+		pipeline.Commit = from.PullRequest.MergeCommit.Hash
+		pipeline.Ref = fmt.Sprintf("refs/heads/%s", from.PullRequest.Dest.Branch.Name)
+		pipeline.Branch = from.PullRequest.Dest.Branch.Name
+	}
+
+	return pipeline
 }
 
 // convertPushHook is a helper function used to convert a Bitbucket push
