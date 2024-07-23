@@ -11,6 +11,8 @@ Some versions need some changes to the server configuration or the pipeline conf
 
 ## `next`
 
+- Removed `WOODPECKER_DEV_OAUTH_HOST` and `WOODPECKER_DEV_GITEA_OAUTH_URL` use `WOODPECKER_EXPERT_FORGE_OAUTH_HOST`
+- Compatibility mode of deprecated `pipeline:`, `platform:` and `branches:` pipeline config options are now removed and pipeline will now fail if still in use.
 - Deprecated `steps.[name].group` in favor of `steps.[name].depends_on` (see [workflow syntax](./20-usage/20-workflow-syntax.md#depends_on) to learn how to set dependencies)
 - Removed `WOODPECKER_ROOT_PATH` and `WOODPECKER_ROOT_URL` config variables. Use `WOODPECKER_HOST` with a path instead
 - Pipelines without a config file will now be skipped instead of failing
@@ -19,7 +21,6 @@ Some versions need some changes to the server configuration or the pipeline conf
 - Deprecated alternative names for secrets, use `environment` with `from_secret`
 - Deprecated slice definition for env vars
 - Deprecated `environment` filter, use `when.evaluate`
-- Use `WOODPECKER_EXPERT_FORGE_OAUTH_HOST` instead of `WOODPECKER_DEV_GITEA_OAUTH_URL` or `WOODPECKER_DEV_OAUTH_HOST`
 - Deprecated `WOODPECKER_WEBHOOK_HOST` in favor of `WOODPECKER_EXPERT_WEBHOOK_HOST`
 
 ## 2.0.0
