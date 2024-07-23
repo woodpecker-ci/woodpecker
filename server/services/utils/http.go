@@ -17,19 +17,19 @@ package utils
 import (
 	"bytes"
 	"context"
-	"crypto"
+	"crypto/ed25519"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 	"net/url"
 
-	"github.com/go-ap/httpsig"
+	"github.com/yaronf/httpsign"
 )
 
 // Send makes an http request to the given endpoint, writing the input
 // to the request body and un-marshaling the output from the response body.
-func Send(ctx context.Context, method, path string, privateKey crypto.PrivateKey, in, out any) (int, error) {
+func Send(ctx context.Context, method, path string, privateKey ed25519.PrivateKey, in, out any) (int, error) {
 	uri, err := url.Parse(path)
 	if err != nil {
 		return 0, err
@@ -54,12 +54,12 @@ func Send(ctx context.Context, method, path string, privateKey crypto.PrivateKey
 		req.Header.Set("Content-Type", "application/json")
 	}
 
-	err = SignHTTPRequest(privateKey, req)
+	client, err := signClient(privateKey)
 	if err != nil {
 		return 0, err
 	}
 
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := client.Do(req)
 	if err != nil {
 		return 0, err
 	}
@@ -79,10 +79,14 @@ func Send(ctx context.Context, method, path string, privateKey crypto.PrivateKey
 	return resp.StatusCode, err
 }
 
-func SignHTTPRequest(privateKey crypto.PrivateKey, req *http.Request) error {
-	pubKeyID := "woodpecker-ci-plugins"
+func signClient(privateKey ed25519.PrivateKey) (*httpsign.Client, error) {
+	pubKeyID := "woodpecker-ci-extensions"
 
-	signer := httpsig.NewEd25519Signer(pubKeyID, privateKey, nil)
-
-	return signer.Sign(req)
+	signer, err := httpsign.NewEd25519Signer(privateKey,
+		httpsign.NewSignConfig(),
+		httpsign.Headers("@request-target", "content-digest")) // The Content-Digest header will be auto-generated
+	if err != nil {
+		return nil, err
+	}
+	return httpsign.NewDefaultClient(httpsign.NewClientConfig().SetSignatureName(pubKeyID).SetSigner(signer)), nil // sign requests, don't verify responses
 }
