@@ -64,11 +64,11 @@
 
     <template #tabActions>
       <div class="flex gap-x-4">
-        <div class="flex space-x-1 items-center flex-shrink-0" :title="created">
+        <div class="flex space-x-1 items-center flex-shrink-0" :title="$t('repo.pipeline.created', { created })">
           <Icon name="since" />
           <span>{{ since }}</span>
         </div>
-        <div class="flex space-x-1 items-center flex-shrink-0">
+        <div class="flex space-x-1 items-center flex-shrink-0" :title="$t('repo.pipeline.duration')">
           <Icon name="duration" />
           <span>{{ duration }}</span>
         </div>
@@ -104,6 +104,7 @@ import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 
 import Button from '~/components/atomic/Button.vue';
+import Icon from '~/components/atomic/Icon.vue';
 import DeployPipelinePopup from '~/components/layout/popups/DeployPipelinePopup.vue';
 import Scaffold from '~/components/layout/scaffold/Scaffold.vue';
 import Tab from '~/components/layout/scaffold/Tab.vue';

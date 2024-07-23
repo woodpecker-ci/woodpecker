@@ -25,7 +25,7 @@ import (
 	"time"
 
 	"github.com/rs/zerolog/log"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 	"gopkg.in/yaml.v3"
 	v1 "k8s.io/api/core/v1"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -83,7 +83,7 @@ func newDefaultDeleteOptions() meta_v1.DeleteOptions {
 
 func configFromCliContext(ctx context.Context) (*config, error) {
 	if ctx != nil {
-		if c, ok := ctx.Value(types.CliContext).(*cli.Context); ok {
+		if c, ok := ctx.Value(types.CliCommand).(*cli.Command); ok {
 			config := config{
 				Namespace:                   c.String("backend-k8s-namespace"),
 				StorageClass:                c.String("backend-k8s-storage-class"),
@@ -395,7 +395,6 @@ func (e *kube) DestroyStep(ctx context.Context, step *types.Step, taskUUID strin
 func (e *kube) DestroyWorkflow(ctx context.Context, conf *types.Config, taskUUID string) error {
 	log.Trace().Str("taskUUID", taskUUID).Msg("deleting Kubernetes primitives")
 
-	// Use noContext because the ctx sent to this function will be canceled/done in case of error or canceled by user.
 	for _, stage := range conf.Stages {
 		for _, step := range stage.Steps {
 			err := stopPod(ctx, e, step, defaultDeleteOptions)

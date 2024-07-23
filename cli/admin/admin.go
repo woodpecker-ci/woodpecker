@@ -15,7 +15,7 @@
 package admin
 
 import (
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
 	"go.woodpecker-ci.org/woodpecker/v2/cli/admin/registry"
 )
@@ -24,7 +24,7 @@ import (
 var Command = &cli.Command{
 	Name:  "admin",
 	Usage: "administer server settings",
-	Subcommands: []*cli.Command{
+	Commands: []*cli.Command{
 		registry.Command,
 	},
 }

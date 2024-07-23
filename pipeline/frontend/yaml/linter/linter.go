@@ -172,9 +172,6 @@ func (l *Linter) lintTrusted(config *WorkflowConfig, c *types.Container, area st
 	if len(c.NetworkMode) != 0 {
 		errors = append(errors, "Insufficient privileges to use network_mode")
 	}
-	if c.Networks.Networks != nil && len(c.Networks.Networks) != 0 {
-		errors = append(errors, "Insufficient privileges to use networks")
-	}
 	if c.Volumes.Volumes != nil && len(c.Volumes.Volumes) != 0 {
 		errors = append(errors, "Insufficient privileges to use volumes")
 	}
@@ -216,45 +213,6 @@ func (l *Linter) lintDeprecations(config *WorkflowConfig) (err error) {
 	err = xyaml.Unmarshal([]byte(config.RawConfig), parsed)
 	if err != nil {
 		return err
-	}
-
-	if parsed.PipelineDoNotUseIt.ContainerList != nil {
-		err = multierr.Append(err, &errorTypes.PipelineError{
-			Type:    errorTypes.PipelineErrorTypeDeprecation,
-			Message: "Please use 'steps:' instead of deprecated 'pipeline:' list",
-			Data: errors.DeprecationErrorData{
-				File:  config.File,
-				Field: "pipeline",
-				Docs:  "https://woodpecker-ci.org/docs/next/migrations#next-200",
-			},
-			IsWarning: true,
-		})
-	}
-
-	if parsed.PlatformDoNotUseIt != "" {
-		err = multierr.Append(err, &errorTypes.PipelineError{
-			Type:    errorTypes.PipelineErrorTypeDeprecation,
-			Message: "Please use labels instead of deprecated 'platform' filters",
-			Data: errors.DeprecationErrorData{
-				File:  config.File,
-				Field: "platform",
-				Docs:  "https://woodpecker-ci.org/docs/next/migrations#next-200",
-			},
-			IsWarning: true,
-		})
-	}
-
-	if parsed.BranchesDoNotUseIt != nil {
-		err = multierr.Append(err, &errorTypes.PipelineError{
-			Type:    errorTypes.PipelineErrorTypeDeprecation,
-			Message: "Please use global when instead of deprecated 'branches' filter",
-			Data: errors.DeprecationErrorData{
-				File:  config.File,
-				Field: "branches",
-				Docs:  "https://woodpecker-ci.org/docs/next/migrations#next-200",
-			},
-			IsWarning: true,
-		})
 	}
 
 	for _, step := range parsed.Steps.ContainerList {
