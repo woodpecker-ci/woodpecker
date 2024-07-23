@@ -4,10 +4,11 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @anbraten, @pat-s, @qwerty287, @smainz
+@6543, @anbraten, @j04n-f, @pat-s, @qwerty287, @smainz
 
 ### 💥 Breaking changes
 
+- Remove `WOODPECKER_DEV_OAUTH_HOST` and `WOODPECKER_DEV_GITEA_OAUTH_URL` [[#3961](https://github.com/woodpecker-ci/woodpecker/pull/3961)]
 - Remove deprecated pipeline settings [[#3916](https://github.com/woodpecker-ci/woodpecker/pull/3916)]
 - server: remove old unused routes [[#3845](https://github.com/woodpecker-ci/woodpecker/pull/3845)]
 - CLI: remove step-id and add step-number as option to logs [[#3927](https://github.com/woodpecker-ci/woodpecker/pull/3927)]
@@ -18,6 +19,7 @@
 
 ### 🐛 Bug Fixes
 
+- Add updated, merged and declined events to bb webhook activation [[#3963](https://github.com/woodpecker-ci/woodpecker/pull/3963)]
 - Fix login via navbar [[#3962](https://github.com/woodpecker-ci/woodpecker/pull/3962)]
 - Truncate creation in list [[#3952](https://github.com/woodpecker-ci/woodpecker/pull/3952)]
 - Fix panic if forge is unreachable [[#3944](https://github.com/woodpecker-ci/woodpecker/pull/3944)]
