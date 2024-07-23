@@ -22,6 +22,7 @@ Some versions need some changes to the server configuration or the pipeline conf
 - Deprecated slice definition for env vars
 - Deprecated `environment` filter, use `when.evaluate`
 - Deprecated `WOODPECKER_WEBHOOK_HOST` in favor of `WOODPECKER_EXPERT_WEBHOOK_HOST`
+- Migrated to rfc9421 for webhook signatures
 
 ## 2.0.0
 
