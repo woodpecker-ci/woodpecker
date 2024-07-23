@@ -139,10 +139,11 @@ func TestParse(t *testing.T) {
 }
 
 func TestParseLegacy(t *testing.T) {
-	sampleYamlPipelineLegacy := `
-platform: linux/amd64
+	sampleYamlPipeline := `
+labels:
+  platform: linux/amd64
 
-pipeline:
+steps:
   say hello:
     image: bash
     commands: echo hello
@@ -164,7 +165,7 @@ pipeline:
     commands: meh!
 `
 
-	workflow1, err := ParseString(sampleYamlPipelineLegacy)
+	workflow1, err := ParseString(sampleYamlPipeline)
 	if !assert.NoError(t, err) {
 		return
 	}
