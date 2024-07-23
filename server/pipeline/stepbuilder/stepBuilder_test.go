@@ -348,10 +348,10 @@ func TestBranchFilter(t *testing.T) {
 			{Data: []byte(`
 when:
   event: push
+  branch: main
 steps:
   xxx:
     image: scratch
-branches: main
 `)},
 			{Data: []byte(`
 when:
