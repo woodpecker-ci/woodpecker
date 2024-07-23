@@ -8,6 +8,8 @@
 
 ### 💥 Breaking changes
 
+- Require gitlab 12.4 [[#3966](https://github.com/woodpecker-ci/woodpecker/pull/3966)]
+- Migrate to maintained httpsign library [[#3839](https://github.com/woodpecker-ci/woodpecker/pull/3839)]
 - Remove `WOODPECKER_DEV_OAUTH_HOST` and `WOODPECKER_DEV_GITEA_OAUTH_URL` [[#3961](https://github.com/woodpecker-ci/woodpecker/pull/3961)]
 - Remove deprecated pipeline settings [[#3916](https://github.com/woodpecker-ci/woodpecker/pull/3916)]
 - server: remove old unused routes [[#3845](https://github.com/woodpecker-ci/woodpecker/pull/3845)]
