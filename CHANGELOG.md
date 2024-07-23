@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @pat-s, @qwerty287, @smainz
+@6543, @anbraten, @pat-s, @qwerty287, @smainz
 
 ### 💥 Breaking changes
 
@@ -15,6 +15,12 @@
 ### 🔒 Security
 
 - Update Forgejo SDK [[#3948](https://github.com/woodpecker-ci/woodpecker/pull/3948)]
+
+### 🐛 Bug Fixes
+
+- Fix login via navbar [[#3962](https://github.com/woodpecker-ci/woodpecker/pull/3962)]
+- Truncate creation in list [[#3952](https://github.com/woodpecker-ci/woodpecker/pull/3952)]
+- Fix panic if forge is unreachable [[#3944](https://github.com/woodpecker-ci/woodpecker/pull/3944)]
 
 ### 📚 Documentation
 
@@ -28,11 +34,6 @@
 - Improve cron list [[#3947](https://github.com/woodpecker-ci/woodpecker/pull/3947)]
 - Add PULLREQUEST_DRONE_PULL_REQUEST drone env [[#3939](https://github.com/woodpecker-ci/woodpecker/pull/3939)]
 - Make agent gRPC errors distinguishable [[#3936](https://github.com/woodpecker-ci/woodpecker/pull/3936)]
-
-### 🐛 Bug Fixes
-
-- Truncate creation in list [[#3952](https://github.com/woodpecker-ci/woodpecker/pull/3952)]
-- Fix panic if forge is unreachable [[#3944](https://github.com/woodpecker-ci/woodpecker/pull/3944)]
 
 ### Misc
 
