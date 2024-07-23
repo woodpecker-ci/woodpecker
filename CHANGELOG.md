@@ -19,6 +19,7 @@
 
 ### 🐛 Bug Fixes
 
+- Change Bitbucket PR hook to point the source branch, commit & ref [[#3965](https://github.com/woodpecker-ci/woodpecker/pull/3965)]
 - Add updated, merged and declined events to bb webhook activation [[#3963](https://github.com/woodpecker-ci/woodpecker/pull/3963)]
 - Fix login via navbar [[#3962](https://github.com/woodpecker-ci/woodpecker/pull/3962)]
 - Truncate creation in list [[#3952](https://github.com/woodpecker-ci/woodpecker/pull/3952)]
