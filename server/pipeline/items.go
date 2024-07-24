@@ -118,7 +118,7 @@ func parsePipeline(forge forge.Forge, store store.Store, currentPipeline *model.
 			HTTPProxy:  server.Config.Pipeline.Proxy.HTTP,
 			HTTPSProxy: server.Config.Pipeline.Proxy.HTTPS,
 		}),
-		compiler.WithWorkspaceFromURL("/woodpecker", repo.ForgeURL),
+		compiler.WithWorkspaceFromURL(compiler.DefaultWorkspaceBase, repo.ForgeURL),
 		compiler.WithTrusted(repo.IsTrusted),
 		compiler.WithNetrcOnlyTrusted(repo.NetrcOnlyTrusted),
 	)
