@@ -117,7 +117,7 @@ func (l *Linter) lintContainers(config *WorkflowConfig, area string) error {
 				linterErr = multierr.Append(linterErr, err)
 			}
 		}
-		if err := l.lintCommands(config, container, area); err != nil {
+		if err := l.lintSettings(config, container, area); err != nil {
 			linterErr = multierr.Append(linterErr, err)
 		}
 	}
@@ -132,16 +132,18 @@ func (l *Linter) lintImage(config *WorkflowConfig, c *types.Container, area stri
 	return nil
 }
 
-func (l *Linter) lintCommands(config *WorkflowConfig, c *types.Container, field string) error {
-	if len(c.Commands) == 0 {
+func (l *Linter) lintSettings(config *WorkflowConfig, c *types.Container, field string) error {
+	if len(c.Settings) == 0 {
 		return nil
 	}
-	if len(c.Settings) != 0 {
-		var keys []string
-		for key := range c.Settings {
-			keys = append(keys, key)
-		}
-		return newLinterError(fmt.Sprintf("Cannot configure both commands and custom attributes %v", keys), config.File, fmt.Sprintf("%s.%s", field, c.Name), false)
+	if len(c.Commands) != 0 {
+		return newLinterError("Cannot configure both commands and settings", config.File, fmt.Sprintf("%s.%s", field, c.Name), false)
+	}
+	if len(c.Entrypoint) != 0 {
+		return newLinterError("Cannot configure both entrypoint and settings", config.File, fmt.Sprintf("%s.%s", field, c.Name), false)
+	}
+	if len(c.Environment) != 0 {
+		return newLinterError("Cannot configure both environment and settings", config.File, fmt.Sprintf("%s.%s", field, c.Name), false)
 	}
 	return nil
 }
@@ -169,9 +171,6 @@ func (l *Linter) lintTrusted(config *WorkflowConfig, c *types.Container, area st
 	}
 	if len(c.NetworkMode) != 0 {
 		errors = append(errors, "Insufficient privileges to use network_mode")
-	}
-	if c.Networks.Networks != nil && len(c.Networks.Networks) != 0 {
-		errors = append(errors, "Insufficient privileges to use networks")
 	}
 	if c.Volumes.Volumes != nil && len(c.Volumes.Volumes) != 0 {
 		errors = append(errors, "Insufficient privileges to use volumes")
@@ -214,45 +213,6 @@ func (l *Linter) lintDeprecations(config *WorkflowConfig) (err error) {
 	err = xyaml.Unmarshal([]byte(config.RawConfig), parsed)
 	if err != nil {
 		return err
-	}
-
-	if parsed.PipelineDoNotUseIt.ContainerList != nil {
-		err = multierr.Append(err, &errorTypes.PipelineError{
-			Type:    errorTypes.PipelineErrorTypeDeprecation,
-			Message: "Please use 'steps:' instead of deprecated 'pipeline:' list",
-			Data: errors.DeprecationErrorData{
-				File:  config.File,
-				Field: "pipeline",
-				Docs:  "https://woodpecker-ci.org/docs/next/migrations#next-200",
-			},
-			IsWarning: true,
-		})
-	}
-
-	if parsed.PlatformDoNotUseIt != "" {
-		err = multierr.Append(err, &errorTypes.PipelineError{
-			Type:    errorTypes.PipelineErrorTypeDeprecation,
-			Message: "Please use labels instead of deprecated 'platform' filters",
-			Data: errors.DeprecationErrorData{
-				File:  config.File,
-				Field: "platform",
-				Docs:  "https://woodpecker-ci.org/docs/next/migrations#next-200",
-			},
-			IsWarning: true,
-		})
-	}
-
-	if parsed.BranchesDoNotUseIt != nil {
-		err = multierr.Append(err, &errorTypes.PipelineError{
-			Type:    errorTypes.PipelineErrorTypeDeprecation,
-			Message: "Please use global when instead of deprecated 'branches' filter",
-			Data: errors.DeprecationErrorData{
-				File:  config.File,
-				Field: "branches",
-				Docs:  "https://woodpecker-ci.org/docs/next/migrations#next-200",
-			},
-			IsWarning: true,
-		})
 	}
 
 	for _, step := range parsed.Steps.ContainerList {

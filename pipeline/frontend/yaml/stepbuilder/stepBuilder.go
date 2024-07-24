@@ -203,6 +203,8 @@ func (b *StepBuilder) compileWorkflow(parsed *yaml_types.Workflow, environ map[s
 			),
 		),
 		compiler.WithTrusted(b.RepoIsTrusted),
+		// compiler.WithProxy(b.ProxyOpts),
+		// compiler.WithWorkspaceFromURL(compiler.DefaultWorkspaceBase, b.Repo.ForgeURL),
 		compiler.WithMetadata(metadata),
 	)
 	options = append(options, b.CompilerOptions...)

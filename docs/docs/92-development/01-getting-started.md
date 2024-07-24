@@ -4,12 +4,12 @@ You can develop on your local computer by following the [steps below](#preparati
 
 ## Gitpod
 
-If you want to start development or updating docs as easy as possible, you can use our preconfigured setup for Woodpecker using [Gitpod](https://github.com/gitpod-io/gitpod). Gitpod starts a complete development setup in the cloud containing:
+If you want to start development or updating docs as easy as possible, you can use our pre-configured setup for Woodpecker using [Gitpod](https://github.com/gitpod-io/gitpod). Gitpod starts a complete development setup in the cloud containing:
 
 - An IDE in the browser or bridged to your local VS-Code or Jetbrains
-- A preconfigured [Gitea](https://github.com/go-gitea/gitea) instance as forge
-- A preconfigured Woodpecker server
-- A single preconfigured Woodpecker agent node
+- A pre-configured [Gitea](https://github.com/go-gitea/gitea) instance as forge
+- A pre-configured Woodpecker server
+- A single pre-configured Woodpecker agent node
 - Our docs preview server
 
 Start Woodpecker in Gitpod by clicking on the following badge. You can log in with `woodpecker` and `password`.
@@ -46,7 +46,7 @@ To apply it during local development, take a look at [`pre-commit`s documentatio
 
 ### Create a `.env` file with your development configuration
 
-Similar to the environment variables you can set for your production setup of Woodpecker, you can create a `.env` in the root of the Woodpecker project and add any need config to it.
+Similar to the environment variables you can set for your production setup of Woodpecker, you can create a `.env` file in the root of the Woodpecker project and add any needed config to it.
 
 A common config for debugging would look like this:
 

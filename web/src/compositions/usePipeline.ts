@@ -27,7 +27,8 @@ export default (pipeline: Ref<Pipeline | undefined>) => {
   const i18n = useI18n();
   const since = computed(() => {
     if (sinceRaw.value === 0) {
-      return i18n.t('time.not_started');
+      // return i18n.t('time.not_started');
+      return '-';
     }
 
     if (sinceElapsed.value === undefined) {
@@ -73,15 +74,11 @@ export default (pipeline: Ref<Pipeline | undefined>) => {
     return prettyDuration(durationElapsed.value);
   });
 
-  const message = computed(() => {
-    if (!pipeline.value) {
-      return '';
-    }
+  const message = computed(() => convertEmojis(pipeline.value?.message ?? ''));
+  const shortMessage = computed(() => message.value.split('\n')[0]);
 
-    return convertEmojis(pipeline.value.message);
-  });
-
-  const title = computed(() => message.value.split('\n')[0]);
+  const prTitleWithDescription = computed(() => convertEmojis(pipeline.value?.title ?? ''));
+  const prTitle = computed(() => prTitleWithDescription.value.split('\n')[0]);
 
   const prettyRef = computed(() => {
     if (pipeline.value?.event === 'push' || pipeline.value?.event === 'deployment') {
@@ -117,5 +114,5 @@ export default (pipeline: Ref<Pipeline | undefined>) => {
     return toLocaleString(new Date(start * 1000));
   });
 
-  return { since, duration, message, title, prettyRef, created };
+  return { since, duration, message, shortMessage, prTitle, prTitleWithDescription, prettyRef, created };
 };

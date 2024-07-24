@@ -94,17 +94,11 @@ func TestUnmarshalContainer(t *testing.T) {
 		MemLimit:     base.MemStringOrInt(1024),
 		MemSwapLimit: base.MemStringOrInt(1024),
 		Name:         "my-build-container",
-		Networks: Networks{
-			Networks: []*Network{
-				{Name: "some-network"},
-				{Name: "other-network"},
-			},
-		},
-		NetworkMode: "bridge",
-		Pull:        true,
-		Privileged:  true,
-		ShmSize:     base.MemStringOrInt(1024),
-		Tmpfs:       base.StringOrSlice{"/var/lib/test"},
+		NetworkMode:  "bridge",
+		Pull:         true,
+		Privileged:   true,
+		ShmSize:      base.MemStringOrInt(1024),
+		Tmpfs:        base.StringOrSlice{"/var/lib/test"},
 		Volumes: Volumes{
 			Volumes: []*Volume{
 				{Source: "", Destination: "/var/lib/mysql"},

@@ -15,12 +15,13 @@
 package core
 
 import (
+	"context"
 	"os"
 
 	// Load config from .env file.
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/rs/zerolog/log"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
 	backend "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 	"go.woodpecker-ci.org/woodpecker/v2/shared/logger"
@@ -28,8 +29,8 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/version"
 )
 
-func RunAgent(backends []backend.Backend) {
-	app := cli.NewApp()
+func RunAgent(ctx context.Context, backends []backend.Backend) {
+	app := &cli.Command{}
 	app.Name = "woodpecker-agent"
 	app.Version = version.String()
 	app.Usage = "woodpecker agent"
@@ -47,7 +48,7 @@ func RunAgent(backends []backend.Backend) {
 	}
 	app.Flags = agentFlags
 
-	if err := app.Run(os.Args); err != nil {
+	if err := app.Run(ctx, os.Args); err != nil {
 		log.Fatal().Err(err).Msg("error running agent") //nolint:forbidigo
 	}
 }

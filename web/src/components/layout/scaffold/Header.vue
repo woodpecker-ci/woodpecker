@@ -52,6 +52,7 @@
 </template>
 
 <script setup lang="ts">
+import IconButton from '~/components/atomic/IconButton.vue';
 import TextField from '~/components/form/TextField.vue';
 import Container from '~/components/layout/Container.vue';
 

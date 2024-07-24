@@ -15,12 +15,13 @@
 package common
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
 	forge_types "go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v2/shared/constant"
@@ -87,16 +88,16 @@ func DetectPipelineConfig() (isDir bool, config string, _ error) {
 	return false, "", fmt.Errorf("could not detect pipeline config")
 }
 
-func RunPipelineFunc(c *cli.Context, fileFunc, dirFunc func(*cli.Context, string) error) error {
+func RunPipelineFunc(ctx context.Context, c *cli.Command, fileFunc, dirFunc func(context.Context, *cli.Command, string) error) error {
 	if c.Args().Len() == 0 {
 		isDir, path, err := DetectPipelineConfig()
 		if err != nil {
 			return err
 		}
 		if isDir {
-			return dirFunc(c, path)
+			return dirFunc(ctx, c, path)
 		}
-		return fileFunc(c, path)
+		return fileFunc(ctx, c, path)
 	}
 
 	multiArgs := c.Args().Len() > 1
@@ -109,11 +110,11 @@ func RunPipelineFunc(c *cli.Context, fileFunc, dirFunc func(*cli.Context, string
 			fmt.Println("#", fi.Name())
 		}
 		if fi.IsDir() {
-			if err := dirFunc(c, arg); err != nil {
+			if err := dirFunc(ctx, c, arg); err != nil {
 				return err
 			}
 		} else {
-			if err := fileFunc(c, arg); err != nil {
+			if err := fileFunc(ctx, c, arg); err != nil {
 				return err
 			}
 		}

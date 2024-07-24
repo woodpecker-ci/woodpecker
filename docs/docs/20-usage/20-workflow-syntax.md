@@ -6,6 +6,11 @@ The Workflow section defines a list of steps to build, test and deploy your code
 An exception to this rule are steps with a [`status: [failure]`](#status) condition, which ensures that they are executed in the case of a failed run.
 :::
 
+:::note
+We support most of YAML 1.2, but preserve some behavior from 1.1 for backward compatibility.
+Read more at: [https://github.com/go-yaml/yaml](https://github.com/go-yaml/yaml/tree/v3)
+:::
+
 Example steps:
 
 ```yaml
@@ -196,7 +201,7 @@ Some of the steps may be allowed to fail without causing the whole workflow and 
 
 ### `when` - Conditional Execution
 
-Woodpecker supports defining a list of conditions for a step by using a `when` block. If at least one of the conditions in the `when` block evaluate to true the step is executed, otherwise it is skipped. A condition is evaluated to true if _all_ subconditions are true.
+Woodpecker supports defining a list of conditions for a step by using a `when` block. If at least one of the conditions in the `when` block evaluate to true the step is executed, otherwise it is skipped. A condition is evaluated to true if _all_ sub-conditions are true.
 A condition can be a check like:
 
 ```diff
@@ -215,7 +220,7 @@ A condition can be a check like:
 The `slack` step is executed if one of these conditions is met:
 
 1. The pipeline is executed from a pull request in the repo `test/test`
-2. The pipeline is executed from a push to `maiǹ`
+2. The pipeline is executed from a push to `main`
 
 #### `repo`
 
@@ -518,7 +523,9 @@ For more details check the [services docs](./60-services.md).
 
 ## `workspace`
 
-The workspace defines the shared volume and working directory shared by all workflow steps. The default workspace matches the pattern `/woodpecker/src/github.com/octocat/hello-world`, based on your repository URL.
+The workspace defines the shared volume and working directory shared by all workflow steps.
+The default workspace base is `/woodpecker` and the path is extended with the repository URL (`src/{url-without-schema}`).
+So an example would be `/woodpecker/src/github.com/octocat/hello-world`.
 
 The workspace can be customized using the workspace block in the YAML file:
 
@@ -534,6 +541,10 @@ The workspace can be customized using the workspace block in the YAML file:
        - go get
        - go test
 ```
+
+:::note
+Plugins will always have the workspace base at `/woodpecker`
+:::
 
 The base attribute defines a shared base volume available to all steps. This ensures your source code, dependencies and compiled binaries are persisted and shared between steps.
 

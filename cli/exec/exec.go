@@ -22,7 +22,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
 	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline"
@@ -49,7 +49,7 @@ var Command = &cli.Command{
 	Flags:     utils.MergeSlices(flags, docker.Flags, kubernetes.Flags, local.Flags),
 }
 
-func run(c *cli.Context) error {
+func run(ctx context.Context, c *cli.Command) error {
 	repoPath := c.Args().First()
 	if repoPath == "" {
 		repoPath = "."
@@ -76,7 +76,7 @@ func run(c *cli.Context) error {
 	}
 
 	getWorkflowMetadata := func(workflow *model.Workflow) metadata.Metadata {
-		return metadataFromContext(c, workflow)
+		return metadataFromContext(ctx, workflow)
 	}
 
 	repoIsTrusted := false
@@ -131,14 +131,14 @@ func run(c *cli.Context) error {
 	return nil
 }
 
-func runWorkflow(c *cli.Context, compiled *backend_types.Config) error {
-	backendCtx := context.WithValue(c.Context, backend_types.CliContext, c)
+func runWorkflow(ctx context.Context, c *cli.Command, compiled *backend_types.Config) error {
 	backends := []backend_types.Backend{
 		kubernetes.New(),
 		docker.New(),
 		local.New(),
 		dummy.New(),
 	}
+	backendCtx := context.WithValue(ctx, backend_types.CliCommand, c)
 	backendEngine, err := backend.FindBackend(backendCtx, backends, c.String("backend-engine"))
 	if err != nil {
 		return err
@@ -148,21 +148,21 @@ func runWorkflow(c *cli.Context, compiled *backend_types.Config) error {
 		return err
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), c.Duration("timeout"))
+	pipelineCtx, cancel := context.WithTimeout(context.Background(), c.Duration("timeout"))
 	defer cancel()
-	ctx = utils.WithContextSigtermCallback(ctx, func() {
-		fmt.Println("ctrl+c received, terminating process")
+	pipelineCtx = utils.WithContextSigtermCallback(pipelineCtx, func() {
+		fmt.Printf("ctrl+c received, terminating current pipeline '%s'\n", confStr)
 	})
 
 	return pipeline.New(compiled,
-		pipeline.WithContext(ctx),
+		pipeline.WithContext(pipelineCtx), //nolint:contextcheck
 		pipeline.WithTracer(pipeline.DefaultTracer),
 		pipeline.WithLogger(defaultLogger),
 		pipeline.WithBackend(backendEngine),
 		pipeline.WithDescription(map[string]string{
 			"CLI": "exec",
 		}),
-	).Run(c.Context)
+	).Run(ctx)
 }
 
 // convertPathForWindows converts a path to use slash separators
