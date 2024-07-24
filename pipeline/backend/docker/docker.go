@@ -22,7 +22,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/image"
 	"github.com/docker/docker/api/types/network"
@@ -174,7 +173,7 @@ func (e *docker) SetupWorkflow(ctx context.Context, conf *backend.Config, taskUU
 		networkDriver = networkDriverNAT
 	}
 	for _, n := range conf.Networks {
-		_, err := e.client.NetworkCreate(ctx, n.Name, types.NetworkCreate{
+		_, err := e.client.NetworkCreate(ctx, n.Name, network.CreateOptions{
 			Driver:     networkDriver,
 			EnableIPv6: &e.enableIPv6,
 		})
