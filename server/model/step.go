@@ -37,7 +37,7 @@ type Step struct {
 	Failure    string      `json:"-"                    xorm:"failure"`
 	ExitCode   int         `json:"exit_code"            xorm:"exit_code"`
 	Started    int64       `json:"started,omitempty"    xorm:"started"`
-	Finished   int64       `json:"finished,omitempty"   xorm:"stopped"`
+	Finished   int64       `json:"finished,omitempty"   xorm:"finished"`
 	Type       StepType    `json:"type,omitempty"       xorm:"type"`
 } //	@name Step
 
