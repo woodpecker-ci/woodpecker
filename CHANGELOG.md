@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-07-23
+## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-07-24
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -8,6 +8,8 @@
 
 ### 💥 Breaking changes
 
+- Drop version in schema [[#3970](https://github.com/woodpecker-ci/woodpecker/pull/3970)]
+- Update docker to v27 [[#3972](https://github.com/woodpecker-ci/woodpecker/pull/3972)]
 - Require gitlab 12.4 [[#3966](https://github.com/woodpecker-ci/woodpecker/pull/3966)]
 - Migrate to maintained httpsign library [[#3839](https://github.com/woodpecker-ci/woodpecker/pull/3839)]
 - Remove `WOODPECKER_DEV_OAUTH_HOST` and `WOODPECKER_DEV_GITEA_OAUTH_URL` [[#3961](https://github.com/woodpecker-ci/woodpecker/pull/3961)]
