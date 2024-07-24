@@ -86,7 +86,8 @@ Sometimes you have some tasks that you need to do in every project. For example,
 If you want to get a Slack notification after your pipeline has finished, you can add a Slack plugin to your pipeline:
 
 ```yaml
----
+...
+
 - name: notify me on Slack
   image: plugins/slack
   settings:
