@@ -15,7 +15,6 @@
 package exec
 
 import (
-	"context"
 	"runtime"
 	"strings"
 
@@ -26,7 +25,7 @@ import (
 )
 
 // return the metadata from the cli context.
-func metadataFromContext(ctx context.Context, c *cli.Command, workflow *model.Workflow) metadata.Metadata {
+func metadataFromCommand(c *cli.Command, workflow *model.Workflow) metadata.Metadata {
 	platform := c.String("system-platform")
 	if platform == "" {
 		platform = runtime.GOOS + "/" + runtime.GOARCH

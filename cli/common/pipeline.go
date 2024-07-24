@@ -28,7 +28,7 @@ import (
 )
 
 // TODO: use don't import from server => move FileMeta to pipeline package
-func GetConfigs(c *cli.Context, dir string) ([]*forge_types.FileMeta, error) {
+func GetConfigs(ctx context.Context, dir string) ([]*forge_types.FileMeta, error) {
 	stat, err := os.Stat(dir)
 	if err != nil {
 		return nil, err
