@@ -52,19 +52,14 @@ export default class ApiClient {
     });
 
     if (!res.ok) {
-      let message = res.statusText;
-      const resText = await res.text();
-      if (resText) {
-        message = `${res.statusText}: ${resText}`;
-      }
       const error: ApiError = {
         status: res.status,
-        message,
+        message: res.statusText,
       };
       if (this.onerror) {
         this.onerror(error);
       }
-      throw new Error(message);
+      throw new Error(res.statusText);
     }
 
     const contentType = res.headers.get('Content-Type');
