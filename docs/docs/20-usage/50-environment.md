@@ -172,7 +172,7 @@ Example commit substitution:
 ```diff
  steps:
    - name: docker
-     image: plugins/docker
+     image: woodpeckerci/plugin-docker-buildx
      settings:
 +      tags: ${CI_COMMIT_SHA}
 ```
@@ -182,7 +182,7 @@ Example tag substitution:
 ```diff
  steps:
    - name: docker
-     image: plugins/docker
+     image: woodpeckerci/plugin-docker-buildx
      settings:
 +      tags: ${CI_COMMIT_TAG}
 ```
@@ -210,7 +210,7 @@ Example variable substitution with substring:
 ```diff
  steps:
    - name: docker
-     image: plugins/docker
+     image: woodpeckerci/plugin-docker-buildx
      settings:
 +      tags: ${CI_COMMIT_SHA:0:8}
 ```
@@ -220,7 +220,7 @@ Example variable substitution strips `v` prefix from `v.1.0.0`:
 ```diff
  steps:
    - name: docker
-     image: plugins/docker
+     image: woodpeckerci/plugin-docker-buildx
      settings:
 +      tags: ${CI_COMMIT_TAG##v}
 ```
