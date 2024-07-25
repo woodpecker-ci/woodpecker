@@ -43,8 +43,8 @@
 
 <script lang="ts" setup>
 import { useNotification } from '@kyvg/vue3-notification';
-import { inject as vueInject, Ref } from 'vue';
-import { computed, onMounted, ref, watch } from 'vue';
+import type { Ref } from 'vue';
+import { computed, onMounted, ref, inject as vueInject, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 
@@ -57,7 +57,7 @@ import Panel from '~/components/layout/Panel.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { inject } from '~/compositions/useInjectProvide';
 import { usePaginate } from '~/compositions/usePaginate';
-import { RepoPermissions } from '~/lib/api/types';
+import type { RepoPermissions } from '~/lib/api/types';
 
 defineProps<{
   open: boolean;
@@ -70,7 +70,6 @@ const emit = defineEmits<{
 const apiClient = useApiClient();
 const notifications = useNotification();
 const i18n = useI18n();
-
 
 const repo = inject('repo');
 const repoPermissions = vueInject<Ref<RepoPermissions>>('repo-permissions');
