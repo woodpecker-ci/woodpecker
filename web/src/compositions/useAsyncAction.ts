@@ -1,6 +1,9 @@
 import { computed, ref } from 'vue';
 
-export function useAsyncAction<T extends unknown[]>(action: (...a: T) => void | Promise<void>, onerror: ((error: any) => void) | undefined = undefined) {
+export function useAsyncAction<T extends unknown[]>(
+  action: (...a: T) => void | Promise<void>,
+  onerror: ((error: any) => void) | undefined = undefined,
+) {
   const isLoading = ref(false);
 
   async function doSubmit(...a: T) {
@@ -12,9 +15,9 @@ export function useAsyncAction<T extends unknown[]>(action: (...a: T) => void | 
     try {
       await action(...a);
     } catch (error) {
-      console.error(error)
+      console.error(error);
       if (onerror) {
-        onerror(error)
+        onerror(error);
       }
     }
     isLoading.value = false;
