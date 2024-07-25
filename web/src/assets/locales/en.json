@@ -242,9 +242,7 @@
       "errors": "Errors ({count})",
       "warnings": "Warnings ({count})",
       "show_errors": "Show errors",
-      "we_got_some_errors": "Oh no, we got some errors!",
-      "duration": "Pipeline duration",
-      "created": "Created: {created}"
+      "we_got_some_errors": "Oh no, we got some errors!"
     }
   },
   "org": {
@@ -469,5 +467,7 @@
   "internal_error": "Some internal error occurred",
   "registration_closed": "The registration is closed",
   "access_denied": "You are not allowed to access this instance",
-  "invalid_state": "The OAuth state is invalid"
+  "invalid_state": "The OAuth state is invalid",
+  "pipeline_duration": "Pipeline duration: {duration}",
+  "pipeline_created": "Created: {created}"
 }
