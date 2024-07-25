@@ -42,7 +42,10 @@
 </template>
 
 <script lang="ts" setup>
+import { useNotification } from '@kyvg/vue3-notification';
+import { inject as vueInject, Ref } from 'vue';
 import { computed, onMounted, ref, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 
 import Button from '~/components/atomic/Button.vue';
@@ -54,6 +57,7 @@ import Panel from '~/components/layout/Panel.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { inject } from '~/compositions/useInjectProvide';
 import { usePaginate } from '~/compositions/usePaginate';
+import { RepoPermissions } from '~/lib/api/types';
 
 defineProps<{
   open: boolean;
@@ -64,8 +68,15 @@ const emit = defineEmits<{
 }>();
 
 const apiClient = useApiClient();
+const notifications = useNotification();
+const i18n = useI18n();
+
 
 const repo = inject('repo');
+const repoPermissions = vueInject<Ref<RepoPermissions>>('repo-permissions');
+if (!repoPermissions) {
+  throw new Error('Unexpected: "repo" and "repoPermissions" should be provided at this place');
+}
 
 const router = useRouter();
 const branches = ref<{ text: string; value: string }[]>([]);
@@ -91,6 +102,11 @@ const pipelineOptions = computed(() => {
 
 const loading = ref(true);
 onMounted(async () => {
+  if (!repoPermissions.value.push) {
+    notifications.notify({ type: 'error', title: i18n.t('repo.settings.not_allowed') });
+    await router.replace({ name: 'home' });
+  }
+
   const data = await usePaginate((page) => apiClient.getRepoBranches(repo.value.id, { page }));
   branches.value = data.map((e) => ({
     text: e,

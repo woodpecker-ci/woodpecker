@@ -107,7 +107,7 @@ const routes: RouteRecordRaw[] = [
             path: 'manual',
             name: 'repo-manual',
             component: (): Component => import('~/views/repo/RepoManualPipeline.vue'),
-            meta: { repoHeader: true },
+            meta: { authentication: 'required', repoHeader: true }
           },
         ],
       },
