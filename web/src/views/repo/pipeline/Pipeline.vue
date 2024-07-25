@@ -76,7 +76,6 @@ import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useNotifications from '~/compositions/useNotifications';
 import type { Pipeline, PipelineStep, Repo, RepoPermissions } from '~/lib/api/types';
-import { findStep } from '~/utils/helpers';
 
 const props = defineProps<{
   stepId?: string | null;
@@ -137,8 +136,6 @@ const selectedStepId = computed({
     router.replace({ params: { ...route.params, stepId: `${_selectedStepId}` } });
   },
 });
-
-const selectedStep = computed(() => findStep(pipeline.value.workflows || [], selectedStepId.value || -1));
 
 const { doSubmit: approvePipeline, isLoading: isApprovingPipeline } = useAsyncAction(async () => {
   if (!repo) {
