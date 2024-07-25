@@ -477,7 +477,7 @@ var flags = append([]cli.Flag{
 	// expert flags
 	//
 	&cli.StringFlag{
-		Sources: cli.EnvVars("WOODPECKER_EXPERT_WEBHOOK_HOST", "WOODPECKER_WEBHOOK_HOST"), // TODO: remove WOODPECKER_WEBHOOK_HOST in next major release
+		Sources: cli.EnvVars("WOODPECKER_EXPERT_WEBHOOK_HOST"),
 		Name:    "server-webhook-host",
 		Usage:   "!!!for experts!!! fully qualified woodpecker server url called by forge's webhooks. Format: <scheme>://<host>[/<prefix path>]",
 	},
