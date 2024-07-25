@@ -8,6 +8,7 @@
 
 ### 💥 Breaking changes
 
+- Fix dropped env vars [[#3969](https://github.com/woodpecker-ci/woodpecker/pull/3969)]
 - Drop version in schema [[#3970](https://github.com/woodpecker-ci/woodpecker/pull/3970)]
 - Update docker to v27 [[#3972](https://github.com/woodpecker-ci/woodpecker/pull/3972)]
 - Require gitlab 12.4 [[#3966](https://github.com/woodpecker-ci/woodpecker/pull/3966)]
@@ -21,6 +22,16 @@
 
 - Update Forgejo SDK [[#3948](https://github.com/woodpecker-ci/woodpecker/pull/3948)]
 
+### 📈 Enhancement
+
+- Show logs if step has error [[#3979](https://github.com/woodpecker-ci/woodpecker/pull/3979)]
+- Refactor docker backend and add more test coverage [[#2700](https://github.com/woodpecker-ci/woodpecker/pull/2700)]
+- Make cli plugin log purge recognize steps by name [[#3953](https://github.com/woodpecker-ci/woodpecker/pull/3953)]
+- Pin page size [[#3946](https://github.com/woodpecker-ci/woodpecker/pull/3946)]
+- Improve cron list [[#3947](https://github.com/woodpecker-ci/woodpecker/pull/3947)]
+- Add PULLREQUEST_DRONE_PULL_REQUEST drone env [[#3939](https://github.com/woodpecker-ci/woodpecker/pull/3939)]
+- Make agent gRPC errors distinguishable [[#3936](https://github.com/woodpecker-ci/woodpecker/pull/3936)]
+
 ### 🐛 Bug Fixes
 
 - Change Bitbucket PR hook to point the source branch, commit & ref [[#3965](https://github.com/woodpecker-ci/woodpecker/pull/3965)]
@@ -32,15 +43,6 @@
 ### 📚 Documentation
 
 - Add spellchecking for docs [[#3787](https://github.com/woodpecker-ci/woodpecker/pull/3787)]
-
-### 📈 Enhancement
-
-- Refactor docker backend and add more test coverage [[#2700](https://github.com/woodpecker-ci/woodpecker/pull/2700)]
-- Make cli plugin log purge recognize steps by name [[#3953](https://github.com/woodpecker-ci/woodpecker/pull/3953)]
-- Pin page size [[#3946](https://github.com/woodpecker-ci/woodpecker/pull/3946)]
-- Improve cron list [[#3947](https://github.com/woodpecker-ci/woodpecker/pull/3947)]
-- Add PULLREQUEST_DRONE_PULL_REQUEST drone env [[#3939](https://github.com/woodpecker-ci/woodpecker/pull/3939)]
-- Make agent gRPC errors distinguishable [[#3936](https://github.com/woodpecker-ci/woodpecker/pull/3936)]
 
 ### Misc
 
