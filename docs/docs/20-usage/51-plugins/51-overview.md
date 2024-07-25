@@ -34,7 +34,7 @@ steps:
       - go test
 
   - name: publish
-    image: plugins/docker
+    image: woodpeckerci/plugin-docker-buildx
     settings:
       repo: foo/bar
       tags: latest

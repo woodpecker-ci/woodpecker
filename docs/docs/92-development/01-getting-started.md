@@ -54,8 +54,7 @@ A common config for debugging would look like this:
 WOODPECKER_OPEN=true
 WOODPECKER_ADMIN=your-username
 
-# if you want to test webhooks with an online forge like GitHub this address needs to be accessible from public server
-WOODPECKER_HOST=http://your-dev-address.com
+WOODPECKER_HOST=http://localhost:8000
 
 # github (sample for a forge config - see /docs/administration/forge/overview for other forges)
 WOODPECKER_GITHUB=true
@@ -70,8 +69,8 @@ WOODPECKER_MAX_WORKFLOWS=1
 # enable if you want to develop the UI
 # WOODPECKER_DEV_WWW_PROXY=http://localhost:8010
 
-# used so you can login without using a public address
-WOODPECKER_DEV_OAUTH_HOST=http://localhost:8000
+# if you want to test webhooks with an online forge like GitHub this address needs to be set and accessible from public server
+WOODPECKER_EXPERT_WEBHOOK_HOST=http://your-address.com
 
 # disable health-checks while debugging (normally not needed while developing)
 WOODPECKER_HEALTHCHECK=false
