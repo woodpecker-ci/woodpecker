@@ -206,11 +206,7 @@ func setupEvilGlobals(ctx context.Context, c *cli.Command, s store.Store) error 
 	} else {
 		server.Config.Server.WebhookHost = serverHost
 	}
-	if c.IsSet("server-dev-oauth-host-deprecated") {
-		server.Config.Server.OAuthHost = c.String("server-dev-oauth-host-deprecated")
-	} else {
-		server.Config.Server.OAuthHost = serverHost
-	}
+	server.Config.Server.OAuthHost = serverHost
 	server.Config.Server.Port = c.String("server-addr")
 	server.Config.Server.PortTLS = c.String("server-addr-tls")
 	server.Config.Server.StatusContext = c.String("status-context")

@@ -4,7 +4,7 @@
             "queue": {
                 "agent": "agente",
                 "stats": {
-                    "completed_count": "Task Completati",
+                    "completed_count": "Attività Completate",
                     "worker_count": "Liberi",
                     "running_count": "In esecuzione",
                     "waiting_on_deps_count": "In attesa delle dipendenze",
@@ -15,12 +15,12 @@
                 "resume": "Riprendi",
                 "resumed": "Coda ripresa",
                 "paused": "Coda sospesa",
-                "tasks": "Task",
-                "task_running": "Task in esecuzione",
-                "task_waiting_on_deps": "Task in attesa delle dipendenze",
-                "desc": "Task in attesa di essere eseguiti dagli agenti",
+                "tasks": "Attività",
+                "task_running": "Attività in esecuzione",
+                "task_waiting_on_deps": "Attività in attesa delle dipendenze",
+                "desc": "Attività in attesa di essere eseguiti dagli agenti",
                 "queue": "Coda",
-                "task_pending": "Task in attesa"
+                "task_pending": "Attività in attesa"
             },
             "users": {
                 "add": "Aggiungi utente",
@@ -29,7 +29,7 @@
                     "placeholder": "L'utente è un amministratore"
                 },
                 "created": "Utente creato",
-                "delete_confirm": "Vuoi davvero eliminare questo utente? Ciò eliminerà anche tutti i repository di proprietà di questo utente.",
+                "delete_confirm": "Vuoi davvero eliminare questo utente? Ciò eliminerà anche tutte le repository di proprietà di questo utente.",
                 "delete_user": "Elimina utente",
                 "deleted": "Utente eliminato",
                 "edit_user": "Modifica utente",
@@ -61,7 +61,7 @@
                 },
                 "no_schedule": {
                     "name": "Disabilita agente",
-                    "placeholder": "Impedisci all'agente di accettare nuovi task"
+                    "placeholder": "Impedisci all'agente di accettare nuove attività"
                 },
                 "token": "Token",
                 "platform": {
@@ -90,24 +90,24 @@
                 "delete_org": "Elimina organizzazione",
                 "deleted": "Organizzazione eliminata",
                 "org_settings": "Impostazioni organizzazione",
-                "delete_confirm": "Vuoi davvero eliminare questa organizzazione? Ciò eliminerà anche tutti i repository di proprietà di questa organizzazione.",
+                "delete_confirm": "Vuoi davvero eliminare questa organizzazione? Ciò eliminerà anche tutte le repository di proprietà di questa organizzazione.",
                 "view": "Mostra organizzazione",
                 "orgs": "Organizzazioni"
             },
             "secrets": {
                 "warning": "Questi segreti saranno disponibili a tutti gli utenti.",
-                "desc": "I segreti globali possono essere passati ad ogni step della pipeline del repository, come variabili d'ambiente."
+                "desc": "I segreti globali possono essere passati ad ogni step della pipeline della repository, come variabili d'ambiente."
             },
             "repos": {
                 "settings": "Impostazioni repository",
                 "repos": "Repository",
-                "desc": "Repository che sono o sono stati abilitati su questo server.",
-                "none": "Ancora nessun repository.",
+                "desc": "Repository che sono o sono state abilitate su questo server.",
+                "none": "Ancora nessuna repository.",
                 "view": "Mostra repository",
                 "disabled": "Disabilitato",
                 "repair": {
                     "repair": "Ripara tutti",
-                    "success": "Repository riparati"
+                    "success": "Repository riparate"
                 }
             },
             "not_allowed": "Non ti è consentito accedere alle impostazioni del server.",
@@ -139,7 +139,7 @@
         "deploy_pipeline": {
             "enter_target": "Ambiente di destinazione del deploy",
             "title": "Avvia evento di deploy per la pipeline corrente #{pipelineId}",
-            "trigger": "Deploy",
+            "trigger": "Distribuzione",
             "variables": {
                 "add": "Aggiungi variabile",
                 "desc": "Specifica variabili addizionali da usare nella pipeline. Le variabili con lo stesso nome saranno sovrascritte.",
@@ -148,14 +148,14 @@
                 "value": "Valore variabile",
                 "delete": "Elimina variabile"
             },
-            "enter_task": "Task di Deploy"
+            "enter_task": "Attività di distribuzione"
         },
         "enable": {
             "enable": "Abilita",
             "enabled": "Già abilitato",
             "list_reloaded": "Elenco dei repository ricaricato",
             "reload": "Ricarica i repository",
-            "success": "Repository abilitato",
+            "success": "Repository abilitata",
             "disabled": "Disabilitato"
         },
         "manual_pipeline": {
@@ -171,8 +171,8 @@
                 "delete": "Elimina variabile"
             }
         },
-        "not_allowed": "Non ti è consentito accedere a questo repository",
-        "open_in_forge": "Apri pagina web del repository",
+        "not_allowed": "Non ti è consentito accedere a questa repository",
+        "open_in_forge": "Apri pagina web della repository",
         "pipeline": {
             "actions": {
                 "cancel": "Annulla",
@@ -184,7 +184,7 @@
                 "cancel_success": "Pipeline annullata",
                 "restart_success": "Pipeline riavviata",
                 "log_download": "Scarica",
-                "deploy": "Deploy"
+                "deploy": "Distribuzione"
             },
             "no_pipelines": "Non è ancora stata attivata alcuna pipeline.",
             "pipelines_for": "Pipeline per ramo \"{branch}\"",
@@ -192,7 +192,7 @@
             "no_pipeline_steps": "Nessuno step disponibile nella pipeline!",
             "step_not_started": "Questo step non è ancora iniziato.",
             "config": "Configurazione",
-            "tasks": "Task",
+            "tasks": "Attività",
             "log_delete_confirm": "Vuoi davvero eliminare i registri attività di questo step?",
             "errors": "Errori ({count})",
             "protected": {
@@ -227,7 +227,7 @@
                 "release": "Rilascio",
                 "push": "Invia",
                 "pr": "Richiesta di Modifica",
-                "deploy": "Deploy",
+                "deploy": "Distribuzione",
                 "pr_closed": "Richiesta di Modifica unita / chiusa"
             },
             "exit_code": "Codice di Uscita {exitCode}",
@@ -237,28 +237,29 @@
             "log_title": "Registro Attività di Step",
             "pipelines_for_pr": "Pipeline per richiesta di modifica #{index}",
             "duration": "Durata pipeline",
-            "created": "Creata: {created}"
+            "created": "Creata: {created}",
+            "no_logs": "Nessun registro"
         },
         "pull_requests": "Richieste di modifica",
         "settings": {
             "actions": {
                 "actions": "Azioni",
                 "repair": {
-                    "success": "Repository riparato",
+                    "success": "Repository riparata",
                     "repair": "Ripara repository"
                 },
                 "delete": {
                     "delete": "Elimina repository",
                     "confirm": "Tutti i dati andranno persi dopo questa azione!!!\n\nVuoi davvero procedere?",
-                    "success": "Repository eliminato"
+                    "success": "Repository eliminata"
                 },
                 "disable": {
                     "disable": "Disabilita repository",
-                    "success": "Repository disabilitato"
+                    "success": "Repository disabilitata"
                 },
                 "enable": {
                     "enable": "Abilita repository",
-                    "success": "Repository abiltato"
+                    "success": "Repository abiltata"
                 }
             },
             "crons": {
@@ -303,7 +304,7 @@
                     "desc": "Ogni pipeline deve essere approvata prima di essere eseguita."
                 },
                 "save": "Salva impostazioni",
-                "success": "Impostazioni del repository aggiornate",
+                "success": "Impostazioni della repository aggiornate",
                 "timeout": {
                     "minutes": "minuti",
                     "timeout": "Scadenza"
@@ -314,7 +315,7 @@
                         "internal": "Interno"
                     },
                     "private": {
-                        "desc": "Solo tu e gli altri proprietari del repository potete vedere questo progetto.",
+                        "desc": "Solo tu e gli altri proprietari della repository potete vedere questo progetto.",
                         "private": "Privato"
                     },
                     "public": {
@@ -344,7 +345,7 @@
                     "desc": "Inietta le credenziali netrc solo nei contenitori attendibili (consigliato)."
                 }
             },
-            "not_allowed": "Non ti è consentito accedere alle impostazioni di questo repository",
+            "not_allowed": "Non ti è consentito accedere alle impostazioni di questa repository",
             "secrets": {
                 "name": "Nome",
                 "value": "Valore"
@@ -383,7 +384,7 @@
     "repositories": "Repository",
     "search": "Cerca…",
     "time": {
-        "not_started": "non ancora avviato",
+        "not_started": "non ancora iniziato",
         "template": "MMM D, YYYY, HH:mm z"
     },
     "unknown_error": "Si è verificato un errore sconosciuto",
@@ -418,7 +419,7 @@
                 }
             },
             "registries": {
-                "desc": "È possibile aggiungere le credenziali dei registri per utilizzare immagini private per tutte le pipeline personali."
+                "desc": "È possibile aggiungere le credenziali di registro per utilizzare immagini private in tutte le pipeline personali."
             }
         }
     },
@@ -443,7 +444,7 @@
         "deleted": "Segreto eliminato",
         "images": {
             "images": "Disponibile per le seguenti immagini",
-            "desc": "Elenco di immagini in cui questo segreto è disponibile, lascia vuoto per consentire tutte le immagini."
+            "desc": "Elenco di immagini in cui questo segreto è disponibile, lascia vuoto per consentire a tutte le immagini."
         },
         "secrets": "Segreti",
         "desc": "I segreti possono essere passati ad ogni step della pipeline, come variabili d'ambiente."
@@ -472,7 +473,7 @@
         "settings": {
             "not_allowed": "Non ti è consentito accedere alle impostazioni di questa organizzazione",
             "secrets": {
-                "desc": "I segreti dell'organizzazione possono essere passati ad ogni step della pipeline del repository dell'organizzazione, come variabili d'ambiente."
+                "desc": "I segreti dell'organizzazione possono essere passati ad ogni step della pipeline della repository dell'organizzazione, come variabili d'ambiente."
             },
             "registries": {
                 "desc": "È possibile aggiungere le credenziali di registro dell'organizzazione per utilizzare immagini private per tutte le pipeline di un'organizzazione."
@@ -484,7 +485,7 @@
         "delete_confirm": "Vuoi davvero eliminare questo registro?",
         "registries": "Registri",
         "credentials": "Credenziali di registro",
-        "desc": "È possibile aggiungere le credenziali dei registri per utilizzare immagini private per le pipeline.",
+        "desc": "È possibile aggiungere le credenziali di registro per utilizzare immagini private nelle pipeline.",
         "none": "Ancora nessune credenziali di registro.",
         "address": {
             "address": "Indirizzo",
