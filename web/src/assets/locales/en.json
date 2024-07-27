@@ -191,6 +191,7 @@
       "pipelines_for_pr": "Pipelines for pull request #{index}",
       "exit_code": "Exit Code {exitCode}",
       "loading": "Loading…",
+      "no_logs": "No logs",
       "pipeline": "Pipeline #{pipelineId}",
       "log_title": "Step Logs",
       "log_download_error": "There was an error while downloading the log file",
