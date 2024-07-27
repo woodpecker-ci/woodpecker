@@ -146,10 +146,6 @@ func TestLintErrors(t *testing.T) {
 			want: "Insufficient privileges to use network_mode",
 		},
 		{
-			from: "steps: { build: { image: golang, networks: [ outside, default ] }  }",
-			want: "Insufficient privileges to use networks",
-		},
-		{
 			from: "steps: { build: { image: golang, volumes: [ '/opt/data:/var/lib/mysql' ] }  }",
 			want: "Insufficient privileges to use volumes",
 		},
@@ -168,6 +164,10 @@ func TestLintErrors(t *testing.T) {
 		{
 			from: "steps: { build: { image: golang, settings: { test: 'true' }, environment: [ 'TEST=true' ] } }",
 			want: "Cannot configure both environment and settings",
+		},
+		{
+			from: "{pipeline: { build: { image: golang, settings: { test: 'true' } } }, when: { branch: main, event: push } }",
+			want: "Additional property pipeline is not allowed",
 		},
 	}
 

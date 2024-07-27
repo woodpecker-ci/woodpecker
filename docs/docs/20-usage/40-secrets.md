@@ -105,7 +105,7 @@ Create the secrets and limit to a set of images:
  woodpecker-cli secret add \
    -repository octocat/hello-world \
 +  -image plugins/s3 \
-+  -image peloton/woodpecker-ecs \
++  -image woodpeckerci/plugin-ecs \
    -name aws_access_key_id \
    -value <value>
 ```

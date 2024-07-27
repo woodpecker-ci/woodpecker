@@ -30,7 +30,7 @@ steps:
 services:
   echo:
     image: dummy
-    commands: echo "i am a sevice"
+    commands: echo "i am a service"
 ```
 
 This could be executed via `woodpecker-cli --log-level trace exec --backend-engine dummy example.yaml`:
@@ -69,7 +69,7 @@ This could be executed via `woodpecker-cli --log-level trace exec --backend-engi
 9:18PM TRC pipeline/backend/dummy/dummy.go:208 > delete workflow environment taskUUID=01J10P578JQE6E25VV1EQF0745
 ```
 
-There are also environment variables to alter step behaviour:
+There are also environment variables to alter step behavior:
 
 - `SLEEP: 10` will let the step wait 10 seconds
 - `EXPECT_TYPE` allows to check if a step is a `clone`, `service`, `plugin` or `commands`

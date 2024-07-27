@@ -111,6 +111,7 @@ func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 
 	var transport grpc.DialOption
 	if c.Bool("grpc-secure") {
+		log.Trace().Msg("use ssl for grpc")
 		transport = grpc.WithTransportCredentials(grpc_credentials.NewTLS(&tls.Config{InsecureSkipVerify: c.Bool("grpc-skip-insecure")}))
 	} else {
 		transport = grpc.WithTransportCredentials(insecure.NewCredentials())
@@ -125,7 +126,7 @@ func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 		}),
 	)
 	if err != nil {
-		return err
+		return fmt.Errorf("could not create new gRPC 'channel' for authentication: %w", err)
 	}
 	defer authConn.Close()
 
@@ -137,7 +138,7 @@ func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 	authClient := agent_rpc.NewAuthGrpcClient(authConn, agentToken, agentConfig.AgentID)
 	authInterceptor, err := agent_rpc.NewAuthInterceptor(grpcClientCtx, authClient, authInterceptorRefreshInterval) //nolint:contextcheck
 	if err != nil {
-		return err
+		return fmt.Errorf("could not create new auth interceptor: %w", err)
 	}
 
 	conn, err := grpc.NewClient(
@@ -151,7 +152,7 @@ func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 		grpc.WithStreamInterceptor(authInterceptor.Stream()),
 	)
 	if err != nil {
-		return err
+		return fmt.Errorf("could not create new gRPC 'channel' for normal orchestration: %w", err)
 	}
 	defer conn.Close()
 

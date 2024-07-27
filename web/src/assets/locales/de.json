@@ -3,7 +3,7 @@
         "settings": {
             "agents": {
                 "add": "Agent hinzufügen",
-                "agents": "Agents",
+                "agents": "Agenten",
                 "backend": {
                     "backend": "Backend",
                     "badge": "Backend"
@@ -17,36 +17,36 @@
                 "delete_agent": "Agent löschen",
                 "delete_confirm": "Wollen Sie diesen Agent wirklich löschen? Dieser kann sich dann nicht mehr mit dem Server verbinden.",
                 "deleted": "Agent gelöscht",
-                "desc": "Für diesen Server registrierte Agents",
+                "desc": "Für diesen Server registrierte Agenten.",
                 "edit_agent": "Agent bearbeiten",
                 "id": "ID",
                 "last_contact": "Letzter Kontakt",
                 "name": {
                     "name": "Name",
-                    "placeholder": "Name des Agents"
+                    "placeholder": "Name des Agenten"
                 },
                 "never": "Nie",
                 "no_schedule": {
                     "name": "Agent deaktivieren",
                     "placeholder": "Agent daran hindern, neue Aufgaben zu nehmen"
                 },
-                "none": "Es gibt noch keine Agents.",
+                "none": "Es gibt noch keine Agenten.",
                 "platform": {
                     "badge": "Plattform",
                     "platform": "Plattform"
                 },
                 "save": "Agent speichern",
                 "saved": "Agent gespeichert",
-                "show": "Agents anzeigen",
+                "show": "Agenten anzeigen",
                 "token": "Schlüssel",
                 "version": "Version"
             },
-            "not_allowed": "Du darfst nicht auf die Server-Einstellungen zugreifen",
+            "not_allowed": "Du darfst nicht auf die Server-Einstellungen zugreifen.",
             "orgs": {
                 "delete_confirm": "Möchtest du diese Organisation wirklich löschen? Das wird auch alle Repositorys löschen, die dieser Organisation gehören.",
                 "delete_org": "Organisation löschen",
                 "deleted": "Organisation gelöscht",
-                "desc": "Organisationen mit Repositorys auf diesem Server",
+                "desc": "Organisationen, die Repositorys auf diesem Server besitzen.",
                 "none": "Es gibt noch keine Organisationen.",
                 "org_settings": "Organisations-Einstellungen",
                 "orgs": "Organisationen",
@@ -54,7 +54,7 @@
             },
             "queue": {
                 "agent": "Agent",
-                "desc": "Aufgaben, die darauf warten, von Agents ausgeführt zu werden",
+                "desc": "Aufgaben, die darauf warten, von Agenten ausgeführt zu werden",
                 "pause": "Pausieren",
                 "paused": "Warteschlange wurde pausiert",
                 "queue": "Warteschlange",
@@ -74,7 +74,7 @@
                 "waiting_for": "wartet auf"
             },
             "repos": {
-                "desc": "Repositorys, die auf dem Server aktiviert sind oder waren",
+                "desc": "Repositorys, die auf dem Server aktiviert sind oder waren.",
                 "disabled": "Deaktiviert",
                 "none": "Es gibt noch keine Repositorys.",
                 "repair": {
@@ -89,7 +89,7 @@
                 "add": "Geheimnis hinzufügen",
                 "created": "Globales Geheimnis erstellt",
                 "deleted": "Globales Geheimnis gelöscht",
-                "desc": "Globale Geheimnisse können an alle Repositorys als Umgebungsvariablen übergeben werden.",
+                "desc": "Globale Geheimnisse können an Pipelineschritte aller Repositorys als Umgebungsvariablen übergeben werden.",
                 "events": {
                     "events": "Verfügbar für folgende Ereignisse",
                     "pr_warning": "Bitte sei vorsichtig mit dieser Option, da eine böswillige Person über einen Pull-Request deine Geheimnisse erhalten könnte."
@@ -106,7 +106,7 @@
                 "secrets": "Geheimnisse",
                 "show": "Geheimnisse anzeigen",
                 "value": "Wert",
-                "warning": "Diese Geheimnisse können von allen Nutzern des Server eingesehen werden."
+                "warning": "Diese Geheimnisse können von allen Nutzern eingesehen werden."
             },
             "settings": "Einstellungen",
             "users": {
@@ -132,8 +132,8 @@
                 "users": "Benutzer"
             },
             "registries": {
-                "desc": "Globale Register-Zugangsdaten können für private Images aller Pipelines des Servers verwendet werden.",
-                "warning": "Diese Register-Zugangsdaten sind für alle Benutzer des Servers verfügbar."
+                "desc": "Globale Register-Zugangsdaten können für private Images aller Pipelines verwendet werden.",
+                "warning": "Diese Register-Zugangsdaten sind für alle Benutzer verfügbar."
             }
         }
     },
@@ -162,7 +162,7 @@
                 "add": "Geheimnis hinzufügen",
                 "created": "Organisations-Geheimnis erstellt",
                 "deleted": "Organisations-Geheimnis gelöscht",
-                "desc": "Organisation-Geheimnisse können an alle Repositorys der Organisation als Umgebungsvariablen übergeben werden.",
+                "desc": "Organisation-Geheimnisse können an alle Pipelineschritte in Repositorys der Organisation als Umgebungsvariablen übergeben werden.",
                 "events": {
                     "events": "Verfügbar für folgende Ereignisse",
                     "pr_warning": "Bitte sei vorsichtig mit dieser Option, da eine böswillige Person über einen Pull-Request deine Geheimnisse erhalten könnte."
@@ -182,7 +182,7 @@
             },
             "settings": "Einstellungen",
             "registries": {
-                "desc": "Register-Zugangsdaten der Organisation können für private Images aller Organisation-Pipelines verwendet werden."
+                "desc": "Register-Zugangsdaten der Organisation können für private Images aller Organisations-Pipelines verwendet werden."
             }
         }
     },
@@ -294,7 +294,9 @@
             "warnings": "Warnungen ({count})",
             "we_got_some_errors": "Oh nein, es gab einige Fehler!",
             "log_delete_confirm": "Möchtest du die Logs diesen Schrittes wirklich löschen?",
-            "log_delete_error": "Es gab einen Fehler beim Löschen der Logs des Schrittes"
+            "log_delete_error": "Es gab einen Fehler beim Löschen der Logs des Schrittes",
+            "duration": "Pipeline-Dauer",
+            "created": "Erstellt: {created}"
         },
         "pull_requests": "Pull-Requests",
         "settings": {
@@ -386,7 +388,7 @@
                     "timeout": "Zeitlimit"
                 },
                 "trusted": {
-                    "desc": "Die zugrundeliegenden Pipeline-Container erhalten Zugriff auf ausgeweitete Funktionen wie z. B. das Einhängen von Volumes.",
+                    "desc": "Die zugrundeliegenden Pipeline-Container erhalten Zugriff auf ausgeweitete Funktionen (z. B. das Einhängen von Laufwerken).",
                     "trusted": "Vertrauenswürdig"
                 },
                 "visibility": {
@@ -504,7 +506,7 @@
                 "add": "Geheimnis hinzufügen",
                 "created": "Benutzer-Geheimnis erstellt",
                 "deleted": "Benutzer-Geheimnis gelöscht",
-                "desc": "Benutzer-Geheimnisse können an alle Repositorys des Benutzers als Umgebungsvariablen übergeben werden.",
+                "desc": "Benutzer-Geheimnisse können an alle persönlichen Pipelineschritte als Umgebungsvariablen übergeben werden.",
                 "events": {
                     "events": "Verfügbar für folgende Ereignisse",
                     "pr_warning": "Bitte sei vorsichtig mit dieser Option, da eine böswillige Person über einen Pull-Request deine Geheimnisse erhalten könnte."
@@ -534,14 +536,14 @@
                 "cli_usage": "Beispiel zur Nutzung des CLI"
             },
             "registries": {
-                "desc": "Register-Zugangsdaten des Benitzers können für alle Pipelines des Benutzers verwendet werden."
+                "desc": "Register-Zugangsdaten des Benutzers können für private Images aller persönlichen Pipelines verwendet werden."
             }
         }
     },
     "username": "Benutzername",
     "welcome": "Willkommen bei Woodpecker",
     "login_to_cli": "In CLI anmelden",
-    "login_to_cli_description": "Wenn du fortfährst, wirst bei im CLI angemeldet.",
+    "login_to_cli_description": "Wenn du fortfährst, wirst du im CLI angemeldet.",
     "abort": "Abbrechen",
     "cli_login_success": "Anmelden im CLI erfolgreich",
     "cli_login_failed": "Anmelden im CLI fehlgeschlagen",
@@ -549,7 +551,7 @@
     "return_to_cli": "Du kannst diesen Tab jetzt schließen und zur CLI zurückkehren.",
     "secrets": {
         "secrets": "Geheimnisse",
-        "desc": "Geheimnisse können zur Laufzeit als Umgebungsvariablen an einzelne Pipelineschritte übergeben werden.",
+        "desc": "Geheimnisse können als Umgebungsvariablen an einzelne Pipelineschritte übergeben werden.",
         "none": "Es gibt noch keine Geheimnisse.",
         "add": "Geheimnis hinzufügen",
         "save": "Geheimnis speichern",
@@ -561,12 +563,12 @@
         "created": "Geheimnis erstellt",
         "saved": "Geheimnis gespeichert",
         "images": {
-            "images": "Verfügbar für folgende Images",
-            "desc": "Liste der Images, für die dieses Geheimnis verfügbar ist; leer lassen, um alle Images zuzulassen"
+            "images": "Verfügbar für die folgenden Images",
+            "desc": "Liste der Images, für die dieses Geheimnis verfügbar ist; leer lassen, um für alle Images zuzulassen."
         },
         "events": {
-            "events": "Verfügbar bei folgenden Ereignissen",
-            "pr_warning": "Bitte sei vorsichtig mit dieser Option, da eine böswillige Person über einen Pull-Request deine Geheimnisse erhalten könnte."
+            "events": "Verfügbar bei den folgenden Ereignissen",
+            "pr_warning": "Bitte sei vorsichtig mit dieser Option: Eine böswillige Person könnte über einen Pull-Request deine Geheimnisse erhalten."
         },
         "plugins_only": "Nur für Plugins verfügbar",
         "edit": "Geheimnis bearbeiten",
@@ -586,7 +588,7 @@
         "credentials": "Register-Zugangsdaten",
         "none": "Es gibt noch keine Register-Zugangsdaten.",
         "registries": "Register",
-        "desc": "Register-Zugangsdaten können für private Images in deiner Pipelines verwendet werden.",
+        "desc": "Register-Zugangsdaten können für private Images in Pipelines verwendet werden.",
         "deleted": "Register-Zugangsdaten gelöscht",
         "save": "Register speichern",
         "add": "Register hinzufügen",

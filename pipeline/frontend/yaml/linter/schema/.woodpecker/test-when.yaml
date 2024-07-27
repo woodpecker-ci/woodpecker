@@ -19,6 +19,9 @@ steps:
       - echo "test"
     when:
       event: push
+      branch:
+        include: main
+        exclude: [develop, feature/*]
 
   when-event-array:
     image: alpine
