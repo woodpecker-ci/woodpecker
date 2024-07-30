@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-07-27
+## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-07-30
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -22,6 +22,11 @@
 
 - Update Forgejo SDK [[#3948](https://github.com/woodpecker-ci/woodpecker/pull/3948)]
 
+### 📚 Documentation
+
+- fix(deps): update docs npm deps non-major [[#3990](https://github.com/woodpecker-ci/woodpecker/pull/3990)]
+- Add spellchecking for docs [[#3787](https://github.com/woodpecker-ci/woodpecker/pull/3787)]
+
 ### 📈 Enhancement
 
 - Show logs if step has error [[#3979](https://github.com/woodpecker-ci/woodpecker/pull/3979)]
@@ -40,12 +45,10 @@
 - Truncate creation in list [[#3952](https://github.com/woodpecker-ci/woodpecker/pull/3952)]
 - Fix panic if forge is unreachable [[#3944](https://github.com/woodpecker-ci/woodpecker/pull/3944)]
 
-### 📚 Documentation
-
-- Add spellchecking for docs [[#3787](https://github.com/woodpecker-ci/woodpecker/pull/3787)]
-
 ### Misc
 
+- chore(deps): lock file maintenance [[#3991](https://github.com/woodpecker-ci/woodpecker/pull/3991)]
+- fix(deps): update github.com/urfave/cli/v3 digest to 127cf54 [[#3989](https://github.com/woodpecker-ci/woodpecker/pull/3989)]
 - fix(deps): update golang-packages [[#3958](https://github.com/woodpecker-ci/woodpecker/pull/3958)]
 - Improve wording [[#3951](https://github.com/woodpecker-ci/woodpecker/pull/3951)]
 - Fix typos and optimize wording [[#3940](https://github.com/woodpecker-ci/woodpecker/pull/3940)]
