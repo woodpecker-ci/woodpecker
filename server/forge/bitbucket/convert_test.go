@@ -131,7 +131,7 @@ func Test_helper(t *testing.T) {
 			hook.PullRequest.Source.Repo.FullName = "baz/bar"
 			hook.PullRequest.Source.Commit.Hash = "c8411d7"
 			hook.PullRequest.Links.HTML.Href = "https://bitbucket.org/foo/bar/pulls/5"
-			hook.PullRequest.Desc = "updated README"
+			hook.PullRequest.Title = "updated README"
 			hook.PullRequest.Updated = time.Now()
 
 			pipeline := convertPullHook(hook)
@@ -143,7 +143,7 @@ func Test_helper(t *testing.T) {
 			g.Assert(pipeline.ForgeURL).Equal(hook.PullRequest.Links.HTML.Href)
 			g.Assert(pipeline.Ref).Equal("refs/heads/change")
 			g.Assert(pipeline.Refspec).Equal("change:main")
-			g.Assert(pipeline.Message).Equal(hook.PullRequest.Desc)
+			g.Assert(pipeline.Message).Equal(hook.PullRequest.Title)
 			g.Assert(pipeline.Timestamp).Equal(hook.PullRequest.Updated.Unix())
 		})
 
