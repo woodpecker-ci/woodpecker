@@ -178,7 +178,7 @@ func convertPullHook(from *internal.PullRequestHook) *model.Pipeline {
 		),
 		ForgeURL:  from.PullRequest.Links.HTML.Href,
 		Branch:    from.PullRequest.Source.Branch.Name,
-		Message:   from.PullRequest.Desc,
+		Message:   from.PullRequest.Title,
 		Avatar:    from.Actor.Links.Avatar.Href,
 		Author:    from.Actor.Login,
 		Sender:    from.Actor.Login,
