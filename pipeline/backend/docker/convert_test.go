@@ -19,8 +19,8 @@ import (
 	"sort"
 	"testing"
 
-	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
+	"github.com/docker/docker/api/types/system"
 	"github.com/stretchr/testify/assert"
 
 	backend "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
@@ -111,7 +111,7 @@ var (
 	}
 
 	testEngine = &docker{
-		info: types.Info{
+		info: system.Info{
 			Architecture:    "x86_64",
 			OSType:          "linux",
 			DefaultRuntime:  "runc",
@@ -166,7 +166,7 @@ func TestEncodeAuthToBase64(t *testing.T) {
 }
 
 func TestToConfigSmall(t *testing.T) {
-	engine := docker{info: types.Info{OSType: "linux/riscv64"}}
+	engine := docker{info: system.Info{OSType: "linux/riscv64"}}
 
 	conf := engine.toConfig(&backend.Step{
 		Name:     "test",
@@ -196,7 +196,7 @@ func TestToConfigSmall(t *testing.T) {
 }
 
 func TestToConfigFull(t *testing.T) {
-	engine := docker{info: types.Info{OSType: "linux/riscv64"}}
+	engine := docker{info: system.Info{OSType: "linux/riscv64"}}
 
 	conf := engine.toConfig(&backend.Step{
 		Name:         "test",

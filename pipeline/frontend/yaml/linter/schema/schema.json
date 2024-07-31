@@ -51,10 +51,6 @@
       "items": {
         "type": "string"
       }
-    },
-    "version": {
-      "type": "number",
-      "default": 1
     }
   },
   "definitions": {

@@ -197,14 +197,6 @@ Examples:
 - `WOODPECKER_HOST=http://example.org/woodpecker`
 - `WOODPECKER_HOST=http://example.org:1234/woodpecker`
 
-### `WOODPECKER_WEBHOOK_HOST`
-
-> Default: value from `WOODPECKER_HOST` config env
-
-Server fully qualified URL of the Webhook-facing hostname and path prefix.
-
-Example: `WOODPECKER_WEBHOOK_HOST=http://woodpecker-server.cicd.svc.cluster.local:8000`
-
 ### `WOODPECKER_SERVER_ADDR`
 
 > Default: `:8000`
