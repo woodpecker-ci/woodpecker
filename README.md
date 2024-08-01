@@ -67,12 +67,16 @@ An overview of the current translation state is available at <https://translate.
 
 To help with translation, the language-specific files in <https://github.com/woodpecker-ci/woodpecker/tree/main/web/src/assets/locales> can be edited.
 
-## Woodpecker and Codeberg
+## Public Woodpecker Instances
 
 Woodpecker is used as the main CI/CD engine at [Codeberg](https://codeberg.org), an alternative Git hosting platform with a focus on privacy and free software development.
 While there are people which contribute to both projects, there is no official relationship between both.
 
-While Woodpecker hosts the core repos at GitHub (for historical reasons and outreach), the offical plugins are developed in the [woodpecker-plugins organization at Codeberg](https://codeberg.org/woodpecker-plugins).
+## Plugins
+
+Woodpecker can be extended via plugins.
+The [plugin overview website](https://woodpecker-ci.org/plugins) helps browsing available plugins.
+It combines both plugins by the Woodpecker core team and community-maintained ones.
 
 ## Star History
 
