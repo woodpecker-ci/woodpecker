@@ -65,7 +65,7 @@ You can support the project by becoming a backer on [Open Collective](https://op
 
 ## Documentation
 
-<https://woodpecker-ci.org/docs/
+<https://woodpecker-ci.org/docs/>
 
 ## Translation
 
