@@ -51,7 +51,7 @@ It requires around 100 MB of RAM (Server) and 30 MB (Agent) at runtime in idle m
 
 ## Support
 
-You can support the project by becoming a backer on [Open Collective](https://opencollective.com/woodpecker-ci#category-CONTRIBUTE).
+You can support the project by becoming a backer on [Open Collective](https://opencollective.com/woodpecker-ci#category-CONTRIBUTE) or via [GitHub Sponsors](https://github.com/sponsors/woodpecker-ci).
 
 <a href="https://opencollective.com/woodpecker-ci" target="_blank"><img src="https://opencollective.com/woodpecker-ci/backers.svg?width=890" alt="Open Collective backers"></a>
 
