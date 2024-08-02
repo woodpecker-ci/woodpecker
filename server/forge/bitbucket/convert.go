@@ -171,7 +171,7 @@ func convertPullHook(from *internal.PullRequestHook) *model.Pipeline {
 	pipeline := &model.Pipeline{
 		Event:  event,
 		Commit: from.PullRequest.Source.Commit.Hash,
-		Ref:    fmt.Sprintf("refs/heads/%s", from.PullRequest.Source.Branch.Name),
+		Ref:    fmt.Sprintf("refs/pull-requests/%d/from", from.PullRequest.ID),
 		Refspec: fmt.Sprintf("%s:%s",
 			from.PullRequest.Source.Branch.Name,
 			from.PullRequest.Dest.Branch.Name,
