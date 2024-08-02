@@ -73,7 +73,6 @@ To help with translation, the language-specific files in <https://github.com/woo
 ## Public Woodpecker Instances
 
 Woodpecker is used as the main CI/CD engine at [Codeberg](https://codeberg.org), an alternative Git hosting platform with a focus on privacy and free software development.
-While there are people which contribute to both projects, there is no official relationship between both.
 
 ## Plugins
 
