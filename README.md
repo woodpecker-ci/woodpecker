@@ -7,6 +7,9 @@
 </p>
 <br/>
 <p align="center">
+  <a href="https://ci.woodpecker-ci.org/repos/3780" title="Pipeline Status">
+    <img src="https://ci.woodpecker-ci.org/api/badges/3780/status.svg" alt="Pipeline Status">
+  </a>
   <a href="https://codecov.io/gh/woodpecker-ci/woodpecker">
     <img src="https://codecov.io/gh/woodpecker-ci/woodpecker/branch/main/graph/badge.svg" alt="Code coverage">
   </a>
