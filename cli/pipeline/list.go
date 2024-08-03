@@ -93,11 +93,11 @@ func pipelineList(_ context.Context, c *cli.Command, client woodpecker.Client) (
 	before := c.Timestamp("before")
 	after := c.Timestamp("after")
 
-	if before != nil {
-		opt.Before = *before
+	if !before.IsZero() {
+		opt.Before = before
 	}
-	if after != nil {
-		opt.After = *after
+	if !after.IsZero() {
+		opt.After = after
 	}
 
 	pipelines, err := client.PipelineList(repoID, opt)
