@@ -203,10 +203,10 @@ func injectVariableOrSecretRecursive(v any, getVariableValue, getSecretValue fun
 		// gopkg.in/yaml.v3 only emits this map interface
 		case map[string]any:
 			// handle secrets
-			value, isSecret, err := injectVariableOrSecret(v, getVariableValue, getSecretValue)
+			value, isInjected, err := injectVariableOrSecret(v, getVariableValue, getSecretValue)
 			if err != nil {
 				return nil, err
-			} else if isSecret {
+			} else if isInjected {
 				return value, nil
 			}
 
