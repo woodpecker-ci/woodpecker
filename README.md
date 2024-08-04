@@ -43,55 +43,50 @@
 </p>
 <br/>
 
-Woodpecker is a simple yet powerful CI/CD engine with great extensibility.
+Woodpecker is a simple, yet powerful CI/CD engine with great extensibility.
 
 ![woodpecker](docs/docs/woodpecker.png)
 
-## 🫶 Support
+## Installation & Resources
 
-Please consider donating and become a backer. 🙏 [[Become a backer](https://opencollective.com/woodpecker-ci#category-CONTRIBUTE)]
+Woodpecker can be installed in various ways (see the [Installation Instructions](https://woodpecker-ci.org/docs/administration/getting-started)) and by, default, runs with a SQLite DB.
+It requires around 100 MB of RAM (Server) and 30 MB (Agent) at runtime in idle mode.
+
+## Support
+
+You can support the project by becoming a backer on [Open Collective](https://opencollective.com/woodpecker-ci#category-CONTRIBUTE) or via [GitHub Sponsors](https://github.com/sponsors/woodpecker-ci).
 
 <a href="https://opencollective.com/woodpecker-ci" target="_blank"><img src="https://opencollective.com/woodpecker-ci/backers.svg?width=890" alt="Open Collective backers"></a>
 
-## 📖 Documentation
+## Documentation
 
-<https://woodpecker-ci.org/>
+<https://woodpecker-ci.org/docs/>
 
-## ✨ Contribute
+## Translation
 
-See [Contributing Guide](https://github.com/woodpecker-ci/.github/blob/main/CONTRIBUTING.md)
+We have a self-hosted [Weblate](https://weblate.org/en/) instance at [translate.woodpecker-ci.org](https://translate.woodpecker-ci.org).
 
-[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://woodpecker-ci.org/docs/next/development/getting-started#gitpod)
+An overview of the current translation state is available at <https://translate.woodpecker-ci.org/projects/woodpecker-ci/#languages>.
 
-## 📣 Translate
+To help with translation, the language-specific files in <https://github.com/woodpecker-ci/woodpecker/tree/main/web/src/assets/locales> can be edited.
 
-We use an own [Weblate](https://weblate.org/en/) instance at [translate.woodpecker-ci.org](https://translate.woodpecker-ci.org).
+## Public Woodpecker Instances
 
-<a href="https://translate.woodpecker-ci.org/engage/woodpecker-ci/">
-  <img src="https://translate.woodpecker-ci.org/widgets/woodpecker-ci/-/ui/multi-blue.svg" alt="Translation status" />
-</a>
+Woodpecker is used as the main CI/CD engine at [Codeberg](https://codeberg.org), an alternative Git hosting platform with a focus on privacy and free software development.
 
-## 👋 Who uses Woodpecker?
+## Plugins
 
-Woodpecker is used by [itself](https://ci.woodpecker-ci.org/woodpecker/woodpecker-ci/), multiple well-known companies, organizations like [Codeberg](https://codeberg.org), hobbyists and many others.
+Woodpecker can be extended via plugins.
+The [plugin overview website](https://woodpecker-ci.org/plugins) helps browsing available plugins.
+It combines both plugins by the Woodpecker core team and community-maintained ones.
 
-Leave a [comment](https://github.com/woodpecker-ci/woodpecker/discussions/2149) if you're using it as well.
+## Star History
 
-Also consider using the topic `WoodpeckerCI` in your repository, so others can learn from your config and use the hashtag `#WoodpeckerCI` when talking about the project on social media!
-
-Here are some places where people mention Woodpecker:
-
-- [GitHub](https://github.com/topics/WoodpeckerCI)
-- [Codeberg](https://codeberg.org/explore/repos?q=woodpeckerci&topic=1)
-- [Twitter](https://twitter.com/search?q=%23WoodpeckerCI&src=typed_query)
-- [Fediverse](https://mastodon.social/tags/WoodpeckerCI)
-
-## ✨ Stars over time
-
-[![Stargazers over time](https://starchart.cc/woodpecker-ci/woodpecker.svg)](https://starchart.cc/woodpecker-ci/woodpecker)
+[![Star History Chart](https://api.star-history.com/svg?repos=woodpecker-ci/woodpecker&type=Date)](https://star-history.com/#woodpecker-ci/woodpecker&Date)
 
 ## License
 
-Woodpecker is Apache 2.0 licensed with the source files in this repository having a header indicating which license they are under and what copyrights apply.
+Woodpecker is Apache 2.0 licensed.
+The source files have a header indicating which license they are under and what copyrights apply.
 
-Files under the `docs/` folder are licensed under Creative Commons Attribution-ShareAlike 4.0 International Public License.
+Everything in `docs/` is licensed under the Creative Commons Attribution-ShareAlike 4.0 International Public License.
