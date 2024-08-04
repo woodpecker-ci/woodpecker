@@ -13,6 +13,7 @@ User=woodpecker
 Group=woodpecker
 ExecStart=/usr/local/bin/woodpecker-agent
 WorkingDirectory=/var/lib/woodpecker/
+StateDirectory=woodpecker
 
 [Install]
 WantedBy=multi-user.target
