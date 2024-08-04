@@ -192,7 +192,7 @@ list.map:
 			return variable, nil
 		}
 
-		return "", fmt.Errorf("secret %q not found or not allowed to be used", name)
+		return "", fmt.Errorf("variable %q not found or not allowed to be used", name)
 	}
 	getSecretValue := func(name string) (string, error) {
 		name = strings.ToLower(name)
