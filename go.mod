@@ -56,7 +56,7 @@ require (
 	github.com/swaggo/gin-swagger v1.6.0
 	github.com/swaggo/swag v1.16.3
 	github.com/urfave/cli-docs/v3 v3.0.0-alpha5.0.20240714105325-1da00919bcb4
-	github.com/urfave/cli/v3 v3.0.0-alpha9.0.20240711030030-937cfe918cb1
+	github.com/urfave/cli/v3 v3.0.0-alpha9.0.20240717192922-127cf54fac9f
 	github.com/xanzy/go-gitlab v0.107.0
 	github.com/xeipuuv/gojsonschema v1.2.0
 	github.com/yaronf/httpsign v0.3.1
