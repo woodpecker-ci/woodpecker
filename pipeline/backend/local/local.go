@@ -63,7 +63,8 @@ func (e *local) Name() string {
 }
 
 func (e *local) IsAvailable(context.Context) bool {
-	return true
+	_, inContainer := os.LookupEnv("WOODPECKER_IN_CONTAINER")
+	return !inContainer
 }
 
 func (e *local) Flags() []cli.Flag {
