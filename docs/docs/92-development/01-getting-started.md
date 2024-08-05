@@ -81,7 +81,7 @@ WOODPECKER_HEALTHCHECK=false
 
 ### Setup OAuth
 
-Create an OAuth app for your forge as described in the [forges documentation](../30-administration/11-forges/11-overview.md). If you set `WOODPECKER_DEV_OAUTH_HOST=http://localhost:8000` you can use that address with the path as explained for the specific forge to login without the need for a public address. For example for GitHub you would use `http://localhost:8000/authorize` as authorization callback URL.
+Create an OAuth app for your forge as described in the [forges documentation](../30-administration/11-forges/11-overview.md).
 
 ## Developing with VS Code
 

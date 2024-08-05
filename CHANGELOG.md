@@ -33,7 +33,6 @@
 - Remove `unplugin-icons` [[#3809](https://github.com/woodpecker-ci/woodpecker/pull/3809)]
 - Release windows binaries as zip file [[#3906](https://github.com/woodpecker-ci/woodpecker/pull/3906)]
 - Convert to openapi 3.0 [[#3897](https://github.com/woodpecker-ci/woodpecker/pull/3897)]
-- Enhance pipeline list [[#3898](https://github.com/woodpecker-ci/woodpecker/pull/3898)]
 - Add user registries UI [[#3888](https://github.com/woodpecker-ci/woodpecker/pull/3888)]
 - Sort users by login [[#3891](https://github.com/woodpecker-ci/woodpecker/pull/3891)]
 - Exclude dummy backend in production [[#3877](https://github.com/woodpecker-ci/woodpecker/pull/3877)]
