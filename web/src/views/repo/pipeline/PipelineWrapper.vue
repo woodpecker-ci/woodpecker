@@ -64,11 +64,11 @@
 
     <template #tabActions>
       <div class="flex gap-x-4">
-        <div class="flex space-x-1 items-center flex-shrink-0" :title="created">
+        <div class="flex space-x-1 items-center flex-shrink-0" :title="$t('repo.pipeline.created', { created })">
           <Icon name="since" />
           <span>{{ since }}</span>
         </div>
-        <div class="flex space-x-1 items-center flex-shrink-0">
+        <div class="flex space-x-1 items-center flex-shrink-0" :title="$t('repo.pipeline.duration')">
           <Icon name="duration" />
           <span>{{ duration }}</span>
         </div>

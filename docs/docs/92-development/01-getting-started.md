@@ -4,12 +4,12 @@ You can develop on your local computer by following the [steps below](#preparati
 
 ## Gitpod
 
-If you want to start development or updating docs as easy as possible, you can use our preconfigured setup for Woodpecker using [Gitpod](https://github.com/gitpod-io/gitpod). Gitpod starts a complete development setup in the cloud containing:
+If you want to start development or updating docs as easy as possible, you can use our pre-configured setup for Woodpecker using [Gitpod](https://github.com/gitpod-io/gitpod). Gitpod starts a complete development setup in the cloud containing:
 
 - An IDE in the browser or bridged to your local VS-Code or Jetbrains
-- A preconfigured [Gitea](https://github.com/go-gitea/gitea) instance as forge
-- A preconfigured Woodpecker server
-- A single preconfigured Woodpecker agent node
+- A pre-configured [Gitea](https://github.com/go-gitea/gitea) instance as forge
+- A pre-configured Woodpecker server
+- A single pre-configured Woodpecker agent node
 - Our docs preview server
 
 Start Woodpecker in Gitpod by clicking on the following badge. You can log in with `woodpecker` and `password`.
@@ -54,8 +54,7 @@ A common config for debugging would look like this:
 WOODPECKER_OPEN=true
 WOODPECKER_ADMIN=your-username
 
-# if you want to test webhooks with an online forge like GitHub this address needs to be accessible from public server
-WOODPECKER_HOST=http://your-dev-address.com
+WOODPECKER_HOST=http://localhost:8000
 
 # github (sample for a forge config - see /docs/administration/forge/overview for other forges)
 WOODPECKER_GITHUB=true
@@ -70,8 +69,8 @@ WOODPECKER_MAX_WORKFLOWS=1
 # enable if you want to develop the UI
 # WOODPECKER_DEV_WWW_PROXY=http://localhost:8010
 
-# used so you can login without using a public address
-WOODPECKER_DEV_OAUTH_HOST=http://localhost:8000
+# if you want to test webhooks with an online forge like GitHub this address needs to be set and accessible from public server
+WOODPECKER_EXPERT_WEBHOOK_HOST=http://your-address.com
 
 # disable health-checks while debugging (normally not needed while developing)
 WOODPECKER_HEALTHCHECK=false
@@ -82,7 +81,7 @@ WOODPECKER_HEALTHCHECK=false
 
 ### Setup OAuth
 
-Create an OAuth app for your forge as described in the [forges documentation](../30-administration/11-forges/11-overview.md). If you set `WOODPECKER_DEV_OAUTH_HOST=http://localhost:8000` you can use that address with the path as explained for the specific forge to login without the need for a public address. For example for GitHub you would use `http://localhost:8000/authorize` as authorization callback URL.
+Create an OAuth app for your forge as described in the [forges documentation](../30-administration/11-forges/11-overview.md).
 
 ## Developing with VS Code
 

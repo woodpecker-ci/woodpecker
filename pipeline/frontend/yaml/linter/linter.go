@@ -215,45 +215,6 @@ func (l *Linter) lintDeprecations(config *WorkflowConfig) (err error) {
 		return err
 	}
 
-	if parsed.PipelineDoNotUseIt.ContainerList != nil {
-		err = multierr.Append(err, &errorTypes.PipelineError{
-			Type:    errorTypes.PipelineErrorTypeDeprecation,
-			Message: "Please use 'steps:' instead of deprecated 'pipeline:' list",
-			Data: errors.DeprecationErrorData{
-				File:  config.File,
-				Field: "pipeline",
-				Docs:  "https://woodpecker-ci.org/docs/next/migrations#next-200",
-			},
-			IsWarning: true,
-		})
-	}
-
-	if parsed.PlatformDoNotUseIt != "" {
-		err = multierr.Append(err, &errorTypes.PipelineError{
-			Type:    errorTypes.PipelineErrorTypeDeprecation,
-			Message: "Please use labels instead of deprecated 'platform' filters",
-			Data: errors.DeprecationErrorData{
-				File:  config.File,
-				Field: "platform",
-				Docs:  "https://woodpecker-ci.org/docs/next/migrations#next-200",
-			},
-			IsWarning: true,
-		})
-	}
-
-	if parsed.BranchesDoNotUseIt != nil {
-		err = multierr.Append(err, &errorTypes.PipelineError{
-			Type:    errorTypes.PipelineErrorTypeDeprecation,
-			Message: "Please use global when instead of deprecated 'branches' filter",
-			Data: errors.DeprecationErrorData{
-				File:  config.File,
-				Field: "branches",
-				Docs:  "https://woodpecker-ci.org/docs/next/migrations#next-200",
-			},
-			IsWarning: true,
-		})
-	}
-
 	for _, step := range parsed.Steps.ContainerList {
 		if step.Group != "" {
 			err = multierr.Append(err, &errorTypes.PipelineError{

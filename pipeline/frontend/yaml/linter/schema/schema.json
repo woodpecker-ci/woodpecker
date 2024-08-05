@@ -20,18 +20,11 @@
     "skip_clone": {
       "type": "boolean"
     },
-    "branches": {
-      "$ref": "#/definitions/branches"
-    },
     "when": {
-      "$ref": "#/definitions/pipeline_when"
+      "$ref": "#/definitions/workflow_when"
     },
     "steps": {
       "$ref": "#/definitions/step_list"
-    },
-    "pipeline": {
-      "$ref": "#/definitions/step_list",
-      "description": "deprecated, use steps"
     },
     "services": {
       "$ref": "#/definitions/services"
@@ -41,9 +34,6 @@
     },
     "matrix": {
       "$ref": "#/definitions/matrix"
-    },
-    "platform": {
-      "$ref": "#/definitions/platform"
     },
     "labels": {
       "$ref": "#/definitions/labels"
@@ -61,10 +51,6 @@
       "items": {
         "type": "string"
       }
-    },
-    "version": {
-      "type": "number",
-      "default": 1
     }
   },
   "definitions": {
@@ -128,55 +114,6 @@
         "type": ["boolean", "string", "number", "array", "object"]
       }
     },
-    "branches": {
-      "description": "deprecated, use when.branch",
-      "oneOf": [
-        {
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "minProperties": 1
-        },
-        {
-          "type": "string"
-        },
-        {
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "exclude": {
-              "oneOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  },
-                  "minLength": 1
-                },
-                {
-                  "type": "string"
-                }
-              ]
-            },
-            "include": {
-              "oneOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  },
-                  "minLength": 1
-                },
-                {
-                  "type": "string"
-                }
-              ]
-            }
-          }
-        }
-      ]
-    },
     "step_list": {
       "description": "The steps section defines a list of steps which will be executed serially, in the order in which they are defined. Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#steps",
       "oneOf": [
@@ -196,22 +133,22 @@
         }
       ]
     },
-    "pipeline_when": {
-      "description": "Whole pipelines can be skipped based on conditions. Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#when---global-workflow-conditions",
+    "workflow_when": {
+      "description": "Whole workflow can be skipped based on conditions. Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#when---global-workflow-conditions",
       "oneOf": [
         {
           "type": "array",
           "minLength": 1,
           "items": {
-            "$ref": "#/definitions/pipeline_when_condition"
+            "$ref": "#/definitions/workflow_when_condition"
           }
         },
         {
-          "$ref": "#/definitions/pipeline_when_condition"
+          "$ref": "#/definitions/workflow_when_condition"
         }
       ]
     },
-    "pipeline_when_condition": {
+    "workflow_when_condition": {
       "type": "object",
       "additionalProperties": false,
       "properties": {
@@ -1119,11 +1056,6 @@
         },
         "minLength": 1
       }
-    },
-    "platform": {
-      "description": "deprecated, use labels.platform",
-      "type": "string",
-      "additionalProperties": false
     },
     "labels": {
       "description": "Configures the labels used for the agent selection. Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#labels",

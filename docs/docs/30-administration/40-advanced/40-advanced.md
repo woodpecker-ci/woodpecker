@@ -1,4 +1,4 @@
-# Adavanced options
+# Advanced options
 
 Why should we be happy with a default setup? We should not! Woodpecker offers a lot of advanced options to configure it to your needs.
 

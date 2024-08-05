@@ -45,7 +45,7 @@ NUMBER  STATUS   EVENT   BRANCH  COMMIT                                    AUTHO
 42  success  push
 ```
 
-In addition especially useful for programmtic usage there is a `go-template` output format which will output the data using the provided go template like this:
+In addition especially useful for programmatic usage there is a `go-template` output format which will output the data using the provided go template like this:
 
 ```bash
 ########
