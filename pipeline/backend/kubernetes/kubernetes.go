@@ -254,7 +254,7 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 		}
 
 		if pod.Name == podName {
-			if isImagePullBackOffState(pod) {
+			if isImagePullBackOffState(pod) || isInvalidImageName(pod) {
 				finished <- true
 			}
 
@@ -286,7 +286,7 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 		return nil, err
 	}
 
-	if isImagePullBackOffState(pod) {
+	if isImagePullBackOffState(pod) || isInvalidImageName(pod) {
 		return nil, fmt.Errorf("could not pull image for pod %s", podName)
 	}
 
@@ -330,7 +330,7 @@ func (e *kube) TailStep(ctx context.Context, step *types.Step, taskUUID string) 
 		}
 
 		if pod.Name == podName {
-			if isImagePullBackOffState(pod) {
+			if isImagePullBackOffState(pod) || isInvalidImageName(pod) {
 				up <- true
 			}
 			switch pod.Status.Phase {
