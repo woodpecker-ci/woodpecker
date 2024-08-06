@@ -100,10 +100,6 @@ func configFromCliContext(ctx context.Context) (*config, error) {
 				},
 				NativeSecretsAllowFromStep: c.Bool("backend-k8s-allow-native-secrets"),
 			}
-			// TODO: remove in next major
-			if len(config.ImagePullSecretNames) == 1 && config.ImagePullSecretNames[0] == "regcred" {
-				log.Warn().Msg("WOODPECKER_BACKEND_K8S_PULL_SECRET_NAMES is set to the default ('regcred'). It will default to empty in Woodpecker 3.0. Set it explicitly before then.")
-			}
 			// Unmarshal label and annotation settings here to ensure they're valid on startup
 			if labels := c.String("backend-k8s-pod-labels"); labels != "" {
 				if err := yaml.Unmarshal([]byte(labels), &config.PodLabels); err != nil {
@@ -254,7 +250,7 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 		}
 
 		if pod.Name == podName {
-			if isImagePullBackOffState(pod) {
+			if isImagePullBackOffState(pod) || isInvalidImageName(pod) {
 				finished <- true
 			}
 
@@ -286,7 +282,7 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 		return nil, err
 	}
 
-	if isImagePullBackOffState(pod) {
+	if isImagePullBackOffState(pod) || isInvalidImageName(pod) {
 		return nil, fmt.Errorf("could not pull image for pod %s", podName)
 	}
 
@@ -330,7 +326,7 @@ func (e *kube) TailStep(ctx context.Context, step *types.Step, taskUUID string) 
 		}
 
 		if pod.Name == podName {
-			if isImagePullBackOffState(pod) {
+			if isImagePullBackOffState(pod) || isInvalidImageName(pod) {
 				up <- true
 			}
 			switch pod.Status.Phase {
