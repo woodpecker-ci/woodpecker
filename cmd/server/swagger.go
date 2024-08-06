@@ -33,7 +33,7 @@ func setupSwaggerStaticConfig() {
 	docs.SwaggerInfo.InfoInstanceName = "api"
 	docs.SwaggerInfo.Title = "Woodpecker CI API"
 	docs.SwaggerInfo.Version = version.String()
-	docs.SwaggerInfo.Description = "Woodpecker is a simple yet powerful CI/CD engine with great extensibility.\n" +
+	docs.SwaggerInfo.Description = "Woodpecker is a simple, yet powerful CI/CD engine with great extensibility.\n" +
 		"To get a personal access token (PAT) for authentication, please log in your Woodpecker server,\n" +
 		"and go to you personal profile page, by clicking the user icon at the top right."
 }

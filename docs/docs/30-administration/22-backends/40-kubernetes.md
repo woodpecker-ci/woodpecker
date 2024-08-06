@@ -197,7 +197,7 @@ backend_options:
 ```
 
 :::note
-AppArmor syntax follows [KEP-24](https://github.com/kubernetes/enhancements/blob/fddcbb9cbf3df39ded03bad71228265ac6e5215f/keps/sig-node/24-apparmor/README.md).
+The feature requires Kubernetes v1.30 or above.
 :::
 
 ### Annotations and labels
