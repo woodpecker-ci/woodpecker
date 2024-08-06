@@ -11,6 +11,10 @@
       </span>
     </template>
 
+    <Tab id="variables" :title="$t('variables.variables')">
+      <OrgVariablesTab />
+    </Tab>
+
     <Tab id="secrets" :title="$t('secrets.secrets')">
       <OrgSecretsTab />
     </Tab>
@@ -30,6 +34,7 @@ import Scaffold from '~/components/layout/scaffold/Scaffold.vue';
 import Tab from '~/components/layout/scaffold/Tab.vue';
 import OrgRegistriesTab from '~/components/org/settings/OrgRegistriesTab.vue';
 import OrgSecretsTab from '~/components/org/settings/OrgSecretsTab.vue';
+import OrgVariablesTab from '~/components/org/settings/OrgVariablesTab.vue';
 import { inject } from '~/compositions/useInjectProvide';
 import useNotifications from '~/compositions/useNotifications';
 import { useRouteBack } from '~/compositions/useRouteBack';

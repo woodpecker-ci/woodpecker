@@ -6,6 +6,9 @@
     <Tab id="info" :title="$t('info')">
       <AdminInfoTab />
     </Tab>
+    <Tab id="variables" :title="$t('variables.variables')">
+      <AdminVariablesTab />
+    </Tab>
     <Tab id="secrets" :title="$t('secrets.secrets')">
       <AdminSecretsTab />
     </Tab>
@@ -43,6 +46,7 @@ import AdminRegistriesTab from '~/components/admin/settings/AdminRegistriesTab.v
 import AdminReposTab from '~/components/admin/settings/AdminReposTab.vue';
 import AdminSecretsTab from '~/components/admin/settings/AdminSecretsTab.vue';
 import AdminUsersTab from '~/components/admin/settings/AdminUsersTab.vue';
+import AdminVariablesTab from '~/components/admin/settings/AdminVariablesTab.vue';
 import Scaffold from '~/components/layout/scaffold/Scaffold.vue';
 import Tab from '~/components/layout/scaffold/Tab.vue';
 import useAuthentication from '~/compositions/useAuthentication';

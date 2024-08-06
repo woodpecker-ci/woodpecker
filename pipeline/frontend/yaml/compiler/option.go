@@ -56,6 +56,16 @@ func WithRegistry(registries ...Registry) Option {
 	}
 }
 
+// WithVariable configures the compiler with external variables
+// to be injected into the container at runtime.
+func WithVariable(variables ...Variable) Option {
+	return func(compiler *Compiler) {
+		for _, variable := range variables {
+			compiler.variables[strings.ToLower(variable.Name)] = variable
+		}
+	}
+}
+
 // WithSecret configures the compiler with external secrets
 // to be injected into the container at runtime.
 func WithSecret(secrets ...Secret) Option {
