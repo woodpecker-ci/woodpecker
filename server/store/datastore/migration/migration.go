@@ -63,6 +63,7 @@ var migrationTasks = []*xormigrate.Migration{
 	&setForgeID,
 	&unifyColumnsTables,
 	&alterTableRegistriesFixRequiredFields,
+	&cronWithoutSec,
 }
 
 var allBeans = []any{
