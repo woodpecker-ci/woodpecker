@@ -82,7 +82,6 @@ var Flags = []cli.Flag{
 		Sources: cli.EnvVars("WOODPECKER_BACKEND_K8S_PULL_SECRET_NAMES"),
 		Name:    "backend-k8s-pod-image-pull-secret-names",
 		Usage:   "backend k8s pull secret names for private registries",
-		Value:   []string{"regcred"},
 	},
 	&cli.BoolFlag{
 		Sources: cli.EnvVars("WOODPECKER_BACKEND_K8S_ALLOW_NATIVE_SECRETS"),
