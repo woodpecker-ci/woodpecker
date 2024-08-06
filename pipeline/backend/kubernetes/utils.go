@@ -65,6 +65,18 @@ func isImagePullBackOffState(pod *v1.Pod) bool {
 	return false
 }
 
+func isInvalidImageName(pod *v1.Pod) bool {
+	for _, containerState := range pod.Status.ContainerStatuses {
+		if containerState.State.Waiting != nil {
+			if containerState.State.Waiting.Reason == "InvalidImageName" {
+				return true
+			}
+		}
+	}
+
+	return false
+}
+
 // getClientOutOfCluster returns a k8s client set to the request from outside of cluster.
 func getClientOutOfCluster() (kubernetes.Interface, error) {
 	kubeConfigPath := os.Getenv("KUBECONFIG") // cspell:words KUBECONFIG
