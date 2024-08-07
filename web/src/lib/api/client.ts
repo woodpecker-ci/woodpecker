@@ -55,7 +55,7 @@ export default class ApiClient {
       let message = res.statusText;
       const resText = await res.text();
       if (resText) {
-        message = `${res.statusText  }: ${  resText}`;
+        message = `${res.statusText}: ${resText}`;
       }
       const error: ApiError = {
         status: res.status,
