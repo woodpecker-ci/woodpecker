@@ -8,6 +8,7 @@
 
 ### 💥 Breaking changes
 
+- Improved Local backend detection [[#4006](https://github.com/woodpecker-ci/woodpecker/pull/4006)]
 - Refactor JSON and SDK fields [[#3968](https://github.com/woodpecker-ci/woodpecker/pull/3968)]
 - Migrate to maintained cron lib and remove seconds [[#3785](https://github.com/woodpecker-ci/woodpecker/pull/3785)]
 - Switched to profile-based AppArmor configuration [[#4008](https://github.com/woodpecker-ci/woodpecker/pull/4008)]
