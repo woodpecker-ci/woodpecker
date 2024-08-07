@@ -62,11 +62,14 @@ func (e *local) Name() string {
 	return "local"
 }
 
-func (e *local) IsAvailable(context.Context) bool {
+func (e *local) IsAvailable(ctx context.Context) bool {
+	if c, ok := ctx.Value(types.CliCommand).(*cli.Command); ok {
+		if c.String("backend-engine") == e.Name() {
+			return true
+		}
+	}
 	_, inContainer := os.LookupEnv("WOODPECKER_IN_CONTAINER")
-	// note: we don't need to check by args as this would indicate we are not in an container anyway ...
-	backend := os.Getenv("WOODPECKER_BACKEND")
-	return backend == "local" || !inContainer
+	return !inContainer
 }
 
 func (e *local) Flags() []cli.Flag {
