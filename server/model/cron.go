@@ -17,7 +17,7 @@ package model
 import (
 	"fmt"
 
-	"github.com/robfig/cron"
+	"github.com/gdgvda/cron"
 )
 
 type Cron struct {
@@ -46,7 +46,7 @@ func (c *Cron) Validate() error {
 		return fmt.Errorf("schedule is required")
 	}
 
-	_, err := cron.Parse(c.Schedule)
+	_, err := cron.ParseStandard(c.Schedule)
 	if err != nil {
 		return fmt.Errorf("can't parse schedule: %w", err)
 	}

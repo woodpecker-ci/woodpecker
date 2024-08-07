@@ -38,7 +38,8 @@
         "desc": "Specify additional variables to use in your pipeline. Variables with the same name will be overwritten.",
         "name": "Variable name",
         "value": "Variable value"
-      }
+      },
+      "show_pipelines": "Show pipelines"
     },
     "deploy_pipeline": {
       "title": "Trigger deployment event for current pipeline #{pipelineId}",

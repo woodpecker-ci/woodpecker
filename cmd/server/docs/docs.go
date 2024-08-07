@@ -4458,14 +4458,12 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "created": {
-                    "description": "TODO change JSON field to \"created\" in 3.0",
                     "type": "integer"
                 },
                 "event": {
                     "type": "string"
                 },
                 "finished": {
-                    "description": "TODO change JSON field to \"finished\" in 3.0",
                     "type": "integer"
                 },
                 "id": {
@@ -4487,7 +4485,6 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "started": {
-                    "description": "TODO change JSON field to \"started\" in 3.0",
                     "type": "integer"
                 },
                 "status": {

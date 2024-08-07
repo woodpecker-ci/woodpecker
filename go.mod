@@ -26,6 +26,7 @@ require (
 	github.com/expr-lang/expr v1.16.9
 	github.com/franela/goblin v0.0.0-20211003143422-0a4f594942bf
 	github.com/fsnotify/fsnotify v1.7.0
+	github.com/gdgvda/cron v0.2.0
 	github.com/getkin/kin-openapi v0.126.0
 	github.com/gin-gonic/gin v1.10.0
 	github.com/gitsight/go-vcsurl v1.0.1
@@ -49,7 +50,6 @@ require (
 	github.com/oklog/ulid/v2 v2.1.0
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.19.1
-	github.com/robfig/cron v1.2.0
 	github.com/rs/zerolog v1.33.0
 	github.com/stretchr/testify v1.9.0
 	github.com/swaggo/files v1.0.1
