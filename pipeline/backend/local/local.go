@@ -64,7 +64,8 @@ func (e *local) Name() string {
 
 func (e *local) IsAvailable(context.Context) bool {
 	_, inContainer := os.LookupEnv("WOODPECKER_IN_CONTAINER")
-	return !inContainer
+	backend := os.Getenv("WOODPECKER_BACKEND")
+	return backend == "local" || !inContainer
 }
 
 func (e *local) Flags() []cli.Flag {
