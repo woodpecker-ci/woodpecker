@@ -64,6 +64,7 @@ var migrationTasks = []*xormigrate.Migration{
 	&unifyColumnsTables,
 	&alterTableRegistriesFixRequiredFields,
 	&cronWithoutSec,
+	&renameStartEndTime,
 }
 
 var allBeans = []any{
