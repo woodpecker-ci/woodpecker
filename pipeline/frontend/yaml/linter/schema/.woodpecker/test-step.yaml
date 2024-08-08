@@ -47,12 +47,6 @@ steps:
       - docker_username
       - docker_prod_password
 
-  group:
-    group: test
-    image: golang
-    commands:
-      - go test
-
   detached:
     image: redis
     detach: true

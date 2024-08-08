@@ -215,21 +215,6 @@ func (l *Linter) lintDeprecations(config *WorkflowConfig) (err error) {
 		return err
 	}
 
-	for _, step := range parsed.Steps.ContainerList {
-		if step.Group != "" {
-			err = multierr.Append(err, &errorTypes.PipelineError{
-				Type:    errorTypes.PipelineErrorTypeDeprecation,
-				Message: "Please use depends_on instead of deprecated 'group' setting",
-				Data: errors.DeprecationErrorData{
-					File:  config.File,
-					Field: "steps." + step.Name + ".group",
-					Docs:  "https://woodpecker-ci.org/docs/next/usage/workflow-syntax#depends_on",
-				},
-				IsWarning: true,
-			})
-		}
-	}
-
 	return err
 }
 

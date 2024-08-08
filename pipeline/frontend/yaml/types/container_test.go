@@ -164,7 +164,6 @@ func TestUnmarshalContainers(t *testing.T) {
 		},
 		{
 			from: `publish-agent:
-    group: bundle
     image: print/env
     settings:
       repo: woodpeckerci/woodpecker-agent
@@ -179,7 +178,6 @@ func TestUnmarshalContainers(t *testing.T) {
 				{
 					Name:  "publish-agent",
 					Image: "print/env",
-					Group: "bundle",
 					Secrets: []string{"docker_username", "docker_password"},
 					Settings: map[string]any{
 						"repo":       "woodpeckerci/woodpecker-agent",
@@ -200,7 +198,6 @@ func TestUnmarshalContainers(t *testing.T) {
 		},
 		{
 			from: `publish-cli:
-    group: docker
     image: print/env
     settings:
       repo: woodpeckerci/woodpecker-cli
@@ -213,7 +210,6 @@ func TestUnmarshalContainers(t *testing.T) {
 				{
 					Name:  "publish-cli",
 					Image: "print/env",
-					Group: "docker",
 					Settings: map[string]any{
 						"repo":       "woodpeckerci/woodpecker-cli",
 						"dockerfile": "docker/Dockerfile.cli",

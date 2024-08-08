@@ -39,7 +39,6 @@ type (
 		Detached       bool               `yaml:"detach,omitempty"`
 		Directory      string             `yaml:"directory,omitempty"`
 		Failure        string             `yaml:"failure,omitempty"`
-		Group          string             `yaml:"group,omitempty"`
 		Image          string             `yaml:"image,omitempty"`
 		Name           string             `yaml:"name,omitempty"`
 		Pull           bool               `yaml:"pull,omitempty"`

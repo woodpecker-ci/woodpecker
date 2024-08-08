@@ -276,10 +276,6 @@
         "volumes": {
           "$ref": "#/definitions/step_volumes"
         },
-        "group": {
-          "description": "deprecated, use depends_on",
-          "type": "string"
-        },
         "depends_on": {
           "description": "Execute a step after another step has finished.",
           "oneOf": [
@@ -362,10 +358,6 @@
         "volumes": {
           "$ref": "#/definitions/step_volumes"
         },
-        "group": {
-          "description": "deprecated, use depends_on",
-          "type": "string"
-        },
         "depends_on": {
           "description": "Execute a step after another step has finished.",
           "oneOf": [
@@ -444,10 +436,6 @@
         },
         "volumes": {
           "$ref": "#/definitions/step_volumes"
-        },
-        "group": {
-          "description": "deprecated, use depends_on",
-          "type": "string"
         },
         "depends_on": {
           "description": "Execute a step after another step has finished.",

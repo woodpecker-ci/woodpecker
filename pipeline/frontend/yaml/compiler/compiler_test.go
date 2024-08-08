@@ -150,19 +150,17 @@ func TestCompilerCompile(t *testing.T) {
 			},
 		},
 		{
-			name: "workflow with three steps and one group",
+			name: "workflow with three steps",
 			fronConf: &yaml_types.Workflow{Steps: yaml_types.ContainerList{ContainerList: []*yaml_types.Container{{
 				Name:     "echo env",
 				Image:    "bash",
 				Commands: []string{"env"},
 			}, {
 				Name:     "parallel echo 1",
-				Group:    "parallel",
 				Image:    "bash",
 				Commands: []string{"echo 1"},
 			}, {
 				Name:     "parallel echo 2",
-				Group:    "parallel",
 				Image:    "bash",
 				Commands: []string{"echo 2"},
 			}}}},
@@ -194,7 +192,9 @@ func TestCompilerCompile(t *testing.T) {
 						WorkingDir: "/test/src/github.com/octocat/hello-world",
 						Networks:   []backend_types.Conn{{Name: "test_default", Aliases: []string{"parallel echo 1"}}},
 						ExtraHosts: []backend_types.HostAlias{},
-					}, {
+					}},
+				}, {
+					Steps: []*backend_types.Step{{
 						Name:       "parallel echo 2",
 						Type:       backend_types.StepTypeCommands,
 						Image:      "bash",
@@ -206,8 +206,8 @@ func TestCompilerCompile(t *testing.T) {
 						Networks:   []backend_types.Conn{{Name: "test_default", Aliases: []string{"parallel echo 2"}}},
 						ExtraHosts: []backend_types.HostAlias{},
 					}},
-				}},
-			},
+				},
+			}},
 		},
 		{
 			name: "workflow with three steps and depends_on",
