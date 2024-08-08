@@ -46,7 +46,7 @@ export function isStepRunning(step: PipelineStep): boolean {
  * @returns {number} 0 if created at the same time, < 0 if b was create before a, > 0 otherwise
  */
 export function comparePipelines(a: Pipeline, b: Pipeline): number {
-  return (b.created_at || -1) - (a.created_at || -1);
+  return (b.created || -1) - (a.created || -1);
 }
 
 /**
