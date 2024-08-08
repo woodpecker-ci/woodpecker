@@ -4,8 +4,8 @@ import (
 	"testing"
 
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/stepbuilder"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
-	sharedPipeline "go.woodpecker-ci.org/woodpecker/v2/server/pipeline/stepbuilder"
 )
 
 func TestSetPipelineStepsOnPipeline(t *testing.T) {
@@ -16,7 +16,7 @@ func TestSetPipelineStepsOnPipeline(t *testing.T) {
 		Event: model.EventPush,
 	}
 
-	pipelineItems := []*sharedPipeline.Item{{
+	pipelineItems := []*stepbuilder.Item{{
 		Workflow: &model.Workflow{
 			PID: 1,
 		},

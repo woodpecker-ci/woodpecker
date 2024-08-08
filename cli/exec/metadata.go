@@ -15,19 +15,17 @@
 package exec
 
 import (
-	"context"
 	"runtime"
 	"strings"
 
 	"github.com/urfave/cli/v3"
-
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/metadata"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/matrix"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 	"go.woodpecker-ci.org/woodpecker/v2/version"
 )
 
 // return the metadata from the cli context.
-func metadataFromContext(_ context.Context, c *cli.Command, axis matrix.Axis) metadata.Metadata {
+func metadataFromCommand(c *cli.Command, workflow *model.Workflow) metadata.Metadata {
 	platform := c.String("system-platform")
 	if platform == "" {
 		platform = runtime.GOOS + "/" + runtime.GOARCH
@@ -51,6 +49,7 @@ func metadataFromContext(_ context.Context, c *cli.Command, axis matrix.Axis) me
 			CloneSSHURL: c.String("repo-clone-ssh-url"),
 			Private:     c.Bool("repo-private"),
 			Trusted:     c.Bool("repo-trusted"),
+			Branch:      "main", // TODO: get the branch from the context
 		},
 		Curr: metadata.Pipeline{
 			Number:     c.Int("pipeline-number"),
@@ -98,9 +97,9 @@ func metadataFromContext(_ context.Context, c *cli.Command, axis matrix.Axis) me
 			},
 		},
 		Workflow: metadata.Workflow{
-			Name:   c.String("workflow-name"),
-			Number: int(c.Int("workflow-number")),
-			Matrix: axis,
+			Name:   workflow.Name,
+			Number: workflow.PID,
+			Matrix: workflow.Environ,
 		},
 		Step: metadata.Step{
 			Name:   c.String("step-name"),
