@@ -250,11 +250,8 @@ func PostHook(c *gin.Context) {
 func getRepoFromToken(store store.Store, t *token.Token) (*model.Repo, error) {
 	// try to get the repo by the repo-id
 	repoID, err := strconv.ParseInt(t.Get("repo-id"), 10, 64)
-	if err == nil {
-		return store.GetRepo(repoID)
+	if err != nil {
+		return nil, err
 	}
-
-	// try to get the repo by the repo name or by its redirection
-	repoName := t.Get("text")
-	return store.GetRepoName(repoName)
+	return store.GetRepo(repoID)
 }
