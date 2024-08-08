@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-08-07
+## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-08-08
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -8,6 +8,7 @@
 
 ### 💥 Breaking changes
 
+- Drop repo name fallback for hooks [[#4013](https://github.com/woodpecker-ci/woodpecker/pull/4013)]
 - Improved Local backend detection [[#4006](https://github.com/woodpecker-ci/woodpecker/pull/4006)]
 - Refactor JSON and SDK fields [[#3968](https://github.com/woodpecker-ci/woodpecker/pull/3968)]
 - Migrate to maintained cron lib and remove seconds [[#3785](https://github.com/woodpecker-ci/woodpecker/pull/3785)]
@@ -25,10 +26,12 @@
 
 ### 🔒 Security
 
+- Update gitea sdk [[#4012](https://github.com/woodpecker-ci/woodpecker/pull/4012)]
 - Update Forgejo SDK [[#3948](https://github.com/woodpecker-ci/woodpecker/pull/3948)]
 
 ### 📈 Enhancement
 
+- Show error returned from API [[#3980](https://github.com/woodpecker-ci/woodpecker/pull/3980)]
 - Move manual popup to own page [[#3981](https://github.com/woodpecker-ci/woodpecker/pull/3981)]
 - Fail on InvalidImageName [[#4007](https://github.com/woodpecker-ci/woodpecker/pull/4007)]
 - Use Bitbucket PR title for pipeline message [[#3984](https://github.com/woodpecker-ci/woodpecker/pull/3984)]
@@ -59,6 +62,7 @@
 
 ### Misc
 
+- Show error if secret name is missing [[#4014](https://github.com/woodpecker-ci/woodpecker/pull/4014)]
 - chore(deps): lock file maintenance [[#3991](https://github.com/woodpecker-ci/woodpecker/pull/3991)]
 - fix(deps): update github.com/urfave/cli/v3 digest to 127cf54 [[#3989](https://github.com/woodpecker-ci/woodpecker/pull/3989)]
 - fix(deps): update golang-packages [[#3958](https://github.com/woodpecker-ci/woodpecker/pull/3958)]
