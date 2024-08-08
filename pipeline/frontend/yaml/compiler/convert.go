@@ -125,18 +125,18 @@ func (c *Compiler) createProcess(container *yaml_types.Container, stepType backe
 		return nil, err
 	}
 
-	for _, requested := range container.Secrets.Secrets {
-		secretValue, err := getSecretValue(requested.Source)
+	for _, requested := range container.Secrets {
+		secretValue, err := getSecretValue(requested)
 		if err != nil {
 			return nil, err
 		}
 
-		toUpperTarget := strings.ToUpper(requested.Target)
+		toUpperTarget := strings.ToUpper(requested)
 		if !environmentAllowed(toUpperTarget, stepType) {
 			continue
 		}
 
-		environment[requested.Target] = secretValue
+		environment[requested] = secretValue
 		// TODO: deprecated, remove in 3.x
 		environment[toUpperTarget] = secretValue
 	}

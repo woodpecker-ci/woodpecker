@@ -762,23 +762,7 @@
       "description": "Pass secrets to a pipeline step at runtime. Read more: https://woodpecker-ci.org/docs/usage/secrets",
       "type": "array",
       "items": {
-        "oneOf": [
-          {
-            "type": "string"
-          },
-          {
-            "type": "object",
-            "required": ["source", "target"],
-            "properties": {
-              "source": {
-                "type": "string"
-              },
-              "target": {
-                "type": "string"
-              }
-            }
-          }
-        ]
+        "type": "string"
       },
       "minLength": 1
     },

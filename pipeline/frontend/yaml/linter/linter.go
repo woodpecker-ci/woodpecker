@@ -262,23 +262,6 @@ func (l *Linter) lintDeprecations(config *WorkflowConfig) (err error) {
 		}
 	}
 
-	for _, step := range parsed.Steps.ContainerList {
-		for i, c := range step.Secrets.Secrets {
-			if c.Source != c.Target {
-				err = multierr.Append(err, &errorTypes.PipelineError{
-					Type:    errorTypes.PipelineErrorTypeDeprecation,
-					Message: "Secrets alternative names are deprecated, use environment with from_secret",
-					Data: errors.DeprecationErrorData{
-						File:  config.File,
-						Field: fmt.Sprintf("steps.%s.secrets[%d]", step.Name, i),
-						Docs:  "https://woodpecker-ci.org/docs/usage/secrets#use-secrets-in-settings-and-environment",
-					},
-					IsWarning: true,
-				})
-			}
-		}
-	}
-
 	for i, c := range parsed.When.Constraints {
 		if !c.Environment.IsEmpty() {
 			err = multierr.Append(err, &errorTypes.PipelineError{

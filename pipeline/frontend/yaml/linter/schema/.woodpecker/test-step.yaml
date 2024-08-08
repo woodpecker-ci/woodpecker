@@ -54,8 +54,7 @@ steps:
       - echo $DOCKER_PASSWORD
     secrets:
       - docker_username
-      - source: docker_prod_password
-        target: docker_password
+      - docker_prod_password
 
   group:
     group: test

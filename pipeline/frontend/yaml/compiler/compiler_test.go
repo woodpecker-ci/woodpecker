@@ -274,7 +274,7 @@ func TestCompilerCompile(t *testing.T) {
 				Name:     "step",
 				Image:    "bash",
 				Commands: []string{"env"},
-				Secrets:  yaml_types.Secrets{Secrets: []*yaml_types.Secret{{Source: "missing", Target: "missing"}}},
+				Secrets:  []string{"missing"},
 			}}}},
 			backConf:    nil,
 			expectedErr: "secret \"missing\" not found",

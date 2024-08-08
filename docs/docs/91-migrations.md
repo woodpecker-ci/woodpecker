@@ -12,7 +12,7 @@ Some versions need some changes to the server configuration or the pipeline conf
 - Removed implicitly defined `regcred` image pull secret name. Set it explicitly via `WOODPECKER_BACKEND_K8S_PULL_SECRET_NAMES`
 - Deprecated `includes` and `excludes` support from **event** filter
 - Deprecated uppercasing all secret env vars, instead, the value of the `secrets` property is used. [Read more](./20-usage/40-secrets.md#use-secrets-in-commands)
-- Deprecated alternative names for secrets, use `environment` with `from_secret`
+- Removed alternative names for secrets, use `environment` with `from_secret`
 - Deprecated slice definition for env vars
 - Deprecated `environment` filter, use `when.evaluate`
 - Removed `WOODPECKER_WEBHOOK_HOST` in favor of `WOODPECKER_EXPERT_WEBHOOK_HOST`

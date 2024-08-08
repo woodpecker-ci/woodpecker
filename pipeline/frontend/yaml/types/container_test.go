@@ -182,13 +182,7 @@ func TestUnmarshalContainers(t *testing.T) {
 					Name:  "publish-agent",
 					Image: "print/env",
 					Group: "bundle",
-					Secrets: Secrets{Secrets: []*Secret{{
-						Source: "docker_username",
-						Target: "docker_username",
-					}, {
-						Source: "docker_password",
-						Target: "docker_password",
-					}}},
+					Secrets: []string{"docker_username", "docker_password"},
 					Settings: map[string]any{
 						"repo":       "woodpeckerci/woodpecker-agent",
 						"dockerfile": "docker/Dockerfile.agent",
