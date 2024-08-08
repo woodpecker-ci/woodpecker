@@ -57,8 +57,6 @@ func newApp() *cli.Command {
 		deploy.Command,
 		exec.Command,
 		info.Command,
-		// TODO: Remove in 3.x
-		registry.Command,
 		secret.Command,
 		user.Command,
 		lint.Command,

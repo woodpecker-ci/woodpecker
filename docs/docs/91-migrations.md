@@ -22,6 +22,7 @@ Some versions need some changes to the server configuration or the pipeline conf
 - Crons now use standard Linux syntax without seconds
 - Replaced `configs` object by `netrc` in external configuration APIs
 - Removed old API routes: `registry/` -> `registries`, `/authorize/token`
+- Replaced `registry` command with `repo registry` in cli
 
 ## 2.0.0
 
