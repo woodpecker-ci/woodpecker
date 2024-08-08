@@ -188,10 +188,6 @@
           "description": "Execute a step only on a specific platform. Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#platform",
           "$ref": "#/definitions/constraint_list"
         },
-        "environment": {
-          "description": "Execute a step only for a specific environment. Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#environment",
-          "$ref": "#/definitions/constraint_list"
-        },
         "instance": {
           "description": "Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#instance",
           "$ref": "#/definitions/constraint_list"
@@ -552,10 +548,6 @@
         },
         "platform": {
           "description": "Execute a step only on a specific platform. Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#platform",
-          "$ref": "#/definitions/constraint_list"
-        },
-        "environment": {
-          "description": "Execute a step only for a specific environment. Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#environment",
           "$ref": "#/definitions/constraint_list"
         },
         "matrix": {

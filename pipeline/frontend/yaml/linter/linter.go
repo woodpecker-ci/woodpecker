@@ -262,38 +262,6 @@ func (l *Linter) lintDeprecations(config *WorkflowConfig) (err error) {
 		}
 	}
 
-	for i, c := range parsed.When.Constraints {
-		if !c.Environment.IsEmpty() {
-			err = multierr.Append(err, &errorTypes.PipelineError{
-				Type:    errorTypes.PipelineErrorTypeDeprecation,
-				Message: "environment filters are deprecated, use evaluate with CI_PIPELINE_DEPLOY_TARGET",
-				Data: errors.DeprecationErrorData{
-					File:  config.File,
-					Field: fmt.Sprintf("when[%d].environment", i),
-					Docs:  "https://woodpecker-ci.org/docs/usage/workflow-syntax#evaluate",
-				},
-				IsWarning: true,
-			})
-		}
-	}
-
-	for _, step := range parsed.Steps.ContainerList {
-		for i, c := range step.When.Constraints {
-			if !c.Environment.IsEmpty() {
-				err = multierr.Append(err, &errorTypes.PipelineError{
-					Type:    errorTypes.PipelineErrorTypeDeprecation,
-					Message: "environment filters are deprecated, use evaluate with CI_PIPELINE_DEPLOY_TARGET",
-					Data: errors.DeprecationErrorData{
-						File:  config.File,
-						Field: fmt.Sprintf("steps.%s.when[%d].environment", step.Name, i),
-						Docs:  "https://woodpecker-ci.org/docs/usage/workflow-syntax#evaluate",
-					},
-					IsWarning: true,
-				})
-			}
-		}
-	}
-
 	return err
 }
 

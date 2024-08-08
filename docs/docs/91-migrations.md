@@ -14,7 +14,7 @@ Some versions need some changes to the server configuration or the pipeline conf
 - Removed uppercasing all secret env vars, instead, the value of the `secrets` property is used. [Read more](./20-usage/40-secrets.md#use-secrets-in-commands)
 - Removed alternative names for secrets, use `environment` with `from_secret`
 - Removed slice definition for env vars
-- Deprecated `environment` filter, use `when.evaluate`
+- Removed `environment` filter, use `when.evaluate`
 - Removed `WOODPECKER_WEBHOOK_HOST` in favor of `WOODPECKER_EXPERT_WEBHOOK_HOST`
 - Migrated to rfc9421 for webhook signatures
 - Renamed `start_time`, `end_time`, `created_at`, `started_at`, `finished_at` and `reviewed_at` JSON fields to `started`, `finished`, `created`, `started`, `finished`, `reviewed`

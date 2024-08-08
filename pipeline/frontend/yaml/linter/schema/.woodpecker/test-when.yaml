@@ -78,7 +78,6 @@ steps:
     commands:
       - echo "test"
     when:
-      environment: production
       event: deployment
 
   when-matrix:
