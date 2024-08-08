@@ -23,12 +23,6 @@ To configure cron jobs you need at least push access to the repository.
 
    ![cron settings](./cron-settings.png)
 
-   The supported schedule syntax can be found at <https://pkg.go.dev/github.com/robfig/cron?utm_source=godoc#hdr-CRON_Expression_Format>. If you need general understanding of the cron syntax <https://it-tools.tech/crontab-generator> is a good place to start and experiment.
+   The supported schedule syntax can be found at <https://pkg.go.dev/github.com/gdgvda/cron#hdr-CRON_Expression_Format>. If you need general understanding of the cron syntax <https://it-tools.tech/crontab-generator> is a good place to start and experiment.
 
-   Examples: `@every 5m`, `@daily`, `0 30 * * * *` ...
-
-   :::info
-   Woodpeckers cron syntax starts with seconds instead of minutes as used by most linux cron schedulers.
-
-   Example: "At minute 30 every hour" would be `0 30 * * * *` instead of `30 * * * *`
-   :::
+   Examples: `@every 5m`, `@daily`, `30 * * * *` ...

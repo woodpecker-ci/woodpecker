@@ -2,13 +2,6 @@
 
 Some versions need some changes to the server configuration or the pipeline configuration files.
 
-<!--
-## 3.0.0
-
-- Update all webhooks by pressing the "Repair all" button in the admin settings as the webhook token claims have changed
-
--->
-
 ## `next`
 
 - Removed `WOODPECKER_DEV_OAUTH_HOST` and `WOODPECKER_DEV_GITEA_OAUTH_URL` use `WOODPECKER_EXPERT_FORGE_OAUTH_HOST`
@@ -16,6 +9,7 @@ Some versions need some changes to the server configuration or the pipeline conf
 - Deprecated `steps.[name].group` in favor of `steps.[name].depends_on` (see [workflow syntax](./20-usage/20-workflow-syntax.md#depends_on) to learn how to set dependencies)
 - Removed `WOODPECKER_ROOT_PATH` and `WOODPECKER_ROOT_URL` config variables. Use `WOODPECKER_HOST` with a path instead
 - Pipelines without a config file will now be skipped instead of failing
+- Removed implicitly defined `regcred` image pull secret name. Set it explicitly via `WOODPECKER_BACKEND_K8S_PULL_SECRET_NAMES`
 - Deprecated `includes` and `excludes` support from **event** filter
 - Deprecated uppercasing all secret env vars, instead, the value of the `secrets` property is used. [Read more](./20-usage/40-secrets.md#use-secrets-in-commands)
 - Deprecated alternative names for secrets, use `environment` with `from_secret`
@@ -23,6 +17,9 @@ Some versions need some changes to the server configuration or the pipeline conf
 - Deprecated `environment` filter, use `when.evaluate`
 - Removed `WOODPECKER_WEBHOOK_HOST` in favor of `WOODPECKER_EXPERT_WEBHOOK_HOST`
 - Migrated to rfc9421 for webhook signatures
+- Renamed `start_time`, `end_time`, `created_at`, `started_at`, `finished_at` and `reviewed_at` JSON fields to `started`, `finished`, `created`, `started`, `finished`, `reviewed`
+- Update all webhooks by pressing the "Repair all" button in the admin settings as the webhook token claims have changed
+- Crons now use standard Linux syntax without seconds
 
 ## 2.0.0
 

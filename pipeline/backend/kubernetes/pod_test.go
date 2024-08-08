@@ -162,7 +162,6 @@ func TestFullPod(t *testing.T) {
 			},
 			"annotations": {
 				"apps.kubernetes.io/pod-index": "0",
-				"container.apparmor.security.beta.kubernetes.io/wp-01he8bebctabr3kgk0qj36d2me-0": "localhost/k8s-apparmor-example-deny-write",
 				"kubernetes.io/limit-ranger": "LimitRanger plugin set: cpu, memory request and limit for container"
 			}
 		},
@@ -250,9 +249,13 @@ func TestFullPod(t *testing.T) {
 				"runAsGroup": 101,
 				"runAsNonRoot": true,
 				"fsGroup": 101,
+				"appArmorProfile": {
+					"type": "Localhost",
+					"localhostProfile": "k8s-apparmor-example-deny-write"
+				},
 				"seccompProfile": {
-        	"type": "Localhost",
-          "localhostProfile": "profiles/audit.json"
+					"type": "Localhost",
+					"localhostProfile": "profiles/audit.json"
 				}
 			},
 			"imagePullSecrets": [

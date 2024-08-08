@@ -360,7 +360,8 @@ func GetRepoBranches(c *gin.Context) {
 
 	branches, err := _forge.Branches(c, user, repo, session.Pagination(c))
 	if err != nil {
-		_ = c.AbortWithError(http.StatusInternalServerError, err)
+		log.Error().Err(err).Msg("failed to load branches")
+		c.String(http.StatusInternalServerError, "failed to load branches: %s", err)
 		return
 	}
 

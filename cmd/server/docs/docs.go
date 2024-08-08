@@ -4415,8 +4415,7 @@ const docTemplate = `{
                 "branch": {
                     "type": "string"
                 },
-                "created_at": {
-                    "description": "TODO change JSON field to \"created\" in 3.0",
+                "created": {
                     "type": "integer"
                 },
                 "creator_id": {
@@ -4458,15 +4457,13 @@ const docTemplate = `{
                 "commit": {
                     "type": "string"
                 },
-                "created_at": {
-                    "description": "TODO change JSON field to \"created\" in 3.0",
+                "created": {
                     "type": "integer"
                 },
                 "event": {
                     "type": "string"
                 },
-                "finished_at": {
-                    "description": "TODO change JSON field to \"finished\" in 3.0",
+                "finished": {
                     "type": "integer"
                 },
                 "id": {
@@ -4487,8 +4484,7 @@ const docTemplate = `{
                 "repo_id": {
                     "type": "integer"
                 },
-                "started_at": {
-                    "description": "TODO change JSON field to \"started\" in 3.0",
+                "started": {
                     "type": "integer"
                 },
                 "status": {
@@ -4645,8 +4641,7 @@ const docTemplate = `{
                 "commit": {
                     "type": "string"
                 },
-                "created_at": {
-                    "description": "TODO change JSON field to \"created\" in 3.0",
+                "created": {
                     "type": "integer"
                 },
                 "deploy_task": {
@@ -4664,8 +4659,7 @@ const docTemplate = `{
                 "event": {
                     "$ref": "#/definitions/WebhookEvent"
                 },
-                "finished_at": {
-                    "description": "TODO change JSON field to \"finished\" in 3.0",
+                "finished": {
                     "type": "integer"
                 },
                 "forge_url": {
@@ -4698,8 +4692,7 @@ const docTemplate = `{
                 "refspec": {
                     "type": "string"
                 },
-                "reviewed_at": {
-                    "description": "TODO change JSON field to \"reviewed\" in 3.0",
+                "reviewed": {
                     "type": "integer"
                 },
                 "reviewed_by": {
@@ -4709,8 +4702,7 @@ const docTemplate = `{
                     "description": "uses reported user for webhooks and name of cron for cron pipelines",
                     "type": "string"
                 },
-                "started_at": {
-                    "description": "TODO change JSON field to \"started\" in 3.0",
+                "started": {
                     "type": "integer"
                 },
                 "status": {
@@ -4722,8 +4714,7 @@ const docTemplate = `{
                 "title": {
                     "type": "string"
                 },
-                "updated_at": {
-                    "description": "TODO change JSON field to \"updated\" in 3.0",
+                "updated": {
                     "type": "integer"
                 },
                 "variables": {
@@ -5012,13 +5003,13 @@ const docTemplate = `{
         "Step": {
             "type": "object",
             "properties": {
-                "end_time": {
-                    "type": "integer"
-                },
                 "error": {
                     "type": "string"
                 },
                 "exit_code": {
+                    "type": "integer"
+                },
+                "finished": {
                     "type": "integer"
                 },
                 "id": {
@@ -5036,7 +5027,7 @@ const docTemplate = `{
                 "ppid": {
                     "type": "integer"
                 },
-                "start_time": {
+                "started": {
                     "type": "integer"
                 },
                 "state": {
@@ -5196,9 +5187,6 @@ const docTemplate = `{
                         "$ref": "#/definitions/Step"
                     }
                 },
-                "end_time": {
-                    "type": "integer"
-                },
                 "environ": {
                     "type": "object",
                     "additionalProperties": {
@@ -5207,6 +5195,9 @@ const docTemplate = `{
                 },
                 "error": {
                     "type": "string"
+                },
+                "finished": {
+                    "type": "integer"
                 },
                 "id": {
                     "type": "integer"
@@ -5223,7 +5214,7 @@ const docTemplate = `{
                 "platform": {
                     "type": "string"
                 },
-                "start_time": {
+                "started": {
                     "type": "integer"
                 },
                 "state": {

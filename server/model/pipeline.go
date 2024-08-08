@@ -28,10 +28,10 @@ type Pipeline struct {
 	Event               WebhookEvent           `json:"event"                   xorm:"event"`
 	Status              StatusValue            `json:"status"                  xorm:"INDEX 'status'"`
 	Errors              []*types.PipelineError `json:"errors"                  xorm:"json 'errors'"`
-	Created             int64                  `json:"created_at"              xorm:"'created' NOT NULL DEFAULT 0 created"` // TODO change JSON field to "created" in 3.0
-	Updated             int64                  `json:"updated_at"              xorm:"'updated' NOT NULL DEFAULT 0 updated"` // TODO change JSON field to "updated" in 3.0
-	Started             int64                  `json:"started_at"              xorm:"started"`                              // TODO change JSON field to "started" in 3.0
-	Finished            int64                  `json:"finished_at"             xorm:"finished"`                             // TODO change JSON field to "finished" in 3.0
+	Created             int64                  `json:"created"                 xorm:"'created' NOT NULL DEFAULT 0 created"`
+	Updated             int64                  `json:"updated"                 xorm:"'updated' NOT NULL DEFAULT 0 updated"`
+	Started             int64                  `json:"started"                 xorm:"started"`
+	Finished            int64                  `json:"finished"                xorm:"finished"`
 	DeployTo            string                 `json:"deploy_to"               xorm:"deploy"`
 	DeployTask          string                 `json:"deploy_task"             xorm:"deploy_task"`
 	Commit              string                 `json:"commit"                  xorm:"commit"`
@@ -46,7 +46,7 @@ type Pipeline struct {
 	Email               string                 `json:"author_email"            xorm:"email"`
 	ForgeURL            string                 `json:"forge_url"               xorm:"forge_url"`
 	Reviewer            string                 `json:"reviewed_by"             xorm:"reviewer"`
-	Reviewed            int64                  `json:"reviewed_at"             xorm:"reviewed"` // TODO change JSON field to "reviewed" in 3.0
+	Reviewed            int64                  `json:"reviewed"                xorm:"reviewed"`
 	Workflows           []*Workflow            `json:"workflows,omitempty"     xorm:"-"`
 	ChangedFiles        []string               `json:"changed_files,omitempty" xorm:"LONGTEXT 'changed_files'"`
 	AdditionalVariables map[string]string      `json:"variables,omitempty"     xorm:"json 'additional_variables'"`
