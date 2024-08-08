@@ -21,6 +21,7 @@ Some versions need some changes to the server configuration or the pipeline conf
 - Update all webhooks by pressing the "Repair all" button in the admin settings as the webhook token claims have changed
 - Crons now use standard Linux syntax without seconds
 - Replaced `configs` object by `netrc` in external configuration APIs
+- Removed old API routes: `registry/` -> `registries`, `/authorize/token`
 
 ## 2.0.0
 
