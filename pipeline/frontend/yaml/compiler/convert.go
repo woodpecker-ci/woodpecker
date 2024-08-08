@@ -41,7 +41,6 @@ func (c *Compiler) createProcess(container *yaml_types.Container, stepType backe
 	var (
 		uuid = ulid.Make()
 
-		detached   bool
 		workingDir string
 
 		privileged  = container.Privileged
@@ -92,8 +91,8 @@ func (c *Compiler) createProcess(container *yaml_types.Container, stepType backe
 
 	environment["CI_WORKSPACE"] = path.Join(workspaceBase, c.workspacePath)
 
-	if stepType == backend_types.StepTypeService || container.Detached {
-		detached = true
+	if container.Detached {
+		stepType = backend_types.StepTypeService
 	}
 
 	workingDir = c.stepWorkingDir(container)
@@ -114,8 +113,8 @@ func (c *Compiler) createProcess(container *yaml_types.Container, stepType backe
 		return secret.Value, nil
 	}
 
-	// TODO: why don't we pass secrets to detached steps?
-	if !detached {
+	// TODO: why don't we pass settings to services?
+	if stepType != backend_types.StepTypeService {
 		if err := settings.ParamsToEnv(container.Settings, environment, "PLUGIN_", true, getSecretValue); err != nil {
 			return nil, err
 		}
@@ -204,7 +203,6 @@ func (c *Compiler) createProcess(container *yaml_types.Container, stepType backe
 		Type:           stepType,
 		Image:          container.Image,
 		Pull:           container.Pull,
-		Detached:       detached,
 		Privileged:     privileged,
 		WorkingDir:     workingDir,
 		Environment:    environment,

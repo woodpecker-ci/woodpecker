@@ -220,29 +220,38 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 		}
 	}
 
+	services := make([]*dagCompilerStep, 0, len(conf.Services.ContainerList))
+	steps := make([]*dagCompilerStep, 0, len(conf.Steps.ContainerList))
+
 	// add services steps
-	if len(conf.Services.ContainerList) != 0 {
-		stage := new(backend_types.Stage)
-
-		for _, container := range conf.Services.ContainerList {
-			if match, err := container.When.Match(c.metadata, false, c.env); !match && err == nil {
-				continue
-			} else if err != nil {
-				return nil, err
-			}
-
-			step, err := c.createProcess(container, backend_types.StepTypeService)
-			if err != nil {
-				return nil, err
-			}
-
-			stage.Steps = append(stage.Steps, step)
+	for pos, container := range conf.Services.ContainerList {
+		// Skip if local and should not run local
+		if c.local && !container.When.IsLocal() {
+			continue
 		}
-		config.Stages = append(config.Stages, stage)
+
+		if match, err := container.When.Match(c.metadata, false, c.env); !match && err == nil {
+			continue
+		} else if err != nil {
+			return nil, err
+		}
+
+		step, err := c.createProcess(container, backend_types.StepTypeService)
+		if err != nil {
+			return nil, err
+		}
+
+		services = append(services, &dagCompilerStep{
+			step:      step,
+			position:  pos,
+			name:      container.Name,
+			dependsOn: container.DependsOn,
+			needs:     container.Needs,
+		})
 	}
 
 	// add pipeline steps
-	steps := make([]*dagCompilerStep, 0, len(conf.Steps.ContainerList))
+	posServices := len(conf.Services.ContainerList)
 	for pos, container := range conf.Steps.ContainerList {
 		// Skip if local and should not run local
 		if c.local && !container.When.IsLocal() {
@@ -273,15 +282,16 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 
 		steps = append(steps, &dagCompilerStep{
 			step:      step,
-			position:  pos,
+			position:  pos + posServices, // services should be shown on top
 			name:      container.Name,
 			group:     container.Group,
 			dependsOn: container.DependsOn,
+			needs:     container.Needs,
 		})
 	}
 
 	// generate stages out of steps
-	stepStages, err := newDAGCompiler(steps).compile()
+	stepStages, err := newDAGCompiler(steps, services).compile()
 	if err != nil {
 		return nil, err
 	}
