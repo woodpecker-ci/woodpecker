@@ -10,3 +10,7 @@ section: daemon/system
 contents:
   - src: ./dist/agent/linux_amd64/woodpecker-agent
     dst: /usr/local/bin/woodpecker-agent
+  - src: ./woodpecker-agent.service
+    dst: /usr/local/lib/systemd/system/
+  - src: ./woodpecker-agent.env.example
+    dst: /etc/woodpecker/

@@ -1,0 +1,19 @@
+[Unit]
+Description=WoodpeckerCI server
+Documentation=https://woodpecker-ci.org/docs/administration/server-config
+Requires=network.target
+After=network.target
+ConditionFileNotEmpty=/etc/woodpecker/woodpecker-server.env
+ConditionPathExists=/etc/woodpecker/woodpecker-server.env
+
+[Service]
+Type=simple
+EnvironmentFile=/etc/woodpecker/woodpecker-server.env
+User=woodpecker
+Group=woodpecker
+ExecStart=/usr/local/bin/woodpecker-server
+WorkingDirectory=/var/lib/woodpecker/
+StateDirectory=woodpecker
+
+[Install]
+WantedBy=multi-user.target
