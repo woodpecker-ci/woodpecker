@@ -131,14 +131,11 @@ func (c *Compiler) createProcess(container *yaml_types.Container, stepType backe
 			return nil, err
 		}
 
-		toUpperTarget := strings.ToUpper(requested)
-		if !environmentAllowed(toUpperTarget, stepType) {
+		if !environmentAllowed(requested, stepType) {
 			continue
 		}
 
 		environment[requested] = secretValue
-		// TODO: deprecated, remove in 3.x
-		environment[toUpperTarget] = secretValue
 	}
 
 	if utils.MatchImage(container.Image, c.escalated...) && container.IsPlugin() {
