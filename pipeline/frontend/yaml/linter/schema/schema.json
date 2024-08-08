@@ -163,18 +163,7 @@
         "event": {
           "description": "Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#event",
           "default": [],
-          "oneOf": [
-            {
-              "type": "array",
-              "minLength": 1,
-              "items": {
-                "$ref": "#/definitions/event_enum"
-              }
-            },
-            {
-              "$ref": "#/definitions/event_enum"
-            }
-          ]
+          "$ref": "#/definitions/event_constraint_list"
         },
         "ref": {
           "description": "Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#ref",
@@ -618,40 +607,6 @@
           "minLength": 1,
           "items": {
             "$ref": "#/definitions/event_enum"
-          }
-        },
-        {
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "include": {
-              "oneOf": [
-                {
-                  "$ref": "#/definitions/event_enum"
-                },
-                {
-                  "type": "array",
-                  "minLength": 1,
-                  "items": {
-                    "$ref": "#/definitions/event_enum"
-                  }
-                }
-              ]
-            },
-            "exclude": {
-              "oneOf": [
-                {
-                  "$ref": "#/definitions/event_enum"
-                },
-                {
-                  "type": "array",
-                  "minLength": 1,
-                  "items": {
-                    "$ref": "#/definitions/event_enum"
-                  }
-                }
-              ]
-            }
           }
         }
       ]

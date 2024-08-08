@@ -230,38 +230,6 @@ func (l *Linter) lintDeprecations(config *WorkflowConfig) (err error) {
 		}
 	}
 
-	for i, c := range parsed.When.Constraints {
-		if len(c.Event.Exclude) != 0 {
-			err = multierr.Append(err, &errorTypes.PipelineError{
-				Type:    errorTypes.PipelineErrorTypeDeprecation,
-				Message: "Please only use allow lists for events",
-				Data: errors.DeprecationErrorData{
-					File:  config.File,
-					Field: fmt.Sprintf("when[%d].event", i),
-					Docs:  "https://woodpecker-ci.org/docs/usage/workflow-syntax#event-1",
-				},
-				IsWarning: true,
-			})
-		}
-	}
-
-	for _, step := range parsed.Steps.ContainerList {
-		for i, c := range step.When.Constraints {
-			if len(c.Event.Exclude) != 0 {
-				err = multierr.Append(err, &errorTypes.PipelineError{
-					Type:    errorTypes.PipelineErrorTypeDeprecation,
-					Message: "Please only use allow lists for events",
-					Data: errors.DeprecationErrorData{
-						File:  config.File,
-						Field: fmt.Sprintf("steps.%s.when[%d].event", step.Name, i),
-						Docs:  "https://woodpecker-ci.org/docs/usage/workflow-syntax#event",
-					},
-					IsWarning: true,
-				})
-			}
-		}
-	}
-
 	return err
 }
 
@@ -274,7 +242,7 @@ func (l *Linter) lintBadHabits(config *WorkflowConfig) (err error) {
 
 	rootEventFilters := len(parsed.When.Constraints) > 0
 	for _, c := range parsed.When.Constraints {
-		if len(c.Event.Include) == 0 {
+		if len(c.Event) == 0 {
 			rootEventFilters = false
 			break
 		}
@@ -288,7 +256,7 @@ func (l *Linter) lintBadHabits(config *WorkflowConfig) (err error) {
 			} else {
 				stepEventIndex := -1
 				for i, c := range step.When.Constraints {
-					if len(c.Event.Include) == 0 {
+					if len(c.Event) == 0 {
 						stepEventIndex = i
 						break
 					}

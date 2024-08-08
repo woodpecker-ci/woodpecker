@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"maps"
 	"path"
+	"slices"
 	"strings"
 
 	"github.com/bmatcuk/doublestar/v4"
@@ -48,8 +49,7 @@ type (
 		Local       yamlBaseTypes.BoolTrue
 		Path        Path
 		Evaluate    string `yaml:"evaluate,omitempty"`
-		// TODO: change to StringOrSlice in 3.x
-		Event List
+		Event				yamlBaseTypes.StringOrSlice
 	}
 
 	// List defines a runtime constraint for exclude & include string slices.
@@ -163,7 +163,7 @@ func (c *Constraint) Match(m metadata.Metadata, global bool, env map[string]stri
 	}
 
 	match = match && c.Platform.Match(m.Sys.Platform) &&
-		c.Event.Match(m.Curr.Event) &&
+		(len(c.Event) == 0 || slices.Contains(c.Event, m.Curr.Event)) &&
 		c.Repo.Match(path.Join(m.Repo.Owner, m.Repo.Name)) &&
 		c.Ref.Match(m.Curr.Commit.Ref) &&
 		c.Instance.Match(m.Sys.Host)

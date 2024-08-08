@@ -114,9 +114,7 @@ func TestUnmarshalContainer(t *testing.T) {
 					},
 				},
 				{
-					Event: constraint.List{
-						Include: []string{"cron"},
-					},
+					Event: base.StringOrSlice{"cron",},
 					Cron: constraint.List{
 						Include: []string{"job1"},
 					},
@@ -192,7 +190,7 @@ func TestUnmarshalContainers(t *testing.T) {
 					When: constraint.When{
 						Constraints: []constraint.Constraint{
 							{
-								Event:  constraint.List{Include: []string{"push"}},
+								Event:  base.StringOrSlice{"push"},
 								Branch: constraint.List{Include: []string{"${CI_REPO_DEFAULT_BRANCH}"}},
 							},
 						},
@@ -224,7 +222,7 @@ func TestUnmarshalContainers(t *testing.T) {
 					When: constraint.When{
 						Constraints: []constraint.Constraint{
 							{
-								Event:  constraint.List{Include: []string{"push"}},
+								Event:  base.StringOrSlice{"push"},
 								Branch: constraint.List{Include: []string{"${CI_REPO_DEFAULT_BRANCH}"}},
 							},
 						},
@@ -246,11 +244,11 @@ func TestUnmarshalContainers(t *testing.T) {
 					When: constraint.When{
 						Constraints: []constraint.Constraint{
 							{
-								Event:  constraint.List{Include: []string{"push"}},
+								Event:  base.StringOrSlice{"push"},
 								Branch: constraint.List{Include: []string{"${CI_REPO_DEFAULT_BRANCH}"}},
 							},
 							{
-								Event: constraint.List{Include: []string{"pull_request"}},
+								Event: base.StringOrSlice{"pull_request"},
 							},
 						},
 					},
