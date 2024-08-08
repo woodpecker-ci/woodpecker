@@ -41,8 +41,8 @@ dns: 8.8.8.8
 dns_search: example.com
 entrypoint: [/bin/sh, -c]
 environment:
-  - RACK_ENV=development
-  - SHOW=true
+  RACK_ENV: development
+  SHOW: true
 extra_hosts:
  - somehost:162.242.195.82
  - otherhost:50.31.209.229
@@ -88,7 +88,7 @@ func TestUnmarshalContainer(t *testing.T) {
 		DNS:          base.StringOrSlice{"8.8.8.8"},
 		DNSSearch:    base.StringOrSlice{"example.com"},
 		Entrypoint:   []string{"/bin/sh", "-c"},
-		Environment:  base.SliceOrMap{"RACK_ENV": "development", "SHOW": "true"},
+		Environment:  map[string]any{"RACK_ENV": "development", "SHOW": true},
 		ExtraHosts:   []string{"somehost:162.242.195.82", "otherhost:50.31.209.229", "ipv6:2001:db8::10"},
 		Image:        "golang:latest",
 		MemLimit:     base.MemStringOrInt(1024),

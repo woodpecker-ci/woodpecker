@@ -50,8 +50,7 @@ type (
 		DependsOn      base.StringOrSlice `yaml:"depends_on,omitempty"`
 
 		Secrets []string `yaml:"secrets,omitempty"`
-		// TODO: make map[string]any in 3.x
-		Environment base.SliceOrMap `yaml:"environment,omitempty"`
+		Environment map[string]any `yaml:"environment,omitempty"`
 
 		// Docker and Kubernetes Specific
 		Privileged bool `yaml:"privileged,omitempty"`

@@ -13,7 +13,7 @@ Some versions need some changes to the server configuration or the pipeline conf
 - Deprecated `includes` and `excludes` support from **event** filter
 - Removed uppercasing all secret env vars, instead, the value of the `secrets` property is used. [Read more](./20-usage/40-secrets.md#use-secrets-in-commands)
 - Removed alternative names for secrets, use `environment` with `from_secret`
-- Deprecated slice definition for env vars
+- Removed slice definition for env vars
 - Deprecated `environment` filter, use `when.evaluate`
 - Removed `WOODPECKER_WEBHOOK_HOST` in favor of `WOODPECKER_EXPERT_WEBHOOK_HOST`
 - Migrated to rfc9421 for webhook signatures
