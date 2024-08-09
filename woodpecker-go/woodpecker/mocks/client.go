@@ -323,9 +323,9 @@ func (_m *Client) CronUpdate(repoID int64, cron *woodpecker.Cron) (*woodpecker.C
 	return r0, r1
 }
 
-// Deploy provides a mock function with given fields: repoID, pipeline, env, params
-func (_m *Client) Deploy(repoID int64, pipeline int64, env string, params map[string]string) (*woodpecker.Pipeline, error) {
-	ret := _m.Called(repoID, pipeline, env, params)
+// Deploy provides a mock function with given fields: repoID, pipeline, opt
+func (_m *Client) Deploy(repoID int64, pipeline int64, opt woodpecker.DeployOptions) (*woodpecker.Pipeline, error) {
+	ret := _m.Called(repoID, pipeline, opt)
 
 	if len(ret) == 0 {
 		panic("no return value specified for Deploy")
@@ -333,19 +333,19 @@ func (_m *Client) Deploy(repoID int64, pipeline int64, env string, params map[st
 
 	var r0 *woodpecker.Pipeline
 	var r1 error
-	if rf, ok := ret.Get(0).(func(int64, int64, string, map[string]string) (*woodpecker.Pipeline, error)); ok {
-		return rf(repoID, pipeline, env, params)
+	if rf, ok := ret.Get(0).(func(int64, int64, woodpecker.DeployOptions) (*woodpecker.Pipeline, error)); ok {
+		return rf(repoID, pipeline, opt)
 	}
-	if rf, ok := ret.Get(0).(func(int64, int64, string, map[string]string) *woodpecker.Pipeline); ok {
-		r0 = rf(repoID, pipeline, env, params)
+	if rf, ok := ret.Get(0).(func(int64, int64, woodpecker.DeployOptions) *woodpecker.Pipeline); ok {
+		r0 = rf(repoID, pipeline, opt)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*woodpecker.Pipeline)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(int64, int64, string, map[string]string) error); ok {
-		r1 = rf(repoID, pipeline, env, params)
+	if rf, ok := ret.Get(1).(func(int64, int64, woodpecker.DeployOptions) error); ok {
+		r1 = rf(repoID, pipeline, opt)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -1151,9 +1151,9 @@ func (_m *Client) PipelineKill(repoID int64, pipeline int64) error {
 	return r0
 }
 
-// PipelineLast provides a mock function with given fields: repoID, branch
-func (_m *Client) PipelineLast(repoID int64, branch string) (*woodpecker.Pipeline, error) {
-	ret := _m.Called(repoID, branch)
+// PipelineLast provides a mock function with given fields: repoID, opt
+func (_m *Client) PipelineLast(repoID int64, opt woodpecker.PipelineLastOptions) (*woodpecker.Pipeline, error) {
+	ret := _m.Called(repoID, opt)
 
 	if len(ret) == 0 {
 		panic("no return value specified for PipelineLast")
@@ -1161,19 +1161,19 @@ func (_m *Client) PipelineLast(repoID int64, branch string) (*woodpecker.Pipelin
 
 	var r0 *woodpecker.Pipeline
 	var r1 error
-	if rf, ok := ret.Get(0).(func(int64, string) (*woodpecker.Pipeline, error)); ok {
-		return rf(repoID, branch)
+	if rf, ok := ret.Get(0).(func(int64, woodpecker.PipelineLastOptions) (*woodpecker.Pipeline, error)); ok {
+		return rf(repoID, opt)
 	}
-	if rf, ok := ret.Get(0).(func(int64, string) *woodpecker.Pipeline); ok {
-		r0 = rf(repoID, branch)
+	if rf, ok := ret.Get(0).(func(int64, woodpecker.PipelineLastOptions) *woodpecker.Pipeline); ok {
+		r0 = rf(repoID, opt)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*woodpecker.Pipeline)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(int64, string) error); ok {
-		r1 = rf(repoID, branch)
+	if rf, ok := ret.Get(1).(func(int64, woodpecker.PipelineLastOptions) error); ok {
+		r1 = rf(repoID, opt)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -1181,9 +1181,9 @@ func (_m *Client) PipelineLast(repoID int64, branch string) (*woodpecker.Pipelin
 	return r0, r1
 }
 
-// PipelineList provides a mock function with given fields: repoID
-func (_m *Client) PipelineList(repoID int64) ([]*woodpecker.Pipeline, error) {
-	ret := _m.Called(repoID)
+// PipelineList provides a mock function with given fields: repoID, opt
+func (_m *Client) PipelineList(repoID int64, opt woodpecker.PipelineListOptions) ([]*woodpecker.Pipeline, error) {
+	ret := _m.Called(repoID, opt)
 
 	if len(ret) == 0 {
 		panic("no return value specified for PipelineList")
@@ -1191,19 +1191,19 @@ func (_m *Client) PipelineList(repoID int64) ([]*woodpecker.Pipeline, error) {
 
 	var r0 []*woodpecker.Pipeline
 	var r1 error
-	if rf, ok := ret.Get(0).(func(int64) ([]*woodpecker.Pipeline, error)); ok {
-		return rf(repoID)
+	if rf, ok := ret.Get(0).(func(int64, woodpecker.PipelineListOptions) ([]*woodpecker.Pipeline, error)); ok {
+		return rf(repoID, opt)
 	}
-	if rf, ok := ret.Get(0).(func(int64) []*woodpecker.Pipeline); ok {
-		r0 = rf(repoID)
+	if rf, ok := ret.Get(0).(func(int64, woodpecker.PipelineListOptions) []*woodpecker.Pipeline); ok {
+		r0 = rf(repoID, opt)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]*woodpecker.Pipeline)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(int64) error); ok {
-		r1 = rf(repoID)
+	if rf, ok := ret.Get(1).(func(int64, woodpecker.PipelineListOptions) error); ok {
+		r1 = rf(repoID, opt)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -1241,9 +1241,9 @@ func (_m *Client) PipelineQueue() ([]*woodpecker.Feed, error) {
 	return r0, r1
 }
 
-// PipelineStart provides a mock function with given fields: repoID, num, params
-func (_m *Client) PipelineStart(repoID int64, num int64, params map[string]string) (*woodpecker.Pipeline, error) {
-	ret := _m.Called(repoID, num, params)
+// PipelineStart provides a mock function with given fields: repoID, num, opt
+func (_m *Client) PipelineStart(repoID int64, num int64, opt woodpecker.PipelineStartOptions) (*woodpecker.Pipeline, error) {
+	ret := _m.Called(repoID, num, opt)
 
 	if len(ret) == 0 {
 		panic("no return value specified for PipelineStart")
@@ -1251,19 +1251,19 @@ func (_m *Client) PipelineStart(repoID int64, num int64, params map[string]strin
 
 	var r0 *woodpecker.Pipeline
 	var r1 error
-	if rf, ok := ret.Get(0).(func(int64, int64, map[string]string) (*woodpecker.Pipeline, error)); ok {
-		return rf(repoID, num, params)
+	if rf, ok := ret.Get(0).(func(int64, int64, woodpecker.PipelineStartOptions) (*woodpecker.Pipeline, error)); ok {
+		return rf(repoID, num, opt)
 	}
-	if rf, ok := ret.Get(0).(func(int64, int64, map[string]string) *woodpecker.Pipeline); ok {
-		r0 = rf(repoID, num, params)
+	if rf, ok := ret.Get(0).(func(int64, int64, woodpecker.PipelineStartOptions) *woodpecker.Pipeline); ok {
+		r0 = rf(repoID, num, opt)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*woodpecker.Pipeline)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(int64, int64, map[string]string) error); ok {
-		r1 = rf(repoID, num, params)
+	if rf, ok := ret.Get(1).(func(int64, int64, woodpecker.PipelineStartOptions) error); ok {
+		r1 = rf(repoID, num, opt)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -1535,9 +1535,9 @@ func (_m *Client) RepoDel(repoID int64) error {
 	return r0
 }
 
-// RepoList provides a mock function with given fields:
-func (_m *Client) RepoList() ([]*woodpecker.Repo, error) {
-	ret := _m.Called()
+// RepoList provides a mock function with given fields: opt
+func (_m *Client) RepoList(opt woodpecker.RepoListOptions) ([]*woodpecker.Repo, error) {
+	ret := _m.Called(opt)
 
 	if len(ret) == 0 {
 		panic("no return value specified for RepoList")
@@ -1545,49 +1545,19 @@ func (_m *Client) RepoList() ([]*woodpecker.Repo, error) {
 
 	var r0 []*woodpecker.Repo
 	var r1 error
-	if rf, ok := ret.Get(0).(func() ([]*woodpecker.Repo, error)); ok {
-		return rf()
+	if rf, ok := ret.Get(0).(func(woodpecker.RepoListOptions) ([]*woodpecker.Repo, error)); ok {
+		return rf(opt)
 	}
-	if rf, ok := ret.Get(0).(func() []*woodpecker.Repo); ok {
-		r0 = rf()
+	if rf, ok := ret.Get(0).(func(woodpecker.RepoListOptions) []*woodpecker.Repo); ok {
+		r0 = rf(opt)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]*woodpecker.Repo)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func() error); ok {
-		r1 = rf()
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
-// RepoListOpts provides a mock function with given fields: _a0
-func (_m *Client) RepoListOpts(_a0 bool) ([]*woodpecker.Repo, error) {
-	ret := _m.Called(_a0)
-
-	if len(ret) == 0 {
-		panic("no return value specified for RepoListOpts")
-	}
-
-	var r0 []*woodpecker.Repo
-	var r1 error
-	if rf, ok := ret.Get(0).(func(bool) ([]*woodpecker.Repo, error)); ok {
-		return rf(_a0)
-	}
-	if rf, ok := ret.Get(0).(func(bool) []*woodpecker.Repo); ok {
-		r0 = rf(_a0)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]*woodpecker.Repo)
-		}
-	}
-
-	if rf, ok := ret.Get(1).(func(bool) error); ok {
-		r1 = rf(_a0)
+	if rf, ok := ret.Get(1).(func(woodpecker.RepoListOptions) error); ok {
+		r1 = rf(opt)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -1625,17 +1595,17 @@ func (_m *Client) RepoLookup(repoFullName string) (*woodpecker.Repo, error) {
 	return r0, r1
 }
 
-// RepoMove provides a mock function with given fields: repoID, dst
-func (_m *Client) RepoMove(repoID int64, dst string) error {
-	ret := _m.Called(repoID, dst)
+// RepoMove provides a mock function with given fields: repoID, opt
+func (_m *Client) RepoMove(repoID int64, opt woodpecker.RepoMoveOptions) error {
+	ret := _m.Called(repoID, opt)
 
 	if len(ret) == 0 {
 		panic("no return value specified for RepoMove")
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(int64, string) error); ok {
-		r0 = rf(repoID, dst)
+	if rf, ok := ret.Get(0).(func(int64, woodpecker.RepoMoveOptions) error); ok {
+		r0 = rf(repoID, opt)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -1673,9 +1643,9 @@ func (_m *Client) RepoPatch(repoID int64, repo *woodpecker.RepoPatch) (*woodpeck
 	return r0, r1
 }
 
-// RepoPost provides a mock function with given fields: forgeRemoteID
-func (_m *Client) RepoPost(forgeRemoteID int64) (*woodpecker.Repo, error) {
-	ret := _m.Called(forgeRemoteID)
+// RepoPost provides a mock function with given fields: opt
+func (_m *Client) RepoPost(opt woodpecker.RepoPostOptions) (*woodpecker.Repo, error) {
+	ret := _m.Called(opt)
 
 	if len(ret) == 0 {
 		panic("no return value specified for RepoPost")
@@ -1683,19 +1653,19 @@ func (_m *Client) RepoPost(forgeRemoteID int64) (*woodpecker.Repo, error) {
 
 	var r0 *woodpecker.Repo
 	var r1 error
-	if rf, ok := ret.Get(0).(func(int64) (*woodpecker.Repo, error)); ok {
-		return rf(forgeRemoteID)
+	if rf, ok := ret.Get(0).(func(woodpecker.RepoPostOptions) (*woodpecker.Repo, error)); ok {
+		return rf(opt)
 	}
-	if rf, ok := ret.Get(0).(func(int64) *woodpecker.Repo); ok {
-		r0 = rf(forgeRemoteID)
+	if rf, ok := ret.Get(0).(func(woodpecker.RepoPostOptions) *woodpecker.Repo); ok {
+		r0 = rf(opt)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*woodpecker.Repo)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(int64) error); ok {
-		r1 = rf(forgeRemoteID)
+	if rf, ok := ret.Get(1).(func(woodpecker.RepoPostOptions) error); ok {
+		r1 = rf(opt)
 	} else {
 		r1 = ret.Error(1)
 	}
