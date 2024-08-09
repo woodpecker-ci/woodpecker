@@ -20,6 +20,9 @@ Some versions need some changes to the server configuration or the pipeline conf
 - Renamed `start_time`, `end_time`, `created_at`, `started_at`, `finished_at` and `reviewed_at` JSON fields to `started`, `finished`, `created`, `started`, `finished`, `reviewed`
 - Update all webhooks by pressing the "Repair all" button in the admin settings as the webhook token claims have changed
 - Crons now use standard Linux syntax without seconds
+- Replaced `configs` object by `netrc` in external configuration APIs
+- Removed old API routes: `registry/` -> `registries`, `/authorize/token`
+- Replaced `registry` command with `repo registry` in cli
 
 ## 2.0.0
 
