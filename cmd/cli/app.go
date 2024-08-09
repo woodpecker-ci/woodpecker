@@ -29,7 +29,6 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/cli/org"
 	"go.woodpecker-ci.org/woodpecker/v2/cli/pipeline"
 	"go.woodpecker-ci.org/woodpecker/v2/cli/repo"
-	"go.woodpecker-ci.org/woodpecker/v2/cli/repo/registry"
 	"go.woodpecker-ci.org/woodpecker/v2/cli/secret"
 	"go.woodpecker-ci.org/woodpecker/v2/cli/setup"
 	"go.woodpecker-ci.org/woodpecker/v2/cli/update"
