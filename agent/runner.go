@@ -105,7 +105,6 @@ func (r *Runner) Run(runnerCtx, shutdownCtx context.Context) error { //nolint:co
 		if err := r.client.Wait(workflowCtx, workflow.ID); err != nil {
 			canceled = true
 			logger.Warn().Err(err).Msg("cancel signal received")
-
 			cancel()
 		} else {
 			logger.Debug().Msg("done listening for cancel signal")
@@ -117,11 +116,10 @@ func (r *Runner) Run(runnerCtx, shutdownCtx context.Context) error { //nolint:co
 			select {
 			case <-workflowCtx.Done():
 				logger.Debug().Msg("pipeline done")
-
 				return
+
 			case <-time.After(time.Minute):
 				logger.Debug().Msg("pipeline lease renewed")
-
 				if err := r.client.Extend(workflowCtx, workflow.ID); err != nil {
 					log.Error().Err(err).Msg("extending pipeline deadline failed")
 				}
@@ -144,7 +142,7 @@ func (r *Runner) Run(runnerCtx, shutdownCtx context.Context) error { //nolint:co
 		pipeline.WithContext(workflowCtx),
 		pipeline.WithTaskUUID(fmt.Sprint(workflow.ID)),
 		pipeline.WithLogger(r.createLogger(logger, &uploads, workflow)),
-		pipeline.WithTracer(r.createTracer(ctxMeta, logger, workflow)),
+		pipeline.WithTracer(r.createTracer(ctxMeta, &uploads, logger, workflow)),
 		pipeline.WithBackend(*r.backend),
 		pipeline.WithDescription(map[string]string{
 			"workflow_id":     workflow.ID,
@@ -170,9 +168,9 @@ func (r *Runner) Run(runnerCtx, shutdownCtx context.Context) error { //nolint:co
 		Bool("canceled", canceled).
 		Msg("workflow finished")
 
-	logger.Debug().Msg("uploading logs ...")
+	logger.Debug().Msg("uploading logs and traces / states ...")
 	uploads.Wait()
-	logger.Debug().Msg("uploaded logs")
+	logger.Debug().Msg("uploaded logs and traces / states")
 
 	logger.Debug().
 		Str("error", state.Error).

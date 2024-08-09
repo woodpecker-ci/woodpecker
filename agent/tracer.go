@@ -18,6 +18,7 @@ import (
 	"context"
 	"runtime"
 	"strconv"
+	"sync"
 	"time"
 
 	"github.com/rs/zerolog"
@@ -26,11 +27,13 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc"
 )
 
-func (r *Runner) createTracer(ctxMeta context.Context, logger zerolog.Logger, workflow *rpc.Workflow) pipeline.TraceFunc {
+func (r *Runner) createTracer(ctxMeta context.Context, uploads *sync.WaitGroup, logger zerolog.Logger, workflow *rpc.Workflow) pipeline.TraceFunc {
 	return func(state *pipeline.State) error {
+		uploads.Add(1)
+
 		stepLogger := logger.With().
 			Str("image", state.Pipeline.Step.Image).
-			Str("workflowID", workflow.ID).
+			Str("workflow_id", workflow.ID).
 			Err(state.Process.Error).
 			Int("exit_code", state.Process.ExitCode).
 			Bool("exited", state.Process.Exited).
@@ -38,10 +41,12 @@ func (r *Runner) createTracer(ctxMeta context.Context, logger zerolog.Logger, wo
 
 		stepState := rpc.StepState{
 			StepUUID: state.Pipeline.Step.UUID,
-			Exited:   state.Process.Exited,
 			ExitCode: state.Process.ExitCode,
-			Started:  time.Now().Unix(), // TODO: do not do this
-			Finished: time.Now().Unix(),
+		}
+		if !state.Process.Exited {
+			stepState.Started = time.Now().Unix() // TODO: do not do this (UpdateStepStatus currently takes care that this is not overwritten)
+		} else {
+			stepState.Finished = time.Now().Unix()
 		}
 		if state.Process.Error != nil {
 			stepState.Error = state.Process.Error.Error()
@@ -57,6 +62,7 @@ func (r *Runner) createTracer(ctxMeta context.Context, logger zerolog.Logger, wo
 			}
 
 			stepLogger.Debug().Msg("update step status complete")
+			uploads.Done()
 		}()
 		if state.Process.Exited {
 			return nil
