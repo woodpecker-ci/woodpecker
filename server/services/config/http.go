@@ -38,9 +38,9 @@ type configData struct {
 }
 
 type requestStructure struct {
-	Repo          *model.Repo     `json:"repo"`
-	Pipeline      *model.Pipeline `json:"pipeline"`
-	Netrc         *model.Netrc    `json:"netrc"`
+	Repo     *model.Repo     `json:"repo"`
+	Pipeline *model.Pipeline `json:"pipeline"`
+	Netrc    *model.Netrc    `json:"netrc"`
 }
 
 type responseStructure struct {
@@ -59,9 +59,9 @@ func (h *http) Fetch(ctx context.Context, forge forge.Forge, user *model.User, r
 
 	response := new(responseStructure)
 	body := requestStructure{
-		Repo:          repo,
-		Pipeline:      pipeline,
-		Netrc:         netrc,
+		Repo:     repo,
+		Pipeline: pipeline,
+		Netrc:    netrc,
 	}
 
 	status, err := utils.Send(ctx, net_http.MethodPost, h.endpoint, h.privateKey, body, response)
