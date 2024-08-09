@@ -86,7 +86,14 @@ func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 		hostname, _ = os.Hostname()
 	}
 
-	counter.Polling = int(c.Int("max-workflows"))
+	parallel := int(c.Int("max-workflows"))
+	singleWorkflow := c.Bool("single-workflow")
+	if singleWorkflow && parallel > 1 {
+		log.Warn().Msgf("max-workflows forced from %d to 1 due to agent running single workflow mode.", parallel)
+		parallel = 1
+	}
+
+	counter.Polling = parallel
 	counter.Running = 0
 
 	if c.Bool("healthcheck") {
@@ -277,13 +284,24 @@ func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 					log.Error().Err(err).Msg("runner done with error")
 					return err
 				}
+
+				if singleWorkflow {
+					log.Info().Msg("shutdown single workflow runner")
+					return nil
+				}
 			}
 		})
 	}
 
-	log.Info().Msgf(
-		"starting Woodpecker agent with version '%s' and backend '%s' using platform '%s' running up to %d pipelines in parallel",
-		version.String(), backendEngine.Name(), engInfo.Platform, maxWorkflows)
+	if singleWorkflow {
+		log.Info().Msgf(
+			"starting Woodpecker agent with version '%s' and backend '%s' using platform '%s' running up in single workflow mode",
+			version.String(), backendEngine.Name(), engInfo.Platform)
+	} else {
+		log.Info().Msgf(
+			"starting Woodpecker agent with version '%s' and backend '%s' using platform '%s' running up to %d pipelines in parallel",
+			version.String(), backendEngine.Name(), engInfo.Platform, parallel)
+	}
 
 	return serviceWaitingGroup.Wait()
 }
