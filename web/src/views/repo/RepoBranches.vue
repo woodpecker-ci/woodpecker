@@ -21,13 +21,15 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, inject, Ref, watch } from 'vue';
+import { computed, inject, watch, type Ref } from 'vue';
 
 import Badge from '~/components/atomic/Badge.vue';
+import Icon from '~/components/atomic/Icon.vue';
 import ListItem from '~/components/atomic/ListItem.vue';
+import Panel from '~/components/layout/Panel.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { usePagination } from '~/compositions/usePaginate';
-import { Repo } from '~/lib/api/types';
+import type { Repo } from '~/lib/api/types';
 
 const apiClient = useApiClient();
 

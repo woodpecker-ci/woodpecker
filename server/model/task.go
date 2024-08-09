@@ -21,12 +21,12 @@ import (
 
 // Task defines scheduled pipeline Task.
 type Task struct {
-	ID           string                 `json:"id"           xorm:"PK UNIQUE 'task_id'"`
-	Data         []byte                 `json:"data"         xorm:"LONGBLOB 'task_data'"`
-	Labels       map[string]string      `json:"labels"       xorm:"json 'task_labels'"`
-	Dependencies []string               `json:"dependencies" xorm:"json 'task_dependencies'"`
-	RunOn        []string               `json:"run_on"       xorm:"json 'task_run_on'"`
-	DepStatus    map[string]StatusValue `json:"dep_status"   xorm:"json 'task_dep_status'"`
+	ID           string                 `json:"id"           xorm:"PK UNIQUE 'id'"`
+	Data         []byte                 `json:"data"         xorm:"LONGBLOB 'data'"`
+	Labels       map[string]string      `json:"labels"       xorm:"json 'labels'"`
+	Dependencies []string               `json:"dependencies" xorm:"json 'dependencies'"`
+	RunOn        []string               `json:"run_on"       xorm:"json 'run_on'"`
+	DepStatus    map[string]StatusValue `json:"dep_status"   xorm:"json 'dependencies_status'"`
 	AgentID      int64                  `json:"agent_id"     xorm:"'agent_id'"`
 } //	@name Task
 

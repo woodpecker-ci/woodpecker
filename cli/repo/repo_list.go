@@ -15,10 +15,11 @@
 package repo
 
 import (
+	"context"
 	"os"
 	"text/template"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
 	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
 	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
@@ -38,8 +39,8 @@ var repoListCmd = &cli.Command{
 	},
 }
 
-func repoList(c *cli.Context) error {
-	client, err := internal.NewClient(c)
+func repoList(ctx context.Context, c *cli.Command) error {
+	client, err := internal.NewClient(ctx, c)
 	if err != nil {
 		return err
 	}

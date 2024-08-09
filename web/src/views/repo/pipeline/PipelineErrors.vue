@@ -1,7 +1,7 @@
 <template>
   <Panel>
     <div class="grid justify-center gap-x-4 text-left grid-3-1">
-      <template v-for="(error, i) in pipeline.errors" :key="i">
+      <template v-for="(error, i) in pipeline!.errors" :key="i">
         <Icon
           name="attention"
           class="flex-shrink-0 my-1"
@@ -10,11 +10,13 @@
             'text-wp-state-error-100': !error.is_warning,
           }"
         />
+        <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
         <span>[{{ error.type }}]</span>
         <span
           v-if="isLinterError(error) || isDeprecationError(error) || isBadHabitError(error)"
           class="whitespace-nowrap"
         >
+          <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
           <span v-if="error.data?.file" class="font-bold">{{ error.data?.file }}: </span>
           <span>{{ error.data?.field }}</span>
         </span>
@@ -36,8 +38,9 @@
 </template>
 
 <script lang="ts" setup>
-import { inject, Ref } from 'vue';
+import { inject, type Ref } from 'vue';
 
+import Icon from '~/components/atomic/Icon.vue';
 import Panel from '~/components/layout/Panel.vue';
 import type { Pipeline, PipelineError } from '~/lib/api/types';
 

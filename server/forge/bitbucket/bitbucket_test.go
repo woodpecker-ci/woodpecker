@@ -90,12 +90,6 @@ func Test_bitbucket(t *testing.T) {
 				})
 				g.Assert(err).IsNotNil()
 			})
-			g.It("Should handle authentication errors", func() {
-				_, _, err := c.Login(ctx, &types.OAuthRequest{
-					Error: "invalid_scope",
-				})
-				g.Assert(err).IsNotNil()
-			})
 		})
 
 		g.Describe("Given an access token", func() {
@@ -285,7 +279,7 @@ func Test_bitbucket(t *testing.T) {
 
 		g.It("Should parse the hook", func() {
 			buf := bytes.NewBufferString(fixtures.HookPush)
-			req, _ := http.NewRequest("POST", "/hook", buf)
+			req, _ := http.NewRequest(http.MethodPost, "/hook", buf)
 			req.Header = http.Header{}
 			req.Header.Set(hookEvent, hookPush)
 

@@ -147,7 +147,7 @@ import { useAsyncAction } from '~/compositions/useAsyncAction';
 import { useDate } from '~/compositions/useDate';
 import useNotifications from '~/compositions/useNotifications';
 import { usePagination } from '~/compositions/usePaginate';
-import { Agent } from '~/lib/api/types';
+import type { Agent } from '~/lib/api/types';
 
 const apiClient = useApiClient();
 const notifications = useNotifications();
@@ -175,14 +175,14 @@ const { doSubmit: saveAgent, isLoading: isSaving } = useAsyncAction(async () => 
     selectedAgent.value = await apiClient.createAgent(selectedAgent.value);
   }
   notifications.notify({
-    title: t(isEditingAgent.value ? 'admin.settings.agents.saved' : 'admin.settings.agents.created'),
+    title: isEditingAgent.value ? t('admin.settings.agents.saved') : t('admin.settings.agents.created'),
     type: 'success',
   });
   resetPage();
 });
 
 const { doSubmit: deleteAgent, isLoading: isDeleting } = useAsyncAction(async (_agent: Agent) => {
-  // eslint-disable-next-line no-restricted-globals, no-alert
+  // eslint-disable-next-line no-alert
   if (!confirm(t('admin.settings.agents.delete_confirm'))) {
     return;
   }

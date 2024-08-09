@@ -17,18 +17,18 @@ package model
 
 // Workflow represents a workflow in the pipeline.
 type Workflow struct {
-	ID         int64             `json:"id"                   xorm:"pk autoincr 'workflow_id'"`
-	PipelineID int64             `json:"pipeline_id"          xorm:"UNIQUE(s) INDEX 'workflow_pipeline_id'"`
-	PID        int               `json:"pid"                  xorm:"UNIQUE(s) 'workflow_pid'"`
-	Name       string            `json:"name"                 xorm:"workflow_name"`
-	State      StatusValue       `json:"state"                xorm:"workflow_state"`
-	Error      string            `json:"error,omitempty"      xorm:"TEXT 'workflow_error'"`
-	Started    int64             `json:"start_time,omitempty" xorm:"workflow_started"`
-	Stopped    int64             `json:"end_time,omitempty"   xorm:"workflow_stopped"`
-	AgentID    int64             `json:"agent_id,omitempty"   xorm:"workflow_agent_id"`
-	Platform   string            `json:"platform,omitempty"   xorm:"workflow_platform"`
-	Environ    map[string]string `json:"environ,omitempty"    xorm:"json 'workflow_environ'"`
-	AxisID     int               `json:"-"                    xorm:"workflow_axis_id"`
+	ID         int64             `json:"id"                   xorm:"pk autoincr 'id'"`
+	PipelineID int64             `json:"pipeline_id"          xorm:"UNIQUE(s) INDEX 'pipeline_id'"`
+	PID        int               `json:"pid"                  xorm:"UNIQUE(s) 'pid'"`
+	Name       string            `json:"name"                 xorm:"name"`
+	State      StatusValue       `json:"state"                xorm:"state"`
+	Error      string            `json:"error,omitempty"      xorm:"TEXT 'error'"`
+	Started    int64             `json:"start_time,omitempty" xorm:"started"`
+	Finished   int64             `json:"end_time,omitempty"   xorm:"stopped"`
+	AgentID    int64             `json:"agent_id,omitempty"   xorm:"agent_id"`
+	Platform   string            `json:"platform,omitempty"   xorm:"platform"`
+	Environ    map[string]string `json:"environ,omitempty"    xorm:"json 'environ'"`
+	AxisID     int               `json:"-"                    xorm:"axis_id"`
 	Children   []*Step           `json:"children,omitempty"   xorm:"-"`
 }
 

@@ -104,18 +104,47 @@ func BlockTilQueueHasRunningItem(c *gin.Context) {
 func PostHook(c *gin.Context) {
 	_store := store.FromContext(c)
 
-	_forge, err := server.Config.Services.Manager.ForgeMain() // TODO: get the forge for the specific repo somehow
+	//
+	// 1. Check if the webhook is valid and authorized
+	//
+
+	var repo *model.Repo
+
+	_, err := token.ParseRequest([]token.Type{token.HookToken}, c.Request, func(t *token.Token) (string, error) {
+		var err error
+		repo, err = getRepoFromToken(_store, t)
+		if err != nil {
+			return "", err
+		}
+
+		return repo.Hash, nil
+	})
 	if err != nil {
-		log.Error().Err(err).Msg("Cannot get main forge")
+		msg := "failure to parse token from hook"
+		log.Error().Err(err).Msg(msg)
+		c.String(http.StatusBadRequest, msg)
+		return
+	}
+
+	if repo == nil {
+		msg := "failure to get repo from token"
+		log.Error().Msg(msg)
+		c.String(http.StatusBadRequest, msg)
+		return
+	}
+
+	_forge, err := server.Config.Services.Manager.ForgeFromRepo(repo)
+	if err != nil {
+		log.Error().Err(err).Int64("repo-id", repo.ID).Msgf("Cannot get forge with id: %d", repo.ForgeID)
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
 
 	//
-	// 1. Parse webhook
+	// 2. Parse the webhook data
 	//
 
-	tmpRepo, tmpPipeline, err := _forge.Hook(c, c.Request)
+	repoFromForge, pipelineFromForge, err := _forge.Hook(c, c.Request)
 	if err != nil {
 		if errors.Is(err, &types.ErrIgnoreEvent{}) {
 			msg := fmt.Sprintf("forge driver: %s", err)
@@ -130,13 +159,13 @@ func PostHook(c *gin.Context) {
 		return
 	}
 
-	if tmpPipeline == nil {
+	if pipelineFromForge == nil {
 		msg := "ignoring hook: hook parsing resulted in empty pipeline"
 		log.Debug().Msg(msg)
 		c.String(http.StatusOK, msg)
 		return
 	}
-	if tmpRepo == nil {
+	if repoFromForge == nil {
 		msg := "failure to ascertain repo from hook"
 		log.Debug().Msg(msg)
 		c.String(http.StatusBadRequest, msg)
@@ -144,21 +173,24 @@ func PostHook(c *gin.Context) {
 	}
 
 	//
-	// 2. Get related repo from store and take repo renaming into account
+	// 3. Check the repo from the token is matching the repo returned by the forge
 	//
 
-	repo, err := _store.GetRepoNameFallback(tmpRepo.ForgeRemoteID, tmpRepo.FullName)
-	if err != nil {
-		log.Error().Err(err).Msgf("failure to get repo %s from store", tmpRepo.FullName)
-		handleDBError(c, err)
+	if repo.ForgeRemoteID != repoFromForge.ForgeRemoteID {
+		log.Warn().Msgf("ignoring hook: repo %s does not match the repo from the token", repo.FullName)
+		c.String(http.StatusBadRequest, "failure to parse token from hook")
 		return
 	}
+
+	//
+	// 4. Check if the repo is active and has an owner
+	//
+
 	if !repo.IsActive {
-		log.Debug().Msgf("ignoring hook: repo %s is inactive", tmpRepo.FullName)
+		log.Debug().Msgf("ignoring hook: repo %s is inactive", repoFromForge.FullName)
 		c.Status(http.StatusNoContent)
 		return
 	}
-	currentRepoFullName := repo.FullName
 
 	if repo.UserID == 0 {
 		log.Warn().Msgf("ignoring hook. repo %s has no owner.", repo.FullName)
@@ -174,44 +206,10 @@ func PostHook(c *gin.Context) {
 	forge.Refresh(c, _forge, _store, user)
 
 	//
-	// 3. Check if the webhook is a valid and authorized one
+	// 4. Update the repo
 	//
 
-	// get the token and verify the hook is authorized
-	parsedToken, err := token.ParseRequest(c.Request, func(_ *token.Token) (string, error) {
-		return repo.Hash, nil
-	})
-	if err != nil {
-		msg := fmt.Sprintf("failure to parse token from hook for %s", repo.FullName)
-		log.Error().Err(err).Msg(msg)
-		c.String(http.StatusBadRequest, msg)
-		return
-	}
-
-	// TODO: remove fallback for text full name in next major release
-	verifiedKey := parsedToken.Get("repo-id") == strconv.FormatInt(repo.ID, 10) || parsedToken.Get("text") == currentRepoFullName
-	if !verifiedKey {
-		verifiedKey, err = _store.HasRedirectionForRepo(repo.ID, repo.FullName)
-		if err != nil {
-			msg := "failure to verify token from hook. Could not check for redirections of the repo"
-			log.Error().Err(err).Msg(msg)
-			c.String(http.StatusInternalServerError, msg)
-			return
-		}
-	}
-
-	if !verifiedKey {
-		msg := fmt.Sprintf("failure to verify token from hook. Expected %s, got %s", repo.FullName, parsedToken.Get("text"))
-		log.Debug().Msg(msg)
-		c.String(http.StatusForbidden, msg)
-		return
-	}
-
-	//
-	// 4. Update repo
-	//
-
-	if currentRepoFullName != tmpRepo.FullName {
+	if repo.FullName != repoFromForge.FullName {
 		// create a redirection
 		err = _store.CreateRedirection(&model.Redirection{RepoID: repo.ID, FullName: repo.FullName})
 		if err != nil {
@@ -220,7 +218,7 @@ func PostHook(c *gin.Context) {
 		}
 	}
 
-	repo.Update(tmpRepo)
+	repo.Update(repoFromForge)
 	err = _store.UpdateRepo(repo)
 	if err != nil {
 		c.String(http.StatusInternalServerError, err.Error())
@@ -231,7 +229,7 @@ func PostHook(c *gin.Context) {
 	// 5. Check if pull requests are allowed for this repo
 	//
 
-	if (tmpPipeline.Event == model.EventPull || tmpPipeline.Event == model.EventPullClosed) && !repo.AllowPull {
+	if (pipelineFromForge.Event == model.EventPull || pipelineFromForge.Event == model.EventPullClosed) && !repo.AllowPull {
 		log.Debug().Str("repo", repo.FullName).Msg("ignoring hook: pull requests are disabled for this repo in woodpecker")
 		c.Status(http.StatusNoContent)
 		return
@@ -241,10 +239,22 @@ func PostHook(c *gin.Context) {
 	// 6. Finally create a pipeline
 	//
 
-	pl, err := pipeline.Create(c, _store, repo, tmpPipeline)
+	pl, err := pipeline.Create(c, _store, repo, pipelineFromForge)
 	if err != nil {
 		handlePipelineErr(c, err)
 	} else {
 		c.JSON(http.StatusOK, pl)
 	}
+}
+
+func getRepoFromToken(store store.Store, t *token.Token) (*model.Repo, error) {
+	// try to get the repo by the repo-id
+	repoID, err := strconv.ParseInt(t.Get("repo-id"), 10, 64)
+	if err == nil {
+		return store.GetRepo(repoID)
+	}
+
+	// try to get the repo by the repo name or by its redirection
+	repoName := t.Get("text")
+	return store.GetRepoName(repoName)
 }

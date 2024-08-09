@@ -15,6 +15,15 @@ const config: Config = {
   organizationName: 'woodpecker-ci',
   projectName: 'woodpecker-ci.github.io',
   trailingSlash: false,
+  headTags: [
+    {
+      tagName: 'link',
+      attributes: {
+        href: 'https://floss.social/@WoodpeckerCI',
+        rel: 'me',
+      },
+    },
+  ],
   themeConfig: {
     navbar: {
       title: 'Woodpecker',
@@ -25,7 +34,7 @@ const config: Config = {
       items: [
         {
           type: 'doc',
-          docId: 'intro',
+          docId: 'intro/index',
           activeBaseRegex: 'docs/(?!migrations|awesome)',
           position: 'left',
           label: 'Docs',
@@ -51,19 +60,20 @@ const config: Config = {
               label: 'Awesome',
             },
             {
-              to: '/faq',
-              label: 'FAQ',
-            },
-            {
               to: '/api',
               label: 'API',
             },
-            { to: 'cookbook', label: 'Cookbook' },
           ],
         },
         {
           type: 'docsVersionDropdown',
           position: 'right',
+          dropdownItemsAfter: [
+            {
+              to: '/versions',
+              label: 'All versions',
+            },
+          ],
         },
         {
           href: 'https://github.com/woodpecker-ci/woodpecker',
@@ -94,11 +104,7 @@ const config: Config = {
             },
             {
               label: 'Server setup',
-              to: '/docs/administration/deployment/overview',
-            },
-            {
-              label: 'FAQ',
-              to: '/faq',
+              to: '/docs/administration/getting-started',
             },
           ],
         },
@@ -212,21 +218,6 @@ const config: Config = {
         } as any;
       },
     }),
-    [
-      '@docusaurus/plugin-content-blog',
-      {
-        id: 'cookbook-blog',
-        /**
-         * URL route for the blog section of your site.
-         * *DO NOT* include a trailing slash.
-         */
-        routeBasePath: 'cookbook',
-        /**
-         * Path to data on filesystem relative to site dir.
-         */
-        path: './cookbook',
-      },
-    ],
   ],
   themes: [
     path.resolve(__dirname, 'plugins', 'woodpecker-plugins', 'dist'),
@@ -245,39 +236,27 @@ const config: Config = {
           sidebarPath: require.resolve('./sidebars.js'),
           editUrl: 'https://github.com/woodpecker-ci/woodpecker/edit/main/docs/',
           includeCurrentVersion: true,
-          lastVersion: '2.5',
+          lastVersion: '2.7',
           onlyIncludeVersions:
-            process.env.NODE_ENV === 'development' ? ['current', '2.5'] : ['current', '2.5', '2.4', '2.3', '1.0'],
+            process.env.NODE_ENV === 'development' ? ['current', '2.7'] : ['current', '2.7', '2.6', '2.5', '1.0'],
           versions: {
             current: {
-              label: 'Next',
+              label: 'Next 🚧',
               banner: 'unreleased',
             },
+            '2.7': {
+              label: '2.7.x',
+            },
+            '2.6': {
+              label: '2.6.x 💀',
+              banner: 'unmaintained',
+            },
             '2.5': {
-              label: '2.5.x',
-            },
-            '2.4': {
-              label: '2.4.x',
-              banner: 'unmaintained',
-            },
-            '2.3': {
-              label: '2.3.x',
-              banner: 'unmaintained',
-            },
-            '2.2': {
-              label: '2.2.x',
-              banner: 'unmaintained',
-            },
-            '2.1': {
-              label: '2.1.x',
-              banner: 'unmaintained',
-            },
-            '2.0': {
-              label: '2.0.x',
+              label: '2.5.x 💀',
               banner: 'unmaintained',
             },
             '1.0': {
-              label: '1.0.x',
+              label: '1.0.x 💀',
               banner: 'unmaintained',
             },
           },

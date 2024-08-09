@@ -15,15 +15,18 @@
 package internal
 
 import (
+	"context"
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
 	"net/http"
+	"os/exec"
 	"strconv"
 	"strings"
 
+	vsc_url "github.com/gitsight/go-vcsurl"
 	"github.com/rs/zerolog/log"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 	"golang.org/x/net/proxy"
 	"golang.org/x/oauth2"
 
@@ -31,7 +34,7 @@ import (
 )
 
 // NewClient returns a new client from the CLI context.
-func NewClient(c *cli.Context) (woodpecker.Client, error) {
+func NewClient(ctx context.Context, c *cli.Command) (woodpecker.Client, error) {
 	var (
 		skip     = c.Bool("skip-verify")
 		socks    = c.String("socks-proxy")
@@ -61,8 +64,7 @@ func NewClient(c *cli.Context) (woodpecker.Client, error) {
 	}
 
 	config := new(oauth2.Config)
-	client := config.Client(
-		c.Context,
+	client := config.Client(ctx,
 		&oauth2.Token{
 			AccessToken: token,
 		},
@@ -90,8 +92,52 @@ func NewClient(c *cli.Context) (woodpecker.Client, error) {
 	return woodpecker.NewClient(server, client), nil
 }
 
+func getRepoFromGit(remoteName string) (string, error) {
+	cmd := exec.Command("git", "remote", "get-url", remoteName)
+	stdout, err := cmd.Output()
+	if err != nil {
+		return "", fmt.Errorf("could not get remote url: %w", err)
+	}
+
+	gitRemote := strings.TrimSpace(string(stdout))
+
+	log.Debug().Str("git-remote", gitRemote).Msg("extracted remote url from git")
+
+	if len(gitRemote) == 0 {
+		return "", fmt.Errorf("no repository provided")
+	}
+
+	u, err := vsc_url.Parse(gitRemote)
+	if err != nil {
+		return "", fmt.Errorf("could not parse git remote url: %w", err)
+	}
+
+	repoFullName := u.FullName
+	log.Debug().Str("repo", repoFullName).Msg("extracted repository from remote url")
+
+	return repoFullName, nil
+}
+
 // ParseRepo parses the repository owner and name from a string.
 func ParseRepo(client woodpecker.Client, str string) (repoID int64, err error) {
+	if str == "" {
+		str, err = getRepoFromGit("upstream")
+		if err != nil {
+			log.Debug().Err(err).Msg("could not get repository from git upstream remote")
+		}
+	}
+
+	if str == "" {
+		str, err = getRepoFromGit("origin")
+		if err != nil {
+			log.Debug().Err(err).Msg("could not get repository from git origin remote")
+		}
+	}
+
+	if str == "" {
+		return 0, fmt.Errorf("no repository provided")
+	}
+
 	if strings.Contains(str, "/") {
 		repo, err := client.RepoLookup(str)
 		if err != nil {
@@ -114,4 +160,48 @@ func ParseKeyPair(p []string) map[string]string {
 		params[before] = after
 	}
 	return params
+}
+
+/*
+ParseStep parses the step id form a string which may either be the step PID (step number) or a step name.
+These rules apply:
+
+- Step ID take precedence over step name when searching for a match.
+- First match is used, when there are multiple steps with the same name.
+
+Strictly speaking, this is not parsing, but a lookup.
+
+TODO: Use PID instead of StepID
+*/
+func ParseStep(client woodpecker.Client, repoID, number int64, stepArg string) (stepID int64, err error) {
+	pipeline, err := client.Pipeline(repoID, number)
+	if err != nil {
+		return 0, err
+	}
+
+	stepID, err = strconv.ParseInt(stepArg, 10, 64)
+	// TODO: for 3.0 do "stepPID, err := strconv.ParseInt(stepArg, 10, 64)"
+	if err == nil {
+		return stepID, nil
+		/*
+			// TODO: for 3.0
+			for _, wf := range pipeline.Workflows {
+				for _, step := range wf.Children {
+					if int64(step.PID) == stepPID {
+						return step.ID, nil
+					}
+				}
+			}
+		*/
+	}
+
+	for _, wf := range pipeline.Workflows {
+		for _, step := range wf.Children {
+			if step.Name == stepArg {
+				return step.ID, nil
+			}
+		}
+	}
+
+	return 0, fmt.Errorf("no step with number or name '%s' found", stepArg)
 }

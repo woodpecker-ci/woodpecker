@@ -285,7 +285,7 @@ func GetStepLogs(c *gin.Context) {
 		return
 	}
 
-	logs, err := _store.LogFind(step)
+	logs, err := server.Config.Services.LogStore.LogFind(step)
 	if err != nil {
 		handleDBError(c, err)
 		return
@@ -562,7 +562,7 @@ func PostPipeline(c *gin.Context) {
 			return
 		}
 
-		pl.Deploy = c.DefaultQuery("deploy_to", pl.Deploy)
+		pl.DeployTo = c.DefaultQuery("deploy_to", pl.DeployTo)
 	}
 
 	// Read query string parameters into pipelineParams, exclude reserved params
@@ -580,11 +580,11 @@ func PostPipeline(c *gin.Context) {
 		}
 	}
 
-	newpipeline, err := pipeline.Restart(c, _store, pl, user, repo, envs)
+	newPipeline, err := pipeline.Restart(c, _store, pl, user, repo, envs)
 	if err != nil {
 		handlePipelineErr(c, err)
 	} else {
-		c.JSON(http.StatusOK, newpipeline)
+		c.JSON(http.StatusOK, newPipeline)
 	}
 }
 
@@ -622,7 +622,7 @@ func DeletePipelineLogs(c *gin.Context) {
 	}
 
 	for _, step := range steps {
-		if lErr := _store.LogDelete(step); err != nil {
+		if lErr := server.Config.Services.LogStore.LogDelete(step); err != nil {
 			err = errors.Join(err, lErr)
 		}
 	}

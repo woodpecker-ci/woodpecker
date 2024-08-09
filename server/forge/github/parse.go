@@ -22,7 +22,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/google/go-github/v62/github"
+	"github.com/google/go-github/v63/github"
 
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
@@ -126,10 +126,10 @@ func parseDeployHook(hook *github.DeploymentEvent) (*model.Repo, *model.Pipeline
 		Message:    hook.GetDeployment().GetDescription(),
 		Ref:        hook.GetDeployment().GetRef(),
 		Branch:     hook.GetDeployment().GetRef(),
-		Deploy:     hook.GetDeployment().GetEnvironment(),
 		Avatar:     hook.GetSender().GetAvatarURL(),
 		Author:     hook.GetSender().GetLogin(),
 		Sender:     hook.GetSender().GetLogin(),
+		DeployTo:   hook.GetDeployment().GetEnvironment(),
 		DeployTask: hook.GetDeployment().GetTask(),
 	}
 	// if the ref is a sha or short sha we need to manually construct the ref.
@@ -197,7 +197,7 @@ func parseReleaseHook(hook *github.ReleaseEvent) (*model.Repo, *model.Pipeline) 
 		Event:        model.EventRelease,
 		ForgeURL:     hook.GetRelease().GetHTMLURL(),
 		Ref:          fmt.Sprintf("refs/tags/%s", hook.GetRelease().GetTagName()),
-		Branch:       hook.GetRelease().GetTargetCommitish(),
+		Branch:       hook.GetRelease().GetTargetCommitish(), // cspell:disable-line
 		Message:      fmt.Sprintf("created release %s", name),
 		Author:       hook.GetRelease().GetAuthor().GetLogin(),
 		Avatar:       hook.GetRelease().GetAuthor().GetAvatarURL(),

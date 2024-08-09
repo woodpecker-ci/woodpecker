@@ -15,17 +15,27 @@
 package main
 
 import (
+	"context"
+
+	"github.com/rs/zerolog/log"
+
 	"go.woodpecker-ci.org/woodpecker/v2/cmd/agent/core"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/docker"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/kubernetes"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/local"
 	backendTypes "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/utils"
 )
 
+var backends = []backendTypes.Backend{
+	kubernetes.New(),
+	docker.New(),
+	local.New(),
+}
+
 func main() {
-	core.RunAgent([]backendTypes.Backend{
-		kubernetes.New(),
-		docker.New(),
-		local.New(),
+	ctx := utils.WithContextSigtermCallback(context.Background(), func() {
+		log.Info().Msg("termination signal is received, shutting down agent")
 	})
+	core.RunAgent(ctx, backends)
 }
