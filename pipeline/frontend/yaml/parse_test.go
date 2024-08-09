@@ -15,6 +15,7 @@
 package yaml
 
 import (
+	"slices"
 	"testing"
 
 	"github.com/franela/goblin"
@@ -35,7 +36,7 @@ func TestParse(t *testing.T) {
 					g.Fail(err)
 				}
 
-				g.Assert(out.When.Constraints[0].Event.Match("tester")).Equal(true)
+				g.Assert(slices.Contains(out.When.Constraints[0].Event, "tester")).Equal(true)
 
 				g.Assert(out.Workspace.Base).Equal("/go")
 				g.Assert(out.Workspace.Path).Equal("src/github.com/octocat/hello-world")
@@ -85,7 +86,7 @@ func TestParse(t *testing.T) {
 				g.Assert(len(out.Steps.ContainerList[0].When.Constraints)).Equal(0)
 				g.Assert(out.Steps.ContainerList[1].Name).Equal("notify_success")
 				g.Assert(out.Steps.ContainerList[1].Image).Equal("plugins/slack")
-				g.Assert(out.Steps.ContainerList[1].When.Constraints[0].Event.Include).Equal([]string{"success"})
+				g.Assert(out.Steps.ContainerList[1].When.Constraints[0].Event).Equal(yaml_base_types.StringOrSlice{"success"})
 			})
 
 			matchConfig, err := ParseString(sampleYaml)

@@ -215,102 +215,6 @@ func (l *Linter) lintDeprecations(config *WorkflowConfig) (err error) {
 		return err
 	}
 
-	for _, step := range parsed.Steps.ContainerList {
-		if step.Group != "" {
-			err = multierr.Append(err, &errorTypes.PipelineError{
-				Type:    errorTypes.PipelineErrorTypeDeprecation,
-				Message: "Please use depends_on instead of deprecated 'group' setting",
-				Data: errors.DeprecationErrorData{
-					File:  config.File,
-					Field: "steps." + step.Name + ".group",
-					Docs:  "https://woodpecker-ci.org/docs/next/usage/workflow-syntax#depends_on",
-				},
-				IsWarning: true,
-			})
-		}
-	}
-
-	for i, c := range parsed.When.Constraints {
-		if len(c.Event.Exclude) != 0 {
-			err = multierr.Append(err, &errorTypes.PipelineError{
-				Type:    errorTypes.PipelineErrorTypeDeprecation,
-				Message: "Please only use allow lists for events",
-				Data: errors.DeprecationErrorData{
-					File:  config.File,
-					Field: fmt.Sprintf("when[%d].event", i),
-					Docs:  "https://woodpecker-ci.org/docs/usage/workflow-syntax#event-1",
-				},
-				IsWarning: true,
-			})
-		}
-	}
-
-	for _, step := range parsed.Steps.ContainerList {
-		for i, c := range step.When.Constraints {
-			if len(c.Event.Exclude) != 0 {
-				err = multierr.Append(err, &errorTypes.PipelineError{
-					Type:    errorTypes.PipelineErrorTypeDeprecation,
-					Message: "Please only use allow lists for events",
-					Data: errors.DeprecationErrorData{
-						File:  config.File,
-						Field: fmt.Sprintf("steps.%s.when[%d].event", step.Name, i),
-						Docs:  "https://woodpecker-ci.org/docs/usage/workflow-syntax#event",
-					},
-					IsWarning: true,
-				})
-			}
-		}
-	}
-
-	for _, step := range parsed.Steps.ContainerList {
-		for i, c := range step.Secrets.Secrets {
-			if c.Source != c.Target {
-				err = multierr.Append(err, &errorTypes.PipelineError{
-					Type:    errorTypes.PipelineErrorTypeDeprecation,
-					Message: "Secrets alternative names are deprecated, use environment with from_secret",
-					Data: errors.DeprecationErrorData{
-						File:  config.File,
-						Field: fmt.Sprintf("steps.%s.secrets[%d]", step.Name, i),
-						Docs:  "https://woodpecker-ci.org/docs/usage/secrets#use-secrets-in-settings-and-environment",
-					},
-					IsWarning: true,
-				})
-			}
-		}
-	}
-
-	for i, c := range parsed.When.Constraints {
-		if !c.Environment.IsEmpty() {
-			err = multierr.Append(err, &errorTypes.PipelineError{
-				Type:    errorTypes.PipelineErrorTypeDeprecation,
-				Message: "environment filters are deprecated, use evaluate with CI_PIPELINE_DEPLOY_TARGET",
-				Data: errors.DeprecationErrorData{
-					File:  config.File,
-					Field: fmt.Sprintf("when[%d].environment", i),
-					Docs:  "https://woodpecker-ci.org/docs/usage/workflow-syntax#evaluate",
-				},
-				IsWarning: true,
-			})
-		}
-	}
-
-	for _, step := range parsed.Steps.ContainerList {
-		for i, c := range step.When.Constraints {
-			if !c.Environment.IsEmpty() {
-				err = multierr.Append(err, &errorTypes.PipelineError{
-					Type:    errorTypes.PipelineErrorTypeDeprecation,
-					Message: "environment filters are deprecated, use evaluate with CI_PIPELINE_DEPLOY_TARGET",
-					Data: errors.DeprecationErrorData{
-						File:  config.File,
-						Field: fmt.Sprintf("steps.%s.when[%d].environment", step.Name, i),
-						Docs:  "https://woodpecker-ci.org/docs/usage/workflow-syntax#evaluate",
-					},
-					IsWarning: true,
-				})
-			}
-		}
-	}
-
 	return err
 }
 
@@ -323,7 +227,7 @@ func (l *Linter) lintBadHabits(config *WorkflowConfig) (err error) {
 
 	rootEventFilters := len(parsed.When.Constraints) > 0
 	for _, c := range parsed.When.Constraints {
-		if len(c.Event.Include) == 0 {
+		if len(c.Event) == 0 {
 			rootEventFilters = false
 			break
 		}
@@ -337,7 +241,7 @@ func (l *Linter) lintBadHabits(config *WorkflowConfig) (err error) {
 			} else {
 				stepEventIndex := -1
 				for i, c := range step.When.Constraints {
-					if len(c.Event.Include) == 0 {
+					if len(c.Event) == 0 {
 						stepEventIndex = i
 						break
 					}
