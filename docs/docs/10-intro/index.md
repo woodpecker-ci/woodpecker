@@ -2,8 +2,6 @@
 
 Woodpecker is a CI/CD tool. It is designed to be lightweight, simple to use and fast. Before we dive into the details, let's have a look at some of the basics.
 
-![Woodpecker CI screenshot](../woodpecker.png)
-
 ## Have you ever heard of CI/CD or pipelines?
 
 Don't worry if you haven't. We'll guide you through the basics. CI/CD stands for Continuous Integration and Continuous Deployment. It's basically like a conveyor belt that moves your code from development to production doing all kinds of
