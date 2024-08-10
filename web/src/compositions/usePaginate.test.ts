@@ -18,11 +18,11 @@ async function waitForState<T>(ref: Ref<T>, expected: T): Promise<void> {
   });
 }
 
-// TODO enable again with eslint-plugin-promise eslint-disable-next-line promise/prefer-await-to-callbacks
+// eslint-disable-next-line promise/prefer-await-to-callbacks
 export const mountComposition = (cb: () => void) => {
   const wrapper = shallowMount({
     setup() {
-      // TODO enable again with eslint-plugin-promise eslint-disable-next-line promise/prefer-await-to-callbacks
+      // eslint-disable-next-line promise/prefer-await-to-callbacks
       cb();
       return {};
     },
