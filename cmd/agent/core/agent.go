@@ -280,11 +280,15 @@ func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 				log.Debug().Msg("polling new steps")
 				if err := runner.Run(agentCtx, shutdownCtx); err != nil {
 					log.Error().Err(err).Msg("runner done with error")
+					if singleWorkflow {
+						ctxCancel(nil)
+					}
 					return err
 				}
 
 				if singleWorkflow {
 					log.Info().Msg("shutdown single workflow runner")
+					ctxCancel(nil)
 					return nil
 				}
 			}
