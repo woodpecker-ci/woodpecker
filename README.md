@@ -45,7 +45,7 @@
 
 Woodpecker is a simple, yet powerful CI/CD engine with great extensibility.
 
-![woodpecker](docs/docs/woodpecker.png)
+![woodpecker](docs/woodpecker.png)
 
 ## Installation & Resources
 
