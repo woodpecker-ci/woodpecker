@@ -4,8 +4,8 @@
 import antfu from '@antfu/eslint-config';
 import js from '@eslint/js';
 import vueI18n from '@intlify/eslint-plugin-vue-i18n';
-import eslintPluginVueScopedCSS from 'eslint-plugin-vue-scoped-css';
 import eslintPromise from 'eslint-plugin-promise';
+import eslintPluginVueScopedCSS from 'eslint-plugin-vue-scoped-css';
 
 export default antfu(
   {
