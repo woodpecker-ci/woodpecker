@@ -18,7 +18,7 @@ package linter
 type Option func(*Linter)
 
 // WithTrusted adds the trusted option to the linter.
-func WithTrusted(trusted bool) Option {
+func WithTrusted(trusted TrustedConfiguration) Option {
 	return func(linter *Linter) {
 		linter.trusted = trusted
 	}

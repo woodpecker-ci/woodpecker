@@ -54,6 +54,33 @@
       </InputField>
 
       <InputField
+        v-if="user?.admin"
+        docs-url="docs/usage/project-settings#project-settings-1"
+        :label="$t('repo.settings.general.trusted.trusted')"
+      >
+        <Checkbox
+          v-model="repoSettings.trusted.network"
+          :label="$t('repo.settings.general.trusted.network.network')"
+          :description="$t('repo.settings.general.network.desc')"
+        />
+        <Checkbox
+          v-model="repoSettings.trusted.resources"
+          :label="$t('repo.settings.general.trusted.resources.resources')"
+          :description="$t('repo.settings.general.resources.desc')"
+        />
+        <Checkbox
+          v-model="repoSettings.trusted.volumes"
+          :label="$t('repo.settings.general.trusted.volumes.volumes')"
+          :description="$t('repo.settings.general.volumes.desc')"
+        />
+        <Checkbox
+          v-model="repoSettings.trusted.security"
+          :label="$t('repo.settings.general.trusted.security.security')"
+          :description="$t('repo.settings.general.security.desc')"
+        />
+      </InputField>
+
+      <InputField
         docs-url="docs/usage/project-settings#project-visibility"
         :label="$t('repo.settings.general.visibility.visibility')"
       >

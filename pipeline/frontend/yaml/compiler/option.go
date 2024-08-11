@@ -178,10 +178,10 @@ func WithDefaultCloneImage(cloneImage string) Option {
 	}
 }
 
-// WithTrusted configures the compiler with the trusted repo option.
-func WithTrusted(trusted bool) Option {
+// WithTrustedSecurity configures the compiler with the trusted repo option.
+func WithTrustedSecurity(trusted bool) Option {
 	return func(compiler *Compiler) {
-		compiler.trustedPipeline = trusted
+		compiler.securityTrustedPipeline = trusted
 	}
 }
 

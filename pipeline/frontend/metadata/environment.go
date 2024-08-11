@@ -62,7 +62,12 @@ func (m *Metadata) Environ() map[string]string {
 		"CI_REPO_CLONE_SSH_URL":  m.Repo.CloneSSHURL,
 		"CI_REPO_DEFAULT_BRANCH": m.Repo.Branch,
 		"CI_REPO_PRIVATE":        strconv.FormatBool(m.Repo.Private),
-		"CI_REPO_TRUSTED":        strconv.FormatBool(m.Repo.Trusted),
+		"CI_REPO_TRUSTED_NETWORK":        strconv.FormatBool(m.Repo.Trusted.Network),
+		"CI_REPO_TRUSTED_RESOURCES":        strconv.FormatBool(m.Repo.Trusted.Resources),
+		"CI_REPO_TRUSTED_VOLUMES":        strconv.FormatBool(m.Repo.Trusted.Volumes),
+		"CI_REPO_TRUSTED_SECURITY":        strconv.FormatBool(m.Repo.Trusted.Security),
+		// Deprecated
+		"CI_REPO_TRUSTED": strconv.FormatBool(m.Repo.Trusted.Security && m.Repo.Trusted.Network && m.Repo.Trusted.Resources && m.Repo.Trusted.Volumes),
 
 		"CI_COMMIT_SHA":                 m.Curr.Commit.Sha,
 		"CI_COMMIT_REF":                 m.Curr.Commit.Ref,

@@ -52,7 +52,12 @@ func MetadataFromStruct(forge metadata.ServerForge, repo *model.Repo, pipeline, 
 			CloneSSHURL: repo.CloneSSH,
 			Private:     repo.IsSCMPrivate,
 			Branch:      repo.Branch,
-			Trusted:     repo.IsTrusted,
+			Trusted: metadata.TrustedConfiguration{
+				Network: repo.Trusted.Network,
+				Volumes: repo.Trusted.Volumes,
+				Resources: repo.Trusted.Resources,
+				Security: repo.Trusted.Security,
+			},
 		}
 
 		if idx := strings.LastIndex(repo.FullName, "/"); idx != -1 {

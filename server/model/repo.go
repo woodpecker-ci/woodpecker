@@ -41,7 +41,7 @@ type Repo struct {
 	Timeout                      int64          `json:"timeout,omitempty"               xorm:"timeout"`
 	Visibility                   RepoVisibility `json:"visibility"                      xorm:"varchar(10) 'visibility'"`
 	IsSCMPrivate                 bool           `json:"private"                         xorm:"private"`
-	IsTrusted                    bool           `json:"trusted"                         xorm:"trusted"`
+	Trusted                      TrustedConfiguration           `json:"trusted"                         xorm:"json 'trusted'"`
 	IsGated                      bool           `json:"gated"                           xorm:"gated"`
 	IsActive                     bool           `json:"active"                          xorm:"active"`
 	AllowPull                    bool           `json:"allow_pr"                        xorm:"allow_pr"`
@@ -109,7 +109,6 @@ func (r *Repo) Update(from *Repo) {
 // RepoPatch represents a repository patch object.
 type RepoPatch struct {
 	Config                       *string         `json:"config_file,omitempty"`
-	IsTrusted                    *bool           `json:"trusted,omitempty"`
 	IsGated                      *bool           `json:"gated,omitempty"`
 	Timeout                      *int64          `json:"timeout,omitempty"`
 	Visibility                   *string         `json:"visibility,omitempty"`
@@ -117,10 +116,25 @@ type RepoPatch struct {
 	AllowDeploy                  *bool           `json:"allow_deploy,omitempty"`
 	CancelPreviousPipelineEvents *[]WebhookEvent `json:"cancel_previous_pipeline_events"`
 	NetrcOnlyTrusted             *bool           `json:"netrc_only_trusted"`
+	Trusted *TrustedConfigurationPatch `json:"trusted"`
 } //	@name RepoPatch
 
 type ForgeRemoteID string
 
 func (r ForgeRemoteID) IsValid() bool {
 	return r != "" && r != "0"
+}
+
+type TrustedConfiguration struct {
+	Network bool `json:"network"`
+	Volumes bool `json:"volumes"`
+	Resources bool `json:"resources"`
+	Security bool `json:"security"`
+}
+
+type TrustedConfigurationPatch struct {
+	Network *bool `json:"network"`
+	Volumes *bool `json:"volumes"`
+	Resources *bool `json:"resources"`
+	Security *bool `json:"security"`
 }

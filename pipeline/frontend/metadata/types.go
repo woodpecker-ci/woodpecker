@@ -39,7 +39,7 @@ type (
 		Private     bool     `json:"private,omitempty"`
 		Secrets     []Secret `json:"secrets,omitempty"`
 		Branch      string   `json:"default_branch,omitempty"`
-		Trusted     bool     `json:"trusted,omitempty"`
+		Trusted     TrustedConfiguration     `json:"trusted_conf,omitempty"`
 	}
 
 	// Pipeline defines runtime metadata for a pipeline.
@@ -121,4 +121,12 @@ type (
 		// URL returns the root url of a configured forge
 		URL() string
 	}
+
+	TrustedConfiguration struct {
+		Network bool `json:"network,omitempty"`
+		Volumes bool `json:"volumes,omitempty"`
+		Resources bool `json:"resources,omitempty"`
+		Security bool `json:"security,omitempty"`
+	}
+
 )

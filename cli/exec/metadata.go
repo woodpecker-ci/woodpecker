@@ -50,7 +50,12 @@ func metadataFromContext(_ context.Context, c *cli.Command, axis matrix.Axis) me
 			CloneURL:    c.String("repo-clone-url"),
 			CloneSSHURL: c.String("repo-clone-ssh-url"),
 			Private:     c.Bool("repo-private"),
-			Trusted:     c.Bool("repo-trusted"),
+			Trusted:    metadata.TrustedConfiguration{
+				Security: c.Bool("repo-trusted"),
+				Network: c.Bool("repo-trusted"),
+				Resources: c.Bool("repo-trusted"),
+				Volumes: c.Bool("repo-trusted"),
+			},
 		},
 		Curr: metadata.Pipeline{
 			Number:     c.Int("pipeline-number"),

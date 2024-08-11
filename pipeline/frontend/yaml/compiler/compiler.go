@@ -106,7 +106,7 @@ type Compiler struct {
 	secrets           map[string]Secret
 	reslimit          ResourceLimit
 	defaultCloneImage string
-	trustedPipeline   bool
+	securityTrustedPipeline   bool
 	netrcOnlyTrusted  bool
 }
 
@@ -208,7 +208,7 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 			}
 
 			// only inject netrc if it's a trusted repo or a trusted plugin
-			if !c.netrcOnlyTrusted || c.trustedPipeline || (container.IsPlugin() && container.IsTrustedCloneImage()) {
+			if !c.netrcOnlyTrusted || c.securityTrustedPipeline || (container.IsPlugin() && container.IsTrustedCloneImage()) {
 				for k, v := range c.cloneEnv {
 					step.Environment[k] = v
 				}
@@ -265,7 +265,7 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 		}
 
 		// inject netrc if it's a trusted repo or a trusted clone-plugin
-		if c.trustedPipeline || (container.IsPlugin() && container.IsTrustedCloneImage()) {
+		if c.securityTrustedPipeline || (container.IsPlugin() && container.IsTrustedCloneImage()) {
 			for k, v := range c.cloneEnv {
 				step.Environment[k] = v
 			}

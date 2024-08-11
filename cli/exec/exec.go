@@ -185,7 +185,12 @@ func execWithAxis(ctx context.Context, c *cli.Command, file, repoPath string, ax
 	}
 
 	// lint the yaml file
-	err = linter.New(linter.WithTrusted(true)).Lint([]*linter.WorkflowConfig{{
+	err = linter.New(linter.WithTrusted(linter.TrustedConfiguration{
+		Network: true,
+		Volumes: true,
+		Resources: true,
+		Security: true,
+	})).Lint([]*linter.WorkflowConfig{{
 		File:      path.Base(file),
 		RawConfig: confStr,
 		Workflow:  conf,

@@ -95,7 +95,12 @@ func lintFile(_ context.Context, _ *cli.Command, file string) error {
 	}
 
 	// TODO: lint multiple files at once to allow checks for sth like "depends_on" to work
-	err = linter.New(linter.WithTrusted(true)).Lint([]*linter.WorkflowConfig{config})
+	err = linter.New(linter.WithTrusted(linter.TrustedConfiguration{
+		Network: true,
+		Volumes: true,
+		Resources: true,
+		Security: true,
+	})).Lint([]*linter.WorkflowConfig{config})
 	if err != nil {
 		str, err := FormatLintError(config.File, err)
 
