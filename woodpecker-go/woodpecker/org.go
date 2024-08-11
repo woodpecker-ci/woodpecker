@@ -5,6 +5,8 @@ import "fmt"
 const (
 	pathOrg           = "%s/api/orgs/%d"
 	pathOrgLookup     = "%s/api/orgs/lookup/%s"
+	pathOrgVariables  = "%s/api/orgs/%d/variables"
+	pathOrgVariable   = "%s/api/orgs/%d/variables/%s"
 	pathOrgSecrets    = "%s/api/orgs/%d/secrets"
 	pathOrgSecret     = "%s/api/orgs/%d/secrets/%s"
 	pathOrgRegistries = "%s/api/orgs/%d/registries"
@@ -25,6 +27,44 @@ func (c *client) OrgLookup(name string) (*Org, error) {
 	uri := fmt.Sprintf(pathOrgLookup, c.addr, name)
 	err := c.get(uri, out)
 	return out, err
+}
+
+// OrgVariable returns an organization variable by name.
+func (c *client) OrgVariable(orgID int64, variable string) (*Variable, error) {
+	out := new(Variable)
+	uri := fmt.Sprintf(pathOrgVariable, c.addr, orgID, variable)
+	err := c.get(uri, out)
+	return out, err
+}
+
+// OrgVariableList returns a list of all organization variables.
+func (c *client) OrgVariableList(orgID int64) ([]*Variable, error) {
+	var out []*Variable
+	uri := fmt.Sprintf(pathOrgVariables, c.addr, orgID)
+	err := c.get(uri, &out)
+	return out, err
+}
+
+// OrgVariableCreate creates an organization variable.
+func (c *client) OrgVariableCreate(orgID int64, in *Variable) (*Variable, error) {
+	out := new(Variable)
+	uri := fmt.Sprintf(pathOrgVariables, c.addr, orgID)
+	err := c.post(uri, in, out)
+	return out, err
+}
+
+// OrgVariableUpdate updates an organization variable.
+func (c *client) OrgVariableUpdate(orgID int64, in *Variable) (*Variable, error) {
+	out := new(Variable)
+	uri := fmt.Sprintf(pathOrgVariable, c.addr, orgID, in.Name)
+	err := c.patch(uri, in, out)
+	return out, err
+}
+
+// OrgVariableDelete deletes an organization variable.
+func (c *client) OrgVariableDelete(orgID int64, variable string) error {
+	uri := fmt.Sprintf(pathOrgVariable, c.addr, orgID, variable)
+	return c.delete(uri)
 }
 
 // OrgSecret returns an organization secret by name.

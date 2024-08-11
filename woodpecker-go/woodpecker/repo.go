@@ -16,6 +16,8 @@ const (
 	pathApprove        = "%s/api/repos/%d/pipelines/%d/approve"
 	pathDecline        = "%s/api/repos/%d/pipelines/%d/decline"
 	pathStop           = "%s/api/repos/%d/pipelines/%d/cancel"
+	pathRepoVariables  = "%s/api/repos/%d/variables"
+	pathRepoVariable   = "%s/api/repos/%d/variables/%s"
 	pathRepoSecrets    = "%s/api/repos/%d/secrets"
 	pathRepoSecret     = "%s/api/repos/%d/secrets/%s"
 	pathRepoRegistries = "%s/api/repos/%d/registries"
@@ -118,6 +120,44 @@ func (c *client) RegistryUpdate(repoID int64, in *Registry) (*Registry, error) {
 // RegistryDelete deletes a registry.
 func (c *client) RegistryDelete(repoID int64, hostname string) error {
 	uri := fmt.Sprintf(pathRepoRegistry, c.addr, repoID, hostname)
+	return c.delete(uri)
+}
+
+// Variable returns a variable by name.
+func (c *client) Variable(repoID int64, variable string) (*Variable, error) {
+	out := new(Variable)
+	uri := fmt.Sprintf(pathRepoVariable, c.addr, repoID, variable)
+	err := c.get(uri, out)
+	return out, err
+}
+
+// VariableList returns a list of all repository variables.
+func (c *client) VariableList(repoID int64) ([]*Variable, error) {
+	var out []*Variable
+	uri := fmt.Sprintf(pathRepoVariables, c.addr, repoID)
+	err := c.get(uri, &out)
+	return out, err
+}
+
+// VariableCreate creates a variable.
+func (c *client) VariableCreate(repoID int64, in *Variable) (*Variable, error) {
+	out := new(Variable)
+	uri := fmt.Sprintf(pathRepoVariables, c.addr, repoID)
+	err := c.post(uri, in, out)
+	return out, err
+}
+
+// VariableUpdate updates a variable.
+func (c *client) VariableUpdate(repoID int64, in *Variable) (*Variable, error) {
+	out := new(Variable)
+	uri := fmt.Sprintf(pathRepoVariable, c.addr, repoID, in.Name)
+	err := c.patch(uri, in, out)
+	return out, err
+}
+
+// VariableDelete deletes a variable.
+func (c *client) VariableDelete(repoID int64, variable string) error {
+	uri := fmt.Sprintf(pathRepoVariable, c.addr, repoID, variable)
 	return c.delete(uri)
 }
 

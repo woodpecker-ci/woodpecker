@@ -629,6 +629,144 @@ func (_m *Client) GlobalSecretUpdate(secret *woodpecker.Secret) (*woodpecker.Sec
 	return r0, r1
 }
 
+// GlobalVariable provides a mock function with given fields: variable
+func (_m *Client) GlobalVariable(variable string) (*woodpecker.Variable, error) {
+	ret := _m.Called(variable)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GlobalVariable")
+	}
+
+	var r0 *woodpecker.Variable
+	var r1 error
+	if rf, ok := ret.Get(0).(func(string) (*woodpecker.Variable, error)); ok {
+		return rf(variable)
+	}
+	if rf, ok := ret.Get(0).(func(string) *woodpecker.Variable); ok {
+		r0 = rf(variable)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*woodpecker.Variable)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(variable)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GlobalVariableCreate provides a mock function with given fields: variable
+func (_m *Client) GlobalVariableCreate(variable *woodpecker.Variable) (*woodpecker.Variable, error) {
+	ret := _m.Called(variable)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GlobalVariableCreate")
+	}
+
+	var r0 *woodpecker.Variable
+	var r1 error
+	if rf, ok := ret.Get(0).(func(*woodpecker.Variable) (*woodpecker.Variable, error)); ok {
+		return rf(variable)
+	}
+	if rf, ok := ret.Get(0).(func(*woodpecker.Variable) *woodpecker.Variable); ok {
+		r0 = rf(variable)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*woodpecker.Variable)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(*woodpecker.Variable) error); ok {
+		r1 = rf(variable)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GlobalVariableDelete provides a mock function with given fields: variable
+func (_m *Client) GlobalVariableDelete(variable string) error {
+	ret := _m.Called(variable)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GlobalVariableDelete")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(string) error); ok {
+		r0 = rf(variable)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// GlobalVariableList provides a mock function with given fields:
+func (_m *Client) GlobalVariableList() ([]*woodpecker.Variable, error) {
+	ret := _m.Called()
+
+	if len(ret) == 0 {
+		panic("no return value specified for GlobalVariableList")
+	}
+
+	var r0 []*woodpecker.Variable
+	var r1 error
+	if rf, ok := ret.Get(0).(func() ([]*woodpecker.Variable, error)); ok {
+		return rf()
+	}
+	if rf, ok := ret.Get(0).(func() []*woodpecker.Variable); ok {
+		r0 = rf()
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*woodpecker.Variable)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func() error); ok {
+		r1 = rf()
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GlobalVariableUpdate provides a mock function with given fields: variable
+func (_m *Client) GlobalVariableUpdate(variable *woodpecker.Variable) (*woodpecker.Variable, error) {
+	ret := _m.Called(variable)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GlobalVariableUpdate")
+	}
+
+	var r0 *woodpecker.Variable
+	var r1 error
+	if rf, ok := ret.Get(0).(func(*woodpecker.Variable) (*woodpecker.Variable, error)); ok {
+		return rf(variable)
+	}
+	if rf, ok := ret.Get(0).(func(*woodpecker.Variable) *woodpecker.Variable); ok {
+		r0 = rf(variable)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*woodpecker.Variable)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(*woodpecker.Variable) error); ok {
+		r1 = rf(variable)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // LogLevel provides a mock function with given fields:
 func (_m *Client) LogLevel() (*woodpecker.LogLevel, error) {
 	ret := _m.Called()
@@ -1006,6 +1144,144 @@ func (_m *Client) OrgSecretUpdate(orgID int64, secret *woodpecker.Secret) (*wood
 
 	if rf, ok := ret.Get(1).(func(int64, *woodpecker.Secret) error); ok {
 		r1 = rf(orgID, secret)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// OrgVariable provides a mock function with given fields: orgID, variable
+func (_m *Client) OrgVariable(orgID int64, variable string) (*woodpecker.Variable, error) {
+	ret := _m.Called(orgID, variable)
+
+	if len(ret) == 0 {
+		panic("no return value specified for OrgVariable")
+	}
+
+	var r0 *woodpecker.Variable
+	var r1 error
+	if rf, ok := ret.Get(0).(func(int64, string) (*woodpecker.Variable, error)); ok {
+		return rf(orgID, variable)
+	}
+	if rf, ok := ret.Get(0).(func(int64, string) *woodpecker.Variable); ok {
+		r0 = rf(orgID, variable)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*woodpecker.Variable)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(int64, string) error); ok {
+		r1 = rf(orgID, variable)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// OrgVariableCreate provides a mock function with given fields: orgID, variable
+func (_m *Client) OrgVariableCreate(orgID int64, variable *woodpecker.Variable) (*woodpecker.Variable, error) {
+	ret := _m.Called(orgID, variable)
+
+	if len(ret) == 0 {
+		panic("no return value specified for OrgVariableCreate")
+	}
+
+	var r0 *woodpecker.Variable
+	var r1 error
+	if rf, ok := ret.Get(0).(func(int64, *woodpecker.Variable) (*woodpecker.Variable, error)); ok {
+		return rf(orgID, variable)
+	}
+	if rf, ok := ret.Get(0).(func(int64, *woodpecker.Variable) *woodpecker.Variable); ok {
+		r0 = rf(orgID, variable)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*woodpecker.Variable)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(int64, *woodpecker.Variable) error); ok {
+		r1 = rf(orgID, variable)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// OrgVariableDelete provides a mock function with given fields: orgID, variable
+func (_m *Client) OrgVariableDelete(orgID int64, variable string) error {
+	ret := _m.Called(orgID, variable)
+
+	if len(ret) == 0 {
+		panic("no return value specified for OrgVariableDelete")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(int64, string) error); ok {
+		r0 = rf(orgID, variable)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// OrgVariableList provides a mock function with given fields: orgID
+func (_m *Client) OrgVariableList(orgID int64) ([]*woodpecker.Variable, error) {
+	ret := _m.Called(orgID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for OrgVariableList")
+	}
+
+	var r0 []*woodpecker.Variable
+	var r1 error
+	if rf, ok := ret.Get(0).(func(int64) ([]*woodpecker.Variable, error)); ok {
+		return rf(orgID)
+	}
+	if rf, ok := ret.Get(0).(func(int64) []*woodpecker.Variable); ok {
+		r0 = rf(orgID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*woodpecker.Variable)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(int64) error); ok {
+		r1 = rf(orgID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// OrgVariableUpdate provides a mock function with given fields: orgID, variable
+func (_m *Client) OrgVariableUpdate(orgID int64, variable *woodpecker.Variable) (*woodpecker.Variable, error) {
+	ret := _m.Called(orgID, variable)
+
+	if len(ret) == 0 {
+		panic("no return value specified for OrgVariableUpdate")
+	}
+
+	var r0 *woodpecker.Variable
+	var r1 error
+	if rf, ok := ret.Get(0).(func(int64, *woodpecker.Variable) (*woodpecker.Variable, error)); ok {
+		return rf(orgID, variable)
+	}
+	if rf, ok := ret.Get(0).(func(int64, *woodpecker.Variable) *woodpecker.Variable); ok {
+		r0 = rf(orgID, variable)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*woodpecker.Variable)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(int64, *woodpecker.Variable) error); ok {
+		r1 = rf(orgID, variable)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -2108,6 +2384,144 @@ func (_m *Client) UserPost(_a0 *woodpecker.User) (*woodpecker.User, error) {
 
 	if rf, ok := ret.Get(1).(func(*woodpecker.User) error); ok {
 		r1 = rf(_a0)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// Variable provides a mock function with given fields: repoID, variable
+func (_m *Client) Variable(repoID int64, variable string) (*woodpecker.Variable, error) {
+	ret := _m.Called(repoID, variable)
+
+	if len(ret) == 0 {
+		panic("no return value specified for Variable")
+	}
+
+	var r0 *woodpecker.Variable
+	var r1 error
+	if rf, ok := ret.Get(0).(func(int64, string) (*woodpecker.Variable, error)); ok {
+		return rf(repoID, variable)
+	}
+	if rf, ok := ret.Get(0).(func(int64, string) *woodpecker.Variable); ok {
+		r0 = rf(repoID, variable)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*woodpecker.Variable)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(int64, string) error); ok {
+		r1 = rf(repoID, variable)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// VariableCreate provides a mock function with given fields: repoID, variable
+func (_m *Client) VariableCreate(repoID int64, variable *woodpecker.Variable) (*woodpecker.Variable, error) {
+	ret := _m.Called(repoID, variable)
+
+	if len(ret) == 0 {
+		panic("no return value specified for VariableCreate")
+	}
+
+	var r0 *woodpecker.Variable
+	var r1 error
+	if rf, ok := ret.Get(0).(func(int64, *woodpecker.Variable) (*woodpecker.Variable, error)); ok {
+		return rf(repoID, variable)
+	}
+	if rf, ok := ret.Get(0).(func(int64, *woodpecker.Variable) *woodpecker.Variable); ok {
+		r0 = rf(repoID, variable)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*woodpecker.Variable)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(int64, *woodpecker.Variable) error); ok {
+		r1 = rf(repoID, variable)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// VariableDelete provides a mock function with given fields: repoID, variable
+func (_m *Client) VariableDelete(repoID int64, variable string) error {
+	ret := _m.Called(repoID, variable)
+
+	if len(ret) == 0 {
+		panic("no return value specified for VariableDelete")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(int64, string) error); ok {
+		r0 = rf(repoID, variable)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// VariableList provides a mock function with given fields: repoID
+func (_m *Client) VariableList(repoID int64) ([]*woodpecker.Variable, error) {
+	ret := _m.Called(repoID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for VariableList")
+	}
+
+	var r0 []*woodpecker.Variable
+	var r1 error
+	if rf, ok := ret.Get(0).(func(int64) ([]*woodpecker.Variable, error)); ok {
+		return rf(repoID)
+	}
+	if rf, ok := ret.Get(0).(func(int64) []*woodpecker.Variable); ok {
+		r0 = rf(repoID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*woodpecker.Variable)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(int64) error); ok {
+		r1 = rf(repoID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// VariableUpdate provides a mock function with given fields: repoID, variable
+func (_m *Client) VariableUpdate(repoID int64, variable *woodpecker.Variable) (*woodpecker.Variable, error) {
+	ret := _m.Called(repoID, variable)
+
+	if len(ret) == 0 {
+		panic("no return value specified for VariableUpdate")
+	}
+
+	var r0 *woodpecker.Variable
+	var r1 error
+	if rf, ok := ret.Get(0).(func(int64, *woodpecker.Variable) (*woodpecker.Variable, error)); ok {
+		return rf(repoID, variable)
+	}
+	if rf, ok := ret.Get(0).(func(int64, *woodpecker.Variable) *woodpecker.Variable); ok {
+		r0 = rf(repoID, variable)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*woodpecker.Variable)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(int64, *woodpecker.Variable) error); ok {
+		r1 = rf(repoID, variable)
 	} else {
 		r1 = ret.Error(1)
 	}
