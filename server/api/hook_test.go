@@ -21,6 +21,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server/services/permissions"
 	mocks_registry_service "go.woodpecker-ci.org/woodpecker/v2/server/services/registry/mocks"
 	mocks_secret_service "go.woodpecker-ci.org/woodpecker/v2/server/services/secret/mocks"
+	mocks_variable_service "go.woodpecker-ci.org/woodpecker/v2/server/services/variable/mocks"
 	mocks_store "go.woodpecker-ci.org/woodpecker/v2/server/store/mocks"
 	"go.woodpecker-ci.org/woodpecker/v2/shared/token"
 )
@@ -35,6 +36,7 @@ func TestHook(t *testing.T) {
 			_forge := mocks_forge.NewForge(t)
 			_store := mocks_store.NewStore(t)
 			_configService := mocks_config_service.NewService(t)
+			_variableService := mocks_variable_service.NewService(t)
 			_secretService := mocks_secret_service.NewService(t)
 			_registryService := mocks_registry_service.NewService(t)
 			server.Config.Services.Manager = _manager
@@ -88,8 +90,10 @@ func TestHook(t *testing.T) {
 			_configService.On("Fetch", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, nil)
 			_forge.On("Netrc", mock.Anything, mock.Anything).Return(&model.Netrc{}, nil)
 			_store.On("GetPipelineLastBefore", mock.Anything, mock.Anything, mock.Anything).Return(nil, nil)
+			_manager.On("VariableServiceFromRepo", repo).Return(_variableService)
 			_manager.On("SecretServiceFromRepo", repo).Return(_secretService)
 			_secretService.On("SecretListPipeline", repo, mock.Anything, mock.Anything).Return(nil, nil)
+			_variableService.On("VariableListPipeline", repo, mock.Anything, mock.Anything).Return(nil, nil)
 			_manager.On("RegistryServiceFromRepo", repo).Return(_registryService)
 			_registryService.On("RegistryListPipeline", repo, mock.Anything).Return(nil, nil)
 			_manager.On("EnvironmentService").Return(nil)
