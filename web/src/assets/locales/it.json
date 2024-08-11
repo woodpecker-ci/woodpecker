@@ -169,7 +169,8 @@
                 "title": "Variabili aggiuntive per la pipeline",
                 "value": "Valore variabile",
                 "delete": "Elimina variabile"
-            }
+            },
+            "show_pipelines": "Mostra pipeline"
         },
         "not_allowed": "Non ti è consentito accedere a questa repository",
         "open_in_forge": "Apri pagina web della repository",
