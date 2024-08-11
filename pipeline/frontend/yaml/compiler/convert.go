@@ -151,22 +151,6 @@ func (c *Compiler) createProcess(container *yaml_types.Container, stepType backe
 		environment[toUpperTarget] = secretValue
 	}
 
-	for _, requested := range container.Variables.Variables {
-		variableValue, err := getVariableValue(requested.Source)
-		if err != nil {
-			return nil, err
-		}
-
-		toUpperTarget := strings.ToUpper(requested.Target)
-		if !environmentAllowed(toUpperTarget, stepType) {
-			continue
-		}
-
-		environment[requested.Target] = variableValue
-		// TODO: deprecated, remove in 3.x
-		environment[toUpperTarget] = variableValue
-	}
-
 	if utils.MatchImage(container.Image, c.escalated...) && container.IsPlugin() {
 		privileged = true
 	}

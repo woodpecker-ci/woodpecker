@@ -271,10 +271,9 @@ func TestCompilerCompile(t *testing.T) {
 		{
 			name: "workflow with missing variable",
 			fronConf: &yaml_types.Workflow{Steps: yaml_types.ContainerList{ContainerList: []*yaml_types.Container{{
-				Name:      "step",
-				Image:     "bash",
-				Commands:  []string{"env"},
-				Variables: yaml_types.Variables{Variables: []*yaml_types.Variable{{Source: "missing", Target: "missing"}}},
+				Name:     "step",
+				Image:    "bash",
+				Commands: []string{"env"},
 			}}}},
 			backConf:    nil,
 			expectedErr: "variable \"missing\" not found",
