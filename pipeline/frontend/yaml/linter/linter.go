@@ -175,7 +175,7 @@ func (l *Linter) lintTrusted(config *WorkflowConfig, c *types.Container, area st
 	if len(c.NetworkMode) != 0 {
 		errors = append(errors, "Insufficient privileges to use network_mode")
 	}
-	if c.Volumes.Volumes != nil && len(c.Volumes.Volumes) != 0 {
+	if len(c.Volumes.Volumes) != 0 {
 		errors = append(errors, "Insufficient privileges to use volumes")
 	}
 	if len(c.Tmpfs) != 0 {
