@@ -358,15 +358,6 @@ func (s *RPC) Log(c context.Context, rpcLogEntry *rpc.LogEntry) error {
 		}
 	}()
 
-	agent, err := s.getAgentFromContext(c)
-	if err != nil {
-		return err
-	}
-	agent.LastWork = time.Now().Unix()
-	if err := s.store.AgentUpdate(agent); err != nil {
-		return err
-	}
-
 	return server.Config.Services.LogStore.LogAppend(logEntry)
 }
 
