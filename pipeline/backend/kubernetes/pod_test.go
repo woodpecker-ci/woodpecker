@@ -65,7 +65,7 @@ func TestStepLabel(t *testing.T) {
 }
 
 func TestTinyPod(t *testing.T) {
-	expected := `
+	const expected = `
 	{
 		"metadata": {
 			"name": "wp-01he8bebctabr3kgk0qj36d2me-0",
@@ -149,7 +149,7 @@ func TestTinyPod(t *testing.T) {
 }
 
 func TestFullPod(t *testing.T) {
-	expected := `
+	const expected = `
 	{
 		"metadata": {
 			"name": "wp-01he8bebctabr3kgk0qj36d2me-0",
@@ -429,7 +429,7 @@ func TestPodPrivilege(t *testing.T) {
 }
 
 func TestScratchPod(t *testing.T) {
-	expected := `
+	const expected = `
 	{
 		"metadata": {
 			"name": "wp-01he8bebctabr3kgk0qj36d2me-0",
@@ -474,7 +474,7 @@ func TestScratchPod(t *testing.T) {
 }
 
 func TestSecrets(t *testing.T) {
-	expected := `
+	const expected = `
 	{
 		"metadata": {
 			"name": "wp-3kgk0qj36d2me01he8bebctabr-0",
