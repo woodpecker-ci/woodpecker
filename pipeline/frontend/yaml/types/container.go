@@ -49,7 +49,7 @@ type (
 		DependsOn      base.StringOrSlice `yaml:"depends_on,omitempty"`
 		Needs          base.StringOrSlice `yaml:"needs,omitempty"`
 
-		// TODO deprecated remove in 3.0
+		// TODO deprecated remove in next major
 		Detached bool `yaml:"detach,omitempty"`
 		// TODO: make []string in 3.x
 		Secrets Secrets `yaml:"secrets,omitempty"`
