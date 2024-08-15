@@ -163,7 +163,7 @@ func TestLintErrors(t *testing.T) {
 		},
 		{
 			from: "steps: { build: { image: golang, settings: { test: 'true' }, environment: [ 'TEST=true' ] } }",
-			want: "Cannot configure both environment and settings",
+			want: "Should not configure both environment and settings",
 		},
 	}
 

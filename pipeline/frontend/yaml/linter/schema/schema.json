@@ -511,9 +511,6 @@
         "directory": {
           "$ref": "#/definitions/step_directory"
         },
-        "secrets": {
-          "$ref": "#/definitions/step_secrets"
-        },
         "settings": {
           "$ref": "#/definitions/step_settings"
         },
