@@ -1,6 +1,6 @@
 <template>
   <Scaffold
-    v-if="repo && repoPermissions && $route.meta.repoHeader"
+    v-if="repo && repoPermissions && route.meta.repoHeader"
     v-model:activeTab="activeTab"
     enable-tabs
     disable-tab-url-hash-mode
