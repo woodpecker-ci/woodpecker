@@ -119,8 +119,8 @@ importers:
         specifier: ^2.11.0
         version: 2.14.0
       marked:
-        specifier: ^13.0.0
-        version: 13.0.3
+        specifier: ^14.0.0
+        version: 14.0.0
       tslib:
         specifier: ^2.6.2
         version: 2.6.3
@@ -3668,8 +3668,8 @@ packages:
   markdown-table@3.0.3:
     resolution: {integrity: sha512-Z1NL3Tb1M9wH4XESsCDEksWoKTdlUafKc4pt0GRwjUyXaCFZ+dc3g2erqB6zm3szA2IUSi7VnPI+o/9jnxh9hw==}
 
-  marked@13.0.3:
-    resolution: {integrity: sha512-rqRix3/TWzE9rIoFGIn8JmsVfhiuC8VIQ8IdX5TfzmeBucdY05/0UlzKaw0eVtpcN/OdVFpBk7CjKGo9iHJ/zA==}
+  marked@14.0.0:
+    resolution: {integrity: sha512-uIj4+faQ+MgHgwUW1l2PsPglZLOLOT1uErt06dAPtx2kjteLAkbsd/0FiYg/MGS+i7ZKLb7w2WClxHkzOOuryQ==}
     engines: {node: '>= 18'}
     hasBin: true
 
@@ -5846,7 +5846,7 @@ snapshots:
       debug: 4.3.6
       gensync: 1.0.0-beta.2
       json5: 2.2.3
-      semver: 6.3.1
+      semver: 7.6.3
     transitivePeerDependencies:
       - supports-color
 
@@ -10520,7 +10520,7 @@ snapshots:
 
   markdown-table@3.0.3: {}
 
-  marked@13.0.3: {}
+  marked@14.0.0: {}
 
   marked@4.3.0: {}
 
