@@ -1,13 +1,14 @@
 # Changelog
 
-## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-08-08
+## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-08-15
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @anbraten, @dvjn, @j04n-f, @jenrik, @pat-s, @qwerty287, @smainz, @zc-devs
+@6543, @anbraten, @dvjn, @hg, @j04n-f, @jenrik, @pat-s, @qwerty287, @smainz, @zc-devs
 
 ### 💥 Breaking changes
 
+- Remove various deprecations [[#4017](https://github.com/woodpecker-ci/woodpecker/pull/4017)]
 - Drop repo name fallback for hooks [[#4013](https://github.com/woodpecker-ci/woodpecker/pull/4013)]
 - Improved Local backend detection [[#4006](https://github.com/woodpecker-ci/woodpecker/pull/4006)]
 - Refactor JSON and SDK fields [[#3968](https://github.com/woodpecker-ci/woodpecker/pull/3968)]
@@ -26,11 +27,14 @@
 
 ### 🔒 Security
 
+- Warn if using secrets/env with plugin [[#4027](https://github.com/woodpecker-ci/woodpecker/pull/4027)]
 - Update gitea sdk [[#4012](https://github.com/woodpecker-ci/woodpecker/pull/4012)]
 - Update Forgejo SDK [[#3948](https://github.com/woodpecker-ci/woodpecker/pull/3948)]
 
 ### 📈 Enhancement
 
+- Only update agent.LastWork if not done recently [[#4031](https://github.com/woodpecker-ci/woodpecker/pull/4031)]
+- Improve error on config loading [[#4024](https://github.com/woodpecker-ci/woodpecker/pull/4024)]
 - Show error returned from API [[#3980](https://github.com/woodpecker-ci/woodpecker/pull/3980)]
 - Move manual popup to own page [[#3981](https://github.com/woodpecker-ci/woodpecker/pull/3981)]
 - Fail on InvalidImageName [[#4007](https://github.com/woodpecker-ci/woodpecker/pull/4007)]
@@ -45,6 +49,8 @@
 
 ### 🐛 Bug Fixes
 
+- Set refspec for gitlab MR [[#4021](https://github.com/woodpecker-ci/woodpecker/pull/4021)]
+- Set `CI_PREV_COMMIT_{SOURCE,TARGET}_BRANCH` as mentioned in the documentation [[#4001](https://github.com/woodpecker-ci/woodpecker/pull/4001)]
 - [Bitbucket Datacenter] Return empty list instead of null [[#4010](https://github.com/woodpecker-ci/woodpecker/pull/4010)]
 - Fix org settings page [[#4002](https://github.com/woodpecker-ci/woodpecker/pull/4002)]
 - Fix BB PR pipeline ref [[#3985](https://github.com/woodpecker-ci/woodpecker/pull/3985)]
