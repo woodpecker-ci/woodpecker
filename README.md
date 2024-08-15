@@ -68,8 +68,6 @@ We have a self-hosted [Weblate](https://weblate.org/en/) instance at [translate.
 
 An overview of the current translation state is available at <https://translate.woodpecker-ci.org/projects/woodpecker-ci/#languages>.
 
-To help with translation, the language-specific files in <https://github.com/woodpecker-ci/woodpecker/tree/main/web/src/assets/locales> can be edited.
-
 ## Public Woodpecker Instances
 
 Woodpecker is used as the main CI/CD engine at [Codeberg](https://codeberg.org), an alternative Git hosting platform with a focus on privacy and free software development.
