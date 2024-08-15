@@ -40,7 +40,7 @@ import { computed, toRef } from 'vue';
 import Button from '~/components/atomic/Button.vue';
 import InputField from '~/components/form/InputField.vue';
 import TextField from '~/components/form/TextField.vue';
-import { type Variable } from '~/lib/api/types';
+import type { Variable } from '~/lib/api/types';
 
 const props = defineProps<{
   modelValue: Partial<Variable>;

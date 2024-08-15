@@ -51,7 +51,7 @@ import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useAuthentication from '~/compositions/useAuthentication';
 import useNotifications from '~/compositions/useNotifications';
 import { usePagination } from '~/compositions/usePaginate';
-import { type Variable } from '~/lib/api/types';
+import type { Variable } from '~/lib/api/types';
 
 const emptyVariable: Partial<Variable> = {
   name: '',
