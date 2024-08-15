@@ -114,7 +114,7 @@ func TestUnmarshalContainer(t *testing.T) {
 					},
 				},
 				{
-					Event: base.StringOrSlice{"cron",},
+					Event: base.StringOrSlice{"cron"},
 					Cron: constraint.List{
 						Include: []string{"job1"},
 					},
@@ -176,8 +176,8 @@ func TestUnmarshalContainers(t *testing.T) {
       event: push`,
 			want: []*Container{
 				{
-					Name:  "publish-agent",
-					Image: "print/env",
+					Name:    "publish-agent",
+					Image:   "print/env",
 					Secrets: []string{"docker_username", "docker_password"},
 					Settings: map[string]any{
 						"repo":       "woodpeckerci/woodpecker-agent",

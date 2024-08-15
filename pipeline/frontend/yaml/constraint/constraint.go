@@ -38,18 +38,18 @@ type (
 	}
 
 	Constraint struct {
-		Ref         List
-		Repo        List
-		Instance    List
-		Platform    List
-		Branch      List
-		Cron        List
-		Status      List
-		Matrix      Map
-		Local       yamlBaseTypes.BoolTrue
-		Path        Path
-		Evaluate    string `yaml:"evaluate,omitempty"`
-		Event				yamlBaseTypes.StringOrSlice
+		Ref      List
+		Repo     List
+		Instance List
+		Platform List
+		Branch   List
+		Cron     List
+		Status   List
+		Matrix   Map
+		Local    yamlBaseTypes.BoolTrue
+		Path     Path
+		Evaluate string `yaml:"evaluate,omitempty"`
+		Event    yamlBaseTypes.StringOrSlice
 	}
 
 	// List defines a runtime constraint for exclude & include string slices.

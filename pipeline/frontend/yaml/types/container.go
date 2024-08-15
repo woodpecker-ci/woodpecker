@@ -48,7 +48,7 @@ type (
 		Ports          []string           `yaml:"ports,omitempty"`
 		DependsOn      base.StringOrSlice `yaml:"depends_on,omitempty"`
 
-		Secrets []string `yaml:"secrets,omitempty"`
+		Secrets     []string       `yaml:"secrets,omitempty"`
 		Environment map[string]any `yaml:"environment,omitempty"`
 
 		// Docker and Kubernetes Specific
