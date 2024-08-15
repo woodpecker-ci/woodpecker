@@ -34,7 +34,7 @@ var DefaultConfigOrder = [...]string{
 const (
 	// DefaultCloneImage can be changed by 'WOODPECKER_DEFAULT_CLONE_IMAGE' at runtime.
 	// renovate: datasource=docker depName=woodpeckerci/plugin-git
-	DefaultCloneImage = "docker.io/woodpeckerci/plugin-git:2.5.1"
+	DefaultCloneImage = "docker.io/woodpeckerci/plugin-git:2.5.2"
 )
 
 var TrustedCloneImages = []string{
