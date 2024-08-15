@@ -162,7 +162,7 @@ func TestLintErrors(t *testing.T) {
 			want: "Cannot configure both entrypoint and settings",
 		},
 		{
-			from: "steps: { build: { image: golang, settings: { test: 'true' }, environment: [ 'TEST': 'true' ] } }",
+			from: "steps: { build: { image: golang, settings: { test: 'true' }, environment: { 'TEST': 'true' } } }",
 			want: "Should not configure both environment and settings",
 		},
 		{
