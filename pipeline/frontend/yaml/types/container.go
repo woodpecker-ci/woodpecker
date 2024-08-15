@@ -122,7 +122,7 @@ func (c *Container) IsPlugin() bool {
 	return len(c.Commands) == 0 &&
 		len(c.Entrypoint) == 0 &&
 		len(c.Environment) == 0 &&
-		len(c.Secrets.Secrets) == 0
+		len(c.Secrets) == 0
 }
 
 func (c *Container) IsTrustedCloneImage() bool {
