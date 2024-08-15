@@ -39,7 +39,6 @@ type (
 		Detached       bool               `yaml:"detach,omitempty"`
 		Directory      string             `yaml:"directory,omitempty"`
 		Failure        string             `yaml:"failure,omitempty"`
-		Group          string             `yaml:"group,omitempty"`
 		Image          string             `yaml:"image,omitempty"`
 		Name           string             `yaml:"name,omitempty"`
 		Pull           bool               `yaml:"pull,omitempty"`
@@ -49,10 +48,8 @@ type (
 		Ports          []string           `yaml:"ports,omitempty"`
 		DependsOn      base.StringOrSlice `yaml:"depends_on,omitempty"`
 
-		// TODO: make []string in 3.x
-		Secrets Secrets `yaml:"secrets,omitempty"`
-		// TODO: make map[string]any in 3.x
-		Environment base.SliceOrMap `yaml:"environment,omitempty"`
+		Secrets     []string       `yaml:"secrets,omitempty"`
+		Environment map[string]any `yaml:"environment,omitempty"`
 
 		// Docker and Kubernetes Specific
 		Privileged bool `yaml:"privileged,omitempty"`
@@ -125,7 +122,7 @@ func (c *Container) IsPlugin() bool {
 	return len(c.Commands) == 0 &&
 		len(c.Entrypoint) == 0 &&
 		len(c.Environment) == 0 &&
-		len(c.Secrets.Secrets) == 0
+		len(c.Secrets) == 0
 }
 
 func (c *Container) IsTrustedCloneImage() bool {
