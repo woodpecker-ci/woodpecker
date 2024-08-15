@@ -51,7 +51,7 @@
     "@vue/compiler-sfc": "^3.4.27",
     "@vue/test-utils": "^2.4.6",
     "eslint": "^9.4.0",
-    "eslint-plugin-promise": "^6.6.0",
+    "eslint-plugin-promise": "^7.0.0",
     "eslint-plugin-vue-scoped-css": "^2.8.0",
     "jsdom": "^24.1.0",
     "prettier": "^3.3.0",
