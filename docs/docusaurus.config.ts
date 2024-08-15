@@ -264,6 +264,7 @@ const config: Config = {
         blog: {
           blogTitle: 'Blog',
           blogDescription: 'A blog for release announcements, turorials...',
+          onInlineAuthors: 'ignore',
           // postsPerPage: 'ALL',
           // blogSidebarCount: 0,
         },
