@@ -145,7 +145,7 @@ func (l *Linter) lintSettings(config *WorkflowConfig, c *types.Container, field 
 	if len(c.Environment) != 0 {
 		return newLinterError("Should not configure both environment and settings", config.File, fmt.Sprintf("%s.%s", field, c.Name), true)
 	}
-	if len(c.Secrets.Secrets) != 0 {
+	if len(c.Secrets) != 0 {
 		return newLinterError("Should not configure both secrets and settings", config.File, fmt.Sprintf("%s.%s", field, c.Name), true)
 	}
 	return nil
