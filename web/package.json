@@ -31,7 +31,7 @@
     "pinia": "^2.1.7",
     "prismjs": "^1.29.0",
     "semver": "^7.6.2",
-    "simple-icons": "^12.3.0",
+    "simple-icons": "^13.0.0",
     "vue": "^3.4.27",
     "vue-i18n": "^9.13.1",
     "vue-router": "^4.3.2"
