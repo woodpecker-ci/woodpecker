@@ -30,18 +30,25 @@ var (
 	maxChangedFiles = 500
 )
 
-// Environ returns the metadata as a map of environment variables.
-func (m *Metadata) Environ() map[string]string {
+func getSourceTargetBranches(refspec string) (string, string) {
 	var (
 		sourceBranch string
 		targetBranch string
 	)
 
-	branchParts := strings.Split(m.Curr.Commit.Refspec, ":")
+	branchParts := strings.Split(refspec, ":")
 	if len(branchParts) == 2 { //nolint:mnd
 		sourceBranch = branchParts[0]
 		targetBranch = branchParts[1]
 	}
+
+	return sourceBranch, targetBranch
+}
+
+// Environ returns the metadata as a map of environment variables.
+func (m *Metadata) Environ() map[string]string {
+	sourceBranch, targetBranch := getSourceTargetBranches(m.Curr.Commit.Refspec)
+	prevSourceBranch, prevTargetBranch := getSourceTargetBranches(m.Prev.Commit.Refspec)
 
 	params := map[string]string{
 		"CI":                     m.Sys.Name,
@@ -102,6 +109,8 @@ func (m *Metadata) Environ() map[string]string {
 		"CI_PREV_COMMIT_AUTHOR":        m.Prev.Commit.Author.Name,
 		"CI_PREV_COMMIT_AUTHOR_EMAIL":  m.Prev.Commit.Author.Email,
 		"CI_PREV_COMMIT_AUTHOR_AVATAR": m.Prev.Commit.Author.Avatar,
+		"CI_PREV_COMMIT_SOURCE_BRANCH": prevSourceBranch,
+		"CI_PREV_COMMIT_TARGET_BRANCH": prevTargetBranch,
 
 		"CI_PREV_PIPELINE_NUMBER":        strconv.FormatInt(m.Prev.Number, 10),
 		"CI_PREV_PIPELINE_PARENT":        strconv.FormatInt(m.Prev.Parent, 10),
