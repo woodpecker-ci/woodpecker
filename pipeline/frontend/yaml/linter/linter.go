@@ -143,7 +143,10 @@ func (l *Linter) lintSettings(config *WorkflowConfig, c *types.Container, field 
 		return newLinterError("Cannot configure both entrypoint and settings", config.File, fmt.Sprintf("%s.%s", field, c.Name), false)
 	}
 	if len(c.Environment) != 0 {
-		return newLinterError("Cannot configure both environment and settings", config.File, fmt.Sprintf("%s.%s", field, c.Name), false)
+		return newLinterError("Should not configure both environment and settings", config.File, fmt.Sprintf("%s.%s", field, c.Name), true)
+	}
+	if len(c.Secrets.Secrets) != 0 {
+		return newLinterError("Should not configure both secrets and settings", config.File, fmt.Sprintf("%s.%s", field, c.Name), true)
 	}
 	return nil
 }
@@ -172,7 +175,7 @@ func (l *Linter) lintTrusted(config *WorkflowConfig, c *types.Container, area st
 	if len(c.NetworkMode) != 0 {
 		errors = append(errors, "Insufficient privileges to use network_mode")
 	}
-	if c.Volumes.Volumes != nil && len(c.Volumes.Volumes) != 0 {
+	if len(c.Volumes.Volumes) != 0 {
 		errors = append(errors, "Insufficient privileges to use volumes")
 	}
 	if len(c.Tmpfs) != 0 {

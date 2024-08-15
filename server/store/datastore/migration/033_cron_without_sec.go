@@ -42,8 +42,9 @@ var cronWithoutSec = xormigrate.Migration{
 				continue
 			}
 
-			c.Schedule = strings.SplitN(strings.TrimSpace(c.Schedule), " ", 2)[1]
-			if _, err := sess.Update(c); err != nil {
+			if _, err := sess.Update(&model.Cron{
+				Schedule: strings.SplitN(strings.TrimSpace(c.Schedule), " ", 2)[1],
+			}, c); err != nil {
 				return err
 			}
 		}
