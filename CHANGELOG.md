@@ -32,18 +32,9 @@
 - Update gitea sdk [[#4012](https://github.com/woodpecker-ci/woodpecker/pull/4012)]
 - Update Forgejo SDK [[#3948](https://github.com/woodpecker-ci/woodpecker/pull/3948)]
 
-### 📚 Documentation
-
-- Fix inline author warning [[#4040](https://github.com/woodpecker-ci/woodpecker/pull/4040)]
-- Updated Secrets image filter docs [[#4028](https://github.com/woodpecker-ci/woodpecker/pull/4028)]
-- Update dependency marked to v14 [[#4036](https://github.com/woodpecker-ci/woodpecker/pull/4036)]
-- Update docs npm deps non-major [[#4033](https://github.com/woodpecker-ci/woodpecker/pull/4033)]
-- Overhaul README [[#3995](https://github.com/woodpecker-ci/woodpecker/pull/3995)]
-- fix(deps): update docs npm deps non-major [[#3990](https://github.com/woodpecker-ci/woodpecker/pull/3990)]
-- Add spellchecking for docs [[#3787](https://github.com/woodpecker-ci/woodpecker/pull/3787)]
-
 ### 📈 Enhancement
 
+- Duplicate key `workflow_id` in the agent logs [[#4046](https://github.com/woodpecker-ci/woodpecker/pull/4046)]
 - Only update agent.LastWork if not done recently [[#4031](https://github.com/woodpecker-ci/woodpecker/pull/4031)]
 - Improve error on config loading [[#4024](https://github.com/woodpecker-ci/woodpecker/pull/4024)]
 - Show error returned from API [[#3980](https://github.com/woodpecker-ci/woodpecker/pull/3980)]
@@ -57,6 +48,16 @@
 - Improve cron list [[#3947](https://github.com/woodpecker-ci/woodpecker/pull/3947)]
 - Add PULLREQUEST_DRONE_PULL_REQUEST drone env [[#3939](https://github.com/woodpecker-ci/woodpecker/pull/3939)]
 - Make agent gRPC errors distinguishable [[#3936](https://github.com/woodpecker-ci/woodpecker/pull/3936)]
+
+### 📚 Documentation
+
+- Fix inline author warning [[#4040](https://github.com/woodpecker-ci/woodpecker/pull/4040)]
+- Updated Secrets image filter docs [[#4028](https://github.com/woodpecker-ci/woodpecker/pull/4028)]
+- Update dependency marked to v14 [[#4036](https://github.com/woodpecker-ci/woodpecker/pull/4036)]
+- Update docs npm deps non-major [[#4033](https://github.com/woodpecker-ci/woodpecker/pull/4033)]
+- Overhaul README [[#3995](https://github.com/woodpecker-ci/woodpecker/pull/3995)]
+- fix(deps): update docs npm deps non-major [[#3990](https://github.com/woodpecker-ci/woodpecker/pull/3990)]
+- Add spellchecking for docs [[#3787](https://github.com/woodpecker-ci/woodpecker/pull/3787)]
 
 ### 🐛 Bug Fixes
 
