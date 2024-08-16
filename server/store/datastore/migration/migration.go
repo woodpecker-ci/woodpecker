@@ -91,10 +91,7 @@ var allBeans = []any{
 
 func initSchemaOnly(e *xorm.Engine) error {
 	m := xormigrate.New(e, migrationTasks)
-	m.InitSchema(func(_ *xorm.Engine) error {
-		// do nothing on schema init, models are synced in any case below
-		return nil
-	})
+	m.InitSchema(syncAll)
 	return m.Migrate()
 }
 
