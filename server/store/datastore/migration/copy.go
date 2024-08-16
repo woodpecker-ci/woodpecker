@@ -21,6 +21,7 @@ import (
 
 	"github.com/rs/zerolog/log"
 	"xorm.io/xorm"
+	"xorm.io/xorm/schemas"
 
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
@@ -49,58 +50,58 @@ func Copy(ctx context.Context, src, dest *xorm.Engine) error {
 	// copy data
 	// IMPORTANT: if you add something here, also add it to migration.go allBeans slice
 	{ // TODO: find a way to use reflection to be able to use allBeans -> code-generation might be a better way ...
-		if err := copyBean[model.Agent](src, dest); err != nil {
+		if err := copyBean[model.Agent](ctx, src, dest); err != nil {
 			return err
 		}
-		if err := copyBean[model.Pipeline](src, dest); err != nil {
+		if err := copyBean[model.Pipeline](ctx, src, dest); err != nil {
 			return err
 		}
-		if err := copyBean[model.PipelineConfig](src, dest); err != nil {
+		if err := copyBean[model.PipelineConfig](ctx, src, dest); err != nil {
 			return err
 		}
-		if err := copyBean[model.Config](src, dest); err != nil {
+		if err := copyBean[model.Config](ctx, src, dest); err != nil {
 			return err
 		}
-		if err := copyBean[model.LogEntry](src, dest); err != nil {
+		if err := copyBean[model.LogEntry](ctx, src, dest); err != nil {
 			return err
 		}
-		if err := copyBean[model.Perm](src, dest); err != nil {
+		if err := copyBean[model.Perm](ctx, src, dest); err != nil {
 			return err
 		}
-		if err := copyBean[model.Step](src, dest); err != nil {
+		if err := copyBean[model.Step](ctx, src, dest); err != nil {
 			return err
 		}
-		if err := copyBean[model.Registry](src, dest); err != nil {
+		if err := copyBean[model.Registry](ctx, src, dest); err != nil {
 			return err
 		}
-		if err := copyBean[model.Repo](src, dest); err != nil {
+		if err := copyBean[model.Repo](ctx, src, dest); err != nil {
 			return err
 		}
-		if err := copyBean[model.Secret](src, dest); err != nil {
+		if err := copyBean[model.Secret](ctx, src, dest); err != nil {
 			return err
 		}
-		if err := copyBean[model.Task](src, dest); err != nil {
+		if err := copyBean[model.Task](ctx, src, dest); err != nil {
 			return err
 		}
-		if err := copyBean[model.User](src, dest); err != nil {
+		if err := copyBean[model.User](ctx, src, dest); err != nil {
 			return err
 		}
-		if err := copyBean[model.ServerConfig](src, dest); err != nil {
+		if err := copyBean[model.ServerConfig](ctx, src, dest); err != nil {
 			return err
 		}
-		if err := copyBean[model.Cron](src, dest); err != nil {
+		if err := copyBean[model.Cron](ctx, src, dest); err != nil {
 			return err
 		}
-		if err := copyBean[model.Redirection](src, dest); err != nil {
+		if err := copyBean[model.Redirection](ctx, src, dest); err != nil {
 			return err
 		}
-		if err := copyBean[model.Forge](src, dest); err != nil {
+		if err := copyBean[model.Forge](ctx, src, dest); err != nil {
 			return err
 		}
-		if err := copyBean[model.Workflow](src, dest); err != nil {
+		if err := copyBean[model.Workflow](ctx, src, dest); err != nil {
 			return err
 		}
-		if err := copyBean[model.Org](src, dest); err != nil {
+		if err := copyBean[model.Org](ctx, src, dest); err != nil {
 			return err
 		}
 	}
@@ -108,10 +109,10 @@ func Copy(ctx context.Context, src, dest *xorm.Engine) error {
 	return nil
 }
 
-func copyBean[T any](src, dest *xorm.Engine) error {
+func copyBean[T any](ctx context.Context, src, dest *xorm.Engine) error {
 	tableName := dest.TableName(new(T))
 	log.Info().Msgf("Start copy %s table", tableName)
-	aliveMsgCancel := showBeAliveSign(tableName)
+	aliveMsgCancel := showBeAliveSign(ctx, tableName)
 	defer aliveMsgCancel(nil)
 
 	page := 0
@@ -119,6 +120,11 @@ func copyBean[T any](src, dest *xorm.Engine) error {
 	items := make([]*T, 0, perPage)
 
 	for {
+		// for each loop we just check if the context got canceled
+		if err := ctx.Err(); err != nil {
+			return err
+		}
+
 		// TODO: use waitGroup and chanel to stream items through
 		// clean item list
 		items = items[:0]
@@ -144,14 +150,38 @@ func copyBean[T any](src, dest *xorm.Engine) error {
 		page++
 	}
 
+	// for postgress we have to manually update the sequence for autoincrements
+	if dest.Dialect().URI().DBType == schemas.POSTGRES {
+		t, err := dest.TableInfo(new(T))
+		if err != nil {
+			return err
+		}
+		if t.AutoIncrement != "" {
+			max := 0
+			if _, err := dest.SQL(fmt.Sprintf("SELECT MAX(%s) FROM %s;", t.AutoIncrement, tableName)).Get(&max); err != nil {
+				return fmt.Errorf("could not get max value to calc auto increments max for postgress: %w", err)
+			}
+
+			log.Debug().Msgf("for '%s' found auto increment '%s' with current max at '%d'", tableName, t.AutoIncrement, max)
+
+			if max > 0 {
+				sql := fmt.Sprintf("SELECT pg_catalog.setval('%s_%s_seq', %d, true)", tableName, t.AutoIncrement, max)
+				if _, err := dest.Exec(sql); err != nil {
+					log.Debug().Err(err).Msgf("could not exec: '%s'", sql)
+					return fmt.Errorf("could not update auto increments for postgress: %w", err)
+				}
+			}
+		}
+	}
+
 	aliveMsgCancel(nil)
 	return nil
 }
 
 var showBeAliveSignDelay = time.Second * 20
 
-func showBeAliveSign(taskName string) context.CancelCauseFunc {
-	ctx, cancel := context.WithCancelCause(context.Background())
+func showBeAliveSign(ctx context.Context, taskName string) context.CancelCauseFunc {
+	ctx, cancel := context.WithCancelCause(ctx)
 	go func() {
 		for {
 			select {
