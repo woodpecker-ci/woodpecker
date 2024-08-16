@@ -67,7 +67,7 @@ var migrationTasks = []*xormigrate.Migration{
 	&renameStartEndTime,
 }
 
-// IMPORTANT: if you add something here, also add it to copy.go Copy() func
+// IMPORTANT: if you add something here, also add it to copy.go Copy() func.
 var allBeans = []any{
 	new(model.Agent),
 	new(model.Pipeline),
