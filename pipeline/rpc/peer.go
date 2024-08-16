@@ -82,8 +82,8 @@ type Peer interface {
 	// Update updates the step state
 	Update(c context.Context, workflowID string, state StepState) error
 
-	// Log writes the step log entry
-	Log(c context.Context, logEntry *LogEntry) error
+	// EnqueueLog queues the step log entry for delayed sending
+	EnqueueLog(logEntry *LogEntry)
 
 	// RegisterAgent register our agent to the server
 	RegisterAgent(ctx context.Context, platform, backend, version string, capacity int) (int64, error)

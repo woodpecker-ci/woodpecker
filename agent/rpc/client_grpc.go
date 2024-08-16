@@ -37,17 +37,21 @@ const ClientGrpcVersion int32 = proto.Version
 type client struct {
 	client proto.WoodpeckerClient
 	conn   *grpc.ClientConn
+	logs   chan *proto.LogEntry
 }
 
 // NewGrpcClient returns a new grpc Client.
-func NewGrpcClient(conn *grpc.ClientConn) rpc.Peer {
+func NewGrpcClient(ctx context.Context, conn *grpc.ClientConn) rpc.Peer {
 	client := new(client)
 	client.client = proto.NewWoodpeckerClient(conn)
 	client.conn = conn
+	client.logs = make(chan *proto.LogEntry, 10) // max memory use: 10 lines * 1 MiB
+	go client.processLogs(ctx)
 	return client
 }
 
 func (c *client) Close() error {
+	close(c.logs)
 	return c.conn.Close()
 }
 
@@ -367,18 +371,69 @@ func (c *client) Update(ctx context.Context, id string, state rpc.StepState) (er
 	return nil
 }
 
-// Log writes the workflow log entry.
-func (c *client) Log(ctx context.Context, logEntry *rpc.LogEntry) (err error) {
-	retry := c.newBackOff()
-	req := new(proto.LogRequest)
-	req.LogEntry = new(proto.LogEntry)
-	req.LogEntry.StepUuid = logEntry.StepUUID
-	req.LogEntry.Data = logEntry.Data
-	req.LogEntry.Line = int32(logEntry.Line)
-	req.LogEntry.Time = logEntry.Time
-	req.LogEntry.Type = int32(logEntry.Type)
+// EnqueueLog queues the log entry to be written in a batch later.
+func (c *client) EnqueueLog(logEntry *rpc.LogEntry) {
+	c.logs <- &proto.LogEntry{
+		StepUuid: logEntry.StepUUID,
+		Data:     logEntry.Data,
+		Line:     int32(logEntry.Line),
+		Time:     logEntry.Time,
+		Type:     int32(logEntry.Type),
+	}
+}
+
+func (c *client) processLogs(ctx context.Context) {
+	var entries []*proto.LogEntry
+	var bytes int
+
+	send := func() {
+		if len(entries) == 0 {
+			return
+		}
+
+		log.Debug().
+			Int("entries", len(entries)).
+			Int("bytes", bytes).
+			Msg("log drain: sending queued logs")
+
+		if err := c.sendLogs(ctx, entries); err != nil {
+			log.Error().Err(err).Msg("log drain: could not send logs to server")
+		}
+
+		// even if send failed, we don't have infinite memory; retry has already been used
+		entries = entries[:0]
+		bytes = 0
+	}
+
+	// ctx.Done() is covered by the log channel being closed
 	for {
-		_, err = c.client.Log(ctx, req)
+		select {
+		case entry, ok := <-c.logs:
+			if !ok {
+				log.Info().Msg("log drain: channel closed")
+				send()
+				return
+			}
+
+			entries = append(entries, entry)
+			bytes += len(entry.Data)
+
+			if bytes >= 256*1024 { // 256 KiB; picked to prevent GRPC message size overflow
+				send()
+			}
+
+		case <-time.After(time.Second):
+			send()
+		}
+	}
+}
+
+func (c *client) sendLogs(ctx context.Context, entries []*proto.LogEntry) error {
+	req := &proto.LogRequest{LogEntries: entries}
+	retry := c.newBackOff()
+
+	for {
+		_, err := c.client.Log(ctx, req)
 		if err == nil {
 			break
 		}

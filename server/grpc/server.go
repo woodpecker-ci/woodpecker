@@ -17,6 +17,7 @@ package grpc
 import (
 	"context"
 	"encoding/json"
+	"github.com/rs/zerolog/log"
 
 	"github.com/prometheus/client_golang/prometheus"
 	prometheus_auto "github.com/prometheus/client_golang/prometheus/promauto"
@@ -133,15 +134,20 @@ func (s *WoodpeckerServer) Extend(c context.Context, req *proto.ExtendRequest) (
 }
 
 func (s *WoodpeckerServer) Log(c context.Context, req *proto.LogRequest) (*proto.Empty, error) {
-	logEntry := &rpc.LogEntry{
-		Data:     req.GetLogEntry().GetData(),
-		Line:     int(req.GetLogEntry().GetLine()),
-		Time:     req.GetLogEntry().GetTime(),
-		StepUUID: req.GetLogEntry().GetStepUuid(),
-		Type:     int(req.GetLogEntry().GetType()),
+	var err error
+	for _, reqEntry := range req.GetLogEntries() {
+		peerEntry := &rpc.LogEntry{
+			Data:     reqEntry.GetData(),
+			Line:     int(reqEntry.GetLine()),
+			Time:     reqEntry.GetTime(),
+			StepUUID: reqEntry.GetStepUuid(),
+			Type:     int(reqEntry.GetType()),
+		}
+		if err = s.peer.Log(c, peerEntry); err != nil {
+			log.Error().Err(err).Msg("could not write log entry")
+		}
 	}
 	res := new(proto.Empty)
-	err := s.peer.Log(c, logEntry)
 	return res, err
 }
 
