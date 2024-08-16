@@ -24,7 +24,6 @@ type dagCompilerStep struct {
 	step      *backend_types.Step
 	position  int
 	name      string
-	group     string
 	dependsOn []string
 	needs     []string
 }
@@ -73,12 +72,11 @@ func (c dagCompiler) compile() ([]*backend_types.Stage, error) {
 	if c.isDAG() {
 		return c.compileByDependsOn()
 	}
-	return c.compileByGroup()
+	return c.compileSequence()
 }
 
-func (c dagCompiler) compileByGroup() ([]*backend_types.Stage, error) {
+func (c dagCompiler) compileSequence() ([]*backend_types.Stage, error) {
 	stages := make([]*backend_types.Stage, 0, len(c.steps))
-
 	if len(c.services) > 0 {
 		servicesStage := new(backend_types.Stage)
 		for _, s := range c.services {
@@ -87,20 +85,10 @@ func (c dagCompiler) compileByGroup() ([]*backend_types.Stage, error) {
 		stages = append(stages, servicesStage)
 	}
 
-	var currentStage *backend_types.Stage
-	var currentGroup string
-
 	for _, s := range c.steps {
-		// create a new stage if current step is in a new group compared to last one
-		if currentStage == nil || currentGroup != s.group || s.group == "" {
-			currentGroup = s.group
-
-			currentStage = new(backend_types.Stage)
-			stages = append(stages, currentStage)
-		}
-
-		// add step to current stage
-		currentStage.Steps = append(currentStage.Steps, s.step)
+		stages = append(stages, &backend_types.Stage{
+			Steps: []*backend_types.Step{s.step},
+		})
 	}
 
 	return stages, nil

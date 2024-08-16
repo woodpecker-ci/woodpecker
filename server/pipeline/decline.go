@@ -16,6 +16,7 @@ package pipeline
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/rs/zerolog/log"
@@ -31,7 +32,7 @@ func Decline(ctx context.Context, store store.Store, pipeline *model.Pipeline, u
 	if err != nil {
 		msg := fmt.Sprintf("failure to load forge for repo '%s'", repo.FullName)
 		log.Error().Err(err).Str("repo", repo.FullName).Msg(msg)
-		return nil, fmt.Errorf(msg)
+		return nil, errors.New(msg)
 	}
 
 	if pipeline.Status != model.StatusBlocked {
