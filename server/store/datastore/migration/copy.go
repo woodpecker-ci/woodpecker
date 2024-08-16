@@ -48,7 +48,7 @@ func Copy(ctx context.Context, src, dest *xorm.Engine) error {
 
 	// copy data
 	// IMPORTANT: if you add something here, also add it to migration.go allBeans slice
-	{ // TODO: find a way to use reflection to be able to use allBeans
+	{ // TODO: find a way to use reflection to be able to use allBeans -> code-generation might be a better way ...
 		if err := copyBean[model.Agent](src, dest); err != nil {
 			return err
 		}
