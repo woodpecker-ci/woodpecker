@@ -275,7 +275,6 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 			step:      step,
 			position:  pos,
 			name:      container.Name,
-			group:     container.Group,
 			dependsOn: container.DependsOn,
 		})
 	}

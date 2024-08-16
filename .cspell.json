@@ -230,7 +230,7 @@
     "Makefile",
     "flake.nix",
     "go.mod",
-    "pipeline/rpc/proto/woodpecker.pb.go",
+    "**/*.pb.go",
     "server/store/datastore/migration/**/*",
     "web/components.d.ts",
     "web/src/assets/locales/**/*",
