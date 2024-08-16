@@ -38,7 +38,6 @@ func (r *Runner) createLogger(_logger zerolog.Logger, uploads *sync.WaitGroup, w
 
 		logger := _logger.With().
 			Str("image", step.Image).
-			Str("workflow_id", workflow.ID).
 			Logger()
 
 		uploads.Add(1)
