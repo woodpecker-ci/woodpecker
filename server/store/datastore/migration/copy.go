@@ -125,7 +125,6 @@ func copyBean[T any](ctx context.Context, src, dest *xorm.Engine) error {
 			return err
 		}
 
-		// TODO: use waitGroup and chanel to stream items through
 		// clean item list
 		items = items[:0]
 		log.Trace().Msgf("copy table '%s' page %d", tableName, page)
