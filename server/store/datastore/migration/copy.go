@@ -25,7 +25,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
-func Copy(src, dest *xorm.Engine) error {
+func Copy(ctx context.Context, src, dest *xorm.Engine) error {
 	// first check if the new database already has existing data
 	for _, bean := range allBeans {
 		exist, err := dest.IsTableExist(bean)
@@ -37,7 +37,7 @@ func Copy(src, dest *xorm.Engine) error {
 	}
 
 	// next we make sure the all required migrations are executed
-	if err := Migrate(src, true); err != nil {
+	if err := Migrate(ctx, src, true); err != nil {
 		return fmt.Errorf("migrate source database failed: %w", err)
 	}
 

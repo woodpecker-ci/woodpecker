@@ -64,7 +64,7 @@ func (s storage) Close() error {
 	return s.engine.Close()
 }
 
-func ImportOldDB(srcOpts, destOpts *store.Opts) error {
+func ImportOldDB(ctx context.Context, srcOpts, destOpts *store.Opts) error {
 	srcEng, err := xorm.NewEngine(srcOpts.Driver, srcOpts.Config)
 	if err != nil {
 		return err
