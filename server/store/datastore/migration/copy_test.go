@@ -1,6 +1,7 @@
 package migration
 
 import (
+	"context"
 	"os"
 	"testing"
 
@@ -22,6 +23,6 @@ func TestCopy(t *testing.T) {
 	destEngine, _ := xorm.NewEngine("sqlite3", ":memory:")
 	defer destEngine.Close()
 
-	err = Copy(srcEngine, destEngine)
+	err = Copy(context.Background(), srcEngine, destEngine)
 	assert.NoError(t, err)
 }
