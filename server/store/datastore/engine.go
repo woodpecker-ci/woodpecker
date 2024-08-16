@@ -73,5 +73,5 @@ func ImportOldDB(ctx context.Context, srcOpts, destOpts *store.Opts) error {
 	if err != nil {
 		return err
 	}
-	return migration.Copy(srcEng, destEng)
+	return migration.Copy(ctx, srcEng, destEng)
 }

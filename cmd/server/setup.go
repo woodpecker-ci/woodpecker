@@ -102,7 +102,7 @@ func setupStore(ctx context.Context, c *cli.Command) (store.Store, error) {
 		}
 		log.Trace().Msgf("migrate and import from datastore: %#v", *oldOpts)
 		log.Info().Msg("database to convert detected")
-		if err := datastore.ImportOldDB(oldOpts, opts); err != nil {
+		if err := datastore.ImportOldDB(ctx, oldOpts, opts); err != nil {
 			return nil, err
 		}
 		if importOnly {
