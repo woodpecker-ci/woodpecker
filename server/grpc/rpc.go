@@ -138,7 +138,7 @@ func (s *RPC) Update(_ context.Context, strWorkflowID string, state rpc.StepStat
 			Int64("stepPipelineID", step.PipelineID).
 			Int64("currentPipelineID", currentPipeline.ID).
 			Msg(msg)
-		return fmt.Errorf(msg)
+		return errors.New(msg)
 	}
 
 	repo, err := s.store.GetRepo(currentPipeline.RepoID)
