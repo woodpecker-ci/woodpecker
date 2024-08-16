@@ -4,7 +4,7 @@ toc_max_heading_level: 2
 
 # GitLab
 
-Woodpecker comes with built-in support for the GitLab version 8.2 and higher. To enable GitLab you should configure the Woodpecker container using the following environment variables:
+Woodpecker comes with built-in support for the GitLab version 12.4 and higher. To enable GitLab you should configure the Woodpecker container using the following environment variables:
 
 ```ini
 WOODPECKER_GITLAB=true

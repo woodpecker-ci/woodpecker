@@ -16,6 +16,7 @@ package compiler
 
 import (
 	"fmt"
+	"path"
 
 	backend_types "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/metadata"
@@ -98,8 +99,8 @@ type Compiler struct {
 	networks          []string
 	env               map[string]string
 	cloneEnv          map[string]string
-	base              string
-	path              string
+	workspaceBase     string
+	workspacePath     string
 	metadata          metadata.Metadata
 	registries        []Registry
 	secrets           map[string]Secret
@@ -156,10 +157,10 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 	// overrides the default workspace paths when specified
 	// in the YAML file.
 	if len(conf.Workspace.Base) != 0 {
-		c.base = conf.Workspace.Base
+		c.workspaceBase = path.Clean(conf.Workspace.Base)
 	}
 	if len(conf.Workspace.Path) != 0 {
-		c.path = conf.Workspace.Path
+		c.workspacePath = path.Clean(conf.Workspace.Path)
 	}
 
 	cloneImage := constant.DefaultCloneImage
@@ -274,7 +275,6 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 			step:      step,
 			position:  pos,
 			name:      container.Name,
-			group:     container.Group,
 			dependsOn: container.DependsOn,
 		})
 	}

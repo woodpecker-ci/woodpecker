@@ -48,6 +48,7 @@ describe('usePaginate', () => {
       usePaginationComposition = usePagination<{ name: string }>(
         async (page) => repoSecrets[page - 1],
         () => true,
+        { pageSize: 3 },
       );
     });
     await waitForState(usePaginationComposition.loading, true);
@@ -63,6 +64,7 @@ describe('usePaginate', () => {
       usePaginationComposition = usePagination<{ name: string }>(
         async (page) => repoSecrets[page - 1],
         () => true,
+        { pageSize: 3 },
       );
     });
     await waitForState(usePaginationComposition.loading, true);
@@ -86,7 +88,7 @@ describe('usePaginate', () => {
           return orgSecrets[page - 1];
         },
         () => true,
-        { each: ['repo', 'org'] },
+        { each: ['repo', 'org'], pageSize: 3 },
       );
     });
     await waitForState(usePaginationComposition.loading, true);
@@ -111,6 +113,7 @@ describe('usePaginate', () => {
       usePaginationComposition = usePagination<{ name: string }>(
         async (page) => repoSecrets[page - 1],
         () => true,
+        { pageSize: 3 },
       );
     });
     await waitForState(usePaginationComposition.loading, true);
@@ -132,6 +135,7 @@ describe('usePaginate', () => {
       usePaginationComposition = usePagination<{ name: string }>(
         async (page) => repoSecrets[page - 1],
         () => true,
+        { pageSize: 3 },
       );
     });
     await waitForState(usePaginationComposition.loading, true);

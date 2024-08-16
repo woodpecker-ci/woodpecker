@@ -131,6 +131,8 @@ func TestCopyLineByLineSizeLimit(t *testing.T) {
 	if _, err := w.Write([]byte("67\n89")); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
+	// wait for writer to write
+	time.Sleep(time.Millisecond)
 
 	writes = testWriter.GetWrites()
 	assert.Lenf(t, testWriter.GetWrites(), 2, "expected 2 writes, got: %v", writes)

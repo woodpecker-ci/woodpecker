@@ -14,76 +14,77 @@
 
 package kubernetes
 
-import "github.com/urfave/cli/v2"
+import (
+	"github.com/urfave/cli/v3"
+)
 
 var Flags = []cli.Flag{
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_BACKEND_K8S_NAMESPACE"},
+		Sources: cli.EnvVars("WOODPECKER_BACKEND_K8S_NAMESPACE"),
 		Name:    "backend-k8s-namespace",
 		Usage:   "backend k8s namespace",
 		Value:   "woodpecker",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_BACKEND_K8S_VOLUME_SIZE"},
+		Sources: cli.EnvVars("WOODPECKER_BACKEND_K8S_VOLUME_SIZE"),
 		Name:    "backend-k8s-volume-size",
 		Usage:   "backend k8s volume size (default 10G)",
 		Value:   "10G",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_BACKEND_K8S_STORAGE_CLASS"},
+		Sources: cli.EnvVars("WOODPECKER_BACKEND_K8S_STORAGE_CLASS"),
 		Name:    "backend-k8s-storage-class",
 		Usage:   "backend k8s storage class",
 		Value:   "",
 	},
 	&cli.BoolFlag{
-		EnvVars: []string{"WOODPECKER_BACKEND_K8S_STORAGE_RWX"},
+		Sources: cli.EnvVars("WOODPECKER_BACKEND_K8S_STORAGE_RWX"),
 		Name:    "backend-k8s-storage-rwx",
 		Usage:   "backend k8s storage access mode, should ReadWriteMany (RWX) instead of ReadWriteOnce (RWO) be used? (default: true)",
 		Value:   true,
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_BACKEND_K8S_POD_LABELS"},
+		Sources: cli.EnvVars("WOODPECKER_BACKEND_K8S_POD_LABELS"),
 		Name:    "backend-k8s-pod-labels",
 		Usage:   "backend k8s additional Agent-wide worker pod labels",
 		Value:   "",
 	},
 	&cli.BoolFlag{
-		EnvVars: []string{"WOODPECKER_BACKEND_K8S_POD_LABELS_ALLOW_FROM_STEP"},
+		Sources: cli.EnvVars("WOODPECKER_BACKEND_K8S_POD_LABELS_ALLOW_FROM_STEP"),
 		Name:    "backend-k8s-pod-labels-allow-from-step",
 		Usage:   "whether to allow using labels from step's backend options",
 		Value:   false,
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_BACKEND_K8S_POD_ANNOTATIONS"},
+		Sources: cli.EnvVars("WOODPECKER_BACKEND_K8S_POD_ANNOTATIONS"),
 		Name:    "backend-k8s-pod-annotations",
 		Usage:   "backend k8s additional Agent-wide worker pod annotations",
 		Value:   "",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_BACKEND_K8S_POD_NODE_SELECTOR"},
+		Sources: cli.EnvVars("WOODPECKER_BACKEND_K8S_POD_NODE_SELECTOR"),
 		Name:    "backend-k8s-pod-node-selector",
 		Usage:   "backend k8s Agent-wide worker pod node selector",
 		Value:   "",
 	},
 	&cli.BoolFlag{
-		EnvVars: []string{"WOODPECKER_BACKEND_K8S_POD_ANNOTATIONS_ALLOW_FROM_STEP"},
+		Sources: cli.EnvVars("WOODPECKER_BACKEND_K8S_POD_ANNOTATIONS_ALLOW_FROM_STEP"),
 		Name:    "backend-k8s-pod-annotations-allow-from-step",
 		Usage:   "whether to allow using annotations from step's backend options",
 		Value:   false,
 	},
 	&cli.BoolFlag{
-		EnvVars: []string{"WOODPECKER_BACKEND_K8S_SECCTX_NONROOT"}, // cspell:words secctx nonroot
+		Sources: cli.EnvVars("WOODPECKER_BACKEND_K8S_SECCTX_NONROOT"), // cspell:words secctx nonroot
 		Name:    "backend-k8s-secctx-nonroot",
 		Usage:   "`run as non root` Kubernetes security context option",
 	},
 	&cli.StringSliceFlag{
-		EnvVars: []string{"WOODPECKER_BACKEND_K8S_PULL_SECRET_NAMES"},
+		Sources: cli.EnvVars("WOODPECKER_BACKEND_K8S_PULL_SECRET_NAMES"),
 		Name:    "backend-k8s-pod-image-pull-secret-names",
 		Usage:   "backend k8s pull secret names for private registries",
-		Value:   cli.NewStringSlice("regcred"),
 	},
 	&cli.BoolFlag{
-		EnvVars: []string{"WOODPECKER_BACKEND_K8S_ALLOW_NATIVE_SECRETS"},
+		Sources: cli.EnvVars("WOODPECKER_BACKEND_K8S_ALLOW_NATIVE_SECRETS"),
 		Name:    "backend-k8s-allow-native-secrets",
 		Usage:   "whether to allow existing Kubernetes secrets to be referenced from steps",
 		Value:   false,

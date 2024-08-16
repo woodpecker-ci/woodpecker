@@ -15,6 +15,7 @@
 package migration
 
 import (
+	"context"
 	"fmt"
 	"reflect"
 
@@ -62,6 +63,8 @@ var migrationTasks = []*xormigrate.Migration{
 	&setForgeID,
 	&unifyColumnsTables,
 	&alterTableRegistriesFixRequiredFields,
+	&cronWithoutSec,
+	&renameStartEndTime,
 }
 
 // IMPORTANT: if you add something here, also add it to copy.go Copy() func
@@ -95,7 +98,8 @@ func initSchemaOnly(e *xorm.Engine) error {
 	return m.Migrate()
 }
 
-func Migrate(e *xorm.Engine, allowLong bool) error {
+// TODO: make xormigrate context aware
+func Migrate(_ context.Context, e *xorm.Engine, allowLong bool) error {
 	e.SetDisableGlobalCache(true)
 
 	m := xormigrate.New(e, migrationTasks)

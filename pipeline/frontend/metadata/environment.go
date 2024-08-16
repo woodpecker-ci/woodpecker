@@ -30,18 +30,25 @@ var (
 	maxChangedFiles = 500
 )
 
-// Environ returns the metadata as a map of environment variables.
-func (m *Metadata) Environ() map[string]string {
+func getSourceTargetBranches(refspec string) (string, string) {
 	var (
 		sourceBranch string
 		targetBranch string
 	)
 
-	branchParts := strings.Split(m.Curr.Commit.Refspec, ":")
+	branchParts := strings.Split(refspec, ":")
 	if len(branchParts) == 2 { //nolint:mnd
 		sourceBranch = branchParts[0]
 		targetBranch = branchParts[1]
 	}
+
+	return sourceBranch, targetBranch
+}
+
+// Environ returns the metadata as a map of environment variables.
+func (m *Metadata) Environ() map[string]string {
+	sourceBranch, targetBranch := getSourceTargetBranches(m.Curr.Commit.Refspec)
+	prevSourceBranch, prevTargetBranch := getSourceTargetBranches(m.Prev.Commit.Refspec)
 
 	params := map[string]string{
 		"CI":                     m.Sys.Name,
@@ -76,8 +83,8 @@ func (m *Metadata) Environ() map[string]string {
 		"CI_PIPELINE_EVENT":         m.Curr.Event,
 		"CI_PIPELINE_URL":           m.getPipelineWebURL(m.Curr, 0),
 		"CI_PIPELINE_FORGE_URL":     m.Curr.ForgeURL,
-		"CI_PIPELINE_DEPLOY_TARGET": m.Curr.Target,
-		"CI_PIPELINE_DEPLOY_TASK":   m.Curr.Task,
+		"CI_PIPELINE_DEPLOY_TARGET": m.Curr.DeployTo,
+		"CI_PIPELINE_DEPLOY_TASK":   m.Curr.DeployTask,
 		"CI_PIPELINE_STATUS":        m.Curr.Status,
 		"CI_PIPELINE_CREATED":       strconv.FormatInt(m.Curr.Created, 10),
 		"CI_PIPELINE_STARTED":       strconv.FormatInt(m.Curr.Started, 10),
@@ -102,14 +109,16 @@ func (m *Metadata) Environ() map[string]string {
 		"CI_PREV_COMMIT_AUTHOR":        m.Prev.Commit.Author.Name,
 		"CI_PREV_COMMIT_AUTHOR_EMAIL":  m.Prev.Commit.Author.Email,
 		"CI_PREV_COMMIT_AUTHOR_AVATAR": m.Prev.Commit.Author.Avatar,
+		"CI_PREV_COMMIT_SOURCE_BRANCH": prevSourceBranch,
+		"CI_PREV_COMMIT_TARGET_BRANCH": prevTargetBranch,
 
 		"CI_PREV_PIPELINE_NUMBER":        strconv.FormatInt(m.Prev.Number, 10),
 		"CI_PREV_PIPELINE_PARENT":        strconv.FormatInt(m.Prev.Parent, 10),
 		"CI_PREV_PIPELINE_EVENT":         m.Prev.Event,
 		"CI_PREV_PIPELINE_URL":           m.getPipelineWebURL(m.Prev, 0),
 		"CI_PREV_PIPELINE_FORGE_URL":     m.Prev.ForgeURL,
-		"CI_PREV_PIPELINE_DEPLOY_TARGET": m.Prev.Target,
-		"CI_PREV_PIPELINE_DEPLOY_TASK":   m.Prev.Task,
+		"CI_PREV_PIPELINE_DEPLOY_TARGET": m.Prev.DeployTo,
+		"CI_PREV_PIPELINE_DEPLOY_TASK":   m.Prev.DeployTask,
 		"CI_PREV_PIPELINE_STATUS":        m.Prev.Status,
 		"CI_PREV_PIPELINE_CREATED":       strconv.FormatInt(m.Prev.Created, 10),
 		"CI_PREV_PIPELINE_STARTED":       strconv.FormatInt(m.Prev.Started, 10),

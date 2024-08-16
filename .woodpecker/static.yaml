@@ -5,7 +5,7 @@ when:
 
 steps:
   - name: lint-editorconfig
-    image: docker.io/mstruebing/editorconfig-checker:v3.0.1
+    image: docker.io/mstruebing/editorconfig-checker:v3.0.3
     depends_on: []
     when:
       - event: pull_request
@@ -26,7 +26,7 @@ steps:
     image: docker.io/woodpeckerci/plugin-prettier:0.1.0
     depends_on: []
     settings:
-      version: 3.2.5
+      version: 3.3.3
 
   - name: links
     image: docker.io/lycheeverse/lychee:0.15.1

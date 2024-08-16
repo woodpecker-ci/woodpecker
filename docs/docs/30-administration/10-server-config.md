@@ -26,14 +26,14 @@ You can **also restrict** registration, by keep registration closed and:
 
 ```ini
 WOODPECKER_OPEN=false
-WOODPECKER_ADMIN=johnsmith,janedoe
+WOODPECKER_ADMIN=john.smith,jane_doe
 ```
 
 ### Only allow registration of users, who are members of approved organizations
 
 ```ini
 WOODPECKER_OPEN=true
-WOODPECKER_ORGS=dolores,dogpatch
+WOODPECKER_ORGS=dolores,dog-patch
 ```
 
 ## Administrators
@@ -41,7 +41,7 @@ WOODPECKER_ORGS=dolores,dogpatch
 Administrators should also be enumerated in your configuration.
 
 ```ini
-WOODPECKER_ADMIN=johnsmith,janedoe
+WOODPECKER_ADMIN=john.smith,jane_doe
 ```
 
 ## Filtering repositories
@@ -51,7 +51,7 @@ Woodpecker operates with the user's OAuth permission. Due to the coarse permissi
 Use the `WOODPECKER_REPO_OWNERS` variable to filter which GitHub user's repos should be synced only. You typically want to put here your company's GitHub name.
 
 ```ini
-WOODPECKER_REPO_OWNERS=mycompany,mycompanyossgithubuser
+WOODPECKER_REPO_OWNERS=my_company,my_company_oss_github_user
 ```
 
 ## Global registry setting
@@ -133,7 +133,7 @@ The examples below show how to place a banner message in the top navigation bar 
 ### `woodpecker.js`
 
 ```javascript
-// place/copy a minified version of jQuery or ZeptoJS here ...
+// place/copy a minified version of your preferred lightweight JavaScript library here ...
 !(function () {
   'use strict';
   function e() {} /*...*/
@@ -196,14 +196,6 @@ Examples:
 - `WOODPECKER_HOST=http://woodpecker.example.org`
 - `WOODPECKER_HOST=http://example.org/woodpecker`
 - `WOODPECKER_HOST=http://example.org:1234/woodpecker`
-
-### `WOODPECKER_WEBHOOK_HOST`
-
-> Default: value from `WOODPECKER_HOST` config env
-
-Server fully qualified URL of the Webhook-facing hostname and path prefix.
-
-Example: `WOODPECKER_WEBHOOK_HOST=http://woodpecker-server.cicd.svc.cluster.local:8000`
 
 ### `WOODPECKER_SERVER_ADDR`
 
@@ -305,7 +297,7 @@ Example: `org1,org2`
 
 > Default: empty
 
-Comma-separated list of syncable repo owners. ???
+Repositories by those owners will be allowed to be used in woodpecker.
 
 Example: `user1,user2`
 
@@ -517,7 +509,7 @@ Example: `WOODPECKER_LIMIT_CPU_SET=1,2`
 
 > Default: empty
 
-Specify a configuration service endpoint, see [Configuration Extension](./100-external-configuration-api.md)
+Specify a configuration service endpoint, see [Configuration Extension](./40-advanced/100-external-configuration-api.md)
 
 ### `WOODPECKER_FORGE_TIMEOUT`
 

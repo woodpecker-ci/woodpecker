@@ -62,10 +62,10 @@ func HandleAuth(c *gin.Context) {
 	code := c.Request.FormValue("code")
 	state := c.Request.FormValue("state")
 	isCallback := code != "" && state != ""
-	forgeID := int64(1) // TODO: replace with forge id when multiple forges are supported
+	var forgeID int64
 
 	if isCallback { // validate the state token
-		_, err := token.Parse([]token.Type{token.OAuthStateToken}, state, func(_ *token.Token) (string, error) {
+		stateToken, err := token.Parse([]token.Type{token.OAuthStateToken}, state, func(_ *token.Token) (string, error) {
 			return server.Config.Server.JWTSecret, nil
 		})
 		if err != nil {
@@ -73,8 +73,29 @@ func HandleAuth(c *gin.Context) {
 			c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=invalid_state")
 			return
 		}
+
+		_forgeID := stateToken.Get("forge-id")
+		forgeID, err = strconv.ParseInt(_forgeID, 10, 64)
+		if err != nil {
+			log.Error().Err(err).Msg("forge-id of state token invalid")
+			c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=invalid_state")
+			return
+		}
 	} else { // only generate a state token if not a callback
 		var err error
+
+		_forgeID := c.Request.FormValue("forge_id")
+		if _forgeID == "" {
+			forgeID = 1 // fallback to main forge
+		} else {
+			forgeID, err = strconv.ParseInt(_forgeID, 10, 64)
+			if err != nil {
+				log.Error().Err(err).Msg("forge-id of state token invalid")
+				c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=invalid_state")
+				return
+			}
+		}
+
 		jwtSecret := server.Config.Server.JWTSecret
 		exp := time.Now().Add(stateTokenDuration).Unix()
 		stateToken := token.New(token.OAuthStateToken)
@@ -208,6 +229,7 @@ func HandleAuth(c *gin.Context) {
 	user.Secret = userFromForge.Secret
 	user.Email = userFromForge.Email
 	user.Avatar = userFromForge.Avatar
+	user.ForgeID = forgeID
 	user.ForgeRemoteID = userFromForge.ForgeRemoteID
 	user.Login = userFromForge.Login
 	user.Admin = user.Admin || server.Config.Permissions.Admins.IsAdmin(userFromForge)
@@ -274,55 +296,4 @@ func GetLogout(c *gin.Context) {
 	httputil.DelCookie(c.Writer, c.Request, "user_sess")
 	httputil.DelCookie(c.Writer, c.Request, "user_last")
 	c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/")
-}
-
-// TODO: remove in 3.0
-func DeprecatedGetLoginToken(c *gin.Context) {
-	_store := store.FromContext(c)
-
-	_forge, err := server.Config.Services.Manager.ForgeByID(1) // TODO: get selected forge from auth request
-	if err != nil {
-		log.Error().Err(err).Msg("Cannot get main forge")
-		c.AbortWithStatus(http.StatusInternalServerError)
-		return
-	}
-
-	in := &tokenPayload{}
-	err = c.Bind(in)
-	if err != nil {
-		_ = c.AbortWithError(http.StatusBadRequest, err)
-		return
-	}
-
-	login, err := _forge.Auth(c, in.Access, in.Refresh)
-	if err != nil {
-		_ = c.AbortWithError(http.StatusUnauthorized, err)
-		return
-	}
-
-	user, err := _store.GetUserLogin(login)
-	if err != nil {
-		handleDBError(c, err)
-		return
-	}
-
-	exp := time.Now().Add(server.Config.Server.SessionExpires).Unix()
-	newToken := token.New(token.SessToken)
-	newToken.Set("user-id", strconv.FormatInt(user.ID, 10))
-	tokenStr, err := newToken.SignExpires(user.Hash, exp)
-	if err != nil {
-		_ = c.AbortWithError(http.StatusInternalServerError, err)
-		return
-	}
-
-	c.JSON(http.StatusOK, &tokenPayload{
-		Access:  tokenStr,
-		Expires: exp - time.Now().Unix(),
-	})
-}
-
-type tokenPayload struct {
-	Access  string `json:"access_token,omitempty"`
-	Refresh string `json:"refresh_token,omitempty"`
-	Expires int64  `json:"expires_in,omitempty"`
 }

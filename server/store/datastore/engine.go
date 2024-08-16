@@ -15,6 +15,8 @@
 package datastore
 
 import (
+	"context"
+
 	"github.com/rs/zerolog"
 	"xorm.io/xorm"
 	xlog "xorm.io/xorm/log"
@@ -54,8 +56,8 @@ func (s storage) Ping() error {
 }
 
 // Migrate old storage or init new one.
-func (s storage) Migrate(allowLong bool) error {
-	return migration.Migrate(s.engine, allowLong)
+func (s storage) Migrate(ctx context.Context, allowLong bool) error {
+	return migration.Migrate(ctx, s.engine, allowLong)
 }
 
 func (s storage) Close() error {
