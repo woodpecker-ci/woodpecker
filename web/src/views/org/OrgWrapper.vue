@@ -1,5 +1,5 @@
 <template>
-  <Scaffold v-if="org && orgPermissions && $route.meta.orgHeader">
+  <Scaffold v-if="org && orgPermissions && route.meta.orgHeader">
     <template #title>
       {{ org.name }}
     </template>
@@ -20,6 +20,7 @@
 
 <script lang="ts" setup>
 import { computed, onMounted, ref, watch } from 'vue';
+import { useRoute } from 'vue-router';
 
 import IconButton from '~/components/atomic/IconButton.vue';
 import Scaffold from '~/components/layout/scaffold/Scaffold.vue';
@@ -33,6 +34,7 @@ const props = defineProps<{
 
 const orgId = computed(() => Number.parseInt(props.orgId, 10));
 const apiClient = useApiClient();
+const route = useRoute();
 
 const org = ref<Org>();
 const orgPermissions = ref<OrgPermissions>();

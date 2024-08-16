@@ -574,7 +574,11 @@
         },
         "plugins_only": "Nur für Plugins verfügbar",
         "edit": "Geheimnis bearbeiten",
-        "delete": "Geheimnis löschen"
+        "delete": "Geheimnis löschen",
+        "plugins": {
+            "images": "Nur für die folgenden Plugins verfügbar",
+            "desc": "Liste aller Plugin-Images, für die dieses Geheimnis verwendet werden kann. Freilassen, um alle Plugins und allgemeine Schritte zu erlauben."
+        }
     },
     "settings": "Einstellungen",
     "oauth_error": "Fehler bei der Authentifizierung mit OAuth-Anbieter",
