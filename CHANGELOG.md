@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-08-15
+## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-08-16
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -8,6 +8,7 @@
 
 ### 💥 Breaking changes
 
+- Remove old pipeline options [[#4016](https://github.com/woodpecker-ci/woodpecker/pull/4016)]
 - Remove various deprecations [[#4017](https://github.com/woodpecker-ci/woodpecker/pull/4017)]
 - Drop repo name fallback for hooks [[#4013](https://github.com/woodpecker-ci/woodpecker/pull/4013)]
 - Improved Local backend detection [[#4006](https://github.com/woodpecker-ci/woodpecker/pull/4006)]
@@ -30,6 +31,16 @@
 - Warn if using secrets/env with plugin [[#4027](https://github.com/woodpecker-ci/woodpecker/pull/4027)]
 - Update gitea sdk [[#4012](https://github.com/woodpecker-ci/woodpecker/pull/4012)]
 - Update Forgejo SDK [[#3948](https://github.com/woodpecker-ci/woodpecker/pull/3948)]
+
+### 📚 Documentation
+
+- Fix inline author warning [[#4040](https://github.com/woodpecker-ci/woodpecker/pull/4040)]
+- Updated Secrets image filter docs [[#4028](https://github.com/woodpecker-ci/woodpecker/pull/4028)]
+- Update dependency marked to v14 [[#4036](https://github.com/woodpecker-ci/woodpecker/pull/4036)]
+- Update docs npm deps non-major [[#4033](https://github.com/woodpecker-ci/woodpecker/pull/4033)]
+- Overhaul README [[#3995](https://github.com/woodpecker-ci/woodpecker/pull/3995)]
+- fix(deps): update docs npm deps non-major [[#3990](https://github.com/woodpecker-ci/woodpecker/pull/3990)]
+- Add spellchecking for docs [[#3787](https://github.com/woodpecker-ci/woodpecker/pull/3787)]
 
 ### 📈 Enhancement
 
@@ -60,14 +71,12 @@
 - Truncate creation in list [[#3952](https://github.com/woodpecker-ci/woodpecker/pull/3952)]
 - Fix panic if forge is unreachable [[#3944](https://github.com/woodpecker-ci/woodpecker/pull/3944)]
 
-### 📚 Documentation
-
-- Overhaul README [[#3995](https://github.com/woodpecker-ci/woodpecker/pull/3995)]
-- fix(deps): update docs npm deps non-major [[#3990](https://github.com/woodpecker-ci/woodpecker/pull/3990)]
-- Add spellchecking for docs [[#3787](https://github.com/woodpecker-ci/woodpecker/pull/3787)]
-
 ### Misc
 
+- Update github.com/urfave/cli/v3 digest to fc07a8c [[#4043](https://github.com/woodpecker-ci/woodpecker/pull/4043)]
+- Update woodpeckerci/plugin-git Docker tag to v2.5.2 [[#4041](https://github.com/woodpecker-ci/woodpecker/pull/4041)]
+- Update web npm deps non-major [[#4034](https://github.com/woodpecker-ci/woodpecker/pull/4034)]
+- Update dependency simple-icons to v13 [[#4037](https://github.com/woodpecker-ci/woodpecker/pull/4037)]
 - Show error if secret name is missing [[#4014](https://github.com/woodpecker-ci/woodpecker/pull/4014)]
 - chore(deps): lock file maintenance [[#3991](https://github.com/woodpecker-ci/woodpecker/pull/3991)]
 - fix(deps): update github.com/urfave/cli/v3 digest to 127cf54 [[#3989](https://github.com/woodpecker-ci/woodpecker/pull/3989)]
