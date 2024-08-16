@@ -94,6 +94,9 @@ func Copy(ctx context.Context, src, dest *xorm.Engine) error {
 		if err := copyBean[model.Redirection](src, dest); err != nil {
 			return err
 		}
+		if err := copyBean[model.Forge](src, dest); err != nil {
+			return err
+		}
 		if err := copyBean[model.Workflow](src, dest); err != nil {
 			return err
 		}
