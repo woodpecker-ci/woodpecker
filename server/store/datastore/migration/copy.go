@@ -26,6 +26,8 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
+const perPage = 100000
+
 func Copy(ctx context.Context, src, dest *xorm.Engine) error {
 	// first check if the new database already has existing data
 	for _, bean := range allBeans {
@@ -116,7 +118,6 @@ func copyBean[T any](ctx context.Context, src, dest *xorm.Engine) error {
 	defer aliveMsgCancel(nil)
 
 	page := 0
-	perPage := 100
 	items := make([]*T, 0, perPage)
 
 	for {
