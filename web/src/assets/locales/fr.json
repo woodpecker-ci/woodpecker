@@ -225,7 +225,8 @@
                 "title": "Variables de pipeline supplémentaire",
                 "value": "Valeur de la variable",
                 "delete": "Supprimer la variable"
-            }
+            },
+            "show_pipelines": "Afficher les pieplines"
         },
         "not_allowed": "Vous n'êtes pas autorisé à accéder à ce dépôt",
         "open_in_forge": "Ouvrir le dépôt dans la forge",
@@ -506,7 +507,7 @@
                 "add": "Ajouter un secret",
                 "created": "Secret d'utilisateur crée",
                 "deleted": "Secret d'utilisateur supprimé",
-                "desc": "Les secrets d'utilisateur peuvent être passés à toutes les étapes du pipeline des dépôts de l'utilisateur sous forme de variables d'environnement.",
+                "desc": "Les secrets d'utilisateur peuvent être passés à toutes les étapes d'un pipeline personnel sous forme de variables d'environnement.",
                 "events": {
                     "events": "Disponible pour les événements suivants",
                     "pr_warning": "Attention, si cette option est activée, un acteur malveillant peut proposer une pull request qui affiche vos secrets."
@@ -549,7 +550,7 @@
     "login_to_cli_description": "En continuant, vous serez connecté via la ligne de commande.",
     "secrets": {
         "secrets": "Secrets",
-        "desc": "Les secrets peuvent être transmis aux différentes étapes de la pipeline au moment de l'exécution en tant que variables d'environnement.",
+        "desc": "Les secrets peuvent être transmis aux différentes étapes de la pipeline en tant que variables d'environnement.",
         "images": {
             "desc": "Liste des images pour lesquelles ce secret est disponible, laisser vide pour autoriser toutes les images",
             "images": "Disponible pour les images suivantes"
@@ -565,12 +566,15 @@
         "saved": "Secret sauvegardé",
         "events": {
             "events": "Disponible lors des événements suivants",
-            "pr_warning": "Soyez prudent avec cette option car un acteur malveillant peut soumettre une pull request qui expose vos secrets."
+            "pr_warning": "Soyez prudent avec cette option : un acteur malveillant peut soumettre une pull request qui expose vos secrets."
         },
         "plugins_only": "Uniquement disponible pour les plugins",
         "edit": "Modifier le secret",
         "delete": "Supprimer le secret",
-        "delete_confirm": "Voulez vous vraiment supprimer ce secret ?"
+        "delete_confirm": "Voulez vous vraiment supprimer ce secret ?",
+        "plugins": {
+            "images": "Disponible pour les plugins suivants"
+        }
     },
     "internal_error": "Une erreur interne est survenue",
     "access_denied": "Vous n'êtes pas autorisé à accéder à cette instance",
@@ -581,7 +585,7 @@
         "registries": "Registres",
         "delete_confirm": "Voulez vous vraiment supprimer ce registre ?",
         "deleted": "Codes d'accès aux registres supprimés",
-        "desc": "Les codes d'accès aux registres peuvent être ajouter pour utiliser des images privées sur votre pipeline.",
+        "desc": "Les codes d'accès aux registres peuvent être ajouté pour utiliser des images privées sur les pipelines.",
         "credentials": "Codes d’accès aux registres",
         "edit": "Éditer le registre",
         "delete": "Supprimer le registre",
