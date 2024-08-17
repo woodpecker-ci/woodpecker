@@ -101,7 +101,7 @@ export default class ApiClient {
     const events = new EventSource(_path);
     events.onmessage = (event) => {
       const data = JSON.parse(event.data as string) as T;
-      // TODO enable again with eslint-plugin-promise eslint-disable-next-line promise/prefer-await-to-callbacks
+      // eslint-disable-next-line promise/prefer-await-to-callbacks
       callback(data);
     };
 
