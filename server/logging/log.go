@@ -77,7 +77,7 @@ func (l *log) Open(_ context.Context, stepID int64) error {
 	return nil
 }
 
-func (l *log) Write(ctx context.Context, stepID int64, logEntry *model.LogEntry) error {
+func (l *log) Write(ctx context.Context, stepID int64, entries ...*model.LogEntry) error {
 	l.Lock()
 	s, ok := l.streams[stepID]
 	l.Unlock()
@@ -92,9 +92,9 @@ func (l *log) Write(ctx context.Context, stepID int64, logEntry *model.LogEntry)
 	}
 
 	s.Lock()
-	s.list = append(s.list, logEntry)
+	s.list = append(s.list, entries...)
 	for sub := range s.subs {
-		go sub.handler(logEntry)
+		go sub.handler(entries...)
 	}
 	s.Unlock()
 	return nil

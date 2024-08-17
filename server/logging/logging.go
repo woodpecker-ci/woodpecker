@@ -33,7 +33,7 @@ type Log interface {
 	Open(c context.Context, stepID int64) error
 
 	// Write writes the entry to the log.
-	Write(c context.Context, stepID int64, entry *model.LogEntry) error
+	Write(c context.Context, stepID int64, entries ...*model.LogEntry) error
 
 	// Tail tails the log.
 	Tail(c context.Context, stepID int64, handler Handler) error
