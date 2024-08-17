@@ -370,7 +370,7 @@ func (s *RPC) Log(c context.Context, stepUUID string, rpcLogEntries []*rpc.LogEn
 	// make sure writes to pubsub are non blocking (https://github.com/woodpecker-ci/woodpecker/blob/c919f32e0b6432a95e1a6d3d0ad662f591adf73f/server/logging/log.go#L9)
 	go func() {
 		// write line to listening web clients
-		if err := s.logger.Write(c, step.ID, logEntries...); err != nil {
+		if err := s.logger.Write(c, step.ID, logEntries); err != nil {
 			log.Error().Err(err).Msgf("rpc server could not write to logger")
 		}
 	}()

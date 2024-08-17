@@ -28,6 +28,7 @@ import (
 	"github.com/rs/zerolog/log"
 
 	"go.woodpecker-ci.org/woodpecker/v2/server"
+	"go.woodpecker-ci.org/woodpecker/v2/server/logging"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 	"go.woodpecker-ci.org/woodpecker/v2/server/pubsub"
 	"go.woodpecker-ci.org/woodpecker/v2/server/router/middleware/session"
@@ -213,17 +214,23 @@ func LogStreamSSE(c *gin.Context) {
 	}
 
 	go func() {
-		err := server.Config.Services.Logs.Tail(ctx, step.ID, func(entries ...*model.LogEntry) {
-			for _, entry := range entries {
-				select {
-				case <-ctx.Done():
-					return
-				default:
-					ee, _ := json.Marshal(entry)
-					logChan <- ee
+		batches := make(logging.LogChan, 100)
+
+		go func() {
+			for entries := range batches {
+				for _, entry := range entries {
+					select {
+					case <-ctx.Done():
+						return
+					default:
+						ee, _ := json.Marshal(entry)
+						logChan <- ee
+					}
 				}
 			}
-		})
+		}()
+
+		err := server.Config.Services.Logs.Tail(ctx, step.ID, batches)
 		if err != nil {
 			log.Error().Err(err).Msg("tail of logs failed")
 		}
