@@ -78,7 +78,7 @@ export default defineConfig({
         copyFile(
           `node_modules/dayjs/esm/locale/${langName}.js`,
           `src/assets/dayjsLocales/${name}.js`,
-          // TODO enable with eslint-plugin-promise eslint-disable-next-line promise/prefer-await-to-callbacks
+          // eslint-disable-next-line promise/prefer-await-to-callbacks
           (err) => {
             if (err) {
               throw err;
