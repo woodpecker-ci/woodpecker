@@ -26,7 +26,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
-const perPage = 10000
+const perPage = 1000
 
 func Copy(ctx context.Context, src, dest *xorm.Engine) error {
 	// first check if the new database already has existing data
