@@ -97,7 +97,7 @@ steps:
 ### References
 
 - [Official YAML specification](https://yaml.org/spec/1.2.2/#3222-anchors-and-aliases)
-- [YAML Cheatsheet](https://learnxinyminutes.com/docs/yaml)
+- [YAML cheat sheet](https://learnxinyminutes.com/docs/yaml)
 
 ## Persisting environment data between steps
 

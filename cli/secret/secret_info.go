@@ -16,6 +16,7 @@ package secret
 
 import (
 	"context"
+	"fmt"
 	"html/template"
 	"os"
 
@@ -51,6 +52,11 @@ func secretInfo(ctx context.Context, c *cli.Command) error {
 		secretName = c.String("name")
 		format     = c.String("format") + "\n"
 	)
+
+	if secretName == "" {
+		return fmt.Errorf("secret name is missing")
+	}
+
 	client, err := internal.NewClient(ctx, c)
 	if err != nil {
 		return err

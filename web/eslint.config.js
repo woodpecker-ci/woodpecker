@@ -4,6 +4,7 @@
 import antfu from '@antfu/eslint-config';
 import js from '@eslint/js';
 import vueI18n from '@intlify/eslint-plugin-vue-i18n';
+import eslintPromise from 'eslint-plugin-promise';
 import eslintPluginVueScopedCSS from 'eslint-plugin-vue-scoped-css';
 
 export default antfu(
@@ -20,54 +21,17 @@ export default antfu(
   },
 
   js.configs.recommended,
-  // eslintPromise.configs.recommended,
-
-  // TypeScript
-  //...tseslint.configs.recommended,
-  //...tseslint.configs.recommendedTypeChecked,
-  //...tseslint.configs.strictTypeChecked,
-  //...tseslint.configs.stylisticTypeChecked,
+  eslintPromise.configs['flat/recommended'],
+  ...eslintPluginVueScopedCSS.configs['flat/recommended'],
+  ...vueI18n.configs['flat/recommended'],
 
   {
     rules: {
       'import/order': 'off',
       'sort-imports': 'off',
-    },
-  },
+      'promise/prefer-await-to-callbacks': 'error',
 
-  ...eslintPluginVueScopedCSS.configs['flat/recommended'],
-
-  // Vue
-  {
-    files: ['**/*.vue'],
-    rules: {
-      'vue/multi-word-component-names': 'off',
-      'vue/html-self-closing': [
-        'error',
-        {
-          html: {
-            void: 'always',
-            normal: 'always',
-            component: 'always',
-          },
-          svg: 'always',
-          math: 'always',
-        },
-      ],
-      'vue/block-order': [
-        'error',
-        {
-          order: ['template', 'script', 'style'],
-        },
-      ],
-      'vue/singleline-html-element-content-newline': ['off'],
-    },
-  },
-
-  // Vue I18n
-  ...vueI18n.configs['flat/recommended'],
-  {
-    rules: {
+      // Vue I18n
       '@intlify/vue-i18n/no-raw-text': [
         'error',
         {
@@ -93,12 +57,40 @@ export default antfu(
       '@intlify/vue-i18n/sfc-locale-attr': 'error',
     },
     settings: {
+      // Vue I18n
       'vue-i18n': {
         localeDir: './src/assets/locales/en.json',
         // Specify the version of `vue-i18n` you are using.
         // If not specified, the message will be parsed twice.
         messageSyntaxVersion: '^9.0.0',
       },
+    },
+  },
+
+  // Vue
+  {
+    files: ['**/*.vue'],
+    rules: {
+      'vue/multi-word-component-names': 'off',
+      'vue/html-self-closing': [
+        'error',
+        {
+          html: {
+            void: 'always',
+            normal: 'always',
+            component: 'always',
+          },
+          svg: 'always',
+          math: 'always',
+        },
+      ],
+      'vue/block-order': [
+        'error',
+        {
+          order: ['template', 'script', 'style'],
+        },
+      ],
+      'vue/singleline-html-element-content-newline': ['off'],
     },
   },
 

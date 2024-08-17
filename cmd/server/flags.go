@@ -378,7 +378,7 @@ var flags = append([]cli.Flag{
 			"WOODPECKER_BITBUCKET_SKIP_VERIFY"),
 	},
 	&cli.StringFlag{
-		Sources: cli.EnvVars("WOODPECKER_EXPERT_FORGE_OAUTH_HOST", "WOODPECKER_DEV_GITEA_OAUTH_URL"), // TODO: remove WOODPECKER_DEV_GITEA_OAUTH_URL in next major release
+		Sources: cli.EnvVars("WOODPECKER_EXPERT_FORGE_OAUTH_HOST"),
 		Name:    "forge-oauth-host",
 		Usage:   "!!!for experts!!! fully qualified public forge url. Use it if your forge url WOODPECKER_FORGE_URL or WOODPECKER_GITEA_URL, ... isn't a public url. Format: <scheme>://<host>[/<prefix path>]",
 	},
@@ -477,17 +477,9 @@ var flags = append([]cli.Flag{
 	// expert flags
 	//
 	&cli.StringFlag{
-		Sources: cli.EnvVars("WOODPECKER_EXPERT_WEBHOOK_HOST", "WOODPECKER_WEBHOOK_HOST"), // TODO: remove WOODPECKER_WEBHOOK_HOST in next major release
+		Sources: cli.EnvVars("WOODPECKER_EXPERT_WEBHOOK_HOST"),
 		Name:    "server-webhook-host",
 		Usage:   "!!!for experts!!! fully qualified woodpecker server url called by forge's webhooks. Format: <scheme>://<host>[/<prefix path>]",
-	},
-	// TODO: remove in next major release
-	&cli.StringFlag{
-		Sources: cli.EnvVars("WOODPECKER_DEV_OAUTH_HOST"),
-		Name:    "server-dev-oauth-host-deprecated",
-		Usage:   "DEPRECATED: use WOODPECKER_EXPERT_FORGE_OAUTH_HOST instead\nfully qualified url used for oauth redirects. Format: <scheme>://<host>[/<prefix path>]",
-		Value:   "",
-		Hidden:  true,
 	},
 	//
 	// secrets encryption in DB

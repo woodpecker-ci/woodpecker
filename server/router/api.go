@@ -15,8 +15,6 @@
 package router
 
 import (
-	"net/http"
-
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog"
 
@@ -130,13 +128,6 @@ func apiRoutes(e *gin.RouterGroup) {
 					repo.GET("/registries/:registry", session.MustPush, api.GetRegistry)
 					repo.PATCH("/registries/:registry", session.MustPush, api.PatchRegistry)
 					repo.DELETE("/registries/:registry", session.MustPush, api.DeleteRegistry)
-
-					// TODO: remove with 3.x
-					repo.GET("/registry", session.MustPush, api.GetRegistryList)
-					repo.POST("/registry", session.MustPush, api.PostRegistry)
-					repo.GET("/registry/:registry", session.MustPush, api.GetRegistry)
-					repo.PATCH("/registry/:registry", session.MustPush, api.PatchRegistry)
-					repo.DELETE("/registry/:registry", session.MustPush, api.DeleteRegistry)
 
 					// requires push permissions
 					repo.GET("/cron", session.MustPush, api.GetCronList)
@@ -272,12 +263,4 @@ func apiRoutes(e *gin.RouterGroup) {
 			}
 		}
 	}
-
-	// TODO: remove with 3.x
-	e.Any("/hook", func(c *gin.Context) {
-		c.String(http.StatusGone, "use /api/hook")
-	})
-	e.Any("/stream/events", func(c *gin.Context) {
-		c.String(http.StatusGone, "use /api/stream/events")
-	})
 }

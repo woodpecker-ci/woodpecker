@@ -32,6 +32,8 @@ The following commands **are destructive** and **irreversible** it is highly rec
 
 ### Remove all unused images
 
+<!-- cspell:ignore trunc -->
+
 ```bash
 docker image rm $(docker images --filter "dangling=true" -q --no-trunc)
 ```

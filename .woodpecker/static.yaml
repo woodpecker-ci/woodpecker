@@ -26,7 +26,7 @@ steps:
     image: docker.io/woodpeckerci/plugin-prettier:0.1.0
     depends_on: []
     settings:
-      version: 3.2.5
+      version: 3.3.3
 
   - name: links
     image: docker.io/lycheeverse/lychee:0.15.1

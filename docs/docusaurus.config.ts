@@ -5,7 +5,7 @@ import * as path from 'path';
 
 const config: Config = {
   title: 'Woodpecker CI',
-  tagline: 'Woodpecker is a simple yet powerful CI/CD engine with great extensibility.',
+  tagline: 'Woodpecker is a simple, yet powerful CI/CD engine with great extensibility.',
   url: 'https://woodpecker-ci.org',
   baseUrl: '/',
   onBrokenLinks: 'throw',
@@ -264,6 +264,7 @@ const config: Config = {
         blog: {
           blogTitle: 'Blog',
           blogDescription: 'A blog for release announcements, turorials...',
+          onInlineAuthors: 'ignore',
           // postsPerPage: 'ALL',
           // blogSidebarCount: 0,
         },
