@@ -39,6 +39,8 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 )
 
+const updateAgentLastWorkDelay = time.Minute
+
 type RPC struct {
 	queue         queue.Queue
 	pubsub        *pubsub.Publisher
@@ -511,7 +513,7 @@ func (s *RPC) getHostnameFromContext(ctx context.Context) (string, error) {
 
 func (s *RPC) updateAgentLastWork(agent *model.Agent) error {
 	// only update agent.LastWork if not done recently
-	if time.Unix(agent.LastWork, 0).Add(1 * time.Minute).Before(time.Now()) {
+	if time.Unix(agent.LastWork, 0).Add(updateAgentLastWorkDelay).Before(time.Now()) {
 		return nil
 	}
 
