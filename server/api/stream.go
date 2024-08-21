@@ -35,6 +35,12 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 )
 
+const (
+	// How many batches of logs to keep for each client before starting to
+	// drop them if the client is not consuming them faster than they arrive.
+	maxQueuedBatchesPerClient int = 30
+)
+
 // EventStreamSSE
 //
 //	@Summary		Stream events like pipeline updates
@@ -214,9 +220,15 @@ func LogStreamSSE(c *gin.Context) {
 	}
 
 	go func() {
-		batches := make(logging.LogChan, 100)
+		batches := make(logging.LogChan, maxQueuedBatchesPerClient)
 
 		go func() {
+			defer func() {
+				if r := recover(); r != nil {
+					log.Error().Msgf("error sending log message: %v", r)
+				}
+			}()
+
 			for entries := range batches {
 				for _, entry := range entries {
 					select {

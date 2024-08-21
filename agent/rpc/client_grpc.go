@@ -25,14 +25,25 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	grpcproto "google.golang.org/protobuf/proto"
 
 	backend "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc/proto"
 )
 
-// Set grpc version on compile time to compare against server version response.
-const ClientGrpcVersion int32 = proto.Version
+const (
+	// Set grpc version on compile time to compare against server version response.
+	ClientGrpcVersion int32 = proto.Version
+
+	// Maximum size of an outgoing log message.
+	// Picked to prevent it from going over GRPC size limit (4 MiB) with a large safety margin.
+	maxLogBatchSize int = 2 * 1024 * 1024
+
+	// Maximum amount of time between sending consecutive batched log messages.
+	// Controls the delay between the CI job generating a log record, and web users receiving it.
+	maxLogFlushPeriod time.Duration = time.Second
+)
 
 type client struct {
 	client proto.WoodpeckerClient
@@ -416,13 +427,13 @@ func (c *client) processLogs(ctx context.Context) {
 			}
 
 			entries = append(entries, entry)
-			bytes += len(entry.Data)
+			bytes += grpcproto.Size(entry)
 
-			if bytes >= 256*1024 { // 256 KiB; picked to prevent GRPC message size overflow
+			if bytes >= maxLogBatchSize {
 				send()
 			}
 
-		case <-time.After(time.Second):
+		case <-time.After(maxLogFlushPeriod):
 			send()
 		}
 	}
