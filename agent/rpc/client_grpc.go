@@ -38,7 +38,7 @@ const (
 
 	// Maximum size of an outgoing log message.
 	// Picked to prevent it from going over GRPC size limit (4 MiB) with a large safety margin.
-	maxLogBatchSize int = 2 * 1024 * 1024
+	maxLogBatchSize int = 1 * 1024 * 1024
 
 	// Maximum amount of time between sending consecutive batched log messages.
 	// Controls the delay between the CI job generating a log record, and web users receiving it.
