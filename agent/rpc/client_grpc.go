@@ -427,7 +427,7 @@ func (c *client) processLogs(ctx context.Context) {
 			}
 
 			entries = append(entries, entry)
-			bytes += grpcproto.Size(entry)
+			bytes += grpcproto.Size(entry) // cspell:words grpcproto
 
 			if bytes >= maxLogBatchSize {
 				send()
