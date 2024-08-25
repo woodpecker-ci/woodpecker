@@ -113,6 +113,10 @@ func Test_expandImage(t *testing.T) {
 			from: "gcr.io/golang:1.0.0",
 			want: "gcr.io/golang:1.0.0",
 		},
+		{
+			from: "codeberg.org/6543/hello:latest@2c98dce11f78c2b4e40f513ca82f75035eb8cfa4957a6d8eb3f917ecaf77803",
+			want: "codeberg.org/6543/hello:latest@2c98dce11f78c2b4e40f513ca82f75035eb8cfa4957a6d8eb3f917ecaf77803",
+		},
 		// error cases, return input unmodified
 		{
 			from: "foo/bar?baz:boo",
@@ -121,6 +125,57 @@ func Test_expandImage(t *testing.T) {
 	}
 	for _, test := range testdata {
 		assert.Equal(t, test.want, expandImage(test.from))
+	}
+}
+
+func Test_imageHasTag(t *testing.T) {
+	testdata := []struct {
+		from string
+		want bool
+	}{
+		{
+			from: "golang",
+			want: false,
+		},
+		{
+			from: "golang:latest",
+			want: true,
+		},
+		{
+			from: "golang:1.0.0",
+			want: true,
+		},
+		{
+			from: "library/golang",
+			want: false,
+		},
+		{
+			from: "library/golang:latest",
+			want: true,
+		},
+		{
+			from: "library/golang:1.0.0",
+			want: true,
+		},
+		{
+			from: "index.docker.io/library/golang:1.0.0",
+			want: true,
+		},
+		{
+			from: "gcr.io/golang",
+			want: false,
+		},
+		{
+			from: "gcr.io/golang:1.0.0",
+			want: true,
+		},
+		{
+			from: "codeberg.org/6543/hello:latest@2c98dce11f78c2b4e40f513ca82f75035eb8cfa4957a6d8eb3f917ecaf77803",
+			want: true,
+		},
+	}
+	for _, test := range testdata {
+		assert.Equal(t, test.want, imageHasTag(test.from))
 	}
 }
 
@@ -202,6 +257,139 @@ func Test_matchImage(t *testing.T) {
 	}
 	for _, test := range testdata {
 		assert.Equal(t, test.want, MatchImage(test.from, test.to))
+	}
+}
+
+func Test_matchImageExact(t *testing.T) {
+	testdata := []struct {
+		from, to string
+		want     bool
+	}{
+		{
+			from: "golang",
+			to:   "golang",
+			want: true,
+		},
+		{
+			from: "golang:latest",
+			to:   "golang",
+			want: true,
+		},
+		{
+			from: "library/golang:latest",
+			to:   "golang",
+			want: true,
+		},
+		{
+			from: "index.docker.io/library/golang:1.0.0",
+			to:   "golang",
+			want: false,
+		},
+		{
+			from: "golang",
+			to:   "golang:latest",
+			want: true,
+		},
+		{
+			from: "library/golang:latest",
+			to:   "library/golang",
+			want: true,
+		},
+		{
+			from: "gcr.io/golang",
+			to:   "gcr.io/golang",
+			want: true,
+		},
+		{
+			from: "gcr.io/golang:1.0.0",
+			to:   "gcr.io/golang",
+			want: false,
+		},
+		{
+			from: "gcr.io/golang:latest",
+			to:   "gcr.io/golang",
+			want: true,
+		},
+		{
+			from: "gcr.io/golang",
+			to:   "gcr.io/golang:latest",
+			want: true,
+		},
+		{
+			from: "golang",
+			to:   "library/golang",
+			want: true,
+		},
+		{
+			from: "golang",
+			to:   "gcr.io/project/golang",
+			want: false,
+		},
+		{
+			from: "golang",
+			to:   "gcr.io/library/golang",
+			want: false,
+		},
+		{
+			from: "golang",
+			to:   "gcr.io/golang",
+			want: false,
+		},
+	}
+	for _, test := range testdata {
+		if !assert.Equal(t, test.want, MatchImageExact(test.from, test.to)) {
+			t.Logf("test data: '%s' -> '%s'", test.from, test.to)
+		}
+	}
+}
+
+func Test_matchImageDynamic(t *testing.T) {
+	testdata := []struct {
+		name, from string
+		to         []string
+		want       bool
+	}{
+		{
+			name: "simple compare",
+			from: "golang",
+			to:   []string{"golang"},
+			want: true,
+		},
+		{
+			name: "compare non-taged image whit list who tag requirement",
+			from: "golang",
+			to:   []string{"golang:v3.0"},
+			want: false,
+		},
+		{
+			name: "compare taged image whit list who tag no requirement",
+			from: "golang:v3.0",
+			to:   []string{"golang"},
+			want: true,
+		},
+		{
+			name: "compare taged image whit list who has image with no tag requirement",
+			from: "golang:1.0",
+			to:   []string{"golang", "golang:2.0"},
+			want: true,
+		},
+		{
+			name: "compare taged image whit list who only has images with tag requirement",
+			from: "golang:1.0",
+			to:   []string{"golang:latest", "golang:2.0"},
+			want: false,
+		},
+		{
+			name: "compare taged image whit list who only has images with tag requirement",
+			from: "golang:1.0",
+			to:   []string{"golang:latest", "golang:1.0"},
+			want: true,
+		},
+	}
+	for _, test := range testdata {
+		if !assert.Equal(t, test.want, MatchImageDynamic(test.from, test.to...)) {
+			t.Logf("test data: '%s' -> '%s'", test.from, test.to)
+		}
 	}
 }
 
