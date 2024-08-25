@@ -4,7 +4,7 @@ Please check the following tips:
 
 2. Provide a meaningful title for this pull request. It will be used as the commit message when this pull request is merged. Add as many commits as you like with any messages you like, they will be squashed into one commit.
 
-3. If this pull request fixes an issue, refer to the issue with messages like `Ref #1234`, `Closes #1234`, or `Fixes #1234`.
+3. If this pull request fixes an issue, refer to the issue with messages like `Ref #1234`, `Closes #1234`, or `Fixes #1234` in the pull description.
 
 4. Please check that you are targeting the `main` branch. Pull requests on release branches are only allowed for backports.
 
