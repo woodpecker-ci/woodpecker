@@ -39,6 +39,8 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 )
 
+const updateAgentLastWorkDelay = time.Minute
+
 type RPC struct {
 	queue         queue.Queue
 	pubsub        *pubsub.Publisher
@@ -98,8 +100,7 @@ func (s *RPC) Extend(c context.Context, workflowID string) error {
 		return err
 	}
 
-	agent.LastWork = time.Now().Unix()
-	err = s.store.AgentUpdate(agent)
+	err = s.updateAgentLastWork(agent)
 	if err != nil {
 		return err
 	}
@@ -138,7 +139,7 @@ func (s *RPC) Update(_ context.Context, strWorkflowID string, state rpc.StepStat
 			Int64("stepPipelineID", step.PipelineID).
 			Int64("currentPipelineID", currentPipeline.ID).
 			Msg(msg)
-		return fmt.Errorf(msg)
+		return errors.New(msg)
 	}
 
 	repo, err := s.store.GetRepo(currentPipeline.RepoID)
@@ -237,8 +238,7 @@ func (s *RPC) Init(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 	}
 	s.updateForgeStatus(c, repo, currentPipeline, workflow)
 
-	agent.LastWork = time.Now().Unix()
-	return s.store.AgentUpdate(agent)
+	return s.updateAgentLastWork(agent)
 }
 
 // Done marks the workflow with the given ID as done.
@@ -331,8 +331,7 @@ func (s *RPC) Done(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 	if err != nil {
 		return err
 	}
-	agent.LastWork = time.Now().Unix()
-	return s.store.AgentUpdate(agent)
+	return s.updateAgentLastWork(agent)
 }
 
 // Log writes a log entry to the database and publishes it to the pubsub.
@@ -362,8 +361,9 @@ func (s *RPC) Log(c context.Context, rpcLogEntry *rpc.LogEntry) error {
 	if err != nil {
 		return err
 	}
-	agent.LastWork = time.Now().Unix()
-	if err := s.store.AgentUpdate(agent); err != nil {
+
+	err = s.updateAgentLastWork(agent)
+	if err != nil {
 		return err
 	}
 
@@ -509,4 +509,18 @@ func (s *RPC) getHostnameFromContext(ctx context.Context) (string, error) {
 		}
 	}
 	return "", errors.New("no hostname in metadata")
+}
+
+func (s *RPC) updateAgentLastWork(agent *model.Agent) error {
+	// only update agent.LastWork if not done recently
+	if time.Unix(agent.LastWork, 0).Add(updateAgentLastWorkDelay).Before(time.Now()) {
+		return nil
+	}
+
+	agent.LastWork = time.Now().Unix()
+	if err := s.store.AgentUpdate(agent); err != nil {
+		return err
+	}
+
+	return nil
 }

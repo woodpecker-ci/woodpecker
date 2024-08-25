@@ -124,6 +124,7 @@ func convertMergeRequestHook(hook *gitlab.MergeEvent, req *http.Request) (int, *
 
 	pipeline.Ref = fmt.Sprintf(mergeRefs, obj.IID)
 	pipeline.Branch = obj.SourceBranch
+	pipeline.Refspec = fmt.Sprintf("%s:%s", obj.SourceBranch, obj.TargetBranch)
 
 	author := lastCommit.Author
 

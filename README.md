@@ -45,11 +45,11 @@
 
 Woodpecker is a simple, yet powerful CI/CD engine with great extensibility.
 
-![woodpecker](docs/docs/woodpecker.png)
+![woodpecker](docs/woodpecker.png)
 
 ## Installation & Resources
 
-Woodpecker can be installed in various ways (see the [Installation Instructions](https://woodpecker-ci.org/docs/administration/getting-started)) and by, default, runs with a SQLite DB.
+Woodpecker can be installed in various ways (see the [Installation Instructions](https://woodpecker-ci.org/docs/administration/getting-started)) and runs with SQLite as database by default.
 It requires around 100 MB of RAM (Server) and 30 MB (Agent) at runtime in idle mode.
 
 ## Support
@@ -60,15 +60,13 @@ You can support the project by becoming a backer on [Open Collective](https://op
 
 ## Documentation
 
-<https://woodpecker-ci.org/docs/>
+Our documentation can be found at <https://woodpecker-ci.org/docs/intro>.
 
 ## Translation
 
 We have a self-hosted [Weblate](https://weblate.org/en/) instance at [translate.woodpecker-ci.org](https://translate.woodpecker-ci.org).
 
 An overview of the current translation state is available at <https://translate.woodpecker-ci.org/projects/woodpecker-ci/#languages>.
-
-To help with translation, the language-specific files in <https://github.com/woodpecker-ci/woodpecker/tree/main/web/src/assets/locales> can be edited.
 
 ## Public Woodpecker Instances
 
