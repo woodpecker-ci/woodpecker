@@ -14,8 +14,8 @@ import (
 )
 
 const (
-	// base64 overhead + space for other JSON fields (just to be safe)
-	maxLineLength int = (pipeline.MaxLogLineLength/3)*4 + (64 * 1024)
+	// Add base64 overhead and space for other JSON fields (just to be safe).
+	maxLineLength int = (pipeline.MaxLogLineLength/3)*4 + (64 * 1024) //nolint:mnd
 )
 
 type logStore struct {
