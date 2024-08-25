@@ -1,10 +1,10 @@
 # Changelog
 
-## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-08-17
+## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-08-25
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @anbraten, @dvjn, @hg, @j04n-f, @jenrik, @pat-s, @qwerty287, @smainz, @zc-devs
+@6543, @anbraten, @dvjn, @hg, @j04n-f, @jenrik, @johanneskastl, @pat-s, @qwerty287, @smainz, @zc-devs
 
 ### 💥 Breaking changes
 
@@ -75,6 +75,7 @@
 
 ### Misc
 
+- Add systemd unit files to the RPM/DEB packages [[#3986](https://github.com/woodpecker-ci/woodpecker/pull/3986)]
 - Add eslint-plugin-promise back [[#4022](https://github.com/woodpecker-ci/woodpecker/pull/4022)]
 - Update github.com/urfave/cli/v3 digest to fc07a8c [[#4043](https://github.com/woodpecker-ci/woodpecker/pull/4043)]
 - Update woodpeckerci/plugin-git Docker tag to v2.5.2 [[#4041](https://github.com/woodpecker-ci/woodpecker/pull/4041)]
