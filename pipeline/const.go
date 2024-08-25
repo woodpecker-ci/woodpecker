@@ -14,4 +14,10 @@
 
 package pipeline
 
-const ExitCodeKilled int = 137
+const (
+	ExitCodeKilled int = 137
+
+	// Store no more than 1mb in a log-line as 4mb is the limit of a grpc message
+	// and log-lines needs to be parsed by the browsers later on.
+	MaxLogLineLength int = 1 * 1024 * 1024 // 1mb
+)
