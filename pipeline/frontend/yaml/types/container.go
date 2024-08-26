@@ -126,5 +126,5 @@ func (c *Container) IsPlugin() bool {
 }
 
 func (c *Container) IsTrustedCloneImage() bool {
-	return c.IsPlugin() && utils.MatchImage(c.Image, constant.TrustedCloneImages...)
+	return c.IsPlugin() && utils.MatchImageExact(c.Image, constant.TrustedCloneImages...)
 }
