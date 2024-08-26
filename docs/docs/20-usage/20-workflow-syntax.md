@@ -521,12 +521,6 @@ Woodpecker gives the ability to define Docker volumes in the YAML. You can use t
 
 For more details check the [volumes docs](./70-volumes.md).
 
-### `detach`
-
-Woodpecker gives the ability to detach steps to run them in background until the workflow finishes.
-
-For more details check the [service docs](./60-services.md#detachment).
-
 ### `directory`
 
 Using `directory`, you can set a subdirectory of your repository or an absolute path inside the Docker container in which your commands will run.
