@@ -165,7 +165,6 @@ func TestConvertDAGToStages(t *testing.T) {
 		"echo env": {
 			position: 3,
 			name:     "echo env",
-			group:    "",
 			step: &backend_types.Step{
 				Name: "echo env",
 			},
@@ -183,7 +182,6 @@ func TestConvertDAGToStages(t *testing.T) {
 		"service 1": {
 			position:  0,
 			name:      "service 1",
-			group:     "",
 			dependsOn: []string{"echo env"},
 			step: &backend_types.Step{
 				Name: "service 1",
@@ -193,7 +191,6 @@ func TestConvertDAGToStages(t *testing.T) {
 			position: 1,
 			name:     "service 2",
 			needs:    []string{"service 1"},
-			group:    "",
 			step: &backend_types.Step{
 				Name: "service 2",
 			},
@@ -203,7 +200,6 @@ func TestConvertDAGToStages(t *testing.T) {
 			name:      "service 3",
 			needs:     []string{"service 1"},
 			dependsOn: []string{"echo env"},
-			group:     "",
 			step: &backend_types.Step{
 				Name: "service 3",
 			},
