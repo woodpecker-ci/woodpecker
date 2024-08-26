@@ -1,6 +1,6 @@
 # Welcome to Woodpecker
 
-Woodpecker is a simple yet powerful CI/CD engine with great extensibility. It focuses on executing pipelines inside [containers](https://opencontainers.org/).
+Woodpecker is a simple, yet powerful CI/CD engine with great extensibility. It focuses on executing pipelines inside [containers](https://opencontainers.org/).
 If you are already using containers in your daily workflow, you'll for sure love Woodpecker.
 
 ![woodpecker](woodpecker.png)

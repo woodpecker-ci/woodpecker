@@ -38,7 +38,8 @@
         "desc": "Specify additional variables to use in your pipeline. Variables with the same name will be overwritten.",
         "name": "Variable name",
         "value": "Variable value"
-      }
+      },
+      "show_pipelines": "Show pipelines"
     },
     "deploy_pipeline": {
       "title": "Trigger deployment event for current pipeline #{pipelineId}",
@@ -421,9 +422,9 @@
     "deleted": "Secret deleted",
     "created": "Secret created",
     "saved": "Secret saved",
-    "images": {
-      "images": "Available for the following images",
-      "desc": "List of images where this secret is available, leave empty to allow for all images."
+    "plugins": {
+      "images": "Available only for the following plugins",
+      "desc": "List of plugins images where this secret is available, leave empty to allow for all plugins and general steps."
     },
     "events": {
       "events": "Available at the following events",
