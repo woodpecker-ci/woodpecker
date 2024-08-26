@@ -12,7 +12,7 @@ tags: [community, image, podman]
 
 <!-- cspell:ignore buildah Containerfile roundcube -->
 
-I run Woodpecker CI with podman backend instead of docker and just figured out how to build images with buildah. Since I couldn't find this anywhere documented I thought I might as well just share it here.
+I run Woodpecker CI with podman backend instead of docker and just figured out how to build images with buildah. Since I couldn't find this anywhere documented, I thought I might as well just share it here.
 
 It's actually pretty straight forward. Here's what my repository structure looks like:
 
@@ -49,9 +49,9 @@ steps:
     secrets: [registry_login_token]
 ```
 
-As you can see I'm using this workflow over at gitlab.com. It should work with GitHub as well with adjusting the registry login.
+As you can see, I'm using this workflow over at gitlab.com. It should work with GitHub as well, with adjusting the registry login.
 
-You may have to adjust the `when:` to your needs. Furthermore, you must check the `trusted` checkbox in project settings. Therefore be sure to run trusted code only in this setup.
+You may have to adjust the `when:` to your needs. Furthermore, you must check the `trusted` checkbox in project settings. Therefore, be sure to run trusted code only in this setup.
 
 This seems to work fine so far. I wonder if anybody else made this work a different way.
 

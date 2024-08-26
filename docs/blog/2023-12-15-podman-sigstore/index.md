@@ -14,7 +14,7 @@ tags: [community, image, podman, sigstore, signature]
 
 This example shows how to build a container image with podman while verifying the base image and signing the resulting image.
 
-The image being pulled uses a keyless signature while the image being built will be signed by a pre-generated private key.
+The image being pulled uses a keyless signature, while the image being built will be signed by a pre-generated private key.
 
 ## Prerequisites
 
@@ -30,7 +30,7 @@ skopeo generate-sigstore-key --output-prefix myKey
 
 This command will generate a `myKey.private` and a `myKey.pub` keyfile.
 
-Store the `myKey.private` as secret in Woodpecker. In the example below the secret is called `sigstore_private_key`
+Store the `myKey.private` as secret in Woodpecker. In the example below, the secret is called `sigstore_private_key`
 
 ### Configure hosts pulling the resulting image
 
@@ -87,7 +87,7 @@ steps:
             use-sigstore-attachments: true" >> /etc/containers/registries.d/default.yaml
 
       # At pull, check the keyless sigstore signature of the distroless image.
-      # This is a very strict container policy. It allows to pull from gcr.io/distroless only. Every other registry will be rejected.
+      # This is a very strict container policy. It allows pulling from gcr.io/distroless only. Every other registry will be rejected.
       # See https://github.com/containers/image/blob/main/docs/containers-policy.json.5.md for more information.
 
       # fulcio CA crt obtained from https://github.com/sigstore/sigstore/blob/main/pkg/tuf/repository/targets/fulcio_v1.crt.pem
