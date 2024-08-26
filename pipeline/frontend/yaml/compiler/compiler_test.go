@@ -323,9 +323,10 @@ func TestCompilerCompile(t *testing.T) {
 						Commands:   []string{"env"},
 						OnSuccess:  true,
 						Failure:    "fail",
-						Volumes:    []string{defaultVolumes[0].Name + ":"},
+						Volumes:    []string{defaultVolumes[0].Name + ":/test"},
 						Networks:   []backend_types.Conn{{Name: "test_default", Aliases: []string{"service"}}},
 						ExtraHosts: []backend_types.HostAlias{},
+						WorkingDir: "/test/src/github.com/octocat/hello-world",
 					}, {
 						Name:       "echo env",
 						Type:       backend_types.StepTypeCommands,
@@ -333,9 +334,10 @@ func TestCompilerCompile(t *testing.T) {
 						Commands:   []string{"env"},
 						OnSuccess:  true,
 						Failure:    "fail",
-						Volumes:    []string{defaultVolumes[0].Name + ":"},
+						Volumes:    []string{defaultVolumes[0].Name + ":/test"},
 						Networks:   []backend_types.Conn{{Name: "test_default", Aliases: []string{"echo env"}}},
 						ExtraHosts: []backend_types.HostAlias{},
+						WorkingDir: "/test/src/github.com/octocat/hello-world",
 					}},
 				}, {
 					Steps: []*backend_types.Step{{
@@ -345,9 +347,10 @@ func TestCompilerCompile(t *testing.T) {
 						Commands:   []string{"echo 1"},
 						OnSuccess:  true,
 						Failure:    "fail",
-						Volumes:    []string{defaultVolumes[0].Name + ":"},
+						Volumes:    []string{defaultVolumes[0].Name + ":/test"},
 						Networks:   []backend_types.Conn{{Name: "test_default", Aliases: []string{"service-depend"}}},
 						ExtraHosts: []backend_types.HostAlias{},
+						WorkingDir: "/test/src/github.com/octocat/hello-world",
 					}},
 				}, {
 					Steps: []*backend_types.Step{{
@@ -357,9 +360,10 @@ func TestCompilerCompile(t *testing.T) {
 						Commands:   []string{"echo 1"},
 						OnSuccess:  true,
 						Failure:    "fail",
-						Volumes:    []string{defaultVolumes[0].Name + ":"},
+						Volumes:    []string{defaultVolumes[0].Name + ":/test"},
 						Networks:   []backend_types.Conn{{Name: "test_default", Aliases: []string{"service-depend-on-service"}}},
 						ExtraHosts: []backend_types.HostAlias{},
+						WorkingDir: "/test/src/github.com/octocat/hello-world",
 					}},
 				}},
 			},
