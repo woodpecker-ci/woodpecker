@@ -4,6 +4,7 @@ Some versions need some changes to the server configuration or the pipeline conf
 
 ## `next`
 
+- If secret who are filtered by plugin now check against tag if you specify a tag
 - Only allow trusted-clone- and escalated-plugins if image name **AND TAG** matches (before the tag was ignored)
 - Removed `WOODPECKER_DEV_OAUTH_HOST` and `WOODPECKER_DEV_GITEA_OAUTH_URL` use `WOODPECKER_EXPERT_FORGE_OAUTH_HOST`
 - Compatibility mode of deprecated `pipeline:`, `platform:` and `branches:` pipeline config options are now removed and pipeline will now fail if still in use.
