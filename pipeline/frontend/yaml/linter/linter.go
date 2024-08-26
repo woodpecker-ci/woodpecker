@@ -104,12 +104,17 @@ func (l *Linter) lintCloneSteps(config *WorkflowConfig) error {
 	if len(config.Workflow.Clone.ContainerList) == 0 {
 		return nil
 	}
+	var linterErr error
 	for _, container := range config.Workflow.Clone.ContainerList {
 		if !utils.MatchImageExact(container.Image, constant.TrustedCloneImages...) {
-			return newLinterError("Specified clone image does not match allow list, netrc will not be injected", config.File, fmt.Sprintf("clone.%s", container.Name), true)
+			linterErr = multierr.Append(linterErr,
+				newLinterError(
+					"Specified clone image does not match allow list, netrc will not be injected",
+					config.File, fmt.Sprintf("clone.%s", container.Name), true),
+			)
 		}
 	}
-	return nil
+	return linterErr
 }
 
 func (l *Linter) lintContainers(config *WorkflowConfig, area string) error {
