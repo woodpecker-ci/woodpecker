@@ -24,6 +24,8 @@ import (
 	errorTypes "go.woodpecker-ci.org/woodpecker/v2/pipeline/errors/types"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/linter/schema"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/types"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/utils"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/constant"
 )
 
 // A Linter lints a pipeline configuration.
@@ -71,6 +73,10 @@ func (l *Linter) lintFile(config *WorkflowConfig) error {
 		linterErr = multierr.Append(linterErr, newLinterError("Invalid or missing steps section", config.File, "steps", false))
 	}
 
+	if err := l.lintCloneSteps(config); err != nil {
+		linterErr = multierr.Append(linterErr, err)
+	}
+
 	if err := l.lintContainers(config, "clone"); err != nil {
 		linterErr = multierr.Append(linterErr, err)
 	}
@@ -92,6 +98,18 @@ func (l *Linter) lintFile(config *WorkflowConfig) error {
 	}
 
 	return linterErr
+}
+
+func (l *Linter) lintCloneSteps(config *WorkflowConfig) error {
+	if len(config.Workflow.Clone.ContainerList) == 0 {
+		return nil
+	}
+	for _, container := range config.Workflow.Clone.ContainerList {
+		if !utils.MatchImageExact(container.Image, constant.TrustedCloneImages...) {
+			return newLinterError("Specified clone image does not match allow list, netrc will not be injected", config.File, fmt.Sprintf("clone.%s", container.Name), true)
+		}
+	}
+	return nil
 }
 
 func (l *Linter) lintContainers(config *WorkflowConfig, area string) error {

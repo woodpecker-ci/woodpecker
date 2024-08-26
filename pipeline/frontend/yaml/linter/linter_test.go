@@ -169,6 +169,10 @@ func TestLintErrors(t *testing.T) {
 			from: "{pipeline: { build: { image: golang, settings: { test: 'true' } } }, when: { branch: main, event: push } }",
 			want: "Additional property pipeline is not allowed",
 		},
+		{
+			from: "{steps: { build: { image: golang, settings: { test: 'true' } } }, when: { branch: main, event: push }, clone: { git: { image: woodpeckerci/plugin-git:v1.1.0 } } }",
+			want: "Specified clone image does not match allow list, netrc will not be injected",
+		},
 	}
 
 	for _, test := range testdata {
