@@ -16,7 +16,7 @@ I run Woodpecker CI with podman backend instead of docker and just figured out h
 
 It's actually pretty straight forward. Here's what my repository structure looks like:
 
-```nohighlight
+```bash
 .
 ├── roundcube
 │   ├── Containerfile

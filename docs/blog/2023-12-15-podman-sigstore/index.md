@@ -41,7 +41,7 @@ See [here](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linu
 Consider the `Makefile` having a `build` target that will be used in the following workflow.
 This target yields a Go binary with the filename `app` that will be placed in the root directory.
 
-```nohighlight
+```bash
 .
 ├── Containerfile
 ├── main.go
