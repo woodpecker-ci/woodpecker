@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-08-25
+## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-08-26
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -34,6 +34,7 @@
 
 ### 📚 Documentation
 
+- Add community posts from discussions [[#4058](https://github.com/woodpecker-ci/woodpecker/pull/4058)]
 - Add a pull request template with some basic guidelines [[#4055](https://github.com/woodpecker-ci/woodpecker/pull/4055)]
 - Add examples of CI environment variable values [[#4009](https://github.com/woodpecker-ci/woodpecker/pull/4009)]
 - Fix inline author warning [[#4040](https://github.com/woodpecker-ci/woodpecker/pull/4040)]
