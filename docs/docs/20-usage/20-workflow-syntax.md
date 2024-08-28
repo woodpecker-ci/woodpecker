@@ -288,7 +288,16 @@ when:
 
 #### `event`
 
-Available events: `push`, `pull_request`, `pull_request_closed`, `tag`, `release`, `deployment`, `cron`, `manual`
+The available events are:
+
+- `push`: A push event is triggered when a commit is pushed to a branch.
+- `pull_request`: A pull request event is triggered when a pull request is opened or a new commit is pushed to it.
+- `pull_request_closed`: A pull request closed event is triggered when a pull request is closed or merged.
+- `tag`: A tag event is triggered when a tag is pushed.
+- `release`: A release event is triggered when a release, pre-release or draft is created. (You can apply further filters using [evaluate](#evaluate) with [environment variables](./50-environment.md#built-in-environment-variables).)
+- `deployment`
+- `cron`: A cron event is triggered when a cron job is executed.
+- `manual`: A manual event is triggered when a user manually triggers a pipeline.
 
 Execute a step if the build event is a `tag`:
 
