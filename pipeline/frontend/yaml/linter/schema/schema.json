@@ -227,7 +227,7 @@
     },
     "step": {
       "description": "A step of your workflow executes either arbitrary commands or uses a plugin. Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#steps",
-      "oneOf": [
+      "anyOf": [
         {
           "$ref": "#/definitions/commands_step"
         },
@@ -240,7 +240,33 @@
       "description": "Every step of your pipeline executes arbitrary commands inside a specified docker container. Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#steps",
       "type": "object",
       "additionalProperties": false,
-      "required": ["image", "commands"],
+      "required": ["image"],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "detach": {
+                "const": true
+              }
+            }
+          },
+          "then": {},
+          "else": {
+            "anyOf": [
+              {
+                "required": [
+                  "commands"
+                ]
+              },
+              {
+                "required": [
+                  "entrypoint"
+                ]
+              }
+            ]
+          }
+        }
+      ],
       "properties": {
         "name": {
           "description": "The name of the step. Can be used if using the array style steps list.",
