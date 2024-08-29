@@ -254,14 +254,10 @@
           "else": {
             "anyOf": [
               {
-                "required": [
-                  "commands"
-                ]
+                "required": ["commands"]
               },
               {
-                "required": [
-                  "entrypoint"
-                ]
+                "required": ["entrypoint"]
               }
             ]
           }
