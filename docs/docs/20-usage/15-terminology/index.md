@@ -14,7 +14,7 @@
 - **Repos**: Short for repositories, these are storage locations where code is stored.
 - **[Forge][Forge]**: The hosting platform or service where the repositories are hosted.
 - **[Workspace][workspace]**: A folder shared between all steps of a [workflow][Workflow] containing the repository and all the generated data from previous steps.
-- **Event**: Triggers the execution of a [pipeline][Pipeline], such as a [forge][Forge] event like `push`, or `manual` triggered manually from the UI.
+- **[Event][Event]**: Triggers the execution of a [pipeline][Pipeline], such as a [forge][Forge] event like `push`, or `manual` triggered manually from the UI.
 - **Commit**: A defined state of the code, usually associated with a version control system like Git.
 - **[Matrix][Matrix]**: A configuration option that allows the execution of [workflows][Workflow] for each value in the matrix.
 - **Service**: A service is a step that is executed from the start of a [workflow][Workflow] until its end. It can be accessed by name via the network from other steps within the same [workflow][Workflow].
@@ -44,6 +44,7 @@ Sometimes there are multiple terms that can be used to describe something. This 
 
 <!-- References -->
 
+[Event]: ../20-workflow-syntax.md#event
 [Pipeline]: ../20-workflow-syntax.md
 [Workflow]: ../25-workflows.md
 [Forge]: ../../30-administration/11-forges/11-overview.md
