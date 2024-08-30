@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-08-29
+## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-08-30
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -34,6 +34,7 @@
 
 ### 🐛 Bug Fixes
 
+- Wait for tracer to be done before finishing workflow [[#4068](https://github.com/woodpecker-ci/woodpecker/pull/4068)]
 - Fix schema with detached steps [[#4066](https://github.com/woodpecker-ci/woodpecker/pull/4066)]
 - Fix schema with commands and entrypoint [[#4065](https://github.com/woodpecker-ci/woodpecker/pull/4065)]
 - Read long log lines from file storage correctly [[#4048](https://github.com/woodpecker-ci/woodpecker/pull/4048)]
