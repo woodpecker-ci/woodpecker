@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-08-30
+## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-08-31
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -8,6 +8,7 @@
 
 ### 💥 Breaking changes
 
+- Add option to filter secrets by plugins with specific tags [[#4069](https://github.com/woodpecker-ci/woodpecker/pull/4069)]
 - Remove old pipeline options [[#4016](https://github.com/woodpecker-ci/woodpecker/pull/4016)]
 - Remove various deprecations [[#4017](https://github.com/woodpecker-ci/woodpecker/pull/4017)]
 - Drop repo name fallback for hooks [[#4013](https://github.com/woodpecker-ci/woodpecker/pull/4013)]
