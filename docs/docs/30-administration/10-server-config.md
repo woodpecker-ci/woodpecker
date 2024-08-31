@@ -464,7 +464,7 @@ Supported variables:
 - `workflow`: the workflow's name
 - `owner`: the repo's owner
 - `repo`: the repo's name
-- `axis_id`: the workflow's matrix number 
+- `axis_id`: the workflow's matrix number
 
 ---
 
