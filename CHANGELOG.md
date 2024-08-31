@@ -8,6 +8,7 @@
 
 ### 💥 Breaking changes
 
+- Remove all default 3rd party privileged plugins [[#3918](https://github.com/woodpecker-ci/woodpecker/pull/3918)]
 - Add option to filter secrets by plugins with specific tags [[#4069](https://github.com/woodpecker-ci/woodpecker/pull/4069)]
 - Remove old pipeline options [[#4016](https://github.com/woodpecker-ci/woodpecker/pull/4016)]
 - Remove various deprecations [[#4017](https://github.com/woodpecker-ci/woodpecker/pull/4017)]
@@ -17,7 +18,7 @@
 - Migrate to maintained cron lib and remove seconds [[#3785](https://github.com/woodpecker-ci/woodpecker/pull/3785)]
 - Switched to profile-based AppArmor configuration [[#4008](https://github.com/woodpecker-ci/woodpecker/pull/4008)]
 - Removed Kubernetes default image pull secret name [[#4005](https://github.com/woodpecker-ci/woodpecker/pull/4005)]
-- Fix dropped env vars [[#3969](https://github.com/woodpecker-ci/woodpecker/pull/3969)]
+- Drop "WOODPECKER_WEBHOOK_HOST" env var and adjust docs [[#3969](https://github.com/woodpecker-ci/woodpecker/pull/3969)]
 - Drop version in schema [[#3970](https://github.com/woodpecker-ci/woodpecker/pull/3970)]
 - Update docker to v27 [[#3972](https://github.com/woodpecker-ci/woodpecker/pull/3972)]
 - Require gitlab 12.4 [[#3966](https://github.com/woodpecker-ci/woodpecker/pull/3966)]
