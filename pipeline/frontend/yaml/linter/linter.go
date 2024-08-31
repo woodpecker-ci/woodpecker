@@ -142,7 +142,7 @@ func (l *Linter) lintPrivilegedPlugins(config *WorkflowConfig, c *types.Containe
 	if utils.MatchImage(c.Image, "plugins/docker", "plugins/gcr", "plugins/ecr") {
 		// check first if user did not add them back
 		if !utils.MatchImage(c.Image, server.Config.Pipeline.PrivilegedPlugins...) {
-			return newLinterError("Use plugins who where removed from WOODPECKER_ESCALATE, use 'woodpeckerci/plugin-docker-buildx' instead", config.File, fmt.Sprintf("%s.%s", area, c.Name), false)
+			return newLinterError("Cannot use once privileged plugins removed from WOODPECKER_ESCALATE, use 'woodpeckerci/plugin-docker-buildx' instead", config.File, fmt.Sprintf("%s.%s", area, c.Name), false)
 		}
 	}
 

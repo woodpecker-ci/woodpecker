@@ -171,7 +171,7 @@ func TestLintErrors(t *testing.T) {
 		},
 		{
 			from: "{steps: { build: { image: plugins/docker, settings: { test: 'true' } } }, when: { branch: main, event: push } } }",
-			want: "Use plugins who where removed from WOODPECKER_ESCALATE, use 'woodpeckerci/plugin-docker-buildx' instead",
+			want: "Cannot use once privileged plugins removed from WOODPECKER_ESCALATE, use 'woodpeckerci/plugin-docker-buildx' instead",
 		},
 	}
 
