@@ -55,12 +55,18 @@ If you have some missing resources, please feel free to [open a pull-request](ht
 - [Deploying mdbook to codeberg pages using woodpecker CI](https://www.markpitblado.me/blog/deploying-mdbook-to-codeberg-pages-using-woodpecker-ci/)
 - [Deploy a Fly app with Woodpecker CI](https://joeroe.io/2024/01/09/deploy-fly-woodpecker-ci.html)
 - [Ansible - using Woodpecker as an alternative to Semaphore](https://pat-s.me/ansible-using-woodpecker-as-an-alternative-to-semaphore/)
+- [Simple selfhosted CI/CD with Woodpecker](https://xyquadrat.ch/blog/simple-ci-with-woodpecker/)
+- [Notes to self on Woodpecker-CI](https://jpmens.net/2023/09/22/notes-to-self-on-woodpecker-ci/)
+- [CI/CD with Woodpecker and Gitea](https://wilw.dev/blog/2023/04/23/woodpecker-ci/)
 
 ## Videos
 
 - [Replace Ansible Semaphore with Woodpecker CI](https://www.youtube.com/watch?v=d610YPvCB0E)
 - ["unexpected EOF" error when trying to pair Woodpecker CI served through the Caddy with Gitea](https://www.youtube.com/watch?v=n7Hyvt71Np0)
 - [CICD Environment in Docker Swarm behind Caddy Server - Part 2 Woodpeckerci](https://www.youtube.com/watch?v=rkbw_k7JvS0)
+- [How to Build & Publish Custom Docker Container using Gitea & Woodpecker behind Caddy Server | TUNEIT](https://www.youtube.com/watch?v=9m7DbgL1mNk)
+- [Radicle Woodpecker CI Integration](https://www.youtube.com/watch?v=Ks1nbYLn4P8)
+- [woodpecker-ci/woodpecker - Gource visualisation](https://www.youtube.com/watch?v=38JuakZ6m5s)
 
 ## Plugins
 
