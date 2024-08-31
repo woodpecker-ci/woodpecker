@@ -346,9 +346,7 @@ Context: when someone does log into Woodpecker, a temporary session token is cre
 As long as the session is valid (until it expires or log-out),
 a user can log into Woodpecker, without re-authentication.
 
-### `WOODPECKER_ESCALATE`
-
-> Defaults are defined in [shared/constant/constant.go](https://github.com/woodpecker-ci/woodpecker/blob/main/shared/constant/constant.go)
+### `WOODPECKER_PLUGINS_PRIVILEGED`
 
 Docker images to run in privileged mode. Only change if you are sure what you do!
 

@@ -14,9 +14,6 @@
 
 package constant
 
-// PrivilegedPlugins can be changed by 'WOODPECKER_ESCALATE' at runtime.
-var PrivilegedPlugins = []string{}
-
 // DefaultConfigOrder represent the priority in witch woodpecker search for a pipeline config by default
 // folders are indicated by supplying a trailing slash.
 var DefaultConfigOrder = [...]string{

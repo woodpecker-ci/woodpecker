@@ -35,6 +35,13 @@ var Command = &cli.Command{
 	Usage:     "lint a pipeline configuration file",
 	ArgsUsage: "[path/to/.woodpecker.yaml]",
 	Action:    lint,
+	Flags: []cli.Flag{
+		&cli.StringSliceFlag{
+			Sources: cli.EnvVars("WOODPECKER_PLUGINS_PRIVILEGED"),
+			Name:    "plugins-privileged",
+			Usage:   "Allow plugins to run in privileged mode, if environment variable is defined but empty there will be none",
+		},
+	},
 }
 
 func lint(ctx context.Context, c *cli.Command) error {
@@ -69,7 +76,7 @@ func lintDir(ctx context.Context, c *cli.Command, dir string) error {
 	return nil
 }
 
-func lintFile(_ context.Context, _ *cli.Command, file string) error {
+func lintFile(_ context.Context, c *cli.Command, file string) error {
 	fi, err := os.Open(file)
 	if err != nil {
 		return err
@@ -83,7 +90,7 @@ func lintFile(_ context.Context, _ *cli.Command, file string) error {
 
 	rawConfig := string(buf)
 
-	c, err := yaml.ParseString(rawConfig)
+	parsedConfig, err := yaml.ParseString(rawConfig)
 	if err != nil {
 		return err
 	}
@@ -91,11 +98,14 @@ func lintFile(_ context.Context, _ *cli.Command, file string) error {
 	config := &linter.WorkflowConfig{
 		File:      path.Base(file),
 		RawConfig: rawConfig,
-		Workflow:  c,
+		Workflow:  parsedConfig,
 	}
 
 	// TODO: lint multiple files at once to allow checks for sth like "depends_on" to work
-	err = linter.New(linter.WithTrusted(true)).Lint([]*linter.WorkflowConfig{config})
+	err = linter.New(
+		linter.WithTrusted(true),
+		linter.PrivilegedPlugins(c.StringSlice("plugins-privileged")),
+	).Lint([]*linter.WorkflowConfig{config})
 	if err != nil {
 		str, err := FormatLintError(config.File, err)
 
