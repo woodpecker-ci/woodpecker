@@ -27,6 +27,6 @@ func WithTrusted(trusted bool) Option {
 // PrivilegedPlugins adds the list of privileged plugins.
 func PrivilegedPlugins(plugins []string) Option {
 	return func(linter *Linter) {
-		linter.privilegedPlugins = plugins
+		linter.privilegedPlugins = &plugins
 	}
 }
