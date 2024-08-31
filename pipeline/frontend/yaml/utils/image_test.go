@@ -254,6 +254,11 @@ func Test_matchImage(t *testing.T) {
 			to:   "gcr.io/golang",
 			want: false,
 		},
+		{
+			from: "woodpeckerci/plugin-docker-buildx",
+			to:   "docker.io/woodpeckerci/plugin-docker-buildx",
+			want: true,
+		},
 	}
 	for _, test := range testdata {
 		assert.Equal(t, test.want, MatchImage(test.from, test.to))
