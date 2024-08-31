@@ -16,13 +16,8 @@ package constant
 
 // PrivilegedPlugins can be changed by 'WOODPECKER_ESCALATE' at runtime.
 var PrivilegedPlugins = []string{
-	// latest buildx
-	"docker.io/woodpeckerci/plugin-docker-buildx:latest",
-	"codeberg.org/woodpecker-plugins/docker-buildx:latest",
-	// renovate: datasource=docker depName=docker.io/woodpeckerci/plugin-docker-buildx
-	"docker.io/woodpeckerci/plugin-docker-buildx:4.2.0",
-	// renovate: datasource=docker depName=codeberg.org/woodpecker-plugins/docker-buildx
-	"codeberg.org/woodpecker-plugins/docker-buildx:4.2.0",
+	"docker.io/woodpeckerci/plugin-docker-buildx",
+	"codeberg.org/woodpecker-plugins/docker-buildx",
 }
 
 // DefaultConfigOrder represent the priority in witch woodpecker search for a pipeline config by default
