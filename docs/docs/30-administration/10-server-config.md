@@ -351,7 +351,7 @@ a user can log into Woodpecker, without re-authentication.
 > Defaults are defined in [shared/constant/constant.go](https://github.com/woodpecker-ci/woodpecker/blob/main/shared/constant/constant.go)
 
 Docker images to run in privileged mode. Only change if you are sure what you do!
-You should specify the tag as images are compared via exact matches.
+You should specify the tag of your images too, as this enforces exact matches.
 
 <!--
 ### `WOODPECKER_VOLUME`
