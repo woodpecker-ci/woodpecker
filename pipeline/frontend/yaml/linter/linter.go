@@ -25,12 +25,12 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/linter/schema"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/types"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/utils"
-	"go.woodpecker-ci.org/woodpecker/v2/server"
 )
 
 // A Linter lints a pipeline configuration.
 type Linter struct {
-	trusted bool
+	trusted           bool
+	privilegedPlugins []string
 }
 
 // New creates a new Linter with options.
@@ -141,8 +141,12 @@ func (l *Linter) lintPrivilegedPlugins(config *WorkflowConfig, c *types.Containe
 	// lint for conflicts of https://github.com/woodpecker-ci/woodpecker/pull/3918
 	if utils.MatchImage(c.Image, "plugins/docker", "plugins/gcr", "plugins/ecr") {
 		// check first if user did not add them back
-		if !utils.MatchImage(c.Image, server.Config.Pipeline.PrivilegedPlugins...) {
-			return newLinterError("Cannot use once privileged plugins removed from WOODPECKER_ESCALATE, use 'woodpeckerci/plugin-docker-buildx' instead", config.File, fmt.Sprintf("%s.%s", area, c.Name), false)
+		if !utils.MatchImage(c.Image, l.privilegedPlugins...) {
+			return newLinterError(
+				"Cannot use once privileged plugins removed from WOODPECKER_ESCALATE, use 'woodpeckerci/plugin-docker-buildx' instead",
+				config.File, fmt.Sprintf("%s.%s", area, c.Name),
+				l.privilegedPlugins == nil, // if linter has no info of current privileged plugins, it's just a warning
+			)
 		}
 	}
 
