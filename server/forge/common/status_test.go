@@ -32,9 +32,8 @@ func TestGetPipelineStatusContext(t *testing.T) {
 	}()
 
 	repo := &model.Repo{Owner: "user1", Name: "repo1"}
-	pipeline := &model.Pipeline{Event: model.EventPull}
 	workflow := &model.Workflow{Name: "lint"}
-	pipeline.Workflows = append(pipeline.Workflows, workflow)
+	pipeline := &model.Pipeline{Event: model.EventPull, Workflows: []*model.Workflow{workflow}}
 
 	assert.EqualValues(t, "", GetPipelineStatusContext(repo, pipeline, workflow))
 
