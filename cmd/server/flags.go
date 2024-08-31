@@ -161,7 +161,7 @@ var flags = append([]cli.Flag{
 	&cli.StringSliceFlag{
 		Sources: cli.EnvVars("WOODPECKER_ESCALATE"),
 		Name:    "escalate",
-		Usage:   "Allow plugins to get access to docker socket (privileged mode), if environment variable is defined but empty there will be none",
+		Usage:   "Allow plugins to run in privileged mode, if environment variable is defined but empty there will be none",
 		Value:   constant.PrivilegedPlugins,
 	},
 	&cli.StringSliceFlag{
