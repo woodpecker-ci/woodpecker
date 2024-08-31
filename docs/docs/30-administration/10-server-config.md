@@ -454,7 +454,7 @@ Context prefix Woodpecker will use to publish status messages to SCM. You probab
 
 ### `WOODPECKER_STATUS_CONTEXT_FORMAT`
 
-> Default: `{{ .context }}/{{ .event }}{{if not (eq .workflow "woodpecker")}}/{{ .workflow }}{{end}}{{if not (eq .axis_id 0)}}/{{.axis_id}}{{end}}`
+> Default: `{{.context}}/{{.event}}{{if gt .workflow_count 1)}}/{{.workflow}}{{end}}{{if not (eq .axis_id 0)}}/{{.axis_id}}{{end}}`
 
 Template for the status messages published to forges, uses [Go templates](https://pkg.go.dev/text/template) as template language.
 Supported variables:

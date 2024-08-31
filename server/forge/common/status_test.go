@@ -34,6 +34,7 @@ func TestGetPipelineStatusContext(t *testing.T) {
 	repo := &model.Repo{Owner: "user1", Name: "repo1"}
 	pipeline := &model.Pipeline{Event: model.EventPull}
 	workflow := &model.Workflow{Name: "lint"}
+	pipeline.Workflows = append(pipeline.Workflows, workflow)
 
 	assert.EqualValues(t, "", GetPipelineStatusContext(repo, pipeline, workflow))
 
@@ -46,4 +47,10 @@ func TestGetPipelineStatusContext(t *testing.T) {
 	server.Config.Server.StatusContext = "ci"
 	server.Config.Server.StatusContextFormat = "{{ .context }}:{{ .owner }}/{{ .repo }}:{{ .event }}:{{ .workflow }}"
 	assert.EqualValues(t, "ci:user1/repo1:push:lint", GetPipelineStatusContext(repo, pipeline, workflow))
+
+	server.Config.Server.StatusContext = "ci"
+	server.Config.Server.StatusContextFormat = "{{.context}}/{{.event}}{{if gt .workflow_count 1}}/{{.workflow}}{{end}}"
+	assert.EqualValues(t, "ci/push", GetPipelineStatusContext(repo, pipeline, workflow))
+	pipeline.Workflows = append(pipeline.Workflows, &model.Workflow{Name: "build"})
+	assert.EqualValues(t, "ci/push/lint", GetPipelineStatusContext(repo, pipeline, workflow))
 }

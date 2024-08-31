@@ -38,12 +38,13 @@ func GetPipelineStatusContext(repo *model.Repo, pipeline *model.Pipeline, workfl
 	}
 	var ctx bytes.Buffer
 	err = tmpl.Execute(&ctx, map[string]any{
-		"context":  server.Config.Server.StatusContext,
-		"event":    event,
-		"workflow": workflow.Name,
-		"owner":    repo.Owner,
-		"repo":     repo.Name,
-		"axis_id":  workflow.AxisID,
+		"context":        server.Config.Server.StatusContext,
+		"event":          event,
+		"workflow":       workflow.Name,
+		"workflow_count": len(pipeline.Workflows),
+		"owner":          repo.Owner,
+		"repo":           repo.Name,
+		"axis_id":        workflow.AxisID,
 	})
 	if err != nil {
 		log.Error().Err(err).Msg("could not create status context")
