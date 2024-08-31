@@ -61,18 +61,6 @@ func MatchImage(from string, to ...string) bool {
 	return false
 }
 
-// MatchImageExact returns true if the image name and tag matches
-// an image in the list.
-func MatchImageExact(from string, to ...string) bool {
-	from = expandImage(from)
-	for _, match := range to {
-		if from == expandImage(match) {
-			return true
-		}
-	}
-	return false
-}
-
 // MatchImageDynamic check if image is in list based on list.
 // If an list entry has a tag specified it only will match if both are the same, else the tag is ignored.
 func MatchImageDynamic(from string, to ...string) bool {
