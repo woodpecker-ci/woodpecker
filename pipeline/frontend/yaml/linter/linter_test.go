@@ -39,7 +39,7 @@ steps:
       - go build
       - go test
   publish:
-    image: plugins/docker
+    image: woodpeckerci/plugin-docker-buildx
     settings:
       repo: foo/bar
       foo: bar
@@ -61,7 +61,7 @@ steps:
       - go build
       - go test
   - name: publish
-    image: plugins/docker
+    image: woodpeckerci/plugin-docker-buildx
     settings:
       repo: foo/bar
       foo: bar
@@ -168,6 +168,10 @@ func TestLintErrors(t *testing.T) {
 		{
 			from: "{pipeline: { build: { image: golang, settings: { test: 'true' } } }, when: { branch: main, event: push } }",
 			want: "Additional property pipeline is not allowed",
+		},
+		{
+			from: "{steps: { build: { image: plugins/docker, settings: { test: 'true' } } }, when: { branch: main, event: push } } }",
+			want: "Cannot use once privileged plugins removed from WOODPECKER_ESCALATE, use 'woodpeckerci/plugin-docker-buildx' instead",
 		},
 		{
 			from: "{steps: { build: { image: golang, settings: { test: 'true' } } }, when: { branch: main, event: push }, clone: { git: { image: woodpeckerci/plugin-git:v1.1.0 } } }",

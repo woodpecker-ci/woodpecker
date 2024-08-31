@@ -30,7 +30,8 @@ import (
 
 // A Linter lints a pipeline configuration.
 type Linter struct {
-	trusted bool
+	trusted           bool
+	privilegedPlugins *[]string
 }
 
 // New creates a new Linter with options.
@@ -143,6 +144,9 @@ func (l *Linter) lintContainers(config *WorkflowConfig, area string) error {
 		if err := l.lintSettings(config, container, area); err != nil {
 			linterErr = multierr.Append(linterErr, err)
 		}
+		if err := l.lintPrivilegedPlugins(config, container, area); err != nil {
+			linterErr = multierr.Append(linterErr, err)
+		}
 	}
 
 	return linterErr
@@ -152,6 +156,22 @@ func (l *Linter) lintImage(config *WorkflowConfig, c *types.Container, area stri
 	if len(c.Image) == 0 {
 		return newLinterError("Invalid or missing image", config.File, fmt.Sprintf("%s.%s", area, c.Name), false)
 	}
+	return nil
+}
+
+func (l *Linter) lintPrivilegedPlugins(config *WorkflowConfig, c *types.Container, area string) error {
+	// lint for conflicts of https://github.com/woodpecker-ci/woodpecker/pull/3918
+	if utils.MatchImage(c.Image, "plugins/docker", "plugins/gcr", "plugins/ecr") {
+		msg := "Cannot use once privileged plugins removed from WOODPECKER_ESCALATE, use 'woodpeckerci/plugin-docker-buildx' instead"
+		// check first if user did not add them back
+		if l.privilegedPlugins != nil && !utils.MatchImage(c.Image, *l.privilegedPlugins...) {
+			return newLinterError(msg, config.File, fmt.Sprintf("%s.%s", area, c.Name), false)
+		} else if l.privilegedPlugins == nil {
+			// if linter has no info of current privileged plugins, it's just a warning
+			return newLinterError(msg, config.File, fmt.Sprintf("%s.%s", area, c.Name), true)
+		}
+	}
+
 	return nil
 }
 
@@ -241,7 +261,7 @@ func (l *Linter) lintDeprecations(config *WorkflowConfig) (err error) {
 		return err
 	}
 
-	return err
+	return nil
 }
 
 func (l *Linter) lintBadHabits(config *WorkflowConfig) (err error) {

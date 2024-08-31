@@ -16,9 +16,6 @@ package constant
 
 // PrivilegedPlugins can be changed by 'WOODPECKER_ESCALATE' at runtime.
 var PrivilegedPlugins = []string{
-	"plugins/docker",
-	"plugins/gcr",
-	"plugins/ecr",
 	// latest buildx
 	"docker.io/woodpeckerci/plugin-docker-buildx:latest",
 	"codeberg.org/woodpecker-plugins/docker-buildx:latest",
