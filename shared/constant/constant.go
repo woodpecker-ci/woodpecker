@@ -16,8 +16,13 @@ package constant
 
 // PrivilegedPlugins can be changed by 'WOODPECKER_ESCALATE' at runtime.
 var PrivilegedPlugins = []string{
-	"docker.io/woodpeckerci/plugin-docker-buildx",
-	"codeberg.org/woodpecker-plugins/docker-buildx",
+	// latest buildx
+	"docker.io/woodpeckerci/plugin-docker-buildx:latest",
+	"codeberg.org/woodpecker-plugins/docker-buildx:latest",
+	// renovate: datasource=docker depName=docker.io/woodpeckerci/plugin-docker-buildx
+	"docker.io/woodpeckerci/plugin-docker-buildx:4.2.0",
+	// renovate: datasource=docker depName=codeberg.org/woodpecker-plugins/docker-buildx
+	"codeberg.org/woodpecker-plugins/docker-buildx:4.2.0",
 }
 
 // DefaultConfigOrder represent the priority in witch woodpecker search for a pipeline config by default
@@ -35,6 +40,41 @@ const (
 )
 
 var TrustedCloneImages = []string{
+	// we should trust to inject netrc to the clone step image we assign ourselves
 	DefaultCloneImage,
-	"quay.io/woodpeckerci/plugin-git",
+	// we should trust the latest versions of our clone plugin(s)
+	"docker.io/woodpeckerci/plugin-git:latest",
+	"quay.io/woodpeckerci/plugin-git:latest",
+	// alternate valid trusted images
+	// renovate: datasource=docker depName=quay.io/woodpeckerci/plugin-git
+	"quay.io/woodpeckerci/plugin-git:2.5.2",
+
+	// allow the dev image
+	"docker.io/woodpeckerci/plugin-git:next",
+
+	// old version witch we know have no problem (e.g. allow-list)
+	"docker.io/woodpeckerci/plugin-git:2.5.2",
+	"quay.io/woodpeckerci/plugin-git:2.5.2",
+	"docker.io/woodpeckerci/plugin-git:2.5.1",
+	"quay.io/woodpeckerci/plugin-git:2.5.1",
+	"docker.io/woodpeckerci/plugin-git:2.5.0",
+	"quay.io/woodpeckerci/plugin-git:2.5.0",
+	"docker.io/woodpeckerci/plugin-git:2.4.0",
+	"quay.io/woodpeckerci/plugin-git:2.4.0",
+	"docker.io/woodpeckerci/plugin-git:2.3.1",
+	"quay.io/woodpeckerci/plugin-git:2.3.1",
+	"docker.io/woodpeckerci/plugin-git:2.3.0",
+	"quay.io/woodpeckerci/plugin-git:2.3.0",
+	"docker.io/woodpeckerci/plugin-git:2.2.0",
+	"quay.io/woodpeckerci/plugin-git:2.2.0",
+	"docker.io/woodpeckerci/plugin-git:2.1.2",
+	"quay.io/woodpeckerci/plugin-git:2.1.2",
+	"docker.io/woodpeckerci/plugin-git:2.1.0",
+	"quay.io/woodpeckerci/plugin-git:2.1.0",
+	"docker.io/woodpeckerci/plugin-git:2.0.3",
+	"quay.io/woodpeckerci/plugin-git:2.0.3",
+	"docker.io/woodpeckerci/plugin-git:2.0.2",
+	"quay.io/woodpeckerci/plugin-git:2.0.2",
+	"docker.io/woodpeckerci/plugin-git:2.0.1",
+	"quay.io/woodpeckerci/plugin-git:2.0.1",
 }
