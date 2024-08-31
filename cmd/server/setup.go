@@ -226,9 +226,9 @@ func setupEvilGlobals(ctx context.Context, c *cli.Command, s store.Store) error 
 	server.Config.WebUI.SkipVersionCheck = c.Bool("skip-version-check")
 
 	// list has default value but should be able to be set to zero
-	server.Config.Pipeline.Privileged = c.StringSlice("escalate")
+	server.Config.Pipeline.PrivilegedPlugins = c.StringSlice("escalate")
 	if val, set := os.LookupEnv("WOODPECKER_ESCALATE"); set && val == "" {
-		server.Config.Pipeline.Privileged = []string{}
+		server.Config.Pipeline.PrivilegedPlugins = []string{}
 	}
 
 	// prometheus

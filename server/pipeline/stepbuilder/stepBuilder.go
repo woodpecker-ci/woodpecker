@@ -267,7 +267,7 @@ func (b *StepBuilder) toInternalRepresentation(parsed *yaml_types.Workflow, envi
 		compiler.WithEnviron(environ),
 		compiler.WithEnviron(b.Envs),
 		// TODO: server deps should be moved into StepBuilder fields and set on StepBuilder creation
-		compiler.WithEscalated(server.Config.Pipeline.Privileged...),
+		compiler.WithEscalated(server.Config.Pipeline.PrivilegedPlugins...),
 		compiler.WithResourceLimit(server.Config.Pipeline.Limits.MemSwapLimit, server.Config.Pipeline.Limits.MemLimit, server.Config.Pipeline.Limits.ShmSize, server.Config.Pipeline.Limits.CPUQuota, server.Config.Pipeline.Limits.CPUShares, server.Config.Pipeline.Limits.CPUSet),
 		compiler.WithVolumes(server.Config.Pipeline.Volumes...),
 		compiler.WithNetworks(server.Config.Pipeline.Networks...),
