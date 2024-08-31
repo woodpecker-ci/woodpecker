@@ -35,6 +35,7 @@
 
 ### 📚 Documentation
 
+- Add some posts and videos [[#4070](https://github.com/woodpecker-ci/woodpecker/pull/4070)]
 - Move event type descriptions from Terminology to Workflow Syntax [[#4062](https://github.com/woodpecker-ci/woodpecker/pull/4062)]
 - Add community posts from discussions [[#4058](https://github.com/woodpecker-ci/woodpecker/pull/4058)]
 - Add a pull request template with some basic guidelines [[#4055](https://github.com/woodpecker-ci/woodpecker/pull/4055)]
