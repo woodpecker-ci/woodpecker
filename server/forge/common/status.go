@@ -58,21 +58,21 @@ func GetPipelineStatusContext(repo *model.Repo, pipeline *model.Pipeline, workfl
 func GetPipelineStatusDescription(status model.StatusValue) string {
 	switch status {
 	case model.StatusPending:
-		return "Pipeline is pending"
+		return "Pending"
 	case model.StatusRunning:
-		return "Pipeline is running"
+		return "Running"
 	case model.StatusSuccess:
-		return "Pipeline was successful"
+		return "Succeed"
 	case model.StatusFailure, model.StatusError:
-		return "Pipeline failed"
+		return "Failed"
 	case model.StatusKilled:
-		return "Pipeline was canceled"
+		return "Canceled"
 	case model.StatusBlocked:
-		return "Pipeline is pending approval"
+		return "Pending approval"
 	case model.StatusDeclined:
-		return "Pipeline was rejected"
+		return "Rejected"
 	default:
-		return "unknown status"
+		return "Unknown"
 	}
 }
 
