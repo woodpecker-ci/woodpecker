@@ -448,7 +448,11 @@
             "desc": "Elenco di immagini in cui questo segreto è disponibile, lascia vuoto per consentire a tutte le immagini."
         },
         "secrets": "Segreti",
-        "desc": "I segreti possono essere passati ad ogni step della pipeline, come variabili d'ambiente."
+        "desc": "I segreti possono essere passati ad ogni step della pipeline, come variabili d'ambiente.",
+        "plugins": {
+            "images": "Disponibile solo per le seguenti estensioni",
+            "desc": "Elenco delle estensioni in cui questo segreto è disponibile, lascia vuoto per consentire tutto."
+        }
     },
     "default": "predefinito",
     "info": "Dettagli",
