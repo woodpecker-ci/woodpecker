@@ -34,7 +34,7 @@ steps:
       - go test
 
   - name: publish
-    image: woodpeckerci/plugin-docker-buildx
+    image: woodpeckerci/plugin-kaniko
     settings:
       repo: foo/bar
       tags: latest

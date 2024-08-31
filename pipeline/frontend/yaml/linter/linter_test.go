@@ -39,7 +39,7 @@ steps:
       - go build
       - go test
   publish:
-    image: woodpeckerci/plugin-docker-buildx
+    image: woodpeckerci/plugin-kaniko
     settings:
       repo: foo/bar
       foo: bar
@@ -61,7 +61,7 @@ steps:
       - go build
       - go test
   - name: publish
-    image: woodpeckerci/plugin-docker-buildx
+    image: woodpeckerci/plugin-kaniko
     settings:
       repo: foo/bar
       foo: bar

@@ -255,8 +255,8 @@ func Test_matchImage(t *testing.T) {
 			want: false,
 		},
 		{
-			from: "woodpeckerci/plugin-docker-buildx",
-			to:   "docker.io/woodpeckerci/plugin-docker-buildx",
+			from: "woodpeckerci/plugin-kaniko",
+			to:   "docker.io/woodpeckerci/plugin-kaniko",
 			want: true,
 		},
 	}
