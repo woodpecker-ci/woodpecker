@@ -74,6 +74,11 @@ Please be careful when exposing secrets to pull requests. If your repository is 
 
 To prevent abusing your secrets from malicious usage, you can limit a secret to a list of plugins. If enabled they are not available to any other plugin (steps without user-defined commands). If you or an attacker defines explicit commands, the secrets will not be available to the container to prevent leaking them.
 
+:::note
+if you specify an tag, the filter will also respect it.
+just make sure you don't specify the same image without one, this will lead to ignore it again.
+:::
+
 ![plugins filter](./secrets-plugins-filter.png)
 
 ## Adding Secrets
