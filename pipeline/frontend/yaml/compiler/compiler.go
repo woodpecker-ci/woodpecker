@@ -49,7 +49,7 @@ func (s *Secret) Available(event string, container *yaml_types.Container) error 
 		return fmt.Errorf("secret %q only allowed to be used by plugins by step %q", s.Name, container.Name)
 	}
 
-	if onlyAllowSecretForPlugins && !utils.MatchImage(container.Image, s.AllowedPlugins...) {
+	if onlyAllowSecretForPlugins && !utils.MatchImageDynamic(container.Image, s.AllowedPlugins...) {
 		return fmt.Errorf("secret %q is not allowed to be used with image %q by step %q", s.Name, container.Image, container.Name)
 	}
 

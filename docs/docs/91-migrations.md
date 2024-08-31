@@ -5,6 +5,7 @@ Some versions need some changes to the server configuration or the pipeline conf
 ## `next`
 
 - Remove `plugins/docker`, `plugins/gcr` and `plugins/ecr` from the default list of privileged plugins ([modify the list via config if needed](./30-administration/10-server-config.md#woodpecker_escalate)).
+- Secret filters for plugins now check against tag if specified
 - Removed `WOODPECKER_DEV_OAUTH_HOST` and `WOODPECKER_DEV_GITEA_OAUTH_URL` use `WOODPECKER_EXPERT_FORGE_OAUTH_HOST`
 - Compatibility mode of deprecated `pipeline:`, `platform:` and `branches:` pipeline config options are now removed and pipeline will now fail if still in use.
 - Removed `steps.[name].group` in favor of `steps.[name].depends_on` (see [workflow syntax](./20-usage/20-workflow-syntax.md#depends_on) to learn how to set dependencies)
