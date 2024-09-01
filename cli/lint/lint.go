@@ -27,6 +27,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/linter"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/constant"
 )
 
 // Command exports the info command.
@@ -40,6 +41,12 @@ var Command = &cli.Command{
 			Sources: cli.EnvVars("WOODPECKER_PLUGINS_PRIVILEGED"),
 			Name:    "plugins-privileged",
 			Usage:   "Allow plugins to run in privileged mode, if environment variable is defined but empty there will be none",
+		},
+		&cli.StringSliceFlag{
+			Sources: cli.EnvVars("WOODPECKER_PLUGINS_TRUSTED_CLONE"),
+			Name:    "plugins-trusted-clone",
+			Usage:   "Plugins witch are trusted to handle the netrc info in clone steps",
+			Value:   constant.TrustedClonePlugins,
 		},
 	},
 }
@@ -105,6 +112,7 @@ func lintFile(_ context.Context, c *cli.Command, file string) error {
 	err = linter.New(
 		linter.WithTrusted(true),
 		linter.PrivilegedPlugins(c.StringSlice("plugins-privileged")),
+		linter.WithTrustedClonePlugins(c.StringSlice("plugins-trusted-clone")),
 	).Lint([]*linter.WorkflowConfig{config})
 	if err != nil {
 		str, err := FormatLintError(config.File, err)
