@@ -141,7 +141,7 @@ func (c *Compiler) createProcess(container *yaml_types.Container, stepType backe
 		environment[toUpperTarget] = secretValue
 	}
 
-	if utils.MatchImage(container.Image, c.escalated...) && container.IsPlugin() {
+	if utils.MatchImageDynamic(container.Image, c.escalated...) && container.IsPlugin() {
 		privileged = true
 	}
 
