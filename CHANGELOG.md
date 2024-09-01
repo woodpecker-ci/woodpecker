@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-08-31
+## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-09-01
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -36,6 +36,7 @@
 
 ### 📚 Documentation
 
+- Use kaniko plugin in docs as example [[#4072](https://github.com/woodpecker-ci/woodpecker/pull/4072)]
 - Add some posts and videos [[#4070](https://github.com/woodpecker-ci/woodpecker/pull/4070)]
 - Move event type descriptions from Terminology to Workflow Syntax [[#4062](https://github.com/woodpecker-ci/woodpecker/pull/4062)]
 - Add community posts from discussions [[#4058](https://github.com/woodpecker-ci/woodpecker/pull/4058)]
