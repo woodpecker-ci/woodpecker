@@ -421,7 +421,7 @@
   },
   "variables": {
     "variables": "Variables",
-    "desc": "Variables can be passed to individual pipeline steps at runtime as environmental variables.",
+    "desc": "Variables can be passed to individual pipeline steps at execution start.",
     "none": "There are no variables yet.",
     "add": "Add variable",
     "save": "Save variable",
