@@ -22,7 +22,6 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/constraint"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/types/base"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/utils"
-	"go.woodpecker-ci.org/woodpecker/v2/shared/constant"
 )
 
 type (
@@ -125,6 +124,6 @@ func (c *Container) IsPlugin() bool {
 		len(c.Secrets) == 0
 }
 
-func (c *Container) IsTrustedCloneImage() bool {
-	return c.IsPlugin() && utils.MatchImage(c.Image, constant.TrustedCloneImages...)
+func (c *Container) IsTrustedCloneImage(trustedClonePlugins []string) bool {
+	return c.IsPlugin() && utils.MatchImageDynamic(c.Image, trustedClonePlugins...)
 }

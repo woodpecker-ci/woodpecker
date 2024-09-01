@@ -41,6 +41,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/linter"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/matrix"
 	pipelineLog "go.woodpecker-ci.org/woodpecker/v2/pipeline/log"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/constant"
 	"go.woodpecker-ci.org/woodpecker/v2/shared/utils"
 )
 
@@ -185,7 +186,10 @@ func execWithAxis(ctx context.Context, c *cli.Command, file, repoPath string, ax
 	}
 
 	// lint the yaml file
-	err = linter.New(linter.WithTrusted(true)).Lint([]*linter.WorkflowConfig{{
+	err = linter.New(
+		linter.WithTrusted(true),
+		linter.WithTrustedClonePlugins(constant.TrustedClonePlugins),
+	).Lint([]*linter.WorkflowConfig{{
 		File:      path.Base(file),
 		RawConfig: confStr,
 		Workflow:  conf,

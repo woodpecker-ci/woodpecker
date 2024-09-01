@@ -92,7 +92,7 @@ func TestCompilerCompile(t *testing.T) {
 		Steps: []*backend_types.Step{{
 			Name:       "clone",
 			Type:       backend_types.StepTypeClone,
-			Image:      constant.DefaultCloneImage,
+			Image:      constant.DefaultClonePlugin,
 			OnSuccess:  true,
 			Failure:    "fail",
 			Volumes:    []string{defaultVolumes[0].Name + ":/woodpecker"},
