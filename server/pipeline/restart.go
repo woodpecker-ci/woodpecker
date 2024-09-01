@@ -33,7 +33,7 @@ func Restart(ctx context.Context, store store.Store, lastPipeline *model.Pipelin
 	if err != nil {
 		msg := fmt.Sprintf("failure to load forge for repo '%s'", repo.FullName)
 		log.Error().Err(err).Str("repo", repo.FullName).Msg(msg)
-		return nil, fmt.Errorf(msg)
+		return nil, errors.New(msg)
 	}
 
 	switch lastPipeline.Status {
@@ -70,7 +70,7 @@ func Restart(ctx context.Context, store store.Store, lastPipeline *model.Pipelin
 	if err != nil {
 		msg := fmt.Sprintf("failure to save pipeline for %s", repo.FullName)
 		log.Error().Err(err).Msg(msg)
-		return nil, fmt.Errorf(msg)
+		return nil, errors.New(msg)
 	}
 
 	if len(configs) == 0 {
@@ -85,27 +85,27 @@ func Restart(ctx context.Context, store store.Store, lastPipeline *model.Pipelin
 	if err := linkPipelineConfigs(store, configs, newPipeline.ID); err != nil {
 		msg := fmt.Sprintf("failure to persist pipeline config for %s.", repo.FullName)
 		log.Error().Err(err).Msg(msg)
-		return nil, fmt.Errorf(msg)
+		return nil, errors.New(msg)
 	}
 
 	newPipeline, pipelineItems, err := createPipelineItems(ctx, forge, store, newPipeline, user, repo, pipelineFiles, envs)
 	if err != nil {
 		msg := fmt.Sprintf("failure to createPipelineItems for %s", repo.FullName)
 		log.Error().Err(err).Msg(msg)
-		return nil, fmt.Errorf(msg)
+		return nil, errors.New(msg)
 	}
 
 	if err := prepareStart(ctx, forge, store, newPipeline, user, repo); err != nil {
 		msg := fmt.Sprintf("failure to prepare pipeline for %s", repo.FullName)
 		log.Error().Err(err).Msg(msg)
-		return nil, fmt.Errorf(msg)
+		return nil, errors.New(msg)
 	}
 
 	newPipeline, err = start(ctx, forge, store, newPipeline, user, repo, pipelineItems)
 	if err != nil {
 		msg := fmt.Sprintf("failure to start pipeline for %s", repo.FullName)
 		log.Error().Err(err).Msg(msg)
-		return nil, fmt.Errorf(msg)
+		return nil, errors.New(msg)
 	}
 
 	return newPipeline, nil

@@ -34,7 +34,7 @@ steps:
       - go test
 
   - name: publish
-    image: woodpeckerci/plugin-docker-buildx
+    image: woodpeckerci/plugin-kaniko
     settings:
       repo: foo/bar
       tags: latest
@@ -50,9 +50,10 @@ steps:
 Plugins are just pipeline steps. They share the build workspace, mounted as a volume, and therefore have access to your source tree.
 While normal steps are all about arbitrary code execution, plugins should only allow the functions intended by the plugin author.
 
-So there are a few limitations, like the workspace base is always mounted at `/woodpecker`, but the working directory is dynamically adjusted accordingly. So as user of a plugin you should not have to care about this.
-
-Also instead of using environment variables the plugin should only care about one prefixed with `PLUGIN_` witch are the internal representation of the **settings** ([read more](./20-creating-plugins.md)).
+That's why there are a few limitations. The workspace base is always mounted at `/woodpecker`, but the working directory is dynamically
+adjusted accordingly, as user of a plugin you should not have to care about this. Also, you cannot use the plugin together with `commands`
+or `entrypoint` which will fail. Using `secrets` or `environment` is possible, but in this case, the plugin is internally not treated as plugin
+anymore. The container then cannot access secrets with plugin filter anymore and the containers won't be privileged without explicit definition.
 
 ## Finding Plugins
 
