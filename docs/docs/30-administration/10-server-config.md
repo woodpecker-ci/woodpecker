@@ -323,7 +323,9 @@ List of event names that will be canceled when a new pipeline for the same conte
 
 > Default is defined in [shared/constant/constant.go](https://github.com/woodpecker-ci/woodpecker/blob/main/shared/constant/constant.go)
 
-The default docker image to be used when cloning the repo
+The default docker image to be used when cloning the repo.
+
+It is also added to the trusted clone plugin list.
 
 ### `WOODPECKER_DEFAULT_PIPELINE_TIMEOUT`
 
