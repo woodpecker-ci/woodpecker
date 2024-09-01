@@ -30,6 +30,7 @@
 
 ### 🔒 Security
 
+- Allow admins to specify priviledged plugins by name **and tag** [[#4075](https://github.com/woodpecker-ci/woodpecker/pull/4075)]
 - Allow alter trusted clone plugins and filter them via tag [[#4074](https://github.com/woodpecker-ci/woodpecker/pull/4074)]
 - Warn if using secrets/env with plugin [[#4027](https://github.com/woodpecker-ci/woodpecker/pull/4027)]
 - Update gitea sdk [[#4012](https://github.com/woodpecker-ci/woodpecker/pull/4012)]
