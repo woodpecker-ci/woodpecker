@@ -35,7 +35,7 @@ const (
 )
 
 // TrustedClonePlugins can be changed by 'WOODPECKER_PLUGINS_TRUSTED_CLONE' at runtime.
-var TrustedCloneImages = []string{
+var TrustedClonePlugins = []string{
 	// we should trust to inject netrc to the clone step image we assign ourselves
 	DefaultClonePlugin,
 	// we should trust the latest versions of our clone plugin(s)
