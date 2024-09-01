@@ -135,10 +135,11 @@ var flags = append([]cli.Flag{
 		Value:   []string{"push", "pull_request"},
 	},
 	&cli.StringFlag{
-		Sources: cli.EnvVars("WOODPECKER_DEFAULT_CLONE_IMAGE"),
-		Name:    "default-clone-image",
+		Sources: cli.EnvVars("WOODPECKER_DEFAULT_CLONE_PLUGIN", "WOODPECKER_DEFAULT_CLONE_IMAGE"),
+		Name:    "default-clone-plugin",
+		Aliases: []string{"default-clone-image"},
 		Usage:   "The default docker image to be used when cloning the repo",
-		Value:   constant.DefaultCloneImage,
+		Value:   constant.DefaultClonePlugin,
 	},
 	&cli.IntFlag{
 		Sources: cli.EnvVars("WOODPECKER_DEFAULT_PIPELINE_TIMEOUT"),
@@ -163,6 +164,12 @@ var flags = append([]cli.Flag{
 		Name:    "escalate",
 		Usage:   "Allow plugins to run in privileged mode, if environment variable is defined but empty there will be none",
 		Value:   constant.PrivilegedPlugins,
+	},
+	&cli.StringSliceFlag{
+		Sources: cli.EnvVars("WOODPECKER_PLUGINS_TRUSTED_CLONE"),
+		Name:    "plugins-trusted-clone",
+		Usage:   "Plugins witch are trusted to handle the netrc info in clone steps",
+		Value:   constant.TrustedClonePlugins,
 	},
 	&cli.StringSliceFlag{
 		Sources: cli.EnvVars("WOODPECKER_VOLUME"),

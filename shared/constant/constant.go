@@ -29,47 +29,14 @@ var DefaultConfigOrder = [...]string{
 }
 
 const (
-	// DefaultCloneImage can be changed by 'WOODPECKER_DEFAULT_CLONE_IMAGE' at runtime.
+	// DefaultClonePlugin can be changed by 'WOODPECKER_DEFAULT_CLONE_PLUGIN' at runtime.
 	// renovate: datasource=docker depName=woodpeckerci/plugin-git
-	DefaultCloneImage = "docker.io/woodpeckerci/plugin-git:2.5.2"
+	DefaultClonePlugin = "docker.io/woodpeckerci/plugin-git:2.5.2"
 )
 
-var TrustedCloneImages = []string{
-	// we should trust to inject netrc to the clone step image we assign ourselves
-	DefaultCloneImage,
-	// we should trust the latest versions of our clone plugin(s)
-	"docker.io/woodpeckerci/plugin-git:latest",
-	"quay.io/woodpeckerci/plugin-git:latest",
-	// alternate valid trusted images
-	// renovate: datasource=docker depName=quay.io/woodpeckerci/plugin-git
-	"quay.io/woodpeckerci/plugin-git:2.5.2",
-
-	// allow the dev image
-	"docker.io/woodpeckerci/plugin-git:next",
-
-	// old version witch we know have no problem (e.g. allow-list)
-	"docker.io/woodpeckerci/plugin-git:2.5.2",
-	"quay.io/woodpeckerci/plugin-git:2.5.2",
-	"docker.io/woodpeckerci/plugin-git:2.5.1",
-	"quay.io/woodpeckerci/plugin-git:2.5.1",
-	"docker.io/woodpeckerci/plugin-git:2.5.0",
-	"quay.io/woodpeckerci/plugin-git:2.5.0",
-	"docker.io/woodpeckerci/plugin-git:2.4.0",
-	"quay.io/woodpeckerci/plugin-git:2.4.0",
-	"docker.io/woodpeckerci/plugin-git:2.3.1",
-	"quay.io/woodpeckerci/plugin-git:2.3.1",
-	"docker.io/woodpeckerci/plugin-git:2.3.0",
-	"quay.io/woodpeckerci/plugin-git:2.3.0",
-	"docker.io/woodpeckerci/plugin-git:2.2.0",
-	"quay.io/woodpeckerci/plugin-git:2.2.0",
-	"docker.io/woodpeckerci/plugin-git:2.1.2",
-	"quay.io/woodpeckerci/plugin-git:2.1.2",
-	"docker.io/woodpeckerci/plugin-git:2.1.0",
-	"quay.io/woodpeckerci/plugin-git:2.1.0",
-	"docker.io/woodpeckerci/plugin-git:2.0.3",
-	"quay.io/woodpeckerci/plugin-git:2.0.3",
-	"docker.io/woodpeckerci/plugin-git:2.0.2",
-	"quay.io/woodpeckerci/plugin-git:2.0.2",
-	"docker.io/woodpeckerci/plugin-git:2.0.1",
-	"quay.io/woodpeckerci/plugin-git:2.0.1",
+// TrustedClonePlugins can be changed by 'WOODPECKER_PLUGINS_TRUSTED_CLONE' at runtime.
+var TrustedClonePlugins = []string{
+	DefaultClonePlugin,
+	"docker.io/woodpeckerci/plugin-git",
+	"quay.io/woodpeckerci/plugin-git",
 }
