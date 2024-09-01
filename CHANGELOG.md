@@ -86,6 +86,7 @@
 
 ### Misc
 
+- fix(deps): update module github.com/google/go-github/v63 to v64 [[#4073](https://github.com/woodpecker-ci/woodpecker/pull/4073)]
 - fix(deps): update golang-packages [[#4059](https://github.com/woodpecker-ci/woodpecker/pull/4059)]
 - Add systemd unit files to the RPM/DEB packages [[#3986](https://github.com/woodpecker-ci/woodpecker/pull/3986)]
 - Add eslint-plugin-promise back [[#4022](https://github.com/woodpecker-ci/woodpecker/pull/4022)]
