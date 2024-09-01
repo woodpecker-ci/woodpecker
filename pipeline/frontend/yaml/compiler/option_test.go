@@ -20,6 +20,7 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/metadata"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/constant"
 )
 
 func TestWithWorkspace(t *testing.T) {
@@ -171,4 +172,12 @@ func TestDefaultClonePlugin(t *testing.T) {
 		WithDefaultClonePlugin("not-an-image"),
 	)
 	assert.Equal(t, "not-an-image", compiler.defaultClonePlugin)
+}
+
+func TestWithTrustedClonePlugins(t *testing.T) {
+	compiler := New(WithTrustedClonePlugins([]string{"not-an-image"}))
+	assert.ElementsMatch(t, []string{"not-an-image"}, compiler.trustedClonePlugins)
+
+	compiler = New()
+	assert.ElementsMatch(t, constant.TrustedClonePlugins, compiler.trustedClonePlugins)
 }
