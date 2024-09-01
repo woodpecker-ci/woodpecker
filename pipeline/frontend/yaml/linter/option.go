@@ -30,3 +30,10 @@ func PrivilegedPlugins(plugins []string) Option {
 		linter.privilegedPlugins = &plugins
 	}
 }
+
+// WithTrustedClonePlugins adds the list of trusted clone plugins.
+func WithTrustedClonePlugins(plugins []string) Option {
+	return func(linter *Linter) {
+		linter.trustedClonePlugins = &plugins
+	}
+}

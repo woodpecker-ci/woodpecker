@@ -173,6 +173,10 @@ func TestLintErrors(t *testing.T) {
 			from: "{steps: { build: { image: plugins/docker, settings: { test: 'true' } } }, when: { branch: main, event: push } } }",
 			want: "Cannot use once privileged plugins removed from WOODPECKER_ESCALATE, use 'woodpeckerci/plugin-docker-buildx' instead",
 		},
+		{
+			from: "{steps: { build: { image: golang, settings: { test: 'true' } } }, when: { branch: main, event: push }, clone: { git: { image: some-other/plugin-git:v1.1.0 } } }",
+			want: "Specified clone image does not match allow list, netrc will not be injected",
+		},
 	}
 
 	for _, test := range testdata {
