@@ -30,6 +30,7 @@
 
 ### 🔒 Security
 
+- Allow alter trusted clone plugins and filter them via tag [[#4074](https://github.com/woodpecker-ci/woodpecker/pull/4074)]
 - Warn if using secrets/env with plugin [[#4027](https://github.com/woodpecker-ci/woodpecker/pull/4027)]
 - Update gitea sdk [[#4012](https://github.com/woodpecker-ci/woodpecker/pull/4012)]
 - Update Forgejo SDK [[#3948](https://github.com/woodpecker-ci/woodpecker/pull/3948)]
