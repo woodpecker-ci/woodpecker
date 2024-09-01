@@ -92,22 +92,23 @@ type ResourceLimit struct {
 
 // Compiler compiles the yaml.
 type Compiler struct {
-	local             bool
-	escalated         []string
-	prefix            string
-	volumes           []string
-	networks          []string
-	env               map[string]string
-	cloneEnv          map[string]string
-	workspaceBase     string
-	workspacePath     string
-	metadata          metadata.Metadata
-	registries        []Registry
-	secrets           map[string]Secret
-	reslimit          ResourceLimit
-	defaultCloneImage string
-	trustedPipeline   bool
-	netrcOnlyTrusted  bool
+	local               bool
+	escalated           []string
+	prefix              string
+	volumes             []string
+	networks            []string
+	env                 map[string]string
+	cloneEnv            map[string]string
+	workspaceBase       string
+	workspacePath       string
+	metadata            metadata.Metadata
+	registries          []Registry
+	secrets             map[string]Secret
+	reslimit            ResourceLimit
+	defaultClonePlugin  string
+	trustedClonePlugins []string
+	trustedPipeline     bool
+	netrcOnlyTrusted    bool
 }
 
 // New creates a new Compiler with options.
@@ -163,9 +164,9 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 		c.workspacePath = path.Clean(conf.Workspace.Path)
 	}
 
-	cloneImage := constant.DefaultCloneImage
-	if len(c.defaultCloneImage) > 0 {
-		cloneImage = c.defaultCloneImage
+	cloneImage := constant.DefaultClonePlugin
+	if len(c.defaultClonePlugin) > 0 {
+		cloneImage = c.defaultClonePlugin
 	}
 
 	// add default clone step

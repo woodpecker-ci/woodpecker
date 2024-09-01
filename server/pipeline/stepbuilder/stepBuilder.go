@@ -281,7 +281,7 @@ func (b *StepBuilder) toInternalRepresentation(parsed *yaml_types.Workflow, envi
 			),
 			b.Repo.IsSCMPrivate || server.Config.Pipeline.AuthenticatePublicRepos,
 		),
-		compiler.WithDefaultCloneImage(server.Config.Pipeline.DefaultCloneImage),
+		compiler.WithDefaultClonePlugin(server.Config.Pipeline.DefaultClonePlugin),
 		compiler.WithRegistry(registries...),
 		compiler.WithSecret(secrets...),
 		compiler.WithPrefix(

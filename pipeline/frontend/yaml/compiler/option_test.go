@@ -166,9 +166,9 @@ func TestWithEnviron(t *testing.T) {
 	assert.Equal(t, "true", compiler.env["SHOW"])
 }
 
-func TestWithDefaultCloneImage(t *testing.T) {
+func TestDefaultClonePlugin(t *testing.T) {
 	compiler := New(
-		WithDefaultCloneImage("not-an-image"),
+		WithDefaultClonePlugin("not-an-image"),
 	)
 	assert.Equal(t, "not-an-image", compiler.defaultCloneImage)
 }

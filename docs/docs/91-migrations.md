@@ -4,6 +4,7 @@ Some versions need some changes to the server configuration or the pipeline conf
 
 ## `next`
 
+- `WOODPECKER_DEFAULT_CLONE_IMAGE` got depricated use `WOODPECKER_DEFAULT_CLONE_PLUGIN`
 - Check trusted-clone- and priviledged-plugins by image name and tag (if tag is set)
 - Remove `plugins/docker`, `plugins/gcr` and `plugins/ecr` from the default list of privileged plugins ([modify the list via config if needed](./30-administration/10-server-config.md#woodpecker_escalate)).
 - Secret filters for plugins now check against tag if specified

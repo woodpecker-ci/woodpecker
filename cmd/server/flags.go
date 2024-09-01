@@ -135,10 +135,11 @@ var flags = append([]cli.Flag{
 		Value:   []string{"push", "pull_request"},
 	},
 	&cli.StringFlag{
-		Sources: cli.EnvVars("WOODPECKER_DEFAULT_CLONE_IMAGE"),
-		Name:    "default-clone-image",
+		Sources: cli.EnvVars("WOODPECKER_DEFAULT_CLONE_PLUGIN", "WOODPECKER_DEFAULT_CLONE_IMAGE"),
+		Name:    "default-clone-plugin",
+		Aliases: []string{"default-clone-image"},
 		Usage:   "The default docker image to be used when cloning the repo",
-		Value:   constant.DefaultCloneImage,
+		Value:   constant.DefaultClonePlugin,
 	},
 	&cli.IntFlag{
 		Sources: cli.EnvVars("WOODPECKER_DEFAULT_PIPELINE_TIMEOUT"),

@@ -172,9 +172,9 @@ func WithResourceLimit(swap, mem, shmSize, cpuQuota, cpuShares int64, cpuSet str
 	}
 }
 
-func WithDefaultCloneImage(cloneImage string) Option {
+func WithDefaultClonePlugin(cloneImage string) Option {
 	return func(compiler *Compiler) {
-		compiler.defaultCloneImage = cloneImage
+		compiler.defaultClonePlugin = cloneImage
 	}
 }
 
