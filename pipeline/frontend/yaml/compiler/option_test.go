@@ -170,5 +170,5 @@ func TestDefaultClonePlugin(t *testing.T) {
 	compiler := New(
 		WithDefaultClonePlugin("not-an-image"),
 	)
-	assert.Equal(t, "not-an-image", compiler.defaultCloneImage)
+	assert.Equal(t, "not-an-image", compiler.defaultClonePlugin)
 }

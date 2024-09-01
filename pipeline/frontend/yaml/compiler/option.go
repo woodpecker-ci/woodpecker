@@ -178,6 +178,12 @@ func WithDefaultClonePlugin(cloneImage string) Option {
 	}
 }
 
+func WithTrustedClonePlugins(images []string) Option {
+	return func(compiler *Compiler) {
+		compiler.trustedClonePlugins = images
+	}
+}
+
 // WithTrusted configures the compiler with the trusted repo option.
 func WithTrusted(trusted bool) Option {
 	return func(compiler *Compiler) {

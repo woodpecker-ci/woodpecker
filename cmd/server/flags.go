@@ -166,6 +166,12 @@ var flags = append([]cli.Flag{
 		Value:   constant.PrivilegedPlugins,
 	},
 	&cli.StringSliceFlag{
+		Sources: cli.EnvVars("WOODPECKER_PLUGINS_TRUSTED_CLONE"),
+		Name:    "plugins-trusted-clone",
+		Usage:   "Plugins witch are trusted to handle the netrc info in clone steps",
+		Value:   constant.TrustedClonePlugins,
+	},
+	&cli.StringSliceFlag{
 		Sources: cli.EnvVars("WOODPECKER_VOLUME"),
 		Name:    "volume",
 	},

@@ -143,6 +143,7 @@ func (b *StepBuilder) genItemForWorkflow(workflow *model.Workflow, axis matrix.A
 	errorsAndWarnings = multierr.Append(errorsAndWarnings, linter.New(
 		linter.WithTrusted(b.Repo.IsTrusted),
 		linter.PrivilegedPlugins(server.Config.Pipeline.PrivilegedPlugins),
+		linter.WithTrustedClonePlugins(server.Config.Pipeline.TrustedClonePlugins),
 	).Lint([]*linter.WorkflowConfig{{
 		Workflow:  parsed,
 		File:      workflow.Name,
@@ -282,6 +283,7 @@ func (b *StepBuilder) toInternalRepresentation(parsed *yaml_types.Workflow, envi
 			b.Repo.IsSCMPrivate || server.Config.Pipeline.AuthenticatePublicRepos,
 		),
 		compiler.WithDefaultClonePlugin(server.Config.Pipeline.DefaultClonePlugin),
+		compiler.WithTrustedClonePlugins(server.Config.Pipeline.TrustedClonePlugins),
 		compiler.WithRegistry(registries...),
 		compiler.WithSecret(secrets...),
 		compiler.WithPrefix(

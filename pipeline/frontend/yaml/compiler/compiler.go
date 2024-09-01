@@ -114,9 +114,10 @@ type Compiler struct {
 // New creates a new Compiler with options.
 func New(opts ...Option) *Compiler {
 	compiler := &Compiler{
-		env:      map[string]string{},
-		cloneEnv: map[string]string{},
-		secrets:  map[string]Secret{},
+		env:                 map[string]string{},
+		cloneEnv:            map[string]string{},
+		secrets:             map[string]Secret{},
+		trustedClonePlugins: constant.TrustedClonePlugins,
 	}
 	for _, opt := range opts {
 		opt(compiler)
@@ -209,7 +210,7 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 			}
 
 			// only inject netrc if it's a trusted repo or a trusted plugin
-			if !c.netrcOnlyTrusted || c.trustedPipeline || (container.IsPlugin() && container.IsTrustedCloneImage()) {
+			if !c.netrcOnlyTrusted || c.trustedPipeline || (container.IsPlugin() && container.IsTrustedCloneImage(c.trustedClonePlugins)) {
 				for k, v := range c.cloneEnv {
 					step.Environment[k] = v
 				}
@@ -266,7 +267,7 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 		}
 
 		// inject netrc if it's a trusted repo or a trusted clone-plugin
-		if c.trustedPipeline || (container.IsPlugin() && container.IsTrustedCloneImage()) {
+		if c.trustedPipeline || (container.IsPlugin() && container.IsTrustedCloneImage(c.trustedClonePlugins)) {
 			for k, v := range c.cloneEnv {
 				step.Environment[k] = v
 			}

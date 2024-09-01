@@ -27,6 +27,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/linter"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/constant"
 )
 
 // Command exports the info command.
@@ -95,7 +96,10 @@ func lintFile(_ context.Context, _ *cli.Command, file string) error {
 	}
 
 	// TODO: lint multiple files at once to allow checks for sth like "depends_on" to work
-	err = linter.New(linter.WithTrusted(true)).Lint([]*linter.WorkflowConfig{config})
+	err = linter.New(
+		linter.WithTrusted(true),
+		linter.WithTrustedClonePlugins(constant.TrustedClonePlugins),
+	).Lint([]*linter.WorkflowConfig{config})
 	if err != nil {
 		str, err := FormatLintError(config.File, err)
 

@@ -30,8 +30,9 @@ import (
 
 // A Linter lints a pipeline configuration.
 type Linter struct {
-	trusted           bool
-	privilegedPlugins *[]string
+	trusted             bool
+	privilegedPlugins   *[]string
+	trustedClonePlugins *[]string
 }
 
 // New creates a new Linter with options.
@@ -105,9 +106,15 @@ func (l *Linter) lintCloneSteps(config *WorkflowConfig) error {
 	if len(config.Workflow.Clone.ContainerList) == 0 {
 		return nil
 	}
+
+	trustedClonePlugins := constant.TrustedClonePlugins
+	if l.trustedClonePlugins != nil {
+		trustedClonePlugins = *l.trustedClonePlugins
+	}
+
 	var linterErr error
 	for _, container := range config.Workflow.Clone.ContainerList {
-		if !utils.MatchImageDynamic(container.Image, constant.TrustedCloneImages...) {
+		if !utils.MatchImageDynamic(container.Image, trustedClonePlugins...) {
 			linterErr = multierr.Append(linterErr,
 				newLinterError(
 					"Specified clone image does not match allow list, netrc will not be injected",
