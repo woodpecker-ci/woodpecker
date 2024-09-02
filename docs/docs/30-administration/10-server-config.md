@@ -360,6 +360,8 @@ a user can log into Woodpecker, without re-authentication.
 
 Docker images to run in privileged mode. Only change if you are sure what you do!
 
+You should specify the tag of your images too, as this enforces exact matches.
+
 <!--
 ### `WOODPECKER_VOLUME`
 > Default: empty
