@@ -7,7 +7,7 @@ Some versions need some changes to the server configuration or the pipeline conf
 - Rename server environment variable `WOODPECKER_ESCALATE` to `WOODPECKER_PLUGINS_PRIVILEGED`
 - Remove all default privileged plugins ([re-add plugins to the list via config if needed](./30-administration/10-server-config.md#woodpecker_plugins_privileged)).
 - `WOODPECKER_DEFAULT_CLONE_IMAGE` got depricated use `WOODPECKER_DEFAULT_CLONE_PLUGIN`
-- Check trusted-clone- and priviledged-plugins by image name and tag (if tag is set)
+- Check trusted-clone- and privileged-plugins by image name and tag (if tag is set)
 - Secret filters for plugins now check against tag if specified
 - Removed `WOODPECKER_DEV_OAUTH_HOST` and `WOODPECKER_DEV_GITEA_OAUTH_URL` use `WOODPECKER_EXPERT_FORGE_OAUTH_HOST`
 - Compatibility mode of deprecated `pipeline:`, `platform:` and `branches:` pipeline config options are now removed and pipeline will now fail if still in use.
