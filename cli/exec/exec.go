@@ -185,9 +185,12 @@ func execWithAxis(ctx context.Context, c *cli.Command, file, repoPath string, ax
 		volumes = append(volumes, repoPath+":"+path.Join(workspaceBase, workspacePath))
 	}
 
+	privilegedPlugins := c.StringSlice("plugins-privileged")
+
 	// lint the yaml file
 	err = linter.New(
 		linter.WithTrusted(true),
+		linter.PrivilegedPlugins(privilegedPlugins),
 		linter.WithTrustedClonePlugins(constant.TrustedClonePlugins),
 	).Lint([]*linter.WorkflowConfig{{
 		File:      path.Base(file),
@@ -205,7 +208,7 @@ func execWithAxis(ctx context.Context, c *cli.Command, file, repoPath string, ax
 	// compiles the yaml file
 	compiled, err := compiler.New(
 		compiler.WithEscalated(
-			c.StringSlice("privileged")...,
+			privilegedPlugins...,
 		),
 		compiler.WithVolumes(volumes...),
 		compiler.WithWorkspace(
