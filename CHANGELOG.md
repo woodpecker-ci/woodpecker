@@ -8,6 +8,7 @@
 
 ### 💥 Breaking changes
 
+- Remove all default privileged plugins [[#4053](https://github.com/woodpecker-ci/woodpecker/pull/4053)]
 - Remove all default 3rd party privileged plugins [[#3918](https://github.com/woodpecker-ci/woodpecker/pull/3918)]
 - Add option to filter secrets by plugins with specific tags [[#4069](https://github.com/woodpecker-ci/woodpecker/pull/4069)]
 - Remove old pipeline options [[#4016](https://github.com/woodpecker-ci/woodpecker/pull/4016)]
