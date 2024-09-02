@@ -160,10 +160,9 @@ var flags = append([]cli.Flag{
 		Value:   time.Hour * 72,
 	},
 	&cli.StringSliceFlag{
-		Sources: cli.EnvVars("WOODPECKER_ESCALATE"),
-		Name:    "escalate",
+		Sources: cli.EnvVars("WOODPECKER_PLUGINS_PRIVILEGED"),
+		Name:    "plugins-privileged",
 		Usage:   "Allow plugins to run in privileged mode, if environment variable is defined but empty there will be none",
-		Value:   constant.PrivilegedPlugins,
 	},
 	&cli.StringSliceFlag{
 		Sources: cli.EnvVars("WOODPECKER_PLUGINS_TRUSTED_CLONE"),
