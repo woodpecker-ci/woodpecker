@@ -19,7 +19,7 @@ require (
 	github.com/charmbracelet/huh/spinner v0.0.0-20240327025511-ec643317aa10
 	github.com/distribution/reference v0.5.0
 	github.com/docker/cli v24.0.9+incompatible
-	github.com/docker/docker v24.0.9+incompatible
+	github.com/docker/docker v24.0.10-0.20240723193628-852759a7df45+incompatible
 	github.com/docker/go-connections v0.5.0
 	github.com/docker/go-units v0.5.0
 	github.com/drone/envsubst v1.0.3
@@ -43,7 +43,7 @@ require (
 	github.com/lib/pq v1.10.9
 	github.com/mattn/go-sqlite3 v1.14.22
 	github.com/mitchellh/mapstructure v1.5.0
-	github.com/moby/moby v24.0.9+incompatible
+	github.com/moby/moby v24.0.10-0.20240723193628-852759a7df45+incompatible
 	github.com/moby/term v0.5.0
 	github.com/muesli/termenv v0.15.2
 	github.com/neticdk/go-bitbucket v1.0.0
