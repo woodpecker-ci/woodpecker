@@ -234,6 +234,9 @@ func setupEvilGlobals(ctx context.Context, c *cli.Command, s store.Store) error 
 	if val, set := os.LookupEnv("WOODPECKER_ESCALATE"); set && val == "" {
 		server.Config.Pipeline.Privileged = []string{}
 	}
+	if val, set := os.LookupEnv("WOODPECKER_PLUGINS_PRIVILEGED"); set && val == "" {
+		server.Config.Pipeline.Privileged = []string{}
+	}
 
 	// prometheus
 	server.Config.Prometheus.AuthToken = c.String("prometheus-auth-token")
