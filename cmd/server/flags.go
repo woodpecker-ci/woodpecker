@@ -159,7 +159,7 @@ var flags = append([]cli.Flag{
 		Value:   time.Hour * 72,
 	},
 	&cli.StringSliceFlag{
-		Sources: cli.EnvVars("WOODPECKER_ESCALATE"),
+		Sources: cli.EnvVars("WOODPECKER_ESCALATE", "WOODPECKER_PLUGINS_PRIVILEGED"),
 		Name:    "escalate",
 		Usage:   "images to run in privileged mode",
 		Value:   constant.PrivilegedPlugins,
