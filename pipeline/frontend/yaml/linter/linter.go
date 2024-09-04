@@ -29,7 +29,8 @@ import (
 
 // A Linter lints a pipeline configuration.
 type Linter struct {
-	trusted bool
+	trusted           bool
+	privilegedPlugins *[]string
 }
 
 // New creates a new Linter with options.
@@ -119,6 +120,9 @@ func (l *Linter) lintContainers(config *WorkflowConfig, area string) error {
 			}
 		}
 		if err := l.lintSettings(config, container, area); err != nil {
+			linterErr = multierr.Append(linterErr, err)
+		}
+		if err := l.lintPrivilegedPlugins(config, container, area); err != nil {
 			linterErr = multierr.Append(linterErr, err)
 		}
 	}
