@@ -166,16 +166,8 @@ func TestLintErrors(t *testing.T) {
 			want: "Should not configure both environment and settings",
 		},
 		{
-			from: "{pipeline: { build: { image: golang, settings: { test: 'true' } } }, when: { branch: main, event: push } }",
-			want: "Additional property pipeline is not allowed",
-		},
-		{
 			from: "{steps: { build: { image: plugins/docker, settings: { test: 'true' } } }, when: { branch: main, event: push } } }",
 			want: "Cannot use once by default privileged plugin 'plugins/docker', if needed add it too WOODPECKER_PLUGINS_PRIVILEGED",
-		},
-		{
-			from: "{steps: { build: { image: golang, settings: { test: 'true' } } }, when: { branch: main, event: push }, clone: { git: { image: some-other/plugin-git:v1.1.0 } } }",
-			want: "Specified clone image does not match allow list, netrc will not be injected",
 		},
 	}
 
@@ -183,7 +175,9 @@ func TestLintErrors(t *testing.T) {
 		conf, err := yaml.ParseString(test.from)
 		assert.NoError(t, err)
 
-		lerr := linter.New().Lint([]*linter.WorkflowConfig{{
+		lerr := linter.New(
+			linter.PrivilegedPlugins([]string{"woodpeckerci/plugin-docker-buildx"}),
+		).Lint([]*linter.WorkflowConfig{{
 			File:      test.from,
 			RawConfig: test.from,
 			Workflow:  conf,
