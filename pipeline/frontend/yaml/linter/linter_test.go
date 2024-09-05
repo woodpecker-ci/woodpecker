@@ -165,13 +165,19 @@ func TestLintErrors(t *testing.T) {
 			from: "steps: { build: { image: golang, settings: { test: 'true' }, environment: [ 'TEST=true' ] } }",
 			want: "Should not configure both environment and settings",
 		},
+		{
+			from: "{steps: { build: { image: plugins/docker, settings: { test: 'true' } } }, when: { branch: main, event: push } } }",
+			want: "Cannot use once by default privileged plugin 'plugins/docker', if needed add it too WOODPECKER_PLUGINS_PRIVILEGED",
+		},
 	}
 
 	for _, test := range testdata {
 		conf, err := yaml.ParseString(test.from)
 		assert.NoError(t, err)
 
-		lerr := linter.New().Lint([]*linter.WorkflowConfig{{
+		lerr := linter.New(
+			linter.PrivilegedPlugins([]string{"woodpeckerci/plugin-docker-buildx"}),
+		).Lint([]*linter.WorkflowConfig{{
 			File:      test.from,
 			RawConfig: test.from,
 			Workflow:  conf,

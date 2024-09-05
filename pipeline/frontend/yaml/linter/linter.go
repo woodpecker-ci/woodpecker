@@ -24,11 +24,14 @@ import (
 	errorTypes "go.woodpecker-ci.org/woodpecker/v2/pipeline/errors/types"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/linter/schema"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/types"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/utils"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/constant"
 )
 
 // A Linter lints a pipeline configuration.
 type Linter struct {
-	trusted bool
+	trusted           bool
+	privilegedPlugins *[]string
 }
 
 // New creates a new Linter with options.
@@ -120,6 +123,9 @@ func (l *Linter) lintContainers(config *WorkflowConfig, area string) error {
 		if err := l.lintSettings(config, container, area); err != nil {
 			linterErr = multierr.Append(linterErr, err)
 		}
+		if err := l.lintPrivilegedPlugins(config, container, area); err != nil {
+			linterErr = multierr.Append(linterErr, err)
+		}
 	}
 
 	return linterErr
@@ -129,6 +135,18 @@ func (l *Linter) lintImage(config *WorkflowConfig, c *types.Container, area stri
 	if len(c.Image) == 0 {
 		return newLinterError("Invalid or missing image", config.File, fmt.Sprintf("%s.%s", area, c.Name), false)
 	}
+	return nil
+}
+
+func (l *Linter) lintPrivilegedPlugins(config *WorkflowConfig, c *types.Container, area string) error {
+	if utils.MatchImage(c.Image, constant.PrivilegedPlugins...) {
+		msg := fmt.Sprintf("Cannot use once by default privileged plugin '%s', if needed add it too WOODPECKER_PLUGINS_PRIVILEGED", c.Image)
+		// check first if user did not add them back
+		if l.privilegedPlugins != nil && !utils.MatchImageDynamic(c.Image, *l.privilegedPlugins...) {
+			return newLinterError(msg, config.File, fmt.Sprintf("%s.%s", area, c.Name), false)
+		}
+	}
+
 	return nil
 }
 

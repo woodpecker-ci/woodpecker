@@ -142,6 +142,7 @@ func (b *StepBuilder) genItemForWorkflow(workflow *model.Workflow, axis matrix.A
 	// lint pipeline
 	errorsAndWarnings = multierr.Append(errorsAndWarnings, linter.New(
 		linter.WithTrusted(b.Repo.IsTrusted),
+		linter.PrivilegedPlugins(server.Config.Pipeline.Privileged),
 	).Lint([]*linter.WorkflowConfig{{
 		Workflow:  parsed,
 		File:      workflow.Name,
