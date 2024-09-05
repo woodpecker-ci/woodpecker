@@ -11,7 +11,7 @@ Some versions need some changes to the server configuration or the pipeline conf
   - `CI_PIPELINE_STATUS` was always `success`
   - `CI_STEP_STATUS` was always `success`
 - Rename server environment variable `WOODPECKER_ESCALATE` to `WOODPECKER_PLUGINS_PRIVILEGED`
-- Remove all default privileged plugins ([re-add plugins to the list via config if needed](./30-administration/10-server-config.md#woodpecker_plugins_privileged)).
+- All default privileged plugins (like `woodpeckerci/plugin-docker-buildx`) where removed, ([re-add plugins to the list via config if needed](./30-administration/10-server-config.md#woodpecker_plugins_privileged)).
 - `WOODPECKER_DEFAULT_CLONE_IMAGE` got depricated use `WOODPECKER_DEFAULT_CLONE_PLUGIN`
 - Check trusted-clone- and privileged-plugins by image name and tag (if tag is set)
 - Secret filters for plugins now check against tag if specified
