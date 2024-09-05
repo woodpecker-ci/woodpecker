@@ -4,7 +4,7 @@ Some versions need some changes to the server configuration or the pipeline conf
 
 ## `next`
 
-- Move docker resource limit settings into agent configuration
+- Move docker resource limit settings from server into agent configuration
 - Rename server environment variable `WOODPECKER_ESCALATE` to `WOODPECKER_PLUGINS_PRIVILEGED`
 - Remove all default privileged plugins ([re-add plugins to the list via config if needed](./30-administration/10-server-config.md#woodpecker_plugins_privileged)).
 - `WOODPECKER_DEFAULT_CLONE_IMAGE` got depricated use `WOODPECKER_DEFAULT_CLONE_PLUGIN`
