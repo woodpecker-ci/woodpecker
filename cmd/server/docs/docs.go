@@ -4859,7 +4859,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "trusted": {
-                    "type": "boolean"
+                    "$ref": "#/definitions/model.TrustedConfiguration"
                 },
                 "visibility": {
                     "$ref": "#/definitions/RepoVisibility"
@@ -4894,7 +4894,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "trusted": {
-                    "type": "boolean"
+                    "$ref": "#/definitions/model.TrustedConfigurationPatch"
                 },
                 "visibility": {
                     "type": "string"
@@ -5174,6 +5174,40 @@ const docTemplate = `{
                 "ForgeTypeBitbucketDatacenter",
                 "ForgeTypeAddon"
             ]
+        },
+        "model.TrustedConfiguration": {
+            "type": "object",
+            "properties": {
+                "network": {
+                    "type": "boolean"
+                },
+                "resources": {
+                    "type": "boolean"
+                },
+                "security": {
+                    "type": "boolean"
+                },
+                "volumes": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "model.TrustedConfigurationPatch": {
+            "type": "object",
+            "properties": {
+                "network": {
+                    "type": "boolean"
+                },
+                "resources": {
+                    "type": "boolean"
+                },
+                "security": {
+                    "type": "boolean"
+                },
+                "volumes": {
+                    "type": "boolean"
+                }
+            }
         },
         "model.Workflow": {
             "type": "object",
