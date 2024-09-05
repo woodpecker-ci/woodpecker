@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-09-04
+## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-09-05
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -89,6 +89,8 @@
 
 ### Misc
 
+- chore(deps): update docker.io/golang docker tag to v1.23 [[#4081](https://github.com/woodpecker-ci/woodpecker/pull/4081)]
+- chore(deps): update docker.io/woodpeckerci/plugin-prettier docker tag to v0.2.0 [[#4082](https://github.com/woodpecker-ci/woodpecker/pull/4082)]
 - fix(deps): update module github.com/google/go-github/v63 to v64 [[#4073](https://github.com/woodpecker-ci/woodpecker/pull/4073)]
 - fix(deps): update golang-packages [[#4059](https://github.com/woodpecker-ci/woodpecker/pull/4059)]
 - Add systemd unit files to the RPM/DEB packages [[#3986](https://github.com/woodpecker-ci/woodpecker/pull/3986)]
