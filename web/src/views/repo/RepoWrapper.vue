@@ -1,6 +1,6 @@
 <template>
   <Scaffold
-    v-if="repo && repoPermissions && $route.meta.repoHeader"
+    v-if="repo && repoPermissions && route.meta.repoHeader"
     v-model:activeTab="activeTab"
     enable-tabs
     disable-tab-url-hash-mode
@@ -30,11 +30,17 @@
 
     <template #tabActions>
       <Button
-        v-if="repoPermissions.push"
+        v-if="repoPermissions.push && route.name !== 'repo-manual'"
         :text="$t('repo.manual_pipeline.trigger')"
-        @click="showManualPipelinePopup = true"
+        start-icon="manual-pipeline"
+        :to="{ name: 'repo-manual' }"
       />
-      <ManualPipelinePopup :open="showManualPipelinePopup" @close="showManualPipelinePopup = false" />
+      <Button
+        v-else-if="repoPermissions.push"
+        :text="$t('repo.manual_pipeline.show_pipelines')"
+        start-icon="back"
+        :to="{ name: 'repo' }"
+      />
     </template>
 
     <Tab id="activity" :title="$t('repo.activity')" />
@@ -54,7 +60,6 @@ import { useRoute, useRouter } from 'vue-router';
 import Button from '~/components/atomic/Button.vue';
 import type { IconNames } from '~/components/atomic/Icon.vue';
 import IconButton from '~/components/atomic/IconButton.vue';
-import ManualPipelinePopup from '~/components/layout/popups/ManualPipelinePopup.vue';
 import Scaffold from '~/components/layout/scaffold/Scaffold.vue';
 import Tab from '~/components/layout/scaffold/Tab.vue';
 import useApiClient from '~/compositions/useApiClient';
@@ -96,8 +101,6 @@ const forgeIcon = computed<IconNames>(() => {
   }
   return 'repo';
 });
-
-const showManualPipelinePopup = ref(false);
 
 async function loadRepo() {
   repoPermissions.value = await apiClient.getRepoPermissions(repositoryId.value);

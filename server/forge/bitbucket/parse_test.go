@@ -63,7 +63,7 @@ func Test_parser(t *testing.T) {
 				g.Assert(err).IsNil()
 				g.Assert(r.FullName).Equal("user_name/repo_name")
 				g.Assert(b.Event).Equal(model.EventPull)
-				g.Assert(b.Commit).Equal("ce5965ddd289")
+				g.Assert(b.Commit).Equal("d3022fc0ca3d")
 			})
 
 			g.It("should return pull-request details for a pull-request merged payload", func() {
@@ -76,7 +76,7 @@ func Test_parser(t *testing.T) {
 				g.Assert(err).IsNil()
 				g.Assert(r.FullName).Equal("anbraten/test-2")
 				g.Assert(b.Event).Equal(model.EventPullClosed)
-				g.Assert(b.Commit).Equal("6c5f0bc9b2aa")
+				g.Assert(b.Commit).Equal("006704dbeab2")
 			})
 
 			g.It("should return pull-request details for a pull-request closed payload", func() {
@@ -89,7 +89,7 @@ func Test_parser(t *testing.T) {
 				g.Assert(err).IsNil()
 				g.Assert(r.FullName).Equal("anbraten/test-2")
 				g.Assert(b.Event).Equal(model.EventPullClosed)
-				g.Assert(b.Commit).Equal("006704dbeab2")
+				g.Assert(b.Commit).Equal("f90e18fc9d45")
 			})
 		})
 

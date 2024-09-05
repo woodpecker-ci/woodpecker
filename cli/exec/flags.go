@@ -18,8 +18,6 @@ import (
 	"time"
 
 	"github.com/urfave/cli/v3"
-
-	"go.woodpecker-ci.org/woodpecker/v2/shared/constant"
 )
 
 var flags = []cli.Flag{
@@ -58,9 +56,9 @@ var flags = []cli.Flag{
 		Hidden:  true,
 	},
 	&cli.StringSliceFlag{
-		Name:  "privileged",
-		Usage: "privileged plugins",
-		Value: constant.PrivilegedPlugins,
+		Sources: cli.EnvVars("WOODPECKER_PLUGINS_PRIVILEGED"),
+		Name:    "plugins-privileged",
+		Usage:   "Allow plugins to run in privileged mode, if environment variable is defined but empty there will be none",
 	},
 	&cli.StringFlag{
 		Sources: cli.EnvVars("WOODPECKER_BACKEND"),

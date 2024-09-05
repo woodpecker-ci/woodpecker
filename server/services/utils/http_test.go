@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package utils_test
+package utils
 
 import (
 	"bytes"
@@ -21,15 +21,14 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
-	"github.com/go-ap/httpsig"
 	"github.com/stretchr/testify/assert"
-
-	"go.woodpecker-ci.org/woodpecker/v2/server/services/utils"
+	"github.com/yaronf/httpsign"
 )
 
-func TestSign(t *testing.T) {
-	pubKeyID := "woodpecker-ci-plugins"
+func TestSignClient(t *testing.T) {
+	pubKeyID := "woodpecker-ci-extensions"
 
 	pubEd25519Key, privEd25519Key, err := ed25519.GenerateKey(rand.Reader)
 	if !assert.NoError(t, err) {
@@ -38,36 +37,36 @@ func TestSign(t *testing.T) {
 
 	body := []byte("{\"foo\":\"bar\"}")
 
-	req, err := http.NewRequest(http.MethodGet, "http://example.com", bytes.NewBuffer(body))
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	req.Header.Set("Content-Type", "application/json")
-
-	err = utils.SignHTTPRequest(privEd25519Key, req)
-	if err != nil {
-		t.Fatal(err)
-	}
-
 	verifyHandler := func(w http.ResponseWriter, r *http.Request) {
-		keystore := httpsig.NewMemoryKeyStore()
-		keystore.SetKey(pubKeyID, pubEd25519Key)
-
-		verifier := httpsig.NewVerifier(keystore)
-		verifier.SetRequiredHeaders([]string{"(request-target)", "date"})
-
-		keyID, err := verifier.Verify(r)
+		verifier, err := httpsign.NewEd25519Verifier(pubEd25519Key,
+			httpsign.NewVerifyConfig(),
+			httpsign.Headers("@request-target", "content-digest")) // The Content-Digest header will be auto-generated
 		assert.NoError(t, err)
-		assert.Equal(t, pubKeyID, keyID)
+
+		err = httpsign.VerifyRequest(pubKeyID, *verifier, r)
+		assert.NoError(t, err)
 
 		w.WriteHeader(http.StatusOK)
 	}
 
-	rr := httptest.NewRecorder()
-	handler := http.HandlerFunc(verifyHandler)
+	server := httptest.NewServer(http.HandlerFunc(verifyHandler))
 
-	handler.ServeHTTP(rr, req)
+	req, err := http.NewRequest("GET", server.URL+"/", bytes.NewBuffer(body))
+	if !assert.NoError(t, err) {
+		return
+	}
 
-	assert.Equal(t, http.StatusOK, rr.Code)
+	req.Header.Set("Date", time.Now().Format(time.RFC3339))
+	req.Header.Set("Content-Type", "application/json")
+
+	client, err := signClient(privEd25519Key)
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	rr, err := client.Do(req)
+	assert.NoError(t, err)
+	defer rr.Body.Close()
+
+	assert.Equal(t, http.StatusOK, rr.StatusCode)
 }

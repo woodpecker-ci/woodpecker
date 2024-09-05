@@ -1,4 +1,4 @@
-FROM --platform=$BUILDPLATFORM docker.io/golang:1.22 AS build
+FROM --platform=$BUILDPLATFORM docker.io/golang:1.23 AS build
 
 WORKDIR /src
 COPY . .
@@ -10,6 +10,8 @@ RUN mkdir -p /etc/woodpecker
 
 FROM scratch
 ENV GODEBUG=netdns=go
+# Internal setting do NOT change! Signals that woodpecker is running inside a container
+ENV WOODPECKER_IN_CONTAINER=true
 EXPOSE 3000
 
 # copy certs from build image
