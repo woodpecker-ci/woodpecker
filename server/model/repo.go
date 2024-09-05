@@ -28,8 +28,8 @@ type Repo struct {
 	// ForgeRemoteID is the unique identifier for the repository on the forge.
 	ForgeRemoteID                ForgeRemoteID  `json:"forge_remote_id"                 xorm:"forge_remote_id"`
 	OrgID                        int64          `json:"org_id"                          xorm:"INDEX 'org_id'"`
-	Owner                        string         `json:"owner"                           xorm:"INDEX UNIQUE(name) 'owner'"`
-	Name                         string         `json:"name"                            xorm:"INDEX UNIQUE(name) 'name'"`
+	Owner                        string         `json:"owner"                           xorm:"UNIQUE(name) 'owner'"`
+	Name                         string         `json:"name"                            xorm:"UNIQUE(name) 'name'"`
 	FullName                     string         `json:"full_name"                       xorm:"UNIQUE 'full_name'"`
 	Avatar                       string         `json:"avatar_url,omitempty"            xorm:"varchar(500) 'avatar'"`
 	ForgeURL                     string         `json:"forge_url,omitempty"             xorm:"varchar(1000) 'forge_url'"`
