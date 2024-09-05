@@ -157,9 +157,15 @@ func WithNetworks(networks ...string) Option {
 	}
 }
 
-func WithDefaultCloneImage(cloneImage string) Option {
+func WithDefaultClonePlugin(cloneImage string) Option {
 	return func(compiler *Compiler) {
-		compiler.defaultCloneImage = cloneImage
+		compiler.defaultClonePlugin = cloneImage
+	}
+}
+
+func WithTrustedClonePlugins(images []string) Option {
+	return func(compiler *Compiler) {
+		compiler.trustedClonePlugins = images
 	}
 }
 

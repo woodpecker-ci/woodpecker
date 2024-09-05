@@ -8,8 +8,14 @@ import (
 	"path/filepath"
 	"strings"
 
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 	"go.woodpecker-ci.org/woodpecker/v2/server/services/log"
+)
+
+const (
+	// Add base64 overhead and space for other JSON fields (just to be safe).
+	maxLineLength int = (pipeline.MaxLogLineLength/3)*4 + (64 * 1024) //nolint:mnd
 )
 
 type logStore struct {
@@ -43,7 +49,10 @@ func (l logStore) LogFind(step *model.Step) ([]*model.LogEntry, error) {
 		return nil, err
 	}
 
+	buf := make([]byte, 0, bufio.MaxScanTokenSize)
 	s := bufio.NewScanner(file)
+	s.Buffer(buf, maxLineLength)
+
 	var entries []*model.LogEntry
 	for s.Scan() {
 		j := s.Text()

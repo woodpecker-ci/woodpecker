@@ -2,26 +2,33 @@
 
 Some versions need some changes to the server configuration or the pipeline configuration files.
 
-<!--
-## 3.0.0
-
-- Update all webhooks by pressing the "Repair all" button in the admin settings as the webhook token claims have changed
-
--->
-
 ## `next`
 
 - Move docker resource limit settings into agent configuration
-- Deprecated `steps.[name].group` in favor of `steps.[name].depends_on` (see [workflow syntax](./20-usage/20-workflow-syntax.md#depends_on) to learn how to set dependencies)
+- Rename server environment variable `WOODPECKER_ESCALATE` to `WOODPECKER_PLUGINS_PRIVILEGED`
+- Remove all default privileged plugins ([re-add plugins to the list via config if needed](./30-administration/10-server-config.md#woodpecker_plugins_privileged)).
+- `WOODPECKER_DEFAULT_CLONE_IMAGE` got depricated use `WOODPECKER_DEFAULT_CLONE_PLUGIN`
+- Check trusted-clone- and privileged-plugins by image name and tag (if tag is set)
+- Secret filters for plugins now check against tag if specified
+- Removed `WOODPECKER_DEV_OAUTH_HOST` and `WOODPECKER_DEV_GITEA_OAUTH_URL` use `WOODPECKER_EXPERT_FORGE_OAUTH_HOST`
+- Compatibility mode of deprecated `pipeline:`, `platform:` and `branches:` pipeline config options are now removed and pipeline will now fail if still in use.
+- Removed `steps.[name].group` in favor of `steps.[name].depends_on` (see [workflow syntax](./20-usage/20-workflow-syntax.md#depends_on) to learn how to set dependencies)
 - Removed `WOODPECKER_ROOT_PATH` and `WOODPECKER_ROOT_URL` config variables. Use `WOODPECKER_HOST` with a path instead
 - Pipelines without a config file will now be skipped instead of failing
-- Deprecated `includes` and `excludes` support from **event** filter
-- Deprecated uppercasing all secret env vars, instead, the value of the `secrets` property is used. [Read more](./20-usage/40-secrets.md#use-secrets-in-commands)
-- Deprecated alternative names for secrets, use `environment` with `from_secret`
-- Deprecated slice definition for env vars
-- Deprecated `environment` filter, use `when.evaluate`
-- Use `WOODPECKER_EXPERT_FORGE_OAUTH_HOST` instead of `WOODPECKER_DEV_GITEA_OAUTH_URL` or `WOODPECKER_DEV_OAUTH_HOST`
-- Deprecated `WOODPECKER_WEBHOOK_HOST` in favor of `WOODPECKER_EXPERT_WEBHOOK_HOST`
+- Removed implicitly defined `regcred` image pull secret name. Set it explicitly via `WOODPECKER_BACKEND_K8S_PULL_SECRET_NAMES`
+- Removed `includes` and `excludes` support from **event** filter
+- Removed uppercasing all secret env vars, instead, the value of the `secrets` property is used. [Read more](./20-usage/40-secrets.md#use-secrets-in-commands)
+- Removed alternative names for secrets, use `environment` with `from_secret`
+- Removed slice definition for env vars
+- Removed `environment` filter, use `when.evaluate`
+- Removed `WOODPECKER_WEBHOOK_HOST` in favor of `WOODPECKER_EXPERT_WEBHOOK_HOST`
+- Migrated to rfc9421 for webhook signatures
+- Renamed `start_time`, `end_time`, `created_at`, `started_at`, `finished_at` and `reviewed_at` JSON fields to `started`, `finished`, `created`, `started`, `finished`, `reviewed`
+- Update all webhooks by pressing the "Repair all" button in the admin settings as the webhook token claims have changed
+- Crons now use standard Linux syntax without seconds
+- Replaced `configs` object by `netrc` in external configuration APIs
+- Removed old API routes: `registry/` -> `registries`, `/authorize/token`
+- Replaced `registry` command with `repo registry` in cli
 
 ## 2.0.0
 

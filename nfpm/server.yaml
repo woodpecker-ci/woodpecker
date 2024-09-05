@@ -10,3 +10,7 @@ section: daemon/system
 contents:
   - src: ./dist/server/linux_amd64/woodpecker-server
     dst: /usr/local/bin/woodpecker-server
+  - src: ./woodpecker-server.service
+    dst: /usr/local/lib/systemd/system/
+  - src: ./woodpecker-server.env.example
+    dst: /etc/woodpecker/
