@@ -40,12 +40,9 @@ import (
 )
 
 type docker struct {
-	client     client.APIClient
-	enableIPv6 bool
-	network    string
-	volumes    []string
-	info       system.Info
-	config     config
+	client client.APIClient
+	info   system.Info
+	config config
 }
 
 const (
