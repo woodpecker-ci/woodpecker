@@ -41,6 +41,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/linter"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/matrix"
 	pipelineLog "go.woodpecker-ci.org/woodpecker/v2/pipeline/log"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/constant"
 	"go.woodpecker-ci.org/woodpecker/v2/shared/utils"
 )
 
@@ -184,8 +185,14 @@ func execWithAxis(ctx context.Context, c *cli.Command, file, repoPath string, ax
 		volumes = append(volumes, repoPath+":"+path.Join(workspaceBase, workspacePath))
 	}
 
+	privilegedPlugins := c.StringSlice("plugins-privileged")
+
 	// lint the yaml file
-	err = linter.New(linter.WithTrusted(true)).Lint([]*linter.WorkflowConfig{{
+	err = linter.New(
+		linter.WithTrusted(true),
+		linter.PrivilegedPlugins(privilegedPlugins),
+		linter.WithTrustedClonePlugins(constant.TrustedClonePlugins),
+	).Lint([]*linter.WorkflowConfig{{
 		File:      path.Base(file),
 		RawConfig: confStr,
 		Workflow:  conf,
@@ -201,7 +208,7 @@ func execWithAxis(ctx context.Context, c *cli.Command, file, repoPath string, ax
 	// compiles the yaml file
 	compiled, err := compiler.New(
 		compiler.WithEscalated(
-			c.StringSlice("privileged")...,
+			privilegedPlugins...,
 		),
 		compiler.WithVolumes(volumes...),
 		compiler.WithWorkspace(
@@ -281,8 +288,7 @@ func convertPathForWindows(path string) string {
 	return filepath.ToSlash(path)
 }
 
-const maxLogLineLength = 1024 * 1024 // 1mb
 var defaultLogger = pipeline.Logger(func(step *backend_types.Step, rc io.ReadCloser) error {
 	logWriter := NewLineWriter(step.Name, step.UUID)
-	return pipelineLog.CopyLineByLine(logWriter, rc, maxLogLineLength)
+	return pipelineLog.CopyLineByLine(logWriter, rc, pipeline.MaxLogLineLength)
 })
