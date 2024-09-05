@@ -104,7 +104,7 @@ When using the `local` backend, the `image` entry is used to specify the shell, 
        - go test
 
    - name: publish
-+    image: woodpeckerci/plugin-docker-buildx
++    image: woodpeckerci/plugin-kaniko
      repo: foo/bar
 
  services:
@@ -288,7 +288,16 @@ when:
 
 #### `event`
 
-Available events: `push`, `pull_request`, `pull_request_closed`, `tag`, `release`, `deployment`, `cron`, `manual`
+The available events are:
+
+- `push`: triggered when a commit is pushed to a branch.
+- `pull_request`: triggered when a pull request is opened or a new commit is pushed to it.
+- `pull_request_closed`: triggered when a pull request is closed or merged.
+- `tag`: triggered when a tag is pushed.
+- `release`: triggered when a release, pre-release or draft is created. (You can apply further filters using [evaluate](#evaluate) with [environment variables](./50-environment.md#built-in-environment-variables).)
+- `deployment` (only available for GitHub): triggered when a deployment is created in the repository.
+- `cron`: triggered when a cron job is executed.
+- `manual`: triggered when a user manually triggers a pipeline.
 
 Execute a step if the build event is a `tag`:
 
@@ -475,7 +484,7 @@ Normally steps of a workflow are executed serially in the order in which they ar
        - go build
 
    - name: deploy
-     image: woodpeckerci/plugin-docker-buildx
+     image: woodpeckerci/plugin-kaniko
      settings:
        repo: foo/bar
 +    depends_on: [build, test] # deploy will be executed after build and test finished

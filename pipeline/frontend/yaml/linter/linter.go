@@ -24,11 +24,15 @@ import (
 	errorTypes "go.woodpecker-ci.org/woodpecker/v2/pipeline/errors/types"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/linter/schema"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/types"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/utils"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/constant"
 )
 
 // A Linter lints a pipeline configuration.
 type Linter struct {
-	trusted bool
+	trusted             bool
+	privilegedPlugins   *[]string
+	trustedClonePlugins *[]string
 }
 
 // New creates a new Linter with options.
@@ -71,6 +75,10 @@ func (l *Linter) lintFile(config *WorkflowConfig) error {
 		linterErr = multierr.Append(linterErr, newLinterError("Invalid or missing steps section", config.File, "steps", false))
 	}
 
+	if err := l.lintCloneSteps(config); err != nil {
+		linterErr = multierr.Append(linterErr, err)
+	}
+
 	if err := l.lintContainers(config, "clone"); err != nil {
 		linterErr = multierr.Append(linterErr, err)
 	}
@@ -91,6 +99,29 @@ func (l *Linter) lintFile(config *WorkflowConfig) error {
 		linterErr = multierr.Append(linterErr, err)
 	}
 
+	return linterErr
+}
+
+func (l *Linter) lintCloneSteps(config *WorkflowConfig) error {
+	if len(config.Workflow.Clone.ContainerList) == 0 {
+		return nil
+	}
+
+	trustedClonePlugins := constant.TrustedClonePlugins
+	if l.trustedClonePlugins != nil {
+		trustedClonePlugins = *l.trustedClonePlugins
+	}
+
+	var linterErr error
+	for _, container := range config.Workflow.Clone.ContainerList {
+		if !utils.MatchImageDynamic(container.Image, trustedClonePlugins...) {
+			linterErr = multierr.Append(linterErr,
+				newLinterError(
+					"Specified clone image does not match allow list, netrc will not be injected",
+					config.File, fmt.Sprintf("clone.%s", container.Name), true),
+			)
+		}
+	}
 	return linterErr
 }
 
@@ -120,6 +151,9 @@ func (l *Linter) lintContainers(config *WorkflowConfig, area string) error {
 		if err := l.lintSettings(config, container, area); err != nil {
 			linterErr = multierr.Append(linterErr, err)
 		}
+		if err := l.lintPrivilegedPlugins(config, container, area); err != nil {
+			linterErr = multierr.Append(linterErr, err)
+		}
 	}
 
 	return linterErr
@@ -129,6 +163,22 @@ func (l *Linter) lintImage(config *WorkflowConfig, c *types.Container, area stri
 	if len(c.Image) == 0 {
 		return newLinterError("Invalid or missing image", config.File, fmt.Sprintf("%s.%s", area, c.Name), false)
 	}
+	return nil
+}
+
+func (l *Linter) lintPrivilegedPlugins(config *WorkflowConfig, c *types.Container, area string) error {
+	// lint for conflicts of https://github.com/woodpecker-ci/woodpecker/pull/3918
+	if utils.MatchImage(c.Image, "plugins/docker", "plugins/gcr", "plugins/ecr", "woodpeckerci/plugin-docker-buildx") {
+		msg := fmt.Sprintf("Cannot use once by default privileged plugin '%s', if needed add it too WOODPECKER_PLUGINS_PRIVILEGED", c.Image)
+		// check first if user did not add them back
+		if l.privilegedPlugins != nil && !utils.MatchImageDynamic(c.Image, *l.privilegedPlugins...) {
+			return newLinterError(msg, config.File, fmt.Sprintf("%s.%s", area, c.Name), false)
+		} else if l.privilegedPlugins == nil {
+			// if linter has no info of current privileged plugins, it's just a warning
+			return newLinterError(msg, config.File, fmt.Sprintf("%s.%s", area, c.Name), true)
+		}
+	}
+
 	return nil
 }
 

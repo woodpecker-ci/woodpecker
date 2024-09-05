@@ -81,7 +81,7 @@ This is the reference list of all environment variables available to your pipeli
 |                                  | **Current pipeline**                                                                                               |                                                                                            |
 | `CI_PIPELINE_NUMBER`             | pipeline number                                                                                                    | `8`                                                                                        |
 | `CI_PIPELINE_PARENT`             | number of parent pipeline                                                                                          | `0`                                                                                        |
-| `CI_PIPELINE_EVENT`              | pipeline event (see [pipeline events](../20-usage/15-terminology/index.md#pipeline-events))                        | `push`, `pull_request`, `pull_request_closed`, `tag`, `release`, `manual`, `cron`          |
+| `CI_PIPELINE_EVENT`              | pipeline event (see [`event`](../20-usage/20-workflow-syntax.md#event))                                            | `push`, `pull_request`, `pull_request_closed`, `tag`, `release`, `manual`, `cron`          |
 | `CI_PIPELINE_URL`                | link to the web UI for the pipeline                                                                                | `https://ci.example.com/repos/7/pipeline/8`                                                |
 | `CI_PIPELINE_FORGE_URL`          | link to the forge's web UI for the commit(s) or tag that triggered the pipeline                                    | `https://git.example.com/john-doe/my-repo/commit/eba09b46064473a1d345da7abf28b477468e8dbd` |
 | `CI_PIPELINE_DEPLOY_TARGET`      | pipeline deploy target for `deployment` events                                                                     | `production`                                                                               |
@@ -115,7 +115,7 @@ This is the reference list of all environment variables available to your pipeli
 |                                  | **Previous pipeline**                                                                                              |                                                                                            |
 | `CI_PREV_PIPELINE_NUMBER`        | previous pipeline number                                                                                           | `7`                                                                                        |
 | `CI_PREV_PIPELINE_PARENT`        | previous pipeline number of parent pipeline                                                                        | `0`                                                                                        |
-| `CI_PREV_PIPELINE_EVENT`         | previous pipeline event (see [pipeline events](../20-usage/15-terminology/index.md#pipeline-events))               | `push`, `pull_request`, `pull_request_closed`, `tag`, `release`, `manual`, `cron`          |
+| `CI_PREV_PIPELINE_EVENT`         | previous pipeline event (see [`event`](../20-usage/20-workflow-syntax.md#event))                                   | `push`, `pull_request`, `pull_request_closed`, `tag`, `release`, `manual`, `cron`          |
 | `CI_PREV_PIPELINE_URL`           | previous pipeline link in CI                                                                                       | `https://ci.example.com/repos/7/pipeline/7`                                                |
 | `CI_PREV_PIPELINE_FORGE_URL`     | previous pipeline link to event in forge                                                                           | `https://git.example.com/john-doe/my-repo/commit/15784117e4e103f36cba75a9e29da48046eb82c4` |
 | `CI_PREV_PIPELINE_DEPLOY_TARGET` | previous pipeline deploy target for `deployment` events                                                            | `production`                                                                               |
@@ -172,7 +172,7 @@ Example commit substitution:
 ```diff
  steps:
    - name: docker
-     image: woodpeckerci/plugin-docker-buildx
+     image: woodpeckerci/plugin-kaniko
      settings:
 +      tags: ${CI_COMMIT_SHA}
 ```
@@ -182,7 +182,7 @@ Example tag substitution:
 ```diff
  steps:
    - name: docker
-     image: woodpeckerci/plugin-docker-buildx
+     image: woodpeckerci/plugin-kaniko
      settings:
 +      tags: ${CI_COMMIT_TAG}
 ```
@@ -210,7 +210,7 @@ Example variable substitution with substring:
 ```diff
  steps:
    - name: docker
-     image: woodpeckerci/plugin-docker-buildx
+     image: woodpeckerci/plugin-kaniko
      settings:
 +      tags: ${CI_COMMIT_SHA:0:8}
 ```
@@ -220,7 +220,7 @@ Example variable substitution strips `v` prefix from `v.1.0.0`:
 ```diff
  steps:
    - name: docker
-     image: woodpeckerci/plugin-docker-buildx
+     image: woodpeckerci/plugin-kaniko
      settings:
 +      tags: ${CI_COMMIT_TAG##v}
 ```
