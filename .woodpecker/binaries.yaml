@@ -5,7 +5,7 @@ when:
     path: Makefile
 
 variables:
-  - &golang_image 'docker.io/golang:1.22'
+  - &golang_image 'docker.io/golang:1.23'
   - &node_image 'docker.io/node:22-alpine'
   - &xgo_image 'docker.io/techknowlogick/xgo:go-1.22.x'
 
