@@ -24,9 +24,9 @@ import (
 )
 
 type repoV035 struct {
-	ID      int64 `xorm:"pk autoincr 'id'"`
-	IsTrusted                      bool           `xorm:"'trusted'"`
-	Trusted                      model.TrustedConfiguration           `xorm:"json 'trusted_conf'"`
+	ID        int64                      `xorm:"pk autoincr 'id'"`
+	IsTrusted bool                       `xorm:"'trusted'"`
+	Trusted   model.TrustedConfiguration `xorm:"json 'trusted_conf'"`
 }
 
 func (repoV035) TableName() string {
@@ -48,9 +48,9 @@ var splitTrusted = xormigrate.Migration{
 		for _, r := range repos {
 			if _, err := sess.Update(&repoV035{
 				Trusted: model.TrustedConfiguration{
-					Network: r.IsTrusted,
-					Security: r.IsTrusted,
-					Volumes: r.IsTrusted,
+					Network:   r.IsTrusted,
+					Security:  r.IsTrusted,
+					Volumes:   r.IsTrusted,
 					Resources: r.IsTrusted,
 				},
 			}, r); err != nil {

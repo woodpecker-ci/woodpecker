@@ -41,6 +41,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/linter"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/matrix"
 	pipelineLog "go.woodpecker-ci.org/woodpecker/v2/pipeline/log"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/constant"
 	"go.woodpecker-ci.org/woodpecker/v2/shared/utils"
 )
 
@@ -184,13 +185,19 @@ func execWithAxis(ctx context.Context, c *cli.Command, file, repoPath string, ax
 		volumes = append(volumes, repoPath+":"+path.Join(workspaceBase, workspacePath))
 	}
 
+	privilegedPlugins := c.StringSlice("plugins-privileged")
+
 	// lint the yaml file
-	err = linter.New(linter.WithTrusted(linter.TrustedConfiguration{
-		Network: true,
-		Volumes: true,
-		Resources: true,
-		Security: true,
-	})).Lint([]*linter.WorkflowConfig{{
+	err = linter.New(
+		linter.WithTrusted(linter.TrustedConfiguration{
+			Network:   true,
+			Volumes:   true,
+			Resources: true,
+			Security:  true,
+		}),
+		linter.PrivilegedPlugins(privilegedPlugins),
+		linter.WithTrustedClonePlugins(constant.TrustedClonePlugins),
+	).Lint([]*linter.WorkflowConfig{{
 		File:      path.Base(file),
 		RawConfig: confStr,
 		Workflow:  conf,
@@ -206,7 +213,7 @@ func execWithAxis(ctx context.Context, c *cli.Command, file, repoPath string, ax
 	// compiles the yaml file
 	compiled, err := compiler.New(
 		compiler.WithEscalated(
-			c.StringSlice("privileged")...,
+			privilegedPlugins...,
 		),
 		compiler.WithVolumes(volumes...),
 		compiler.WithWorkspace(

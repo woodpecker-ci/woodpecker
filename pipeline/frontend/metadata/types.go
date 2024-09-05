@@ -29,17 +29,17 @@ type (
 
 	// Repo defines runtime metadata for a repository.
 	Repo struct {
-		ID          int64    `json:"id,omitempty"`
-		Name        string   `json:"name,omitempty"`
-		Owner       string   `json:"owner,omitempty"`
-		RemoteID    string   `json:"remote_id,omitempty"`
-		ForgeURL    string   `json:"forge_url,omitempty"`
-		CloneURL    string   `json:"clone_url,omitempty"`
-		CloneSSHURL string   `json:"clone_url_ssh,omitempty"`
-		Private     bool     `json:"private,omitempty"`
-		Secrets     []Secret `json:"secrets,omitempty"`
-		Branch      string   `json:"default_branch,omitempty"`
-		Trusted     TrustedConfiguration     `json:"trusted_conf,omitempty"`
+		ID          int64                `json:"id,omitempty"`
+		Name        string               `json:"name,omitempty"`
+		Owner       string               `json:"owner,omitempty"`
+		RemoteID    string               `json:"remote_id,omitempty"`
+		ForgeURL    string               `json:"forge_url,omitempty"`
+		CloneURL    string               `json:"clone_url,omitempty"`
+		CloneSSHURL string               `json:"clone_url_ssh,omitempty"`
+		Private     bool                 `json:"private,omitempty"`
+		Secrets     []Secret             `json:"secrets,omitempty"`
+		Branch      string               `json:"default_branch,omitempty"`
+		Trusted     TrustedConfiguration `json:"trusted_conf,omitempty"`
 	}
 
 	// Pipeline defines runtime metadata for a pipeline.
@@ -123,10 +123,9 @@ type (
 	}
 
 	TrustedConfiguration struct {
-		Network bool `json:"network,omitempty"`
-		Volumes bool `json:"volumes,omitempty"`
+		Network   bool `json:"network,omitempty"`
+		Volumes   bool `json:"volumes,omitempty"`
 		Resources bool `json:"resources,omitempty"`
-		Security bool `json:"security,omitempty"`
+		Security  bool `json:"security,omitempty"`
 	}
-
 )
