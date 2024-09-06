@@ -9,7 +9,7 @@
 ### 🔒 Security
 
 - Lint privileged plugin match and allow to be set empty [[#4084](https://github.com/woodpecker-ci/woodpecker/pull/4084)]
-- Allow admins to specify priviledged plugins by name **and tag** [[#4076](https://github.com/woodpecker-ci/woodpecker/pull/4076)]
+- Allow admins to specify privileged plugins by name **and tag** [[#4076](https://github.com/woodpecker-ci/woodpecker/pull/4076)]
 - Warn if using secrets/env with plugin [[#4039](https://github.com/woodpecker-ci/woodpecker/pull/4039)]
 
 ### 🐛 Bug Fixes
