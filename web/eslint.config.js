@@ -29,6 +29,8 @@ export default antfu(
     rules: {
       'import/order': 'off',
       'sort-imports': 'off',
+      'perfectionist/sort-imports': 'off',
+      'perfectionist/sort-named-imports': 'off',
       'promise/prefer-await-to-callbacks': 'error',
 
       // Vue I18n
