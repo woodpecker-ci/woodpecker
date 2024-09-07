@@ -53,7 +53,9 @@ var splitTrusted = xormigrate.Migration{
 					Volumes:   r.IsTrusted,
 					Resources: r.IsTrusted,
 				},
-			}, r); err != nil {
+			}, &repoV035{
+				ID: r.ID,
+			}); err != nil {
 				return err
 			}
 		}
@@ -66,10 +68,6 @@ var splitTrusted = xormigrate.Migration{
 			return err
 		}
 
-		if err := renameColumn(sess, "repos", "trusted_conf", "trusted"); err != nil {
-			return err
-		}
-
-		return nil
+		return renameColumn(sess, "repos", "trusted_conf", "trusted")
 	},
 }

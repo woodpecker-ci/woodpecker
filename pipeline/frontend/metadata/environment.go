@@ -66,7 +66,7 @@ func (m *Metadata) Environ() map[string]string {
 		"CI_REPO_TRUSTED_RESOURCES": strconv.FormatBool(m.Repo.Trusted.Resources),
 		"CI_REPO_TRUSTED_VOLUMES":   strconv.FormatBool(m.Repo.Trusted.Volumes),
 		"CI_REPO_TRUSTED_SECURITY":  strconv.FormatBool(m.Repo.Trusted.Security),
-		// Deprecated
+		// Deprecated remove in 4.x
 		"CI_REPO_TRUSTED": strconv.FormatBool(m.Repo.Trusted.Security && m.Repo.Trusted.Network && m.Repo.Trusted.Resources && m.Repo.Trusted.Volumes),
 
 		"CI_COMMIT_SHA":                 m.Curr.Commit.Sha,
