@@ -45,12 +45,6 @@
           :label="$t('repo.settings.general.netrc_only_trusted.netrc_only_trusted')"
           :description="$t('repo.settings.general.netrc_only_trusted.desc')"
         />
-        <Checkbox
-          v-if="user?.admin"
-          v-model="repoSettings.trusted"
-          :label="$t('repo.settings.general.trusted.trusted')"
-          :description="$t('repo.settings.general.trusted.desc')"
-        />
       </InputField>
 
       <InputField
@@ -61,22 +55,22 @@
         <Checkbox
           v-model="repoSettings.trusted.network"
           :label="$t('repo.settings.general.trusted.network.network')"
-          :description="$t('repo.settings.general.network.desc')"
+          :description="$t('repo.settings.general.trusted.network.desc')"
         />
         <Checkbox
           v-model="repoSettings.trusted.resources"
           :label="$t('repo.settings.general.trusted.resources.resources')"
-          :description="$t('repo.settings.general.resources.desc')"
+          :description="$t('repo.settings.general.trusted.resources.desc')"
         />
         <Checkbox
           v-model="repoSettings.trusted.volumes"
           :label="$t('repo.settings.general.trusted.volumes.volumes')"
-          :description="$t('repo.settings.general.volumes.desc')"
+          :description="$t('repo.settings.general.trusted.volumes.desc')"
         />
         <Checkbox
           v-model="repoSettings.trusted.security"
           :label="$t('repo.settings.general.trusted.security.security')"
-          :description="$t('repo.settings.general.security.desc')"
+          :description="$t('repo.settings.general.trusted.security.desc')"
         />
       </InputField>
 

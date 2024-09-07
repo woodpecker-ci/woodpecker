@@ -111,7 +111,7 @@
             "desc": "Underlying pipeline containers get access to volume privileges."
           },
           "security": {
-            "volumes": "security",
+            "security": "Security",
             "desc": "Underlying pipeline containers get access to security privileges."
           }
         },
