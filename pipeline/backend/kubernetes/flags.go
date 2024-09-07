@@ -89,4 +89,28 @@ var Flags = []cli.Flag{
 		Usage:   "whether to allow existing Kubernetes secrets to be referenced from steps",
 		Value:   false,
 	},
+	&cli.StringFlag{
+		Sources: cli.EnvVars("WOODPECKER_BACKEND_K8S_REGISTRY_SECRET_LABELS"),
+		Name:    "backend-k8s-registry-secret-labels",
+		Usage:   "backend k8s additional Agent-wide registry image pull secret labels",
+		Value:   "",
+	},
+	&cli.BoolFlag{
+		Sources: cli.EnvVars("WOODPECKER_BACKEND_K8S_REGISTRY_SECRET_LABELS_ALLOW_FROM_STEP"),
+		Name:    "backend-k8s-registry-secret-labels-allow-from-step",
+		Usage:   "whether to allow using labels from step's backend options for registry image pull secrets",
+		Value:   false,
+	},
+	&cli.StringFlag{
+		Sources: cli.EnvVars("WOODPECKER_BACKEND_K8S_REGISTRY_SECRET_ANNOTATIONS"),
+		Name:    "backend-k8s-registry-secret-annotations",
+		Usage:   "backend k8s additional Agent-wide regstry image pull secret annotations",
+		Value:   "",
+	},
+	&cli.BoolFlag{
+		Sources: cli.EnvVars("WOODPECKER_BACKEND_K8S_REGISTRY_SECRET_ANNOTATIONS_ALLOW_FROM_STEP"),
+		Name:    "backend-k8s-registrys-secret-annotations-allow-from-step",
+		Usage:   "whether to allow using annotations from step's backend options for registry image pull secret",
+		Value:   false,
+	},
 }

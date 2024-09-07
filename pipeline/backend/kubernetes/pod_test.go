@@ -266,8 +266,8 @@ func TestFullPod(t *testing.T) {
 					"name": "another-pull-secret"
 				},
 				{
-          "name": "wp-01he8bebctabr3kgk0qj36d2me-0"
-        }
+					"name": "wp-01he8bebctabr3kgk0qj36d2me-0"
+				}
 			],
 			"tolerations": [
 				{

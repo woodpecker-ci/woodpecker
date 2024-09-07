@@ -16,6 +16,7 @@ package kubernetes
 
 import (
 	"context"
+	stderrs "errors"
 	"fmt"
 	"io"
 	"maps"
@@ -54,18 +55,22 @@ type kube struct {
 }
 
 type config struct {
-	Namespace                   string
-	StorageClass                string
-	VolumeSize                  string
-	StorageRwx                  bool
-	PodLabels                   map[string]string
-	PodLabelsAllowFromStep      bool
-	PodAnnotations              map[string]string
-	PodAnnotationsAllowFromStep bool
-	PodNodeSelector             map[string]string
-	ImagePullSecretNames        []string
-	SecurityContext             SecurityContextConfig
-	NativeSecretsAllowFromStep  bool
+	Namespace                              string
+	StorageClass                           string
+	VolumeSize                             string
+	StorageRwx                             bool
+	PodLabels                              map[string]string
+	PodLabelsAllowFromStep                 bool
+	PodAnnotations                         map[string]string
+	PodAnnotationsAllowFromStep            bool
+	RegistrySecretLabels                   map[string]string
+	RegistrySecretLabelsAllowFromStep      bool
+	RegistrySecretAnnotations              map[string]string
+	RegistrySecretAnnotationsAllowFromStep bool
+	PodNodeSelector                        map[string]string
+	ImagePullSecretNames                   []string
+	SecurityContext                        SecurityContextConfig
+	NativeSecretsAllowFromStep             bool
 }
 type SecurityContextConfig struct {
 	RunAsNonRoot bool
@@ -85,16 +90,20 @@ func configFromCliContext(ctx context.Context) (*config, error) {
 	if ctx != nil {
 		if c, ok := ctx.Value(types.CliCommand).(*cli.Command); ok {
 			config := config{
-				Namespace:                   c.String("backend-k8s-namespace"),
-				StorageClass:                c.String("backend-k8s-storage-class"),
-				VolumeSize:                  c.String("backend-k8s-volume-size"),
-				StorageRwx:                  c.Bool("backend-k8s-storage-rwx"),
-				PodLabels:                   make(map[string]string), // just init empty map to prevent nil panic
-				PodLabelsAllowFromStep:      c.Bool("backend-k8s-pod-labels-allow-from-step"),
-				PodAnnotations:              make(map[string]string), // just init empty map to prevent nil panic
-				PodAnnotationsAllowFromStep: c.Bool("backend-k8s-pod-annotations-allow-from-step"),
-				PodNodeSelector:             make(map[string]string), // just init empty map to prevent nil panic
-				ImagePullSecretNames:        c.StringSlice("backend-k8s-pod-image-pull-secret-names"),
+				Namespace:                              c.String("backend-k8s-namespace"),
+				StorageClass:                           c.String("backend-k8s-storage-class"),
+				VolumeSize:                             c.String("backend-k8s-volume-size"),
+				StorageRwx:                             c.Bool("backend-k8s-storage-rwx"),
+				PodLabels:                              make(map[string]string), // just init empty map to prevent nil panic
+				PodLabelsAllowFromStep:                 c.Bool("backend-k8s-pod-labels-allow-from-step"),
+				PodAnnotations:                         make(map[string]string), // just init empty map to prevent nil panic
+				PodAnnotationsAllowFromStep:            c.Bool("backend-k8s-pod-annotations-allow-from-step"),
+				PodNodeSelector:                        make(map[string]string), // just init empty map to prevent nil panic
+				RegistrySecretLabels:                   make(map[string]string), // just init empty map to prevent nil panic
+				RegistrySecretLabelsAllowFromStep:      c.Bool("backend-k8s-registry-secret-labels-allow-from-step"),
+				RegistrySecretAnnotations:              make(map[string]string), // just init empty map to prevent nil panic
+				RegistrySecretAnnotationsAllowFromStep: c.Bool("backend-k8s-registry-secret-annotations-allow-from-step"),
+				ImagePullSecretNames:                   c.StringSlice("backend-k8s-pod-image-pull-secret-names"),
 				SecurityContext: SecurityContextConfig{
 					RunAsNonRoot: c.Bool("backend-k8s-secctx-nonroot"), // cspell:words secctx nonroot
 				},
@@ -116,6 +125,18 @@ func configFromCliContext(ctx context.Context) (*config, error) {
 			if nodeSelector := c.String("backend-k8s-pod-node-selector"); nodeSelector != "" {
 				if err := yaml.Unmarshal([]byte(nodeSelector), &config.PodNodeSelector); err != nil {
 					log.Error().Err(err).Msgf("could not unmarshal pod node selector '%s'", nodeSelector)
+					return nil, err
+				}
+			}
+			if labels := c.String("backend-k8s-registry-secret-labels"); labels != "" {
+				if err := yaml.Unmarshal([]byte(labels), &config.RegistrySecretLabels); err != nil {
+					log.Error().Err(err).Msgf("could not unmarshal registry secret labels '%s'", c.String("backend-k8s-registry-secret-labels"))
+					return nil, err
+				}
+			}
+			if annotations := c.String("backend-k8s-registry-secret-annotations"); annotations != "" {
+				if err := yaml.Unmarshal([]byte(c.String("backend-k8s-registry-secret-annotations")), &config.RegistrySecretAnnotations); err != nil {
+					log.Error().Err(err).Msgf("could not unmarshal registry secret annotations '%s'", c.String("backend-k8s-registry-secret-annotations"))
 					return nil, err
 				}
 			}
@@ -223,6 +244,13 @@ func (e *kube) StartStep(ctx context.Context, step *types.Step, taskUUID string)
 	options, err := parseBackendOptions(step)
 	if err != nil {
 		log.Error().Err(err).Msg("could not parse backend options")
+	}
+
+	if needsRegistrySecret(step) {
+		err = startRegistrySecret(ctx, e, step, options)
+		if err != nil {
+			return err
+		}
 	}
 
 	log.Trace().Str("taskUUID", taskUUID).Msgf("starting step: %s", step.Name)
@@ -382,9 +410,20 @@ func (e *kube) TailStep(ctx context.Context, step *types.Step, taskUUID string) 
 }
 
 func (e *kube) DestroyStep(ctx context.Context, step *types.Step, taskUUID string) error {
+	var errs []error
 	log.Trace().Str("taskUUID", taskUUID).Msgf("Stopping step: %s", step.Name)
+	if needsRegistrySecret(step) {
+		err := stopRegistrySecret(ctx, e, step, defaultDeleteOptions)
+		if err != nil {
+			errs = append(errs, err)
+		}
+	}
+
 	err := stopPod(ctx, e, step, defaultDeleteOptions)
-	return err
+	if err != nil {
+		errs = append(errs, err)
+	}
+	return stderrs.Join(errs...)
 }
 
 // DestroyWorkflow destroys the pipeline environment.

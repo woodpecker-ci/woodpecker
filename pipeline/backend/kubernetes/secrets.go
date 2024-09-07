@@ -15,11 +15,22 @@
 package kubernetes
 
 import (
+	"context"
+	"encoding/json"
 	"fmt"
+	"maps"
 	"strings"
 
+	"github.com/distribution/reference"
+	config_file "github.com/docker/cli/cli/config/configfile"
+	config_file_types "github.com/docker/cli/cli/config/types"
 	"github.com/rs/zerolog/log"
 	v1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/errors"
+	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/utils"
 )
 
 type nativeSecretsProcessor struct {
@@ -188,4 +199,130 @@ func secretReference(name string) v1.LocalObjectReference {
 	return v1.LocalObjectReference{
 		Name: name,
 	}
+}
+
+func needsRegistrySecret(step *types.Step) bool {
+	return step.AuthConfig.Username != "" && step.AuthConfig.Password != ""
+}
+
+func mkRegistrySecret(step *types.Step, config *config, options BackendOptions) (*v1.Secret, error) {
+	name, err := registrySecretName(step)
+	if err != nil {
+		return nil, err
+	}
+
+	labels, err := registrySecretLabels(step, config, options)
+	if err != nil {
+		return nil, err
+	}
+	annotations := registrySecretAnnotations(config, options)
+
+	named, err := utils.ParseNamed(step.Image)
+	if err != nil {
+		return nil, err
+	}
+
+	authConfig := config_file.ConfigFile{
+		AuthConfigs: map[string]config_file_types.AuthConfig{
+			reference.Domain(named): {
+				Username: step.AuthConfig.Username,
+				Password: step.AuthConfig.Password,
+			},
+		},
+	}
+
+	configFileJSON, err := json.Marshal(authConfig)
+	if err != nil {
+		return nil, err
+	}
+
+	return &v1.Secret{
+		ObjectMeta: meta_v1.ObjectMeta{
+			Namespace:   config.Namespace,
+			Name:        name,
+			Labels:      labels,
+			Annotations: annotations,
+		},
+		Type: v1.SecretTypeDockerConfigJson,
+		Data: map[string][]byte{
+			v1.DockerConfigJsonKey: configFileJSON,
+		},
+	}, nil
+}
+
+func registrySecretName(step *types.Step) (string, error) {
+	return podName(step)
+}
+
+func registrySecretLabels(step *types.Step, config *config, options BackendOptions) (map[string]string, error) {
+	var err error
+	labels := make(map[string]string)
+
+	if len(options.Labels) > 0 {
+		if config.RegistrySecretLabelsAllowFromStep {
+			log.Trace().Msgf("using labels from the backend options: %v", options.Labels)
+			maps.Copy(labels, options.Labels)
+		} else {
+			log.Debug().Msg("Registry secret labels were defined in backend options, but its using disallowed by instance configuration")
+		}
+	}
+	if len(config.RegistrySecretLabels) > 0 {
+		log.Trace().Msgf("using labels from the configuration: %v", config.RegistrySecretLabels)
+		maps.Copy(labels, config.RegistrySecretLabels)
+	}
+	if step.Type == types.StepTypeService {
+		labels[ServiceLabel], _ = serviceName(step)
+	}
+	labels[StepLabel], err = stepLabel(step)
+	if err != nil {
+		return labels, err
+	}
+
+	return labels, nil
+}
+
+func registrySecretAnnotations(config *config, options BackendOptions) map[string]string {
+	annotations := make(map[string]string)
+
+	if len(options.Annotations) > 0 {
+		if config.RegistrySecretAnnotationsAllowFromStep {
+			log.Trace().Msgf("using annotations from the backend options: %v", options.Annotations)
+			maps.Copy(annotations, options.Annotations)
+		} else {
+			log.Debug().Msg("Registry secret annotations were defined in backend options, but its using disallowed by instance configuration ")
+		}
+	}
+	if len(config.RegistrySecretAnnotations) > 0 {
+		log.Trace().Msgf("using annotations from the configuration: %v", config.RegistrySecretAnnotations)
+		maps.Copy(annotations, config.RegistrySecretAnnotations)
+	}
+
+	return annotations
+}
+
+func startRegistrySecret(ctx context.Context, engine *kube, step *types.Step, options BackendOptions) error {
+	secret, err := mkRegistrySecret(step, engine.config, options)
+	if err != nil {
+		return err
+	}
+	log.Trace().Msgf("creating secret: %s", secret.Name)
+	_, err = engine.client.CoreV1().Secrets(engine.config.Namespace).Create(ctx, secret, meta_v1.CreateOptions{})
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func stopRegistrySecret(ctx context.Context, engine *kube, step *types.Step, deleteOpts meta_v1.DeleteOptions) error {
+	name, err := registrySecretName(step)
+	if err != nil {
+		return err
+	}
+	log.Trace().Str("name", name).Msg("deleting secret")
+
+	err = engine.client.CoreV1().Secrets(engine.config.Namespace).Delete(ctx, name, deleteOpts)
+	if errors.IsNotFound(err) {
+		return nil
+	}
+	return err
 }

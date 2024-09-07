@@ -84,6 +84,7 @@ func imageHasTag(name string) bool {
 	return strings.Contains(name, ":")
 }
 
+// ParseNamed parses an image as a reference to validate it then parses it as a named reference
 func ParseNamed(image string) (reference.Named, error) {
 	ref, err := reference.ParseAnyReference(image)
 	if err != nil {

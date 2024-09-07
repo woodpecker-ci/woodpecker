@@ -16,7 +16,6 @@ package kubernetes
 
 import (
 	"context"
-	stderrs "errors"
 	"fmt"
 	"maps"
 	"strings"
@@ -164,13 +163,13 @@ func podSpec(step *types.Step, config *config, options BackendOptions, nsp nativ
 
 	log.Trace().Msgf("using the image pull secrets: %v", config.ImagePullSecretNames)
 	spec.ImagePullSecrets = secretsReferences(config.ImagePullSecretNames)
-	if needsImagePullSecret(step) {
+	if needsRegistrySecret(step) {
 		log.Trace().Msgf("using an image pull secret from registries")
-		name, err := podName(step)
+		name, err := registrySecretName(step)
 		if err != nil {
 			return spec, err
 		}
-		spec.ImagePullSecrets = append(spec.ImagePullSecrets, v1.LocalObjectReference{Name: name})
+		spec.ImagePullSecrets = append(spec.ImagePullSecrets, secretReference(name))
 	}
 
 	spec.Volumes = append(spec.Volumes, nsp.volumes...)
@@ -514,18 +513,6 @@ func startPod(ctx context.Context, engine *kube, step *types.Step, options Backe
 		return nil, err
 	}
 
-	if needsImagePullSecret(step) {
-		pullSecret, err := mkImagePullSecret(step, engineConfig, podName, engine.goos, options)
-		if err != nil {
-			return nil, err
-		}
-		log.Trace().Msgf("creating secret: %s", pullSecret.Name)
-		_, err = engine.client.CoreV1().Secrets(engineConfig.Namespace).Create(ctx, pullSecret, meta_v1.CreateOptions{})
-		if err != nil {
-			return nil, err
-		}
-	}
-
 	log.Trace().Msgf("creating pod: %s", pod.Name)
 	return engine.client.CoreV1().Pods(engineConfig.Namespace).Create(ctx, pod, meta_v1.CreateOptions{})
 }
@@ -535,23 +522,13 @@ func stopPod(ctx context.Context, engine *kube, step *types.Step, deleteOpts met
 	if err != nil {
 		return err
 	}
-	errs := make([]error, 0, 2)
-	if needsImagePullSecret(step) {
-		log.Trace().Str("name", podName).Msg("deleting secret")
-
-		err = engine.client.CoreV1().Secrets(engine.config.Namespace).Delete(ctx, podName, deleteOpts)
-		if err != nil && !errors.IsNotFound(err) {
-			errs = append(errs, err)
-		}
-	}
 
 	log.Trace().Str("name", podName).Msg("deleting pod")
 
 	err = engine.client.CoreV1().Pods(engine.config.Namespace).Delete(ctx, podName, deleteOpts)
-	if !errors.IsNotFound(err) {
-		errs = append(errs, err)
+	if errors.IsNotFound(err) {
 		// Don't abort on 404 errors from k8s, they most likely mean that the pod hasn't been created yet, usually because pipeline was canceled before running all steps.
 		return nil
 	}
-	return stderrs.Join(errs...)
+	return err
 }
