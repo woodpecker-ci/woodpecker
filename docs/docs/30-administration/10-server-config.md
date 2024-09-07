@@ -319,11 +319,13 @@ Always use authentication to clone repositories even if they are public. Needed 
 
 List of event names that will be canceled when a new pipeline for the same context (tag, branch) is created.
 
-### `WOODPECKER_DEFAULT_CLONE_IMAGE`
+### `WOODPECKER_DEFAULT_CLONE_PLUGIN`
 
 > Default is defined in [shared/constant/constant.go](https://github.com/woodpecker-ci/woodpecker/blob/main/shared/constant/constant.go)
 
-The default docker image to be used when cloning the repo
+The default docker image to be used when cloning the repo.
+
+It is also added to the trusted clone plugin list.
 
 ### `WOODPECKER_DEFAULT_PIPELINE_TIMEOUT`
 
@@ -346,11 +348,20 @@ Context: when someone does log into Woodpecker, a temporary session token is cre
 As long as the session is valid (until it expires or log-out),
 a user can log into Woodpecker, without re-authentication.
 
-### `WOODPECKER_ESCALATE`
+### `WOODPECKER_PLUGINS_PRIVILEGED`
+
+Docker images to run in privileged mode. Only change if you are sure what you do!
+
+You should specify the tag of your images too, as this enforces exact matches.
+
+### WOODPECKER_PLUGINS_TRUSTED_CLONE
 
 > Defaults are defined in [shared/constant/constant.go](https://github.com/woodpecker-ci/woodpecker/blob/main/shared/constant/constant.go)
 
-Docker images to run in privileged mode. Only change if you are sure what you do!
+Plugins witch are trusted to handle the netrc info in clone steps.
+If a clone step use an image not in this list, the netrc will not be injected and an user has to use other methods (e.g. secrets) to clone non public repos.
+
+You should specify the tag of your images too, as this enforces exact matches.
 
 <!--
 ### `WOODPECKER_VOLUME`

@@ -87,13 +87,13 @@ func (c *client) Version(ctx context.Context) (*rpc.Version, error) {
 }
 
 // Next returns the next workflow in the queue.
-func (c *client) Next(ctx context.Context, f rpc.Filter) (*rpc.Workflow, error) {
+func (c *client) Next(ctx context.Context, filter rpc.Filter) (*rpc.Workflow, error) {
 	var res *proto.NextResponse
 	var err error
 	retry := c.newBackOff()
 	req := new(proto.NextRequest)
 	req.Filter = new(proto.Filter)
-	req.Filter.Labels = f.Labels
+	req.Filter.Labels = filter.Labels
 	for {
 		res, err = c.client.Next(ctx, req)
 		if err == nil {
@@ -150,10 +150,10 @@ func (c *client) Next(ctx context.Context, f rpc.Filter) (*rpc.Workflow, error) 
 }
 
 // Wait blocks until the workflow is complete.
-func (c *client) Wait(ctx context.Context, id string) (err error) {
+func (c *client) Wait(ctx context.Context, workflowID string) (err error) {
 	retry := c.newBackOff()
 	req := new(proto.WaitRequest)
-	req.Id = id
+	req.Id = workflowID
 	for {
 		_, err = c.client.Wait(ctx, req)
 		if err == nil {
@@ -288,10 +288,10 @@ func (c *client) Done(ctx context.Context, workflowID string, state rpc.Workflow
 }
 
 // Extend extends the workflow deadline.
-func (c *client) Extend(ctx context.Context, id string) (err error) {
+func (c *client) Extend(ctx context.Context, workflowID string) (err error) {
 	retry := c.newBackOff()
 	req := new(proto.ExtendRequest)
-	req.Id = id
+	req.Id = workflowID
 	for {
 		_, err = c.client.Extend(ctx, req)
 		if err == nil {
@@ -332,10 +332,10 @@ func (c *client) Extend(ctx context.Context, id string) (err error) {
 }
 
 // Update updates the workflow state.
-func (c *client) Update(ctx context.Context, id string, state rpc.StepState) (err error) {
+func (c *client) Update(ctx context.Context, workflowID string, state rpc.StepState) (err error) {
 	retry := c.newBackOff()
 	req := new(proto.UpdateRequest)
-	req.Id = id
+	req.Id = workflowID
 	req.State = new(proto.StepState)
 	req.State.StepUuid = state.StepUUID
 	req.State.Started = state.Started

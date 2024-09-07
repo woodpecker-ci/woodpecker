@@ -4,6 +4,11 @@ Some versions need some changes to the server configuration or the pipeline conf
 
 ## `next`
 
+- Rename server environment variable `WOODPECKER_ESCALATE` to `WOODPECKER_PLUGINS_PRIVILEGED`
+- All default privileged plugins (like `woodpeckerci/plugin-docker-buildx`) were removed. Please carefully [re-add those plugins](./30-administration/10-server-config.md#woodpecker_plugins_privileged) you trust and rely on.
+- `WOODPECKER_DEFAULT_CLONE_IMAGE` got depricated use `WOODPECKER_DEFAULT_CLONE_PLUGIN`
+- Check trusted-clone- and privileged-plugins by image name and tag (if tag is set)
+- Secret filters for plugins now check against tag if specified
 - Removed `WOODPECKER_DEV_OAUTH_HOST` and `WOODPECKER_DEV_GITEA_OAUTH_URL` use `WOODPECKER_EXPERT_FORGE_OAUTH_HOST`
 - Compatibility mode of deprecated `pipeline:`, `platform:` and `branches:` pipeline config options are now removed and pipeline will now fail if still in use.
 - Removed `steps.[name].group` in favor of `steps.[name].depends_on` (see [workflow syntax](./20-usage/20-workflow-syntax.md#depends_on) to learn how to set dependencies)
