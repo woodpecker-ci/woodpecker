@@ -46,7 +46,7 @@ var splitTrusted = xormigrate.Migration{
 		}
 
 		for _, r := range repos {
-			if _, err := sess.Update(&repoV035{
+			if _, err := sess.Cols("trusted_conf").Update(&repoV035{
 				Trusted: model.TrustedConfiguration{
 					Network:   r.IsTrusted,
 					Security:  r.IsTrusted,
