@@ -19,6 +19,7 @@
 - Add updated, merged and declined events to bb webhook activation [[#3963](https://github.com/woodpecker-ci/woodpecker/pull/3963)]
 - Fix login via navbar [[#3962](https://github.com/woodpecker-ci/woodpecker/pull/3962)]
 - Fix panic if forge is unreachable [[#3944](https://github.com/woodpecker-ci/woodpecker/pull/3944)]
+- Fix org settings page [[#4093](https://github.com/woodpecker-ci/woodpecker/pull/4093)]
 
 ### Misc
 
