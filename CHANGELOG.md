@@ -1,5 +1,30 @@
 # Changelog
 
+## [2.7.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.7.1) - 2024-09-07
+
+### ❤️ Thanks to all contributors! ❤️
+
+@6543, @anbraten, @j04n-f, @qwerty287
+
+### 🔒 Security
+
+- Lint privileged plugin match and allow to be set empty [[#4084](https://github.com/woodpecker-ci/woodpecker/pull/4084)]
+- Allow admins to specify privileged plugins by name **and tag** [[#4076](https://github.com/woodpecker-ci/woodpecker/pull/4076)]
+- Warn if using secrets/env with plugin [[#4039](https://github.com/woodpecker-ci/woodpecker/pull/4039)]
+
+### 🐛 Bug Fixes
+
+- Set refspec for gitlab MR [[#4021](https://github.com/woodpecker-ci/woodpecker/pull/4021)]
+- Change Bitbucket PR hook to point the source branch, commit & ref [[#3965](https://github.com/woodpecker-ci/woodpecker/pull/3965)]
+- Add updated, merged and declined events to bb webhook activation [[#3963](https://github.com/woodpecker-ci/woodpecker/pull/3963)]
+- Fix login via navbar [[#3962](https://github.com/woodpecker-ci/woodpecker/pull/3962)]
+- Fix panic if forge is unreachable [[#3944](https://github.com/woodpecker-ci/woodpecker/pull/3944)]
+- Fix org settings page [[#4093](https://github.com/woodpecker-ci/woodpecker/pull/4093)]
+
+### Misc
+
+- Bump github.com/docker/docker from v24.0.9 to v24.0.9+30 [[#4077](https://github.com/woodpecker-ci/woodpecker/pull/4077)]
+
 ## [2.7.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.7.0) - 2024-07-18
 
 ### ❤️ Thanks to all contributors! ❤️
