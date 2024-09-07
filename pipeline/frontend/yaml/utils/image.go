@@ -84,14 +84,18 @@ func imageHasTag(name string) bool {
 	return strings.Contains(name, ":")
 }
 
+func ParseNamed(image string) (reference.Named, error) {
+	ref, err := reference.ParseAnyReference(image)
+	if err != nil {
+		return nil, err
+	}
+	return reference.ParseNamed(ref.String())
+}
+
 // MatchHostname returns true if the image hostname
 // matches the specified hostname.
 func MatchHostname(image, hostname string) bool {
-	ref, err := reference.ParseAnyReference(image)
-	if err != nil {
-		return false
-	}
-	named, err := reference.ParseNamed(ref.String())
+	named, err := ParseNamed(image)
 	if err != nil {
 		return false
 	}
