@@ -226,9 +226,17 @@ func setupEvilGlobals(ctx context.Context, c *cli.Command, s store.Store) error 
 	server.Config.Server.CustomJsFile = strings.TrimSpace(c.String("custom-js-file"))
 	server.Config.Pipeline.Networks = c.StringSlice("network")
 	server.Config.Pipeline.Volumes = c.StringSlice("volume")
-	server.Config.Pipeline.Privileged = c.StringSlice("escalate")
 	server.Config.WebUI.EnableSwagger = c.Bool("enable-swagger")
 	server.Config.WebUI.SkipVersionCheck = c.Bool("skip-version-check")
+
+	// list has default value but should be able to be set to zero
+	server.Config.Pipeline.Privileged = c.StringSlice("escalate")
+	if val, set := os.LookupEnv("WOODPECKER_ESCALATE"); set && val == "" {
+		server.Config.Pipeline.Privileged = []string{}
+	}
+	if val, set := os.LookupEnv("WOODPECKER_PLUGINS_PRIVILEGED"); set && val == "" {
+		server.Config.Pipeline.Privileged = []string{}
+	}
 
 	// prometheus
 	server.Config.Prometheus.AuthToken = c.String("prometheus-auth-token")

@@ -14,7 +14,11 @@
 
 package utils
 
-import "github.com/distribution/reference"
+import (
+	"strings"
+
+	"github.com/distribution/reference"
+)
 
 // trimImage returns the short image name without tag.
 func trimImage(name string) string {
@@ -55,6 +59,29 @@ func MatchImage(from string, to ...string) bool {
 		}
 	}
 	return false
+}
+
+// MatchImageDynamic check if image is in list based on list.
+// If an list entry has a tag specified it only will match if both are the same, else the tag is ignored.
+func MatchImageDynamic(from string, to ...string) bool {
+	fullFrom := expandImage(from)
+	trimFrom := trimImage(from)
+	for _, match := range to {
+		if imageHasTag(match) {
+			if fullFrom == expandImage(match) {
+				return true
+			}
+		} else {
+			if trimFrom == trimImage(match) {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+func imageHasTag(name string) bool {
+	return strings.Contains(name, ":")
 }
 
 // MatchHostname returns true if the image hostname
