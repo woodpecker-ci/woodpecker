@@ -6,8 +6,8 @@ Some versions need some changes to the server configuration or the pipeline conf
 
 - Removed built-in environment variables:
   - `CI_COMMIT_URL` use `CI_PIPELINE_FORGE_URL`
-  - `CI_STEP_FINISHED` as empty durring execution
-  - `CI_PIPELINE_FINISHED` as empty durring execution
+  - `CI_STEP_FINISHED` as empty during execution
+  - `CI_PIPELINE_FINISHED` as empty during execution
   - `CI_PIPELINE_STATUS` was always `success`
   - `CI_STEP_STATUS` was always `success`
 - Rename server environment variable `WOODPECKER_ESCALATE` to `WOODPECKER_PLUGINS_PRIVILEGED`
