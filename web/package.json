@@ -53,7 +53,7 @@
     "eslint": "^9.4.0",
     "eslint-plugin-promise": "^7.0.0",
     "eslint-plugin-vue-scoped-css": "^2.8.0",
-    "jsdom": "^24.1.0",
+    "jsdom": "^25.0.0",
     "prettier": "^3.3.0",
     "replace-in-file": "^8.0.0",
     "tinycolor2": "^1.6.0",
