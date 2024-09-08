@@ -153,9 +153,7 @@ func (m *Metadata) Environ() map[string]string {
 func (m *Metadata) AddStepEnvironment(env map[string]string, step Step) map[string]string {
 	env["CI_STEP_NAME"] = step.Name
 	env["CI_STEP_NUMBER"] = strconv.Itoa(step.Number)
-	env["CI_STEP_STATUS"] = ""   // will be set by agent
 	env["CI_STEP_STARTED"] = ""  // will be set by agent
-	env["CI_STEP_FINISHED"] = "" // will be set by agent
 	env["CI_STEP_URL"] = m.getPipelineWebURL(m.Curr, step.Number)
 	return env
 }
