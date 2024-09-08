@@ -18,7 +18,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"maps"
 	"strings"
 
 	"github.com/distribution/reference"
@@ -205,17 +204,16 @@ func needsRegistrySecret(step *types.Step) bool {
 	return step.AuthConfig.Username != "" && step.AuthConfig.Password != ""
 }
 
-func mkRegistrySecret(step *types.Step, config *config, options BackendOptions) (*v1.Secret, error) {
+func mkRegistrySecret(step *types.Step, config *config) (*v1.Secret, error) {
 	name, err := registrySecretName(step)
 	if err != nil {
 		return nil, err
 	}
 
-	labels, err := registrySecretLabels(step, config, options)
+	labels, err := registrySecretLabels(step)
 	if err != nil {
 		return nil, err
 	}
-	annotations := registrySecretAnnotations(config, options)
 
 	named, err := utils.ParseNamed(step.Image)
 	if err != nil {
@@ -238,10 +236,9 @@ func mkRegistrySecret(step *types.Step, config *config, options BackendOptions) 
 
 	return &v1.Secret{
 		ObjectMeta: meta_v1.ObjectMeta{
-			Namespace:   config.Namespace,
-			Name:        name,
-			Labels:      labels,
-			Annotations: annotations,
+			Namespace: config.Namespace,
+			Name:      name,
+			Labels:    labels,
 		},
 		Type: v1.SecretTypeDockerConfigJson,
 		Data: map[string][]byte{
@@ -254,22 +251,10 @@ func registrySecretName(step *types.Step) (string, error) {
 	return podName(step)
 }
 
-func registrySecretLabels(step *types.Step, config *config, options BackendOptions) (map[string]string, error) {
+func registrySecretLabels(step *types.Step) (map[string]string, error) {
 	var err error
 	labels := make(map[string]string)
 
-	if len(options.Labels) > 0 {
-		if config.RegistrySecretLabelsAllowFromStep {
-			log.Trace().Msgf("using labels from the backend options: %v", options.Labels)
-			maps.Copy(labels, options.Labels)
-		} else {
-			log.Debug().Msg("Registry secret labels were defined in backend options, but its using disallowed by instance configuration")
-		}
-	}
-	if len(config.RegistrySecretLabels) > 0 {
-		log.Trace().Msgf("using labels from the configuration: %v", config.RegistrySecretLabels)
-		maps.Copy(labels, config.RegistrySecretLabels)
-	}
 	if step.Type == types.StepTypeService {
 		labels[ServiceLabel], _ = serviceName(step)
 	}
@@ -281,27 +266,8 @@ func registrySecretLabels(step *types.Step, config *config, options BackendOptio
 	return labels, nil
 }
 
-func registrySecretAnnotations(config *config, options BackendOptions) map[string]string {
-	annotations := make(map[string]string)
-
-	if len(options.Annotations) > 0 {
-		if config.RegistrySecretAnnotationsAllowFromStep {
-			log.Trace().Msgf("using annotations from the backend options: %v", options.Annotations)
-			maps.Copy(annotations, options.Annotations)
-		} else {
-			log.Debug().Msg("Registry secret annotations were defined in backend options, but its using disallowed by instance configuration ")
-		}
-	}
-	if len(config.RegistrySecretAnnotations) > 0 {
-		log.Trace().Msgf("using annotations from the configuration: %v", config.RegistrySecretAnnotations)
-		maps.Copy(annotations, config.RegistrySecretAnnotations)
-	}
-
-	return annotations
-}
-
-func startRegistrySecret(ctx context.Context, engine *kube, step *types.Step, options BackendOptions) error {
-	secret, err := mkRegistrySecret(step, engine.config, options)
+func startRegistrySecret(ctx context.Context, engine *kube, step *types.Step) error {
+	secret, err := mkRegistrySecret(step, engine.config)
 	if err != nil {
 		return err
 	}

@@ -212,13 +212,7 @@ func TestRegistrySecret(t *testing.T) {
 			"namespace": "woodpecker",
 			"creationTimestamp": null,
 			"labels": {
-				"app": "test",
-				"part-of": "woodpecker-ci",
 				"step": "go-test"
-			},
-			"annotations": {
-				"apps.kubernetes.io/pod-index": "0",
-				"kubernetes.io/limit-ranger": "LimitRanger plugin set: cpu, memory request and limit for container"
 			}
 		},
 		"type": "kubernetes.io/dockerconfigjson",
@@ -236,14 +230,7 @@ func TestRegistrySecret(t *testing.T) {
 			Password: "bar",
 		},
 	}, &config{
-		Namespace:                              "woodpecker",
-		RegistrySecretLabels:                   map[string]string{"app": "test"},
-		RegistrySecretLabelsAllowFromStep:      true,
-		RegistrySecretAnnotations:              map[string]string{"apps.kubernetes.io/pod-index": "0"},
-		RegistrySecretAnnotationsAllowFromStep: true,
-	}, BackendOptions{
-		Labels:      map[string]string{"part-of": "woodpecker-ci"},
-		Annotations: map[string]string{"kubernetes.io/limit-ranger": "LimitRanger plugin set: cpu, memory request and limit for container"},
+		Namespace: "woodpecker",
 	})
 	assert.NoError(t, err)
 
