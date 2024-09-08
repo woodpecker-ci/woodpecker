@@ -104,12 +104,12 @@ var Flags = []cli.Flag{
 	&cli.StringFlag{
 		Sources: cli.EnvVars("WOODPECKER_BACKEND_K8S_REGISTRY_SECRET_ANNOTATIONS"),
 		Name:    "backend-k8s-registry-secret-annotations",
-		Usage:   "backend k8s additional Agent-wide regstry image pull secret annotations",
+		Usage:   "backend k8s additional Agent-wide registry image pull secret annotations",
 		Value:   "",
 	},
 	&cli.BoolFlag{
 		Sources: cli.EnvVars("WOODPECKER_BACKEND_K8S_REGISTRY_SECRET_ANNOTATIONS_ALLOW_FROM_STEP"),
-		Name:    "backend-k8s-registrys-secret-annotations-allow-from-step",
+		Name:    "backend-k8s-registry-secret-annotations-allow-from-step",
 		Usage:   "whether to allow using annotations from step's backend options for registry image pull secret",
 		Value:   false,
 	},

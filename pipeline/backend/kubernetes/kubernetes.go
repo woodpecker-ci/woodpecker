@@ -16,7 +16,7 @@ package kubernetes
 
 import (
 	"context"
-	stderrs "errors"
+	std_errs "errors"
 	"fmt"
 	"io"
 	"maps"
@@ -423,7 +423,7 @@ func (e *kube) DestroyStep(ctx context.Context, step *types.Step, taskUUID strin
 	if err != nil {
 		errs = append(errs, err)
 	}
-	return stderrs.Join(errs...)
+	return std_errs.Join(errs...)
 }
 
 // DestroyWorkflow destroys the pipeline environment.
