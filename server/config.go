@@ -64,11 +64,12 @@ var Config = struct {
 	Pipeline struct {
 		AuthenticatePublicRepos             bool
 		DefaultCancelPreviousPipelineEvents []model.WebhookEvent
-		DefaultCloneImage                   string
+		DefaultClonePlugin                  string
+		TrustedClonePlugins                 []string
 		Limits                              model.ResourceLimit
 		Volumes                             []string
 		Networks                            []string
-		Privileged                          []string
+		PrivilegedPlugins                   []string
 		DefaultTimeout                      int64
 		MaxTimeout                          int64
 		Proxy                               struct {

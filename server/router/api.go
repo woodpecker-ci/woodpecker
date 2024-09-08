@@ -129,13 +129,6 @@ func apiRoutes(e *gin.RouterGroup) {
 					repo.PATCH("/registries/:registry", session.MustPush, api.PatchRegistry)
 					repo.DELETE("/registries/:registry", session.MustPush, api.DeleteRegistry)
 
-					// TODO: remove with 3.x
-					repo.GET("/registry", session.MustPush, api.GetRegistryList)
-					repo.POST("/registry", session.MustPush, api.PostRegistry)
-					repo.GET("/registry/:registry", session.MustPush, api.GetRegistry)
-					repo.PATCH("/registry/:registry", session.MustPush, api.PatchRegistry)
-					repo.DELETE("/registry/:registry", session.MustPush, api.DeleteRegistry)
-
 					// requires push permissions
 					repo.GET("/cron", session.MustPush, api.GetCronList)
 					repo.POST("/cron", session.MustPush, api.PostCron)

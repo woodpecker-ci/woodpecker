@@ -70,9 +70,16 @@ Secrets are not exposed to pull requests by default. You can override this behav
 Please be careful when exposing secrets to pull requests. If your repository is open source and accepts pull requests your secrets are not safe. A bad actor can submit a malicious pull request that exposes your secrets.
 :::
 
-## Image filter
+## Plugins filter
 
-To prevent abusing your secrets from malicious usage, you can limit a secret to a list of images. If enabled they are not available to any other plugin (steps without user-defined commands). If you or an attacker defines explicit commands, the secrets will not be available to the container to prevent leaking them.
+To prevent abusing your secrets from malicious usage, you can limit a secret to a list of plugins. If enabled they are not available to any other plugin (steps without user-defined commands). If you or an attacker defines explicit commands, the secrets will not be available to the container to prevent leaking them.
+
+:::note
+If you specify a tag, the filter will respect it.
+Just make sure you don't specify the same image without one, otherwise it will be ignored again.
+:::
+
+![plugins filter](./secrets-plugins-filter.png)
 
 ## Adding Secrets
 
@@ -105,7 +112,7 @@ Create the secrets and limit to a set of images:
  woodpecker-cli secret add \
    -repository octocat/hello-world \
 +  -image plugins/s3 \
-+  -image peloton/woodpecker-ecs \
++  -image woodpeckerci/plugin-ecs \
    -name aws_access_key_id \
    -value <value>
 ```

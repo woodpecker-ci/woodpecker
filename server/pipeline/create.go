@@ -38,7 +38,7 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 	if err != nil {
 		msg := fmt.Sprintf("failure to find repo owner via id '%d'", repo.UserID)
 		log.Error().Err(err).Str("repo", repo.FullName).Msg(msg)
-		return nil, fmt.Errorf(msg)
+		return nil, errors.New(msg)
 	}
 
 	if pipeline.Event == model.EventPush || pipeline.Event == model.EventPull || pipeline.Event == model.EventPullClosed {
@@ -57,7 +57,7 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 	if err != nil {
 		msg := fmt.Sprintf("failure to load forge for repo '%s'", repo.FullName)
 		log.Error().Err(err).Str("repo", repo.FullName).Msg(msg)
-		return nil, fmt.Errorf(msg)
+		return nil, errors.New(msg)
 	}
 
 	// If the forge has a refresh token, the current access token
@@ -88,7 +88,7 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 		return nil, ErrFiltered
 	} else if configFetchErr != nil {
 		log.Debug().Str("repo", repo.FullName).Err(configFetchErr).Msgf("error while fetching config '%s' in '%s' with user: '%s'", repo.Config, pipeline.Ref, repoUser.Login)
-		return nil, updatePipelineWithErr(ctx, _forge, _store, pipeline, repo, repoUser, fmt.Errorf("pipeline definition not found in %s", repo.FullName))
+		return nil, updatePipelineWithErr(ctx, _forge, _store, pipeline, repo, repoUser, fmt.Errorf("could not load config from forge: %w", err))
 	}
 
 	pipelineItems, parseErr := parsePipeline(_forge, _store, pipeline, repoUser, repo, forgeYamlConfigs, nil)
@@ -117,7 +117,7 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 		if err != nil {
 			msg := fmt.Sprintf("failed to find or persist pipeline config for %s", repo.FullName)
 			log.Error().Err(err).Msg(msg)
-			return nil, fmt.Errorf(msg)
+			return nil, errors.New(msg)
 		}
 		configs = append(configs, config)
 	}
@@ -125,7 +125,7 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 	if err := linkPipelineConfigs(_store, configs, pipeline.ID); err != nil {
 		msg := fmt.Sprintf("failed to find or persist pipeline config for %s", repo.FullName)
 		log.Error().Err(err).Msg(msg)
-		return nil, fmt.Errorf(msg)
+		return nil, errors.New(msg)
 	}
 
 	if err := prepareStart(ctx, _forge, _store, pipeline, repoUser, repo); err != nil {
@@ -145,7 +145,7 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 	if err != nil {
 		msg := fmt.Sprintf("failed to start pipeline for %s", repo.FullName)
 		log.Error().Err(err).Msg(msg)
-		return nil, fmt.Errorf(msg)
+		return nil, errors.New(msg)
 	}
 
 	return pipeline, nil

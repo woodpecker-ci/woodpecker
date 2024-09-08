@@ -23,8 +23,8 @@ type Workflow struct {
 	Name       string            `json:"name"                 xorm:"name"`
 	State      StatusValue       `json:"state"                xorm:"state"`
 	Error      string            `json:"error,omitempty"      xorm:"TEXT 'error'"`
-	Started    int64             `json:"start_time,omitempty" xorm:"started"`
-	Finished   int64             `json:"end_time,omitempty"   xorm:"stopped"`
+	Started    int64             `json:"started,omitempty"    xorm:"started"`
+	Finished   int64             `json:"finished,omitempty"   xorm:"finished"`
 	AgentID    int64             `json:"agent_id,omitempty"   xorm:"agent_id"`
 	Platform   string            `json:"platform,omitempty"   xorm:"platform"`
 	Environ    map[string]string `json:"environ,omitempty"    xorm:"json 'environ'"`
