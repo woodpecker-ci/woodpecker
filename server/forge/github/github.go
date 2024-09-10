@@ -25,6 +25,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/gofri/go-github-ratelimit/github_ratelimit"
 	"github.com/google/go-github/v63/github"
@@ -41,8 +42,9 @@ import (
 )
 
 const (
-	defaultURL = "https://github.com"      // Default GitHub URL
-	defaultAPI = "https://api.github.com/" // Default GitHub API URL
+	defaultURL                         = "https://github.com"      // Default GitHub URL
+	defaultAPI                         = "https://api.github.com/" // Default GitHub API URL
+	secondaryRateLimitAccumulatedSleep = time.Duration(60)         // Limit the accumulated sleep duration for all secondary rate limits
 )
 
 // Opts defines configuration options.
@@ -439,7 +441,16 @@ func (c *client) newClientToken(token string) *github.Client {
 		}
 	}
 
-	rateLimiter, _ := github_ratelimit.NewRateLimitWaiterClient(base)
+	rateLimiter, _ := github_ratelimit.NewRateLimitWaiterClient(
+		base,
+		github_ratelimit.WithLimitDetectedCallback(
+			func(callback *github_ratelimit.CallbackContext) {
+				duration := callback.SleepUntil.Sub(time.Now())
+				log.Warn().Msgf("Hit GitHub secondary rate limit (sleeping for %s)", duration)
+			}),
+		github_ratelimit.WithTotalSleepLimit(secondaryRateLimitAccumulatedSleep, nil),
+	)
+
 	client := github.NewClient(rateLimiter).WithAuthToken(token)
 	client.BaseURL, _ = url.Parse(c.API)
 	return client
