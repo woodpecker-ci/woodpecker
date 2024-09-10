@@ -39,6 +39,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 )
 
+// updateAgentLastWorkDelay the delay before the LastWork info should be updated
 const updateAgentLastWorkDelay = time.Minute
 
 type RPC struct {
