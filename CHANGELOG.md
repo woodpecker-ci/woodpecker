@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-09-08
+## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-09-10
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -10,7 +10,6 @@
 
 - Remove some ci environment variables [[#3846](https://github.com/woodpecker-ci/woodpecker/pull/3846)]
 - Remove all default privileged plugins [[#4053](https://github.com/woodpecker-ci/woodpecker/pull/4053)]
-- Remove all default 3rd party privileged plugins [[#3918](https://github.com/woodpecker-ci/woodpecker/pull/3918)]
 - Add option to filter secrets by plugins with specific tags [[#4069](https://github.com/woodpecker-ci/woodpecker/pull/4069)]
 - Remove old pipeline options [[#4016](https://github.com/woodpecker-ci/woodpecker/pull/4016)]
 - Remove various deprecations [[#4017](https://github.com/woodpecker-ci/woodpecker/pull/4017)]
@@ -40,7 +39,6 @@
 
 - Add indices to repo table [[#4087](https://github.com/woodpecker-ci/woodpecker/pull/4087)]
 - Duplicate key `workflow_id` in the agent logs [[#4046](https://github.com/woodpecker-ci/woodpecker/pull/4046)]
-- Only update agent.LastWork if not done recently [[#4031](https://github.com/woodpecker-ci/woodpecker/pull/4031)]
 - Improve error on config loading [[#4024](https://github.com/woodpecker-ci/woodpecker/pull/4024)]
 - Show error returned from API [[#3980](https://github.com/woodpecker-ci/woodpecker/pull/3980)]
 - Move manual popup to own page [[#3981](https://github.com/woodpecker-ci/woodpecker/pull/3981)]
@@ -76,6 +74,7 @@
 - Fix schema with detached steps [[#4066](https://github.com/woodpecker-ci/woodpecker/pull/4066)]
 - Fix schema with commands and entrypoint [[#4065](https://github.com/woodpecker-ci/woodpecker/pull/4065)]
 - Read long log lines from file storage correctly [[#4048](https://github.com/woodpecker-ci/woodpecker/pull/4048)]
+- Only update agent.LastWork if not done recently [[#4031](https://github.com/woodpecker-ci/woodpecker/pull/4031)]
 - Set refspec for gitlab MR [[#4021](https://github.com/woodpecker-ci/woodpecker/pull/4021)]
 - Set `CI_PREV_COMMIT_{SOURCE,TARGET}_BRANCH` as mentioned in the documentation [[#4001](https://github.com/woodpecker-ci/woodpecker/pull/4001)]
 - [Bitbucket Datacenter] Return empty list instead of null [[#4010](https://github.com/woodpecker-ci/woodpecker/pull/4010)]
@@ -102,7 +101,6 @@
 - Update dependency simple-icons to v13 [[#4037](https://github.com/woodpecker-ci/woodpecker/pull/4037)]
 - Show error if secret name is missing [[#4014](https://github.com/woodpecker-ci/woodpecker/pull/4014)]
 - chore(deps): lock file maintenance [[#3991](https://github.com/woodpecker-ci/woodpecker/pull/3991)]
-- fix(deps): update github.com/urfave/cli/v3 digest to 127cf54 [[#3989](https://github.com/woodpecker-ci/woodpecker/pull/3989)]
 - fix(deps): update golang-packages [[#3958](https://github.com/woodpecker-ci/woodpecker/pull/3958)]
 - Improve wording [[#3951](https://github.com/woodpecker-ci/woodpecker/pull/3951)]
 - Fix typos and optimize wording [[#3940](https://github.com/woodpecker-ci/woodpecker/pull/3940)]
