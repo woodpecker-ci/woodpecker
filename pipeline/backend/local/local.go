@@ -105,6 +105,7 @@ func (e *local) SetupWorkflow(_ context.Context, _ *types.Config, taskUUID strin
 		baseDir:  baseDir,
 		homeDir:  filepath.Join(baseDir, "home"),
 	}
+	e.saveState(taskUUID, state)
 
 	if err := os.Mkdir(state.homeDir, 0o700); err != nil {
 		return err
@@ -117,6 +118,16 @@ func (e *local) SetupWorkflow(_ context.Context, _ *types.Config, taskUUID strin
 		}
 	} else {
 		state.workspaceDir = e.execDir
+		if stat, err := os.Stat(e.execDir); os.IsNotExist(err) {
+			log.Debug().Msgf("create workspace directory set by WOODPECKER_BACKEND_LOCAL_EXEC_DIR")
+			if err := os.Mkdir(state.workspaceDir, 0o700); err != nil {
+				return err
+			}
+		} else if !stat.IsDir() {
+			err := fmt.Errorf("backend option 'WOODPECKER_BACKEND_LOCAL_EXEC_DIR' was set to an existing file")
+			log.Error().Err(err).Msg("")
+			return err
+		}
 	}
 
 	e.saveState(taskUUID, state)
