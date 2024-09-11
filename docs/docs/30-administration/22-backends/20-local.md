@@ -65,3 +65,11 @@ In the context of the local backend, plugins are simply executable binaries, whi
 > Default: default temp directory
 
 Directory to create folders for workflows.
+
+#### `WOODPECKER_BACKEND_LOCAL_EXEC_DIR`
+
+> Default: *empty*
+
+:::warning
+Only set it if you know why
+:::
