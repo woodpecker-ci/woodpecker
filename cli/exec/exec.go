@@ -129,7 +129,11 @@ func runExec(ctx context.Context, c *cli.Command, file, repoPath string) error {
 }
 
 func execWithAxis(ctx context.Context, c *cli.Command, file, repoPath string, axis matrix.Axis) error {
-	metadata := metadataFromContext(ctx, c, axis)
+	metadata, err := metadataFromContext(ctx, c, axis)
+	if err != nil {
+		return err
+	}
+
 	environ := metadata.Environ()
 	var secrets []compiler.Secret
 	for key, val := range metadata.Workflow.Matrix {

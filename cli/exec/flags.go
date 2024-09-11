@@ -32,6 +32,11 @@ var flags = []cli.Flag{
 		Name:    "repo-path",
 		Usage:   "path to local repository",
 	},
+	&cli.StringFlag{
+		Sources: cli.EnvVars("WOODPECKER_METADATA_FILE"),
+		Name:    "metadata-file",
+		Usage:   "path to metadata file who has stored the pipeline environment to emulate (can be downloaded from an existing pipeline), infos can be overwritten.",
+	},
 	&cli.DurationFlag{
 		Sources: cli.EnvVars("WOODPECKER_TIMEOUT"),
 		Name:    "timeout",
