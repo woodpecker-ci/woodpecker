@@ -132,6 +132,8 @@ func execWithAxis(ctx context.Context, c *cli.Command, file, repoPath string, ax
 	metadata, err := metadataFromContext(ctx, c, axis)
 	if err != nil {
 		return err
+	} else if metadata == nil {
+		return fmt.Errorf("metadata is nil")
 	}
 
 	environ := metadata.Environ()
@@ -238,7 +240,7 @@ func execWithAxis(ctx context.Context, c *cli.Command, file, repoPath string, ax
 			c.String("netrc-password"),
 			c.String("netrc-machine"),
 		),
-		compiler.WithMetadata(metadata),
+		compiler.WithMetadata(*metadata),
 		compiler.WithSecret(secrets...),
 		compiler.WithEnviron(pipelineEnv),
 	).Compile(conf)
