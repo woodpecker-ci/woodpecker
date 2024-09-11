@@ -3144,6 +3144,55 @@ const docTemplate = `{
                 }
             }
         },
+        "/repos/{repo_id}/pipelines/{number}/metadata": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Pipelines"
+                ],
+                "summary": "Get metadata for a pipeline or a specific workflow, including previous pipeline info",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cpersonal access token\u003e",
+                        "description": "Insert your personal access token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "the repository id",
+                        "name": "repo_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "the number of the pipeline",
+                        "name": "number",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "the name of a specific workflow (optional)",
+                        "name": "workflow",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/metadata.Metadata"
+                        }
+                    }
+                }
+            }
+        },
         "/repos/{repo_id}/pull_requests": {
             "get": {
                 "produces": [
@@ -5153,6 +5202,245 @@ const docTemplate = `{
                 "EventCron",
                 "EventManual"
             ]
+        },
+        "metadata.Author": {
+            "type": "object",
+            "properties": {
+                "avatar": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "metadata.Commit": {
+            "type": "object",
+            "properties": {
+                "author": {
+                    "$ref": "#/definitions/metadata.Author"
+                },
+                "branch": {
+                    "type": "string"
+                },
+                "changed_files": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "is_prerelease": {
+                    "type": "boolean"
+                },
+                "labels": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "message": {
+                    "type": "string"
+                },
+                "ref": {
+                    "type": "string"
+                },
+                "refspec": {
+                    "type": "string"
+                },
+                "sha": {
+                    "type": "string"
+                }
+            }
+        },
+        "metadata.Forge": {
+            "type": "object",
+            "properties": {
+                "type": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                }
+            }
+        },
+        "metadata.Metadata": {
+            "type": "object",
+            "properties": {
+                "curr": {
+                    "$ref": "#/definitions/metadata.Pipeline"
+                },
+                "forge": {
+                    "$ref": "#/definitions/metadata.Forge"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "prev": {
+                    "$ref": "#/definitions/metadata.Pipeline"
+                },
+                "repo": {
+                    "$ref": "#/definitions/metadata.Repo"
+                },
+                "step": {
+                    "$ref": "#/definitions/metadata.Step"
+                },
+                "sys": {
+                    "$ref": "#/definitions/metadata.System"
+                },
+                "workflow": {
+                    "$ref": "#/definitions/metadata.Workflow"
+                }
+            }
+        },
+        "metadata.Pipeline": {
+            "type": "object",
+            "properties": {
+                "commit": {
+                    "$ref": "#/definitions/metadata.Commit"
+                },
+                "created": {
+                    "type": "integer"
+                },
+                "cron": {
+                    "type": "string"
+                },
+                "event": {
+                    "type": "string"
+                },
+                "finished": {
+                    "type": "integer"
+                },
+                "forge_url": {
+                    "type": "string"
+                },
+                "number": {
+                    "type": "integer"
+                },
+                "parent": {
+                    "type": "integer"
+                },
+                "started": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "target": {
+                    "type": "string"
+                },
+                "task": {
+                    "type": "string"
+                }
+            }
+        },
+        "metadata.Repo": {
+            "type": "object",
+            "properties": {
+                "clone_url": {
+                    "type": "string"
+                },
+                "clone_url_ssh": {
+                    "type": "string"
+                },
+                "default_branch": {
+                    "type": "string"
+                },
+                "forge_url": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "owner": {
+                    "type": "string"
+                },
+                "private": {
+                    "type": "boolean"
+                },
+                "remote_id": {
+                    "type": "string"
+                },
+                "secrets": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/metadata.Secret"
+                    }
+                },
+                "trusted": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "metadata.Secret": {
+            "type": "object",
+            "properties": {
+                "mask": {
+                    "type": "boolean"
+                },
+                "mount": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            }
+        },
+        "metadata.Step": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "number": {
+                    "type": "integer"
+                }
+            }
+        },
+        "metadata.System": {
+            "type": "object",
+            "properties": {
+                "arch": {
+                    "type": "string"
+                },
+                "host": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                },
+                "version": {
+                    "type": "string"
+                }
+            }
+        },
+        "metadata.Workflow": {
+            "type": "object",
+            "properties": {
+                "matrix": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "name": {
+                    "type": "string"
+                },
+                "number": {
+                    "type": "integer"
+                }
+            }
         },
         "model.ForgeType": {
             "type": "string",
