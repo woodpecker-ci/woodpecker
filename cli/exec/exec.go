@@ -113,7 +113,9 @@ func runExec(ctx context.Context, c *cli.Command, file, repoPath string) error {
 
 	// if we use the local backend we should signal to run at $repoPath
 	if c.String("backend-engine") == "local" && !c.IsSet("backend-local-exec-dir") {
-		c.Set("backend-local-exec-dir", repoPath)
+		if err := c.Set("backend-local-exec-dir", repoPath); err != nil {
+			return err
+		}
 	}
 
 	axes, err := matrix.ParseString(string(dat))
