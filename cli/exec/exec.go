@@ -119,13 +119,25 @@ func run(ctx context.Context, c *cli.Command) error {
 		return err
 	}
 
-	for _, item := range items {
-		// TODO: check dependencies
-		// err := runWorkflow(c, item.Config)
-		// if err != nil {
-		// 	return err
-		// }
-		fmt.Println("#", item.Workflow.Name)
+	done := make(map[string]bool)
+	for len(done) < len(items) {
+		for _, item := range items {
+			fmt.Println("#", item.Workflow.Name)
+
+			for _, step := range item.DependsOn {
+				if !done[step] {
+					fmt.Printf("%s is waiting for %s\n", item.Workflow.Name, step)
+					continue
+				}
+			}
+
+			err := runWorkflow(ctx, c, item.Config, item.Workflow.Name)
+			if err != nil {
+				return err
+			}
+
+			done[item.Workflow.Name] = true
+		}
 	}
 
 	return nil
