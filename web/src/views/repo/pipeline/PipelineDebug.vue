@@ -59,7 +59,7 @@ async function downloadMetadata() {
     const url = window.URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `pipeline-${pipeline.value.number}${selectedWorkflow.value ? `-${  selectedWorkflow.value}` : ''}-metadata.json`;
+    link.download = `pipeline-${pipeline.value.number}${selectedWorkflow.value ? `-${selectedWorkflow.value}` : ''}-metadata.json`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);

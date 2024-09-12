@@ -23,6 +23,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/urfave/cli/v3"
+
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/metadata"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/matrix"
 )
@@ -52,9 +53,9 @@ func TestMetadataFromContext(t *testing.T) {
 		}
 
 		runCommand(flags, func(c *cli.Command) {
-			c.Set("metadata-file", tempFileName)
+			_ = c.Set("metadata-file", tempFileName)
 
-			m, err := metadataFromContext(nil, c, nil)
+			m, err := metadataFromContext(context.Background(), c, nil)
 			require.NoError(t, err)
 			assert.Equal(t, "test-repo", m.Repo.Name)
 			assert.Equal(t, int64(5), m.Curr.Number)
@@ -71,11 +72,11 @@ func TestMetadataFromContext(t *testing.T) {
 		}
 
 		runCommand(flags, func(c *cli.Command) {
-			c.Set("metadata-file", tempFileName)
-			c.Set("repo-name", "aUser/override-repo")
-			c.Set("pipeline-number", "10")
+			_ = c.Set("metadata-file", tempFileName)
+			_ = c.Set("repo-name", "aUser/override-repo")
+			_ = c.Set("pipeline-number", "10")
 
-			m, err := metadataFromContext(nil, c, nil)
+			m, err := metadataFromContext(context.Background(), c, nil)
 			require.NoError(t, err)
 			assert.Equal(t, "override-repo", m.Repo.Name)
 			assert.Equal(t, int64(10), m.Curr.Number)
@@ -95,9 +96,9 @@ func TestMetadataFromContext(t *testing.T) {
 		}
 
 		runCommand(flags, func(c *cli.Command) {
-			c.Set("metadata-file", tempFile.Name())
+			_ = c.Set("metadata-file", tempFile.Name())
 
-			_, err = metadataFromContext(nil, c, nil)
+			_, err = metadataFromContext(context.Background(), c, nil)
 			assert.Error(t, err)
 		})
 	})
@@ -109,7 +110,7 @@ func TestMetadataFromContext(t *testing.T) {
 		}
 
 		runCommand(flags, func(c *cli.Command) {
-			m, err := metadataFromContext(nil, c, nil)
+			m, err := metadataFromContext(context.Background(), c, nil)
 			require.NoError(t, err)
 			assert.Equal(t, "test", m.Repo.Owner)
 			assert.Equal(t, "default-repo", m.Repo.Name)
@@ -120,7 +121,7 @@ func TestMetadataFromContext(t *testing.T) {
 	t.Run("MatrixAxis", func(t *testing.T) {
 		runCommand([]cli.Flag{}, func(c *cli.Command) {
 			axis := matrix.Axis{"go": "1.16", "os": "linux"}
-			m, err := metadataFromContext(nil, c, axis)
+			m, err := metadataFromContext(context.Background(), c, axis)
 			require.NoError(t, err)
 			assert.EqualValues(t, map[string]string{"go": "1.16", "os": "linux"}, m.Workflow.Matrix)
 		})
