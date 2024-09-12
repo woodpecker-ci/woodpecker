@@ -14,12 +14,17 @@
 
 package model
 
+import (
+	"errors"
+	"fmt"
+)
+
 type Agent struct {
 	ID          int64  `json:"id"            xorm:"pk autoincr 'id'"`
 	Created     int64  `json:"created"       xorm:"created"`
 	Updated     int64  `json:"updated"       xorm:"updated"`
 	Name        string `json:"name"          xorm:"name"`
-	OwnerID     int64  `json:"owner_id"      xorm:"'owner_id'"`
+	OrgID       int64  `json:"owner_id"      xorm:"'owner_id'"` // TODO: rename to org_id
 	Token       string `json:"token"         xorm:"token"`
 	LastContact int64  `json:"last_contact"  xorm:"last_contact"`
 	LastWork    int64  `json:"last_work"     xorm:"last_work"` // last time the agent did something, this value is used to determine if the agent is still doing work used by the autoscaler
@@ -28,6 +33,8 @@ type Agent struct {
 	Capacity    int32  `json:"capacity"      xorm:"capacity"`
 	Version     string `json:"version"       xorm:"'version'"`
 	NoSchedule  bool   `json:"no_schedule"   xorm:"no_schedule"`
+	// Server side enforced agent filters
+	Filters map[string]string `json:"filters" xorm:"'filters' json"`
 } //	@name Agent
 
 // TableName return database table name for xorm.
@@ -36,5 +43,37 @@ func (Agent) TableName() string {
 }
 
 func (a *Agent) IsSystemAgent() bool {
-	return a.OwnerID == -1
+	return a.OrgID == -1
+}
+
+var ErrFiltersBroken = errors.New("while creating filters map error ocured")
+
+func (a *Agent) GetFilters() (map[string]string, error) {
+	filters := a.Filters
+	if filters == nil {
+		filters = make(map[string]string)
+	}
+
+	// enforce filters for user and organization agents
+	if a.IsSystemAgent() {
+		filters["org-id"] = "*"  // allow all orgs
+		filters["repo-id"] = "*" // allow all repos
+	} else if a.OrgID > 0 {
+		filters["org-id"] = fmt.Sprintf("%d", a.OrgID)
+		filters["repo-id"] = "*" // allow all repos of the org
+	}
+
+	return filters, nil
+}
+
+func (a *Agent) CanAccessRepo(repo *Repo) bool {
+	if a.IsSystemAgent() {
+		return true
+	}
+
+	if a.OrgID == repo.OrgID {
+		return true
+	}
+
+	return false
 }

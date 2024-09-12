@@ -62,7 +62,7 @@ func (s *WoodpeckerAuthServer) getAgent(agentID int64, agentToken string) (*mode
 		if agentToken == s.agentMasterToken && agentID == -1 {
 			agent := new(model.Agent)
 			agent.Name = ""
-			agent.OwnerID = -1 // system agent
+			agent.OrgID = -1 // system agent
 			agent.Token = s.agentMasterToken
 			agent.Backend = ""
 			agent.Platform = ""
@@ -89,5 +89,8 @@ func (s *WoodpeckerAuthServer) getAgent(agentID int64, agentToken string) (*mode
 	if err != nil && errors.Is(err, types.RecordNotExist) {
 		return nil, fmt.Errorf("individual agent not found by token: %w", err)
 	}
+
+	// TODO: check if an agent can still pretend to be an other one
+
 	return agent, err
 }

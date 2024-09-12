@@ -187,12 +187,16 @@ func (q *fifo) Wait(c context.Context, id string) error {
 }
 
 // Extend extends the task execution deadline.
-func (q *fifo) Extend(_ context.Context, id string) error {
+func (q *fifo) Extend(_ context.Context, agentID int64, id string) error {
 	q.Lock()
 	defer q.Unlock()
 
 	state, ok := q.running[id]
 	if ok {
+		if state.item.AgentID != agentID {
+			return ErrAgentMissmatch
+		}
+
 		state.deadline = time.Now().Add(q.extension)
 		return nil
 	}

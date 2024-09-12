@@ -37,7 +37,7 @@ func queuePipeline(ctx context.Context, repo *model.Repo, pipelineItems []*stepb
 		for k, v := range item.Labels {
 			task.Labels[k] = v
 		}
-		task.Labels["repo"] = repo.FullName
+		enforceLabels(task, repo)
 		task.Dependencies = taskIDs(item.DependsOn, pipelineItems)
 		task.RunOn = item.RunsOn
 		task.DepStatus = make(map[string]model.StatusValue)
@@ -55,6 +55,13 @@ func queuePipeline(ctx context.Context, repo *model.Repo, pipelineItems []*stepb
 		tasks = append(tasks, task)
 	}
 	return server.Config.Services.Queue.PushAtOnce(ctx, tasks)
+}
+
+func enforceLabels(task *model.Task, repo *model.Repo) {
+	task.Labels["repo"] = repo.FullName
+	task.Labels["owner"] = repo.Owner
+	task.Labels["repo-id"] = fmt.Sprint(repo.ID)
+	task.Labels["org-id"] = fmt.Sprint(repo.OrgID)
 }
 
 func taskIDs(dependsOn []string, pipelineItems []*stepbuilder.Item) (taskIDs []string) {
