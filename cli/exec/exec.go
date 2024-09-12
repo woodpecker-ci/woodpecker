@@ -74,24 +74,6 @@ func run(ctx context.Context, c *cli.Command) error {
 		volumes = append(volumes, repoPath+":"+path.Join(workspaceBase, workspacePath))
 	}
 
-	// lint the yaml file
-	// err = linter.New(
-	// 	linter.WithTrusted(true),
-	// 	linter.PrivilegedPlugins(privilegedPlugins),
-	// 	linter.WithTrustedClonePlugins(constant.TrustedClonePlugins),
-	// ).Lint([]*linter.WorkflowConfig{{
-	// 	File:      path.Base(file),
-	// 	RawConfig: confStr,
-	// 	Workflow:  conf,
-	// }})
-	// if err != nil {
-	// 	str, err := lint.FormatLintError(file, err)
-	// 	fmt.Print(str)
-	// 	if err != nil {
-	// 		return err
-	// 	}
-	// }
-
 	getWorkflowMetadata := func(workflow *model.Workflow) metadata.Metadata {
 		return metadataFromCommand(c, workflow)
 	}
