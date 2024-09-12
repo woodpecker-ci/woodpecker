@@ -92,7 +92,8 @@ steps:
     image: plugins/slack
     settings:
       channel: developers
-      username: woodpecker
+      username:
+        from_variable: slack_username
       password:
         from_secret: slack_token
     when:
@@ -102,6 +103,8 @@ steps:
 To configure a plugin you can use the `settings` section.
 
 Sometime you need to provide secrets to the plugin. You can do this by using the `from_secret` key. The secret must be defined in the Woodpecker UI. You can find more information about secrets [here](./40-secrets.md).
+
+Similarly, you can also define public variables using the `from_variable` key. You can find more information about variables [here](./39-variables.md).
 
 Similar to the `when` section at the top of the file which is for the complete workflow, you can use the `when` section for each step to define when a step should be executed.
 

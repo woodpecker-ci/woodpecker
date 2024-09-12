@@ -33,6 +33,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/cli/setup"
 	"go.woodpecker-ci.org/woodpecker/v2/cli/update"
 	"go.woodpecker-ci.org/woodpecker/v2/cli/user"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/variable"
 	"go.woodpecker-ci.org/woodpecker/v2/version"
 )
 
@@ -57,6 +58,7 @@ func newApp() *cli.Command {
 		exec.Command,
 		info.Command,
 		secret.Command,
+		variable.Command,
 		user.Command,
 		lint.Command,
 		loglevel.Command,

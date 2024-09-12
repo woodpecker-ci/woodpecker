@@ -136,6 +136,15 @@ type (
 		Password string `json:"password,omitempty"`
 	}
 
+	// Variable represents a public variable.
+	Variable struct {
+		ID     int64  `json:"id"`
+		OrgID  int64  `json:"org_id"`
+		RepoID int64  `json:"repo_id"`
+		Name   string `json:"name"`
+		Value  string `json:"value,omitempty"`
+	}
+
 	// Secret represents a secret variable, such as a password or token.
 	Secret struct {
 		ID     int64    `json:"id"`

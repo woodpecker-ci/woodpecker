@@ -168,6 +168,21 @@ type Client interface {
 	// GlobalRegistryDelete deletes a global registry.
 	GlobalRegistryDelete(registry string) error
 
+	// Variable returns a variable by name.
+	Variable(repoID int64, variable string) (*Variable, error)
+
+	// VariableList returns a list of all repository variables.
+	VariableList(repoID int64) ([]*Variable, error)
+
+	// VariableCreate creates a variable.
+	VariableCreate(repoID int64, variable *Variable) (*Variable, error)
+
+	// VariableUpdate updates a variable.
+	VariableUpdate(repoID int64, variable *Variable) (*Variable, error)
+
+	// VariableDelete deletes a variable.
+	VariableDelete(repoID int64, variable string) error
+
 	// Secret returns a secret by name.
 	Secret(repoID int64, secret string) (*Secret, error)
 
@@ -189,6 +204,21 @@ type Client interface {
 	// OrgLookup returns an organization id by name.
 	OrgLookup(orgName string) (*Org, error)
 
+	// OrgVariable returns an organization variable by name.
+	OrgVariable(orgID int64, variable string) (*Variable, error)
+
+	// OrgVariableList returns a list of all organization variables.
+	OrgVariableList(orgID int64) ([]*Variable, error)
+
+	// OrgVariableCreate creates an organization variable.
+	OrgVariableCreate(orgID int64, variable *Variable) (*Variable, error)
+
+	// OrgVariableUpdate updates an organization variable.
+	OrgVariableUpdate(orgID int64, variable *Variable) (*Variable, error)
+
+	// OrgVariableDelete deletes an organization variable.
+	OrgVariableDelete(orgID int64, variable string) error
+
 	// OrgSecret returns an organization secret by name.
 	OrgSecret(orgID int64, secret string) (*Secret, error)
 
@@ -203,6 +233,21 @@ type Client interface {
 
 	// OrgSecretDelete deletes an organization secret.
 	OrgSecretDelete(orgID int64, secret string) error
+
+	// GlobalVariable returns an global variable by name.
+	GlobalVariable(variable string) (*Variable, error)
+
+	// GlobalVariableList returns a list of all global variables.
+	GlobalVariableList() ([]*Variable, error)
+
+	// GlobalVariableCreate creates a global variable.
+	GlobalVariableCreate(variable *Variable) (*Variable, error)
+
+	// GlobalVariableUpdate updates a global variable.
+	GlobalVariableUpdate(variable *Variable) (*Variable, error)
+
+	// GlobalVariableDelete deletes a global variable.
+	GlobalVariableDelete(variable string) error
 
 	// GlobalSecret returns an global secret by name.
 	GlobalSecret(secret string) (*Secret, error)

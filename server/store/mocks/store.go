@@ -1312,6 +1312,66 @@ func (_m *Store) GlobalSecretList(_a0 *model.ListOptions) ([]*model.Secret, erro
 	return r0, r1
 }
 
+// GlobalVariableFind provides a mock function with given fields: _a0
+func (_m *Store) GlobalVariableFind(_a0 string) (*model.Variable, error) {
+	ret := _m.Called(_a0)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GlobalVariableFind")
+	}
+
+	var r0 *model.Variable
+	var r1 error
+	if rf, ok := ret.Get(0).(func(string) (*model.Variable, error)); ok {
+		return rf(_a0)
+	}
+	if rf, ok := ret.Get(0).(func(string) *model.Variable); ok {
+		r0 = rf(_a0)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.Variable)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(_a0)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GlobalVariableList provides a mock function with given fields: _a0
+func (_m *Store) GlobalVariableList(_a0 *model.ListOptions) ([]*model.Variable, error) {
+	ret := _m.Called(_a0)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GlobalVariableList")
+	}
+
+	var r0 []*model.Variable
+	var r1 error
+	if rf, ok := ret.Get(0).(func(*model.ListOptions) ([]*model.Variable, error)); ok {
+		return rf(_a0)
+	}
+	if rf, ok := ret.Get(0).(func(*model.ListOptions) []*model.Variable); ok {
+		r0 = rf(_a0)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*model.Variable)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(*model.ListOptions) error); ok {
+		r1 = rf(_a0)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // HasRedirectionForRepo provides a mock function with given fields: _a0, _a1
 func (_m *Store) HasRedirectionForRepo(_a0 int64, _a1 string) (bool, error) {
 	ret := _m.Called(_a0, _a1)
@@ -1716,6 +1776,66 @@ func (_m *Store) OrgUpdate(_a0 *model.Org) error {
 	}
 
 	return r0
+}
+
+// OrgVariableFind provides a mock function with given fields: _a0, _a1
+func (_m *Store) OrgVariableFind(_a0 int64, _a1 string) (*model.Variable, error) {
+	ret := _m.Called(_a0, _a1)
+
+	if len(ret) == 0 {
+		panic("no return value specified for OrgVariableFind")
+	}
+
+	var r0 *model.Variable
+	var r1 error
+	if rf, ok := ret.Get(0).(func(int64, string) (*model.Variable, error)); ok {
+		return rf(_a0, _a1)
+	}
+	if rf, ok := ret.Get(0).(func(int64, string) *model.Variable); ok {
+		r0 = rf(_a0, _a1)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.Variable)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(int64, string) error); ok {
+		r1 = rf(_a0, _a1)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// OrgVariableList provides a mock function with given fields: _a0, _a1
+func (_m *Store) OrgVariableList(_a0 int64, _a1 *model.ListOptions) ([]*model.Variable, error) {
+	ret := _m.Called(_a0, _a1)
+
+	if len(ret) == 0 {
+		panic("no return value specified for OrgVariableList")
+	}
+
+	var r0 []*model.Variable
+	var r1 error
+	if rf, ok := ret.Get(0).(func(int64, *model.ListOptions) ([]*model.Variable, error)); ok {
+		return rf(_a0, _a1)
+	}
+	if rf, ok := ret.Get(0).(func(int64, *model.ListOptions) []*model.Variable); ok {
+		r0 = rf(_a0, _a1)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*model.Variable)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(int64, *model.ListOptions) error); ok {
+		r1 = rf(_a0, _a1)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
 }
 
 // PermFind provides a mock function with given fields: user, repo
@@ -2590,6 +2710,150 @@ func (_m *Store) UserFeed(_a0 *model.User) ([]*model.Feed, error) {
 	}
 
 	return r0, r1
+}
+
+// VariableCreate provides a mock function with given fields: _a0
+func (_m *Store) VariableCreate(_a0 *model.Variable) error {
+	ret := _m.Called(_a0)
+
+	if len(ret) == 0 {
+		panic("no return value specified for VariableCreate")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(*model.Variable) error); ok {
+		r0 = rf(_a0)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// VariableDelete provides a mock function with given fields: _a0
+func (_m *Store) VariableDelete(_a0 *model.Variable) error {
+	ret := _m.Called(_a0)
+
+	if len(ret) == 0 {
+		panic("no return value specified for VariableDelete")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(*model.Variable) error); ok {
+		r0 = rf(_a0)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// VariableFind provides a mock function with given fields: _a0, _a1
+func (_m *Store) VariableFind(_a0 *model.Repo, _a1 string) (*model.Variable, error) {
+	ret := _m.Called(_a0, _a1)
+
+	if len(ret) == 0 {
+		panic("no return value specified for VariableFind")
+	}
+
+	var r0 *model.Variable
+	var r1 error
+	if rf, ok := ret.Get(0).(func(*model.Repo, string) (*model.Variable, error)); ok {
+		return rf(_a0, _a1)
+	}
+	if rf, ok := ret.Get(0).(func(*model.Repo, string) *model.Variable); ok {
+		r0 = rf(_a0, _a1)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.Variable)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(*model.Repo, string) error); ok {
+		r1 = rf(_a0, _a1)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// VariableList provides a mock function with given fields: _a0, _a1, _a2
+func (_m *Store) VariableList(_a0 *model.Repo, _a1 bool, _a2 *model.ListOptions) ([]*model.Variable, error) {
+	ret := _m.Called(_a0, _a1, _a2)
+
+	if len(ret) == 0 {
+		panic("no return value specified for VariableList")
+	}
+
+	var r0 []*model.Variable
+	var r1 error
+	if rf, ok := ret.Get(0).(func(*model.Repo, bool, *model.ListOptions) ([]*model.Variable, error)); ok {
+		return rf(_a0, _a1, _a2)
+	}
+	if rf, ok := ret.Get(0).(func(*model.Repo, bool, *model.ListOptions) []*model.Variable); ok {
+		r0 = rf(_a0, _a1, _a2)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*model.Variable)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(*model.Repo, bool, *model.ListOptions) error); ok {
+		r1 = rf(_a0, _a1, _a2)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// VariableListAll provides a mock function with given fields:
+func (_m *Store) VariableListAll() ([]*model.Variable, error) {
+	ret := _m.Called()
+
+	if len(ret) == 0 {
+		panic("no return value specified for VariableListAll")
+	}
+
+	var r0 []*model.Variable
+	var r1 error
+	if rf, ok := ret.Get(0).(func() ([]*model.Variable, error)); ok {
+		return rf()
+	}
+	if rf, ok := ret.Get(0).(func() []*model.Variable); ok {
+		r0 = rf()
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*model.Variable)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func() error); ok {
+		r1 = rf()
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// VariableUpdate provides a mock function with given fields: _a0
+func (_m *Store) VariableUpdate(_a0 *model.Variable) error {
+	ret := _m.Called(_a0)
+
+	if len(ret) == 0 {
+		panic("no return value specified for VariableUpdate")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(*model.Variable) error); ok {
+		r0 = rf(_a0)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
 }
 
 // WorkflowGetTree provides a mock function with given fields: _a0

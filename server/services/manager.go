@@ -27,6 +27,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server/services/environment"
 	"go.woodpecker-ci.org/woodpecker/v2/server/services/registry"
 	"go.woodpecker-ci.org/woodpecker/v2/server/services/secret"
+	"go.woodpecker-ci.org/woodpecker/v2/server/services/variable"
 	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 )
 
@@ -38,6 +39,8 @@ type SetupForge func(forge *model.Forge) (forge.Forge, error)
 
 type Manager interface {
 	SignaturePublicKey() crypto.PublicKey
+	VariableServiceFromRepo(repo *model.Repo) variable.Service
+	VariableService() variable.Service
 	SecretServiceFromRepo(repo *model.Repo) secret.Service
 	SecretService() secret.Service
 	RegistryServiceFromRepo(repo *model.Repo) registry.Service
@@ -53,6 +56,7 @@ type manager struct {
 	signaturePrivateKey crypto.PrivateKey
 	signaturePublicKey  crypto.PublicKey
 	store               store.Store
+	variable            variable.Service
 	secret              secret.Service
 	registry            registry.Service
 	config              config.Service
@@ -82,6 +86,7 @@ func NewManager(c *cli.Command, store store.Store, setupForge SetupForge) (Manag
 		signaturePublicKey:  signaturePublicKey,
 		store:               store,
 		secret:              setupSecretService(store),
+		variable:            setupVariableService(store),
 		registry:            setupRegistryService(store, c.String("docker-config")),
 		config:              configService,
 		environment:         environment.Parse(c.StringSlice("environment")),
@@ -92,6 +97,14 @@ func NewManager(c *cli.Command, store store.Store, setupForge SetupForge) (Manag
 
 func (m *manager) SignaturePublicKey() crypto.PublicKey {
 	return m.signaturePublicKey
+}
+
+func (m *manager) VariableServiceFromRepo(_ *model.Repo) variable.Service {
+	return m.VariableService()
+}
+
+func (m *manager) VariableService() variable.Service {
+	return m.variable
 }
 
 func (m *manager) SecretServiceFromRepo(_ *model.Repo) secret.Service {
