@@ -8,7 +8,7 @@
         <option value="">{{ $t('repo.pipeline.debug.none') }}</option>
         <option v-for="workflow in workflows" :key="workflow" :value="workflow">{{ workflow }}</option>
       </select>
-      <Button :text="$t('repo.pipeline.debug.download_metadata')" @click="downloadMetadata" :is-loading="isLoading" />
+      <Button :is-loading="isLoading" :text="$t('repo.pipeline.debug.download_metadata')" @click="downloadMetadata" />
     </div>
   </div>
   <div v-else class="flex items-center justify-center h-full">
@@ -59,7 +59,7 @@ async function downloadMetadata() {
     const url = window.URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `pipeline-${pipeline.value.number}${selectedWorkflow.value ? '-' + selectedWorkflow.value : ''}-metadata.json`;
+    link.download = `pipeline-${pipeline.value.number}${selectedWorkflow.value ? `-${  selectedWorkflow.value}` : ''}-metadata.json`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
