@@ -97,7 +97,7 @@ func parsePipeline(forge forge.Forge, store store.Store, currentPipeline *model.
 	meta := metadata.NewMetadataServerForge(forge, repo, currentPipeline, last, server.Config.Server.Host)
 
 	b := stepbuilder.NewStepBuilder(yamls, meta.MetadataFromStruct, repo.IsTrusted, server.Config.Server.Host, envs,
-		compiler.WithEscalated(server.Config.Pipeline.Privileged...),
+		compiler.WithEscalated(server.Config.Pipeline.PrivilegedPlugins...),
 		compiler.WithResourceLimit(server.Config.Pipeline.Limits.MemSwapLimit, server.Config.Pipeline.Limits.MemLimit, server.Config.Pipeline.Limits.ShmSize, server.Config.Pipeline.Limits.CPUQuota, server.Config.Pipeline.Limits.CPUShares, server.Config.Pipeline.Limits.CPUSet),
 		compiler.WithVolumes(server.Config.Pipeline.Volumes...),
 		compiler.WithNetworks(server.Config.Pipeline.Networks...),
@@ -110,7 +110,8 @@ func parsePipeline(forge forge.Forge, store store.Store, currentPipeline *model.
 			),
 			repo.IsSCMPrivate || server.Config.Pipeline.AuthenticatePublicRepos,
 		),
-		compiler.WithDefaultCloneImage(server.Config.Pipeline.DefaultCloneImage),
+		compiler.WithDefaultClonePlugin(server.Config.Pipeline.DefaultClonePlugin),
+		compiler.WithTrustedClonePlugins(server.Config.Pipeline.TrustedClonePlugins),
 		compiler.WithRegistry(registries...),
 		compiler.WithSecret(secrets...),
 		compiler.WithProxy(compiler.ProxyOptions{

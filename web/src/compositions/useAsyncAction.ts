@@ -1,10 +1,9 @@
 import { computed, ref } from 'vue';
 
-import useNotifications from '~/compositions/useNotifications';
-
-const notifications = useNotifications();
-
-export function useAsyncAction<T extends unknown[]>(action: (...a: T) => void | Promise<void>) {
+export function useAsyncAction<T extends unknown[]>(
+  action: (...a: T) => void | Promise<void>,
+  onerror: ((error: any) => void) | undefined = undefined,
+) {
   const isLoading = ref(false);
 
   async function doSubmit(...a: T) {
@@ -16,7 +15,10 @@ export function useAsyncAction<T extends unknown[]>(action: (...a: T) => void | 
     try {
       await action(...a);
     } catch (error) {
-      notifications.notify({ title: (error as Error).message, type: 'error' });
+      console.error(error);
+      if (onerror) {
+        onerror(error);
+      }
     }
     isLoading.value = false;
   }

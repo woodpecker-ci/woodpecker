@@ -18,6 +18,7 @@ import (
 	"context"
 	"runtime"
 	"strconv"
+	"sync"
 	"time"
 
 	"github.com/rs/zerolog"
@@ -26,11 +27,13 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc"
 )
 
-func (r *Runner) createTracer(ctxMeta context.Context, logger zerolog.Logger, workflow *rpc.Workflow) pipeline.TraceFunc {
+func (r *Runner) createTracer(ctxMeta context.Context, uploads *sync.WaitGroup, logger zerolog.Logger, workflow *rpc.Workflow) pipeline.TraceFunc {
 	return func(state *pipeline.State) error {
+		uploads.Add(1)
+
 		stepLogger := logger.With().
 			Str("image", state.Pipeline.Step.Image).
-			Str("workflowID", workflow.ID).
+			Str("workflow_id", workflow.ID).
 			Err(state.Process.Error).
 			Int("exit_code", state.Process.ExitCode).
 			Bool("exited", state.Process.Exited).
@@ -57,6 +60,7 @@ func (r *Runner) createTracer(ctxMeta context.Context, logger zerolog.Logger, wo
 			}
 
 			stepLogger.Debug().Msg("update step status complete")
+			uploads.Done()
 		}()
 		if state.Process.Exited {
 			return nil
@@ -68,20 +72,11 @@ func (r *Runner) createTracer(ctxMeta context.Context, logger zerolog.Logger, wo
 		// TODO: find better way to update this state and move it to pipeline to have the same env in cli-exec
 		state.Pipeline.Step.Environment["CI_MACHINE"] = r.hostname
 
-		state.Pipeline.Step.Environment["CI_PIPELINE_STATUS"] = "success"
 		state.Pipeline.Step.Environment["CI_PIPELINE_STARTED"] = strconv.FormatInt(state.Pipeline.Started, 10)
-		state.Pipeline.Step.Environment["CI_PIPELINE_FINISHED"] = strconv.FormatInt(time.Now().Unix(), 10)
 
-		state.Pipeline.Step.Environment["CI_STEP_STATUS"] = "success"
 		state.Pipeline.Step.Environment["CI_STEP_STARTED"] = strconv.FormatInt(state.Pipeline.Started, 10)
-		state.Pipeline.Step.Environment["CI_STEP_FINISHED"] = strconv.FormatInt(time.Now().Unix(), 10)
 
 		state.Pipeline.Step.Environment["CI_SYSTEM_PLATFORM"] = runtime.GOOS + "/" + runtime.GOARCH
-
-		if state.Pipeline.Error != nil {
-			state.Pipeline.Step.Environment["CI_PIPELINE_STATUS"] = "failure"
-			state.Pipeline.Step.Environment["CI_STEP_STATUS"] = "failure"
-		}
 
 		return nil
 	}

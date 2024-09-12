@@ -74,16 +74,35 @@ func run(ctx context.Context, c *cli.Command) error {
 		volumes = append(volumes, repoPath+":"+path.Join(workspaceBase, workspacePath))
 	}
 
+	// lint the yaml file
+	// err = linter.New(
+	// 	linter.WithTrusted(true),
+	// 	linter.PrivilegedPlugins(privilegedPlugins),
+	// 	linter.WithTrustedClonePlugins(constant.TrustedClonePlugins),
+	// ).Lint([]*linter.WorkflowConfig{{
+	// 	File:      path.Base(file),
+	// 	RawConfig: confStr,
+	// 	Workflow:  conf,
+	// }})
+	// if err != nil {
+	// 	str, err := lint.FormatLintError(file, err)
+	// 	fmt.Print(str)
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	// }
+
 	getWorkflowMetadata := func(workflow *model.Workflow) metadata.Metadata {
 		return metadataFromCommand(c, workflow)
 	}
 
 	repoIsTrusted := false
 	host := "localhost"
+	privilegedPlugins := c.StringSlice("plugins-privileged")
 
 	b := stepbuilder.NewStepBuilder(yamls, getWorkflowMetadata, repoIsTrusted, host, envs,
 		compiler.WithEscalated(
-			c.StringSlice("privileged")...,
+			privilegedPlugins...,
 		),
 		compiler.WithVolumes(volumes...),
 		compiler.WithWorkspace(
@@ -183,8 +202,7 @@ func convertPathForWindows(path string) string {
 	return filepath.ToSlash(path)
 }
 
-const maxLogLineLength = 1024 * 1024 // 1mb
 var defaultLogger = pipeline.Logger(func(step *backend_types.Step, rc io.ReadCloser) error {
 	logWriter := NewLineWriter(step.Name, step.UUID)
-	return pipelineLog.CopyLineByLine(logWriter, rc, maxLogLineLength)
+	return pipelineLog.CopyLineByLine(logWriter, rc, pipeline.MaxLogLineLength)
 })

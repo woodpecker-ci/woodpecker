@@ -226,7 +226,8 @@
                 "title": "Zusätzliche Pipeline-Variablen",
                 "value": "Variablenwert",
                 "delete": "Variable löschen"
-            }
+            },
+            "show_pipelines": "Pipelines anzeigen"
         },
         "not_allowed": "Zugriff auf dieses Repository nicht erlaubt",
         "open_in_forge": "Repository in der Forge öffnen",
@@ -296,7 +297,8 @@
             "log_delete_confirm": "Möchtest du die Logs diesen Schrittes wirklich löschen?",
             "log_delete_error": "Es gab einen Fehler beim Löschen der Logs des Schrittes",
             "duration": "Pipeline-Dauer",
-            "created": "Erstellt: {created}"
+            "created": "Erstellt: {created}",
+            "no_logs": "Keine Logs"
         },
         "pull_requests": "Pull-Requests",
         "settings": {
@@ -572,7 +574,11 @@
         },
         "plugins_only": "Nur für Plugins verfügbar",
         "edit": "Geheimnis bearbeiten",
-        "delete": "Geheimnis löschen"
+        "delete": "Geheimnis löschen",
+        "plugins": {
+            "images": "Nur für die folgenden Plugins verfügbar",
+            "desc": "Liste aller Plugin-Images, für die dieses Geheimnis verwendet werden kann. Freilassen, um alle Plugins und allgemeine Schritte zu erlauben."
+        }
     },
     "settings": "Einstellungen",
     "oauth_error": "Fehler bei der Authentifizierung mit OAuth-Anbieter",
