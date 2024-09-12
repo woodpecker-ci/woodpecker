@@ -42,6 +42,8 @@ type StepBuilder struct {
 	CompilerOptions         []compiler.Option
 	GetWorkflowMetadataData func(*model.Workflow) metadata.Metadata
 	RepoIsTrusted           bool
+	TrustedClonePlugins     []string
+	PrivilegedPlugins       []string
 	Host                    string
 	Envs                    map[string]string
 }
@@ -145,8 +147,8 @@ func (b *StepBuilder) genItemForWorkflow(workflow *model.Workflow, axis matrix.A
 	// lint pipeline
 	errorsAndWarnings = multierr.Append(errorsAndWarnings, linter.New(
 		linter.WithTrusted(b.RepoIsTrusted),
-		// linter.PrivilegedPlugins(server.Config.Pipeline.PrivilegedPlugins),
-		// linter.WithTrustedClonePlugins(server.Config.Pipeline.TrustedClonePlugins),
+		linter.PrivilegedPlugins(b.PrivilegedPlugins),
+		linter.WithTrustedClonePlugins(b.TrustedClonePlugins),
 	).Lint([]*linter.WorkflowConfig{{
 		Workflow:  parsed,
 		File:      workflow.Name,

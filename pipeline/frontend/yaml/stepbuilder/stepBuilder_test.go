@@ -16,7 +16,6 @@
 package stepbuilder
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -65,11 +64,8 @@ steps:
 		},
 	}
 
-	if pipelineItems, err := b.Build(); err != nil {
-		t.Fatal(err)
-	} else {
-		fmt.Println(pipelineItems)
-	}
+	_, err := b.Build()
+	assert.NoError(t, err)
 }
 
 func TestMissingGlobalEnvsubst(t *testing.T) {
@@ -95,11 +91,8 @@ steps:
 		},
 	}
 
-	if _, err := b.Build(); err != nil {
-		fmt.Println("test rightfully failed")
-	} else {
-		t.Fatal("test erroneously succeeded")
-	}
+	_, err := b.Build()
+	assert.ErrorContains(t, err, "Invalid or missing image")
 }
 
 func TestMultilineEnvsubst(t *testing.T) {
@@ -130,11 +123,8 @@ steps:
 		},
 	}
 
-	if pipelineItems, err := b.Build(); err != nil {
-		t.Fatal(err)
-	} else {
-		fmt.Println(pipelineItems)
-	}
+	_, err := b.Build()
+	assert.NoError(t, err)
 }
 
 func TestMultiPipeline(t *testing.T) {

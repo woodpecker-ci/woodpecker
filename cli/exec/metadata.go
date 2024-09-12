@@ -19,6 +19,7 @@ import (
 	"strings"
 
 	"github.com/urfave/cli/v3"
+
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/metadata"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 	"go.woodpecker-ci.org/woodpecker/v2/version"
@@ -49,7 +50,7 @@ func metadataFromCommand(c *cli.Command, workflow *model.Workflow) metadata.Meta
 			CloneSSHURL: c.String("repo-clone-ssh-url"),
 			Private:     c.Bool("repo-private"),
 			Trusted:     c.Bool("repo-trusted"),
-			Branch:      "main", // TODO: get the branch from the context
+			Branch:      "main", // TODO: allow to set the default branch
 		},
 		Curr: metadata.Pipeline{
 			Number:     c.Int("pipeline-number"),

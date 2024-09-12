@@ -25,13 +25,6 @@ import (
 )
 
 type MetadataServerForge struct {
-	// Repo     *model.Repo
-	// Curr     *model.Pipeline
-	// Last     *model.Pipeline
-	// Netrc    *model.Netrc
-	// Secs     []*model.Secret
-	// Regs     []*model.Registry
-	// Forge    metadata.ServerForge
 	forge    metadata.ServerForge
 	repo     *model.Repo
 	pipeline *model.Pipeline

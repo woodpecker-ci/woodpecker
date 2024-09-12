@@ -22,6 +22,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v3"
 
 	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
@@ -31,10 +32,11 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/kubernetes"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/local"
 	backend_types "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
+	pipeline_errors "go.woodpecker-ci.org/woodpecker/v2/pipeline/errors"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/metadata"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/compiler"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/stepbuilder"
-	pipelineLog "go.woodpecker-ci.org/woodpecker/v2/pipeline/log"
+	pipeline_log "go.woodpecker-ci.org/woodpecker/v2/pipeline/log"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 	"go.woodpecker-ci.org/woodpecker/v2/shared/utils"
 )
@@ -81,6 +83,7 @@ func run(ctx context.Context, c *cli.Command) error {
 	repoIsTrusted := false
 	host := "localhost"
 	privilegedPlugins := c.StringSlice("plugins-privileged")
+	secrets := []compiler.Secret{}
 
 	b := stepbuilder.NewStepBuilder(yamls, getWorkflowMetadata, repoIsTrusted, host, envs,
 		compiler.WithEscalated(
@@ -111,25 +114,31 @@ func run(ctx context.Context, c *cli.Command) error {
 			c.String("netrc-machine"),
 		),
 		// compiler.WithMetadata(metadata),
-		// compiler.WithSecret(secrets...), // TODO: secrets
+		compiler.WithSecret(secrets...),
 		// compiler.WithEnviron(pipelineEnv), // TODO: pipelineEnv
 	)
+	b.PrivilegedPlugins = privilegedPlugins
+
 	items, err := b.Build()
-	if err != nil {
+	if pipeline_errors.HasBlockingErrors(err) {
 		return err
+	} else if err != nil {
+		log.Error().Err(err).Msg("error building pipeline")
 	}
 
 	done := make(map[string]bool)
 	for len(done) < len(items) {
 		for _, item := range items {
-			fmt.Println("#", item.Workflow.Name)
-
-			for _, step := range item.DependsOn {
-				if !done[step] {
-					fmt.Printf("%s is waiting for %s\n", item.Workflow.Name, step)
-					continue
-				}
+			// skip already executed workflows
+			if done[item.Workflow.Name] {
+				continue
 			}
+
+			if waitingForDependencies(item, done) {
+				continue
+			}
+
+			fmt.Printf("# %s\n", item.Workflow.Name)
 
 			err := runWorkflow(ctx, c, item.Config, item.Workflow.Name)
 			if err != nil {
@@ -198,5 +207,15 @@ func convertPathForWindows(path string) string {
 
 var defaultLogger = pipeline.Logger(func(step *backend_types.Step, rc io.ReadCloser) error {
 	logWriter := NewLineWriter(step.Name, step.UUID)
-	return pipelineLog.CopyLineByLine(logWriter, rc, pipeline.MaxLogLineLength)
+	return pipeline_log.CopyLineByLine(logWriter, rc, pipeline.MaxLogLineLength)
 })
+
+func waitingForDependencies(item *stepbuilder.Item, done map[string]bool) bool {
+	for _, step := range item.DependsOn {
+		if v, ok := done[step]; !ok || !v {
+			return true
+		}
+	}
+
+	return false
+}
