@@ -119,7 +119,7 @@ func (e *local) SetupWorkflow(_ context.Context, _ *types.Config, taskUUID strin
 	} else {
 		state.workspaceDir = e.execDir
 		if stat, err := os.Stat(e.execDir); os.IsNotExist(err) {
-			log.Debug().Msgf("create workspace directory set by WOODPECKER_BACKEND_LOCAL_EXEC_DIR")
+			log.Debug().Msgf("create workspace directory '%s' set by WOODPECKER_BACKEND_LOCAL_EXEC_DIR", e.execDir)
 			if err := os.Mkdir(state.workspaceDir, 0o700); err != nil {
 				return err
 			}

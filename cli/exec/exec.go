@@ -72,7 +72,7 @@ func execDir(ctx context.Context, c *cli.Command, dir string) error {
 	} else {
 		repoPath, _ = filepath.Abs(filepath.Dir(dir))
 	}
-	if runtime.GOOS == "windows" {
+	if runtime.GOOS == "windows" && c.String("backend-engine") != "local" {
 		repoPath = convertPathForWindows(repoPath)
 	}
 	return filepath.Walk(dir, func(path string, info os.FileInfo, e error) error {
@@ -99,7 +99,7 @@ func execFile(ctx context.Context, c *cli.Command, file string) error {
 	} else {
 		repoPath, _ = filepath.Abs(filepath.Dir(file))
 	}
-	if runtime.GOOS == "windows" {
+	if runtime.GOOS == "windows" && c.String("backend-engine") != "local" {
 		repoPath = convertPathForWindows(repoPath)
 	}
 	return runExec(ctx, c, file, repoPath)
