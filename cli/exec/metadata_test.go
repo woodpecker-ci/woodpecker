@@ -128,7 +128,7 @@ func TestMetadataFromContext(t *testing.T) {
 	})
 }
 
-func createTempFile(t *testing.T, content interface{}) string {
+func createTempFile(t *testing.T, content any) string {
 	t.Helper()
 	tempFile, err := os.CreateTemp("", "metadata.json")
 	require.NoError(t, err)
