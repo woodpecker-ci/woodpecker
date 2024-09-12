@@ -83,31 +83,23 @@ func run(ctx context.Context, c *cli.Command) error {
 	repoIsTrusted := false
 	host := "localhost"
 	privilegedPlugins := c.StringSlice("plugins-privileged")
-	secrets := []compiler.Secret{}
+	secrets := []compiler.Secret{} // TODO: implement secrets
 
 	b := stepbuilder.NewStepBuilder(yamls, getWorkflowMetadata, repoIsTrusted, host, envs,
-		compiler.WithEscalated(
-			privilegedPlugins...,
-		),
+		compiler.WithEscalated(privilegedPlugins...),
 		compiler.WithVolumes(volumes...),
 		compiler.WithWorkspace(
 			workspaceBase,
 			workspacePath,
 		),
-		compiler.WithNetworks(
-			c.StringSlice("network")...,
-		),
-		compiler.WithPrefix(
-			c.String("prefix"),
-		),
+		compiler.WithNetworks(c.StringSlice("network")...),
+		compiler.WithPrefix(c.String("prefix")),
 		compiler.WithProxy(compiler.ProxyOptions{
 			NoProxy:    c.String("backend-no-proxy"),
 			HTTPProxy:  c.String("backend-http-proxy"),
 			HTTPSProxy: c.String("backend-https-proxy"),
 		}),
-		compiler.WithLocal(
-			c.Bool("local"),
-		),
+		compiler.WithLocal(c.Bool("local")),
 		compiler.WithNetrc(
 			c.String("netrc-username"),
 			c.String("netrc-password"),
@@ -115,7 +107,7 @@ func run(ctx context.Context, c *cli.Command) error {
 		),
 		// compiler.WithMetadata(metadata),
 		compiler.WithSecret(secrets...),
-		// compiler.WithEnviron(pipelineEnv), // TODO: pipelineEnv
+		compiler.WithEnviron(envs),
 	)
 	b.PrivilegedPlugins = privilegedPlugins
 
