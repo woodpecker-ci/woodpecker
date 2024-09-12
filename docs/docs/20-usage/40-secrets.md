@@ -28,10 +28,10 @@ once their usage is declared in the `secrets` section:
 
 The case of the environment variables is not changed, but secret matching is done case-insensitively. In the example above, `DOCKER_PASSWORD` would also match if the secret is called `docker_password`.
 
-### Use secrets in normal steps via environment
+### Using secrets in non-plugin steps via "environment:"
 
 You can set an environment value from secrets using the `from_secret` syntax.
-So the secret key and environment variable name can differ.
+This way, the secret key and environment variable name can differ.
 
 ```diff
  steps:
@@ -45,11 +45,11 @@ So the secret key and environment variable name can differ.
 +        from_secret: some_username
 ```
 
-### Use secrets in plugins via settings
+### Using secrets in plugins-steps via "settings:"
 
 The `from_secret` syntax also work for settings in any hierarchy.
 
-In this example, the secret named `secret_token` would be passed to the setting named `SURGE_TOKEN`,which will be available in the plugin as environment variable named `PLUGIN_SURGE_TOKEN` (See [plugins](./51-plugins/20-creating-plugins.md#settings) for details).
+In the below example, the secret `SURGE_TOKEN` would be passed to the setting named `surge_token`, which again will be available in the plugin as environment variable named `PLUGIN_SURGE_TOKEN` (See [plugins](./51-plugins/20-creating-plugins.md#settings) for details).
 
 ```diff
  steps:
@@ -61,7 +61,7 @@ In this example, the secret named `secret_token` would be passed to the setting 
 +        from_secret: SURGE_TOKEN
 ```
 
-As settings can have complex structure, the `from_secret` is supported in all of it:
+As settings can have complex structures, `from_secret` is supported any:
 
 ```yaml
 steps:
@@ -71,7 +71,7 @@ steps:
       path: 'artifacts'
       simple_token:
         from_secret: A_TOKEN
-      advanced:
+      advanced_setting:
         items:
           - "value1"
           - some:
