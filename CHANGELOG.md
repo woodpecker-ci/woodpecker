@@ -1,10 +1,10 @@
 # Changelog
 
-## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-09-10
+## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-09-12
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @anbraten, @hg, @j04n-f, @jenrik, @johanneskastl, @not-my-profile, @pat-s, @qwerty287, @smainz, @xtexChooser, @zc-devs
+@6543, @anbraten, @gnowland, @hg, @j04n-f, @jenrik, @johanneskastl, @not-my-profile, @pat-s, @qwerty287, @smainz, @xtexChooser, @zc-devs
 
 ### 💥 Breaking changes
 
@@ -35,6 +35,23 @@
 - Update gitea sdk [[#4012](https://github.com/woodpecker-ci/woodpecker/pull/4012)]
 - Update Forgejo SDK [[#3948](https://github.com/woodpecker-ci/woodpecker/pull/3948)]
 
+### 📚 Documentation
+
+- [docs] Removes dot prefix from pipeline configuration filenames [[#4105](https://github.com/woodpecker-ci/woodpecker/pull/4105)]
+- Use kaniko plugin in docs as example [[#4072](https://github.com/woodpecker-ci/woodpecker/pull/4072)]
+- Add some posts and videos [[#4070](https://github.com/woodpecker-ci/woodpecker/pull/4070)]
+- Move event type descriptions from Terminology to Workflow Syntax [[#4062](https://github.com/woodpecker-ci/woodpecker/pull/4062)]
+- Add community posts from discussions [[#4058](https://github.com/woodpecker-ci/woodpecker/pull/4058)]
+- Add a pull request template with some basic guidelines [[#4055](https://github.com/woodpecker-ci/woodpecker/pull/4055)]
+- Add examples of CI environment variable values [[#4009](https://github.com/woodpecker-ci/woodpecker/pull/4009)]
+- Fix inline author warning [[#4040](https://github.com/woodpecker-ci/woodpecker/pull/4040)]
+- Updated Secrets image filter docs [[#4028](https://github.com/woodpecker-ci/woodpecker/pull/4028)]
+- Update dependency marked to v14 [[#4036](https://github.com/woodpecker-ci/woodpecker/pull/4036)]
+- Update docs npm deps non-major [[#4033](https://github.com/woodpecker-ci/woodpecker/pull/4033)]
+- Overhaul README [[#3995](https://github.com/woodpecker-ci/woodpecker/pull/3995)]
+- fix(deps): update docs npm deps non-major [[#3990](https://github.com/woodpecker-ci/woodpecker/pull/3990)]
+- Add spellchecking for docs [[#3787](https://github.com/woodpecker-ci/woodpecker/pull/3787)]
+
 ### 📈 Enhancement
 
 - Add indices to repo table [[#4087](https://github.com/woodpecker-ci/woodpecker/pull/4087)]
@@ -51,22 +68,6 @@
 - Improve cron list [[#3947](https://github.com/woodpecker-ci/woodpecker/pull/3947)]
 - Add PULLREQUEST_DRONE_PULL_REQUEST drone env [[#3939](https://github.com/woodpecker-ci/woodpecker/pull/3939)]
 - Make agent gRPC errors distinguishable [[#3936](https://github.com/woodpecker-ci/woodpecker/pull/3936)]
-
-### 📚 Documentation
-
-- Use kaniko plugin in docs as example [[#4072](https://github.com/woodpecker-ci/woodpecker/pull/4072)]
-- Add some posts and videos [[#4070](https://github.com/woodpecker-ci/woodpecker/pull/4070)]
-- Move event type descriptions from Terminology to Workflow Syntax [[#4062](https://github.com/woodpecker-ci/woodpecker/pull/4062)]
-- Add community posts from discussions [[#4058](https://github.com/woodpecker-ci/woodpecker/pull/4058)]
-- Add a pull request template with some basic guidelines [[#4055](https://github.com/woodpecker-ci/woodpecker/pull/4055)]
-- Add examples of CI environment variable values [[#4009](https://github.com/woodpecker-ci/woodpecker/pull/4009)]
-- Fix inline author warning [[#4040](https://github.com/woodpecker-ci/woodpecker/pull/4040)]
-- Updated Secrets image filter docs [[#4028](https://github.com/woodpecker-ci/woodpecker/pull/4028)]
-- Update dependency marked to v14 [[#4036](https://github.com/woodpecker-ci/woodpecker/pull/4036)]
-- Update docs npm deps non-major [[#4033](https://github.com/woodpecker-ci/woodpecker/pull/4033)]
-- Overhaul README [[#3995](https://github.com/woodpecker-ci/woodpecker/pull/3995)]
-- fix(deps): update docs npm deps non-major [[#3990](https://github.com/woodpecker-ci/woodpecker/pull/3990)]
-- Add spellchecking for docs [[#3787](https://github.com/woodpecker-ci/woodpecker/pull/3787)]
 
 ### 🐛 Bug Fixes
 
