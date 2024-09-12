@@ -127,7 +127,7 @@ func metadataFromContext(_ context.Context, c *cli.Command, axis matrix.Axis) (*
 	return m, nil
 }
 
-// metadataFileAndOverrideOrDefault will either use the flag default or if metadata file is set only overload if explicit set
+// metadataFileAndOverrideOrDefault will either use the flag default or if metadata file is set only overload if explicit set.
 func metadataFileAndOverrideOrDefault[T any](c *cli.Command, flag string, setter func(T), getter func(string) T) {
 	if !c.IsSet("metadata-file") || c.IsSet(flag) {
 		setter(getter(flag))

@@ -410,7 +410,7 @@ func GetPipelineMetadata(c *gin.Context) {
 	repo := session.Repo(c)
 	num, err := strconv.ParseInt(c.Param("number"), 10, 64)
 	if err != nil {
-		c.AbortWithError(http.StatusBadRequest, err)
+		_ = c.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
 	workflowName := c.Query("workflow")
@@ -442,7 +442,7 @@ func GetPipelineMetadata(c *gin.Context) {
 			}
 		}
 		if workflow == nil {
-			c.AbortWithError(http.StatusNotFound, fmt.Errorf("workflow '%s' was not found within pipeline %d", workflowName, currentPipeline.ID))
+			_ = c.AbortWithError(http.StatusNotFound, fmt.Errorf("workflow '%s' was not found within pipeline %d", workflowName, currentPipeline.ID))
 			return
 		}
 	}
