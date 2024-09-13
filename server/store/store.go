@@ -180,6 +180,8 @@ type Store interface {
 	AgentList(p *model.ListOptions) ([]*model.Agent, error)
 	AgentUpdate(*model.Agent) error
 	AgentDelete(*model.Agent) error
+	AgentListForOrg(orgID int64, opt *model.ListOptions) ([]*model.Agent, error)
+	AgentListForRepo(repoID int64, opt *model.ListOptions) ([]*model.Agent, error)
 
 	// Workflow
 	WorkflowGetTree(*model.Pipeline) ([]*model.Workflow, error)
