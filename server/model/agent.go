@@ -15,7 +15,6 @@
 package model
 
 import (
-	"errors"
 	"fmt"
 )
 
@@ -24,7 +23,7 @@ type Agent struct {
 	Created     int64  `json:"created"       xorm:"created"`
 	Updated     int64  `json:"updated"       xorm:"updated"`
 	Name        string `json:"name"          xorm:"name"`
-	OwnerID     int64  `json:"owner_id"      xorm:"'owner_id'"`
+	OwnerID     int64  `json:"owner_id"      xorm:"INDEX 'owner_id'"`
 	OrgID       int64  `json:"org_id"        xorm:"INDEX 'org_id'"`
 	RepoID      int64  `json:"repo_id"       xorm:"INDEX 'repo_id'"`
 	Token       string `json:"token"         xorm:"token"`
@@ -49,8 +48,6 @@ func (Agent) TableName() string {
 func (a *Agent) IsSystemAgent() bool {
 	return a.OrgID == SystemAgentOwnerID
 }
-
-var ErrFiltersBroken = errors.New("while creating filters map error ocured")
 
 func (a *Agent) GetFilters() (map[string]string, error) {
 	filters := a.Filters
