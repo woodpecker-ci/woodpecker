@@ -27,8 +27,6 @@ type Agent struct {
 	Updated     int64  `json:"updated"       xorm:"updated"`
 	Name        string `json:"name"          xorm:"name"`
 	OwnerID     int64  `json:"owner_id"      xorm:"INDEX 'owner_id'"`
-	OrgID       int64  `json:"org_id"        xorm:"INDEX 'org_id'"`
-	RepoID      int64  `json:"repo_id"       xorm:"INDEX 'repo_id'"`
 	Token       string `json:"token"         xorm:"token"`
 	LastContact int64  `json:"last_contact"  xorm:"last_contact"`
 	LastWork    int64  `json:"last_work"     xorm:"last_work"` // last time the agent did something, this value is used to determine if the agent is still doing work used by the autoscaler
@@ -37,6 +35,10 @@ type Agent struct {
 	Capacity    int32  `json:"capacity"      xorm:"capacity"`
 	Version     string `json:"version"       xorm:"'version'"`
 	NoSchedule  bool   `json:"no_schedule"   xorm:"no_schedule"`
+	// OrgID is counted as unset if set to -1, this is done to ensure a new(Agent) still enforce the OrgID check by default
+	OrgID int64 `json:"org_id"        xorm:"INDEX 'org_id'"`
+	// RepoID is counted as unset if set to -1, this is done to ensure a new(Agent) still enforce the OrgID check by default
+	RepoID int64 `json:"repo_id"       xorm:"INDEX 'repo_id'"`
 	// Server side enforced agent filters
 	Filters map[string]string `json:"filters" xorm:"'filters' json"`
 } //	@name Agent
