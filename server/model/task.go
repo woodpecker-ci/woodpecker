@@ -41,6 +41,20 @@ func (t *Task) String() string {
 	return sb.String()
 }
 
+func (t *Task) CalcLabels(r *Repo) (map[string]string, error) {
+	if r == nil {
+		return nil, fmt.Errorf("repo is nil but needed for calc task labels")
+	}
+	if t.Labels == nil {
+		t.Labels = make(map[string]string)
+	}
+	t.Labels["repo"] = r.FullName
+	t.Labels["owner"] = r.Owner
+	t.Labels[agentFilterRepoID] = fmt.Sprint(r.ID)
+	t.Labels[agentFilterOrgID] = fmt.Sprint(r.OrgID)
+	return t.Labels, nil
+}
+
 // ShouldRun tells if a task should be run or skipped, based on dependencies.
 func (t *Task) ShouldRun() bool {
 	if t.runsOnFailure() && t.runsOnSuccess() {

@@ -18,6 +18,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"maps"
 
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc"
 	"go.woodpecker-ci.org/woodpecker/v2/server"
@@ -31,13 +32,14 @@ func queuePipeline(ctx context.Context, repo *model.Repo, pipelineItems []*stepb
 		if item.Workflow.State == model.StatusSkipped {
 			continue
 		}
-		task := new(model.Task)
-		task.ID = fmt.Sprint(item.Workflow.ID)
-		task.Labels = map[string]string{}
-		for k, v := range item.Labels {
-			task.Labels[k] = v
+		task := &model.Task{
+			ID:     fmt.Sprint(item.Workflow.ID),
+			Labels: make(map[string]string),
 		}
-		enforceLabels(task, repo)
+		maps.Copy(task.Labels, item.Labels)
+		if _, err := task.CalcLabels(repo); err != nil {
+			return err
+		}
 		task.Dependencies = taskIDs(item.DependsOn, pipelineItems)
 		task.RunOn = item.RunsOn
 		task.DepStatus = make(map[string]model.StatusValue)
@@ -55,13 +57,6 @@ func queuePipeline(ctx context.Context, repo *model.Repo, pipelineItems []*stepb
 		tasks = append(tasks, task)
 	}
 	return server.Config.Services.Queue.PushAtOnce(ctx, tasks)
-}
-
-func enforceLabels(task *model.Task, repo *model.Repo) {
-	task.Labels["repo"] = repo.FullName
-	task.Labels["owner"] = repo.Owner
-	task.Labels["repo-id"] = fmt.Sprint(repo.ID)
-	task.Labels["org-id"] = fmt.Sprint(repo.OrgID)
 }
 
 func taskIDs(dependsOn []string, pipelineItems []*stepbuilder.Item) (taskIDs []string) {

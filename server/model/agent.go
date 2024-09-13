@@ -41,7 +41,11 @@ type Agent struct {
 	Filters map[string]string `json:"filters" xorm:"'filters' json"`
 } //	@name Agent
 
-const SystemAgentOwnerID = -1
+const (
+	SystemAgentOwnerID = -1
+	agentFilterOrgID   = "org-id"
+	agentFilterRepoID  = "repo-id"
+)
 
 // TableName return database table name for xorm.
 func (Agent) TableName() string {
@@ -64,10 +68,10 @@ func (a *Agent) GetServerFilters() (map[string]string, error) {
 
 	// enforce filters for user and organization agents
 	if a.OrgID != SystemAgentOwnerID {
-		filters["org-id"] = fmt.Sprintf("%d", a.OrgID)
+		filters[agentFilterOrgID] = fmt.Sprintf("%d", a.OrgID)
 	}
 	if a.RepoID != SystemAgentOwnerID {
-		filters["repo-id"] = fmt.Sprintf("%d", a.RepoID)
+		filters[agentFilterRepoID] = fmt.Sprintf("%d", a.RepoID)
 	}
 
 	return filters, nil
