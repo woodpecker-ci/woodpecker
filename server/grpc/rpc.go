@@ -72,7 +72,7 @@ func (s *RPC) Next(c context.Context, agentFilter rpc.Filter) (*rpc.Workflow, er
 	if err != nil {
 		return nil, err
 	}
-	// by overwrite and extend the agent labels
+	// ... by overwrite and extend the agent labels
 	for k, v := range agentServerFilters {
 		agentFilter.Labels[k] = v
 	}
@@ -132,7 +132,7 @@ func (s *RPC) Extend(c context.Context, workflowID string) error {
 	return s.queue.Extend(c, agent.ID, workflowID)
 }
 
-// Update implements the rpc.Update function
+// Update updates the state of a step.
 func (s *RPC) Update(c context.Context, strWorkflowID string, state rpc.StepState) error {
 	workflowID, err := strconv.ParseInt(strWorkflowID, 10, 64)
 	if err != nil {
@@ -141,7 +141,7 @@ func (s *RPC) Update(c context.Context, strWorkflowID string, state rpc.StepStat
 
 	workflow, err := s.store.WorkflowLoad(workflowID)
 	if err != nil {
-		log.Error().Err(err).Msgf("rpc.update: cannot find workflow with id %s", strWorkflowID)
+		log.Error().Err(err).Msgf("rpc.update: cannot find workflow with id %d", workflowID)
 		return err
 	}
 
@@ -178,7 +178,7 @@ func (s *RPC) Update(c context.Context, strWorkflowID string, state rpc.StepStat
 	}
 
 	// check before agent can alter some state
-	if err := s.checkAgentPermissionByWorkflow(c, agent, strWorkflowID, workflow, repo); err != nil {
+	if err := s.checkAgentPermissionByWorkflow(c, agent, strWorkflowID, currentPipeline, repo); err != nil {
 		return err
 	}
 
@@ -241,7 +241,7 @@ func (s *RPC) Init(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 	}
 
 	// check before agent can alter some state
-	if err := s.checkAgentPermissionByWorkflow(c, agent, strWorkflowID, workflow, repo); err != nil {
+	if err := s.checkAgentPermissionByWorkflow(c, agent, strWorkflowID, currentPipeline, repo); err != nil {
 		return err
 	}
 
@@ -317,7 +317,7 @@ func (s *RPC) Done(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 	}
 
 	// check before agent can alter some state
-	if err := s.checkAgentPermissionByWorkflow(c, agent, strWorkflowID, workflow, repo); err != nil {
+	if err := s.checkAgentPermissionByWorkflow(c, agent, strWorkflowID, currentPipeline, repo); err != nil {
 		return err
 	}
 
@@ -399,14 +399,8 @@ func (s *RPC) Log(c context.Context, rpcLogEntry *rpc.LogEntry) error {
 		return err
 	}
 
-	repo, err := s.store.GetRepo(currentPipeline.RepoID)
-	if err != nil {
-		log.Error().Err(err).Msgf("cannot find repo with id %d", currentPipeline.RepoID)
-		return err
-	}
-
 	// check before agent can alter some state
-	if err := s.checkAgentPermissionByWorkflow(c, agent, "-1", nil, repo); err != nil {
+	if err := s.checkAgentPermissionByWorkflow(c, agent, "", currentPipeline, nil); err != nil {
 		return err
 	}
 
@@ -492,30 +486,31 @@ func (s *RPC) ReportHealth(ctx context.Context, status string) error {
 	return s.store.AgentUpdate(agent)
 }
 
-func (s *RPC) checkAgentPermissionByWorkflow(c context.Context, agent *model.Agent, strWorkflowID string, workflow *model.Workflow, repo *model.Repo) error {
-	workflowID, err := strconv.ParseInt(strWorkflowID, 10, 64)
-	if err != nil {
-		return err
-	}
-
+func (s *RPC) checkAgentPermissionByWorkflow(c context.Context, agent *model.Agent, strWorkflowID string, pipeline *model.Pipeline, repo *model.Repo) error {
+	var err error
 	if repo == nil {
-		if workflow == nil {
-			workflow, err = s.store.WorkflowLoad(workflowID)
+		if pipeline == nil {
+			workflowID, err := strconv.ParseInt(strWorkflowID, 10, 64)
+			if err != nil {
+				return err
+			}
+
+			workflow, err := s.store.WorkflowLoad(workflowID)
 			if err != nil {
 				log.Error().Err(err).Msgf("rpc.update: cannot find workflow with id %d", workflowID)
 				return err
 			}
+
+			pipeline, err = s.store.GetPipeline(workflow.PipelineID)
+			if err != nil {
+				log.Error().Err(err).Msgf("cannot find pipeline with id %d", workflow.PipelineID)
+				return err
+			}
 		}
 
-		currentPipeline, err := s.store.GetPipeline(workflow.PipelineID)
+		repo, err = s.store.GetRepo(pipeline.RepoID)
 		if err != nil {
-			log.Error().Err(err).Msgf("cannot find pipeline with id %d", workflow.PipelineID)
-			return err
-		}
-
-		repo, err = s.store.GetRepo(currentPipeline.RepoID)
-		if err != nil {
-			log.Error().Err(err).Msgf("cannot find repo with id %d", currentPipeline.RepoID)
+			log.Error().Err(err).Msgf("cannot find repo with id %d", pipeline.RepoID)
 			return err
 		}
 	}

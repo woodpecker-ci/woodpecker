@@ -194,7 +194,7 @@ func (q *fifo) Extend(_ context.Context, agentID int64, id string) error {
 	state, ok := q.running[id]
 	if ok {
 		if state.item.AgentID != agentID {
-			return ErrAgentMissmatch
+			return ErrAgentMissMatch
 		}
 
 		state.deadline = time.Now().Add(q.extension)

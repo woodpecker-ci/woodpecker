@@ -44,7 +44,7 @@ func createFilterFunc(agentFilter rpc.Filter) queue.FilterFn {
 
 			match, err := doublestar.Match(taskLabelValue, agentLabelValue)
 			if err != nil {
-				log.Error().Err(err).Msg("got unexpected error while try to match task and agent lable value")
+				log.Error().Err(err).Msg("got unexpected error while try to match task and agent label value")
 			}
 			return match
 		}
