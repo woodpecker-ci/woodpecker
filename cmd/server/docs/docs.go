@@ -4757,6 +4757,7 @@ const docTemplate = `{
                     "type": "boolean"
                 },
                 "org_id": {
+                    "description": "OrgID is counted as unset if set to -1, this is done to ensure a new(Agent) still enforce the OrgID check by default",
                     "type": "integer"
                 },
                 "owner_id": {
@@ -4766,6 +4767,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "repo_id": {
+                    "description": "RepoID is counted as unset if set to -1, this is done to ensure a new(Agent) still enforce the OrgID check by default",
                     "type": "integer"
                 },
                 "token": {
