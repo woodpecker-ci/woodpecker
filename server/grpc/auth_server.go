@@ -89,8 +89,5 @@ func (s *WoodpeckerAuthServer) getAgent(agentID int64, agentToken string) (*mode
 	if err != nil && errors.Is(err, types.RecordNotExist) {
 		return nil, fmt.Errorf("individual agent not found by token: %w", err)
 	}
-
-	// TODO: check if an agent can still pretend to be an other one
-
 	return agent, err
 }
