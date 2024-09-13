@@ -55,7 +55,7 @@ func (Agent) TableName() string {
 }
 
 func (a *Agent) IsSystemAgent() bool {
-	return a.OrgID == SystemAgentOwnerID
+	return a.OwnerID == SystemAgentOwnerID
 }
 
 func GenerateNewAgentToken() string {
@@ -84,13 +84,6 @@ func (a *Agent) CanAccessRepo(repo *Repo) bool {
 		return true
 	}
 
-	if a.RepoID != SystemAgentOwnerID && a.RepoID == repo.OrgID {
-		return true
-	}
-
-	if a.OrgID != SystemAgentOwnerID && a.OrgID == repo.OrgID {
-		return true
-	}
-
-	return false
+	return a.RepoID != SystemAgentOwnerID && a.RepoID == repo.OrgID && (a.OrgID == SystemAgentOwnerID || a.OrgID == repo.OrgID) ||
+		a.OrgID != SystemAgentOwnerID && a.OrgID == repo.OrgID && (a.RepoID == SystemAgentOwnerID || a.RepoID == repo.OrgID)
 }

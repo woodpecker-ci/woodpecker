@@ -90,12 +90,22 @@ func TestAgent_GetServerFilters(t *testing.T) {
 }
 
 func TestAgent_CanAccessRepo(t *testing.T) {
+	t.Run("EmptyAgent", func(t *testing.T) {
+		agent := &Agent{}
+		repo := &Repo{OrgID: 123}
+		assert.False(t, agent.CanAccessRepo(repo))
+	})
+
+	repo := &Repo{ID: 123, OrgID: 123}
+	otherRepo := &Repo{ID: 456, OrgID: 456}
+
 	t.Run("SystemAgent", func(t *testing.T) {
 		agent := &Agent{
-			OrgID:  SystemAgentOwnerID,
-			RepoID: SystemAgentOwnerID,
+			OwnerID: SystemAgentOwnerID,
+			OrgID:   SystemAgentOwnerID,
+			RepoID:  SystemAgentOwnerID,
 		}
-		repo := &Repo{OrgID: 123}
+
 		assert.True(t, agent.CanAccessRepo(repo))
 	})
 
@@ -104,11 +114,8 @@ func TestAgent_CanAccessRepo(t *testing.T) {
 			OrgID:  123,
 			RepoID: SystemAgentOwnerID,
 		}
-		repo := &Repo{OrgID: 123}
 		assert.True(t, agent.CanAccessRepo(repo))
-
-		repoOtherOrg := &Repo{OrgID: 456}
-		assert.False(t, agent.CanAccessRepo(repoOtherOrg))
+		assert.False(t, agent.CanAccessRepo(otherRepo))
 	})
 
 	t.Run("RepoAgent", func(t *testing.T) {
@@ -116,11 +123,8 @@ func TestAgent_CanAccessRepo(t *testing.T) {
 			OrgID:  SystemAgentOwnerID,
 			RepoID: 123,
 		}
-		repo := &Repo{OrgID: 123}
 		assert.True(t, agent.CanAccessRepo(repo))
-
-		repoOtherOrg := &Repo{OrgID: 456}
-		assert.False(t, agent.CanAccessRepo(repoOtherOrg))
+		assert.False(t, agent.CanAccessRepo(otherRepo))
 	})
 
 	t.Run("OrgAndRepoAgent", func(t *testing.T) {
@@ -128,13 +132,14 @@ func TestAgent_CanAccessRepo(t *testing.T) {
 			OrgID:  123,
 			RepoID: 456,
 		}
-		repoSameOrg := &Repo{OrgID: 123}
-		assert.True(t, agent.CanAccessRepo(repoSameOrg))
+		assert.False(t, agent.CanAccessRepo(repo))
+		assert.False(t, agent.CanAccessRepo(otherRepo))
 
-		repoSameRepo := &Repo{OrgID: 456}
-		assert.True(t, agent.CanAccessRepo(repoSameRepo))
-
-		repoOther := &Repo{OrgID: 789}
-		assert.False(t, agent.CanAccessRepo(repoOther))
+		agent = &Agent{
+			OrgID:  456,
+			RepoID: 456,
+		}
+		assert.False(t, agent.CanAccessRepo(repo))
+		assert.True(t, agent.CanAccessRepo(otherRepo))
 	})
 }
