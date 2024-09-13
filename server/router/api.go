@@ -74,8 +74,8 @@ func apiRoutes(e *gin.RouterGroup) {
 
 					org.GET("/agents", api.GetOrgAgents)
 					org.POST("/agents", api.PostOrgAgent)
-					org.PATCH("/agents/:agent", api.PatchOrgAgent)
-					org.DELETE("/agents/:agent", api.DeleteOrgAgent)
+					org.PATCH("/agents/:agent_id", api.PatchOrgAgent)
+					org.DELETE("/agents/:agent_id", api.DeleteOrgAgent)
 				}
 			}
 		}
@@ -147,8 +147,8 @@ func apiRoutes(e *gin.RouterGroup) {
 						agentBase.Use(session.MustRepoAdmin())
 						agentBase.GET("", api.GetRepoAgents)
 						agentBase.POST("", api.PostRepoAgent)
-						agentBase.PATCH("/:agent", api.PatchRepoAgent)
-						agentBase.DELETE("/:agent", api.DeleteRepoAgent)
+						agentBase.PATCH("/:agent_id", api.PatchRepoAgent)
+						agentBase.DELETE("/:agent_id", api.DeleteRepoAgent)
 					}
 
 					// requires admin permissions
@@ -230,10 +230,10 @@ func apiRoutes(e *gin.RouterGroup) {
 			agentBase.Use(session.MustAdmin())
 			agentBase.GET("", api.GetAgents)
 			agentBase.POST("", api.PostAgent)
-			agentBase.GET("/:agent", api.GetAgent)
-			agentBase.GET("/:agent/tasks", api.GetAgentTasks)
-			agentBase.PATCH("/:agent", api.PatchAgent)
-			agentBase.DELETE("/:agent", api.DeleteAgent)
+			agentBase.GET("/:agent_id", api.GetAgent)
+			agentBase.GET("/:agent_id/tasks", api.GetAgentTasks)
+			agentBase.PATCH("/:agent_id", api.PatchAgent)
+			agentBase.DELETE("/:agent_id", api.DeleteAgent)
 		}
 
 		apiBase.GET("/forges", api.GetForges)

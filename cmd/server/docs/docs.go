@@ -101,7 +101,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/agents/{agent}": {
+        "/agents/{agent_id}": {
             "get": {
                 "produces": [
                     "application/json"
@@ -211,7 +211,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/agents/{agent}/tasks": {
+        "/agents/{agent_id}/tasks": {
             "get": {
                 "produces": [
                     "application/json"

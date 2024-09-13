@@ -52,14 +52,14 @@ func GetAgents(c *gin.Context) {
 // GetAgent
 //
 //	@Summary	Get an agent
-//	@Router		/agents/{agent} [get]
+//	@Router		/agents/{agent_id} [get]
 //	@Produce	json
 //	@Success	200	{object}	Agent
 //	@Tags		Agents
 //	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 //	@Param		agent			path	int		true	"the agent's id"
 func GetAgent(c *gin.Context) {
-	agentID, err := strconv.ParseInt(c.Param("agent"), 10, 64)
+	agentID, err := strconv.ParseInt(c.Param("agent_id"), 10, 64)
 	if err != nil {
 		_ = c.AbortWithError(http.StatusBadRequest, err)
 		return
@@ -76,14 +76,14 @@ func GetAgent(c *gin.Context) {
 // GetAgentTasks
 //
 //	@Summary	List agent tasks
-//	@Router		/agents/{agent}/tasks [get]
+//	@Router		/agents/{agent_id}/tasks [get]
 //	@Produce	json
 //	@Success	200	{array}	Task
 //	@Tags		Agents
 //	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 //	@Param		agent			path	int		true	"the agent's id"
 func GetAgentTasks(c *gin.Context) {
-	agentID, err := strconv.ParseInt(c.Param("agent"), 10, 64)
+	agentID, err := strconv.ParseInt(c.Param("agent_id"), 10, 64)
 	if err != nil {
 		_ = c.AbortWithError(http.StatusBadRequest, err)
 		return
@@ -112,7 +112,7 @@ func GetAgentTasks(c *gin.Context) {
 // PatchAgent
 //
 //	@Summary	Update an agent
-//	@Router		/agents/{agent} [patch]
+//	@Router		/agents/{agent_id} [patch]
 //	@Produce	json
 //	@Success	200	{object}	Agent
 //	@Tags		Agents
@@ -129,7 +129,7 @@ func PatchAgent(c *gin.Context) {
 		return
 	}
 
-	agentID, err := strconv.ParseInt(c.Param("agent"), 10, 64)
+	agentID, err := strconv.ParseInt(c.Param("agent_id"), 10, 64)
 	if err != nil {
 		_ = c.AbortWithError(http.StatusBadRequest, err)
 		return
@@ -197,7 +197,7 @@ func PostAgent(c *gin.Context) {
 // DeleteAgent
 //
 //	@Summary	Delete an agent
-//	@Router		/agents/{agent} [delete]
+//	@Router		/agents/{agent_id} [delete]
 //	@Produce	plain
 //	@Success	200
 //	@Tags		Agents
@@ -206,7 +206,7 @@ func PostAgent(c *gin.Context) {
 func DeleteAgent(c *gin.Context) {
 	_store := store.FromContext(c)
 
-	agentID, err := strconv.ParseInt(c.Param("agent"), 10, 64)
+	agentID, err := strconv.ParseInt(c.Param("agent_id"), 10, 64)
 	if err != nil {
 		_ = c.AbortWithError(http.StatusBadRequest, err)
 		return
