@@ -48,8 +48,9 @@ func TestAgentFindByID(t *testing.T) {
 	defer closer()
 
 	agent := &model.Agent{
-		ID:   int64(1),
-		Name: "test",
+		ID:    int64(1),
+		Name:  "test",
+		Token: "secret-token",
 	}
 	err := store.AgentCreate(agent)
 	assert.NoError(t, err)
