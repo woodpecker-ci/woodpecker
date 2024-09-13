@@ -41,7 +41,10 @@ type Agent struct {
 	Filters map[string]string `json:"filters" xorm:"'filters' json"`
 } //	@name Agent
 
-const SystemAgentOwnerID = -1
+const (
+	SystemAgentOwnerID = -1
+	notSet             = -1
+)
 
 // TableName return database table name for xorm.
 func (Agent) TableName() string {
@@ -63,10 +66,10 @@ func (a *Agent) GetServerFilters() (map[string]string, error) {
 	}
 
 	// enforce filters for user and organization agents
-	if a.OrgID != SystemAgentOwnerID {
+	if a.OrgID != notSet {
 		filters["org-id"] = fmt.Sprintf("%d", a.OrgID)
 	}
-	if a.RepoID != SystemAgentOwnerID {
+	if a.RepoID != notSet {
 		filters["repo-id"] = fmt.Sprintf("%d", a.RepoID)
 	}
 
@@ -78,7 +81,11 @@ func (a *Agent) CanAccessRepo(repo *Repo) bool {
 		return true
 	}
 
-	if a.OrgID == repo.OrgID {
+	if a.RepoID != notSet && a.RepoID == repo.OrgID {
+		return true
+	}
+
+	if a.OrgID != notSet && a.OrgID == repo.OrgID {
 		return true
 	}
 

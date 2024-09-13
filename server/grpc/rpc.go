@@ -101,11 +101,20 @@ func (s *RPC) Next(c context.Context, agentFilter rpc.Filter) (*rpc.Workflow, er
 
 // Wait blocks until the workflow with the given ID is done.
 func (s *RPC) Wait(c context.Context, workflowID string) error {
+	agent, err := s.getAgentFromContext(c)
+	if err != nil {
+		return err
+	}
+
+	if err := s.checkAgentPermissionByWorkflow(c, agent, workflowID, nil, nil); err != nil {
+		return err
+	}
+
 	return s.queue.Wait(c, workflowID)
 }
 
 // Extend extends the lease for the workflow with the given ID.
-func (s *RPC) Extend(c context.Context, strWorkflowID string) error {
+func (s *RPC) Extend(c context.Context, workflowID string) error {
 	agent, err := s.getAgentFromContext(c)
 	if err != nil {
 		return err
@@ -116,38 +125,11 @@ func (s *RPC) Extend(c context.Context, strWorkflowID string) error {
 		return err
 	}
 
-	workflowID, err := strconv.ParseInt(strWorkflowID, 10, 64)
-	if err != nil {
+	if err := s.checkAgentPermissionByWorkflow(c, agent, workflowID, nil, nil); err != nil {
 		return err
 	}
 
-	workflow, err := s.store.WorkflowLoad(workflowID)
-	if err != nil {
-		log.Error().Err(err).Msgf("rpc.update: cannot find workflow with id %d", workflowID)
-		return err
-	}
-
-	currentPipeline, err := s.store.GetPipeline(workflow.PipelineID)
-	if err != nil {
-		log.Error().Err(err).Msgf("cannot find pipeline with id %d", workflow.PipelineID)
-		return err
-	}
-
-	repo, err := s.store.GetRepo(currentPipeline.RepoID)
-	if err != nil {
-		log.Error().Err(err).Msgf("cannot find repo with id %d", currentPipeline.RepoID)
-		return err
-	}
-
-	if !agent.CanAccessRepo(repo) {
-		msg := fmt.Sprintf("agent '%d' is not allowed to interact with repo[%d] '%s'", agent.ID, repo.ID, repo.FullName)
-		log.Error().
-			Int64("repoId", repo.ID).
-			Msg(msg)
-		return fmt.Errorf(msg)
-	}
-
-	return s.queue.Extend(c, agent.ID, strWorkflowID)
+	return s.queue.Extend(c, agent.ID, workflowID)
 }
 
 // Update implements the rpc.Update function
@@ -159,7 +141,7 @@ func (s *RPC) Update(c context.Context, strWorkflowID string, state rpc.StepStat
 
 	workflow, err := s.store.WorkflowLoad(workflowID)
 	if err != nil {
-		log.Error().Err(err).Msgf("rpc.update: cannot find workflow with id %d", workflowID)
+		log.Error().Err(err).Msgf("rpc.update: cannot find workflow with id %s", strWorkflowID)
 		return err
 	}
 
@@ -195,12 +177,9 @@ func (s *RPC) Update(c context.Context, strWorkflowID string, state rpc.StepStat
 		return err
 	}
 
-	if !agent.CanAccessRepo(repo) {
-		msg := fmt.Sprintf("agent '%d' is not allowed to interact with repo '%s'", agent.ID, repo.FullName)
-		log.Error().
-			Int64("repoId", repo.ID).
-			Msg(msg)
-		return fmt.Errorf(msg)
+	// check before agent can alter some state
+	if err := s.checkAgentPermissionByWorkflow(c, agent, strWorkflowID, workflow, repo); err != nil {
+		return err
 	}
 
 	if err := pipeline.UpdateStepStatus(s.store, step, state); err != nil {
@@ -261,12 +240,9 @@ func (s *RPC) Init(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 		return err
 	}
 
-	if !agent.CanAccessRepo(repo) {
-		msg := fmt.Sprintf("agent '%d' is not allowed to interact with repo '%s'", agent.ID, repo.FullName)
-		log.Error().
-			Int64("repoId", repo.ID).
-			Msg(msg)
-		return fmt.Errorf(msg)
+	// check before agent can alter some state
+	if err := s.checkAgentPermissionByWorkflow(c, agent, strWorkflowID, workflow, repo); err != nil {
+		return err
 	}
 
 	if currentPipeline.Status == model.StatusPending {
@@ -340,12 +316,9 @@ func (s *RPC) Done(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 		return err
 	}
 
-	if !agent.CanAccessRepo(repo) {
-		msg := fmt.Sprintf("agent '%d' is not allowed to interact with repo '%s'", agent.ID, repo.FullName)
-		log.Error().
-			Int64("repoId", repo.ID).
-			Msg(msg)
-		return fmt.Errorf(msg)
+	// check before agent can alter some state
+	if err := s.checkAgentPermissionByWorkflow(c, agent, strWorkflowID, workflow, repo); err != nil {
+		return err
 	}
 
 	logger := log.With().
@@ -432,12 +405,9 @@ func (s *RPC) Log(c context.Context, rpcLogEntry *rpc.LogEntry) error {
 		return err
 	}
 
-	if !agent.CanAccessRepo(repo) {
-		msg := fmt.Sprintf("agent '%d' is not allowed to interact with repo '%s'", agent.ID, repo.FullName)
-		log.Error().
-			Int64("repoId", repo.ID).
-			Msg(msg)
-		return fmt.Errorf(msg)
+	// check before agent can alter some state
+	if err := s.checkAgentPermissionByWorkflow(c, agent, "-1", nil, repo); err != nil {
+		return err
 	}
 
 	logEntry := &model.LogEntry{
@@ -520,6 +490,42 @@ func (s *RPC) ReportHealth(ctx context.Context, status string) error {
 	agent.LastContact = time.Now().Unix()
 
 	return s.store.AgentUpdate(agent)
+}
+
+func (s *RPC) checkAgentPermissionByWorkflow(c context.Context, agent *model.Agent, strWorkflowID string, workflow *model.Workflow, repo *model.Repo) error {
+	workflowID, err := strconv.ParseInt(strWorkflowID, 10, 64)
+	if err != nil {
+		return err
+	}
+
+	if repo == nil {
+		if workflow == nil {
+			workflow, err = s.store.WorkflowLoad(workflowID)
+			if err != nil {
+				log.Error().Err(err).Msgf("rpc.update: cannot find workflow with id %d", workflowID)
+				return err
+			}
+		}
+
+		currentPipeline, err := s.store.GetPipeline(workflow.PipelineID)
+		if err != nil {
+			log.Error().Err(err).Msgf("cannot find pipeline with id %d", workflow.PipelineID)
+			return err
+		}
+
+		repo, err = s.store.GetRepo(currentPipeline.RepoID)
+		if err != nil {
+			log.Error().Err(err).Msgf("cannot find repo with id %d", currentPipeline.RepoID)
+			return err
+		}
+	}
+
+	if !agent.CanAccessRepo(repo) {
+		msg := fmt.Sprintf("agent '%d' is not allowed to interact with repo[%d] '%s'", agent.ID, repo.ID, repo.FullName)
+		log.Error().Int64("repoId", repo.ID).Msg(msg)
+		return fmt.Errorf(msg)
+	}
+	return nil
 }
 
 func (s *RPC) completeChildrenIfParentCompleted(completedWorkflow *model.Workflow) {
