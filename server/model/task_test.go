@@ -40,7 +40,6 @@ func TestTask_CalcLabels(t *testing.T) {
 		assert.NotNil(t, labels)
 		assert.Equal(t, map[string]string{
 			"repo":            "",
-			"owner":           "",
 			agentFilterRepoID: "0",
 			agentFilterOrgID:  "0",
 		}, labels)
@@ -50,7 +49,6 @@ func TestTask_CalcLabels(t *testing.T) {
 		task := &Task{}
 		repo := &Repo{
 			FullName: "test/repo",
-			Owner:    "test",
 			ID:       123,
 			OrgID:    456,
 		}
@@ -61,7 +59,6 @@ func TestTask_CalcLabels(t *testing.T) {
 		assert.NotNil(t, labels)
 		assert.Equal(t, map[string]string{
 			"repo":            "test/repo",
-			"owner":           "test",
 			agentFilterRepoID: "123",
 			agentFilterOrgID:  "456",
 		}, labels)
@@ -75,7 +72,6 @@ func TestTask_CalcLabels(t *testing.T) {
 		}
 		repo := &Repo{
 			FullName: "test/repo",
-			Owner:    "test",
 			ID:       123,
 			OrgID:    456,
 		}
@@ -87,7 +83,6 @@ func TestTask_CalcLabels(t *testing.T) {
 		assert.Equal(t, map[string]string{
 			"existing":        "label",
 			"repo":            "test/repo",
-			"owner":           "test",
 			agentFilterRepoID: "123",
 			agentFilterOrgID:  "456",
 		}, labels)

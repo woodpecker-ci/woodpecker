@@ -1,6 +1,9 @@
 export interface Agent {
   id: number;
   name: string;
+  owner_id: number;
+  org_id: number;
+  repo_id: number;
   token: string;
   created: number;
   updated: number;
@@ -10,4 +13,5 @@ export interface Agent {
   capacity: number;
   version: string;
   no_schedule: boolean;
+  filters?: Record<string, string>;
 }
