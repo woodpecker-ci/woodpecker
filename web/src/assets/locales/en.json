@@ -304,6 +304,12 @@
           "desc": "The max amount of parallel pipelines executed by this agent.",
           "badge": "capacity"
         },
+        "repo":{
+          "badge": "repo"
+        },
+        "org":{
+          "badge": "org"
+        },
         "version": "Version",
         "last_contact": "Last contact",
         "never": "Never",
