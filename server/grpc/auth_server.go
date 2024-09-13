@@ -60,13 +60,13 @@ func (s *WoodpeckerAuthServer) getAgent(agentID int64, agentToken string) (*mode
 	// global agent secret auth
 	if s.agentMasterToken != "" {
 		if agentToken == s.agentMasterToken && agentID == -1 {
-			agent := new(model.Agent)
-			agent.Name = ""
-			agent.OwnerID = model.SystemAgentOwnerID
-			agent.Token = s.agentMasterToken
-			agent.Backend = ""
-			agent.Platform = ""
-			agent.Capacity = -1
+			agent := &model.Agent{
+				OwnerID:  model.SystemAgentOwnerID,
+				OrgID:    model.SystemAgentOwnerID,
+				RepoID:   model.SystemAgentOwnerID,
+				Token:    s.agentMasterToken,
+				Capacity: -1,
+			}
 			err := s.store.AgentCreate(agent)
 			if err != nil {
 				log.Error().Err(err).Msg("error creating system agent")

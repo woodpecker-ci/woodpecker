@@ -177,9 +177,12 @@ func PostAgent(c *gin.Context) {
 
 	agent := &model.Agent{
 		Name:       in.Name,
-		NoSchedule: in.NoSchedule,
 		OwnerID:    user.ID,
+		OrgID:      model.SystemAgentOwnerID,
+		RepoID:     model.SystemAgentOwnerID,
+		NoSchedule: in.NoSchedule,
 		Token:      model.GenerateNewAgentToken(),
+		Filters:    in.Filters,
 	}
 	if err = store.FromContext(c).AgentCreate(agent); err != nil {
 		c.String(http.StatusInternalServerError, err.Error())
@@ -265,9 +268,10 @@ func PostOrgAgent(c *gin.Context) {
 
 	agent := &model.Agent{
 		Name:       in.Name,
-		NoSchedule: in.NoSchedule,
 		OwnerID:    user.ID,
 		OrgID:      orgID,
+		RepoID:     model.SystemAgentOwnerID,
+		NoSchedule: in.NoSchedule,
 		Token:      model.GenerateNewAgentToken(),
 		Filters:    in.Filters,
 	}
@@ -449,6 +453,12 @@ func PostRepoAgent(c *gin.Context) {
 		return
 	}
 
+	repo, err := _store.GetRepo(repoID)
+	if err != nil {
+		handleDBError(c, err)
+		return
+	}
+
 	in := new(model.Agent)
 	err = c.Bind(in)
 	if err != nil {
@@ -460,6 +470,7 @@ func PostRepoAgent(c *gin.Context) {
 		Name:       in.Name,
 		NoSchedule: in.NoSchedule,
 		OwnerID:    user.ID,
+		OrgID:      repo.OrgID,
 		RepoID:     repoID,
 		Token:      model.GenerateNewAgentToken(),
 		Filters:    in.Filters,

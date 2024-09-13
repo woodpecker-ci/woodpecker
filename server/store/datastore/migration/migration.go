@@ -65,6 +65,7 @@ var migrationTasks = []*xormigrate.Migration{
 	&alterTableRegistriesFixRequiredFields,
 	&cronWithoutSec,
 	&renameStartEndTime,
+	&addOrgAndRepoAgents,
 }
 
 var allBeans = []any{
