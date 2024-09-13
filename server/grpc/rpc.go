@@ -77,6 +77,8 @@ func (s *RPC) Next(c context.Context, agentFilter rpc.Filter) (*rpc.Workflow, er
 		agentFilter.Labels[k] = v
 	}
 
+	log.Trace().Msgf("Agent %s[%d] try pull task with filter labels: %v", agent.Name, agent.ID, agentFilter.Labels)
+
 	filterFn := createFilterFunc(agentFilter)
 
 	for {

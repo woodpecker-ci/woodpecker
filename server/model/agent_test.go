@@ -48,7 +48,10 @@ func TestAgent_GetServerFilters(t *testing.T) {
 		}
 		filters, err := agent.GetServerFilters()
 		assert.NoError(t, err)
-		assert.Empty(t, filters)
+		assert.Equal(t, map[string]string{
+			agentFilterOrgID:  "*",
+			agentFilterRepoID: "*",
+		}, filters)
 	})
 
 	t.Run("OrgAgent", func(t *testing.T) {
@@ -59,7 +62,8 @@ func TestAgent_GetServerFilters(t *testing.T) {
 		filters, err := agent.GetServerFilters()
 		assert.NoError(t, err)
 		assert.Equal(t, map[string]string{
-			agentFilterOrgID: "123",
+			agentFilterOrgID:  "123",
+			agentFilterRepoID: "*",
 		}, filters)
 	})
 
@@ -72,6 +76,7 @@ func TestAgent_GetServerFilters(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, map[string]string{
 			agentFilterRepoID: "456",
+			agentFilterOrgID:  "*",
 		}, filters)
 	})
 

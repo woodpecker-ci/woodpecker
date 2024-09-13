@@ -71,9 +71,13 @@ func (a *Agent) GetServerFilters() (map[string]string, error) {
 	// enforce filters for user and organization agents
 	if a.OrgID != SystemAgentOwnerID {
 		filters[agentFilterOrgID] = fmt.Sprintf("%d", a.OrgID)
+	} else {
+		filters[agentFilterOrgID] = "*"
 	}
 	if a.RepoID != SystemAgentOwnerID {
 		filters[agentFilterRepoID] = fmt.Sprintf("%d", a.RepoID)
+	} else {
+		filters[agentFilterRepoID] = "*"
 	}
 
 	return filters, nil
