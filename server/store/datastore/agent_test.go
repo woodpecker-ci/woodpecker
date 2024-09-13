@@ -109,19 +109,19 @@ func TestAgentListForOrg(t *testing.T) {
 	defer closer()
 
 	agent1 := &model.Agent{
-		ID:      int64(1),
-		Name:    "test-1",
-		OwnerID: int64(100),
+		ID:    int64(1),
+		Name:  "test-1",
+		OrgID: int64(100),
 	}
 	agent2 := &model.Agent{
-		ID:      int64(2),
-		Name:    "test-2",
-		OwnerID: int64(100),
+		ID:    int64(2),
+		Name:  "test-2",
+		OrgID: int64(100),
 	}
 	agent3 := &model.Agent{
-		ID:      int64(3),
-		Name:    "test-3",
-		OwnerID: int64(200),
+		ID:    int64(3),
+		Name:  "test-3",
+		OrgID: int64(200),
 	}
 	assert.NoError(t, store.AgentCreate(agent1))
 	assert.NoError(t, store.AgentCreate(agent2))
