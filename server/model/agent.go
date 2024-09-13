@@ -15,7 +15,10 @@
 package model
 
 import (
+	"encoding/base32"
 	"fmt"
+
+	"github.com/gorilla/securecookie"
 )
 
 type Agent struct {
@@ -47,6 +50,10 @@ func (Agent) TableName() string {
 
 func (a *Agent) IsSystemAgent() bool {
 	return a.OrgID == SystemAgentOwnerID
+}
+
+func GenerateNewAgentToken() string {
+	return base32.StdEncoding.EncodeToString(securecookie.GenerateRandomKey(32))
 }
 
 func (a *Agent) GetFilters() (map[string]string, error) {

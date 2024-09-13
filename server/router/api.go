@@ -71,6 +71,11 @@ func apiRoutes(e *gin.RouterGroup) {
 					org.GET("/registries/:registry", api.GetOrgRegistry)
 					org.PATCH("/registries/:registry", api.PatchOrgRegistry)
 					org.DELETE("/registries/:registry", api.DeleteOrgRegistry)
+
+					org.GET("/agents", api.GetOrgAgents)
+					org.POST("/agents", api.PostOrgAgent)
+					org.PATCH("/agents/:agent", api.PatchOrgAgent)
+					org.DELETE("/agents/:agent", api.DeleteOrgAgent)
 				}
 			}
 		}
@@ -136,6 +141,15 @@ func apiRoutes(e *gin.RouterGroup) {
 					repo.POST("/cron/:cron", session.MustPush, api.RunCron)
 					repo.PATCH("/cron/:cron", session.MustPush, api.PatchCron)
 					repo.DELETE("/cron/:cron", session.MustPush, api.DeleteCron)
+
+					agentBase := apiBase.Group("/agents")
+					{
+						agentBase.Use(session.MustRepoAdmin())
+						agentBase.GET("", api.GetRepoAgents)
+						agentBase.POST("", api.PostRepoAgent)
+						agentBase.PATCH("/:agent", api.PatchRepoAgent)
+						agentBase.DELETE("/:agent", api.DeleteRepoAgent)
+					}
 
 					// requires admin permissions
 					repo.PATCH("", session.MustRepoAdmin(), api.PatchRepo)
