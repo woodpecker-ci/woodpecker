@@ -84,6 +84,6 @@ func (a *Agent) CanAccessRepo(repo *Repo) bool {
 		return true
 	}
 
-	return a.RepoID != SystemAgentOwnerID && a.RepoID == repo.OrgID && (a.OrgID == SystemAgentOwnerID || a.OrgID == repo.OrgID) ||
-		a.OrgID != SystemAgentOwnerID && a.OrgID == repo.OrgID && (a.RepoID == SystemAgentOwnerID || a.RepoID == repo.OrgID)
+	return a.RepoID != SystemAgentOwnerID && a.RepoID == repo.ID && (a.OrgID == SystemAgentOwnerID || a.OrgID == repo.OrgID) ||
+		a.OrgID != SystemAgentOwnerID && a.OrgID == repo.OrgID && (a.RepoID == SystemAgentOwnerID || a.RepoID == repo.ID)
 }
