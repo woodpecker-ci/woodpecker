@@ -97,7 +97,10 @@ func GetAgentTasks(c *gin.Context) {
 	info := server.Config.Services.Queue.Info(c)
 	for _, task := range info.Running {
 		if task.AgentID == agent.ID {
-			tasks = append(tasks, task)
+			t := *task
+			// we copy the task and remove sensitive data
+			t.Data = nil
+			tasks = append(tasks, &t)
 		}
 	}
 
