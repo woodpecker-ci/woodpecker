@@ -56,7 +56,7 @@ func GenerateNewAgentToken() string {
 	return base32.StdEncoding.EncodeToString(securecookie.GenerateRandomKey(32))
 }
 
-func (a *Agent) GetFilters() (map[string]string, error) {
+func (a *Agent) GetServerFilters() (map[string]string, error) {
 	filters := a.Filters
 	if filters == nil {
 		filters = make(map[string]string)
