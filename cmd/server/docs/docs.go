@@ -4359,6 +4359,13 @@ const docTemplate = `{
                 "created": {
                     "type": "integer"
                 },
+                "filters": {
+                    "description": "Server side enforced agent filters",
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
                 "id": {
                     "type": "integer"
                 },
@@ -4376,6 +4383,7 @@ const docTemplate = `{
                     "type": "boolean"
                 },
                 "owner_id": {
+                    "description": "TODO: rename to org_id",
                     "type": "integer"
                 },
                 "platform": {

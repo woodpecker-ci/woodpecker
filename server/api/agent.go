@@ -173,7 +173,7 @@ func PostAgent(c *gin.Context) {
 	agent := &model.Agent{
 		Name:       in.Name,
 		NoSchedule: in.NoSchedule,
-		OwnerID:    user.ID,
+		OrgID:      user.ID,
 		Token: base32.StdEncoding.EncodeToString(
 			securecookie.GenerateRandomKey(32),
 		),
