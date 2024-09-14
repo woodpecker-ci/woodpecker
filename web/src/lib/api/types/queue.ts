@@ -1,6 +1,5 @@
 export interface Task {
   id: number;
-  data: string;
   labels: { [key: string]: string };
   dependencies: string[];
   dep_status: { [key: string]: string };
