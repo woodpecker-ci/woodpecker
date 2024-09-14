@@ -66,13 +66,8 @@ var addOrgs = xormigrate.Migration{
 			}
 		}
 
-		if err := sess.Sync(new(model.Org), new(syncRepo022), new(userV031)); err != nil {
+		if err := sess.Sync(new(model.Org), new(syncRepo022), new(userV031), new(oldSecret022)); err != nil {
 			return fmt.Errorf("sync new models failed: %w", err)
-		}
-
-		// make sure the columns exist before removing them
-		if _, err := sess.SyncWithOptions(xorm.SyncOptions{IgnoreConstrains: true, IgnoreIndices: true}, new(oldSecret022)); err != nil {
-			return fmt.Errorf("sync old secrets models failed: %w", err)
 		}
 
 		// get all org names from repos
