@@ -35,6 +35,24 @@
 - Update gitea sdk [[#4012](https://github.com/woodpecker-ci/woodpecker/pull/4012)]
 - Update Forgejo SDK [[#3948](https://github.com/woodpecker-ci/woodpecker/pull/3948)]
 
+### 📈 Enhancement
+
+- Allow to restart declined pipelines [[#4109](https://github.com/woodpecker-ci/woodpecker/pull/4109)]
+- Add indices to repo table [[#4087](https://github.com/woodpecker-ci/woodpecker/pull/4087)]
+- Duplicate key `workflow_id` in the agent logs [[#4046](https://github.com/woodpecker-ci/woodpecker/pull/4046)]
+- Improve error on config loading [[#4024](https://github.com/woodpecker-ci/woodpecker/pull/4024)]
+- Show error returned from API [[#3980](https://github.com/woodpecker-ci/woodpecker/pull/3980)]
+- Move manual popup to own page [[#3981](https://github.com/woodpecker-ci/woodpecker/pull/3981)]
+- Fail on InvalidImageName [[#4007](https://github.com/woodpecker-ci/woodpecker/pull/4007)]
+- Use Bitbucket PR title for pipeline message [[#3984](https://github.com/woodpecker-ci/woodpecker/pull/3984)]
+- Show logs if step has error [[#3979](https://github.com/woodpecker-ci/woodpecker/pull/3979)]
+- Refactor docker backend and add more test coverage [[#2700](https://github.com/woodpecker-ci/woodpecker/pull/2700)]
+- Make cli plugin log purge recognize steps by name [[#3953](https://github.com/woodpecker-ci/woodpecker/pull/3953)]
+- Pin page size [[#3946](https://github.com/woodpecker-ci/woodpecker/pull/3946)]
+- Improve cron list [[#3947](https://github.com/woodpecker-ci/woodpecker/pull/3947)]
+- Add PULLREQUEST_DRONE_PULL_REQUEST drone env [[#3939](https://github.com/woodpecker-ci/woodpecker/pull/3939)]
+- Make agent gRPC errors distinguishable [[#3936](https://github.com/woodpecker-ci/woodpecker/pull/3936)]
+
 ### 🐛 Bug Fixes
 
 - Fix migration registries table [[#4111](https://github.com/woodpecker-ci/woodpecker/pull/4111)]
@@ -69,23 +87,6 @@
 - Overhaul README [[#3995](https://github.com/woodpecker-ci/woodpecker/pull/3995)]
 - fix(deps): update docs npm deps non-major [[#3990](https://github.com/woodpecker-ci/woodpecker/pull/3990)]
 - Add spellchecking for docs [[#3787](https://github.com/woodpecker-ci/woodpecker/pull/3787)]
-
-### 📈 Enhancement
-
-- Add indices to repo table [[#4087](https://github.com/woodpecker-ci/woodpecker/pull/4087)]
-- Duplicate key `workflow_id` in the agent logs [[#4046](https://github.com/woodpecker-ci/woodpecker/pull/4046)]
-- Improve error on config loading [[#4024](https://github.com/woodpecker-ci/woodpecker/pull/4024)]
-- Show error returned from API [[#3980](https://github.com/woodpecker-ci/woodpecker/pull/3980)]
-- Move manual popup to own page [[#3981](https://github.com/woodpecker-ci/woodpecker/pull/3981)]
-- Fail on InvalidImageName [[#4007](https://github.com/woodpecker-ci/woodpecker/pull/4007)]
-- Use Bitbucket PR title for pipeline message [[#3984](https://github.com/woodpecker-ci/woodpecker/pull/3984)]
-- Show logs if step has error [[#3979](https://github.com/woodpecker-ci/woodpecker/pull/3979)]
-- Refactor docker backend and add more test coverage [[#2700](https://github.com/woodpecker-ci/woodpecker/pull/2700)]
-- Make cli plugin log purge recognize steps by name [[#3953](https://github.com/woodpecker-ci/woodpecker/pull/3953)]
-- Pin page size [[#3946](https://github.com/woodpecker-ci/woodpecker/pull/3946)]
-- Improve cron list [[#3947](https://github.com/woodpecker-ci/woodpecker/pull/3947)]
-- Add PULLREQUEST_DRONE_PULL_REQUEST drone env [[#3939](https://github.com/woodpecker-ci/woodpecker/pull/3939)]
-- Make agent gRPC errors distinguishable [[#3936](https://github.com/woodpecker-ci/woodpecker/pull/3936)]
 
 ### Misc
 
