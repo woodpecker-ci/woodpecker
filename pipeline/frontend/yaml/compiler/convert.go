@@ -45,6 +45,7 @@ func (c *Compiler) createProcess(container *yaml_types.Container, stepType backe
 
 		privileged  = container.Privileged
 		networkMode = container.NetworkMode
+		stepName = container.Name
 	)
 
 	workspaceBase := c.workspaceBase
@@ -93,6 +94,7 @@ func (c *Compiler) createProcess(container *yaml_types.Container, stepType backe
 
 	if container.Detached {
 		stepType = backend_types.StepTypeService
+		stepName = uuid.String() + stepName
 	}
 
 	workingDir = c.stepWorkingDir(container)
@@ -195,7 +197,7 @@ func (c *Compiler) createProcess(container *yaml_types.Container, stepType backe
 	}
 
 	return &backend_types.Step{
-		Name:           container.Name,
+		Name:           stepName,
 		UUID:           uuid.String(),
 		Type:           stepType,
 		Image:          container.Image,
