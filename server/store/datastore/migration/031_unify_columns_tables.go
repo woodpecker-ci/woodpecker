@@ -114,7 +114,7 @@ type registryV031 struct {
 }
 
 func (registryV031) TableName() string {
-	return "registries"
+	return "registry"
 }
 
 type repoV031 struct {
