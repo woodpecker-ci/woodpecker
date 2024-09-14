@@ -26,12 +26,12 @@ import (
 var addOrgID = xormigrate.Migration{
 	ID: "add-org-id",
 	MigrateSession: func(sess *xorm.Session) error {
-		if err := sess.Sync(new(userV031)); err != nil {
+		if err := sess.Sync(new(userV009)); err != nil {
 			return fmt.Errorf("sync new models failed: %w", err)
 		}
 
 		// get all users
-		var users []*userV031
+		var users []*userV009
 		if err := sess.Find(&users); err != nil {
 			return fmt.Errorf("find all repos failed: %w", err)
 		}

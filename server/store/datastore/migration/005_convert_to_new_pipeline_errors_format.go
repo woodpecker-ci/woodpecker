@@ -21,20 +21,20 @@ import (
 	errorTypes "go.woodpecker-ci.org/woodpecker/v2/pipeline/errors/types"
 )
 
-// perPage027 set the size of the slice to read per page.
-var perPage027 = 100
+// perPage005 set the size of the slice to read per page.
+var perPage005 = 100
 
-type pipeline027 struct {
+type pipeline005 struct {
 	ID     int64                       `json:"id"              xorm:"pk autoincr 'pipeline_id'"`
 	Error  string                      `json:"error"           xorm:"LONGTEXT 'pipeline_error'"` // old error format
 	Errors []*errorTypes.PipelineError `json:"errors"          xorm:"json 'pipeline_errors'"`    // new error format
 }
 
-func (pipeline027) TableName() string {
+func (pipeline005) TableName() string {
 	return "pipelines"
 }
 
-type PipelineError027 struct {
+type PipelineError005 struct {
 	Type      string `json:"type"`
 	Message   string `json:"message"`
 	IsWarning bool   `json:"is_warning"`
@@ -46,23 +46,23 @@ var convertToNewPipelineErrorFormat = xormigrate.Migration{
 	Long: true,
 	MigrateSession: func(sess *xorm.Session) (err error) {
 		// make sure pipeline_error column exists
-		if err := sess.Sync(new(pipeline027)); err != nil {
+		if err := sess.Sync(new(pipeline005)); err != nil {
 			return err
 		}
 
 		page := 0
-		oldPipelines := make([]*pipeline027, 0, perPage027)
+		oldPipelines := make([]*pipeline005, 0, perPage005)
 
 		for {
 			oldPipelines = oldPipelines[:0]
 
-			err := sess.Limit(perPage027, page*perPage027).Cols("pipeline_id", "pipeline_error").Where("pipeline_error != ''").Find(&oldPipelines)
+			err := sess.Limit(perPage005, page*perPage005).Cols("pipeline_id", "pipeline_error").Where("pipeline_error != ''").Find(&oldPipelines)
 			if err != nil {
 				return err
 			}
 
 			for _, oldPipeline := range oldPipelines {
-				var newPipeline pipeline027
+				var newPipeline pipeline005
 				newPipeline.ID = oldPipeline.ID
 				newPipeline.Errors = []*errorTypes.PipelineError{{
 					Type:    "generic",
@@ -74,7 +74,7 @@ var convertToNewPipelineErrorFormat = xormigrate.Migration{
 				}
 			}
 
-			if len(oldPipelines) < perPage027 {
+			if len(oldPipelines) < perPage005 {
 				break
 			}
 

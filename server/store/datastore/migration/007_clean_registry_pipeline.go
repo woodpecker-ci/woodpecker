@@ -19,17 +19,17 @@ import (
 	"xorm.io/xorm"
 )
 
-type oldRegistry029 struct {
+type oldRegistry007 struct {
 	ID    int64  `json:"id"       xorm:"pk autoincr 'registry_id'"`
 	Token string `json:"token"    xorm:"TEXT 'registry_token'"`
 	Email string `json:"email"    xorm:"varchar(500) 'registry_email'"`
 }
 
-func (oldRegistry029) TableName() string {
+func (oldRegistry007) TableName() string {
 	return "registry"
 }
 
-type oldPipeline029 struct {
+type oldPipeline007 struct {
 	ID       int64  `json:"id"                      xorm:"pk autoincr 'pipeline_id'"`
 	ConfigID int64  `json:"-"                       xorm:"pipeline_config_id"`
 	Enqueued int64  `json:"enqueued_at"             xorm:"pipeline_enqueued"`
@@ -37,14 +37,14 @@ type oldPipeline029 struct {
 }
 
 // TableName return database table name for xorm.
-func (oldPipeline029) TableName() string {
+func (oldPipeline007) TableName() string {
 	return "pipelines"
 }
 
 var cleanRegistryPipeline = xormigrate.Migration{
 	ID: "clean-registry-pipeline",
 	MigrateSession: func(sess *xorm.Session) (err error) {
-		if err := sess.Sync(new(oldRegistry029), new(oldPipeline029)); err != nil {
+		if err := sess.Sync(new(oldRegistry007), new(oldPipeline007)); err != nil {
 			return err
 		}
 

@@ -24,7 +24,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
-type configV031 struct {
+type configV009 struct {
 	ID     int64  `xorm:"pk autoincr 'config_id'"`
 	RepoID int64  `xorm:"UNIQUE(s) 'config_repo_id'"`
 	Hash   string `xorm:"UNIQUE(s) 'config_hash'"`
@@ -32,11 +32,11 @@ type configV031 struct {
 	Data   []byte `xorm:"LONGBLOB 'config_data'"`
 }
 
-func (configV031) TableName() string {
+func (configV009) TableName() string {
 	return "config"
 }
 
-type cronV031 struct {
+type cronV009 struct {
 	ID        int64  `xorm:"pk autoincr 'i_d'"`
 	Name      string `xorm:"name UNIQUE(s) INDEX"`
 	RepoID    int64  `xorm:"repo_id UNIQUE(s) INDEX"`
@@ -47,11 +47,11 @@ type cronV031 struct {
 	Branch    string `xorm:"branch"`
 }
 
-func (cronV031) TableName() string {
+func (cronV009) TableName() string {
 	return "crons"
 }
 
-type permV031 struct {
+type permV009 struct {
 	UserID int64 `xorm:"UNIQUE(s) INDEX NOT NULL 'perm_user_id'"`
 	RepoID int64 `xorm:"UNIQUE(s) INDEX NOT NULL 'perm_repo_id'"`
 	Pull   bool  `xorm:"perm_pull"`
@@ -60,11 +60,11 @@ type permV031 struct {
 	Synced int64 `xorm:"perm_synced"`
 }
 
-func (permV031) TableName() string {
+func (permV009) TableName() string {
 	return "perms"
 }
 
-type pipelineV031 struct {
+type pipelineV009 struct {
 	ID         int64                  `xorm:"pk autoincr 'pipeline_id'"`
 	RepoID     int64                  `xorm:"UNIQUE(s) INDEX 'pipeline_repo_id'"`
 	Number     int64                  `xorm:"UNIQUE(s) 'pipeline_number'"`
@@ -93,19 +93,19 @@ type pipelineV031 struct {
 	Reviewed   int64                  `xorm:"pipeline_reviewed"`
 }
 
-func (pipelineV031) TableName() string {
+func (pipelineV009) TableName() string {
 	return "pipelines"
 }
 
-type redirectionV031 struct {
+type redirectionV009 struct {
 	ID int64 `xorm:"pk autoincr 'redirection_id'"`
 }
 
-func (r redirectionV031) TableName() string {
+func (r redirectionV009) TableName() string {
 	return "redirections"
 }
 
-type registryV031 struct {
+type registryV009 struct {
 	ID       int64  `xorm:"pk autoincr 'registry_id'"`
 	RepoID   int64  `xorm:"UNIQUE(s) INDEX 'registry_repo_id'"`
 	Address  string `xorm:"UNIQUE(s) INDEX 'registry_addr'"`
@@ -113,11 +113,11 @@ type registryV031 struct {
 	Password string `xorm:"TEXT 'registry_password'"`
 }
 
-func (registryV031) TableName() string {
+func (registryV009) TableName() string {
 	return "registry"
 }
 
-type repoV031 struct {
+type repoV009 struct {
 	ID           int64                `xorm:"pk autoincr 'repo_id'"`
 	UserID       int64                `xorm:"repo_user_id"`
 	OrgID        int64                `xorm:"repo_org_id"`
@@ -143,11 +143,11 @@ type repoV031 struct {
 	Hash         string               `xorm:"varchar(500) 'repo_hash'"`
 }
 
-func (repoV031) TableName() string {
+func (repoV009) TableName() string {
 	return "repos"
 }
 
-type secretV031 struct {
+type secretV009 struct {
 	ID     int64                `xorm:"pk autoincr 'secret_id'"`
 	OrgID  int64                `xorm:"NOT NULL DEFAULT 0 UNIQUE(s) INDEX 'secret_org_id'"`
 	RepoID int64                `xorm:"NOT NULL DEFAULT 0 UNIQUE(s) INDEX 'secret_repo_id'"`
@@ -157,11 +157,11 @@ type secretV031 struct {
 	Events []model.WebhookEvent `xorm:"json 'secret_events'"`
 }
 
-func (secretV031) TableName() string {
+func (secretV009) TableName() string {
 	return "secrets"
 }
 
-type stepV031 struct {
+type stepV009 struct {
 	ID         int64             `xorm:"pk autoincr 'step_id'"`
 	UUID       string            `xorm:"INDEX 'step_uuid'"`
 	PipelineID int64             `xorm:"UNIQUE(s) INDEX 'step_pipeline_id'"`
@@ -177,11 +177,11 @@ type stepV031 struct {
 	Type       model.StepType    `xorm:"step_type"`
 }
 
-func (stepV031) TableName() string {
+func (stepV009) TableName() string {
 	return "steps"
 }
 
-type taskV031 struct {
+type taskV009 struct {
 	ID           string                       `xorm:"PK UNIQUE 'task_id'"`
 	Data         []byte                       `xorm:"LONGBLOB 'task_data'"`
 	Labels       map[string]string            `xorm:"json 'task_labels'"`
@@ -190,11 +190,11 @@ type taskV031 struct {
 	DepStatus    map[string]model.StatusValue `xorm:"json 'task_dep_status'"`
 }
 
-func (taskV031) TableName() string {
+func (taskV009) TableName() string {
 	return "tasks"
 }
 
-type userV031 struct {
+type userV009 struct {
 	ID     int64  `xorm:"pk autoincr 'user_id'"`
 	Login  string `xorm:"UNIQUE 'user_login'"`
 	Token  string `xorm:"TEXT 'user_token'"`
@@ -207,11 +207,11 @@ type userV031 struct {
 	OrgID  int64  `xorm:"user_org_id"`
 }
 
-func (userV031) TableName() string {
+func (userV009) TableName() string {
 	return "users"
 }
 
-type workflowV031 struct {
+type workflowV009 struct {
 	ID         int64             `xorm:"pk autoincr 'workflow_id'"`
 	PipelineID int64             `xorm:"UNIQUE(s) INDEX 'workflow_pipeline_id'"`
 	PID        int               `xorm:"UNIQUE(s) 'workflow_pid'"`
@@ -226,23 +226,23 @@ type workflowV031 struct {
 	AxisID     int               `xorm:"workflow_axis_id"`
 }
 
-func (workflowV031) TableName() string {
+func (workflowV009) TableName() string {
 	return "workflows"
 }
 
-type serverConfigV031 struct {
+type serverConfigV009 struct {
 	Key   string `xorm:"pk 'key'"`
 	Value string `xorm:"value"`
 }
 
-func (serverConfigV031) TableName() string {
+func (serverConfigV009) TableName() string {
 	return "server_config"
 }
 
 var unifyColumnsTables = xormigrate.Migration{
 	ID: "unify-columns-tables",
 	MigrateSession: func(sess *xorm.Session) (err error) {
-		if err := sess.Sync(new(configV031), new(cronV031), new(permV031), new(pipelineV031), new(redirectionV031), new(registryV031), new(repoV031), new(secretV031), new(stepV031), new(taskV031), new(userV031), new(workflowV031), new(serverConfigV031)); err != nil {
+		if err := sess.Sync(new(configV009), new(cronV009), new(permV009), new(pipelineV009), new(redirectionV009), new(registryV009), new(repoV009), new(secretV009), new(stepV009), new(taskV009), new(userV009), new(workflowV009), new(serverConfigV009)); err != nil {
 			return fmt.Errorf("sync models failed: %w", err)
 		}
 

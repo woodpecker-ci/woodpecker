@@ -23,7 +23,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
-type userV030 struct {
+type userV008 struct {
 	ID            int64               `xorm:"pk autoincr 'user_id'"`
 	ForgeID       int64               `xorm:"forge_id"`
 	ForgeRemoteID model.ForgeRemoteID `xorm:"forge_remote_id"`
@@ -38,11 +38,11 @@ type userV030 struct {
 	OrgID         int64               `xorm:"user_org_id"`
 }
 
-func (userV030) TableName() string {
+func (userV008) TableName() string {
 	return "users"
 }
 
-type repoV030 struct {
+type repoV008 struct {
 	ID                           int64                `xorm:"pk autoincr 'repo_id'"`
 	UserID                       int64                `xorm:"repo_user_id"`
 	ForgeID                      int64                `xorm:"forge_id"`
@@ -73,11 +73,11 @@ type repoV030 struct {
 	NetrcOnlyTrusted             bool                 `xorm:"NOT NULL DEFAULT true 'netrc_only_trusted'"`
 }
 
-func (repoV030) TableName() string {
+func (repoV008) TableName() string {
 	return "repos"
 }
 
-type forgeV030 struct {
+type forgeV008 struct {
 	ID                int64           `xorm:"pk autoincr 'id'"`
 	Type              model.ForgeType `xorm:"VARCHAR(250) 'type'"`
 	URL               string          `xorm:"VARCHAR(500) 'url'"`
@@ -88,18 +88,18 @@ type forgeV030 struct {
 	AdditionalOptions map[string]any  `xorm:"json 'additional_options'"`
 }
 
-func (forgeV030) TableName() string {
+func (forgeV008) TableName() string {
 	return "forge"
 }
 
 var setForgeID = xormigrate.Migration{
 	ID: "set-forge-id",
 	MigrateSession: func(sess *xorm.Session) (err error) {
-		if err := sess.Sync(new(userV030), new(repoV030), new(forgeV030), new(model.Org)); err != nil {
+		if err := sess.Sync(new(userV008), new(repoV008), new(forgeV008), new(model.Org)); err != nil {
 			return fmt.Errorf("sync new models failed: %w", err)
 		}
 
-		_, err = sess.Exec(fmt.Sprintf("UPDATE `%s` SET forge_id=1;", userV030{}.TableName()))
+		_, err = sess.Exec(fmt.Sprintf("UPDATE `%s` SET forge_id=1;", userV008{}.TableName()))
 		if err != nil {
 			return err
 		}
@@ -109,7 +109,7 @@ var setForgeID = xormigrate.Migration{
 			return err
 		}
 
-		_, err = sess.Exec(fmt.Sprintf("UPDATE `%s` SET forge_id=1;", repoV030{}.TableName()))
+		_, err = sess.Exec(fmt.Sprintf("UPDATE `%s` SET forge_id=1;", repoV008{}.TableName()))
 		return err
 	},
 }
