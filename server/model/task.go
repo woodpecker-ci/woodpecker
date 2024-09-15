@@ -22,7 +22,7 @@ import (
 // Task defines scheduled pipeline Task.
 type Task struct {
 	ID           string                 `json:"id"           xorm:"PK UNIQUE 'id'"`
-	Data         []byte                 `json:"data"         xorm:"LONGBLOB 'data'"`
+	Data         []byte                 `json:"-"            xorm:"LONGBLOB 'data'"`
 	Labels       map[string]string      `json:"labels"       xorm:"json 'labels'"`
 	Dependencies []string               `json:"dependencies" xorm:"json 'dependencies'"`
 	RunOn        []string               `json:"run_on"       xorm:"json 'run_on'"`

@@ -1,6 +1,5 @@
 export interface Task {
   id: number;
-  data: string;
   labels: Record<string, string>;
   dependencies: string[];
   dep_status: Record<string, string>;
