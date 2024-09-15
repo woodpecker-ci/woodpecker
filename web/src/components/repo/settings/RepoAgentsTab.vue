@@ -19,12 +19,6 @@
         <span>{{ agent.name || `Agent ${agent.id}` }}</span>
         <span class="ml-auto">
           <span class="hidden md:inline-block space-x-2">
-            <Badge
-              v-if="agent.org_id != -1 && agent.repo_id == -1"
-              :label="$t('admin.settings.agents.org.badge')"
-              :value="agent.org_id"
-            />
-            <Badge v-if="agent.repo_id != -1" :label="$t('admin.settings.agents.repo.badge')" :value="agent.repo_id" />
             <Badge v-if="agent.platform" :label="$t('admin.settings.agents.platform.badge')" :value="agent.platform" />
             <Badge v-if="agent.backend" :label="$t('admin.settings.agents.backend.badge')" :value="agent.backend" />
             <Badge v-if="agent.capacity" :label="$t('admin.settings.agents.capacity.badge')" :value="agent.capacity" />
@@ -189,7 +183,7 @@
 
 <script lang="ts" setup>
 import { cloneDeep } from 'lodash';
-import { computed, ref } from 'vue';
+import { computed, inject, ref, type Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import Badge from '~/components/atomic/Badge.vue';
@@ -206,12 +200,17 @@ import { useAsyncAction } from '~/compositions/useAsyncAction';
 import { useDate } from '~/compositions/useDate';
 import useNotifications from '~/compositions/useNotifications';
 import { usePagination } from '~/compositions/usePaginate';
-import type { Agent } from '~/lib/api/types';
+import type { Agent, Repo } from '~/lib/api/types';
 
 const apiClient = useApiClient();
 const notifications = useNotifications();
 const date = useDate();
 const { t } = useI18n();
+
+const repo = inject<Ref<Repo>>('repo');
+if (repo === undefined) {
+  throw new Error('Unexpected: "repo" should be provided at this place');
+}
 
 const selectedAgent = ref<Partial<Agent>>();
 const isEditingAgent = computed(() => !!selectedAgent.value?.id);
@@ -220,7 +219,7 @@ const newFilterKey = ref('');
 const newFilterValue = ref('');
 
 async function loadAgents(page: number): Promise<Agent[] | null> {
-  return apiClient.getAgents({ page });
+  return apiClient.getRepoAgents(repo!.value.id, { page });
 }
 
 const { resetPage, data: agents } = usePagination(loadAgents, () => !selectedAgent.value);
@@ -233,14 +232,14 @@ const { doSubmit: saveAgent, isLoading: isSaving } = useAsyncAction(async () => 
   selectedAgent.value.filters = Object.fromEntries(filters.value.map((filter) => [filter.key, filter.value]));
 
   if (isEditingAgent.value) {
-    await apiClient.updateAgent(selectedAgent.value);
+    await apiClient.updateRepoAgent(repo.value.id, selectedAgent.value.id!, selectedAgent.value);
     selectedAgent.value = undefined;
     filters.value = [];
   } else {
-    selectedAgent.value = await apiClient.createAgent(selectedAgent.value);
+    selectedAgent.value = await apiClient.createRepoAgent(repo.value.id, selectedAgent.value);
   }
   notifications.notify({
-    title: isEditingAgent.value ? t('admin.settings.agents.created') : t('admin.settings.agents.saved'),
+    title: isEditingAgent.value ? t('admin.settings.agents.saved') : t('admin.settings.agents.created'),
     type: 'success',
   });
   resetPage();
@@ -252,7 +251,7 @@ const { doSubmit: deleteAgent, isLoading: isDeleting } = useAsyncAction(async (_
     return;
   }
 
-  await apiClient.deleteAgent(_agent);
+  await apiClient.deleteRepoAgent(repo.value.id, _agent.id);
   notifications.notify({ title: t('admin.settings.agents.deleted'), type: 'success' });
   resetPage();
 });
