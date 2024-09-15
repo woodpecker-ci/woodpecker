@@ -37,5 +37,5 @@ var TrustedClonePlugins = []string{
 	"quay.io/woodpeckerci/plugin-git",
 }
 
-// TaskTimeout is the time till a running task is counted as dead
+// TaskTimeout is the time till a running task is counted as dead.
 var TaskTimeout = time.Minute

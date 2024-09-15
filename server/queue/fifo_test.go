@@ -52,7 +52,7 @@ func TestFifo(t *testing.T) {
 
 func TestFifoExpire(t *testing.T) {
 	want := &model.Task{ID: "1"}
-	ctx, cancel := context.WithCancel(context.Background())
+	ctx, cancel := context.WithCancelCause(context.Background())
 
 	q, _ := New(ctx).(*fifo)
 	q.extension = 0
@@ -64,7 +64,7 @@ func TestFifoExpire(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, want, got)
 
-	cancel()
+	cancel(nil)
 	q.process()
 	assert.Len(t, info.Pending, 1, "expect task re-added to pending queue")
 }

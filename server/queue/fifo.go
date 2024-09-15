@@ -56,7 +56,6 @@ type fifo struct {
 const processTimeInterval = time.Second
 
 // New returns a new fifo queue.
-//
 func New(ctx context.Context) Queue {
 	q := &fifo{
 		ctx:           ctx,
