@@ -39,6 +39,8 @@ type Runner struct {
 	backend  *backend.Backend
 }
 
+const workflowHeartbeat = time.Second * 10
+
 func NewRunner(workEngine rpc.Peer, f rpc.Filter, h string, state *State, backend *backend.Backend) Runner {
 	return Runner{
 		client:   workEngine,
@@ -118,7 +120,7 @@ func (r *Runner) Run(runnerCtx, shutdownCtx context.Context) error { //nolint:co
 				logger.Debug().Msg("pipeline done")
 				return
 
-			case <-time.After(time.Minute):
+			case <-time.After(workflowHeartbeat):
 				logger.Debug().Msg("pipeline lease renewed")
 				if err := r.client.Extend(workflowCtx, workflow.ID); err != nil {
 					log.Error().Err(err).Msg("extending pipeline deadline failed")

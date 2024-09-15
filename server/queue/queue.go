@@ -18,6 +18,7 @@ import (
 	"context"
 	"errors"
 	"strings"
+	"time"
 
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
@@ -29,6 +30,8 @@ var (
 	// ErrNotFound indicates the task was not found in the queue.
 	ErrNotFound = errors.New("queue: task not found")
 )
+
+const TaskTimeout = time.Minute
 
 // InfoT provides runtime information.
 type InfoT struct {

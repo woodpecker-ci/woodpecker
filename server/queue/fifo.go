@@ -60,7 +60,7 @@ func New(_ context.Context) Queue {
 		running:       map[string]*entry{},
 		pending:       list.New(),
 		waitingOnDeps: list.New(),
-		extension:     time.Minute * 10,
+		extension:     TaskTimeout,
 		paused:        false,
 	}
 }
