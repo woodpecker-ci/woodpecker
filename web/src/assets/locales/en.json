@@ -318,7 +318,7 @@
         "delete_agent": "Delete agent",
         "filters": {
           "name": "Filters",
-          "desc": "Server side enforced labels to filter tasks",
+          "desc": "Server side enforced labels of agents to filter workflows",
           "key": "Label name ...",
           "value": "Filter value ...",
           "add": "Add filter",
