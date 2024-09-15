@@ -488,7 +488,7 @@ func (s *RPC) ReportHealth(ctx context.Context, status string) error {
 	return s.store.AgentUpdate(agent)
 }
 
-func (s *RPC) checkAgentPermissionByWorkflow(c context.Context, agent *model.Agent, strWorkflowID string, pipeline *model.Pipeline, repo *model.Repo) error {
+func (s *RPC) checkAgentPermissionByWorkflow(_ context.Context, agent *model.Agent, strWorkflowID string, pipeline *model.Pipeline, repo *model.Repo) error {
 	var err error
 	if repo == nil {
 		if pipeline == nil {
@@ -520,7 +520,7 @@ func (s *RPC) checkAgentPermissionByWorkflow(c context.Context, agent *model.Age
 	if !agent.CanAccessRepo(repo) {
 		msg := fmt.Sprintf("agent '%d' is not allowed to interact with repo[%d] '%s'", agent.ID, repo.ID, repo.FullName)
 		log.Error().Int64("repoId", repo.ID).Msg(msg)
-		return fmt.Errorf(msg)
+		return errors.New(msg)
 	}
 	return nil
 }

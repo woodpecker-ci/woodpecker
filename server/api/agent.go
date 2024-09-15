@@ -27,7 +27,7 @@ import (
 )
 
 //
-// Global Agents
+// Global Agents.
 //
 
 // GetAgents
@@ -238,7 +238,7 @@ func DeleteAgent(c *gin.Context) {
 }
 
 //
-// Org/User Agents
+// Org/User Agents.
 //
 
 // PostOrgAgent

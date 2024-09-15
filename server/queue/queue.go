@@ -29,7 +29,7 @@ var (
 	// ErrNotFound indicates the task was not found in the queue.
 	ErrNotFound = errors.New("queue: task not found")
 
-	// ErrAgentMissMatch indicates an agent does not mat to the task
+	// ErrAgentMissMatch indicates an agent does not mat to the task.
 	ErrAgentMissMatch = errors.New("task has not expected agent id")
 )
 
