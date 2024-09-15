@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-09-14
+## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-09-15
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -8,6 +8,7 @@
 
 ### 💥 Breaking changes
 
+- Don't expose task data via api [[#4108](https://github.com/woodpecker-ci/woodpecker/pull/4108)]
 - Remove some ci environment variables [[#3846](https://github.com/woodpecker-ci/woodpecker/pull/3846)]
 - Remove all default privileged plugins [[#4053](https://github.com/woodpecker-ci/woodpecker/pull/4053)]
 - Add option to filter secrets by plugins with specific tags [[#4069](https://github.com/woodpecker-ci/woodpecker/pull/4069)]
