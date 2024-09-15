@@ -57,7 +57,6 @@ const processTimeInterval = time.Second
 
 // New returns a new fifo queue.
 //
-//nolint:mnd
 func New(ctx context.Context) Queue {
 	q := &fifo{
 		ctx:           ctx,
