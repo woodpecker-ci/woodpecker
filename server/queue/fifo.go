@@ -24,6 +24,7 @@ import (
 	"github.com/rs/zerolog/log"
 
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/constant"
 )
 
 type entry struct {
@@ -64,7 +65,7 @@ func New(ctx context.Context) Queue {
 		running:       map[string]*entry{},
 		pending:       list.New(),
 		waitingOnDeps: list.New(),
-		extension:     TaskTimeout,
+		extension:     constant.TaskTimeout,
 		paused:        false,
 	}
 	go q.process()

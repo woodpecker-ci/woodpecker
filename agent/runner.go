@@ -28,6 +28,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline"
 	backend "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/constant"
 	"go.woodpecker-ci.org/woodpecker/v2/shared/utils"
 )
 
@@ -38,8 +39,6 @@ type Runner struct {
 	counter  *State
 	backend  *backend.Backend
 }
-
-const workflowHeartbeat = time.Second * 10
 
 func NewRunner(workEngine rpc.Peer, f rpc.Filter, h string, state *State, backend *backend.Backend) Runner {
 	return Runner{
@@ -120,7 +119,7 @@ func (r *Runner) Run(runnerCtx, shutdownCtx context.Context) error { //nolint:co
 				logger.Debug().Msg("pipeline done")
 				return
 
-			case <-time.After(workflowHeartbeat):
+			case <-time.After(constant.TaskTimeout / 3):
 				logger.Debug().Msg("pipeline lease renewed")
 				if err := r.client.Extend(workflowCtx, workflow.ID); err != nil {
 					log.Error().Err(err).Msg("extending pipeline deadline failed")
