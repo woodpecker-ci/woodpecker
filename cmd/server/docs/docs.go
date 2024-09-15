@@ -5064,12 +5064,6 @@ const docTemplate = `{
                 "agent_id": {
                     "type": "integer"
                 },
-                "data": {
-                    "type": "array",
-                    "items": {
-                        "type": "integer"
-                    }
-                },
                 "dep_status": {
                     "type": "object",
                     "additionalProperties": {
