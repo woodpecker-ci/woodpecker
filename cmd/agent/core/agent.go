@@ -62,7 +62,7 @@ var (
 	shutdownCtx                                = context.Background()
 )
 
-func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
+func Run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 	agentCtx, ctxCancel := context.WithCancelCause(ctx)
 	stopAgentFunc = func(err error) {
 		msg := "shutdown of whole agent"
@@ -300,7 +300,7 @@ func runWithRetry(backendEngines []types.Backend) func(ctx context.Context, c *c
 		retryDelay := c.Duration("connect-retry-delay")
 		var err error
 		for i := 0; i < retryCount; i++ {
-			if err = run(ctx, c, backendEngines); status.Code(err) == codes.Unavailable {
+			if err = Run(ctx, c, backendEngines); status.Code(err) == codes.Unavailable {
 				log.Warn().Err(err).Msg(fmt.Sprintf("cannot connect to server, retrying in %v", retryDelay))
 				time.Sleep(retryDelay)
 			} else {
