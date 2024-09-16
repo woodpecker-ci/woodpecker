@@ -31,7 +31,13 @@ func (s storage) ServerConfigSet(key, value string) error {
 		Key: key,
 	}
 
-	count, err := s.engine.Count(config)
+	sess := s.engine.NewSession()
+	defer sess.Close()
+	if err := sess.Begin(); err != nil {
+		return err
+	}
+
+	count, err := sess.Count(config)
 	if err != nil {
 		return err
 	}
@@ -39,12 +45,15 @@ func (s storage) ServerConfigSet(key, value string) error {
 	config.Value = value
 
 	if count == 0 {
-		_, err := s.engine.Insert(config)
+		_, err = sess.Insert(config)
+	} else {
+		_, err = sess.Where("`key` = ?", config.Key).Cols("value").Update(config)
+	}
+	if err != nil {
 		return err
 	}
 
-	_, err = s.engine.Where("`key` = ?", config.Key).Cols("value").Update(config)
-	return err
+	return sess.Commit()
 }
 
 func (s storage) ServerConfigDelete(key string) error {
