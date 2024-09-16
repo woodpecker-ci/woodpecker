@@ -41,7 +41,7 @@ func (t *Task) String() string {
 	return sb.String()
 }
 
-func (t *Task) CalcLabels(r *Repo) (map[string]string, error) {
+func (t *Task) GetLabels(r *Repo) (map[string]string, error) {
 	if r == nil {
 		return nil, fmt.Errorf("repo is nil but needed for calc task labels")
 	}

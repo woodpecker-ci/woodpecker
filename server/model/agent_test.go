@@ -43,8 +43,8 @@ func TestAgent_GetServerFilters(t *testing.T) {
 
 	t.Run("SystemAgent", func(t *testing.T) {
 		agent := &Agent{
-			OrgID:  SystemAgentOwnerID,
-			RepoID: SystemAgentOwnerID,
+			OrgID:  IDNotSet,
+			RepoID: IDNotSet,
 		}
 		filters, err := agent.GetServerFilters()
 		assert.NoError(t, err)
@@ -57,7 +57,7 @@ func TestAgent_GetServerFilters(t *testing.T) {
 	t.Run("OrgAgent", func(t *testing.T) {
 		agent := &Agent{
 			OrgID:  123,
-			RepoID: SystemAgentOwnerID,
+			RepoID: IDNotSet,
 		}
 		filters, err := agent.GetServerFilters()
 		assert.NoError(t, err)
@@ -69,7 +69,7 @@ func TestAgent_GetServerFilters(t *testing.T) {
 
 	t.Run("RepoAgent", func(t *testing.T) {
 		agent := &Agent{
-			OrgID:  SystemAgentOwnerID,
+			OrgID:  IDNotSet,
 			RepoID: 456,
 		}
 		filters, err := agent.GetServerFilters()
@@ -105,9 +105,9 @@ func TestAgent_CanAccessRepo(t *testing.T) {
 
 	t.Run("SystemAgent", func(t *testing.T) {
 		agent := &Agent{
-			OwnerID: SystemAgentOwnerID,
-			OrgID:   SystemAgentOwnerID,
-			RepoID:  SystemAgentOwnerID,
+			OwnerID: IDNotSet,
+			OrgID:   IDNotSet,
+			RepoID:  IDNotSet,
 		}
 
 		assert.True(t, agent.CanAccessRepo(repo))
@@ -116,7 +116,7 @@ func TestAgent_CanAccessRepo(t *testing.T) {
 	t.Run("OrgAgent", func(t *testing.T) {
 		agent := &Agent{
 			OrgID:  12,
-			RepoID: SystemAgentOwnerID,
+			RepoID: IDNotSet,
 		}
 		assert.True(t, agent.CanAccessRepo(repo))
 		assert.False(t, agent.CanAccessRepo(otherRepo))
@@ -124,7 +124,7 @@ func TestAgent_CanAccessRepo(t *testing.T) {
 
 	t.Run("RepoAgent", func(t *testing.T) {
 		agent := &Agent{
-			OrgID:  SystemAgentOwnerID,
+			OrgID:  IDNotSet,
 			RepoID: 123,
 		}
 		assert.True(t, agent.CanAccessRepo(repo))

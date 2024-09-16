@@ -44,8 +44,8 @@ var addOrgAndRepoAgents = xormigrate.Migration{
 
 		// Explizite make current existing agents to global agents
 		_, err = sess.Cols("org_id", "repo_id").Update(&model.Agent{
-			OrgID:  model.SystemAgentOwnerID,
-			RepoID: model.SystemAgentOwnerID,
+			OrgID:  model.IDNotSet,
+			RepoID: model.IDNotSet,
 		})
 		return err
 	},

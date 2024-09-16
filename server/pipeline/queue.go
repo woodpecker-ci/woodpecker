@@ -37,7 +37,7 @@ func queuePipeline(ctx context.Context, repo *model.Repo, pipelineItems []*stepb
 			Labels: make(map[string]string),
 		}
 		maps.Copy(task.Labels, item.Labels)
-		if _, err := task.CalcLabels(repo); err != nil {
+		if _, err := task.GetLabels(repo); err != nil {
 			return err
 		}
 		task.Dependencies = taskIDs(item.DependsOn, pipelineItems)

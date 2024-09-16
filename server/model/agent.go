@@ -44,7 +44,7 @@ type Agent struct {
 } //	@name Agent
 
 const (
-	SystemAgentOwnerID = -1
+	IDNotSet = -1
 	agentFilterOrgID   = "org-id"
 	agentFilterRepoID  = "repo-id"
 )
@@ -55,7 +55,7 @@ func (Agent) TableName() string {
 }
 
 func (a *Agent) IsSystemAgent() bool {
-	return a.OwnerID == SystemAgentOwnerID
+	return a.OwnerID == IDNotSet
 }
 
 func GenerateNewAgentToken() string {
@@ -69,12 +69,12 @@ func (a *Agent) GetServerFilters() (map[string]string, error) {
 	}
 
 	// enforce filters for user and organization agents
-	if a.OrgID != SystemAgentOwnerID {
+	if a.OrgID != IDNotSet {
 		filters[agentFilterOrgID] = fmt.Sprintf("%d", a.OrgID)
 	} else {
 		filters[agentFilterOrgID] = "*"
 	}
-	if a.RepoID != SystemAgentOwnerID {
+	if a.RepoID != IDNotSet {
 		filters[agentFilterRepoID] = fmt.Sprintf("%d", a.RepoID)
 	} else {
 		filters[agentFilterRepoID] = "*"
@@ -88,6 +88,6 @@ func (a *Agent) CanAccessRepo(repo *Repo) bool {
 		return true
 	}
 
-	return a.RepoID != SystemAgentOwnerID && a.RepoID == repo.ID && (a.OrgID == SystemAgentOwnerID || a.OrgID == repo.OrgID) ||
-		a.OrgID != SystemAgentOwnerID && a.OrgID == repo.OrgID && (a.RepoID == SystemAgentOwnerID || a.RepoID == repo.ID)
+	return a.RepoID != IDNotSet && a.RepoID == repo.ID && (a.OrgID == IDNotSet || a.OrgID == repo.OrgID) ||
+		a.OrgID != IDNotSet && a.OrgID == repo.OrgID && (a.RepoID == IDNotSet || a.RepoID == repo.ID)
 }
