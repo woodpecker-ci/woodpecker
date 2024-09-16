@@ -214,6 +214,7 @@ var flags = []cli.Flag{
 	},
 	&cli.StringFlag{
 		Sources: cli.EnvVars("CI_PIPELINE_FILES"),
+		Usage:   "either json formatted list of strings, or comma separated string list",
 		Name:    "pipeline-files",
 	},
 	&cli.StringFlag{
