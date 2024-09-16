@@ -52,7 +52,9 @@ type fifo struct {
 	paused        bool
 }
 
-const processTimeInterval = time.Second
+// processTimeInterval is the time till the queue rearranges things,
+// as the agent pull in  10 milliseconds we should also give them work asap.
+const processTimeInterval = 100 * time.Millisecond
 
 // New returns a new fifo queue.
 func New(ctx context.Context) Queue {
