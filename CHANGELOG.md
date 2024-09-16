@@ -8,6 +8,7 @@
 
 ### 💥 Breaking changes
 
+- Require upgrade from 2.x [[#4112](https://github.com/woodpecker-ci/woodpecker/pull/4112)]
 - Don't expose task data via api [[#4108](https://github.com/woodpecker-ci/woodpecker/pull/4108)]
 - Remove some ci environment variables [[#3846](https://github.com/woodpecker-ci/woodpecker/pull/3846)]
 - Remove all default privileged plugins [[#4053](https://github.com/woodpecker-ci/woodpecker/pull/4053)]
