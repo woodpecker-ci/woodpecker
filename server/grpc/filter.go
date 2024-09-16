@@ -15,9 +15,6 @@
 package grpc
 
 import (
-	"github.com/bmatcuk/doublestar/v4"
-	"github.com/rs/zerolog/log"
-
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 	"go.woodpecker-ci.org/woodpecker/v2/server/queue"
@@ -42,11 +39,9 @@ func createFilterFunc(agentFilter rpc.Filter) queue.FilterFn {
 				continue
 			}
 
-			match, err := doublestar.Match(taskLabelValue, agentLabelValue)
-			if err != nil {
-				log.Error().Err(err).Msg("got unexpected error while try to match task and agent label value")
+			if taskLabelValue != agentLabelValue {
+				return false
 			}
-			return match
 		}
 		return true
 	}
