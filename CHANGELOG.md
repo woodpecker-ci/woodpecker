@@ -39,6 +39,7 @@
 
 ### 📈 Enhancement
 
+- Make cli exec metadata on pair with build in server generated metadata [[#4119](https://github.com/woodpecker-ci/woodpecker/pull/4119)]
 - Allow to restart declined pipelines [[#4109](https://github.com/woodpecker-ci/woodpecker/pull/4109)]
 - Add indices to repo table [[#4087](https://github.com/woodpecker-ci/woodpecker/pull/4087)]
 - Duplicate key `workflow_id` in the agent logs [[#4046](https://github.com/woodpecker-ci/woodpecker/pull/4046)]
