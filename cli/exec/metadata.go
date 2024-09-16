@@ -60,7 +60,7 @@ func metadataFromContext(_ context.Context, c *cli.Command, axis matrix.Axis) (*
 	var err error
 	metadataFileAndOverrideOrDefault(c, "pipeline-files", func(changedFilesRaw string) {
 		var changedFiles []string
-		if changedFilesRaw[0] == '[' {
+		if len(changedFilesRaw) != 0 && changedFilesRaw[0] == '[' {
 			if err := json.Unmarshal([]byte(changedFilesRaw), &changedFiles); err != nil {
 				err = fmt.Errorf("pipeline-files detected json but could not parse it: %w", err)
 			}
