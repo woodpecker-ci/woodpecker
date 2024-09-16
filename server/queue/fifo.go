@@ -258,6 +258,12 @@ func (q *fifo) KickAgentWorkers(agentID int64) {
 // match the item to a single subscriber until context got cancel.
 func (q *fifo) process() {
 	for {
+		select {
+		case <-time.After(processTimeInterval):
+		case <-q.ctx.Done():
+			return
+		}
+
 		q.Lock()
 		if q.paused {
 			q.Unlock()
@@ -279,12 +285,6 @@ func (q *fifo) process() {
 			worker.channel <- task
 		}
 		q.Unlock()
-
-		select {
-		case <-time.After(processTimeInterval):
-		case <-q.ctx.Done():
-			return
-		}
 	}
 }
 

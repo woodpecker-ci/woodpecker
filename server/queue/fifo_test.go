@@ -64,7 +64,11 @@ func TestFifoExpire(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, want, got)
 
-	cancel(nil)
+	// cancel the context to let the process func end
+	go func() {
+		time.Sleep(time.Millisecond)
+		cancel(nil)
+	}()
 	q.process()
 	assert.Len(t, info.Pending, 1, "expect task re-added to pending queue")
 }
