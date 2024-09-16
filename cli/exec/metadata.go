@@ -47,7 +47,7 @@ func metadataFromContext(_ context.Context, c *cli.Command, axis matrix.Axis) (m
 	changedFilesRaw := c.String("pipeline-files")
 	if changedFilesRaw[0] == '[' {
 		if err := json.Unmarshal([]byte(changedFilesRaw), &changedFiles); err != nil {
-			return metadata.Metadata{}, fmt.Errorf("pipeline-files detected json but could not pares it: %w", err)
+			return metadata.Metadata{}, fmt.Errorf("pipeline-files detected json but could not parse it: %w", err)
 		}
 	} else {
 		for _, file := range strings.Split(changedFilesRaw, ",") {
