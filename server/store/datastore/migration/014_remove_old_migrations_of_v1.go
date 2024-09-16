@@ -19,8 +19,8 @@ import (
 	"xorm.io/xorm"
 )
 
-var removeOldMigrations = xormigrate.Migration{
-	ID: "remove-old-migrations",
+var removeOldMigrationsOfV1 = xormigrate.Migration{
+	ID: "remove-old-migrations-of-v1",
 	MigrateSession: func(sess *xorm.Session) (err error) {
 		_, err = sess.Table(&xormigrate.Migration{}).In("id", []string{
 			"xorm",

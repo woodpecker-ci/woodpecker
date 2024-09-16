@@ -42,7 +42,7 @@ var migrationTasks = []*xormigrate.Migration{
 	&cronWithoutSec,
 	&renameStartEndTime,
 	&fixV31Registries,
-	&removeOldMigrations,
+	&removeOldMigrationsOfV1,
 }
 
 var allBeans = []any{
