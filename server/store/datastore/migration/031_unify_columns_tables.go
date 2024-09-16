@@ -113,6 +113,10 @@ type registryV031 struct {
 	Password string `xorm:"TEXT 'registry_password'"`
 }
 
+func (registryV031) TableName() string {
+	return "registry"
+}
+
 type repoV031 struct {
 	ID           int64                `xorm:"pk autoincr 'repo_id'"`
 	UserID       int64                `xorm:"repo_user_id"`

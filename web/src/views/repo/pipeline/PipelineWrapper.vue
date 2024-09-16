@@ -1,7 +1,7 @@
 <template>
   <Scaffold
     v-if="pipeline && repo"
-    v-model:activeTab="activeTab"
+    v-model:active-tab="activeTab"
     enable-tabs
     disable-tab-url-hash-mode
     :go-back="goBack"
@@ -31,7 +31,7 @@
           }}</span>
         </div>
 
-        <template v-if="repoPermissions!.push && pipeline.status !== 'declined' && pipeline.status !== 'blocked'">
+        <template v-if="repoPermissions!.push && pipeline.status !== 'blocked'">
           <div class="flex content-start gap-x-2">
             <Button
               v-if="pipeline.status === 'pending' || pipeline.status === 'running'"
