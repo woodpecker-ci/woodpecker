@@ -17,6 +17,7 @@ package exec
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"os"
 	"runtime"
 	"strings"
@@ -56,9 +57,29 @@ func metadataFromContext(_ context.Context, c *cli.Command, axis matrix.Axis) (*
 		}
 	}, c.String)
 
+	var err error
+	metadataFileAndOverrideOrDefault(c, "pipeline-files", func(changedFilesRaw string) {
+		var changedFiles []string
+		if changedFilesRaw[0] == '[' {
+			if err := json.Unmarshal([]byte(changedFilesRaw), &changedFiles); err != nil {
+				err = fmt.Errorf("pipeline-files detected json but could not parse it: %w", err)
+			}
+		} else {
+			for _, file := range strings.Split(changedFilesRaw, ",") {
+				changedFiles = append(changedFiles, strings.TrimSpace(file))
+			}
+		}
+		m.Curr.Commit.ChangedFiles = changedFiles
+	}, c.String)
+	if err != nil {
+		return nil, err
+	}
+
 	// Repo
 	metadataFileAndOverrideOrDefault(c, "repo-remote-id", func(s string) { m.Repo.RemoteID = s }, c.String)
 	metadataFileAndOverrideOrDefault(c, "repo-url", func(s string) { m.Repo.ForgeURL = s }, c.String)
+	metadataFileAndOverrideOrDefault(c, "repo-scm", func(s string) { m.Repo.SCM = s }, c.String)
+	metadataFileAndOverrideOrDefault(c, "repo-default-branch", func(s string) { m.Repo.Branch = s }, c.String)
 	metadataFileAndOverrideOrDefault(c, "repo-clone-url", func(s string) { m.Repo.CloneURL = s }, c.String)
 	metadataFileAndOverrideOrDefault(c, "repo-clone-ssh-url", func(s string) { m.Repo.CloneSSHURL = s }, c.String)
 	metadataFileAndOverrideOrDefault(c, "repo-private", func(b bool) { m.Repo.Private = b }, c.Bool)
@@ -85,6 +106,9 @@ func metadataFromContext(_ context.Context, c *cli.Command, axis matrix.Axis) (*
 	metadataFileAndOverrideOrDefault(c, "commit-author-name", func(s string) { m.Curr.Commit.Author.Name = s }, c.String)
 	metadataFileAndOverrideOrDefault(c, "commit-author-email", func(s string) { m.Curr.Commit.Author.Email = s }, c.String)
 	metadataFileAndOverrideOrDefault(c, "commit-author-avatar", func(s string) { m.Curr.Commit.Author.Avatar = s }, c.String)
+
+	metadataFileAndOverrideOrDefault(c, "commit-pull-labels", func(sl []string) { m.Curr.Commit.PullRequestLabels = sl }, c.StringSlice)
+	metadataFileAndOverrideOrDefault(c, "commit-release-is-pre", func(b bool) { m.Curr.Commit.IsPrerelease = b }, c.Bool)
 
 	// Previous Pipeline
 	metadataFileAndOverrideOrDefault(c, "prev-pipeline-number", func(i int64) { m.Prev.Number = i }, c.Int)
@@ -117,6 +141,7 @@ func metadataFromContext(_ context.Context, c *cli.Command, axis matrix.Axis) (*
 	// System
 	metadataFileAndOverrideOrDefault(c, "system-name", func(s string) { m.Sys.Name = s }, c.String)
 	metadataFileAndOverrideOrDefault(c, "system-url", func(s string) { m.Sys.URL = s }, c.String)
+	metadataFileAndOverrideOrDefault(c, "system-host", func(s string) { m.Sys.Host = s }, c.String)
 	m.Sys.Platform = platform
 	m.Sys.Version = version.Version
 

@@ -132,6 +132,10 @@ var flags = []cli.Flag{
 		Name:    "system-platform",
 	},
 	&cli.StringFlag{
+		Sources: cli.EnvVars("CI_SYSTEM_HOST"),
+		Name:    "system-host",
+	},
+	&cli.StringFlag{
 		Sources: cli.EnvVars("CI_SYSTEM_NAME"),
 		Name:    "system-name",
 		Value:   "woodpecker",
@@ -153,6 +157,16 @@ var flags = []cli.Flag{
 	&cli.StringFlag{
 		Sources: cli.EnvVars("CI_REPO_URL"),
 		Name:    "repo-url",
+	},
+	&cli.StringFlag{
+		Sources: cli.EnvVars("CI_REPO_SCM"),
+		Name:    "repo-scm",
+		Value:   "git",
+	},
+	&cli.StringFlag{
+		Sources: cli.EnvVars("CI_REPO_DEFAULT_BRANCH"),
+		Name:    "repo-default-branch",
+		Value:   "main",
 	},
 	&cli.StringFlag{
 		Sources: cli.EnvVars("CI_REPO_CLONE_URL"),
@@ -192,16 +206,21 @@ var flags = []cli.Flag{
 		Value:   "manual",
 	},
 	&cli.StringFlag{
-		Sources: cli.EnvVars("CI_PIPELINE_URL"),
+		Sources: cli.EnvVars("CI_PIPELINE_FORGE_URL"),
 		Name:    "pipeline-url",
 	},
 	&cli.StringFlag{
-		Sources: cli.EnvVars("CI_PIPELINE_DEPLOY_TARGET", "CI_PIPELINE_TARGET"), // TODO: remove CI_PIPELINE_TARGET in 3.x
+		Sources: cli.EnvVars("CI_PIPELINE_DEPLOY_TARGET"),
 		Name:    "pipeline-deploy-to",
 	},
 	&cli.StringFlag{
-		Sources: cli.EnvVars("CI_PIPELINE_DEPLOY_TASK", "CI_PIPELINE_TASK"), // TODO: remove CI_PIPELINE_TASK in 3.x
+		Sources: cli.EnvVars("CI_PIPELINE_DEPLOY_TASK"),
 		Name:    "pipeline-deploy-task",
+	},
+	&cli.StringFlag{
+		Sources: cli.EnvVars("CI_PIPELINE_FILES"),
+		Usage:   "either json formatted list of strings, or comma separated string list",
+		Name:    "pipeline-files",
 	},
 	&cli.StringFlag{
 		Sources: cli.EnvVars("CI_COMMIT_SHA"),
@@ -218,13 +237,14 @@ var flags = []cli.Flag{
 	&cli.StringFlag{
 		Sources: cli.EnvVars("CI_COMMIT_BRANCH"),
 		Name:    "commit-branch",
+		Value:   "main",
 	},
 	&cli.StringFlag{
 		Sources: cli.EnvVars("CI_COMMIT_MESSAGE"),
 		Name:    "commit-message",
 	},
 	&cli.StringFlag{
-		Sources: cli.EnvVars("CI_COMMIT_AUTHOR_NAME"),
+		Sources: cli.EnvVars("CI_COMMIT_AUTHOR"),
 		Name:    "commit-author-name",
 	},
 	&cli.StringFlag{
@@ -234,6 +254,14 @@ var flags = []cli.Flag{
 	&cli.StringFlag{
 		Sources: cli.EnvVars("CI_COMMIT_AUTHOR_EMAIL"),
 		Name:    "commit-author-email",
+	},
+	&cli.StringSliceFlag{
+		Sources: cli.EnvVars("CI_COMMIT_PULL_REQUEST_LABELS"),
+		Name:    "commit-pull-labels",
+	},
+	&cli.BoolFlag{
+		Sources: cli.EnvVars("CI_COMMIT_PRERELEASE"),
+		Name:    "commit-release-is-pre",
 	},
 	&cli.IntFlag{
 		Sources: cli.EnvVars("CI_PREV_PIPELINE_NUMBER"),
@@ -260,8 +288,16 @@ var flags = []cli.Flag{
 		Name:    "prev-pipeline-event",
 	},
 	&cli.StringFlag{
-		Sources: cli.EnvVars("CI_PREV_PIPELINE_URL"),
+		Sources: cli.EnvVars("CI_PREV_PIPELINE_FORGE_URL"),
 		Name:    "prev-pipeline-url",
+	},
+	&cli.StringFlag{
+		Sources: cli.EnvVars("CI_PREV_PIPELINE_DEPLOY_TARGET"),
+		Name:    "prev-pipeline-deploy-to",
+	},
+	&cli.StringFlag{
+		Sources: cli.EnvVars("CI_PREV_PIPELINE_DEPLOY_TASK"),
+		Name:    "prev-pipeline-deploy-task",
 	},
 	&cli.StringFlag{
 		Sources: cli.EnvVars("CI_PREV_COMMIT_SHA"),
@@ -284,7 +320,7 @@ var flags = []cli.Flag{
 		Name:    "prev-commit-message",
 	},
 	&cli.StringFlag{
-		Sources: cli.EnvVars("CI_PREV_COMMIT_AUTHOR_NAME"),
+		Sources: cli.EnvVars("CI_PREV_COMMIT_AUTHOR"),
 		Name:    "prev-commit-author-name",
 	},
 	&cli.StringFlag{
