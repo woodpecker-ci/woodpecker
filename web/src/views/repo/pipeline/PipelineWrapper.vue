@@ -31,7 +31,7 @@
           }}</span>
         </div>
 
-        <template v-if="repoPermissions!.push && pipeline.status !== 'declined' && pipeline.status !== 'blocked'">
+        <template v-if="repoPermissions!.push && pipeline.status !== 'blocked'">
           <div class="flex content-start gap-x-2">
             <Button
               v-if="pipeline.status === 'pending' || pipeline.status === 'running'"
