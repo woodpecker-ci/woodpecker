@@ -5363,31 +5363,8 @@ const docTemplate = `{
                 "scm": {
                     "type": "string"
                 },
-                "secrets": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/metadata.Secret"
-                    }
-                },
                 "trusted": {
                     "type": "boolean"
-                }
-            }
-        },
-        "metadata.Secret": {
-            "type": "object",
-            "properties": {
-                "mask": {
-                    "type": "boolean"
-                },
-                "mount": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "value": {
-                    "type": "string"
                 }
             }
         },
