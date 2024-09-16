@@ -131,7 +131,7 @@ func runExec(ctx context.Context, c *cli.Command, file, repoPath string) error {
 func execWithAxis(ctx context.Context, c *cli.Command, file, repoPath string, axis matrix.Axis) error {
 	metadata, err := metadataFromContext(ctx, c, axis)
 	if err != nil {
-		return fmt.Errorf("could not create metadata: %w")
+		return fmt.Errorf("could not create metadata: %w", err)
 	}
 	environ := metadata.Environ()
 	var secrets []compiler.Secret
