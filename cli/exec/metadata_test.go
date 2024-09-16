@@ -112,9 +112,11 @@ func TestMetadataFromContext(t *testing.T) {
 		runCommand(flags, func(c *cli.Command) {
 			m, err := metadataFromContext(context.Background(), c, nil)
 			require.NoError(t, err)
-			assert.Equal(t, "test", m.Repo.Owner)
-			assert.Equal(t, "default-repo", m.Repo.Name)
-			assert.Equal(t, int64(1), m.Curr.Number)
+			if assert.NotNil(t, m) {
+				assert.Equal(t, "test", m.Repo.Owner)
+				assert.Equal(t, "default-repo", m.Repo.Name)
+				assert.Equal(t, int64(1), m.Curr.Number)
+			}
 		})
 	})
 
