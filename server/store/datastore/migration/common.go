@@ -214,7 +214,6 @@ func alterColumnDefault(sess *xorm.Session, table, column, defValue string) erro
 	}
 }
 
-//nolint:unparam
 func alterColumnNull(sess *xorm.Session, table, column string, null bool) error {
 	val := "NULL"
 	if !null {

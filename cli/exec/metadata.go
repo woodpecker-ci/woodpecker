@@ -16,6 +16,8 @@ package exec
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 	"runtime"
 	"strings"
 
@@ -27,7 +29,7 @@ import (
 )
 
 // return the metadata from the cli context.
-func metadataFromContext(_ context.Context, c *cli.Command, axis matrix.Axis) metadata.Metadata {
+func metadataFromContext(_ context.Context, c *cli.Command, axis matrix.Axis) (metadata.Metadata, error) {
 	platform := c.String("system-platform")
 	if platform == "" {
 		platform = runtime.GOOS + "/" + runtime.GOARCH
@@ -41,12 +43,26 @@ func metadataFromContext(_ context.Context, c *cli.Command, axis matrix.Axis) me
 		repoName = fullRepoName[idx+1:]
 	}
 
+	var changedFiles []string
+	changedFilesRaw := c.String("pipeline-files")
+	if changedFilesRaw[0] == '[' {
+		if err := json.Unmarshal([]byte(changedFilesRaw), &changedFiles); err != nil {
+			return metadata.Metadata{}, fmt.Errorf("pipeline-files detected json but could not parse it: %w", err)
+		}
+	} else {
+		for _, file := range strings.Split(changedFilesRaw, ",") {
+			changedFiles = append(changedFiles, strings.TrimSpace(file))
+		}
+	}
+
 	return metadata.Metadata{
 		Repo: metadata.Repo{
 			Name:        repoName,
 			Owner:       repoOwner,
 			RemoteID:    c.String("repo-remote-id"),
 			ForgeURL:    c.String("repo-url"),
+			SCM:         c.String("repo-scm"),
+			Branch:      c.String("repo-default-branch"),
 			CloneURL:    c.String("repo-clone-url"),
 			CloneSSHURL: c.String("repo-clone-ssh-url"),
 			Private:     c.Bool("repo-private"),
@@ -74,6 +90,9 @@ func metadataFromContext(_ context.Context, c *cli.Command, axis matrix.Axis) me
 					Email:  c.String("commit-author-email"),
 					Avatar: c.String("commit-author-avatar"),
 				},
+				PullRequestLabels: c.StringSlice("commit-pull-labels"),
+				IsPrerelease:      c.Bool("commit-release-is-pre"),
+				ChangedFiles:      changedFiles,
 			},
 		},
 		Prev: metadata.Pipeline{
@@ -109,6 +128,7 @@ func metadataFromContext(_ context.Context, c *cli.Command, axis matrix.Axis) me
 		Sys: metadata.System{
 			Name:     c.String("system-name"),
 			URL:      c.String("system-url"),
+			Host:     c.String("system-host"),
 			Platform: platform,
 			Version:  version.Version,
 		},
@@ -116,5 +136,5 @@ func metadataFromContext(_ context.Context, c *cli.Command, axis matrix.Axis) me
 			Type: c.String("forge-type"),
 			URL:  c.String("forge-url"),
 		},
-	}
+	}, nil
 }
