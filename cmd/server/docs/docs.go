@@ -5360,6 +5360,9 @@ const docTemplate = `{
                 "remote_id": {
                     "type": "string"
                 },
+                "scm": {
+                    "type": "string"
+                },
                 "secrets": {
                     "type": "array",
                     "items": {
