@@ -432,7 +432,7 @@ func DeleteOrgAgent(c *gin.Context) {
 }
 
 //
-// Repo Agents
+// Repo Agents.
 //
 
 // PostRepoAgent
