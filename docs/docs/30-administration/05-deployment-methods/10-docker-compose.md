@@ -1,8 +1,8 @@
-# docker-compose
+# docker compose
 
-The below [docker-compose](https://docs.docker.com/compose/) configuration can be used to start a Woodpecker server with a single agent.
+The below [docker compose](https://docs.docker.com/compose/) configuration can be used to start a Woodpecker server with a single agent.
 
-It relies on a number of environment variables that you must set before running `docker-compose up`. The variables are described below.
+It relies on a number of environment variables that you must set before running `docker compose up`. The variables are described below.
 
 ```yaml title="docker-compose.yaml"
 version: '3'
