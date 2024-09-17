@@ -149,8 +149,14 @@ func (s *RPC) Update(_ context.Context, strWorkflowID string, state rpc.StepStat
 		return err
 	}
 
-	if err := pipeline.UpdateStepStatus(s.store, step, state); err != nil {
-		log.Error().Err(err).Msg("rpc.update: cannot update step")
+	if state.Finished == 0 {
+		if _, err := pipeline.UpdateStepStatusToRunning(s.store, *step, state); err != nil {
+			log.Error().Err(err).Msg("rpc.update: cannot update step")
+		}
+	} else {
+		if _, err := pipeline.UpdateStepStatusToDone(s.store, *step, state); err != nil {
+			log.Error().Err(err).Msg("rpc.update: cannot update step")
+		}
 	}
 
 	if currentPipeline.Workflows, err = s.store.WorkflowGetTree(currentPipeline); err != nil {
@@ -206,10 +212,19 @@ func (s *RPC) Init(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 		return err
 	}
 
-	if currentPipeline.Status == model.StatusPending {
-		if currentPipeline, err = pipeline.UpdateToStatusRunning(s.store, *currentPipeline, state.Started); err != nil {
-			log.Error().Err(err).Msgf("init: cannot update pipeline %d state", currentPipeline.ID)
-		}
+	// Init should only be called on pending pipelines
+	if currentPipeline.Status != model.StatusPending {
+		log.Error().Msgf("pipeline %d is not pending", currentPipeline.ID)
+		return errors.New("pipeline is not pending")
+	}
+
+	if currentPipeline, err = pipeline.UpdateToStatusRunning(s.store, *currentPipeline, state.Started); err != nil {
+		log.Error().Err(err).Msgf("init: cannot update pipeline %d state", currentPipeline.ID)
+	}
+
+	workflow, err = pipeline.UpdateWorkflowToStatusRunning(s.store, *workflow, state)
+	if err != nil {
+		return err
 	}
 
 	s.updateForgeStatus(c, repo, currentPipeline, workflow)
