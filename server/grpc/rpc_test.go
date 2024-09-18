@@ -17,9 +17,11 @@ package grpc
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/franela/goblin"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 	"google.golang.org/grpc/metadata"
 
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
@@ -105,5 +107,53 @@ func TestRegisterAgent(t *testing.T) {
 
 			assert.EqualValues(t, 1337, agentID)
 		})
+	})
+}
+
+func TestUpdateAgentLastWork(t *testing.T) {
+	t.Run("When last work was never updated it should update last work timestamp", func(t *testing.T) {
+		agent := model.Agent{
+			LastWork: 0,
+		}
+		store := mocks_store.NewStore(t)
+		rpc := RPC{
+			store: store,
+		}
+		store.On("AgentUpdate", mock.Anything).Once().Return(nil)
+
+		err := rpc.updateAgentLastWork(&agent)
+		assert.NoError(t, err)
+
+		assert.NotZero(t, agent.LastWork)
+	})
+
+	t.Run("When last work was updated over a minute ago it should update last work timestamp", func(t *testing.T) {
+		lastWork := time.Now().Add(-time.Hour).Unix()
+		agent := model.Agent{
+			LastWork: lastWork,
+		}
+		store := mocks_store.NewStore(t)
+		rpc := RPC{
+			store: store,
+		}
+		store.On("AgentUpdate", mock.Anything).Once().Return(nil)
+
+		err := rpc.updateAgentLastWork(&agent)
+		assert.NoError(t, err)
+
+		assert.NotEqual(t, lastWork, agent.LastWork)
+	})
+
+	t.Run("When last work was updated in the last minute it should not update last work timestamp again", func(t *testing.T) {
+		lastWork := time.Now().Add(-time.Second * 30).Unix()
+		agent := model.Agent{
+			LastWork: lastWork,
+		}
+		rpc := RPC{}
+
+		err := rpc.updateAgentLastWork(&agent)
+		assert.NoError(t, err)
+
+		assert.Equal(t, lastWork, agent.LastWork)
 	})
 }
