@@ -513,8 +513,8 @@ func (s *RPC) getHostnameFromContext(ctx context.Context) (string, error) {
 }
 
 func (s *RPC) updateAgentLastWork(agent *model.Agent) error {
-	// only update agent.LastWork if not done recently
-	if time.Unix(agent.LastWork, 0).Add(updateAgentLastWorkDelay).Before(time.Now()) {
+	// only update agent.LastWork if not recently updated
+	if time.Unix(agent.LastWork, 0).Add(updateAgentLastWorkDelay).After(time.Now()) {
 		return nil
 	}
 
