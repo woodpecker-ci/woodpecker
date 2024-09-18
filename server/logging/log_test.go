@@ -40,10 +40,10 @@ func TestLogging(t *testing.T) {
 	)
 
 	receiver := make(LogChan, 10)
+	defer close(receiver)
 
 	go func() {
-		for {
-			<-receiver
+		for range receiver {
 			wg.Done()
 		}
 	}()
