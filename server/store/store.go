@@ -143,7 +143,7 @@ type Store interface {
 
 	// Logs
 	LogFind(*model.Step) ([]*model.LogEntry, error)
-	LogAppend(logEntry *model.LogEntry) error
+	LogAppend(*model.Step, []*model.LogEntry) error
 	LogDelete(*model.Step) error
 
 	// Tasks
