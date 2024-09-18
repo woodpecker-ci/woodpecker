@@ -48,17 +48,6 @@ type StepBuilder struct {
 	Envs                    map[string]string
 }
 
-func NewStepBuilder(yamls []*forge_types.FileMeta, getWorkflowMetadataData func(workflow *model.Workflow) metadata.Metadata, repoIsTrusted bool, host string, envs map[string]string, compilerOptions ...compiler.Option) *StepBuilder {
-	return &StepBuilder{
-		Yamls:                   yamls,
-		CompilerOptions:         compilerOptions,
-		GetWorkflowMetadataData: getWorkflowMetadataData,
-		RepoIsTrusted:           repoIsTrusted,
-		Host:                    host,
-		Envs:                    envs,
-	}
-}
-
 func (b *StepBuilder) Build() (items []*Item, errorsAndWarnings error) {
 	b.Yamls = forge_types.SortByName(b.Yamls)
 
@@ -203,6 +192,8 @@ func (b *StepBuilder) compileWorkflow(parsed *yaml_types.Workflow, environ map[s
 			),
 		),
 		compiler.WithTrusted(b.RepoIsTrusted),
+		compiler.WithEscalated(b.PrivilegedPlugins...),
+		compiler.WithTrustedClonePlugins(b.TrustedClonePlugins),
 		compiler.WithMetadata(metadata),
 	)
 	options = append(options, b.CompilerOptions...)

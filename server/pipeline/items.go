@@ -96,33 +96,40 @@ func parsePipeline(forge forge.Forge, store store.Store, currentPipeline *model.
 
 	meta := metadata.NewMetadataServerForge(forge, repo, currentPipeline, last, server.Config.Server.Host)
 
-	b := stepbuilder.NewStepBuilder(yamls, meta.MetadataFromStruct, repo.IsTrusted, server.Config.Server.Host, envs,
-		compiler.WithEscalated(server.Config.Pipeline.PrivilegedPlugins...),
-		compiler.WithResourceLimit(server.Config.Pipeline.Limits.MemSwapLimit, server.Config.Pipeline.Limits.MemLimit, server.Config.Pipeline.Limits.ShmSize, server.Config.Pipeline.Limits.CPUQuota, server.Config.Pipeline.Limits.CPUShares, server.Config.Pipeline.Limits.CPUSet),
-		compiler.WithVolumes(server.Config.Pipeline.Volumes...),
-		compiler.WithNetworks(server.Config.Pipeline.Networks...),
-		compiler.WithLocal(false),
-		compiler.WithOption(
-			compiler.WithNetrc(
-				netrc.Login,
-				netrc.Password,
-				netrc.Machine,
+	b := &stepbuilder.StepBuilder{
+		Yamls:                   yamls,
+		GetWorkflowMetadataData: meta.MetadataFromStruct,
+		RepoIsTrusted:           repo.IsTrusted,
+		Host:                    server.Config.Server.Host,
+		Envs:                    envs,
+		TrustedClonePlugins:     server.Config.Pipeline.TrustedClonePlugins,
+		PrivilegedPlugins:       server.Config.Pipeline.PrivilegedPlugins,
+		CompilerOptions: []compiler.Option{
+			compiler.WithResourceLimit(server.Config.Pipeline.Limits.MemSwapLimit, server.Config.Pipeline.Limits.MemLimit, server.Config.Pipeline.Limits.ShmSize, server.Config.Pipeline.Limits.CPUQuota, server.Config.Pipeline.Limits.CPUShares, server.Config.Pipeline.Limits.CPUSet),
+			compiler.WithVolumes(server.Config.Pipeline.Volumes...),
+			compiler.WithNetworks(server.Config.Pipeline.Networks...),
+			compiler.WithLocal(false),
+			compiler.WithOption(
+				compiler.WithNetrc(
+					netrc.Login,
+					netrc.Password,
+					netrc.Machine,
+				),
+				repo.IsSCMPrivate || server.Config.Pipeline.AuthenticatePublicRepos,
 			),
-			repo.IsSCMPrivate || server.Config.Pipeline.AuthenticatePublicRepos,
-		),
-		compiler.WithDefaultClonePlugin(server.Config.Pipeline.DefaultClonePlugin),
-		compiler.WithTrustedClonePlugins(server.Config.Pipeline.TrustedClonePlugins),
-		compiler.WithRegistry(registries...),
-		compiler.WithSecret(secrets...),
-		compiler.WithProxy(compiler.ProxyOptions{
-			NoProxy:    server.Config.Pipeline.Proxy.No,
-			HTTPProxy:  server.Config.Pipeline.Proxy.HTTP,
-			HTTPSProxy: server.Config.Pipeline.Proxy.HTTPS,
-		}),
-		compiler.WithWorkspaceFromURL(compiler.DefaultWorkspaceBase, repo.ForgeURL),
-		compiler.WithTrusted(repo.IsTrusted),
-		compiler.WithNetrcOnlyTrusted(repo.NetrcOnlyTrusted),
-	)
+			compiler.WithDefaultClonePlugin(server.Config.Pipeline.DefaultClonePlugin),
+			compiler.WithRegistry(registries...),
+			compiler.WithSecret(secrets...),
+			compiler.WithProxy(compiler.ProxyOptions{
+				NoProxy:    server.Config.Pipeline.Proxy.No,
+				HTTPProxy:  server.Config.Pipeline.Proxy.HTTP,
+				HTTPSProxy: server.Config.Pipeline.Proxy.HTTPS,
+			}),
+			compiler.WithWorkspaceFromURL(compiler.DefaultWorkspaceBase, repo.ForgeURL),
+			compiler.WithNetrcOnlyTrusted(repo.NetrcOnlyTrusted),
+		},
+	}
+
 	return b.Build()
 }
 

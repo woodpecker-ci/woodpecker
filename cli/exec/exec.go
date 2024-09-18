@@ -85,31 +85,38 @@ func run(ctx context.Context, c *cli.Command) error {
 	privilegedPlugins := c.StringSlice("plugins-privileged")
 	secrets := []compiler.Secret{} // TODO: implement secrets
 
-	b := stepbuilder.NewStepBuilder(yamls, getWorkflowMetadata, repoIsTrusted, host, envs,
-		compiler.WithEscalated(privilegedPlugins...),
-		compiler.WithVolumes(volumes...),
-		compiler.WithWorkspace(
-			workspaceBase,
-			workspacePath,
-		),
-		compiler.WithNetworks(c.StringSlice("network")...),
-		compiler.WithPrefix(c.String("prefix")),
-		compiler.WithProxy(compiler.ProxyOptions{
-			NoProxy:    c.String("backend-no-proxy"),
-			HTTPProxy:  c.String("backend-http-proxy"),
-			HTTPSProxy: c.String("backend-https-proxy"),
-		}),
-		compiler.WithLocal(c.Bool("local")),
-		compiler.WithNetrc(
-			c.String("netrc-username"),
-			c.String("netrc-password"),
-			c.String("netrc-machine"),
-		),
-		// compiler.WithMetadata(metadata),
-		compiler.WithSecret(secrets...),
-		compiler.WithEnviron(envs),
-	)
-	b.PrivilegedPlugins = privilegedPlugins
+	b := &stepbuilder.StepBuilder{
+		Yamls:                   yamls,
+		RepoIsTrusted:           repoIsTrusted,
+		Host:                    host,
+		Envs:                    envs,
+		GetWorkflowMetadataData: getWorkflowMetadata,
+		PrivilegedPlugins:       privilegedPlugins,
+		TrustedClonePlugins:     nil, // TODO: ?
+		CompilerOptions: []compiler.Option{
+			compiler.WithVolumes(volumes...),
+			compiler.WithWorkspace(
+				workspaceBase,
+				workspacePath,
+			),
+			compiler.WithNetworks(c.StringSlice("network")...),
+			compiler.WithPrefix(c.String("prefix")),
+			compiler.WithProxy(compiler.ProxyOptions{
+				NoProxy:    c.String("backend-no-proxy"),
+				HTTPProxy:  c.String("backend-http-proxy"),
+				HTTPSProxy: c.String("backend-https-proxy"),
+			}),
+			compiler.WithLocal(c.Bool("local")),
+			compiler.WithNetrc(
+				c.String("netrc-username"),
+				c.String("netrc-password"),
+				c.String("netrc-machine"),
+			),
+			compiler.WithSecret(secrets...),
+			compiler.WithEnviron(envs),
+			// compiler.WithMetadata(metadata),
+		},
+	}
 
 	items, err := b.Build()
 	if pipeline_errors.HasBlockingErrors(err) {
