@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-09-17
+## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-09-18
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -39,6 +39,7 @@
 
 ### 📈 Enhancement
 
+- Process workflow logs in batches [[#4045](https://github.com/woodpecker-ci/woodpecker/pull/4045)]
 - Make cli exec metadata on pair with build in server generated metadata [[#4119](https://github.com/woodpecker-ci/woodpecker/pull/4119)]
 - Allow to restart declined pipelines [[#4109](https://github.com/woodpecker-ci/woodpecker/pull/4109)]
 - Add indices to repo table [[#4087](https://github.com/woodpecker-ci/woodpecker/pull/4087)]
