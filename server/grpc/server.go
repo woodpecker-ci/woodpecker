@@ -17,6 +17,7 @@ package grpc
 import (
 	"context"
 	"encoding/json"
+
 	"github.com/prometheus/client_golang/prometheus"
 	prometheus_auto "github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/rs/zerolog/log"

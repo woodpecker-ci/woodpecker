@@ -235,8 +235,11 @@ func LogStreamSSE(c *gin.Context) {
 					case <-ctx.Done():
 						return
 					default:
-						ee, _ := json.Marshal(entry)
-						logChan <- ee
+						if ee, err := json.Marshal(entry); err == nil {
+							logChan <- ee
+						} else {
+							log.Error().Err(err).Msg("unable to serialize log entry")
+						}
 					}
 				}
 			}

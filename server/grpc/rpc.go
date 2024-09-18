@@ -336,7 +336,7 @@ func (s *RPC) Done(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 }
 
 // Log writes a log entry to the database and publishes it to the pubsub.
-// stepUUID makes it explicit that all entries must come from the same step.
+// An explicit stepUUID makes it obvious that all entries must come from the same step.
 func (s *RPC) Log(c context.Context, stepUUID string, rpcLogEntries []*rpc.LogEntry) error {
 	step, err := s.store.StepByUUID(stepUUID)
 	if err != nil {
@@ -357,7 +357,7 @@ func (s *RPC) Log(c context.Context, stepUUID string, rpcLogEntries []*rpc.LogEn
 
 	for _, rpcLogEntry := range rpcLogEntries {
 		if rpcLogEntry.StepUUID != stepUUID {
-			panic(fmt.Sprintf("expected step UUID %s, got %s", stepUUID, rpcLogEntry.StepUUID))
+			return fmt.Errorf("expected step UUID %s, got %s", stepUUID, rpcLogEntry.StepUUID)
 		}
 		logEntries = append(logEntries, &model.LogEntry{
 			StepID: step.ID,

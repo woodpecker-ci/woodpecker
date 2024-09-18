@@ -4,10 +4,11 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
-	logger "github.com/rs/zerolog/log"
 	"os"
 	"path/filepath"
 	"strings"
+
+	logger "github.com/rs/zerolog/log"
 
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
