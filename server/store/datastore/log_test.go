@@ -45,9 +45,7 @@ func TestLogCreateFindDelete(t *testing.T) {
 		},
 	}
 
-	for _, logEntry := range logEntries {
-		assert.NoError(t, store.LogAppend(logEntry))
-	}
+	assert.NoError(t, store.LogAppend(&step, logEntries))
 
 	// we want to find our inserted logs
 	_logEntries, err := store.LogFind(&step)
@@ -83,9 +81,7 @@ func TestLogAppend(t *testing.T) {
 		},
 	}
 
-	for _, logEntry := range logEntries {
-		assert.NoError(t, store.LogAppend(logEntry))
-	}
+	assert.NoError(t, store.LogAppend(&step, logEntries))
 
 	logEntry := &model.LogEntry{
 		StepID: step.ID,
@@ -94,7 +90,7 @@ func TestLogAppend(t *testing.T) {
 		Time:   20,
 	}
 
-	assert.NoError(t, store.LogAppend(logEntry))
+	assert.NoError(t, store.LogAppend(&step, []*model.LogEntry{logEntry}))
 
 	_logEntries, err := store.LogFind(&step)
 	assert.NoError(t, err)
