@@ -842,6 +842,9 @@
         "environment": {
           "$ref": "#/definitions/step_environment"
         },
+        "directory": {
+          "$ref": "#/definitions/step_directory"
+        },
         "secrets": {
           "$ref": "#/definitions/step_secrets"
         },
