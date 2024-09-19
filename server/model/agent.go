@@ -44,9 +44,9 @@ type Agent struct {
 } //	@name Agent
 
 const (
-	IDNotSet = -1
-	agentFilterOrgID   = "org-id"
-	agentFilterRepoID  = "repo-id"
+	IDNotSet          = -1
+	agentFilterOrgID  = "org-id"
+	agentFilterRepoID = "repo-id"
 )
 
 // TableName return database table name for xorm.

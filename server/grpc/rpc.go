@@ -528,12 +528,13 @@ func (s *RPC) checkAgentPermissionByWorkflow(_ context.Context, agent *model.Age
 		}
 	}
 
-	if !agent.CanAccessRepo(repo) {
-		msg := fmt.Sprintf("agent '%d' is not allowed to interact with repo[%d] '%s'", agent.ID, repo.ID, repo.FullName)
-		log.Error().Int64("repoId", repo.ID).Msg(msg)
-		return errors.New(msg)
+	if agent.CanAccessRepo(repo) {
+		return nil
 	}
-	return nil
+
+	msg := fmt.Sprintf("agent '%d' is not allowed to interact with repo[%d] '%s'", agent.ID, repo.ID, repo.FullName)
+	log.Error().Int64("repoId", repo.ID).Msg(msg)
+	return errors.New(msg)
 }
 
 func (s *RPC) completeChildrenIfParentCompleted(completedWorkflow *model.Workflow) {
