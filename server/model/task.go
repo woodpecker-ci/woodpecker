@@ -43,7 +43,7 @@ func (t *Task) String() string {
 
 func (t *Task) GetLabels(r *Repo) (map[string]string, error) {
 	if r == nil {
-		return nil, fmt.Errorf("repo is nil but needed for calc task labels")
+		return nil, fmt.Errorf("repo is nil but needed to get task labels")
 	}
 	if t.Labels == nil {
 		t.Labels = make(map[string]string)

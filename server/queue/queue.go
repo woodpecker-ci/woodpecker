@@ -29,8 +29,8 @@ var (
 	// ErrNotFound indicates the task was not found in the queue.
 	ErrNotFound = errors.New("queue: task not found")
 
-	// ErrAgentMissMatch indicates an agent does not mat to the task.
-	ErrAgentMissMatch = errors.New("task has not expected agent id")
+	// ErrAgentMissMatch indicates a task is assigned to a different agent
+	ErrAgentMissMatch = errors.New("task assigned to different agent")
 )
 
 // InfoT provides runtime information.

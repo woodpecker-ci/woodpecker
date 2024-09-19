@@ -27,7 +27,7 @@ func TestTask_CalcLabels(t *testing.T) {
 
 		assert.Error(t, err)
 		assert.Nil(t, labels)
-		assert.EqualError(t, err, "repo is nil but needed for calc task labels")
+		assert.EqualError(t, err, "repo is nil but needed to get task labels")
 	})
 
 	t.Run("Empty Repo", func(t *testing.T) {

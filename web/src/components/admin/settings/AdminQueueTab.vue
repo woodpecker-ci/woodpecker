@@ -115,7 +115,7 @@ const tasks = computed(() => {
       ...task,
       labels: Object.fromEntries(Object.entries(task.labels).filter(([key]) => key !== 'org-id' && key !== 'repo-id')),
     }))
-    .sort((a, b) => a.id - b.id);
+    .toSorted((a, b) => a.id - b.id);
 });
 
 async function loadQueueInfo() {

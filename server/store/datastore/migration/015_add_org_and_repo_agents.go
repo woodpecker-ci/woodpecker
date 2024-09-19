@@ -42,7 +42,7 @@ var addOrgAndRepoAgents = xormigrate.Migration{
 			return fmt.Errorf("sync models failed: %w", err)
 		}
 
-		// Explizite make current existing agents to global agents
+		// Update all existing agents to be global agents
 		_, err = sess.Cols("org_id", "repo_id").Update(&model.Agent{
 			OrgID:  model.IDNotSet,
 			RepoID: model.IDNotSet,
