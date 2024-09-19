@@ -26,7 +26,7 @@ type Agent struct {
 	Created     int64  `json:"created"       xorm:"created"`
 	Updated     int64  `json:"updated"       xorm:"updated"`
 	Name        string `json:"name"          xorm:"name"`
-	OwnerID     int64  `json:"owner_id"      xorm:"INDEX 'owner_id'"`
+	OwnerID     int64  `json:"owner_id"      xorm:"'owner_id'"`
 	Token       string `json:"token"         xorm:"token"`
 	LastContact int64  `json:"last_contact"  xorm:"last_contact"`
 	LastWork    int64  `json:"last_work"     xorm:"last_work"` // last time the agent did something, this value is used to determine if the agent is still doing work used by the autoscaler
