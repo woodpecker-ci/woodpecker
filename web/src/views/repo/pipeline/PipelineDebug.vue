@@ -13,11 +13,11 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, inject, ref, type Ref } from 'vue';
+import { inject, onMounted, ref, type Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
-import type { SelectOption } from '~/components/form/form.types';
 import Button from '~/components/atomic/Button.vue';
+import type { SelectOption } from '~/components/form/form.types';
 import SelectField from '~/components/form/SelectField.vue';
 import useApiClient from '~/compositions/useApiClient';
 import useNotifications from '~/compositions/useNotifications';
@@ -67,16 +67,17 @@ async function downloadMetadata() {
   }
 }
 
-async function loadWorkflows(){
-  workflows.value = pipeline?.value?.workflows?.map((w)=> ({
-    value: w.name,
-    text: w.name,
-  })) || ([]);
+async function loadWorkflows() {
+  workflows.value =
+    pipeline?.value?.workflows?.map((w) => ({
+      value: w.name,
+      text: w.name,
+    })) || [];
   workflows.value.unshift({
     value: '',
-    text:  t('repo.pipeline.debug.none'),
+    text: t('repo.pipeline.debug.none'),
   });
-};
+}
 
 onMounted(() => {
   loadWorkflows();
