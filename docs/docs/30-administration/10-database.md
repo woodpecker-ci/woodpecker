@@ -7,8 +7,6 @@ The default database engine of Woodpecker is an embedded SQLite database which r
 By default Woodpecker uses a SQLite database stored under `/var/lib/woodpecker/`. If using containers, you can mount a [data volume](https://docs.docker.com/storage/volumes/#create-and-manage-volumes) to persist the SQLite database.
 
 ```diff title="docker-compose.yaml"
- version: '3'
-
  services:
    woodpecker-server:
      [...]
