@@ -326,7 +326,7 @@ var flags = []cli.Flag{
 		Sources: cli.EnvVars("CI_PREV_COMMIT_AUTHOR_EMAIL"),
 		Name:    "prev-commit-author-email",
 	},
-	&cli.IntFlag{
+	&cli.StringFlag{
 		Sources: cli.EnvVars("CI_WORKFLOW_NAME"),
 		Name:    "workflow-name",
 	},
