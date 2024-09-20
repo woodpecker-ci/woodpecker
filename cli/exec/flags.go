@@ -175,9 +175,22 @@ var flags = []cli.Flag{
 		Sources: cli.EnvVars("CI_REPO_PRIVATE"),
 		Name:    "repo-private",
 	},
+	// TODO remove CI_REPO_TRUSTED in 4.x
 	&cli.BoolFlag{
-		Sources: cli.EnvVars("CI_REPO_TRUSTED"),
-		Name:    "repo-trusted",
+		Sources: cli.EnvVars("CI_REPO_TRUSTED_NETWORK", "CI_REPO_TRUSTED"),
+		Name:    "repo-trusted-network",
+	},
+	&cli.BoolFlag{
+		Sources: cli.EnvVars("CI_REPO_TRUSTED_RESOURCES", "CI_REPO_TRUSTED"),
+		Name:    "repo-trusted-resources",
+	},
+	&cli.BoolFlag{
+		Sources: cli.EnvVars("CI_REPO_TRUSTED_VOLUMES", "CI_REPO_TRUSTED"),
+		Name:    "repo-trusted-volumes",
+	},
+	&cli.BoolFlag{
+		Sources: cli.EnvVars("CI_REPO_TRUSTED_SECURITY", "CI_REPO_TRUSTED"),
+		Name:    "repo-trusted-security",
 	},
 	&cli.IntFlag{
 		Sources: cli.EnvVars("CI_PIPELINE_NUMBER"),
