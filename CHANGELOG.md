@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @anbraten, @gnowland, @hg, @j04n-f, @jenrik, @johanneskastl, @not-my-profile, @pat-s, @qwerty287, @smainz, @xtexChooser, @zc-devs
+@6543, @anbraten, @gnowland, @hg, @j04n-f, @jenrik, @johanneskastl, @lukashass, @not-my-profile, @pat-s, @qwerty287, @smainz, @xtexChooser, @zc-devs
 
 ### 💥 Breaking changes
 
@@ -39,6 +39,7 @@
 
 ### 📈 Enhancement
 
+- Set repo user to repairing user when old user is missing [[#4128](https://github.com/woodpecker-ci/woodpecker/pull/4128)]
 - Restart tasks on dead agents sooner [[#4114](https://github.com/woodpecker-ci/woodpecker/pull/4114)]
 - Process workflow logs in batches [[#4045](https://github.com/woodpecker-ci/woodpecker/pull/4045)]
 - Make cli exec metadata on pair with build in server generated metadata [[#4119](https://github.com/woodpecker-ci/woodpecker/pull/4119)]
