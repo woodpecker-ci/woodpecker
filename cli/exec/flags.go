@@ -17,6 +17,7 @@ package exec
 import (
 	"time"
 
+	"github.com/oklog/ulid/v2"
 	"github.com/urfave/cli/v3"
 )
 
@@ -51,7 +52,7 @@ var flags = []cli.Flag{
 	&cli.StringFlag{
 		Sources: cli.EnvVars("WOODPECKER_PREFIX"),
 		Name:    "prefix",
-		Value:   "woodpecker",
+		Value:   "woodpecker_" + ulid.Make().String(),
 		Usage:   "prefix used for containers, volumes, networks, ... created by woodpecker",
 		Hidden:  true,
 	},
