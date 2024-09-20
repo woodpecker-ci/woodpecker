@@ -1,13 +1,7 @@
 <template>
   <div v-if="repoPermissions && repoPermissions.push" class="p-4">
+    <SelectField v-if="repoPermissions && repoPermissions.push" v-model="selectedWorkflow" :options="workflows" />
     <div class="flex items-center space-x-4">
-      <select
-        v-model="selectedWorkflow"
-        class="bg-wp-control-neutral-100 text-wp-text-100 border-wp-control-neutral-200 border py-1 px-2 rounded-md"
-      >
-        <option value="">{{ $t('repo.pipeline.debug.none') }}</option>
-        <option v-for="workflow in workflows" :key="workflow" :value="workflow">{{ workflow }}</option>
-      </select>
       <Button :is-loading="isLoading" :text="$t('repo.pipeline.debug.download_metadata')" @click="downloadMetadata" />
     </div>
   </div>
@@ -19,10 +13,12 @@
 </template>
 
 <script setup lang="ts">
-import { computed, inject, ref, type Ref } from 'vue';
+import { onMounted, inject, ref, type Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
+import type { SelectOption } from '~/components/form/form.types';
 import Button from '~/components/atomic/Button.vue';
+import SelectField from '~/components/form/SelectField.vue';
 import useApiClient from '~/compositions/useApiClient';
 import useNotifications from '~/compositions/useNotifications';
 import type { Pipeline, Repo, RepoPermissions } from '~/lib/api/types';
@@ -37,10 +33,7 @@ const repoPermissions = inject<Ref<RepoPermissions>>('repo-permissions');
 
 const isLoading = ref(false);
 const selectedWorkflow = ref('');
-
-const workflows = computed(() => {
-  return pipeline?.value?.workflows?.map((w) => w.name) || [];
-});
+const workflows = ref<SelectOption[]>([]);
 
 async function downloadMetadata() {
   if (!repo?.value || !pipeline?.value || !repoPermissions?.value?.push) {
@@ -73,4 +66,19 @@ async function downloadMetadata() {
     isLoading.value = false;
   }
 }
+
+async function loadWorkflows(){
+  workflows.value = pipeline?.value?.workflows?.map((w)=> ({
+    value: w.name,
+    text: w.name,
+  })) || ([]);
+  workflows.value.unshift({
+    value: '',
+    text:  t('repo.pipeline.debug.none'),
+  });
+};
+
+onMounted(() => {
+  loadWorkflows();
+});
 </script>
