@@ -622,7 +622,7 @@ func repairRepo(c *gin.Context, repo *model.Repo, withPerms, skipOnErr bool) {
 			if err != nil {
 				_ = c.AbortWithError(http.StatusInternalServerError, err)
 			}
-			log.Info().Msgf("Could not find repo user with ID %d during repo repair, set to repair request user with ID %d", oldUserID, user.ID)
+			log.Debug().Msgf("Could not find repo user with ID %d during repo repair, set to repair request user with ID %d", oldUserID, user.ID)
 		} else {
 			_ = c.AbortWithError(http.StatusInternalServerError, err)
 		}
