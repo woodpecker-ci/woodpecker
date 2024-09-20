@@ -45,19 +45,26 @@ var splitTrusted = xormigrate.Migration{
 			return err
 		}
 
-		for _, r := range repos {
-			if _, err := sess.Cols("trusted_conf").Update(&repoV035{
-				Trusted: model.TrustedConfiguration{
-					Network:   r.IsTrusted,
-					Security:  r.IsTrusted,
-					Volumes:   r.IsTrusted,
-					Resources: r.IsTrusted,
-				},
-			}, &repoV035{
-				ID: r.ID,
-			}); err != nil {
-				return err
-			}
+		if _, err := sess.Where("trusted = ?", false).Cols("trusted_conf").Update(&repoV035{
+			Trusted: model.TrustedConfiguration{
+				Network:   false,
+				Security:  false,
+				Volumes:   false,
+				Resources: false,
+			},
+		}); err != nil {
+			return err
+		}
+
+		if _, err := sess.Where("trusted = ?", true).Cols("trusted_conf").Update(&repoV035{
+			Trusted: model.TrustedConfiguration{
+				Network:   true,
+				Security:  true,
+				Volumes:   true,
+				Resources: true,
+			},
+		}); err != nil {
+			return err
 		}
 
 		if err := dropTableColumns(sess, "repos", "trusted"); err != nil {
