@@ -11,8 +11,6 @@ Woodpecker comes with experimental support for Bitbucket Datacenter / Server, fo
 To enable Bitbucket Server you should configure the Woodpecker container using the following environment variables:
 
 ```diff title="docker-compose.yaml"
- version: '3'
-
  services:
    woodpecker-server:
      [...]
