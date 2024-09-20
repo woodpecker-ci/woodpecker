@@ -37,7 +37,7 @@ services:
       - 51820/udp
 ```
 
-You can use any step property, including `depends_on`. Services can depend on other services and steps.
+You can use any step property, including `depends_on` (dependency on a step) and `needs` (dependency on another service). Services can depend on other services and steps.
 
 ## Configuration
 
