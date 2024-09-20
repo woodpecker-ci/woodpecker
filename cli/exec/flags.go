@@ -334,10 +334,6 @@ var flags = []cli.Flag{
 		Sources: cli.EnvVars("CI_WORKFLOW_NUMBER"),
 		Name:    "workflow-number",
 	},
-	&cli.IntFlag{
-		Sources: cli.EnvVars("CI_STEP_NAME"),
-		Name:    "step-name",
-	},
 	&cli.StringSliceFlag{
 		Sources: cli.EnvVars("CI_ENV"),
 		Name:    "env",
