@@ -30,7 +30,7 @@ import (
 )
 
 // return the metadata from the cli context.
-func metadataFromContext(_ context.Context, c *cli.Command, axis matrix.Axis) (*metadata.Metadata, error) {
+func metadataFromContext(_ context.Context, c *cli.Command, axis matrix.Axis, w *metadata.Workflow) (*metadata.Metadata, error) {
 	m := &metadata.Metadata{}
 
 	if c.IsSet("metadata-file") {
@@ -148,6 +148,10 @@ func metadataFromContext(_ context.Context, c *cli.Command, axis matrix.Axis) (*
 	// Forge
 	metadataFileAndOverrideOrDefault(c, "forge-type", func(s string) { m.Forge.Type = s }, c.String)
 	metadataFileAndOverrideOrDefault(c, "forge-url", func(s string) { m.Forge.URL = s }, c.String)
+
+	if w != nil {
+		m.Workflow = *w
+	}
 
 	return m, nil
 }
