@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-09-19
+## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-09-20
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -39,6 +39,7 @@
 
 ### 📚 Documentation
 
+- Docs: reference to built-in docker compose and remove deprecated version from compose examples [[#4123](https://github.com/woodpecker-ci/woodpecker/pull/4123)]
 - directory key is allowed for services [[#4127](https://github.com/woodpecker-ci/woodpecker/pull/4127)]
 - [docs] Removes dot prefix from pipeline configuration filenames [[#4105](https://github.com/woodpecker-ci/woodpecker/pull/4105)]
 - Use kaniko plugin in docs as example [[#4072](https://github.com/woodpecker-ci/woodpecker/pull/4072)]
