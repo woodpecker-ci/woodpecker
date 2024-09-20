@@ -58,7 +58,7 @@ steps:
   test:
     depends_on:
       - install-dependencies
-      - format-check # wait for it else test artifacts are falsely detected as unformated
+      - format-check # wait for it else test artifacts are falsely detected as wrong
     image: *node_image
     directory: web/
     commands:
