@@ -20,10 +20,10 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestTask_CalcLabels(t *testing.T) {
+func TestTask_GetLabels(t *testing.T) {
 	t.Run("Nil Repo", func(t *testing.T) {
 		task := &Task{}
-		labels, err := task.CalcLabels(nil)
+		labels, err := task.GetLabels(nil)
 
 		assert.Error(t, err)
 		assert.Nil(t, labels)
@@ -34,7 +34,7 @@ func TestTask_CalcLabels(t *testing.T) {
 		task := &Task{}
 		repo := &Repo{}
 
-		labels, err := task.CalcLabels(repo)
+		labels, err := task.GetLabels(repo)
 
 		assert.NoError(t, err)
 		assert.NotNil(t, labels)
@@ -53,7 +53,7 @@ func TestTask_CalcLabels(t *testing.T) {
 			OrgID:    456,
 		}
 
-		labels, err := task.CalcLabels(repo)
+		labels, err := task.GetLabels(repo)
 
 		assert.NoError(t, err)
 		assert.NotNil(t, labels)
@@ -76,7 +76,7 @@ func TestTask_CalcLabels(t *testing.T) {
 			OrgID:    456,
 		}
 
-		labels, err := task.CalcLabels(repo)
+		labels, err := task.GetLabels(repo)
 
 		assert.NoError(t, err)
 		assert.NotNil(t, labels)
