@@ -14,6 +14,8 @@
 
 package constant
 
+import "time"
+
 // DefaultConfigOrder represent the priority in witch woodpecker search for a pipeline config by default
 // folders are indicated by supplying a trailing slash.
 var DefaultConfigOrder = [...]string{
@@ -34,3 +36,6 @@ var TrustedClonePlugins = []string{
 	"docker.io/woodpeckerci/plugin-git",
 	"quay.io/woodpeckerci/plugin-git",
 }
+
+// TaskTimeout is the time till a running task is counted as dead.
+var TaskTimeout = time.Minute

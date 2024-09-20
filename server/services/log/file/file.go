@@ -8,6 +8,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	logger "github.com/rs/zerolog/log"
+
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 	"go.woodpecker-ci.org/woodpecker/v2/server/services/log"
@@ -70,19 +72,30 @@ func (l logStore) LogFind(step *model.Step) ([]*model.LogEntry, error) {
 	return entries, nil
 }
 
-func (l logStore) LogAppend(logEntry *model.LogEntry) error {
-	file, err := os.OpenFile(l.filePath(logEntry.StepID), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o600)
+func (l logStore) LogAppend(step *model.Step, logEntries []*model.LogEntry) error {
+	path := l.filePath(step.ID)
+
+	file, err := os.OpenFile(path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o600)
 	if err != nil {
+		logger.Error().Err(err).Msgf("could not open log file %s", path)
 		return err
 	}
-	jsonData, err := json.Marshal(logEntry)
-	if err != nil {
-		return err
+
+	var bytes []byte
+
+	for _, logEntry := range logEntries {
+		if jsonLine, err := json.Marshal(logEntry); err == nil {
+			bytes = append(bytes, jsonLine...)
+			bytes = append(bytes, byte('\n'))
+		} else {
+			logger.Error().Err(err).Msg("could not convert log entry to JSON")
+		}
 	}
-	_, err = file.Write(append(jsonData, byte('\n')))
-	if err != nil {
-		return err
+
+	if _, err = file.Write(bytes); err != nil {
+		logger.Error().Err(err).Msg("could not write out log entries")
 	}
+
 	return file.Close()
 }
 

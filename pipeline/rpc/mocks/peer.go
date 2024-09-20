@@ -35,6 +35,11 @@ func (_m *Peer) Done(c context.Context, workflowID string, state rpc.WorkflowSta
 	return r0
 }
 
+// EnqueueLog provides a mock function with given fields: logEntry
+func (_m *Peer) EnqueueLog(logEntry *rpc.LogEntry) {
+	_m.Called(logEntry)
+}
+
 // Extend provides a mock function with given fields: c, workflowID
 func (_m *Peer) Extend(c context.Context, workflowID string) error {
 	ret := _m.Called(c, workflowID)
@@ -64,24 +69,6 @@ func (_m *Peer) Init(c context.Context, workflowID string, state rpc.WorkflowSta
 	var r0 error
 	if rf, ok := ret.Get(0).(func(context.Context, string, rpc.WorkflowState) error); ok {
 		r0 = rf(c, workflowID, state)
-	} else {
-		r0 = ret.Error(0)
-	}
-
-	return r0
-}
-
-// Log provides a mock function with given fields: c, logEntry
-func (_m *Peer) Log(c context.Context, logEntry *rpc.LogEntry) error {
-	ret := _m.Called(c, logEntry)
-
-	if len(ret) == 0 {
-		panic("no return value specified for Log")
-	}
-
-	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, *rpc.LogEntry) error); ok {
-		r0 = rf(c, logEntry)
 	} else {
 		r0 = ret.Error(0)
 	}
