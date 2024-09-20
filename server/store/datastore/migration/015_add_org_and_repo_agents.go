@@ -24,11 +24,10 @@ import (
 )
 
 type agentV015 struct {
-	ID      int64             `xorm:"pk autoincr 'id'"`
-	OwnerID int64             `xorm:"INDEX 'owner_id'"`
-	OrgID   int64             `xorm:"INDEX 'org_id'"`
-	RepoID  int64             `xorm:"INDEX 'repo_id'"`
-	Filters map[string]string `xorm:"'filters' json"`
+	ID      int64 `xorm:"pk autoincr 'id'"`
+	OwnerID int64 `xorm:"INDEX 'owner_id'"`
+	OrgID   int64 `xorm:"INDEX 'org_id'"`
+	RepoID  int64 `xorm:"INDEX 'repo_id'"`
 }
 
 func (agentV015) TableName() string {
