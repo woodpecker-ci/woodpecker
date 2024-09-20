@@ -61,6 +61,58 @@
           />
         </InputField>
 
+        <InputField v-slot="{ id }" :label="$t('admin.settings.agents.filters.name')">
+          <span class="text-sm text-wp-text-alt-100 mb-2">{{ $t('admin.settings.agents.filters.desc') }}</span>
+          <div class="flex flex-col gap-2">
+            <div v-for="(filter, index) in filters" :key="index" class="flex gap-4">
+              <TextField
+                :id="`${id}-key-${index}`"
+                v-model="filter.key"
+                :placeholder="$t('admin.settings.agents.filters.key')"
+              />
+              <TextField
+                :id="`${id}-value-${index}`"
+                v-model="filter.value"
+                :placeholder="$t('admin.settings.agents.filters.value')"
+              />
+              <div class="w-10 flex-shrink-0">
+                <Button
+                  type="button"
+                  color="red"
+                  class="ml-auto"
+                  :title="$t('admin.settings.agents.filters.delete')"
+                  @click="deleteFilter(index)"
+                >
+                  <Icon name="remove" />
+                </Button>
+              </div>
+            </div>
+            <div class="flex gap-4">
+              <TextField
+                :id="`${id}-new-key`"
+                v-model="newFilterKey"
+                :placeholder="$t('admin.settings.agents.filters.key')"
+              />
+              <TextField
+                :id="`${id}-new-value`"
+                v-model="newFilterValue"
+                :placeholder="$t('admin.settings.agents.filters.value')"
+              />
+              <div class="w-10 flex-shrink-0">
+                <Button
+                  type="button"
+                  color="green"
+                  class="ml-auto"
+                  :title="$t('admin.settings.agents.filters.add')"
+                  @click="addFilter"
+                >
+                  <Icon name="plus" />
+                </Button>
+              </div>
+            </div>
+          </div>
+        </InputField>
+
         <InputField :label="$t('admin.settings.agents.no_schedule.name')">
           <Checkbox
             :model-value="selectedAgent.no_schedule || false"
@@ -142,6 +194,7 @@ import { useI18n } from 'vue-i18n';
 
 import Badge from '~/components/atomic/Badge.vue';
 import Button from '~/components/atomic/Button.vue';
+import Icon from '~/components/atomic/Icon.vue';
 import IconButton from '~/components/atomic/IconButton.vue';
 import ListItem from '~/components/atomic/ListItem.vue';
 import Checkbox from '~/components/form/Checkbox.vue';
@@ -162,6 +215,9 @@ const { t } = useI18n();
 
 const selectedAgent = ref<Partial<Agent>>();
 const isEditingAgent = computed(() => !!selectedAgent.value?.id);
+const filters = ref<Array<{ key: string; value: string }>>([]);
+const newFilterKey = ref('');
+const newFilterValue = ref('');
 
 async function loadAgents(page: number): Promise<Agent[] | null> {
   return apiClient.getAgents({ page });
@@ -174,9 +230,12 @@ const { doSubmit: saveAgent, isLoading: isSaving } = useAsyncAction(async () => 
     throw new Error("Unexpected: Can't get agent");
   }
 
+  selectedAgent.value.filters = Object.fromEntries(filters.value.map((filter) => [filter.key, filter.value]));
+
   if (isEditingAgent.value) {
     await apiClient.updateAgent(selectedAgent.value);
     selectedAgent.value = undefined;
+    filters.value = [];
   } else {
     selectedAgent.value = await apiClient.createAgent(selectedAgent.value);
   }
@@ -200,9 +259,23 @@ const { doSubmit: deleteAgent, isLoading: isDeleting } = useAsyncAction(async (_
 
 function editAgent(agent: Agent) {
   selectedAgent.value = cloneDeep(agent);
+  filters.value = Object.entries(agent.filters || {}).map(([key, value]) => ({ key, value }));
 }
 
 function showAddAgent() {
-  selectedAgent.value = cloneDeep({ name: '' });
+  selectedAgent.value = cloneDeep({ name: '', filters: {} });
+  filters.value = [];
+}
+
+function deleteFilter(index: number) {
+  filters.value.splice(index, 1);
+}
+
+function addFilter() {
+  if (newFilterKey.value && newFilterValue.value) {
+    filters.value.push({ key: newFilterKey.value, value: newFilterValue.value });
+    newFilterKey.value = '';
+    newFilterValue.value = '';
+  }
 }
 </script>

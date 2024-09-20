@@ -39,6 +39,8 @@ type Agent struct {
 	OrgID int64 `json:"org_id"        xorm:"INDEX 'org_id'"`
 	// RepoID is counted as unset if set to -1, this is done to ensure a new(Agent) still enforce the OrgID check by default
 	RepoID int64 `json:"repo_id"       xorm:"INDEX 'repo_id'"`
+	// Server side enforced agent filters
+	Filters map[string]string `json:"filters" xorm:"'filters' json"`
 } //	@name Agent
 
 const (
@@ -61,7 +63,10 @@ func GenerateNewAgentToken() string {
 }
 
 func (a *Agent) GetServerFilters() (map[string]string, error) {
-	filters := make(map[string]string)
+	filters := a.Filters
+	if filters == nil {
+		filters = make(map[string]string)
+	}
 
 	// enforce filters for user and organization agents
 	if a.OrgID != IDNotSet {

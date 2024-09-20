@@ -13,4 +13,5 @@ export interface Agent {
   capacity: number;
   version: string;
   no_schedule: boolean;
+  filters?: Record<string, string>;
 }

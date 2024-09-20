@@ -140,6 +140,7 @@ func PatchAgent(c *gin.Context) {
 
 	// Update allowed fields
 	agent.Name = in.Name
+	agent.Filters = in.Filters
 	agent.NoSchedule = in.NoSchedule
 	if agent.NoSchedule {
 		server.Config.Services.Queue.KickAgentWorkers(agent.ID)
@@ -181,6 +182,7 @@ func PostAgent(c *gin.Context) {
 		RepoID:     model.IDNotSet,
 		NoSchedule: in.NoSchedule,
 		Token:      model.GenerateNewAgentToken(),
+		Filters:    in.Filters,
 	}
 	if err = store.FromContext(c).AgentCreate(agent); err != nil {
 		c.String(http.StatusInternalServerError, err.Error())
@@ -246,7 +248,7 @@ func DeleteAgent(c *gin.Context) {
 //	@Tags		Agents
 //	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 //	@Param		org_id			path	int		true	"the organization's id"
-//	@Param		agent			body	Agent	true	"the agent's data (only 'name' and 'no_schedule' are read)"
+//	@Param		agent			body	Agent	true	"the agent's data (only 'name', 'no_schedule', and 'filters' are read)"
 func PostOrgAgent(c *gin.Context) {
 	_store := store.FromContext(c)
 	user := session.User(c)
@@ -271,6 +273,7 @@ func PostOrgAgent(c *gin.Context) {
 		RepoID:     model.IDNotSet,
 		NoSchedule: in.NoSchedule,
 		Token:      model.GenerateNewAgentToken(),
+		Filters:    in.Filters,
 	}
 
 	if err = _store.AgentCreate(agent); err != nil {
@@ -355,6 +358,7 @@ func PatchOrgAgent(c *gin.Context) {
 
 	// Update allowed fields
 	agent.Name = in.Name
+	agent.Filters = in.Filters
 	agent.NoSchedule = in.NoSchedule
 	if agent.NoSchedule {
 		server.Config.Services.Queue.KickAgentWorkers(agent.ID)
@@ -438,7 +442,7 @@ func DeleteOrgAgent(c *gin.Context) {
 //	@Tags		Agents
 //	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 //	@Param		repo_id			path	int		true	"the repository's id"
-//	@Param		agent			body	Agent	true	"the agent's data (only 'name' and 'no_schedule' are read)"
+//	@Param		agent			body	Agent	true	"the agent's data (only 'name', 'no_schedule', and 'filters' are read)"
 func PostRepoAgent(c *gin.Context) {
 	_store := store.FromContext(c)
 	user := session.User(c)
@@ -469,6 +473,7 @@ func PostRepoAgent(c *gin.Context) {
 		OrgID:      repo.OrgID,
 		RepoID:     repoID,
 		Token:      model.GenerateNewAgentToken(),
+		Filters:    in.Filters,
 	}
 
 	if err = _store.AgentCreate(agent); err != nil {
@@ -553,6 +558,7 @@ func PatchRepoAgent(c *gin.Context) {
 
 	// Update allowed fields
 	agent.Name = in.Name
+	agent.Filters = in.Filters
 	agent.NoSchedule = in.NoSchedule
 	if agent.NoSchedule {
 		server.Config.Services.Queue.KickAgentWorkers(agent.ID)
