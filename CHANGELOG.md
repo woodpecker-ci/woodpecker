@@ -38,6 +38,25 @@
 - Update gitea sdk [[#4012](https://github.com/woodpecker-ci/woodpecker/pull/4012)]
 - Update Forgejo SDK [[#3948](https://github.com/woodpecker-ci/woodpecker/pull/3948)]
 
+### 🐛 Bug Fixes
+
+- Fix repo add loading spinner [[#4135](https://github.com/woodpecker-ci/woodpecker/pull/4135)]
+- Fix migration registries table [[#4111](https://github.com/woodpecker-ci/woodpecker/pull/4111)]
+- Wait for tracer to be done before finishing workflow [[#4068](https://github.com/woodpecker-ci/woodpecker/pull/4068)]
+- Fix schema with detached steps [[#4066](https://github.com/woodpecker-ci/woodpecker/pull/4066)]
+- Fix schema with commands and entrypoint [[#4065](https://github.com/woodpecker-ci/woodpecker/pull/4065)]
+- Read long log lines from file storage correctly [[#4048](https://github.com/woodpecker-ci/woodpecker/pull/4048)]
+- Only update agent.LastWork if not done recently [[#4031](https://github.com/woodpecker-ci/woodpecker/pull/4031)]
+- Set refspec for gitlab MR [[#4021](https://github.com/woodpecker-ci/woodpecker/pull/4021)]
+- Set `CI_PREV_COMMIT_{SOURCE,TARGET}_BRANCH` as mentioned in the documentation [[#4001](https://github.com/woodpecker-ci/woodpecker/pull/4001)]
+- [Bitbucket Datacenter] Return empty list instead of null [[#4010](https://github.com/woodpecker-ci/woodpecker/pull/4010)]
+- Fix BB PR pipeline ref [[#3985](https://github.com/woodpecker-ci/woodpecker/pull/3985)]
+- Change Bitbucket PR hook to point the source branch, commit & ref [[#3965](https://github.com/woodpecker-ci/woodpecker/pull/3965)]
+- Add updated, merged and declined events to bb webhook activation [[#3963](https://github.com/woodpecker-ci/woodpecker/pull/3963)]
+- Fix login via navbar [[#3962](https://github.com/woodpecker-ci/woodpecker/pull/3962)]
+- Truncate creation in list [[#3952](https://github.com/woodpecker-ci/woodpecker/pull/3952)]
+- Fix panic if forge is unreachable [[#3944](https://github.com/woodpecker-ci/woodpecker/pull/3944)]
+
 ### 📈 Enhancement
 
 - Set repo user to repairing user when old user is missing [[#4128](https://github.com/woodpecker-ci/woodpecker/pull/4128)]
@@ -78,24 +97,6 @@
 - Overhaul README [[#3995](https://github.com/woodpecker-ci/woodpecker/pull/3995)]
 - fix(deps): update docs npm deps non-major [[#3990](https://github.com/woodpecker-ci/woodpecker/pull/3990)]
 - Add spellchecking for docs [[#3787](https://github.com/woodpecker-ci/woodpecker/pull/3787)]
-
-### 🐛 Bug Fixes
-
-- Fix migration registries table [[#4111](https://github.com/woodpecker-ci/woodpecker/pull/4111)]
-- Wait for tracer to be done before finishing workflow [[#4068](https://github.com/woodpecker-ci/woodpecker/pull/4068)]
-- Fix schema with detached steps [[#4066](https://github.com/woodpecker-ci/woodpecker/pull/4066)]
-- Fix schema with commands and entrypoint [[#4065](https://github.com/woodpecker-ci/woodpecker/pull/4065)]
-- Read long log lines from file storage correctly [[#4048](https://github.com/woodpecker-ci/woodpecker/pull/4048)]
-- Only update agent.LastWork if not done recently [[#4031](https://github.com/woodpecker-ci/woodpecker/pull/4031)]
-- Set refspec for gitlab MR [[#4021](https://github.com/woodpecker-ci/woodpecker/pull/4021)]
-- Set `CI_PREV_COMMIT_{SOURCE,TARGET}_BRANCH` as mentioned in the documentation [[#4001](https://github.com/woodpecker-ci/woodpecker/pull/4001)]
-- [Bitbucket Datacenter] Return empty list instead of null [[#4010](https://github.com/woodpecker-ci/woodpecker/pull/4010)]
-- Fix BB PR pipeline ref [[#3985](https://github.com/woodpecker-ci/woodpecker/pull/3985)]
-- Change Bitbucket PR hook to point the source branch, commit & ref [[#3965](https://github.com/woodpecker-ci/woodpecker/pull/3965)]
-- Add updated, merged and declined events to bb webhook activation [[#3963](https://github.com/woodpecker-ci/woodpecker/pull/3963)]
-- Fix login via navbar [[#3962](https://github.com/woodpecker-ci/woodpecker/pull/3962)]
-- Truncate creation in list [[#3952](https://github.com/woodpecker-ci/woodpecker/pull/3952)]
-- Fix panic if forge is unreachable [[#3944](https://github.com/woodpecker-ci/woodpecker/pull/3944)]
 
 ### Misc
 
