@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-09-20
+## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-09-21
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -8,6 +8,7 @@
 
 ### 💥 Breaking changes
 
+- Set `/woodpecker` as default workdir for the **woodpecker-cli** container [[#4130](https://github.com/woodpecker-ci/woodpecker/pull/4130)]
 - Require upgrade from 2.x [[#4112](https://github.com/woodpecker-ci/woodpecker/pull/4112)]
 - Don't expose task data via api [[#4108](https://github.com/woodpecker-ci/woodpecker/pull/4108)]
 - Remove some ci environment variables [[#3846](https://github.com/woodpecker-ci/woodpecker/pull/3846)]
