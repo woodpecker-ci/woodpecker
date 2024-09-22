@@ -252,8 +252,7 @@
         "download_metadata": "Download Metadata File",
         "error_fetching": "Error fetching metadata",
         "download_success": "Metadata downloaded successfully",
-        "no_permission": "You don't have permission to access debug information.",
-        "none": "None"
+        "no_permission": "You don't have permission to access debug information."
       }
     }
   },

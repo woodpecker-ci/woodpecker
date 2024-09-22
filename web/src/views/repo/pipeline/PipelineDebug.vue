@@ -1,6 +1,5 @@
 <template>
   <div v-if="repoPermissions && repoPermissions.push" class="p-4">
-    <SelectField v-if="repoPermissions && repoPermissions.push" v-model="selectedWorkflow" :options="workflows" />
     <div class="flex items-center space-x-4">
       <Button :is-loading="isLoading" :text="$t('repo.pipeline.debug.download_metadata')" @click="downloadMetadata" />
     </div>
@@ -13,12 +12,10 @@
 </template>
 
 <script setup lang="ts">
-import { inject, onMounted, ref, type Ref } from 'vue';
+import { inject, ref, type Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import Button from '~/components/atomic/Button.vue';
-import type { SelectOption } from '~/components/form/form.types';
-import SelectField from '~/components/form/SelectField.vue';
 import useApiClient from '~/compositions/useApiClient';
 import useNotifications from '~/compositions/useNotifications';
 import type { Pipeline, Repo, RepoPermissions } from '~/lib/api/types';
@@ -32,8 +29,6 @@ const pipeline = inject<Ref<Pipeline>>('pipeline');
 const repoPermissions = inject<Ref<RepoPermissions>>('repo-permissions');
 
 const isLoading = ref(false);
-const selectedWorkflow = ref('');
-const workflows = ref<SelectOption[]>([]);
 
 async function downloadMetadata() {
   if (!repo?.value || !pipeline?.value || !repoPermissions?.value?.push) {
@@ -43,7 +38,7 @@ async function downloadMetadata() {
 
   isLoading.value = true;
   try {
-    const metadata = await apiClient.getPipelineMetadata(repo.value.id, pipeline.value.number, selectedWorkflow.value);
+    const metadata = await apiClient.getPipelineMetadata(repo.value.id, pipeline.value.number);
 
     // Create a Blob with the JSON data
     const blob = new Blob([JSON.stringify(metadata, null, 2)], { type: 'application/json' });
@@ -52,7 +47,7 @@ async function downloadMetadata() {
     const url = window.URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `pipeline-${pipeline.value.number}${selectedWorkflow.value ? `-${selectedWorkflow.value}` : ''}-metadata.json`;
+    link.download = `${repo.value.full_name.replaceAll('/', '_')}-pipeline-${pipeline.value.number}-metadata.json`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -66,20 +61,4 @@ async function downloadMetadata() {
     isLoading.value = false;
   }
 }
-
-async function loadWorkflows() {
-  workflows.value =
-    pipeline?.value?.workflows?.map((w) => ({
-      value: w.name,
-      text: w.name,
-    })) || [];
-  workflows.value.unshift({
-    value: '',
-    text: t('repo.pipeline.debug.none'),
-  });
-}
-
-onMounted(() => {
-  loadWorkflows();
-});
 </script>
