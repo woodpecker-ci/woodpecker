@@ -153,11 +153,6 @@ func TestGetPipelineMetadata(t *testing.T) {
 		Status: model.StatusFailure,
 	}
 
-	fakeWorkflow := &model.Workflow{
-		Name: "test",
-		PID:  1,
-	}
-
 	fakeRepo := &model.Repo{ID: 1}
 
 	mockForge := forge_mocks.NewForge(t)
@@ -170,7 +165,6 @@ func TestGetPipelineMetadata(t *testing.T) {
 
 	mockStore := store_mocks.NewStore(t)
 	mockStore.On("GetPipelineNumber", mock.Anything, int64(2)).Return(fakePipeline, nil)
-	mockStore.On("WorkflowGetTree", fakePipeline).Return([]*model.Workflow{fakeWorkflow}, nil)
 	mockStore.On("GetPipelineLastBefore", mock.Anything, mock.Anything, int64(2)).Return(prevPipeline, nil)
 
 	t.Run("PipelineMetadata", func(t *testing.T) {
@@ -195,29 +189,6 @@ func TestGetPipelineMetadata(t *testing.T) {
 			assert.Equal(t, int64(1), response.Prev.Number)
 		})
 
-		t.Run("should get pipeline metadata with specific workflow", func(t *testing.T) {
-			w := httptest.NewRecorder()
-			c, _ := gin.CreateTestContext(w)
-			c.Params = gin.Params{{Key: "number", Value: "2"}}
-			c.Request, _ = http.NewRequest("GET", "/?workflow=test", nil)
-			c.Set("store", mockStore)
-			c.Set("repo", fakeRepo)
-
-			GetPipelineMetadata(c)
-
-			assert.Equal(t, http.StatusOK, w.Code)
-
-			var response metadata.Metadata
-			err := json.Unmarshal(w.Body.Bytes(), &response)
-			assert.NoError(t, err)
-
-			assert.Equal(t, int64(1), response.Repo.ID)
-			assert.Equal(t, int64(2), response.Curr.Number)
-			assert.Equal(t, int64(1), response.Prev.Number)
-			assert.Equal(t, "test", response.Workflow.Name)
-			assert.Equal(t, 1, response.Workflow.Number)
-		})
-
 		t.Run("should return bad request for invalid pipeline number", func(t *testing.T) {
 			w := httptest.NewRecorder()
 			c, _ := gin.CreateTestContext(w)
@@ -235,23 +206,6 @@ func TestGetPipelineMetadata(t *testing.T) {
 			w := httptest.NewRecorder()
 			c, _ := gin.CreateTestContext(w)
 			c.Params = gin.Params{{Key: "number", Value: "3"}}
-			c.Set("store", mockStore)
-			c.Set("repo", fakeRepo)
-
-			GetPipelineMetadata(c)
-
-			assert.Equal(t, http.StatusNotFound, w.Code)
-		})
-
-		t.Run("should return not found for non-existent workflow", func(t *testing.T) {
-			mockStore := store_mocks.NewStore(t)
-			mockStore.On("GetPipelineNumber", mock.Anything, int64(2)).Return(fakePipeline, nil)
-			mockStore.On("WorkflowGetTree", fakePipeline).Return([]*model.Workflow{fakeWorkflow}, nil)
-
-			w := httptest.NewRecorder()
-			c, _ := gin.CreateTestContext(w)
-			c.Params = gin.Params{{Key: "number", Value: "2"}}
-			c.Request, _ = http.NewRequest("GET", "/?workflow=nonexistent", nil)
 			c.Set("store", mockStore)
 			c.Set("repo", fakeRepo)
 
