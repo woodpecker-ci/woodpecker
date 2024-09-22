@@ -36,10 +36,8 @@ func Restart(ctx context.Context, store store.Store, lastPipeline *model.Pipelin
 		return nil, errors.New(msg)
 	}
 
-	switch lastPipeline.Status {
-	case model.StatusDeclined,
-		model.StatusBlocked:
-		return nil, &ErrBadRequest{Msg: fmt.Sprintf("cannot restart a pipeline with status %s", lastPipeline.Status)}
+	if lastPipeline.Status == model.StatusBlocked {
+		return nil, &ErrBadRequest{Msg: "cannot restart a pipeline with status blocked"}
 	}
 
 	// fetch the old pipeline config from the database

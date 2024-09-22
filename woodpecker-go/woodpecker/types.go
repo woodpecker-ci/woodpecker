@@ -246,7 +246,6 @@ type (
 	// Task is the JSON data for a task.
 	Task struct {
 		ID           string            `json:"id"`
-		Data         []byte            `json:"data"`
 		Labels       map[string]string `json:"labels"`
 		Dependencies []string          `json:"dependencies"`
 		RunOn        []string          `json:"run_on"`
