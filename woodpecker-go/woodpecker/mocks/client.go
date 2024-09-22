@@ -1211,16 +1211,9 @@ func (_m *Client) PipelineList(repoID int64) ([]*woodpecker.Pipeline, error) {
 	return r0, r1
 }
 
-// PipelineMetadata provides a mock function with given fields: repoID, pipelineNumber, workflow
-func (_m *Client) PipelineMetadata(repoID int64, pipelineNumber int, workflow ...string) ([]byte, error) {
-	_va := make([]interface{}, len(workflow))
-	for _i := range workflow {
-		_va[_i] = workflow[_i]
-	}
-	var _ca []interface{}
-	_ca = append(_ca, repoID, pipelineNumber)
-	_ca = append(_ca, _va...)
-	ret := _m.Called(_ca...)
+// PipelineMetadata provides a mock function with given fields: repoID, pipelineNumber
+func (_m *Client) PipelineMetadata(repoID int64, pipelineNumber int) ([]byte, error) {
+	ret := _m.Called(repoID, pipelineNumber)
 
 	if len(ret) == 0 {
 		panic("no return value specified for PipelineMetadata")
@@ -1228,19 +1221,19 @@ func (_m *Client) PipelineMetadata(repoID int64, pipelineNumber int, workflow ..
 
 	var r0 []byte
 	var r1 error
-	if rf, ok := ret.Get(0).(func(int64, int, ...string) ([]byte, error)); ok {
-		return rf(repoID, pipelineNumber, workflow...)
+	if rf, ok := ret.Get(0).(func(int64, int) ([]byte, error)); ok {
+		return rf(repoID, pipelineNumber)
 	}
-	if rf, ok := ret.Get(0).(func(int64, int, ...string) []byte); ok {
-		r0 = rf(repoID, pipelineNumber, workflow...)
+	if rf, ok := ret.Get(0).(func(int64, int) []byte); ok {
+		r0 = rf(repoID, pipelineNumber)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]byte)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(int64, int, ...string) error); ok {
-		r1 = rf(repoID, pipelineNumber, workflow...)
+	if rf, ok := ret.Get(1).(func(int64, int) error); ok {
+		r1 = rf(repoID, pipelineNumber)
 	} else {
 		r1 = ret.Error(1)
 	}

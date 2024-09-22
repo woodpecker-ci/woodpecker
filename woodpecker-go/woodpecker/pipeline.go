@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"net/url"
 )
 
 const (
@@ -21,12 +20,8 @@ func (c *client) PipelineQueue() ([]*Feed, error) {
 }
 
 // PipelineMetadata returns metadata for a pipeline, workflow name is optional.
-func (c *client) PipelineMetadata(repoID int64, pipelineNumber int, workflow ...string) ([]byte, error) {
+func (c *client) PipelineMetadata(repoID int64, pipelineNumber int) ([]byte, error) {
 	uri := fmt.Sprintf(pathPipelineMetadata, c.addr, repoID, pipelineNumber)
-
-	if len(workflow) != 0 {
-		uri += fmt.Sprintf("?workflow=%s", url.QueryEscape(workflow[0]))
-	}
 
 	body, err := c.open(uri, http.MethodGet, nil)
 	if err != nil {
