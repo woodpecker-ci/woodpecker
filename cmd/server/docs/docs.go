@@ -3175,12 +3175,6 @@ const docTemplate = `{
                         "name": "number",
                         "in": "path",
                         "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "the name of a specific workflow (optional)",
-                        "name": "workflow",
-                        "in": "query"
                     }
                 ],
                 "responses": {

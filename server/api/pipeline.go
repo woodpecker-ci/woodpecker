@@ -22,7 +22,6 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -405,7 +404,6 @@ func GetPipelineConfig(c *gin.Context) {
 //	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 //	@Param		repo_id			path	int		true	"the repository id"
 //	@Param		number			path	int		true	"the number of the pipeline"
-//	@Param		workflow		query	string	false	"the name of a specific workflow (optional)"
 func GetPipelineMetadata(c *gin.Context) {
 	repo := session.Repo(c)
 	num, err := strconv.ParseInt(c.Param("number"), 10, 64)
@@ -413,7 +411,6 @@ func GetPipelineMetadata(c *gin.Context) {
 		_ = c.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
-	workflowName := c.Query("workflow")
 
 	_store := store.FromContext(c)
 	currentPipeline, err := _store.GetPipelineNumber(repo, num)
@@ -428,32 +425,13 @@ func GetPipelineMetadata(c *gin.Context) {
 		return
 	}
 
-	var workflow *model.Workflow
-	if workflowName != "" {
-		workflows, err := _store.WorkflowGetTree(currentPipeline)
-		if err != nil {
-			handleDBError(c, err)
-			return
-		}
-		for _, w := range workflows {
-			if strings.EqualFold(w.Name, workflowName) {
-				workflow = w
-				break
-			}
-		}
-		if workflow == nil {
-			_ = c.AbortWithError(http.StatusNotFound, fmt.Errorf("workflow '%s' was not found within pipeline %d", workflowName, currentPipeline.ID))
-			return
-		}
-	}
-
 	prevPipeline, err := _store.GetPipelineLastBefore(repo, currentPipeline.Branch, currentPipeline.ID)
 	if err != nil && !errors.Is(err, types.RecordNotExist) {
 		handleDBError(c, err)
 		return
 	}
 
-	metadata := stepbuilder.MetadataFromStruct(forge, repo, currentPipeline, prevPipeline, workflow, server.Config.Server.Host)
+	metadata := stepbuilder.MetadataFromStruct(forge, repo, currentPipeline, prevPipeline, nil, server.Config.Server.Host)
 	c.JSON(http.StatusOK, metadata)
 }
 
