@@ -179,6 +179,9 @@
           "confirm": "All data will be lost after this action!!!\n\nDo you really want to proceed?",
           "success": "Repository deleted"
         }
+      },
+      "agents": {
+        "desc": "Agents registered for this repository."
       }
     },
     "pipeline": {
@@ -257,6 +260,9 @@
       },
       "registries": {
         "desc": "Organization registry credentials can be added to use private images for all pipelines of an organization."
+      },
+      "agents": {
+        "desc": "Agents registered for this organization."
       }
     }
   },
@@ -412,6 +418,9 @@
         "download_cli": "Download CLI",
         "reset_token": "Reset token",
         "swagger_ui": "Swagger UI"
+      },
+      "agents": {
+        "desc": "Agents registered to your account repos."
       }
     }
   },
