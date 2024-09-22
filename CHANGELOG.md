@@ -38,6 +38,10 @@
 - Update gitea sdk [[#4012](https://github.com/woodpecker-ci/woodpecker/pull/4012)]
 - Update Forgejo SDK [[#3948](https://github.com/woodpecker-ci/woodpecker/pull/3948)]
 
+### ✨ Features
+
+- Default git clone support sha256 [[#4136](https://github.com/woodpecker-ci/woodpecker/pull/4136)]
+
 ### 🐛 Bug Fixes
 
 - Fix repo add loading spinner [[#4135](https://github.com/woodpecker-ci/woodpecker/pull/4135)]
