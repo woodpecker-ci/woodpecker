@@ -19,7 +19,6 @@ import { useI18n } from 'vue-i18n';
 
 import Button from '~/components/atomic/Button.vue';
 import Panel from '~/components/layout/Panel.vue';
-
 import useApiClient from '~/compositions/useApiClient';
 import useNotifications from '~/compositions/useNotifications';
 import type { Pipeline, Repo, RepoPermissions } from '~/lib/api/types';
