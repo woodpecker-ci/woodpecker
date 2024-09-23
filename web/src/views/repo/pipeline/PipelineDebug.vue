@@ -1,9 +1,11 @@
 <template>
-  <div v-if="repoPermissions && repoPermissions.push" class="p-4">
-    <div class="flex items-center space-x-4">
-      <Button :is-loading="isLoading" :text="$t('repo.pipeline.debug.download_metadata')" @click="downloadMetadata" />
-    </div>
-  </div>
+  <template v-if="repoPermissions && repoPermissions.push">
+    <Panel>
+      <div class="flex items-center space-x-4">
+        <Button :is-loading="isLoading" :text="$t('repo.pipeline.debug.download_metadata')" @click="downloadMetadata" />
+      </div>
+    </Panel>
+  </template>
   <div v-else class="flex items-center justify-center h-full">
     <div class="text-center p-8 bg-wp-control-error-100 rounded-lg shadow-lg">
       <p class="text-2xl font-bold text-white">{{ $t('repo.pipeline.debug.no_permission') }}</p>
@@ -16,6 +18,8 @@ import { inject, ref, type Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import Button from '~/components/atomic/Button.vue';
+import Panel from '~/components/layout/Panel.vue';
+
 import useApiClient from '~/compositions/useApiClient';
 import useNotifications from '~/compositions/useNotifications';
 import type { Pipeline, Repo, RepoPermissions } from '~/lib/api/types';
