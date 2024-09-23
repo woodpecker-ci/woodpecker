@@ -52,17 +52,23 @@ func TestFifo(t *testing.T) {
 
 func TestFifoExpire(t *testing.T) {
 	want := &model.Task{ID: "1"}
+	ctx, cancel := context.WithCancelCause(context.Background())
 
-	q, _ := New(context.Background()).(*fifo)
+	q, _ := New(ctx).(*fifo)
 	q.extension = 0
-	assert.NoError(t, q.Push(noContext, want))
-	info := q.Info(noContext)
+	assert.NoError(t, q.Push(ctx, want))
+	info := q.Info(ctx)
 	assert.Len(t, info.Pending, 1, "expect task in pending queue")
 
-	got, err := q.Poll(noContext, 1, func(*model.Task) bool { return true })
+	got, err := q.Poll(ctx, 1, func(*model.Task) bool { return true })
 	assert.NoError(t, err)
 	assert.Equal(t, want, got)
 
+	// cancel the context to let the process func end
+	go func() {
+		time.Sleep(time.Millisecond)
+		cancel(nil)
+	}()
 	q.process()
 	assert.Len(t, info.Pending, 1, "expect task re-added to pending queue")
 }
