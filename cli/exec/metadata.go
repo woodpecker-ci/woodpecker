@@ -134,10 +134,6 @@ func metadataFromContext(_ context.Context, c *cli.Command, axis matrix.Axis, w 
 	metadataFileAndOverrideOrDefault(c, "workflow-number", func(i int64) { m.Workflow.Number = int(i) }, c.Int)
 	m.Workflow.Matrix = axis
 
-	// Step
-	metadataFileAndOverrideOrDefault(c, "step-name", func(s string) { m.Step.Name = s }, c.String)
-	metadataFileAndOverrideOrDefault(c, "step-number", func(i int64) { m.Step.Number = int(i) }, c.Int)
-
 	// System
 	metadataFileAndOverrideOrDefault(c, "system-name", func(s string) { m.Sys.Name = s }, c.String)
 	metadataFileAndOverrideOrDefault(c, "system-url", func(s string) { m.Sys.URL = s }, c.String)
