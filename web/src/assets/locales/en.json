@@ -253,7 +253,8 @@
         "error_fetching": "Error fetching metadata",
         "download_success": "Metadata downloaded successfully",
         "no_permission": "You don't have permission to access debug information.",
-        "example_cli_exec": "Example CLI exec with Metadata File:"
+        "example_exec_title": "Rerun pipeline locally:",
+        "example_exec_desc": "Download the pipeline metadata and run the pipeline locally again in the same context to fix any issues."
       }
     }
   },

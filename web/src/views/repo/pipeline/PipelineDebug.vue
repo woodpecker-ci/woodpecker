@@ -1,7 +1,8 @@
 <template>
   <template v-if="repoPermissions && repoPermissions.push">
     <Panel>
-      <InputField :label="$t('repo.pipeline.debug.example_cli_exec')">
+      <InputField :label="$t('repo.pipeline.debug.example_exec_title')">
+        <p class="text-sm text-wp-text-alt-100 mb-2">{{ $t('repo.pipeline.debug.example_exec_desc') }}</p>
         <pre class="code-box">{{ cliExecWithMetadata }}</pre>
       </InputField>
       <div class="flex items-center space-x-4">
@@ -38,7 +39,7 @@ const repoPermissions = inject<Ref<RepoPermissions>>('repo-permissions');
 const isLoading = ref(false);
 
 const downloadFileName = `${repo?.value.full_name.replaceAll('/', '-')}-pipeline-${pipeline?.value.number}-metadata.json`;
-const cliExecWithMetadata = `# woodpecker-cli exec --metadata-file ${downloadFileName} --commit-event push`;
+const cliExecWithMetadata = `# woodpecker-cli exec --metadata-file ${downloadFileName}`;
 
 async function downloadMetadata() {
   if (!repo?.value || !pipeline?.value || !repoPermissions?.value?.push) {
