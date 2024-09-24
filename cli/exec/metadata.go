@@ -121,10 +121,6 @@ func metadataFromContext(_ context.Context, c *cli.Command, axis matrix.Axis) (m
 			Number: int(c.Int("workflow-number")),
 			Matrix: axis,
 		},
-		Step: metadata.Step{
-			Name:   c.String("step-name"),
-			Number: int(c.Int("step-number")),
-		},
 		Sys: metadata.System{
 			Name:     c.String("system-name"),
 			URL:      c.String("system-url"),
