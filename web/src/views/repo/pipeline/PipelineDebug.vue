@@ -1,8 +1,8 @@
 <template>
   <template v-if="repoPermissions && repoPermissions.push">
     <Panel>
-      <InputField :label="$t('repo.pipeline.debug.example_exec_title')">
-        <p class="text-sm text-wp-text-alt-100 mb-2">{{ $t('repo.pipeline.debug.example_exec_desc') }}</p>
+      <InputField :label="$t('repo.pipeline.debug.metadata_exec_title')">
+        <p class="text-sm text-wp-text-alt-100 mb-2">{{ $t('repo.pipeline.debug.metadata_exec_desc') }}</p>
         <pre class="code-box">{{ cliExecWithMetadata }}</pre>
       </InputField>
       <div class="flex items-center space-x-4">
@@ -38,8 +38,8 @@ const repoPermissions = inject<Ref<RepoPermissions>>('repo-permissions');
 
 const isLoading = ref(false);
 
-const downloadFileName = `${repo?.value.full_name.replaceAll('/', '-')}-pipeline-${pipeline?.value.number}-metadata.json`;
-const cliExecWithMetadata = `# woodpecker-cli exec --metadata-file ${downloadFileName}`;
+const metadataFileName = computed(() => `${repo?.value.full_name.replaceAll('/', '-')}-pipeline-${pipeline?.value.number}-metadata.json`;
+const cliExecWithMetadata = computed(() => `# woodpecker exec --metadata-file ${metadataFileName.value}`);
 
 async function downloadMetadata() {
   if (!repo?.value || !pipeline?.value || !repoPermissions?.value?.push) {
@@ -58,13 +58,13 @@ async function downloadMetadata() {
     const url = window.URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = downloadFileName;
+    link.download = metadataFileName;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
     window.URL.revokeObjectURL(url);
 
-    notifications.notify({ type: 'success', title: t('repo.pipeline.debug.download_success') });
+    notifications.notify({ type: 'success', title: t('repo.pipeline.debug.metadata_download_successful') });
   } catch (error) {
     console.error('Error fetching metadata:', error);
     notifications.notify({ type: 'error', title: t('repo.pipeline.debug.error_fetching') });
