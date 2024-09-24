@@ -53,13 +53,6 @@ var flags = []cli.Flag{
 		Name:    "network",
 		Usage:   "external networks",
 	},
-	&cli.StringFlag{
-		Sources: cli.EnvVars("WOODPECKER_PREFIX"),
-		Name:    "prefix",
-		Value:   "woodpecker",
-		Usage:   "prefix used for containers, volumes, networks, ... created by woodpecker",
-		Hidden:  true,
-	},
 	&cli.StringSliceFlag{
 		Sources: cli.EnvVars("WOODPECKER_PLUGINS_PRIVILEGED"),
 		Name:    "plugins-privileged",
