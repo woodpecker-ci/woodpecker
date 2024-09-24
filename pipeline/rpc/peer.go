@@ -62,7 +62,7 @@ type (
 		Platform     string            `json:"platform"`
 		Backend      string            `json:"backend"`
 		Capacity     int               `json:"capacity"`
-		CustomLabels map[string]string `json:"labels"`
+		CustomLabels map[string]string `json:"custom_labels"`
 	}
 )
 
