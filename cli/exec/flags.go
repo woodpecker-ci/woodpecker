@@ -17,7 +17,6 @@ package exec
 import (
 	"time"
 
-	"github.com/oklog/ulid/v2"
 	"github.com/urfave/cli/v3"
 )
 
@@ -48,14 +47,6 @@ var flags = []cli.Flag{
 		Sources: cli.EnvVars("WOODPECKER_NETWORKS"),
 		Name:    "network",
 		Usage:   "external networks",
-	},
-	&cli.StringFlag{
-		Sources: cli.EnvVars("WOODPECKER_PREFIX"),
-		Name:    "prefix",
-		// emulate server behavior https://github.com/woodpecker-ci/woodpecker/blob/eebaa10d104cbc3fa7ce4c0e344b0b7978405135/server/pipeline/stepbuilder/stepBuilder.go#L289-L295
-		Value:  "wp_" + ulid.Make().String(),
-		Usage:  "prefix used for containers, volumes, networks, ... created by woodpecker",
-		Hidden: true,
 	},
 	&cli.StringSliceFlag{
 		Sources: cli.EnvVars("WOODPECKER_PLUGINS_PRIVILEGED"),
