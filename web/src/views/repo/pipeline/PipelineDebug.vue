@@ -1,6 +1,9 @@
 <template>
   <template v-if="repoPermissions && repoPermissions.push">
     <Panel>
+      <InputField :label="$t('repo.pipeline.debug.example_cli_exec')">
+        <pre class="code-box">{{ cliExecWithMetadata }}</pre>
+      </InputField>
       <div class="flex items-center space-x-4">
         <Button :is-loading="isLoading" :text="$t('repo.pipeline.debug.download_metadata')" @click="downloadMetadata" />
       </div>
@@ -19,6 +22,7 @@ import { useI18n } from 'vue-i18n';
 
 import Button from '~/components/atomic/Button.vue';
 import Panel from '~/components/layout/Panel.vue';
+import InputField from '~/components/form/InputField.vue';
 import useApiClient from '~/compositions/useApiClient';
 import useNotifications from '~/compositions/useNotifications';
 import type { Pipeline, Repo, RepoPermissions } from '~/lib/api/types';
@@ -32,6 +36,8 @@ const pipeline = inject<Ref<Pipeline>>('pipeline');
 const repoPermissions = inject<Ref<RepoPermissions>>('repo-permissions');
 
 const isLoading = ref(false);
+
+const cliExecWithMetadata = `# woodpecker-cli exec --metadata-file org-repo-pipeline-123.json --commit-event push`;
 
 async function downloadMetadata() {
   if (!repo?.value || !pipeline?.value || !repoPermissions?.value?.push) {
@@ -50,7 +56,7 @@ async function downloadMetadata() {
     const url = window.URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `${repo.value.full_name.replaceAll('/', '_')}-pipeline-${pipeline.value.number}-metadata.json`;
+    link.download = `${repo.value.full_name.replaceAll('/', '-')}-pipeline-${pipeline.value.number}-metadata.json`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
