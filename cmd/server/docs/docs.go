@@ -4359,6 +4359,12 @@ const docTemplate = `{
                 "created": {
                     "type": "integer"
                 },
+                "custom_labels": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
                 "id": {
                     "type": "integer"
                 },

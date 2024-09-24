@@ -10,4 +10,5 @@ export interface Agent {
   capacity: number;
   version: string;
   no_schedule: boolean;
+  custom_labels: Record<string, string>;
 }

@@ -15,19 +15,20 @@
 package model
 
 type Agent struct {
-	ID          int64  `json:"id"            xorm:"pk autoincr 'id'"`
-	Created     int64  `json:"created"       xorm:"created"`
-	Updated     int64  `json:"updated"       xorm:"updated"`
-	Name        string `json:"name"          xorm:"name"`
-	OwnerID     int64  `json:"owner_id"      xorm:"'owner_id'"`
-	Token       string `json:"token"         xorm:"token"`
-	LastContact int64  `json:"last_contact"  xorm:"last_contact"`
-	LastWork    int64  `json:"last_work"     xorm:"last_work"` // last time the agent did something, this value is used to determine if the agent is still doing work used by the autoscaler
-	Platform    string `json:"platform"      xorm:"VARCHAR(100) 'platform'"`
-	Backend     string `json:"backend"       xorm:"VARCHAR(100) 'backend'"`
-	Capacity    int32  `json:"capacity"      xorm:"capacity"`
-	Version     string `json:"version"       xorm:"'version'"`
-	NoSchedule  bool   `json:"no_schedule"   xorm:"no_schedule"`
+	ID           int64             `json:"id"            xorm:"pk autoincr 'id'"`
+	Created      int64             `json:"created"       xorm:"created"`
+	Updated      int64             `json:"updated"       xorm:"updated"`
+	Name         string            `json:"name"          xorm:"name"`
+	OwnerID      int64             `json:"owner_id"      xorm:"'owner_id'"`
+	Token        string            `json:"token"         xorm:"token"`
+	LastContact  int64             `json:"last_contact"  xorm:"last_contact"`
+	LastWork     int64             `json:"last_work"     xorm:"last_work"` // last time the agent did something, this value is used to determine if the agent is still doing work used by the autoscaler
+	Platform     string            `json:"platform"      xorm:"VARCHAR(100) 'platform'"`
+	Backend      string            `json:"backend"       xorm:"VARCHAR(100) 'backend'"`
+	Capacity     int32             `json:"capacity"      xorm:"capacity"`
+	Version      string            `json:"version"       xorm:"'version'"`
+	CustomLabels map[string]string `json:"custom_labels" xorm:"JSON 'custom_labels'"`
+	NoSchedule   bool              `json:"no_schedule"   xorm:"no_schedule"`
 } //	@name Agent
 
 // TableName return database table name for xorm.

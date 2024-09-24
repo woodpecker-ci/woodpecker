@@ -106,9 +106,9 @@ func (_m *Peer) Next(c context.Context, f rpc.Filter) (*rpc.Workflow, error) {
 	return r0, r1
 }
 
-// RegisterAgent provides a mock function with given fields: ctx, platform, backend, version, capacity
-func (_m *Peer) RegisterAgent(ctx context.Context, platform string, backend string, version string, capacity int) (int64, error) {
-	ret := _m.Called(ctx, platform, backend, version, capacity)
+// RegisterAgent provides a mock function with given fields: ctx, info
+func (_m *Peer) RegisterAgent(ctx context.Context, info rpc.AgentInfo) (int64, error) {
+	ret := _m.Called(ctx, info)
 
 	if len(ret) == 0 {
 		panic("no return value specified for RegisterAgent")
@@ -116,17 +116,17 @@ func (_m *Peer) RegisterAgent(ctx context.Context, platform string, backend stri
 
 	var r0 int64
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, string, string, string, int) (int64, error)); ok {
-		return rf(ctx, platform, backend, version, capacity)
+	if rf, ok := ret.Get(0).(func(context.Context, rpc.AgentInfo) (int64, error)); ok {
+		return rf(ctx, info)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, string, string, string, int) int64); ok {
-		r0 = rf(ctx, platform, backend, version, capacity)
+	if rf, ok := ret.Get(0).(func(context.Context, rpc.AgentInfo) int64); ok {
+		r0 = rf(ctx, info)
 	} else {
 		r0 = ret.Get(0).(int64)
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, string, string, string, int) error); ok {
-		r1 = rf(ctx, platform, backend, version, capacity)
+	if rf, ok := ret.Get(1).(func(context.Context, rpc.AgentInfo) error); ok {
+		r1 = rf(ctx, info)
 	} else {
 		r1 = ret.Error(1)
 	}

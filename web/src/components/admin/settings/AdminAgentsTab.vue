@@ -90,6 +90,15 @@
           </InputField>
 
           <InputField
+            v-if="selectedAgent.custom_labels && Object.keys(selectedAgent.custom_labels).length > 0"
+            v-slot="{ id }"
+            :label="$t('admin.settings.agents.custom_labels.custom_labels')"
+          >
+            <span class="text-wp-text-alt-100">{{ $t('admin.settings.agents.custom_labels.desc') }}</span>
+            <TextField :id="id" :model-value="formatCustomLabels(selectedAgent.custom_labels)" disabled />
+          </InputField>
+
+          <InputField
             v-slot="{ id }"
             :label="$t('admin.settings.agents.capacity.capacity')"
             docs-url="docs/next/administration/agent-config#woodpecker_max_workflows"
@@ -191,6 +200,12 @@ const { doSubmit: deleteAgent, isLoading: isDeleting } = useAsyncAction(async (_
   notifications.notify({ title: t('admin.settings.agents.deleted'), type: 'success' });
   resetPage();
 });
+
+function formatCustomLabels(labels: Record<string, string>): string {
+  return Object.entries(labels)
+    .map(([key, value]) => `${key}=${value}`)
+    .join(', ');
+}
 
 function editAgent(agent: Agent) {
   selectedAgent.value = cloneDeep(agent);
