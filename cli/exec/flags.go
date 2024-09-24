@@ -53,7 +53,7 @@ var flags = []cli.Flag{
 		Sources: cli.EnvVars("WOODPECKER_PREFIX"),
 		Name:    "prefix",
 		// emulate server behavior https://github.com/woodpecker-ci/woodpecker/blob/eebaa10d104cbc3fa7ce4c0e344b0b7978405135/server/pipeline/stepbuilder/stepBuilder.go#L289-L295
-		Value:  "woodpecker_" + ulid.Make().String(),
+		Value:  "wp_" + ulid.Make().String(),
 		Usage:  "prefix used for containers, volumes, networks, ... created by woodpecker",
 		Hidden: true,
 	},
