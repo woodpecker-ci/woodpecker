@@ -4,6 +4,7 @@ Some versions need some changes to the server configuration or the pipeline conf
 
 ## `next`
 
+- Deprecate `WOODPECKER_FILTER_LABELS` use `WOODPECKER_AGENT_LABELS`
 - Set `/woodpecker` as defautl workdir for the **woodpecker-cli** container
 - Removed built-in environment variables:
   - `CI_COMMIT_URL` use `CI_PIPELINE_FORGE_URL`
