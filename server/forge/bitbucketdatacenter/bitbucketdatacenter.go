@@ -211,7 +211,7 @@ func (c *client) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error
 	}
 
 	opts := &bb.RepositorySearchOptions{Permission: bb.PermissionRepoWrite, ListOptions: bb.ListOptions{Limit: listLimit}}
-	var all []*model.Repo
+	all := make([]*model.Repo, 0)
 	for {
 		repos, resp, err := bc.Projects.SearchRepositories(ctx, opts)
 		if err != nil {
@@ -277,7 +277,7 @@ func (c *client) Dir(ctx context.Context, u *model.User, r *model.Repo, p *model
 	}
 
 	opts := &bb.FilesListOptions{At: p.Commit}
-	var all []*forge_types.FileMeta
+	all := make([]*forge_types.FileMeta, 0)
 	for {
 		list, resp, err := bc.Projects.ListFiles(ctx, r.Owner, r.Name, path, opts)
 		if err != nil {
@@ -341,7 +341,7 @@ func (c *client) Branches(ctx context.Context, u *model.User, r *model.Repo, p *
 	}
 
 	opts := &bb.BranchSearchOptions{ListOptions: convertListOptions(p)}
-	var all []string
+	all := make([]string, 0)
 	for {
 		branches, resp, err := bc.Projects.SearchBranches(ctx, r.Owner, r.Name, opts)
 		if err != nil {
@@ -389,7 +389,7 @@ func (c *client) PullRequests(ctx context.Context, u *model.User, r *model.Repo,
 	}
 
 	opts := &bb.PullRequestSearchOptions{ListOptions: convertListOptions(p)}
-	var all []*model.PullRequest
+	all := make([]*model.PullRequest, 0)
 	for {
 		prs, resp, err := bc.Projects.SearchPullRequests(ctx, r.Owner, r.Name, opts)
 		if err != nil {

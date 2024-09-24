@@ -15,8 +15,6 @@
 package router
 
 import (
-	"net/http"
-
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog"
 
@@ -61,11 +59,18 @@ func apiRoutes(e *gin.RouterGroup) {
 					org.Use(session.MustOrgMember(true))
 					org.DELETE("", session.MustAdmin(), api.DeleteOrg)
 					org.GET("", api.GetOrg)
+
 					org.GET("/secrets", api.GetOrgSecretList)
 					org.POST("/secrets", api.PostOrgSecret)
 					org.GET("/secrets/:secret", api.GetOrgSecret)
 					org.PATCH("/secrets/:secret", api.PatchOrgSecret)
 					org.DELETE("/secrets/:secret", api.DeleteOrgSecret)
+
+					org.GET("/registries", api.GetOrgRegistryList)
+					org.POST("/registries", api.PostOrgRegistry)
+					org.GET("/registries/:registry", api.GetOrgRegistry)
+					org.PATCH("/registries/:registry", api.PatchOrgRegistry)
+					org.DELETE("/registries/:registry", api.DeleteOrgRegistry)
 				}
 			}
 		}
@@ -118,11 +123,11 @@ func apiRoutes(e *gin.RouterGroup) {
 					repo.DELETE("/secrets/:secret", session.MustPush, api.DeleteSecret)
 
 					// requires push permissions
-					repo.GET("/registry", session.MustPush, api.GetRegistryList)
-					repo.POST("/registry", session.MustPush, api.PostRegistry)
-					repo.GET("/registry/:registry", session.MustPush, api.GetRegistry)
-					repo.PATCH("/registry/:registry", session.MustPush, api.PatchRegistry)
-					repo.DELETE("/registry/:registry", session.MustPush, api.DeleteRegistry)
+					repo.GET("/registries", session.MustPush, api.GetRegistryList)
+					repo.POST("/registries", session.MustPush, api.PostRegistry)
+					repo.GET("/registries/:registry", session.MustPush, api.GetRegistry)
+					repo.PATCH("/registries/:registry", session.MustPush, api.PatchRegistry)
+					repo.DELETE("/registries/:registry", session.MustPush, api.DeleteRegistry)
 
 					// requires push permissions
 					repo.GET("/cron", session.MustPush, api.GetCronList)
@@ -184,6 +189,21 @@ func apiRoutes(e *gin.RouterGroup) {
 			secrets.DELETE("/:secret", api.DeleteGlobalSecret)
 		}
 
+		// global registries can be read without actual values by any user
+		readGlobalRegistries := apiBase.Group("/registries")
+		{
+			readGlobalRegistries.Use(session.MustUser())
+			readGlobalRegistries.GET("", api.GetGlobalRegistryList)
+			readGlobalRegistries.GET("/:registry", api.GetGlobalRegistry)
+		}
+		registries := apiBase.Group("/registries")
+		{
+			registries.Use(session.MustAdmin())
+			registries.POST("", api.PostGlobalRegistry)
+			registries.PATCH("/:registry", api.PatchGlobalRegistry)
+			registries.DELETE("/:registry", api.DeleteGlobalRegistry)
+		}
+
 		logLevel := apiBase.Group("/log-level")
 		{
 			logLevel.Use(session.MustAdmin())
@@ -243,12 +263,4 @@ func apiRoutes(e *gin.RouterGroup) {
 			}
 		}
 	}
-
-	// TODO: remove with 3.x
-	e.Any("/hook", func(c *gin.Context) {
-		c.String(http.StatusGone, "use /api/hook")
-	})
-	e.Any("/stream/events", func(c *gin.Context) {
-		c.String(http.StatusGone, "use /api/stream/events")
-	})
 }

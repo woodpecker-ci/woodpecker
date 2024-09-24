@@ -16,7 +16,6 @@
 package log
 
 import (
-	"context"
 	"io"
 	"strings"
 	"sync"
@@ -40,7 +39,7 @@ type LineWriter struct {
 }
 
 // NewLineWriter returns a new line reader.
-func NewLineWriter(peer rpc.Peer, stepUUID string, secret ...string) io.WriteCloser {
+func NewLineWriter(peer rpc.Peer, stepUUID string, secret ...string) io.Writer {
 	lw := &LineWriter{
 		peer:      peer,
 		stepUUID:  stepUUID,
@@ -67,13 +66,6 @@ func (w *LineWriter) Write(p []byte) (n int, err error) {
 
 	w.num++
 
-	if err := w.peer.Log(context.Background(), line); err != nil {
-		return 0, err
-	}
-
+	w.peer.EnqueueLog(line)
 	return len(data), nil
-}
-
-func (w *LineWriter) Close() error {
-	return nil
 }

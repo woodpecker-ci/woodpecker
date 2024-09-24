@@ -15,13 +15,14 @@
 package core
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"strings"
 
 	"github.com/rs/zerolog/log"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
 	"go.woodpecker-ci.org/woodpecker/v2/agent"
 	"go.woodpecker-ci.org/woodpecker/v2/version"
@@ -81,13 +82,18 @@ var counter = &agent.State{
 
 // handles pinging the endpoint and returns an error if the
 // agent is in an unhealthy state.
-func pinger(c *cli.Context) error {
+func pinger(ctx context.Context, c *cli.Command) error {
 	healthcheckAddress := c.String("healthcheck-addr")
 	if strings.HasPrefix(healthcheckAddress, ":") {
 		// this seems sufficient according to https://pkg.go.dev/net#Dial
 		healthcheckAddress = "localhost" + healthcheckAddress
 	}
-	resp, err := http.Get("http://" + healthcheckAddress + "/healthz")
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, "http://"+healthcheckAddress+"/healthz", nil)
+	if err != nil {
+		return err
+	}
+	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return err
 	}

@@ -15,20 +15,19 @@
 package lint
 
 import (
-	"errors"
+	"context"
 	"fmt"
 	"os"
 	"path"
 	"path/filepath"
 	"strings"
 
-	term_env "github.com/muesli/termenv"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
 	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
-	pipeline_errors "go.woodpecker-ci.org/woodpecker/v2/pipeline/errors"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/linter"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/constant"
 )
 
 // Command exports the info command.
@@ -37,13 +36,26 @@ var Command = &cli.Command{
 	Usage:     "lint a pipeline configuration file",
 	ArgsUsage: "[path/to/.woodpecker.yaml]",
 	Action:    lint,
+	Flags: []cli.Flag{
+		&cli.StringSliceFlag{
+			Sources: cli.EnvVars("WOODPECKER_PLUGINS_PRIVILEGED"),
+			Name:    "plugins-privileged",
+			Usage:   "Allow plugins to run in privileged mode, if environment variable is defined but empty there will be none",
+		},
+		&cli.StringSliceFlag{
+			Sources: cli.EnvVars("WOODPECKER_PLUGINS_TRUSTED_CLONE"),
+			Name:    "plugins-trusted-clone",
+			Usage:   "Plugins witch are trusted to handle the netrc info in clone steps",
+			Value:   constant.TrustedClonePlugins,
+		},
+	},
 }
 
-func lint(c *cli.Context) error {
-	return common.RunPipelineFunc(c, lintFile, lintDir)
+func lint(ctx context.Context, c *cli.Command) error {
+	return common.RunPipelineFunc(ctx, c, lintFile, lintDir)
 }
 
-func lintDir(c *cli.Context, dir string) error {
+func lintDir(ctx context.Context, c *cli.Command, dir string) error {
 	var errorStrings []string
 	if err := filepath.Walk(dir, func(path string, info os.FileInfo, e error) error {
 		if e != nil {
@@ -53,7 +65,7 @@ func lintDir(c *cli.Context, dir string) error {
 		// check if it is a regular file (not dir)
 		if info.Mode().IsRegular() && (strings.HasSuffix(info.Name(), ".yaml") || strings.HasSuffix(info.Name(), ".yml")) {
 			fmt.Println("#", info.Name())
-			if err := lintFile(c, path); err != nil {
+			if err := lintFile(ctx, c, path); err != nil {
 				errorStrings = append(errorStrings, err.Error())
 			}
 			fmt.Println("")
@@ -71,9 +83,7 @@ func lintDir(c *cli.Context, dir string) error {
 	return nil
 }
 
-func lintFile(_ *cli.Context, file string) error {
-	output := term_env.NewOutput(os.Stdout)
-
+func lintFile(_ context.Context, c *cli.Command, file string) error {
 	fi, err := os.Open(file)
 	if err != nil {
 		return err
@@ -87,7 +97,7 @@ func lintFile(_ *cli.Context, file string) error {
 
 	rawConfig := string(buf)
 
-	c, err := yaml.ParseString(rawConfig)
+	parsedConfig, err := yaml.ParseString(rawConfig)
 	if err != nil {
 		return err
 	}
@@ -95,40 +105,23 @@ func lintFile(_ *cli.Context, file string) error {
 	config := &linter.WorkflowConfig{
 		File:      path.Base(file),
 		RawConfig: rawConfig,
-		Workflow:  c,
+		Workflow:  parsedConfig,
 	}
 
 	// TODO: lint multiple files at once to allow checks for sth like "depends_on" to work
-	err = linter.New(linter.WithTrusted(true)).Lint([]*linter.WorkflowConfig{config})
+	err = linter.New(
+		linter.WithTrusted(true),
+		linter.PrivilegedPlugins(c.StringSlice("plugins-privileged")),
+		linter.WithTrustedClonePlugins(c.StringSlice("plugins-trusted-clone")),
+	).Lint([]*linter.WorkflowConfig{config})
 	if err != nil {
-		fmt.Printf("🔥 %s has warnings / errors:\n", output.String(config.File).Underline())
+		str, err := FormatLintError(config.File, err)
 
-		hasErrors := false
-		for _, err := range pipeline_errors.GetPipelineErrors(err) {
-			line := "  "
-
-			if err.IsWarning {
-				line = fmt.Sprintf("%s ⚠️ ", line)
-			} else {
-				line = fmt.Sprintf("%s ❌", line)
-				hasErrors = true
-			}
-
-			if data := pipeline_errors.GetLinterData(err); data != nil {
-				line = fmt.Sprintf("%s %s\t%s", line, output.String(data.Field).Bold(), err.Message)
-			} else {
-				line = fmt.Sprintf("%s %s", line, err.Message)
-			}
-
-			// TODO: use table output
-			fmt.Printf("%s\n", line)
+		if str != "" {
+			fmt.Print(str)
 		}
 
-		if hasErrors {
-			return errors.New("config has errors")
-		}
-
-		return nil
+		return err
 	}
 
 	fmt.Println("✅ Config is valid")

@@ -38,17 +38,23 @@ const (
 func mkPod(step *types.Step, config *config, podName, goos string, options BackendOptions) (*v1.Pod, error) {
 	var err error
 
+	nsp := newNativeSecretsProcessor(config, options.Secrets)
+	err = nsp.process()
+	if err != nil {
+		return nil, err
+	}
+
 	meta, err := podMeta(step, config, options, podName)
 	if err != nil {
 		return nil, err
 	}
 
-	spec, err := podSpec(step, config, options)
+	spec, err := podSpec(step, config, options, nsp)
 	if err != nil {
 		return nil, err
 	}
 
-	container, err := podContainer(step, podName, goos, options)
+	container, err := podContainer(step, podName, goos, options, nsp)
 	if err != nil {
 		return nil, err
 	}
@@ -78,7 +84,7 @@ func podMeta(step *types.Step, config *config, options BackendOptions, podName s
 	meta := meta_v1.ObjectMeta{
 		Name:        podName,
 		Namespace:   config.Namespace,
-		Annotations: podAnnotations(config, options, podName),
+		Annotations: podAnnotations(config, options),
 	}
 
 	meta.Labels, err = podLabels(step, config, options)
@@ -120,7 +126,7 @@ func stepLabel(step *types.Step) (string, error) {
 	return toDNSName(step.Name)
 }
 
-func podAnnotations(config *config, options BackendOptions, podName string) map[string]string {
+func podAnnotations(config *config, options BackendOptions) map[string]string {
 	annotations := make(map[string]string)
 
 	if len(options.Annotations) > 0 {
@@ -135,38 +141,35 @@ func podAnnotations(config *config, options BackendOptions, podName string) map[
 		log.Trace().Msgf("using annotations from the configuration: %v", config.PodAnnotations)
 		maps.Copy(annotations, config.PodAnnotations)
 	}
-	securityContext := options.SecurityContext
-	if securityContext != nil {
-		key, value := apparmorAnnotation(podName, securityContext.ApparmorProfile)
-		if key != nil && value != nil {
-			annotations[*key] = *value
-		}
-	}
 
 	return annotations
 }
 
-func podSpec(step *types.Step, config *config, options BackendOptions) (v1.PodSpec, error) {
+func podSpec(step *types.Step, config *config, options BackendOptions, nsp nativeSecretsProcessor) (v1.PodSpec, error) {
 	var err error
 	spec := v1.PodSpec{
 		RestartPolicy:      v1.RestartPolicyNever,
 		RuntimeClassName:   options.RuntimeClassName,
 		ServiceAccountName: options.ServiceAccountName,
-		ImagePullSecrets:   imagePullSecretsReferences(config.ImagePullSecretNames),
 		HostAliases:        hostAliases(step.ExtraHosts),
 		NodeSelector:       nodeSelector(options.NodeSelector, config.PodNodeSelector, step.Environment["CI_SYSTEM_PLATFORM"]),
 		Tolerations:        tolerations(options.Tolerations),
 		SecurityContext:    podSecurityContext(options.SecurityContext, config.SecurityContext, step.Privileged),
 	}
-	spec.Volumes, err = volumes(step.Volumes)
+	spec.Volumes, err = pvcVolumes(step.Volumes)
 	if err != nil {
 		return spec, err
 	}
 
+	log.Trace().Msgf("using the image pull secrets: %v", config.ImagePullSecretNames)
+	spec.ImagePullSecrets = secretsReferences(config.ImagePullSecretNames)
+
+	spec.Volumes = append(spec.Volumes, nsp.volumes...)
+
 	return spec, nil
 }
 
-func podContainer(step *types.Step, podName, goos string, options BackendOptions) (v1.Container, error) {
+func podContainer(step *types.Step, podName, goos string, options BackendOptions, nsp nativeSecretsProcessor) (v1.Container, error) {
 	var err error
 	container := v1.Container{
 		Name:            podName,
@@ -201,10 +204,14 @@ func podContainer(step *types.Step, podName, goos string, options BackendOptions
 		return container, err
 	}
 
+	container.EnvFrom = append(container.EnvFrom, nsp.envFromSources...)
+	container.Env = append(container.Env, nsp.envVars...)
+	container.VolumeMounts = append(container.VolumeMounts, nsp.mounts...)
+
 	return container, nil
 }
 
-func volumes(volumes []string) ([]v1.Volume, error) {
+func pvcVolumes(volumes []string) ([]v1.Volume, error) {
 	var vols []v1.Volume
 
 	for _, v := range volumes {
@@ -212,13 +219,13 @@ func volumes(volumes []string) ([]v1.Volume, error) {
 		if err != nil {
 			return nil, err
 		}
-		vols = append(vols, volume(volumeName))
+		vols = append(vols, pvcVolume(volumeName))
 	}
 
 	return vols, nil
 }
 
-func volume(name string) v1.Volume {
+func pvcVolume(name string) v1.Volume {
 	pvcSource := v1.PersistentVolumeClaimVolumeSource{
 		ClaimName: name,
 		ReadOnly:  false,
@@ -282,22 +289,6 @@ func hostAlias(extraHost types.HostAlias) v1.HostAlias {
 	return v1.HostAlias{
 		IP:        extraHost.IP,
 		Hostnames: []string{extraHost.Name},
-	}
-}
-
-func imagePullSecretsReferences(imagePullSecretNames []string) []v1.LocalObjectReference {
-	log.Trace().Msgf("using the image pull secrets: %v", imagePullSecretNames)
-
-	secretReferences := make([]v1.LocalObjectReference, len(imagePullSecretNames))
-	for i, imagePullSecretName := range imagePullSecretNames {
-		secretReferences[i] = imagePullSecretsReference(imagePullSecretName)
-	}
-	return secretReferences
-}
-
-func imagePullSecretsReference(imagePullSecretName string) v1.LocalObjectReference {
-	return v1.LocalObjectReference{
-		Name: imagePullSecretName,
 	}
 }
 
@@ -379,11 +370,12 @@ func toleration(backendToleration Toleration) v1.Toleration {
 
 func podSecurityContext(sc *SecurityContext, secCtxConf SecurityContextConfig, stepPrivileged bool) *v1.PodSecurityContext {
 	var (
-		nonRoot *bool
-		user    *int64
-		group   *int64
-		fsGroup *int64
-		seccomp *v1.SeccompProfile
+		nonRoot  *bool
+		user     *int64
+		group    *int64
+		fsGroup  *int64
+		seccomp  *v1.SeccompProfile
+		apparmor *v1.AppArmorProfile
 	)
 
 	if secCtxConf.RunAsNonRoot {
@@ -412,6 +404,7 @@ func podSecurityContext(sc *SecurityContext, secCtxConf SecurityContextConfig, s
 		}
 
 		seccomp = seccompProfile(sc.SeccompProfile)
+		apparmor = apparmorProfile(sc.ApparmorProfile)
 	}
 
 	if nonRoot == nil && user == nil && group == nil && fsGroup == nil && seccomp == nil {
@@ -419,11 +412,12 @@ func podSecurityContext(sc *SecurityContext, secCtxConf SecurityContextConfig, s
 	}
 
 	securityContext := &v1.PodSecurityContext{
-		RunAsNonRoot:   nonRoot,
-		RunAsUser:      user,
-		RunAsGroup:     group,
-		FSGroup:        fsGroup,
-		SeccompProfile: seccomp,
+		RunAsNonRoot:    nonRoot,
+		RunAsUser:       user,
+		RunAsGroup:      group,
+		FSGroup:         fsGroup,
+		SeccompProfile:  seccomp,
+		AppArmorProfile: apparmor,
 	}
 	log.Trace().Msgf("pod security context that will be used: %v", securityContext)
 	return securityContext
@@ -443,6 +437,22 @@ func seccompProfile(scp *SecProfile) *v1.SeccompProfile {
 	}
 
 	return seccompProfile
+}
+
+func apparmorProfile(scp *SecProfile) *v1.AppArmorProfile {
+	if scp == nil || len(scp.Type) == 0 {
+		return nil
+	}
+	log.Trace().Msgf("using AppArmor profile: %v", scp)
+
+	apparmorProfile := &v1.AppArmorProfile{
+		Type: v1.AppArmorProfileType(scp.Type),
+	}
+	if len(scp.LocalhostProfile) > 0 {
+		apparmorProfile.LocalhostProfile = &scp.LocalhostProfile
+	}
+
+	return apparmorProfile
 }
 
 func containerSecurityContext(sc *SecurityContext, stepPrivileged bool) *v1.SecurityContext {
@@ -471,36 +481,6 @@ func containerSecurityContext(sc *SecurityContext, stepPrivileged bool) *v1.Secu
 	}
 
 	return nil
-}
-
-func apparmorAnnotation(containerName string, scp *SecProfile) (*string, *string) {
-	if scp == nil {
-		return nil, nil
-	}
-	log.Trace().Msgf("using AppArmor profile: %v", scp)
-
-	var (
-		profileType string
-		profilePath string
-	)
-
-	if scp.Type == SecProfileTypeRuntimeDefault {
-		profileType = "runtime"
-		profilePath = "default"
-	}
-
-	if scp.Type == SecProfileTypeLocalhost {
-		profileType = "localhost"
-		profilePath = scp.LocalhostProfile
-	}
-
-	if len(profileType) == 0 {
-		return nil, nil
-	}
-
-	key := v1.DeprecatedAppArmorBetaContainerAnnotationKeyPrefix + containerName
-	value := profileType + "/" + profilePath
-	return &key, &value
 }
 
 func mapToEnvVars(m map[string]string) []v1.EnvVar {

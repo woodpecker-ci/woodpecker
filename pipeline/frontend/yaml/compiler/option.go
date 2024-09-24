@@ -97,8 +97,8 @@ func WithNetrc(username, password, machine string) Option {
 // plugin steps in the pipeline.
 func WithWorkspace(base, path string) Option {
 	return func(compiler *Compiler) {
-		compiler.base = base
-		compiler.path = path
+		compiler.workspaceBase = base
+		compiler.workspacePath = path
 	}
 }
 
@@ -172,9 +172,15 @@ func WithResourceLimit(swap, mem, shmSize, cpuQuota, cpuShares int64, cpuSet str
 	}
 }
 
-func WithDefaultCloneImage(cloneImage string) Option {
+func WithDefaultClonePlugin(cloneImage string) Option {
 	return func(compiler *Compiler) {
-		compiler.defaultCloneImage = cloneImage
+		compiler.defaultClonePlugin = cloneImage
+	}
+}
+
+func WithTrustedClonePlugins(images []string) Option {
+	return func(compiler *Compiler) {
+		compiler.trustedClonePlugins = images
 	}
 }
 

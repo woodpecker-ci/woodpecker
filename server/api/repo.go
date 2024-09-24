@@ -360,7 +360,8 @@ func GetRepoBranches(c *gin.Context) {
 
 	branches, err := _forge.Branches(c, user, repo, session.Pagination(c))
 	if err != nil {
-		_ = c.AbortWithError(http.StatusInternalServerError, err)
+		log.Error().Err(err).Msg("failed to load branches")
+		c.String(http.StatusInternalServerError, "failed to load branches: %s", err)
 		return
 	}
 
@@ -614,10 +615,14 @@ func repairRepo(c *gin.Context, repo *model.Repo, withPerms, skipOnErr bool) {
 	user, err := _store.GetUser(repo.UserID)
 	if err != nil {
 		if errors.Is(err, types.RecordNotExist) {
-			if !skipOnErr {
-				c.AbortWithStatus(http.StatusNotFound)
+			oldUserID := repo.UserID
+			user = session.User(c)
+			repo.UserID = user.ID
+			err = _store.UpdateRepo(repo)
+			if err != nil {
+				_ = c.AbortWithError(http.StatusInternalServerError, err)
 			}
-			log.Error().Err(err).Msg("could not get user on repo repair")
+			log.Debug().Msgf("Could not find repo user with ID %d during repo repair, set to repair request user with ID %d", oldUserID, user.ID)
 		} else {
 			_ = c.AbortWithError(http.StatusInternalServerError, err)
 		}

@@ -52,14 +52,19 @@ export default class ApiClient {
     });
 
     if (!res.ok) {
+      let message = res.statusText;
+      const resText = await res.text();
+      if (resText) {
+        message = `${res.statusText}: ${resText}`;
+      }
       const error: ApiError = {
         status: res.status,
-        message: res.statusText,
+        message,
       };
       if (this.onerror) {
         this.onerror(error);
       }
-      throw new Error(res.statusText);
+      throw new Error(message);
     }
 
     const contentType = res.headers.get('Content-Type');
@@ -70,19 +75,19 @@ export default class ApiClient {
     return res.text();
   }
 
-  _get(path: string) {
+  async _get(path: string) {
     return this._request('GET', path);
   }
 
-  _post(path: string, data?: unknown) {
+  async _post(path: string, data?: unknown) {
     return this._request('POST', path, data);
   }
 
-  _patch(path: string, data?: unknown) {
+  async _patch(path: string, data?: unknown) {
     return this._request('PATCH', path, data);
   }
 
-  _delete(path: string) {
+  async _delete(path: string) {
     return this._request('DELETE', path);
   }
 
@@ -96,7 +101,7 @@ export default class ApiClient {
     const events = new EventSource(_path);
     events.onmessage = (event) => {
       const data = JSON.parse(event.data as string) as T;
-      // TODO enable again with eslint-plugin-promise eslint-disable-next-line promise/prefer-await-to-callbacks
+      // eslint-disable-next-line promise/prefer-await-to-callbacks
       callback(data);
     };
 

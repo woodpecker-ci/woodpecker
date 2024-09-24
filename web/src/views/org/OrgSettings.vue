@@ -14,6 +14,10 @@
     <Tab id="secrets" :title="$t('secrets.secrets')">
       <OrgSecretsTab />
     </Tab>
+
+    <Tab id="registries" :title="$t('registries.registries')">
+      <OrgRegistriesTab />
+    </Tab>
   </Scaffold>
 </template>
 
@@ -22,7 +26,9 @@ import { onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 
+import Scaffold from '~/components/layout/scaffold/Scaffold.vue';
 import Tab from '~/components/layout/scaffold/Tab.vue';
+import OrgRegistriesTab from '~/components/org/settings/OrgRegistriesTab.vue';
 import OrgSecretsTab from '~/components/org/settings/OrgSecretsTab.vue';
 import { inject } from '~/compositions/useInjectProvide';
 import useNotifications from '~/compositions/useNotifications';
