@@ -58,11 +58,11 @@ func metadataFromContext(_ context.Context, c *cli.Command, axis matrix.Axis, w 
 	}, c.String)
 
 	var err error
-	metadataFileAndOverrideOrDefault(c, "pipeline-files", func(changedFilesRaw string) {
+	metadataFileAndOverrideOrDefault(c, "pipeline-changed-files", func(changedFilesRaw string) {
 		var changedFiles []string
 		if len(changedFilesRaw) != 0 && changedFilesRaw[0] == '[' {
 			if jsonErr := json.Unmarshal([]byte(changedFilesRaw), &changedFiles); jsonErr != nil {
-				err = fmt.Errorf("pipeline-files detected json but could not parse it: %w", jsonErr)
+				err = fmt.Errorf("pipeline-changed-files detected json but could not parse it: %w", jsonErr)
 			}
 		} else {
 			for _, file := range strings.Split(changedFilesRaw, ",") {
