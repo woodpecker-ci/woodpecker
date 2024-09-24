@@ -37,7 +37,8 @@ const repoPermissions = inject<Ref<RepoPermissions>>('repo-permissions');
 
 const isLoading = ref(false);
 
-const cliExecWithMetadata = `# woodpecker-cli exec --metadata-file org-repo-pipeline-123.json --commit-event push`;
+const downloadFileName = `${repo?.value.full_name.replaceAll('/', '-')}-pipeline-${pipeline?.value.number}-metadata.json`;
+const cliExecWithMetadata = `# woodpecker-cli exec --metadata-file ${downloadFileName} --commit-event push`;
 
 async function downloadMetadata() {
   if (!repo?.value || !pipeline?.value || !repoPermissions?.value?.push) {
@@ -56,7 +57,7 @@ async function downloadMetadata() {
     const url = window.URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `${repo.value.full_name.replaceAll('/', '-')}-pipeline-${pipeline.value.number}-metadata.json`;
+    link.download = downloadFileName
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
