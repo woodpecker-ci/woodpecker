@@ -56,7 +56,7 @@ type (
 		ServerVersion string `json:"server_version,omitempty"`
 	}
 
-	// AgentInfo represents all the metadata that should be known about an agent
+	// AgentInfo represents all the metadata that should be known about an agent.
 	AgentInfo struct {
 		Version      string            `json:"version"`
 		Platform     string            `json:"platform"`
