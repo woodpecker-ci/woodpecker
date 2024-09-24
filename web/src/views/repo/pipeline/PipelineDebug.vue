@@ -18,7 +18,7 @@
 </template>
 
 <script setup lang="ts">
-import { inject, ref, type Ref } from 'vue';
+import { computed, inject, ref, type Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import Button from '~/components/atomic/Button.vue';
@@ -38,12 +38,14 @@ const repoPermissions = inject<Ref<RepoPermissions>>('repo-permissions');
 
 const isLoading = ref(false);
 
-const metadataFileName = computed(() => `${repo?.value.full_name.replaceAll('/', '-')}-pipeline-${pipeline?.value.number}-metadata.json`;
+const metadataFileName = computed(
+  () => `${repo?.value.full_name.replaceAll('/', '-')}-pipeline-${pipeline?.value.number}-metadata.json`,
+);
 const cliExecWithMetadata = computed(() => `# woodpecker exec --metadata-file ${metadataFileName.value}`);
 
 async function downloadMetadata() {
   if (!repo?.value || !pipeline?.value || !repoPermissions?.value?.push) {
-    notifications.notify({ type: 'error', title: t('repo.pipeline.debug.error_fetching') });
+    notifications.notify({ type: 'error', title: t('repo.pipeline.debug.metadata_download_error') });
     return;
   }
 
@@ -58,7 +60,7 @@ async function downloadMetadata() {
     const url = window.URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = metadataFileName;
+    link.download = metadataFileName.value;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -67,7 +69,7 @@ async function downloadMetadata() {
     notifications.notify({ type: 'success', title: t('repo.pipeline.debug.metadata_download_successful') });
   } catch (error) {
     console.error('Error fetching metadata:', error);
-    notifications.notify({ type: 'error', title: t('repo.pipeline.debug.error_fetching') });
+    notifications.notify({ type: 'error', title: t('repo.pipeline.debug.metadata_download_error') });
   } finally {
     isLoading.value = false;
   }
