@@ -8,7 +8,10 @@ RUN --mount=type=cache,target=/root/.cache/go-build \
     make build-cli
 
 FROM docker.io/alpine:3.20
+WORKDIR /woodpecker
+
 RUN apk add -U --no-cache ca-certificates
+
 ENV GODEBUG=netdns=go
 ENV WOODPECKER_DISABLE_UPDATE_CHECK=true
 
