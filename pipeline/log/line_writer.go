@@ -16,7 +16,6 @@
 package log
 
 import (
-	"context"
 	"io"
 	"strings"
 	"sync"
@@ -67,9 +66,6 @@ func (w *LineWriter) Write(p []byte) (n int, err error) {
 
 	w.num++
 
-	if err := w.peer.Log(context.Background(), line); err != nil {
-		return 0, err
-	}
-
+	w.peer.EnqueueLog(line)
 	return len(data), nil
 }

@@ -56,7 +56,7 @@ func (m *Metadata) Environ() map[string]string {
 		"CI_REPO_NAME":           m.Repo.Name,
 		"CI_REPO_OWNER":          m.Repo.Owner,
 		"CI_REPO_REMOTE_ID":      m.Repo.RemoteID,
-		"CI_REPO_SCM":            "git",
+		"CI_REPO_SCM":            m.Repo.SCM,
 		"CI_REPO_URL":            m.Repo.ForgeURL,
 		"CI_REPO_CLONE_URL":      m.Repo.CloneURL,
 		"CI_REPO_CLONE_SSH_URL":  m.Repo.CloneSSHURL,
@@ -85,20 +85,16 @@ func (m *Metadata) Environ() map[string]string {
 		"CI_PIPELINE_FORGE_URL":     m.Curr.ForgeURL,
 		"CI_PIPELINE_DEPLOY_TARGET": m.Curr.DeployTo,
 		"CI_PIPELINE_DEPLOY_TASK":   m.Curr.DeployTask,
-		"CI_PIPELINE_STATUS":        m.Curr.Status,
 		"CI_PIPELINE_CREATED":       strconv.FormatInt(m.Curr.Created, 10),
 		"CI_PIPELINE_STARTED":       strconv.FormatInt(m.Curr.Started, 10),
-		"CI_PIPELINE_FINISHED":      strconv.FormatInt(m.Curr.Finished, 10),
 
 		"CI_WORKFLOW_NAME":   m.Workflow.Name,
 		"CI_WORKFLOW_NUMBER": strconv.Itoa(m.Workflow.Number),
 
-		"CI_STEP_NAME":     m.Step.Name,
-		"CI_STEP_NUMBER":   strconv.Itoa(m.Step.Number),
-		"CI_STEP_STATUS":   "", // will be set by agent
-		"CI_STEP_STARTED":  "", // will be set by agent
-		"CI_STEP_FINISHED": "", // will be set by agent
-		"CI_STEP_URL":      m.getPipelineWebURL(m.Curr, m.Step.Number),
+		"CI_STEP_NAME":    m.Step.Name,
+		"CI_STEP_NUMBER":  strconv.Itoa(m.Step.Number),
+		"CI_STEP_STARTED": "", // will be set by agent
+		"CI_STEP_URL":     m.getPipelineWebURL(m.Curr, m.Step.Number),
 
 		"CI_PREV_COMMIT_SHA":           m.Prev.Commit.Sha,
 		"CI_PREV_COMMIT_REF":           m.Prev.Commit.Ref,
@@ -132,9 +128,6 @@ func (m *Metadata) Environ() map[string]string {
 
 		"CI_FORGE_TYPE": m.Forge.Type,
 		"CI_FORGE_URL":  m.Forge.URL,
-
-		// TODO: Deprecated, remove in 3.x
-		"CI_COMMIT_URL": m.Curr.ForgeURL,
 	}
 	if m.Curr.Event == EventTag || m.Curr.Event == EventRelease || strings.HasPrefix(m.Curr.Commit.Ref, "refs/tags/") {
 		params["CI_COMMIT_TAG"] = strings.TrimPrefix(m.Curr.Commit.Ref, "refs/tags/")

@@ -6,13 +6,11 @@ Please note that the autoscaler is not feature-complete yet. You can follow the 
 
 ## Setup
 
-### docker-compose
+### docker compose
 
-If you are using docker-compose you can add the following to your `docker-compose.yaml` file:
+If you are using docker compose you can add the following to your `docker-compose.yaml` file:
 
 ```yaml
-version: '3'
-
 services:
   woodpecker-server:
     image: woodpeckerci/woodpecker-server:next

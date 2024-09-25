@@ -4,9 +4,16 @@ Some versions need some changes to the server configuration or the pipeline conf
 
 ## `next`
 
+- Removed built-in environment variables:
+  - `CI_COMMIT_URL` use `CI_PIPELINE_FORGE_URL`
+  - `CI_STEP_FINISHED` as empty during execution
+  - `CI_PIPELINE_FINISHED` as empty during execution
+  - `CI_PIPELINE_STATUS` was always `success`
+  - `CI_STEP_STATUS` was always `success`
+- Set `/woodpecker` as defautl workdir for the **woodpecker-cli** container
 - Move docker resource limit settings from server into agent configuration
 - Rename server environment variable `WOODPECKER_ESCALATE` to `WOODPECKER_PLUGINS_PRIVILEGED`
-- Remove all default privileged plugins ([re-add plugins to the list via config if needed](./30-administration/10-server-config.md#woodpecker_plugins_privileged)).
+- All default privileged plugins (like `woodpeckerci/plugin-docker-buildx`) were removed. Please carefully [re-add those plugins](./30-administration/10-server-config.md#woodpecker_plugins_privileged) you trust and rely on.
 - `WOODPECKER_DEFAULT_CLONE_IMAGE` got depricated use `WOODPECKER_DEFAULT_CLONE_PLUGIN`
 - Check trusted-clone- and privileged-plugins by image name and tag (if tag is set)
 - Secret filters for plugins now check against tag if specified
@@ -29,6 +36,7 @@ Some versions need some changes to the server configuration or the pipeline conf
 - Replaced `configs` object by `netrc` in external configuration APIs
 - Removed old API routes: `registry/` -> `registries`, `/authorize/token`
 - Replaced `registry` command with `repo registry` in cli
+- Disallow upgrades from 1.x, upgrade to 2.x first
 
 ## 2.0.0
 
