@@ -249,7 +249,16 @@
       "show_errors": "Show errors",
       "we_got_some_errors": "Oh no, we got some errors!",
       "duration": "Pipeline duration",
-      "created": "Created: {created}"
+      "created": "Created: {created}",
+      "debug": {
+        "title": "Debug",
+        "download_metadata": "Download metadata",
+        "metadata_download_error": "Error downloading metadata",
+        "metadata_download_successful": "Metadata downloaded successfully",
+        "no_permission": "You don't have permission to access debug information.",
+        "metadata_exec_title": "Rerun pipeline locally",
+        "metadata_exec_desc": "Download this pipeline's metadata to run it locally. This allows you to troubleshoot issues and test changes before committing them."
+      }
     }
   },
   "org": {

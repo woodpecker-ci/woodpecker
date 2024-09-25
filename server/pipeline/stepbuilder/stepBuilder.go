@@ -42,7 +42,7 @@ import (
 type StepBuilder struct {
 	Repo      *model.Repo
 	Curr      *model.Pipeline
-	Last      *model.Pipeline
+	Prev      *model.Pipeline
 	Netrc     *model.Netrc
 	Secs      []*model.Secret
 	Regs      []*model.Registry
@@ -115,7 +115,7 @@ func (b *StepBuilder) Build() (items []*Item, errorsAndWarnings error) {
 }
 
 func (b *StepBuilder) genItemForWorkflow(workflow *model.Workflow, axis matrix.Axis, data string) (item *Item, errorsAndWarnings error) {
-	workflowMetadata := MetadataFromStruct(b.Forge, b.Repo, b.Curr, b.Last, workflow, b.Host)
+	workflowMetadata := MetadataFromStruct(b.Forge, b.Repo, b.Curr, b.Prev, workflow, b.Host)
 	environ := b.environmentVariables(workflowMetadata, axis)
 
 	// add global environment variables for substituting
