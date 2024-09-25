@@ -67,8 +67,8 @@ func (s *RPC) Next(c context.Context, agentFilter rpc.Filter) (*rpc.Workflow, er
 		return nil, nil
 	}
 
-	// enforce server set agent filters ...
-	agentServerFilters, err := agent.GetServerFilters()
+	// enforce server set agent labels ...
+	agentServerLabels, err := agent.GetServerLabels()
 	if err != nil {
 		return nil, err
 	}
