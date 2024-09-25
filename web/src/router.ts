@@ -94,6 +94,11 @@ const routes: RouteRecordRaw[] = [
                 component: (): Component => import('~/views/repo/pipeline/PipelineErrors.vue'),
                 props: true,
               },
+              {
+                path: 'debug',
+                name: 'repo-pipeline-debug',
+                component: (): Component => import('~/views/repo/pipeline/PipelineDebug.vue'),
+              },
             ],
           },
           {
