@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-09-24
+## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-09-25
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -40,6 +40,7 @@
 
 ### ✨ Features
 
+- Replay pipeline using `cli exec` by downloading metadata [[#4103](https://github.com/woodpecker-ci/woodpecker/pull/4103)]
 - Default git clone support sha256 [[#4136](https://github.com/woodpecker-ci/woodpecker/pull/4136)]
 
 ### 🐛 Bug Fixes
