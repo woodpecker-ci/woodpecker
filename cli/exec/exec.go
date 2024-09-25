@@ -25,6 +25,7 @@ import (
 	"strings"
 
 	"github.com/drone/envsubst"
+	"github.com/oklog/ulid/v2"
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v3"
 
@@ -170,6 +171,9 @@ func execWithAxis(ctx context.Context, c *cli.Command, file, repoPath string, ax
 		return err
 	}
 
+	// emulate server behavior https://github.com/woodpecker-ci/woodpecker/blob/eebaa10d104cbc3fa7ce4c0e344b0b7978405135/server/pipeline/stepbuilder/stepBuilder.go#L289-L295
+	prefix := "wp_" + ulid.Make().String()
+
 	// configure volumes for local execution
 	volumes := c.StringSlice("volumes")
 	if c.Bool("local") {
@@ -184,7 +188,7 @@ func execWithAxis(ctx context.Context, c *cli.Command, file, repoPath string, ax
 			workspacePath = c.String("workspace-path")
 		}
 
-		volumes = append(volumes, c.String("prefix")+"_default:"+workspaceBase)
+		volumes = append(volumes, prefix+"_default:"+workspaceBase)
 		volumes = append(volumes, repoPath+":"+path.Join(workspaceBase, workspacePath))
 	}
 
@@ -221,9 +225,7 @@ func execWithAxis(ctx context.Context, c *cli.Command, file, repoPath string, ax
 		compiler.WithNetworks(
 			c.StringSlice("network")...,
 		),
-		compiler.WithPrefix(
-			c.String("prefix"),
-		),
+		compiler.WithPrefix(prefix),
 		compiler.WithProxy(compiler.ProxyOptions{
 			NoProxy:    c.String("backend-no-proxy"),
 			HTTPProxy:  c.String("backend-http-proxy"),
