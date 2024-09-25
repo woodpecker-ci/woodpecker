@@ -30,10 +30,10 @@ func TestGenerateNewAgentToken(t *testing.T) {
 	assert.Len(t, token1, 56)
 }
 
-func TestAgent_GetServerFilters(t *testing.T) {
+func TestAgent_GetServerLabels(t *testing.T) {
 	t.Run("EmptyAgent", func(t *testing.T) {
 		agent := &Agent{}
-		filters, err := agent.GetServerFilters()
+		filters, err := agent.GetServerLabels()
 		assert.NoError(t, err)
 		assert.Equal(t, map[string]string{
 			agentFilterRepoID: "0",
@@ -46,7 +46,7 @@ func TestAgent_GetServerFilters(t *testing.T) {
 			OrgID:  IDNotSet,
 			RepoID: IDNotSet,
 		}
-		filters, err := agent.GetServerFilters()
+		filters, err := agent.GetServerLabels()
 		assert.NoError(t, err)
 		assert.Equal(t, map[string]string{
 			agentFilterOrgID:  "*",
@@ -59,7 +59,7 @@ func TestAgent_GetServerFilters(t *testing.T) {
 			OrgID:  123,
 			RepoID: IDNotSet,
 		}
-		filters, err := agent.GetServerFilters()
+		filters, err := agent.GetServerLabels()
 		assert.NoError(t, err)
 		assert.Equal(t, map[string]string{
 			agentFilterOrgID:  "123",
@@ -72,7 +72,7 @@ func TestAgent_GetServerFilters(t *testing.T) {
 			OrgID:  IDNotSet,
 			RepoID: 456,
 		}
-		filters, err := agent.GetServerFilters()
+		filters, err := agent.GetServerLabels()
 		assert.NoError(t, err)
 		assert.Equal(t, map[string]string{
 			agentFilterRepoID: "456",
@@ -85,7 +85,7 @@ func TestAgent_GetServerFilters(t *testing.T) {
 			OrgID:  123,
 			RepoID: 456,
 		}
-		filters, err := agent.GetServerFilters()
+		filters, err := agent.GetServerLabels()
 		assert.NoError(t, err)
 		assert.Equal(t, map[string]string{
 			agentFilterOrgID:  "123",

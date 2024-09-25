@@ -60,7 +60,7 @@ func GenerateNewAgentToken() string {
 	return base32.StdEncoding.EncodeToString(securecookie.GenerateRandomKey(32))
 }
 
-func (a *Agent) GetServerFilters() (map[string]string, error) {
+func (a *Agent) GetServerLabels() (map[string]string, error) {
 	filters := make(map[string]string)
 
 	// enforce filters for user and organization agents
