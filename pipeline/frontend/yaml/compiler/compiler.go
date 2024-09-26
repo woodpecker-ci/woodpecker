@@ -81,15 +81,6 @@ func (s *Secret) Match(event string) bool {
 	return false
 }
 
-type ResourceLimit struct {
-	MemSwapLimit int64
-	MemLimit     int64
-	ShmSize      int64
-	CPUQuota     int64
-	CPUShares    int64
-	CPUSet       string
-}
-
 // Compiler compiles the yaml.
 type Compiler struct {
 	local               bool
@@ -104,7 +95,6 @@ type Compiler struct {
 	metadata            metadata.Metadata
 	registries          []Registry
 	secrets             map[string]Secret
-	reslimit            ResourceLimit
 	defaultClonePlugin  string
 	trustedClonePlugins []string
 	trustedPipeline     bool
