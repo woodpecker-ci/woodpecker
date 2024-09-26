@@ -185,6 +185,7 @@ func (b *StepBuilder) compileWorkflow(parsed *yaml_types.Workflow, environ map[s
 		compiler.WithEnviron(environ),
 		compiler.WithEnviron(b.Envs),
 		compiler.WithEscalated(b.PrivilegedPlugins...),
+		compiler.WithTrustedClonePlugins(b.TrustedClonePlugins),
 		compiler.WithPrefix(
 			fmt.Sprintf(
 				"wp_%s_%d",
@@ -192,7 +193,6 @@ func (b *StepBuilder) compileWorkflow(parsed *yaml_types.Workflow, environ map[s
 				workflowID,
 			),
 		),
-		compiler.WithTrustedClonePlugins(b.TrustedClonePlugins),
 		compiler.WithMetadata(metadata),
 		compiler.WithTrusted(b.RepoIsTrusted),
 	)
