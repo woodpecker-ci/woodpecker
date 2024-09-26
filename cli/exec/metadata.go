@@ -15,6 +15,7 @@
 package exec
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -24,12 +25,12 @@ import (
 	"github.com/urfave/cli/v3"
 
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/metadata"
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/matrix"
 	"go.woodpecker-ci.org/woodpecker/v2/version"
 )
 
 // return the metadata from the cli context.
-func metadataFromCommand(c *cli.Command, workflow *model.Workflow) (*metadata.Metadata, error) {
+func metadataFromContext(_ context.Context, c *cli.Command, axis matrix.Axis, w *metadata.Workflow) (*metadata.Metadata, error) {
 	m := &metadata.Metadata{}
 
 	if c.IsSet("metadata-file") {

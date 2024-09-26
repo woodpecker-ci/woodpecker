@@ -18,62 +18,12 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"path/filepath"
 	"strings"
 
 	"github.com/urfave/cli/v3"
 
-	forge_types "go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v2/shared/constant"
 )
-
-// TODO: use don't import from server => move FileMeta to pipeline package
-func GetConfigs(ctx context.Context, dir string) ([]*forge_types.FileMeta, error) {
-	stat, err := os.Stat(dir)
-	if err != nil {
-		return nil, err
-	}
-
-	if stat.Mode().IsRegular() {
-		data, err := os.ReadFile(dir)
-		if err != nil {
-			return nil, err
-		}
-
-		return []*forge_types.FileMeta{{
-			Name: dir,
-			Data: data,
-		}}, nil
-	}
-
-	var files []*forge_types.FileMeta
-	err = filepath.Walk(dir, func(path string, info os.FileInfo, e error) error {
-		if e != nil {
-			return e
-		}
-
-		if !strings.HasSuffix(info.Name(), ".yaml") && !strings.HasSuffix(info.Name(), ".yml") {
-			return nil
-		}
-
-		data, err := os.ReadFile(path)
-		if err != nil {
-			return err
-		}
-
-		files = append(files, &forge_types.FileMeta{
-			Name: path,
-			Data: data,
-		})
-
-		return nil
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	return files, nil
-}
 
 func DetectPipelineConfig() (isDir bool, config string, _ error) {
 	for _, config := range constant.DefaultConfigOrder {

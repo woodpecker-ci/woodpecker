@@ -18,26 +18,32 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"os"
 	"path"
 	"path/filepath"
+	"runtime"
 	"strings"
 
+	"github.com/drone/envsubst"
+	"github.com/oklog/ulid/v2"
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v3"
 
 	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/lint"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/docker"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/kubernetes"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/local"
 	backend_types "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
-	pipeline_errors "go.woodpecker-ci.org/woodpecker/v2/pipeline/errors"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/metadata"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/compiler"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/stepbuilder"
-	pipeline_log "go.woodpecker-ci.org/woodpecker/v2/pipeline/log"
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/linter"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/matrix"
+	pipelineLog "go.woodpecker-ci.org/woodpecker/v2/pipeline/log"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/constant"
 	"go.woodpecker-ci.org/woodpecker/v2/shared/utils"
 )
 
@@ -50,118 +56,208 @@ var Command = &cli.Command{
 	Flags:     utils.MergeSlices(flags, docker.Flags, kubernetes.Flags, local.Flags),
 }
 
-func run(ctx context.Context, c *cli.Command) error {
-	repoPath := c.Args().First()
-	if repoPath == "" {
-		repoPath = "."
-	}
-
-	yamls, err := common.GetConfigs(ctx, path.Join(repoPath, ".woodpecker"))
-	if err != nil {
-		return err
-	}
-
-	envs := make(map[string]string)
-	for _, env := range c.StringSlice("env") {
-		before, after, _ := strings.Cut(env, "=")
-		envs[before] = after
-	}
-
-	// configure volumes for local execution
-	volumes := c.StringSlice("volumes")
-	workspaceBase := c.String("workspace-base")
-	workspacePath := c.String("workspace-path")
-	if c.Bool("local") {
-		volumes = append(volumes, c.String("prefix")+"_default:"+workspaceBase)
-		volumes = append(volumes, repoPath+":"+path.Join(workspaceBase, workspacePath))
-	}
-
-	getWorkflowMetadata := func(workflow *model.Workflow) metadata.Metadata {
-		m, err := metadataFromCommand(c, workflow)
-		if err != nil {
-			log.Error().Err(err).Msg("error getting metadata")
-		}
-		return *m
-	}
-
-	repoIsTrusted := false
-	host := "localhost"
-	privilegedPlugins := c.StringSlice("plugins-privileged")
-	secrets := []compiler.Secret{} // TODO: implement secrets
-
-	b := &stepbuilder.StepBuilder{
-		Yamls:                   yamls,
-		RepoIsTrusted:           repoIsTrusted,
-		Host:                    host,
-		Envs:                    envs,
-		GetWorkflowMetadataData: getWorkflowMetadata,
-		PrivilegedPlugins:       privilegedPlugins,
-		TrustedClonePlugins:     nil, // TODO: ?
-		CompilerOptions: []compiler.Option{
-			compiler.WithVolumes(volumes...),
-			compiler.WithWorkspace(
-				workspaceBase,
-				workspacePath,
-			),
-			compiler.WithNetworks(c.StringSlice("network")...),
-			compiler.WithPrefix(c.String("prefix")),
-			compiler.WithProxy(compiler.ProxyOptions{
-				NoProxy:    c.String("backend-no-proxy"),
-				HTTPProxy:  c.String("backend-http-proxy"),
-				HTTPSProxy: c.String("backend-https-proxy"),
-			}),
-			compiler.WithLocal(c.Bool("local")),
-			compiler.WithNetrc(
-				c.String("netrc-username"),
-				c.String("netrc-password"),
-				c.String("netrc-machine"),
-			),
-			compiler.WithSecret(secrets...),
-			compiler.WithEnviron(envs),
-			// compiler.WithMetadata(metadata),
-		},
-	}
-
-	items, err := b.Build()
-	if pipeline_errors.HasBlockingErrors(err) {
-		return err
-	} else if err != nil {
-		log.Error().Err(err).Msg("error building pipeline")
-	}
-
-	done := make(map[string]bool)
-	for len(done) < len(items) {
-		for _, item := range items {
-			// skip already executed workflows
-			if done[item.Workflow.Name] {
-				continue
-			}
-
-			if waitingForDependencies(item, done) {
-				continue
-			}
-
-			fmt.Printf("# %s\n", item.Workflow.Name)
-
-			err := runWorkflow(ctx, c, item.Config, item.Workflow.Name)
-			if err != nil {
-				return err
-			}
-
-			done[item.Workflow.Name] = true
-		}
-	}
-
-	return nil
-}
-
 var backends = []backend_types.Backend{
 	kubernetes.New(),
 	docker.New(),
 	local.New(),
 }
 
-func runWorkflow(ctx context.Context, c *cli.Command, compiled *backend_types.Config, workflowName string) error {
+func run(ctx context.Context, c *cli.Command) error {
+	return common.RunPipelineFunc(ctx, c, execFile, execDir)
+}
+
+func execDir(ctx context.Context, c *cli.Command, dir string) error {
+	// TODO: respect pipeline dependency
+	repoPath := c.String("repo-path")
+	if repoPath != "" {
+		repoPath, _ = filepath.Abs(repoPath)
+	} else {
+		repoPath, _ = filepath.Abs(filepath.Dir(dir))
+	}
+	if runtime.GOOS == "windows" {
+		repoPath = convertPathForWindows(repoPath)
+	}
+	// TODO: respect depends_on and do parallel runs with output to multiple _windows_ e.g. tmux like
+	return filepath.Walk(dir, func(path string, info os.FileInfo, e error) error {
+		if e != nil {
+			return e
+		}
+
+		// check if it is a regular file (not dir)
+		if info.Mode().IsRegular() && (strings.HasSuffix(info.Name(), ".yaml") || strings.HasSuffix(info.Name(), ".yml")) {
+			fmt.Println("#", info.Name())
+			_ = runExec(ctx, c, path, repoPath, false) // TODO: should we drop errors or store them and report back?
+			fmt.Println("")
+			return nil
+		}
+
+		return nil
+	})
+}
+
+func execFile(ctx context.Context, c *cli.Command, file string) error {
+	repoPath := c.String("repo-path")
+	if repoPath != "" {
+		repoPath, _ = filepath.Abs(repoPath)
+	} else {
+		repoPath, _ = filepath.Abs(filepath.Dir(file))
+	}
+	if runtime.GOOS == "windows" {
+		repoPath = convertPathForWindows(repoPath)
+	}
+	return runExec(ctx, c, file, repoPath, true)
+}
+
+func runExec(ctx context.Context, c *cli.Command, file, repoPath string, singleExec bool) error {
+	dat, err := os.ReadFile(file)
+	if err != nil {
+		return err
+	}
+
+	axes, err := matrix.ParseString(string(dat))
+	if err != nil {
+		return fmt.Errorf("parse matrix fail")
+	}
+
+	if len(axes) == 0 {
+		axes = append(axes, matrix.Axis{})
+	}
+	for _, axis := range axes {
+		err := execWithAxis(ctx, c, file, repoPath, axis, singleExec)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func execWithAxis(ctx context.Context, c *cli.Command, file, repoPath string, axis matrix.Axis, singleExec bool) error {
+	var metadataWorkflow *metadata.Workflow
+	if !singleExec {
+		// TODO: proper try to use the engine to generate the same metadata for workflows
+		// https://github.com/woodpecker-ci/woodpecker/pull/3967
+		metadataWorkflow.Name = strings.TrimSuffix(strings.TrimSuffix(file, ".yaml"), ".yml")
+	}
+	metadata, err := metadataFromContext(ctx, c, axis, metadataWorkflow)
+	if err != nil {
+		return fmt.Errorf("could not create metadata: %w", err)
+	} else if metadata == nil {
+		return fmt.Errorf("metadata is nil")
+	}
+
+	environ := metadata.Environ()
+	var secrets []compiler.Secret
+	for key, val := range metadata.Workflow.Matrix {
+		environ[key] = val
+		secrets = append(secrets, compiler.Secret{
+			Name:  key,
+			Value: val,
+		})
+	}
+
+	pipelineEnv := make(map[string]string)
+	for _, env := range c.StringSlice("env") {
+		before, after, _ := strings.Cut(env, "=")
+		pipelineEnv[before] = after
+		if oldVar, exists := environ[before]; exists {
+			// override existing values, but print a warning
+			log.Warn().Msgf("environment variable '%s' had value '%s', but got overwritten", before, oldVar)
+		}
+		environ[before] = after
+	}
+
+	tmpl, err := envsubst.ParseFile(file)
+	if err != nil {
+		return err
+	}
+	confStr, err := tmpl.Execute(func(name string) string {
+		return environ[name]
+	})
+	if err != nil {
+		return err
+	}
+
+	conf, err := yaml.ParseString(confStr)
+	if err != nil {
+		return err
+	}
+
+	// emulate server behavior https://github.com/woodpecker-ci/woodpecker/blob/eebaa10d104cbc3fa7ce4c0e344b0b7978405135/server/pipeline/stepbuilder/stepBuilder.go#L289-L295
+	prefix := "wp_" + ulid.Make().String()
+
+	// configure volumes for local execution
+	volumes := c.StringSlice("volumes")
+	if c.Bool("local") {
+		var (
+			workspaceBase = conf.Workspace.Base
+			workspacePath = conf.Workspace.Path
+		)
+		if workspaceBase == "" {
+			workspaceBase = c.String("workspace-base")
+		}
+		if workspacePath == "" {
+			workspacePath = c.String("workspace-path")
+		}
+
+		volumes = append(volumes, prefix+"_default:"+workspaceBase)
+		volumes = append(volumes, repoPath+":"+path.Join(workspaceBase, workspacePath))
+	}
+
+	privilegedPlugins := c.StringSlice("plugins-privileged")
+
+	// lint the yaml file
+	err = linter.New(
+		linter.WithTrusted(true),
+		linter.PrivilegedPlugins(privilegedPlugins),
+		linter.WithTrustedClonePlugins(constant.TrustedClonePlugins),
+	).Lint([]*linter.WorkflowConfig{{
+		File:      path.Base(file),
+		RawConfig: confStr,
+		Workflow:  conf,
+	}})
+	if err != nil {
+		str, err := lint.FormatLintError(file, err)
+		fmt.Print(str)
+		if err != nil {
+			return err
+		}
+	}
+
+	// compiles the yaml file
+	compiled, err := compiler.New(
+		compiler.WithEscalated(
+			privilegedPlugins...,
+		),
+		compiler.WithVolumes(volumes...),
+		compiler.WithWorkspace(
+			c.String("workspace-base"),
+			c.String("workspace-path"),
+		),
+		compiler.WithNetworks(
+			c.StringSlice("network")...,
+		),
+		compiler.WithPrefix(prefix),
+		compiler.WithProxy(compiler.ProxyOptions{
+			NoProxy:    c.String("backend-no-proxy"),
+			HTTPProxy:  c.String("backend-http-proxy"),
+			HTTPSProxy: c.String("backend-https-proxy"),
+		}),
+		compiler.WithLocal(
+			c.Bool("local"),
+		),
+		compiler.WithNetrc(
+			c.String("netrc-username"),
+			c.String("netrc-password"),
+			c.String("netrc-machine"),
+		),
+		compiler.WithMetadata(*metadata),
+		compiler.WithSecret(secrets...),
+		compiler.WithEnviron(pipelineEnv),
+	).Compile(conf)
+	if err != nil {
+		return err
+	}
+
 	backendCtx := context.WithValue(ctx, backend_types.CliCommand, c)
 	backendEngine, err := backend.FindBackend(backendCtx, backends, c.String("backend-engine"))
 	if err != nil {
@@ -175,7 +271,7 @@ func runWorkflow(ctx context.Context, c *cli.Command, compiled *backend_types.Co
 	pipelineCtx, cancel := context.WithTimeout(context.Background(), c.Duration("timeout"))
 	defer cancel()
 	pipelineCtx = utils.WithContextSigtermCallback(pipelineCtx, func() {
-		fmt.Printf("ctrl+c received, terminating current pipeline '%s'\n", workflowName)
+		fmt.Printf("ctrl+c received, terminating current pipeline '%s'\n", confStr)
 	})
 
 	return pipeline.New(compiled,
@@ -210,15 +306,5 @@ func convertPathForWindows(path string) string {
 
 var defaultLogger = pipeline.Logger(func(step *backend_types.Step, rc io.ReadCloser) error {
 	logWriter := NewLineWriter(step.Name, step.UUID)
-	return pipeline_log.CopyLineByLine(logWriter, rc, pipeline.MaxLogLineLength)
+	return pipelineLog.CopyLineByLine(logWriter, rc, pipeline.MaxLogLineLength)
 })
-
-func waitingForDependencies(item *stepbuilder.Item, done map[string]bool) bool {
-	for _, step := range item.DependsOn {
-		if v, ok := done[step]; !ok || !v {
-			return true
-		}
-	}
-
-	return false
-}
