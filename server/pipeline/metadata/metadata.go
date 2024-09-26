@@ -25,20 +25,20 @@ import (
 )
 
 type MetadataServerForge struct {
-	forge    metadata.ServerForge
-	repo     *model.Repo
-	pipeline *model.Pipeline
-	last     *model.Pipeline
-	sysURL   string
+	forge        metadata.ServerForge
+	repo         *model.Repo
+	pipeline     *model.Pipeline
+	prevPipeline *model.Pipeline
+	sysURL       string
 }
 
-func NewMetadataServerForge(forge metadata.ServerForge, repo *model.Repo, pipeline *model.Pipeline, last *model.Pipeline, sysURL string) *MetadataServerForge {
+func NewMetadataServerForge(forge metadata.ServerForge, repo *model.Repo, pipeline *model.Pipeline, prevPipeline *model.Pipeline, sysURL string) *MetadataServerForge {
 	return &MetadataServerForge{
-		forge:    forge,
-		repo:     repo,
-		pipeline: pipeline,
-		last:     last,
-		sysURL:   sysURL,
+		forge:        forge,
+		repo:         repo,
+		pipeline:     pipeline,
+		prevPipeline: prevPipeline,
+		sysURL:       sysURL,
 	}
 }
 
@@ -66,6 +66,7 @@ func (m *MetadataServerForge) MetadataFromStruct(workflow *model.Workflow) metad
 			Owner:       m.repo.Owner,
 			RemoteID:    fmt.Sprint(m.repo.ForgeRemoteID),
 			ForgeURL:    m.repo.ForgeURL,
+			SCM:         string(m.repo.SCMKind),
 			CloneURL:    m.repo.Clone,
 			CloneSSHURL: m.repo.CloneSSH,
 			Private:     m.repo.IsSCMPrivate,
@@ -95,7 +96,7 @@ func (m *MetadataServerForge) MetadataFromStruct(workflow *model.Workflow) metad
 	return metadata.Metadata{
 		Repo:     fRepo,
 		Curr:     metadataPipelineFromModelPipeline(m.pipeline, true),
-		Prev:     metadataPipelineFromModelPipeline(m.last, false),
+		Prev:     metadataPipelineFromModelPipeline(m.prevPipeline, false),
 		Workflow: fWorkflow,
 		Step:     metadata.Step{},
 		Sys: metadata.System{
