@@ -38,7 +38,7 @@ func getMockMetadata(t *testing.T) func(*model.Workflow) metadata.Metadata {
 	last := &model.Pipeline{}
 	host := ""
 	meta := server_metadata.NewMetadataServerForge(getMockForge(t), repo, curr, last, host)
-	return meta.MetadataFromStruct
+	return meta.MetadataForWorkflow
 }
 
 func TestGlobalEnvsubst(t *testing.T) {
@@ -49,8 +49,8 @@ func TestGlobalEnvsubst(t *testing.T) {
 			"KEY_K": "VALUE_V",
 			"IMAGE": "scratch",
 		},
-		GetWorkflowMetadataData: getMockMetadata(t),
-		Host:                    "",
+		GetWorkflowMetadata: getMockMetadata(t),
+		Host:                "",
 		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
 when:
@@ -76,8 +76,8 @@ func TestMissingGlobalEnvsubst(t *testing.T) {
 			"KEY_K":    "VALUE_V",
 			"NO_IMAGE": "scratch",
 		},
-		GetWorkflowMetadataData: getMockMetadata(t),
-		Host:                    "",
+		GetWorkflowMetadata: getMockMetadata(t),
+		Host:                "",
 		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
 when:
@@ -99,8 +99,8 @@ func TestMultilineEnvsubst(t *testing.T) {
 	t.Parallel()
 
 	b := StepBuilder{
-		GetWorkflowMetadataData: getMockMetadata(t),
-		Host:                    "",
+		GetWorkflowMetadata: getMockMetadata(t),
+		Host:                "",
 		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
 when:
@@ -131,8 +131,8 @@ func TestMultiPipeline(t *testing.T) {
 	t.Parallel()
 
 	b := StepBuilder{
-		GetWorkflowMetadataData: getMockMetadata(t),
-		Host:                    "",
+		GetWorkflowMetadata: getMockMetadata(t),
+		Host:                "",
 		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
 when:
@@ -164,8 +164,8 @@ func TestDependsOn(t *testing.T) {
 	t.Parallel()
 
 	b := StepBuilder{
-		GetWorkflowMetadataData: getMockMetadata(t),
-		Host:                    "",
+		GetWorkflowMetadata: getMockMetadata(t),
+		Host:                "",
 		Yamls: []*forge_types.FileMeta{
 			{Name: "lint", Data: []byte(`
 when:
@@ -211,8 +211,8 @@ func TestRunsOn(t *testing.T) {
 	t.Parallel()
 
 	b := StepBuilder{
-		GetWorkflowMetadataData: getMockMetadata(t),
-		Host:                    "",
+		GetWorkflowMetadata: getMockMetadata(t),
+		Host:                "",
 		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
 when:
@@ -244,8 +244,8 @@ func TestPipelineName(t *testing.T) {
 	t.Parallel()
 
 	b := StepBuilder{
-		GetWorkflowMetadataData: getMockMetadata(t),
-		Host:                    "",
+		GetWorkflowMetadata: getMockMetadata(t),
+		Host:                "",
 		Yamls: []*forge_types.FileMeta{
 			{Name: ".woodpecker/lint.yml", Data: []byte(`
 when:
@@ -278,8 +278,8 @@ func TestBranchFilter(t *testing.T) {
 	t.Parallel()
 
 	b := StepBuilder{
-		GetWorkflowMetadataData: getMockMetadata(t),
-		Host:                    "",
+		GetWorkflowMetadata: getMockMetadata(t),
+		Host:                "",
 		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
 when:
@@ -315,8 +315,8 @@ func TestRootWhenFilter(t *testing.T) {
 	t.Parallel()
 
 	b := StepBuilder{
-		GetWorkflowMetadataData: getMockMetadata(t),
-		Host:                    "",
+		GetWorkflowMetadata: getMockMetadata(t),
+		Host:                "",
 		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
 when:
@@ -354,8 +354,8 @@ func TestZeroSteps(t *testing.T) {
 	t.Parallel()
 
 	b := StepBuilder{
-		GetWorkflowMetadataData: getMockMetadata(t),
-		Host:                    "",
+		GetWorkflowMetadata: getMockMetadata(t),
+		Host:                "",
 		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
 when:
@@ -383,8 +383,8 @@ func TestZeroStepsAsMultiPipelineDeps(t *testing.T) {
 	t.Parallel()
 
 	b := StepBuilder{
-		GetWorkflowMetadataData: getMockMetadata(t),
-		Host:                    "",
+		GetWorkflowMetadata: getMockMetadata(t),
+		Host:                "",
 		Yamls: []*forge_types.FileMeta{
 			{Name: "zerostep", Data: []byte(`
 when:
@@ -430,8 +430,8 @@ func TestZeroStepsAsMultiPipelineTransitiveDeps(t *testing.T) {
 	t.Parallel()
 
 	b := StepBuilder{
-		GetWorkflowMetadataData: getMockMetadata(t),
-		Host:                    "",
+		GetWorkflowMetadata: getMockMetadata(t),
+		Host:                "",
 		Yamls: []*forge_types.FileMeta{
 			{Name: "zerostep", Data: []byte(`
 when:

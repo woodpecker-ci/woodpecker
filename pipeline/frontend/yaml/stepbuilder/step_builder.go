@@ -38,14 +38,14 @@ import (
 
 // StepBuilder Takes the hook data and the yaml and returns in internal data model.
 type StepBuilder struct {
-	Yamls                   []*forge_types.FileMeta // TODO: get rid of server type in this package
-	CompilerOptions         []compiler.Option
-	GetWorkflowMetadataData func(*model.Workflow) metadata.Metadata
-	RepoIsTrusted           bool
-	TrustedClonePlugins     []string
-	PrivilegedPlugins       []string
-	Host                    string
-	Envs                    map[string]string
+	Yamls               []*forge_types.FileMeta // TODO: get rid of server type in this package
+	CompilerOptions     []compiler.Option
+	GetWorkflowMetadata func(*model.Workflow) metadata.Metadata
+	RepoIsTrusted       bool
+	TrustedClonePlugins []string
+	PrivilegedPlugins   []string
+	Host                string
+	Envs                map[string]string
 }
 
 func (b *StepBuilder) Build() (items []*Item, errorsAndWarnings error) {
@@ -102,7 +102,7 @@ func (b *StepBuilder) Build() (items []*Item, errorsAndWarnings error) {
 }
 
 func (b *StepBuilder) genItemForWorkflow(workflow *model.Workflow, axis matrix.Axis, data string) (item *Item, errorsAndWarnings error) {
-	workflowMetadata := b.GetWorkflowMetadataData(workflow)
+	workflowMetadata := b.GetWorkflowMetadata(workflow)
 	environ := workflowMetadata.Environ()
 	for k, v := range axis {
 		environ[k] = v

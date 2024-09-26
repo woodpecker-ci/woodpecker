@@ -97,13 +97,13 @@ func parsePipeline(forge forge.Forge, store store.Store, currentPipeline *model.
 	meta := metadata.NewMetadataServerForge(forge, repo, currentPipeline, prev, server.Config.Server.Host)
 
 	b := &stepbuilder.StepBuilder{
-		Yamls:                   yamls,
-		GetWorkflowMetadataData: meta.MetadataFromStruct,
-		RepoIsTrusted:           repo.IsTrusted,
-		Host:                    server.Config.Server.Host,
-		Envs:                    envs,
-		TrustedClonePlugins:     server.Config.Pipeline.TrustedClonePlugins,
-		PrivilegedPlugins:       server.Config.Pipeline.PrivilegedPlugins,
+		Yamls:               yamls,
+		GetWorkflowMetadata: meta.MetadataForWorkflow,
+		RepoIsTrusted:       repo.IsTrusted,
+		Host:                server.Config.Server.Host,
+		Envs:                envs,
+		TrustedClonePlugins: server.Config.Pipeline.TrustedClonePlugins,
+		PrivilegedPlugins:   server.Config.Pipeline.PrivilegedPlugins,
 		CompilerOptions: []compiler.Option{
 			compiler.WithResourceLimit(server.Config.Pipeline.Limits.MemSwapLimit, server.Config.Pipeline.Limits.MemLimit, server.Config.Pipeline.Limits.ShmSize, server.Config.Pipeline.Limits.CPUQuota, server.Config.Pipeline.Limits.CPUShares, server.Config.Pipeline.Limits.CPUSet),
 			compiler.WithVolumes(server.Config.Pipeline.Volumes...),

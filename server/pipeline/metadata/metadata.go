@@ -42,8 +42,8 @@ func NewMetadataServerForge(forge metadata.ServerForge, repo *model.Repo, pipeli
 	}
 }
 
-// MetadataFromStruct return the metadata from a pipeline will run with.
-func (m *MetadataServerForge) MetadataFromStruct(workflow *model.Workflow) metadata.Metadata {
+// MetadataForWorkflow returns the metadata for a workflow.
+func (m *MetadataServerForge) MetadataForWorkflow(workflow *model.Workflow) metadata.Metadata {
 	host := m.sysURL
 	uri, err := url.Parse(m.sysURL)
 	if err == nil {

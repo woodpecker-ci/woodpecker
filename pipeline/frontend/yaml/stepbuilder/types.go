@@ -6,7 +6,7 @@ import (
 )
 
 type Item struct {
-	Workflow  *model.Workflow
+	Workflow  *model.Workflow // TODO: get rid of server type in this package
 	Labels    map[string]string
 	DependsOn []string
 	RunsOn    []string

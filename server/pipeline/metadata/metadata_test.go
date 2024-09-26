@@ -99,7 +99,7 @@ func TestMetadataFromStruct(t *testing.T) {
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
 			meta := NewMetadataServerForge(testCase.forge, testCase.repo, testCase.pipeline, testCase.prev, testCase.sysURL)
-			result := meta.MetadataFromStruct(testCase.workflow)
+			result := meta.MetadataForWorkflow(testCase.workflow)
 			assert.EqualValues(t, testCase.expectedMetadata, result)
 			assert.EqualValues(t, testCase.expectedEnviron, result.Environ())
 		})
