@@ -8,6 +8,7 @@
 
 ### 💥 Breaking changes
 
+- Move docker resource limit settings from server to agent [[#3174](https://github.com/woodpecker-ci/woodpecker/pull/3174)]
 - Set `/woodpecker` as default workdir for the **woodpecker-cli** container [[#4130](https://github.com/woodpecker-ci/woodpecker/pull/4130)]
 - Require upgrade from 2.x [[#4112](https://github.com/woodpecker-ci/woodpecker/pull/4112)]
 - Don't expose task data via api [[#4108](https://github.com/woodpecker-ci/woodpecker/pull/4108)]
