@@ -77,7 +77,11 @@ func run(ctx context.Context, c *cli.Command) error {
 	}
 
 	getWorkflowMetadata := func(workflow *model.Workflow) metadata.Metadata {
-		return metadataFromCommand(c, workflow)
+		m, err := metadataFromCommand(c, workflow)
+		if err != nil {
+			log.Error().Err(err).Msg("error getting metadata")
+		}
+		return *m
 	}
 
 	repoIsTrusted := false

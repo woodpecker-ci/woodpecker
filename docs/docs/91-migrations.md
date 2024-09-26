@@ -4,6 +4,7 @@ Some versions need some changes to the server configuration or the pipeline conf
 
 ## `next`
 
+- Set `/woodpecker` as defautl workdir for the **woodpecker-cli** container
 - Removed built-in environment variables:
   - `CI_COMMIT_URL` use `CI_PIPELINE_FORGE_URL`
   - `CI_STEP_FINISHED` as empty during execution
@@ -34,6 +35,7 @@ Some versions need some changes to the server configuration or the pipeline conf
 - Replaced `configs` object by `netrc` in external configuration APIs
 - Removed old API routes: `registry/` -> `registries`, `/authorize/token`
 - Replaced `registry` command with `repo registry` in cli
+- Disallow upgrades from 1.x, upgrade to 2.x first
 
 ## 2.0.0
 

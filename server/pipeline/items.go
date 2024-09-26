@@ -39,7 +39,7 @@ func parsePipeline(forge forge.Forge, store store.Store, currentPipeline *model.
 	}
 
 	// get the previous pipeline so that we can send status change notifications
-	last, err := store.GetPipelineLastBefore(repo, currentPipeline.Branch, currentPipeline.ID)
+	prev, err := store.GetPipelineLastBefore(repo, currentPipeline.Branch, currentPipeline.ID)
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		log.Error().Err(err).Str("repo", repo.FullName).Msgf("error getting last pipeline before pipeline number '%d'", currentPipeline.Number)
 	}
@@ -94,7 +94,7 @@ func parsePipeline(forge forge.Forge, store store.Store, currentPipeline *model.
 		envs[k] = v
 	}
 
-	meta := metadata.NewMetadataServerForge(forge, repo, currentPipeline, last, server.Config.Server.Host)
+	meta := metadata.NewMetadataServerForge(forge, repo, currentPipeline, prev, server.Config.Server.Host)
 
 	b := &stepbuilder.StepBuilder{
 		Yamls:                   yamls,
