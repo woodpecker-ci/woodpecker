@@ -27,6 +27,9 @@ import (
 func TestLint(t *testing.T) {
 	testdatas := []struct{ Title, Data string }{{
 		Title: "map", Data: `
+when:
+  event: push
+
 steps:
   build:
     image: docker
@@ -36,7 +39,7 @@ steps:
       - go build
       - go test
   publish:
-    image: plugins/docker
+    image: woodpeckerci/plugin-kaniko
     settings:
       repo: foo/bar
       foo: bar
@@ -46,6 +49,9 @@ services:
 `,
 	}, {
 		Title: "list", Data: `
+when:
+  event: push
+
 steps:
   - name: build
     image: docker
@@ -55,7 +61,7 @@ steps:
       - go build
       - go test
   - name: publish
-    image: plugins/docker
+    image: woodpeckerci/plugin-kaniko
     settings:
       repo: foo/bar
       foo: bar
@@ -65,6 +71,9 @@ services:
 `,
 	}, {
 		Title: "merge maps", Data: `
+when:
+  event: push
+
 variables:
   step_template: &base-step
     image: golang:1.19
@@ -112,10 +121,6 @@ func TestLintErrors(t *testing.T) {
 			want: "Insufficient privileges to use privileged mode",
 		},
 		{
-			from: "steps: { build: { image: golang, shm_size: 10gb }  }",
-			want: "Insufficient privileges to override shm_size",
-		},
-		{
 			from: "steps: { build: { image: golang, dns: [ 8.8.8.8 ] }  }",
 			want: "Insufficient privileges to use custom dns",
 		},
@@ -137,16 +142,74 @@ func TestLintErrors(t *testing.T) {
 			want: "Insufficient privileges to use network_mode",
 		},
 		{
-			from: "steps: { build: { image: golang, networks: [ outside, default ] }  }",
-			want: "Insufficient privileges to use networks",
-		},
-		{
 			from: "steps: { build: { image: golang, volumes: [ '/opt/data:/var/lib/mysql' ] }  }",
 			want: "Insufficient privileges to use volumes",
 		},
 		{
 			from: "steps: { build: { image: golang, network_mode: 'container:name' }  }",
 			want: "Insufficient privileges to use network_mode",
+		},
+		{
+			from: "steps: { build: { image: golang, settings: { test: 'true' }, commands: [ 'echo ja', 'echo nein' ] } }",
+			want: "Cannot configure both commands and settings",
+		},
+		{
+			from: "steps: { build: { image: golang, settings: { test: 'true' }, entrypoint: [ '/bin/fish' ] } }",
+			want: "Cannot configure both entrypoint and settings",
+		},
+		{
+			from: "steps: { build: { image: golang, settings: { test: 'true' }, environment: { 'TEST': 'true' } } }",
+			want: "Should not configure both environment and settings",
+		},
+		{
+			from: "{pipeline: { build: { image: golang, settings: { test: 'true' } } }, when: { branch: main, event: push } }",
+			want: "Additional property pipeline is not allowed",
+		},
+		{
+			from: "{steps: { build: { image: plugins/docker, settings: { test: 'true' } } }, when: { branch: main, event: push } } }",
+			want: "Cannot use once by default privileged plugin 'plugins/docker', if needed add it too WOODPECKER_PLUGINS_PRIVILEGED",
+		},
+		{
+			from: "{steps: { build: { image: golang, settings: { test: 'true' } } }, when: { branch: main, event: push }, clone: { git: { image: some-other/plugin-git:v1.1.0 } } }",
+			want: "Specified clone image does not match allow list, netrc will not be injected",
+		},
+	}
+
+	for _, test := range testdata {
+		conf, err := yaml.ParseString(test.from)
+		assert.NoError(t, err)
+
+		lerr := linter.New().Lint([]*linter.WorkflowConfig{{
+			File:      test.from,
+			RawConfig: test.from,
+			Workflow:  conf,
+		}})
+		assert.Error(t, lerr, "expected lint error for configuration", test.from)
+
+		lerrors := errors.GetPipelineErrors(lerr)
+		found := false
+		for _, lerr := range lerrors {
+			if lerr.Message == test.want {
+				found = true
+				break
+			}
+		}
+		assert.True(t, found, "Expected error %q, got %q", test.want, lerrors)
+	}
+}
+
+func TestBadHabits(t *testing.T) {
+	testdata := []struct {
+		from string
+		want string
+	}{
+		{
+			from: "steps: { build: { image: golang } }",
+			want: "Please set an event filter for all steps or the whole workflow on all items of the when block",
+		},
+		{
+			from: "when: [{branch: xyz}, {event: push}]\nsteps: { build: { image: golang } }",
+			want: "Please set an event filter for all steps or the whole workflow on all items of the when block",
 		},
 	}
 

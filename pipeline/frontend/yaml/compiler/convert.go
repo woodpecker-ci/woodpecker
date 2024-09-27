@@ -30,6 +30,13 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/utils"
 )
 
+const (
+	// The pluginWorkspaceBase should not be changed, only if you are sure what you do.
+	pluginWorkspaceBase = "/woodpecker"
+	// DefaultWorkspaceBase is set if not altered by the user.
+	DefaultWorkspaceBase = pluginWorkspaceBase
+)
+
 func (c *Compiler) createProcess(container *yaml_types.Container, stepType backend_types.StepType) (*backend_types.Step, error) {
 	var (
 		uuid = ulid.Make()
@@ -37,11 +44,16 @@ func (c *Compiler) createProcess(container *yaml_types.Container, stepType backe
 		detached   bool
 		workingDir string
 
-		workspace   = fmt.Sprintf("%s_default:%s", c.prefix, c.base)
 		privileged  = container.Privileged
 		networkMode = container.NetworkMode
-		// network    = container.Network
 	)
+
+	workspaceBase := c.workspaceBase
+	if container.IsPlugin() {
+		// plugins have a predefined workspace base to not tamper with entrypoint executables
+		workspaceBase = pluginWorkspaceBase
+	}
+	workspaceVolume := fmt.Sprintf("%s_default:%s", c.prefix, workspaceBase)
 
 	networks := []backend_types.Conn{
 		{
@@ -67,7 +79,7 @@ func (c *Compiler) createProcess(container *yaml_types.Container, stepType backe
 
 	var volumes []string
 	if !c.local {
-		volumes = append(volumes, workspace)
+		volumes = append(volumes, workspaceVolume)
 	}
 	volumes = append(volumes, c.volumes...)
 	for _, volume := range container.Volumes.Volumes {
@@ -76,18 +88,15 @@ func (c *Compiler) createProcess(container *yaml_types.Container, stepType backe
 
 	// append default environment variables
 	environment := map[string]string{}
-	maps.Copy(environment, container.Environment)
 	maps.Copy(environment, c.env)
 
-	environment["CI_WORKSPACE"] = path.Join(c.base, c.path)
+	environment["CI_WORKSPACE"] = path.Join(workspaceBase, c.workspacePath)
 
 	if stepType == backend_types.StepTypeService || container.Detached {
 		detached = true
 	}
 
-	if !detached || len(container.Commands) != 0 {
-		workingDir = c.stepWorkingDir(container)
-	}
+	workingDir = c.stepWorkingDir(container)
 
 	getSecretValue := func(name string) (string, error) {
 		name = strings.ToLower(name)
@@ -107,21 +116,29 @@ func (c *Compiler) createProcess(container *yaml_types.Container, stepType backe
 
 	// TODO: why don't we pass secrets to detached steps?
 	if !detached {
-		if err := settings.ParamsToEnv(container.Settings, environment, getSecretValue); err != nil {
+		if err := settings.ParamsToEnv(container.Settings, environment, "PLUGIN_", true, getSecretValue); err != nil {
 			return nil, err
 		}
 	}
 
-	for _, requested := range container.Secrets.Secrets {
-		secretValue, err := getSecretValue(requested.Source)
+	if err := settings.ParamsToEnv(container.Environment, environment, "", false, getSecretValue); err != nil {
+		return nil, err
+	}
+
+	for _, requested := range container.Secrets {
+		secretValue, err := getSecretValue(requested)
 		if err != nil {
 			return nil, err
 		}
 
-		environment[strings.ToUpper(requested.Target)] = secretValue
+		if !environmentAllowed(requested, stepType) {
+			continue
+		}
+
+		environment[requested] = secretValue
 	}
 
-	if utils.MatchImage(container.Image, c.escalated...) && container.IsPlugin() {
+	if utils.MatchImageDynamic(container.Image, c.escalated...) && container.IsPlugin() {
 		privileged = true
 	}
 
@@ -132,36 +149,6 @@ func (c *Compiler) createProcess(container *yaml_types.Container, stepType backe
 			authConfig.Password = registry.Password
 			break
 		}
-	}
-
-	// Advanced backend settings
-	backendOptions := backend_types.BackendOptions{
-		Kubernetes: convertKubernetesBackendOptions(&container.BackendOptions.Kubernetes),
-	}
-
-	memSwapLimit := int64(container.MemSwapLimit)
-	if c.reslimit.MemSwapLimit != 0 {
-		memSwapLimit = c.reslimit.MemSwapLimit
-	}
-	memLimit := int64(container.MemLimit)
-	if c.reslimit.MemLimit != 0 {
-		memLimit = c.reslimit.MemLimit
-	}
-	shmSize := int64(container.ShmSize)
-	if c.reslimit.ShmSize != 0 {
-		shmSize = c.reslimit.ShmSize
-	}
-	cpuQuota := int64(container.CPUQuota)
-	if c.reslimit.CPUQuota != 0 {
-		cpuQuota = c.reslimit.CPUQuota
-	}
-	cpuShares := int64(container.CPUShares)
-	if c.reslimit.CPUShares != 0 {
-		cpuShares = c.reslimit.CPUShares
-	}
-	cpuSet := container.CPUSet
-	if c.reslimit.CPUSet != "" {
-		cpuSet = c.reslimit.CPUSet
 	}
 
 	var ports []backend_types.Port
@@ -202,19 +189,13 @@ func (c *Compiler) createProcess(container *yaml_types.Container, stepType backe
 		Networks:       networks,
 		DNS:            container.DNS,
 		DNSSearch:      container.DNSSearch,
-		MemSwapLimit:   memSwapLimit,
-		MemLimit:       memLimit,
-		ShmSize:        shmSize,
-		CPUQuota:       cpuQuota,
-		CPUShares:      cpuShares,
-		CPUSet:         cpuSet,
 		AuthConfig:     authConfig,
 		OnSuccess:      onSuccess,
 		OnFailure:      onFailure,
 		Failure:        failure,
 		NetworkMode:    networkMode,
 		Ports:          ports,
-		BackendOptions: backendOptions,
+		BackendOptions: container.BackendOptions,
 	}, nil
 }
 
@@ -222,7 +203,11 @@ func (c *Compiler) stepWorkingDir(container *yaml_types.Container) string {
 	if path.IsAbs(container.Directory) {
 		return container.Directory
 	}
-	return path.Join(c.base, c.path, container.Directory)
+	base := c.workspaceBase
+	if container.IsPlugin() {
+		base = pluginWorkspaceBase
+	}
+	return path.Join(base, c.workspacePath, container.Directory)
 }
 
 func convertPort(portDef string) (backend_types.Port, error) {
@@ -239,53 +224,4 @@ func convertPort(portDef string) (backend_types.Port, error) {
 	port.Number = uint16(portNumber)
 
 	return port, nil
-}
-
-func convertKubernetesBackendOptions(kubeOpt *yaml_types.KubernetesBackendOptions) backend_types.KubernetesBackendOptions {
-	resources := backend_types.Resources{
-		Limits:   kubeOpt.Resources.Limits,
-		Requests: kubeOpt.Resources.Requests,
-	}
-
-	var tolerations []backend_types.Toleration
-	for _, t := range kubeOpt.Tolerations {
-		tolerations = append(tolerations, backend_types.Toleration{
-			Key:               t.Key,
-			Operator:          backend_types.TolerationOperator(t.Operator),
-			Value:             t.Value,
-			Effect:            backend_types.TaintEffect(t.Effect),
-			TolerationSeconds: t.TolerationSeconds,
-		})
-	}
-
-	var securityContext *backend_types.SecurityContext
-	if kubeOpt.SecurityContext != nil {
-		securityContext = &backend_types.SecurityContext{
-			Privileged:   kubeOpt.SecurityContext.Privileged,
-			RunAsNonRoot: kubeOpt.SecurityContext.RunAsNonRoot,
-			RunAsUser:    kubeOpt.SecurityContext.RunAsUser,
-			RunAsGroup:   kubeOpt.SecurityContext.RunAsGroup,
-			FSGroup:      kubeOpt.SecurityContext.FSGroup,
-		}
-		if kubeOpt.SecurityContext.SeccompProfile != nil {
-			securityContext.SeccompProfile = &backend_types.SecProfile{
-				Type:             backend_types.SecProfileType(kubeOpt.SecurityContext.SeccompProfile.Type),
-				LocalhostProfile: kubeOpt.SecurityContext.SeccompProfile.LocalhostProfile,
-			}
-		}
-		if kubeOpt.SecurityContext.ApparmorProfile != nil {
-			securityContext.ApparmorProfile = &backend_types.SecProfile{
-				Type:             backend_types.SecProfileType(kubeOpt.SecurityContext.ApparmorProfile.Type),
-				LocalhostProfile: kubeOpt.SecurityContext.ApparmorProfile.LocalhostProfile,
-			}
-		}
-	}
-
-	return backend_types.KubernetesBackendOptions{
-		Resources:          resources,
-		ServiceAccountName: kubeOpt.ServiceAccountName,
-		NodeSelector:       kubeOpt.NodeSelector,
-		Tolerations:        tolerations,
-		SecurityContext:    securityContext,
-	}
 }

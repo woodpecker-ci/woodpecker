@@ -50,7 +50,7 @@ func TestSecretAvailable(t *testing.T) {
 	assert.ErrorContains(t, secret.Available("push", &yaml_types.Container{
 		Image:    "golang",
 		Commands: yaml_base_types.StringOrSlice{"echo 'this is not a plugin'"},
-	}), "only allowed to be used by plugins by step")
+	}), "is only allowed to be used by plugins (a filter has been set on the secret). Note: Image filters do not work for normal steps")
 	assert.ErrorContains(t, secret.Available("push", &yaml_types.Container{
 		Image:    "not-golang",
 		Commands: yaml_base_types.StringOrSlice{},
@@ -61,13 +61,14 @@ func TestSecretAvailable(t *testing.T) {
 }
 
 func TestCompilerCompile(t *testing.T) {
+	repoURL := "https://github.com/octocat/hello-world"
 	compiler := New(
 		WithMetadata(metadata.Metadata{
 			Repo: metadata.Repo{
 				Owner:    "octacat",
 				Name:     "hello-world",
 				Private:  true,
-				ForgeURL: "https://github.com/octocat/hello-world",
+				ForgeURL: repoURL,
 				CloneURL: "https://github.com/octocat/hello-world.git",
 			},
 		}),
@@ -76,6 +77,8 @@ func TestCompilerCompile(t *testing.T) {
 			"COLORED": "true",
 		}),
 		WithPrefix("test"),
+		// we use "/test" as custom workspace base to ensure the enforcement of the pluginWorkspaceBase is applied
+		WithWorkspaceFromURL("/test", repoURL),
 	)
 
 	defaultNetworks := []*backend_types.Network{{
@@ -89,10 +92,11 @@ func TestCompilerCompile(t *testing.T) {
 		Steps: []*backend_types.Step{{
 			Name:       "clone",
 			Type:       backend_types.StepTypeClone,
-			Image:      constant.DefaultCloneImage,
+			Image:      constant.DefaultClonePlugin,
 			OnSuccess:  true,
 			Failure:    "fail",
-			Volumes:    []string{defaultVolumes[0].Name + ":"},
+			Volumes:    []string{defaultVolumes[0].Name + ":/woodpecker"},
+			WorkingDir: "/woodpecker/src/github.com/octocat/hello-world",
 			Networks:   []backend_types.Conn{{Name: "test_default", Aliases: []string{"clone"}}},
 			ExtraHosts: []backend_types.HostAlias{},
 		}},
@@ -137,7 +141,8 @@ func TestCompilerCompile(t *testing.T) {
 						Image:      "dummy_img",
 						OnSuccess:  true,
 						Failure:    "fail",
-						Volumes:    []string{defaultVolumes[0].Name + ":"},
+						Volumes:    []string{defaultVolumes[0].Name + ":/woodpecker"},
+						WorkingDir: "/woodpecker/src/github.com/octocat/hello-world",
 						Networks:   []backend_types.Conn{{Name: "test_default", Aliases: []string{"dummy"}}},
 						ExtraHosts: []backend_types.HostAlias{},
 					}},
@@ -145,60 +150,65 @@ func TestCompilerCompile(t *testing.T) {
 			},
 		},
 		{
-			name: "workflow with three steps and one group",
+			name: "workflow with three steps",
 			fronConf: &yaml_types.Workflow{Steps: yaml_types.ContainerList{ContainerList: []*yaml_types.Container{{
 				Name:     "echo env",
 				Image:    "bash",
 				Commands: []string{"env"},
 			}, {
 				Name:     "parallel echo 1",
-				Group:    "parallel",
 				Image:    "bash",
 				Commands: []string{"echo 1"},
 			}, {
 				Name:     "parallel echo 2",
-				Group:    "parallel",
 				Image:    "bash",
 				Commands: []string{"echo 2"},
 			}}}},
 			backConf: &backend_types.Config{
 				Networks: defaultNetworks,
 				Volumes:  defaultVolumes,
-				Stages: []*backend_types.Stage{defaultCloneStage, {
-					Steps: []*backend_types.Step{{
-						Name:       "echo env",
-						Type:       backend_types.StepTypeCommands,
-						Image:      "bash",
-						Commands:   []string{"env"},
-						OnSuccess:  true,
-						Failure:    "fail",
-						Volumes:    []string{defaultVolumes[0].Name + ":"},
-						Networks:   []backend_types.Conn{{Name: "test_default", Aliases: []string{"echo env"}}},
-						ExtraHosts: []backend_types.HostAlias{},
-					}},
-				}, {
-					Steps: []*backend_types.Step{{
-						Name:       "parallel echo 1",
-						Type:       backend_types.StepTypeCommands,
-						Image:      "bash",
-						Commands:   []string{"echo 1"},
-						OnSuccess:  true,
-						Failure:    "fail",
-						Volumes:    []string{defaultVolumes[0].Name + ":"},
-						Networks:   []backend_types.Conn{{Name: "test_default", Aliases: []string{"parallel echo 1"}}},
-						ExtraHosts: []backend_types.HostAlias{},
+				Stages: []*backend_types.Stage{
+					defaultCloneStage, {
+						Steps: []*backend_types.Step{{
+							Name:       "echo env",
+							Type:       backend_types.StepTypeCommands,
+							Image:      "bash",
+							Commands:   []string{"env"},
+							OnSuccess:  true,
+							Failure:    "fail",
+							Volumes:    []string{defaultVolumes[0].Name + ":/test"},
+							WorkingDir: "/test/src/github.com/octocat/hello-world",
+							Networks:   []backend_types.Conn{{Name: "test_default", Aliases: []string{"echo env"}}},
+							ExtraHosts: []backend_types.HostAlias{},
+						}},
 					}, {
-						Name:       "parallel echo 2",
-						Type:       backend_types.StepTypeCommands,
-						Image:      "bash",
-						Commands:   []string{"echo 2"},
-						OnSuccess:  true,
-						Failure:    "fail",
-						Volumes:    []string{defaultVolumes[0].Name + ":"},
-						Networks:   []backend_types.Conn{{Name: "test_default", Aliases: []string{"parallel echo 2"}}},
-						ExtraHosts: []backend_types.HostAlias{},
-					}},
-				}},
+						Steps: []*backend_types.Step{{
+							Name:       "parallel echo 1",
+							Type:       backend_types.StepTypeCommands,
+							Image:      "bash",
+							Commands:   []string{"echo 1"},
+							OnSuccess:  true,
+							Failure:    "fail",
+							Volumes:    []string{defaultVolumes[0].Name + ":/test"},
+							WorkingDir: "/test/src/github.com/octocat/hello-world",
+							Networks:   []backend_types.Conn{{Name: "test_default", Aliases: []string{"parallel echo 1"}}},
+							ExtraHosts: []backend_types.HostAlias{},
+						}},
+					}, {
+						Steps: []*backend_types.Step{{
+							Name:       "parallel echo 2",
+							Type:       backend_types.StepTypeCommands,
+							Image:      "bash",
+							Commands:   []string{"echo 2"},
+							OnSuccess:  true,
+							Failure:    "fail",
+							Volumes:    []string{defaultVolumes[0].Name + ":/test"},
+							WorkingDir: "/test/src/github.com/octocat/hello-world",
+							Networks:   []backend_types.Conn{{Name: "test_default", Aliases: []string{"parallel echo 2"}}},
+							ExtraHosts: []backend_types.HostAlias{},
+						}},
+					},
+				},
 			},
 		},
 		{
@@ -228,7 +238,8 @@ func TestCompilerCompile(t *testing.T) {
 						Commands:   []string{"env"},
 						OnSuccess:  true,
 						Failure:    "fail",
-						Volumes:    []string{defaultVolumes[0].Name + ":"},
+						Volumes:    []string{defaultVolumes[0].Name + ":/test"},
+						WorkingDir: "/test/src/github.com/octocat/hello-world",
 						Networks:   []backend_types.Conn{{Name: "test_default", Aliases: []string{"echo env"}}},
 						ExtraHosts: []backend_types.HostAlias{},
 					}, {
@@ -238,7 +249,8 @@ func TestCompilerCompile(t *testing.T) {
 						Commands:   []string{"echo 2"},
 						OnSuccess:  true,
 						Failure:    "fail",
-						Volumes:    []string{defaultVolumes[0].Name + ":"},
+						Volumes:    []string{defaultVolumes[0].Name + ":/test"},
+						WorkingDir: "/test/src/github.com/octocat/hello-world",
 						Networks:   []backend_types.Conn{{Name: "test_default", Aliases: []string{"echo 2"}}},
 						ExtraHosts: []backend_types.HostAlias{},
 					}},
@@ -250,7 +262,8 @@ func TestCompilerCompile(t *testing.T) {
 						Commands:   []string{"echo 1"},
 						OnSuccess:  true,
 						Failure:    "fail",
-						Volumes:    []string{defaultVolumes[0].Name + ":"},
+						Volumes:    []string{defaultVolumes[0].Name + ":/test"},
+						WorkingDir: "/test/src/github.com/octocat/hello-world",
 						Networks:   []backend_types.Conn{{Name: "test_default", Aliases: []string{"echo 1"}}},
 						ExtraHosts: []backend_types.HostAlias{},
 					}},
@@ -263,7 +276,7 @@ func TestCompilerCompile(t *testing.T) {
 				Name:     "step",
 				Image:    "bash",
 				Commands: []string{"env"},
-				Secrets:  yaml_types.Secrets{Secrets: []*yaml_types.Secret{{Source: "missing", Target: "missing"}}},
+				Secrets:  []string{"missing"},
 			}}}},
 			backConf:    nil,
 			expectedErr: "secret \"missing\" not found",
@@ -341,4 +354,41 @@ func TestSecretMatch(t *testing.T) {
 			assert.Equal(t, tc.match, tc.secret.Match(tc.event))
 		})
 	}
+}
+
+func TestCompilerCompilePrivileged(t *testing.T) {
+	compiler := New(
+		WithEscalated("test/image"),
+	)
+
+	fronConf := &yaml_types.Workflow{
+		SkipClone: true,
+		Steps: yaml_types.ContainerList{
+			ContainerList: []*yaml_types.Container{
+				{
+					Name:      "privileged-plugin",
+					Image:     "test/image",
+					DependsOn: []string{}, // no dependencies =>  enable dag mode & all steps are executed in parallel
+				},
+				{
+					Name:     "no-plugin",
+					Image:    "test/image",
+					Commands: []string{"echo 'i am not a plugin anymore'"},
+				},
+				{
+					Name:  "not-privileged-image",
+					Image: "some/other-image",
+				},
+			},
+		},
+	}
+
+	backConf, err := compiler.Compile(fronConf)
+	assert.NoError(t, err)
+
+	assert.Len(t, backConf.Stages, 1)
+	assert.Len(t, backConf.Stages[0].Steps, 3)
+	assert.True(t, backConf.Stages[0].Steps[0].Privileged)
+	assert.False(t, backConf.Stages[0].Steps[1].Privileged)
+	assert.False(t, backConf.Stages[0].Steps[2].Privileged)
 }

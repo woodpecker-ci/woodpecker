@@ -29,16 +29,16 @@ import (
 func (s storage) ConfigsForPipeline(pipelineID int64) ([]*model.Config, error) {
 	configs := make([]*model.Config, 0, perPage)
 	return configs, s.engine.
-		Table("config").
-		Join("LEFT", "pipeline_config", "config.config_id = pipeline_config.config_id").
-		Where("pipeline_config.pipeline_id = ?", pipelineID).
+		Table("configs").
+		Join("LEFT", "pipeline_configs", "configs.id = pipeline_configs.config_id").
+		Where("pipeline_configs.pipeline_id = ?", pipelineID).
 		Find(&configs)
 }
 
 func (s storage) configFindIdentical(sess *xorm.Session, repoID int64, hash, name string) (*model.Config, error) {
 	conf := new(model.Config)
 	if err := wrapGet(sess.Where(
-		builder.Eq{"config_repo_id": repoID, "config_hash": hash, "config_name": name},
+		builder.Eq{"repo_id": repoID, "hash": hash, "name": name},
 	).Get(conf)); err != nil {
 		return nil, err
 	}
@@ -67,18 +67,6 @@ func (s storage) ConfigPersist(conf *model.Config) (*model.Config, error) {
 	}
 
 	return conf, sess.Commit()
-}
-
-func (s storage) ConfigFindApproved(config *model.Config) (bool, error) {
-	return s.engine.Table("pipelines").Select("pipelines.pipeline_id").
-		Join("INNER", "pipeline_config", "pipelines.pipeline_id = pipeline_config.pipeline_id").
-		Where(builder.Eq{"pipelines.pipeline_repo_id": config.RepoID, "pipeline_config.config_id": config.ID}.
-			And(builder.NotIn("pipelines.pipeline_status", model.StatusBlocked, model.StatusPending))).
-		Exist()
-}
-
-func (s storage) ConfigCreate(config *model.Config) error {
-	return s.configCreate(s.engine.NewSession(), config)
 }
 
 func (s storage) configCreate(sess *xorm.Session, config *model.Config) error {

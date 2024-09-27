@@ -20,12 +20,7 @@
     </div>
     <div class="flex ml-auto -m-1.5 items-center space-x-2">
       <div v-if="user?.admin" class="relative">
-        <IconButton
-          class="navbar-icon"
-          :title="$t('admin.settings.settings')"
-          :to="{ name: 'admin-settings' }"
-          icon="settings"
-        />
+        <IconButton class="navbar-icon" :title="$t('settings')" :to="{ name: 'admin-settings' }" icon="settings" />
         <div
           v-if="version?.needsUpdate"
           class="absolute top-2 right-2 bg-int-wp-state-error-100 rounded-full w-3 h-3"
@@ -36,7 +31,7 @@
       <IconButton v-if="user" :to="{ name: 'user' }" :title="$t('user.settings.settings')" class="navbar-icon !p-1.5">
         <img v-if="user && user.avatar_url" class="rounded-md" :src="`${user.avatar_url}`" />
       </IconButton>
-      <Button v-else :text="$t('login')" @click="doLogin" />
+      <Button v-else :text="$t('login')" :to="`/login?url=${route.fullPath}`" />
     </div>
   </nav>
 </template>
@@ -59,10 +54,6 @@ const route = useRoute();
 const authentication = useAuthentication();
 const { user } = authentication;
 const apiUrl = `${config.rootPath ?? ''}/swagger/index.html`;
-
-function doLogin() {
-  authentication.authenticate(route.fullPath);
-}
 
 const { enableSwagger } = config;
 </script>

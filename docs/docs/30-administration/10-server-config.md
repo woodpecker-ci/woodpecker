@@ -6,7 +6,7 @@ toc_max_heading_level: 2
 
 ## User registration
 
-Woodpecker does not have its own user registry; users are provided from your [forge](./11-forges/10-overview.md) (using OAuth2).
+Woodpecker does not have its own user registry; users are provided from your [forge](./11-forges/11-overview.md) (using OAuth2).
 
 Registration is closed by default (`WOODPECKER_OPEN=false`). If registration is open (`WOODPECKER_OPEN=true`) then every user with an account at the configured forge can login to Woodpecker.
 
@@ -26,14 +26,14 @@ You can **also restrict** registration, by keep registration closed and:
 
 ```ini
 WOODPECKER_OPEN=false
-WOODPECKER_ADMIN=johnsmith,janedoe
+WOODPECKER_ADMIN=john.smith,jane_doe
 ```
 
 ### Only allow registration of users, who are members of approved organizations
 
 ```ini
 WOODPECKER_OPEN=true
-WOODPECKER_ORGS=dolores,dogpatch
+WOODPECKER_ORGS=dolores,dog-patch
 ```
 
 ## Administrators
@@ -41,7 +41,7 @@ WOODPECKER_ORGS=dolores,dogpatch
 Administrators should also be enumerated in your configuration.
 
 ```ini
-WOODPECKER_ADMIN=johnsmith,janedoe
+WOODPECKER_ADMIN=john.smith,jane_doe
 ```
 
 ## Filtering repositories
@@ -51,7 +51,7 @@ Woodpecker operates with the user's OAuth permission. Due to the coarse permissi
 Use the `WOODPECKER_REPO_OWNERS` variable to filter which GitHub user's repos should be synced only. You typically want to put here your company's GitHub name.
 
 ```ini
-WOODPECKER_REPO_OWNERS=mycompany,mycompanyossgithubuser
+WOODPECKER_REPO_OWNERS=my_company,my_company_oss_github_user
 ```
 
 ## Global registry setting
@@ -63,17 +63,15 @@ Point it to your server's docker config.
 WOODPECKER_DOCKER_CONFIG=/root/.docker/config.json
 ```
 
-## Handling sensitive data in docker-compose and docker-swarm
+## Handling sensitive data in **docker compose** and **docker swarm**
 
-To handle sensitive data in docker-compose or docker-swarm configurations there are several options:
+To handle sensitive data in `docker compose` or `docker swarm` configurations there are several options:
 
-For docker-compose you can use a `.env` file next to your compose configuration to store the secrets outside of the compose file. While this separates configuration from secrets it is still not very secure.
+For docker compose you can use a `.env` file next to your compose configuration to store the secrets outside of the compose file. While this separates configuration from secrets it is still not very secure.
 
-Alternatively use docker-secrets. As it may be difficult to use docker secrets for environment variables woodpecker allows to read sensible data from files by providing a `*_FILE` option of all sensible configuration variables. Woodpecker will try to read the value directly from this file. Keep in mind that when the original environment variable gets specified at the same time it will override the value read from the file.
+Alternatively use docker-secrets. As it may be difficult to use docker secrets for environment variables Woodpecker allows to read sensible data from files by providing a `*_FILE` option of all sensible configuration variables. Woodpecker will try to read the value directly from this file. Keep in mind that when the original environment variable gets specified at the same time it will override the value read from the file.
 
 ```diff title="docker-compose.yaml"
- version: '3'
-
  services:
    woodpecker-server:
      [...]
@@ -133,7 +131,7 @@ The examples below show how to place a banner message in the top navigation bar 
 ### `woodpecker.js`
 
 ```javascript
-// place/copy a minified version of jQuery or ZeptoJS here ...
+// place/copy a minified version of your preferred lightweight JavaScript library here ...
 !(function () {
   'use strict';
   function e() {} /*...*/
@@ -196,14 +194,6 @@ Examples:
 - `WOODPECKER_HOST=http://woodpecker.example.org`
 - `WOODPECKER_HOST=http://example.org/woodpecker`
 - `WOODPECKER_HOST=http://example.org:1234/woodpecker`
-
-### `WOODPECKER_WEBHOOK_HOST`
-
-> Default: value from `WOODPECKER_HOST` config env
-
-Server fully qualified URL of the Webhook-facing hostname and path prefix.
-
-Example: `WOODPECKER_WEBHOOK_HOST=http://woodpecker-server.cicd.svc.cluster.local:8000`
 
 ### `WOODPECKER_SERVER_ADDR`
 
@@ -305,7 +295,7 @@ Example: `org1,org2`
 
 > Default: empty
 
-Comma-separated list of syncable repo owners. ???
+Repositories by those owners will be allowed to be used in woodpecker.
 
 Example: `user1,user2`
 
@@ -327,11 +317,13 @@ Always use authentication to clone repositories even if they are public. Needed 
 
 List of event names that will be canceled when a new pipeline for the same context (tag, branch) is created.
 
-### `WOODPECKER_DEFAULT_CLONE_IMAGE`
+### `WOODPECKER_DEFAULT_CLONE_PLUGIN`
 
 > Default is defined in [shared/constant/constant.go](https://github.com/woodpecker-ci/woodpecker/blob/main/shared/constant/constant.go)
 
-The default docker image to be used when cloning the repo
+The default docker image to be used when cloning the repo.
+
+It is also added to the trusted clone plugin list.
 
 ### `WOODPECKER_DEFAULT_PIPELINE_TIMEOUT`
 
@@ -354,11 +346,20 @@ Context: when someone does log into Woodpecker, a temporary session token is cre
 As long as the session is valid (until it expires or log-out),
 a user can log into Woodpecker, without re-authentication.
 
-### `WOODPECKER_ESCALATE`
+### `WOODPECKER_PLUGINS_PRIVILEGED`
+
+Docker images to run in privileged mode. Only change if you are sure what you do!
+
+You should specify the tag of your images too, as this enforces exact matches.
+
+### WOODPECKER_PLUGINS_TRUSTED_CLONE
 
 > Defaults are defined in [shared/constant/constant.go](https://github.com/woodpecker-ci/woodpecker/blob/main/shared/constant/constant.go)
 
-Docker images to run in privileged mode. Only change if you are sure what you do!
+Plugins witch are trusted to handle the netrc info in clone steps.
+If a clone step use an image not in this list, the netrc will not be injected and an user has to use other methods (e.g. secrets) to clone non public repos.
+
+You should specify the tag of your images too, as this enforces exact matches.
 
 <!--
 ### `WOODPECKER_VOLUME`
@@ -419,7 +420,7 @@ The database driver name. Possible values are `sqlite3`, `mysql` or `postgres`.
 
 ### `WOODPECKER_DATABASE_DATASOURCE`
 
-> Default: `woodpecker.sqlite`
+> Default: `woodpecker.sqlite` if not running inside a container, `/var/lib/woodpecker/woodpecker.sqlite` if running inside a container
 
 The database connection string. The default value is the path of the embedded SQLite database file.
 
@@ -440,30 +441,6 @@ WOODPECKER_DATABASE_DATASOURCE=postgres://root:password@1.2.3.4:5432/woodpecker?
 > Default: empty
 
 Read the value for `WOODPECKER_DATABASE_DATASOURCE` from the specified filepath
-
-### `WOODPECKER_ENCRYPTION_KEY`
-
-> Default: empty
-
-Encryption key used to encrypt secrets in DB. See [secrets encryption](./40-encryption.md)
-
-### `WOODPECKER_ENCRYPTION_KEY_FILE`
-
-> Default: empty
-
-Read the value for `WOODPECKER_ENCRYPTION_KEY` from the specified filepath
-
-### `WOODPECKER_ENCRYPTION_TINK_KEYSET_FILE`
-
-> Default: empty
-
-Filepath to encryption keyset used to encrypt secrets in DB. See [secrets encryption](./40-encryption.md)
-
-### `WOODPECKER_ENCRYPTION_DISABLE`
-
-> Default: empty
-
-Boolean flag to decrypt secrets in DB and disable server encryption. See [secrets encryption](./40-encryption.md)
 
 ### `WOODPECKER_PROMETHEUS_AUTH_TOKEN`
 
@@ -497,63 +474,25 @@ Supported variables:
 - `owner`: the repo's owner
 - `repo`: the repo's name
 
-### `WOODPECKER_ADDONS`
-
-> Default: empty
-
-List of addon files. See [addons](./75-addons/00-overview.md).
-
 ---
-
-### `WOODPECKER_LIMIT_MEM_SWAP`
-
-> Default: `0`
-
-The maximum amount of memory a single pipeline container is allowed to swap to disk, configured in bytes. There is no limit if `0`.
-
-### `WOODPECKER_LIMIT_MEM`
-
-> Default: `0`
-
-The maximum amount of memory a single pipeline container can use, configured in bytes. There is no limit if `0`.
-
-### `WOODPECKER_LIMIT_SHM_SIZE`
-
-> Default: `0`
-
-The maximum amount of memory of `/dev/shm` allowed in bytes. There is no limit if `0`.
-
-### `WOODPECKER_LIMIT_CPU_QUOTA`
-
-> Default: `0`
-
-The number of microseconds per CPU period that the container is limited to before throttled. There is no limit if `0`.
-
-### `WOODPECKER_LIMIT_CPU_SHARES`
-
-> Default: `0`
-
-The relative weight vs. other containers.
-
-### `WOODPECKER_LIMIT_CPU_SET`
-
-> Default: empty
-
-Comma-separated list to limit the specific CPUs or cores a pipeline container can use.
-
-Example: `WOODPECKER_LIMIT_CPU_SET=1,2`
 
 ### `WOODPECKER_CONFIG_SERVICE_ENDPOINT`
 
 > Default: empty
 
-Specify a configuration service endpoint, see [Configuration Extension](./100-external-configuration-api.md)
+Specify a configuration service endpoint, see [Configuration Extension](./40-advanced/100-external-configuration-api.md)
 
 ### `WOODPECKER_FORGE_TIMEOUT`
 
 > Default: 3s
 
 Specify timeout when fetching the Woodpecker configuration from forge. See <https://pkg.go.dev/time#ParseDuration> for syntax reference.
+
+### `WOODPECKER_FORGE_RETRY`
+
+> Default: 3
+
+Specify how many retries of fetching the Woodpecker configuration from a forge are done before we fail.
 
 ### `WOODPECKER_ENABLE_SWAGGER`
 
@@ -567,20 +506,36 @@ Enable the Swagger UI for API documentation.
 
 Disable version check in admin web UI.
 
+### `WOODPECKER_LOG_STORE`
+
+> Default: `database`
+
+Where to store logs. Possible values: `database` or `file`.
+
+### `WOODPECKER_LOG_STORE_FILE_PATH`
+
+> Default empty
+
+Directory to store logs in if [`WOODPECKER_LOG_STORE`](#woodpecker_log_store) is `file`.
+
 ---
 
 ### `WOODPECKER_GITHUB_...`
 
-See [GitHub configuration](forges/github/#configuration)
+See [GitHub configuration](./11-forges/20-github.md#configuration)
 
 ### `WOODPECKER_GITEA_...`
 
-See [Gitea configuration](forges/gitea/#configuration)
+See [Gitea configuration](./11-forges/30-gitea.md#configuration)
 
 ### `WOODPECKER_BITBUCKET_...`
 
-See [Bitbucket configuration](forges/bitbucket/#configuration)
+See [Bitbucket configuration](./11-forges/50-bitbucket.md#configuration)
 
 ### `WOODPECKER_GITLAB_...`
 
-See [Gitlab configuration](forges/gitlab/#configuration)
+See [GitLab configuration](./11-forges/40-gitlab.md#configuration)
+
+### `WOODPECKER_ADDON_FORGE`
+
+See [addon forges](./11-forges/100-addon.md).

@@ -29,29 +29,6 @@ var (
 	ErrSecretEventInvalid = errors.New("invalid secret event")
 )
 
-// SecretService defines a service for managing secrets.
-type SecretService interface {
-	SecretListPipeline(*Repo, *Pipeline, *ListOptions) ([]*Secret, error)
-	// Repository secrets
-	SecretFind(*Repo, string) (*Secret, error)
-	SecretList(*Repo, *ListOptions) ([]*Secret, error)
-	SecretCreate(*Repo, *Secret) error
-	SecretUpdate(*Repo, *Secret) error
-	SecretDelete(*Repo, string) error
-	// Organization secrets
-	OrgSecretFind(int64, string) (*Secret, error)
-	OrgSecretList(int64, *ListOptions) ([]*Secret, error)
-	OrgSecretCreate(int64, *Secret) error
-	OrgSecretUpdate(int64, *Secret) error
-	OrgSecretDelete(int64, string) error
-	// Global secrets
-	GlobalSecretFind(string) (*Secret, error)
-	GlobalSecretList(*ListOptions) ([]*Secret, error)
-	GlobalSecretCreate(*Secret) error
-	GlobalSecretUpdate(*Secret) error
-	GlobalSecretDelete(string) error
-}
-
 // SecretStore persists secret information to storage.
 type SecretStore interface {
 	SecretFind(*Repo, string) (*Secret, error)
@@ -68,21 +45,21 @@ type SecretStore interface {
 
 // Secret represents a secret variable, such as a password or token.
 type Secret struct {
-	ID     int64          `json:"id"              xorm:"pk autoincr 'secret_id'"`
-	OrgID  int64          `json:"org_id"          xorm:"NOT NULL DEFAULT 0 UNIQUE(s) INDEX 'secret_org_id'"`
-	RepoID int64          `json:"repo_id"         xorm:"NOT NULL DEFAULT 0 UNIQUE(s) INDEX 'secret_repo_id'"`
-	Name   string         `json:"name"            xorm:"NOT NULL UNIQUE(s) INDEX 'secret_name'"`
-	Value  string         `json:"value,omitempty" xorm:"TEXT 'secret_value'"`
-	Images []string       `json:"images"          xorm:"json 'secret_images'"`
-	Events []WebhookEvent `json:"events"          xorm:"json 'secret_events'"`
+	ID     int64          `json:"id"              xorm:"pk autoincr 'id'"`
+	OrgID  int64          `json:"org_id"          xorm:"NOT NULL DEFAULT 0 UNIQUE(s) INDEX 'org_id'"`
+	RepoID int64          `json:"repo_id"         xorm:"NOT NULL DEFAULT 0 UNIQUE(s) INDEX 'repo_id'"`
+	Name   string         `json:"name"            xorm:"NOT NULL UNIQUE(s) INDEX 'name'"`
+	Value  string         `json:"value,omitempty" xorm:"TEXT 'value'"`
+	Images []string       `json:"images"          xorm:"json 'images'"`
+	Events []WebhookEvent `json:"events"          xorm:"json 'events'"`
 } //	@name Secret
 
-// TableName return database table name for xorm
+// TableName return database table name for xorm.
 func (Secret) TableName() string {
 	return "secrets"
 }
 
-// BeforeInsert will sort events before inserted into database
+// BeforeInsert will sort events before inserted into database.
 func (s *Secret) BeforeInsert() {
 	s.Events = sortEvents(s.Events)
 }

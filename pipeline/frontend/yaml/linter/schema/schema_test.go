@@ -33,18 +33,6 @@ func TestSchema(t *testing.T) {
 		fail     bool
 	}{
 		{
-			name:     "Branches",
-			testFile: ".woodpecker/test-branches.yaml",
-		},
-		{
-			name:     "Branches Array",
-			testFile: ".woodpecker/test-branches-array.yaml",
-		},
-		{
-			name:     "Branches exclude & include",
-			testFile: ".woodpecker/test-branches-exclude-include.yaml",
-		},
-		{
 			name:     "Clone",
 			testFile: ".woodpecker/test-clone.yaml",
 		},
@@ -85,10 +73,6 @@ func TestSchema(t *testing.T) {
 			testFile: ".woodpecker/test-workspace.yaml",
 		},
 		{
-			name:     "Platform",
-			testFile: ".woodpecker/test-platform.yaml",
-		},
-		{
 			name:     "Labels",
 			testFile: ".woodpecker/test-labels.yaml",
 		},
@@ -110,6 +94,21 @@ func TestSchema(t *testing.T) {
 			name:     "Step DAG syntax",
 			testFile: ".woodpecker/test-dag.yaml",
 			fail:     false,
+		},
+		{
+			name:     "Custom backend",
+			testFile: ".woodpecker/test-custom-backend.yaml",
+			fail:     false,
+		},
+		{
+			name:     "Broken Plugin by environment",
+			testFile: ".woodpecker/test-broken-plugin.yaml",
+			fail:     true,
+		},
+		{
+			name:     "Broken Plugin by commands",
+			testFile: ".woodpecker/test-broken-plugin2.yaml",
+			fail:     true,
 		},
 	}
 

@@ -19,21 +19,23 @@ steps:
       - echo "test"
     when:
       event: push
+      branch:
+        include: main
+        exclude: [develop, feature/*]
 
   when-event-array:
     image: alpine
     commands:
       - echo "test"
     when:
-      event: [push, pull_request, tag, deployment]
-
-  when-event-exclude-pull_request_closed:
-    image: alpine
-    commands:
-      - echo "test"
-    when:
       event:
-        exclude: pull_request_closed
+        - manual
+        - push
+        - pull_request
+        - pull_request_closed
+        - tag
+        - deployment
+        - release
 
   when-ref:
     image: alpine
@@ -68,7 +70,6 @@ steps:
     commands:
       - echo "test"
     when:
-      environment: production
       event: deployment
 
   when-matrix:
@@ -112,6 +113,7 @@ steps:
         include: ['.woodpecker/*.yml', '*.ini']
         exclude: ['*.md', 'docs/**']
         ignore_message: '[ALL]'
+        on_empty: true
 
   when-repo:
     image: alpine

@@ -51,9 +51,9 @@ func NewServer(t *testing.T) *httptest.Server {
 			return
 		case "/api/v4/projects/4/hooks":
 			switch r.Method {
-			case "GET":
+			case http.MethodGet:
 				w.Write(project4PayloadHooks)
-			case "POST":
+			case http.MethodPost:
 				w.Write(project4PayloadHook)
 				w.WriteHeader(201)
 			}

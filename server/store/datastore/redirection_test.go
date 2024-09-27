@@ -20,25 +20,7 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
-	"go.woodpecker-ci.org/woodpecker/v2/server/store/types"
 )
-
-func TestGetRedirection(t *testing.T) {
-	store, closer := newTestStore(t, new(model.Redirection))
-	defer closer()
-
-	redirection := &model.Redirection{
-		RepoID:   1,
-		FullName: "foo/bar",
-	}
-	assert.NoError(t, store.CreateRedirection(redirection))
-	redirectionFromStore, err := store.GetRedirection("foo/bar")
-	assert.NoError(t, err)
-	assert.NotNil(t, redirectionFromStore)
-	assert.Equal(t, redirection.RepoID, redirectionFromStore.RepoID)
-	_, err = store.GetRedirection("foo/baz")
-	assert.ErrorIs(t, err, types.RecordNotExist)
-}
 
 func TestCreateRedirection(t *testing.T) {
 	store, closer := newTestStore(t, new(model.Redirection))

@@ -28,7 +28,8 @@ import (
 )
 
 const (
-	mergeRefs = "refs/merge-requests/%d/head" // merge request merged with base
+	mergeRefs               = "refs/merge-requests/%d/head" // merge request merged with base
+	VisibilityLevelInternal = 10
 )
 
 func (g *GitLab) convertGitLabRepo(_repo *gitlab.Project, projectMember *gitlab.ProjectMember) (*model.Repo, error) {
@@ -46,7 +47,7 @@ func (g *GitLab) convertGitLabRepo(_repo *gitlab.Project, projectMember *gitlab.
 		CloneSSH:      _repo.SSHURLToRepo,
 		Branch:        _repo.DefaultBranch,
 		Visibility:    model.RepoVisibility(_repo.Visibility),
-		IsSCMPrivate:  !_repo.Public,
+		IsSCMPrivate:  _repo.Visibility == gitlab.InternalVisibility || _repo.Visibility == gitlab.PrivateVisibility,
 		Perm: &model.Perm{
 			Pull:  isRead(_repo, projectMember),
 			Push:  isWrite(projectMember),
@@ -112,7 +113,7 @@ func convertMergeRequestHook(hook *gitlab.MergeEvent, req *http.Request) (int, *
 	}
 
 	pipeline.Event = model.EventPull
-	if obj.State == "closed" {
+	if obj.State == "closed" || obj.State == "merged" {
 		pipeline.Event = model.EventPullClosed
 	}
 
@@ -123,6 +124,7 @@ func convertMergeRequestHook(hook *gitlab.MergeEvent, req *http.Request) (int, *
 
 	pipeline.Ref = fmt.Sprintf(mergeRefs, obj.IID)
 	pipeline.Branch = obj.SourceBranch
+	pipeline.Refspec = fmt.Sprintf("%s:%s", obj.SourceBranch, obj.TargetBranch)
 
 	author := lastCommit.Author
 
@@ -188,7 +190,7 @@ func convertPushHook(hook *gitlab.PushEvent) (*model.Repo, *model.Pipeline, erro
 		files = append(files, cm.Removed...)
 		files = append(files, cm.Modified...)
 	}
-	pipeline.ChangedFiles = utils.DedupStrings(files)
+	pipeline.ChangedFiles = utils.DeduplicateStrings(files)
 
 	return repo, pipeline, nil
 }
@@ -258,7 +260,7 @@ func convertReleaseHook(hook *gitlab.ReleaseEvent) (*model.Repo, *model.Pipeline
 	repo.CloneSSH = hook.Project.GitSSHURL
 	repo.FullName = hook.Project.PathWithNamespace
 	repo.Branch = hook.Project.DefaultBranch
-	repo.IsSCMPrivate = hook.Project.VisibilityLevel > 10
+	repo.IsSCMPrivate = hook.Project.VisibilityLevel > VisibilityLevelInternal
 
 	pipeline := &model.Pipeline{
 		Event:    model.EventRelease,
@@ -292,9 +294,13 @@ func getUserAvatar(email string) string {
 	)
 }
 
+// extractFromPath splits a repository path string into owner and name components.
+// It requires at least two path components, otherwise an error is returned.
 func extractFromPath(str string) (string, string, error) {
+	const minPathComponents = 2
+
 	s := strings.Split(str, "/")
-	if len(s) < 2 {
+	if len(s) < minPathComponents {
 		return "", "", fmt.Errorf("minimum match not found")
 	}
 	return s[0], s[1], nil

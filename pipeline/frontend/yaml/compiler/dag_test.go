@@ -85,7 +85,6 @@ func TestConvertDAGToStages(t *testing.T) {
 		"echo env": {
 			position: 0,
 			name:     "echo env",
-			group:    "",
 			step: &backend_types.Step{
 				UUID:  "01HJDPEW6R7J0JBE3F1T7Q0TYX",
 				Type:  "commands",
@@ -96,7 +95,6 @@ func TestConvertDAGToStages(t *testing.T) {
 		"echo 1": {
 			position:  1,
 			name:      "echo 1",
-			group:     "",
 			dependsOn: []string{"echo env", "echo 2"},
 			step: &backend_types.Step{
 				UUID:  "01HJDPF770QGRZER8RF79XVS4M",
@@ -108,7 +106,6 @@ func TestConvertDAGToStages(t *testing.T) {
 		"echo 2": {
 			position: 2,
 			name:     "echo 2",
-			group:    "",
 			step: &backend_types.Step{
 				UUID:  "01HJDPFF5RMEYZW0YTGR1Y1ZR0",
 				Type:  "commands",

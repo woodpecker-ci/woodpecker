@@ -62,10 +62,6 @@ func Test_gitea(t *testing.T) {
 				g.Assert(f.url).Equal("http://localhost:8080")
 				g.Assert(f.SkipVerify).Equal(true)
 			})
-			g.It("Should handle malformed url", func() {
-				_, err := New(Opts{URL: "%gh&%ij"})
-				g.Assert(err).IsNotNil()
-			})
 		})
 
 		g.Describe("Generating a netrc file", func() {
@@ -153,7 +149,7 @@ func Test_gitea(t *testing.T) {
 
 		g.It("Given a PR hook", func() {
 			buf := bytes.NewBufferString(fixtures.HookPullRequest)
-			req, _ := http.NewRequest("POST", "/hook", buf)
+			req, _ := http.NewRequest(http.MethodPost, "/hook", buf)
 			req.Header = http.Header{}
 			req.Header.Set(hookEvent, hookPullRequest)
 			mockStore.On("GetRepoNameFallback", mock.Anything, mock.Anything).Return(fakeRepo, nil)

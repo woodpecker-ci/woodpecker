@@ -1,12 +1,5 @@
-when:
-  - event: pull_request
-  - event: push
-    branch:
-      - ${CI_REPO_DEFAULT_BRANCH}
-      - renovate/*
-
 variables:
-  - &golang_image 'docker.io/golang:1.21.5'
+  - &golang_image 'docker.io/golang:1.22'
   - &when
     - path: &when_path # related config files
         - '.woodpecker/test.yaml'
@@ -20,6 +13,14 @@ variables:
     - event: push
       branch: renovate/*
       path: *when_path
+
+when:
+  - event: pull_request
+  - event: push
+    branch: renovate/*
+  - event: push
+    branch: ${CI_REPO_DEFAULT_BRANCH}
+    path: *when_path
 
 steps:
   vendor:
@@ -37,6 +38,9 @@ steps:
     image: *golang_image
     commands:
       - go run go.woodpecker-ci.org/woodpecker/v2/cmd/cli lint
+    environment:
+      WOODPECKER_DISABLE_UPDATE_CHECK: true
+      WOODPECKER_PLUGINS_PRIVILEGED: 'docker.io/woodpeckerci/plugin-docker-buildx:4.2.0'
     when:
       - event: pull_request
         path:
@@ -68,34 +72,11 @@ steps:
       - '[ -n "$DIFF" ] && { echo "swagger not up to date, exec `make generate-swagger` and commit"; exit 1; } || true'
     when: *when
 
-  lint-editorconfig:
-    image: docker.io/mstruebing/editorconfig-checker:2.7.2
-    when:
-      - event: pull_request
-      - event: push
-        branch: renovate/*
-
   lint-license-header:
     image: *golang_image
     commands:
-      - go install github.com/google/addlicense@latest
+      - go install github.com/google/addlicense@latest # cspell:words addlicense
       - 'addlicense -check -ignore "vendor/**" **/*.go'
-    when: *when
-
-  prettier:
-    image: docker.io/woodpeckerci/plugin-prettier:0.1.0
-    settings:
-      version: 3.2.4
-    when:
-      - event: pull_request
-      - event: push
-        branch: renovate/*
-
-  spellcheck:
-    image: docker.io/node:21-alpine
-    commands:
-      - corepack enable
-      - pnpx cspell lint --no-progress --gitignore '{**,.*}/{*,.*}'
     when: *when
 
   test:
@@ -115,7 +96,7 @@ steps:
       - vendor
     image: *golang_image
     environment:
-      - WOODPECKER_DATABASE_DRIVER=sqlite3
+      WOODPECKER_DATABASE_DRIVER: sqlite3
     commands:
       - make test-server-datastore-coverage
     when:
@@ -126,8 +107,8 @@ steps:
       - vendor
     image: *golang_image
     environment:
-      - WOODPECKER_DATABASE_DRIVER=postgres
-      - WOODPECKER_DATABASE_DATASOURCE=host=postgres user=postgres dbname=postgres sslmode=disable
+      WOODPECKER_DATABASE_DRIVER: postgres
+      WOODPECKER_DATABASE_DATASOURCE: 'host=postgres user=postgres dbname=postgres sslmode=disable' # cspell:disable-line
     commands:
       - make test-server-datastore
     when: *when
@@ -137,8 +118,8 @@ steps:
       - vendor
     image: *golang_image
     environment:
-      - WOODPECKER_DATABASE_DRIVER=mysql
-      - WOODPECKER_DATABASE_DATASOURCE=root@tcp(mysql:3306)/test?parseTime=true
+      WOODPECKER_DATABASE_DRIVER: mysql
+      WOODPECKER_DATABASE_DATASOURCE: root@tcp(mysql:3306)/test?parseTime=true
     commands:
       - make test-server-datastore
     when: *when
@@ -167,14 +148,14 @@ services:
     image: docker.io/postgres:16
     ports: ['5432']
     environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_HOST_AUTH_METHOD=trust
+      POSTGRES_USER: postgres
+      POSTGRES_HOST_AUTH_METHOD: trust
     when: *when
 
   mysql:
     image: docker.io/mysql:8.2.0
     ports: ['3306']
     environment:
-      - MYSQL_DATABASE=test
-      - MYSQL_ALLOW_EMPTY_PASSWORD=yes
+      MYSQL_DATABASE: test
+      MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
     when: *when

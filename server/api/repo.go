@@ -45,9 +45,14 @@ import (
 //	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 //	@Param		forge_remote_id	query	string	true	"the id of a repository at the forge"
 func PostRepo(c *gin.Context) {
-	forge := server.Config.Services.Forge
 	_store := store.FromContext(c)
 	user := session.User(c)
+	_forge, err := server.Config.Services.Manager.ForgeFromUser(user)
+	if err != nil {
+		log.Error().Err(err).Msg("Cannot get forge from user")
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
 
 	forgeRemoteID := model.ForgeRemoteID(c.Query("forge_remote_id"))
 	if !forgeRemoteID.IsValid() {
@@ -67,7 +72,7 @@ func PostRepo(c *gin.Context) {
 		return
 	}
 
-	from, err := forge.Repo(c, user, forgeRemoteID, "", "")
+	from, err := _forge.Repo(c, user, forgeRemoteID, "", "")
 	if err != nil {
 		c.String(http.StatusInternalServerError, "Could not fetch repository from forge.")
 		return
@@ -86,6 +91,7 @@ func PostRepo(c *gin.Context) {
 	} else {
 		repo = from
 		repo.SecurityMode = model.SecurityModeApproveForkPRs
+		repo.AllowDeploy = false
 		repo.NetrcOnlyTrusted = true
 		repo.CancelPreviousPipelineEvents = server.Config.Pipeline.DefaultCancelPreviousPipelineEvents
 	}
@@ -111,8 +117,52 @@ func PostRepo(c *gin.Context) {
 		)
 	}
 
+	// find org of repo
+	var org *model.Org
+	org, err = _store.OrgFindByName(repo.Owner)
+	if err != nil && !errors.Is(err, types.RecordNotExist) {
+		c.String(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	// create an org if it doesn't exist yet
+	if errors.Is(err, types.RecordNotExist) {
+		org, err = _forge.Org(c, user, repo.Owner)
+		if err != nil {
+			msg := "could not fetch organization from forge."
+			log.Error().Err(err).Msg(msg)
+			c.String(http.StatusInternalServerError, msg)
+			return
+		}
+
+		org.ForgeID = user.ForgeID
+		err = _store.OrgCreate(org)
+		if err != nil {
+			msg := "could not create organization in store."
+			log.Error().Err(err).Msg(msg)
+			c.String(http.StatusInternalServerError, msg)
+			return
+		}
+	}
+
+	repo.OrgID = org.ID
+
+	if enabledOnce {
+		err = _store.UpdateRepo(repo)
+	} else {
+		repo.ForgeID = user.ForgeID // TODO: allow to use other connected forges of the user
+		err = _store.CreateRepo(repo)
+	}
+	if err != nil {
+		msg := "could not create/update repo in store."
+		log.Error().Err(err).Msg(msg)
+		c.String(http.StatusInternalServerError, msg)
+		return
+	}
+
 	// creates the jwt token used to verify the repository
-	t := token.New(token.HookToken, repo.FullName)
+	t := token.New(token.HookToken)
+	t.Set("repo-id", strconv.FormatInt(repo.ID, 10))
 	sig, err := t.Sign(repo.Hash)
 	if err != nil {
 		msg := "could not generate new jwt token."
@@ -127,36 +177,7 @@ func PostRepo(c *gin.Context) {
 		sig,
 	)
 
-	// find org of repo
-	var org *model.Org
-	org, err = _store.OrgFindByName(repo.Owner)
-	if err != nil && !errors.Is(err, types.RecordNotExist) {
-		c.String(http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	// create an org if it doesn't exist yet
-	if errors.Is(err, types.RecordNotExist) {
-		org, err = forge.Org(c, user, repo.Owner)
-		if err != nil {
-			msg := "could not fetch organization from forge."
-			log.Error().Err(err).Msg(msg)
-			c.String(http.StatusInternalServerError, msg)
-			return
-		}
-
-		err = _store.OrgCreate(org)
-		if err != nil {
-			msg := "could not create organization in store."
-			log.Error().Err(err).Msg(msg)
-			c.String(http.StatusInternalServerError, msg)
-			return
-		}
-	}
-
-	repo.OrgID = org.ID
-
-	err = forge.Activate(c, user, repo, hookURL)
+	err = _forge.Activate(c, user, repo, hookURL)
 	if err != nil {
 		msg := "could not create webhook in forge."
 		log.Error().Err(err).Msg(msg)
@@ -164,17 +185,6 @@ func PostRepo(c *gin.Context) {
 		return
 	}
 
-	if enabledOnce {
-		err = _store.UpdateRepo(repo)
-	} else {
-		err = _store.CreateRepo(repo)
-	}
-	if err != nil {
-		msg := "could not create/update repo in store."
-		log.Error().Err(err).Msg(msg)
-		c.String(http.StatusInternalServerError, msg)
-		return
-	}
 	repo.Perm = from.Perm
 	repo.Perm.Synced = time.Now().Unix()
 	repo.Perm.UserID = user.ID
@@ -191,7 +201,7 @@ func PostRepo(c *gin.Context) {
 
 // PatchRepo
 //
-//	@Summary	Change a repository
+//	@Summary	Update a repository
 //	@Router		/repos/{repo_id} [patch]
 //	@Produce	json
 //	@Success	200	{object}	Repo
@@ -211,7 +221,7 @@ func PatchRepo(c *gin.Context) {
 	}
 
 	if in.Timeout != nil && *in.Timeout > server.Config.Pipeline.MaxTimeout && !user.Admin {
-		c.String(http.StatusForbidden, fmt.Sprintf("Timeout is not allowed to be higher than max timeout (%dmin)", server.Config.Pipeline.MaxTimeout))
+		c.String(http.StatusForbidden, fmt.Sprintf("Timeout is not allowed to be higher than max timeout (%d min)", server.Config.Pipeline.MaxTimeout))
 		return
 	}
 	if in.IsTrusted != nil && *in.IsTrusted != repo.IsTrusted && !user.Admin {
@@ -222,6 +232,9 @@ func PatchRepo(c *gin.Context) {
 
 	if in.SecurityMode != nil {
 		repo.SecurityMode = *in.SecurityMode
+	}
+	if in.AllowDeploy != nil {
+		repo.AllowDeploy = *in.AllowDeploy
 	}
 	if in.IsTrusted != nil {
 		repo.IsTrusted = *in.IsTrusted
@@ -259,7 +272,7 @@ func PatchRepo(c *gin.Context) {
 
 // ChownRepo
 //
-//	@Summary	Change a repository's owner, to the one holding the access token
+//	@Summary	Change a repository's owner to the currently authenticated user
 //	@Router		/repos/{repo_id}/chown [post]
 //	@Produce	json
 //	@Success	200	{object}	Repo
@@ -282,20 +295,20 @@ func ChownRepo(c *gin.Context) {
 
 // LookupRepo
 //
-//	@Summary	Get repository by full-name
+//	@Summary	Lookup a repository by full name
 //	@Router		/repos/lookup/{repo_full_name} [get]
 //	@Produce	json
 //	@Success	200	{object}	Repo
 //	@Tags		Repositories
 //	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param		repo_full_name	path	string	true	"the repository full-name / slug"
+//	@Param		repo_full_name	path	string	true	"the repository full name / slug"
 func LookupRepo(c *gin.Context) {
 	c.JSON(http.StatusOK, session.Repo(c))
 }
 
 // GetRepo
 //
-//	@Summary	Get repository information
+//	@Summary	Get a repository
 //	@Router		/repos/{repo_id} [get]
 //	@Produce	json
 //	@Success	200	{object}	Repo
@@ -308,7 +321,7 @@ func GetRepo(c *gin.Context) {
 
 // GetRepoPermissions
 //
-//	@Summary		Repository permission information
+//	@Summary		Check current authenticated users access to the repository
 //	@Description	The repository permission, according to the used access token.
 //	@Router			/repos/{repo_id}/permissions [get]
 //	@Produce		json
@@ -323,7 +336,7 @@ func GetRepoPermissions(c *gin.Context) {
 
 // GetRepoBranches
 //
-//	@Summary	Get repository branches
+//	@Summary	Get branches of a repository
 //	@Router		/repos/{repo_id}/branches [get]
 //	@Produce	json
 //	@Success	200	{array}	string
@@ -335,11 +348,17 @@ func GetRepoPermissions(c *gin.Context) {
 func GetRepoBranches(c *gin.Context) {
 	repo := session.Repo(c)
 	user := session.User(c)
-	f := server.Config.Services.Forge
-
-	branches, err := f.Branches(c, user, repo, session.Pagination(c))
+	_forge, err := server.Config.Services.Manager.ForgeFromRepo(repo)
 	if err != nil {
-		_ = c.AbortWithError(http.StatusInternalServerError, err)
+		log.Error().Err(err).Msg("Cannot get forge from repo")
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	branches, err := _forge.Branches(c, user, repo, session.Pagination(c))
+	if err != nil {
+		log.Error().Err(err).Msg("failed to load branches")
+		c.String(http.StatusInternalServerError, "failed to load branches: %s", err)
 		return
 	}
 
@@ -348,7 +367,7 @@ func GetRepoBranches(c *gin.Context) {
 
 // GetRepoPullRequests
 //
-//	@Summary	List active pull requests
+//	@Summary	List active pull requests of a repository
 //	@Router		/repos/{repo_id}/pull_requests [get]
 //	@Produce	json
 //	@Success	200	{array}	PullRequest
@@ -360,9 +379,14 @@ func GetRepoBranches(c *gin.Context) {
 func GetRepoPullRequests(c *gin.Context) {
 	repo := session.Repo(c)
 	user := session.User(c)
-	f := server.Config.Services.Forge
+	_forge, err := server.Config.Services.Manager.ForgeFromRepo(repo)
+	if err != nil {
+		log.Error().Err(err).Msg("Cannot get forge from repo")
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
 
-	prs, err := f.PullRequests(c, user, repo, session.Pagination(c))
+	prs, err := _forge.PullRequests(c, user, repo, session.Pagination(c))
 	if err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
@@ -383,9 +407,14 @@ func GetRepoPullRequests(c *gin.Context) {
 func DeleteRepo(c *gin.Context) {
 	remove, _ := strconv.ParseBool(c.Query("remove"))
 	_store := store.FromContext(c)
-
 	repo := session.Repo(c)
 	user := session.User(c)
+	_forge, err := server.Config.Services.Manager.ForgeFromRepo(repo)
+	if err != nil {
+		log.Error().Err(err).Msg("Cannot get forge from repo")
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
 
 	repo.IsActive = false
 	repo.UserID = 0
@@ -402,7 +431,7 @@ func DeleteRepo(c *gin.Context) {
 		}
 	}
 
-	if err := server.Config.Services.Forge.Deactivate(c, user, repo, server.Config.Server.WebhookHost); err != nil {
+	if err := _forge.Deactivate(c, user, repo, server.Config.Server.WebhookHost); err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
@@ -438,10 +467,15 @@ func RepairRepo(c *gin.Context) {
 //	@Param		repo_id			path	int		true	"the repository id"
 //	@Param		to				query	string	true	"the username to move the repository to"
 func MoveRepo(c *gin.Context) {
-	forge := server.Config.Services.Forge
 	_store := store.FromContext(c)
 	repo := session.Repo(c)
 	user := session.User(c)
+	_forge, err := server.Config.Services.Manager.ForgeFromRepo(repo)
+	if err != nil {
+		log.Error().Err(err).Msg("Cannot get forge from repo")
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
 
 	to, exists := c.GetQuery("to")
 	if !exists {
@@ -456,7 +490,7 @@ func MoveRepo(c *gin.Context) {
 		return
 	}
 
-	from, err := forge.Repo(c, user, "", owner, name)
+	from, err := _forge.Repo(c, user, "", owner, name)
 	if err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
@@ -486,7 +520,8 @@ func MoveRepo(c *gin.Context) {
 	}
 
 	// creates the jwt token used to verify the repository
-	t := token.New(token.HookToken, repo.FullName)
+	t := token.New(token.HookToken)
+	t.Set("repo-id", strconv.FormatInt(repo.ID, 10))
 	sig, err := t.Sign(repo.Hash)
 	if err != nil {
 		c.String(http.StatusInternalServerError, err.Error())
@@ -501,10 +536,10 @@ func MoveRepo(c *gin.Context) {
 		sig,
 	)
 
-	if err := forge.Deactivate(c, user, repo, host); err != nil {
-		log.Trace().Err(err).Msgf("deactivate repo '%s' for move to activate later, got an error", repo.FullName)
+	if err := _forge.Deactivate(c, user, repo, host); err != nil {
+		log.Trace().Err(err).Msgf("deactivate repo '%s' for move to activate later, got an error", strconv.FormatInt(repo.ID, 10))
 	}
-	if err := forge.Activate(c, user, repo, hookURL); err != nil {
+	if err := _forge.Activate(c, user, repo, hookURL); err != nil {
 		c.String(http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -513,7 +548,8 @@ func MoveRepo(c *gin.Context) {
 
 // GetAllRepos
 //
-//	@Summary	List all repositories on the server. Requires admin rights.
+//	@Summary	List all repositories on the server
+//	@Description	Returns a list of all repositories. Requires admin rights.
 //	@Router		/repos [get]
 //	@Produce	json
 //	@Success	200	{array}	Repo
@@ -538,7 +574,8 @@ func GetAllRepos(c *gin.Context) {
 
 // RepairAllRepos
 //
-//	@Summary	Repair all repositories on the server. Requires admin rights.
+//	@Summary	Repair all repositories on the server
+//	@Description Executes a repair process on all repositories. Requires admin rights.
 //	@Router		/repos/repair [post]
 //	@Produce	plain
 //	@Success	204
@@ -564,16 +601,25 @@ func RepairAllRepos(c *gin.Context) {
 }
 
 func repairRepo(c *gin.Context, repo *model.Repo, withPerms, skipOnErr bool) {
-	forge := server.Config.Services.Forge
 	_store := store.FromContext(c)
+	_forge, err := server.Config.Services.Manager.ForgeFromRepo(repo)
+	if err != nil {
+		log.Error().Err(err).Msg("Cannot get forge from repo")
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
 
 	user, err := _store.GetUser(repo.UserID)
 	if err != nil {
 		if errors.Is(err, types.RecordNotExist) {
-			if !skipOnErr {
-				c.AbortWithStatus(http.StatusNotFound)
+			oldUserID := repo.UserID
+			user = session.User(c)
+			repo.UserID = user.ID
+			err = _store.UpdateRepo(repo)
+			if err != nil {
+				_ = c.AbortWithError(http.StatusInternalServerError, err)
 			}
-			log.Error().Err(err).Msg("could not get user on repo repair")
+			log.Debug().Msgf("Could not find repo user with ID %d during repo repair, set to repair request user with ID %d", oldUserID, user.ID)
 		} else {
 			_ = c.AbortWithError(http.StatusInternalServerError, err)
 		}
@@ -581,7 +627,8 @@ func repairRepo(c *gin.Context, repo *model.Repo, withPerms, skipOnErr bool) {
 	}
 
 	// creates the jwt token used to verify the repository
-	t := token.New(token.HookToken, repo.FullName)
+	t := token.New(token.HookToken)
+	t.Set("repo-id", strconv.FormatInt(repo.ID, 10))
 	sig, err := t.Sign(repo.Hash)
 	if err != nil {
 		c.String(http.StatusInternalServerError, err.Error())
@@ -596,7 +643,7 @@ func repairRepo(c *gin.Context, repo *model.Repo, withPerms, skipOnErr bool) {
 		sig,
 	)
 
-	from, err := forge.Repo(c, user, repo.ForgeRemoteID, repo.Owner, repo.Name)
+	from, err := _forge.Repo(c, user, repo.ForgeRemoteID, repo.Owner, repo.Name)
 	if err != nil {
 		log.Error().Err(err).Msgf("get repo '%s/%s' from forge", repo.Owner, repo.Name)
 		if !skipOnErr {
@@ -629,10 +676,10 @@ func repairRepo(c *gin.Context, repo *model.Repo, withPerms, skipOnErr bool) {
 		}
 	}
 
-	if err := forge.Deactivate(c, user, repo, host); err != nil {
+	if err := _forge.Deactivate(c, user, repo, host); err != nil {
 		log.Trace().Err(err).Msgf("deactivate repo '%s' to repair failed", repo.FullName)
 	}
-	if err := forge.Activate(c, user, repo, hookURL); err != nil {
+	if err := _forge.Activate(c, user, repo, hookURL); err != nil {
 		c.String(http.StatusInternalServerError, err.Error())
 		return
 	}

@@ -6,7 +6,7 @@ In case there is a single configuration in `.woodpecker.yaml` Woodpecker will cr
 
 By placing the configurations in a folder which is by default named `.woodpecker/` Woodpecker will create a pipeline with multiple workflows each named by the file they are defined in. Only `.yml` and `.yaml` files will be used and files in any subfolders like `.woodpecker/sub-folder/test.yaml` will be ignored.
 
-You can also set some custom path like `.my-ci/pipelines/` instead of `.woodpecker/` in the [repository settings](./71-repo-settings.md).
+You can also set some custom path like `.my-ci/pipelines/` instead of `.woodpecker/` in the [project settings](./75-project-settings.md).
 
 ## Benefits of using workflows
 
@@ -18,18 +18,18 @@ You can also set some custom path like `.my-ci/pipelines/` instead of `.woodpeck
 
 :::warning
 Please note that files are only shared between steps of the same workflow (see [File changes are incremental](./20-workflow-syntax.md#file-changes-are-incremental)). That means you cannot access artifacts e.g. from the `build` workflow in the `deploy` workflow.
-If you still need to pass artifacts between the workflows you need use some storage [plugin](./51-plugins/10-overview.md) (e.g. one which stores files in an Amazon S3 bucket).
+If you still need to pass artifacts between the workflows you need use some storage [plugin](./51-plugins/51-overview.md) (e.g. one which stores files in an Amazon S3 bucket).
 :::
 
 ```bash
 .woodpecker/
-├── .build.yaml
-├── .deploy.yaml
-├── .lint.yaml
-└── .test.yaml
+├── build.yaml
+├── deploy.yaml
+├── lint.yaml
+└── test.yaml
 ```
 
-```yaml title=".woodpecker/.build.yaml"
+```yaml title=".woodpecker/build.yaml"
 steps:
   - name: build
     image: debian:stable-slim
@@ -38,7 +38,7 @@ steps:
       - sleep 5
 ```
 
-```yaml title=".woodpecker/.deploy.yaml"
+```yaml title=".woodpecker/deploy.yaml"
 steps:
   - name: deploy
     image: debian:stable-slim
@@ -51,7 +51,7 @@ depends_on:
   - test
 ```
 
-```yaml title=".woodpecker/.test.yaml"
+```yaml title=".woodpecker/test.yaml"
 steps:
   - name: test
     image: debian:stable-slim
@@ -63,7 +63,7 @@ depends_on:
   - build
 ```
 
-```yaml title=".woodpecker/.lint.yaml"
+```yaml title=".woodpecker/lint.yaml"
 steps:
   - name: lint
     image: debian:stable-slim

@@ -17,12 +17,14 @@ package queue
 import (
 	"container/list"
 	"context"
+	"fmt"
 	"sync"
 	"time"
 
 	"github.com/rs/zerolog/log"
 
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/constant"
 )
 
 type entry struct {
@@ -36,11 +38,13 @@ type worker struct {
 	agentID int64
 	filter  FilterFn
 	channel chan *model.Task
+	stop    context.CancelCauseFunc
 }
 
 type fifo struct {
 	sync.Mutex
 
+	ctx           context.Context
 	workers       map[*worker]struct{}
 	running       map[string]*entry
 	pending       *list.List
@@ -49,76 +53,83 @@ type fifo struct {
 	paused        bool
 }
 
+// processTimeInterval is the time till the queue rearranges things,
+// as the agent pull in 10 milliseconds we should also give them work asap.
+const processTimeInterval = 100 * time.Millisecond
+
 // New returns a new fifo queue.
-func New(_ context.Context) Queue {
-	return &fifo{
+func New(ctx context.Context) Queue {
+	q := &fifo{
+		ctx:           ctx,
 		workers:       map[*worker]struct{}{},
 		running:       map[string]*entry{},
 		pending:       list.New(),
 		waitingOnDeps: list.New(),
-		extension:     time.Minute * 10,
+		extension:     constant.TaskTimeout,
 		paused:        false,
 	}
+	go q.process()
+	return q
 }
 
-// Push pushes an item to the tail of this queue.
+// Push pushes a task to the tail of this queue.
 func (q *fifo) Push(_ context.Context, task *model.Task) error {
 	q.Lock()
 	q.pending.PushBack(task)
 	q.Unlock()
-	go q.process()
 	return nil
 }
 
-// Push pushes an item to the tail of this queue.
+// PushAtOnce pushes multiple tasks to the tail of this queue.
 func (q *fifo) PushAtOnce(_ context.Context, tasks []*model.Task) error {
 	q.Lock()
 	for _, task := range tasks {
 		q.pending.PushBack(task)
 	}
 	q.Unlock()
-	go q.process()
 	return nil
 }
 
-// Poll retrieves and removes the head of this queue.
+// Poll retrieves and removes a task head of this queue.
 func (q *fifo) Poll(c context.Context, agentID int64, f FilterFn) (*model.Task, error) {
 	q.Lock()
+	ctx, stop := context.WithCancelCause(c)
+
 	w := &worker{
 		agentID: agentID,
 		channel: make(chan *model.Task, 1),
 		filter:  f,
+		stop:    stop,
 	}
 	q.workers[w] = struct{}{}
 	q.Unlock()
-	go q.process()
 
 	for {
 		select {
-		case <-c.Done():
+		case <-ctx.Done():
 			q.Lock()
 			delete(q.workers, w)
 			q.Unlock()
-			return nil, nil
+			return nil, ctx.Err()
 		case t := <-w.channel:
 			return t, nil
 		}
 	}
 }
 
-// Done signals that the item is done executing.
+// Done signals the task is complete.
 func (q *fifo) Done(_ context.Context, id string, exitStatus model.StatusValue) error {
 	return q.finished([]string{id}, exitStatus, nil)
 }
 
-// Error signals that the item is done executing with error.
+// Error signals the task is done with an error.
 func (q *fifo) Error(_ context.Context, id string, err error) error {
 	return q.finished([]string{id}, model.StatusFailure, err)
 }
 
-// ErrorAtOnce signals that the item is done executing with error.
-func (q *fifo) ErrorAtOnce(_ context.Context, id []string, err error) error {
-	return q.finished(id, model.StatusFailure, err)
+// ErrorAtOnce signals multiple done are complete with an error.
+func (q *fifo) ErrorAtOnce(_ context.Context, ids []string, err error) error {
+	return q.finished(ids, model.StatusFailure, err)
 }
 
 func (q *fifo) finished(ids []string, exitStatus model.StatusValue, err error) error {
@@ -145,7 +156,7 @@ func (q *fifo) Evict(c context.Context, id string) error {
 	return q.EvictAtOnce(c, []string{id})
 }
 
-// Evict removes a pending task from the queue.
+// EvictAtOnce removes multiple pending tasks from the queue.
 func (q *fifo) EvictAtOnce(_ context.Context, ids []string) error {
 	q.Lock()
 	defer q.Unlock()
@@ -200,7 +211,6 @@ func (q *fifo) Info(_ context.Context) InfoT {
 	stats.Stats.Pending = q.pending.Len()
 	stats.Stats.WaitingOnDeps = q.waitingOnDeps.Len()
 	stats.Stats.Running = len(q.running)
-	stats.Stats.Complete = 0 // TODO: implement this
 
 	for e := q.pending.Front(); e != nil; e = e.Next() {
 		task, _ := e.Value.(*model.Task)
@@ -219,42 +229,64 @@ func (q *fifo) Info(_ context.Context) InfoT {
 	return stats
 }
 
+// Pause stops the queue from handing out new work items in Poll.
 func (q *fifo) Pause() {
 	q.Lock()
 	q.paused = true
 	q.Unlock()
 }
 
+// Resume starts the queue again.
 func (q *fifo) Resume() {
 	q.Lock()
 	q.paused = false
 	q.Unlock()
-	go q.process()
 }
 
-// helper function that loops through the queue and attempts to
-// match the item to a single subscriber.
-func (q *fifo) process() {
+// KickAgentWorkers kicks all workers for a given agent.
+func (q *fifo) KickAgentWorkers(agentID int64) {
 	q.Lock()
 	defer q.Unlock()
 
-	if q.paused {
-		return
-	}
-
-	q.resubmitExpiredPipelines()
-	q.filterWaiting()
-	for pending, worker := q.assignToWorker(); pending != nil && worker != nil; pending, worker = q.assignToWorker() {
-		task, _ := pending.Value.(*model.Task)
-		task.AgentID = worker.agentID
-		delete(q.workers, worker)
-		q.pending.Remove(pending)
-		q.running[task.ID] = &entry{
-			item:     task,
-			done:     make(chan bool),
-			deadline: time.Now().Add(q.extension),
+	for w := range q.workers {
+		if w.agentID == agentID {
+			w.stop(fmt.Errorf("worker was kicked"))
+			delete(q.workers, w)
 		}
-		worker.channel <- task
+	}
+}
+
+// helper function that loops through the queue and attempts to
+// match the item to a single subscriber until context got cancel.
+func (q *fifo) process() {
+	for {
+		select {
+		case <-time.After(processTimeInterval):
+		case <-q.ctx.Done():
+			return
+		}
+
+		q.Lock()
+		if q.paused {
+			q.Unlock()
+			continue
+		}
+
+		q.resubmitExpiredPipelines()
+		q.filterWaiting()
+		for pending, worker := q.assignToWorker(); pending != nil && worker != nil; pending, worker = q.assignToWorker() {
+			task, _ := pending.Value.(*model.Task)
+			task.AgentID = worker.agentID
+			delete(q.workers, worker)
+			q.pending.Remove(pending)
+			q.running[task.ID] = &entry{
+				item:     task,
+				done:     make(chan bool),
+				deadline: time.Now().Add(q.extension),
+			}
+			worker.channel <- task
+		}
+		q.Unlock()
 	}
 }
 

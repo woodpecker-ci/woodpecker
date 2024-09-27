@@ -38,7 +38,7 @@ type (
 		// Global state of the pipeline.
 		Pipeline struct {
 			// Pipeline time started
-			Time int64 `json:"time"`
+			Started int64 `json:"time"`
 			// Current pipeline step
 			Step *backend.Step `json:"step"`
 			// Current pipeline error state
@@ -88,7 +88,7 @@ func (r *Runtime) MakeLogger() zerolog.Logger {
 	return logCtx.Logger()
 }
 
-// Run starts the execution of a workflow and waits for it to complete
+// Run starts the execution of a workflow and waits for it to complete.
 func (r *Runtime) Run(runnerCtx context.Context) error {
 	logger := r.MakeLogger()
 	logger.Debug().Msgf("executing %d stages, in order of:", len(r.spec.Stages))
@@ -105,7 +105,11 @@ func (r *Runtime) Run(runnerCtx context.Context) error {
 	}
 
 	defer func() {
-		if err := r.engine.DestroyWorkflow(runnerCtx, r.spec, r.taskUUID); err != nil {
+		ctx := runnerCtx //nolint:contextcheck
+		if ctx.Err() != nil {
+			ctx = GetShutdownCtx()
+		}
+		if err := r.engine.DestroyWorkflow(ctx, r.spec, r.taskUUID); err != nil {
 			logger.Error().Err(err).Msg("could not destroy engine")
 		}
 	}()
@@ -129,7 +133,7 @@ func (r *Runtime) Run(runnerCtx context.Context) error {
 	return r.err
 }
 
-// Updates the current status of a step
+// Updates the current status of a step.
 func (r *Runtime) traceStep(processState *backend.State, err error, step *backend.Step) error {
 	if r.tracer == nil {
 		// no tracer nothing to trace :)
@@ -147,7 +151,7 @@ func (r *Runtime) traceStep(processState *backend.State, err error, step *backen
 	}
 
 	state := new(State)
-	state.Pipeline.Time = r.started
+	state.Pipeline.Started = r.started
 	state.Pipeline.Step = step
 	state.Process = processState // empty
 	state.Pipeline.Error = r.err
@@ -158,7 +162,7 @@ func (r *Runtime) traceStep(processState *backend.State, err error, step *backen
 	return err
 }
 
-// Executes a set of parallel steps
+// Executes a set of parallel steps.
 func (r *Runtime) execAll(steps []*backend.Step) <-chan error {
 	var g errgroup.Group
 	done := make(chan error)
@@ -254,9 +258,9 @@ func (r *Runtime) exec(step *backend.Step) (*backend.State, error) {
 		return nil, nil
 	}
 
-	// Some pipeline backends, such as local, will close the pipe from Tail on Wait,
-	// so first make sure all reading has finished.
+	// We wait until all data was logged. (Needed for some backends like local as WaitStep kills the log stream)
 	wg.Wait()
+
 	waitState, err := r.engine.WaitStep(r.ctx, step, r.taskUUID)
 	if err != nil {
 		if errors.Is(err, context.Canceled) {

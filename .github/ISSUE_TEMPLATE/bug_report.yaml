@@ -30,6 +30,30 @@ body:
     validations:
       required: true
   - type: textarea
+    id: steps-to-reproduce
+    attributes:
+      label: Steps to reproduce
+      description: Steps to reproduce the behavior.
+      placeholder: |
+        1. Install Woodpecker Server with the following configuration: ...
+        2. Install Woodpecker Agent with the configuration below: ...
+        3. Besides, set some settings in the forge: ...
+        4. Run them all by the commands: ...
+        5. Go to ..., click here and there, see next error: ...
+        6. Also, check the logs and find this: ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: Expected behavior
+      description: A clear and concise description of what you expected to happen.
+      placeholder: |
+        When I click here and there, there should not be an error, but a successful operation.
+        There should not be the errors in the logs, but the messages, that indicate a process: ...
+    validations:
+      required: false
+  - type: textarea
     id: system-info
     attributes:
       label: System Info

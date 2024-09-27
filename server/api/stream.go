@@ -28,16 +28,23 @@ import (
 	"github.com/rs/zerolog/log"
 
 	"go.woodpecker-ci.org/woodpecker/v2/server"
+	"go.woodpecker-ci.org/woodpecker/v2/server/logging"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 	"go.woodpecker-ci.org/woodpecker/v2/server/pubsub"
 	"go.woodpecker-ci.org/woodpecker/v2/server/router/middleware/session"
 	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 )
 
+const (
+	// How many batches of logs to keep for each client before starting to
+	// drop them if the client is not consuming them faster than they arrive.
+	maxQueuedBatchesPerClient int = 30
+)
+
 // EventStreamSSE
 //
-//	@Summary		Event stream
-//	@Description	event source streaming for compatibility with quic and http2
+//	@Summary		Stream events like pipeline updates
+//	@Description	With quic and http2 support
 //	@Router			/stream/events [get]
 //	@Produce		plain
 //	@Success		200
@@ -71,14 +78,14 @@ func EventStreamSSE(c *gin.Context) {
 		}
 	}
 
-	eventc := make(chan []byte, 10)
+	eventChan := make(chan []byte, 10)
 	ctx, cancel := context.WithCancelCause(
 		context.Background(),
 	)
 
 	defer func() {
 		cancel(nil)
-		close(eventc)
+		close(eventChan)
 		log.Debug().Msg("user feed: connection closed")
 	}()
 
@@ -95,7 +102,7 @@ func EventStreamSSE(c *gin.Context) {
 				case <-ctx.Done():
 					return
 				default:
-					eventc <- m.Data
+					eventChan <- m.Data
 				}
 			}
 		})
@@ -111,7 +118,7 @@ func EventStreamSSE(c *gin.Context) {
 		case <-time.After(time.Second * 30):
 			logWriteStringErr(io.WriteString(rw, ": ping\n\n"))
 			flusher.Flush()
-		case buf, ok := <-eventc:
+		case buf, ok := <-eventChan:
 			if ok {
 				logWriteStringErr(io.WriteString(rw, "data: "))
 				logWriteStringErr(rw.Write(buf))
@@ -124,7 +131,7 @@ func EventStreamSSE(c *gin.Context) {
 
 // LogStreamSSE
 //
-//	@Summary	Log stream
+//	@Summary	Stream logs of a pipeline step
 //	@Router		/stream/logs/{repo_id}/{pipeline}/{stepID} [get]
 //	@Produce	plain
 //	@Success	200
@@ -186,13 +193,13 @@ func LogStreamSSE(c *gin.Context) {
 		return
 	}
 
-	if step.State != model.StatusRunning {
+	if step.State != model.StatusPending && step.State != model.StatusRunning {
 		log.Debug().Msg("step not running (anymore).")
 		logWriteStringErr(io.WriteString(rw, "event: error\ndata: step not running (anymore)\n\n"))
 		return
 	}
 
-	logc := make(chan []byte, 10)
+	logChan := make(chan []byte, 10)
 	ctx, cancel := context.WithCancelCause(
 		context.Background(),
 	)
@@ -201,22 +208,44 @@ func LogStreamSSE(c *gin.Context) {
 
 	defer func() {
 		cancel(nil)
-		close(logc)
+		close(logChan)
 		log.Debug().Msg("log stream: connection closed")
 	}()
 
+	err = server.Config.Services.Logs.Open(ctx, step.ID)
+	if err != nil {
+		log.Error().Err(err).Msg("log stream: open failed")
+		logWriteStringErr(io.WriteString(rw, "event: error\ndata: can't open stream\n\n"))
+		return
+	}
+
 	go func() {
-		err := server.Config.Services.Logs.Tail(ctx, step.ID, func(entries ...*model.LogEntry) {
-			for _, entry := range entries {
-				select {
-				case <-ctx.Done():
-					return
-				default:
-					ee, _ := json.Marshal(entry)
-					logc <- ee
+		batches := make(logging.LogChan, maxQueuedBatchesPerClient)
+
+		go func() {
+			defer func() {
+				if r := recover(); r != nil {
+					log.Error().Msgf("error sending log message: %v", r)
+				}
+			}()
+
+			for entries := range batches {
+				for _, entry := range entries {
+					select {
+					case <-ctx.Done():
+						return
+					default:
+						if ee, err := json.Marshal(entry); err == nil {
+							logChan <- ee
+						} else {
+							log.Error().Err(err).Msg("unable to serialize log entry")
+						}
+					}
 				}
 			}
-		})
+		}()
+
+		err := server.Config.Services.Logs.Tail(ctx, step.ID, batches)
 		if err != nil {
 			log.Error().Err(err).Msg("tail of logs failed")
 		}
@@ -250,7 +279,7 @@ func LogStreamSSE(c *gin.Context) {
 		case <-time.After(time.Second * 30):
 			logWriteStringErr(io.WriteString(rw, ": ping\n\n"))
 			flusher.Flush()
-		case buf, ok := <-logc:
+		case buf, ok := <-logChan:
 			if ok {
 				if id > last {
 					logWriteStringErr(io.WriteString(rw, "id: "+strconv.Itoa(id)))

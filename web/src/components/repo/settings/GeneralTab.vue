@@ -15,6 +15,7 @@
         <template #description>
           <i18n-t keypath="repo.settings.general.pipeline_path.desc" tag="p" class="text-sm text-wp-text-alt-100">
             <span class="code-box-inline px-1">{{ $t('repo.settings.general.pipeline_path.desc_path_example') }}</span>
+            <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
             <span class="code-box-inline px-1">/</span>
           </i18n-t>
         </template>
@@ -28,6 +29,11 @@
           v-model="repoSettings.allow_pr"
           :label="$t('repo.settings.general.allow_pr.allow')"
           :description="$t('repo.settings.general.allow_pr.desc')"
+        />
+        <Checkbox
+          v-model="repoSettings.allow_deploy"
+          :label="$t('repo.settings.general.allow_deploy.allow')"
+          :description="$t('repo.settings.general.allow_deploy.desc')"
         />
         <Checkbox
           v-model="repoSettings.gated"
@@ -92,13 +98,13 @@
 </template>
 
 <script lang="ts" setup>
-import { inject, onMounted, Ref, ref } from 'vue';
+import { inject, onMounted, ref, type Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import Button from '~/components/atomic/Button.vue';
 import Checkbox from '~/components/form/Checkbox.vue';
 import CheckboxesField from '~/components/form/CheckboxesField.vue';
-import { CheckboxOption, RadioOption } from '~/components/form/form.types';
+import type { CheckboxOption, RadioOption } from '~/components/form/form.types';
 import InputField from '~/components/form/InputField.vue';
 import NumberField from '~/components/form/NumberField.vue';
 import RadioField from '~/components/form/RadioField.vue';
@@ -108,7 +114,7 @@ import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useAuthentication from '~/compositions/useAuthentication';
 import useNotifications from '~/compositions/useNotifications';
-import { Repo, RepoSettings, RepoVisibility, WebhookEvents } from '~/lib/api/types';
+import { RepoVisibility, WebhookEvents, type Repo, type RepoSettings } from '~/lib/api/types';
 import { useRepoStore } from '~/store/repos';
 
 const apiClient = useApiClient();
@@ -132,6 +138,7 @@ function loadRepoSettings() {
     gated: repo.value.gated,
     trusted: repo.value.trusted,
     allow_pr: repo.value.allow_pr,
+    allow_deploy: repo.value.allow_deploy,
     cancel_previous_pipeline_events: repo.value.cancel_previous_pipeline_events || [],
     netrc_only_trusted: repo.value.netrc_only_trusted,
   };

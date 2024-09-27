@@ -26,6 +26,7 @@ import (
 
 	backend_types "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 	pipeline_errors "go.woodpecker-ci.org/woodpecker/v2/pipeline/errors"
+	errorTypes "go.woodpecker-ci.org/woodpecker/v2/pipeline/errors/types"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/metadata"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/compiler"
@@ -37,11 +38,11 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
-// StepBuilder Takes the hook data and the yaml and returns in internal data model
+// StepBuilder Takes the hook data and the yaml and returns in internal data model.
 type StepBuilder struct {
 	Repo      *model.Repo
 	Curr      *model.Pipeline
-	Last      *model.Pipeline
+	Prev      *model.Pipeline
 	Netrc     *model.Netrc
 	Secs      []*model.Secret
 	Regs      []*model.Registry
@@ -114,7 +115,7 @@ func (b *StepBuilder) Build() (items []*Item, errorsAndWarnings error) {
 }
 
 func (b *StepBuilder) genItemForWorkflow(workflow *model.Workflow, axis matrix.Axis, data string) (item *Item, errorsAndWarnings error) {
-	workflowMetadata := MetadataFromStruct(b.Forge, b.Repo, b.Curr, b.Last, workflow, b.Host)
+	workflowMetadata := MetadataFromStruct(b.Forge, b.Repo, b.Curr, b.Prev, workflow, b.Host)
 	environ := b.environmentVariables(workflowMetadata, axis)
 
 	// add global environment variables for substituting
@@ -135,12 +136,14 @@ func (b *StepBuilder) genItemForWorkflow(workflow *model.Workflow, axis matrix.A
 	// parse yaml pipeline
 	parsed, err := yaml.ParseString(substituted)
 	if err != nil {
-		return nil, &pipeline_errors.PipelineError{Message: err.Error(), Type: pipeline_errors.PipelineErrorTypeCompiler}
+		return nil, &errorTypes.PipelineError{Message: err.Error(), Type: errorTypes.PipelineErrorTypeCompiler}
 	}
 
 	// lint pipeline
 	errorsAndWarnings = multierr.Append(errorsAndWarnings, linter.New(
 		linter.WithTrusted(b.Repo.IsTrusted),
+		linter.PrivilegedPlugins(server.Config.Pipeline.PrivilegedPlugins),
+		linter.WithTrustedClonePlugins(server.Config.Pipeline.TrustedClonePlugins),
 	).Lint([]*linter.WorkflowConfig{{
 		Workflow:  parsed,
 		File:      workflow.Name,
@@ -237,10 +240,10 @@ func (b *StepBuilder) environmentVariables(metadata metadata.Metadata, axis matr
 	return environ
 }
 
-func (b *StepBuilder) toInternalRepresentation(parsed *yaml_types.Workflow, environ map[string]string, metadata metadata.Metadata, stepID int64) (*backend_types.Config, error) {
+func (b *StepBuilder) toInternalRepresentation(parsed *yaml_types.Workflow, environ map[string]string, metadata metadata.Metadata, workflowID int64) (*backend_types.Config, error) {
 	var secrets []compiler.Secret
 	for _, sec := range b.Secs {
-		events := []string{}
+		var events []string
 		for _, event := range sec.Events {
 			events = append(events, string(event))
 		}
@@ -266,8 +269,7 @@ func (b *StepBuilder) toInternalRepresentation(parsed *yaml_types.Workflow, envi
 		compiler.WithEnviron(environ),
 		compiler.WithEnviron(b.Envs),
 		// TODO: server deps should be moved into StepBuilder fields and set on StepBuilder creation
-		compiler.WithEscalated(server.Config.Pipeline.Privileged...),
-		compiler.WithResourceLimit(server.Config.Pipeline.Limits.MemSwapLimit, server.Config.Pipeline.Limits.MemLimit, server.Config.Pipeline.Limits.ShmSize, server.Config.Pipeline.Limits.CPUQuota, server.Config.Pipeline.Limits.CPUShares, server.Config.Pipeline.Limits.CPUSet),
+		compiler.WithEscalated(server.Config.Pipeline.PrivilegedPlugins...),
 		compiler.WithVolumes(server.Config.Pipeline.Volumes...),
 		compiler.WithNetworks(server.Config.Pipeline.Networks...),
 		compiler.WithLocal(false),
@@ -279,18 +281,19 @@ func (b *StepBuilder) toInternalRepresentation(parsed *yaml_types.Workflow, envi
 			),
 			b.Repo.IsSCMPrivate || server.Config.Pipeline.AuthenticatePublicRepos,
 		),
-		compiler.WithDefaultCloneImage(server.Config.Pipeline.DefaultCloneImage),
+		compiler.WithDefaultClonePlugin(server.Config.Pipeline.DefaultClonePlugin),
+		compiler.WithTrustedClonePlugins(server.Config.Pipeline.TrustedClonePlugins),
 		compiler.WithRegistry(registries...),
 		compiler.WithSecret(secrets...),
 		compiler.WithPrefix(
 			fmt.Sprintf(
 				"wp_%s_%d",
 				strings.ToLower(ulid.Make().String()),
-				stepID,
+				workflowID,
 			),
 		),
 		compiler.WithProxy(b.ProxyOpts),
-		compiler.WithWorkspaceFromURL("/woodpecker", b.Repo.ForgeURL),
+		compiler.WithWorkspaceFromURL(compiler.DefaultWorkspaceBase, b.Repo.ForgeURL),
 		compiler.WithMetadata(metadata),
 		compiler.WithTrusted(b.Repo.IsTrusted),
 		compiler.WithNetrcOnlyTrusted(b.Repo.NetrcOnlyTrusted),

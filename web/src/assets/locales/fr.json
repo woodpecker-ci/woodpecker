@@ -14,10 +14,10 @@
                     "desc": "Le nombre maximum de pipelines exécutées en parallèle par cet agent."
                 },
                 "created": "Agent crée",
-                "delete_agent": "Effacer l'agent",
-                "delete_confirm": "Voulez vous vraiment effacer cet agent ? Il ne pourra plus se connecter sur le serveur.",
-                "deleted": "Agent effacé",
-                "desc": "Agents enregistrés sur ce serveur",
+                "delete_agent": "Supprimer l'agent",
+                "delete_confirm": "Voulez vous vraiment supprimer cet agent ? Il ne pourra plus se connecter sur le serveur.",
+                "deleted": "Agent supprimé",
+                "desc": "Agents enregistrés sur ce serveur.",
                 "edit_agent": "Éditer l'agent",
                 "id": "ID",
                 "last_contact": "Dernier contact",
@@ -41,12 +41,12 @@
                 "token": "Jeton",
                 "version": "Version"
             },
-            "not_allowed": "Vous n'êtes pas autorisé à accéder aux réglages du serveur",
+            "not_allowed": "Vous n'êtes pas autorisé à accéder aux réglages du serveur.",
             "orgs": {
-                "delete_confirm": "Voulez-vous vraiment effacer cette organisation ? Cela supprimera tous les dépôts que possède cette organisation.",
-                "delete_org": "Effacer l'organisation",
-                "deleted": "Organisation effacée",
-                "desc": "Organisations possédant des dépôts sur ce serveur",
+                "delete_confirm": "Voulez-vous vraiment supprimer cette organisation ? Cela supprimera tous les dépôts que possède cette organisation.",
+                "delete_org": "Supprimer l'organisation",
+                "deleted": "Organisation supprimée",
+                "desc": "Organisations possédant des dépôts sur ce serveur.",
                 "none": "Il n'y a pas encore d'organisation.",
                 "org_settings": "Réglages de l'organisation",
                 "orgs": "Organisations",
@@ -74,7 +74,7 @@
                 "waiting_for": "en attente de"
             },
             "repos": {
-                "desc": "Dépôts actifs ou anciennement actifs sur ce serveur",
+                "desc": "Dépôts actifs ou anciennement actifs sur ce serveur.",
                 "disabled": "Désactivé",
                 "none": "Il n'y a pas encore de dépôts.",
                 "repair": {
@@ -88,7 +88,7 @@
             "secrets": {
                 "add": "Ajouter un secret",
                 "created": "Secret global crée",
-                "deleted": "Secret global effacé",
+                "deleted": "Secret global supprimé",
                 "desc": "Les secrets globaux sont transmis sous forme de variable d’environnement lors de l’exécution de toutes les étapes d'un pipeline.",
                 "events": {
                     "events": "Disponible pour les événements suivants",
@@ -106,7 +106,7 @@
                 "secrets": "Secrets",
                 "show": "Afficher les secrets",
                 "value": "Valeur",
-                "warning": "Ces secrets seront disponibles pour tout les comptes du serveur."
+                "warning": "Ces secrets seront disponibles pour tout les comptes."
             },
             "settings": "Réglages",
             "users": {
@@ -119,8 +119,8 @@
                 "cancel": "Annuler",
                 "created": "Compte utilisateur créé",
                 "delete_confirm": "Voulez vous vraiment supprimer ce compte utilisateur ? Cela supprimera tout les dépôts que possède ce compte utilisateur.",
-                "delete_user": "Effacer le compte utilisateur",
-                "deleted": "Compte utilisateur effacé",
+                "delete_user": "Supprimer le compte utilisateur",
+                "deleted": "Compte utilisateur supprimé",
                 "desc": "Utilisateurs enregistrés sur le serveur",
                 "edit_user": "Éditer le compte utilisateur",
                 "email": "Courriel",
@@ -130,6 +130,10 @@
                 "saved": "Compte utilisateur enregistré",
                 "show": "Afficher les comptes utilisateurs",
                 "users": "Utilisateurs"
+            },
+            "registries": {
+                "warning": "Ces codes d’accès au registre seront disponibles pour tout les utilisateurs.",
+                "desc": "Les codes d'accès aux registres globaux peuvent être ajouter pour utiliser les images privées sur tout les pipelines."
             }
         }
     },
@@ -156,8 +160,8 @@
             "secrets": {
                 "add": "Ajouter un secret",
                 "created": "Secret d'organisation crée",
-                "deleted": "Secret d'organisation effacé",
-                "desc": "Les secrets d'organisation sont transmis sous forme de variable d’environnement lors de l’exécution de chaque étape d'un pipeline de tout les dépôts de l'organisation.",
+                "deleted": "Secret d'organisation supprimé",
+                "desc": "Les secrets d'organisation sont transmis sous forme de variable d’environnement à chaque étape d'un pipeline de tout les dépôts de l'organisation.",
                 "events": {
                     "events": "Disponible pour les événements suivants",
                     "pr_warning": "Faites attention avec cette option car un acteur malicieux pourrait soumettre une pull request qui va afficher vos secrets."
@@ -175,7 +179,10 @@
                 "show": "Afficher les secrets",
                 "value": "Valeur"
             },
-            "settings": "Réglages"
+            "settings": "Réglages",
+            "registries": {
+                "desc": "Les codes d'accès aux registres de l'organisation peuvent être ajouté pour utiliser les images privées sur tout les pipelines de l'organisation."
+            }
         }
     },
     "org_level_secret": "Secret d'organisation",
@@ -194,8 +201,10 @@
                 "desc": "Spécifiez les variables additionnelles que votre pipeline va utiliser. Les variables portant le même nom seront écrasées.",
                 "name": "Nom de la variable",
                 "title": "Variables additionnelles du pipeline",
-                "value": "Valeur de la variable"
-            }
+                "value": "Valeur de la variable",
+                "delete": "Supprimer la variable"
+            },
+            "enter_task": "Tâche de déploiement"
         },
         "enable": {
             "disabled": "Désactivé",
@@ -214,11 +223,13 @@
                 "desc": "Ajoutez des variables pour le lancement du pipeline. Les variables existantes seront écrasés.",
                 "name": "Nom de la variable",
                 "title": "Variables de pipeline supplémentaire",
-                "value": "Valeur de la variable"
-            }
+                "value": "Valeur de la variable",
+                "delete": "Supprimer la variable"
+            },
+            "show_pipelines": "Afficher les pieplines"
         },
         "not_allowed": "Vous n'êtes pas autorisé à accéder à ce dépôt",
-        "open_in_forge": "Ouvrir le dépôt dans un système de contrôle de version",
+        "open_in_forge": "Ouvrir le dépôt dans la forge",
         "pipeline": {
             "actions": {
                 "cancel": "Annuler",
@@ -229,7 +240,8 @@
                 "log_auto_scroll_off": "Désactiver le défilement automatique",
                 "log_download": "Télécharger",
                 "restart": "Redémarrer",
-                "restart_success": "Pipeline redémarré"
+                "restart_success": "Pipeline redémarré",
+                "log_delete": "Supprimer"
             },
             "config": "Configuration",
             "errors": "Erreurs ({count})",
@@ -240,7 +252,8 @@
                 "pr": "Pull Request",
                 "push": "Push",
                 "tag": "Tag",
-                "release": "Release"
+                "release": "Release",
+                "pr_closed": "Pull Request fusionnée / fermée"
             },
             "exit_code": "Code de retour {exitCode}",
             "files": "Fichiers changés ({files})",
@@ -279,7 +292,12 @@
             "step_not_started": "L'étape n'a pas démarré encore.",
             "tasks": "Tâches",
             "warnings": "Avertissements ({count})",
-            "we_got_some_errors": "Oh non, il y a des erreurs !"
+            "we_got_some_errors": "Oh non, il y a des erreurs !",
+            "log_delete_error": "Il y a eu une erreur lors de la suppression des logs",
+            "log_delete_confirm": "Voulez vous vraiment supprimer les logs de cette étape ?",
+            "no_logs": "Aucun logs",
+            "duration": "Durée du pipeline",
+            "created": "Crée : {created}"
         },
         "pull_requests": "Pull requests",
         "settings": {
@@ -287,8 +305,8 @@
                 "actions": "Actions",
                 "delete": {
                     "confirm": "Toutes les données vont être perdues aprés cette action ! ! !\n\nVoulez vous vraiment continuer ?",
-                    "delete": "Effacer le dépôt",
-                    "success": "Dépôt effacé"
+                    "delete": "Supprimer le dépôt",
+                    "success": "Dépôt supprimé"
                 },
                 "disable": {
                     "disable": "Désactiver le dépôt",
@@ -319,8 +337,8 @@
                 },
                 "created": "Tâche planifiée crée",
                 "crons": "Tâches planifiées",
-                "delete": "Effacer la tâche planifiée",
-                "deleted": "Tâche planifiée effacée",
+                "delete": "Supprimer la tâche planifiée",
+                "deleted": "Tâche planifiée supprimée",
                 "desc": "Les tâches planifiées peuvent déclencher des pipelines à intervalles réguliers.",
                 "edit": "Modifier la tâche planifiée",
                 "name": {
@@ -371,7 +389,7 @@
                     "timeout": "Délai d’inactivité"
                 },
                 "trusted": {
-                    "desc": "Les conteneurs du pipeline ont accès à des capacités privilégiées comme le montage de volumes.",
+                    "desc": "Les conteneurs du pipeline ont accès à des capacités privilégiées (comme le montage de volumes).",
                     "trusted": "Vérifié"
                 },
                 "visibility": {
@@ -388,6 +406,10 @@
                         "public": "Publique"
                     },
                     "visibility": "Visibilité du projet"
+                },
+                "allow_deploy": {
+                    "allow": "Autoriser les déploiements",
+                    "desc": "Autoriser les déploiements depuis les pipelines ayant réussis. À utiliser que si vous avez confiance dans les utilisateurs ayant un accès en écriture."
                 }
             },
             "not_allowed": "Vous n'êtes pas autorisé à accéder aux paramètres de ce dépôt",
@@ -399,8 +421,8 @@
                 },
                 "created": "Authentifiant de connexion à un registre crée",
                 "credentials": "Authentifiants de connexion à un registre",
-                "delete": "Effacer le registre",
-                "deleted": "Authentifiant de connexion à un registre effacé",
+                "delete": "Supprimer le registre",
+                "deleted": "Authentifiant de connexion à un registre supprimé",
                 "desc": "Des authentifiants de connexion pour les registres peuvent être ajouté pour permettre d'utiliser des images privées pour vos pipelines.",
                 "edit": "Modifier le registre",
                 "none": "Il n'y a pas d’authentifiant de connexion à un registre pour le moment.",
@@ -412,9 +434,9 @@
             "secrets": {
                 "add": "Ajouter un secret",
                 "created": "Secret crée",
-                "delete": "Effacer le secret",
-                "delete_confirm": "Voulez vous vraiment effacer ce secret ?",
-                "deleted": "Secret effacé",
+                "delete": "Supprimer le secret",
+                "delete_confirm": "Voulez vous vraiment supprimer ce secret ?",
+                "deleted": "Secret supprimé",
                 "desc": "Les secrets sont transmis sous forme de variable d’environnement lors de l’exécution d'une étape d'un pipeline.",
                 "edit": "Modifier le secret",
                 "events": {
@@ -484,8 +506,8 @@
             "secrets": {
                 "add": "Ajouter un secret",
                 "created": "Secret d'utilisateur crée",
-                "deleted": "Secret d'utilisateur effacé",
-                "desc": "Les secrets d'utilisateur peuvent être passés à toutes les étapes du pipeline des dépôts de l'utilisateur sous forme de variables d'environnement.",
+                "deleted": "Secret d'utilisateur supprimé",
+                "desc": "Les secrets d'utilisateur peuvent être passés à toutes les étapes d'un pipeline personnel sous forme de variables d'environnement.",
                 "events": {
                     "events": "Disponible pour les événements suivants",
                     "pr_warning": "Attention, si cette option est activée, un acteur malveillant peut proposer une pull request qui affiche vos secrets."
@@ -503,10 +525,92 @@
                 "show": "Afficher les secrets",
                 "value": "Valeur"
             },
-            "settings": "Paramètres du compte utilisateur"
+            "settings": "Paramètres du compte utilisateur",
+            "cli_and_api": {
+                "desc": "Jeton d'Accès Personnel, ligne de command et usage de l'API",
+                "token": "Jeton d'Accès Personnel",
+                "api_usage": "Exemple d'utilisation de l'API",
+                "download_cli": "Télécharger l'interface en ligne de commande",
+                "reset_token": "Réinitialiser le jeton\"",
+                "cli_and_api": "Ligne de commande et API",
+                "cli_usage": "Exemple d'utilisation de la ligne de commande",
+                "swagger_ui": "Interface Swagger"
+            }
         }
     },
     "username": "Nom d'utilisateur",
     "welcome": "Bienvenue sur Woodpecker",
-    "empty_list": "Aucune {entity} trouvée !"
+    "empty_list": "Aucune {entity} trouvée !",
+    "login_to_cli": "Login en ligne de commande",
+    "abort": "Abandonner",
+    "cli_login_success": "Connexion en ligne de commande réussie",
+    "cli_login_failed": "Connexion en ligne de commande échouée",
+    "cli_login_denied": "Connexion à la ligne de commande interdite",
+    "return_to_cli": "Vous pouvez fermer cet onglet et revenir à la ligne de commande.",
+    "login_to_cli_description": "En continuant, vous serez connecté via la ligne de commande.",
+    "secrets": {
+        "secrets": "Secrets",
+        "desc": "Les secrets peuvent être transmis aux différentes étapes de la pipeline en tant que variables d'environnement.",
+        "images": {
+            "desc": "Liste des images pour lesquelles ce secret est disponible, laisser vide pour autoriser toutes les images",
+            "images": "Disponible pour les images suivantes"
+        },
+        "none": "Il n'y a pas encore de secrets.",
+        "add": "Ajouter un secret",
+        "save": "Sauvegarder le secret",
+        "show": "Afficher les secrets",
+        "name": "Nom",
+        "value": "Valeur",
+        "deleted": "Secret supprimé",
+        "created": "Secret créé",
+        "saved": "Secret sauvegardé",
+        "events": {
+            "events": "Disponible lors des événements suivants",
+            "pr_warning": "Soyez prudent avec cette option : un acteur malveillant peut soumettre une pull request qui expose vos secrets."
+        },
+        "plugins_only": "Uniquement disponible pour les plugins",
+        "edit": "Modifier le secret",
+        "delete": "Supprimer le secret",
+        "delete_confirm": "Voulez vous vraiment supprimer ce secret ?",
+        "plugins": {
+            "images": "Disponible pour les plugins suivants"
+        }
+    },
+    "internal_error": "Une erreur interne est survenue",
+    "access_denied": "Vous n'êtes pas autorisé à accéder à cette instance",
+    "oauth_error": "Erreur lors de l'authentification auprès du fournisseur OAuth",
+    "registration_closed": "Les inscriptions sont fermés",
+    "settings": "Réglages",
+    "registries": {
+        "registries": "Registres",
+        "delete_confirm": "Voulez vous vraiment supprimer ce registre ?",
+        "deleted": "Codes d'accès aux registres supprimés",
+        "desc": "Les codes d'accès aux registres peuvent être ajouté pour utiliser des images privées sur les pipelines.",
+        "credentials": "Codes d’accès aux registres",
+        "edit": "Éditer le registre",
+        "delete": "Supprimer le registre",
+        "add": "Ajouter un registre",
+        "view": "Voir le registre",
+        "save": "Enregistrer le registre",
+        "show": "Afficher les registres",
+        "address": {
+            "address": "Adresse",
+            "desc": "Adresse du registre (e.g. docker.io)"
+        },
+        "saved": "Codes d'accès aux registres enregistrés",
+        "created": "Codes d’accès aux registres crées",
+        "none": "Il n'y a pas de code d’accès aux registres."
+    },
+    "invalid_state": "L'état OAuth est invalide",
+    "by_user": "par {user}",
+    "pushed_to": "poussé vers",
+    "closed": "fermé",
+    "deployed_to": "déployé vers",
+    "created": "crée",
+    "triggered": "déclenché",
+    "pipeline_duration": "Durée du pipeline",
+    "pipeline_since": "Pipeline crée {created} minutes ago",
+    "pipeline_has_warnings": "Le pipeline a des alertes",
+    "pipeline_has_errors": "Le pipeline a des erreurs",
+    "login_with": "Se connecter avec {forge}"
 }

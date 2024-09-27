@@ -20,6 +20,8 @@ import (
 	"time"
 )
 
+// cspell:words pagelen
+
 type Account struct {
 	UUID  string `json:"uuid"`
 	Login string `json:"username"`
@@ -108,10 +110,10 @@ type Repo struct {
 	Scm        string  `json:"scm"`
 	Desc       string  `json:"desc"`
 	Links      Links   `json:"links"`
-	Mainbranch struct {
+	MainBranch struct {
 		Type string `json:"type"`
 		Name string `json:"name"`
-	} `json:"mainbranch"`
+	} `json:"mainbranch"` // cspell:ignore mainbranch
 }
 
 type RepoResp struct {
@@ -161,6 +163,10 @@ type PullRequestHook struct {
 		Links   Links     `json:"links"`
 		Created time.Time `json:"created_on"`
 		Updated time.Time `json:"updated_on"`
+
+		MergeCommit struct {
+			Hash string `json:"hash"`
+		} `json:"merge_commit"`
 
 		Source struct {
 			Repo   Repo `json:"repository"`
@@ -282,7 +288,12 @@ type CommitsResp struct {
 }
 
 type Commit struct {
-	Hash string `json:"hash"`
+	Hash  string `json:"hash"`
+	Links struct {
+		HTML struct {
+			Href string `json:"href"`
+		} `json:"html"`
+	} `json:"links"`
 }
 
 type DirResp struct {

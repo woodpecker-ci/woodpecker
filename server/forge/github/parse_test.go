@@ -40,7 +40,7 @@ const (
 
 func testHookRequest(payload []byte, event string) *http.Request {
 	buf := bytes.NewBuffer(payload)
-	req, _ := http.NewRequest("POST", "/hook", buf)
+	req, _ := http.NewRequest(http.MethodPost, "/hook", buf)
 	req.Header = http.Header{}
 	req.Header.Set(hookEvent, event)
 	return req
@@ -119,6 +119,8 @@ func Test_parser(t *testing.T) {
 				g.Assert(b).IsNotNil()
 				g.Assert(p).IsNil()
 				g.Assert(b.Event).Equal(model.EventDeploy)
+				g.Assert(b.DeployTo).Equal("production")
+				g.Assert(b.DeployTask).Equal("deploy")
 			})
 		})
 
