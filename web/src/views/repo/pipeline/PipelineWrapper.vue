@@ -93,6 +93,7 @@
       id="changed-files"
       :title="$t('repo.pipeline.files', { files: pipeline.changed_files?.length })"
     />
+    <Tab v-if="repoPermissions && repoPermissions.push" id="debug" :title="$t('repo.pipeline.debug.title')" />
 
     <router-view />
   </Scaffold>
@@ -219,6 +220,10 @@ const activeTab = computed({
       return 'errors';
     }
 
+    if (route.name === 'repo-pipeline-debug' && repoPermissions.value?.push) {
+      return 'debug';
+    }
+
     return 'tasks';
   },
   set(tab: string) {
@@ -236,6 +241,10 @@ const activeTab = computed({
 
     if (tab === 'errors') {
       router.replace({ name: 'repo-pipeline-errors' });
+    }
+
+    if (tab === 'debug' && repoPermissions.value?.push) {
+      router.replace({ name: 'repo-pipeline-debug' });
     }
   },
 });

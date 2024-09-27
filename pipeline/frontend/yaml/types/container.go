@@ -54,18 +54,12 @@ type (
 		Privileged bool `yaml:"privileged,omitempty"`
 
 		// Undocumented
-		CPUQuota     base.StringOrInt    `yaml:"cpu_quota,omitempty"`
-		CPUSet       string              `yaml:"cpuset,omitempty"`
-		CPUShares    base.StringOrInt    `yaml:"cpu_shares,omitempty"`
-		Devices      []string            `yaml:"devices,omitempty"`
-		DNSSearch    base.StringOrSlice  `yaml:"dns_search,omitempty"`
-		DNS          base.StringOrSlice  `yaml:"dns,omitempty"`
-		ExtraHosts   []string            `yaml:"extra_hosts,omitempty"`
-		MemLimit     base.MemStringOrInt `yaml:"mem_limit,omitempty"`
-		MemSwapLimit base.MemStringOrInt `yaml:"memswap_limit,omitempty"`
-		NetworkMode  string              `yaml:"network_mode,omitempty"`
-		ShmSize      base.MemStringOrInt `yaml:"shm_size,omitempty"`
-		Tmpfs        []string            `yaml:"tmpfs,omitempty"`
+		Devices     []string           `yaml:"devices,omitempty"`
+		DNSSearch   base.StringOrSlice `yaml:"dns_search,omitempty"`
+		DNS         base.StringOrSlice `yaml:"dns,omitempty"`
+		ExtraHosts  []string           `yaml:"extra_hosts,omitempty"`
+		NetworkMode string             `yaml:"network_mode,omitempty"`
+		Tmpfs       []string           `yaml:"tmpfs,omitempty"`
 	}
 )
 

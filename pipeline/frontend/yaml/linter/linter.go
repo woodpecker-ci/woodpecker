@@ -214,23 +214,9 @@ func (l *Linter) lintTrusted(config *WorkflowConfig, c *types.Container, area st
 			errors = append(errors, "Insufficient privileges to use privileged mode")
 		}
 	}
-	if !l.trusted.Resources {
-		if c.ShmSize != 0 {
-			errors = append(errors, "Insufficient privileges to override shm_size")
-		}
-	}
 	if !l.trusted.Network {
 		if len(c.DNS) != 0 {
 			errors = append(errors, "Insufficient privileges to use custom dns")
-		}
-		if len(c.DNSSearch) != 0 {
-			errors = append(errors, "Insufficient privileges to use dns_search")
-		}
-		if len(c.ExtraHosts) != 0 {
-			errors = append(errors, "Insufficient privileges to use extra_hosts")
-		}
-		if len(c.NetworkMode) != 0 {
-			errors = append(errors, "Insufficient privileges to use network_mode")
 		}
 	}
 	if !l.trusted.Volumes {
