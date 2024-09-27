@@ -54,10 +54,9 @@ func MetadataFromStruct(forge metadata.ServerForge, repo *model.Repo, pipeline, 
 			Private:     repo.IsSCMPrivate,
 			Branch:      repo.Branch,
 			Trusted: metadata.TrustedConfiguration{
-				Network:   repo.Trusted.Network,
-				Volumes:   repo.Trusted.Volumes,
-				Resources: repo.Trusted.Resources,
-				Security:  repo.Trusted.Security,
+				Network:  repo.Trusted.Network,
+				Volumes:  repo.Trusted.Volumes,
+				Security: repo.Trusted.Security,
 			},
 		}
 

@@ -142,10 +142,9 @@ func (b *StepBuilder) genItemForWorkflow(workflow *model.Workflow, axis matrix.A
 	// lint pipeline
 	errorsAndWarnings = multierr.Append(errorsAndWarnings, linter.New(
 		linter.WithTrusted(linter.TrustedConfiguration{
-			Network:   b.Repo.Trusted.Network,
-			Volumes:   b.Repo.Trusted.Volumes,
-			Resources: b.Repo.Trusted.Resources,
-			Security:  b.Repo.Trusted.Security,
+			Network:  b.Repo.Trusted.Network,
+			Volumes:  b.Repo.Trusted.Volumes,
+			Security: b.Repo.Trusted.Security,
 		}),
 		linter.PrivilegedPlugins(server.Config.Pipeline.PrivilegedPlugins),
 		linter.WithTrustedClonePlugins(server.Config.Pipeline.TrustedClonePlugins),

@@ -47,10 +47,9 @@ var splitTrusted = xormigrate.Migration{
 
 		if _, err := sess.Where("trusted = ?", false).Cols("trusted_conf").Update(&repoV035{
 			Trusted: model.TrustedConfiguration{
-				Network:   false,
-				Security:  false,
-				Volumes:   false,
-				Resources: false,
+				Network:  false,
+				Security: false,
+				Volumes:  false,
 			},
 		}); err != nil {
 			return err
@@ -58,10 +57,9 @@ var splitTrusted = xormigrate.Migration{
 
 		if _, err := sess.Where("trusted = ?", true).Cols("trusted_conf").Update(&repoV035{
 			Trusted: model.TrustedConfiguration{
-				Network:   true,
-				Security:  true,
-				Volumes:   true,
-				Resources: true,
+				Network:  true,
+				Security: true,
+				Volumes:  true,
 			},
 		}); err != nil {
 			return err

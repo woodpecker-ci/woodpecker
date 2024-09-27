@@ -191,11 +191,6 @@ var flags = []cli.Flag{
 		Usage:   "Set the metadata environment variable \"CI_REPO_TRUSTED_NETWORK\".",
 	},
 	&cli.BoolFlag{
-		Sources: cli.EnvVars("CI_REPO_TRUSTED_RESOURCES", "CI_REPO_TRUSTED"),
-		Name:    "repo-trusted-resources",
-		Usage:   "Set the metadata environment variable \"CI_REPO_TRUSTED_RESOURCES\".",
-	},
-	&cli.BoolFlag{
 		Sources: cli.EnvVars("CI_REPO_TRUSTED_VOLUMES", "CI_REPO_TRUSTED"),
 		Name:    "repo-trusted-volumes",
 		Usage:   "Set the metadata environment variable \"CI_REPO_TRUSTED_VOLUMES\".",

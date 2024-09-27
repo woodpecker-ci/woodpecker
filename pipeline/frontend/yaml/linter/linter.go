@@ -36,10 +36,9 @@ type Linter struct {
 }
 
 type TrustedConfiguration struct {
-	Network   bool
-	Volumes   bool
-	Resources bool
-	Security  bool
+	Network  bool
+	Volumes  bool
+	Security bool
 }
 
 // New creates a new Linter with options.

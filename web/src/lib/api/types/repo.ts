@@ -107,5 +107,4 @@ export interface RepoTrusted {
   network: boolean;
   volumes: boolean;
   security: boolean;
-  resources: boolean;
 }

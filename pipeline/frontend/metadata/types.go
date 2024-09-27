@@ -115,9 +115,8 @@ type (
 	}
 
 	TrustedConfiguration struct {
-		Network   bool `json:"network,omitempty"`
-		Volumes   bool `json:"volumes,omitempty"`
-		Resources bool `json:"resources,omitempty"`
-		Security  bool `json:"security,omitempty"`
+		Network  bool `json:"network,omitempty"`
+		Volumes  bool `json:"volumes,omitempty"`
+		Security bool `json:"security,omitempty"`
 	}
 )

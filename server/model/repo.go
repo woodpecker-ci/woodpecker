@@ -126,15 +126,13 @@ func (r ForgeRemoteID) IsValid() bool {
 }
 
 type TrustedConfiguration struct {
-	Network   bool `json:"network"`
-	Volumes   bool `json:"volumes"`
-	Resources bool `json:"resources"`
-	Security  bool `json:"security"`
+	Network  bool `json:"network"`
+	Volumes  bool `json:"volumes"`
+	Security bool `json:"security"`
 }
 
 type TrustedConfigurationPatch struct {
-	Network   *bool `json:"network"`
-	Volumes   *bool `json:"volumes"`
-	Resources *bool `json:"resources"`
-	Security  *bool `json:"security"`
+	Network  *bool `json:"network"`
+	Volumes  *bool `json:"volumes"`
+	Security *bool `json:"security"`
 }

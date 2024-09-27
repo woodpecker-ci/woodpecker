@@ -58,11 +58,6 @@
           :description="$t('repo.settings.general.trusted.network.desc')"
         />
         <Checkbox
-          v-model="repoSettings.trusted.resources"
-          :label="$t('repo.settings.general.trusted.resources.resources')"
-          :description="$t('repo.settings.general.trusted.resources.desc')"
-        />
-        <Checkbox
           v-model="repoSettings.trusted.volumes"
           :label="$t('repo.settings.general.trusted.volumes.volumes')"
           :description="$t('repo.settings.general.trusted.volumes.desc')"

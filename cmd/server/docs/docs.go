@@ -5358,7 +5358,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "trusted": {
-                    "type": "boolean"
+                    "$ref": "#/definitions/metadata.TrustedConfiguration"
                 }
             }
         },
@@ -5390,6 +5390,20 @@ const docTemplate = `{
                 },
                 "version": {
                     "type": "string"
+                }
+            }
+        },
+        "metadata.TrustedConfiguration": {
+            "type": "object",
+            "properties": {
+                "network": {
+                    "type": "boolean"
+                },
+                "security": {
+                    "type": "boolean"
+                },
+                "volumes": {
+                    "type": "boolean"
                 }
             }
         },
@@ -5437,9 +5451,6 @@ const docTemplate = `{
                 "network": {
                     "type": "boolean"
                 },
-                "resources": {
-                    "type": "boolean"
-                },
                 "security": {
                     "type": "boolean"
                 },
@@ -5452,9 +5463,6 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "network": {
-                    "type": "boolean"
-                },
-                "resources": {
                     "type": "boolean"
                 },
                 "security": {
