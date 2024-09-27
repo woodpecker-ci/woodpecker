@@ -37,6 +37,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/kubernetes"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/local"
 	backend_types "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/metadata"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/compiler"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/linter"
@@ -76,6 +77,7 @@ func execDir(ctx context.Context, c *cli.Command, dir string) error {
 	if runtime.GOOS == "windows" {
 		repoPath = convertPathForWindows(repoPath)
 	}
+	// TODO: respect depends_on and do parallel runs with output to multiple _windows_ e.g. tmux like
 	return filepath.Walk(dir, func(path string, info os.FileInfo, e error) error {
 		if e != nil {
 			return e
@@ -84,7 +86,7 @@ func execDir(ctx context.Context, c *cli.Command, dir string) error {
 		// check if it is a regular file (not dir)
 		if info.Mode().IsRegular() && (strings.HasSuffix(info.Name(), ".yaml") || strings.HasSuffix(info.Name(), ".yml")) {
 			fmt.Println("#", info.Name())
-			_ = runExec(ctx, c, path, repoPath) // TODO: should we drop errors or store them and report back?
+			_ = runExec(ctx, c, path, repoPath, false) // TODO: should we drop errors or store them and report back?
 			fmt.Println("")
 			return nil
 		}
@@ -103,10 +105,10 @@ func execFile(ctx context.Context, c *cli.Command, file string) error {
 	if runtime.GOOS == "windows" {
 		repoPath = convertPathForWindows(repoPath)
 	}
-	return runExec(ctx, c, file, repoPath)
+	return runExec(ctx, c, file, repoPath, true)
 }
 
-func runExec(ctx context.Context, c *cli.Command, file, repoPath string) error {
+func runExec(ctx context.Context, c *cli.Command, file, repoPath string, singleExec bool) error {
 	dat, err := os.ReadFile(file)
 	if err != nil {
 		return err
@@ -121,7 +123,7 @@ func runExec(ctx context.Context, c *cli.Command, file, repoPath string) error {
 		axes = append(axes, matrix.Axis{})
 	}
 	for _, axis := range axes {
-		err := execWithAxis(ctx, c, file, repoPath, axis)
+		err := execWithAxis(ctx, c, file, repoPath, axis, singleExec)
 		if err != nil {
 			return err
 		}
@@ -129,11 +131,20 @@ func runExec(ctx context.Context, c *cli.Command, file, repoPath string) error {
 	return nil
 }
 
-func execWithAxis(ctx context.Context, c *cli.Command, file, repoPath string, axis matrix.Axis) error {
-	metadata, err := metadataFromContext(ctx, c, axis)
+func execWithAxis(ctx context.Context, c *cli.Command, file, repoPath string, axis matrix.Axis, singleExec bool) error {
+	var metadataWorkflow *metadata.Workflow
+	if !singleExec {
+		// TODO: proper try to use the engine to generate the same metadata for workflows
+		// https://github.com/woodpecker-ci/woodpecker/pull/3967
+		metadataWorkflow.Name = strings.TrimSuffix(strings.TrimSuffix(file, ".yaml"), ".yml")
+	}
+	metadata, err := metadataFromContext(ctx, c, axis, metadataWorkflow)
 	if err != nil {
 		return fmt.Errorf("could not create metadata: %w", err)
+	} else if metadata == nil {
+		return fmt.Errorf("metadata is nil")
 	}
+
 	environ := metadata.Environ()
 	var secrets []compiler.Secret
 	for key, val := range metadata.Workflow.Matrix {
@@ -239,7 +250,7 @@ func execWithAxis(ctx context.Context, c *cli.Command, file, repoPath string, ax
 			c.String("netrc-password"),
 			c.String("netrc-machine"),
 		),
-		compiler.WithMetadata(metadata),
+		compiler.WithMetadata(*metadata),
 		compiler.WithSecret(secrets...),
 		compiler.WithEnviron(pipelineEnv),
 	).Compile(conf)

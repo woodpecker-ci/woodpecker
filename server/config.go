@@ -66,7 +66,6 @@ var Config = struct {
 		DefaultCancelPreviousPipelineEvents []model.WebhookEvent
 		DefaultClonePlugin                  string
 		TrustedClonePlugins                 []string
-		Limits                              model.ResourceLimit
 		Volumes                             []string
 		Networks                            []string
 		PrivilegedPlugins                   []string
