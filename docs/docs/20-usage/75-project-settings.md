@@ -1,8 +1,8 @@
-# Repository settings
+# Project settings
 
-As the owner of a repository in Woodpecker you can change repository related settings via the web interface.
+As the owner of a project in Woodpecker you can change project related settings via the web interface.
 
-![repository settings](./repo-settings.png)
+![project settings](./project-settings.png)
 
 ## Pipeline path
 
@@ -27,16 +27,16 @@ Otherwise, these users will be able to steal secrets that are only available for
 
 ## Protected
 
-Every pipeline initiated by an webhook event needs to be approved by a repository members with push permissions before being executed.
+Every pipeline initiated by an webhook event needs to be approved by a project members with push permissions before being executed.
 The protected option can be used as an additional review process before running potentially harmful pipelines. Especially if pipelines can be executed by third-parties through pull-requests.
 
 ## Trusted
 
-If you set your repository to trusted, a pipeline step and by this the underlying containers gets access to escalated capabilities like mounting volumes.
+If you set your project to trusted, a pipeline step and by this the underlying containers gets access to escalated capabilities like mounting volumes.
 
 :::note
 
-Only server admins can set this option. If you are not a server admin this option won't be shown in your repository settings.
+Only server admins can set this option. If you are not a server admin this option won't be shown in your project settings.
 
 :::
 
@@ -46,11 +46,11 @@ Cloning pipeline step may need git credentials. They are injected via netrc. By 
 
 ## Project visibility
 
-You can change the visibility of your repository by this setting. If a user has access to a repository they can see all builds and their logs and artifacts. Settings, Secrets and Registries can only be accessed by owners.
+You can change the visibility of your project by this setting. If a user has access to a project they can see all builds and their logs and artifacts. Settings, Secrets and Registries can only be accessed by owners.
 
-- `Public` Every user can see your repository without being logged in.
-- `Internal` Only authenticated users of the Woodpecker instance can see this repository.
-- `Private` Only you and other owners of the repository can see this repository.
+- `Public` Every user can see your project without being logged in.
+- `Internal` Only authenticated users of the Woodpecker instance can see this project.
+- `Private` Only you and other owners of the repository can see this project.
 
 ## Timeout
 
