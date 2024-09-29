@@ -12,6 +12,8 @@ Some versions need some changes to the server configuration or the pipeline conf
   - `CI_PIPELINE_FINISHED` as empty during execution
   - `CI_PIPELINE_STATUS` was always `success`
   - `CI_STEP_STATUS` was always `success`
+- Set `/woodpecker` as defautl workdir for the **woodpecker-cli** container
+- Move docker resource limit settings from server into agent configuration
 - Rename server environment variable `WOODPECKER_ESCALATE` to `WOODPECKER_PLUGINS_PRIVILEGED`
 - All default privileged plugins (like `woodpeckerci/plugin-docker-buildx`) were removed. Please carefully [re-add those plugins](./30-administration/10-server-config.md#woodpecker_plugins_privileged) you trust and rely on.
 - `WOODPECKER_DEFAULT_CLONE_IMAGE` got depricated use `WOODPECKER_DEFAULT_CLONE_PLUGIN`

@@ -437,7 +437,7 @@
     "saved": "Secret saved",
     "plugins": {
       "images": "Available only for the following plugins",
-      "desc": "List of plugins images where this secret is available, leave empty to allow for all plugins and general steps."
+      "desc": "List of plugin images where this secret is available. Leave empty to allow for all plugins and normal steps."
     },
     "events": {
       "events": "Available at the following events",
