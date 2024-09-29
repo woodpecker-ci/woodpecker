@@ -121,10 +121,6 @@ func TestLintErrors(t *testing.T) {
 			want: "Insufficient privileges to use privileged mode",
 		},
 		{
-			from: "steps: { build: { image: golang, shm_size: 10gb }  }",
-			want: "Insufficient privileges to override shm_size",
-		},
-		{
 			from: "steps: { build: { image: golang, dns: [ 8.8.8.8 ] }  }",
 			want: "Insufficient privileges to use custom dns",
 		},

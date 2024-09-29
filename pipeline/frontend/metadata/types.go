@@ -29,17 +29,17 @@ type (
 
 	// Repo defines runtime metadata for a repository.
 	Repo struct {
-		ID          int64    `json:"id,omitempty"`
-		Name        string   `json:"name,omitempty"`
-		Owner       string   `json:"owner,omitempty"`
-		RemoteID    string   `json:"remote_id,omitempty"`
-		ForgeURL    string   `json:"forge_url,omitempty"`
-		CloneURL    string   `json:"clone_url,omitempty"`
-		CloneSSHURL string   `json:"clone_url_ssh,omitempty"`
-		Private     bool     `json:"private,omitempty"`
-		Secrets     []Secret `json:"secrets,omitempty"`
-		Branch      string   `json:"default_branch,omitempty"`
-		Trusted     bool     `json:"trusted,omitempty"`
+		ID          int64  `json:"id,omitempty"`
+		Name        string `json:"name,omitempty"`
+		Owner       string `json:"owner,omitempty"`
+		RemoteID    string `json:"remote_id,omitempty"`
+		ForgeURL    string `json:"forge_url,omitempty"`
+		SCM         string `json:"scm,omitempty"`
+		CloneURL    string `json:"clone_url,omitempty"`
+		CloneSSHURL string `json:"clone_url_ssh,omitempty"`
+		Private     bool   `json:"private,omitempty"`
+		Branch      string `json:"default_branch,omitempty"`
+		Trusted     bool   `json:"trusted,omitempty"`
 	}
 
 	// Pipeline defines runtime metadata for a pipeline.
@@ -89,14 +89,6 @@ type (
 	Step struct {
 		Name   string `json:"name,omitempty"`
 		Number int    `json:"number,omitempty"`
-	}
-
-	// Secret defines a runtime secret.
-	Secret struct {
-		Name  string `json:"name,omitempty"`
-		Value string `json:"value,omitempty"`
-		Mount string `json:"mount,omitempty"`
-		Mask  bool   `json:"mask,omitempty"`
 	}
 
 	// System defines runtime metadata for a ci/cd system.

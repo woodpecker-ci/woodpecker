@@ -63,17 +63,15 @@ Point it to your server's docker config.
 WOODPECKER_DOCKER_CONFIG=/root/.docker/config.json
 ```
 
-## Handling sensitive data in docker-compose and docker-swarm
+## Handling sensitive data in **docker compose** and **docker swarm**
 
-To handle sensitive data in docker-compose or docker-swarm configurations there are several options:
+To handle sensitive data in `docker compose` or `docker swarm` configurations there are several options:
 
-For docker-compose you can use a `.env` file next to your compose configuration to store the secrets outside of the compose file. While this separates configuration from secrets it is still not very secure.
+For docker compose you can use a `.env` file next to your compose configuration to store the secrets outside of the compose file. While this separates configuration from secrets it is still not very secure.
 
 Alternatively use docker-secrets. As it may be difficult to use docker secrets for environment variables Woodpecker allows to read sensible data from files by providing a `*_FILE` option of all sensible configuration variables. Woodpecker will try to read the value directly from this file. Keep in mind that when the original environment variable gets specified at the same time it will override the value read from the file.
 
 ```diff title="docker-compose.yaml"
- version: '3'
-
  services:
    woodpecker-server:
      [...]
@@ -477,44 +475,6 @@ Supported variables:
 - `repo`: the repo's name
 
 ---
-
-### `WOODPECKER_LIMIT_MEM_SWAP`
-
-> Default: `0`
-
-The maximum amount of memory a single pipeline container is allowed to swap to disk, configured in bytes. There is no limit if `0`.
-
-### `WOODPECKER_LIMIT_MEM`
-
-> Default: `0`
-
-The maximum amount of memory a single pipeline container can use, configured in bytes. There is no limit if `0`.
-
-### `WOODPECKER_LIMIT_SHM_SIZE`
-
-> Default: `0`
-
-The maximum amount of memory of `/dev/shm` allowed in bytes. There is no limit if `0`.
-
-### `WOODPECKER_LIMIT_CPU_QUOTA`
-
-> Default: `0`
-
-The number of microseconds per CPU period that the container is limited to before throttled. There is no limit if `0`.
-
-### `WOODPECKER_LIMIT_CPU_SHARES`
-
-> Default: `0`
-
-The relative weight vs. other containers.
-
-### `WOODPECKER_LIMIT_CPU_SET`
-
-> Default: empty
-
-Comma-separated list to limit the specific CPUs or cores a pipeline container can use.
-
-Example: `WOODPECKER_LIMIT_CPU_SET=1,2`
 
 ### `WOODPECKER_CONFIG_SERVICE_ENDPOINT`
 

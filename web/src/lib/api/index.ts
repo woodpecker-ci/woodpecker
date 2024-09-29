@@ -119,6 +119,10 @@ export default class WoodpeckerClient extends ApiClient {
     return this._get(`/api/repos/${repoId}/pipelines/${pipelineNumber}/config`) as Promise<PipelineConfig[]>;
   }
 
+  async getPipelineMetadata(repoId: number, pipelineNumber: number): Promise<any> {
+    return this._get(`/api/repos/${repoId}/pipelines/${pipelineNumber}/metadata`) as Promise<any>;
+  }
+
   async getPipelineFeed(): Promise<PipelineFeed[]> {
     return this._get(`/api/user/feed`) as Promise<PipelineFeed[]>;
   }
