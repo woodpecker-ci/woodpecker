@@ -264,6 +264,9 @@ func TestFullPod(t *testing.T) {
 				},
 				{
 					"name": "another-pull-secret"
+				},
+				{
+					"name": "wp-01he8bebctabr3kgk0qj36d2me-0"
 				}
 			],
 			"tolerations": [
@@ -317,6 +320,7 @@ func TestFullPod(t *testing.T) {
 		},
 	}
 	pod, err := mkPod(&types.Step{
+		UUID:        "01he8bebctabr3kgk0qj36d2me-0",
 		Name:        "go-test",
 		Image:       "meltwater/drone-cache",
 		WorkingDir:  "/woodpecker/src",
@@ -328,6 +332,10 @@ func TestFullPod(t *testing.T) {
 		Environment: map[string]string{"CGO": "0"},
 		ExtraHosts:  hostAliases,
 		Ports:       ports,
+		AuthConfig: types.Auth{
+			Username: "foo",
+			Password: "bar",
+		},
 	}, &config{
 		Namespace:                   "woodpecker",
 		ImagePullSecretNames:        []string{"regcred", "another-pull-secret"},
