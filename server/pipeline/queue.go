@@ -37,14 +37,14 @@ func queuePipeline(ctx context.Context, repo *model.Repo, pipelineItems []*stepb
 			Labels: make(map[string]string),
 		}
 		maps.Copy(task.Labels, item.Labels)
-		if _, err := task.GetLabels(repo); err != nil {
+		err := task.ApplyLabelsFromRepo(repo)
+		if err != nil {
 			return err
 		}
 		task.Dependencies = taskIDs(item.DependsOn, pipelineItems)
 		task.RunOn = item.RunsOn
 		task.DepStatus = make(map[string]model.StatusValue)
 
-		var err error
 		task.Data, err = json.Marshal(rpc.Workflow{
 			ID:      fmt.Sprint(item.Workflow.ID),
 			Config:  item.Config,

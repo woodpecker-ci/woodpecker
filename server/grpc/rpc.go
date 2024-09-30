@@ -67,17 +67,17 @@ func (s *RPC) Next(c context.Context, agentFilter rpc.Filter) (*rpc.Workflow, er
 		return nil, nil
 	}
 
-	// enforce server set agent labels ...
 	agentServerLabels, err := agent.GetServerLabels()
 	if err != nil {
 		return nil, err
 	}
-	// ... by overwrite and extend the agent labels
+
+	// enforce labels from server by overwriting agent labels
 	for k, v := range agentServerLabels {
 		agentFilter.Labels[k] = v
 	}
 
-	log.Trace().Msgf("Agent %s[%d] try pull task with filter labels: %v", agent.Name, agent.ID, agentFilter.Labels)
+	log.Trace().Msgf("Agent %s[%d] tries to pull task with labels: %v", agent.Name, agent.ID, agentFilter.Labels)
 
 	filterFn := createFilterFunc(agentFilter)
 
@@ -501,26 +501,26 @@ func (s *RPC) ReportHealth(ctx context.Context, status string) error {
 
 func (s *RPC) checkAgentPermissionByWorkflow(_ context.Context, agent *model.Agent, strWorkflowID string, pipeline *model.Pipeline, repo *model.Repo) error {
 	var err error
-	if repo == nil {
-		if pipeline == nil {
-			workflowID, err := strconv.ParseInt(strWorkflowID, 10, 64)
-			if err != nil {
-				return err
-			}
-
-			workflow, err := s.store.WorkflowLoad(workflowID)
-			if err != nil {
-				log.Error().Err(err).Msgf("rpc.update: cannot find workflow with id %d", workflowID)
-				return err
-			}
-
-			pipeline, err = s.store.GetPipeline(workflow.PipelineID)
-			if err != nil {
-				log.Error().Err(err).Msgf("cannot find pipeline with id %d", workflow.PipelineID)
-				return err
-			}
+	if repo == nil && pipeline == nil {
+		workflowID, err := strconv.ParseInt(strWorkflowID, 10, 64)
+		if err != nil {
+			return err
 		}
 
+		workflow, err := s.store.WorkflowLoad(workflowID)
+		if err != nil {
+			log.Error().Err(err).Msgf("cannot find workflow with id %d", workflowID)
+			return err
+		}
+
+		pipeline, err = s.store.GetPipeline(workflow.PipelineID)
+		if err != nil {
+			log.Error().Err(err).Msgf("cannot find pipeline with id %d", workflow.PipelineID)
+			return err
+		}
+	}
+
+	if repo == nil {
 		repo, err = s.store.GetRepo(pipeline.RepoID)
 		if err != nil {
 			log.Error().Err(err).Msgf("cannot find repo with id %d", pipeline.RepoID)

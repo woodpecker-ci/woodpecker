@@ -40,7 +40,7 @@ func TestAgent_GetServerLabels(t *testing.T) {
 		}, filters)
 	})
 
-	t.Run("SystemAgent", func(t *testing.T) {
+	t.Run("GlobalAgent", func(t *testing.T) {
 		agent := &Agent{
 			OrgID: IDNotSet,
 		}
@@ -72,10 +72,9 @@ func TestAgent_CanAccessRepo(t *testing.T) {
 		assert.False(t, agent.CanAccessRepo(repo))
 	})
 
-	t.Run("SystemAgent", func(t *testing.T) {
+	t.Run("GlobalAgent", func(t *testing.T) {
 		agent := &Agent{
-			OwnerID: IDNotSet,
-			OrgID:   IDNotSet,
+			OrgID: IDNotSet,
 		}
 
 		assert.True(t, agent.CanAccessRepo(repo))

@@ -23,10 +23,10 @@ import (
 func TestTask_GetLabels(t *testing.T) {
 	t.Run("Nil Repo", func(t *testing.T) {
 		task := &Task{}
-		labels, err := task.GetLabels(nil)
+		err := task.ApplyLabelsFromRepo(nil)
 
 		assert.Error(t, err)
-		assert.Nil(t, labels)
+		assert.Nil(t, task.Labels)
 		assert.EqualError(t, err, "repo is nil but needed to get task labels")
 	})
 
@@ -34,14 +34,14 @@ func TestTask_GetLabels(t *testing.T) {
 		task := &Task{}
 		repo := &Repo{}
 
-		labels, err := task.GetLabels(repo)
+		err := task.ApplyLabelsFromRepo(repo)
 
 		assert.NoError(t, err)
-		assert.NotNil(t, labels)
+		assert.NotNil(t, task.Labels)
 		assert.Equal(t, map[string]string{
 			"repo":           "",
 			agentFilterOrgID: "0",
-		}, labels)
+		}, task.Labels)
 	})
 
 	t.Run("Empty Labels", func(t *testing.T) {
@@ -52,14 +52,14 @@ func TestTask_GetLabels(t *testing.T) {
 			OrgID:    456,
 		}
 
-		labels, err := task.GetLabels(repo)
+		err := task.ApplyLabelsFromRepo(repo)
 
 		assert.NoError(t, err)
-		assert.NotNil(t, labels)
+		assert.NotNil(t, task.Labels)
 		assert.Equal(t, map[string]string{
 			"repo":           "test/repo",
 			agentFilterOrgID: "456",
-		}, labels)
+		}, task.Labels)
 	})
 
 	t.Run("Existing Labels", func(t *testing.T) {
@@ -74,14 +74,14 @@ func TestTask_GetLabels(t *testing.T) {
 			OrgID:    456,
 		}
 
-		labels, err := task.GetLabels(repo)
+		err := task.ApplyLabelsFromRepo(repo)
 
 		assert.NoError(t, err)
-		assert.NotNil(t, labels)
+		assert.NotNil(t, task.Labels)
 		assert.Equal(t, map[string]string{
 			"existing":       "label",
 			"repo":           "test/repo",
 			agentFilterOrgID: "456",
-		}, labels)
+		}, task.Labels)
 	})
 }

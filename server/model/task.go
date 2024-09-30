@@ -41,16 +41,16 @@ func (t *Task) String() string {
 	return sb.String()
 }
 
-func (t *Task) GetLabels(r *Repo) (map[string]string, error) {
+func (t *Task) ApplyLabelsFromRepo(r *Repo) error {
 	if r == nil {
-		return nil, fmt.Errorf("repo is nil but needed to get task labels")
+		return fmt.Errorf("repo is nil but needed to get task labels")
 	}
 	if t.Labels == nil {
 		t.Labels = make(map[string]string)
 	}
 	t.Labels["repo"] = r.FullName
-	t.Labels[agentFilterOrgID] = fmt.Sprint(r.OrgID)
-	return t.Labels, nil
+	t.Labels[agentFilterOrgID] = fmt.Sprintf("%d", r.OrgID)
+	return nil
 }
 
 // ShouldRun tells if a task should be run or skipped, based on dependencies.

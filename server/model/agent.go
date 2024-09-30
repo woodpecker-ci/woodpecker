@@ -71,9 +71,15 @@ func (a *Agent) GetServerLabels() (map[string]string, error) {
 }
 
 func (a *Agent) CanAccessRepo(repo *Repo) bool {
-	if a.IsSystemAgent() {
+	// global agent
+	if a.OrgID == IDNotSet {
 		return true
 	}
 
-	return a.OrgID == IDNotSet || a.OrgID == repo.OrgID
+	// agent has access to the organization
+	if a.OrgID == repo.OrgID {
+		return true
+	}
+
+	return false
 }
