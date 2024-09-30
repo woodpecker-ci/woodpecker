@@ -29,21 +29,20 @@ import (
 
 	"github.com/yaronf/httpsign"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server/services/utils/hostmatcher"
+	host_matcher "go.woodpecker-ci.org/woodpecker/v2/server/services/utils/hostmatcher"
 )
 
 type Client struct {
 	*httpsign.Client
-	privateKey crypto.PrivateKey
 }
 
-func getHttpClient(privateKey crypto.PrivateKey, allowedHostListValue string) (*httpsign.Client, error) {
-	timeout := time.Duration(10 * time.Second)
+func getHTTPClient(privateKey crypto.PrivateKey, allowedHostListValue string) (*httpsign.Client, error) {
+	timeout := time.Duration(10)
 
 	if allowedHostListValue == "" {
-		allowedHostListValue = hostmatcher.MatchBuiltinExternal
+		allowedHostListValue = host_matcher.MatchBuiltinExternal
 	}
-	allowedHostMatcher := hostmatcher.ParseHostMatchList("WOODPECKER_ALLOWED_EXTENSIONS_HOSTS", allowedHostListValue)
+	allowedHostMatcher := host_matcher.ParseHostMatchList("WOODPECKER_ALLOWED_EXTENSIONS_HOSTS", allowedHostListValue)
 
 	pubKeyID := "woodpecker-ci-extensions"
 
@@ -63,7 +62,7 @@ func getHttpClient(privateKey crypto.PrivateKey, allowedHostListValue string) (*
 		Timeout: timeout,
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: false},
-			DialContext:     hostmatcher.NewDialContext("extensions", allowedHostMatcher, nil),
+			DialContext:     host_matcher.NewDialContext("extensions", allowedHostMatcher, nil),
 		},
 	}
 
@@ -73,7 +72,7 @@ func getHttpClient(privateKey crypto.PrivateKey, allowedHostListValue string) (*
 }
 
 func NewHTTPClient(privateKey crypto.PrivateKey, allowedHostList string) (*Client, error) {
-	client, err := getHttpClient(privateKey, allowedHostList)
+	client, err := getHTTPClient(privateKey, allowedHostList)
 	if err != nil {
 		return nil, err
 	}

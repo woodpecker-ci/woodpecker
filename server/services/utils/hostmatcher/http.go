@@ -1,5 +1,5 @@
 // Copyright 2021 The Gitea Authors. All rights reserved.
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: MIT.
 
 package hostmatcher
 
@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-// NewDialContext returns a DialContext for Transport, the DialContext will do allow/block list check
+// NewDialContext returns a DialContext for Transport, the DialContext will do allow/block list check.
 func NewDialContext(usage string, allowList, blockList *HostMatchList) func(ctx context.Context, network, addr string) (net.Conn, error) {
 	return NewDialContextWithProxy(usage, allowList, blockList, nil)
 }
@@ -26,10 +26,13 @@ func NewDialContextWithProxy(usage string, allowList, blockList *HostMatchList, 
 	//   transport.DialContext addrOrHost=domain.com:80
 	//   dialer.Control tcp4:11.22.33.44:80
 	return func(ctx context.Context, network, addrOrHost string) (net.Conn, error) {
+		// default values are from http.DefaultTransport
+		const dialTimeout = 30 * time.Second
+		const dialKeepAlive = 30 * time.Second
+
 		dialer := net.Dialer{
-			// default values comes from http.DefaultTransport
-			Timeout:   30 * time.Second,
-			KeepAlive: 30 * time.Second,
+			Timeout:   dialTimeout,
+			KeepAlive: dialKeepAlive,
 
 			Control: func(network, ipAddr string, _ syscall.RawConn) error {
 				host, port, err := net.SplitHostPort(addrOrHost)

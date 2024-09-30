@@ -1,5 +1,5 @@
 // Copyright 2021 The Gitea Authors. All rights reserved.
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: MIT.
 
 package hostmatcher
 
@@ -22,7 +22,7 @@ type HostMatchList struct {
 	ipNets []*net.IPNet
 }
 
-// MatchBuiltinExternal A valid non-private unicast IP, all hosts on public internet are matched
+// MatchBuiltinExternal A valid non-private unicast IP, all hosts on public internet are matched.
 const MatchBuiltinExternal = "external"
 
 // MatchBuiltinPrivate RFC 1918 (10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16) and RFC 4193 (FC00::/7). Also called LAN/Intranet.
@@ -44,11 +44,12 @@ func ParseHostMatchList(settingKeyHint, hostList string) *HostMatchList {
 			continue
 		}
 		_, ipNet, err := net.ParseCIDR(s)
-		if err == nil {
+		switch {
+		case err == nil:
 			hl.ipNets = append(hl.ipNets, ipNet)
-		} else if isBuiltin(s) {
+		case isBuiltin(s):
 			hl.builtins = append(hl.builtins, s)
-		} else {
+		default:
 			hl.patterns = append(hl.patterns, s)
 		}
 	}
