@@ -30,8 +30,10 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 	"go.woodpecker-ci.org/woodpecker/v2/server/pipeline"
+	"go.woodpecker-ci.org/woodpecker/v2/server/pipeline/stepbuilder"
 	"go.woodpecker-ci.org/woodpecker/v2/server/router/middleware/session"
 	"go.woodpecker-ci.org/woodpecker/v2/server/store"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store/types"
 )
 
 // CreatePipeline
@@ -390,6 +392,47 @@ func GetPipelineConfig(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, configs)
+}
+
+// GetPipelineMetadata
+//
+//	@Summary	Get metadata for a pipeline or a specific workflow, including previous pipeline info
+//	@Router		/repos/{repo_id}/pipelines/{number}/metadata [get]
+//	@Produce	json
+//	@Success	200	{object}	metadata.Metadata
+//	@Tags		Pipelines
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		repo_id			path	int		true	"the repository id"
+//	@Param		number			path	int		true	"the number of the pipeline"
+func GetPipelineMetadata(c *gin.Context) {
+	repo := session.Repo(c)
+	num, err := strconv.ParseInt(c.Param("number"), 10, 64)
+	if err != nil {
+		_ = c.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+
+	_store := store.FromContext(c)
+	currentPipeline, err := _store.GetPipelineNumber(repo, num)
+	if err != nil {
+		handleDBError(c, err)
+		return
+	}
+
+	forge, err := server.Config.Services.Manager.ForgeFromRepo(repo)
+	if err != nil {
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	prevPipeline, err := _store.GetPipelineLastBefore(repo, currentPipeline.Branch, currentPipeline.ID)
+	if err != nil && !errors.Is(err, types.RecordNotExist) {
+		handleDBError(c, err)
+		return
+	}
+
+	metadata := stepbuilder.MetadataFromStruct(forge, repo, currentPipeline, prevPipeline, nil, server.Config.Server.Host)
+	c.JSON(http.StatusOK, metadata)
 }
 
 // CancelPipeline

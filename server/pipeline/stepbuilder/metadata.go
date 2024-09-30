@@ -25,7 +25,7 @@ import (
 )
 
 // MetadataFromStruct return the metadata from a pipeline will run with.
-func MetadataFromStruct(forge metadata.ServerForge, repo *model.Repo, pipeline, last *model.Pipeline, workflow *model.Workflow, sysURL string) metadata.Metadata {
+func MetadataFromStruct(forge metadata.ServerForge, repo *model.Repo, pipeline, prev *model.Pipeline, workflow *model.Workflow, sysURL string) metadata.Metadata {
 	host := sysURL
 	uri, err := url.Parse(sysURL)
 	if err == nil {
@@ -48,6 +48,7 @@ func MetadataFromStruct(forge metadata.ServerForge, repo *model.Repo, pipeline, 
 			Owner:       repo.Owner,
 			RemoteID:    fmt.Sprint(repo.ForgeRemoteID),
 			ForgeURL:    repo.ForgeURL,
+			SCM:         string(repo.SCMKind),
 			CloneURL:    repo.Clone,
 			CloneSSHURL: repo.CloneSSH,
 			Private:     repo.IsSCMPrivate,
@@ -77,7 +78,7 @@ func MetadataFromStruct(forge metadata.ServerForge, repo *model.Repo, pipeline, 
 	return metadata.Metadata{
 		Repo:     fRepo,
 		Curr:     metadataPipelineFromModelPipeline(pipeline, true),
-		Prev:     metadataPipelineFromModelPipeline(last, false),
+		Prev:     metadataPipelineFromModelPipeline(prev, false),
 		Workflow: fWorkflow,
 		Step:     metadata.Step{},
 		Sys: metadata.System{
