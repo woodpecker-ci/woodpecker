@@ -482,6 +482,12 @@ Supported variables:
 
 Specify a configuration service endpoint, see [Configuration Extension](./40-advanced/100-external-configuration-api.md)
 
+### `WOODPECKER_ALLOWED_EXTENSIONS_HOSTS`
+
+> Default: `external`
+
+Comma-separated list of allowed hosts for extensions. Possible values are `loopback`, `private`, `external`, `*` or CIDR list.
+
 ### `WOODPECKER_FORGE_TIMEOUT`
 
 > Default: 3s

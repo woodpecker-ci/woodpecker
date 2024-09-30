@@ -39,7 +39,7 @@ func ApplyPagination[T any](d *ListOptions, slice []T) []T {
 }
 
 func (d *ListOptions) Encode() string {
-	query := []string{}
+	var query []string
 
 	if d.Page != 0 {
 		query = append(query, fmt.Sprintf("page=%d", d.Page))
