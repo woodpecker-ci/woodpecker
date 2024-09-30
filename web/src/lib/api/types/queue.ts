@@ -1,8 +1,8 @@
 export interface Task {
   id: number;
-  labels: { [key: string]: string };
+  labels: Record<string, string>;
   dependencies: string[];
-  dep_status: { [key: string]: string };
+  dep_status: Record<string, string>;
   run_on: string[];
   agent_id: number;
 }
