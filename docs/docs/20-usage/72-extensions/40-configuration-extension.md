@@ -5,6 +5,7 @@ endpoint in the repository settings in the extensions tab.
 
 Using such an extension can be useful if you want to:
 
+<!-- cSpell:words templating,Starlark,Jsonnet -->
 - Preprocess the original configuration file with something like go templating
 - Convert custom attributes to Woodpecker attributes
 - Add defaults to the configuration like default steps
@@ -71,7 +72,7 @@ Example request:
     "uid": "",
     "user_id": 0,
     "namespace": "",
-    "name": "woodpecker-testpipe",
+    "name": "woodpecker-test-pipeline",
     "slug": "",
     "scm": "git",
     "git_http_url": "",
@@ -99,7 +100,7 @@ Example request:
     "author_avatar": "https://myforge.com/avatars/d6b3f7787a685fcdf2a44e2c685c7e03",
     "author_email": "my@email.com",
     "branch": "main",
-    "changed_files": ["somefilename.txt"],
+    "changed_files": ["some-filename.txt"],
     "commit": "2fff90f8d288a4640e90f05049fe30e61a14fd50",
     "created_at": 0,
     "deploy_to": "",

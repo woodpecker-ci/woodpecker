@@ -1,6 +1,7 @@
 // Copyright 2021 The Gitea Authors. All rights reserved.
 // SPDX-License-Identifier: MIT.
 
+// cSpell:words hostmatcher
 package hostmatcher
 
 import (
@@ -56,7 +57,7 @@ func ParseHostMatchList(settingKeyHint, hostList string) *HostMatchList {
 	return hl
 }
 
-// ParseSimpleMatchList parse a simple matchlist (no built-in networks, no CIDR support, only wildcard pattern match).
+// ParseSimpleMatchList parse a simple match-list (no built-in networks, no CIDR support, only wildcard pattern match).
 func ParseSimpleMatchList(settingKeyHint, matchList string) *HostMatchList {
 	hl := &HostMatchList{
 		SettingKeyHint: settingKeyHint,
@@ -67,7 +68,7 @@ func ParseSimpleMatchList(settingKeyHint, matchList string) *HostMatchList {
 		if s == "" {
 			continue
 		}
-		// we keep the same result as old `matchlist`, so no builtin/CIDR support here, we only match wildcard patterns
+		// we keep the same result as old `match-list`, so no builtin/CIDR support here, we only match wildcard patterns
 		hl.patterns = append(hl.patterns, s)
 	}
 	return hl
