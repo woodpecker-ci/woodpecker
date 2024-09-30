@@ -16,6 +16,7 @@ package kubernetes
 
 import (
 	"context"
+	std_errs "errors"
 	"fmt"
 	"io"
 	"maps"
@@ -225,6 +226,13 @@ func (e *kube) StartStep(ctx context.Context, step *types.Step, taskUUID string)
 		log.Error().Err(err).Msg("could not parse backend options")
 	}
 
+	if needsRegistrySecret(step) {
+		err = startRegistrySecret(ctx, e, step)
+		if err != nil {
+			return err
+		}
+	}
+
 	log.Trace().Str("taskUUID", taskUUID).Msgf("starting step: %s", step.Name)
 	_, err = startPod(ctx, e, step, options)
 	return err
@@ -382,9 +390,20 @@ func (e *kube) TailStep(ctx context.Context, step *types.Step, taskUUID string) 
 }
 
 func (e *kube) DestroyStep(ctx context.Context, step *types.Step, taskUUID string) error {
+	var errs []error
 	log.Trace().Str("taskUUID", taskUUID).Msgf("Stopping step: %s", step.Name)
+	if needsRegistrySecret(step) {
+		err := stopRegistrySecret(ctx, e, step, defaultDeleteOptions)
+		if err != nil {
+			errs = append(errs, err)
+		}
+	}
+
 	err := stopPod(ctx, e, step, defaultDeleteOptions)
-	return err
+	if err != nil {
+		errs = append(errs, err)
+	}
+	return std_errs.Join(errs...)
 }
 
 // DestroyWorkflow destroys the pipeline environment.
