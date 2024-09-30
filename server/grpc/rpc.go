@@ -73,7 +73,7 @@ func (s *RPC) Next(c context.Context, agentFilter rpc.Filter) (*rpc.Workflow, er
 		return nil, err
 	}
 	// ... by overwrite and extend the agent labels
-	for k, v := range agentServerFilters {
+	for k, v := range agentServerLabels {
 		agentFilter.Labels[k] = v
 	}
 
