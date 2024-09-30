@@ -495,7 +495,7 @@
   "extensions_description": "Extensions are HTTP services that can be called by Woodpecker instead of using the builtin ones.",
   "secrets_extension_endpoint": "Secrets extension endpoint",
   "secrets_extension_alpha_state": "The secret extension is in alpha state and might change in the future.",
-  "extension_endpoint_placeholder": "e.g. https://my-extension-endpint.tld/api",
+  "extension_endpoint_placeholder": "e.g. https://example.com/api",
   "config_extension_endpoint": "Config extension endpoint",
   "extensions_signatures_public_key": "Public key for signatures",
   "extensions_signatures_public_key_description": "This public key should be used by your extensions to verify webhook calls from Woodpecker.",
