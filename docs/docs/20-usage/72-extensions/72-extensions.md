@@ -13,7 +13,9 @@ You need to trust the extensions as they are receiving private information like 
 data like malicious pipeline configurations that could be executed.
 :::
 
-To prevent your extensions from such attacks, Woodpecker is signing all http-requests using [http signatures](https://tools.ietf.org/html/draft-cavage-http-signatures). Woodpecker therefore uses a public-private ed25519 key pair. To verify the requests your extension has to verify the signature of all request using the public key with some library like [httpsig](https://github.com/yaronf/httpsign). You can get the public Woodpecker key by opening `http://my-woodpecker.tld/api/signature/public-key` or by visiting the Woodpecker UI, going to you repo settings and opening the extensions page.
+To prevent your extensions from such attacks, Woodpecker is signing all http-requests using [http signatures](https://tools.ietf.org/html/draft-cavage-http-signatures). Woodpecker therefore uses a public-private ed25519 key pair.
+To verify the requests your extension has to verify the signature of all request using the public key with some library like [httpsign](https://github.com/yaronf/httpsign).
+You can get the public Woodpecker key by opening `http://my-woodpecker.tld/api/signature/public-key` or by visiting the Woodpecker UI, going to you repo settings and opening the extensions page.
 
 ## Example extensions
 
