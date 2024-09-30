@@ -20,7 +20,7 @@ func TestSetGatedState(t *testing.T) {
 		{
 			name: "no restrictions",
 			repo: &model.Repo{
-				SecurityMode: model.SecurityModeNoRestrictions,
+				ApprovalMode: model.ApprovalModeAllOutsideCollaborators,
 			},
 			pipeline: &model.Pipeline{
 				Event: model.EventPull,
@@ -30,7 +30,7 @@ func TestSetGatedState(t *testing.T) {
 		{
 			name: "require approval for fork PRs",
 			repo: &model.Repo{
-				SecurityMode: model.SecurityModeApproveForkPRs,
+				ApprovalMode: model.ApprovalModeAllOutsideCollaborators,
 			},
 			pipeline: &model.Pipeline{
 				Event: model.EventPull,
@@ -40,7 +40,7 @@ func TestSetGatedState(t *testing.T) {
 		{
 			name: "by-pass for cron / manual events",
 			repo: &model.Repo{
-				SecurityMode: model.SecurityModeApproveForkPRs,
+				ApprovalMode: model.ApprovalModeAllEvents,
 			},
 			pipeline: &model.Pipeline{
 				Event: model.EventCron,
@@ -51,7 +51,7 @@ func TestSetGatedState(t *testing.T) {
 		{
 			name: "require approval for everything",
 			repo: &model.Repo{
-				SecurityMode: model.SecurityModeApproveEverything,
+				ApprovalMode: model.ApprovalModeAllEvents,
 			},
 			pipeline: &model.Pipeline{
 				Event: model.EventPush,

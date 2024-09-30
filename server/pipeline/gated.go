@@ -25,15 +25,15 @@ func setGatedState(repo *model.Repo, pipeline *model.Pipeline) {
 		return
 	}
 
-	if repo.SecurityMode == model.SecurityModeNoRestrictions {
+	if repo.ApprovalMode == model.ApprovalModeAllEvents {
 		return
 	}
 
-	if isPullRequestEvent && isFork && repo.SecurityMode == model.SecurityModeApproveForkPRs {
+	if isPullRequestEvent && isFork && repo.ApprovalMode == model.ApprovalModeAllOutsideCollaborators {
 		pipeline.Status = model.StatusBlocked
 	}
 
-	if repo.SecurityMode == model.SecurityModeApproveEverything {
+	if repo.ApprovalMode == model.ApprovalModeAllEvents {
 		pipeline.Status = model.StatusBlocked
 	}
 }

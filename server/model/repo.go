@@ -20,13 +20,20 @@ import (
 	"strings"
 )
 
-type SecurityMode string
+type ApprovalMode string
 
 var (
-	SecurityModeNoRestrictions    SecurityMode = "no_restrictions"
-	SecurityModeApproveForkPRs    SecurityMode = "approve_fork_prs"
-	SecurityModeApproveEverything SecurityMode = "approve_everything"
+	ApprovalModeFirstTimeContributors   ApprovalMode = "block_first_time_contributors"
+	ApprovalModeAllOutsideCollaborators ApprovalMode = "block_all_outside_collaborators"
+	ApprovalModeAllNonMaintainers       ApprovalMode = "block_all_non_maintainers"
+	ApprovalModeAllEvents               ApprovalMode = "block_all_events"
 )
+
+// Require approval for:
+// - first-time contributors
+// - all outside collaborators
+// - all non maintainers
+// - all events
 
 // Repo represents a repository.
 type Repo struct {
@@ -50,7 +57,7 @@ type Repo struct {
 	Visibility                   RepoVisibility `json:"visibility"                      xorm:"varchar(10) 'visibility'"`
 	IsSCMPrivate                 bool           `json:"private"                         xorm:"private"`
 	IsTrusted                    bool           `json:"trusted"                         xorm:"trusted"`
-	SecurityMode                 SecurityMode   `json:"security_mode"                   xorm:"security_mode"`
+	ApprovalMode                 ApprovalMode   `json:"approval_mode"                   xorm:"approval_mode"`
 	IsActive                     bool           `json:"active"                          xorm:"active"`
 	AllowPull                    bool           `json:"allow_pr"                        xorm:"allow_pr"`
 	AllowDeploy                  bool           `json:"allow_deploy"                    xorm:"allow_deploy"`
@@ -120,7 +127,7 @@ type RepoPatch struct {
 	IsTrusted                    *bool           `json:"trusted,omitempty"`
 	Timeout                      *int64          `json:"timeout,omitempty"`
 	Visibility                   *string         `json:"visibility,omitempty"`
-	SecurityMode                 *SecurityMode   `json:"security_mode,omitempty"`
+	SecurityMode                 *ApprovalMode   `json:"security_mode,omitempty"`
 	AllowDeploy                  *bool           `json:"allow_deploy,omitempty"`
 	CancelPreviousPipelineEvents *[]WebhookEvent `json:"cancel_previous_pipeline_events"`
 	NetrcOnlyTrusted             *bool           `json:"netrc_only_trusted"`
