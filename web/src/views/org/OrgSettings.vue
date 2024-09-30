@@ -18,6 +18,10 @@
     <Tab id="registries" :title="$t('registries.registries')">
       <OrgRegistriesTab />
     </Tab>
+
+    <Tab id="agents" :title="$t('admin.settings.agents.agents')">
+      <OrgAgentsTab />
+    </Tab>
   </Scaffold>
 </template>
 
@@ -28,6 +32,7 @@ import { useRouter } from 'vue-router';
 
 import Scaffold from '~/components/layout/scaffold/Scaffold.vue';
 import Tab from '~/components/layout/scaffold/Tab.vue';
+import OrgAgentsTab from '~/components/org/settings/OrgAgentsTab.vue';
 import OrgRegistriesTab from '~/components/org/settings/OrgRegistriesTab.vue';
 import OrgSecretsTab from '~/components/org/settings/OrgSecretsTab.vue';
 import { inject } from '~/compositions/useInjectProvide';

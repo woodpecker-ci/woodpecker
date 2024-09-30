@@ -28,6 +28,9 @@ var (
 
 	// ErrNotFound indicates the task was not found in the queue.
 	ErrNotFound = errors.New("queue: task not found")
+
+	// ErrAgentMissMatch indicates a task is assigned to a different agent.
+	ErrAgentMissMatch = errors.New("task assigned to different agent")
 )
 
 // InfoT provides runtime information.
@@ -79,7 +82,7 @@ type Queue interface {
 	Poll(c context.Context, agentID int64, f FilterFn) (*model.Task, error)
 
 	// Extend extends the deadline for a task.
-	Extend(c context.Context, id string) error
+	Extend(c context.Context, agentID int64, workflowID string) error
 
 	// Done signals the task is complete.
 	Done(c context.Context, id string, exitStatus model.StatusValue) error
