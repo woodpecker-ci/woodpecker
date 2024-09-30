@@ -31,7 +31,7 @@ func NewDialContextWithProxy(usage string, allowList, blockList *HostMatchList, 
 			Timeout:   30 * time.Second,
 			KeepAlive: 30 * time.Second,
 
-			Control: func(network, ipAddr string, c syscall.RawConn) error {
+			Control: func(network, ipAddr string, _ syscall.RawConn) error {
 				host, port, err := net.SplitHostPort(addrOrHost)
 				if err != nil {
 					return err

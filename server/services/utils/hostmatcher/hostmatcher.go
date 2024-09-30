@@ -35,7 +35,7 @@ func isBuiltin(s string) bool {
 	return s == MatchBuiltinExternal || s == MatchBuiltinPrivate || s == MatchBuiltinLoopback
 }
 
-// ParseHostMatchList parses the host list HostMatchList
+// ParseHostMatchList parses the host list HostMatchList.
 func ParseHostMatchList(settingKeyHint, hostList string) *HostMatchList {
 	hl := &HostMatchList{SettingKeyHint: settingKeyHint, SettingValue: hostList}
 	for _, s := range strings.Split(hostList, ",") {
@@ -55,7 +55,7 @@ func ParseHostMatchList(settingKeyHint, hostList string) *HostMatchList {
 	return hl
 }
 
-// ParseSimpleMatchList parse a simple matchlist (no built-in networks, no CIDR support, only wildcard pattern match)
+// ParseSimpleMatchList parse a simple matchlist (no built-in networks, no CIDR support, only wildcard pattern match).
 func ParseSimpleMatchList(settingKeyHint, matchList string) *HostMatchList {
 	hl := &HostMatchList{
 		SettingKeyHint: settingKeyHint,
@@ -72,17 +72,17 @@ func ParseSimpleMatchList(settingKeyHint, matchList string) *HostMatchList {
 	return hl
 }
 
-// AppendBuiltin appends more builtins to match
+// AppendBuiltin appends more builtins to match.
 func (hl *HostMatchList) AppendBuiltin(builtin string) {
 	hl.builtins = append(hl.builtins, builtin)
 }
 
-// AppendPattern appends more pattern to match
+// AppendPattern appends more pattern to match.
 func (hl *HostMatchList) AppendPattern(pattern string) {
 	hl.patterns = append(hl.patterns, pattern)
 }
 
-// IsEmpty checks if the checklist is empty
+// IsEmpty checks if the checklist is empty.
 func (hl *HostMatchList) IsEmpty() bool {
 	return hl == nil || (len(hl.builtins) == 0 && len(hl.patterns) == 0 && len(hl.ipNets) == 0)
 }
@@ -127,7 +127,7 @@ func (hl *HostMatchList) checkIP(ip net.IP) bool {
 	return false
 }
 
-// MatchHostName checks if the host matches an allow/deny(block) list
+// MatchHostName checks if the host matches an allow/deny(block) list.
 func (hl *HostMatchList) MatchHostName(host string) bool {
 	if hl == nil {
 		return false
@@ -146,7 +146,7 @@ func (hl *HostMatchList) MatchHostName(host string) bool {
 	return false
 }
 
-// MatchIPAddr checks if the IP matches an allow/deny(block) list, it's safe to pass `nil` to `ip`
+// MatchIPAddr checks if the IP matches an allow/deny(block) list, it's safe to pass `nil` to `ip`.
 func (hl *HostMatchList) MatchIPAddr(ip net.IP) bool {
 	if hl == nil {
 		return false
@@ -155,7 +155,7 @@ func (hl *HostMatchList) MatchIPAddr(ip net.IP) bool {
 	return hl.checkPattern(host) || hl.checkIP(ip)
 }
 
-// MatchHostOrIP checks if the host or IP matches an allow/deny(block) list
+// MatchHostOrIP checks if the host or IP matches an allow/deny(block) list.
 func (hl *HostMatchList) MatchHostOrIP(host string, ip net.IP) bool {
 	return hl.MatchHostName(host) || hl.MatchIPAddr(ip)
 }

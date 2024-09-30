@@ -58,7 +58,7 @@ func setupSecretService(store store.Store) secret.Service {
 	return secret.NewDB(store)
 }
 
-func setupConfigService(c *cli.Context, client *utils.Client) (config.Service, error) {
+func setupConfigService(c *cli.Command, client *utils.Client) (config.Service, error) {
 	timeout := c.Duration("forge-timeout")
 	retries := c.Uint("forge-retry")
 	if retries == 0 {

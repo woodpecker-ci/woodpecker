@@ -32,11 +32,11 @@ import (
 )
 
 type Client struct {
-	*http.Client
+	*httpsign.Client
 	privateKey crypto.PrivateKey
 }
 
-func getHttpClient(allowedHostListValue string) *http.Client {
+func getHttpClient(privateKey crypto.PrivateKey, allowedHostListValue string) (*httpsign.Client, error) {
 	timeout := time.Duration(10 * time.Second)
 
 	if allowedHostListValue == "" {
@@ -44,20 +44,42 @@ func getHttpClient(allowedHostListValue string) *http.Client {
 	}
 	allowedHostMatcher := hostmatcher.ParseHostMatchList("WOODPECKER_ALLOWED_EXTENSIONS_HOSTS", allowedHostListValue)
 
-	return &http.Client{
+	pubKeyID := "woodpecker-ci-extensions"
+
+	ed25519Key, ok := privateKey.(ed25519.PrivateKey)
+	if !ok {
+		return nil, fmt.Errorf("invalid private key type")
+	}
+
+	signer, err := httpsign.NewEd25519Signer(ed25519Key,
+		httpsign.NewSignConfig(),
+		httpsign.Headers("@request-target", "content-digest")) // The Content-Digest header will be auto-generated
+	if err != nil {
+		return nil, err
+	}
+
+	client := http.Client{
 		Timeout: timeout,
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: false},
 			DialContext:     hostmatcher.NewDialContext("extensions", allowedHostMatcher, nil),
 		},
 	}
+
+	config := httpsign.NewClientConfig().SetSignatureName(pubKeyID).SetSigner(signer)
+
+	return httpsign.NewClient(client, config), nil
 }
 
-func NewHTTPClient(privateKey crypto.PrivateKey, allowedHostList string) *Client {
-	return &Client{
-		Client:     getHttpClient(allowedHostList),
-		privateKey: privateKey,
+func NewHTTPClient(privateKey crypto.PrivateKey, allowedHostList string) (*Client, error) {
+	client, err := getHttpClient(privateKey, allowedHostList)
+	if err != nil {
+		return nil, err
 	}
+
+	return &Client{
+		Client: client,
+	}, nil
 }
 
 // Send makes an http request to the given endpoint, writing the input
@@ -87,11 +109,6 @@ func (e *Client) Send(ctx context.Context, method, path string, in, out any) (in
 		req.Header.Set("Content-Type", "application/json")
 	}
 
-	err = SignHTTPRequest(e.privateKey, req)
-	if err != nil {
-		return 0, err
-	}
-
 	resp, err := e.Do(req)
 	if err != nil {
 		return 0, err
@@ -110,16 +127,4 @@ func (e *Client) Send(ctx context.Context, method, path string, in, out any) (in
 	// if no other errors parse and return the json response.
 	err = json.NewDecoder(resp.Body).Decode(out)
 	return resp.StatusCode, err
-}
-
-func signClient(privateKey ed25519.PrivateKey) (*httpsign.Client, error) {
-	pubKeyID := "woodpecker-ci-extensions"
-
-	signer, err := httpsign.NewEd25519Signer(privateKey,
-		httpsign.NewSignConfig(),
-		httpsign.Headers("@request-target", "content-digest")) // The Content-Digest header will be auto-generated
-	if err != nil {
-		return nil, err
-	}
-	return httpsign.NewDefaultClient(httpsign.NewClientConfig().SetSignatureName(pubKeyID).SetSigner(signer)), nil // sign requests, don't verify responses
 }
