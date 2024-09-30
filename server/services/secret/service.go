@@ -20,6 +20,8 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
+//go:generate mockery --name Service --output mocks --case underscore
+
 // Service defines a service for managing secrets.
 type Service interface {
 	SecretListPipeline(context.Context, *model.Repo, *model.Pipeline, *model.ListOptions) ([]*model.Secret, error)

@@ -1,18 +1,16 @@
-/* eslint-disable import/no-extraneous-dependencies */
+import { copyFile, existsSync, mkdirSync, readdirSync } from 'node:fs';
+import path from 'node:path';
+import process from 'node:process';
 import VueI18nPlugin from '@intlify/unplugin-vue-i18n/vite';
 import vue from '@vitejs/plugin-vue';
-import { copyFile, existsSync, mkdirSync, readdirSync } from 'fs';
-import path from 'path';
-import replace from 'replace-in-file';
-import IconsResolver from 'unplugin-icons/resolver';
-import Icons from 'unplugin-icons/vite';
-import Components from 'unplugin-vue-components/vite';
+import { replaceInFileSync } from 'replace-in-file';
+import type { Plugin } from 'vite';
 import prismjs from 'vite-plugin-prismjs';
 import WindiCSS from 'vite-plugin-windicss';
 import svgLoader from 'vite-svg-loader';
 import { defineConfig } from 'vitest/config';
 
-function woodpeckerInfoPlugin() {
+function woodpeckerInfoPlugin(): Plugin {
   return {
     name: 'woodpecker-info',
     configureServer() {
@@ -26,7 +24,7 @@ function woodpeckerInfoPlugin() {
   };
 }
 
-function externalCSSPlugin() {
+function externalCSSPlugin(): Plugin {
   return {
     name: 'external-css',
     transformIndexHtml: {
@@ -61,7 +59,7 @@ export default defineConfig({
         mkdirSync('src/assets/dayjsLocales');
       }
 
-      filenames.forEach(async (name) => {
+      filenames.forEach((name) => {
         // English is always directly loaded (compiled by Vite) and thus not copied
         if (name === 'en') {
           return;
@@ -88,7 +86,7 @@ export default defineConfig({
           },
         );
       });
-      replace.sync({
+      replaceInFileSync({
         files: 'src/assets/dayjsLocales/*.js',
         // remove any dayjs import and any dayjs.locale call
         from: /(?:import dayjs.*'|dayjs\.locale.*);/g,
@@ -97,13 +95,13 @@ export default defineConfig({
 
       return {
         name: 'vue-i18n-supported-locales',
-        // eslint-disable-next-line consistent-return
+
         resolveId(id) {
           if (id === virtualModuleId) {
             return resolvedVirtualModuleId;
           }
         },
-        // eslint-disable-next-line consistent-return
+
         load(id) {
           if (id === resolvedVirtualModuleId) {
             return `export const SUPPORTED_LOCALES = ${JSON.stringify(filenames)}`;
@@ -112,11 +110,7 @@ export default defineConfig({
       };
     })(),
     WindiCSS(),
-    Icons({}),
     svgLoader(),
-    Components({
-      resolvers: [IconsResolver()],
-    }),
     externalCSSPlugin(),
     woodpeckerInfoPlugin(),
     prismjs({
@@ -130,7 +124,7 @@ export default defineConfig({
   },
   logLevel: 'warn',
   server: {
-    host: process.env.VITE_DEV_SERVER_HOST || '127.0.0.1',
+    host: process.env.VITE_DEV_SERVER_HOST ?? '127.0.0.1',
     port: 8010,
   },
   test: {

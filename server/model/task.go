@@ -21,12 +21,12 @@ import (
 
 // Task defines scheduled pipeline Task.
 type Task struct {
-	ID           string                 `json:"id"           xorm:"PK UNIQUE 'task_id'"`
-	Data         []byte                 `json:"data"         xorm:"LONGBLOB 'task_data'"`
-	Labels       map[string]string      `json:"labels"       xorm:"json 'task_labels'"`
-	Dependencies []string               `json:"dependencies" xorm:"json 'task_dependencies'"`
-	RunOn        []string               `json:"run_on"       xorm:"json 'task_run_on'"`
-	DepStatus    map[string]StatusValue `json:"dep_status"   xorm:"json 'task_dep_status'"`
+	ID           string                 `json:"id"           xorm:"PK UNIQUE 'id'"`
+	Data         []byte                 `json:"-"            xorm:"LONGBLOB 'data'"`
+	Labels       map[string]string      `json:"labels"       xorm:"json 'labels'"`
+	Dependencies []string               `json:"dependencies" xorm:"json 'dependencies'"`
+	RunOn        []string               `json:"run_on"       xorm:"json 'run_on'"`
+	DepStatus    map[string]StatusValue `json:"dep_status"   xorm:"json 'dependencies_status'"`
 	AgentID      int64                  `json:"agent_id"     xorm:"'agent_id'"`
 } //	@name Task
 
@@ -39,6 +39,18 @@ func (t *Task) String() string {
 	var sb strings.Builder
 	sb.WriteString(fmt.Sprintf("%s (%s) - %s", t.ID, t.Dependencies, t.DepStatus))
 	return sb.String()
+}
+
+func (t *Task) ApplyLabelsFromRepo(r *Repo) error {
+	if r == nil {
+		return fmt.Errorf("repo is nil but needed to get task labels")
+	}
+	if t.Labels == nil {
+		t.Labels = make(map[string]string)
+	}
+	t.Labels["repo"] = r.FullName
+	t.Labels[agentFilterOrgID] = fmt.Sprintf("%d", r.OrgID)
+	return nil
 }
 
 // ShouldRun tells if a task should be run or skipped, based on dependencies.

@@ -16,6 +16,7 @@ package kubernetes
 
 import (
 	"context"
+	std_errs "errors"
 	"fmt"
 	"io"
 	"maps"
@@ -25,7 +26,7 @@ import (
 	"time"
 
 	"github.com/rs/zerolog/log"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 	"gopkg.in/yaml.v3"
 	v1 "k8s.io/api/core/v1"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -65,6 +66,7 @@ type config struct {
 	PodNodeSelector             map[string]string
 	ImagePullSecretNames        []string
 	SecurityContext             SecurityContextConfig
+	NativeSecretsAllowFromStep  bool
 }
 type SecurityContextConfig struct {
 	RunAsNonRoot bool
@@ -82,7 +84,7 @@ func newDefaultDeleteOptions() meta_v1.DeleteOptions {
 
 func configFromCliContext(ctx context.Context) (*config, error) {
 	if ctx != nil {
-		if c, ok := ctx.Value(types.CliContext).(*cli.Context); ok {
+		if c, ok := ctx.Value(types.CliCommand).(*cli.Command); ok {
 			config := config{
 				Namespace:                   c.String("backend-k8s-namespace"),
 				StorageClass:                c.String("backend-k8s-storage-class"),
@@ -97,10 +99,7 @@ func configFromCliContext(ctx context.Context) (*config, error) {
 				SecurityContext: SecurityContextConfig{
 					RunAsNonRoot: c.Bool("backend-k8s-secctx-nonroot"), // cspell:words secctx nonroot
 				},
-			}
-			// TODO: remove in next major
-			if len(config.ImagePullSecretNames) == 1 && config.ImagePullSecretNames[0] == "regcred" {
-				log.Warn().Msg("WOODPECKER_BACKEND_K8S_PULL_SECRET_NAMES is set to the default ('regcred'). It will default to empty in Woodpecker 3.0. Set it explicitly before then.")
+				NativeSecretsAllowFromStep: c.Bool("backend-k8s-allow-native-secrets"),
 			}
 			// Unmarshal label and annotation settings here to ensure they're valid on startup
 			if labels := c.String("backend-k8s-pod-labels"); labels != "" {
@@ -227,6 +226,13 @@ func (e *kube) StartStep(ctx context.Context, step *types.Step, taskUUID string)
 		log.Error().Err(err).Msg("could not parse backend options")
 	}
 
+	if needsRegistrySecret(step) {
+		err = startRegistrySecret(ctx, e, step)
+		if err != nil {
+			return err
+		}
+	}
+
 	log.Trace().Str("taskUUID", taskUUID).Msgf("starting step: %s", step.Name)
 	_, err = startPod(ctx, e, step, options)
 	return err
@@ -252,7 +258,7 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 		}
 
 		if pod.Name == podName {
-			if isImagePullBackOffState(pod) {
+			if isImagePullBackOffState(pod) || isInvalidImageName(pod) {
 				finished <- true
 			}
 
@@ -284,7 +290,7 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 		return nil, err
 	}
 
-	if isImagePullBackOffState(pod) {
+	if isImagePullBackOffState(pod) || isInvalidImageName(pod) {
 		return nil, fmt.Errorf("could not pull image for pod %s", podName)
 	}
 
@@ -328,7 +334,7 @@ func (e *kube) TailStep(ctx context.Context, step *types.Step, taskUUID string) 
 		}
 
 		if pod.Name == podName {
-			if isImagePullBackOffState(pod) {
+			if isImagePullBackOffState(pod) || isInvalidImageName(pod) {
 				up <- true
 			}
 			switch pod.Status.Phase {
@@ -384,16 +390,26 @@ func (e *kube) TailStep(ctx context.Context, step *types.Step, taskUUID string) 
 }
 
 func (e *kube) DestroyStep(ctx context.Context, step *types.Step, taskUUID string) error {
+	var errs []error
 	log.Trace().Str("taskUUID", taskUUID).Msgf("Stopping step: %s", step.Name)
+	if needsRegistrySecret(step) {
+		err := stopRegistrySecret(ctx, e, step, defaultDeleteOptions)
+		if err != nil {
+			errs = append(errs, err)
+		}
+	}
+
 	err := stopPod(ctx, e, step, defaultDeleteOptions)
-	return err
+	if err != nil {
+		errs = append(errs, err)
+	}
+	return std_errs.Join(errs...)
 }
 
 // DestroyWorkflow destroys the pipeline environment.
 func (e *kube) DestroyWorkflow(ctx context.Context, conf *types.Config, taskUUID string) error {
 	log.Trace().Str("taskUUID", taskUUID).Msg("deleting Kubernetes primitives")
 
-	// Use noContext because the ctx sent to this function will be canceled/done in case of error or canceled by user.
 	for _, stage := range conf.Stages {
 		for _, step := range stage.Steps {
 			err := stopPod(ctx, e, step, defaultDeleteOptions)

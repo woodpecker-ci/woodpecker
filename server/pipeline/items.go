@@ -38,7 +38,7 @@ func parsePipeline(forge forge.Forge, store store.Store, currentPipeline *model.
 	}
 
 	// get the previous pipeline so that we can send status change notifications
-	last, err := store.GetPipelineLastBefore(repo, currentPipeline.Branch, currentPipeline.ID)
+	prev, err := store.GetPipelineLastBefore(repo, currentPipeline.Branch, currentPipeline.ID)
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		log.Error().Err(err).Str("repo", repo.FullName).Msgf("error getting last pipeline before pipeline number '%d'", currentPipeline.Number)
 	}
@@ -51,7 +51,7 @@ func parsePipeline(forge forge.Forge, store store.Store, currentPipeline *model.
 	}
 
 	registryService := server.Config.Services.Manager.RegistryServiceFromRepo(repo)
-	regs, err := registryService.RegistryList(repo, &model.ListOptions{All: true})
+	regs, err := registryService.RegistryListPipeline(repo, currentPipeline)
 	if err != nil {
 		log.Error().Err(err).Msgf("error getting registry credentials for %s#%d", repo.FullName, currentPipeline.Number)
 	}
@@ -75,7 +75,7 @@ func parsePipeline(forge forge.Forge, store store.Store, currentPipeline *model.
 	b := stepbuilder.StepBuilder{
 		Repo:  repo,
 		Curr:  currentPipeline,
-		Last:  last,
+		Prev:  prev,
 		Netrc: netrc,
 		Secs:  secs,
 		Regs:  regs,

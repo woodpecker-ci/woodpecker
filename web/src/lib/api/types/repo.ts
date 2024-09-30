@@ -1,5 +1,5 @@
 // A version control repository.
-export type Repo = {
+export interface Repo {
   // Is the repo currently active or not
   active: boolean;
 
@@ -8,6 +8,9 @@ export type Repo = {
 
   // The id of the repository on the source control management system.
   forge_remote_id: string;
+
+  // The id of the forge that the repository is on.
+  forge_id: number;
 
   // The source control management being used.
   // Currently, this is either 'git' or 'hg' (Mercurial).
@@ -76,13 +79,15 @@ export type Repo = {
 
   // Endpoint for config extensions
   config_extension_endpoint: string;
-};
+}
 
+/* eslint-disable no-unused-vars */
 export enum RepoVisibility {
   Public = 'public',
   Private = 'private',
   Internal = 'internal',
 }
+/* eslint-enable */
 
 export type RepoSettings = Pick<
   Repo,
@@ -99,9 +104,9 @@ export type RepoSettings = Pick<
 
 export type ExtensionSettings = Pick<Repo, 'config_extension_endpoint' | 'secret_extension_endpoint'>;
 
-export type RepoPermissions = {
+export interface RepoPermissions {
   pull: boolean;
   push: boolean;
   admin: boolean;
   synced: number;
-};
+}

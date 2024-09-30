@@ -58,12 +58,10 @@ func Load(noRouteHandler http.HandlerFunc, middleware ...gin.HandlerFunc) http.H
 		base.GET("/web-config.js", web.Config)
 
 		base.GET("/logout", api.GetLogout)
-		base.GET("/login", api.HandleLogin)
 		auth := base.Group("/authorize")
 		{
 			auth.GET("", api.HandleAuth)
 			auth.POST("", api.HandleAuth)
-			auth.POST("/token", api.GetLoginToken)
 		}
 
 		base.GET("/metrics", metrics.PromHandler())

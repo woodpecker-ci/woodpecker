@@ -85,7 +85,7 @@ import ListItem from '~/components/atomic/ListItem.vue';
 import Settings from '~/components/layout/Settings.vue';
 import useApiClient from '~/compositions/useApiClient';
 import useNotifications from '~/compositions/useNotifications';
-import { QueueInfo } from '~/lib/api/types/queue';
+import type { QueueInfo } from '~/lib/api/types';
 
 import AdminQueueStats from './queue/AdminQueueStats.vue';
 
@@ -110,7 +110,12 @@ const tasks = computed(() => {
     _tasks.push(...queueInfo.value.waiting_on_deps.map((task) => ({ ...task, status: 'waiting_on_deps' })));
   }
 
-  return _tasks.sort((a, b) => a.id - b.id);
+  return _tasks
+    .map((task) => ({
+      ...task,
+      labels: Object.fromEntries(Object.entries(task.labels).filter(([key]) => key !== 'org-id')),
+    }))
+    .toSorted((a, b) => a.id - b.id);
 });
 
 async function loadQueueInfo() {

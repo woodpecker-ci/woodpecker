@@ -20,7 +20,7 @@ import (
 	"time"
 
 	"github.com/jellydator/ttlcache/v3"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
@@ -32,7 +32,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 )
 
-//go:generate mockery --name Manager --output mocks --case underscore
+//go:generate mockery --name Manager --output mocks --case underscore --note "+build test"
 
 const forgeCacheTTL = 10 * time.Minute
 
@@ -48,7 +48,7 @@ type Manager interface {
 	EnvironmentService() environment.Service
 	ForgeFromRepo(repo *model.Repo) (forge.Forge, error)
 	ForgeFromUser(user *model.User) (forge.Forge, error)
-	ForgeMain() (forge.Forge, error)
+	ForgeByID(forgeID int64) (forge.Forge, error)
 }
 
 type manager struct {
@@ -64,7 +64,7 @@ type manager struct {
 	client              *utils.Client
 }
 
-func NewManager(c *cli.Context, store store.Store, setupForge SetupForge) (Manager, error) {
+func NewManager(c *cli.Command, store store.Store, setupForge SetupForge) (Manager, error) {
 	signaturePrivateKey, signaturePublicKey, err := setupSignatureKeys(store)
 	if err != nil {
 		return nil, err
@@ -133,18 +133,14 @@ func (m *manager) EnvironmentService() environment.Service {
 }
 
 func (m *manager) ForgeFromRepo(repo *model.Repo) (forge.Forge, error) {
-	return m.getForgeByID(repo.ForgeID)
+	return m.ForgeByID(repo.ForgeID)
 }
 
 func (m *manager) ForgeFromUser(user *model.User) (forge.Forge, error) {
-	return m.getForgeByID(user.ForgeID)
+	return m.ForgeByID(user.ForgeID)
 }
 
-func (m *manager) ForgeMain() (forge.Forge, error) {
-	return m.getForgeByID(1) // main forge is always 1 and is configured via environment variables
-}
-
-func (m *manager) getForgeByID(id int64) (forge.Forge, error) {
+func (m *manager) ForgeByID(id int64) (forge.Forge, error) {
 	item := m.forgeCache.Get(id)
 	if item != nil && !item.IsExpired() {
 		return item.Value(), nil

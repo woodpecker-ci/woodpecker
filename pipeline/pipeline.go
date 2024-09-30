@@ -38,7 +38,7 @@ type (
 		// Global state of the pipeline.
 		Pipeline struct {
 			// Pipeline time started
-			Time int64 `json:"time"`
+			Started int64 `json:"time"`
 			// Current pipeline step
 			Step *backend.Step `json:"step"`
 			// Current pipeline error state
@@ -105,7 +105,11 @@ func (r *Runtime) Run(runnerCtx context.Context) error {
 	}
 
 	defer func() {
-		if err := r.engine.DestroyWorkflow(runnerCtx, r.spec, r.taskUUID); err != nil {
+		ctx := runnerCtx //nolint:contextcheck
+		if ctx.Err() != nil {
+			ctx = GetShutdownCtx()
+		}
+		if err := r.engine.DestroyWorkflow(ctx, r.spec, r.taskUUID); err != nil {
 			logger.Error().Err(err).Msg("could not destroy engine")
 		}
 	}()
@@ -147,7 +151,7 @@ func (r *Runtime) traceStep(processState *backend.State, err error, step *backen
 	}
 
 	state := new(State)
-	state.Pipeline.Time = r.started
+	state.Pipeline.Started = r.started
 	state.Pipeline.Step = step
 	state.Process = processState // empty
 	state.Pipeline.Error = r.err
@@ -254,9 +258,9 @@ func (r *Runtime) exec(step *backend.Step) (*backend.State, error) {
 		return nil, nil
 	}
 
-	// Some pipeline backends, such as local, will close the pipe from Tail on Wait,
-	// so first make sure all reading has finished.
+	// We wait until all data was logged. (Needed for some backends like local as WaitStep kills the log stream)
 	wg.Wait()
+
 	waitState, err := r.engine.WaitStep(r.ctx, step, r.taskUUID)
 	if err != nil {
 		if errors.Is(err, context.Canceled) {

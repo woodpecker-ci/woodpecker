@@ -15,6 +15,7 @@
 package migration
 
 import (
+	"context"
 	"fmt"
 	"reflect"
 
@@ -28,30 +29,6 @@ import (
 // They are executed in order and if one fails Xormigrate will try to rollback that specific one and quits.
 var migrationTasks = []*xormigrate.Migration{
 	&legacyToXormigrate,
-	&legacy2Xorm,
-	&alterTableReposDropFallback,
-	&alterTableReposDropAllowDeploysAllowTags,
-	&fixPRSecretEventName,
-	&alterTableReposDropCounter,
-	&dropSenders,
-	&alterTableLogUpdateColumnLogDataType,
-	&alterTableSecretsAddUserCol,
-	&recreateAgentsTable,
-	&lowercaseSecretNames,
-	&renameBuildsToPipeline,
-	&renameColumnsBuildsToPipeline,
-	&renameTableProcsToSteps,
-	&renameRemoteToForge,
-	&renameForgeIDToForgeRemoteID,
-	&removeActiveFromUsers,
-	&removeInactiveRepos,
-	&dropFiles,
-	&removeMachineCol,
-	&dropOldCols,
-	&initLogsEntriesTable,
-	&migrateLogs2LogEntries,
-	&parentStepsToWorkflows,
-	&addOrgs,
 	&addOrgID,
 	&alterTableTasksUpdateColumnTaskDataType,
 	&alterTableConfigUpdateColumnConfigDataType,
@@ -60,6 +37,13 @@ var migrationTasks = []*xormigrate.Migration{
 	&renameLinkToURL,
 	&cleanRegistryPipeline,
 	&setForgeID,
+	&unifyColumnsTables,
+	&alterTableRegistriesFixRequiredFields,
+	&cronWithoutSec,
+	&renameStartEndTime,
+	&fixV31Registries,
+	&removeOldMigrationsOfV1,
+	&addOrgAgents,
 }
 
 var allBeans = []any{
@@ -83,7 +67,8 @@ var allBeans = []any{
 	new(model.Org),
 }
 
-func Migrate(e *xorm.Engine, allowLong bool) error {
+// TODO: make xormigrate context aware
+func Migrate(_ context.Context, e *xorm.Engine, allowLong bool) error {
 	e.SetDisableGlobalCache(true)
 
 	m := xormigrate.New(e, migrationTasks)

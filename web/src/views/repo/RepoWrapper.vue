@@ -1,7 +1,7 @@
 <template>
   <Scaffold
-    v-if="repo && repoPermissions && $route.meta.repoHeader"
-    v-model:activeTab="activeTab"
+    v-if="repo && repoPermissions && route.meta.repoHeader"
+    v-model:active-tab="activeTab"
     enable-tabs
     disable-tab-url-hash-mode
   >
@@ -9,15 +9,17 @@
       <span class="flex">
         <router-link :to="{ name: 'org', params: { orgId: repo.org_id } }" class="hover:underline">{{
           repo.owner
+          /* eslint-disable-next-line @intlify/vue-i18n/no-raw-text */
         }}</router-link>
-        {{ `&nbsp;/&nbsp;${repo.name}` }}
+        &nbsp;/
+        {{ repo.name }}
       </span>
     </template>
     <template #titleActions>
       <a v-if="badgeUrl" :href="badgeUrl" target="_blank">
         <img :src="badgeUrl" />
       </a>
-      <IconButton :href="repo.forge_url" :title="$t('repo.open_in_forge')" :icon="forge ?? 'repo'" class="forge" />
+      <IconButton :href="repo.forge_url" :title="$t('repo.open_in_forge')" :icon="forgeIcon" class="forge" />
       <IconButton
         v-if="repoPermissions.admin"
         :to="{ name: 'repo-settings' }"
@@ -28,11 +30,17 @@
 
     <template #tabActions>
       <Button
-        v-if="repoPermissions.push"
+        v-if="repoPermissions.push && route.name !== 'repo-manual'"
         :text="$t('repo.manual_pipeline.trigger')"
-        @click="showManualPipelinePopup = true"
+        start-icon="manual-pipeline"
+        :to="{ name: 'repo-manual' }"
       />
-      <ManualPipelinePopup :open="showManualPipelinePopup" @close="showManualPipelinePopup = false" />
+      <Button
+        v-else-if="repoPermissions.push"
+        :text="$t('repo.manual_pipeline.show_pipelines')"
+        start-icon="back"
+        :to="{ name: 'repo' }"
+      />
     </template>
 
     <Tab id="activity" :title="$t('repo.activity')" />
@@ -49,15 +57,17 @@ import { computed, onMounted, provide, ref, toRef, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 
+import Button from '~/components/atomic/Button.vue';
+import type { IconNames } from '~/components/atomic/Icon.vue';
 import IconButton from '~/components/atomic/IconButton.vue';
-import ManualPipelinePopup from '~/components/layout/popups/ManualPipelinePopup.vue';
 import Scaffold from '~/components/layout/scaffold/Scaffold.vue';
 import Tab from '~/components/layout/scaffold/Tab.vue';
 import useApiClient from '~/compositions/useApiClient';
 import useAuthentication from '~/compositions/useAuthentication';
 import useConfig from '~/compositions/useConfig';
+import { useForgeStore } from '~/compositions/useForgeStore';
 import useNotifications from '~/compositions/useNotifications';
-import { RepoPermissions } from '~/lib/api/types';
+import type { Forge, RepoPermissions } from '~/lib/api/types';
 import { usePipelineStore } from '~/store/pipelines';
 import { useRepoStore } from '~/store/repos';
 
@@ -66,7 +76,7 @@ const props = defineProps<{
 }>();
 
 const _repoId = toRef(props, 'repoId');
-const repositoryId = computed(() => parseInt(_repoId.value, 10));
+const repositoryId = computed(() => Number.parseInt(_repoId.value, 10));
 const repoStore = useRepoStore();
 const pipelineStore = usePipelineStore();
 const apiClient = useApiClient();
@@ -76,16 +86,21 @@ const route = useRoute();
 const router = useRouter();
 const i18n = useI18n();
 const config = useConfig();
+const forgeStore = useForgeStore();
 
-const { forge } = useConfig(); // TODO: remove this and use the forge type from the corresponding repo
 const repo = repoStore.getRepo(repositoryId);
 const repoPermissions = ref<RepoPermissions>();
 const pipelines = pipelineStore.getRepoPipelines(repositoryId);
 provide('repo', repo);
 provide('repo-permissions', repoPermissions);
 provide('pipelines', pipelines);
-
-const showManualPipelinePopup = ref(false);
+const forge = ref<Forge>();
+const forgeIcon = computed<IconNames>(() => {
+  if (forge.value && forge.value.type !== 'addon') {
+    return forge.value.type;
+  }
+  return 'repo';
+});
 
 async function loadRepo() {
   repoPermissions.value = await apiClient.getRepoPermissions(repositoryId.value);
@@ -102,6 +117,10 @@ async function loadRepo() {
 
   await repoStore.loadRepo(repositoryId.value);
   await pipelineStore.loadRepoPipelines(repositoryId.value);
+
+  if (repo.value) {
+    forge.value = (await forgeStore.getForge(repo.value?.forge_id)).value;
+  }
 }
 
 onMounted(() => {

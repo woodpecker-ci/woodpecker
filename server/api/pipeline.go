@@ -30,8 +30,10 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 	"go.woodpecker-ci.org/woodpecker/v2/server/pipeline"
+	"go.woodpecker-ci.org/woodpecker/v2/server/pipeline/stepbuilder"
 	"go.woodpecker-ci.org/woodpecker/v2/server/router/middleware/session"
 	"go.woodpecker-ci.org/woodpecker/v2/server/store"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store/types"
 )
 
 // CreatePipeline
@@ -64,7 +66,11 @@ func CreatePipeline(c *gin.Context) {
 
 	user := session.User(c)
 
-	lastCommit, _ := _forge.BranchHead(c, user, repo, opts.Branch)
+	lastCommit, err := _forge.BranchHead(c, user, repo, opts.Branch)
+	if err != nil {
+		_ = c.AbortWithError(http.StatusInternalServerError, fmt.Errorf("could not fetch branch head: %w", err))
+		return
+	}
 
 	tmpPipeline := createTmpPipeline(model.EventManual, lastCommit, user, &opts)
 
@@ -285,7 +291,7 @@ func GetStepLogs(c *gin.Context) {
 		return
 	}
 
-	logs, err := _store.LogFind(step)
+	logs, err := server.Config.Services.LogStore.LogFind(step)
 	if err != nil {
 		handleDBError(c, err)
 		return
@@ -386,6 +392,47 @@ func GetPipelineConfig(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, configs)
+}
+
+// GetPipelineMetadata
+//
+//	@Summary	Get metadata for a pipeline or a specific workflow, including previous pipeline info
+//	@Router		/repos/{repo_id}/pipelines/{number}/metadata [get]
+//	@Produce	json
+//	@Success	200	{object}	metadata.Metadata
+//	@Tags		Pipelines
+//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		repo_id			path	int		true	"the repository id"
+//	@Param		number			path	int		true	"the number of the pipeline"
+func GetPipelineMetadata(c *gin.Context) {
+	repo := session.Repo(c)
+	num, err := strconv.ParseInt(c.Param("number"), 10, 64)
+	if err != nil {
+		_ = c.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+
+	_store := store.FromContext(c)
+	currentPipeline, err := _store.GetPipelineNumber(repo, num)
+	if err != nil {
+		handleDBError(c, err)
+		return
+	}
+
+	forge, err := server.Config.Services.Manager.ForgeFromRepo(repo)
+	if err != nil {
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	prevPipeline, err := _store.GetPipelineLastBefore(repo, currentPipeline.Branch, currentPipeline.ID)
+	if err != nil && !errors.Is(err, types.RecordNotExist) {
+		handleDBError(c, err)
+		return
+	}
+
+	metadata := stepbuilder.MetadataFromStruct(forge, repo, currentPipeline, prevPipeline, nil, server.Config.Server.Host)
+	c.JSON(http.StatusOK, metadata)
 }
 
 // CancelPipeline
@@ -562,7 +609,7 @@ func PostPipeline(c *gin.Context) {
 			return
 		}
 
-		pl.Deploy = c.DefaultQuery("deploy_to", pl.Deploy)
+		pl.DeployTo = c.DefaultQuery("deploy_to", pl.DeployTo)
 	}
 
 	// Read query string parameters into pipelineParams, exclude reserved params
@@ -622,7 +669,7 @@ func DeletePipelineLogs(c *gin.Context) {
 	}
 
 	for _, step := range steps {
-		if lErr := _store.LogDelete(step); err != nil {
+		if lErr := server.Config.Services.LogStore.LogDelete(step); err != nil {
 			err = errors.Join(err, lErr)
 		}
 	}

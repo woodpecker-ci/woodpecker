@@ -8,17 +8,7 @@
       />
 
       <div class="flex items-start justify-center flex-grow relative basis-full md:basis-auto">
-        <Container v-if="selectedStep?.error" fill-width class="p-0">
-          <Panel>
-            <div class="flex flex-col items-center text-center gap-4">
-              <Icon name="status-error" class="w-16 h-16 text-wp-state-error-100" />
-              <span class="text-xl">{{ $t('repo.pipeline.we_got_some_errors') }}</span>
-              <span class="whitespace-pre-wrap">{{ selectedStep?.error }}</span>
-            </div>
-          </Panel>
-        </Container>
-
-        <Container v-else-if="pipeline!.errors?.some((e) => !e.is_warning)" fill-width class="p-0">
+        <Container v-if="pipeline!.errors?.some((e) => !e.is_warning)" fill-width class="p-0">
           <Panel>
             <div class="flex flex-col items-center text-center gap-4">
               <Icon name="status-error" class="w-16 h-16 text-wp-state-error-100" />
@@ -72,20 +62,20 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, inject, Ref, toRef } from 'vue';
+import { computed, inject, toRef, type Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 
 import Button from '~/components/atomic/Button.vue';
 import Icon from '~/components/atomic/Icon.vue';
 import Container from '~/components/layout/Container.vue';
+import Panel from '~/components/layout/Panel.vue';
 import PipelineLog from '~/components/repo/pipeline/PipelineLog.vue';
 import PipelineStepList from '~/components/repo/pipeline/PipelineStepList.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useNotifications from '~/compositions/useNotifications';
-import { Pipeline, PipelineStep, Repo, RepoPermissions } from '~/lib/api/types';
-import { findStep } from '~/utils/helpers';
+import type { Pipeline, PipelineStep, Repo, RepoPermissions } from '~/lib/api/types';
 
 const props = defineProps<{
   stepId?: string | null;
@@ -111,7 +101,7 @@ const defaultStepId = computed(() => pipeline.value?.workflows?.[0].children?.[0
 const selectedStepId = computed({
   get() {
     if (stepId.value !== '' && stepId.value !== null && stepId.value !== undefined) {
-      const id = parseInt(stepId.value, 10);
+      const id = Number.parseInt(stepId.value, 10);
 
       let step = pipeline.value.workflows?.find((workflow) => workflow.pid === id)?.children[0];
       if (step) {
@@ -146,8 +136,6 @@ const selectedStepId = computed({
     router.replace({ params: { ...route.params, stepId: `${_selectedStepId}` } });
   },
 });
-
-const selectedStep = computed(() => findStep(pipeline.value.workflows || [], selectedStepId.value || -1));
 
 const { doSubmit: approvePipeline, isLoading: isApprovingPipeline } = useAsyncAction(async () => {
   if (!repo) {

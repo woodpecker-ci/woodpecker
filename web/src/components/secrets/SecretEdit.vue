@@ -21,8 +21,8 @@
         />
       </InputField>
 
-      <InputField v-slot="{ id }" :label="$t('secrets.images.images')">
-        <span class="ml-1 mb-2 text-wp-text-alt-100">{{ $t('secrets.images.desc') }}</span>
+      <InputField v-slot="{ id }" :label="$t('secrets.plugins.images')">
+        <span class="ml-1 mb-2 text-wp-text-alt-100">{{ $t('secrets.plugins.desc') }}</span>
 
         <div class="flex flex-col gap-2">
           <div v-for="image in innerValue.images" :key="image" class="flex gap-2">
@@ -59,10 +59,10 @@ import { useI18n } from 'vue-i18n';
 
 import Button from '~/components/atomic/Button.vue';
 import CheckboxesField from '~/components/form/CheckboxesField.vue';
-import { CheckboxOption } from '~/components/form/form.types';
+import type { CheckboxOption } from '~/components/form/form.types';
 import InputField from '~/components/form/InputField.vue';
 import TextField from '~/components/form/TextField.vue';
-import { Secret, WebhookEvents } from '~/lib/api/types';
+import { WebhookEvents, type Secret } from '~/lib/api/types';
 
 const props = defineProps<{
   modelValue: Partial<Secret>;

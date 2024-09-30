@@ -97,8 +97,8 @@ func WithNetrc(username, password, machine string) Option {
 // plugin steps in the pipeline.
 func WithWorkspace(base, path string) Option {
 	return func(compiler *Compiler) {
-		compiler.base = base
-		compiler.path = path
+		compiler.workspaceBase = base
+		compiler.workspacePath = path
 	}
 }
 
@@ -157,24 +157,15 @@ func WithNetworks(networks ...string) Option {
 	}
 }
 
-// WithResourceLimit configures the compiler with default resource limits that
-// are applied each container in the pipeline.
-func WithResourceLimit(swap, mem, shmSize, cpuQuota, cpuShares int64, cpuSet string) Option {
+func WithDefaultClonePlugin(cloneImage string) Option {
 	return func(compiler *Compiler) {
-		compiler.reslimit = ResourceLimit{
-			MemSwapLimit: swap,
-			MemLimit:     mem,
-			ShmSize:      shmSize,
-			CPUQuota:     cpuQuota,
-			CPUShares:    cpuShares,
-			CPUSet:       cpuSet,
-		}
+		compiler.defaultClonePlugin = cloneImage
 	}
 }
 
-func WithDefaultCloneImage(cloneImage string) Option {
+func WithTrustedClonePlugins(images []string) Option {
 	return func(compiler *Compiler) {
-		compiler.defaultCloneImage = cloneImage
+		compiler.trustedClonePlugins = images
 	}
 }
 

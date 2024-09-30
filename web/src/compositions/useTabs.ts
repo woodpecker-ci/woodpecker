@@ -1,12 +1,14 @@
-import { inject, onMounted, provide, Ref, ref } from 'vue';
+import { inject, onMounted, provide, ref, type Ref } from 'vue';
 import { useRoute } from 'vue-router';
 
-export type Tab = {
+import type { IconNames } from '~/components/atomic/Icon.vue';
+
+export interface Tab {
   id: string;
   title: string;
-  icon?: string;
+  icon?: IconNames;
   iconClass?: string;
-};
+}
 
 export function useTabsProvider({
   activeTab,
@@ -29,7 +31,7 @@ export function useTabsProvider({
     }
 
     const hashTab = route.hash.replace(/^#/, '');
-    // eslint-disable-next-line no-param-reassign
+
     activeTab.value = hashTab || tabs.value[0].id;
   });
 }

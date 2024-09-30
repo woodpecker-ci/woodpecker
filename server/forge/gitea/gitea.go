@@ -113,16 +113,7 @@ func (c *Gitea) oauth2Config(ctx context.Context) (*oauth2.Config, context.Conte
 // Gitea account details are returned when the user is successfully authenticated.
 func (c *Gitea) Login(ctx context.Context, req *forge_types.OAuthRequest) (*model.User, string, error) {
 	config, oauth2Ctx := c.oauth2Config(ctx)
-	redirectURL := config.AuthCodeURL("woodpecker")
-
-	// check the OAuth errors
-	if req.Error != "" {
-		return nil, redirectURL, &forge_types.AuthError{
-			Err:         req.Error,
-			Description: req.ErrorDescription,
-			URI:         req.ErrorURI,
-		}
-	}
+	redirectURL := config.AuthCodeURL(req.State)
 
 	// check the OAuth code
 	if len(req.Code) == 0 {
@@ -383,7 +374,7 @@ func (c *Gitea) Activate(ctx context.Context, u *model.User, r *model.Repo, link
 	hook := gitea.CreateHookOption{
 		Type:   gitea.HookTypeGitea,
 		Config: config,
-		Events: []string{"push", "create", "pull_request"},
+		Events: []string{"push", "create", "pull_request", "release"},
 		Active: true,
 	}
 
@@ -481,12 +472,17 @@ func (c *Gitea) PullRequests(ctx context.Context, u *model.User, r *model.Repo, 
 		return nil, err
 	}
 
-	pullRequests, _, err := client.ListRepoPullRequests(r.Owner, r.Name, gitea.ListPullRequestsOptions{
+	pullRequests, resp, err := client.ListRepoPullRequests(r.Owner, r.Name, gitea.ListPullRequestsOptions{
 		ListOptions: gitea.ListOptions{Page: p.Page, PageSize: p.PerPage},
 		State:       gitea.StateOpen,
 	})
 	if err != nil {
-		return nil, err
+		// Repositories without commits return empty list with status code 404
+		if pullRequests != nil && resp != nil && resp.StatusCode == http.StatusNotFound {
+			err = nil
+		} else {
+			return nil, err
+		}
 	}
 
 	result := make([]*model.PullRequest, len(pullRequests))

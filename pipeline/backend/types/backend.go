@@ -18,7 +18,7 @@ import (
 	"context"
 	"io"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 // Backend defines a container orchestration backend and is used
