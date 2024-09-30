@@ -184,19 +184,18 @@ var flags = []cli.Flag{
 		Name:    "repo-private",
 		Usage:   "Set the metadata environment variable \"CI_REPO_PRIVATE\".",
 	},
-	// TODO remove CI_REPO_TRUSTED in 4.x
 	&cli.BoolFlag{
-		Sources: cli.EnvVars("CI_REPO_TRUSTED_NETWORK", "CI_REPO_TRUSTED"),
+		Sources: cli.EnvVars("CI_REPO_TRUSTED_NETWORK"),
 		Name:    "repo-trusted-network",
 		Usage:   "Set the metadata environment variable \"CI_REPO_TRUSTED_NETWORK\".",
 	},
 	&cli.BoolFlag{
-		Sources: cli.EnvVars("CI_REPO_TRUSTED_VOLUMES", "CI_REPO_TRUSTED"),
+		Sources: cli.EnvVars("CI_REPO_TRUSTED_VOLUMES"),
 		Name:    "repo-trusted-volumes",
 		Usage:   "Set the metadata environment variable \"CI_REPO_TRUSTED_VOLUMES\".",
 	},
 	&cli.BoolFlag{
-		Sources: cli.EnvVars("CI_REPO_TRUSTED_SECURITY", "CI_REPO_TRUSTED"),
+		Sources: cli.EnvVars("CI_REPO_TRUSTED_SECURITY"),
 		Name:    "repo-trusted-security",
 		Usage:   "Set the metadata environment variable \"CI_REPO_TRUSTED_SECURITY\".",
 	},
