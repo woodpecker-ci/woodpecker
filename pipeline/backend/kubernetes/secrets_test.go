@@ -15,10 +15,14 @@
 package kubernetes
 
 import (
+	"encoding/json"
 	"testing"
 
+	"github.com/kinbiko/jsonassert"
 	"github.com/stretchr/testify/assert"
 	v1 "k8s.io/api/core/v1"
+
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 )
 
 func TestNativeSecretsEnabled(t *testing.T) {
@@ -177,4 +181,62 @@ func TestFileSecret(t *testing.T) {
 			SubPath:   ".dockerconfigjson",
 		},
 	}, nsp.mounts)
+}
+
+func TestNoAuthNoSecret(t *testing.T) {
+	assert.False(t, needsRegistrySecret(&types.Step{}))
+}
+
+func TestNoPasswordNoSecret(t *testing.T) {
+	assert.False(t, needsRegistrySecret(&types.Step{
+		AuthConfig: types.Auth{Username: "foo"},
+	}))
+}
+
+func TestNoUsernameNoSecret(t *testing.T) {
+	assert.False(t, needsRegistrySecret(&types.Step{
+		AuthConfig: types.Auth{Password: "foo"},
+	}))
+}
+
+func TestUsernameAndPasswordNeedsSecret(t *testing.T) {
+	assert.True(t, needsRegistrySecret(&types.Step{
+		AuthConfig: types.Auth{Username: "foo", Password: "bar"},
+	}))
+}
+
+func TestRegistrySecret(t *testing.T) {
+	const expected = `{
+		"metadata": {
+			"name": "wp-01he8bebctabr3kgk0qj36d2me-0",
+			"namespace": "woodpecker",
+			"creationTimestamp": null,
+			"labels": {
+				"step": "go-test"
+			}
+		},
+		"type": "kubernetes.io/dockerconfigjson",
+		"data": {
+			".dockerconfigjson": "eyJhdXRocyI6eyJkb2NrZXIuaW8iOnsidXNlcm5hbWUiOiJmb28iLCJwYXNzd29yZCI6ImJhciJ9fX0="
+		}
+	}`
+
+	secret, err := mkRegistrySecret(&types.Step{
+		UUID:  "01he8bebctabr3kgk0qj36d2me-0",
+		Name:  "go-test",
+		Image: "meltwater/drone-cache",
+		AuthConfig: types.Auth{
+			Username: "foo",
+			Password: "bar",
+		},
+	}, &config{
+		Namespace: "woodpecker",
+	})
+	assert.NoError(t, err)
+
+	secretJSON, err := json.Marshal(secret)
+	assert.NoError(t, err)
+
+	ja := jsonassert.New(t)
+	ja.Assertf(string(secretJSON), expected)
 }

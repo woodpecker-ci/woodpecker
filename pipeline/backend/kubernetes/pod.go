@@ -163,6 +163,14 @@ func podSpec(step *types.Step, config *config, options BackendOptions, nsp nativ
 
 	log.Trace().Msgf("using the image pull secrets: %v", config.ImagePullSecretNames)
 	spec.ImagePullSecrets = secretsReferences(config.ImagePullSecretNames)
+	if needsRegistrySecret(step) {
+		log.Trace().Msgf("using an image pull secret from registries")
+		name, err := registrySecretName(step)
+		if err != nil {
+			return spec, err
+		}
+		spec.ImagePullSecrets = append(spec.ImagePullSecrets, secretReference(name))
+	}
 
 	spec.Volumes = append(spec.Volumes, nsp.volumes...)
 
@@ -514,6 +522,7 @@ func stopPod(ctx context.Context, engine *kube, step *types.Step, deleteOpts met
 	if err != nil {
 		return err
 	}
+
 	log.Trace().Str("name", podName).Msg("deleting pod")
 
 	err = engine.client.CoreV1().Pods(engine.config.Namespace).Delete(ctx, podName, deleteOpts)
