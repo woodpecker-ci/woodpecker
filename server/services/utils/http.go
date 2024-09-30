@@ -116,7 +116,7 @@ func (e *Client) Send(ctx context.Context, method, path string, in, out any) (in
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+	if resp.StatusCode < http.StatusOK || resp.StatusCode >= http.StatusMultipleChoices {
 		body, err := io.ReadAll(resp.Body)
 		if err != nil {
 			return resp.StatusCode, err
