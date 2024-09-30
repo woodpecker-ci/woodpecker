@@ -41,17 +41,18 @@
 
 ### ✨ Features
 
+- Implement org/user agents [[#3539](https://github.com/woodpecker-ci/woodpecker/pull/3539)]
 - Replay pipeline using `cli exec` by downloading metadata [[#4103](https://github.com/woodpecker-ci/woodpecker/pull/4103)]
 - Update clone plugin to support sha256 [[#4136](https://github.com/woodpecker-ci/woodpecker/pull/4136)]
 
 ### 📈 Enhancement
 
 - Implement registries for Kubernetes backend [[#4092](https://github.com/woodpecker-ci/woodpecker/pull/4092)]
-- cli exec: fix flag type and remove uneffective ones [[#4129](https://github.com/woodpecker-ci/woodpecker/pull/4129)]
+- Correct cli exec flags and remove ineffective ones [[#4129](https://github.com/woodpecker-ci/woodpecker/pull/4129)]
 - Set repo user to repairing user when old user is missing [[#4128](https://github.com/woodpecker-ci/woodpecker/pull/4128)]
 - Restart tasks on dead agents sooner [[#4114](https://github.com/woodpecker-ci/woodpecker/pull/4114)]
 - Process workflow logs in batches [[#4045](https://github.com/woodpecker-ci/woodpecker/pull/4045)]
-- Make cli exec metadata on pair with build in server generated metadata [[#4119](https://github.com/woodpecker-ci/woodpecker/pull/4119)]
+- Adjust cli exec metadata structure to equal server metadata [[#4119](https://github.com/woodpecker-ci/woodpecker/pull/4119)]
 - Allow to restart declined pipelines [[#4109](https://github.com/woodpecker-ci/woodpecker/pull/4109)]
 - Add indices to repo table [[#4087](https://github.com/woodpecker-ci/woodpecker/pull/4087)]
 - Duplicate key `workflow_id` in the agent logs [[#4046](https://github.com/woodpecker-ci/woodpecker/pull/4046)]
