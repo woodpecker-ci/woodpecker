@@ -27,24 +27,22 @@ type agentV015 struct {
 	ID      int64 `xorm:"pk autoincr 'id'"`
 	OwnerID int64 `xorm:"INDEX 'owner_id'"`
 	OrgID   int64 `xorm:"INDEX 'org_id'"`
-	RepoID  int64 `xorm:"INDEX 'repo_id'"`
 }
 
 func (agentV015) TableName() string {
 	return "agents"
 }
 
-var addOrgAndRepoAgents = xormigrate.Migration{
-	ID: "add-org-and-repo-agents",
+var addOrgAgents = xormigrate.Migration{
+	ID: "add-org-agents",
 	MigrateSession: func(sess *xorm.Session) (err error) {
 		if err := sess.Sync(new(agentV015)); err != nil {
 			return fmt.Errorf("sync models failed: %w", err)
 		}
 
 		// Update all existing agents to be global agents
-		_, err = sess.Cols("org_id", "repo_id").Update(&model.Agent{
-			OrgID:  model.IDNotSet,
-			RepoID: model.IDNotSet,
+		_, err = sess.Cols("org_id").Update(&model.Agent{
+			OrgID: model.IDNotSet,
 		})
 		return err
 	},

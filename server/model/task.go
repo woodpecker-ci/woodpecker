@@ -49,7 +49,6 @@ func (t *Task) GetLabels(r *Repo) (map[string]string, error) {
 		t.Labels = make(map[string]string)
 	}
 	t.Labels["repo"] = r.FullName
-	t.Labels[agentFilterRepoID] = fmt.Sprint(r.ID)
 	t.Labels[agentFilterOrgID] = fmt.Sprint(r.OrgID)
 	return t.Labels, nil
 }

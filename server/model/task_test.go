@@ -39,9 +39,8 @@ func TestTask_GetLabels(t *testing.T) {
 		assert.NoError(t, err)
 		assert.NotNil(t, labels)
 		assert.Equal(t, map[string]string{
-			"repo":            "",
-			agentFilterRepoID: "0",
-			agentFilterOrgID:  "0",
+			"repo":           "",
+			agentFilterOrgID: "0",
 		}, labels)
 	})
 
@@ -58,9 +57,8 @@ func TestTask_GetLabels(t *testing.T) {
 		assert.NoError(t, err)
 		assert.NotNil(t, labels)
 		assert.Equal(t, map[string]string{
-			"repo":            "test/repo",
-			agentFilterRepoID: "123",
-			agentFilterOrgID:  "456",
+			"repo":           "test/repo",
+			agentFilterOrgID: "456",
 		}, labels)
 	})
 
@@ -81,10 +79,9 @@ func TestTask_GetLabels(t *testing.T) {
 		assert.NoError(t, err)
 		assert.NotNil(t, labels)
 		assert.Equal(t, map[string]string{
-			"existing":        "label",
-			"repo":            "test/repo",
-			agentFilterRepoID: "123",
-			agentFilterOrgID:  "456",
+			"existing":       "label",
+			"repo":           "test/repo",
+			agentFilterOrgID: "456",
 		}, labels)
 	})
 }

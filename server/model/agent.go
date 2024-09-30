@@ -37,14 +37,11 @@ type Agent struct {
 	NoSchedule  bool   `json:"no_schedule"   xorm:"no_schedule"`
 	// OrgID is counted as unset if set to -1, this is done to ensure a new(Agent) still enforce the OrgID check by default
 	OrgID int64 `json:"org_id"        xorm:"INDEX 'org_id'"`
-	// RepoID is counted as unset if set to -1, this is done to ensure a new(Agent) still enforce the OrgID check by default
-	RepoID int64 `json:"repo_id"       xorm:"INDEX 'repo_id'"`
 } //	@name Agent
 
 const (
-	IDNotSet          = -1
-	agentFilterOrgID  = "org-id"
-	agentFilterRepoID = "repo-id"
+	IDNotSet         = -1
+	agentFilterOrgID = "org-id"
 )
 
 // TableName return database table name for xorm.
@@ -69,11 +66,6 @@ func (a *Agent) GetServerLabels() (map[string]string, error) {
 	} else {
 		filters[agentFilterOrgID] = "*"
 	}
-	if a.RepoID != IDNotSet {
-		filters[agentFilterRepoID] = fmt.Sprintf("%d", a.RepoID)
-	} else {
-		filters[agentFilterRepoID] = "*"
-	}
 
 	return filters, nil
 }
@@ -83,6 +75,5 @@ func (a *Agent) CanAccessRepo(repo *Repo) bool {
 		return true
 	}
 
-	return a.RepoID != IDNotSet && a.RepoID == repo.ID && (a.OrgID == IDNotSet || a.OrgID == repo.OrgID) ||
-		a.OrgID != IDNotSet && a.OrgID == repo.OrgID && (a.RepoID == IDNotSet || a.RepoID == repo.ID)
+	return a.OrgID == IDNotSet || a.OrgID == repo.OrgID
 }

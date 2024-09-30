@@ -178,7 +178,6 @@ func PostAgent(c *gin.Context) {
 		Name:       in.Name,
 		OwnerID:    user.ID,
 		OrgID:      model.IDNotSet,
-		RepoID:     model.IDNotSet,
 		NoSchedule: in.NoSchedule,
 		Token:      model.GenerateNewAgentToken(),
 	}
@@ -268,7 +267,6 @@ func PostOrgAgent(c *gin.Context) {
 		Name:       in.Name,
 		OwnerID:    user.ID,
 		OrgID:      orgID,
-		RepoID:     model.IDNotSet,
 		NoSchedule: in.NoSchedule,
 		Token:      model.GenerateNewAgentToken(),
 	}
