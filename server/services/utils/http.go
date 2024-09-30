@@ -28,6 +28,7 @@ import (
 	"time"
 
 	"github.com/yaronf/httpsign"
+
 	"go.woodpecker-ci.org/woodpecker/v2/server/services/utils/hostmatcher"
 )
 

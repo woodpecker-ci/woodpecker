@@ -74,9 +74,6 @@ export interface Repo {
 
   netrc_only_trusted: boolean;
 
-  // Endpoint for secrets extensions
-  secret_extension_endpoint: string;
-
   // Endpoint for config extensions
   config_extension_endpoint: string;
 }
@@ -102,7 +99,7 @@ export type RepoSettings = Pick<
   | 'netrc_only_trusted'
 >;
 
-export type ExtensionSettings = Pick<Repo, 'config_extension_endpoint' | 'secret_extension_endpoint'>;
+export type ExtensionSettings = Pick<Repo, 'config_extension_endpoint'>;
 
 export interface RepoPermissions {
   pull: boolean;

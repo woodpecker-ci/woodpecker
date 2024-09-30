@@ -5,7 +5,6 @@ Woodpecker allows you to replace internal logic with external extensions by usin
 There are currently two types of extensions available:
 
 - [Configuration extension](./40-configuration-extension.md) to modify or generate Woodpeckers pipeline configurations.
-- [Secrets extension (alpha state)](./20-secrets-extension.md) to receive and update secrets from an external system like Hashicorp Vault or AWS Secrets Manager.
 
 ## Security
 
@@ -14,11 +13,11 @@ You need to trust the extensions as they are receiving private information like 
 data like malicious pipeline configurations that could be executed.
 :::
 
-To prevent your extensions from such attaks, Woodpecker is signing all http-requests using [http signatures](https://tools.ietf.org/html/draft-cavage-http-signatures). Woodpecker therefore uses a public-private ed25519 key pair. To verify the requests your extension has to verify the signature of all request using the public key with some library like [httpsig](https://github.com/go-fed/httpsig). You can get the public Woodpecker key by opening `http://my-woodpecker.tld/api/signature/public-key` or by visiting the Woodpecker UI, going to you repo settings and opening the extensions page.
+To prevent your extensions from such attacks, Woodpecker is signing all http-requests using [http signatures](https://tools.ietf.org/html/draft-cavage-http-signatures). Woodpecker therefore uses a public-private ed25519 key pair. To verify the requests your extension has to verify the signature of all request using the public key with some library like [httpsig](https://github.com/yaronf/httpsign). You can get the public Woodpecker key by opening `http://my-woodpecker.tld/api/signature/public-key` or by visiting the Woodpecker UI, going to you repo settings and opening the extensions page.
 
 ## Example extensions
 
-A simplistic serivce providing endpoints for a config and secrets extension can be found here: [https://github.com/woodpecker-ci/example-extensions](https://github.com/woodpecker-ci/example-extensions)
+A simplistic service providing endpoints for a config and secrets extension can be found here: [https://github.com/woodpecker-ci/example-extensions](https://github.com/woodpecker-ci/example-extensions)
 
 ## Configuration
 
@@ -30,4 +29,4 @@ To prevent extensions from calling local services by default only external hosts
   - `external`: A valid non-private unicast IP, you can access all hosts on public internet.
   - `*`: All hosts are allowed.
 - CIDR list: `1.2.3.0/8` for IPv4 and `2001:db8::/32` for IPv6
-- (Wildcard) hosts: `mydomain.com`, `*.mydomain.com`, `192.168.100.*`
+- (Wildcard) hosts: `example.com`, `*.example.com`, `192.168.100.*`

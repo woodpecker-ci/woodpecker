@@ -39,7 +39,7 @@ func GetSecret(c *gin.Context) {
 	name := c.Param("secret")
 
 	secretService := server.Config.Services.Manager.SecretServiceFromRepo(repo)
-	secret, err := secretService.SecretFind(c, repo, name)
+	secret, err := secretService.SecretFind(repo, name)
 	if err != nil {
 		handleDBError(c, err)
 		return
@@ -78,7 +78,7 @@ func PostSecret(c *gin.Context) {
 	}
 
 	secretService := server.Config.Services.Manager.SecretServiceFromRepo(repo)
-	if err := secretService.SecretCreate(c, repo, secret); err != nil {
+	if err := secretService.SecretCreate(repo, secret); err != nil {
 		c.String(http.StatusInternalServerError, "Error inserting secret %q. %s", in.Name, err)
 		return
 	}
@@ -110,7 +110,7 @@ func PatchSecret(c *gin.Context) {
 	}
 
 	secretService := server.Config.Services.Manager.SecretServiceFromRepo(repo)
-	secret, err := secretService.SecretFind(c, repo, name)
+	secret, err := secretService.SecretFind(repo, name)
 	if err != nil {
 		handleDBError(c, err)
 		return
@@ -129,7 +129,7 @@ func PatchSecret(c *gin.Context) {
 		c.String(http.StatusUnprocessableEntity, "Error updating secret. %s", err)
 		return
 	}
-	if err := secretService.SecretUpdate(c, repo, secret); err != nil {
+	if err := secretService.SecretUpdate(repo, secret); err != nil {
 		c.String(http.StatusInternalServerError, "Error updating secret %q. %s", in.Name, err)
 		return
 	}
@@ -150,7 +150,7 @@ func PatchSecret(c *gin.Context) {
 func GetSecretList(c *gin.Context) {
 	repo := session.Repo(c)
 	secretService := server.Config.Services.Manager.SecretServiceFromRepo(repo)
-	list, err := secretService.SecretList(c, repo, session.Pagination(c))
+	list, err := secretService.SecretList(repo, session.Pagination(c))
 	if err != nil {
 		c.String(http.StatusInternalServerError, "Error getting secret list. %s", err)
 		return
@@ -178,7 +178,7 @@ func DeleteSecret(c *gin.Context) {
 	name := c.Param("secret")
 
 	secretService := server.Config.Services.Manager.SecretServiceFromRepo(repo)
-	if err := secretService.SecretDelete(c, repo, name); err != nil {
+	if err := secretService.SecretDelete(repo, name); err != nil {
 		handleDBError(c, err)
 		return
 	}

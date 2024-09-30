@@ -30,7 +30,7 @@ WOODPECKER_CONFIG_SERVICE_ENDPOINT=https://example.com/ciconfig
 
 ## How it works
 
-When a pipline is triggered Woodpecker will fetch the pipeline configuration from the repository, then make a HTTP POST request to the configured extension with a JSON payload containing some data like the repository, pipeline information and the current config files retrieved from the repository. The extension can then send back modified or even new pipeline configurations following Woodpeckers offical yaml format that should be used.
+When a pipeline is triggered Woodpecker will fetch the pipeline configuration from the repository, then make a HTTP POST request to the configured extension with a JSON payload containing some data like the repository, pipeline information and the current config files retrieved from the repository. The extension can then send back modified or even new pipeline configurations following Woodpeckers official yaml format that should be used.
 
 :::tip
 The netrc data is pretty powerful as it contains credentials to access the repository. You can use this to clone the repository or even use the forge (Github or Gitlab, ...) api to get more information about the repository.

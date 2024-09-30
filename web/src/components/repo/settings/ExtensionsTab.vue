@@ -12,16 +12,6 @@
 
     <div class="flex flex-col mt-4 border-t-1 dark:border-gray-600">
       <form @submit.prevent="saveExtensions">
-        <InputField :label="$t('secrets_extension_endpoint')" docs-url="docs/usage/extensions/secrets-extension">
-          <TextField
-            v-model="extensions.secret_extension_endpoint"
-            :placeholder="$t('secrets_extension_endpoint_placeholder')"
-          />
-          <template #description>
-            <p class="text-sm">{{ $t('secrets_extension_alpha_state') }}</p>
-          </template>
-        </InputField>
-
         <InputField :label="$t('config_extension_endpoint')" docs-url="docs/usage/extensions/configuration-extension">
           <TextField
             v-model="extensions.config_extension_endpoint"
@@ -36,7 +26,7 @@
 </template>
 
 <script lang="ts" setup>
-import { inject, onMounted, Ref, ref } from 'vue';
+import { inject, onMounted, ref, type Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import Button from '~/components/atomic/Button.vue';
@@ -46,7 +36,7 @@ import Panel from '~/components/layout/Panel.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useNotifications from '~/compositions/useNotifications';
-import { ExtensionSettings, Repo } from '~/lib/api/types';
+import type { ExtensionSettings, Repo } from '~/lib/api/types';
 
 const i18n = useI18n();
 
@@ -65,7 +55,6 @@ onMounted(async () => {
 });
 
 const extensions = ref<ExtensionSettings>({
-  secret_extension_endpoint: repo.value.secret_extension_endpoint,
   config_extension_endpoint: repo.value.config_extension_endpoint,
 });
 

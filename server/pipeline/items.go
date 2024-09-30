@@ -43,9 +43,8 @@ func parsePipeline(forge forge.Forge, store store.Store, currentPipeline *model.
 		log.Error().Err(err).Str("repo", repo.FullName).Msgf("error getting last pipeline before pipeline number '%d'", currentPipeline.Number)
 	}
 
-	ctx := context.Background()
 	secretService := server.Config.Services.Manager.SecretServiceFromRepo(repo)
-	secs, err := secretService.SecretListPipeline(ctx, repo, currentPipeline, &model.ListOptions{All: true})
+	secs, err := secretService.SecretListPipeline(repo, currentPipeline)
 	if err != nil {
 		log.Error().Err(err).Msgf("error getting secrets for %s#%d", repo.FullName, currentPipeline.Number)
 	}

@@ -14,33 +14,29 @@
 
 package secret
 
-import (
-	"context"
-
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
-)
+import "go.woodpecker-ci.org/woodpecker/v2/server/model"
 
 //go:generate mockery --name Service --output mocks --case underscore
 
 // Service defines a service for managing secrets.
 type Service interface {
-	SecretListPipeline(context.Context, *model.Repo, *model.Pipeline, *model.ListOptions) ([]*model.Secret, error)
+	SecretListPipeline(*model.Repo, *model.Pipeline) ([]*model.Secret, error)
 	// Repository secrets
-	SecretFind(context.Context, *model.Repo, string) (*model.Secret, error)
-	SecretList(context.Context, *model.Repo, *model.ListOptions) ([]*model.Secret, error)
-	SecretCreate(context.Context, *model.Repo, *model.Secret) error
-	SecretUpdate(context.Context, *model.Repo, *model.Secret) error
-	SecretDelete(context.Context, *model.Repo, string) error
+	SecretFind(*model.Repo, string) (*model.Secret, error)
+	SecretList(*model.Repo, *model.ListOptions) ([]*model.Secret, error)
+	SecretCreate(*model.Repo, *model.Secret) error
+	SecretUpdate(*model.Repo, *model.Secret) error
+	SecretDelete(*model.Repo, string) error
 	// Organization secrets
-	OrgSecretFind(context.Context, int64, string) (*model.Secret, error)
-	OrgSecretList(context.Context, int64, *model.ListOptions) ([]*model.Secret, error)
-	OrgSecretCreate(context.Context, int64, *model.Secret) error
-	OrgSecretUpdate(context.Context, int64, *model.Secret) error
-	OrgSecretDelete(context.Context, int64, string) error
+	OrgSecretFind(int64, string) (*model.Secret, error)
+	OrgSecretList(int64, *model.ListOptions) ([]*model.Secret, error)
+	OrgSecretCreate(int64, *model.Secret) error
+	OrgSecretUpdate(int64, *model.Secret) error
+	OrgSecretDelete(int64, string) error
 	// Global secrets
-	GlobalSecretFind(context.Context, string) (*model.Secret, error)
-	GlobalSecretList(context.Context, *model.ListOptions) ([]*model.Secret, error)
-	GlobalSecretCreate(context.Context, *model.Secret) error
-	GlobalSecretUpdate(context.Context, *model.Secret) error
-	GlobalSecretDelete(context.Context, string) error
+	GlobalSecretFind(string) (*model.Secret, error)
+	GlobalSecretList(*model.ListOptions) ([]*model.Secret, error)
+	GlobalSecretCreate(*model.Secret) error
+	GlobalSecretUpdate(*model.Secret) error
+	GlobalSecretDelete(string) error
 }

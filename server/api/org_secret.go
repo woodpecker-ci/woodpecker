@@ -45,7 +45,7 @@ func GetOrgSecret(c *gin.Context) {
 	}
 
 	secretService := server.Config.Services.Manager.SecretService()
-	secret, err := secretService.OrgSecretFind(c, orgID, name)
+	secret, err := secretService.OrgSecretFind(orgID, name)
 	if err != nil {
 		handleDBError(c, err)
 		return
@@ -72,7 +72,7 @@ func GetOrgSecretList(c *gin.Context) {
 	}
 
 	secretService := server.Config.Services.Manager.SecretService()
-	list, err := secretService.OrgSecretList(c, orgID, session.Pagination(c))
+	list, err := secretService.OrgSecretList(orgID, session.Pagination(c))
 	if err != nil {
 		c.String(http.StatusInternalServerError, "Error getting secret list for %q. %s", orgID, err)
 		return
@@ -120,7 +120,7 @@ func PostOrgSecret(c *gin.Context) {
 	}
 
 	secretService := server.Config.Services.Manager.SecretService()
-	if err := secretService.OrgSecretCreate(c, orgID, secret); err != nil {
+	if err := secretService.OrgSecretCreate(orgID, secret); err != nil {
 		c.String(http.StatusInternalServerError, "Error inserting org %q secret %q. %s", orgID, in.Name, err)
 		return
 	}
@@ -154,7 +154,7 @@ func PatchOrgSecret(c *gin.Context) {
 	}
 
 	secretService := server.Config.Services.Manager.SecretService()
-	secret, err := secretService.OrgSecretFind(c, orgID, name)
+	secret, err := secretService.OrgSecretFind(orgID, name)
 	if err != nil {
 		handleDBError(c, err)
 		return
@@ -174,7 +174,7 @@ func PatchOrgSecret(c *gin.Context) {
 		return
 	}
 
-	if err := secretService.OrgSecretUpdate(c, orgID, secret); err != nil {
+	if err := secretService.OrgSecretUpdate(orgID, secret); err != nil {
 		c.String(http.StatusInternalServerError, "Error updating org %q secret %q. %s", orgID, in.Name, err)
 		return
 	}
@@ -200,7 +200,7 @@ func DeleteOrgSecret(c *gin.Context) {
 	}
 
 	secretService := server.Config.Services.Manager.SecretService()
-	if err := secretService.OrgSecretDelete(c, orgID, name); err != nil {
+	if err := secretService.OrgSecretDelete(orgID, name); err != nil {
 		handleDBError(c, err)
 		return
 	}

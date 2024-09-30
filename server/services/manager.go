@@ -103,11 +103,7 @@ func (m *manager) SignaturePublicKey() crypto.PublicKey {
 	return m.signaturePublicKey
 }
 
-func (m *manager) SecretServiceFromRepo(repo *model.Repo) secret.Service {
-	if repo.SecretExtensionEndpoint != "" {
-		return secret.NewHTTP(m.SecretService(), strings.TrimRight(repo.SecretExtensionEndpoint, "/"), m.client)
-	}
-
+func (m *manager) SecretServiceFromRepo(_ *model.Repo) secret.Service {
 	return m.SecretService()
 }
 
