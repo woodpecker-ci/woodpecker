@@ -143,6 +143,36 @@ func (_m *Store) AgentList(p *model.ListOptions) ([]*model.Agent, error) {
 	return r0, r1
 }
 
+// AgentListForOrg provides a mock function with given fields: orgID, opt
+func (_m *Store) AgentListForOrg(orgID int64, opt *model.ListOptions) ([]*model.Agent, error) {
+	ret := _m.Called(orgID, opt)
+
+	if len(ret) == 0 {
+		panic("no return value specified for AgentListForOrg")
+	}
+
+	var r0 []*model.Agent
+	var r1 error
+	if rf, ok := ret.Get(0).(func(int64, *model.ListOptions) ([]*model.Agent, error)); ok {
+		return rf(orgID, opt)
+	}
+	if rf, ok := ret.Get(0).(func(int64, *model.ListOptions) []*model.Agent); ok {
+		r0 = rf(orgID, opt)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*model.Agent)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(int64, *model.ListOptions) error); ok {
+		r1 = rf(orgID, opt)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // AgentUpdate provides a mock function with given fields: _a0
 func (_m *Store) AgentUpdate(_a0 *model.Agent) error {
 	ret := _m.Called(_a0)
