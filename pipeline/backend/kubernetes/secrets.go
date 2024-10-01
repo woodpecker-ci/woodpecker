@@ -15,11 +15,21 @@
 package kubernetes
 
 import (
+	"context"
+	"encoding/json"
 	"fmt"
 	"strings"
 
+	"github.com/distribution/reference"
+	config_file "github.com/docker/cli/cli/config/configfile"
+	config_file_types "github.com/docker/cli/cli/config/types"
 	"github.com/rs/zerolog/log"
 	v1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/errors"
+	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/utils"
 )
 
 type nativeSecretsProcessor struct {
@@ -188,4 +198,97 @@ func secretReference(name string) v1.LocalObjectReference {
 	return v1.LocalObjectReference{
 		Name: name,
 	}
+}
+
+func needsRegistrySecret(step *types.Step) bool {
+	return step.AuthConfig.Username != "" && step.AuthConfig.Password != ""
+}
+
+func mkRegistrySecret(step *types.Step, config *config) (*v1.Secret, error) {
+	name, err := registrySecretName(step)
+	if err != nil {
+		return nil, err
+	}
+
+	labels, err := registrySecretLabels(step)
+	if err != nil {
+		return nil, err
+	}
+
+	named, err := utils.ParseNamed(step.Image)
+	if err != nil {
+		return nil, err
+	}
+
+	authConfig := config_file.ConfigFile{
+		AuthConfigs: map[string]config_file_types.AuthConfig{
+			reference.Domain(named): {
+				Username: step.AuthConfig.Username,
+				Password: step.AuthConfig.Password,
+			},
+		},
+	}
+
+	configFileJSON, err := json.Marshal(authConfig)
+	if err != nil {
+		return nil, err
+	}
+
+	return &v1.Secret{
+		ObjectMeta: meta_v1.ObjectMeta{
+			Namespace: config.Namespace,
+			Name:      name,
+			Labels:    labels,
+		},
+		Type: v1.SecretTypeDockerConfigJson,
+		Data: map[string][]byte{
+			v1.DockerConfigJsonKey: configFileJSON,
+		},
+	}, nil
+}
+
+func registrySecretName(step *types.Step) (string, error) {
+	return podName(step)
+}
+
+func registrySecretLabels(step *types.Step) (map[string]string, error) {
+	var err error
+	labels := make(map[string]string)
+
+	if step.Type == types.StepTypeService {
+		labels[ServiceLabel], _ = serviceName(step)
+	}
+	labels[StepLabel], err = stepLabel(step)
+	if err != nil {
+		return labels, err
+	}
+
+	return labels, nil
+}
+
+func startRegistrySecret(ctx context.Context, engine *kube, step *types.Step) error {
+	secret, err := mkRegistrySecret(step, engine.config)
+	if err != nil {
+		return err
+	}
+	log.Trace().Msgf("creating secret: %s", secret.Name)
+	_, err = engine.client.CoreV1().Secrets(engine.config.Namespace).Create(ctx, secret, meta_v1.CreateOptions{})
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func stopRegistrySecret(ctx context.Context, engine *kube, step *types.Step, deleteOpts meta_v1.DeleteOptions) error {
+	name, err := registrySecretName(step)
+	if err != nil {
+		return err
+	}
+	log.Trace().Str("name", name).Msg("deleting secret")
+
+	err = engine.client.CoreV1().Secrets(engine.config.Namespace).Delete(ctx, name, deleteOpts)
+	if errors.IsNotFound(err) {
+		return nil
+	}
+	return err
 }
