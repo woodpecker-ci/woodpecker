@@ -48,6 +48,7 @@ This way, the secret key and environment variable name can differ.
 ### Using secrets in plugins-steps via "settings:"
 
 The `from_secret` syntax also work for settings in any hierarchy.
+Note that you can not use `secrets` and also not use it with `environment`, as this could alter the execution of plugins and so it is forbidden by the linter now.
 
 In the below example, the secret `SURGE_TOKEN` would be passed to the setting named `surge_token`, which again will be available in the plugin as environment variable named `PLUGIN_SURGE_TOKEN` (See [plugins](./51-plugins/20-creating-plugins.md#settings) for details).
 
