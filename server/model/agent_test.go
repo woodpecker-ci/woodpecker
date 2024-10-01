@@ -123,7 +123,7 @@ func TestAgent_CanAccessRepo(t *testing.T) {
 
 	t.Run("RepoAgent", func(t *testing.T) {
 		agent := &Agent{
-			OrgID:  IDNotSet,
+			OrgID:  12,
 			RepoID: 123,
 		}
 		assert.True(t, agent.CanAccessRepo(repo))
