@@ -176,12 +176,12 @@ func PostAgent(c *gin.Context) {
 	user := session.User(c)
 
 	agent := &model.Agent{
-		Name:          in.Name,
-		OwnerID:       user.ID,
-		OrgID:         model.IDNotSet,
-		NoSchedule:    in.NoSchedule,
-		Token:         model.GenerateNewAgentToken(),
-		agent.Filters: in.Filters,
+		Name:       in.Name,
+		OwnerID:    user.ID,
+		OrgID:      model.IDNotSet,
+		NoSchedule: in.NoSchedule,
+		Token:      model.GenerateNewAgentToken(),
+		Filters:    in.Filters,
 	}
 	if err = store.FromContext(c).AgentCreate(agent); err != nil {
 		c.String(http.StatusInternalServerError, err.Error())
@@ -266,12 +266,12 @@ func PostOrgAgent(c *gin.Context) {
 	}
 
 	agent := &model.Agent{
-		Name:          in.Name,
-		OwnerID:       user.ID,
-		OrgID:         orgID,
-		NoSchedule:    in.NoSchedule,
-		Token:         model.GenerateNewAgentToken(),
-		agent.Filters: in.Filters,
+		Name:       in.Name,
+		OwnerID:    user.ID,
+		OrgID:      orgID,
+		NoSchedule: in.NoSchedule,
+		Token:      model.GenerateNewAgentToken(),
+		Filters:    in.Filters,
 	}
 
 	if err = _store.AgentCreate(agent); err != nil {

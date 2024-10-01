@@ -19,8 +19,6 @@ import (
 
 	"src.techknowlogick.com/xormigrate"
 	"xorm.io/xorm"
-
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
 type agentV016 struct {
