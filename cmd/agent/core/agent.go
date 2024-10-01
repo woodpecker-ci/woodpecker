@@ -86,7 +86,14 @@ func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 		hostname, _ = os.Hostname()
 	}
 
-	counter.Polling = int(c.Int("max-workflows"))
+	maxWorkflows := int(c.Int("max-workflows"))
+	singleWorkflow := c.Bool("single-workflow")
+	if singleWorkflow && maxWorkflows > 1 {
+		log.Warn().Msgf("max-workflows forced from %d to 1 due to agent running single workflow mode.", maxWorkflows)
+		maxWorkflows = 1
+	}
+
+	counter.Polling = maxWorkflows
 	counter.Running = 0
 
 	if c.Bool("healthcheck") {
@@ -197,7 +204,6 @@ func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 	}
 	log.Debug().Msgf("loaded %s backend engine", backendEngine.Name())
 
-	maxWorkflows := int(c.Int("max-workflows"))
 	agentConfig.AgentID, err = client.RegisterAgent(grpcCtx, engInfo.Platform, backendEngine.Name(), version.String(), maxWorkflows) //nolint:contextcheck
 	if err != nil {
 		return err
@@ -275,15 +281,30 @@ func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 				log.Debug().Msg("polling new steps")
 				if err := runner.Run(agentCtx, shutdownCtx); err != nil {
 					log.Error().Err(err).Msg("runner done with error")
+					if singleWorkflow {
+						ctxCancel(nil)
+					}
 					return err
+				}
+
+				if singleWorkflow {
+					log.Info().Msg("shutdown single workflow runner")
+					ctxCancel(nil)
+					return nil
 				}
 			}
 		})
 	}
 
-	log.Info().Msgf(
-		"starting Woodpecker agent with version '%s' and backend '%s' using platform '%s' running up to %d pipelines in parallel",
-		version.String(), backendEngine.Name(), engInfo.Platform, maxWorkflows)
+	if singleWorkflow {
+		log.Info().Msgf(
+			"starting Woodpecker agent with version '%s' and backend '%s' using platform '%s' running up in single workflow mode",
+			version.String(), backendEngine.Name(), engInfo.Platform)
+	} else {
+		log.Info().Msgf(
+			"starting Woodpecker agent with version '%s' and backend '%s' using platform '%s' running up to %d pipelines in parallel",
+			version.String(), backendEngine.Name(), engInfo.Platform, maxWorkflows)
+		}
 
 	return serviceWaitingGroup.Wait()
 }
