@@ -78,5 +78,6 @@ func Copy(ctx context.Context, src, dest *xorm.Engine) error {
 	}
 
 	fmt.Fprintf(file, `	return nil
-}`)
+}
+`)
 }
