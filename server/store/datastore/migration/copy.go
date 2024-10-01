@@ -26,6 +26,31 @@ import (
 
 const perPage = 1000
 
+func Copy(ctx context.Context, src, dest *xorm.Engine) error {
+	// first check if the new database already has existing data
+	for _, bean := range AllBeans {
+		exist, err := dest.IsTableExist(bean)
+		if err != nil {
+			return err
+		} else if exist {
+			return fmt.Errorf("existing table '%s' in import destination detected", dest.TableName(bean))
+		}
+	}
+
+	// next we make sure the all required migrations are executed
+	if err := Migrate(ctx, src, true); err != nil {
+		return fmt.Errorf("migrate source database failed: %w", err)
+	}
+
+	// init schema in destination
+	if err := initSchemaOnly(dest); err != nil {
+		return err
+	}
+
+	// copy data
+	return CopyData(ctx, src, dest)
+}
+
 func copyBean[T any](ctx context.Context, src, dest *xorm.Engine) error {
 	tableName := dest.TableName(new(T))
 	log.Info().Msgf("Start copy %s table", tableName)

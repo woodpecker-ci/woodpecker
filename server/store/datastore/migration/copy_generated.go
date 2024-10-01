@@ -4,35 +4,13 @@ package migration
 
 import (
 	"context"
-	"fmt"
 
 	"xorm.io/xorm"
 
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
-func Copy(ctx context.Context, src, dest *xorm.Engine) error {
-	// first check if the new database already has existing data
-	for _, bean := range AllBeans {
-		exist, err := dest.IsTableExist(bean)
-		if err != nil {
-			return err
-		} else if exist {
-			return fmt.Errorf("existing table '%s' in import destination detected", dest.TableName(bean))
-		}
-	}
-
-	// next we make sure the all required migrations are executed
-	if err := Migrate(ctx, src, true); err != nil {
-		return fmt.Errorf("migrate source database failed: %w", err)
-	}
-
-	// init schema in destination
-	if err := initSchemaOnly(dest); err != nil {
-		return err
-	}
-
-	// copy data
+func CopyData(ctx context.Context, src, dest *xorm.Engine) error {
 	if err := copyBean[model.Agent](ctx, src, dest); err != nil {
 		return err
 	}
