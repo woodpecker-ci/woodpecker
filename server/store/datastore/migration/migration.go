@@ -43,6 +43,7 @@ var migrationTasks = []*xormigrate.Migration{
 	&renameStartEndTime,
 	&fixV31Registries,
 	&removeOldMigrationsOfV1,
+	&addOrgAgents,
 }
 
 // IMPORTANT: if you add something here, also add it to copy.go Copy() func.
