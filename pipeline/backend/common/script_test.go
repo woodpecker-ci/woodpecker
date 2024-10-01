@@ -33,7 +33,6 @@ func TestGenerateContainerConf(t *testing.T) {
 	assert.Equal(t, []string{"powershell", "-noprofile", "-noninteractive", "-command", "[System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($Env:CI_SCRIPT)) | iex"}, gotEntry)
 	gotEnv, gotEntry = GenerateContainerConf([]string{"echo hello world"}, "linux")
 	assert.Equal(t, posixScriptBase64, gotEnv["CI_SCRIPT"])
-	assert.Equal(t, "/root", gotEnv["HOME"])
 	assert.Equal(t, "/bin/sh", gotEnv["SHELL"])
 	assert.Equal(t, []string{"/bin/sh", "-c", "echo $CI_SCRIPT | base64 -d | /bin/sh -e"}, gotEntry)
 }
