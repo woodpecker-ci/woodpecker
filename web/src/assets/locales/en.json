@@ -179,6 +179,9 @@
           "confirm": "All data will be lost after this action!!!\n\nDo you really want to proceed?",
           "success": "Repository deleted"
         }
+      },
+      "agents": {
+        "desc": "Agents registered for this repository."
       }
     },
     "pipeline": {
@@ -315,6 +318,9 @@
           "capacity": "Capacity",
           "desc": "The max amount of parallel pipelines executed by this agent.",
           "badge": "capacity"
+        },
+        "repo": {
+          "badge": "repo"
         },
         "org": {
           "badge": "org"

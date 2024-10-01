@@ -143,6 +143,15 @@ func apiRoutes(e *gin.RouterGroup) {
 					repo.PATCH("/cron/:cron", session.MustPush, api.PatchCron)
 					repo.DELETE("/cron/:cron", session.MustPush, api.DeleteCron)
 
+					agentBase := repo.Group("/agents")
+					{
+						agentBase.Use(session.MustRepoAdmin())
+						agentBase.GET("", api.GetRepoAgents)
+						agentBase.POST("", api.PostRepoAgent)
+						agentBase.PATCH("/:agent_id", api.PatchRepoAgent)
+						agentBase.DELETE("/:agent_id", api.DeleteRepoAgent)
+					}
+
 					// requires admin permissions
 					repo.PATCH("", session.MustRepoAdmin(), api.PatchRepo)
 					repo.DELETE("", session.MustRepoAdmin(), api.DeleteRepo)

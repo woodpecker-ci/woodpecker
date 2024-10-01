@@ -28,6 +28,9 @@
     <Tab id="crons" :title="$t('repo.settings.crons.crons')">
       <CronTab />
     </Tab>
+    <Tab id="agents" :title="$t('admin.settings.agents.agents')">
+      <RepoAgentsTab />
+    </Tab>
     <Tab id="badge" :title="$t('repo.settings.badge.badge')">
       <BadgeTab />
     </Tab>
@@ -49,6 +52,7 @@ import BadgeTab from '~/components/repo/settings/BadgeTab.vue';
 import CronTab from '~/components/repo/settings/CronTab.vue';
 import GeneralTab from '~/components/repo/settings/GeneralTab.vue';
 import RegistriesTab from '~/components/repo/settings/RegistriesTab.vue';
+import RepoAgentsTab from '~/components/repo/settings/RepoAgentsTab.vue';
 import SecretsTab from '~/components/repo/settings/SecretsTab.vue';
 import useNotifications from '~/compositions/useNotifications';
 import { useRouteBack } from '~/compositions/useRouteBack';

@@ -9,9 +9,14 @@
       <span class="ml-auto">
         <span class="hidden md:inline-block space-x-2">
           <Badge
-            v-if="props.isAdmin === true && agent.org_id !== -1"
+            v-if="props.isAdmin === true && agent.org_id !== -1 && agent.repo_id === -1"
             :label="$t('admin.settings.agents.org.badge')"
             :value="agent.org_id"
+          />
+          <Badge
+            v-if="props.isAdmin === true && agent.repo_id !== -1"
+            :label="$t('admin.settings.agents.repo.badge')"
+            :value="agent.repo_id"
           />
           <Badge v-if="agent.platform" :label="$t('admin.settings.agents.platform.badge')" :value="agent.platform" />
           <Badge v-if="agent.backend" :label="$t('admin.settings.agents.backend.badge')" :value="agent.backend" />

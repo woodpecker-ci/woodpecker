@@ -144,3 +144,43 @@ func TestAgentListForOrg(t *testing.T) {
 	assert.Equal(t, 1, len(agents))
 	assert.Equal(t, "test-1", agents[0].Name)
 }
+
+func TestAgentListForRepo(t *testing.T) {
+	store, closer := newTestStore(t, new(model.Agent))
+	defer closer()
+
+	agent1 := &model.Agent{
+		ID:     int64(1),
+		Name:   "test-1",
+		RepoID: int64(1000),
+	}
+	agent2 := &model.Agent{
+		ID:     int64(2),
+		Name:   "test-2",
+		RepoID: int64(1000),
+	}
+	agent3 := &model.Agent{
+		ID:     int64(3),
+		Name:   "test-3",
+		RepoID: int64(2000),
+	}
+	assert.NoError(t, store.AgentCreate(agent1))
+	assert.NoError(t, store.AgentCreate(agent2))
+	assert.NoError(t, store.AgentCreate(agent3))
+
+	agents, err := store.AgentListForRepo(1000, &model.ListOptions{All: true})
+	assert.NoError(t, err)
+	assert.Equal(t, 2, len(agents))
+	assert.Equal(t, "test-1", agents[0].Name)
+	assert.Equal(t, "test-2", agents[1].Name)
+
+	agents, err = store.AgentListForRepo(2000, &model.ListOptions{All: true})
+	assert.NoError(t, err)
+	assert.Equal(t, 1, len(agents))
+	assert.Equal(t, "test-3", agents[0].Name)
+
+	agents, err = store.AgentListForRepo(1000, &model.ListOptions{Page: 1, PerPage: 1})
+	assert.NoError(t, err)
+	assert.Equal(t, 1, len(agents))
+	assert.Equal(t, "test-1", agents[0].Name)
+}
