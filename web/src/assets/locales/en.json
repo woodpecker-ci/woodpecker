@@ -330,7 +330,6 @@
           "desc": "Server side enforced labels of agents to filter workflows",
           "key": "Label name ...",
           "value": "Filter value ...",
-          "add": "Add filter",
           "delete": "Delete filter"
         }
       },

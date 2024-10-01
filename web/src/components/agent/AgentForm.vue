@@ -6,54 +6,13 @@
 
     <InputField v-slot="{ id }" :label="$t('admin.settings.agents.filters.name')">
       <span class="text-sm text-wp-text-alt-100 mb-2">{{ $t('admin.settings.agents.filters.desc') }}</span>
-      <div class="flex flex-col gap-2">
-        <div v-for="(filter, index) in filters" :key="index" class="flex gap-4">
-          <TextField
-            :id="`${id}-key-${index}`"
-            v-model="filter.key"
-            :placeholder="$t('admin.settings.agents.filters.key')"
-          />
-          <TextField
-            :id="`${id}-value-${index}`"
-            v-model="filter.value"
-            :placeholder="$t('admin.settings.agents.filters.value')"
-          />
-          <div class="w-10 flex-shrink-0">
-            <Button
-              type="button"
-              color="red"
-              class="ml-auto"
-              :title="$t('admin.settings.agents.filters.delete')"
-              @click="deleteFilter(index)"
-            >
-              <Icon name="remove" />
-            </Button>
-          </div>
-        </div>
-        <div class="flex gap-4">
-          <TextField
-            :id="`${id}-new-key`"
-            v-model="newFilterKey"
-            :placeholder="$t('admin.settings.agents.filters.key')"
-          />
-          <TextField
-            :id="`${id}-new-value`"
-            v-model="newFilterValue"
-            :placeholder="$t('admin.settings.agents.filters.value')"
-          />
-          <div class="w-10 flex-shrink-0">
-            <Button
-              type="button"
-              color="green"
-              class="ml-auto"
-              :title="$t('admin.settings.agents.filters.add')"
-              @click="addFilter"
-            >
-              <Icon name="plus" />
-            </Button>
-          </div>
-        </div>
-      </div>
+      <KeyValueEditor
+        :id="id"
+        v-model="agent.filters"
+        :key-placeholder="$t('admin.settings.agents.filters.key')"
+        :value-placeholder="$t('admin.settings.agents.filters.value')"
+        :delete-title="$t('admin.settings.agents.filters.delete')"
+      />
     </InputField>
 
     <InputField :label="$t('admin.settings.agents.no_schedule.name')">
@@ -122,12 +81,12 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from 'vue';
+import { computed } from 'vue';
 
 import Button from '~/components/atomic/Button.vue';
-import Icon from '~/components/atomic/Icon.vue';
 import Checkbox from '~/components/form/Checkbox.vue';
 import InputField from '~/components/form/InputField.vue';
+import KeyValueEditor from '~/components/form/KeyValueEditor.vue';
 import TextField from '~/components/form/TextField.vue';
 import { useDate } from '~/compositions/useDate';
 import type { Agent } from '~/lib/api/types';
@@ -150,32 +109,8 @@ const agent = computed({
   get: () => props.modelValue,
   set: (value) => emit('update:modelValue', value),
 });
-const filters = computed(() => Object.entries(agent.value.filters || {}).map(([key, value]) => ({ key, value })));
-
-const newFilterKey = ref('');
-const newFilterValue = ref('');
 
 function updateAgent(newValues: Partial<Agent>) {
   emit('update:modelValue', { ...agent.value, ...newValues });
-}
-
-function deleteFilter(index: number) {
-  const newFilters = [...filters.value];
-  newFilters.splice(index, 1);
-  updateFilters(newFilters);
-}
-
-function addFilter() {
-  if (newFilterKey.value && newFilterValue.value) {
-    const newFilters = [...filters.value, { key: newFilterKey.value, value: newFilterValue.value }];
-    updateFilters(newFilters);
-    newFilterKey.value = '';
-    newFilterValue.value = '';
-  }
-}
-
-function updateFilters(newFilters: Array<{ key: string; value: string }>) {
-  const filtersObject = Object.fromEntries(newFilters.map((filter) => [filter.key, filter.value]));
-  updateAgent({ filters: filtersObject });
 }
 </script>
