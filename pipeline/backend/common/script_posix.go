@@ -53,6 +53,7 @@ fi
 unset CI_NETRC_USERNAME
 unset CI_NETRC_PASSWORD
 unset CI_SCRIPT
+chown -R $(whoami) /woodpecker
 `
 
 // traceScript is a helper script that is added to the step script
