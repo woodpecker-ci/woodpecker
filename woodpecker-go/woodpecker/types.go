@@ -233,6 +233,7 @@ type (
 		Updated      int64             `json:"updated"`
 		Name         string            `json:"name"`
 		OwnerID      int64             `json:"owner_id"`
+		OrgID        int64             `json:"org_id"`
 		Token        string            `json:"token"`
 		LastContact  int64             `json:"last_contact"`
 		LastWork     int64             `json:"last_work"`

@@ -14,6 +14,13 @@
 
 package model
 
+import (
+	"encoding/base32"
+	"fmt"
+
+	"github.com/gorilla/securecookie"
+)
+
 type Agent struct {
 	ID           int64             `json:"id"            xorm:"pk autoincr 'id'"`
 	Created      int64             `json:"created"       xorm:"created"`
@@ -27,9 +34,16 @@ type Agent struct {
 	Backend      string            `json:"backend"       xorm:"VARCHAR(100) 'backend'"`
 	Capacity     int32             `json:"capacity"      xorm:"capacity"`
 	Version      string            `json:"version"       xorm:"'version'"`
-	CustomLabels map[string]string `json:"custom_labels" xorm:"JSON 'custom_labels'"`
 	NoSchedule   bool              `json:"no_schedule"   xorm:"no_schedule"`
+	CustomLabels map[string]string `json:"custom_labels" xorm:"JSON 'custom_labels'"`
+	// OrgID is counted as unset if set to -1, this is done to ensure a new(Agent) still enforce the OrgID check by default
+	OrgID int64 `json:"org_id"        xorm:"INDEX 'org_id'"`
 } //	@name Agent
+
+const (
+	IDNotSet         = -1
+	agentFilterOrgID = "org-id"
+)
 
 // TableName return database table name for xorm.
 func (Agent) TableName() string {
@@ -37,5 +51,36 @@ func (Agent) TableName() string {
 }
 
 func (a *Agent) IsSystemAgent() bool {
-	return a.OwnerID == -1
+	return a.OwnerID == IDNotSet
+}
+
+func GenerateNewAgentToken() string {
+	return base32.StdEncoding.EncodeToString(securecookie.GenerateRandomKey(32))
+}
+
+func (a *Agent) GetServerLabels() (map[string]string, error) {
+	filters := make(map[string]string)
+
+	// enforce filters for user and organization agents
+	if a.OrgID != IDNotSet {
+		filters[agentFilterOrgID] = fmt.Sprintf("%d", a.OrgID)
+	} else {
+		filters[agentFilterOrgID] = "*"
+	}
+
+	return filters, nil
+}
+
+func (a *Agent) CanAccessRepo(repo *Repo) bool {
+	// global agent
+	if a.OrgID == IDNotSet {
+		return true
+	}
+
+	// agent has access to the organization
+	if a.OrgID == repo.OrgID {
+		return true
+	}
+
+	return false
 }

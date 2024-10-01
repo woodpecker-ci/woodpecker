@@ -1,6 +1,8 @@
 export interface Agent {
   id: number;
   name: string;
+  owner_id: number;
+  org_id: number;
   token: string;
   created: number;
   updated: number;
