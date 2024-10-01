@@ -46,8 +46,10 @@ var migrationTasks = []*xormigrate.Migration{
 	&addOrgAgents,
 }
 
-// IMPORTANT: if you add something here, also add it to copy.go Copy() func.
-var allBeans = []any{
+// IMPORTANT: if you add something here run generate
+//
+//go:generate go run generate.go
+var AllBeans = []any{
 	new(model.Agent),
 	new(model.Pipeline),
 	new(model.PipelineConfig),
@@ -106,7 +108,7 @@ func Migrate(_ context.Context, e *xorm.Engine, allowLong bool) error {
 }
 
 func syncAll(sess *xorm.Engine) error {
-	for _, bean := range allBeans {
+	for _, bean := range AllBeans {
 		if err := sess.Sync(bean); err != nil {
 			return fmt.Errorf("sync error '%s': %w", reflect.TypeOf(bean), err)
 		}

@@ -22,94 +22,9 @@ import (
 	"github.com/rs/zerolog/log"
 	"xorm.io/xorm"
 	"xorm.io/xorm/schemas"
-
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
 const perPage = 1000
-
-func Copy(ctx context.Context, src, dest *xorm.Engine) error {
-	// first check if the new database already has existing data
-	for _, bean := range allBeans {
-		exist, err := dest.IsTableExist(bean)
-		if err != nil {
-			return err
-		} else if exist {
-			return fmt.Errorf("existing table '%s' in import destination detected", dest.TableName(bean))
-		}
-	}
-
-	// next we make sure the all required migrations are executed
-	if err := Migrate(ctx, src, true); err != nil {
-		return fmt.Errorf("migrate source database failed: %w", err)
-	}
-
-	// init schema in destination
-	if err := initSchemaOnly(dest); err != nil {
-		return err
-	}
-
-	// copy data
-	// IMPORTANT: if you add something here, also add it to migration.go allBeans slice
-	{ // TODO: find a way to use reflection to be able to use allBeans -> code-generation might be a better way ...
-		if err := copyBean[model.Agent](ctx, src, dest); err != nil {
-			return err
-		}
-		if err := copyBean[model.Pipeline](ctx, src, dest); err != nil {
-			return err
-		}
-		if err := copyBean[model.PipelineConfig](ctx, src, dest); err != nil {
-			return err
-		}
-		if err := copyBean[model.Config](ctx, src, dest); err != nil {
-			return err
-		}
-		if err := copyBean[model.LogEntry](ctx, src, dest); err != nil {
-			return err
-		}
-		if err := copyBean[model.Perm](ctx, src, dest); err != nil {
-			return err
-		}
-		if err := copyBean[model.Step](ctx, src, dest); err != nil {
-			return err
-		}
-		if err := copyBean[model.Registry](ctx, src, dest); err != nil {
-			return err
-		}
-		if err := copyBean[model.Repo](ctx, src, dest); err != nil {
-			return err
-		}
-		if err := copyBean[model.Secret](ctx, src, dest); err != nil {
-			return err
-		}
-		if err := copyBean[model.Task](ctx, src, dest); err != nil {
-			return err
-		}
-		if err := copyBean[model.User](ctx, src, dest); err != nil {
-			return err
-		}
-		if err := copyBean[model.ServerConfig](ctx, src, dest); err != nil {
-			return err
-		}
-		if err := copyBean[model.Cron](ctx, src, dest); err != nil {
-			return err
-		}
-		if err := copyBean[model.Redirection](ctx, src, dest); err != nil {
-			return err
-		}
-		if err := copyBean[model.Forge](ctx, src, dest); err != nil {
-			return err
-		}
-		if err := copyBean[model.Workflow](ctx, src, dest); err != nil {
-			return err
-		}
-		if err := copyBean[model.Org](ctx, src, dest); err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
 
 func copyBean[T any](ctx context.Context, src, dest *xorm.Engine) error {
 	tableName := dest.TableName(new(T))
