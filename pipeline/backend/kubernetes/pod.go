@@ -434,7 +434,7 @@ func podSecurityContext(sc *SecurityContext, secCtxConf SecurityContextConfig, s
 		RunAsUser:           user,
 		RunAsGroup:          group,
 		FSGroup:             fsGroup,
-		FsGroupChangePolicy: fsGroupChangePolicy,
+		FSGroupChangePolicy: fsGroupChangePolicy,
 		SeccompProfile:      seccomp,
 		AppArmorProfile:     apparmor,
 	}
