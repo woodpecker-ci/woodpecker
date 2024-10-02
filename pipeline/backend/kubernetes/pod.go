@@ -390,6 +390,9 @@ func podSecurityContext(sc *SecurityContext, secCtxConf SecurityContextConfig, s
 	if secCtxConf.RunAsNonRoot {
 		nonRoot = newBool(true)
 	}
+	if secCtxConf.FSGroup != nil {
+		fsGroup = secCtxConf.FSGroup
+	}
 
 	if sc != nil {
 		// only allow to set user if its not root or step is privileged
@@ -407,6 +410,11 @@ func podSecurityContext(sc *SecurityContext, secCtxConf SecurityContextConfig, s
 			fsGroup = sc.FSGroup
 		}
 
+		// if unset, set fsGroup to 1000 by default to support non-root images
+		if sc.FSGroup != nil {
+			fsGroup = sc.FSGroup
+		}
+
 		// only allow to set nonRoot if it's not set globally already
 		if nonRoot == nil && sc.RunAsNonRoot != nil {
 			nonRoot = sc.RunAsNonRoot
@@ -414,11 +422,6 @@ func podSecurityContext(sc *SecurityContext, secCtxConf SecurityContextConfig, s
 
 		seccomp = seccompProfile(sc.SeccompProfile)
 		apparmor = apparmorProfile(sc.ApparmorProfile)
-	}
-
-	// if unset, set fsGroup to 1000 by default to support non-root images
-	if sc.FSGroup == nil {
-		fsGroup = newInt64(defaultFSGroup)
 	}
 
 	if nonRoot == nil && user == nil && group == nil && fsGroup == nil && seccomp == nil {
