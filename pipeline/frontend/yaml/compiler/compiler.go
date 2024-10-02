@@ -91,7 +91,6 @@ type Compiler struct {
 	env                 map[string]string
 	cloneEnv            map[string]string
 	workspaceBase       string
-	workspacePath       string
 	metadata            metadata.Metadata
 	registries          []Registry
 	secrets             map[string]Secret
@@ -151,9 +150,6 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 	// in the YAML file.
 	if len(conf.Workspace.Base) != 0 {
 		c.workspaceBase = path.Clean(conf.Workspace.Base)
-	}
-	if len(conf.Workspace.Path) != 0 {
-		c.workspacePath = path.Clean(conf.Workspace.Path)
 	}
 
 	// add default clone step

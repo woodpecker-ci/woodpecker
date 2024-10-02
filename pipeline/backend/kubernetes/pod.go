@@ -182,8 +182,7 @@ func podContainer(step *types.Step, podName, goos string, options BackendOptions
 	container := v1.Container{
 		Name:            podName,
 		Image:           step.Image,
-		// WorkingDir:      step.WorkingDir,
-		WorkingDir:     "/woodpecker",
+		WorkingDir:      step.WorkingDir,
 		Ports:           containerPorts(step.Ports),
 		SecurityContext: containerSecurityContext(options.SecurityContext, step.Privileged),
 	}

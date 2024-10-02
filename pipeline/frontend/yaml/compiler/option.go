@@ -98,7 +98,6 @@ func WithNetrc(username, password, machine string) Option {
 func WithWorkspace(base, path string) Option {
 	return func(compiler *Compiler) {
 		compiler.workspaceBase = base
-		compiler.workspacePath = path
 	}
 }
 

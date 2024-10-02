@@ -90,7 +90,7 @@ func (c *Compiler) createProcess(container *yaml_types.Container, stepType backe
 	environment := map[string]string{}
 	maps.Copy(environment, c.env)
 
-	environment["CI_WORKSPACE"] = path.Join(workspaceBase, c.workspacePath)
+	environment["CI_WORKSPACE"] = path.Join(workspaceBase)
 
 	if stepType == backend_types.StepTypeService || container.Detached {
 		detached = true
@@ -207,7 +207,7 @@ func (c *Compiler) stepWorkingDir(container *yaml_types.Container) string {
 	if container.IsPlugin() {
 		base = pluginWorkspaceBase
 	}
-	return path.Join(base, c.workspacePath, container.Directory)
+return path.Join(base)
 }
 
 func convertPort(portDef string) (backend_types.Port, error) {
