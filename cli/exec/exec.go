@@ -190,13 +190,17 @@ func execWithAxis(ctx context.Context, c *cli.Command, file, repoPath string, ax
 	if c.Bool("local") {
 		var (
 			workspaceBase = conf.Workspace.Base
+			workspacePath = conf.Workspace.Path
 		)
 		if workspaceBase == "" {
 			workspaceBase = c.String("workspace-base")
 		}
+		if workspacePath == "" {
+			workspacePath = c.String("workspace-path")
+		}
 
 		volumes = append(volumes, prefix+"_default:"+workspaceBase)
-		volumes = append(volumes, repoPath+":"+path.Join(workspaceBase))
+		volumes = append(volumes, repoPath+":"+path.Join(workspaceBase, workspacePath))
 	}
 
 	privilegedPlugins := c.StringSlice("plugins-privileged")
