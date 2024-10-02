@@ -47,22 +47,31 @@ This way, the secret key and environment variable name can differ.
 
 ### Using secrets in plugins-steps via "settings:"
 
-The `from_secret` syntax also work for settings in any hierarchy.
-Note that you can not use `secrets` and also not use it with `environment`, as this could alter the execution of plugins and so it is forbidden by the linter now.
+The `from_secret` syntax also works for settings in any hierarchy.
 
-In the below example, the secret `SURGE_TOKEN` would be passed to the setting named `surge_token`, which again will be available in the plugin as environment variable named `PLUGIN_SURGE_TOKEN` (See [plugins](./51-plugins/20-creating-plugins.md#settings) for details).
+:::info Important
+You cannot use `secrets` or `environment` directly in plugin steps, as this could alter plugin execution. Instead, use the `settings` field for secrets in plugins:
 
-```diff
- steps:
-   - name: deploy-preview:
-     image: woodpeckerci/plugin-surge-preview
-     settings:
-       path: 'docs/build/'
-+      surge_token:
-+        from_secret: SURGE_TOKEN
+- It's safer: Plugin settings are a controlled interface for customization.
+- It's consistent: Plugins define which settings they accept and how to handle them.
+- It maintains security: This approach doesn't compromise the plugin's integrity or security model.
+
+This restriction is enforced by the linter to ensure plugin safety and predictable behavior.
+:::
+
+In the example below, the secret `SURGE_TOKEN` would be passed to the setting named `surge_token`, which will be available in the plugin as an environment variable named `PLUGIN_SURGE_TOKEN` (See [plugins](./51-plugins/20-creating-plugins.md#settings) for details).
+
+```yaml
+steps:
+  - name: deploy-preview:
+    image: woodpeckerci/plugin-surge-preview
+    settings:
+      path: 'docs/build/'
+      surge_token:
+        from_secret: SURGE_TOKEN
 ```
 
-As settings can have complex structures, `from_secret` is supported any:
+As settings can have complex structures, `from_secret` is supported at any level:
 
 ```yaml
 steps:
@@ -79,6 +88,8 @@ steps:
               from_secret: secret_value
           - "value3"
 ```
+
+This approach allows for flexible and secure use of secrets within plugin settings while maintaining the integrity and security of the plugin execution environment.
 
 ### Note about parameter pre-processing
 
