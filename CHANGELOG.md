@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-10-01
+## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-10-02
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -111,6 +111,7 @@
 
 ### Misc
 
+- Add `.lycheeignore` [[#4154](https://github.com/woodpecker-ci/woodpecker/pull/4154)]
 - chore(deps): update dependency @antfu/eslint-config to v3 [[#4095](https://github.com/woodpecker-ci/woodpecker/pull/4095)]
 - chore(deps): update dependency jsdom to v25 [[#4094](https://github.com/woodpecker-ci/woodpecker/pull/4094)]
 - chore(deps): update docker.io/golang docker tag to v1.23 [[#4081](https://github.com/woodpecker-ci/woodpecker/pull/4081)]
