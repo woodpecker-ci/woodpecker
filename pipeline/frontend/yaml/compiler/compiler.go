@@ -156,6 +156,22 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 		c.workspacePath = path.Clean(conf.Workspace.Path)
 	}
 
+	// find general services (who are not mentioned within needs at all)
+	generalServices := make(map[string]struct{})
+	{
+		needsMap := make(map[string]struct{})
+		for _, step := range append(conf.Steps.ContainerList, conf.Services.ContainerList...) {
+			for _, need := range step.Needs {
+				needsMap[need] = struct{}{}
+			}
+		}
+		for _, service := range conf.Services.ContainerList {
+			if _, hasNeed := needsMap[service.Name]; !hasNeed {
+				generalServices[service.Name] = struct{}{}
+			}
+		}
+	}
+
 	// add default clone step
 	if !c.local && len(conf.Clone.ContainerList) == 0 && !conf.SkipClone && len(c.defaultClonePlugin) != 0 {
 		cloneSettings := map[string]any{"depth": "0"}
@@ -229,12 +245,15 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 			return nil, err
 		}
 
+		_, isGeneralService := generalServices[container.Name]
+
 		services = append(services, &dagCompilerStep{
-			step:      step,
-			position:  pos,
-			name:      container.Name,
-			dependsOn: container.DependsOn,
-			needs:     container.Needs,
+			step:             step,
+			position:         pos,
+			name:             container.Name,
+			dependsOn:        container.DependsOn,
+			needs:            container.Needs,
+			isGeneralService: isGeneralService,
 		})
 	}
 

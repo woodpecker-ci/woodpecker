@@ -21,11 +21,12 @@ import (
 )
 
 type dagCompilerStep struct {
-	step      *backend_types.Step
-	position  int
-	name      string
-	dependsOn []string
-	needs     []string
+	step             *backend_types.Step
+	position         int
+	name             string
+	dependsOn        []string
+	needs            []string
+	isGeneralService bool
 }
 
 type dagCompiler struct {
@@ -51,7 +52,7 @@ func (c dagCompiler) isDAG() bool {
 			return true
 		}
 	}
-	return c.hasNeeds()
+	return c.hasNeeds() // TODO: this do not allow to mix needs with sequential steps
 }
 
 func (c dagCompiler) hasNeeds() bool {
@@ -95,6 +96,8 @@ func (c dagCompiler) compileSequence() ([]*backend_types.Stage, error) {
 }
 
 func (c dagCompiler) compileByDependsOn() ([]*backend_types.Stage, error) {
+	// TODO: start general services first!
+
 	stepMap := make(map[string]*dagCompilerStep, len(c.steps))
 	for _, s := range c.steps {
 		stepMap[s.name] = s
