@@ -207,7 +207,7 @@ func (c *Compiler) stepWorkingDir(container *yaml_types.Container) string {
 	if container.IsPlugin() {
 		base = pluginWorkspaceBase
 	}
-return path.Join(base)
+return path.Join(base, container.Directory)
 }
 
 func convertPort(portDef string) (backend_types.Port, error) {
