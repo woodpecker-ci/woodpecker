@@ -18,32 +18,65 @@ once their usage is declared in the `secrets` section:
 
 ```diff
  steps:
-   - name: docker
-     image: docker
+   - name: test
+     image: bash
      commands:
-+      - echo $docker_username
-+      - echo $DOCKER_PASSWORD
-+    secrets: [ docker_username, DOCKER_PASSWORD ]
++      - echo $some_username
++      - echo $SOME_PASSWORD
++    secrets: [ some_username, SOME_PASSWORD ]
 ```
 
 The case of the environment variables is not changed, but secret matching is done case-insensitively. In the example above, `DOCKER_PASSWORD` would also match if the secret is called `docker_password`.
 
-### Use secrets in settings and environment
+### Use secrets in normal steps via environment
 
-You can set an setting or environment value from secrets using the `from_secret` syntax.
-
-In this example, the secret named `secret_token` would be passed to the setting named `token`,which will be available in the plugin as environment variable named `PLUGIN_TOKEN` (See [plugins](./51-plugins/20-creating-plugins.md#settings) for details), and to the environment variable `TOKEN_ENV`.
+You can set an environment value from secrets using the `from_secret` syntax.
+So the secret key and environment variable name can differ.
 
 ```diff
  steps:
-   - name: docker
-     image: my-plugin
+   - name: test
+     image: bash
+     commands:
+       - env | grep OWN
+-    secrets: [ some_username, SOME_PASSWORD ]
 +    environment:
-+      TOKEN_ENV:
-+        from_secret: secret_token
-+    settings:
-+      token:
-+        from_secret: secret_token
++      SOME_OWN_DEFINED_VAR:
++        from_secret: some_username
+```
+
+### Use secrets in plugins via settings
+
+The `from_secret` syntax also work for settings in any hierarchy.
+
+In this example, the secret named `secret_token` would be passed to the setting named `SURGE_TOKEN`,which will be available in the plugin as environment variable named `PLUGIN_SURGE_TOKEN` (See [plugins](./51-plugins/20-creating-plugins.md#settings) for details).
+
+```diff
+ steps:
+   - name: deploy-preview:
+     image: woodpeckerci/plugin-surge-preview
+     settings:
+       path: 'docs/build/'
++      surge_token:
++        from_secret: SURGE_TOKEN
+```
+
+As settings can have complex structure, the `from_secret` is supported in all of it:
+
+```yaml
+steps:
+  - name: deploy-test:
+    image: plugin-example
+    settings:
+      path: 'artifacts'
+      simple_token:
+        from_secret: A_TOKEN
+      advanced:
+        items:
+          - "value1"
+          - some:
+              from_secret: secret_value
+          - "value3"
 ```
 
 ### Note about parameter pre-processing
@@ -52,14 +85,14 @@ Please note parameter expressions are subject to pre-processing. When using secr
 
 ```diff
  steps:
-   - name: docker
-     image: docker
+   - name: "echo password"
+     image: bash
      commands:
--      - echo ${docker_username}
--      - echo ${DOCKER_PASSWORD}
-+      - echo $${docker_username}
-+      - echo $${DOCKER_PASSWORD}
-     secrets: [ docker_username, DOCKER_PASSWORD ]
+-      - echo ${some_username}
+-      - echo ${SOME_PASSWORD}
++      - echo $${some_username}
++      - echo $${SOME_PASSWORD}
+     secrets: [ some_username, SOME_PASSWORD ]
 ```
 
 ### Use in Pull Requests events
@@ -70,9 +103,11 @@ Secrets are not exposed to pull requests by default. You can override this behav
 Please be careful when exposing secrets to pull requests. If your repository is open source and accepts pull requests your secrets are not safe. A bad actor can submit a malicious pull request that exposes your secrets.
 :::
 
-## Image filter
+## Plugins filter
 
-To prevent abusing your secrets from malicious usage, you can limit a secret to a list of images. If enabled they are not available to any other plugin (steps without user-defined commands). If you or an attacker defines explicit commands, the secrets will not be available to the container to prevent leaking them.
+To prevent abusing your secrets from malicious usage, you can limit a secret to a list of plugins. If enabled they are not available to any other plugin (steps without user-defined commands). If you or an attacker defines explicit commands, the secrets will not be available to the container to prevent leaking them.
+
+![plugins filter](./secrets-plugins-filter.png)
 
 ## Adding Secrets
 
