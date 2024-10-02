@@ -391,16 +391,6 @@ func TestPodPrivilege(t *testing.T) {
 	}
 	pod, err = createTestPod(false, false, secCtx)
 	assert.NoError(t, err)
-	assert.Nil(t, pod.Spec.SecurityContext)
-	assert.Nil(t, pod.Spec.Containers[0].SecurityContext)
-
-	// step is not privileged, but security context is requesting privileged
-	secCtx = SecurityContext{
-		Privileged: newBool(true),
-	}
-	pod, err = createTestPod(false, false, secCtx)
-	assert.NoError(t, err)
-	assert.NotNil(t, pod.Spec.SecurityContext)
 	assert.Equal(t, &v1.PodSecurityContext{
 		SELinuxOptions:           (*v1.SELinuxOptions)(nil),
 		WindowsOptions:           (*v1.WindowsSecurityContextOptions)(nil),
@@ -409,12 +399,22 @@ func TestPodPrivilege(t *testing.T) {
 		RunAsNonRoot:             (*bool)(nil),
 		SupplementalGroups:       []int64(nil),
 		SupplementalGroupsPolicy: (*v1.SupplementalGroupsPolicy)(nil),
-		FSGroup:                  newInt64(1000),
+		FSGroup:                  newInt64(0),
 		Sysctls:                  []v1.Sysctl(nil),
 		FSGroupChangePolicy:      (*v1.PodFSGroupChangePolicy)(nil),
 		SeccompProfile:           (*v1.SeccompProfile)(nil),
 		AppArmorProfile:          (*v1.AppArmorProfile)(nil),
 	}, pod.Spec.SecurityContext)
+	assert.Nil(t, pod.Spec.Containers[0].SecurityContext)
+
+	// step is not privileged, but security context is requesting privileged
+	secCtx = SecurityContext{
+		Privileged: newBool(true),
+	}
+	pod, err = createTestPod(false, false, secCtx)
+	assert.NoError(t, err)
+	assert.Nil(t, pod.Spec.SecurityContext)
+	assert.Equal(t, (*v1.PodSecurityContext)(nil), pod.Spec.SecurityContext)
 
 	// step is privileged and security context is requesting privileged
 	secCtx = SecurityContext{
