@@ -31,8 +31,9 @@ import (
 )
 
 const (
-	StepLabel = "step"
-	podPrefix = "wp-"
+	StepLabel            = "step"
+	podPrefix            = "wp-"
+	defaultFSGroup int64 = 1000
 )
 
 func mkPod(step *types.Step, config *config, podName, goos string, options BackendOptions) (*v1.Pod, error) {
@@ -378,13 +379,12 @@ func toleration(backendToleration Toleration) v1.Toleration {
 
 func podSecurityContext(sc *SecurityContext, secCtxConf SecurityContextConfig, stepPrivileged bool) *v1.PodSecurityContext {
 	var (
-		nonRoot             *bool
-		user                *int64
-		group               *int64
-		fsGroup             *int64
-		// fsGroupChangePolicy *v1.PodFSGroupChangePolicy
-		seccomp             *v1.SeccompProfile
-		apparmor            *v1.AppArmorProfile
+		nonRoot  *bool
+		user     *int64
+		group    *int64
+		fsGroup  *int64
+		seccomp  *v1.SeccompProfile
+		apparmor *v1.AppArmorProfile
 	)
 
 	if secCtxConf.RunAsNonRoot {
@@ -414,16 +414,7 @@ func podSecurityContext(sc *SecurityContext, secCtxConf SecurityContextConfig, s
 
 		// if unset, set fsGroup to 1000 by default to support non-root images
 		if sc.FSGroup == nil {
-			fsGroup = newInt64(1000)
-			do the same for fsGroupChangePolicy but only if fsGroup is also set accordingly
-			if sc.FSGroupChangePolicy == nil {
-				policy := v1.PodFSGroupChangePolicyOnRootMismatch
-				}
-				fsGroupChangePolicy = &policy
-			}
-			else {
-				fsGroupChangePolicy = sc.FSGroupChangePolicy
-		}
+			fsGroup = newInt64(defaultFSGroup)
 		}
 
 		seccomp = seccompProfile(sc.SeccompProfile)
@@ -435,13 +426,12 @@ func podSecurityContext(sc *SecurityContext, secCtxConf SecurityContextConfig, s
 	}
 
 	securityContext := &v1.PodSecurityContext{
-		RunAsNonRoot:        nonRoot,
-		RunAsUser:           user,
-		RunAsGroup:          group,
-		FSGroup:             fsGroup,
-		FSGroupChangePolicy: fsGroupChangePolicy,
-		SeccompProfile:      seccomp,
-		AppArmorProfile:     apparmor,
+		RunAsNonRoot:    nonRoot,
+		RunAsUser:       user,
+		RunAsGroup:      group,
+		FSGroup:         fsGroup,
+		SeccompProfile:  seccomp,
+		AppArmorProfile: apparmor,
 	}
 	log.Trace().Msgf("pod security context that will be used: %v", securityContext)
 	return securityContext
