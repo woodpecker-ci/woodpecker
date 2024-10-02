@@ -382,7 +382,7 @@ func podSecurityContext(sc *SecurityContext, secCtxConf SecurityContextConfig, s
 		user                *int64
 		group               *int64
 		fsGroup             *int64
-		fsGroupChangePolicy *string
+		// fsGroupChangePolicy *v1.PodFSGroupChangePolicy
 		seccomp             *v1.SeccompProfile
 		apparmor            *v1.AppArmorProfile
 	)
@@ -414,11 +414,12 @@ func podSecurityContext(sc *SecurityContext, secCtxConf SecurityContextConfig, s
 
 		// if unset, set fsGroup to 1000 by default to support non-root images
 		if sc.FSGroup == nil {
-			fsGroup = 1000
+			fsGroup = newInt64(1000)
 			// do the same for fsGroupChangePolicy but only if fsGroup is also set accordingly
-			if sc.FSGroupChangePolicy == nil {
-				fsGroupChangePolicy = "OnRootMismatch"
-			}
+			// if sc.FSGroupChangePolicy == nil {
+			// 	policy := v1.PodFSGroupChangePolicyOnRootMismatch
+			// 	fsGroupChangePolicy = &policy
+			// }
 		}
 
 		seccomp = seccompProfile(sc.SeccompProfile)
@@ -434,7 +435,7 @@ func podSecurityContext(sc *SecurityContext, secCtxConf SecurityContextConfig, s
 		RunAsUser:           user,
 		RunAsGroup:          group,
 		FSGroup:             fsGroup,
-		FSGroupChangePolicy: fsGroupChangePolicy,
+		// FSGroupChangePolicy: fsGroupChangePolicy,
 		SeccompProfile:      seccomp,
 		AppArmorProfile:     apparmor,
 	}
