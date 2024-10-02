@@ -93,7 +93,6 @@ func TestTinyPod(t *testing.T) {
 						"-c",
 						"echo $CI_SCRIPT | base64 -d | /bin/sh -e"
 					],
-					"workingDir": "/woodpecker/src",
 					"env": [
 						"<<UNORDERED>>",
 						{
@@ -106,7 +105,7 @@ func TestTinyPod(t *testing.T) {
 						},
 						{
 							"name": "CI_SCRIPT",
-							"value": "CmlmIFsgLW4gIiRDSV9ORVRSQ19NQUNISU5FIiBdOyB0aGVuCmNhdCA8PEVPRiA+ICRIT01FLy5uZXRyYwptYWNoaW5lICRDSV9ORVRSQ19NQUNISU5FCmxvZ2luICRDSV9ORVRSQ19VU0VSTkFNRQpwYXNzd29yZCAkQ0lfTkVUUkNfUEFTU1dPUkQKRU9GCmNobW9kIDA2MDAgJEhPTUUvLm5ldHJjCmZpCnVuc2V0IENJX05FVFJDX1VTRVJOQU1FCnVuc2V0IENJX05FVFJDX1BBU1NXT1JECnVuc2V0IENJX1NDUklQVAoKZWNobyArICdncmFkbGUgYnVpbGQnCmdyYWRsZSBidWlsZAo="
+							"value": "CmlmIFsgLW4gIiRDSV9ORVRSQ19NQUNISU5FIiBdOyB0aGVuCmNhdCA8PEVPRiA+ICRIT01FLy5uZXRyYwptYWNoaW5lICRDSV9ORVRSQ19NQUNISU5FCmxvZ2luICRDSV9ORVRSQ19VU0VSTkFNRQpwYXNzd29yZCAkQ0lfTkVUUkNfUEFTU1dPUkQKRU9GCmNobW9kIDA2MDAgJEhPTUUvLm5ldHJjCmZpCnVuc2V0IENJX05FVFJDX1VTRVJOQU1FCnVuc2V0IENJX05FVFJDX1BBU1NXT1JECnVuc2V0IENJX1NDUklQVApta2RpciAtcCAkQ0lfV09SS1NQQUNFCmNkICRDSV9XT1JLU1BBQ0UKCmVjaG8gKyAnZ3JhZGxlIGJ1aWxkJwpncmFkbGUgYnVpbGQK"
 						}
 					],
 					"resources": {},
@@ -178,7 +177,6 @@ func TestFullPod(t *testing.T) {
 						"/bin/sh",
 						"-c"
 					],
-					"workingDir": "/woodpecker/src",
 					"ports": [
 						{
 							"containerPort": 1234
@@ -200,7 +198,7 @@ func TestFullPod(t *testing.T) {
 						},
 						{
 							"name": "CI_SCRIPT",
-							"value": "CmlmIFsgLW4gIiRDSV9ORVRSQ19NQUNISU5FIiBdOyB0aGVuCmNhdCA8PEVPRiA+ICRIT01FLy5uZXRyYwptYWNoaW5lICRDSV9ORVRSQ19NQUNISU5FCmxvZ2luICRDSV9ORVRSQ19VU0VSTkFNRQpwYXNzd29yZCAkQ0lfTkVUUkNfUEFTU1dPUkQKRU9GCmNobW9kIDA2MDAgJEhPTUUvLm5ldHJjCmZpCnVuc2V0IENJX05FVFJDX1VTRVJOQU1FCnVuc2V0IENJX05FVFJDX1BBU1NXT1JECnVuc2V0IENJX1NDUklQVAoKZWNobyArICdnbyBnZXQnCmdvIGdldAoKZWNobyArICdnbyB0ZXN0JwpnbyB0ZXN0Cg=="
+							"value": "CmlmIFsgLW4gIiRDSV9ORVRSQ19NQUNISU5FIiBdOyB0aGVuCmNhdCA8PEVPRiA+ICRIT01FLy5uZXRyYwptYWNoaW5lICRDSV9ORVRSQ19NQUNISU5FCmxvZ2luICRDSV9ORVRSQ19VU0VSTkFNRQpwYXNzd29yZCAkQ0lfTkVUUkNfUEFTU1dPUkQKRU9GCmNobW9kIDA2MDAgJEhPTUUvLm5ldHJjCmZpCnVuc2V0IENJX05FVFJDX1VTRVJOQU1FCnVuc2V0IENJX05FVFJDX1BBU1NXT1JECnVuc2V0IENJX1NDUklQVApta2RpciAtcCAkQ0lfV09SS1NQQUNFCmNkICRDSV9XT1JLU1BBQ0UKCmVjaG8gKyAnZ28gZ2V0JwpnbyBnZXQKCmVjaG8gKyAnZ28gdGVzdCcKZ28gdGVzdAo="
 						},
 						{
 							"name": "SHELL",
@@ -402,8 +400,21 @@ func TestPodPrivilege(t *testing.T) {
 	}
 	pod, err = createTestPod(false, false, secCtx)
 	assert.NoError(t, err)
-	assert.Nil(t, pod.Spec.SecurityContext)
-	assert.Nil(t, pod.Spec.Containers[0].SecurityContext)
+	assert.NotNil(t, pod.Spec.SecurityContext)
+	assert.Equal(t, &v1.PodSecurityContext{
+		SELinuxOptions:           (*v1.SELinuxOptions)(nil),
+		WindowsOptions:           (*v1.WindowsSecurityContextOptions)(nil),
+		RunAsUser:                (*int64)(nil),
+		RunAsGroup:               (*int64)(nil),
+		RunAsNonRoot:             (*bool)(nil),
+		SupplementalGroups:       []int64(nil),
+		SupplementalGroupsPolicy: (*v1.SupplementalGroupsPolicy)(nil),
+		FSGroup:                  newInt64(1000),
+		Sysctls:                  []v1.Sysctl(nil),
+		FSGroupChangePolicy:      (*v1.PodFSGroupChangePolicy)(nil),
+		SeccompProfile:           (*v1.SeccompProfile)(nil),
+		AppArmorProfile:          (*v1.AppArmorProfile)(nil),
+	}, pod.Spec.SecurityContext)
 
 	// step is privileged and security context is requesting privileged
 	secCtx = SecurityContext{
