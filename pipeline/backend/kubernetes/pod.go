@@ -416,8 +416,8 @@ func podSecurityContext(sc *SecurityContext, secCtxConf SecurityContextConfig, s
 		if sc.FSGroup == nil {
 			fsGroup = 1000
 			// do the same for fsGroupChangePolicy but only if fsGroup is also set accordingly
-			if sc.fsGroupChangePolicy == nil {
-				FsGroupChangePolicy = "OnRootMismatch"
+			if sc.FSGroupChangePolicy == nil {
+				fsGroupChangePolicy = "OnRootMismatch"
 			}
 		}
 
