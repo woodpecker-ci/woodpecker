@@ -412,13 +412,13 @@ func podSecurityContext(sc *SecurityContext, secCtxConf SecurityContextConfig, s
 			nonRoot = sc.RunAsNonRoot
 		}
 
-		// if unset, set fsGroup to 1000 by default to support non-root images
-		if sc.FSGroup == nil {
-			fsGroup = newInt64(defaultFSGroup)
-		}
-
 		seccomp = seccompProfile(sc.SeccompProfile)
 		apparmor = apparmorProfile(sc.ApparmorProfile)
+	}
+
+	// if unset, set fsGroup to 1000 by default to support non-root images
+	if sc.FSGroup == nil {
+		fsGroup = newInt64(defaultFSGroup)
 	}
 
 	if nonRoot == nil && user == nil && group == nil && fsGroup == nil && seccomp == nil {
