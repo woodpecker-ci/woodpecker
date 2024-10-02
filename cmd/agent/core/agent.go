@@ -239,7 +239,7 @@ func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 		return err
 	}
 
-	log.Debug().Msgf("agent configured with labels: %#v", labels)
+	log.Debug().Any("labels", labels).Msgf("agent configured with labels")
 
 	filter := rpc.Filter{
 		Labels: labels,
