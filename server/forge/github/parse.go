@@ -173,6 +173,7 @@ func parsePullHook(hook *github.PullRequestEvent, merge bool) (*github.PullReque
 			hook.GetPullRequest().GetBase().GetRef(),
 		),
 		PullRequestLabels: convertLabels(hook.GetPullRequest().Labels),
+		PullRequestTitle:  hook.GetPullRequest().GetTitle(),
 	}
 	if merge {
 		pipeline.Ref = fmt.Sprintf(mergeRefs, hook.GetPullRequest().GetNumber())

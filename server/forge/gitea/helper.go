@@ -172,6 +172,7 @@ func pipelineFromPullRequest(hook *pullRequestHook) *model.Pipeline {
 			hook.PullRequest.Base.Ref,
 		),
 		PullRequestLabels: convertLabels(hook.PullRequest.Labels),
+		PullRequestTitle:  hook.PullRequest.Title,
 	}
 
 	return pipeline

@@ -89,6 +89,7 @@ func Test_parser(t *testing.T) {
 				g.Assert(b).IsNotNil()
 				g.Assert(p).IsNotNil()
 				g.Assert(b.Event).Equal(model.EventPull)
+				g.Assert(b.PullRequestTitle).Equal(b.Message)
 			})
 			g.It("should handle a PR closed hook when PR got closed", func() {
 				req := testHookRequest([]byte(fixtures.HookPullRequestClosed), hookPull)

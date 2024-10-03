@@ -176,13 +176,14 @@ func convertPullHook(from *internal.PullRequestHook) *model.Pipeline {
 			from.PullRequest.Source.Branch.Name,
 			from.PullRequest.Dest.Branch.Name,
 		),
-		ForgeURL:  from.PullRequest.Links.HTML.Href,
-		Branch:    from.PullRequest.Source.Branch.Name,
-		Message:   from.PullRequest.Title,
-		Avatar:    from.Actor.Links.Avatar.Href,
-		Author:    from.Actor.Login,
-		Sender:    from.Actor.Login,
-		Timestamp: from.PullRequest.Updated.UTC().Unix(),
+		ForgeURL:         from.PullRequest.Links.HTML.Href,
+		Branch:           from.PullRequest.Source.Branch.Name,
+		Message:          from.PullRequest.Title,
+		PullRequestTitle: from.PullRequest.Title,
+		Avatar:           from.Actor.Links.Avatar.Href,
+		Author:           from.Actor.Login,
+		Sender:           from.Actor.Login,
+		Timestamp:        from.PullRequest.Updated.UTC().Unix(),
 	}
 
 	if from.PullRequest.State == stateClosed {

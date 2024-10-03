@@ -68,6 +68,7 @@ type (
 		Author            Author   `json:"author,omitempty"`
 		ChangedFiles      []string `json:"changed_files,omitempty"`
 		PullRequestLabels []string `json:"labels,omitempty"`
+		PullRequestTitle  string   `json:"title,omitempty"`
 		IsPrerelease      bool     `json:"is_prerelease,omitempty"`
 	}
 

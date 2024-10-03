@@ -218,6 +218,7 @@ func TestGiteaParser(t *testing.T) {
 				Email:             "gordon@golang.org",
 				ForgeURL:          "http://gitea.golang.org/gordon/hello-world/pull/1",
 				PullRequestLabels: []string{},
+				PullRequestTitle:  "Update the README with new information",
 			},
 		},
 		{
@@ -260,6 +261,7 @@ func TestGiteaParser(t *testing.T) {
 					"Kind/Bug",
 					"Kind/Security",
 				},
+				PullRequestTitle: "New Pull",
 			},
 		},
 		{
@@ -298,6 +300,7 @@ func TestGiteaParser(t *testing.T) {
 				Email:             "anbraten@sender.gitea.com",
 				ForgeURL:          "https://gitea.com/anbraten/test-repo/pulls/1",
 				PullRequestLabels: []string{},
+				PullRequestTitle:  "Adjust file",
 			},
 		},
 		{
@@ -336,6 +339,7 @@ func TestGiteaParser(t *testing.T) {
 				Email:             "anbraten@noreply.gitea.com",
 				ForgeURL:          "https://gitea.com/anbraten/test-repo/pulls/1",
 				PullRequestLabels: []string{},
+				PullRequestTitle:  "Adjust file",
 			},
 		},
 		{
