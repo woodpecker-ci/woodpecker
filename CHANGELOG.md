@@ -112,6 +112,8 @@
 
 ### Misc
 
+- chore(deps): update dependency vite to v5.4.6 [security] [[#4163](https://github.com/woodpecker-ci/woodpecker/pull/4163)]
+- renovate: set `automergetype=pr` [[#4162](https://github.com/woodpecker-ci/woodpecker/pull/4162)]
 - fix(deps): update golang-packages [[#4161](https://github.com/woodpecker-ci/woodpecker/pull/4161)]
 - Bump trivy (and lockfile deps) [[#4160](https://github.com/woodpecker-ci/woodpecker/pull/4160)]
 - Add `.lycheeignore` [[#4154](https://github.com/woodpecker-ci/woodpecker/pull/4154)]
