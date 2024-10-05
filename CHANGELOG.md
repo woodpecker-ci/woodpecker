@@ -45,6 +45,27 @@
 - Replay pipeline using `cli exec` by downloading metadata [[#4103](https://github.com/woodpecker-ci/woodpecker/pull/4103)]
 - Update clone plugin to support sha256 [[#4136](https://github.com/woodpecker-ci/woodpecker/pull/4136)]
 
+### 📚 Documentation
+
+- chore(deps): update docs npm deps non-major [[#4164](https://github.com/woodpecker-ci/woodpecker/pull/4164)]
+- Update image filter error message [[#4143](https://github.com/woodpecker-ci/woodpecker/pull/4143)]
+- Docs: reference to built-in docker compose and remove deprecated version from compose examples [[#4123](https://github.com/woodpecker-ci/woodpecker/pull/4123)]
+- directory key is allowed for services [[#4127](https://github.com/woodpecker-ci/woodpecker/pull/4127)]
+- [docs] Removes dot prefix from pipeline configuration filenames [[#4105](https://github.com/woodpecker-ci/woodpecker/pull/4105)]
+- Use kaniko plugin in docs as example [[#4072](https://github.com/woodpecker-ci/woodpecker/pull/4072)]
+- Add some posts and videos [[#4070](https://github.com/woodpecker-ci/woodpecker/pull/4070)]
+- Move event type descriptions from Terminology to Workflow Syntax [[#4062](https://github.com/woodpecker-ci/woodpecker/pull/4062)]
+- Add community posts from discussions [[#4058](https://github.com/woodpecker-ci/woodpecker/pull/4058)]
+- Add a pull request template with some basic guidelines [[#4055](https://github.com/woodpecker-ci/woodpecker/pull/4055)]
+- Add examples of CI environment variable values [[#4009](https://github.com/woodpecker-ci/woodpecker/pull/4009)]
+- Fix inline author warning [[#4040](https://github.com/woodpecker-ci/woodpecker/pull/4040)]
+- Updated Secrets image filter docs [[#4028](https://github.com/woodpecker-ci/woodpecker/pull/4028)]
+- Update dependency marked to v14 [[#4036](https://github.com/woodpecker-ci/woodpecker/pull/4036)]
+- Update docs npm deps non-major [[#4033](https://github.com/woodpecker-ci/woodpecker/pull/4033)]
+- Overhaul README [[#3995](https://github.com/woodpecker-ci/woodpecker/pull/3995)]
+- fix(deps): update docs npm deps non-major [[#3990](https://github.com/woodpecker-ci/woodpecker/pull/3990)]
+- Add spellchecking for docs [[#3787](https://github.com/woodpecker-ci/woodpecker/pull/3787)]
+
 ### 📈 Enhancement
 
 - Print agent labels in debug mode [[#4155](https://github.com/woodpecker-ci/woodpecker/pull/4155)]
@@ -70,26 +91,6 @@
 - Add PULLREQUEST_DRONE_PULL_REQUEST drone env [[#3939](https://github.com/woodpecker-ci/woodpecker/pull/3939)]
 - Make agent gRPC errors distinguishable [[#3936](https://github.com/woodpecker-ci/woodpecker/pull/3936)]
 
-### 📚 Documentation
-
-- Update image filter error message [[#4143](https://github.com/woodpecker-ci/woodpecker/pull/4143)]
-- Docs: reference to built-in docker compose and remove deprecated version from compose examples [[#4123](https://github.com/woodpecker-ci/woodpecker/pull/4123)]
-- directory key is allowed for services [[#4127](https://github.com/woodpecker-ci/woodpecker/pull/4127)]
-- [docs] Removes dot prefix from pipeline configuration filenames [[#4105](https://github.com/woodpecker-ci/woodpecker/pull/4105)]
-- Use kaniko plugin in docs as example [[#4072](https://github.com/woodpecker-ci/woodpecker/pull/4072)]
-- Add some posts and videos [[#4070](https://github.com/woodpecker-ci/woodpecker/pull/4070)]
-- Move event type descriptions from Terminology to Workflow Syntax [[#4062](https://github.com/woodpecker-ci/woodpecker/pull/4062)]
-- Add community posts from discussions [[#4058](https://github.com/woodpecker-ci/woodpecker/pull/4058)]
-- Add a pull request template with some basic guidelines [[#4055](https://github.com/woodpecker-ci/woodpecker/pull/4055)]
-- Add examples of CI environment variable values [[#4009](https://github.com/woodpecker-ci/woodpecker/pull/4009)]
-- Fix inline author warning [[#4040](https://github.com/woodpecker-ci/woodpecker/pull/4040)]
-- Updated Secrets image filter docs [[#4028](https://github.com/woodpecker-ci/woodpecker/pull/4028)]
-- Update dependency marked to v14 [[#4036](https://github.com/woodpecker-ci/woodpecker/pull/4036)]
-- Update docs npm deps non-major [[#4033](https://github.com/woodpecker-ci/woodpecker/pull/4033)]
-- Overhaul README [[#3995](https://github.com/woodpecker-ci/woodpecker/pull/3995)]
-- fix(deps): update docs npm deps non-major [[#3990](https://github.com/woodpecker-ci/woodpecker/pull/3990)]
-- Add spellchecking for docs [[#3787](https://github.com/woodpecker-ci/woodpecker/pull/3787)]
-
 ### 🐛 Bug Fixes
 
 - Ensure cli exec has by default not the same prefix [[#4132](https://github.com/woodpecker-ci/woodpecker/pull/4132)]
@@ -110,28 +111,38 @@
 - Truncate creation in list [[#3952](https://github.com/woodpecker-ci/woodpecker/pull/3952)]
 - Fix panic if forge is unreachable [[#3944](https://github.com/woodpecker-ci/woodpecker/pull/3944)]
 
-### Misc
+### 📦️ Dependency
 
+- chore(deps): update woodpeckerci/plugin-release docker tag to v0.2.1 [[#4175](https://github.com/woodpecker-ci/woodpecker/pull/4175)]
+- chore(deps): update woodpeckerci/plugin-ready-release-go docker tag to v2 [[#4182](https://github.com/woodpecker-ci/woodpecker/pull/4182)]
+- fix(deps): update github.com/muesli/termenv digest to 82936c5 [[#4165](https://github.com/woodpecker-ci/woodpecker/pull/4165)]
+- chore(deps): update postgres docker tag to v17 [[#4181](https://github.com/woodpecker-ci/woodpecker/pull/4181)]
+- chore(deps): update pre-commit non-major [[#4173](https://github.com/woodpecker-ci/woodpecker/pull/4173)]
+- chore(deps): update docker.io/golang docker tag to v1.23 [[#4170](https://github.com/woodpecker-ci/woodpecker/pull/4170)]
+- chore(deps): update node.js to v22 [[#4180](https://github.com/woodpecker-ci/woodpecker/pull/4180)]
 - chore(deps): update dependency vite to v5.4.6 [security] [[#4163](https://github.com/woodpecker-ci/woodpecker/pull/4163)]
-- renovate: set `automergetype=pr` [[#4162](https://github.com/woodpecker-ci/woodpecker/pull/4162)]
 - fix(deps): update golang-packages [[#4161](https://github.com/woodpecker-ci/woodpecker/pull/4161)]
 - Bump trivy (and lockfile deps) [[#4160](https://github.com/woodpecker-ci/woodpecker/pull/4160)]
-- Add `.lycheeignore` [[#4154](https://github.com/woodpecker-ci/woodpecker/pull/4154)]
 - chore(deps): update dependency @antfu/eslint-config to v3 [[#4095](https://github.com/woodpecker-ci/woodpecker/pull/4095)]
 - chore(deps): update dependency jsdom to v25 [[#4094](https://github.com/woodpecker-ci/woodpecker/pull/4094)]
 - chore(deps): update docker.io/golang docker tag to v1.23 [[#4081](https://github.com/woodpecker-ci/woodpecker/pull/4081)]
 - chore(deps): update docker.io/woodpeckerci/plugin-prettier docker tag to v0.2.0 [[#4082](https://github.com/woodpecker-ci/woodpecker/pull/4082)]
 - fix(deps): update module github.com/google/go-github/v63 to v64 [[#4073](https://github.com/woodpecker-ci/woodpecker/pull/4073)]
 - fix(deps): update golang-packages [[#4059](https://github.com/woodpecker-ci/woodpecker/pull/4059)]
-- Add systemd unit files to the RPM/DEB packages [[#3986](https://github.com/woodpecker-ci/woodpecker/pull/3986)]
-- Add eslint-plugin-promise back [[#4022](https://github.com/woodpecker-ci/woodpecker/pull/4022)]
 - Update github.com/urfave/cli/v3 digest to fc07a8c [[#4043](https://github.com/woodpecker-ci/woodpecker/pull/4043)]
 - Update woodpeckerci/plugin-git Docker tag to v2.5.2 [[#4041](https://github.com/woodpecker-ci/woodpecker/pull/4041)]
 - Update web npm deps non-major [[#4034](https://github.com/woodpecker-ci/woodpecker/pull/4034)]
 - Update dependency simple-icons to v13 [[#4037](https://github.com/woodpecker-ci/woodpecker/pull/4037)]
-- Show error if secret name is missing [[#4014](https://github.com/woodpecker-ci/woodpecker/pull/4014)]
 - chore(deps): lock file maintenance [[#3991](https://github.com/woodpecker-ci/woodpecker/pull/3991)]
 - fix(deps): update golang-packages [[#3958](https://github.com/woodpecker-ci/woodpecker/pull/3958)]
+
+### Misc
+
+- renovate: set `automergetype=pr` [[#4162](https://github.com/woodpecker-ci/woodpecker/pull/4162)]
+- Add `.lycheeignore` [[#4154](https://github.com/woodpecker-ci/woodpecker/pull/4154)]
+- Add systemd unit files to the RPM/DEB packages [[#3986](https://github.com/woodpecker-ci/woodpecker/pull/3986)]
+- Add eslint-plugin-promise back [[#4022](https://github.com/woodpecker-ci/woodpecker/pull/4022)]
+- Show error if secret name is missing [[#4014](https://github.com/woodpecker-ci/woodpecker/pull/4014)]
 - Improve wording [[#3951](https://github.com/woodpecker-ci/woodpecker/pull/3951)]
 - Fix typos and optimize wording [[#3940](https://github.com/woodpecker-ci/woodpecker/pull/3940)]
 
