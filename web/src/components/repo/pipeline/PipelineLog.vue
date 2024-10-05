@@ -106,8 +106,6 @@
 </template>
 
 <script lang="ts" setup>
-import '~/style/console.css';
-
 import { useStorage } from '@vueuse/core';
 import { AnsiUp } from 'ansi_up';
 import { decode } from 'js-base64';
@@ -122,6 +120,8 @@ import useApiClient from '~/compositions/useApiClient';
 import useNotifications from '~/compositions/useNotifications';
 import type { Pipeline, Repo, RepoPermissions } from '~/lib/api/types';
 import { findStep, isStepFinished, isStepRunning } from '~/utils/helpers';
+
+import '~/style/console.css';
 
 interface LogLine {
   index: number;

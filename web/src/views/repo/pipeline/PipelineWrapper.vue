@@ -1,7 +1,7 @@
 <template>
   <Scaffold
     v-if="pipeline && repo"
-    v-model:activeTab="activeTab"
+    v-model:active-tab="activeTab"
     enable-tabs
     disable-tab-url-hash-mode
     :go-back="goBack"
