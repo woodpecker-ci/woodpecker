@@ -21,7 +21,7 @@
     "@intlify/unplugin-vue-i18n": "^4.0.0",
     "@kyvg/vue3-notification": "^3.2.1",
     "@mdi/js": "^7.4.47",
-    "@vueuse/core": "^10.11.1",
+    "@vueuse/core": "^11.0.0",
     "ansi_up": "^6.0.2",
     "dayjs": "^1.11.12",
     "fuse.js": "^7.0.0",
