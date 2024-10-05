@@ -1,5 +1,5 @@
-import type { InjectionKey, Ref } from 'vue';
 import { inject as vueInject, provide as vueProvide } from 'vue';
+import type { InjectionKey, Ref } from 'vue';
 
 import type { Org, OrgPermissions, Repo } from '~/lib/api/types';
 
