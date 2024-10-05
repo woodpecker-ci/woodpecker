@@ -54,7 +54,7 @@
   "pnpm": {
     "overrides": {
       "got": "^14.0.0",
-      "path-to-regexp": "^3.3.0",
+      "path-to-regexp": "^8.0.0",
       "cookie": "^0.7.0"
     }
   }
