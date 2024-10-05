@@ -153,7 +153,7 @@ services:
     when: *when
 
   mysql:
-    image: docker.io/mysql:8.2.0
+    image: docker.io/mysql:8.4.2
     ports: ['3306']
     environment:
       MYSQL_DATABASE: test
