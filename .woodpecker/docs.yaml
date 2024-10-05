@@ -1,6 +1,6 @@
 variables:
-  - &golang_image 'docker.io/golang:1.22'
-  - &node_image 'docker.io/node:21-alpine'
+  - &golang_image 'docker.io/golang:1.23'
+  - &node_image 'docker.io/node:22-alpine'
   - &alpine_image 'docker.io/alpine:3.19'
   - path: &when_path
       - 'docs/**'

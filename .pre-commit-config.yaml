@@ -10,11 +10,11 @@ repos:
       - id: end-of-file-fixer
       - id: trailing-whitespace
   - repo: https://github.com/golangci/golangci-lint
-    rev: v1.59.1
+    rev: v1.61.0
     hooks:
       - id: golangci-lint
   - repo: https://github.com/igorshubovych/markdownlint-cli
-    rev: v0.41.0
+    rev: v0.42.0
     hooks:
       - id: markdownlint
         exclude: '^(docs/versioned_docs/.*|CHANGELOG.md)$'
