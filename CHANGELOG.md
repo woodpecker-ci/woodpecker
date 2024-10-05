@@ -35,6 +35,7 @@
 
 ### 🔒 Security
 
+- chore(deps): update dependency vite to v5.4.6 [security] [[#4163](https://github.com/woodpecker-ci/woodpecker/pull/4163)]
 - Allow altering trusted clone plugins and filter them via tag [[#4074](https://github.com/woodpecker-ci/woodpecker/pull/4074)]
 - Update gitea sdk [[#4012](https://github.com/woodpecker-ci/woodpecker/pull/4012)]
 - Update Forgejo SDK [[#3948](https://github.com/woodpecker-ci/woodpecker/pull/3948)]
@@ -47,6 +48,8 @@
 
 ### 📚 Documentation
 
+- chore(deps): lock file maintenance [[#4186](https://github.com/woodpecker-ci/woodpecker/pull/4186)]
+- chore(deps): update dependency concurrently to v9 [[#4176](https://github.com/woodpecker-ci/woodpecker/pull/4176)]
 - chore(deps): update docs npm deps non-major [[#4164](https://github.com/woodpecker-ci/woodpecker/pull/4164)]
 - Update image filter error message [[#4143](https://github.com/woodpecker-ci/woodpecker/pull/4143)]
 - Docs: reference to built-in docker compose and remove deprecated version from compose examples [[#4123](https://github.com/woodpecker-ci/woodpecker/pull/4123)]
@@ -113,6 +116,16 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update web npm deps non-major [[#4174](https://github.com/woodpecker-ci/woodpecker/pull/4174)]
+- chore(deps): update docker.io/postgres docker tag to v17 [[#4179](https://github.com/woodpecker-ci/woodpecker/pull/4179)]
+- fix(deps): update dependency @intlify/unplugin-vue-i18n to v5 [[#4183](https://github.com/woodpecker-ci/woodpecker/pull/4183)]
+- fix(deps): update dependency @vueuse/core to v11 [[#4184](https://github.com/woodpecker-ci/woodpecker/pull/4184)]
+- chore(deps): update docker.io/woodpeckerci/plugin-codecov docker tag to v2.1.5 [[#4167](https://github.com/woodpecker-ci/woodpecker/pull/4167)]
+- fix(deps): update module github.com/google/go-github/v64 to v65 [[#4185](https://github.com/woodpecker-ci/woodpecker/pull/4185)]
+- chore(deps): update docker.io/mysql docker tag to v9 [[#4178](https://github.com/woodpecker-ci/woodpecker/pull/4178)]
+- chore(deps): update docker.io/alpine docker tag to v3.20 [[#4169](https://github.com/woodpecker-ci/woodpecker/pull/4169)]
+- fix(deps): update github.com/urfave/cli/v3 digest to 20ef97b [[#4166](https://github.com/woodpecker-ci/woodpecker/pull/4166)]
+- chore(deps): update docker.io/woodpeckerci/plugin-surge-preview docker tag to v1.3.2 [[#4168](https://github.com/woodpecker-ci/woodpecker/pull/4168)]
 - chore(deps): update woodpeckerci/plugin-release docker tag to v0.2.1 [[#4175](https://github.com/woodpecker-ci/woodpecker/pull/4175)]
 - chore(deps): update woodpeckerci/plugin-ready-release-go docker tag to v2 [[#4182](https://github.com/woodpecker-ci/woodpecker/pull/4182)]
 - fix(deps): update github.com/muesli/termenv digest to 82936c5 [[#4165](https://github.com/woodpecker-ci/woodpecker/pull/4165)]
@@ -120,7 +133,6 @@
 - chore(deps): update pre-commit non-major [[#4173](https://github.com/woodpecker-ci/woodpecker/pull/4173)]
 - chore(deps): update docker.io/golang docker tag to v1.23 [[#4170](https://github.com/woodpecker-ci/woodpecker/pull/4170)]
 - chore(deps): update node.js to v22 [[#4180](https://github.com/woodpecker-ci/woodpecker/pull/4180)]
-- chore(deps): update dependency vite to v5.4.6 [security] [[#4163](https://github.com/woodpecker-ci/woodpecker/pull/4163)]
 - fix(deps): update golang-packages [[#4161](https://github.com/woodpecker-ci/woodpecker/pull/4161)]
 - Bump trivy (and lockfile deps) [[#4160](https://github.com/woodpecker-ci/woodpecker/pull/4160)]
 - chore(deps): update dependency @antfu/eslint-config to v3 [[#4095](https://github.com/woodpecker-ci/woodpecker/pull/4095)]
