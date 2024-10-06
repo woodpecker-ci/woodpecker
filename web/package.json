@@ -18,10 +18,10 @@
     "test": "vitest"
   },
   "dependencies": {
-    "@intlify/unplugin-vue-i18n": "^4.0.0",
+    "@intlify/unplugin-vue-i18n": "^5.0.0",
     "@kyvg/vue3-notification": "^3.2.1",
     "@mdi/js": "^7.4.47",
-    "@vueuse/core": "^10.11.1",
+    "@vueuse/core": "^11.0.0",
     "ansi_up": "^6.0.2",
     "dayjs": "^1.11.12",
     "fuse.js": "^7.0.0",
@@ -33,7 +33,7 @@
     "semver": "^7.6.3",
     "simple-icons": "^13.5.0",
     "vue": "^3.4.38",
-    "vue-i18n": "^9.13.1",
+    "vue-i18n": "^10.0.3",
     "vue-router": "^4.4.3"
   },
   "devDependencies": {
@@ -57,7 +57,7 @@
     "prettier": "^3.3.3",
     "replace-in-file": "^8.1.0",
     "tinycolor2": "^1.6.0",
-    "typescript": "5.5.4",
+    "typescript": "5.6.2",
     "vite": "^5.4.1",
     "vite-plugin-prismjs": "^0.0.11",
     "vite-plugin-windicss": "^1.9.3",
