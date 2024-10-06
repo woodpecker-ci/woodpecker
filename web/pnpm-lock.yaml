@@ -52,7 +52,7 @@ importers:
         version: 7.6.3
       simple-icons:
         specifier: ^13.5.0
-        version: 13.12.0
+        version: 13.13.0
       vue:
         specifier: ^3.4.38
         version: 3.5.11(typescript@5.6.2)
@@ -2350,8 +2350,8 @@ packages:
     resolution: {integrity: sha512-bzyZ1e88w9O1iNJbKnOlvYTrWPDl46O1bG0D3XInv+9tkPrxrN8jUUTiFlDkkmKWgn1M6CfIA13SuGqOa9Korw==}
     engines: {node: '>=14'}
 
-  simple-icons@13.12.0:
-    resolution: {integrity: sha512-UY6Zpet45M8ON24y0x3LsvNkh7a+zxzX4u8KulYXEbJnQ8J1mdel9Tl+7aKmpvKck0TYsU7K58RhfRwd2/7G1Q==}
+  simple-icons@13.13.0:
+    resolution: {integrity: sha512-lHit5FeMG4Uga9M81Hf6UKugVTC9xnuSYM+AqZ4UMIoaRnkraq2T1RvvgRGk2T1CjONim3NfwzLx26hbDhvZlg==}
     engines: {node: '>=0.12.18'}
 
   sisteransi@1.0.5:
@@ -5312,7 +5312,7 @@ snapshots:
 
   signal-exit@4.1.0: {}
 
-  simple-icons@13.12.0: {}
+  simple-icons@13.13.0: {}
 
   sisteransi@1.0.5: {}
 
