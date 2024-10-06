@@ -34,21 +34,6 @@ var (
 	pullRegexp = regexp.MustCompile(`\d+`)
 )
 
-func getSourceTargetBranches(refspec string) (string, string) {
-	var (
-		sourceBranch string
-		targetBranch string
-	)
-
-	branchParts := strings.Split(refspec, ":")
-	if len(branchParts) == 2 { //nolint:mnd
-		sourceBranch = branchParts[0]
-		targetBranch = branchParts[1]
-	}
-
-	return sourceBranch, targetBranch
-}
-
 // Environ returns the metadata as a map of environment variables.
 func (m *Metadata) Environ() map[string]string {
 	params := make(map[string]string, initialEnvMapSize)
@@ -100,14 +85,11 @@ func (m *Metadata) Environ() map[string]string {
 	// CI_STEP_STARTED will be set by agent
 
 	commit := pipeline.Commit
-	sourceBranch, targetBranch := getSourceTargetBranches(commit.Refspec)
 	setNonEmptyEnvVar(params, "CI_COMMIT_SHA", commit.Sha)
 	setNonEmptyEnvVar(params, "CI_COMMIT_REF", commit.Ref)
 	setNonEmptyEnvVar(params, "CI_COMMIT_REFSPEC", commit.Refspec)
 	setNonEmptyEnvVar(params, "CI_COMMIT_MESSAGE", commit.Message)
 	setNonEmptyEnvVar(params, "CI_COMMIT_BRANCH", commit.Branch)
-	setNonEmptyEnvVar(params, "CI_COMMIT_SOURCE_BRANCH", sourceBranch)
-	setNonEmptyEnvVar(params, "CI_COMMIT_TARGET_BRANCH", targetBranch)
 	setNonEmptyEnvVar(params, "CI_COMMIT_AUTHOR", commit.Author.Name)
 	setNonEmptyEnvVar(params, "CI_COMMIT_AUTHOR_EMAIL", commit.Author.Email)
 	setNonEmptyEnvVar(params, "CI_COMMIT_AUTHOR_AVATAR", commit.Author.Avatar)
@@ -118,6 +100,9 @@ func (m *Metadata) Environ() map[string]string {
 		setNonEmptyEnvVar(params, "CI_COMMIT_PRERELEASE", strconv.FormatBool(pipeline.Commit.IsPrerelease))
 	}
 	if pipeline.Event == EventPull || pipeline.Event == EventPullClosed {
+		sourceBranch, targetBranch := getSourceTargetBranches(commit.Refspec)
+		setNonEmptyEnvVar(params, "CI_COMMIT_SOURCE_BRANCH", sourceBranch)
+		setNonEmptyEnvVar(params, "CI_COMMIT_TARGET_BRANCH", targetBranch)
 		setNonEmptyEnvVar(params, "CI_COMMIT_PULL_REQUEST", pullRegexp.FindString(pipeline.Commit.Ref))
 		setNonEmptyEnvVar(params, "CI_COMMIT_PULL_REQUEST_LABELS", strings.Join(pipeline.Commit.PullRequestLabels, ","))
 	}
@@ -150,17 +135,19 @@ func (m *Metadata) Environ() map[string]string {
 	setNonEmptyEnvVar(params, "CI_PREV_PIPELINE_FINISHED", strconv.FormatInt(prevPipeline.Finished, 10))
 
 	prevCommit := prevPipeline.Commit
-	prevSourceBranch, prevTargetBranch := getSourceTargetBranches(prevCommit.Refspec)
 	setNonEmptyEnvVar(params, "CI_PREV_COMMIT_SHA", prevCommit.Sha)
 	setNonEmptyEnvVar(params, "CI_PREV_COMMIT_REF", prevCommit.Ref)
 	setNonEmptyEnvVar(params, "CI_PREV_COMMIT_REFSPEC", prevCommit.Refspec)
 	setNonEmptyEnvVar(params, "CI_PREV_COMMIT_MESSAGE", prevCommit.Message)
 	setNonEmptyEnvVar(params, "CI_PREV_COMMIT_BRANCH", prevCommit.Branch)
-	setNonEmptyEnvVar(params, "CI_PREV_COMMIT_SOURCE_BRANCH", prevSourceBranch)
-	setNonEmptyEnvVar(params, "CI_PREV_COMMIT_TARGET_BRANCH", prevTargetBranch)
 	setNonEmptyEnvVar(params, "CI_PREV_COMMIT_AUTHOR", prevCommit.Author.Name)
 	setNonEmptyEnvVar(params, "CI_PREV_COMMIT_AUTHOR_EMAIL", prevCommit.Author.Email)
 	setNonEmptyEnvVar(params, "CI_PREV_COMMIT_AUTHOR_AVATAR", prevCommit.Author.Avatar)
+	if prevPipeline.Event == EventPull || prevPipeline.Event == EventPullClosed {
+		prevSourceBranch, prevTargetBranch := getSourceTargetBranches(prevCommit.Refspec)
+		setNonEmptyEnvVar(params, "CI_PREV_COMMIT_SOURCE_BRANCH", prevSourceBranch)
+		setNonEmptyEnvVar(params, "CI_PREV_COMMIT_TARGET_BRANCH", prevTargetBranch)
+	}
 
 	return params
 }
@@ -171,6 +158,21 @@ func (m *Metadata) getPipelineWebURL(pipeline Pipeline, stepNumber int) string {
 	}
 
 	return fmt.Sprintf("%s/repos/%d/pipeline/%d/%d", m.Sys.URL, m.Repo.ID, pipeline.Number, stepNumber)
+}
+
+func getSourceTargetBranches(refspec string) (string, string) {
+	var (
+		sourceBranch string
+		targetBranch string
+	)
+
+	branchParts := strings.Split(refspec, ":")
+	if len(branchParts) == 2 { //nolint:mnd
+		sourceBranch = branchParts[0]
+		targetBranch = branchParts[1]
+	}
+
+	return sourceBranch, targetBranch
 }
 
 func setNonEmptyEnvVar(env map[string]string, key, value string) {
