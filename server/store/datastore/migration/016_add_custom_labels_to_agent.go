@@ -19,30 +19,23 @@ import (
 
 	"src.techknowlogick.com/xormigrate"
 	"xorm.io/xorm"
-
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
 type agentV016 struct {
-	ID     int64 `xorm:"pk autoincr 'id'"`
-	RepoID int64 `xorm:"INDEX 'repo_id'"`
+	ID           int64             `xorm:"pk autoincr 'id'"`
+	CustomLabels map[string]string `xorm:"JSON 'custom_labels'"`
 }
 
 func (agentV016) TableName() string {
 	return "agents"
 }
 
-var addRepoAgents = xormigrate.Migration{
-	ID: "add-repo-agents",
+var addCustomLabelsToAgent = xormigrate.Migration{
+	ID: "add-custom-labels-to-agent",
 	MigrateSession: func(sess *xorm.Session) (err error) {
 		if err := sess.Sync(new(agentV016)); err != nil {
 			return fmt.Errorf("sync models failed: %w", err)
 		}
-
-		// Update all existing agents to be global agents
-		_, err = sess.Cols("repo_id").Update(&model.Agent{
-			OrgID: model.IDNotSet,
-		})
-		return err
+		return nil
 	},
 }

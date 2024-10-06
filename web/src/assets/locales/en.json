@@ -319,11 +319,15 @@
           "desc": "The max amount of parallel pipelines executed by this agent.",
           "badge": "capacity"
         },
-        "repo": {
-          "badge": "repo"
+        "custom_labels": {
+          "custom_labels": "Custom Labels",
+          "desc": "The custom labels set by the agent admin on agent startup."
         },
         "org": {
           "badge": "org"
+        },
+        "repo": {
+          "badge": "repo"
         },
         "version": "Version",
         "last_contact": "Last contact",

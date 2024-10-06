@@ -24,6 +24,7 @@ import (
 	"github.com/stretchr/testify/mock"
 	"google.golang.org/grpc/metadata"
 
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 	mocks_store "go.woodpecker-ci.org/woodpecker/v2/server/store/mocks"
 )
@@ -52,15 +53,19 @@ func TestRegisterAgent(t *testing.T) {
 
 			store.On("AgentFind", int64(1337)).Once().Return(storeAgent, nil)
 			store.On("AgentUpdate", &updatedAgent).Once().Return(nil)
-			rpc := RPC{
+			grpc := RPC{
 				store: store,
 			}
 			ctx := metadata.NewIncomingContext(
 				context.Background(),
 				metadata.Pairs("hostname", "hostname", "agent_id", "1337"),
 			)
-			capacity := int32(2)
-			agentID, err := rpc.RegisterAgent(ctx, "platform", "backend", "version", capacity)
+			agentID, err := grpc.RegisterAgent(ctx, rpc.AgentInfo{
+				Version:  "version",
+				Platform: "platform",
+				Backend:  "backend",
+				Capacity: 2,
+			})
 			if !assert.NoError(t, err) {
 				return
 			}
@@ -92,15 +97,19 @@ func TestRegisterAgent(t *testing.T) {
 
 			store.On("AgentFind", int64(1337)).Once().Return(storeAgent, nil)
 			store.On("AgentUpdate", &updatedAgent).Once().Return(nil)
-			rpc := RPC{
+			grpc := RPC{
 				store: store,
 			}
 			ctx := metadata.NewIncomingContext(
 				context.Background(),
 				metadata.Pairs("hostname", "newHostname", "agent_id", "1337"),
 			)
-			capacity := int32(2)
-			agentID, err := rpc.RegisterAgent(ctx, "platform", "backend", "version", capacity)
+			agentID, err := grpc.RegisterAgent(ctx, rpc.AgentInfo{
+				Version:  "version",
+				Platform: "platform",
+				Backend:  "backend",
+				Capacity: 2,
+			})
 			if !assert.NoError(t, err) {
 				return
 			}
