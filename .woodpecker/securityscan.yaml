@@ -6,7 +6,7 @@ when:
       - renovate/*
 
 variables:
-  - &trivy_plugin docker.io/woodpeckerci/plugin-trivy:1.1.0
+  - &trivy_plugin docker.io/woodpeckerci/plugin-trivy:1.1.1
 
 steps:
   backend:
