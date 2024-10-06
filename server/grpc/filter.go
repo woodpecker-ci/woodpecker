@@ -38,7 +38,7 @@ func createFilterFunc(agentFilter rpc.Filter) queue.FilterFn {
 			switch {
 			// if agent label has a wildcard
 			case agentLabelValue == "*":
-				score += 1
+				score++
 			// if agent label has an exact match
 			case agentLabelValue == taskLabelValue:
 				score += 10
