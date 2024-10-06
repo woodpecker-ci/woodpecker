@@ -516,3 +516,129 @@ func TestShouldRun(t *testing.T) {
 	}
 	assert.True(t, task.ShouldRun(), "on failure, tasks should run on skipped deps, something failed higher up the chain")
 }
+
+func TestFifoWithScoring(t *testing.T) {
+	ctx := context.Background()
+	q := New(ctx)
+
+	// Create tasks with different labels
+	task1 := &model.Task{ID: "1", Labels: map[string]string{"org-id": "123", "platform": "linux"}}
+	task2 := &model.Task{ID: "2", Labels: map[string]string{"org-id": "456", "platform": "linux"}}
+	task3 := &model.Task{ID: "3", Labels: map[string]string{"org-id": "789", "platform": "windows"}}
+	task4 := &model.Task{ID: "4", Labels: map[string]string{"org-id": "123", "platform": "linux"}}
+	task5 := &model.Task{ID: "5", Labels: map[string]string{"org-id": "*", "platform": "linux"}}
+
+	assert.NoError(t, q.Push(ctx, task1))
+	assert.NoError(t, q.Push(ctx, task2))
+	assert.NoError(t, q.Push(ctx, task3))
+	assert.NoError(t, q.Push(ctx, task4))
+	assert.NoError(t, q.Push(ctx, task5))
+
+	// Create filter functions for different workers
+	// for task 1 and 4
+	filter1 := func(task *model.Task) (bool, int) {
+		if task.Labels["org-id"] == "123" {
+			return true, 20
+		}
+		if task.Labels["platform"] == "linux" {
+			return true, 10
+		}
+		return true, 1
+	}
+	// for task 2
+	filter2 := func(task *model.Task) (bool, int) {
+		if task.Labels["org-id"] == "456" {
+			return true, 20
+		}
+		if task.Labels["platform"] == "linux" {
+			return true, 10
+		}
+		return true, 1
+	}
+	// for task 3
+	filter3 := func(task *model.Task) (bool, int) {
+		if task.Labels["platform"] == "windows" {
+			return true, 20
+		}
+		return true, 1
+	}
+	// for task 5
+	filter5 := func(task *model.Task) (bool, int) {
+		if task.Labels["org-id"] == "*" {
+			return true, 15
+		}
+		return true, 1
+	}
+
+	// Start polling in separate goroutines
+	results := make(chan *model.Task, 5)
+	for i := 1; i <= 5; i++ {
+		go func(n int) {
+			var filter FilterFn
+			switch n {
+			case 1:
+				filter = filter1
+			case 2:
+				filter = filter2
+			case 3:
+				filter = filter3
+			case 4:
+				filter = filter1 // Another worker with the same filter as worker 1
+			case 5:
+				filter = filter5
+			}
+			task, err := q.Poll(ctx, int64(i), filter)
+			assert.NoError(t, err)
+			results <- task
+		}(i)
+	}
+
+	// Collect results
+	var receivedTasks []*model.Task
+	for i := 0; i < 5; i++ {
+		select {
+		case task := <-results:
+			receivedTasks = append(receivedTasks, task)
+		case <-time.After(time.Second):
+			t.Fatal("Timeout waiting for tasks")
+		}
+	}
+
+	// Assert that tasks were assigned to the most appropriate workers
+	assert.Len(t, receivedTasks, 5, "All tasks should be assigned")
+
+	// Check if tasks are assigned as expected
+	taskIDs := make([]string, 5)
+	for i, task := range receivedTasks {
+		taskIDs[i] = task.ID
+	}
+	assert.ElementsMatch(t, taskIDs, []string{"1", "2", "3", "4", "5"})
+
+	// Check if tasks with org-id "123" are assigned to workers with filter1
+	for _, task := range receivedTasks {
+		if task.ID == "1" || task.ID == "4" {
+			assert.True(t, task.AgentID == 1 || task.AgentID == 4, "Tasks with org-id 123 should be assigned to workers with filter1")
+		}
+	}
+
+	// Check if task with org-id "456" is assigned to worker with filter2
+	for _, task := range receivedTasks {
+		if task.ID == "2" {
+			assert.Equal(t, int64(2), task.AgentID, "Task with org-id 456 should be assigned to worker with filter2")
+		}
+	}
+
+	// Check if task with platform "windows" is assigned to worker with filter3
+	for _, task := range receivedTasks {
+		if task.ID == "3" {
+			assert.Equal(t, int64(3), task.AgentID, "Task with platform windows should be assigned to worker with filter3")
+		}
+	}
+
+	// Check if task with org-id "*" is assigned to worker with filter4
+	for _, task := range receivedTasks {
+		if task.ID == "5" {
+			assert.Equal(t, int64(5), task.AgentID, "Task with org-id * should be assigned to worker with filter4")
+		}
+	}
+}
