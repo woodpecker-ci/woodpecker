@@ -325,16 +325,24 @@ func (q *fifo) filterWaiting() {
 
 func (q *fifo) assignToWorker() (*list.Element, *worker) {
 	var next *list.Element
+	var bestWorker *worker
+	var bestScore int
+
 	for e := q.pending.Front(); e != nil; e = next {
 		next = e.Next()
 		task, _ := e.Value.(*model.Task)
 		log.Debug().Msgf("queue: trying to assign task: %v with deps %v", task.ID, task.Dependencies)
 
 		for w := range q.workers {
-			if w.filter(task) {
-				log.Debug().Msgf("queue: assigned task: %v with deps %v", task.ID, task.Dependencies)
-				return e, w
+			matched, score := w.filter(task)
+			if matched && score > bestScore {
+				bestWorker = w
+				bestScore = score
 			}
+		}
+		if bestWorker != nil {
+			log.Debug().Msgf("queue: assigned task: %v with deps %v to worker with score %d", task.ID, task.Dependencies, bestScore)
+			return e, bestWorker
 		}
 	}
 
