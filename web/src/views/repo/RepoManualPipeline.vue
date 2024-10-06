@@ -7,33 +7,16 @@
       </InputField>
       <InputField v-slot="{ id }" :label="$t('repo.manual_pipeline.variables.title')">
         <span class="text-sm text-wp-text-alt-100 mb-2">{{ $t('repo.manual_pipeline.variables.desc') }}</span>
-        <div class="flex flex-col gap-2">
-          <div v-for="(_, i) in payload.variables" :key="i" class="flex gap-4">
-            <TextField
-              :id="id"
-              v-model="payload.variables[i].name"
-              :placeholder="$t('repo.manual_pipeline.variables.name')"
-            />
-            <TextField
-              :id="id"
-              v-model="payload.variables[i].value"
-              :placeholder="$t('repo.manual_pipeline.variables.value')"
-            />
-            <div class="w-10 flex-shrink-0">
-              <Button
-                v-if="i !== payload.variables.length - 1"
-                color="red"
-                class="ml-auto"
-                :title="$t('repo.manual_pipeline.variables.delete')"
-                @click="deleteVar(i)"
-              >
-                <Icon name="remove" />
-              </Button>
-            </div>
-          </div>
-        </div>
+        <KeyValueEditor
+          :id="id"
+          v-model="payload.variables"
+          :key-placeholder="$t('repo.manual_pipeline.variables.name')"
+          :value-placeholder="$t('repo.manual_pipeline.variables.value')"
+          :delete-title="$t('repo.manual_pipeline.variables.delete')"
+          @update:is-valid="isVariablesValid = $event"
+        />
       </InputField>
-      <Button type="submit" :text="$t('repo.manual_pipeline.trigger')" />
+      <Button type="submit" :text="$t('repo.manual_pipeline.trigger')" :disabled="!isFormValid" />
     </form>
   </Panel>
   <div v-else class="flex justify-center text-wp-text-100">
@@ -44,15 +27,15 @@
 <script lang="ts" setup>
 import { useNotification } from '@kyvg/vue3-notification';
 import type { Ref } from 'vue';
-import { computed, onMounted, ref, inject as vueInject, watch } from 'vue';
+import { computed, onMounted, ref, inject as vueInject } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 
 import Button from '~/components/atomic/Button.vue';
 import Icon from '~/components/atomic/Icon.vue';
 import InputField from '~/components/form/InputField.vue';
+import KeyValueEditor from '~/components/form/KeyValueEditor.vue';
 import SelectField from '~/components/form/SelectField.vue';
-import TextField from '~/components/form/TextField.vue';
 import Panel from '~/components/layout/Panel.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { inject } from '~/compositions/useInjectProvide';
@@ -79,25 +62,21 @@ if (!repoPermissions) {
 
 const router = useRouter();
 const branches = ref<{ text: string; value: string }[]>([]);
-const payload = ref<{ branch: string; variables: { name: string; value: string }[] }>({
+const payload = ref<{ branch: string; variables: Record<string, string> }>({
   branch: 'main',
-  variables: [
-    {
-      name: '',
-      value: '',
-    },
-  ],
+  variables: {},
 });
 
-const pipelineOptions = computed(() => {
-  const variables = Object.fromEntries(
-    payload.value.variables.filter((e) => e.name !== '').map((item) => [item.name, item.value]),
-  );
-  return {
-    ...payload.value,
-    variables,
-  };
+const isVariablesValid = ref(true);
+
+const isFormValid = computed(() => {
+  return payload.value.branch !== '' && isVariablesValid.value;
 });
+
+const pipelineOptions = computed(() => ({
+  ...payload.value,
+  variables: payload.value.variables,
+}));
 
 const loading = ref(true);
 onMounted(async () => {
@@ -113,23 +92,6 @@ onMounted(async () => {
   }));
   loading.value = false;
 });
-
-watch(
-  payload,
-  () => {
-    if (payload.value.variables[payload.value.variables.length - 1].name !== '') {
-      payload.value.variables.push({
-        name: '',
-        value: '',
-      });
-    }
-  },
-  { deep: true },
-);
-
-function deleteVar(index: number) {
-  payload.value.variables.splice(index, 1);
-}
 
 async function triggerManualPipeline() {
   loading.value = true;
