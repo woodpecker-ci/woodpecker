@@ -13,9 +13,10 @@
           :key-placeholder="$t('repo.manual_pipeline.variables.name')"
           :value-placeholder="$t('repo.manual_pipeline.variables.value')"
           :delete-title="$t('repo.manual_pipeline.variables.delete')"
+          @update:is-valid="isVariablesValid = $event"
         />
       </InputField>
-      <Button type="submit" :text="$t('repo.manual_pipeline.trigger')" />
+      <Button type="submit" :text="$t('repo.manual_pipeline.trigger')" :disabled="!isFormValid" />
     </form>
   </Panel>
   <div v-else class="flex justify-center text-wp-text-100">
@@ -64,6 +65,12 @@ const branches = ref<{ text: string; value: string }[]>([]);
 const payload = ref<{ branch: string; variables: Record<string, string> }>({
   branch: 'main',
   variables: {},
+});
+
+const isVariablesValid = ref(true);
+
+const isFormValid = computed(() => {
+  return payload.value.branch !== '' && isVariablesValid.value;
 });
 
 const pipelineOptions = computed(() => ({
