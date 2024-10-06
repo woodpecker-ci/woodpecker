@@ -442,22 +442,10 @@ func DeleteOrgAgent(c *gin.Context) {
 func PostRepoAgent(c *gin.Context) {
 	_store := store.FromContext(c)
 	user := session.User(c)
-
-	repoID, err := strconv.ParseInt(c.Param("repo_id"), 10, 64)
-	if err != nil {
-		c.String(http.StatusBadRequest, "Invalid repository ID")
-		return
-	}
-
-	repo, err := _store.GetRepo(repoID)
-	if err != nil {
-		handleDBError(c, err)
-		return
-	}
+	repo := session.Repo(c)
 
 	in := new(model.Agent)
-	err = c.Bind(in)
-	if err != nil {
+	if err := c.Bind(in); err != nil {
 		c.String(http.StatusBadRequest, err.Error())
 		return
 	}
@@ -467,11 +455,11 @@ func PostRepoAgent(c *gin.Context) {
 		NoSchedule: in.NoSchedule,
 		OwnerID:    user.ID,
 		OrgID:      repo.OrgID,
-		RepoID:     repoID,
+		RepoID:     repo.ID,
 		Token:      model.GenerateNewAgentToken(),
 	}
 
-	if err = _store.AgentCreate(agent); err != nil {
+	if err := _store.AgentCreate(agent); err != nil {
 		c.String(http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -492,14 +480,9 @@ func PostRepoAgent(c *gin.Context) {
 //	@Param		perPage			query	int		false	"for response pagination, max items per page"	default(50)
 func GetRepoAgents(c *gin.Context) {
 	_store := store.FromContext(c)
+	repo := session.Repo(c)
 
-	repoID, err := strconv.ParseInt(c.Param("repo_id"), 10, 64)
-	if err != nil {
-		c.String(http.StatusBadRequest, "Invalid repository ID")
-		return
-	}
-
-	agents, err := _store.AgentListForRepo(repoID, session.Pagination(c))
+	agents, err := _store.AgentListForRepo(repo.ID, session.Pagination(c))
 	if err != nil {
 		c.String(http.StatusInternalServerError, "Error getting agent list. %s", err)
 		return
@@ -521,12 +504,7 @@ func GetRepoAgents(c *gin.Context) {
 //	@Param		agent			body	Agent	true	"the agent's updated data"
 func PatchRepoAgent(c *gin.Context) {
 	_store := store.FromContext(c)
-
-	repoID, err := strconv.ParseInt(c.Param("repo_id"), 10, 64)
-	if err != nil {
-		c.String(http.StatusBadRequest, "Invalid repository ID")
-		return
-	}
+	repo := session.Repo(c)
 
 	agentID, err := strconv.ParseInt(c.Param("agent_id"), 10, 64)
 	if err != nil {
@@ -540,7 +518,7 @@ func PatchRepoAgent(c *gin.Context) {
 		return
 	}
 
-	if agent.RepoID != repoID {
+	if agent.RepoID != repo.ID {
 		c.String(http.StatusBadRequest, "Agent does not belong to this repository")
 		return
 	}
@@ -578,12 +556,7 @@ func PatchRepoAgent(c *gin.Context) {
 //	@Param		agent_id		path	int		true	"the agent's id"
 func DeleteRepoAgent(c *gin.Context) {
 	_store := store.FromContext(c)
-
-	repoID, err := strconv.ParseInt(c.Param("repo_id"), 10, 64)
-	if err != nil {
-		c.String(http.StatusBadRequest, "Invalid repository ID")
-		return
-	}
+	repo := session.Repo(c)
 
 	agentID, err := strconv.ParseInt(c.Param("agent_id"), 10, 64)
 	if err != nil {
@@ -597,7 +570,7 @@ func DeleteRepoAgent(c *gin.Context) {
 		return
 	}
 
-	if agent.RepoID != repoID {
+	if agent.RepoID != repo.ID {
 		c.String(http.StatusBadRequest, "Agent does not belong to this repository")
 		return
 	}
