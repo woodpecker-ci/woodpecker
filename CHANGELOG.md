@@ -46,31 +46,9 @@
 - Replay pipeline using `cli exec` by downloading metadata [[#4103](https://github.com/woodpecker-ci/woodpecker/pull/4103)]
 - Update clone plugin to support sha256 [[#4136](https://github.com/woodpecker-ci/woodpecker/pull/4136)]
 
-### 📚 Documentation
-
-- chore(deps): lock file maintenance [[#4186](https://github.com/woodpecker-ci/woodpecker/pull/4186)]
-- chore(deps): update dependency concurrently to v9 [[#4176](https://github.com/woodpecker-ci/woodpecker/pull/4176)]
-- chore(deps): update docs npm deps non-major [[#4164](https://github.com/woodpecker-ci/woodpecker/pull/4164)]
-- Update image filter error message [[#4143](https://github.com/woodpecker-ci/woodpecker/pull/4143)]
-- Docs: reference to built-in docker compose and remove deprecated version from compose examples [[#4123](https://github.com/woodpecker-ci/woodpecker/pull/4123)]
-- directory key is allowed for services [[#4127](https://github.com/woodpecker-ci/woodpecker/pull/4127)]
-- [docs] Removes dot prefix from pipeline configuration filenames [[#4105](https://github.com/woodpecker-ci/woodpecker/pull/4105)]
-- Use kaniko plugin in docs as example [[#4072](https://github.com/woodpecker-ci/woodpecker/pull/4072)]
-- Add some posts and videos [[#4070](https://github.com/woodpecker-ci/woodpecker/pull/4070)]
-- Move event type descriptions from Terminology to Workflow Syntax [[#4062](https://github.com/woodpecker-ci/woodpecker/pull/4062)]
-- Add community posts from discussions [[#4058](https://github.com/woodpecker-ci/woodpecker/pull/4058)]
-- Add a pull request template with some basic guidelines [[#4055](https://github.com/woodpecker-ci/woodpecker/pull/4055)]
-- Add examples of CI environment variable values [[#4009](https://github.com/woodpecker-ci/woodpecker/pull/4009)]
-- Fix inline author warning [[#4040](https://github.com/woodpecker-ci/woodpecker/pull/4040)]
-- Updated Secrets image filter docs [[#4028](https://github.com/woodpecker-ci/woodpecker/pull/4028)]
-- Update dependency marked to v14 [[#4036](https://github.com/woodpecker-ci/woodpecker/pull/4036)]
-- Update docs npm deps non-major [[#4033](https://github.com/woodpecker-ci/woodpecker/pull/4033)]
-- Overhaul README [[#3995](https://github.com/woodpecker-ci/woodpecker/pull/3995)]
-- fix(deps): update docs npm deps non-major [[#3990](https://github.com/woodpecker-ci/woodpecker/pull/3990)]
-- Add spellchecking for docs [[#3787](https://github.com/woodpecker-ci/woodpecker/pull/3787)]
-
 ### 📈 Enhancement
 
+- Highlight invalid entries in manual pipeline trigger [[#4153](https://github.com/woodpecker-ci/woodpecker/pull/4153)]
 - Print agent labels in debug mode [[#4155](https://github.com/woodpecker-ci/woodpecker/pull/4155)]
 - Implement registries for Kubernetes backend [[#4092](https://github.com/woodpecker-ci/woodpecker/pull/4092)]
 - Correct cli exec flags and remove ineffective ones [[#4129](https://github.com/woodpecker-ci/woodpecker/pull/4129)]
@@ -94,6 +72,29 @@
 - Add PULLREQUEST_DRONE_PULL_REQUEST drone env [[#3939](https://github.com/woodpecker-ci/woodpecker/pull/3939)]
 - Make agent gRPC errors distinguishable [[#3936](https://github.com/woodpecker-ci/woodpecker/pull/3936)]
 
+### 📚 Documentation
+
+- chore(deps): lock file maintenance [[#4186](https://github.com/woodpecker-ci/woodpecker/pull/4186)]
+- chore(deps): update dependency concurrently to v9 [[#4176](https://github.com/woodpecker-ci/woodpecker/pull/4176)]
+- chore(deps): update docs npm deps non-major [[#4164](https://github.com/woodpecker-ci/woodpecker/pull/4164)]
+- Update image filter error message [[#4143](https://github.com/woodpecker-ci/woodpecker/pull/4143)]
+- Docs: reference to built-in docker compose and remove deprecated version from compose examples [[#4123](https://github.com/woodpecker-ci/woodpecker/pull/4123)]
+- directory key is allowed for services [[#4127](https://github.com/woodpecker-ci/woodpecker/pull/4127)]
+- [docs] Removes dot prefix from pipeline configuration filenames [[#4105](https://github.com/woodpecker-ci/woodpecker/pull/4105)]
+- Use kaniko plugin in docs as example [[#4072](https://github.com/woodpecker-ci/woodpecker/pull/4072)]
+- Add some posts and videos [[#4070](https://github.com/woodpecker-ci/woodpecker/pull/4070)]
+- Move event type descriptions from Terminology to Workflow Syntax [[#4062](https://github.com/woodpecker-ci/woodpecker/pull/4062)]
+- Add community posts from discussions [[#4058](https://github.com/woodpecker-ci/woodpecker/pull/4058)]
+- Add a pull request template with some basic guidelines [[#4055](https://github.com/woodpecker-ci/woodpecker/pull/4055)]
+- Add examples of CI environment variable values [[#4009](https://github.com/woodpecker-ci/woodpecker/pull/4009)]
+- Fix inline author warning [[#4040](https://github.com/woodpecker-ci/woodpecker/pull/4040)]
+- Updated Secrets image filter docs [[#4028](https://github.com/woodpecker-ci/woodpecker/pull/4028)]
+- Update dependency marked to v14 [[#4036](https://github.com/woodpecker-ci/woodpecker/pull/4036)]
+- Update docs npm deps non-major [[#4033](https://github.com/woodpecker-ci/woodpecker/pull/4033)]
+- Overhaul README [[#3995](https://github.com/woodpecker-ci/woodpecker/pull/3995)]
+- fix(deps): update docs npm deps non-major [[#3990](https://github.com/woodpecker-ci/woodpecker/pull/3990)]
+- Add spellchecking for docs [[#3787](https://github.com/woodpecker-ci/woodpecker/pull/3787)]
+
 ### 🐛 Bug Fixes
 
 - Ensure cli exec has by default not the same prefix [[#4132](https://github.com/woodpecker-ci/woodpecker/pull/4132)]
@@ -116,6 +117,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update dependency vue-i18n to v10.0.4 [[#4200](https://github.com/woodpecker-ci/woodpecker/pull/4200)]
 - chore(deps): update pre-commit hook pre-commit/pre-commit-hooks to v5 [[#4192](https://github.com/woodpecker-ci/woodpecker/pull/4192)]
 - fix(deps): update dependency simple-icons to v13.13.0 [[#4196](https://github.com/woodpecker-ci/woodpecker/pull/4196)]
 - chore(deps): update web npm deps non-major [[#4174](https://github.com/woodpecker-ci/woodpecker/pull/4174)]
