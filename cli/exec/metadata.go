@@ -83,7 +83,9 @@ func metadataFromContext(_ context.Context, c *cli.Command, axis matrix.Axis, w 
 	metadataFileAndOverrideOrDefault(c, "repo-clone-url", func(s string) { m.Repo.CloneURL = s }, c.String)
 	metadataFileAndOverrideOrDefault(c, "repo-clone-ssh-url", func(s string) { m.Repo.CloneSSHURL = s }, c.String)
 	metadataFileAndOverrideOrDefault(c, "repo-private", func(b bool) { m.Repo.Private = b }, c.Bool)
-	metadataFileAndOverrideOrDefault(c, "repo-trusted", func(b bool) { m.Repo.Trusted = b }, c.Bool)
+	metadataFileAndOverrideOrDefault(c, "repo-trusted-network", func(b bool) { m.Repo.Trusted.Network = b }, c.Bool)
+	metadataFileAndOverrideOrDefault(c, "repo-trusted-security", func(b bool) { m.Repo.Trusted.Security = b }, c.Bool)
+	metadataFileAndOverrideOrDefault(c, "repo-trusted-volumes", func(b bool) { m.Repo.Trusted.Volumes = b }, c.Bool)
 
 	// Current Pipeline
 	metadataFileAndOverrideOrDefault(c, "pipeline-number", func(i int64) { m.Curr.Number = i }, c.Int)

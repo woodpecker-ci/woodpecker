@@ -98,7 +98,18 @@
         },
         "trusted": {
           "trusted": "Trusted",
-          "desc": "Underlying pipeline containers get access to escalated capabilities (like mounting volumes)."
+          "network": {
+            "network": "Network",
+            "desc": "Underlying pipeline containers get access to network privileges like changing DNS."
+          },
+          "volumes": {
+            "volumes": "Volumes",
+            "desc": "Underlying pipeline containers get access to volume privileges."
+          },
+          "security": {
+            "security": "Security",
+            "desc": "Underlying pipeline containers get access to security privileges."
+          }
         },
         "visibility": {
           "visibility": "Project visibility",
