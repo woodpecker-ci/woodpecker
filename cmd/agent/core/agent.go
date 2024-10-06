@@ -254,6 +254,8 @@ func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 	// ... and let it overwrite by custom ones
 	maps.Copy(labels, customLabels)
 
+	log.Debug().Any("labels", labels).Msgf("agent configured with labels")
+
 	filter := rpc.Filter{
 		Labels: labels,
 	}
