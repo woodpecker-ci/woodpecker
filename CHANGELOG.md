@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-10-05
+## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-10-06
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -116,6 +116,8 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update pre-commit hook pre-commit/pre-commit-hooks to v5 [[#4192](https://github.com/woodpecker-ci/woodpecker/pull/4192)]
+- fix(deps): update dependency simple-icons to v13.13.0 [[#4196](https://github.com/woodpecker-ci/woodpecker/pull/4196)]
 - chore(deps): update web npm deps non-major [[#4174](https://github.com/woodpecker-ci/woodpecker/pull/4174)]
 - chore(deps): update docker.io/postgres docker tag to v17 [[#4179](https://github.com/woodpecker-ci/woodpecker/pull/4179)]
 - fix(deps): update dependency @intlify/unplugin-vue-i18n to v5 [[#4183](https://github.com/woodpecker-ci/woodpecker/pull/4183)]
