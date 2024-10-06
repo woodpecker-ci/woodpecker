@@ -178,5 +178,7 @@ func getSourceTargetBranches(refspec string) (string, string) {
 func setNonEmptyEnvVar(env map[string]string, key, value string) {
 	if len(value) > 0 {
 		env[key] = value
+	} else {
+		log.Trace().Str("variable", key).Msg("env var is filtered as it's empty")
 	}
 }
