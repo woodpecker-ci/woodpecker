@@ -76,6 +76,17 @@ func TestCreateFilterFunc(t *testing.T) {
 			wantScore:   0,
 		},
 		{
+			name: "missing lable",
+			agentFilter: rpc.Filter{
+				Labels: map[string]string{"platform": "linux"},
+			},
+			task: &model.Task{
+				Labels: map[string]string{"needed": "some"},
+			},
+			wantMatched: false,
+			wantScore:   0,
+		},
+		{
 			name: "Empty task labels",
 			agentFilter: rpc.Filter{
 				Labels: map[string]string{"org-id": "123", "platform": "linux"},
@@ -92,7 +103,7 @@ func TestCreateFilterFunc(t *testing.T) {
 				Labels: map[string]string{"org-id": "123", "platform": "linux", "extra": "value"},
 			},
 			task: &model.Task{
-				Labels: map[string]string{"org-id": "123", "platform": "linux"},
+				Labels: map[string]string{"org-id": "123", "platform": "linux", "empty": ""},
 			},
 			wantMatched: true,
 			wantScore:   20,
