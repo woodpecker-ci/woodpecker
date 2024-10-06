@@ -34,6 +34,15 @@
       </InputField>
 
       <InputField
+        v-if="agent.custom_labels && Object.keys(agent.custom_labels).length > 0"
+        v-slot="{ id }"
+        :label="$t('admin.settings.agents.custom_labels.custom_labels')"
+      >
+        <span class="text-wp-text-alt-100">{{ $t('admin.settings.agents.custom_labels.desc') }}</span>
+        <TextField :id="id" :model-value="formatCustomLabels(agent.custom_labels)" disabled />
+      </InputField>
+
+      <InputField
         v-slot="{ id }"
         :label="$t('admin.settings.agents.capacity.capacity')"
         docs-url="docs/next/administration/agent-config#woodpecker_max_workflows"
@@ -100,5 +109,11 @@ const agent = computed({
 
 function updateAgent(newValues: Partial<Agent>) {
   emit('update:modelValue', { ...agent.value, ...newValues });
+}
+
+function formatCustomLabels(labels: Record<string, string>): string {
+  return Object.entries(labels)
+    .map(([key, value]) => `${key}=${value}`)
+    .join(', ');
 }
 </script>
