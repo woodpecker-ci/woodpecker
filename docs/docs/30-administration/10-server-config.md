@@ -60,9 +60,8 @@ By default non instance admins can create new agents for their user-/org-repos t
 If an instance admin don't want this feature enabled, they can disable the registration of new one.
 
 :::note
-You should enable it if you have, for example,
-global secrets and don't trust your users to create a rogue agent and pipeline for secret extraction,
-to harden woodpecker.
+You should set this option if you have, for example,
+global secrets and don't trust your users to create a rogue agent and pipeline for secret extraction.
 :::
 
 ```env
