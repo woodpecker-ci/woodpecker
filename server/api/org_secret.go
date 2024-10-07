@@ -16,7 +16,6 @@ package api
 
 import (
 	"net/http"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 
@@ -36,16 +35,11 @@ import (
 //	@Param		org_id			path	string	true	"the org's id"
 //	@Param		secret			path	string	true	"the secret's name"
 func GetOrgSecret(c *gin.Context) {
+	org := session.Org(c)
 	name := c.Param("secret")
 
-	orgID, err := strconv.ParseInt(c.Param("org_id"), 10, 64)
-	if err != nil {
-		c.String(http.StatusBadRequest, "Error parsing org id. %s", err)
-		return
-	}
-
 	secretService := server.Config.Services.Manager.SecretService()
-	secret, err := secretService.OrgSecretFind(orgID, name)
+	secret, err := secretService.OrgSecretFind(org.ID, name)
 	if err != nil {
 		handleDBError(c, err)
 		return
@@ -65,16 +59,12 @@ func GetOrgSecret(c *gin.Context) {
 //	@Param		page			query	int		false	"for response pagination, page offset number"	default(1)
 //	@Param		perPage			query	int		false	"for response pagination, max items per page"	default(50)
 func GetOrgSecretList(c *gin.Context) {
-	orgID, err := strconv.ParseInt(c.Param("org_id"), 10, 64)
-	if err != nil {
-		c.String(http.StatusBadRequest, "Error parsing org id. %s", err)
-		return
-	}
+	org := session.Org(c)
 
 	secretService := server.Config.Services.Manager.SecretService()
-	list, err := secretService.OrgSecretList(orgID, session.Pagination(c))
+	list, err := secretService.OrgSecretList(org.ID, session.Pagination(c))
 	if err != nil {
-		c.String(http.StatusInternalServerError, "Error getting secret list for %q. %s", orgID, err)
+		c.String(http.StatusInternalServerError, "Error getting secret list for %q. %s", org.ID, err)
 		return
 	}
 	// copy the secret detail to remove the sensitive
@@ -96,32 +86,28 @@ func GetOrgSecretList(c *gin.Context) {
 //	@Param		org_id			path	string	true	"the org's id"
 //	@Param		secretData		body	Secret	true	"the new secret"
 func PostOrgSecret(c *gin.Context) {
-	orgID, err := strconv.ParseInt(c.Param("org_id"), 10, 64)
-	if err != nil {
-		c.String(http.StatusBadRequest, "Error parsing org id. %s", err)
-		return
-	}
+	org := session.Org(c)
 
 	in := new(model.Secret)
 	if err := c.Bind(in); err != nil {
-		c.String(http.StatusBadRequest, "Error parsing org %q secret. %s", orgID, err)
+		c.String(http.StatusBadRequest, "Error parsing org %q secret. %s", org.ID, err)
 		return
 	}
 	secret := &model.Secret{
-		OrgID:  orgID,
+		OrgID:  org.ID,
 		Name:   in.Name,
 		Value:  in.Value,
 		Events: in.Events,
 		Images: in.Images,
 	}
 	if err := secret.Validate(); err != nil {
-		c.String(http.StatusUnprocessableEntity, "Error inserting org %q secret. %s", orgID, err)
+		c.String(http.StatusUnprocessableEntity, "Error inserting org %q secret. %s", org.ID, err)
 		return
 	}
 
 	secretService := server.Config.Services.Manager.SecretService()
-	if err := secretService.OrgSecretCreate(orgID, secret); err != nil {
-		c.String(http.StatusInternalServerError, "Error inserting org %q secret %q. %s", orgID, in.Name, err)
+	if err := secretService.OrgSecretCreate(org.ID, secret); err != nil {
+		c.String(http.StatusInternalServerError, "Error inserting org %q secret %q. %s", org.ID, in.Name, err)
 		return
 	}
 	c.JSON(http.StatusOK, secret.Copy())
@@ -139,22 +125,17 @@ func PostOrgSecret(c *gin.Context) {
 //	@Param		secret			path	string	true	"the secret's name"
 //	@Param		secretData		body	Secret	true	"the update secret data"
 func PatchOrgSecret(c *gin.Context) {
+	org := session.Org(c)
 	name := c.Param("secret")
-	orgID, err := strconv.ParseInt(c.Param("org_id"), 10, 64)
-	if err != nil {
-		c.String(http.StatusBadRequest, "Error parsing org id. %s", err)
-		return
-	}
 
 	in := new(model.Secret)
-	err = c.Bind(in)
-	if err != nil {
+	if err := c.Bind(in); err != nil {
 		c.String(http.StatusBadRequest, "Error parsing secret. %s", err)
 		return
 	}
 
 	secretService := server.Config.Services.Manager.SecretService()
-	secret, err := secretService.OrgSecretFind(orgID, name)
+	secret, err := secretService.OrgSecretFind(org.ID, name)
 	if err != nil {
 		handleDBError(c, err)
 		return
@@ -170,12 +151,12 @@ func PatchOrgSecret(c *gin.Context) {
 	}
 
 	if err := secret.Validate(); err != nil {
-		c.String(http.StatusUnprocessableEntity, "Error updating org %q secret. %s", orgID, err)
+		c.String(http.StatusUnprocessableEntity, "Error updating org %q secret. %s", org.ID, err)
 		return
 	}
 
-	if err := secretService.OrgSecretUpdate(orgID, secret); err != nil {
-		c.String(http.StatusInternalServerError, "Error updating org %q secret %q. %s", orgID, in.Name, err)
+	if err := secretService.OrgSecretUpdate(org.ID, secret); err != nil {
+		c.String(http.StatusInternalServerError, "Error updating org %q secret %q. %s", org.ID, in.Name, err)
 		return
 	}
 	c.JSON(http.StatusOK, secret.Copy())
@@ -192,15 +173,11 @@ func PatchOrgSecret(c *gin.Context) {
 //	@Param		org_id			path	string	true	"the org's id"
 //	@Param		secret			path	string	true	"the secret's name"
 func DeleteOrgSecret(c *gin.Context) {
+	org := session.Org(c)
 	name := c.Param("secret")
-	orgID, err := strconv.ParseInt(c.Param("org_id"), 10, 64)
-	if err != nil {
-		c.String(http.StatusBadRequest, "Error parsing org id. %s", err)
-		return
-	}
 
 	secretService := server.Config.Services.Manager.SecretService()
-	if err := secretService.OrgSecretDelete(orgID, name); err != nil {
+	if err := secretService.OrgSecretDelete(org.ID, name); err != nil {
 		handleDBError(c, err)
 		return
 	}

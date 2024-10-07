@@ -52,6 +52,7 @@ func apiRoutes(e *gin.RouterGroup) {
 			orgs.GET("/lookup/*org_full_name", api.LookupOrg)
 			orgBase := orgs.Group("/:org_id")
 			{
+				orgBase.Use(session.MustOrg())
 				orgBase.GET("/permissions", api.GetOrgPermissions)
 
 				org := orgBase.Group("")
