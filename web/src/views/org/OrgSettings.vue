@@ -19,7 +19,7 @@
       <OrgRegistriesTab />
     </Tab>
 
-    <Tab v-if="useConfig().orgAgents" id="agents" :title="$t('admin.settings.agents.agents')">
+    <Tab v-if="useConfig().userRegisteredAgents" id="agents" :title="$t('admin.settings.agents.agents')">
       <OrgAgentsTab />
     </Tab>
   </Scaffold>
