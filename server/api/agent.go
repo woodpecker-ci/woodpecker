@@ -252,6 +252,7 @@ func PostOrgAgent(c *gin.Context) {
 
 	if !user.Admin && server.Config.Agent.DisableNonAdminAgents {
 		c.String(http.StatusForbidden, "creation of user-/org-agents was disabled by the woodpecker admin")
+		return
 	}
 
 	orgID, err := strconv.ParseInt(c.Param("org_id"), 10, 64)
