@@ -54,6 +54,15 @@ Use the `WOODPECKER_REPO_OWNERS` variable to filter which GitHub user's repos sh
 WOODPECKER_REPO_OWNERS=my_company,my_company_oss_github_user
 ```
 
+## Disallow normal users to create agents
+
+By default non instance admins can create new agents for there user-/org-repos they have admin access to.
+If an instance admin don't want this feature enabled, he can disable the registration of new one.
+
+```env
+WOODPECKER_DISABLE_USER_AGENT_REGISTRATION=true
+```
+
 ## Global registry setting
 
 If you want to make available a specific private registry to all pipelines, use the `WOODPECKER_DOCKER_CONFIG` server configuration.

@@ -160,6 +160,9 @@ func setupEvilGlobals(ctx context.Context, c *cli.Command, s store.Store) error 
 		return fmt.Errorf("could not setup log store: %w", err)
 	}
 
+	// agents
+	server.Config.Agent.DisableNonAdminAgents = c.Bool("disable-user-agent-registration")
+
 	// authentication
 	server.Config.Pipeline.AuthenticatePublicRepos = c.Bool("authenticate-public-repos")
 
