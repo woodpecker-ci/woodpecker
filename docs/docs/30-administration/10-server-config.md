@@ -56,8 +56,14 @@ WOODPECKER_REPO_OWNERS=my_company,my_company_oss_github_user
 
 ## Disallow normal users to create agents
 
-By default non instance admins can create new agents for there user-/org-repos they have admin access to.
-If an instance admin don't want this feature enabled, he can disable the registration of new one.
+By default non instance admins can create new agents for their user-/org-repos they have admin access to.
+If an instance admin don't want this feature enabled, they can disable the registration of new one.
+
+:::note
+You should enable it if you have, for example,
+global secrets and don't trust your users to create a rogue agent and pipeline for secret extraction,
+to harden woodpecker.
+:::
 
 ```env
 WOODPECKER_DISABLE_USER_AGENT_REGISTRATION=true
