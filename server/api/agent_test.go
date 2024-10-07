@@ -246,12 +246,12 @@ func TestDeleteAgent(t *testing.T) {
 func TestPostOrgAgent(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
-	t.Run("should fail for non-admin user when DisableNonAdminAgents is true", func(t *testing.T) {
+	t.Run("should fail for non-admin user when DisableNonAdminAgentRegistration is true", func(t *testing.T) {
 		// Set up the config
-		originalConfig := server.Config.Agent.DisableNonAdminAgents
-		server.Config.Agent.DisableNonAdminAgents = true
+		originalConfig := server.Config.Agent.DisableNonAdminAgentRegistration
+		server.Config.Agent.DisableNonAdminAgentRegistration = true
 		defer func() {
-			server.Config.Agent.DisableNonAdminAgents = originalConfig
+			server.Config.Agent.DisableNonAdminAgentRegistration = originalConfig
 		}()
 
 		mockStore := store_mocks.NewStore(t)
@@ -280,12 +280,12 @@ func TestPostOrgAgent(t *testing.T) {
 		mockStore.AssertNotCalled(t, "AgentCreate")
 	})
 
-	t.Run("should succeed for admin user when DisableNonAdminAgents is true", func(t *testing.T) {
+	t.Run("should succeed for admin user when DisableNonAdminAgentRegistration is true", func(t *testing.T) {
 		// Set up the config
-		originalConfig := server.Config.Agent.DisableNonAdminAgents
-		server.Config.Agent.DisableNonAdminAgents = true
+		originalConfig := server.Config.Agent.DisableNonAdminAgentRegistration
+		server.Config.Agent.DisableNonAdminAgentRegistration = true
 		defer func() {
-			server.Config.Agent.DisableNonAdminAgents = originalConfig
+			server.Config.Agent.DisableNonAdminAgentRegistration = originalConfig
 		}()
 
 		mockStore := store_mocks.NewStore(t)
@@ -314,12 +314,12 @@ func TestPostOrgAgent(t *testing.T) {
 		mockStore.AssertCalled(t, "AgentCreate", mock.AnythingOfType("*model.Agent"))
 	})
 
-	t.Run("should succeed for non-admin user when DisableNonAdminAgents is false", func(t *testing.T) {
+	t.Run("should succeed for non-admin user when DisableNonAdminAgentRegistration is false", func(t *testing.T) {
 		// Set up the config
-		originalConfig := server.Config.Agent.DisableNonAdminAgents
-		server.Config.Agent.DisableNonAdminAgents = false
+		originalConfig := server.Config.Agent.DisableNonAdminAgentRegistration
+		server.Config.Agent.DisableNonAdminAgentRegistration = false
 		defer func() {
-			server.Config.Agent.DisableNonAdminAgents = originalConfig
+			server.Config.Agent.DisableNonAdminAgentRegistration = originalConfig
 		}()
 
 		mockStore := store_mocks.NewStore(t)

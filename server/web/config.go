@@ -46,7 +46,7 @@ func Config(c *gin.Context) {
 		"skip_version_check":     server.Config.WebUI.SkipVersionCheck,
 		"root_path":              server.Config.Server.RootPath,
 		"enable_swagger":         server.Config.WebUI.EnableSwagger,
-		"user_registered_agents": !server.Config.Agent.DisableNonAdminAgents,
+		"user_registered_agents": !server.Config.Agent.DisableNonAdminAgentRegistration,
 	}
 
 	// default func map with json parser.

@@ -55,7 +55,7 @@ var Config = struct {
 		CustomJsFile        string
 	}
 	Agent struct {
-		DisableNonAdminAgents bool
+		DisableNonAdminAgentRegistration bool
 	}
 	WebUI struct {
 		EnableSwagger    bool

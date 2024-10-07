@@ -250,7 +250,7 @@ func PostOrgAgent(c *gin.Context) {
 	_store := store.FromContext(c)
 	user := session.User(c)
 
-	if !user.Admin && server.Config.Agent.DisableNonAdminAgents {
+	if !user.Admin && server.Config.Agent.DisableNonAdminAgentRegistration {
 		c.String(http.StatusForbidden, "creation of user-/org-agents was disabled by the woodpecker admin")
 		return
 	}
