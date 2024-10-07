@@ -64,7 +64,7 @@ You should set this option if you have, for example,
 global secrets and don't trust your users to create a rogue agent and pipeline for secret extraction.
 :::
 
-```env
+```ini
 WOODPECKER_DISABLE_USER_AGENT_REGISTRATION=true
 ```
 
@@ -417,6 +417,12 @@ A shared secret used by server and agents to authenticate communication. A secre
 > Default: empty
 
 Read the value for `WOODPECKER_AGENT_SECRET` from the specified filepath
+
+### `WOODPECKER_DISABLE_USER_AGENT_REGISTRATION`
+
+> Default: false
+
+[Read about "Disallow normal users to create agents"](./10-server-config.md#disallow-normal-users-to-create-agents)
 
 ### `WOODPECKER_KEEPALIVE_MIN_TIME`
 
