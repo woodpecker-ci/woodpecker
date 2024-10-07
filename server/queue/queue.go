@@ -69,6 +69,8 @@ func (t *InfoT) String() string {
 // the Task is skipped and not returned to the subscriber.
 type FilterFn func(*model.Task) bool
 
+//go:generate mockery --name Queue --output mocks --case underscore --note "+build test"
+
 // Queue defines a task queue for scheduling tasks among
 // a pool of workers.
 type Queue interface {
