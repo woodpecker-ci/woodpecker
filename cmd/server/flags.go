@@ -196,7 +196,7 @@ var flags = append([]cli.Flag{
 	&cli.BoolFlag{
 		Sources: cli.EnvVars("WOODPECKER_DISABLE_USER_AGENT_REGISTRATION"),
 		Name:    "disable-user-agent-registration",
-		Usage:   "Disallow registration of new user-/org-agents",
+		Usage:   "Disable user registered agents",
 	},
 	&cli.DurationFlag{
 		Sources: cli.EnvVars("WOODPECKER_KEEPALIVE_MIN_TIME"),
