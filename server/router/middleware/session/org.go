@@ -57,13 +57,10 @@ func MustOrg() gin.HandlerFunc {
 
 		org, err := store.FromContext(c).OrgGet(orgID)
 		if err != nil {
-			if errors.Is(err, types.RecordNotExist) {
-				c.String(http.StatusNotFound, "Organization not found")
-				c.Abort()
+			if !errors.Is(err, types.RecordNotExist) {
+				_ = c.AbortWithError(http.StatusInternalServerError, err)
 				return
 			}
-			_ = c.AbortWithError(http.StatusInternalServerError, err)
-			return
 		}
 
 		if org == nil {
