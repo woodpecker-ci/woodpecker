@@ -42,7 +42,7 @@ func createFilterFunc(agentFilter rpc.Filter) queue.FilterFn {
 			// if agent label has an exact match
 			case agentLabelValue == taskLabelValue:
 				score += 10
-			// it as a non-match
+			// agent doesn't match
 			default:
 				return false, 0
 			}
