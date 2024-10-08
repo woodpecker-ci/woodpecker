@@ -32,7 +32,7 @@ func TestCreateFilterFunc(t *testing.T) {
 		wantScore   int
 	}{
 		{
-			name: "Exact matches",
+			name: "Two exact matches",
 			agentFilter: rpc.Filter{
 				Labels: map[string]string{"org-id": "123", "platform": "linux"},
 			},
@@ -43,7 +43,7 @@ func TestCreateFilterFunc(t *testing.T) {
 			wantScore:   20,
 		},
 		{
-			name: "Wildcard match",
+			name: "Wildcard and exact match",
 			agentFilter: rpc.Filter{
 				Labels: map[string]string{"org-id": "*", "platform": "linux"},
 			},
@@ -76,7 +76,7 @@ func TestCreateFilterFunc(t *testing.T) {
 			wantScore:   0,
 		},
 		{
-			name: "missing lable",
+			name: "Missing label",
 			agentFilter: rpc.Filter{
 				Labels: map[string]string{"platform": "linux"},
 			},
@@ -98,7 +98,7 @@ func TestCreateFilterFunc(t *testing.T) {
 			wantScore:   0,
 		},
 		{
-			name: "Subset of labels",
+			name: "Agent with additional label",
 			agentFilter: rpc.Filter{
 				Labels: map[string]string{"org-id": "123", "platform": "linux", "extra": "value"},
 			},
@@ -109,7 +109,7 @@ func TestCreateFilterFunc(t *testing.T) {
 			wantScore:   20,
 		},
 		{
-			name: "All wildcards",
+			name: "Two wildcard matches",
 			agentFilter: rpc.Filter{
 				Labels: map[string]string{"org-id": "*", "platform": "*"},
 			},
