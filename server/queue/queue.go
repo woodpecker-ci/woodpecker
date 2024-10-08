@@ -67,7 +67,8 @@ func (t *InfoT) String() string {
 
 // Filter filters tasks in the queue. If the Filter returns false,
 // the Task is skipped and not returned to the subscriber.
-type FilterFn func(*model.Task) bool
+// The int return value represents the matching score (higher is better).
+type FilterFn func(*model.Task) (bool, int)
 
 //go:generate mockery --name Queue --output mocks --case underscore --note "+build test"
 
