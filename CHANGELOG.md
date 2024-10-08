@@ -48,6 +48,7 @@
 
 ### 📈 Enhancement
 
+- Assign workflows to agents with the best label matches [[#4201](https://github.com/woodpecker-ci/woodpecker/pull/4201)]
 - Report custom labels set by agent admins back [[#4141](https://github.com/woodpecker-ci/woodpecker/pull/4141)]
 - Highlight invalid entries in manual pipeline trigger [[#4153](https://github.com/woodpecker-ci/woodpecker/pull/4153)]
 - Print agent labels in debug mode [[#4155](https://github.com/woodpecker-ci/woodpecker/pull/4155)]
