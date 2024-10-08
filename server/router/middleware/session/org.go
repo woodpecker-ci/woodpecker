@@ -38,7 +38,7 @@ func Org(c *gin.Context) *model.Org {
 	return r
 }
 
-func SetOrg() gin.HandlerFunc {
+func MustOrg() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
 			orgID int64
@@ -66,22 +66,13 @@ func SetOrg() gin.HandlerFunc {
 			return
 		}
 
-		c.Set("org", org)
-		c.Next()
-	}
-}
-
-func MustOrg() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		SetOrg()(c)
-		if c.IsAborted() {
-			return
-		}
-		if Org(c) == nil {
+		if org == nil {
 			c.String(http.StatusNotFound, "Organization not found")
 			c.Abort()
 			return
 		}
+
+		c.Set("org", org)
 		c.Next()
 	}
 }
