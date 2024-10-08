@@ -107,7 +107,7 @@ func TestPipelineList(t *testing.T) {
 	for _, tt := range testtases {
 		t.Run(tt.name, func(t *testing.T) {
 			mockClient := mocks.NewClient(t)
-			mockClient.On("PipelineList", mock.Anything).Return(tt.pipelines, tt.pipelineErr)
+			mockClient.On("PipelineList", mock.Anything, mock.Anything).Return(tt.pipelines, tt.pipelineErr)
 			mockClient.On("RepoLookup", mock.Anything).Return(&woodpecker.Repo{ID: tt.repoID}, nil)
 
 			command := pipelineListCmd
