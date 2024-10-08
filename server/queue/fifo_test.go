@@ -604,7 +604,6 @@ func TestFifoWithScoring(t *testing.T) {
 		}
 	}
 
-	// Assert that tasks were assigned to the most appropriate workers
 	assert.Len(t, receivedTasks, 5, "All tasks should be assigned")
 
 	// Check if tasks are assigned as expected
