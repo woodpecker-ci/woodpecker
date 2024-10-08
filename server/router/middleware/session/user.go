@@ -131,7 +131,7 @@ func MustOrgMember(admin bool) gin.HandlerFunc {
 
 		org := Org(c)
 		if org == nil {
-			c.String(http.StatusBadRequest, "Org not loaded")
+			c.String(http.StatusBadRequest, "Organization not loaded")
 			c.Abort()
 			return
 		}
