@@ -4,8 +4,7 @@
 
 ### Important
 
-If you use `woodpeckerci/plugin-docker-buildx` plugin and you version pinned it, update to v5.0.0.
-You could also re-allow old versions if you add it to `WOODPECKER_PLUGINS_PRIVILEGED` but make sure all pipelines are checked before they run!
+If you want a secure instance, set the `WOODPECKER_PLUGINS_PRIVILEGED` to only allow `woodpeckerci/plugin-docker-buildx` plugin to be v5.0.0 or later.
 
 [Read more](https://github.com/woodpecker-ci/woodpecker/pull/4213)
 
@@ -15,7 +14,6 @@ You could also re-allow old versions if you add it to `WOODPECKER_PLUGINS_PRIVIL
 
 ### 🔒 Security
 
-- Only allow `woodpeckerci/plugin-docker-buildx` plugin >= 5.0.0 to be priviledged by default [[#4213](https://github.com/woodpecker-ci/woodpecker/pull/4213)]
 - Chore(deps): update dependency vite to v5.4.6 [security] ([#4163](https://github.com/woodpecker-ci/woodpecker/pull/4163)) [[#4187](https://github.com/woodpecker-ci/woodpecker/pull/4187)]
 
 ### 🐛 Bug Fixes
