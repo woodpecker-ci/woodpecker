@@ -171,6 +171,24 @@ Enable XORM logs.
 
 Enable XORM SQL command logs.
 
+### `WOODPECKER_XORM_MAX_CONNECTIONS`
+
+> Default: `100`
+
+Max database connections xorm is allowed create.
+
+### `WOODPECKER_XORM_IDLE_CONNECTIONS`
+
+> Default: `2`
+
+Amount of database connections xorm will hold open.
+
+### `WOODPECKER_XORM_CONNECTION_TIMEOUT`
+
+> Default: `3 Seconds`
+
+Time an active database connection is allowed to stay open.
+
 ### `WOODPECKER_DEBUG_PRETTY`
 
 > Default: `false`
