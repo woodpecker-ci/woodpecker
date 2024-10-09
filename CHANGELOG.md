@@ -1,5 +1,36 @@
 # Changelog
 
+## [2.7.2](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.7.1) - 2024-10-09
+
+### Important
+
+If you use `woodpeckerci/plugin-docker-buildx` plugin and you version pinned it, update to v5.0.0.
+You could also re-allow old versions if you add it to `WOODPECKER_PLUGINS_PRIVILEGED` but make sure all pipelines are checked before they run!
+
+[Read more](https://github.com/woodpecker-ci/woodpecker/pull/4213)
+
+### ❤️ Thanks to all contributors! ❤️
+
+@6543, @anbraten, @j04n-f, @qwerty287
+
+### 🔒 Security
+
+- Only allow `woodpeckerci/plugin-docker-buildx` plugin >= 5.0.0 to be priviledged by default [[#4213](https://github.com/woodpecker-ci/woodpecker/pull/4213)]
+- Chore(deps): update dependency vite to v5.4.6 [security] ([#4163](https://github.com/woodpecker-ci/woodpecker/pull/4163)) [[#4187](https://github.com/woodpecker-ci/woodpecker/pull/4187)]
+
+### 🐛 Bug Fixes
+
+- Run queue.process() in background [[#4115](https://github.com/woodpecker-ci/woodpecker/pull/4115)]
+- Only update agent.LastWork if not done recently ([#4031](https://github.com/woodpecker-ci/woodpecker/pull/4031)) [[#4100](https://github.com/woodpecker-ci/woodpecker/pull/4100)]
+
+### 📈 Enhancemen
+
+- Print agent labels in debug mode ([#4155](https://github.com/woodpecker-ci/woodpecker/pull/4155)) [[#4156](https://github.com/woodpecker-ci/woodpecker/pull/4156)]
+
+### Misc
+
+- Backport JS dependency updates [[#4189](https://github.com/woodpecker-ci/woodpecker/pull/4189)]
+
 ## [2.7.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.7.1) - 2024-09-07
 
 ### ❤️ Thanks to all contributors! ❤️
