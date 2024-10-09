@@ -38,7 +38,7 @@ func Org(c *gin.Context) *model.Org {
 	return r
 }
 
-func MustOrg() gin.HandlerFunc {
+func SetOrg() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
 			orgID int64
@@ -56,11 +56,9 @@ func MustOrg() gin.HandlerFunc {
 		}
 
 		org, err := store.FromContext(c).OrgGet(orgID)
-		if err != nil {
-			if !errors.Is(err, types.RecordNotExist) {
-				_ = c.AbortWithError(http.StatusInternalServerError, err)
-				return
-			}
+		if err != nil && !errors.Is(err, types.RecordNotExist) {
+			_ = c.AbortWithError(http.StatusInternalServerError, err)
+			return
 		}
 
 		if org == nil {
@@ -71,5 +69,18 @@ func MustOrg() gin.HandlerFunc {
 
 		c.Set("org", org)
 		c.Next()
+	}
+}
+
+func MustOrg() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		org := Org(c)
+		switch {
+		case org == nil:
+			c.String(http.StatusNotFound, "Organization not loaded")
+			c.Abort()
+		default:
+			c.Next()
+		}
 	}
 }
