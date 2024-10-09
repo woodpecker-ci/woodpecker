@@ -19,8 +19,14 @@ var PrivilegedPlugins = []string{
 	"plugins/docker",
 	"plugins/gcr",
 	"plugins/ecr",
-	"woodpeckerci/plugin-docker-buildx",
-	"codeberg.org/woodpecker-plugins/docker-buildx",
+	"woodpeckerci/plugin-docker-buildx:5",
+	"codeberg.org/woodpecker-plugins/docker-buildx:5",
+	"woodpeckerci/plugin-docker-buildx:5.0",
+	"codeberg.org/woodpecker-plugins/docker-buildx:5.0",
+	"woodpeckerci/plugin-docker-buildx:5.0.0",
+	"codeberg.org/woodpecker-plugins/docker-buildx:5.0.0",
+	"woodpeckerci/plugin-docker-buildx:latest",
+	"codeberg.org/woodpecker-plugins/docker-buildx:latest",
 }
 
 // DefaultConfigOrder represent the priority in witch woodpecker search for a pipeline config by default
