@@ -171,7 +171,7 @@ func TestLintErrors(t *testing.T) {
 		},
 		{
 			from: "{steps: { build: { image: golang, secrets: [ 'test' ] } }, when: { event: manual } }",
-			want: "Lower-case secret is used, it might not work properly since 3.0",
+			want: "Lower-case secret is used, uppercasing all secret env vars will be removed in 3.0; perhaps, you want to uppercase secret name in pipeline definition or lowercase env var in used commands",
 		},
 	}
 

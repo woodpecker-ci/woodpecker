@@ -346,7 +346,7 @@ func (l *Linter) lintDeprecations(config *WorkflowConfig) (err error) {
 			if secret.Target != secretUpper {
 				err = multierr.Append(err, &errorTypes.PipelineError{
 					Type:    errorTypes.PipelineErrorTypeDeprecation,
-					Message: "Lower-case secret is used, it might not work properly since 3.0",
+					Message: "Lower-case secret is used, uppercasing all secret env vars will be removed in 3.0; perhaps, you want to uppercase secret name in pipeline definition or lowercase env var in used commands",
 					Data: errors.DeprecationErrorData{
 						File:  config.File,
 						Field: fmt.Sprintf("steps.%s.secrets[%d]", step.Name, i),
