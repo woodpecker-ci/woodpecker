@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package utils
+package utils_test
 
 import (
 	"bytes"
@@ -25,6 +25,8 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/yaronf/httpsign"
+
+	"go.woodpecker-ci.org/woodpecker/v2/server/services/utils"
 )
 
 func TestSignClient(t *testing.T) {
@@ -59,7 +61,7 @@ func TestSignClient(t *testing.T) {
 	req.Header.Set("Date", time.Now().Format(time.RFC3339))
 	req.Header.Set("Content-Type", "application/json")
 
-	client, err := signClient(privEd25519Key)
+	client, err := utils.NewHTTPClient(privEd25519Key, "loopback")
 	if !assert.NoError(t, err) {
 		return
 	}

@@ -73,6 +73,9 @@ export interface Repo {
   cancel_previous_pipeline_events: string[];
 
   netrc_only_trusted: boolean;
+
+  // Endpoint for config extensions
+  config_extension_endpoint: string;
 }
 
 /* eslint-disable no-unused-vars */
@@ -95,6 +98,8 @@ export type RepoSettings = Pick<
   | 'cancel_previous_pipeline_events'
   | 'netrc_only_trusted'
 >;
+
+export type ExtensionSettings = Pick<Repo, 'config_extension_endpoint'>;
 
 export interface RepoPermissions {
   pull: boolean;
