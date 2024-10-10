@@ -218,6 +218,23 @@ var flags = append([]cli.Flag{
 		Value: datasourceDefaultValue(),
 	},
 	&cli.StringFlag{
+		Sources: cli.EnvVars("WOODPECKER_OLD_DATABASE_DRIVER"),
+		Name:    "old-driver",
+		Usage:   "driver of database to be migrated & imported",
+		Value:   "",
+	},
+	&cli.StringFlag{
+		Sources: cli.EnvVars("WOODPECKER_OLD_DATABASE_DATASOURCE"),
+		Name:    "old-datasource",
+		Usage:   "driver configuration of database to be migrated & imported",
+		Value:   "",
+	},
+	&cli.BoolFlag{
+		Sources: cli.EnvVars("WOODPECKER_OLD_DATABASE_IMPORT_ONLY"),
+		Name:    "import-old-datastore-only",
+		Usage:   "if '--old-driver' and --old-datasource' are set, exit successfully after import.",
+	},
+	&cli.StringFlag{
 		Sources: cli.NewValueSourceChain(
 			cli.File(os.Getenv("WOODPECKER_PROMETHEUS_AUTH_TOKEN_FILE")),
 			cli.EnvVar("WOODPECKER_PROMETHEUS_AUTH_TOKEN")),
