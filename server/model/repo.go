@@ -20,6 +20,14 @@ import (
 	"strings"
 )
 
+type SecurityMode string
+
+var (
+	SecurityModeNoRestrictions    SecurityMode = "no_restrictions"
+	SecurityModeApproveForkPRs    SecurityMode = "approve_fork_prs"
+	SecurityModeApproveEverything SecurityMode = "approve_everything"
+)
+
 // Repo represents a repository.
 type Repo struct {
 	ID      int64 `json:"id,omitempty"                    xorm:"pk autoincr 'id'"`
@@ -42,7 +50,7 @@ type Repo struct {
 	Visibility                   RepoVisibility `json:"visibility"                      xorm:"varchar(10) 'visibility'"`
 	IsSCMPrivate                 bool           `json:"private"                         xorm:"private"`
 	IsTrusted                    bool           `json:"trusted"                         xorm:"trusted"`
-	IsGated                      bool           `json:"gated"                           xorm:"gated"`
+	SecurityMode                 SecurityMode   `json:"security_mode"                   xorm:"security_mode"`
 	IsActive                     bool           `json:"active"                          xorm:"active"`
 	AllowPull                    bool           `json:"allow_pr"                        xorm:"allow_pr"`
 	AllowDeploy                  bool           `json:"allow_deploy"                    xorm:"allow_deploy"`
@@ -110,10 +118,9 @@ func (r *Repo) Update(from *Repo) {
 type RepoPatch struct {
 	Config                       *string         `json:"config_file,omitempty"`
 	IsTrusted                    *bool           `json:"trusted,omitempty"`
-	IsGated                      *bool           `json:"gated,omitempty"`
 	Timeout                      *int64          `json:"timeout,omitempty"`
 	Visibility                   *string         `json:"visibility,omitempty"`
-	AllowPull                    *bool           `json:"allow_pr,omitempty"`
+	SecurityMode                 *SecurityMode   `json:"security_mode,omitempty"`
 	AllowDeploy                  *bool           `json:"allow_deploy,omitempty"`
 	CancelPreviousPipelineEvents *[]WebhookEvent `json:"cancel_previous_pipeline_events"`
 	NetrcOnlyTrusted             *bool           `json:"netrc_only_trusted"`
