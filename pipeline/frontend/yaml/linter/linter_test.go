@@ -169,6 +169,10 @@ func TestLintErrors(t *testing.T) {
 			from: "{steps: { build: { image: plugins/docker, settings: { test: 'true' } } }, when: { branch: main, event: push } } }",
 			want: "Cannot use once by default privileged plugin 'plugins/docker', if needed add it too WOODPECKER_PLUGINS_PRIVILEGED",
 		},
+		{
+			from: "{steps: { build: { image: golang, secrets: [ 'test' ] } }, when: { event: manual } }",
+			want: "Lower-case secret is used, it might not work properly since 3.0",
+		},
 	}
 
 	for _, test := range testdata {
