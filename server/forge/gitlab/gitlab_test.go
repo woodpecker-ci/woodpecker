@@ -60,7 +60,7 @@ func Test_GitLab(t *testing.T) {
 
 	user := model.User{
 		Login:         "test_user",
-		Token:         "e3b0c44298fc1c149afbf4c8996fb",
+		AccessToken:   "e3b0c44298fc1c149afbf4c8996fb",
 		ForgeRemoteID: "3",
 	}
 

@@ -65,7 +65,7 @@ func Test_github(t *testing.T) {
 				forge, _ := New(Opts{})
 				netrc, _ := forge.Netrc(fakeUser, fakeRepo)
 				g.Assert(netrc.Machine).Equal("github.com")
-				g.Assert(netrc.Login).Equal(fakeUser.Token)
+				g.Assert(netrc.Login).Equal(fakeUser.AccessToken)
 				g.Assert(netrc.Password).Equal("x-oauth-basic")
 			})
 			g.It("Should return a netrc with the machine account", func() {
@@ -115,8 +115,8 @@ func Test_github(t *testing.T) {
 
 var (
 	fakeUser = &model.User{
-		Login: "octocat",
-		Token: "cfcd2084",
+		Login:       "octocat",
+		AccessToken: "cfcd2084",
 	}
 
 	fakeRepo = &model.Repo{
