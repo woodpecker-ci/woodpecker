@@ -38,11 +38,14 @@ type Agent struct {
 	CustomLabels map[string]string `json:"custom_labels" xorm:"JSON 'custom_labels'"`
 	// OrgID is counted as unset if set to -1, this is done to ensure a new(Agent) still enforce the OrgID check by default
 	OrgID int64 `json:"org_id"        xorm:"INDEX 'org_id'"`
+	// RepoID is counted as unset if set to -1, this is done to ensure a new(Agent) still enforce the OrgID check by default
+	RepoID int64 `json:"repo_id"       xorm:"INDEX 'repo_id'"`
 } //	@name Agent
 
 const (
-	IDNotSet         = -1
-	agentFilterOrgID = "org-id"
+	IDNotSet          = -1
+	agentFilterOrgID  = "org-id"
+	agentFilterRepoID = "repo-id"
 )
 
 // TableName return database table name for xorm.
@@ -67,18 +70,28 @@ func (a *Agent) GetServerLabels() (map[string]string, error) {
 	} else {
 		filters[agentFilterOrgID] = "*"
 	}
+	if a.RepoID != IDNotSet {
+		filters[agentFilterRepoID] = fmt.Sprintf("%d", a.RepoID)
+	} else {
+		filters[agentFilterRepoID] = "*"
+	}
 
 	return filters, nil
 }
 
 func (a *Agent) CanAccessRepo(repo *Repo) bool {
 	// global agent
-	if a.OrgID == IDNotSet {
+	if a.OrgID == IDNotSet && a.RepoID == IDNotSet {
 		return true
 	}
 
 	// agent has access to the organization
-	if a.OrgID == repo.OrgID {
+	if a.OrgID == repo.OrgID && a.RepoID == IDNotSet {
+		return true
+	}
+
+	// agent has access to the repo
+	if a.OrgID == repo.OrgID && a.RepoID == repo.ID {
 		return true
 	}
 
