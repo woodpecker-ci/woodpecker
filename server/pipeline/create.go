@@ -87,13 +87,13 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 
 		return nil, ErrFiltered
 	} else if configFetchErr != nil {
-		log.Debug().Str("repo", repo.FullName).Err(configFetchErr).Msgf("error while fetching config '%s' in '%s' with user: '%s'", repo.Config, pipeline.Ref, repoUser.Login)
+		log.Error().Str("repo", repo.FullName).Err(configFetchErr).Msgf("error while fetching config '%s' in '%s' with user: '%s'", repo.Config, pipeline.Ref, repoUser.Login)
 		return nil, updatePipelineWithErr(ctx, _forge, _store, pipeline, repo, repoUser, fmt.Errorf("could not load config from forge: %w", err))
 	}
 
 	pipelineItems, parseErr := parsePipeline(_forge, _store, pipeline, repoUser, repo, forgeYamlConfigs, nil)
 	if pipeline_errors.HasBlockingErrors(parseErr) {
-		log.Debug().Str("repo", repo.FullName).Err(parseErr).Msg("failed to parse yaml")
+		log.Error().Str("repo", repo.FullName).Err(parseErr).Msg("failed to parse yaml")
 		return pipeline, updatePipelineWithErr(ctx, _forge, _store, pipeline, repo, repoUser, parseErr)
 	} else if parseErr != nil {
 		pipeline.Errors = pipeline_errors.GetPipelineErrors(parseErr)
