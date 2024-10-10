@@ -16,6 +16,7 @@ package linter
 
 import (
 	"fmt"
+	"strings"
 
 	"codeberg.org/6543/xyaml"
 	"go.uber.org/multierr"
@@ -332,6 +333,24 @@ func (l *Linter) lintDeprecations(config *WorkflowConfig) (err error) {
 						File:  config.File,
 						Field: fmt.Sprintf("steps.%s.secrets[%d]", step.Name, i),
 						Docs:  "https://woodpecker-ci.org/docs/usage/secrets#use-secrets-in-settings-and-environment",
+					},
+					IsWarning: true,
+				})
+			}
+		}
+	}
+
+	for _, step := range parsed.Steps.ContainerList {
+		for i, secret := range step.Secrets.Secrets {
+			secretUpper := strings.ToUpper(secret.Target)
+			if secret.Target != secretUpper {
+				err = multierr.Append(err, &errorTypes.PipelineError{
+					Type:    errorTypes.PipelineErrorTypeDeprecation,
+					Message: "Lower-case secret is used, uppercasing all secret env vars will be removed in 3.0. In order to prevent disruption, you can uppercase secret name in pipeline definition in advance. Additionally you can lowercase env vars in used commands after 3.0 release.",
+					Data: errors.DeprecationErrorData{
+						File:  config.File,
+						Field: fmt.Sprintf("steps.%s.secrets[%d]", step.Name, i),
+						Docs:  "https://woodpecker-ci.org/docs/next/migrations#next",
 					},
 					IsWarning: true,
 				})

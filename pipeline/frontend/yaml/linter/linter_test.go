@@ -169,6 +169,10 @@ func TestLintErrors(t *testing.T) {
 			from: "{steps: { build: { image: plugins/docker, settings: { test: 'true' } } }, when: { branch: main, event: push } } }",
 			want: "Cannot use once by default privileged plugin 'plugins/docker', if needed add it too WOODPECKER_PLUGINS_PRIVILEGED",
 		},
+		{
+			from: "{steps: { build: { image: golang, secrets: [ 'test' ] } }, when: { event: manual } }",
+			want: "Lower-case secret is used, uppercasing all secret env vars will be removed in 3.0. In order to prevent disruption, you can uppercase secret name in pipeline definition in advance. Additionally you can lowercase env vars in used commands after 3.0 release.",
+		},
 	}
 
 	for _, test := range testdata {
