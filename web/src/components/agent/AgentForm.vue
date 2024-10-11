@@ -21,11 +21,7 @@
         <TextField :id="id" :model-value="agent.id?.toString()" disabled />
       </InputField>
 
-      <InputField
-        v-slot="{ id }"
-        :label="$t('admin.settings.agents.backend.backend')"
-        docs-url="docs/next/administration/backends/docker"
-      >
+      <InputField v-slot="{ id }" :label="$t('admin.settings.agents.backend.backend')" :docs-url="backendDocsUrl">
         <TextField :id="id" v-model="agent.backend" disabled />
       </InputField>
 
@@ -105,6 +101,16 @@ const date = useDate();
 const agent = computed({
   get: () => props.modelValue,
   set: (value) => emit('update:modelValue', value),
+});
+
+const baseDocsUrl = 'https://woodpecker-ci.org/docs/next/administration/backends/';
+
+const backendDocsUrl = computed(() => {
+  let backendUrlSuffix = agent.value.backend?.toLowerCase();
+  if (backendUrlSuffix === 'custom') {
+    backendUrlSuffix = 'custom-backends';
+  }
+  return `${baseDocsUrl}${backendUrlSuffix === '' ? 'docker' : backendUrlSuffix}`;
 });
 
 function updateAgent(newValues: Partial<Agent>) {
