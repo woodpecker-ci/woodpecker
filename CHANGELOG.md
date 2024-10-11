@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @Fishbowler, @anbraten, @gnowland, @hg, @j04n-f, @jenrik, @johanneskastl, @lukashass, @meln5674, @not-my-profile, @pat-s, @qwerty287, @smainz, @xtexChooser, @zc-devs
+@6543, @Fishbowler, @anbraten, @gnowland, @hg, @j04n-f, @jenrik, @johanneskastl, @lukashass, @meln5674, @not-my-profile, @pat-s, @qwerty287, @smainz, @tori-27, @xtexChooser, @zc-devs
 
 ### 💥 Breaking changes
 
@@ -48,6 +48,7 @@
 
 ### 📈 Enhancement
 
+- WebUI: agent edit/detail view: change the **HELP** url based on the b… [[#4219](https://github.com/woodpecker-ci/woodpecker/pull/4219)]
 - Use middleware to load org [[#4208](https://github.com/woodpecker-ci/woodpecker/pull/4208)]
 - Assign workflows to agents with the best label matches [[#4201](https://github.com/woodpecker-ci/woodpecker/pull/4201)]
 - Report custom labels set by agent admins back [[#4141](https://github.com/woodpecker-ci/woodpecker/pull/4141)]
