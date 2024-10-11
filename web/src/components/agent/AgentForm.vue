@@ -26,7 +26,7 @@
         :label="$t('admin.settings.agents.backend.backend')"
         :docs-url="backendDocsUrl"
       >
-        <TextField :id="id" v-model="agent.backend" />
+        <TextField :id="id" v-model="agent.backend" disabled />
       </InputField>
 
       <InputField v-slot="{ id }" :label="$t('admin.settings.agents.platform.platform')">
