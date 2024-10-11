@@ -26,7 +26,7 @@
         :label="$t('admin.settings.agents.backend.backend')"
         :docs-url="backendDocsUrl"
       >
-        <TextField :id="id" v-model="agent.backend" disabled />
+        <TextField :id="id" v-model="agent.backend" />
       </InputField>
 
       <InputField v-slot="{ id }" :label="$t('admin.settings.agents.platform.platform')">
@@ -111,17 +111,13 @@ const agent = computed({
 const baseDocsUrl = 'https://woodpecker-ci.org/docs/next/administration/backends/';
 
 const backendDocsUrl = computed(() =>{
-  switch(agent.value.backend?.toLowerCase()){
-    case 'local':
-      return `${baseDocsUrl}local`;
-    case 'kubernetes':
-      return `${baseDocsUrl}kubernetes`;
-    case 'custom':
-      return `${baseDocsUrl}custom-backends`;
-    default:
-      return `${baseDocsUrl}docker`
+  let backendUrlSuffix = agent.value.backend?.toLowerCase();
+  if (backendUrlSuffix === 'custom') {
+    backendUrlSuffix = 'custom-backends';
   }
-})
+  return `${baseDocsUrl}${(backendUrlSuffix === '') ? 'docker' : backendUrlSuffix}`;
+});
+
 
 function updateAgent(newValues: Partial<Agent>) {
   emit('update:modelValue', { ...agent.value, ...newValues });
