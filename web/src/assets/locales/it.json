@@ -85,6 +85,10 @@
                 "delete_agent": "Elimina agente",
                 "org": {
                     "badge": "org"
+                },
+                "custom_labels": {
+                    "custom_labels": "Etichette Personalizzate",
+                    "desc": "Le etichette personalizzate impostate dall'amministratore dell'agente all'avvio dell'agente."
                 }
             },
             "orgs": {
@@ -466,7 +470,7 @@
         "desc": "I segreti possono essere passati ad ogni step della pipeline, come variabili d'ambiente.",
         "plugins": {
             "images": "Disponibile solo per le seguenti estensioni",
-            "desc": "Elenco delle estensioni in cui questo segreto è disponibile, lascia vuoto per consentire tutto."
+            "desc": "Elenco delle estensioni in cui questo segreto è disponibile. Vuoto, per consentire a ogni estensione e step normale."
         }
     },
     "default": "predefinito",
