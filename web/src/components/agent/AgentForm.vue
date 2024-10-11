@@ -24,7 +24,7 @@
       <InputField
         v-slot="{ id }"
         :label="$t('admin.settings.agents.backend.backend')"
-        docs-url="docs/next/administration/backends/docker"
+        :docs-url="backendDocsUrl"
       >
         <TextField :id="id" v-model="agent.backend" disabled />
       </InputField>
@@ -79,6 +79,7 @@
 </template>
 
 <script lang="ts" setup>
+import { setWith } from 'lodash';
 import { computed } from 'vue';
 
 import Button from '~/components/atomic/Button.vue';
@@ -106,6 +107,21 @@ const agent = computed({
   get: () => props.modelValue,
   set: (value) => emit('update:modelValue', value),
 });
+
+const baseDocsUrl = 'https://woodpecker-ci.org/docs/next/administration/backends/';
+
+const backendDocsUrl = computed(() =>{
+  switch(agent.value.backend?.toLowerCase()){
+    case 'local':
+      return `${baseDocsUrl}local`;
+    case 'kubernetes':
+      return `${baseDocsUrl}kubernetes`;
+    case 'custom':
+      return `${baseDocsUrl}custom-backends`;
+    default:
+      return `${baseDocsUrl}docker`
+  }
+})
 
 function updateAgent(newValues: Partial<Agent>) {
   emit('update:modelValue', { ...agent.value, ...newValues });
