@@ -297,7 +297,12 @@
             "log_delete_confirm": "Voulez vous vraiment supprimer les logs de cette étape ?",
             "no_logs": "Aucun logs",
             "duration": "Durée du pipeline",
-            "created": "Crée : {created}"
+            "created": "Crée : {created}",
+            "debug": {
+                "title": "Débogage",
+                "download_metadata": "Télécharger les métadonnées",
+                "metadata_download_error": "Erreur lors du téléchargement des métadonnées"
+            }
         },
         "pull_requests": "Pull requests",
         "settings": {

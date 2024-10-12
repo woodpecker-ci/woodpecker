@@ -16,7 +16,6 @@ package api
 
 import (
 	"net/http"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 
@@ -36,16 +35,11 @@ import (
 //	@Param		org_id			path	string	true	"the org's id"
 //	@Param		registry		path	string	true	"the registry's address"
 func GetOrgRegistry(c *gin.Context) {
+	org := session.Org(c)
 	addr := c.Param("registry")
 
-	orgID, err := strconv.ParseInt(c.Param("org_id"), 10, 64)
-	if err != nil {
-		c.String(http.StatusBadRequest, "Error parsing org id. %s", err)
-		return
-	}
-
 	registryService := server.Config.Services.Manager.RegistryService()
-	registry, err := registryService.OrgRegistryFind(orgID, addr)
+	registry, err := registryService.OrgRegistryFind(org.ID, addr)
 	if err != nil {
 		handleDBError(c, err)
 		return
@@ -65,16 +59,12 @@ func GetOrgRegistry(c *gin.Context) {
 //	@Param		page				query	int			false	"for response pagination, page offset number"	default(1)
 //	@Param		perPage			query	int			false	"for response pagination, max items per page"	default(50)
 func GetOrgRegistryList(c *gin.Context) {
-	orgID, err := strconv.ParseInt(c.Param("org_id"), 10, 64)
-	if err != nil {
-		c.String(http.StatusBadRequest, "Error parsing org id. %s", err)
-		return
-	}
+	org := session.Org(c)
 
 	registryService := server.Config.Services.Manager.RegistryService()
-	list, err := registryService.OrgRegistryList(orgID, session.Pagination(c))
+	list, err := registryService.OrgRegistryList(org.ID, session.Pagination(c))
 	if err != nil {
-		c.String(http.StatusInternalServerError, "Error getting registry list for %q. %s", orgID, err)
+		c.String(http.StatusInternalServerError, "Error getting registry list for %q. %s", org.ID, err)
 		return
 	}
 	// copy the registry detail to remove the sensitive
@@ -96,31 +86,27 @@ func GetOrgRegistryList(c *gin.Context) {
 //	@Param		org_id					path	string		true	"the org's id"
 //	@Param		registryData		body	Registry	true	"the new registry"
 func PostOrgRegistry(c *gin.Context) {
-	orgID, err := strconv.ParseInt(c.Param("org_id"), 10, 64)
-	if err != nil {
-		c.String(http.StatusBadRequest, "Error parsing org id. %s", err)
-		return
-	}
+	org := session.Org(c)
 
 	in := new(model.Registry)
 	if err := c.Bind(in); err != nil {
-		c.String(http.StatusBadRequest, "Error parsing org %q registry. %s", orgID, err)
+		c.String(http.StatusBadRequest, "Error parsing org %q registry. %s", org.ID, err)
 		return
 	}
 	registry := &model.Registry{
-		OrgID:    orgID,
+		OrgID:    org.ID,
 		Address:  in.Address,
 		Username: in.Username,
 		Password: in.Password,
 	}
 	if err := registry.Validate(); err != nil {
-		c.String(http.StatusUnprocessableEntity, "Error inserting org %q registry. %s", orgID, err)
+		c.String(http.StatusUnprocessableEntity, "Error inserting org %q registry. %s", org.ID, err)
 		return
 	}
 
 	registryService := server.Config.Services.Manager.RegistryService()
-	if err := registryService.OrgRegistryCreate(orgID, registry); err != nil {
-		c.String(http.StatusInternalServerError, "Error inserting org %q registry %q. %s", orgID, in.Address, err)
+	if err := registryService.OrgRegistryCreate(org.ID, registry); err != nil {
+		c.String(http.StatusInternalServerError, "Error inserting org %q registry %q. %s", org.ID, in.Address, err)
 		return
 	}
 	c.JSON(http.StatusOK, registry.Copy())
@@ -138,22 +124,17 @@ func PostOrgRegistry(c *gin.Context) {
 //	@Param		registry			path	string		true	"the registry's name"
 //	@Param		registryData	body	Registry	true	"the update registry data"
 func PatchOrgRegistry(c *gin.Context) {
+	org := session.Org(c)
 	addr := c.Param("registry")
-	orgID, err := strconv.ParseInt(c.Param("org_id"), 10, 64)
-	if err != nil {
-		c.String(http.StatusBadRequest, "Error parsing org id. %s", err)
-		return
-	}
 
 	in := new(model.Registry)
-	err = c.Bind(in)
-	if err != nil {
+	if err := c.Bind(in); err != nil {
 		c.String(http.StatusBadRequest, "Error parsing registry. %s", err)
 		return
 	}
 
 	registryService := server.Config.Services.Manager.RegistryService()
-	registry, err := registryService.OrgRegistryFind(orgID, addr)
+	registry, err := registryService.OrgRegistryFind(org.ID, addr)
 	if err != nil {
 		handleDBError(c, err)
 		return
@@ -169,12 +150,12 @@ func PatchOrgRegistry(c *gin.Context) {
 	}
 
 	if err := registry.Validate(); err != nil {
-		c.String(http.StatusUnprocessableEntity, "Error updating org %q registry. %s", orgID, err)
+		c.String(http.StatusUnprocessableEntity, "Error updating org %q registry. %s", org.ID, err)
 		return
 	}
 
-	if err := registryService.OrgRegistryUpdate(orgID, registry); err != nil {
-		c.String(http.StatusInternalServerError, "Error updating org %q registry %q. %s", orgID, in.Address, err)
+	if err := registryService.OrgRegistryUpdate(org.ID, registry); err != nil {
+		c.String(http.StatusInternalServerError, "Error updating org %q registry %q. %s", org.ID, in.Address, err)
 		return
 	}
 	c.JSON(http.StatusOK, registry.Copy())
@@ -191,15 +172,11 @@ func PatchOrgRegistry(c *gin.Context) {
 //	@Param		org_id			path	string	true	"the org's id"
 //	@Param		registry		path	string	true	"the registry's name"
 func DeleteOrgRegistry(c *gin.Context) {
+	org := session.Org(c)
 	addr := c.Param("registry")
-	orgID, err := strconv.ParseInt(c.Param("org_id"), 10, 64)
-	if err != nil {
-		c.String(http.StatusBadRequest, "Error parsing org id. %s", err)
-		return
-	}
 
 	registryService := server.Config.Services.Manager.RegistryService()
-	if err := registryService.OrgRegistryDelete(orgID, addr); err != nil {
+	if err := registryService.OrgRegistryDelete(org.ID, addr); err != nil {
 		handleDBError(c, err)
 		return
 	}
