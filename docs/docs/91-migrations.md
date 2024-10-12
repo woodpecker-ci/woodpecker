@@ -4,6 +4,7 @@ Some versions need some changes to the server configuration or the pipeline conf
 
 ## `next`
 
+- Deprecate `WOODPECKER_FILTER_LABELS` use `WOODPECKER_AGENT_LABELS`
 - Removed built-in environment variables:
   - `CI_COMMIT_URL` use `CI_PIPELINE_FORGE_URL`
   - `CI_STEP_FINISHED` as empty during execution
