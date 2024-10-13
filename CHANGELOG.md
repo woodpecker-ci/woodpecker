@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-10-12
+## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-10-13
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -48,6 +48,8 @@
 
 ### 📚 Documentation
 
+- Use "Woodpecker Authors" as copyright on website [[#4225](https://github.com/woodpecker-ci/woodpecker/pull/4225)]
+- chore(deps): update dependency cookie to v1 [[#4224](https://github.com/woodpecker-ci/woodpecker/pull/4224)]
 - fix(deps): update docs npm deps non-major [[#4221](https://github.com/woodpecker-ci/woodpecker/pull/4221)]
 - Fix errant apostrophe in docker-compose documentation [[#4203](https://github.com/woodpecker-ci/woodpecker/pull/4203)]
 - chore(deps): lock file maintenance [[#4186](https://github.com/woodpecker-ci/woodpecker/pull/4186)]
@@ -123,6 +125,9 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update dependency simple-icons to v13.14.0 [[#4226](https://github.com/woodpecker-ci/woodpecker/pull/4226)]
+- fix(deps): update web npm deps non-major [[#4223](https://github.com/woodpecker-ci/woodpecker/pull/4223)]
+- fix(deps): update golang-packages [[#4215](https://github.com/woodpecker-ci/woodpecker/pull/4215)]
 - fix(deps): update golang-packages [[#4210](https://github.com/woodpecker-ci/woodpecker/pull/4210)]
 - fix(deps): update module github.com/google/go-github/v65 to v66 [[#4205](https://github.com/woodpecker-ci/woodpecker/pull/4205)]
 - fix(deps): update dependency vue-i18n to v10.0.4 [[#4200](https://github.com/woodpecker-ci/woodpecker/pull/4200)]
