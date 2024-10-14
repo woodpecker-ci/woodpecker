@@ -23,17 +23,10 @@ import (
 type ApprovalMode string
 
 var (
-	ApprovalModeFirstTimeContributors   ApprovalMode = "block_first_time_contributors"
-	ApprovalModeAllOutsideCollaborators ApprovalMode = "block_all_outside_collaborators"
-	ApprovalModeAllNonMaintainers       ApprovalMode = "block_all_non_maintainers"
-	ApprovalModeAllEvents               ApprovalMode = "block_all_events"
+	ApprovalModeForks        ApprovalMode = "block_forks"         // require approval for PRs from forks (default)
+	ApprovalModePullRequests ApprovalMode = "block_pull_requests" // require approval for all PRs
+	ApprovalModeAllEvents    ApprovalMode = "block_all_events"    // require approval for all events
 )
-
-// Require approval for:
-// - first-time contributors
-// - all outside collaborators
-// - all non maintainers
-// - all events
 
 // Repo represents a repository.
 type Repo struct {

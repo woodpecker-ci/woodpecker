@@ -52,6 +52,7 @@ type Pipeline struct {
 	AdditionalVariables map[string]string      `json:"variables,omitempty"     xorm:"json 'additional_variables'"`
 	PullRequestLabels   []string               `json:"pr_labels,omitempty"     xorm:"json 'pr_labels'"`
 	IsPrerelease        bool                   `json:"is_prerelease,omitempty" xorm:"is_prerelease"`
+	FromFork            bool                   `json:"from_fork,omitempty"     xorm:"from_fork"`
 } //	@name Pipeline
 
 // TableName return database table name for xorm.
