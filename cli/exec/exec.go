@@ -139,7 +139,7 @@ func runExec(ctx context.Context, c *cli.Command, file, repoPath string, singleE
 }
 
 func execWithAxis(ctx context.Context, c *cli.Command, file, repoPath string, axis matrix.Axis, singleExec bool) error {
-	var metadataWorkflow *metadata.Workflow
+	metadataWorkflow := &metadata.Workflow{}
 	if !singleExec {
 		// TODO: proper try to use the engine to generate the same metadata for workflows
 		// https://github.com/woodpecker-ci/woodpecker/pull/3967

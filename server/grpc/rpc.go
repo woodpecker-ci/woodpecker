@@ -441,7 +441,7 @@ func (s *RPC) Log(c context.Context, stepUUID string, rpcLogEntries []*rpc.LogEn
 	return nil
 }
 
-func (s *RPC) RegisterAgent(ctx context.Context, platform, backend, version string, capacity int32) (int64, error) {
+func (s *RPC) RegisterAgent(ctx context.Context, info rpc.AgentInfo) (int64, error) {
 	agent, err := s.getAgentFromContext(ctx)
 	if err != nil {
 		return -1, err
@@ -453,10 +453,11 @@ func (s *RPC) RegisterAgent(ctx context.Context, platform, backend, version stri
 		}
 	}
 
-	agent.Backend = backend
-	agent.Platform = platform
-	agent.Capacity = capacity
-	agent.Version = version
+	agent.Backend = info.Backend
+	agent.Platform = info.Platform
+	agent.Capacity = int32(info.Capacity)
+	agent.Version = info.Version
+	agent.CustomLabels = info.CustomLabels
 
 	err = s.store.AgentUpdate(agent)
 	if err != nil {
