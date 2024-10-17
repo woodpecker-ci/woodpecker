@@ -45,6 +45,9 @@ func NewEngine(opts *store.Opts) (store.Store, error) {
 	logger := newXORMLogger(level)
 	engine.SetLogger(logger)
 	engine.ShowSQL(opts.XORM.ShowSQL)
+	engine.SetMaxOpenConns(opts.XORM.MaxOpenConns)
+	engine.SetMaxIdleConns(opts.XORM.MaxIdleConns)
+	engine.SetConnMaxLifetime(opts.XORM.ConnMaxLifetime)
 
 	return &storage{
 		engine: engine,
