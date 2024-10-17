@@ -47,7 +47,10 @@ var migrationTasks = []*xormigrate.Migration{
 	&addCustomLabelsToAgent,
 }
 
-var allBeans = []any{
+// IMPORTANT: if you add something here run generate
+//
+//go:generate go run generate.go
+var AllBeans = []any{
 	new(model.Agent),
 	new(model.Pipeline),
 	new(model.PipelineConfig),
@@ -66,6 +69,12 @@ var allBeans = []any{
 	new(model.Forge),
 	new(model.Workflow),
 	new(model.Org),
+}
+
+func initSchemaOnly(e *xorm.Engine) error {
+	m := xormigrate.New(e, migrationTasks)
+	m.InitSchema(syncAll)
+	return m.Migrate()
 }
 
 // TODO: make xormigrate context aware
@@ -100,7 +109,7 @@ func Migrate(_ context.Context, e *xorm.Engine, allowLong bool) error {
 }
 
 func syncAll(sess *xorm.Engine) error {
-	for _, bean := range allBeans {
+	for _, bean := range AllBeans {
 		if err := sess.Sync(bean); err != nil {
 			return fmt.Errorf("sync error '%s': %w", reflect.TypeOf(bean), err)
 		}
