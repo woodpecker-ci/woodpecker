@@ -110,7 +110,11 @@ func lintFile(_ context.Context, c *cli.Command, file string) error {
 
 	// TODO: lint multiple files at once to allow checks for sth like "depends_on" to work
 	err = linter.New(
-		linter.WithTrusted(true),
+		linter.WithTrusted(linter.TrustedConfiguration{
+			Network:  true,
+			Volumes:  true,
+			Security: true,
+		}),
 		linter.PrivilegedPlugins(c.StringSlice("plugins-privileged")),
 		linter.WithTrustedClonePlugins(c.StringSlice("plugins-trusted-clone")),
 	).Lint([]*linter.WorkflowConfig{config})
