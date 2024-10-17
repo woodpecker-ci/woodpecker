@@ -156,6 +156,22 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 		c.workspacePath = path.Clean(conf.Workspace.Path)
 	}
 
+	// find general services (who are not mentioned within needs at all)
+	generalServices := make(map[string]struct{})
+	{
+		needsMap := make(map[string]struct{})
+		for _, step := range append(conf.Steps.ContainerList, conf.Services.ContainerList...) {
+			for _, need := range step.Needs {
+				needsMap[need] = struct{}{}
+			}
+		}
+		for _, service := range conf.Services.ContainerList {
+			if _, hasNeed := needsMap[service.Name]; !hasNeed {
+				generalServices[service.Name] = struct{}{}
+			}
+		}
+	}
+
 	// add default clone step
 	if !c.local && len(conf.Clone.ContainerList) == 0 && !conf.SkipClone && len(c.defaultClonePlugin) != 0 {
 		cloneSettings := map[string]any{"depth": "0"}
@@ -208,29 +224,41 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 		}
 	}
 
+	services := make([]*dagCompilerStep, 0, len(conf.Services.ContainerList))
+	steps := make([]*dagCompilerStep, 0, len(conf.Steps.ContainerList))
+
 	// add services steps
-	if len(conf.Services.ContainerList) != 0 {
-		stage := new(backend_types.Stage)
-
-		for _, container := range conf.Services.ContainerList {
-			if match, err := container.When.Match(c.metadata, false, c.env); !match && err == nil {
-				continue
-			} else if err != nil {
-				return nil, err
-			}
-
-			step, err := c.createProcess(container, backend_types.StepTypeService)
-			if err != nil {
-				return nil, err
-			}
-
-			stage.Steps = append(stage.Steps, step)
+	for pos, container := range conf.Services.ContainerList {
+		// Skip if local and should not run local
+		if c.local && !container.When.IsLocal() {
+			continue
 		}
-		config.Stages = append(config.Stages, stage)
+
+		if match, err := container.When.Match(c.metadata, false, c.env); !match && err == nil {
+			continue
+		} else if err != nil {
+			return nil, err
+		}
+
+		step, err := c.createProcess(container, backend_types.StepTypeService)
+		if err != nil {
+			return nil, err
+		}
+
+		_, isGeneralService := generalServices[container.Name]
+
+		services = append(services, &dagCompilerStep{
+			step:             step,
+			position:         pos,
+			name:             container.Name,
+			dependsOn:        container.DependsOn,
+			needs:            container.Needs,
+			isGeneralService: isGeneralService,
+		})
 	}
 
 	// add pipeline steps
-	steps := make([]*dagCompilerStep, 0, len(conf.Steps.ContainerList))
+	posServices := len(conf.Services.ContainerList)
 	for pos, container := range conf.Steps.ContainerList {
 		// Skip if local and should not run local
 		if c.local && !container.When.IsLocal() {
@@ -261,14 +289,15 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 
 		steps = append(steps, &dagCompilerStep{
 			step:      step,
-			position:  pos,
+			position:  pos + posServices, // services should be shown on top
 			name:      container.Name,
 			dependsOn: container.DependsOn,
+			needs:     container.Needs,
 		})
 	}
 
 	// generate stages out of steps
-	stepStages, err := newDAGCompiler(steps).compile()
+	stepStages, err := newDAGCompiler(steps, services).compile()
 	if err != nil {
 		return nil, err
 	}
