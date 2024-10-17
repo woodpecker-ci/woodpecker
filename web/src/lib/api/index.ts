@@ -343,6 +343,23 @@ export default class WoodpeckerClient extends ApiClient {
     return this._delete(`/api/orgs/${orgId}/agents/${agentId}`);
   }
 
+  async getRepoAgents(repoId: number, opts?: PaginationOptions): Promise<Agent[] | null> {
+    const query = encodeQueryString(opts);
+    return this._get(`/api/repos/${repoId}/agents?${query}`) as Promise<Agent[] | null>;
+  }
+
+  async createRepoAgent(repoId: number, agent: Partial<Agent>): Promise<Agent> {
+    return this._post(`/api/repos/${repoId}/agents`, agent) as Promise<Agent>;
+  }
+
+  async updateRepoAgent(repoId: number, agentId: number, agent: Partial<Agent>): Promise<Agent> {
+    return this._patch(`/api/repos/${repoId}/agents/${agentId}`, agent) as Promise<Agent>;
+  }
+
+  async deleteRepoAgent(repoId: number, agentId: number): Promise<unknown> {
+    return this._delete(`/api/repos/${repoId}/agents/${agentId}`);
+  }
+
   async getForges(opts?: PaginationOptions): Promise<Forge[] | null> {
     const query = encodeQueryString(opts);
     return this._get(`/api/forges?${query}`) as Promise<Forge[] | null>;

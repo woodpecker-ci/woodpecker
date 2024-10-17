@@ -63,6 +63,7 @@ func (s *WoodpeckerAuthServer) getAgent(agentID int64, agentToken string) (*mode
 			agent := &model.Agent{
 				OwnerID:  model.IDNotSet,
 				OrgID:    model.IDNotSet,
+				RepoID:   model.IDNotSet,
 				Token:    s.agentMasterToken,
 				Capacity: -1,
 			}
