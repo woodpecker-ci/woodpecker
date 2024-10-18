@@ -17,7 +17,7 @@
     "@docusaurus/core": "^3.5.2",
     "@docusaurus/plugin-content-blog": "^3.5.2",
     "@docusaurus/preset-classic": "^3.5.2",
-    "@easyops-cn/docusaurus-search-local": "^0.44.5",
+    "@easyops-cn/docusaurus-search-local": "^0.45.0",
     "@mdx-js/react": "^3.0.1",
     "@svgr/webpack": "^8.1.0",
     "clsx": "^2.1.1",
@@ -55,7 +55,7 @@
     "overrides": {
       "got": "^14.0.0",
       "path-to-regexp": "^3.3.0",
-      "cookie": "^0.7.0"
+      "cookie": "^1.0.0"
     }
   }
 }
