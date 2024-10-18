@@ -5,14 +5,14 @@ go 1.22.0
 toolchain go1.23.2
 
 require (
-	al.essio.dev/pkg/shellescape v1.5.0
+	al.essio.dev/pkg/shellescape v1.5.1
 	code.gitea.io/sdk/gitea v0.19.0
 	codeberg.org/6543/go-yaml2json v1.0.0
 	codeberg.org/6543/xyaml v1.1.0
 	codeberg.org/mvdkleijn/forgejo-sdk/forgejo v1.1.1
 	github.com/6543/logfile-open v1.2.1
 	github.com/adrg/xdg v0.5.0
-	github.com/bmatcuk/doublestar/v4 v4.6.1
+	github.com/bmatcuk/doublestar/v4 v4.7.1
 	github.com/caddyserver/certmagic v0.21.4
 	github.com/cenkalti/backoff/v4 v4.3.0
 	github.com/charmbracelet/huh v0.6.0
@@ -57,7 +57,7 @@ require (
 	github.com/swaggo/swag v1.16.3
 	github.com/urfave/cli-docs/v3 v3.0.0-alpha5.0.20240714105325-1da00919bcb4
 	github.com/urfave/cli/v3 v3.0.0-alpha9.0.20241004184838-20ef97b2155a
-	github.com/xanzy/go-gitlab v0.109.0
+	github.com/xanzy/go-gitlab v0.111.0
 	github.com/xeipuuv/gojsonschema v1.2.0
 	github.com/yaronf/httpsign v0.3.1
 	github.com/zalando/go-keyring v0.2.5
@@ -69,7 +69,7 @@ require (
 	golang.org/x/term v0.25.0
 	golang.org/x/text v0.19.0
 	google.golang.org/grpc v1.67.1
-	google.golang.org/protobuf v1.34.2
+	google.golang.org/protobuf v1.35.1
 	gopkg.in/yaml.v3 v3.0.1
 	k8s.io/api v0.31.1
 	k8s.io/apimachinery v0.31.1

@@ -297,14 +297,9 @@ func PostOrgAgent(c *gin.Context) {
 //	@Param		perPage			query	int		false	"for response pagination, max items per page"	default(50)
 func GetOrgAgents(c *gin.Context) {
 	_store := store.FromContext(c)
+	org := session.Org(c)
 
-	orgID, err := strconv.ParseInt(c.Param("org_id"), 10, 64)
-	if err != nil {
-		c.String(http.StatusBadRequest, "Error parsing org id. %s", err)
-		return
-	}
-
-	agents, err := _store.AgentListForOrg(orgID, session.Pagination(c))
+	agents, err := _store.AgentListForOrg(org.ID, session.Pagination(c))
 	if err != nil {
 		c.String(http.StatusInternalServerError, "Error getting agent list. %s", err)
 		return
@@ -326,12 +321,7 @@ func GetOrgAgents(c *gin.Context) {
 //	@Param		agent			body	Agent	true	"the agent's updated data"
 func PatchOrgAgent(c *gin.Context) {
 	_store := store.FromContext(c)
-
-	orgID, err := strconv.ParseInt(c.Param("org_id"), 10, 64)
-	if err != nil {
-		c.String(http.StatusBadRequest, "Invalid organization ID")
-		return
-	}
+	org := session.Org(c)
 
 	agentID, err := strconv.ParseInt(c.Param("agent_id"), 10, 64)
 	if err != nil {
@@ -345,7 +335,7 @@ func PatchOrgAgent(c *gin.Context) {
 		return
 	}
 
-	if agent.OrgID != orgID {
+	if agent.OrgID != org.ID {
 		c.String(http.StatusBadRequest, "Agent does not belong to this organization")
 		return
 	}
@@ -383,12 +373,7 @@ func PatchOrgAgent(c *gin.Context) {
 //	@Param		agent_id		path	int		true	"the agent's id"
 func DeleteOrgAgent(c *gin.Context) {
 	_store := store.FromContext(c)
-
-	orgID, err := strconv.ParseInt(c.Param("org_id"), 10, 64)
-	if err != nil {
-		c.String(http.StatusBadRequest, "Invalid organization ID")
-		return
-	}
+	org := session.Org(c)
 
 	agentID, err := strconv.ParseInt(c.Param("agent_id"), 10, 64)
 	if err != nil {
@@ -402,7 +387,7 @@ func DeleteOrgAgent(c *gin.Context) {
 		return
 	}
 
-	if agent.OrgID != orgID {
+	if agent.OrgID != org.ID {
 		c.String(http.StatusBadRequest, "Agent does not belong to this organization")
 		return
 	}
