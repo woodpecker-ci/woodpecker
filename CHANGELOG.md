@@ -1,10 +1,10 @@
 # Changelog
 
-## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-10-13
+## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-10-18
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @Fishbowler, @anbraten, @gnowland, @hg, @j04n-f, @jenrik, @johanneskastl, @lukashass, @meln5674, @not-my-profile, @pat-s, @qwerty287, @smainz, @tori-27, @xtexChooser, @zc-devs
+@6543, @Fishbowler, @M0Rf30, @anbraten, @gnowland, @hg, @j04n-f, @jenrik, @johanneskastl, @lukashass, @meln5674, @not-my-profile, @pat-s, @qwerty287, @smainz, @tori-27, @xtexChooser, @zc-devs
 
 ### 💥 Breaking changes
 
@@ -48,6 +48,7 @@
 
 ### 📚 Documentation
 
+- Remove archived plugin [[#4227](https://github.com/woodpecker-ci/woodpecker/pull/4227)]
 - Use "Woodpecker Authors" as copyright on website [[#4225](https://github.com/woodpecker-ci/woodpecker/pull/4225)]
 - chore(deps): update dependency cookie to v1 [[#4224](https://github.com/woodpecker-ci/woodpecker/pull/4224)]
 - fix(deps): update docs npm deps non-major [[#4221](https://github.com/woodpecker-ci/woodpecker/pull/4221)]
@@ -75,7 +76,7 @@
 
 ### 📈 Enhancement
 
-- WebUI: agent edit/detail view: change the **HELP** url based on the b… [[#4219](https://github.com/woodpecker-ci/woodpecker/pull/4219)]
+- Agent edit/detail view: change the help url based on the backend [[#4219](https://github.com/woodpecker-ci/woodpecker/pull/4219)]
 - Use middleware to load org [[#4208](https://github.com/woodpecker-ci/woodpecker/pull/4208)]
 - Assign workflows to agents with the best label matches [[#4201](https://github.com/woodpecker-ci/woodpecker/pull/4201)]
 - Report custom labels set by agent admins back [[#4141](https://github.com/woodpecker-ci/woodpecker/pull/4141)]
@@ -167,6 +168,7 @@
 
 ### Misc
 
+- Add Telegram plugin [[#4229](https://github.com/woodpecker-ci/woodpecker/pull/4229)]
 - [pre-commit.ci] pre-commit autoupdate [[#4209](https://github.com/woodpecker-ci/woodpecker/pull/4209)]
 - renovate: set `automergetype=pr` [[#4162](https://github.com/woodpecker-ci/woodpecker/pull/4162)]
 - Add `.lycheeignore` [[#4154](https://github.com/woodpecker-ci/woodpecker/pull/4154)]
