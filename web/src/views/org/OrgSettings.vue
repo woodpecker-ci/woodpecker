@@ -19,7 +19,7 @@
       <OrgRegistriesTab />
     </Tab>
 
-    <Tab id="agents" :title="$t('admin.settings.agents.agents')">
+    <Tab v-if="useConfig().userRegisteredAgents" id="agents" :title="$t('admin.settings.agents.agents')">
       <OrgAgentsTab />
     </Tab>
   </Scaffold>
@@ -35,6 +35,7 @@ import Tab from '~/components/layout/scaffold/Tab.vue';
 import OrgAgentsTab from '~/components/org/settings/OrgAgentsTab.vue';
 import OrgRegistriesTab from '~/components/org/settings/OrgRegistriesTab.vue';
 import OrgSecretsTab from '~/components/org/settings/OrgSecretsTab.vue';
+import useConfig from '~/compositions/useConfig';
 import { inject } from '~/compositions/useInjectProvide';
 import useNotifications from '~/compositions/useNotifications';
 import { useRouteBack } from '~/compositions/useRouteBack';
