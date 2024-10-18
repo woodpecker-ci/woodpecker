@@ -50,6 +50,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'update:modelValue', value: Record<string, string>): void;
+  (e: 'update:isValid', value: boolean): void;
 }>();
 
 const items = ref(Object.entries(props.modelValue).map(([key, value]) => ({ key, value })));
@@ -63,6 +64,13 @@ const displayItems = computed(() => {
 
 function isDuplicateKey(key: string, index: number): boolean {
   return items.value.some((item, i) => item.key === key && i !== index && key !== '');
+}
+
+function checkValidity() {
+  const isValid = items.value.every(
+    (item, idx) => !isDuplicateKey(item.key, idx) && (item.key !== '' || idx === items.value.length - 1),
+  );
+  emit('update:isValid', isValid);
 }
 
 function updateItem(index: number, field: 'key' | 'value', value: string) {
@@ -81,6 +89,7 @@ function updateItem(index: number, field: 'key' | 'value', value: string) {
   );
 
   emit('update:modelValue', newValue);
+  checkValidity();
 }
 
 function deleteItem(index: number) {
@@ -93,5 +102,6 @@ function deleteItem(index: number) {
   );
 
   emit('update:modelValue', newValue);
+  checkValidity();
 }
 </script>

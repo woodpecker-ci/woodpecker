@@ -316,6 +316,10 @@
           "desc": "The max amount of parallel pipelines executed by this agent.",
           "badge": "capacity"
         },
+        "custom_labels": {
+          "custom_labels": "Custom Labels",
+          "desc": "The custom labels set by the agent admin on agent startup."
+        },
         "org": {
           "badge": "org"
         },
