@@ -21,19 +21,19 @@ import (
 	"xorm.io/xorm"
 )
 
-type agentV016 struct {
+type agentV017 struct {
 	ID      int64             `xorm:"pk autoincr 'id'"`
 	Filters map[string]string `xorm:"'filters' json"`
 }
 
-func (agentV016) TableName() string {
+func (agentV017) TableName() string {
 	return "agents"
 }
 
 var addServerSideEnforcedAgentLabels = xormigrate.Migration{
 	ID: "add-server-side-enforced-agent-labels",
 	MigrateSession: func(sess *xorm.Session) (err error) {
-		if err := sess.Sync(new(agentV016)); err != nil {
+		if err := sess.Sync(new(agentV017)); err != nil {
 			return fmt.Errorf("sync models failed: %w", err)
 		}
 		return nil
