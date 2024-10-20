@@ -35,7 +35,6 @@ type (
 		BackendOptions map[string]any     `yaml:"backend_options,omitempty"`
 		Commands       base.StringOrSlice `yaml:"commands,omitempty"`
 		Entrypoint     base.StringOrSlice `yaml:"entrypoint,omitempty"`
-		Detached       bool               `yaml:"detach,omitempty"`
 		Directory      string             `yaml:"directory,omitempty"`
 		Failure        string             `yaml:"failure,omitempty"`
 		Image          string             `yaml:"image,omitempty"`
@@ -46,9 +45,12 @@ type (
 		When           constraint.When    `yaml:"when,omitempty"`
 		Ports          []string           `yaml:"ports,omitempty"`
 		DependsOn      base.StringOrSlice `yaml:"depends_on,omitempty"`
+		Needs          base.StringOrSlice `yaml:"needs,omitempty"`
+		Secrets        []string           `yaml:"secrets,omitempty"`
+		Environment    map[string]any     `yaml:"environment,omitempty"`
 
-		Secrets     []string       `yaml:"secrets,omitempty"`
-		Environment map[string]any `yaml:"environment,omitempty"`
+		// TODO deprecated remove in next major
+		Detached bool `yaml:"detach,omitempty"`
 
 		// Docker and Kubernetes Specific
 		Privileged bool `yaml:"privileged,omitempty"`
