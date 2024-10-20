@@ -36,11 +36,11 @@ Please note parameter expressions are subject to pre-processing. When using secr
    - name: docker
      image: docker
      commands:
--      - echo ${docker_username}
--      - echo ${DOCKER_PASSWORD}
-+      - echo $${docker_username}
-+      - echo $${DOCKER_PASSWORD}
-     secrets: [ docker_username, DOCKER_PASSWORD ]
+-      - echo ${TOKEN_ENV}
++      - echo $${TOKEN_ENV}
+     environment:
+       TOKEN_ENV:
+         from_secret: secret_token
 ```
 
 ### Use in Pull Requests events
