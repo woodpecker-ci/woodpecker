@@ -38,6 +38,7 @@ Some versions need some changes to the server configuration or the pipeline conf
 - Removed old API routes: `registry/` -> `registries`, `/authorize/token`
 - Replaced `registry` command with `repo registry` in cli
 - Disallow upgrades from 1.x, upgrade to 2.x first
+- Deprecated `secrets`, use `environment` with `from_secret`
 
 ## 2.0.0
 
