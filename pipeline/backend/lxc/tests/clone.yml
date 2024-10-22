@@ -1,0 +1,9 @@
+clone:
+  git:
+    image: docker.io/woodpeckerci/plugin-git
+
+steps:
+  job:
+    image: debian:bullseye
+    commands: |
+      echo SOMETHING
