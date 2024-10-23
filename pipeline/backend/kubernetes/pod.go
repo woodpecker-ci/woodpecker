@@ -28,6 +28,7 @@ import (
 
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/common"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/metadata"
 )
 
 const (
@@ -35,7 +36,7 @@ const (
 	podPrefix = "wp-"
 )
 
-func mkPod(step *types.Step, config *config, podName, goos string, options BackendOptions) (*v1.Pod, error) {
+func mkPod(step *types.Step, config *config, podName, goos string, options BackendOptions, metadata *metadata.Metadata) (*v1.Pod, error) {
 	var err error
 
 	nsp := newNativeSecretsProcessor(config, options.Secrets)
@@ -49,7 +50,7 @@ func mkPod(step *types.Step, config *config, podName, goos string, options Backe
 		return nil, err
 	}
 
-	spec, err := podSpec(step, config, options, nsp)
+	spec, err := podSpec(step, config, options, nsp, metadata)
 	if err != nil {
 		return nil, err
 	}
@@ -68,15 +69,15 @@ func mkPod(step *types.Step, config *config, podName, goos string, options Backe
 	return pod, nil
 }
 
-func stepToPodName(step *types.Step) (name string, err error) {
+func stepToPodName(step *types.Step, metadata *metadata.Metadata) (name string, err error) {
 	if step.Type == types.StepTypeService {
 		return serviceName(step)
 	}
-	return podName(step)
+	return podName(step, metadata)
 }
 
-func podName(step *types.Step) (string, error) {
-	return dnsName(podPrefix + step.UUID)
+func podName(step *types.Step, metadata *metadata.Metadata) (string, error) {
+	return dnsName(strings.ReplaceAll(podPrefix+metadata.Repo.Owner+"-"+metadata.Repo.Name+"-"+metadata.Workflow.Name+"-"+step.Name+"-"+step.UUID[:5], "_", "-"))
 }
 
 func podMeta(step *types.Step, config *config, options BackendOptions, podName string) (meta_v1.ObjectMeta, error) {
@@ -145,7 +146,7 @@ func podAnnotations(config *config, options BackendOptions) map[string]string {
 	return annotations
 }
 
-func podSpec(step *types.Step, config *config, options BackendOptions, nsp nativeSecretsProcessor) (v1.PodSpec, error) {
+func podSpec(step *types.Step, config *config, options BackendOptions, nsp nativeSecretsProcessor, metadata *metadata.Metadata) (v1.PodSpec, error) {
 	var err error
 	spec := v1.PodSpec{
 		RestartPolicy:      v1.RestartPolicyNever,
@@ -165,7 +166,7 @@ func podSpec(step *types.Step, config *config, options BackendOptions, nsp nativ
 	spec.ImagePullSecrets = secretsReferences(config.ImagePullSecretNames)
 	if needsRegistrySecret(step) {
 		log.Trace().Msgf("using an image pull secret from registries")
-		name, err := registrySecretName(step)
+		name, err := registrySecretName(step, metadata)
 		if err != nil {
 			return spec, err
 		}
@@ -502,13 +503,13 @@ func mapToEnvVars(m map[string]string) []v1.EnvVar {
 	return ev
 }
 
-func startPod(ctx context.Context, engine *kube, step *types.Step, options BackendOptions) (*v1.Pod, error) {
-	podName, err := stepToPodName(step)
+func startPod(ctx context.Context, engine *kube, step *types.Step, options BackendOptions, metadata *metadata.Metadata) (*v1.Pod, error) {
+	podName, err := stepToPodName(step, metadata)
 	if err != nil {
 		return nil, err
 	}
 	engineConfig := engine.getConfig()
-	pod, err := mkPod(step, engineConfig, podName, engine.goos, options)
+	pod, err := mkPod(step, engineConfig, podName, engine.goos, options, metadata)
 	if err != nil {
 		return nil, err
 	}
@@ -517,8 +518,8 @@ func startPod(ctx context.Context, engine *kube, step *types.Step, options Backe
 	return engine.client.CoreV1().Pods(engineConfig.Namespace).Create(ctx, pod, meta_v1.CreateOptions{})
 }
 
-func stopPod(ctx context.Context, engine *kube, step *types.Step, deleteOpts meta_v1.DeleteOptions) error {
-	podName, err := stepToPodName(step)
+func stopPod(ctx context.Context, engine *kube, step *types.Step, deleteOpts meta_v1.DeleteOptions, metadata *metadata.Metadata) error {
+	podName, err := stepToPodName(step, metadata)
 	if err != nil {
 		return err
 	}

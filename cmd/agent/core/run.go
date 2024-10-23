@@ -24,17 +24,18 @@ import (
 	"github.com/urfave/cli/v3"
 
 	backend "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/metadata"
 	"go.woodpecker-ci.org/woodpecker/v2/shared/logger"
 	"go.woodpecker-ci.org/woodpecker/v2/shared/utils"
 	"go.woodpecker-ci.org/woodpecker/v2/version"
 )
 
-func RunAgent(ctx context.Context, backends []backend.Backend) {
+func RunAgent(ctx context.Context, backends []backend.Backend, metadata *metadata.Metadata) {
 	app := &cli.Command{}
 	app.Name = "woodpecker-agent"
 	app.Version = version.String()
 	app.Usage = "woodpecker agent"
-	app.Action = runWithRetry(backends)
+	app.Action = runWithRetry(backends, metadata)
 	app.Commands = []*cli.Command{
 		{
 			Name:   "ping",

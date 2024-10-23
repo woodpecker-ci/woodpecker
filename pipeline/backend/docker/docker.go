@@ -36,6 +36,7 @@ import (
 	"github.com/urfave/cli/v3"
 
 	backend "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/metadata"
 	"go.woodpecker-ci.org/woodpecker/v2/shared/utils"
 )
 
@@ -169,7 +170,7 @@ func (e *docker) SetupWorkflow(ctx context.Context, conf *backend.Config, taskUU
 	return nil
 }
 
-func (e *docker) StartStep(ctx context.Context, step *backend.Step, taskUUID string) error {
+func (e *docker) StartStep(ctx context.Context, step *backend.Step, taskUUID string, metadata *metadata.Metadata) error {
 	log.Trace().Str("taskUUID", taskUUID).Msgf("start step %s", step.Name)
 
 	config := e.toConfig(step)
@@ -247,7 +248,7 @@ func (e *docker) StartStep(ctx context.Context, step *backend.Step, taskUUID str
 	return e.client.ContainerStart(ctx, containerName, container.StartOptions{})
 }
 
-func (e *docker) WaitStep(ctx context.Context, step *backend.Step, taskUUID string) (*backend.State, error) {
+func (e *docker) WaitStep(ctx context.Context, step *backend.Step, taskUUID string, metadata *metadata.Metadata) (*backend.State, error) {
 	log.Trace().Str("taskUUID", taskUUID).Msgf("wait for step %s", step.Name)
 
 	containerName := toContainerName(step)
@@ -270,7 +271,7 @@ func (e *docker) WaitStep(ctx context.Context, step *backend.Step, taskUUID stri
 	}, nil
 }
 
-func (e *docker) TailStep(ctx context.Context, step *backend.Step, taskUUID string) (io.ReadCloser, error) {
+func (e *docker) TailStep(ctx context.Context, step *backend.Step, taskUUID string, metadata *metadata.Metadata) (io.ReadCloser, error) {
 	log.Trace().Str("taskUUID", taskUUID).Msgf("tail logs of step %s", step.Name)
 
 	logs, err := e.client.ContainerLogs(ctx, toContainerName(step), container.LogsOptions{
@@ -294,7 +295,7 @@ func (e *docker) TailStep(ctx context.Context, step *backend.Step, taskUUID stri
 	return rc, nil
 }
 
-func (e *docker) DestroyStep(ctx context.Context, step *backend.Step, taskUUID string) error {
+func (e *docker) DestroyStep(ctx context.Context, step *backend.Step, taskUUID string, metadata *metadata.Metadata) error {
 	log.Trace().Str("taskUUID", taskUUID).Msgf("stop step %s", step.Name)
 
 	containerName := toContainerName(step)
@@ -310,7 +311,7 @@ func (e *docker) DestroyStep(ctx context.Context, step *backend.Step, taskUUID s
 	return nil
 }
 
-func (e *docker) DestroyWorkflow(ctx context.Context, conf *backend.Config, taskUUID string) error {
+func (e *docker) DestroyWorkflow(ctx context.Context, conf *backend.Config, taskUUID string, metadata *metadata.Metadata) error {
 	log.Trace().Str("taskUUID", taskUUID).Msgf("delete workflow environment")
 
 	for _, stage := range conf.Stages {

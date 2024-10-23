@@ -23,6 +23,7 @@ import (
 	v1 "k8s.io/api/core/v1"
 
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/metadata"
 )
 
 func TestNativeSecretsEnabled(t *testing.T) {
@@ -208,7 +209,7 @@ func TestUsernameAndPasswordNeedsSecret(t *testing.T) {
 func TestRegistrySecret(t *testing.T) {
 	const expected = `{
 		"metadata": {
-			"name": "wp-01he8bebctabr3kgk0qj36d2me-0",
+			"name": "wp-owner-repo-name-my-workflow-go-test-01he8",
 			"namespace": "woodpecker",
 			"creationTimestamp": null,
 			"labels": {
@@ -231,7 +232,11 @@ func TestRegistrySecret(t *testing.T) {
 		},
 	}, &config{
 		Namespace: "woodpecker",
-	})
+	},
+		&metadata.Metadata{
+			Workflow: metadata.Workflow{Name: "my-workflow"},
+			Repo:     metadata.Repo{Owner: "owner", Name: "repo_name"},
+		})
 	assert.NoError(t, err)
 
 	secretJSON, err := json.Marshal(secret)

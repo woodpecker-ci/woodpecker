@@ -24,6 +24,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/kubernetes"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/local"
 	backendTypes "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/metadata"
 	"go.woodpecker-ci.org/woodpecker/v2/shared/utils"
 )
 
@@ -33,9 +34,11 @@ var backends = []backendTypes.Backend{
 	local.New(),
 }
 
+var metadataList = &metadata.Metadata{}
+
 func main() {
 	ctx := utils.WithContextSigtermCallback(context.Background(), func() {
 		log.Info().Msg("termination signal is received, shutting down agent")
 	})
-	core.RunAgent(ctx, backends)
+	core.RunAgent(ctx, backends, metadataList)
 }

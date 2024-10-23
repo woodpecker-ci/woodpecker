@@ -35,13 +35,14 @@ import (
 	grpc_credentials "google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/keepalive"
-	"google.golang.org/grpc/metadata"
+	grpc_metadata "google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 
 	"go.woodpecker-ci.org/woodpecker/v2/agent"
 	agent_rpc "go.woodpecker-ci.org/woodpecker/v2/agent/rpc"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/metadata"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc"
 	"go.woodpecker-ci.org/woodpecker/v2/shared/logger"
 	"go.woodpecker-ci.org/woodpecker/v2/shared/utils"
@@ -63,7 +64,7 @@ var (
 	shutdownCtx                                = context.Background()
 )
 
-func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
+func run(ctx context.Context, c *cli.Command, backends []types.Backend, metadata *metadata.Metadata) error {
 	agentCtx, ctxCancel := context.WithCancelCause(ctx)
 	stopAgentFunc = func(err error) {
 		msg := "shutdown of whole agent"
@@ -160,7 +161,7 @@ func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 	client := agent_rpc.NewGrpcClient(ctx, conn)
 	agentConfigPersisted := atomic.Bool{}
 
-	grpcCtx := metadata.NewOutgoingContext(grpcClientCtx, metadata.Pairs("hostname", hostname))
+	grpcCtx := grpc_metadata.NewOutgoingContext(grpcClientCtx, grpc_metadata.Pairs("hostname", hostname))
 
 	// check if grpc server version is compatible with agent
 	grpcServerVersion, err := client.Version(grpcCtx) //nolint:contextcheck
@@ -290,7 +291,7 @@ func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 				}
 
 				log.Debug().Msg("polling new steps")
-				if err := runner.Run(agentCtx, shutdownCtx); err != nil {
+				if err := runner.Run(agentCtx, shutdownCtx, metadata); err != nil {
 					log.Error().Err(err).Msg("runner done with error")
 					return err
 				}
@@ -305,7 +306,7 @@ func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 	return serviceWaitingGroup.Wait()
 }
 
-func runWithRetry(backendEngines []types.Backend) func(ctx context.Context, c *cli.Command) error {
+func runWithRetry(backendEngines []types.Backend, metadata *metadata.Metadata) func(ctx context.Context, c *cli.Command) error {
 	return func(ctx context.Context, c *cli.Command) error {
 		if err := logger.SetupGlobalLogger(ctx, c, true); err != nil {
 			return err
@@ -317,7 +318,7 @@ func runWithRetry(backendEngines []types.Backend) func(ctx context.Context, c *c
 		retryDelay := c.Duration("connect-retry-delay")
 		var err error
 		for i := 0; i < retryCount; i++ {
-			if err = run(ctx, c, backendEngines); status.Code(err) == codes.Unavailable {
+			if err = run(ctx, c, backendEngines, metadata); status.Code(err) == codes.Unavailable {
 				log.Warn().Err(err).Msg(fmt.Sprintf("cannot connect to server, retrying in %v", retryDelay))
 				time.Sleep(retryDelay)
 			} else {
