@@ -20,11 +20,10 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestTask_GetLabels(t *testing.T) {
+func TestTask_ApplyLabelsFromRepo(t *testing.T) {
 	t.Run("Nil Repo", func(t *testing.T) {
 		task := &Task{}
 		err := task.ApplyLabelsFromRepo(nil)
-
 		assert.Error(t, err)
 		assert.Nil(t, task.Labels)
 		assert.EqualError(t, err, "repo is nil but needed to get task labels")
@@ -34,13 +33,11 @@ func TestTask_GetLabels(t *testing.T) {
 		task := &Task{}
 		repo := &Repo{}
 
-		err := task.ApplyLabelsFromRepo(repo)
-
-		assert.NoError(t, err)
-		assert.NotNil(t, task.Labels)
+		assert.NoError(t, task.ApplyLabelsFromRepo(repo))
 		assert.Equal(t, map[string]string{
-			"repo":           "",
-			agentFilterOrgID: "0",
+			"repo":            "",
+			agentFilterRepoID: "0",
+			agentFilterOrgID:  "0",
 		}, task.Labels)
 	})
 
@@ -52,13 +49,11 @@ func TestTask_GetLabels(t *testing.T) {
 			OrgID:    456,
 		}
 
-		err := task.ApplyLabelsFromRepo(repo)
-
-		assert.NoError(t, err)
-		assert.NotNil(t, task.Labels)
+		assert.NoError(t, task.ApplyLabelsFromRepo(repo))
 		assert.Equal(t, map[string]string{
-			"repo":           "test/repo",
-			agentFilterOrgID: "456",
+			"repo":            "test/repo",
+			agentFilterRepoID: "123",
+			agentFilterOrgID:  "456",
 		}, task.Labels)
 	})
 
@@ -74,14 +69,12 @@ func TestTask_GetLabels(t *testing.T) {
 			OrgID:    456,
 		}
 
-		err := task.ApplyLabelsFromRepo(repo)
-
-		assert.NoError(t, err)
-		assert.NotNil(t, task.Labels)
+		assert.NoError(t, task.ApplyLabelsFromRepo(repo))
 		assert.Equal(t, map[string]string{
-			"existing":       "label",
-			"repo":           "test/repo",
-			agentFilterOrgID: "456",
+			"existing":        "label",
+			"repo":            "test/repo",
+			agentFilterRepoID: "123",
+			agentFilterOrgID:  "456",
 		}, task.Labels)
 	})
 }
