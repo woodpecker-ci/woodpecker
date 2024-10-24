@@ -24,7 +24,13 @@ var Flags = []cli.Flag{
 	&cli.StringFlag{
 		Name:    "backend-local-temp-dir",
 		Sources: cli.EnvVars("WOODPECKER_BACKEND_LOCAL_TEMP_DIR"),
-		Usage:   "set a different temp dir to clone workflows into",
+		Usage:   "Set a different temp dir to clone workflows into.",
 		Value:   os.TempDir(),
+	},
+	&cli.StringFlag{
+		Name:    "backend-local-exec-dir",
+		Sources: cli.EnvVars("WOODPECKER_BACKEND_LOCAL_EXEC_DIR"),
+		Usage:   "Instead of using an tmp dir, we use this directory to exec the workflow in (for 'woodpecker-cli exec ...').",
+		Hidden:  true,
 	},
 }
