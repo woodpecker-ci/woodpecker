@@ -32,6 +32,7 @@ Some versions need some changes to the server configuration or the pipeline conf
 - Removed `WOODPECKER_WEBHOOK_HOST` in favor of `WOODPECKER_EXPERT_WEBHOOK_HOST`
 - Migrated to rfc9421 for webhook signatures
 - Renamed `start_time`, `end_time`, `created_at`, `started_at`, `finished_at` and `reviewed_at` JSON fields to `started`, `finished`, `created`, `started`, `finished`, `reviewed`
+- JSON field `trusted` on repo model was changed from boolean to object
 - Update all webhooks by pressing the "Repair all" button in the admin settings as the webhook token claims have changed
 - Crons now use standard Linux syntax without seconds
 - Replaced `configs` object by `netrc` in external configuration APIs

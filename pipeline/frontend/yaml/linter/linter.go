@@ -30,9 +30,15 @@ import (
 
 // A Linter lints a pipeline configuration.
 type Linter struct {
-	trusted             bool
+	trusted             TrustedConfiguration
 	privilegedPlugins   *[]string
 	trustedClonePlugins *[]string
+}
+
+type TrustedConfiguration struct {
+	Network  bool
+	Volumes  bool
+	Security bool
 }
 
 // New creates a new Linter with options.
@@ -143,10 +149,8 @@ func (l *Linter) lintContainers(config *WorkflowConfig, area string) error {
 		if err := l.lintImage(config, container, area); err != nil {
 			linterErr = multierr.Append(linterErr, err)
 		}
-		if !l.trusted {
-			if err := l.lintTrusted(config, container, area); err != nil {
-				linterErr = multierr.Append(linterErr, err)
-			}
+		if err := l.lintTrusted(config, container, area); err != nil {
+			linterErr = multierr.Append(linterErr, err)
 		}
 		if err := l.lintSettings(config, container, area); err != nil {
 			linterErr = multierr.Append(linterErr, err)
@@ -204,29 +208,35 @@ func (l *Linter) lintSettings(config *WorkflowConfig, c *types.Container, field 
 func (l *Linter) lintTrusted(config *WorkflowConfig, c *types.Container, area string) error {
 	yamlPath := fmt.Sprintf("%s.%s", area, c.Name)
 	errors := []string{}
-	if c.Privileged {
-		errors = append(errors, "Insufficient privileges to use privileged mode")
+	if !l.trusted.Security {
+		if c.Privileged {
+			errors = append(errors, "Insufficient privileges to use privileged mode")
+		}
 	}
-	if len(c.DNS) != 0 {
-		errors = append(errors, "Insufficient privileges to use custom dns")
+	if !l.trusted.Network {
+		if len(c.DNS) != 0 {
+			errors = append(errors, "Insufficient privileges to use custom dns")
+		}
+		if len(c.DNSSearch) != 0 {
+			errors = append(errors, "Insufficient privileges to use dns_search")
+		}
+		if len(c.ExtraHosts) != 0 {
+			errors = append(errors, "Insufficient privileges to use extra_hosts")
+		}
+		if len(c.NetworkMode) != 0 {
+			errors = append(errors, "Insufficient privileges to use network_mode")
+		}
 	}
-	if len(c.DNSSearch) != 0 {
-		errors = append(errors, "Insufficient privileges to use dns_search")
-	}
-	if len(c.Devices) != 0 {
-		errors = append(errors, "Insufficient privileges to use devices")
-	}
-	if len(c.ExtraHosts) != 0 {
-		errors = append(errors, "Insufficient privileges to use extra_hosts")
-	}
-	if len(c.NetworkMode) != 0 {
-		errors = append(errors, "Insufficient privileges to use network_mode")
-	}
-	if len(c.Volumes.Volumes) != 0 {
-		errors = append(errors, "Insufficient privileges to use volumes")
-	}
-	if len(c.Tmpfs) != 0 {
-		errors = append(errors, "Insufficient privileges to use tmpfs")
+	if !l.trusted.Volumes {
+		if len(c.Devices) != 0 {
+			errors = append(errors, "Insufficient privileges to use devices")
+		}
+		if len(c.Volumes.Volumes) != 0 {
+			errors = append(errors, "Insufficient privileges to use volumes")
+		}
+		if len(c.Tmpfs) != 0 {
+			errors = append(errors, "Insufficient privileges to use tmpfs")
+		}
 	}
 
 	if len(errors) > 0 {
