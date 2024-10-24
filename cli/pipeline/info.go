@@ -48,7 +48,7 @@ func pipelineInfo(ctx context.Context, c *cli.Command) error {
 	var number int64
 	if pipelineArg == "last" || len(pipelineArg) == 0 {
 		// Fetch the pipeline number from the last pipeline
-		pipeline, err := client.PipelineLast(repoID, "")
+		pipeline, err := client.PipelineLast(repoID, woodpecker.PipelineLastOptions{})
 		if err != nil {
 			return err
 		}
