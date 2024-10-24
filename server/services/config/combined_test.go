@@ -220,7 +220,7 @@ func TestFetchFromConfigService(t *testing.T) {
 			files, err := configFetcher.Fetch(
 				context.Background(),
 				f,
-				&model.User{Token: "xxx"},
+				&model.User{AccessToken: "xxx"},
 				repo,
 				&model.Pipeline{Commit: "89ab7b2d6bfb347144ac7c557e638ab402848fee"},
 				[]*forge_types.FileMeta{},

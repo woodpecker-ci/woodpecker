@@ -111,8 +111,8 @@ type modelUser struct {
 
 func (m *modelUser) asModel() *model.User {
 	m.User.ForgeRemoteID = m.ForgeRemoteID
-	m.User.Token = m.Token
-	m.User.Secret = m.Secret
+	m.User.AccessToken = m.Token
+	m.User.RefreshToken = m.Secret
 	m.User.Expiry = m.Expiry
 	m.User.Hash = m.Hash
 	return m.User
@@ -122,8 +122,8 @@ func modelUserFromModel(u *model.User) *modelUser {
 	return &modelUser{
 		User:          u,
 		ForgeRemoteID: u.ForgeRemoteID,
-		Token:         u.Token,
-		Secret:        u.Secret,
+		Token:         u.AccessToken,
+		Secret:        u.RefreshToken,
 		Expiry:        u.Expiry,
 		Hash:          u.Hash,
 	}
