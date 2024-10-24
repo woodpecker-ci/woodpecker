@@ -14,7 +14,7 @@
     <Tab id="cli-and-api" :title="$t('user.settings.cli_and_api.cli_and_api')">
       <UserCLIAndAPITab />
     </Tab>
-    <Tab id="agents" :title="$t('admin.settings.agents.agents')">
+    <Tab v-if="useConfig().userRegisteredAgents" id="agents" :title="$t('admin.settings.agents.agents')">
       <UserAgentsTab />
     </Tab>
   </Scaffold>
