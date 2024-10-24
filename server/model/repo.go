@@ -50,6 +50,7 @@ type Repo struct {
 	Hash                         string         `json:"-"                               xorm:"varchar(500) 'hash'"`
 	Perm                         *Perm          `json:"-"                               xorm:"-"`
 	CancelPreviousPipelineEvents []WebhookEvent `json:"cancel_previous_pipeline_events" xorm:"json 'cancel_previous_pipeline_events'"`
+	ConfigExtensionEndpoint      string         `json:"config_extension_endpoint"       xorm:"varchar(500) 'config_extension_endpoint'"`
 	NetrcOnlyTrusted             bool           `json:"netrc_only_trusted"              xorm:"NOT NULL DEFAULT true 'netrc_only_trusted'"`
 } //	@name Repo
 
@@ -116,6 +117,7 @@ type RepoPatch struct {
 	AllowPull                    *bool           `json:"allow_pr,omitempty"`
 	AllowDeploy                  *bool           `json:"allow_deploy,omitempty"`
 	CancelPreviousPipelineEvents *[]WebhookEvent `json:"cancel_previous_pipeline_events"`
+	ConfigExtensionEndpoint      *string         `json:"config_extension_endpoint,omitempty"`
 	NetrcOnlyTrusted             *bool           `json:"netrc_only_trusted"`
 } //	@name RepoPatch
 
