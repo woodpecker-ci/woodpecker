@@ -53,12 +53,15 @@ const (
 func setupStore(ctx context.Context, c *cli.Command) (store.Store, error) {
 	datasource := c.String("datasource")
 	driver := c.String("driver")
+	oldDatasource := c.String("old-datasource")
+	oldDriver := c.String("old-driver")
+	importOnly := c.Bool("import-old-datastore-only")
 	xorm := store.XORM{
 		Log:     c.Bool("log-xorm"),
 		ShowSQL: c.Bool("log-xorm-sql"),
 	}
 
-	if driver == "sqlite3" {
+	if driver == "sqlite3" || oldDriver == "sqlite3" {
 		if datastore.SupportedDriver("sqlite3") {
 			log.Debug().Msg("server has sqlite3 support")
 		} else {
@@ -82,16 +85,31 @@ func setupStore(ctx context.Context, c *cli.Command) (store.Store, error) {
 		XORM:   xorm,
 	}
 	log.Trace().Msgf("setup datastore: %#v", *opts)
-	store, err := datastore.NewEngine(opts)
+	_store, err := datastore.NewEngine(opts)
 	if err != nil {
 		return nil, fmt.Errorf("could not open datastore: %w", err)
 	}
 
-	if err := store.Migrate(ctx, c.Bool("migrations-allow-long")); err != nil {
-		return nil, fmt.Errorf("could not migrate datastore: %w", err)
+	if oldDatasource == "" {
+		if err := _store.Migrate(ctx, c.Bool("migrations-allow-long")); err != nil {
+			return nil, fmt.Errorf("could not migrate datastore: %w", err)
+		}
+	} else {
+		oldOpts := &store.Opts{
+			Driver: oldDriver,
+			Config: oldDatasource,
+		}
+		log.Trace().Msgf("migrate and import from datastore: %#v", *oldOpts)
+		log.Info().Msg("database to convert detected")
+		if err := datastore.ImportOldDB(ctx, oldOpts, opts); err != nil {
+			return nil, err
+		}
+		if importOnly {
+			os.Exit(0)
+		}
 	}
 
-	return store, nil
+	return _store, nil
 }
 
 func checkSqliteFileExist(path string) error {

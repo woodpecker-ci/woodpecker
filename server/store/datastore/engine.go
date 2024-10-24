@@ -63,3 +63,15 @@ func (s storage) Migrate(ctx context.Context, allowLong bool) error {
 func (s storage) Close() error {
 	return s.engine.Close()
 }
+
+func ImportOldDB(ctx context.Context, srcOpts, destOpts *store.Opts) error {
+	srcEng, err := xorm.NewEngine(srcOpts.Driver, srcOpts.Config)
+	if err != nil {
+		return err
+	}
+	destEng, err := xorm.NewEngine(destOpts.Driver, destOpts.Config)
+	if err != nil {
+		return err
+	}
+	return migration.Copy(ctx, srcEng, destEng)
+}
