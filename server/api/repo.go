@@ -90,7 +90,7 @@ func PostRepo(c *gin.Context) {
 		repo.Update(from)
 	} else {
 		repo = from
-		repo.AllowPull = true
+		repo.ApprovalMode = model.ApprovalModeAllOutsideCollaborators
 		repo.AllowDeploy = false
 		repo.NetrcOnlyTrusted = true
 		repo.CancelPreviousPipelineEvents = server.Config.Pipeline.DefaultCancelPreviousPipelineEvents
@@ -230,14 +230,11 @@ func PatchRepo(c *gin.Context) {
 		return
 	}
 
-	if in.AllowPull != nil {
-		repo.AllowPull = *in.AllowPull
+	if in.SecurityMode != nil {
+		repo.ApprovalMode = *in.SecurityMode
 	}
 	if in.AllowDeploy != nil {
 		repo.AllowDeploy = *in.AllowDeploy
-	}
-	if in.IsGated != nil {
-		repo.IsGated = *in.IsGated
 	}
 	if in.IsTrusted != nil {
 		repo.IsTrusted = *in.IsTrusted

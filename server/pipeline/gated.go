@@ -17,10 +17,26 @@ package pipeline
 import "go.woodpecker-ci.org/woodpecker/v2/server/model"
 
 func setGatedState(repo *model.Repo, pipeline *model.Pipeline) {
-	// TODO(336): extend gated feature with an allow/block List
-	if repo.IsGated &&
-		// events created by woodpecker itself should run right away
-		pipeline.Event != model.EventCron && pipeline.Event != model.EventManual {
+	// skip events created by woodpecker itself
+	if pipeline.Event == model.EventCron || pipeline.Event == model.EventManual {
+		return
+	}
+
+	// always require approval for pull requests from forks
+	if pipeline.Event == model.EventPull && pipeline.FromFork {
 		pipeline.Status = model.StatusBlocked
+		return
+	}
+
+	// repository requires approval for pull requests
+	if pipeline.Event == model.EventPull && repo.ApprovalMode == model.ApprovalModePullRequests {
+		pipeline.Status = model.StatusBlocked
+		return
+	}
+
+	// repository requires approval for all events
+	if repo.ApprovalMode == model.ApprovalModeAllEvents {
+		pipeline.Status = model.StatusBlocked
+		return
 	}
 }
