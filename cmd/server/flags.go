@@ -36,6 +36,24 @@ var flags = append([]cli.Flag{
 		Name:    "log-xorm-sql",
 		Usage:   "enable xorm sql command logging",
 	},
+	&cli.IntFlag{
+		Sources: cli.EnvVars("WOODPECKER_XORM_MAX_CONNECTIONS"),
+		Name:    "xorm-max-open-connections",
+		Usage:   "max connections xorm is allowed create",
+		Value:   100,
+	},
+	&cli.IntFlag{
+		Sources: cli.EnvVars("WOODPECKER_XORM_IDLE_CONNECTIONS"),
+		Name:    "xorm-max-idle-connections",
+		Usage:   "amount of connections xorm will hold open",
+		Value:   2,
+	},
+	&cli.DurationFlag{
+		Sources: cli.EnvVars("WOODPECKER_XORM_CONNECTION_TIMEOUT"),
+		Name:    "xorm-max-connection-timeout",
+		Usage:   "time an active connection is allowed to stay open",
+		Value:   3 * time.Second,
+	},
 	&cli.StringFlag{
 		Sources: cli.EnvVars("WOODPECKER_HOST"),
 		Name:    "server-host",
