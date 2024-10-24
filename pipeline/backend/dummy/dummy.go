@@ -30,6 +30,7 @@ import (
 	"github.com/urfave/cli/v3"
 
 	backend "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/metadata"
 )
 
 type dummy struct {
@@ -87,7 +88,7 @@ func (e *dummy) SetupWorkflow(_ context.Context, _ *backend.Config, taskUUID str
 	return nil
 }
 
-func (e *dummy) StartStep(_ context.Context, step *backend.Step, taskUUID string) error {
+func (e *dummy) StartStep(_ context.Context, step *backend.Step, taskUUID string, metadata *metadata.Metadata) error {
 	log.Trace().Str("taskUUID", taskUUID).Msgf("start step %s", step.Name)
 
 	// internal state checks
@@ -114,7 +115,7 @@ func (e *dummy) StartStep(_ context.Context, step *backend.Step, taskUUID string
 	return nil
 }
 
-func (e *dummy) WaitStep(ctx context.Context, step *backend.Step, taskUUID string) (*backend.State, error) {
+func (e *dummy) WaitStep(ctx context.Context, step *backend.Step, taskUUID string, metadata *metadata.Metadata) (*backend.State, error) {
 	log.Trace().Str("taskUUID", taskUUID).Msgf("wait for step %s", step.Name)
 
 	_, exist := e.kv.Load("task_" + taskUUID)
@@ -172,7 +173,7 @@ func (e *dummy) WaitStep(ctx context.Context, step *backend.Step, taskUUID strin
 	}, nil
 }
 
-func (e *dummy) TailStep(_ context.Context, step *backend.Step, taskUUID string) (io.ReadCloser, error) {
+func (e *dummy) TailStep(_ context.Context, step *backend.Step, taskUUID string, metadata *metadata.Metadata) (io.ReadCloser, error) {
 	log.Trace().Str("taskUUID", taskUUID).Msgf("tail logs of step %s", step.Name)
 
 	_, exist := e.kv.Load("task_" + taskUUID)
@@ -196,7 +197,7 @@ func (e *dummy) TailStep(_ context.Context, step *backend.Step, taskUUID string)
 	return io.NopCloser(strings.NewReader(dummyExecStepOutput(step))), nil
 }
 
-func (e *dummy) DestroyStep(_ context.Context, step *backend.Step, taskUUID string) error {
+func (e *dummy) DestroyStep(_ context.Context, step *backend.Step, taskUUID string, metadata *metadata.Metadata) error {
 	log.Trace().Str("taskUUID", taskUUID).Msgf("stop step %s", step.Name)
 
 	_, exist := e.kv.Load("task_" + taskUUID)
@@ -217,7 +218,7 @@ func (e *dummy) DestroyStep(_ context.Context, step *backend.Step, taskUUID stri
 	return nil
 }
 
-func (e *dummy) DestroyWorkflow(_ context.Context, _ *backend.Config, taskUUID string) error {
+func (e *dummy) DestroyWorkflow(_ context.Context, _ *backend.Config, taskUUID string, metadata *metadata.Metadata) error {
 	log.Trace().Str("taskUUID", taskUUID).Msgf("delete workflow environment")
 
 	_, exist := e.kv.Load("task_" + taskUUID)

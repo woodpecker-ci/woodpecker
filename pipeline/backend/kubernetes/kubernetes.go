@@ -38,6 +38,7 @@ import (
 	"k8s.io/client-go/tools/cache"
 
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/metadata"
 )
 
 const (
@@ -220,28 +221,28 @@ func (e *kube) SetupWorkflow(ctx context.Context, conf *types.Config, taskUUID s
 }
 
 // StartStep starts the pipeline step.
-func (e *kube) StartStep(ctx context.Context, step *types.Step, taskUUID string) error {
+func (e *kube) StartStep(ctx context.Context, step *types.Step, taskUUID string, metadata *metadata.Metadata) error {
 	options, err := parseBackendOptions(step)
 	if err != nil {
 		log.Error().Err(err).Msg("could not parse backend options")
 	}
 
 	if needsRegistrySecret(step) {
-		err = startRegistrySecret(ctx, e, step)
+		err = startRegistrySecret(ctx, e, step, metadata)
 		if err != nil {
 			return err
 		}
 	}
 
 	log.Trace().Str("taskUUID", taskUUID).Msgf("starting step: %s", step.Name)
-	_, err = startPod(ctx, e, step, options)
+	_, err = startPod(ctx, e, step, options, metadata)
 	return err
 }
 
 // WaitStep waits for the pipeline step to complete and returns
 // the completion results.
-func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) (*types.State, error) {
-	podName, err := stepToPodName(step)
+func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string, metadata *metadata.Metadata) (*types.State, error) {
+	podName, err := stepToPodName(step, metadata)
 	if err != nil {
 		return nil, err
 	}
@@ -316,8 +317,8 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 }
 
 // TailStep tails the pipeline step logs.
-func (e *kube) TailStep(ctx context.Context, step *types.Step, taskUUID string) (io.ReadCloser, error) {
-	podName, err := stepToPodName(step)
+func (e *kube) TailStep(ctx context.Context, step *types.Step, taskUUID string, metadata *metadata.Metadata) (io.ReadCloser, error) {
+	podName, err := stepToPodName(step, metadata)
 	if err != nil {
 		return nil, err
 	}
@@ -389,17 +390,17 @@ func (e *kube) TailStep(ctx context.Context, step *types.Step, taskUUID string) 
 	return rc, nil
 }
 
-func (e *kube) DestroyStep(ctx context.Context, step *types.Step, taskUUID string) error {
+func (e *kube) DestroyStep(ctx context.Context, step *types.Step, taskUUID string, metadata *metadata.Metadata) error {
 	var errs []error
 	log.Trace().Str("taskUUID", taskUUID).Msgf("Stopping step: %s", step.Name)
 	if needsRegistrySecret(step) {
-		err := stopRegistrySecret(ctx, e, step, defaultDeleteOptions)
+		err := stopRegistrySecret(ctx, e, step, defaultDeleteOptions, metadata)
 		if err != nil {
 			errs = append(errs, err)
 		}
 	}
 
-	err := stopPod(ctx, e, step, defaultDeleteOptions)
+	err := stopPod(ctx, e, step, defaultDeleteOptions, metadata)
 	if err != nil {
 		errs = append(errs, err)
 	}
@@ -407,12 +408,12 @@ func (e *kube) DestroyStep(ctx context.Context, step *types.Step, taskUUID strin
 }
 
 // DestroyWorkflow destroys the pipeline environment.
-func (e *kube) DestroyWorkflow(ctx context.Context, conf *types.Config, taskUUID string) error {
+func (e *kube) DestroyWorkflow(ctx context.Context, conf *types.Config, taskUUID string, metadata *metadata.Metadata) error {
 	log.Trace().Str("taskUUID", taskUUID).Msg("deleting Kubernetes primitives")
 
 	for _, stage := range conf.Stages {
 		for _, step := range stage.Steps {
-			err := stopPod(ctx, e, step, defaultDeleteOptions)
+			err := stopPod(ctx, e, step, defaultDeleteOptions, metadata)
 			if err != nil {
 				return err
 			}

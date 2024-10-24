@@ -29,6 +29,7 @@ import (
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/metadata"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/utils"
 )
 
@@ -204,8 +205,8 @@ func needsRegistrySecret(step *types.Step) bool {
 	return step.AuthConfig.Username != "" && step.AuthConfig.Password != ""
 }
 
-func mkRegistrySecret(step *types.Step, config *config) (*v1.Secret, error) {
-	name, err := registrySecretName(step)
+func mkRegistrySecret(step *types.Step, config *config, metadata *metadata.Metadata) (*v1.Secret, error) {
+	name, err := registrySecretName(step, metadata)
 	if err != nil {
 		return nil, err
 	}
@@ -247,8 +248,8 @@ func mkRegistrySecret(step *types.Step, config *config) (*v1.Secret, error) {
 	}, nil
 }
 
-func registrySecretName(step *types.Step) (string, error) {
-	return podName(step)
+func registrySecretName(step *types.Step, metadata *metadata.Metadata) (string, error) {
+	return podName(step, metadata)
 }
 
 func registrySecretLabels(step *types.Step) (map[string]string, error) {
@@ -266,8 +267,8 @@ func registrySecretLabels(step *types.Step) (map[string]string, error) {
 	return labels, nil
 }
 
-func startRegistrySecret(ctx context.Context, engine *kube, step *types.Step) error {
-	secret, err := mkRegistrySecret(step, engine.config)
+func startRegistrySecret(ctx context.Context, engine *kube, step *types.Step, metadata *metadata.Metadata) error {
+	secret, err := mkRegistrySecret(step, engine.config, metadata)
 	if err != nil {
 		return err
 	}
@@ -279,8 +280,8 @@ func startRegistrySecret(ctx context.Context, engine *kube, step *types.Step) er
 	return nil
 }
 
-func stopRegistrySecret(ctx context.Context, engine *kube, step *types.Step, deleteOpts meta_v1.DeleteOptions) error {
-	name, err := registrySecretName(step)
+func stopRegistrySecret(ctx context.Context, engine *kube, step *types.Step, deleteOpts meta_v1.DeleteOptions, metadata *metadata.Metadata) error {
+	name, err := registrySecretName(step, metadata)
 	if err != nil {
 		return err
 	}

@@ -282,7 +282,7 @@ func execWithAxis(ctx context.Context, c *cli.Command, file, repoPath string, ax
 		pipeline.WithDescription(map[string]string{
 			"CLI": "exec",
 		}),
-	).Run(ctx)
+	).Run(ctx, metadata)
 }
 
 // convertPathForWindows converts a path to use slash separators
