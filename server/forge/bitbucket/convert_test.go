@@ -145,6 +145,7 @@ func Test_helper(t *testing.T) {
 			g.Assert(pipeline.Ref).Equal("refs/pull-requests/1/from")
 			g.Assert(pipeline.Refspec).Equal("change:main")
 			g.Assert(pipeline.Message).Equal(hook.PullRequest.Title)
+			g.Assert(pipeline.PullRequestTitle).Equal(hook.PullRequest.Title)
 			g.Assert(pipeline.Timestamp).Equal(hook.PullRequest.Updated.Unix())
 		})
 
