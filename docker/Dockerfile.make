@@ -1,6 +1,6 @@
 # docker build --rm  -f docker/Dockerfile.make -t woodpecker/make:local .
 FROM docker.io/golang:1.23-alpine3.19 as golang_image
-FROM docker.io/node:22-alpine3.19
+FROM docker.io/node:23-alpine3.19
 
 # renovate: datasource=repology depName=alpine_3_19/make versioning=loose
 ENV MAKE_VERSION="4.4.1-r2"
