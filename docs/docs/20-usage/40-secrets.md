@@ -11,26 +11,7 @@ Woodpecker provides three different levels to add secrets to your pipeline. The 
 
 ## Usage
 
-### Use secrets in commands
-
-Secrets are exposed to your pipeline steps and plugins as uppercase environment variables and can therefore be referenced in the commands section of your pipeline,
-once their usage is declared in the `secrets` section:
-
-```diff
- steps:
-   - name: docker
-     image: docker
-     commands:
-+      - echo $docker_username
-+      - echo $DOCKER_PASSWORD
-+    secrets: [ docker_username, DOCKER_PASSWORD ]
-```
-
-The case of the environment variables is not changed, but secret matching is done case-insensitively. In the example above, `DOCKER_PASSWORD` would also match if the secret is called `docker_password`.
-
-### Use secrets in settings and environment
-
-You can set an setting or environment value from secrets using the `from_secret` syntax.
+You can set a setting or an environment value from secrets using the `from_secret` syntax.
 
 In this example, the secret named `secret_token` would be passed to the setting named `token`,which will be available in the plugin as environment variable named `PLUGIN_TOKEN` (See [plugins](./51-plugins/20-creating-plugins.md#settings) for details), and to the environment variable `TOKEN_ENV`.
 
@@ -55,11 +36,11 @@ Please note parameter expressions are subject to pre-processing. When using secr
    - name: docker
      image: docker
      commands:
--      - echo ${docker_username}
--      - echo ${DOCKER_PASSWORD}
-+      - echo $${docker_username}
-+      - echo $${DOCKER_PASSWORD}
-     secrets: [ docker_username, DOCKER_PASSWORD ]
+-      - echo ${TOKEN_ENV}
++      - echo $${TOKEN_ENV}
+     environment:
+       TOKEN_ENV:
+         from_secret: secret_token
 ```
 
 ### Use in Pull Requests events
