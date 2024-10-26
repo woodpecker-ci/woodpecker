@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-10-25
+## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-10-26
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -35,6 +35,7 @@
 
 ### 🔒 Security
 
+- chore: fix `http-proxy-middleware` CVE [[#4257](https://github.com/woodpecker-ci/woodpecker/pull/4257)]
 - chore(deps): update dependency vite to v5.4.6 [security] [[#4163](https://github.com/woodpecker-ci/woodpecker/pull/4163)]
 - Allow altering trusted clone plugins and filter them via tag [[#4074](https://github.com/woodpecker-ci/woodpecker/pull/4074)]
 - Update gitea sdk [[#4012](https://github.com/woodpecker-ci/woodpecker/pull/4012)]
@@ -46,6 +47,27 @@
 - Replay pipeline using `cli exec` by downloading metadata [[#4103](https://github.com/woodpecker-ci/woodpecker/pull/4103)]
 - Update clone plugin to support sha256 [[#4136](https://github.com/woodpecker-ci/woodpecker/pull/4136)]
 
+### 🐛 Bug Fixes
+
+- fix: repo/owner parsing for gitlab [[#4255](https://github.com/woodpecker-ci/woodpecker/pull/4255)]
+- Ensure cli exec has by default not the same prefix [[#4132](https://github.com/woodpecker-ci/woodpecker/pull/4132)]
+- Fix repo add loading spinner [[#4135](https://github.com/woodpecker-ci/woodpecker/pull/4135)]
+- Fix migration registries table [[#4111](https://github.com/woodpecker-ci/woodpecker/pull/4111)]
+- Wait for tracer to be done before finishing workflow [[#4068](https://github.com/woodpecker-ci/woodpecker/pull/4068)]
+- Fix schema with detached steps [[#4066](https://github.com/woodpecker-ci/woodpecker/pull/4066)]
+- Fix schema with commands and entrypoint [[#4065](https://github.com/woodpecker-ci/woodpecker/pull/4065)]
+- Read long log lines from file storage correctly [[#4048](https://github.com/woodpecker-ci/woodpecker/pull/4048)]
+- Only update agent.LastWork if not done recently [[#4031](https://github.com/woodpecker-ci/woodpecker/pull/4031)]
+- Set refspec for gitlab MR [[#4021](https://github.com/woodpecker-ci/woodpecker/pull/4021)]
+- Set `CI_PREV_COMMIT_{SOURCE,TARGET}_BRANCH` as mentioned in the documentation [[#4001](https://github.com/woodpecker-ci/woodpecker/pull/4001)]
+- [Bitbucket Datacenter] Return empty list instead of null [[#4010](https://github.com/woodpecker-ci/woodpecker/pull/4010)]
+- Fix BB PR pipeline ref [[#3985](https://github.com/woodpecker-ci/woodpecker/pull/3985)]
+- Change Bitbucket PR hook to point the source branch, commit & ref [[#3965](https://github.com/woodpecker-ci/woodpecker/pull/3965)]
+- Add updated, merged and declined events to bb webhook activation [[#3963](https://github.com/woodpecker-ci/woodpecker/pull/3963)]
+- Fix login via navbar [[#3962](https://github.com/woodpecker-ci/woodpecker/pull/3962)]
+- Truncate creation in list [[#3952](https://github.com/woodpecker-ci/woodpecker/pull/3952)]
+- Fix panic if forge is unreachable [[#3944](https://github.com/woodpecker-ci/woodpecker/pull/3944)]
+
 ### 📈 Enhancement
 
 - Deprecate `secrets` [[#4235](https://github.com/woodpecker-ci/woodpecker/pull/4235)]
@@ -54,7 +76,6 @@
 - Assign workflows to agents with the best label matches [[#4201](https://github.com/woodpecker-ci/woodpecker/pull/4201)]
 - Report custom labels set by agent admins back [[#4141](https://github.com/woodpecker-ci/woodpecker/pull/4141)]
 - Highlight invalid entries in manual pipeline trigger [[#4153](https://github.com/woodpecker-ci/woodpecker/pull/4153)]
-- Print agent labels in debug mode [[#4155](https://github.com/woodpecker-ci/woodpecker/pull/4155)]
 - Implement registries for Kubernetes backend [[#4092](https://github.com/woodpecker-ci/woodpecker/pull/4092)]
 - Correct cli exec flags and remove ineffective ones [[#4129](https://github.com/woodpecker-ci/woodpecker/pull/4129)]
 - Set repo user to repairing user when old user is missing [[#4128](https://github.com/woodpecker-ci/woodpecker/pull/4128)]
@@ -105,28 +126,9 @@
 - fix(deps): update docs npm deps non-major [[#3990](https://github.com/woodpecker-ci/woodpecker/pull/3990)]
 - Add spellchecking for docs [[#3787](https://github.com/woodpecker-ci/woodpecker/pull/3787)]
 
-### 🐛 Bug Fixes
-
-- Ensure cli exec has by default not the same prefix [[#4132](https://github.com/woodpecker-ci/woodpecker/pull/4132)]
-- Fix repo add loading spinner [[#4135](https://github.com/woodpecker-ci/woodpecker/pull/4135)]
-- Fix migration registries table [[#4111](https://github.com/woodpecker-ci/woodpecker/pull/4111)]
-- Wait for tracer to be done before finishing workflow [[#4068](https://github.com/woodpecker-ci/woodpecker/pull/4068)]
-- Fix schema with detached steps [[#4066](https://github.com/woodpecker-ci/woodpecker/pull/4066)]
-- Fix schema with commands and entrypoint [[#4065](https://github.com/woodpecker-ci/woodpecker/pull/4065)]
-- Read long log lines from file storage correctly [[#4048](https://github.com/woodpecker-ci/woodpecker/pull/4048)]
-- Only update agent.LastWork if not done recently [[#4031](https://github.com/woodpecker-ci/woodpecker/pull/4031)]
-- Set refspec for gitlab MR [[#4021](https://github.com/woodpecker-ci/woodpecker/pull/4021)]
-- Set `CI_PREV_COMMIT_{SOURCE,TARGET}_BRANCH` as mentioned in the documentation [[#4001](https://github.com/woodpecker-ci/woodpecker/pull/4001)]
-- [Bitbucket Datacenter] Return empty list instead of null [[#4010](https://github.com/woodpecker-ci/woodpecker/pull/4010)]
-- Fix BB PR pipeline ref [[#3985](https://github.com/woodpecker-ci/woodpecker/pull/3985)]
-- Change Bitbucket PR hook to point the source branch, commit & ref [[#3965](https://github.com/woodpecker-ci/woodpecker/pull/3965)]
-- Add updated, merged and declined events to bb webhook activation [[#3963](https://github.com/woodpecker-ci/woodpecker/pull/3963)]
-- Fix login via navbar [[#3962](https://github.com/woodpecker-ci/woodpecker/pull/3962)]
-- Truncate creation in list [[#3952](https://github.com/woodpecker-ci/woodpecker/pull/3952)]
-- Fix panic if forge is unreachable [[#3944](https://github.com/woodpecker-ci/woodpecker/pull/3944)]
-
 ### 📦️ Dependency
 
+- chore(deps): update web npm deps non-major [[#4250](https://github.com/woodpecker-ci/woodpecker/pull/4250)]
 - chore(deps): update node.js to v23 [[#4239](https://github.com/woodpecker-ci/woodpecker/pull/4239)]
 - chore(deps): update web npm deps non-major [[#4237](https://github.com/woodpecker-ci/woodpecker/pull/4237)]
 - chore(deps): update docker.io/mysql docker tag to v9.1.0 [[#4236](https://github.com/woodpecker-ci/woodpecker/pull/4236)]
