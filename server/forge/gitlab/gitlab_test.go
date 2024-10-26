@@ -301,16 +301,67 @@ func Test_GitLab(t *testing.T) {
 	})
 }
 
-// Test extractFromPath function.
 func TestExtractFromPath(t *testing.T) {
-	owner, name, err := extractFromPath("owner/group/repo")
-	if err != nil {
-		t.Fatalf("expected no error, got %v", err)
+	type testCase struct {
+		name        string
+		input       string
+		wantOwner   string
+		wantName    string
+		errContains string
 	}
-	if owner != "owner/group" {
-		t.Errorf("expected owner to be 'owner/group', got %s", owner)
+
+	tests := []testCase{
+		{
+			name:      "basic two components",
+			input:     "owner/repo",
+			wantOwner: "owner",
+			wantName:  "repo",
+		},
+		{
+			name:      "three components",
+			input:     "owner/group/repo",
+			wantOwner: "owner/group",
+			wantName:  "repo",
+		},
+		{
+			name:      "many components",
+			input:     "owner/group/subgroup/deep/repo",
+			wantOwner: "owner/group/subgroup/deep",
+			wantName:  "repo",
+		},
+		{
+			name:        "empty string",
+			input:       "",
+			errContains: "minimum match not found",
+		},
+		{
+			name:        "single component",
+			input:       "onlyrepo",
+			errContains: "minimum match not found",
+		},
+		{
+			name:      "trailing slash",
+			input:     "owner/repo/",
+			wantOwner: "owner/repo",
+			wantName:  "",
+		},
 	}
-	if name != "repo" {
-		t.Errorf("expected name to be 'repo', got %s", name)
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			owner, name, err := extractFromPath(tc.input)
+
+			// Check error expectations
+			if tc.errContains != "" {
+				if assert.Error(t, err) {
+					assert.Contains(t, err.Error(), tc.errContains)
+				}
+				return
+			}
+
+			assert.NoError(t, err)
+			assert.EqualValues(t, tc.wantOwner, owner)
+			assert.EqualValues(t, tc.wantName, name)
+		})
 	}
 }
