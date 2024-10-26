@@ -300,3 +300,17 @@ func Test_GitLab(t *testing.T) {
 		})
 	})
 }
+
+// Test function
+func TestExtractFromPath(t *testing.T) {
+	owner, name, err := extractFromPath("owner/group/repo")
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+	if owner != "owner/group" {
+		t.Errorf("expected owner to be 'owner/group', got %s", owner)
+	}
+	if name != "repo" {
+		t.Errorf("expected name to be 'repo', got %s", name)
+	}
+}
