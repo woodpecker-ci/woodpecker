@@ -553,7 +553,7 @@ func (g *GitLab) Deactivate(ctx context.Context, user *model.User, repo *model.R
 		}
 
 		for _, hook := range hooks {
-			if hook.URL == webURL {
+			if strings.Contains(hook.URL, webURL) {
 				hookID = hook.ID
 				break
 			}
