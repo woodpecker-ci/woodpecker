@@ -555,12 +555,16 @@ func (g *GitLab) Deactivate(ctx context.Context, user *model.User, repo *model.R
 		for _, hook := range hooks {
 			if strings.Contains(hook.URL, webURL) {
 				hookID = hook.ID
+				_, err = client.Projects.DeleteProjectHook(_repo.ID, hookID, gitlab.WithContext(ctx))
+				if err != nil {
+					return err
+				}
 				break
 			}
 		}
 
 		// Exit the loop when we've seen all pages
-		if resp.CurrentPage >= resp.TotalPages {
+		if hookID != -1 || resp.CurrentPage >= resp.TotalPages {
 			break
 		}
 
@@ -568,13 +572,7 @@ func (g *GitLab) Deactivate(ctx context.Context, user *model.User, repo *model.R
 		listProjectHooksOptions.Page = resp.NextPage
 	}
 
-	if hookID == -1 {
-		return fmt.Errorf("could not find hook to delete")
-	}
-
-	_, err = client.Projects.DeleteProjectHook(_repo.ID, hookID, gitlab.WithContext(ctx))
-
-	return err
+	return nil
 }
 
 // Branches returns the names of all branches for the named repository.
