@@ -301,7 +301,7 @@ func Test_GitLab(t *testing.T) {
 	})
 }
 
-// Test function
+// Test extractFromPath function.
 func TestExtractFromPath(t *testing.T) {
 	owner, name, err := extractFromPath("owner/group/repo")
 	if err != nil {
