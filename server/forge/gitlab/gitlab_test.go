@@ -300,3 +300,68 @@ func Test_GitLab(t *testing.T) {
 		})
 	})
 }
+
+func TestExtractFromPath(t *testing.T) {
+	type testCase struct {
+		name        string
+		input       string
+		wantOwner   string
+		wantName    string
+		errContains string
+	}
+
+	tests := []testCase{
+		{
+			name:      "basic two components",
+			input:     "owner/repo",
+			wantOwner: "owner",
+			wantName:  "repo",
+		},
+		{
+			name:      "three components",
+			input:     "owner/group/repo",
+			wantOwner: "owner/group",
+			wantName:  "repo",
+		},
+		{
+			name:      "many components",
+			input:     "owner/group/subgroup/deep/repo",
+			wantOwner: "owner/group/subgroup/deep",
+			wantName:  "repo",
+		},
+		{
+			name:        "empty string",
+			input:       "",
+			errContains: "minimum match not found",
+		},
+		{
+			name:        "single component",
+			input:       "onlyrepo",
+			errContains: "minimum match not found",
+		},
+		{
+			name:      "trailing slash",
+			input:     "owner/repo/",
+			wantOwner: "owner/repo",
+			wantName:  "",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			owner, name, err := extractFromPath(tc.input)
+
+			// Check error expectations
+			if tc.errContains != "" {
+				if assert.Error(t, err) {
+					assert.Contains(t, err.Error(), tc.errContains)
+				}
+				return
+			}
+
+			assert.NoError(t, err)
+			assert.EqualValues(t, tc.wantOwner, owner)
+			assert.EqualValues(t, tc.wantName, name)
+		})
+	}
+}
