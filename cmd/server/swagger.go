@@ -20,8 +20,8 @@ import (
 )
 
 // Generate docs/swagger.json via:
-//go:generate CGO_ENABLED=0 go run woodpecker_docs_gen.go swagger.go
-//go:generate CGO_ENABLED=0 go run github.com/getkin/kin-openapi/cmd/validate@latest ../../docs/swagger.json
+//go:generate go run woodpecker_docs_gen.go swagger.go
+//go:generate go run github.com/getkin/kin-openapi/cmd/validate@latest ../../docs/swagger.json
 
 // setupSwaggerStaticConfig initializes static content only (contacts, title and description)
 // for dynamic configuration of e.g. hostname, etc. see router.setupSwaggerConfigAndRoutes
