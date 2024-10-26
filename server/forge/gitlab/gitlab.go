@@ -559,7 +559,6 @@ func (g *GitLab) Deactivate(ctx context.Context, user *model.User, repo *model.R
 				if err != nil {
 					return err
 				}
-				break
 			}
 		}
 
