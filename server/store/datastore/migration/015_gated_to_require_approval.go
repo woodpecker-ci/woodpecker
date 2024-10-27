@@ -72,6 +72,6 @@ var gatedToRequireApproval = xormigrate.Migration{
 			page++
 		}
 
-		return dropTableColumns(sess, "pipelines", "pipeline_error")
+		return dropTableColumns(sess, "repos", "gated")
 	},
 }
