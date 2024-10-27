@@ -13,7 +13,7 @@ steps:
         branch: renovate/*
 
   - name: spellcheck
-    image: docker.io/node:22-alpine
+    image: docker.io/node:23-alpine
     depends_on: []
     commands:
       - corepack enable

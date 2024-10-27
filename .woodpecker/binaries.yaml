@@ -6,7 +6,7 @@ when:
 
 variables:
   - &golang_image 'docker.io/golang:1.23'
-  - &node_image 'docker.io/node:22-alpine'
+  - &node_image 'docker.io/node:23-alpine'
   - &xgo_image 'docker.io/techknowlogick/xgo:go-1.22.x'
 
 # cspell:words bindata netgo
@@ -97,7 +97,7 @@ steps:
   release:
     depends_on:
       - checksums
-    image: woodpeckerci/plugin-release:0.1.0
+    image: woodpeckerci/plugin-release:0.2.1
     settings:
       api_key:
         from_secret: github_token

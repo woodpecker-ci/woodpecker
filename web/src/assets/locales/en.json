@@ -246,7 +246,16 @@
       "show_errors": "Show errors",
       "we_got_some_errors": "Oh no, we got some errors!",
       "duration": "Pipeline duration",
-      "created": "Created: {created}"
+      "created": "Created: {created}",
+      "debug": {
+        "title": "Debug",
+        "download_metadata": "Download metadata",
+        "metadata_download_error": "Error downloading metadata",
+        "metadata_download_successful": "Metadata downloaded successfully",
+        "no_permission": "You don't have permission to access debug information.",
+        "metadata_exec_title": "Rerun pipeline locally",
+        "metadata_exec_desc": "Download this pipeline's metadata to run it locally. This allows you to troubleshoot issues and test changes before committing them."
+      }
     }
   },
   "org": {
@@ -257,6 +266,9 @@
       },
       "registries": {
         "desc": "Organization registry credentials can be added to use private images for all pipelines of an organization."
+      },
+      "agents": {
+        "desc": "Agents registered for this organization."
       }
     }
   },
@@ -303,6 +315,13 @@
           "capacity": "Capacity",
           "desc": "The max amount of parallel pipelines executed by this agent.",
           "badge": "capacity"
+        },
+        "custom_labels": {
+          "custom_labels": "Custom Labels",
+          "desc": "The custom labels set by the agent admin on agent startup."
+        },
+        "org": {
+          "badge": "org"
         },
         "version": "Version",
         "last_contact": "Last contact",
@@ -406,6 +425,9 @@
         "download_cli": "Download CLI",
         "reset_token": "Reset token",
         "swagger_ui": "Swagger UI"
+      },
+      "agents": {
+        "desc": "Agents registered to your account repos."
       }
     }
   },
@@ -424,7 +446,7 @@
     "saved": "Secret saved",
     "plugins": {
       "images": "Available only for the following plugins",
-      "desc": "List of plugins images where this secret is available, leave empty to allow for all plugins and general steps."
+      "desc": "List of plugin images where this secret is available. Leave empty to allow for all plugins and normal steps."
     },
     "events": {
       "events": "Available at the following events",

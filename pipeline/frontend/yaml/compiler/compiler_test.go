@@ -50,7 +50,7 @@ func TestSecretAvailable(t *testing.T) {
 	assert.ErrorContains(t, secret.Available("push", &yaml_types.Container{
 		Image:    "golang",
 		Commands: yaml_base_types.StringOrSlice{"echo 'this is not a plugin'"},
-	}), "only allowed to be used by plugins by step")
+	}), "is only allowed to be used by plugins (a filter has been set on the secret). Note: Image filters do not work for normal steps")
 	assert.ErrorContains(t, secret.Available("push", &yaml_types.Container{
 		Image:    "not-golang",
 		Commands: yaml_base_types.StringOrSlice{},

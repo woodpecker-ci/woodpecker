@@ -32,6 +32,11 @@ var flags = []cli.Flag{
 		Name:    "repo-path",
 		Usage:   "path to local repository",
 	},
+	&cli.StringFlag{
+		Sources: cli.EnvVars("WOODPECKER_METADATA_FILE"),
+		Name:    "metadata-file",
+		Usage:   "path to pipeline metadata file (normally downloaded from UI). Parameters can be adjusted by applying additional cli flags",
+	},
 	&cli.DurationFlag{
 		Sources: cli.EnvVars("WOODPECKER_TIMEOUT"),
 		Name:    "timeout",
@@ -47,13 +52,6 @@ var flags = []cli.Flag{
 		Sources: cli.EnvVars("WOODPECKER_NETWORKS"),
 		Name:    "network",
 		Usage:   "external networks",
-	},
-	&cli.StringFlag{
-		Sources: cli.EnvVars("WOODPECKER_PREFIX"),
-		Name:    "prefix",
-		Value:   "woodpecker",
-		Usage:   "prefix used for containers, volumes, networks, ... created by woodpecker",
-		Hidden:  true,
 	},
 	&cli.StringSliceFlag{
 		Sources: cli.EnvVars("WOODPECKER_PLUGINS_PRIVILEGED"),
@@ -235,7 +233,7 @@ var flags = []cli.Flag{
 	&cli.StringFlag{
 		Sources: cli.EnvVars("CI_PIPELINE_FILES"),
 		Usage:   "Set the metadata environment variable \"CI_PIPELINE_FILES\", either json formatted list of strings, or comma separated string list.",
-		Name:    "pipeline-files",
+		Name:    "pipeline-changed-files",
 	},
 	&cli.StringFlag{
 		Sources: cli.EnvVars("CI_COMMIT_SHA"),

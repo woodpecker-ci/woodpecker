@@ -476,44 +476,6 @@ Supported variables:
 
 ---
 
-### `WOODPECKER_LIMIT_MEM_SWAP`
-
-> Default: `0`
-
-The maximum amount of memory a single pipeline container is allowed to swap to disk, configured in bytes. There is no limit if `0`.
-
-### `WOODPECKER_LIMIT_MEM`
-
-> Default: `0`
-
-The maximum amount of memory a single pipeline container can use, configured in bytes. There is no limit if `0`.
-
-### `WOODPECKER_LIMIT_SHM_SIZE`
-
-> Default: `0`
-
-The maximum amount of memory of `/dev/shm` allowed in bytes. There is no limit if `0`.
-
-### `WOODPECKER_LIMIT_CPU_QUOTA`
-
-> Default: `0`
-
-The number of microseconds per CPU period that the container is limited to before throttled. There is no limit if `0`.
-
-### `WOODPECKER_LIMIT_CPU_SHARES`
-
-> Default: `0`
-
-The relative weight vs. other containers.
-
-### `WOODPECKER_LIMIT_CPU_SET`
-
-> Default: empty
-
-Comma-separated list to limit the specific CPUs or cores a pipeline container can use.
-
-Example: `WOODPECKER_LIMIT_CPU_SET=1,2`
-
 ### `WOODPECKER_CONFIG_SERVICE_ENDPOINT`
 
 > Default: empty
@@ -522,7 +484,7 @@ Specify a configuration service endpoint, see [Configuration Extension](./40-adv
 
 ### `WOODPECKER_FORGE_TIMEOUT`
 
-> Default: 3s
+> Default: 5s
 
 Specify timeout when fetching the Woodpecker configuration from forge. See <https://pkg.go.dev/time#ParseDuration> for syntax reference.
 

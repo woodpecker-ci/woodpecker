@@ -55,6 +55,15 @@ type (
 		GrpcVersion   int32  `json:"grpc_version,omitempty"`
 		ServerVersion string `json:"server_version,omitempty"`
 	}
+
+	// AgentInfo represents all the metadata that should be known about an agent.
+	AgentInfo struct {
+		Version      string            `json:"version"`
+		Platform     string            `json:"platform"`
+		Backend      string            `json:"backend"`
+		Capacity     int               `json:"capacity"`
+		CustomLabels map[string]string `json:"custom_labels"`
+	}
 )
 
 //go:generate mockery --name Peer --output mocks --case underscore --note "+build test"
@@ -86,7 +95,7 @@ type Peer interface {
 	EnqueueLog(logEntry *LogEntry)
 
 	// RegisterAgent register our agent to the server
-	RegisterAgent(ctx context.Context, platform, backend, version string, capacity int) (int64, error)
+	RegisterAgent(ctx context.Context, info AgentInfo) (int64, error)
 
 	// UnregisterAgent unregister our agent from the server
 	UnregisterAgent(ctx context.Context) error

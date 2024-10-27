@@ -207,9 +207,6 @@ func (l *Linter) lintTrusted(config *WorkflowConfig, c *types.Container, area st
 	if c.Privileged {
 		errors = append(errors, "Insufficient privileges to use privileged mode")
 	}
-	if c.ShmSize != 0 {
-		errors = append(errors, "Insufficient privileges to override shm_size")
-	}
 	if len(c.DNS) != 0 {
 		errors = append(errors, "Insufficient privileges to use custom dns")
 	}
@@ -266,6 +263,21 @@ func (l *Linter) lintDeprecations(config *WorkflowConfig) (err error) {
 	err = xyaml.Unmarshal([]byte(config.RawConfig), parsed)
 	if err != nil {
 		return err
+	}
+
+	for _, container := range parsed.Steps.ContainerList {
+		if len(container.Secrets) > 0 {
+			err = multierr.Append(err, &errorTypes.PipelineError{
+				Type:    errorTypes.PipelineErrorTypeDeprecation,
+				Message: "Secrets are deprecated, use environment with from_secret",
+				Data: errors.DeprecationErrorData{
+					File:  config.File,
+					Field: fmt.Sprintf("steps.%s.secrets", container.Name),
+					Docs:  "https://woodpecker-ci.org/docs/usage/secrets#usage",
+				},
+				IsWarning: true,
+			})
+		}
 	}
 
 	return nil

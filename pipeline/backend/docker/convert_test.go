@@ -196,37 +196,44 @@ func TestToConfigSmall(t *testing.T) {
 }
 
 func TestToConfigFull(t *testing.T) {
-	engine := docker{info: system.Info{OSType: "linux/riscv64"}}
+	engine := docker{
+		info: system.Info{OSType: "linux/riscv64"},
+		config: config{
+			enableIPv6: true,
+			resourceLimit: resourceLimit{
+				MemSwapLimit: 12,
+				MemLimit:     13,
+				ShmSize:      14,
+				CPUQuota:     15,
+				CPUShares:    16,
+			},
+		},
+	}
 
 	conf := engine.toConfig(&backend.Step{
-		Name:         "test",
-		UUID:         "09238932",
-		Type:         backend.StepTypeCommands,
-		Image:        "golang:1.2.3",
-		Pull:         true,
-		Detached:     true,
-		Privileged:   true,
-		WorkingDir:   "/src/abc",
-		Environment:  map[string]string{"TAGS": "sqlite"},
-		Commands:     []string{"go test", "go vet ./..."},
-		ExtraHosts:   []backend.HostAlias{{Name: "t", IP: "1.2.3.4"}},
-		Volumes:      []string{"/cache:/cache"},
-		Tmpfs:        []string{"/tmp"},
-		Devices:      []string{"/dev/sdc"},
-		Networks:     []backend.Conn{{Name: "extra-net", Aliases: []string{"extra.net"}}},
-		DNS:          []string{"9.9.9.9", "8.8.8.8"},
-		DNSSearch:    nil,
-		MemSwapLimit: 12,
-		MemLimit:     13,
-		ShmSize:      14,
-		CPUQuota:     15,
-		CPUShares:    16,
-		OnFailure:    true,
-		OnSuccess:    true,
-		Failure:      "fail",
-		AuthConfig:   backend.Auth{Username: "user", Password: "123456"},
-		NetworkMode:  "bridge",
-		Ports:        []backend.Port{{Number: 21}, {Number: 22}},
+		Name:        "test",
+		UUID:        "09238932",
+		Type:        backend.StepTypeCommands,
+		Image:       "golang:1.2.3",
+		Pull:        true,
+		Detached:    true,
+		Privileged:  true,
+		WorkingDir:  "/src/abc",
+		Environment: map[string]string{"TAGS": "sqlite"},
+		Commands:    []string{"go test", "go vet ./..."},
+		ExtraHosts:  []backend.HostAlias{{Name: "t", IP: "1.2.3.4"}},
+		Volumes:     []string{"/cache:/cache"},
+		Tmpfs:       []string{"/tmp"},
+		Devices:     []string{"/dev/sdc"},
+		Networks:    []backend.Conn{{Name: "extra-net", Aliases: []string{"extra.net"}}},
+		DNS:         []string{"9.9.9.9", "8.8.8.8"},
+		DNSSearch:   nil,
+		OnFailure:   true,
+		OnSuccess:   true,
+		Failure:     "fail",
+		AuthConfig:  backend.Auth{Username: "user", Password: "123456"},
+		NetworkMode: "bridge",
+		Ports:       []backend.Port{{Number: 21}, {Number: 22}},
 	})
 
 	assert.NotNil(t, conf)

@@ -4,13 +4,15 @@ Some versions need some changes to the server configuration or the pipeline conf
 
 ## `next`
 
-- Set `/woodpecker` as defautl workdir for the **woodpecker-cli** container
+- Deprecate `WOODPECKER_FILTER_LABELS` use `WOODPECKER_AGENT_LABELS`
 - Removed built-in environment variables:
   - `CI_COMMIT_URL` use `CI_PIPELINE_FORGE_URL`
   - `CI_STEP_FINISHED` as empty during execution
   - `CI_PIPELINE_FINISHED` as empty during execution
   - `CI_PIPELINE_STATUS` was always `success`
   - `CI_STEP_STATUS` was always `success`
+- Set `/woodpecker` as defautl workdir for the **woodpecker-cli** container
+- Move docker resource limit settings from server into agent configuration
 - Rename server environment variable `WOODPECKER_ESCALATE` to `WOODPECKER_PLUGINS_PRIVILEGED`
 - All default privileged plugins (like `woodpeckerci/plugin-docker-buildx`) were removed. Please carefully [re-add those plugins](./30-administration/10-server-config.md#woodpecker_plugins_privileged) you trust and rely on.
 - `WOODPECKER_DEFAULT_CLONE_IMAGE` got depricated use `WOODPECKER_DEFAULT_CLONE_PLUGIN`
@@ -23,7 +25,7 @@ Some versions need some changes to the server configuration or the pipeline conf
 - Pipelines without a config file will now be skipped instead of failing
 - Removed implicitly defined `regcred` image pull secret name. Set it explicitly via `WOODPECKER_BACKEND_K8S_PULL_SECRET_NAMES`
 - Removed `includes` and `excludes` support from **event** filter
-- Removed uppercasing all secret env vars, instead, the value of the `secrets` property is used. [Read more](./20-usage/40-secrets.md#use-secrets-in-commands)
+- Removed uppercasing all secret env vars, instead, the value of the `secrets` property is used. [Read more](./20-usage/40-secrets.md#usage)
 - Removed alternative names for secrets, use `environment` with `from_secret`
 - Removed slice definition for env vars
 - Removed `environment` filter, use `when.evaluate`
@@ -36,6 +38,7 @@ Some versions need some changes to the server configuration or the pipeline conf
 - Removed old API routes: `registry/` -> `registries`, `/authorize/token`
 - Replaced `registry` command with `repo registry` in cli
 - Disallow upgrades from 1.x, upgrade to 2.x first
+- Deprecated `secrets`, use `environment` with `from_secret`
 
 ## 2.0.0
 

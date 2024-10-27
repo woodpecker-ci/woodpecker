@@ -42,7 +42,7 @@ import (
 type StepBuilder struct {
 	Repo      *model.Repo
 	Curr      *model.Pipeline
-	Last      *model.Pipeline
+	Prev      *model.Pipeline
 	Netrc     *model.Netrc
 	Secs      []*model.Secret
 	Regs      []*model.Registry
@@ -115,7 +115,7 @@ func (b *StepBuilder) Build() (items []*Item, errorsAndWarnings error) {
 }
 
 func (b *StepBuilder) genItemForWorkflow(workflow *model.Workflow, axis matrix.Axis, data string) (item *Item, errorsAndWarnings error) {
-	workflowMetadata := MetadataFromStruct(b.Forge, b.Repo, b.Curr, b.Last, workflow, b.Host)
+	workflowMetadata := MetadataFromStruct(b.Forge, b.Repo, b.Curr, b.Prev, workflow, b.Host)
 	environ := b.environmentVariables(workflowMetadata, axis)
 
 	// add global environment variables for substituting
@@ -270,7 +270,6 @@ func (b *StepBuilder) toInternalRepresentation(parsed *yaml_types.Workflow, envi
 		compiler.WithEnviron(b.Envs),
 		// TODO: server deps should be moved into StepBuilder fields and set on StepBuilder creation
 		compiler.WithEscalated(server.Config.Pipeline.PrivilegedPlugins...),
-		compiler.WithResourceLimit(server.Config.Pipeline.Limits.MemSwapLimit, server.Config.Pipeline.Limits.MemLimit, server.Config.Pipeline.Limits.ShmSize, server.Config.Pipeline.Limits.CPUQuota, server.Config.Pipeline.Limits.CPUShares, server.Config.Pipeline.Limits.CPUSet),
 		compiler.WithVolumes(server.Config.Pipeline.Volumes...),
 		compiler.WithNetworks(server.Config.Pipeline.Networks...),
 		compiler.WithLocal(false),
