@@ -43,6 +43,8 @@ var migrationTasks = []*xormigrate.Migration{
 	&renameStartEndTime,
 	&fixV31Registries,
 	&removeOldMigrationsOfV1,
+	&addOrgAgents,
+	&addCustomLabelsToAgent,
 }
 
 var allBeans = []any{

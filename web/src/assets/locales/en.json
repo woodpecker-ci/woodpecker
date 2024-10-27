@@ -266,6 +266,9 @@
       },
       "registries": {
         "desc": "Organization registry credentials can be added to use private images for all pipelines of an organization."
+      },
+      "agents": {
+        "desc": "Agents registered for this organization."
       }
     }
   },
@@ -312,6 +315,13 @@
           "capacity": "Capacity",
           "desc": "The max amount of parallel pipelines executed by this agent.",
           "badge": "capacity"
+        },
+        "custom_labels": {
+          "custom_labels": "Custom Labels",
+          "desc": "The custom labels set by the agent admin on agent startup."
+        },
+        "org": {
+          "badge": "org"
         },
         "version": "Version",
         "last_contact": "Last contact",
@@ -415,6 +425,9 @@
         "download_cli": "Download CLI",
         "reset_token": "Reset token",
         "swagger_ui": "Swagger UI"
+      },
+      "agents": {
+        "desc": "Agents registered to your account repos."
       }
     }
   },
