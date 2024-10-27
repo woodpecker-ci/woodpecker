@@ -10,7 +10,7 @@ If you want a secure instance, set the `WOODPECKER_PLUGINS_PRIVILEGED` to only a
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @anbraten, @j04n-f, @qwerty287
+@6543, @anbraten, @j04n-f, @pat-s, @qwerty287
 
 ### 🔒 Security
 
