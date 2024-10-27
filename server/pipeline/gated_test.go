@@ -18,27 +18,7 @@ func TestSetGatedState(t *testing.T) {
 		expectBlocked bool
 	}{
 		{
-			name: "no restrictions",
-			repo: &model.Repo{
-				ApprovalMode: model.ApprovalModeAllOutsideCollaborators,
-			},
-			pipeline: &model.Pipeline{
-				Event: model.EventPull,
-			},
-			expectBlocked: false,
-		},
-		{
-			name: "require approval for fork PRs",
-			repo: &model.Repo{
-				ApprovalMode: model.ApprovalModeAllOutsideCollaborators,
-			},
-			pipeline: &model.Pipeline{
-				Event: model.EventPull,
-			},
-			expectBlocked: true,
-		},
-		{
-			name: "by-pass for cron / manual events",
+			name: "by-pass for cron",
 			repo: &model.Repo{
 				ApprovalMode: model.ApprovalModeAllEvents,
 			},
@@ -47,7 +27,38 @@ func TestSetGatedState(t *testing.T) {
 			},
 			expectBlocked: false,
 		},
-
+		{
+			name: "by-pass for manual pipeline",
+			repo: &model.Repo{
+				ApprovalMode: model.ApprovalModeAllEvents,
+			},
+			pipeline: &model.Pipeline{
+				Event: model.EventManual,
+			},
+			expectBlocked: false,
+		},
+		{
+			name: "require approval for fork PRs",
+			repo: &model.Repo{
+				ApprovalMode: model.ApprovalModeForks,
+			},
+			pipeline: &model.Pipeline{
+				Event:    model.EventPull,
+				FromFork: true,
+			},
+			expectBlocked: true,
+		},
+		{
+			name: "require approval for PRs",
+			repo: &model.Repo{
+				ApprovalMode: model.ApprovalModePullRequests,
+			},
+			pipeline: &model.Pipeline{
+				Event:    model.EventPull,
+				FromFork: false,
+			},
+			expectBlocked: true,
+		},
 		{
 			name: "require approval for everything",
 			repo: &model.Repo{

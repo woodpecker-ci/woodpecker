@@ -90,7 +90,7 @@ func PostRepo(c *gin.Context) {
 		repo.Update(from)
 	} else {
 		repo = from
-		repo.ApprovalMode = model.ApprovalModeAllOutsideCollaborators
+		repo.ApprovalMode = model.ApprovalModeForks
 		repo.AllowDeploy = false
 		repo.NetrcOnlyTrusted = true
 		repo.CancelPreviousPipelineEvents = server.Config.Pipeline.DefaultCancelPreviousPipelineEvents
