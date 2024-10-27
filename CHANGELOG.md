@@ -128,6 +128,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update web npm deps non-major [[#4258](https://github.com/woodpecker-ci/woodpecker/pull/4258)]
 - chore(deps): update web npm deps non-major [[#4250](https://github.com/woodpecker-ci/woodpecker/pull/4250)]
 - chore(deps): update node.js to v23 [[#4239](https://github.com/woodpecker-ci/woodpecker/pull/4239)]
 - chore(deps): update web npm deps non-major [[#4237](https://github.com/woodpecker-ci/woodpecker/pull/4237)]
