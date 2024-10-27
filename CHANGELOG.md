@@ -18,6 +18,7 @@ If you want a secure instance, set the `WOODPECKER_PLUGINS_PRIVILEGED` to only a
 
 ### 🐛 Bug Fixes
 
+- Fix repo/owner parsing for gitlab ([#4255](https://github.com/woodpecker-ci/woodpecker/pull/4255)) [[#4261](https://github.com/woodpecker-ci/woodpecker/pull/4261)]
 - Run queue.process() in background [[#4115](https://github.com/woodpecker-ci/woodpecker/pull/4115)]
 - Only update agent.LastWork if not done recently ([#4031](https://github.com/woodpecker-ci/woodpecker/pull/4031)) [[#4100](https://github.com/woodpecker-ci/woodpecker/pull/4100)]
 
