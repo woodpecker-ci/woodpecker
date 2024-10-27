@@ -58,7 +58,7 @@ func main() {
 
 	// convert to OpenApi3
 	if err := toOpenApi3(filePath, filePath); err != nil {
-		fmt.Printf("convert from '%s' to '%s'\n", filePath, filePath)
+		fmt.Printf("converting '%s' from openapi v2 to v3 failed\n", filePath)
 		panic(err)
 	}
 }
@@ -85,12 +85,12 @@ func toOpenApi3(input, output string) error {
 	var doc2 openapi2.T
 	err = json.Unmarshal(data2, &doc2)
 	if err != nil {
-		return fmt.Errorf("Unmarshal input: %w", err)
+		return fmt.Errorf("unmarshal input: %w", err)
 	}
 
 	doc3, err := openapi2conv.ToV3(&doc2)
 	if err != nil {
-		return fmt.Errorf("convert v2 to v3: %w", err)
+		return fmt.Errorf("convert openapi v2 to v3: %w", err)
 	}
 	err = doc3.Validate(context.Background())
 	if err != nil {
