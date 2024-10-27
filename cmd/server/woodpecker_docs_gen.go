@@ -79,7 +79,7 @@ func removeHost(jsonIn string) (string, error) {
 func toOpenApi3(input, output string) error {
 	data2, err := os.ReadFile(input)
 	if err != nil {
-		return fmt.Errorf("Read input: %w", err)
+		return fmt.Errorf("read input: %w", err)
 	}
 
 	var doc2 openapi2.T
