@@ -35,9 +35,9 @@ var repoUpdateCmd = &cli.Command{
 			Name:  "trusted",
 			Usage: "repository is trusted",
 		},
-		&cli.BoolFlag{
-			Name:  "gated",
-			Usage: "repository is gated",
+		&cli.StringFlag{
+			Name:  "approval-mode",
+			Usage: "repository approval mode",
 		},
 		&cli.DurationFlag{
 			Name:  "timeout",
@@ -78,7 +78,7 @@ func repoUpdate(ctx context.Context, c *cli.Command) error {
 		config          = c.String("config")
 		timeout         = c.Duration("timeout")
 		trusted         = c.Bool("trusted")
-		gated           = c.Bool("gated")
+		approvalMode    = c.String("approval-mode")
 		pipelineCounter = int(c.Int("pipeline-counter"))
 		unsafe          = c.Bool("unsafe")
 	)
@@ -87,8 +87,8 @@ func repoUpdate(ctx context.Context, c *cli.Command) error {
 	if c.IsSet("trusted") {
 		patch.IsTrusted = &trusted
 	}
-	if c.IsSet("gated") {
-		patch.IsGated = &gated
+	if c.IsSet("approval-mode") {
+		patch.ApprovalMode = &approvalMode
 	}
 	if c.IsSet("timeout") {
 		v := int64(timeout / time.Minute)

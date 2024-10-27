@@ -64,7 +64,7 @@ Config path: {{ .Config }}
 Visibility: {{ .Visibility }}
 Private: {{ .IsSCMPrivate }}
 Trusted: {{ .IsTrusted }}
-Gated: {{ .IsGated }}
+Require approval for: {{ .RequireApproval }}
 Clone url: {{ .Clone }}
 Allow pull-requests: {{ .AllowPullRequests }}
 `

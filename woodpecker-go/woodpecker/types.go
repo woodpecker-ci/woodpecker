@@ -41,7 +41,7 @@ type (
 		Visibility                   string   `json:"visibility"`
 		IsSCMPrivate                 bool     `json:"private"`
 		IsTrusted                    bool     `json:"trusted"`
-		IsGated                      bool     `json:"gated"`
+		RequireApproval              string   `json:"require_approval"`
 		IsActive                     bool     `json:"active"`
 		AllowPullRequests            bool     `json:"allow_pr"`
 		Config                       string   `json:"config_file"`
@@ -53,7 +53,7 @@ type (
 	RepoPatch struct {
 		Config          *string `json:"config_file,omitempty"`
 		IsTrusted       *bool   `json:"trusted,omitempty"`
-		IsGated         *bool   `json:"gated,omitempty"`
+		RequireApproval *string `json:"require_approval,omitempty"`
 		Timeout         *int64  `json:"timeout,omitempty"`
 		Visibility      *string `json:"visibility"`
 		AllowPull       *bool   `json:"allow_pr,omitempty"`

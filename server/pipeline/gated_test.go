@@ -20,7 +20,7 @@ func TestSetGatedState(t *testing.T) {
 		{
 			name: "by-pass for cron",
 			repo: &model.Repo{
-				ApprovalMode: model.ApprovalModeAllEvents,
+				RequireApproval: model.RequireApprovalAllEvents,
 			},
 			pipeline: &model.Pipeline{
 				Event: model.EventCron,
@@ -30,7 +30,7 @@ func TestSetGatedState(t *testing.T) {
 		{
 			name: "by-pass for manual pipeline",
 			repo: &model.Repo{
-				ApprovalMode: model.ApprovalModeAllEvents,
+				RequireApproval: model.RequireApprovalAllEvents,
 			},
 			pipeline: &model.Pipeline{
 				Event: model.EventManual,
@@ -40,7 +40,7 @@ func TestSetGatedState(t *testing.T) {
 		{
 			name: "require approval for fork PRs",
 			repo: &model.Repo{
-				ApprovalMode: model.ApprovalModeForks,
+				RequireApproval: model.RequireApprovalForks,
 			},
 			pipeline: &model.Pipeline{
 				Event:    model.EventPull,
@@ -51,7 +51,7 @@ func TestSetGatedState(t *testing.T) {
 		{
 			name: "require approval for PRs",
 			repo: &model.Repo{
-				ApprovalMode: model.ApprovalModePullRequests,
+				RequireApproval: model.RequireApprovalPullRequests,
 			},
 			pipeline: &model.Pipeline{
 				Event:    model.EventPull,
@@ -62,7 +62,7 @@ func TestSetGatedState(t *testing.T) {
 		{
 			name: "require approval for everything",
 			repo: &model.Repo{
-				ApprovalMode: model.ApprovalModeAllEvents,
+				RequireApproval: model.RequireApprovalAllEvents,
 			},
 			pipeline: &model.Pipeline{
 				Event: model.EventPush,
@@ -72,7 +72,7 @@ func TestSetGatedState(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		setGatedState(tc.repo, tc.pipeline)
+		setApprovalState(tc.repo, tc.pipeline)
 		assert.Equal(t, tc.expectBlocked, tc.pipeline.Status == model.StatusBlocked)
 	}
 }

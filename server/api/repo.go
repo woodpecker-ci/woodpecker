@@ -90,7 +90,7 @@ func PostRepo(c *gin.Context) {
 		repo.Update(from)
 	} else {
 		repo = from
-		repo.ApprovalMode = model.ApprovalModeForks
+		repo.RequireApproval = model.RequireApprovalForks
 		repo.AllowDeploy = false
 		repo.NetrcOnlyTrusted = true
 		repo.CancelPreviousPipelineEvents = server.Config.Pipeline.DefaultCancelPreviousPipelineEvents
@@ -230,8 +230,8 @@ func PatchRepo(c *gin.Context) {
 		return
 	}
 
-	if in.ApprovalMode != nil {
-		repo.ApprovalMode = *in.ApprovalMode
+	if in.RequireApproval != nil {
+		repo.RequireApproval = *in.RequireApproval
 	}
 	if in.AllowDeploy != nil {
 		repo.AllowDeploy = *in.AllowDeploy

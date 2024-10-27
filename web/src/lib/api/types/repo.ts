@@ -67,7 +67,7 @@ export interface Repo {
 
   last_pipeline: number;
 
-  gated: boolean;
+  require_approval: 'forks' | 'pull_requests' | 'all_events';
 
   // Events that will cancel running pipelines before starting a new one
   cancel_previous_pipeline_events: string[];
@@ -89,7 +89,7 @@ export type RepoSettings = Pick<
   | 'timeout'
   | 'visibility'
   | 'trusted'
-  | 'gated'
+  | 'require_approval'
   | 'allow_pr'
   | 'allow_deploy'
   | 'cancel_previous_pipeline_events'
