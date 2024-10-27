@@ -110,6 +110,7 @@ func PostHook(c *gin.Context) {
 
 	var repo *model.Repo
 
+	log.Trace().Msgf("Hook parsing (1.): Check if the webhook is valid and authorized")
 	_, err := token.ParseRequest([]token.Type{token.HookToken}, c.Request, func(t *token.Token) (string, error) {
 		var err error
 		repo, err = getRepoFromToken(_store, t)
@@ -144,6 +145,7 @@ func PostHook(c *gin.Context) {
 	// 2. Parse the webhook data
 	//
 
+	log.Trace().Msgf("Hook parsing (2.): Parse the webhook data")
 	repoFromForge, pipelineFromForge, err := _forge.Hook(c, c.Request)
 	if err != nil {
 		if errors.Is(err, &types.ErrIgnoreEvent{}) {
@@ -176,6 +178,7 @@ func PostHook(c *gin.Context) {
 	// 3. Check the repo from the token is matching the repo returned by the forge
 	//
 
+	log.Trace().Msgf("Hook parsing (3.): Check the repo from the token is matching the repo returned by the forge")
 	if repo.ForgeRemoteID != repoFromForge.ForgeRemoteID {
 		log.Warn().Msgf("ignoring hook: repo %s does not match the repo from the token", repo.FullName)
 		c.String(http.StatusBadRequest, "failure to parse token from hook")
@@ -186,6 +189,7 @@ func PostHook(c *gin.Context) {
 	// 4. Check if the repo is active and has an owner
 	//
 
+	log.Trace().Msgf("Hook parsing (4.): Check if the repo is active and has an owner")
 	if !repo.IsActive {
 		log.Debug().Msgf("ignoring hook: repo %s is inactive", repoFromForge.FullName)
 		c.Status(http.StatusNoContent)
@@ -206,9 +210,10 @@ func PostHook(c *gin.Context) {
 	forge.Refresh(c, _forge, _store, user)
 
 	//
-	// 4. Update the repo
+	// 5. Update the repo
 	//
 
+	log.Trace().Msgf("Hook parsing (5.): Update the repo")
 	if repo.FullName != repoFromForge.FullName {
 		// create a redirection
 		err = _store.CreateRedirection(&model.Redirection{RepoID: repo.ID, FullName: repo.FullName})
@@ -226,9 +231,10 @@ func PostHook(c *gin.Context) {
 	}
 
 	//
-	// 5. Check if pull requests are allowed for this repo
+	// 6. Check if pull requests are allowed for this repo
 	//
 
+	log.Trace().Msgf("Hook parsing (5.): Check if pull requests are allowed for this repo")
 	if (pipelineFromForge.Event == model.EventPull || pipelineFromForge.Event == model.EventPullClosed) && !repo.AllowPull {
 		log.Debug().Str("repo", repo.FullName).Msg("ignoring hook: pull requests are disabled for this repo in woodpecker")
 		c.Status(http.StatusNoContent)
@@ -236,9 +242,10 @@ func PostHook(c *gin.Context) {
 	}
 
 	//
-	// 6. Finally create a pipeline
+	// 7. Finally create a pipeline
 	//
 
+	log.Trace().Msgf("Hook parsing (6.): Return pipeline info")
 	pl, err := pipeline.Create(c, _store, repo, pipelineFromForge)
 	if err != nil {
 		handlePipelineErr(c, err)
