@@ -49,6 +49,7 @@
 
 ### 🐛 Bug Fixes
 
+- Increase `WOODPECKER_FORGE_TIMEOUT` to fix config fetching for GitLab [[#4262](https://github.com/woodpecker-ci/woodpecker/pull/4262)]
 - fix: repo/owner parsing for gitlab [[#4255](https://github.com/woodpecker-ci/woodpecker/pull/4255)]
 - Ensure cli exec has by default not the same prefix [[#4132](https://github.com/woodpecker-ci/woodpecker/pull/4132)]
 - Fix repo add loading spinner [[#4135](https://github.com/woodpecker-ci/woodpecker/pull/4135)]
