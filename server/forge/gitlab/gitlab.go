@@ -541,7 +541,6 @@ func (g *GitLab) Deactivate(ctx context.Context, user *model.User, repo *model.R
 		return err
 	}
 
-	hookID := -1
 	listProjectHooksOptions := &gitlab.ListProjectHooksOptions{
 		PerPage: perPage,
 		Page:    1,
@@ -554,9 +553,8 @@ func (g *GitLab) Deactivate(ctx context.Context, user *model.User, repo *model.R
 
 		for _, hook := range hooks {
 			if strings.Contains(hook.URL, webURL) {
-				hookID = hook.ID
-				_, err = client.Projects.DeleteProjectHook(_repo.ID, hookID, gitlab.WithContext(ctx))
-				log.Info().Msg(fmt.Sprintf("successfully deleted hook with ID %d for repo %s", hookID, repo.FullName))
+				_, err = client.Projects.DeleteProjectHook(_repo.ID, hook.ID, gitlab.WithContext(ctx))
+				log.Info().Msg(fmt.Sprintf("successfully deleted hook with ID %d for repo %s", hook.ID, repo.FullName))
 				if err != nil {
 					return err
 				}
