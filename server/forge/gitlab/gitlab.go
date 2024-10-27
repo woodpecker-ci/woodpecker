@@ -563,8 +563,7 @@ func (g *GitLab) Deactivate(ctx context.Context, user *model.User, repo *model.R
 			}
 		}
 
-		// Exit the loop when we've seen all pages
-		if hookID != -1 || resp.CurrentPage >= resp.TotalPages {
+		if resp.CurrentPage >= resp.TotalPages {
 			break
 		}
 
