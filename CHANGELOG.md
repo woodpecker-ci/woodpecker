@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-10-26
+## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-10-27
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -174,6 +174,7 @@
 
 ### Misc
 
+- Improve nix development environment [[#4256](https://github.com/woodpecker-ci/woodpecker/pull/4256)]
 - Add Telegram plugin [[#4229](https://github.com/woodpecker-ci/woodpecker/pull/4229)]
 - [pre-commit.ci] pre-commit autoupdate [[#4209](https://github.com/woodpecker-ci/woodpecker/pull/4209)]
 - renovate: set `automergetype=pr` [[#4162](https://github.com/woodpecker-ci/woodpecker/pull/4162)]
