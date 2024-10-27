@@ -230,8 +230,8 @@ func PatchRepo(c *gin.Context) {
 		return
 	}
 
-	if in.SecurityMode != nil {
-		repo.ApprovalMode = *in.SecurityMode
+	if in.ApprovalMode != nil {
+		repo.ApprovalMode = *in.ApprovalMode
 	}
 	if in.AllowDeploy != nil {
 		repo.AllowDeploy = *in.AllowDeploy

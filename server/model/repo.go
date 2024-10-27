@@ -120,7 +120,7 @@ type RepoPatch struct {
 	IsTrusted                    *bool           `json:"trusted,omitempty"`
 	Timeout                      *int64          `json:"timeout,omitempty"`
 	Visibility                   *string         `json:"visibility,omitempty"`
-	SecurityMode                 *ApprovalMode   `json:"security_mode,omitempty"`
+	ApprovalMode                 *ApprovalMode   `json:"approval_mode,omitempty"`
 	AllowDeploy                  *bool           `json:"allow_deploy,omitempty"`
 	CancelPreviousPipelineEvents *[]WebhookEvent `json:"cancel_previous_pipeline_events"`
 	NetrcOnlyTrusted             *bool           `json:"netrc_only_trusted"`
