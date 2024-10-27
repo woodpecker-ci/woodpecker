@@ -59,7 +59,7 @@ func (f *forgeFetcher) Fetch(ctx context.Context, forge forge.Forge, user *model
 	for i := 0; i < int(f.retryCount); i++ {
 		files, err = ffc.fetch(ctx, strings.TrimSpace(repo.Config))
 		if err != nil {
-			log.Trace().Err(err).Msgf("%d. try failed", i+1)
+			log.Trace().Err(err).Msgf("Attempt #%d failed", i+1)
 		}
 		if errors.Is(err, context.DeadlineExceeded) {
 			continue
@@ -143,7 +143,7 @@ func (f *forgeFetcherContext) getFirstAvailableConfig(c context.Context, configs
 	for _, fileOrFolder := range configs {
 		if strings.HasSuffix(fileOrFolder, "/") {
 			// config is a folder
-			log.Trace().Msgf("fetching 'fileOrFolder' %s from forge", fileOrFolder)
+			log.Trace().Msgf("fetching %s from forge", fileOrFolder)
 			files, err := f.forge.Dir(c, f.user, f.repo, f.pipeline, strings.TrimSuffix(fileOrFolder, "/"))
 			// if folder is not supported we will get a "Not implemented" error and continue
 			if err != nil {
