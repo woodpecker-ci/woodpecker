@@ -67,7 +67,8 @@ func (t *InfoT) String() string {
 
 // Filter filters tasks in the queue. If the Filter returns false,
 // the Task is skipped and not returned to the subscriber.
-type FilterFn func(*model.Task) bool
+// The int return value represents the matching score (higher is better).
+type FilterFn func(*model.Task) (bool, int)
 
 // Queue defines a task queue for scheduling tasks among
 // a pool of workers.
