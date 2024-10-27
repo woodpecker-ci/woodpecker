@@ -35,10 +35,14 @@
           :label="$t('repo.settings.general.allow_deploy.allow')"
           :description="$t('repo.settings.general.allow_deploy.desc')"
         />
-        <Checkbox
-          v-model="repoSettings.gated"
-          :label="$t('repo.settings.general.protected.protected')"
-          :description="$t('repo.settings.general.protected.desc')"
+        <SelectField
+          v-model="repoSettings.require_approval"
+          :placeholder="$t('require_approval.require_approval_for')"
+          :options="[
+            { value: 'forks', text: $t('require_approval.forks') },
+            { value: 'pull_requests', text: $t('require_approval.pull_requests') },
+            { value: 'all_events', text: $t('require_approval.all_events') },
+          ]"
         />
         <Checkbox
           v-model="repoSettings.netrc_only_trusted"
@@ -108,6 +112,7 @@ import type { CheckboxOption, RadioOption } from '~/components/form/form.types';
 import InputField from '~/components/form/InputField.vue';
 import NumberField from '~/components/form/NumberField.vue';
 import RadioField from '~/components/form/RadioField.vue';
+import SelectField from '~/components/form/SelectField.vue';
 import TextField from '~/components/form/TextField.vue';
 import Settings from '~/components/layout/Settings.vue';
 import useApiClient from '~/compositions/useApiClient';
@@ -135,7 +140,7 @@ function loadRepoSettings() {
     config_file: repo.value.config_file,
     timeout: repo.value.timeout,
     visibility: repo.value.visibility,
-    gated: repo.value.gated,
+    require_approval: repo.value.require_approval,
     trusted: repo.value.trusted,
     allow_pr: repo.value.allow_pr,
     allow_deploy: repo.value.allow_deploy,
