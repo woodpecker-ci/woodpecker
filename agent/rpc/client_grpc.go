@@ -480,12 +480,15 @@ func (c *client) sendLogs(ctx context.Context, entries []*proto.LogEntry) error 
 	return nil
 }
 
-func (c *client) RegisterAgent(ctx context.Context, platform, backend, version string, capacity int) (int64, error) {
+func (c *client) RegisterAgent(ctx context.Context, info rpc.AgentInfo) (int64, error) {
 	req := new(proto.RegisterAgentRequest)
-	req.Platform = platform
-	req.Backend = backend
-	req.Version = version
-	req.Capacity = int32(capacity)
+	req.Info = &proto.AgentInfo{
+		Platform:     info.Platform,
+		Backend:      info.Backend,
+		Version:      info.Version,
+		Capacity:     int32(info.Capacity),
+		CustomLabels: info.CustomLabels,
+	}
 
 	res, err := c.client.RegisterAgent(ctx, req)
 	return res.GetAgentId(), err

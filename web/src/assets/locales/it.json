@@ -82,7 +82,14 @@
                 "never": "Mai",
                 "delete_confirm": "Vuoi davvero eliminare questo agente? Non sarà più in grado di connettersi al server.",
                 "edit_agent": "Modifica agente",
-                "delete_agent": "Elimina agente"
+                "delete_agent": "Elimina agente",
+                "org": {
+                    "badge": "org"
+                },
+                "custom_labels": {
+                    "custom_labels": "Etichette Personalizzate",
+                    "desc": "Le etichette personalizzate impostate dall'amministratore dell'agente all'avvio dell'agente."
+                }
             },
             "orgs": {
                 "desc": "Organizzazioni che possiedono repository su questo server.",
@@ -239,7 +246,16 @@
             "pipelines_for_pr": "Pipeline per richiesta di modifica #{index}",
             "duration": "Durata pipeline",
             "created": "Creata: {created}",
-            "no_logs": "Nessun registro"
+            "no_logs": "Nessun registro",
+            "debug": {
+                "title": "Diagnostica",
+                "download_metadata": "Download metadati",
+                "metadata_download_error": "Errore durante il download dei metadati",
+                "metadata_download_successful": "Metadati scaricati correttamente",
+                "no_permission": "Non si dispone dell'autorizzazione per accedere alle informazioni di diagnostica.",
+                "metadata_exec_title": "Riesegui pipeline localmente",
+                "metadata_exec_desc": "Scarica i metadati di questa pipeline per eseguirla in locale. In questo modo è possibile risolvere i problemi e testare le modifiche prima di eseguirne il commit."
+            }
         },
         "pull_requests": "Richieste di modifica",
         "settings": {
@@ -421,6 +437,9 @@
             },
             "registries": {
                 "desc": "È possibile aggiungere le credenziali di registro per utilizzare immagini private in tutte le pipeline personali."
+            },
+            "agents": {
+                "desc": "Agenti registrati nei repository dell'account."
             }
         }
     },
@@ -451,7 +470,7 @@
         "desc": "I segreti possono essere passati ad ogni step della pipeline, come variabili d'ambiente.",
         "plugins": {
             "images": "Disponibile solo per le seguenti estensioni",
-            "desc": "Elenco delle estensioni in cui questo segreto è disponibile, lascia vuoto per consentire tutto."
+            "desc": "Elenco delle estensioni in cui questo segreto è disponibile. Vuoto, per consentire a ogni estensione e step normale."
         }
     },
     "default": "predefinito",
@@ -482,6 +501,9 @@
             },
             "registries": {
                 "desc": "È possibile aggiungere le credenziali di registro dell'organizzazione per utilizzare immagini private per tutte le pipeline di un'organizzazione."
+            },
+            "agents": {
+                "desc": "Agenti registrati per questa organizzazione."
             }
         }
     },

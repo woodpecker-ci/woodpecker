@@ -39,7 +39,14 @@
                 "saved": "Agent gespeichert",
                 "show": "Agenten anzeigen",
                 "token": "Schlüssel",
-                "version": "Version"
+                "version": "Version",
+                "org": {
+                    "badge": "Organisation"
+                },
+                "custom_labels": {
+                    "desc": "Die benutzerdefinierten Labels, die vom Agent-Administrator beim Start des Agenten festgelegt wurden.",
+                    "custom_labels": "Benutzerdefinierte Labels"
+                }
             },
             "not_allowed": "Du darfst nicht auf die Server-Einstellungen zugreifen.",
             "orgs": {
@@ -132,8 +139,8 @@
                 "users": "Benutzer"
             },
             "registries": {
-                "desc": "Globale Register-Zugangsdaten können für private Images aller Pipelines verwendet werden.",
-                "warning": "Diese Register-Zugangsdaten sind für alle Benutzer verfügbar."
+                "desc": "Globale Register-Zugangsdaten können hinzugefügt werden, um für private Images für alle Pipelines zu verwenden.",
+                "warning": "Diese Register-Zugangsdaten werden für alle Benutzer verfügbar sein."
             }
         }
     },
@@ -141,7 +148,7 @@
     "back": "Zurück",
     "cancel": "Abbrechen",
     "default": "Standard",
-    "docs": "Docs",
+    "docs": "Dokumentation",
     "documentation_for": "Dokumentation für „{topic}“",
     "empty_list": "Keine {entity} gefunden!",
     "errors": {
@@ -182,7 +189,10 @@
             },
             "settings": "Einstellungen",
             "registries": {
-                "desc": "Register-Zugangsdaten der Organisation können für private Images aller Organisations-Pipelines verwendet werden."
+                "desc": "Zugangsdaten zum Register der Organisation können für private Images aller Pipelines der Organisation verwendet werden."
+            },
+            "agents": {
+                "desc": "Agents registriert für diese Organisation."
             }
         }
     },
@@ -221,7 +231,7 @@
             "trigger": "Pipeline ausführen",
             "variables": {
                 "add": "Variable hinzufügen",
-                "desc": "Spezifiziere weitere Variablen für deine Pipeline. Vordefinierte Variablen mit dem selben Namen werden überschrieben.",
+                "desc": "Füge weitere Variablen für deine Pipeline hinzu. Vordefinierte Variablen mit demselben Namen werden überschrieben.",
                 "name": "Variablenname",
                 "title": "Zusätzliche Pipeline-Variablen",
                 "value": "Variablenwert",
@@ -298,7 +308,16 @@
             "log_delete_error": "Es gab einen Fehler beim Löschen der Logs des Schrittes",
             "duration": "Pipeline-Dauer",
             "created": "Erstellt: {created}",
-            "no_logs": "Keine Logs"
+            "no_logs": "Keine Logs",
+            "debug": {
+                "no_permission": "Du bist nicht berechtigt auf die Debug Informationen zuzugreifen.",
+                "download_metadata": "Metadaten herunterladen",
+                "metadata_download_successful": "Die Metadaten wurden erfolgreich heruntergeladen",
+                "metadata_download_error": "Fehler beim Herunterladen der Metadaten",
+                "title": "Debug",
+                "metadata_exec_title": "Pipeline lokal erneut ausführen",
+                "metadata_exec_desc": "Lade die Metadaten dieser Pipeline herunter, um diese lokal auszuführen. Dies erlaubt dir, Fehler zu beheben und Änderungen zu testen, bevor du einen Commit erstellst."
+            }
         },
         "pull_requests": "Pull-Requests",
         "settings": {
@@ -539,6 +558,9 @@
             },
             "registries": {
                 "desc": "Register-Zugangsdaten des Benutzers können für private Images aller persönlichen Pipelines verwendet werden."
+            },
+            "agents": {
+                "desc": "Agenten, die für die Repositorys deines Benutzers registriert sind."
             }
         }
     },
@@ -594,18 +616,18 @@
         "credentials": "Register-Zugangsdaten",
         "none": "Es gibt noch keine Register-Zugangsdaten.",
         "registries": "Register",
-        "desc": "Register-Zugangsdaten können für private Images in Pipelines verwendet werden.",
+        "desc": "Register-Zugangsdaten können hinzugefügt werden, um private Images für Pipelines zu nutzen.",
         "deleted": "Register-Zugangsdaten gelöscht",
         "save": "Register speichern",
         "add": "Register hinzufügen",
-        "view": "Register anzeigen",
+        "view": "Register ansehen",
         "edit": "Register bearbeiten",
         "delete": "Register löschen",
         "created": "Register-Zugangsdaten erstellt",
         "saved": "Register-Zugangsdaten gespeichert",
-        "show": "Register anzeigen"
+        "show": "Zeige Register"
     },
-    "invalid_state": "Der OAuth-Status ist ungültig.",
+    "invalid_state": "Der OAuth-Status ist ungültig",
     "by_user": "von {user}",
     "pushed_to": "gepusht auf",
     "closed": "geschlossen",

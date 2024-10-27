@@ -8,9 +8,9 @@ The Kubernetes backend executes steps inside standalone Pods. A temporary PVC is
 
 ## Images from private registries
 
-In order to pull private container images defined in your pipeline YAML you must provide [registry credentials in Kubernetes Secret](https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/).
-As the Secret is Agent-wide, it has to be placed in namespace defined by `WOODPECKER_BACKEND_K8S_NAMESPACE`.
-Besides, you need to provide the Secret name to Agent via `WOODPECKER_BACKEND_K8S_PULL_SECRET_NAMES`.
+In addition to [registries specified in the UI](../../20-usage/41-registries.md), you may provide [registry credentials in Kubernetes Secrets](https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/) to pull private container images defined in your pipeline YAML.
+
+Place these Secrets in namespace defined by `WOODPECKER_BACKEND_K8S_NAMESPACE` and provide the Secret names to Agents via `WOODPECKER_BACKEND_K8S_PULL_SECRET_NAMES`.
 
 ## Job specific configuration
 
