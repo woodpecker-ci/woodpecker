@@ -55,7 +55,7 @@ func (f *forgeFetcher) Fetch(ctx context.Context, forge forge.Forge, user *model
 		timeout:  f.timeout,
 	}
 
-	files, err = ffc.fetch(ctx, strings.TrimSpace(repo.Config))
+	// files, err = ffc.fetch(ctx, strings.TrimSpace(repo.Config))
 
 	// try to fetch multiple times
 	for i := 0; i < int(f.retryCount); i++ {
