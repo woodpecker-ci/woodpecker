@@ -82,16 +82,14 @@ func (s *RPC) Next(c context.Context, agentFilter rpc.Filter) (*rpc.Workflow, er
 
 	filterFn := createFilterFunc(agentFilter)
 
-	for {
-		// poll blocks until a task is available or the context is canceled / worker is kicked
-		task, err := s.queue.Poll(c, agent.ID, filterFn)
-		if err != nil || task == nil {
-			return nil, err
-		}
-
-		workflow := new(rpc.Workflow)
-		return workflow, json.Unmarshal(task.Data, workflow)
+	// poll blocks until a task is available or the context is canceled / worker is kicked
+	task, err := s.queue.Poll(c, agent.ID, filterFn)
+	if err != nil || task == nil {
+		return nil, err
 	}
+
+	workflow := new(rpc.Workflow)
+	return workflow, json.Unmarshal(task.Data, workflow)
 }
 
 // Wait blocks until the workflow with the given ID is done.
