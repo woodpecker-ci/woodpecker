@@ -90,16 +90,17 @@ func (s *RPC) Next(c context.Context, agentFilter rpc.Filter) (*rpc.Workflow, er
 
 		// TODO: evaluate if a task should not run and mark it as done, currently require a running agent
 		// who trigger a pull. this should move into it's own go routine.
-		if task.ShouldRun() {
-			workflow := new(rpc.Workflow)
-			err = json.Unmarshal(task.Data, workflow)
-			return workflow, err
+		if !task.ShouldRun() {
+			// task should not run, so mark it as done
+			if err := s.Done(c, task.ID, rpc.WorkflowState{}); err != nil {
+				log.Error().Err(err).Msgf("marking workflow task '%s' as done failed", task.ID)
+			}
+			continue
 		}
 
-		// task should not run, so mark it as done
-		if err := s.Done(c, task.ID, rpc.WorkflowState{}); err != nil {
-			log.Error().Err(err).Msgf("marking workflow task '%s' as done failed", task.ID)
-		}
+		workflow := new(rpc.Workflow)
+		err = json.Unmarshal(task.Data, workflow)
+		return workflow, err
 	}
 }
 
