@@ -16,7 +16,7 @@ To allow multiple versions, you can separate them with commas:
 
 ```bash
 WOODPECKER_PLUGINS_PRIVILEGED=woodpeckerci/plugin-docker-buildx:5.0.0,woodpeckerci/plugin-docker-buildx:5.1.0
-``` 
+```
 
 This setup ensures only specified, stable plugin versions are given privileged access.
 
