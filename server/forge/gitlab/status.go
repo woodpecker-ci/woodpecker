@@ -35,6 +35,7 @@ func getStatus(status model.StatusValue) gitlab.BuildStateValue {
 	case model.StatusKilled:
 		return gitlab.Canceled
 	default:
-		return gitlab.Failed
+		// no typo: https://github.com/runatlantis/atlantis/pull/1971#issue-1093158742
+		return gitlab.Pending
 	}
 }
