@@ -100,6 +100,7 @@ func (s *RPC) Next(c context.Context, agentFilter rpc.Filter) (*rpc.Workflow, er
 
 		workflow := new(rpc.Workflow)
 		err = json.Unmarshal(task.Data, workflow)
+
 		return workflow, err
 	}
 }
