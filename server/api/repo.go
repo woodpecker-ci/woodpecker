@@ -90,7 +90,8 @@ func PostRepo(c *gin.Context) {
 		repo.Update(from)
 	} else {
 		repo = from
-		repo.RequireApproval = model.RequireApprovalForks
+		repo.RequireApproval = model.RequireApprovalPullRequests
+		repo.AllowPull = true
 		repo.AllowDeploy = false
 		repo.NetrcOnlyTrusted = true
 		repo.CancelPreviousPipelineEvents = server.Config.Pipeline.DefaultCancelPreviousPipelineEvents
@@ -230,11 +231,20 @@ func PatchRepo(c *gin.Context) {
 		return
 	}
 
-	if in.RequireApproval != nil {
-		repo.RequireApproval = *in.RequireApproval
+	if in.AllowPull != nil {
+		repo.AllowPull = *in.AllowPull
 	}
 	if in.AllowDeploy != nil {
 		repo.AllowDeploy = *in.AllowDeploy
+	}
+	if in.RequireApproval != nil {
+		switch *in.RequireApproval {
+		case string(model.RequireApprovalForks), string(model.RequireApprovalPullRequests), string(model.RequireApprovalAllEvents):
+			repo.RequireApproval = model.ApprovalMode(*in.RequireApproval)
+		default:
+			c.String(http.StatusBadRequest, "Invalid require-approval setting")
+			return
+		}
 	}
 	if in.IsTrusted != nil {
 		repo.IsTrusted = *in.IsTrusted

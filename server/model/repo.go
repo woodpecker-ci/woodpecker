@@ -50,7 +50,7 @@ type Repo struct {
 	Visibility                   RepoVisibility `json:"visibility"                      xorm:"varchar(10) 'visibility'"`
 	IsSCMPrivate                 bool           `json:"private"                         xorm:"private"`
 	IsTrusted                    bool           `json:"trusted"                         xorm:"trusted"`
-	RequireApproval              ApprovalMode   `json:"require_approval"                xorm:"require_approval"`
+	RequireApproval              ApprovalMode   `json:"require_approval"                xorm:"varchar(50) require_approval"`
 	IsActive                     bool           `json:"active"                          xorm:"active"`
 	AllowPull                    bool           `json:"allow_pr"                        xorm:"allow_pr"`
 	AllowDeploy                  bool           `json:"allow_deploy"                    xorm:"allow_deploy"`
@@ -118,9 +118,10 @@ func (r *Repo) Update(from *Repo) {
 type RepoPatch struct {
 	Config                       *string         `json:"config_file,omitempty"`
 	IsTrusted                    *bool           `json:"trusted,omitempty"`
+	RequireApproval              *string         `json:"require_approval,omitempty"`
 	Timeout                      *int64          `json:"timeout,omitempty"`
 	Visibility                   *string         `json:"visibility,omitempty"`
-	RequireApproval              *ApprovalMode   `json:"approval_mode,omitempty"`
+	AllowPull                    *bool           `json:"allow_pr,omitempty"`
 	AllowDeploy                  *bool           `json:"allow_deploy,omitempty"`
 	CancelPreviousPipelineEvents *[]WebhookEvent `json:"cancel_previous_pipeline_events"`
 	NetrcOnlyTrusted             *bool           `json:"netrc_only_trusted"`

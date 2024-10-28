@@ -78,7 +78,7 @@ func repoUpdate(ctx context.Context, c *cli.Command) error {
 		config          = c.String("config")
 		timeout         = c.Duration("timeout")
 		trusted         = c.Bool("trusted")
-		approvalMode    = c.String("approval-mode")
+		requireApproval = c.String("require-approval")
 		pipelineCounter = int(c.Int("pipeline-counter"))
 		unsafe          = c.Bool("unsafe")
 	)
@@ -87,8 +87,11 @@ func repoUpdate(ctx context.Context, c *cli.Command) error {
 	if c.IsSet("trusted") {
 		patch.IsTrusted = &trusted
 	}
-	if c.IsSet("approval-mode") {
-		patch.ApprovalMode = &approvalMode
+	if c.IsSet("require-approval") {
+		switch requireApproval {
+		case "forks", "pull_requests", "all_events":
+			patch.RequireApproval = &requireApproval
+		}
 	}
 	if c.IsSet("timeout") {
 		v := int64(timeout / time.Minute)
