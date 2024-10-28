@@ -58,15 +58,15 @@ func (f *forgeFetcher) Fetch(ctx context.Context, forge forge.Forge, user *model
 	files, err = ffc.fetch(ctx, strings.TrimSpace(repo.Config))
 
 	// try to fetch multiple times
-	// for i := 0; i < int(f.retryCount); i++ {
-	// 	files, err = ffc.fetch(ctx, strings.TrimSpace(repo.Config))
-	// 	if err != nil {
-	// 		log.Trace().Err(err).Msgf("Attempt #%d failed", i+1)
-	// 	}
-	// 	if errors.Is(err, context.DeadlineExceeded) {
-	// 		continue
-	// 	}
-	// }
+	for i := 0; i < int(f.retryCount); i++ {
+		files, err = ffc.fetch(ctx, strings.TrimSpace(repo.Config))
+		if err != nil {
+			log.Trace().Err(err).Msgf("Fetching config files: Attempt #%d failed", i+1)
+		}
+		if errors.Is(err, context.DeadlineExceeded) {
+			continue
+		}
+	}
 
 	return
 }
