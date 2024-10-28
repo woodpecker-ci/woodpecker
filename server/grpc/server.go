@@ -17,7 +17,6 @@ package grpc
 import (
 	"context"
 	"encoding/json"
-	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
 	prometheus_auto "github.com/prometheus/client_golang/prometheus/promauto"
@@ -32,9 +31,6 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 	"go.woodpecker-ci.org/woodpecker/v2/version"
 )
-
-// markSkippedDoneTimeInterval is the time interval we search in the queue for workflows that can be marked as done
-const markSkippedDoneTimeInterval = 3 * time.Second
 
 // WoodpeckerServer is a grpc server implementation.
 type WoodpeckerServer struct {
@@ -71,12 +67,6 @@ func NewWoodpeckerServer(ctx context.Context, queue queue.Queue, logger logging.
 // TODO: find better place for this background service
 func (ws *WoodpeckerServer) markSkippedDone() {
 	for {
-		select {
-		case <-time.After(markSkippedDoneTimeInterval):
-		case <-ws.peer.ctx.Done():
-			return
-		}
-
 		task, err := ws.peer.queue.Poll(ws.peer.ctx, -1, func(t *model.Task) (bool, int) {
 			return !t.ShouldRun(), 0
 		})
@@ -84,6 +74,12 @@ func (ws *WoodpeckerServer) markSkippedDone() {
 			log.Error().Err(err).Msg("got error while polling for tasks that should be skipped")
 			continue
 		}
+		if task == nil {
+			log.Error().Msg("queue poll returned nil task")
+			continue
+		}
+
+		log.Trace().Msgf("mark skipped task '%s' as done", task.String())
 		if err := ws.peer.Done(ws.peer.ctx, task.ID, rpc.WorkflowState{}); err != nil {
 			log.Error().Err(err).Msgf("marking workflow task '%s' as done failed", task.ID)
 		}
