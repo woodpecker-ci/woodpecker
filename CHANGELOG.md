@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-10-27
+## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-10-28
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -78,6 +78,7 @@
 - Assign workflows to agents with the best label matches [[#4201](https://github.com/woodpecker-ci/woodpecker/pull/4201)]
 - Report custom labels set by agent admins back [[#4141](https://github.com/woodpecker-ci/woodpecker/pull/4141)]
 - Highlight invalid entries in manual pipeline trigger [[#4153](https://github.com/woodpecker-ci/woodpecker/pull/4153)]
+- Print agent labels in debug mode [[#4155](https://github.com/woodpecker-ci/woodpecker/pull/4155)]
 - Implement registries for Kubernetes backend [[#4092](https://github.com/woodpecker-ci/woodpecker/pull/4092)]
 - Correct cli exec flags and remove ineffective ones [[#4129](https://github.com/woodpecker-ci/woodpecker/pull/4129)]
 - Set repo user to repairing user when old user is missing [[#4128](https://github.com/woodpecker-ci/woodpecker/pull/4128)]
