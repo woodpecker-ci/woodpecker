@@ -78,10 +78,7 @@ func (ws *WoodpeckerServer) markSkippedDone() {
 		}
 
 		task, err := ws.peer.queue.Poll(ws.peer.ctx, -1, func(t *model.Task) (bool, int) {
-			if !t.ShouldRun() {
-				return true, 0
-			}
-			return false, 0
+			return !t.ShouldRun(), 0
 		})
 		if err != nil {
 			log.Error().Err(err).Msg("got error while polling for tasks that should be skipped")
