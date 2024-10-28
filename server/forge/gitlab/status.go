@@ -25,7 +25,7 @@ func getStatus(status model.StatusValue) gitlab.BuildStateValue {
 	switch status {
 	case model.StatusPending, model.StatusBlocked:
 		// no typo: https://github.com/runatlantis/atlantis/pull/1971#issue-1093158742
-		return gitlab.Running
+		return gitlab.Pending
 	case model.StatusRunning:
 		return gitlab.Running
 	case model.StatusSuccess:
@@ -36,6 +36,6 @@ func getStatus(status model.StatusValue) gitlab.BuildStateValue {
 		return gitlab.Canceled
 	default:
 		// no typo: https://github.com/runatlantis/atlantis/pull/1971#issue-1093158742
-		return gitlab.Pending
+		return gitlab.Failed
 	}
 }
