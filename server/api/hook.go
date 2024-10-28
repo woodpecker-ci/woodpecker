@@ -244,6 +244,7 @@ func PostHook(c *gin.Context) {
 	if err != nil {
 		handlePipelineErr(c, err)
 	} else {
+		fmt.Printf("%s", pl.Event)
 		// c.JSON(http.StatusOK, pl)
 	}
 }
