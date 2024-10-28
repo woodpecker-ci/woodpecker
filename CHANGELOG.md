@@ -6,7 +6,7 @@
 
 If you want a secure instance, set the `WOODPECKER_PLUGINS_PRIVILEGED` to only allow `woodpeckerci/plugin-docker-buildx` plugin to be v5.0.0 or later.
 
-[Read more](https://github.com/woodpecker-ci/woodpecker/pull/4213)
+Read more about it in [#4213](https://github.com/woodpecker-ci/woodpecker/pull/4213)
 
 ### ❤️ Thanks to all contributors! ❤️
 
