@@ -24,7 +24,8 @@ import (
 func getStatus(status model.StatusValue) gitlab.BuildStateValue {
 	switch status {
 	case model.StatusPending, model.StatusBlocked:
-		return gitlab.Pending
+		// no typo: https://github.com/runatlantis/atlantis/pull/1971#issue-1093158742
+		return gitlab.Running
 	case model.StatusRunning:
 		return gitlab.Running
 	case model.StatusSuccess:
