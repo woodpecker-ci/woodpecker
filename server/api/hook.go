@@ -158,6 +158,7 @@ func PostHook(c *gin.Context) {
 		c.String(http.StatusBadRequest, msg)
 		return
 	}
+	c.JSON(http.StatusOK, "Received webhook: ")
 
 	if pipelineFromForge == nil {
 		msg := "ignoring hook: hook parsing resulted in empty pipeline"
@@ -239,14 +240,12 @@ func PostHook(c *gin.Context) {
 	// 7. Finally create a pipeline
 	//
 
-	c.JSON(http.StatusOK, "Received webhook: ")
 	pl, err := pipeline.Create(c, _store, repo, pipelineFromForge)
 	if err != nil {
 		handlePipelineErr(c, err)
 	} else {
-		c.JSON(http.StatusOK, pl)
+		// c.JSON(http.StatusOK, pl)
 	}
-	log.Trace().Msgf("Hook parsing (9.): Processed pipeline.Create()")
 }
 
 func getRepoFromToken(store store.Store, t *token.Token) (*model.Repo, error) {
