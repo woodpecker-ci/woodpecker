@@ -67,7 +67,7 @@ func NewWoodpeckerServer(ctx context.Context, queue queue.Queue, logger logging.
 // TODO: find better place for this background service
 func (ws *WoodpeckerServer) markSkippedDone() {
 	for {
-		task, err := ws.peer.queue.Poll(ws.peer.ctx, -1, func(t *model.Task) (bool, int) {
+		task, err := ws.peer.queue.Poll(ws.peer.ctx, queue.InternalWorkerID, func(t *model.Task) (bool, int) {
 			return !t.ShouldRun(), 0
 		})
 		if err != nil {

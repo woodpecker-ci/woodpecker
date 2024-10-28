@@ -27,6 +27,9 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/shared/constant"
 )
 
+// InternalWorkerID is pseudo agent ID for internal routines using the queue.
+const InternalWorkerID = -2
+
 type entry struct {
 	item     *model.Task
 	done     chan bool
@@ -213,7 +216,13 @@ func (q *fifo) Extend(_ context.Context, agentID int64, taskID string) error {
 func (q *fifo) Info(_ context.Context) InfoT {
 	q.Lock()
 	stats := InfoT{}
-	stats.Stats.Workers = len(q.workers)
+	workerCount := 0
+	for w := range q.workers {
+		if w.agentID != InternalWorkerID { // ignore internal workers
+			workerCount++
+		}
+	}
+	stats.Stats.Workers = workerCount
 	stats.Stats.Pending = q.pending.Len()
 	stats.Stats.WaitingOnDeps = q.waitingOnDeps.Len()
 	stats.Stats.Running = len(q.running)
@@ -251,6 +260,10 @@ func (q *fifo) Resume() {
 
 // KickAgentWorkers kicks all workers for a given agent.
 func (q *fifo) KickAgentWorkers(agentID int64) {
+	if agentID == InternalWorkerID {
+		return
+	}
+
 	q.Lock()
 	defer q.Unlock()
 
