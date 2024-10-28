@@ -158,7 +158,6 @@ func PostHook(c *gin.Context) {
 		c.String(http.StatusBadRequest, msg)
 		return
 	}
-	c.String(http.StatusOK, "Received webhook: ")
 
 	if pipelineFromForge == nil {
 		msg := "ignoring hook: hook parsing resulted in empty pipeline"
@@ -207,7 +206,7 @@ func PostHook(c *gin.Context) {
 	forge.Refresh(c, _forge, _store, user)
 
 	//
-	// 5. Update the repo
+	// 4. Update the repo
 	//
 
 	if repo.FullName != repoFromForge.FullName {
@@ -227,7 +226,7 @@ func PostHook(c *gin.Context) {
 	}
 
 	//
-	// 6. Check if pull requests are allowed for this repo
+	// 5. Check if pull requests are allowed for this repo
 	//
 
 	if (pipelineFromForge.Event == model.EventPull || pipelineFromForge.Event == model.EventPullClosed) && !repo.AllowPull {
@@ -237,15 +236,14 @@ func PostHook(c *gin.Context) {
 	}
 
 	//
-	// 7. Finally create a pipeline
+	// 6. Finally create a pipeline
 	//
 
 	pl, err := pipeline.Create(c, _store, repo, pipelineFromForge)
 	if err != nil {
 		handlePipelineErr(c, err)
 	} else {
-		fmt.Printf("%s", pl.Event)
-		// c.JSON(http.StatusOK, pl)
+		c.JSON(http.StatusOK, pl)
 	}
 }
 
