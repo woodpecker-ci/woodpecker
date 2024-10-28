@@ -1,6 +1,6 @@
 # Changelog
 
-## [2.7.2](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.7.1) - 2024-10-09
+## [2.7.2](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.7.2) - 2024-10-09
 
 ### Important
 
