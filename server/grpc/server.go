@@ -65,9 +65,9 @@ func NewWoodpeckerServer(ctx context.Context, queue queue.Queue, logger logging.
 
 // mark skipped tasks done, based on dependencies.
 // TODO: find better place for this background service
-func (ws *WoodpeckerServer) markSkippedDone() {
+func (s *WoodpeckerServer) markSkippedDone() {
 	for {
-		task, err := ws.peer.queue.Poll(ws.peer.ctx, queue.InternalWorkerID, func(t *model.Task) (bool, int) {
+		task, err := s.peer.queue.Poll(s.peer.ctx, queue.InternalWorkerID, func(t *model.Task) (bool, int) {
 			return !t.ShouldRun(), 0
 		})
 		if err != nil {
@@ -80,7 +80,7 @@ func (ws *WoodpeckerServer) markSkippedDone() {
 		}
 
 		log.Trace().Msgf("mark skipped task '%s' as done", task.String())
-		if err := ws.peer.Done(ws.peer.ctx, task.ID, rpc.WorkflowState{}); err != nil {
+		if err := s.peer.Done(s.peer.ctx, task.ID, rpc.WorkflowState{}); err != nil {
 			log.Error().Err(err).Msgf("marking workflow task '%s' as done failed", task.ID)
 		}
 	}
