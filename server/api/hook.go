@@ -246,13 +246,15 @@ func PostHook(c *gin.Context) {
 	//
 
 	log.Trace().Msgf("Hook parsing (7.): Return pipeline info")
-	c.JSON(http.StatusOK, "")
+	c.JSON(http.StatusOK, "Success")
+	log.Trace().Msgf("Hook parsing (8.): Sent 200 response")
 	pl, err := pipeline.Create(c, _store, repo, pipelineFromForge)
 	if err != nil {
 		handlePipelineErr(c, err)
 	} else {
 		c.JSON(http.StatusOK, pl)
 	}
+	log.Trace().Msgf("Hook parsing (9.): Processed pipeline.Create()")
 }
 
 func getRepoFromToken(store store.Store, t *token.Token) (*model.Repo, error) {
