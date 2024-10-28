@@ -25,7 +25,7 @@ Some versions need some changes to the server configuration or the pipeline conf
 - Pipelines without a config file will now be skipped instead of failing
 - Removed implicitly defined `regcred` image pull secret name. Set it explicitly via `WOODPECKER_BACKEND_K8S_PULL_SECRET_NAMES`
 - Removed `includes` and `excludes` support from **event** filter
-- Removed uppercasing all secret env vars, instead, the value of the `secrets` property is used. [Read more](./20-usage/40-secrets.md#use-secrets-in-commands)
+- Removed uppercasing all secret env vars, instead, the value of the `secrets` property is used. [Read more](./20-usage/40-secrets.md#usage)
 - Removed alternative names for secrets, use `environment` with `from_secret`
 - Removed slice definition for env vars
 - Removed `environment` filter, use `when.evaluate`
@@ -39,6 +39,7 @@ Some versions need some changes to the server configuration or the pipeline conf
 - Removed old API routes: `registry/` -> `registries`, `/authorize/token`
 - Replaced `registry` command with `repo registry` in cli
 - Disallow upgrades from 1.x, upgrade to 2.x first
+- Deprecated `secrets`, use `environment` with `from_secret`
 
 ## 2.0.0
 

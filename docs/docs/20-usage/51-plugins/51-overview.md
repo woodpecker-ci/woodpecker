@@ -52,7 +52,7 @@ While normal steps are all about arbitrary code execution, plugins should only a
 
 That's why there are a few limitations. The workspace base is always mounted at `/woodpecker`, but the working directory is dynamically
 adjusted accordingly, as user of a plugin you should not have to care about this. Also, you cannot use the plugin together with `commands`
-or `entrypoint` which will fail. Using `secrets` or `environment` is possible, but in this case, the plugin is internally not treated as plugin
+or `entrypoint` which will fail. Using `environment` is possible, but in this case, the plugin is internally not treated as plugin
 anymore. The container then cannot access secrets with plugin filter anymore and the containers won't be privileged without explicit definition.
 
 ## Finding Plugins

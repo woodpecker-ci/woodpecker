@@ -179,12 +179,6 @@ Woodpecker provides the ability to pass environment variables to individual step
 
 For more details, check the [environment docs](./50-environment.md).
 
-### `secrets`
-
-Woodpecker provides the ability to store named parameters external to the YAML configuration file, in a central secret store. These secrets can be passed to individual steps of the workflow at runtime.
-
-For more details, check the [secrets docs](./40-secrets.md).
-
 ### `failure`
 
 Some of the steps may be allowed to fail without causing the whole workflow and therefore pipeline to report a failure (e.g., a step executing a linting check). To enable this, add `failure: ignore` to your step. If Woodpecker encounters an error while executing the step, it will report it as failed but still executes the next steps of the workflow, if any, without affecting the status of the workflow.
