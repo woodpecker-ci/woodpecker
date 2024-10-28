@@ -158,7 +158,7 @@ func PostHook(c *gin.Context) {
 		c.String(http.StatusBadRequest, msg)
 		return
 	}
-	c.JSON(http.StatusOK, "Received webhook: ")
+	c.String(http.StatusOK, "Received webhook: ")
 
 	if pipelineFromForge == nil {
 		msg := "ignoring hook: hook parsing resulted in empty pipeline"
