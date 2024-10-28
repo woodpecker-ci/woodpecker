@@ -484,7 +484,7 @@ Specify a configuration service endpoint, see [Configuration Extension](./40-adv
 
 ### `WOODPECKER_FORGE_TIMEOUT`
 
-> Default: 3s
+> Default: 5s
 
 Specify timeout when fetching the Woodpecker configuration from forge. See <https://pkg.go.dev/time#ParseDuration> for syntax reference.
 

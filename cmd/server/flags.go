@@ -287,7 +287,7 @@ var flags = append([]cli.Flag{
 		Sources: cli.EnvVars("WOODPECKER_FORGE_TIMEOUT"),
 		Name:    "forge-timeout",
 		Usage:   "how many seconds before timeout when fetching the Woodpecker configuration from a Forge",
-		Value:   time.Second * 3,
+		Value:   time.Second * 5,
 	},
 	&cli.UintFlag{
 		Sources: cli.EnvVars("WOODPECKER_FORGE_RETRY"),
