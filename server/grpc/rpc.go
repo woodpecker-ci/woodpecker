@@ -43,6 +43,7 @@ import (
 const updateAgentLastWorkDelay = time.Minute
 
 type RPC struct {
+	ctx           context.Context
 	queue         queue.Queue
 	pubsub        *pubsub.Publisher
 	logger        logging.Log
@@ -86,16 +87,6 @@ func (s *RPC) Next(c context.Context, agentFilter rpc.Filter) (*rpc.Workflow, er
 		task, err := s.queue.Poll(c, agent.ID, filterFn)
 		if err != nil || task == nil {
 			return nil, err
-		}
-
-		// TODO: evaluate if a task should not run and mark it as done, currently require a running agent
-		// who trigger a pull. this should move into it's own go routine.
-		if !task.ShouldRun() {
-			// task should not run, so mark it as done
-			if err := s.Done(c, task.ID, rpc.WorkflowState{}); err != nil {
-				log.Error().Err(err).Msgf("marking workflow task '%s' as done failed", task.ID)
-			}
-			continue
 		}
 
 		workflow := new(rpc.Workflow)

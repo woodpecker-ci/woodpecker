@@ -22,6 +22,11 @@ import (
 
 func createFilterFunc(agentFilter rpc.Filter) queue.FilterFn {
 	return func(task *model.Task) (bool, int) {
+		// don't return tasks who are not ready jet
+		if !task.ShouldRun() {
+			return false, 0
+		}
+
 		score := 0
 		for taskLabel, taskLabelValue := range task.Labels {
 			// if a task label is empty it will be ignored

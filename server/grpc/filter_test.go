@@ -62,7 +62,6 @@ func TestCreateFilterFunc(t *testing.T) {
 				Labels: map[string]string{"org-id": "123", "platform": "windows"},
 			},
 			wantMatched: false,
-			wantScore:   0,
 		},
 		{
 			name: "No match",
@@ -73,7 +72,6 @@ func TestCreateFilterFunc(t *testing.T) {
 				Labels: map[string]string{"org-id": "123", "platform": "windows"},
 			},
 			wantMatched: false,
-			wantScore:   0,
 		},
 		{
 			name: "Missing label",
@@ -84,7 +82,6 @@ func TestCreateFilterFunc(t *testing.T) {
 				Labels: map[string]string{"needed": "some"},
 			},
 			wantMatched: false,
-			wantScore:   0,
 		},
 		{
 			name: "Empty task labels",
@@ -118,6 +115,15 @@ func TestCreateFilterFunc(t *testing.T) {
 			},
 			wantMatched: true,
 			wantScore:   2,
+		},
+		{
+			name:        "dont match task not ready to run",
+			agentFilter: rpc.Filter{},
+			task: &model.Task{
+				Labels: map[string]string{"org-id": "123", "platform": "linux"},
+				RunOn:  []string{"success"},
+			},
+			wantMatched: false,
 		},
 	}
 
