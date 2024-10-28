@@ -234,7 +234,7 @@ func PostHook(c *gin.Context) {
 	// 6. Check if pull requests are allowed for this repo
 	//
 
-	log.Trace().Msgf("Hook parsing (5.): Check if pull requests are allowed for this repo")
+	log.Trace().Msgf("Hook parsing (6.): Check if pull requests are allowed for this repo")
 	if (pipelineFromForge.Event == model.EventPull || pipelineFromForge.Event == model.EventPullClosed) && !repo.AllowPull {
 		log.Debug().Str("repo", repo.FullName).Msg("ignoring hook: pull requests are disabled for this repo in woodpecker")
 		c.Status(http.StatusNoContent)
@@ -245,7 +245,8 @@ func PostHook(c *gin.Context) {
 	// 7. Finally create a pipeline
 	//
 
-	log.Trace().Msgf("Hook parsing (6.): Return pipeline info")
+	log.Trace().Msgf("Hook parsing (7.): Return pipeline info")
+	c.JSON(http.StatusOK, "")
 	pl, err := pipeline.Create(c, _store, repo, pipelineFromForge)
 	if err != nil {
 		handlePipelineErr(c, err)
