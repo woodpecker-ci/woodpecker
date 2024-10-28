@@ -4,7 +4,21 @@
 
 ### Important
 
-If you want a secure instance, set the `WOODPECKER_PLUGINS_PRIVILEGED` to only allow `woodpeckerci/plugin-docker-buildx` plugin to be v5.0.0 or later.
+To secure your instance, set `WOODPECKER_PLUGINS_PRIVILEGED` to only allow specific versions of the `woodpeckerci/plugin-docker-buildx` plugin, use version 5.0.0 or above. This prevents older, potentially unstable versions from being privileged.
+
+For example, to allow only version 5.0.0, use:
+
+```bash
+WOODPECKER_PLUGINS_PRIVILEGED=woodpeckerci/plugin-docker-buildx:5.0.0
+```
+
+To allow multiple versions, you can separate them with commas:
+
+```bash
+WOODPECKER_PLUGINS_PRIVILEGED=woodpeckerci/plugin-docker-buildx:5.0.0,woodpeckerci/plugin-docker-buildx:5.1.0
+``` 
+
+This setup ensures only specified, stable plugin versions are given privileged access.
 
 Read more about it in [#4213](https://github.com/woodpecker-ci/woodpecker/pull/4213)
 
