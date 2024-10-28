@@ -88,6 +88,8 @@ func (s *RPC) Next(c context.Context, agentFilter rpc.Filter) (*rpc.Workflow, er
 			return nil, err
 		}
 
+		// TODO: evaluate if a task should not run and mark it as done, currently require a running agent
+		// who trigger a pull. this should move into it's own go routine.
 		if task.ShouldRun() {
 			workflow := new(rpc.Workflow)
 			err = json.Unmarshal(task.Data, workflow)
