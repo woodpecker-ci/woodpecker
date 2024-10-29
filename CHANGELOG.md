@@ -32,6 +32,7 @@ Read more about it in [#4213](https://github.com/woodpecker-ci/woodpecker/pull/4
 
 ### 🐛 Bug Fixes
 
+- Don't parse forge config files multiple times if no error occured ([#4272](https://github.com/woodpecker-ci/woodpecker/pull/4272)) [[#4273](https://github.com/woodpecker-ci/woodpecker/pull/4273)]
 - Fix repo/owner parsing for gitlab ([#4255](https://github.com/woodpecker-ci/woodpecker/pull/4255)) [[#4261](https://github.com/woodpecker-ci/woodpecker/pull/4261)]
 - Run queue.process() in background [[#4115](https://github.com/woodpecker-ci/woodpecker/pull/4115)]
 - Only update agent.LastWork if not done recently ([#4031](https://github.com/woodpecker-ci/woodpecker/pull/4031)) [[#4100](https://github.com/woodpecker-ci/woodpecker/pull/4100)]
