@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-10-28
+## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-10-29
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -49,6 +49,7 @@
 
 ### 🐛 Bug Fixes
 
+- Don't parse forge config files multiple times if no error occured [[#4272](https://github.com/woodpecker-ci/woodpecker/pull/4272)]
 - Delete GitLab webhooks with partial URL match [[#4259](https://github.com/woodpecker-ci/woodpecker/pull/4259)]
 - Increase `WOODPECKER_FORGE_TIMEOUT` to fix config fetching for GitLab [[#4262](https://github.com/woodpecker-ci/woodpecker/pull/4262)]
 - fix: repo/owner parsing for gitlab [[#4255](https://github.com/woodpecker-ci/woodpecker/pull/4255)]
