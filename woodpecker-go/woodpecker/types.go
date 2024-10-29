@@ -41,6 +41,7 @@ type (
 		Visibility                   string   `json:"visibility"`
 		IsSCMPrivate                 bool     `json:"private"`
 		IsTrusted                    bool     `json:"trusted"`
+		IsGated                      bool     `json:"gated,omitempty"` // TODO: remove in next major release
 		RequireApproval              string   `json:"require_approval"`
 		IsActive                     bool     `json:"active"`
 		AllowPullRequests            bool     `json:"allow_pr"`
@@ -53,6 +54,7 @@ type (
 	RepoPatch struct {
 		Config          *string `json:"config_file,omitempty"`
 		IsTrusted       *bool   `json:"trusted,omitempty"`
+		IsGated         *bool   `json:"gated,omitempty"` // TODO: remove in next major release
 		RequireApproval *string `json:"require_approval,omitempty"`
 		Timeout         *int64  `json:"timeout,omitempty"`
 		Visibility      *string `json:"visibility"`

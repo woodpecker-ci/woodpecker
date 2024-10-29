@@ -35,9 +35,13 @@ var repoUpdateCmd = &cli.Command{
 			Name:  "trusted",
 			Usage: "repository is trusted",
 		},
+		&cli.BoolFlag{
+			Name:  "gated",
+			Usage: "repository is gated",
+		},
 		&cli.StringFlag{
-			Name:  "approval-mode",
-			Usage: "repository approval mode",
+			Name:  "require-approval",
+			Usage: "repository require approval",
 		},
 		&cli.DurationFlag{
 			Name:  "timeout",
@@ -78,6 +82,7 @@ func repoUpdate(ctx context.Context, c *cli.Command) error {
 		config          = c.String("config")
 		timeout         = c.Duration("timeout")
 		trusted         = c.Bool("trusted")
+		gated           = c.Bool("gated")
 		requireApproval = c.String("require-approval")
 		pipelineCounter = int(c.Int("pipeline-counter"))
 		unsafe          = c.Bool("unsafe")
@@ -87,10 +92,31 @@ func repoUpdate(ctx context.Context, c *cli.Command) error {
 	if c.IsSet("trusted") {
 		patch.IsTrusted = &trusted
 	}
+	// TODO: remove isGated in next major release
+	if c.IsSet("gated") {
+		if gated {
+			allEvents := "all_events"
+			patch.RequireApproval = &allEvents
+		} else {
+			forks := "forks"
+			patch.RequireApproval = &forks
+		}
+	}
 	if c.IsSet("require-approval") {
 		switch requireApproval {
 		case "forks", "pull_requests", "all_events":
 			patch.RequireApproval = &requireApproval
+		}
+
+		// TODO: remove isGated in next major release
+		if requireApproval == "all_events" {
+			trueBool := true
+			patch.IsGated = &trueBool
+		}
+
+		if requireApproval == "forks" {
+			falseBool := false
+			patch.IsGated = &falseBool
 		}
 	}
 	if c.IsSet("timeout") {

@@ -118,6 +118,7 @@ func (r *Repo) Update(from *Repo) {
 type RepoPatch struct {
 	Config                       *string         `json:"config_file,omitempty"`
 	IsTrusted                    *bool           `json:"trusted,omitempty"`
+	IsGated                      *bool           `json:"gated,omitempty"` // TODO: deprecated in favor of RequireApproval => Remove in next major release
 	RequireApproval              *string         `json:"require_approval,omitempty"`
 	Timeout                      *int64          `json:"timeout,omitempty"`
 	Visibility                   *string         `json:"visibility,omitempty"`

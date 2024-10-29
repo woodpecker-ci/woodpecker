@@ -21,43 +21,47 @@ import (
 	"xorm.io/xorm"
 )
 
-// perPage015 set the size of the slice to read per page.
-var perPage015 = 100
+// perPage017 set the size of the slice to read per page.
+var perPage017 = 100
 
-type repo015 struct {
-	ID              int64  `json:"id"               xorm:"pk autoincr 'pipeline_id'"`
+type repo017 struct {
+	ID              int64  `json:"id,omitempty"     xorm:"pk autoincr 'id'"`
 	IsGated         bool   `json:"gated"            xorm:"gated"`
 	RequireApproval string `json:"require_approval" xorm:"require_approval"`
+	PREnabled       bool   `json:"pr_enabled"       xorm:"DEFAULT TRUE 'pr_enabled'"`
 }
 
-func (repo015) TableName() string {
+func (repo017) TableName() string {
 	return "repos"
 }
 
 var gatedToRequireApproval = xormigrate.Migration{
 	ID: "gated-to-require-approval",
 	MigrateSession: func(sess *xorm.Session) (err error) {
-		if err := sess.Sync(new(repo015)); err != nil {
+		if err := sess.Sync(new(repo017)); err != nil {
 			return fmt.Errorf("sync new models failed: %w", err)
 		}
 
 		page := 0
-		oldRepos := make([]*repo015, 0, perPage015)
+		oldRepos := make([]*repo017, 0, perPage017)
 
 		for {
 			oldRepos = oldRepos[:0]
 
-			err := sess.Limit(perPage015, page*perPage015).Cols("require_approval", "gated").Find(&oldRepos)
+			err := sess.Limit(perPage017, page*perPage017).Cols("require_approval", "pr_enabled", "gated").Find(&oldRepos)
 			if err != nil {
 				return err
 			}
 
 			for _, oldRepo := range oldRepos {
-				var newRepo repo015
+				var newRepo repo017
 				newRepo.ID = oldRepo.ID
-				newRepo.RequireApproval = "forks"
 				if oldRepo.IsGated {
 					newRepo.RequireApproval = "all_events"
+				} else if oldRepo.PREnabled {
+					newRepo.RequireApproval = "pull_requests"
+				} else {
+					newRepo.RequireApproval = "forks"
 				}
 
 				if _, err := sess.ID(oldRepo.ID).Cols("require_approval").Update(newRepo); err != nil {
@@ -65,7 +69,7 @@ var gatedToRequireApproval = xormigrate.Migration{
 				}
 			}
 
-			if len(oldRepos) < perPage015 {
+			if len(oldRepos) < perPage017 {
 				break
 			}
 
