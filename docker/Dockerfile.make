@@ -1,6 +1,6 @@
 # docker build --rm  -f docker/Dockerfile.make -t woodpecker/make:local .
-FROM docker.io/golang:1.23 as golang_image
-FROM docker.io/node:23
+FROM docker.io/golang:1.23-alpine as golang_image
+FROM docker.io/node:23-alpine
 
 RUN apk add --no-cache --update make gcc binutils-gold musl-dev protoc && \
   corepack enable
