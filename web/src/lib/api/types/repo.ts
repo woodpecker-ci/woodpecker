@@ -67,7 +67,7 @@ export interface Repo {
 
   last_pipeline: number;
 
-  require_approval: 'forks' | 'pull_requests' | 'all_events';
+  require_approval: RepoRequireApproval;
 
   // Events that will cancel running pipelines before starting a new one
   cancel_previous_pipeline_events: string[];
