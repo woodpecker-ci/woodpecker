@@ -25,10 +25,9 @@ Only activate this option if you trust all users who have push access to your re
 Otherwise, these users will be able to steal secrets that are only available for `deploy` events.
 :::
 
-## Protected
+## Require approval for
 
-Every pipeline initiated by an webhook event needs to be approved by a project members with push permissions before being executed.
-The protected option can be used as an additional review process before running potentially harmful pipelines. Especially if pipelines can be executed by third-parties through pull-requests.
+To prevent malicious pipelines from extracting secrets or running harmful commands or to prevent accidental pipeline runs, you can require approval for an additional review process. If you enable this option, a pipeline will be put on hold after creation and will only continue after approval. The least restrictive setting is `Approvals for forked repositories`. Forked repositories will always require approval as they can't be trusted in general.
 
 ## Trusted
 

@@ -3,7 +3,7 @@
     :href="`${docsUrl}`"
     :title="$t('documentation_for', { topic })"
     target="_blank"
-    class="text-wp-link-100 hover:text-wp-link-200 cursor-pointer mt-1"
+    class="text-wp-link-100 hover:text-wp-link-200 cursor-pointer"
   >
     <Icon name="question" class="!w-4 !h-4" />
   </a>

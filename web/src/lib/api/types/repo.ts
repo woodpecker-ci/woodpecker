@@ -81,6 +81,12 @@ export enum RepoVisibility {
   Private = 'private',
   Internal = 'internal',
 }
+
+export enum RepoRequireApproval {
+  Forks = 'forks',
+  PullRequests = 'pull_requests',
+  AllEvents = 'all_events',
+}
 /* eslint-enable */
 
 export type RepoSettings = Pick<

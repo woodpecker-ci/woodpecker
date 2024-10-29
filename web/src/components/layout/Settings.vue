@@ -2,11 +2,11 @@
   <Panel>
     <div class="flex flex-row border-b mb-4 pb-4 items-center dark:border-wp-background-100">
       <div class="ml-2">
-        <h1 class="text-xl text-wp-text-100">{{ title }}</h1>
-        <p v-if="desc" class="text-sm text-wp-text-alt-100">
-          {{ desc }}
+        <h1 class="text-xl text-wp-text-100 flex items-center gap-1">
+          {{ title }}
           <DocsLink v-if="docsUrl" :topic="title" :url="docsUrl" />
-        </p>
+        </h1>
+        <p v-if="desc" class="text-sm text-wp-text-alt-100">{{ desc }}</p>
         <Warning v-if="warning" class="text-sm mt-1" :text="warning" />
       </div>
 

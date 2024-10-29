@@ -2,26 +2,6 @@
   <Settings :title="$t('repo.settings.general.general')">
     <form v-if="repoSettings" class="flex flex-col" @submit.prevent="saveRepoSettings">
       <InputField
-        docs-url="docs/usage/project-settings#pipeline-path"
-        :label="$t('repo.settings.general.pipeline_path.path')"
-      >
-        <template #default="{ id }">
-          <TextField
-            :id="id"
-            v-model="repoSettings.config_file"
-            :placeholder="$t('repo.settings.general.pipeline_path.default')"
-          />
-        </template>
-        <template #description>
-          <i18n-t keypath="repo.settings.general.pipeline_path.desc" tag="p" class="text-sm text-wp-text-alt-100">
-            <span class="code-box-inline px-1">{{ $t('repo.settings.general.pipeline_path.desc_path_example') }}</span>
-            <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
-            <span class="code-box-inline px-1">/</span>
-          </i18n-t>
-        </template>
-      </InputField>
-
-      <InputField
         docs-url="docs/usage/project-settings#project-settings-1"
         :label="$t('repo.settings.general.project')"
       >
@@ -35,15 +15,6 @@
           :label="$t('repo.settings.general.allow_deploy.allow')"
           :description="$t('repo.settings.general.allow_deploy.desc')"
         />
-        <SelectField
-          v-model="repoSettings.require_approval"
-          :placeholder="$t('require_approval.require_approval_for')"
-          :options="[
-            { value: 'forks', text: $t('require_approval.forks') },
-            { value: 'pull_requests', text: $t('require_approval.pull_requests') },
-            { value: 'all_events', text: $t('require_approval.all_events') },
-          ]"
-        />
         <Checkbox
           v-model="repoSettings.netrc_only_trusted"
           :label="$t('repo.settings.general.netrc_only_trusted.netrc_only_trusted')"
@@ -55,6 +26,31 @@
           :label="$t('repo.settings.general.trusted.trusted')"
           :description="$t('repo.settings.general.trusted.desc')"
         />
+      </InputField>
+
+      <InputField :label="$t('require_approval.require_approval_for')">
+        <RadioField
+          v-model="repoSettings.require_approval"
+          :options="[
+            {
+              value: RepoRequireApproval.Forks,
+              text: $t('require_approval.forks'),
+            },
+            {
+              value: RepoRequireApproval.PullRequests,
+              text: $t('require_approval.pull_requests'),
+            },
+            {
+              value: RepoRequireApproval.AllEvents,
+              text: $t('require_approval.all_events'),
+            },
+          ]"
+        />
+        <template #description>
+          <p class="text-sm">
+            {{ $t('require_approval.desc') }}
+          </p>
+        </template>
       </InputField>
 
       <InputField
@@ -73,6 +69,25 @@
           <NumberField :id="id" v-model="repoSettings.timeout" class="w-24" />
           <span class="ml-4 text-wp-text-alt-100">{{ $t('repo.settings.general.timeout.minutes') }}</span>
         </div>
+      </InputField>
+
+      <InputField
+        docs-url="docs/usage/project-settings#pipeline-path"
+        :label="$t('repo.settings.general.pipeline_path.path')"
+      >
+        <template #default="{ id }">
+          <TextField
+            :id="id"
+            v-model="repoSettings.config_file"
+            :placeholder="$t('repo.settings.general.pipeline_path.default')"
+          />
+        </template>
+        <template #description>
+          <i18n-t keypath="repo.settings.general.pipeline_path.desc" tag="p" class="text-sm text-wp-text-alt-100">
+            <span class="code-box-inline px-1">{{ $t('repo.settings.general.pipeline_path.desc_path_example') }}</span>
+            <span class="code-box-inline px-1">{{ pathSeparator }}</span>
+          </i18n-t>
+        </template>
       </InputField>
 
       <InputField
@@ -112,14 +127,13 @@ import type { CheckboxOption, RadioOption } from '~/components/form/form.types';
 import InputField from '~/components/form/InputField.vue';
 import NumberField from '~/components/form/NumberField.vue';
 import RadioField from '~/components/form/RadioField.vue';
-import SelectField from '~/components/form/SelectField.vue';
 import TextField from '~/components/form/TextField.vue';
 import Settings from '~/components/layout/Settings.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useAuthentication from '~/compositions/useAuthentication';
 import useNotifications from '~/compositions/useNotifications';
-import { RepoVisibility, WebhookEvents, type Repo, type RepoSettings } from '~/lib/api/types';
+import { RepoRequireApproval, RepoVisibility, WebhookEvents, type Repo, type RepoSettings } from '~/lib/api/types';
 import { useRepoStore } from '~/store/repos';
 
 const apiClient = useApiClient();
@@ -130,6 +144,8 @@ const i18n = useI18n();
 
 const repo = inject<Ref<Repo>>('repo');
 const repoSettings = ref<RepoSettings>();
+
+const pathSeparator = '/';
 
 function loadRepoSettings() {
   if (!repo) {

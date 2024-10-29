@@ -88,10 +88,6 @@
           "allow": "Allow deployments",
           "desc": "Allow deployments from successful pipelines. Only use if you trust all users with push access."
         },
-        "protected": {
-          "protected": "Protected",
-          "desc": "Every pipeline needs to be approved before being executed."
-        },
         "netrc_only_trusted": {
           "netrc_only_trusted": "Only inject netrc credentials into trusted containers",
           "desc": "Only inject netrc credentials into trusted containers (recommended)."
@@ -496,8 +492,9 @@
   "invalid_state": "The OAuth state is invalid",
   "require_approval": {
     "require_approval_for": "Require approval for",
-    "forks": "Pull request from forks",
-    "pull_requests": "Pull requests",
-    "all_events": "All events"
+    "forks": "Pull request from forked repositories",
+    "pull_requests": "All pull requests",
+    "all_events": "All events",
+    "desc": "Prevent malicious pipelines from exposing secrets or running harmful tasks by approving them before execution."
   }
 }
