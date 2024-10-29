@@ -356,7 +356,7 @@ You should specify the tag of your images too, as this enforces exact matches.
 
 > Defaults are defined in [shared/constant/constant.go](https://github.com/woodpecker-ci/woodpecker/blob/main/shared/constant/constant.go)
 
-Plugins witch are trusted to handle the netrc info in clone steps.
+Plugins which are trusted to handle the netrc info in clone steps.
 If a clone step use an image not in this list, the netrc will not be injected and an user has to use other methods (e.g. secrets) to clone non public repos.
 
 You should specify the tag of your images too, as this enforces exact matches.
