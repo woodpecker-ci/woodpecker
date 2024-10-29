@@ -59,10 +59,9 @@ func (f *forgeFetcher) Fetch(ctx context.Context, forge forge.Forge, user *model
 	for i := 0; i < int(f.retryCount); i++ {
 		files, err = ffc.fetch(ctx, strings.TrimSpace(repo.Config))
 		if err != nil {
-			log.Trace().Err(err).Msgf("%d. try failed", i+1)
-		}
-		if errors.Is(err, context.DeadlineExceeded) {
-			continue
+			log.Trace().Err(err).Msgf("Fetching config files: Attempt #%d failed", i+1)
+		} else {
+			break
 		}
 	}
 
