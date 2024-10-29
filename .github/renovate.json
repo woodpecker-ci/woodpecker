@@ -7,9 +7,23 @@
       "customType": "regex",
       "fileMatch": ["shared/constant/constant.go"],
       "matchStrings": [
-        "//\\s*renovate:\\s*datasource=(?<datasource>.*?) depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?\\s+DefaultCloneImage = \"docker.io/woodpeckerci/plugin-git:(?<currentValue>.*)\""
+        "//\\s*renovate:\\s*datasource=(?<datasource>.*?) depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?\\s+DefaultClonePlugin = \"docker.io/woodpeckerci/plugin-git:(?<currentValue>.*)\""
       ],
       "versioningTemplate": "{{#if versioning}}{{{versioning}}}{{else}}semver{{/if}}"
+    },
+    {
+      "customType": "regex",
+      "fileMatch": [
+        "(^|/|\\.)([Dd]ocker|[Cc]ontainer)file$",
+        "(^|/)([Dd]ocker|[Cc]ontainer)file[^/]*$",
+        "^\\.woodpecker/.*\\.yaml$",
+        "^Makefile$"
+      ],
+      "matchStrings": ["xgo:go-(?<currentValue>[\\d\\.]+)", "XGO_VERSION\\s*\\?=\\s*(?<currentValue>[\\d\\.]+)"],
+      "datasourceTemplate": "docker",
+      "extractVersionTemplate": "^go-(?<version>.*)$",
+      "versioningTemplate": "semver",
+      "depNameTemplate": "techknowlogick/xgo"
     }
   ],
   "packageRules": [
@@ -30,7 +44,7 @@
     },
     {
       "groupName": "golang-lang",
-      "matchPackagePatterns": ["^golang$", "xgo"],
+      "matchPackagePatterns": ["^golang$"],
       "matchUpdateTypes": ["minor", "patch"]
     },
     {
@@ -59,11 +73,6 @@
       "matchManagers": ["npm"],
       "matchUpdateTypes": ["minor", "patch"],
       "matchFileNames": ["docs/**/package.json"]
-    },
-    {
-      "matchDatasources": ["docker"],
-      "matchPackagePatterns": ["xgo"],
-      "versioning": "regex:^go-(?<major>\\d+)?(\\.(?<minor>\\d+))?(\\.(?<patch>\\d+))$"
     }
   ]
 }
