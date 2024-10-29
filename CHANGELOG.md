@@ -49,6 +49,7 @@
 
 ### 📚 Documentation
 
+- chore(deps): update docs npm deps non-major [[#4238](https://github.com/woodpecker-ci/woodpecker/pull/4238)]
 - Correct spelling [[#4279](https://github.com/woodpecker-ci/woodpecker/pull/4279)]
 - Remove archived plugin [[#4227](https://github.com/woodpecker-ci/woodpecker/pull/4227)]
 - Use "Woodpecker Authors" as copyright on website [[#4225](https://github.com/woodpecker-ci/woodpecker/pull/4225)]
