@@ -41,11 +41,6 @@
       "verified": true
     },
     {
-      "name": "Block Git changes",
-      "docs": "https://codeberg.org/qwerty287/woodpecker-block-git-changes/raw/branch/main/docs.md",
-      "verified": false
-    },
-    {
       "name": "Regex check",
       "docs": "https://codeberg.org/qwerty287/woodpecker-regex-check/raw/branch/main/docs.md",
       "verified": false
@@ -218,6 +213,11 @@
     {
       "name": "Docker Tags",
       "docs": "https://raw.githubusercontent.com/dvjn/woodpecker-docker-tags-plugin/main/docs.md",
+      "verified": false
+    },
+    {
+      "name": "Telegram",
+      "docs": "https://raw.githubusercontent.com/appleboy/drone-telegram/refs/heads/master/DOCS.md",
       "verified": false
     }
   ]
