@@ -129,7 +129,6 @@
     "nosniff",
     "ntfy",
     "octocat",
-    "ontainer",
     "opensource",
     "Pacman",
     "picus",
@@ -253,6 +252,7 @@
     "pnpm-lock.yaml",
     "**/node_modules/**/*",
     "cmd/server/docs/docs.go",
+    "renovate.json",
     // TODO: remove the following
     "docs/**/*.js",
     "docs/**/*.ts"
