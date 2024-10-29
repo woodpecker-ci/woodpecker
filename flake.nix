@@ -94,7 +94,7 @@
             paths = [
               cli
               agent
-              server
+              # server # need impure because of pnpm
             ];
           };
         };
