@@ -57,3 +57,13 @@ make build-agent
 ### build the image
 docker buildx build --platform linux/amd64 -t username/repo:tag -f docker/Dockerfile.agent.multiarch --push .
 ```
+
+### CLI
+
+```sh
+### build the CLI
+make build-cli
+
+### build the image
+docker buildx build --platform linux/amd64 -t username/repo:tag -f docker/Dockerfile.cli.multiarch --push .
+```
