@@ -17,31 +17,39 @@ package pipeline
 import "go.woodpecker-ci.org/woodpecker/v2/server/model"
 
 func setApprovalState(repo *model.Repo, pipeline *model.Pipeline) {
+	if !needsApproval(repo, pipeline) {
+		return
+	}
+
+	// set pipeline status to blocked and require approval
+	pipeline.Status = model.StatusBlocked
+}
+
+func needsApproval(repo *model.Repo, pipeline *model.Pipeline) bool {
 	// skip events created by woodpecker itself
 	if pipeline.Event == model.EventCron || pipeline.Event == model.EventManual {
-		return
+		return false
 	}
 
-	// allow all events without approval
+	// repository allows all events without approval
 	if repo.RequireApproval == model.RequireApprovalNone {
-		return
+		return false
 	}
 
-	// require approval for pull requests from forks
+	// repository requires approval for pull requests from forks
 	if pipeline.Event == model.EventPull && pipeline.FromFork {
-		pipeline.Status = model.StatusBlocked
-		return
+		return true
 	}
 
 	// repository requires approval for pull requests
 	if pipeline.Event == model.EventPull && repo.RequireApproval == model.RequireApprovalPullRequests {
-		pipeline.Status = model.StatusBlocked
-		return
+		return true
 	}
 
 	// repository requires approval for all events
 	if repo.RequireApproval == model.RequireApprovalAllEvents {
-		pipeline.Status = model.StatusBlocked
-		return
+		return true
 	}
+
+	return false
 }
