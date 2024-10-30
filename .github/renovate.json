@@ -31,7 +31,7 @@
     },
     {
       "groupName": "golang-lang",
-      "matchPackagePatterns": ["^golang$"],
+      "matchPackagePatterns": ["^golang$", "xgo"],
       "matchUpdateTypes": ["minor", "patch"]
     },
     {
