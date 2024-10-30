@@ -239,8 +239,8 @@ func PatchRepo(c *gin.Context) {
 	}
 
 	if in.RequireApproval != nil {
-		switch *in.RequireApproval {
-		case string(model.RequireApprovalForks), string(model.RequireApprovalPullRequests), string(model.RequireApprovalAllEvents):
+		switch model.ApprovalMode(*in.RequireApproval) {
+		case model.RequireApprovalNone, model.RequireApprovalForks, model.RequireApprovalPullRequests, model.RequireApprovalAllEvents:
 			repo.RequireApproval = model.ApprovalMode(*in.RequireApproval)
 		default:
 			c.String(http.StatusBadRequest, "Invalid require-approval setting")

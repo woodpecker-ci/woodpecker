@@ -23,6 +23,7 @@ import (
 type ApprovalMode string
 
 var (
+	RequireApprovalNone         ApprovalMode = "none"          // require approval for no events
 	RequireApprovalForks        ApprovalMode = "forks"         // require approval for PRs from forks (default)
 	RequireApprovalPullRequests ApprovalMode = "pull_requests" // require approval for all PRs
 	RequireApprovalAllEvents    ApprovalMode = "all_events"    // require approval for all events

@@ -33,6 +33,11 @@
           v-model="repoSettings.require_approval"
           :options="[
             {
+              value: RepoRequireApproval.None,
+              text: $t('require_approval.none'),
+              description: $t('require_approval.none_desc'),
+            },
+            {
               value: RepoRequireApproval.Forks,
               text: $t('require_approval.forks'),
             },

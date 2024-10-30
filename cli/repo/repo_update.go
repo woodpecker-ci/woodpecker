@@ -41,7 +41,7 @@ var repoUpdateCmd = &cli.Command{
 		},
 		&cli.StringFlag{
 			Name:  "require-approval",
-			Usage: "repository require approval",
+			Usage: "repository requires approval for",
 		},
 		&cli.DurationFlag{
 			Name:  "timeout",
@@ -95,26 +95,25 @@ func repoUpdate(ctx context.Context, c *cli.Command) error {
 	// TODO: remove isGated in next major release
 	if c.IsSet("gated") {
 		if gated {
-			allEvents := "all_events"
-			patch.RequireApproval = &allEvents
+			patch.RequireApproval = &woodpecker.RequireApprovalAllEvents
 		} else {
-			forks := "forks"
-			patch.RequireApproval = &forks
+			patch.RequireApproval = &woodpecker.RequireApprovalForks
 		}
 	}
 	if c.IsSet("require-approval") {
-		switch requireApproval {
-		case "forks", "pull_requests", "all_events":
+		switch woodpecker.ApprovalMode(requireApproval) {
+		case woodpecker.RequireApprovalNone, woodpecker.RequireApprovalForks, woodpecker.RequireApprovalPullRequests, woodpecker.RequireApprovalAllEvents:
+			requireApproval := woodpecker.ApprovalMode(requireApproval)
 			patch.RequireApproval = &requireApproval
 		}
 
 		// TODO: remove isGated in next major release
-		if requireApproval == "all_events" {
+		if requireApproval == string(woodpecker.RequireApprovalAllEvents) {
 			trueBool := true
 			patch.IsGated = &trueBool
 		}
 
-		if requireApproval == "forks" {
+		if requireApproval == string(woodpecker.RequireApprovalForks) {
 			falseBool := false
 			patch.IsGated = &falseBool
 		}

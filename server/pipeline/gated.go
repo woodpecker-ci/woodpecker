@@ -22,7 +22,12 @@ func setApprovalState(repo *model.Repo, pipeline *model.Pipeline) {
 		return
 	}
 
-	// always require approval for pull requests from forks
+	// allow all events without approval
+	if repo.RequireApproval == model.RequireApprovalNone {
+		return
+	}
+
+	// require approval for pull requests from forks
 	if pipeline.Event == model.EventPull && pipeline.FromFork {
 		pipeline.Status = model.StatusBlocked
 		return

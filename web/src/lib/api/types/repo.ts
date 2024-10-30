@@ -83,6 +83,7 @@ export enum RepoVisibility {
 }
 
 export enum RepoRequireApproval {
+  None = 'none',
   Forks = 'forks',
   PullRequests = 'pull_requests',
   AllEvents = 'all_events',

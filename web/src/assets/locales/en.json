@@ -492,6 +492,8 @@
   "invalid_state": "The OAuth state is invalid",
   "require_approval": {
     "require_approval_for": "Require approval for",
+    "none": "No approval required",
+    "none_desc": "This setting can be dangerous and should only be used on private forges where all users are trusted.",
     "forks": "Pull request from forked repositories",
     "pull_requests": "All pull requests",
     "all_events": "All events",
