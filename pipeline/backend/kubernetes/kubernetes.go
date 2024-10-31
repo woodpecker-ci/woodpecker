@@ -379,7 +379,6 @@ func (e *kube) TailStep(ctx context.Context, step *types.Step, taskUUID string) 
 	go func() {
 		defer logs.Close()
 		defer wc.Close()
-		defer rc.Close()
 
 		_, err = io.Copy(wc, logs)
 		if err != nil {
