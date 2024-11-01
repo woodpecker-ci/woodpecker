@@ -95,8 +95,8 @@ steps:
 			assert.NoError(t, err)
 
 			assert.NoError(t, linter.New(linter.WithTrusted(linter.TrustedConfiguration{
-				Network: true,
-				Volumes: true,
+				Network:  true,
+				Volumes:  true,
 				Security: true,
 			})).Lint([]*linter.WorkflowConfig{{
 				File:      testd.Title,
