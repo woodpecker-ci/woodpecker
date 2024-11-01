@@ -225,10 +225,23 @@ func PatchRepo(c *gin.Context) {
 		c.String(http.StatusForbidden, fmt.Sprintf("Timeout is not allowed to be higher than max timeout (%d min)", server.Config.Pipeline.MaxTimeout))
 		return
 	}
-	if in.IsTrusted != nil && *in.IsTrusted != repo.IsTrusted && !user.Admin {
-		log.Trace().Msgf("user '%s' wants to make repo trusted without being an instance admin", user.Login)
-		c.String(http.StatusForbidden, "Insufficient privileges")
-		return
+
+	if in.Trusted != nil {
+		if (*in.Trusted.Network != repo.Trusted.Network || *in.Trusted.Volumes != repo.Trusted.Volumes || *in.Trusted.Security != repo.Trusted.Security) && !user.Admin {
+			log.Trace().Msgf("user '%s' wants to change trusted without being an instance admin", user.Login)
+			c.String(http.StatusForbidden, "Insufficient privileges")
+			return
+		}
+
+		if in.Trusted.Network != nil {
+			repo.Trusted.Network = *in.Trusted.Network
+		}
+		if in.Trusted.Security != nil {
+			repo.Trusted.Security = *in.Trusted.Security
+		}
+		if in.Trusted.Volumes != nil {
+			repo.Trusted.Volumes = *in.Trusted.Volumes
+		}
 	}
 
 	if in.AllowPull != nil {
@@ -252,9 +265,6 @@ func PatchRepo(c *gin.Context) {
 		} else {
 			repo.RequireApproval = model.RequireApprovalForks
 		}
-	}
-	if in.IsTrusted != nil {
-		repo.IsTrusted = *in.IsTrusted
 	}
 	if in.Timeout != nil {
 		repo.Timeout = *in.Timeout

@@ -20,11 +20,27 @@
           :label="$t('repo.settings.general.netrc_only_trusted.netrc_only_trusted')"
           :description="$t('repo.settings.general.netrc_only_trusted.desc')"
         />
+      </InputField>
+
+      <InputField
+        v-if="user?.admin"
+        docs-url="docs/usage/project-settings#project-settings-1"
+        :label="$t('repo.settings.general.trusted.trusted')"
+      >
         <Checkbox
-          v-if="user?.admin"
-          v-model="repoSettings.trusted"
-          :label="$t('repo.settings.general.trusted.trusted')"
-          :description="$t('repo.settings.general.trusted.desc')"
+          v-model="repoSettings.trusted.network"
+          :label="$t('repo.settings.general.trusted.network.network')"
+          :description="$t('repo.settings.general.trusted.network.desc')"
+        />
+        <Checkbox
+          v-model="repoSettings.trusted.volumes"
+          :label="$t('repo.settings.general.trusted.volumes.volumes')"
+          :description="$t('repo.settings.general.trusted.volumes.desc')"
+        />
+        <Checkbox
+          v-model="repoSettings.trusted.security"
+          :label="$t('repo.settings.general.trusted.security.security')"
+          :description="$t('repo.settings.general.trusted.security.desc')"
         />
       </InputField>
 

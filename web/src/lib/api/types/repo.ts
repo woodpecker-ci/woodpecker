@@ -50,7 +50,7 @@ export interface Repo {
   // Whether the repository has trusted access for pipelines.
   // If the repository is trusted then the host network can be used and
   // volumes can be created.
-  trusted: boolean;
+  trusted: RepoTrusted;
 
   // x-dart-type: Duration
   // The amount of time in minutes before the pipeline is killed.
@@ -108,4 +108,10 @@ export interface RepoPermissions {
   push: boolean;
   admin: boolean;
   synced: number;
+}
+
+export interface RepoTrusted {
+  network: boolean;
+  volumes: boolean;
+  security: boolean;
 }
