@@ -1,13 +1,14 @@
 # Changelog
 
-## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-10-30
+## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-11-01
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @Fishbowler, @M0Rf30, @anbraten, @gnowland, @hg, @j04n-f, @jenrik, @johanneskastl, @lukashass, @meln5674, @not-my-profile, @pat-s, @qwerty287, @smainz, @tori-27, @xtexChooser, @zc-devs
+@6543, @Fishbowler, @M0Rf30, @anbraten, @gnowland, @hg, @j04n-f, @jenrik, @johanneskastl, @lukashass, @meln5674, @not-my-profile, @pat-s, @qwerty287, @smainz, @tori-27, @xoxys, @xtexChooser, @zc-devs
 
 ### 💥 Breaking changes
 
+- Split repo trusted setting [[#4025](https://github.com/woodpecker-ci/woodpecker/pull/4025)]
 - Move docker resource limit settings from server to agent [[#3174](https://github.com/woodpecker-ci/woodpecker/pull/3174)]
 - Set `/woodpecker` as default workdir for the **woodpecker-cli** container [[#4130](https://github.com/woodpecker-ci/woodpecker/pull/4130)]
 - Require upgrade from 2.x [[#4112](https://github.com/woodpecker-ci/woodpecker/pull/4112)]
@@ -186,6 +187,7 @@
 
 ### Misc
 
+- Fix wording for privileged plugins linter error [[#4280](https://github.com/woodpecker-ci/woodpecker/pull/4280)]
 - Fix renovate support for `xgo` [[#4276](https://github.com/woodpecker-ci/woodpecker/pull/4276)]
 - Improve nix development environment [[#4256](https://github.com/woodpecker-ci/woodpecker/pull/4256)]
 - [pre-commit.ci] pre-commit autoupdate [[#4209](https://github.com/woodpecker-ci/woodpecker/pull/4209)]
