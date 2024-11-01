@@ -40,11 +40,6 @@ var splitTrusted = xormigrate.Migration{
 			return fmt.Errorf("sync new models failed: %w", err)
 		}
 
-		var repos []*repoV035
-		if err := sess.Find(&repos); err != nil {
-			return err
-		}
-
 		if _, err := sess.Where("trusted = ?", false).Cols("trusted_conf").Update(&repoV035{
 			Trusted: model.TrustedConfiguration{
 				Network:  false,
