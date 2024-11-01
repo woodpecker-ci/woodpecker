@@ -40,6 +40,7 @@ $netrc=[string]::Format("{0}\_netrc",$Env:HOME);
 };
 [Environment]::SetEnvironmentVariable("CI_NETRC_PASSWORD",$null);
 [Environment]::SetEnvironmentVariable("CI_SCRIPT",$null);
+if ([Environment]::GetEnvironmentVariable('CI_WORKSPACE')) { cd "$env:CI_WORKSPACE" };
 
 Write-Output ('+ "echo %PATH%"');
 & echo %PATH%; if ($LASTEXITCODE -ne 0) {exit $LASTEXITCODE}
