@@ -2,12 +2,13 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": ["github>woodpecker-ci/renovate-config"],
   "automergeType": "pr",
+  "enabledManagers": ["woodpecker"],
   "customManagers": [
     {
       "customType": "regex",
       "fileMatch": ["shared/constant/constant.go"],
       "matchStrings": [
-        "//\\s*renovate:\\s*datasource=(?<datasource>.*?) depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?\\s+DefaultCloneImage = \"docker.io/woodpeckerci/plugin-git:(?<currentValue>.*)\""
+        "//\\s*renovate:\\s*datasource=(?<datasource>.*?) depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?\\s+DefaultClonePlugin = \"docker.io/woodpeckerci/plugin-git:(?<currentValue>.*)\""
       ],
       "versioningTemplate": "{{#if versioning}}{{{versioning}}}{{else}}semver{{/if}}"
     }
@@ -61,9 +62,10 @@
       "matchFileNames": ["docs/**/package.json"]
     },
     {
+      "description": "Extract version from xgo container tags",
       "matchDatasources": ["docker"],
-      "matchPackagePatterns": ["xgo"],
-      "versioning": "regex:^go-(?<major>\\d+)?(\\.(?<minor>\\d+))?(\\.(?<patch>\\d+))$"
+      "matchPackagePatterns": ["techknowlogick/xgo"],
+      "versioning": "regex:^go-(?<major>\\d+)\\.(?<minor>\\d+)\\.x$"
     }
   ]
 }
