@@ -28,7 +28,7 @@ type repo017 struct {
 	ID              int64  `json:"id,omitempty"     xorm:"pk autoincr 'id'"`
 	IsGated         bool   `json:"gated"            xorm:"gated"`
 	RequireApproval string `json:"require_approval" xorm:"require_approval"`
-	PREnabled       bool   `json:"pr_enabled"       xorm:"DEFAULT TRUE 'pr_enabled'"`
+	Visibility      string `json:"visibility"       xorm:"varchar(10) 'visibility'"`
 }
 
 func (repo017) TableName() string {
@@ -48,7 +48,7 @@ var gatedToRequireApproval = xormigrate.Migration{
 		for {
 			oldRepos = oldRepos[:0]
 
-			err := sess.Limit(perPage017, page*perPage017).Cols("require_approval", "pr_enabled", "gated").Find(&oldRepos)
+			err := sess.Limit(perPage017, page*perPage017).Cols("id", "gated", "visibility").Find(&oldRepos)
 			if err != nil {
 				return err
 			}
@@ -58,10 +58,10 @@ var gatedToRequireApproval = xormigrate.Migration{
 				newRepo.ID = oldRepo.ID
 				if oldRepo.IsGated {
 					newRepo.RequireApproval = "all_events"
-				} else if oldRepo.PREnabled {
-					newRepo.RequireApproval = "pull_requests"
-				} else {
+				} else if oldRepo.Visibility == "public" {
 					newRepo.RequireApproval = "forks"
+				} else {
+					newRepo.RequireApproval = "none"
 				}
 
 				if _, err := sess.ID(oldRepo.ID).Cols("require_approval").Update(newRepo); err != nil {

@@ -97,7 +97,7 @@ func repoUpdate(ctx context.Context, c *cli.Command) error {
 		if gated {
 			patch.RequireApproval = &woodpecker.RequireApprovalAllEvents
 		} else {
-			patch.RequireApproval = &woodpecker.RequireApprovalForks
+			patch.RequireApproval = &woodpecker.RequireApprovalNone
 		}
 	}
 	if c.IsSet("require-approval") {
@@ -113,7 +113,7 @@ func repoUpdate(ctx context.Context, c *cli.Command) error {
 			patch.IsGated = &trueBool
 		}
 
-		if requireApproval == string(woodpecker.RequireApprovalForks) {
+		if requireApproval == string(woodpecker.RequireApprovalNone) {
 			falseBool := false
 			patch.IsGated = &falseBool
 		}
