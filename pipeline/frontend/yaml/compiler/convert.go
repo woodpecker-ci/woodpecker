@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"maps"
 	"path"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -33,9 +34,27 @@ import (
 const (
 	// The pluginWorkspaceBase should not be changed, only if you are sure what you do.
 	pluginWorkspaceBase = "/woodpecker"
+	// The pluginWorkspaceBaseWindows is like pluginWorkspaceBase but used if we detect windows as container host target.
+	pluginWorkspaceBaseWindows = `c:\woodpecker`
 	// DefaultWorkspaceBase is set if not altered by the user.
 	DefaultWorkspaceBase = pluginWorkspaceBase
 )
+
+var workspaceHasWindowsPattern = regexp.MustCompile(`^[a-zA-Z]:\\`)
+
+func (c *Compiler) checkRunOnWindowsHeuristics() bool {
+	// if user customized the workspace witch indicates it targets windows
+	if workspaceHasWindowsPattern.MatchString(c.workspaceBase) {
+		return true
+	}
+
+	// if the platform filter targets windows
+	if strings.HasPrefix(strings.ToLower(c.metadata.Sys.Platform), "windows") {
+		return true
+	}
+
+	return false
+}
 
 func (c *Compiler) createProcess(container *yaml_types.Container, stepType backend_types.StepType) (*backend_types.Step, error) {
 	var (
@@ -51,7 +70,11 @@ func (c *Compiler) createProcess(container *yaml_types.Container, stepType backe
 	workspaceBase := c.workspaceBase
 	if container.IsPlugin() {
 		// plugins have a predefined workspace base to not tamper with entrypoint executables
-		workspaceBase = pluginWorkspaceBase
+		if c.checkRunOnWindowsHeuristics() {
+			workspaceBase = pluginWorkspaceBaseWindows
+		} else {
+			workspaceBase = pluginWorkspaceBase
+		}
 	}
 	workspaceVolume := fmt.Sprintf("%s_default:%s", c.prefix, workspaceBase)
 
@@ -205,7 +228,11 @@ func (c *Compiler) stepWorkingDir(container *yaml_types.Container) string {
 	}
 	base := c.workspaceBase
 	if container.IsPlugin() {
-		base = pluginWorkspaceBase
+		if c.checkRunOnWindowsHeuristics() {
+			base = pluginWorkspaceBaseWindows
+		} else {
+			base = pluginWorkspaceBase
+		}
 	}
 	return path.Join(base, c.workspacePath, container.Directory)
 }

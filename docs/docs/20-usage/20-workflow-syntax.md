@@ -546,7 +546,8 @@ The workspace can be customized using the workspace block in the YAML file:
 ```
 
 :::note
-Plugins will always have the workspace base at `/woodpecker`
+Plugins will always have the workspace base at `/woodpecker`.
+If windows is detected as container host os, it's `c:\woodpecker`.
 :::
 
 The base attribute defines a shared base volume available to all steps. This ensures your source code, dependencies and compiled binaries are persisted and shared between steps.
