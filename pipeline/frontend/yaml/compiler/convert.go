@@ -228,6 +228,7 @@ func (c *Compiler) stepWorkingDir(container *yaml_types.Container) string {
 	}
 	base := c.workspaceBase
 	if container.IsPlugin() {
+		// plugins have a predefined workspace base to not tamper with entrypoint executables
 		if c.checkRunOnWindowsHeuristics() {
 			base = pluginWorkspaceBaseWindows
 		} else {
