@@ -289,7 +289,7 @@ The available events are:
 - `pull_request_closed`: triggered when a pull request is closed or merged.
 - `tag`: triggered when a tag is pushed.
 - `release`: triggered when a release, pre-release or draft is created. (You can apply further filters using [evaluate](#evaluate) with [environment variables](./50-environment.md#built-in-environment-variables).)
-- `deployment` (only available for GitHub): triggered when a deployment is created in the repository.
+- `deployment`: triggered when a deployment is created in the repository.
 - `cron`: triggered when a cron job is executed.
 - `manual`: triggered when a user manually triggers a pipeline.
 
