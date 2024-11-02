@@ -54,11 +54,11 @@ func setupStore(ctx context.Context, c *cli.Command) (store.Store, error) {
 	datasource := c.String("datasource")
 	driver := c.String("driver")
 	xorm := store.XORM{
-		Log:             c.Bool("log-xorm"),
-		ShowSQL:         c.Bool("log-xorm-sql"),
-		MaxOpenConns:    int(c.Int("xorm-max-open-connections")),
-		MaxIdleConns:    int(c.Int("xorm-max-idle-connections")),
-		ConnMaxLifetime: c.Duration("xorm-max-connection-timeout"),
+		Log:             c.Bool("db-log"),
+		ShowSQL:         c.Bool("db-log-sql"),
+		MaxOpenConns:    int(c.Int("db-max-open-connections")),
+		MaxIdleConns:    int(c.Int("db-max-idle-connections")),
+		ConnMaxLifetime: c.Duration("db-max-connection-timeout"),
 	}
 
 	if driver == "sqlite3" {

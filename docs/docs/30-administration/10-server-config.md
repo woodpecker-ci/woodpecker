@@ -159,31 +159,31 @@ Configures the logging level. Possible values are `trace`, `debug`, `info`, `war
 Output destination for logs.
 'stdout' and 'stderr' can be used as special keywords.
 
-### `WOODPECKER_LOG_XORM`
+### `WOODPECKER_DB_LOG`
 
 > Default: `false`
 
-Enable XORM logs.
+Enable logging in database engine (currently xorm).
 
-### `WOODPECKER_LOG_XORM_SQL`
+### `WOODPECKER_DB_LOG_SQL`
 
 > Default: `false`
 
-Enable XORM SQL command logs.
+Enable logging of sql commands.
 
-### `WOODPECKER_XORM_MAX_CONNECTIONS`
+### `WOODPECKER_DB_MAX_CONNECTIONS`
 
 > Default: `100`
 
 Max database connections xorm is allowed create.
 
-### `WOODPECKER_XORM_IDLE_CONNECTIONS`
+### `WOODPECKER_DB_IDLE_CONNECTIONS`
 
 > Default: `2`
 
 Amount of database connections xorm will hold open.
 
-### `WOODPECKER_XORM_CONNECTION_TIMEOUT`
+### `WOODPECKER_DB_CONNECTION_TIMEOUT`
 
 > Default: `3 Seconds`
 

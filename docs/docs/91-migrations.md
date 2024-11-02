@@ -4,6 +4,7 @@ Some versions need some changes to the server configuration or the pipeline conf
 
 ## `next`
 
+- Deprecate `WOODPECKER_LOG_XORM` and `WOODPECKER_LOG_XORM_SQL` use `"WOODPECKER_DB_LOG` and `"WOODPECKER_DB_LOG_SQL`
 - Deprecate `WOODPECKER_FILTER_LABELS` use `WOODPECKER_AGENT_LABELS`
 - Removed built-in environment variables:
   - `CI_COMMIT_URL` use `CI_PIPELINE_FORGE_URL`

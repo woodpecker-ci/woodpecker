@@ -27,30 +27,32 @@ import (
 
 var flags = append([]cli.Flag{
 	&cli.BoolFlag{
-		Sources: cli.EnvVars("WOODPECKER_LOG_XORM"),
-		Name:    "log-xorm",
-		Usage:   "enable xorm logging",
+		Sources: cli.EnvVars("WOODPECKER_DB_LOG", "WOODPECKER_LOG_XORM"),
+		Name:    "db-log",
+		Aliases: []string{"log-xorm"}, // TODO: remove in v4.0.0
+		Usage:   "enable logging in database engine (currently xorm)",
 	},
 	&cli.BoolFlag{
-		Sources: cli.EnvVars("WOODPECKER_LOG_XORM_SQL"),
-		Name:    "log-xorm-sql",
-		Usage:   "enable xorm sql command logging",
+		Sources: cli.EnvVars("WOODPECKER_DB_LOG_SQL", "WOODPECKER_LOG_XORM_SQL"),
+		Name:    "db-log-sql",
+		Aliases: []string{"log-xorm-sql"}, // TODO: remove in v4.0.0
+		Usage:   "enable logging of sql commands",
 	},
 	&cli.IntFlag{
-		Sources: cli.EnvVars("WOODPECKER_XORM_MAX_CONNECTIONS"),
-		Name:    "xorm-max-open-connections",
+		Sources: cli.EnvVars("WOODPECKER_DB_MAX_CONNECTIONS"),
+		Name:    "db-max-open-connections",
 		Usage:   "max connections xorm is allowed create",
 		Value:   100,
 	},
 	&cli.IntFlag{
-		Sources: cli.EnvVars("WOODPECKER_XORM_IDLE_CONNECTIONS"),
-		Name:    "xorm-max-idle-connections",
+		Sources: cli.EnvVars("WOODPECKER_DB_IDLE_CONNECTIONS"),
+		Name:    "db-max-idle-connections",
 		Usage:   "amount of connections xorm will hold open",
 		Value:   2,
 	},
 	&cli.DurationFlag{
-		Sources: cli.EnvVars("WOODPECKER_XORM_CONNECTION_TIMEOUT"),
-		Name:    "xorm-max-connection-timeout",
+		Sources: cli.EnvVars("WOODPECKER_DB_CONNECTION_TIMEOUT"),
+		Name:    "db-max-connection-timeout",
 		Usage:   "time an active connection is allowed to stay open",
 		Value:   3 * time.Second,
 	},
