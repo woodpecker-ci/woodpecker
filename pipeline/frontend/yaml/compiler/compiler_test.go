@@ -299,6 +299,51 @@ func TestCompilerCompile(t *testing.T) {
 			backConf:    nil,
 			expectedErr: "step 'dummy' depends on unknown step 'not exist'",
 		},
+		{
+			name: "workflow that targets windows as container host",
+			fronConf: &yaml_types.Workflow{
+				Steps: yaml_types.ContainerList{ContainerList: []*yaml_types.Container{{
+					Name:     "hello powershell",
+					Image:    "mcr.microsoft.com/windows/servercore:ltsc2022",
+					Commands: []string{"powershell.exe /c 'echo hello'"},
+				}}},
+				Workspace: yaml_types.Workspace{
+					Base: "c:\\tmp",
+				},
+			},
+			backConf: &backend_types.Config{
+				Stages: []*backend_types.Stage{
+					{
+						Steps: []*backend_types.Step{{
+							Name:          "clone",
+							Type:          backend_types.StepTypeClone,
+							Image:         constant.DefaultClonePlugin,
+							OnSuccess:     true,
+							Failure:       "fail",
+							Volumes:       []string{"test_default:c:\\woodpecker"},
+							WorkingDir:    "c:\\woodpecker/src/github.com/octocat/hello-world",
+							WorkspaceBase: `c:\woodpecker`,
+							Networks:      []backend_types.Conn{{Name: "test_default", Aliases: []string{"clone"}}},
+							ExtraHosts:    []backend_types.HostAlias{},
+						}},
+					}, {Steps: []*backend_types.Step{{
+						Name:          "hello powershell",
+						Type:          backend_types.StepTypeCommands,
+						Image:         "mcr.microsoft.com/windows/servercore:ltsc2022",
+						Commands:      []string{"powershell.exe /c 'echo hello'"},
+						OnSuccess:     true,
+						Failure:       "fail",
+						Volumes:       []string{"test_default:c:\\tmp"},
+						WorkingDir:    "c:\\tmp/src/github.com/octocat/hello-world",
+						WorkspaceBase: `c:\tmp`,
+						Networks:      []backend_types.Conn{{Name: "test_default", Aliases: []string{"hello powershell"}}},
+						ExtraHosts:    []backend_types.HostAlias{},
+					}}},
+				},
+				Networks: defaultNetworks,
+				Volumes:  defaultVolumes,
+			},
+		},
 	}
 
 	for _, test := range tests {
