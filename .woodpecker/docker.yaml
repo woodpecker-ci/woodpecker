@@ -97,7 +97,7 @@ steps:
       - apt install -y tree
       - make cross-compile-server
     environment:
-      PLATFORMS: linux|amd64
+      PLATFORMS: linux|arm/v7;linux|arm64/v8;linux|amd64
       TAGS: sqlite sqlite_unlock_notify netgo
     when:
       - event: pull_request
