@@ -96,6 +96,7 @@ func (m *Metadata) Environ() map[string]string {
 		"CI_WORKFLOW_NUMBER": strconv.Itoa(m.Workflow.Number),
 
 		"CI_STEP_NAME":    m.Step.Name,
+		"CI_STEP_TYPE":    m.Step.Type,
 		"CI_STEP_NUMBER":  strconv.Itoa(m.Step.Number),
 		"CI_STEP_STARTED": "", // will be set by agent
 		"CI_STEP_URL":     m.getPipelineWebURL(m.Curr, m.Step.Number),
