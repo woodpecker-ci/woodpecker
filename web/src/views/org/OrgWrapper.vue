@@ -7,7 +7,7 @@
     <template #titleActions>
       <IconButton
         v-if="orgPermissions.admin"
-        :to="{ name: org.is_user ? 'user' : 'repo-settings' }"
+        :to="{ name: org.is_user ? 'user' : 'org-settings-secrets' }"
         :title="$t('settings')"
         icon="settings"
       />
