@@ -8,6 +8,7 @@
 
 ### 💥 Breaking changes
 
+- Kubernetes | Docker: Add support for rootless images [[#4151](https://github.com/woodpecker-ci/woodpecker/pull/4151)]
 - Split repo trusted setting [[#4025](https://github.com/woodpecker-ci/woodpecker/pull/4025)]
 - Move docker resource limit settings from server to agent [[#3174](https://github.com/woodpecker-ci/woodpecker/pull/3174)]
 - Set `/woodpecker` as default workdir for the **woodpecker-cli** container [[#4130](https://github.com/woodpecker-ci/woodpecker/pull/4130)]
