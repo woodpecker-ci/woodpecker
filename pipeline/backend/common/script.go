@@ -22,13 +22,11 @@ func GenerateContainerConf(commands []string, goos string) (env map[string]strin
 	env = make(map[string]string)
 	if goos == "windows" {
 		env["CI_SCRIPT"] = base64.StdEncoding.EncodeToString([]byte(generateScriptWindows(commands)))
-		env["HOME"] = "c:\\root"
 		env["SHELL"] = "powershell.exe"
 		// cspell:disable-next-line
 		entry = []string{"powershell", "-noprofile", "-noninteractive", "-command", "[System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($Env:CI_SCRIPT)) | iex"}
 	} else {
 		env["CI_SCRIPT"] = base64.StdEncoding.EncodeToString([]byte(generateScriptPosix(commands)))
-		env["HOME"] = "/root"
 		env["SHELL"] = "/bin/sh"
 		entry = []string{"/bin/sh", "-c", "echo $CI_SCRIPT | base64 -d | /bin/sh -e"}
 	}
