@@ -374,7 +374,7 @@ You should specify the tag of your images too, as this enforces exact matches.
 
 > Defaults are defined in [shared/constant/constant.go](https://github.com/woodpecker-ci/woodpecker/blob/main/shared/constant/constant.go)
 
-Plugins witch are trusted to handle the netrc info in clone steps.
+Plugins which are trusted to handle the netrc info in clone steps.
 If a clone step use an image not in this list, the netrc will not be injected and an user has to use other methods (e.g. secrets) to clone non public repos.
 
 You should specify the tag of your images too, as this enforces exact matches.
@@ -502,7 +502,7 @@ Specify a configuration service endpoint, see [Configuration Extension](./40-adv
 
 ### `WOODPECKER_FORGE_TIMEOUT`
 
-> Default: 3s
+> Default: 5s
 
 Specify timeout when fetching the Woodpecker configuration from forge. See <https://pkg.go.dev/time#ParseDuration> for syntax reference.
 

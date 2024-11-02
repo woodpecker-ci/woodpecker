@@ -185,7 +185,7 @@ var flags = append([]cli.Flag{
 	&cli.StringSliceFlag{
 		Sources: cli.EnvVars("WOODPECKER_PLUGINS_TRUSTED_CLONE"),
 		Name:    "plugins-trusted-clone",
-		Usage:   "Plugins witch are trusted to handle the netrc info in clone steps",
+		Usage:   "Plugins which are trusted to handle the netrc info in clone steps",
 		Value:   constant.TrustedClonePlugins,
 	},
 	&cli.StringSliceFlag{
@@ -305,7 +305,7 @@ var flags = append([]cli.Flag{
 		Sources: cli.EnvVars("WOODPECKER_FORGE_TIMEOUT"),
 		Name:    "forge-timeout",
 		Usage:   "how many seconds before timeout when fetching the Woodpecker configuration from a Forge",
-		Value:   time.Second * 3,
+		Value:   time.Second * 5,
 	},
 	&cli.UintFlag{
 		Sources: cli.EnvVars("WOODPECKER_FORGE_RETRY"),
