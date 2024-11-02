@@ -13,14 +13,14 @@ steps:
     depends_on: []
     image: *trivy_plugin
     settings:
-      server: server:10000
+      server: http://server:10000
       skip-dirs: web/,docs/
 
   docs:
     depends_on: []
     image: *trivy_plugin
     settings:
-      server: server:10000
+      server: http://server:10000
       skip-dirs: node_modules/,plugins/woodpecker-plugins/node_modules/
       dir: docs/
 
@@ -28,7 +28,7 @@ steps:
     depends_on: []
     image: *trivy_plugin
     settings:
-      server: server:10000
+      server: http://server:10000
       skip-dirs: node_modules/
       dir: web/
 
