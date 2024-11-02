@@ -36,6 +36,6 @@ services:
   server:
     image: ghcr.io/aquasecurity/trivy:0.57.0
     commands:
-      -  trivy server --listen 0.0.0.0:10000 --db-repository docker.io/aquasec/trivy-db:2
+      - trivy server --listen 0.0.0.0:10000 --db-repository docker.io/aquasec/trivy-db:2
     ports:
-     - 10000
+      - 10000
