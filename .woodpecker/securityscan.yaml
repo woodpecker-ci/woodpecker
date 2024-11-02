@@ -11,6 +11,7 @@ variables:
 steps:
   backend:
     depends_on: []
+    pull: true
     image: *trivy_plugin
     settings:
       server: server
@@ -18,6 +19,7 @@ steps:
 
   docs:
     depends_on: []
+    pull: true
     image: *trivy_plugin
     settings:
       server: server
@@ -26,6 +28,7 @@ steps:
 
   web:
     depends_on: []
+    pull: true
     image: *trivy_plugin
     settings:
       server: server
@@ -35,6 +38,7 @@ steps:
 services:
   server:
     image: *trivy_plugin
+    pull: true
     settings:
       service: true
       db-repository: docker.io/aquasec/trivy-db:2
