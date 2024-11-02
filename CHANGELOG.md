@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-11-01
+## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-11-02
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -47,6 +47,40 @@
 - Implement org/user agents [[#3539](https://github.com/woodpecker-ci/woodpecker/pull/3539)]
 - Replay pipeline using `cli exec` by downloading metadata [[#4103](https://github.com/woodpecker-ci/woodpecker/pull/4103)]
 - Update clone plugin to support sha256 [[#4136](https://github.com/woodpecker-ci/woodpecker/pull/4136)]
+
+### 📈 Enhancement
+
+- Add additionall error message on swagger v2 to v3 convert [[#4254](https://github.com/woodpecker-ci/woodpecker/pull/4254)]
+- Deprecate `secrets` [[#4235](https://github.com/woodpecker-ci/woodpecker/pull/4235)]
+- Agent edit/detail view: change the help url based on the backend [[#4219](https://github.com/woodpecker-ci/woodpecker/pull/4219)]
+- Use middleware to load org [[#4208](https://github.com/woodpecker-ci/woodpecker/pull/4208)]
+- Assign workflows to agents with the best label matches [[#4201](https://github.com/woodpecker-ci/woodpecker/pull/4201)]
+- Report custom labels set by agent admins back [[#4141](https://github.com/woodpecker-ci/woodpecker/pull/4141)]
+- Highlight invalid entries in manual pipeline trigger [[#4153](https://github.com/woodpecker-ci/woodpecker/pull/4153)]
+- Print agent labels in debug mode [[#4155](https://github.com/woodpecker-ci/woodpecker/pull/4155)]
+- Implement registries for Kubernetes backend [[#4092](https://github.com/woodpecker-ci/woodpecker/pull/4092)]
+- Correct cli exec flags and remove ineffective ones [[#4129](https://github.com/woodpecker-ci/woodpecker/pull/4129)]
+- Set repo user to repairing user when old user is missing [[#4128](https://github.com/woodpecker-ci/woodpecker/pull/4128)]
+- Restart tasks on dead agents sooner [[#4114](https://github.com/woodpecker-ci/woodpecker/pull/4114)]
+- Process workflow logs in batches [[#4045](https://github.com/woodpecker-ci/woodpecker/pull/4045)]
+- Adjust cli exec metadata structure to equal server metadata [[#4119](https://github.com/woodpecker-ci/woodpecker/pull/4119)]
+- Allow to restart declined pipelines [[#4109](https://github.com/woodpecker-ci/woodpecker/pull/4109)]
+- Add indices to repo table [[#4087](https://github.com/woodpecker-ci/woodpecker/pull/4087)]
+- Add systemd unit files to the RPM/DEB packages [[#3986](https://github.com/woodpecker-ci/woodpecker/pull/3986)]
+- Duplicate key `workflow_id` in the agent logs [[#4046](https://github.com/woodpecker-ci/woodpecker/pull/4046)]
+- Improve error on config loading [[#4024](https://github.com/woodpecker-ci/woodpecker/pull/4024)]
+- Show error if secret name is missing [[#4014](https://github.com/woodpecker-ci/woodpecker/pull/4014)]
+- Show error returned from API [[#3980](https://github.com/woodpecker-ci/woodpecker/pull/3980)]
+- Move manual popup to own page [[#3981](https://github.com/woodpecker-ci/woodpecker/pull/3981)]
+- Fail on InvalidImageName [[#4007](https://github.com/woodpecker-ci/woodpecker/pull/4007)]
+- Use Bitbucket PR title for pipeline message [[#3984](https://github.com/woodpecker-ci/woodpecker/pull/3984)]
+- Show logs if step has error [[#3979](https://github.com/woodpecker-ci/woodpecker/pull/3979)]
+- Refactor docker backend and add more test coverage [[#2700](https://github.com/woodpecker-ci/woodpecker/pull/2700)]
+- Make cli plugin log purge recognize steps by name [[#3953](https://github.com/woodpecker-ci/woodpecker/pull/3953)]
+- Pin page size [[#3946](https://github.com/woodpecker-ci/woodpecker/pull/3946)]
+- Improve cron list [[#3947](https://github.com/woodpecker-ci/woodpecker/pull/3947)]
+- Add PULLREQUEST_DRONE_PULL_REQUEST drone env [[#3939](https://github.com/woodpecker-ci/woodpecker/pull/3939)]
+- Make agent gRPC errors distinguishable [[#3936](https://github.com/woodpecker-ci/woodpecker/pull/3936)]
 
 ### 📚 Documentation
 
@@ -104,41 +138,9 @@
 - Truncate creation in list [[#3952](https://github.com/woodpecker-ci/woodpecker/pull/3952)]
 - Fix panic if forge is unreachable [[#3944](https://github.com/woodpecker-ci/woodpecker/pull/3944)]
 
-### 📈 Enhancement
-
-- Deprecate `secrets` [[#4235](https://github.com/woodpecker-ci/woodpecker/pull/4235)]
-- Agent edit/detail view: change the help url based on the backend [[#4219](https://github.com/woodpecker-ci/woodpecker/pull/4219)]
-- Use middleware to load org [[#4208](https://github.com/woodpecker-ci/woodpecker/pull/4208)]
-- Assign workflows to agents with the best label matches [[#4201](https://github.com/woodpecker-ci/woodpecker/pull/4201)]
-- Report custom labels set by agent admins back [[#4141](https://github.com/woodpecker-ci/woodpecker/pull/4141)]
-- Highlight invalid entries in manual pipeline trigger [[#4153](https://github.com/woodpecker-ci/woodpecker/pull/4153)]
-- Print agent labels in debug mode [[#4155](https://github.com/woodpecker-ci/woodpecker/pull/4155)]
-- Implement registries for Kubernetes backend [[#4092](https://github.com/woodpecker-ci/woodpecker/pull/4092)]
-- Correct cli exec flags and remove ineffective ones [[#4129](https://github.com/woodpecker-ci/woodpecker/pull/4129)]
-- Set repo user to repairing user when old user is missing [[#4128](https://github.com/woodpecker-ci/woodpecker/pull/4128)]
-- Restart tasks on dead agents sooner [[#4114](https://github.com/woodpecker-ci/woodpecker/pull/4114)]
-- Process workflow logs in batches [[#4045](https://github.com/woodpecker-ci/woodpecker/pull/4045)]
-- Adjust cli exec metadata structure to equal server metadata [[#4119](https://github.com/woodpecker-ci/woodpecker/pull/4119)]
-- Allow to restart declined pipelines [[#4109](https://github.com/woodpecker-ci/woodpecker/pull/4109)]
-- Add indices to repo table [[#4087](https://github.com/woodpecker-ci/woodpecker/pull/4087)]
-- Add systemd unit files to the RPM/DEB packages [[#3986](https://github.com/woodpecker-ci/woodpecker/pull/3986)]
-- Duplicate key `workflow_id` in the agent logs [[#4046](https://github.com/woodpecker-ci/woodpecker/pull/4046)]
-- Improve error on config loading [[#4024](https://github.com/woodpecker-ci/woodpecker/pull/4024)]
-- Show error if secret name is missing [[#4014](https://github.com/woodpecker-ci/woodpecker/pull/4014)]
-- Show error returned from API [[#3980](https://github.com/woodpecker-ci/woodpecker/pull/3980)]
-- Move manual popup to own page [[#3981](https://github.com/woodpecker-ci/woodpecker/pull/3981)]
-- Fail on InvalidImageName [[#4007](https://github.com/woodpecker-ci/woodpecker/pull/4007)]
-- Use Bitbucket PR title for pipeline message [[#3984](https://github.com/woodpecker-ci/woodpecker/pull/3984)]
-- Show logs if step has error [[#3979](https://github.com/woodpecker-ci/woodpecker/pull/3979)]
-- Refactor docker backend and add more test coverage [[#2700](https://github.com/woodpecker-ci/woodpecker/pull/2700)]
-- Make cli plugin log purge recognize steps by name [[#3953](https://github.com/woodpecker-ci/woodpecker/pull/3953)]
-- Pin page size [[#3946](https://github.com/woodpecker-ci/woodpecker/pull/3946)]
-- Improve cron list [[#3947](https://github.com/woodpecker-ci/woodpecker/pull/3947)]
-- Add PULLREQUEST_DRONE_PULL_REQUEST drone env [[#3939](https://github.com/woodpecker-ci/woodpecker/pull/3939)]
-- Make agent gRPC errors distinguishable [[#3936](https://github.com/woodpecker-ci/woodpecker/pull/3936)]
-
 ### 📦️ Dependency
 
+- chore(deps): update docker.io/techknowlogick/xgo docker tag to go-1.23.x [[#4282](https://github.com/woodpecker-ci/woodpecker/pull/4282)]
 - fix(deps): update golang-packages [[#4251](https://github.com/woodpecker-ci/woodpecker/pull/4251)]
 - fix(deps): update web npm deps non-major [[#4258](https://github.com/woodpecker-ci/woodpecker/pull/4258)]
 - chore(deps): update web npm deps non-major [[#4250](https://github.com/woodpecker-ci/woodpecker/pull/4250)]
