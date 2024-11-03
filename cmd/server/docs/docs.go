@@ -5290,7 +5290,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "trusted": {
-                    "type": "boolean"
+                    "$ref": "#/definitions/model.TrustedConfiguration"
                 },
                 "visibility": {
                     "$ref": "#/definitions/RepoVisibility"
@@ -5325,7 +5325,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "trusted": {
-                    "type": "boolean"
+                    "$ref": "#/definitions/model.TrustedConfigurationPatch"
                 },
                 "visibility": {
                     "type": "string"
@@ -5746,7 +5746,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "trusted": {
-                    "type": "boolean"
+                    "$ref": "#/definitions/metadata.TrustedConfiguration"
                 }
             }
         },
@@ -5778,6 +5778,20 @@ const docTemplate = `{
                 },
                 "version": {
                     "type": "string"
+                }
+            }
+        },
+        "metadata.TrustedConfiguration": {
+            "type": "object",
+            "properties": {
+                "network": {
+                    "type": "boolean"
+                },
+                "security": {
+                    "type": "boolean"
+                },
+                "volumes": {
+                    "type": "boolean"
                 }
             }
         },
@@ -5818,6 +5832,34 @@ const docTemplate = `{
                 "ForgeTypeBitbucketDatacenter",
                 "ForgeTypeAddon"
             ]
+        },
+        "model.TrustedConfiguration": {
+            "type": "object",
+            "properties": {
+                "network": {
+                    "type": "boolean"
+                },
+                "security": {
+                    "type": "boolean"
+                },
+                "volumes": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "model.TrustedConfigurationPatch": {
+            "type": "object",
+            "properties": {
+                "network": {
+                    "type": "boolean"
+                },
+                "security": {
+                    "type": "boolean"
+                },
+                "volumes": {
+                    "type": "boolean"
+                }
+            }
         },
         "model.Workflow": {
             "type": "object",

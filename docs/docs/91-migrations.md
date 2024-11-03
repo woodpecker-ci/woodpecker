@@ -25,19 +25,21 @@ Some versions need some changes to the server configuration or the pipeline conf
 - Pipelines without a config file will now be skipped instead of failing
 - Removed implicitly defined `regcred` image pull secret name. Set it explicitly via `WOODPECKER_BACKEND_K8S_PULL_SECRET_NAMES`
 - Removed `includes` and `excludes` support from **event** filter
-- Removed uppercasing all secret env vars, instead, the value of the `secrets` property is used. [Read more](./20-usage/40-secrets.md#use-secrets-in-commands)
+- Removed uppercasing all secret env vars, instead, the value of the `secrets` property is used. [Read more](./20-usage/40-secrets.md#usage)
 - Removed alternative names for secrets, use `environment` with `from_secret`
 - Removed slice definition for env vars
 - Removed `environment` filter, use `when.evaluate`
 - Removed `WOODPECKER_WEBHOOK_HOST` in favor of `WOODPECKER_EXPERT_WEBHOOK_HOST`
 - Migrated to rfc9421 for webhook signatures
 - Renamed `start_time`, `end_time`, `created_at`, `started_at`, `finished_at` and `reviewed_at` JSON fields to `started`, `finished`, `created`, `started`, `finished`, `reviewed`
+- JSON field `trusted` on repo model was changed from boolean to object
 - Update all webhooks by pressing the "Repair all" button in the admin settings as the webhook token claims have changed
 - Crons now use standard Linux syntax without seconds
 - Replaced `configs` object by `netrc` in external configuration APIs
 - Removed old API routes: `registry/` -> `registries`, `/authorize/token`
 - Replaced `registry` command with `repo registry` in cli
 - Disallow upgrades from 1.x, upgrade to 2.x first
+- Deprecated `secrets`, use `environment` with `from_secret`
 
 ## 2.0.0
 
