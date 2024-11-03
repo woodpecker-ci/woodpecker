@@ -19,11 +19,9 @@ import (
 	"errors"
 	"fmt"
 	"strings"
-	"time"
 
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 	"go.woodpecker-ci.org/woodpecker/v2/server/store"
-	"go.woodpecker-ci.org/woodpecker/v2/shared/constant"
 )
 
 var (
@@ -122,9 +120,8 @@ type Queue interface {
 
 // Config holds the configuration for the queue.
 type Config struct {
-	Backend   Type
-	Extension time.Duration
-	Store     store.Store
+	Backend Type
+	Store   store.Store
 }
 
 // Queue type
@@ -146,10 +143,6 @@ func New(ctx context.Context, config Config) (Queue, error) {
 		}
 	default:
 		return nil, fmt.Errorf("unsupported queue backend: %s", config.Backend)
-	}
-
-	if config.Extension == 0 {
-		config.Extension = constant.TaskTimeout
 	}
 
 	return q, nil
