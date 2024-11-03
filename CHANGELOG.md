@@ -1,5 +1,46 @@
 # Changelog
 
+## [2.7.2](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.7.2) - 2024-11-03
+
+### Important
+
+To secure your instance, set `WOODPECKER_PLUGINS_PRIVILEGED` to only allow specific versions of the `woodpeckerci/plugin-docker-buildx` plugin, use version 5.0.0 or above. This prevents older, potentially unstable versions from being privileged.
+
+For example, to allow only version 5.0.0, use:
+
+```bash
+WOODPECKER_PLUGINS_PRIVILEGED=woodpeckerci/plugin-docker-buildx:5.0.0
+```
+
+To allow multiple versions, you can separate them with commas:
+
+```bash
+WOODPECKER_PLUGINS_PRIVILEGED=woodpeckerci/plugin-docker-buildx:5.0.0,woodpeckerci/plugin-docker-buildx:5.1.0
+```
+
+This setup ensures only specified, stable plugin versions are given privileged access.
+
+Read more about it in [#4213](https://github.com/woodpecker-ci/woodpecker/pull/4213)
+
+### ❤️ Thanks to all contributors! ❤️
+
+@6543, @anbraten, @j04n-f, @pat-s, @qwerty287
+
+### 🔒 Security
+
+- Chore(deps): update dependency vite to v5.4.6 [security] ([#4163](https://github.com/woodpecker-ci/woodpecker/pull/4163)) [[#4187](https://github.com/woodpecker-ci/woodpecker/pull/4187)]
+
+### 🐛 Bug Fixes
+
+- Don't parse forge config files multiple times if no error occured ([#4272](https://github.com/woodpecker-ci/woodpecker/pull/4272)) [[#4273](https://github.com/woodpecker-ci/woodpecker/pull/4273)]
+- Fix repo/owner parsing for gitlab ([#4255](https://github.com/woodpecker-ci/woodpecker/pull/4255)) [[#4261](https://github.com/woodpecker-ci/woodpecker/pull/4261)]
+- Run queue.process() in background [[#4115](https://github.com/woodpecker-ci/woodpecker/pull/4115)]
+- Only update agent.LastWork if not done recently ([#4031](https://github.com/woodpecker-ci/woodpecker/pull/4031)) [[#4100](https://github.com/woodpecker-ci/woodpecker/pull/4100)]
+
+### Misc
+
+- Backport JS dependency updates [[#4189](https://github.com/woodpecker-ci/woodpecker/pull/4189)]
+
 ## [2.7.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.7.1) - 2024-09-07
 
 ### ❤️ Thanks to all contributors! ❤️
