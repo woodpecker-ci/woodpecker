@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-11-02
+## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-11-03
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -142,6 +142,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update docker.io/woodpeckerci/plugin-trivy docker tag to v1.2.0 [[#4289](https://github.com/woodpecker-ci/woodpecker/pull/4289)]
 - chore(deps): update docker.io/techknowlogick/xgo docker tag to go-1.23.x [[#4282](https://github.com/woodpecker-ci/woodpecker/pull/4282)]
 - fix(deps): update golang-packages [[#4251](https://github.com/woodpecker-ci/woodpecker/pull/4251)]
 - fix(deps): update web npm deps non-major [[#4258](https://github.com/woodpecker-ci/woodpecker/pull/4258)]
