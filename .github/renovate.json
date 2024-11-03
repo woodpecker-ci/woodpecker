@@ -31,8 +31,8 @@
     },
     {
       "groupName": "golang-lang",
-      "matchPackagePatterns": ["^golang$", "xgo"],
-      "matchUpdateTypes": ["minor", "patch"]
+      "matchUpdateTypes": ["minor", "patch"],
+      "matchPackageNames": ["/^golang$/", "/xgo/"]
     },
     {
       "groupName": "golang-packages",
@@ -64,8 +64,8 @@
     {
       "description": "Extract version from xgo container tags",
       "matchDatasources": ["docker"],
-      "matchPackagePatterns": ["techknowlogick/xgo"],
-      "versioning": "regex:^go-(?<major>\\d+)\\.(?<minor>\\d+)\\.x$"
+      "versioning": "regex:^go-(?<major>\\d+)\\.(?<minor>\\d+)\\.x$",
+      "matchPackageNames": ["/techknowlogick/xgo/"]
     }
   ]
 }
