@@ -1,9 +1,8 @@
 steps:
-  release-helper:
-    image: woodpeckerci/plugin-ready-release-go:1.1.2
-    pull: true
+  - name: release-helper
+    image: woodpeckerci/plugin-ready-release-go:2.0.0
     settings:
-      release_branch: ${CI_REPO_DEFAULT_BRANCH}
+      release_branch: ${CI_COMMIT_BRANCH}
       forge_type: github
       git_email: woodpecker-bot@obermui.de
       github_token:
@@ -11,6 +10,8 @@ steps:
 
 when:
   - event: push
-    branch: ${CI_REPO_DEFAULT_BRANCH}
+    branch:
+      - ${CI_REPO_DEFAULT_BRANCH}
+      - release/*
   - event: manual
     evaluate: 'TASK == "release-helper"'
