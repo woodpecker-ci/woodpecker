@@ -32,4 +32,3 @@ Following semantic versioning (semver) guidelines, breaking changes will trigger
    - [ ] Discord
    - [ ] Matrix
    - [ ] Twitter
-
