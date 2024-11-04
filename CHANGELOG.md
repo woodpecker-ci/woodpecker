@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-11-03
+## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-11-04
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -193,6 +193,7 @@
 
 ### Misc
 
+- Use release-helper for release/* branches [[#4301](https://github.com/woodpecker-ci/woodpecker/pull/4301)]
 - Fix wording for privileged plugins linter error [[#4280](https://github.com/woodpecker-ci/woodpecker/pull/4280)]
 - Fix renovate support for `xgo` [[#4276](https://github.com/woodpecker-ci/woodpecker/pull/4276)]
 - Improve nix development environment [[#4256](https://github.com/woodpecker-ci/woodpecker/pull/4256)]
