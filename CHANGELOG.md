@@ -4,11 +4,15 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@anbraten
+@anbraten, @woodpecker-bot
+
+### 🐛 Bug Fixes
+
+- Upgrade vue-i18n [[#4298](https://github.com/woodpecker-ci/woodpecker/pull/4298)]
 
 ### Misc
 
-- Use release-helper for release/* branches [[#4300](https://github.com/woodpecker-ci/woodpecker/pull/4300)]
+- 🎉 Release 2.7.3 [[#4303](https://github.com/woodpecker-ci/woodpecker/pull/4303)]
 
 ## [2.7.2](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.7.2) - 2024-11-03
 
