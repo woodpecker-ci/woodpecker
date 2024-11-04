@@ -33,7 +33,7 @@
     "semver": "^7.6.3",
     "simple-icons": "^13.5.0",
     "vue": "^3.4.38",
-    "vue-i18n": "^9.13.1",
+    "vue-i18n": "^10.0.4",
     "vue-router": "^4.4.3"
   },
   "devDependencies": {
