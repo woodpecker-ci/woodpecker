@@ -32,8 +32,6 @@ In this example, the secret named `secret_token` would be passed to the setting 
 +        from_secret: secret_token
 ```
 
-The `from_secret` syntax also works for settings in any hierarchy.
-
 :::info Important
 You cannot use the deprecated `secrets` or `environment` directly in plugin steps, as this could alter plugin execution.
 Instead, use the `settings` field for secrets in plugins:
