@@ -12,6 +12,7 @@
 
 ### Misc
 
+- Bump release plugin [[#4311](https://github.com/woodpecker-ci/woodpecker/pull/4311)]
 - Use release-helper for release/* branches [[#4300](https://github.com/woodpecker-ci/woodpecker/pull/4300)]
 
 ## [2.7.2](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.7.2) - 2024-11-03
