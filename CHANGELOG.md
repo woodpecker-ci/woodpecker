@@ -50,7 +50,7 @@
 
 ### 📈 Enhancement
 
-- Add options to controll the database connections (open,idle,timeout) [[#4212](https://github.com/woodpecker-ci/woodpecker/pull/4212)]
+- Add options to control the database connections (open,idle,timeout) [[#4212](https://github.com/woodpecker-ci/woodpecker/pull/4212)]
 - Move Queue creation behind new func that evaluates queue type [[#4252](https://github.com/woodpecker-ci/woodpecker/pull/4252)]
 - Add additionall error message on swagger v2 to v3 convert [[#4254](https://github.com/woodpecker-ci/woodpecker/pull/4254)]
 - Deprecate `secrets` [[#4235](https://github.com/woodpecker-ci/woodpecker/pull/4235)]
@@ -192,7 +192,6 @@
 
 ### Misc
 
-- Start a trivy server service [[#4288](https://github.com/woodpecker-ci/woodpecker/pull/4288)]
 - Use release-helper for release/* branches [[#4301](https://github.com/woodpecker-ci/woodpecker/pull/4301)]
 - Fix wording for privileged plugins linter error [[#4280](https://github.com/woodpecker-ci/woodpecker/pull/4280)]
 - Fix renovate support for `xgo` [[#4276](https://github.com/woodpecker-ci/woodpecker/pull/4276)]
