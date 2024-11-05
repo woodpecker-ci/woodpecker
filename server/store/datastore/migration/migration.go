@@ -45,6 +45,7 @@ var migrationTasks = []*xormigrate.Migration{
 	&removeOldMigrationsOfV1,
 	&addOrgAgents,
 	&addCustomLabelsToAgent,
+	&splitTrusted,
 }
 
 // IMPORTANT: if you add something here run generate

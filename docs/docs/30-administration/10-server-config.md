@@ -159,17 +159,35 @@ Configures the logging level. Possible values are `trace`, `debug`, `info`, `war
 Output destination for logs.
 'stdout' and 'stderr' can be used as special keywords.
 
-### `WOODPECKER_LOG_XORM`
+### `WOODPECKER_DATABASE_LOG`
 
 > Default: `false`
 
-Enable XORM logs.
+Enable logging in database engine (currently xorm).
 
-### `WOODPECKER_LOG_XORM_SQL`
+### `WOODPECKER_DATABASE_LOG_SQL`
 
 > Default: `false`
 
-Enable XORM SQL command logs.
+Enable logging of sql commands.
+
+### `WOODPECKER_DATABASE_MAX_CONNECTIONS`
+
+> Default: `100`
+
+Max database connections xorm is allowed create.
+
+### `WOODPECKER_DATABASE_IDLE_CONNECTIONS`
+
+> Default: `2`
+
+Amount of database connections xorm will hold open.
+
+### `WOODPECKER_DATABASE_CONNECTION_TIMEOUT`
+
+> Default: `3 Seconds`
+
+Time an active database connection is allowed to stay open.
 
 ### `WOODPECKER_DEBUG_PRETTY`
 
@@ -356,7 +374,7 @@ You should specify the tag of your images too, as this enforces exact matches.
 
 > Defaults are defined in [shared/constant/constant.go](https://github.com/woodpecker-ci/woodpecker/blob/main/shared/constant/constant.go)
 
-Plugins witch are trusted to handle the netrc info in clone steps.
+Plugins which are trusted to handle the netrc info in clone steps.
 If a clone step use an image not in this list, the netrc will not be injected and an user has to use other methods (e.g. secrets) to clone non public repos.
 
 You should specify the tag of your images too, as this enforces exact matches.
