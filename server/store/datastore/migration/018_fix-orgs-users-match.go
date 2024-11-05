@@ -50,7 +50,7 @@ var correctPotentialCorruptOrgsUsersRelation = xormigrate.Migration{
 		case schemas.POSTGRES:
 			_, err = sess.Exec(`UPDATE users u SET org_id = o.id FROM orgs o WHERE o.name = u.login AND o.forge_id = u.forge_id;`)
 		case schemas.SQLITE:
-			_, err = sess.Exec(`UPDATE users SET org_id = ( SELECT orgs.id FROM orgs WHERE orgs.name = users.login AND orgs.forge_id = users.forge_id );`)
+			_, err = sess.Exec(`UPDATE users SET org_id = ( SELECT orgs.id FROM orgs WHERE orgs.name = users.login AND orgs.forge_id = users.forge_id ) WHERE users.login IN (SELECT orgs.name FROM orgs);`)
 		default:
 			err = fmt.Errorf("dialect '%s' not supported", dialect)
 		}
