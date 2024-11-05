@@ -18,62 +18,46 @@ import (
 	"fmt"
 
 	"src.techknowlogick.com/xormigrate"
+	"xorm.io/builder"
 	"xorm.io/xorm"
 )
-
-// perPage017 set the size of the slice to read per page.
-var perPage017 = 100
-
-type repo017 struct {
-	ID              int64  `json:"id,omitempty"     xorm:"pk autoincr 'id'"`
-	IsGated         bool   `json:"gated"            xorm:"gated"`
-	RequireApproval string `json:"require_approval" xorm:"require_approval"`
-	Visibility      string `json:"visibility"       xorm:"varchar(10) 'visibility'"`
-}
-
-func (repo017) TableName() string {
-	return "repos"
-}
 
 var gatedToRequireApproval = xormigrate.Migration{
 	ID: "gated-to-require-approval",
 	MigrateSession: func(sess *xorm.Session) (err error) {
-		if err := sess.Sync(new(repo017)); err != nil {
+		type repos struct {
+			ID              int64  `xorm:"pk autoincr 'id'"`
+			IsGated         bool   `xorm:"gated"`
+			RequireApproval string `xorm:"require_approval"`
+			Visibility      string `xorm:"varchar(10) 'visibility'"`
+		}
+
+		if err := sess.Sync(new(repos)); err != nil {
 			return fmt.Errorf("sync new models failed: %w", err)
 		}
 
-		page := 0
-		oldRepos := make([]*repo017, 0, perPage017)
+		// migrate gated repos
+		if _, err := sess.Exec(
+			builder.Update(builder.Eq{"require_approval": "all_events"}).
+				From(new(repos)).
+				Where(builder.Eq{"gated": true})); err != nil {
+			return err
+		}
 
-		for {
-			oldRepos = oldRepos[:0]
+		// migrate public repos to new default require approval
+		if _, err := sess.Exec(
+			builder.Update(builder.Eq{"require_approval": "pull_requests"}).
+				From(new(repos)).
+				Where(builder.Eq{"gated": false, "visibility": "public"})); err != nil {
+			return err
+		}
 
-			err := sess.Limit(perPage017, page*perPage017).Cols("id", "gated", "visibility").Find(&oldRepos)
-			if err != nil {
-				return err
-			}
-
-			for _, oldRepo := range oldRepos {
-				var newRepo repo017
-				newRepo.ID = oldRepo.ID
-				if oldRepo.IsGated {
-					newRepo.RequireApproval = "all_events"
-				} else if oldRepo.Visibility == "public" {
-					newRepo.RequireApproval = "forks"
-				} else {
-					newRepo.RequireApproval = "none"
-				}
-
-				if _, err := sess.ID(oldRepo.ID).Cols("require_approval").Update(newRepo); err != nil {
-					return err
-				}
-			}
-
-			if len(oldRepos) < perPage017 {
-				break
-			}
-
-			page++
+		// migrate private repos to new default require approval
+		if _, err := sess.Exec(
+			builder.Update(builder.Eq{"require_approval": "none"}).
+				From(new(repos)).
+				Where(builder.Eq{"gated": false}.And(builder.Neq{"visibility": "public"}))); err != nil {
+			return err
 		}
 
 		return dropTableColumns(sess, "repos", "gated")
