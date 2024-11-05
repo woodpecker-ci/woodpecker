@@ -106,8 +106,11 @@ func checkSqliteFileExist(path string) error {
 	return err
 }
 
-func setupQueue(ctx context.Context, s store.Store) queue.Queue {
-	return queue.WithTaskStore(ctx, queue.New(ctx), s)
+func setupQueue(ctx context.Context, s store.Store) (queue.Queue, error) {
+	return queue.New(ctx, queue.Config{
+		Backend: queue.TypeMemory,
+		Store:   s,
+	})
 }
 
 func setupMembershipService(_ context.Context, _store store.Store) cache.MembershipService {
@@ -146,18 +149,19 @@ func setupJWTSecret(_store store.Store) (string, error) {
 	return jwtSecret, nil
 }
 
-func setupEvilGlobals(ctx context.Context, c *cli.Command, s store.Store) error {
+func setupEvilGlobals(ctx context.Context, c *cli.Command, s store.Store) (err error) {
 	// services
-	server.Config.Services.Queue = setupQueue(ctx, s)
 	server.Config.Services.Logs = logging.New()
 	server.Config.Services.Pubsub = pubsub.New()
 	server.Config.Services.Membership = setupMembershipService(ctx, s)
-	serviceManager, err := services.NewManager(c, s, setup.Forge)
+	server.Config.Services.Queue, err = setupQueue(ctx, s)
+	if err != nil {
+		return fmt.Errorf("could not setup queue: %w", err)
+	}
+	server.Config.Services.Manager, err = services.NewManager(c, s, setup.Forge)
 	if err != nil {
 		return fmt.Errorf("could not setup service manager: %w", err)
 	}
-	server.Config.Services.Manager = serviceManager
-
 	server.Config.Services.LogStore, err = setupLogStore(c, s)
 	if err != nil {
 		return fmt.Errorf("could not setup log store: %w", err)
