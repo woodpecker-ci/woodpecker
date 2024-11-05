@@ -124,6 +124,7 @@ func convertMergeRequestHook(hook *gitlab.MergeEvent, req *http.Request) (int, *
 
 	pipeline.Ref = fmt.Sprintf(mergeRefs, obj.IID)
 	pipeline.Branch = obj.SourceBranch
+	pipeline.Refspec = fmt.Sprintf("%s:%s", obj.SourceBranch, obj.TargetBranch)
 
 	author := lastCommit.Author
 
@@ -302,7 +303,9 @@ func extractFromPath(str string) (string, string, error) {
 	if len(s) < minPathComponents {
 		return "", "", fmt.Errorf("minimum match not found")
 	}
-	return s[0], s[1], nil
+	owner := strings.Join(s[:len(s)-1], "/")
+	name := s[len(s)-1]
+	return owner, name, nil
 }
 
 func convertLabels(from []*gitlab.EventLabel) []string {

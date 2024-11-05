@@ -122,8 +122,6 @@ func MustUser() gin.HandlerFunc {
 
 func MustOrgMember(admin bool) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		_store := store.FromContext(c)
-
 		user := User(c)
 		if user == nil {
 			c.String(http.StatusUnauthorized, "User not authorized")
@@ -131,15 +129,10 @@ func MustOrgMember(admin bool) gin.HandlerFunc {
 			return
 		}
 
-		orgID, err := strconv.ParseInt(c.Param("org_id"), 10, 64)
-		if err != nil {
-			c.String(http.StatusBadRequest, "Error parsing org id. %s", err)
-			return
-		}
-
-		org, err := _store.OrgGet(orgID)
-		if err != nil {
-			c.String(http.StatusNotFound, "Organization not found")
+		org := Org(c)
+		if org == nil {
+			c.String(http.StatusBadRequest, "Organization not loaded")
+			c.Abort()
 			return
 		}
 

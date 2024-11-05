@@ -16,12 +16,14 @@
         :key="cron.id"
         class="items-center !bg-wp-background-200 !dark:bg-wp-background-100"
       >
-        <span>{{ cron.name }}</span>
-        <span v-if="cron.next_exec && cron.next_exec > 0" class="ml-auto">
-          <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
-          {{ $t('repo.settings.crons.next_exec') }}: {{ date.toLocaleString(new Date(cron.next_exec * 1000)) }}
+        <span class="grid grid-cols-3 w-full">
+          <span>{{ cron.name }}</span>
+          <span v-if="cron.next_exec && cron.next_exec > 0" class="col-span-2 <md:hidden">
+            <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
+            {{ $t('repo.settings.crons.next_exec') }}: {{ date.toLocaleString(new Date(cron.next_exec * 1000)) }}
+          </span>
+          <span v-else class="col-span-2 <md:hidden">{{ $t('repo.settings.crons.not_executed_yet') }}</span>
         </span>
-        <span v-else class="ml-auto">{{ $t('repo.settings.crons.not_executed_yet') }}</span>
         <IconButton icon="play" class="ml-auto w-8 h-8" :title="$t('repo.settings.crons.run')" @click="runCron(cron)" />
         <IconButton icon="edit" class="w-8 h-8" :title="$t('repo.settings.crons.edit')" @click="selectedCron = cron" />
         <IconButton
@@ -58,7 +60,7 @@
         <InputField
           v-slot="{ id }"
           :label="$t('repo.settings.crons.schedule.title')"
-          docs-url="https://pkg.go.dev/github.com/robfig/cron?utm_source=godoc#hdr-CRON_Expression_Format"
+          docs-url="https://pkg.go.dev/github.com/gdgvda/cron#hdr-CRON_Expression_Format"
         >
           <TextField
             :id="id"

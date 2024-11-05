@@ -1,12 +1,13 @@
 package update
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
 
 	"github.com/rs/zerolog/log"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 // Command exports the update command.
@@ -22,10 +23,10 @@ var Command = &cli.Command{
 	Action: update,
 }
 
-func update(c *cli.Context) error {
+func update(ctx context.Context, c *cli.Command) error {
 	log.Info().Msg("Checking for updates ...")
 
-	newVersion, err := CheckForUpdate(c.Context, c.Bool("force"))
+	newVersion, err := CheckForUpdate(ctx, c.Bool("force"))
 	if err != nil {
 		return err
 	}
@@ -38,7 +39,7 @@ func update(c *cli.Context) error {
 	log.Info().Msgf("New version %s is available! Updating ...", newVersion.Version)
 
 	var tarFilePath string
-	tarFilePath, err = downloadNewVersion(c.Context, newVersion.AssetURL)
+	tarFilePath, err = downloadNewVersion(ctx, newVersion.AssetURL)
 	if err != nil {
 		return err
 	}

@@ -11,8 +11,6 @@ Woodpecker comes with experimental support for Bitbucket Datacenter / Server, fo
 To enable Bitbucket Server you should configure the Woodpecker container using the following environment variables:
 
 ```diff title="docker-compose.yaml"
- version: '3'
-
  services:
    woodpecker-server:
      [...]
@@ -35,7 +33,10 @@ Woodpecker uses `git+https` to clone repositories, however, Bitbucket Server doe
 
 ## Registration
 
-Woodpecker must be registered with Bitbucket Datacenter / Server. In the administration section of Bitbucket choose "Application Links" and then "Create link". Woodpecker should be listed as "External Application" and the direction should be set to "Incomming". Note the client id and client secret of the registration to be used in the configuration of Woodpecker.
+Woodpecker must be registered with Bitbucket Datacenter / Server.
+In the administration section of Bitbucket choose "Application Links" and then "Create link".
+Woodpecker should be listed as "External Application" and the direction should be set to "Incoming".
+Note the client id and client secret of the registration to be used in the configuration of Woodpecker.
 
 See also [Configure an incoming link](https://confluence.atlassian.com/bitbucketserver/configure-an-incoming-link-1108483657.html).
 

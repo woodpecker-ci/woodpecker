@@ -26,85 +26,95 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
-var noContext = context.Background()
+var filterFnTrue = func(*model.Task) (bool, int) { return true, 1 }
 
 func TestFifo(t *testing.T) {
 	want := &model.Task{ID: "1"}
+	ctx := context.Background()
 
-	q := New(context.Background())
-	assert.NoError(t, q.Push(noContext, want))
-	info := q.Info(noContext)
+	q := NewMemoryQueue(ctx)
+	assert.NoError(t, q.Push(ctx, want))
+	info := q.Info(ctx)
 	assert.Len(t, info.Pending, 1, "expect task in pending queue")
 
-	got, err := q.Poll(noContext, 1, func(*model.Task) bool { return true })
+	got, err := q.Poll(ctx, 1, filterFnTrue)
 	assert.NoError(t, err)
 	assert.Equal(t, want, got)
 
-	info = q.Info(noContext)
+	info = q.Info(ctx)
 	assert.Len(t, info.Pending, 0, "expect task removed from pending queue")
 	assert.Len(t, info.Running, 1, "expect task in running queue")
 
-	assert.NoError(t, q.Done(noContext, got.ID, model.StatusSuccess))
-	info = q.Info(noContext)
+	assert.NoError(t, q.Done(ctx, got.ID, model.StatusSuccess))
+	info = q.Info(ctx)
 	assert.Len(t, info.Pending, 0, "expect task removed from pending queue")
 	assert.Len(t, info.Running, 0, "expect task removed from running queue")
 }
 
 func TestFifoExpire(t *testing.T) {
 	want := &model.Task{ID: "1"}
+	ctx, cancel := context.WithCancelCause(context.Background())
 
-	q, _ := New(context.Background()).(*fifo)
+	q, _ := NewMemoryQueue(ctx).(*fifo)
 	q.extension = 0
-	assert.NoError(t, q.Push(noContext, want))
-	info := q.Info(noContext)
+	assert.NoError(t, q.Push(ctx, want))
+	info := q.Info(ctx)
 	assert.Len(t, info.Pending, 1, "expect task in pending queue")
 
-	got, err := q.Poll(noContext, 1, func(*model.Task) bool { return true })
+	got, err := q.Poll(ctx, 1, filterFnTrue)
 	assert.NoError(t, err)
 	assert.Equal(t, want, got)
 
+	// cancel the context to let the process func end
+	go func() {
+		time.Sleep(time.Millisecond)
+		cancel(nil)
+	}()
 	q.process()
 	assert.Len(t, info.Pending, 1, "expect task re-added to pending queue")
 }
 
 func TestFifoWait(t *testing.T) {
 	want := &model.Task{ID: "1"}
+	ctx := context.Background()
 
-	q, _ := New(context.Background()).(*fifo)
-	assert.NoError(t, q.Push(noContext, want))
+	q, _ := NewMemoryQueue(ctx).(*fifo)
+	assert.NoError(t, q.Push(ctx, want))
 
-	got, err := q.Poll(noContext, 1, func(*model.Task) bool { return true })
+	got, err := q.Poll(ctx, 1, filterFnTrue)
 	assert.NoError(t, err)
 	assert.Equal(t, want, got)
 
 	var wg sync.WaitGroup
 	wg.Add(1)
 	go func() {
-		assert.NoError(t, q.Wait(noContext, got.ID))
+		assert.NoError(t, q.Wait(ctx, got.ID))
 		wg.Done()
 	}()
 
 	<-time.After(time.Millisecond)
-	assert.NoError(t, q.Done(noContext, got.ID, model.StatusSuccess))
+	assert.NoError(t, q.Done(ctx, got.ID, model.StatusSuccess))
 	wg.Wait()
 }
 
 func TestFifoEvict(t *testing.T) {
 	t1 := &model.Task{ID: "1"}
+	ctx := context.Background()
 
-	q := New(context.Background())
-	assert.NoError(t, q.Push(noContext, t1))
-	info := q.Info(noContext)
+	q := NewMemoryQueue(ctx)
+	assert.NoError(t, q.Push(ctx, t1))
+	info := q.Info(ctx)
 	assert.Len(t, info.Pending, 1, "expect task in pending queue")
-	err := q.Evict(noContext, t1.ID)
+	err := q.Evict(ctx, t1.ID)
 	assert.NoError(t, err)
-	info = q.Info(noContext)
+	info = q.Info(ctx)
 	assert.Len(t, info.Pending, 0)
-	err = q.Evict(noContext, t1.ID)
+	err = q.Evict(ctx, t1.ID)
 	assert.ErrorIs(t, err, ErrNotFound)
 }
 
 func TestFifoDependencies(t *testing.T) {
+	ctx := context.Background()
 	task1 := &model.Task{
 		ID: "1",
 	}
@@ -115,21 +125,22 @@ func TestFifoDependencies(t *testing.T) {
 		DepStatus:    make(map[string]model.StatusValue),
 	}
 
-	q, _ := New(context.Background()).(*fifo)
-	assert.NoError(t, q.PushAtOnce(noContext, []*model.Task{task2, task1}))
+	q, _ := NewMemoryQueue(ctx).(*fifo)
+	assert.NoError(t, q.PushAtOnce(ctx, []*model.Task{task2, task1}))
 
-	got, err := q.Poll(noContext, 1, func(*model.Task) bool { return true })
+	got, err := q.Poll(ctx, 1, filterFnTrue)
 	assert.NoError(t, err)
 	assert.Equal(t, task1, got)
 
-	assert.NoError(t, q.Done(noContext, got.ID, model.StatusSuccess))
+	assert.NoError(t, q.Done(ctx, got.ID, model.StatusSuccess))
 
-	got, err = q.Poll(noContext, 1, func(*model.Task) bool { return true })
+	got, err = q.Poll(ctx, 1, filterFnTrue)
 	assert.NoError(t, err)
 	assert.Equal(t, task2, got)
 }
 
 func TestFifoErrors(t *testing.T) {
+	ctx := context.Background()
 	task1 := &model.Task{
 		ID: "1",
 	}
@@ -147,27 +158,28 @@ func TestFifoErrors(t *testing.T) {
 		RunOn:        []string{"success", "failure"},
 	}
 
-	q, _ := New(context.Background()).(*fifo)
-	assert.NoError(t, q.PushAtOnce(noContext, []*model.Task{task2, task3, task1}))
+	q, _ := NewMemoryQueue(ctx).(*fifo)
+	assert.NoError(t, q.PushAtOnce(ctx, []*model.Task{task2, task3, task1}))
 
-	got, err := q.Poll(noContext, 1, func(*model.Task) bool { return true })
+	got, err := q.Poll(ctx, 1, filterFnTrue)
 	assert.NoError(t, err)
 	assert.Equal(t, task1, got)
 
-	assert.NoError(t, q.Error(noContext, got.ID, fmt.Errorf("exit code 1, there was an error")))
+	assert.NoError(t, q.Error(ctx, got.ID, fmt.Errorf("exit code 1, there was an error")))
 
-	got, err = q.Poll(noContext, 1, func(*model.Task) bool { return true })
+	got, err = q.Poll(ctx, 1, filterFnTrue)
 	assert.NoError(t, err)
 	assert.Equal(t, task2, got)
 	assert.False(t, got.ShouldRun())
 
-	got, err = q.Poll(noContext, 1, func(*model.Task) bool { return true })
+	got, err = q.Poll(ctx, 1, filterFnTrue)
 	assert.NoError(t, err)
 	assert.Equal(t, task3, got)
 	assert.True(t, got.ShouldRun())
 }
 
 func TestFifoErrors2(t *testing.T) {
+	ctx := context.Background()
 	task1 := &model.Task{
 		ID: "1",
 	}
@@ -182,29 +194,30 @@ func TestFifoErrors2(t *testing.T) {
 		DepStatus:    make(map[string]model.StatusValue),
 	}
 
-	q, _ := New(context.Background()).(*fifo)
-	assert.NoError(t, q.PushAtOnce(noContext, []*model.Task{task2, task3, task1}))
+	q, _ := NewMemoryQueue(ctx).(*fifo)
+	assert.NoError(t, q.PushAtOnce(ctx, []*model.Task{task2, task3, task1}))
 
 	for i := 0; i < 2; i++ {
-		got, err := q.Poll(noContext, 1, func(*model.Task) bool { return true })
+		got, err := q.Poll(ctx, 1, filterFnTrue)
 		assert.NoError(t, err)
 		assert.False(t, got != task1 && got != task2, "expect task1 or task2 returned from queue as task3 depends on them")
 
 		if got != task1 {
-			assert.NoError(t, q.Done(noContext, got.ID, model.StatusSuccess))
+			assert.NoError(t, q.Done(ctx, got.ID, model.StatusSuccess))
 		}
 		if got != task2 {
-			assert.NoError(t, q.Error(noContext, got.ID, fmt.Errorf("exit code 1, there was an error")))
+			assert.NoError(t, q.Error(ctx, got.ID, fmt.Errorf("exit code 1, there was an error")))
 		}
 	}
 
-	got, err := q.Poll(noContext, 1, func(*model.Task) bool { return true })
+	got, err := q.Poll(ctx, 1, filterFnTrue)
 	assert.NoError(t, err)
 	assert.Equal(t, task3, got)
 	assert.False(t, got.ShouldRun())
 }
 
 func TestFifoErrorsMultiThread(t *testing.T) {
+	ctx := context.Background()
 	task1 := &model.Task{
 		ID: "1",
 	}
@@ -221,8 +234,8 @@ func TestFifoErrorsMultiThread(t *testing.T) {
 		DepStatus:    make(map[string]model.StatusValue),
 	}
 
-	q, _ := New(context.Background()).(*fifo)
-	assert.NoError(t, q.PushAtOnce(noContext, []*model.Task{task2, task3, task1}))
+	q, _ := NewMemoryQueue(ctx).(*fifo)
+	assert.NoError(t, q.PushAtOnce(ctx, []*model.Task{task2, task3, task1}))
 
 	obtainedWorkCh := make(chan *model.Task)
 
@@ -230,7 +243,7 @@ func TestFifoErrorsMultiThread(t *testing.T) {
 		go func(i int) {
 			for {
 				fmt.Printf("Worker %d started\n", i)
-				got, err := q.Poll(noContext, 1, func(*model.Task) bool { return true })
+				got, err := q.Poll(ctx, 1, filterFnTrue)
 				assert.NoError(t, err)
 				obtainedWorkCh <- got
 			}
@@ -249,22 +262,22 @@ func TestFifoErrorsMultiThread(t *testing.T) {
 			case !task1Processed:
 				assert.Equal(t, task1, got)
 				task1Processed = true
-				assert.NoError(t, q.Error(noContext, got.ID, fmt.Errorf("exit code 1, there was an error")))
+				assert.NoError(t, q.Error(ctx, got.ID, fmt.Errorf("exit code 1, there was an error")))
 				go func() {
 					for {
 						fmt.Printf("Worker spawned\n")
-						got, _ := q.Poll(noContext, 1, func(*model.Task) bool { return true })
+						got, _ := q.Poll(ctx, 1, filterFnTrue)
 						obtainedWorkCh <- got
 					}
 				}()
 			case !task2Processed:
 				assert.Equal(t, task2, got)
 				task2Processed = true
-				assert.NoError(t, q.Done(noContext, got.ID, model.StatusSuccess))
+				assert.NoError(t, q.Done(ctx, got.ID, model.StatusSuccess))
 				go func() {
 					for {
 						fmt.Printf("Worker spawned\n")
-						got, _ := q.Poll(noContext, 1, func(*model.Task) bool { return true })
+						got, _ := q.Poll(ctx, 1, filterFnTrue)
 						obtainedWorkCh <- got
 					}
 				}()
@@ -275,7 +288,7 @@ func TestFifoErrorsMultiThread(t *testing.T) {
 			}
 
 		case <-time.After(5 * time.Second):
-			info := q.Info(noContext)
+			info := q.Info(ctx)
 			fmt.Println(info.String())
 			t.Errorf("test timed out")
 			return
@@ -284,6 +297,7 @@ func TestFifoErrorsMultiThread(t *testing.T) {
 }
 
 func TestFifoTransitiveErrors(t *testing.T) {
+	ctx := context.Background()
 	task1 := &model.Task{
 		ID: "1",
 	}
@@ -300,27 +314,28 @@ func TestFifoTransitiveErrors(t *testing.T) {
 		DepStatus:    make(map[string]model.StatusValue),
 	}
 
-	q, _ := New(context.Background()).(*fifo)
-	assert.NoError(t, q.PushAtOnce(noContext, []*model.Task{task2, task3, task1}))
+	q, _ := NewMemoryQueue(ctx).(*fifo)
+	assert.NoError(t, q.PushAtOnce(ctx, []*model.Task{task2, task3, task1}))
 
-	got, err := q.Poll(noContext, 1, func(*model.Task) bool { return true })
+	got, err := q.Poll(ctx, 1, filterFnTrue)
 	assert.NoError(t, err)
 	assert.Equal(t, task1, got)
-	assert.NoError(t, q.Error(noContext, got.ID, fmt.Errorf("exit code 1, there was an error")))
+	assert.NoError(t, q.Error(ctx, got.ID, fmt.Errorf("exit code 1, there was an error")))
 
-	got, err = q.Poll(noContext, 1, func(*model.Task) bool { return true })
+	got, err = q.Poll(ctx, 1, filterFnTrue)
 	assert.NoError(t, err)
 	assert.Equal(t, task2, got)
 	assert.False(t, got.ShouldRun(), "expect task2 should not run, since task1 failed")
-	assert.NoError(t, q.Done(noContext, got.ID, model.StatusSkipped))
+	assert.NoError(t, q.Done(ctx, got.ID, model.StatusSkipped))
 
-	got, err = q.Poll(noContext, 1, func(*model.Task) bool { return true })
+	got, err = q.Poll(ctx, 1, filterFnTrue)
 	assert.NoError(t, err)
 	assert.Equal(t, task3, got)
 	assert.False(t, got.ShouldRun(), "expect task3 should not run, task1 failed, thus task2 was skipped, task3 should be skipped too")
 }
 
 func TestFifoCancel(t *testing.T) {
+	ctx := context.Background()
 	task1 := &model.Task{
 		ID: "1",
 	}
@@ -338,34 +353,35 @@ func TestFifoCancel(t *testing.T) {
 		RunOn:        []string{"success", "failure"},
 	}
 
-	q, _ := New(context.Background()).(*fifo)
-	assert.NoError(t, q.PushAtOnce(noContext, []*model.Task{task2, task3, task1}))
+	q, _ := NewMemoryQueue(ctx).(*fifo)
+	assert.NoError(t, q.PushAtOnce(ctx, []*model.Task{task2, task3, task1}))
 
-	_, _ = q.Poll(noContext, 1, func(*model.Task) bool { return true })
-	assert.NoError(t, q.Error(noContext, task1.ID, fmt.Errorf("canceled")))
-	assert.NoError(t, q.Error(noContext, task2.ID, fmt.Errorf("canceled")))
-	assert.NoError(t, q.Error(noContext, task3.ID, fmt.Errorf("canceled")))
+	_, _ = q.Poll(ctx, 1, filterFnTrue)
+	assert.NoError(t, q.Error(ctx, task1.ID, fmt.Errorf("canceled")))
+	assert.NoError(t, q.Error(ctx, task2.ID, fmt.Errorf("canceled")))
+	assert.NoError(t, q.Error(ctx, task3.ID, fmt.Errorf("canceled")))
 
-	info := q.Info(noContext)
+	info := q.Info(ctx)
 	assert.Len(t, info.Pending, 0, "all pipelines should be canceled")
 }
 
 func TestFifoPause(t *testing.T) {
+	ctx := context.Background()
 	task1 := &model.Task{
 		ID: "1",
 	}
 
-	q, _ := New(context.Background()).(*fifo)
+	q, _ := NewMemoryQueue(ctx).(*fifo)
 	var wg sync.WaitGroup
 	wg.Add(1)
 	go func() {
-		_, _ = q.Poll(noContext, 1, func(*model.Task) bool { return true })
+		_, _ = q.Poll(ctx, 1, filterFnTrue)
 		wg.Done()
 	}()
 
 	q.Pause()
 	t0 := time.Now()
-	assert.NoError(t, q.Push(noContext, task1))
+	assert.NoError(t, q.Push(ctx, task1))
 	time.Sleep(20 * time.Millisecond)
 	q.Resume()
 
@@ -375,25 +391,27 @@ func TestFifoPause(t *testing.T) {
 	assert.Greater(t, t1.Sub(t0), 20*time.Millisecond, "should have waited til resume")
 
 	q.Pause()
-	assert.NoError(t, q.Push(noContext, task1))
+	assert.NoError(t, q.Push(ctx, task1))
 	q.Resume()
-	_, _ = q.Poll(noContext, 1, func(*model.Task) bool { return true })
+	_, _ = q.Poll(ctx, 1, filterFnTrue)
 }
 
 func TestFifoPauseResume(t *testing.T) {
+	ctx := context.Background()
 	task1 := &model.Task{
 		ID: "1",
 	}
 
-	q, _ := New(context.Background()).(*fifo)
+	q, _ := NewMemoryQueue(ctx).(*fifo)
 	q.Pause()
-	assert.NoError(t, q.Push(noContext, task1))
+	assert.NoError(t, q.Push(ctx, task1))
 	q.Resume()
 
-	_, _ = q.Poll(noContext, 1, func(*model.Task) bool { return true })
+	_, _ = q.Poll(ctx, 1, filterFnTrue)
 }
 
 func TestWaitingVsPending(t *testing.T) {
+	ctx := context.Background()
 	task1 := &model.Task{
 		ID: "1",
 	}
@@ -411,20 +429,20 @@ func TestWaitingVsPending(t *testing.T) {
 		RunOn:        []string{"success", "failure"},
 	}
 
-	q, _ := New(context.Background()).(*fifo)
-	assert.NoError(t, q.PushAtOnce(noContext, []*model.Task{task2, task3, task1}))
+	q, _ := NewMemoryQueue(ctx).(*fifo)
+	assert.NoError(t, q.PushAtOnce(ctx, []*model.Task{task2, task3, task1}))
 
-	got, _ := q.Poll(noContext, 1, func(*model.Task) bool { return true })
+	got, _ := q.Poll(ctx, 1, filterFnTrue)
 
-	info := q.Info(noContext)
+	info := q.Info(ctx)
 	assert.Equal(t, 2, info.Stats.WaitingOnDeps)
 
-	assert.NoError(t, q.Error(noContext, got.ID, fmt.Errorf("exit code 1, there was an error")))
-	got, err := q.Poll(noContext, 1, func(*model.Task) bool { return true })
+	assert.NoError(t, q.Error(ctx, got.ID, fmt.Errorf("exit code 1, there was an error")))
+	got, err := q.Poll(ctx, 1, filterFnTrue)
 	assert.NoError(t, err)
 	assert.EqualValues(t, task2, got)
 
-	info = q.Info(noContext)
+	info = q.Info(ctx)
 	assert.Equal(t, 0, info.Stats.WaitingOnDeps)
 	assert.Equal(t, 1, info.Stats.Pending)
 }
@@ -497,4 +515,109 @@ func TestShouldRun(t *testing.T) {
 		RunOn: []string{"failure"},
 	}
 	assert.True(t, task.ShouldRun(), "on failure, tasks should run on skipped deps, something failed higher up the chain")
+}
+
+func TestFifoWithScoring(t *testing.T) {
+	ctx := context.Background()
+	q := NewMemoryQueue(ctx)
+
+	// Create tasks with different labels
+	tasks := []*model.Task{
+		{ID: "1", Labels: map[string]string{"org-id": "123", "platform": "linux"}},
+		{ID: "2", Labels: map[string]string{"org-id": "456", "platform": "linux"}},
+		{ID: "3", Labels: map[string]string{"org-id": "789", "platform": "windows"}},
+		{ID: "4", Labels: map[string]string{"org-id": "123", "platform": "linux"}},
+		{ID: "5", Labels: map[string]string{"org-id": "*", "platform": "linux"}},
+	}
+
+	for _, task := range tasks {
+		assert.NoError(t, q.Push(ctx, task))
+	}
+
+	// Create filter functions for different workers
+	filters := map[int]FilterFn{
+		1: func(task *model.Task) (bool, int) {
+			if task.Labels["org-id"] == "123" {
+				return true, 20
+			}
+			if task.Labels["platform"] == "linux" {
+				return true, 10
+			}
+			return true, 1
+		},
+		2: func(task *model.Task) (bool, int) {
+			if task.Labels["org-id"] == "456" {
+				return true, 20
+			}
+			if task.Labels["platform"] == "linux" {
+				return true, 10
+			}
+			return true, 1
+		},
+		3: func(task *model.Task) (bool, int) {
+			if task.Labels["platform"] == "windows" {
+				return true, 20
+			}
+			return true, 1
+		},
+		4: func(task *model.Task) (bool, int) {
+			if task.Labels["org-id"] == "123" {
+				return true, 20
+			}
+			if task.Labels["platform"] == "linux" {
+				return true, 10
+			}
+			return true, 1
+		},
+		5: func(task *model.Task) (bool, int) {
+			if task.Labels["org-id"] == "*" {
+				return true, 15
+			}
+			return true, 1
+		},
+	}
+
+	// Start polling in separate goroutines
+	results := make(chan *model.Task, 5)
+	for i := 1; i <= 5; i++ {
+		go func(n int) {
+			task, err := q.Poll(ctx, int64(n), filters[n])
+			assert.NoError(t, err)
+			results <- task
+		}(i)
+	}
+
+	// Collect results
+	receivedTasks := make(map[string]int64)
+	for i := 0; i < 5; i++ {
+		select {
+		case task := <-results:
+			receivedTasks[task.ID] = task.AgentID
+		case <-time.After(time.Second):
+			t.Fatal("Timeout waiting for tasks")
+		}
+	}
+
+	assert.Len(t, receivedTasks, 5, "All tasks should be assigned")
+
+	// Define expected agent assignments
+	// Map structure: {taskID: []possible agentIDs}
+	// - taskID "1" and "4" can be assigned to agents 1 or 4 (org-id "123")
+	// - taskID "2" should be assigned to agent 2 (org-id "456")
+	// - taskID "3" should be assigned to agent 3 (platform "windows")
+	// - taskID "5" should be assigned to agent 5 (org-id "*")
+	expectedAssignments := map[string][]int64{
+		"1": {1, 4},
+		"2": {2},
+		"3": {3},
+		"4": {1, 4},
+		"5": {5},
+	}
+
+	// Check if tasks are assigned as expected
+	for taskID, expectedAgents := range expectedAssignments {
+		agentID, ok := receivedTasks[taskID]
+		assert.True(t, ok, "Task %s should be assigned", taskID)
+		assert.Contains(t, expectedAgents, agentID, "Task %s should be assigned to one of the expected agents", taskID)
+	}
 }

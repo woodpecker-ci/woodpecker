@@ -19,11 +19,13 @@ package main
 
 import (
 	"os"
+
+	docs "github.com/urfave/cli-docs/v3"
 )
 
 func main() {
 	app := newApp()
-	md, err := app.ToMarkdown()
+	md, err := docs.ToMarkdown(app)
 	if err != nil {
 		panic(err)
 	}

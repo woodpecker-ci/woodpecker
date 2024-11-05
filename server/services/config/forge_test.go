@@ -287,7 +287,7 @@ func TestFetch(t *testing.T) {
 			f := new(mocks.Forge)
 			dirs := map[string][]*forge_types.FileMeta{}
 			for _, file := range tt.files {
-				f.On("File", mock.Anything, mock.Anything, mock.Anything, mock.Anything, file.name).Return(file.data, nil)
+				f.On("File", mock.Anything, mock.Anything, mock.Anything, mock.Anything, file.name).Once().Return(file.data, nil)
 				path := filepath.Dir(file.name)
 				if path != "." {
 					dirs[path] = append(dirs[path], &forge_types.FileMeta{
@@ -298,7 +298,7 @@ func TestFetch(t *testing.T) {
 			}
 
 			for path, files := range dirs {
-				f.On("Dir", mock.Anything, mock.Anything, mock.Anything, mock.Anything, path).Return(files, nil)
+				f.On("Dir", mock.Anything, mock.Anything, mock.Anything, mock.Anything, path).Once().Return(files, nil)
 			}
 
 			// if the previous mocks do not match return not found errors

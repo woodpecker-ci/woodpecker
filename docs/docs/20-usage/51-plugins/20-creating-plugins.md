@@ -10,7 +10,7 @@ These are passed to your plugin as uppercase env vars with a `PLUGIN_` prefix.
 Using a setting like `url` results in an env var named `PLUGIN_URL`.
 
 Characters like `-` are converted to an underscore (`_`). `some_String` gets `PLUGIN_SOME_STRING`.
-CamelCase is not respected, `anInt` get `PLUGIN_ANINT`.
+CamelCase is not respected, `anInt` get `PLUGIN_ANINT`. <!-- cspell:ignore ANINT -->
 
 ### Basic settings
 
@@ -42,7 +42,7 @@ Values like this are converted to JSON and then passed to your plugin. In the ex
 
 ### Secrets
 
-Secrets should be passed as settings too. Therefore, users should use [`from_secret`](../40-secrets.md#use-secrets-in-settings-and-environment).
+Secrets should be passed as settings too. Therefore, users should use [`from_secret`](../40-secrets.md#usage).
 
 ## Plugin library
 

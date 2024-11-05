@@ -106,7 +106,7 @@ message UpdateRequest {
 }
 
 message LogRequest {
-  LogEntry logEntry = 1;
+  repeated LogEntry logEntries = 1;
 }
 
 message Empty {
@@ -116,11 +116,16 @@ message ReportHealthRequest {
   string status = 1;
 }
 
-message RegisterAgentRequest {
+message AgentInfo {
   string platform = 1;
   int32  capacity = 2;
   string backend  = 3;
   string version  = 4;
+  map<string, string> customLabels = 5;
+}
+
+message RegisterAgentRequest {
+  AgentInfo info = 1;
 }
 
 //

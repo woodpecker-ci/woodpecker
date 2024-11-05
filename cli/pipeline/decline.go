@@ -15,10 +15,11 @@
 package pipeline
 
 import (
+	"context"
 	"fmt"
 	"strconv"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
 	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
 )
@@ -30,9 +31,9 @@ var pipelineDeclineCmd = &cli.Command{
 	Action:    pipelineDecline,
 }
 
-func pipelineDecline(c *cli.Context) (err error) {
+func pipelineDecline(ctx context.Context, c *cli.Command) (err error) {
 	repoIDOrFullName := c.Args().First()
-	client, err := internal.NewClient(c)
+	client, err := internal.NewClient(ctx, c)
 	if err != nil {
 		return err
 	}

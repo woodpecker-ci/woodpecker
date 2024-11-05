@@ -83,7 +83,7 @@ func TestCopyLineByLine(t *testing.T) {
 	assert.Lenf(t, writes, 2, "expected 2 writes, got: %v", writes)
 
 	// wait for the goroutine to write the data
-	time.Sleep(time.Millisecond)
+	time.Sleep(10 * time.Millisecond)
 
 	writtenData := strings.Join(writes, "-")
 	assert.Equal(t, "12345\n-678\n", writtenData, "unexpected writtenData: %s", writtenData)

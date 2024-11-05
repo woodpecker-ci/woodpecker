@@ -15,6 +15,7 @@
 package logger
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"os"
@@ -22,37 +23,37 @@ import (
 	"github.com/6543/logfile-open"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 var GlobalLoggerFlags = []cli.Flag{
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_LOG_LEVEL"},
+		Sources: cli.EnvVars("WOODPECKER_LOG_LEVEL"),
 		Name:    "log-level",
 		Usage:   "set logging level",
 		Value:   "info",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_LOG_FILE"},
+		Sources: cli.EnvVars("WOODPECKER_LOG_FILE"),
 		Name:    "log-file",
 		Usage:   "Output destination for logs. 'stdout' and 'stderr' can be used as special keywords.",
 		Value:   "stderr",
 	},
 	&cli.BoolFlag{
-		EnvVars: []string{"WOODPECKER_DEBUG_PRETTY"},
+		Sources: cli.EnvVars("WOODPECKER_DEBUG_PRETTY"),
 		Name:    "pretty",
 		Usage:   "enable pretty-printed debug output",
 		Value:   isInteractiveTerminal(), // make pretty on interactive terminal by default
 	},
 	&cli.BoolFlag{
-		EnvVars: []string{"WOODPECKER_DEBUG_NOCOLOR"},
+		Sources: cli.EnvVars("WOODPECKER_DEBUG_NOCOLOR"),
 		Name:    "nocolor",
 		Usage:   "disable colored debug output, only has effect if pretty output is set too",
 		Value:   !isInteractiveTerminal(), // do color on interactive terminal by default
 	},
 }
 
-func SetupGlobalLogger(c *cli.Context, outputLvl bool) error {
+func SetupGlobalLogger(ctx context.Context, c *cli.Command, outputLvl bool) error {
 	logLevel := c.String("log-level")
 	pretty := c.Bool("pretty")
 	noColor := c.Bool("nocolor")
@@ -65,7 +66,7 @@ func SetupGlobalLogger(c *cli.Context, outputLvl bool) error {
 	case "stdout":
 		file = os.Stdout
 	default: // a file was set
-		openFile, err := logfile.OpenFileWithContext(c.Context, logFile, 0o660)
+		openFile, err := logfile.OpenFileWithContext(ctx, logFile, 0o660)
 		if err != nil {
 			return fmt.Errorf("could not open log file '%s': %w", logFile, err)
 		}

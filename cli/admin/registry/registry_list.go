@@ -15,10 +15,11 @@
 package registry
 
 import (
+	"context"
 	"html/template"
 	"os"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
 	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
 	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
@@ -33,10 +34,10 @@ var registryListCmd = &cli.Command{
 	},
 }
 
-func registryList(c *cli.Context) error {
+func registryList(ctx context.Context, c *cli.Command) error {
 	format := c.String("format") + "\n"
 
-	client, err := internal.NewClient(c)
+	client, err := internal.NewClient(ctx, c)
 	if err != nil {
 		return err
 	}

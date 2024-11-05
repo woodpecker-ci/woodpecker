@@ -1,10 +1,7 @@
 FROM docker.io/alpine:3.20
 
-# renovate: datasource=repology depName=alpine_3_18/ca-certificates versioning=loose
-ENV CA_CERTIFICATES_VERSION="20240226-r0"
-
 ARG TARGETOS TARGETARCH
-RUN apk add -U --no-cache ca-certificates=${CA_CERTIFICATES_VERSION}
+RUN apk add -U --no-cache ca-certificates
 ENV GODEBUG=netdns=go
 # Internal setting do NOT change! Signals that woodpecker is running inside a container
 ENV WOODPECKER_IN_CONTAINER=true

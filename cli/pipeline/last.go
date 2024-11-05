@@ -15,7 +15,9 @@
 package pipeline
 
 import (
-	"github.com/urfave/cli/v2"
+	"context"
+
+	"github.com/urfave/cli/v3"
 
 	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
 	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
@@ -36,9 +38,9 @@ var pipelineLastCmd = &cli.Command{
 	}...),
 }
 
-func pipelineLast(c *cli.Context) error {
+func pipelineLast(ctx context.Context, c *cli.Command) error {
 	repoIDOrFullName := c.Args().First()
-	client, err := internal.NewClient(c)
+	client, err := internal.NewClient(ctx, c)
 	if err != nil {
 		return err
 	}

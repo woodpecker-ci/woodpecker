@@ -30,7 +30,7 @@ import (
 	prometheus_http "github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 	"golang.org/x/sync/errgroup"
 
 	"go.woodpecker-ci.org/woodpecker/v2/server"
@@ -39,7 +39,6 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server/router/middleware"
 	"go.woodpecker-ci.org/woodpecker/v2/server/web"
 	"go.woodpecker-ci.org/woodpecker/v2/shared/logger"
-	"go.woodpecker-ci.org/woodpecker/v2/shared/utils"
 	"go.woodpecker-ci.org/woodpecker/v2/version"
 )
 
@@ -53,14 +52,10 @@ var (
 	shutdownCtx                                = context.Background()
 )
 
-func run(c *cli.Context) error {
-	if err := logger.SetupGlobalLogger(c, true); err != nil {
+func run(ctx context.Context, c *cli.Command) error {
+	if err := logger.SetupGlobalLogger(ctx, c, true); err != nil {
 		return err
 	}
-
-	ctx := utils.WithContextSigtermCallback(c.Context, func() {
-		log.Info().Msg("termination signal is received, shutting down server")
-	})
 
 	ctx, ctxCancel := context.WithCancelCause(ctx)
 	stopServerFunc = func(err error) {

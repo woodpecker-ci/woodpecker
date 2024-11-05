@@ -24,6 +24,7 @@
 <script setup lang="ts">
 import { useRoute, useRouter } from 'vue-router';
 
+import Icon from '~/components/atomic/Icon.vue';
 import { useTabsClient, type Tab } from '~/compositions/useTabs';
 
 const router = useRouter();

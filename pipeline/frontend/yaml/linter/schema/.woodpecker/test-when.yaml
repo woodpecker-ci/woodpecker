@@ -19,6 +19,9 @@ steps:
       - echo "test"
     when:
       event: push
+      branch:
+        include: main
+        exclude: [develop, feature/*]
 
   when-event-array:
     image: alpine
@@ -33,14 +36,6 @@ steps:
         - tag
         - deployment
         - release
-
-  when-event-exclude-pull_request_closed:
-    image: alpine
-    commands:
-      - echo "test"
-    when:
-      event:
-        exclude: pull_request_closed
 
   when-ref:
     image: alpine
@@ -75,7 +70,6 @@ steps:
     commands:
       - echo "test"
     when:
-      environment: production
       event: deployment
 
   when-matrix:

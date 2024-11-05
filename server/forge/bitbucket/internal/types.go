@@ -164,6 +164,10 @@ type PullRequestHook struct {
 		Created time.Time `json:"created_on"`
 		Updated time.Time `json:"updated_on"`
 
+		MergeCommit struct {
+			Hash string `json:"hash"`
+		} `json:"merge_commit"`
+
 		Source struct {
 			Repo   Repo `json:"repository"`
 			Commit struct {

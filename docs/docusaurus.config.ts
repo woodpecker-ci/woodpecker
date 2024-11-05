@@ -5,7 +5,7 @@ import * as path from 'path';
 
 const config: Config = {
   title: 'Woodpecker CI',
-  tagline: 'Woodpecker is a simple yet powerful CI/CD engine with great extensibility.',
+  tagline: 'Woodpecker is a simple, yet powerful CI/CD engine with great extensibility.',
   url: 'https://woodpecker-ci.org',
   baseUrl: '/',
   onBrokenLinks: 'throw',
@@ -34,7 +34,7 @@ const config: Config = {
       items: [
         {
           type: 'doc',
-          docId: 'intro',
+          docId: 'intro/index',
           activeBaseRegex: 'docs/(?!migrations|awesome)',
           position: 'left',
           label: 'Docs',
@@ -50,20 +50,19 @@ const config: Config = {
           position: 'left',
           items: [
             {
-              to: '/docs/next/migrations', // Always point to newest migration guide
-              activeBaseRegex: 'docs/(next/)?migrations',
+              to: '/migrations', // Always point to newest migration guide
+              activeBaseRegex: 'migrations',
               label: 'Migrations',
             },
             {
-              to: '/docs/next/awesome', // Always point to newest awesome list
-              activeBaseRegex: 'docs/(next/)?awesome',
+              to: '/awesome', // Always point to newest awesome list
+              activeBaseRegex: 'awesome',
               label: 'Awesome',
             },
             {
               to: '/api',
               label: 'API',
             },
-            { to: 'cookbook', label: 'Cookbook' },
           ],
         },
         {
@@ -105,7 +104,7 @@ const config: Config = {
             },
             {
               label: 'Server setup',
-              to: '/docs/administration/deployment/overview',
+              to: '/docs/administration/getting-started',
             },
           ],
         },
@@ -148,7 +147,7 @@ const config: Config = {
           ],
         },
       ],
-      copyright: `Copyright © ${new Date().getFullYear()} Woodpecker CI. Built with Docusaurus.`,
+      copyright: `Copyright © ${new Date().getFullYear()} Woodpecker Authors. Built with Docusaurus.`,
     },
     prism: {
       theme: themes.github,
@@ -219,21 +218,6 @@ const config: Config = {
         } as any;
       },
     }),
-    [
-      '@docusaurus/plugin-content-blog',
-      {
-        id: 'cookbook-blog',
-        /**
-         * URL route for the blog section of your site.
-         * *DO NOT* include a trailing slash.
-         */
-        routeBasePath: 'cookbook',
-        /**
-         * Path to data on filesystem relative to site dir.
-         */
-        path: './cookbook',
-      },
-    ],
   ],
   themes: [
     path.resolve(__dirname, 'plugins', 'woodpecker-plugins', 'dist'),
@@ -252,23 +236,23 @@ const config: Config = {
           sidebarPath: require.resolve('./sidebars.js'),
           editUrl: 'https://github.com/woodpecker-ci/woodpecker/edit/main/docs/',
           includeCurrentVersion: true,
-          lastVersion: '2.6',
+          lastVersion: '2.7',
           onlyIncludeVersions:
-            process.env.NODE_ENV === 'development' ? ['current', '2.6'] : ['current', '2.6', '2.5', '2.4', '1.0'],
+            process.env.NODE_ENV === 'development' ? ['current', '2.7'] : ['current', '2.7', '2.6', '2.5', '1.0'],
           versions: {
             current: {
               label: 'Next 🚧',
               banner: 'unreleased',
             },
+            '2.7': {
+              label: '2.7.x',
+            },
             '2.6': {
-              label: '2.6.x',
+              label: '2.6.x 💀',
+              banner: 'unmaintained',
             },
             '2.5': {
               label: '2.5.x 💀',
-              banner: 'unmaintained',
-            },
-            '2.4': {
-              label: '2.4.x 💀',
               banner: 'unmaintained',
             },
             '1.0': {
@@ -280,6 +264,7 @@ const config: Config = {
         blog: {
           blogTitle: 'Blog',
           blogDescription: 'A blog for release announcements, turorials...',
+          onInlineAuthors: 'ignore',
           // postsPerPage: 'ALL',
           // blogSidebarCount: 0,
         },

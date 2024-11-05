@@ -19,7 +19,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
 	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
 	"go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker"
@@ -29,7 +29,7 @@ import (
 var Command = &cli.Command{
 	Name:  "secret",
 	Usage: "manage secrets",
-	Subcommands: []*cli.Command{
+	Commands: []*cli.Command{
 		secretCreateCmd,
 		secretDeleteCmd,
 		secretUpdateCmd,
@@ -38,7 +38,7 @@ var Command = &cli.Command{
 	},
 }
 
-func parseTargetArgs(client woodpecker.Client, c *cli.Context) (global bool, orgID, repoID int64, err error) {
+func parseTargetArgs(client woodpecker.Client, c *cli.Command) (global bool, orgID, repoID int64, err error) {
 	if c.Bool("global") {
 		return true, -1, -1, nil
 	}

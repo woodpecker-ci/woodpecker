@@ -82,7 +82,7 @@
               <PipelineStatusIcon :status="workflow.state" class="!h-4 !w-4" />
               <span class="truncate">{{ workflow.name }}</span>
               <PipelineStepDuration
-                v-if="workflow.start_time !== workflow.end_time"
+                v-if="workflow.started !== workflow.finished"
                 :workflow="workflow"
                 class="mr-1 pr-2px"
               />

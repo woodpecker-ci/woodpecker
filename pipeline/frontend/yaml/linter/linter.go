@@ -24,11 +24,21 @@ import (
 	errorTypes "go.woodpecker-ci.org/woodpecker/v2/pipeline/errors/types"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/linter/schema"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/types"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/utils"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/constant"
 )
 
 // A Linter lints a pipeline configuration.
 type Linter struct {
-	trusted bool
+	trusted             TrustedConfiguration
+	privilegedPlugins   *[]string
+	trustedClonePlugins *[]string
+}
+
+type TrustedConfiguration struct {
+	Network  bool
+	Volumes  bool
+	Security bool
 }
 
 // New creates a new Linter with options.
@@ -71,6 +81,10 @@ func (l *Linter) lintFile(config *WorkflowConfig) error {
 		linterErr = multierr.Append(linterErr, newLinterError("Invalid or missing steps section", config.File, "steps", false))
 	}
 
+	if err := l.lintCloneSteps(config); err != nil {
+		linterErr = multierr.Append(linterErr, err)
+	}
+
 	if err := l.lintContainers(config, "clone"); err != nil {
 		linterErr = multierr.Append(linterErr, err)
 	}
@@ -94,6 +108,29 @@ func (l *Linter) lintFile(config *WorkflowConfig) error {
 	return linterErr
 }
 
+func (l *Linter) lintCloneSteps(config *WorkflowConfig) error {
+	if len(config.Workflow.Clone.ContainerList) == 0 {
+		return nil
+	}
+
+	trustedClonePlugins := constant.TrustedClonePlugins
+	if l.trustedClonePlugins != nil {
+		trustedClonePlugins = *l.trustedClonePlugins
+	}
+
+	var linterErr error
+	for _, container := range config.Workflow.Clone.ContainerList {
+		if !utils.MatchImageDynamic(container.Image, trustedClonePlugins...) {
+			linterErr = multierr.Append(linterErr,
+				newLinterError(
+					"Specified clone image does not match allow list, netrc will not be injected",
+					config.File, fmt.Sprintf("clone.%s", container.Name), true),
+			)
+		}
+	}
+	return linterErr
+}
+
 func (l *Linter) lintContainers(config *WorkflowConfig, area string) error {
 	var linterErr error
 
@@ -112,12 +149,13 @@ func (l *Linter) lintContainers(config *WorkflowConfig, area string) error {
 		if err := l.lintImage(config, container, area); err != nil {
 			linterErr = multierr.Append(linterErr, err)
 		}
-		if !l.trusted {
-			if err := l.lintTrusted(config, container, area); err != nil {
-				linterErr = multierr.Append(linterErr, err)
-			}
+		if err := l.lintTrusted(config, container, area); err != nil {
+			linterErr = multierr.Append(linterErr, err)
 		}
 		if err := l.lintSettings(config, container, area); err != nil {
+			linterErr = multierr.Append(linterErr, err)
+		}
+		if err := l.lintPrivilegedPlugins(config, container, area); err != nil {
 			linterErr = multierr.Append(linterErr, err)
 		}
 	}
@@ -132,6 +170,22 @@ func (l *Linter) lintImage(config *WorkflowConfig, c *types.Container, area stri
 	return nil
 }
 
+func (l *Linter) lintPrivilegedPlugins(config *WorkflowConfig, c *types.Container, area string) error {
+	// lint for conflicts of https://github.com/woodpecker-ci/woodpecker/pull/3918
+	if utils.MatchImage(c.Image, "plugins/docker", "plugins/gcr", "plugins/ecr", "woodpeckerci/plugin-docker-buildx") {
+		msg := fmt.Sprintf("The formerly privileged plugin '%s' is no longer privileged by default, if required, add it to WOODPECKER_PLUGINS_PRIVILEGED", c.Image)
+		// check first if user did not add them back
+		if l.privilegedPlugins != nil && !utils.MatchImageDynamic(c.Image, *l.privilegedPlugins...) {
+			return newLinterError(msg, config.File, fmt.Sprintf("%s.%s", area, c.Name), false)
+		} else if l.privilegedPlugins == nil {
+			// if linter has no info of current privileged plugins, it's just a warning
+			return newLinterError(msg, config.File, fmt.Sprintf("%s.%s", area, c.Name), true)
+		}
+	}
+
+	return nil
+}
+
 func (l *Linter) lintSettings(config *WorkflowConfig, c *types.Container, field string) error {
 	if len(c.Settings) == 0 {
 		return nil
@@ -143,7 +197,10 @@ func (l *Linter) lintSettings(config *WorkflowConfig, c *types.Container, field 
 		return newLinterError("Cannot configure both entrypoint and settings", config.File, fmt.Sprintf("%s.%s", field, c.Name), false)
 	}
 	if len(c.Environment) != 0 {
-		return newLinterError("Cannot configure both environment and settings", config.File, fmt.Sprintf("%s.%s", field, c.Name), false)
+		return newLinterError("Should not configure both environment and settings", config.File, fmt.Sprintf("%s.%s", field, c.Name), true)
+	}
+	if len(c.Secrets) != 0 {
+		return newLinterError("Should not configure both secrets and settings", config.File, fmt.Sprintf("%s.%s", field, c.Name), true)
 	}
 	return nil
 }
@@ -151,35 +208,35 @@ func (l *Linter) lintSettings(config *WorkflowConfig, c *types.Container, field 
 func (l *Linter) lintTrusted(config *WorkflowConfig, c *types.Container, area string) error {
 	yamlPath := fmt.Sprintf("%s.%s", area, c.Name)
 	errors := []string{}
-	if c.Privileged {
-		errors = append(errors, "Insufficient privileges to use privileged mode")
+	if !l.trusted.Security {
+		if c.Privileged {
+			errors = append(errors, "Insufficient privileges to use privileged mode")
+		}
 	}
-	if c.ShmSize != 0 {
-		errors = append(errors, "Insufficient privileges to override shm_size")
+	if !l.trusted.Network {
+		if len(c.DNS) != 0 {
+			errors = append(errors, "Insufficient privileges to use custom dns")
+		}
+		if len(c.DNSSearch) != 0 {
+			errors = append(errors, "Insufficient privileges to use dns_search")
+		}
+		if len(c.ExtraHosts) != 0 {
+			errors = append(errors, "Insufficient privileges to use extra_hosts")
+		}
+		if len(c.NetworkMode) != 0 {
+			errors = append(errors, "Insufficient privileges to use network_mode")
+		}
 	}
-	if len(c.DNS) != 0 {
-		errors = append(errors, "Insufficient privileges to use custom dns")
-	}
-	if len(c.DNSSearch) != 0 {
-		errors = append(errors, "Insufficient privileges to use dns_search")
-	}
-	if len(c.Devices) != 0 {
-		errors = append(errors, "Insufficient privileges to use devices")
-	}
-	if len(c.ExtraHosts) != 0 {
-		errors = append(errors, "Insufficient privileges to use extra_hosts")
-	}
-	if len(c.NetworkMode) != 0 {
-		errors = append(errors, "Insufficient privileges to use network_mode")
-	}
-	if c.Networks.Networks != nil && len(c.Networks.Networks) != 0 {
-		errors = append(errors, "Insufficient privileges to use networks")
-	}
-	if c.Volumes.Volumes != nil && len(c.Volumes.Volumes) != 0 {
-		errors = append(errors, "Insufficient privileges to use volumes")
-	}
-	if len(c.Tmpfs) != 0 {
-		errors = append(errors, "Insufficient privileges to use tmpfs")
+	if !l.trusted.Volumes {
+		if len(c.Devices) != 0 {
+			errors = append(errors, "Insufficient privileges to use devices")
+		}
+		if len(c.Volumes.Volumes) != 0 {
+			errors = append(errors, "Insufficient privileges to use volumes")
+		}
+		if len(c.Tmpfs) != 0 {
+			errors = append(errors, "Insufficient privileges to use tmpfs")
+		}
 	}
 
 	if len(errors) > 0 {
@@ -218,142 +275,22 @@ func (l *Linter) lintDeprecations(config *WorkflowConfig) (err error) {
 		return err
 	}
 
-	if parsed.PipelineDoNotUseIt.ContainerList != nil {
-		err = multierr.Append(err, &errorTypes.PipelineError{
-			Type:    errorTypes.PipelineErrorTypeDeprecation,
-			Message: "Please use 'steps:' instead of deprecated 'pipeline:' list",
-			Data: errors.DeprecationErrorData{
-				File:  config.File,
-				Field: "pipeline",
-				Docs:  "https://woodpecker-ci.org/docs/next/migrations#next-200",
-			},
-			IsWarning: true,
-		})
-	}
-
-	if parsed.PlatformDoNotUseIt != "" {
-		err = multierr.Append(err, &errorTypes.PipelineError{
-			Type:    errorTypes.PipelineErrorTypeDeprecation,
-			Message: "Please use labels instead of deprecated 'platform' filters",
-			Data: errors.DeprecationErrorData{
-				File:  config.File,
-				Field: "platform",
-				Docs:  "https://woodpecker-ci.org/docs/next/migrations#next-200",
-			},
-			IsWarning: true,
-		})
-	}
-
-	if parsed.BranchesDoNotUseIt != nil {
-		err = multierr.Append(err, &errorTypes.PipelineError{
-			Type:    errorTypes.PipelineErrorTypeDeprecation,
-			Message: "Please use global when instead of deprecated 'branches' filter",
-			Data: errors.DeprecationErrorData{
-				File:  config.File,
-				Field: "branches",
-				Docs:  "https://woodpecker-ci.org/docs/next/migrations#next-200",
-			},
-			IsWarning: true,
-		})
-	}
-
-	for _, step := range parsed.Steps.ContainerList {
-		if step.Group != "" {
+	for _, container := range parsed.Steps.ContainerList {
+		if len(container.Secrets) > 0 {
 			err = multierr.Append(err, &errorTypes.PipelineError{
 				Type:    errorTypes.PipelineErrorTypeDeprecation,
-				Message: "Please use depends_on instead of deprecated 'group' setting",
+				Message: "Secrets are deprecated, use environment with from_secret",
 				Data: errors.DeprecationErrorData{
 					File:  config.File,
-					Field: "steps." + step.Name + ".group",
-					Docs:  "https://woodpecker-ci.org/docs/next/usage/workflow-syntax#depends_on",
+					Field: fmt.Sprintf("steps.%s.secrets", container.Name),
+					Docs:  "https://woodpecker-ci.org/docs/usage/secrets#usage",
 				},
 				IsWarning: true,
 			})
 		}
 	}
 
-	for i, c := range parsed.When.Constraints {
-		if len(c.Event.Exclude) != 0 {
-			err = multierr.Append(err, &errorTypes.PipelineError{
-				Type:    errorTypes.PipelineErrorTypeDeprecation,
-				Message: "Please only use allow lists for events",
-				Data: errors.DeprecationErrorData{
-					File:  config.File,
-					Field: fmt.Sprintf("when[%d].event", i),
-					Docs:  "https://woodpecker-ci.org/docs/usage/workflow-syntax#event-1",
-				},
-				IsWarning: true,
-			})
-		}
-	}
-
-	for _, step := range parsed.Steps.ContainerList {
-		for i, c := range step.When.Constraints {
-			if len(c.Event.Exclude) != 0 {
-				err = multierr.Append(err, &errorTypes.PipelineError{
-					Type:    errorTypes.PipelineErrorTypeDeprecation,
-					Message: "Please only use allow lists for events",
-					Data: errors.DeprecationErrorData{
-						File:  config.File,
-						Field: fmt.Sprintf("steps.%s.when[%d].event", step.Name, i),
-						Docs:  "https://woodpecker-ci.org/docs/usage/workflow-syntax#event",
-					},
-					IsWarning: true,
-				})
-			}
-		}
-	}
-
-	for _, step := range parsed.Steps.ContainerList {
-		for i, c := range step.Secrets.Secrets {
-			if c.Source != c.Target {
-				err = multierr.Append(err, &errorTypes.PipelineError{
-					Type:    errorTypes.PipelineErrorTypeDeprecation,
-					Message: "Secrets alternative names are deprecated, use environment with from_secret",
-					Data: errors.DeprecationErrorData{
-						File:  config.File,
-						Field: fmt.Sprintf("steps.%s.secrets[%d]", step.Name, i),
-						Docs:  "https://woodpecker-ci.org/docs/usage/secrets#use-secrets-in-settings-and-environment",
-					},
-					IsWarning: true,
-				})
-			}
-		}
-	}
-
-	for i, c := range parsed.When.Constraints {
-		if !c.Environment.IsEmpty() {
-			err = multierr.Append(err, &errorTypes.PipelineError{
-				Type:    errorTypes.PipelineErrorTypeDeprecation,
-				Message: "environment filters are deprecated, use evaluate with CI_PIPELINE_DEPLOY_TARGET",
-				Data: errors.DeprecationErrorData{
-					File:  config.File,
-					Field: fmt.Sprintf("when[%d].environment", i),
-					Docs:  "https://woodpecker-ci.org/docs/usage/workflow-syntax#evaluate",
-				},
-				IsWarning: true,
-			})
-		}
-	}
-
-	for _, step := range parsed.Steps.ContainerList {
-		for i, c := range step.When.Constraints {
-			if !c.Environment.IsEmpty() {
-				err = multierr.Append(err, &errorTypes.PipelineError{
-					Type:    errorTypes.PipelineErrorTypeDeprecation,
-					Message: "environment filters are deprecated, use evaluate with CI_PIPELINE_DEPLOY_TARGET",
-					Data: errors.DeprecationErrorData{
-						File:  config.File,
-						Field: fmt.Sprintf("steps.%s.when[%d].environment", step.Name, i),
-						Docs:  "https://woodpecker-ci.org/docs/usage/workflow-syntax#evaluate",
-					},
-					IsWarning: true,
-				})
-			}
-		}
-	}
-
-	return err
+	return nil
 }
 
 func (l *Linter) lintBadHabits(config *WorkflowConfig) (err error) {
@@ -365,7 +302,7 @@ func (l *Linter) lintBadHabits(config *WorkflowConfig) (err error) {
 
 	rootEventFilters := len(parsed.When.Constraints) > 0
 	for _, c := range parsed.When.Constraints {
-		if len(c.Event.Include) == 0 {
+		if len(c.Event) == 0 {
 			rootEventFilters = false
 			break
 		}
@@ -379,7 +316,7 @@ func (l *Linter) lintBadHabits(config *WorkflowConfig) (err error) {
 			} else {
 				stepEventIndex := -1
 				for i, c := range step.When.Constraints {
-					if len(c.Event.Include) == 0 {
+					if len(c.Event) == 0 {
 						stepEventIndex = i
 						break
 					}

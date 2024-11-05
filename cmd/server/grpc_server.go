@@ -20,7 +20,7 @@ import (
 	"net"
 
 	"github.com/rs/zerolog/log"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/keepalive"
 
@@ -30,10 +30,10 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 )
 
-func runGrpcServer(ctx context.Context, c *cli.Context, _store store.Store) error {
+func runGrpcServer(ctx context.Context, c *cli.Command, _store store.Store) error {
 	lis, err := net.Listen("tcp", c.String("grpc-addr"))
 	if err != nil {
-		log.Fatal().Err(err).Msg("failed to listen on grpc-addr") //nolint:forbidigo
+		return fmt.Errorf("failed to listen on grpc-addr: %w", err)
 	}
 
 	jwtSecret := c.String("grpc-secret")

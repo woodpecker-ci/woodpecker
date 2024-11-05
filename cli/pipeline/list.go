@@ -15,7 +15,9 @@
 package pipeline
 
 import (
-	"github.com/urfave/cli/v2"
+	"context"
+
+	"github.com/urfave/cli/v3"
 
 	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
 	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
@@ -49,19 +51,19 @@ var pipelineListCmd = &cli.Command{
 	}...),
 }
 
-func List(c *cli.Context) error {
-	client, err := internal.NewClient(c)
+func List(ctx context.Context, c *cli.Command) error {
+	client, err := internal.NewClient(ctx, c)
 	if err != nil {
 		return err
 	}
-	resources, err := pipelineList(c, client)
+	resources, err := pipelineList(ctx, c, client)
 	if err != nil {
 		return err
 	}
 	return pipelineOutput(c, resources)
 }
 
-func pipelineList(c *cli.Context, client woodpecker.Client) ([]woodpecker.Pipeline, error) {
+func pipelineList(_ context.Context, c *cli.Command, client woodpecker.Client) ([]woodpecker.Pipeline, error) {
 	resources := make([]woodpecker.Pipeline, 0)
 
 	repoIDOrFullName := c.Args().First()
@@ -78,7 +80,7 @@ func pipelineList(c *cli.Context, client woodpecker.Client) ([]woodpecker.Pipeli
 	branch := c.String("branch")
 	event := c.String("event")
 	status := c.String("status")
-	limit := c.Int("limit")
+	limit := int(c.Int("limit"))
 
 	var count int
 	for _, pipeline := range pipelines {

@@ -15,52 +15,98 @@
 package pipeline
 
 import (
+	"context"
 	"fmt"
+	"os"
 	"strconv"
+	"text/template"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
 	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker"
 )
 
 var pipelineLogsCmd = &cli.Command{
 	Name:      "logs",
 	Usage:     "show pipeline logs",
-	ArgsUsage: "<repo-id|repo-full-name> [pipeline] [stepID]",
+	ArgsUsage: "<repo-id|repo-full-name> <pipeline> [step-number|step-name]",
 	Action:    pipelineLogs,
 }
 
-func pipelineLogs(c *cli.Context) error {
+func pipelineLogs(ctx context.Context, c *cli.Command) error {
 	repoIDOrFullName := c.Args().First()
-	client, err := internal.NewClient(c)
+	client, err := internal.NewClient(ctx, c)
 	if err != nil {
 		return err
+	}
+	if len(repoIDOrFullName) == 0 {
+		return fmt.Errorf("missing required argument repo-id / repo-full-name")
 	}
 	repoID, err := internal.ParseRepo(client, repoIDOrFullName)
 	if err != nil {
-		return err
+		return fmt.Errorf("invalid repo '%s': %w ", repoIDOrFullName, err)
 	}
 
-	numberArgIndex := 1
-	number, err := strconv.ParseInt(c.Args().Get(numberArgIndex), 10, 64)
+	pipelineArg := c.Args().Get(1)
+	if len(pipelineArg) == 0 {
+		return fmt.Errorf("missing required argument pipeline")
+	}
+	number, err := strconv.ParseInt(pipelineArg, 10, 64)
+	if err != nil {
+		return fmt.Errorf("invalid pipeline '%s': %w", pipelineArg, err)
+	}
+
+	stepArg := c.Args().Get(2) //nolint:mnd
+	if len(stepArg) == 0 {
+		return showPipelineLog(client, repoID, number)
+	}
+
+	step, err := internal.ParseStep(client, repoID, number, stepArg)
+	if err != nil {
+		return fmt.Errorf("invalid step '%s': %w", stepArg, err)
+	}
+	return showStepLog(client, repoID, number, step)
+}
+
+func showPipelineLog(client woodpecker.Client, repoID, number int64) error {
+	pipeline, err := client.Pipeline(repoID, number)
 	if err != nil {
 		return err
 	}
 
-	stepArgIndex := 2
-	step, err := strconv.ParseInt(c.Args().Get(stepArgIndex), 10, 64)
+	tmpl, err := template.New("_").Parse(tmplPipelineLogs + "\n")
 	if err != nil {
 		return err
 	}
 
+	for _, workflow := range pipeline.Workflows {
+		for _, step := range workflow.Children {
+			if err := tmpl.Execute(os.Stdout, map[string]any{"workflow": workflow, "step": step}); err != nil {
+				return err
+			}
+			err := showStepLog(client, repoID, number, step.ID)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+
+func showStepLog(client woodpecker.Client, repoID, number, step int64) error {
 	logs, err := client.StepLogEntries(repoID, number, step)
 	if err != nil {
 		return err
 	}
 
 	for _, log := range logs {
-		fmt.Print(string(log.Data))
+		fmt.Println(string(log.Data))
 	}
 
 	return nil
 }
+
+// template for pipeline ps information.
+var tmplPipelineLogs = "\x1b[33m{{ .workflow.Name }} > {{ .step.Name }} (#{{ .step.PID }}):\x1b[0m"
