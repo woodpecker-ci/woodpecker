@@ -195,6 +195,7 @@
 
 ### Misc
 
+- Start a trivy server service [[#4288](https://github.com/woodpecker-ci/woodpecker/pull/4288)]
 - Use release-helper for release/* branches [[#4301](https://github.com/woodpecker-ci/woodpecker/pull/4301)]
 - Fix wording for privileged plugins linter error [[#4280](https://github.com/woodpecker-ci/woodpecker/pull/4280)]
 - Fix renovate support for `xgo` [[#4276](https://github.com/woodpecker-ci/woodpecker/pull/4276)]
