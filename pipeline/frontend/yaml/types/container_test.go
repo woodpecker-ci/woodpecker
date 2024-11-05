@@ -30,9 +30,6 @@ image: golang:latest
 commands:
   - go build
   - go test
-cpu_quota: 11
-cpuset: 1,2
-cpu_shares: 99
 detach: true
 devices:
   - /dev/ttyUSB0:/dev/ttyUSB0
@@ -41,8 +38,8 @@ dns: 8.8.8.8
 dns_search: example.com
 entrypoint: [/bin/sh, -c]
 environment:
-  - RACK_ENV=development
-  - SHOW=true
+  RACK_ENV: development
+  SHOW: true
 extra_hosts:
  - somehost:162.242.195.82
  - otherhost:50.31.209.229
@@ -54,9 +51,6 @@ networks:
   - other-network
 pull: true
 privileged: true
-shm_size: 1kb
-mem_limit: 1kb
-memswap_limit: 1kb
 volumes:
   - /var/lib/mysql
   - /opt/data:/var/lib/mysql
@@ -78,27 +72,21 @@ ports:
 
 func TestUnmarshalContainer(t *testing.T) {
 	want := Container{
-		Commands:     base.StringOrSlice{"go build", "go test"},
-		CPUQuota:     base.StringOrInt(11),
-		CPUSet:       "1,2",
-		CPUShares:    base.StringOrInt(99),
-		Detached:     true,
-		Devices:      []string{"/dev/ttyUSB0:/dev/ttyUSB0"},
-		Directory:    "example/",
-		DNS:          base.StringOrSlice{"8.8.8.8"},
-		DNSSearch:    base.StringOrSlice{"example.com"},
-		Entrypoint:   []string{"/bin/sh", "-c"},
-		Environment:  base.SliceOrMap{"RACK_ENV": "development", "SHOW": "true"},
-		ExtraHosts:   []string{"somehost:162.242.195.82", "otherhost:50.31.209.229", "ipv6:2001:db8::10"},
-		Image:        "golang:latest",
-		MemLimit:     base.MemStringOrInt(1024),
-		MemSwapLimit: base.MemStringOrInt(1024),
-		Name:         "my-build-container",
-		NetworkMode:  "bridge",
-		Pull:         true,
-		Privileged:   true,
-		ShmSize:      base.MemStringOrInt(1024),
-		Tmpfs:        base.StringOrSlice{"/var/lib/test"},
+		Commands:    base.StringOrSlice{"go build", "go test"},
+		Detached:    true,
+		Devices:     []string{"/dev/ttyUSB0:/dev/ttyUSB0"},
+		Directory:   "example/",
+		DNS:         base.StringOrSlice{"8.8.8.8"},
+		DNSSearch:   base.StringOrSlice{"example.com"},
+		Entrypoint:  []string{"/bin/sh", "-c"},
+		Environment: map[string]any{"RACK_ENV": "development", "SHOW": true},
+		ExtraHosts:  []string{"somehost:162.242.195.82", "otherhost:50.31.209.229", "ipv6:2001:db8::10"},
+		Image:       "golang:latest",
+		Name:        "my-build-container",
+		NetworkMode: "bridge",
+		Pull:        true,
+		Privileged:  true,
+		Tmpfs:       base.StringOrSlice{"/var/lib/test"},
 		Volumes: Volumes{
 			Volumes: []*Volume{
 				{Source: "", Destination: "/var/lib/mysql"},
@@ -114,9 +102,7 @@ func TestUnmarshalContainer(t *testing.T) {
 					},
 				},
 				{
-					Event: constraint.List{
-						Include: []string{"cron"},
-					},
+					Event: base.StringOrSlice{"cron"},
 					Cron: constraint.List{
 						Include: []string{"job1"},
 					},
@@ -166,7 +152,6 @@ func TestUnmarshalContainers(t *testing.T) {
 		},
 		{
 			from: `publish-agent:
-    group: bundle
     image: print/env
     settings:
       repo: woodpeckerci/woodpecker-agent
@@ -179,16 +164,9 @@ func TestUnmarshalContainers(t *testing.T) {
       event: push`,
 			want: []*Container{
 				{
-					Name:  "publish-agent",
-					Image: "print/env",
-					Group: "bundle",
-					Secrets: Secrets{Secrets: []*Secret{{
-						Source: "docker_username",
-						Target: "docker_username",
-					}, {
-						Source: "docker_password",
-						Target: "docker_password",
-					}}},
+					Name:    "publish-agent",
+					Image:   "print/env",
+					Secrets: []string{"docker_username", "docker_password"},
 					Settings: map[string]any{
 						"repo":       "woodpeckerci/woodpecker-agent",
 						"dockerfile": "docker/Dockerfile.agent",
@@ -198,7 +176,7 @@ func TestUnmarshalContainers(t *testing.T) {
 					When: constraint.When{
 						Constraints: []constraint.Constraint{
 							{
-								Event:  constraint.List{Include: []string{"push"}},
+								Event:  base.StringOrSlice{"push"},
 								Branch: constraint.List{Include: []string{"${CI_REPO_DEFAULT_BRANCH}"}},
 							},
 						},
@@ -208,7 +186,6 @@ func TestUnmarshalContainers(t *testing.T) {
 		},
 		{
 			from: `publish-cli:
-    group: docker
     image: print/env
     settings:
       repo: woodpeckerci/woodpecker-cli
@@ -221,7 +198,6 @@ func TestUnmarshalContainers(t *testing.T) {
 				{
 					Name:  "publish-cli",
 					Image: "print/env",
-					Group: "docker",
 					Settings: map[string]any{
 						"repo":       "woodpeckerci/woodpecker-cli",
 						"dockerfile": "docker/Dockerfile.cli",
@@ -230,7 +206,7 @@ func TestUnmarshalContainers(t *testing.T) {
 					When: constraint.When{
 						Constraints: []constraint.Constraint{
 							{
-								Event:  constraint.List{Include: []string{"push"}},
+								Event:  base.StringOrSlice{"push"},
 								Branch: constraint.List{Include: []string{"${CI_REPO_DEFAULT_BRANCH}"}},
 							},
 						},
@@ -252,11 +228,11 @@ func TestUnmarshalContainers(t *testing.T) {
 					When: constraint.When{
 						Constraints: []constraint.Constraint{
 							{
-								Event:  constraint.List{Include: []string{"push"}},
+								Event:  base.StringOrSlice{"push"},
 								Branch: constraint.List{Include: []string{"${CI_REPO_DEFAULT_BRANCH}"}},
 							},
 							{
-								Event: constraint.List{Include: []string{"pull_request"}},
+								Event: base.StringOrSlice{"pull_request"},
 							},
 						},
 					},

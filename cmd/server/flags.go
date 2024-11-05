@@ -27,14 +27,34 @@ import (
 
 var flags = append([]cli.Flag{
 	&cli.BoolFlag{
-		Sources: cli.EnvVars("WOODPECKER_LOG_XORM"),
-		Name:    "log-xorm",
-		Usage:   "enable xorm logging",
+		Sources: cli.EnvVars("WOODPECKER_DATABASE_LOG", "WOODPECKER_LOG_XORM"),
+		Name:    "db-log",
+		Aliases: []string{"log-xorm"}, // TODO: remove in v4.0.0
+		Usage:   "enable logging in database engine (currently xorm)",
 	},
 	&cli.BoolFlag{
-		Sources: cli.EnvVars("WOODPECKER_LOG_XORM_SQL"),
-		Name:    "log-xorm-sql",
-		Usage:   "enable xorm sql command logging",
+		Sources: cli.EnvVars("WOODPECKER_DATABASE_LOG_SQL", "WOODPECKER_LOG_XORM_SQL"),
+		Name:    "db-log-sql",
+		Aliases: []string{"log-xorm-sql"}, // TODO: remove in v4.0.0
+		Usage:   "enable logging of sql commands",
+	},
+	&cli.IntFlag{
+		Sources: cli.EnvVars("WOODPECKER_DATABASE_MAX_CONNECTIONS"),
+		Name:    "db-max-open-connections",
+		Usage:   "max connections xorm is allowed create",
+		Value:   100,
+	},
+	&cli.IntFlag{
+		Sources: cli.EnvVars("WOODPECKER_DATABASE_IDLE_CONNECTIONS"),
+		Name:    "db-max-idle-connections",
+		Usage:   "amount of connections xorm will hold open",
+		Value:   2,
+	},
+	&cli.DurationFlag{
+		Sources: cli.EnvVars("WOODPECKER_DATABASE_CONNECTION_TIMEOUT"),
+		Name:    "db-max-connection-timeout",
+		Usage:   "time an active connection is allowed to stay open",
+		Value:   3 * time.Second,
 	},
 	&cli.StringFlag{
 		Sources: cli.EnvVars("WOODPECKER_HOST"),
@@ -135,10 +155,11 @@ var flags = append([]cli.Flag{
 		Value:   []string{"push", "pull_request"},
 	},
 	&cli.StringFlag{
-		Sources: cli.EnvVars("WOODPECKER_DEFAULT_CLONE_IMAGE"),
-		Name:    "default-clone-image",
+		Sources: cli.EnvVars("WOODPECKER_DEFAULT_CLONE_PLUGIN", "WOODPECKER_DEFAULT_CLONE_IMAGE"),
+		Name:    "default-clone-plugin",
+		Aliases: []string{"default-clone-image"},
 		Usage:   "The default docker image to be used when cloning the repo",
-		Value:   constant.DefaultCloneImage,
+		Value:   constant.DefaultClonePlugin,
 	},
 	&cli.IntFlag{
 		Sources: cli.EnvVars("WOODPECKER_DEFAULT_PIPELINE_TIMEOUT"),
@@ -159,10 +180,15 @@ var flags = append([]cli.Flag{
 		Value:   time.Hour * 72,
 	},
 	&cli.StringSliceFlag{
-		Sources: cli.EnvVars("WOODPECKER_ESCALATE"),
-		Name:    "escalate",
-		Usage:   "images to run in privileged mode",
-		Value:   constant.PrivilegedPlugins,
+		Sources: cli.EnvVars("WOODPECKER_PLUGINS_PRIVILEGED"),
+		Name:    "plugins-privileged",
+		Usage:   "Allow plugins to run in privileged mode, if environment variable is defined but empty there will be none",
+	},
+	&cli.StringSliceFlag{
+		Sources: cli.EnvVars("WOODPECKER_PLUGINS_TRUSTED_CLONE"),
+		Name:    "plugins-trusted-clone",
+		Usage:   "Plugins which are trusted to handle the netrc info in clone steps",
+		Value:   constant.TrustedClonePlugins,
 	},
 	&cli.StringSliceFlag{
 		Sources: cli.EnvVars("WOODPECKER_VOLUME"),
@@ -199,7 +225,8 @@ var flags = append([]cli.Flag{
 	},
 	&cli.StringFlag{
 		Sources: cli.EnvVars("WOODPECKER_DATABASE_DRIVER"),
-		Name:    "driver",
+		Name:    "db-driver",
+		Aliases: []string{"driver"}, // TODO: remove in v4.0.0
 		Usage:   "database driver",
 		Value:   "sqlite3",
 	},
@@ -207,9 +234,10 @@ var flags = append([]cli.Flag{
 		Sources: cli.NewValueSourceChain(
 			cli.File(os.Getenv("WOODPECKER_DATABASE_DATASOURCE_FILE")),
 			cli.EnvVar("WOODPECKER_DATABASE_DATASOURCE")),
-		Name:  "datasource",
-		Usage: "database driver configuration string",
-		Value: datasourceDefaultValue(),
+		Name:    "db-datasource",
+		Aliases: []string{"datasource"}, // TODO: remove in v4.0.0
+		Usage:   "database driver configuration string",
+		Value:   datasourceDefaultValue(),
 	},
 	&cli.StringFlag{
 		Sources: cli.NewValueSourceChain(
@@ -281,7 +309,7 @@ var flags = append([]cli.Flag{
 		Sources: cli.EnvVars("WOODPECKER_FORGE_TIMEOUT"),
 		Name:    "forge-timeout",
 		Usage:   "how many seconds before timeout when fetching the Woodpecker configuration from a Forge",
-		Value:   time.Second * 3,
+		Value:   time.Second * 5,
 	},
 	&cli.UintFlag{
 		Sources: cli.EnvVars("WOODPECKER_FORGE_RETRY"),
@@ -289,36 +317,8 @@ var flags = append([]cli.Flag{
 		Usage:   "How many retries of fetching the Woodpecker configuration from a forge are done before we fail",
 		Value:   3,
 	},
-	&cli.IntFlag{
-		Sources: cli.EnvVars("WOODPECKER_LIMIT_MEM_SWAP"),
-		Name:    "limit-mem-swap",
-		Usage:   "maximum memory used for swap in bytes",
-	},
-	&cli.IntFlag{
-		Sources: cli.EnvVars("WOODPECKER_LIMIT_MEM"),
-		Name:    "limit-mem",
-		Usage:   "maximum memory allowed in bytes",
-	},
-	&cli.IntFlag{
-		Sources: cli.EnvVars("WOODPECKER_LIMIT_SHM_SIZE"),
-		Name:    "limit-shm-size",
-		Usage:   "docker compose /dev/shm allowed in bytes",
-	},
-	&cli.IntFlag{
-		Sources: cli.EnvVars("WOODPECKER_LIMIT_CPU_QUOTA"),
-		Name:    "limit-cpu-quota",
-		Usage:   "impose a cpu quota",
-	},
-	&cli.IntFlag{
-		Sources: cli.EnvVars("WOODPECKER_LIMIT_CPU_SHARES"),
-		Name:    "limit-cpu-shares",
-		Usage:   "change the cpu shares",
-	},
-	&cli.StringFlag{
-		Sources: cli.EnvVars("WOODPECKER_LIMIT_CPU_SET"),
-		Name:    "limit-cpu-set",
-		Usage:   "set the cpus allowed to execute containers",
-	},
+	//
+	// generic forge settings
 	//
 	&cli.StringFlag{
 		Name:    "forge-url",
@@ -477,7 +477,7 @@ var flags = append([]cli.Flag{
 	// expert flags
 	//
 	&cli.StringFlag{
-		Sources: cli.EnvVars("WOODPECKER_EXPERT_WEBHOOK_HOST", "WOODPECKER_WEBHOOK_HOST"), // TODO: remove WOODPECKER_WEBHOOK_HOST in next major release
+		Sources: cli.EnvVars("WOODPECKER_EXPERT_WEBHOOK_HOST"),
 		Name:    "server-webhook-host",
 		Usage:   "!!!for experts!!! fully qualified woodpecker server url called by forge's webhooks. Format: <scheme>://<host>[/<prefix path>]",
 	},

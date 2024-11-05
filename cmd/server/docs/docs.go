@@ -101,7 +101,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/agents/{agent}": {
+        "/agents/{agent_id}": {
             "get": {
                 "produces": [
                     "application/json"
@@ -211,7 +211,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/agents/{agent}/tasks": {
+        "/agents/{agent_id}/tasks": {
             "get": {
                 "produces": [
                     "application/json"
@@ -1058,6 +1058,193 @@ const docTemplate = `{
                             "items": {
                                 "$ref": "#/definitions/Org"
                             }
+                        }
+                    }
+                }
+            }
+        },
+        "/orgs/{org_id}/agents": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Agents"
+                ],
+                "summary": "List agents for an organization",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cpersonal access token\u003e",
+                        "description": "Insert your personal access token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "the organization's id",
+                        "name": "org_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "for response pagination, page offset number",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 50,
+                        "description": "for response pagination, max items per page",
+                        "name": "perPage",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Agent"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Creates a new agent with a random token, scoped to the specified organization",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Agents"
+                ],
+                "summary": "Create a new organization-scoped agent",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cpersonal access token\u003e",
+                        "description": "Insert your personal access token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "the organization's id",
+                        "name": "org_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "the agent's data (only 'name' and 'no_schedule' are read)",
+                        "name": "agent",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Agent"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Agent"
+                        }
+                    }
+                }
+            }
+        },
+        "/orgs/{org_id}/agents/{agent_id}": {
+            "delete": {
+                "produces": [
+                    "text/plain"
+                ],
+                "tags": [
+                    "Agents"
+                ],
+                "summary": "Delete an organization-scoped agent",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cpersonal access token\u003e",
+                        "description": "Insert your personal access token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "the organization's id",
+                        "name": "org_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "the agent's id",
+                        "name": "agent_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            },
+            "patch": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Agents"
+                ],
+                "summary": "Update an organization-scoped agent",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cpersonal access token\u003e",
+                        "description": "Insert your personal access token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "the organization's id",
+                        "name": "org_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "the agent's id",
+                        "name": "agent_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "the agent's updated data",
+                        "name": "agent",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Agent"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Agent"
                         }
                     }
                 }
@@ -3144,6 +3331,49 @@ const docTemplate = `{
                 }
             }
         },
+        "/repos/{repo_id}/pipelines/{number}/metadata": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Pipelines"
+                ],
+                "summary": "Get metadata for a pipeline or a specific workflow, including previous pipeline info",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cpersonal access token\u003e",
+                        "description": "Insert your personal access token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "the repository id",
+                        "name": "repo_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "the number of the pipeline",
+                        "name": "number",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/metadata.Metadata"
+                        }
+                    }
+                }
+            }
+        },
         "/repos/{repo_id}/pull_requests": {
             "get": {
                 "produces": [
@@ -4359,6 +4589,12 @@ const docTemplate = `{
                 "created": {
                     "type": "integer"
                 },
+                "custom_labels": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
                 "id": {
                     "type": "integer"
                 },
@@ -4374,6 +4610,10 @@ const docTemplate = `{
                 },
                 "no_schedule": {
                     "type": "boolean"
+                },
+                "org_id": {
+                    "description": "OrgID is counted as unset if set to -1, this is done to ensure a new(Agent) still enforce the OrgID check by default",
+                    "type": "integer"
                 },
                 "owner_id": {
                     "type": "integer"
@@ -4415,8 +4655,7 @@ const docTemplate = `{
                 "branch": {
                     "type": "string"
                 },
-                "created_at": {
-                    "description": "TODO change JSON field to \"created\" in 3.0",
+                "created": {
                     "type": "integer"
                 },
                 "creator_id": {
@@ -4458,15 +4697,13 @@ const docTemplate = `{
                 "commit": {
                     "type": "string"
                 },
-                "created_at": {
-                    "description": "TODO change JSON field to \"created\" in 3.0",
+                "created": {
                     "type": "integer"
                 },
                 "event": {
                     "type": "string"
                 },
-                "finished_at": {
-                    "description": "TODO change JSON field to \"finished\" in 3.0",
+                "finished": {
                     "type": "integer"
                 },
                 "id": {
@@ -4487,8 +4724,7 @@ const docTemplate = `{
                 "repo_id": {
                     "type": "integer"
                 },
-                "started_at": {
-                    "description": "TODO change JSON field to \"started\" in 3.0",
+                "started": {
                     "type": "integer"
                 },
                 "status": {
@@ -4645,8 +4881,7 @@ const docTemplate = `{
                 "commit": {
                     "type": "string"
                 },
-                "created_at": {
-                    "description": "TODO change JSON field to \"created\" in 3.0",
+                "created": {
                     "type": "integer"
                 },
                 "deploy_task": {
@@ -4664,8 +4899,7 @@ const docTemplate = `{
                 "event": {
                     "$ref": "#/definitions/WebhookEvent"
                 },
-                "finished_at": {
-                    "description": "TODO change JSON field to \"finished\" in 3.0",
+                "finished": {
                     "type": "integer"
                 },
                 "forge_url": {
@@ -4698,8 +4932,7 @@ const docTemplate = `{
                 "refspec": {
                     "type": "string"
                 },
-                "reviewed_at": {
-                    "description": "TODO change JSON field to \"reviewed\" in 3.0",
+                "reviewed": {
                     "type": "integer"
                 },
                 "reviewed_by": {
@@ -4709,8 +4942,7 @@ const docTemplate = `{
                     "description": "uses reported user for webhooks and name of cron for cron pipelines",
                     "type": "string"
                 },
-                "started_at": {
-                    "description": "TODO change JSON field to \"started\" in 3.0",
+                "started": {
                     "type": "integer"
                 },
                 "status": {
@@ -4722,8 +4954,7 @@ const docTemplate = `{
                 "title": {
                     "type": "string"
                 },
-                "updated_at": {
-                    "description": "TODO change JSON field to \"updated\" in 3.0",
+                "updated": {
                     "type": "integer"
                 },
                 "variables": {
@@ -4868,7 +5099,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "trusted": {
-                    "type": "boolean"
+                    "$ref": "#/definitions/model.TrustedConfiguration"
                 },
                 "visibility": {
                     "$ref": "#/definitions/RepoVisibility"
@@ -4903,7 +5134,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "trusted": {
-                    "type": "boolean"
+                    "$ref": "#/definitions/model.TrustedConfigurationPatch"
                 },
                 "visibility": {
                     "type": "string"
@@ -5012,13 +5243,13 @@ const docTemplate = `{
         "Step": {
             "type": "object",
             "properties": {
-                "end_time": {
-                    "type": "integer"
-                },
                 "error": {
                     "type": "string"
                 },
                 "exit_code": {
+                    "type": "integer"
+                },
+                "finished": {
                     "type": "integer"
                 },
                 "id": {
@@ -5036,7 +5267,7 @@ const docTemplate = `{
                 "ppid": {
                     "type": "integer"
                 },
-                "start_time": {
+                "started": {
                     "type": "integer"
                 },
                 "state": {
@@ -5072,12 +5303,6 @@ const docTemplate = `{
             "properties": {
                 "agent_id": {
                     "type": "integer"
-                },
-                "data": {
-                    "type": "array",
-                    "items": {
-                        "type": "integer"
-                    }
                 },
                 "dep_status": {
                     "type": "object",
@@ -5163,6 +5388,239 @@ const docTemplate = `{
                 "EventManual"
             ]
         },
+        "metadata.Author": {
+            "type": "object",
+            "properties": {
+                "avatar": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "metadata.Commit": {
+            "type": "object",
+            "properties": {
+                "author": {
+                    "$ref": "#/definitions/metadata.Author"
+                },
+                "branch": {
+                    "type": "string"
+                },
+                "changed_files": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "is_prerelease": {
+                    "type": "boolean"
+                },
+                "labels": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "message": {
+                    "type": "string"
+                },
+                "ref": {
+                    "type": "string"
+                },
+                "refspec": {
+                    "type": "string"
+                },
+                "sha": {
+                    "type": "string"
+                }
+            }
+        },
+        "metadata.Forge": {
+            "type": "object",
+            "properties": {
+                "type": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                }
+            }
+        },
+        "metadata.Metadata": {
+            "type": "object",
+            "properties": {
+                "curr": {
+                    "$ref": "#/definitions/metadata.Pipeline"
+                },
+                "forge": {
+                    "$ref": "#/definitions/metadata.Forge"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "prev": {
+                    "$ref": "#/definitions/metadata.Pipeline"
+                },
+                "repo": {
+                    "$ref": "#/definitions/metadata.Repo"
+                },
+                "step": {
+                    "$ref": "#/definitions/metadata.Step"
+                },
+                "sys": {
+                    "$ref": "#/definitions/metadata.System"
+                },
+                "workflow": {
+                    "$ref": "#/definitions/metadata.Workflow"
+                }
+            }
+        },
+        "metadata.Pipeline": {
+            "type": "object",
+            "properties": {
+                "commit": {
+                    "$ref": "#/definitions/metadata.Commit"
+                },
+                "created": {
+                    "type": "integer"
+                },
+                "cron": {
+                    "type": "string"
+                },
+                "event": {
+                    "type": "string"
+                },
+                "finished": {
+                    "type": "integer"
+                },
+                "forge_url": {
+                    "type": "string"
+                },
+                "number": {
+                    "type": "integer"
+                },
+                "parent": {
+                    "type": "integer"
+                },
+                "started": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "target": {
+                    "type": "string"
+                },
+                "task": {
+                    "type": "string"
+                }
+            }
+        },
+        "metadata.Repo": {
+            "type": "object",
+            "properties": {
+                "clone_url": {
+                    "type": "string"
+                },
+                "clone_url_ssh": {
+                    "type": "string"
+                },
+                "default_branch": {
+                    "type": "string"
+                },
+                "forge_url": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "owner": {
+                    "type": "string"
+                },
+                "private": {
+                    "type": "boolean"
+                },
+                "remote_id": {
+                    "type": "string"
+                },
+                "scm": {
+                    "type": "string"
+                },
+                "trusted": {
+                    "$ref": "#/definitions/metadata.TrustedConfiguration"
+                }
+            }
+        },
+        "metadata.Step": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "number": {
+                    "type": "integer"
+                }
+            }
+        },
+        "metadata.System": {
+            "type": "object",
+            "properties": {
+                "arch": {
+                    "type": "string"
+                },
+                "host": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                },
+                "version": {
+                    "type": "string"
+                }
+            }
+        },
+        "metadata.TrustedConfiguration": {
+            "type": "object",
+            "properties": {
+                "network": {
+                    "type": "boolean"
+                },
+                "security": {
+                    "type": "boolean"
+                },
+                "volumes": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "metadata.Workflow": {
+            "type": "object",
+            "properties": {
+                "matrix": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "name": {
+                    "type": "string"
+                },
+                "number": {
+                    "type": "integer"
+                }
+            }
+        },
         "model.ForgeType": {
             "type": "string",
             "enum": [
@@ -5184,6 +5642,34 @@ const docTemplate = `{
                 "ForgeTypeAddon"
             ]
         },
+        "model.TrustedConfiguration": {
+            "type": "object",
+            "properties": {
+                "network": {
+                    "type": "boolean"
+                },
+                "security": {
+                    "type": "boolean"
+                },
+                "volumes": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "model.TrustedConfigurationPatch": {
+            "type": "object",
+            "properties": {
+                "network": {
+                    "type": "boolean"
+                },
+                "security": {
+                    "type": "boolean"
+                },
+                "volumes": {
+                    "type": "boolean"
+                }
+            }
+        },
         "model.Workflow": {
             "type": "object",
             "properties": {
@@ -5196,9 +5682,6 @@ const docTemplate = `{
                         "$ref": "#/definitions/Step"
                     }
                 },
-                "end_time": {
-                    "type": "integer"
-                },
                 "environ": {
                     "type": "object",
                     "additionalProperties": {
@@ -5207,6 +5690,9 @@ const docTemplate = `{
                 },
                 "error": {
                     "type": "string"
+                },
+                "finished": {
+                    "type": "integer"
                 },
                 "id": {
                     "type": "integer"
@@ -5223,7 +5709,7 @@ const docTemplate = `{
                 "platform": {
                     "type": "string"
                 },
-                "start_time": {
+                "started": {
                     "type": "integer"
                 },
                 "state": {

@@ -60,7 +60,7 @@
         <InputField
           v-slot="{ id }"
           :label="$t('repo.settings.crons.schedule.title')"
-          docs-url="https://pkg.go.dev/github.com/robfig/cron?utm_source=godoc#hdr-CRON_Expression_Format"
+          docs-url="https://pkg.go.dev/github.com/gdgvda/cron#hdr-CRON_Expression_Format"
         >
           <TextField
             :id="id"

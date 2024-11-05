@@ -12,19 +12,24 @@ dayjs.extend(advancedFormat);
 dayjs.extend(relativeTime);
 dayjs.extend(duration);
 
+function toLocaleString(date: Date) {
+  return dayjs(date).format(useI18n().t('time.template'));
+}
+
+function timeAgo(date: Date | string | number) {
+  return dayjs().to(dayjs(date));
+}
+
+function prettyDuration(durationMs: number) {
+  return dayjs.duration(durationMs).humanize();
+}
+
+function durationAsNumber(durationMs: number): string {
+  const dur = dayjs.duration(durationMs);
+  return dur.format(dur.hours() > 1 ? 'HH:mm:ss' : 'mm:ss');
+}
+
 export function useDate() {
-  function toLocaleString(date: Date) {
-    return dayjs(date).format(useI18n().t('time.template'));
-  }
-
-  function timeAgo(date: Date | string | number) {
-    return dayjs().to(dayjs(date));
-  }
-
-  function prettyDuration(durationMs: number) {
-    return dayjs.duration(durationMs).humanize();
-  }
-
   const addedLocales = ['en'];
 
   async function setDayjsLocale(locale: string) {
@@ -34,11 +39,6 @@ export function useDate() {
     } else {
       dayjs.locale(locale);
     }
-  }
-
-  function durationAsNumber(durationMs: number): string {
-    const dur = dayjs.duration(durationMs);
-    return dur.format(dur.hours() > 1 ? 'HH:mm:ss' : 'mm:ss');
   }
 
   return {

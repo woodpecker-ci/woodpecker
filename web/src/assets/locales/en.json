@@ -38,7 +38,8 @@
         "desc": "Specify additional variables to use in your pipeline. Variables with the same name will be overwritten.",
         "name": "Variable name",
         "value": "Variable value"
-      }
+      },
+      "show_pipelines": "Show pipelines"
     },
     "deploy_pipeline": {
       "title": "Trigger deployment event for current pipeline #{pipelineId}",
@@ -97,7 +98,18 @@
         },
         "trusted": {
           "trusted": "Trusted",
-          "desc": "Underlying pipeline containers get access to escalated capabilities (like mounting volumes)."
+          "network": {
+            "network": "Network",
+            "desc": "Underlying pipeline containers get access to network privileges like changing DNS."
+          },
+          "volumes": {
+            "volumes": "Volumes",
+            "desc": "Underlying pipeline containers get access to volume privileges."
+          },
+          "security": {
+            "security": "Security",
+            "desc": "Underlying pipeline containers get access to security privileges."
+          }
         },
         "visibility": {
           "visibility": "Project visibility",
@@ -191,6 +203,7 @@
       "pipelines_for_pr": "Pipelines for pull request #{index}",
       "exit_code": "Exit Code {exitCode}",
       "loading": "Loading…",
+      "no_logs": "No logs",
       "pipeline": "Pipeline #{pipelineId}",
       "log_title": "Step Logs",
       "log_download_error": "There was an error while downloading the log file",
@@ -242,7 +255,16 @@
       "errors": "Errors ({count})",
       "warnings": "Warnings ({count})",
       "show_errors": "Show errors",
-      "we_got_some_errors": "Oh no, we got some errors!"
+      "we_got_some_errors": "Oh no, we got some errors!",
+      "debug": {
+        "title": "Debug",
+        "download_metadata": "Download metadata",
+        "metadata_download_error": "Error downloading metadata",
+        "metadata_download_successful": "Metadata downloaded successfully",
+        "no_permission": "You don't have permission to access debug information.",
+        "metadata_exec_title": "Rerun pipeline locally",
+        "metadata_exec_desc": "Download this pipeline's metadata to run it locally. This allows you to troubleshoot issues and test changes before committing them."
+      }
     }
   },
   "org": {
@@ -253,6 +275,9 @@
       },
       "registries": {
         "desc": "Organization registry credentials can be added to use private images for all pipelines of an organization."
+      },
+      "agents": {
+        "desc": "Agents registered for this organization."
       }
     }
   },
@@ -299,6 +324,13 @@
           "capacity": "Capacity",
           "desc": "The max amount of parallel pipelines executed by this agent.",
           "badge": "capacity"
+        },
+        "custom_labels": {
+          "custom_labels": "Custom Labels",
+          "desc": "The custom labels set by the agent admin on agent startup."
+        },
+        "org": {
+          "badge": "org"
         },
         "version": "Version",
         "last_contact": "Last contact",
@@ -402,6 +434,9 @@
         "download_cli": "Download CLI",
         "reset_token": "Reset token",
         "swagger_ui": "Swagger UI"
+      },
+      "agents": {
+        "desc": "Agents registered to your account repos."
       }
     }
   },
@@ -418,9 +453,9 @@
     "deleted": "Secret deleted",
     "created": "Secret created",
     "saved": "Secret saved",
-    "images": {
-      "images": "Available for the following images",
-      "desc": "List of images where this secret is available, leave empty to allow for all images."
+    "plugins": {
+      "images": "Available only for the following plugins",
+      "desc": "List of plugin images where this secret is available. Leave empty to allow for all plugins and normal steps."
     },
     "events": {
       "events": "Available at the following events",

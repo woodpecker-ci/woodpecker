@@ -137,8 +137,6 @@ To install the Woodpecker server behind a [Traefik](https://traefik.io/) load ba
 <!-- cspell:words redirectscheme certresolver  -->
 
 ```yaml
-version: '3.8'
-
 services:
   server:
     image: woodpeckerci/woodpecker-server:latest

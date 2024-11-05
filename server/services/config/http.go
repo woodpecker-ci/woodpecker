@@ -38,10 +38,9 @@ type configData struct {
 }
 
 type requestStructure struct {
-	Repo          *model.Repo     `json:"repo"`
-	Pipeline      *model.Pipeline `json:"pipeline"`
-	Netrc         *model.Netrc    `json:"netrc"`
-	Configuration []*configData   `json:"configs"` // TODO: deprecate in favor of netrc and remove in next major release
+	Repo     *model.Repo     `json:"repo"`
+	Pipeline *model.Pipeline `json:"pipeline"`
+	Netrc    *model.Netrc    `json:"netrc"`
 }
 
 type responseStructure struct {
@@ -53,11 +52,6 @@ func NewHTTP(endpoint string, privateKey ed25519.PrivateKey) Service {
 }
 
 func (h *http) Fetch(ctx context.Context, forge forge.Forge, user *model.User, repo *model.Repo, pipeline *model.Pipeline, oldConfigData []*types.FileMeta, _ bool) ([]*types.FileMeta, error) {
-	currentConfigs := make([]*configData, len(oldConfigData))
-	for i, pipe := range oldConfigData {
-		currentConfigs[i] = &configData{Name: pipe.Name, Data: string(pipe.Data)}
-	}
-
 	netrc, err := forge.Netrc(user, repo)
 	if err != nil {
 		return nil, fmt.Errorf("could not get Netrc data from forge: %w", err)
@@ -65,10 +59,9 @@ func (h *http) Fetch(ctx context.Context, forge forge.Forge, user *model.User, r
 
 	response := new(responseStructure)
 	body := requestStructure{
-		Repo:          repo,
-		Pipeline:      pipeline,
-		Configuration: currentConfigs,
-		Netrc:         netrc,
+		Repo:     repo,
+		Pipeline: pipeline,
+		Netrc:    netrc,
 	}
 
 	status, err := utils.Send(ctx, net_http.MethodPost, h.endpoint, h.privateKey, body, response)

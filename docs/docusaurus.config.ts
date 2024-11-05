@@ -5,7 +5,7 @@ import * as path from 'path';
 
 const config: Config = {
   title: 'Woodpecker CI',
-  tagline: 'Woodpecker is a simple yet powerful CI/CD engine with great extensibility.',
+  tagline: 'Woodpecker is a simple, yet powerful CI/CD engine with great extensibility.',
   url: 'https://woodpecker-ci.org',
   baseUrl: '/',
   onBrokenLinks: 'throw',
@@ -50,13 +50,13 @@ const config: Config = {
           position: 'left',
           items: [
             {
-              to: '/docs/next/migrations', // Always point to newest migration guide
-              activeBaseRegex: 'docs/(next/)?migrations',
+              to: '/migrations', // Always point to newest migration guide
+              activeBaseRegex: 'migrations',
               label: 'Migrations',
             },
             {
-              to: '/docs/next/awesome', // Always point to newest awesome list
-              activeBaseRegex: 'docs/(next/)?awesome',
+              to: '/awesome', // Always point to newest awesome list
+              activeBaseRegex: 'awesome',
               label: 'Awesome',
             },
             {
@@ -147,7 +147,7 @@ const config: Config = {
           ],
         },
       ],
-      copyright: `Copyright © ${new Date().getFullYear()} Woodpecker CI. Built with Docusaurus.`,
+      copyright: `Copyright © ${new Date().getFullYear()} Woodpecker Authors. Built with Docusaurus.`,
     },
     prism: {
       theme: themes.github,
@@ -264,6 +264,7 @@ const config: Config = {
         blog: {
           blogTitle: 'Blog',
           blogDescription: 'A blog for release announcements, turorials...',
+          onInlineAuthors: 'ignore',
           // postsPerPage: 'ALL',
           // blogSidebarCount: 0,
         },

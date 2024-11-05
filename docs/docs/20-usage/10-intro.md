@@ -86,16 +86,17 @@ Sometimes you have some tasks that you need to do in every project. For example,
 If you want to get a Slack notification after your pipeline has finished, you can add a Slack plugin to your pipeline:
 
 ```yaml
----
-- name: notify me on Slack
-  image: plugins/slack
-  settings:
-    channel: developers
-    username: woodpecker
-    password:
-      from_secret: slack_token
-  when:
-    status: [success, failure] # This will execute the step on success and failure
+steps:
+  # ...
+  - name: notify me on Slack
+    image: plugins/slack
+    settings:
+      channel: developers
+      username: woodpecker
+      password:
+        from_secret: slack_token
+    when:
+      status: [success, failure] # This will execute the step on success and failure
 ```
 
 To configure a plugin you can use the `settings` section.

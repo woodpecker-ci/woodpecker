@@ -21,8 +21,8 @@
         />
       </InputField>
 
-      <InputField v-slot="{ id }" :label="$t('secrets.images.images')">
-        <span class="ml-1 mb-2 text-wp-text-alt-100">{{ $t('secrets.images.desc') }}</span>
+      <InputField v-slot="{ id }" :label="$t('secrets.plugins.images')">
+        <span class="ml-1 mb-2 text-wp-text-alt-100">{{ $t('secrets.plugins.desc') }}</span>
 
         <div class="flex flex-col gap-2">
           <div v-for="image in innerValue.images" :key="image" class="flex gap-2">
