@@ -23,6 +23,18 @@ var (
 	RequireApprovalAllEvents    ApprovalMode = "all_events"    // require approval for all events
 )
 
+func (mode ApprovalMode) Valid() bool {
+	switch mode {
+	case RequireApprovalNone,
+		RequireApprovalForks,
+		RequireApprovalPullRequests,
+		RequireApprovalAllEvents:
+		return true
+	default:
+		return false
+	}
+}
+
 type (
 	// User represents a user account.
 	User struct {

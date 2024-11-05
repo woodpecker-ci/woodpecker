@@ -29,6 +29,18 @@ var (
 	RequireApprovalAllEvents    ApprovalMode = "all_events"    // require approval for all external events
 )
 
+func (mode ApprovalMode) Valid() bool {
+	switch mode {
+	case RequireApprovalNone,
+		RequireApprovalForks,
+		RequireApprovalPullRequests,
+		RequireApprovalAllEvents:
+		return true
+	default:
+		return false
+	}
+}
+
 // Repo represents a repository.
 type Repo struct {
 	ID      int64 `json:"id,omitempty"                    xorm:"pk autoincr 'id'"`

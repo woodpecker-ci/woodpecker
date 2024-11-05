@@ -101,13 +101,9 @@ func repoUpdate(ctx context.Context, c *cli.Command) error {
 		}
 	}
 	if c.IsSet("require-approval") {
-		switch mode := woodpecker.ApprovalMode(requireApproval); mode {
-		case woodpecker.RequireApprovalNone,
-			woodpecker.RequireApprovalForks,
-			woodpecker.RequireApprovalPullRequests,
-			woodpecker.RequireApprovalAllEvents:
+		if mode := woodpecker.ApprovalMode(requireApproval); mode.Valid() {
 			patch.RequireApproval = &mode
-		default:
+		} else {
 			return fmt.Errorf("update approval mode failed: '%s' is no valid mode", mode)
 		}
 
