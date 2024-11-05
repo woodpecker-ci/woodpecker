@@ -184,9 +184,9 @@ func (e *lxc) StartStep(ctx context.Context, step *types.Step, taskUUID string) 
 	}
 	env = append(env, "PATH="+os.Getenv("PATH"))
 
-	defaultCloneImage := strings.Split(constant.DefaultCloneImage, ":")
+	defaultCloneImage := strings.Split(constant.DefaultClonePlugin, ":")
 	if len(defaultCloneImage) != 2 {
-		err := fmt.Errorf("%s does not split in two but in %v", constant.DefaultCloneImage, defaultCloneImage)
+		err := fmt.Errorf("%s does not split in two but in %v", constant.DefaultClonePlugin, defaultCloneImage)
 		log.Error().Err(err).Msg("")
 		return err
 	}
