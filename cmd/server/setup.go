@@ -51,8 +51,8 @@ const (
 )
 
 func setupStore(ctx context.Context, c *cli.Command) (store.Store, error) {
-	datasource := c.String("datasource")
-	driver := c.String("driver")
+	datasource := c.String("db-datasource")
+	driver := c.String("db-driver")
 	xorm := store.XORM{
 		Log:             c.Bool("db-log"),
 		ShowSQL:         c.Bool("db-log-sql"),

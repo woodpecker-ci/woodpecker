@@ -225,7 +225,8 @@ var flags = append([]cli.Flag{
 	},
 	&cli.StringFlag{
 		Sources: cli.EnvVars("WOODPECKER_DATABASE_DRIVER"),
-		Name:    "driver",
+		Name:    "db-driver",
+		Aliases: []string{"driver"}, // TODO: remove in v4.0.0
 		Usage:   "database driver",
 		Value:   "sqlite3",
 	},
@@ -233,9 +234,10 @@ var flags = append([]cli.Flag{
 		Sources: cli.NewValueSourceChain(
 			cli.File(os.Getenv("WOODPECKER_DATABASE_DATASOURCE_FILE")),
 			cli.EnvVar("WOODPECKER_DATABASE_DATASOURCE")),
-		Name:  "datasource",
-		Usage: "database driver configuration string",
-		Value: datasourceDefaultValue(),
+		Name:    "db-datasource",
+		Aliases: []string{"datasource"}, // TODO: remove in v4.0.0
+		Usage:   "database driver configuration string",
+		Value:   datasourceDefaultValue(),
 	},
 	&cli.StringFlag{
 		Sources: cli.NewValueSourceChain(
