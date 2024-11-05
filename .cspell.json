@@ -245,7 +245,6 @@
     "**/testdata/**",
     "docs/versioned_docs/",
     "package.json",
-    "91-migrations.md",
     // generated
     "go.sum",
     "flake.lock",

@@ -59,8 +59,8 @@ const processTimeInterval = 100 * time.Millisecond
 
 var ErrWorkerKicked = fmt.Errorf("worker was kicked")
 
-// New returns a new fifo queue.
-func New(ctx context.Context) Queue {
+// NewMemoryQueue returns a new fifo queue.
+func NewMemoryQueue(ctx context.Context) Queue {
 	q := &fifo{
 		ctx:           ctx,
 		workers:       map[*worker]struct{}{},
