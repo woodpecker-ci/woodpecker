@@ -101,19 +101,21 @@ func repoUpdate(ctx context.Context, c *cli.Command) error {
 		}
 	}
 	if c.IsSet("require-approval") {
-		switch woodpecker.ApprovalMode(requireApproval) {
-		case woodpecker.RequireApprovalNone, woodpecker.RequireApprovalForks, woodpecker.RequireApprovalPullRequests, woodpecker.RequireApprovalAllEvents:
-			requireApproval := woodpecker.ApprovalMode(requireApproval)
-			patch.RequireApproval = &requireApproval
+		switch mode := woodpecker.ApprovalMode(requireApproval); mode {
+		case woodpecker.RequireApprovalNone,
+			woodpecker.RequireApprovalForks,
+			woodpecker.RequireApprovalPullRequests,
+			woodpecker.RequireApprovalAllEvents:
+			patch.RequireApproval = &mode
+		default:
+			return fmt.Errorf("update approval mode failed: '%s' is no valid mode", mode)
 		}
 
 		// TODO: remove isGated in next major release
 		if requireApproval == string(woodpecker.RequireApprovalAllEvents) {
 			trueBool := true
 			patch.IsGated = &trueBool
-		}
-
-		if requireApproval == string(woodpecker.RequireApprovalNone) {
+		} else if requireApproval == string(woodpecker.RequireApprovalNone) {
 			falseBool := false
 			patch.IsGated = &falseBool
 		}
