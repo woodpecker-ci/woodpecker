@@ -121,7 +121,7 @@ generate-swagger: install-tools ## Run swagger code generation
 	go generate cmd/server/woodpecker_docs_gen.go
 
 generate-client:
-	go generate cmd/cli/app.go
+	go generate woodpecker-go/client.go
 
 generate-license-header: install-tools
 	addlicense -c "Woodpecker Authors" -ignore "vendor/**" **/*.go
