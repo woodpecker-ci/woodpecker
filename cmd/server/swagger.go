@@ -21,7 +21,7 @@ import (
 
 // Generate docs/swagger.json via:
 //go:generate go run woodpecker_docs_gen.go swagger.go
-//go:generate go run github.com/go-swagger/go-swagger/cmd/swagger@latest validate ../../docs/swagger.json
+//go:generate go run github.com/getkin/kin-openapi/cmd/validate@latest ../../docs/swagger.json
 
 // setupSwaggerStaticConfig initializes static content only (contacts, title and description)
 // for dynamic configuration of e.g. hostname, etc. see router.setupSwaggerConfigAndRoutes
@@ -33,7 +33,7 @@ func setupSwaggerStaticConfig() {
 	docs.SwaggerInfo.InfoInstanceName = "api"
 	docs.SwaggerInfo.Title = "Woodpecker CI API"
 	docs.SwaggerInfo.Version = version.String()
-	docs.SwaggerInfo.Description = "Woodpecker is a simple yet powerful CI/CD engine with great extensibility.\n" +
+	docs.SwaggerInfo.Description = "Woodpecker is a simple, yet powerful CI/CD engine with great extensibility.\n" +
 		"To get a personal access token (PAT) for authentication, please log in your Woodpecker server,\n" +
 		"and go to you personal profile page, by clicking the user icon at the top right."
 }

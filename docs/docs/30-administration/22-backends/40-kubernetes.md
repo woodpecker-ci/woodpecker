@@ -8,9 +8,9 @@ The Kubernetes backend executes steps inside standalone Pods. A temporary PVC is
 
 ## Images from private registries
 
-In order to pull private container images defined in your pipeline YAML you must provide [registry credentials in Kubernetes Secret](https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/).
-As the Secret is Agent-wide, it has to be placed in namespace defined by `WOODPECKER_BACKEND_K8S_NAMESPACE`.
-Besides, you need to provide the Secret name to Agent via `WOODPECKER_BACKEND_K8S_PULL_SECRET_NAMES`.
+In addition to [registries specified in the UI](../../20-usage/41-registries.md), you may provide [registry credentials in Kubernetes Secrets](https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/) to pull private container images defined in your pipeline YAML.
+
+Place these Secrets in namespace defined by `WOODPECKER_BACKEND_K8S_NAMESPACE` and provide the Secret names to Agents via `WOODPECKER_BACKEND_K8S_PULL_SECRET_NAMES`.
 
 ## Job specific configuration
 
@@ -107,7 +107,7 @@ steps:
           limits:
             memory: 256Mi
         nodeSelector:
-          beta.kubernetes.io/instance-type: p3.8xlarge
+          beta.kubernetes.io/instance-type: Standard_D2_v3
         tolerations:
           - key: 'key1'
             operator: 'Equal'
@@ -156,6 +156,8 @@ Note that the `backend_options.kubernetes.securityContext` object allows you to 
 By default, the properties will be set at the Pod level. Properties that are only supported on the container level will be set there instead. So, the
 configuration shown above will result in something like the following Pod spec:
 
+<!-- cspell:disable -->
+
 ```yaml
 kind: Pod
 spec:
@@ -170,7 +172,9 @@ spec:
   [...]
 ```
 
-You can also restrict a container's syscalls with [seccomp](https://kubernetes.io/docs/tutorials/security/seccomp/) profile
+<!-- cspell:enable -->
+
+You can also restrict a syscalls of containers with [seccomp](https://kubernetes.io/docs/tutorials/security/seccomp/) profile.
 
 ```yaml
 backend_options:
@@ -193,7 +197,7 @@ backend_options:
 ```
 
 :::note
-AppArmor syntax follows [KEP-24](https://github.com/kubernetes/enhancements/blob/fddcbb9cbf3df39ded03bad71228265ac6e5215f/keps/sig-node/24-apparmor/README.md).
+The feature requires Kubernetes v1.30 or above.
 :::
 
 ### Annotations and labels
@@ -230,7 +234,8 @@ See [this issue](https://github.com/woodpecker-ci/woodpecker/issues/2510) for mo
 
 ### `KUBERNETES_SERVICE_HOST` environment variable
 
-Like the below env vars used for configuration, this can be set in the environment fonfiguration of the agent. It configures the address of the Kubernetes API server to connect to.
+Like the below env vars used for configuration, this can be set in the environment for configuration of the agent.
+It configures the address of the Kubernetes API server to connect to.
 
 If running the agent within Kubernetes, this will already be set and you don't have to add it manually.
 
@@ -292,7 +297,7 @@ Determines if Pod annotations can be defined from a step's backend options.
 
 Additional node selector to apply to worker pods. Must be a YAML object, e.g. `{"topology.kubernetes.io/region":"eu-central-1"}`.
 
-### `WOODPECKER_BACKEND_K8S_SECCTX_NONROOT`
+### `WOODPECKER_BACKEND_K8S_SECCTX_NONROOT` <!-- cspell:ignore SECCTX NONROOT -->
 
 > Default: `false`
 

@@ -15,6 +15,7 @@
 package internal
 
 import (
+	"context"
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
@@ -25,7 +26,7 @@ import (
 
 	vsc_url "github.com/gitsight/go-vcsurl"
 	"github.com/rs/zerolog/log"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 	"golang.org/x/net/proxy"
 	"golang.org/x/oauth2"
 
@@ -33,7 +34,7 @@ import (
 )
 
 // NewClient returns a new client from the CLI context.
-func NewClient(c *cli.Context) (woodpecker.Client, error) {
+func NewClient(ctx context.Context, c *cli.Command) (woodpecker.Client, error) {
 	var (
 		skip     = c.Bool("skip-verify")
 		socks    = c.String("socks-proxy")
@@ -63,8 +64,7 @@ func NewClient(c *cli.Context) (woodpecker.Client, error) {
 	}
 
 	config := new(oauth2.Config)
-	client := config.Client(
-		c.Context,
+	client := config.Client(ctx,
 		&oauth2.Token{
 			AccessToken: token,
 		},
@@ -160,4 +160,41 @@ func ParseKeyPair(p []string) map[string]string {
 		params[before] = after
 	}
 	return params
+}
+
+/*
+ParseStep parses the step id form a string which may either be the step PID (step number) or a step name.
+These rules apply:
+
+- Step PID take precedence over step name when searching for a match.
+- First match is used, when there are multiple steps with the same name.
+
+Strictly speaking, this is not parsing, but a lookup.
+*/
+func ParseStep(client woodpecker.Client, repoID, number int64, stepArg string) (stepID int64, err error) {
+	pipeline, err := client.Pipeline(repoID, number)
+	if err != nil {
+		return 0, err
+	}
+
+	stepPID, err := strconv.ParseInt(stepArg, 10, 64)
+	if err == nil {
+		for _, wf := range pipeline.Workflows {
+			for _, step := range wf.Children {
+				if int64(step.PID) == stepPID {
+					return step.ID, nil
+				}
+			}
+		}
+	}
+
+	for _, wf := range pipeline.Workflows {
+		for _, step := range wf.Children {
+			if step.Name == stepArg {
+				return step.ID, nil
+			}
+		}
+	}
+
+	return 0, fmt.Errorf("no step with number or name '%s' found", stepArg)
 }

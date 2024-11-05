@@ -1,0 +1,8 @@
+steps:
+  publish:
+    image: plugins/docker
+    settings:
+      repo: foo/bar
+      tags: latest
+    environment:
+      CGO: 0

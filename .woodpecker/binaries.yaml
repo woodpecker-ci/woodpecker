@@ -1,12 +1,15 @@
 when:
-  event: tag
+  - event: tag
+  - event: pull_request
+    branch: ${CI_REPO_DEFAULT_BRANCH}
+    path: Makefile
 
 variables:
-  - &golang_image 'docker.io/golang:1.22'
-  - &node_image 'docker.io/node:22-alpine'
-  - &xgo_image 'docker.io/techknowlogick/xgo:go-1.22.x'
+  - &golang_image 'docker.io/golang:1.23'
+  - &node_image 'docker.io/node:23-alpine'
+  - &xgo_image 'docker.io/techknowlogick/xgo:go-1.23.x'
 
-# cspell:words bindata netgo TARGZ
+# cspell:words bindata netgo
 
 steps:
   build-web:
@@ -35,7 +38,7 @@ steps:
     environment:
       PLATFORMS: linux|arm64/v8;linux|amd64;windows|amd64
       TAGS: bindata sqlite sqlite_unlock_notify netgo
-      TARGZ: '1'
+      ARCHIVE_IT: '1'
 
   build-tarball:
     depends_on:
@@ -50,6 +53,8 @@ steps:
       - vendor
     image: *golang_image
     commands:
+      - apt update
+      - apt install -y zip
       - make release-agent
 
   build-cli:
@@ -57,6 +62,8 @@ steps:
       - vendor
     image: *golang_image
     commands:
+      - apt update
+      - apt install -y zip
       - make release-cli
 
   build-deb-rpm:
@@ -90,13 +97,16 @@ steps:
   release:
     depends_on:
       - checksums
-    image: woodpeckerci/plugin-release:0.1.0
+    image: woodpeckerci/plugin-release:0.2.1
     settings:
       api_key:
         from_secret: github_token
       files:
         - dist/*.tar.gz
+        - dist/*.zip
         - dist/*.deb
         - dist/*.rpm
         - dist/checksums.txt
       title: ${CI_COMMIT_TAG##v}
+    when:
+      event: tag

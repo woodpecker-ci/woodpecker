@@ -17,7 +17,6 @@ package rpc
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"strings"
 	"time"
 
@@ -26,29 +25,44 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	grpcproto "google.golang.org/protobuf/proto"
 
 	backend "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc/proto"
 )
 
-// Set grpc version on compile time to compare against server version response.
-const ClientGrpcVersion int32 = proto.Version
+const (
+	// Set grpc version on compile time to compare against server version response.
+	ClientGrpcVersion int32 = proto.Version
+
+	// Maximum size of an outgoing log message.
+	// Picked to prevent it from going over GRPC size limit (4 MiB) with a large safety margin.
+	maxLogBatchSize int = 1 * 1024 * 1024
+
+	// Maximum amount of time between sending consecutive batched log messages.
+	// Controls the delay between the CI job generating a log record, and web users receiving it.
+	maxLogFlushPeriod time.Duration = time.Second
+)
 
 type client struct {
 	client proto.WoodpeckerClient
 	conn   *grpc.ClientConn
+	logs   chan *proto.LogEntry
 }
 
 // NewGrpcClient returns a new grpc Client.
-func NewGrpcClient(conn *grpc.ClientConn) rpc.Peer {
+func NewGrpcClient(ctx context.Context, conn *grpc.ClientConn) rpc.Peer {
 	client := new(client)
 	client.client = proto.NewWoodpeckerClient(conn)
 	client.conn = conn
+	client.logs = make(chan *proto.LogEntry, 10) // max memory use: 10 lines * 1 MiB
+	go client.processLogs(ctx)
 	return client
 }
 
 func (c *client) Close() error {
+	close(c.logs)
 	return c.conn.Close()
 }
 
@@ -73,13 +87,13 @@ func (c *client) Version(ctx context.Context) (*rpc.Version, error) {
 }
 
 // Next returns the next workflow in the queue.
-func (c *client) Next(ctx context.Context, f rpc.Filter) (*rpc.Workflow, error) {
+func (c *client) Next(ctx context.Context, filter rpc.Filter) (*rpc.Workflow, error) {
 	var res *proto.NextResponse
 	var err error
 	retry := c.newBackOff()
 	req := new(proto.NextRequest)
 	req.Filter = new(proto.Filter)
-	req.Filter.Labels = f.Labels
+	req.Filter.Labels = filter.Labels
 	for {
 		res, err = c.client.Next(ctx, req)
 		if err == nil {
@@ -90,8 +104,10 @@ func (c *client) Next(ctx context.Context, f rpc.Filter) (*rpc.Workflow, error) 
 		case codes.Canceled:
 			if ctx.Err() != nil {
 				// expected as context was canceled
+				log.Debug().Err(err).Msgf("grpc error: next(): context canceled")
 				return nil, nil
 			}
+			log.Error().Err(err).Msgf("grpc error: next(): code: %v", status.Code(err))
 			return nil, err
 		case
 			codes.Aborted,
@@ -105,10 +121,11 @@ func (c *client) Next(ctx context.Context, f rpc.Filter) (*rpc.Workflow, error) 
 				// https://github.com/woodpecker-ci/woodpecker/issues/717#issuecomment-1049365104
 				log.Trace().Err(err).Msg("grpc: to many keepalive pings without sending data")
 			} else {
-				log.Error().Err(err).Msgf("grpc error: next(): code: %v", status.Code(err))
+				log.Warn().Err(err).Msgf("grpc error: next(): code: %v", status.Code(err))
 			}
 		default:
-			return nil, fmt.Errorf("grpc error: next(): code: %v: %w", status.Code(err), err)
+			log.Error().Err(err).Msgf("grpc error: next(): code: %v", status.Code(err))
+			return nil, err
 		}
 
 		select {
@@ -133,19 +150,25 @@ func (c *client) Next(ctx context.Context, f rpc.Filter) (*rpc.Workflow, error) 
 }
 
 // Wait blocks until the workflow is complete.
-func (c *client) Wait(ctx context.Context, id string) (err error) {
+func (c *client) Wait(ctx context.Context, workflowID string) (err error) {
 	retry := c.newBackOff()
 	req := new(proto.WaitRequest)
-	req.Id = id
+	req.Id = workflowID
 	for {
 		_, err = c.client.Wait(ctx, req)
 		if err == nil {
 			break
 		}
 
-		log.Error().Err(err).Msgf("grpc error: wait(): code: %v", status.Code(err))
-
 		switch status.Code(err) {
+		case codes.Canceled:
+			if ctx.Err() != nil {
+				// expected as context was canceled
+				log.Debug().Err(err).Msgf("grpc error: wait(): context canceled")
+				return nil
+			}
+			log.Error().Err(err).Msgf("grpc error: wait(): code: %v", status.Code(err))
+			return err
 		case
 			codes.Aborted,
 			codes.DataLoss,
@@ -153,7 +176,9 @@ func (c *client) Wait(ctx context.Context, id string) (err error) {
 			codes.Internal,
 			codes.Unavailable:
 			// non-fatal errors
+			log.Warn().Err(err).Msgf("grpc error: wait(): code: %v", status.Code(err))
 		default:
+			log.Error().Err(err).Msgf("grpc error: wait(): code: %v", status.Code(err))
 			return err
 		}
 
@@ -184,6 +209,14 @@ func (c *client) Init(ctx context.Context, workflowID string, state rpc.Workflow
 		log.Error().Err(err).Msgf("grpc error: init(): code: %v", status.Code(err))
 
 		switch status.Code(err) {
+		case codes.Canceled:
+			if ctx.Err() != nil {
+				// expected as context was canceled
+				log.Debug().Err(err).Msgf("grpc error: init(): context canceled")
+				return nil
+			}
+			log.Error().Err(err).Msgf("grpc error: init(): code: %v", status.Code(err))
+			return err
 		case
 			codes.Aborted,
 			codes.DataLoss,
@@ -191,7 +224,9 @@ func (c *client) Init(ctx context.Context, workflowID string, state rpc.Workflow
 			codes.Internal,
 			codes.Unavailable:
 			// non-fatal errors
+			log.Warn().Err(err).Msgf("grpc error: init(): code: %v", status.Code(err))
 		default:
+			log.Error().Err(err).Msgf("grpc error: init(): code: %v", status.Code(err))
 			return err
 		}
 
@@ -222,6 +257,14 @@ func (c *client) Done(ctx context.Context, workflowID string, state rpc.Workflow
 		log.Error().Err(err).Msgf("grpc error: done(): code: %v", status.Code(err))
 
 		switch status.Code(err) {
+		case codes.Canceled:
+			if ctx.Err() != nil {
+				// expected as context was canceled
+				log.Debug().Err(err).Msgf("grpc error: done(): context canceled")
+				return nil
+			}
+			log.Error().Err(err).Msgf("grpc error: done(): code: %v", status.Code(err))
+			return err
 		case
 			codes.Aborted,
 			codes.DataLoss,
@@ -229,7 +272,9 @@ func (c *client) Done(ctx context.Context, workflowID string, state rpc.Workflow
 			codes.Internal,
 			codes.Unavailable:
 			// non-fatal errors
+			log.Warn().Err(err).Msgf("grpc error: done(): code: %v", status.Code(err))
 		default:
+			log.Error().Err(err).Msgf("grpc error: done(): code: %v", status.Code(err))
 			return err
 		}
 
@@ -243,10 +288,10 @@ func (c *client) Done(ctx context.Context, workflowID string, state rpc.Workflow
 }
 
 // Extend extends the workflow deadline.
-func (c *client) Extend(ctx context.Context, id string) (err error) {
+func (c *client) Extend(ctx context.Context, workflowID string) (err error) {
 	retry := c.newBackOff()
 	req := new(proto.ExtendRequest)
-	req.Id = id
+	req.Id = workflowID
 	for {
 		_, err = c.client.Extend(ctx, req)
 		if err == nil {
@@ -256,6 +301,14 @@ func (c *client) Extend(ctx context.Context, id string) (err error) {
 		log.Error().Err(err).Msgf("grpc error: extend(): code: %v", status.Code(err))
 
 		switch status.Code(err) {
+		case codes.Canceled:
+			if ctx.Err() != nil {
+				// expected as context was canceled
+				log.Debug().Err(err).Msgf("grpc error: extend(): context canceled")
+				return nil
+			}
+			log.Error().Err(err).Msgf("grpc error: extend(): code: %v", status.Code(err))
+			return err
 		case
 			codes.Aborted,
 			codes.DataLoss,
@@ -263,7 +316,9 @@ func (c *client) Extend(ctx context.Context, id string) (err error) {
 			codes.Internal,
 			codes.Unavailable:
 			// non-fatal errors
+			log.Warn().Err(err).Msgf("grpc error: extend(): code: %v", status.Code(err))
 		default:
+			log.Error().Err(err).Msgf("grpc error: extend(): code: %v", status.Code(err))
 			return err
 		}
 
@@ -277,10 +332,10 @@ func (c *client) Extend(ctx context.Context, id string) (err error) {
 }
 
 // Update updates the workflow state.
-func (c *client) Update(ctx context.Context, id string, state rpc.StepState) (err error) {
+func (c *client) Update(ctx context.Context, workflowID string, state rpc.StepState) (err error) {
 	retry := c.newBackOff()
 	req := new(proto.UpdateRequest)
-	req.Id = id
+	req.Id = workflowID
 	req.State = new(proto.StepState)
 	req.State.StepUuid = state.StepUUID
 	req.State.Started = state.Started
@@ -297,6 +352,14 @@ func (c *client) Update(ctx context.Context, id string, state rpc.StepState) (er
 		log.Error().Err(err).Msgf("grpc error: update(): code: %v", status.Code(err))
 
 		switch status.Code(err) {
+		case codes.Canceled:
+			if ctx.Err() != nil {
+				// expected as context was canceled
+				log.Debug().Err(err).Msgf("grpc error: update(): context canceled")
+				return nil
+			}
+			log.Error().Err(err).Msgf("grpc error: update(): code: %v", status.Code(err))
+			return err
 		case
 			codes.Aborted,
 			codes.DataLoss,
@@ -304,7 +367,9 @@ func (c *client) Update(ctx context.Context, id string, state rpc.StepState) (er
 			codes.Internal,
 			codes.Unavailable:
 			// non-fatal errors
+			log.Warn().Err(err).Msgf("grpc error: update(): code: %v", status.Code(err))
 		default:
+			log.Error().Err(err).Msgf("grpc error: update(): code: %v", status.Code(err))
 			return err
 		}
 
@@ -317,25 +382,82 @@ func (c *client) Update(ctx context.Context, id string, state rpc.StepState) (er
 	return nil
 }
 
-// Log writes the workflow log entry.
-func (c *client) Log(ctx context.Context, logEntry *rpc.LogEntry) (err error) {
-	retry := c.newBackOff()
-	req := new(proto.LogRequest)
-	req.LogEntry = new(proto.LogEntry)
-	req.LogEntry.StepUuid = logEntry.StepUUID
-	req.LogEntry.Data = logEntry.Data
-	req.LogEntry.Line = int32(logEntry.Line)
-	req.LogEntry.Time = logEntry.Time
-	req.LogEntry.Type = int32(logEntry.Type)
+// EnqueueLog queues the log entry to be written in a batch later.
+func (c *client) EnqueueLog(logEntry *rpc.LogEntry) {
+	c.logs <- &proto.LogEntry{
+		StepUuid: logEntry.StepUUID,
+		Data:     logEntry.Data,
+		Line:     int32(logEntry.Line),
+		Time:     logEntry.Time,
+		Type:     int32(logEntry.Type),
+	}
+}
+
+func (c *client) processLogs(ctx context.Context) {
+	var entries []*proto.LogEntry
+	var bytes int
+
+	send := func() {
+		if len(entries) == 0 {
+			return
+		}
+
+		log.Debug().
+			Int("entries", len(entries)).
+			Int("bytes", bytes).
+			Msg("log drain: sending queued logs")
+
+		if err := c.sendLogs(ctx, entries); err != nil {
+			log.Error().Err(err).Msg("log drain: could not send logs to server")
+		}
+
+		// even if send failed, we don't have infinite memory; retry has already been used
+		entries = entries[:0]
+		bytes = 0
+	}
+
+	// ctx.Done() is covered by the log channel being closed
 	for {
-		_, err = c.client.Log(ctx, req)
+		select {
+		case entry, ok := <-c.logs:
+			if !ok {
+				log.Info().Msg("log drain: channel closed")
+				send()
+				return
+			}
+
+			entries = append(entries, entry)
+			bytes += grpcproto.Size(entry) // cspell:words grpcproto
+
+			if bytes >= maxLogBatchSize {
+				send()
+			}
+
+		case <-time.After(maxLogFlushPeriod):
+			send()
+		}
+	}
+}
+
+func (c *client) sendLogs(ctx context.Context, entries []*proto.LogEntry) error {
+	req := &proto.LogRequest{LogEntries: entries}
+	retry := c.newBackOff()
+
+	for {
+		_, err := c.client.Log(ctx, req)
 		if err == nil {
 			break
 		}
 
-		log.Error().Err(err).Msgf("grpc error: log(): code: %v", status.Code(err))
-
 		switch status.Code(err) {
+		case codes.Canceled:
+			if ctx.Err() != nil {
+				// expected as context was canceled
+				log.Debug().Err(err).Msgf("grpc error: log(): context canceled")
+				return nil
+			}
+			log.Error().Err(err).Msgf("grpc error: log(): code: %v", status.Code(err))
+			return err
 		case
 			codes.Aborted,
 			codes.DataLoss,
@@ -343,7 +465,9 @@ func (c *client) Log(ctx context.Context, logEntry *rpc.LogEntry) (err error) {
 			codes.Internal,
 			codes.Unavailable:
 			// non-fatal errors
+			log.Warn().Err(err).Msgf("grpc error: log(): code: %v", status.Code(err))
 		default:
+			log.Error().Err(err).Msgf("grpc error: log(): code: %v", status.Code(err))
 			return err
 		}
 
@@ -356,12 +480,15 @@ func (c *client) Log(ctx context.Context, logEntry *rpc.LogEntry) (err error) {
 	return nil
 }
 
-func (c *client) RegisterAgent(ctx context.Context, platform, backend, version string, capacity int) (int64, error) {
+func (c *client) RegisterAgent(ctx context.Context, info rpc.AgentInfo) (int64, error) {
 	req := new(proto.RegisterAgentRequest)
-	req.Platform = platform
-	req.Backend = backend
-	req.Version = version
-	req.Capacity = int32(capacity)
+	req.Info = &proto.AgentInfo{
+		Platform:     info.Platform,
+		Backend:      info.Backend,
+		Version:      info.Version,
+		Capacity:     int32(info.Capacity),
+		CustomLabels: info.CustomLabels,
+	}
 
 	res, err := c.client.RegisterAgent(ctx, req)
 	return res.GetAgentId(), err
@@ -383,6 +510,14 @@ func (c *client) ReportHealth(ctx context.Context) (err error) {
 			return nil
 		}
 		switch status.Code(err) {
+		case codes.Canceled:
+			if ctx.Err() != nil {
+				// expected as context was canceled
+				log.Debug().Err(err).Msgf("grpc error: report_health(): context canceled")
+				return nil
+			}
+			log.Error().Err(err).Msgf("grpc error: report_health(): code: %v", status.Code(err))
+			return err
 		case
 			codes.Aborted,
 			codes.DataLoss,
@@ -390,7 +525,9 @@ func (c *client) ReportHealth(ctx context.Context) (err error) {
 			codes.Internal,
 			codes.Unavailable:
 			// non-fatal errors
+			log.Warn().Err(err).Msgf("grpc error: report_health(): code: %v", status.Code(err))
 		default:
+			log.Error().Err(err).Msgf("grpc error: report_health(): code: %v", status.Code(err))
 			return err
 		}
 

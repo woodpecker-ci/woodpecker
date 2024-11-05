@@ -18,7 +18,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
 	"go.woodpecker-ci.org/woodpecker/v2/server/services/encryption/types"
 	"go.woodpecker-ci.org/woodpecker/v2/server/store"
@@ -30,8 +30,8 @@ type tinkConfiguration struct {
 	clients        []types.EncryptionClient
 }
 
-func newTink(ctx *cli.Context, s store.Store) types.EncryptionServiceBuilder {
-	filepath := ctx.String(tinkKeysetFilepathConfigFlag)
+func newTink(c *cli.Command, s store.Store) types.EncryptionServiceBuilder {
+	filepath := c.String(tinkKeysetFilepathConfigFlag)
 	return &tinkConfiguration{filepath, s, nil}
 }
 

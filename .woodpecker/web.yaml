@@ -6,7 +6,7 @@ when:
       - renovate/*
 
 variables:
-  - &node_image 'docker.io/node:22-alpine'
+  - &node_image 'docker.io/node:23-alpine'
   - &when
     path:
       # related config files
@@ -58,6 +58,7 @@ steps:
   test:
     depends_on:
       - install-dependencies
+      - format-check # wait for it else test artifacts are falsely detected as wrong
     image: *node_image
     directory: web/
     commands:

@@ -39,7 +39,8 @@ CGO_ENABLED ?= 1 # only used to compile server
 
 HAS_GO = $(shell hash go > /dev/null 2>&1 && echo "GO" || echo "NOGO" )
 ifeq ($(HAS_GO),GO)
-	XGO_VERSION ?= go-1.20.x
+  # renovate: datasource=docker depName=docker.io/techknowlogick/xgo
+	XGO_VERSION ?= go-1.22.x
 	CGO_CFLAGS ?= $(shell go env CGO_CFLAGS)
 endif
 CGO_CFLAGS ?=
@@ -170,20 +171,20 @@ lint-ui: ui-dependencies ## Lint UI code
 	(cd web/; pnpm lint --quiet)
 
 test-agent: ## Test agent code
-	go test -race -cover -coverprofile agent-coverage.out -timeout 30s -tags 'test $(TAGS)' go.woodpecker-ci.org/woodpecker/v2/cmd/agent go.woodpecker-ci.org/woodpecker/v2/agent/...
+	go test -race -cover -coverprofile agent-coverage.out -timeout 60s -tags 'test $(TAGS)' go.woodpecker-ci.org/woodpecker/v2/cmd/agent go.woodpecker-ci.org/woodpecker/v2/agent/...
 
 test-server: ## Test server code
-	go test -race -cover -coverprofile server-coverage.out -timeout 30s -tags 'test $(TAGS)' go.woodpecker-ci.org/woodpecker/v2/cmd/server $(shell go list go.woodpecker-ci.org/woodpecker/v2/server/... | grep -v '/store')
+	go test -race -cover -coverprofile server-coverage.out -timeout 60s -tags 'test $(TAGS)' go.woodpecker-ci.org/woodpecker/v2/cmd/server $(shell go list go.woodpecker-ci.org/woodpecker/v2/server/... | grep -v '/store')
 
 test-cli: ## Test cli code
-	go test -race -cover -coverprofile cli-coverage.out -timeout 30s -tags 'test $(TAGS)' go.woodpecker-ci.org/woodpecker/v2/cmd/cli go.woodpecker-ci.org/woodpecker/v2/cli/...
+	go test -race -cover -coverprofile cli-coverage.out -timeout 60s -tags 'test $(TAGS)' go.woodpecker-ci.org/woodpecker/v2/cmd/cli go.woodpecker-ci.org/woodpecker/v2/cli/...
 
 test-server-datastore: ## Test server datastore
-	go test -timeout 120s -tags 'test $(TAGS)' -run TestMigrate go.woodpecker-ci.org/woodpecker/v2/server/store/...
-	go test -race -timeout 45s -tags 'test $(TAGS)' -skip TestMigrate go.woodpecker-ci.org/woodpecker/v2/server/store/...
+	go test -timeout 300s -tags 'test $(TAGS)' -run TestMigrate go.woodpecker-ci.org/woodpecker/v2/server/store/...
+	go test -race -timeout 100s -tags 'test $(TAGS)' -skip TestMigrate go.woodpecker-ci.org/woodpecker/v2/server/store/...
 
 test-server-datastore-coverage: ## Test server datastore with coverage report
-	go test -race -cover -coverprofile datastore-coverage.out -timeout 180s -tags 'test $(TAGS)' go.woodpecker-ci.org/woodpecker/v2/server/store/...
+	go test -race -cover -coverprofile datastore-coverage.out -timeout 300s -tags 'test $(TAGS)' go.woodpecker-ci.org/woodpecker/v2/server/store/...
 
 test-ui: ui-dependencies ## Test UI code
 	(cd web/; pnpm run lint)
@@ -192,7 +193,7 @@ test-ui: ui-dependencies ## Test UI code
 	(cd web/; pnpm run test)
 
 test-lib: ## Test lib code
-	go test -race -cover -coverprofile coverage.out -timeout 30s -tags 'test $(TAGS)' $(shell go list ./... | grep -v '/cmd\|/agent\|/cli\|/server')
+	go test -race -cover -coverprofile coverage.out -timeout 60s -tags 'test $(TAGS)' $(shell go list ./... | grep -v '/cmd\|/agent\|/cli\|/server')
 
 .PHONY: test
 test: test-agent test-server test-server-datastore test-cli test-lib ## Run all tests
@@ -242,22 +243,39 @@ release-server-xgo: check-xgo ## Create server binaries for release using xgo
 	@echo "arch orgi:$(TARGETARCH)"
 	@echo "arch (xgo):$(TARGETARCH_XGO)"
 	@echo "arch (buildx):$(TARGETARCH_BUILDX)"
-
+	# build via xgo
 	CGO_CFLAGS="$(CGO_CFLAGS)" xgo -go $(XGO_VERSION) -dest ${DIST_DIR}/server/$(TARGETOS)_$(TARGETARCH_BUILDX) -tags 'netgo osusergo grpcnotrace $(TAGS)' -ldflags '-linkmode external $(LDFLAGS)' -targets '$(TARGETOS)/$(TARGETARCH_XGO)' -out woodpecker-server -pkg cmd/server .
-	@if [ "$${XGO_IN_XGO:-0}" -eq "1" ]; then echo "inside xgo image"; \
+	# move binary into subfolder depending on target os and arch
+	@if [ "$${XGO_IN_XGO:-0}" -eq "1" ]; then \
+	  echo "inside xgo image"; \
 	  mkdir -p ${DIST_DIR}/server/$(TARGETOS)_$(TARGETARCH_BUILDX); \
 	  mv -vf /build/woodpecker-server* ${DIST_DIR}/server/$(TARGETOS)_$(TARGETARCH_BUILDX)/woodpecker-server$(BIN_SUFFIX); \
-	else echo "outside xgo image"; \
+	else \
+	  echo "outside xgo image"; \
 	  [ -f "${DIST_DIR}/server/$(TARGETOS)_$(TARGETARCH_BUILDX)/woodpecker-server$(BIN_SUFFIX)" ] && rm -v ${DIST_DIR}/server/$(TARGETOS)_$(TARGETARCH_BUILDX)/woodpecker-server$(BIN_SUFFIX); \
 	  mv -v ${DIST_DIR}/server/$(TARGETOS)_$(TARGETARCH_XGO)/woodpecker-server* ${DIST_DIR}/server/$(TARGETOS)_$(TARGETARCH_BUILDX)/woodpecker-server$(BIN_SUFFIX); \
 	fi
-	@[ "$${TARGZ:-0}" -eq "1" ] && tar -cvzf ${DIST_DIR}/woodpecker-server_$(TARGETOS)_$(TARGETARCH_BUILDX).tar.gz -C ${DIST_DIR}/server/$(TARGETOS)_$(TARGETARCH_BUILDX) woodpecker-server$(BIN_SUFFIX) || echo "skip creating '${DIST_DIR}/woodpecker-server_$(TARGETOS)_$(TARGETARCH_BUILDX).tar.gz'"
+	# if enabled package it in an archive
+	@if [ "$${ARCHIVE_IT:-0}" -eq "1" ]; then \
+	  if [ "$(BIN_SUFFIX)" = ".exe" ]; then \
+		  rm -f  ${DIST_DIR}/woodpecker-server_$(TARGETOS)_$(TARGETARCH_BUILDX).zip; \
+	    zip -j ${DIST_DIR}/woodpecker-server_$(TARGETOS)_$(TARGETARCH_BUILDX).zip ${DIST_DIR}/server/$(TARGETOS)_$(TARGETARCH_BUILDX)/woodpecker-server.exe; \
+	  else \
+	    tar -cvzf ${DIST_DIR}/woodpecker-server_$(TARGETOS)_$(TARGETARCH_BUILDX).tar.gz -C ${DIST_DIR}/server/$(TARGETOS)_$(TARGETARCH_BUILDX) woodpecker-server$(BIN_SUFFIX); \
+	  fi; \
+	else \
+	  echo "skip creating '${DIST_DIR}/woodpecker-server_$(TARGETOS)_$(TARGETARCH_BUILDX).tar.gz'"; \
+	fi
 
 release-server: ## Create server binaries for release
 	# compile
 	GOOS=$(TARGETOS) GOARCH=$(TARGETARCH) CGO_ENABLED=${CGO_ENABLED} go build -ldflags '${LDFLAGS}' -tags 'grpcnotrace $(TAGS)' -o ${DIST_DIR}/server/$(TARGETOS)_$(TARGETARCH)/woodpecker-server$(BIN_SUFFIX) go.woodpecker-ci.org/woodpecker/v2/cmd/server
 	# tar binary files
-	tar -cvzf ${DIST_DIR}/woodpecker-server_$(TARGETOS)_$(TARGETARCH).tar.gz -C ${DIST_DIR}/server/$(TARGETOS)_$(TARGETARCH) woodpecker-server$(BIN_SUFFIX)
+	if [ "$(BIN_SUFFIX)" == ".exe" ]; then \
+	  zip -j ${DIST_DIR}/woodpecker-server_$(TARGETOS)_$(TARGETARCH).zip ${DIST_DIR}/server/$(TARGETOS)_$(TARGETARCH)/woodpecker-server.exe; \
+	else \
+	  tar -cvzf ${DIST_DIR}/woodpecker-server_$(TARGETOS)_$(TARGETARCH).tar.gz -C ${DIST_DIR}/server/$(TARGETOS)_$(TARGETARCH) woodpecker-server$(BIN_SUFFIX); \
+	fi
 
 release-agent: ## Create agent binaries for release
 	# compile
@@ -271,9 +289,11 @@ release-agent: ## Create agent binaries for release
 	tar -cvzf ${DIST_DIR}/woodpecker-agent_linux_amd64.tar.gz   -C ${DIST_DIR}/agent/linux_amd64   woodpecker-agent
 	tar -cvzf ${DIST_DIR}/woodpecker-agent_linux_arm64.tar.gz   -C ${DIST_DIR}/agent/linux_arm64   woodpecker-agent
 	tar -cvzf ${DIST_DIR}/woodpecker-agent_linux_arm.tar.gz     -C ${DIST_DIR}/agent/linux_arm     woodpecker-agent
-	tar -cvzf ${DIST_DIR}/woodpecker-agent_windows_amd64.tar.gz -C ${DIST_DIR}/agent/windows_amd64 woodpecker-agent.exe
 	tar -cvzf ${DIST_DIR}/woodpecker-agent_darwin_amd64.tar.gz  -C ${DIST_DIR}/agent/darwin_amd64  woodpecker-agent
 	tar -cvzf ${DIST_DIR}/woodpecker-agent_darwin_arm64.tar.gz  -C ${DIST_DIR}/agent/darwin_arm64  woodpecker-agent
+	# zip binary files
+	rm -f  ${DIST_DIR}/woodpecker-agent_windows_amd64.zip
+	zip -j ${DIST_DIR}/woodpecker-agent_windows_amd64.zip          ${DIST_DIR}/agent/windows_amd64/woodpecker-agent.exe
 
 release-cli: ## Create cli binaries for release
 	# compile
@@ -287,9 +307,11 @@ release-cli: ## Create cli binaries for release
 	tar -cvzf ${DIST_DIR}/woodpecker-cli_linux_amd64.tar.gz   -C ${DIST_DIR}/cli/linux_amd64   woodpecker-cli
 	tar -cvzf ${DIST_DIR}/woodpecker-cli_linux_arm64.tar.gz   -C ${DIST_DIR}/cli/linux_arm64   woodpecker-cli
 	tar -cvzf ${DIST_DIR}/woodpecker-cli_linux_arm.tar.gz     -C ${DIST_DIR}/cli/linux_arm     woodpecker-cli
-	tar -cvzf ${DIST_DIR}/woodpecker-cli_windows_amd64.tar.gz -C ${DIST_DIR}/cli/windows_amd64 woodpecker-cli.exe
 	tar -cvzf ${DIST_DIR}/woodpecker-cli_darwin_amd64.tar.gz  -C ${DIST_DIR}/cli/darwin_amd64  woodpecker-cli
 	tar -cvzf ${DIST_DIR}/woodpecker-cli_darwin_arm64.tar.gz  -C ${DIST_DIR}/cli/darwin_arm64  woodpecker-cli
+	# zip binary files
+	rm -f  ${DIST_DIR}/woodpecker-cli_windows_amd64.zip
+	zip -j ${DIST_DIR}/woodpecker-cli_windows_amd64.zip          ${DIST_DIR}/cli/windows_amd64/woodpecker-cli.exe
 
 release-checksums: ## Create checksums for all release files
 	# generate shas for tar files

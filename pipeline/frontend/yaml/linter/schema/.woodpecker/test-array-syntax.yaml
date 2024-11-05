@@ -1,5 +1,3 @@
-version: 1
-
 clone:
   - name: git
     image: woodpeckerci/plugin-git

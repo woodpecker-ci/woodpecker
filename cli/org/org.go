@@ -15,7 +15,7 @@
 package org
 
 import (
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
 	"go.woodpecker-ci.org/woodpecker/v2/cli/org/registry"
 )
@@ -24,7 +24,7 @@ import (
 var Command = &cli.Command{
 	Name:  "org",
 	Usage: "manage organizations",
-	Subcommands: []*cli.Command{
+	Commands: []*cli.Command{
 		registry.Command,
 	},
 }

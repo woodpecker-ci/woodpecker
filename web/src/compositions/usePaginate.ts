@@ -1,19 +1,26 @@
 import { useInfiniteScroll } from '@vueuse/core';
 import { onMounted, ref, watch, type Ref, type UnwrapRef } from 'vue';
 
-export async function usePaginate<T>(getSingle: (page: number) => Promise<T[]>): Promise<T[]> {
+const defaultPageSize = 50;
+
+// usePaginate loads all pages
+export async function usePaginate<T>(
+  getSingle: (page: number) => Promise<T[]>,
+  pageSize: number = defaultPageSize,
+): Promise<T[]> {
   let hasMore = true;
   let page = 1;
   const result: T[] = [];
   while (hasMore) {
     const singleRes = await getSingle(page);
     result.push(...singleRes);
-    hasMore = singleRes.length !== 0;
+    hasMore = singleRes.length >= pageSize;
     page += 1;
   }
   return result;
 }
 
+// usePagination loads pages on demand
 export function usePagination<T, S = unknown>(
   _loadData: (page: number, arg: S) => Promise<T[] | null>,
   isActive: () => boolean = () => true,
@@ -25,7 +32,7 @@ export function usePagination<T, S = unknown>(
 ) {
   const scrollElement = _scrollElement === null ? null : ref(document.getElementById('scroll-component'));
   const page = ref(1);
-  const pageSize = ref(_pageSize ?? 0);
+  const pageSize = ref(_pageSize ?? defaultPageSize);
   const hasMore = ref(true);
   const data = ref<T[]>([]) as Ref<T[]>;
   const loading = ref(false);
@@ -48,14 +55,12 @@ export function usePagination<T, S = unknown>(
       // use next each element
       each.value.shift();
       page.value = 1;
-      pageSize.value = _pageSize ?? 0;
       hasMore.value = each.value.length > 0;
       if (hasMore.value) {
         loading.value = false;
         await loadData();
       }
     }
-    pageSize.value = newData.length;
     loading.value = false;
   }
 
@@ -76,7 +81,6 @@ export function usePagination<T, S = unknown>(
     const _page = page.value;
 
     page.value = 1;
-    pageSize.value = _pageSize ?? 0;
     hasMore.value = true;
     data.value = [];
     loading.value = false;

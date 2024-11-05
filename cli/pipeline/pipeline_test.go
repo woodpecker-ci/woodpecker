@@ -2,11 +2,12 @@ package pipeline
 
 import (
 	"bytes"
+	"context"
 	"io"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
 	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
 	"go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker"
@@ -59,28 +60,27 @@ func TestPipelineOutput(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			app := &cli.App{Writer: io.Discard}
-			c := cli.NewContext(app, nil, nil)
+			command := &cli.Command{
+				Writer: io.Discard,
+				Name:   "output",
+				Flags:  common.OutputFlags("table"),
+				Action: func(_ context.Context, c *cli.Command) error {
+					var buf bytes.Buffer
+					err := pipelineOutput(c, pipelines, &buf)
 
-			command := &cli.Command{}
-			command.Name = "output"
-			command.Flags = common.OutputFlags("table")
-			command.Action = func(c *cli.Context) error {
-				var buf bytes.Buffer
-				err := pipelineOutput(c, pipelines, &buf)
+					if tt.wantErr {
+						assert.Error(t, err)
+						return nil
+					}
 
-				if tt.wantErr {
-					assert.Error(t, err)
+					assert.NoError(t, err)
+					assert.Equal(t, tt.expected, buf.String())
+
 					return nil
-				}
-
-				assert.NoError(t, err)
-				assert.Equal(t, tt.expected, buf.String())
-
-				return nil
+				},
 			}
 
-			_ = command.Run(c, tt.args...)
+			_ = command.Run(context.Background(), tt.args)
 		})
 	}
 }

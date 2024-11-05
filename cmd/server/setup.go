@@ -20,27 +20,37 @@ import (
 	"encoding/base32"
 	"errors"
 	"fmt"
+	"net/url"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/gorilla/securecookie"
-	"github.com/prometheus/client_golang/prometheus"
-	prometheus_auto "github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/rs/zerolog/log"
-	"github.com/urfave/cli/v2"
-	"golang.org/x/sync/errgroup"
+	"github.com/urfave/cli/v3"
 
 	"go.woodpecker-ci.org/woodpecker/v2/server"
 	"go.woodpecker-ci.org/woodpecker/v2/server/cache"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge/setup"
+	"go.woodpecker-ci.org/woodpecker/v2/server/logging"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/pubsub"
 	"go.woodpecker-ci.org/woodpecker/v2/server/queue"
+	"go.woodpecker-ci.org/woodpecker/v2/server/services"
 	logService "go.woodpecker-ci.org/woodpecker/v2/server/services/log"
 	"go.woodpecker-ci.org/woodpecker/v2/server/services/log/file"
+	"go.woodpecker-ci.org/woodpecker/v2/server/services/permissions"
 	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 	"go.woodpecker-ci.org/woodpecker/v2/server/store/datastore"
 	"go.woodpecker-ci.org/woodpecker/v2/server/store/types"
 )
 
-func setupStore(c *cli.Context) (store.Store, error) {
+const (
+	queueInfoRefreshInterval = 500 * time.Millisecond
+	storeInfoRefreshInterval = 10 * time.Second
+)
+
+func setupStore(ctx context.Context, c *cli.Command) (store.Store, error) {
 	datasource := c.String("datasource")
 	driver := c.String("driver")
 	xorm := store.XORM{
@@ -77,7 +87,7 @@ func setupStore(c *cli.Context) (store.Store, error) {
 		return nil, fmt.Errorf("could not open datastore: %w", err)
 	}
 
-	if err := store.Migrate(c.Bool("migrations-allow-long")); err != nil {
+	if err := store.Migrate(ctx, c.Bool("migrations-allow-long")); err != nil {
 		return nil, fmt.Errorf("could not migrate datastore: %w", err)
 	}
 
@@ -93,75 +103,18 @@ func checkSqliteFileExist(path string) error {
 	return err
 }
 
-func setupQueue(c *cli.Context, s store.Store) queue.Queue {
-	return queue.WithTaskStore(queue.New(c.Context), s)
+func setupQueue(ctx context.Context, s store.Store) (queue.Queue, error) {
+	return queue.New(ctx, queue.Config{
+		Backend: queue.TypeMemory,
+		Store:   s,
+	})
 }
 
-func setupMembershipService(_ *cli.Context, _store store.Store) cache.MembershipService {
+func setupMembershipService(_ context.Context, _store store.Store) cache.MembershipService {
 	return cache.NewMembershipService(_store)
 }
 
-func setupMetrics(g *errgroup.Group, _store store.Store) {
-	pendingSteps := prometheus_auto.NewGauge(prometheus.GaugeOpts{
-		Namespace: "woodpecker",
-		Name:      "pending_steps",
-		Help:      "Total number of pending pipeline steps.",
-	})
-	waitingSteps := prometheus_auto.NewGauge(prometheus.GaugeOpts{
-		Namespace: "woodpecker",
-		Name:      "waiting_steps",
-		Help:      "Total number of pipeline waiting on deps.",
-	})
-	runningSteps := prometheus_auto.NewGauge(prometheus.GaugeOpts{
-		Namespace: "woodpecker",
-		Name:      "running_steps",
-		Help:      "Total number of running pipeline steps.",
-	})
-	workers := prometheus_auto.NewGauge(prometheus.GaugeOpts{
-		Namespace: "woodpecker",
-		Name:      "worker_count",
-		Help:      "Total number of workers.",
-	})
-	pipelines := prometheus_auto.NewGauge(prometheus.GaugeOpts{
-		Namespace: "woodpecker",
-		Name:      "pipeline_total_count",
-		Help:      "Total number of pipelines.",
-	})
-	users := prometheus_auto.NewGauge(prometheus.GaugeOpts{
-		Namespace: "woodpecker",
-		Name:      "user_count",
-		Help:      "Total number of users.",
-	})
-	repos := prometheus_auto.NewGauge(prometheus.GaugeOpts{
-		Namespace: "woodpecker",
-		Name:      "repo_count",
-		Help:      "Total number of repos.",
-	})
-
-	g.Go(func() error {
-		for {
-			stats := server.Config.Services.Queue.Info(context.TODO())
-			pendingSteps.Set(float64(stats.Stats.Pending))
-			waitingSteps.Set(float64(stats.Stats.WaitingOnDeps))
-			runningSteps.Set(float64(stats.Stats.Running))
-			workers.Set(float64(stats.Stats.Workers))
-			time.Sleep(500 * time.Millisecond)
-		}
-	})
-	g.Go(func() error {
-		for {
-			repoCount, _ := _store.GetRepoCount()
-			userCount, _ := _store.GetUserCount()
-			pipelineCount, _ := _store.GetPipelineCount()
-			pipelines.Set(float64(pipelineCount))
-			users.Set(float64(userCount))
-			repos.Set(float64(repoCount))
-			time.Sleep(10 * time.Second)
-		}
-	})
-}
-
-func setupLogStore(c *cli.Context, s store.Store) (logService.Service, error) {
+func setupLogStore(c *cli.Command, s store.Store) (logService.Service, error) {
 	switch c.String("log-store") {
 	case "file":
 		return file.NewLogStore(c.String("log-store-file-path"))
@@ -191,4 +144,91 @@ func setupJWTSecret(_store store.Store) (string, error) {
 	}
 
 	return jwtSecret, nil
+}
+
+func setupEvilGlobals(ctx context.Context, c *cli.Command, s store.Store) (err error) {
+	// services
+	server.Config.Services.Logs = logging.New()
+	server.Config.Services.Pubsub = pubsub.New()
+	server.Config.Services.Membership = setupMembershipService(ctx, s)
+	server.Config.Services.Queue, err = setupQueue(ctx, s)
+	if err != nil {
+		return fmt.Errorf("could not setup queue: %w", err)
+	}
+	server.Config.Services.Manager, err = services.NewManager(c, s, setup.Forge)
+	if err != nil {
+		return fmt.Errorf("could not setup service manager: %w", err)
+	}
+	server.Config.Services.LogStore, err = setupLogStore(c, s)
+	if err != nil {
+		return fmt.Errorf("could not setup log store: %w", err)
+	}
+
+	// authentication
+	server.Config.Pipeline.AuthenticatePublicRepos = c.Bool("authenticate-public-repos")
+
+	// Cloning
+	server.Config.Pipeline.DefaultClonePlugin = c.String("default-clone-plugin")
+	server.Config.Pipeline.TrustedClonePlugins = c.StringSlice("plugins-trusted-clone")
+	server.Config.Pipeline.TrustedClonePlugins = append(server.Config.Pipeline.TrustedClonePlugins, server.Config.Pipeline.DefaultClonePlugin)
+
+	// Execution
+	_events := c.StringSlice("default-cancel-previous-pipeline-events")
+	events := make([]model.WebhookEvent, 0, len(_events))
+	for _, v := range _events {
+		events = append(events, model.WebhookEvent(v))
+	}
+	server.Config.Pipeline.DefaultCancelPreviousPipelineEvents = events
+	server.Config.Pipeline.DefaultTimeout = c.Int("default-pipeline-timeout")
+	server.Config.Pipeline.MaxTimeout = c.Int("max-pipeline-timeout")
+
+	// backend options for pipeline compiler
+	server.Config.Pipeline.Proxy.No = c.String("backend-no-proxy")
+	server.Config.Pipeline.Proxy.HTTP = c.String("backend-http-proxy")
+	server.Config.Pipeline.Proxy.HTTPS = c.String("backend-https-proxy")
+
+	// server configuration
+	server.Config.Server.JWTSecret, err = setupJWTSecret(s)
+	if err != nil {
+		return fmt.Errorf("could not setup jwt secret: %w", err)
+	}
+	server.Config.Server.Cert = c.String("server-cert")
+	server.Config.Server.Key = c.String("server-key")
+	server.Config.Server.AgentToken = c.String("agent-secret")
+	serverHost := strings.TrimSuffix(c.String("server-host"), "/")
+	server.Config.Server.Host = serverHost
+	if c.IsSet("server-webhook-host") {
+		server.Config.Server.WebhookHost = c.String("server-webhook-host")
+	} else {
+		server.Config.Server.WebhookHost = serverHost
+	}
+	server.Config.Server.OAuthHost = serverHost
+	server.Config.Server.Port = c.String("server-addr")
+	server.Config.Server.PortTLS = c.String("server-addr-tls")
+	server.Config.Server.StatusContext = c.String("status-context")
+	server.Config.Server.StatusContextFormat = c.String("status-context-format")
+	server.Config.Server.SessionExpires = c.Duration("session-expires")
+	u, _ := url.Parse(server.Config.Server.Host)
+	rootPath := strings.TrimSuffix(u.Path, "/")
+	if rootPath != "" && !strings.HasPrefix(rootPath, "/") {
+		rootPath = "/" + rootPath
+	}
+	server.Config.Server.RootPath = rootPath
+	server.Config.Server.CustomCSSFile = strings.TrimSpace(c.String("custom-css-file"))
+	server.Config.Server.CustomJsFile = strings.TrimSpace(c.String("custom-js-file"))
+	server.Config.Pipeline.Networks = c.StringSlice("network")
+	server.Config.Pipeline.Volumes = c.StringSlice("volume")
+	server.Config.WebUI.EnableSwagger = c.Bool("enable-swagger")
+	server.Config.WebUI.SkipVersionCheck = c.Bool("skip-version-check")
+	server.Config.Pipeline.PrivilegedPlugins = c.StringSlice("plugins-privileged")
+
+	// prometheus
+	server.Config.Prometheus.AuthToken = c.String("prometheus-auth-token")
+
+	// permissions
+	server.Config.Permissions.Open = c.Bool("open")
+	server.Config.Permissions.Admins = permissions.NewAdmins(c.StringSlice("admin"))
+	server.Config.Permissions.Orgs = permissions.NewOrgs(c.StringSlice("orgs"))
+	server.Config.Permissions.OwnersAllowlist = permissions.NewOwnersAllowlist(c.StringSlice("repo-owners"))
+	return nil
 }

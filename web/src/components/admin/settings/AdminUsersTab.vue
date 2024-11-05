@@ -90,6 +90,7 @@ import Badge from '~/components/atomic/Badge.vue';
 import Button from '~/components/atomic/Button.vue';
 import IconButton from '~/components/atomic/IconButton.vue';
 import ListItem from '~/components/atomic/ListItem.vue';
+import Checkbox from '~/components/form/Checkbox.vue';
 import InputField from '~/components/form/InputField.vue';
 import TextField from '~/components/form/TextField.vue';
 import Settings from '~/components/layout/Settings.vue';

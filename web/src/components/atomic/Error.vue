@@ -10,6 +10,8 @@
 </template>
 
 <script lang="ts" setup>
+import Icon from './Icon.vue';
+
 defineProps<{
   textOnly?: boolean;
   text?: string;

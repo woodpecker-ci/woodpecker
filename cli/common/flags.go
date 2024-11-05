@@ -15,49 +15,49 @@
 package common
 
 import (
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
 	"go.woodpecker-ci.org/woodpecker/v2/shared/logger"
 )
 
 var GlobalFlags = append([]cli.Flag{
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_CONFIG"},
+		Sources: cli.EnvVars("WOODPECKER_CONFIG"),
 		Name:    "config",
 		Aliases: []string{"c"},
 		Usage:   "path to config file",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_SERVER"},
+		Sources: cli.EnvVars("WOODPECKER_SERVER"),
 		Name:    "server",
 		Aliases: []string{"s"},
 		Usage:   "server address",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_TOKEN"},
+		Sources: cli.EnvVars("WOODPECKER_TOKEN"),
 		Name:    "token",
 		Aliases: []string{"t"},
 		Usage:   "server auth token",
 	},
 	&cli.BoolFlag{
-		EnvVars: []string{"WOODPECKER_DISABLE_UPDATE_CHECK"},
+		Sources: cli.EnvVars("WOODPECKER_DISABLE_UPDATE_CHECK"),
 		Name:    "disable-update-check",
 		Usage:   "disable update check",
 	},
 	&cli.BoolFlag{
-		EnvVars: []string{"WOODPECKER_SKIP_VERIFY"},
+		Sources: cli.EnvVars("WOODPECKER_SKIP_VERIFY"),
 		Name:    "skip-verify",
 		Usage:   "skip ssl verification",
 		Hidden:  true,
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"SOCKS_PROXY"},
+		Sources: cli.EnvVars("SOCKS_PROXY"),
 		Name:    "socks-proxy",
 		Usage:   "socks proxy address",
 		Hidden:  true,
 	},
 	&cli.BoolFlag{
-		EnvVars: []string{"SOCKS_PROXY_OFF"},
+		Sources: cli.EnvVars("SOCKS_PROXY_OFF"),
 		Name:    "socks-proxy-off",
 		Usage:   "socks proxy ignored",
 		Hidden:  true,

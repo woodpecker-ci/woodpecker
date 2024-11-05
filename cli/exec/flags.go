@@ -17,53 +17,49 @@ package exec
 import (
 	"time"
 
-	"github.com/urfave/cli/v2"
-
-	"go.woodpecker-ci.org/woodpecker/v2/shared/constant"
+	"github.com/urfave/cli/v3"
 )
 
 var flags = []cli.Flag{
 	&cli.BoolFlag{
-		EnvVars: []string{"WOODPECKER_LOCAL"},
+		Sources: cli.EnvVars("WOODPECKER_LOCAL"),
 		Name:    "local",
 		Usage:   "run from local directory",
 		Value:   true,
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_REPO_PATH"},
+		Sources: cli.EnvVars("WOODPECKER_REPO_PATH"),
 		Name:    "repo-path",
 		Usage:   "path to local repository",
 	},
+	&cli.StringFlag{
+		Sources: cli.EnvVars("WOODPECKER_METADATA_FILE"),
+		Name:    "metadata-file",
+		Usage:   "path to pipeline metadata file (normally downloaded from UI). Parameters can be adjusted by applying additional cli flags",
+	},
 	&cli.DurationFlag{
-		EnvVars: []string{"WOODPECKER_TIMEOUT"},
+		Sources: cli.EnvVars("WOODPECKER_TIMEOUT"),
 		Name:    "timeout",
 		Usage:   "pipeline timeout",
 		Value:   time.Hour,
 	},
 	&cli.StringSliceFlag{
-		EnvVars: []string{"WOODPECKER_VOLUMES"},
+		Sources: cli.EnvVars("WOODPECKER_VOLUMES"),
 		Name:    "volumes",
 		Usage:   "pipeline volumes",
 	},
 	&cli.StringSliceFlag{
-		EnvVars: []string{"WOODPECKER_NETWORKS"},
+		Sources: cli.EnvVars("WOODPECKER_NETWORKS"),
 		Name:    "network",
 		Usage:   "external networks",
 	},
-	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_PREFIX"},
-		Name:    "prefix",
-		Value:   "woodpecker",
-		Usage:   "prefix used for containers, volumes, networks, ... created by woodpecker",
-		Hidden:  true,
-	},
 	&cli.StringSliceFlag{
-		Name:  "privileged",
-		Usage: "privileged plugins",
-		Value: cli.NewStringSlice(constant.PrivilegedPlugins...),
+		Sources: cli.EnvVars("WOODPECKER_PLUGINS_PRIVILEGED"),
+		Name:    "plugins-privileged",
+		Usage:   "Allow plugins to run in privileged mode, if environment variable is defined but empty there will be none",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_BACKEND"},
+		Sources: cli.EnvVars("WOODPECKER_BACKEND"),
 		Name:    "backend-engine",
 		Usage:   "backend engine to run pipelines on",
 		Value:   "auto-detect",
@@ -73,17 +69,17 @@ var flags = []cli.Flag{
 	// backend options for pipeline compiler
 	//
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_BACKEND_NO_PROXY", "NO_PROXY", "no_proxy"},
+		Sources: cli.EnvVars("WOODPECKER_BACKEND_NO_PROXY", "NO_PROXY", "no_proxy"),
 		Usage:   "if set, pass the environment variable down as \"NO_PROXY\" to steps",
 		Name:    "backend-no-proxy",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_BACKEND_HTTP_PROXY", "HTTP_PROXY", "http_proxy"},
+		Sources: cli.EnvVars("WOODPECKER_BACKEND_HTTP_PROXY", "HTTP_PROXY", "http_proxy"),
 		Usage:   "if set, pass the environment variable down as \"HTTP_PROXY\" to steps",
 		Name:    "backend-http-proxy",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"WOODPECKER_BACKEND_HTTPS_PROXY", "HTTPS_PROXY", "https_proxy"},
+		Sources: cli.EnvVars("WOODPECKER_BACKEND_HTTPS_PROXY", "HTTPS_PROXY", "https_proxy"),
 		Usage:   "if set, pass the environment variable down as \"HTTPS_PROXY\" to steps",
 		Name:    "backend-https-proxy",
 	},
@@ -97,12 +93,12 @@ var flags = []cli.Flag{
 	// workspace default
 	//
 	&cli.StringFlag{
-		EnvVars: []string{"CI_WORKSPACE_BASE"},
+		Sources: cli.EnvVars("CI_WORKSPACE_BASE"),
 		Name:    "workspace-base",
 		Value:   "/woodpecker",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"CI_WORKSPACE_PATH"},
+		Sources: cli.EnvVars("CI_WORKSPACE_PATH"),
 		Name:    "workspace-path",
 		Value:   "src",
 	},
@@ -110,218 +106,304 @@ var flags = []cli.Flag{
 	// netrc parameters
 	//
 	&cli.StringFlag{
-		EnvVars: []string{"CI_NETRC_USERNAME"},
+		Sources: cli.EnvVars("CI_NETRC_USERNAME"),
 		Name:    "netrc-username",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"CI_NETRC_PASSWORD"},
+		Sources: cli.EnvVars("CI_NETRC_PASSWORD"),
 		Name:    "netrc-password",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"CI_NETRC_MACHINE"},
+		Sources: cli.EnvVars("CI_NETRC_MACHINE"),
 		Name:    "netrc-machine",
 	},
 	//
 	// metadata parameters
 	//
 	&cli.StringFlag{
-		EnvVars: []string{"CI_SYSTEM_PLATFORM"},
+		Sources: cli.EnvVars("CI_SYSTEM_PLATFORM"),
 		Name:    "system-platform",
+		Usage:   "Set the metadata environment variable \"CI_SYSTEM_PLATFORM\".",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"CI_SYSTEM_NAME"},
+		Sources: cli.EnvVars("CI_SYSTEM_HOST"),
+		Name:    "system-host",
+		Usage:   "Set the metadata environment variable \"CI_SYSTEM_HOST\".",
+	},
+	&cli.StringFlag{
+		Sources: cli.EnvVars("CI_SYSTEM_NAME"),
 		Name:    "system-name",
+		Usage:   "Set the metadata environment variable \"CI_SYSTEM_NAME\".",
 		Value:   "woodpecker",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"CI_SYSTEM_URL"},
+		Sources: cli.EnvVars("CI_SYSTEM_URL"),
 		Name:    "system-url",
+		Usage:   "Set the metadata environment variable \"CI_SYSTEM_URL\".",
 		Value:   "https://github.com/woodpecker-ci/woodpecker",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"CI_REPO"},
+		Sources: cli.EnvVars("CI_REPO"),
 		Name:    "repo",
-		Usage:   "full repo name",
+		Usage:   "Set the full name to derive metadata environment variables \"CI_REPO\", \"CI_REPO_NAME\" and \"CI_REPO_OWNER\".",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"CI_REPO_REMOTE_ID"},
+		Sources: cli.EnvVars("CI_REPO_REMOTE_ID"),
 		Name:    "repo-remote-id",
+		Usage:   "Set the metadata environment variable \"CI_REPO_REMOTE_ID\".",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"CI_REPO_URL"},
+		Sources: cli.EnvVars("CI_REPO_URL"),
 		Name:    "repo-url",
+		Usage:   "Set the metadata environment variable \"CI_REPO_URL\".",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"CI_REPO_CLONE_URL"},
+		Sources: cli.EnvVars("CI_REPO_SCM"),
+		Name:    "repo-scm",
+		Usage:   "Set the metadata environment variable \"CI_REPO_SCM\".",
+		Value:   "git",
+	},
+	&cli.StringFlag{
+		Sources: cli.EnvVars("CI_REPO_DEFAULT_BRANCH"),
+		Name:    "repo-default-branch",
+		Usage:   "Set the metadata environment variable \"CI_REPO_DEFAULT_BRANCH\".",
+		Value:   "main",
+	},
+	&cli.StringFlag{
+		Sources: cli.EnvVars("CI_REPO_CLONE_URL"),
 		Name:    "repo-clone-url",
+		Usage:   "Set the metadata environment variable \"CI_REPO_CLONE_URL\".",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"CI_REPO_CLONE_SSH_URL"},
+		Sources: cli.EnvVars("CI_REPO_CLONE_SSH_URL"),
 		Name:    "repo-clone-ssh-url",
+		Usage:   "Set the metadata environment variable \"CI_REPO_CLONE_SSH_URL\".",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"CI_REPO_PRIVATE"},
+		Sources: cli.EnvVars("CI_REPO_PRIVATE"),
 		Name:    "repo-private",
+		Usage:   "Set the metadata environment variable \"CI_REPO_PRIVATE\".",
 	},
 	&cli.BoolFlag{
-		EnvVars: []string{"CI_REPO_TRUSTED"},
-		Name:    "repo-trusted",
+		Sources: cli.EnvVars("CI_REPO_TRUSTED_NETWORK"),
+		Name:    "repo-trusted-network",
+		Usage:   "Set the metadata environment variable \"CI_REPO_TRUSTED_NETWORK\".",
+	},
+	&cli.BoolFlag{
+		Sources: cli.EnvVars("CI_REPO_TRUSTED_VOLUMES"),
+		Name:    "repo-trusted-volumes",
+		Usage:   "Set the metadata environment variable \"CI_REPO_TRUSTED_VOLUMES\".",
+	},
+	&cli.BoolFlag{
+		Sources: cli.EnvVars("CI_REPO_TRUSTED_SECURITY"),
+		Name:    "repo-trusted-security",
+		Usage:   "Set the metadata environment variable \"CI_REPO_TRUSTED_SECURITY\".",
 	},
 	&cli.IntFlag{
-		EnvVars: []string{"CI_PIPELINE_NUMBER"},
+		Sources: cli.EnvVars("CI_PIPELINE_NUMBER"),
 		Name:    "pipeline-number",
+		Usage:   "Set the metadata environment variable \"CI_PIPELINE_NUMBER\".",
 	},
 	&cli.IntFlag{
-		EnvVars: []string{"CI_PIPELINE_PARENT"},
+		Sources: cli.EnvVars("CI_PIPELINE_PARENT"),
 		Name:    "pipeline-parent",
+		Usage:   "Set the metadata environment variable \"CI_PIPELINE_PARENT\".",
 	},
-	&cli.Int64Flag{
-		EnvVars: []string{"CI_PIPELINE_CREATED"},
+	&cli.IntFlag{
+		Sources: cli.EnvVars("CI_PIPELINE_CREATED"),
 		Name:    "pipeline-created",
+		Usage:   "Set the metadata environment variable \"CI_PIPELINE_CREATED\".",
 	},
-	&cli.Int64Flag{
-		EnvVars: []string{"CI_PIPELINE_STARTED"},
+	&cli.IntFlag{
+		Sources: cli.EnvVars("CI_PIPELINE_STARTED"),
 		Name:    "pipeline-started",
-	},
-	&cli.Int64Flag{
-		EnvVars: []string{"CI_PIPELINE_FINISHED"},
-		Name:    "pipeline-finished",
+		Usage:   "Set the metadata environment variable \"CI_PIPELINE_STARTED\".",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"CI_PIPELINE_STATUS"},
-		Name:    "pipeline-status",
-	},
-	&cli.StringFlag{
-		EnvVars: []string{"CI_PIPELINE_EVENT"},
+		Sources: cli.EnvVars("CI_PIPELINE_EVENT"),
 		Name:    "pipeline-event",
+		Usage:   "Set the metadata environment variable \"CI_PIPELINE_EVENT\".",
 		Value:   "manual",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"CI_PIPELINE_URL"},
+		Sources: cli.EnvVars("CI_PIPELINE_FORGE_URL"),
 		Name:    "pipeline-url",
+		Usage:   "Set the metadata environment variable \"CI_PIPELINE_FORGE_URL\".",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"CI_PIPELINE_DEPLOY_TARGET", "CI_PIPELINE_TARGET"}, // TODO: remove CI_PIPELINE_TARGET in 3.x
+		Sources: cli.EnvVars("CI_PIPELINE_DEPLOY_TARGET"),
 		Name:    "pipeline-deploy-to",
+		Usage:   "Set the metadata environment variable \"CI_PIPELINE_DEPLOY_TARGET\".",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"CI_PIPELINE_DEPLOY_TASK", "CI_PIPELINE_TASK"}, // TODO: remove CI_PIPELINE_TASK in 3.x
+		Sources: cli.EnvVars("CI_PIPELINE_DEPLOY_TASK"),
 		Name:    "pipeline-deploy-task",
+		Usage:   "Set the metadata environment variable \"CI_PIPELINE_DEPLOY_TASK\".",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"CI_COMMIT_SHA"},
+		Sources: cli.EnvVars("CI_PIPELINE_FILES"),
+		Usage:   "Set the metadata environment variable \"CI_PIPELINE_FILES\", either json formatted list of strings, or comma separated string list.",
+		Name:    "pipeline-changed-files",
+	},
+	&cli.StringFlag{
+		Sources: cli.EnvVars("CI_COMMIT_SHA"),
 		Name:    "commit-sha",
+		Usage:   "Set the metadata environment variable \"CI_COMMIT_SHA\".",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"CI_COMMIT_REF"},
+		Sources: cli.EnvVars("CI_COMMIT_REF"),
 		Name:    "commit-ref",
+		Usage:   "Set the metadata environment variable \"CI_COMMIT_REF\".",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"CI_COMMIT_REFSPEC"},
+		Sources: cli.EnvVars("CI_COMMIT_REFSPEC"),
 		Name:    "commit-refspec",
+		Usage:   "Set the metadata environment variable \"CI_COMMIT_REFSPEC\".",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"CI_COMMIT_BRANCH"},
+		Sources: cli.EnvVars("CI_COMMIT_BRANCH"),
 		Name:    "commit-branch",
+		Usage:   "Set the metadata environment variable \"CI_COMMIT_BRANCH\".",
+		Value:   "main",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"CI_COMMIT_MESSAGE"},
+		Sources: cli.EnvVars("CI_COMMIT_MESSAGE"),
 		Name:    "commit-message",
+		Usage:   "Set the metadata environment variable \"CI_COMMIT_MESSAGE\".",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"CI_COMMIT_AUTHOR_NAME"},
+		Sources: cli.EnvVars("CI_COMMIT_AUTHOR"),
 		Name:    "commit-author-name",
+		Usage:   "Set the metadata environment variable \"CI_COMMIT_AUTHOR\".",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"CI_COMMIT_AUTHOR_AVATAR"},
+		Sources: cli.EnvVars("CI_COMMIT_AUTHOR_AVATAR"),
 		Name:    "commit-author-avatar",
+		Usage:   "Set the metadata environment variable \"CI_COMMIT_AUTHOR_AVATAR\".",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"CI_COMMIT_AUTHOR_EMAIL"},
+		Sources: cli.EnvVars("CI_COMMIT_AUTHOR_EMAIL"),
 		Name:    "commit-author-email",
-	},
-	&cli.IntFlag{
-		EnvVars: []string{"CI_PREV_PIPELINE_NUMBER"},
-		Name:    "prev-pipeline-number",
-	},
-	&cli.Int64Flag{
-		EnvVars: []string{"CI_PREV_PIPELINE_CREATED"},
-		Name:    "prev-pipeline-created",
-	},
-	&cli.Int64Flag{
-		EnvVars: []string{"CI_PREV_PIPELINE_STARTED"},
-		Name:    "prev-pipeline-started",
-	},
-	&cli.Int64Flag{
-		EnvVars: []string{"CI_PREV_PIPELINE_FINISHED"},
-		Name:    "prev-pipeline-finished",
-	},
-	&cli.StringFlag{
-		EnvVars: []string{"CI_PREV_PIPELINE_STATUS"},
-		Name:    "prev-pipeline-status",
-	},
-	&cli.StringFlag{
-		EnvVars: []string{"CI_PREV_PIPELINE_EVENT"},
-		Name:    "prev-pipeline-event",
-	},
-	&cli.StringFlag{
-		EnvVars: []string{"CI_PREV_PIPELINE_URL"},
-		Name:    "prev-pipeline-url",
-	},
-	&cli.StringFlag{
-		EnvVars: []string{"CI_PREV_COMMIT_SHA"},
-		Name:    "prev-commit-sha",
-	},
-	&cli.StringFlag{
-		EnvVars: []string{"CI_PREV_COMMIT_REF"},
-		Name:    "prev-commit-ref",
-	},
-	&cli.StringFlag{
-		EnvVars: []string{"CI_PREV_COMMIT_REFSPEC"},
-		Name:    "prev-commit-refspec",
-	},
-	&cli.StringFlag{
-		EnvVars: []string{"CI_PREV_COMMIT_BRANCH"},
-		Name:    "prev-commit-branch",
-	},
-	&cli.StringFlag{
-		EnvVars: []string{"CI_PREV_COMMIT_MESSAGE"},
-		Name:    "prev-commit-message",
-	},
-	&cli.StringFlag{
-		EnvVars: []string{"CI_PREV_COMMIT_AUTHOR_NAME"},
-		Name:    "prev-commit-author-name",
-	},
-	&cli.StringFlag{
-		EnvVars: []string{"CI_PREV_COMMIT_AUTHOR_AVATAR"},
-		Name:    "prev-commit-author-avatar",
-	},
-	&cli.StringFlag{
-		EnvVars: []string{"CI_PREV_COMMIT_AUTHOR_EMAIL"},
-		Name:    "prev-commit-author-email",
-	},
-	&cli.IntFlag{
-		EnvVars: []string{"CI_WORKFLOW_NAME"},
-		Name:    "workflow-name",
-	},
-	&cli.IntFlag{
-		EnvVars: []string{"CI_WORKFLOW_NUMBER"},
-		Name:    "workflow-number",
-	},
-	&cli.IntFlag{
-		EnvVars: []string{"CI_STEP_NAME"},
-		Name:    "step-name",
+		Usage:   "Set the metadata environment variable \"CI_COMMIT_AUTHOR_EMAIL\".",
 	},
 	&cli.StringSliceFlag{
-		EnvVars: []string{"CI_ENV"},
+		Sources: cli.EnvVars("CI_COMMIT_PULL_REQUEST_LABELS"),
+		Name:    "commit-pull-labels",
+		Usage:   "Set the metadata environment variable \"CI_COMMIT_PULL_REQUEST_LABELS\".",
+	},
+	&cli.BoolFlag{
+		Sources: cli.EnvVars("CI_COMMIT_PRERELEASE"),
+		Name:    "commit-release-is-pre",
+		Usage:   "Set the metadata environment variable \"CI_COMMIT_PRERELEASE\".",
+	},
+	&cli.IntFlag{
+		Sources: cli.EnvVars("CI_PREV_PIPELINE_NUMBER"),
+		Name:    "prev-pipeline-number",
+		Usage:   "Set the metadata environment variable \"CI_PREV_PIPELINE_NUMBER\".",
+	},
+	&cli.IntFlag{
+		Sources: cli.EnvVars("CI_PREV_PIPELINE_CREATED"),
+		Name:    "prev-pipeline-created",
+		Usage:   "Set the metadata environment variable \"CI_PREV_PIPELINE_CREATED\".",
+	},
+	&cli.IntFlag{
+		Sources: cli.EnvVars("CI_PREV_PIPELINE_STARTED"),
+		Name:    "prev-pipeline-started",
+		Usage:   "Set the metadata environment variable \"CI_PREV_PIPELINE_STARTED\".",
+	},
+	&cli.IntFlag{
+		Sources: cli.EnvVars("CI_PREV_PIPELINE_FINISHED"),
+		Name:    "prev-pipeline-finished",
+		Usage:   "Set the metadata environment variable \"CI_PREV_PIPELINE_FINISHED\".",
+	},
+	&cli.StringFlag{
+		Sources: cli.EnvVars("CI_PREV_PIPELINE_STATUS"),
+		Name:    "prev-pipeline-status",
+		Usage:   "Set the metadata environment variable \"CI_PREV_PIPELINE_STATUS\".",
+	},
+	&cli.StringFlag{
+		Sources: cli.EnvVars("CI_PREV_PIPELINE_EVENT"),
+		Name:    "prev-pipeline-event",
+		Usage:   "Set the metadata environment variable \"CI_PREV_PIPELINE_EVENT\".",
+	},
+	&cli.StringFlag{
+		Sources: cli.EnvVars("CI_PREV_PIPELINE_FORGE_URL"),
+		Name:    "prev-pipeline-url",
+		Usage:   "Set the metadata environment variable \"CI_PREV_PIPELINE_FORGE_URL\".",
+	},
+	&cli.StringFlag{
+		Sources: cli.EnvVars("CI_PREV_PIPELINE_DEPLOY_TARGET"),
+		Name:    "prev-pipeline-deploy-to",
+		Usage:   "Set the metadata environment variable \"CI_PREV_PIPELINE_DEPLOY_TARGET\".",
+	},
+	&cli.StringFlag{
+		Sources: cli.EnvVars("CI_PREV_PIPELINE_DEPLOY_TASK"),
+		Name:    "prev-pipeline-deploy-task",
+		Usage:   "Set the metadata environment variable \"CI_PREV_PIPELINE_DEPLOY_TASK\".",
+	},
+	&cli.StringFlag{
+		Sources: cli.EnvVars("CI_PREV_COMMIT_SHA"),
+		Name:    "prev-commit-sha",
+		Usage:   "Set the metadata environment variable \"CI_PREV_COMMIT_SHA\".",
+	},
+	&cli.StringFlag{
+		Sources: cli.EnvVars("CI_PREV_COMMIT_REF"),
+		Name:    "prev-commit-ref",
+		Usage:   "Set the metadata environment variable \"CI_PREV_COMMIT_REF\".",
+	},
+	&cli.StringFlag{
+		Sources: cli.EnvVars("CI_PREV_COMMIT_REFSPEC"),
+		Name:    "prev-commit-refspec",
+		Usage:   "Set the metadata environment variable \"CI_PREV_COMMIT_REFSPEC\".",
+	},
+	&cli.StringFlag{
+		Sources: cli.EnvVars("CI_PREV_COMMIT_BRANCH"),
+		Name:    "prev-commit-branch",
+		Usage:   "Set the metadata environment variable \"CI_PREV_COMMIT_BRANCH\".",
+	},
+	&cli.StringFlag{
+		Sources: cli.EnvVars("CI_PREV_COMMIT_MESSAGE"),
+		Name:    "prev-commit-message",
+		Usage:   "Set the metadata environment variable \"CI_PREV_COMMIT_MESSAGE\".",
+	},
+	&cli.StringFlag{
+		Sources: cli.EnvVars("CI_PREV_COMMIT_AUTHOR"),
+		Name:    "prev-commit-author-name",
+		Usage:   "Set the metadata environment variable \"CI_PREV_COMMIT_AUTHOR\".",
+	},
+	&cli.StringFlag{
+		Sources: cli.EnvVars("CI_PREV_COMMIT_AUTHOR_AVATAR"),
+		Name:    "prev-commit-author-avatar",
+		Usage:   "Set the metadata environment variable \"CI_PREV_COMMIT_AUTHOR_AVATAR\".",
+	},
+	&cli.StringFlag{
+		Sources: cli.EnvVars("CI_PREV_COMMIT_AUTHOR_EMAIL"),
+		Name:    "prev-commit-author-email",
+		Usage:   "Set the metadata environment variable \"CI_PREV_COMMIT_AUTHOR_EMAIL\".",
+	},
+	&cli.StringFlag{
+		Sources: cli.EnvVars("CI_WORKFLOW_NAME"),
+		Name:    "workflow-name",
+		Usage:   "Set the metadata environment variable \"CI_WORKFLOW_NAME\".",
+	},
+	&cli.IntFlag{
+		Sources: cli.EnvVars("CI_WORKFLOW_NUMBER"),
+		Name:    "workflow-number",
+		Usage:   "Set the metadata environment variable \"CI_WORKFLOW_NUMBER\".",
+	},
+	&cli.StringSliceFlag{
+		Sources: cli.EnvVars("CI_ENV"),
 		Name:    "env",
+		Usage:   "Set the metadata environment variable \"CI_ENV\".",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"CI_FORGE_TYPE"},
+		Sources: cli.EnvVars("CI_FORGE_TYPE"),
 		Name:    "forge-type",
+		Usage:   "Set the metadata environment variable \"CI_FORGE_TYPE\".",
 	},
 	&cli.StringFlag{
-		EnvVars: []string{"CI_FORGE_URL"},
+		Sources: cli.EnvVars("CI_FORGE_URL"),
 		Name:    "forge-url",
+		Usage:   "Set the metadata environment variable \"CI_FORGE_URL\".",
 	},
 }

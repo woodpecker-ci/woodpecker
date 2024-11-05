@@ -15,10 +15,11 @@
 package log
 
 import (
+	"context"
 	"fmt"
 	"strconv"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
 	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
 )
@@ -26,44 +27,52 @@ import (
 var logPurgeCmd = &cli.Command{
 	Name:      "purge",
 	Usage:     "purge a log",
-	ArgsUsage: "<repo-id|repo-full-name> <pipeline> [step]",
+	ArgsUsage: "<repo-id|repo-full-name> <pipeline> [step-number|step-name]",
 	Action:    logPurge,
 }
 
-func logPurge(c *cli.Context) (err error) {
-	client, err := internal.NewClient(c)
+func logPurge(ctx context.Context, c *cli.Command) (err error) {
+	client, err := internal.NewClient(ctx, c)
 	if err != nil {
 		return err
 	}
 	repoIDOrFullName := c.Args().First()
+	if len(repoIDOrFullName) == 0 {
+		return fmt.Errorf("missing required argument repo-id / repo-full-name")
+	}
 	repoID, err := internal.ParseRepo(client, repoIDOrFullName)
 	if err != nil {
-		return err
+		return fmt.Errorf("invalid repo '%s': %w", repoIDOrFullName, err)
 	}
-	number, err := strconv.ParseInt(c.Args().Get(1), 10, 64)
+
+	pipelineArg := c.Args().Get(1)
+	if len(pipelineArg) == 0 {
+		return fmt.Errorf("missing required argument pipeline")
+	}
+	number, err := strconv.ParseInt(pipelineArg, 10, 64)
 	if err != nil {
 		return err
 	}
 
 	stepArg := c.Args().Get(2) //nolint:mnd
-	// TODO: Add lookup by name: stepID, err := internal.ParseStep(client, repoID, stepIDOrName)
 	var stepID int64
 	if len(stepArg) != 0 {
-		stepID, err = strconv.ParseInt(stepArg, 10, 64)
+		stepID, err = internal.ParseStep(client, repoID, number, stepArg)
 		if err != nil {
 			return err
 		}
 	}
 
 	if stepID > 0 {
+		fmt.Printf("Purging logs for pipeline %s#%d step %d\n", repoIDOrFullName, number, stepID)
 		err = client.StepLogsPurge(repoID, number, stepID)
 	} else {
+		fmt.Printf("Purging logs for pipeline %s#%d\n", repoIDOrFullName, number)
 		err = client.LogsPurge(repoID, number)
 	}
 	if err != nil {
 		return err
 	}
 
-	fmt.Printf("Purging logs for pipeline %s#%d\n", repoIDOrFullName, number)
 	return nil
 }

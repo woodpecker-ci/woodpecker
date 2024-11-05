@@ -16,6 +16,7 @@ package pipeline
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/rs/zerolog/log"
@@ -37,7 +38,7 @@ func Approve(ctx context.Context, store store.Store, currentPipeline *model.Pipe
 	if err != nil {
 		msg := fmt.Sprintf("failure to load forge for repo '%s'", repo.FullName)
 		log.Error().Err(err).Str("repo", repo.FullName).Msg(msg)
-		return nil, fmt.Errorf(msg)
+		return nil, errors.New(msg)
 	}
 
 	// fetch the pipeline file from the database
@@ -84,7 +85,7 @@ func Approve(ctx context.Context, store store.Store, currentPipeline *model.Pipe
 	if err != nil {
 		msg := fmt.Sprintf("failure to createPipelineItems for %s", repo.FullName)
 		log.Error().Err(err).Msg(msg)
-		return nil, fmt.Errorf(msg)
+		return nil, errors.New(msg)
 	}
 
 	// we have no way to link old workflows and steps in database to new engine generated steps,
@@ -100,7 +101,7 @@ func Approve(ctx context.Context, store store.Store, currentPipeline *model.Pipe
 	if err != nil {
 		msg := fmt.Sprintf("failure to start pipeline for %s: %v", repo.FullName, err)
 		log.Error().Err(err).Msg(msg)
-		return nil, fmt.Errorf(msg)
+		return nil, errors.New(msg)
 	}
 
 	return currentPipeline, nil

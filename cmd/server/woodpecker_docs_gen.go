@@ -22,11 +22,14 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"os"
 	"path"
 
+	"github.com/getkin/kin-openapi/openapi2"
+	"github.com/getkin/kin-openapi/openapi2conv"
 	"go.woodpecker-ci.org/woodpecker/v2/cmd/server/docs"
 )
 
@@ -34,31 +37,76 @@ func main() {
 	// set swagger infos
 	setupSwaggerStaticConfig()
 
+	basePath := path.Join("..", "..")
+	filePath := path.Join(basePath, "docs", "swagger.json")
+
 	// generate swagger file
-	f, err := os.Create(path.Join("..", "..", "docs", "swagger.json"))
+	f, err := os.Create(filePath)
 	if err != nil {
 		panic(err)
 	}
 	defer f.Close()
 	doc := docs.SwaggerInfo.ReadDoc()
-	doc = removeHost(doc)
+	doc, err = removeHost(doc)
+	if err != nil {
+		panic(err)
+	}
 	_, err = f.WriteString(doc)
 	if err != nil {
 		panic(err)
 	}
 
 	fmt.Println("generated swagger.json")
+
+	// convert to OpenApi3
+	if err := toOpenApi3(filePath, filePath); err != nil {
+		fmt.Printf("converting '%s' from openapi v2 to v3 failed\n", filePath)
+		panic(err)
+	}
 }
 
-func removeHost(jsonIn string) string {
+func removeHost(jsonIn string) (string, error) {
 	m := make(map[string]interface{})
 	if err := json.Unmarshal([]byte(jsonIn), &m); err != nil {
-		panic(err)
+		return "", err
 	}
 	delete(m, "host")
 	raw, err := json.Marshal(m)
 	if err != nil {
-		panic(err)
+		return "", err
 	}
-	return string(raw)
+	return string(raw), nil
+}
+
+func toOpenApi3(input, output string) error {
+	data2, err := os.ReadFile(input)
+	if err != nil {
+		return fmt.Errorf("read input: %w", err)
+	}
+
+	var doc2 openapi2.T
+	err = json.Unmarshal(data2, &doc2)
+	if err != nil {
+		return fmt.Errorf("unmarshal input: %w", err)
+	}
+
+	doc3, err := openapi2conv.ToV3(&doc2)
+	if err != nil {
+		return fmt.Errorf("convert openapi v2 to v3: %w", err)
+	}
+	err = doc3.Validate(context.Background())
+	if err != nil {
+		return err
+	}
+
+	data, err := json.Marshal(doc3)
+	if err != nil {
+		return fmt.Errorf("Marshal converted: %w", err)
+	}
+
+	if err = os.WriteFile(output, data, 0o644); err != nil {
+		return fmt.Errorf("write output: %w", err)
+	}
+
+	return nil
 }

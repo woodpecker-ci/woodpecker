@@ -33,7 +33,7 @@
                   :title="$t('repo.deploy_pipeline.variables.delete')"
                   @click="deleteVar(i)"
                 >
-                  <i-la-times />
+                  <Icon name="remove" />
                 </Button>
               </div>
             </div>
@@ -50,6 +50,7 @@ import { computed, onMounted, ref, toRef, watch } from 'vue';
 import { useRouter } from 'vue-router';
 
 import Button from '~/components/atomic/Button.vue';
+import Icon from '~/components/atomic/Icon.vue';
 import InputField from '~/components/form/InputField.vue';
 import TextField from '~/components/form/TextField.vue';
 import Panel from '~/components/layout/Panel.vue';

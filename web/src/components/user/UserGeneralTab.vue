@@ -23,6 +23,7 @@ import { SUPPORTED_LOCALES } from 'virtual:vue-i18n-supported-locales';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
+import InputField from '~/components/form/InputField.vue';
 import SelectField from '~/components/form/SelectField.vue';
 import Settings from '~/components/layout/Settings.vue';
 import { setI18nLanguage } from '~/compositions/useI18n';

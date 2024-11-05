@@ -15,10 +15,11 @@
 package repo
 
 import (
+	"context"
 	"fmt"
 	"time"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
 	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
 	"go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker"
@@ -61,9 +62,9 @@ var repoUpdateCmd = &cli.Command{
 	},
 }
 
-func repoUpdate(c *cli.Context) error {
+func repoUpdate(ctx context.Context, c *cli.Command) error {
 	repoIDOrFullName := c.Args().First()
-	client, err := internal.NewClient(c)
+	client, err := internal.NewClient(ctx, c)
 	if err != nil {
 		return err
 	}
@@ -78,7 +79,7 @@ func repoUpdate(c *cli.Context) error {
 		timeout         = c.Duration("timeout")
 		trusted         = c.Bool("trusted")
 		gated           = c.Bool("gated")
-		pipelineCounter = c.Int("pipeline-counter")
+		pipelineCounter = int(c.Int("pipeline-counter"))
 		unsafe          = c.Bool("unsafe")
 	)
 

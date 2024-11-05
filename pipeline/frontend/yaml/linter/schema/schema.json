@@ -20,18 +20,11 @@
     "skip_clone": {
       "type": "boolean"
     },
-    "branches": {
-      "$ref": "#/definitions/branches"
-    },
     "when": {
-      "$ref": "#/definitions/pipeline_when"
+      "$ref": "#/definitions/workflow_when"
     },
     "steps": {
       "$ref": "#/definitions/step_list"
-    },
-    "pipeline": {
-      "$ref": "#/definitions/step_list",
-      "description": "deprecated, use steps"
     },
     "services": {
       "$ref": "#/definitions/services"
@@ -41,9 +34,6 @@
     },
     "matrix": {
       "$ref": "#/definitions/matrix"
-    },
-    "platform": {
-      "$ref": "#/definitions/platform"
     },
     "labels": {
       "$ref": "#/definitions/labels"
@@ -61,10 +51,6 @@
       "items": {
         "type": "string"
       }
-    },
-    "version": {
-      "type": "number",
-      "default": 1
     }
   },
   "definitions": {
@@ -128,55 +114,6 @@
         "type": ["boolean", "string", "number", "array", "object"]
       }
     },
-    "branches": {
-      "description": "deprecated, use when.branch",
-      "oneOf": [
-        {
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "minProperties": 1
-        },
-        {
-          "type": "string"
-        },
-        {
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "exclude": {
-              "oneOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  },
-                  "minLength": 1
-                },
-                {
-                  "type": "string"
-                }
-              ]
-            },
-            "include": {
-              "oneOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  },
-                  "minLength": 1
-                },
-                {
-                  "type": "string"
-                }
-              ]
-            }
-          }
-        }
-      ]
-    },
     "step_list": {
       "description": "The steps section defines a list of steps which will be executed serially, in the order in which they are defined. Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#steps",
       "oneOf": [
@@ -196,22 +133,22 @@
         }
       ]
     },
-    "pipeline_when": {
-      "description": "Whole pipelines can be skipped based on conditions. Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#when---global-workflow-conditions",
+    "workflow_when": {
+      "description": "Whole workflow can be skipped based on conditions. Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#when---global-workflow-conditions",
       "oneOf": [
         {
           "type": "array",
           "minLength": 1,
           "items": {
-            "$ref": "#/definitions/pipeline_when_condition"
+            "$ref": "#/definitions/workflow_when_condition"
           }
         },
         {
-          "$ref": "#/definitions/pipeline_when_condition"
+          "$ref": "#/definitions/workflow_when_condition"
         }
       ]
     },
-    "pipeline_when_condition": {
+    "workflow_when_condition": {
       "type": "object",
       "additionalProperties": false,
       "properties": {
@@ -226,18 +163,7 @@
         "event": {
           "description": "Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#event",
           "default": [],
-          "oneOf": [
-            {
-              "type": "array",
-              "minLength": 1,
-              "items": {
-                "$ref": "#/definitions/event_enum"
-              }
-            },
-            {
-              "$ref": "#/definitions/event_enum"
-            }
-          ]
+          "$ref": "#/definitions/event_constraint_list"
         },
         "ref": {
           "description": "Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#ref",
@@ -249,10 +175,6 @@
         },
         "platform": {
           "description": "Execute a step only on a specific platform. Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#platform",
-          "$ref": "#/definitions/constraint_list"
-        },
-        "environment": {
-          "description": "Execute a step only for a specific environment. Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#environment",
           "$ref": "#/definitions/constraint_list"
         },
         "instance": {
@@ -304,10 +226,43 @@
       }
     },
     "step": {
+      "description": "A step of your workflow executes either arbitrary commands or uses a plugin. Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#steps",
+      "anyOf": [
+        {
+          "$ref": "#/definitions/commands_step"
+        },
+        {
+          "$ref": "#/definitions/plugin_step"
+        }
+      ]
+    },
+    "commands_step": {
       "description": "Every step of your pipeline executes arbitrary commands inside a specified docker container. Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#steps",
       "type": "object",
       "additionalProperties": false,
       "required": ["image"],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "detach": {
+                "const": true
+              }
+            }
+          },
+          "then": {},
+          "else": {
+            "anyOf": [
+              {
+                "required": ["commands"]
+              },
+              {
+                "required": ["entrypoint"]
+              }
+            ]
+          }
+        }
+      ],
       "properties": {
         "name": {
           "description": "The name of the step. Can be used if using the array style steps list.",
@@ -334,18 +289,11 @@
         "secrets": {
           "$ref": "#/definitions/step_secrets"
         },
-        "settings": {
-          "$ref": "#/definitions/step_settings"
-        },
         "when": {
           "$ref": "#/definitions/step_when"
         },
         "volumes": {
           "$ref": "#/definitions/step_volumes"
-        },
-        "group": {
-          "description": "deprecated, use depends_on",
-          "type": "string"
         },
         "depends_on": {
           "description": "Execute a step after another step has finished.",
@@ -389,6 +337,67 @@
               "type": "string"
             }
           ]
+        }
+      }
+    },
+    "plugin_step": {
+      "description": "Plugins let you execute predefined functions in a more secure context. Read more: https://woodpecker-ci.org/docs/usage/plugins/overview",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["image"],
+      "properties": {
+        "name": {
+          "description": "The name of the step. Can be used if using the array style steps list.",
+          "type": "string"
+        },
+        "image": {
+          "$ref": "#/definitions/step_image"
+        },
+        "privileged": {
+          "$ref": "#/definitions/step_privileged"
+        },
+        "pull": {
+          "$ref": "#/definitions/step_pull"
+        },
+        "directory": {
+          "$ref": "#/definitions/step_directory"
+        },
+        "settings": {
+          "$ref": "#/definitions/step_settings"
+        },
+        "when": {
+          "$ref": "#/definitions/step_when"
+        },
+        "volumes": {
+          "$ref": "#/definitions/step_volumes"
+        },
+        "depends_on": {
+          "description": "Execute a step after another step has finished.",
+          "oneOf": [
+            {
+              "type": "array",
+              "minLength": 1,
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "detach": {
+          "description": "Detach a step to run in background until pipeline finishes. Read more: https://woodpecker-ci.org/docs/usage/services#detachment",
+          "type": "boolean"
+        },
+        "failure": {
+          "description": "How to handle the failure of this step. Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#failure",
+          "type": "string",
+          "enum": ["fail", "ignore"],
+          "default": "fail"
+        },
+        "backend_options": {
+          "$ref": "#/definitions/step_backend_options"
         }
       }
     },
@@ -450,10 +459,6 @@
         },
         "platform": {
           "description": "Execute a step only on a specific platform. Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#platform",
-          "$ref": "#/definitions/constraint_list"
-        },
-        "environment": {
-          "description": "Execute a step only for a specific environment. Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#environment",
           "$ref": "#/definitions/constraint_list"
         },
         "matrix": {
@@ -524,40 +529,6 @@
           "minLength": 1,
           "items": {
             "$ref": "#/definitions/event_enum"
-          }
-        },
-        {
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "include": {
-              "oneOf": [
-                {
-                  "$ref": "#/definitions/event_enum"
-                },
-                {
-                  "type": "array",
-                  "minLength": 1,
-                  "items": {
-                    "$ref": "#/definitions/event_enum"
-                  }
-                }
-              ]
-            },
-            "exclude": {
-              "oneOf": [
-                {
-                  "$ref": "#/definitions/event_enum"
-                },
-                {
-                  "type": "array",
-                  "minLength": 1,
-                  "items": {
-                    "$ref": "#/definitions/event_enum"
-                  }
-                }
-              ]
-            }
           }
         }
       ]
@@ -640,43 +611,16 @@
     },
     "step_environment": {
       "description": "Pass environment variables to a pipeline step. Read more: https://woodpecker-ci.org/docs/usage/environment",
-      "oneOf": [
-        {
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "minLength": 1
-        },
-        {
-          "type": "object",
-          "additionalProperties": {
-            "type": ["boolean", "string", "number", "array", "object"]
-          }
-        }
-      ]
+      "type": "object",
+      "additionalProperties": {
+        "type": ["boolean", "string", "number", "array", "object"]
+      }
     },
     "step_secrets": {
       "description": "Pass secrets to a pipeline step at runtime. Read more: https://woodpecker-ci.org/docs/usage/secrets",
       "type": "array",
       "items": {
-        "oneOf": [
-          {
-            "type": "string"
-          },
-          {
-            "type": "object",
-            "required": ["source", "target"],
-            "properties": {
-              "source": {
-                "type": "string"
-              },
-              "target": {
-                "type": "string"
-              }
-            }
-          }
-        ]
+        "type": "string"
       },
       "minLength": 1
     },
@@ -898,6 +842,9 @@
         "environment": {
           "$ref": "#/definitions/step_environment"
         },
+        "directory": {
+          "$ref": "#/definitions/step_directory"
+        },
         "secrets": {
           "$ref": "#/definitions/step_secrets"
         },
@@ -954,11 +901,6 @@
         },
         "minLength": 1
       }
-    },
-    "platform": {
-      "description": "deprecated, use labels.platform",
-      "type": "string",
-      "additionalProperties": false
     },
     "labels": {
       "description": "Configures the labels used for the agent selection. Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#labels",

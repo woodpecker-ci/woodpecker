@@ -27,7 +27,7 @@ import (
 	"time"
 
 	"github.com/rs/zerolog/log"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
 	backend "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 )

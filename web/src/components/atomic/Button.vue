@@ -28,7 +28,7 @@
           'bg-wp-control-error-200': color === 'red',
         }"
       >
-        <Icon name="loading" class="animate-spin" />
+        <Icon name="spinner" />
       </div>
     </slot>
   </component>

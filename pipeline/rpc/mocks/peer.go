@@ -35,6 +35,11 @@ func (_m *Peer) Done(c context.Context, workflowID string, state rpc.WorkflowSta
 	return r0
 }
 
+// EnqueueLog provides a mock function with given fields: logEntry
+func (_m *Peer) EnqueueLog(logEntry *rpc.LogEntry) {
+	_m.Called(logEntry)
+}
+
 // Extend provides a mock function with given fields: c, workflowID
 func (_m *Peer) Extend(c context.Context, workflowID string) error {
 	ret := _m.Called(c, workflowID)
@@ -64,24 +69,6 @@ func (_m *Peer) Init(c context.Context, workflowID string, state rpc.WorkflowSta
 	var r0 error
 	if rf, ok := ret.Get(0).(func(context.Context, string, rpc.WorkflowState) error); ok {
 		r0 = rf(c, workflowID, state)
-	} else {
-		r0 = ret.Error(0)
-	}
-
-	return r0
-}
-
-// Log provides a mock function with given fields: c, logEntry
-func (_m *Peer) Log(c context.Context, logEntry *rpc.LogEntry) error {
-	ret := _m.Called(c, logEntry)
-
-	if len(ret) == 0 {
-		panic("no return value specified for Log")
-	}
-
-	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, *rpc.LogEntry) error); ok {
-		r0 = rf(c, logEntry)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -119,9 +106,9 @@ func (_m *Peer) Next(c context.Context, f rpc.Filter) (*rpc.Workflow, error) {
 	return r0, r1
 }
 
-// RegisterAgent provides a mock function with given fields: ctx, platform, backend, version, capacity
-func (_m *Peer) RegisterAgent(ctx context.Context, platform string, backend string, version string, capacity int) (int64, error) {
-	ret := _m.Called(ctx, platform, backend, version, capacity)
+// RegisterAgent provides a mock function with given fields: ctx, info
+func (_m *Peer) RegisterAgent(ctx context.Context, info rpc.AgentInfo) (int64, error) {
+	ret := _m.Called(ctx, info)
 
 	if len(ret) == 0 {
 		panic("no return value specified for RegisterAgent")
@@ -129,17 +116,17 @@ func (_m *Peer) RegisterAgent(ctx context.Context, platform string, backend stri
 
 	var r0 int64
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, string, string, string, int) (int64, error)); ok {
-		return rf(ctx, platform, backend, version, capacity)
+	if rf, ok := ret.Get(0).(func(context.Context, rpc.AgentInfo) (int64, error)); ok {
+		return rf(ctx, info)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, string, string, string, int) int64); ok {
-		r0 = rf(ctx, platform, backend, version, capacity)
+	if rf, ok := ret.Get(0).(func(context.Context, rpc.AgentInfo) int64); ok {
+		r0 = rf(ctx, info)
 	} else {
 		r0 = ret.Get(0).(int64)
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, string, string, string, int) error); ok {
-		r1 = rf(ctx, platform, backend, version, capacity)
+	if rf, ok := ret.Get(1).(func(context.Context, rpc.AgentInfo) error); ok {
+		r1 = rf(ctx, info)
 	} else {
 		r1 = ret.Error(1)
 	}

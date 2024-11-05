@@ -15,14 +15,14 @@
 package user
 
 import (
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 // Command exports the user command set.
 var Command = &cli.Command{
 	Name:  "user",
 	Usage: "manage users",
-	Subcommands: []*cli.Command{
+	Commands: []*cli.Command{
 		userListCmd,
 		userInfoCmd,
 		userAddCmd,
