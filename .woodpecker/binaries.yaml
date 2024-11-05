@@ -2,12 +2,14 @@ when:
   - event: tag
   - event: pull_request
     branch: ${CI_REPO_DEFAULT_BRANCH}
-    path: Makefile
+    path:
+      - Makefile
+      - .woodpecker/binaries.yaml
 
 variables:
   - &golang_image 'docker.io/golang:1.23'
   - &node_image 'docker.io/node:23-alpine'
-  - &xgo_image 'docker.io/techknowlogick/xgo:go-1.23.x'
+  - &xgo_image 'docker.io/techknowlogick/xgo:go-1.23.1'
 
 # cspell:words bindata netgo
 
