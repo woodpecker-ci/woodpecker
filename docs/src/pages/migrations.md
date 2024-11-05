@@ -36,7 +36,7 @@ This will be the next version of Woodpecker.
 
 ## Admin migrations
 
-- Deprecate `WOODPECKER_LOG_XORM` and `WOODPECKER_LOG_XORM_SQL` use `"WOODPECKER_DB_LOG` and `"WOODPECKER_DB_LOG_SQL`
+- Deprecate `WOODPECKER_LOG_XORM` and `WOODPECKER_LOG_XORM_SQL` use `"WOODPECKER_DATABASE_LOG` and `"WOODPECKER_DATABASE_LOG_SQL`
 - Deprecate `WOODPECKER_FILTER_LABELS` use `WOODPECKER_AGENT_LABELS`
 - Move docker resource limit settings from server into agent configuration
 - Rename server environment variable `WOODPECKER_ESCALATE` to `WOODPECKER_PLUGINS_PRIVILEGED`
