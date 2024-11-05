@@ -104,7 +104,7 @@ When using the `local` backend, the `image` entry is used to specify the shell, 
        - go test
 
    - name: publish
-+    image: plugins/docker
++    image: woodpeckerci/plugin-kaniko
      repo: foo/bar
 
  services:
@@ -189,12 +189,6 @@ You can also use a custom shell with `CI_SCRIPT` (Base64-encoded) if you set `co
 Woodpecker provides the ability to pass environment variables to individual steps.
 
 For more details, check the [environment docs](./50-environment.md).
-
-### `secrets`
-
-Woodpecker provides the ability to store named parameters external to the YAML configuration file, in a central secret store. These secrets can be passed to individual steps of the workflow at runtime.
-
-For more details, check the [secrets docs](./40-secrets.md).
 
 ### `failure`
 
@@ -299,7 +293,16 @@ when:
 
 #### `event`
 
-Available events: `push`, `pull_request`, `pull_request_closed`, `tag`, `release`, `deployment`, `cron`, `manual`
+The available events are:
+
+- `push`: triggered when a commit is pushed to a branch.
+- `pull_request`: triggered when a pull request is opened or a new commit is pushed to it.
+- `pull_request_closed`: triggered when a pull request is closed or merged.
+- `tag`: triggered when a tag is pushed.
+- `release`: triggered when a release, pre-release or draft is created. (You can apply further filters using [evaluate](#evaluate) with [environment variables](./50-environment.md#built-in-environment-variables).)
+- `deployment` (only available for GitHub): triggered when a deployment is created in the repository.
+- `cron`: triggered when a cron job is executed.
+- `manual`: triggered when a user manually triggers a pipeline.
 
 Execute a step if the build event is a `tag`:
 
@@ -486,7 +489,7 @@ Normally steps of a workflow are executed serially in the order in which they ar
        - go build
 
    - name: deploy
-     image: plugins/docker
+     image: woodpeckerci/plugin-kaniko
      settings:
        repo: foo/bar
 +    depends_on: [build, test] # deploy will be executed after build and test finished
@@ -612,7 +615,7 @@ For more details check the [matrix build docs](./30-matrix-workflows.md).
 
 You can set labels for your workflow to select an agent to execute the workflow on. An agent will pick up and run a workflow when **every** label assigned to it matches the agents labels.
 
-To set additional agent labels, check the [agent configuration options](../30-administration/15-agent-config.md#woodpecker_filter_labels). Agents will have at least four default labels: `platform=agent-os/agent-arch`, `hostname=my-agent`, `backend=docker` (type of the agent backend) and `repo=*`. Agents can use a `*` as a wildcard for a label. For example `repo=*` will match every repo.
+To set additional agent labels, check the [agent configuration options](../30-administration/15-agent-config.md#woodpecker_agent_labels). Agents will have at least four default labels: `platform=agent-os/agent-arch`, `hostname=my-agent`, `backend=docker` (type of the agent backend) and `repo=*`. Agents can use a `*` as a wildcard for a label. For example `repo=*` will match every repo.
 
 Workflow labels with an empty value will be ignored.
 By default, each workflow has at least the `repo=your-user/your-repo-name` label. If you have set the [platform attribute](#platform) for your workflow it will have a label like `platform=your-os/your-arch` as well.

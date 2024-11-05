@@ -1,7 +1,7 @@
 variables:
-  - &golang_image 'docker.io/golang:1.22'
-  - &node_image 'docker.io/node:21-alpine'
-  - &alpine_image 'docker.io/alpine:3.19'
+  - &golang_image 'docker.io/golang:1.23'
+  - &node_image 'docker.io/node:23-alpine'
+  - &alpine_image 'docker.io/alpine:3.20'
   - path: &when_path
       - 'docs/**'
       - '.woodpecker/docs.yaml'
@@ -60,7 +60,7 @@ steps:
       - event: manual
 
   deploy-preview:
-    image: docker.io/woodpeckerci/plugin-surge-preview:1.3.0
+    image: docker.io/woodpeckerci/plugin-surge-preview:1.3.2
     settings:
       path: 'docs/build/'
       surge_token:

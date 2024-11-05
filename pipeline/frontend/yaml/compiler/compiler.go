@@ -46,10 +46,10 @@ type Secret struct {
 func (s *Secret) Available(event string, container *yaml_types.Container) error {
 	onlyAllowSecretForPlugins := len(s.AllowedPlugins) > 0
 	if onlyAllowSecretForPlugins && !container.IsPlugin() {
-		return fmt.Errorf("secret %q only allowed to be used by plugins by step %q", s.Name, container.Name)
+		return fmt.Errorf("secret %q is only allowed to be used by plugins (a filter has been set on the secret). Note: Image filters do not work for normal steps", s.Name)
 	}
 
-	if onlyAllowSecretForPlugins && !utils.MatchImage(container.Image, s.AllowedPlugins...) {
+	if onlyAllowSecretForPlugins && !utils.MatchImageDynamic(container.Image, s.AllowedPlugins...) {
 		return fmt.Errorf("secret %q is not allowed to be used with image %q by step %q", s.Name, container.Image, container.Name)
 	}
 
@@ -81,41 +81,34 @@ func (s *Secret) Match(event string) bool {
 	return false
 }
 
-type ResourceLimit struct {
-	MemSwapLimit int64
-	MemLimit     int64
-	ShmSize      int64
-	CPUQuota     int64
-	CPUShares    int64
-	CPUSet       string
-}
-
 // Compiler compiles the yaml.
 type Compiler struct {
-	local             bool
-	escalated         []string
-	prefix            string
-	volumes           []string
-	networks          []string
-	env               map[string]string
-	cloneEnv          map[string]string
-	workspaceBase     string
-	workspacePath     string
-	metadata          metadata.Metadata
-	registries        []Registry
-	secrets           map[string]Secret
-	reslimit          ResourceLimit
-	defaultCloneImage string
-	trustedPipeline   bool
-	netrcOnlyTrusted  bool
+	local                   bool
+	escalated               []string
+	prefix                  string
+	volumes                 []string
+	networks                []string
+	env                     map[string]string
+	cloneEnv                map[string]string
+	workspaceBase           string
+	workspacePath           string
+	metadata                metadata.Metadata
+	registries              []Registry
+	secrets                 map[string]Secret
+	defaultClonePlugin      string
+	trustedClonePlugins     []string
+	securityTrustedPipeline bool
+	netrcOnlyTrusted        bool
 }
 
 // New creates a new Compiler with options.
 func New(opts ...Option) *Compiler {
 	compiler := &Compiler{
-		env:      map[string]string{},
-		cloneEnv: map[string]string{},
-		secrets:  map[string]Secret{},
+		env:                 map[string]string{},
+		cloneEnv:            map[string]string{},
+		secrets:             map[string]Secret{},
+		defaultClonePlugin:  constant.DefaultClonePlugin,
+		trustedClonePlugins: constant.TrustedClonePlugins,
 	}
 	for _, opt := range opts {
 		opt(compiler)
@@ -163,20 +156,15 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 		c.workspacePath = path.Clean(conf.Workspace.Path)
 	}
 
-	cloneImage := constant.DefaultCloneImage
-	if len(c.defaultCloneImage) > 0 {
-		cloneImage = c.defaultCloneImage
-	}
-
 	// add default clone step
-	if !c.local && len(conf.Clone.ContainerList) == 0 && !conf.SkipClone {
+	if !c.local && len(conf.Clone.ContainerList) == 0 && !conf.SkipClone && len(c.defaultClonePlugin) != 0 {
 		cloneSettings := map[string]any{"depth": "0"}
 		if c.metadata.Curr.Event == metadata.EventTag {
 			cloneSettings["tags"] = "true"
 		}
 		container := &yaml_types.Container{
 			Name:        defaultCloneName,
-			Image:       cloneImage,
+			Image:       c.defaultClonePlugin,
 			Settings:    cloneSettings,
 			Environment: make(map[string]any),
 		}
@@ -208,7 +196,7 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 			}
 
 			// only inject netrc if it's a trusted repo or a trusted plugin
-			if !c.netrcOnlyTrusted || c.trustedPipeline || (container.IsPlugin() && container.IsTrustedCloneImage()) {
+			if !c.netrcOnlyTrusted || c.securityTrustedPipeline || (container.IsPlugin() && container.IsTrustedCloneImage(c.trustedClonePlugins)) {
 				for k, v := range c.cloneEnv {
 					step.Environment[k] = v
 				}
@@ -265,7 +253,7 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 		}
 
 		// inject netrc if it's a trusted repo or a trusted clone-plugin
-		if c.trustedPipeline || (container.IsPlugin() && container.IsTrustedCloneImage()) {
+		if c.securityTrustedPipeline || (container.IsPlugin() && container.IsTrustedCloneImage(c.trustedClonePlugins)) {
 			for k, v := range c.cloneEnv {
 				step.Environment[k] = v
 			}
@@ -275,7 +263,6 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 			step:      step,
 			position:  pos,
 			name:      container.Name,
-			group:     container.Group,
 			dependsOn: container.DependsOn,
 		})
 	}

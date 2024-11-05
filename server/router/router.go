@@ -62,7 +62,6 @@ func Load(noRouteHandler http.HandlerFunc, middleware ...gin.HandlerFunc) http.H
 		{
 			auth.GET("", api.HandleAuth)
 			auth.POST("", api.HandleAuth)
-			auth.POST("/token", api.DeprecatedGetLoginToken)
 		}
 
 		base.GET("/metrics", metrics.PromHandler())

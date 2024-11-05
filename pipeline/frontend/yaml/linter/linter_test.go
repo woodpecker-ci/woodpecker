@@ -39,7 +39,7 @@ steps:
       - go build
       - go test
   publish:
-    image: plugins/docker
+    image: woodpeckerci/plugin-kaniko
     settings:
       repo: foo/bar
       foo: bar
@@ -61,7 +61,7 @@ steps:
       - go build
       - go test
   - name: publish
-    image: plugins/docker
+    image: woodpeckerci/plugin-kaniko
     settings:
       repo: foo/bar
       foo: bar
@@ -94,7 +94,11 @@ steps:
 			conf, err := yaml.ParseString(testd.Data)
 			assert.NoError(t, err)
 
-			assert.NoError(t, linter.New(linter.WithTrusted(true)).Lint([]*linter.WorkflowConfig{{
+			assert.NoError(t, linter.New(linter.WithTrusted(linter.TrustedConfiguration{
+				Network:  true,
+				Volumes:  true,
+				Security: true,
+			})).Lint([]*linter.WorkflowConfig{{
 				File:      testd.Title,
 				RawConfig: testd.Data,
 				Workflow:  conf,
@@ -119,10 +123,6 @@ func TestLintErrors(t *testing.T) {
 		{
 			from: "steps: { build: { image: golang, privileged: true }  }",
 			want: "Insufficient privileges to use privileged mode",
-		},
-		{
-			from: "steps: { build: { image: golang, shm_size: 10gb }  }",
-			want: "Insufficient privileges to override shm_size",
 		},
 		{
 			from: "steps: { build: { image: golang, dns: [ 8.8.8.8 ] }  }",
@@ -162,8 +162,20 @@ func TestLintErrors(t *testing.T) {
 			want: "Cannot configure both entrypoint and settings",
 		},
 		{
-			from: "steps: { build: { image: golang, settings: { test: 'true' }, environment: [ 'TEST=true' ] } }",
-			want: "Cannot configure both environment and settings",
+			from: "steps: { build: { image: golang, settings: { test: 'true' }, environment: { 'TEST': 'true' } } }",
+			want: "Should not configure both environment and settings",
+		},
+		{
+			from: "{pipeline: { build: { image: golang, settings: { test: 'true' } } }, when: { branch: main, event: push } }",
+			want: "Additional property pipeline is not allowed",
+		},
+		{
+			from: "{steps: { build: { image: plugins/docker, settings: { test: 'true' } } }, when: { branch: main, event: push } } }",
+			want: "The formerly privileged plugin 'plugins/docker' is no longer privileged by default, if required, add it to WOODPECKER_PLUGINS_PRIVILEGED",
+		},
+		{
+			from: "{steps: { build: { image: golang, settings: { test: 'true' } } }, when: { branch: main, event: push }, clone: { git: { image: some-other/plugin-git:v1.1.0 } } }",
+			want: "Specified clone image does not match allow list, netrc will not be injected",
 		},
 	}
 

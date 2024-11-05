@@ -14,7 +14,11 @@
 
 package utils
 
-import "github.com/distribution/reference"
+import (
+	"strings"
+
+	"github.com/distribution/reference"
+)
 
 // trimImage returns the short image name without tag.
 func trimImage(name string) string {
@@ -57,14 +61,42 @@ func MatchImage(from string, to ...string) bool {
 	return false
 }
 
+// MatchImageDynamic check if image is in list based on list.
+// If an list entry has a tag specified it only will match if both are the same, else the tag is ignored.
+func MatchImageDynamic(from string, to ...string) bool {
+	fullFrom := expandImage(from)
+	trimFrom := trimImage(from)
+	for _, match := range to {
+		if imageHasTag(match) {
+			if fullFrom == expandImage(match) {
+				return true
+			}
+		} else {
+			if trimFrom == trimImage(match) {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+func imageHasTag(name string) bool {
+	return strings.Contains(name, ":")
+}
+
+// ParseNamed parses an image as a reference to validate it then parses it as a named reference.
+func ParseNamed(image string) (reference.Named, error) {
+	ref, err := reference.ParseAnyReference(image)
+	if err != nil {
+		return nil, err
+	}
+	return reference.ParseNamed(ref.String())
+}
+
 // MatchHostname returns true if the image hostname
 // matches the specified hostname.
 func MatchHostname(image, hostname string) bool {
-	ref, err := reference.ParseAnyReference(image)
-	if err != nil {
-		return false
-	}
-	named, err := reference.ParseNamed(ref.String())
+	named, err := ParseNamed(image)
 	if err != nil {
 		return false
 	}

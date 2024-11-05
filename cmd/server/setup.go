@@ -43,7 +43,6 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 	"go.woodpecker-ci.org/woodpecker/v2/server/store/datastore"
 	"go.woodpecker-ci.org/woodpecker/v2/server/store/types"
-	"go.woodpecker-ci.org/woodpecker/v2/shared/constant"
 )
 
 const (
@@ -52,11 +51,14 @@ const (
 )
 
 func setupStore(ctx context.Context, c *cli.Command) (store.Store, error) {
-	datasource := c.String("datasource")
-	driver := c.String("driver")
+	datasource := c.String("db-datasource")
+	driver := c.String("db-driver")
 	xorm := store.XORM{
-		Log:     c.Bool("log-xorm"),
-		ShowSQL: c.Bool("log-xorm-sql"),
+		Log:             c.Bool("db-log"),
+		ShowSQL:         c.Bool("db-log-sql"),
+		MaxOpenConns:    int(c.Int("db-max-open-connections")),
+		MaxIdleConns:    int(c.Int("db-max-idle-connections")),
+		ConnMaxLifetime: c.Duration("db-max-connection-timeout"),
 	}
 
 	if driver == "sqlite3" {
@@ -104,8 +106,11 @@ func checkSqliteFileExist(path string) error {
 	return err
 }
 
-func setupQueue(ctx context.Context, s store.Store) queue.Queue {
-	return queue.WithTaskStore(ctx, queue.New(ctx), s)
+func setupQueue(ctx context.Context, s store.Store) (queue.Queue, error) {
+	return queue.New(ctx, queue.Config{
+		Backend: queue.TypeMemory,
+		Store:   s,
+	})
 }
 
 func setupMembershipService(_ context.Context, _store store.Store) cache.MembershipService {
@@ -144,18 +149,19 @@ func setupJWTSecret(_store store.Store) (string, error) {
 	return jwtSecret, nil
 }
 
-func setupEvilGlobals(ctx context.Context, c *cli.Command, s store.Store) error {
+func setupEvilGlobals(ctx context.Context, c *cli.Command, s store.Store) (err error) {
 	// services
-	server.Config.Services.Queue = setupQueue(ctx, s)
 	server.Config.Services.Logs = logging.New()
 	server.Config.Services.Pubsub = pubsub.New()
 	server.Config.Services.Membership = setupMembershipService(ctx, s)
-	serviceManager, err := services.NewManager(c, s, setup.Forge)
+	server.Config.Services.Queue, err = setupQueue(ctx, s)
+	if err != nil {
+		return fmt.Errorf("could not setup queue: %w", err)
+	}
+	server.Config.Services.Manager, err = services.NewManager(c, s, setup.Forge)
 	if err != nil {
 		return fmt.Errorf("could not setup service manager: %w", err)
 	}
-	server.Config.Services.Manager = serviceManager
-
 	server.Config.Services.LogStore, err = setupLogStore(c, s)
 	if err != nil {
 		return fmt.Errorf("could not setup log store: %w", err)
@@ -165,8 +171,9 @@ func setupEvilGlobals(ctx context.Context, c *cli.Command, s store.Store) error 
 	server.Config.Pipeline.AuthenticatePublicRepos = c.Bool("authenticate-public-repos")
 
 	// Cloning
-	server.Config.Pipeline.DefaultCloneImage = c.String("default-clone-image")
-	constant.TrustedCloneImages = append(constant.TrustedCloneImages, server.Config.Pipeline.DefaultCloneImage)
+	server.Config.Pipeline.DefaultClonePlugin = c.String("default-clone-plugin")
+	server.Config.Pipeline.TrustedClonePlugins = c.StringSlice("plugins-trusted-clone")
+	server.Config.Pipeline.TrustedClonePlugins = append(server.Config.Pipeline.TrustedClonePlugins, server.Config.Pipeline.DefaultClonePlugin)
 
 	// Execution
 	_events := c.StringSlice("default-cancel-previous-pipeline-events")
@@ -177,14 +184,6 @@ func setupEvilGlobals(ctx context.Context, c *cli.Command, s store.Store) error 
 	server.Config.Pipeline.DefaultCancelPreviousPipelineEvents = events
 	server.Config.Pipeline.DefaultTimeout = c.Int("default-pipeline-timeout")
 	server.Config.Pipeline.MaxTimeout = c.Int("max-pipeline-timeout")
-
-	// limits
-	server.Config.Pipeline.Limits.MemSwapLimit = c.Int("limit-mem-swap")
-	server.Config.Pipeline.Limits.MemLimit = c.Int("limit-mem")
-	server.Config.Pipeline.Limits.ShmSize = c.Int("limit-shm-size")
-	server.Config.Pipeline.Limits.CPUQuota = c.Int("limit-cpu-quota")
-	server.Config.Pipeline.Limits.CPUShares = c.Int("limit-cpu-shares")
-	server.Config.Pipeline.Limits.CPUSet = c.String("limit-cpu-set")
 
 	// backend options for pipeline compiler
 	server.Config.Pipeline.Proxy.No = c.String("backend-no-proxy")
@@ -206,11 +205,7 @@ func setupEvilGlobals(ctx context.Context, c *cli.Command, s store.Store) error 
 	} else {
 		server.Config.Server.WebhookHost = serverHost
 	}
-	if c.IsSet("server-dev-oauth-host-deprecated") {
-		server.Config.Server.OAuthHost = c.String("server-dev-oauth-host-deprecated")
-	} else {
-		server.Config.Server.OAuthHost = serverHost
-	}
+	server.Config.Server.OAuthHost = serverHost
 	server.Config.Server.Port = c.String("server-addr")
 	server.Config.Server.PortTLS = c.String("server-addr-tls")
 	server.Config.Server.StatusContext = c.String("status-context")
@@ -226,9 +221,9 @@ func setupEvilGlobals(ctx context.Context, c *cli.Command, s store.Store) error 
 	server.Config.Server.CustomJsFile = strings.TrimSpace(c.String("custom-js-file"))
 	server.Config.Pipeline.Networks = c.StringSlice("network")
 	server.Config.Pipeline.Volumes = c.StringSlice("volume")
-	server.Config.Pipeline.Privileged = c.StringSlice("escalate")
 	server.Config.WebUI.EnableSwagger = c.Bool("enable-swagger")
 	server.Config.WebUI.SkipVersionCheck = c.Bool("skip-version-check")
+	server.Config.Pipeline.PrivilegedPlugins = c.StringSlice("plugins-privileged")
 
 	// prometheus
 	server.Config.Prometheus.AuthToken = c.String("prometheus-auth-token")

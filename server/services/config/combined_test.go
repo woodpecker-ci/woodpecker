@@ -27,9 +27,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/go-ap/httpsig"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"github.com/yaronf/httpsign"
 
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge/mocks"
 	forge_types "go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
@@ -120,22 +120,16 @@ func TestFetchFromConfigService(t *testing.T) {
 
 	fixtureHandler := func(w http.ResponseWriter, r *http.Request) {
 		// check signature
-		pubKeyID := "woodpecker-ci-plugins"
+		pubKeyID := "woodpecker-ci-extensions"
 
-		keystore := httpsig.NewMemoryKeyStore()
-		keystore.SetKey(pubKeyID, pubEd25519Key)
+		verifier, err := httpsign.NewEd25519Verifier(pubEd25519Key,
+			httpsign.NewVerifyConfig(),
+			httpsign.Headers("@request-target", "content-digest")) // The Content-Digest header will be auto-generated
+		assert.NoError(t, err)
 
-		verifier := httpsig.NewVerifier(keystore)
-		verifier.SetRequiredHeaders([]string{"(request-target)", "date"})
-
-		keyID, err := verifier.Verify(r)
+		err = httpsign.VerifyRequest(pubKeyID, *verifier, r)
 		if err != nil {
 			http.Error(w, "Invalid signature", http.StatusBadRequest)
-			return
-		}
-
-		if keyID != pubKeyID {
-			http.Error(w, "Used wrong key", http.StatusBadRequest)
 			return
 		}
 
@@ -163,12 +157,12 @@ func TestFetchFromConfigService(t *testing.T) {
 		}
 
 		if req.Repo.Name == "Fetch empty" {
-			w.WriteHeader(404)
+			w.WriteHeader(http.StatusNotFound)
 			return
 		}
 
 		if req.Repo.Name == "Use old config" {
-			w.WriteHeader(204)
+			w.WriteHeader(http.StatusNoContent)
 			return
 		}
 
@@ -192,7 +186,7 @@ func TestFetchFromConfigService(t *testing.T) {
 
 	ts := httptest.NewServer(http.HandlerFunc(fixtureHandler))
 	defer ts.Close()
-	httpFetcher := config.NewHTTP(ts.URL, privEd25519Key)
+	httpFetcher := config.NewHTTP(ts.URL+"/", privEd25519Key)
 
 	for _, tt := range testTable {
 		t.Run(tt.name, func(t *testing.T) {

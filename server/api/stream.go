@@ -28,10 +28,17 @@ import (
 	"github.com/rs/zerolog/log"
 
 	"go.woodpecker-ci.org/woodpecker/v2/server"
+	"go.woodpecker-ci.org/woodpecker/v2/server/logging"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 	"go.woodpecker-ci.org/woodpecker/v2/server/pubsub"
 	"go.woodpecker-ci.org/woodpecker/v2/server/router/middleware/session"
 	"go.woodpecker-ci.org/woodpecker/v2/server/store"
+)
+
+const (
+	// How many batches of logs to keep for each client before starting to
+	// drop them if the client is not consuming them faster than they arrive.
+	maxQueuedBatchesPerClient int = 30
 )
 
 // EventStreamSSE
@@ -213,17 +220,32 @@ func LogStreamSSE(c *gin.Context) {
 	}
 
 	go func() {
-		err := server.Config.Services.Logs.Tail(ctx, step.ID, func(entries ...*model.LogEntry) {
-			for _, entry := range entries {
-				select {
-				case <-ctx.Done():
-					return
-				default:
-					ee, _ := json.Marshal(entry)
-					logChan <- ee
+		batches := make(logging.LogChan, maxQueuedBatchesPerClient)
+
+		go func() {
+			defer func() {
+				if r := recover(); r != nil {
+					log.Error().Msgf("error sending log message: %v", r)
+				}
+			}()
+
+			for entries := range batches {
+				for _, entry := range entries {
+					select {
+					case <-ctx.Done():
+						return
+					default:
+						if ee, err := json.Marshal(entry); err == nil {
+							logChan <- ee
+						} else {
+							log.Error().Err(err).Msg("unable to serialize log entry")
+						}
+					}
 				}
 			}
-		})
+		}()
+
+		err := server.Config.Services.Logs.Tail(ctx, step.ID, batches)
 		if err != nil {
 			log.Error().Err(err).Msg("tail of logs failed")
 		}

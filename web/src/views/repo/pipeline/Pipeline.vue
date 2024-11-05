@@ -8,17 +8,7 @@
       />
 
       <div class="flex items-start justify-center flex-grow relative basis-full md:basis-auto">
-        <Container v-if="selectedStep?.error" fill-width class="p-0">
-          <Panel>
-            <div class="flex flex-col items-center text-center gap-4">
-              <Icon name="status-error" class="w-16 h-16 text-wp-state-error-100" />
-              <span class="text-xl">{{ $t('repo.pipeline.we_got_some_errors') }}</span>
-              <span class="whitespace-pre-wrap">{{ selectedStep?.error }}</span>
-            </div>
-          </Panel>
-        </Container>
-
-        <Container v-else-if="pipeline!.errors?.some((e) => !e.is_warning)" fill-width class="p-0">
+        <Container v-if="pipeline!.errors?.some((e) => !e.is_warning)" fill-width class="p-0">
           <Panel>
             <div class="flex flex-col items-center text-center gap-4">
               <Icon name="status-error" class="w-16 h-16 text-wp-state-error-100" />
@@ -86,7 +76,6 @@ import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useNotifications from '~/compositions/useNotifications';
 import type { Pipeline, PipelineStep, Repo, RepoPermissions } from '~/lib/api/types';
-import { findStep } from '~/utils/helpers';
 
 const props = defineProps<{
   stepId?: string | null;
@@ -147,8 +136,6 @@ const selectedStepId = computed({
     router.replace({ params: { ...route.params, stepId: `${_selectedStepId}` } });
   },
 });
-
-const selectedStep = computed(() => findStep(pipeline.value.workflows || [], selectedStepId.value || -1));
 
 const { doSubmit: approvePipeline, isLoading: isApprovingPipeline } = useAsyncAction(async () => {
   if (!repo) {

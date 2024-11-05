@@ -31,7 +31,7 @@ const apiClient = useApiClient();
 const { notify } = useNotifications();
 const i18n = useI18n();
 
-// TODO reenable with eslint-plugin-promise eslint-disable-next-line promise/prefer-await-to-callbacks
+// eslint-disable-next-line promise/prefer-await-to-callbacks
 apiClient.setErrorHandler((err) => {
   if (err.status === 404) {
     notify({ title: i18n.t('errors.not_found'), type: 'error' });

@@ -431,16 +431,14 @@ func TestClient_AgentTasksList(t *testing.T) {
 			agentID: 1,
 			expected: []*Task{
 				{
-					ID:   "4696",
-					Data: []byte{},
+					ID: "4696",
 					Labels: map[string]string{
 						"platform": "linux/amd64",
 						"repo":     "woodpecker-ci/woodpecker",
 					},
 				},
 				{
-					ID:   "4697",
-					Data: []byte{},
+					ID: "4697",
 					Labels: map[string]string{
 						"platform": "linux/arm64",
 						"repo":     "woodpecker-ci/woodpecker",

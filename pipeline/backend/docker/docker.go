@@ -22,8 +22,10 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/docker/docker/api/types"
+	"github.com/docker/docker/api/types/container"
+	"github.com/docker/docker/api/types/image"
 	"github.com/docker/docker/api/types/network"
+	"github.com/docker/docker/api/types/system"
 	"github.com/docker/docker/api/types/volume"
 	tls_config "github.com/docker/go-connections/tlsconfig"
 	"github.com/moby/moby/client"
@@ -38,11 +40,9 @@ import (
 )
 
 type docker struct {
-	client     client.APIClient
-	enableIPv6 bool
-	network    string
-	volumes    []string
-	info       types.Info
+	client client.APIClient
+	info   system.Info
+	config config
 }
 
 const (
@@ -130,22 +130,9 @@ func (e *docker) Load(ctx context.Context) (*backend.BackendInfo, error) {
 		return nil, err
 	}
 
-	e.enableIPv6 = c.Bool("backend-docker-ipv6")
-	e.network = c.String("backend-docker-network")
-
-	volumes := strings.Split(c.String("backend-docker-volumes"), ",")
-	e.volumes = make([]string, 0, len(volumes))
-	// Validate provided volume definitions
-	for _, v := range volumes {
-		if v == "" {
-			continue
-		}
-		parts, err := splitVolumeParts(v)
-		if err != nil {
-			log.Error().Err(err).Msgf("invalid volume '%s' provided in WOODPECKER_BACKEND_DOCKER_VOLUMES", v)
-			continue
-		}
-		e.volumes = append(e.volumes, strings.Join(parts, ":"))
+	e.config, err = configFromCli(c)
+	if err != nil {
+		return nil, err
 	}
 
 	return &backend.BackendInfo{
@@ -171,9 +158,9 @@ func (e *docker) SetupWorkflow(ctx context.Context, conf *backend.Config, taskUU
 		networkDriver = networkDriverNAT
 	}
 	for _, n := range conf.Networks {
-		_, err := e.client.NetworkCreate(ctx, n.Name, types.NetworkCreate{
+		_, err := e.client.NetworkCreate(ctx, n.Name, network.CreateOptions{
 			Driver:     networkDriver,
-			EnableIPv6: e.enableIPv6,
+			EnableIPv6: &e.config.enableIPv6,
 		})
 		if err != nil {
 			return err
@@ -186,11 +173,11 @@ func (e *docker) StartStep(ctx context.Context, step *backend.Step, taskUUID str
 	log.Trace().Str("taskUUID", taskUUID).Msgf("start step %s", step.Name)
 
 	config := e.toConfig(step)
-	hostConfig := toHostConfig(step)
+	hostConfig := toHostConfig(step, &e.config)
 	containerName := toContainerName(step)
 
 	// create pull options with encoded authorization credentials.
-	pullOpts := types.ImagePullOptions{}
+	pullOpts := image.PullOptions{}
 	if step.AuthConfig.Username != "" && step.AuthConfig.Password != "" {
 		pullOpts.RegistryAuth, _ = encodeAuthToBase64(step.AuthConfig)
 	}
@@ -215,7 +202,7 @@ func (e *docker) StartStep(ctx context.Context, step *backend.Step, taskUUID str
 	}
 
 	// add default volumes to the host configuration
-	hostConfig.Binds = utils.DeduplicateStrings(append(hostConfig.Binds, e.volumes...))
+	hostConfig.Binds = utils.DeduplicateStrings(append(hostConfig.Binds, e.config.volumes...))
 
 	_, err := e.client.ContainerCreate(ctx, config, hostConfig, nil, nil, containerName)
 	if client.IsErrNotFound(err) {
@@ -249,15 +236,15 @@ func (e *docker) StartStep(ctx context.Context, step *backend.Step, taskUUID str
 		}
 
 		// join the container to an existing network
-		if e.network != "" {
-			err = e.client.NetworkConnect(ctx, e.network, containerName, &network.EndpointSettings{})
+		if e.config.network != "" {
+			err = e.client.NetworkConnect(ctx, e.config.network, containerName, &network.EndpointSettings{})
 			if err != nil {
 				return err
 			}
 		}
 	}
 
-	return e.client.ContainerStart(ctx, containerName, types.ContainerStartOptions{})
+	return e.client.ContainerStart(ctx, containerName, container.StartOptions{})
 }
 
 func (e *docker) WaitStep(ctx context.Context, step *backend.Step, taskUUID string) (*backend.State, error) {
@@ -286,7 +273,7 @@ func (e *docker) WaitStep(ctx context.Context, step *backend.Step, taskUUID stri
 func (e *docker) TailStep(ctx context.Context, step *backend.Step, taskUUID string) (io.ReadCloser, error) {
 	log.Trace().Str("taskUUID", taskUUID).Msgf("tail logs of step %s", step.Name)
 
-	logs, err := e.client.ContainerLogs(ctx, toContainerName(step), types.ContainerLogsOptions{
+	logs, err := e.client.ContainerLogs(ctx, toContainerName(step), container.LogsOptions{
 		Follow:     true,
 		ShowStdout: true,
 		ShowStderr: true,
@@ -350,7 +337,7 @@ func (e *docker) DestroyWorkflow(ctx context.Context, conf *backend.Config, task
 	return nil
 }
 
-var removeOpts = types.ContainerRemoveOptions{
+var removeOpts = container.RemoveOptions{
 	RemoveVolumes: true,
 	RemoveLinks:   false,
 	Force:         false,

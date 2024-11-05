@@ -34,6 +34,10 @@
             go-mockery
             protobuf
             sqlite
+            go-swag # for generate-swagger
+            addlicense
+            protoc-gen-go
+            protoc-gen-go-grpc
           ];
           CFLAGS = "-I${pkgs.glibc.dev}/include";
           LDFLAGS = "-L${pkgs.glibc}/lib";

@@ -26,19 +26,12 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc"
 )
 
-const (
-	// Store not more than 1mb in a log-line as 4mb is the limit of a grpc message
-	// and log-lines needs to be parsed by the browsers later on.
-	maxLogLineLength = 1024 * 1024 // 1mb
-)
-
 func (r *Runner) createLogger(_logger zerolog.Logger, uploads *sync.WaitGroup, workflow *rpc.Workflow) pipeline.Logger {
 	return func(step *backend.Step, rc io.ReadCloser) error {
 		defer rc.Close()
 
 		logger := _logger.With().
 			Str("image", step.Image).
-			Str("workflow_id", workflow.ID).
 			Logger()
 
 		uploads.Add(1)
@@ -51,7 +44,7 @@ func (r *Runner) createLogger(_logger zerolog.Logger, uploads *sync.WaitGroup, w
 		logger.Debug().Msg("log stream opened")
 
 		logStream := log.NewLineWriter(r.client, step.UUID, secrets...)
-		if err := log.CopyLineByLine(logStream, rc, maxLogLineLength); err != nil {
+		if err := log.CopyLineByLine(logStream, rc, pipeline.MaxLogLineLength); err != nil {
 			logger.Error().Err(err).Msg("copy limited logStream part")
 		}
 
