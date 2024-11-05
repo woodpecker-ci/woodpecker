@@ -24,6 +24,7 @@ type Step struct {
 	Detached       bool              `json:"detach,omitempty"`
 	Privileged     bool              `json:"privileged,omitempty"`
 	WorkingDir     string            `json:"working_dir,omitempty"`
+	WorkspaceBase  string            `json:"workspace_base,omitempty"`
 	Environment    map[string]string `json:"environment,omitempty"`
 	Entrypoint     []string          `json:"entrypoint,omitempty"`
 	Commands       []string          `json:"commands,omitempty"`

@@ -11,46 +11,32 @@ Woodpecker provides three different levels to add secrets to your pipeline. The 
 
 ## Usage
 
-### Use secrets in commands
+You can set a setting or an environment value from secrets using the `from_secret` syntax.
 
-Secrets are exposed to your pipeline steps and plugins as uppercase environment variables and can therefore be referenced in the commands section of your pipeline,
-once their usage is declared in the `secrets` section:
-
-```diff
- steps:
-   - name: test
-     image: bash
-     commands:
-+      - echo $some_username
-+      - echo $SOME_PASSWORD
-+    secrets: [ some_username, SOME_PASSWORD ]
-```
-
-The case of the environment variables is not changed, but secret matching is done case-insensitively. In the example above, `DOCKER_PASSWORD` would also match if the secret is called `docker_password`.
-
-### Using secrets in non-plugin steps via "environment:"
-
-You can set an environment value from secrets using the `from_secret` syntax.
-This way, the secret key and environment variable name can differ.
+In this example, the secret named `secret_token` would be passed to the setting named `token`,which will be available in the plugin as environment variable named `PLUGIN_TOKEN` (See [plugins](./51-plugins/20-creating-plugins.md#settings) for details), and to the environment variable `TOKEN_ENV`.
 
 ```diff
  steps:
-   - name: test
+   - name: 'plugin do stuff'
+     image: publish-plugin
++    settings:
++      token:
++        from_secret: secret_token
+
+   - name: 'some commands using secrets'
      image: bash
      commands:
-       - env | grep OWN
--    secrets: [ some_username, SOME_PASSWORD ]
+       - env | grep TOKEN
 +    environment:
-+      SOME_OWN_DEFINED_VAR:
-+        from_secret: some_username
++      TOKEN_ENV:
++        from_secret: secret_token
 ```
-
-### Using secrets in plugins-steps via "settings:"
 
 The `from_secret` syntax also works for settings in any hierarchy.
 
 :::info Important
-You cannot use `secrets` or `environment` directly in plugin steps, as this could alter plugin execution. Instead, use the `settings` field for secrets in plugins:
+You cannot use the deprecated `secrets` or `environment` directly in plugin steps, as this could alter plugin execution.
+Instead, use the `settings` field for secrets in plugins:
 
 - It's safer: Plugin settings are a controlled interface for customization.
 - It's consistent: Plugins define which settings they accept and how to handle them.
@@ -100,11 +86,11 @@ Please note parameter expressions are subject to pre-processing. When using secr
    - name: "echo password"
      image: bash
      commands:
--      - echo ${some_username}
--      - echo ${SOME_PASSWORD}
-+      - echo $${some_username}
-+      - echo $${SOME_PASSWORD}
-     secrets: [ some_username, SOME_PASSWORD ]
+-      - echo ${TOKEN_ENV}
++      - echo $${TOKEN_ENV}
+     environment:
+       TOKEN_ENV:
+         from_secret: secret_token
 ```
 
 ### Use in Pull Requests events

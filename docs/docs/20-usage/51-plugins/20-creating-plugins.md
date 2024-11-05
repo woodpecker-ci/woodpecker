@@ -42,7 +42,7 @@ Values like this are converted to JSON and then passed to your plugin. In the ex
 
 ### Secrets
 
-Secrets should be passed as a setting option. Therefore, users should use [`from_secret`](../40-secrets.md#using-secrets-in-non-plugin-steps-via-environment).
+Secrets should be passed as settings too. Therefore, users should use [`from_secret`](../40-secrets.md#usage).
 
 ## Plugin library
 

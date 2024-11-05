@@ -47,8 +47,10 @@ type (
 		Ports          []string           `yaml:"ports,omitempty"`
 		DependsOn      base.StringOrSlice `yaml:"depends_on,omitempty"`
 
-		Secrets     []string       `yaml:"secrets,omitempty"`
 		Environment map[string]any `yaml:"environment,omitempty"`
+
+		// Deprecated
+		Secrets []string `yaml:"secrets,omitempty"`
 
 		// Docker and Kubernetes Specific
 		Privileged bool `yaml:"privileged,omitempty"`
