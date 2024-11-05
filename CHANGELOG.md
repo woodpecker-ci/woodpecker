@@ -38,7 +38,6 @@
 ### 🔒 Security
 
 - chore: fix `http-proxy-middleware` CVE [[#4257](https://github.com/woodpecker-ci/woodpecker/pull/4257)]
-- chore(deps): update dependency vite to v5.4.6 [security] [[#4163](https://github.com/woodpecker-ci/woodpecker/pull/4163)]
 - Allow altering trusted clone plugins and filter them via tag [[#4074](https://github.com/woodpecker-ci/woodpecker/pull/4074)]
 - Update gitea sdk [[#4012](https://github.com/woodpecker-ci/woodpecker/pull/4012)]
 - Update Forgejo SDK [[#3948](https://github.com/woodpecker-ci/woodpecker/pull/3948)]
@@ -89,10 +88,8 @@
 
 - gitea: add check if pull_request webhook is missing pull info [[#4305](https://github.com/woodpecker-ci/woodpecker/pull/4305)]
 - Refresh token before loading branches [[#4284](https://github.com/woodpecker-ci/woodpecker/pull/4284)]
-- Don't parse forge config files multiple times if no error occured [[#4272](https://github.com/woodpecker-ci/woodpecker/pull/4272)]
 - Delete GitLab webhooks with partial URL match [[#4259](https://github.com/woodpecker-ci/woodpecker/pull/4259)]
 - Increase `WOODPECKER_FORGE_TIMEOUT` to fix config fetching for GitLab [[#4262](https://github.com/woodpecker-ci/woodpecker/pull/4262)]
-- fix: repo/owner parsing for gitlab [[#4255](https://github.com/woodpecker-ci/woodpecker/pull/4255)]
 - Ensure cli exec has by default not the same prefix [[#4132](https://github.com/woodpecker-ci/woodpecker/pull/4132)]
 - Fix repo add loading spinner [[#4135](https://github.com/woodpecker-ci/woodpecker/pull/4135)]
 - Fix migration registries table [[#4111](https://github.com/woodpecker-ci/woodpecker/pull/4111)]
@@ -100,7 +97,6 @@
 - Fix schema with detached steps [[#4066](https://github.com/woodpecker-ci/woodpecker/pull/4066)]
 - Fix schema with commands and entrypoint [[#4065](https://github.com/woodpecker-ci/woodpecker/pull/4065)]
 - Read long log lines from file storage correctly [[#4048](https://github.com/woodpecker-ci/woodpecker/pull/4048)]
-- Only update agent.LastWork if not done recently [[#4031](https://github.com/woodpecker-ci/woodpecker/pull/4031)]
 - Set refspec for gitlab MR [[#4021](https://github.com/woodpecker-ci/woodpecker/pull/4021)]
 - Set `CI_PREV_COMMIT_{SOURCE,TARGET}_BRANCH` as mentioned in the documentation [[#4001](https://github.com/woodpecker-ci/woodpecker/pull/4001)]
 - [Bitbucket Datacenter] Return empty list instead of null [[#4010](https://github.com/woodpecker-ci/woodpecker/pull/4010)]
@@ -181,7 +177,6 @@
 - chore(deps): update docker.io/golang docker tag to v1.23 [[#4170](https://github.com/woodpecker-ci/woodpecker/pull/4170)]
 - chore(deps): update node.js to v22 [[#4180](https://github.com/woodpecker-ci/woodpecker/pull/4180)]
 - fix(deps): update golang-packages [[#4161](https://github.com/woodpecker-ci/woodpecker/pull/4161)]
-- Bump trivy (and lockfile deps) [[#4160](https://github.com/woodpecker-ci/woodpecker/pull/4160)]
 - chore(deps): update dependency @antfu/eslint-config to v3 [[#4095](https://github.com/woodpecker-ci/woodpecker/pull/4095)]
 - chore(deps): update dependency jsdom to v25 [[#4094](https://github.com/woodpecker-ci/woodpecker/pull/4094)]
 - chore(deps): update docker.io/golang docker tag to v1.23 [[#4081](https://github.com/woodpecker-ci/woodpecker/pull/4081)]
