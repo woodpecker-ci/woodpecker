@@ -95,7 +95,7 @@ Read more about it in [#4213](https://github.com/woodpecker-ci/woodpecker/pull/4
 - Renamed API endpoints for pipelines (`<owner>/<repo>/builds/<buildId>` -> `<owner>/<repo>/pipelines/<pipelineId>`), old ones are still available but deprecated
 - Updated Prometheus gauge `build_*` to `pipeline_*`
 - Updated Prometheus gauge `*_job_*` to `*_step_*`
-- Renamed config env `WOODPECKER_MAX_PROCS` to `WOODPECKER_MAX_WORKFLOWS` (still available as fallback)
+- Renamed config env `WOODPECKER_MAX_PROCS` to `WOODPECKER_MAX_WORKFLOWS` (still available as fallback) <!-- cspell:ignore PROCS -->
 - The pipelines are now also read from `.yaml` files, the new default order is `.woodpecker/*.yml` and `.woodpecker/*.yaml` (without any prioritization) -> `.woodpecker.yml` -> `.woodpecker.yaml`
 - Dropped support for [Coding](https://coding.net/), [Gogs](https://gogs.io) and Bitbucket Server (Stash).
 - `/api/queue/resume` & `/api/queue/pause` endpoint methods were changed from `GET` to `POST`
