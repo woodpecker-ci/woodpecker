@@ -39,7 +39,7 @@ var gatedToRequireApproval = xormigrate.Migration{
 		// migrate gated repos
 		if _, err := sess.Exec(
 			builder.Update(builder.Eq{"require_approval": "all_events"}).
-				From(new(repos)).
+				From("repos").
 				Where(builder.Eq{"gated": true})); err != nil {
 			return err
 		}
@@ -47,7 +47,7 @@ var gatedToRequireApproval = xormigrate.Migration{
 		// migrate public repos to new default require approval
 		if _, err := sess.Exec(
 			builder.Update(builder.Eq{"require_approval": "pull_requests"}).
-				From(new(repos)).
+				From("repos").
 				Where(builder.Eq{"gated": false, "visibility": "public"})); err != nil {
 			return err
 		}
@@ -55,7 +55,7 @@ var gatedToRequireApproval = xormigrate.Migration{
 		// migrate private repos to new default require approval
 		if _, err := sess.Exec(
 			builder.Update(builder.Eq{"require_approval": "none"}).
-				From(new(repos)).
+				From("repos").
 				Where(builder.Eq{"gated": false}.And(builder.Neq{"visibility": "public"}))); err != nil {
 			return err
 		}
