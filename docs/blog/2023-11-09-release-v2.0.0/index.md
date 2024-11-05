@@ -53,7 +53,7 @@ Security is pretty important to us and we want to make sure that no one can stea
 
 ## Migration notes
 
-There have been a few more breaking changes. [Read more about what you need to do when upgrading!](../docs/migrations#200)
+There have been a few more breaking changes. [Read more about what you need to do when upgrading!](/migrations#200)
 
 ## New features
 

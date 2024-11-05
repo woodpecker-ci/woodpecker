@@ -410,7 +410,19 @@
                 },
                 "trusted": {
                     "desc": "Die zugrundeliegenden Pipeline-Container erhalten Zugriff auf ausgeweitete Funktionen (z. B. das Einhängen von Laufwerken).",
-                    "trusted": "Vertrauenswürdig"
+                    "trusted": "Vertrauenswürdig",
+                    "network": {
+                        "network": "Netzwerk",
+                        "desc": "Zugrundeliegende Pipeline-Container erhalten Zugriff auf Netzwerk-Privilegien wie das Ändern des DNS."
+                    },
+                    "volumes": {
+                        "volumes": "Volumen",
+                        "desc": "Zugrundeliegende Pipeline-Container erhalten Zugriff auf Volumen-Privilegien."
+                    },
+                    "security": {
+                        "security": "Sicherheit",
+                        "desc": "Zugrundeliegende Pipeline-Container erhalten Zugriff auf Sicherheits-Privilegien."
+                    }
                 },
                 "visibility": {
                     "internal": {
