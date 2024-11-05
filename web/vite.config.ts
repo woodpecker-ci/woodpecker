@@ -18,7 +18,6 @@ function woodpeckerInfoPlugin(): Plugin {
         '1) Please add `WOODPECKER_DEV_WWW_PROXY=http://localhost:8010` to your `.env` file.\n' +
         'After starting the woodpecker server as well you should now be able to access the UI at http://localhost:8000/\n\n' +
         '2) If you want to run the vite dev server (`pnpm start`) within a container please set `VITE_DEV_SERVER_HOST=0.0.0.0`.';
-      // eslint-disable-next-line no-console
       console.log(info);
     },
   };
@@ -78,7 +77,7 @@ export default defineConfig({
         copyFile(
           `node_modules/dayjs/esm/locale/${langName}.js`,
           `src/assets/dayjsLocales/${name}.js`,
-          // TODO enable with eslint-plugin-promise eslint-disable-next-line promise/prefer-await-to-callbacks
+          // eslint-disable-next-line promise/prefer-await-to-callbacks
           (err) => {
             if (err) {
               throw err;

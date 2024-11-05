@@ -18,6 +18,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"maps"
 
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc"
 	"go.woodpecker-ci.org/woodpecker/v2/server"
@@ -31,18 +32,19 @@ func queuePipeline(ctx context.Context, repo *model.Repo, pipelineItems []*stepb
 		if item.Workflow.State == model.StatusSkipped {
 			continue
 		}
-		task := new(model.Task)
-		task.ID = fmt.Sprint(item.Workflow.ID)
-		task.Labels = map[string]string{}
-		for k, v := range item.Labels {
-			task.Labels[k] = v
+		task := &model.Task{
+			ID:     fmt.Sprint(item.Workflow.ID),
+			Labels: make(map[string]string),
 		}
-		task.Labels["repo"] = repo.FullName
+		maps.Copy(task.Labels, item.Labels)
+		err := task.ApplyLabelsFromRepo(repo)
+		if err != nil {
+			return err
+		}
 		task.Dependencies = taskIDs(item.DependsOn, pipelineItems)
 		task.RunOn = item.RunsOn
 		task.DepStatus = make(map[string]model.StatusValue)
 
-		var err error
 		task.Data, err = json.Marshal(rpc.Workflow{
 			ID:      fmt.Sprint(item.Workflow.ID),
 			Config:  item.Config,

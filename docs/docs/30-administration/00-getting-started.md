@@ -32,9 +32,9 @@ In addition you need at least some kind of database which requires additional re
 
 ## Installation
 
-You can install Woodpecker on multiple ways. If you are not sure which one to choose, we recommend using the [docker-compose](./05-deployment-methods/10-docker-compose.md) method for the beginning:
+You can install Woodpecker on multiple ways. If you are not sure which one to choose, we recommend using the [docker compose](./05-deployment-methods/10-docker-compose.md) method for the beginning:
 
-- Using [docker-compose](./05-deployment-methods/10-docker-compose.md) with the official [container images](./05-deployment-methods/10-docker-compose.md#docker-images)
+- Using [docker compose](./05-deployment-methods/10-docker-compose.md) with the official [container images](./05-deployment-methods/10-docker-compose.md#docker-images)
 - Using [Kubernetes](./05-deployment-methods/20-kubernetes.md) via the Woodpecker Helm chart
 - Using binaries, DEBs or RPMs you can download from [latest release](https://github.com/woodpecker-ci/woodpecker/releases/latest)
 - Or using a [third-party installation method](./05-deployment-methods/30-third-party.md)
@@ -55,5 +55,5 @@ Check the [server configuration](./10-server-config.md) and [agent configuration
 
 The agent is the worker which executes the [workflows](../20-usage/15-terminology/index.md).
 Woodpecker agents can execute work using a [backend](../20-usage/15-terminology/index.md) like [docker](./22-backends/10-docker.md) or [kubernetes](./22-backends/40-kubernetes.md).
-By default if you choose to deploy an agent using [docker-compose](./05-deployment-methods/10-docker-compose.md) the agent simply use docker for the backend as well.
+By default if you choose to deploy an agent using [docker compose](./05-deployment-methods/10-docker-compose.md) the agent simply use docker for the backend as well.
 So nothing to worry about here. If you still prefer to adjust the agent to your needs, check the [agent configuration](./15-agent-config.md) page.

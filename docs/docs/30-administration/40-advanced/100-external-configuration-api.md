@@ -81,12 +81,11 @@ WOODPECKER_CONFIG_SERVICE_ENDPOINT=https://example.com/ciconfig
     "updated_at": 0,
     "verified": false
   },
-  "configs": [
-    {
-      "name": ".woodpecker.yaml",
-      "data": "steps:\n  - name: backend\n    image: alpine\n    commands:\n      - echo \"Hello there from Repo (.woodpecker.yaml)\"\n"
-    }
-  ]
+  "netrc": {
+    "machine": "https://example.com",
+    "login": "user",
+    "password": "password"
+  }
 }
 ```
 

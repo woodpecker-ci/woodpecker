@@ -143,6 +143,36 @@ func (_m *Store) AgentList(p *model.ListOptions) ([]*model.Agent, error) {
 	return r0, r1
 }
 
+// AgentListForOrg provides a mock function with given fields: orgID, opt
+func (_m *Store) AgentListForOrg(orgID int64, opt *model.ListOptions) ([]*model.Agent, error) {
+	ret := _m.Called(orgID, opt)
+
+	if len(ret) == 0 {
+		panic("no return value specified for AgentListForOrg")
+	}
+
+	var r0 []*model.Agent
+	var r1 error
+	if rf, ok := ret.Get(0).(func(int64, *model.ListOptions) ([]*model.Agent, error)); ok {
+		return rf(orgID, opt)
+	}
+	if rf, ok := ret.Get(0).(func(int64, *model.ListOptions) []*model.Agent); ok {
+		r0 = rf(orgID, opt)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*model.Agent)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(int64, *model.ListOptions) error); ok {
+		r1 = rf(orgID, opt)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // AgentUpdate provides a mock function with given fields: _a0
 func (_m *Store) AgentUpdate(_a0 *model.Agent) error {
 	ret := _m.Called(_a0)
@@ -1340,17 +1370,17 @@ func (_m *Store) HasRedirectionForRepo(_a0 int64, _a1 string) (bool, error) {
 	return r0, r1
 }
 
-// LogAppend provides a mock function with given fields: logEntry
-func (_m *Store) LogAppend(logEntry *model.LogEntry) error {
-	ret := _m.Called(logEntry)
+// LogAppend provides a mock function with given fields: _a0, _a1
+func (_m *Store) LogAppend(_a0 *model.Step, _a1 []*model.LogEntry) error {
+	ret := _m.Called(_a0, _a1)
 
 	if len(ret) == 0 {
 		panic("no return value specified for LogAppend")
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(*model.LogEntry) error); ok {
-		r0 = rf(logEntry)
+	if rf, ok := ret.Get(0).(func(*model.Step, []*model.LogEntry) error); ok {
+		r0 = rf(_a0, _a1)
 	} else {
 		r0 = ret.Error(0)
 	}

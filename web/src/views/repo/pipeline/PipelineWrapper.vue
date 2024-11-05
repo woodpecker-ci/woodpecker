@@ -1,7 +1,7 @@
 <template>
   <Scaffold
     v-if="pipeline && repo"
-    v-model:activeTab="activeTab"
+    v-model:active-tab="activeTab"
     enable-tabs
     disable-tab-url-hash-mode
     :go-back="goBack"
@@ -31,7 +31,7 @@
           }}</span>
         </div>
 
-        <template v-if="repoPermissions!.push && pipeline.status !== 'declined' && pipeline.status !== 'blocked'">
+        <template v-if="repoPermissions!.push && pipeline.status !== 'blocked'">
           <div class="flex content-start gap-x-2">
             <Button
               v-if="pipeline.status === 'pending' || pipeline.status === 'running'"
@@ -93,6 +93,7 @@
       id="changed-files"
       :title="$t('repo.pipeline.files', { files: pipeline.changed_files?.length })"
     />
+    <Tab v-if="repoPermissions && repoPermissions.push" id="debug" :title="$t('repo.pipeline.debug.title')" />
 
     <router-view />
   </Scaffold>
@@ -219,6 +220,10 @@ const activeTab = computed({
       return 'errors';
     }
 
+    if (route.name === 'repo-pipeline-debug' && repoPermissions.value?.push) {
+      return 'debug';
+    }
+
     return 'tasks';
   },
   set(tab: string) {
@@ -236,6 +241,10 @@ const activeTab = computed({
 
     if (tab === 'errors') {
       router.replace({ name: 'repo-pipeline-errors' });
+    }
+
+    if (tab === 'debug' && repoPermissions.value?.push) {
+      router.replace({ name: 'repo-pipeline-debug' });
     }
   },
 });

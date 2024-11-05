@@ -29,7 +29,9 @@ func TestGenerateScriptWin(t *testing.T) {
 			from: []string{"echo %PATH%", "go build", "go test"},
 			want: `
 $ErrorActionPreference = 'Stop';
-&cmd /c "mkdir c:\root";
+if ([Environment]::GetEnvironmentVariable('CI_WORKSPACE')) { if (-not (Test-Path "$env:CI_WORKSPACE")) { New-Item -Path "$env:CI_WORKSPACE" -ItemType Directory -Force }};
+if (-not [Environment]::GetEnvironmentVariable('HOME')) { [Environment]::SetEnvironmentVariable('HOME', 'c:\root') };
+if (-not (Test-Path "$env:HOME")) { New-Item -Path "$env:HOME" -ItemType Directory -Force };
 if ($Env:CI_NETRC_MACHINE) {
 $netrc=[string]::Format("{0}\_netrc",$Env:HOME);
 "machine $Env:CI_NETRC_MACHINE" >> $netrc;
@@ -38,6 +40,7 @@ $netrc=[string]::Format("{0}\_netrc",$Env:HOME);
 };
 [Environment]::SetEnvironmentVariable("CI_NETRC_PASSWORD",$null);
 [Environment]::SetEnvironmentVariable("CI_SCRIPT",$null);
+if ([Environment]::GetEnvironmentVariable('CI_WORKSPACE')) { cd "$env:CI_WORKSPACE" };
 
 Write-Output ('+ "echo %PATH%"');
 & echo %PATH%; if ($LASTEXITCODE -ne 0) {exit $LASTEXITCODE}

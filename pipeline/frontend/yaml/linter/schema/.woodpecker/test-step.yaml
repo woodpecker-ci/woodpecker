@@ -38,15 +38,6 @@ steps:
     commands:
       - go test
 
-  environment-array:
-    image: golang
-    environment:
-      - CGO=0
-      - GOOS=linux
-      - GOARCH=amd64
-    commands:
-      - go test
-
   secrets:
     image: docker
     commands:
@@ -54,14 +45,7 @@ steps:
       - echo $DOCKER_PASSWORD
     secrets:
       - docker_username
-      - source: docker_prod_password
-        target: docker_password
-
-  group:
-    group: test
-    image: golang
-    commands:
-      - go test
+      - docker_prod_password
 
   detached:
     image: redis

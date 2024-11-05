@@ -16,6 +16,7 @@ package kubernetes
 
 import (
 	"context"
+	std_errs "errors"
 	"fmt"
 	"io"
 	"maps"
@@ -69,6 +70,7 @@ type config struct {
 }
 type SecurityContextConfig struct {
 	RunAsNonRoot bool
+	FSGroup      *int64
 }
 
 func newDefaultDeleteOptions() meta_v1.DeleteOptions {
@@ -97,12 +99,9 @@ func configFromCliContext(ctx context.Context) (*config, error) {
 				ImagePullSecretNames:        c.StringSlice("backend-k8s-pod-image-pull-secret-names"),
 				SecurityContext: SecurityContextConfig{
 					RunAsNonRoot: c.Bool("backend-k8s-secctx-nonroot"), // cspell:words secctx nonroot
+					FSGroup:      newInt64(defaultFSGroup),
 				},
 				NativeSecretsAllowFromStep: c.Bool("backend-k8s-allow-native-secrets"),
-			}
-			// TODO: remove in next major
-			if len(config.ImagePullSecretNames) == 1 && config.ImagePullSecretNames[0] == "regcred" {
-				log.Warn().Msg("WOODPECKER_BACKEND_K8S_PULL_SECRET_NAMES is set to the default ('regcred'). It will default to empty in Woodpecker 3.0. Set it explicitly before then.")
 			}
 			// Unmarshal label and annotation settings here to ensure they're valid on startup
 			if labels := c.String("backend-k8s-pod-labels"); labels != "" {
@@ -229,6 +228,13 @@ func (e *kube) StartStep(ctx context.Context, step *types.Step, taskUUID string)
 		log.Error().Err(err).Msg("could not parse backend options")
 	}
 
+	if needsRegistrySecret(step) {
+		err = startRegistrySecret(ctx, e, step)
+		if err != nil {
+			return err
+		}
+	}
+
 	log.Trace().Str("taskUUID", taskUUID).Msgf("starting step: %s", step.Name)
 	_, err = startPod(ctx, e, step, options)
 	return err
@@ -254,7 +260,7 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 		}
 
 		if pod.Name == podName {
-			if isImagePullBackOffState(pod) {
+			if isImagePullBackOffState(pod) || isInvalidImageName(pod) {
 				finished <- true
 			}
 
@@ -286,7 +292,7 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 		return nil, err
 	}
 
-	if isImagePullBackOffState(pod) {
+	if isImagePullBackOffState(pod) || isInvalidImageName(pod) {
 		return nil, fmt.Errorf("could not pull image for pod %s", podName)
 	}
 
@@ -330,7 +336,7 @@ func (e *kube) TailStep(ctx context.Context, step *types.Step, taskUUID string) 
 		}
 
 		if pod.Name == podName {
-			if isImagePullBackOffState(pod) {
+			if isImagePullBackOffState(pod) || isInvalidImageName(pod) {
 				up <- true
 			}
 			switch pod.Status.Phase {
@@ -386,9 +392,20 @@ func (e *kube) TailStep(ctx context.Context, step *types.Step, taskUUID string) 
 }
 
 func (e *kube) DestroyStep(ctx context.Context, step *types.Step, taskUUID string) error {
+	var errs []error
 	log.Trace().Str("taskUUID", taskUUID).Msgf("Stopping step: %s", step.Name)
+	if needsRegistrySecret(step) {
+		err := stopRegistrySecret(ctx, e, step, defaultDeleteOptions)
+		if err != nil {
+			errs = append(errs, err)
+		}
+	}
+
 	err := stopPod(ctx, e, step, defaultDeleteOptions)
-	return err
+	if err != nil {
+		errs = append(errs, err)
+	}
+	return std_errs.Join(errs...)
 }
 
 // DestroyWorkflow destroys the pipeline environment.

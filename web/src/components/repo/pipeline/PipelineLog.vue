@@ -13,7 +13,7 @@
 
         <div class="flex flex-row items-center ml-auto gap-x-2">
           <IconButton
-            v-if="step?.end_time !== undefined && hasLogs"
+            v-if="step?.finished !== undefined && hasLogs"
             :is-loading="downloadInProgress"
             :title="$t('repo.pipeline.actions.log_download')"
             class="!hover:bg-white !hover:bg-opacity-10"
@@ -21,14 +21,14 @@
             @click="download"
           />
           <IconButton
-            v-if="step?.end_time !== undefined && hasLogs && hasPushPermission"
+            v-if="step?.finished !== undefined && hasLogs && hasPushPermission"
             :title="$t('repo.pipeline.actions.log_delete')"
             class="!hover:bg-white !hover:bg-opacity-10"
             icon="trash"
             @click="deleteLogs"
           />
           <IconButton
-            v-if="step?.end_time === undefined"
+            v-if="step?.finished === undefined"
             :title="
               autoScroll ? $t('repo.pipeline.actions.log_auto_scroll_off') : $t('repo.pipeline.actions.log_auto_scroll')
             "
@@ -89,13 +89,13 @@
 
       <div class="m-auto text-xl text-wp-text-alt-100">
         <span v-if="step?.state === 'skipped'">{{ $t('repo.pipeline.actions.canceled') }}</span>
-        <span v-else-if="!step?.start_time">{{ $t('repo.pipeline.step_not_started') }}</span>
+        <span v-else-if="!step?.started">{{ $t('repo.pipeline.step_not_started') }}</span>
         <div v-else-if="!loadedLogs">{{ $t('repo.pipeline.loading') }}</div>
         <div v-else-if="log?.length === 0">{{ $t('repo.pipeline.no_logs') }}</div>
       </div>
 
       <div
-        v-if="step?.end_time !== undefined"
+        v-if="step?.finished !== undefined"
         class="flex items-center w-full bg-wp-code-100 text-md text-wp-code-text-alt-100 p-4 font-bold"
       >
         <PipelineStatusIcon :status="step.state" class="!h-4 !w-4" />
@@ -350,7 +350,7 @@ watch(stepSlug, async () => {
 
 watch(step, async (newStep, oldStep) => {
   if (oldStep?.name === newStep?.name) {
-    if (oldStep?.end_time !== newStep?.end_time && autoScroll.value) {
+    if (oldStep?.finished !== newStep?.finished && autoScroll.value) {
       scrollDown();
     }
 

@@ -110,8 +110,9 @@ func TestSanitizeParamKey(t *testing.T) {
 	assert.EqualValues(t, "PLUGIN_DRY_RUN", sanitizeParamKey("PLUGIN_", true, "dry-run"))
 	assert.EqualValues(t, "PLUGIN_DRY_RUN", sanitizeParamKey("PLUGIN_", true, "dry_Run"))
 	assert.EqualValues(t, "PLUGIN_DRY_RUN", sanitizeParamKey("PLUGIN_", true, "dry.run"))
-	assert.EqualValues(t, "PLUGIN_dry_run", sanitizeParamKey("PLUGIN_", false, "dry-run"))
+	assert.EqualValues(t, "PLUGIN_dry-run", sanitizeParamKey("PLUGIN_", false, "dry-run"))
 	assert.EqualValues(t, "PLUGIN_dry_Run", sanitizeParamKey("PLUGIN_", false, "dry_Run"))
+	assert.EqualValues(t, "PLUGIN_dry.run", sanitizeParamKey("PLUGIN_", false, "dry.run"))
 }
 
 func TestYAMLToParamsToEnv(t *testing.T) {
