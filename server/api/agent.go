@@ -57,7 +57,7 @@ func GetAgents(c *gin.Context) {
 //	@Success	200	{object}	Agent
 //	@Tags		Agents
 //	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param		agent			path	int		true	"the agent's id"
+//	@Param		agent_id			path	int		true	"the agent's id"
 func GetAgent(c *gin.Context) {
 	agentID, err := strconv.ParseInt(c.Param("agent_id"), 10, 64)
 	if err != nil {
@@ -81,7 +81,7 @@ func GetAgent(c *gin.Context) {
 //	@Success	200	{array}	Task
 //	@Tags		Agents
 //	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param		agent			path	int		true	"the agent's id"
+//	@Param		agent_id			path	int		true	"the agent's id"
 func GetAgentTasks(c *gin.Context) {
 	agentID, err := strconv.ParseInt(c.Param("agent_id"), 10, 64)
 	if err != nil {
@@ -114,7 +114,7 @@ func GetAgentTasks(c *gin.Context) {
 //	@Success	200	{object}	Agent
 //	@Tags		Agents
 //	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param		agent			path	int		true	"the agent's id"
+//	@Param		agent_id			path	int		true	"the agent's id"
 //	@Param		agentData		body	Agent	true	"the agent's data"
 func PatchAgent(c *gin.Context) {
 	_store := store.FromContext(c)
@@ -196,7 +196,7 @@ func PostAgent(c *gin.Context) {
 //	@Success	200
 //	@Tags		Agents
 //	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param		agent			path	int		true	"the agent's id"
+//	@Param		agent_id			path	int		true	"the agent's id"
 func DeleteAgent(c *gin.Context) {
 	_store := store.FromContext(c)
 

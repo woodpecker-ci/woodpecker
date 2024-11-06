@@ -122,7 +122,7 @@ const docTemplate = `{
                     {
                         "type": "integer",
                         "description": "the agent's id",
-                        "name": "agent",
+                        "name": "agent_id",
                         "in": "path",
                         "required": true
                     }
@@ -156,7 +156,7 @@ const docTemplate = `{
                     {
                         "type": "integer",
                         "description": "the agent's id",
-                        "name": "agent",
+                        "name": "agent_id",
                         "in": "path",
                         "required": true
                     }
@@ -187,7 +187,7 @@ const docTemplate = `{
                     {
                         "type": "integer",
                         "description": "the agent's id",
-                        "name": "agent",
+                        "name": "agent_id",
                         "in": "path",
                         "required": true
                     },
@@ -232,7 +232,7 @@ const docTemplate = `{
                     {
                         "type": "integer",
                         "description": "the agent's id",
-                        "name": "agent",
+                        "name": "agent_id",
                         "in": "path",
                         "required": true
                     }
@@ -4554,22 +4554,15 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "allOf": [
-                                {
+                            "type": "object",
+                            "properties": {
+                                "source": {
                                     "type": "string"
                                 },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "source": {
-                                            "type": "string"
-                                        },
-                                        "version": {
-                                            "type": "string"
-                                        }
-                                    }
+                                "version": {
+                                    "type": "string"
                                 }
-                            ]
+                            }
                         }
                     }
                 }
