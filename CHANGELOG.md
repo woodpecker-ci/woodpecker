@@ -1,5 +1,15 @@
 # Changelog
 
+## [2.7.4](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.7.4) - 2024-11-06
+
+### ❤️ Thanks to all contributors! ❤️
+
+@anbraten
+
+### Misc
+
+- Use release-helper for release/* branches [[#4302](https://github.com/woodpecker-ci/woodpecker/pull/4302)]
+
 ## [2.7.3](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.7.3) - 2024-11-04
 
 ### ❤️ Thanks to all contributors! ❤️
