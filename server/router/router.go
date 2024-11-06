@@ -23,7 +23,7 @@ import (
 	swagger_files "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 
-	"go.woodpecker-ci.org/woodpecker/v2/cmd/server/docs"
+	"go.woodpecker-ci.org/woodpecker/v2/cmd/server/openapi"
 	"go.woodpecker-ci.org/woodpecker/v2/server"
 	"go.woodpecker-ci.org/woodpecker/v2/server/api"
 	"go.woodpecker-ci.org/woodpecker/v2/server/api/metrics"
@@ -78,8 +78,8 @@ func Load(noRouteHandler http.HandlerFunc, middleware ...gin.HandlerFunc) http.H
 }
 
 func setupSwaggerConfigAndRoutes(e *gin.Engine) {
-	docs.SwaggerInfo.Host = getHost(server.Config.Server.Host)
-	docs.SwaggerInfo.BasePath = server.Config.Server.RootPath + "/api"
+	openapi.SwaggerInfo.Host = getHost(server.Config.Server.Host)
+	openapi.SwaggerInfo.BasePath = server.Config.Server.RootPath + "/api"
 	e.GET(server.Config.Server.RootPath+"/swagger/*any", ginSwagger.WrapHandler(swagger_files.Handler))
 }
 
