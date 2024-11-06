@@ -119,9 +119,6 @@ generate-swagger: install-tools ## Run openapi code generation and format it
 	go run github.com/swaggo/swag/cmd/swag fmt
 	CGO_ENABLED=0 go generate cmd/server/openapi.go
 
-generate-client:
-	go generate woodpecker-go/client.go
-
 generate-license-header: install-tools
 	addlicense -c "Woodpecker Authors" -ignore "vendor/**" **/*.go
 
