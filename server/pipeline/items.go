@@ -72,16 +72,17 @@ func parsePipeline(forge forge.Forge, store store.Store, currentPipeline *model.
 	}
 
 	b := stepbuilder.StepBuilder{
-		Repo:  repo,
-		Curr:  currentPipeline,
-		Prev:  prev,
-		Netrc: netrc,
-		Secs:  secs,
-		Regs:  regs,
-		Envs:  envs,
-		Host:  server.Config.Server.Host,
-		Yamls: yamls,
-		Forge: forge,
+		Repo:          repo,
+		Curr:          currentPipeline,
+		Prev:          prev,
+		Netrc:         netrc,
+		Secs:          secs,
+		Regs:          regs,
+		Envs:          envs,
+		Host:          server.Config.Server.Host,
+		Yamls:         yamls,
+		Forge:         forge,
+		DefaultLabels: server.Config.Pipeline.DefaultWorkflowLabels,
 		ProxyOpts: compiler.ProxyOptions{
 			NoProxy:    server.Config.Pipeline.Proxy.No,
 			HTTPProxy:  server.Config.Pipeline.Proxy.HTTP,

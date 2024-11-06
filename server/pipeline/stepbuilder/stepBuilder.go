@@ -40,17 +40,18 @@ import (
 
 // StepBuilder Takes the hook data and the yaml and returns in internal data model.
 type StepBuilder struct {
-	Repo      *model.Repo
-	Curr      *model.Pipeline
-	Prev      *model.Pipeline
-	Netrc     *model.Netrc
-	Secs      []*model.Secret
-	Regs      []*model.Registry
-	Host      string
-	Yamls     []*forge_types.FileMeta
-	Envs      map[string]string
-	Forge     metadata.ServerForge
-	ProxyOpts compiler.ProxyOptions
+	Repo          *model.Repo
+	Curr          *model.Pipeline
+	Prev          *model.Pipeline
+	Netrc         *model.Netrc
+	Secs          []*model.Secret
+	Regs          []*model.Registry
+	Host          string
+	Yamls         []*forge_types.FileMeta
+	Envs          map[string]string
+	Forge         metadata.ServerForge
+	DefaultLabels map[string]string
+	ProxyOpts     compiler.ProxyOptions
 }
 
 type Item struct {
@@ -186,8 +187,12 @@ func (b *StepBuilder) genItemForWorkflow(workflow *model.Workflow, axis matrix.A
 		DependsOn: parsed.DependsOn,
 		RunsOn:    parsed.RunsOn,
 	}
-	if item.Labels == nil {
-		item.Labels = map[string]string{}
+	if len(item.Labels) == 0 {
+		item.Labels = make(map[string]string, len(b.DefaultLabels))
+		// Set default labels if no labels are defined in the pipeline
+		for k, v := range b.DefaultLabels {
+			item.Labels[k] = v
+		}
 	}
 
 	return item, errorsAndWarnings
