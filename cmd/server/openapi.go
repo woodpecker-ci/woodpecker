@@ -20,7 +20,7 @@ import (
 )
 
 // Generate docs/openapi.json via:
-//go:generate go run github.com/swaggo/swag/cmd/swag init -g ../../server/api/ -g ../../cmd/server/openapi.go --outputTypes go -output cmd/server/openapi
+//go:generate go run github.com/swaggo/swag/cmd/swag init -g ../../server/api/ -g ../../cmd/server/openapi.go --outputTypes go -output openapi
 //go:generate go run openapi_json_gen.go openapi.go
 //go:generate go run github.com/getkin/kin-openapi/cmd/validate@latest ../../docs/openapi.json
 

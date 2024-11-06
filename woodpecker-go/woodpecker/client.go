@@ -40,15 +40,11 @@ type client struct {
 }
 
 // New returns a client at the specified url.
-//
-// Deprecated: use woodpecker-go.New instead.
 func New(uri string) Client {
 	return &client{http.DefaultClient, strings.TrimSuffix(uri, "/")}
 }
 
 // NewClient returns a client at the specified url.
-//
-// Deprecated: use woodpecker-go.NewWithClient instead.
 func NewClient(uri string, cli *http.Client) Client {
 	return &client{cli, strings.TrimSuffix(uri, "/")}
 }

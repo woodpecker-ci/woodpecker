@@ -1338,8 +1338,8 @@ type HttpRequestDoer interface {
 	Do(req *http.Request) (*http.Response, error)
 }
 
-// Client which conforms to the OpenAPI3 specification for this service.
-type Client struct {
+// WPClient which conforms to the OpenAPI3 specification for this service.
+type WPClient struct {
 	// The endpoint of the server conforming to this interface, with scheme,
 	// https://api.deepmap.com for example. This can contain a path relative
 	// to the server, such as https://api.deepmap.com/dev-test, and all the
@@ -1356,12 +1356,12 @@ type Client struct {
 }
 
 // ClientOption allows setting custom parameters during construction
-type ClientOption func(*Client) error
+type ClientOption func(*WPClient) error
 
-// Creates a new Client, with reasonable defaults
-func NewClient(server string, opts ...ClientOption) (*Client, error) {
+// Creates a new WPClient, with reasonable defaults
+func NewClient(server string, opts ...ClientOption) (*WPClient, error) {
 	// create a client with sane default values
-	client := Client{
+	client := WPClient{
 		Server: server,
 	}
 	// mutate client and add all optional params
@@ -1384,7 +1384,7 @@ func NewClient(server string, opts ...ClientOption) (*Client, error) {
 // WithHTTPClient allows overriding the default Doer, which is
 // automatically created using http.Client. This is useful for tests.
 func WithHTTPClient(doer HttpRequestDoer) ClientOption {
-	return func(c *Client) error {
+	return func(c *WPClient) error {
 		c.Client = doer
 		return nil
 	}
@@ -1393,7 +1393,7 @@ func WithHTTPClient(doer HttpRequestDoer) ClientOption {
 // WithRequestEditorFn allows setting up a callback function, which will be
 // called right before sending the request. This can be used to mutate the request.
 func WithRequestEditorFn(fn RequestEditorFn) ClientOption {
-	return func(c *Client) error {
+	return func(c *WPClient) error {
 		c.RequestEditors = append(c.RequestEditors, fn)
 		return nil
 	}
@@ -1755,7 +1755,7 @@ type ClientInterface interface {
 	GetVersion(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
 }
 
-func (c *Client) GetAgents(ctx context.Context, params *GetAgentsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) GetAgents(ctx context.Context, params *GetAgentsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetAgentsRequest(c.Server, params)
 	if err != nil {
 		return nil, err
@@ -1767,7 +1767,7 @@ func (c *Client) GetAgents(ctx context.Context, params *GetAgentsParams, reqEdit
 	return c.Client.Do(req)
 }
 
-func (c *Client) PostAgentsWithBody(ctx context.Context, params *PostAgentsParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) PostAgentsWithBody(ctx context.Context, params *PostAgentsParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewPostAgentsRequestWithBody(c.Server, params, contentType, body)
 	if err != nil {
 		return nil, err
@@ -1779,7 +1779,7 @@ func (c *Client) PostAgentsWithBody(ctx context.Context, params *PostAgentsParam
 	return c.Client.Do(req)
 }
 
-func (c *Client) DeleteAgentsAgentId(ctx context.Context, agentId int, params *DeleteAgentsAgentIdParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) DeleteAgentsAgentId(ctx context.Context, agentId int, params *DeleteAgentsAgentIdParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewDeleteAgentsAgentIdRequest(c.Server, agentId, params)
 	if err != nil {
 		return nil, err
@@ -1791,7 +1791,7 @@ func (c *Client) DeleteAgentsAgentId(ctx context.Context, agentId int, params *D
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetAgentsAgentId(ctx context.Context, agentId int, params *GetAgentsAgentIdParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) GetAgentsAgentId(ctx context.Context, agentId int, params *GetAgentsAgentIdParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetAgentsAgentIdRequest(c.Server, agentId, params)
 	if err != nil {
 		return nil, err
@@ -1803,7 +1803,7 @@ func (c *Client) GetAgentsAgentId(ctx context.Context, agentId int, params *GetA
 	return c.Client.Do(req)
 }
 
-func (c *Client) PatchAgentsAgentIdWithBody(ctx context.Context, agentId int, params *PatchAgentsAgentIdParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) PatchAgentsAgentIdWithBody(ctx context.Context, agentId int, params *PatchAgentsAgentIdParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewPatchAgentsAgentIdRequestWithBody(c.Server, agentId, params, contentType, body)
 	if err != nil {
 		return nil, err
@@ -1815,7 +1815,7 @@ func (c *Client) PatchAgentsAgentIdWithBody(ctx context.Context, agentId int, pa
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetAgentsAgentIdTasks(ctx context.Context, agentId int, params *GetAgentsAgentIdTasksParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) GetAgentsAgentIdTasks(ctx context.Context, agentId int, params *GetAgentsAgentIdTasksParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetAgentsAgentIdTasksRequest(c.Server, agentId, params)
 	if err != nil {
 		return nil, err
@@ -1827,7 +1827,7 @@ func (c *Client) GetAgentsAgentIdTasks(ctx context.Context, agentId int, params 
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetBadgesRepoIdCcXml(ctx context.Context, repoId int, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) GetBadgesRepoIdCcXml(ctx context.Context, repoId int, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetBadgesRepoIdCcXmlRequest(c.Server, repoId)
 	if err != nil {
 		return nil, err
@@ -1839,7 +1839,7 @@ func (c *Client) GetBadgesRepoIdCcXml(ctx context.Context, repoId int, reqEditor
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetBadgesRepoIdStatusSvg(ctx context.Context, repoId int, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) GetBadgesRepoIdStatusSvg(ctx context.Context, repoId int, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetBadgesRepoIdStatusSvgRequest(c.Server, repoId)
 	if err != nil {
 		return nil, err
@@ -1851,7 +1851,7 @@ func (c *Client) GetBadgesRepoIdStatusSvg(ctx context.Context, repoId int, reqEd
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetDebugPprof(ctx context.Context, params *GetDebugPprofParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) GetDebugPprof(ctx context.Context, params *GetDebugPprofParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetDebugPprofRequest(c.Server, params)
 	if err != nil {
 		return nil, err
@@ -1863,7 +1863,7 @@ func (c *Client) GetDebugPprof(ctx context.Context, params *GetDebugPprofParams,
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetDebugPprofBlock(ctx context.Context, params *GetDebugPprofBlockParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) GetDebugPprofBlock(ctx context.Context, params *GetDebugPprofBlockParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetDebugPprofBlockRequest(c.Server, params)
 	if err != nil {
 		return nil, err
@@ -1875,7 +1875,7 @@ func (c *Client) GetDebugPprofBlock(ctx context.Context, params *GetDebugPprofBl
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetDebugPprofCmdline(ctx context.Context, params *GetDebugPprofCmdlineParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) GetDebugPprofCmdline(ctx context.Context, params *GetDebugPprofCmdlineParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetDebugPprofCmdlineRequest(c.Server, params)
 	if err != nil {
 		return nil, err
@@ -1887,7 +1887,7 @@ func (c *Client) GetDebugPprofCmdline(ctx context.Context, params *GetDebugPprof
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetDebugPprofGoroutine(ctx context.Context, params *GetDebugPprofGoroutineParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) GetDebugPprofGoroutine(ctx context.Context, params *GetDebugPprofGoroutineParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetDebugPprofGoroutineRequest(c.Server, params)
 	if err != nil {
 		return nil, err
@@ -1899,7 +1899,7 @@ func (c *Client) GetDebugPprofGoroutine(ctx context.Context, params *GetDebugPpr
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetDebugPprofHeap(ctx context.Context, params *GetDebugPprofHeapParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) GetDebugPprofHeap(ctx context.Context, params *GetDebugPprofHeapParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetDebugPprofHeapRequest(c.Server, params)
 	if err != nil {
 		return nil, err
@@ -1911,7 +1911,7 @@ func (c *Client) GetDebugPprofHeap(ctx context.Context, params *GetDebugPprofHea
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetDebugPprofProfile(ctx context.Context, params *GetDebugPprofProfileParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) GetDebugPprofProfile(ctx context.Context, params *GetDebugPprofProfileParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetDebugPprofProfileRequest(c.Server, params)
 	if err != nil {
 		return nil, err
@@ -1923,7 +1923,7 @@ func (c *Client) GetDebugPprofProfile(ctx context.Context, params *GetDebugPprof
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetDebugPprofSymbol(ctx context.Context, params *GetDebugPprofSymbolParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) GetDebugPprofSymbol(ctx context.Context, params *GetDebugPprofSymbolParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetDebugPprofSymbolRequest(c.Server, params)
 	if err != nil {
 		return nil, err
@@ -1935,7 +1935,7 @@ func (c *Client) GetDebugPprofSymbol(ctx context.Context, params *GetDebugPprofS
 	return c.Client.Do(req)
 }
 
-func (c *Client) PostDebugPprofSymbol(ctx context.Context, params *PostDebugPprofSymbolParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) PostDebugPprofSymbol(ctx context.Context, params *PostDebugPprofSymbolParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewPostDebugPprofSymbolRequest(c.Server, params)
 	if err != nil {
 		return nil, err
@@ -1947,7 +1947,7 @@ func (c *Client) PostDebugPprofSymbol(ctx context.Context, params *PostDebugPpro
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetDebugPprofThreadcreate(ctx context.Context, params *GetDebugPprofThreadcreateParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) GetDebugPprofThreadcreate(ctx context.Context, params *GetDebugPprofThreadcreateParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetDebugPprofThreadcreateRequest(c.Server, params)
 	if err != nil {
 		return nil, err
@@ -1959,7 +1959,7 @@ func (c *Client) GetDebugPprofThreadcreate(ctx context.Context, params *GetDebug
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetDebugPprofTrace(ctx context.Context, params *GetDebugPprofTraceParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) GetDebugPprofTrace(ctx context.Context, params *GetDebugPprofTraceParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetDebugPprofTraceRequest(c.Server, params)
 	if err != nil {
 		return nil, err
@@ -1971,7 +1971,7 @@ func (c *Client) GetDebugPprofTrace(ctx context.Context, params *GetDebugPprofTr
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetForges(ctx context.Context, params *GetForgesParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) GetForges(ctx context.Context, params *GetForgesParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetForgesRequest(c.Server, params)
 	if err != nil {
 		return nil, err
@@ -1983,7 +1983,7 @@ func (c *Client) GetForges(ctx context.Context, params *GetForgesParams, reqEdit
 	return c.Client.Do(req)
 }
 
-func (c *Client) PostForgesWithBody(ctx context.Context, params *PostForgesParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) PostForgesWithBody(ctx context.Context, params *PostForgesParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewPostForgesRequestWithBody(c.Server, params, contentType, body)
 	if err != nil {
 		return nil, err
@@ -1995,7 +1995,7 @@ func (c *Client) PostForgesWithBody(ctx context.Context, params *PostForgesParam
 	return c.Client.Do(req)
 }
 
-func (c *Client) DeleteForgesForgeId(ctx context.Context, forgeId int, params *DeleteForgesForgeIdParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) DeleteForgesForgeId(ctx context.Context, forgeId int, params *DeleteForgesForgeIdParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewDeleteForgesForgeIdRequest(c.Server, forgeId, params)
 	if err != nil {
 		return nil, err
@@ -2007,7 +2007,7 @@ func (c *Client) DeleteForgesForgeId(ctx context.Context, forgeId int, params *D
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetForgesForgeId(ctx context.Context, forgeId int, params *GetForgesForgeIdParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) GetForgesForgeId(ctx context.Context, forgeId int, params *GetForgesForgeIdParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetForgesForgeIdRequest(c.Server, forgeId, params)
 	if err != nil {
 		return nil, err
@@ -2019,7 +2019,7 @@ func (c *Client) GetForgesForgeId(ctx context.Context, forgeId int, params *GetF
 	return c.Client.Do(req)
 }
 
-func (c *Client) PatchForgesForgeIdWithBody(ctx context.Context, forgeId int, params *PatchForgesForgeIdParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) PatchForgesForgeIdWithBody(ctx context.Context, forgeId int, params *PatchForgesForgeIdParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewPatchForgesForgeIdRequestWithBody(c.Server, forgeId, params, contentType, body)
 	if err != nil {
 		return nil, err
@@ -2031,7 +2031,7 @@ func (c *Client) PatchForgesForgeIdWithBody(ctx context.Context, forgeId int, pa
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetHealthz(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) GetHealthz(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetHealthzRequest(c.Server)
 	if err != nil {
 		return nil, err
@@ -2043,7 +2043,7 @@ func (c *Client) GetHealthz(ctx context.Context, reqEditors ...RequestEditorFn) 
 	return c.Client.Do(req)
 }
 
-func (c *Client) PostHookWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) PostHookWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewPostHookRequestWithBody(c.Server, contentType, body)
 	if err != nil {
 		return nil, err
@@ -2055,7 +2055,7 @@ func (c *Client) PostHookWithBody(ctx context.Context, contentType string, body 
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetLogLevel(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) GetLogLevel(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetLogLevelRequest(c.Server)
 	if err != nil {
 		return nil, err
@@ -2067,7 +2067,7 @@ func (c *Client) GetLogLevel(ctx context.Context, reqEditors ...RequestEditorFn)
 	return c.Client.Do(req)
 }
 
-func (c *Client) PostLogLevelWithBody(ctx context.Context, params *PostLogLevelParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) PostLogLevelWithBody(ctx context.Context, params *PostLogLevelParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewPostLogLevelRequestWithBody(c.Server, params, contentType, body)
 	if err != nil {
 		return nil, err
@@ -2079,7 +2079,7 @@ func (c *Client) PostLogLevelWithBody(ctx context.Context, params *PostLogLevelP
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetOrgLookupOrgFullName(ctx context.Context, orgFullName string, params *GetOrgLookupOrgFullNameParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) GetOrgLookupOrgFullName(ctx context.Context, orgFullName string, params *GetOrgLookupOrgFullNameParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetOrgLookupOrgFullNameRequest(c.Server, orgFullName, params)
 	if err != nil {
 		return nil, err
@@ -2091,7 +2091,7 @@ func (c *Client) GetOrgLookupOrgFullName(ctx context.Context, orgFullName string
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetOrgs(ctx context.Context, params *GetOrgsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) GetOrgs(ctx context.Context, params *GetOrgsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetOrgsRequest(c.Server, params)
 	if err != nil {
 		return nil, err
@@ -2103,7 +2103,7 @@ func (c *Client) GetOrgs(ctx context.Context, params *GetOrgsParams, reqEditors 
 	return c.Client.Do(req)
 }
 
-func (c *Client) DeleteOrgsId(ctx context.Context, id string, params *DeleteOrgsIdParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) DeleteOrgsId(ctx context.Context, id string, params *DeleteOrgsIdParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewDeleteOrgsIdRequest(c.Server, id, params)
 	if err != nil {
 		return nil, err
@@ -2115,7 +2115,7 @@ func (c *Client) DeleteOrgsId(ctx context.Context, id string, params *DeleteOrgs
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetOrgsOrgId(ctx context.Context, orgId string, params *GetOrgsOrgIdParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) GetOrgsOrgId(ctx context.Context, orgId string, params *GetOrgsOrgIdParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetOrgsOrgIdRequest(c.Server, orgId, params)
 	if err != nil {
 		return nil, err
@@ -2127,7 +2127,7 @@ func (c *Client) GetOrgsOrgId(ctx context.Context, orgId string, params *GetOrgs
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetOrgsOrgIdAgents(ctx context.Context, orgId int, params *GetOrgsOrgIdAgentsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) GetOrgsOrgIdAgents(ctx context.Context, orgId int, params *GetOrgsOrgIdAgentsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetOrgsOrgIdAgentsRequest(c.Server, orgId, params)
 	if err != nil {
 		return nil, err
@@ -2139,7 +2139,7 @@ func (c *Client) GetOrgsOrgIdAgents(ctx context.Context, orgId int, params *GetO
 	return c.Client.Do(req)
 }
 
-func (c *Client) PostOrgsOrgIdAgentsWithBody(ctx context.Context, orgId int, params *PostOrgsOrgIdAgentsParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) PostOrgsOrgIdAgentsWithBody(ctx context.Context, orgId int, params *PostOrgsOrgIdAgentsParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewPostOrgsOrgIdAgentsRequestWithBody(c.Server, orgId, params, contentType, body)
 	if err != nil {
 		return nil, err
@@ -2151,7 +2151,7 @@ func (c *Client) PostOrgsOrgIdAgentsWithBody(ctx context.Context, orgId int, par
 	return c.Client.Do(req)
 }
 
-func (c *Client) DeleteOrgsOrgIdAgentsAgentId(ctx context.Context, orgId int, agentId int, params *DeleteOrgsOrgIdAgentsAgentIdParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) DeleteOrgsOrgIdAgentsAgentId(ctx context.Context, orgId int, agentId int, params *DeleteOrgsOrgIdAgentsAgentIdParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewDeleteOrgsOrgIdAgentsAgentIdRequest(c.Server, orgId, agentId, params)
 	if err != nil {
 		return nil, err
@@ -2163,7 +2163,7 @@ func (c *Client) DeleteOrgsOrgIdAgentsAgentId(ctx context.Context, orgId int, ag
 	return c.Client.Do(req)
 }
 
-func (c *Client) PatchOrgsOrgIdAgentsAgentIdWithBody(ctx context.Context, orgId int, agentId int, params *PatchOrgsOrgIdAgentsAgentIdParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) PatchOrgsOrgIdAgentsAgentIdWithBody(ctx context.Context, orgId int, agentId int, params *PatchOrgsOrgIdAgentsAgentIdParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewPatchOrgsOrgIdAgentsAgentIdRequestWithBody(c.Server, orgId, agentId, params, contentType, body)
 	if err != nil {
 		return nil, err
@@ -2175,7 +2175,7 @@ func (c *Client) PatchOrgsOrgIdAgentsAgentIdWithBody(ctx context.Context, orgId 
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetOrgsOrgIdPermissions(ctx context.Context, orgId string, params *GetOrgsOrgIdPermissionsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) GetOrgsOrgIdPermissions(ctx context.Context, orgId string, params *GetOrgsOrgIdPermissionsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetOrgsOrgIdPermissionsRequest(c.Server, orgId, params)
 	if err != nil {
 		return nil, err
@@ -2187,7 +2187,7 @@ func (c *Client) GetOrgsOrgIdPermissions(ctx context.Context, orgId string, para
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetOrgsOrgIdRegistries(ctx context.Context, orgId string, params *GetOrgsOrgIdRegistriesParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) GetOrgsOrgIdRegistries(ctx context.Context, orgId string, params *GetOrgsOrgIdRegistriesParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetOrgsOrgIdRegistriesRequest(c.Server, orgId, params)
 	if err != nil {
 		return nil, err
@@ -2199,7 +2199,7 @@ func (c *Client) GetOrgsOrgIdRegistries(ctx context.Context, orgId string, param
 	return c.Client.Do(req)
 }
 
-func (c *Client) PostOrgsOrgIdRegistriesWithBody(ctx context.Context, orgId string, params *PostOrgsOrgIdRegistriesParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) PostOrgsOrgIdRegistriesWithBody(ctx context.Context, orgId string, params *PostOrgsOrgIdRegistriesParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewPostOrgsOrgIdRegistriesRequestWithBody(c.Server, orgId, params, contentType, body)
 	if err != nil {
 		return nil, err
@@ -2211,7 +2211,7 @@ func (c *Client) PostOrgsOrgIdRegistriesWithBody(ctx context.Context, orgId stri
 	return c.Client.Do(req)
 }
 
-func (c *Client) DeleteOrgsOrgIdRegistriesRegistry(ctx context.Context, orgId string, registry string, params *DeleteOrgsOrgIdRegistriesRegistryParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) DeleteOrgsOrgIdRegistriesRegistry(ctx context.Context, orgId string, registry string, params *DeleteOrgsOrgIdRegistriesRegistryParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewDeleteOrgsOrgIdRegistriesRegistryRequest(c.Server, orgId, registry, params)
 	if err != nil {
 		return nil, err
@@ -2223,7 +2223,7 @@ func (c *Client) DeleteOrgsOrgIdRegistriesRegistry(ctx context.Context, orgId st
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetOrgsOrgIdRegistriesRegistry(ctx context.Context, orgId string, registry string, params *GetOrgsOrgIdRegistriesRegistryParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) GetOrgsOrgIdRegistriesRegistry(ctx context.Context, orgId string, registry string, params *GetOrgsOrgIdRegistriesRegistryParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetOrgsOrgIdRegistriesRegistryRequest(c.Server, orgId, registry, params)
 	if err != nil {
 		return nil, err
@@ -2235,7 +2235,7 @@ func (c *Client) GetOrgsOrgIdRegistriesRegistry(ctx context.Context, orgId strin
 	return c.Client.Do(req)
 }
 
-func (c *Client) PatchOrgsOrgIdRegistriesRegistryWithBody(ctx context.Context, orgId string, registry string, params *PatchOrgsOrgIdRegistriesRegistryParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) PatchOrgsOrgIdRegistriesRegistryWithBody(ctx context.Context, orgId string, registry string, params *PatchOrgsOrgIdRegistriesRegistryParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewPatchOrgsOrgIdRegistriesRegistryRequestWithBody(c.Server, orgId, registry, params, contentType, body)
 	if err != nil {
 		return nil, err
@@ -2247,7 +2247,7 @@ func (c *Client) PatchOrgsOrgIdRegistriesRegistryWithBody(ctx context.Context, o
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetOrgsOrgIdSecrets(ctx context.Context, orgId string, params *GetOrgsOrgIdSecretsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) GetOrgsOrgIdSecrets(ctx context.Context, orgId string, params *GetOrgsOrgIdSecretsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetOrgsOrgIdSecretsRequest(c.Server, orgId, params)
 	if err != nil {
 		return nil, err
@@ -2259,7 +2259,7 @@ func (c *Client) GetOrgsOrgIdSecrets(ctx context.Context, orgId string, params *
 	return c.Client.Do(req)
 }
 
-func (c *Client) PostOrgsOrgIdSecretsWithBody(ctx context.Context, orgId string, params *PostOrgsOrgIdSecretsParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) PostOrgsOrgIdSecretsWithBody(ctx context.Context, orgId string, params *PostOrgsOrgIdSecretsParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewPostOrgsOrgIdSecretsRequestWithBody(c.Server, orgId, params, contentType, body)
 	if err != nil {
 		return nil, err
@@ -2271,7 +2271,7 @@ func (c *Client) PostOrgsOrgIdSecretsWithBody(ctx context.Context, orgId string,
 	return c.Client.Do(req)
 }
 
-func (c *Client) DeleteOrgsOrgIdSecretsSecret(ctx context.Context, orgId string, secret string, params *DeleteOrgsOrgIdSecretsSecretParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) DeleteOrgsOrgIdSecretsSecret(ctx context.Context, orgId string, secret string, params *DeleteOrgsOrgIdSecretsSecretParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewDeleteOrgsOrgIdSecretsSecretRequest(c.Server, orgId, secret, params)
 	if err != nil {
 		return nil, err
@@ -2283,7 +2283,7 @@ func (c *Client) DeleteOrgsOrgIdSecretsSecret(ctx context.Context, orgId string,
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetOrgsOrgIdSecretsSecret(ctx context.Context, orgId string, secret string, params *GetOrgsOrgIdSecretsSecretParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) GetOrgsOrgIdSecretsSecret(ctx context.Context, orgId string, secret string, params *GetOrgsOrgIdSecretsSecretParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetOrgsOrgIdSecretsSecretRequest(c.Server, orgId, secret, params)
 	if err != nil {
 		return nil, err
@@ -2295,7 +2295,7 @@ func (c *Client) GetOrgsOrgIdSecretsSecret(ctx context.Context, orgId string, se
 	return c.Client.Do(req)
 }
 
-func (c *Client) PatchOrgsOrgIdSecretsSecretWithBody(ctx context.Context, orgId string, secret string, params *PatchOrgsOrgIdSecretsSecretParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) PatchOrgsOrgIdSecretsSecretWithBody(ctx context.Context, orgId string, secret string, params *PatchOrgsOrgIdSecretsSecretParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewPatchOrgsOrgIdSecretsSecretRequestWithBody(c.Server, orgId, secret, params, contentType, body)
 	if err != nil {
 		return nil, err
@@ -2307,7 +2307,7 @@ func (c *Client) PatchOrgsOrgIdSecretsSecretWithBody(ctx context.Context, orgId 
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetPipelines(ctx context.Context, params *GetPipelinesParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) GetPipelines(ctx context.Context, params *GetPipelinesParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetPipelinesRequest(c.Server, params)
 	if err != nil {
 		return nil, err
@@ -2319,7 +2319,7 @@ func (c *Client) GetPipelines(ctx context.Context, params *GetPipelinesParams, r
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetQueueInfo(ctx context.Context, params *GetQueueInfoParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) GetQueueInfo(ctx context.Context, params *GetQueueInfoParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetQueueInfoRequest(c.Server, params)
 	if err != nil {
 		return nil, err
@@ -2331,7 +2331,7 @@ func (c *Client) GetQueueInfo(ctx context.Context, params *GetQueueInfoParams, r
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetQueueNorunningpipelines(ctx context.Context, params *GetQueueNorunningpipelinesParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) GetQueueNorunningpipelines(ctx context.Context, params *GetQueueNorunningpipelinesParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetQueueNorunningpipelinesRequest(c.Server, params)
 	if err != nil {
 		return nil, err
@@ -2343,7 +2343,7 @@ func (c *Client) GetQueueNorunningpipelines(ctx context.Context, params *GetQueu
 	return c.Client.Do(req)
 }
 
-func (c *Client) PostQueuePause(ctx context.Context, params *PostQueuePauseParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) PostQueuePause(ctx context.Context, params *PostQueuePauseParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewPostQueuePauseRequest(c.Server, params)
 	if err != nil {
 		return nil, err
@@ -2355,7 +2355,7 @@ func (c *Client) PostQueuePause(ctx context.Context, params *PostQueuePauseParam
 	return c.Client.Do(req)
 }
 
-func (c *Client) PostQueueResume(ctx context.Context, params *PostQueueResumeParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) PostQueueResume(ctx context.Context, params *PostQueueResumeParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewPostQueueResumeRequest(c.Server, params)
 	if err != nil {
 		return nil, err
@@ -2367,7 +2367,7 @@ func (c *Client) PostQueueResume(ctx context.Context, params *PostQueueResumePar
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetRegistries(ctx context.Context, params *GetRegistriesParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) GetRegistries(ctx context.Context, params *GetRegistriesParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetRegistriesRequest(c.Server, params)
 	if err != nil {
 		return nil, err
@@ -2379,7 +2379,7 @@ func (c *Client) GetRegistries(ctx context.Context, params *GetRegistriesParams,
 	return c.Client.Do(req)
 }
 
-func (c *Client) PostRegistriesWithBody(ctx context.Context, params *PostRegistriesParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) PostRegistriesWithBody(ctx context.Context, params *PostRegistriesParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewPostRegistriesRequestWithBody(c.Server, params, contentType, body)
 	if err != nil {
 		return nil, err
@@ -2391,7 +2391,7 @@ func (c *Client) PostRegistriesWithBody(ctx context.Context, params *PostRegistr
 	return c.Client.Do(req)
 }
 
-func (c *Client) DeleteRegistriesRegistry(ctx context.Context, registry string, params *DeleteRegistriesRegistryParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) DeleteRegistriesRegistry(ctx context.Context, registry string, params *DeleteRegistriesRegistryParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewDeleteRegistriesRegistryRequest(c.Server, registry, params)
 	if err != nil {
 		return nil, err
@@ -2403,7 +2403,7 @@ func (c *Client) DeleteRegistriesRegistry(ctx context.Context, registry string, 
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetRegistriesRegistry(ctx context.Context, registry string, params *GetRegistriesRegistryParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) GetRegistriesRegistry(ctx context.Context, registry string, params *GetRegistriesRegistryParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetRegistriesRegistryRequest(c.Server, registry, params)
 	if err != nil {
 		return nil, err
@@ -2415,7 +2415,7 @@ func (c *Client) GetRegistriesRegistry(ctx context.Context, registry string, par
 	return c.Client.Do(req)
 }
 
-func (c *Client) PatchRegistriesRegistryWithBody(ctx context.Context, registry string, params *PatchRegistriesRegistryParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) PatchRegistriesRegistryWithBody(ctx context.Context, registry string, params *PatchRegistriesRegistryParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewPatchRegistriesRegistryRequestWithBody(c.Server, registry, params, contentType, body)
 	if err != nil {
 		return nil, err
@@ -2427,7 +2427,7 @@ func (c *Client) PatchRegistriesRegistryWithBody(ctx context.Context, registry s
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetRepos(ctx context.Context, params *GetReposParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) GetRepos(ctx context.Context, params *GetReposParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetReposRequest(c.Server, params)
 	if err != nil {
 		return nil, err
@@ -2439,7 +2439,7 @@ func (c *Client) GetRepos(ctx context.Context, params *GetReposParams, reqEditor
 	return c.Client.Do(req)
 }
 
-func (c *Client) PostRepos(ctx context.Context, params *PostReposParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) PostRepos(ctx context.Context, params *PostReposParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewPostReposRequest(c.Server, params)
 	if err != nil {
 		return nil, err
@@ -2451,7 +2451,7 @@ func (c *Client) PostRepos(ctx context.Context, params *PostReposParams, reqEdit
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetReposLookupRepoFullName(ctx context.Context, repoFullName string, params *GetReposLookupRepoFullNameParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) GetReposLookupRepoFullName(ctx context.Context, repoFullName string, params *GetReposLookupRepoFullNameParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetReposLookupRepoFullNameRequest(c.Server, repoFullName, params)
 	if err != nil {
 		return nil, err
@@ -2463,7 +2463,7 @@ func (c *Client) GetReposLookupRepoFullName(ctx context.Context, repoFullName st
 	return c.Client.Do(req)
 }
 
-func (c *Client) PostReposRepair(ctx context.Context, params *PostReposRepairParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) PostReposRepair(ctx context.Context, params *PostReposRepairParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewPostReposRepairRequest(c.Server, params)
 	if err != nil {
 		return nil, err
@@ -2475,7 +2475,7 @@ func (c *Client) PostReposRepair(ctx context.Context, params *PostReposRepairPar
 	return c.Client.Do(req)
 }
 
-func (c *Client) DeleteReposRepoId(ctx context.Context, repoId int, params *DeleteReposRepoIdParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) DeleteReposRepoId(ctx context.Context, repoId int, params *DeleteReposRepoIdParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewDeleteReposRepoIdRequest(c.Server, repoId, params)
 	if err != nil {
 		return nil, err
@@ -2487,7 +2487,7 @@ func (c *Client) DeleteReposRepoId(ctx context.Context, repoId int, params *Dele
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetReposRepoId(ctx context.Context, repoId int, params *GetReposRepoIdParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) GetReposRepoId(ctx context.Context, repoId int, params *GetReposRepoIdParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetReposRepoIdRequest(c.Server, repoId, params)
 	if err != nil {
 		return nil, err
@@ -2499,7 +2499,7 @@ func (c *Client) GetReposRepoId(ctx context.Context, repoId int, params *GetRepo
 	return c.Client.Do(req)
 }
 
-func (c *Client) PatchReposRepoIdWithBody(ctx context.Context, repoId int, params *PatchReposRepoIdParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) PatchReposRepoIdWithBody(ctx context.Context, repoId int, params *PatchReposRepoIdParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewPatchReposRepoIdRequestWithBody(c.Server, repoId, params, contentType, body)
 	if err != nil {
 		return nil, err
@@ -2511,7 +2511,7 @@ func (c *Client) PatchReposRepoIdWithBody(ctx context.Context, repoId int, param
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetReposRepoIdBranches(ctx context.Context, repoId int, params *GetReposRepoIdBranchesParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) GetReposRepoIdBranches(ctx context.Context, repoId int, params *GetReposRepoIdBranchesParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetReposRepoIdBranchesRequest(c.Server, repoId, params)
 	if err != nil {
 		return nil, err
@@ -2523,7 +2523,7 @@ func (c *Client) GetReposRepoIdBranches(ctx context.Context, repoId int, params 
 	return c.Client.Do(req)
 }
 
-func (c *Client) PostReposRepoIdChown(ctx context.Context, repoId int, params *PostReposRepoIdChownParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) PostReposRepoIdChown(ctx context.Context, repoId int, params *PostReposRepoIdChownParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewPostReposRepoIdChownRequest(c.Server, repoId, params)
 	if err != nil {
 		return nil, err
@@ -2535,7 +2535,7 @@ func (c *Client) PostReposRepoIdChown(ctx context.Context, repoId int, params *P
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetReposRepoIdCron(ctx context.Context, repoId int, params *GetReposRepoIdCronParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) GetReposRepoIdCron(ctx context.Context, repoId int, params *GetReposRepoIdCronParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetReposRepoIdCronRequest(c.Server, repoId, params)
 	if err != nil {
 		return nil, err
@@ -2547,7 +2547,7 @@ func (c *Client) GetReposRepoIdCron(ctx context.Context, repoId int, params *Get
 	return c.Client.Do(req)
 }
 
-func (c *Client) PostReposRepoIdCronWithBody(ctx context.Context, repoId int, params *PostReposRepoIdCronParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) PostReposRepoIdCronWithBody(ctx context.Context, repoId int, params *PostReposRepoIdCronParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewPostReposRepoIdCronRequestWithBody(c.Server, repoId, params, contentType, body)
 	if err != nil {
 		return nil, err
@@ -2559,7 +2559,7 @@ func (c *Client) PostReposRepoIdCronWithBody(ctx context.Context, repoId int, pa
 	return c.Client.Do(req)
 }
 
-func (c *Client) DeleteReposRepoIdCronCron(ctx context.Context, repoId int, cron string, params *DeleteReposRepoIdCronCronParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) DeleteReposRepoIdCronCron(ctx context.Context, repoId int, cron string, params *DeleteReposRepoIdCronCronParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewDeleteReposRepoIdCronCronRequest(c.Server, repoId, cron, params)
 	if err != nil {
 		return nil, err
@@ -2571,7 +2571,7 @@ func (c *Client) DeleteReposRepoIdCronCron(ctx context.Context, repoId int, cron
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetReposRepoIdCronCron(ctx context.Context, repoId int, cron string, params *GetReposRepoIdCronCronParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) GetReposRepoIdCronCron(ctx context.Context, repoId int, cron string, params *GetReposRepoIdCronCronParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetReposRepoIdCronCronRequest(c.Server, repoId, cron, params)
 	if err != nil {
 		return nil, err
@@ -2583,7 +2583,7 @@ func (c *Client) GetReposRepoIdCronCron(ctx context.Context, repoId int, cron st
 	return c.Client.Do(req)
 }
 
-func (c *Client) PatchReposRepoIdCronCronWithBody(ctx context.Context, repoId int, cron string, params *PatchReposRepoIdCronCronParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) PatchReposRepoIdCronCronWithBody(ctx context.Context, repoId int, cron string, params *PatchReposRepoIdCronCronParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewPatchReposRepoIdCronCronRequestWithBody(c.Server, repoId, cron, params, contentType, body)
 	if err != nil {
 		return nil, err
@@ -2595,7 +2595,7 @@ func (c *Client) PatchReposRepoIdCronCronWithBody(ctx context.Context, repoId in
 	return c.Client.Do(req)
 }
 
-func (c *Client) PostReposRepoIdCronCron(ctx context.Context, repoId int, cron string, params *PostReposRepoIdCronCronParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) PostReposRepoIdCronCron(ctx context.Context, repoId int, cron string, params *PostReposRepoIdCronCronParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewPostReposRepoIdCronCronRequest(c.Server, repoId, cron, params)
 	if err != nil {
 		return nil, err
@@ -2607,7 +2607,7 @@ func (c *Client) PostReposRepoIdCronCron(ctx context.Context, repoId int, cron s
 	return c.Client.Do(req)
 }
 
-func (c *Client) DeleteReposRepoIdLogsNumber(ctx context.Context, repoId int, number int, params *DeleteReposRepoIdLogsNumberParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) DeleteReposRepoIdLogsNumber(ctx context.Context, repoId int, number int, params *DeleteReposRepoIdLogsNumberParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewDeleteReposRepoIdLogsNumberRequest(c.Server, repoId, number, params)
 	if err != nil {
 		return nil, err
@@ -2619,7 +2619,7 @@ func (c *Client) DeleteReposRepoIdLogsNumber(ctx context.Context, repoId int, nu
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetReposRepoIdLogsNumberStepID(ctx context.Context, repoId int, number int, stepID int, params *GetReposRepoIdLogsNumberStepIDParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) GetReposRepoIdLogsNumberStepID(ctx context.Context, repoId int, number int, stepID int, params *GetReposRepoIdLogsNumberStepIDParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetReposRepoIdLogsNumberStepIDRequest(c.Server, repoId, number, stepID, params)
 	if err != nil {
 		return nil, err
@@ -2631,7 +2631,7 @@ func (c *Client) GetReposRepoIdLogsNumberStepID(ctx context.Context, repoId int,
 	return c.Client.Do(req)
 }
 
-func (c *Client) DeleteReposRepoIdLogsNumberStepId(ctx context.Context, repoId int, number int, stepId int, params *DeleteReposRepoIdLogsNumberStepIdParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) DeleteReposRepoIdLogsNumberStepId(ctx context.Context, repoId int, number int, stepId int, params *DeleteReposRepoIdLogsNumberStepIdParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewDeleteReposRepoIdLogsNumberStepIdRequest(c.Server, repoId, number, stepId, params)
 	if err != nil {
 		return nil, err
@@ -2643,7 +2643,7 @@ func (c *Client) DeleteReposRepoIdLogsNumberStepId(ctx context.Context, repoId i
 	return c.Client.Do(req)
 }
 
-func (c *Client) PostReposRepoIdMove(ctx context.Context, repoId int, params *PostReposRepoIdMoveParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) PostReposRepoIdMove(ctx context.Context, repoId int, params *PostReposRepoIdMoveParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewPostReposRepoIdMoveRequest(c.Server, repoId, params)
 	if err != nil {
 		return nil, err
@@ -2655,7 +2655,7 @@ func (c *Client) PostReposRepoIdMove(ctx context.Context, repoId int, params *Po
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetReposRepoIdPermissions(ctx context.Context, repoId int, params *GetReposRepoIdPermissionsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) GetReposRepoIdPermissions(ctx context.Context, repoId int, params *GetReposRepoIdPermissionsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetReposRepoIdPermissionsRequest(c.Server, repoId, params)
 	if err != nil {
 		return nil, err
@@ -2667,7 +2667,7 @@ func (c *Client) GetReposRepoIdPermissions(ctx context.Context, repoId int, para
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetReposRepoIdPipelines(ctx context.Context, repoId int, params *GetReposRepoIdPipelinesParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) GetReposRepoIdPipelines(ctx context.Context, repoId int, params *GetReposRepoIdPipelinesParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetReposRepoIdPipelinesRequest(c.Server, repoId, params)
 	if err != nil {
 		return nil, err
@@ -2679,7 +2679,7 @@ func (c *Client) GetReposRepoIdPipelines(ctx context.Context, repoId int, params
 	return c.Client.Do(req)
 }
 
-func (c *Client) PostReposRepoIdPipelinesWithBody(ctx context.Context, repoId int, params *PostReposRepoIdPipelinesParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) PostReposRepoIdPipelinesWithBody(ctx context.Context, repoId int, params *PostReposRepoIdPipelinesParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewPostReposRepoIdPipelinesRequestWithBody(c.Server, repoId, params, contentType, body)
 	if err != nil {
 		return nil, err
@@ -2691,7 +2691,7 @@ func (c *Client) PostReposRepoIdPipelinesWithBody(ctx context.Context, repoId in
 	return c.Client.Do(req)
 }
 
-func (c *Client) DeleteReposRepoIdPipelinesNumber(ctx context.Context, repoId int, number int, params *DeleteReposRepoIdPipelinesNumberParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) DeleteReposRepoIdPipelinesNumber(ctx context.Context, repoId int, number int, params *DeleteReposRepoIdPipelinesNumberParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewDeleteReposRepoIdPipelinesNumberRequest(c.Server, repoId, number, params)
 	if err != nil {
 		return nil, err
@@ -2703,7 +2703,7 @@ func (c *Client) DeleteReposRepoIdPipelinesNumber(ctx context.Context, repoId in
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetReposRepoIdPipelinesNumber(ctx context.Context, repoId int, number int, params *GetReposRepoIdPipelinesNumberParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) GetReposRepoIdPipelinesNumber(ctx context.Context, repoId int, number int, params *GetReposRepoIdPipelinesNumberParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetReposRepoIdPipelinesNumberRequest(c.Server, repoId, number, params)
 	if err != nil {
 		return nil, err
@@ -2715,7 +2715,7 @@ func (c *Client) GetReposRepoIdPipelinesNumber(ctx context.Context, repoId int, 
 	return c.Client.Do(req)
 }
 
-func (c *Client) PostReposRepoIdPipelinesNumber(ctx context.Context, repoId int, number int, params *PostReposRepoIdPipelinesNumberParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) PostReposRepoIdPipelinesNumber(ctx context.Context, repoId int, number int, params *PostReposRepoIdPipelinesNumberParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewPostReposRepoIdPipelinesNumberRequest(c.Server, repoId, number, params)
 	if err != nil {
 		return nil, err
@@ -2727,7 +2727,7 @@ func (c *Client) PostReposRepoIdPipelinesNumber(ctx context.Context, repoId int,
 	return c.Client.Do(req)
 }
 
-func (c *Client) PostReposRepoIdPipelinesNumberApprove(ctx context.Context, repoId int, number int, params *PostReposRepoIdPipelinesNumberApproveParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) PostReposRepoIdPipelinesNumberApprove(ctx context.Context, repoId int, number int, params *PostReposRepoIdPipelinesNumberApproveParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewPostReposRepoIdPipelinesNumberApproveRequest(c.Server, repoId, number, params)
 	if err != nil {
 		return nil, err
@@ -2739,7 +2739,7 @@ func (c *Client) PostReposRepoIdPipelinesNumberApprove(ctx context.Context, repo
 	return c.Client.Do(req)
 }
 
-func (c *Client) PostReposRepoIdPipelinesNumberCancel(ctx context.Context, repoId int, number int, params *PostReposRepoIdPipelinesNumberCancelParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) PostReposRepoIdPipelinesNumberCancel(ctx context.Context, repoId int, number int, params *PostReposRepoIdPipelinesNumberCancelParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewPostReposRepoIdPipelinesNumberCancelRequest(c.Server, repoId, number, params)
 	if err != nil {
 		return nil, err
@@ -2751,7 +2751,7 @@ func (c *Client) PostReposRepoIdPipelinesNumberCancel(ctx context.Context, repoI
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetReposRepoIdPipelinesNumberConfig(ctx context.Context, repoId int, number int, params *GetReposRepoIdPipelinesNumberConfigParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) GetReposRepoIdPipelinesNumberConfig(ctx context.Context, repoId int, number int, params *GetReposRepoIdPipelinesNumberConfigParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetReposRepoIdPipelinesNumberConfigRequest(c.Server, repoId, number, params)
 	if err != nil {
 		return nil, err
@@ -2763,7 +2763,7 @@ func (c *Client) GetReposRepoIdPipelinesNumberConfig(ctx context.Context, repoId
 	return c.Client.Do(req)
 }
 
-func (c *Client) PostReposRepoIdPipelinesNumberDecline(ctx context.Context, repoId int, number int, params *PostReposRepoIdPipelinesNumberDeclineParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) PostReposRepoIdPipelinesNumberDecline(ctx context.Context, repoId int, number int, params *PostReposRepoIdPipelinesNumberDeclineParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewPostReposRepoIdPipelinesNumberDeclineRequest(c.Server, repoId, number, params)
 	if err != nil {
 		return nil, err
@@ -2775,7 +2775,7 @@ func (c *Client) PostReposRepoIdPipelinesNumberDecline(ctx context.Context, repo
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetReposRepoIdPipelinesNumberMetadata(ctx context.Context, repoId int, number int, params *GetReposRepoIdPipelinesNumberMetadataParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) GetReposRepoIdPipelinesNumberMetadata(ctx context.Context, repoId int, number int, params *GetReposRepoIdPipelinesNumberMetadataParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetReposRepoIdPipelinesNumberMetadataRequest(c.Server, repoId, number, params)
 	if err != nil {
 		return nil, err
@@ -2787,7 +2787,7 @@ func (c *Client) GetReposRepoIdPipelinesNumberMetadata(ctx context.Context, repo
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetReposRepoIdPullRequests(ctx context.Context, repoId int, params *GetReposRepoIdPullRequestsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) GetReposRepoIdPullRequests(ctx context.Context, repoId int, params *GetReposRepoIdPullRequestsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetReposRepoIdPullRequestsRequest(c.Server, repoId, params)
 	if err != nil {
 		return nil, err
@@ -2799,7 +2799,7 @@ func (c *Client) GetReposRepoIdPullRequests(ctx context.Context, repoId int, par
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetReposRepoIdRegistries(ctx context.Context, repoId int, params *GetReposRepoIdRegistriesParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) GetReposRepoIdRegistries(ctx context.Context, repoId int, params *GetReposRepoIdRegistriesParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetReposRepoIdRegistriesRequest(c.Server, repoId, params)
 	if err != nil {
 		return nil, err
@@ -2811,7 +2811,7 @@ func (c *Client) GetReposRepoIdRegistries(ctx context.Context, repoId int, param
 	return c.Client.Do(req)
 }
 
-func (c *Client) PostReposRepoIdRegistriesWithBody(ctx context.Context, repoId int, params *PostReposRepoIdRegistriesParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) PostReposRepoIdRegistriesWithBody(ctx context.Context, repoId int, params *PostReposRepoIdRegistriesParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewPostReposRepoIdRegistriesRequestWithBody(c.Server, repoId, params, contentType, body)
 	if err != nil {
 		return nil, err
@@ -2823,7 +2823,7 @@ func (c *Client) PostReposRepoIdRegistriesWithBody(ctx context.Context, repoId i
 	return c.Client.Do(req)
 }
 
-func (c *Client) DeleteReposRepoIdRegistriesRegistry(ctx context.Context, repoId int, registry string, params *DeleteReposRepoIdRegistriesRegistryParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) DeleteReposRepoIdRegistriesRegistry(ctx context.Context, repoId int, registry string, params *DeleteReposRepoIdRegistriesRegistryParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewDeleteReposRepoIdRegistriesRegistryRequest(c.Server, repoId, registry, params)
 	if err != nil {
 		return nil, err
@@ -2835,7 +2835,7 @@ func (c *Client) DeleteReposRepoIdRegistriesRegistry(ctx context.Context, repoId
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetReposRepoIdRegistriesRegistry(ctx context.Context, repoId int, registry string, params *GetReposRepoIdRegistriesRegistryParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) GetReposRepoIdRegistriesRegistry(ctx context.Context, repoId int, registry string, params *GetReposRepoIdRegistriesRegistryParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetReposRepoIdRegistriesRegistryRequest(c.Server, repoId, registry, params)
 	if err != nil {
 		return nil, err
@@ -2847,7 +2847,7 @@ func (c *Client) GetReposRepoIdRegistriesRegistry(ctx context.Context, repoId in
 	return c.Client.Do(req)
 }
 
-func (c *Client) PatchReposRepoIdRegistriesRegistryWithBody(ctx context.Context, repoId int, registry string, params *PatchReposRepoIdRegistriesRegistryParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) PatchReposRepoIdRegistriesRegistryWithBody(ctx context.Context, repoId int, registry string, params *PatchReposRepoIdRegistriesRegistryParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewPatchReposRepoIdRegistriesRegistryRequestWithBody(c.Server, repoId, registry, params, contentType, body)
 	if err != nil {
 		return nil, err
@@ -2859,7 +2859,7 @@ func (c *Client) PatchReposRepoIdRegistriesRegistryWithBody(ctx context.Context,
 	return c.Client.Do(req)
 }
 
-func (c *Client) PostReposRepoIdRepair(ctx context.Context, repoId int, params *PostReposRepoIdRepairParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) PostReposRepoIdRepair(ctx context.Context, repoId int, params *PostReposRepoIdRepairParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewPostReposRepoIdRepairRequest(c.Server, repoId, params)
 	if err != nil {
 		return nil, err
@@ -2871,7 +2871,7 @@ func (c *Client) PostReposRepoIdRepair(ctx context.Context, repoId int, params *
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetReposRepoIdSecrets(ctx context.Context, repoId int, params *GetReposRepoIdSecretsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) GetReposRepoIdSecrets(ctx context.Context, repoId int, params *GetReposRepoIdSecretsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetReposRepoIdSecretsRequest(c.Server, repoId, params)
 	if err != nil {
 		return nil, err
@@ -2883,7 +2883,7 @@ func (c *Client) GetReposRepoIdSecrets(ctx context.Context, repoId int, params *
 	return c.Client.Do(req)
 }
 
-func (c *Client) PostReposRepoIdSecretsWithBody(ctx context.Context, repoId int, params *PostReposRepoIdSecretsParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) PostReposRepoIdSecretsWithBody(ctx context.Context, repoId int, params *PostReposRepoIdSecretsParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewPostReposRepoIdSecretsRequestWithBody(c.Server, repoId, params, contentType, body)
 	if err != nil {
 		return nil, err
@@ -2895,7 +2895,7 @@ func (c *Client) PostReposRepoIdSecretsWithBody(ctx context.Context, repoId int,
 	return c.Client.Do(req)
 }
 
-func (c *Client) DeleteReposRepoIdSecretsSecretName(ctx context.Context, repoId int, secretName string, params *DeleteReposRepoIdSecretsSecretNameParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) DeleteReposRepoIdSecretsSecretName(ctx context.Context, repoId int, secretName string, params *DeleteReposRepoIdSecretsSecretNameParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewDeleteReposRepoIdSecretsSecretNameRequest(c.Server, repoId, secretName, params)
 	if err != nil {
 		return nil, err
@@ -2907,7 +2907,7 @@ func (c *Client) DeleteReposRepoIdSecretsSecretName(ctx context.Context, repoId 
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetReposRepoIdSecretsSecretName(ctx context.Context, repoId int, secretName string, params *GetReposRepoIdSecretsSecretNameParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) GetReposRepoIdSecretsSecretName(ctx context.Context, repoId int, secretName string, params *GetReposRepoIdSecretsSecretNameParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetReposRepoIdSecretsSecretNameRequest(c.Server, repoId, secretName, params)
 	if err != nil {
 		return nil, err
@@ -2919,7 +2919,7 @@ func (c *Client) GetReposRepoIdSecretsSecretName(ctx context.Context, repoId int
 	return c.Client.Do(req)
 }
 
-func (c *Client) PatchReposRepoIdSecretsSecretNameWithBody(ctx context.Context, repoId int, secretName string, params *PatchReposRepoIdSecretsSecretNameParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) PatchReposRepoIdSecretsSecretNameWithBody(ctx context.Context, repoId int, secretName string, params *PatchReposRepoIdSecretsSecretNameParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewPatchReposRepoIdSecretsSecretNameRequestWithBody(c.Server, repoId, secretName, params, contentType, body)
 	if err != nil {
 		return nil, err
@@ -2931,7 +2931,7 @@ func (c *Client) PatchReposRepoIdSecretsSecretNameWithBody(ctx context.Context, 
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetSecrets(ctx context.Context, params *GetSecretsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) GetSecrets(ctx context.Context, params *GetSecretsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetSecretsRequest(c.Server, params)
 	if err != nil {
 		return nil, err
@@ -2943,7 +2943,7 @@ func (c *Client) GetSecrets(ctx context.Context, params *GetSecretsParams, reqEd
 	return c.Client.Do(req)
 }
 
-func (c *Client) PostSecretsWithBody(ctx context.Context, params *PostSecretsParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) PostSecretsWithBody(ctx context.Context, params *PostSecretsParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewPostSecretsRequestWithBody(c.Server, params, contentType, body)
 	if err != nil {
 		return nil, err
@@ -2955,7 +2955,7 @@ func (c *Client) PostSecretsWithBody(ctx context.Context, params *PostSecretsPar
 	return c.Client.Do(req)
 }
 
-func (c *Client) DeleteSecretsSecret(ctx context.Context, secret string, params *DeleteSecretsSecretParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) DeleteSecretsSecret(ctx context.Context, secret string, params *DeleteSecretsSecretParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewDeleteSecretsSecretRequest(c.Server, secret, params)
 	if err != nil {
 		return nil, err
@@ -2967,7 +2967,7 @@ func (c *Client) DeleteSecretsSecret(ctx context.Context, secret string, params 
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetSecretsSecret(ctx context.Context, secret string, params *GetSecretsSecretParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) GetSecretsSecret(ctx context.Context, secret string, params *GetSecretsSecretParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetSecretsSecretRequest(c.Server, secret, params)
 	if err != nil {
 		return nil, err
@@ -2979,7 +2979,7 @@ func (c *Client) GetSecretsSecret(ctx context.Context, secret string, params *Ge
 	return c.Client.Do(req)
 }
 
-func (c *Client) PatchSecretsSecretWithBody(ctx context.Context, secret string, params *PatchSecretsSecretParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) PatchSecretsSecretWithBody(ctx context.Context, secret string, params *PatchSecretsSecretParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewPatchSecretsSecretRequestWithBody(c.Server, secret, params, contentType, body)
 	if err != nil {
 		return nil, err
@@ -2991,7 +2991,7 @@ func (c *Client) PatchSecretsSecretWithBody(ctx context.Context, secret string, 
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetSignaturePublicKey(ctx context.Context, params *GetSignaturePublicKeyParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) GetSignaturePublicKey(ctx context.Context, params *GetSignaturePublicKeyParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetSignaturePublicKeyRequest(c.Server, params)
 	if err != nil {
 		return nil, err
@@ -3003,7 +3003,7 @@ func (c *Client) GetSignaturePublicKey(ctx context.Context, params *GetSignature
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetStreamEvents(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) GetStreamEvents(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetStreamEventsRequest(c.Server)
 	if err != nil {
 		return nil, err
@@ -3015,7 +3015,7 @@ func (c *Client) GetStreamEvents(ctx context.Context, reqEditors ...RequestEdito
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetStreamLogsRepoIdPipelineStepID(ctx context.Context, repoId int, pipeline int, stepID int, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) GetStreamLogsRepoIdPipelineStepID(ctx context.Context, repoId int, pipeline int, stepID int, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetStreamLogsRepoIdPipelineStepIDRequest(c.Server, repoId, pipeline, stepID)
 	if err != nil {
 		return nil, err
@@ -3027,7 +3027,7 @@ func (c *Client) GetStreamLogsRepoIdPipelineStepID(ctx context.Context, repoId i
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetUser(ctx context.Context, params *GetUserParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) GetUser(ctx context.Context, params *GetUserParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetUserRequest(c.Server, params)
 	if err != nil {
 		return nil, err
@@ -3039,7 +3039,7 @@ func (c *Client) GetUser(ctx context.Context, params *GetUserParams, reqEditors 
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetUserFeed(ctx context.Context, params *GetUserFeedParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) GetUserFeed(ctx context.Context, params *GetUserFeedParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetUserFeedRequest(c.Server, params)
 	if err != nil {
 		return nil, err
@@ -3051,7 +3051,7 @@ func (c *Client) GetUserFeed(ctx context.Context, params *GetUserFeedParams, req
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetUserRepos(ctx context.Context, params *GetUserReposParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) GetUserRepos(ctx context.Context, params *GetUserReposParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetUserReposRequest(c.Server, params)
 	if err != nil {
 		return nil, err
@@ -3063,7 +3063,7 @@ func (c *Client) GetUserRepos(ctx context.Context, params *GetUserReposParams, r
 	return c.Client.Do(req)
 }
 
-func (c *Client) DeleteUserToken(ctx context.Context, params *DeleteUserTokenParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) DeleteUserToken(ctx context.Context, params *DeleteUserTokenParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewDeleteUserTokenRequest(c.Server, params)
 	if err != nil {
 		return nil, err
@@ -3075,7 +3075,7 @@ func (c *Client) DeleteUserToken(ctx context.Context, params *DeleteUserTokenPar
 	return c.Client.Do(req)
 }
 
-func (c *Client) PostUserToken(ctx context.Context, params *PostUserTokenParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) PostUserToken(ctx context.Context, params *PostUserTokenParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewPostUserTokenRequest(c.Server, params)
 	if err != nil {
 		return nil, err
@@ -3087,7 +3087,7 @@ func (c *Client) PostUserToken(ctx context.Context, params *PostUserTokenParams,
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetUsers(ctx context.Context, params *GetUsersParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) GetUsers(ctx context.Context, params *GetUsersParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetUsersRequest(c.Server, params)
 	if err != nil {
 		return nil, err
@@ -3099,7 +3099,7 @@ func (c *Client) GetUsers(ctx context.Context, params *GetUsersParams, reqEditor
 	return c.Client.Do(req)
 }
 
-func (c *Client) PostUsersWithBody(ctx context.Context, params *PostUsersParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) PostUsersWithBody(ctx context.Context, params *PostUsersParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewPostUsersRequestWithBody(c.Server, params, contentType, body)
 	if err != nil {
 		return nil, err
@@ -3111,7 +3111,7 @@ func (c *Client) PostUsersWithBody(ctx context.Context, params *PostUsersParams,
 	return c.Client.Do(req)
 }
 
-func (c *Client) DeleteUsersLogin(ctx context.Context, login string, params *DeleteUsersLoginParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) DeleteUsersLogin(ctx context.Context, login string, params *DeleteUsersLoginParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewDeleteUsersLoginRequest(c.Server, login, params)
 	if err != nil {
 		return nil, err
@@ -3123,7 +3123,7 @@ func (c *Client) DeleteUsersLogin(ctx context.Context, login string, params *Del
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetUsersLogin(ctx context.Context, login string, params *GetUsersLoginParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) GetUsersLogin(ctx context.Context, login string, params *GetUsersLoginParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetUsersLoginRequest(c.Server, login, params)
 	if err != nil {
 		return nil, err
@@ -3135,7 +3135,7 @@ func (c *Client) GetUsersLogin(ctx context.Context, login string, params *GetUse
 	return c.Client.Do(req)
 }
 
-func (c *Client) PatchUsersLoginWithBody(ctx context.Context, login string, params *PatchUsersLoginParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) PatchUsersLoginWithBody(ctx context.Context, login string, params *PatchUsersLoginParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewPatchUsersLoginRequestWithBody(c.Server, login, params, contentType, body)
 	if err != nil {
 		return nil, err
@@ -3147,7 +3147,7 @@ func (c *Client) PatchUsersLoginWithBody(ctx context.Context, login string, para
 	return c.Client.Do(req)
 }
 
-func (c *Client) PatchUsersLogin(ctx context.Context, login string, params *PatchUsersLoginParams, body PatchUsersLoginJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) PatchUsersLogin(ctx context.Context, login string, params *PatchUsersLoginParams, body PatchUsersLoginJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewPatchUsersLoginRequest(c.Server, login, params, body)
 	if err != nil {
 		return nil, err
@@ -3159,7 +3159,7 @@ func (c *Client) PatchUsersLogin(ctx context.Context, login string, params *Patc
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetVersion(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
+func (c *WPClient) GetVersion(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetVersionRequest(c.Server)
 	if err != nil {
 		return nil, err
@@ -9409,7 +9409,7 @@ func NewGetVersionRequest(server string) (*http.Request, error) {
 	return req, nil
 }
 
-func (c *Client) applyEditors(ctx context.Context, req *http.Request, additionalEditors []RequestEditorFn) error {
+func (c *WPClient) applyEditors(ctx context.Context, req *http.Request, additionalEditors []RequestEditorFn) error {
 	for _, r := range c.RequestEditors {
 		if err := r(ctx, req); err != nil {
 			return err
@@ -9440,7 +9440,7 @@ func NewClientWithResponses(server string, opts ...ClientOption) (*ClientWithRes
 
 // WithBaseURL overrides the baseURL.
 func WithBaseURL(baseURL string) ClientOption {
-	return func(c *Client) error {
+	return func(c *WPClient) error {
 		newBaseURL, err := url.Parse(baseURL)
 		if err != nil {
 			return err
