@@ -19,6 +19,7 @@ import (
 	"io"
 
 	"github.com/urfave/cli/v3"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/metadata"
 )
 
 // Backend defines a container orchestration backend and is used
@@ -40,20 +41,20 @@ type Backend interface {
 	SetupWorkflow(ctx context.Context, conf *Config, taskUUID string) error
 
 	// StartStep starts the workflow step.
-	StartStep(ctx context.Context, step *Step, taskUUID string) error
+	StartStep(ctx context.Context, step *Step, taskUUID string, metadata *metadata.Metadata) error
 
 	// WaitStep waits for the workflow step to complete and returns
 	// the completion results.
-	WaitStep(ctx context.Context, step *Step, taskUUID string) (*State, error)
+	WaitStep(ctx context.Context, step *Step, taskUUID string, metadata *metadata.Metadata) (*State, error)
 
 	// TailStep tails the workflow step logs.
-	TailStep(ctx context.Context, step *Step, taskUUID string) (io.ReadCloser, error)
+	TailStep(ctx context.Context, step *Step, taskUUID string, metadata *metadata.Metadata) (io.ReadCloser, error)
 
 	// DestroyStep destroys the workflow step.
-	DestroyStep(ctx context.Context, step *Step, taskUUID string) error
+	DestroyStep(ctx context.Context, step *Step, taskUUID string, metadata *metadata.Metadata) error
 
 	// DestroyWorkflow destroys the workflow environment.
-	DestroyWorkflow(ctx context.Context, conf *Config, taskUUID string) error
+	DestroyWorkflow(ctx context.Context, conf *Config, taskUUID string, metadata *metadata.Metadata) error
 }
 
 // BackendInfo represents the reported information of a loaded backend.

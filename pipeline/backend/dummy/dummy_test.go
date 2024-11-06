@@ -23,6 +23,7 @@ import (
 
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/dummy"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/metadata"
 )
 
 func TestSmalPipelineDummyRun(t *testing.T) {
@@ -39,17 +40,18 @@ func TestSmalPipelineDummyRun(t *testing.T) {
 	t.Run("expect fail of step func with non setup workflow", func(t *testing.T) {
 		step := &types.Step{Name: "step1", UUID: "SID_1"}
 		nonExistWorkflowID := "WID_NONE"
+		metadata := &metadata.Metadata{}
 
-		err := dummyEngine.StartStep(ctx, step, nonExistWorkflowID)
+		err := dummyEngine.StartStep(ctx, step, nonExistWorkflowID, metadata)
 		assert.Error(t, err)
 
-		_, err = dummyEngine.TailStep(ctx, step, nonExistWorkflowID)
+		_, err = dummyEngine.TailStep(ctx, step, nonExistWorkflowID, metadata)
 		assert.Error(t, err)
 
-		_, err = dummyEngine.WaitStep(ctx, step, nonExistWorkflowID)
+		_, err = dummyEngine.WaitStep(ctx, step, nonExistWorkflowID, metadata)
 		assert.Error(t, err)
 
-		err = dummyEngine.DestroyStep(ctx, step, nonExistWorkflowID)
+		err = dummyEngine.DestroyStep(ctx, step, nonExistWorkflowID, metadata)
 		assert.Error(t, err)
 	})
 
@@ -61,13 +63,14 @@ func TestSmalPipelineDummyRun(t *testing.T) {
 			Environment: map[string]string{},
 			Commands:    []string{"echo ja", "echo nein"},
 		}
+		metadata := &metadata.Metadata{}
 		workflowUUID := "WID_1"
 
 		assert.NoError(t, dummyEngine.SetupWorkflow(ctx, nil, workflowUUID))
 
-		assert.NoError(t, dummyEngine.StartStep(ctx, step, workflowUUID))
+		assert.NoError(t, dummyEngine.StartStep(ctx, step, workflowUUID, metadata))
 
-		reader, err := dummyEngine.TailStep(ctx, step, workflowUUID)
+		reader, err := dummyEngine.TailStep(ctx, step, workflowUUID, metadata)
 		assert.NoError(t, err)
 		log, err := io.ReadAll(reader)
 		assert.NoError(t, err)
@@ -81,14 +84,14 @@ echo nein
 ------------------
 `, string(log))
 
-		state, err := dummyEngine.WaitStep(ctx, step, workflowUUID)
+		state, err := dummyEngine.WaitStep(ctx, step, workflowUUID, metadata)
 		assert.NoError(t, err)
 		assert.NoError(t, state.Error)
 		assert.EqualValues(t, 0, state.ExitCode)
 
-		assert.NoError(t, dummyEngine.DestroyStep(ctx, step, workflowUUID))
+		assert.NoError(t, dummyEngine.DestroyStep(ctx, step, workflowUUID, metadata))
 
-		assert.NoError(t, dummyEngine.DestroyWorkflow(ctx, nil, workflowUUID))
+		assert.NoError(t, dummyEngine.DestroyWorkflow(ctx, nil, workflowUUID, metadata))
 	})
 
 	t.Run("step exec error", func(t *testing.T) {
@@ -98,23 +101,24 @@ echo nein
 			Type:        types.StepTypePlugin,
 			Environment: map[string]string{dummy.EnvKeyStepType: "plugin", dummy.EnvKeyStepExitCode: "1"},
 		}
+		metadata := &metadata.Metadata{}
 		workflowUUID := "WID_1"
 
 		assert.NoError(t, dummyEngine.SetupWorkflow(ctx, nil, workflowUUID))
 
-		assert.NoError(t, dummyEngine.StartStep(ctx, step, workflowUUID))
+		assert.NoError(t, dummyEngine.StartStep(ctx, step, workflowUUID, metadata))
 
-		_, err := dummyEngine.TailStep(ctx, step, workflowUUID)
+		_, err := dummyEngine.TailStep(ctx, step, workflowUUID, metadata)
 		assert.NoError(t, err)
 
-		state, err := dummyEngine.WaitStep(ctx, step, workflowUUID)
+		state, err := dummyEngine.WaitStep(ctx, step, workflowUUID, metadata)
 		assert.NoError(t, err)
 		assert.NoError(t, state.Error)
 		assert.EqualValues(t, 1, state.ExitCode)
 
-		assert.NoError(t, dummyEngine.DestroyStep(ctx, step, workflowUUID))
+		assert.NoError(t, dummyEngine.DestroyStep(ctx, step, workflowUUID, metadata))
 
-		assert.NoError(t, dummyEngine.DestroyWorkflow(ctx, nil, workflowUUID))
+		assert.NoError(t, dummyEngine.DestroyWorkflow(ctx, nil, workflowUUID, metadata))
 	})
 
 	t.Run("step tail error", func(t *testing.T) {
@@ -123,21 +127,22 @@ echo nein
 			UUID:        "SID_2",
 			Environment: map[string]string{dummy.EnvKeyStepTailFail: "true"},
 		}
+		metadata := &metadata.Metadata{}
 		workflowUUID := "WID_1"
 
 		assert.NoError(t, dummyEngine.SetupWorkflow(ctx, nil, workflowUUID))
 
-		assert.NoError(t, dummyEngine.StartStep(ctx, step, workflowUUID))
+		assert.NoError(t, dummyEngine.StartStep(ctx, step, workflowUUID, metadata))
 
-		_, err := dummyEngine.TailStep(ctx, step, workflowUUID)
+		_, err := dummyEngine.TailStep(ctx, step, workflowUUID, metadata)
 		assert.Error(t, err)
 
-		_, err = dummyEngine.WaitStep(ctx, step, workflowUUID)
+		_, err = dummyEngine.WaitStep(ctx, step, workflowUUID, metadata)
 		assert.NoError(t, err)
 
-		assert.NoError(t, dummyEngine.DestroyStep(ctx, step, workflowUUID))
+		assert.NoError(t, dummyEngine.DestroyStep(ctx, step, workflowUUID, metadata))
 
-		assert.NoError(t, dummyEngine.DestroyWorkflow(ctx, nil, workflowUUID))
+		assert.NoError(t, dummyEngine.DestroyWorkflow(ctx, nil, workflowUUID, metadata))
 	})
 
 	t.Run("step start fail", func(t *testing.T) {
@@ -147,22 +152,23 @@ echo nein
 			Type:        types.StepTypeService,
 			Environment: map[string]string{dummy.EnvKeyStepType: "service", dummy.EnvKeyStepStartFail: "true"},
 		}
+		metadata := &metadata.Metadata{}
 		workflowUUID := "WID_1"
 
 		assert.NoError(t, dummyEngine.SetupWorkflow(ctx, nil, workflowUUID))
 
-		assert.Error(t, dummyEngine.StartStep(ctx, step, workflowUUID))
+		assert.Error(t, dummyEngine.StartStep(ctx, step, workflowUUID, metadata))
 
-		_, err := dummyEngine.TailStep(ctx, step, workflowUUID)
+		_, err := dummyEngine.TailStep(ctx, step, workflowUUID, metadata)
 		assert.Error(t, err)
 
-		state, err := dummyEngine.WaitStep(ctx, step, workflowUUID)
+		state, err := dummyEngine.WaitStep(ctx, step, workflowUUID, metadata)
 		assert.Error(t, err)
 		assert.Error(t, state.Error)
 		assert.EqualValues(t, 0, state.ExitCode)
 
-		assert.Error(t, dummyEngine.DestroyStep(ctx, step, workflowUUID))
+		assert.Error(t, dummyEngine.DestroyStep(ctx, step, workflowUUID, metadata))
 
-		assert.NoError(t, dummyEngine.DestroyWorkflow(ctx, nil, workflowUUID))
+		assert.NoError(t, dummyEngine.DestroyWorkflow(ctx, nil, workflowUUID, metadata))
 	})
 }

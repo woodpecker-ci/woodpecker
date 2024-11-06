@@ -23,34 +23,35 @@ import (
 	v1 "k8s.io/api/core/v1"
 
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/metadata"
 )
 
 func TestPodName(t *testing.T) {
-	name, err := podName(&types.Step{UUID: "01he8bebctabr3kgk0qj36d2me-0"})
+	name, err := podName(&types.Step{UUID: "01he8bebctabr3kgk0qj36d2me-0", Name: "stepName"}, &metadata.Metadata{Workflow: metadata.Workflow{Name: "my-workflow"}, Repo: metadata.Repo{Owner: "owner", Name: "repo_name"}})
 	assert.NoError(t, err)
-	assert.Equal(t, "wp-01he8bebctabr3kgk0qj36d2me-0", name)
+	assert.Equal(t, "wp-owner-repo-name-my-workflow-stepname-01he8", name)
 
-	_, err = podName(&types.Step{UUID: "01he8bebctabr3kgk0qj36d2me\\0a"})
+	_, err = podName(&types.Step{UUID: "01he8bebctabr3kgk0qj36d2me\\0a", Name: ".."}, &metadata.Metadata{Workflow: metadata.Workflow{Name: "my-workflow"}, Repo: metadata.Repo{Owner: "owner", Name: "repo_name!"}})
 	assert.ErrorIs(t, err, ErrDNSPatternInvalid)
 
-	_, err = podName(&types.Step{UUID: "01he8bebctabr3kgk0qj36d2me-0-services-0..woodpecker-runtime.svc.cluster.local"})
+	_, err = podName(&types.Step{UUID: "01he8bebctabr3kgk0qj36d2me-0-services-0..woodpecker-runtime.svc.cluster.local"}, &metadata.Metadata{Workflow: metadata.Workflow{Name: "my-workflow"}, Repo: metadata.Repo{Owner: "owner", Name: "repo_name.."}})
 	assert.ErrorIs(t, err, ErrDNSPatternInvalid)
 }
 
 func TestStepToPodName(t *testing.T) {
-	name, err := stepToPodName(&types.Step{UUID: "01he8bebctabr3kg", Name: "clone", Type: types.StepTypeClone})
+	name, err := stepToPodName(&types.Step{UUID: "01he8bebctabr3kg", Name: "clone", Type: types.StepTypeClone}, &metadata.Metadata{Workflow: metadata.Workflow{Name: "my-workflow"}, Repo: metadata.Repo{Owner: "owner", Name: "repo_name"}})
 	assert.NoError(t, err)
-	assert.EqualValues(t, "wp-01he8bebctabr3kg", name)
-	name, err = stepToPodName(&types.Step{UUID: "01he8bebctabr3kg", Name: "cache", Type: types.StepTypeCache})
+	assert.EqualValues(t, "wp-owner-repo-name-my-workflow-clone-01he8", name)
+	name, err = stepToPodName(&types.Step{UUID: "01he8bebctabr3kg", Name: "cache", Type: types.StepTypeCache}, &metadata.Metadata{Workflow: metadata.Workflow{Name: "my-workflow"}, Repo: metadata.Repo{Owner: "owner", Name: "repo_name"}})
 	assert.NoError(t, err)
-	assert.EqualValues(t, "wp-01he8bebctabr3kg", name)
-	name, err = stepToPodName(&types.Step{UUID: "01he8bebctabr3kg", Name: "release", Type: types.StepTypePlugin})
+	assert.EqualValues(t, "wp-owner-repo-name-my-workflow-cache-01he8", name)
+	name, err = stepToPodName(&types.Step{UUID: "01he8bebctabr3kg", Name: "release", Type: types.StepTypePlugin}, &metadata.Metadata{Workflow: metadata.Workflow{Name: "my-workflow"}, Repo: metadata.Repo{Owner: "owner", Name: "repo_name"}})
 	assert.NoError(t, err)
-	assert.EqualValues(t, "wp-01he8bebctabr3kg", name)
-	name, err = stepToPodName(&types.Step{UUID: "01he8bebctabr3kg", Name: "prepare-env", Type: types.StepTypeCommands})
+	assert.EqualValues(t, "wp-owner-repo-name-my-workflow-release-01he8", name)
+	name, err = stepToPodName(&types.Step{UUID: "01he8bebctabr3kg", Name: "prepare-env", Type: types.StepTypeCommands}, &metadata.Metadata{Workflow: metadata.Workflow{Name: "my-workflow"}, Repo: metadata.Repo{Owner: "owner", Name: "repo_name"}})
 	assert.NoError(t, err)
-	assert.EqualValues(t, "wp-01he8bebctabr3kg", name)
-	name, err = stepToPodName(&types.Step{UUID: "01he8bebctabr3kg", Name: "postgres", Type: types.StepTypeService})
+	assert.EqualValues(t, "wp-owner-repo-name-my-workflow-prepare-env-01he8", name)
+	name, err = stepToPodName(&types.Step{UUID: "01he8bebctabr3kg", Name: "postgres", Type: types.StepTypeService}, &metadata.Metadata{Workflow: metadata.Workflow{Name: "workflow-postgres"}, Repo: metadata.Repo{Owner: "owner", Name: "repo_name"}})
 	assert.NoError(t, err)
 	assert.EqualValues(t, "wp-svc-01he8bebctabr3kg-postgres", name)
 }
@@ -133,7 +134,7 @@ func TestTinyPod(t *testing.T) {
 		Environment: map[string]string{"CI": "woodpecker"},
 	}, &config{
 		Namespace: "woodpecker",
-	}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{})
+	}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{}, &metadata.Metadata{Workflow: metadata.Workflow{Name: "my-workflow"}})
 	assert.NoError(t, err)
 
 	podJSON, err := json.Marshal(pod)
@@ -147,7 +148,7 @@ func TestFullPod(t *testing.T) {
 	const expected = `
 	{
 		"metadata": {
-			"name": "wp-01he8bebctabr3kgk0qj36d2me-0",
+			"name": "wp-owner-repo-name-my-workflow-go-test-01he8",
 			"namespace": "woodpecker",
 			"creationTimestamp": null,
 			"labels": {
@@ -171,7 +172,7 @@ func TestFullPod(t *testing.T) {
 			],
 			"containers": [
 				{
-					"name": "wp-01he8bebctabr3kgk0qj36d2me-0",
+					"name": "wp-owner-repo-name-my-workflow-go-test-01he8",
 					"image": "meltwater/drone-cache",
 					"command": [
 						"/bin/sh",
@@ -256,7 +257,7 @@ func TestFullPod(t *testing.T) {
 					"name": "another-pull-secret"
 				},
 				{
-					"name": "wp-01he8bebctabr3kgk0qj36d2me-0"
+					"name": "wp-owner-repo-name-my-workflow-go-test-01he8"
 				}
 			],
 			"tolerations": [
@@ -335,7 +336,7 @@ func TestFullPod(t *testing.T) {
 		PodAnnotationsAllowFromStep: true,
 		PodNodeSelector:             map[string]string{"topology.kubernetes.io/region": "eu-central-1"},
 		SecurityContext:             SecurityContextConfig{RunAsNonRoot: false},
-	}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{
+	}, "wp-owner-repo-name-my-workflow-go-test-01he8", "linux/amd64", BackendOptions{
 		Labels:             map[string]string{"part-of": "woodpecker-ci"},
 		Annotations:        map[string]string{"kubernetes.io/limit-ranger": "LimitRanger plugin set: cpu, memory request and limit for container"},
 		NodeSelector:       map[string]string{"storage": "ssd"},
@@ -347,7 +348,7 @@ func TestFullPod(t *testing.T) {
 			Limits:   map[string]string{"memory": "256Mi", "cpu": "2"},
 		},
 		SecurityContext: &secCtx,
-	})
+	}, &metadata.Metadata{Workflow: metadata.Workflow{Name: "my-workflow"}, Repo: metadata.Repo{Owner: "owner", Name: "repo_name"}})
 	assert.NoError(t, err)
 
 	podJSON, err := json.Marshal(pod)
@@ -368,7 +369,7 @@ func TestPodPrivilege(t *testing.T) {
 			SecurityContext: SecurityContextConfig{RunAsNonRoot: globalRunAsRoot},
 		}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{
 			SecurityContext: &secCtx,
-		})
+		}, &metadata.Metadata{Workflow: metadata.Workflow{Name: "my-workflow"}})
 	}
 
 	// securty context is requesting user and group 101 (non-root)
@@ -474,7 +475,7 @@ func TestScratchPod(t *testing.T) {
 		Entrypoint: []string{"/usr/bin/curl", "-v", "google.com"},
 	}, &config{
 		Namespace: "woodpecker",
-	}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{})
+	}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{}, &metadata.Metadata{Workflow: metadata.Workflow{Name: "my-workflow"}})
 	assert.NoError(t, err)
 
 	podJSON, err := json.Marshal(pod)
@@ -593,7 +594,7 @@ func TestSecrets(t *testing.T) {
 				Target: SecretTarget{File: "~/.docker/config.json"},
 			},
 		},
-	})
+	}, &metadata.Metadata{Workflow: metadata.Workflow{Name: "my-workflow"}})
 	assert.NoError(t, err)
 
 	podJSON, err := json.Marshal(pod)
