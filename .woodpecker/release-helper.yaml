@@ -13,5 +13,3 @@ when:
     branch:
       - ${CI_REPO_DEFAULT_BRANCH}
       - release/*
-  - event: manual
-    evaluate: 'TASK == "release-helper"'
