@@ -115,7 +115,8 @@ clean-all: clean ## Clean all artifacts
 generate: install-tools generate-swagger ## Run all code generations
 	CGO_ENABLED=0 go generate ./...
 
-generate-swagger: install-tools ## Run openapi code generation
+generate-swagger: install-tools ## Run openapi code generation and format it
+	go run github.com/swaggo/swag/cmd/swag fmt
 	CGO_ENABLED=0 go generate cmd/server/openapi.go
 
 generate-client:

@@ -70,9 +70,6 @@ steps:
       - 'make generate-swagger'
       - 'DIFF=$(git diff | head)'
       - '[ -n "$DIFF" ] && { echo "openapi not up to date, exec `make generate-openapi` and commit"; exit 1; } || true'
-      - go run github.com/swaggo/swag/cmd/swag fmt
-      - 'DIFF=$(git diff | head)'
-      - '[ -n "$DIFF" ] && { echo "openapi routes not formatted, exec `go run github.com/swaggo/swag/cmd/swag fmt` and commit"; exit 1; } || true'
     when: *when
 
   lint-license-header:
