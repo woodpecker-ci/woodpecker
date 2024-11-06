@@ -24,7 +24,7 @@ import (
 func generateScriptWindows(commands []string, workDir string) string {
 	var buf bytes.Buffer
 
-	if err := setupScriptTmpl.Execute(&buf, map[string]string{
+	if err := setupScriptWinTmpl.Execute(&buf, map[string]string{
 		"WorkDir": workDir,
 	}); err != nil {
 		// should never happen but well we have an error to trance
@@ -46,7 +46,7 @@ func generateScriptWindows(commands []string, workDir string) string {
 
 const setupScriptWinProto = `
 $ErrorActionPreference = 'Stop';
-if ([Environment]::GetEnvironmentVariable('CI_WORKSPACE')) { if (-not (Test-Path "{{.WorkDir}}")) { New-Item -Path "{{.WorkDir}}" -ItemType Directory -Force }};
+if (-not (Test-Path "{{.WorkDir}}")) { New-Item -Path "{{.WorkDir}}" -ItemType Directory -Force };
 if (-not [Environment]::GetEnvironmentVariable('HOME')) { [Environment]::SetEnvironmentVariable('HOME', 'c:\root') };
 if (-not (Test-Path "$env:HOME")) { New-Item -Path "$env:HOME" -ItemType Directory -Force };
 if ($Env:CI_NETRC_MACHINE) {
@@ -57,7 +57,7 @@ $netrc=[string]::Format("{0}\_netrc",$Env:HOME);
 };
 [Environment]::SetEnvironmentVariable("CI_NETRC_PASSWORD",$null);
 [Environment]::SetEnvironmentVariable("CI_SCRIPT",$null);
-if ([Environment]::GetEnvironmentVariable('CI_WORKSPACE')) { cd "{{.WorkDir}}" };
+cd "{{.WorkDir}}";
 `
 
 var setupScriptWinTmpl, _ = template.New("").Parse(setupScriptWinProto)
