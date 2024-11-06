@@ -52,6 +52,9 @@ func (e *docker) toConfig(step *types.Step) *container.Config {
 			configEnv[k] = v
 		}
 		config.Entrypoint = entry
+
+		// step.WorkingDir will be respected by the generated script
+		config.WorkingDir = step.WorkspaceBase
 	}
 	if len(step.Entrypoint) > 0 {
 		config.Entrypoint = step.Entrypoint
