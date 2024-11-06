@@ -16,6 +16,7 @@ package common
 
 import (
 	"testing"
+	"text/template"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -57,4 +58,10 @@ go test
 		script := generateScriptPosix(test.from)
 		assert.EqualValues(t, test.want, script, "Want encoded script for %s", test.from)
 	}
+}
+
+func TestSetupScriptProtoParse(t *testing.T) {
+	// just ensure that we have a working `setupScriptTmpl` on runntime
+	_, err := template.New("").Parse(setupScriptProto)
+	assert.NoError(t, err)
 }

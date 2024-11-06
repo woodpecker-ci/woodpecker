@@ -16,6 +16,7 @@ package common
 
 import (
 	"testing"
+	"text/template"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -58,4 +59,10 @@ Write-Output ('+ "go test"');
 		script := generateScriptWindows(test.from)
 		assert.EqualValues(t, test.want, script, "Want encoded script for %s", test.from)
 	}
+}
+
+func TestSetupScriptWinProtoParse(t *testing.T) {
+	// just ensure that we have a working `setupScriptWinTmpl` on runntime
+	_, err := template.New("").Parse(setupScriptWinProto)
+	assert.NoError(t, err)
 }
