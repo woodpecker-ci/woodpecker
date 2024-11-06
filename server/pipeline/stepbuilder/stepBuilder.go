@@ -17,6 +17,7 @@ package stepbuilder
 
 import (
 	"fmt"
+	"maps"
 	"path/filepath"
 	"strings"
 
@@ -190,9 +191,7 @@ func (b *StepBuilder) genItemForWorkflow(workflow *model.Workflow, axis matrix.A
 	if len(item.Labels) == 0 {
 		item.Labels = make(map[string]string, len(b.DefaultLabels))
 		// Set default labels if no labels are defined in the pipeline
-		for k, v := range b.DefaultLabels {
-			item.Labels[k] = v
-		}
+		maps.Copy(item.Labels, b.DefaultLabels)
 	}
 
 	return item, errorsAndWarnings
