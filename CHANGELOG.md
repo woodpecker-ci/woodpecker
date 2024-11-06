@@ -4,7 +4,11 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@anbraten
+@6543, @anbraten
+
+### 🐛 Bug Fixes
+
+- Add migration to autofix corrupted users.org_id entrys in db (#4307) [[#4327](https://github.com/woodpecker-ci/woodpecker/pull/4327)]
 
 ### Misc
 
