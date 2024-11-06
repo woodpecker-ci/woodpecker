@@ -183,7 +183,7 @@ func podContainer(step *types.Step, podName, goos string, options BackendOptions
 	container := v1.Container{
 		Name:            podName,
 		Image:           step.Image,
-		WorkingDir:      step.WorkspaceBase,
+		WorkingDir:      step.WorkspaceBase, // step.WorkingDir will be respected by the generated script // TODO: plugins wont work with this at all!!!
 		Ports:           containerPorts(step.Ports),
 		SecurityContext: containerSecurityContext(options.SecurityContext, step.Privileged),
 	}
