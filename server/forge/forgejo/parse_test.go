@@ -217,6 +217,7 @@ func TestForgejoParser(t *testing.T) {
 				Email:             "gordon@golang.org",
 				ForgeURL:          "http://forgejo.golang.org/gordon/hello-world/pull/1",
 				PullRequestLabels: []string{},
+				PullRequestTitle:  "Update the README with new information",
 			},
 		},
 		{
@@ -259,6 +260,7 @@ func TestForgejoParser(t *testing.T) {
 					"Kind/Bug",
 					"Kind/Security",
 				},
+				PullRequestTitle: "New Pull",
 			},
 		},
 		{
@@ -297,6 +299,7 @@ func TestForgejoParser(t *testing.T) {
 				Email:             "anbraten@sender.forgejo.com",
 				ForgeURL:          "https://forgejo.com/anbraten/test-repo/pulls/1",
 				PullRequestLabels: []string{},
+				PullRequestTitle:  "Adjust file",
 			},
 		},
 		{
@@ -335,6 +338,7 @@ func TestForgejoParser(t *testing.T) {
 				Email:             "anbraten@noreply.forgejo.com",
 				ForgeURL:          "https://forgejo.com/anbraten/test-repo/pulls/1",
 				PullRequestLabels: []string{},
+				PullRequestTitle:  "Adjust file",
 			},
 		},
 		{
