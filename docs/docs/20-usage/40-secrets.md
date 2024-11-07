@@ -33,14 +33,11 @@ In this example, the secret named `secret_token` would be passed to the setting 
 ```
 
 :::info Important
-You cannot use the deprecated `secrets` or `environment` directly in plugin steps, as this could alter plugin execution.
-Instead, use the `settings` field for secrets in plugins:
+Avoid using the deprecated `secrets` or `environment` fields in plugin steps.
+These options can potentially impact plugin execution and integrity.
+Instead, provide secrets via the `settings` field, preferably using the `from_secret` syntax (see below).
 
-- It's safer: Plugin settings are a controlled interface for customization.
-- It's consistent: Plugins define which settings they accept and how to handle them.
-- It maintains security: This approach doesn't compromise the plugin's integrity or security model.
-
-This restriction is enforced by the linter to ensure plugin safety and predictable behavior.
+This rule is also enforced by the pipeline linter to promote safe and predictable plugin behavior.
 :::
 
 In the example below, the secret `SURGE_TOKEN` would be passed to the setting named `surge_token`, which will be available in the plugin as an environment variable named `PLUGIN_SURGE_TOKEN` (See [plugins](./51-plugins/20-creating-plugins.md#settings) for details).
