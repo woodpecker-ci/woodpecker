@@ -18,8 +18,8 @@ once their usage is declared in the `secrets` section:
 
 ```diff
  steps:
-   - name: test
-     image: bash
+   - name: "step name"
+     image: registry/repo/image:tag
      commands:
 +      - echo $some_username
 +      - echo $SOME_PASSWORD
