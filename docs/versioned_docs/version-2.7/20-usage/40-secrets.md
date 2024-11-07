@@ -26,7 +26,8 @@ once their usage is declared in the `secrets` section:
 +    secrets: [ some_username, SOME_PASSWORD ]
 ```
 
-The case of the environment variables is not changed, but secret matching is done case-insensitively. In the example above, `DOCKER_PASSWORD` would also match if the secret is called `docker_password`.
+The environment variables retain their original case, but secret matching is performed in a case-insensitive manner.
+In this example, `DOCKER_PASSWORD` would still match even if the secret is named `docker_password`.
 
 ### Use secrets in normal steps via environment
 
