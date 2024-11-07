@@ -17,8 +17,8 @@ In this example, the secret named `secret_token` would be passed to the setting 
 
 ```diff
  steps:
-   - name: 'plugin do stuff'
-     image: publish-plugin
+   - name: 'plugin step'
+     image: registry/repo/image:tag
 +    settings:
 +      token:
 +        from_secret: secret_token
