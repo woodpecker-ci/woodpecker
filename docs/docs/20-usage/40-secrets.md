@@ -81,8 +81,8 @@ Please note parameter expressions are subject to pre-processing. When using secr
    - name: "step name"
      image: registry/repo/image:tag
      commands:
--      - echo ${TOKEN_ENV}
-+      - echo $${TOKEN_ENV}
+-      - echo ${TOKEN}
++      - echo $${TOKEN}
      environment:
        TOKEN_ENV:
          from_secret: secret_token
