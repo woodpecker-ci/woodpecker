@@ -78,8 +78,8 @@ Please note parameter expressions are subject to pre-processing. When using secr
 
 ```diff
  steps:
-   - name: "echo password"
-     image: bash
+   - name: "step name"
+     image: registry/repo/image:tag
      commands:
 -      - echo ${TOKEN_ENV}
 +      - echo $${TOKEN_ENV}
