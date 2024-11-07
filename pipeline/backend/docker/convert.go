@@ -47,11 +47,14 @@ func (e *docker) toConfig(step *types.Step) *container.Config {
 	maps.Copy(configEnv, step.Environment)
 
 	if len(step.Commands) > 0 {
-		env, entry := common.GenerateContainerConf(step.Commands, e.info.OSType)
+		env, entry := common.GenerateContainerConf(step.Commands, e.info.OSType, step.WorkingDir)
 		for k, v := range env {
 			configEnv[k] = v
 		}
 		config.Entrypoint = entry
+
+		// step.WorkingDir will be respected by the generated script
+		config.WorkingDir = step.WorkspaceBase
 	}
 	if len(step.Entrypoint) > 0 {
 		config.Entrypoint = step.Entrypoint

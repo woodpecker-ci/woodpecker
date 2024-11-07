@@ -17,16 +17,22 @@ package common
 import (
 	"bytes"
 	"fmt"
+	"text/template"
 
 	"al.essio.dev/pkg/shellescape"
 )
 
 // generateScriptPosix is a helper function that generates a step script
 // for a linux container using the given.
-func generateScriptPosix(commands []string) string {
+func generateScriptPosix(commands []string, workDir string) string {
 	var buf bytes.Buffer
 
-	buf.WriteString(setupScript)
+	if err := setupScriptTmpl.Execute(&buf, map[string]string{
+		"WorkDir": workDir,
+	}); err != nil {
+		// should never happen but well we have an error to trance
+		return fmt.Sprintf("echo 'failed to generate posix script from commands: %s'; exit 1", err.Error())
+	}
 
 	for _, command := range commands {
 		buf.WriteString(fmt.Sprintf(
@@ -39,9 +45,9 @@ func generateScriptPosix(commands []string) string {
 	return buf.String()
 }
 
-// setupScript is a helper script this is added to the step script to ensure
+// setupScriptProto is a helper script this is added to the step script to ensure
 // a minimum set of environment variables are set correctly.
-const setupScript = `
+const setupScriptProto = `
 if [ -n "$CI_NETRC_MACHINE" ]; then
 cat <<EOF > $HOME/.netrc
 machine $CI_NETRC_MACHINE
@@ -53,9 +59,11 @@ fi
 unset CI_NETRC_USERNAME
 unset CI_NETRC_PASSWORD
 unset CI_SCRIPT
-mkdir -p "$CI_WORKSPACE"
-cd "$CI_WORKSPACE"
+mkdir -p "{{.WorkDir}}"
+cd "{{.WorkDir}}"
 `
+
+var setupScriptTmpl, _ = template.New("").Parse(setupScriptProto)
 
 // traceScript is a helper script that is added to the step script
 // to trace a command.
