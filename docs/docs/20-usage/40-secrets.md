@@ -70,7 +70,7 @@ steps:
           - "value3"
 ```
 
-This approach allows for flexible and secure use of secrets within plugin settings while maintaining the integrity and security of the plugin execution environment.
+This method ensures flexible and secure use of secrets within plugin settings, while preserving the integrity and security of the plugin execution environment.
 
 ### Note about parameter pre-processing
 
