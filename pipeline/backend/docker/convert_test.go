@@ -185,11 +185,7 @@ func TestToConfigSmall(t *testing.T) {
 			"wp_uuid": "09238932",
 		},
 		Env: []string{
-			"CI_SCRIPT=CmlmIFsgLW4gIiRDSV9ORVRSQ19NQUNISU5FIiBdOyB0aGVuCmNhdCA8PEVPRiA+ICRIT01FLy5uZXRyYwptYWNoaW" +
-				"5lICRDSV9ORVRSQ19NQUNISU5FCmxvZ2luICRDSV9ORVRSQ19VU0VSTkFNRQpwYXNzd29yZCAkQ0lfTkVUUkNfUEFTU1dPUkQKRU9" +
-				"GCmNobW9kIDA2MDAgJEhPTUUvLm5ldHJjCmZpCnVuc2V0IENJX05FVFJDX1VTRVJOQU1FCnVuc2V0IENJX05FVFJDX1BBU1NXT1JE" +
-				"CnVuc2V0IENJX1NDUklQVAoKZWNobyArICdnbyB0ZXN0JwpnbyB0ZXN0Cg==",
-			"HOME=/root",
+			"CI_SCRIPT=CmlmIFsgLW4gIiRDSV9ORVRSQ19NQUNISU5FIiBdOyB0aGVuCmNhdCA8PEVPRiA+ICRIT01FLy5uZXRyYwptYWNoaW5lICRDSV9ORVRSQ19NQUNISU5FCmxvZ2luICRDSV9ORVRSQ19VU0VSTkFNRQpwYXNzd29yZCAkQ0lfTkVUUkNfUEFTU1dPUkQKRU9GCmNobW9kIDA2MDAgJEhPTUUvLm5ldHJjCmZpCnVuc2V0IENJX05FVFJDX1VTRVJOQU1FCnVuc2V0IENJX05FVFJDX1BBU1NXT1JECnVuc2V0IENJX1NDUklQVApta2RpciAtcCAiIgpjZCAiIgoKZWNobyArICdnbyB0ZXN0JwpnbyB0ZXN0Cg==",
 			"SHELL=/bin/sh",
 		},
 	}, conf)
@@ -211,36 +207,37 @@ func TestToConfigFull(t *testing.T) {
 	}
 
 	conf := engine.toConfig(&backend.Step{
-		Name:        "test",
-		UUID:        "09238932",
-		Type:        backend.StepTypeCommands,
-		Image:       "golang:1.2.3",
-		Pull:        true,
-		Detached:    true,
-		Privileged:  true,
-		WorkingDir:  "/src/abc",
-		Environment: map[string]string{"TAGS": "sqlite"},
-		Commands:    []string{"go test", "go vet ./..."},
-		ExtraHosts:  []backend.HostAlias{{Name: "t", IP: "1.2.3.4"}},
-		Volumes:     []string{"/cache:/cache"},
-		Tmpfs:       []string{"/tmp"},
-		Devices:     []string{"/dev/sdc"},
-		Networks:    []backend.Conn{{Name: "extra-net", Aliases: []string{"extra.net"}}},
-		DNS:         []string{"9.9.9.9", "8.8.8.8"},
-		DNSSearch:   nil,
-		OnFailure:   true,
-		OnSuccess:   true,
-		Failure:     "fail",
-		AuthConfig:  backend.Auth{Username: "user", Password: "123456"},
-		NetworkMode: "bridge",
-		Ports:       []backend.Port{{Number: 21}, {Number: 22}},
+		Name:          "test",
+		UUID:          "09238932",
+		Type:          backend.StepTypeCommands,
+		Image:         "golang:1.2.3",
+		Pull:          true,
+		Detached:      true,
+		Privileged:    true,
+		WorkingDir:    "/src/abc",
+		WorkspaceBase: "/src",
+		Environment:   map[string]string{"TAGS": "sqlite"},
+		Commands:      []string{"go test", "go vet ./..."},
+		ExtraHosts:    []backend.HostAlias{{Name: "t", IP: "1.2.3.4"}},
+		Volumes:       []string{"/cache:/cache"},
+		Tmpfs:         []string{"/tmp"},
+		Devices:       []string{"/dev/sdc"},
+		Networks:      []backend.Conn{{Name: "extra-net", Aliases: []string{"extra.net"}}},
+		DNS:           []string{"9.9.9.9", "8.8.8.8"},
+		DNSSearch:     nil,
+		OnFailure:     true,
+		OnSuccess:     true,
+		Failure:       "fail",
+		AuthConfig:    backend.Auth{Username: "user", Password: "123456"},
+		NetworkMode:   "bridge",
+		Ports:         []backend.Port{{Number: 21}, {Number: 22}},
 	})
 
 	assert.NotNil(t, conf)
 	sort.Strings(conf.Env)
 	assert.EqualValues(t, &container.Config{
 		Image:        "golang:1.2.3",
-		WorkingDir:   "/src/abc",
+		WorkingDir:   "/src",
 		AttachStdout: true,
 		AttachStderr: true,
 		Entrypoint:   []string{"/bin/sh", "-c", "echo $CI_SCRIPT | base64 -d | /bin/sh -e"},
@@ -249,12 +246,7 @@ func TestToConfigFull(t *testing.T) {
 			"wp_uuid": "09238932",
 		},
 		Env: []string{
-			"CI_SCRIPT=CmlmIFsgLW4gIiRDSV9ORVRSQ19NQUNISU5FIiBdOyB0aGVuCmNhdCA8PEVPRiA+ICRIT01FLy5uZXRyYwptYWNoaW" +
-				"5lICRDSV9ORVRSQ19NQUNISU5FCmxvZ2luICRDSV9ORVRSQ19VU0VSTkFNRQpwYXNzd29yZCAkQ0lfTkVUUkNfUEFTU1dPUkQKRU" +
-				"9GCmNobW9kIDA2MDAgJEhPTUUvLm5ldHJjCmZpCnVuc2V0IENJX05FVFJDX1VTRVJOQU1FCnVuc2V0IENJX05FVFJDX1BBU1NXT1" +
-				"JECnVuc2V0IENJX1NDUklQVAoKZWNobyArICdnbyB0ZXN0JwpnbyB0ZXN0CgplY2hvICsgJ2dvIHZldCAuLy4uLicKZ28gdmV0IC" +
-				"4vLi4uCg==",
-			"HOME=/root",
+			"CI_SCRIPT=CmlmIFsgLW4gIiRDSV9ORVRSQ19NQUNISU5FIiBdOyB0aGVuCmNhdCA8PEVPRiA+ICRIT01FLy5uZXRyYwptYWNoaW5lICRDSV9ORVRSQ19NQUNISU5FCmxvZ2luICRDSV9ORVRSQ19VU0VSTkFNRQpwYXNzd29yZCAkQ0lfTkVUUkNfUEFTU1dPUkQKRU9GCmNobW9kIDA2MDAgJEhPTUUvLm5ldHJjCmZpCnVuc2V0IENJX05FVFJDX1VTRVJOQU1FCnVuc2V0IENJX05FVFJDX1BBU1NXT1JECnVuc2V0IENJX1NDUklQVApta2RpciAtcCAiL3NyYy9hYmMiCmNkICIvc3JjL2FiYyIKCmVjaG8gKyAnZ28gdGVzdCcKZ28gdGVzdAoKZWNobyArICdnbyB2ZXQgLi8uLi4nCmdvIHZldCAuLy4uLgo=",
 			"SHELL=/bin/sh",
 			"TAGS=sqlite",
 		},

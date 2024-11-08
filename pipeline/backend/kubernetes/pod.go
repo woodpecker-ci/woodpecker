@@ -31,8 +31,9 @@ import (
 )
 
 const (
-	StepLabel = "step"
-	podPrefix = "wp-"
+	StepLabel            = "step"
+	podPrefix            = "wp-"
+	defaultFSGroup int64 = 1000
 )
 
 func mkPod(step *types.Step, config *config, podName, goos string, options BackendOptions) (*v1.Pod, error) {
@@ -192,9 +193,12 @@ func podContainer(step *types.Step, podName, goos string, options BackendOptions
 	}
 
 	if len(step.Commands) > 0 {
-		scriptEnv, command := common.GenerateContainerConf(step.Commands, goos)
+		scriptEnv, command := common.GenerateContainerConf(step.Commands, goos, step.WorkingDir)
 		container.Command = command
 		maps.Copy(step.Environment, scriptEnv)
+
+		// step.WorkingDir will be respected by the generated script
+		container.WorkingDir = step.WorkspaceBase
 	}
 	if len(step.Entrypoint) > 0 {
 		container.Command = step.Entrypoint
@@ -389,6 +393,9 @@ func podSecurityContext(sc *SecurityContext, secCtxConf SecurityContextConfig, s
 	if secCtxConf.RunAsNonRoot {
 		nonRoot = newBool(true)
 	}
+	if secCtxConf.FSGroup != nil {
+		fsGroup = secCtxConf.FSGroup
+	}
 
 	if sc != nil {
 		// only allow to set user if its not root or step is privileged
@@ -403,6 +410,11 @@ func podSecurityContext(sc *SecurityContext, secCtxConf SecurityContextConfig, s
 
 		// only allow to set fsGroup if its not root or step is privileged
 		if sc.FSGroup != nil && (*sc.FSGroup != 0 || stepPrivileged) {
+			fsGroup = sc.FSGroup
+		}
+
+		// if unset, set fsGroup to 1000 by default to support non-root images
+		if sc.FSGroup != nil {
 			fsGroup = sc.FSGroup
 		}
 

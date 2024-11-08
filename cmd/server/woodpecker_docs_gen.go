@@ -24,6 +24,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"os"
 	"path"
 
@@ -57,6 +58,7 @@ func main() {
 
 	// convert to OpenApi3
 	if err := toOpenApi3(filePath, filePath); err != nil {
+		fmt.Printf("converting '%s' from openapi v2 to v3 failed\n", filePath)
 		panic(err)
 	}
 }
@@ -77,18 +79,18 @@ func removeHost(jsonIn string) (string, error) {
 func toOpenApi3(input, output string) error {
 	data2, err := os.ReadFile(input)
 	if err != nil {
-		return err
+		return fmt.Errorf("read input: %w", err)
 	}
 
 	var doc2 openapi2.T
 	err = json.Unmarshal(data2, &doc2)
 	if err != nil {
-		return err
+		return fmt.Errorf("unmarshal input: %w", err)
 	}
 
 	doc3, err := openapi2conv.ToV3(&doc2)
 	if err != nil {
-		return err
+		return fmt.Errorf("convert openapi v2 to v3: %w", err)
 	}
 	err = doc3.Validate(context.Background())
 	if err != nil {
@@ -97,8 +99,12 @@ func toOpenApi3(input, output string) error {
 
 	data, err := json.Marshal(doc3)
 	if err != nil {
-		return err
+		return fmt.Errorf("Marshal converted: %w", err)
 	}
 
-	return os.WriteFile(output, data, 0o644)
+	if err = os.WriteFile(output, data, 0o644); err != nil {
+		return fmt.Errorf("write output: %w", err)
+	}
+
+	return nil
 }
