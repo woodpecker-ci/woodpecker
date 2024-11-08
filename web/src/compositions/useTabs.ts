@@ -25,9 +25,9 @@ export function useTabsProvider() {
         if (route.name.toString() in alternativeRoute) {
           return alternativeRoute[route.name.toString()];
         }
-        return route.name.toString()
+        return route.name.toString();
       }
-      return tabs.value[0].to
+      return tabs.value[0].to;
     },
     set(tab) {
       router.push({ name: tab }).catch(console.error);
