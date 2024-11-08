@@ -1,11 +1,9 @@
 <template>
   <Scaffold
     v-if="pipeline && repo"
-    v-model:active-tab="activeTab"
     enable-tabs
-    disable-tab-url-hash-mode
     :go-back="goBack"
-    :fluid-content="activeTab === 'tasks'"
+    :fluid-content="route.name === 'repo-pipeline'"
     full-width-header
   >
     <template #title>
@@ -75,10 +73,10 @@
       </div>
     </template>
 
-    <Tab id="tasks" :title="$t('repo.pipeline.tasks')" />
+    <Tab id="repo-pipeline" :title="$t('repo.pipeline.tasks')" />
     <Tab
       v-if="pipeline.errors && pipeline.errors.length > 0"
-      id="errors"
+      id="repo-pipeline-errors"
       icon="attention"
       :title="
         pipeline.errors.some((e) => !e.is_warning)
@@ -87,13 +85,17 @@
       "
       :icon-class="pipeline.errors.some((e) => !e.is_warning) ? 'text-wp-state-error-100' : 'text-wp-state-warn-100'"
     />
-    <Tab id="config" :title="$t('repo.pipeline.config')" />
+    <Tab id="repo-pipeline-config" :title="$t('repo.pipeline.config')" />
     <Tab
       v-if="pipeline.changed_files && pipeline.changed_files.length > 0"
-      id="changed-files"
+      id="repo-pipeline-changed-files"
       :title="$t('repo.pipeline.files', { files: pipeline.changed_files?.length })"
     />
-    <Tab v-if="repoPermissions && repoPermissions.push" id="debug" :title="$t('repo.pipeline.debug.title')" />
+    <Tab
+      v-if="repoPermissions && repoPermissions.push"
+      id="repo-pipeline-debug"
+      :title="$t('repo.pipeline.debug.title')"
+    />
 
     <router-view />
   </Scaffold>
@@ -204,49 +206,6 @@ onMounted(loadPipeline);
 watch([repositoryId, pipelineId], loadPipeline);
 onBeforeUnmount(() => {
   favicon.updateStatus('default');
-});
-
-const activeTab = computed({
-  get() {
-    if (route.name === 'repo-pipeline-changed-files') {
-      return 'changed-files';
-    }
-
-    if (route.name === 'repo-pipeline-config') {
-      return 'config';
-    }
-
-    if (route.name === 'repo-pipeline-errors') {
-      return 'errors';
-    }
-
-    if (route.name === 'repo-pipeline-debug' && repoPermissions.value?.push) {
-      return 'debug';
-    }
-
-    return 'tasks';
-  },
-  set(tab: string) {
-    if (tab === 'tasks') {
-      router.replace({ name: 'repo-pipeline' });
-    }
-
-    if (tab === 'changed-files') {
-      router.replace({ name: 'repo-pipeline-changed-files' });
-    }
-
-    if (tab === 'config') {
-      router.replace({ name: 'repo-pipeline-config' });
-    }
-
-    if (tab === 'errors') {
-      router.replace({ name: 'repo-pipeline-errors' });
-    }
-
-    if (tab === 'debug' && repoPermissions.value?.push) {
-      router.replace({ name: 'repo-pipeline-debug' });
-    }
-  },
 });
 
 const goBack = useRouteBack({ name: 'repo' });

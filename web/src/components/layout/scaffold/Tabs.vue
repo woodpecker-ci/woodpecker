@@ -22,15 +22,11 @@
 </template>
 
 <script setup lang="ts">
-import { useRoute, useRouter } from 'vue-router';
 
 import Icon from '~/components/atomic/Icon.vue';
 import { useTabsClient, type Tab } from '~/compositions/useTabs';
 
-const router = useRouter();
-const route = useRoute();
-
-const { activeTab, tabs, disableUrlHashMode } = useTabsClient();
+const { activeTab, tabs } = useTabsClient();
 
 async function selectTab(tab: Tab) {
   if (tab.id === undefined) {
@@ -38,9 +34,5 @@ async function selectTab(tab: Tab) {
   }
 
   activeTab.value = tab.id;
-
-  if (!disableUrlHashMode.value) {
-    await router.replace({ params: route.params, hash: `#${tab.id}` });
-  }
 }
 </script>

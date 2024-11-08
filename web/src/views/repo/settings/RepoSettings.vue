@@ -1,5 +1,5 @@
 <template>
-  <Scaffold v-model:active-tab="activeTab" enable-tabs :go-back="goBack" disable-tab-url-hash-mode>
+  <Scaffold enable-tabs :go-back="goBack">
     <template #title>
       <span>
         <router-link :to="{ name: 'org', params: { orgId: repo!.org_id } }" class="hover:underline">{{
@@ -16,21 +16,21 @@
       </span>
     </template>
 
-    <Tab id="general" :title="$t('repo.settings.general.general')" />
-    <Tab id="secrets" :title="$t('secrets.secrets')" />
-    <Tab id="registries" :title="$t('registries.registries')" />
-    <Tab id="crons" :title="$t('repo.settings.crons.crons')" />
-    <Tab id="badge" :title="$t('repo.settings.badge.badge')" />
-    <Tab id="actions" :title="$t('repo.settings.actions.actions')" />
+    <Tab id="repo-settings-general" :title="$t('repo.settings.general.general')" />
+    <Tab id="repo-settings-secrets" :title="$t('secrets.secrets')" />
+    <Tab id="repo-settings-registries" :title="$t('registries.registries')" />
+    <Tab id="repo-settings-crons" :title="$t('repo.settings.crons.crons')" />
+    <Tab id="repo-settings-badge" :title="$t('repo.settings.badge.badge')" />
+    <Tab id="repo-settings-actions" :title="$t('repo.settings.actions.actions')" />
 
     <router-view />
   </Scaffold>
 </template>
 
 <script lang="ts" setup>
-import { computed, inject, onMounted, type Ref } from 'vue';
+import { inject, onMounted, type Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useRoute, useRouter } from 'vue-router';
+import { useRouter } from 'vue-router';
 
 import Scaffold from '~/components/layout/scaffold/Scaffold.vue';
 import Tab from '~/components/layout/scaffold/Tab.vue';
@@ -40,7 +40,6 @@ import type { Repo, RepoPermissions } from '~/lib/api/types';
 
 const notifications = useNotifications();
 const router = useRouter();
-const route = useRoute();
 const i18n = useI18n();
 
 const repoPermissions = inject<Ref<RepoPermissions>>('repo-permissions');
@@ -61,40 +60,4 @@ onMounted(async () => {
 });
 
 const goBack = useRouteBack({ name: 'repo' });
-
-const activeTab = computed({
-  get() {
-    if (route.name === 'repo-settings-secrets') {
-      return 'secrets';
-    }
-    if (route.name === 'repo-settings-registries') {
-      return 'registries';
-    }
-    if (route.name === 'repo-settings-crons') {
-      return 'crons';
-    }
-    if (route.name === 'repo-settings-badge') {
-      return 'badge';
-    }
-    if (route.name === 'repo-settings-actions') {
-      return 'actions';
-    }
-    return 'general';
-  },
-  set(tab: string) {
-    if (tab === 'secrets') {
-      router.push({ name: 'repo-settings-secrets' });
-    } else if (tab === 'registries') {
-      router.push({ name: 'repo-settings-registries' });
-    } else if (tab === 'crons') {
-      router.push({ name: 'repo-settings-crons' });
-    } else if (tab === 'badge') {
-      router.push({ name: 'repo-settings-badge' });
-    } else if (tab === 'actions') {
-      router.push({ name: 'repo-settings-actions' });
-    } else {
-      router.push({ name: 'repo-settings-general' });
-    }
-  },
-});
 </script>

@@ -12,6 +12,7 @@ import { useTabsClient, type Tab } from '~/compositions/useTabs';
 
 const props = defineProps<{
   id?: string;
+  alternativeRoute?: string;
   title: string;
   icon?: IconNames;
   iconClass?: string;
@@ -23,6 +24,7 @@ const tab = ref<Tab>();
 onMounted(() => {
   tab.value = {
     id: props.id || props.title.toLocaleLowerCase().replace(' ', '-') || tabs.value.length.toString(),
+    alternativeRoute: props.alternativeRoute,
     title: props.title,
     icon: props.icon,
     iconClass: props.iconClass,

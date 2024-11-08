@@ -1,10 +1,5 @@
 <template>
-  <Scaffold
-    v-if="repo && repoPermissions && route.meta.repoHeader"
-    v-model:active-tab="activeTab"
-    enable-tabs
-    disable-tab-url-hash-mode
-  >
+  <Scaffold v-if="repo && repoPermissions && route.meta.repoHeader" enable-tabs>
     <template #title>
       <span class="flex">
         <router-link :to="{ name: 'org', params: { orgId: repo.org_id } }" class="hover:underline">{{
@@ -43,9 +38,14 @@
       />
     </template>
 
-    <Tab id="activity" :title="$t('repo.activity')" />
-    <Tab id="branches" :title="$t('repo.branches')" />
-    <Tab v-if="repo.pr_enabled && repo.allow_pr" id="pull_requests" :title="$t('repo.pull_requests')" />
+    <Tab id="repo" :title="$t('repo.activity')" />
+    <Tab id="repo-branches" alternative-route="repo-branch" :title="$t('repo.branches')" />
+    <Tab
+      v-if="repo.pr_enabled && repo.allow_pr"
+      id="repo-pull-requests"
+      alternative-route="repo-pull-request"
+      :title="$t('repo.pull_requests')"
+    />
 
     <router-view />
   </Scaffold>
@@ -132,25 +132,4 @@ watch([repositoryId], () => {
 });
 
 const badgeUrl = computed(() => repo.value && `${config.rootPath}/api/badges/${repo.value.id}/status.svg`);
-
-const activeTab = computed({
-  get() {
-    if (route.name === 'repo-branches' || route.name === 'repo-branch') {
-      return 'branches';
-    }
-    if (route.name === 'repo-pull-requests' || route.name === 'repo-pull-request') {
-      return 'pull_requests';
-    }
-    return 'activity';
-  },
-  set(tab: string) {
-    if (tab === 'branches') {
-      router.push({ name: 'repo-branches' });
-    } else if (tab === 'pull_requests') {
-      router.push({ name: 'repo-pull-requests' });
-    } else {
-      router.push({ name: 'repo' });
-    }
-  },
-});
 </script>
