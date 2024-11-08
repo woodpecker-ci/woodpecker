@@ -24,7 +24,7 @@ import (
 //go:generate go run openapi_json_gen.go openapi.go
 //go:generate go run github.com/getkin/kin-openapi/cmd/validate@latest ../../docs/openapi.json
 
-// setupOpenApiStaticConfig initializes static content (version) for the OpenAPI config.
+// setupOpenAPIStaticConfig initializes static content (version) for the OpenAPI config.
 //
 //	@title			Woodpecker CI API
 //	@description	Woodpecker is a simple, yet powerful CI/CD engine with great extensibility.
@@ -33,6 +33,6 @@ import (
 //	@BasePath		/api
 //	@contact.name	Woodpecker CI
 //	@contact.url	https://woodpecker-ci.org/
-func setupOpenApiStaticConfig() {
+func setupOpenAPIStaticConfig() {
 	openapi.SwaggerInfo.Version = version.String()
 }

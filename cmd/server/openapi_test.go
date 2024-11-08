@@ -9,6 +9,6 @@ import (
 )
 
 func TestSetupOpenApiStaticConfig(t *testing.T) {
-	setupOpenApiStaticConfig()
+	setupOpenAPIStaticConfig()
 	assert.Equal(t, "/api", openapi.SwaggerInfo.BasePath)
 }
