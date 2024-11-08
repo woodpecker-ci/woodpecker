@@ -19,13 +19,18 @@
       }}</a>
     </div>
     <div class="flex ml-auto -m-1.5 items-center space-x-2">
-      <div v-if="user?.admin" class="relative">
-        <IconButton class="navbar-icon" :title="$t('settings')" :to="{ name: 'admin-settings-info' }" icon="settings" />
+      <IconButton
+        v-if="user?.admin"
+        class="navbar-icon relative"
+        :title="$t('settings')"
+        :to="{ name: 'admin-settings-info' }"
+      >
+        <Icon name="settings" />
         <div
           v-if="version?.needsUpdate"
           class="absolute top-2 right-2 bg-int-wp-state-error-100 rounded-full w-3 h-3"
         />
-      </div>
+      </IconButton>
 
       <ActivePipelines v-if="user" class="navbar-icon" />
       <IconButton
@@ -46,6 +51,7 @@ import { useRoute } from 'vue-router';
 
 import WoodpeckerLogo from '~/assets/logo.svg?component';
 import Button from '~/components/atomic/Button.vue';
+import Icon from '~/components/atomic/Icon.vue';
 import IconButton from '~/components/atomic/IconButton.vue';
 import useAuthentication from '~/compositions/useAuthentication';
 import useConfig from '~/compositions/useConfig';

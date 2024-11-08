@@ -6,19 +6,21 @@ when:
       - renovate/*
 
 variables:
-  - &trivy_plugin docker.io/woodpeckerci/plugin-trivy:1.1.1
+  - &trivy_plugin docker.io/woodpeckerci/plugin-trivy:1.2.0
 
 steps:
   backend:
     depends_on: []
     image: *trivy_plugin
     settings:
+      server: server
       skip-dirs: web/,docs/
 
   docs:
     depends_on: []
     image: *trivy_plugin
     settings:
+      server: server
       skip-dirs: node_modules/,plugins/woodpecker-plugins/node_modules/
       dir: docs/
 
@@ -26,5 +28,18 @@ steps:
     depends_on: []
     image: *trivy_plugin
     settings:
+      server: server
       skip-dirs: node_modules/
       dir: web/
+
+services:
+  server:
+    image: *trivy_plugin
+    # settings:
+    #   service: true
+    #   db-repository: docker.io/aquasec/trivy-db:2
+    environment:
+      PLUGIN_SERVICE: 'true'
+      PLUGIN_DB_REPOSITORY: 'docker.io/aquasec/trivy-db:2'
+    ports:
+      - 10000

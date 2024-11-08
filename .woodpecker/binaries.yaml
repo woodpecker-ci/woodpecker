@@ -2,7 +2,9 @@ when:
   - event: tag
   - event: pull_request
     branch: ${CI_REPO_DEFAULT_BRANCH}
-    path: Makefile
+    path:
+      - Makefile
+      - .woodpecker/binaries.yaml
 
 variables:
   - &golang_image 'docker.io/golang:1.23'
