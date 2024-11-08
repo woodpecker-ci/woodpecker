@@ -11,9 +11,9 @@
       </span>
     </template>
 
-    <Tab id="org-settings-secrets" :title="$t('secrets.secrets')" />
-    <Tab id="org-settings-registries" :title="$t('registries.registries')" />
-    <Tab id="org-settings-agents" :title="$t('admin.settings.agents.agents')" />
+    <Tab to="org-settings-secrets" :title="$t('secrets.secrets')" />
+    <Tab to="org-settings-registries" :title="$t('registries.registries')" />
+    <Tab to="org-settings-agents" :title="$t('admin.settings.agents.agents')" />
 
     <router-view />
   </Scaffold>

@@ -11,7 +11,7 @@ import type { IconNames } from '~/components/atomic/Icon.vue';
 import { useTabsClient, type Tab } from '~/compositions/useTabs';
 
 const props = defineProps<{
-  id?: string;
+  to?: string;
   alternativeRoute?: string;
   title: string;
   icon?: IconNames;
@@ -23,7 +23,7 @@ const tab = ref<Tab>();
 
 onMounted(() => {
   tab.value = {
-    id: props.id || props.title.toLocaleLowerCase().replace(' ', '-') || tabs.value.length.toString(),
+    to: props.to || props.title.toLocaleLowerCase().replace(' ', '-') || tabs.value.length.toString(),
     alternativeRoute: props.alternativeRoute,
     title: props.title,
     icon: props.icon,
@@ -31,10 +31,10 @@ onMounted(() => {
   };
 
   // don't add tab if tab id is already present
-  if (!tabs.value.find(({ id }) => id === props.id)) {
+  if (!tabs.value.find(({ to }) => to === props.to)) {
     tabs.value.push(tab.value);
   }
 });
 
-const isActive = computed(() => tab.value && tab.value.id === activeTab.value);
+const isActive = computed(() => tab.value && tab.value.to === activeTab.value);
 </script>

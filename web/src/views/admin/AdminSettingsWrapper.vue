@@ -3,14 +3,14 @@
     <template #title>
       {{ $t('settings') }}
     </template>
-    <Tab id="admin-settings-info" :title="$t('info')" />
-    <Tab id="admin-settings-secrets" :title="$t('secrets.secrets')" />
-    <Tab id="admin-settings-registries" :title="$t('registries.registries')" />
-    <Tab id="admin-settings-repos" :title="$t('admin.settings.repos.repos')" />
-    <Tab id="admin-settings-users" :title="$t('admin.settings.users.users')" />
-    <Tab id="admin-settings-orgs" :title="$t('admin.settings.orgs.orgs')" />
-    <Tab id="admin-settings-agents" :title="$t('admin.settings.agents.agents')" />
-    <Tab id="admin-settings-queue" :title="$t('admin.settings.queue.queue')" />
+    <Tab to="admin-settings-info" :title="$t('info')" />
+    <Tab to="admin-settings-secrets" :title="$t('secrets.secrets')" />
+    <Tab to="admin-settings-registries" :title="$t('registries.registries')" />
+    <Tab to="admin-settings-repos" :title="$t('admin.settings.repos.repos')" />
+    <Tab to="admin-settings-users" :title="$t('admin.settings.users.users')" />
+    <Tab to="admin-settings-orgs" :title="$t('admin.settings.orgs.orgs')" />
+    <Tab to="admin-settings-agents" :title="$t('admin.settings.agents.agents')" />
+    <Tab to="admin-settings-queue" :title="$t('admin.settings.queue.queue')" />
 
     <router-view />
   </Scaffold>

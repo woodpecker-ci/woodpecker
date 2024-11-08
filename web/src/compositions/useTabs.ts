@@ -4,7 +4,7 @@ import { useRoute, useRouter } from 'vue-router';
 import type { IconNames } from '~/components/atomic/Icon.vue';
 
 export interface Tab {
-  id: string;
+  to: string;
   alternativeRoute?: string;
   title: string;
   icon?: IconNames;
@@ -27,7 +27,7 @@ export function useTabsProvider() {
         }
         return route.name.toString()
       }
-      return tabs.value[0].id
+      return tabs.value[0].to
     },
     set(tab) {
       router.push({ name: tab }).catch(console.error);
@@ -40,7 +40,7 @@ export function useTabsProvider() {
   onMounted(() => {
     for (const i of tabs.value) {
       if (i.alternativeRoute !== undefined) {
-        alternativeRoute[i.alternativeRoute] = i.id;
+        alternativeRoute[i.alternativeRoute] = i.to;
       }
     }
   });
