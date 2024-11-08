@@ -179,6 +179,7 @@ func (c *Compiler) createProcess(container *yaml_types.Container, stepType backe
 		Pull:           container.Pull,
 		Privileged:     privileged,
 		WorkingDir:     workingDir,
+		WorkspaceBase:  workspaceBase,
 		Environment:    environment,
 		Commands:       container.Commands,
 		Entrypoint:     container.Entrypoint,
