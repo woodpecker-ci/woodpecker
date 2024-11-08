@@ -98,7 +98,18 @@
         },
         "trusted": {
           "trusted": "Trusted",
-          "desc": "Underlying pipeline containers get access to escalated capabilities (like mounting volumes)."
+          "network": {
+            "network": "Network",
+            "desc": "Underlying pipeline containers get access to network privileges like changing DNS."
+          },
+          "volumes": {
+            "volumes": "Volumes",
+            "desc": "Underlying pipeline containers get access to volume privileges."
+          },
+          "security": {
+            "security": "Security",
+            "desc": "Underlying pipeline containers get access to security privileges."
+          }
         },
         "visibility": {
           "visibility": "Project visibility",
@@ -266,6 +277,9 @@
       },
       "registries": {
         "desc": "Organization registry credentials can be added to use private images for all pipelines of an organization."
+      },
+      "agents": {
+        "desc": "Agents registered for this organization."
       }
     }
   },
@@ -312,6 +326,13 @@
           "capacity": "Capacity",
           "desc": "The max amount of parallel pipelines executed by this agent.",
           "badge": "capacity"
+        },
+        "custom_labels": {
+          "custom_labels": "Custom Labels",
+          "desc": "The custom labels set by the agent admin on agent startup."
+        },
+        "org": {
+          "badge": "org"
         },
         "version": "Version",
         "last_contact": "Last contact",
@@ -415,6 +436,9 @@
         "download_cli": "Download CLI",
         "reset_token": "Reset token",
         "swagger_ui": "Swagger UI"
+      },
+      "agents": {
+        "desc": "Agents registered to your account repos."
       }
     }
   },
@@ -433,7 +457,7 @@
     "saved": "Secret saved",
     "plugins": {
       "images": "Available only for the following plugins",
-      "desc": "List of plugins images where this secret is available, leave empty to allow for all plugins and general steps."
+      "desc": "List of plugin images where this secret is available. Leave empty to allow for all plugins and normal steps."
     },
     "events": {
       "events": "Available at the following events",

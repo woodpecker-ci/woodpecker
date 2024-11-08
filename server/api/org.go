@@ -16,7 +16,6 @@ package api
 
 import (
 	"net/http"
-	"strconv"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -58,20 +57,7 @@ func GetOrgs(c *gin.Context) {
 //	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 //	@Param		org_id			path	string	true	"the organization's id"
 func GetOrg(c *gin.Context) {
-	_store := store.FromContext(c)
-
-	orgID, err := strconv.ParseInt(c.Param("org_id"), 10, 64)
-	if err != nil {
-		c.String(http.StatusBadRequest, "Error parsing org id. %s", err)
-		return
-	}
-
-	org, err := _store.OrgGet(orgID)
-	if err != nil {
-		handleDBError(c, err)
-		return
-	}
-
+	org := session.Org(c)
 	c.JSON(http.StatusOK, org)
 }
 
@@ -86,7 +72,7 @@ func GetOrg(c *gin.Context) {
 //	@Param		org_id			path	string	true	"the organization's id"
 func GetOrgPermissions(c *gin.Context) {
 	user := session.User(c)
-	_store := store.FromContext(c)
+	org := session.Org(c)
 
 	_forge, err := server.Config.Services.Manager.ForgeFromUser(user)
 	if err != nil {
@@ -95,20 +81,8 @@ func GetOrgPermissions(c *gin.Context) {
 		return
 	}
 
-	orgID, err := strconv.ParseInt(c.Param("org_id"), 10, 64)
-	if err != nil {
-		c.String(http.StatusBadRequest, "Error parsing org id. %s", err)
-		return
-	}
-
 	if user == nil {
 		c.JSON(http.StatusOK, &model.OrgPerm{})
-		return
-	}
-
-	org, err := _store.OrgGet(orgID)
-	if err != nil {
-		c.String(http.StatusInternalServerError, "Error getting org %d. %s", orgID, err)
 		return
 	}
 
@@ -125,7 +99,7 @@ func GetOrgPermissions(c *gin.Context) {
 
 	perm, err := server.Config.Services.Membership.Get(c, _forge, user, org.Name)
 	if err != nil {
-		c.String(http.StatusInternalServerError, "Error getting membership for %d. %s", orgID, err)
+		c.String(http.StatusInternalServerError, "Error getting membership for %d. %s", org.ID, err)
 		return
 	}
 
@@ -200,15 +174,9 @@ func LookupOrg(c *gin.Context) {
 //	@Param			id				path	string	true	"the org's id"
 func DeleteOrg(c *gin.Context) {
 	_store := store.FromContext(c)
+	org := session.Org(c)
 
-	orgID, err := strconv.ParseInt(c.Param("org_id"), 10, 64)
-	if err != nil {
-		c.String(http.StatusBadRequest, "Error parsing org id. %s", err)
-		return
-	}
-
-	err = _store.OrgDelete(orgID)
-	if err != nil {
+	if err := _store.OrgDelete(org.ID); err != nil {
 		handleDBError(c, err)
 		return
 	}

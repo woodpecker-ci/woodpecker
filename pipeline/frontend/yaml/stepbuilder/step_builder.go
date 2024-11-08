@@ -41,7 +41,7 @@ type StepBuilder struct {
 	Yamls               []*forge_types.FileMeta // TODO: get rid of server type in this package
 	CompilerOptions     []compiler.Option
 	GetWorkflowMetadata func(*model.Workflow) metadata.Metadata
-	RepoIsTrusted       bool
+	RepoTrusted         *metadata.TrustedConfiguration
 	TrustedClonePlugins []string
 	PrivilegedPlugins   []string
 	Host                string
@@ -131,7 +131,11 @@ func (b *StepBuilder) genItemForWorkflow(workflow *model.Workflow, axis matrix.A
 
 	// lint pipeline
 	errorsAndWarnings = multierr.Append(errorsAndWarnings, linter.New(
-		linter.WithTrusted(b.RepoIsTrusted),
+		linter.WithTrusted(linter.TrustedConfiguration{
+			Network:  b.RepoTrusted.Network,
+			Volumes:  b.RepoTrusted.Volumes,
+			Security: b.RepoTrusted.Security,
+		}),
 		linter.PrivilegedPlugins(b.PrivilegedPlugins),
 		linter.WithTrustedClonePlugins(b.TrustedClonePlugins),
 	).Lint([]*linter.WorkflowConfig{{
@@ -194,7 +198,7 @@ func (b *StepBuilder) compileWorkflow(parsed *yaml_types.Workflow, environ map[s
 			),
 		),
 		compiler.WithMetadata(metadata),
-		compiler.WithTrusted(b.RepoIsTrusted),
+		compiler.WithTrustedSecurity(b.RepoTrusted.Security),
 	)
 	options = append(options, b.CompilerOptions...)
 

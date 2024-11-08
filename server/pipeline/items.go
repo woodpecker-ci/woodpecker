@@ -22,6 +22,7 @@ import (
 	"github.com/rs/zerolog/log"
 
 	pipeline_errors "go.woodpecker-ci.org/woodpecker/v2/pipeline/errors"
+	pipeline_metadata "go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/metadata"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/compiler"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/stepbuilder"
 	"go.woodpecker-ci.org/woodpecker/v2/server"
@@ -99,13 +100,16 @@ func parsePipeline(forge forge.Forge, store store.Store, currentPipeline *model.
 	b := &stepbuilder.StepBuilder{
 		Yamls:               yamls,
 		GetWorkflowMetadata: meta.MetadataForWorkflow,
-		RepoIsTrusted:       repo.IsTrusted,
+		RepoTrusted: &pipeline_metadata.TrustedConfiguration{
+			Network:  repo.Trusted.Network,
+			Volumes:  repo.Trusted.Volumes,
+			Security: repo.Trusted.Security,
+		},
 		Host:                server.Config.Server.Host,
 		Envs:                envs,
 		TrustedClonePlugins: server.Config.Pipeline.TrustedClonePlugins,
 		PrivilegedPlugins:   server.Config.Pipeline.PrivilegedPlugins,
 		CompilerOptions: []compiler.Option{
-			compiler.WithResourceLimit(server.Config.Pipeline.Limits.MemSwapLimit, server.Config.Pipeline.Limits.MemLimit, server.Config.Pipeline.Limits.ShmSize, server.Config.Pipeline.Limits.CPUQuota, server.Config.Pipeline.Limits.CPUShares, server.Config.Pipeline.Limits.CPUSet),
 			compiler.WithVolumes(server.Config.Pipeline.Volumes...),
 			compiler.WithNetworks(server.Config.Pipeline.Networks...),
 			compiler.WithLocal(false),

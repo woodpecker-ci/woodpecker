@@ -16,6 +16,7 @@ package kubernetes
 
 import (
 	"context"
+	std_errs "errors"
 	"fmt"
 	"io"
 	"maps"
@@ -69,6 +70,7 @@ type config struct {
 }
 type SecurityContextConfig struct {
 	RunAsNonRoot bool
+	FSGroup      *int64
 }
 
 func newDefaultDeleteOptions() meta_v1.DeleteOptions {
@@ -97,6 +99,7 @@ func configFromCliContext(ctx context.Context) (*config, error) {
 				ImagePullSecretNames:        c.StringSlice("backend-k8s-pod-image-pull-secret-names"),
 				SecurityContext: SecurityContextConfig{
 					RunAsNonRoot: c.Bool("backend-k8s-secctx-nonroot"), // cspell:words secctx nonroot
+					FSGroup:      newInt64(defaultFSGroup),
 				},
 				NativeSecretsAllowFromStep: c.Bool("backend-k8s-allow-native-secrets"),
 			}
@@ -223,6 +226,13 @@ func (e *kube) StartStep(ctx context.Context, step *types.Step, taskUUID string)
 	options, err := parseBackendOptions(step)
 	if err != nil {
 		log.Error().Err(err).Msg("could not parse backend options")
+	}
+
+	if needsRegistrySecret(step) {
+		err = startRegistrySecret(ctx, e, step)
+		if err != nil {
+			return err
+		}
 	}
 
 	log.Trace().Str("taskUUID", taskUUID).Msgf("starting step: %s", step.Name)
@@ -382,9 +392,20 @@ func (e *kube) TailStep(ctx context.Context, step *types.Step, taskUUID string) 
 }
 
 func (e *kube) DestroyStep(ctx context.Context, step *types.Step, taskUUID string) error {
+	var errs []error
 	log.Trace().Str("taskUUID", taskUUID).Msgf("Stopping step: %s", step.Name)
+	if needsRegistrySecret(step) {
+		err := stopRegistrySecret(ctx, e, step, defaultDeleteOptions)
+		if err != nil {
+			errs = append(errs, err)
+		}
+	}
+
 	err := stopPod(ctx, e, step, defaultDeleteOptions)
-	return err
+	if err != nil {
+		errs = append(errs, err)
+	}
+	return std_errs.Join(errs...)
 }
 
 // DestroyWorkflow destroys the pipeline environment.

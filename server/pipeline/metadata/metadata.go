@@ -71,7 +71,11 @@ func (m *MetadataServerForge) MetadataForWorkflow(workflow *model.Workflow) meta
 			CloneSSHURL: m.repo.CloneSSH,
 			Private:     m.repo.IsSCMPrivate,
 			Branch:      m.repo.Branch,
-			Trusted:     m.repo.IsTrusted,
+			Trusted: metadata.TrustedConfiguration{
+				Network:  m.repo.Trusted.Network,
+				Volumes:  m.repo.Trusted.Volumes,
+				Security: m.repo.Trusted.Security,
+			},
 		}
 
 		if idx := strings.LastIndex(m.repo.FullName, "/"); idx != -1 {
