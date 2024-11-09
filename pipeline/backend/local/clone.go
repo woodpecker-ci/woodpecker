@@ -23,20 +23,20 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"runtime"
 	"strings"
 
 	"github.com/rs/zerolog/log"
-	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
+
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 )
 
-// checkGitCloneCap check if we have the git binary on hand
+// checkGitCloneCap check if we have the git binary on hand.
 func checkGitCloneCap() error {
 	_, err := exec.LookPath("git")
 	return err
 }
 
-// loadClone on backend start determine if there is a global plugin-git binary
+// loadClone on backend start determine if there is a global plugin-git binary.
 func (e *local) loadClone() {
 	binary, err := exec.LookPath("plugin-git")
 	if err != nil || binary == "" {
@@ -46,7 +46,7 @@ func (e *local) loadClone() {
 	e.pluginGitBinary = binary
 }
 
-// setupClone prepare the clone environment before exec
+// setupClone prepare the clone environment before exec.
 func (e *local) setupClone(state *workflowState) error {
 	if e.pluginGitBinary != "" {
 		state.pluginGitBinary = e.pluginGitBinary
@@ -55,13 +55,13 @@ func (e *local) setupClone(state *workflowState) error {
 
 	log.Info().Msg("no global 'plugin-git' installed, try to download for current workflow")
 	state.pluginGitBinary = filepath.Join(state.homeDir, "plugin-git")
-	if runtime.GOOS == "windows" {
+	if e.os == "windows" {
 		state.pluginGitBinary += ".exe"
 	}
-	return downloadLatestGitPluginBinary(state.pluginGitBinary)
+	return e.downloadLatestGitPluginBinary(state.pluginGitBinary)
 }
 
-// execClone executes a clone-step locally
+// execClone executes a clone-step locally.
 func (e *local) execClone(ctx context.Context, step *types.Step, state *workflowState, env []string) error {
 	if scm := step.Environment["CI_REPO_SCM"]; scm != "git" {
 		return fmt.Errorf("local backend can only clone from git repos, but this repo use '%s'", scm)
@@ -79,18 +79,16 @@ func (e *local) execClone(ctx context.Context, step *types.Step, state *workflow
 		log.Warn().Msgf("clone step image '%s' does not match default git clone image. We ignore it and use our plugin-git anyway.", step.Image)
 	}
 
-	rmCmd, err := writeNetRC(step, state)
+	rmCmd, err := e.writeNetRC(step, state)
 	if err != nil {
 		return err
 	}
-
-	env = append(env, "CI_WORKSPACE="+state.workspaceDir)
 
 	// Prepare command
 	var cmd *exec.Cmd
 	if rmCmd != "" {
 		// if we have a netrc injected we have to make sure it's deleted in any case after clone was attempted
-		if runtime.GOOS == "windows" {
+		if e.os == "windows" {
 			pwsh, err := exec.LookPath("powershell.exe")
 			if err != nil {
 				return err
@@ -110,13 +108,13 @@ func (e *local) execClone(ctx context.Context, step *types.Step, state *workflow
 	e.output, _ = cmd.StdoutPipe()
 	cmd.Stderr = cmd.Stdout
 
-	state.stepCMDs[step.Name] = cmd
+	state.stepCMDs[step.UUID] = cmd
 
 	return cmd.Start()
 }
 
-// writeNetRC write a netrc file into the home dir of a given workflow state
-func writeNetRC(step *types.Step, state *workflowState) (string, error) {
+// writeNetRC write a netrc file into the home dir of a given workflow state.
+func (e *local) writeNetRC(step *types.Step, state *workflowState) (string, error) {
 	if step.Environment["CI_NETRC_MACHINE"] == "" {
 		log.Trace().Msg("no netrc to write")
 		return "", nil
@@ -124,7 +122,7 @@ func writeNetRC(step *types.Step, state *workflowState) (string, error) {
 
 	file := filepath.Join(state.homeDir, ".netrc")
 	rmCmd := fmt.Sprintf("rm \"%s\"", file)
-	if runtime.GOOS == "windows" {
+	if e.os == "windows" {
 		file = filepath.Join(state.homeDir, "_netrc")
 		rmCmd = fmt.Sprintf("del \"%s\"", file)
 	}
@@ -134,8 +132,8 @@ func writeNetRC(step *types.Step, state *workflowState) (string, error) {
 }
 
 // downloadLatestGitPluginBinary download the latest plugin-git binary based on runtime OS and Arch
-// and saves it to dest
-func downloadLatestGitPluginBinary(dest string) error {
+// and saves it to dest.
+func (e *local) downloadLatestGitPluginBinary(dest string) error {
 	type asset struct {
 		Name               string
 		BrowserDownloadURL string `json:"browser_download_url"`
@@ -161,7 +159,7 @@ func downloadLatestGitPluginBinary(dest string) error {
 	}
 
 	for _, at := range rel.Assets {
-		if strings.Contains(at.Name, runtime.GOOS) && strings.Contains(at.Name, runtime.GOARCH) {
+		if strings.Contains(at.Name, e.os) && strings.Contains(at.Name, e.arch) {
 			resp2, err := http.Get(at.BrowserDownloadURL)
 			if err != nil {
 				return fmt.Errorf("could not download plugin-git: %w", err)

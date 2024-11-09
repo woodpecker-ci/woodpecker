@@ -42,7 +42,7 @@ func Logger(timeFormat string, utc bool) gin.HandlerFunc {
 			end = end.UTC()
 		}
 
-		entry := map[string]interface{}{
+		entry := map[string]any{
 			"status":     c.Writer.Status(),
 			"method":     c.Request.Method,
 			"path":       path,

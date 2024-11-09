@@ -43,20 +43,20 @@ import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useNotifications from '~/compositions/useNotifications';
 import { usePagination } from '~/compositions/usePaginate';
-import { Org } from '~/lib/api/types';
+import type { Org } from '~/lib/api/types';
 
 const apiClient = useApiClient();
 const notifications = useNotifications();
 const { t } = useI18n();
 
 async function loadOrgs(page: number): Promise<Org[] | null> {
-  return apiClient.getOrgs(page);
+  return apiClient.getOrgs({ page });
 }
 
 const { resetPage, data: orgs } = usePagination(loadOrgs);
 
 const { doSubmit: deleteOrg, isLoading: isDeleting } = useAsyncAction(async (_org: Org) => {
-  // eslint-disable-next-line no-restricted-globals, no-alert
+  // eslint-disable-next-line no-alert
   if (!confirm(t('admin.settings.orgs.delete_confirm'))) {
     return;
   }

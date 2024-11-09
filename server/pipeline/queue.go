@@ -18,46 +18,52 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"maps"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline"
-	"github.com/woodpecker-ci/woodpecker/pipeline/rpc"
-	"github.com/woodpecker-ci/woodpecker/server"
-	"github.com/woodpecker-ci/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc"
+	"go.woodpecker-ci.org/woodpecker/v2/server"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/pipeline/stepbuilder"
 )
 
-func queuePipeline(repo *model.Repo, pipelineItems []*pipeline.Item) error {
+func queuePipeline(ctx context.Context, repo *model.Repo, pipelineItems []*stepbuilder.Item) error {
 	var tasks []*model.Task
 	for _, item := range pipelineItems {
 		if item.Workflow.State == model.StatusSkipped {
 			continue
 		}
-		task := new(model.Task)
-		task.ID = fmt.Sprint(item.Workflow.ID)
-		task.Labels = map[string]string{}
-		for k, v := range item.Labels {
-			task.Labels[k] = v
+		task := &model.Task{
+			ID:     fmt.Sprint(item.Workflow.ID),
+			Labels: make(map[string]string),
 		}
-		task.Labels["repo"] = repo.FullName
-		task.Dependencies = taskIds(item.DependsOn, pipelineItems)
+		maps.Copy(task.Labels, item.Labels)
+		err := task.ApplyLabelsFromRepo(repo)
+		if err != nil {
+			return err
+		}
+		task.Dependencies = taskIDs(item.DependsOn, pipelineItems)
 		task.RunOn = item.RunsOn
 		task.DepStatus = make(map[string]model.StatusValue)
 
-		task.Data, _ = json.Marshal(rpc.Workflow{
+		task.Data, err = json.Marshal(rpc.Workflow{
 			ID:      fmt.Sprint(item.Workflow.ID),
 			Config:  item.Config,
 			Timeout: repo.Timeout,
 		})
+		if err != nil {
+			return err
+		}
 
 		tasks = append(tasks, task)
 	}
-	return server.Config.Services.Queue.PushAtOnce(context.Background(), tasks)
+	return server.Config.Services.Queue.PushAtOnce(ctx, tasks)
 }
 
-func taskIds(dependsOn []string, pipelineItems []*pipeline.Item) (taskIds []string) {
+func taskIDs(dependsOn []string, pipelineItems []*stepbuilder.Item) (taskIDs []string) {
 	for _, dep := range dependsOn {
 		for _, pipelineItem := range pipelineItems {
 			if pipelineItem.Workflow.Name == dep {
-				taskIds = append(taskIds, fmt.Sprint(pipelineItem.Workflow.ID))
+				taskIDs = append(taskIDs, fmt.Sprint(pipelineItem.Workflow.ID))
 			}
 		}
 	}

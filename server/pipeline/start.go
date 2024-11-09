@@ -19,48 +19,41 @@ import (
 
 	"github.com/rs/zerolog/log"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline"
-	"github.com/woodpecker-ci/woodpecker/server"
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/store"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/pipeline/stepbuilder"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 )
 
-// start a pipeline, make sure it was stored persistent in the store before
-func start(ctx context.Context, store store.Store, activePipeline *model.Pipeline, user *model.User, repo *model.Repo, pipelineItems []*pipeline.Item) (*model.Pipeline, error) {
+// start a pipeline, make sure it was stored persistent in the store before.
+func start(ctx context.Context, forge forge.Forge, store store.Store, activePipeline *model.Pipeline, user *model.User, repo *model.Repo, pipelineItems []*stepbuilder.Item) (*model.Pipeline, error) {
 	// call to cancel previous pipelines if needed
-	if err := cancelPreviousPipelines(ctx, store, activePipeline, repo, user); err != nil {
+	if err := cancelPreviousPipelines(ctx, forge, store, activePipeline, repo, user); err != nil {
 		// should be not breaking
-		log.Error().Err(err).Msg("Failed to cancel previous pipelines")
+		log.Error().Err(err).Msg("failed to cancel previous pipelines")
 	}
 
-	if err := store.WorkflowsCreate(activePipeline.Workflows); err != nil {
-		log.Error().Err(err).Str("repo", repo.FullName).Msgf("error persisting steps for %s#%d", repo.FullName, activePipeline.Number)
-		return nil, err
-	}
+	publishPipeline(ctx, forge, activePipeline, repo, user)
 
-	publishPipeline(ctx, activePipeline, repo, user)
-
-	if err := queuePipeline(repo, pipelineItems); err != nil {
+	if err := queuePipeline(ctx, repo, pipelineItems); err != nil {
 		log.Error().Err(err).Msg("queuePipeline")
 		return nil, err
-	}
-
-	// open logs streamer for each step
-	for _, wf := range activePipeline.Workflows {
-		for _, step := range wf.Children {
-			stepID := step.ID
-			go func() {
-				if err := server.Config.Services.Logs.Open(context.Background(), stepID); err != nil {
-					log.Error().Err(err).Msgf("could not open log stream for step %d", stepID)
-				}
-			}()
-		}
 	}
 
 	return activePipeline, nil
 }
 
-func publishPipeline(ctx context.Context, pipeline *model.Pipeline, repo *model.Repo, repoUser *model.User) {
+func prepareStart(ctx context.Context, forge forge.Forge, store store.Store, activePipeline *model.Pipeline, user *model.User, repo *model.Repo) error {
+	if err := store.WorkflowsCreate(activePipeline.Workflows); err != nil {
+		log.Error().Err(err).Str("repo", repo.FullName).Msgf("error persisting steps for %s#%d", repo.FullName, activePipeline.Number)
+		return err
+	}
+
+	publishPipeline(ctx, forge, activePipeline, repo, user)
+	return nil
+}
+
+func publishPipeline(ctx context.Context, forge forge.Forge, pipeline *model.Pipeline, repo *model.Repo, repoUser *model.User) {
 	publishToTopic(pipeline, repo)
-	updatePipelineStatus(ctx, pipeline, repo, repoUser)
+	updatePipelineStatus(ctx, forge, pipeline, repo, repoUser)
 }

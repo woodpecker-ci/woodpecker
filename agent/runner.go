@@ -23,13 +23,13 @@ import (
 	"time"
 
 	"github.com/rs/zerolog/log"
-	"github.com/tevino/abool/v2"
 	"google.golang.org/grpc/metadata"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline"
-	backend "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
-	"github.com/woodpecker-ci/woodpecker/pipeline/rpc"
-	"github.com/woodpecker-ci/woodpecker/shared/utils"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline"
+	backend "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/constant"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/utils"
 )
 
 type Runner struct {
@@ -37,59 +37,59 @@ type Runner struct {
 	filter   rpc.Filter
 	hostname string
 	counter  *State
-	engine   *backend.Engine
+	backend  *backend.Backend
 }
 
-func NewRunner(workEngine rpc.Peer, f rpc.Filter, h string, state *State, backend *backend.Engine) Runner {
+func NewRunner(workEngine rpc.Peer, f rpc.Filter, h string, state *State, backend *backend.Backend) Runner {
 	return Runner{
 		client:   workEngine,
 		filter:   f,
 		hostname: h,
 		counter:  state,
-		engine:   backend,
+		backend:  backend,
 	}
 }
 
-func (r *Runner) Run(runnerCtx context.Context) error {
+func (r *Runner) Run(runnerCtx, shutdownCtx context.Context) error { //nolint:contextcheck
 	log.Debug().Msg("request next execution")
 
 	meta, _ := metadata.FromOutgoingContext(runnerCtx)
-	ctxmeta := metadata.NewOutgoingContext(context.Background(), meta)
+	ctxMeta := metadata.NewOutgoingContext(context.Background(), meta)
 
 	// get the next workflow from the queue
-	work, err := r.client.Next(runnerCtx, r.filter)
+	workflow, err := r.client.Next(runnerCtx, r.filter)
 	if err != nil {
 		return err
 	}
-	if work == nil {
+	if workflow == nil {
 		return nil
 	}
 
 	timeout := time.Hour
-	if minutes := work.Timeout; minutes != 0 {
+	if minutes := workflow.Timeout; minutes != 0 {
 		timeout = time.Duration(minutes) * time.Minute
 	}
 
-	repoName := extractRepositoryName(work.Config)       // hack
-	pipelineNumber := extractPipelineNumber(work.Config) // hack
+	repoName := extractRepositoryName(workflow.Config)       // hack
+	pipelineNumber := extractPipelineNumber(workflow.Config) // hack
 
 	r.counter.Add(
-		work.ID,
+		workflow.ID,
 		timeout,
 		repoName,
 		pipelineNumber,
 	)
-	defer r.counter.Done(work.ID)
+	defer r.counter.Done(workflow.ID)
 
 	logger := log.With().
 		Str("repo", repoName).
 		Str("pipeline", pipelineNumber).
-		Str("id", work.ID).
+		Str("workflow_id", workflow.ID).
 		Logger()
 
 	logger.Debug().Msg("received execution")
 
-	workflowCtx, cancel := context.WithTimeout(ctxmeta, timeout)
+	workflowCtx, cancel := context.WithTimeout(ctxMeta, timeout)
 	defer cancel()
 
 	// Add sigterm support for internal context.
@@ -99,17 +99,16 @@ func (r *Runner) Run(runnerCtx context.Context) error {
 		logger.Error().Msg("Received sigterm termination signal")
 	})
 
-	canceled := abool.New()
+	canceled := false
 	go func() {
 		logger.Debug().Msg("listen for cancel signal")
 
-		if werr := r.client.Wait(workflowCtx, work.ID); werr != nil {
-			canceled.SetTo(true)
-			logger.Warn().Err(werr).Msg("cancel signal received")
-
+		if err := r.client.Wait(workflowCtx, workflow.ID); err != nil {
+			canceled = true
+			logger.Warn().Err(err).Msg("cancel signal received")
 			cancel()
 		} else {
-			logger.Debug().Msg("stop listening for cancel signal")
+			logger.Debug().Msg("done listening for cancel signal")
 		}
 	}()
 
@@ -118,90 +117,83 @@ func (r *Runner) Run(runnerCtx context.Context) error {
 			select {
 			case <-workflowCtx.Done():
 				logger.Debug().Msg("pipeline done")
-
 				return
-			case <-time.After(time.Minute):
-				logger.Debug().Msg("pipeline lease renewed")
 
-				if err := r.client.Extend(workflowCtx, work.ID); err != nil {
+			case <-time.After(constant.TaskTimeout / 3):
+				logger.Debug().Msg("pipeline lease renewed")
+				if err := r.client.Extend(workflowCtx, workflow.ID); err != nil {
 					log.Error().Err(err).Msg("extending pipeline deadline failed")
 				}
 			}
 		}
 	}()
 
-	state := rpc.State{}
+	state := rpc.WorkflowState{}
 	state.Started = time.Now().Unix()
 
-	err = r.client.Init(ctxmeta, work.ID, state)
+	err = r.client.Init(runnerCtx, workflow.ID, state)
 	if err != nil {
-		logger.Error().Err(err).Msg("pipeline initialization failed")
+		logger.Error().Err(err).Msg("workflow initialization failed")
+		// TODO: should we return here?
 	}
 
 	var uploads sync.WaitGroup
-	err = pipeline.New(work.Config,
+	//nolint:contextcheck
+	err = pipeline.New(workflow.Config,
 		pipeline.WithContext(workflowCtx),
-		pipeline.WithTaskUUID(fmt.Sprint(work.ID)),
-		pipeline.WithLogger(r.createLogger(logger, &uploads, work)),
-		pipeline.WithTracer(r.createTracer(ctxmeta, logger, work)),
-		pipeline.WithEngine(*r.engine),
+		pipeline.WithTaskUUID(fmt.Sprint(workflow.ID)),
+		pipeline.WithLogger(r.createLogger(logger, &uploads, workflow)),
+		pipeline.WithTracer(r.createTracer(ctxMeta, &uploads, logger, workflow)),
+		pipeline.WithBackend(*r.backend),
 		pipeline.WithDescription(map[string]string{
-			"ID":       work.ID,
-			"Repo":     repoName,
-			"Pipeline": pipelineNumber,
+			"workflow_id":     workflow.ID,
+			"repo":            repoName,
+			"pipeline_number": pipelineNumber,
 		}),
 	).Run(runnerCtx)
 
 	state.Finished = time.Now().Unix()
-	state.Exited = true
 
-	if canceled.IsSet() {
-		state.Error = ""
-		state.ExitCode = 137
-	} else if err != nil {
-		pExitError := &pipeline.ExitError{}
-		if errors.As(err, &pExitError) {
-			state.ExitCode = pExitError.Code
-		} else if errors.Is(err, pipeline.ErrCancel) {
-			state.Error = ""
-			state.ExitCode = 137
-			canceled.SetTo(true)
-		} else {
-			state.ExitCode = 1
-			state.Error = err.Error()
-		}
+	if errors.Is(err, pipeline.ErrCancel) {
+		canceled = true
+	} else if canceled {
+		err = errors.Join(err, pipeline.ErrCancel)
+	}
+
+	if err != nil {
+		state.Error = err.Error()
 	}
 
 	logger.Debug().
 		Str("error", state.Error).
-		Int("exit_code", state.ExitCode).
-		Bool("canceled", canceled.IsSet()).
-		Msg("pipeline complete")
+		Bool("canceled", canceled).
+		Msg("workflow finished")
 
-	logger.Debug().Msg("uploading logs")
+	logger.Debug().Msg("uploading logs and traces / states ...")
 	uploads.Wait()
-	logger.Debug().Msg("uploading logs complete")
+	logger.Debug().Msg("uploaded logs and traces / states")
 
 	logger.Debug().
 		Str("error", state.Error).
-		Int("exit_code", state.ExitCode).
-		Msg("updating pipeline status")
+		Msg("updating workflow status")
 
-	if err := r.client.Done(ctxmeta, work.ID, state); err != nil {
-		logger.Error().Err(err).Msg("updating pipeline status failed")
+	doneCtx := runnerCtx
+	if doneCtx.Err() != nil {
+		doneCtx = shutdownCtx
+	}
+	if err := r.client.Done(doneCtx, workflow.ID, state); err != nil {
+		logger.Error().Err(err).Msg("updating workflow status failed")
 	} else {
-		logger.Debug().Msg("updating pipeline status complete")
+		logger.Debug().Msg("updating workflow status complete")
 	}
 
 	return nil
 }
 
-// extract repository name from the configuration
 func extractRepositoryName(config *backend.Config) string {
 	return config.Stages[0].Steps[0].Environment["CI_REPO"]
 }
 
-// extract pipeline number from the configuration
 func extractPipelineNumber(config *backend.Config) string {
 	return config.Stages[0].Steps[0].Environment["CI_PIPELINE_NUMBER"]
 }

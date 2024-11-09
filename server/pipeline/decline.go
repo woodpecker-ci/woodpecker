@@ -16,30 +16,53 @@ package pipeline
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/rs/zerolog/log"
 
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/store"
+	"go.woodpecker-ci.org/woodpecker/v2/server"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 )
 
-// Decline updates the status to declined for blocked pipelines because of a gated repo
+// Decline updates the status to declined for blocked pipelines because of a gated repo.
 func Decline(ctx context.Context, store store.Store, pipeline *model.Pipeline, user *model.User, repo *model.Repo) (*model.Pipeline, error) {
+	forge, err := server.Config.Services.Manager.ForgeFromRepo(repo)
+	if err != nil {
+		msg := fmt.Sprintf("failure to load forge for repo '%s'", repo.FullName)
+		log.Error().Err(err).Str("repo", repo.FullName).Msg(msg)
+		return nil, errors.New(msg)
+	}
+
 	if pipeline.Status != model.StatusBlocked {
 		return nil, fmt.Errorf("cannot decline a pipeline with status %s", pipeline.Status)
 	}
 
-	_, err := UpdateToStatusDeclined(store, *pipeline, user.Login)
+	pipeline, err = UpdateToStatusDeclined(store, *pipeline, user.Login)
 	if err != nil {
 		return nil, fmt.Errorf("error updating pipeline. %w", err)
 	}
 
 	if pipeline.Workflows, err = store.WorkflowGetTree(pipeline); err != nil {
-		log.Error().Err(err).Msg("can not build tree from step list")
+		log.Error().Err(err).Msg("cannot build tree from step list")
 	}
 
-	updatePipelineStatus(ctx, pipeline, repo, user)
+	for _, wf := range pipeline.Workflows {
+		wf.State = model.StatusDeclined
+		if err := store.WorkflowUpdate(wf); err != nil {
+			return nil, fmt.Errorf("error updating workflow. %w", err)
+		}
+
+		for _, step := range wf.Children {
+			step.State = model.StatusDeclined
+			if err := store.StepUpdate(step); err != nil {
+				return nil, fmt.Errorf("error updating step. %w", err)
+			}
+		}
+	}
+
+	updatePipelineStatus(ctx, forge, pipeline, repo, user)
 
 	publishToTopic(pipeline, repo)
 

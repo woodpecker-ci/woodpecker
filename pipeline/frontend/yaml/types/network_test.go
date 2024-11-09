@@ -17,9 +17,8 @@ package types
 import (
 	"testing"
 
-	"gopkg.in/yaml.v3"
-
 	"github.com/stretchr/testify/assert"
+	"gopkg.in/yaml.v3"
 )
 
 func TestMarshalNetworks(t *testing.T) {
@@ -91,7 +90,7 @@ network2:
 	}
 	for _, network := range networks {
 		bytes, err := yaml.Marshal(network.networks)
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.Equal(t, network.expected, string(bytes), "should be equal")
 	}
 }

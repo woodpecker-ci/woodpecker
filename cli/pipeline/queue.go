@@ -15,14 +15,15 @@
 package pipeline
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"text/template"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
-	"github.com/woodpecker-ci/woodpecker/cli/common"
-	"github.com/woodpecker-ci/woodpecker/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
 )
 
 var pipelineQueueCmd = &cli.Command{
@@ -30,13 +31,11 @@ var pipelineQueueCmd = &cli.Command{
 	Usage:     "show pipeline queue",
 	ArgsUsage: " ",
 	Action:    pipelineQueue,
-	Flags: append(common.GlobalFlags,
-		common.FormatFlag(tmplPipelineQueue),
-	),
+	Flags:     []cli.Flag{common.FormatFlag(tmplPipelineQueue)},
 }
 
-func pipelineQueue(c *cli.Context) error {
-	client, err := internal.NewClient(c)
+func pipelineQueue(ctx context.Context, c *cli.Command) error {
+	client, err := internal.NewClient(ctx, c)
 	if err != nil {
 		return err
 	}
@@ -64,7 +63,7 @@ func pipelineQueue(c *cli.Context) error {
 	return nil
 }
 
-// template for pipeline list information
+// Template for pipeline list information.
 var tmplPipelineQueue = "\x1b[33m{{ .FullName }} #{{ .Number }} \x1b[0m" + `
 Status: {{ .Status }}
 Event: {{ .Event }}

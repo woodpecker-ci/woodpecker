@@ -1,46 +1,65 @@
 import { useInfiniteScroll } from '@vueuse/core';
-import { onMounted, Ref, ref, watch } from 'vue';
+import { onMounted, ref, watch, type Ref, type UnwrapRef } from 'vue';
 
-export async function usePaginate<T>(getSingle: (page: number) => Promise<T[]>): Promise<T[]> {
+const defaultPageSize = 50;
+
+// usePaginate loads all pages
+export async function usePaginate<T>(
+  getSingle: (page: number) => Promise<T[]>,
+  pageSize: number = defaultPageSize,
+): Promise<T[]> {
   let hasMore = true;
   let page = 1;
   const result: T[] = [];
   while (hasMore) {
-    // eslint-disable-next-line no-await-in-loop
     const singleRes = await getSingle(page);
     result.push(...singleRes);
-    hasMore = singleRes.length !== 0;
+    hasMore = singleRes.length >= pageSize;
     page += 1;
   }
   return result;
 }
 
-export function usePagination<T>(
-  _loadData: (page: number) => Promise<T[] | null>,
+// usePagination loads pages on demand
+export function usePagination<T, S = unknown>(
+  _loadData: (page: number, arg: S) => Promise<T[] | null>,
   isActive: () => boolean = () => true,
-  scrollElement = ref(document.getElementById('scroll-component')),
+  {
+    scrollElement: _scrollElement,
+    each: _each,
+    pageSize: _pageSize,
+  }: { scrollElement?: Ref<HTMLElement | null> | null; each?: S[]; pageSize?: number } = {},
 ) {
+  const scrollElement = _scrollElement === null ? null : ref(document.getElementById('scroll-component'));
   const page = ref(1);
-  const pageSize = ref(0);
+  const pageSize = ref(_pageSize ?? defaultPageSize);
   const hasMore = ref(true);
   const data = ref<T[]>([]) as Ref<T[]>;
   const loading = ref(false);
+  const each = ref([...(_each ?? [])]);
 
   async function loadData() {
+    if (loading.value === true || hasMore.value === false) {
+      return;
+    }
+
     loading.value = true;
-    const newData = await _loadData(page.value);
-    hasMore.value = newData !== null && newData.length >= pageSize.value;
-    if (newData !== null && newData.length !== 0) {
-      if (page.value === 1) {
-        pageSize.value = newData.length;
-        data.value = newData;
-      } else {
-        data.value.push(...newData);
+    const newData = (await _loadData(page.value, each.value?.[0] as S)) ?? [];
+    hasMore.value = newData.length >= pageSize.value && newData.length > 0;
+    if (newData.length > 0) {
+      data.value.push(...newData);
+    }
+
+    // last page and each has more
+    if (!hasMore.value && each.value.length > 0) {
+      // use next each element
+      each.value.shift();
+      page.value = 1;
+      hasMore.value = each.value.length > 0;
+      if (hasMore.value) {
+        loading.value = false;
+        await loadData();
       }
-    } else if (page.value === 1) {
-      data.value = [];
-    } else {
-      hasMore.value = false;
     }
     loading.value = false;
   }
@@ -48,26 +67,30 @@ export function usePagination<T>(
   onMounted(loadData);
   watch(page, loadData);
 
-  useInfiniteScroll(
-    scrollElement,
-    () => {
-      if (isActive() && !loading.value && hasMore.value) {
-        // load more
-        page.value += 1;
-      }
-    },
-    { distance: 10 },
-  );
-
-  const resetPage = () => {
-    if (page.value !== 1) {
-      // just set page = 1, will be handled by watcher
-      page.value = 1;
-    } else {
-      // we need to reload, but page is already 1, so changing won't trigger watcher
-      loadData();
+  function nextPage() {
+    if (isActive() && !loading.value && hasMore.value) {
+      page.value += 1;
     }
-  };
+  }
 
-  return { resetPage, data };
+  if (scrollElement !== null) {
+    useInfiniteScroll(scrollElement, nextPage, { distance: 10 });
+  }
+
+  async function resetPage() {
+    const _page = page.value;
+
+    page.value = 1;
+    hasMore.value = true;
+    data.value = [];
+    loading.value = false;
+    each.value = [...(_each ?? [])] as UnwrapRef<S[]>;
+
+    if (_page === 1) {
+      // we need to reload manually as the page is already 1, so changing won't trigger watcher
+      await loadData();
+    }
+  }
+
+  return { resetPage, nextPage, data, hasMore, loading };
 }

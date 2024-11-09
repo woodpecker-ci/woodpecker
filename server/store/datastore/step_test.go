@@ -20,8 +20,8 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/store/types"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store/types"
 )
 
 func TestStepFind(t *testing.T) {
@@ -76,23 +76,12 @@ func TestStepChild(t *testing.T) {
 			State:      "success",
 		},
 	})
-	if err != nil {
-		t.Errorf("Unexpected error: insert steps: %s", err)
-		return
-	}
+	assert.NoError(t, err)
 	_ = sess.Commit()
 	step, err := store.StepChild(&model.Pipeline{ID: 1}, 1, "build")
-	if err != nil {
-		t.Error(err)
-		return
-	}
-
-	if got, want := step.PID, 2; got != want {
-		t.Errorf("Want step pid %d, got %d", want, got)
-	}
-	if got, want := step.Name, "build"; got != want {
-		t.Errorf("Want step name %s, got %s", want, got)
-	}
+	assert.NoError(t, err)
+	assert.Equal(t, 2, step.PID)
+	assert.Equal(t, "build", step.Name)
 }
 
 func TestStepList(t *testing.T) {
@@ -124,19 +113,12 @@ func TestStepList(t *testing.T) {
 			State:      "success",
 		},
 	})
-	if err != nil {
-		t.Errorf("Unexpected error: insert steps: %s", err)
-		return
-	}
+	assert.NoError(t, err)
+
 	_ = sess.Commit()
 	steps, err := store.StepList(&model.Pipeline{ID: 1})
-	if err != nil {
-		t.Error(err)
-		return
-	}
-	if got, want := len(steps), 2; got != want {
-		t.Errorf("Want %d steps, got %d", want, got)
-	}
+	assert.NoError(t, err)
+	assert.Len(t, steps, 2)
 }
 
 func TestStepUpdate(t *testing.T) {
@@ -154,24 +136,13 @@ func TestStepUpdate(t *testing.T) {
 		ExitCode:   255,
 	}
 	sess := store.engine.NewSession()
-	if err := store.stepCreate(sess, []*model.Step{step}); err != nil {
-		t.Errorf("Unexpected error: insert step: %s", err)
-		return
-	}
+	assert.NoError(t, store.stepCreate(sess, []*model.Step{step}))
 	_ = sess.Commit()
 	step.State = "running"
-	if err := store.StepUpdate(step); err != nil {
-		t.Errorf("Unexpected error: update step: %s", err)
-		return
-	}
+	assert.NoError(t, store.StepUpdate(step))
 	updated, err := store.StepFind(&model.Pipeline{ID: 1}, 1)
-	if err != nil {
-		t.Error(err)
-		return
-	}
-	if got, want := updated.State, model.StatusRunning; got != want {
-		t.Errorf("Want step name %s, got %s", want, got)
-	}
+	assert.NoError(t, err)
+	assert.Equal(t, model.StatusRunning, updated.State)
 }
 
 func TestStepIndexes(t *testing.T) {
@@ -181,7 +152,7 @@ func TestStepIndexes(t *testing.T) {
 	sess := store.engine.NewSession()
 	defer sess.Close()
 
-	if err := store.stepCreate(sess, []*model.Step{
+	assert.NoError(t, store.stepCreate(sess, []*model.Step{
 		{
 			UUID:       "4db7e5fc-5312-4d02-9e14-b51b9e3242cc",
 			PipelineID: 1,
@@ -190,13 +161,10 @@ func TestStepIndexes(t *testing.T) {
 			State:      "running",
 			Name:       "build",
 		},
-	}); err != nil {
-		t.Errorf("Unexpected error: insert steps: %s", err)
-		return
-	}
+	}))
 
 	// fail due to duplicate pid
-	if err := store.stepCreate(sess, []*model.Step{
+	assert.Error(t, store.stepCreate(sess, []*model.Step{
 		{
 			UUID:       "c1f33a9e-2a02-4579-95ec-90255d785a12",
 			PipelineID: 1,
@@ -205,9 +173,7 @@ func TestStepIndexes(t *testing.T) {
 			State:      "success",
 			Name:       "clone",
 		},
-	}); err == nil {
-		t.Errorf("Unexpected error: duplicate pid")
-	}
+	}))
 }
 
 func TestStepByUUID(t *testing.T) {
@@ -246,4 +212,39 @@ func TestStepByUUID(t *testing.T) {
 	assert.Empty(t, step)
 }
 
-// TODO: func TestStepCascade(t *testing.T) {}
+func TestStepLoad(t *testing.T) {
+	store, closer := newTestStore(t, new(model.Step))
+	defer closer()
+
+	sess := store.engine.NewSession()
+	assert.NoError(t, store.stepCreate(sess, []*model.Step{
+		{
+			UUID:       "4db7e5fc-5312-4d02-9e14-b51b9e3242cc",
+			PipelineID: 1,
+			PID:        1,
+			PPID:       1,
+			State:      "running",
+			Name:       "build",
+		},
+		{
+			UUID:       "fc7c7fd6-553e-480b-8ed7-30d8563d0b79",
+			PipelineID: 4,
+			PID:        6,
+			PPID:       7,
+			Name:       "build",
+			State:      "pending",
+			Error:      "pc load letter",
+			ExitCode:   255,
+		},
+	}))
+	_ = sess.Close()
+
+	step, err := store.StepLoad(1)
+	assert.NoError(t, err)
+	assert.NotEmpty(t, step)
+	assert.Equal(t, step.UUID, "4db7e5fc-5312-4d02-9e14-b51b9e3242cc")
+
+	step, err = store.StepLoad(5)
+	assert.ErrorIs(t, err, types.RecordNotExist)
+	assert.Empty(t, step)
+}

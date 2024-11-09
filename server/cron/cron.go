@@ -19,25 +19,26 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/robfig/cron"
+	"github.com/gdgvda/cron"
 	"github.com/rs/zerolog/log"
 
-	"github.com/woodpecker-ci/woodpecker/server/forge"
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/pipeline"
-	"github.com/woodpecker-ci/woodpecker/server/store"
+	"go.woodpecker-ci.org/woodpecker/v2/server"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/pipeline"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 )
 
 const (
-	// checkTime specifies the interval woodpecker checks for new crons to exec
-	checkTime = 10 * time.Second
+	// Specifies the interval woodpecker checks for new crons to exec.
+	checkTime = time.Minute
 
-	// checkItems specifies the batch size of crons to retrieve per check from database
+	// Specifies the batch size of crons to retrieve per check from database.
 	checkItems = 10
 )
 
-// Start starts the cron scheduler loop
-func Start(ctx context.Context, store store.Store, forge forge.Forge) error {
+// Run starts the cron scheduler loop.
+func Run(ctx context.Context, store store.Store) error {
 	for {
 		select {
 		case <-ctx.Done():
@@ -45,7 +46,7 @@ func Start(ctx context.Context, store store.Store, forge forge.Forge) error {
 		case <-time.After(checkTime):
 			go func() {
 				now := time.Now()
-				log.Trace().Msg("Cron: fetch next crons")
+				log.Trace().Msg("cron: fetch next crons")
 
 				crons, err := store.CronListNextExecute(now.Unix(), checkItems)
 				if err != nil {
@@ -54,7 +55,7 @@ func Start(ctx context.Context, store store.Store, forge forge.Forge) error {
 				}
 
 				for _, cron := range crons {
-					if err := runCron(store, forge, cron, now); err != nil {
+					if err := runCron(ctx, store, cron, now); err != nil {
 						log.Error().Err(err).Int64("cronID", cron.ID).Msg("run cron failed")
 					}
 				}
@@ -63,23 +64,22 @@ func Start(ctx context.Context, store store.Store, forge forge.Forge) error {
 	}
 }
 
-// CalcNewNext parses a cron string and calculates the next exec time based on it
+// CalcNewNext parses a cron string and calculates the next exec time based on it.
 func CalcNewNext(schedule string, now time.Time) (time.Time, error) {
 	// remove local timezone
 	now = now.UTC()
 
 	// TODO: allow the users / the admin to set a specific timezone
 
-	c, err := cron.Parse(schedule)
+	c, err := cron.ParseStandard(schedule)
 	if err != nil {
 		return time.Time{}, fmt.Errorf("cron parse schedule: %w", err)
 	}
 	return c.Next(now), nil
 }
 
-func runCron(store store.Store, forge forge.Forge, cron *model.Cron, now time.Time) error {
-	log.Trace().Msgf("Cron: run id[%d]", cron.ID)
-	ctx := context.Background()
+func runCron(ctx context.Context, store store.Store, cron *model.Cron, now time.Time) error {
+	log.Trace().Msgf("cron: run id[%d]", cron.ID)
 
 	newNext, err := CalcNewNext(cron.Schedule, now)
 	if err != nil {
@@ -96,7 +96,7 @@ func runCron(store store.Store, forge forge.Forge, cron *model.Cron, now time.Ti
 		return nil
 	}
 
-	repo, newPipeline, err := CreatePipeline(ctx, store, forge, cron)
+	repo, newPipeline, err := CreatePipeline(ctx, store, cron)
 	if err != nil {
 		return err
 	}
@@ -105,8 +105,13 @@ func runCron(store store.Store, forge forge.Forge, cron *model.Cron, now time.Ti
 	return err
 }
 
-func CreatePipeline(ctx context.Context, store store.Store, f forge.Forge, cron *model.Cron) (*model.Repo, *model.Pipeline, error) {
+func CreatePipeline(ctx context.Context, store store.Store, cron *model.Cron) (*model.Repo, *model.Pipeline, error) {
 	repo, err := store.GetRepo(cron.RepoID)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	_forge, err := server.Config.Services.Manager.ForgeFromRepo(repo)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -124,21 +129,21 @@ func CreatePipeline(ctx context.Context, store store.Store, f forge.Forge, cron 
 	// If the forge has a refresh token, the current access token
 	// may be stale. Therefore, we should refresh prior to dispatching
 	// the pipeline.
-	forge.Refresh(ctx, f, store, creator)
+	forge.Refresh(ctx, _forge, store, creator)
 
-	commit, err := f.BranchHead(ctx, creator, repo, cron.Branch)
+	commit, err := _forge.BranchHead(ctx, creator, repo, cron.Branch)
 	if err != nil {
 		return nil, nil, err
 	}
 
 	return repo, &model.Pipeline{
 		Event:     model.EventCron,
-		Commit:    commit,
+		Commit:    commit.SHA,
 		Ref:       "refs/heads/" + cron.Branch,
 		Branch:    cron.Branch,
 		Message:   cron.Name,
 		Timestamp: cron.NextExec,
 		Sender:    cron.Name,
-		Link:      repo.Link,
+		ForgeURL:  commit.ForgeURL,
 	}, nil
 }

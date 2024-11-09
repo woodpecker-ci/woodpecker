@@ -18,13 +18,13 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/woodpecker-ci/woodpecker/server"
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/store"
-	"github.com/woodpecker-ci/woodpecker/shared/token"
-
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
+
+	"go.woodpecker-ci.org/woodpecker/v2/server"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/token"
 )
 
 func User(c *gin.Context) *model.User {
@@ -43,9 +43,13 @@ func SetUser() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var user *model.User
 
-		t, err := token.ParseRequest(c.Request, func(t *token.Token) (string, error) {
+		t, err := token.ParseRequest([]token.Type{token.UserToken, token.SessToken}, c.Request, func(t *token.Token) (string, error) {
 			var err error
-			user, err = store.FromContext(c).GetUserLogin(t.Text)
+			userID, err := strconv.ParseInt(t.Get("user-id"), 10, 64)
+			if err != nil {
+				return "", err
+			}
+			user, err = store.FromContext(c).GetUser(userID)
 			return user.Hash, err
 		})
 		if err == nil {
@@ -54,8 +58,8 @@ func SetUser() gin.HandlerFunc {
 			// if this is a session token (ie not the API token)
 			// this means the user is accessing with a web browser,
 			// so we should implement CSRF protection measures.
-			if t.Kind == token.SessToken {
-				err = token.CheckCsrf(c.Request, func(t *token.Token) (string, error) {
+			if t.Type == token.SessToken {
+				err = token.CheckCsrf(c.Request, func(_ *token.Token) (string, error) {
 					return user.Hash, nil
 				})
 				// if csrf token validation fails, exit immediately
@@ -75,10 +79,10 @@ func MustAdmin() gin.HandlerFunc {
 		user := User(c)
 		switch {
 		case user == nil:
-			c.String(401, "User not authorized")
+			c.String(http.StatusUnauthorized, "User not authorized")
 			c.Abort()
 		case !user.Admin:
-			c.String(403, "User not authorized")
+			c.String(http.StatusForbidden, "User not authorized")
 			c.Abort()
 		default:
 			c.Next()
@@ -92,10 +96,10 @@ func MustRepoAdmin() gin.HandlerFunc {
 		perm := Perm(c)
 		switch {
 		case user == nil:
-			c.String(401, "User not authorized")
+			c.String(http.StatusUnauthorized, "User not authorized")
 			c.Abort()
 		case !perm.Admin:
-			c.String(403, "User not authorized")
+			c.String(http.StatusForbidden, "User not authorized")
 			c.Abort()
 		default:
 			c.Next()
@@ -108,7 +112,7 @@ func MustUser() gin.HandlerFunc {
 		user := User(c)
 		switch {
 		case user == nil:
-			c.String(401, "User not authorized")
+			c.String(http.StatusUnauthorized, "User not authorized")
 			c.Abort()
 		default:
 			c.Next()
@@ -118,8 +122,6 @@ func MustUser() gin.HandlerFunc {
 
 func MustOrgMember(admin bool) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		_store := store.FromContext(c)
-
 		user := User(c)
 		if user == nil {
 			c.String(http.StatusUnauthorized, "User not authorized")
@@ -127,15 +129,10 @@ func MustOrgMember(admin bool) gin.HandlerFunc {
 			return
 		}
 
-		orgID, err := strconv.ParseInt(c.Param("org_id"), 10, 64)
-		if err != nil {
-			c.String(http.StatusBadRequest, "Error parsing org id. %s", err)
-			return
-		}
-
-		org, err := _store.OrgGet(orgID)
-		if err != nil {
-			c.String(http.StatusNotFound, "Organization not found")
+		org := Org(c)
+		if org == nil {
+			c.String(http.StatusBadRequest, "Organization not loaded")
+			c.Abort()
 			return
 		}
 
@@ -145,16 +142,23 @@ func MustOrgMember(admin bool) gin.HandlerFunc {
 			return
 		}
 
-		perm, err := server.Config.Services.Membership.Get(c, user, org.Name)
+		_forge, err := server.Config.Services.Manager.ForgeFromUser(user)
 		if err != nil {
-			log.Error().Msgf("Failed to check membership: %v", err)
+			log.Error().Err(err).Msg("Cannot get forge from user")
+			c.AbortWithStatus(http.StatusInternalServerError)
+			return
+		}
+
+		perm, err := server.Config.Services.Membership.Get(c, _forge, user, org.Name)
+		if err != nil {
+			log.Error().Err(err).Msg("failed to check membership")
 			c.String(http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
 			c.Abort()
 			return
 		}
 
 		if perm == nil || (!admin && !perm.Member) || (admin && !perm.Admin) {
-			c.String(http.StatusForbidden, "User not authorized")
+			c.String(http.StatusForbidden, "user not authorized")
 			c.Abort()
 			return
 		}

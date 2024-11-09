@@ -19,10 +19,9 @@ import (
 
 	"gopkg.in/yaml.v3"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/constraint"
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types/base"
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/utils"
-	"github.com/woodpecker-ci/woodpecker/shared/constant"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/constraint"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/types/base"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/utils"
 )
 
 type (
@@ -33,40 +32,36 @@ type (
 
 	// Container defines a container.
 	Container struct {
-		BackendOptions BackendOptions         `yaml:"backend_options,omitempty"`
-		Commands       base.StringOrSlice     `yaml:"commands,omitempty"`
-		Detached       bool                   `yaml:"detach,omitempty"`
-		Directory      string                 `yaml:"directory,omitempty"`
-		Environment    base.SliceOrMap        `yaml:"environment,omitempty"`
-		Failure        string                 `yaml:"failure,omitempty"`
-		Group          string                 `yaml:"group,omitempty"`
-		Image          string                 `yaml:"image,omitempty"`
-		Name           string                 `yaml:"name,omitempty"`
-		Pull           bool                   `yaml:"pull,omitempty"`
-		Secrets        Secrets                `yaml:"secrets,omitempty"`
-		Settings       map[string]interface{} `yaml:"settings"`
-		Volumes        Volumes                `yaml:"volumes,omitempty"`
-		When           constraint.When        `yaml:"when,omitempty"`
+		BackendOptions map[string]any     `yaml:"backend_options,omitempty"`
+		Commands       base.StringOrSlice `yaml:"commands,omitempty"`
+		Entrypoint     base.StringOrSlice `yaml:"entrypoint,omitempty"`
+		Detached       bool               `yaml:"detach,omitempty"`
+		Directory      string             `yaml:"directory,omitempty"`
+		Failure        string             `yaml:"failure,omitempty"`
+		Image          string             `yaml:"image,omitempty"`
+		Name           string             `yaml:"name,omitempty"`
+		Pull           bool               `yaml:"pull,omitempty"`
+		Settings       map[string]any     `yaml:"settings"`
+		Volumes        Volumes            `yaml:"volumes,omitempty"`
+		When           constraint.When    `yaml:"when,omitempty"`
+		Ports          []string           `yaml:"ports,omitempty"`
+		DependsOn      base.StringOrSlice `yaml:"depends_on,omitempty"`
 
-		// Docker Specific
+		Environment map[string]any `yaml:"environment,omitempty"`
+
+		// Deprecated
+		Secrets []string `yaml:"secrets,omitempty"`
+
+		// Docker and Kubernetes Specific
 		Privileged bool `yaml:"privileged,omitempty"`
 
 		// Undocumented
-		CPUQuota     base.StringOrInt    `yaml:"cpu_quota,omitempty"`
-		CPUSet       string              `yaml:"cpuset,omitempty"`
-		CPUShares    base.StringOrInt    `yaml:"cpu_shares,omitempty"`
-		Devices      []string            `yaml:"devices,omitempty"`
-		DNSSearch    base.StringOrSlice  `yaml:"dns_search,omitempty"`
-		DNS          base.StringOrSlice  `yaml:"dns,omitempty"`
-		ExtraHosts   []string            `yaml:"extra_hosts,omitempty"`
-		IpcMode      string              `yaml:"ipc_mode,omitempty"`
-		MemLimit     base.MemStringOrInt `yaml:"mem_limit,omitempty"`
-		MemSwapLimit base.MemStringOrInt `yaml:"memswap_limit,omitempty"`
-		NetworkMode  string              `yaml:"network_mode,omitempty"`
-		Networks     Networks            `yaml:"networks,omitempty"`
-		ShmSize      base.MemStringOrInt `yaml:"shm_size,omitempty"`
-		Sysctls      base.SliceOrMap     `yaml:"sysctls,omitempty"`
-		Tmpfs        []string            `yaml:"tmpfs,omitempty"`
+		Devices     []string           `yaml:"devices,omitempty"`
+		DNSSearch   base.StringOrSlice `yaml:"dns_search,omitempty"`
+		DNS         base.StringOrSlice `yaml:"dns,omitempty"`
+		ExtraHosts  []string           `yaml:"extra_hosts,omitempty"`
+		NetworkMode string             `yaml:"network_mode,omitempty"`
+		Tmpfs       []string           `yaml:"tmpfs,omitempty"`
 	}
 )
 
@@ -119,9 +114,12 @@ func (c *ContainerList) UnmarshalYAML(value *yaml.Node) error {
 }
 
 func (c *Container) IsPlugin() bool {
-	return len(c.Commands) == 0
+	return len(c.Commands) == 0 &&
+		len(c.Entrypoint) == 0 &&
+		len(c.Environment) == 0 &&
+		len(c.Secrets) == 0
 }
 
-func (c *Container) IsTrustedCloneImage() bool {
-	return c.IsPlugin() && utils.MatchImage(c.Image, constant.TrustedCloneImages...)
+func (c *Container) IsTrustedCloneImage(trustedClonePlugins []string) bool {
+	return c.IsPlugin() && utils.MatchImageDynamic(c.Image, trustedClonePlugins...)
 }

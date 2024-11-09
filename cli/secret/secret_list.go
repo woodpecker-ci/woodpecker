@@ -15,15 +15,16 @@
 package secret
 
 import (
+	"context"
 	"html/template"
 	"os"
 	"strings"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
-	"github.com/woodpecker-ci/woodpecker/cli/common"
-	"github.com/woodpecker-ci/woodpecker/cli/internal"
-	"github.com/woodpecker-ci/woodpecker/woodpecker-go/woodpecker"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker"
 )
 
 var secretListCmd = &cli.Command{
@@ -31,7 +32,7 @@ var secretListCmd = &cli.Command{
 	Usage:     "list secrets",
 	ArgsUsage: "[repo-id|repo-full-name]",
 	Action:    secretList,
-	Flags: append(common.GlobalFlags,
+	Flags: []cli.Flag{
 		&cli.BoolFlag{
 			Name:  "global",
 			Usage: "global secret",
@@ -39,13 +40,13 @@ var secretListCmd = &cli.Command{
 		common.OrgFlag,
 		common.RepoFlag,
 		common.FormatFlag(tmplSecretList, true),
-	),
+	},
 }
 
-func secretList(c *cli.Context) error {
+func secretList(ctx context.Context, c *cli.Command) error {
 	format := c.String("format") + "\n"
 
-	client, err := internal.NewClient(c)
+	client, err := internal.NewClient(ctx, c)
 	if err != nil {
 		return err
 	}
@@ -56,17 +57,18 @@ func secretList(c *cli.Context) error {
 	}
 
 	var list []*woodpecker.Secret
-	if global {
+	switch {
+	case global:
 		list, err = client.GlobalSecretList()
 		if err != nil {
 			return err
 		}
-	} else if orgID != -1 {
+	case orgID != -1:
 		list, err = client.OrgSecretList(orgID)
 		if err != nil {
 			return err
 		}
-	} else {
+	default:
 		list, err = client.SecretList(repoID)
 		if err != nil {
 			return err
@@ -85,7 +87,7 @@ func secretList(c *cli.Context) error {
 	return nil
 }
 
-// template for secret list items
+// Template for secret list items.
 var tmplSecretList = "\x1b[33m{{ .Name }} \x1b[0m" + `
 Events: {{ list .Events }}
 {{- if .Images }}

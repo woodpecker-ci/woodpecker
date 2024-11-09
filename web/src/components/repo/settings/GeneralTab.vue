@@ -5,13 +5,17 @@
         docs-url="docs/usage/project-settings#pipeline-path"
         :label="$t('repo.settings.general.pipeline_path.path')"
       >
-        <TextField
-          v-model="repoSettings.config_file"
-          :placeholder="$t('repo.settings.general.pipeline_path.default')"
-        />
+        <template #default="{ id }">
+          <TextField
+            :id="id"
+            v-model="repoSettings.config_file"
+            :placeholder="$t('repo.settings.general.pipeline_path.default')"
+          />
+        </template>
         <template #description>
           <i18n-t keypath="repo.settings.general.pipeline_path.desc" tag="p" class="text-sm text-wp-text-alt-100">
             <span class="code-box-inline px-1">{{ $t('repo.settings.general.pipeline_path.desc_path_example') }}</span>
+            <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
             <span class="code-box-inline px-1">/</span>
           </i18n-t>
         </template>
@@ -27,6 +31,11 @@
           :description="$t('repo.settings.general.allow_pr.desc')"
         />
         <Checkbox
+          v-model="repoSettings.allow_deploy"
+          :label="$t('repo.settings.general.allow_deploy.allow')"
+          :description="$t('repo.settings.general.allow_deploy.desc')"
+        />
+        <Checkbox
           v-model="repoSettings.gated"
           :label="$t('repo.settings.general.protected.protected')"
           :description="$t('repo.settings.general.protected.desc')"
@@ -36,11 +45,27 @@
           :label="$t('repo.settings.general.netrc_only_trusted.netrc_only_trusted')"
           :description="$t('repo.settings.general.netrc_only_trusted.desc')"
         />
+      </InputField>
+
+      <InputField
+        v-if="user?.admin"
+        docs-url="docs/usage/project-settings#project-settings-1"
+        :label="$t('repo.settings.general.trusted.trusted')"
+      >
         <Checkbox
-          v-if="user?.admin"
-          v-model="repoSettings.trusted"
-          :label="$t('repo.settings.general.trusted.trusted')"
-          :description="$t('repo.settings.general.trusted.desc')"
+          v-model="repoSettings.trusted.network"
+          :label="$t('repo.settings.general.trusted.network.network')"
+          :description="$t('repo.settings.general.trusted.network.desc')"
+        />
+        <Checkbox
+          v-model="repoSettings.trusted.volumes"
+          :label="$t('repo.settings.general.trusted.volumes.volumes')"
+          :description="$t('repo.settings.general.trusted.volumes.desc')"
+        />
+        <Checkbox
+          v-model="repoSettings.trusted.security"
+          :label="$t('repo.settings.general.trusted.security.security')"
+          :description="$t('repo.settings.general.trusted.security.desc')"
         />
       </InputField>
 
@@ -51,10 +76,14 @@
         <RadioField v-model="repoSettings.visibility" :options="projectVisibilityOptions" />
       </InputField>
 
-      <InputField docs-url="docs/usage/project-settings#timeout" :label="$t('repo.settings.general.timeout.timeout')">
+      <InputField
+        v-slot="{ id }"
+        docs-url="docs/usage/project-settings#timeout"
+        :label="$t('repo.settings.general.timeout.timeout')"
+      >
         <div class="flex items-center">
-          <NumberField v-model="repoSettings.timeout" class="w-24" />
-          <span class="ml-4 text-gray-600">{{ $t('repo.settings.general.timeout.minutes') }}</span>
+          <NumberField :id="id" v-model="repoSettings.timeout" class="w-24" />
+          <span class="ml-4 text-wp-text-alt-100">{{ $t('repo.settings.general.timeout.minutes') }}</span>
         </div>
       </InputField>
 
@@ -85,13 +114,13 @@
 </template>
 
 <script lang="ts" setup>
-import { inject, onMounted, Ref, ref } from 'vue';
+import { inject, onMounted, ref, type Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import Button from '~/components/atomic/Button.vue';
 import Checkbox from '~/components/form/Checkbox.vue';
 import CheckboxesField from '~/components/form/CheckboxesField.vue';
-import { CheckboxOption, RadioOption } from '~/components/form/form.types';
+import type { CheckboxOption, RadioOption } from '~/components/form/form.types';
 import InputField from '~/components/form/InputField.vue';
 import NumberField from '~/components/form/NumberField.vue';
 import RadioField from '~/components/form/RadioField.vue';
@@ -101,7 +130,7 @@ import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useAuthentication from '~/compositions/useAuthentication';
 import useNotifications from '~/compositions/useNotifications';
-import { Repo, RepoSettings, RepoVisibility, WebhookEvents } from '~/lib/api/types';
+import { RepoVisibility, WebhookEvents, type Repo, type RepoSettings } from '~/lib/api/types';
 import { useRepoStore } from '~/store/repos';
 
 const apiClient = useApiClient();
@@ -125,6 +154,7 @@ function loadRepoSettings() {
     gated: repo.value.gated,
     trusted: repo.value.trusted,
     allow_pr: repo.value.allow_pr,
+    allow_deploy: repo.value.allow_deploy,
     cancel_previous_pipeline_events: repo.value.cancel_previous_pipeline_events || [],
     netrc_only_trusted: repo.value.netrc_only_trusted,
   };

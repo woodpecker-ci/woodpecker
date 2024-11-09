@@ -22,8 +22,8 @@ import (
 
 	"github.com/rs/zerolog/log"
 
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/store"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 )
 
 func ExtractHostFromCloneURL(cloneURL string) (string, error) {
@@ -55,7 +55,7 @@ func UserToken(ctx context.Context, r *model.Repo, u *model.User) string {
 		return ""
 	}
 	if r == nil {
-		log.Error().Msg("can not get user token by empty repo")
+		log.Error().Msg("cannot get user token by empty repo")
 		return ""
 	}
 	user, err := _store.GetUser(r.UserID)

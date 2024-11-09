@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col w-full md:w-3/12 md:max-w-md md:min-w-xs md:ml-4 text-wp-text-100 gap-2 pb-2">
+  <div class="flex flex-col w-full md:w-3/12 md:max-w-md md:min-w-xs text-wp-text-100 gap-2 pb-2">
     <div
       class="flex flex-wrap p-4 gap-1 justify-between flex-shrink-0 rounded-md border bg-wp-background-100 border-wp-background-400 dark:bg-wp-background-200"
     >
@@ -11,11 +11,11 @@
         <span>{{ pipeline.author }}</span>
       </div>
       <a
-        v-if="pipeline.event === 'pull_request'"
+        v-if="pipeline.event === 'pull_request' || pipeline.event === 'pull_request_closed'"
         class="flex items-center space-x-1 text-wp-link-100 hover:text-wp-link-200 min-w-0"
-        :href="pipeline.link_url"
+        :href="pipeline.forge_url"
       >
-        <Icon name="pull_request" />
+        <Icon name="pull-request" />
         <span class="truncate">{{ prettyRef }}</span>
       </a>
       <router-link
@@ -29,7 +29,7 @@
         <span class="truncate">{{ prettyRef }}</span>
       </router-link>
       <div v-else class="flex space-x-1 items-center min-w-0">
-        <Icon v-if="pipeline.event === 'tag'" name="tag" />
+        <Icon v-if="pipeline.event === 'tag' || pipeline.event === 'release'" name="tag" />
 
         <span class="truncate">{{ prettyRef }}</span>
       </div>
@@ -41,7 +41,7 @@
         <a
           v-else
           class="text-wp-link-100 hover:text-wp-link-200 flex items-center"
-          :href="pipeline.link_url"
+          :href="pipeline.forge_url"
           target="_blank"
         >
           <Icon name="commit" />
@@ -50,9 +50,9 @@
       </div>
     </div>
 
-    <div v-if="pipeline.workflows === undefined || pipeline.workflows.length === 0" class="m-auto mt-4">
+    <Panel v-if="pipeline.workflows === undefined || pipeline.workflows.length === 0">
       <span>{{ $t('repo.pipeline.no_pipeline_steps') }}</span>
-    </div>
+    </Panel>
 
     <div class="flex-grow min-h-0 w-full relative">
       <div class="absolute top-0 left-0 right-0 h-full flex flex-col md:overflow-y-auto gap-y-2">
@@ -68,7 +68,7 @@
               </div>
             </div>
             <button
-              v-if="pipeline.workflows && pipeline.workflows.length > 1"
+              v-if="!singleConfig"
               type="button"
               :title="workflow.name"
               class="flex items-center gap-2 py-2 px-1 hover-effect hover:bg-wp-background-300 dark:hover:bg-wp-background-400 rounded-md"
@@ -82,7 +82,7 @@
               <PipelineStatusIcon :status="workflow.state" class="!h-4 !w-4" />
               <span class="truncate">{{ workflow.name }}</span>
               <PipelineStepDuration
-                v-if="workflow.start_time !== workflow.end_time"
+                v-if="workflow.started !== workflow.finished"
                 :workflow="workflow"
                 class="mr-1 pr-2px"
               />
@@ -92,7 +92,7 @@
             class="transition-height duration-150 overflow-hidden"
             :class="{
               'max-h-0': workflowsCollapsed[workflow.id],
-              'ml-6': pipeline.workflows && pipeline.workflows.length > 1,
+              'ml-6': !singleConfig,
             }"
           >
             <button
@@ -103,13 +103,11 @@
               class="flex p-2 gap-2 border-2 border-transparent rounded-md items-center hover-effect hover:bg-wp-background-300 dark:hover:bg-wp-background-400 w-full"
               :class="{
                 'bg-wp-background-300 dark:bg-wp-background-400': selectedStepId && selectedStepId === step.pid,
-                'mt-1':
-                  (pipeline.workflows && pipeline.workflows.length > 1) ||
-                  (workflow.children && step.pid !== workflow.children[0].pid),
+                'mt-1': !singleConfig || (workflow.children && step.pid !== workflow.children[0].pid),
               }"
               @click="$emit('update:selected-step-id', step.pid)"
             >
-              <PipelineStatusIcon :status="step.state" class="!h-4 !w-4" />
+              <PipelineStatusIcon :service="step.type === StepType.Service" :status="step.state" class="!h-4 !w-4" />
               <span class="truncate">{{ step.name }}</span>
               <PipelineStepDuration :step="step" />
             </button>
@@ -121,14 +119,15 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, toRef } from 'vue';
+import { computed, inject, ref, toRef, type Ref } from 'vue';
 
 import Badge from '~/components/atomic/Badge.vue';
 import Icon from '~/components/atomic/Icon.vue';
+import Panel from '~/components/layout/Panel.vue';
 import PipelineStatusIcon from '~/components/repo/pipeline/PipelineStatusIcon.vue';
 import PipelineStepDuration from '~/components/repo/pipeline/PipelineStepDuration.vue';
 import usePipeline from '~/compositions/usePipeline';
-import { Pipeline, PipelineStep } from '~/lib/api/types';
+import { StepType, type Pipeline, type PipelineConfig, type PipelineStep } from '~/lib/api/types';
 
 const props = defineProps<{
   pipeline: Pipeline;
@@ -140,17 +139,25 @@ defineEmits<{
 }>();
 
 const pipeline = toRef(props, 'pipeline');
+const selectedStepId = toRef(props, 'selectedStepId');
 const { prettyRef } = usePipeline(pipeline);
+const pipelineConfigs = inject<Ref<PipelineConfig[]>>('pipeline-configs');
 
 const workflowsCollapsed = ref<Record<PipelineStep['id'], boolean>>(
-  props.pipeline.workflows && props.pipeline.workflows.length > 1
-    ? (props.pipeline.workflows || []).reduce(
+  pipeline.value.workflows && pipeline.value.workflows.length > 1
+    ? (pipeline.value.workflows || []).reduce(
         (collapsed, workflow) => ({
           ...collapsed,
-          [workflow.id]: ['success', 'skipped', 'blocked'].includes(workflow.state),
+          [workflow.id]:
+            ['success', 'skipped', 'blocked'].includes(workflow.state) &&
+            !workflow.children.some((child) => child.pid === selectedStepId.value),
         }),
         {},
       )
     : {},
+);
+
+const singleConfig = computed(
+  () => pipelineConfigs?.value?.length === 1 && pipeline.value.workflows && pipeline.value.workflows.length === 1,
 );
 </script>

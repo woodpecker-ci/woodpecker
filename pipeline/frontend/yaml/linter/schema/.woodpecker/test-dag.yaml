@@ -1,0 +1,22 @@
+steps:
+  first:
+    image: test
+
+  second:
+    depends_on: first
+    image: test
+
+  next:
+    image: test
+    depends_on:
+      - first
+      - second
+
+  some:
+    image: test
+    depends_on:
+      - first
+
+  last:
+    image: test
+    depends_on: next

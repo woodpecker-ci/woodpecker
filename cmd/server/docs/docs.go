@@ -26,7 +26,7 @@ const docTemplate = `{
                 "tags": [
                     "Agents"
                 ],
-                "summary": "Get agent list",
+                "summary": "List agents",
                 "parameters": [
                     {
                         "type": "string",
@@ -64,13 +64,14 @@ const docTemplate = `{
                 }
             },
             "post": {
+                "description": "Creates a new agent with a random token",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Agents"
                 ],
-                "summary": "Create a new agent with a random token so a new agent can connect to the server",
+                "summary": "Create a new agent",
                 "parameters": [
                     {
                         "type": "string",
@@ -100,7 +101,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/agents/{agent}": {
+        "/agents/{agent_id}": {
             "get": {
                 "produces": [
                     "application/json"
@@ -108,7 +109,7 @@ const docTemplate = `{
                 "tags": [
                     "Agents"
                 ],
-                "summary": "Get agent information",
+                "summary": "Get an agent",
                 "parameters": [
                     {
                         "type": "string",
@@ -173,7 +174,7 @@ const docTemplate = `{
                 "tags": [
                     "Agents"
                 ],
-                "summary": "Update agent information",
+                "summary": "Update an agent",
                 "parameters": [
                     {
                         "type": "string",
@@ -210,7 +211,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/agents/{agent}/tasks": {
+        "/agents/{agent_id}/tasks": {
             "get": {
                 "produces": [
                     "application/json"
@@ -218,7 +219,7 @@ const docTemplate = `{
                 "tags": [
                     "Agents"
                 ],
-                "summary": "Get agent tasks",
+                "summary": "List agent tasks",
                 "parameters": [
                     {
                         "type": "string",
@@ -261,16 +262,9 @@ const docTemplate = `{
                 "summary": "Provide pipeline status information to the CCMenu tool",
                 "parameters": [
                     {
-                        "type": "string",
-                        "description": "the repository owner's name",
-                        "name": "owner",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "the repository name",
-                        "name": "name",
+                        "type": "integer",
+                        "description": "the repository id",
+                        "name": "repo_id",
                         "in": "path",
                         "required": true
                     }
@@ -290,7 +284,7 @@ const docTemplate = `{
                 "tags": [
                     "Badges"
                 ],
-                "summary": "Get status badge, SVG format",
+                "summary": "Get status of pipeline as SVG badge",
                 "parameters": [
                     {
                         "type": "integer",
@@ -603,6 +597,197 @@ const docTemplate = `{
                 }
             }
         },
+        "/forges": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Forges"
+                ],
+                "summary": "List forges",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cpersonal access token\u003e",
+                        "description": "Insert your personal access token",
+                        "name": "Authorization",
+                        "in": "header"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "for response pagination, page offset number",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 50,
+                        "description": "for response pagination, max items per page",
+                        "name": "perPage",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Forge"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Creates a new forge with a random token",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Forges"
+                ],
+                "summary": "Create a new forge",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cpersonal access token\u003e",
+                        "description": "Insert your personal access token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "the forge's data (only 'name' and 'no_schedule' are read)",
+                        "name": "forge",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Forge"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Forge"
+                        }
+                    }
+                }
+            }
+        },
+        "/forges/{forgeId}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Forges"
+                ],
+                "summary": "Get a forge",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cpersonal access token\u003e",
+                        "description": "Insert your personal access token",
+                        "name": "Authorization",
+                        "in": "header"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "the forge's id",
+                        "name": "forgeId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Forge"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "produces": [
+                    "text/plain"
+                ],
+                "tags": [
+                    "Forges"
+                ],
+                "summary": "Delete a forge",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cpersonal access token\u003e",
+                        "description": "Insert your personal access token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "the forge's id",
+                        "name": "forgeId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            },
+            "patch": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Forges"
+                ],
+                "summary": "Update a forge",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cpersonal access token\u003e",
+                        "description": "Insert your personal access token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "the forge's id",
+                        "name": "forgeId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "the forge's data",
+                        "name": "forgeData",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Forge"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Forge"
+                        }
+                    }
+                }
+            }
+        },
         "/healthz": {
             "get": {
                 "description": "If everything is fine, just a 204 will be returned, a 500 signals server state is unhealthy.",
@@ -664,19 +849,12 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "allOf": [
-                                {
+                            "type": "object",
+                            "properties": {
+                                "log-level": {
                                     "type": "string"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "log-level": {
-                                            "type": "string"
-                                        }
-                                    }
                                 }
-                            ]
+                            }
                         }
                     }
                 }
@@ -705,19 +883,12 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "allOf": [
-                                {
+                            "type": "object",
+                            "properties": {
+                                "log-level": {
                                     "type": "string"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "log-level": {
-                                            "type": "string"
-                                        }
-                                    }
                                 }
-                            ]
+                            }
                         }
                     }
                 ],
@@ -725,59 +896,13 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "allOf": [
-                                {
+                            "type": "object",
+                            "properties": {
+                                "log-level": {
                                     "type": "string"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "log-level": {
-                                            "type": "string"
-                                        }
-                                    }
                                 }
-                            ]
+                            }
                         }
-                    }
-                }
-            }
-        },
-        "/logs/{repo_id}/{pipeline}/{stepID}": {
-            "get": {
-                "produces": [
-                    "text/plain"
-                ],
-                "tags": [
-                    "Pipeline logs"
-                ],
-                "summary": "Log stream",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "the repository id",
-                        "name": "repo_id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "description": "the number of the pipeline",
-                        "name": "pipeline",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "description": "the step id",
-                        "name": "stepID",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK"
                     }
                 }
             }
@@ -790,7 +915,7 @@ const docTemplate = `{
                 "tags": [
                     "Organizations"
                 ],
-                "summary": "Lookup organization by full-name",
+                "summary": "Lookup an organization by full name",
                 "parameters": [
                     {
                         "type": "string",
@@ -802,7 +927,7 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "the organizations full-name / slug",
+                        "description": "the organizations full name / slug",
                         "name": "org_full_name",
                         "in": "path",
                         "required": true
@@ -827,7 +952,7 @@ const docTemplate = `{
                 "tags": [
                     "Orgs"
                 ],
-                "summary": "Get all orgs",
+                "summary": "List organizations",
                 "parameters": [
                     {
                         "type": "string",
@@ -874,7 +999,7 @@ const docTemplate = `{
                 "tags": [
                     "Orgs"
                 ],
-                "summary": "Delete an org",
+                "summary": "Delete an organization",
                 "parameters": [
                     {
                         "type": "string",
@@ -907,7 +1032,7 @@ const docTemplate = `{
                 "tags": [
                     "Organization"
                 ],
-                "summary": "Get organization by id",
+                "summary": "Get an organization",
                 "parameters": [
                     {
                         "type": "string",
@@ -919,7 +1044,7 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "the organziation's id",
+                        "description": "the organization's id",
                         "name": "org_id",
                         "in": "path",
                         "required": true
@@ -938,6 +1063,193 @@ const docTemplate = `{
                 }
             }
         },
+        "/orgs/{org_id}/agents": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Agents"
+                ],
+                "summary": "List agents for an organization",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cpersonal access token\u003e",
+                        "description": "Insert your personal access token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "the organization's id",
+                        "name": "org_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "for response pagination, page offset number",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 50,
+                        "description": "for response pagination, max items per page",
+                        "name": "perPage",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Agent"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Creates a new agent with a random token, scoped to the specified organization",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Agents"
+                ],
+                "summary": "Create a new organization-scoped agent",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cpersonal access token\u003e",
+                        "description": "Insert your personal access token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "the organization's id",
+                        "name": "org_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "the agent's data (only 'name' and 'no_schedule' are read)",
+                        "name": "agent",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Agent"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Agent"
+                        }
+                    }
+                }
+            }
+        },
+        "/orgs/{org_id}/agents/{agent_id}": {
+            "delete": {
+                "produces": [
+                    "text/plain"
+                ],
+                "tags": [
+                    "Agents"
+                ],
+                "summary": "Delete an organization-scoped agent",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cpersonal access token\u003e",
+                        "description": "Insert your personal access token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "the organization's id",
+                        "name": "org_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "the agent's id",
+                        "name": "agent_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            },
+            "patch": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Agents"
+                ],
+                "summary": "Update an organization-scoped agent",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cpersonal access token\u003e",
+                        "description": "Insert your personal access token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "the organization's id",
+                        "name": "org_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "the agent's id",
+                        "name": "agent_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "the agent's updated data",
+                        "name": "agent",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Agent"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Agent"
+                        }
+                    }
+                }
+            }
+        },
         "/orgs/{org_id}/permissions": {
             "get": {
                 "produces": [
@@ -946,7 +1258,7 @@ const docTemplate = `{
                 "tags": [
                     "Organization permissions"
                 ],
-                "summary": "Get the permissions of the current user in the given organization",
+                "summary": "Get the permissions of the currently authenticated user for the given organization",
                 "parameters": [
                     {
                         "type": "string",
@@ -958,7 +1270,7 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "the organziation's id",
+                        "description": "the organization's id",
                         "name": "org_id",
                         "in": "path",
                         "required": true
@@ -977,6 +1289,233 @@ const docTemplate = `{
                 }
             }
         },
+        "/orgs/{org_id}/registries": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Organization registries"
+                ],
+                "summary": "List organization registries",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cpersonal access token\u003e",
+                        "description": "Insert your personal access token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "the org's id",
+                        "name": "org_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "for response pagination, page offset number",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 50,
+                        "description": "for response pagination, max items per page",
+                        "name": "perPage",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Registry"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Organization registries"
+                ],
+                "summary": "Create an organization registry",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cpersonal access token\u003e",
+                        "description": "Insert your personal access token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "the org's id",
+                        "name": "org_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "the new registry",
+                        "name": "registryData",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Registry"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Registry"
+                        }
+                    }
+                }
+            }
+        },
+        "/orgs/{org_id}/registries/{registry}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Organization registries"
+                ],
+                "summary": "Get a organization registry by address",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cpersonal access token\u003e",
+                        "description": "Insert your personal access token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "the org's id",
+                        "name": "org_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "the registry's address",
+                        "name": "registry",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Registry"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "produces": [
+                    "text/plain"
+                ],
+                "tags": [
+                    "Organization registries"
+                ],
+                "summary": "Delete an organization registry by name",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cpersonal access token\u003e",
+                        "description": "Insert your personal access token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "the org's id",
+                        "name": "org_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "the registry's name",
+                        "name": "registry",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            },
+            "patch": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Organization registries"
+                ],
+                "summary": "Update an organization registry by name",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cpersonal access token\u003e",
+                        "description": "Insert your personal access token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "the org's id",
+                        "name": "org_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "the registry's name",
+                        "name": "registry",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "the update registry data",
+                        "name": "registryData",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Registry"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Registry"
+                        }
+                    }
+                }
+            }
+        },
         "/orgs/{org_id}/secrets": {
             "get": {
                 "produces": [
@@ -985,7 +1524,7 @@ const docTemplate = `{
                 "tags": [
                     "Organization secrets"
                 ],
-                "summary": "Get the organization secret list",
+                "summary": "List organization secrets",
                 "parameters": [
                     {
                         "type": "string",
@@ -1028,6 +1567,49 @@ const docTemplate = `{
                         }
                     }
                 }
+            },
+            "post": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Organization secrets"
+                ],
+                "summary": "Create an organization secret",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cpersonal access token\u003e",
+                        "description": "Insert your personal access token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "the org's id",
+                        "name": "org_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "the new secret",
+                        "name": "secretData",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Secret"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Secret"
+                        }
+                    }
+                }
             }
         },
         "/orgs/{org_id}/secrets/{secret}": {
@@ -1038,7 +1620,7 @@ const docTemplate = `{
                 "tags": [
                     "Organization secrets"
                 ],
-                "summary": "Get the named organization secret",
+                "summary": "Get a organization secret by name",
                 "parameters": [
                     {
                         "type": "string",
@@ -1079,7 +1661,7 @@ const docTemplate = `{
                 "tags": [
                     "Organization secrets"
                 ],
-                "summary": "Delete the named secret from an organization",
+                "summary": "Delete an organization secret by name",
                 "parameters": [
                     {
                         "type": "string",
@@ -1117,7 +1699,7 @@ const docTemplate = `{
                 "tags": [
                     "Organization secrets"
                 ],
-                "summary": "Update an organization secret",
+                "summary": "Update an organization secret by name",
                 "parameters": [
                     {
                         "type": "string",
@@ -1161,51 +1743,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/orgs/{owner}/secrets": {
-            "post": {
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Organization secrets"
-                ],
-                "summary": "Persist/create an organization secret",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "default": "Bearer \u003cpersonal access token\u003e",
-                        "description": "Insert your personal access token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "the org's id",
-                        "name": "org_id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "the new secret",
-                        "name": "secretData",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/Secret"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/Secret"
-                        }
-                    }
-                }
-            }
-        },
         "/pipelines": {
             "get": {
                 "produces": [
@@ -1214,7 +1751,7 @@ const docTemplate = `{
                 "tags": [
                     "Pipeline queues"
                 ],
-                "summary": "List pipeline queues",
+                "summary": "List pipelines in queue",
                 "parameters": [
                     {
                         "type": "string",
@@ -1291,8 +1828,8 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "OK"
+                    "204": {
+                        "description": "No Content"
                     }
                 }
             }
@@ -1305,7 +1842,7 @@ const docTemplate = `{
                 "tags": [
                     "Pipeline queues"
                 ],
-                "summary": "Pause a pipeline queue",
+                "summary": "Pause the pipeline queue",
                 "parameters": [
                     {
                         "type": "string",
@@ -1317,8 +1854,8 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "OK"
+                    "204": {
+                        "description": "No Content"
                     }
                 }
             }
@@ -1331,7 +1868,7 @@ const docTemplate = `{
                 "tags": [
                     "Pipeline queues"
                 ],
-                "summary": "Resume a pipeline queue",
+                "summary": "Resume the pipeline queue",
                 "parameters": [
                     {
                         "type": "string",
@@ -1343,21 +1880,214 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        },
+        "/registries": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Registries"
+                ],
+                "summary": "List global registries",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cpersonal access token\u003e",
+                        "description": "Insert your personal access token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "for response pagination, page offset number",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 50,
+                        "description": "for response pagination, max items per page",
+                        "name": "perPage",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
                     "200": {
-                        "description": "OK"
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Registry"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Registries"
+                ],
+                "summary": "Create a global registry",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cpersonal access token\u003e",
+                        "description": "Insert your personal access token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "the registry object data",
+                        "name": "registry",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Registry"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Registry"
+                        }
+                    }
+                }
+            }
+        },
+        "/registries/{registry}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Registries"
+                ],
+                "summary": "Get a global registry by name",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cpersonal access token\u003e",
+                        "description": "Insert your personal access token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "the registry's name",
+                        "name": "registry",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Registry"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "produces": [
+                    "text/plain"
+                ],
+                "tags": [
+                    "Registries"
+                ],
+                "summary": "Delete a global registry by name",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cpersonal access token\u003e",
+                        "description": "Insert your personal access token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "the registry's name",
+                        "name": "registry",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            },
+            "patch": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Registries"
+                ],
+                "summary": "Update a global registry by name",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cpersonal access token\u003e",
+                        "description": "Insert your personal access token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "the registry's name",
+                        "name": "registry",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "the registry's data",
+                        "name": "registryData",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Registry"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Registry"
+                        }
                     }
                 }
             }
         },
         "/repos": {
             "get": {
+                "description": "Returns a list of all repositories. Requires admin rights.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Repositories"
                 ],
-                "summary": "List all repositories on the server. Requires admin rights.",
+                "summary": "List all repositories on the server",
                 "parameters": [
                     {
                         "type": "string",
@@ -1443,7 +2173,7 @@ const docTemplate = `{
                 "tags": [
                     "Repositories"
                 ],
-                "summary": "Get repository by full-name",
+                "summary": "Lookup a repository by full name",
                 "parameters": [
                     {
                         "type": "string",
@@ -1455,7 +2185,7 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "the repository full-name / slug",
+                        "description": "the repository full name / slug",
                         "name": "repo_full_name",
                         "in": "path",
                         "required": true
@@ -1471,6 +2201,33 @@ const docTemplate = `{
                 }
             }
         },
+        "/repos/repair": {
+            "post": {
+                "description": "Executes a repair process on all repositories. Requires admin rights.",
+                "produces": [
+                    "text/plain"
+                ],
+                "tags": [
+                    "Repositories"
+                ],
+                "summary": "Repair all repositories on the server",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cpersonal access token\u003e",
+                        "description": "Insert your personal access token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        },
         "/repos/{repo_id}": {
             "get": {
                 "produces": [
@@ -1479,7 +2236,7 @@ const docTemplate = `{
                 "tags": [
                     "Repositories"
                 ],
-                "summary": "Get repository information",
+                "summary": "Get a repository",
                 "parameters": [
                     {
                         "type": "string",
@@ -1547,7 +2304,7 @@ const docTemplate = `{
                 "tags": [
                     "Repositories"
                 ],
-                "summary": "Change a repository",
+                "summary": "Update a repository",
                 "parameters": [
                     {
                         "type": "string",
@@ -1592,7 +2349,7 @@ const docTemplate = `{
                 "tags": [
                     "Repositories"
                 ],
-                "summary": "Get repository branches",
+                "summary": "Get branches of a repository",
                 "parameters": [
                     {
                         "type": "string",
@@ -1645,7 +2402,7 @@ const docTemplate = `{
                 "tags": [
                     "Repositories"
                 ],
-                "summary": "Change a repository's owner, to the one holding the access token",
+                "summary": "Change a repository's owner to the currently authenticated user",
                 "parameters": [
                     {
                         "type": "string",
@@ -1681,7 +2438,7 @@ const docTemplate = `{
                 "tags": [
                     "Repository cron jobs"
                 ],
-                "summary": "Get the cron job list",
+                "summary": "List cron jobs",
                 "parameters": [
                     {
                         "type": "string",
@@ -1732,7 +2489,7 @@ const docTemplate = `{
                 "tags": [
                     "Repository cron jobs"
                 ],
-                "summary": "Persist/creat a cron job",
+                "summary": "Create a cron job",
                 "parameters": [
                     {
                         "type": "string",
@@ -1777,7 +2534,7 @@ const docTemplate = `{
                 "tags": [
                     "Repository cron jobs"
                 ],
-                "summary": "Get a cron job by id",
+                "summary": "Get a cron job",
                 "parameters": [
                     {
                         "type": "string",
@@ -1859,7 +2616,7 @@ const docTemplate = `{
                 "tags": [
                     "Repository cron jobs"
                 ],
-                "summary": "Delete a cron job by id",
+                "summary": "Delete a cron job",
                 "parameters": [
                     {
                         "type": "string",
@@ -1942,14 +2699,14 @@ const docTemplate = `{
             }
         },
         "/repos/{repo_id}/logs/{number}": {
-            "post": {
+            "delete": {
                 "produces": [
                     "text/plain"
                 ],
                 "tags": [
                     "Pipeline logs"
                 ],
-                "summary": "Deletes log",
+                "summary": "Deletes all logs of a pipeline",
                 "parameters": [
                     {
                         "type": "string",
@@ -1989,7 +2746,7 @@ const docTemplate = `{
                 "tags": [
                     "Pipeline logs"
                 ],
-                "summary": "Log information",
+                "summary": "Get logs for a pipeline step",
                 "parameters": [
                     {
                         "type": "string",
@@ -2034,6 +2791,53 @@ const docTemplate = `{
                 }
             }
         },
+        "/repos/{repo_id}/logs/{number}/{stepId}": {
+            "delete": {
+                "produces": [
+                    "text/plain"
+                ],
+                "tags": [
+                    "Pipeline logs"
+                ],
+                "summary": "Delete step logs of a pipeline",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cpersonal access token\u003e",
+                        "description": "Insert your personal access token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "the repository id",
+                        "name": "repo_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "the number of the pipeline",
+                        "name": "number",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "the step id",
+                        "name": "stepId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        },
         "/repos/{repo_id}/move": {
             "post": {
                 "produces": [
@@ -2068,8 +2872,8 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "OK"
+                    "204": {
+                        "description": "No Content"
                     }
                 }
             }
@@ -2083,7 +2887,7 @@ const docTemplate = `{
                 "tags": [
                     "Repositories"
                 ],
-                "summary": "Repository permission information",
+                "summary": "Check current authenticated users access to the repository",
                 "parameters": [
                     {
                         "type": "string",
@@ -2094,16 +2898,9 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "the repository owner's name",
-                        "name": "owner",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "the repository name",
-                        "name": "name",
+                        "type": "integer",
+                        "description": "the repository id",
+                        "name": "repo_id",
                         "in": "path",
                         "required": true
                     }
@@ -2120,13 +2917,14 @@ const docTemplate = `{
         },
         "/repos/{repo_id}/pipelines": {
             "get": {
+                "description": "Get a list of pipelines for a repository.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Pipelines"
                 ],
-                "summary": "Get pipelines, current running and past ones",
+                "summary": "List repository pipelines",
                 "parameters": [
                     {
                         "type": "string",
@@ -2156,6 +2954,18 @@ const docTemplate = `{
                         "description": "for response pagination, max items per page",
                         "name": "perPage",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "only return pipelines before this RFC3339 date",
+                        "name": "before",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "only return pipelines after this RFC3339 date",
+                        "name": "after",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -2177,7 +2987,7 @@ const docTemplate = `{
                 "tags": [
                     "Pipelines"
                 ],
-                "summary": "Run/trigger a pipelines",
+                "summary": "Trigger a manual pipeline",
                 "parameters": [
                     {
                         "type": "string",
@@ -2222,7 +3032,7 @@ const docTemplate = `{
                 "tags": [
                     "Pipelines"
                 ],
-                "summary": "Pipeline information by number",
+                "summary": "Get a repositories pipeline",
                 "parameters": [
                     {
                         "type": "string",
@@ -2275,16 +3085,9 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "the repository owner's name",
-                        "name": "owner",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "the repository name",
-                        "name": "name",
+                        "type": "integer",
+                        "description": "the repository id",
+                        "name": "repo_id",
                         "in": "path",
                         "required": true
                     },
@@ -2316,6 +3119,44 @@ const docTemplate = `{
                         }
                     }
                 }
+            },
+            "delete": {
+                "produces": [
+                    "text/plain"
+                ],
+                "tags": [
+                    "Pipelines"
+                ],
+                "summary": "Delete a pipeline",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cpersonal access token\u003e",
+                        "description": "Insert your personal access token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "the repository id",
+                        "name": "repo_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "the number of the pipeline",
+                        "name": "number",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
             }
         },
         "/repos/{repo_id}/pipelines/{number}/approve": {
@@ -2326,7 +3167,7 @@ const docTemplate = `{
                 "tags": [
                     "Pipelines"
                 ],
-                "summary": "Start pipelines in gated repos",
+                "summary": "Approve and start a pipeline",
                 "parameters": [
                     {
                         "type": "string",
@@ -2369,7 +3210,7 @@ const docTemplate = `{
                 "tags": [
                     "Pipelines"
                 ],
-                "summary": "Cancels a pipeline",
+                "summary": "Cancel a pipeline",
                 "parameters": [
                     {
                         "type": "string",
@@ -2409,7 +3250,7 @@ const docTemplate = `{
                 "tags": [
                     "Pipelines"
                 ],
-                "summary": "Pipeline configuration",
+                "summary": "Get configuration files for a pipeline",
                 "parameters": [
                     {
                         "type": "string",
@@ -2455,7 +3296,7 @@ const docTemplate = `{
                 "tags": [
                     "Pipelines"
                 ],
-                "summary": "Decline pipelines in gated repos",
+                "summary": "Decline a pipeline",
                 "parameters": [
                     {
                         "type": "string",
@@ -2490,6 +3331,49 @@ const docTemplate = `{
                 }
             }
         },
+        "/repos/{repo_id}/pipelines/{number}/metadata": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Pipelines"
+                ],
+                "summary": "Get metadata for a pipeline or a specific workflow, including previous pipeline info",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "Bearer \u003cpersonal access token\u003e",
+                        "description": "Insert your personal access token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "the repository id",
+                        "name": "repo_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "the number of the pipeline",
+                        "name": "number",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/metadata.Metadata"
+                        }
+                    }
+                }
+            }
+        },
         "/repos/{repo_id}/pull_requests": {
             "get": {
                 "produces": [
@@ -2498,7 +3382,7 @@ const docTemplate = `{
                 "tags": [
                     "Repositories"
                 ],
-                "summary": "List active pull requests",
+                "summary": "List active pull requests of a repository",
                 "parameters": [
                     {
                         "type": "string",
@@ -2543,7 +3427,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/repos/{repo_id}/registry": {
+        "/repos/{repo_id}/registries": {
             "get": {
                 "produces": [
                     "application/json"
@@ -2551,7 +3435,7 @@ const docTemplate = `{
                 "tags": [
                     "Repository registries"
                 ],
-                "summary": "Get the registry list",
+                "summary": "List registries",
                 "parameters": [
                     {
                         "type": "string",
@@ -2602,7 +3486,7 @@ const docTemplate = `{
                 "tags": [
                     "Repository registries"
                 ],
-                "summary": "Persist/create a registry",
+                "summary": "Create a registry",
                 "parameters": [
                     {
                         "type": "string",
@@ -2639,7 +3523,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/repos/{repo_id}/registry/{registry}": {
+        "/repos/{repo_id}/registries/{registry}": {
             "get": {
                 "produces": [
                     "application/json"
@@ -2647,7 +3531,7 @@ const docTemplate = `{
                 "tags": [
                     "Repository registries"
                 ],
-                "summary": "Get a named registry",
+                "summary": "Get a registry by name",
                 "parameters": [
                     {
                         "type": "string",
@@ -2688,7 +3572,7 @@ const docTemplate = `{
                 "tags": [
                     "Repository registries"
                 ],
-                "summary": "Delete a named registry",
+                "summary": "Delete a registry by name",
                 "parameters": [
                     {
                         "type": "string",
@@ -2726,7 +3610,7 @@ const docTemplate = `{
                 "tags": [
                     "Repository registries"
                 ],
-                "summary": "Update a named registry",
+                "summary": "Update a registry by name",
                 "parameters": [
                     {
                         "type": "string",
@@ -2797,8 +3681,8 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "OK"
+                    "204": {
+                        "description": "No Content"
                     }
                 }
             }
@@ -2811,7 +3695,7 @@ const docTemplate = `{
                 "tags": [
                     "Repository secrets"
                 ],
-                "summary": "Get the secret list",
+                "summary": "List repository secrets",
                 "parameters": [
                     {
                         "type": "string",
@@ -2862,7 +3746,7 @@ const docTemplate = `{
                 "tags": [
                     "Repository secrets"
                 ],
-                "summary": "Persist/create a secret",
+                "summary": "Create a repository secret",
                 "parameters": [
                     {
                         "type": "string",
@@ -2907,7 +3791,7 @@ const docTemplate = `{
                 "tags": [
                     "Repository secrets"
                 ],
-                "summary": "Get a named secret",
+                "summary": "Get a repository secret by name",
                 "parameters": [
                     {
                         "type": "string",
@@ -2948,7 +3832,7 @@ const docTemplate = `{
                 "tags": [
                     "Repository secrets"
                 ],
-                "summary": "Delete a named secret",
+                "summary": "Delete a repository secret by name",
                 "parameters": [
                     {
                         "type": "string",
@@ -2986,7 +3870,7 @@ const docTemplate = `{
                 "tags": [
                     "Repository secrets"
                 ],
-                "summary": "Update a named secret",
+                "summary": "Update a repository secret by name",
                 "parameters": [
                     {
                         "type": "string",
@@ -3038,7 +3922,7 @@ const docTemplate = `{
                 "tags": [
                     "Secrets"
                 ],
-                "summary": "Get the global secret list",
+                "summary": "List global secrets",
                 "parameters": [
                     {
                         "type": "string",
@@ -3082,7 +3966,7 @@ const docTemplate = `{
                 "tags": [
                     "Secrets"
                 ],
-                "summary": "Persist/create a global secret",
+                "summary": "Create a global secret",
                 "parameters": [
                     {
                         "type": "string",
@@ -3248,6 +4132,62 @@ const docTemplate = `{
                 }
             }
         },
+        "/stream/events": {
+            "get": {
+                "description": "With quic and http2 support",
+                "produces": [
+                    "text/plain"
+                ],
+                "tags": [
+                    "Events"
+                ],
+                "summary": "Stream events like pipeline updates",
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/stream/logs/{repo_id}/{pipeline}/{stepID}": {
+            "get": {
+                "produces": [
+                    "text/plain"
+                ],
+                "tags": [
+                    "Pipeline logs"
+                ],
+                "summary": "Stream logs of a pipeline step",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "the repository id",
+                        "name": "repo_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "the number of the pipeline",
+                        "name": "pipeline",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "the step id",
+                        "name": "stepID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
         "/user": {
             "get": {
                 "produces": [
@@ -3256,7 +4196,7 @@ const docTemplate = `{
                 "tags": [
                     "User"
                 ],
-                "summary": "Returns the currently authenticated user.",
+                "summary": "Get the currently authenticated user",
                 "parameters": [
                     {
                         "type": "string",
@@ -3279,14 +4219,14 @@ const docTemplate = `{
         },
         "/user/feed": {
             "get": {
-                "description": "Feed entries can be used to display information on the latest builds.",
+                "description": "The feed lists the most recent pipeline for the currently authenticated user.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "User"
                 ],
-                "summary": "A feed entry for a build.",
+                "summary": "Get the currently authenticated users pipeline feed",
                 "parameters": [
                     {
                         "type": "string",
@@ -3301,7 +4241,10 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/Feed"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Feed"
+                            }
                         }
                     }
                 }
@@ -3316,7 +4259,7 @@ const docTemplate = `{
                 "tags": [
                     "User"
                 ],
-                "summary": "Get user's repos",
+                "summary": "Get user's repositories",
                 "parameters": [
                     {
                         "type": "string",
@@ -3406,7 +4349,7 @@ const docTemplate = `{
                 "tags": [
                     "Users"
                 ],
-                "summary": "Get all users",
+                "summary": "List users",
                 "parameters": [
                     {
                         "type": "string",
@@ -3560,7 +4503,7 @@ const docTemplate = `{
                 "tags": [
                     "Users"
                 ],
-                "summary": "Change a user",
+                "summary": "Update a user",
                 "parameters": [
                     {
                         "type": "string",
@@ -3646,10 +4589,20 @@ const docTemplate = `{
                 "created": {
                     "type": "integer"
                 },
+                "custom_labels": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
                 "id": {
                     "type": "integer"
                 },
                 "last_contact": {
+                    "type": "integer"
+                },
+                "last_work": {
+                    "description": "last time the agent did something, this value is used to determine if the agent is still doing work used by the autoscaler",
                     "type": "integer"
                 },
                 "name": {
@@ -3657,6 +4610,10 @@ const docTemplate = `{
                 },
                 "no_schedule": {
                     "type": "boolean"
+                },
+                "org_id": {
+                    "description": "OrgID is counted as unset if set to -1, this is done to ensure a new(Agent) still enforce the OrgID check by default",
+                    "type": "integer"
                 },
                 "owner_id": {
                     "type": "integer"
@@ -3698,7 +4655,7 @@ const docTemplate = `{
                 "branch": {
                     "type": "string"
                 },
-                "created_at": {
+                "created": {
                     "type": "integer"
                 },
                 "creator_id": {
@@ -3740,13 +4697,13 @@ const docTemplate = `{
                 "commit": {
                     "type": "string"
                 },
-                "created_at": {
+                "created": {
                     "type": "integer"
                 },
                 "event": {
                     "type": "string"
                 },
-                "finished_at": {
+                "finished": {
                     "type": "integer"
                 },
                 "id": {
@@ -3764,19 +4721,44 @@ const docTemplate = `{
                 "refspec": {
                     "type": "string"
                 },
-                "remote": {
-                    "type": "string"
-                },
                 "repo_id": {
                     "type": "integer"
                 },
-                "started_at": {
+                "started": {
                     "type": "integer"
                 },
                 "status": {
                     "type": "string"
                 },
                 "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "Forge": {
+            "type": "object",
+            "properties": {
+                "additional_options": {
+                    "type": "object",
+                    "additionalProperties": {}
+                },
+                "client": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "oauth_host": {
+                    "description": "public url for oauth if different from url",
+                    "type": "string"
+                },
+                "skip_verify": {
+                    "type": "boolean"
+                },
+                "type": {
+                    "$ref": "#/definitions/model.ForgeType"
+                },
+                "url": {
                     "type": "string"
                 }
             }
@@ -3827,6 +4809,9 @@ const docTemplate = `{
         "Org": {
             "type": "object",
             "properties": {
+                "forge_id": {
+                    "type": "integer"
+                },
                 "id": {
                     "type": "integer"
                 },
@@ -3893,35 +4878,38 @@ const docTemplate = `{
                         "type": "string"
                     }
                 },
-                "clone_url": {
-                    "type": "string"
-                },
                 "commit": {
                     "type": "string"
                 },
-                "created_at": {
+                "created": {
                     "type": "integer"
+                },
+                "deploy_task": {
+                    "type": "string"
                 },
                 "deploy_to": {
                     "type": "string"
                 },
-                "enqueued_at": {
-                    "type": "integer"
-                },
-                "error": {
-                    "type": "string"
+                "errors": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/types.PipelineError"
+                    }
                 },
                 "event": {
                     "$ref": "#/definitions/WebhookEvent"
                 },
-                "finished_at": {
+                "finished": {
                     "type": "integer"
+                },
+                "forge_url": {
+                    "type": "string"
                 },
                 "id": {
                     "type": "integer"
                 },
-                "link_url": {
-                    "type": "string"
+                "is_prerelease": {
+                    "type": "boolean"
                 },
                 "message": {
                     "type": "string"
@@ -3944,7 +4932,7 @@ const docTemplate = `{
                 "refspec": {
                     "type": "string"
                 },
-                "reviewed_at": {
+                "reviewed": {
                     "type": "integer"
                 },
                 "reviewed_by": {
@@ -3954,7 +4942,7 @@ const docTemplate = `{
                     "description": "uses reported user for webhooks and name of cron for cron pipelines",
                     "type": "string"
                 },
-                "started_at": {
+                "started": {
                     "type": "integer"
                 },
                 "status": {
@@ -3966,7 +4954,7 @@ const docTemplate = `{
                 "title": {
                     "type": "string"
                 },
-                "updated_at": {
+                "updated": {
                     "type": "integer"
                 },
                 "variables": {
@@ -4001,7 +4989,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "index": {
-                    "type": "integer"
+                    "type": "string"
                 },
                 "title": {
                     "type": "string"
@@ -4014,17 +5002,20 @@ const docTemplate = `{
                 "address": {
                     "type": "string"
                 },
-                "email": {
-                    "type": "string"
-                },
                 "id": {
+                    "type": "integer"
+                },
+                "org_id": {
                     "type": "integer"
                 },
                 "password": {
                     "type": "string"
                 },
-                "token": {
-                    "type": "string"
+                "readonly": {
+                    "type": "boolean"
+                },
+                "repo_id": {
+                    "type": "integer"
                 },
                 "username": {
                     "type": "string"
@@ -4035,6 +5026,9 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "active": {
+                    "type": "boolean"
+                },
+                "allow_deploy": {
                     "type": "boolean"
                 },
                 "allow_pr": {
@@ -4061,8 +5055,14 @@ const docTemplate = `{
                 "default_branch": {
                     "type": "string"
                 },
+                "forge_id": {
+                    "type": "integer"
+                },
                 "forge_remote_id": {
                     "description": "ForgeRemoteID is the unique identifier for the repository on the forge.",
+                    "type": "string"
+                },
+                "forge_url": {
                     "type": "string"
                 },
                 "full_name": {
@@ -4073,9 +5073,6 @@ const docTemplate = `{
                 },
                 "id": {
                     "type": "integer"
-                },
-                "link_url": {
-                    "type": "string"
                 },
                 "name": {
                     "type": "string"
@@ -4089,6 +5086,9 @@ const docTemplate = `{
                 "owner": {
                     "type": "string"
                 },
+                "pr_enabled": {
+                    "type": "boolean"
+                },
                 "private": {
                     "type": "boolean"
                 },
@@ -4099,7 +5099,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "trusted": {
-                    "type": "boolean"
+                    "$ref": "#/definitions/model.TrustedConfiguration"
                 },
                 "visibility": {
                     "$ref": "#/definitions/RepoVisibility"
@@ -4109,6 +5109,9 @@ const docTemplate = `{
         "RepoPatch": {
             "type": "object",
             "properties": {
+                "allow_deploy": {
+                    "type": "boolean"
+                },
                 "allow_pr": {
                     "type": "boolean"
                 },
@@ -4131,7 +5134,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "trusted": {
-                    "type": "boolean"
+                    "$ref": "#/definitions/model.TrustedConfigurationPatch"
                 },
                 "visibility": {
                     "type": "string"
@@ -4169,7 +5172,7 @@ const docTemplate = `{
         "Secret": {
             "type": "object",
             "properties": {
-                "event": {
+                "events": {
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/WebhookEvent"
@@ -4178,7 +5181,7 @@ const docTemplate = `{
                 "id": {
                     "type": "integer"
                 },
-                "image": {
+                "images": {
                     "type": "array",
                     "items": {
                         "type": "string"
@@ -4187,8 +5190,11 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
-                "plugins_only": {
-                    "type": "boolean"
+                "org_id": {
+                    "type": "integer"
+                },
+                "repo_id": {
+                    "type": "integer"
                 },
                 "value": {
                     "type": "string"
@@ -4206,8 +5212,21 @@ const docTemplate = `{
                 "killed",
                 "error",
                 "blocked",
-                "declined"
+                "declined",
+                "created"
             ],
+            "x-enum-comments": {
+                "StatusBlocked": "waiting for approval",
+                "StatusCreated": "created / internal use only",
+                "StatusDeclined": "blocked and declined",
+                "StatusError": "error with the config / while parsing / some other system problem",
+                "StatusFailure": "failed to finish (exit code != 0)",
+                "StatusKilled": "killed by user",
+                "StatusPending": "pending to be executed",
+                "StatusRunning": "currently running",
+                "StatusSkipped": "skipped as another step failed",
+                "StatusSuccess": "successfully finished"
+            },
             "x-enum-varnames": [
                 "StatusSkipped",
                 "StatusPending",
@@ -4217,19 +5236,20 @@ const docTemplate = `{
                 "StatusKilled",
                 "StatusError",
                 "StatusBlocked",
-                "StatusDeclined"
+                "StatusDeclined",
+                "StatusCreated"
             ]
         },
         "Step": {
             "type": "object",
             "properties": {
-                "end_time": {
-                    "type": "integer"
-                },
                 "error": {
                     "type": "string"
                 },
                 "exit_code": {
+                    "type": "integer"
+                },
+                "finished": {
                     "type": "integer"
                 },
                 "id": {
@@ -4247,7 +5267,7 @@ const docTemplate = `{
                 "ppid": {
                     "type": "integer"
                 },
-                "start_time": {
+                "started": {
                     "type": "integer"
                 },
                 "state": {
@@ -4283,12 +5303,6 @@ const docTemplate = `{
             "properties": {
                 "agent_id": {
                     "type": "integer"
-                },
-                "data": {
-                    "type": "array",
-                    "items": {
-                        "type": "integer"
-                    }
                 },
                 "dep_status": {
                     "type": "object",
@@ -4334,6 +5348,9 @@ const docTemplate = `{
                     "description": "Email is the email address for this user.\n\nrequired: true",
                     "type": "string"
                 },
+                "forge_id": {
+                    "type": "integer"
+                },
                 "id": {
                     "description": "the id for this user.\n\nrequired: true",
                     "type": "integer"
@@ -4353,7 +5370,9 @@ const docTemplate = `{
             "enum": [
                 "push",
                 "pull_request",
+                "pull_request_closed",
                 "tag",
+                "release",
                 "deployment",
                 "cron",
                 "manual"
@@ -4361,11 +5380,295 @@ const docTemplate = `{
             "x-enum-varnames": [
                 "EventPush",
                 "EventPull",
+                "EventPullClosed",
                 "EventTag",
+                "EventRelease",
                 "EventDeploy",
                 "EventCron",
                 "EventManual"
             ]
+        },
+        "metadata.Author": {
+            "type": "object",
+            "properties": {
+                "avatar": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "metadata.Commit": {
+            "type": "object",
+            "properties": {
+                "author": {
+                    "$ref": "#/definitions/metadata.Author"
+                },
+                "branch": {
+                    "type": "string"
+                },
+                "changed_files": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "is_prerelease": {
+                    "type": "boolean"
+                },
+                "labels": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "message": {
+                    "type": "string"
+                },
+                "ref": {
+                    "type": "string"
+                },
+                "refspec": {
+                    "type": "string"
+                },
+                "sha": {
+                    "type": "string"
+                }
+            }
+        },
+        "metadata.Forge": {
+            "type": "object",
+            "properties": {
+                "type": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                }
+            }
+        },
+        "metadata.Metadata": {
+            "type": "object",
+            "properties": {
+                "curr": {
+                    "$ref": "#/definitions/metadata.Pipeline"
+                },
+                "forge": {
+                    "$ref": "#/definitions/metadata.Forge"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "prev": {
+                    "$ref": "#/definitions/metadata.Pipeline"
+                },
+                "repo": {
+                    "$ref": "#/definitions/metadata.Repo"
+                },
+                "step": {
+                    "$ref": "#/definitions/metadata.Step"
+                },
+                "sys": {
+                    "$ref": "#/definitions/metadata.System"
+                },
+                "workflow": {
+                    "$ref": "#/definitions/metadata.Workflow"
+                }
+            }
+        },
+        "metadata.Pipeline": {
+            "type": "object",
+            "properties": {
+                "commit": {
+                    "$ref": "#/definitions/metadata.Commit"
+                },
+                "created": {
+                    "type": "integer"
+                },
+                "cron": {
+                    "type": "string"
+                },
+                "event": {
+                    "type": "string"
+                },
+                "finished": {
+                    "type": "integer"
+                },
+                "forge_url": {
+                    "type": "string"
+                },
+                "number": {
+                    "type": "integer"
+                },
+                "parent": {
+                    "type": "integer"
+                },
+                "started": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "target": {
+                    "type": "string"
+                },
+                "task": {
+                    "type": "string"
+                }
+            }
+        },
+        "metadata.Repo": {
+            "type": "object",
+            "properties": {
+                "clone_url": {
+                    "type": "string"
+                },
+                "clone_url_ssh": {
+                    "type": "string"
+                },
+                "default_branch": {
+                    "type": "string"
+                },
+                "forge_url": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "owner": {
+                    "type": "string"
+                },
+                "private": {
+                    "type": "boolean"
+                },
+                "remote_id": {
+                    "type": "string"
+                },
+                "scm": {
+                    "type": "string"
+                },
+                "trusted": {
+                    "$ref": "#/definitions/metadata.TrustedConfiguration"
+                }
+            }
+        },
+        "metadata.Step": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "number": {
+                    "type": "integer"
+                }
+            }
+        },
+        "metadata.System": {
+            "type": "object",
+            "properties": {
+                "arch": {
+                    "type": "string"
+                },
+                "host": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                },
+                "version": {
+                    "type": "string"
+                }
+            }
+        },
+        "metadata.TrustedConfiguration": {
+            "type": "object",
+            "properties": {
+                "network": {
+                    "type": "boolean"
+                },
+                "security": {
+                    "type": "boolean"
+                },
+                "volumes": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "metadata.Workflow": {
+            "type": "object",
+            "properties": {
+                "matrix": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "name": {
+                    "type": "string"
+                },
+                "number": {
+                    "type": "integer"
+                }
+            }
+        },
+        "model.ForgeType": {
+            "type": "string",
+            "enum": [
+                "github",
+                "gitlab",
+                "gitea",
+                "forgejo",
+                "bitbucket",
+                "bitbucket-dc",
+                "addon"
+            ],
+            "x-enum-varnames": [
+                "ForgeTypeGithub",
+                "ForgeTypeGitlab",
+                "ForgeTypeGitea",
+                "ForgeTypeForgejo",
+                "ForgeTypeBitbucket",
+                "ForgeTypeBitbucketDatacenter",
+                "ForgeTypeAddon"
+            ]
+        },
+        "model.TrustedConfiguration": {
+            "type": "object",
+            "properties": {
+                "network": {
+                    "type": "boolean"
+                },
+                "security": {
+                    "type": "boolean"
+                },
+                "volumes": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "model.TrustedConfigurationPatch": {
+            "type": "object",
+            "properties": {
+                "network": {
+                    "type": "boolean"
+                },
+                "security": {
+                    "type": "boolean"
+                },
+                "volumes": {
+                    "type": "boolean"
+                }
+            }
         },
         "model.Workflow": {
             "type": "object",
@@ -4379,9 +5682,6 @@ const docTemplate = `{
                         "$ref": "#/definitions/Step"
                     }
                 },
-                "end_time": {
-                    "type": "integer"
-                },
                 "environ": {
                     "type": "object",
                     "additionalProperties": {
@@ -4390,6 +5690,9 @@ const docTemplate = `{
                 },
                 "error": {
                     "type": "string"
+                },
+                "finished": {
+                    "type": "integer"
                 },
                 "id": {
                     "type": "integer"
@@ -4406,13 +5709,52 @@ const docTemplate = `{
                 "platform": {
                     "type": "string"
                 },
-                "start_time": {
+                "started": {
                     "type": "integer"
                 },
                 "state": {
                     "$ref": "#/definitions/StatusValue"
                 }
             }
+        },
+        "types.PipelineError": {
+            "type": "object",
+            "properties": {
+                "data": {},
+                "is_warning": {
+                    "type": "boolean"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "type": {
+                    "$ref": "#/definitions/types.PipelineErrorType"
+                }
+            }
+        },
+        "types.PipelineErrorType": {
+            "type": "string",
+            "enum": [
+                "linter",
+                "deprecation",
+                "compiler",
+                "generic",
+                "bad_habit"
+            ],
+            "x-enum-comments": {
+                "PipelineErrorTypeBadHabit": "some bad-habit error",
+                "PipelineErrorTypeCompiler": "some error with the config semantics",
+                "PipelineErrorTypeDeprecation": "using some deprecated feature",
+                "PipelineErrorTypeGeneric": "some generic error",
+                "PipelineErrorTypeLinter": "some error with the config syntax"
+            },
+            "x-enum-varnames": [
+                "PipelineErrorTypeLinter",
+                "PipelineErrorTypeDeprecation",
+                "PipelineErrorTypeCompiler",
+                "PipelineErrorTypeGeneric",
+                "PipelineErrorTypeBadHabit"
+            ]
         }
     }
 }`

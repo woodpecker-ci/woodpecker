@@ -39,13 +39,14 @@ import Icon from '~/components/atomic/Icon.vue';
 const props = defineProps<{
   title?: string;
   collapsable?: boolean;
+  collapsedByDefault?: boolean;
 }>();
 
 /**
  * _collapsed is used to store the internal state of the panel, but is
  * ignored if the panel is not collapsable.
  */
-const _collapsed = ref(false);
+const _collapsed = ref(props.collapsedByDefault || false);
 
 const collapsed = computed(() => props.collapsable && _collapsed.value);
 </script>

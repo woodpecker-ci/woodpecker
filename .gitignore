@@ -13,7 +13,7 @@
 *.so
 *.dylib
 vendor/
-__debug_bin
+__debug_bin*
 
 # Test binary, built with `go test -c`
 *.test
@@ -40,6 +40,8 @@ docker-compose.yml
 extras/
 /build/
 /dist/
+/data/
+datastore/migration/testfiles/
 
 docs/venv
 

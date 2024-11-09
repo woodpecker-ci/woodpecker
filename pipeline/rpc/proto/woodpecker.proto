@@ -15,7 +15,7 @@
 
 syntax = "proto3";
 
-option go_package = "github.com/woodpecker-ci/woodpecker/pipeline/rpc/proto";
+option go_package = "go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc/proto";
 package proto;
 
 // !IMPORTANT!
@@ -24,26 +24,33 @@ package proto;
 
 // Woodpecker Server Service
 service Woodpecker {
-  rpc Version       (Empty)                returns (VersionResponse) {}
-  rpc Next          (NextRequest)          returns (NextResponse) {}
-  rpc Init          (InitRequest)          returns (Empty) {}
-  rpc Wait          (WaitRequest)          returns (Empty) {}
-  rpc Done          (DoneRequest)          returns (Empty) {}
-  rpc Extend        (ExtendRequest)        returns (Empty) {}
-  rpc Update        (UpdateRequest)        returns (Empty) {}
-  rpc Log           (LogRequest)           returns (Empty) {}
-  rpc RegisterAgent (RegisterAgentRequest) returns (RegisterAgentResponse) {}
-  rpc ReportHealth  (ReportHealthRequest)  returns (Empty) {}
+  rpc Version         (Empty)                returns (VersionResponse) {}
+  rpc Next            (NextRequest)          returns (NextResponse) {}
+  rpc Init            (InitRequest)          returns (Empty) {}
+  rpc Wait            (WaitRequest)          returns (Empty) {}
+  rpc Done            (DoneRequest)          returns (Empty) {}
+  rpc Extend          (ExtendRequest)        returns (Empty) {}
+  rpc Update          (UpdateRequest)        returns (Empty) {}
+  rpc Log             (LogRequest)           returns (Empty) {}
+  rpc RegisterAgent   (RegisterAgentRequest) returns (RegisterAgentResponse) {}
+  rpc UnregisterAgent (Empty)                returns (Empty) {}
+  rpc ReportHealth    (ReportHealthRequest)  returns (Empty) {}
 }
 
 //
 // Basic Types
 //
 
-message State {
-  string name = 1;
-  bool   exited = 2;
-  int32  exit_code = 3;
+message StepState {
+  string step_uuid = 1;
+  int64  started = 2;
+  int64  finished = 3;
+  bool   exited = 4;
+  int32  exit_code = 5;
+  string error = 6;
+}
+
+message WorkflowState {
   int64  started = 4;
   int64  finished = 5;
   string error = 6;
@@ -54,7 +61,7 @@ message LogEntry {
   int64  time = 2;
   int32  line = 3;
   int32  type = 4; // 0 = stdout, 1 = stderr, 2 = exit-code, 3 = metadata, 4 = progress
-  string data = 5;
+  bytes  data = 5;
 }
 
 message Filter {
@@ -77,7 +84,7 @@ message NextRequest {
 
 message InitRequest {
   string id = 1;
-  State  state = 2;
+  WorkflowState state = 2;
 }
 
 message WaitRequest {
@@ -86,7 +93,7 @@ message WaitRequest {
 
 message DoneRequest {
   string id = 1;
-  State  state = 2;
+  WorkflowState state = 2;
 }
 
 message ExtendRequest {
@@ -95,11 +102,11 @@ message ExtendRequest {
 
 message UpdateRequest {
   string id = 1;
-  State  state = 2;
+  StepState state = 2;
 }
 
 message LogRequest {
-  LogEntry logEntry = 1;
+  repeated LogEntry logEntries = 1;
 }
 
 message Empty {
@@ -109,11 +116,16 @@ message ReportHealthRequest {
   string status = 1;
 }
 
-message RegisterAgentRequest {
+message AgentInfo {
   string platform = 1;
   int32  capacity = 2;
   string backend  = 3;
   string version  = 4;
+  map<string, string> customLabels = 5;
+}
+
+message RegisterAgentRequest {
+  AgentInfo info = 1;
 }
 
 //
@@ -133,7 +145,7 @@ message RegisterAgentResponse {
   int64 agent_id = 1;
 }
 
-// Woodpecker auth service is a simple service to authenticate agents and aquire a token
+// Woodpecker auth service is a simple service to authenticate agents and acquire a token
 
 service WoodpeckerAuth {
   rpc Auth          (AuthRequest)          returns (AuthResponse) {}

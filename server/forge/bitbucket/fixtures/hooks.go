@@ -456,10 +456,587 @@ const HookPull = `
 }
 `
 
-const HookMerged = `
+const HookPullRequestMerged = `
 {
+  "repository": {
+    "type": "repository",
+    "full_name": "anbraten/test-2",
+    "links": {
+      "self": {
+        "href": "https://api.bitbucket.org/2.0/repositories/anbraten/test-2"
+      },
+      "html": {
+        "href": "https://bitbucket.org/anbraten/test-2"
+      },
+      "avatar": {
+        "href": "https://bytebucket.org/ravatar/%7B26554729-595f-47d1-aedd-302625cb4a97%7D?ts=default"
+      }
+    },
+    "name": "test-2",
+    "scm": "git",
+    "website": null,
+    "owner": {
+      "display_name": "Anbraten",
+      "links": {
+        "self": {
+          "href": "https://api.bitbucket.org/2.0/users/%7Bb1b7beef-77ca-452d-b059-fa092504ebd7%7D"
+        },
+        "avatar": {
+          "href": "https://avatar-management--avatars.us-west-2.prod.public.atl-paas.net/70121:3046ad5f-946f-48fa-bcb4-a399eef48f0e/784add1f-95cc-42a5-a562-38a0e12de4fa/128"
+        },
+        "html": {
+          "href": "https://bitbucket.org/%7Bb1b7beef-77ca-452d-b059-fa092504ebd7%7D/"
+        }
+      },
+      "type": "user",
+      "uuid": "{b1b7beef-77ca-452d-b059-fa092504ebd7}",
+      "account_id": "70121:3046ad5f-946f-48fa-bcb4-a399eef48f0e",
+      "nickname": "Anbraten"
+    },
+    "workspace": {
+      "type": "workspace",
+      "uuid": "{b1b7beef-77ca-452d-b059-fa092504ebd7}",
+      "name": "Anbraten",
+      "slug": "anbraten",
+      "links": {
+        "avatar": {
+          "href": "https://bitbucket.org/workspaces/anbraten/avatar/?ts=1651865281"
+        },
+        "html": {
+          "href": "https://bitbucket.org/anbraten/"
+        },
+        "self": {
+          "href": "https://api.bitbucket.org/2.0/workspaces/anbraten"
+        }
+      }
+    },
+    "is_private": true,
+    "project": {
+      "type": "project",
+      "key": "TEST",
+      "uuid": "{3fa6429f-95e1-4c5a-875c-1753abcd8ace}",
+      "name": "test",
+      "links": {
+        "self": {
+          "href": "https://api.bitbucket.org/2.0/workspaces/anbraten/projects/TEST"
+        },
+        "html": {
+          "href": "https://bitbucket.org/anbraten/workspace/projects/TEST"
+        },
+        "avatar": {
+          "href": "https://bitbucket.org/account/user/anbraten/projects/TEST/avatar/32?ts=1690725373"
+        }
+      }
+    },
+    "uuid": "{26554729-595f-47d1-aedd-302625cb4a97}",
+    "parent": null
+  },
+  "actor": {
+    "display_name": "Anbraten",
+    "links": {
+      "self": {
+        "href": "https://api.bitbucket.org/2.0/users/%7Bb1b7beef-77ca-452d-b059-fa092504ebd7%7D"
+      },
+      "avatar": {
+        "href": "https://avatar-management--avatars.us-west-2.prod.public.atl-paas.net/70121:3046ad5f-946f-48fa-bcb4-a399eef48f0e/784add1f-95cc-42a5-a562-38a0e12de4fa/128"
+      },
+      "html": {
+        "href": "https://bitbucket.org/%7Bb1b7beef-77ca-452d-b059-fa092504ebd7%7D/"
+      }
+    },
+    "type": "user",
+    "uuid": "{b1b7beef-77ca-452d-b059-fa092504ebd7}",
+    "account_id": "70121:3046ad5f-946f-48fa-bcb4-a399eef48f0e",
+    "nickname": "Anbraten"
+  },
   "pullrequest": {
-    "state": "MERGED"
+    "comment_count": 0,
+    "task_count": 0,
+    "type": "pullrequest",
+    "id": 1,
+    "title": "README.md created online with Bitbucket",
+    "description": "README.md created online with Bitbucket",
+    "rendered": {
+      "title": {
+        "type": "rendered",
+        "raw": "README.md created online with Bitbucket",
+        "markup": "markdown",
+        "html": "<p>README.md created online with Bitbucket</p>"
+      },
+      "description": {
+        "type": "rendered",
+        "raw": "README.md created online with Bitbucket",
+        "markup": "markdown",
+        "html": "<p>README.md created online with Bitbucket</p>"
+      }
+    },
+    "state": "MERGED",
+    "merge_commit": {
+      "type": "commit",
+      "hash": "006704dbeab2",
+      "links": {
+        "self": {
+          "href": "https://api.bitbucket.org/2.0/repositories/anbraten/test-2/commit/006704dbeab2"
+        },
+        "html": {
+          "href": "https://bitbucket.org/anbraten/test-2/commits/006704dbeab2"
+        }
+      }
+    },
+    "close_source_branch": true,
+    "closed_by": {
+      "display_name": "Anbraten",
+      "links": {
+        "self": {
+          "href": "https://api.bitbucket.org/2.0/users/%7Bb1b7beef-77ca-452d-b059-fa092504ebd7%7D"
+        },
+        "avatar": {
+          "href": "https://avatar-management--avatars.us-west-2.prod.public.atl-paas.net/70121:3046ad5f-946f-48fa-bcb4-a399eef48f0e/784add1f-95cc-42a5-a562-38a0e12de4fa/128"
+        },
+        "html": {
+          "href": "https://bitbucket.org/%7Bb1b7beef-77ca-452d-b059-fa092504ebd7%7D/"
+        }
+      },
+      "type": "user",
+      "uuid": "{b1b7beef-77ca-452d-b059-fa092504ebd7}",
+      "account_id": "70121:3046ad5f-946f-48fa-bcb4-a399eef48f0e",
+      "nickname": "Anbraten"
+    },
+    "author": {
+      "display_name": "Anbraten",
+      "links": {
+        "self": {
+          "href": "https://api.bitbucket.org/2.0/users/%7Bb1b7beef-77ca-452d-b059-fa092504ebd7%7D"
+        },
+        "avatar": {
+          "href": "https://avatar-management--avatars.us-west-2.prod.public.atl-paas.net/70121:3046ad5f-946f-48fa-bcb4-a399eef48f0e/784add1f-95cc-42a5-a562-38a0e12de4fa/128"
+        },
+        "html": {
+          "href": "https://bitbucket.org/%7Bb1b7beef-77ca-452d-b059-fa092504ebd7%7D/"
+        }
+      },
+      "type": "user",
+      "uuid": "{b1b7beef-77ca-452d-b059-fa092504ebd7}",
+      "account_id": "70121:3046ad5f-946f-48fa-bcb4-a399eef48f0e",
+      "nickname": "Anbraten"
+    },
+    "reason": "",
+    "created_on": "2023-12-05T18:28:16.861881+00:00",
+    "updated_on": "2023-12-05T18:29:44.785393+00:00",
+    "destination": {
+      "branch": {
+        "name": "main"
+      },
+      "commit": {
+        "type": "commit",
+        "hash": "6c5f0bc9b2aa",
+        "links": {
+          "self": {
+            "href": "https://api.bitbucket.org/2.0/repositories/anbraten/test-2/commit/6c5f0bc9b2aa"
+          },
+          "html": {
+            "href": "https://bitbucket.org/anbraten/test-2/commits/6c5f0bc9b2aa"
+          }
+        }
+      },
+      "repository": {
+        "type": "repository",
+        "full_name": "anbraten/test-2",
+        "links": {
+          "self": {
+            "href": "https://api.bitbucket.org/2.0/repositories/anbraten/test-2"
+          },
+          "html": {
+            "href": "https://bitbucket.org/anbraten/test-2"
+          },
+          "avatar": {
+            "href": "https://bytebucket.org/ravatar/%7B26554729-595f-47d1-aedd-302625cb4a97%7D?ts=default"
+          }
+        },
+        "name": "test-2",
+        "uuid": "{26554729-595f-47d1-aedd-302625cb4a97}"
+      }
+    },
+    "source": {
+      "branch": {
+        "name": "patch-2"
+      },
+      "commit": {
+        "type": "commit",
+        "hash": "668218c13e04",
+        "links": {
+          "self": {
+            "href": "https://api.bitbucket.org/2.0/repositories/anbraten/test-2/commit/668218c13e04"
+          },
+          "html": {
+            "href": "https://bitbucket.org/anbraten/test-2/commits/668218c13e04"
+          }
+        }
+      },
+      "repository": {
+        "type": "repository",
+        "full_name": "anbraten/test-2",
+        "links": {
+          "self": {
+            "href": "https://api.bitbucket.org/2.0/repositories/anbraten/test-2"
+          },
+          "html": {
+            "href": "https://bitbucket.org/anbraten/test-2"
+          },
+          "avatar": {
+            "href": "https://bytebucket.org/ravatar/%7B26554729-595f-47d1-aedd-302625cb4a97%7D?ts=default"
+          }
+        },
+        "name": "test-2",
+        "uuid": "{26554729-595f-47d1-aedd-302625cb4a97}"
+      }
+    },
+    "reviewers": [],
+    "participants": [
+      {
+        "type": "participant",
+        "user": {
+          "display_name": "Anbraten",
+          "links": {
+            "self": {
+              "href": "https://api.bitbucket.org/2.0/users/%7Bb1b7beef-77ca-452d-b059-fa092504ebd7%7D"
+            },
+            "avatar": {
+              "href": "https://avatar-management--avatars.us-west-2.prod.public.atl-paas.net/70121:3046ad5f-946f-48fa-bcb4-a399eef48f0e/784add1f-95cc-42a5-a562-38a0e12de4fa/128"
+            },
+            "html": {
+              "href": "https://bitbucket.org/%7Bb1b7beef-77ca-452d-b059-fa092504ebd7%7D/"
+            }
+          },
+          "type": "user",
+          "uuid": "{b1b7beef-77ca-452d-b059-fa092504ebd7}",
+          "account_id": "70121:3046ad5f-946f-48fa-bcb4-a399eef48f0e",
+          "nickname": "Anbraten"
+        },
+        "role": "PARTICIPANT",
+        "approved": true,
+        "state": "approved",
+        "participated_on": "2023-12-05T18:29:25.611876+00:00"
+      }
+    ],
+    "links": {
+      "self": {
+        "href": "https://api.bitbucket.org/2.0/repositories/anbraten/test-2/pullrequests/1"
+      },
+      "html": {
+        "href": "https://bitbucket.org/anbraten/test-2/pull-requests/1"
+      },
+      "commits": {
+        "href": "https://api.bitbucket.org/2.0/repositories/anbraten/test-2/pullrequests/1/commits"
+      },
+      "approve": {
+        "href": "https://api.bitbucket.org/2.0/repositories/anbraten/test-2/pullrequests/1/approve"
+      },
+      "request-changes": {
+        "href": "https://api.bitbucket.org/2.0/repositories/anbraten/test-2/pullrequests/1/request-changes"
+      },
+      "diff": {
+        "href": "https://api.bitbucket.org/2.0/repositories/anbraten/test-2/diff/anbraten/test-2:668218c13e04%0D6c5f0bc9b2aa?from_pullrequest_id=1&topic=true"
+      },
+      "diffstat": {
+        "href": "https://api.bitbucket.org/2.0/repositories/anbraten/test-2/diffstat/anbraten/test-2:668218c13e04%0D6c5f0bc9b2aa?from_pullrequest_id=1&topic=true"
+      },
+      "comments": {
+        "href": "https://api.bitbucket.org/2.0/repositories/anbraten/test-2/pullrequests/1/comments"
+      },
+      "activity": {
+        "href": "https://api.bitbucket.org/2.0/repositories/anbraten/test-2/pullrequests/1/activity"
+      },
+      "merge": {
+        "href": "https://api.bitbucket.org/2.0/repositories/anbraten/test-2/pullrequests/1/merge"
+      },
+      "decline": {
+        "href": "https://api.bitbucket.org/2.0/repositories/anbraten/test-2/pullrequests/1/decline"
+      },
+      "statuses": {
+        "href": "https://api.bitbucket.org/2.0/repositories/anbraten/test-2/pullrequests/1/statuses"
+      }
+    },
+    "summary": {
+      "type": "rendered",
+      "raw": "README.md created online with Bitbucket",
+      "markup": "markdown",
+      "html": "<p>README.md created online with Bitbucket</p>"
+    }
+  }
+}
+`
+
+const HookPullRequestDeclined = `
+{
+  "repository": {
+    "type": "repository",
+    "full_name": "anbraten/test-2",
+    "links": {
+      "self": {
+        "href": "https://api.bitbucket.org/2.0/repositories/anbraten/test-2"
+      },
+      "html": {
+        "href": "https://bitbucket.org/anbraten/test-2"
+      },
+      "avatar": {
+        "href": "https://bytebucket.org/ravatar/%7B26554729-595f-47d1-aedd-302625cb4a97%7D?ts=default"
+      }
+    },
+    "name": "test-2",
+    "scm": "git",
+    "website": null,
+    "owner": {
+      "display_name": "Anbraten",
+      "links": {
+        "self": {
+          "href": "https://api.bitbucket.org/2.0/users/%7Bb1b7beef-77ca-452d-b059-fa092504ebd7%7D"
+        },
+        "avatar": {
+          "href": "https://avatar-management--avatars.us-west-2.prod.public.atl-paas.net/70121:3046ad5f-946f-48fa-bcb4-a399eef48f0e/784add1f-95cc-42a5-a562-38a0e12de4fa/128"
+        },
+        "html": {
+          "href": "https://bitbucket.org/%7Bb1b7beef-77ca-452d-b059-fa092504ebd7%7D/"
+        }
+      },
+      "type": "user",
+      "uuid": "{b1b7beef-77ca-452d-b059-fa092504ebd7}",
+      "account_id": "70121:3046ad5f-946f-48fa-bcb4-a399eef48f0e",
+      "nickname": "Anbraten"
+    },
+    "workspace": {
+      "type": "workspace",
+      "uuid": "{b1b7beef-77ca-452d-b059-fa092504ebd7}",
+      "name": "Anbraten",
+      "slug": "anbraten",
+      "links": {
+        "avatar": {
+          "href": "https://bitbucket.org/workspaces/anbraten/avatar/?ts=1651865281"
+        },
+        "html": {
+          "href": "https://bitbucket.org/anbraten/"
+        },
+        "self": {
+          "href": "https://api.bitbucket.org/2.0/workspaces/anbraten"
+        }
+      }
+    },
+    "is_private": true,
+    "project": {
+      "type": "project",
+      "key": "TEST",
+      "uuid": "{3fa6429f-95e1-4c5a-875c-1753abcd8ace}",
+      "name": "test",
+      "links": {
+        "self": {
+          "href": "https://api.bitbucket.org/2.0/workspaces/anbraten/projects/TEST"
+        },
+        "html": {
+          "href": "https://bitbucket.org/anbraten/workspace/projects/TEST"
+        },
+        "avatar": {
+          "href": "https://bitbucket.org/account/user/anbraten/projects/TEST/avatar/32?ts=1690725373"
+        }
+      }
+    },
+    "uuid": "{26554729-595f-47d1-aedd-302625cb4a97}",
+    "parent": null
+  },
+  "actor": {
+    "display_name": "Anbraten",
+    "links": {
+      "self": {
+        "href": "https://api.bitbucket.org/2.0/users/%7Bb1b7beef-77ca-452d-b059-fa092504ebd7%7D"
+      },
+      "avatar": {
+        "href": "https://avatar-management--avatars.us-west-2.prod.public.atl-paas.net/70121:3046ad5f-946f-48fa-bcb4-a399eef48f0e/784add1f-95cc-42a5-a562-38a0e12de4fa/128"
+      },
+      "html": {
+        "href": "https://bitbucket.org/%7Bb1b7beef-77ca-452d-b059-fa092504ebd7%7D/"
+      }
+    },
+    "type": "user",
+    "uuid": "{b1b7beef-77ca-452d-b059-fa092504ebd7}",
+    "account_id": "70121:3046ad5f-946f-48fa-bcb4-a399eef48f0e",
+    "nickname": "Anbraten"
+  },
+  "pullrequest": {
+    "comment_count": 0,
+    "task_count": 0,
+    "type": "pullrequest",
+    "id": 2,
+    "title": "CHANGELOG.md created online with Bitbucket",
+    "description": "CHANGELOG.md created online with Bitbucket",
+    "rendered": {
+      "title": {
+        "type": "rendered",
+        "raw": "CHANGELOG.md created online with Bitbucket",
+        "markup": "markdown",
+        "html": "<p>CHANGELOG.md created online with Bitbucket</p>"
+      },
+      "description": {
+        "type": "rendered",
+        "raw": "CHANGELOG.md created online with Bitbucket",
+        "markup": "markdown",
+        "html": "<p>CHANGELOG.md created online with Bitbucket</p>"
+      }
+    },
+    "state": "DECLINED",
+    "merge_commit": null,
+    "close_source_branch": false,
+    "closed_by": {
+      "display_name": "Anbraten",
+      "links": {
+        "self": {
+          "href": "https://api.bitbucket.org/2.0/users/%7Bb1b7beef-77ca-452d-b059-fa092504ebd7%7D"
+        },
+        "avatar": {
+          "href": "https://avatar-management--avatars.us-west-2.prod.public.atl-paas.net/70121:3046ad5f-946f-48fa-bcb4-a399eef48f0e/784add1f-95cc-42a5-a562-38a0e12de4fa/128"
+        },
+        "html": {
+          "href": "https://bitbucket.org/%7Bb1b7beef-77ca-452d-b059-fa092504ebd7%7D/"
+        }
+      },
+      "type": "user",
+      "uuid": "{b1b7beef-77ca-452d-b059-fa092504ebd7}",
+      "account_id": "70121:3046ad5f-946f-48fa-bcb4-a399eef48f0e",
+      "nickname": "Anbraten"
+    },
+    "author": {
+      "display_name": "Anbraten",
+      "links": {
+        "self": {
+          "href": "https://api.bitbucket.org/2.0/users/%7Bb1b7beef-77ca-452d-b059-fa092504ebd7%7D"
+        },
+        "avatar": {
+          "href": "https://avatar-management--avatars.us-west-2.prod.public.atl-paas.net/70121:3046ad5f-946f-48fa-bcb4-a399eef48f0e/784add1f-95cc-42a5-a562-38a0e12de4fa/128"
+        },
+        "html": {
+          "href": "https://bitbucket.org/%7Bb1b7beef-77ca-452d-b059-fa092504ebd7%7D/"
+        }
+      },
+      "type": "user",
+      "uuid": "{b1b7beef-77ca-452d-b059-fa092504ebd7}",
+      "account_id": "70121:3046ad5f-946f-48fa-bcb4-a399eef48f0e",
+      "nickname": "Anbraten"
+    },
+    "reason": "",
+    "created_on": "2023-12-05T18:36:27.667680+00:00",
+    "updated_on": "2023-12-05T18:36:57.260672+00:00",
+    "destination": {
+      "branch": {
+        "name": "main"
+      },
+      "commit": {
+        "type": "commit",
+        "hash": "006704dbeab2",
+        "links": {
+          "self": {
+            "href": "https://api.bitbucket.org/2.0/repositories/anbraten/test-2/commit/006704dbeab2"
+          },
+          "html": {
+            "href": "https://bitbucket.org/anbraten/test-2/commits/006704dbeab2"
+          }
+        }
+      },
+      "repository": {
+        "type": "repository",
+        "full_name": "anbraten/test-2",
+        "links": {
+          "self": {
+            "href": "https://api.bitbucket.org/2.0/repositories/anbraten/test-2"
+          },
+          "html": {
+            "href": "https://bitbucket.org/anbraten/test-2"
+          },
+          "avatar": {
+            "href": "https://bytebucket.org/ravatar/%7B26554729-595f-47d1-aedd-302625cb4a97%7D?ts=default"
+          }
+        },
+        "name": "test-2",
+        "uuid": "{26554729-595f-47d1-aedd-302625cb4a97}"
+      }
+    },
+    "source": {
+      "branch": {
+        "name": "patch-2"
+      },
+      "commit": {
+        "type": "commit",
+        "hash": "f90e18fc9d45",
+        "links": {
+          "self": {
+            "href": "https://api.bitbucket.org/2.0/repositories/anbraten/test-2/commit/f90e18fc9d45"
+          },
+          "html": {
+            "href": "https://bitbucket.org/anbraten/test-2/commits/f90e18fc9d45"
+          }
+        }
+      },
+      "repository": {
+        "type": "repository",
+        "full_name": "anbraten/test-2",
+        "links": {
+          "self": {
+            "href": "https://api.bitbucket.org/2.0/repositories/anbraten/test-2"
+          },
+          "html": {
+            "href": "https://bitbucket.org/anbraten/test-2"
+          },
+          "avatar": {
+            "href": "https://bytebucket.org/ravatar/%7B26554729-595f-47d1-aedd-302625cb4a97%7D?ts=default"
+          }
+        },
+        "name": "test-2",
+        "uuid": "{26554729-595f-47d1-aedd-302625cb4a97}"
+      }
+    },
+    "reviewers": [],
+    "participants": [],
+    "links": {
+      "self": {
+        "href": "https://api.bitbucket.org/2.0/repositories/anbraten/test-2/pullrequests/2"
+      },
+      "html": {
+        "href": "https://bitbucket.org/anbraten/test-2/pull-requests/2"
+      },
+      "commits": {
+        "href": "https://api.bitbucket.org/2.0/repositories/anbraten/test-2/pullrequests/2/commits"
+      },
+      "approve": {
+        "href": "https://api.bitbucket.org/2.0/repositories/anbraten/test-2/pullrequests/2/approve"
+      },
+      "request-changes": {
+        "href": "https://api.bitbucket.org/2.0/repositories/anbraten/test-2/pullrequests/2/request-changes"
+      },
+      "diff": {
+        "href": "https://api.bitbucket.org/2.0/repositories/anbraten/test-2/diff/anbraten/test-2:f90e18fc9d45%0D006704dbeab2?from_pullrequest_id=2&topic=true"
+      },
+      "diffstat": {
+        "href": "https://api.bitbucket.org/2.0/repositories/anbraten/test-2/diffstat/anbraten/test-2:f90e18fc9d45%0D006704dbeab2?from_pullrequest_id=2&topic=true"
+      },
+      "comments": {
+        "href": "https://api.bitbucket.org/2.0/repositories/anbraten/test-2/pullrequests/2/comments"
+      },
+      "activity": {
+        "href": "https://api.bitbucket.org/2.0/repositories/anbraten/test-2/pullrequests/2/activity"
+      },
+      "merge": {
+        "href": "https://api.bitbucket.org/2.0/repositories/anbraten/test-2/pullrequests/2/merge"
+      },
+      "decline": {
+        "href": "https://api.bitbucket.org/2.0/repositories/anbraten/test-2/pullrequests/2/decline"
+      },
+      "statuses": {
+        "href": "https://api.bitbucket.org/2.0/repositories/anbraten/test-2/pullrequests/2/statuses"
+      }
+    },
+    "summary": {
+      "type": "rendered",
+      "raw": "CHANGELOG.md created online with Bitbucket",
+      "markup": "markdown",
+      "html": "<p>CHANGELOG.md created online with Bitbucket</p>"
+    }
   }
 }
 `

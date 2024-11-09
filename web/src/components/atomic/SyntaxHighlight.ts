@@ -1,7 +1,7 @@
 import '~/style/prism.css';
 
 import Prism from 'prismjs';
-import { computed, defineComponent, h, toRef, VNode } from 'vue';
+import { computed, defineComponent, h, toRef, type VNode } from 'vue';
 
 declare type Data = Record<string, unknown>;
 

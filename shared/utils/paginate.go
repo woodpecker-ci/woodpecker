@@ -14,7 +14,7 @@
 
 package utils
 
-// Paginate iterates over a func call until it does not return new items and return it as list
+// Paginate iterates over a func call until it does not return new items and return it as list.
 func Paginate[T any](get func(page int) ([]T, error)) ([]T, error) {
 	items := make([]T, 0, 10)
 	page := 1

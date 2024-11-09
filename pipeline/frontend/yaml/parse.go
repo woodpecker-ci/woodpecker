@@ -17,7 +17,7 @@ package yaml
 import (
 	"codeberg.org/6543/xyaml"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/types"
 )
 
 // ParseBytes parses the configuration from bytes b.
@@ -27,7 +27,6 @@ func ParseBytes(b []byte) (*types.Workflow, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	return out, nil
 }
 

@@ -10,24 +10,24 @@
     "style": "mkdir -p dist/theme/ && cp src/theme/style.css dist/theme/style.css"
   },
   "devDependencies": {
-    "@docusaurus/module-type-aliases": "^2.4.1",
-    "@docusaurus/theme-classic": "^2.4.1",
-    "@docusaurus/types": "^2.4.1",
-    "@tsconfig/docusaurus": "^2.0.0",
-    "@types/marked": "^5.0.0",
-    "@types/node": "^18.17.1",
-    "axios": "^1.0.0",
-    "concurrently": "^8.0.0",
-    "marked": "^9.0.0",
-    "tslib": "^2.6.1",
-    "typescript": "^5.0.0"
+    "@docusaurus/module-type-aliases": "^3.3.2",
+    "@docusaurus/theme-classic": "^3.3.2",
+    "@docusaurus/types": "^3.3.2",
+    "@tsconfig/docusaurus": "^2.0.3",
+    "@types/node": "^20.12.13",
+    "axios": "^1.7.2",
+    "concurrently": "^9.0.0",
+    "isomorphic-dompurify": "^2.11.0",
+    "marked": "^14.0.0",
+    "tslib": "^2.6.2",
+    "typescript": "^5.4.5"
   },
   "peerDependencies": {
     "react": "^17.0.2 || ^18.0.0",
     "react-dom": "^17.0.2 || ^18.0.0"
   },
   "dependencies": {
-    "fuse.js": "^6.6.2",
-    "yaml": "^2.3.1"
+    "fuse.js": "^7.0.0",
+    "yaml": "^2.4.2"
   }
 }

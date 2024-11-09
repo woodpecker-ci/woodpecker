@@ -21,6 +21,26 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestPvcName(t *testing.T) {
+	name, err := volumeName("woodpecker_cache:/woodpecker/src/cache")
+	assert.NoError(t, err)
+	assert.Equal(t, "woodpecker-cache", name)
+
+	_, err = volumeName("woodpecker\\cache")
+	assert.ErrorIs(t, err, ErrDNSPatternInvalid)
+
+	_, err = volumeName("-woodpecker.cache:/woodpecker/src/cache")
+	assert.ErrorIs(t, err, ErrDNSPatternInvalid)
+}
+
+func TestPvcMount(t *testing.T) {
+	mount := volumeMountPath("woodpecker-cache:/woodpecker/src/cache")
+	assert.Equal(t, "/woodpecker/src/cache", mount)
+
+	mount = volumeMountPath("/woodpecker/src/cache")
+	assert.Equal(t, "/woodpecker/src/cache", mount)
+}
+
 func TestPersistentVolumeClaim(t *testing.T) {
 	expectedRwx := `
 	{
@@ -64,20 +84,35 @@ func TestPersistentVolumeClaim(t *testing.T) {
 	  "status": {}
 	}`
 
-	pvc, err := PersistentVolumeClaim("someNamespace", "somename", "local-storage", "1Gi", true)
-	assert.Nil(t, err)
+	pvc, err := mkPersistentVolumeClaim(&config{
+		Namespace:    "someNamespace",
+		StorageClass: "local-storage",
+		VolumeSize:   "1Gi",
+		StorageRwx:   true,
+	}, "somename")
+	assert.NoError(t, err)
 
 	j, err := json.Marshal(pvc)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.JSONEq(t, expectedRwx, string(j))
 
-	pvc, err = PersistentVolumeClaim("someNamespace", "somename", "local-storage", "1Gi", false)
-	assert.Nil(t, err)
+	pvc, err = mkPersistentVolumeClaim(&config{
+		Namespace:    "someNamespace",
+		StorageClass: "local-storage",
+		VolumeSize:   "1Gi",
+		StorageRwx:   false,
+	}, "somename")
+	assert.NoError(t, err)
 
 	j, err = json.Marshal(pvc)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	assert.JSONEq(t, expectedRwo, string(j))
 
-	_, err = PersistentVolumeClaim("someNamespace", "some0INVALID3name", "local-storage", "1Gi", false)
-	assert.NotNil(t, err)
+	_, err = mkPersistentVolumeClaim(&config{
+		Namespace:    "someNamespace",
+		StorageClass: "local-storage",
+		VolumeSize:   "1Gi",
+		StorageRwx:   false,
+	}, "some0..INVALID3name")
+	assert.Error(t, err)
 }

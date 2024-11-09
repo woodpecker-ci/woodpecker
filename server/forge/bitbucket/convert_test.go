@@ -22,8 +22,8 @@ import (
 	"github.com/franela/goblin"
 	"golang.org/x/oauth2"
 
-	"github.com/woodpecker-ci/woodpecker/server/forge/bitbucket/internal"
-	"github.com/woodpecker-ci/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge/bitbucket/internal"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
 func Test_helper(t *testing.T) {
@@ -65,7 +65,7 @@ func Test_helper(t *testing.T) {
 			g.Assert(string(to.SCMKind)).Equal(from.Scm)
 			g.Assert(to.IsSCMPrivate).Equal(from.IsPrivate)
 			g.Assert(to.Clone).Equal(from.Links.HTML.Href)
-			g.Assert(to.Link).Equal(from.Links.HTML.Href)
+			g.Assert(to.ForgeURL).Equal(from.Links.HTML.Href)
 			g.Assert(to.Perm.Push).IsTrue()
 			g.Assert(to.Perm.Admin).IsFalse()
 		})
@@ -129,21 +129,22 @@ func Test_helper(t *testing.T) {
 			hook.PullRequest.Dest.Repo.Links.HTML.Href = "https://bitbucket.org/foo/bar"
 			hook.PullRequest.Source.Branch.Name = "change"
 			hook.PullRequest.Source.Repo.FullName = "baz/bar"
+			hook.PullRequest.Source.Commit.Hash = "c8411d7"
 			hook.PullRequest.Links.HTML.Href = "https://bitbucket.org/foo/bar/pulls/5"
-			hook.PullRequest.Desc = "updated README"
+			hook.PullRequest.Title = "updated README"
 			hook.PullRequest.Updated = time.Now()
+			hook.PullRequest.ID = 1
 
 			pipeline := convertPullHook(hook)
 			g.Assert(pipeline.Event).Equal(model.EventPull)
 			g.Assert(pipeline.Author).Equal(hook.Actor.Login)
 			g.Assert(pipeline.Avatar).Equal(hook.Actor.Links.Avatar.Href)
-			g.Assert(pipeline.Commit).Equal(hook.PullRequest.Dest.Commit.Hash)
-			g.Assert(pipeline.Branch).Equal(hook.PullRequest.Dest.Branch.Name)
-			g.Assert(pipeline.Link).Equal(hook.PullRequest.Links.HTML.Href)
-			g.Assert(pipeline.Ref).Equal("refs/heads/main")
+			g.Assert(pipeline.Commit).Equal(hook.PullRequest.Source.Commit.Hash)
+			g.Assert(pipeline.Branch).Equal(hook.PullRequest.Source.Branch.Name)
+			g.Assert(pipeline.ForgeURL).Equal(hook.PullRequest.Links.HTML.Href)
+			g.Assert(pipeline.Ref).Equal("refs/pull-requests/1/from")
 			g.Assert(pipeline.Refspec).Equal("change:main")
-			g.Assert(pipeline.CloneURL).Equal("https://bitbucket.org/baz/bar")
-			g.Assert(pipeline.Message).Equal(hook.PullRequest.Desc)
+			g.Assert(pipeline.Message).Equal(hook.PullRequest.Title)
 			g.Assert(pipeline.Timestamp).Equal(hook.PullRequest.Updated.Unix())
 		})
 
@@ -167,7 +168,7 @@ func Test_helper(t *testing.T) {
 			g.Assert(pipeline.Avatar).Equal(hook.Actor.Links.Avatar.Href)
 			g.Assert(pipeline.Commit).Equal(change.New.Target.Hash)
 			g.Assert(pipeline.Branch).Equal(change.New.Name)
-			g.Assert(pipeline.Link).Equal(change.New.Target.Links.HTML.Href)
+			g.Assert(pipeline.ForgeURL).Equal(change.New.Target.Links.HTML.Href)
 			g.Assert(pipeline.Ref).Equal("refs/heads/main")
 			g.Assert(pipeline.Message).Equal(change.New.Target.Message)
 			g.Assert(pipeline.Timestamp).Equal(change.New.Target.Date.Unix())

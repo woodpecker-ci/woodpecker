@@ -1,0 +1,67 @@
+when:
+  - event: pull_request
+  - event: push
+    branch:
+      - release/*
+      - renovate/*
+
+variables:
+  - &node_image 'docker.io/node:23-alpine'
+  - &when
+    path:
+      # related config files
+      - '.woodpecker/web.yaml'
+      # web source code
+      - 'web/**'
+      # api source code
+      - 'server/api/**'
+
+steps:
+  install-dependencies:
+    image: *node_image
+    directory: web/
+    commands:
+      - corepack enable
+      - pnpm install --frozen-lockfile
+    when: *when
+
+  lint:
+    depends_on:
+      - install-dependencies
+    image: *node_image
+    directory: web/
+    commands:
+      - corepack enable
+      - pnpm lint
+    when: *when
+
+  format-check:
+    depends_on:
+      - install-dependencies
+    image: *node_image
+    directory: web/
+    commands:
+      - corepack enable
+      - pnpm format:check
+    when: *when
+
+  typecheck:
+    depends_on:
+      - install-dependencies
+    image: *node_image
+    directory: web/
+    commands:
+      - corepack enable
+      - pnpm typecheck
+    when: *when
+
+  test:
+    depends_on:
+      - install-dependencies
+      - format-check # wait for it else test artifacts are falsely detected as wrong
+    image: *node_image
+    directory: web/
+    commands:
+      - corepack enable
+      - pnpm test
+    when: *when

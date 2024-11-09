@@ -19,7 +19,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/woodpecker-ci/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
 func TestTaskList(t *testing.T) {
@@ -34,25 +34,15 @@ func TestTaskList(t *testing.T) {
 	}))
 
 	list, err := store.TaskList()
-	if err != nil {
-		t.Error(err)
-		return
-	}
+	assert.NoError(t, err)
 	assert.Len(t, list, 1, "Expected one task in list")
 	assert.Equal(t, "some_random_id", list[0].ID)
 	assert.Equal(t, "foo", string(list[0].Data))
 	assert.EqualValues(t, map[string]model.StatusValue{"test": "dep"}, list[0].DepStatus)
 
-	err = store.TaskDelete("some_random_id")
-	if err != nil {
-		t.Error(err)
-		return
-	}
+	assert.NoError(t, store.TaskDelete("some_random_id"))
 
 	list, err = store.TaskList()
-	if err != nil {
-		t.Error(err)
-		return
-	}
+	assert.NoError(t, err)
 	assert.Len(t, list, 0, "Want empty task list after delete")
 }

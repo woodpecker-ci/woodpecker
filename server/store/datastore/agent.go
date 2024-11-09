@@ -17,14 +17,13 @@ package datastore
 import (
 	"errors"
 
-	"github.com/woodpecker-ci/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
-var ErrNoTokenProvided = errors.New("Please provide a token")
+var ErrNoTokenProvided = errors.New("please provide a token")
 
-func (s storage) AgentList(p *model.ListOptions) ([]*model.Agent, error) {
-	var agents []*model.Agent
-	return agents, s.paginate(p).Find(&agents)
+func (s storage) AgentList(p *model.ListOptions) (agents []*model.Agent, _ error) {
+	return agents, s.paginate(p).OrderBy("id").Find(&agents)
 }
 
 func (s storage) AgentFind(id int64) (*model.Agent, error) {
@@ -54,4 +53,8 @@ func (s storage) AgentUpdate(agent *model.Agent) error {
 
 func (s storage) AgentDelete(agent *model.Agent) error {
 	return wrapDelete(s.engine.ID(agent.ID).Delete(new(model.Agent)))
+}
+
+func (s storage) AgentListForOrg(orgID int64, p *model.ListOptions) (agents []*model.Agent, _ error) {
+	return agents, s.paginate(p).Where("org_id = ?", orgID).OrderBy("id").Find(&agents)
 }

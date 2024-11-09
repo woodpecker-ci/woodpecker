@@ -15,46 +15,33 @@
 
 package model
 
-// StepStore persists process information to storage.
-type StepStore interface {
-	StepLoad(int64) (*Step, error)
-	StepFind(*Pipeline, int) (*Step, error)
-	StepChild(*Pipeline, int, string) (*Step, error)
-	StepList(*Pipeline) ([]*Step, error)
-	StepCreate([]*Step) error
-	StepUpdate(*Step) error
-	StepClear(*Pipeline) error
-}
-
-// Different ways to handle failure states
+// Different ways to handle failure states.
 const (
 	FailureIgnore = "ignore"
 	FailureFail   = "fail"
-	// FailureCancel = "cancel" // Not implemented yet
+	//nolint:godot
+	// TODO: Not implemented yet.
+	// FailureCancel = "cancel"
 )
 
 // Step represents a process in the pipeline.
 type Step struct {
-	ID         int64       `json:"id"                   xorm:"pk autoincr 'step_id'"`
-	UUID       string      `json:"uuid"                 xorm:"INDEX 'step_uuid'"`
-	PipelineID int64       `json:"pipeline_id"          xorm:"UNIQUE(s) INDEX 'step_pipeline_id'"`
-	PID        int         `json:"pid"                  xorm:"UNIQUE(s) 'step_pid'"`
-	PPID       int         `json:"ppid"                 xorm:"step_ppid"`
-	Name       string      `json:"name"                 xorm:"step_name"`
-	State      StatusValue `json:"state"                xorm:"step_state"`
-	Error      string      `json:"error,omitempty"      xorm:"TEXT 'step_error'"`
-	Failure    string      `json:"-"                    xorm:"step_failure"`
-	ExitCode   int         `json:"exit_code"            xorm:"step_exit_code"`
-	Started    int64       `json:"start_time,omitempty" xorm:"step_started"`
-	Stopped    int64       `json:"end_time,omitempty"   xorm:"step_stopped"`
-	Type       StepType    `json:"type,omitempty"       xorm:"step_type"`
+	ID         int64       `json:"id"                   xorm:"pk autoincr 'id'"`
+	UUID       string      `json:"uuid"                 xorm:"INDEX 'uuid'"`
+	PipelineID int64       `json:"pipeline_id"          xorm:"UNIQUE(s) INDEX 'pipeline_id'"`
+	PID        int         `json:"pid"                  xorm:"UNIQUE(s) 'pid'"`
+	PPID       int         `json:"ppid"                 xorm:"ppid"`
+	Name       string      `json:"name"                 xorm:"name"`
+	State      StatusValue `json:"state"                xorm:"state"`
+	Error      string      `json:"error,omitempty"      xorm:"TEXT 'error'"`
+	Failure    string      `json:"-"                    xorm:"failure"`
+	ExitCode   int         `json:"exit_code"            xorm:"exit_code"`
+	Started    int64       `json:"started,omitempty"    xorm:"started"`
+	Finished   int64       `json:"finished,omitempty"   xorm:"finished"`
+	Type       StepType    `json:"type,omitempty"       xorm:"type"`
 } //	@name Step
 
-type UpdateStepStore interface {
-	StepUpdate(*Step) error
-}
-
-// TableName return database table name for xorm
+// TableName return database table name for xorm.
 func (Step) TableName() string {
 	return "steps"
 }
@@ -69,7 +56,7 @@ func (p *Step) Failing() bool {
 	return p.Failure == FailureFail && (p.State == StatusError || p.State == StatusKilled || p.State == StatusFailure)
 }
 
-// StepType identifies the type of step
+// StepType identifies the type of step.
 type StepType string //	@name StepType
 
 const (

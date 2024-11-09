@@ -5,21 +5,21 @@ import { usePipelineStore } from '~/store/pipelines';
 
 import useAuthentication from './useAuthentication';
 
-const { userConfig, setUserConfig } = useUserConfig();
+const userConfig = useUserConfig();
+
+function toggle() {
+  userConfig.setUserConfig('isPipelineFeedOpen', !userConfig.userConfig.value.isPipelineFeedOpen);
+}
+
+function close() {
+  userConfig.setUserConfig('isPipelineFeedOpen', false);
+}
 
 export default () => {
   const pipelineStore = usePipelineStore();
   const { isAuthenticated } = useAuthentication();
 
-  const isOpen = computed(() => userConfig.value.isPipelineFeedOpen && !!isAuthenticated);
-
-  function toggle() {
-    setUserConfig('isPipelineFeedOpen', !userConfig.value.isPipelineFeedOpen);
-  }
-
-  function close() {
-    setUserConfig('isPipelineFeedOpen', false);
-  }
+  const isOpen = computed(() => userConfig.userConfig.value.isPipelineFeedOpen && !!isAuthenticated);
 
   const sortedPipelines = toRef(pipelineStore, 'pipelineFeed');
   const activePipelines = toRef(pipelineStore, 'activePipelines');

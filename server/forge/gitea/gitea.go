@@ -13,18 +13,15 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-//
-// This file has been modified by Informatyka Boguslawski sp. z o.o. sp.k.
 
 package gitea
 
 import (
 	"context"
 	"crypto/tls"
+	"errors"
 	"fmt"
-	"net"
 	"net/http"
-	"net/url"
 	"path"
 	"path/filepath"
 	"strconv"
@@ -35,27 +32,29 @@ import (
 	"github.com/rs/zerolog/log"
 	"golang.org/x/oauth2"
 
-	"github.com/woodpecker-ci/woodpecker/server"
-	"github.com/woodpecker-ci/woodpecker/server/forge"
-	"github.com/woodpecker-ci/woodpecker/server/forge/common"
-	forge_types "github.com/woodpecker-ci/woodpecker/server/forge/types"
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/store"
-	shared_utils "github.com/woodpecker-ci/woodpecker/shared/utils"
+	"go.woodpecker-ci.org/woodpecker/v2/server"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge/common"
+	forge_types "go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store"
+	shared_utils "go.woodpecker-ci.org/woodpecker/v2/shared/utils"
 )
 
 const (
 	authorizeTokenURL = "%s/login/oauth/authorize"
 	accessTokenURL    = "%s/login/oauth/access_token"
-	perPage           = 50
-	giteaDevVersion   = "v1.18.0"
+	defaultPageSize   = 50
+	giteaDevVersion   = "v1.21.0"
 )
 
 type Gitea struct {
 	url          string
 	ClientID     string
 	ClientSecret string
+	OAuthHost    string
 	SkipVerify   bool
+	pageSize     int
 }
 
 // Opts defines configuration options.
@@ -63,44 +62,42 @@ type Opts struct {
 	URL        string // Gitea server url.
 	Client     string // OAuth2 Client ID
 	Secret     string // OAuth2 Client Secret
+	OAuthHost  string // OAuth2 Host
 	SkipVerify bool   // Skip ssl verification.
 }
 
 // New returns a Forge implementation that integrates with Gitea,
 // an open source Git service written in Go. See https://gitea.io/
 func New(opts Opts) (forge.Forge, error) {
-	u, err := url.Parse(opts.URL)
-	if err != nil {
-		return nil, err
-	}
-	host, _, err := net.SplitHostPort(u.Host)
-	if err == nil {
-		u.Host = host
-	}
 	return &Gitea{
 		url:          opts.URL,
 		ClientID:     opts.Client,
 		ClientSecret: opts.Secret,
+		OAuthHost:    opts.OAuthHost,
 		SkipVerify:   opts.SkipVerify,
 	}, nil
 }
 
-// Name returns the string name of this driver
+// Name returns the string name of this driver.
 func (c *Gitea) Name() string {
 	return "gitea"
 }
 
-// URL returns the root url of a configured forge
+// URL returns the root url of a configured forge.
 func (c *Gitea) URL() string {
 	return c.url
 }
 
 func (c *Gitea) oauth2Config(ctx context.Context) (*oauth2.Config, context.Context) {
+	publicOAuthURL := c.OAuthHost
+	if publicOAuthURL == "" {
+		publicOAuthURL = c.url
+	}
 	return &oauth2.Config{
 			ClientID:     c.ClientID,
 			ClientSecret: c.ClientSecret,
 			Endpoint: oauth2.Endpoint{
-				AuthURL:  fmt.Sprintf(authorizeTokenURL, c.url),
+				AuthURL:  fmt.Sprintf(authorizeTokenURL, publicOAuthURL),
 				TokenURL: fmt.Sprintf(accessTokenURL, c.url),
 			},
 			RedirectURL: fmt.Sprintf("%s/authorize", server.Config.Server.OAuthHost),
@@ -114,37 +111,27 @@ func (c *Gitea) oauth2Config(ctx context.Context) (*oauth2.Config, context.Conte
 
 // Login authenticates an account with Gitea using basic authentication. The
 // Gitea account details are returned when the user is successfully authenticated.
-func (c *Gitea) Login(ctx context.Context, w http.ResponseWriter, req *http.Request) (*model.User, error) {
+func (c *Gitea) Login(ctx context.Context, req *forge_types.OAuthRequest) (*model.User, string, error) {
 	config, oauth2Ctx := c.oauth2Config(ctx)
+	redirectURL := config.AuthCodeURL(req.State)
 
-	// get the OAuth errors
-	if err := req.FormValue("error"); err != "" {
-		return nil, &forge_types.AuthError{
-			Err:         err,
-			Description: req.FormValue("error_description"),
-			URI:         req.FormValue("error_uri"),
-		}
+	// check the OAuth code
+	if len(req.Code) == 0 {
+		return nil, redirectURL, nil
 	}
 
-	// get the OAuth code
-	code := req.FormValue("code")
-	if len(code) == 0 {
-		http.Redirect(w, req, config.AuthCodeURL("woodpecker"), http.StatusSeeOther)
-		return nil, nil
-	}
-
-	token, err := config.Exchange(oauth2Ctx, code)
+	token, err := config.Exchange(oauth2Ctx, req.Code)
 	if err != nil {
-		return nil, err
+		return nil, redirectURL, err
 	}
 
 	client, err := c.newClientToken(ctx, token.AccessToken)
 	if err != nil {
-		return nil, err
+		return nil, redirectURL, err
 	}
 	account, _, err := client.GetMyUserInfo()
 	if err != nil {
-		return nil, err
+		return nil, redirectURL, err
 	}
 
 	return &model.User{
@@ -155,7 +142,7 @@ func (c *Gitea) Login(ctx context.Context, w http.ResponseWriter, req *http.Requ
 		Email:         account.Email,
 		ForgeRemoteID: model.ForgeRemoteID(fmt.Sprint(account.ID)),
 		Avatar:        expandAvatar(c.url, account.AvatarURL),
-	}, nil
+	}, redirectURL, nil
 }
 
 // Auth uses the Gitea oauth2 access token and refresh token to authenticate
@@ -207,7 +194,7 @@ func (c *Gitea) Teams(ctx context.Context, u *model.User) ([]*model.Team, error)
 			gitea.ListOrgsOptions{
 				ListOptions: gitea.ListOptions{
 					Page:     page,
-					PageSize: perPage,
+					PageSize: c.perPage(ctx),
 				},
 			},
 		)
@@ -258,24 +245,26 @@ func (c *Gitea) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error)
 		return nil, err
 	}
 
-	return shared_utils.Paginate(func(page int) ([]*model.Repo, error) {
+	repos, err := shared_utils.Paginate(func(page int) ([]*gitea.Repository, error) {
 		repos, _, err := client.ListMyRepos(
 			gitea.ListReposOptions{
 				ListOptions: gitea.ListOptions{
 					Page:     page,
-					PageSize: perPage,
+					PageSize: c.perPage(ctx),
 				},
 			},
 		)
-		result := make([]*model.Repo, 0, len(repos))
-		for _, repo := range repos {
-			if repo.Archived {
-				continue
-			}
-			result = append(result, toRepo(repo))
-		}
-		return result, err
+		return repos, err
 	})
+
+	result := make([]*model.Repo, 0, len(repos))
+	for _, repo := range repos {
+		if repo.Archived {
+			continue
+		}
+		result = append(result, toRepo(repo))
+	}
+	return result, err
 }
 
 // File fetches the file from the Gitea repository and returns its contents.
@@ -285,7 +274,10 @@ func (c *Gitea) File(ctx context.Context, u *model.User, r *model.Repo, b *model
 		return nil, err
 	}
 
-	cfg, _, err := client.GetFile(r.Owner, r.Name, b.Commit, f)
+	cfg, resp, err := client.GetFile(r.Owner, r.Name, b.Commit, f)
+	if err != nil && resp != nil && resp.StatusCode == http.StatusNotFound {
+		return nil, errors.Join(err, &forge_types.ErrConfigNotFound{Configs: []string{f}})
+	}
 	return cfg, err
 }
 
@@ -310,6 +302,9 @@ func (c *Gitea) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model.
 		if m, _ := filepath.Match(f, e.Path); m && e.Type == "blob" {
 			data, err := c.File(ctx, u, r, b, e.Path)
 			if err != nil {
+				if errors.Is(err, &forge_types.ErrConfigNotFound{}) {
+					return nil, fmt.Errorf("git tree reported existence of file but we got: %s", err.Error())
+				}
 				return nil, fmt.Errorf("multi-pipeline cannot get %s: %w", e.Path, err)
 			}
 
@@ -336,7 +331,7 @@ func (c *Gitea) Status(ctx context.Context, user *model.User, repo *model.Repo, 
 		pipeline.Commit,
 		gitea.CreateStatusOption{
 			State:       getStatus(workflow.State),
-			TargetURL:   common.GetPipelineStatusLink(repo, pipeline, workflow),
+			TargetURL:   common.GetPipelineStatusURL(repo, pipeline, workflow),
 			Description: common.GetPipelineStatusDescription(workflow.State),
 			Context:     common.GetPipelineStatusContext(repo, pipeline, workflow),
 		},
@@ -379,7 +374,7 @@ func (c *Gitea) Activate(ctx context.Context, u *model.User, r *model.Repo, link
 	hook := gitea.CreateHookOption{
 		Type:   gitea.HookTypeGitea,
 		Config: config,
-		Events: []string{"push", "create", "pull_request"},
+		Events: []string{"push", "create", "pull_request", "release"},
 		Active: true,
 	}
 
@@ -390,11 +385,11 @@ func (c *Gitea) Activate(ctx context.Context, u *model.User, r *model.Repo, link
 	_, response, err := client.CreateRepoHook(r.Owner, r.Name, hook)
 	if err != nil {
 		if response != nil {
-			if response.StatusCode == 404 {
-				return fmt.Errorf("Could not find repository")
+			if response.StatusCode == http.StatusNotFound {
+				return fmt.Errorf("could not find repository")
 			}
-			if response.StatusCode == 200 {
-				return fmt.Errorf("Could not find repository, repository was probably renamed")
+			if response.StatusCode == http.StatusOK {
+				return fmt.Errorf("could not find repository, repository was probably renamed")
 			}
 		}
 		return err
@@ -410,7 +405,15 @@ func (c *Gitea) Deactivate(ctx context.Context, u *model.User, r *model.Repo, li
 		return err
 	}
 
-	hooks, _, err := client.ListRepoHooks(r.Owner, r.Name, gitea.ListHooksOptions{})
+	hooks, err := shared_utils.Paginate(func(page int) ([]*gitea.Hook, error) {
+		hooks, _, err := client.ListRepoHooks(r.Owner, r.Name, gitea.ListHooksOptions{
+			ListOptions: gitea.ListOptions{
+				Page:     page,
+				PageSize: c.perPage(ctx),
+			},
+		})
+		return hooks, err
+	})
 	if err != nil {
 		return err
 	}
@@ -444,19 +447,22 @@ func (c *Gitea) Branches(ctx context.Context, u *model.User, r *model.Repo, p *m
 	return result, err
 }
 
-// BranchHead returns the sha of the head (latest commit) of the specified branch
-func (c *Gitea) BranchHead(ctx context.Context, u *model.User, r *model.Repo, branch string) (string, error) {
+// BranchHead returns the sha of the head (latest commit) of the specified branch.
+func (c *Gitea) BranchHead(ctx context.Context, u *model.User, r *model.Repo, branch string) (*model.Commit, error) {
 	token := common.UserToken(ctx, r, u)
 	client, err := c.newClientToken(ctx, token)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	b, _, err := client.GetRepoBranch(r.Owner, r.Name, branch)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	return b.Commit.ID, nil
+	return &model.Commit{
+		SHA:      b.Commit.ID,
+		ForgeURL: b.Commit.URL,
+	}, nil
 }
 
 func (c *Gitea) PullRequests(ctx context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]*model.PullRequest, error) {
@@ -466,18 +472,23 @@ func (c *Gitea) PullRequests(ctx context.Context, u *model.User, r *model.Repo, 
 		return nil, err
 	}
 
-	pullRequests, _, err := client.ListRepoPullRequests(r.Owner, r.Name, gitea.ListPullRequestsOptions{
+	pullRequests, resp, err := client.ListRepoPullRequests(r.Owner, r.Name, gitea.ListPullRequestsOptions{
 		ListOptions: gitea.ListOptions{Page: p.Page, PageSize: p.PerPage},
 		State:       gitea.StateOpen,
 	})
 	if err != nil {
-		return nil, err
+		// Repositories without commits return empty list with status code 404
+		if pullRequests != nil && resp != nil && resp.StatusCode == http.StatusNotFound {
+			err = nil
+		} else {
+			return nil, err
+		}
 	}
 
 	result := make([]*model.PullRequest, len(pullRequests))
 	for i := range pullRequests {
 		result[i] = &model.PullRequest{
-			Index: pullRequests[i].Index,
+			Index: model.ForgeRemoteID(strconv.Itoa(int(pullRequests[i].Index))),
 			Title: pullRequests[i].Title,
 		}
 	}
@@ -492,7 +503,16 @@ func (c *Gitea) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.
 		return nil, nil, err
 	}
 
-	if pipeline != nil && pipeline.Event == model.EventPull && len(pipeline.ChangedFiles) == 0 {
+	if pipeline != nil && pipeline.Event == model.EventRelease && pipeline.Commit == "" {
+		tagName := strings.Split(pipeline.Ref, "/")[2]
+		sha, err := c.getTagCommitSHA(ctx, repo, tagName)
+		if err != nil {
+			return nil, nil, err
+		}
+		pipeline.Commit = sha
+	}
+
+	if pipeline != nil && (pipeline.Event == model.EventPull || pipeline.Event == model.EventPullClosed) && len(pipeline.ChangedFiles) == 0 {
 		index, err := strconv.ParseInt(strings.Split(pipeline.Ref, "/")[2], 10, 64)
 		if err != nil {
 			return nil, nil, err
@@ -537,11 +557,8 @@ func (c *Gitea) Org(ctx context.Context, u *model.User, owner string) (*model.Or
 		return nil, err
 	}
 
-	org, _, err := client.GetOrg(owner)
-	if err != nil {
-		return nil, err
-	}
-	if org != nil {
+	org, _, orgErr := client.GetOrg(owner)
+	if orgErr == nil && org != nil {
 		return &model.Org{
 			Name:    org.UserName,
 			Private: gitea.VisibleType(org.Visibility) != gitea.VisibleTypePublic,
@@ -550,6 +567,9 @@ func (c *Gitea) Org(ctx context.Context, u *model.User, owner string) (*model.Or
 
 	user, _, err := client.GetUserInfo(owner)
 	if err != nil {
+		if orgErr != nil {
+			err = errors.Join(orgErr, err)
+		}
 		return nil, err
 	}
 	return &model.Org{
@@ -559,7 +579,7 @@ func (c *Gitea) Org(ctx context.Context, u *model.User, owner string) (*model.Or
 	}, nil
 }
 
-// helper function to return the Gitea client with Token
+// newClientToken returns the Gitea client with Token.
 func (c *Gitea) newClientToken(ctx context.Context, token string) (*gitea.Client, error) {
 	httpClient := &http.Client{}
 	if c.SkipVerify {
@@ -568,7 +588,8 @@ func (c *Gitea) newClientToken(ctx context.Context, token string) (*gitea.Client
 		}
 	}
 	client, err := gitea.NewClient(c.url, gitea.SetToken(token), gitea.SetHTTPClient(httpClient), gitea.SetContext(ctx))
-	if err != nil && strings.Contains(err.Error(), "Malformed version") {
+	if err != nil &&
+		(errors.Is(err, &gitea.ErrUnknownVersion{}) || strings.Contains(err.Error(), "Malformed version")) {
 		// we guess it's a dev gitea version
 		log.Error().Err(err).Msgf("could not detect gitea version, assume dev version %s", giteaDevVersion)
 		client, err = gitea.NewClient(c.url, gitea.SetGiteaVersion(giteaDevVersion), gitea.SetToken(token), gitea.SetHTTPClient(httpClient), gitea.SetContext(ctx))
@@ -621,12 +642,6 @@ func (c *Gitea) getChangedFilesForPR(ctx context.Context, repo *model.Repo, inde
 		return nil, err
 	}
 
-	if client.CheckServerVersionConstraint(">= 1.18.0") != nil {
-		// version too low
-		log.Debug().Msg("Gitea version does not support getting changed files for PRs")
-		return []string{}, nil
-	}
-
 	return shared_utils.Paginate(func(page int) ([]string, error) {
 		giteaFiles, _, err := client.ListPullRequestFiles(repo.Owner, repo.Name, index,
 			gitea.ListPullRequestFilesOptions{ListOptions: gitea.ListOptions{Page: page}})
@@ -640,4 +655,50 @@ func (c *Gitea) getChangedFilesForPR(ctx context.Context, repo *model.Repo, inde
 		}
 		return files, nil
 	})
+}
+
+func (c *Gitea) getTagCommitSHA(ctx context.Context, repo *model.Repo, tagName string) (string, error) {
+	_store, ok := store.TryFromContext(ctx)
+	if !ok {
+		log.Error().Msg("could not get store from context")
+		return "", nil
+	}
+
+	repo, err := _store.GetRepoNameFallback(repo.ForgeRemoteID, repo.FullName)
+	if err != nil {
+		return "", err
+	}
+
+	user, err := _store.GetUser(repo.UserID)
+	if err != nil {
+		return "", err
+	}
+
+	client, err := c.newClientToken(ctx, user.Token)
+	if err != nil {
+		return "", err
+	}
+
+	tag, _, err := client.GetTag(repo.Owner, repo.Name, tagName)
+	if err != nil {
+		return "", err
+	}
+
+	return tag.Commit.SHA, nil
+}
+
+func (c *Gitea) perPage(ctx context.Context) int {
+	if c.pageSize == 0 {
+		client, err := c.newClientToken(ctx, "")
+		if err != nil {
+			return defaultPageSize
+		}
+
+		api, _, err := client.GetGlobalAPISettings()
+		if err != nil {
+			return defaultPageSize
+		}
+		c.pageSize = api.MaxResponseItems
+	}
+	return c.pageSize
 }

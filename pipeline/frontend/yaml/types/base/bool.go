@@ -25,7 +25,7 @@ type BoolTrue struct {
 	value bool
 }
 
-// UnmarshalYAML implements custom Yaml unmarshaling.
+// UnmarshalYAML implements custom Yaml unmarshal.
 func (b *BoolTrue) UnmarshalYAML(value *yaml.Node) error {
 	var s string
 	if err := value.Decode(&s); err != nil {

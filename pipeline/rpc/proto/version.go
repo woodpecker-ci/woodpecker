@@ -15,5 +15,5 @@
 package proto
 
 // Version is the version of the woodpecker.proto file,
-// !IMPORTANT! increased by 1 each time it get changed !IMPORTANT!
-const Version int32 = 4
+// IMPORTANT: increased by 1 each time it get changed.
+const Version int32 = 11

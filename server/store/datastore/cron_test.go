@@ -20,7 +20,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/woodpecker-ci/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
 func TestCronCreate(t *testing.T) {
@@ -32,7 +32,7 @@ func TestCronCreate(t *testing.T) {
 	assert.NoError(t, store.CronCreate(cron1))
 	assert.NotEqualValues(t, 0, cron1.ID)
 
-	// can not insert cron job with same repoID and title
+	// cannot insert cron job with same repoID and title
 	assert.Error(t, store.CronCreate(cron1))
 
 	oldID := cron1.ID

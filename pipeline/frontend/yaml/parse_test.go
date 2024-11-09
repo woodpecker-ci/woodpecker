@@ -15,12 +15,14 @@
 package yaml
 
 import (
+	"slices"
 	"testing"
 
 	"github.com/franela/goblin"
+	"github.com/stretchr/testify/assert"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/metadata"
-	yaml_base_types "github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types/base"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/metadata"
+	yaml_base_types "go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/types/base"
 )
 
 func TestParse(t *testing.T) {
@@ -34,7 +36,7 @@ func TestParse(t *testing.T) {
 					g.Fail(err)
 				}
 
-				g.Assert(out.When.Constraints[0].Event.Match("tester")).Equal(true)
+				g.Assert(slices.Contains(out.When.Constraints[0].Event, "tester")).Equal(true)
 
 				g.Assert(out.Workspace.Base).Equal("/go")
 				g.Assert(out.Workspace.Path).Equal("src/github.com/octocat/hello-world")
@@ -84,7 +86,7 @@ func TestParse(t *testing.T) {
 				g.Assert(len(out.Steps.ContainerList[0].When.Constraints)).Equal(0)
 				g.Assert(out.Steps.ContainerList[1].Name).Equal("notify_success")
 				g.Assert(out.Steps.ContainerList[1].Image).Equal("plugins/slack")
-				g.Assert(out.Steps.ContainerList[1].When.Constraints[0].Event.Include).Equal([]string{"success"})
+				g.Assert(out.Steps.ContainerList[1].When.Constraints[0].Event).Equal(yaml_base_types.StringOrSlice{"success"})
 			})
 
 			matchConfig, err := ParseString(sampleYaml)
@@ -135,6 +137,48 @@ func TestParse(t *testing.T) {
 			})
 		})
 	})
+}
+
+func TestParseLegacy(t *testing.T) {
+	sampleYamlPipeline := `
+labels:
+  platform: linux/amd64
+
+steps:
+  say hello:
+    image: bash
+    commands: echo hello
+`
+
+	sampleYamlPipelineLegacyIgnore := `
+platform: windows/amd64
+labels:
+  platform: linux/amd64
+
+steps:
+  say hello:
+    image: bash
+    commands: echo hello
+
+pipeline:
+  old crap:
+    image: bash
+    commands: meh!
+`
+
+	workflow1, err := ParseString(sampleYamlPipeline)
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	workflow2, err := ParseString(sampleYamlPipelineLegacyIgnore)
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	assert.EqualValues(t, workflow1, workflow2)
+	assert.Len(t, workflow1.Steps.ContainerList, 1)
+	assert.EqualValues(t, "say hello", workflow1.Steps.ContainerList[0].Name)
 }
 
 var sampleYaml = `
@@ -207,3 +251,38 @@ steps:
     when:
       event: success
 `
+
+var sampleSliceYaml = `
+steps:
+  nil_slice:
+    image: plugins/slack
+  empty_slice:
+    image: plugins/slack
+    depends_on: []
+`
+
+func TestSlice(t *testing.T) {
+	g := goblin.Goblin(t)
+
+	g.Describe("Parser", func() {
+		g.It("should marshal a not set slice to nil", func() {
+			out, err := ParseString(sampleSliceYaml)
+			if err != nil {
+				g.Fail(err)
+			}
+
+			g.Assert(out.Steps.ContainerList[0].DependsOn).IsNil()
+			g.Assert(len(out.Steps.ContainerList[0].DependsOn)).Equal(0)
+		})
+
+		g.It("should marshal an empty slice", func() {
+			out, err := ParseString(sampleSliceYaml)
+			if err != nil {
+				g.Fail(err)
+			}
+
+			g.Assert(out.Steps.ContainerList[1].DependsOn).IsNotNil()
+			g.Assert(len(out.Steps.ContainerList[1].DependsOn)).Equal(0)
+		})
+	})
+}

@@ -9,7 +9,7 @@ export default (): WoodpeckerClient => {
     const config = useConfig();
     const server = config.rootPath;
     const token = null;
-    const csrf = config.csrf || null;
+    const csrf = config.csrf ?? null;
 
     apiClient = new WoodpeckerClient(server, token, csrf);
   }

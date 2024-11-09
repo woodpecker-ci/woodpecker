@@ -15,18 +15,24 @@
 package main
 
 import (
-	"fmt"
+	"context"
 	"os"
 
 	_ "github.com/joho/godotenv/autoload"
-	"github.com/urfave/cli/v2"
-	_ "github.com/woodpecker-ci/woodpecker/cmd/server/docs"
+	"github.com/rs/zerolog/log"
+	"github.com/urfave/cli/v3"
 
-	"github.com/woodpecker-ci/woodpecker/version"
+	_ "go.woodpecker-ci.org/woodpecker/v2/cmd/server/docs"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/utils"
+	"go.woodpecker-ci.org/woodpecker/v2/version"
 )
 
 func main() {
-	app := cli.NewApp()
+	ctx := utils.WithContextSigtermCallback(context.Background(), func() {
+		log.Info().Msg("termination signal is received, shutting down server")
+	})
+
+	app := cli.Command{}
 	app.Name = "woodpecker-server"
 	app.Version = version.String()
 	app.Usage = "woodpecker server"
@@ -42,8 +48,7 @@ func main() {
 
 	setupSwaggerStaticConfig()
 
-	if err := app.Run(os.Args); err != nil {
-		_, _ = fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
+	if err := app.Run(ctx, os.Args); err != nil {
+		log.Error().Err(err).Msgf("error running server")
 	}
 }

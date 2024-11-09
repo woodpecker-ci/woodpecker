@@ -20,7 +20,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/woodpecker-ci/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
 func TestSecretFind(t *testing.T) {
@@ -34,37 +34,17 @@ func TestSecretFind(t *testing.T) {
 		Images: []string{"golang", "node"},
 		Events: []model.WebhookEvent{"push", "tag"},
 	})
-	if err != nil {
-		t.Errorf("Unexpected error: insert secret: %s", err)
-		return
-	}
+	assert.NoError(t, err)
 
 	secret, err := store.SecretFind(&model.Repo{ID: 1}, "password")
-	if err != nil {
-		t.Error(err)
-		return
-	}
-	if got, want := secret.RepoID, int64(1); got != want {
-		t.Errorf("Want repo id %d, got %d", want, got)
-	}
-	if got, want := secret.Name, "password"; got != want {
-		t.Errorf("Want secret name %s, got %s", want, got)
-	}
-	if got, want := secret.Value, "correct-horse-battery-staple"; got != want {
-		t.Errorf("Want secret value %s, got %s", want, got)
-	}
-	if got, want := secret.Events[0], model.EventPush; got != want {
-		t.Errorf("Want secret event %s, got %s", want, got)
-	}
-	if got, want := secret.Events[1], model.EventTag; got != want {
-		t.Errorf("Want secret event %s, got %s", want, got)
-	}
-	if got, want := secret.Images[0], "golang"; got != want {
-		t.Errorf("Want secret image %s, got %s", want, got)
-	}
-	if got, want := secret.Images[1], "node"; got != want {
-		t.Errorf("Want secret image %s, got %s", want, got)
-	}
+	assert.NoError(t, err)
+	assert.EqualValues(t, 1, secret.RepoID)
+	assert.Equal(t, "password", secret.Name)
+	assert.Equal(t, "correct-horse-battery-staple", secret.Value)
+	assert.Equal(t, model.EventPush, secret.Events[0])
+	assert.Equal(t, model.EventTag, secret.Events[1])
+	assert.Equal(t, "golang", secret.Images[0])
+	assert.Equal(t, "node", secret.Images[1])
 }
 
 func TestSecretList(t *testing.T) {
@@ -109,24 +89,13 @@ func TestSecretUpdate(t *testing.T) {
 		Name:   "foo",
 		Value:  "baz",
 	}
-	if err := store.SecretCreate(secret); err != nil {
-		t.Errorf("Unexpected error: insert secret: %s", err)
-		return
-	}
+	assert.NoError(t, store.SecretCreate(secret))
 	secret.Value = "qux"
 	assert.EqualValues(t, 1, secret.ID)
-	if err := store.SecretUpdate(secret); err != nil {
-		t.Errorf("Unexpected error: update secret: %s", err)
-		return
-	}
+	assert.NoError(t, store.SecretUpdate(secret))
 	updated, err := store.SecretFind(&model.Repo{ID: 1}, "foo")
-	if err != nil {
-		t.Error(err)
-		return
-	}
-	if got, want := updated.Value, "qux"; got != want {
-		t.Errorf("Want secret value %s, got %s", want, got)
-	}
+	assert.NoError(t, err)
+	assert.Equal(t, "qux", updated.Value)
 }
 
 func TestSecretDelete(t *testing.T) {
@@ -138,43 +107,29 @@ func TestSecretDelete(t *testing.T) {
 		Name:   "foo",
 		Value:  "baz",
 	}
-	if err := store.SecretCreate(secret); err != nil {
-		t.Errorf("Unexpected error: insert secret: %s", err)
-		return
-	}
+	assert.NoError(t, store.SecretCreate(secret))
 
-	if err := store.SecretDelete(secret); err != nil {
-		t.Errorf("Unexpected error: delete secret: %s", err)
-		return
-	}
+	assert.NoError(t, store.SecretDelete(secret))
 	_, err := store.SecretFind(&model.Repo{ID: 1}, "foo")
-	if err == nil {
-		t.Errorf("Expect error: sql.ErrNoRows")
-		return
-	}
+	assert.Error(t, err)
 }
 
 func TestSecretIndexes(t *testing.T) {
 	store, closer := newTestStore(t, new(model.Secret))
 	defer closer()
 
-	if err := store.SecretCreate(&model.Secret{
+	assert.NoError(t, store.SecretCreate(&model.Secret{
 		RepoID: 1,
 		Name:   "foo",
 		Value:  "bar",
-	}); err != nil {
-		t.Errorf("Unexpected error: insert secret: %s", err)
-		return
-	}
+	}))
 
 	// fail due to duplicate name
-	if err := store.SecretCreate(&model.Secret{
+	assert.Error(t, store.SecretCreate(&model.Secret{
 		RepoID: 1,
 		Name:   "foo",
 		Value:  "baz",
-	}); err == nil {
-		t.Errorf("Unexpected error: duplicate name")
-	}
+	}))
 }
 
 func createTestSecrets(t *testing.T, store *storage) {
@@ -210,37 +165,17 @@ func TestOrgSecretFind(t *testing.T) {
 		Images: []string{"golang", "node"},
 		Events: []model.WebhookEvent{"push", "tag"},
 	})
-	if err != nil {
-		t.Errorf("Unexpected error: insert secret: %s", err)
-		return
-	}
+	assert.NoError(t, err)
 
 	secret, err := store.OrgSecretFind(12, "password")
-	if err != nil {
-		t.Error(err)
-		return
-	}
-	if got, want := secret.OrgID, int64(12); got != want {
-		t.Errorf("Want org_id %d, got %d", want, got)
-	}
-	if got, want := secret.Name, "password"; got != want {
-		t.Errorf("Want secret name %s, got %s", want, got)
-	}
-	if got, want := secret.Value, "correct-horse-battery-staple"; got != want {
-		t.Errorf("Want secret value %s, got %s", want, got)
-	}
-	if got, want := secret.Events[0], model.EventPush; got != want {
-		t.Errorf("Want secret event %s, got %s", want, got)
-	}
-	if got, want := secret.Events[1], model.EventTag; got != want {
-		t.Errorf("Want secret event %s, got %s", want, got)
-	}
-	if got, want := secret.Images[0], "golang"; got != want {
-		t.Errorf("Want secret image %s, got %s", want, got)
-	}
-	if got, want := secret.Images[1], "node"; got != want {
-		t.Errorf("Want secret image %s, got %s", want, got)
-	}
+	assert.NoError(t, err)
+	assert.EqualValues(t, 12, secret.OrgID)
+	assert.Equal(t, "password", secret.Name)
+	assert.Equal(t, "correct-horse-battery-staple", secret.Value)
+	assert.Equal(t, model.EventPush, secret.Events[0])
+	assert.Equal(t, model.EventTag, secret.Events[1])
+	assert.Equal(t, "golang", secret.Images[0])
+	assert.Equal(t, "node", secret.Images[1])
 }
 
 func TestOrgSecretList(t *testing.T) {
@@ -253,7 +188,7 @@ func TestOrgSecretList(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Len(t, list, 1)
 
-	assert.True(t, list[0].Organization())
+	assert.True(t, list[0].IsOrganization())
 }
 
 func TestGlobalSecretFind(t *testing.T) {
@@ -266,34 +201,16 @@ func TestGlobalSecretFind(t *testing.T) {
 		Images: []string{"golang", "node"},
 		Events: []model.WebhookEvent{"push", "tag"},
 	})
-	if err != nil {
-		t.Errorf("Unexpected error: insert secret: %s", err)
-		return
-	}
+	assert.NoError(t, err)
 
 	secret, err := store.GlobalSecretFind("password")
-	if err != nil {
-		t.Error(err)
-		return
-	}
-	if got, want := secret.Name, "password"; got != want {
-		t.Errorf("Want secret name %s, got %s", want, got)
-	}
-	if got, want := secret.Value, "correct-horse-battery-staple"; got != want {
-		t.Errorf("Want secret value %s, got %s", want, got)
-	}
-	if got, want := secret.Events[0], model.EventPush; got != want {
-		t.Errorf("Want secret event %s, got %s", want, got)
-	}
-	if got, want := secret.Events[1], model.EventTag; got != want {
-		t.Errorf("Want secret event %s, got %s", want, got)
-	}
-	if got, want := secret.Images[0], "golang"; got != want {
-		t.Errorf("Want secret image %s, got %s", want, got)
-	}
-	if got, want := secret.Images[1], "node"; got != want {
-		t.Errorf("Want secret image %s, got %s", want, got)
-	}
+	assert.NoError(t, err)
+	assert.Equal(t, "password", secret.Name)
+	assert.Equal(t, "correct-horse-battery-staple", secret.Value)
+	assert.Equal(t, model.EventPush, secret.Events[0])
+	assert.Equal(t, model.EventTag, secret.Events[1])
+	assert.Equal(t, "golang", secret.Images[0])
+	assert.Equal(t, "node", secret.Images[1])
 }
 
 func TestGlobalSecretList(t *testing.T) {
@@ -306,5 +223,5 @@ func TestGlobalSecretList(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Len(t, list, 1)
 
-	assert.True(t, list[0].Global())
+	assert.True(t, list[0].IsGlobal())
 }

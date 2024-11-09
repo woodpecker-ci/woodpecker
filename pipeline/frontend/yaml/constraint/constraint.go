@@ -15,18 +15,19 @@
 package constraint
 
 import (
-	"errors"
 	"fmt"
 	"maps"
 	"path"
+	"slices"
 	"strings"
 
-	"github.com/antonmedv/expr"
 	"github.com/bmatcuk/doublestar/v4"
+	"github.com/expr-lang/expr"
+	"go.uber.org/multierr"
 	"gopkg.in/yaml.v3"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/metadata"
-	yamlBaseTypes "github.com/woodpecker-ci/woodpecker/pipeline/frontend/yaml/types/base"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/metadata"
+	yamlBaseTypes "go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/types/base"
 )
 
 type (
@@ -37,19 +38,18 @@ type (
 	}
 
 	Constraint struct {
-		Ref         List
-		Repo        List
-		Instance    List
-		Platform    List
-		Environment List
-		Event       List
-		Branch      List
-		Cron        List
-		Status      List
-		Matrix      Map
-		Local       yamlBaseTypes.BoolTrue
-		Path        Path
-		Evaluate    string `yaml:"evaluate,omitempty"`
+		Ref      List
+		Repo     List
+		Instance List
+		Platform List
+		Branch   List
+		Cron     List
+		Status   List
+		Matrix   Map
+		Local    yamlBaseTypes.BoolTrue
+		Path     Path
+		Evaluate string `yaml:"evaluate,omitempty"`
+		Event    yamlBaseTypes.StringOrSlice
 	}
 
 	// List defines a runtime constraint for exclude & include string slices.
@@ -68,7 +68,8 @@ type (
 	Path struct {
 		Include       []string
 		Exclude       []string
-		IgnoreMessage string `yaml:"ignore_message,omitempty"`
+		IgnoreMessage string                 `yaml:"ignore_message,omitempty"`
+		OnEmpty       yamlBaseTypes.BoolTrue `yaml:"on_empty,omitempty"`
 	}
 )
 
@@ -121,7 +122,7 @@ func (when *When) IncludesStatusSuccess() bool {
 	return false
 }
 
-// False if (any) non local
+// False if (any) non local.
 func (when *When) IsLocal() bool {
 	for _, c := range when.Constraints {
 		if !c.Local.Bool() {
@@ -162,8 +163,7 @@ func (c *Constraint) Match(m metadata.Metadata, global bool, env map[string]stri
 	}
 
 	match = match && c.Platform.Match(m.Sys.Platform) &&
-		c.Environment.Match(m.Curr.Target) &&
-		c.Event.Match(m.Curr.Event) &&
+		(len(c.Event) == 0 || slices.Contains(c.Event, m.Curr.Event)) &&
 		c.Repo.Match(path.Join(m.Repo.Owner, m.Repo.Name)) &&
 		c.Ref.Match(m.Curr.Commit.Ref) &&
 		c.Instance.Match(m.Sys.Host)
@@ -195,13 +195,17 @@ func (c *Constraint) Match(m metadata.Metadata, global bool, env map[string]stri
 		if err != nil {
 			return false, err
 		}
-		match = match && result.(bool)
+		bResult, ok := result.(bool)
+		if !ok {
+			return false, fmt.Errorf("could not parse result: %v", result)
+		}
+		match = match && bResult
 	}
 
 	return match, nil
 }
 
-// IsEmpty return true if a constraint has no conditions
+// IsEmpty return true if a constraint has no conditions.
 func (c List) IsEmpty() bool {
 	return len(c.Include) == 0 && len(c.Exclude) == 0
 }
@@ -241,7 +245,7 @@ func (c *List) Excludes(v string) bool {
 	return false
 }
 
-// UnmarshalYAML unmarshals the constraint.
+// UnmarshalYAML unmarshal the constraint.
 func (c *List) UnmarshalYAML(value *yaml.Node) error {
 	out1 := struct {
 		Include yamlBaseTypes.StringOrSlice
@@ -254,14 +258,14 @@ func (c *List) UnmarshalYAML(value *yaml.Node) error {
 	err2 := value.Decode(&out2)
 
 	c.Exclude = out1.Exclude
-	c.Include = append(
+	c.Include = append( //nolint:gocritic
 		out1.Include,
 		out2...,
 	)
 
 	if err1 != nil && err2 != nil {
 		y, _ := yaml.Marshal(value)
-		return fmt.Errorf("Could not parse condition: %s: %w", y, errors.Join(err1, err2))
+		return fmt.Errorf("could not parse condition: %s: %w", y, multierr.Append(err1, err2))
 	}
 
 	return nil
@@ -298,7 +302,7 @@ func (c *Map) Match(params map[string]string) bool {
 }
 
 // UnmarshalYAML unmarshal the constraint map.
-func (c *Map) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (c *Map) UnmarshalYAML(unmarshal func(any) error) error {
 	out1 := struct {
 		Include map[string]string
 		Exclude map[string]string
@@ -326,6 +330,7 @@ func (c *Path) UnmarshalYAML(value *yaml.Node) error {
 		Include       yamlBaseTypes.StringOrSlice `yaml:"include,omitempty"`
 		Exclude       yamlBaseTypes.StringOrSlice `yaml:"exclude,omitempty"`
 		IgnoreMessage string                      `yaml:"ignore_message,omitempty"`
+		OnEmpty       yamlBaseTypes.BoolTrue      `yaml:"on_empty,omitempty"`
 	}{}
 
 	var out2 yamlBaseTypes.StringOrSlice
@@ -335,14 +340,15 @@ func (c *Path) UnmarshalYAML(value *yaml.Node) error {
 
 	c.Exclude = out1.Exclude
 	c.IgnoreMessage = out1.IgnoreMessage
-	c.Include = append(
+	c.OnEmpty = out1.OnEmpty
+	c.Include = append( //nolint:gocritic
 		out1.Include,
 		out2...,
 	)
 
 	if err1 != nil && err2 != nil {
 		y, _ := yaml.Marshal(value)
-		return fmt.Errorf("Could not parse condition: %s", y)
+		return fmt.Errorf("could not parse condition: %s", y)
 	}
 
 	return nil
@@ -356,9 +362,9 @@ func (c *Path) Match(v []string, message string) bool {
 		return true
 	}
 
-	// always match if there are no commit files (empty commit)
+	// return value based on 'on_empty', if there are no commit files (empty commit)
 	if len(v) == 0 {
-		return true
+		return c.OnEmpty.Bool()
 	}
 
 	if len(c.Exclude) > 0 && c.Excludes(v) {

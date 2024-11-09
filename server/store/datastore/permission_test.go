@@ -19,7 +19,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/woodpecker-ci/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
 func TestPermFind(t *testing.T) {
@@ -46,25 +46,13 @@ func TestPermFind(t *testing.T) {
 			Admin:  false,
 		},
 	)
-	if err != nil {
-		t.Error(err)
-		return
-	}
+	assert.NoError(t, err)
 
 	perm, err := store.PermFind(user, repo)
-	if err != nil {
-		t.Error(err)
-		return
-	}
-	if got, want := perm.Pull, true; got != want {
-		t.Errorf("Wanted pull %v, got %v", want, got)
-	}
-	if got, want := perm.Push, false; got != want {
-		t.Errorf("Wanted push %v, got %v", want, got)
-	}
-	if got, want := perm.Admin, false; got != want {
-		t.Errorf("Wanted admin %v, got %v", want, got)
-	}
+	assert.NoError(t, err)
+	assert.True(t, perm.Pull)
+	assert.False(t, perm.Push)
+	assert.False(t, perm.Admin)
 }
 
 func TestPermUpsert(t *testing.T) {
@@ -91,25 +79,13 @@ func TestPermUpsert(t *testing.T) {
 			Admin:  false,
 		},
 	)
-	if err != nil {
-		t.Error(err)
-		return
-	}
+	assert.NoError(t, err)
 
 	perm, err := store.PermFind(user, repo)
-	if err != nil {
-		t.Error(err)
-		return
-	}
-	if got, want := perm.Pull, true; got != want {
-		t.Errorf("Wanted pull %v, got %v", want, got)
-	}
-	if got, want := perm.Push, false; got != want {
-		t.Errorf("Wanted push %v, got %v", want, got)
-	}
-	if got, want := perm.Admin, false; got != want {
-		t.Errorf("Wanted admin %v, got %v", want, got)
-	}
+	assert.NoError(t, err)
+	assert.True(t, perm.Pull)
+	assert.False(t, perm.Push)
+	assert.False(t, perm.Admin)
 
 	//
 	// this will attempt to replace the existing permissions
@@ -126,69 +102,11 @@ func TestPermUpsert(t *testing.T) {
 			Admin:  true,
 		},
 	)
-	if err != nil {
-		t.Error(err)
-		return
-	}
+	assert.NoError(t, err)
 
 	perm, err = store.PermFind(user, repo)
-	if err != nil {
-		t.Error(err)
-		return
-	}
-	if got, want := perm.Pull, true; got != want {
-		t.Errorf("Wanted pull %v, got %v", want, got)
-	}
-	if got, want := perm.Push, true; got != want {
-		t.Errorf("Wanted push %v, got %v", want, got)
-	}
-	if got, want := perm.Admin, true; got != want {
-		t.Errorf("Wanted admin %v, got %v", want, got)
-	}
-}
-
-func TestPermDelete(t *testing.T) {
-	store, closer := newTestStore(t, new(model.Repo), new(model.Perm), new(model.User))
-	defer closer()
-
-	user := &model.User{ID: 1}
-	repo := &model.Repo{
-		UserID:        1,
-		FullName:      "bradrydzewski/test",
-		Owner:         "bradrydzewski",
-		Name:          "test",
-		ForgeRemoteID: "1",
-	}
-	assert.NoError(t, store.CreateRepo(repo))
-
-	err := store.PermUpsert(
-		&model.Perm{
-			UserID: user.ID,
-			RepoID: repo.ID,
-			Repo:   repo,
-			Pull:   true,
-			Push:   false,
-			Admin:  false,
-		},
-	)
-	if err != nil {
-		t.Errorf("Unexpected error: insert perm: %s", err)
-		return
-	}
-
-	perm, err := store.PermFind(user, repo)
-	if err != nil {
-		t.Errorf("Unexpected error: select perm: %s", err)
-		return
-	}
-	err = store.PermDelete(perm)
-	if err != nil {
-		t.Errorf("Unexpected error: delete perm: %s", err)
-		return
-	}
-	_, err = store.PermFind(user, repo)
-	if err == nil {
-		t.Errorf("Expect error: sql.ErrNoRows")
-		return
-	}
+	assert.NoError(t, err)
+	assert.True(t, perm.Pull)
+	assert.True(t, perm.Push)
+	assert.True(t, perm.Admin)
 }

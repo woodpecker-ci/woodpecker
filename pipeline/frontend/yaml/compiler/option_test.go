@@ -15,10 +15,12 @@
 package compiler
 
 import (
-	"reflect"
 	"testing"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline/frontend/metadata"
+	"github.com/stretchr/testify/assert"
+
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/metadata"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/constant"
 )
 
 func TestWithWorkspace(t *testing.T) {
@@ -28,12 +30,8 @@ func TestWithWorkspace(t *testing.T) {
 			"src/github.com/octocat/hello-world",
 		),
 	)
-	if compiler.base != "/pipeline" {
-		t.Errorf("WithWorkspace must set the base directory")
-	}
-	if compiler.path != "src/github.com/octocat/hello-world" {
-		t.Errorf("WithWorkspace must set the path directory")
-	}
+	assert.Equal(t, "/pipeline", compiler.workspaceBase)
+	assert.Equal(t, "src/github.com/octocat/hello-world", compiler.workspacePath)
 }
 
 func TestWithEscalated(t *testing.T) {
@@ -43,9 +41,8 @@ func TestWithEscalated(t *testing.T) {
 			"docker-dev",
 		),
 	)
-	if compiler.escalated[0] != "docker" || compiler.escalated[1] != "docker-dev" {
-		t.Errorf("WithEscalated must whitelist privileged images")
-	}
+	assert.Equal(t, "docker", compiler.escalated[0])
+	assert.Equal(t, "docker-dev", compiler.escalated[1])
 }
 
 func TestWithVolumes(t *testing.T) {
@@ -55,9 +52,8 @@ func TestWithVolumes(t *testing.T) {
 			"/foo:/foo",
 		),
 	)
-	if compiler.volumes[0] != "/tmp:/tmp" || compiler.volumes[1] != "/foo:/foo" {
-		t.Errorf("TestWithVolumes must set default volumes")
-	}
+	assert.Equal(t, "/tmp:/tmp", compiler.volumes[0])
+	assert.Equal(t, "/foo:/foo", compiler.volumes[1])
 }
 
 func TestWithNetworks(t *testing.T) {
@@ -67,46 +63,12 @@ func TestWithNetworks(t *testing.T) {
 			"overlay_bar",
 		),
 	)
-	if compiler.networks[0] != "overlay_1" || compiler.networks[1] != "overlay_bar" {
-		t.Errorf("TestWithNetworks must set networks from parameters")
-	}
-}
-
-func TestWithResourceLimit(t *testing.T) {
-	compiler := New(
-		WithResourceLimit(
-			1,
-			2,
-			3,
-			4,
-			5,
-			"0,2-5",
-		),
-	)
-	if compiler.reslimit.MemSwapLimit != 1 {
-		t.Errorf("TestWithResourceLimit must set MemSwapLimit from parameters")
-	}
-	if compiler.reslimit.MemLimit != 2 {
-		t.Errorf("TestWithResourceLimit must set MemLimit from parameters")
-	}
-	if compiler.reslimit.ShmSize != 3 {
-		t.Errorf("TestWithResourceLimit must set ShmSize from parameters")
-	}
-	if compiler.reslimit.CPUQuota != 4 {
-		t.Errorf("TestWithResourceLimit must set CPUQuota from parameters")
-	}
-	if compiler.reslimit.CPUShares != 5 {
-		t.Errorf("TestWithResourceLimit must set CPUShares from parameters")
-	}
-	if compiler.reslimit.CPUSet != "0,2-5" {
-		t.Errorf("TestWithResourceLimit must set CPUSet from parameters")
-	}
+	assert.Equal(t, "overlay_1", compiler.networks[0])
+	assert.Equal(t, "overlay_bar", compiler.networks[1])
 }
 
 func TestWithPrefix(t *testing.T) {
-	if New(WithPrefix("someprefix_")).prefix != "someprefix_" {
-		t.Errorf("WithPrefix must set the prefix")
-	}
+	assert.Equal(t, "someprefix_", New(WithPrefix("someprefix_")).prefix)
 }
 
 func TestWithMetadata(t *testing.T) {
@@ -115,35 +77,23 @@ func TestWithMetadata(t *testing.T) {
 			Owner:    "octacat",
 			Name:     "hello-world",
 			Private:  true,
-			Link:     "https://github.com/octocat/hello-world",
+			ForgeURL: "https://github.com/octocat/hello-world",
 			CloneURL: "https://github.com/octocat/hello-world.git",
 		},
 	}
 	compiler := New(
 		WithMetadata(metadata),
 	)
-	if !reflect.DeepEqual(compiler.metadata, metadata) {
-		t.Errorf("WithMetadata must set compiler the metadata")
-	}
 
-	if compiler.env["CI_REPO_NAME"] != metadata.Repo.Name {
-		t.Errorf("WithMetadata must set CI_REPO_NAME")
-	}
-	if compiler.env["CI_REPO_URL"] != metadata.Repo.Link {
-		t.Errorf("WithMetadata must set CI_REPO_URL")
-	}
-	if compiler.env["CI_REPO_CLONE_URL"] != metadata.Repo.CloneURL {
-		t.Errorf("WithMetadata must set CI_REPO_CLONE_URL")
-	}
+	assert.Equal(t, metadata, compiler.metadata)
+	assert.Equal(t, metadata.Repo.Name, compiler.env["CI_REPO_NAME"])
+	assert.Equal(t, metadata.Repo.ForgeURL, compiler.env["CI_REPO_URL"])
+	assert.Equal(t, metadata.Repo.CloneURL, compiler.env["CI_REPO_CLONE_URL"])
 }
 
 func TestWithLocal(t *testing.T) {
-	if New(WithLocal(true)).local == false {
-		t.Errorf("WithLocal true must enable the local flag")
-	}
-	if New(WithLocal(false)).local == true {
-		t.Errorf("WithLocal false must disable the local flag")
-	}
+	assert.True(t, New(WithLocal(true)).local)
+	assert.False(t, New(WithLocal(false)).local)
 }
 
 func TestWithNetrc(t *testing.T) {
@@ -154,15 +104,9 @@ func TestWithNetrc(t *testing.T) {
 			"github.com",
 		),
 	)
-	if compiler.cloneEnv["CI_NETRC_USERNAME"] != "octocat" {
-		t.Errorf("WithNetrc should set CI_NETRC_USERNAME")
-	}
-	if compiler.cloneEnv["CI_NETRC_PASSWORD"] != "password" {
-		t.Errorf("WithNetrc should set CI_NETRC_PASSWORD")
-	}
-	if compiler.cloneEnv["CI_NETRC_MACHINE"] != "github.com" {
-		t.Errorf("WithNetrc should set CI_NETRC_MACHINE")
-	}
+	assert.Equal(t, "octocat", compiler.cloneEnv["CI_NETRC_USERNAME"])
+	assert.Equal(t, "password", compiler.cloneEnv["CI_NETRC_PASSWORD"])
+	assert.Equal(t, "github.com", compiler.cloneEnv["CI_NETRC_MACHINE"])
 }
 
 func TestWithProxy(t *testing.T) {
@@ -187,9 +131,7 @@ func TestWithProxy(t *testing.T) {
 		}),
 	)
 	for key, value := range testdata {
-		if compiler.env[key] != value {
-			t.Errorf("WithProxy should set %s=%s", key, value)
-		}
+		assert.Equal(t, value, compiler.env[key])
 	}
 }
 
@@ -202,54 +144,21 @@ func TestWithEnviron(t *testing.T) {
 			},
 		),
 	)
-	if compiler.env["RACK_ENV"] != "development" {
-		t.Errorf("WithEnviron should set RACK_ENV")
-	}
-	if compiler.env["SHOW"] != "true" {
-		t.Errorf("WithEnviron should set SHOW")
-	}
+	assert.Equal(t, "development", compiler.env["RACK_ENV"])
+	assert.Equal(t, "true", compiler.env["SHOW"])
 }
 
-func TestWithVolumeCacher(t *testing.T) {
+func TestDefaultClonePlugin(t *testing.T) {
 	compiler := New(
-		WithVolumeCacher("/cache"),
+		WithDefaultClonePlugin("not-an-image"),
 	)
-	cacher, ok := compiler.cacher.(*volumeCacher)
-	if !ok {
-		t.Errorf("Expected volume cacher configured")
-	}
-	if got, want := cacher.base, "/cache"; got != want {
-		t.Errorf("Expected volume cacher with base %s, got %s", want, got)
-	}
+	assert.Equal(t, "not-an-image", compiler.defaultClonePlugin)
 }
 
-func TestWithDefaultCloneImage(t *testing.T) {
-	compiler := New(
-		WithDefaultCloneImage("not-an-image"),
-	)
-	if compiler.defaultCloneImage != "not-an-image" {
-		t.Errorf("Expected default clone image 'not-an-image' not found")
-	}
-}
+func TestWithTrustedClonePlugins(t *testing.T) {
+	compiler := New(WithTrustedClonePlugins([]string{"not-an-image"}))
+	assert.ElementsMatch(t, []string{"not-an-image"}, compiler.trustedClonePlugins)
 
-func TestWithS3Cacher(t *testing.T) {
-	compiler := New(
-		WithS3Cacher("some-access-key", "some-secret-key", "some-region", "some-bucket"),
-	)
-	cacher, ok := compiler.cacher.(*s3Cacher)
-	if !ok {
-		t.Errorf("Expected s3 cacher configured")
-	}
-	if got, want := cacher.bucket, "some-bucket"; got != want {
-		t.Errorf("Expected s3 cacher with bucket %s, got %s", want, got)
-	}
-	if got, want := cacher.access, "some-access-key"; got != want {
-		t.Errorf("Expected s3 cacher with access key %s, got %s", want, got)
-	}
-	if got, want := cacher.region, "some-region"; got != want {
-		t.Errorf("Expected s3 cacher with region %s, got %s", want, got)
-	}
-	if got, want := cacher.secret, "some-secret-key"; got != want {
-		t.Errorf("Expected s3 cacher with secret key %s, got %s", want, got)
-	}
+	compiler = New()
+	assert.ElementsMatch(t, constant.TrustedClonePlugins, compiler.trustedClonePlugins)
 }

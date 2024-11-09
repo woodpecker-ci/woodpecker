@@ -15,14 +15,15 @@
 package secret
 
 import (
+	"context"
 	"os"
 	"strings"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
-	"github.com/woodpecker-ci/woodpecker/cli/common"
-	"github.com/woodpecker-ci/woodpecker/cli/internal"
-	"github.com/woodpecker-ci/woodpecker/woodpecker-go/woodpecker"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker"
 )
 
 var secretCreateCmd = &cli.Command{
@@ -30,7 +31,7 @@ var secretCreateCmd = &cli.Command{
 	Usage:     "adds a secret",
 	ArgsUsage: "[repo-id|repo-full-name]",
 	Action:    secretCreate,
-	Flags: append(common.GlobalFlags,
+	Flags: []cli.Flag{
 		&cli.BoolFlag{
 			Name:  "global",
 			Usage: "global secret",
@@ -53,25 +54,20 @@ var secretCreateCmd = &cli.Command{
 			Name:  "image",
 			Usage: "secret limited to these images",
 		},
-		&cli.BoolFlag{
-			Name:  "plugins-only",
-			Usage: "secret limited to plugins",
-		},
-	),
+	},
 }
 
-func secretCreate(c *cli.Context) error {
-	client, err := internal.NewClient(c)
+func secretCreate(ctx context.Context, c *cli.Command) error {
+	client, err := internal.NewClient(ctx, c)
 	if err != nil {
 		return err
 	}
 
 	secret := &woodpecker.Secret{
-		Name:        strings.ToLower(c.String("name")),
-		Value:       c.String("value"),
-		Images:      c.StringSlice("image"),
-		PluginsOnly: c.Bool("plugins-only"),
-		Events:      c.StringSlice("event"),
+		Name:   strings.ToLower(c.String("name")),
+		Value:  c.String("value"),
+		Images: c.StringSlice("image"),
+		Events: c.StringSlice("event"),
 	}
 	if len(secret.Events) == 0 {
 		secret.Events = defaultSecretEvents
@@ -107,5 +103,6 @@ func secretCreate(c *cli.Context) error {
 var defaultSecretEvents = []string{
 	woodpecker.EventPush,
 	woodpecker.EventTag,
+	woodpecker.EventRelease,
 	woodpecker.EventDeploy,
 }

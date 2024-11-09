@@ -15,14 +15,14 @@
 package repo
 
 import (
+	"context"
 	"fmt"
 	"time"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
-	"github.com/woodpecker-ci/woodpecker/cli/common"
-	"github.com/woodpecker-ci/woodpecker/cli/internal"
-	"github.com/woodpecker-ci/woodpecker/woodpecker-go/woodpecker"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker"
 )
 
 var repoUpdateCmd = &cli.Command{
@@ -30,7 +30,7 @@ var repoUpdateCmd = &cli.Command{
 	Usage:     "update a repository",
 	ArgsUsage: "<repo-id|repo-full-name>",
 	Action:    repoUpdate,
-	Flags: append(common.GlobalFlags,
+	Flags: []cli.Flag{
 		&cli.BoolFlag{
 			Name:  "trusted",
 			Usage: "repository is trusted",
@@ -59,12 +59,12 @@ var repoUpdateCmd = &cli.Command{
 			Name:  "unsafe",
 			Usage: "validate updating the pipeline-counter is unsafe",
 		},
-	),
+	},
 }
 
-func repoUpdate(c *cli.Context) error {
+func repoUpdate(ctx context.Context, c *cli.Command) error {
 	repoIDOrFullName := c.Args().First()
-	client, err := internal.NewClient(c)
+	client, err := internal.NewClient(ctx, c)
 	if err != nil {
 		return err
 	}
@@ -79,7 +79,7 @@ func repoUpdate(c *cli.Context) error {
 		timeout         = c.Duration("timeout")
 		trusted         = c.Bool("trusted")
 		gated           = c.Bool("gated")
-		pipelineCounter = c.Int("pipeline-counter")
+		pipelineCounter = int(c.Int("pipeline-counter"))
 		unsafe          = c.Bool("unsafe")
 	)
 

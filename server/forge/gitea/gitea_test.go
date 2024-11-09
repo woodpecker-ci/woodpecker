@@ -26,11 +26,11 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/mock"
 
-	"github.com/woodpecker-ci/woodpecker/server/forge/gitea/fixtures"
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/store"
-	mocks_store "github.com/woodpecker-ci/woodpecker/server/store/mocks"
-	"github.com/woodpecker-ci/woodpecker/shared/utils"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge/gitea/fixtures"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store"
+	mocks_store "go.woodpecker-ci.org/woodpecker/v2/server/store/mocks"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/utils"
 )
 
 func Test_gitea(t *testing.T) {
@@ -57,12 +57,10 @@ func Test_gitea(t *testing.T) {
 					URL:        "http://localhost:8080",
 					SkipVerify: true,
 				})
-				g.Assert(forge.(*Gitea).url).Equal("http://localhost:8080")
-				g.Assert(forge.(*Gitea).SkipVerify).Equal(true)
-			})
-			g.It("Should handle malformed url", func() {
-				_, err := New(Opts{URL: "%gh&%ij"})
-				g.Assert(err).IsNotNil()
+
+				f, _ := forge.(*Gitea)
+				g.Assert(f.url).Equal("http://localhost:8080")
+				g.Assert(f.SkipVerify).Equal(true)
 			})
 		})
 
@@ -92,7 +90,7 @@ func Test_gitea(t *testing.T) {
 				g.Assert(repo.FullName).Equal(fakeRepo.Owner + "/" + fakeRepo.Name)
 				g.Assert(repo.IsSCMPrivate).IsTrue()
 				g.Assert(repo.Clone).Equal("http://localhost/test_name/repo_name.git")
-				g.Assert(repo.Link).Equal("http://localhost/test_name/repo_name")
+				g.Assert(repo.ForgeURL).Equal("http://localhost/test_name/repo_name")
 			})
 			g.It("Should handle a not found error", func() {
 				_, err := c.Repo(ctx, fakeUser, "0", fakeRepoNotFound.Owner, fakeRepoNotFound.Name)
@@ -151,7 +149,7 @@ func Test_gitea(t *testing.T) {
 
 		g.It("Given a PR hook", func() {
 			buf := bytes.NewBufferString(fixtures.HookPullRequest)
-			req, _ := http.NewRequest("POST", "/hook", buf)
+			req, _ := http.NewRequest(http.MethodPost, "/hook", buf)
 			req.Header = http.Header{}
 			req.Header.Set(hookEvent, hookPullRequest)
 			mockStore.On("GetRepoNameFallback", mock.Anything, mock.Anything).Return(fakeRepo, nil)

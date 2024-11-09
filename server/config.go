@@ -12,49 +12,33 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-//
-// This file has been modified by Informatyka Boguslawski sp. z o.o. sp.k.
 
 package server
 
 import (
-	"crypto"
 	"time"
 
-	"github.com/woodpecker-ci/woodpecker/server/cache"
-	"github.com/woodpecker-ci/woodpecker/server/forge"
-	"github.com/woodpecker-ci/woodpecker/server/logging"
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/plugins/config"
-	"github.com/woodpecker-ci/woodpecker/server/pubsub"
-	"github.com/woodpecker-ci/woodpecker/server/queue"
+	"go.woodpecker-ci.org/woodpecker/v2/server/cache"
+	"go.woodpecker-ci.org/woodpecker/v2/server/logging"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/pubsub"
+	"go.woodpecker-ci.org/woodpecker/v2/server/queue"
+	"go.woodpecker-ci.org/woodpecker/v2/server/services"
+	"go.woodpecker-ci.org/woodpecker/v2/server/services/log"
+	"go.woodpecker-ci.org/woodpecker/v2/server/services/permissions"
 )
 
 var Config = struct {
 	Services struct {
-		Pubsub              *pubsub.Publisher
-		Queue               queue.Queue
-		Logs                logging.Log
-		Secrets             model.SecretService
-		Registries          model.RegistryService
-		Environ             model.EnvironService
-		Forge               forge.Forge
-		Timeout             time.Duration
-		Membership          cache.MembershipService
-		ConfigService       config.Extension
-		SignaturePrivateKey crypto.PrivateKey
-		SignaturePublicKey  crypto.PublicKey
-	}
-	Storage struct {
-		// Users  model.UserStore
-		// Repos  model.RepoStore
-		// Builds model.BuildStore
-		// Logs   model.LogStore
-		Steps model.StepStore
-		// Registries model.RegistryStore
-		// Secrets model.SecretStore
+		Pubsub     *pubsub.Publisher
+		Queue      queue.Queue
+		Logs       logging.Log
+		Membership cache.MembershipService
+		Manager    services.Manager
+		LogStore   log.Service
 	}
 	Server struct {
+		JWTSecret           string
 		Key                 string
 		Cert                string
 		OAuthHost           string
@@ -63,20 +47,16 @@ var Config = struct {
 		Port                string
 		PortTLS             string
 		AgentToken          string
-		Docs                string
 		StatusContext       string
 		StatusContextFormat string
 		SessionExpires      time.Duration
 		RootPath            string
 		CustomCSSFile       string
 		CustomJsFile        string
-		Migrations          struct {
-			AllowLong bool
-		}
-		EnableSwagger bool
-		// Open bool
-		// Orgs map[string]struct{}
-		// Admins map[string]struct{}
+	}
+	WebUI struct {
+		EnableSwagger    bool
+		SkipVersionCheck bool
 	}
 	Prometheus struct {
 		AuthToken string
@@ -84,11 +64,11 @@ var Config = struct {
 	Pipeline struct {
 		AuthenticatePublicRepos             bool
 		DefaultCancelPreviousPipelineEvents []model.WebhookEvent
-		DefaultCloneImage                   string
-		Limits                              model.ResourceLimit
+		DefaultClonePlugin                  string
+		TrustedClonePlugins                 []string
 		Volumes                             []string
 		Networks                            []string
-		Privileged                          []string
+		PrivilegedPlugins                   []string
 		DefaultTimeout                      int64
 		MaxTimeout                          int64
 		Proxy                               struct {
@@ -96,5 +76,11 @@ var Config = struct {
 			HTTP  string
 			HTTPS string
 		}
+	}
+	Permissions struct {
+		Open            bool
+		Admins          *permissions.Admins
+		Orgs            *permissions.Orgs
+		OwnersAllowlist *permissions.OwnersAllowlist
 	}
 }{}

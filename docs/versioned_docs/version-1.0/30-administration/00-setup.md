@@ -15,8 +15,6 @@ A Woodpecker deployment consists of two parts:
 
 Woodpecker is having two different kinds of releases: **stable** and **next**.
 
-To find out more about the differences between the two releases, please read the [FAQ](/faq).
-
 ## Hardware Requirements
 
 Below are resources requirements for Woodpecker components itself:

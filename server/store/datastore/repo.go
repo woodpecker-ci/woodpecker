@@ -16,13 +16,14 @@ package datastore
 
 import (
 	"errors"
+	"fmt"
 	"strings"
 
 	"xorm.io/builder"
 	"xorm.io/xorm"
 
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/store/types"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store/types"
 )
 
 func (s storage) GetRepo(id int64) (*model.Repo, error) {
@@ -72,14 +73,22 @@ func (s storage) GetRepoName(fullName string) (*model.Repo, error) {
 
 func (s storage) getRepoName(e *xorm.Session, fullName string) (*model.Repo, error) {
 	repo := new(model.Repo)
-	return repo, wrapGet(e.Where("LOWER(repo_full_name) = ?", strings.ToLower(fullName)).Get(repo))
+	return repo, wrapGet(e.Where("LOWER(full_name) = ?", strings.ToLower(fullName)).Get(repo))
 }
 
 func (s storage) GetRepoCount() (int64, error) {
-	return s.engine.Where(builder.Eq{"repo_active": true}).Count(new(model.Repo))
+	return s.engine.Where(builder.Eq{"active": true}).Count(new(model.Repo))
 }
 
 func (s storage) CreateRepo(repo *model.Repo) error {
+	switch {
+	case repo.Name == "":
+		return fmt.Errorf("repo name is empty")
+	case repo.Owner == "":
+		return fmt.Errorf("repo owner is empty")
+	case repo.FullName == "":
+		return fmt.Errorf("repo full name is empty")
+	}
 	// only Insert set auto created ID back to object
 	_, err := s.engine.Insert(repo)
 	return err
@@ -96,16 +105,16 @@ func (s storage) DeleteRepo(repo *model.Repo) error {
 
 func (s storage) deleteRepo(sess *xorm.Session, repo *model.Repo) error {
 	const batchSize = perPage
-	if _, err := sess.Where("config_repo_id = ?", repo.ID).Delete(new(model.Config)); err != nil {
+	if _, err := sess.Where("repo_id = ?", repo.ID).Delete(new(model.Config)); err != nil {
 		return err
 	}
-	if _, err := sess.Where("perm_repo_id = ?", repo.ID).Delete(new(model.Perm)); err != nil {
+	if _, err := sess.Where("repo_id = ?", repo.ID).Delete(new(model.Perm)); err != nil {
 		return err
 	}
-	if _, err := sess.Where("registry_repo_id = ?", repo.ID).Delete(new(model.Registry)); err != nil {
+	if _, err := sess.Where("repo_id = ?", repo.ID).Delete(new(model.Registry)); err != nil {
 		return err
 	}
-	if _, err := sess.Where("secret_repo_id = ?", repo.ID).Delete(new(model.Secret)); err != nil {
+	if _, err := sess.Where("repo_id = ?", repo.ID).Delete(new(model.Secret)); err != nil {
 		return err
 	}
 	if _, err := sess.Where("repo_id = ?", repo.ID).Delete(new(model.Redirection)); err != nil {
@@ -115,7 +124,7 @@ func (s storage) deleteRepo(sess *xorm.Session, repo *model.Repo) error {
 	// delete related pipelines
 	for startPipelines := 0; ; startPipelines += batchSize {
 		pipelineIDs := make([]int64, 0, batchSize)
-		if err := sess.Limit(batchSize, startPipelines).Table("pipelines").Cols("pipeline_id").Where("pipeline_repo_id = ?", repo.ID).Find(&pipelineIDs); err != nil {
+		if err := sess.Limit(batchSize, startPipelines).Table("pipelines").Cols("id").Where("repo_id = ?", repo.ID).Find(&pipelineIDs); err != nil {
 			return err
 		}
 		if len(pipelineIDs) == 0 {
@@ -123,7 +132,7 @@ func (s storage) deleteRepo(sess *xorm.Session, repo *model.Repo) error {
 		}
 
 		for i := range pipelineIDs {
-			if err := deletePipeline(sess, pipelineIDs[i]); err != nil {
+			if err := s.deletePipeline(sess, pipelineIDs[i]); err != nil {
 				return err
 			}
 		}
@@ -137,27 +146,27 @@ func (s storage) deleteRepo(sess *xorm.Session, repo *model.Repo) error {
 func (s storage) RepoList(user *model.User, owned, active bool) ([]*model.Repo, error) {
 	repos := make([]*model.Repo, 0)
 	sess := s.engine.Table("repos").
-		Join("INNER", "perms", "perms.perm_repo_id = repos.repo_id").
-		Where("perms.perm_user_id = ?", user.ID)
+		Join("INNER", "perms", "perms.repo_id = repos.id").
+		Where("perms.user_id = ?", user.ID)
 	if owned {
-		sess = sess.And(builder.Eq{"perms.perm_push": true}.Or(builder.Eq{"perms.perm_admin": true}))
+		sess = sess.And(builder.Eq{"perms.push": true}.Or(builder.Eq{"perms.admin": true}))
 	}
 	if active {
-		sess = sess.And(builder.Eq{"repos.repo_active": true})
+		sess = sess.And(builder.Eq{"repos.active": true})
 	}
 	return repos, sess.
-		Asc("repo_full_name").
+		Asc("full_name").
 		Find(&repos)
 }
 
-// RepoListAll list all repos
+// RepoListAll list all repos.
 func (s storage) RepoListAll(active bool, p *model.ListOptions) ([]*model.Repo, error) {
 	repos := make([]*model.Repo, 0)
 	sess := s.paginate(p).Table("repos")
 	if active {
-		sess = sess.And(builder.Eq{"repos.repo_active": true})
+		sess = sess.And(builder.Eq{"repos.active": true})
 	}
 	return repos, sess.
-		Asc("repo_full_name").
+		Asc("full_name").
 		Find(&repos)
 }

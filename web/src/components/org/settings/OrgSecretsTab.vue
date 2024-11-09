@@ -1,23 +1,13 @@
 <template>
-  <Settings
-    :title="$t('org.settings.secrets.secrets')"
-    :desc="$t('org.settings.secrets.desc')"
-    docs-url="docs/usage/secrets"
-  >
+  <Settings :title="$t('secrets.secrets')" :desc="$t('org.settings.secrets.desc')" docs-url="docs/usage/secrets">
     <template #titleActions>
-      <Button
-        v-if="selectedSecret"
-        :text="$t('org.settings.secrets.show')"
-        start-icon="back"
-        @click="selectedSecret = undefined"
-      />
-      <Button v-else :text="$t('org.settings.secrets.add')" start-icon="plus" @click="showAddSecret" />
+      <Button v-if="selectedSecret" :text="$t('secrets.show')" start-icon="back" @click="selectedSecret = undefined" />
+      <Button v-else :text="$t('secrets.add')" start-icon="plus" @click="showAddSecret" />
     </template>
 
     <SecretList
       v-if="!selectedSecret"
       v-model="secrets"
-      i18n-prefix="org.settings.secrets."
       :is-deleting="isDeleting"
       @edit="editSecret"
       @delete="deleteSecret"
@@ -26,7 +16,6 @@
     <SecretEdit
       v-else
       v-model="selectedSecret"
-      i18n-prefix="org.settings.secrets."
       :is-saving="isSaving"
       @save="createSecret"
       @cancel="selectedSecret = undefined"
@@ -36,7 +25,7 @@
 
 <script lang="ts" setup>
 import { cloneDeep } from 'lodash';
-import { computed, inject, Ref, ref } from 'vue';
+import { computed, inject, ref, type Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import Button from '~/components/atomic/Button.vue';
@@ -47,13 +36,13 @@ import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useNotifications from '~/compositions/useNotifications';
 import { usePagination } from '~/compositions/usePaginate';
-import { Org, Secret, WebhookEvents } from '~/lib/api/types';
+import { WebhookEvents, type Org, type Secret } from '~/lib/api/types';
 
-const emptySecret = {
+const emptySecret: Partial<Secret> = {
   name: '',
   value: '',
-  image: [],
-  event: [WebhookEvents.Push],
+  images: [],
+  events: [WebhookEvents.Push],
 };
 
 const apiClient = useApiClient();
@@ -69,7 +58,7 @@ async function loadSecrets(page: number): Promise<Secret[] | null> {
     throw new Error("Unexpected: Can't load org");
   }
 
-  return apiClient.getOrgSecretList(org.value.id, page);
+  return apiClient.getOrgSecretList(org.value.id, { page });
 }
 
 const { resetPage, data: secrets } = usePagination(loadSecrets, () => !selectedSecret.value);
@@ -89,7 +78,7 @@ const { doSubmit: createSecret, isLoading: isSaving } = useAsyncAction(async () 
     await apiClient.createOrgSecret(org.value.id, selectedSecret.value);
   }
   notifications.notify({
-    title: i18n.t(isEditingSecret.value ? 'org.settings.secrets.saved' : 'org.settings.secrets.created'),
+    title: isEditingSecret.value ? i18n.t('secrets.saved') : i18n.t('secrets.created'),
     type: 'success',
   });
   selectedSecret.value = undefined;
@@ -102,7 +91,7 @@ const { doSubmit: deleteSecret, isLoading: isDeleting } = useAsyncAction(async (
   }
 
   await apiClient.deleteOrgSecret(org.value.id, _secret.name);
-  notifications.notify({ title: i18n.t('org.settings.secrets.deleted'), type: 'success' });
+  notifications.notify({ title: i18n.t('secrets.deleted'), type: 'success' });
   resetPage();
 });
 

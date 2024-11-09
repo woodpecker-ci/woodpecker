@@ -1,0 +1,913 @@
+{
+  "title": "Woodpecker CI configuration file",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://raw.githubusercontent.com/woodpecker-ci/woodpecker/main/pipeline/frontend/yaml/linter/schema/schema.json",
+  "description": "Schema of a Woodpecker pipeline file. Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax",
+  "type": "object",
+  "required": ["steps"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "format": "uri"
+    },
+    "variables": {
+      "description": "Use yaml aliases to define variables. Read more: https://woodpecker-ci.org/docs/usage/advanced-usage"
+    },
+    "clone": {
+      "$ref": "#/definitions/clone"
+    },
+    "skip_clone": {
+      "type": "boolean"
+    },
+    "when": {
+      "$ref": "#/definitions/workflow_when"
+    },
+    "steps": {
+      "$ref": "#/definitions/step_list"
+    },
+    "services": {
+      "$ref": "#/definitions/services"
+    },
+    "workspace": {
+      "$ref": "#/definitions/workspace"
+    },
+    "matrix": {
+      "$ref": "#/definitions/matrix"
+    },
+    "labels": {
+      "$ref": "#/definitions/labels"
+    },
+    "depends_on": {
+      "type": "array",
+      "minLength": 1,
+      "items": {
+        "type": "string"
+      }
+    },
+    "runs_on": {
+      "type": "array",
+      "minLength": 1,
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "definitions": {
+    "clone": {
+      "description": "Configures the clone step. Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#clone",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "git": {
+              "type": "object",
+              "properties": {
+                "image": {
+                  "$ref": "#/definitions/step_image"
+                },
+                "settings": {
+                  "$ref": "#/definitions/clone_settings"
+                }
+              }
+            }
+          }
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/step"
+          },
+          "minLength": 1
+        }
+      ]
+    },
+    "clone_settings": {
+      "description": "Change the settings of your clone plugin. Read more: https://woodpecker-ci.org/plugins/Git%20Clone",
+      "type": "object",
+      "properties": {
+        "depth": {
+          "type": "number",
+          "description": "If specified, uses git's --depth option to create a shallow clone with a limited number of commits, overwritten by partial"
+        },
+        "recursive": {
+          "type": "boolean",
+          "default": false,
+          "description": "Clones submodules recursively"
+        },
+        "partial": {
+          "type": "boolean",
+          "description": "Only fetch the one commit and it's blob objects to resolve all files, overwrite depth with 1"
+        },
+        "lfs": {
+          "type": "boolean",
+          "default": true,
+          "description": "Set this to false to disable retrieval of LFS files"
+        },
+        "tags": {
+          "type": "boolean",
+          "description": "Fetches tags when set to true, default is false if event is not tag else true"
+        }
+      },
+      "additionalProperties": {
+        "type": ["boolean", "string", "number", "array", "object"]
+      }
+    },
+    "step_list": {
+      "description": "The steps section defines a list of steps which will be executed serially, in the order in which they are defined. Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#steps",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/step"
+          },
+          "minProperties": 1
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/step"
+          },
+          "minLength": 1
+        }
+      ]
+    },
+    "workflow_when": {
+      "description": "Whole workflow can be skipped based on conditions. Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#when---global-workflow-conditions",
+      "oneOf": [
+        {
+          "type": "array",
+          "minLength": 1,
+          "items": {
+            "$ref": "#/definitions/workflow_when_condition"
+          }
+        },
+        {
+          "$ref": "#/definitions/workflow_when_condition"
+        }
+      ]
+    },
+    "workflow_when_condition": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "repo": {
+          "description": "Execute a step only on a specific repository. Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#repo",
+          "$ref": "#/definitions/constraint_list"
+        },
+        "branch": {
+          "description": "Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#branch",
+          "$ref": "#/definitions/constraint_list"
+        },
+        "event": {
+          "description": "Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#event",
+          "default": [],
+          "$ref": "#/definitions/event_constraint_list"
+        },
+        "ref": {
+          "description": "Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#ref",
+          "type": "string"
+        },
+        "cron": {
+          "description": "filter cron by title. Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#cron",
+          "$ref": "#/definitions/constraint_list"
+        },
+        "platform": {
+          "description": "Execute a step only on a specific platform. Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#platform",
+          "$ref": "#/definitions/constraint_list"
+        },
+        "instance": {
+          "description": "Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#instance",
+          "$ref": "#/definitions/constraint_list"
+        },
+        "path": {
+          "description": "Execute a step only on commit with certain files added/removed/modified. Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#path",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "object",
+              "properties": {
+                "include": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "exclude": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "ignore_message": {
+                  "type": "string"
+                },
+                "on_empty": {
+                  "type": "boolean"
+                }
+              },
+              "additionalProperties": false
+            }
+          ]
+        },
+        "evaluate": {
+          "description": "Execute a step only if the expression evaluates to true. Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#evaluate",
+          "type": "string"
+        }
+      }
+    },
+    "step": {
+      "description": "A step of your workflow executes either arbitrary commands or uses a plugin. Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#steps",
+      "anyOf": [
+        {
+          "$ref": "#/definitions/commands_step"
+        },
+        {
+          "$ref": "#/definitions/plugin_step"
+        }
+      ]
+    },
+    "commands_step": {
+      "description": "Every step of your pipeline executes arbitrary commands inside a specified docker container. Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#steps",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["image"],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "detach": {
+                "const": true
+              }
+            }
+          },
+          "then": {},
+          "else": {
+            "anyOf": [
+              {
+                "required": ["commands"]
+              },
+              {
+                "required": ["entrypoint"]
+              }
+            ]
+          }
+        }
+      ],
+      "properties": {
+        "name": {
+          "description": "The name of the step. Can be used if using the array style steps list.",
+          "type": "string"
+        },
+        "image": {
+          "$ref": "#/definitions/step_image"
+        },
+        "privileged": {
+          "$ref": "#/definitions/step_privileged"
+        },
+        "pull": {
+          "$ref": "#/definitions/step_pull"
+        },
+        "commands": {
+          "$ref": "#/definitions/step_commands"
+        },
+        "environment": {
+          "$ref": "#/definitions/step_environment"
+        },
+        "directory": {
+          "$ref": "#/definitions/step_directory"
+        },
+        "secrets": {
+          "$ref": "#/definitions/step_secrets"
+        },
+        "when": {
+          "$ref": "#/definitions/step_when"
+        },
+        "volumes": {
+          "$ref": "#/definitions/step_volumes"
+        },
+        "depends_on": {
+          "description": "Execute a step after another step has finished.",
+          "oneOf": [
+            {
+              "type": "array",
+              "minLength": 1,
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "detach": {
+          "description": "Detach a step to run in background until pipeline finishes. Read more: https://woodpecker-ci.org/docs/usage/services#detachment",
+          "type": "boolean"
+        },
+        "failure": {
+          "description": "How to handle the failure of this step. Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#failure",
+          "type": "string",
+          "enum": ["fail", "ignore"],
+          "default": "fail"
+        },
+        "backend_options": {
+          "$ref": "#/definitions/step_backend_options"
+        },
+        "entrypoint": {
+          "description": "Defines container entrypoint.",
+          "oneOf": [
+            {
+              "type": "array",
+              "minLength": 1,
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "string"
+            }
+          ]
+        }
+      }
+    },
+    "plugin_step": {
+      "description": "Plugins let you execute predefined functions in a more secure context. Read more: https://woodpecker-ci.org/docs/usage/plugins/overview",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["image"],
+      "properties": {
+        "name": {
+          "description": "The name of the step. Can be used if using the array style steps list.",
+          "type": "string"
+        },
+        "image": {
+          "$ref": "#/definitions/step_image"
+        },
+        "privileged": {
+          "$ref": "#/definitions/step_privileged"
+        },
+        "pull": {
+          "$ref": "#/definitions/step_pull"
+        },
+        "directory": {
+          "$ref": "#/definitions/step_directory"
+        },
+        "settings": {
+          "$ref": "#/definitions/step_settings"
+        },
+        "when": {
+          "$ref": "#/definitions/step_when"
+        },
+        "volumes": {
+          "$ref": "#/definitions/step_volumes"
+        },
+        "depends_on": {
+          "description": "Execute a step after another step has finished.",
+          "oneOf": [
+            {
+              "type": "array",
+              "minLength": 1,
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "detach": {
+          "description": "Detach a step to run in background until pipeline finishes. Read more: https://woodpecker-ci.org/docs/usage/services#detachment",
+          "type": "boolean"
+        },
+        "failure": {
+          "description": "How to handle the failure of this step. Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#failure",
+          "type": "string",
+          "enum": ["fail", "ignore"],
+          "default": "fail"
+        },
+        "backend_options": {
+          "$ref": "#/definitions/step_backend_options"
+        }
+      }
+    },
+    "step_when": {
+      "description": "Steps can be skipped based on conditions. Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#when---conditional-execution",
+      "oneOf": [
+        {
+          "type": "array",
+          "minLength": 1,
+          "items": {
+            "$ref": "#/definitions/step_when_condition"
+          }
+        },
+        {
+          "$ref": "#/definitions/step_when_condition"
+        }
+      ]
+    },
+    "step_when_condition": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "repo": {
+          "description": "Execute a step only on a specific repository. Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#repo",
+          "$ref": "#/definitions/constraint_list"
+        },
+        "branch": {
+          "description": "Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#branch",
+          "$ref": "#/definitions/constraint_list"
+        },
+        "event": {
+          "description": "Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#event",
+          "$ref": "#/definitions/event_constraint_list"
+        },
+        "ref": {
+          "description": "Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#ref",
+          "type": "string"
+        },
+        "cron": {
+          "description": "filter cron by title. Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#cron",
+          "$ref": "#/definitions/constraint_list"
+        },
+        "status": {
+          "description": "Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#status",
+          "oneOf": [
+            {
+              "type": "array",
+              "minLength": 1,
+              "items": {
+                "type": "string",
+                "enum": ["success", "failure"]
+              }
+            },
+            {
+              "type": "string",
+              "enum": ["success", "failure"]
+            }
+          ]
+        },
+        "platform": {
+          "description": "Execute a step only on a specific platform. Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#platform",
+          "$ref": "#/definitions/constraint_list"
+        },
+        "matrix": {
+          "description": "Read more: https://woodpecker-ci.org/docs/usage/matrix-workflows",
+          "type": "object",
+          "additionalProperties": {
+            "type": ["boolean", "string", "number"]
+          }
+        },
+        "instance": {
+          "description": "Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#instance",
+          "$ref": "#/definitions/constraint_list"
+        },
+        "path": {
+          "description": "Execute a step only on commit with certain files added/removed/modified. Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#path",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "object",
+              "properties": {
+                "include": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "exclude": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "ignore_message": {
+                  "type": "string"
+                },
+                "on_empty": {
+                  "type": "boolean"
+                }
+              },
+              "additionalProperties": false
+            }
+          ]
+        },
+        "evaluate": {
+          "description": "Execute a step only if the expression evaluates to true. Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#evaluate",
+          "type": "string"
+        }
+      }
+    },
+    "event_enum": {
+      "enum": ["push", "pull_request", "pull_request_closed", "tag", "deployment", "cron", "manual", "release"]
+    },
+    "event_constraint_list": {
+      "oneOf": [
+        {
+          "$ref": "#/definitions/event_enum"
+        },
+        {
+          "type": "array",
+          "minLength": 1,
+          "items": {
+            "$ref": "#/definitions/event_enum"
+          }
+        }
+      ]
+    },
+    "constraint_list": {
+      "oneOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "array",
+          "minLength": 1,
+          "items": {
+            "type": "string"
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "include": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "array",
+                  "minLength": 1,
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              ]
+            },
+            "exclude": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "array",
+                  "minLength": 1,
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "step_image": {
+      "description": "Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#image",
+      "type": "string"
+    },
+    "step_privileged": {
+      "description": "Run the step in privileged mode. Read more: https://woodpecker-ci.org/docs/next/usage/workflow-syntax#privileged-mode",
+      "type": "boolean",
+      "default": false
+    },
+    "step_pull": {
+      "description": "Always pull the latest image on pipeline execution Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#image",
+      "type": "boolean"
+    },
+    "step_commands": {
+      "description": "Commands of every pipeline step are executed serially as if you would enter them into your local shell. Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#commands",
+      "oneOf": [
+        {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minLength": 1
+        },
+        {
+          "type": "string"
+        }
+      ]
+    },
+    "step_environment": {
+      "description": "Pass environment variables to a pipeline step. Read more: https://woodpecker-ci.org/docs/usage/environment",
+      "type": "object",
+      "additionalProperties": {
+        "type": ["boolean", "string", "number", "array", "object"]
+      }
+    },
+    "step_secrets": {
+      "description": "Pass secrets to a pipeline step at runtime. Read more: https://woodpecker-ci.org/docs/usage/secrets",
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minLength": 1
+    },
+    "step_settings": {
+      "description": "Change the settings of your plugin. Read more: https://woodpecker-ci.org/docs/usage/plugins/overview",
+      "type": "object",
+      "additionalProperties": {
+        "type": ["boolean", "string", "number", "array", "object"]
+      }
+    },
+    "step_volumes": {
+      "description": "Mount files or folders from the host machine into your step container. Read more: https://woodpecker-ci.org/docs/usage/volumes",
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minLength": 1
+    },
+    "step_directory": {
+      "description": "Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#directory",
+      "type": "string"
+    },
+    "step_backend_options": {
+      "description": "Advanced options for the different agent backends",
+      "type": "object",
+      "properties": {
+        "kubernetes": {
+          "$ref": "#/definitions/step_backend_kubernetes"
+        }
+      }
+    },
+    "step_backend_kubernetes": {
+      "description": "Advanced options for the kubernetes agent backends",
+      "type": "object",
+      "properties": {
+        "labels": {
+          "type": "object",
+          "additionalProperties": {
+            "type": ["boolean", "string", "number"]
+          }
+        },
+        "annotations": {
+          "type": "object",
+          "additionalProperties": {
+            "type": ["boolean", "string", "number"]
+          }
+        },
+        "securityContext": {
+          "$ref": "#/definitions/step_backend_kubernetes_security_context"
+        },
+        "runtimeClassName": {
+          "description": "Read more: https://woodpecker-ci.org/docs/administration/backends/kubernetes#runtimeclassname",
+          "type": "string"
+        },
+        "secrets": {
+          "description": "The secrets section defines a list of references to the native Kubernetes secrets",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/step_kubernetes_secret"
+          },
+          "minLength": 1
+        }
+      }
+    },
+    "step_backend_kubernetes_resources": {
+      "description": "Resources for the kubernetes backend. Read more: https://woodpecker-ci.org/docs/administration/backends/kubernetes#job-specific-configuration",
+      "type": "object",
+      "properties": {
+        "requests": {
+          "$ref": "#/definitions/step_kubernetes_resources_object"
+        },
+        "limits": {
+          "$ref": "#/definitions/step_kubernetes_resources_object"
+        }
+      }
+    },
+    "step_backend_kubernetes_security_context": {
+      "description": "Pods / containers security context. Read more: https://woodpecker-ci.org/docs/administration/backends/kubernetes#securitycontext",
+      "type": "object",
+      "properties": {
+        "privileged": {
+          "type": "boolean"
+        },
+        "runAsNonRoot": {
+          "type": "boolean"
+        },
+        "runAsUser": {
+          "type": "number"
+        },
+        "runAsGroup": {
+          "type": "number"
+        },
+        "fsGroup": {
+          "type": "number"
+        },
+        "seccompProfile": {
+          "$ref": "#/definitions/step_backend_kubernetes_secprofile"
+        },
+        "apparmorProfile": {
+          "$ref": "#/definitions/step_backend_kubernetes_secprofile"
+        }
+      }
+    },
+    "step_backend_kubernetes_secprofile": {
+      "description": "Pods / containers security profile. Read more: https://woodpecker-ci.org/docs/administration/backends/kubernetes#job-specific-configuration",
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "localhostProfile": {
+          "type": "string"
+        }
+      }
+    },
+    "step_kubernetes_resources_object": {
+      "description": "A list of kubernetes resource mappings",
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "step_backend_kubernetes_service_account": {
+      "description": "serviceAccountName to be use by job. Read more: https://woodpecker-ci.org/docs/administration/backends/kubernetes#serviceaccountname",
+      "type": "object",
+      "properties": {
+        "requests": {
+          "$ref": "#/definitions/step_kubernetes_service_account_object"
+        },
+        "limits": {
+          "$ref": "#/definitions/step_kubernetes_service_account_object"
+        }
+      }
+    },
+    "step_kubernetes_service_account_object": {
+      "description": "A list of kubernetes resource mappings",
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "step_kubernetes_secret": {
+      "description": "A reference to a native Kubernetes secret",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "description": "The name of the secret. Can be used if using the array style secrets list.",
+          "type": "string"
+        },
+        "key": {
+          "description": "The key of the secret to select from.",
+          "type": "string"
+        },
+        "target": {
+          "$ref": "#/definitions/step_kubernetes_secret_target"
+        }
+      }
+    },
+    "step_kubernetes_secret_target": {
+      "description": "A target which a native Kubernetes secret maps to.",
+      "oneOf": [
+        {
+          "env": {
+            "description": "The name of the environment variable which secret maps to.",
+            "type": "string"
+          }
+        },
+        {
+          "file": {
+            "description": "The filename (path) which secret maps to.",
+            "type": "string"
+          }
+        }
+      ]
+    },
+    "services": {
+      "description": "Read more: https://woodpecker-ci.org/docs/usage/services",
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/service"
+          },
+          "minProperties": 1
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/service"
+          },
+          "minLength": 1
+        }
+      ]
+    },
+    "service": {
+      "description": "Read more: https://woodpecker-ci.org/docs/usage/services",
+      "type": "object",
+      "additionalProperties": false,
+      "minProperties": 1,
+      "required": ["image"],
+      "properties": {
+        "name": {
+          "description": "The name of the service. Can be used if using the array style services list",
+          "type": "string"
+        },
+        "image": {
+          "$ref": "#/definitions/step_image"
+        },
+        "privileged": {
+          "$ref": "#/definitions/step_privileged"
+        },
+        "pull": {
+          "$ref": "#/definitions/step_pull"
+        },
+        "commands": {
+          "$ref": "#/definitions/step_commands"
+        },
+        "environment": {
+          "$ref": "#/definitions/step_environment"
+        },
+        "directory": {
+          "$ref": "#/definitions/step_directory"
+        },
+        "secrets": {
+          "$ref": "#/definitions/step_secrets"
+        },
+        "settings": {
+          "$ref": "#/definitions/step_settings"
+        },
+        "when": {
+          "$ref": "#/definitions/step_when"
+        },
+        "volumes": {
+          "$ref": "#/definitions/step_volumes"
+        },
+        "backend_options": {
+          "$ref": "#/definitions/step_backend_options"
+        },
+        "ports": {
+          "description": "expose ports to which other steps can connect to",
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ]
+          },
+          "minLength": 1
+        }
+      }
+    },
+    "workspace": {
+      "description": "Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#workspace",
+      "type": "object",
+      "additionalProperties": true
+    },
+    "matrix": {
+      "description": "Execute pipeline for each matrix combination. Read more: https://woodpecker-ci.org/docs/usage/matrix-workflows",
+      "type": "object",
+      "properties": {
+        "include": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          },
+          "minLength": 1
+        }
+      },
+      "additionalProperties": {
+        "type": "array",
+        "items": {
+          "type": ["boolean", "string", "number"]
+        },
+        "minLength": 1
+      }
+    },
+    "labels": {
+      "description": "Configures the labels used for the agent selection. Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#labels",
+      "type": "object",
+      "additionalProperties": {
+        "type": ["boolean", "string", "number"]
+      }
+    }
+  }
+}

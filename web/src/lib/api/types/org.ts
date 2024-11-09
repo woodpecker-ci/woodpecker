@@ -1,12 +1,12 @@
 // A version control organization.
-export type Org = {
+export interface Org {
   // The name of the organization.
   id: number;
   name: string;
   is_user: boolean;
-};
+}
 
-export type OrgPermissions = {
+export interface OrgPermissions {
   member: boolean;
   admin: boolean;
-};
+}

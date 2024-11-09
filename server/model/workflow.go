@@ -17,25 +17,22 @@ package model
 
 // Workflow represents a workflow in the pipeline.
 type Workflow struct {
-	ID         int64             `json:"id"                   xorm:"pk autoincr 'workflow_id'"`
-	PipelineID int64             `json:"pipeline_id"          xorm:"UNIQUE(s) INDEX 'workflow_pipeline_id'"`
-	PID        int               `json:"pid"                  xorm:"UNIQUE(s) 'workflow_pid'"`
-	Name       string            `json:"name"                 xorm:"workflow_name"`
-	State      StatusValue       `json:"state"                xorm:"workflow_state"`
-	Error      string            `json:"error,omitempty"      xorm:"TEXT 'workflow_error'"`
-	Started    int64             `json:"start_time,omitempty" xorm:"workflow_started"`
-	Stopped    int64             `json:"end_time,omitempty"   xorm:"workflow_stopped"`
-	AgentID    int64             `json:"agent_id,omitempty"   xorm:"workflow_agent_id"`
-	Platform   string            `json:"platform,omitempty"   xorm:"workflow_platform"`
-	Environ    map[string]string `json:"environ,omitempty"    xorm:"json 'workflow_environ'"`
+	ID         int64             `json:"id"                   xorm:"pk autoincr 'id'"`
+	PipelineID int64             `json:"pipeline_id"          xorm:"UNIQUE(s) INDEX 'pipeline_id'"`
+	PID        int               `json:"pid"                  xorm:"UNIQUE(s) 'pid'"`
+	Name       string            `json:"name"                 xorm:"name"`
+	State      StatusValue       `json:"state"                xorm:"state"`
+	Error      string            `json:"error,omitempty"      xorm:"TEXT 'error'"`
+	Started    int64             `json:"started,omitempty"    xorm:"started"`
+	Finished   int64             `json:"finished,omitempty"   xorm:"finished"`
+	AgentID    int64             `json:"agent_id,omitempty"   xorm:"agent_id"`
+	Platform   string            `json:"platform,omitempty"   xorm:"platform"`
+	Environ    map[string]string `json:"environ,omitempty"    xorm:"json 'environ'"`
+	AxisID     int               `json:"-"                    xorm:"axis_id"`
 	Children   []*Step           `json:"children,omitempty"   xorm:"-"`
 }
 
-type UpdateWorkflowStore interface {
-	WorkflowUpdate(*Workflow) error
-}
-
-// TableName return database table name for xorm
+// TableName return database table name for xorm.
 func (Workflow) TableName() string {
 	return "workflows"
 }
@@ -50,7 +47,7 @@ func (p *Workflow) Failing() bool {
 	return p.State == StatusError || p.State == StatusKilled || p.State == StatusFailure
 }
 
-// IsThereRunningStage determine if it contains workflows running or pending to run
+// IsThereRunningStage determine if it contains workflows running or pending to run.
 // TODO: return false based on depends_on (https://github.com/woodpecker-ci/woodpecker/pull/730#discussion_r795681697)
 func IsThereRunningStage(workflows []*Workflow) bool {
 	for _, p := range workflows {
@@ -61,7 +58,7 @@ func IsThereRunningStage(workflows []*Workflow) bool {
 	return false
 }
 
-// PipelineStatus determine pipeline status based on corresponding workflow list
+// PipelineStatus determine pipeline status based on corresponding workflow list.
 func PipelineStatus(workflows []*Workflow) StatusValue {
 	status := StatusSuccess
 
@@ -74,7 +71,7 @@ func PipelineStatus(workflows []*Workflow) StatusValue {
 	return status
 }
 
-// WorkflowStatus determine workflow status based on corresponding step list
+// WorkflowStatus determine workflow status based on corresponding step list.
 func WorkflowStatus(steps []*Step) StatusValue {
 	status := StatusSuccess
 

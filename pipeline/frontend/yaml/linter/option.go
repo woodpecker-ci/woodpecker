@@ -18,8 +18,22 @@ package linter
 type Option func(*Linter)
 
 // WithTrusted adds the trusted option to the linter.
-func WithTrusted(trusted bool) Option {
+func WithTrusted(trusted TrustedConfiguration) Option {
 	return func(linter *Linter) {
 		linter.trusted = trusted
+	}
+}
+
+// PrivilegedPlugins adds the list of privileged plugins.
+func PrivilegedPlugins(plugins []string) Option {
+	return func(linter *Linter) {
+		linter.privilegedPlugins = &plugins
+	}
+}
+
+// WithTrustedClonePlugins adds the list of trusted clone plugins.
+func WithTrustedClonePlugins(plugins []string) Option {
+	return func(linter *Linter) {
+		linter.trustedClonePlugins = &plugins
 	}
 }

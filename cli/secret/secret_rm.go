@@ -15,10 +15,12 @@
 package secret
 
 import (
-	"github.com/urfave/cli/v2"
+	"context"
 
-	"github.com/woodpecker-ci/woodpecker/cli/common"
-	"github.com/woodpecker-ci/woodpecker/cli/internal"
+	"github.com/urfave/cli/v3"
+
+	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
 )
 
 var secretDeleteCmd = &cli.Command{
@@ -26,7 +28,7 @@ var secretDeleteCmd = &cli.Command{
 	Usage:     "remove a secret",
 	ArgsUsage: "[repo-id|repo-full-name]",
 	Action:    secretDelete,
-	Flags: append(common.GlobalFlags,
+	Flags: []cli.Flag{
 		&cli.BoolFlag{
 			Name:  "global",
 			Usage: "global secret",
@@ -37,13 +39,13 @@ var secretDeleteCmd = &cli.Command{
 			Name:  "name",
 			Usage: "secret name",
 		},
-	),
+	},
 }
 
-func secretDelete(c *cli.Context) error {
+func secretDelete(ctx context.Context, c *cli.Command) error {
 	secretName := c.String("name")
 
-	client, err := internal.NewClient(c)
+	client, err := internal.NewClient(ctx, c)
 	if err != nil {
 		return err
 	}

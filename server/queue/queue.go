@@ -17,9 +17,11 @@ package queue
 import (
 	"context"
 	"errors"
+	"fmt"
 	"strings"
 
-	"github.com/woodpecker-ci/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 )
 
 var (
@@ -28,6 +30,9 @@ var (
 
 	// ErrNotFound indicates the task was not found in the queue.
 	ErrNotFound = errors.New("queue: task not found")
+
+	// ErrAgentMissMatch indicates a task is assigned to a different agent.
+	ErrAgentMissMatch = errors.New("task assigned to different agent")
 )
 
 // InfoT provides runtime information.
@@ -40,7 +45,6 @@ type InfoT struct {
 		Pending       int `json:"pending_count"`
 		WaitingOnDeps int `json:"waiting_on_deps_count"`
 		Running       int `json:"running_count"`
-		Complete      int `json:"completed_count"`
 	} `json:"stats"`
 	Paused bool `json:"paused"`
 } //	@name InfoT
@@ -65,7 +69,8 @@ func (t *InfoT) String() string {
 
 // Filter filters tasks in the queue. If the Filter returns false,
 // the Task is skipped and not returned to the subscriber.
-type FilterFn func(*model.Task) bool
+// The int return value represents the matching score (higher is better).
+type FilterFn func(*model.Task) (bool, int)
 
 // Queue defines a task queue for scheduling tasks among
 // a pool of workers.
@@ -73,29 +78,29 @@ type Queue interface {
 	// Push pushes a task to the tail of this queue.
 	Push(c context.Context, task *model.Task) error
 
-	// PushAtOnce pushes a task to the tail of this queue.
+	// PushAtOnce pushes multiple tasks to the tail of this queue.
 	PushAtOnce(c context.Context, tasks []*model.Task) error
 
 	// Poll retrieves and removes a task head of this queue.
 	Poll(c context.Context, agentID int64, f FilterFn) (*model.Task, error)
 
 	// Extend extends the deadline for a task.
-	Extend(c context.Context, id string) error
+	Extend(c context.Context, agentID int64, workflowID string) error
 
 	// Done signals the task is complete.
 	Done(c context.Context, id string, exitStatus model.StatusValue) error
 
-	// Error signals the task is complete with errors.
+	// Error signals the task is done with an error.
 	Error(c context.Context, id string, err error) error
 
-	// ErrorAtOnce signals the task is complete with errors.
-	ErrorAtOnce(c context.Context, id []string, err error) error
+	// ErrorAtOnce signals multiple done are complete with an error.
+	ErrorAtOnce(c context.Context, ids []string, err error) error
 
 	// Evict removes a pending task from the queue.
 	Evict(c context.Context, id string) error
 
-	// EvictAtOnce removes a pending task from the queue.
-	EvictAtOnce(c context.Context, id []string) error
+	// EvictAtOnce removes multiple pending tasks from the queue.
+	EvictAtOnce(c context.Context, ids []string) error
 
 	// Wait waits until the task is complete.
 	Wait(c context.Context, id string) error
@@ -106,6 +111,39 @@ type Queue interface {
 	// Pause stops the queue from handing out new work items in Poll
 	Pause()
 
-	// Resume starts the queue again, Poll returns new items
+	// Resume starts the queue again.
 	Resume()
+
+	// KickAgentWorkers kicks all workers for a given agent.
+	KickAgentWorkers(agentID int64)
+}
+
+// Config holds the configuration for the queue.
+type Config struct {
+	Backend Type
+	Store   store.Store
+}
+
+// Queue type.
+type Type string
+
+const (
+	TypeMemory Type = "memory"
+)
+
+// New creates a new queue based on the provided configuration.
+func New(ctx context.Context, config Config) (Queue, error) {
+	var q Queue
+
+	switch config.Backend {
+	case TypeMemory:
+		q = NewMemoryQueue(ctx)
+		if config.Store != nil {
+			q = WithTaskStore(ctx, q, config.Store)
+		}
+	default:
+		return nil, fmt.Errorf("unsupported queue backend: %s", config.Backend)
+	}
+
+	return q, nil
 }

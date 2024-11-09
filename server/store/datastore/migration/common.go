@@ -37,7 +37,7 @@ func renameTable(sess *xorm.Session, old, new string) error {
 	}
 }
 
-// WARNING: YOU MUST COMMIT THE SESSION AT THE END
+// WARNING: YOU MUST COMMIT THE SESSION AT THE END.
 func dropTableColumns(sess *xorm.Session, tableName string, columnNames ...string) (err error) {
 	// Copyright 2017 The Gitea Authors. All rights reserved.
 	// Use of this source code is governed by a MIT-style
@@ -76,62 +76,14 @@ func dropTableColumns(sess *xorm.Session, tableName string, columnNames ...strin
 			}
 		}
 
-		// Here we need to get the columns from the original table
-		sql := fmt.Sprintf("SELECT sql FROM sqlite_master WHERE tbl_name='%s' and type='table'", tableName)
-		res, err := sess.Query(sql)
-		if err != nil {
-			return err
-		}
-		tableSQL := normalizeSQLiteTableSchema(string(res[0]["sql"]))
-
-		// Separate out the column definitions
-		tableSQL = tableSQL[strings.Index(tableSQL, "("):]
-
-		// Remove the required columnNames
-		tableSQL = removeColumnFromSQLITETableSchema(tableSQL, columnNames...)
-
-		// Ensure the query is ended properly
-		tableSQL = strings.TrimSpace(tableSQL)
-		if tableSQL[len(tableSQL)-1] != ')' {
-			if tableSQL[len(tableSQL)-1] == ',' {
-				tableSQL = tableSQL[:len(tableSQL)-1]
+		// Now drop the columns
+		for _, columnName := range columnNames {
+			_, err := sess.Exec(fmt.Sprintf("ALTER TABLE `%s` DROP COLUMN `%s`;", tableName, columnName))
+			if err != nil {
+				return fmt.Errorf("table `%s`, drop column %v: %w", tableName, columnName, err)
 			}
-			tableSQL += ")"
 		}
 
-		// Find all the columns in the table
-		var columns []string
-		for _, rawColumn := range strings.Split(strings.ReplaceAll(tableSQL[1:len(tableSQL)-1], ", ", ",\n"), "\n") {
-			if strings.ContainsAny(rawColumn, "()") {
-				continue
-			}
-			rawColumn = strings.TrimSpace(rawColumn)
-			columns = append(columns,
-				strings.ReplaceAll(rawColumn[0:strings.Index(rawColumn, " ")], "`", ""),
-			)
-		}
-
-		tableSQL = fmt.Sprintf("CREATE TABLE `new_%s_new` ", tableName) + tableSQL
-		if _, err := sess.Exec(tableSQL); err != nil {
-			return err
-		}
-
-		// Now restore the data
-		columnsSeparated := strings.Join(columns, ",")
-		insertSQL := fmt.Sprintf("INSERT INTO `new_%s_new` (%s) SELECT %s FROM %s", tableName, columnsSeparated, columnsSeparated, tableName)
-		if _, err := sess.Exec(insertSQL); err != nil {
-			return err
-		}
-
-		// Now drop the old table
-		if _, err := sess.Exec(fmt.Sprintf("DROP TABLE `%s`", tableName)); err != nil {
-			return err
-		}
-
-		// Rename the table
-		if _, err := sess.Exec(fmt.Sprintf("ALTER TABLE `new_%s_new` RENAME TO `%s`", tableName, tableName)); err != nil {
-			return err
-		}
 	case schemas.POSTGRES:
 		cols := ""
 		for _, col := range columnNames {
@@ -141,7 +93,7 @@ func dropTableColumns(sess *xorm.Session, tableName string, columnNames ...strin
 			cols += "DROP COLUMN `" + col + "` CASCADE"
 		}
 		if _, err := sess.Exec(fmt.Sprintf("ALTER TABLE `%s` %s", tableName, cols)); err != nil {
-			return fmt.Errorf("drop table `%s` columns %v: %w", tableName, columnNames, err)
+			return fmt.Errorf("table `%s`, drop columns %v: %w", tableName, columnNames, err)
 		}
 	case schemas.MYSQL:
 		// Drop indexes on columns first
@@ -169,7 +121,7 @@ func dropTableColumns(sess *xorm.Session, tableName string, columnNames ...strin
 			cols += "DROP COLUMN `" + col + "`"
 		}
 		if _, err := sess.Exec(fmt.Sprintf("ALTER TABLE `%s` %s", tableName, cols)); err != nil {
-			return fmt.Errorf("drop table `%s` columns %v: %w", tableName, columnNames, err)
+			return fmt.Errorf("table `%s`, drop columns %v: %w", tableName, columnNames, err)
 		}
 	default:
 		return fmt.Errorf("dialect '%s' not supported", dialect)
@@ -181,7 +133,26 @@ func dropTableColumns(sess *xorm.Session, tableName string, columnNames ...strin
 func alterColumnDefault(sess *xorm.Session, table, column, defValue string) error {
 	dialect := sess.Engine().Dialect().URI().DBType
 	switch dialect {
-	case schemas.MYSQL, schemas.POSTGRES:
+	case schemas.MYSQL:
+		sql := fmt.Sprintf("SHOW COLUMNS FROM `%s` WHERE lower(field) = '%s'", table, strings.ToLower(column))
+		res, err := sess.Query(sql)
+		if err != nil {
+			return err
+		}
+
+		if len(res) == 0 || len(res[0]["Type"]) == 0 {
+			return fmt.Errorf("column %s data type in table %s can not be detected", column, table)
+		}
+
+		dataType := string(res[0]["Type"])
+		var nullable string
+		if string(res[0]["Null"]) == "NO" {
+			nullable = "NOT NULL"
+		}
+
+		_, err = sess.Exec(fmt.Sprintf("ALTER TABLE `%s` MODIFY `%s` %s %s DEFAULT %s;", table, column, dataType, nullable, defValue))
+		return err
+	case schemas.POSTGRES:
 		_, err := sess.Exec(fmt.Sprintf("ALTER TABLE `%s` ALTER COLUMN `%s` SET DEFAULT %s;", table, column, defValue))
 		return err
 	case schemas.SQLITE:
@@ -199,7 +170,26 @@ func alterColumnNull(sess *xorm.Session, table, column string, null bool) error 
 	dialect := sess.Engine().Dialect().URI().DBType
 	switch dialect {
 	case schemas.MYSQL:
-		_, err := sess.Exec(fmt.Sprintf("ALTER TABLE `%s` COLUMN `%s` SET %s;", table, column, val))
+		sql := fmt.Sprintf("SHOW COLUMNS FROM `%s` WHERE lower(field) = '%s'", table, strings.ToLower(column))
+		res, err := sess.Query(sql)
+		if err != nil {
+			return err
+		}
+
+		if len(res) == 0 || len(res[0]["Type"]) == 0 {
+			return fmt.Errorf("column %s data type in table %s can not be detected", column, table)
+		}
+
+		dataType := string(res[0]["Type"])
+		defValue := string(res[0]["Default"])
+
+		if defValue != "NULL" && defValue != "" {
+			defValue = fmt.Sprintf("DEFAULT '%s'", defValue)
+		} else {
+			defValue = ""
+		}
+
+		_, err = sess.Exec(fmt.Sprintf("ALTER TABLE `%s` MODIFY `%s` %s %s %s;", table, column, dataType, val, defValue))
 		return err
 	case schemas.POSTGRES:
 		_, err := sess.Exec(fmt.Sprintf("ALTER TABLE `%s` ALTER COLUMN `%s` SET %s;", table, column, val))

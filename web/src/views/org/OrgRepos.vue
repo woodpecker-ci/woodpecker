@@ -9,7 +9,7 @@
         v-if="orgPermissions.admin"
         icon="settings"
         :to="{ name: org.is_user ? 'user' : 'org-settings' }"
-        :title="$t('org.settings.settings')"
+        :title="$t('settings')"
       />
     </template>
 

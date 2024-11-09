@@ -15,15 +15,14 @@
 
 package forge
 
-//go:generate go install github.com/vektra/mockery/v2@latest
-//go:generate mockery --name Forge --output mocks --case underscore
+//go:generate mockery --name Forge --output mocks --case underscore --note "+build test"
 
 import (
 	"context"
 	"net/http"
 
-	"github.com/woodpecker-ci/woodpecker/server/forge/types"
-	"github.com/woodpecker-ci/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
 // TODO: use pagination
@@ -36,8 +35,8 @@ type Forge interface {
 	URL() string
 
 	// Login authenticates the session and returns the
-	// forge user details.
-	Login(ctx context.Context, w http.ResponseWriter, r *http.Request) (*model.User, error)
+	// forge user details and the URL to redirect to if not authorized yet.
+	Login(ctx context.Context, r *types.OAuthRequest) (*model.User, string, error)
 
 	// Auth authenticates the session and returns the forge user
 	// login for the given token and secret
@@ -78,7 +77,7 @@ type Forge interface {
 	Branches(ctx context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]string, error)
 
 	// BranchHead returns the sha of the head (latest commit) of the specified branch
-	BranchHead(ctx context.Context, u *model.User, r *model.Repo, branch string) (string, error)
+	BranchHead(ctx context.Context, u *model.User, r *model.Repo, branch string) (*model.Commit, error)
 
 	// PullRequests returns all pull requests for the named repository.
 	PullRequests(ctx context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]*model.PullRequest, error)

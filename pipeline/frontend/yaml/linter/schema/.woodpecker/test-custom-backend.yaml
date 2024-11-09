@@ -1,0 +1,10 @@
+steps:
+  build:
+    image: golang
+    commands:
+      - go build
+      - go test
+    backend_options:
+      custom_backend:
+        option1: xyz
+        option2: [1, 2, 3]

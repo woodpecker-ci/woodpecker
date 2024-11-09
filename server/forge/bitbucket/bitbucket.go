@@ -17,29 +17,32 @@ package bitbucket
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
 	"path/filepath"
+	"strconv"
 
 	"golang.org/x/oauth2"
 
-	"github.com/woodpecker-ci/woodpecker/server"
-	"github.com/woodpecker-ci/woodpecker/server/forge"
-	"github.com/woodpecker-ci/woodpecker/server/forge/bitbucket/internal"
-	"github.com/woodpecker-ci/woodpecker/server/forge/common"
-	forge_types "github.com/woodpecker-ci/woodpecker/server/forge/types"
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	shared_utils "github.com/woodpecker-ci/woodpecker/shared/utils"
+	"go.woodpecker-ci.org/woodpecker/v2/server"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge/bitbucket/internal"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge/common"
+	forge_types "go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	shared_utils "go.woodpecker-ci.org/woodpecker/v2/shared/utils"
 )
 
 // Bitbucket cloud endpoints.
 const (
 	DefaultAPI = "https://api.bitbucket.org"
 	DefaultURL = "https://bitbucket.org"
+	pageSize   = 100
 )
 
-// Opts are forge options for bitbucket
+// Opts are forge options for bitbucket.
 type Opts struct {
 	Client string
 	Secret string
@@ -64,48 +67,38 @@ func New(opts *Opts) (forge.Forge, error) {
 	// TODO: add checks
 }
 
-// Name returns the string name of this driver
+// Name returns the string name of this driver.
 func (c *config) Name() string {
 	return "bitbucket"
 }
 
-// URL returns the root url of a configured forge
+// URL returns the root url of a configured forge.
 func (c *config) URL() string {
 	return c.url
 }
 
 // Login authenticates an account with Bitbucket using the oauth2 protocol. The
 // Bitbucket account details are returned when the user is successfully authenticated.
-func (c *config) Login(ctx context.Context, w http.ResponseWriter, req *http.Request) (*model.User, error) {
+func (c *config) Login(ctx context.Context, req *forge_types.OAuthRequest) (*model.User, string, error) {
 	config := c.newOAuth2Config()
+	redirectURL := config.AuthCodeURL(req.State)
 
-	// get the OAuth errors
-	if err := req.FormValue("error"); err != "" {
-		return nil, &forge_types.AuthError{
-			Err:         err,
-			Description: req.FormValue("error_description"),
-			URI:         req.FormValue("error_uri"),
-		}
+	// check the OAuth code
+	if len(req.Code) == 0 {
+		return nil, redirectURL, nil
 	}
 
-	// get the OAuth code
-	code := req.FormValue("code")
-	if len(code) == 0 {
-		http.Redirect(w, req, config.AuthCodeURL("woodpecker"), http.StatusSeeOther)
-		return nil, nil
-	}
-
-	token, err := config.Exchange(ctx, code)
+	token, err := config.Exchange(ctx, req.Code)
 	if err != nil {
-		return nil, err
+		return nil, redirectURL, err
 	}
 
 	client := internal.NewClient(ctx, c.API, config.Client(ctx, token))
 	curr, err := client.FindCurrent()
 	if err != nil {
-		return nil, err
+		return nil, redirectURL, err
 	}
-	return convertUser(curr, token), nil
+	return convertUser(curr, token), redirectURL, nil
 }
 
 // Auth uses the Bitbucket oauth2 access token and refresh token to authenticate
@@ -141,7 +134,7 @@ func (c *config) Refresh(ctx context.Context, user *model.User) (bool, error) {
 func (c *config) Teams(ctx context.Context, u *model.User) ([]*model.Team, error) {
 	return shared_utils.Paginate(func(page int) ([]*model.Team, error) {
 		opts := &internal.ListWorkspacesOpts{
-			PageLen: 100,
+			PageLen: pageSize,
 			Page:    page,
 			Role:    "member",
 		}
@@ -158,11 +151,11 @@ func (c *config) Repo(ctx context.Context, u *model.User, remoteID model.ForgeRe
 	if remoteID.IsValid() {
 		name = string(remoteID)
 	}
-	repos, err := c.Repos(ctx, u)
-	if err != nil {
-		return nil, err
-	}
-	if len(owner) == 0 {
+	if owner == "" {
+		repos, err := c.Repos(ctx, u)
+		if err != nil {
+			return nil, err
+		}
 		for _, repo := range repos {
 			if string(repo.ForgeRemoteID) == name {
 				owner = repo.Owner
@@ -187,28 +180,41 @@ func (c *config) Repo(ctx context.Context, u *model.User, remoteID model.ForgeRe
 func (c *config) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error) {
 	client := c.newClient(ctx, u)
 
-	var all []*model.Repo
-
-	resp, err := client.ListWorkspaces(&internal.ListWorkspacesOpts{
-		PageLen: 100,
-		Role:    "member",
+	workspaces, err := shared_utils.Paginate(func(page int) ([]*internal.Workspace, error) {
+		resp, err := client.ListWorkspaces(&internal.ListWorkspacesOpts{
+			Page:    page,
+			PageLen: pageSize,
+			Role:    "member",
+		})
+		if err != nil {
+			return nil, err
+		}
+		return resp.Values, nil
 	})
 	if err != nil {
-		return all, err
+		return nil, err
 	}
 
-	for _, workspace := range resp.Values {
+	userPermissions, err := client.ListPermissionsAll()
+	if err != nil {
+		return nil, err
+	}
+
+	userPermissionsByRepo := make(map[string]*internal.RepoPerm)
+	for _, permission := range userPermissions {
+		userPermissionsByRepo[permission.Repo.FullName] = permission
+	}
+
+	var all []*model.Repo
+	for _, workspace := range workspaces {
 		repos, err := client.ListReposAll(workspace.Slug)
 		if err != nil {
-			return all, err
+			return nil, err
 		}
 		for _, repo := range repos {
-			perm, err := client.GetPermission(repo.FullName)
-			if err != nil {
-				return nil, err
+			if perm, ok := userPermissionsByRepo[repo.FullName]; ok {
+				all = append(all, convertRepo(repo, perm))
 			}
-
-			all = append(all, convertRepo(repo, perm))
 		}
 	}
 	return all, nil
@@ -218,12 +224,18 @@ func (c *config) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error
 func (c *config) File(ctx context.Context, u *model.User, r *model.Repo, p *model.Pipeline, f string) ([]byte, error) {
 	config, err := c.newClient(ctx, u).FindSource(r.Owner, r.Name, p.Commit, f)
 	if err != nil {
+		var rspErr internal.Error
+		if ok := errors.As(err, &rspErr); ok && rspErr.Status == http.StatusNotFound {
+			return nil, &forge_types.ErrConfigNotFound{
+				Configs: []string{f},
+			}
+		}
 		return nil, err
 	}
-	return []byte(*config), err
+	return []byte(*config), nil
 }
 
-// Dir fetches a folder from the bitbucket repository
+// Dir fetches a folder from the bitbucket repository.
 func (c *config) Dir(ctx context.Context, u *model.User, r *model.Repo, p *model.Pipeline, f string) ([]*forge_types.FileMeta, error) {
 	var page *string
 	repoPathFiles := []*forge_types.FileMeta{}
@@ -231,6 +243,12 @@ func (c *config) Dir(ctx context.Context, u *model.User, r *model.Repo, p *model
 	for {
 		filesResp, err := client.GetRepoFiles(r.Owner, r.Name, p.Commit, f, page)
 		if err != nil {
+			var rspErr internal.Error
+			if ok := errors.As(err, &rspErr); ok && rspErr.Status == http.StatusNotFound {
+				return nil, &forge_types.ErrConfigNotFound{
+					Configs: []string{f},
+				}
+			}
 			return nil, err
 		}
 		for _, file := range filesResp.Values {
@@ -277,7 +295,7 @@ func (c *config) Status(ctx context.Context, user *model.User, repo *model.Repo,
 		State: convertStatus(pipeline.Status),
 		Desc:  common.GetPipelineStatusDescription(pipeline.Status),
 		Key:   "Woodpecker",
-		URL:   common.GetPipelineStatusLink(repo, pipeline, nil),
+		URL:   common.GetPipelineStatusURL(repo, pipeline, nil),
 	}
 	return c.newClient(ctx, user).CreateStatus(repo.Owner, repo.Name, pipeline.Commit, &status)
 }
@@ -286,7 +304,7 @@ func (c *config) Status(ctx context.Context, user *model.User, repo *model.Repo,
 // the Bitbucket repository. Prior to registering hook, previously created hooks
 // are deleted.
 func (c *config) Activate(ctx context.Context, u *model.User, r *model.Repo, link string) error {
-	rawurl, err := url.Parse(link)
+	rawURL, err := url.Parse(link)
 	if err != nil {
 		return err
 	}
@@ -294,8 +312,8 @@ func (c *config) Activate(ctx context.Context, u *model.User, r *model.Repo, lin
 
 	return c.newClient(ctx, u).CreateHook(r.Owner, r.Name, &internal.Hook{
 		Active: true,
-		Desc:   rawurl.Host,
-		Events: []string{"repo:push", "pullrequest:created"},
+		Desc:   rawURL.Host,
+		Events: []string{"repo:push", "pullrequest:created", "pullrequest:updated", "pullrequest:fulfilled", "pullrequest:rejected"},
 		URL:    link,
 	})
 }
@@ -305,11 +323,19 @@ func (c *config) Activate(ctx context.Context, u *model.User, r *model.Repo, lin
 func (c *config) Deactivate(ctx context.Context, u *model.User, r *model.Repo, link string) error {
 	client := c.newClient(ctx, u)
 
-	hooks, err := client.ListHooks(r.Owner, r.Name, &internal.ListOpts{})
+	hooks, err := shared_utils.Paginate(func(page int) ([]*internal.Hook, error) {
+		hooks, err := client.ListHooks(r.Owner, r.Name, &internal.ListOpts{
+			Page: page,
+		})
+		if err != nil {
+			return nil, err
+		}
+		return hooks.Values, nil
+	})
 	if err != nil {
 		return err
 	}
-	hook := matchingHooks(hooks.Values, link)
+	hook := matchingHooks(hooks, link)
 	if hook != nil {
 		return client.DeleteHook(r.Owner, r.Name, hook.UUID)
 	}
@@ -340,9 +366,16 @@ func (c *config) Branches(ctx context.Context, u *model.User, r *model.Repo, p *
 	return branches, nil
 }
 
-// BranchHead returns the sha of the head (latest commit) of the specified branch
-func (c *config) BranchHead(ctx context.Context, u *model.User, r *model.Repo, branch string) (string, error) {
-	return c.newClient(ctx, u).GetBranchHead(r.Owner, r.Name, branch)
+// BranchHead returns the sha of the head (latest commit) of the specified branch.
+func (c *config) BranchHead(ctx context.Context, u *model.User, r *model.Repo, branch string) (*model.Commit, error) {
+	commit, err := c.newClient(ctx, u).GetBranchHead(r.Owner, r.Name, branch)
+	if err != nil {
+		return nil, err
+	}
+	return &model.Commit{
+		SHA:      commit.Hash,
+		ForgeURL: commit.Links.HTML.Href,
+	}, nil
 }
 
 // PullRequests returns the pull requests of the named repository.
@@ -352,10 +385,10 @@ func (c *config) PullRequests(ctx context.Context, u *model.User, r *model.Repo,
 	if err != nil {
 		return nil, err
 	}
-	result := []*model.PullRequest{}
+	var result []*model.PullRequest
 	for _, pullRequest := range pullRequests {
 		result = append(result, &model.PullRequest{
-			Index: int64(pullRequest.ID),
+			Index: model.ForgeRemoteID(strconv.Itoa(int(pullRequest.ID))),
 			Title: pullRequest.Title,
 		})
 	}
@@ -386,11 +419,11 @@ func (c *config) Org(ctx context.Context, u *model.User, owner string) (*model.O
 
 	return &model.Org{
 		Name:   workspace.Slug,
-		IsUser: false, // bitbucket uses workspaces (similar to orgs) for teams and single users so we can not distinguish between them
+		IsUser: false, // bitbucket uses workspaces (similar to orgs) for teams and single users so we cannot distinguish between them
 	}, nil
 }
 
-// helper function to return the bitbucket oauth2 client
+// helper function to return the bitbucket oauth2 client.
 func (c *config) newClient(ctx context.Context, u *model.User) *internal.Client {
 	if u == nil {
 		return c.newClientToken(ctx, "", "")
@@ -398,7 +431,7 @@ func (c *config) newClient(ctx context.Context, u *model.User) *internal.Client 
 	return c.newClientToken(ctx, u.Token, u.Secret)
 }
 
-// helper function to return the bitbucket oauth2 client
+// helper function to return the bitbucket oauth2 client.
 func (c *config) newClientToken(ctx context.Context, token, secret string) *internal.Client {
 	return internal.NewClientToken(
 		ctx,
@@ -412,7 +445,7 @@ func (c *config) newClientToken(ctx context.Context, token, secret string) *inte
 	)
 }
 
-// helper function to return the bitbucket oauth2 config
+// helper function to return the bitbucket oauth2 config.
 func (c *config) newOAuth2Config() *oauth2.Config {
 	return &oauth2.Config{
 		ClientID:     c.Client,
@@ -426,14 +459,14 @@ func (c *config) newOAuth2Config() *oauth2.Config {
 }
 
 // helper function to return matching hooks.
-func matchingHooks(hooks []*internal.Hook, rawurl string) *internal.Hook {
-	link, err := url.Parse(rawurl)
+func matchingHooks(hooks []*internal.Hook, rawURL string) *internal.Hook {
+	link, err := url.Parse(rawURL)
 	if err != nil {
 		return nil
 	}
 	for _, hook := range hooks {
-		hookurl, err := url.Parse(hook.URL)
-		if err == nil && hookurl.Host == link.Host {
+		hookURL, err := url.Parse(hook.URL)
+		if err == nil && hookURL.Host == link.Host {
 			return hook
 		}
 	}

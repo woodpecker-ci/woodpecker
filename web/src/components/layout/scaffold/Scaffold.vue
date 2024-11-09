@@ -18,7 +18,7 @@
 </template>
 
 <script setup lang="ts">
-import { toRef } from 'vue';
+import { computed, ref, watch } from 'vue';
 
 import Container from '~/components/layout/Container.vue';
 import { useTabsProvider } from '~/compositions/useTabs';
@@ -33,7 +33,7 @@ const props = defineProps<{
 
   // Tabs
   enableTabs?: boolean;
-  disableHashMode?: boolean;
+  disableTabUrlHashMode?: boolean;
   activeTab?: string;
 
   // Content
@@ -41,15 +41,29 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (event: 'update:activeTab', value: string): void;
+  (event: 'update:activeTab', value: string | undefined): void;
   (event: 'update:search', value: string): void;
 }>();
 
 if (props.enableTabs) {
+  const internalActiveTab = ref(props.activeTab);
+
+  watch(
+    () => props.activeTab,
+    (activeTab) => {
+      internalActiveTab.value = activeTab;
+    },
+  );
+
   useTabsProvider({
-    activeTabProp: toRef(props, 'activeTab'),
-    disableHashMode: toRef(props, 'disableHashMode'),
-    updateActiveTabProp: (value) => emit('update:activeTab', value),
+    activeTab: computed({
+      get: () => internalActiveTab.value,
+      set: (value) => {
+        internalActiveTab.value = value;
+        emit('update:activeTab', value);
+      },
+    }),
+    disableUrlHashMode: computed(() => props.disableTabUrlHashMode || false),
   });
 }
 </script>

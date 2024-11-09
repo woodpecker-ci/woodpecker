@@ -1,7 +1,7 @@
 <template>
   <aside
     v-if="isOpen"
-    v-on-click-outside="close"
+    ref="target"
     class="flex flex-col z-50 overflow-y-auto items-center bg-wp-background-100 dark:bg-wp-background-200 border-wp-background-400"
     :aria-label="$t('pipeline_feed')"
   >
@@ -22,11 +22,15 @@
 </template>
 
 <script lang="ts" setup>
-import { vOnClickOutside } from '@vueuse/components';
+import { onClickOutside } from '@vueuse/core';
+import { ref } from 'vue';
 
 import PipelineFeedItem from '~/components/pipeline-feed/PipelineFeedItem.vue';
 import usePipelineFeed from '~/compositions/usePipelineFeed';
 
 const pipelineFeed = usePipelineFeed();
 const { close, isOpen, sortedPipelines } = pipelineFeed;
+
+const target = ref<HTMLElement>();
+onClickOutside(target, close, { ignore: ['.active-pipelines-toggle'] });
 </script>

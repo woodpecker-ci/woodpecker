@@ -16,7 +16,7 @@
   >
     <slot>
       <Icon v-if="startIcon" :name="startIcon" class="!w-6 !h-6" :class="{ invisible: isLoading, 'mr-1': text }" />
-      <span :class="{ invisible: isLoading }">{{ text }}</span>
+      <span :class="{ invisible: isLoading }" class="flex-shrink-0">{{ text }}</span>
       <Icon v-if="endIcon" :name="endIcon" class="ml-2 w-6 h-6" :class="{ invisible: isLoading }" />
       <div
         v-if="isLoading"
@@ -28,7 +28,7 @@
           'bg-wp-control-error-200': color === 'red',
         }"
       >
-        <Icon name="loading" class="animate-spin" />
+        <Icon name="spinner" />
       </div>
     </slot>
   </component>
@@ -36,9 +36,10 @@
 
 <script lang="ts" setup>
 import { computed, useAttrs } from 'vue';
-import { RouteLocationRaw } from 'vue-router';
+import type { RouteLocationRaw } from 'vue-router';
 
-import Icon, { IconNames } from '~/components/atomic/Icon.vue';
+import type { IconNames } from '~/components/atomic/Icon.vue';
+import Icon from '~/components/atomic/Icon.vue';
 
 const props = withDefaults(
   defineProps<{

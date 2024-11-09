@@ -41,7 +41,7 @@ func TestPubsub(t *testing.T) {
 		broker.Subscribe(ctx, func(message Message) { assert.Equal(t, testMessage, message); wg.Done() })
 	}()
 	go func() {
-		broker.Subscribe(ctx, func(message Message) { wg.Done() })
+		broker.Subscribe(ctx, func(_ Message) { wg.Done() })
 	}()
 
 	<-time.After(500 * time.Millisecond)

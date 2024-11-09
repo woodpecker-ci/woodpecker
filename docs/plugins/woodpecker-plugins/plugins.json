@@ -31,9 +31,14 @@
       "verified": true
     },
     {
-      "name": "Block Git changes",
-      "docs": "https://codeberg.org/qwerty287/woodpecker-block-git-changes/raw/branch/main/docs.md",
-      "verified": false
+      "name": "Prettier",
+      "docs": "https://raw.githubusercontent.com/woodpecker-ci/plugin-prettier/main/docs.md",
+      "verified": true
+    },
+    {
+      "name": "Extend env",
+      "docs": "https://raw.githubusercontent.com/woodpecker-ci/plugin-extend-env/main/docs.md",
+      "verified": true
     },
     {
       "name": "Regex check",
@@ -51,6 +56,11 @@
       "verified": false
     },
     {
+      "name": "Gitea publisher-golang",
+      "docs": "https://raw.githubusercontent.com/woodpecker-kit/woodpecker-gitea-publisher-golang/main/doc/docs.md",
+      "verified": false
+    },
+    {
       "name": "Git Push",
       "docs": "https://raw.githubusercontent.com/appleboy/drone-git-push/master/DOCS.md",
       "verified": false
@@ -59,30 +69,6 @@
       "name": "WebDAV",
       "docs": "https://raw.githubusercontent.com/ViViDboarder/drone-webdav/master/docs.md",
       "verified": false
-    },
-    {
-      "// todo": true,
-      "name": "Email",
-      "docs": "https://raw.githubusercontent.com/woodpecker-ci/plugin-email/master/docs.md",
-      "verified": true
-    },
-    {
-      "// todo": true,
-      "name": "Docker",
-      "docs": "https://raw.githubusercontent.com/woodpecker-ci/plugin-docker/master/docs.md",
-      "verified": true
-    },
-    {
-      "// todo": true,
-      "name": "GitHub release",
-      "docs": "https://raw.githubusercontent.com/woodpecker-ci/plugin-github-release/master/docs.md",
-      "verified": true
-    },
-    {
-      "// todo": true,
-      "name": "Chart releaser",
-      "docs": "https://raw.githubusercontent.com/woodpecker-ci/plugin-chart-releaser/master/docs.md",
-      "verified": true
     },
     {
       "name": "Aptly publish",
@@ -95,8 +81,8 @@
       "verified": true
     },
     {
-      "name": "Gitea Release",
-      "docs": "https://codeberg.org/woodpecker-plugins/gitea-release/raw/branch/main/docs.md",
+      "name": "Release",
+      "docs": "https://codeberg.org/woodpecker-plugins/release/raw/branch/main/docs.md",
       "verified": true
     },
     {
@@ -147,6 +133,91 @@
     {
       "name": "NixOS Remote Builder",
       "docs": "https://codeberg.org/JohnWalkerx/nix-remote-builder-plugin/raw/branch/main/docs.md",
+      "verified": false
+    },
+    {
+      "name": "Release Helper",
+      "docs": "https://raw.githubusercontent.com/woodpecker-ci/plugin-ready-release-go/main/docs.md",
+      "verified": true
+    },
+    {
+      "name": "Nix - Attic",
+      "docs": "https://git.vdx.hu/voidcontext/woodpecker-plugin-nix-attic/raw/branch/main/docs.md",
+      "verified": false
+    },
+    {
+      "name": "Codeberg Pages Deploy",
+      "docs": "https://codeberg.org/xfix/plugin-codeberg-pages-deploy/raw/branch/master/README.md",
+      "verified": false
+    },
+    {
+      "name": "Reviewdog golangci-lint",
+      "docs": "https://codeberg.org/woodpecker-plugins/reviewdog-golangci-lint/raw/branch/main/docs.md",
+      "verified": true
+    },
+    {
+      "name": "Reviewdog ESLint",
+      "docs": "https://codeberg.org/woodpecker-plugins/reviewdog-eslint/raw/branch/main/docs.md",
+      "verified": true
+    },
+    {
+      "name": "Ansible",
+      "docs": "https://codeberg.org/woodpecker-plugins/ansible/raw/branch/main/docs.md",
+      "verified": true
+    },
+    {
+      "name": "Kaniko",
+      "docs": "https://raw.githubusercontent.com/woodpecker-ci/plugin-kaniko/main/docs.md",
+      "verified": true
+    },
+    {
+      "name": "Gradle Wrapper Validation",
+      "docs": "https://codeberg.org/beaks/gradle-wrapper-validation/raw/branch/main/docs.md",
+      "verified": false
+    },
+    {
+      "name": "Sonatype Nexus",
+      "docs": "https://raw.githubusercontent.com/rockdrilla/woodpecker-sonatype-nexus/main/docs.md",
+      "verified": false
+    },
+    {
+      "name": "Mastodon Post",
+      "docs": "https://codeberg.org/woodpecker-plugins/mastodon-post/raw/branch/main/docs.md",
+      "verified": true
+    },
+    {
+      "name": "Discord",
+      "docs": "https://raw.githubusercontent.com/appleboy/drone-discord/master/DOCS.md",
+      "verified": false
+    },
+    {
+      "name": "Forge deployments",
+      "docs": "https://raw.githubusercontent.com/woodpecker-ci/plugin-deployments/main/docs.md",
+      "verified": true
+    },
+    {
+      "name": "Twine",
+      "docs": "https://gitea.elara.ws/music-kraken/plugin-twine/raw/branch/master/docs.md",
+      "verified": false
+    },
+    {
+      "name": "Gitea Package",
+      "docs": "https://gitea.ocram85.com/plugins/gitea-package/raw/branch/main/docs.md",
+      "verified": false
+    },
+    {
+      "name": "Is It Up Yet?",
+      "docs": "https://raw.githubusercontent.com/dvjn/woodpecker-is-it-up-yet-plugin/main/docs.md",
+      "verified": false
+    },
+    {
+      "name": "Docker Tags",
+      "docs": "https://raw.githubusercontent.com/dvjn/woodpecker-docker-tags-plugin/main/docs.md",
+      "verified": false
+    },
+    {
+      "name": "Telegram",
+      "docs": "https://raw.githubusercontent.com/appleboy/drone-telegram/refs/heads/master/DOCS.md",
       "verified": false
     }
   ]

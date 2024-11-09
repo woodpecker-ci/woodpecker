@@ -8,9 +8,11 @@
           params: { repoId: pipeline.repo_id },
         }"
         class="underline"
-        >{{ repo?.owner }} / {{ repo?.name }}</router-link
       >
-      <span class="whitespace-nowrap overflow-hidden overflow-ellipsis" :title="message">{{ title }}</span>
+        <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
+        {{ repo?.owner }} / {{ repo?.name }}
+      </router-link>
+      <span class="whitespace-nowrap overflow-hidden overflow-ellipsis" :title="message">{{ shortMessage }}</span>
       <div class="flex flex-col mt-2">
         <div class="flex space-x-2 items-center" :title="created">
           <Icon name="since" />
@@ -31,7 +33,7 @@ import { computed, toRef } from 'vue';
 import Icon from '~/components/atomic/Icon.vue';
 import PipelineStatusIcon from '~/components/repo/pipeline/PipelineStatusIcon.vue';
 import usePipeline from '~/compositions/usePipeline';
-import { PipelineFeed } from '~/lib/api/types';
+import type { PipelineFeed } from '~/lib/api/types';
 import { useRepoStore } from '~/store/repos';
 
 const props = defineProps<{
@@ -43,5 +45,5 @@ const repoStore = useRepoStore();
 const pipeline = toRef(props, 'pipeline');
 const repo = repoStore.getRepo(computed(() => pipeline.value.repo_id));
 
-const { since, duration, message, title, created } = usePipeline(pipeline);
+const { since, duration, shortMessage, message, created } = usePipeline(pipeline);
 </script>

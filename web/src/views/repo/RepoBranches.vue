@@ -1,25 +1,35 @@
 <template>
-  <div v-if="branches" class="space-y-4">
-    <ListItem
-      v-for="branch in branches"
-      :key="branch"
-      class="text-wp-text-100"
-      :to="{ name: 'repo-branch', params: { branch } }"
-    >
-      {{ branch }}
-      <Badge v-if="branch === repo?.default_branch" :label="$t('default')" class="ml-auto" />
-    </ListItem>
+  <div class="space-y-4">
+    <template v-if="branches.length > 0">
+      <ListItem
+        v-for="branch in branchesWithDefaultBranchFirst"
+        :key="branch"
+        class="text-wp-text-100"
+        :to="{ name: 'repo-branch', params: { branch } }"
+      >
+        {{ branch }}
+        <Badge v-if="branch === repo?.default_branch" :label="$t('default')" class="ml-auto" />
+      </ListItem>
+    </template>
+    <div v-else-if="loading" class="flex justify-center text-wp-text-100">
+      <Icon name="spinner" />
+    </div>
+    <Panel v-else class="flex justify-center">
+      {{ $t('empty_list', { entity: $t('repo.branches') }) }}
+    </Panel>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { inject, Ref, watch } from 'vue';
+import { computed, inject, watch, type Ref } from 'vue';
 
 import Badge from '~/components/atomic/Badge.vue';
+import Icon from '~/components/atomic/Icon.vue';
 import ListItem from '~/components/atomic/ListItem.vue';
+import Panel from '~/components/layout/Panel.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { usePagination } from '~/compositions/usePaginate';
-import { Repo } from '~/lib/api/types';
+import type { Repo } from '~/lib/api/types';
 
 const apiClient = useApiClient();
 
@@ -33,10 +43,24 @@ async function loadBranches(page: number): Promise<string[]> {
     throw new Error('Unexpected: "repo" should be provided at this place');
   }
 
-  return apiClient.getRepoBranches(repo.value.id, page);
+  return apiClient.getRepoBranches(repo.value.id, { page });
 }
 
-const { resetPage, data: branches } = usePagination(loadBranches);
+const { resetPage, data: branches, loading } = usePagination(loadBranches);
+
+const branchesWithDefaultBranchFirst = computed(() =>
+  branches.value.toSorted((a, b) => {
+    if (a === repo.value.default_branch) {
+      return -1;
+    }
+
+    if (b === repo.value.default_branch) {
+      return 1;
+    }
+
+    return 0;
+  }),
+);
 
 watch(repo, resetPage);
 </script>

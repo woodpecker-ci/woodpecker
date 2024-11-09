@@ -15,22 +15,22 @@
 package migration
 
 import (
+	"context"
 	"os"
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
-	"xorm.io/xorm"
-	"xorm.io/xorm/schemas"
-
-	// blank imports to register the sql drivers
+	// Blank imports to register the sql drivers.
 	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/lib/pq"
 	_ "github.com/mattn/go-sqlite3"
+	"github.com/stretchr/testify/assert"
+	"xorm.io/xorm"
+	"xorm.io/xorm/schemas"
 )
 
 const (
-	sqliteDB = "./testfiles/sqlite.db"
+	sqliteDB = "./test-files/sqlite.db"
 )
 
 func testDriver() string {
@@ -42,7 +42,7 @@ func testDriver() string {
 }
 
 func createSQLiteDB(t *testing.T) string {
-	tmpF, err := os.CreateTemp("./testfiles", "tmp_")
+	tmpF, err := os.CreateTemp("./test-files", "tmp_")
 	if !assert.NoError(t, err) {
 		t.FailNow()
 	}
@@ -94,14 +94,9 @@ func testDB(t *testing.T, new bool) (engine *xorm.Engine, closeDB func()) {
 }
 
 func TestMigrate(t *testing.T) {
-	// make all tasks required for tests
-	for _, task := range migrationTasks {
-		task.required = true
-	}
-
 	// init new db
 	engine, closeDB := testDB(t, true)
-	assert.NoError(t, Migrate(engine))
+	assert.NoError(t, Migrate(context.Background(), engine, true))
 	closeDB()
 
 	dbType := engine.Dialect().URI().DBType
@@ -112,6 +107,6 @@ func TestMigrate(t *testing.T) {
 
 	// migrate old db
 	engine, closeDB = testDB(t, false)
-	assert.NoError(t, Migrate(engine))
+	assert.NoError(t, Migrate(context.Background(), engine, true))
 	closeDB()
 }

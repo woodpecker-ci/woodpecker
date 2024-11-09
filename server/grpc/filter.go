@@ -15,34 +15,38 @@
 package grpc
 
 import (
-	"github.com/woodpecker-ci/woodpecker/pipeline/rpc"
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/queue"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/queue"
 )
 
-func createFilterFunc(agentFilter rpc.Filter) (queue.FilterFn, error) {
-	return func(task *model.Task) bool {
+func createFilterFunc(agentFilter rpc.Filter) queue.FilterFn {
+	return func(task *model.Task) (bool, int) {
+		score := 0
 		for taskLabel, taskLabelValue := range task.Labels {
 			// if a task label is empty it will be ignored
 			if taskLabelValue == "" {
 				continue
 			}
 
+			// all task labels are required to be present for an agent to match
 			agentLabelValue, ok := agentFilter.Labels[taskLabel]
-
 			if !ok {
-				return false
+				return false, 0
 			}
 
+			switch {
 			// if agent label has a wildcard
-			if agentLabelValue == "*" {
-				continue
-			}
-
-			if taskLabelValue != agentLabelValue {
-				return false
+			case agentLabelValue == "*":
+				score++
+			// if agent label has an exact match
+			case agentLabelValue == taskLabelValue:
+				score += 10
+			// agent doesn't match
+			default:
+				return false, 0
 			}
 		}
-		return true
-	}, nil
+		return true, score
+	}
 }

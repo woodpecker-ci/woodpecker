@@ -20,7 +20,7 @@ const modelValue = toRef(props, 'modelValue');
 const innerValue = computed({
   get: () => modelValue.value.toString(),
   set: (value) => {
-    emit('update:modelValue', parseFloat(value));
+    emit('update:modelValue', Number.parseFloat(value));
   },
 });
 </script>

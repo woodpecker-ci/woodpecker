@@ -1,0 +1,2 @@
+ignored:
+  - DL3018 # pin versions in Dockerfile

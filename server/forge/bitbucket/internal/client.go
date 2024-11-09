@@ -25,19 +25,17 @@ import (
 
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/bitbucket"
-)
 
-const (
-	get  = "GET"
-	post = "POST"
-	del  = "DELETE"
+	shared_utils "go.woodpecker-ci.org/woodpecker/v2/shared/utils"
 )
 
 const (
 	pathUser          = "%s/2.0/user/"
 	pathEmails        = "%s/2.0/user/emails"
-	pathPermissions   = "%s/2.0/user/permissions/repositories?q=repository.full_name=%q"
-	pathWorkspace     = "%s/2.0/workspaces/?%s"
+	pathPermission    = "%s/2.0/user/permissions/repositories?q=repository.full_name=%q"
+	pathPermissions   = "%s/2.0/user/permissions/repositories?%s"
+	pathWorkspaces    = "%s/2.0/workspaces/?%s"
+	pathWorkspace     = "%s/2.0/workspaces/%s"
 	pathRepo          = "%s/2.0/repositories/%s/%s"
 	pathRepos         = "%s/2.0/repositories/%s?%s"
 	pathHook          = "%s/2.0/repositories/%s/%s/hooks/%s"
@@ -46,9 +44,10 @@ const (
 	pathStatus        = "%s/2.0/repositories/%s/%s/commit/%s/statuses/build"
 	pathBranches      = "%s/2.0/repositories/%s/%s/refs/branches?%s"
 	pathOrgPerms      = "%s/2.0/workspaces/%s/permissions?%s"
-	pathPullRequests  = "%s/2.0/repositories/%s/%s/pullrequests"
+	pathPullRequests  = "%s/2.0/repositories/%s/%s/pullrequests?%s"
 	pathBranchCommits = "%s/2.0/repositories/%s/%s/commits/%s"
-	pathDir           = "%s/2.0/repositories/%s/%s/src/%s%s"
+	pathDir           = "%s/2.0/repositories/%s/%s/src/%s/%s"
+	pageSize          = 100
 )
 
 type Client struct {
@@ -77,97 +76,89 @@ func NewClientToken(ctx context.Context, url, client, secret string, token *oaut
 func (c *Client) FindCurrent() (*Account, error) {
 	out := new(Account)
 	uri := fmt.Sprintf(pathUser, c.base)
-	_, err := c.do(uri, get, nil, out)
+	_, err := c.do(uri, http.MethodGet, nil, out)
 	return out, err
 }
 
 func (c *Client) ListEmail() (*EmailResp, error) {
 	out := new(EmailResp)
 	uri := fmt.Sprintf(pathEmails, c.base)
-	_, err := c.do(uri, get, nil, out)
+	_, err := c.do(uri, http.MethodGet, nil, out)
 	return out, err
 }
 
 func (c *Client) ListWorkspaces(opts *ListWorkspacesOpts) (*WorkspacesResp, error) {
 	out := new(WorkspacesResp)
-	uri := fmt.Sprintf(pathWorkspace, c.base, opts.Encode())
-	_, err := c.do(uri, get, nil, out)
+	uri := fmt.Sprintf(pathWorkspaces, c.base, opts.Encode())
+	_, err := c.do(uri, http.MethodGet, nil, out)
 	return out, err
 }
 
 func (c *Client) FindRepo(owner, name string) (*Repo, error) {
 	out := new(Repo)
 	uri := fmt.Sprintf(pathRepo, c.base, owner, name)
-	_, err := c.do(uri, get, nil, out)
+	_, err := c.do(uri, http.MethodGet, nil, out)
 	return out, err
 }
 
 func (c *Client) ListRepos(workspace string, opts *ListOpts) (*RepoResp, error) {
 	out := new(RepoResp)
 	uri := fmt.Sprintf(pathRepos, c.base, workspace, opts.Encode())
-	_, err := c.do(uri, get, nil, out)
+	_, err := c.do(uri, http.MethodGet, nil, out)
 	return out, err
 }
 
 func (c *Client) ListReposAll(workspace string) ([]*Repo, error) {
-	page := 1
-	var repos []*Repo
-
-	for {
-		resp, err := c.ListRepos(workspace, &ListOpts{Page: page, PageLen: 100})
+	return shared_utils.Paginate(func(page int) ([]*Repo, error) {
+		resp, err := c.ListRepos(workspace, &ListOpts{Page: page, PageLen: pageSize})
 		if err != nil {
-			return repos, err
+			return nil, err
 		}
-		repos = append(repos, resp.Values...)
-		if len(resp.Next) == 0 {
-			break
-		}
-		page = resp.Page + 1
-	}
-	return repos, nil
+		return resp.Values, nil
+	})
 }
 
 func (c *Client) FindHook(owner, name, id string) (*Hook, error) {
 	out := new(Hook)
 	uri := fmt.Sprintf(pathHook, c.base, owner, name, id)
-	_, err := c.do(uri, get, nil, out)
+	_, err := c.do(uri, http.MethodGet, nil, out)
 	return out, err
 }
 
 func (c *Client) ListHooks(owner, name string, opts *ListOpts) (*HookResp, error) {
 	out := new(HookResp)
 	uri := fmt.Sprintf(pathHooks, c.base, owner, name, opts.Encode())
-	_, err := c.do(uri, get, nil, out)
+	_, err := c.do(uri, http.MethodGet, nil, out)
 	return out, err
 }
 
 func (c *Client) CreateHook(owner, name string, hook *Hook) error {
 	uri := fmt.Sprintf(pathHooks, c.base, owner, name, "")
-	_, err := c.do(uri, post, hook, nil)
+	_, err := c.do(uri, http.MethodPost, hook, nil)
 	return err
 }
 
 func (c *Client) DeleteHook(owner, name, id string) error {
 	uri := fmt.Sprintf(pathHook, c.base, owner, name, id)
-	_, err := c.do(uri, del, nil, nil)
+	_, err := c.do(uri, http.MethodDelete, nil, nil)
 	return err
 }
 
 func (c *Client) FindSource(owner, name, revision, path string) (*string, error) {
 	uri := fmt.Sprintf(pathSource, c.base, owner, name, revision, path)
-	return c.do(uri, get, nil, nil)
+	return c.do(uri, http.MethodGet, nil, nil)
 }
 
 func (c *Client) CreateStatus(owner, name, revision string, status *PipelineStatus) error {
 	uri := fmt.Sprintf(pathStatus, c.base, owner, name, revision)
-	_, err := c.do(uri, post, status, nil)
+	_, err := c.do(uri, http.MethodPost, status, nil)
 	return err
 }
 
 func (c *Client) GetPermission(fullName string) (*RepoPerm, error) {
 	out := new(RepoPermResp)
-	uri := fmt.Sprintf(pathPermissions, c.base, fullName)
-	_, err := c.do(uri, get, nil, out)
+	uri := fmt.Sprintf(pathPermission, c.base, fullName)
+	_, err := c.do(uri, http.MethodGet, nil, out)
 	if err != nil {
 		return nil, err
 	}
@@ -178,32 +169,49 @@ func (c *Client) GetPermission(fullName string) (*RepoPerm, error) {
 	return out.Values[0], nil
 }
 
+func (c *Client) ListPermissions(opts *ListOpts) (*RepoPermResp, error) {
+	out := new(RepoPermResp)
+	uri := fmt.Sprintf(pathPermissions, c.base, opts.Encode())
+	_, err := c.do(uri, http.MethodGet, nil, out)
+	return out, err
+}
+
+func (c *Client) ListPermissionsAll() ([]*RepoPerm, error) {
+	return shared_utils.Paginate(func(page int) ([]*RepoPerm, error) {
+		resp, err := c.ListPermissions(&ListOpts{Page: page, PageLen: pageSize})
+		if err != nil {
+			return nil, err
+		}
+		return resp.Values, nil
+	})
+}
+
 func (c *Client) ListBranches(owner, name string, opts *ListOpts) ([]*Branch, error) {
 	out := new(BranchResp)
 	uri := fmt.Sprintf(pathBranches, c.base, owner, name, opts.Encode())
-	_, err := c.do(uri, get, nil, out)
+	_, err := c.do(uri, http.MethodGet, nil, out)
 	return out.Values, err
 }
 
-func (c *Client) GetBranchHead(owner, name, branch string) (string, error) {
+func (c *Client) GetBranchHead(owner, name, branch string) (*Commit, error) {
 	out := new(CommitsResp)
 	uri := fmt.Sprintf(pathBranchCommits, c.base, owner, name, branch)
-	_, err := c.do(uri, get, nil, out)
+	_, err := c.do(uri, http.MethodGet, nil, out)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	if len(out.Values) == 0 {
-		return "", fmt.Errorf("no commits in branch %s", branch)
+		return nil, fmt.Errorf("no commits in branch %s", branch)
 	}
-	return out.Values[0].Hash, nil
+	return out.Values[0], nil
 }
 
 func (c *Client) GetUserWorkspaceMembership(workspace, user string) (string, error) {
 	out := new(WorkspaceMembershipResp)
-	opts := &ListOpts{Page: 1, PageLen: 100}
+	opts := &ListOpts{Page: 1, PageLen: pageSize}
 	for {
 		uri := fmt.Sprintf(pathOrgPerms, c.base, workspace, opts.Encode())
-		_, err := c.do(uri, get, nil, out)
+		_, err := c.do(uri, http.MethodGet, nil, out)
 		if err != nil {
 			return "", err
 		}
@@ -222,15 +230,15 @@ func (c *Client) GetUserWorkspaceMembership(workspace, user string) (string, err
 
 func (c *Client) ListPullRequests(owner, name string, opts *ListOpts) ([]*PullRequest, error) {
 	out := new(PullRequestResp)
-	uri := fmt.Sprintf(pathPullRequests, c.base, owner, name)
-	_, err := c.do(uri, get, opts.Encode(), out)
+	uri := fmt.Sprintf(pathPullRequests, c.base, owner, name, opts.Encode())
+	_, err := c.do(uri, http.MethodGet, nil, out)
 	return out.Values, err
 }
 
 func (c *Client) GetWorkspace(name string) (*Workspace, error) {
 	out := new(Workspace)
 	uri := fmt.Sprintf(pathWorkspace, c.base, name)
-	_, err := c.do(uri, get, nil, out)
+	_, err := c.do(uri, http.MethodGet, nil, out)
 	return out, err
 }
 
@@ -240,12 +248,12 @@ func (c *Client) GetRepoFiles(owner, name, revision, path string, page *string) 
 	if page != nil {
 		uri += "?page=" + *page
 	}
-	_, err := c.do(uri, get, nil, out)
+	_, err := c.do(uri, http.MethodGet, nil, out)
 	return out, err
 }
 
-func (c *Client) do(rawurl, method string, in, out interface{}) (*string, error) {
-	uri, err := url.Parse(rawurl)
+func (c *Client) do(rawURL, method string, in, out any) (*string, error) {
+	uri, err := url.Parse(rawURL)
 	if err != nil {
 		return nil, err
 	}

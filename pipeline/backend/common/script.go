@@ -16,31 +16,20 @@ package common
 
 import (
 	"encoding/base64"
-	"runtime"
 )
 
-func GenerateContainerConf(commands []string) (env map[string]string, entry, cmd []string) {
+func GenerateContainerConf(commands []string, goos, workDir string) (env map[string]string, entry []string) {
 	env = make(map[string]string)
-	if runtime.GOOS == "windows" {
-		env["CI_SCRIPT"] = base64.StdEncoding.EncodeToString([]byte(generateScriptWindows(commands)))
-		env["HOME"] = "c:\\root"
+	if goos == "windows" {
+		env["CI_SCRIPT"] = base64.StdEncoding.EncodeToString([]byte(generateScriptWindows(commands, workDir)))
 		env["SHELL"] = "powershell.exe"
-		entry = []string{"powershell", "-noprofile", "-noninteractive", "-command"}
-		cmd = []string{"[System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($Env:CI_SCRIPT)) | iex"}
+		// cspell:disable-next-line
+		entry = []string{"powershell", "-noprofile", "-noninteractive", "-command", "[System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($Env:CI_SCRIPT)) | iex"}
 	} else {
-		env["CI_SCRIPT"] = base64.StdEncoding.EncodeToString([]byte(generateScriptPosix(commands)))
-		env["HOME"] = "/root"
+		env["CI_SCRIPT"] = base64.StdEncoding.EncodeToString([]byte(generateScriptPosix(commands, workDir)))
 		env["SHELL"] = "/bin/sh"
-		entry = []string{"/bin/sh", "-c"}
-		cmd = []string{"echo $CI_SCRIPT | base64 -d | /bin/sh -e"}
+		entry = []string{"/bin/sh", "-c", "echo $CI_SCRIPT | base64 -d | /bin/sh -e"}
 	}
 
-	return env, entry, cmd
-}
-
-func GenerateScript(commands []string) string {
-	if runtime.GOOS == "windows" {
-		return generateScriptWindows(commands)
-	}
-	return generateScriptPosix(commands)
+	return env, entry
 }

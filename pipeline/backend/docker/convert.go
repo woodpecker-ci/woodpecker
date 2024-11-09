@@ -17,39 +17,51 @@ package docker
 import (
 	"encoding/base64"
 	"encoding/json"
+	"maps"
 	"regexp"
 	"strings"
 
 	"github.com/docker/docker/api/types/container"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline/backend/common"
-	"github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/common"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 )
 
+// Valid container volumes must have at least two components, source and destination.
+const minVolumeComponents = 2
+
 // returns a container configuration.
-func toConfig(step *types.Step) *container.Config {
+func (e *docker) toConfig(step *types.Step) *container.Config {
 	config := &container.Config{
-		Image:        step.Image,
-		Labels:       map[string]string{"wp_uuid": step.UUID},
+		Image: step.Image,
+		Labels: map[string]string{
+			"wp_uuid": step.UUID,
+			"wp_step": step.Name,
+		},
 		WorkingDir:   step.WorkingDir,
 		AttachStdout: true,
 		AttachStderr: true,
+		Volumes:      toVol(step.Volumes),
 	}
+	configEnv := make(map[string]string)
+	maps.Copy(configEnv, step.Environment)
 
-	if len(step.Commands) != 0 {
-		env, entry, cmd := common.GenerateContainerConf(step.Commands)
+	if len(step.Commands) > 0 {
+		env, entry := common.GenerateContainerConf(step.Commands, e.info.OSType, step.WorkingDir)
 		for k, v := range env {
-			step.Environment[k] = v
+			configEnv[k] = v
 		}
 		config.Entrypoint = entry
-		config.Cmd = cmd
+
+		// step.WorkingDir will be respected by the generated script
+		config.WorkingDir = step.WorkspaceBase
+	}
+	if len(step.Entrypoint) > 0 {
+		config.Entrypoint = step.Entrypoint
 	}
 
-	if len(step.Environment) != 0 {
-		config.Env = toEnv(step.Environment)
-	}
-	if len(step.Volumes) != 0 {
-		config.Volumes = toVol(step.Volumes)
+	if len(configEnv) != 0 {
+		config.Env = toEnv(configEnv)
 	}
 	return config
 }
@@ -59,31 +71,24 @@ func toContainerName(step *types.Step) string {
 }
 
 // returns a container host configuration.
-func toHostConfig(step *types.Step) *container.HostConfig {
+func toHostConfig(step *types.Step, conf *config) *container.HostConfig {
 	config := &container.HostConfig{
 		Resources: container.Resources{
-			CPUQuota:   step.CPUQuota,
-			CPUShares:  step.CPUShares,
-			CpusetCpus: step.CPUSet,
-			Memory:     step.MemLimit,
-			MemorySwap: step.MemSwapLimit,
+			CPUQuota:   conf.resourceLimit.CPUQuota,
+			CPUShares:  conf.resourceLimit.CPUShares,
+			CpusetCpus: conf.resourceLimit.CPUSet,
+			Memory:     conf.resourceLimit.MemLimit,
+			MemorySwap: conf.resourceLimit.MemSwapLimit,
 		},
+		ShmSize: conf.resourceLimit.ShmSize,
 		LogConfig: container.LogConfig{
 			Type: "json-file",
 		},
 		Privileged: step.Privileged,
-		ShmSize:    step.ShmSize,
-		Sysctls:    step.Sysctls,
 	}
 
-	// if len(step.VolumesFrom) != 0 {
-	// 	config.VolumesFrom = step.VolumesFrom
-	// }
 	if len(step.NetworkMode) != 0 {
 		config.NetworkMode = container.NetworkMode(step.NetworkMode)
-	}
-	if len(step.IpcMode) != 0 {
-		config.IpcMode = container.IpcMode(step.IpcMode)
 	}
 	if len(step.DNS) != 0 {
 		config.DNS = step.DNS
@@ -91,8 +96,12 @@ func toHostConfig(step *types.Step) *container.HostConfig {
 	if len(step.DNSSearch) != 0 {
 		config.DNSSearch = step.DNSSearch
 	}
+	extraHosts := []string{}
+	for _, hostAlias := range step.ExtraHosts {
+		extraHosts = append(extraHosts, hostAlias.Name+":"+hostAlias.IP)
+	}
 	if len(step.ExtraHosts) != 0 {
-		config.ExtraHosts = step.ExtraHosts
+		config.ExtraHosts = extraHosts
 	}
 	if len(step.Devices) != 0 {
 		config.Devices = toDev(step.Devices)
@@ -119,13 +128,16 @@ func toHostConfig(step *types.Step) *container.HostConfig {
 // helper function that converts a slice of volume paths to a set of
 // unique volume names.
 func toVol(paths []string) map[string]struct{} {
-	set := map[string]struct{}{}
+	if len(paths) == 0 {
+		return nil
+	}
+	set := make(map[string]struct{})
 	for _, path := range paths {
 		parts, err := splitVolumeParts(path)
 		if err != nil {
 			continue
 		}
-		if len(parts) < 2 {
+		if len(parts) < minVolumeComponents {
 			continue
 		}
 		set[parts[1]] = struct{}{}
@@ -138,21 +150,25 @@ func toVol(paths []string) map[string]struct{} {
 func toEnv(env map[string]string) []string {
 	var envs []string
 	for k, v := range env {
-		envs = append(envs, k+"="+v)
+		if k != "" {
+			envs = append(envs, k+"="+v)
+		}
 	}
 	return envs
 }
 
-// helper function that converts a slice of device paths to a slice of
-// container.DeviceMapping.
+// toDev converts a slice of volume paths to a set of device mappings for
+// use in a Docker container config. It handles splitting the volume paths
+// into host and container paths, and setting default permissions.
 func toDev(paths []string) []container.DeviceMapping {
 	var devices []container.DeviceMapping
+
 	for _, path := range paths {
 		parts, err := splitVolumeParts(path)
 		if err != nil {
 			continue
 		}
-		if len(parts) < 2 {
+		if len(parts) < minVolumeComponents {
 			continue
 		}
 		if strings.HasSuffix(parts[1], ":ro") || strings.HasSuffix(parts[1], ":rw") {
@@ -177,8 +193,17 @@ func encodeAuthToBase64(authConfig types.Auth) (string, error) {
 	return base64.URLEncoding.EncodeToString(buf), nil
 }
 
-// helper function that split volume path
+// splitVolumeParts splits a volume string into its constituent parts.
+//
+// The parts are:
+//
+//  1. The path on the host machine
+//  2. The path inside the container
+//  3. The read/write mode
+//
+// It handles Windows and Linux style volume paths.
 func splitVolumeParts(volumeParts string) ([]string, error) {
+	// cspell:disable-next-line
 	pattern := `^((?:[\w]\:)?[^\:]*)\:((?:[\w]\:)?[^\:]*)(?:\:([rwom]*))?`
 	r, err := regexp.Compile(pattern)
 	if err != nil {

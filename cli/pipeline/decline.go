@@ -15,13 +15,13 @@
 package pipeline
 
 import (
+	"context"
 	"fmt"
 	"strconv"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
-	"github.com/woodpecker-ci/woodpecker/cli/common"
-	"github.com/woodpecker-ci/woodpecker/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
 )
 
 var pipelineDeclineCmd = &cli.Command{
@@ -29,12 +29,11 @@ var pipelineDeclineCmd = &cli.Command{
 	Usage:     "decline a pipeline",
 	ArgsUsage: "<repo-id|repo-full-name> <pipeline>",
 	Action:    pipelineDecline,
-	Flags:     common.GlobalFlags,
 }
 
-func pipelineDecline(c *cli.Context) (err error) {
+func pipelineDecline(ctx context.Context, c *cli.Command) (err error) {
 	repoIDOrFullName := c.Args().First()
-	client, err := internal.NewClient(c)
+	client, err := internal.NewClient(ctx, c)
 	if err != nil {
 		return err
 	}
@@ -43,7 +42,7 @@ func pipelineDecline(c *cli.Context) (err error) {
 		return err
 	}
 
-	number, err := strconv.Atoi(c.Args().Get(1))
+	number, err := strconv.ParseInt(c.Args().Get(1), 10, 64)
 	if err != nil {
 		return err
 	}

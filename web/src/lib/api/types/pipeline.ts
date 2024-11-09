@@ -1,7 +1,14 @@
-import { WebhookEvents } from './webhook';
+import type { WebhookEvents } from './webhook';
+
+export interface PipelineError<D = unknown> {
+  type: string;
+  message: string;
+  data?: D;
+  is_warning: boolean;
+}
 
 // A pipeline for a repository.
-export type Pipeline = {
+export interface Pipeline {
   id: number;
 
   // The pipeline number.
@@ -15,22 +22,19 @@ export type Pipeline = {
   //  The current status of the pipeline.
   status: PipelineStatus;
 
-  error: string;
+  errors?: PipelineError[];
 
   // When the pipeline request was received.
-  created_at: number;
+  created: number;
 
   // When the pipeline was updated last time in database.
-  updated_at: number;
-
-  // When the pipeline was enqueued.
-  enqueued_at: number;
+  updated: number;
 
   // When the pipeline began execution.
-  started_at: number;
+  started: number;
 
   // When the pipeline was finished.
-  finished_at: number;
+  finished: number;
 
   // Where the deployment should go.
   deploy_to: string;
@@ -69,24 +73,19 @@ export type Pipeline = {
   //  email for the author of the commit.
   author_email: string;
 
-  // The link to view the repository.
-  // This link will point to the repository state associated with the pipeline's commit.
-  link_url: string;
-
-  signed: boolean;
-
-  verified: boolean;
+  // This url will point to the repository state associated with the pipeline's commit.
+  forge_url: string;
 
   reviewed_by: string;
 
-  reviewed_at: number;
+  reviewed: number;
 
   // The steps associated with this pipeline.
   // A pipeline will have multiple steps if a matrix pipeline was used or if a rebuild was requested.
   workflows?: PipelineWorkflow[];
 
   changed_files?: string[];
-};
+}
 
 export type PipelineStatus =
   | 'blocked'
@@ -100,21 +99,21 @@ export type PipelineStatus =
   | 'started'
   | 'success';
 
-export type PipelineWorkflow = {
+export interface PipelineWorkflow {
   id: number;
   pipeline_id: number;
   pid: number;
   name: string;
   state: PipelineStatus;
   environ?: Record<string, string>;
-  start_time?: number;
-  end_time?: number;
+  started?: number;
+  finished?: number;
   agent_id?: number;
   error?: string;
   children: PipelineStep[];
-};
+}
 
-export type PipelineStep = {
+export interface PipelineStep {
   id: number;
   uuid: string;
   pipeline_id: number;
@@ -123,29 +122,31 @@ export type PipelineStep = {
   name: string;
   state: PipelineStatus;
   exit_code: number;
-  start_time?: number;
-  end_time?: number;
+  started?: number;
+  finished?: number;
   error?: string;
   type?: StepType;
-};
+}
 
-export type PipelineLog = {
+export interface PipelineLog {
   id: number;
   step_id: number;
   time: number;
   line: number;
   data: string; // base64 encoded
   type: number;
-};
+}
 
 export type PipelineFeed = Pipeline & {
   repo_id: number;
 };
 
+/* eslint-disable no-unused-vars */
 export enum StepType {
-  Clone = 1,
-  Service,
-  Plugin,
-  Commands,
-  Cache,
+  Clone = 'clone',
+  Service = 'service',
+  Plugin = 'plugin',
+  Commands = 'commands',
+  Cache = 'cache',
 }
+/* eslint-enable */

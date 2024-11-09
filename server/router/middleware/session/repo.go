@@ -23,11 +23,11 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
-	"github.com/woodpecker-ci/woodpecker/server"
 
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/store"
-	"github.com/woodpecker-ci/woodpecker/server/store/types"
+	"go.woodpecker-ci.org/woodpecker/v2/server"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store/types"
 )
 
 func Repo(c *gin.Context) *model.Repo {
@@ -66,14 +66,14 @@ func SetRepo() gin.HandlerFunc {
 			repo, err = _store.GetRepoName(fullName)
 		}
 
-		if repo != nil {
+		if repo != nil && err == nil {
 			c.Set("repo", repo)
 			c.Next()
 			return
 		}
 
 		// debugging
-		log.Debug().Err(err).Msgf("Cannot find repository %s.", fullName)
+		log.Debug().Err(err).Msgf("cannot find repository %s", fullName)
 
 		if user == nil {
 			c.AbortWithStatus(http.StatusUnauthorized)
@@ -106,19 +106,26 @@ func SetPerm() gin.HandlerFunc {
 		_store := store.FromContext(c)
 		user := User(c)
 		repo := Repo(c)
+		_forge, err := server.Config.Services.Manager.ForgeFromRepo(repo)
+		if err != nil {
+			log.Error().Err(err).Msg("Cannot get forge from repo")
+			c.AbortWithStatus(http.StatusInternalServerError)
+			return
+		}
+
 		perm := new(model.Perm)
 
 		if user != nil {
 			var err error
 			perm, err = _store.PermFind(user, repo)
 			if err != nil {
-				log.Error().Msgf("Error fetching permission for %s %s. %s",
-					user.Login, repo.FullName, err)
+				log.Error().Err(err).Msgf("error fetching permission for %s %s",
+					user.Login, repo.FullName)
 			}
 			if time.Unix(perm.Synced, 0).Add(time.Hour).Before(time.Now()) {
-				_repo, err := server.Config.Services.Forge.Repo(c, user, repo.ForgeRemoteID, repo.Owner, repo.Name)
+				_repo, err := _forge.Repo(c, user, repo.ForgeRemoteID, repo.Owner, repo.Name)
 				if err == nil {
-					log.Debug().Msgf("Synced user permission for %s %s", user.Login, repo.FullName)
+					log.Debug().Msgf("synced user permission for %s %s", user.Login, repo.FullName)
 					perm = _repo.Perm
 					perm.Repo = repo
 					perm.RepoID = repo.ID
@@ -150,7 +157,7 @@ func SetPerm() gin.HandlerFunc {
 			log.Debug().Msgf("%s granted %+v permission to %s",
 				user.Login, perm, repo.FullName)
 		} else {
-			log.Debug().Msgf("Guest granted %+v to %s", perm, repo.FullName)
+			log.Debug().Msgf("guest granted %+v to %s", perm, repo.FullName)
 		}
 
 		c.Set("perm", perm)
@@ -170,11 +177,11 @@ func MustPull(c *gin.Context) {
 	// debugging
 	if user != nil {
 		c.AbortWithStatus(http.StatusNotFound)
-		log.Debug().Msgf("User %s denied read access to %s",
+		log.Debug().Msgf("user %s denied read access to %s",
 			user.Login, c.Request.URL.Path)
 	} else {
 		c.AbortWithStatus(http.StatusUnauthorized)
-		log.Debug().Msgf("Guest denied read access to %s %s",
+		log.Debug().Msgf("guest denied read access to %s %s",
 			c.Request.Method,
 			c.Request.URL.Path,
 		)
@@ -195,11 +202,11 @@ func MustPush(c *gin.Context) {
 	// debugging
 	if user != nil {
 		c.AbortWithStatus(http.StatusNotFound)
-		log.Debug().Msgf("User %s denied write access to %s",
+		log.Debug().Msgf("user %s denied write access to %s",
 			user.Login, c.Request.URL.Path)
 	} else {
 		c.AbortWithStatus(http.StatusUnauthorized)
-		log.Debug().Msgf("Guest denied write access to %s %s",
+		log.Debug().Msgf("guest denied write access to %s %s",
 			c.Request.Method,
 			c.Request.URL.Path,
 		)

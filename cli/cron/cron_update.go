@@ -15,14 +15,15 @@
 package cron
 
 import (
+	"context"
 	"html/template"
 	"os"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
-	"github.com/woodpecker-ci/woodpecker/cli/common"
-	"github.com/woodpecker-ci/woodpecker/cli/internal"
-	"github.com/woodpecker-ci/woodpecker/woodpecker-go/woodpecker"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker"
 )
 
 var cronUpdateCmd = &cli.Command{
@@ -30,7 +31,7 @@ var cronUpdateCmd = &cli.Command{
 	Usage:     "update a cron job",
 	ArgsUsage: "[repo-id|repo-full-name]",
 	Action:    cronUpdate,
-	Flags: append(common.GlobalFlags,
+	Flags: []cli.Flag{
 		common.RepoFlag,
 		&cli.StringFlag{
 			Name:     "id",
@@ -50,13 +51,13 @@ var cronUpdateCmd = &cli.Command{
 			Usage: "cron schedule",
 		},
 		common.FormatFlag(tmplCronList, true),
-	),
+	},
 }
 
-func cronUpdate(c *cli.Context) error {
+func cronUpdate(ctx context.Context, c *cli.Command) error {
 	var (
 		repoIDOrFullName = c.String("repository")
-		jobID            = c.Int64("id")
+		cronID           = c.Int("id")
 		jobName          = c.String("name")
 		branch           = c.String("branch")
 		schedule         = c.String("schedule")
@@ -65,7 +66,7 @@ func cronUpdate(c *cli.Context) error {
 	if repoIDOrFullName == "" {
 		repoIDOrFullName = c.Args().First()
 	}
-	client, err := internal.NewClient(c)
+	client, err := internal.NewClient(ctx, c)
 	if err != nil {
 		return err
 	}
@@ -74,7 +75,7 @@ func cronUpdate(c *cli.Context) error {
 		return err
 	}
 	cron := &woodpecker.Cron{
-		ID:       jobID,
+		ID:       cronID,
 		Name:     jobName,
 		Branch:   branch,
 		Schedule: schedule,

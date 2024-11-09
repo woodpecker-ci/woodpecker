@@ -18,11 +18,13 @@ package datastore
 import (
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/franela/goblin"
 	"github.com/stretchr/testify/assert"
 
-	"github.com/woodpecker-ci/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store/types"
 )
 
 func TestPipelines(t *testing.T) {
@@ -143,78 +145,6 @@ func TestPipelines(t *testing.T) {
 			g.Assert(pipeline2.Number).Equal(GetPipeline.Number)
 		})
 
-		g.It("Should Get a Pipeline by Ref", func() {
-			pipeline1 := &model.Pipeline{
-				RepoID: repo.ID,
-				Status: model.StatusPending,
-				Ref:    "refs/pull/5",
-			}
-			pipeline2 := &model.Pipeline{
-				RepoID: repo.ID,
-				Status: model.StatusPending,
-				Ref:    "refs/pull/6",
-			}
-			err1 := store.CreatePipeline(pipeline1, []*model.Step{}...)
-			g.Assert(err1).IsNil()
-			err2 := store.CreatePipeline(pipeline2, []*model.Step{}...)
-			g.Assert(err2).IsNil()
-			GetPipeline, err3 := store.GetPipelineRef(&model.Repo{ID: 1}, "refs/pull/6")
-			g.Assert(err3).IsNil()
-			g.Assert(pipeline2.ID).Equal(GetPipeline.ID)
-			g.Assert(pipeline2.RepoID).Equal(GetPipeline.RepoID)
-			g.Assert(pipeline2.Number).Equal(GetPipeline.Number)
-			g.Assert(pipeline2.Ref).Equal(GetPipeline.Ref)
-		})
-
-		g.It("Should Get a Pipeline by Ref", func() {
-			pipeline1 := &model.Pipeline{
-				RepoID: repo.ID,
-				Status: model.StatusPending,
-				Ref:    "refs/pull/5",
-			}
-			pipeline2 := &model.Pipeline{
-				RepoID: repo.ID,
-				Status: model.StatusPending,
-				Ref:    "refs/pull/6",
-			}
-			err1 := store.CreatePipeline(pipeline1, []*model.Step{}...)
-			g.Assert(err1).IsNil()
-			err2 := store.CreatePipeline(pipeline2, []*model.Step{}...)
-			g.Assert(err2).IsNil()
-			GetPipeline, err3 := store.GetPipelineRef(&model.Repo{ID: 1}, "refs/pull/6")
-			g.Assert(err3).IsNil()
-			g.Assert(pipeline2.ID).Equal(GetPipeline.ID)
-			g.Assert(pipeline2.RepoID).Equal(GetPipeline.RepoID)
-			g.Assert(pipeline2.Number).Equal(GetPipeline.Number)
-			g.Assert(pipeline2.Ref).Equal(GetPipeline.Ref)
-		})
-
-		g.It("Should Get a Pipeline by Commit", func() {
-			pipeline1 := &model.Pipeline{
-				RepoID: repo.ID,
-				Status: model.StatusPending,
-				Branch: "main",
-				Commit: "85f8c029b902ed9400bc600bac301a0aadb144ac",
-			}
-			pipeline2 := &model.Pipeline{
-				RepoID: repo.ID,
-				Status: model.StatusPending,
-				Branch: "dev",
-				Commit: "85f8c029b902ed9400bc600bac301a0aadb144aa",
-			}
-			err1 := store.CreatePipeline(pipeline1, []*model.Step{}...)
-			g.Assert(err1).IsNil()
-			err2 := store.CreatePipeline(pipeline2, []*model.Step{}...)
-			g.Assert(err2).IsNil()
-			GetPipeline, err3 := store.GetPipelineCommit(&model.Repo{ID: 1}, pipeline2.Commit, pipeline2.Branch)
-			g.Assert(err3).IsNil()
-			g.Assert(pipeline2.ID).Equal(GetPipeline.ID)
-			g.Assert(pipeline2.RepoID).Equal(GetPipeline.RepoID)
-			g.Assert(pipeline2.Number).Equal(GetPipeline.Number)
-			g.Assert(pipeline2.Commit).Equal(GetPipeline.Commit)
-			g.Assert(pipeline2.Branch).Equal(GetPipeline.Branch)
-		})
-
 		g.It("Should Get the last Pipeline", func() {
 			pipeline1 := &model.Pipeline{
 				RepoID: repo.ID,
@@ -292,12 +222,32 @@ func TestPipelines(t *testing.T) {
 			g.Assert(err1).IsNil()
 			err2 := store.CreatePipeline(pipeline2, []*model.Step{}...)
 			g.Assert(err2).IsNil()
-			pipelines, err3 := store.GetPipelineList(&model.Repo{ID: 1}, &model.ListOptions{Page: 1, PerPage: 50})
+			pipelines, err3 := store.GetPipelineList(&model.Repo{ID: 1}, &model.ListOptions{Page: 1, PerPage: 50}, nil)
 			g.Assert(err3).IsNil()
 			g.Assert(len(pipelines)).Equal(2)
 			g.Assert(pipelines[0].ID).Equal(pipeline2.ID)
 			g.Assert(pipelines[0].RepoID).Equal(pipeline2.RepoID)
 			g.Assert(pipelines[0].Status).Equal(pipeline2.Status)
+		})
+
+		g.It("Should get filtered pipelines", func() {
+			pipeline1 := &model.Pipeline{
+				RepoID: repo.ID,
+			}
+			pipeline2 := &model.Pipeline{
+				RepoID: repo.ID,
+			}
+			err1 := store.CreatePipeline(pipeline1, []*model.Step{}...)
+			g.Assert(err1).IsNil()
+			time.Sleep(1 * time.Second)
+			before := time.Now().Unix()
+			err2 := store.CreatePipeline(pipeline2, []*model.Step{}...)
+			g.Assert(err2).IsNil()
+			pipelines, err3 := store.GetPipelineList(&model.Repo{ID: 1}, &model.ListOptions{Page: 1, PerPage: 50}, &model.PipelineFilter{Before: before})
+			g.Assert(err3).IsNil()
+			g.Assert(len(pipelines)).Equal(1)
+			g.Assert(pipelines[0].ID).Equal(pipeline1.ID)
+			g.Assert(pipelines[0].RepoID).Equal(pipeline1.RepoID)
 		})
 	})
 }
@@ -322,4 +272,68 @@ func TestPipelineIncrement(t *testing.T) {
 	pipelineC := &model.Pipeline{RepoID: 2}
 	assert.NoError(t, store.CreatePipeline(pipelineC))
 	assert.EqualValues(t, 1, pipelineC.Number)
+}
+
+func TestDeletePipeline(t *testing.T) {
+	store, closer := newTestStore(t, new(model.Pipeline), new(model.Repo), new(model.Workflow),
+		new(model.Step), new(model.LogEntry), new(model.PipelineConfig), new(model.Config))
+	defer closer()
+
+	_, err := store.engine.Insert(
+		&model.Pipeline{
+			ID:     2,
+			Number: 2,
+			RepoID: 7,
+		},
+		&model.Pipeline{
+			ID:     5,
+			Number: 3,
+			RepoID: 7,
+		},
+		&model.Pipeline{
+			ID:     8,
+			Number: 4,
+			RepoID: 7,
+		},
+		&model.Config{
+			ID:     23,
+			Hash:   "1234",
+			Name:   "test",
+			RepoID: 7,
+		},
+		&model.Config{
+			ID:     25,
+			Hash:   "6789",
+			Name:   "test",
+			RepoID: 7,
+		},
+		&model.PipelineConfig{
+			PipelineID: 2,
+			ConfigID:   23,
+		},
+		&model.PipelineConfig{
+			PipelineID: 5,
+			ConfigID:   23,
+		},
+		&model.PipelineConfig{
+			PipelineID: 8,
+			ConfigID:   25,
+		},
+	)
+	assert.NoError(t, err)
+
+	// delete non existing pipeline
+	assert.ErrorIs(t, types.RecordNotExist, store.DeletePipeline(&model.Pipeline{ID: 1}))
+
+	// delete pipeline with shares config
+	assert.NoError(t, store.DeletePipeline(&model.Pipeline{ID: 2}))
+	count, err := store.engine.Count(new(model.Config))
+	assert.NoError(t, err)
+	assert.EqualValues(t, 2, count)
+
+	// delete pipeline with unique config
+	assert.NoError(t, store.DeletePipeline(&model.Pipeline{ID: 8}))
+	count, err = store.engine.Count(new(model.Config))
+	assert.NoError(t, err)
+	assert.EqualValues(t, 1, count)
 }

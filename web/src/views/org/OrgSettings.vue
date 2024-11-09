@@ -4,14 +4,23 @@
       <span>
         <router-link :to="{ name: 'org' }" class="hover:underline">
           {{ org.name }}
+          <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
         </router-link>
         /
-        {{ $t('org.settings.settings') }}
+        {{ $t('settings') }}
       </span>
     </template>
 
-    <Tab id="secrets" :title="$t('org.settings.secrets.secrets')">
+    <Tab id="secrets" :title="$t('secrets.secrets')">
       <OrgSecretsTab />
+    </Tab>
+
+    <Tab id="registries" :title="$t('registries.registries')">
+      <OrgRegistriesTab />
+    </Tab>
+
+    <Tab id="agents" :title="$t('admin.settings.agents.agents')">
+      <OrgAgentsTab />
     </Tab>
   </Scaffold>
 </template>
@@ -21,7 +30,10 @@ import { onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 
+import Scaffold from '~/components/layout/scaffold/Scaffold.vue';
 import Tab from '~/components/layout/scaffold/Tab.vue';
+import OrgAgentsTab from '~/components/org/settings/OrgAgentsTab.vue';
+import OrgRegistriesTab from '~/components/org/settings/OrgRegistriesTab.vue';
 import OrgSecretsTab from '~/components/org/settings/OrgSecretsTab.vue';
 import { inject } from '~/compositions/useInjectProvide';
 import useNotifications from '~/compositions/useNotifications';

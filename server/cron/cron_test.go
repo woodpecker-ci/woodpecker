@@ -22,13 +22,16 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
-	mocks_forge "github.com/woodpecker-ci/woodpecker/server/forge/mocks"
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	mocks_store "github.com/woodpecker-ci/woodpecker/server/store/mocks"
+	"go.woodpecker-ci.org/woodpecker/v2/server"
+	mocks_forge "go.woodpecker-ci.org/woodpecker/v2/server/forge/mocks"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	mocks_manager "go.woodpecker-ci.org/woodpecker/v2/server/services/mocks"
+	mocks_store "go.woodpecker-ci.org/woodpecker/v2/server/store/mocks"
 )
 
-func TestCreateBuild(t *testing.T) {
-	forge := mocks_forge.NewForge(t)
+func TestCreatePipeline(t *testing.T) {
+	_manager := mocks_manager.NewManager(t)
+	_forge := mocks_forge.NewForge(t)
 	store := mocks_store.NewStore(t)
 	ctx := context.Background()
 
@@ -47,19 +50,25 @@ func TestCreateBuild(t *testing.T) {
 	// mock things
 	store.On("GetRepo", mock.Anything).Return(repo1, nil)
 	store.On("GetUser", mock.Anything).Return(creator, nil)
-	forge.On("BranchHead", mock.Anything, creator, repo1, "default").Return("sha1", nil)
+	_forge.On("BranchHead", mock.Anything, creator, repo1, "default").Return(&model.Commit{
+		ForgeURL: "https://example.com/sha1",
+		SHA:      "sha1",
+	}, nil)
+	_manager.On("ForgeFromRepo", repo1).Return(_forge, nil)
+	server.Config.Services.Manager = _manager
 
-	_, pipeline, err := CreatePipeline(ctx, store, forge, &model.Cron{
+	_, pipeline, err := CreatePipeline(ctx, store, &model.Cron{
 		Name: "test",
 	})
 	assert.NoError(t, err)
 	assert.EqualValues(t, &model.Pipeline{
-		Event:   "cron",
-		Commit:  "sha1",
-		Branch:  "default",
-		Ref:     "refs/heads/default",
-		Message: "test",
-		Sender:  "test",
+		Branch:   "default",
+		Commit:   "sha1",
+		Event:    "cron",
+		ForgeURL: "https://example.com/sha1",
+		Message:  "test",
+		Ref:      "refs/heads/default",
+		Sender:   "test",
 	}, pipeline)
 }
 

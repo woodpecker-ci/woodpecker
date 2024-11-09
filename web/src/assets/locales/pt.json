@@ -1,112 +1,514 @@
 {
-  "back": "Voltar",
-  "cancel": "Cancelar",
-  "color_scheme_dark": "Mudar para o modo claro",
-  "color_scheme_light": "Mudar para o modo escuro",
-  "docs": "Documentação",
-  "documentation_for": "Documentação para \"{topic}\"",
-  "errors": {
-    "not_found": "Servidor não pode encontrar o objeto requisitado"
-  },
-  "login": "Entrar",
-  "logout": "Sair",
-  "not_found": {
-    "back_home": "Voltar para o início"
-  },
-  "password": "Senha",
-  "repo": {
-    "activity": "Atividade",
-    "add": "Adicionar repositório",
-    "deploy_pipeline": {
-      "variables": {
-        "add": "Adicionar variável",
-        "name": "Nome da variável",
-        "value": "Valor da variável"
-      }
+    "back": "Voltar",
+    "cancel": "Cancelar",
+    "docs": "Documentação",
+    "documentation_for": "Documentação para \"{topic}\"",
+    "errors": {
+        "not_found": "Servidor não pode encontrar o objeto requisitado"
     },
-    "enable": {
-      "enable": "Habilitar",
-      "enabled": "Já habilitado",
-      "list_reloaded": "Lista de repositório recarregada",
-      "reload": "Recarregar repositórios",
-      "success": "Repositório habilitado"
+    "login": "Entrar",
+    "logout": "Sair",
+    "not_found": {
+        "back_home": "Voltar para o início",
+        "not_found": "Opa 404, quebramos alguma coisa, ou você teve um erro de digitação :-/"
     },
-    "manual_pipeline": {
-      "variables": {
-        "add": "Adicionar variável",
-        "desc": "Especifica variáveis adicionais para usar na sua pipeline. Variáveis com o mesmo nome serão sobreescrito.",
-        "name": "Nome da variável",
-        "value": "Valor da variável"
-      }
+    "password": "Senha",
+    "repo": {
+        "activity": "Atividade",
+        "add": "Adicionar repositório",
+        "deploy_pipeline": {
+            "variables": {
+                "add": "Adicionar variável",
+                "name": "Nome da variável",
+                "value": "Valor da variável",
+                "title": "Variáveis adicionais do pipeline",
+                "desc": "Especifique variáveis adicionais a serem usadas em seu pipeline. As variáveis com o mesmo nome serão substituídas.",
+                "delete": "Excluir variável"
+            },
+            "title": "Acionar o evento de implantação para o pipeline atual #{pipelineId}",
+            "enter_target": "Ambiente de implantação de destino",
+            "trigger": "Implementar"
+        },
+        "enable": {
+            "enable": "Habilitar",
+            "enabled": "Já habilitado",
+            "list_reloaded": "Lista de repositório recarregada",
+            "reload": "Recarregar repositórios",
+            "success": "Repositório habilitado",
+            "disabled": "Desativado"
+        },
+        "manual_pipeline": {
+            "variables": {
+                "add": "Adicionar variável",
+                "desc": "Especifica variáveis adicionais para usar na sua pipeline. Variáveis com o mesmo nome serão sobreescrito.",
+                "name": "Nome da variável",
+                "value": "Valor da variável",
+                "delete": "Excluir variável",
+                "title": "Variáveis adicionais do pipeline"
+            },
+            "title": "Executar um pipeline manual",
+            "trigger": "Executar pipeline",
+            "select_branch": "Selecionar branch"
+        },
+        "not_allowed": "Você não está autorizado a acessar este repositório",
+        "open_in_forge": "Abrir repositório no Sistema de Controle de Versão",
+        "settings": {
+            "general": {
+                "allow_pr": {
+                    "allow": "Permitir Pull Requests",
+                    "desc": "Os pipelines podem ser executados em pull requests."
+                },
+                "cancel_prev": {
+                    "cancel": "Cancelar pipelines anteriores",
+                    "desc": "Permite cancelar pipelines pendentes e em execução do mesmo evento e contexto antes de iniciar o pipeline recém-acionado."
+                },
+                "general": "Geral",
+                "project": "Configurações de Projeto",
+                "protected": {
+                    "desc": "Todas as pipeline necessitam de aprovação antes de serem executadas.",
+                    "protected": "Protegido"
+                },
+                "save": "Salvar configurações",
+                "success": "Configurações do repositório atualizadas",
+                "timeout": {
+                    "minutes": "minutos",
+                    "timeout": "Tempo limite"
+                },
+                "trusted": {
+                    "trusted": "Confiável",
+                    "desc": "Os contêineres de pipeline subjacente obtêm acesso a recursos escalonados, como a montagem de volumes."
+                },
+                "visibility": {
+                    "internal": {
+                        "desc": "Somente usuários autenticados na instância Woodpecker podem ver este projeto.",
+                        "internal": "Interno"
+                    },
+                    "private": {
+                        "desc": "Somente você e outros donos do repositório podem ver este projeto.",
+                        "private": "Privado"
+                    },
+                    "public": {
+                        "desc": "Qualquer usuário pode ver seu projeto sem estar logado.",
+                        "public": "Público"
+                    },
+                    "visibility": "Visibilidade do projeto"
+                },
+                "netrc_only_trusted": {
+                    "desc": "Injete as credenciais netrc somente em contêineres confiáveis (recomendado).",
+                    "netrc_only_trusted": "Injetar credenciais netrc somente em contêineres confiáveis"
+                },
+                "pipeline_path": {
+                    "path": "Caminho do pipeline",
+                    "default": "Por padrão: .woodpecker/*.{'{yaml,yml}'} -> .woodpecker.yaml -> .woodpecker.yml",
+                    "desc": "Caminho para a configuração do pipeline (por exemplo, {0}). As pastas devem terminar com {1}.",
+                    "desc_path_example": "my/path/"
+                }
+            },
+            "not_allowed": "Você não está autorizado a acessar as configurações deste repositório",
+            "secrets": {
+                "add": "Adicionar secret",
+                "created": "Secret criado",
+                "delete": "Excluir secret",
+                "delete_confirm": "Você realmente deseja excluir este secret?",
+                "deleted": "Secret excluído",
+                "edit": "Editar secret",
+                "images": {
+                    "images": "Disponíveis para as seguintes imagens",
+                    "desc": "Lista de imagens em que esse segredo está disponível; deixe em branco para permitir todas as imagens"
+                },
+                "name": "Nome",
+                "save": "Salvar secret",
+                "saved": "Secret salvo",
+                "show": "Exibir secrets",
+                "value": "Valor",
+                "desc": "Os segredos podem ser passados em tempo de execução como variáveis de ambiente para etapas individuais no pipeline.",
+                "secrets": "Segredos",
+                "none": "Não há segredos ainda.",
+                "events": {
+                    "events": "Disponível nos seguintes eventos",
+                    "pr_warning": "Tenha cuidado com essa opção, pois um agente mal-intencionado pode enviar um pull request malicioso que expõe seus segredos."
+                },
+                "plugins_only": "Disponível apenas para plugins"
+            },
+            "settings": "Configurações",
+            "crons": {
+                "desc": "As tarefas Cron podem ser usados para acionar pipelines regularmente.",
+                "delete": "Excluir cron",
+                "crons": "Crons",
+                "show": "Mostrar crons",
+                "add": "Adicionar cron",
+                "none": "Ainda não existem crons.",
+                "save": "Salvar cron",
+                "created": "Cron criado",
+                "saved": "Cron salvo",
+                "deleted": "Cron excluído",
+                "next_exec": "Próxima execução",
+                "not_executed_yet": "Ainda não foi executado",
+                "run": "Executar agora",
+                "branch": {
+                    "title": "Branch",
+                    "placeholder": "Branch (usa o branch padrão se estiver vazio)"
+                },
+                "name": {
+                    "name": "Nome",
+                    "placeholder": "Nome do trabalho cron"
+                },
+                "schedule": {
+                    "title": "Programação (com base no UTC)",
+                    "placeholder": "Programação"
+                },
+                "edit": "Editar cron"
+            },
+            "actions": {
+                "repair": {
+                    "repair": "Reparar repositório",
+                    "success": "Repositório reparado"
+                },
+                "delete": {
+                    "confirm": "Todos os dados serão perdidos após essa ação!!!\n\nVocê realmente deseja continuar?",
+                    "delete": "Excluir repositório",
+                    "success": "Repositório excluído"
+                },
+                "actions": "Ações",
+                "disable": {
+                    "disable": "Desativar repositório",
+                    "success": "Repositório desativado"
+                },
+                "enable": {
+                    "enable": "Ativar repositório",
+                    "success": "Repositório ativado"
+                }
+            },
+            "registries": {
+                "desc": "As credenciais de registries podem ser adicionadas para usar imagens privadas para o seu pipeline.",
+                "created": "Credenciais de registry criadas",
+                "saved": "Credenciais de registry salvas",
+                "registries": "Registries",
+                "credentials": "Credenciais de registry",
+                "show": "Mostrar registries",
+                "add": "Adicionar registry",
+                "none": "Ainda não há credenciais de registry.",
+                "save": "Salvar registry",
+                "deleted": "Credenciais de registry excluídas",
+                "address": {
+                    "address": "Endereço",
+                    "placeholder": "Endereço de registry (por exemplo, docker.io)"
+                },
+                "edit": "Editar registry",
+                "delete": "Excluir registry"
+            },
+            "badge": {
+                "badge": "Emblema",
+                "type": "Sintaxe",
+                "type_url": "URL",
+                "type_markdown": "Markdown",
+                "type_html": "HTML",
+                "branch": "Branch"
+            }
+        },
+        "user_none": "Esta organização / usuário ainda não tem nenhum projeto.",
+        "pipeline": {
+            "protected": {
+                "awaits": "Esse pipeline está aguardando a aprovação de um mantenedor!",
+                "review": "Revisar alterações",
+                "approve": "Aprovar",
+                "decline": "Recusar",
+                "declined": "Esse pipeline foi recusado!",
+                "approve_success": "Pipeline aprovado",
+                "decline_success": "Pipeline recusado"
+            },
+            "status": {
+                "started": "iniciado",
+                "status": "Status: {status}",
+                "blocked": "bloqueado",
+                "pending": "pendente",
+                "running": "executando",
+                "skipped": "omitido",
+                "success": "sucesso",
+                "declined": "recusado",
+                "error": "erro",
+                "failure": "falha",
+                "killed": "finalizado"
+            },
+            "we_got_some_errors": "Oh não, temos alguns erros!",
+            "step_not_started": "Essa etapa ainda não foi iniciada.",
+            "log_download_error": "Ocorreu um erro ao fazer o download do arquivo de registro",
+            "actions": {
+                "log_auto_scroll_off": "Desativar a rolagem automática",
+                "cancel": "Cancelar",
+                "restart": "Reiniciar",
+                "canceled": "Essa etapa foi cancelada.",
+                "cancel_success": "Pipeline cancelado",
+                "deploy": "Implementar",
+                "restart_success": "Pipeline reiniciado",
+                "log_download": "Baixar",
+                "log_auto_scroll": "Rolagem automática para baixo"
+            },
+            "tasks": "Tarefas",
+            "config": "Configuração",
+            "files": "Arquivos alterados ({files})",
+            "no_files": "Nenhum arquivo foi alterado.",
+            "no_pipelines": "Nenhum pipelines foi iniciado ainda.",
+            "event": {
+                "push": "Push",
+                "tag": "Tag",
+                "pr": "Pull Request",
+                "deploy": "Implementar",
+                "cron": "Cron",
+                "manual": "Manual",
+                "release": "Release"
+            },
+            "errors": "Erros ({count})",
+            "warnings": "Avisos ({count})",
+            "show_errors": "Mostrar erros",
+            "no_pipeline_steps": "Não há etapas de pipeline disponíveis!",
+            "pipelines_for": "Pipelines para branch \"{branch}\"",
+            "pipelines_for_pr": "Pipelines para o pull request #{index}",
+            "exit_code": "Código de saída {exitCode}",
+            "loading": "Carregando…",
+            "pipeline": "Pipeline #{pipelineId}",
+            "log_title": "Registros de etapas"
+        },
+        "branches": "Branches",
+        "pull_requests": "Pull requests"
     },
-    "not_allowed": "Você não está autorizado a acessar este repositório",
-    "open_in_forge": "Abrir repositório no Sistema de Controle de Versão",
-    "settings": {
-      "general": {
-        "allow_pr": {
-          "allow": "Permitir Pull Requests"
-        },
-        "cancel_prev": {
-          "cancel": "Cancelar pipelines anteriores"
-        },
-        "general": "Geral",
-        "project": "Configurações de Projeto",
-        "protected": {
-          "desc": "Todas as pipeline necessitam de aprovação antes de serem executadas.",
-          "protected": "Protegido"
-        },
-        "save": "Salvar configurações",
-        "success": "Configurações do repositório atualizadas",
-        "timeout": {
-          "minutes": "minutos"
-        },
-        "trusted": {
-          "trusted": "Confiável"
-        },
-        "visibility": {
-          "internal": {
-            "desc": "Somente usuários autenticados na instância Woodpecker podem ver este projeto."
-          },
-          "private": {
-            "desc": "Somente você e outros donos do repositório podem ver este projeto.",
-            "private": "Privado"
-          },
-          "public": {
-            "desc": "Qualquer usuário pode ver seu projeto sem estar logado.",
-            "public": "Público"
-          },
-          "visibility": "Visibilidade do projeto"
+    "repos": "Repos",
+    "repositories": "Repositórios",
+    "search": "Buscar…",
+    "time": {
+        "not_started": "não iniciado ainda",
+        "template": "DD.MM.YYYY, HH:mm z",
+        "weeks_short": "sem",
+        "days_short": "d",
+        "hours_short": "h",
+        "min_short": "min",
+        "sec_short": "seg"
+    },
+    "unknown_error": "Ocorreu um erro desconhecido",
+    "url": "URL",
+    "username": "Nome de usuário",
+    "welcome": "Bem-vindo ao Woodpecker",
+    "admin": {
+        "settings": {
+            "queue": {
+                "stats": {
+                    "completed_count": "Tarefas concluídas",
+                    "worker_count": "Livre",
+                    "running_count": "Executando",
+                    "pending_count": "Pendente",
+                    "waiting_on_deps_count": "Aguardando dependências"
+                },
+                "queue": "Em fila",
+                "desc": "Tarefas aguardando para serem executadas pelos agentes",
+                "pause": "Pausa",
+                "resume": "Retomar",
+                "paused": "A fila está em pausa",
+                "resumed": "A fila foi retomada",
+                "tasks": "Tarefas",
+                "task_running": "A tarefa está em execução",
+                "task_pending": "Tarefa pendente",
+                "task_waiting_on_deps": "A tarefa está aguardando as dependências",
+                "agent": "agente",
+                "waiting_for": "esperando por"
+            },
+            "users": {
+                "show": "Mostrar usuários",
+                "delete_confirm": "Você realmente deseja excluir esse usuário? Isso também excluirá todos os repositórios pertencentes a esse usuário.",
+                "created": "Usuário criado",
+                "edit_user": "Editar usuário",
+                "users": "Usuários",
+                "desc": "Usuários registrados para este servidor",
+                "login": "Login",
+                "email": "Email",
+                "avatar_url": "URL do avatar",
+                "save": "Salvar usuário",
+                "cancel": "Cancelar",
+                "add": "Adicionar usuário",
+                "none": "Ainda não há usuários.",
+                "deleted": "Usuário excluído",
+                "saved": "Usuário salvo",
+                "admin": {
+                    "admin": "Admin",
+                    "placeholder": "O usuário é um administrador"
+                },
+                "delete_user": "Excluir usuário"
+            },
+            "orgs": {
+                "delete_org": "Excluir organização",
+                "delete_confirm": "Você deseja realmente excluir essa organização? Isso também excluirá todos os repositórios pertencentes a essa organização.",
+                "orgs": "Organizações",
+                "desc": "Organizações proprietárias de repositórios neste servidor",
+                "none": "Ainda não existem organizações.",
+                "org_settings": "Configurações da organização",
+                "deleted": "Organização excluída",
+                "view": "Ver organização"
+            },
+            "secrets": {
+                "deleted": "Segredo global excluído",
+                "images": {
+                    "desc": "Lista de imagens em que esse segredo está disponível; deixe em branco para permitir todas as imagens",
+                    "images": "Disponível para as seguintes imagens"
+                },
+                "secrets": "Segredos",
+                "desc": "Os segredos globais podem ser transmitidos em tempo de execução como variáveis de ambiente para etapas individuais no pipeline de qualquer repositório.",
+                "warning": "Esses segredos estarão disponíveis para todos os usuários do servidor.",
+                "none": "Ainda não há segredos globais.",
+                "add": "Adicionar segredo",
+                "save": "Salvar segredo",
+                "show": "Mostrar segredos",
+                "name": "Nome",
+                "value": "Valor",
+                "created": "Segredo global criado",
+                "saved": "Segredo global salvo",
+                "plugins_only": "Disponível apenas para plugins",
+                "events": {
+                    "events": "Disponível nos seguintes eventos",
+                    "pr_warning": "Tenha cuidado com essa opção, pois um agente mal-intencionado pode enviar um pull request malicioso que expõe seus segredos."
+                }
+            },
+            "agents": {
+                "show": "Mostrar agentes",
+                "name": {
+                    "name": "Nome",
+                    "placeholder": "Nome do agente"
+                },
+                "no_schedule": {
+                    "placeholder": "Impedir agente de assumir novas tarefas",
+                    "name": "Desativar agente"
+                },
+                "delete_confirm": "Você realmente deseja excluir esse agente? Ele não conseguirá mais se conectar ao servidor.",
+                "agents": "Agentes",
+                "desc": "Agentes registrados para este servidor",
+                "none": "Ainda não há agentes.",
+                "id": "ID",
+                "add": "Adicionar agente",
+                "save": "Salvar agente",
+                "created": "Agente criado",
+                "saved": "Agente salvo",
+                "deleted": "Agente excluído",
+                "token": "Token",
+                "platform": {
+                    "platform": "Plataforma",
+                    "badge": "plataforma"
+                },
+                "backend": {
+                    "backend": "Backend",
+                    "badge": "backend"
+                },
+                "capacity": {
+                    "capacity": "Capacidade",
+                    "desc": "A quantidade máxima de pipelines paralelos executados por esse agente.",
+                    "badge": "capacidade"
+                },
+                "version": "Versão",
+                "last_contact": "Último contato",
+                "never": "Nunca",
+                "edit_agent": "Editar agente",
+                "delete_agent": "Excluir agente"
+            },
+            "settings": "Configurações",
+            "not_allowed": "Você não tem permissão para acessar as configurações do servidor",
+            "repos": {
+                "repos": "Repositórios",
+                "desc": "Repositórios que estão ou estavam ativados neste servidor",
+                "none": "Ainda não há repositórios.",
+                "view": "Ver repositório",
+                "settings": "Configurações do repositório",
+                "disabled": "Desativado",
+                "repair": {
+                    "repair": "Reparar todos",
+                    "success": "Repositórios reparados"
+                }
+            }
         }
-      },
-      "not_allowed": "Você não está autorizado a acessar as configurações deste repositório",
-      "secrets": {
-        "add": "Adicionar secret",
-        "created": "Secret criado",
-        "delete": "Excluir secret",
-        "delete_confirm": "Você realmente deseja excluir este secret?",
-        "deleted": "Secret excluído",
-        "edit": "Editar secret",
-        "images": {
-          "images": "Disponíveis para as seguintes imagens"
-        },
-        "name": "Nome",
-        "save": "Salvar secret",
-        "saved": "Secret salvo",
-        "show": "Exibir secrets",
-        "value": "Valor"
-      },
-      "settings": "Configurações"
     },
-    "user_none": "Esta organização / usuário ainda não tem nenhum projeto."
-  },
-  "repos": "Repos",
-  "repositories": "Repositórios",
-  "search": "Buscar…",
-  "time": {
-    "not_started": "não iniciado ainda"
-  },
-  "unknown_error": "Ocorreu um erro desconhecido",
-  "url": "URL",
-  "username": "Nome de usuário",
-  "welcome": "Bem-vindo ao Woodpecker"
+    "org": {
+        "settings": {
+            "secrets": {
+                "secrets": "Segredos",
+                "desc": "Os segredos organizacionais podem ser transmitidos em tempo de execução como variáveis de ambiente para etapas individuais de qualquer pipeline na organização.",
+                "images": {
+                    "desc": "Lista de imagens em que esse segredo está disponível; deixe em branco para permitir todas as imagens",
+                    "images": "Disponível para as seguintes imagens"
+                },
+                "events": {
+                    "pr_warning": "Tenha cuidado com essa opção, pois um agente mal-intencionado pode enviar um pull request malicioso que expõe seus segredos.",
+                    "events": "Disponível nos seguintes eventos"
+                },
+                "none": "Ainda não há segredos de organização.",
+                "add": "Adicionar segredo",
+                "save": "Salvar segredo",
+                "show": "Mostrar segredos",
+                "name": "Nome",
+                "value": "Valor",
+                "deleted": "Segredo da organização excluído",
+                "created": "Segredo da organização criado",
+                "saved": "Segredo da organização salvo",
+                "plugins_only": "Disponível apenas para plugins"
+            },
+            "settings": "Configurações",
+            "not_allowed": "Você não tem permissão para acessar as configurações desta organização"
+        }
+    },
+    "api": "API",
+    "empty_list": "Nenhuma {entity} encontrada!",
+    "pipeline_feed": "Relatório de atividades de pipeline",
+    "user": {
+        "settings": {
+            "secrets": {
+                "desc": "Os segredos do usuário podem ser passados em tempo de execução como variáveis de ambiente para etapas individuais de qualquer pipeline de usuário.",
+                "images": {
+                    "desc": "Lista de imagens em que esse segredo está disponível; deixe em branco para permitir todas as imagens",
+                    "images": "Disponível para as seguintes imagens"
+                },
+                "secrets": "Segredos",
+                "none": "Ainda não há segredos de usuário.",
+                "add": "Adicionar segredo",
+                "save": "Salvar segredo",
+                "show": "Mostrar segredos",
+                "name": "Nome",
+                "value": "Valor",
+                "deleted": "Segredo do usuário excluído",
+                "created": "Segredo de usuário criado",
+                "saved": "Segredo do usuário salvo",
+                "plugins_only": "Disponível apenas para plugins",
+                "events": {
+                    "events": "Disponível nos seguintes eventos",
+                    "pr_warning": "Tenha cuidado com essa opção, pois um agente mal-intencionado pode enviar um pull request malicioso que expõe seus segredos."
+                }
+            },
+            "api": {
+                "desc": "Token de acesso pessoal e uso da API",
+                "token": "Token de acesso pessoal",
+                "shell_setup_before": "Execute as etapas de configuração do shell antes",
+                "api": "API",
+                "shell_setup": "Configuração do shell",
+                "api_usage": "Exemplo de uso da API",
+                "cli_usage": "Exemplo de uso da CLI",
+                "dl_cli": "Download da CLI",
+                "reset_token": "Redefinir token",
+                "swagger_ui": "Swagger UI"
+            },
+            "settings": "Configurações do usuário",
+            "general": {
+                "general": "Geral",
+                "language": "Idioma",
+                "theme": {
+                    "theme": "Tema",
+                    "light": "Claro",
+                    "dark": "Escuro",
+                    "auto": "Auto"
+                }
+            }
+        },
+        "oauth_error": "Erro ao autenticar no provedor OAuth",
+        "internal_error": "Ocorreu um erro interno",
+        "access_denied": "Você não tem permissão para fazer login"
+    },
+    "update_woodpecker": "Atualize sua instância do Woodpecker para {0}",
+    "default": "padrão",
+    "info": "Info",
+    "running_version": "Você está executando Woodpecker {0}",
+    "global_level_secret": "segredo global",
+    "org_level_secret": "segredo da organização"
 }

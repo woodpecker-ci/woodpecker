@@ -15,15 +15,22 @@
 package main
 
 import (
+	"context"
 	"os"
 
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/rs/zerolog/log"
+
+	"go.woodpecker-ci.org/woodpecker/v2/shared/utils"
 )
 
 func main() {
+	ctx := utils.WithContextSigtermCallback(context.Background(), func() {
+		log.Info().Msg("termination signal is received, terminate cli")
+	})
+
 	app := newApp()
-	if err := app.Run(os.Args); err != nil {
-		log.Fatal().Err(err).Msg("error running cli")
+	if err := app.Run(ctx, os.Args); err != nil {
+		log.Fatal().Err(err).Msg("error running cli") //nolint:forbidigo
 	}
 }

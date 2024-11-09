@@ -58,3 +58,34 @@ func TestEqualSliceValues(t *testing.T) {
 	assert.True(t, EqualSliceValues([]bool{true, false, false}, []bool{false, false, true}))
 	assert.False(t, EqualSliceValues([]bool{true, false, false}, []bool{true, false, true}))
 }
+
+func TestSliceToBoolMap(t *testing.T) {
+	assert.Equal(t, map[string]bool{
+		"a": true,
+		"b": true,
+		"c": true,
+	}, SliceToBoolMap([]string{"a", "b", "c"}))
+	assert.Equal(t, map[string]bool{}, SliceToBoolMap([]string{}))
+	assert.Equal(t, map[string]bool{}, SliceToBoolMap([]string{""}))
+}
+
+func TestStringSliceDeleteEmpty(t *testing.T) {
+	tests := []struct {
+		in  []string
+		out []string
+	}{{
+		in:  []string{"", "ab", "ab"},
+		out: []string{"ab", "ab"},
+	}, {
+		in:  []string{"", "ab", ""},
+		out: []string{"ab"},
+	}, {
+		in:  []string{""},
+		out: []string{},
+	}}
+
+	for _, tc := range tests {
+		exp := StringSliceDeleteEmpty(tc.in)
+		assert.EqualValues(t, tc.out, exp, "got '%#v', expects %#v", exp, tc.out)
+	}
+}

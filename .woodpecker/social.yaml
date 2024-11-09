@@ -1,0 +1,26 @@
+depends_on:
+  - docker
+  - binaries
+
+when:
+  - event: tag
+
+steps:
+  - name: mastodon-toot
+    image: docker.io/woodpeckerci/plugin-mastodon-post
+    settings:
+      server_url: https://floss.social
+      access_token:
+        from_secret: mastodon_token
+      visibility: public
+      ai_token:
+        from_secret: openai_token
+      ai_prompt: |
+        We want to present the next version of our app on Mastodon.
+        Therefore we want to post a catching text, so users will know why they should
+        update to the newest version. Highlight the most special features. If there is no special feature
+        included just summarize the changes in a few sentences. The whole text should not be longer than 240
+        characters. Avoid naming contributors from. Use #WoodpeckerCI, #release and
+        additional fitting hashtags and emojis to make the post more appealing
+
+        The changelog entry: {{ changelog }}

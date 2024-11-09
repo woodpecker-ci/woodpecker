@@ -2,12 +2,12 @@
 
 ```Go
 import (
-  "github.com/woodpecker-ci/woodpecker/woodpecker-go/woodpecker"
+  "go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker"
   "golang.org/x/oauth2"
 )
 
 const (
-  token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9"
+  token = "dummyToken"
   host  = "http://woodpecker.company.tld"
 )
 

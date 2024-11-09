@@ -1,4 +1,4 @@
-import { Pipeline, PipelineStep, PipelineWorkflow, Repo } from '~/lib/api/types';
+import type { Pipeline, PipelineStep, PipelineWorkflow, Repo } from '~/lib/api/types';
 
 export function findStep(workflows: PipelineWorkflow[], pid: number): PipelineStep | undefined {
   return workflows.reduce(
@@ -24,20 +24,16 @@ export function findStep(workflows: PipelineWorkflow[], pid: number): PipelineSt
 }
 
 /**
- * Returns true if the process is in a completed state.
- *
- * @param {Object} step - The process object.
- * @returns {boolean}
+ * @param {object} step - The process object.
+ * @returns {boolean} true if the process is in a completed state
  */
 export function isStepFinished(step: PipelineStep): boolean {
   return step.state !== 'running' && step.state !== 'pending';
 }
 
 /**
- * Returns true if the process is running.
- *
- * @param {Object} step - The process object.
- * @returns {boolean}
+ * @param {object} step - The process object.
+ * @returns {boolean} true if the process is running
  */
 export function isStepRunning(step: PipelineStep): boolean {
   return step.state === 'running';
@@ -45,23 +41,34 @@ export function isStepRunning(step: PipelineStep): boolean {
 
 /**
  * Compare two pipelines by creation timestamp.
- * @param {Object} a - A pipeline.
- * @param {Object} b - A pipeline.
- * @returns {number}
+ * @param {object} a - A pipeline.
+ * @param {object} b - A pipeline.
+ * @returns {number} 0 if created at the same time, < 0 if b was create before a, > 0 otherwise
  */
 export function comparePipelines(a: Pipeline, b: Pipeline): number {
-  return (b.created_at || -1) - (a.created_at || -1);
+  return (b.created || -1) - (a.created || -1);
+}
+
+/**
+ * Compare two pipelines by the status.
+ * Giving pending, running, or started higher priority than other status
+ * @param {object} a - A pipeline.
+ * @param {object} b - A pipeline.
+ * @returns {number} 0 if status same priority, < 0 if b has higher priority, > 0 otherwise
+ */
+export function comparePipelinesWithStatus(a: Pipeline, b: Pipeline): number {
+  const bPriority = ['pending', 'running', 'started'].includes(b.status) ? 1 : 0;
+  const aPriority = ['pending', 'running', 'started'].includes(a.status) ? 1 : 0;
+  return bPriority - aPriority || comparePipelines(a, b);
 }
 
 export function isPipelineActive(pipeline: Pipeline): boolean {
   return ['pending', 'running', 'started'].includes(pipeline.status);
 }
 
-export function repoSlug(ownerOrRepo: Repo): string;
-export function repoSlug(ownerOrRepo: string, name: string): string;
 export function repoSlug(ownerOrRepo: string | Repo, name?: string): string {
   if (typeof ownerOrRepo === 'string') {
-    if (!name) {
+    if (name === undefined) {
       throw new Error('Please provide a name as well');
     }
 

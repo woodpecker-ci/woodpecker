@@ -15,37 +15,33 @@
 package datastore
 
 import (
-	"fmt"
+	"github.com/rs/zerolog/log"
 
-	"github.com/woodpecker-ci/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
+
+// Maximum number of records to store in one PostgreSQL statement.
+// Too large a value results in `pq: got XX parameters but PostgreSQL only supports 65535 parameters`.
+const pgBatchSize = 1000
 
 func (s storage) LogFind(step *model.Step) ([]*model.LogEntry, error) {
 	var logEntries []*model.LogEntry
 	return logEntries, s.engine.Asc("id").Where("step_id = ?", step.ID).Find(&logEntries)
 }
 
-func (s storage) LogSave(step *model.Step, logEntries []*model.LogEntry) error {
-	sess := s.engine.NewSession()
-	defer sess.Close()
-	if err := sess.Begin(); err != nil {
-		return err
-	}
+func (s storage) LogAppend(_ *model.Step, logEntries []*model.LogEntry) error {
+	var err error
 
-	for _, logEntry := range logEntries {
-		if logEntry.StepID != step.ID {
-			return fmt.Errorf("got a log-entry with step id '%d' but expected '%d'", logEntry.StepID, step.ID)
-		}
-		if _, err := sess.Insert(logEntry); err != nil {
-			return err
+	// TODO: adapted from slices.Chunk(); switch to it in Go 1.23+
+	for i := 0; i < len(logEntries); i += pgBatchSize {
+		end := min(pgBatchSize, len(logEntries[i:]))
+		chunk := logEntries[i : i+end]
+
+		if _, err = s.engine.Insert(chunk); err != nil {
+			log.Error().Err(err).Msg("could not store log entries to db")
 		}
 	}
 
-	return sess.Commit()
-}
-
-func (s storage) LogAppend(logEntry *model.LogEntry) error {
-	_, err := s.engine.Insert(logEntry)
 	return err
 }
 

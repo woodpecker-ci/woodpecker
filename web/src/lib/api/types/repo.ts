@@ -1,5 +1,5 @@
 // A version control repository.
-export type Repo = {
+export interface Repo {
   // Is the repo currently active or not
   active: boolean;
 
@@ -9,9 +9,15 @@ export type Repo = {
   // The id of the repository on the source control management system.
   forge_remote_id: string;
 
+  // The id of the forge that the repository is on.
+  forge_id: number;
+
   // The source control management being used.
-  // Currently this is either 'git' or 'hg' (Mercurial).
+  // Currently, this is either 'git' or 'hg' (Mercurial).
   scm: string;
+
+  // Whether the forge repo has PRs enabled.
+  pr_enabled: boolean;
 
   // The id of the organization that owns the repository.
   org_id: number;
@@ -29,8 +35,8 @@ export type Repo = {
   // The url for the avatar image.
   avatar_url: string;
 
-  // The link to view the repository.
-  link_url: string;
+  // The url to view the repository.
+  forge_url: string;
 
   // The url used to clone the repository.
   clone_url: string;
@@ -44,7 +50,7 @@ export type Repo = {
   // Whether the repository has trusted access for pipelines.
   // If the repository is trusted then the host network can be used and
   // volumes can be created.
-  trusted: boolean;
+  trusted: RepoTrusted;
 
   // x-dart-type: Duration
   // The amount of time in minutes before the pipeline is killed.
@@ -52,6 +58,8 @@ export type Repo = {
 
   // Whether pull requests should trigger a pipeline.
   allow_pr: boolean;
+
+  allow_deploy: boolean;
 
   config_file: string;
 
@@ -65,13 +73,15 @@ export type Repo = {
   cancel_previous_pipeline_events: string[];
 
   netrc_only_trusted: boolean;
-};
+}
 
+/* eslint-disable no-unused-vars */
 export enum RepoVisibility {
   Public = 'public',
   Private = 'private',
   Internal = 'internal',
 }
+/* eslint-enable */
 
 export type RepoSettings = Pick<
   Repo,
@@ -81,13 +91,20 @@ export type RepoSettings = Pick<
   | 'trusted'
   | 'gated'
   | 'allow_pr'
+  | 'allow_deploy'
   | 'cancel_previous_pipeline_events'
   | 'netrc_only_trusted'
 >;
 
-export type RepoPermissions = {
+export interface RepoPermissions {
   pull: boolean;
   push: boolean;
   admin: boolean;
   synced: number;
-};
+}
+
+export interface RepoTrusted {
+  network: boolean;
+  volumes: boolean;
+  security: boolean;
+}

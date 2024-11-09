@@ -1,5 +1,6 @@
 {
   "cancel": "Cancel",
+  "login_with": "Login with {forge}",
   "login": "Login",
   "welcome": "Welcome to Woodpecker",
   "repos": "Repos",
@@ -10,13 +11,11 @@
   "search": "Search…",
   "username": "Username",
   "password": "Password",
-  "url": "URL",
   "back": "Back",
-  "color_scheme_light": "Switch to dark mode",
-  "color_scheme_dark": "Switch to light mode",
   "unknown_error": "An unknown error occurred",
   "documentation_for": "Documentation for \"{topic}\"",
   "pipeline_feed": "Pipeline feed",
+  "empty_list": "No {entity} found!",
   "not_found": {
     "not_found": "Whoa 404, either we broke something or you had a typing mishap :-/",
     "back_home": "Back to home"
@@ -25,12 +24,7 @@
     "not_found": "Server could not find requested object"
   },
   "time": {
-    "tmpl": "MMM D, YYYY, HH:mm z",
-    "weeks_short": "w",
-    "days_short": "d",
-    "hours_short": "h",
-    "min_short": "min",
-    "sec_short": "sec",
+    "template": "MMM D, YYYY, HH:mm z",
     "not_started": "not started yet"
   },
   "repo": {
@@ -39,19 +33,21 @@
       "trigger": "Run pipeline",
       "select_branch": "Select branch",
       "variables": {
-        "add": "Add variable",
+        "delete": "Delete variable",
         "title": "Additional pipeline variables",
         "desc": "Specify additional variables to use in your pipeline. Variables with the same name will be overwritten.",
         "name": "Variable name",
         "value": "Variable value"
-      }
+      },
+      "show_pipelines": "Show pipelines"
     },
     "deploy_pipeline": {
       "title": "Trigger deployment event for current pipeline #{pipelineId}",
       "enter_target": "Target deployment environment",
+      "enter_task": "Deployment task",
       "trigger": "Deploy",
       "variables": {
-        "add": "Add variable",
+        "delete": "Delete variable",
         "title": "Additional pipeline variables",
         "desc": "Specify additional variables to use in your pipeline. Variables with the same name will be overwritten.",
         "name": "Variable name",
@@ -65,16 +61,13 @@
     "user_none": "This organization / user does not have any projects yet.",
     "not_allowed": "You are not allowed to access this repository",
     "enable": {
-      "reload": "Reload repositories",
       "enable": "Enable",
       "enabled": "Already enabled",
       "disabled": "Disabled",
-      "success": "Repository enabled",
-      "list_reloaded": "Repository list reloaded"
+      "success": "Repository enabled"
     },
-    "open_in_forge": "Open Repository in Version Control System",
+    "open_in_forge": "Open repository in forge",
     "settings": {
-      "settings": "Settings",
       "not_allowed": "You are not allowed to access this repository's settings",
       "general": {
         "general": "General",
@@ -91,6 +84,10 @@
           "allow": "Allow Pull Requests",
           "desc": "Pipelines can run on pull requests."
         },
+        "allow_deploy": {
+          "allow": "Allow deployments",
+          "desc": "Allow deployments from successful pipelines. Only use if you trust all users with push access."
+        },
         "protected": {
           "protected": "Protected",
           "desc": "Every pipeline needs to be approved before being executed."
@@ -101,7 +98,19 @@
         },
         "trusted": {
           "trusted": "Trusted",
-          "desc": "Underlying pipeline containers get access to escalated capabilities like mounting volumes or access to git credentials."
+          "desc": "Underlying pipeline containers get access to escalated capabilities like mounting volumes or access to git credentials.",
+          "network": {
+            "network": "Network",
+            "desc": "Underlying pipeline containers get access to network privileges like changing DNS."
+          },
+          "volumes": {
+            "volumes": "Volumes",
+            "desc": "Underlying pipeline containers get access to volume privileges."
+          },
+          "security": {
+            "security": "Security",
+            "desc": "Underlying pipeline containers get access to security privileges."
+          }
         },
         "visibility": {
           "visibility": "Project visibility",
@@ -126,49 +135,6 @@
           "cancel": "Cancel previous pipelines",
           "desc": "Enable to cancel pending and running pipelines of the same event and context before starting the newly triggered one."
         }
-      },
-      "secrets": {
-        "secrets": "Secrets",
-        "desc": "Secrets can be passed to individual pipeline steps at runtime as environmental variables.",
-        "none": "There are no secrets yet.",
-        "add": "Add secret",
-        "save": "Save secret",
-        "show": "Show secrets",
-        "name": "Name",
-        "value": "Value",
-        "delete_confirm": "Do you really want to delete this secret?",
-        "deleted": "Secret deleted",
-        "created": "Secret created",
-        "saved": "Secret saved",
-        "images": {
-          "images": "Available for following images",
-          "desc": "Comma separated list of images where this secret is available, leave empty to allow all images"
-        },
-        "events": {
-          "events": "Available at following events",
-          "pr_warning": "Please be careful with this option as a bad actor can submit a malicious pull request that exposes your secrets."
-        },
-        "plugins_only": "Only available for plugins",
-        "edit": "Edit secret",
-        "delete": "Delete secret"
-      },
-      "registries": {
-        "registries": "Registries",
-        "creds": "Registry credentials",
-        "desc": "Registries credentials can be added to use private images for your pipeline.",
-        "show": "Show registries",
-        "add": "Add registry",
-        "none": "There are no registry credentials yet.",
-        "save": "Save registry",
-        "created": "Registry credentials created",
-        "saved": "Registry credentials saved",
-        "deleted": "Registry credentials deleted",
-        "address": {
-          "address": "Address",
-          "placeholder": "Registry Address (e.g. docker.io)"
-        },
-        "edit": "Edit registry",
-        "delete": "Delete registry"
       },
       "crons": {
         "crons": "Crons",
@@ -231,8 +197,6 @@
       "tasks": "Tasks",
       "config": "Config",
       "files": "Changed files ({files})",
-      "no_files": "No files have been changed.",
-      "execution_error": "Execution error",
       "no_pipelines": "No pipelines have been started yet.",
       "no_pipeline_steps": "No pipeline steps available!",
       "step_not_started": "This step hasn't started yet.",
@@ -240,9 +204,12 @@
       "pipelines_for_pr": "Pipelines for pull request #{index}",
       "exit_code": "Exit Code {exitCode}",
       "loading": "Loading…",
+      "no_logs": "No logs",
       "pipeline": "Pipeline #{pipelineId}",
       "log_title": "Step Logs",
       "log_download_error": "There was an error while downloading the log file",
+      "log_delete_confirm": "Do you really want to delete logs of this step?",
+      "log_delete_error": "There was an error while deleting the step logs",
       "actions": {
         "cancel": "Cancel",
         "restart": "Restart",
@@ -251,11 +218,11 @@
         "deploy": "Deploy",
         "restart_success": "Pipeline restarted",
         "log_download": "Download",
+        "log_delete": "Delete",
         "log_auto_scroll": "Automatically scroll down",
         "log_auto_scroll_off": "Turn off automatic scrolling"
       },
       "protected": {
-        "review": "Review changes",
         "awaits": "This pipeline is awaiting approval by a maintainer!",
         "approve": "Approve",
         "decline": "Decline",
@@ -267,9 +234,11 @@
         "push": "Push",
         "tag": "Tag",
         "pr": "Pull Request",
+        "pr_closed": "Pull Request merged / closed",
         "deploy": "Deploy",
         "cron": "Cron",
-        "manual": "Manual"
+        "manual": "Manual",
+        "release": "Release"
       },
       "status": {
         "status": "Status: {status}",
@@ -283,67 +252,52 @@
         "error": "error",
         "failure": "failure",
         "killed": "killed"
+      },
+      "errors": "Errors ({count})",
+      "warnings": "Warnings ({count})",
+      "show_errors": "Show errors",
+      "we_got_some_errors": "Oh no, we got some errors!",
+      "duration": "Pipeline duration",
+      "created": "Created: {created}",
+      "debug": {
+        "title": "Debug",
+        "download_metadata": "Download metadata",
+        "metadata_download_error": "Error downloading metadata",
+        "metadata_download_successful": "Metadata downloaded successfully",
+        "no_permission": "You don't have permission to access debug information.",
+        "metadata_exec_title": "Rerun pipeline locally",
+        "metadata_exec_desc": "Download this pipeline's metadata to run it locally. This allows you to troubleshoot issues and test changes before committing them."
       }
     }
   },
   "org": {
     "settings": {
-      "settings": "Settings",
       "not_allowed": "You are not allowed to access this organization's settings",
       "secrets": {
-        "secrets": "Secrets",
-        "desc": "Organization secrets can be passed to all organization's repository individual pipeline steps at runtime as environmental variables.",
-        "none": "There are no organization secrets yet.",
-        "add": "Add secret",
-        "save": "Save secret",
-        "show": "Show secrets",
-        "name": "Name",
-        "value": "Value",
-        "deleted": "Organization secret deleted",
-        "created": "Organization secret created",
-        "saved": "Organization secret saved",
-        "images": {
-          "images": "Available for following images",
-          "desc": "Comma separated list of images where this secret is available, leave empty to allow all images"
-        },
-        "plugins_only": "Only available for plugins",
-        "events": {
-          "events": "Available at following events",
-          "pr_warning": "Please be careful with this option as a bad actor can submit a malicious pull request that exposes your secrets."
-        }
+        "desc": "Organization secrets can be passed to all organization's repository's pipeline steps as environmental variables."
+      },
+      "registries": {
+        "desc": "Organization registry credentials can be added to use private images for all pipelines of an organization."
+      },
+      "agents": {
+        "desc": "Agents registered for this organization."
       }
     }
   },
   "admin": {
     "settings": {
-      "settings": "Settings",
-      "not_allowed": "You are not allowed to access server settings",
+      "not_allowed": "You are not allowed to access server settings.",
       "secrets": {
-        "secrets": "Secrets",
-        "desc": "Global secrets can be passed to all repositories individual pipeline steps at runtime as environmental variables.",
-        "warning": "These secrets will be available for all server users.",
-        "none": "There are no global secrets yet.",
-        "add": "Add secret",
-        "save": "Save secret",
-        "show": "Show secrets",
-        "name": "Name",
-        "value": "Value",
-        "deleted": "Global secret deleted",
-        "created": "Global secret created",
-        "saved": "Global secret saved",
-        "images": {
-          "images": "Available for following images",
-          "desc": "Comma separated list of images where this secret is available, leave empty to allow all images"
-        },
-        "plugins_only": "Only available for plugins",
-        "events": {
-          "events": "Available at following events",
-          "pr_warning": "Please be careful with this option as a bad actor can submit a malicious pull request that exposes your secrets."
-        }
+        "desc": "Global secrets can be passed to all repository's pipeline steps as environmental variables.",
+        "warning": "These secrets will be available for all users."
+      },
+      "registries": {
+        "desc": "Global registry credentials can be added to use private images for all pipelines.",
+        "warning": "These registry credentials will be available for all users."
       },
       "agents": {
         "agents": "Agents",
-        "desc": "Agents registered for this server",
+        "desc": "Agents registered on this server.",
         "none": "There are no agents yet.",
         "id": "ID",
         "add": "Add agent",
@@ -374,10 +328,17 @@
           "desc": "The max amount of parallel pipelines executed by this agent.",
           "badge": "capacity"
         },
+        "custom_labels": {
+          "custom_labels": "Custom Labels",
+          "desc": "The custom labels set by the agent admin on agent startup."
+        },
+        "org": {
+          "badge": "org"
+        },
         "version": "Version",
         "last_contact": "Last contact",
         "never": "Never",
-        "delete_confirm": "Do you really want to delete this agent? It wont be able to connected to the server anymore.",
+        "delete_confirm": "Do you really want to delete this agent? It will not be able to connect to the server anymore.",
         "edit_agent": "Edit agent",
         "delete_agent": "Delete agent"
       },
@@ -426,7 +387,7 @@
       },
       "orgs": {
         "orgs": "Organizations",
-        "desc": "Organizations owning repositories on this server",
+        "desc": "Organizations owning repositories on this server.",
         "none": "There are no organizations yet.",
         "org_settings": "Organization settings",
         "delete_org": "Delete organization",
@@ -436,11 +397,15 @@
       },
       "repos": {
         "repos": "Repositories",
-        "desc": "Repositories that are or were enabled on this server",
+        "desc": "Repositories that are or have been enabled on this server.",
         "none": "There are no repositories yet.",
         "view": "View repository",
         "settings": "Repository settings",
-        "disabled": "Disabled"
+        "disabled": "Disabled",
+        "repair": {
+          "repair": "Repair all",
+          "success": "Repositories repaired"
+        }
       }
     }
   },
@@ -449,46 +414,96 @@
       "settings": "User Settings",
       "general": {
         "general": "General",
-        "language": "Language"
-      },
-      "secrets": {
-        "secrets": "Secrets",
-        "desc": "User secrets can be passed to all user's repository individual pipeline steps at runtime as environmental variables.",
-        "none": "There are no user secrets yet.",
-        "add": "Add secret",
-        "save": "Save secret",
-        "show": "Show secrets",
-        "name": "Name",
-        "value": "Value",
-        "deleted": "User secret deleted",
-        "created": "User secret created",
-        "saved": "User secret saved",
-        "images": {
-          "images": "Available for following images",
-          "desc": "Comma separated list of images where this secret is available, leave empty to allow all images"
-        },
-        "plugins_only": "Only available for plugins",
-        "events": {
-          "events": "Available at following events",
-          "pr_warning": "Please be careful with this option as a bad actor can submit a malicious pull request that exposes your secrets."
+        "language": "Language",
+        "theme": {
+          "theme": "Theme",
+          "light": "Light",
+          "dark": "Dark",
+          "auto": "Auto"
         }
       },
-      "api": {
-        "api": "API",
-        "desc": "Personal Access Token and API usage",
+      "secrets": {
+        "desc": "User secrets can be passed to personal pipeline steps as environmental variables."
+      },
+      "registries": {
+        "desc": "User registry credentials can be added to use private images for all personal pipelines."
+      },
+      "cli_and_api": {
+        "cli_and_api": "CLI & API",
+        "desc": "Personal Access Token, CLI and API usage",
         "token": "Personal Access Token",
-        "shell_setup": "Shell setup",
         "api_usage": "Example API Usage",
         "cli_usage": "Example CLI Usage",
-        "dl_cli": "Download CLI",
-        "shell_setup_before": "do shell setup steps before",
+        "download_cli": "Download CLI",
         "reset_token": "Reset token",
         "swagger_ui": "Swagger UI"
+      },
+      "agents": {
+        "desc": "Agents registered to your account repos."
       }
-    },
-    "oauth_error": "Error while authenticating against OAuth provider",
-    "internal_error": "Some internal error occurred",
-    "access_denied": "You are not allowed to login"
+    }
   },
-  "default": "default"
+  "secrets": {
+    "secrets": "Secrets",
+    "desc": "Secrets can be passed to individual pipeline steps as environmental variables.",
+    "none": "There are no secrets yet.",
+    "add": "Add secret",
+    "save": "Save secret",
+    "show": "Show secrets",
+    "name": "Name",
+    "value": "Value",
+    "delete_confirm": "Do you really want to delete this secret?",
+    "deleted": "Secret deleted",
+    "created": "Secret created",
+    "saved": "Secret saved",
+    "plugins": {
+      "images": "Available only for the following plugins",
+      "desc": "List of plugin images where this secret is available. Leave empty to allow for all plugins and normal steps."
+    },
+    "events": {
+      "events": "Available at the following events",
+      "pr_warning": "Please be careful with this option: a bad actor can submit a malicious pull request that exposes your secrets."
+    },
+    "edit": "Edit secret",
+    "delete": "Delete secret"
+  },
+  "registries": {
+    "registries": "Registries",
+    "credentials": "Registry credentials",
+    "desc": "Registry credentials can be added to use private images for pipelines.",
+    "none": "There are no registry credentials yet.",
+    "address": {
+      "address": "Address",
+      "desc": "Registry Address (e.g. docker.io)"
+    },
+    "show": "Show registries",
+    "save": "Save registry",
+    "add": "Add registry",
+    "view": "View registry",
+    "edit": "Edit registry",
+    "delete": "Delete registry",
+    "delete_confirm": "Do you really want to delete this registry?",
+    "created": "Registry credentials created",
+    "saved": "Registry credentials saved",
+    "deleted": "Registry credentials deleted"
+  },
+  "default": "default",
+  "info": "Info",
+  "running_version": "You are running Woodpecker {0}",
+  "update_woodpecker": "Please update your Woodpecker instance to {0}",
+  "global_level_secret": "global secret",
+  "org_level_secret": "organization secret",
+  "login_to_cli": "Login to CLI",
+  "login_to_cli_description": "By continuing you will be logged into the CLI.",
+  "abort": "Abort",
+  "cli_login_success": "Login to CLI successful",
+  "cli_login_failed": "Login to CLI failed",
+  "cli_login_denied": "Login to CLI denied",
+  "return_to_cli": "You can now close this tab and return to the CLI.",
+  "settings": "Settings",
+  "oauth_error": "Error while authenticating against OAuth provider",
+  "internal_error": "Some internal error occurred",
+  "registration_closed": "The registration is closed",
+  "access_denied": "You are not allowed to access this instance",
+  "invalid_state": "The OAuth state is invalid"
 }

@@ -23,22 +23,19 @@ import (
 	"google.golang.org/grpc/metadata"
 )
 
-// AuthInterceptor is a client interceptor for authentication
+// AuthInterceptor is a client interceptor for authentication.
 type AuthInterceptor struct {
 	authClient  *AuthClient
 	accessToken string
 }
 
-// NewAuthInterceptor returns a new auth interceptor
-func NewAuthInterceptor(
-	authClient *AuthClient,
-	refreshDuration time.Duration,
-) (*AuthInterceptor, error) {
+// NewAuthInterceptor returns a new auth interceptor.
+func NewAuthInterceptor(ctx context.Context, authClient *AuthClient, refreshDuration time.Duration) (*AuthInterceptor, error) {
 	interceptor := &AuthInterceptor{
 		authClient: authClient,
 	}
 
-	err := interceptor.scheduleRefreshToken(refreshDuration)
+	err := interceptor.scheduleRefreshToken(ctx, refreshDuration)
 	if err != nil {
 		return nil, err
 	}
@@ -46,12 +43,12 @@ func NewAuthInterceptor(
 	return interceptor, nil
 }
 
-// Unary returns a client interceptor to authenticate unary RPC
+// Unary returns a client interceptor to authenticate unary RPC.
 func (interceptor *AuthInterceptor) Unary() grpc.UnaryClientInterceptor {
 	return func(
 		ctx context.Context,
 		method string,
-		req, reply interface{},
+		req, reply any,
 		cc *grpc.ClientConn,
 		invoker grpc.UnaryInvoker,
 		opts ...grpc.CallOption,
@@ -60,7 +57,7 @@ func (interceptor *AuthInterceptor) Unary() grpc.UnaryClientInterceptor {
 	}
 }
 
-// Stream returns a client interceptor to authenticate stream RPC
+// Stream returns a client interceptor to authenticate stream RPC.
 func (interceptor *AuthInterceptor) Stream() grpc.StreamClientInterceptor {
 	return func(
 		ctx context.Context,
@@ -78,21 +75,26 @@ func (interceptor *AuthInterceptor) attachToken(ctx context.Context) context.Con
 	return metadata.AppendToOutgoingContext(ctx, "token", interceptor.accessToken)
 }
 
-func (interceptor *AuthInterceptor) scheduleRefreshToken(refreshDuration time.Duration) error {
-	err := interceptor.refreshToken()
+func (interceptor *AuthInterceptor) scheduleRefreshToken(ctx context.Context, refreshInterval time.Duration) error {
+	err := interceptor.refreshToken(ctx)
 	if err != nil {
 		return err
 	}
 
 	go func() {
-		wait := refreshDuration
+		wait := refreshInterval
+
 		for {
-			time.Sleep(wait)
-			err := interceptor.refreshToken()
-			if err != nil {
-				wait = time.Second
-			} else {
-				wait = refreshDuration
+			select {
+			case <-ctx.Done():
+				return
+			case <-time.After(wait):
+				err := interceptor.refreshToken(ctx)
+				if err != nil {
+					wait = time.Second
+				} else {
+					wait = refreshInterval
+				}
 			}
 		}
 	}()
@@ -100,8 +102,8 @@ func (interceptor *AuthInterceptor) scheduleRefreshToken(refreshDuration time.Du
 	return nil
 }
 
-func (interceptor *AuthInterceptor) refreshToken() error {
-	accessToken, _, err := interceptor.authClient.Auth()
+func (interceptor *AuthInterceptor) refreshToken(ctx context.Context) error {
+	accessToken, _, err := interceptor.authClient.Auth(ctx)
 	if err != nil {
 		return err
 	}

@@ -1,51 +1,71 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["config:recommended", ":maintainLockFilesWeekly"],
-  "prConcurrentLimit": 5,
+  "extends": ["github>woodpecker-ci/renovate-config"],
+  "automergeType": "pr",
+  "enabledManagers": ["woodpecker"],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "fileMatch": ["shared/constant/constant.go"],
+      "matchStrings": [
+        "//\\s*renovate:\\s*datasource=(?<datasource>.*?) depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?\\s+DefaultClonePlugin = \"docker.io/woodpeckerci/plugin-git:(?<currentValue>.*)\""
+      ],
+      "versioningTemplate": "{{#if versioning}}{{{versioning}}}{{else}}semver{{/if}}"
+    }
+  ],
   "packageRules": [
     {
+      "matchCurrentVersion": "<1.0.0",
+      "matchPackageNames": ["github.com/distribution/reference"],
+      "matchUpdateTypes": ["major", "minor"],
+      "dependencyDashboardApproval": true
+    },
+    {
+      "matchPackageNames": ["github.com/charmbracelet/huh/spinner"],
+      "enabled": false
+    },
+    {
       "matchManagers": ["docker-compose"],
-      "matchFileNames": ["docker-compose.gitpod.yml"],
-      "labels": ["devx"]
+      "matchFileNames": ["docker-compose.gitpod.yaml"],
+      "addLabels": ["devx"]
     },
     {
-      "matchManagers": ["gomod", "npm", "dockerfile"],
-      "labels": ["dependencies"]
-    },
-    {
-      "matchManagers": ["woodpecker"],
-      "labels": ["build"]
-    },
-    {
-      "groupName": "golang (lang)",
-      "matchPackagePatterns": ["^golang$", "xgo"],
+      "groupName": "golang-lang",
       "matchUpdateTypes": ["minor", "patch"],
-      "extends": ["schedule:daily"]
+      "matchPackageNames": ["/^golang$/", "/xgo/"]
     },
     {
-      "groupName": "golang (packages)",
+      "groupName": "golang-packages",
       "matchManagers": ["gomod"],
-      "matchUpdateTypes": ["minor", "patch"],
-      "extends": ["schedule:daily"]
+      "matchUpdateTypes": ["minor", "patch"]
+    },
+    {
+      "matchManagers": ["npm"],
+      "matchFileNames": ["web/package.json"],
+      "addLabels": ["ui"]
+    },
+    {
+      "matchManagers": ["npm"],
+      "matchFileNames": ["docs/**/package.json"],
+      "addLabels": ["documentation"]
     },
     {
       "groupName": "web npm deps non-major",
       "matchManagers": ["npm"],
       "matchUpdateTypes": ["minor", "patch"],
-      "matchFileNames": ["web/package.json"],
-      "extends": ["schedule:daily"]
+      "matchFileNames": ["web/package.json"]
     },
     {
       "groupName": "docs npm deps non-major",
       "matchManagers": ["npm"],
       "matchUpdateTypes": ["minor", "patch"],
-      "matchFileNames": ["docs/**/package.json"],
-      "extends": ["schedule:daily"]
+      "matchFileNames": ["docs/**/package.json"]
     },
     {
+      "description": "Extract version from xgo container tags",
       "matchDatasources": ["docker"],
-      "matchPackagePatterns": ["xgo"],
-      "versioning": "regex:^go-(?<major>\\d+)?(\\.(?<minor>\\d+))?(\\.(?<patch>\\d+))$"
+      "versioning": "regex:^go-(?<major>\\d+)\\.(?<minor>\\d+)\\.x$",
+      "matchPackageNames": ["/techknowlogick/xgo/"]
     }
   ]
 }

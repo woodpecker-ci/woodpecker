@@ -15,12 +15,12 @@
 package repo
 
 import (
+	"context"
 	"fmt"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
-	"github.com/woodpecker-ci/woodpecker/cli/common"
-	"github.com/woodpecker-ci/woodpecker/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
 )
 
 var repoRemoveCmd = &cli.Command{
@@ -28,12 +28,11 @@ var repoRemoveCmd = &cli.Command{
 	Usage:     "remove a repository",
 	ArgsUsage: "<repo-id|repo-full-name>",
 	Action:    repoRemove,
-	Flags:     common.GlobalFlags,
 }
 
-func repoRemove(c *cli.Context) error {
+func repoRemove(ctx context.Context, c *cli.Command) error {
 	repoIDOrFullName := c.Args().First()
-	client, err := internal.NewClient(c)
+	client, err := internal.NewClient(ctx, c)
 	if err != nil {
 		return err
 	}

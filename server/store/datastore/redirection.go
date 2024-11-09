@@ -18,14 +18,8 @@ import (
 	"xorm.io/builder"
 	"xorm.io/xorm"
 
-	"github.com/woodpecker-ci/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
-
-func (s storage) GetRedirection(fullName string) (*model.Redirection, error) {
-	sess := s.engine.NewSession()
-	defer sess.Close()
-	return s.getRedirection(sess, fullName)
-}
 
 func (s storage) getRedirection(e *xorm.Session, fullName string) (*model.Redirection, error) {
 	repo := new(model.Redirection)

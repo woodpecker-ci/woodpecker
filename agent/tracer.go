@@ -18,29 +18,32 @@ import (
 	"context"
 	"runtime"
 	"strconv"
+	"sync"
 	"time"
 
 	"github.com/rs/zerolog"
 
-	"github.com/woodpecker-ci/woodpecker/pipeline"
-	"github.com/woodpecker-ci/woodpecker/pipeline/rpc"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc"
 )
 
-func (r *Runner) createTracer(ctxmeta context.Context, logger zerolog.Logger, workflow *rpc.Workflow) pipeline.TraceFunc {
+func (r *Runner) createTracer(ctxMeta context.Context, uploads *sync.WaitGroup, logger zerolog.Logger, workflow *rpc.Workflow) pipeline.TraceFunc {
 	return func(state *pipeline.State) error {
-		steplogger := logger.With().
+		uploads.Add(1)
+
+		stepLogger := logger.With().
 			Str("image", state.Pipeline.Step.Image).
-			Str("stage", state.Pipeline.Step.Alias).
+			Str("workflow_id", workflow.ID).
 			Err(state.Process.Error).
 			Int("exit_code", state.Process.ExitCode).
 			Bool("exited", state.Process.Exited).
 			Logger()
 
-		stepState := rpc.State{
-			Step:     state.Pipeline.Step.Alias,
+		stepState := rpc.StepState{
+			StepUUID: state.Pipeline.Step.UUID,
 			Exited:   state.Process.Exited,
 			ExitCode: state.Process.ExitCode,
-			Started:  time.Now().Unix(), // TODO do not do this
+			Started:  time.Now().Unix(), // TODO: do not do this
 			Finished: time.Now().Unix(),
 		}
 		if state.Process.Error != nil {
@@ -48,15 +51,16 @@ func (r *Runner) createTracer(ctxmeta context.Context, logger zerolog.Logger, wo
 		}
 
 		defer func() {
-			steplogger.Debug().Msg("update step status")
+			stepLogger.Debug().Msg("update step status")
 
-			if uerr := r.client.Update(ctxmeta, workflow.ID, stepState); uerr != nil {
-				steplogger.Debug().
-					Err(uerr).
+			if err := r.client.Update(ctxMeta, workflow.ID, stepState); err != nil {
+				stepLogger.Debug().
+					Err(err).
 					Msg("update step status error")
 			}
 
-			steplogger.Debug().Msg("update step status complete")
+			stepLogger.Debug().Msg("update step status complete")
+			uploads.Done()
 		}()
 		if state.Process.Exited {
 			return nil
@@ -68,20 +72,11 @@ func (r *Runner) createTracer(ctxmeta context.Context, logger zerolog.Logger, wo
 		// TODO: find better way to update this state and move it to pipeline to have the same env in cli-exec
 		state.Pipeline.Step.Environment["CI_MACHINE"] = r.hostname
 
-		state.Pipeline.Step.Environment["CI_PIPELINE_STATUS"] = "success"
-		state.Pipeline.Step.Environment["CI_PIPELINE_STARTED"] = strconv.FormatInt(state.Pipeline.Time, 10)
-		state.Pipeline.Step.Environment["CI_PIPELINE_FINISHED"] = strconv.FormatInt(time.Now().Unix(), 10)
+		state.Pipeline.Step.Environment["CI_PIPELINE_STARTED"] = strconv.FormatInt(state.Pipeline.Started, 10)
 
-		state.Pipeline.Step.Environment["CI_STEP_STATUS"] = "success"
-		state.Pipeline.Step.Environment["CI_STEP_STARTED"] = strconv.FormatInt(state.Pipeline.Time, 10)
-		state.Pipeline.Step.Environment["CI_STEP_FINISHED"] = strconv.FormatInt(time.Now().Unix(), 10)
+		state.Pipeline.Step.Environment["CI_STEP_STARTED"] = strconv.FormatInt(state.Pipeline.Started, 10)
 
 		state.Pipeline.Step.Environment["CI_SYSTEM_PLATFORM"] = runtime.GOOS + "/" + runtime.GOARCH
-
-		if state.Pipeline.Error != nil {
-			state.Pipeline.Step.Environment["CI_PIPELINE_STATUS"] = "failure"
-			state.Pipeline.Step.Environment["CI_STEP_STATUS"] = "failure"
-		}
 
 		return nil
 	}

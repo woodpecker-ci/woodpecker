@@ -18,7 +18,7 @@ import (
 	"xorm.io/builder"
 	"xorm.io/xorm"
 
-	"github.com/woodpecker-ci/woodpecker/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
 func (s storage) StepLoad(id int64) (*model.Step, error) {
@@ -29,29 +29,29 @@ func (s storage) StepLoad(id int64) (*model.Step, error) {
 func (s storage) StepFind(pipeline *model.Pipeline, pid int) (*model.Step, error) {
 	step := new(model.Step)
 	return step, wrapGet(s.engine.Where(
-		builder.Eq{"step_pipeline_id": pipeline.ID, "step_pid": pid},
+		builder.Eq{"pipeline_id": pipeline.ID, "pid": pid},
 	).Get(step))
 }
 
 func (s storage) StepByUUID(uuid string) (*model.Step, error) {
 	step := new(model.Step)
 	return step, wrapGet(s.engine.Where(
-		builder.Eq{"step_uuid": uuid},
+		builder.Eq{"uuid": uuid},
 	).Get(step))
 }
 
 func (s storage) StepChild(pipeline *model.Pipeline, ppid int, child string) (*model.Step, error) {
 	step := new(model.Step)
 	return step, wrapGet(s.engine.Where(
-		builder.Eq{"step_pipeline_id": pipeline.ID, "step_ppid": ppid, "step_name": child},
+		builder.Eq{"pipeline_id": pipeline.ID, "ppid": ppid, "name": child},
 	).Get(step))
 }
 
 func (s storage) StepList(pipeline *model.Pipeline) ([]*model.Step, error) {
 	stepList := make([]*model.Step, 0)
 	return stepList, s.engine.
-		Where("step_pipeline_id = ?", pipeline.ID).
-		OrderBy("step_pid").
+		Where("pipeline_id = ?", pipeline.ID).
+		OrderBy("pid").
 		Find(&stepList)
 }
 
@@ -62,9 +62,9 @@ func (s storage) StepListFromWorkflowFind(workflow *model.Workflow) ([]*model.St
 func (s storage) stepListWorkflow(sess *xorm.Session, workflow *model.Workflow) ([]*model.Step, error) {
 	stepList := make([]*model.Step, 0)
 	return stepList, sess.
-		Where("step_pipeline_id = ?", workflow.PipelineID).
-		Where("step_ppid = ?", workflow.PID).
-		OrderBy("step_pid").
+		Where("pipeline_id = ?", workflow.PipelineID).
+		Where("ppid = ?", workflow.PID).
+		OrderBy("pid").
 		Find(&stepList)
 }
 
@@ -83,26 +83,8 @@ func (s storage) StepUpdate(step *model.Step) error {
 	return err
 }
 
-func (s storage) StepClear(pipeline *model.Pipeline) error {
-	sess := s.engine.NewSession()
-	defer sess.Close()
-	if err := sess.Begin(); err != nil {
-		return err
-	}
-
-	if _, err := sess.Where("step_pipeline_id = ?", pipeline.ID).Delete(new(model.Step)); err != nil {
-		return err
-	}
-
-	if _, err := sess.Where("workflow_pipeline_id = ?", pipeline.ID).Delete(new(model.Workflow)); err != nil {
-		return err
-	}
-
-	return sess.Commit()
-}
-
 func deleteStep(sess *xorm.Session, stepID int64) error {
-	if _, err := sess.Where("step_id = ?", stepID).Delete(new(model.LogEntry)); err != nil {
+	if _, err := sess.Where("id = ?", stepID).Delete(new(model.LogEntry)); err != nil {
 		return err
 	}
 	return wrapDelete(sess.ID(stepID).Delete(new(model.Step)))

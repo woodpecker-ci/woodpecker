@@ -27,20 +27,31 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
 
-	"github.com/woodpecker-ci/woodpecker/server"
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/server/pubsub"
-	"github.com/woodpecker-ci/woodpecker/server/router/middleware/session"
-	"github.com/woodpecker-ci/woodpecker/server/store"
+	"go.woodpecker-ci.org/woodpecker/v2/server"
+	"go.woodpecker-ci.org/woodpecker/v2/server/logging"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/pubsub"
+	"go.woodpecker-ci.org/woodpecker/v2/server/router/middleware/session"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 )
 
-//
-// event source streaming for compatibility with quic and http2
-//
+const (
+	// How many batches of logs to keep for each client before starting to
+	// drop them if the client is not consuming them faster than they arrive.
+	maxQueuedBatchesPerClient int = 30
+)
 
+// EventStreamSSE
+//
+//	@Summary		Stream events like pipeline updates
+//	@Description	With quic and http2 support
+//	@Router			/stream/events [get]
+//	@Produce		plain
+//	@Success		200
+//	@Tags			Events
 func EventStreamSSE(c *gin.Context) {
 	c.Header("Content-Type", "text/event-stream")
-	c.Header("Cache-Control", "no-cache")
+	c.Header("Cache-Control", "no-store")
 	c.Header("Connection", "keep-alive")
 	c.Header("X-Accel-Buffering", "no")
 
@@ -67,14 +78,14 @@ func EventStreamSSE(c *gin.Context) {
 		}
 	}
 
-	eventc := make(chan []byte, 10)
+	eventChan := make(chan []byte, 10)
 	ctx, cancel := context.WithCancelCause(
 		context.Background(),
 	)
 
 	defer func() {
 		cancel(nil)
-		close(eventc)
+		close(eventChan)
 		log.Debug().Msg("user feed: connection closed")
 	}()
 
@@ -91,7 +102,7 @@ func EventStreamSSE(c *gin.Context) {
 				case <-ctx.Done():
 					return
 				default:
-					eventc <- m.Data
+					eventChan <- m.Data
 				}
 			}
 		})
@@ -107,7 +118,7 @@ func EventStreamSSE(c *gin.Context) {
 		case <-time.After(time.Second * 30):
 			logWriteStringErr(io.WriteString(rw, ": ping\n\n"))
 			flusher.Flush()
-		case buf, ok := <-eventc:
+		case buf, ok := <-eventChan:
 			if ok {
 				logWriteStringErr(io.WriteString(rw, "data: "))
 				logWriteStringErr(rw.Write(buf))
@@ -118,16 +129,16 @@ func EventStreamSSE(c *gin.Context) {
 	}
 }
 
-// LogStream
+// LogStreamSSE
 //
-//	@Summary	Log stream
-//	@Router		/logs/{repo_id}/{pipeline}/{stepID} [get]
+//	@Summary	Stream logs of a pipeline step
+//	@Router		/stream/logs/{repo_id}/{pipeline}/{stepID} [get]
 //	@Produce	plain
 //	@Success	200
-//	@Tags			Pipeline logs
-//	@Param		repo_id			path	int		true	"the repository id"
-//	@Param		pipeline	path	int		true		"the number of the pipeline"
-//	@Param		stepID		path	int		true		"the step id"
+//	@Tags		Pipeline logs
+//	@Param		repo_id		path	int	true	"the repository id"
+//	@Param		pipeline	path	int	true	"the number of the pipeline"
+//	@Param		stepID		path	int	true	"the step id"
 func LogStreamSSE(c *gin.Context) {
 	c.Header("Content-Type", "text/event-stream")
 	c.Header("Cache-Control", "no-cache")
@@ -156,7 +167,7 @@ func LogStreamSSE(c *gin.Context) {
 	}
 	pl, err := _store.GetPipelineNumber(repo, pipeline)
 	if err != nil {
-		log.Debug().Msgf("stream cannot get pipeline number: %v", err)
+		log.Debug().Err(err).Msg("stream cannot get pipeline number")
 		logWriteStringErr(io.WriteString(rw, "event: error\ndata: pipeline not found\n\n"))
 		return
 	}
@@ -169,50 +180,72 @@ func LogStreamSSE(c *gin.Context) {
 	}
 	step, err := _store.StepLoad(stepID)
 	if err != nil {
-		log.Debug().Msgf("stream cannot get step number: %v", err)
+		log.Debug().Err(err).Msg("stream cannot get step number")
 		logWriteStringErr(io.WriteString(rw, "event: error\ndata: process not found\n\n"))
 		return
 	}
 
 	if step.PipelineID != pl.ID {
-		// make sure we can not read arbitrary logs by id
+		// make sure we cannot read arbitrary logs by id
 		err = fmt.Errorf("step with id %d is not part of repo %s", stepID, repo.FullName)
 		log.Debug().Err(err).Msg("event error")
 		logWriteStringErr(io.WriteString(rw, "event: error\ndata: "+err.Error()+"\n\n"))
 		return
 	}
 
-	if step.State != model.StatusRunning {
+	if step.State != model.StatusPending && step.State != model.StatusRunning {
 		log.Debug().Msg("step not running (anymore).")
 		logWriteStringErr(io.WriteString(rw, "event: error\ndata: step not running (anymore)\n\n"))
 		return
 	}
 
-	logc := make(chan []byte, 10)
+	logChan := make(chan []byte, 10)
 	ctx, cancel := context.WithCancelCause(
 		context.Background(),
 	)
 
-	log.Debug().Msgf("log stream: connection opened")
+	log.Debug().Msg("log stream: connection opened")
 
 	defer func() {
 		cancel(nil)
-		close(logc)
-		log.Debug().Msgf("log stream: connection closed")
+		close(logChan)
+		log.Debug().Msg("log stream: connection closed")
 	}()
 
+	err = server.Config.Services.Logs.Open(ctx, step.ID)
+	if err != nil {
+		log.Error().Err(err).Msg("log stream: open failed")
+		logWriteStringErr(io.WriteString(rw, "event: error\ndata: can't open stream\n\n"))
+		return
+	}
+
 	go func() {
-		err := server.Config.Services.Logs.Tail(ctx, step.ID, func(entries ...*model.LogEntry) {
-			for _, entry := range entries {
-				select {
-				case <-ctx.Done():
-					return
-				default:
-					ee, _ := json.Marshal(entry)
-					logc <- ee
+		batches := make(logging.LogChan, maxQueuedBatchesPerClient)
+
+		go func() {
+			defer func() {
+				if r := recover(); r != nil {
+					log.Error().Msgf("error sending log message: %v", r)
+				}
+			}()
+
+			for entries := range batches {
+				for _, entry := range entries {
+					select {
+					case <-ctx.Done():
+						return
+					default:
+						if ee, err := json.Marshal(entry); err == nil {
+							logChan <- ee
+						} else {
+							log.Error().Err(err).Msg("unable to serialize log entry")
+						}
+					}
 				}
 			}
-		})
+		}()
+
+		err := server.Config.Services.Logs.Tail(ctx, step.ID, batches)
 		if err != nil {
 			log.Error().Err(err).Msg("tail of logs failed")
 		}
@@ -246,7 +279,7 @@ func LogStreamSSE(c *gin.Context) {
 		case <-time.After(time.Second * 30):
 			logWriteStringErr(io.WriteString(rw, ": ping\n\n"))
 			flusher.Flush()
-		case buf, ok := <-logc:
+		case buf, ok := <-logChan:
 			if ok {
 				if id > last {
 					logWriteStringErr(io.WriteString(rw, "id: "+strconv.Itoa(id)))

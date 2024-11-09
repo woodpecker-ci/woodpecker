@@ -28,9 +28,9 @@
 </template>
 
 <script lang="ts" setup>
-import { RouteLocationRaw } from 'vue-router';
+import type { RouteLocationRaw } from 'vue-router';
 
-import Icon, { IconNames } from '~/components/atomic/Icon.vue';
+import Icon, { type IconNames } from '~/components/atomic/Icon.vue';
 
 defineProps<{
   icon?: IconNames;

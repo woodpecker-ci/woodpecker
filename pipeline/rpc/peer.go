@@ -18,7 +18,7 @@ package rpc
 import (
 	"context"
 
-	backend "github.com/woodpecker-ci/woodpecker/pipeline/backend/types"
+	backend "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 )
 
 type (
@@ -27,11 +27,18 @@ type (
 		Labels map[string]string `json:"labels"`
 	}
 
-	// State defines the workflow state.
-	State struct {
-		Step     string `json:"step"`
+	// StepState defines the step state.
+	StepState struct {
+		StepUUID string `json:"step_uuid"`
+		Started  int64  `json:"started"`
+		Finished int64  `json:"finished"`
 		Exited   bool   `json:"exited"`
 		ExitCode int    `json:"exit_code"`
+		Error    string `json:"error"`
+	}
+
+	// WorkflowState defines the workflow state.
+	WorkflowState struct {
 		Started  int64  `json:"started"`
 		Finished int64  `json:"finished"`
 		Error    string `json:"error"`
@@ -48,7 +55,18 @@ type (
 		GrpcVersion   int32  `json:"grpc_version,omitempty"`
 		ServerVersion string `json:"server_version,omitempty"`
 	}
+
+	// AgentInfo represents all the metadata that should be known about an agent.
+	AgentInfo struct {
+		Version      string            `json:"version"`
+		Platform     string            `json:"platform"`
+		Backend      string            `json:"backend"`
+		Capacity     int               `json:"capacity"`
+		CustomLabels map[string]string `json:"custom_labels"`
+	}
 )
+
+//go:generate mockery --name Peer --output mocks --case underscore --note "+build test"
 
 // Peer defines a peer-to-peer connection.
 type Peer interface {
@@ -59,25 +77,28 @@ type Peer interface {
 	Next(c context.Context, f Filter) (*Workflow, error)
 
 	// Wait blocks until the workflow is complete
-	Wait(c context.Context, id string) error
+	Wait(c context.Context, workflowID string) error
 
 	// Init signals the workflow is initialized
-	Init(c context.Context, id string, state State) error
+	Init(c context.Context, workflowID string, state WorkflowState) error
 
 	// Done signals the workflow is complete
-	Done(c context.Context, id string, state State) error
+	Done(c context.Context, workflowID string, state WorkflowState) error
 
 	// Extend extends the workflow deadline
-	Extend(c context.Context, id string) error
+	Extend(c context.Context, workflowID string) error
 
-	// Update updates the workflow state
-	Update(c context.Context, id string, state State) error
+	// Update updates the step state
+	Update(c context.Context, workflowID string, state StepState) error
 
-	// Log writes the workflow log entry
-	Log(c context.Context, logEntry *LogEntry) error
+	// EnqueueLog queues the step log entry for delayed sending
+	EnqueueLog(logEntry *LogEntry)
 
 	// RegisterAgent register our agent to the server
-	RegisterAgent(ctx context.Context, platform, backend, version string, capacity int) (int64, error)
+	RegisterAgent(ctx context.Context, info AgentInfo) (int64, error)
+
+	// UnregisterAgent unregister our agent from the server
+	UnregisterAgent(ctx context.Context) error
 
 	// ReportHealth reports health status of the agent to the server
 	ReportHealth(c context.Context) error

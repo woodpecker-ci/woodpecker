@@ -26,7 +26,7 @@
         <IconButton
           icon="edit"
           :title="$t('admin.settings.users.edit_user')"
-          class="w-8 h-8"
+          class="w-8 h-8 <md:ml-auto"
           :class="{ 'ml-auto': !user.admin, 'ml-2': user.admin }"
           @click="editUser(user)"
         />
@@ -43,18 +43,18 @@
     </div>
     <div v-else>
       <form @submit.prevent="saveUser">
-        <InputField :label="$t('admin.settings.users.login')">
-          <TextField v-model="selectedUser.login" :disabled="isEditingUser" />
+        <InputField v-slot="{ id }" :label="$t('admin.settings.users.login')">
+          <TextField :id="id" v-model="selectedUser.login" :disabled="isEditingUser" />
         </InputField>
 
-        <InputField :label="$t('admin.settings.users.email')">
-          <TextField v-model="selectedUser.email" />
+        <InputField v-slot="{ id }" :label="$t('admin.settings.users.email')">
+          <TextField :id="id" v-model="selectedUser.email" />
         </InputField>
 
-        <InputField :label="$t('admin.settings.users.avatar_url')">
+        <InputField v-slot="{ id }" :label="$t('admin.settings.users.avatar_url')">
           <div class="flex gap-2">
             <img v-if="selectedUser.avatar_url" class="rounded-md h-8 w-8" :src="selectedUser.avatar_url" />
-            <TextField v-model="selectedUser.avatar_url" />
+            <TextField :id="id" v-model="selectedUser.avatar_url" />
           </div>
         </InputField>
 
@@ -90,6 +90,7 @@ import Badge from '~/components/atomic/Badge.vue';
 import Button from '~/components/atomic/Button.vue';
 import IconButton from '~/components/atomic/IconButton.vue';
 import ListItem from '~/components/atomic/ListItem.vue';
+import Checkbox from '~/components/form/Checkbox.vue';
 import InputField from '~/components/form/InputField.vue';
 import TextField from '~/components/form/TextField.vue';
 import Settings from '~/components/layout/Settings.vue';
@@ -97,7 +98,7 @@ import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useNotifications from '~/compositions/useNotifications';
 import { usePagination } from '~/compositions/usePaginate';
-import { User } from '~/lib/api/types';
+import type { User } from '~/lib/api/types';
 
 const apiClient = useApiClient();
 const notifications = useNotifications();
@@ -107,7 +108,7 @@ const selectedUser = ref<Partial<User>>();
 const isEditingUser = computed(() => !!selectedUser.value?.id);
 
 async function loadUsers(page: number): Promise<User[] | null> {
-  return apiClient.getUsers(page);
+  return apiClient.getUsers({ page });
 }
 
 const { resetPage, data: users } = usePagination(loadUsers, () => !selectedUser.value);
@@ -135,7 +136,7 @@ const { doSubmit: saveUser, isLoading: isSaving } = useAsyncAction(async () => {
 });
 
 const { doSubmit: deleteUser, isLoading: isDeleting } = useAsyncAction(async (_user: User) => {
-  // eslint-disable-next-line no-restricted-globals, no-alert
+  // eslint-disable-next-line no-alert
   if (!confirm(t('admin.settings.users.delete_confirm'))) {
     return;
   }

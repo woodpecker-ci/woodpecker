@@ -25,11 +25,11 @@ import (
 
 	"code.gitea.io/sdk/gitea"
 
-	"github.com/woodpecker-ci/woodpecker/server/model"
-	"github.com/woodpecker-ci/woodpecker/shared/utils"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/shared/utils"
 )
 
-// helper function that converts a Gitea repository to a Woodpecker repository.
+// toRepo converts a Gitea repository to a Woodpecker repository.
 func toRepo(from *gitea.Repository) *model.Repo {
 	name := strings.Split(from.FullName, "/")[1]
 	avatar := expandAvatar(
@@ -43,16 +43,17 @@ func toRepo(from *gitea.Repository) *model.Repo {
 		Owner:         from.Owner.UserName,
 		FullName:      from.FullName,
 		Avatar:        avatar,
-		Link:          from.HTMLURL,
+		ForgeURL:      from.HTMLURL,
 		IsSCMPrivate:  from.Private || from.Owner.Visibility != gitea.VisibleTypePublic,
 		Clone:         from.CloneURL,
 		CloneSSH:      from.SSHURL,
 		Branch:        from.DefaultBranch,
 		Perm:          toPerm(from.Permissions),
+		PREnabled:     from.HasPullRequests,
 	}
 }
 
-// helper function that converts a Gitea permission to a Woodpecker permission.
+// toPerm converts a Gitea permission to a Woodpecker permission.
 func toPerm(from *gitea.Permission) *model.Perm {
 	return &model.Perm{
 		Pull:  from.Pull,
@@ -61,7 +62,7 @@ func toPerm(from *gitea.Permission) *model.Perm {
 	}
 }
 
-// helper function that converts a Gitea team to a Woodpecker team.
+// toTeam converts a Gitea team to a Woodpecker team.
 func toTeam(from *gitea.Organization, link string) *model.Team {
 	return &model.Team{
 		Login:  from.UserName,
@@ -69,30 +70,30 @@ func toTeam(from *gitea.Organization, link string) *model.Team {
 	}
 }
 
-// helper function that extracts the Pipeline data from a Gitea push hook
+// pipelineFromPush extracts the Pipeline data from a Gitea push hook.
 func pipelineFromPush(hook *pushHook) *model.Pipeline {
 	avatar := expandAvatar(
 		hook.Repo.HTMLURL,
 		fixMalformedAvatar(hook.Sender.AvatarURL),
 	)
 
-	message := ""
+	var message string
 	link := hook.Compare
 	if len(hook.Commits) > 0 {
 		message = hook.Commits[0].Message
+		if len(hook.Commits) == 1 {
+			link = hook.Commits[0].URL
+		}
 	} else {
 		message = hook.HeadCommit.Message
-	}
-
-	if len(hook.Commits) == 1 {
-		link = hook.Commits[0].URL
+		link = hook.HeadCommit.URL
 	}
 
 	return &model.Pipeline{
 		Event:        model.EventPush,
 		Commit:       hook.After,
 		Ref:          hook.Ref,
-		Link:         link,
+		ForgeURL:     link,
 		Branch:       strings.TrimPrefix(hook.Ref, "refs/heads/"),
 		Message:      message,
 		Avatar:       avatar,
@@ -117,57 +118,86 @@ func getChangedFilesFromPushHook(hook *pushHook) []string {
 	files = append(files, hook.HeadCommit.Removed...)
 	files = append(files, hook.HeadCommit.Modified...)
 
-	return utils.DedupStrings(files)
+	return utils.DeduplicateStrings(files)
 }
 
-// helper function that extracts the Pipeline data from a Gitea tag hook
+// pipelineFromTag extracts the Pipeline data from a Gitea tag hook.
 func pipelineFromTag(hook *pushHook) *model.Pipeline {
 	avatar := expandAvatar(
 		hook.Repo.HTMLURL,
 		fixMalformedAvatar(hook.Sender.AvatarURL),
 	)
+	ref := strings.TrimPrefix(hook.Ref, "refs/tags/")
 
 	return &model.Pipeline{
 		Event:     model.EventTag,
 		Commit:    hook.Sha,
-		Ref:       fmt.Sprintf("refs/tags/%s", hook.Ref),
-		Link:      fmt.Sprintf("%s/src/tag/%s", hook.Repo.HTMLURL, hook.Ref),
-		Branch:    fmt.Sprintf("refs/tags/%s", hook.Ref),
-		Message:   fmt.Sprintf("created tag %s", hook.Ref),
+		Ref:       fmt.Sprintf("refs/tags/%s", ref),
+		ForgeURL:  fmt.Sprintf("%s/src/tag/%s", hook.Repo.HTMLURL, ref),
+		Message:   fmt.Sprintf("created tag %s", ref),
 		Avatar:    avatar,
 		Author:    hook.Sender.UserName,
 		Sender:    hook.Sender.UserName,
+		Email:     hook.Sender.Email,
 		Timestamp: time.Now().UTC().Unix(),
 	}
 }
 
-// helper function that extracts the Pipeline data from a Gitea pull_request hook
+// pipelineFromPullRequest extracts the Pipeline data from a Gitea pull_request hook.
 func pipelineFromPullRequest(hook *pullRequestHook) *model.Pipeline {
 	avatar := expandAvatar(
 		hook.Repo.HTMLURL,
 		fixMalformedAvatar(hook.PullRequest.Poster.AvatarURL),
 	)
+
+	event := model.EventPull
+	if hook.Action == actionClose {
+		event = model.EventPullClosed
+	}
+
 	pipeline := &model.Pipeline{
-		Event:   model.EventPull,
-		Commit:  hook.PullRequest.Head.Sha,
-		Link:    hook.PullRequest.URL,
-		Ref:     fmt.Sprintf("refs/pull/%d/head", hook.Number),
-		Branch:  hook.PullRequest.Base.Ref,
-		Message: hook.PullRequest.Title,
-		Author:  hook.PullRequest.Poster.UserName,
-		Avatar:  avatar,
-		Sender:  hook.Sender.UserName,
-		Title:   hook.PullRequest.Title,
+		Event:    event,
+		Commit:   hook.PullRequest.Head.Sha,
+		ForgeURL: hook.PullRequest.HTMLURL,
+		Ref:      fmt.Sprintf("refs/pull/%d/head", hook.Number),
+		Branch:   hook.PullRequest.Base.Ref,
+		Message:  hook.PullRequest.Title,
+		Author:   hook.PullRequest.Poster.UserName,
+		Avatar:   avatar,
+		Sender:   hook.Sender.UserName,
+		Email:    hook.Sender.Email,
+		Title:    hook.PullRequest.Title,
 		Refspec: fmt.Sprintf("%s:%s",
 			hook.PullRequest.Head.Ref,
 			hook.PullRequest.Base.Ref,
 		),
 		PullRequestLabels: convertLabels(hook.PullRequest.Labels),
 	}
+
 	return pipeline
 }
 
-// helper function that parses a push hook from a read closer.
+func pipelineFromRelease(hook *releaseHook) *model.Pipeline {
+	avatar := expandAvatar(
+		hook.Repo.HTMLURL,
+		fixMalformedAvatar(hook.Sender.AvatarURL),
+	)
+
+	return &model.Pipeline{
+		Event:        model.EventRelease,
+		Ref:          fmt.Sprintf("refs/tags/%s", hook.Release.TagName),
+		ForgeURL:     hook.Release.HTMLURL,
+		Branch:       hook.Release.Target,
+		Message:      fmt.Sprintf("created release %s", hook.Release.Title),
+		Avatar:       avatar,
+		Author:       hook.Sender.UserName,
+		Sender:       hook.Sender.UserName,
+		Email:        hook.Sender.Email,
+		IsPrerelease: hook.Release.IsPrerelease,
+	}
+}
+
+// parsePush parses a push hook from a read closer.
 func parsePush(r io.Reader) (*pushHook, error) {
 	push := new(pushHook)
 	err := json.NewDecoder(r).Decode(push)
@@ -180,8 +210,13 @@ func parsePullRequest(r io.Reader) (*pullRequestHook, error) {
 	return pr, err
 }
 
-// fixMalformedAvatar is a helper function that fixes an avatar url if malformed
-// (currently a known bug with gitea)
+func parseRelease(r io.Reader) (*releaseHook, error) {
+	pr := new(releaseHook)
+	err := json.NewDecoder(r).Decode(pr)
+	return pr, err
+}
+
+// fixMalformedAvatar fixes an avatar url if malformed (currently a known bug with gitea).
 func fixMalformedAvatar(url string) string {
 	index := strings.Index(url, "///")
 	if index != -1 {
@@ -189,43 +224,42 @@ func fixMalformedAvatar(url string) string {
 	}
 	index = strings.Index(url, "//avatars/")
 	if index != -1 {
-		return strings.Replace(url, "//avatars/", "/avatars/", -1)
+		return strings.ReplaceAll(url, "//avatars/", "/avatars/")
 	}
 	return url
 }
 
-// expandAvatar is a helper function that converts a relative avatar URL to the
-// absolute url.
-func expandAvatar(repo, rawurl string) string {
-	aurl, err := url.Parse(rawurl)
+// expandAvatar converts a relative avatar URL to the absolute url.
+func expandAvatar(repo, rawURL string) string {
+	aURL, err := url.Parse(rawURL)
 	if err != nil {
-		return rawurl
+		return rawURL
 	}
-	if aurl.IsAbs() {
+	if aURL.IsAbs() {
 		// Url is already absolute
-		return aurl.String()
+		return aURL.String()
 	}
 
 	// Resolve to base
 	burl, err := url.Parse(repo)
 	if err != nil {
-		return rawurl
+		return rawURL
 	}
-	aurl = burl.ResolveReference(aurl)
+	aURL = burl.ResolveReference(aURL)
 
-	return aurl.String()
+	return aURL.String()
 }
 
-// helper function to return matching hooks.
-func matchingHooks(hooks []*gitea.Hook, rawurl string) *gitea.Hook {
-	link, err := url.Parse(rawurl)
+// matchingHooks return matching hooks.
+func matchingHooks(hooks []*gitea.Hook, rawURL string) *gitea.Hook {
+	link, err := url.Parse(rawURL)
 	if err != nil {
 		return nil
 	}
 	for _, hook := range hooks {
 		if val, ok := hook.Config["url"]; ok {
-			hookurl, err := url.Parse(val)
-			if err == nil && hookurl.Host == link.Host {
+			hookURL, err := url.Parse(val)
+			if err == nil && hookURL.Host == link.Host {
 				return hook
 			}
 		}
