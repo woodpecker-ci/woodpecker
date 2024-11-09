@@ -23,25 +23,21 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
-type agentV015 struct {
-	ID      int64 `xorm:"pk autoincr 'id'"`
-	OwnerID int64 `xorm:"INDEX 'owner_id'"`
-	OrgID   int64 `xorm:"INDEX 'org_id'"`
-}
-
-func (agentV015) TableName() string {
-	return "agents"
-}
-
 var addOrgAgents = xormigrate.Migration{
 	ID: "add-org-agents",
 	MigrateSession: func(sess *xorm.Session) (err error) {
-		if err := sess.Sync(new(agentV015)); err != nil {
+		type agents struct {
+			ID      int64 `xorm:"pk autoincr 'id'"`
+			OwnerID int64 `xorm:"INDEX 'owner_id'"`
+			OrgID   int64 `xorm:"INDEX 'org_id'"`
+		}
+
+		if err := sess.Sync(new(agents)); err != nil {
 			return fmt.Errorf("sync models failed: %w", err)
 		}
 
 		// Update all existing agents to be global agents
-		_, err = sess.Cols("org_id").Update(&model.Agent{
+		_, err = sess.Cols("org_id").Update(&agents{
 			OrgID: model.IDNotSet,
 		})
 		return err

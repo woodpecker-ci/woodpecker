@@ -1,50 +1,80 @@
 # Migrations
 
-Some versions need some changes to the server configuration or the pipeline configuration files.
+Some versions need some changes to the server configuration or the pipeline configuration files. If you are an user check the `User migrations` section of an version. As an admin of a Woodpecker server or agent check the `Admin migrations` section.
 
 ## `next`
 
-- Deprecate `WOODPECKER_FILTER_LABELS` use `WOODPECKER_AGENT_LABELS`
+:::info
+This will be the next version of Woodpecker.
+:::
+
+## User migrations
+
 - Removed built-in environment variables:
   - `CI_COMMIT_URL` use `CI_PIPELINE_FORGE_URL`
   - `CI_STEP_FINISHED` as empty during execution
   - `CI_PIPELINE_FINISHED` as empty during execution
   - `CI_PIPELINE_STATUS` was always `success`
   - `CI_STEP_STATUS` was always `success`
-- Set `/woodpecker` as defautl workdir for the **woodpecker-cli** container
-- Move docker resource limit settings from server into agent configuration
-- Rename server environment variable `WOODPECKER_ESCALATE` to `WOODPECKER_PLUGINS_PRIVILEGED`
-- All default privileged plugins (like `woodpeckerci/plugin-docker-buildx`) were removed. Please carefully [re-add those plugins](./30-administration/10-server-config.md#woodpecker_plugins_privileged) you trust and rely on.
-- `WOODPECKER_DEFAULT_CLONE_IMAGE` got depricated use `WOODPECKER_DEFAULT_CLONE_PLUGIN`
-- Check trusted-clone- and privileged-plugins by image name and tag (if tag is set)
+- Set `/woodpecker` as default workdir for the **woodpecker-cli** container
 - Secret filters for plugins now check against tag if specified
-- Removed `WOODPECKER_DEV_OAUTH_HOST` and `WOODPECKER_DEV_GITEA_OAUTH_URL` use `WOODPECKER_EXPERT_FORGE_OAUTH_HOST`
 - Compatibility mode of deprecated `pipeline:`, `platform:` and `branches:` pipeline config options are now removed and pipeline will now fail if still in use.
-- Removed `steps.[name].group` in favor of `steps.[name].depends_on` (see [workflow syntax](./20-usage/20-workflow-syntax.md#depends_on) to learn how to set dependencies)
-- Removed `WOODPECKER_ROOT_PATH` and `WOODPECKER_ROOT_URL` config variables. Use `WOODPECKER_HOST` with a path instead
+- Removed `steps.[name].group` in favor of `steps.[name].depends_on` (see [workflow syntax](/docs/usage/workflow-syntax#depends_on) to learn how to set dependencies)
 - Pipelines without a config file will now be skipped instead of failing
-- Removed implicitly defined `regcred` image pull secret name. Set it explicitly via `WOODPECKER_BACKEND_K8S_PULL_SECRET_NAMES`
 - Removed `includes` and `excludes` support from **event** filter
-- Removed uppercasing all secret env vars, instead, the value of the `secrets` property is used. [Read more](./20-usage/40-secrets.md#usage)
+- Removed upper-casing all secret env vars, instead, the value of the `secrets` property is used. [Read more](/docs/usage/secrets#usage)
 - Removed alternative names for secrets, use `environment` with `from_secret`
-- Removed slice definition for env vars
 - Removed `environment` filter, use `when.evaluate`
 - Removed `WOODPECKER_WEBHOOK_HOST` in favor of `WOODPECKER_EXPERT_WEBHOOK_HOST`
-- Migrated to rfc9421 for webhook signatures
 - Renamed `start_time`, `end_time`, `created_at`, `started_at`, `finished_at` and `reviewed_at` JSON fields to `started`, `finished`, `created`, `started`, `finished`, `reviewed`
 - JSON field `trusted` on repo model was changed from boolean to object
 - Update all webhooks by pressing the "Repair all" button in the admin settings as the webhook token claims have changed
 - Crons now use standard Linux syntax without seconds
-- Replaced `configs` object by `netrc` in external configuration APIs
 - Removed old API routes: `registry/` -> `registries`, `/authorize/token`
 - Replaced `registry` command with `repo registry` in cli
-- Disallow upgrades from 1.x, upgrade to 2.x first
 - Deprecated `secrets`, use `environment` with `from_secret`
+
+## Admin migrations
+
+- Deprecate `WOODPECKER_LOG_XORM` and `WOODPECKER_LOG_XORM_SQL` use `"WOODPECKER_DATABASE_LOG` and `"WOODPECKER_DATABASE_LOG_SQL`
+- Deprecate `WOODPECKER_FILTER_LABELS` use `WOODPECKER_AGENT_LABELS`
+- Move docker resource limit settings from server into agent configuration
+- Rename server environment variable `WOODPECKER_ESCALATE` to `WOODPECKER_PLUGINS_PRIVILEGED`
+- All default privileged plugins (like `woodpeckerci/plugin-docker-buildx`) were removed. Please carefully [re-add those plugins](/docs/next/administration/server-config#woodpecker_plugins_privileged) you trust and rely on.
+- `WOODPECKER_DEFAULT_CLONE_IMAGE` got deprecated use `WOODPECKER_DEFAULT_CLONE_PLUGIN`
+- Check trusted-clone- and privileged-plugins by image name and tag (if tag is set)
+- Removed `WOODPECKER_DEV_OAUTH_HOST` and `WOODPECKER_DEV_GITEA_OAUTH_URL` use `WOODPECKER_EXPERT_FORGE_OAUTH_HOST`
+- Removed `WOODPECKER_ROOT_PATH` and `WOODPECKER_ROOT_URL` config variables. Use `WOODPECKER_HOST` with a path instead
+- Removed implicitly defined `regcred` image pull secret name. Set it explicitly via `WOODPECKER_BACKEND_K8S_PULL_SECRET_NAMES`
+- Removed slice definition for env vars
+- Migrated to rfc9421 for webhook signatures
+- Replaced `configs` object by `netrc` in external configuration APIs
+- Disallow upgrades from 1.x, upgrade to 2.x first
+
+## 2.7.2
+
+To secure your instance, set `WOODPECKER_PLUGINS_PRIVILEGED` to only allow specific versions of the `woodpeckerci/plugin-docker-buildx` plugin, use version 5.0.0 or above. This prevents older, potentially unstable versions from being privileged.
+
+For example, to allow only version 5.0.0, use:
+
+```bash
+WOODPECKER_PLUGINS_PRIVILEGED=woodpeckerci/plugin-docker-buildx:5.0.0
+```
+
+To allow multiple versions, you can separate them with commas:
+
+```bash
+WOODPECKER_PLUGINS_PRIVILEGED=woodpeckerci/plugin-docker-buildx:5.0.0,woodpeckerci/plugin-docker-buildx:5.1.0
+```
+
+This setup ensures only specified, stable plugin versions are given privileged access.
+
+Read more about it in [#4213](https://github.com/woodpecker-ci/woodpecker/pull/4213)
 
 ## 2.0.0
 
 - Dropped deprecated `CI_BUILD_*`, `CI_PREV_BUILD_*`, `CI_JOB_*`, `*_LINK`, `CI_SYSTEM_ARCH`, `CI_REPO_REMOTE` built-in environment variables
-- Deprecated `platform:` filter in favor of `labels:`, [read more](./20-usage/20-workflow-syntax.md#filter-by-platform)
+- Deprecated `platform:` filter in favor of `labels:`, [read more](/docs/usage/workflow-syntax#filter-by-platform)
 - Secrets `event` property was renamed to `events` and `image` to `images` as both are lists. The new property `events` / `images` has to be used in the api. The old properties `event` and `image` were removed.
 - The secrets `plugin_only` option was removed. Secrets with images are now always only available for plugins using listed by the `images` property. Existing secrets with a list of `images` will now only be available to the listed images if they are used as a plugin.
 - Removed `build` alias for `pipeline` command in CLI
@@ -56,8 +86,8 @@ Some versions need some changes to the server configuration or the pipeline conf
 
 ## 1.0.0
 
-- The signature used to verify extension calls (like those used for the [config-extension](./30-administration/40-advanced/100-external-configuration-api.md)) done by the Woodpecker server switched from using a shared-secret HMac to an ed25519 key-pair. Read more about it at the [config-extensions](./30-administration/40-advanced/100-external-configuration-api.md) documentation.
-- Refactored support for old agent filter labels and expressions. Learn how to use the new [filter](./20-usage/20-workflow-syntax.md#labels)
+- The signature used to verify extension calls (like those used for the [config-extension](/docs/administration/advanced/external-configuration-api)) done by the Woodpecker server switched from using a shared-secret HMac to an ed25519 key-pair. Read more about it at the [config-extensions](/docs/administration/advanced/external-configuration-api) documentation.
+- Refactored support for old agent filter labels and expressions. Learn how to use the new [filter](/docs/usage/workflow-syntax#labels)
 - Renamed step environment variable `CI_SYSTEM_ARCH` to `CI_SYSTEM_PLATFORM`. Same applies for the cli exec variable.
 - Renamed environment variables `CI_BUILD_*` and `CI_PREV_BUILD_*` to `CI_PIPELINE_*` and `CI_PREV_PIPELINE_*`, old ones are still available but deprecated
 - Renamed environment variables `CI_JOB_*` to `CI_STEP_*`, old ones are still available but deprecated
@@ -66,7 +96,7 @@ Some versions need some changes to the server configuration or the pipeline conf
 - Renamed API endpoints for pipelines (`<owner>/<repo>/builds/<buildId>` -> `<owner>/<repo>/pipelines/<pipelineId>`), old ones are still available but deprecated
 - Updated Prometheus gauge `build_*` to `pipeline_*`
 - Updated Prometheus gauge `*_job_*` to `*_step_*`
-- Renamed config env `WOODPECKER_MAX_PROCS` to `WOODPECKER_MAX_WORKFLOWS` (still available as fallback)
+- Renamed config env `WOODPECKER_MAX_PROCS` to `WOODPECKER_MAX_WORKFLOWS` (still available as fallback) <!-- cspell:ignore PROCS -->
 - The pipelines are now also read from `.yaml` files, the new default order is `.woodpecker/*.yml` and `.woodpecker/*.yaml` (without any prioritization) -> `.woodpecker.yml` -> `.woodpecker.yaml`
 - Dropped support for [Coding](https://coding.net/), [Gogs](https://gogs.io) and Bitbucket Server (Stash).
 - `/api/queue/resume` & `/api/queue/pause` endpoint methods were changed from `GET` to `POST`
@@ -95,7 +125,7 @@ Some versions need some changes to the server configuration or the pipeline conf
 
   Only projects created after updating will have an empty value by default. Existing projects will stick to the current pipeline path which is `.drone.yml` in most cases.
 
-  Read more about it at the [Project Settings](./20-usage/75-project-settings.md#pipeline-path)
+  Read more about it at the [Project Settings](/docs/usage/project-settings#pipeline-path)
 
 - From version `0.15.0` ongoing there will be three types of docker images: `latest`, `next` and `x.x.x` with an alpine variant for each type like `latest-alpine`.
   If you used `latest` before to try pre-release features you should switch to `next` after this release.
@@ -130,7 +160,7 @@ Some versions need some changes to the server configuration or the pipeline conf
     - CI_SOURCE_BRANCH => use CI_COMMIT_SOURCE_BRANCH
     - CI_TARGET_BRANCH => use CI_COMMIT_TARGET_BRANCH
 
-  For all available variables and their descriptions have a look at [built-in-environment-variables](./20-usage/50-environment.md#built-in-environment-variables).
+  For all available variables and their descriptions have a look at [built-in-environment-variables](/docs/usage/environment#built-in-environment-variables).
 
 - Prometheus metrics have been changed from `drone_*` to `woodpecker_*`
 
