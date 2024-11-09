@@ -50,6 +50,7 @@
 
 ### 📈 Enhancement
 
+- Pass settings to services [[#4338](https://github.com/woodpecker-ci/woodpecker/pull/4338)]
 - Inline model types for migrations [[#4293](https://github.com/woodpecker-ci/woodpecker/pull/4293)]
 - Add options to control the database connections (open,idle,timeout) [[#4212](https://github.com/woodpecker-ci/woodpecker/pull/4212)]
 - Move Queue creation behind new func that evaluates queue type [[#4252](https://github.com/woodpecker-ci/woodpecker/pull/4252)]
