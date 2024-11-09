@@ -57,7 +57,7 @@ WOODPECKER_REPO_OWNERS=my_company,my_company_oss_github_user
 ## Disallow normal users to create agents
 
 By default, users can create new agents for their repos they have admin access to.
-If an instance admin doesn't want this feature enabled, they can disable the registration of new one.
+If an instance admin doesn't want this feature enabled, they can disable the API and hide the Web UI elements.
 
 :::note
 You should set this option if you have, for example,
