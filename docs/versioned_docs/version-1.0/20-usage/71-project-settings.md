@@ -33,7 +33,7 @@ Only server admins can set this option. If you are not a server admin this optio
 
 :::
 
-### Only inject netrc credentials into trusted containers
+### Only inject netrc credentials into trusted clone plugins
 
 The "clone" step may need git credentials (e.g. for private repos).
 These are injected via `netrc`.
