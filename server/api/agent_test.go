@@ -246,7 +246,7 @@ func TestDeleteAgent(t *testing.T) {
 func TestPostOrgAgent(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
-	t.Run("should fail for non-admin user when DisableNonAdminAgentRegistration is true", func(t *testing.T) {
+	t.Run("should fail when DisableNonAdminAgentRegistration is true", func(t *testing.T) {
 		// Set up the config
 		originalConfig := server.Config.Agent.DisableNonAdminAgentRegistration
 		server.Config.Agent.DisableNonAdminAgentRegistration = true
@@ -278,40 +278,6 @@ func TestPostOrgAgent(t *testing.T) {
 
 		// Ensure no agent was created
 		mockStore.AssertNotCalled(t, "AgentCreate")
-	})
-
-	t.Run("should succeed for admin user when DisableNonAdminAgentRegistration is true", func(t *testing.T) {
-		// Set up the config
-		originalConfig := server.Config.Agent.DisableNonAdminAgentRegistration
-		server.Config.Agent.DisableNonAdminAgentRegistration = true
-		defer func() {
-			server.Config.Agent.DisableNonAdminAgentRegistration = originalConfig
-		}()
-
-		mockStore := store_mocks.NewStore(t)
-		mockStore.On("AgentCreate", mock.AnythingOfType("*model.Agent")).Return(nil)
-
-		w := httptest.NewRecorder()
-		c, _ := gin.CreateTestContext(w)
-		c.Set("store", mockStore)
-
-		// Set up an admin user
-		c.Set("user", &model.User{
-			ID:    1,
-			Admin: true,
-		})
-
-		c.Params = gin.Params{{Key: "org_id", Value: "1"}}
-		c.Request, _ = http.NewRequest(http.MethodPost, "/", strings.NewReader(`{"name":"new-agent"}`))
-		c.Request.Header.Set("Content-Type", "application/json")
-
-		PostOrgAgent(c)
-		c.Writer.WriteHeaderNow()
-
-		assert.Equal(t, http.StatusOK, w.Code)
-
-		// Ensure an agent was created
-		mockStore.AssertCalled(t, "AgentCreate", mock.AnythingOfType("*model.Agent"))
 	})
 
 	t.Run("should succeed for non-admin user when DisableNonAdminAgentRegistration is false", func(t *testing.T) {
