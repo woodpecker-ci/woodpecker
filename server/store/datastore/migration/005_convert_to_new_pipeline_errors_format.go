@@ -26,7 +26,7 @@ var convertToNewPipelineErrorFormat = xormigrate.Migration{
 	ID:   "convert-to-new-pipeline-error-format",
 	Long: true,
 	MigrateSession: func(sess *xorm.Session) (err error) {
-		type PipelineError struct {
+		type pipelineError struct {
 			Type      string `json:"type"`
 			Message   string `json:"message"`
 			IsWarning bool   `json:"is_warning"`
@@ -36,7 +36,7 @@ var convertToNewPipelineErrorFormat = xormigrate.Migration{
 		type pipelines struct {
 			ID     int64            `json:"id"              xorm:"pk autoincr 'pipeline_id'"`
 			Error  string           `json:"error"           xorm:"LONGTEXT 'pipeline_error'"` // old error format
-			Errors []*PipelineError `json:"errors"          xorm:"json 'pipeline_errors'"`    // new error format
+			Errors []*pipelineError `json:"errors"          xorm:"json 'pipeline_errors'"`    // new error format
 		}
 
 		// make sure pipeline_error column exists
@@ -58,7 +58,7 @@ var convertToNewPipelineErrorFormat = xormigrate.Migration{
 			for _, oldPipeline := range oldPipelines {
 				var newPipeline pipelines
 				newPipeline.ID = oldPipeline.ID
-				newPipeline.Errors = []*PipelineError{{
+				newPipeline.Errors = []*pipelineError{{
 					Type:    "generic",
 					Message: oldPipeline.Error,
 				}}
