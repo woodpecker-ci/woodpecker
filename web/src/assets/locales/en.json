@@ -93,8 +93,8 @@
           "desc": "Every pipeline needs to be approved before being executed."
         },
         "netrc_only_trusted": {
-          "netrc_only_trusted": "Only inject netrc credentials into trusted containers",
-          "desc": "Only inject netrc credentials into trusted containers (recommended)."
+          "netrc_only_trusted": "Only inject netrc credentials into trusted clone step plugins.",
+          "desc": "If checked, git netrc credentials will only be available to plugins listed in env var `WOODPECKER_PLUGINS_TRUSTED_CLONE`. netrc credentials are required for a functional clone operation. If unchecked, this will allow untrusted clone plugins in the clone step to function properly. This option does not have effect for non-clone steps."
         },
         "trusted": {
           "trusted": "Trusted",
