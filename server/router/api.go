@@ -18,6 +18,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog"
 
+	"go.woodpecker-ci.org/woodpecker/v2/server"
 	"go.woodpecker-ci.org/woodpecker/v2/server/api"
 	"go.woodpecker-ci.org/woodpecker/v2/server/api/debug"
 	"go.woodpecker-ci.org/woodpecker/v2/server/router/middleware/session"
@@ -74,10 +75,12 @@ func apiRoutes(e *gin.RouterGroup) {
 					org.PATCH("/registries/:registry", api.PatchOrgRegistry)
 					org.DELETE("/registries/:registry", api.DeleteOrgRegistry)
 
-					org.GET("/agents", api.GetOrgAgents)
-					org.POST("/agents", api.PostOrgAgent)
-					org.PATCH("/agents/:agent_id", api.PatchOrgAgent)
-					org.DELETE("/agents/:agent_id", api.DeleteOrgAgent)
+					if !server.Config.Agent.DisableNonAdminAgentRegistration {
+						org.GET("/agents", api.GetOrgAgents)
+						org.POST("/agents", api.PostOrgAgent)
+						org.PATCH("/agents/:agent_id", api.PatchOrgAgent)
+						org.DELETE("/agents/:agent_id", api.DeleteOrgAgent)
+					}
 				}
 			}
 		}
