@@ -17,9 +17,11 @@ package queue
 import (
 	"context"
 	"errors"
+	"fmt"
 	"strings"
 
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 )
 
 var (
@@ -116,4 +118,34 @@ type Queue interface {
 
 	// KickAgentWorkers kicks all workers for a given agent.
 	KickAgentWorkers(agentID int64)
+}
+
+// Config holds the configuration for the queue.
+type Config struct {
+	Backend Type
+	Store   store.Store
+}
+
+// Queue type.
+type Type string
+
+const (
+	TypeMemory Type = "memory"
+)
+
+// New creates a new queue based on the provided configuration.
+func New(ctx context.Context, config Config) (Queue, error) {
+	var q Queue
+
+	switch config.Backend {
+	case TypeMemory:
+		q = NewMemoryQueue(ctx)
+		if config.Store != nil {
+			q = WithTaskStore(ctx, q, config.Store)
+		}
+	default:
+		return nil, fmt.Errorf("unsupported queue backend: %s", config.Backend)
+	}
+
+	return q, nil
 }

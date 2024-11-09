@@ -94,7 +94,11 @@ steps:
 			conf, err := yaml.ParseString(testd.Data)
 			assert.NoError(t, err)
 
-			assert.NoError(t, linter.New(linter.WithTrusted(true)).Lint([]*linter.WorkflowConfig{{
+			assert.NoError(t, linter.New(linter.WithTrusted(linter.TrustedConfiguration{
+				Network:  true,
+				Volumes:  true,
+				Security: true,
+			})).Lint([]*linter.WorkflowConfig{{
 				File:      testd.Title,
 				RawConfig: testd.Data,
 				Workflow:  conf,
@@ -167,7 +171,7 @@ func TestLintErrors(t *testing.T) {
 		},
 		{
 			from: "{steps: { build: { image: plugins/docker, settings: { test: 'true' } } }, when: { branch: main, event: push } } }",
-			want: "Cannot use once by default privileged plugin 'plugins/docker', if needed add it too WOODPECKER_PLUGINS_PRIVILEGED",
+			want: "The formerly privileged plugin 'plugins/docker' is no longer privileged by default, if required, add it to WOODPECKER_PLUGINS_PRIVILEGED",
 		},
 		{
 			from: "{steps: { build: { image: golang, settings: { test: 'true' } } }, when: { branch: main, event: push }, clone: { git: { image: some-other/plugin-git:v1.1.0 } } }",

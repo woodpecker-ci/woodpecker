@@ -114,11 +114,8 @@ func (c *Compiler) createProcess(container *yaml_types.Container, stepType backe
 		return secret.Value, nil
 	}
 
-	// TODO: why don't we pass secrets to detached steps?
-	if !detached {
-		if err := settings.ParamsToEnv(container.Settings, environment, "PLUGIN_", true, getSecretValue); err != nil {
-			return nil, err
-		}
+	if err := settings.ParamsToEnv(container.Settings, environment, "PLUGIN_", true, getSecretValue); err != nil {
+		return nil, err
 	}
 
 	if err := settings.ParamsToEnv(container.Environment, environment, "", false, getSecretValue); err != nil {
@@ -179,6 +176,7 @@ func (c *Compiler) createProcess(container *yaml_types.Container, stepType backe
 		Detached:       detached,
 		Privileged:     privileged,
 		WorkingDir:     workingDir,
+		WorkspaceBase:  workspaceBase,
 		Environment:    environment,
 		Commands:       container.Commands,
 		Entrypoint:     container.Entrypoint,

@@ -179,12 +179,6 @@ Woodpecker provides the ability to pass environment variables to individual step
 
 For more details, check the [environment docs](./50-environment.md).
 
-### `secrets`
-
-Woodpecker provides the ability to store named parameters external to the YAML configuration file, in a central secret store. These secrets can be passed to individual steps of the workflow at runtime.
-
-For more details, check the [secrets docs](./40-secrets.md).
-
 ### `failure`
 
 Some of the steps may be allowed to fail without causing the whole workflow and therefore pipeline to report a failure (e.g., a step executing a linting check). To enable this, add `failure: ignore` to your step. If Woodpecker encounters an error while executing the step, it will report it as failed but still executes the next steps of the workflow, if any, without affecting the status of the workflow.
@@ -295,7 +289,7 @@ The available events are:
 - `pull_request_closed`: triggered when a pull request is closed or merged.
 - `tag`: triggered when a tag is pushed.
 - `release`: triggered when a release, pre-release or draft is created. (You can apply further filters using [evaluate](#evaluate) with [environment variables](./50-environment.md#built-in-environment-variables).)
-- `deployment` (only available for GitHub): triggered when a deployment is created in the repository.
+- `deployment`: triggered when a deployment is created in the repository. (This event can be triggered from Woodpecker directly. GitHub also supports webhook triggers.)
 - `cron`: triggered when a cron job is executed.
 - `manual`: triggered when a user manually triggers a pipeline.
 
