@@ -19,32 +19,24 @@ import (
 	"xorm.io/xorm"
 )
 
-type oldRegistry007 struct {
-	ID    int64  `json:"id"       xorm:"pk autoincr 'registry_id'"`
-	Token string `json:"token"    xorm:"TEXT 'registry_token'"`
-	Email string `json:"email"    xorm:"varchar(500) 'registry_email'"`
-}
-
-func (oldRegistry007) TableName() string {
-	return "registry"
-}
-
-type oldPipeline007 struct {
-	ID       int64  `json:"id"                      xorm:"pk autoincr 'pipeline_id'"`
-	ConfigID int64  `json:"-"                       xorm:"pipeline_config_id"`
-	Enqueued int64  `json:"enqueued_at"             xorm:"pipeline_enqueued"`
-	CloneURL string `json:"clone_url"               xorm:"pipeline_clone_url"`
-}
-
-// TableName return database table name for xorm.
-func (oldPipeline007) TableName() string {
-	return "pipelines"
-}
-
 var cleanRegistryPipeline = xormigrate.Migration{
 	ID: "clean-registry-pipeline",
 	MigrateSession: func(sess *xorm.Session) (err error) {
-		if err := sess.Sync(new(oldRegistry007), new(oldPipeline007)); err != nil {
+		type registry struct {
+			ID    int64  `json:"id"       xorm:"pk autoincr 'registry_id'"`
+			Token string `json:"token"    xorm:"TEXT 'registry_token'"`
+			Email string `json:"email"    xorm:"varchar(500) 'registry_email'"`
+		}
+
+		type pipelines struct {
+			ID       int64  `json:"id"                      xorm:"pk autoincr 'pipeline_id'"`
+			ConfigID int64  `json:"-"                       xorm:"pipeline_config_id"`
+			Enqueued int64  `json:"enqueued_at"             xorm:"pipeline_enqueued"`
+			CloneURL string `json:"clone_url"               xorm:"pipeline_clone_url"`
+		}
+
+		// ensure columns to drop exist
+		if err := sess.Sync(new(registry), new(pipelines)); err != nil {
 			return err
 		}
 
