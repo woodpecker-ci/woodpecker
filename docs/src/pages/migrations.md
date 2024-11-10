@@ -16,7 +16,7 @@ This will be the next version of Woodpecker.
   - `CI_PIPELINE_FINISHED` as empty during execution
   - `CI_PIPELINE_STATUS` was always `success`
   - `CI_STEP_STATUS` was always `success`
-  - `CI_REPO_SCM`
+  - `CI_REPO_SCM` was always `git`
 - Set `/woodpecker` as default workdir for the **woodpecker-cli** container
 - Secret filters for plugins now check against tag if specified
 - Compatibility mode of deprecated `pipeline:`, `platform:` and `branches:` pipeline config options are now removed and pipeline will now fail if still in use.
