@@ -36,10 +36,5 @@ onMounted(async () => {
     notifications.notify({ type: 'error', title: i18n.t('admin.settings.not_allowed') });
     await router.replace({ name: 'home' });
   }
-
-  if (!user?.admin) {
-    notifications.notify({ type: 'error', title: i18n.t('admin.settings.not_allowed') });
-    await router.replace({ name: 'home' });
-  }
 });
 </script>
