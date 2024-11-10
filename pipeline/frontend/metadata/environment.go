@@ -56,7 +56,6 @@ func (m *Metadata) Environ() map[string]string {
 		"CI_REPO_NAME":             m.Repo.Name,
 		"CI_REPO_OWNER":            m.Repo.Owner,
 		"CI_REPO_REMOTE_ID":        m.Repo.RemoteID,
-		"CI_REPO_SCM":              m.Repo.SCM,
 		"CI_REPO_URL":              m.Repo.ForgeURL,
 		"CI_REPO_CLONE_URL":        m.Repo.CloneURL,
 		"CI_REPO_CLONE_SSH_URL":    m.Repo.CloneSSHURL,
