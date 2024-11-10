@@ -42,13 +42,13 @@ Only server admins can set this option. If you are not a server admin this optio
 
 ## Only inject netrc credentials into trusted clone plugins
 
-The "clone" step may need git credentials (e.g. for private repos).
-These are injected via `netrc`.
-By default, they're only injected into "trusted" clone plugins listed in env var `WOODPECKER_PLUGINS_TRUSTED_CLONE`.
-If this option is unchecked, git credentials will be injected into any plugin used in the clone step, regardless of being listed in `WOODPECKER_PLUGINS_TRUSTED_CLONE`.
+The clone step may require git credentials (e.g. for private repos) which are injected via `netrc`.
+
+By default, they are only injected into trusted clone plugins listed in the env var `WOODPECKER_PLUGINS_TRUSTED_CLONE`.
+If this option is disabled, the git credentials are injected into every clone plugin, regardless of whether it is trusted or not.
 
 :::note
-This option does not have any effect for other steps than the "clone" step.
+This option has no effect on steps other than the clone step.
 :::
 
 ## Project visibility
