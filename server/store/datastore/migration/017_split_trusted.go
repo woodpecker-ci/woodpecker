@@ -23,24 +23,20 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
-type repoV035 struct {
-	ID        int64                      `xorm:"pk autoincr 'id'"`
-	IsTrusted bool                       `xorm:"'trusted'"`
-	Trusted   model.TrustedConfiguration `xorm:"json 'trusted_conf'"`
-}
-
-func (repoV035) TableName() string {
-	return "repos"
-}
-
 var splitTrusted = xormigrate.Migration{
 	ID: "split-trusted",
 	MigrateSession: func(sess *xorm.Session) error {
-		if err := sess.Sync(new(repoV035)); err != nil {
+		type repos struct {
+			ID        int64                      `xorm:"pk autoincr 'id'"`
+			IsTrusted bool                       `xorm:"'trusted'"`
+			Trusted   model.TrustedConfiguration `xorm:"json 'trusted_conf'"`
+		}
+
+		if err := sess.Sync(new(repos)); err != nil {
 			return fmt.Errorf("sync new models failed: %w", err)
 		}
 
-		if _, err := sess.Where("trusted = ?", false).Cols("trusted_conf").Update(&repoV035{
+		if _, err := sess.Where("trusted = ?", false).Cols("trusted_conf").Update(&repos{
 			Trusted: model.TrustedConfiguration{
 				Network:  false,
 				Security: false,
@@ -50,7 +46,7 @@ var splitTrusted = xormigrate.Migration{
 			return err
 		}
 
-		if _, err := sess.Where("trusted = ?", true).Cols("trusted_conf").Update(&repoV035{
+		if _, err := sess.Where("trusted = ?", true).Cols("trusted_conf").Update(&repos{
 			Trusted: model.TrustedConfiguration{
 				Network:  true,
 				Security: true,
