@@ -75,7 +75,7 @@ func apiRoutes(e *gin.RouterGroup) {
 					org.PATCH("/registries/:registry", api.PatchOrgRegistry)
 					org.DELETE("/registries/:registry", api.DeleteOrgRegistry)
 
-					if !server.Config.Agent.DisableNonAdminAgentRegistration {
+					if !server.Config.Agent.DisableUserRegisteredAgentRegistration {
 						org.GET("/agents", api.GetOrgAgents)
 						org.POST("/agents", api.PostOrgAgent)
 						org.PATCH("/agents/:agent_id", api.PatchOrgAgent)

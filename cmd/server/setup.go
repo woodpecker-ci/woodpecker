@@ -168,7 +168,7 @@ func setupEvilGlobals(ctx context.Context, c *cli.Command, s store.Store) (err e
 	}
 
 	// agents
-	server.Config.Agent.DisableNonAdminAgentRegistration = c.Bool("disable-user-agent-registration")
+	server.Config.Agent.DisableUserRegisteredAgentRegistration = c.Bool("disable-user-agent-registration")
 
 	// authentication
 	server.Config.Pipeline.AuthenticatePublicRepos = c.Bool("authenticate-public-repos")

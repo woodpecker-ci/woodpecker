@@ -246,12 +246,12 @@ func TestDeleteAgent(t *testing.T) {
 func TestPostOrgAgent(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
-	t.Run("should fail when DisableNonAdminAgentRegistration is true", func(t *testing.T) {
+	t.Run("should fail when DisableUserRegisteredAgentRegistration is true", func(t *testing.T) {
 		// Set up the config
-		originalConfig := server.Config.Agent.DisableNonAdminAgentRegistration
-		server.Config.Agent.DisableNonAdminAgentRegistration = true
+		originalConfig := server.Config.Agent.DisableUserRegisteredAgentRegistration
+		server.Config.Agent.DisableUserRegisteredAgentRegistration = true
 		defer func() {
-			server.Config.Agent.DisableNonAdminAgentRegistration = originalConfig
+			server.Config.Agent.DisableUserRegisteredAgentRegistration = originalConfig
 		}()
 
 		mockStore := store_mocks.NewStore(t)
@@ -280,12 +280,12 @@ func TestPostOrgAgent(t *testing.T) {
 		mockStore.AssertNotCalled(t, "AgentCreate")
 	})
 
-	t.Run("should succeed for non-admin user when DisableNonAdminAgentRegistration is false", func(t *testing.T) {
+	t.Run("should succeed for non-admin user when DisableUserRegisteredAgentRegistration is false", func(t *testing.T) {
 		// Set up the config
-		originalConfig := server.Config.Agent.DisableNonAdminAgentRegistration
-		server.Config.Agent.DisableNonAdminAgentRegistration = false
+		originalConfig := server.Config.Agent.DisableUserRegisteredAgentRegistration
+		server.Config.Agent.DisableUserRegisteredAgentRegistration = false
 		defer func() {
-			server.Config.Agent.DisableNonAdminAgentRegistration = originalConfig
+			server.Config.Agent.DisableUserRegisteredAgentRegistration = originalConfig
 		}()
 
 		mockStore := store_mocks.NewStore(t)
