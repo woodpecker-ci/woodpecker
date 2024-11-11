@@ -122,36 +122,36 @@ func TestLintErrors(t *testing.T) {
 		},
 		{
 			from: "steps: { build: { image: golang, privileged: true }  }",
-			want: "Insufficient privileges to use privileged mode",
+			want: "Insufficient trust level to use privileged mode",
 		},
 		{
 			from: "steps: { build: { image: golang, dns: [ 8.8.8.8 ] }  }",
-			want: "Insufficient privileges to use custom dns",
+			want: "Insufficient trust level to use custom dns",
 		},
 
 		{
 			from: "steps: { build: { image: golang, dns_search: [ example.com ] }  }",
-			want: "Insufficient privileges to use dns_search",
+			want: "Insufficient trust level to use dns_search",
 		},
 		{
 			from: "steps: { build: { image: golang, devices: [ '/dev/tty0:/dev/tty0' ] }  }",
-			want: "Insufficient privileges to use devices",
+			want: "Insufficient trust level to use devices",
 		},
 		{
 			from: "steps: { build: { image: golang, extra_hosts: [ 'somehost:162.242.195.82' ] }  }",
-			want: "Insufficient privileges to use extra_hosts",
+			want: "Insufficient trust level to use extra_hosts",
 		},
 		{
 			from: "steps: { build: { image: golang, network_mode: host }  }",
-			want: "Insufficient privileges to use network_mode",
+			want: "Insufficient trust level to use network_mode",
 		},
 		{
 			from: "steps: { build: { image: golang, volumes: [ '/opt/data:/var/lib/mysql' ] }  }",
-			want: "Insufficient privileges to use volumes",
+			want: "Insufficient trust level to use volumes",
 		},
 		{
 			from: "steps: { build: { image: golang, network_mode: 'container:name' }  }",
-			want: "Insufficient privileges to use network_mode",
+			want: "Insufficient trust level to use network_mode",
 		},
 		{
 			from: "steps: { build: { image: golang, settings: { test: 'true' }, commands: [ 'echo ja', 'echo nein' ] } }",
@@ -175,7 +175,7 @@ func TestLintErrors(t *testing.T) {
 		},
 		{
 			from: "{steps: { build: { image: golang, settings: { test: 'true' } } }, when: { branch: main, event: push }, clone: { git: { image: some-other/plugin-git:v1.1.0 } } }",
-			want: "Specified clone image does not match allow list, netrc will not be injected",
+			want: "Specified clone image does not match allow list, netrc is not injected",
 		},
 	}
 
@@ -209,11 +209,11 @@ func TestBadHabits(t *testing.T) {
 	}{
 		{
 			from: "steps: { build: { image: golang } }",
-			want: "Please set an event filter for all steps or the whole workflow on all items of the when block",
+			want: "Set an event filter for all steps or the entire workflow on all items of the when block",
 		},
 		{
 			from: "when: [{branch: xyz}, {event: push}]\nsteps: { build: { image: golang } }",
-			want: "Please set an event filter for all steps or the whole workflow on all items of the when block",
+			want: "Set an event filter for all steps or the entire workflow on all items of the when block",
 		},
 	}
 
