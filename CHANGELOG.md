@@ -199,6 +199,7 @@
 
 ### Misc
 
+- Improve linter messages in UI [[#4351](https://github.com/woodpecker-ci/woodpecker/pull/4351)]
 - Use settings for service [[#4336](https://github.com/woodpecker-ci/woodpecker/pull/4336)]
 - Use release-helper for release/* branches [[#4301](https://github.com/woodpecker-ci/woodpecker/pull/4301)]
 - Fix wording for privileged plugins linter error [[#4280](https://github.com/woodpecker-ci/woodpecker/pull/4280)]
