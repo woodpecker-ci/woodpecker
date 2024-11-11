@@ -23,7 +23,7 @@ var removeRepoScm = xormigrate.Migration{
 	ID: "remove-repo-scm",
 	MigrateSession: func(sess *xorm.Session) (err error) {
 		type repos struct {
-			SCMKind                      string        `xorm:"varchar(50) 'repo_scm'"`
+			SCMKind string `xorm:"varchar(50) 'scm'"`
 		}
 
 		// ensure columns to drop exist
