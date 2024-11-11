@@ -3,7 +3,7 @@
     <div class="flex flex-col gap-y-4">
       <template v-for="(error, _index) in pipeline!.errors" :key="_index">
         <div>
-          <div class="grid grid-cols-[minmax(10rem,auto),4fr] items-center">
+          <div class="grid grid-cols-[minmax(10rem,auto),3fr]">
             <span class="flex items-center gap-x-2">
               <Icon
                 name="attention"
@@ -20,23 +20,25 @@
             </span>
             <span
               v-if="isLinterError(error) || isDeprecationError(error) || isBadHabitError(error)"
-              class="whitespace-nowrap"
+              class="flex items-center gap-x-2 whitespace-nowrap"
             >
               <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
-              <span v-if="error.data?.file" class="font-bold">{{ error.data?.file }}: </span>
-              <span>{{ error.data?.field }}</span>
-            </span>
-            <span v-else />
-          </div>
-          <div class="grid grid-cols-[minmax(10rem,auto),4fr] col-start-2">
-            <span />
-            <span class="flex gap-x-2">
-              <RenderMarkdown :content="error.message" />
+              <span>
+                <span v-if="error.data?.file" class="font-bold">{{ error.data?.file }}: </span>
+                <span>{{ error.data?.field }}</span>
+              </span>
               <DocsLink
                 v-if="isDeprecationError(error) || isBadHabitError(error)"
                 :topic="error.data?.field || ''"
                 :url="error.data?.docs || ''"
               />
+            </span>
+            <span v-else />
+          </div>
+          <div class="grid grid-cols-[minmax(10rem,auto),4fr] col-start-2">
+            <span />
+            <span>
+              <RenderMarkdown :content="error.message" />
             </span>
           </div>
         </div>
