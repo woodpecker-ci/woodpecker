@@ -126,6 +126,9 @@ func (l *Linter) lintContainers(config *WorkflowConfig, area string) error {
 		if err := l.lintPrivilegedPlugins(config, container, area); err != nil {
 			linterErr = multierr.Append(linterErr, err)
 		}
+		if err := l.lintEnvironment(config, container, area); err != nil {
+			linterErr = multierr.Append(linterErr, err)
+		}
 	}
 
 	return linterErr
@@ -160,11 +163,27 @@ func (l *Linter) lintSettings(config *WorkflowConfig, c *types.Container, field 
 	if len(c.Entrypoint) != 0 {
 		return newLinterError("Cannot configure both entrypoint and settings", config.File, fmt.Sprintf("%s.%s", field, c.Name), false)
 	}
-	if len(c.Environment) != 0 {
+	if len(c.Environment.Map) != 0 {
 		return newLinterError("Should not configure both environment and settings", config.File, fmt.Sprintf("%s.%s", field, c.Name), true)
 	}
 	if len(c.Secrets.Secrets) != 0 {
 		return newLinterError("Should not configure both secrets and settings", config.File, fmt.Sprintf("%s.%s", field, c.Name), true)
+	}
+	return nil
+}
+
+func (l *Linter) lintEnvironment(config *WorkflowConfig, c *types.Container, field string) error {
+	if c.Environment.WasSlice {
+		return &errorTypes.PipelineError{
+			Type:    errorTypes.PipelineErrorTypeDeprecation,
+			Message: "Please use map syntax. List syntax is deprecated for 'environment'",
+			Data: errors.DeprecationErrorData{
+				File:  config.File,
+				Field: field,
+				Docs:  "https://woodpecker-ci.org/docs/usage/environment",
+			},
+			IsWarning: true,
+		}
 	}
 	return nil
 }
