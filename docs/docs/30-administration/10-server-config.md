@@ -54,6 +54,20 @@ Use the `WOODPECKER_REPO_OWNERS` variable to filter which GitHub user's repos sh
 WOODPECKER_REPO_OWNERS=my_company,my_company_oss_github_user
 ```
 
+## Disallow normal users to create agents
+
+By default, users can create new agents for their repos they have admin access to.
+If an instance admin doesn't want this feature enabled, they can disable the API and hide the Web UI elements.
+
+:::note
+You should set this option if you have, for example,
+global secrets and don't trust your users to create a rogue agent and pipeline for secret extraction.
+:::
+
+```ini
+WOODPECKER_DISABLE_USER_AGENT_REGISTRATION=true
+```
+
 ## Global registry setting
 
 If you want to make available a specific private registry to all pipelines, use the `WOODPECKER_DOCKER_CONFIG` server configuration.
@@ -421,6 +435,12 @@ A shared secret used by server and agents to authenticate communication. A secre
 > Default: empty
 
 Read the value for `WOODPECKER_AGENT_SECRET` from the specified filepath
+
+### `WOODPECKER_DISABLE_USER_AGENT_REGISTRATION`
+
+> Default: false
+
+[Read about "Disallow normal users to create agents"](./10-server-config.md#disallow-normal-users-to-create-agents)
 
 ### `WOODPECKER_KEEPALIVE_MIN_TIME`
 

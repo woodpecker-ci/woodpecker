@@ -72,6 +72,8 @@ func (t *InfoT) String() string {
 // The int return value represents the matching score (higher is better).
 type FilterFn func(*model.Task) (bool, int)
 
+//go:generate mockery --name Queue --output mocks --case underscore --note "+build test"
+
 // Queue defines a task queue for scheduling tasks among
 // a pool of workers.
 type Queue interface {
