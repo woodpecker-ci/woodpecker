@@ -37,6 +37,7 @@
 
 ### 🔒 Security
 
+- Add server config to disable user registered agents [[#4206](https://github.com/woodpecker-ci/woodpecker/pull/4206)]
 - chore: fix `http-proxy-middleware` CVE [[#4257](https://github.com/woodpecker-ci/woodpecker/pull/4257)]
 - Allow altering trusted clone plugins and filter them via tag [[#4074](https://github.com/woodpecker-ci/woodpecker/pull/4074)]
 - Update gitea sdk [[#4012](https://github.com/woodpecker-ci/woodpecker/pull/4012)]
@@ -101,7 +102,6 @@
 - Correct cli exec flags and remove ineffective ones [[#4129](https://github.com/woodpecker-ci/woodpecker/pull/4129)]
 - Set repo user to repairing user when old user is missing [[#4128](https://github.com/woodpecker-ci/woodpecker/pull/4128)]
 - Restart tasks on dead agents sooner [[#4114](https://github.com/woodpecker-ci/woodpecker/pull/4114)]
-- Process workflow logs in batches [[#4045](https://github.com/woodpecker-ci/woodpecker/pull/4045)]
 - Adjust cli exec metadata structure to equal server metadata [[#4119](https://github.com/woodpecker-ci/woodpecker/pull/4119)]
 - Allow to restart declined pipelines [[#4109](https://github.com/woodpecker-ci/woodpecker/pull/4109)]
 - Add indices to repo table [[#4087](https://github.com/woodpecker-ci/woodpecker/pull/4087)]
