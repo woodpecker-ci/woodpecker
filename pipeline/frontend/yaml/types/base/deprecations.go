@@ -33,7 +33,7 @@ func (s *EnvironmentMap) UnmarshalYAML(unmarshal func(any) error) error {
 
 	var sliceType []any
 	if err := unmarshal(&sliceType); err == nil {
-		return fmt.Errorf("Deprecated environment string list got remove (https://woodpecker-ci.org/docs/usage/environment)")
+		return fmt.Errorf("deprecated environment string list got remove (https://woodpecker-ci.org/docs/usage/environment)")
 	}
 
 	return err
@@ -52,7 +52,7 @@ func (s *SecretsSlice) UnmarshalYAML(unmarshal func(any) error) error {
 
 	var objectSlice []any
 	if err := unmarshal(&objectSlice); err == nil {
-		return fmt.Errorf("Deprecated secrets syntax got remove (https://woodpecker-ci.org/docs/usage/secrets)")
+		return fmt.Errorf("deprecated secrets syntax got remove (https://woodpecker-ci.org/docs/usage/secrets)")
 	}
 
 	return err
