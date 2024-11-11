@@ -114,7 +114,7 @@ func TestLintErrors(t *testing.T) {
 	}{
 		{
 			from: "",
-			want: "Invalid or missing steps section",
+			want: "Invalid or missing `steps` section",
 		},
 		{
 			from: "steps: { build: { image: '' }  }",
@@ -122,56 +122,56 @@ func TestLintErrors(t *testing.T) {
 		},
 		{
 			from: "steps: { build: { image: golang, privileged: true }  }",
-			want: "Insufficient trust level to use privileged mode",
+			want: "Insufficient trust level to use `privileged` mode",
 		},
 		{
 			from: "steps: { build: { image: golang, dns: [ 8.8.8.8 ] }  }",
-			want: "Insufficient trust level to use custom dns",
+			want: "Insufficient trust level to use custom `dns`",
 		},
 
 		{
 			from: "steps: { build: { image: golang, dns_search: [ example.com ] }  }",
-			want: "Insufficient trust level to use dns_search",
+			want: "Insufficient trust level to use `dns_search`",
 		},
 		{
 			from: "steps: { build: { image: golang, devices: [ '/dev/tty0:/dev/tty0' ] }  }",
-			want: "Insufficient trust level to use devices",
+			want: "Insufficient trust level to use `devices`",
 		},
 		{
 			from: "steps: { build: { image: golang, extra_hosts: [ 'somehost:162.242.195.82' ] }  }",
-			want: "Insufficient trust level to use extra_hosts",
+			want: "Insufficient trust level to use `extra_hosts`",
 		},
 		{
 			from: "steps: { build: { image: golang, network_mode: host }  }",
-			want: "Insufficient trust level to use network_mode",
+			want: "Insufficient trust level to use `network_mode`",
 		},
 		{
 			from: "steps: { build: { image: golang, volumes: [ '/opt/data:/var/lib/mysql' ] }  }",
-			want: "Insufficient trust level to use volumes",
+			want: "Insufficient trust level to use `volumes`",
 		},
 		{
 			from: "steps: { build: { image: golang, network_mode: 'container:name' }  }",
-			want: "Insufficient trust level to use network_mode",
+			want: "Insufficient trust level to use `network_mode`",
 		},
 		{
 			from: "steps: { build: { image: golang, settings: { test: 'true' }, commands: [ 'echo ja', 'echo nein' ] } }",
-			want: "Cannot configure both commands and settings",
+			want: "Cannot configure both `commands` and `settings`",
 		},
 		{
 			from: "steps: { build: { image: golang, settings: { test: 'true' }, entrypoint: [ '/bin/fish' ] } }",
-			want: "Cannot configure both entrypoint and settings",
+			want: "Cannot configure both `entrypoint` and `settings`",
 		},
 		{
 			from: "steps: { build: { image: golang, settings: { test: 'true' }, environment: { 'TEST': 'true' } } }",
-			want: "Should not configure both environment and settings",
+			want: "Should not configure both `environment` and `settings`",
 		},
 		{
 			from: "{pipeline: { build: { image: golang, settings: { test: 'true' } } }, when: { branch: main, event: push } }",
-			want: "Additional property pipeline is not allowed",
+			want: "Additional property `pipeline` is not allowed",
 		},
 		{
 			from: "{steps: { build: { image: plugins/docker, settings: { test: 'true' } } }, when: { branch: main, event: push } } }",
-			want: "The formerly privileged plugin 'plugins/docker' is no longer privileged by default, if required, add it to WOODPECKER_PLUGINS_PRIVILEGED",
+			want: "The formerly privileged plugin `plugins/docker` is no longer privileged by default, if required, add it to `WOODPECKER_PLUGINS_PRIVILEGED`",
 		},
 		{
 			from: "{steps: { build: { image: golang, settings: { test: 'true' } } }, when: { branch: main, event: push }, clone: { git: { image: some-other/plugin-git:v1.1.0 } } }",
@@ -209,11 +209,11 @@ func TestBadHabits(t *testing.T) {
 	}{
 		{
 			from: "steps: { build: { image: golang } }",
-			want: "Set an event filter for all steps or the entire workflow on all items of the when block",
+			want: "Set an event filter for all steps or the entire workflow on all items of the `when` block",
 		},
 		{
 			from: "when: [{branch: xyz}, {event: push}]\nsteps: { build: { image: golang } }",
-			want: "Set an event filter for all steps or the entire workflow on all items of the when block",
+			want: "Set an event filter for all steps or the entire workflow on all items of the `when` block",
 		},
 	}
 
