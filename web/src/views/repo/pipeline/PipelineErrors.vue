@@ -1,7 +1,7 @@
 <template>
   <Panel>
     <div class="flex flex-col gap-y-4">
-      <template v-for="(error,i) in pipeline!.errors" :key="i">
+      <template v-for="(error, _index) in pipeline!.errors" :key="_index">
         <div>
           <div class="grid grid-cols-[minmax(10rem,auto),4fr] items-center">
             <span class="flex items-center gap-x-2">
@@ -14,7 +14,9 @@
                 }"
               />
               <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
-              <span><code>{{ error.type }}</code></span>
+              <span>
+                <code>{{ error.type }}</code>
+              </span>
             </span>
             <span
               v-if="isLinterError(error) || isDeprecationError(error) || isBadHabitError(error)"
@@ -30,7 +32,11 @@
             <span />
             <span class="flex gap-x-2">
               <RenderMarkdown :content="error.message" />
-              <DocsLink v-if="isDeprecationError(error) || isBadHabitError(error)" :topic="error.data?.field || ''" :url="error.data?.docs || ''" />
+              <DocsLink
+                v-if="isDeprecationError(error) || isBadHabitError(error)"
+                :topic="error.data?.field || ''"
+                :url="error.data?.docs || ''"
+              />
             </span>
           </div>
         </div>
@@ -42,9 +48,9 @@
 <script lang="ts" setup>
 import { inject, type Ref } from 'vue';
 
-import RenderMarkdown from '~/components/atomic/RenderMarkdown.vue';
 import DocsLink from '~/components/atomic/DocsLink.vue';
 import Icon from '~/components/atomic/Icon.vue';
+import RenderMarkdown from '~/components/atomic/RenderMarkdown.vue';
 import Panel from '~/components/layout/Panel.vue';
 import type { Pipeline, PipelineError } from '~/lib/api/types';
 
