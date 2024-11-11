@@ -173,7 +173,7 @@ var flags = append([]cli.Flag{
 		Usage:   "The maximum time in minutes you can set in the repo settings before a pipeline gets killed",
 		Value:   120,
 	},
-	&cli.IntFlag{
+	&cli.StringSliceFlag{
 		Sources: cli.EnvVars("WOODPECKER_DEFAULT_WORKFLOW_LABELS"),
 		Name:    "default-workflow-labels",
 		Usage:   "The default label filter to set for workflows that has no label filter set. By default workflows will be allowed to run on any agent, if not specified in the workflow.",
