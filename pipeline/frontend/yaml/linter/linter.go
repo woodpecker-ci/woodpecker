@@ -78,7 +78,7 @@ func (l *Linter) lintFile(config *WorkflowConfig) error {
 	var linterErr error
 
 	if len(config.Workflow.Steps.ContainerList) == 0 {
-		linterErr = multierr.Append(linterErr, newLinterError("Invalid or missing steps section", config.File, "steps", false))
+		linterErr = multierr.Append(linterErr, newLinterError("Invalid or missing `steps` section", config.File, "steps", false))
 	}
 
 	if err := l.lintCloneSteps(config); err != nil {
