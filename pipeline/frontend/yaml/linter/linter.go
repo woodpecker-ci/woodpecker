@@ -189,17 +189,6 @@ func (l *Linter) lintContainerDeprecations(config *WorkflowConfig, c *types.Cont
 	if c.Secrets.LegacyFormat {
 		err = multierr.Append(err, &errorTypes.PipelineError{
 			Type:    errorTypes.PipelineErrorTypeDeprecation,
-			Message: "Legacy secrets syntax detected. Use simple string list syntax.",
-			Data: errors.DeprecationErrorData{
-				File:  config.File,
-				Field: field,
-				Docs:  "https://woodpecker-ci.org/docs/usage/secrets",
-			},
-			IsWarning: true,
-		})
-
-		err = multierr.Append(err, &errorTypes.PipelineError{
-			Type:    errorTypes.PipelineErrorTypeDeprecation,
 			Message: "Secrets alternative names are deprecated, use environment with from_secret or simple string list syntax",
 			Data: errors.DeprecationErrorData{
 				File:  config.File,
