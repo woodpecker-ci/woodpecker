@@ -148,6 +148,6 @@ body,
 }
 
 .code-box-inline,
-code {
+code:not(pre > code) {
   @apply bg-wp-code-200 rounded-md text-wp-code-text-100 px-1 py-px;
 }
