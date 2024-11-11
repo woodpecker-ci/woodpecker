@@ -51,7 +51,7 @@ type (
 		Environment base.EnvironmentMap `yaml:"environment,omitempty"`
 
 		// Deprecated
-		Secrets []string `yaml:"secrets,omitempty"`
+		Secrets base.SecretsSlice `yaml:"secrets,omitempty"`
 
 		// Docker and Kubernetes Specific
 		Privileged bool `yaml:"privileged,omitempty"`

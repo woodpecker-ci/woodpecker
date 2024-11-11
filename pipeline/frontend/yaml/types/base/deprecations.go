@@ -38,3 +38,22 @@ func (s *EnvironmentMap) UnmarshalYAML(unmarshal func(any) error) error {
 
 	return err
 }
+
+type SecretsSlice []string
+
+// UnmarshalYAML implements the Unmarshaler interface.
+func (s *SecretsSlice) UnmarshalYAML(unmarshal func(any) error) error {
+	var stringSlice []string
+	err := unmarshal(&stringSlice)
+	if err == nil {
+		*s = stringSlice
+		return nil
+	}
+
+	var objectSlice []any
+	if err := unmarshal(&objectSlice); err == nil {
+		return fmt.Errorf("Deprecated secrets syntax got remove (https://woodpecker-ci.org/docs/usage/secrets)")
+	}
+
+	return err
+}
