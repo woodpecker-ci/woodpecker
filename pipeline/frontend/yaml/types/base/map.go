@@ -17,7 +17,6 @@
 package base
 
 import (
-	"errors"
 	"fmt"
 )
 
@@ -26,7 +25,8 @@ type EnvironmentMap map[string]any
 // UnmarshalYAML implements the Unmarshaler interface.
 func (s *EnvironmentMap) UnmarshalYAML(unmarshal func(any) error) error {
 	var mapType map[string]any
-	if err := unmarshal(&mapType); err == nil {
+	err := unmarshal(&mapType)
+	if err == nil {
 		*s = mapType
 		return nil
 	}
@@ -36,5 +36,5 @@ func (s *EnvironmentMap) UnmarshalYAML(unmarshal func(any) error) error {
 		return fmt.Errorf("Deprecated environment string list got remove (https://woodpecker-ci.org/docs/usage/environment)")
 	}
 
-	return errors.New("failed to unmarshal map")
+	return err
 }
