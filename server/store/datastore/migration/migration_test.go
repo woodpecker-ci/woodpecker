@@ -57,14 +57,14 @@ func createSQLiteDB(t *testing.T) string {
 	return tmpF.Name()
 }
 
-func testDB(t *testing.T, newDB bool) (engine *xorm.Engine, closeDB func()) {
+func testDB(t *testing.T, initNewDB bool) (engine *xorm.Engine, closeDB func()) {
 	driver := testDriver()
 	var err error
 	closeDB = func() {}
 	switch driver {
 	case "sqlite3":
 		config := ":memory:"
-		if !newDB {
+		if !initNewDB {
 			config = createSQLiteDB(t)
 			closeDB = func() {
 				_ = os.Remove(config)
@@ -77,7 +77,7 @@ func testDB(t *testing.T, newDB bool) (engine *xorm.Engine, closeDB func()) {
 		return
 	case "mysql", "postgres":
 		config := os.Getenv("WOODPECKER_DATABASE_DATASOURCE")
-		if !newDB {
+		if !initNewDB {
 			t.Logf("do not have dump to test against")
 			t.SkipNow()
 		}

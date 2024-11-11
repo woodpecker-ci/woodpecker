@@ -23,14 +23,14 @@ import (
 	"xorm.io/xorm/schemas"
 )
 
-func renameTable(sess *xorm.Session, old, newName string) error {
+func renameTable(sess *xorm.Session, oldTable, newTable string) error {
 	dialect := sess.Engine().Dialect().URI().DBType
 	switch dialect {
 	case schemas.MYSQL:
-		_, err := sess.Exec(fmt.Sprintf("RENAME TABLE `%s` TO `%s`;", old, newName))
+		_, err := sess.Exec(fmt.Sprintf("RENAME TABLE `%s` TO `%s`;", oldTable, newTable))
 		return err
 	case schemas.POSTGRES, schemas.SQLITE:
-		_, err := sess.Exec(fmt.Sprintf("ALTER TABLE `%s` RENAME TO `%s`;", old, newName))
+		_, err := sess.Exec(fmt.Sprintf("ALTER TABLE `%s` RENAME TO `%s`;", oldTable, newTable))
 		return err
 	default:
 		return fmt.Errorf("dialect '%s' not supported", dialect)
