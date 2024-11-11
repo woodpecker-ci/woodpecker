@@ -3,9 +3,9 @@
 </template>
 
 <script setup lang="ts">
-import { computed} from 'vue';
-import { marked } from 'marked';
 import DOMPurify from 'dompurify';
+import { marked } from 'marked';
+import { computed } from 'vue';
 
 const props = defineProps<{
   content: string;
@@ -13,7 +13,6 @@ const props = defineProps<{
 
 const contentHTML = computed<string>(() => {
   const dirtyHTML = marked.parse(props.content);
-  return DOMPurify.sanitize(dirtyHTML as string, {USE_PROFILES: {html: true}});
-})
-
+  return DOMPurify.sanitize(dirtyHTML as string, { USE_PROFILES: { html: true } });
+});
 </script>
