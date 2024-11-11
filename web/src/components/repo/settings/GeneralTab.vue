@@ -42,7 +42,11 @@
         />
       </InputField>
 
-      <InputField v-slot="{ id }" :label="$t('repo.settings.general.netrc_only_trusted.netrc_only_trusted')">
+      <InputField
+        v-slot="{ id }"
+        :label="$t('repo.settings.general.netrc_only_trusted.netrc_only_trusted')"
+        docs-url="docs/usage/project-settings#custom-trusted-clone-plugins"
+      >
         <span class="ml-1 mb-2 text-wp-text-alt-100">{{ $t('repo.settings.general.netrc_only_trusted.desc') }}</span>
 
         <div class="flex flex-col gap-2">
@@ -230,7 +234,6 @@ function addNewImage() {
   if (!newImage.value) {
     return;
   }
-  console.log(repoSettings.value?.netrc_trusted, newImage.value)
   repoSettings.value?.netrc_trusted.push(newImage.value);
   newImage.value = '';
 }
