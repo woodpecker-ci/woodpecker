@@ -40,11 +40,21 @@
           :label="$t('repo.settings.general.protected.protected')"
           :description="$t('repo.settings.general.protected.desc')"
         />
-        <Checkbox
-          v-model="repoSettings.netrc_only_trusted"
-          :label="$t('repo.settings.general.netrc_only_trusted.netrc_only_trusted')"
-          :description="$t('repo.settings.general.netrc_only_trusted.desc')"
-        />
+      </InputField>
+
+      <InputField v-slot="{ id }" :label="$t('repo.settings.general.netrc_only_trusted.netrc_only_trusted')">
+        <span class="ml-1 mb-2 text-wp-text-alt-100">{{ $t('repo.settings.general.netrc_only_trusted.desc') }}</span>
+
+        <div class="flex flex-col gap-2">
+          <div v-for="image in repoSettings.netrc_trusted" :key="image" class="flex gap-2">
+            <TextField :id="id" :model-value="image" disabled />
+            <Button type="button" color="gray" start-icon="trash" @click="removeImage(image)" />
+          </div>
+          <div class="flex gap-2">
+            <TextField :id="id" v-model="newImage" @keydown.enter.prevent="addNewImage" />
+            <Button type="button" color="gray" start-icon="plus" @click="addNewImage" />
+          </div>
+        </div>
       </InputField>
 
       <InputField
@@ -156,7 +166,7 @@ function loadRepoSettings() {
     allow_pr: repo.value.allow_pr,
     allow_deploy: repo.value.allow_deploy,
     cancel_previous_pipeline_events: repo.value.cancel_previous_pipeline_events || [],
-    netrc_only_trusted: repo.value.netrc_only_trusted,
+    netrc_trusted: repo.value.netrc_trusted || [],
   };
 }
 
@@ -214,4 +224,21 @@ const cancelPreviousPipelineEventsOptions: CheckboxOption[] = [
   },
   { value: WebhookEvents.Deploy, text: i18n.t('repo.pipeline.event.deploy') },
 ];
+
+const newImage = ref('');
+function addNewImage() {
+  if (!newImage.value) {
+    return;
+  }
+  console.log(repoSettings.value?.netrc_trusted, newImage.value)
+  repoSettings.value?.netrc_trusted.push(newImage.value);
+  newImage.value = '';
+}
+function removeImage(image: string) {
+  if (!repoSettings.value) {
+    throw new Error('Unexpected: repoSettings should be set');
+  }
+
+  repoSettings.value.netrc_trusted = repoSettings.value.netrc_trusted.filter((i) => i !== image);
+}
 </script>
