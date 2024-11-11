@@ -78,7 +78,7 @@ func (l *Linter) lintFile(config *WorkflowConfig) error {
 	var linterErr error
 
 	if len(config.Workflow.Steps.ContainerList) == 0 {
-		linterErr = multierr.Append(linterErr, newLinterError("Invalid or missing steps section", config.File, "steps", false))
+		linterErr = multierr.Append(linterErr, newLinterError("Invalid or missing `steps` section", config.File, "steps", false))
 	}
 
 	if err := l.lintCloneSteps(config); err != nil {
@@ -123,7 +123,7 @@ func (l *Linter) lintCloneSteps(config *WorkflowConfig) error {
 		if !utils.MatchImageDynamic(container.Image, trustedClonePlugins...) {
 			linterErr = multierr.Append(linterErr,
 				newLinterError(
-					"Specified clone image does not match allow list, netrc will not be injected",
+					"Specified clone image does not match allow list, netrc is not injected",
 					config.File, fmt.Sprintf("clone.%s", container.Name), true),
 			)
 		}
@@ -173,7 +173,7 @@ func (l *Linter) lintImage(config *WorkflowConfig, c *types.Container, area stri
 func (l *Linter) lintPrivilegedPlugins(config *WorkflowConfig, c *types.Container, area string) error {
 	// lint for conflicts of https://github.com/woodpecker-ci/woodpecker/pull/3918
 	if utils.MatchImage(c.Image, "plugins/docker", "plugins/gcr", "plugins/ecr", "woodpeckerci/plugin-docker-buildx") {
-		msg := fmt.Sprintf("The formerly privileged plugin '%s' is no longer privileged by default, if required, add it to WOODPECKER_PLUGINS_PRIVILEGED", c.Image)
+		msg := fmt.Sprintf("The formerly privileged plugin `%s` is no longer privileged by default, if required, add it to `WOODPECKER_PLUGINS_PRIVILEGED`", c.Image)
 		// check first if user did not add them back
 		if l.privilegedPlugins != nil && !utils.MatchImageDynamic(c.Image, *l.privilegedPlugins...) {
 			return newLinterError(msg, config.File, fmt.Sprintf("%s.%s", area, c.Name), false)
@@ -191,16 +191,16 @@ func (l *Linter) lintSettings(config *WorkflowConfig, c *types.Container, field 
 		return nil
 	}
 	if len(c.Commands) != 0 {
-		return newLinterError("Cannot configure both commands and settings", config.File, fmt.Sprintf("%s.%s", field, c.Name), false)
+		return newLinterError("Cannot configure both `commands` and `settings`", config.File, fmt.Sprintf("%s.%s", field, c.Name), false)
 	}
 	if len(c.Entrypoint) != 0 {
-		return newLinterError("Cannot configure both entrypoint and settings", config.File, fmt.Sprintf("%s.%s", field, c.Name), false)
+		return newLinterError("Cannot configure both `entrypoint` and `settings`", config.File, fmt.Sprintf("%s.%s", field, c.Name), false)
 	}
 	if len(c.Environment) != 0 {
-		return newLinterError("Should not configure both environment and settings", config.File, fmt.Sprintf("%s.%s", field, c.Name), true)
+		return newLinterError("Should not configure both `environment` and `settings`", config.File, fmt.Sprintf("%s.%s", field, c.Name), true)
 	}
 	if len(c.Secrets) != 0 {
-		return newLinterError("Should not configure both secrets and settings", config.File, fmt.Sprintf("%s.%s", field, c.Name), true)
+		return newLinterError("Should not configure both `secrets` and `settings`", config.File, fmt.Sprintf("%s.%s", field, c.Name), true)
 	}
 	return nil
 }
@@ -210,32 +210,32 @@ func (l *Linter) lintTrusted(config *WorkflowConfig, c *types.Container, area st
 	errors := []string{}
 	if !l.trusted.Security {
 		if c.Privileged {
-			errors = append(errors, "Insufficient privileges to use privileged mode")
+			errors = append(errors, "Insufficient trust level to use `privileged` mode")
 		}
 	}
 	if !l.trusted.Network {
 		if len(c.DNS) != 0 {
-			errors = append(errors, "Insufficient privileges to use custom dns")
+			errors = append(errors, "Insufficient trust level to use custom `dns`")
 		}
 		if len(c.DNSSearch) != 0 {
-			errors = append(errors, "Insufficient privileges to use dns_search")
+			errors = append(errors, "Insufficient trust level to use `dns_search`")
 		}
 		if len(c.ExtraHosts) != 0 {
-			errors = append(errors, "Insufficient privileges to use extra_hosts")
+			errors = append(errors, "Insufficient trust level to use `extra_hosts`")
 		}
 		if len(c.NetworkMode) != 0 {
-			errors = append(errors, "Insufficient privileges to use network_mode")
+			errors = append(errors, "Insufficient trust level to use `network_mode`")
 		}
 	}
 	if !l.trusted.Volumes {
 		if len(c.Devices) != 0 {
-			errors = append(errors, "Insufficient privileges to use devices")
+			errors = append(errors, "Insufficient trust level to use `devices`")
 		}
 		if len(c.Volumes.Volumes) != 0 {
-			errors = append(errors, "Insufficient privileges to use volumes")
+			errors = append(errors, "Insufficient trust level to use `volumes`")
 		}
 		if len(c.Tmpfs) != 0 {
-			errors = append(errors, "Insufficient privileges to use tmpfs")
+			errors = append(errors, "Insufficient trust level to use `tmpfs`")
 		}
 	}
 
@@ -279,7 +279,7 @@ func (l *Linter) lintDeprecations(config *WorkflowConfig) (err error) {
 		if len(container.Secrets) > 0 {
 			err = multierr.Append(err, &errorTypes.PipelineError{
 				Type:    errorTypes.PipelineErrorTypeDeprecation,
-				Message: "Secrets are deprecated, use environment with from_secret",
+				Message: "Usage of `secrets` is deprecated, use `environment` with `from_secret`",
 				Data: errors.DeprecationErrorData{
 					File:  config.File,
 					Field: fmt.Sprintf("steps.%s.secrets", container.Name),
@@ -328,7 +328,7 @@ func (l *Linter) lintBadHabits(config *WorkflowConfig) (err error) {
 			if field != "" {
 				err = multierr.Append(err, &errorTypes.PipelineError{
 					Type:    errorTypes.PipelineErrorTypeBadHabit,
-					Message: "Please set an event filter for all steps or the whole workflow on all items of the when block",
+					Message: "Set an event filter for all steps or the entire workflow on all items of the `when` block",
 					Data: errors.BadHabitErrorData{
 						File:  config.File,
 						Field: field,
