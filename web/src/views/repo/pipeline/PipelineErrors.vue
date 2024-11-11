@@ -22,8 +22,8 @@
               v-if="isLinterError(error) || isDeprecationError(error) || isBadHabitError(error)"
               class="flex items-center gap-x-2 whitespace-nowrap"
             >
-              <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
               <span>
+                <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
                 <span v-if="error.data?.file" class="font-bold">{{ error.data?.file }}: </span>
                 <span>{{ error.data?.field }}</span>
               </span>
