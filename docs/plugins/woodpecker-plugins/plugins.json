@@ -32,7 +32,7 @@
     },
     {
       "name": "Prettier",
-      "docs": "https://raw.githubusercontent.com/woodpecker-ci/plugin-prettier/main/docs.md",
+      "docs": "https://codeberg.org/woodpecker-plugins/prettier/raw/branch/main/docs.md",
       "verified": true
     },
     {

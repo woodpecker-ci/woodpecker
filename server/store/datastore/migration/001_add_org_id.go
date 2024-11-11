@@ -19,30 +19,39 @@ import (
 
 	"src.techknowlogick.com/xormigrate"
 	"xorm.io/xorm"
-
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
 var addOrgID = xormigrate.Migration{
 	ID: "add-org-id",
 	MigrateSession: func(sess *xorm.Session) error {
-		if err := sess.Sync(new(userV009)); err != nil {
+		type users struct {
+			ID    int64  `xorm:"pk autoincr 'user_id'"`
+			Login string `xorm:"UNIQUE 'user_login'"`
+			OrgID int64  `xorm:"user_org_id"`
+		}
+		type orgs struct {
+			ID     int64  `xorm:"pk autoincr 'id'"`
+			Name   string `xorm:"UNIQUE 'name'"`
+			IsUser bool   `xorm:"is_user"`
+		}
+
+		if err := sess.Sync(new(users), new(orgs)); err != nil {
 			return fmt.Errorf("sync new models failed: %w", err)
 		}
 
 		// get all users
-		var users []*userV009
-		if err := sess.Find(&users); err != nil {
+		var us []*users
+		if err := sess.Find(&us); err != nil {
 			return fmt.Errorf("find all repos failed: %w", err)
 		}
 
-		for _, user := range users {
-			org := &model.Org{}
+		for _, user := range us {
+			org := &orgs{}
 			has, err := sess.Where("name = ?", user.Login).Get(org)
 			if err != nil {
 				return fmt.Errorf("getting org failed: %w", err)
 			} else if !has {
-				org = &model.Org{
+				org = &orgs{
 					Name:   user.Login,
 					IsUser: true,
 				}
