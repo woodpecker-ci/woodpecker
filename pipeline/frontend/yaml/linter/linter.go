@@ -126,7 +126,7 @@ func (l *Linter) lintContainers(config *WorkflowConfig, area string) error {
 		if err := l.lintPrivilegedPlugins(config, container, area); err != nil {
 			linterErr = multierr.Append(linterErr, err)
 		}
-		if err := l.lintEnvironment(config, container, area); err != nil {
+		if err := l.lintContainerDeprecations(config, container, area); err != nil {
 			linterErr = multierr.Append(linterErr, err)
 		}
 	}
@@ -172,20 +172,45 @@ func (l *Linter) lintSettings(config *WorkflowConfig, c *types.Container, field 
 	return nil
 }
 
-func (l *Linter) lintEnvironment(config *WorkflowConfig, c *types.Container, field string) error {
+func (l *Linter) lintContainerDeprecations(config *WorkflowConfig, c *types.Container, field string) (err error) {
 	if c.Environment.WasSlice {
-		return &errorTypes.PipelineError{
+		err = multierr.Append(err, &errorTypes.PipelineError{
 			Type:    errorTypes.PipelineErrorTypeDeprecation,
-			Message: "Please use map syntax. List syntax is deprecated for 'environment'",
+			Message: "Please use map syntax. List syntax is deprecated.",
 			Data: errors.DeprecationErrorData{
 				File:  config.File,
-				Field: field,
+				Field: fmt.Sprintf("%s.%s.environment", field, c.Name),
 				Docs:  "https://woodpecker-ci.org/docs/usage/environment",
 			},
 			IsWarning: true,
-		}
+		})
 	}
-	return nil
+
+	if c.Secrets.LegacyFormat {
+		err = multierr.Append(err, &errorTypes.PipelineError{
+			Type:    errorTypes.PipelineErrorTypeDeprecation,
+			Message: "Legacy secrets syntax detected. Use simple string list syntax.",
+			Data: errors.DeprecationErrorData{
+				File:  config.File,
+				Field: field,
+				Docs:  "https://woodpecker-ci.org/docs/usage/secrets",
+			},
+			IsWarning: true,
+		})
+
+		err = multierr.Append(err, &errorTypes.PipelineError{
+			Type:    errorTypes.PipelineErrorTypeDeprecation,
+			Message: "Secrets alternative names are deprecated, use environment with from_secret or simple string list syntax",
+			Data: errors.DeprecationErrorData{
+				File:  config.File,
+				Field: fmt.Sprintf("%s.%s.secrets", field, c.Name),
+				Docs:  "https://woodpecker-ci.org/docs/usage/secrets#use-secrets-in-settings-and-environment",
+			},
+			IsWarning: true,
+		})
+	}
+
+	return err
 }
 
 func (l *Linter) lintTrusted(config *WorkflowConfig, c *types.Container, area string) error {
@@ -334,23 +359,6 @@ func (l *Linter) lintDeprecations(config *WorkflowConfig) (err error) {
 						File:  config.File,
 						Field: fmt.Sprintf("steps.%s.when[%d].event", step.Name, i),
 						Docs:  "https://woodpecker-ci.org/docs/usage/workflow-syntax#event",
-					},
-					IsWarning: true,
-				})
-			}
-		}
-	}
-
-	for _, step := range parsed.Steps.ContainerList {
-		for i, c := range step.Secrets.Secrets {
-			if c.Source != c.Target {
-				err = multierr.Append(err, &errorTypes.PipelineError{
-					Type:    errorTypes.PipelineErrorTypeDeprecation,
-					Message: "Secrets alternative names are deprecated, use environment with from_secret",
-					Data: errors.DeprecationErrorData{
-						File:  config.File,
-						Field: fmt.Sprintf("steps.%s.secrets[%d]", step.Name, i),
-						Docs:  "https://woodpecker-ci.org/docs/usage/secrets#use-secrets-in-settings-and-environment",
 					},
 					IsWarning: true,
 				})

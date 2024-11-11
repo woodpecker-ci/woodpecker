@@ -49,7 +49,7 @@ type (
 		Ports          []string           `yaml:"ports,omitempty"`
 		DependsOn      base.StringOrSlice `yaml:"depends_on,omitempty"`
 
-		// NOTE: removed in 3.x
+		// NOTE: only []string in 3.x
 		Secrets Secrets `yaml:"secrets,omitempty"`
 		// NOTE: only map[string]any allowed in 3.x
 		Environment base.DeprecatedSliceOrMap `yaml:"environment,omitempty"`

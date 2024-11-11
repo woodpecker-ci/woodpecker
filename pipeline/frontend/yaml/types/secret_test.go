@@ -24,41 +24,50 @@ import (
 func TestUnmarshalSecrets(t *testing.T) {
 	testdata := []struct {
 		from string
-		want []*Secret
+		want Secrets
 	}{
 		{
 			from: "[ mysql_username, mysql_password]",
-			want: []*Secret{
-				{
-					Source: "mysql_username",
-					Target: "mysql_username",
+			want: Secrets{
+				Secrets: []*Secret{
+					{
+						Source: "mysql_username",
+						Target: "mysql_username",
+					},
+					{
+						Source: "mysql_password",
+						Target: "mysql_password",
+					},
 				},
-				{
-					Source: "mysql_password",
-					Target: "mysql_password",
-				},
+				LegacyFormat: false,
 			},
 		},
 		{
 			from: "[ { source: mysql_prod_username, target: mysql_username } ]",
-			want: []*Secret{
-				{
-					Source: "mysql_prod_username",
-					Target: "mysql_username",
+			want: Secrets{
+				Secrets: []*Secret{
+					{
+						Source: "mysql_prod_username",
+						Target: "mysql_username",
+					},
 				},
+				LegacyFormat: true,
 			},
 		},
 		{
 			from: "[ { source: mysql_prod_username, target: mysql_username }, { source: redis_username, target: redis_username } ]",
-			want: []*Secret{
-				{
-					Source: "mysql_prod_username",
-					Target: "mysql_username",
+			want: Secrets{
+				Secrets: []*Secret{
+					{
+						Source: "mysql_prod_username",
+						Target: "mysql_username",
+					},
+					{
+						Source: "redis_username",
+						Target: "redis_username",
+					},
 				},
-				{
-					Source: "redis_username",
-					Target: "redis_username",
-				},
+				LegacyFormat: true,
 			},
 		},
 	}
@@ -68,6 +77,6 @@ func TestUnmarshalSecrets(t *testing.T) {
 		got := Secrets{}
 		err := yaml.Unmarshal(in, &got)
 		assert.NoError(t, err)
-		assert.EqualValues(t, test.want, got.Secrets, "problem parsing secrets %q", test.from)
+		assert.EqualValues(t, test.want, got, "problem parsing secrets %q", test.from)
 	}
 }
