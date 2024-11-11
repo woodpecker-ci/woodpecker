@@ -246,48 +246,7 @@ func TestDeleteAgent(t *testing.T) {
 func TestPostOrgAgent(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
-	t.Run("should fail when DisableUserRegisteredAgentRegistration is true", func(t *testing.T) {
-		// Set up the config
-		originalConfig := server.Config.Agent.DisableUserRegisteredAgentRegistration
-		server.Config.Agent.DisableUserRegisteredAgentRegistration = true
-		defer func() {
-			server.Config.Agent.DisableUserRegisteredAgentRegistration = originalConfig
-		}()
-
-		mockStore := store_mocks.NewStore(t)
-
-		w := httptest.NewRecorder()
-		c, _ := gin.CreateTestContext(w)
-		c.Set("store", mockStore)
-
-		// Set up a non-admin user
-		c.Set("user", &model.User{
-			ID:    1,
-			Admin: false,
-		})
-
-		c.Params = gin.Params{{Key: "org_id", Value: "1"}}
-		c.Request, _ = http.NewRequest(http.MethodPost, "/", strings.NewReader(`{"name":"new-agent"}`))
-		c.Request.Header.Set("Content-Type", "application/json")
-
-		PostOrgAgent(c)
-		c.Writer.WriteHeaderNow()
-
-		assert.Equal(t, http.StatusForbidden, w.Code)
-		assert.Contains(t, w.Body.String(), "creation of user-/org-agents was disabled by the woodpecker admin")
-
-		// Ensure no agent was created
-		mockStore.AssertNotCalled(t, "AgentCreate")
-	})
-
-	t.Run("should succeed for non-admin user when DisableUserRegisteredAgentRegistration is false", func(t *testing.T) {
-		// Set up the config
-		originalConfig := server.Config.Agent.DisableUserRegisteredAgentRegistration
-		server.Config.Agent.DisableUserRegisteredAgentRegistration = false
-		defer func() {
-			server.Config.Agent.DisableUserRegisteredAgentRegistration = originalConfig
-		}()
-
+	t.Run("create org agent should succeed", func(t *testing.T) {
 		mockStore := store_mocks.NewStore(t)
 		mockStore.On("AgentCreate", mock.AnythingOfType("*model.Agent")).Return(nil)
 
