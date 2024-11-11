@@ -167,7 +167,7 @@ func TestLintErrors(t *testing.T) {
 		},
 		{
 			from: "{pipeline: { build: { image: golang, settings: { test: 'true' } } }, when: { branch: main, event: push } }",
-			want: "Additional property `pipeline` is not allowed",
+			want: "Additional property pipeline is not allowed",
 		},
 		{
 			from: "{steps: { build: { image: plugins/docker, settings: { test: 'true' } } }, when: { branch: main, event: push } } }",
