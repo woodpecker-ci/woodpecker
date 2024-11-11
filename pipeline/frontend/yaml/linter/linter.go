@@ -186,10 +186,10 @@ func (l *Linter) lintContainerDeprecations(config *WorkflowConfig, c *types.Cont
 		})
 	}
 
-	if c.Secrets.LegacyFormat {
+	if len(c.Secrets.Secrets) != 0 {
 		err = multierr.Append(err, &errorTypes.PipelineError{
 			Type:    errorTypes.PipelineErrorTypeDeprecation,
-			Message: "Secrets alternative names are deprecated, use environment with from_secret or simple string list syntax",
+			Message: "Secrets are deprecated, use environment with from_secret",
 			Data: errors.DeprecationErrorData{
 				File:  config.File,
 				Field: fmt.Sprintf("%s.%s.secrets", field, c.Name),
