@@ -49,8 +49,8 @@ type (
 
 		Environment map[string]any `yaml:"environment,omitempty"`
 
-		// Deprecated
-		Secrets []string `yaml:"secrets,omitempty"`
+		// Remove after v3.1.0
+		Secrets []any `yaml:"secrets,omitempty"`
 
 		// Docker and Kubernetes Specific
 		Privileged bool `yaml:"privileged,omitempty"`

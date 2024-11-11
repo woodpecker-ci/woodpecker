@@ -158,6 +158,9 @@ func (l *Linter) lintContainers(config *WorkflowConfig, area string) error {
 		if err := l.lintPrivilegedPlugins(config, container, area); err != nil {
 			linterErr = multierr.Append(linterErr, err)
 		}
+		if err := l.lintContainerDeprecations(config, container, area); err != nil {
+			linterErr = multierr.Append(linterErr, err)
+		}
 	}
 
 	return linterErr
@@ -199,10 +202,23 @@ func (l *Linter) lintSettings(config *WorkflowConfig, c *types.Container, field 
 	if len(c.Environment) != 0 {
 		return newLinterError("Should not configure both environment and settings", config.File, fmt.Sprintf("%s.%s", field, c.Name), true)
 	}
-	if len(c.Secrets) != 0 {
-		return newLinterError("Should not configure both secrets and settings", config.File, fmt.Sprintf("%s.%s", field, c.Name), true)
-	}
 	return nil
+}
+
+func (l *Linter) lintContainerDeprecations(config *WorkflowConfig, c *types.Container, field string) (err error) {
+	if len(c.Secrets) != 0 {
+		err = multierr.Append(err, &errorTypes.PipelineError{
+			Type:    errorTypes.PipelineErrorTypeDeprecation,
+			Message: "Secrets are un-supported now, use environment with from_secret",
+			Data: errors.DeprecationErrorData{
+				File:  config.File,
+				Field: fmt.Sprintf("%s.%s.secrets", field, c.Name),
+				Docs:  "https://woodpecker-ci.org/docs/usage/secrets#use-secrets-in-settings-and-environment",
+			},
+		})
+	}
+
+	return err
 }
 
 func (l *Linter) lintTrusted(config *WorkflowConfig, c *types.Container, area string) error {
