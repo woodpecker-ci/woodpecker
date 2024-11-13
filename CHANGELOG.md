@@ -51,6 +51,7 @@
 
 ### 📚 Documentation
 
+- Podman is not (official) supported [[#4367](https://github.com/woodpecker-ci/woodpecker/pull/4367)]
 - Add EditorConfig-Checker Plugin to docs [[#4371](https://github.com/woodpecker-ci/woodpecker/pull/4371)]
 - Update netrc option description [[#4342](https://github.com/woodpecker-ci/woodpecker/pull/4342)]
 - Fix deployment event note [[#4283](https://github.com/woodpecker-ci/woodpecker/pull/4283)]
