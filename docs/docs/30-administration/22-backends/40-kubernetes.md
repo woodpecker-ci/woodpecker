@@ -329,7 +329,7 @@ For Kubernetes, when deployed via Helm chart you will want to set the following 
 ```
 This will enable /metrics on port :9001 without authentication.  This port is not externally exposed by default, use the instructions at [Prometheus](../40-advanced/90-prometheus.md) if you want to enable authenticated external access to metrics.
 
-You may also want to enable pod monitoring via:
+To enable Prometheus pod monitoring discovery, also set the following:
 
 ```
   prometheus:
