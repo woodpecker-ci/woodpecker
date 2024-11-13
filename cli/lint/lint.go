@@ -48,6 +48,11 @@ var Command = &cli.Command{
 			Usage:   "Plugins which are trusted to handle the netrc info in clone steps",
 			Value:   constant.TrustedClonePlugins,
 		},
+		&cli.BoolFlag{
+			Sources: cli.EnvVars("WOODPECKER_WARNING_AS_ERROR"),
+			Name:    "warning-as-error",
+			Usage:   "treat warnings as errors",
+		},
 	},
 }
 
@@ -119,7 +124,7 @@ func lintFile(_ context.Context, c *cli.Command, file string) error {
 		linter.WithTrustedClonePlugins(c.StringSlice("plugins-trusted-clone")),
 	).Lint([]*linter.WorkflowConfig{config})
 	if err != nil {
-		str, err := FormatLintError(config.File, err)
+		str, err := FormatLintError(config.File, err, c.Bool("warning-as-error"))
 
 		if str != "" {
 			fmt.Print(str)
