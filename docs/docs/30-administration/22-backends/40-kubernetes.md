@@ -58,7 +58,7 @@ steps:
       - echo "Hello world"
     backend_options:
       kubernetes:
-        # Use the service account `default` in the current current namespace.
+        # Use the service account `default` in the current namespace.
         # This usually the same as wherever woodpecker is deployed.
         serviceAccountName: default
 ```
