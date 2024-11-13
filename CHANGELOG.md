@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-11-11
+## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-11-13
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -51,6 +51,7 @@
 
 ### 📚 Documentation
 
+- Add EditorConfig-Checker Plugin to docs [[#4371](https://github.com/woodpecker-ci/woodpecker/pull/4371)]
 - Update netrc option description [[#4342](https://github.com/woodpecker-ci/woodpecker/pull/4342)]
 - Fix deployment event note [[#4283](https://github.com/woodpecker-ci/woodpecker/pull/4283)]
 - Improve migration notes [[#4291](https://github.com/woodpecker-ci/woodpecker/pull/4291)]
@@ -86,6 +87,7 @@
 
 ### 📈 Enhancement
 
+- Improve linter messages in UI [[#4351](https://github.com/woodpecker-ci/woodpecker/pull/4351)]
 - Pass settings to services [[#4338](https://github.com/woodpecker-ci/woodpecker/pull/4338)]
 - Inline model types for migrations [[#4293](https://github.com/woodpecker-ci/woodpecker/pull/4293)]
 - Add options to control the database connections (open,idle,timeout) [[#4212](https://github.com/woodpecker-ci/woodpecker/pull/4212)]
@@ -199,14 +201,11 @@
 
 ### Misc
 
-- Improve linter messages in UI [[#4351](https://github.com/woodpecker-ci/woodpecker/pull/4351)]
-- Use settings for service [[#4336](https://github.com/woodpecker-ci/woodpecker/pull/4336)]
 - Use release-helper for release/* branches [[#4301](https://github.com/woodpecker-ci/woodpecker/pull/4301)]
 - Fix wording for privileged plugins linter error [[#4280](https://github.com/woodpecker-ci/woodpecker/pull/4280)]
 - Fix renovate support for `xgo` [[#4276](https://github.com/woodpecker-ci/woodpecker/pull/4276)]
 - Improve nix development environment [[#4256](https://github.com/woodpecker-ci/woodpecker/pull/4256)]
 - [pre-commit.ci] pre-commit autoupdate [[#4209](https://github.com/woodpecker-ci/woodpecker/pull/4209)]
-- renovate: set `automergetype=pr` [[#4162](https://github.com/woodpecker-ci/woodpecker/pull/4162)]
 - Add `.lycheeignore` [[#4154](https://github.com/woodpecker-ci/woodpecker/pull/4154)]
 - Add eslint-plugin-promise back [[#4022](https://github.com/woodpecker-ci/woodpecker/pull/4022)]
 - Improve wording [[#3951](https://github.com/woodpecker-ci/woodpecker/pull/3951)]
