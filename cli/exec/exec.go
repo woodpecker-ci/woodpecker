@@ -220,7 +220,7 @@ func execWithAxis(ctx context.Context, c *cli.Command, file, repoPath string, ax
 		Workflow:  conf,
 	}})
 	if err != nil {
-		str, err := lint.FormatLintError(file, err)
+		str, err := lint.FormatLintError(file, err, false)
 		fmt.Print(str)
 		if err != nil {
 			return err
