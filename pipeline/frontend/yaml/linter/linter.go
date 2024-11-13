@@ -176,7 +176,7 @@ func (l *Linter) lintContainerDeprecations(config *WorkflowConfig, c *types.Cont
 	if c.Environment.WasSlice {
 		err = multierr.Append(err, &errorTypes.PipelineError{
 			Type:    errorTypes.PipelineErrorTypeDeprecation,
-			Message: "Please use map syntax. List syntax is deprecated.",
+			Message: "List syntax for `environment` is deprecated, use map syntax instead",
 			Data: errors.DeprecationErrorData{
 				File:  config.File,
 				Field: fmt.Sprintf("%s.%s.environment", field, c.Name),
@@ -189,7 +189,7 @@ func (l *Linter) lintContainerDeprecations(config *WorkflowConfig, c *types.Cont
 	if c.Secrets.LegacyFormat {
 		err = multierr.Append(err, &errorTypes.PipelineError{
 			Type:    errorTypes.PipelineErrorTypeDeprecation,
-			Message: "Secrets alternative names are deprecated, use environment with from_secret or simple string list syntax",
+			Message: "Alternative names syntax for `secrets` is deprecated, use list syntax or `from_secret` instead",
 			Data: errors.DeprecationErrorData{
 				File:  config.File,
 				Field: fmt.Sprintf("%s.%s.secrets", field, c.Name),
