@@ -106,7 +106,7 @@ message UpdateRequest {
 }
 
 message LogRequest {
-  LogEntry logEntry = 1;
+  repeated LogEntry logEntries = 1;
 }
 
 message Empty {

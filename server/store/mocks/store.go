@@ -1340,17 +1340,17 @@ func (_m *Store) HasRedirectionForRepo(_a0 int64, _a1 string) (bool, error) {
 	return r0, r1
 }
 
-// LogAppend provides a mock function with given fields: logEntry
-func (_m *Store) LogAppend(logEntry *model.LogEntry) error {
-	ret := _m.Called(logEntry)
+// LogAppend provides a mock function with given fields: _a0, _a1
+func (_m *Store) LogAppend(_a0 *model.Step, _a1 []*model.LogEntry) error {
+	ret := _m.Called(_a0, _a1)
 
 	if len(ret) == 0 {
 		panic("no return value specified for LogAppend")
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(*model.LogEntry) error); ok {
-		r0 = rf(logEntry)
+	if rf, ok := ret.Get(0).(func(*model.Step, []*model.LogEntry) error); ok {
+		r0 = rf(_a0, _a1)
 	} else {
 		r0 = ret.Error(0)
 	}
