@@ -44,7 +44,7 @@ docker volume rm $(docker volume ls --filter name=^wp_* --filter dangling=true  
 
 ### Podman
 
-There is no official support for Podman, but one can try to set the environment variable `DOCKER_HOST` to point to the Podman socket. It might work.
+There is no official support for Podman, but one can try to set the environment variable `DOCKER_HOST` to point to the Podman socket. It might work. See also the [Blog posts](https://woodpecker-ci.org/blog).
 
 ## Configuration
 
