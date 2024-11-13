@@ -141,7 +141,7 @@ _If your PVC is not highly available or NFS based, you may need to also integrat
 
 NOTE: If you plan to use this volume on more than one workflow concurrently, make sure you have configured the PVC with:
 
-```
+```yaml
   accessModes:
      - ReadWriteMany
 ```
@@ -357,16 +357,17 @@ Please see [Prometheus](../40-advanced/90-prometheus.md) for general configurati
 
 For Kubernetes, when deployed via Helm chart you will want to set the following values to enable in-cluster metrics gathering:
 
-```
+```yaml
   metrics:
     enabled: true
     port: 9001
 ```
+
 This will enable /metrics on port :9001 without authentication.  This port is not externally exposed by default, use the instructions at [Prometheus](../40-advanced/90-prometheus.md) if you want to enable authenticated external access to metrics.
 
 To enable Prometheus pod monitoring discovery, also set the following:
 
-```
+```yaml
   prometheus:
     podmonitor:
       enabled: true
@@ -378,7 +379,7 @@ To enable Prometheus pod monitoring discovery, also set the following:
 
 If you are not receiving metrics despite doing the above, ensure your Prometheus configuration either has your namespace configured explicitly in `podMonitorNamespaceSelector`, or something similar to the following:
 
-```
+```yaml
     # Search all available namespaces
     podMonitorNamespaceSelector:
       matchLabels: {}
