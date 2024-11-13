@@ -1,10 +1,14 @@
 # Changelog
 
-## [2.7.4](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.7.4) - 2024-11-06
+## [2.8.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.8.0) - 2024-11-13
 
 ### ❤️ Thanks to all contributors! ❤️
 
 @6543, @anbraten
+
+### 📈 Enhancement
+
+- Process workflow logs in batches (#4045) [[#4356](https://github.com/woodpecker-ci/woodpecker/pull/4356)]
 
 ### 🐛 Bug Fixes
 
