@@ -219,6 +219,11 @@
       "name": "Telegram",
       "docs": "https://raw.githubusercontent.com/appleboy/drone-telegram/refs/heads/master/DOCS.md",
       "verified": false
+    },
+    {
+      "name": "EditorConfig Checker",
+      "docs": "https://codeberg.org/woodpecker-plugins/editorconfig-checker/raw/branch/main/docs.md",
+      "verified": true
     }
   ]
 }
