@@ -50,6 +50,21 @@ See the [Kubernetes documentation](https://kubernetes.io/docs/concepts/container
 `serviceAccountName` specifies the name of the ServiceAccount which the Pod will mount. This service account must be created externally.
 See the [Kubernetes documentation](https://kubernetes.io/docs/concepts/security/service-accounts/) for more information on using service accounts.
 
+```yaml
+steps:
+  - name: 'My kubernetes step'
+    image: alpine
+    commands:
+      - echo "Hello world"
+    backend_options:
+      kubernetes:
+        # Use the service account `default` in the current current namespace.
+        # This usually the same as wherever woodpecker is deployed.
+        serviceAccountName: default
+```
+
+To give steps access to the kubernetes api via service account, look at [RBAC Authorization](https://kubernetes.io/docs/reference/access-authn-authz/rbac/)
+
 ### Node selector
 
 `nodeSelector` specifies the labels which are used to select the node on which the job will be executed.
@@ -122,14 +137,16 @@ To mount volumes a PersistentVolume (PV) and PersistentVolumeClaim (PVC) are nee
 
 Persistent volumes need to be manually generated, use the Kubernetes [Persistent Volumes](https://kubernetes.io/docs/concepts/storage/persistent-volumes/) documentation as a reference.
 
-If you plan to use this volume on more than one workflow concurrently, make sure you have configured the PVC with:
+_If your PVC is not highly available or NFS based, you may need to also integrate affinity settings to ensure your steps run on the correct node._
+
+NOTE: If you plan to use this volume on more than one workflow concurrently, make sure you have configured the PVC with:
 
 ```
   accessModes:
      - ReadWriteMany
 ```
 
-Assuming a PVC named `woodpecker-cache` exists, it can be referenced as follows in a step:
+Assuming a PVC named `woodpecker-cache` exists, it can be referenced as follows in a plugin step:
 
 ```yaml
 steps:
@@ -137,8 +154,26 @@ steps:
     image: meltwater/drone-cache
     volumes:
       - woodpecker-cache:/woodpecker/src/cache
+    settings:
+      mount:
+        - "woodpecker-cache"
     [...]
 ```
+
+Or as follows when using a normal image:
+
+```yaml
+steps:
+  - name: "Edit cache"
+    image: alpine:latest
+    volumes:
+      - woodpecker-cache:/woodpecker/src/cache
+    commands:
+      - echo "Hello World" > /woodpecker/src/cache/output.txt
+    [...]
+```
+
+Please note that `settings:` is reserved for use with plugins, and is incompatible with `commands:`
 
 ### Security context
 
