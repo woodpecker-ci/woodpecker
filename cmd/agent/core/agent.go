@@ -155,7 +155,7 @@ func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 	}
 	defer conn.Close()
 
-	client := agent_rpc.NewGrpcClient(conn)
+	client := agent_rpc.NewGrpcClient(ctx, conn)
 	agentConfigPersisted := atomic.Bool{}
 
 	grpcCtx := metadata.NewOutgoingContext(grpcClientCtx, metadata.Pairs("hostname", hostname))

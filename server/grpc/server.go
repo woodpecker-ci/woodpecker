@@ -20,6 +20,7 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 	prometheus_auto "github.com/prometheus/client_golang/prometheus/promauto"
+	"github.com/rs/zerolog/log"
 
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc/proto"
@@ -133,15 +134,39 @@ func (s *WoodpeckerServer) Extend(c context.Context, req *proto.ExtendRequest) (
 }
 
 func (s *WoodpeckerServer) Log(c context.Context, req *proto.LogRequest) (*proto.Empty, error) {
-	logEntry := &rpc.LogEntry{
-		Data:     req.GetLogEntry().GetData(),
-		Line:     int(req.GetLogEntry().GetLine()),
-		Time:     req.GetLogEntry().GetTime(),
-		StepUUID: req.GetLogEntry().GetStepUuid(),
-		Type:     int(req.GetLogEntry().GetType()),
+	var (
+		entries  []*rpc.LogEntry
+		stepUUID string
+	)
+
+	write := func() error {
+		if len(entries) > 0 {
+			if err := s.peer.Log(c, stepUUID, entries); err != nil {
+				log.Error().Err(err).Msg("could not write log entries")
+				return err
+			}
+		}
+		return nil
 	}
+
+	for _, reqEntry := range req.GetLogEntries() {
+		entry := &rpc.LogEntry{
+			Data:     reqEntry.GetData(),
+			Line:     int(reqEntry.GetLine()),
+			Time:     reqEntry.GetTime(),
+			StepUUID: reqEntry.GetStepUuid(),
+			Type:     int(reqEntry.GetType()),
+		}
+		if entry.StepUUID != stepUUID {
+			_ = write()
+			stepUUID = entry.StepUUID
+			entries = entries[:0]
+		}
+		entries = append(entries, entry)
+	}
+
 	res := new(proto.Empty)
-	err := s.peer.Log(c, logEntry)
+	err := write()
 	return res, err
 }
 
