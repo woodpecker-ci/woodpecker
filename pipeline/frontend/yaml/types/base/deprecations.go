@@ -1,4 +1,4 @@
-// Copyright 2023 Woodpecker Authors
+// Copyright 2024 Woodpecker Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ func (s *EnvironmentMap) UnmarshalYAML(unmarshal func(any) error) error {
 
 	var sliceType []any
 	if err := unmarshal(&sliceType); err == nil {
-		return fmt.Errorf("deprecated environment string list got remove (https://woodpecker-ci.org/docs/usage/environment)")
+		return fmt.Errorf("list syntax for 'environment' has been removed, use map syntax instead (https://woodpecker-ci.org/docs/usage/environment)")
 	}
 
 	return err
@@ -52,7 +52,7 @@ func (s *SecretsSlice) UnmarshalYAML(unmarshal func(any) error) error {
 
 	var objectSlice []any
 	if err := unmarshal(&objectSlice); err == nil {
-		return fmt.Errorf("deprecated secrets syntax got remove (https://woodpecker-ci.org/docs/usage/secrets)")
+		return fmt.Errorf("'secrets' property has been removed, use 'from_secret' instead (https://woodpecker-ci.org/docs/usage/secrets)")
 	}
 
 	return err

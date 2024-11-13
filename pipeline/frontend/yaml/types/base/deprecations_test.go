@@ -36,7 +36,7 @@ func TestEnvironmentMapYaml(t *testing.T) {
 	s := StructMap{}
 	err := yaml.Unmarshal([]byte(str), &s)
 	if assert.Error(t, err) {
-		assert.EqualValues(t, "deprecated environment string list got remove (https://woodpecker-ci.org/docs/usage/environment)", err.Error())
+		assert.EqualValues(t, "list syntax for 'environment' has been removed, use map syntax instead (https://woodpecker-ci.org/docs/usage/environment)", err.Error())
 	}
 
 	s.Foos = EnvironmentMap{"bar": "baz", "far": "faz"}
@@ -59,7 +59,7 @@ func TestSecretsSlice(t *testing.T) {
 	s := StructSecret{}
 	err := yaml.Unmarshal([]byte(str), &s)
 	if assert.Error(t, err) {
-		assert.EqualValues(t, "deprecated secrets syntax got remove (https://woodpecker-ci.org/docs/usage/secrets)", err.Error())
+		assert.EqualValues(t, "'secrets' property has been removed, use 'from_secret' instead (https://woodpecker-ci.org/docs/usage/secrets)", err.Error())
 	}
 
 	s.Foos = SecretsSlice{"bar", "baz", "faz"}
