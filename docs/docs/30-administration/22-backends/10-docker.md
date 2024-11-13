@@ -40,6 +40,12 @@ docker image rm $(docker images --filter "dangling=true" -q --no-trunc)
 docker volume rm $(docker volume ls --filter name=^wp_* --filter dangling=true  -q)
 ```
 
+## Tips and tricks
+
+### Podman
+
+There is no official support for Podman, but the one can try set the environment variable `DOCKER_HOST` to point to the Podman socket. It might work.
+
 ## Configuration
 
 ### `WOODPECKER_BACKEND_DOCKER_NETWORK`
