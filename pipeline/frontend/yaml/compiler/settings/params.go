@@ -24,6 +24,11 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+const (
+	fromSecretConst   = "from_secret"
+	fromVariableConst = "from_variable"
+)
+
 // ParamsToEnv uses reflection to convert a map[string]interface to a list
 // of environment variables.
 func ParamsToEnv(from map[string]any, to map[string]string, prefix string, upper bool, getVariableValue, getSecretValue func(name string) (string, error)) (err error) {
@@ -164,7 +169,7 @@ func handleComplex(v any, getVariableValue, getSecretValue func(name string) (st
 // If it's a from_secret request it either  returns the secret value or an error if the secret was not found
 // else it just indicates to progress normally using the provided map as is.
 func injectVariableOrSecret(v map[string]any, getVariableValue, getSecretValue func(name string) (string, error)) (string, bool, error) {
-	if secretNameI, ok := v["from_secret"]; ok {
+	if secretNameI, ok := v[fromSecretConst]; ok {
 		if secretName, ok := secretNameI.(string); ok {
 			secret, err := getSecretValue(secretName)
 			if err != nil {
@@ -175,7 +180,7 @@ func injectVariableOrSecret(v map[string]any, getVariableValue, getSecretValue f
 		}
 		return "", false, fmt.Errorf("from_secret has to be a string")
 	}
-	if variableNameI, ok := v["from_variable"]; ok {
+	if variableNameI, ok := v[fromVariableConst]; ok {
 		if variableName, ok := variableNameI.(string); ok {
 			variable, err := getVariableValue(variableName)
 			if err != nil {
