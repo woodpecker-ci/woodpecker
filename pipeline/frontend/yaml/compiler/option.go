@@ -62,6 +62,8 @@ func WithVariable(variables map[string]string) Option {
 	return func(compiler *Compiler) {
 		if variables != nil {
 			compiler.variables = variables
+		} else {
+			compiler.variables = make(map[string]string)
 		}
 	}
 }
