@@ -357,6 +357,14 @@ The default docker image to be used when cloning the repo.
 
 It is also added to the trusted clone plugin list.
 
+### `WOODPECKER_DEFAULT_WORKFLOW_LABELS`
+
+> By default run workflows on any agent if no label conditions are set in workflow definition.
+
+You can specify default label/platform conditions that will be used for agent selection for workflows that does not have labels conditions set.
+
+Example: `platform=linux/amd64,backend=docker`
+
 ### `WOODPECKER_DEFAULT_PIPELINE_TIMEOUT`
 
 > 60 (minutes)
