@@ -10,9 +10,9 @@ A couple of backend-specific config env vars exists which are described in the [
 
 ## Metrics
 
-Please see [Prometheus](../40-advanced/90-prometheus.md) for general configuration and usage information.
+Please see [Prometheus](../40-advanced/90-prometheus.md) for general information on configuration and usage.
 
-For Kubernetes, when deployed via Helm chart you will want to set the following values to enable in-cluster metrics gathering:
+For Kubernetes, you must set the following values when deploying via Helm chart to enable in-cluster metrics gathering:
 
 ```yaml
   metrics:
@@ -20,9 +20,9 @@ For Kubernetes, when deployed via Helm chart you will want to set the following 
     port: 9001
 ```
 
-This will enable /metrics on port :9001 without authentication.  This port is not externally exposed by default, use the instructions at [Prometheus](../40-advanced/90-prometheus.md) if you want to enable authenticated external access to metrics.
+This activates the `/metrics` endpoint on port `9001` without authentication.  This port is not exposed externally by default. Use the instructions at [Prometheus](../40-advanced/90-prometheus.md) if you want to enable authenticated external access to metrics.
 
-To enable Prometheus pod monitoring discovery, also set the following:
+To enable Prometheus pod monitoring discovery, you must also make the following settings:
 
 ```yaml
   prometheus:
@@ -34,7 +34,7 @@ To enable Prometheus pod monitoring discovery, also set the following:
 
 ### Troubleshooting Metrics
 
-If you are not receiving metrics despite doing the above, ensure your Prometheus configuration either has your namespace configured explicitly in `podMonitorNamespaceSelector`, or something similar to the following:
+If you are not receiving metrics despite the steps above, ensure that in your Prometheus configuration either your namespace is explicitly configured in `podMonitorNamespaceSelector` or the selectors are disabled.
 
 ```yaml
     # Search all available namespaces

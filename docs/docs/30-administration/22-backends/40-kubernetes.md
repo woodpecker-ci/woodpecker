@@ -63,7 +63,7 @@ steps:
         serviceAccountName: default
 ```
 
-To give steps access to the kubernetes api via service account, look at [RBAC Authorization](https://kubernetes.io/docs/reference/access-authn-authz/rbac/)
+To give steps access to the Kubernetes API via service account, take a look at [RBAC Authorization](https://kubernetes.io/docs/reference/access-authn-authz/rbac/)
 
 ### Node selector
 
@@ -135,11 +135,11 @@ steps:
 
 To mount volumes a PersistentVolume (PV) and PersistentVolumeClaim (PVC) are needed on the cluster which can be referenced in steps via the `volumes` option.
 
-Persistent volumes need to be manually generated, use the Kubernetes [Persistent Volumes](https://kubernetes.io/docs/concepts/storage/persistent-volumes/) documentation as a reference.
+Persistent volumes must be created manually. Use the Kubernetes [Persistent Volumes](https://kubernetes.io/docs/concepts/storage/persistent-volumes/) documentation as a reference.
 
-_If your PVC is not highly available or NFS based, you may need to also integrate affinity settings to ensure your steps run on the correct node._
+_If your PVC is not highly available or NFS-based, you may also need to integrate affinity settings to ensure that your steps are executed on the correct node._
 
-NOTE: If you plan to use this volume on more than one workflow concurrently, make sure you have configured the PVC with:
+NOTE: If you plan to use this volume in more than one workflow concurrently, make sure you have configured the PVC in `RWX` mode. Keep in mind that this feature must be supported by the used CSI driver:
 
 ```yaml
   accessModes:
