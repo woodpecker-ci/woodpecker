@@ -51,6 +51,7 @@
 
 ### 📈 Enhancement
 
+- Use squared spinner for active pipelines [[#4379](https://github.com/woodpecker-ci/woodpecker/pull/4379)]
 - Add server configuration option to add default set of labels for workflows that has no labels specified [[#4326](https://github.com/woodpecker-ci/woodpecker/pull/4326)]
 - Add `cli lint` option to treat warnings as errors [[#4373](https://github.com/woodpecker-ci/woodpecker/pull/4373)]
 - Improve error message for wrong secrets / environment config [[#4359](https://github.com/woodpecker-ci/woodpecker/pull/4359)]
