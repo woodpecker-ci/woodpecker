@@ -18,6 +18,8 @@ import (
 	"context"
 	"sync"
 
+	logger "github.com/rs/zerolog/log"
+
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
 
@@ -38,7 +40,7 @@ import (
 // sub.start()... event loop
 
 type subscriber struct {
-	handler Handler
+	receiver LogChan
 }
 
 type stream struct {
@@ -77,7 +79,7 @@ func (l *log) Open(_ context.Context, stepID int64) error {
 	return nil
 }
 
-func (l *log) Write(ctx context.Context, stepID int64, logEntry *model.LogEntry) error {
+func (l *log) Write(ctx context.Context, stepID int64, entries []*model.LogEntry) error {
 	l.Lock()
 	s, ok := l.streams[stepID]
 	l.Unlock()
@@ -92,15 +94,20 @@ func (l *log) Write(ctx context.Context, stepID int64, logEntry *model.LogEntry)
 	}
 
 	s.Lock()
-	s.list = append(s.list, logEntry)
+	s.list = append(s.list, entries...)
 	for sub := range s.subs {
-		go sub.handler(logEntry)
+		select {
+		case sub.receiver <- entries:
+		default:
+			logger.Info().Msgf("subscriber channel is full -- dropping logs for step %d", stepID)
+		}
 	}
 	s.Unlock()
+
 	return nil
 }
 
-func (l *log) Tail(c context.Context, stepID int64, handler Handler) error {
+func (l *log) Tail(c context.Context, stepID int64, receiver LogChan) error {
 	l.Lock()
 	s, ok := l.streams[stepID]
 	l.Unlock()
@@ -109,11 +116,11 @@ func (l *log) Tail(c context.Context, stepID int64, handler Handler) error {
 	}
 
 	sub := &subscriber{
-		handler: handler,
+		receiver: receiver,
 	}
 	s.Lock()
 	if len(s.list) != 0 {
-		sub.handler(s.list...)
+		sub.receiver <- s.list
 	}
 	s.subs[sub] = struct{}{}
 	s.Unlock()
