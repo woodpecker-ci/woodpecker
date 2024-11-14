@@ -1,6 +1,7 @@
 # Secrets
 
-Woodpecker provides the ability to store named parameters external to the YAML configuration file, in a central secret store. These secrets can be passed to individual steps of the pipeline at runtime. <!-- TODO: not runtime but pipeline parse time to be exact -->
+Woodpecker provides the ability to store named parameters external to the YAML configuration file, in a central secret store. These secrets can be passed to individual steps of the pipeline parsing runtime.
+<!-- TODO: should be runtime (https://github.com/woodpecker-ci/woodpecker/issues/2851) -->
 
 Woodpecker provides three different levels to add secrets to your pipeline. The following list shows the priority of the different levels. If a secret is defined in multiple levels, will be used following this priorities: Repository secrets > Organization secrets > Global secrets.
 

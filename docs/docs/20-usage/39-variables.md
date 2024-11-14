@@ -1,6 +1,6 @@
 # Variables
 
-Woodpecker provides the ability to store named parameters external to the YAML configuration file, in a central variable store. These variables can be passed to individual steps of the pipeline at runtime. <!-- TODO: not runtime but pipeline parse time to be exact -->
+Woodpecker provides the ability to store named parameters external to the YAML configuration file, in a central variable store. These variables can be passed to individual steps of the pipeline parsing runtime.
 
 Woodpecker provides three different levels to add variables to your pipeline. The following list shows the priority of the different levels. If a variable is defined in multiple levels, will be used following this priorities: Repository variables > Organization variables > Global variables.
 
