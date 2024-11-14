@@ -33,7 +33,7 @@ import (
 func runGrpcServer(ctx context.Context, c *cli.Command, _store store.Store) error {
 	lis, err := net.Listen("tcp", c.String("grpc-addr"))
 	if err != nil {
-		log.Fatal().Err(err).Msg("failed to listen on grpc-addr") //nolint:forbidigo
+		return fmt.Errorf("failed to listen on grpc-addr: %w", err)
 	}
 
 	jwtSecret := c.String("grpc-secret")

@@ -42,7 +42,7 @@ import (
 type StepBuilder struct {
 	Repo      *model.Repo
 	Curr      *model.Pipeline
-	Last      *model.Pipeline
+	Prev      *model.Pipeline
 	Netrc     *model.Netrc
 	Secs      []*model.Secret
 	Vars      []*model.Variable
@@ -116,7 +116,7 @@ func (b *StepBuilder) Build() (items []*Item, errorsAndWarnings error) {
 }
 
 func (b *StepBuilder) genItemForWorkflow(workflow *model.Workflow, axis matrix.Axis, data string) (item *Item, errorsAndWarnings error) {
-	workflowMetadata := MetadataFromStruct(b.Forge, b.Repo, b.Curr, b.Last, workflow, b.Host)
+	workflowMetadata := MetadataFromStruct(b.Forge, b.Repo, b.Curr, b.Prev, workflow, b.Host)
 	environ := b.environmentVariables(workflowMetadata, axis)
 
 	// add global environment variables for substituting
@@ -142,7 +142,11 @@ func (b *StepBuilder) genItemForWorkflow(workflow *model.Workflow, axis matrix.A
 
 	// lint pipeline
 	errorsAndWarnings = multierr.Append(errorsAndWarnings, linter.New(
-		linter.WithTrusted(b.Repo.IsTrusted),
+		linter.WithTrusted(linter.TrustedConfiguration{
+			Network:  b.Repo.Trusted.Network,
+			Volumes:  b.Repo.Trusted.Volumes,
+			Security: b.Repo.Trusted.Security,
+		}),
 		linter.PrivilegedPlugins(server.Config.Pipeline.PrivilegedPlugins),
 		linter.WithTrustedClonePlugins(server.Config.Pipeline.TrustedClonePlugins),
 	).Lint([]*linter.WorkflowConfig{{
@@ -278,7 +282,6 @@ func (b *StepBuilder) toInternalRepresentation(parsed *yaml_types.Workflow, envi
 		compiler.WithEnviron(b.Envs),
 		// TODO: server deps should be moved into StepBuilder fields and set on StepBuilder creation
 		compiler.WithEscalated(server.Config.Pipeline.PrivilegedPlugins...),
-		compiler.WithResourceLimit(server.Config.Pipeline.Limits.MemSwapLimit, server.Config.Pipeline.Limits.MemLimit, server.Config.Pipeline.Limits.ShmSize, server.Config.Pipeline.Limits.CPUQuota, server.Config.Pipeline.Limits.CPUShares, server.Config.Pipeline.Limits.CPUSet),
 		compiler.WithVolumes(server.Config.Pipeline.Volumes...),
 		compiler.WithNetworks(server.Config.Pipeline.Networks...),
 		compiler.WithLocal(false),
@@ -305,7 +308,7 @@ func (b *StepBuilder) toInternalRepresentation(parsed *yaml_types.Workflow, envi
 		compiler.WithProxy(b.ProxyOpts),
 		compiler.WithWorkspaceFromURL(compiler.DefaultWorkspaceBase, b.Repo.ForgeURL),
 		compiler.WithMetadata(metadata),
-		compiler.WithTrusted(b.Repo.IsTrusted),
+		compiler.WithTrustedSecurity(b.Repo.Trusted.Security),
 		compiler.WithNetrcOnlyTrusted(b.Repo.NetrcOnlyTrusted),
 	).Compile(parsed)
 }

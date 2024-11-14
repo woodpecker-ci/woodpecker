@@ -38,10 +38,20 @@ var Command = &cli.Command{
 	Action:    lint,
 	Flags: []cli.Flag{
 		&cli.StringSliceFlag{
+			Sources: cli.EnvVars("WOODPECKER_PLUGINS_PRIVILEGED"),
+			Name:    "plugins-privileged",
+			Usage:   "Allow plugins to run in privileged mode, if environment variable is defined but empty there will be none",
+		},
+		&cli.StringSliceFlag{
 			Sources: cli.EnvVars("WOODPECKER_PLUGINS_TRUSTED_CLONE"),
 			Name:    "plugins-trusted-clone",
-			Usage:   "Plugins witch are trusted to handle the netrc info in clone steps",
+			Usage:   "Plugins which are trusted to handle the netrc info in clone steps",
 			Value:   constant.TrustedClonePlugins,
+		},
+		&cli.BoolFlag{
+			Sources: cli.EnvVars("WOODPECKER_LINT_STRICT"),
+			Name:    "strict",
+			Usage:   "treat warnings as errors",
 		},
 	},
 }
@@ -105,11 +115,16 @@ func lintFile(_ context.Context, c *cli.Command, file string) error {
 
 	// TODO: lint multiple files at once to allow checks for sth like "depends_on" to work
 	err = linter.New(
-		linter.WithTrusted(true),
+		linter.WithTrusted(linter.TrustedConfiguration{
+			Network:  true,
+			Volumes:  true,
+			Security: true,
+		}),
+		linter.PrivilegedPlugins(c.StringSlice("plugins-privileged")),
 		linter.WithTrustedClonePlugins(c.StringSlice("plugins-trusted-clone")),
 	).Lint([]*linter.WorkflowConfig{config})
 	if err != nil {
-		str, err := FormatLintError(config.File, err)
+		str, err := FormatLintError(config.File, err, c.Bool("strict"))
 
 		if str != "" {
 			fmt.Print(str)

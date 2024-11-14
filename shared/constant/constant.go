@@ -14,11 +14,7 @@
 
 package constant
 
-// PrivilegedPlugins can be changed by 'WOODPECKER_ESCALATE' at runtime.
-var PrivilegedPlugins = []string{
-	"docker.io/woodpeckerci/plugin-docker-buildx",
-	"codeberg.org/woodpecker-plugins/docker-buildx",
-}
+import "time"
 
 // DefaultConfigOrder represent the priority in witch woodpecker search for a pipeline config by default
 // folders are indicated by supplying a trailing slash.
@@ -31,7 +27,7 @@ var DefaultConfigOrder = [...]string{
 const (
 	// DefaultClonePlugin can be changed by 'WOODPECKER_DEFAULT_CLONE_PLUGIN' at runtime.
 	// renovate: datasource=docker depName=woodpeckerci/plugin-git
-	DefaultClonePlugin = "docker.io/woodpeckerci/plugin-git:2.5.2"
+	DefaultClonePlugin = "docker.io/woodpeckerci/plugin-git:2.6.0"
 )
 
 // TrustedClonePlugins can be changed by 'WOODPECKER_PLUGINS_TRUSTED_CLONE' at runtime.
@@ -40,3 +36,6 @@ var TrustedClonePlugins = []string{
 	"docker.io/woodpeckerci/plugin-git",
 	"quay.io/woodpeckerci/plugin-git",
 }
+
+// TaskTimeout is the time till a running task is counted as dead.
+var TaskTimeout = time.Minute

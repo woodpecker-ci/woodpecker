@@ -14,9 +14,9 @@
         </template>
         <template #description>
           <i18n-t keypath="repo.settings.general.pipeline_path.desc" tag="p" class="text-sm text-wp-text-alt-100">
-            <span class="code-box-inline px-1">{{ $t('repo.settings.general.pipeline_path.desc_path_example') }}</span>
+            <span class="code-box-inline">{{ $t('repo.settings.general.pipeline_path.desc_path_example') }}</span>
             <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
-            <span class="code-box-inline px-1">/</span>
+            <span class="code-box-inline">/</span>
           </i18n-t>
         </template>
       </InputField>
@@ -45,11 +45,27 @@
           :label="$t('repo.settings.general.netrc_only_trusted.netrc_only_trusted')"
           :description="$t('repo.settings.general.netrc_only_trusted.desc')"
         />
+      </InputField>
+
+      <InputField
+        v-if="user?.admin"
+        docs-url="docs/usage/project-settings#project-settings-1"
+        :label="$t('repo.settings.general.trusted.trusted')"
+      >
         <Checkbox
-          v-if="user?.admin"
-          v-model="repoSettings.trusted"
-          :label="$t('repo.settings.general.trusted.trusted')"
-          :description="$t('repo.settings.general.trusted.desc')"
+          v-model="repoSettings.trusted.network"
+          :label="$t('repo.settings.general.trusted.network.network')"
+          :description="$t('repo.settings.general.trusted.network.desc')"
+        />
+        <Checkbox
+          v-model="repoSettings.trusted.volumes"
+          :label="$t('repo.settings.general.trusted.volumes.volumes')"
+          :description="$t('repo.settings.general.trusted.volumes.desc')"
+        />
+        <Checkbox
+          v-model="repoSettings.trusted.security"
+          :label="$t('repo.settings.general.trusted.security.security')"
+          :description="$t('repo.settings.general.trusted.security.desc')"
         />
       </InputField>
 

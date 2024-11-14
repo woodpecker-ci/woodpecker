@@ -28,6 +28,7 @@ import (
 	"github.com/rs/zerolog/log"
 
 	"go.woodpecker-ci.org/woodpecker/v2/server"
+	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 	"go.woodpecker-ci.org/woodpecker/v2/server/router/middleware/session"
 	"go.woodpecker-ci.org/woodpecker/v2/server/store"
@@ -224,10 +225,23 @@ func PatchRepo(c *gin.Context) {
 		c.String(http.StatusForbidden, fmt.Sprintf("Timeout is not allowed to be higher than max timeout (%d min)", server.Config.Pipeline.MaxTimeout))
 		return
 	}
-	if in.IsTrusted != nil && *in.IsTrusted != repo.IsTrusted && !user.Admin {
-		log.Trace().Msgf("user '%s' wants to make repo trusted without being an instance admin", user.Login)
-		c.String(http.StatusForbidden, "Insufficient privileges")
-		return
+
+	if in.Trusted != nil {
+		if (*in.Trusted.Network != repo.Trusted.Network || *in.Trusted.Volumes != repo.Trusted.Volumes || *in.Trusted.Security != repo.Trusted.Security) && !user.Admin {
+			log.Trace().Msgf("user '%s' wants to change trusted without being an instance admin", user.Login)
+			c.String(http.StatusForbidden, "Insufficient privileges")
+			return
+		}
+
+		if in.Trusted.Network != nil {
+			repo.Trusted.Network = *in.Trusted.Network
+		}
+		if in.Trusted.Security != nil {
+			repo.Trusted.Security = *in.Trusted.Security
+		}
+		if in.Trusted.Volumes != nil {
+			repo.Trusted.Volumes = *in.Trusted.Volumes
+		}
 	}
 
 	if in.AllowPull != nil {
@@ -238,9 +252,6 @@ func PatchRepo(c *gin.Context) {
 	}
 	if in.IsGated != nil {
 		repo.IsGated = *in.IsGated
-	}
-	if in.IsTrusted != nil {
-		repo.IsTrusted = *in.IsTrusted
 	}
 	if in.Timeout != nil {
 		repo.Timeout = *in.Timeout
@@ -349,8 +360,8 @@ func GetRepoPermissions(c *gin.Context) {
 //	@Param		page			query	int		false	"for response pagination, page offset number"	default(1)
 //	@Param		perPage			query	int		false	"for response pagination, max items per page"	default(50)
 func GetRepoBranches(c *gin.Context) {
+	_store := store.FromContext(c)
 	repo := session.Repo(c)
-	user := session.User(c)
 	_forge, err := server.Config.Services.Manager.ForgeFromRepo(repo)
 	if err != nil {
 		log.Error().Err(err).Msg("Cannot get forge from repo")
@@ -358,7 +369,15 @@ func GetRepoBranches(c *gin.Context) {
 		return
 	}
 
-	branches, err := _forge.Branches(c, user, repo, session.Pagination(c))
+	repoUser, err := _store.GetUser(repo.UserID)
+	if err != nil {
+		handleDBError(c, err)
+		return
+	}
+
+	forge.Refresh(c, _forge, _store, repoUser)
+
+	branches, err := _forge.Branches(c, repoUser, repo, session.Pagination(c))
 	if err != nil {
 		log.Error().Err(err).Msg("failed to load branches")
 		c.String(http.StatusInternalServerError, "failed to load branches: %s", err)
@@ -380,8 +399,8 @@ func GetRepoBranches(c *gin.Context) {
 //	@Param		page			query	int		false	"for response pagination, page offset number"	default(1)
 //	@Param		perPage			query	int		false	"for response pagination, max items per page"	default(50)
 func GetRepoPullRequests(c *gin.Context) {
+	_store := store.FromContext(c)
 	repo := session.Repo(c)
-	user := session.User(c)
 	_forge, err := server.Config.Services.Manager.ForgeFromRepo(repo)
 	if err != nil {
 		log.Error().Err(err).Msg("Cannot get forge from repo")
@@ -389,7 +408,15 @@ func GetRepoPullRequests(c *gin.Context) {
 		return
 	}
 
-	prs, err := _forge.PullRequests(c, user, repo, session.Pagination(c))
+	repoUser, err := _store.GetUser(repo.UserID)
+	if err != nil {
+		handleDBError(c, err)
+		return
+	}
+
+	forge.Refresh(c, _forge, _store, repoUser)
+
+	prs, err := _forge.PullRequests(c, repoUser, repo, session.Pagination(c))
 	if err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
@@ -615,10 +642,14 @@ func repairRepo(c *gin.Context, repo *model.Repo, withPerms, skipOnErr bool) {
 	user, err := _store.GetUser(repo.UserID)
 	if err != nil {
 		if errors.Is(err, types.RecordNotExist) {
-			if !skipOnErr {
-				c.AbortWithStatus(http.StatusNotFound)
+			oldUserID := repo.UserID
+			user = session.User(c)
+			repo.UserID = user.ID
+			err = _store.UpdateRepo(repo)
+			if err != nil {
+				_ = c.AbortWithError(http.StatusInternalServerError, err)
 			}
-			log.Error().Err(err).Msg("could not get user on repo repair")
+			log.Debug().Msgf("Could not find repo user with ID %d during repo repair, set to repair request user with ID %d", oldUserID, user.ID)
 		} else {
 			_ = c.AbortWithError(http.StatusInternalServerError, err)
 		}

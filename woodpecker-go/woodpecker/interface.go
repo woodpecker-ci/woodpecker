@@ -110,6 +110,9 @@ type Client interface {
 	// PipelineKill force kills the running pipeline.
 	PipelineKill(repoID, pipeline int64) error
 
+	// PipelineMetadata returns metadata for a pipeline.
+	PipelineMetadata(repoID int64, pipelineNumber int) ([]byte, error)
+
 	// StepLogEntries returns the LogEntries for the given pipeline step
 	StepLogEntries(repoID, pipeline, stepID int64) ([]*LogEntry, error)
 

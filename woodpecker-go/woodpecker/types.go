@@ -237,25 +237,26 @@ type (
 
 	// Agent is the JSON data for an agent.
 	Agent struct {
-		ID          int64  `json:"id"`
-		Created     int64  `json:"created"`
-		Updated     int64  `json:"updated"`
-		Name        string `json:"name"`
-		OwnerID     int64  `json:"owner_id"`
-		Token       string `json:"token"`
-		LastContact int64  `json:"last_contact"`
-		LastWork    int64  `json:"last_work"`
-		Platform    string `json:"platform"`
-		Backend     string `json:"backend"`
-		Capacity    int32  `json:"capacity"`
-		Version     string `json:"version"`
-		NoSchedule  bool   `json:"no_schedule"`
+		ID           int64             `json:"id"`
+		Created      int64             `json:"created"`
+		Updated      int64             `json:"updated"`
+		Name         string            `json:"name"`
+		OwnerID      int64             `json:"owner_id"`
+		OrgID        int64             `json:"org_id"`
+		Token        string            `json:"token"`
+		LastContact  int64             `json:"last_contact"`
+		LastWork     int64             `json:"last_work"`
+		Platform     string            `json:"platform"`
+		Backend      string            `json:"backend"`
+		Capacity     int32             `json:"capacity"`
+		Version      string            `json:"version"`
+		NoSchedule   bool              `json:"no_schedule"`
+		CustomLabels map[string]string `json:"custom_labels"`
 	}
 
 	// Task is the JSON data for a task.
 	Task struct {
 		ID           string            `json:"id"`
-		Data         []byte            `json:"data"`
 		Labels       map[string]string `json:"labels"`
 		Dependencies []string          `json:"dependencies"`
 		RunOn        []string          `json:"run_on"`

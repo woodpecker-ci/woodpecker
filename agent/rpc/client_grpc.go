@@ -25,29 +25,44 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	grpcproto "google.golang.org/protobuf/proto"
 
 	backend "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc/proto"
 )
 
-// Set grpc version on compile time to compare against server version response.
-const ClientGrpcVersion int32 = proto.Version
+const (
+	// Set grpc version on compile time to compare against server version response.
+	ClientGrpcVersion int32 = proto.Version
+
+	// Maximum size of an outgoing log message.
+	// Picked to prevent it from going over GRPC size limit (4 MiB) with a large safety margin.
+	maxLogBatchSize int = 1 * 1024 * 1024
+
+	// Maximum amount of time between sending consecutive batched log messages.
+	// Controls the delay between the CI job generating a log record, and web users receiving it.
+	maxLogFlushPeriod time.Duration = time.Second
+)
 
 type client struct {
 	client proto.WoodpeckerClient
 	conn   *grpc.ClientConn
+	logs   chan *proto.LogEntry
 }
 
 // NewGrpcClient returns a new grpc Client.
-func NewGrpcClient(conn *grpc.ClientConn) rpc.Peer {
+func NewGrpcClient(ctx context.Context, conn *grpc.ClientConn) rpc.Peer {
 	client := new(client)
 	client.client = proto.NewWoodpeckerClient(conn)
 	client.conn = conn
+	client.logs = make(chan *proto.LogEntry, 10) // max memory use: 10 lines * 1 MiB
+	go client.processLogs(ctx)
 	return client
 }
 
 func (c *client) Close() error {
+	close(c.logs)
 	return c.conn.Close()
 }
 
@@ -367,18 +382,69 @@ func (c *client) Update(ctx context.Context, workflowID string, state rpc.StepSt
 	return nil
 }
 
-// Log writes the step log entry.
-func (c *client) Log(ctx context.Context, logEntry *rpc.LogEntry) (err error) {
-	retry := c.newBackOff()
-	req := new(proto.LogRequest)
-	req.LogEntry = new(proto.LogEntry)
-	req.LogEntry.StepUuid = logEntry.StepUUID
-	req.LogEntry.Data = logEntry.Data
-	req.LogEntry.Line = int32(logEntry.Line)
-	req.LogEntry.Time = logEntry.Time
-	req.LogEntry.Type = int32(logEntry.Type)
+// EnqueueLog queues the log entry to be written in a batch later.
+func (c *client) EnqueueLog(logEntry *rpc.LogEntry) {
+	c.logs <- &proto.LogEntry{
+		StepUuid: logEntry.StepUUID,
+		Data:     logEntry.Data,
+		Line:     int32(logEntry.Line),
+		Time:     logEntry.Time,
+		Type:     int32(logEntry.Type),
+	}
+}
+
+func (c *client) processLogs(ctx context.Context) {
+	var entries []*proto.LogEntry
+	var bytes int
+
+	send := func() {
+		if len(entries) == 0 {
+			return
+		}
+
+		log.Debug().
+			Int("entries", len(entries)).
+			Int("bytes", bytes).
+			Msg("log drain: sending queued logs")
+
+		if err := c.sendLogs(ctx, entries); err != nil {
+			log.Error().Err(err).Msg("log drain: could not send logs to server")
+		}
+
+		// even if send failed, we don't have infinite memory; retry has already been used
+		entries = entries[:0]
+		bytes = 0
+	}
+
+	// ctx.Done() is covered by the log channel being closed
 	for {
-		_, err = c.client.Log(ctx, req)
+		select {
+		case entry, ok := <-c.logs:
+			if !ok {
+				log.Info().Msg("log drain: channel closed")
+				send()
+				return
+			}
+
+			entries = append(entries, entry)
+			bytes += grpcproto.Size(entry) // cspell:words grpcproto
+
+			if bytes >= maxLogBatchSize {
+				send()
+			}
+
+		case <-time.After(maxLogFlushPeriod):
+			send()
+		}
+	}
+}
+
+func (c *client) sendLogs(ctx context.Context, entries []*proto.LogEntry) error {
+	req := &proto.LogRequest{LogEntries: entries}
+	retry := c.newBackOff()
+
+	for {
+		_, err := c.client.Log(ctx, req)
 		if err == nil {
 			break
 		}
@@ -414,12 +480,15 @@ func (c *client) Log(ctx context.Context, logEntry *rpc.LogEntry) (err error) {
 	return nil
 }
 
-func (c *client) RegisterAgent(ctx context.Context, platform, backend, version string, capacity int) (int64, error) {
+func (c *client) RegisterAgent(ctx context.Context, info rpc.AgentInfo) (int64, error) {
 	req := new(proto.RegisterAgentRequest)
-	req.Platform = platform
-	req.Backend = backend
-	req.Version = version
-	req.Capacity = int32(capacity)
+	req.Info = &proto.AgentInfo{
+		Platform:     info.Platform,
+		Backend:      info.Backend,
+		Version:      info.Version,
+		Capacity:     int32(info.Capacity),
+		CustomLabels: info.CustomLabels,
+	}
 
 	res, err := c.client.RegisterAgent(ctx, req)
 	return res.GetAgentId(), err

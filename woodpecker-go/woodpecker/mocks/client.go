@@ -1487,6 +1487,36 @@ func (_m *Client) PipelineList(repoID int64) ([]*woodpecker.Pipeline, error) {
 	return r0, r1
 }
 
+// PipelineMetadata provides a mock function with given fields: repoID, pipelineNumber
+func (_m *Client) PipelineMetadata(repoID int64, pipelineNumber int) ([]byte, error) {
+	ret := _m.Called(repoID, pipelineNumber)
+
+	if len(ret) == 0 {
+		panic("no return value specified for PipelineMetadata")
+	}
+
+	var r0 []byte
+	var r1 error
+	if rf, ok := ret.Get(0).(func(int64, int) ([]byte, error)); ok {
+		return rf(repoID, pipelineNumber)
+	}
+	if rf, ok := ret.Get(0).(func(int64, int) []byte); ok {
+		r0 = rf(repoID, pipelineNumber)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]byte)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(int64, int) error); ok {
+		r1 = rf(repoID, pipelineNumber)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // PipelineQueue provides a mock function with given fields:
 func (_m *Client) PipelineQueue() ([]*woodpecker.Feed, error) {
 	ret := _m.Called()

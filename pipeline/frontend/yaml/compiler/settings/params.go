@@ -44,8 +44,9 @@ func ParamsToEnv(from map[string]any, to map[string]string, prefix string, upper
 
 // sanitizeParamKey formats the environment variable key.
 func sanitizeParamKey(prefix string, upper bool, k string) string {
-	r := strings.ReplaceAll(strings.ReplaceAll(k, ".", "_"), "-", "_")
+	r := k
 	if upper {
+		r = strings.ReplaceAll(strings.ReplaceAll(k, ".", "_"), "-", "_")
 		r = strings.ToUpper(r)
 	}
 	return prefix + r

@@ -52,8 +52,6 @@ SSL support is provided using the [ListenAndServeTLS](https://golang.org/pkg/net
 Update your configuration to expose the following ports:
 
 ```diff title="docker-compose.yaml"
- version: '3'
-
  services:
    woodpecker-server:
      [...]
@@ -66,8 +64,6 @@ Update your configuration to expose the following ports:
 Update your configuration to mount your certificate and key:
 
 ```diff title="docker-compose.yaml"
- version: '3'
-
  services:
    woodpecker-server:
      [...]
@@ -79,8 +75,6 @@ Update your configuration to mount your certificate and key:
 Update your configuration to provide the paths of your certificate and key:
 
 ```diff title="docker-compose.yaml"
- version: '3'
-
  services:
    woodpecker-server:
      [...]

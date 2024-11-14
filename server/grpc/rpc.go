@@ -39,6 +39,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 )
 
+// updateAgentLastWorkDelay the delay before the LastWork info should be updated.
 const updateAgentLastWorkDelay = time.Minute
 
 type RPC struct {
@@ -56,8 +57,6 @@ func (s *RPC) Next(c context.Context, agentFilter rpc.Filter) (*rpc.Workflow, er
 		log.Debug().Msgf("agent connected: %s: polling", hostname)
 	}
 
-	filterFn := createFilterFunc(agentFilter)
-
 	agent, err := s.getAgentFromContext(c)
 	if err != nil {
 		return nil, err
@@ -67,6 +66,20 @@ func (s *RPC) Next(c context.Context, agentFilter rpc.Filter) (*rpc.Workflow, er
 		time.Sleep(1 * time.Second)
 		return nil, nil
 	}
+
+	agentServerLabels, err := agent.GetServerLabels()
+	if err != nil {
+		return nil, err
+	}
+
+	// enforce labels from server by overwriting agent labels
+	for k, v := range agentServerLabels {
+		agentFilter.Labels[k] = v
+	}
+
+	log.Trace().Msgf("Agent %s[%d] tries to pull task with labels: %v", agent.Name, agent.ID, agentFilter.Labels)
+
+	filterFn := createFilterFunc(agentFilter)
 
 	for {
 		// poll blocks until a task is available or the context is canceled / worker is kicked
@@ -90,6 +103,15 @@ func (s *RPC) Next(c context.Context, agentFilter rpc.Filter) (*rpc.Workflow, er
 
 // Wait blocks until the workflow with the given ID is done.
 func (s *RPC) Wait(c context.Context, workflowID string) error {
+	agent, err := s.getAgentFromContext(c)
+	if err != nil {
+		return err
+	}
+
+	if err := s.checkAgentPermissionByWorkflow(c, agent, workflowID, nil, nil); err != nil {
+		return err
+	}
+
 	return s.queue.Wait(c, workflowID)
 }
 
@@ -105,11 +127,15 @@ func (s *RPC) Extend(c context.Context, workflowID string) error {
 		return err
 	}
 
-	return s.queue.Extend(c, workflowID)
+	if err := s.checkAgentPermissionByWorkflow(c, agent, workflowID, nil, nil); err != nil {
+		return err
+	}
+
+	return s.queue.Extend(c, agent.ID, workflowID)
 }
 
 // Update updates the state of a step.
-func (s *RPC) Update(_ context.Context, strWorkflowID string, state rpc.StepState) error {
+func (s *RPC) Update(c context.Context, strWorkflowID string, state rpc.StepState) error {
 	workflowID, err := strconv.ParseInt(strWorkflowID, 10, 64)
 	if err != nil {
 		return err
@@ -124,6 +150,11 @@ func (s *RPC) Update(_ context.Context, strWorkflowID string, state rpc.StepStat
 	currentPipeline, err := s.store.GetPipeline(workflow.PipelineID)
 	if err != nil {
 		log.Error().Err(err).Msgf("cannot find pipeline with id %d", workflow.PipelineID)
+		return err
+	}
+
+	agent, err := s.getAgentFromContext(c)
+	if err != nil {
 		return err
 	}
 
@@ -145,6 +176,11 @@ func (s *RPC) Update(_ context.Context, strWorkflowID string, state rpc.StepStat
 	repo, err := s.store.GetRepo(currentPipeline.RepoID)
 	if err != nil {
 		log.Error().Err(err).Msgf("cannot find repo with id %d", currentPipeline.RepoID)
+		return err
+	}
+
+	// check before agent can alter some state
+	if err := s.checkAgentPermissionByWorkflow(c, agent, strWorkflowID, currentPipeline, repo); err != nil {
 		return err
 	}
 
@@ -191,6 +227,7 @@ func (s *RPC) Init(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 	if err != nil {
 		return err
 	}
+
 	workflow.AgentID = agent.ID
 
 	currentPipeline, err := s.store.GetPipeline(workflow.PipelineID)
@@ -202,6 +239,11 @@ func (s *RPC) Init(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 	repo, err := s.store.GetRepo(currentPipeline.RepoID)
 	if err != nil {
 		log.Error().Err(err).Msgf("cannot find repo with id %d", currentPipeline.RepoID)
+		return err
+	}
+
+	// check before agent can alter some state
+	if err := s.checkAgentPermissionByWorkflow(c, agent, strWorkflowID, currentPipeline, repo); err != nil {
 		return err
 	}
 
@@ -271,6 +313,16 @@ func (s *RPC) Done(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 		return err
 	}
 
+	agent, err := s.getAgentFromContext(c)
+	if err != nil {
+		return err
+	}
+
+	// check before agent can alter some state
+	if err := s.checkAgentPermissionByWorkflow(c, agent, strWorkflowID, currentPipeline, repo); err != nil {
+		return err
+	}
+
 	logger := log.With().
 		Str("repo_id", fmt.Sprint(repo.ID)).
 		Str("pipeline_id", fmt.Sprint(currentPipeline.ID)).
@@ -327,38 +379,30 @@ func (s *RPC) Done(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 		s.pipelineTime.WithLabelValues(repo.FullName, currentPipeline.Branch, string(workflow.State), workflow.Name).Set(float64(workflow.Finished - workflow.Started))
 	}
 
-	agent, err := s.getAgentFromContext(c)
-	if err != nil {
-		return err
-	}
 	return s.updateAgentLastWork(agent)
 }
 
 // Log writes a log entry to the database and publishes it to the pubsub.
-func (s *RPC) Log(c context.Context, rpcLogEntry *rpc.LogEntry) error {
-	// convert rpc log_entry to model.log_entry
-	step, err := s.store.StepByUUID(rpcLogEntry.StepUUID)
+// An explicit stepUUID makes it obvious that all entries must come from the same step.
+func (s *RPC) Log(c context.Context, stepUUID string, rpcLogEntries []*rpc.LogEntry) error {
+	step, err := s.store.StepByUUID(stepUUID)
 	if err != nil {
-		return fmt.Errorf("could not find step with uuid %s in store: %w", rpcLogEntry.StepUUID, err)
+		return fmt.Errorf("could not find step with uuid %s in store: %w", stepUUID, err)
 	}
-	logEntry := &model.LogEntry{
-		StepID: step.ID,
-		Time:   rpcLogEntry.Time,
-		Line:   rpcLogEntry.Line,
-		Data:   rpcLogEntry.Data,
-		Type:   model.LogEntryType(rpcLogEntry.Type),
-	}
-
-	// make sure writes to pubsub are non blocking (https://github.com/woodpecker-ci/woodpecker/blob/c919f32e0b6432a95e1a6d3d0ad662f591adf73f/server/logging/log.go#L9)
-	go func() {
-		// write line to listening web clients
-		if err := s.logger.Write(c, logEntry.StepID, logEntry); err != nil {
-			log.Error().Err(err).Msgf("rpc server could not write to logger")
-		}
-	}()
 
 	agent, err := s.getAgentFromContext(c)
 	if err != nil {
+		return err
+	}
+
+	currentPipeline, err := s.store.GetPipeline(step.PipelineID)
+	if err != nil {
+		log.Error().Err(err).Msgf("cannot find pipeline with id %d", step.PipelineID)
+		return err
+	}
+
+	// check before agent can alter some state
+	if err := s.checkAgentPermissionByWorkflow(c, agent, "", currentPipeline, nil); err != nil {
 		return err
 	}
 
@@ -367,10 +411,37 @@ func (s *RPC) Log(c context.Context, rpcLogEntry *rpc.LogEntry) error {
 		return err
 	}
 
-	return server.Config.Services.LogStore.LogAppend(logEntry)
+	var logEntries []*model.LogEntry
+
+	for _, rpcLogEntry := range rpcLogEntries {
+		if rpcLogEntry.StepUUID != stepUUID {
+			return fmt.Errorf("expected step UUID %s, got %s", stepUUID, rpcLogEntry.StepUUID)
+		}
+		logEntries = append(logEntries, &model.LogEntry{
+			StepID: step.ID,
+			Time:   rpcLogEntry.Time,
+			Line:   rpcLogEntry.Line,
+			Data:   rpcLogEntry.Data,
+			Type:   model.LogEntryType(rpcLogEntry.Type),
+		})
+	}
+
+	// make sure writes to pubsub are non blocking (https://github.com/woodpecker-ci/woodpecker/blob/c919f32e0b6432a95e1a6d3d0ad662f591adf73f/server/logging/log.go#L9)
+	go func() {
+		// write line to listening web clients
+		if err := s.logger.Write(c, step.ID, logEntries); err != nil {
+			log.Error().Err(err).Msgf("rpc server could not write to logger")
+		}
+	}()
+
+	if err = server.Config.Services.LogStore.LogAppend(step, logEntries); err != nil {
+		log.Error().Err(err).Msg("could not store log entries")
+	}
+
+	return nil
 }
 
-func (s *RPC) RegisterAgent(ctx context.Context, platform, backend, version string, capacity int32) (int64, error) {
+func (s *RPC) RegisterAgent(ctx context.Context, info rpc.AgentInfo) (int64, error) {
 	agent, err := s.getAgentFromContext(ctx)
 	if err != nil {
 		return -1, err
@@ -382,10 +453,11 @@ func (s *RPC) RegisterAgent(ctx context.Context, platform, backend, version stri
 		}
 	}
 
-	agent.Backend = backend
-	agent.Platform = platform
-	agent.Capacity = capacity
-	agent.Version = version
+	agent.Backend = info.Backend
+	agent.Platform = info.Platform
+	agent.Capacity = int32(info.Capacity)
+	agent.Version = info.Version
+	agent.CustomLabels = info.CustomLabels
 
 	err = s.store.AgentUpdate(agent)
 	if err != nil {
@@ -426,6 +498,44 @@ func (s *RPC) ReportHealth(ctx context.Context, status string) error {
 	agent.LastContact = time.Now().Unix()
 
 	return s.store.AgentUpdate(agent)
+}
+
+func (s *RPC) checkAgentPermissionByWorkflow(_ context.Context, agent *model.Agent, strWorkflowID string, pipeline *model.Pipeline, repo *model.Repo) error {
+	var err error
+	if repo == nil && pipeline == nil {
+		workflowID, err := strconv.ParseInt(strWorkflowID, 10, 64)
+		if err != nil {
+			return err
+		}
+
+		workflow, err := s.store.WorkflowLoad(workflowID)
+		if err != nil {
+			log.Error().Err(err).Msgf("cannot find workflow with id %d", workflowID)
+			return err
+		}
+
+		pipeline, err = s.store.GetPipeline(workflow.PipelineID)
+		if err != nil {
+			log.Error().Err(err).Msgf("cannot find pipeline with id %d", workflow.PipelineID)
+			return err
+		}
+	}
+
+	if repo == nil {
+		repo, err = s.store.GetRepo(pipeline.RepoID)
+		if err != nil {
+			log.Error().Err(err).Msgf("cannot find repo with id %d", pipeline.RepoID)
+			return err
+		}
+	}
+
+	if agent.CanAccessRepo(repo) {
+		return nil
+	}
+
+	msg := fmt.Sprintf("agent '%d' is not allowed to interact with repo[%d] '%s'", agent.ID, repo.ID, repo.FullName)
+	log.Error().Int64("repoId", repo.ID).Msg(msg)
+	return errors.New(msg)
 }
 
 func (s *RPC) completeChildrenIfParentCompleted(completedWorkflow *model.Workflow) {
@@ -512,8 +622,8 @@ func (s *RPC) getHostnameFromContext(ctx context.Context) (string, error) {
 }
 
 func (s *RPC) updateAgentLastWork(agent *model.Agent) error {
-	// only update agent.LastWork if not done recently
-	if time.Unix(agent.LastWork, 0).Add(updateAgentLastWorkDelay).Before(time.Now()) {
+	// only update agent.LastWork if not recently updated
+	if time.Unix(agent.LastWork, 0).Add(updateAgentLastWorkDelay).After(time.Now()) {
 		return nil
 	}
 
