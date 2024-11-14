@@ -248,20 +248,30 @@ func (b *StepBuilder) environmentVariables(metadata metadata.Metadata, axis matr
 	return environ
 }
 
-func (b *StepBuilder) toInternalRepresentation(parsed *yaml_types.Workflow, environ map[string]string, metadata metadata.Metadata, workflowID int64) (*backend_types.Config, error) {
-	var secrets []compiler.Secret
-	for _, sec := range b.Secs {
-		var events []string
-		for _, event := range sec.Events {
-			events = append(events, string(event))
-		}
+func convertModelSecret(sec *model.Secret) *compiler.Secret {
+	var events []string
+	for _, event := range sec.Events {
+		events = append(events, string(event))
+	}
+	return &compiler.Secret{
+		Name:           sec.Name,
+		Value:          sec.Value,
+		AllowedPlugins: sec.Images,
+		Events:         events,
+	}
+}
 
-		secrets = append(secrets, compiler.Secret{
-			Name:           sec.Name,
-			Value:          sec.Value,
-			AllowedPlugins: sec.Images,
-			Events:         events,
-		})
+func (b *StepBuilder) toInternalRepresentation(parsed *yaml_types.Workflow, environ map[string]string, metadata metadata.Metadata, workflowID int64) (*backend_types.Config, error) {
+	secretsMap := make(map[string]*compiler.Secret)
+	for _, sec := range b.Secs {
+		secretsMap[strings.ToLower(sec.Name)] = convertModelSecret(sec)
+	}
+	secretsQueryer := func(name string) (*compiler.Secret, error) {
+		secret, found := secretsMap[strings.ToLower(name)]
+		if !found {
+			fmt.Errorf("secret %q not found", name)
+		}
+		return secret, nil
 	}
 
 	var registries []compiler.Registry
@@ -292,7 +302,7 @@ func (b *StepBuilder) toInternalRepresentation(parsed *yaml_types.Workflow, envi
 		compiler.WithDefaultClonePlugin(server.Config.Pipeline.DefaultClonePlugin),
 		compiler.WithTrustedClonePlugins(server.Config.Pipeline.TrustedClonePlugins),
 		compiler.WithRegistry(registries...),
-		compiler.WithSecret(secrets...),
+		compiler.WithSecret(secretsQueryer),
 		compiler.WithPrefix(
 			fmt.Sprintf(
 				"wp_%s_%d",

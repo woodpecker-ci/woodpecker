@@ -17,7 +17,6 @@ package compiler
 import (
 	"net/url"
 	"path"
-	"strings"
 
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/metadata"
 )
@@ -58,11 +57,9 @@ func WithRegistry(registries ...Registry) Option {
 
 // WithSecret configures the compiler with external secrets
 // to be injected into the container at runtime.
-func WithSecret(secrets ...Secret) Option {
+func WithSecret(secretQuerier SecretQuerier) Option {
 	return func(compiler *Compiler) {
-		for _, secret := range secrets {
-			compiler.secrets[strings.ToLower(secret.Name)] = secret
-		}
+		compiler.secretQuerier = secretQuerier
 	}
 }
 

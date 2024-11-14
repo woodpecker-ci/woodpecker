@@ -81,6 +81,8 @@ func (s *Secret) Match(event string) bool {
 	return false
 }
 
+type SecretQuerier = func(name string) (*Secret, error)
+
 // Compiler compiles the yaml.
 type Compiler struct {
 	local                   bool
@@ -94,7 +96,7 @@ type Compiler struct {
 	workspacePath           string
 	metadata                metadata.Metadata
 	registries              []Registry
-	secrets                 map[string]Secret
+	secretQuerier           SecretQuerier
 	defaultClonePlugin      string
 	trustedClonePlugins     []string
 	securityTrustedPipeline bool
@@ -106,7 +108,6 @@ func New(opts ...Option) *Compiler {
 	compiler := &Compiler{
 		env:                 map[string]string{},
 		cloneEnv:            map[string]string{},
-		secrets:             map[string]Secret{},
 		defaultClonePlugin:  constant.DefaultClonePlugin,
 		trustedClonePlugins: constant.TrustedClonePlugins,
 	}
@@ -139,14 +140,6 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 		Name: fmt.Sprintf("%s_default", c.prefix),
 	})
 
-	// create secrets for mask
-	for _, sec := range c.secrets {
-		config.Secrets = append(config.Secrets, &backend_types.Secret{
-			Name:  sec.Name,
-			Value: sec.Value,
-		})
-	}
-
 	// overrides the default workspace paths when specified
 	// in the YAML file.
 	if len(conf.Workspace.Base) != 0 {
@@ -171,7 +164,7 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 		for k, v := range c.cloneEnv {
 			container.Environment[k] = v
 		}
-		step, err := c.createProcess(container, backend_types.StepTypeClone)
+		step, err := c.createProcess(config, container, backend_types.StepTypeClone)
 		if err != nil {
 			return nil, err
 		}
@@ -190,7 +183,7 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 
 			stage := new(backend_types.Stage)
 
-			step, err := c.createProcess(container, backend_types.StepTypeClone)
+			step, err := c.createProcess(config, container, backend_types.StepTypeClone)
 			if err != nil {
 				return nil, err
 			}
@@ -219,7 +212,7 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 				return nil, err
 			}
 
-			step, err := c.createProcess(container, backend_types.StepTypeService)
+			step, err := c.createProcess(config, container, backend_types.StepTypeService)
 			if err != nil {
 				return nil, err
 			}
@@ -247,7 +240,7 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 		if container.IsPlugin() {
 			stepType = backend_types.StepTypePlugin
 		}
-		step, err := c.createProcess(container, stepType)
+		step, err := c.createProcess(config, container, stepType)
 		if err != nil {
 			return nil, err
 		}

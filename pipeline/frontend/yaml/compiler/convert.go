@@ -37,7 +37,26 @@ const (
 	DefaultWorkspaceBase = pluginWorkspaceBase
 )
 
-func (c *Compiler) createProcess(container *yaml_types.Container, stepType backend_types.StepType) (*backend_types.Step, error) {
+func (c *Compiler) getSecretValueFunc(workflowConfig *backend_types.Config, container *yaml_types.Container) func(name string) (string, error) {
+	querier := c.secretQuerier
+	return func(name string) (string, error) {
+		secret, err := querier(name)
+		if err != nil {
+			return "", err
+		}
+
+		if err := secret.Available(c.metadata.Curr.Event, container); err != nil {
+			return "", err
+		}
+
+		// add secret value to the values to mask from log streaming
+		workflowConfig.SecretValues = append(workflowConfig.SecretValues, secret.Value)
+
+		return secret.Value, nil
+	}
+}
+
+func (c *Compiler) createProcess(workflowConfig *backend_types.Config, container *yaml_types.Container, stepType backend_types.StepType) (*backend_types.Step, error) {
 	var (
 		uuid = ulid.Make()
 
@@ -98,21 +117,7 @@ func (c *Compiler) createProcess(container *yaml_types.Container, stepType backe
 
 	workingDir = c.stepWorkingDir(container)
 
-	getSecretValue := func(name string) (string, error) {
-		name = strings.ToLower(name)
-		secret, ok := c.secrets[name]
-		if !ok {
-			return "", fmt.Errorf("secret %q not found", name)
-		}
-
-		event := c.metadata.Curr.Event
-		err := secret.Available(event, container)
-		if err != nil {
-			return "", err
-		}
-
-		return secret.Value, nil
-	}
+	getSecretValue := c.getSecretValueFunc(workflowConfig, container)
 
 	if err := settings.ParamsToEnv(container.Settings, environment, "PLUGIN_", true, getSecretValue); err != nil {
 		return nil, err

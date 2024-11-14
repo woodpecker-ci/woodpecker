@@ -146,13 +146,17 @@ func execWithAxis(ctx context.Context, c *cli.Command, file, repoPath string, ax
 	}
 
 	environ := metadata.Environ()
-	var secrets []compiler.Secret
-	for key, val := range metadata.Workflow.Matrix {
-		environ[key] = val
-		secrets = append(secrets, compiler.Secret{
-			Name:  key,
-			Value: val,
-		})
+
+	secretMap := metadata.Workflow.Matrix
+	secretQuerier := func(name string) (*compiler.Secret, error) {
+		secret, found := secretMap[strings.ToLower(name)]
+		if !found {
+			fmt.Errorf("secret %q not found", name)
+		}
+		return &compiler.Secret{
+			Name:  name,
+			Value: secret,
+		}, nil
 	}
 
 	pipelineEnv := make(map[string]string)
@@ -255,7 +259,7 @@ func execWithAxis(ctx context.Context, c *cli.Command, file, repoPath string, ax
 			c.String("netrc-machine"),
 		),
 		compiler.WithMetadata(*metadata),
-		compiler.WithSecret(secrets...),
+		compiler.WithSecret(secretQuerier),
 		compiler.WithEnviron(pipelineEnv),
 	).Compile(conf)
 	if err != nil {
