@@ -99,13 +99,11 @@ func (c *Compiler) createProcess(container *yaml_types.Container, stepType backe
 	workingDir = c.stepWorkingDir(container)
 
 	getVariableValue := func(name string) (string, error) {
-		name = strings.ToLower(name)
-		variable, ok := c.variables[name]
+		value, ok := c.variables[name]
 		if !ok {
 			return "", fmt.Errorf("variable %q not found", name)
 		}
-
-		return variable.Value, nil
+		return value, nil
 	}
 
 	getSecretValue := func(name string) (string, error) {

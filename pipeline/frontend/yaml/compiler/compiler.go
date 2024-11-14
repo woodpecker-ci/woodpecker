@@ -36,11 +36,6 @@ type Registry struct {
 	Password string
 }
 
-type Variable struct {
-	Name  string
-	Value string
-}
-
 type Secret struct {
 	Name           string
 	Value          string
@@ -100,7 +95,7 @@ type Compiler struct {
 	metadata                metadata.Metadata
 	registries              []Registry
 	secrets                 map[string]Secret
-	variables               map[string]Variable
+	variables               map[string]string
 	defaultClonePlugin      string
 	trustedClonePlugins     []string
 	securityTrustedPipeline bool
@@ -113,7 +108,7 @@ func New(opts ...Option) *Compiler {
 		env:                 map[string]string{},
 		cloneEnv:            map[string]string{},
 		secrets:             map[string]Secret{},
-		variables:           map[string]Variable{},
+		variables:           map[string]string{},
 		defaultClonePlugin:  constant.DefaultClonePlugin,
 		trustedClonePlugins: constant.TrustedClonePlugins,
 	}

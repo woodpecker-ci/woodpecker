@@ -58,10 +58,10 @@ func WithRegistry(registries ...Registry) Option {
 
 // WithVariable configures the compiler with external variables
 // to be injected into the container at runtime.
-func WithVariable(variables ...Variable) Option {
+func WithVariable(variables map[string]string) Option {
 	return func(compiler *Compiler) {
-		for _, variable := range variables {
-			compiler.variables[strings.ToLower(variable.Name)] = variable
+		if variables != nil {
+			compiler.variables = variables
 		}
 	}
 }

@@ -260,12 +260,9 @@ func (b *StepBuilder) toInternalRepresentation(parsed *yaml_types.Workflow, envi
 			Events:         events,
 		})
 	}
-	var variables []compiler.Variable
+	variables := make(map[string]string, len(b.Vars))
 	for _, v := range b.Vars {
-		variables = append(variables, compiler.Variable{
-			Name:  v.Name,
-			Value: v.Value,
-		})
+		variables[v.Name] = v.Value
 	}
 
 	var registries []compiler.Registry
@@ -297,7 +294,7 @@ func (b *StepBuilder) toInternalRepresentation(parsed *yaml_types.Workflow, envi
 		compiler.WithTrustedClonePlugins(server.Config.Pipeline.TrustedClonePlugins),
 		compiler.WithRegistry(registries...),
 		compiler.WithSecret(secrets...),
-		compiler.WithVariable(variables...),
+		compiler.WithVariable(variables),
 		compiler.WithPrefix(
 			fmt.Sprintf(
 				"wp_%s_%d",
