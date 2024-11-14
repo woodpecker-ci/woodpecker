@@ -142,8 +142,8 @@ _If your PVC is not highly available or NFS-based, you may also need to integrat
 NOTE: If you plan to use this volume in more than one workflow concurrently, make sure you have configured the PVC in `RWX` mode. Keep in mind that this feature must be supported by the used CSI driver:
 
 ```yaml
-  accessModes:
-     - ReadWriteMany
+accessModes:
+  - ReadWriteMany
 ```
 
 Assuming a PVC named `woodpecker-cache` exists, it can be referenced as follows in a plugin step:
