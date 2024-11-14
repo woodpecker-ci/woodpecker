@@ -54,6 +54,9 @@ var Config = struct {
 		CustomCSSFile       string
 		CustomJsFile        string
 	}
+	Agent struct {
+		DisableUserRegisteredAgentRegistration bool
+	}
 	WebUI struct {
 		EnableSwagger    bool
 		SkipVersionCheck bool
