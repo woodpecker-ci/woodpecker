@@ -1,13 +1,12 @@
 # Variables
 
-Woodpecker provides the ability to store named parameters external to the YAML configuration file, in a central variable store. These variables can be passed to individual steps of the pipeline at runtime.
+Woodpecker provides the ability to store named parameters external to the YAML configuration file, in a central variable store. These variables can be passed to individual steps of the pipeline at runtime. <!-- TODO: not runtime but pipeline parse time to be exact -->
 
 Woodpecker provides three different levels to add variables to your pipeline. The following list shows the priority of the different levels. If a variable is defined in multiple levels, will be used following this priorities: Repository variables > Organization variables > Global variables.
 
 1. **Repository variables**: They are available to all pipelines of an repository.
 2. **Organization variables**: They are available to all pipelines of an organization.
 3. **Global variables**: Can be configured by an instance admin.
-   They are available to all pipelines of the **whole** Woodpecker instance and should therefore **only** be used for variables that are allowed to be read by **all** users.
 
 ## Usage
 
@@ -35,12 +34,12 @@ Variables are added to the Woodpecker in the UI or with the CLI.
 
 ### CLI Examples
 
-Create the variable using default settings. The variable will be available to all images in your pipeline, and will be available to all push, tag, and deployment events (not pull request events).
+Create the variable using default settings. The variable will be available to all steps in your pipeline workflows, on all events.
 
 ```bash
 woodpecker-cli variable add \
   -repository octocat/hello-world \
-  -name aws_access_key_id \
+  -name repo_name \
   -value <value>
 ```
 
@@ -49,6 +48,6 @@ Loading variables from file using curl `@` syntax. This is the recommended appro
 ```diff
  woodpecker-cli variable add \
    -repository octocat/hello-world \
-   -name ssh_key \
-+  -value @/root/ssh/id_rsa
+   -name example_uname \
++  -value @/proc/version
 ```
