@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @Fishbowler, @M0Rf30, @anbraten, @gnowland, @greenaar, @hg, @j04n-f, @jenrik, @johanneskastl, @lukashass, @meln5674, @not-my-profile, @pat-s, @qwerty287, @smainz, @tori-27, @xoxys, @xtexChooser, @zc-devs
+@6543, @Fishbowler, @M0Rf30, @anbraten, @gnowland, @greenaar, @hg, @j04n-f, @jenrik, @johanneskastl, @lafriks, @lukashass, @meln5674, @not-my-profile, @pat-s, @qwerty287, @smainz, @tori-27, @xoxys, @xtexChooser, @zc-devs
 
 ### 💥 Breaking changes
 
@@ -51,6 +51,7 @@
 
 ### 📈 Enhancement
 
+- Add server configuration option to add default set of labels for workflows that has no labels specified [[#4326](https://github.com/woodpecker-ci/woodpecker/pull/4326)]
 - Add `cli lint` option to treat warnings as errors [[#4373](https://github.com/woodpecker-ci/woodpecker/pull/4373)]
 - Improve error message for wrong secrets / environment config [[#4359](https://github.com/woodpecker-ci/woodpecker/pull/4359)]
 - Improve linter messages in UI [[#4351](https://github.com/woodpecker-ci/woodpecker/pull/4351)]
