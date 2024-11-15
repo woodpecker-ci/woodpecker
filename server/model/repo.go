@@ -50,7 +50,7 @@ type Repo struct {
 	Hash                         string               `json:"-"                               xorm:"varchar(500) 'hash'"`
 	Perm                         *Perm                `json:"-"                               xorm:"-"`
 	CancelPreviousPipelineEvents []WebhookEvent       `json:"cancel_previous_pipeline_events" xorm:"json 'cancel_previous_pipeline_events'"`
-	NetrcTrusted                 []string             `json:"netrc_trusted" xorm:"json 'netrc_trusted"`
+	NetrcTrusted                 []string             `json:"netrc_trusted" xorm:"json 'netrc_trusted'"`
 } //	@name Repo
 
 // TableName return database table name for xorm.
