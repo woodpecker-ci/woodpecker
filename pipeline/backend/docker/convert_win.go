@@ -52,6 +52,12 @@ func (e *docker) windowsPathPatch(step *types.Step) {
 				continue
 			}
 
+			// fix source destination
+			if strings.HasPrefix(volParts[0], "/") {
+				volParts[0] = filepath.Join(defaultWindowsDriverLetter, volParts[0])
+			}
+
+			// fix mount destination
 			if !MustNotAddWindowsLetterPattern.MatchString(volParts[1]) {
 				volParts[1] = filepath.Join(defaultWindowsDriverLetter, volParts[1])
 			}
@@ -65,8 +71,10 @@ func (e *docker) windowsPathPatch(step *types.Step) {
 		if !MustNotAddWindowsLetterPattern.MatchString(step.WorkingDir) {
 			step.WorkingDir = filepath.Join(defaultWindowsDriverLetter, step.WorkingDir)
 		}
-		if !MustNotAddWindowsLetterPattern.MatchString(step.Environment["CI_WORKSPACE"]) {
-			step.Environment["CI_WORKSPACE"] = filepath.Join(defaultWindowsDriverLetter, step.Environment["CI_WORKSPACE"])
+		if ciWorkspace, ok := step.Environment["CI_WORKSPACE"]; ok {
+			if !MustNotAddWindowsLetterPattern.MatchString(ciWorkspace) {
+				step.Environment["CI_WORKSPACE"] = filepath.Join(defaultWindowsDriverLetter, ciWorkspace)
+			}
 		}
 	}
 }
