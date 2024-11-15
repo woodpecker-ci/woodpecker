@@ -107,3 +107,10 @@ func BenchmarkReader(b *testing.B) {
 		})
 	}
 }
+
+// cpu: AMD Ryzen 9 7940HS
+// BenchmarkReader/single_line-16         	25690886	      45.20 ns/op		1061.94 MB/s	      48 B/op	       1 allocs/op
+// BenchmarkReader/multi_line-16          	 8817727	      136.4 ns/op		 330.02 MB/s	     120 B/op	       3 allocs/op
+// BenchmarkReader/many_secrets-16        	 4896740	      244.4 ns/op		 253.70 MB/s	     296 B/op	       4 allocs/op
+// BenchmarkReader/large_log-16           	   60102	     19307 ns/op		 881.02 MB/s	   40520 B/op	       9 allocs/op
+// BenchmarkReader/large_log_no_match-16  	  234868	      4980 ns/op		3415.92 MB/s	       0 B/op	       0 allocs/op
