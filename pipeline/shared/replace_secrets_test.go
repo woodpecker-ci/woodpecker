@@ -15,6 +15,7 @@
 package shared
 
 import (
+	"bytes"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -27,7 +28,7 @@ func TestNewSecretsReplacer(t *testing.T) {
 		secrets []string
 		expect  string
 	}{{
-		name:    "dont replace secrets with less than 3 chars",
+		name:    "dont replace secrets with less than 4 chars",
 		log:     "start log\ndone",
 		secrets: []string{"", "d", "art"},
 		expect:  "start log\ndone",
@@ -58,6 +59,51 @@ func TestNewSecretsReplacer(t *testing.T) {
 			rep := NewSecretsReplacer(c.secrets)
 			result := rep.Replace(c.log)
 			assert.EqualValues(t, c.expect, result)
+		})
+	}
+}
+
+func BenchmarkReader(b *testing.B) {
+	testCases := []struct {
+		name    string
+		log     string
+		secrets []string
+	}{
+		{
+			name:    "single line",
+			log:     "this is a log with secret password and more text",
+			secrets: []string{"password"},
+		},
+		{
+			name:    "multi line",
+			log:     "log start\nthis is a multi\nline secret\nlog end",
+			secrets: []string{"multi\nline secret"},
+		},
+		{
+			name:    "many secrets",
+			log:     "log with many secrets: secret1 secret2 secret3 secret4 secret5",
+			secrets: []string{"secret1", "secret2", "secret3", "secret4", "secret5"},
+		},
+		{
+			name:    "large log",
+			log:     "start " + string(bytes.Repeat([]byte("test secret test "), 1000)) + " end",
+			secrets: []string{"secret"},
+		},
+		{
+			name:    "large log no match",
+			log:     "start " + string(bytes.Repeat([]byte("test secret test "), 1000)) + " end",
+			secrets: []string{"XXXXXXX"},
+		},
+	}
+
+	for _, tc := range testCases {
+		b.Run(tc.name, func(b *testing.B) {
+			rep := NewSecretsReplacer(tc.secrets)
+			b.ResetTimer()
+			b.SetBytes(int64(len(tc.log)))
+			for i := 0; i < b.N; i++ {
+				_ = rep.Replace(tc.log)
+			}
 		})
 	}
 }
