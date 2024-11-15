@@ -18,10 +18,6 @@ FROM woodpeckerci/woodpecker-server:latest-alpine
 RUN apk add -U --no-cache docker-credential-ecr-login
 ```
 
-## Podman support
-
-While the agent was developed with Docker/Moby, Podman can also be used by setting the environment variable `DOCKER_HOST` to point to the Podman socket. In order to work without workarounds, Podman 4.0 (or above) is required.
-
 ## Image cleanup
 
 The agent **will not** automatically remove images from the host. This task should be managed by the host system. For example, you can use a cron job to periodically do clean-up tasks for the CI runner.
@@ -43,6 +39,12 @@ docker image rm $(docker images --filter "dangling=true" -q --no-trunc)
 ```bash
 docker volume rm $(docker volume ls --filter name=^wp_* --filter dangling=true  -q)
 ```
+
+## Tips and tricks
+
+### Podman
+
+There is no official support for Podman, but one can try to set the environment variable `DOCKER_HOST` to point to the Podman socket. It might work. See also the [Blog posts](https://woodpecker-ci.org/blog).
 
 ## Configuration
 

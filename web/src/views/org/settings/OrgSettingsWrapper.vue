@@ -13,7 +13,7 @@
 
     <Tab to="org-settings-secrets" :title="$t('secrets.secrets')" />
     <Tab to="org-settings-registries" :title="$t('registries.registries')" />
-    <Tab to="org-settings-agents" :title="$t('admin.settings.agents.agents')" />
+    <Tab v-if="useConfig().userRegisteredAgents" to="org-settings-agents" :title="$t('admin.settings.agents.agents')" />
 
     <router-view />
   </Scaffold>
@@ -26,6 +26,7 @@ import { useRouter } from 'vue-router';
 
 import Scaffold from '~/components/layout/scaffold/Scaffold.vue';
 import Tab from '~/components/layout/scaffold/Tab.vue';
+import useConfig from '~/compositions/useConfig';
 import { inject } from '~/compositions/useInjectProvide';
 import useNotifications from '~/compositions/useNotifications';
 import { useRouteBack } from '~/compositions/useRouteBack';

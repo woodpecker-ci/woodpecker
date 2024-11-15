@@ -7,7 +7,7 @@
     <Tab to="user-secrets" :title="$t('secrets.secrets')" />
     <Tab to="user-registries" :title="$t('registries.registries')" />
     <Tab to="user-cli-and-api" :title="$t('user.settings.cli_and_api.cli_and_api')" />
-    <Tab to="user-agents" :title="$t('admin.settings.agents.agents')" />
+    <Tab v-if="useConfig().userRegisteredAgents" to="user-agents" :title="$t('admin.settings.agents.agents')" />
 
     <router-view />
   </Scaffold>
