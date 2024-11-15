@@ -44,9 +44,12 @@ func TestGlobalEnvsubst(t *testing.T) {
 		},
 		Prev:  &model.Pipeline{},
 		Netrc: &model.Netrc{},
-		Secs:  []*model.Secret{},
-		Regs:  []*model.Registry{},
-		Host:  "",
+		Secs: []*model.Secret{{
+			Name:   "test",
+			Events: []model.WebhookEvent{model.EventPush, model.EventPull, model.EventTag},
+		}},
+		Regs: []*model.Registry{},
+		Host: "",
 		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
 when:
@@ -56,6 +59,8 @@ steps:
     image: ${IMAGE}
     settings:
       yyy: ${CI_COMMIT_MESSAGE}
+      token:
+        from_secret: test
 `)},
 		},
 	}
