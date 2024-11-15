@@ -167,6 +167,9 @@ func setupEvilGlobals(ctx context.Context, c *cli.Command, s store.Store) (err e
 		return fmt.Errorf("could not setup log store: %w", err)
 	}
 
+	// agents
+	server.Config.Agent.DisableUserRegisteredAgentRegistration = c.Bool("disable-user-agent-registration")
+
 	// authentication
 	server.Config.Pipeline.AuthenticatePublicRepos = c.Bool("authenticate-public-repos")
 
@@ -184,6 +187,17 @@ func setupEvilGlobals(ctx context.Context, c *cli.Command, s store.Store) (err e
 	server.Config.Pipeline.DefaultCancelPreviousPipelineEvents = events
 	server.Config.Pipeline.DefaultTimeout = c.Int("default-pipeline-timeout")
 	server.Config.Pipeline.MaxTimeout = c.Int("max-pipeline-timeout")
+
+	_labels := c.StringSlice("default-workflow-labels")
+	labels := make(map[string]string, len(_labels))
+	for _, v := range _labels {
+		name, value, ok := strings.Cut(v, "=")
+		if !ok {
+			return fmt.Errorf("invalid label filter: %s", v)
+		}
+		labels[name] = value
+	}
+	server.Config.Pipeline.DefaultWorkflowLabels = labels
 
 	// backend options for pipeline compiler
 	server.Config.Pipeline.Proxy.No = c.String("backend-no-proxy")
