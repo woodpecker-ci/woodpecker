@@ -15,6 +15,7 @@
 package compiler
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -71,6 +72,9 @@ func TestCompilerCompile(t *testing.T) {
 				ForgeURL: repoURL,
 				CloneURL: "https://github.com/octocat/hello-world.git",
 			},
+			Curr: metadata.Pipeline{
+				Event: "push",
+			},
 		}),
 		WithEnviron(map[string]string{
 			"VERBOSE": "true",
@@ -79,6 +83,22 @@ func TestCompilerCompile(t *testing.T) {
 		WithPrefix("test"),
 		// we use "/test" as custom workspace base to ensure the enforcement of the pluginWorkspaceBase is applied
 		WithWorkspaceFromURL("/test", repoURL),
+		WithSecret(func(name string) (*Secret, error) {
+			if name == "exist" {
+				return &Secret{
+					Name:   name,
+					Value:  "geheim",
+					Events: []string{"push", "tag"},
+				}, nil
+			} else if name == "filter" {
+				return &Secret{
+					Name:   name,
+					Value:  "geheim",
+					Events: []string{"tag"},
+				}, nil
+			}
+			return nil, fmt.Errorf("secret \"%s\" not found", name)
+		}),
 	)
 
 	defaultNetworks := []*backend_types.Network{{
@@ -279,6 +299,37 @@ func TestCompilerCompile(t *testing.T) {
 			},
 		},
 		{
+			name: "workflow with existing secret",
+			fronConf: &yaml_types.Workflow{Steps: yaml_types.ContainerList{ContainerList: []*yaml_types.Container{{
+				Name:     "step",
+				Image:    "bash",
+				Commands: []string{"env"},
+				Environment: yaml_base_types.EnvironmentMap{
+					"SOME_SECRET": map[string]any{"from_secret": "exist"},
+				},
+			}}}},
+			backConf: &backend_types.Config{
+				Networks: defaultNetworks,
+				Volumes:  defaultVolumes,
+				Stages: []*backend_types.Stage{defaultCloneStage, {
+					Steps: []*backend_types.Step{{
+						Name:          "step",
+						Type:          backend_types.StepTypeCommands,
+						Image:         "bash",
+						Commands:      []string{"env"},
+						OnSuccess:     true,
+						Failure:       "fail",
+						Volumes:       []string{defaultVolumes[0].Name + ":/test"},
+						WorkingDir:    "/test/src/github.com/octocat/hello-world",
+						WorkspaceBase: "/test",
+						Networks:      []backend_types.Conn{{Name: "test_default", Aliases: []string{"step"}}},
+						ExtraHosts:    []backend_types.HostAlias{},
+					}},
+				}},
+				SecretValues: []string{"geheim"},
+			},
+		},
+		{
 			name: "workflow with missing secret",
 			fronConf: &yaml_types.Workflow{Steps: yaml_types.ContainerList{ContainerList: []*yaml_types.Container{{
 				Name:     "step",
@@ -288,6 +339,17 @@ func TestCompilerCompile(t *testing.T) {
 			}}}},
 			backConf:    nil,
 			expectedErr: "secret \"missing\" not found",
+		},
+		{
+			name: "workflow with filter secret",
+			fronConf: &yaml_types.Workflow{Steps: yaml_types.ContainerList{ContainerList: []*yaml_types.Container{{
+				Name:     "step",
+				Image:    "bash",
+				Commands: []string{"env"},
+				Secrets:  []string{"filter"},
+			}}}},
+			backConf:    nil,
+			expectedErr: "secret \"filter\" is not allowed to be used with pipeline event \"push\"",
 		},
 		{
 			name: "workflow with broken step dependency",
@@ -306,7 +368,7 @@ func TestCompilerCompile(t *testing.T) {
 			backConf, err := compiler.Compile(test.fronConf)
 			if test.expectedErr != "" {
 				assert.Error(t, err)
-				assert.Equal(t, err.Error(), test.expectedErr)
+				assert.Equal(t, test.expectedErr, err.Error())
 			} else {
 				// we ignore uuids in steps and only check if global env got set ...
 				for _, st := range backConf.Stages {
