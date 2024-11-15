@@ -269,7 +269,7 @@ func (b *StepBuilder) toInternalRepresentation(parsed *yaml_types.Workflow, envi
 	secretsQueryer := func(name string) (*compiler.Secret, error) {
 		secret, found := secretsMap[strings.ToLower(name)]
 		if !found {
-			fmt.Errorf("secret %q not found", name)
+			return nil, fmt.Errorf("secret %q not found", name)
 		}
 		return secret, nil
 	}

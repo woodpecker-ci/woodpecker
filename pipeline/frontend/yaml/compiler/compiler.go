@@ -110,7 +110,7 @@ func New(opts ...Option) *Compiler {
 		cloneEnv:            map[string]string{},
 		defaultClonePlugin:  constant.DefaultClonePlugin,
 		trustedClonePlugins: constant.TrustedClonePlugins,
-		secretQuerier:       func(name string) (*Secret, error) { return nil, fmt.Errorf("not implemented") },
+		secretQuerier:       func(string) (*Secret, error) { return nil, fmt.Errorf("not implemented") },
 	}
 	for _, opt := range opts {
 		opt(compiler)

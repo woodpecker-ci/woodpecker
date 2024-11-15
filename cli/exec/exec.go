@@ -151,7 +151,7 @@ func execWithAxis(ctx context.Context, c *cli.Command, file, repoPath string, ax
 	secretQuerier := func(name string) (*compiler.Secret, error) {
 		secret, found := secretMap[strings.ToLower(name)]
 		if !found {
-			fmt.Errorf("secret %q not found", name)
+			return nil, fmt.Errorf("secret %q not found", name)
 		}
 		return &compiler.Secret{
 			Name:  name,
