@@ -54,6 +54,9 @@ var Config = struct {
 		CustomCSSFile       string
 		CustomJsFile        string
 	}
+	Agent struct {
+		DisableUserRegisteredAgentRegistration bool
+	}
 	WebUI struct {
 		EnableSwagger    bool
 		SkipVersionCheck bool
@@ -64,6 +67,7 @@ var Config = struct {
 	Pipeline struct {
 		AuthenticatePublicRepos             bool
 		DefaultCancelPreviousPipelineEvents []model.WebhookEvent
+		DefaultWorkflowLabels               map[string]string
 		DefaultClonePlugin                  string
 		TrustedClonePlugins                 []string
 		Volumes                             []string
