@@ -1,3 +1,5 @@
+import type { Pipeline } from "./pipeline";
+
 // A version control repository.
 export interface Repo {
   // Is the repo currently active or not
@@ -65,7 +67,7 @@ export interface Repo {
 
   visibility: RepoVisibility;
 
-  last_pipeline: number;
+  last_pipeline: Pipeline;
 
   require_approval: RepoRequireApproval;
 

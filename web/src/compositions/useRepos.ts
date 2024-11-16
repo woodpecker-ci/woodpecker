@@ -16,8 +16,8 @@ export default function useRepos() {
 
   function sortReposByLastActivity(repos: Repo[]): Repo[] {
     return repos.sort((a, b) => {
-      const aLastActivity = a.last_pipeline || 0;
-      const bLastActivity = b.last_pipeline || 0;
+      const aLastActivity = a.last_pipeline?.created || 0;
+      const bLastActivity = b.last_pipeline?.created || 0;
 
       return bLastActivity - aLastActivity;
     });

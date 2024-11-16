@@ -32,9 +32,13 @@ export const useRepoStore = defineStore('repos', () => {
 
   async function loadRepos() {
     const _ownedRepos = await apiClient.getRepoList();
-    _ownedRepos.forEach((repo) => {
-      repos.set(repo.id, repo);
-    });
+    await Promise.all(
+      _ownedRepos.map(async (repo) => {
+        const latestPipeline = await apiClient.getPipelineList(repo.id, { page: 1, perPage: 1 });
+        repo.last_pipeline = latestPipeline[0];
+        repos.set(repo.id, repo);
+      }),
+    );
     ownedRepoIds.value = _ownedRepos.map((repo) => repo.id);
   }
 
