@@ -108,6 +108,8 @@ func BenchmarkReader(b *testing.B) {
 	}
 }
 
+// go test -benchmem -run='^$' -tags test -bench '^BenchmarkReader$' -benchtime=100000x go.woodpecker-ci.org/woodpecker/v2/pipeline/shared
+//
 // cpu: AMD Ryzen 9 7940HS
 // BenchmarkReader/single_line-16            100000             55.13 ns/op         870.70 MB/s          48 B/op          1 allocs/op
 // BenchmarkReader/multi_line-16             100000             149.0 ns/op         302.06 MB/s         120 B/op          3 allocs/op
@@ -121,5 +123,12 @@ func BenchmarkReader(b *testing.B) {
 // BenchmarkReader/many_secrets-24           100000               433.7 ns/op       142.97 MB/s         296 B/op          4 allocs/op
 // BenchmarkReader/large_log-24              100000             26542 ns/op         640.88 MB/s       40520 B/op          9 allocs/op
 // BenchmarkReader/large_log_no_match-24     100000              6212 ns/op        2738.45 MB/s           0 B/op          0 allocs/op
+//
+// cpu: Ampere Altra 2 vCPUs
+// BenchmarkReader/single_line-2             100000             105.1 ns/op         456.89 MB/s          48 B/op          1 allocs/op
+// BenchmarkReader/multi_line-2              100000             441.7 ns/op         101.88 MB/s         120 B/op          3 allocs/op
+// BenchmarkReader/many_secrets-2            100000             868.7 ns/op          71.37 MB/s         296 B/op          4 allocs/op
+// BenchmarkReader/large_log-2               100000             48947 ns/op         347.52 MB/s       40520 B/op          9 allocs/op
+// BenchmarkReader/large_log_no_match-2      100000              9156 ns/op        1857.79 MB/s           0 B/op          0 allocs/op
 
 // TODO: benchmark arm & intel
