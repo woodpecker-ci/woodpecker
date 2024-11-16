@@ -114,3 +114,12 @@ func BenchmarkReader(b *testing.B) {
 // BenchmarkReader/many_secrets-16           100000             273.0 ns/op         227.10 MB/s         296 B/op          4 allocs/op
 // BenchmarkReader/large_log-16              100000             19544 ns/op         870.33 MB/s       40520 B/op          9 allocs/op
 // BenchmarkReader/large_log_no_match-16     100000              5080 ns/op        3348.63 MB/s           0 B/op          0 allocs/op
+//
+// cpu: AMD Ryzen 9 3900XT 12-Core Processor
+// BenchmarkReader/single_line-24            100000                90.87 ns/op      528.23 MB/s          48 B/op          1 allocs/op
+// BenchmarkReader/multi_line-24             100000               276.2 ns/op       162.94 MB/s         120 B/op          3 allocs/op
+// BenchmarkReader/many_secrets-24           100000               433.7 ns/op       142.97 MB/s         296 B/op          4 allocs/op
+// BenchmarkReader/large_log-24              100000             26542 ns/op         640.88 MB/s       40520 B/op          9 allocs/op
+// BenchmarkReader/large_log_no_match-24     100000              6212 ns/op        2738.45 MB/s           0 B/op          0 allocs/op
+
+// TODO: benchmark arm & intel
