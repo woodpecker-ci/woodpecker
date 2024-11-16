@@ -14,7 +14,7 @@
       </div>
 
       <div class="flex flex-col gap-4">
-        <RepoListItem v-for="repo in repoListActivit" :key="repo.id" :repo="repo" />
+        <RepoListItem v-for="repo in repoListActivity" :key="repo.id" :repo="repo" />
       </div>
     </div>
   </Scaffold>
@@ -41,7 +41,7 @@ const { searchedRepos } = useRepoSearch(repos, search);
 const { sortReposByLastAccess, sortReposByLastActivity } = useRepos();
 
 const repoListAccess = computed(() => sortReposByLastAccess(repos.value || []));
-const repoListActivit = computed(() => sortReposByLastActivity(searchedRepos.value || []));
+const repoListActivity = computed(() => sortReposByLastActivity(searchedRepos.value || []));
 
 router.beforeEach(async () => {
   await repoStore.loadRepos();
