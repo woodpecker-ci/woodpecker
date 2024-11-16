@@ -15,6 +15,8 @@ gitea.com/xorm/sqlfiddle v0.0.0-20180821085327-62ce714f951a/go.mod h1:EXuID2Zs0p
 gitee.com/travelliu/dm v1.8.11192/go.mod h1:DHTzyhCrM843x9VdKVbZ+GKXGRbKM2sJ4LxihRxShkE=
 github.com/42wim/httpsig v1.2.2 h1:ofAYoHUNs/MJOLqQ8hIxeyz2QxOz8qdSVvp3PX/oPgA=
 github.com/42wim/httpsig v1.2.2/go.mod h1:P/UYo7ytNBFwc+dg35IubuAUIs8zj5zzFIgUCEl55WY=
+github.com/6543/go-hashvalue-replacer v0.0.0-20241116003916-a8a67ace6701 h1:csaOWztYfNtv7o/NbHjMG/qGNtDo/pwVwJnHDWDyQgs=
+github.com/6543/go-hashvalue-replacer v0.0.0-20241116003916-a8a67ace6701/go.mod h1:+fCz/+h1AIDEtSgeZG6wVPXOwag1WgfosmIz7KaeHDM=
 github.com/6543/go-hashvalue-replacer v0.0.0-20241116014433-da29dad32109 h1:5DPvI79163nINaU7cj3/6XGDYtnh49hOIOJbPB97/Lk=
 github.com/6543/go-hashvalue-replacer v0.0.0-20241116014433-da29dad32109/go.mod h1:+fCz/+h1AIDEtSgeZG6wVPXOwag1WgfosmIz7KaeHDM=
 github.com/6543/logfile-open v1.2.1 h1:az+TtNHclTAKaHfFCTSbuduMllANox1gM9qLQr7LV5I=
