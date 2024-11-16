@@ -68,10 +68,10 @@ import useAuthentication from '~/compositions/useAuthentication';
 import useConfig from '~/compositions/useConfig';
 import { useForgeStore } from '~/compositions/useForgeStore';
 import useNotifications from '~/compositions/useNotifications';
+import { useRouteBack } from '~/compositions/useRouteBack';
 import type { Forge, RepoPermissions } from '~/lib/api/types';
 import { usePipelineStore } from '~/store/pipelines';
 import { useRepoStore } from '~/store/repos';
-import { useRouteBack } from '~/compositions/useRouteBack';
 
 const props = defineProps<{
   repoId: string;
@@ -89,7 +89,6 @@ const router = useRouter();
 const i18n = useI18n();
 const config = useConfig();
 const forgeStore = useForgeStore();
-
 
 const repo = repoStore.getRepo(repositoryId);
 const repoPermissions = ref<RepoPermissions>();
