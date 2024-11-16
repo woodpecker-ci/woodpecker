@@ -29,8 +29,7 @@ func TestLineWriter(t *testing.T) {
 	peer := mocks.NewPeer(t)
 	peer.On("EnqueueLog", mock.Anything)
 
-	secrets := []string{"world"}
-	lw := log.NewLineWriter(peer, "e9ea76a5-44a1-4059-9c4a-6956c478b26d", secrets...)
+	lw := log.NewLineWriter(peer, "e9ea76a5-44a1-4059-9c4a-6956c478b26d")
 
 	_, err := lw.Write([]byte("hello world\n"))
 	assert.NoError(t, err)
@@ -42,7 +41,7 @@ func TestLineWriter(t *testing.T) {
 		Time:     0,
 		Type:     rpc.LogEntryStdout,
 		Line:     0,
-		Data:     []byte("hello ********"),
+		Data:     []byte("hello world"),
 	})
 
 	peer.AssertCalled(t, "EnqueueLog", &rpc.LogEntry{

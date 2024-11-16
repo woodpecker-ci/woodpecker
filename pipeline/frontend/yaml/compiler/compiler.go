@@ -15,8 +15,12 @@
 package compiler
 
 import (
+	"crypto/rand"
+	"crypto/sha256"
 	"fmt"
 	"path"
+
+	hashvalue_replacer "github.com/6543/go-hashvalue-replacer"
 
 	backend_types "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/metadata"
@@ -139,13 +143,23 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 		Name: fmt.Sprintf("%s_default", c.prefix),
 	})
 
-	// create secrets for mask
+	// create mask for secrets
+	secretValues := make([]string, len(c.secrets))
 	for _, sec := range c.secrets {
-		config.Secrets = append(config.Secrets, &backend_types.Secret{
-			Name:  sec.Name,
-			Value: sec.Value,
-		})
+		secretValues = append(secretValues, sec.Value)
 	}
+	salt := make([]byte, 64)
+	_, err := rand.Read(salt)
+	if err != nil {
+		return nil, fmt.Errorf("could not generate salt for secret masker: %w", err)
+	}
+	config.SecretMask.Salt = salt
+	config.SecretMask.Hashes, config.SecretMask.Lengths = hashvalue_replacer.ValuesToArgs(func(salt, data []byte) []byte {
+		h := sha256.New()
+		h.Write(salt)
+		h.Write([]byte(data))
+		return h.Sum(nil)
+	}, salt, secretValues)
 
 	// overrides the default workspace paths when specified
 	// in the YAML file.

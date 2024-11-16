@@ -15,7 +15,8 @@
 package types
 
 // Secret defines a runtime secret.
-type Secret struct {
-	Name  string `json:"name,omitempty"`
-	Value string `json:"value,omitempty"`
+type SecretMask struct {
+	Salt    []byte   `json:"salt,omitempty"`
+	Hashes  [][]byte `json:"value,omitempty"`
+	Lengths []int    `json:"lengths,omitempty"`
 }
