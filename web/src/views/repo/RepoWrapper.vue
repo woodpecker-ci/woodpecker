@@ -4,6 +4,7 @@
     v-model:active-tab="activeTab"
     enable-tabs
     disable-tab-url-hash-mode
+    :go-back="goBack"
   >
     <template #title>
       <span class="flex">
@@ -70,6 +71,7 @@ import useNotifications from '~/compositions/useNotifications';
 import type { Forge, RepoPermissions } from '~/lib/api/types';
 import { usePipelineStore } from '~/store/pipelines';
 import { useRepoStore } from '~/store/repos';
+import { useRouteBack } from '~/compositions/useRouteBack';
 
 const props = defineProps<{
   repoId: string;
@@ -87,6 +89,7 @@ const router = useRouter();
 const i18n = useI18n();
 const config = useConfig();
 const forgeStore = useForgeStore();
+
 
 const repo = repoStore.getRepo(repositoryId);
 const repoPermissions = ref<RepoPermissions>();
@@ -153,4 +156,6 @@ const activeTab = computed({
     }
   },
 });
+
+const goBack = useRouteBack({ name: 'repos' });
 </script>
