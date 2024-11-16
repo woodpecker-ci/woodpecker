@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-11-14
+## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-11-16
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -51,6 +51,7 @@
 
 ### 📈 Enhancement
 
+- Fix responsiveness of the settings template [[#4383](https://github.com/woodpecker-ci/woodpecker/pull/4383)]
 - Use squared spinner for active pipelines [[#4379](https://github.com/woodpecker-ci/woodpecker/pull/4379)]
 - Add server configuration option to add default set of labels for workflows that has no labels specified [[#4326](https://github.com/woodpecker-ci/woodpecker/pull/4326)]
 - Add `cli lint` option to treat warnings as errors [[#4373](https://github.com/woodpecker-ci/woodpecker/pull/4373)]
