@@ -37,18 +37,25 @@ onMounted(async () => {
   }
 }
 .spinner {
-  @apply absolute z-0 inset-1.5 rounded-md;
+  @apply absolute inset-1.5 rounded-md;
   overflow: hidden;
 }
 .spinner::before {
-  @apply absolute -z-2 -inset-1 bg-wp-primary-200 dark:bg-wp-primary-300;
+  @apply absolute bg-wp-primary-200 dark:bg-wp-primary-300;
   content: '';
-  background: #fff;
-  clip-path: polygon(100% 0, 50% 50%, 100% 100%);
+  left: -50%;
+  top: -50%;
+  width: 200%;
+  height: 200%;
+  background-repeat: no-repeat;
+  background-size:
+    50% 50%,
+    50% 50%;
+  background-image: linear-gradient(#fff, #fff);
   animation: rotate 1.5s linear infinite;
 }
 .spinner::after {
-  @apply absolute inset-0.5 bg-blend-darken bg-wp-primary-200 dark:bg-wp-primary-300;
+  @apply absolute inset-0.5 bg-wp-primary-200 dark:bg-wp-primary-300;
   /*
   The nested border radius needs to be calculated correctly to look right:
   https://www.30secondsofcode.org/css/s/nested-border-radius/
