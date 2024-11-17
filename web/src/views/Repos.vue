@@ -10,60 +10,40 @@
 
     <div class="flex flex-col gap-12">
       <div class="gap-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2">
-        <router-link v-for="repo in repoListAccess" :key="repo.id" :to="{ name: 'repo', params: { repoId: repo.id } }">
-          <div
-            class="flex flex-col border rounded-md bg-wp-background-100 overflow-hidden p-4 border-wp-background-400 dark:bg-wp-background-200 cursor-pointer hover:shadow-md hover:bg-wp-background-300 dark:hover:bg-wp-background-300"
-          >
-            <div class="flex items-center gap-4">
-              <img v-if="repo.avatar_url" :src="repo.avatar_url" class="w-8 h-8 rounded-md" alt="..." />
-              <Icon v-else name="repo" class="text-wp-text-100" />
-              <span class="text-wp-text-100 text-lg">{{ `${repo.owner} / ${repo.name}` }}</span>
-              <Badge v-if="repo.visibility === RepoVisibility.Public" :label="$t('repo.settings.general.visibility.public.public')" class="ml-auto" />
-            </div>
-          </div>
-        </router-link>
+        <RepoItems v-for="repo in repoListAccess" :key="repo.id" :repo="repo" />
       </div>
 
       <div class="flex flex-col gap-4">
-        <router-link v-for="repo in searchedRepos" :key="repo.id" :to="{ name: 'repo', params: { repoId: repo.id } }">
-          <div
-            class="flex flex-col border rounded-md bg-wp-background-100 overflow-hidden p-4 border-wp-background-400 dark:bg-wp-background-200 cursor-pointer hover:shadow-md hover:bg-wp-background-300 dark:hover:bg-wp-background-300"
-          >
-            <div class="flex items-center gap-4">
-              <img v-if="repo.avatar_url" :src="repo.avatar_url" class="w-8 h-8 rounded-md" alt="..." />
-              <Icon v-else name="repo" class="text-wp-text-100" />
-              <span class="text-wp-text-100 text-lg">{{ `${repo.owner} / ${repo.name}` }}</span>
-              <Badge v-if="repo.visibility === RepoVisibility.Public" :label="$t('repo.settings.general.visibility.public.public')" class="ml-auto" />
-            </div>
-          </div>
-        </router-link>
+        <RepoItems v-for="repo in repoListActivity" :key="repo.id" :repo="repo" />
       </div>
     </div>
   </Scaffold>
 </template>
 
 <script lang="ts" setup>
-import { computed, onMounted, ref } from 'vue';
+import { computed, ref } from 'vue';
+import { useRouter } from 'vue-router';
 
-import Badge from '~/components/atomic/Badge.vue';
 import Button from '~/components/atomic/Button.vue';
-import Icon from '~/components/atomic/Icon.vue';
 import Scaffold from '~/components/layout/scaffold/Scaffold.vue';
+import RepoItems from '~/components/repo/RepoItems.vue';
 import useRepos from '~/compositions/useRepos';
 import { useRepoSearch } from '~/compositions/useRepoSearch';
-import { RepoVisibility } from '~/lib/api/types';
 import { useRepoStore } from '~/store/repos';
+
+const router = useRouter();
 
 const repoStore = useRepoStore();
 const repos = computed(() => Object.values(repoStore.ownedRepos));
 const search = ref('');
 
 const { searchedRepos } = useRepoSearch(repos, search);
-const { sortReposByLastAccess } = useRepos();
+const { sortReposByLastAccess, sortReposByLastActivity } = useRepos();
 
 const repoListAccess = computed(() => sortReposByLastAccess(repos.value || []));
+const repoListActivity = computed(() => sortReposByLastActivity(searchedRepos.value || []));
 
-onMounted(async () => {
+router.beforeEach(async () => {
   await repoStore.loadRepos();
 });
 </script>

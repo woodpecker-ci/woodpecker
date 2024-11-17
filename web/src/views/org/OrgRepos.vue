@@ -14,9 +14,7 @@
     </template>
 
     <div class="space-y-4">
-      <ListItem v-for="repo in searchedRepos" :key="repo.id" :to="{ name: 'repo', params: { repoId: repo.id } }">
-        <span class="text-wp-text-100">{{ `${repo.owner} / ${repo.name}` }}</span>
-      </ListItem>
+      <RepoItems v-for="repo in searchedRepos" :key="repo.id" :repo="repo" />
     </div>
     <div v-if="(searchedRepos || []).length <= 0" class="text-center">
       <span class="text-wp-text-100 m-auto">{{ $t('repo.user_none') }}</span>
@@ -28,7 +26,7 @@
 import { computed, onMounted, ref } from 'vue';
 
 import IconButton from '~/components/atomic/IconButton.vue';
-import ListItem from '~/components/atomic/ListItem.vue';
+import RepoItems from '~/components/repo/RepoItems.vue';
 import Scaffold from '~/components/layout/scaffold/Scaffold.vue';
 import { inject } from '~/compositions/useInjectProvide';
 import { useRepoSearch } from '~/compositions/useRepoSearch';

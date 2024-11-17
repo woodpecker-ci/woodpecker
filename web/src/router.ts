@@ -19,7 +19,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: '',
         name: 'repos',
-        component: (): Component => import('~/views/RepoList.vue'),
+        component: (): Component => import('~/views/Repos.vue'),
         meta: { authentication: 'required' },
       },
       {

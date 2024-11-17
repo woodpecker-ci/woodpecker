@@ -50,6 +50,7 @@
   <SvgIcon v-else-if="name === 'auto-scroll-off'" :path="mdiDownloadOff" size="24" />
   <SvgIcon v-else-if="name === 'pause'" :path="mdiPause" size="24" />
   <SvgIcon v-else-if="name === 'remove'" :path="mdiClose" size="24" />
+  <SvgIcon v-else-if="name === 'new'" :path="mdiCircleOutline" size="24" />
 
   <SvgIcon v-else-if="name === 'forgejo'" :path="siForgejo.path" size="32" />
   <SvgIcon v-else-if="name === 'gitea'" :path="siGitea.path" size="32" />
@@ -119,6 +120,7 @@ import {
   mdiTagOutline,
   mdiTimelapse,
   mdiTrashCanOutline,
+  mdiCircleOutline,
 } from '@mdi/js';
 import { siForgejo, siGitea } from 'simple-icons';
 
@@ -175,7 +177,8 @@ export type IconNames =
   | 'attention'
   | 'spinner'
   | 'error'
-  | 'remove';
+  | 'remove'
+  | 'new';
 
 defineProps<{
   name: IconNames;
