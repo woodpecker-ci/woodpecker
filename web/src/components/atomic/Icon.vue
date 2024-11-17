@@ -89,6 +89,7 @@ import {
   mdiBitbucket,
   mdiCheckCircle,
   mdiChevronRight,
+  mdiCircleOutline,
   mdiClockTimeEightOutline,
   mdiClose,
   mdiCloseCircleOutline,
@@ -120,7 +121,6 @@ import {
   mdiTagOutline,
   mdiTimelapse,
   mdiTrashCanOutline,
-  mdiCircleOutline,
 } from '@mdi/js';
 import { siForgejo, siGitea } from 'simple-icons';
 

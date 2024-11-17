@@ -42,8 +42,8 @@
 import { computed, toRef } from 'vue';
 import { useI18n } from 'vue-i18n';
 
-import Icon from '~/components/atomic/Icon.vue';
 import Badge from '~/components/atomic/Badge.vue';
+import Icon from '~/components/atomic/Icon.vue';
 import PipelineStatusIcon from '~/components/repo/pipeline/PipelineStatusIcon.vue';
 import usePipeline from '~/compositions/usePipeline';
 import type { Repo } from '~/lib/api/types';

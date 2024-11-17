@@ -1,4 +1,4 @@
-import type { Pipeline } from "./pipeline";
+import type { Pipeline } from './pipeline';
 
 // A version control repository.
 export interface Repo {

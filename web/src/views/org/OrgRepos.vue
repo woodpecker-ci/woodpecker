@@ -26,8 +26,8 @@
 import { computed, onMounted, ref } from 'vue';
 
 import IconButton from '~/components/atomic/IconButton.vue';
-import RepoItems from '~/components/repo/RepoItems.vue';
 import Scaffold from '~/components/layout/scaffold/Scaffold.vue';
+import RepoItems from '~/components/repo/RepoItems.vue';
 import { inject } from '~/compositions/useInjectProvide';
 import { useRepoSearch } from '~/compositions/useRepoSearch';
 import { useRepoStore } from '~/store/repos';
