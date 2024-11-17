@@ -3,7 +3,7 @@
     <div
       class="flex flex-col border rounded-md bg-wp-background-100 overflow-hidden p-4 border-wp-background-400 dark:bg-wp-background-200 cursor-pointer hover:shadow-md hover:bg-wp-background-300 dark:hover:bg-wp-background-300"
     >
-      <div class="grid grid-cols-[auto,1fr] gap-y-2 items-center">
+      <div class="grid grid-cols-[auto,1fr] gap-y-1 items-center">
         <div class="text-wp-text-100 text-lg">{{ `${repo.owner} / ${repo.name}` }}</div>
         <div class="ml-auto">
           <Badge
@@ -24,7 +24,7 @@
           </div>
         </div>
 
-        <div class="col-span-2 text-wp-text-100 text-sm min-h-5 mt-2">
+        <div class="col-span-2 text-wp-text-100 text-sm min-h-5 mt-3">
           <div v-if="pipeline" class="flex gap-x-4 items-center">
             <div class="flex items-center gap-x-1">
               <span :title="pipelineEventTitle">
