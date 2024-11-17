@@ -4,6 +4,7 @@
     v-model:active-tab="activeTab"
     enable-tabs
     disable-tab-url-hash-mode
+    :go-back="goBack"
   >
     <template #title>
       <span class="flex">
@@ -67,6 +68,7 @@ import useAuthentication from '~/compositions/useAuthentication';
 import useConfig from '~/compositions/useConfig';
 import { useForgeStore } from '~/compositions/useForgeStore';
 import useNotifications from '~/compositions/useNotifications';
+import { useRouteBack } from '~/compositions/useRouteBack';
 import type { Forge, RepoPermissions } from '~/lib/api/types';
 import { usePipelineStore } from '~/store/pipelines';
 import { useRepoStore } from '~/store/repos';
@@ -153,4 +155,6 @@ const activeTab = computed({
     }
   },
 });
+
+const goBack = useRouteBack({ name: 'repos' });
 </script>
