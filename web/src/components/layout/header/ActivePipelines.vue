@@ -6,7 +6,7 @@
   >
     <div v-if="pipelineCount > 0" class="spinner" />
     <div
-      class="z-0 flex items-center justify-center w-full h-full font-bold bg-white bg-opacity-15 dark:bg-black dark:bg-opacity-10 rounded-md"
+      class="z-0 flex items-center justify-center h-full w-full font-bold bg-white bg-opacity-15 dark:bg-black dark:bg-opacity-10 rounded-md"
     >
       <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
       {{ pipelineCount > 9 ? '9+' : pipelineCount }}
@@ -44,7 +44,6 @@ onMounted(async () => {
   @apply absolute -z-2 -inset-1 bg-wp-primary-200 dark:bg-wp-primary-300;
   content: '';
   background: #fff;
-  /* clip-path:polygon(0 0,0 100%,100% 0, 100% 100%); */
   clip-path: polygon(100% 0, 50% 50%, 100% 100%);
   animation: rotate 1.5s linear infinite;
 }
