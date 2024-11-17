@@ -53,7 +53,7 @@ onMounted(async () => {
   The nested border radius needs to be calculated correctly to look right:
   https://www.30secondsofcode.org/css/s/nested-border-radius/
   */
-  border-radius: calc(0.375rem- 0.125rem);
+  border-radius: calc(0.375rem - 0.125rem);
   content: '';
 }
 </style>
