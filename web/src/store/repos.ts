@@ -35,7 +35,7 @@ export const useRepoStore = defineStore('repos', () => {
     await Promise.all(
       _ownedRepos.map(async (repo) => {
         const latestPipeline = await apiClient.getPipelineList(repo.id, { page: 1, perPage: 1 });
-        repo.last_pipeline = latestPipeline[0];
+        repo.last_pipeline_item = latestPipeline[0];
         repos.set(repo.id, repo);
       }),
     );
