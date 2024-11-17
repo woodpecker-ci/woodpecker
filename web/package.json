@@ -45,7 +45,7 @@
     "@intlify/eslint-plugin-vue-i18n": "3.0.0",
     "@types/eslint__js": "^8.42.3",
     "@types/lodash": "^4.17.7",
-    "@types/node": "^20.14.15",
+    "@types/node": "^22.0.0",
     "@types/prismjs": "^1.26.4",
     "@types/semver": "^7.5.8",
     "@types/tinycolor2": "^1.4.6",
