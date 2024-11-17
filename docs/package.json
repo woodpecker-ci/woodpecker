@@ -45,7 +45,7 @@
     "@docusaurus/module-type-aliases": "^3.5.2",
     "@docusaurus/tsconfig": "3.5.2",
     "@docusaurus/types": "^3.5.2",
-    "@types/node": "^20.17.1",
+    "@types/node": "^22.0.0",
     "@types/react": "^18.3.12",
     "@types/react-helmet": "^6.1.11",
     "@types/react-router-dom": "^5.3.3",

@@ -14,11 +14,11 @@
     "@docusaurus/theme-classic": "^3.3.2",
     "@docusaurus/types": "^3.3.2",
     "@tsconfig/docusaurus": "^2.0.3",
-    "@types/node": "^20.12.13",
+    "@types/node": "^22.0.0",
     "axios": "^1.7.2",
     "concurrently": "^9.0.0",
     "isomorphic-dompurify": "^2.11.0",
-    "marked": "^14.0.0",
+    "marked": "^15.0.0",
     "tslib": "^2.6.2",
     "typescript": "^5.4.5"
   },
