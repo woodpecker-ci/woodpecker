@@ -49,10 +49,10 @@ type (
 		Ports          []string           `yaml:"ports,omitempty"`
 		DependsOn      base.StringOrSlice `yaml:"depends_on,omitempty"`
 
-		// TODO: make []string in 3.x
+		// NOTE: only []string in 3.x
 		Secrets Secrets `yaml:"secrets,omitempty"`
-		// TODO: make map[string]any in 3.x
-		Environment base.SliceOrMap `yaml:"environment,omitempty"`
+		// NOTE: only map[string]any allowed in 3.x
+		Environment base.DeprecatedSliceOrMap `yaml:"environment,omitempty"`
 
 		// Docker and Kubernetes Specific
 		Privileged bool `yaml:"privileged,omitempty"`
@@ -124,7 +124,7 @@ func (c *ContainerList) UnmarshalYAML(value *yaml.Node) error {
 func (c *Container) IsPlugin() bool {
 	return len(c.Commands) == 0 &&
 		len(c.Entrypoint) == 0 &&
-		len(c.Environment) == 0 &&
+		len(c.Environment.Map) == 0 &&
 		len(c.Secrets.Secrets) == 0
 }
 

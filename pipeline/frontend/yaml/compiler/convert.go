@@ -121,7 +121,7 @@ func (c *Compiler) createProcess(container *yaml_types.Container, stepType backe
 		}
 	}
 
-	if err := settings.ParamsToEnv(container.Environment, environment, "", false, getSecretValue); err != nil {
+	if err := settings.ParamsToEnv(container.Environment.Map, environment, "", false, getSecretValue); err != nil {
 		return nil, err
 	}
 

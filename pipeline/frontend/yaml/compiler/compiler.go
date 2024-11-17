@@ -21,6 +21,7 @@ import (
 	backend_types "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/metadata"
 	yaml_types "go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/types"
+	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/types/base"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/utils"
 	"go.woodpecker-ci.org/woodpecker/v2/shared/constant"
 )
@@ -178,10 +179,10 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 			Name:        defaultCloneName,
 			Image:       cloneImage,
 			Settings:    cloneSettings,
-			Environment: make(map[string]any),
+			Environment: base.DeprecatedSliceOrMap{Map: make(map[string]any)},
 		}
 		for k, v := range c.cloneEnv {
-			container.Environment[k] = v
+			container.Environment.Map[k] = v
 		}
 		step, err := c.createProcess(container, backend_types.StepTypeClone)
 		if err != nil {
