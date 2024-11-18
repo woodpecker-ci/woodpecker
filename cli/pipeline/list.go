@@ -24,9 +24,6 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker"
 )
 
-//nolint:mnd
-var pipelineListCmd = buildPipelineListCmd()
-
 func buildPipelineListCmd() *cli.Command {
 	return &cli.Command{
 		Name:      "ls",
@@ -49,6 +46,7 @@ func buildPipelineListCmd() *cli.Command {
 			&cli.IntFlag{
 				Name:  "limit",
 				Usage: "limit the list size",
+				//nolint:mnd
 				Value: 25,
 			},
 		}...),
