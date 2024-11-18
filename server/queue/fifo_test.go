@@ -16,6 +16,7 @@ package queue
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"sync"
 	"testing"
@@ -276,6 +277,7 @@ func TestFifoErrorsMultiThread(t *testing.T) {
 	assert.NoError(t, q.PushAtOnce(ctx, []*model.Task{task2, task3, task1}))
 
 	obtainedWorkCh := make(chan *model.Task)
+	defer func() { close(obtainedWorkCh) }()
 
 	for i := 0; i < 10; i++ {
 		go func(i int) {
@@ -283,6 +285,9 @@ func TestFifoErrorsMultiThread(t *testing.T) {
 				fmt.Printf("Worker %d started\n", i)
 				waitForProcess()
 				got, err := q.Poll(ctx, 1, filterFnTrue)
+				if err != nil && errors.Is(err, context.Canceled) {
+					return
+				}
 				assert.NoError(t, err)
 				obtainedWorkCh <- got
 			}
@@ -305,7 +310,11 @@ func TestFifoErrorsMultiThread(t *testing.T) {
 				go func() {
 					for {
 						fmt.Printf("Worker spawned\n")
-						got, _ := q.Poll(ctx, 1, filterFnTrue)
+						got, err := q.Poll(ctx, 1, filterFnTrue)
+						if err != nil && errors.Is(err, context.Canceled) {
+							return
+						}
+						assert.NoError(t, err)
 						obtainedWorkCh <- got
 					}
 				}()
@@ -316,7 +325,11 @@ func TestFifoErrorsMultiThread(t *testing.T) {
 				go func() {
 					for {
 						fmt.Printf("Worker spawned\n")
-						got, _ := q.Poll(ctx, 1, filterFnTrue)
+						got, err := q.Poll(ctx, 1, filterFnTrue)
+						if err != nil && errors.Is(err, context.Canceled) {
+							return
+						}
+						assert.NoError(t, err)
 						obtainedWorkCh <- got
 					}
 				}()
