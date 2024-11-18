@@ -8,6 +8,7 @@
 
 ### 📈 Enhancement
 
+- Deprecate `secrets` in favor of `from_secret` [[#4360](https://github.com/woodpecker-ci/woodpecker/pull/4360)]
 - Deprecate and warn of list syntax of environment [[#4358](https://github.com/woodpecker-ci/woodpecker/pull/4358)]
 - Process workflow logs in batches (#4045) [[#4356](https://github.com/woodpecker-ci/woodpecker/pull/4356)]
 
