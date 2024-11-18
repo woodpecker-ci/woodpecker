@@ -49,7 +49,8 @@ func (t *Task) ApplyLabelsFromRepo(r *Repo) error {
 		t.Labels = make(map[string]string)
 	}
 	t.Labels["repo"] = r.FullName
-	t.Labels[agentFilterOrgID] = fmt.Sprintf("%d", r.OrgID)
+	t.Labels[agentFilterRepoID] = fmt.Sprint(r.ID)
+	t.Labels[agentFilterOrgID] = fmt.Sprint(r.OrgID)
 	return nil
 }
 
