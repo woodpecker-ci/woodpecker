@@ -1,8 +1,6 @@
 module go.woodpecker-ci.org/woodpecker/v2
 
-go 1.22.0
-
-toolchain go1.23.2
+go 1.23.2
 
 require (
 	al.essio.dev/pkg/shellescape v1.5.1
@@ -10,6 +8,7 @@ require (
 	codeberg.org/6543/go-yaml2json v1.0.0
 	codeberg.org/6543/xyaml v1.1.0
 	codeberg.org/mvdkleijn/forgejo-sdk/forgejo v1.2.0
+	github.com/6543/go-hashvalue-replacer v0.0.0-20241116014433-da29dad32109
 	github.com/6543/logfile-open v1.2.1
 	github.com/adrg/xdg v0.5.2
 	github.com/bmatcuk/doublestar/v4 v4.7.1

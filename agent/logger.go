@@ -15,9 +15,11 @@
 package agent
 
 import (
+	"crypto/sha256"
 	"io"
 	"sync"
 
+	hashvalue_replacer "github.com/6543/go-hashvalue-replacer"
 	"github.com/rs/zerolog"
 
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline"
@@ -35,22 +37,31 @@ func (r *Runner) createLogger(_logger zerolog.Logger, uploads *sync.WaitGroup, w
 			Logger()
 
 		uploads.Add(1)
-
-		var secrets []string
-		for _, secret := range workflow.Config.Secrets {
-			secrets = append(secrets, secret.Value)
-		}
+		defer uploads.Done()
 
 		logger.Debug().Msg("log stream opened")
 
-		logStream := log.NewLineWriter(r.client, step.UUID, secrets...)
-		if err := log.CopyLineByLine(logStream, rc, pipeline.MaxLogLineLength); err != nil {
+		// mask secrets from reader
+		maskedReader, err := hashvalue_replacer.NewReader(rc, workflow.Config.SecretMask.Salt, workflow.Config.SecretMask.Hashes, workflow.Config.SecretMask.Lengths, hashvalue_replacer.Options{
+			Mask: "********",
+			Hash: func(salt, data []byte) []byte {
+				h := sha256.New()
+				h.Write(salt)
+				h.Write([]byte(data))
+				return h.Sum(nil)
+			},
+		})
+		if err != nil {
+			logger.Error().Err(err).Msg("could not create masked reader")
+			return nil
+		}
+
+		logStream := log.NewLineWriter(r.client, step.UUID)
+		if err := log.CopyLineByLine(logStream, maskedReader, pipeline.MaxLogLineLength); err != nil {
 			logger.Error().Err(err).Msg("copy limited logStream part")
 		}
 
 		logger.Debug().Msg("log stream copied, close ...")
-		uploads.Done()
-
 		return nil
 	}
 }

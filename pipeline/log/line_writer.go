@@ -24,7 +24,6 @@ import (
 	"github.com/rs/zerolog/log"
 
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/shared"
 )
 
 // LineWriter sends logs to the client.
@@ -35,25 +34,20 @@ type LineWriter struct {
 	stepUUID  string
 	num       int
 	startTime time.Time
-	replacer  *strings.Replacer
 }
 
 // NewLineWriter returns a new line reader.
-func NewLineWriter(peer rpc.Peer, stepUUID string, secret ...string) io.Writer {
+func NewLineWriter(peer rpc.Peer, stepUUID string) io.Writer {
 	lw := &LineWriter{
 		peer:      peer,
 		stepUUID:  stepUUID,
 		startTime: time.Now().UTC(),
-		replacer:  shared.NewSecretsReplacer(secret),
 	}
 	return lw
 }
 
 func (w *LineWriter) Write(p []byte) (n int, err error) {
 	data := string(p)
-	if w.replacer != nil {
-		data = w.replacer.Replace(data)
-	}
 	log.Trace().Str("step-uuid", w.stepUUID).Msgf("grpc write line: %s", data)
 
 	line := &rpc.LogEntry{
