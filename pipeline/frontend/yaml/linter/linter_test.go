@@ -175,7 +175,7 @@ func TestLintErrors(t *testing.T) {
 		},
 		{
 			from: "steps: { build: { image: golang, secrets: [ { source: mysql_username, target: mysql_username } ] } }",
-			want: "Alternative names syntax for `secrets` is deprecated, use list syntax or `from_secret` instead",
+			want: "Secrets are deprecated, use environment with from_secret",
 		},
 	}
 
