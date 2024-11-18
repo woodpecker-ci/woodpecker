@@ -67,7 +67,7 @@ export interface Repo {
 
   last_pipeline: number;
 
-  gated: boolean;
+  require_approval: RepoRequireApproval;
 
   // Events that will cancel running pipelines before starting a new one
   cancel_previous_pipeline_events: string[];
@@ -81,6 +81,13 @@ export enum RepoVisibility {
   Private = 'private',
   Internal = 'internal',
 }
+
+export enum RepoRequireApproval {
+  None = 'none',
+  Forks = 'forks',
+  PullRequests = 'pull_requests',
+  AllEvents = 'all_events',
+}
 /* eslint-enable */
 
 export type RepoSettings = Pick<
@@ -89,7 +96,7 @@ export type RepoSettings = Pick<
   | 'timeout'
   | 'visibility'
   | 'trusted'
-  | 'gated'
+  | 'require_approval'
   | 'allow_pr'
   | 'allow_deploy'
   | 'cancel_previous_pipeline_events'

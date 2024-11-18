@@ -1,6 +1,6 @@
 <template>
-  <Settings :title="$t('admin.settings.users.users')" :desc="$t('admin.settings.users.desc')">
-    <template #titleActions>
+  <Settings :title="$t('admin.settings.users.users')" :description="$t('admin.settings.users.desc')">
+    <template #headerActions>
       <Button
         v-if="selectedUser"
         :text="$t('admin.settings.users.show')"

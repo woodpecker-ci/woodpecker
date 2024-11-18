@@ -26,7 +26,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 )
 
-// Decline updates the status to declined for blocked pipelines because of a gated repo.
+// Decline updates the status to declined for blocked pipelines.
 func Decline(ctx context.Context, store store.Store, pipeline *model.Pipeline, user *model.User, repo *model.Repo) (*model.Pipeline, error) {
 	forge, err := server.Config.Services.Manager.ForgeFromRepo(repo)
 	if err != nil {
