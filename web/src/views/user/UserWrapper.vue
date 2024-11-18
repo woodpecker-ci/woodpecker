@@ -1,7 +1,7 @@
 <template>
   <Scaffold enable-tabs>
     <template #title>{{ $t('user.settings.settings') }}</template>
-    <template #titleActions><Button :text="$t('logout')" :to="`${address}/logout`" /></template>
+    <template #headerActions><Button :text="$t('logout')" :to="`${address}/logout`" /></template>
 
     <Tab to="user-general" :title="$t('user.settings.general.general')" />
     <Tab to="user-secrets" :title="$t('secrets.secrets')" />

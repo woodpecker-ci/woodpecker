@@ -4,7 +4,7 @@
       {{ org.name }}
     </template>
 
-    <template #titleActions>
+    <template #headerActions>
       <IconButton
         v-if="orgPermissions.admin"
         icon="settings"

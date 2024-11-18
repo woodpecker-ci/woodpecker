@@ -10,7 +10,7 @@
         {{ repo.name }}
       </span>
     </template>
-    <template #titleActions>
+    <template #headerActions>
       <a v-if="badgeUrl" :href="badgeUrl" target="_blank">
         <img :src="badgeUrl" />
       </a>

@@ -6,7 +6,7 @@
   >
     <div v-if="pipelineCount > 0" class="spinner" />
     <div
-      class="z-1 flex items-center justify-center h-full w-full font-bold bg-white bg-opacity-15 dark:bg-black dark:bg-opacity-10 rounded-md"
+      class="z-0 flex items-center justify-center h-full w-full font-bold bg-white bg-opacity-15 dark:bg-black dark:bg-opacity-10 rounded-md"
     >
       <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
       {{ pipelineCount > 9 ? '9+' : pipelineCount }}
@@ -31,17 +31,17 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-@keyframes spinner-rotate {
+@keyframes rotate {
   100% {
     transform: rotate(1turn);
   }
 }
 .spinner {
-  @apply absolute z-0 inset-1.5 rounded-md;
+  @apply absolute inset-1.5 rounded-md;
   overflow: hidden;
 }
 .spinner::before {
-  @apply absolute -z-2 bg-wp-primary-200 dark:bg-wp-primary-300;
+  @apply absolute bg-wp-primary-200 dark:bg-wp-primary-300;
   content: '';
   left: -50%;
   top: -50%;
@@ -51,11 +51,16 @@ onMounted(async () => {
   background-size:
     50% 50%,
     50% 50%;
-  background-image: linear-gradient(#fff, transparent);
-  animation: spinner-rotate 1.5s linear infinite;
+  background-image: linear-gradient(#fff, #fff);
+  animation: rotate 1.5s linear infinite;
 }
 .spinner::after {
-  @apply absolute inset-0.5 rounded-md bg-blend-darken bg-wp-primary-200 dark:bg-wp-primary-300;
+  @apply absolute inset-0.5 bg-wp-primary-200 dark:bg-wp-primary-300;
+  /*
+  The nested border radius needs to be calculated correctly to look right:
+  https://www.30secondsofcode.org/css/s/nested-border-radius/
+  */
+  border-radius: calc(0.375rem - 0.125rem);
   content: '';
 }
 </style>

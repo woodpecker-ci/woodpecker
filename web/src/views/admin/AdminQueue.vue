@@ -1,6 +1,6 @@
 <template>
-  <Settings :title="$t('admin.settings.queue.queue')" :desc="$t('admin.settings.queue.desc')">
-    <template #titleActions>
+  <Settings :title="$t('admin.settings.queue.queue')" :description="$t('admin.settings.queue.desc')">
+    <template #headerActions>
       <div v-if="queueInfo">
         <div class="flex items-center gap-2">
           <Button
