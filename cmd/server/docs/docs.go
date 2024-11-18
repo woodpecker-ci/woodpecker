@@ -5093,7 +5093,7 @@ const docTemplate = `{
                     "type": "boolean"
                 },
                 "require_approval": {
-                    "type": "string"
+                    "$ref": "#/definitions/model.ApprovalMode"
                 },
                 "scm": {
                     "$ref": "#/definitions/SCMKind"
@@ -5627,6 +5627,27 @@ const docTemplate = `{
                     "type": "integer"
                 }
             }
+        },
+        "model.ApprovalMode": {
+            "type": "string",
+            "enum": [
+                "none",
+                "forks",
+                "pull_requests",
+                "all_events"
+            ],
+            "x-enum-comments": {
+                "RequireApprovalAllEvents": "require approval for all external events",
+                "RequireApprovalForks": "require approval for PRs from forks (default)",
+                "RequireApprovalNone": "require approval for no events",
+                "RequireApprovalPullRequests": "require approval for all PRs"
+            },
+            "x-enum-varnames": [
+                "RequireApprovalNone",
+                "RequireApprovalForks",
+                "RequireApprovalPullRequests",
+                "RequireApprovalAllEvents"
+            ]
         },
         "model.ForgeType": {
             "type": "string",

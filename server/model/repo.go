@@ -22,7 +22,7 @@ import (
 
 type ApprovalMode string
 
-var (
+const (
 	RequireApprovalNone         ApprovalMode = "none"          // require approval for no events
 	RequireApprovalForks        ApprovalMode = "forks"         // require approval for PRs from forks (default)
 	RequireApprovalPullRequests ApprovalMode = "pull_requests" // require approval for all PRs
