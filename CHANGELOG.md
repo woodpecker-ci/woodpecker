@@ -164,6 +164,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update golang-packages [[#4401](https://github.com/woodpecker-ci/woodpecker/pull/4401)]
 - chore(deps): update web npm deps non-major [[#4391](https://github.com/woodpecker-ci/woodpecker/pull/4391)]
 - fix(deps): update dependency @intlify/unplugin-vue-i18n to v6 [[#4397](https://github.com/woodpecker-ci/woodpecker/pull/4397)]
 - chore(deps): update pre-commit hook golangci/golangci-lint to v1.62.0 [[#4390](https://github.com/woodpecker-ci/woodpecker/pull/4390)]
