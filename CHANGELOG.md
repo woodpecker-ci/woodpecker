@@ -1,10 +1,10 @@
 # Changelog
 
-## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-11-16
+## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-11-18
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @Fishbowler, @M0Rf30, @anbraten, @gnowland, @greenaar, @hg, @j04n-f, @jenrik, @johanneskastl, @lafriks, @lukashass, @meln5674, @not-my-profile, @pat-s, @qwerty287, @smainz, @tori-27, @xoxys, @xtexChooser, @zc-devs
+@6543, @Fishbowler, @M0Rf30, @anbraten, @cduchenoy, @gnowland, @greenaar, @hg, @j04n-f, @jenrik, @johanneskastl, @lafriks, @lukashass, @meln5674, @not-my-profile, @pat-s, @qwerty287, @smainz, @tori-27, @xoxys, @xtexChooser, @zc-devs
 
 ### 💥 Breaking changes
 
@@ -49,6 +49,48 @@
 - Replay pipeline using `cli exec` by downloading metadata [[#4103](https://github.com/woodpecker-ci/woodpecker/pull/4103)]
 - Update clone plugin to support sha256 [[#4136](https://github.com/woodpecker-ci/woodpecker/pull/4136)]
 
+### 📚 Documentation
+
+- chore(deps): lock file maintenance [[#4402](https://github.com/woodpecker-ci/woodpecker/pull/4402)]
+- Add microsoft teams plugin [[#4400](https://github.com/woodpecker-ci/woodpecker/pull/4400)]
+- fix(deps): update docs npm deps non-major [[#4394](https://github.com/woodpecker-ci/woodpecker/pull/4394)]
+- chore(deps): update dependency @types/node to v22 [[#4395](https://github.com/woodpecker-ci/woodpecker/pull/4395)]
+- chore(deps): update dependency marked to v15 [[#4396](https://github.com/woodpecker-ci/woodpecker/pull/4396)]
+- Podman is not (official) supported [[#4367](https://github.com/woodpecker-ci/woodpecker/pull/4367)]
+- Add EditorConfig-Checker Plugin to docs [[#4371](https://github.com/woodpecker-ci/woodpecker/pull/4371)]
+- Update netrc option description [[#4342](https://github.com/woodpecker-ci/woodpecker/pull/4342)]
+- Fix deployment event note [[#4283](https://github.com/woodpecker-ci/woodpecker/pull/4283)]
+- Improve migration notes [[#4291](https://github.com/woodpecker-ci/woodpecker/pull/4291)]
+- Add instructions how to build images locally [[#4277](https://github.com/woodpecker-ci/woodpecker/pull/4277)]
+- chore(deps): update docs npm deps non-major [[#4238](https://github.com/woodpecker-ci/woodpecker/pull/4238)]
+- Correct spelling [[#4279](https://github.com/woodpecker-ci/woodpecker/pull/4279)]
+- Add Telegram plugin [[#4229](https://github.com/woodpecker-ci/woodpecker/pull/4229)]
+- Remove archived plugin [[#4227](https://github.com/woodpecker-ci/woodpecker/pull/4227)]
+- Use "Woodpecker Authors" as copyright on website [[#4225](https://github.com/woodpecker-ci/woodpecker/pull/4225)]
+- chore(deps): update dependency cookie to v1 [[#4224](https://github.com/woodpecker-ci/woodpecker/pull/4224)]
+- fix(deps): update docs npm deps non-major [[#4221](https://github.com/woodpecker-ci/woodpecker/pull/4221)]
+- Fix errant apostrophe in docker-compose documentation [[#4203](https://github.com/woodpecker-ci/woodpecker/pull/4203)]
+- chore(deps): lock file maintenance [[#4186](https://github.com/woodpecker-ci/woodpecker/pull/4186)]
+- chore(deps): update dependency concurrently to v9 [[#4176](https://github.com/woodpecker-ci/woodpecker/pull/4176)]
+- chore(deps): update docs npm deps non-major [[#4164](https://github.com/woodpecker-ci/woodpecker/pull/4164)]
+- Update image filter error message [[#4143](https://github.com/woodpecker-ci/woodpecker/pull/4143)]
+- Docs: reference to built-in docker compose and remove deprecated version from compose examples [[#4123](https://github.com/woodpecker-ci/woodpecker/pull/4123)]
+- directory key is allowed for services [[#4127](https://github.com/woodpecker-ci/woodpecker/pull/4127)]
+- [docs] Removes dot prefix from pipeline configuration filenames [[#4105](https://github.com/woodpecker-ci/woodpecker/pull/4105)]
+- Use kaniko plugin in docs as example [[#4072](https://github.com/woodpecker-ci/woodpecker/pull/4072)]
+- Add some posts and videos [[#4070](https://github.com/woodpecker-ci/woodpecker/pull/4070)]
+- Move event type descriptions from Terminology to Workflow Syntax [[#4062](https://github.com/woodpecker-ci/woodpecker/pull/4062)]
+- Add community posts from discussions [[#4058](https://github.com/woodpecker-ci/woodpecker/pull/4058)]
+- Add a pull request template with some basic guidelines [[#4055](https://github.com/woodpecker-ci/woodpecker/pull/4055)]
+- Add examples of CI environment variable values [[#4009](https://github.com/woodpecker-ci/woodpecker/pull/4009)]
+- Fix inline author warning [[#4040](https://github.com/woodpecker-ci/woodpecker/pull/4040)]
+- Updated Secrets image filter docs [[#4028](https://github.com/woodpecker-ci/woodpecker/pull/4028)]
+- Update dependency marked to v14 [[#4036](https://github.com/woodpecker-ci/woodpecker/pull/4036)]
+- Update docs npm deps non-major [[#4033](https://github.com/woodpecker-ci/woodpecker/pull/4033)]
+- Overhaul README [[#3995](https://github.com/woodpecker-ci/woodpecker/pull/3995)]
+- fix(deps): update docs npm deps non-major [[#3990](https://github.com/woodpecker-ci/woodpecker/pull/3990)]
+- Add spellchecking for docs [[#3787](https://github.com/woodpecker-ci/woodpecker/pull/3787)]
+
 ### 📈 Enhancement
 
 - Fix responsiveness of the settings template [[#4383](https://github.com/woodpecker-ci/woodpecker/pull/4383)]
@@ -92,43 +134,6 @@
 - Add PULLREQUEST_DRONE_PULL_REQUEST drone env [[#3939](https://github.com/woodpecker-ci/woodpecker/pull/3939)]
 - Make agent gRPC errors distinguishable [[#3936](https://github.com/woodpecker-ci/woodpecker/pull/3936)]
 
-### 📚 Documentation
-
-- Podman is not (official) supported [[#4367](https://github.com/woodpecker-ci/woodpecker/pull/4367)]
-- Add EditorConfig-Checker Plugin to docs [[#4371](https://github.com/woodpecker-ci/woodpecker/pull/4371)]
-- Update netrc option description [[#4342](https://github.com/woodpecker-ci/woodpecker/pull/4342)]
-- Fix deployment event note [[#4283](https://github.com/woodpecker-ci/woodpecker/pull/4283)]
-- Improve migration notes [[#4291](https://github.com/woodpecker-ci/woodpecker/pull/4291)]
-- Add instructions how to build images locally [[#4277](https://github.com/woodpecker-ci/woodpecker/pull/4277)]
-- chore(deps): update docs npm deps non-major [[#4238](https://github.com/woodpecker-ci/woodpecker/pull/4238)]
-- Correct spelling [[#4279](https://github.com/woodpecker-ci/woodpecker/pull/4279)]
-- Add Telegram plugin [[#4229](https://github.com/woodpecker-ci/woodpecker/pull/4229)]
-- Remove archived plugin [[#4227](https://github.com/woodpecker-ci/woodpecker/pull/4227)]
-- Use "Woodpecker Authors" as copyright on website [[#4225](https://github.com/woodpecker-ci/woodpecker/pull/4225)]
-- chore(deps): update dependency cookie to v1 [[#4224](https://github.com/woodpecker-ci/woodpecker/pull/4224)]
-- fix(deps): update docs npm deps non-major [[#4221](https://github.com/woodpecker-ci/woodpecker/pull/4221)]
-- Fix errant apostrophe in docker-compose documentation [[#4203](https://github.com/woodpecker-ci/woodpecker/pull/4203)]
-- chore(deps): lock file maintenance [[#4186](https://github.com/woodpecker-ci/woodpecker/pull/4186)]
-- chore(deps): update dependency concurrently to v9 [[#4176](https://github.com/woodpecker-ci/woodpecker/pull/4176)]
-- chore(deps): update docs npm deps non-major [[#4164](https://github.com/woodpecker-ci/woodpecker/pull/4164)]
-- Update image filter error message [[#4143](https://github.com/woodpecker-ci/woodpecker/pull/4143)]
-- Docs: reference to built-in docker compose and remove deprecated version from compose examples [[#4123](https://github.com/woodpecker-ci/woodpecker/pull/4123)]
-- directory key is allowed for services [[#4127](https://github.com/woodpecker-ci/woodpecker/pull/4127)]
-- [docs] Removes dot prefix from pipeline configuration filenames [[#4105](https://github.com/woodpecker-ci/woodpecker/pull/4105)]
-- Use kaniko plugin in docs as example [[#4072](https://github.com/woodpecker-ci/woodpecker/pull/4072)]
-- Add some posts and videos [[#4070](https://github.com/woodpecker-ci/woodpecker/pull/4070)]
-- Move event type descriptions from Terminology to Workflow Syntax [[#4062](https://github.com/woodpecker-ci/woodpecker/pull/4062)]
-- Add community posts from discussions [[#4058](https://github.com/woodpecker-ci/woodpecker/pull/4058)]
-- Add a pull request template with some basic guidelines [[#4055](https://github.com/woodpecker-ci/woodpecker/pull/4055)]
-- Add examples of CI environment variable values [[#4009](https://github.com/woodpecker-ci/woodpecker/pull/4009)]
-- Fix inline author warning [[#4040](https://github.com/woodpecker-ci/woodpecker/pull/4040)]
-- Updated Secrets image filter docs [[#4028](https://github.com/woodpecker-ci/woodpecker/pull/4028)]
-- Update dependency marked to v14 [[#4036](https://github.com/woodpecker-ci/woodpecker/pull/4036)]
-- Update docs npm deps non-major [[#4033](https://github.com/woodpecker-ci/woodpecker/pull/4033)]
-- Overhaul README [[#3995](https://github.com/woodpecker-ci/woodpecker/pull/3995)]
-- fix(deps): update docs npm deps non-major [[#3990](https://github.com/woodpecker-ci/woodpecker/pull/3990)]
-- Add spellchecking for docs [[#3787](https://github.com/woodpecker-ci/woodpecker/pull/3787)]
-
 ### 🐛 Bug Fixes
 
 - Fix avatar column type [[#4340](https://github.com/woodpecker-ci/woodpecker/pull/4340)]
@@ -157,6 +162,11 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update web npm deps non-major [[#4391](https://github.com/woodpecker-ci/woodpecker/pull/4391)]
+- fix(deps): update dependency @intlify/unplugin-vue-i18n to v6 [[#4397](https://github.com/woodpecker-ci/woodpecker/pull/4397)]
+- chore(deps): update pre-commit hook golangci/golangci-lint to v1.62.0 [[#4390](https://github.com/woodpecker-ci/woodpecker/pull/4390)]
+- chore(deps): update postgres docker tag to v17.1 [[#4389](https://github.com/woodpecker-ci/woodpecker/pull/4389)]
+- chore(deps): update docker.io/techknowlogick/xgo docker tag to go-1.23.x [[#4388](https://github.com/woodpecker-ci/woodpecker/pull/4388)]
 - chore(config): migrate renovate config [[#4296](https://github.com/woodpecker-ci/woodpecker/pull/4296)]
 - chore(deps): update docker.io/woodpeckerci/plugin-trivy docker tag to v1.2.0 [[#4289](https://github.com/woodpecker-ci/woodpecker/pull/4289)]
 - chore(deps): update docker.io/techknowlogick/xgo docker tag to go-1.23.x [[#4282](https://github.com/woodpecker-ci/woodpecker/pull/4282)]
