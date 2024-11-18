@@ -20,6 +20,27 @@ import (
 	"strings"
 )
 
+type ApprovalMode string
+
+const (
+	RequireApprovalNone         ApprovalMode = "none"          // require approval for no events
+	RequireApprovalForks        ApprovalMode = "forks"         // require approval for PRs from forks (default)
+	RequireApprovalPullRequests ApprovalMode = "pull_requests" // require approval for all PRs
+	RequireApprovalAllEvents    ApprovalMode = "all_events"    // require approval for all external events
+)
+
+func (mode ApprovalMode) Valid() bool {
+	switch mode {
+	case RequireApprovalNone,
+		RequireApprovalForks,
+		RequireApprovalPullRequests,
+		RequireApprovalAllEvents:
+		return true
+	default:
+		return false
+	}
+}
+
 // Repo represents a repository.
 type Repo struct {
 	ID      int64 `json:"id,omitempty"                    xorm:"pk autoincr 'id'"`
@@ -41,7 +62,7 @@ type Repo struct {
 	Timeout                      int64          `json:"timeout,omitempty"               xorm:"timeout"`
 	Visibility                   RepoVisibility `json:"visibility"                      xorm:"varchar(10) 'visibility'"`
 	IsSCMPrivate                 bool           `json:"private"                         xorm:"private"`
-	IsTrusted                    bool           `json:"trusted"                         xorm:"trusted"`
+	RequireApproval              ApprovalMode   `json:"require_approval"          xorm:"varchar(50) require_approval"`
 	IsGated                      bool           `json:"gated"                           xorm:"gated"`
 	IsActive                     bool           `json:"active"                          xorm:"active"`
 	AllowPull                    bool           `json:"allow_pr"                        xorm:"allow_pr"`
@@ -109,7 +130,7 @@ func (r *Repo) Update(from *Repo) {
 // RepoPatch represents a repository patch object.
 type RepoPatch struct {
 	Config                       *string         `json:"config_file,omitempty"`
-	IsTrusted                    *bool           `json:"trusted,omitempty"`
+	RequireApproval              *string         `json:"require_approval,omitempty"`
 	IsGated                      *bool           `json:"gated,omitempty"`
 	Timeout                      *int64          `json:"timeout,omitempty"`
 	Visibility                   *string         `json:"visibility,omitempty"`
