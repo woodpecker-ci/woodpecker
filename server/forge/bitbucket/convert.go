@@ -179,6 +179,7 @@ func convertPullHook(from *internal.PullRequestHook) *model.Pipeline {
 		Author:    from.Actor.Login,
 		Sender:    from.Actor.Login,
 		Timestamp: from.PullRequest.Updated.UTC().Unix(),
+		FromFork:  from.PullRequest.Source.Repo.UUID != from.PullRequest.Dest.Repo.UUID,
 	}
 
 	if from.PullRequest.State == stateClosed {

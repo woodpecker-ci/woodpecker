@@ -1,6 +1,10 @@
 <template>
-  <Settings :title="$t('repo.settings.crons.crons')" :desc="$t('repo.settings.crons.desc')" docs-url="docs/usage/cron">
-    <template #titleActions>
+  <Settings
+    :title="$t('repo.settings.crons.crons')"
+    :description="$t('repo.settings.crons.desc')"
+    docs-url="docs/usage/cron"
+  >
+    <template #headerActions>
       <Button
         v-if="selectedCron"
         start-icon="back"
