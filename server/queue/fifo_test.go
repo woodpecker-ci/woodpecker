@@ -283,7 +283,6 @@ func TestFifoErrorsMultiThread(t *testing.T) {
 		go func(i int) {
 			for {
 				fmt.Printf("Worker %d started\n", i)
-				waitForProcess()
 				got, err := q.Poll(ctx, 1, filterFnTrue)
 				if err != nil && errors.Is(err, context.Canceled) {
 					return
