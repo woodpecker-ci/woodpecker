@@ -167,8 +167,6 @@ const i18n = useI18n();
 const repo = inject<Ref<Repo>>('repo');
 const repoSettings = ref<RepoSettings>();
 
-const pathSeparator = '/';
-
 function loadRepoSettings() {
   if (!repo) {
     throw new Error('Unexpected: Repo should be set');
