@@ -1,6 +1,6 @@
 # Changelog
 
-## [2.8.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.8.0) - 2024-11-13
+## [2.8.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.8.0) - 2024-11-18
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -8,6 +8,7 @@
 
 ### 📈 Enhancement
 
+- Deprecate and warn of list syntax of environment [[#4358](https://github.com/woodpecker-ci/woodpecker/pull/4358)]
 - Process workflow logs in batches (#4045) [[#4356](https://github.com/woodpecker-ci/woodpecker/pull/4356)]
 
 ### 🐛 Bug Fixes
