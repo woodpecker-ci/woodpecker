@@ -135,7 +135,7 @@ func convertMergeRequestHook(hook *gitlab.MergeEvent, req *http.Request) (int, *
 		pipeline.Avatar = getUserAvatar(pipeline.Email)
 	}
 
-	pipeline.Title = obj.Title
+	pipeline.PRTitleDescription = obj.Title + "\n" + obj.Description
 	pipeline.ForgeURL = obj.URL
 	pipeline.PullRequestLabels = convertLabels(hook.Labels)
 
@@ -266,7 +266,7 @@ func convertReleaseHook(hook *gitlab.ReleaseEvent) (*model.Repo, *model.Pipeline
 		Event:    model.EventRelease,
 		Commit:   hook.Commit.ID,
 		ForgeURL: hook.URL,
-		Message:  fmt.Sprintf("created release %s", hook.Name),
+		Message:  hook.Name + "\n" + hook.Description,
 		Sender:   hook.Commit.Author.Name,
 		Author:   hook.Commit.Author.Name,
 		Email:    hook.Commit.Author.Email,
