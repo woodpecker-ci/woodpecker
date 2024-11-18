@@ -74,8 +74,9 @@ steps:
 
   deploy-prepare:
     image: *alpine_image
-    secrets:
-      - BOT_PRIVATE_KEY
+    environment:
+      BOT_PRIVATE_KEY:
+        from_secret: BOT_PRIVATE_KEY
     commands:
       - apk add openssh-client git
       - mkdir -p $HOME/.ssh
@@ -127,8 +128,9 @@ steps:
 
   deploy:
     image: *alpine_image
-    secrets:
-      - BOT_PRIVATE_KEY
+    environment:
+      BOT_PRIVATE_KEY:
+        from_secret: BOT_PRIVATE_KEY
     commands:
       - apk add openssh-client rsync git
       - mkdir -p $HOME/.ssh
