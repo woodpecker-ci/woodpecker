@@ -1,13 +1,16 @@
 <template>
   <Settings
     :title="$t('secrets.secrets')"
-    :desc="$t('admin.settings.secrets.desc')"
+    :description="$t('admin.settings.secrets.desc')"
     docs-url="docs/usage/secrets"
-    :warning="$t('admin.settings.secrets.warning')"
   >
-    <template #titleActions>
+    <template #headerActions>
       <Button v-if="selectedSecret" :text="$t('secrets.show')" start-icon="back" @click="selectedSecret = undefined" />
       <Button v-else :text="$t('secrets.add')" start-icon="plus" @click="showAddSecret" />
+    </template>
+
+    <template #headerEnd>
+      <Warning class="text-sm mt-4" :text="$t('admin.settings.secrets.warning')" />
     </template>
 
     <SecretList
@@ -34,6 +37,7 @@ import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import Button from '~/components/atomic/Button.vue';
+import Warning from '~/components/atomic/Warning.vue';
 import Settings from '~/components/layout/Settings.vue';
 import SecretEdit from '~/components/secrets/SecretEdit.vue';
 import SecretList from '~/components/secrets/SecretList.vue';

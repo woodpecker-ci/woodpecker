@@ -1,6 +1,6 @@
 <template>
-  <Settings :title="$t('registries.credentials')" :desc="$t('registries.desc')" docs-url="docs/usage/registries">
-    <template #titleActions>
+  <Settings :title="$t('registries.credentials')" :description="$t('registries.desc')" docs-url="docs/usage/registries">
+    <template #headerActions>
       <Button
         v-if="selectedRegistry"
         :text="$t('registries.show')"

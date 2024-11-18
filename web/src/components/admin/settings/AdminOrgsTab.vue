@@ -1,5 +1,5 @@
 <template>
-  <Settings :title="$t('admin.settings.orgs.orgs')" :desc="$t('admin.settings.orgs.desc')">
+  <Settings :title="$t('admin.settings.orgs.orgs')" :description="$t('admin.settings.orgs.desc')">
     <div class="space-y-4 text-wp-text-100">
       <ListItem
         v-for="org in orgs"
