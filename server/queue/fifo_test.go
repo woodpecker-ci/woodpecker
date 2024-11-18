@@ -71,6 +71,8 @@ func TestFifoExpire(t *testing.T) {
 	t.Cleanup(func() { cancel(nil) })
 
 	q, _ := NewMemoryQueue(ctx).(*fifo)
+	assert.NotNil(t, q)
+
 	dummyTask := genDummyTask()
 
 	q.extension = 0
@@ -93,6 +95,8 @@ func TestFifoWait(t *testing.T) {
 	t.Cleanup(func() { cancel(nil) })
 
 	q, _ := NewMemoryQueue(ctx).(*fifo)
+	assert.NotNil(t, q)
+
 	dummyTask := genDummyTask()
 
 	assert.NoError(t, q.Push(ctx, dummyTask))
@@ -150,6 +154,8 @@ func TestFifoDependencies(t *testing.T) {
 	}
 
 	q, _ := NewMemoryQueue(ctx).(*fifo)
+	assert.NotNil(t, q)
+
 	assert.NoError(t, q.PushAtOnce(ctx, []*model.Task{task2, task1}))
 
 	waitForProcess()
@@ -184,6 +190,8 @@ func TestFifoErrors(t *testing.T) {
 	}
 
 	q, _ := NewMemoryQueue(ctx).(*fifo)
+	assert.NotNil(t, q)
+
 	assert.NoError(t, q.PushAtOnce(ctx, []*model.Task{task2, task3, task1}))
 
 	waitForProcess()
@@ -221,6 +229,8 @@ func TestFifoErrors2(t *testing.T) {
 	}
 
 	q, _ := NewMemoryQueue(ctx).(*fifo)
+	assert.NotNil(t, q)
+
 	assert.NoError(t, q.PushAtOnce(ctx, []*model.Task{task2, task3, task1}))
 
 	for i := 0; i < 2; i++ {
@@ -261,6 +271,8 @@ func TestFifoErrorsMultiThread(t *testing.T) {
 	}
 
 	q, _ := NewMemoryQueue(ctx).(*fifo)
+	assert.NotNil(t, q)
+
 	assert.NoError(t, q.PushAtOnce(ctx, []*model.Task{task2, task3, task1}))
 
 	obtainedWorkCh := make(chan *model.Task)
@@ -269,6 +281,7 @@ func TestFifoErrorsMultiThread(t *testing.T) {
 		go func(i int) {
 			for {
 				fmt.Printf("Worker %d started\n", i)
+				waitForProcess()
 				got, err := q.Poll(ctx, 1, filterFnTrue)
 				assert.NoError(t, err)
 				obtainedWorkCh <- got
@@ -339,6 +352,8 @@ func TestFifoTransitiveErrors(t *testing.T) {
 	}
 
 	q, _ := NewMemoryQueue(ctx).(*fifo)
+	assert.NotNil(t, q)
+
 	assert.NoError(t, q.PushAtOnce(ctx, []*model.Task{task2, task3, task1}))
 
 	waitForProcess()
@@ -379,6 +394,8 @@ func TestFifoCancel(t *testing.T) {
 	}
 
 	q, _ := NewMemoryQueue(ctx).(*fifo)
+	assert.NotNil(t, q)
+
 	assert.NoError(t, q.PushAtOnce(ctx, []*model.Task{task2, task3, task1}))
 
 	_, _ = q.Poll(ctx, 1, filterFnTrue)
@@ -400,6 +417,8 @@ func TestFifoPause(t *testing.T) {
 	t.Cleanup(func() { cancel(nil) })
 
 	q, _ := NewMemoryQueue(ctx).(*fifo)
+	assert.NotNil(t, q)
+
 	dummyTask := genDummyTask()
 
 	var wg sync.WaitGroup
@@ -431,6 +450,8 @@ func TestFifoPauseResume(t *testing.T) {
 	t.Cleanup(func() { cancel(nil) })
 
 	q, _ := NewMemoryQueue(ctx).(*fifo)
+	assert.NotNil(t, q)
+
 	dummyTask := genDummyTask()
 
 	q.Pause()
@@ -458,6 +479,8 @@ func TestWaitingVsPending(t *testing.T) {
 	}
 
 	q, _ := NewMemoryQueue(ctx).(*fifo)
+	assert.NotNil(t, q)
+
 	assert.NoError(t, q.PushAtOnce(ctx, []*model.Task{task2, task3, task1}))
 
 	got, _ := q.Poll(ctx, 1, filterFnTrue)
