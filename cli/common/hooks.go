@@ -17,9 +17,9 @@ var (
 	cancelWaitForUpdate context.CancelCauseFunc
 )
 
-func Before(ctx context.Context, c *cli.Command) error {
+func Before(ctx context.Context, c *cli.Command) (context.Context, error) {
 	if err := setupGlobalLogger(ctx, c); err != nil {
-		return err
+		return ctx, err
 	}
 
 	go func(context.Context) {
@@ -50,7 +50,7 @@ func Before(ctx context.Context, c *cli.Command) error {
 		}
 	}(ctx)
 
-	return config.Load(ctx, c)
+	return ctx, config.Load(ctx, c)
 }
 
 func After(_ context.Context, _ *cli.Command) error {
