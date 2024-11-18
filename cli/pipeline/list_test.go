@@ -110,7 +110,7 @@ func TestPipelineList(t *testing.T) {
 			mockClient.On("PipelineList", mock.Anything).Return(tt.pipelines, tt.pipelineErr)
 			mockClient.On("RepoLookup", mock.Anything).Return(&woodpecker.Repo{ID: tt.repoID}, nil)
 
-			command := pipelineListCmd
+			command := buildPipelineListCmd()
 			command.Writer = io.Discard
 			command.Action = func(ctx context.Context, c *cli.Command) error {
 				pipelines, err := pipelineList(ctx, c, mockClient)
