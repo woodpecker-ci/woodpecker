@@ -91,7 +91,7 @@ func PostRepo(c *gin.Context) {
 		repo.Update(from)
 	} else {
 		repo = from
-		repo.RequireApproval = model.RequireApprovalPullRequests
+		repo.RequireApproval = model.RequireApprovalForks
 		repo.AllowPull = true
 		repo.AllowDeploy = false
 		repo.NetrcOnlyTrusted = true

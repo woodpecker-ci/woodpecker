@@ -27,7 +27,7 @@ Otherwise, these users will be able to steal secrets that are only available for
 
 ## Require approval for
 
-To prevent malicious pipelines from extracting secrets or running harmful commands or to prevent accidental pipeline runs, you can require approval for an additional review process. If you enable this option, a pipeline will be put on hold after creation and will only continue after approval. The least restrictive setting is `Approvals for forked repositories`. Forked repositories will always require approval as they can't be trusted in general.
+To prevent malicious pipelines from extracting secrets or running harmful commands or to prevent accidental pipeline runs, you can require approval for an additional review process. Depending on the enabled option, a pipeline will be put on hold after creation and will only continue after approval. The default restrictive setting is `Approvals for forked repositories`.
 
 ## Trusted
 
