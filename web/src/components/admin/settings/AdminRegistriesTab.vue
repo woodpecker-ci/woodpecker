@@ -1,11 +1,10 @@
 <template>
   <Settings
     :title="$t('registries.registries')"
-    :desc="$t('admin.settings.registries.desc')"
+    :description="$t('admin.settings.registries.desc')"
     docs-url="docs/usage/registries"
-    :warning="$t('admin.settings.registries.warning')"
   >
-    <template #titleActions>
+    <template #headerActions>
       <Button
         v-if="selectedRegistry"
         :text="$t('registries.show')"
@@ -13,6 +12,10 @@
         @click="selectedRegistry = undefined"
       />
       <Button v-else :text="$t('registries.add')" start-icon="plus" @click="showAddRegistry" />
+    </template>
+
+    <template #headerEnd>
+      <Warning class="text-sm mt-4" :text="$t('admin.settings.registries.warning')" />
     </template>
 
     <RegistryList
@@ -39,6 +42,7 @@ import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import Button from '~/components/atomic/Button.vue';
+import Warning from '~/components/atomic/Warning.vue';
 import Settings from '~/components/layout/Settings.vue';
 import RegistryEdit from '~/components/registry/RegistryEdit.vue';
 import RegistryList from '~/components/registry/RegistryList.vue';
