@@ -4,7 +4,7 @@
       {{ $t('repositories') }}
     </template>
 
-    <template #titleActions>
+    <template #headerActions>
       <Button :to="{ name: 'repo-add' }" start-icon="plus" :text="$t('repo.add')" />
     </template>
 

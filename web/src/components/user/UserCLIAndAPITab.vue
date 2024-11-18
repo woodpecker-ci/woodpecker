@@ -1,7 +1,7 @@
 <template>
-  <Settings :title="$t('user.settings.cli_and_api.cli_and_api')" :desc="$t('user.settings.cli_and_api.desc')">
+  <Settings :title="$t('user.settings.cli_and_api.cli_and_api')" :description="$t('user.settings.cli_and_api.desc')">
     <InputField :label="$t('user.settings.cli_and_api.cli_usage')">
-      <template #titleActions>
+      <template #headerActions>
         <a :href="cliDownload" target="_blank" class="ml-4 text-wp-link-100 hover:text-wp-link-200">{{
           $t('user.settings.cli_and_api.download_cli')
         }}</a>
@@ -10,14 +10,14 @@
     </InputField>
 
     <InputField :label="$t('user.settings.cli_and_api.token')">
-      <template #titleActions>
+      <template #headerActions>
         <Button class="ml-auto" :text="$t('user.settings.cli_and_api.reset_token')" @click="resetToken" />
       </template>
       <pre class="code-box">{{ token }}</pre>
     </InputField>
 
     <InputField :label="$t('user.settings.cli_and_api.api_usage')">
-      <template #titleActions>
+      <template #headerActions>
         <a
           v-if="enableSwagger"
           :href="`${address}/swagger/index.html`"

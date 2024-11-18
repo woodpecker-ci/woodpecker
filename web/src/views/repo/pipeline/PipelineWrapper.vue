@@ -19,7 +19,7 @@
       </span>
     </template>
 
-    <template #titleActions>
+    <template #headerActions>
       <div class="flex md:items-center flex-col gap-2 md:flex-row md:justify-between min-w-0">
         <div class="flex content-start gap-2 min-w-0">
           <PipelineStatusIcon :status="pipeline.status" class="flex flex-shrink-0" />
