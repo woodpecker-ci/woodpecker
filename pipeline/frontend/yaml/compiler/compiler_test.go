@@ -285,7 +285,7 @@ func TestCompilerCompile(t *testing.T) {
 				Image:    "bash",
 				Commands: []string{"env"},
 				Environment: yaml_base_types.EnvironmentMap{
-					"MISSING": map[string]string{"from_secret": "missing"}, // TODO fix!!!
+					"MISSING": map[string]any{"from_secret": "missing"},
 				},
 			}}}},
 			backConf:    nil,
