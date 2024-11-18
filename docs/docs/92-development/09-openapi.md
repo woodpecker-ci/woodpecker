@@ -57,4 +57,3 @@ make generate-openapi
 ```bash title="update the Markdown in the ./docs folder"
 make docs
 ```
-
