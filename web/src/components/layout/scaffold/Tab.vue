@@ -1,40 +1,32 @@
-<template>
-  <div v-if="$slots.default" v-show="isActive" :aria-hidden="!isActive">
-    <slot />
-  </div>
-</template>
+<template><span /></template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue';
+import { onMounted } from 'vue';
+import type { RouteLocationRaw } from 'vue-router';
 
 import type { IconNames } from '~/components/atomic/Icon.vue';
-import { useTabsClient, type Tab } from '~/compositions/useTabs';
+import { useTabsClient } from '~/compositions/useTabs';
 
 const props = defineProps<{
-  to?: string;
-  alternativeRoute?: string;
+  to: RouteLocationRaw;
   title: string;
   icon?: IconNames;
   iconClass?: string;
+  matchChildren?: boolean;
 }>();
 
-const { tabs, activeTab } = useTabsClient();
-const tab = ref<Tab>();
+const { tabs } = useTabsClient();
 
 onMounted(() => {
-  tab.value = {
-    to: props.to || props.title.toLocaleLowerCase().replace(' ', '-') || tabs.value.length.toString(),
-    alternativeRoute: props.alternativeRoute,
-    title: props.title,
-    icon: props.icon,
-    iconClass: props.iconClass,
-  };
-
   // don't add tab if tab id is already present
   if (!tabs.value.find(({ to }) => to === props.to)) {
-    tabs.value.push(tab.value);
+    tabs.value.push({
+      to: props.to,
+      title: props.title,
+      icon: props.icon,
+      iconClass: props.iconClass,
+      matchChildren: props.matchChildren,
+    });
   }
 });
-
-const isActive = computed(() => tab.value && tab.value.to === activeTab.value);
 </script>

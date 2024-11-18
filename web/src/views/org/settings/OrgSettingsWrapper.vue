@@ -11,9 +11,13 @@
       </span>
     </template>
 
-    <Tab to="org-settings-secrets" :title="$t('secrets.secrets')" />
-    <Tab to="org-settings-registries" :title="$t('registries.registries')" />
-    <Tab v-if="useConfig().userRegisteredAgents" to="org-settings-agents" :title="$t('admin.settings.agents.agents')" />
+    <Tab :to="{ name: 'org-settings-secrets' }" :title="$t('secrets.secrets')" />
+    <Tab :to="{ name: 'org-settings-registries' }" :title="$t('registries.registries')" />
+    <Tab
+      v-if="useConfig().userRegisteredAgents"
+      :to="{ name: 'org-settings-agents' }"
+      :title="$t('admin.settings.agents.agents')"
+    />
 
     <router-view />
   </Scaffold>

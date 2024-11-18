@@ -38,12 +38,12 @@
       />
     </template>
 
-    <Tab to="repo" :title="$t('repo.activity')" />
-    <Tab to="repo-branches" alternative-route="repo-branch" :title="$t('repo.branches')" />
+    <Tab :to="{ name: 'repo' }" :title="$t('repo.activity')" />
+    <Tab :to="{ name: 'repo-branches' }" match-children :title="$t('repo.branches')" />
     <Tab
       v-if="repo.pr_enabled && repo.allow_pr"
-      to="repo-pull-requests"
-      alternative-route="repo-pull-request"
+      :to="{ name: 'repo-pull-requests' }"
+      match-children
       :title="$t('repo.pull_requests')"
     />
 

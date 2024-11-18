@@ -3,11 +3,15 @@
     <template #title>{{ $t('user.settings.settings') }}</template>
     <template #headerActions><Button :text="$t('logout')" :to="`${address}/logout`" /></template>
 
-    <Tab to="user" :title="$t('user.settings.general.general')" />
-    <Tab to="user-secrets" :title="$t('secrets.secrets')" />
-    <Tab to="user-registries" :title="$t('registries.registries')" />
-    <Tab to="user-cli-and-api" :title="$t('user.settings.cli_and_api.cli_and_api')" />
-    <Tab v-if="useConfig().userRegisteredAgents" to="user-agents" :title="$t('admin.settings.agents.agents')" />
+    <Tab :to="{ name: 'user' }" :title="$t('user.settings.general.general')" />
+    <Tab :to="{ name: 'user-secrets' }" :title="$t('secrets.secrets')" />
+    <Tab :to="{ name: 'user-registries' }" :title="$t('registries.registries')" />
+    <Tab :to="{ name: 'user-cli-and-api' }" :title="$t('user.settings.cli_and_api.cli_and_api')" />
+    <Tab
+      v-if="useConfig().userRegisteredAgents"
+      :to="{ name: 'user-agents' }"
+      :title="$t('admin.settings.agents.agents')"
+    />
 
     <router-view />
   </Scaffold>

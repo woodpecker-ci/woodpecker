@@ -73,10 +73,10 @@
       </div>
     </template>
 
-    <Tab to="repo-pipeline" :title="$t('repo.pipeline.tasks')" />
+    <Tab :to="{ name: 'repo-pipeline' }" :title="$t('repo.pipeline.tasks')" />
     <Tab
       v-if="pipeline.errors && pipeline.errors.length > 0"
-      to="repo-pipeline-errors"
+      :to="{ name: 'repo-pipeline-errors' }"
       icon="attention"
       :title="
         pipeline.errors.some((e) => !e.is_warning)
@@ -88,12 +88,12 @@
     <Tab to="repo-pipeline-config" :title="$t('repo.pipeline.config')" />
     <Tab
       v-if="pipeline.changed_files && pipeline.changed_files.length > 0"
-      to="repo-pipeline-changed-files"
+      :to="{ name: 'repo-pipeline-changed-files' }"
       :title="$t('repo.pipeline.files', { files: pipeline.changed_files?.length })"
     />
     <Tab
       v-if="repoPermissions && repoPermissions.push"
-      to="repo-pipeline-debug"
+      :to="{ name: 'repo-pipeline-debug' }"
       :title="$t('repo.pipeline.debug.title')"
     />
 

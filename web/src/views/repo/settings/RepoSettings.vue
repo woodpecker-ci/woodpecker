@@ -16,12 +16,12 @@
       </span>
     </template>
 
-    <Tab to="repo-settings" :title="$t('repo.settings.general.general')" />
-    <Tab to="repo-settings-secrets" :title="$t('secrets.secrets')" />
-    <Tab to="repo-settings-registries" :title="$t('registries.registries')" />
-    <Tab to="repo-settings-crons" :title="$t('repo.settings.crons.crons')" />
-    <Tab to="repo-settings-badge" :title="$t('repo.settings.badge.badge')" />
-    <Tab to="repo-settings-actions" :title="$t('repo.settings.actions.actions')" />
+    <Tab :to="{ name: 'repo-settings' }" :title="$t('repo.settings.general.general')" />
+    <Tab :to="{ name: 'repo-settings-secrets' }" :title="$t('secrets.secrets')" />
+    <Tab :to="{ name: 'repo-settings-registries' }" :title="$t('registries.registries')" />
+    <Tab :to="{ name: 'repo-settings-crons' }" :title="$t('repo.settings.crons.crons')" />
+    <Tab :to="{ name: 'repo-settings-badge' }" :title="$t('repo.settings.badge.badge')" />
+    <Tab :to="{ name: 'repo-settings-actions' }" :title="$t('repo.settings.actions.actions')" />
 
     <router-view />
   </Scaffold>

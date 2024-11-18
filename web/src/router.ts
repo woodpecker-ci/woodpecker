@@ -42,29 +42,38 @@ const routes: RouteRecordRaw[] = [
           },
           {
             path: 'branches',
-            name: 'repo-branches',
-            component: (): Component => import('~/views/repo/RepoBranches.vue'),
             meta: { repoHeader: true },
+            children: [
+              {
+                path: '',
+                name: 'repo-branches',
+                component: (): Component => import('~/views/repo/RepoBranches.vue'),
+              },
+              {
+                path: ':branch',
+                name: 'repo-branch',
+                component: (): Component => import('~/views/repo/RepoBranch.vue'),
+                props: (route) => ({ branch: route.params.branch }),
+              },
+            ],
           },
-          {
-            path: 'branches/:branch',
-            name: 'repo-branch',
-            component: (): Component => import('~/views/repo/RepoBranch.vue'),
-            meta: { repoHeader: true },
-            props: (route) => ({ branch: route.params.branch }),
-          },
+
           {
             path: 'pull-requests',
-            name: 'repo-pull-requests',
-            component: (): Component => import('~/views/repo/RepoPullRequests.vue'),
             meta: { repoHeader: true },
-          },
-          {
-            path: 'pull-requests/:pullRequest',
-            name: 'repo-pull-request',
-            component: (): Component => import('~/views/repo/RepoPullRequest.vue'),
-            meta: { repoHeader: true },
-            props: (route) => ({ pullRequest: route.params.pullRequest }),
+            children: [
+              {
+                path: '',
+                name: 'repo-pull-requests',
+                component: (): Component => import('~/views/repo/RepoPullRequests.vue'),
+              },
+              {
+                path: ':pullRequest',
+                name: 'repo-pull-request',
+                component: (): Component => import('~/views/repo/RepoPullRequest.vue'),
+                props: (route) => ({ pullRequest: route.params.pullRequest }),
+              },
+            ],
           },
           {
             path: 'pipeline/:pipelineId',
