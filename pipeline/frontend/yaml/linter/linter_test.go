@@ -162,12 +162,20 @@ func TestLintErrors(t *testing.T) {
 			want: "Cannot configure both entrypoint and settings",
 		},
 		{
-			from: "steps: { build: { image: golang, settings: { test: 'true' }, environment: [ 'TEST=true' ] } }",
+			from: "steps: { build: { image: golang, settings: { test: 'true' }, environment: { TEST: 'true' } } }",
 			want: "Should not configure both environment and settings",
 		},
 		{
 			from: "{steps: { build: { image: plugins/docker, settings: { test: 'true' } } }, when: { branch: main, event: push } } }",
 			want: "Cannot use once by default privileged plugin 'plugins/docker', if needed add it too WOODPECKER_PLUGINS_PRIVILEGED",
+		},
+		{
+			from: "steps: { build: { image: golang, environment: [ 'TEST=true' ] } }",
+			want: "List syntax for `environment` is deprecated, use map syntax instead",
+		},
+		{
+			from: "steps: { build: { image: golang, secrets: [ { source: mysql_username, target: mysql_username } ] } }",
+			want: "Alternative names syntax for `secrets` is deprecated, use list syntax or `from_secret` instead",
 		},
 	}
 
