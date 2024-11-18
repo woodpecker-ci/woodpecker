@@ -286,9 +286,6 @@
         "directory": {
           "$ref": "#/definitions/step_directory"
         },
-        "secrets": {
-          "$ref": "#/definitions/step_secrets"
-        },
         "when": {
           "$ref": "#/definitions/step_when"
         },
@@ -616,14 +613,6 @@
         "type": ["boolean", "string", "number", "array", "object"]
       }
     },
-    "step_secrets": {
-      "description": "Pass secrets to a pipeline step at runtime. Read more: https://woodpecker-ci.org/docs/usage/secrets",
-      "type": "array",
-      "items": {
-        "type": "string"
-      },
-      "minLength": 1
-    },
     "step_settings": {
       "description": "Change the settings of your plugin. Read more: https://woodpecker-ci.org/docs/usage/plugins/overview",
       "type": "object",
@@ -844,9 +833,6 @@
         },
         "directory": {
           "$ref": "#/definitions/step_directory"
-        },
-        "secrets": {
-          "$ref": "#/definitions/step_secrets"
         },
         "settings": {
           "$ref": "#/definitions/step_settings"

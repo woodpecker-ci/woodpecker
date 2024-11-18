@@ -2,7 +2,7 @@
   <component
     :is="to === undefined ? 'button' : httpLink ? 'a' : 'router-link'"
     v-bind="btnAttrs"
-    class="relative flex items-center py-1 px-2 rounded-md border shadow-sm cursor-pointer transition-all duration-150 overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed"
+    class="relative flex flex-shrink-0 whitespace-nowrap items-center py-1 px-2 rounded-md border shadow-sm cursor-pointer transition-all duration-150 overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed"
     :class="{
       'bg-wp-control-neutral-100 hover:bg-wp-control-neutral-200 border-wp-control-neutral-300 text-wp-text-100':
         color === 'gray',
@@ -16,7 +16,7 @@
   >
     <slot>
       <Icon v-if="startIcon" :name="startIcon" class="!w-6 !h-6" :class="{ invisible: isLoading, 'mr-1': text }" />
-      <span :class="{ invisible: isLoading }" class="flex-shrink-0">{{ text }}</span>
+      <span :class="{ invisible: isLoading }">{{ text }}</span>
       <Icon v-if="endIcon" :name="endIcon" class="ml-2 w-6 h-6" :class="{ invisible: isLoading }" />
       <div
         v-if="isLoading"

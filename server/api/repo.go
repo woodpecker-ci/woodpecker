@@ -362,7 +362,6 @@ func GetRepoPermissions(c *gin.Context) {
 func GetRepoBranches(c *gin.Context) {
 	_store := store.FromContext(c)
 	repo := session.Repo(c)
-	user := session.User(c)
 	_forge, err := server.Config.Services.Manager.ForgeFromRepo(repo)
 	if err != nil {
 		log.Error().Err(err).Msg("Cannot get forge from repo")
@@ -370,9 +369,15 @@ func GetRepoBranches(c *gin.Context) {
 		return
 	}
 
-	forge.Refresh(c, _forge, _store, user)
+	repoUser, err := _store.GetUser(repo.UserID)
+	if err != nil {
+		handleDBError(c, err)
+		return
+	}
 
-	branches, err := _forge.Branches(c, user, repo, session.Pagination(c))
+	forge.Refresh(c, _forge, _store, repoUser)
+
+	branches, err := _forge.Branches(c, repoUser, repo, session.Pagination(c))
 	if err != nil {
 		log.Error().Err(err).Msg("failed to load branches")
 		c.String(http.StatusInternalServerError, "failed to load branches: %s", err)
@@ -396,7 +401,6 @@ func GetRepoBranches(c *gin.Context) {
 func GetRepoPullRequests(c *gin.Context) {
 	_store := store.FromContext(c)
 	repo := session.Repo(c)
-	user := session.User(c)
 	_forge, err := server.Config.Services.Manager.ForgeFromRepo(repo)
 	if err != nil {
 		log.Error().Err(err).Msg("Cannot get forge from repo")
@@ -404,9 +408,15 @@ func GetRepoPullRequests(c *gin.Context) {
 		return
 	}
 
-	forge.Refresh(c, _forge, _store, user)
+	repoUser, err := _store.GetUser(repo.UserID)
+	if err != nil {
+		handleDBError(c, err)
+		return
+	}
 
-	prs, err := _forge.PullRequests(c, user, repo, session.Pagination(c))
+	forge.Refresh(c, _forge, _store, repoUser)
+
+	prs, err := _forge.PullRequests(c, repoUser, repo, session.Pagination(c))
 	if err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
