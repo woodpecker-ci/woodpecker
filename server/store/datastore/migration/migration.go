@@ -46,6 +46,7 @@ var migrationTasks = []*xormigrate.Migration{
 	&addOrgAgents,
 	&addCustomLabelsToAgent,
 	&splitTrusted,
+	&correctPotentialCorruptOrgsUsersRelation,
 	&gatedToRequireApproval,
 }
 

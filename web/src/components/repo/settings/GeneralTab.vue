@@ -105,8 +105,9 @@
         </template>
         <template #description>
           <i18n-t keypath="repo.settings.general.pipeline_path.desc" tag="p" class="text-sm text-wp-text-alt-100">
-            <span class="code-box-inline px-1">{{ $t('repo.settings.general.pipeline_path.desc_path_example') }}</span>
-            <span class="code-box-inline px-1">{{ pathSeparator }}</span>
+            <span class="code-box-inline">{{ $t('repo.settings.general.pipeline_path.desc_path_example') }}</span>
+            <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
+            <span class="code-box-inline">/</span>
           </i18n-t>
         </template>
       </InputField>

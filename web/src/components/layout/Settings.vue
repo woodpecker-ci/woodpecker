@@ -1,18 +1,19 @@
 <template>
   <Panel>
-    <div class="flex flex-row border-b mb-4 pb-4 items-center dark:border-wp-background-100">
-      <div class="ml-2">
-        <h1 class="text-xl text-wp-text-100 flex items-center gap-1">
-          {{ title }}
-          <DocsLink v-if="docsUrl" :topic="title" :url="docsUrl" />
-        </h1>
+    <div class="flex flex-col border-b mb-4 pb-4 justify-center dark:border-wp-background-100">
+      <h1 class="text-xl text-wp-text-100 flex items-center gap-1">
+        {{ title }}
+        <DocsLink v-if="docsUrl" :topic="title" :url="docsUrl" />
+      </h1>
+
+      <div class="flex flex-wrap gap-x-4 gap-y-2 items-center justify-between">
         <p v-if="desc" class="text-sm text-wp-text-alt-100">{{ desc }}</p>
-        <Warning v-if="warning" class="text-sm mt-1" :text="warning" />
+        <div v-if="$slots.titleActions">
+          <slot name="titleActions" />
+        </div>
       </div>
 
-      <div class="ml-auto">
-        <slot v-if="$slots.titleActions" name="titleActions" />
-      </div>
+      <Warning v-if="warning" class="text-sm mt-4" :text="warning" />
     </div>
 
     <slot />

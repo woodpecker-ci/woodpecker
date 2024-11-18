@@ -39,9 +39,16 @@ Only server admins can set this option. If you are not a server admin this optio
 
 :::
 
-## Only inject netrc credentials into trusted containers
+## Only inject netrc credentials into trusted clone plugins
 
-Cloning pipeline step may need git credentials. They are injected via netrc. By default, they're only injected if this option is enabled, the repo is trusted ([see above](#trusted)) or the image is a trusted clone image. If you uncheck the option, git credentials will be injected into any container in clone step.
+The clone step may require git credentials (e.g. for private repos) which are injected via `netrc`.
+
+By default, they are only injected into trusted clone plugins listed in the env var `WOODPECKER_PLUGINS_TRUSTED_CLONE`.
+If this option is disabled, the git credentials are injected into every clone plugin, regardless of whether it is trusted or not.
+
+:::note
+This option has no effect on steps other than the clone step.
+:::
 
 ## Project visibility
 
