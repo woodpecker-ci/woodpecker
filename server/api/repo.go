@@ -91,6 +91,7 @@ func PostRepo(c *gin.Context) {
 		repo.Update(from)
 	} else {
 		repo = from
+		repo.RequireApproval = model.RequireApprovalForks
 		repo.AllowPull = true
 		repo.AllowDeploy = false
 		repo.NetrcOnlyTrusted = true
@@ -250,8 +251,20 @@ func PatchRepo(c *gin.Context) {
 	if in.AllowDeploy != nil {
 		repo.AllowDeploy = *in.AllowDeploy
 	}
-	if in.IsGated != nil {
-		repo.IsGated = *in.IsGated
+
+	if in.RequireApproval != nil {
+		if mode := model.ApprovalMode(*in.RequireApproval); mode.Valid() {
+			repo.RequireApproval = mode
+		} else {
+			c.String(http.StatusBadRequest, "Invalid require-approval setting")
+			return
+		}
+	} else if in.IsGated != nil { // TODO: remove isGated in next major release
+		if *in.IsGated {
+			repo.RequireApproval = model.RequireApprovalAllEvents
+		} else {
+			repo.RequireApproval = model.RequireApprovalForks
+		}
 	}
 	if in.Timeout != nil {
 		repo.Timeout = *in.Timeout

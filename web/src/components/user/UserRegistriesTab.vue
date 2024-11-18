@@ -1,10 +1,10 @@
 <template>
   <Settings
     :title="$t('registries.registries')"
-    :desc="$t('user.settings.registries.desc')"
+    :description="$t('user.settings.registries.desc')"
     docs-url="docs/usage/registries"
   >
-    <template #titleActions>
+    <template #headerActions>
       <Button
         v-if="selectedRegistry"
         :text="$t('registries.show')"
