@@ -36,7 +36,7 @@ import (
 
 func main() {
 	// set openapi infos
-	setupOpenApiStaticConfig()
+	setupOpenAPIStaticConfig()
 
 	basePath := path.Join("..", "..")
 	filePath := path.Join(basePath, "docs", "openapi.json")
