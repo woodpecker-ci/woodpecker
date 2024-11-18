@@ -18,15 +18,15 @@ import (
 	"encoding/base64"
 )
 
-func GenerateContainerConf(commands []string, goos string) (env map[string]string, entry []string) {
+func GenerateContainerConf(commands []string, goos, workDir string) (env map[string]string, entry []string) {
 	env = make(map[string]string)
 	if goos == "windows" {
-		env["CI_SCRIPT"] = base64.StdEncoding.EncodeToString([]byte(generateScriptWindows(commands)))
+		env["CI_SCRIPT"] = base64.StdEncoding.EncodeToString([]byte(generateScriptWindows(commands, workDir)))
 		env["SHELL"] = "powershell.exe"
 		// cspell:disable-next-line
 		entry = []string{"powershell", "-noprofile", "-noninteractive", "-command", "[System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($Env:CI_SCRIPT)) | iex"}
 	} else {
-		env["CI_SCRIPT"] = base64.StdEncoding.EncodeToString([]byte(generateScriptPosix(commands)))
+		env["CI_SCRIPT"] = base64.StdEncoding.EncodeToString([]byte(generateScriptPosix(commands, workDir)))
 		env["SHELL"] = "/bin/sh"
 		entry = []string{"/bin/sh", "-c", "echo $CI_SCRIPT | base64 -d | /bin/sh -e"}
 	}
