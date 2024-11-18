@@ -176,7 +176,7 @@ func (l *Linter) lintContainerDeprecations(config *WorkflowConfig, c *types.Cont
 	if c.Environment.WasSlice {
 		err = multierr.Append(err, &errorTypes.PipelineError{
 			Type:    errorTypes.PipelineErrorTypeDeprecation,
-			Message: "Please use map syntax. List syntax is deprecated.",
+			Message: "List syntax for `environment` is deprecated, use map syntax instead",
 			Data: errors.DeprecationErrorData{
 				File:  config.File,
 				Field: fmt.Sprintf("%s.%s.environment", field, c.Name),

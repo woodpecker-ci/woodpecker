@@ -39,6 +39,7 @@ func TestUnmarshalSecrets(t *testing.T) {
 						Target: "mysql_password",
 					},
 				},
+				LegacyFormat: false,
 			},
 		},
 		{
@@ -50,6 +51,7 @@ func TestUnmarshalSecrets(t *testing.T) {
 						Target: "mysql_username",
 					},
 				},
+				LegacyFormat: true,
 			},
 		},
 		{
@@ -65,6 +67,7 @@ func TestUnmarshalSecrets(t *testing.T) {
 						Target: "redis_username",
 					},
 				},
+				LegacyFormat: true,
 			},
 		},
 	}

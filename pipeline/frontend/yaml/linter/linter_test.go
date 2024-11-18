@@ -171,7 +171,7 @@ func TestLintErrors(t *testing.T) {
 		},
 		{
 			from: "steps: { build: { image: golang, environment: [ 'TEST=true' ] } }",
-			want: "Please use map syntax. List syntax is deprecated.",
+			want: "List syntax for `environment` is deprecated, use map syntax instead",
 		},
 		{
 			from: "steps: { build: { image: golang, secrets: [ { source: mysql_username, target: mysql_username } ] } }",

@@ -333,27 +333,12 @@ func (s *RPC) Done(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 }
 
 // Log writes a log entry to the database and publishes it to the pubsub.
-func (s *RPC) Log(c context.Context, rpcLogEntry *rpc.LogEntry) error {
-	// convert rpc log_entry to model.log_entry
-	step, err := s.store.StepByUUID(rpcLogEntry.StepUUID)
+// An explicit stepUUID makes it obvious that all entries must come from the same step.
+func (s *RPC) Log(c context.Context, stepUUID string, rpcLogEntries []*rpc.LogEntry) error {
+	step, err := s.store.StepByUUID(stepUUID)
 	if err != nil {
-		return fmt.Errorf("could not find step with uuid %s in store: %w", rpcLogEntry.StepUUID, err)
+		return fmt.Errorf("could not find step with uuid %s in store: %w", stepUUID, err)
 	}
-	logEntry := &model.LogEntry{
-		StepID: step.ID,
-		Time:   rpcLogEntry.Time,
-		Line:   rpcLogEntry.Line,
-		Data:   rpcLogEntry.Data,
-		Type:   model.LogEntryType(rpcLogEntry.Type),
-	}
-
-	// make sure writes to pubsub are non blocking (https://github.com/woodpecker-ci/woodpecker/blob/c919f32e0b6432a95e1a6d3d0ad662f591adf73f/server/logging/log.go#L9)
-	go func() {
-		// write line to listening web clients
-		if err := s.logger.Write(c, logEntry.StepID, logEntry); err != nil {
-			log.Error().Err(err).Msgf("rpc server could not write to logger")
-		}
-	}()
 
 	agent, err := s.getAgentFromContext(c)
 	if err != nil {
@@ -365,7 +350,34 @@ func (s *RPC) Log(c context.Context, rpcLogEntry *rpc.LogEntry) error {
 		return err
 	}
 
-	return server.Config.Services.LogStore.LogAppend(logEntry)
+	var logEntries []*model.LogEntry
+
+	for _, rpcLogEntry := range rpcLogEntries {
+		if rpcLogEntry.StepUUID != stepUUID {
+			return fmt.Errorf("expected step UUID %s, got %s", stepUUID, rpcLogEntry.StepUUID)
+		}
+		logEntries = append(logEntries, &model.LogEntry{
+			StepID: step.ID,
+			Time:   rpcLogEntry.Time,
+			Line:   rpcLogEntry.Line,
+			Data:   rpcLogEntry.Data,
+			Type:   model.LogEntryType(rpcLogEntry.Type),
+		})
+	}
+
+	// make sure writes to pubsub are non blocking (https://github.com/woodpecker-ci/woodpecker/blob/c919f32e0b6432a95e1a6d3d0ad662f591adf73f/server/logging/log.go#L9)
+	go func() {
+		// write line to listening web clients
+		if err := s.logger.Write(c, step.ID, logEntries); err != nil {
+			log.Error().Err(err).Msgf("rpc server could not write to logger")
+		}
+	}()
+
+	if err = server.Config.Services.LogStore.LogAppend(step, logEntries); err != nil {
+		log.Error().Err(err).Msg("could not store log entries")
+	}
+
+	return nil
 }
 
 func (s *RPC) RegisterAgent(ctx context.Context, platform, backend, version string, capacity int32) (int64, error) {

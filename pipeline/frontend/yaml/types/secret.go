@@ -19,7 +19,8 @@ import "gopkg.in/yaml.v3"
 type (
 	// Secrets defines a collection of secrets.
 	Secrets struct {
-		Secrets []*Secret
+		Secrets      []*Secret
+		LegacyFormat bool
 	}
 
 	// Secret defines a container secret.
@@ -44,5 +45,6 @@ func (s *Secrets) UnmarshalYAML(value *yaml.Node) error {
 		}
 		return nil
 	}
+	s.LegacyFormat = true
 	return yaml.Unmarshal(y, &s.Secrets)
 }
