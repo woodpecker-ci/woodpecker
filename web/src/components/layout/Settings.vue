@@ -7,13 +7,12 @@
       </h1>
 
       <div class="flex flex-wrap gap-x-4 gap-y-2 items-center justify-between">
-        <p v-if="desc" class="text-sm text-wp-text-alt-100">{{ desc }}</p>
-        <div v-if="$slots.titleActions">
-          <slot name="titleActions" />
+        <p v-if="description" class="text-sm text-wp-text-alt-100">{{ description }}</p>
+        <div v-if="$slots.headerActions">
+          <slot name="headerActions" />
         </div>
       </div>
-
-      <Warning v-if="warning" class="text-sm mt-4" :text="warning" />
+      <slot name="headerEnd" />
     </div>
 
     <slot />
@@ -22,13 +21,11 @@
 
 <script setup lang="ts">
 import DocsLink from '~/components/atomic/DocsLink.vue';
-import Warning from '~/components/atomic/Warning.vue';
 import Panel from '~/components/layout/Panel.vue';
 
 defineProps<{
   title: string;
-  desc?: string;
+  description?: string;
   docsUrl?: string;
-  warning?: string;
 }>();
 </script>
