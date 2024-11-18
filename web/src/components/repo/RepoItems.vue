@@ -12,7 +12,6 @@
         <div class="col-span-2 text-wp-text-100">
           <div v-if="pipeline" class="flex gap-x-1 items-center">
             <PipelineStatusIcon v-if="pipeline" :status="pipeline.status" />
-            <Icon v-else name="new" class="text-wp-text-100" />
             <span class="whitespace-nowrap overflow-hidden overflow-ellipsis">{{ shortMessage }}</span>
           </div>
 
@@ -25,22 +24,22 @@
           <div v-if="pipeline" class="flex gap-x-4 items-center">
             <div class="flex items-center gap-x-1">
               <span :title="pipelineEventTitle">
-                <Icon v-if="pipeline.event === 'pull_request'" name="pull-request" size="22" />
-                <Icon v-else-if="pipeline.event === 'pull_request_closed'" name="pull-request-closed" size="22" />
-                <Icon v-else-if="pipeline.event === 'deployment'" name="deployment" size="22" />
-                <Icon v-else-if="pipeline.event === 'tag' || pipeline.event === 'release'" name="tag" size="22" />
-                <Icon v-else-if="pipeline.event === 'cron'" name="push" size="22" />
-                <Icon v-else-if="pipeline.event === 'manual'" name="manual-pipeline" size="22" />
-                <Icon v-else name="push" size="22" />
+                <Icon v-if="pipeline.event === 'pull_request'" name="pull-request" size="20" />
+                <Icon v-else-if="pipeline.event === 'pull_request_closed'" name="pull-request-closed" size="20" />
+                <Icon v-else-if="pipeline.event === 'deployment'" name="deployment" size="20" />
+                <Icon v-else-if="pipeline.event === 'tag' || pipeline.event === 'release'" name="tag" size="20" />
+                <Icon v-else-if="pipeline.event === 'cron'" name="push" size="20" />
+                <Icon v-else-if="pipeline.event === 'manual'" name="manual-pipeline" size="20" />
+                <Icon v-else name="push" size="20" />
               </span>
               <span class="truncate">{{ prettyRef }}</span>
             </div>
             <div class="hidden sm:flex gap-x-1 items-center">
-              <Icon name="commit" size="22" />
+              <Icon name="commit" size="20" />
               <span class="truncate">{{ pipeline.commit.slice(0, 10) }}</span>
             </div>
             <div class="flex flex-shrink-0 gap-x-1 items-center ml-auto">
-              <Icon name="since" size="22" />
+              <Icon name="since" size="20" />
               <span>{{ since }}</span>
             </div>
           </div>

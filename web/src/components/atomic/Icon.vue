@@ -175,8 +175,7 @@ export type IconNames =
   | 'attention'
   | 'spinner'
   | 'error'
-  | 'remove'
-  | 'new';
+  | 'remove';
 
 defineProps<{
   name: IconNames;
