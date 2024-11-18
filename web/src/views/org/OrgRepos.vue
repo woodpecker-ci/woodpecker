@@ -13,7 +13,7 @@
       />
     </template>
 
-    <div class="space-y-4">
+    <div class="flex flex-col gap-4">
       <RepoItems v-for="repo in searchedRepos" :key="repo.id" :repo="repo" />
     </div>
     <div v-if="(searchedRepos || []).length <= 0" class="text-center">
