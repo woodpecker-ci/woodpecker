@@ -23,7 +23,7 @@
         v-if="user?.admin"
         class="navbar-icon relative"
         :title="$t('settings')"
-        :to="{ name: 'admin-settings-info' }"
+        :to="{ name: 'admin-settings' }"
       >
         <Icon name="settings" />
         <div
@@ -35,7 +35,7 @@
       <ActivePipelines v-if="user" class="navbar-icon" />
       <IconButton
         v-if="user"
-        :to="{ name: 'user-general' }"
+        :to="{ name: 'user' }"
         :title="$t('user.settings.settings')"
         class="navbar-icon !p-1.5"
       >

@@ -17,7 +17,7 @@
       <IconButton :href="repo.forge_url" :title="$t('repo.open_in_forge')" :icon="forgeIcon" class="forge" />
       <IconButton
         v-if="repoPermissions.admin"
-        :to="{ name: 'repo-settings-general' }"
+        :to="{ name: 'repo-settings' }"
         :title="$t('settings')"
         icon="settings"
       />

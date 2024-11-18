@@ -103,14 +103,13 @@ const routes: RouteRecordRaw[] = [
           },
           {
             path: 'settings',
-            name: 'repo-settings',
             component: (): Component => import('~/views/repo/settings/RepoSettings.vue'),
             meta: { authentication: 'required' },
             props: true,
             children: [
               {
                 path: '',
-                name: 'repo-settings-general',
+                name: 'repo-settings',
                 component: (): Component => import('~/views/repo/settings/General.vue'),
                 props: true,
               },
@@ -208,14 +207,13 @@ const routes: RouteRecordRaw[] = [
   },
   {
     path: `${rootPath}/admin`,
-    name: 'admin-settings',
     component: (): Component => import('~/views/admin/AdminSettingsWrapper.vue'),
     props: true,
     meta: { authentication: 'required' },
     children: [
       {
         path: '',
-        name: 'admin-settings-info',
+        name: 'admin-settings',
         component: (): Component => import('~/views/admin/AdminInfo.vue'),
         props: true,
       },
@@ -266,14 +264,13 @@ const routes: RouteRecordRaw[] = [
 
   {
     path: `${rootPath}/user`,
-    name: 'user',
     component: (): Component => import('~/views/user/UserWrapper.vue'),
     meta: { authentication: 'required' },
     props: true,
     children: [
       {
         path: '',
-        name: 'user-general',
+        name: 'user',
         component: (): Component => import('~/views/user/UserGeneral.vue'),
         props: true,
       },

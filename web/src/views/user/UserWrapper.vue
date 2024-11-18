@@ -3,7 +3,7 @@
     <template #title>{{ $t('user.settings.settings') }}</template>
     <template #headerActions><Button :text="$t('logout')" :to="`${address}/logout`" /></template>
 
-    <Tab to="user-general" :title="$t('user.settings.general.general')" />
+    <Tab to="user" :title="$t('user.settings.general.general')" />
     <Tab to="user-secrets" :title="$t('secrets.secrets')" />
     <Tab to="user-registries" :title="$t('registries.registries')" />
     <Tab to="user-cli-and-api" :title="$t('user.settings.cli_and_api.cli_and_api')" />
