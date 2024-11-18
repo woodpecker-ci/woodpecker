@@ -67,6 +67,21 @@
       "success": "Repository enabled"
     },
     "open_in_forge": "Open repository in forge",
+    "visibility": {
+      "visibility": "Project visibility",
+      "public": {
+        "public": "Public",
+        "desc": "Every user can see your project without being logged in."
+      },
+      "private": {
+        "private": "Private",
+        "desc": "Only you and other owners of the repository can see this project."
+      },
+      "internal": {
+        "internal": "Internal",
+        "desc": "Only authenticated users of the Woodpecker instance can see this project."
+      }
+    },
     "settings": {
       "not_allowed": "You are not allowed to access this repository's settings",
       "general": {
@@ -105,21 +120,6 @@
           "security": {
             "security": "Security",
             "desc": "Underlying pipeline containers get access to security privileges."
-          }
-        },
-        "visibility": {
-          "visibility": "Project visibility",
-          "public": {
-            "public": "Public",
-            "desc": "Every user can see your project without being logged in."
-          },
-          "private": {
-            "private": "Private",
-            "desc": "Only you and other owners of the repository can see this project."
-          },
-          "internal": {
-            "internal": "Internal",
-            "desc": "Only authenticated users of the Woodpecker instance can see this project."
           }
         },
         "timeout": {

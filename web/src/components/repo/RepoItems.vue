@@ -6,10 +6,7 @@
       <div class="grid grid-cols-[auto,1fr] gap-y-1 items-center">
         <div class="text-wp-text-100 text-lg">{{ `${repo.owner} / ${repo.name}` }}</div>
         <div class="ml-auto">
-          <Badge
-            v-if="repo.visibility === RepoVisibility.Public"
-            :label="$t('repo.settings.general.visibility.public.public')"
-          />
+          <Badge v-if="repo.visibility === RepoVisibility.Public" :label="$t('repo.visibility.public.public')" />
         </div>
 
         <div class="col-span-2 text-wp-text-100">
