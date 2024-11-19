@@ -41,8 +41,10 @@ export const useRepoStore = defineStore('repos', () => {
     await Promise.all(
       _ownedRepos.map(async (repo) => {
         const lastPipeline = await apiClient.getPipelineList(repo.id, { page: 1, perPage: 1 });
-        pipelineStore.setPipeline(repo.id, lastPipeline?.[0]);
-        repo.last_pipeline = lastPipeline?.[0].number;
+        if (lastPipeline.length === 1) {
+          pipelineStore.setPipeline(repo.id, lastPipeline[0]);
+          repo.last_pipeline = lastPipeline[0].number;
+        }
         setRepo(repo);
       }),
     );

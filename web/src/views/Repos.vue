@@ -11,17 +11,17 @@
     <Transition name="fade">
       <div v-if="search === ''" class="flex flex-col">
         <div class="gap-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2">
-          <RepoItem v-for="repo in repoListLastAccess" :key="repo.id" :repo="repo" />
+          <RepoItem v-for="repo in reposLastAccess" :key="repo.id" :repo="repo" />
         </div>
 
         <p class="text-wp-text-100 mt-12 mb-2">{{ $t('all_repositories') }}</p>
         <div class="flex flex-col gap-4">
-          <RepoItem v-for="repo in repoListActivity" :key="repo.id" :repo="repo" />
+          <RepoItem v-for="repo in reposLastActivity" :key="repo.id" :repo="repo" />
         </div>
       </div>
 
       <div v-else class="flex flex-col gap-4">
-        <RepoItem v-for="repo in repoListActivity" :key="repo.id" :repo="repo" />
+        <RepoItem v-for="repo in reposLastActivity" :key="repo.id" :repo="repo" />
       </div>
     </Transition>
   </Scaffold>
@@ -42,20 +42,20 @@ const repoStore = useRepoStore();
 const { sortReposByLastAccess, sortReposByLastActivity, repoWithLastPipeline } = useRepos();
 const repos = computed(() => Object.values(repoStore.ownedRepos).map((r) => repoWithLastPipeline(r)));
 
-const repoListLastAccess = computed(() => sortReposByLastAccess(repos.value || []).slice(0, 4));
+const reposLastAccess = computed(() => sortReposByLastAccess(repos.value || []).slice(0, 4));
 
 const search = ref('');
 const { searchedRepos } = useRepoSearch(
   computed(() => {
     if (search.value === '') {
-      return repos.value.filter((r) => !repoListLastAccess.value.includes(r));
+      return repos.value.filter((r) => !reposLastAccess.value.includes(r));
     }
 
     return repos.value;
   }),
   search,
 );
-const repoListActivity = computed(() => sortReposByLastActivity(searchedRepos.value || []));
+const reposLastActivity = computed(() => sortReposByLastActivity(searchedRepos.value || []));
 
 onMounted(async () => {
   await repoStore.loadRepos();
