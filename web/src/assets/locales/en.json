@@ -507,7 +507,7 @@
     "none": "None",
     "none_desc": "Every event triggers builds, including pull requests. This setting can be dangerous and is only recommended for private instances.",
     "forks": "Pull request from forked repository",
-    "pull_requests": "Any pull requests",
+    "pull_requests": "All pull requests",
     "all_events": "Any event trigger"
   }
 }
