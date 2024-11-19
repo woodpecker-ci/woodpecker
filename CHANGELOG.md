@@ -52,6 +52,7 @@
 
 ### 📈 Enhancement
 
+- Use KeyValueEditor for DeployPipelinePopup too [[#4412](https://github.com/woodpecker-ci/woodpecker/pull/4412)]
 - Use separate routes instead of anchors [[#4285](https://github.com/woodpecker-ci/woodpecker/pull/4285)]
 - Untangle settings / header slots [[#4403](https://github.com/woodpecker-ci/woodpecker/pull/4403)]
 - Fix responsiveness of the settings template [[#4383](https://github.com/woodpecker-ci/woodpecker/pull/4383)]
