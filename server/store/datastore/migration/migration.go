@@ -47,11 +47,8 @@ var migrationTasks = []*xormigrate.Migration{
 	&addCustomLabelsToAgent,
 	&splitTrusted,
 	&correctPotentialCorruptOrgsUsersRelation,
-<<<<<<< HEAD
-	&removeRepoNetrcOnlyTrusted,
-=======
 	&gatedToRequireApproval,
->>>>>>> main
+	&removeRepoNetrcOnlyTrusted,
 }
 
 var allBeans = []any{
