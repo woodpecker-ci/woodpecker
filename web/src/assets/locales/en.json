@@ -71,9 +71,9 @@
       "not_allowed": "You are not allowed to access this repository's settings",
       "general": {
         "general": "General",
-        "project": "Repository settings",
+        "project": "Project settings",
         "save": "Save settings",
-        "success": "Repository settings updated",
+        "success": "Project settings updated",
         "pipeline_path": {
           "path": "Pipeline path",
           "default": "By default: .woodpecker/*.{'{yaml,yml}'} -> .woodpecker.yaml -> .woodpecker.yml",
