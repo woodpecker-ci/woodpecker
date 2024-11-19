@@ -11,7 +11,7 @@
     <Transition name="fade">
       <div v-if="search === ''" class="flex flex-col">
         <div class="gap-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2">
-          <RepoItem v-for="repo in repoListAccess" :key="repo.id" :repo="repo" />
+          <RepoItem v-for="repo in repoListLastAccess" :key="repo.id" :repo="repo" />
         </div>
 
         <p class="text-wp-text-100 mt-12 mb-2">{{ $t('all_repositories') }}</p>
@@ -42,13 +42,13 @@ const repoStore = useRepoStore();
 const { sortReposByLastAccess, sortReposByLastActivity, repoWithLastPipeline } = useRepos();
 const repos = computed(() => Object.values(repoStore.ownedRepos).map((r) => repoWithLastPipeline(r)));
 
-const repoListAccess = computed(() => sortReposByLastAccess(repos.value || []).slice(0, 4));
+const repoListLastAccess = computed(() => sortReposByLastAccess(repos.value || []).slice(0, 4));
 
 const search = ref('');
 const { searchedRepos } = useRepoSearch(
   computed(() => {
     if (search.value === '') {
-      return repos.value.filter((r) => !repoListAccess.value.includes(r));
+      return repos.value.filter((r) => !repoListLastAccess.value.includes(r));
     }
 
     return repos.value;
