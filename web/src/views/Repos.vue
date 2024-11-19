@@ -41,16 +41,21 @@ const repoStore = useRepoStore();
 
 const { sortReposByLastAccess, sortReposByLastActivity, repoWithLastPipeline } = useRepos();
 const repos = computed(() => Object.values(repoStore.ownedRepos).map((r) => repoWithLastPipeline(r)));
-const search = ref('');
-
-const { searchedRepos } = useRepoSearch(repos, search);
 
 const repoListAccess = computed(() => sortReposByLastAccess(repos.value || []).slice(0, 4));
-const repoListActivity = computed(() =>
-  sortReposByLastActivity(searchedRepos.value || []).filter(
-    (r) => search.value !== '' || !repoListAccess.value.includes(r),
-  ),
+
+const search = ref('');
+const { searchedRepos } = useRepoSearch(
+  computed(() => {
+    if (search.value === '') {
+      return repos.value.filter((r) => !repoListAccess.value.includes(r));
+    }
+
+    return repos.value;
+  }),
+  search,
 );
+const repoListActivity = computed(() => sortReposByLastActivity(searchedRepos.value || []));
 
 onMounted(async () => {
   await repoStore.loadRepos();
