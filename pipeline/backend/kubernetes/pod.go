@@ -55,13 +55,6 @@ func mkPod(step *types.Step, config *config, podName, goos string, options Backe
 		return nil, err
 	}
 
-	if len(step.DNS) != 0 {
-		spec.DNSConfig = &v1.PodDNSConfig{
-			Nameservers: step.DNS,
-			Searches:    step.DNSSearch,
-		}
-	}
-
 	container, err := podContainer(step, podName, goos, options, nsp)
 	if err != nil {
 		return nil, err
@@ -167,6 +160,16 @@ func podSpec(step *types.Step, config *config, options BackendOptions, nsp nativ
 	spec.Volumes, err = pvcVolumes(step.Volumes)
 	if err != nil {
 		return spec, err
+	}
+
+	if len(step.DNS) != 0 || len(step.DNSSearch) != 0 {
+		spec.DNSConfig = &v1.PodDNSConfig{}
+		if len(step.DNS) != 0 {
+			spec.DNSConfig.Nameservers = step.DNS
+		}
+		if len(step.DNSSearch) != 0 {
+			spec.DNSConfig.Searches = step.DNSSearch
+		}
 	}
 
 	log.Trace().Msgf("using the image pull secrets: %v", config.ImagePullSecretNames)
