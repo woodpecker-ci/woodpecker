@@ -90,7 +90,7 @@
         },
         "netrc_only_trusted": {
           "netrc_only_trusted": "Custom trusted clone plugins",
-          "desc": "Clone plugins listed here will get access to netrc credentials. This option has no effect on non-clone steps."
+          "desc": "Plugins listed here will get access to netrc credentials that can be used to clone repositories from the forge."
         },
         "trusted": {
           "trusted": "Trusted",
