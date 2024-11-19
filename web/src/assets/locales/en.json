@@ -70,8 +70,8 @@
     "settings": {
       "not_allowed": "You are not allowed to access this repository's settings",
       "general": {
-        "general": "Repository settings",
-        "project": "General",
+        "general": "General",
+        "project": "Repository settings",
         "save": "Save settings",
         "success": "Repository settings updated",
         "pipeline_path": {

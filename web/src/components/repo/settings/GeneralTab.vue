@@ -1,9 +1,9 @@
 <template>
-  <Settings :title="$t('repo.settings.general.general')">
+  <Settings :title="$t('repo.settings.general.project')">
     <form v-if="repoSettings" class="flex flex-col" @submit.prevent="saveRepoSettings">
       <InputField
         docs-url="docs/usage/project-settings#project-settings-1"
-        :label="$t('repo.settings.general.project')"
+        :label="$t('repo.settings.general.general')"
       >
         <Checkbox
           v-model="repoSettings.allow_pr"
