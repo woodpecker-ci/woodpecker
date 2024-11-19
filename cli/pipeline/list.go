@@ -24,31 +24,33 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker"
 )
 
-//nolint:mnd
-var pipelineListCmd = &cli.Command{
-	Name:      "ls",
-	Usage:     "show pipeline history",
-	ArgsUsage: "<repo-id|repo-full-name>",
-	Action:    List,
-	Flags: append(common.OutputFlags("table"), []cli.Flag{
-		&cli.StringFlag{
-			Name:  "branch",
-			Usage: "branch filter",
-		},
-		&cli.StringFlag{
-			Name:  "event",
-			Usage: "event filter",
-		},
-		&cli.StringFlag{
-			Name:  "status",
-			Usage: "status filter",
-		},
-		&cli.IntFlag{
-			Name:  "limit",
-			Usage: "limit the list size",
-			Value: 25,
-		},
-	}...),
+func buildPipelineListCmd() *cli.Command {
+	return &cli.Command{
+		Name:      "ls",
+		Usage:     "show pipeline history",
+		ArgsUsage: "<repo-id|repo-full-name>",
+		Action:    List,
+		Flags: append(common.OutputFlags("table"), []cli.Flag{
+			&cli.StringFlag{
+				Name:  "branch",
+				Usage: "branch filter",
+			},
+			&cli.StringFlag{
+				Name:  "event",
+				Usage: "event filter",
+			},
+			&cli.StringFlag{
+				Name:  "status",
+				Usage: "status filter",
+			},
+			&cli.IntFlag{
+				Name:  "limit",
+				Usage: "limit the list size",
+				//nolint:mnd
+				Value: 25,
+			},
+		}...),
+	}
 }
 
 func List(ctx context.Context, c *cli.Command) error {
