@@ -55,6 +55,13 @@ func mkPod(step *types.Step, config *config, podName, goos string, options Backe
 		return nil, err
 	}
 
+	if len(step.DNS) != 0 {
+		spec.DNSConfig = &v1.PodDNSConfig{
+			Nameservers: step.DNS,
+			Searches:    step.DNSSearch,
+		}
+	}
+
 	container, err := podContainer(step, podName, goos, options, nsp)
 	if err != nil {
 		return nil, err

@@ -47,6 +47,7 @@ type (
 		Ports          []string           `yaml:"ports,omitempty"`
 		DependsOn      base.StringOrSlice `yaml:"depends_on,omitempty"`
 		DNS            base.StringOrSlice `yaml:"dns,omitempty"`
+		DNSSearch      base.StringOrSlice `yaml:"dns_search,omitempty"`
 
 		// TODO: remove base.EnvironmentMap and use map[string]any after v3.0.0 release
 		Environment base.EnvironmentMap `yaml:"environment,omitempty"`
@@ -58,11 +59,10 @@ type (
 		Privileged bool `yaml:"privileged,omitempty"`
 
 		// Undocumented
-		Devices     []string           `yaml:"devices,omitempty"`
-		DNSSearch   base.StringOrSlice `yaml:"dns_search,omitempty"`
-		ExtraHosts  []string           `yaml:"extra_hosts,omitempty"`
-		NetworkMode string             `yaml:"network_mode,omitempty"`
-		Tmpfs       []string           `yaml:"tmpfs,omitempty"`
+		Devices     []string `yaml:"devices,omitempty"`
+		ExtraHosts  []string `yaml:"extra_hosts,omitempty"`
+		NetworkMode string   `yaml:"network_mode,omitempty"`
+		Tmpfs       []string `yaml:"tmpfs,omitempty"`
 	}
 )
 

@@ -771,13 +771,15 @@ Only allowed if 'Trusted Network' option is enabled in repo settings by an admin
 
 ### `dns`
 
-If the backend engine understands to change the dns server, this option will be used to alter the default dns to a custom one for a specific step.
+If the backend engine understands to change the dns server and lookup domain,
+this options will be used to alter the default dns config to a custom one for a specific step.
 
 ```yaml
 steps:
   - name: build
     image: plugin/abc
-    dns: 1.1.1.1
+    dns: 1.2.3.4
+    dns_search: "internal.company"
 ```
 
 ## Privileged mode
