@@ -90,7 +90,7 @@
         },
         "netrc_only_trusted": {
           "netrc_only_trusted": "Only inject git credentials into trusted clone plugins",
-          "desc": "When enabled, Git credentials are accessible only to trusted clone plugins specified in WOODPECKER_PLUGINS_TRUSTED_CLONE. Otherwise, custom clone plugins can use git credentials. This setting has no affect on non-clone steps."
+          "desc": "When enabled, git credentials are accessible only to trusted clone plugins specified in WOODPECKER_PLUGINS_TRUSTED_CLONE. Otherwise, custom clone plugins can use git credentials. This setting has no affect on non-clone steps."
         },
         "trusted": {
           "trusted": "Trusted",
