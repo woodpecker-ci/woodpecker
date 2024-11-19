@@ -86,7 +86,7 @@
         },
         "allow_deploy": {
           "allow": "Allow deployments",
-          "desc": "Allow deployments from successful pipelines. Use this option only if you trust all users with push permissions."
+          "desc": "Permit 'deployment' runs for successful pipelines. All users with with push permissions can trigger these, so use with caution."
         },
         "netrc_only_trusted": {
           "netrc_only_trusted": "Only inject git credentials into trusted clone plugins",
