@@ -779,7 +779,7 @@ steps:
   - name: build
     image: plugin/abc
     dns: 1.2.3.4
-    dns_search: "internal.company"
+    dns_search: 'internal.company'
 ```
 
 ## Privileged mode
