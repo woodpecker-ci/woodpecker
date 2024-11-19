@@ -510,5 +510,6 @@
     "all_events": "All events from forge",
     "desc": "Prevent malicious pipelines from exposing secrets or running harmful tasks by approving them before execution."
   },
-  "all_repositories": "All repositories"
+  "all_repositories": "All repositories",
+  "no_search_results": "No results found"
 }

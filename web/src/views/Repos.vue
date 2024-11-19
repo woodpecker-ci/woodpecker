@@ -8,20 +8,24 @@
       <Button :to="{ name: 'repo-add' }" start-icon="plus" :text="$t('repo.add')" />
     </template>
 
-    <Transition name="fade">
-      <div v-if="search === ''" class="flex flex-col">
-        <div class="gap-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2">
+    <Transition name="fade" mode="out-in">
+      <div v-if="search === '' && repos.length > 0" class="gap-8 grid">
+        <div v-if="reposLastAccess.length > 0" class="gap-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2">
           <RepoItem v-for="repo in reposLastAccess" :key="repo.id" :repo="repo" />
         </div>
 
-        <p class="text-wp-text-100 mt-12 mb-2">{{ $t('all_repositories') }}</p>
         <div class="flex flex-col gap-4">
-          <RepoItem v-for="repo in reposLastActivity" :key="repo.id" :repo="repo" />
+          <h2 class="text-wp-text-100 text-lg">{{ $t('all_repositories') }}</h2>
+          <div class="flex flex-col gap-4">
+            <RepoItem v-for="repo in reposLastActivity" :key="repo.id" :repo="repo" />
+          </div>
         </div>
       </div>
-
-      <div v-else class="flex flex-col gap-4">
-        <RepoItem v-for="repo in reposLastActivity" :key="repo.id" :repo="repo" />
+      <div v-else class="flex flex-col">
+        <div v-if="reposLastActivity.length > 0" class="flex flex-col gap-4">
+          <RepoItem v-for="repo in reposLastActivity" :key="repo.id" :repo="repo" />
+        </div>
+        <span v-else class="text-wp-text-100 text-lg text-center">{{ $t('no_search_results') }}</span>
       </div>
     </Transition>
   </Scaffold>
@@ -45,16 +49,7 @@ const repos = computed(() => Object.values(repoStore.ownedRepos).map((r) => repo
 const reposLastAccess = computed(() => sortReposByLastAccess(repos.value || []).slice(0, 4));
 
 const search = ref('');
-const { searchedRepos } = useRepoSearch(
-  computed(() => {
-    if (search.value === '') {
-      return repos.value.filter((r) => !reposLastAccess.value.includes(r));
-    }
-
-    return repos.value;
-  }),
-  search,
-);
+const { searchedRepos } = useRepoSearch(repos, search);
 const reposLastActivity = computed(() => sortReposByLastActivity(searchedRepos.value || []));
 
 onMounted(async () => {
