@@ -8,7 +8,7 @@
       <IconButton
         v-if="orgPermissions.admin"
         icon="settings"
-        :to="{ name: org.is_user ? 'user' : 'org-settings' }"
+        :to="{ name: org.is_user ? 'user' : 'org-settings-secrets' }"
         :title="$t('settings')"
       />
     </template>
