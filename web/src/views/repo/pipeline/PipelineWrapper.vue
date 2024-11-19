@@ -85,7 +85,7 @@
       "
       :icon-class="pipeline.errors.some((e) => !e.is_warning) ? 'text-wp-state-error-100' : 'text-wp-state-warn-100'"
     />
-    <Tab to="repo-pipeline-config" :title="$t('repo.pipeline.config')" />
+    <Tab :to="{ name: 'repo-pipeline-config' }" :title="$t('repo.pipeline.config')" />
     <Tab
       v-if="pipeline.changed_files && pipeline.changed_files.length > 0"
       :to="{ name: 'repo-pipeline-changed-files' }"
@@ -102,7 +102,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, inject, onBeforeUnmount, onMounted, provide, ref, toRef, watch, type Ref } from 'vue';
+import { computed, inject, onBeforeUnmount, onMounted, ref, toRef, watch, type Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 
@@ -115,6 +115,7 @@ import PipelineStatusIcon from '~/components/repo/pipeline/PipelineStatusIcon.vu
 import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
 import { useFavicon } from '~/compositions/useFavicon';
+import { provide } from '~/compositions/useInjectProvide';
 import useNotifications from '~/compositions/useNotifications';
 import usePipeline from '~/compositions/usePipeline';
 import { useRouteBack } from '~/compositions/useRouteBack';
