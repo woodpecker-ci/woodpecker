@@ -52,7 +52,7 @@ func wrapDelete(c int64, err error) error {
 }
 
 func (s storage) paginate(p *model.ListOptions) *xorm.Session {
-	if p.All {
+	if p == nil || p.All {
 		return s.engine.NewSession()
 	}
 	if p.PerPage < 1 {
