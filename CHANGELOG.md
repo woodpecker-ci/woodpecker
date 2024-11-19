@@ -222,6 +222,7 @@
 
 ### Misc
 
+- Dont run pipeline on push events to renovate branches [[#4406](https://github.com/woodpecker-ci/woodpecker/pull/4406)]
 - Harden and correct fifo task queue tests [[#4377](https://github.com/woodpecker-ci/woodpecker/pull/4377)]
 - Kubernetes documentation enhancements [[#4374](https://github.com/woodpecker-ci/woodpecker/pull/4374)]
 - Use release-helper for release/* branches [[#4301](https://github.com/woodpecker-ci/woodpecker/pull/4301)]
