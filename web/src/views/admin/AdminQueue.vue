@@ -1,6 +1,6 @@
 <template>
-  <Settings :title="$t('admin.settings.queue.queue')" :desc="$t('admin.settings.queue.desc')">
-    <template #titleActions>
+  <Settings :title="$t('admin.settings.queue.queue')" :description="$t('admin.settings.queue.desc')">
+    <template #headerActions>
       <div v-if="queueInfo">
         <div class="flex items-center gap-2">
           <Button
@@ -78,6 +78,7 @@
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
+import AdminQueueStats from '~/components/admin/settings/queue/AdminQueueStats.vue';
 import Badge from '~/components/atomic/Badge.vue';
 import Button from '~/components/atomic/Button.vue';
 import Icon from '~/components/atomic/Icon.vue';
@@ -86,8 +87,6 @@ import Settings from '~/components/layout/Settings.vue';
 import useApiClient from '~/compositions/useApiClient';
 import useNotifications from '~/compositions/useNotifications';
 import type { QueueInfo } from '~/lib/api/types';
-
-import AdminQueueStats from './queue/AdminQueueStats.vue';
 
 const apiClient = useApiClient();
 const notifications = useNotifications();

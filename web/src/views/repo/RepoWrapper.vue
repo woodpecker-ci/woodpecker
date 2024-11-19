@@ -1,11 +1,5 @@
 <template>
-  <Scaffold
-    v-if="repo && repoPermissions && route.meta.repoHeader"
-    v-model:active-tab="activeTab"
-    enable-tabs
-    disable-tab-url-hash-mode
-    :go-back="goBack"
-  >
+  <Scaffold v-if="repo && repoPermissions && route.meta.repoHeader" enable-tabs>
     <template #title>
       <span class="flex">
         <router-link :to="{ name: 'org', params: { orgId: repo.org_id } }" class="hover:underline">{{
@@ -16,7 +10,7 @@
         {{ repo.name }}
       </span>
     </template>
-    <template #titleActions>
+    <template #headerActions>
       <a v-if="badgeUrl" :href="badgeUrl" target="_blank">
         <img :src="badgeUrl" />
       </a>
@@ -44,9 +38,14 @@
       />
     </template>
 
-    <Tab id="activity" :title="$t('repo.activity')" />
-    <Tab id="branches" :title="$t('repo.branches')" />
-    <Tab v-if="repo.pr_enabled && repo.allow_pr" id="pull_requests" :title="$t('repo.pull_requests')" />
+    <Tab :to="{ name: 'repo' }" :title="$t('repo.activity')" />
+    <Tab :to="{ name: 'repo-branches' }" match-children :title="$t('repo.branches')" />
+    <Tab
+      v-if="repo.pr_enabled && repo.allow_pr"
+      :to="{ name: 'repo-pull-requests' }"
+      match-children
+      :title="$t('repo.pull_requests')"
+    />
 
     <router-view />
   </Scaffold>
@@ -68,7 +67,6 @@ import useAuthentication from '~/compositions/useAuthentication';
 import useConfig from '~/compositions/useConfig';
 import { useForgeStore } from '~/compositions/useForgeStore';
 import useNotifications from '~/compositions/useNotifications';
-import { useRouteBack } from '~/compositions/useRouteBack';
 import type { Forge, RepoPermissions } from '~/lib/api/types';
 import { usePipelineStore } from '~/store/pipelines';
 import { useRepoStore } from '~/store/repos';
@@ -134,27 +132,4 @@ watch([repositoryId], () => {
 });
 
 const badgeUrl = computed(() => repo.value && `${config.rootPath}/api/badges/${repo.value.id}/status.svg`);
-
-const activeTab = computed({
-  get() {
-    if (route.name === 'repo-branches' || route.name === 'repo-branch') {
-      return 'branches';
-    }
-    if (route.name === 'repo-pull-requests' || route.name === 'repo-pull-request') {
-      return 'pull_requests';
-    }
-    return 'activity';
-  },
-  set(tab: string) {
-    if (tab === 'branches') {
-      router.push({ name: 'repo-branches' });
-    } else if (tab === 'pull_requests') {
-      router.push({ name: 'repo-pull-requests' });
-    } else {
-      router.push({ name: 'repo' });
-    }
-  },
-});
-
-const goBack = useRouteBack({ name: 'repos' });
 </script>

@@ -1,8 +1,16 @@
 <template>
-  <Settings :title="$t('secrets.secrets')" :desc="$t('user.settings.secrets.desc')" docs-url="docs/usage/secrets">
-    <template #titleActions>
+  <Settings
+    :title="$t('secrets.secrets')"
+    :description="$t('admin.settings.secrets.desc')"
+    docs-url="docs/usage/secrets"
+  >
+    <template #headerActions>
       <Button v-if="selectedSecret" :text="$t('secrets.show')" start-icon="back" @click="selectedSecret = undefined" />
       <Button v-else :text="$t('secrets.add')" start-icon="plus" @click="showAddSecret" />
+    </template>
+
+    <template #headerEnd>
+      <Warning class="text-sm mt-4" :text="$t('admin.settings.secrets.warning')" />
     </template>
 
     <SecretList
@@ -29,15 +37,16 @@ import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import Button from '~/components/atomic/Button.vue';
+import Warning from '~/components/atomic/Warning.vue';
 import Settings from '~/components/layout/Settings.vue';
 import SecretEdit from '~/components/secrets/SecretEdit.vue';
 import SecretList from '~/components/secrets/SecretList.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
-import useAuthentication from '~/compositions/useAuthentication';
 import useNotifications from '~/compositions/useNotifications';
 import { usePagination } from '~/compositions/usePaginate';
-import { WebhookEvents, type Secret } from '~/lib/api/types';
+import type { Secret } from '~/lib/api/types';
+import { WebhookEvents } from '~/lib/api/types';
 
 const emptySecret: Partial<Secret> = {
   name: '',
@@ -50,19 +59,11 @@ const apiClient = useApiClient();
 const notifications = useNotifications();
 const i18n = useI18n();
 
-const { user } = useAuthentication();
-if (!user) {
-  throw new Error('Unexpected: Unauthenticated');
-}
 const selectedSecret = ref<Partial<Secret>>();
 const isEditingSecret = computed(() => !!selectedSecret.value?.id);
 
 async function loadSecrets(page: number): Promise<Secret[] | null> {
-  if (!user) {
-    throw new Error('Unexpected: Unauthenticated');
-  }
-
-  return apiClient.getOrgSecretList(user.org_id, { page });
+  return apiClient.getGlobalSecretList({ page });
 }
 
 const { resetPage, data: secrets } = usePagination(loadSecrets, () => !selectedSecret.value);
@@ -73,9 +74,9 @@ const { doSubmit: createSecret, isLoading: isSaving } = useAsyncAction(async () 
   }
 
   if (isEditingSecret.value) {
-    await apiClient.updateOrgSecret(user.org_id, selectedSecret.value);
+    await apiClient.updateGlobalSecret(selectedSecret.value);
   } else {
-    await apiClient.createOrgSecret(user.org_id, selectedSecret.value);
+    await apiClient.createGlobalSecret(selectedSecret.value);
   }
   notifications.notify({
     title: isEditingSecret.value ? i18n.t('secrets.saved') : i18n.t('secrets.created'),
@@ -86,7 +87,7 @@ const { doSubmit: createSecret, isLoading: isSaving } = useAsyncAction(async () 
 });
 
 const { doSubmit: deleteSecret, isLoading: isDeleting } = useAsyncAction(async (_secret: Secret) => {
-  await apiClient.deleteOrgSecret(user.org_id, _secret.name);
+  await apiClient.deleteGlobalSecret(_secret.name);
   notifications.notify({ title: i18n.t('secrets.deleted'), type: 'success' });
   resetPage();
 });

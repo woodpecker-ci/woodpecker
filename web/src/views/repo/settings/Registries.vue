@@ -1,10 +1,6 @@
 <template>
-  <Settings
-    :title="$t('registries.registries')"
-    :desc="$t('org.settings.registries.desc')"
-    docs-url="docs/usage/registries"
-  >
-    <template #titleActions>
+  <Settings :title="$t('registries.credentials')" :description="$t('registries.desc')" docs-url="docs/usage/registries">
+    <template #headerActions>
       <Button
         v-if="selectedRegistry"
         :text="$t('registries.show')"
@@ -45,7 +41,7 @@ import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useNotifications from '~/compositions/useNotifications';
 import { usePagination } from '~/compositions/usePaginate';
-import type { Org, Registry } from '~/lib/api/types';
+import type { Registry, Repo } from '~/lib/api/types';
 
 const emptyRegistry: Partial<Registry> = {
   address: '',
@@ -57,36 +53,36 @@ const apiClient = useApiClient();
 const notifications = useNotifications();
 const i18n = useI18n();
 
-const org = inject<Ref<Org>>('org');
+const repo = inject<Ref<Repo>>('repo');
 const selectedRegistry = ref<Partial<Registry>>();
-const isEditing = computed(() => !!selectedRegistry.value?.id);
+const isEditingRegistry = computed(() => !!selectedRegistry.value?.id);
 
 async function loadRegistries(page: number): Promise<Registry[] | null> {
-  if (!org?.value) {
-    throw new Error("Unexpected: Can't load org");
+  if (!repo?.value) {
+    throw new Error("Unexpected: Can't load repo");
   }
 
-  return apiClient.getOrgRegistryList(org.value.id, { page });
+  return apiClient.getRegistryList(repo.value.id, { page });
 }
 
 const { resetPage, data: registries } = usePagination(loadRegistries, () => !selectedRegistry.value);
 
 const { doSubmit: createRegistry, isLoading: isSaving } = useAsyncAction(async () => {
-  if (!org?.value) {
-    throw new Error("Unexpected: Can't load org");
+  if (!repo?.value) {
+    throw new Error("Unexpected: Can't load repo");
   }
 
   if (!selectedRegistry.value) {
     throw new Error("Unexpected: Can't get registry");
   }
 
-  if (isEditing.value) {
-    await apiClient.updateOrgRegistry(org.value.id, selectedRegistry.value);
+  if (isEditingRegistry.value) {
+    await apiClient.updateRegistry(repo.value.id, selectedRegistry.value);
   } else {
-    await apiClient.createOrgRegistry(org.value.id, selectedRegistry.value);
+    await apiClient.createRegistry(repo.value.id, selectedRegistry.value);
   }
   notifications.notify({
-    title: isEditing.value ? i18n.t('registries.saved') : i18n.t('registries.created'),
+    title: isEditingRegistry.value ? i18n.t('registries.saved') : i18n.t('registries.created'),
     type: 'success',
   });
   selectedRegistry.value = undefined;
@@ -94,11 +90,12 @@ const { doSubmit: createRegistry, isLoading: isSaving } = useAsyncAction(async (
 });
 
 const { doSubmit: deleteRegistry, isLoading: isDeleting } = useAsyncAction(async (_registry: Registry) => {
-  if (!org?.value) {
-    throw new Error("Unexpected: Can't load org");
+  if (!repo?.value) {
+    throw new Error("Unexpected: Can't load repo");
   }
 
-  await apiClient.deleteOrgRegistry(org.value.id, _registry.address);
+  const registryAddress = encodeURIComponent(_registry.address);
+  await apiClient.deleteRegistry(repo.value.id, registryAddress);
   notifications.notify({ title: i18n.t('registries.deleted'), type: 'success' });
   resetPage();
 });

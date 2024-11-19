@@ -251,6 +251,13 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 			return nil, err
 		}
 
+		// only inject netrc if it's a trusted repo or a trusted plugin
+		if c.securityTrustedPipeline || (container.IsPlugin() && container.IsTrustedCloneImage(c.trustedClonePlugins)) {
+			for k, v := range c.cloneEnv {
+				step.Environment[k] = v
+			}
+		}
+
 		steps = append(steps, &dagCompilerStep{
 			step:      step,
 			position:  pos,
