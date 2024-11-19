@@ -42,8 +42,8 @@
       "show_pipelines": "Show pipelines"
     },
     "deploy_pipeline": {
-      "title": "Trigger deployment event for current pipeline #{pipelineId}",
-      "enter_target": "Target deployment environment",
+      "title": "Trigger a 'deployment' event for current pipeline #{pipelineId}",
+      "enter_target": "Target 'deployment' environment",
       "enter_task": "Deployment task",
       "trigger": "Deploy",
       "variables": {
@@ -85,7 +85,7 @@
           "desc": "Allow pipelines to run on pull requests."
         },
         "allow_deploy": {
-          "allow": "Allow deployments",
+          "allow": "Allow 'deployment' events.",
           "desc": "Permit 'deployment' runs for successful pipelines. All users with with push permissions can trigger these, so use with caution."
         },
         "netrc_only_trusted": {
