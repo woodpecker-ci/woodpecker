@@ -3,12 +3,15 @@ import { inject as vueInject, provide as vueProvide } from 'vue';
 
 import type { Org, OrgPermissions, Pipeline, PipelineConfig, Repo } from '~/lib/api/types';
 
+import type { Tab } from './useTabs';
+
 export interface InjectKeys {
   repo: Ref<Repo>;
   org: Ref<Org | undefined>;
   'org-permissions': Ref<OrgPermissions | undefined>;
   pipeline: Ref<Pipeline | undefined>;
   'pipeline-configs': Ref<PipelineConfig[] | undefined>;
+  tabs: Ref<Tab[]>;
 }
 
 export function inject<T extends keyof InjectKeys>(key: T): InjectKeys[T] {

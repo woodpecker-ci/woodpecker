@@ -1,7 +1,9 @@
-import { inject, provide, ref, type Ref } from 'vue';
+import { ref } from 'vue';
 import type { RouteLocationRaw } from 'vue-router';
 
 import type { IconNames } from '~/components/atomic/Icon.vue';
+
+import { inject, provide } from './useInjectProvide';
 
 export interface Tab {
   to: RouteLocationRaw;
@@ -13,16 +15,10 @@ export interface Tab {
 
 export function useTabsProvider() {
   const tabs = ref<Tab[]>([]);
-
   provide('tabs', tabs);
 }
 
 export function useTabsClient() {
-  const tabs = inject<Ref<Tab[]>>('tabs');
-
-  if (tabs === undefined) {
-    throw new Error('Please use this "useTabsClient" composition inside a component running "useTabsProvider".');
-  }
-
+  const tabs = inject('tabs');
   return { tabs };
 }
