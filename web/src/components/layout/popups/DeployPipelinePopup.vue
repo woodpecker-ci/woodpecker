@@ -13,45 +13,28 @@
         </InputField>
         <InputField v-slot="{ id }" :label="$t('repo.deploy_pipeline.variables.title')">
           <span class="text-sm text-wp-text-alt-100 mb-2">{{ $t('repo.deploy_pipeline.variables.desc') }}</span>
-          <div class="flex flex-col gap-2">
-            <div v-for="(_, i) in payload.variables" :key="i" class="flex gap-4">
-              <TextField
-                :id="id"
-                v-model="payload.variables[i].name"
-                :placeholder="$t('repo.deploy_pipeline.variables.name')"
-              />
-              <TextField
-                :id="id"
-                v-model="payload.variables[i].value"
-                :placeholder="$t('repo.deploy_pipeline.variables.value')"
-              />
-              <div class="w-10 flex-shrink-0">
-                <Button
-                  v-if="i !== payload.variables.length - 1"
-                  color="red"
-                  class="ml-auto"
-                  :title="$t('repo.deploy_pipeline.variables.delete')"
-                  @click="deleteVar(i)"
-                >
-                  <Icon name="remove" />
-                </Button>
-              </div>
-            </div>
-          </div>
+          <KeyValueEditor
+            :id="id"
+            v-model="payload.variables"
+            :key-placeholder="$t('repo.deploy_pipeline.variables.name')"
+            :value-placeholder="$t('repo.deploy_pipeline.variables.value')"
+            :delete-title="$t('repo.deploy_pipeline.variables.delete')"
+            @update:is-valid="isVariablesValid = $event"
+          />
         </InputField>
-        <Button type="submit" :text="$t('repo.deploy_pipeline.trigger')" />
+        <Button type="submit" :text="$t('repo.deploy_pipeline.trigger')" :disabled="!isFormValid" />
       </form>
     </Panel>
   </Popup>
 </template>
 
 <script lang="ts" setup>
-import { computed, onMounted, ref, toRef, watch } from 'vue';
+import { computed, onMounted, ref, toRef } from 'vue';
 import { useRouter } from 'vue-router';
 
 import Button from '~/components/atomic/Button.vue';
-import Icon from '~/components/atomic/Icon.vue';
 import InputField from '~/components/form/InputField.vue';
+import KeyValueEditor from '~/components/form/KeyValueEditor.vue';
 import TextField from '~/components/form/TextField.vue';
 import Panel from '~/components/layout/Panel.vue';
 import Popup from '~/components/layout/Popup.vue';
@@ -68,54 +51,36 @@ const emit = defineEmits<{
 }>();
 
 const apiClient = useApiClient();
-
 const repo = inject('repo');
-
 const router = useRouter();
 
-const payload = ref<{ id: string; environment: string; task: string; variables: { name: string; value: string }[] }>({
+const payload = ref<{
+  id: string;
+  environment: string;
+  task: string;
+  variables: Record<string, string>;
+}>({
   id: '',
   environment: '',
   task: '',
-  variables: [
-    {
-      name: '',
-      value: '',
-    },
-  ],
+  variables: {},
 });
 
-const pipelineOptions = computed(() => {
-  const variables = Object.fromEntries(
-    payload.value.variables.filter((e) => e.name !== '').map((item) => [item.name, item.value]),
-  );
-  return {
-    ...payload.value,
-    variables,
-  };
+const isVariablesValid = ref(true);
+
+const isFormValid = computed(() => {
+  return payload.value.environment !== '' && isVariablesValid.value;
 });
+
+const pipelineOptions = computed(() => ({
+  ...payload.value,
+  variables: payload.value.variables,
+}));
 
 const loading = ref(true);
 onMounted(async () => {
   loading.value = false;
 });
-
-watch(
-  payload,
-  () => {
-    if (payload.value.variables[payload.value.variables.length - 1].name !== '') {
-      payload.value.variables.push({
-        name: '',
-        value: '',
-      });
-    }
-  },
-  { deep: true },
-);
-
-function deleteVar(index: number) {
-  payload.value.variables.splice(index, 1);
-}
 
 const pipelineNumber = toRef(props, 'pipelineNumber');
 async function triggerDeployPipeline() {
