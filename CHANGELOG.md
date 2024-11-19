@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-11-18
+## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-11-19
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -52,6 +52,7 @@
 
 ### 📈 Enhancement
 
+- Use separate routes instead of anchors [[#4285](https://github.com/woodpecker-ci/woodpecker/pull/4285)]
 - Untangle settings / header slots [[#4403](https://github.com/woodpecker-ci/woodpecker/pull/4403)]
 - Fix responsiveness of the settings template [[#4383](https://github.com/woodpecker-ci/woodpecker/pull/4383)]
 - Use squared spinner for active pipelines [[#4379](https://github.com/woodpecker-ci/woodpecker/pull/4379)]
