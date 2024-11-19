@@ -1,6 +1,6 @@
 <template>
-  <Settings :title="$t('admin.settings.repos.repos')" :desc="$t('admin.settings.repos.desc')">
-    <template #titleActions>
+  <Settings :title="$t('admin.settings.repos.repos')" :description="$t('admin.settings.repos.desc')">
+    <template #headerActions>
       <Button
         start-icon="heal"
         :is-loading="isRepairingRepos"

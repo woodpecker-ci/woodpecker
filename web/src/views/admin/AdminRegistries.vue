@@ -1,22 +1,22 @@
 <template>
-  <Panel>
-    <div class="flex flex-row border-b mb-4 pb-4 items-center dark:border-wp-background-100">
-      <div class="ml-2">
-        <h1 class="text-xl text-wp-text-100">{{ $t('registries.registries') }}</h1>
-        <p class="text-sm text-wp-text-alt-100">
-          {{ $t('user.settings.registries.desc') }}
-          <DocsLink :topic="$t('registries.registries')" url="docs/usage/registries" />
-        </p>
-      </div>
+  <Settings
+    :title="$t('registries.registries')"
+    :description="$t('admin.settings.registries.desc')"
+    docs-url="docs/usage/registries"
+  >
+    <template #headerActions>
       <Button
         v-if="selectedRegistry"
-        class="ml-auto"
         :text="$t('registries.show')"
         start-icon="back"
         @click="selectedRegistry = undefined"
       />
-      <Button v-else class="ml-auto" :text="$t('registries.add')" start-icon="plus" @click="showAddRegistry" />
-    </div>
+      <Button v-else :text="$t('registries.add')" start-icon="plus" @click="showAddRegistry" />
+    </template>
+
+    <template #headerEnd>
+      <Warning class="text-sm mt-4" :text="$t('admin.settings.registries.warning')" />
+    </template>
 
     <RegistryList
       v-if="!selectedRegistry"
@@ -33,7 +33,7 @@
       @save="createRegistry"
       @cancel="selectedRegistry = undefined"
     />
-  </Panel>
+  </Settings>
 </template>
 
 <script lang="ts" setup>
@@ -42,13 +42,12 @@ import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import Button from '~/components/atomic/Button.vue';
-import DocsLink from '~/components/atomic/DocsLink.vue';
-import Panel from '~/components/layout/Panel.vue';
+import Warning from '~/components/atomic/Warning.vue';
+import Settings from '~/components/layout/Settings.vue';
 import RegistryEdit from '~/components/registry/RegistryEdit.vue';
 import RegistryList from '~/components/registry/RegistryList.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
-import useAuthentication from '~/compositions/useAuthentication';
 import useNotifications from '~/compositions/useNotifications';
 import { usePagination } from '~/compositions/usePaginate';
 import type { Registry } from '~/lib/api/types';
@@ -63,19 +62,11 @@ const apiClient = useApiClient();
 const notifications = useNotifications();
 const i18n = useI18n();
 
-const { user } = useAuthentication();
-if (!user) {
-  throw new Error('Unexpected: Unauthenticated');
-}
 const selectedRegistry = ref<Partial<Registry>>();
 const isEditingRegistry = computed(() => !!selectedRegistry.value?.id);
 
 async function loadRegistries(page: number): Promise<Registry[] | null> {
-  if (!user) {
-    throw new Error('Unexpected: Unauthenticated');
-  }
-
-  return apiClient.getOrgRegistryList(user.org_id, { page });
+  return apiClient.getGlobalRegistryList({ page });
 }
 
 const { resetPage, data: registries } = usePagination(loadRegistries, () => !selectedRegistry.value);
@@ -86,9 +77,9 @@ const { doSubmit: createRegistry, isLoading: isSaving } = useAsyncAction(async (
   }
 
   if (isEditingRegistry.value) {
-    await apiClient.updateOrgRegistry(user.org_id, selectedRegistry.value);
+    await apiClient.updateGlobalRegistry(selectedRegistry.value);
   } else {
-    await apiClient.createOrgRegistry(user.org_id, selectedRegistry.value);
+    await apiClient.createGlobalRegistry(selectedRegistry.value);
   }
   notifications.notify({
     title: isEditingRegistry.value ? i18n.t('registries.saved') : i18n.t('registries.created'),
@@ -99,7 +90,7 @@ const { doSubmit: createRegistry, isLoading: isSaving } = useAsyncAction(async (
 });
 
 const { doSubmit: deleteRegistry, isLoading: isDeleting } = useAsyncAction(async (_registry: Registry) => {
-  await apiClient.deleteOrgRegistry(user.org_id, _registry.address);
+  await apiClient.deleteGlobalRegistry(_registry.address);
   notifications.notify({ title: i18n.t('registries.deleted'), type: 'success' });
   resetPage();
 });

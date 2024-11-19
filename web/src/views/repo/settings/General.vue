@@ -2,26 +2,6 @@
   <Settings :title="$t('repo.settings.general.general')">
     <form v-if="repoSettings" class="flex flex-col" @submit.prevent="saveRepoSettings">
       <InputField
-        docs-url="docs/usage/project-settings#pipeline-path"
-        :label="$t('repo.settings.general.pipeline_path.path')"
-      >
-        <template #default="{ id }">
-          <TextField
-            :id="id"
-            v-model="repoSettings.config_file"
-            :placeholder="$t('repo.settings.general.pipeline_path.default')"
-          />
-        </template>
-        <template #description>
-          <i18n-t keypath="repo.settings.general.pipeline_path.desc" tag="p" class="text-sm text-wp-text-alt-100">
-            <span class="code-box-inline">{{ $t('repo.settings.general.pipeline_path.desc_path_example') }}</span>
-            <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
-            <span class="code-box-inline">/</span>
-          </i18n-t>
-        </template>
-      </InputField>
-
-      <InputField
         docs-url="docs/usage/project-settings#project-settings-1"
         :label="$t('repo.settings.general.project')"
       >
@@ -34,11 +14,6 @@
           v-model="repoSettings.allow_deploy"
           :label="$t('repo.settings.general.allow_deploy.allow')"
           :description="$t('repo.settings.general.allow_deploy.desc')"
-        />
-        <Checkbox
-          v-model="repoSettings.gated"
-          :label="$t('repo.settings.general.protected.protected')"
-          :description="$t('repo.settings.general.protected.desc')"
         />
         <Checkbox
           v-model="repoSettings.netrc_only_trusted"
@@ -69,6 +44,36 @@
         />
       </InputField>
 
+      <InputField :label="$t('require_approval.require_approval_for')">
+        <RadioField
+          v-model="repoSettings.require_approval"
+          :options="[
+            {
+              value: RepoRequireApproval.None,
+              text: $t('require_approval.none'),
+              description: $t('require_approval.none_desc'),
+            },
+            {
+              value: RepoRequireApproval.Forks,
+              text: $t('require_approval.forks'),
+            },
+            {
+              value: RepoRequireApproval.PullRequests,
+              text: $t('require_approval.pull_requests'),
+            },
+            {
+              value: RepoRequireApproval.AllEvents,
+              text: $t('require_approval.all_events'),
+            },
+          ]"
+        />
+        <template #description>
+          <p class="text-sm">
+            {{ $t('require_approval.desc') }}
+          </p>
+        </template>
+      </InputField>
+
       <InputField
         docs-url="docs/usage/project-settings#project-visibility"
         :label="$t('repo.settings.general.visibility.visibility')"
@@ -85,6 +90,26 @@
           <NumberField :id="id" v-model="repoSettings.timeout" class="w-24" />
           <span class="ml-4 text-wp-text-alt-100">{{ $t('repo.settings.general.timeout.minutes') }}</span>
         </div>
+      </InputField>
+
+      <InputField
+        docs-url="docs/usage/project-settings#pipeline-path"
+        :label="$t('repo.settings.general.pipeline_path.path')"
+      >
+        <template #default="{ id }">
+          <TextField
+            :id="id"
+            v-model="repoSettings.config_file"
+            :placeholder="$t('repo.settings.general.pipeline_path.default')"
+          />
+        </template>
+        <template #description>
+          <i18n-t keypath="repo.settings.general.pipeline_path.desc" tag="p" class="text-sm text-wp-text-alt-100">
+            <span class="code-box-inline">{{ $t('repo.settings.general.pipeline_path.desc_path_example') }}</span>
+            <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
+            <span class="code-box-inline">/</span>
+          </i18n-t>
+        </template>
       </InputField>
 
       <InputField
@@ -130,7 +155,7 @@ import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useAuthentication from '~/compositions/useAuthentication';
 import useNotifications from '~/compositions/useNotifications';
-import { RepoVisibility, WebhookEvents, type Repo, type RepoSettings } from '~/lib/api/types';
+import { RepoRequireApproval, RepoVisibility, WebhookEvents, type Repo, type RepoSettings } from '~/lib/api/types';
 import { useRepoStore } from '~/store/repos';
 
 const apiClient = useApiClient();
@@ -151,7 +176,7 @@ function loadRepoSettings() {
     config_file: repo.value.config_file,
     timeout: repo.value.timeout,
     visibility: repo.value.visibility,
-    gated: repo.value.gated,
+    require_approval: repo.value.require_approval,
     trusted: repo.value.trusted,
     allow_pr: repo.value.allow_pr,
     allow_deploy: repo.value.allow_deploy,

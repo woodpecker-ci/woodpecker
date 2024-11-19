@@ -224,6 +224,11 @@
       "name": "EditorConfig Checker",
       "docs": "https://codeberg.org/woodpecker-plugins/editorconfig-checker/raw/branch/main/docs.md",
       "verified": true
+    },
+    {
+      "name": "Microsoft Teams Notify",
+      "docs": "https://raw.githubusercontent.com/GECO-IT/woodpecker-plugin-teams-notify/refs/heads/main/docs.md",
+      "verified": false
     }
   ]
 }
