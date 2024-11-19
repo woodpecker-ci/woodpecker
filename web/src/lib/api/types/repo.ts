@@ -69,7 +69,7 @@ export interface Repo {
 
   last_pipeline: number;
 
-  last_pipeline_item: Pipeline;
+  last_pipeline_item?: Pipeline;
 
   require_approval: RepoRequireApproval;
 

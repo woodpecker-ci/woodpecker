@@ -21,12 +21,15 @@ export const useRepoStore = defineStore('repos', () => {
   }
 
   function setRepo(repo: Repo) {
-    repos.set(repo.id, repo);
+    repos.set(repo.id, {
+      ...repos.get(repo.id),
+      ...repo,
+    });
   }
 
   async function loadRepo(repoId: number) {
     const repo = await apiClient.getRepo(repoId);
-    repos.set(repo.id, repo);
+    setRepo(repo);
     return repo;
   }
 
@@ -36,7 +39,7 @@ export const useRepoStore = defineStore('repos', () => {
       _ownedRepos.map(async (repo) => {
         const latestPipeline = await apiClient.getPipelineList(repo.id, { page: 1, perPage: 1 });
         repo.last_pipeline_item = latestPipeline[0];
-        repos.set(repo.id, repo);
+        setRepo(repo);
       }),
     );
     ownedRepoIds.value = _ownedRepos.map((repo) => repo.id);

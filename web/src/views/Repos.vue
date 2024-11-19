@@ -8,13 +8,13 @@
       <Button :to="{ name: 'repo-add' }" start-icon="plus" :text="$t('repo.add')" />
     </template>
 
-    <div class="flex flex-col gap-12">
+    <div class="flex flex-col gap-4">
       <div class="gap-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2">
-        <RepoItems v-for="repo in repoListAccess" :key="repo.id" :repo="repo" />
+        <RepoCard v-for="repo in repoListAccess" :key="repo.id" :repo="repo" />
       </div>
 
       <div class="flex flex-col gap-4">
-        <RepoItems v-for="repo in repoListActivity" :key="repo.id" :repo="repo" />
+        <RepoCard v-for="repo in repoListActivity" :key="repo.id" :repo="repo" />
       </div>
     </div>
   </Scaffold>
@@ -25,7 +25,7 @@ import { computed, onMounted, ref } from 'vue';
 
 import Button from '~/components/atomic/Button.vue';
 import Scaffold from '~/components/layout/scaffold/Scaffold.vue';
-import RepoItems from '~/components/repo/RepoItems.vue';
+import RepoCard from '~/components/repo/RepoCard.vue';
 import useRepos from '~/compositions/useRepos';
 import { useRepoSearch } from '~/compositions/useRepoSearch';
 import { useRepoStore } from '~/store/repos';

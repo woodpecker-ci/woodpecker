@@ -14,7 +14,7 @@
     </template>
 
     <div class="flex flex-col gap-4">
-      <RepoItems v-for="repo in searchedRepos" :key="repo.id" :repo="repo" />
+      <RepoCard v-for="repo in searchedRepos" :key="repo.id" :repo="repo" />
     </div>
     <div v-if="(searchedRepos || []).length <= 0" class="text-center">
       <span class="text-wp-text-100 m-auto">{{ $t('repo.user_none') }}</span>
@@ -27,7 +27,7 @@ import { computed, onMounted, ref } from 'vue';
 
 import IconButton from '~/components/atomic/IconButton.vue';
 import Scaffold from '~/components/layout/scaffold/Scaffold.vue';
-import RepoItems from '~/components/repo/RepoItems.vue';
+import RepoCard from '~/components/repo/RepoCard.vue';
 import { inject } from '~/compositions/useInjectProvide';
 import { useRepoSearch } from '~/compositions/useRepoSearch';
 import { useRepoStore } from '~/store/repos';
