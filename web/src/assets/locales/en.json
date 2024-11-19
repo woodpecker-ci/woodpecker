@@ -505,7 +505,7 @@
     "desc": "Prevent malicious pipelines from exposing secrets or running harmful tasks by approving them before execution.",
     "require_approval_for": "Approval requirements",
     "none": "None",
-    "none_desc": "Any event can trigger builds, including Pull Requests. This setting can be dangerous in public instances and is only recommended for private instances",
+    "none_desc": "Every event triggers builds, including pull requests. This setting can be dangerous and is only recommended for private instances.",
     "forks": "Pull request from forked repository",
     "pull_requests": "Any pull requests",
     "all_events": "Any event trigger"
