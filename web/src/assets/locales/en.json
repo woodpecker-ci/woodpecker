@@ -509,5 +509,6 @@
     "pull_requests": "All pull requests",
     "all_events": "All events from forge",
     "desc": "Prevent malicious pipelines from exposing secrets or running harmful tasks by approving them before execution."
-  }
+  },
+  "all_repositories": "All repositories"
 }

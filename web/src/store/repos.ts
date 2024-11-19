@@ -4,8 +4,11 @@ import { computed, reactive, ref, type Ref } from 'vue';
 import useApiClient from '~/compositions/useApiClient';
 import type { Repo } from '~/lib/api/types';
 
+import { usePipelineStore } from './pipelines';
+
 export const useRepoStore = defineStore('repos', () => {
   const apiClient = useApiClient();
+  const pipelineStore = usePipelineStore();
 
   const repos: Map<number, Repo> = reactive(new Map());
   const ownedRepoIds = ref<number[]>([]);
@@ -37,8 +40,9 @@ export const useRepoStore = defineStore('repos', () => {
     const _ownedRepos = await apiClient.getRepoList();
     await Promise.all(
       _ownedRepos.map(async (repo) => {
-        const latestPipeline = await apiClient.getPipelineList(repo.id, { page: 1, perPage: 1 });
-        repo.last_pipeline_item = latestPipeline[0];
+        const lastPipeline = await apiClient.getPipelineList(repo.id, { page: 1, perPage: 1 });
+        pipelineStore.setPipeline(repo.id, lastPipeline?.[0]);
+        repo.last_pipeline = lastPipeline?.[0].number;
         setRepo(repo);
       }),
     );

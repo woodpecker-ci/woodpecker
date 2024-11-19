@@ -8,15 +8,22 @@
       <Button :to="{ name: 'repo-add' }" start-icon="plus" :text="$t('repo.add')" />
     </template>
 
-    <div class="flex flex-col gap-4">
-      <div class="gap-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2">
-        <RepoCard v-for="repo in repoListAccess" :key="repo.id" :repo="repo" />
+    <Transition name="fade">
+      <div v-if="search === ''" class="flex flex-col">
+        <div class="gap-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2">
+          <RepoItem v-for="repo in repoListAccess" :key="repo.id" :repo="repo" />
+        </div>
+
+        <p class="text-wp-text-100 mt-12 mb-2">{{ $t('all_repositories') }}</p>
+        <div class="flex flex-col gap-4">
+          <RepoItem v-for="repo in repoListActivity" :key="repo.id" :repo="repo" />
+        </div>
       </div>
 
-      <div class="flex flex-col gap-4">
-        <RepoCard v-for="repo in repoListActivity" :key="repo.id" :repo="repo" />
+      <div v-else class="flex flex-col gap-4">
+        <RepoItem v-for="repo in repoListActivity" :key="repo.id" :repo="repo" />
       </div>
-    </div>
+    </Transition>
   </Scaffold>
 </template>
 
@@ -25,22 +32,39 @@ import { computed, onMounted, ref } from 'vue';
 
 import Button from '~/components/atomic/Button.vue';
 import Scaffold from '~/components/layout/scaffold/Scaffold.vue';
-import RepoCard from '~/components/repo/RepoCard.vue';
+import RepoItem from '~/components/repo/RepoItem.vue';
 import useRepos from '~/compositions/useRepos';
 import { useRepoSearch } from '~/compositions/useRepoSearch';
 import { useRepoStore } from '~/store/repos';
 
 const repoStore = useRepoStore();
-const repos = computed(() => Object.values(repoStore.ownedRepos));
+
+const { sortReposByLastAccess, sortReposByLastActivity, repoWithLastPipeline } = useRepos();
+const repos = computed(() => Object.values(repoStore.ownedRepos).map((r) => repoWithLastPipeline(r)));
 const search = ref('');
 
 const { searchedRepos } = useRepoSearch(repos, search);
-const { sortReposByLastAccess, sortReposByLastActivity } = useRepos();
 
-const repoListAccess = computed(() => sortReposByLastAccess(repos.value || []));
-const repoListActivity = computed(() => sortReposByLastActivity(searchedRepos.value || []));
+const repoListAccess = computed(() => sortReposByLastAccess(repos.value || []).slice(0, 4));
+const repoListActivity = computed(() =>
+  sortReposByLastActivity(searchedRepos.value || []).filter(
+    (r) => search.value !== '' || !repoListAccess.value.includes(r),
+  ),
+);
 
 onMounted(async () => {
   await repoStore.loadRepos();
 });
 </script>
+
+<style scoped>
+.fade-enter-active,
+.fade-leave-active {
+  transition: all 0.2s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+</style>

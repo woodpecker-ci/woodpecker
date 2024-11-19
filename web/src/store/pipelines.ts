@@ -18,6 +18,14 @@ export const usePipelineStore = defineStore('pipelines', () => {
       ...(repoPipelines.get(pipeline.number) || {}),
       ...pipeline,
     });
+
+    // Update last pipeline number for the repo
+    const repo = repoStore.repos.get(repoId);
+    if (repo?.last_pipeline !== undefined && repo.last_pipeline < pipeline.number) {
+      repo.last_pipeline = pipeline.number;
+      repoStore.setRepo(repo);
+    }
+
     pipelines.set(repoId, repoPipelines);
   }
 
@@ -25,10 +33,14 @@ export const usePipelineStore = defineStore('pipelines', () => {
     return computed(() => Array.from(pipelines.get(repoId.value)?.values() || []).sort(comparePipelines));
   }
 
-  function getPipeline(repoId: Ref<number>, _pipelineNumber: Ref<string>) {
+  function getPipeline(repoId: Ref<number>, _pipelineNumber: Ref<string | number>) {
     return computed(() => {
-      const pipelineNumber = Number.parseInt(_pipelineNumber.value, 10);
-      return pipelines.get(repoId.value)?.get(pipelineNumber);
+      if (typeof _pipelineNumber.value === 'string') {
+        const pipelineNumber = Number.parseInt(_pipelineNumber.value, 10);
+        return pipelines.get(repoId.value)?.get(pipelineNumber);
+      }
+
+      return pipelines.get(repoId.value)?.get(_pipelineNumber.value);
     });
   }
 
