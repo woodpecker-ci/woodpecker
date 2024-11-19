@@ -82,7 +82,7 @@
         },
         "allow_pr": {
           "allow": "Allow Pull Requests",
-          "desc": "Allows pipelines to run on pull request events."
+          "desc": "Allow pipelines to run on pull requests."
         },
         "allow_deploy": {
           "allow": "Allow deployments",
