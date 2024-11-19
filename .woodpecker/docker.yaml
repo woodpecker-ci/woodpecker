@@ -42,9 +42,6 @@ variables:
 when:
   - event: [pull_request, tag]
   - event: push
-    branch:
-      - renovate/*
-  - event: push
     branch: ${CI_REPO_DEFAULT_BRANCH}
     path: *when_path
 
