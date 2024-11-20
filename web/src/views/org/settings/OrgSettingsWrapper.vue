@@ -11,6 +11,7 @@
       </span>
     </template>
 
+    <Tab :to="{ name: 'org-settings-variables' }" :title="$t('variables.variables')" />
     <Tab :to="{ name: 'org-settings-secrets' }" :title="$t('secrets.secrets')" />
     <Tab :to="{ name: 'org-settings-registries' }" :title="$t('registries.registries')" />
     <Tab

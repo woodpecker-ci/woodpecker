@@ -4,6 +4,7 @@
     <template #headerActions><Button :text="$t('logout')" :to="`${address}/logout`" /></template>
 
     <Tab :to="{ name: 'user' }" :title="$t('user.settings.general.general')" />
+    <Tab :to="{ name: 'user-variables' }" :title="$t('variables.variables')" />
     <Tab :to="{ name: 'user-secrets' }" :title="$t('secrets.secrets')" />
     <Tab :to="{ name: 'user-registries' }" :title="$t('registries.registries')" />
     <Tab :to="{ name: 'user-cli-and-api' }" :title="$t('user.settings.cli_and_api.cli_and_api')" />

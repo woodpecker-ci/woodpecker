@@ -124,6 +124,12 @@ const routes: RouteRecordRaw[] = [
                 props: true,
               },
               {
+                path: 'variables',
+                name: 'repo-settings-variables',
+                component: (): Component => import('~/views/repo/settings/Variables.vue'),
+                props: true,
+              },
+              {
                 path: 'secrets',
                 name: 'repo-settings-secrets',
                 component: (): Component => import('~/views/repo/settings/Secrets.vue'),
@@ -189,6 +195,12 @@ const routes: RouteRecordRaw[] = [
         props: true,
         children: [
           {
+            path: 'variables',
+            name: 'org-settings-variables',
+            component: (): Component => import('~/views/org/settings/OrgVariables.vue'),
+            props: true,
+          },
+          {
             path: 'secrets',
             name: 'org-settings-secrets',
             component: (): Component => import('~/views/org/settings/OrgSecrets.vue'),
@@ -225,6 +237,12 @@ const routes: RouteRecordRaw[] = [
         path: '',
         name: 'admin-settings',
         component: (): Component => import('~/views/admin/AdminInfo.vue'),
+        props: true,
+      },
+      {
+        path: 'variables',
+        name: 'admin-settings-variables',
+        component: (): Component => import('~/views/admin/AdminVariables.vue'),
         props: true,
       },
       {
@@ -282,6 +300,12 @@ const routes: RouteRecordRaw[] = [
         path: '',
         name: 'user',
         component: (): Component => import('~/views/user/UserGeneral.vue'),
+        props: true,
+      },
+      {
+        path: 'variables',
+        name: 'user-variables',
+        component: (): Component => import('~/views/user/UserVariables.vue'),
         props: true,
       },
       {
