@@ -8,6 +8,7 @@ import { inject, provide } from './useInjectProvide';
 export interface Tab {
   to: RouteLocationRaw;
   title: string;
+  count?: number;
   icon?: IconNames;
   iconClass?: string;
   matchChildren?: boolean;
