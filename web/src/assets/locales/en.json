@@ -88,10 +88,6 @@
           "allow": "Allow deployments",
           "desc": "Allow deployments from successful pipelines. Only use if you trust all users with push access."
         },
-        "protected": {
-          "protected": "Protected",
-          "desc": "Every pipeline needs to be approved before being executed."
-        },
         "netrc_only_trusted": {
           "netrc_only_trusted": "Only inject netrc credentials into trusted clone plugins",
           "desc": "If enabled, git netrc credentials are only available for trusted clone plugins set in `WOODPECKER_PLUGINS_TRUSTED_CLONE`. Otherwise, all clone plugins can use the netrc credentials. This option has no effect on non-clone steps."
@@ -532,5 +528,14 @@
   "internal_error": "Some internal error occurred",
   "registration_closed": "The registration is closed",
   "access_denied": "You are not allowed to access this instance",
-  "invalid_state": "The OAuth state is invalid"
+  "invalid_state": "The OAuth state is invalid",
+  "require_approval": {
+    "require_approval_for": "Require approval for",
+    "none": "No approval required",
+    "none_desc": "This setting can be dangerous and should only be used on private forges where all users are trusted.",
+    "forks": "Pull request from forked repositories",
+    "pull_requests": "All pull requests",
+    "all_events": "All events from forge",
+    "desc": "Prevent malicious pipelines from exposing secrets or running harmful tasks by approving them before execution."
+  }
 }

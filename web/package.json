@@ -5,7 +5,7 @@
   "license": "Apache-2.0",
   "type": "module",
   "engines": {
-    "node": ">=14"
+    "node": ">=20"
   },
   "scripts": {
     "start": "vite",
@@ -18,7 +18,7 @@
     "test": "vitest"
   },
   "dependencies": {
-    "@intlify/unplugin-vue-i18n": "^5.0.0",
+    "@intlify/unplugin-vue-i18n": "^6.0.0",
     "@kyvg/vue3-notification": "^3.2.1",
     "@mdi/js": "^7.4.47",
     "@vueuse/core": "^11.0.0",
@@ -45,7 +45,7 @@
     "@intlify/eslint-plugin-vue-i18n": "3.0.0",
     "@types/eslint__js": "^8.42.3",
     "@types/lodash": "^4.17.7",
-    "@types/node": "^20.14.15",
+    "@types/node": "^22.0.0",
     "@types/prismjs": "^1.26.4",
     "@types/semver": "^7.5.8",
     "@types/tinycolor2": "^1.4.6",

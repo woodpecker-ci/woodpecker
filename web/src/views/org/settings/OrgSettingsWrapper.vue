@@ -11,21 +11,15 @@
       </span>
     </template>
 
-    <Tab id="variables" :title="$t('variables.variables')">
-      <OrgVariablesTab />
-    </Tab>
+    <Tab :to="{ name: 'org-settings-secrets' }" :title="$t('secrets.secrets')" />
+    <Tab :to="{ name: 'org-settings-registries' }" :title="$t('registries.registries')" />
+    <Tab
+      v-if="useConfig().userRegisteredAgents"
+      :to="{ name: 'org-settings-agents' }"
+      :title="$t('admin.settings.agents.agents')"
+    />
 
-    <Tab id="secrets" :title="$t('secrets.secrets')">
-      <OrgSecretsTab />
-    </Tab>
-
-    <Tab id="registries" :title="$t('registries.registries')">
-      <OrgRegistriesTab />
-    </Tab>
-
-    <Tab v-if="useConfig().userRegisteredAgents" id="agents" :title="$t('admin.settings.agents.agents')">
-      <OrgAgentsTab />
-    </Tab>
+    <router-view />
   </Scaffold>
 </template>
 
@@ -36,10 +30,6 @@ import { useRouter } from 'vue-router';
 
 import Scaffold from '~/components/layout/scaffold/Scaffold.vue';
 import Tab from '~/components/layout/scaffold/Tab.vue';
-import OrgAgentsTab from '~/components/org/settings/OrgAgentsTab.vue';
-import OrgRegistriesTab from '~/components/org/settings/OrgRegistriesTab.vue';
-import OrgSecretsTab from '~/components/org/settings/OrgSecretsTab.vue';
-import OrgVariablesTab from '~/components/org/settings/OrgVariablesTab.vue';
 import useConfig from '~/compositions/useConfig';
 import { inject } from '~/compositions/useInjectProvide';
 import useNotifications from '~/compositions/useNotifications';

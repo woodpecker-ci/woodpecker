@@ -1,6 +1,6 @@
 <template>
   <AgentManager
-    :desc="$t('admin.settings.agents.desc')"
+    :description="$t('admin.settings.agents.desc')"
     :load-agents="loadAgents"
     :create-agent="createAgent"
     :update-agent="updateAgent"
