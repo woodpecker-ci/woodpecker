@@ -49,6 +49,9 @@
   <SvgIcon v-else-if="name === 'play'" :path="mdiPlay" size="1.3rem" />
   <SvgIcon v-else-if="name === 'play-outline'" :path="mdiPlayOutline" size="1.3rem" />
   <SvgIcon v-else-if="name === 'dots'" :path="mdiDotsVertical" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'tray-full'" :path="mdiTrayFull" size="24" />
+  <SvgIcon v-else-if="name === 'file-cog-outlined'" :path="mdiFileCogOutline" size="24" />
+  <SvgIcon v-else-if="name === 'magnify-scan'" :path="mdiMagnifyScan" size="24" />
 
   <SvgIcon v-else-if="name === 'visibility-private'" :path="mdiLockOutline" size="1.3rem" />
   <SvgIcon v-else-if="name === 'visibility-internal'" :path="mdiLockOpenOutline" size="1.3rem" />
@@ -98,6 +101,7 @@ import {
   mdiDownloadOutline,
   mdiEyeOffOutline,
   mdiEyeOutline,
+  mdiFileCogOutline,
   mdiFormatListBulleted,
   mdiGestureTap,
   mdiGit,
@@ -106,6 +110,7 @@ import {
   mdiHelpCircle,
   mdiLockOpenOutline,
   mdiLockOutline,
+  mdiMagnifyScan,
   mdiMinusCircle,
   mdiPackageVariant,
   mdiPause,
@@ -125,6 +130,7 @@ import {
   mdiTagOutline,
   mdiTimerOutline,
   mdiTrashCanOutline,
+  mdiTrayFull,
   mdiWrenchCogOutline,
 } from '@mdi/js';
 import { siForgejo, siGitea } from 'simple-icons';
@@ -183,7 +189,10 @@ export type IconNames =
   | 'spinner'
   | 'visibility-private'
   | 'visibility-internal'
-  | 'dots';
+  | 'dots'
+  | 'tray-full'
+  | 'file-cog-outlined'
+  | 'magnify-scan';
 
 defineProps<{
   name: IconNames;
