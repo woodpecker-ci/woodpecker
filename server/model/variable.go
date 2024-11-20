@@ -21,9 +21,7 @@ import (
 
 var (
 	ErrVariableNameInvalid  = errors.New("invalid variable name")
-	ErrVariableImageInvalid = errors.New("invalid variable image")
 	ErrVariableValueInvalid = errors.New("invalid variable value")
-	ErrVariableEventInvalid = errors.New("invalid variable event")
 )
 
 // VariableStore persists variable information to storage.
