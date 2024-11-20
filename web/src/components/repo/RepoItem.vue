@@ -12,7 +12,7 @@
 
       <div class="col-span-2 text-wp-text-100 mt-4 flex w-full">
         <template v-if="lastPipeline">
-          <div class="flex gap-x-1 items-center">
+          <div class="flex flex-1 min-w-0 gap-x-1 items-center">
             <PipelineStatusIcon v-if="lastPipeline" :status="lastPipeline.status" />
             <span class="whitespace-nowrap overflow-hidden overflow-ellipsis">{{ shortMessage }}</span>
           </div>
