@@ -67,6 +67,21 @@
       "success": "Repository enabled"
     },
     "open_in_forge": "Open repository in forge",
+    "visibility": {
+      "visibility": "Project visibility",
+      "public": {
+        "public": "Public",
+        "desc": "Every user can see your project without being logged in."
+      },
+      "private": {
+        "private": "Private",
+        "desc": "Only you and other owners of the repository can see this project."
+      },
+      "internal": {
+        "internal": "Internal",
+        "desc": "Only authenticated users of the Woodpecker instance can see this project."
+      }
+    },
     "settings": {
       "not_allowed": "You are not allowed to access this repository's settings",
       "general": {
@@ -105,21 +120,6 @@
           "security": {
             "security": "Security",
             "desc": "Underlying pipeline containers get access to security privileges."
-          }
-        },
-        "visibility": {
-          "visibility": "Project visibility",
-          "public": {
-            "public": "Public",
-            "desc": "Every user can see your project without being logged in."
-          },
-          "private": {
-            "private": "Private",
-            "desc": "Only you and other owners of the repository can see this project."
-          },
-          "internal": {
-            "internal": "Internal",
-            "desc": "Only authenticated users of the Woodpecker instance can see this project."
           }
         },
         "timeout": {
@@ -191,7 +191,7 @@
     "pipeline": {
       "tasks": "Tasks",
       "config": "Config",
-      "files": "Changed files ({files})",
+      "files": "Changed files",
       "no_pipelines": "No pipelines have been started yet.",
       "no_pipeline_steps": "No pipeline steps available!",
       "step_not_started": "This step hasn't started yet.",
@@ -248,8 +248,8 @@
         "failure": "failure",
         "killed": "killed"
       },
-      "errors": "Errors ({count})",
-      "warnings": "Warnings ({count})",
+      "errors": "Errors",
+      "warnings": "Warnings",
       "show_errors": "Show errors",
       "we_got_some_errors": "Oh no, we got some errors!",
       "duration": "Pipeline duration",
@@ -509,5 +509,7 @@
     "pull_requests": "All pull requests",
     "all_events": "All events from forge",
     "desc": "Prevent malicious pipelines from exposing secrets or running harmful tasks by approving them before execution."
-  }
+  },
+  "all_repositories": "All repositories",
+  "no_search_results": "No results found"
 }
