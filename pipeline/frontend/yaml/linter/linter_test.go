@@ -179,11 +179,11 @@ func TestLintErrors(t *testing.T) {
 		},
 		{
 			from: "steps: { build: { image: golang, secrets: [ { source: mysql_username, target: mysql_username } ] } }",
-			want: "Secrets are unsupported now, use environment with from_secret",
+			want: "`secrets:` is deprecated, use `environment:` in combination with `from_secret:`"
 		},
 		{
 			from: "steps: { build: { image: golang, secrets: [ 'mysql_username' ] } }",
-			want: "Secrets are unsupported now, use environment with from_secret",
+			want: "`secrets:` is deprecated, use `environment:` in combination with `from_secret:`"
 		},
 	}
 
