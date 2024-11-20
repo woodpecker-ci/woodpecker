@@ -310,7 +310,7 @@
           "placeholder": "Stop agent from taking new tasks"
         },
         "token": "Token",
-        "platform": {gg
+        "platform": {
           "platform": "Platform",
           "badge": "platform"
         },
