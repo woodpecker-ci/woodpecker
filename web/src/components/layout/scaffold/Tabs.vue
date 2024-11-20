@@ -11,15 +11,17 @@
     >
       <Icon v-if="isExactActive || (isActive && tab.matchChildren)" name="chevron-right" class="md:hidden" />
       <Icon v-else name="blank" class="md:hidden" />
-      <span class="flex gap-2 items-center flex-row-reverse md:flex-row">
+      <span class="flex gap-2 items-center flex-row">
         <Icon v-if="tab.icon" :name="tab.icon" :class="tab.iconClass" />
         <span>{{ tab.title }}</span>
+        <CountBadge v-if="tab.count" :value="tab.count" />
       </span>
     </router-link>
   </div>
 </template>
 
 <script setup lang="ts">
+import CountBadge from '~/components/atomic/CountBadge.vue';
 import Icon from '~/components/atomic/Icon.vue';
 import { useTabsClient } from '~/compositions/useTabs';
 

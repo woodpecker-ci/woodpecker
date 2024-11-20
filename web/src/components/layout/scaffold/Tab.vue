@@ -10,6 +10,7 @@ import { useTabsClient } from '~/compositions/useTabs';
 const props = defineProps<{
   to: RouteLocationRaw;
   title: string;
+  count?: number;
   icon?: IconNames;
   iconClass?: string;
   matchChildren?: boolean;
@@ -32,6 +33,7 @@ onMounted(() => {
   tabs.value.push({
     to: props.to,
     title: props.title,
+    count: props.count,
     icon: props.icon,
     iconClass: props.iconClass,
     matchChildren: props.matchChildren,
