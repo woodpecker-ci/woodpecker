@@ -191,7 +191,7 @@
     "pipeline": {
       "tasks": "Tasks",
       "config": "Config",
-      "files": "Changed files ({files})",
+      "files": "Changed files",
       "no_pipelines": "No pipelines have been started yet.",
       "no_pipeline_steps": "No pipeline steps available!",
       "step_not_started": "This step hasn't started yet.",
@@ -248,8 +248,8 @@
         "failure": "failure",
         "killed": "killed"
       },
-      "errors": "Errors ({count})",
-      "warnings": "Warnings ({count})",
+      "errors": "Errors",
+      "warnings": "Warnings",
       "show_errors": "Show errors",
       "we_got_some_errors": "Oh no, we got some errors!",
       "duration": "Pipeline duration",
