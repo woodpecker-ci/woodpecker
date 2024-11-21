@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-11-20
+## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-11-21
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -8,6 +8,7 @@
 
 ### 💥 Breaking changes
 
+- Remove `secrets` in favor of `from_secret` [[#4363](https://github.com/woodpecker-ci/woodpecker/pull/4363)]
 - Kubernetes | Docker: Add support for rootless images [[#4151](https://github.com/woodpecker-ci/woodpecker/pull/4151)]
 - Split repo trusted setting [[#4025](https://github.com/woodpecker-ci/woodpecker/pull/4025)]
 - Move docker resource limit settings from server to agent [[#3174](https://github.com/woodpecker-ci/woodpecker/pull/3174)]
