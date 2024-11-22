@@ -1,7 +1,5 @@
 when:
   - event: pull_request
-  - event: push
-    branch: renovate/*
 
 steps:
   - name: lint-editorconfig
