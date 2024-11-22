@@ -169,7 +169,7 @@ func convertListOptions(p *model.ListOptions) bb.ListOptions {
 }
 
 func updateUserCredentials(u *model.User, t *oauth2.Token) {
-	u.Token = t.AccessToken
-	u.Secret = t.RefreshToken
+	u.AccessToken = t.AccessToken
+	u.RefreshToken = t.RefreshToken
 	u.Expiry = t.Expiry.UTC().Unix()
 }
