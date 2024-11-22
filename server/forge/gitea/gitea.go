@@ -135,8 +135,8 @@ func (c *Gitea) Login(ctx context.Context, req *forge_types.OAuthRequest) (*mode
 	}
 
 	return &model.User{
-		Token:         token.AccessToken,
-		Secret:        token.RefreshToken,
+		AccessToken:   token.AccessToken,
+		RefreshToken:  token.RefreshToken,
 		Expiry:        token.Expiry.UTC().Unix(),
 		Login:         account.UserName,
 		Email:         account.Email,
@@ -166,8 +166,8 @@ func (c *Gitea) Refresh(ctx context.Context, user *model.User) (bool, error) {
 	config.RedirectURL = ""
 
 	source := config.TokenSource(oauth2Ctx, &oauth2.Token{
-		AccessToken:  user.Token,
-		RefreshToken: user.Secret,
+		AccessToken:  user.AccessToken,
+		RefreshToken: user.RefreshToken,
 		Expiry:       time.Unix(user.Expiry, 0),
 	})
 
@@ -176,15 +176,15 @@ func (c *Gitea) Refresh(ctx context.Context, user *model.User) (bool, error) {
 		return false, err
 	}
 
-	user.Token = token.AccessToken
-	user.Secret = token.RefreshToken
+	user.AccessToken = token.AccessToken
+	user.RefreshToken = token.RefreshToken
 	user.Expiry = token.Expiry.UTC().Unix()
 	return true, nil
 }
 
 // Teams is supported by the Gitea driver.
 func (c *Gitea) Teams(ctx context.Context, u *model.User) ([]*model.Team, error) {
-	client, err := c.newClientToken(ctx, u.Token)
+	client, err := c.newClientToken(ctx, u.AccessToken)
 	if err != nil {
 		return nil, err
 	}
@@ -213,7 +213,7 @@ func (c *Gitea) TeamPerm(_ *model.User, _ string) (*model.Perm, error) {
 
 // Repo returns the Gitea repository.
 func (c *Gitea) Repo(ctx context.Context, u *model.User, remoteID model.ForgeRemoteID, owner, name string) (*model.Repo, error) {
-	client, err := c.newClientToken(ctx, u.Token)
+	client, err := c.newClientToken(ctx, u.AccessToken)
 	if err != nil {
 		return nil, err
 	}
@@ -240,7 +240,7 @@ func (c *Gitea) Repo(ctx context.Context, u *model.User, remoteID model.ForgeRem
 // Repos returns a list of all repositories for the Gitea account, including
 // organization repositories.
 func (c *Gitea) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error) {
-	client, err := c.newClientToken(ctx, u.Token)
+	client, err := c.newClientToken(ctx, u.AccessToken)
 	if err != nil {
 		return nil, err
 	}
@@ -269,7 +269,7 @@ func (c *Gitea) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error)
 
 // File fetches the file from the Gitea repository and returns its contents.
 func (c *Gitea) File(ctx context.Context, u *model.User, r *model.Repo, b *model.Pipeline, f string) ([]byte, error) {
-	client, err := c.newClientToken(ctx, u.Token)
+	client, err := c.newClientToken(ctx, u.AccessToken)
 	if err != nil {
 		return nil, err
 	}
@@ -284,7 +284,7 @@ func (c *Gitea) File(ctx context.Context, u *model.User, r *model.Repo, b *model
 func (c *Gitea) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model.Pipeline, f string) ([]*forge_types.FileMeta, error) {
 	var configs []*forge_types.FileMeta
 
-	client, err := c.newClientToken(ctx, u.Token)
+	client, err := c.newClientToken(ctx, u.AccessToken)
 	if err != nil {
 		return nil, err
 	}
@@ -320,7 +320,7 @@ func (c *Gitea) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model.
 
 // Status is supported by the Gitea driver.
 func (c *Gitea) Status(ctx context.Context, user *model.User, repo *model.Repo, pipeline *model.Pipeline, workflow *model.Workflow) error {
-	client, err := c.newClientToken(ctx, user.Token)
+	client, err := c.newClientToken(ctx, user.AccessToken)
 	if err != nil {
 		return err
 	}
@@ -348,7 +348,7 @@ func (c *Gitea) Netrc(u *model.User, r *model.Repo) (*model.Netrc, error) {
 
 	if u != nil {
 		login = u.Login
-		token = u.Token
+		token = u.AccessToken
 	}
 
 	host, err := common.ExtractHostFromCloneURL(r.Clone)
@@ -378,7 +378,7 @@ func (c *Gitea) Activate(ctx context.Context, u *model.User, r *model.Repo, link
 		Active: true,
 	}
 
-	client, err := c.newClientToken(ctx, u.Token)
+	client, err := c.newClientToken(ctx, u.AccessToken)
 	if err != nil {
 		return err
 	}
@@ -400,7 +400,7 @@ func (c *Gitea) Activate(ctx context.Context, u *model.User, r *model.Repo, link
 // Deactivate deactivates the repository be removing repository push hooks from
 // the Gitea repository.
 func (c *Gitea) Deactivate(ctx context.Context, u *model.User, r *model.Repo, link string) error {
-	client, err := c.newClientToken(ctx, u.Token)
+	client, err := c.newClientToken(ctx, u.AccessToken)
 	if err != nil {
 		return err
 	}
@@ -529,7 +529,7 @@ func (c *Gitea) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.
 // OrgMembership returns if user is member of organization and if user
 // is admin/owner in this organization.
 func (c *Gitea) OrgMembership(ctx context.Context, u *model.User, owner string) (*model.OrgPerm, error) {
-	client, err := c.newClientToken(ctx, u.Token)
+	client, err := c.newClientToken(ctx, u.AccessToken)
 	if err != nil {
 		return nil, err
 	}
@@ -552,7 +552,7 @@ func (c *Gitea) OrgMembership(ctx context.Context, u *model.User, owner string) 
 }
 
 func (c *Gitea) Org(ctx context.Context, u *model.User, owner string) (*model.Org, error) {
-	client, err := c.newClientToken(ctx, u.Token)
+	client, err := c.newClientToken(ctx, u.AccessToken)
 	if err != nil {
 		return nil, err
 	}
@@ -637,7 +637,7 @@ func (c *Gitea) getChangedFilesForPR(ctx context.Context, repo *model.Repo, inde
 		return nil, err
 	}
 
-	client, err := c.newClientToken(ctx, user.Token)
+	client, err := c.newClientToken(ctx, user.AccessToken)
 	if err != nil {
 		return nil, err
 	}
@@ -674,7 +674,7 @@ func (c *Gitea) getTagCommitSHA(ctx context.Context, repo *model.Repo, tagName s
 		return "", err
 	}
 
-	client, err := c.newClientToken(ctx, user.Token)
+	client, err := c.newClientToken(ctx, user.AccessToken)
 	if err != nil {
 		return "", err
 	}

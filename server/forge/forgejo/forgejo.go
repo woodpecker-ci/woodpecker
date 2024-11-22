@@ -133,8 +133,8 @@ func (c *Forgejo) Login(ctx context.Context, req *forge_types.OAuthRequest) (*mo
 	}
 
 	return &model.User{
-		Token:         token.AccessToken,
-		Secret:        token.RefreshToken,
+		AccessToken:   token.AccessToken,
+		RefreshToken:  token.RefreshToken,
 		Expiry:        token.Expiry.UTC().Unix(),
 		Login:         account.UserName,
 		Email:         account.Email,
@@ -164,8 +164,8 @@ func (c *Forgejo) Refresh(ctx context.Context, user *model.User) (bool, error) {
 	config.RedirectURL = ""
 
 	source := config.TokenSource(oauth2Ctx, &oauth2.Token{
-		AccessToken:  user.Token,
-		RefreshToken: user.Secret,
+		AccessToken:  user.AccessToken,
+		RefreshToken: user.RefreshToken,
 		Expiry:       time.Unix(user.Expiry, 0),
 	})
 
@@ -174,15 +174,15 @@ func (c *Forgejo) Refresh(ctx context.Context, user *model.User) (bool, error) {
 		return false, err
 	}
 
-	user.Token = token.AccessToken
-	user.Secret = token.RefreshToken
+	user.AccessToken = token.AccessToken
+	user.RefreshToken = token.RefreshToken
 	user.Expiry = token.Expiry.UTC().Unix()
 	return true, nil
 }
 
 // Teams is supported by the Forgejo driver.
 func (c *Forgejo) Teams(ctx context.Context, u *model.User) ([]*model.Team, error) {
-	client, err := c.newClientToken(ctx, u.Token)
+	client, err := c.newClientToken(ctx, u.AccessToken)
 	if err != nil {
 		return nil, err
 	}
@@ -211,7 +211,7 @@ func (c *Forgejo) TeamPerm(_ *model.User, _ string) (*model.Perm, error) {
 
 // Repo returns the Forgejo repository.
 func (c *Forgejo) Repo(ctx context.Context, u *model.User, remoteID model.ForgeRemoteID, owner, name string) (*model.Repo, error) {
-	client, err := c.newClientToken(ctx, u.Token)
+	client, err := c.newClientToken(ctx, u.AccessToken)
 	if err != nil {
 		return nil, err
 	}
@@ -238,7 +238,7 @@ func (c *Forgejo) Repo(ctx context.Context, u *model.User, remoteID model.ForgeR
 // Repos returns a list of all repositories for the Forgejo account, including
 // organization repositories.
 func (c *Forgejo) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error) {
-	client, err := c.newClientToken(ctx, u.Token)
+	client, err := c.newClientToken(ctx, u.AccessToken)
 	if err != nil {
 		return nil, err
 	}
@@ -267,7 +267,7 @@ func (c *Forgejo) Repos(ctx context.Context, u *model.User) ([]*model.Repo, erro
 
 // File fetches the file from the Forgejo repository and returns its contents.
 func (c *Forgejo) File(ctx context.Context, u *model.User, r *model.Repo, b *model.Pipeline, f string) ([]byte, error) {
-	client, err := c.newClientToken(ctx, u.Token)
+	client, err := c.newClientToken(ctx, u.AccessToken)
 	if err != nil {
 		return nil, err
 	}
@@ -282,7 +282,7 @@ func (c *Forgejo) File(ctx context.Context, u *model.User, r *model.Repo, b *mod
 func (c *Forgejo) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model.Pipeline, f string) ([]*forge_types.FileMeta, error) {
 	var configs []*forge_types.FileMeta
 
-	client, err := c.newClientToken(ctx, u.Token)
+	client, err := c.newClientToken(ctx, u.AccessToken)
 	if err != nil {
 		return nil, err
 	}
@@ -318,7 +318,7 @@ func (c *Forgejo) Dir(ctx context.Context, u *model.User, r *model.Repo, b *mode
 
 // Status is supported by the Forgejo driver.
 func (c *Forgejo) Status(ctx context.Context, user *model.User, repo *model.Repo, pipeline *model.Pipeline, workflow *model.Workflow) error {
-	client, err := c.newClientToken(ctx, user.Token)
+	client, err := c.newClientToken(ctx, user.AccessToken)
 	if err != nil {
 		return err
 	}
@@ -346,7 +346,7 @@ func (c *Forgejo) Netrc(u *model.User, r *model.Repo) (*model.Netrc, error) {
 
 	if u != nil {
 		login = u.Login
-		token = u.Token
+		token = u.AccessToken
 	}
 
 	host, err := common.ExtractHostFromCloneURL(r.Clone)
@@ -376,7 +376,7 @@ func (c *Forgejo) Activate(ctx context.Context, u *model.User, r *model.Repo, li
 		Active: true,
 	}
 
-	client, err := c.newClientToken(ctx, u.Token)
+	client, err := c.newClientToken(ctx, u.AccessToken)
 	if err != nil {
 		return err
 	}
@@ -398,7 +398,7 @@ func (c *Forgejo) Activate(ctx context.Context, u *model.User, r *model.Repo, li
 // Deactivate deactivates the repository be removing repository push hooks from
 // the Forgejo repository.
 func (c *Forgejo) Deactivate(ctx context.Context, u *model.User, r *model.Repo, link string) error {
-	client, err := c.newClientToken(ctx, u.Token)
+	client, err := c.newClientToken(ctx, u.AccessToken)
 	if err != nil {
 		return err
 	}
@@ -522,7 +522,7 @@ func (c *Forgejo) Hook(ctx context.Context, r *http.Request) (*model.Repo, *mode
 // OrgMembership returns if user is member of organization and if user
 // is admin/owner in this organization.
 func (c *Forgejo) OrgMembership(ctx context.Context, u *model.User, owner string) (*model.OrgPerm, error) {
-	client, err := c.newClientToken(ctx, u.Token)
+	client, err := c.newClientToken(ctx, u.AccessToken)
 	if err != nil {
 		return nil, err
 	}
@@ -545,7 +545,7 @@ func (c *Forgejo) OrgMembership(ctx context.Context, u *model.User, owner string
 }
 
 func (c *Forgejo) Org(ctx context.Context, u *model.User, owner string) (*model.Org, error) {
-	client, err := c.newClientToken(ctx, u.Token)
+	client, err := c.newClientToken(ctx, u.AccessToken)
 	if err != nil {
 		return nil, err
 	}
@@ -630,7 +630,7 @@ func (c *Forgejo) getChangedFilesForPR(ctx context.Context, repo *model.Repo, in
 		return nil, err
 	}
 
-	client, err := c.newClientToken(ctx, user.Token)
+	client, err := c.newClientToken(ctx, user.AccessToken)
 	if err != nil {
 		return nil, err
 	}
@@ -667,7 +667,7 @@ func (c *Forgejo) getTagCommitSHA(ctx context.Context, repo *model.Repo, tagName
 		return "", err
 	}
 
-	client, err := c.newClientToken(ctx, user.Token)
+	client, err := c.newClientToken(ctx, user.AccessToken)
 	if err != nil {
 		return "", err
 	}
