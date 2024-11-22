@@ -51,6 +51,10 @@
   <SvgIcon v-else-if="name === 'pause'" :path="mdiPause" size="24" />
   <SvgIcon v-else-if="name === 'play'" :path="mdiPlay" size="24" />
   <SvgIcon v-else-if="name === 'remove'" :path="mdiClose" size="24" />
+  <SvgIcon v-else-if="name === 'tray-full'" :path="mdiTrayFull" size="24" />
+  <SvgIcon v-else-if="name === 'file-cog-outlined'" :path="mdiFileCogOutline" size="24" />
+  <SvgIcon v-else-if="name === 'magnify-scan'" :path="mdiMagnifyScan" size="24" />
+  <SvgIcon v-else-if="name === 'file-alert-outline'" :path="mdiFileAlertOutline" size="24" />
 
   <SvgIcon v-else-if="name === 'forgejo'" :path="siForgejo.path" size="32" />
   <SvgIcon v-else-if="name === 'gitea'" :path="siGitea.path" size="32" />
@@ -96,12 +100,15 @@ import {
   mdiDownload,
   mdiDownloadCircle,
   mdiDownloadOff,
+  mdiFileAlertOutline,
+  mdiFileCogOutline,
   mdiFormatListBulleted,
   mdiGestureTap,
   mdiGit,
   mdiGithub,
   mdiGitlab,
   mdiHelpCircleOutline,
+  mdiMagnifyScan,
   mdiMinusCircleOutline,
   mdiPackageVariant,
   mdiPause,
@@ -120,6 +127,7 @@ import {
   mdiTagOutline,
   mdiTimelapse,
   mdiTrashCanOutline,
+  mdiTrayFull,
 } from '@mdi/js';
 import { siForgejo, siGitea } from 'simple-icons';
 
@@ -176,7 +184,11 @@ export type IconNames =
   | 'attention'
   | 'spinner'
   | 'error'
-  | 'remove';
+  | 'remove'
+  | 'tray-full'
+  | 'file-cog-outlined'
+  | 'magnify-scan'
+  | 'file-alert-outline';
 
 defineProps<{
   name: IconNames;

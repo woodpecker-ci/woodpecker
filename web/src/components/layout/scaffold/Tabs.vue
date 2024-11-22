@@ -5,14 +5,14 @@
       :key="tab.title"
       v-slot="{ isActive, isExactActive }"
       :to="tab.to"
-      class="border-transparent w-full py-1 md:py-2 md:w-auto md:px-6 flex cursor-pointer md:border-b-2 text-wp-text-100 hover:text-wp-text-200 items-center"
+      class="border-transparent w-full py-1 md:py-2 md:w-auto md:px-4 flex cursor-pointer md:border-b-2 text-wp-text-100 hover:text-wp-text-200 items-center"
       :active-class="tab.matchChildren ? '!border-wp-text-100' : ''"
       :exact-active-class="tab.matchChildren ? '' : '!border-wp-text-100'"
     >
       <Icon v-if="isExactActive || (isActive && tab.matchChildren)" name="chevron-right" class="md:hidden" />
       <Icon v-else name="blank" class="md:hidden" />
       <span class="flex gap-2 items-center flex-row">
-        <Icon v-if="tab.icon" :name="tab.icon" :class="tab.iconClass" />
+        <Icon v-if="tab.icon" :name="tab.icon" :class="tab.iconClass" size="20" />
         <span>{{ tab.title }}</span>
         <CountBadge v-if="tab.count" :value="tab.count" />
       </span>
