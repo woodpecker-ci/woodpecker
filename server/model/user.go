@@ -43,13 +43,13 @@ type User struct {
 	// required: true
 	Login string `json:"login"  xorm:"UNIQUE 'login'"`
 
-	// Token is the oauth2 token.
-	Token string `json:"-"  xorm:"TEXT 'token'"`
+	// AccessToken is the oauth2 access token.
+	AccessToken string `json:"-"  xorm:"TEXT 'token'"`
 
-	// Secret is the oauth2 token secret.
-	Secret string `json:"-" xorm:"TEXT 'secret'"`
+	// RefreshToken is the oauth2 refresh token.
+	RefreshToken string `json:"-" xorm:"TEXT 'secret'"`
 
-	// Expiry is the token and secret expiration timestamp.
+	// Expiry is the AccessToken expiration timestamp (unix seconds).
 	Expiry int64 `json:"-" xorm:"expiry"`
 
 	// Email is the email address for this user.
