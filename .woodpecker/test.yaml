@@ -10,9 +10,6 @@ variables:
         # schema changes
         - 'pipeline/schema/**'
       event: pull_request
-    - event: push
-      branch: renovate/*
-      path: *when_path
 
 when:
   - event: pull_request
