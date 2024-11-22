@@ -234,6 +234,7 @@
 
 ### Misc
 
+- Improve tab layout and add hover effect [[#4431](https://github.com/woodpecker-ci/woodpecker/pull/4431)]
 - Dont run pipeline on push events to renovate branches [[#4406](https://github.com/woodpecker-ci/woodpecker/pull/4406)]
 - Harden and correct fifo task queue tests [[#4377](https://github.com/woodpecker-ci/woodpecker/pull/4377)]
 - Kubernetes documentation enhancements [[#4374](https://github.com/woodpecker-ci/woodpecker/pull/4374)]
