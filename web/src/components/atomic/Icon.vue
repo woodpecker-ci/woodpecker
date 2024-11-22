@@ -14,12 +14,12 @@
   <SvgIcon v-else-if="name === 'repo'" :path="mdiGit" size="32" />
   <SvgIcon v-else-if="name === 'settings'" :path="mdiCog" size="32" />
   <SvgIcon v-else-if="name === 'trash'" :path="mdiTrashCanOutline" size="24" />
-  <SvgIcon v-else-if="name === 'status-blocked' || name === 'play'" :path="mdiPlay" size="24" />
-  <SvgIcon v-else-if="name === 'status-declined'" :path="mdiStop" size="24" />
+  <SvgIcon v-else-if="name === 'status-blocked'" :path="mdiPlayCircleOutline" size="24" />
+  <SvgIcon v-else-if="name === 'status-declined'" :path="mdiStopCircleOutline" size="24" />
   <SvgIcon
     v-else-if="name === 'status-failure' || name === 'status-error' || name === 'status-killed'"
     type="mdi"
-    :path="mdiCloseThick"
+    :path="mdiCloseCircleOutline"
     size="24"
   />
   <SvgIcon v-else-if="name === 'status-pending'" :path="mdiRadioboxBlank" size="24" />
@@ -29,8 +29,8 @@
     :path="mdiRadioboxIndeterminateVariant"
     size="24"
   />
-  <SvgIcon v-else-if="name === 'status-skipped'" :path="mdiMinusCircle" size="24" />
-  <SvgIcon v-else-if="name === 'status-success'" :path="mdiCheckCircle" size="24" />
+  <SvgIcon v-else-if="name === 'status-skipped'" :path="mdiMinusCircleOutline" size="24" />
+  <SvgIcon v-else-if="name === 'status-success'" :path="mdiCheckCircleOutline" size="24" />
   <SvgIcon v-else-if="name === 'attention'" :path="mdiAlert" size="24" />
   <SvgIcon v-else-if="name === 'warning'" :path="mdiAlertOutline" size="20" />
   <SvgIcon v-else-if="name === 'error'" :path="mdiAlertCircle" size="20" />
@@ -49,6 +49,7 @@
   <SvgIcon v-else-if="name === 'auto-scroll'" :path="mdiDownload" size="24" />
   <SvgIcon v-else-if="name === 'auto-scroll-off'" :path="mdiDownloadOff" size="24" />
   <SvgIcon v-else-if="name === 'pause'" :path="mdiPause" size="24" />
+  <SvgIcon v-else-if="name === 'play'" :path="mdiPlay" size="24" />
   <SvgIcon v-else-if="name === 'remove'" :path="mdiClose" size="24" />
 
   <SvgIcon v-else-if="name === 'forgejo'" :path="siForgejo.path" size="32" />
@@ -86,12 +87,11 @@ import {
   mdiArrowLeft,
   mdiBandage,
   mdiBitbucket,
-  mdiCheckCircle,
+  mdiCheckCircleOutline,
   mdiChevronRight,
   mdiClockTimeEightOutline,
   mdiClose,
   mdiCloseCircleOutline,
-  mdiCloseThick,
   mdiCog,
   mdiDownload,
   mdiDownloadCircle,
@@ -102,11 +102,12 @@ import {
   mdiGithub,
   mdiGitlab,
   mdiHelpCircleOutline,
-  mdiMinusCircle,
+  mdiMinusCircleOutline,
   mdiPackageVariant,
   mdiPause,
   mdiPencil,
   mdiPlay,
+  mdiPlayCircleOutline,
   mdiPlus,
   mdiPower,
   mdiRadioboxBlank,
@@ -115,7 +116,7 @@ import {
   mdiSourceCommit,
   mdiSourceMerge,
   mdiSourcePull,
-  mdiStop,
+  mdiStopCircleOutline,
   mdiTagOutline,
   mdiTimelapse,
   mdiTrashCanOutline,
