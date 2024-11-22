@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-11-21
+## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-11-22
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -53,6 +53,7 @@
 
 ### 📈 Enhancement
 
+- Improve project settings descriptions [[#4410](https://github.com/woodpecker-ci/woodpecker/pull/4410)]
 - Add count badge to visualize counters in tab title [[#4419](https://github.com/woodpecker-ci/woodpecker/pull/4419)]
 - Redesign repo list and include last pipeline [[#4386](https://github.com/woodpecker-ci/woodpecker/pull/4386)]
 - Use KeyValueEditor for DeployPipelinePopup too [[#4412](https://github.com/woodpecker-ci/woodpecker/pull/4412)]
@@ -171,6 +172,8 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update docker.io/woodpeckerci/plugin-trivy docker tag to v1.3.0 [[#4434](https://github.com/woodpecker-ci/woodpecker/pull/4434)]
+- chore(deps): update web npm deps non-major [[#4432](https://github.com/woodpecker-ci/woodpecker/pull/4432)]
 - fix(deps): update golang-packages [[#4401](https://github.com/woodpecker-ci/woodpecker/pull/4401)]
 - chore(deps): update web npm deps non-major [[#4391](https://github.com/woodpecker-ci/woodpecker/pull/4391)]
 - fix(deps): update dependency @intlify/unplugin-vue-i18n to v6 [[#4397](https://github.com/woodpecker-ci/woodpecker/pull/4397)]
