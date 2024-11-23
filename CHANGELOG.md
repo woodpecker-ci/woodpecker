@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-11-22
+## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-11-23
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -176,6 +176,8 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update pre-commit hook igorshubovych/markdownlint-cli to v0.43.0 [[#4443](https://github.com/woodpecker-ci/woodpecker/pull/4443)]
+- chore(deps): update postgres docker tag to v17.2 [[#4442](https://github.com/woodpecker-ci/woodpecker/pull/4442)]
 - chore(deps): update docker.io/woodpeckerci/plugin-trivy docker tag to v1.3.0 [[#4434](https://github.com/woodpecker-ci/woodpecker/pull/4434)]
 - chore(deps): update web npm deps non-major [[#4432](https://github.com/woodpecker-ci/woodpecker/pull/4432)]
 - fix(deps): update golang-packages [[#4401](https://github.com/woodpecker-ci/woodpecker/pull/4401)]
