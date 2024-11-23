@@ -1,8 +1,8 @@
 # Awesome Woodpecker
 
-A curated list of awesome things related to Woodpecker CI.
+A curated list of assets (tools, projects, blog posts) related to Woodpecker CI.
 
-If you have some missing resources, please feel free to [open a pull-request](https://github.com/woodpecker-ci/woodpecker/edit/main/docs/docs/92-awesome.md) and add them.
+If you want to add a new entry, open a pull-request against [awesome.md](https://github.com/woodpecker-ci/woodpecker/edit/main/docs/docs/92-awesome.md).
 
 ## Official Resources
 
@@ -17,9 +17,6 @@ If you have some missing resources, please feel free to [open a pull-request](ht
 - [Woodpecker CI](https://github.com/woodpecker-ci/woodpecker/tree/main/.woodpecker) itself
 - [All official plugins](https://github.com/woodpecker-ci?q=plugin&type=all)
 - [dessalines/thumb-key](https://github.com/dessalines/thumb-key/blob/main/.woodpecker.yml) - Android Jetpack compose linting and building
-- [Vieter](https://git.rustybever.be/vieter-v/vieter) - Archlinux/Pacman repository server & automated package build system
-  - [Rieter](https://git.rustybever.be/Chewing_Bever/rieter) - Rewrite of the Vieter project in Rust
-- [Alex](https://git.rustybever.be/Chewing_Bever/alex) - Minecraft server wrapper designed to automate backups & complement Docker installations
 
 ## Tools
 
@@ -52,7 +49,7 @@ If you have some missing resources, please feel free to [open a pull-request](ht
 - [Quest For CICD - WoodpeckerCI](https://omaramin.me/posts/woodpecker/)
 - [Getting started with Woodpecker CI](https://systeemkabouter.eu/getting-started-with-woodpecker-ci.html)
 - [Installing gitea and woodpecker using binary packages](https://neelex.com/2023/03/26/Installing-gitea-using-binary-packages/)
-- [Deploying mdbook to codeberg pages using woodpecker CI](https://www.markpitblado.me/blog/deploying-mdbook-to-codeberg-pages-using-woodpecker-ci/)
+- [Deploying mdbook to codeberg pages using Woodpecker CI](https://www.markpitblado.me/blog/deploying-mdbook-to-codeberg-pages-using-woodpecker-ci/)
 - [Deploy a Fly app with Woodpecker CI](https://joeroe.io/2024/01/09/deploy-fly-woodpecker-ci.html)
 - [Ansible - using Woodpecker as an alternative to Semaphore](https://pat-s.me/ansible-using-woodpecker-as-an-alternative-to-semaphore/)
 - [Simple selfhosted CI/CD with Woodpecker](https://xyquadrat.ch/blog/simple-ci-with-woodpecker/)
