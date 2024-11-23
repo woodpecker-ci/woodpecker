@@ -10,17 +10,17 @@
     "style": "mkdir -p dist/theme/ && cp src/theme/style.css dist/theme/style.css"
   },
   "devDependencies": {
-    "@docusaurus/module-type-aliases": "^3.6.1",
-    "@docusaurus/theme-classic": "^3.6.1",
-    "@docusaurus/types": "^3.6.1",
+    "@docusaurus/module-type-aliases": "^3.6.3",
+    "@docusaurus/theme-classic": "^3.6.3",
+    "@docusaurus/types": "^3.6.3",
     "@tsconfig/docusaurus": "^2.0.3",
-    "@types/node": "^22.9.0",
+    "@types/node": "^22.9.3",
     "axios": "^1.7.7",
     "concurrently": "^9.1.0",
     "isomorphic-dompurify": "^2.16.0",
-    "marked": "^15.0.0",
+    "marked": "^15.0.2",
     "tslib": "^2.8.1",
-    "typescript": "^5.6.3"
+    "typescript": "^5.7.2"
   },
   "peerDependencies": {
     "react": "^17.0.2 || ^18.0.0",
@@ -28,6 +28,6 @@
   },
   "dependencies": {
     "fuse.js": "^7.0.0",
-    "yaml": "^2.6.0"
+    "yaml": "^2.6.1"
   }
 }
