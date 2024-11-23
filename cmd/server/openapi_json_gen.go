@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// ************************************************************************************************
-// This is a generator tool, to update the Markdown documentation for the woodpecker-ci.org website
-// ************************************************************************************************
+// *********************************************************
+// This is a generator tool, to update the openapi.json file
+// *********************************************************
 
 //go:build generate
 // +build generate
@@ -30,23 +30,24 @@ import (
 
 	"github.com/getkin/kin-openapi/openapi2"
 	"github.com/getkin/kin-openapi/openapi2conv"
-	"go.woodpecker-ci.org/woodpecker/v2/cmd/server/docs"
+
+	"go.woodpecker-ci.org/woodpecker/v2/cmd/server/openapi"
 )
 
 func main() {
-	// set swagger infos
-	setupSwaggerStaticConfig()
+	// set openapi infos
+	setupOpenAPIStaticConfig()
 
 	basePath := path.Join("..", "..")
-	filePath := path.Join(basePath, "docs", "swagger.json")
+	filePath := path.Join(basePath, "docs", "openapi.json")
 
-	// generate swagger file
+	// generate openapi file
 	f, err := os.Create(filePath)
 	if err != nil {
 		panic(err)
 	}
 	defer f.Close()
-	doc := docs.SwaggerInfo.ReadDoc()
+	doc := openapi.SwaggerInfo.ReadDoc()
 	doc, err = removeHost(doc)
 	if err != nil {
 		panic(err)
@@ -55,6 +56,8 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
+	fmt.Println("generated openapi.json")
 
 	// convert to OpenApi3
 	if err := toOpenApi3(filePath, filePath); err != nil {

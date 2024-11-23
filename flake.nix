@@ -34,7 +34,7 @@
             go-mockery
             protobuf
             sqlite
-            go-swag # for generate-swagger
+            go-swag # for generate-openapi
             addlicense
             protoc-gen-go
             protoc-gen-go-grpc
