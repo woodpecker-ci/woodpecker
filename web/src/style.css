@@ -41,6 +41,7 @@
 
   --wp-code-100: theme('colors.int-wp-secondary.300');
   --wp-code-200: theme('colors.int-wp-secondary.600');
+  --wp-code-custom: #f0f1f3;
   --wp-code-text-100: theme('colors.gray.200');
   --wp-code-text-alt-100: theme('colors.gray.300');
 
@@ -90,6 +91,7 @@
 
   --wp-code-100: theme('colors.int-wp-secondary.700');
   --wp-code-200: theme('colors.int-wp-secondary.800');
+  --wp-code-custom: #3d444d;
   --wp-code-text-100: theme('colors.gray.300');
   --wp-code-text-alt-100: theme('colors.gray.400');
 
@@ -149,5 +151,5 @@ body,
 
 .code-box-inline,
 code:not(pre > code) {
-  @apply bg-wp-code-200 rounded-md text-wp-code-text-100 px-1 py-px;
+  @apply bg-wp-code-custom rounded-lg text-wp-code-text-100 px-1.5 py-0.5;
 }
