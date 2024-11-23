@@ -45,6 +45,7 @@ type StepBuilder struct {
 	Curr          *model.Pipeline
 	Prev          *model.Pipeline
 	Netrc         *model.Netrc
+	Vars          []*model.Variable
 	Secs          []*model.Secret
 	Regs          []*model.Registry
 	Host          string
@@ -263,6 +264,10 @@ func (b *StepBuilder) toInternalRepresentation(parsed *yaml_types.Workflow, envi
 			Events:         events,
 		})
 	}
+	variables := make(map[string]string, len(b.Vars))
+	for _, v := range b.Vars {
+		variables[v.Name] = v.Value
+	}
 
 	var registries []compiler.Registry
 	for _, reg := range b.Regs {
@@ -293,6 +298,7 @@ func (b *StepBuilder) toInternalRepresentation(parsed *yaml_types.Workflow, envi
 		compiler.WithTrustedClonePlugins(server.Config.Pipeline.TrustedClonePlugins),
 		compiler.WithRegistry(registries...),
 		compiler.WithSecret(secrets...),
+		compiler.WithVariable(variables),
 		compiler.WithPrefix(
 			fmt.Sprintf(
 				"wp_%s_%d",

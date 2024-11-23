@@ -48,6 +48,7 @@ var migrationTasks = []*xormigrate.Migration{
 	&splitTrusted,
 	&correctPotentialCorruptOrgsUsersRelation,
 	&gatedToRequireApproval,
+	&addVariablesTable,
 }
 
 var allBeans = []any{
@@ -60,6 +61,7 @@ var allBeans = []any{
 	new(model.Step),
 	new(model.Registry),
 	new(model.Repo),
+	new(model.Variable),
 	new(model.Secret),
 	new(model.Task),
 	new(model.User),

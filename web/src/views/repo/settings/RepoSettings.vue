@@ -17,6 +17,7 @@
     </template>
 
     <Tab :to="{ name: 'repo-settings' }" :title="$t('repo.settings.general.general')" />
+    <Tab :to="{ name: 'repo-settings-variables' }" :title="$t('variables.variables')" />
     <Tab :to="{ name: 'repo-settings-secrets' }" :title="$t('secrets.secrets')" />
     <Tab :to="{ name: 'repo-settings-registries' }" :title="$t('registries.registries')" />
     <Tab :to="{ name: 'repo-settings-crons' }" :title="$t('repo.settings.crons.crons')" />

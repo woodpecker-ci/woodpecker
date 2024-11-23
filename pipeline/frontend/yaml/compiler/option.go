@@ -56,6 +56,18 @@ func WithRegistry(registries ...Registry) Option {
 	}
 }
 
+// WithVariable configures the compiler with external variables
+// to be injected into the container at runtime.
+func WithVariable(variables map[string]string) Option {
+	return func(compiler *Compiler) {
+		if variables != nil {
+			compiler.variables = variables
+		} else {
+			compiler.variables = make(map[string]string)
+		}
+	}
+}
+
 // WithSecret configures the compiler with external secrets
 // to be injected into the container at runtime.
 func WithSecret(secrets ...Secret) Option {

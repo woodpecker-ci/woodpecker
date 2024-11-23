@@ -4,6 +4,7 @@
       {{ $t('settings') }}
     </template>
     <Tab :to="{ name: 'admin-settings' }" :title="$t('info')" />
+    <Tab :to="{ name: 'admin-settings-variables' }" :title="$t('variables.variables')" />
     <Tab :to="{ name: 'admin-settings-secrets' }" :title="$t('secrets.secrets')" />
     <Tab :to="{ name: 'admin-settings-registries' }" :title="$t('registries.registries')" />
     <Tab :to="{ name: 'admin-settings-repos' }" :title="$t('admin.settings.repos.repos')" />

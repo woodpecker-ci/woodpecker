@@ -98,6 +98,14 @@ func (c *Compiler) createProcess(container *yaml_types.Container, stepType backe
 
 	workingDir = c.stepWorkingDir(container)
 
+	getVariableValue := func(name string) (string, error) {
+		value, ok := c.variables[name]
+		if !ok {
+			return "", fmt.Errorf("variable %q not found", name)
+		}
+		return value, nil
+	}
+
 	getSecretValue := func(name string) (string, error) {
 		name = strings.ToLower(name)
 		secret, ok := c.secrets[name]
@@ -114,11 +122,11 @@ func (c *Compiler) createProcess(container *yaml_types.Container, stepType backe
 		return secret.Value, nil
 	}
 
-	if err := settings.ParamsToEnv(container.Settings, environment, "PLUGIN_", true, getSecretValue); err != nil {
+	if err := settings.ParamsToEnv(container.Settings, environment, "PLUGIN_", true, getVariableValue, getSecretValue); err != nil {
 		return nil, err
 	}
 
-	if err := settings.ParamsToEnv(container.Environment, environment, "", false, getSecretValue); err != nil {
+	if err := settings.ParamsToEnv(container.Environment, environment, "", false, getVariableValue, getSecretValue); err != nil {
 		return nil, err
 	}
 

@@ -16,65 +16,73 @@ package settings
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v3"
 )
 
+var (
+	getValueByKeyFunc = func(keyValueMap map[string]string) func(string) (string, error) {
+		return func(key string) (string, error) {
+			variable, ok := keyValueMap[key]
+			if ok {
+				return variable, nil
+			}
+			return "", fmt.Errorf("not found")
+		}
+	}
+	errorGetValueByKeyFunc = func(string) (string, error) {
+		return "", fmt.Errorf("not found")
+	}
+)
+
 func TestParamsToEnv(t *testing.T) {
 	from := map[string]any{
-		"skip":             nil,
-		"string":           "stringz",
-		"int":              1,
-		"float":            1.2,
-		"bool":             true,
-		"slice":            []int{1, 2, 3},
-		"map":              map[string]any{"hello": "world"},
-		"complex":          []struct{ Name string }{{"Jack"}, {"Jill"}},
-		"complex2":         struct{ Name string }{"Jack"},
-		"from.address":     "noreply@example.com",
-		"tags":             stringsToInterface("next", "latest"),
-		"tag":              stringsToInterface("next"),
-		"my_secret":        map[string]any{"from_secret": "secret_token"},
-		"UPPERCASE_SECRET": map[string]any{"from_secret": "SECRET_TOKEN"},
+		"skip":         nil,
+		"string":       "stringz",
+		"int":          1,
+		"float":        1.2,
+		"bool":         true,
+		"slice":        []int{1, 2, 3},
+		"map":          map[string]any{"hello": "world"},
+		"complex":      []struct{ Name string }{{"Jack"}, {"Jill"}},
+		"complex2":     struct{ Name string }{"Jack"},
+		"from.address": "noreply@example.com",
+		"tags":         stringsToInterface("next", "latest"),
+		"tag":          stringsToInterface("next"),
+		"my_secret":    map[string]any{"from_secret": "secret_token"},
+		"my_variable":  map[string]any{"from_variable": "normal_variable"},
 	}
 	want := map[string]string{
-		"PLUGIN_STRING":           "stringz",
-		"PLUGIN_INT":              "1",
-		"PLUGIN_FLOAT":            "1.2",
-		"PLUGIN_BOOL":             "true",
-		"PLUGIN_SLICE":            "1,2,3",
-		"PLUGIN_MAP":              `{"hello":"world"}`,
-		"PLUGIN_COMPLEX":          `[{"name":"Jack"},{"name":"Jill"}]`,
-		"PLUGIN_COMPLEX2":         `{"name":"Jack"}`,
-		"PLUGIN_FROM_ADDRESS":     "noreply@example.com",
-		"PLUGIN_TAG":              "next",
-		"PLUGIN_TAGS":             "next,latest",
-		"PLUGIN_MY_SECRET":        "FooBar",
-		"PLUGIN_UPPERCASE_SECRET": "FooBar",
+		"PLUGIN_STRING":       "stringz",
+		"PLUGIN_INT":          "1",
+		"PLUGIN_FLOAT":        "1.2",
+		"PLUGIN_BOOL":         "true",
+		"PLUGIN_SLICE":        "1,2,3",
+		"PLUGIN_MAP":          `{"hello":"world"}`,
+		"PLUGIN_COMPLEX":      `[{"name":"Jack"},{"name":"Jill"}]`,
+		"PLUGIN_COMPLEX2":     `{"name":"Jack"}`,
+		"PLUGIN_FROM_ADDRESS": "noreply@example.com",
+		"PLUGIN_TAG":          "next",
+		"PLUGIN_TAGS":         "next,latest",
+		"PLUGIN_MY_SECRET":    "FooBar",
+		"PLUGIN_MY_VARIABLE":  "FooVar",
+	}
+	variables := map[string]string{
+		"normal_variable": "FooVar",
 	}
 	secrets := map[string]string{
 		"secret_token": "FooBar",
 	}
 	got := map[string]string{}
-	getSecretValue := func(name string) (string, error) {
-		name = strings.ToLower(name)
-		secret, ok := secrets[name]
-		if ok {
-			return secret, nil
-		}
 
-		return "", fmt.Errorf("secret %q not found or not allowed to be used", name)
-	}
-
-	assert.NoError(t, ParamsToEnv(from, got, "PLUGIN_", true, getSecretValue))
+	assert.NoError(t, ParamsToEnv(from, got, "PLUGIN_", true, getValueByKeyFunc(variables), getValueByKeyFunc(secrets)))
 	assert.EqualValues(t, want, got, "Problem converting plugin parameters to environment variables")
 
 	// handle edge cases (#1609)
 	got = map[string]string{}
-	assert.NoError(t, ParamsToEnv(map[string]any{"a": []any{"a", nil}}, got, "PLUGIN_", true, nil))
+	assert.NoError(t, ParamsToEnv(map[string]any{"a": []any{"a", nil}}, got, "PLUGIN_", true, nil, nil))
 	assert.EqualValues(t, map[string]string{"PLUGIN_A": "a,"}, got)
 }
 
@@ -88,11 +96,8 @@ func TestParamsToEnvPrefix(t *testing.T) {
 		"PLUGIN_INT":    "1",
 	}
 	got := map[string]string{}
-	getSecretValue := func(name string) (string, error) {
-		return "", fmt.Errorf("secret %q not found or not allowed to be used", name)
-	}
 
-	assert.NoError(t, ParamsToEnv(from, got, "PLUGIN_", true, getSecretValue))
+	assert.NoError(t, ParamsToEnv(from, got, "PLUGIN_", true, errorGetValueByKeyFunc, errorGetValueByKeyFunc))
 	assert.EqualValues(t, wantPrefixPlugin, got, "Problem converting plugin parameters to environment variables")
 
 	wantNoPrefix := map[string]string{
@@ -102,7 +107,7 @@ func TestParamsToEnvPrefix(t *testing.T) {
 
 	// handle edge cases (#1609)
 	got = map[string]string{}
-	assert.NoError(t, ParamsToEnv(from, got, "", true, getSecretValue))
+	assert.NoError(t, ParamsToEnv(from, got, "", true, errorGetValueByKeyFunc, errorGetValueByKeyFunc))
 	assert.EqualValues(t, wantNoPrefix, got, "Problem converting plugin parameters to environment variables")
 }
 
@@ -124,6 +129,8 @@ bool: true
 slice: [1, 2, 3]
 my_secret:
   from_secret: secret_token
+my_variable:
+  from_variable: normal_variable
 map:
   key: "value"
   entry2:
@@ -132,9 +139,12 @@ map:
     - 3
   secret:
     from_secret: secret_token
+  variable:
+    from_variable: normal_variable
 list.map:
   - registry: https://codeberg.org
-    username: "6543"
+    username:
+      from_variable: cb_username
     password:
       from_secret: cb_password
 `)
@@ -143,31 +153,27 @@ list.map:
 	assert.NoError(t, err)
 
 	want := map[string]string{
-		"PLUGIN_STRING":    "stringz",
-		"PLUGIN_INT":       "1",
-		"PLUGIN_FLOAT":     "1.2",
-		"PLUGIN_BOOL":      "true",
-		"PLUGIN_SLICE":     "1,2,3",
-		"PLUGIN_MY_SECRET": "FooBar",
-		"PLUGIN_MAP":       `{"entry2":["a","b",3],"key":"value","secret":"FooBar"}`,
-		"PLUGIN_LIST_MAP":  `[{"password":"geheim","registry":"https://codeberg.org","username":"6543"}]`,
+		"PLUGIN_STRING":      "stringz",
+		"PLUGIN_INT":         "1",
+		"PLUGIN_FLOAT":       "1.2",
+		"PLUGIN_BOOL":        "true",
+		"PLUGIN_SLICE":       "1,2,3",
+		"PLUGIN_MY_SECRET":   "FooBar",
+		"PLUGIN_MY_VARIABLE": "FooVar",
+		"PLUGIN_MAP":         `{"entry2":["a","b",3],"key":"value","secret":"FooBar","variable":"FooVar"}`,
+		"PLUGIN_LIST_MAP":    `[{"password":"geheim","registry":"https://codeberg.org","username":"6543"}]`,
+	}
+	variables := map[string]string{
+		"normal_variable": "FooVar",
+		"cb_username":     "6543",
 	}
 	secrets := map[string]string{
 		"secret_token": "FooBar",
 		"cb_password":  "geheim",
 	}
 	got := map[string]string{}
-	getSecretValue := func(name string) (string, error) {
-		name = strings.ToLower(name)
-		secret, ok := secrets[name]
-		if ok {
-			return secret, nil
-		}
 
-		return "", fmt.Errorf("secret %q not found or not allowed to be used", name)
-	}
-
-	assert.NoError(t, ParamsToEnv(from, got, "PLUGIN_", true, getSecretValue))
+	assert.NoError(t, ParamsToEnv(from, got, "PLUGIN_", true, getValueByKeyFunc(variables), getValueByKeyFunc(secrets)))
 	assert.EqualValues(t, want, got, "Problem converting plugin parameters to environment variables")
 }
 
@@ -181,17 +187,8 @@ func TestYAMLToParamsToEnvError(t *testing.T) {
 	secrets := map[string]string{
 		"secret_token": "FooBar",
 	}
-	getSecretValue := func(name string) (string, error) {
-		name = strings.ToLower(name)
-		secret, ok := secrets[name]
-		if ok {
-			return secret, nil
-		}
 
-		return "", fmt.Errorf("secret %q not found or not allowed to be used", name)
-	}
-
-	assert.Error(t, ParamsToEnv(from, make(map[string]string), "PLUGIN_", true, getSecretValue))
+	assert.Error(t, ParamsToEnv(from, make(map[string]string), "PLUGIN_", true, errorGetValueByKeyFunc, getValueByKeyFunc(secrets)))
 }
 
 func stringsToInterface(val ...string) []any {
@@ -202,6 +199,23 @@ func stringsToInterface(val ...string) []any {
 	return res
 }
 
+func TestVariableNotFound(t *testing.T) {
+	from := map[string]any{
+		"map": map[string]any{"variable": map[string]any{"from_variable": "normal_variable"}},
+	}
+
+	variables := map[string]string{
+		"a_different_variable": "variable",
+	}
+
+	got := map[string]string{}
+
+	assert.ErrorContains(t,
+		ParamsToEnv(from, got, "PLUGIN_", true, getValueByKeyFunc(variables), errorGetValueByKeyFunc),
+		"not found",
+	)
+}
+
 func TestSecretNotFound(t *testing.T) {
 	from := map[string]any{
 		"map": map[string]any{"secret": map[string]any{"from_secret": "secret_token"}},
@@ -210,18 +224,11 @@ func TestSecretNotFound(t *testing.T) {
 	secrets := map[string]string{
 		"a_different_password": "secret",
 	}
-	getSecretValue := func(name string) (string, error) {
-		name = strings.ToLower(name)
-		secret, ok := secrets[name]
-		if ok {
-			return secret, nil
-		}
 
-		return "", fmt.Errorf("secret %q not found or not allowed to be used", name)
-	}
 	got := map[string]string{}
 
 	assert.ErrorContains(t,
-		ParamsToEnv(from, got, "PLUGIN_", true, getSecretValue),
-		fmt.Sprintf("secret %q not found or not allowed to be used", "secret_token"))
+		ParamsToEnv(from, got, "PLUGIN_", true, errorGetValueByKeyFunc, getValueByKeyFunc(secrets)),
+		"not found",
+	)
 }
