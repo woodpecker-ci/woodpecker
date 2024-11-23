@@ -279,7 +279,7 @@ const config: Config = {
         // Plugin Options for loading OpenAPI files
         specs: [
           {
-            spec: 'swagger.json',
+            spec: 'openapi.json',
             route: '/api/',
           },
         ],
