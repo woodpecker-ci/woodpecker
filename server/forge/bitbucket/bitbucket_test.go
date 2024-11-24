@@ -60,7 +60,7 @@ func Test_bitbucket(t *testing.T) {
 			netrc, _ := forge.Netrc(fakeUser, fakeRepo)
 			g.Assert(netrc.Machine).Equal("bitbucket.org")
 			g.Assert(netrc.Login).Equal("x-token-auth")
-			g.Assert(netrc.Password).Equal(fakeUser.Token)
+			g.Assert(netrc.Password).Equal(fakeUser.AccessToken)
 		})
 
 		g.Describe("Given an authorization request", func() {
@@ -75,8 +75,8 @@ func Test_bitbucket(t *testing.T) {
 				})
 				g.Assert(err).IsNil()
 				g.Assert(u.Login).Equal(fakeUser.Login)
-				g.Assert(u.Token).Equal("2YotnFZFEjr1zCsicMWpAA")
-				g.Assert(u.Secret).Equal("tGzv3JOkF0XG5Qx2TlKWIA")
+				g.Assert(u.AccessToken).Equal("2YotnFZFEjr1zCsicMWpAA")
+				g.Assert(u.RefreshToken).Equal("tGzv3JOkF0XG5Qx2TlKWIA")
 			})
 			g.It("Should handle failure to exchange code", func() {
 				_, _, err := c.Login(ctx, &types.OAuthRequest{
@@ -94,12 +94,12 @@ func Test_bitbucket(t *testing.T) {
 
 		g.Describe("Given an access token", func() {
 			g.It("Should return the authenticated user", func() {
-				login, err := c.Auth(ctx, fakeUser.Token, fakeUser.Secret)
+				login, err := c.Auth(ctx, fakeUser.AccessToken, fakeUser.RefreshToken)
 				g.Assert(err).IsNil()
 				g.Assert(login).Equal(fakeUser.Login)
 			})
 			g.It("Should handle a failure to resolve user", func() {
-				_, err := c.Auth(ctx, fakeUserNotFound.Token, fakeUserNotFound.Secret)
+				_, err := c.Auth(ctx, fakeUserNotFound.AccessToken, fakeUserNotFound.RefreshToken)
 				g.Assert(err).IsNotNil()
 			})
 		})
@@ -109,8 +109,8 @@ func Test_bitbucket(t *testing.T) {
 				ok, err := c.Refresh(ctx, fakeUserRefresh)
 				g.Assert(err).IsNil()
 				g.Assert(ok).IsTrue()
-				g.Assert(fakeUserRefresh.Token).Equal("2YotnFZFEjr1zCsicMWpAA")
-				g.Assert(fakeUserRefresh.Secret).Equal("tGzv3JOkF0XG5Qx2TlKWIA")
+				g.Assert(fakeUserRefresh.AccessToken).Equal("2YotnFZFEjr1zCsicMWpAA")
+				g.Assert(fakeUserRefresh.RefreshToken).Equal("tGzv3JOkF0XG5Qx2TlKWIA")
 			})
 			g.It("Should handle an empty access token", func() {
 				ok, err := c.Refresh(ctx, fakeUserRefreshEmpty)
@@ -293,38 +293,38 @@ func Test_bitbucket(t *testing.T) {
 
 var (
 	fakeUser = &model.User{
-		Login: "superman",
-		Token: "cfcd2084",
+		Login:       "superman",
+		AccessToken: "cfcd2084",
 	}
 
 	fakeUserRefresh = &model.User{
-		Login:  "superman",
-		Secret: "cfcd2084",
+		Login:        "superman",
+		RefreshToken: "cfcd2084",
 	}
 
 	fakeUserRefreshFail = &model.User{
-		Login:  "superman",
-		Secret: "refresh_token_not_found",
+		Login:        "superman",
+		RefreshToken: "refresh_token_not_found",
 	}
 
 	fakeUserRefreshEmpty = &model.User{
-		Login:  "superman",
-		Secret: "refresh_token_is_empty",
+		Login:        "superman",
+		RefreshToken: "refresh_token_is_empty",
 	}
 
 	fakeUserNotFound = &model.User{
-		Login: "superman",
-		Token: "user_not_found",
+		Login:       "superman",
+		AccessToken: "user_not_found",
 	}
 
 	fakeUserNoTeams = &model.User{
-		Login: "superman",
-		Token: "teams_not_found",
+		Login:       "superman",
+		AccessToken: "teams_not_found",
 	}
 
 	fakeUserNoRepos = &model.User{
-		Login: "superman",
-		Token: "repos_not_found",
+		Login:       "superman",
+		AccessToken: "repos_not_found",
 	}
 
 	fakeRepo = &model.Repo{

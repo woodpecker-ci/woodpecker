@@ -36,12 +36,12 @@ type User struct {
 } // @name User
 ```
 
-These guidelines aim to have consistent wording in the swagger doc:
+These guidelines aim to have consistent wording in the OpenAPI doc:
 
 - first word after `@Summary` and `@Summary` are always uppercase
 - `@Summary` has no `.` (dot) at the end of the line
 - model structs shall use custom short names, to ease life for API consumers, using `@name`
-- `@Success` object or array declarations shall be short, this means the actual `model.User` struct must have a `@name` annotation, so that the model can be rendered in Swagger
+- `@Success` object or array declarations shall be short, this means the actual `model.User` struct must have a `@name` annotation, so that the model can be rendered in OpenAPI
 - when pagination is used, `@Param page` and `@Param perPage` must be added manually
 - `@Param Authorization` is almost always present, there are just a few un-protected endpoints
 
@@ -50,14 +50,10 @@ More enhanced information you can find here <https://github.com/swaggo/swag/blob
 
 ### Manual code generation
 
-```bash title="generate the server's Go code containing the Swagger"
-make generate-swagger
+```bash title="generate the server's Go code containing the OpenAPI"
+make generate-openapi
 ```
 
 ```bash title="update the Markdown in the ./docs folder"
 make docs
-```
-
-```bash title="auto-format swagger related godoc"
-go run github.com/swaggo/swag/cmd/swag@latest fmt -g server/api/z.go
 ```

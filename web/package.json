@@ -5,7 +5,7 @@
   "license": "Apache-2.0",
   "type": "module",
   "engines": {
-    "node": ">=14"
+    "node": ">=20"
   },
   "scripts": {
     "start": "vite",
@@ -42,7 +42,7 @@
     "@antfu/eslint-config": "^3.3.2",
     "@eslint/js": "^9.9.0",
     "@ianvs/prettier-plugin-sort-imports": "^4.3.1",
-    "@intlify/eslint-plugin-vue-i18n": "3.0.0",
+    "@intlify/eslint-plugin-vue-i18n": "3.1.0",
     "@types/eslint__js": "^8.42.3",
     "@types/lodash": "^4.17.7",
     "@types/node": "^22.0.0",
