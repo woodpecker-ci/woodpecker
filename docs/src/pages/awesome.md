@@ -2,7 +2,7 @@
 
 A curated list of assets (tools, projects, blog posts) related to Woodpecker CI.
 
-If you want to add a new entry, open a pull-request against [awesome.md](https://github.com/woodpecker-ci/woodpecker/edit/main/docs/docs/92-awesome.md).
+If you want to add a new entry, open a [pull-request](https://github.com/woodpecker-ci/woodpecker/edit/main/docs/docs/92-awesome.md).
 
 ## Official Resources
 
