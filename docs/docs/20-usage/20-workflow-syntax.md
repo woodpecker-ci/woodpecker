@@ -771,8 +771,8 @@ Only allowed if 'Trusted Network' option is enabled in repo settings by an admin
 
 ### `dns`
 
-If the backend engine understands to change the dns server and lookup domain,
-this options will be used to alter the default dns config to a custom one for a specific step.
+If the backend engine understands to change the DNS server and lookup domain,
+this options will be used to alter the default DNS config to a custom one for a specific step.
 
 ```yaml
 steps:

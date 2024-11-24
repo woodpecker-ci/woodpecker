@@ -328,11 +328,11 @@
           "$ref": "#/definitions/string_or_string_slice"
         },
         "dns": {
-          "description": "Change dns server for step. Only allowed if 'Trusted Network' option is enabled in repo settings by an admin. Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#dns",
+          "description": "Change DNS server for step. Only allowed if 'Trusted Network' option is enabled in repo settings by an admin. Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#dns",
           "$ref": "#/definitions/string_or_string_slice"
         },
         "dns_search": {
-          "description": "Change dns lookup domain for step. Only allowed if 'Trusted Network' option is enabled in repo settings by an admin. Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#dns",
+          "description": "Change DNS lookup domain for step. Only allowed if 'Trusted Network' option is enabled in repo settings by an admin. Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#dns",
           "$ref": "#/definitions/string_or_string_slice"
         }
       }
