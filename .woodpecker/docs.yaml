@@ -49,7 +49,6 @@ steps:
   build:
     image: *node_image
     directory: docs/
-    dns: 1.1.1.1
     commands:
       - corepack enable
       - pnpm install --frozen-lockfile
