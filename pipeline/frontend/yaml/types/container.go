@@ -59,8 +59,8 @@ type (
 		// TODO: remove base.EnvironmentMap and use map[string]any after v3.0.0 release
 		Environment base.EnvironmentMap `yaml:"environment,omitempty"`
 
-		// Deprecated
-		Secrets base.SecretsSlice `yaml:"secrets,omitempty"`
+		// Remove after v3.1.0
+		Secrets []any `yaml:"secrets,omitempty"`
 
 		// Docker and Kubernetes Specific
 		Privileged bool `yaml:"privileged,omitempty"`

@@ -58,7 +58,6 @@ steps:
         path: *when_path
       - branch:
           - ${CI_REPO_DEFAULT_BRANCH}
-          - renovate/*
         event: [push, tag]
         path: *when_path
 
@@ -79,7 +78,6 @@ steps:
         path: *when_path
       - branch:
           - ${CI_REPO_DEFAULT_BRANCH}
-          - renovate/*
         event: [push, tag]
         path: *when_path
 
@@ -101,9 +99,6 @@ steps:
         evaluate: 'CI_COMMIT_PULL_REQUEST_LABELS contains "build_pr_images"'
       - event: pull_request
         path: *when_path
-      - event: push
-        path: *when_path
-        branch: renovate/*
 
   cross-compile-server:
     depends_on:
@@ -166,9 +161,6 @@ steps:
       - evaluate: 'not (CI_COMMIT_PULL_REQUEST_LABELS contains "build_pr_images")'
         event: pull_request
         path: *when_path
-      - event: push
-        path: *when_path
-        branch: renovate/*
 
   publish-next-server:
     depends_on:

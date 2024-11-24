@@ -177,6 +177,14 @@ func TestLintErrors(t *testing.T) {
 			from: "{steps: { build: { image: golang, settings: { test: 'true' } } }, when: { branch: main, event: push }, clone: { git: { image: some-other/plugin-git:v1.1.0 } } }",
 			want: "Specified clone image does not match allow list, netrc is not injected",
 		},
+		{
+			from: "steps: { build: { image: golang, secrets: [ { source: mysql_username, target: mysql_username } ] } }",
+			want: "Usage of `secrets` is deprecated, use `environment` in combination with `from_secret`",
+		},
+		{
+			from: "steps: { build: { image: golang, secrets: [ 'mysql_username' ] } }",
+			want: "Usage of `secrets` is deprecated, use `environment` in combination with `from_secret`",
+		},
 	}
 
 	for _, test := range testdata {
