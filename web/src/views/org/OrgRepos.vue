@@ -4,19 +4,17 @@
       {{ org.name }}
     </template>
 
-    <template #titleActions>
+    <template #headerActions>
       <IconButton
         v-if="orgPermissions.admin"
         icon="settings"
-        :to="{ name: org.is_user ? 'user' : 'org-settings' }"
+        :to="{ name: org.is_user ? 'user' : 'org-settings-secrets' }"
         :title="$t('settings')"
       />
     </template>
 
-    <div class="space-y-4">
-      <ListItem v-for="repo in searchedRepos" :key="repo.id" :to="{ name: 'repo', params: { repoId: repo.id } }">
-        <span class="text-wp-text-100">{{ `${repo.owner} / ${repo.name}` }}</span>
-      </ListItem>
+    <div class="flex flex-col gap-4">
+      <RepoItem v-for="repo in searchedRepos" :key="repo.id" :repo="repo" />
     </div>
     <div v-if="(searchedRepos || []).length <= 0" class="text-center">
       <span class="text-wp-text-100 m-auto">{{ $t('repo.user_none') }}</span>
@@ -28,19 +26,25 @@
 import { computed, onMounted, ref } from 'vue';
 
 import IconButton from '~/components/atomic/IconButton.vue';
-import ListItem from '~/components/atomic/ListItem.vue';
 import Scaffold from '~/components/layout/scaffold/Scaffold.vue';
+import RepoItem from '~/components/repo/RepoItem.vue';
 import { inject } from '~/compositions/useInjectProvide';
+import useRepos from '~/compositions/useRepos';
 import { useRepoSearch } from '~/compositions/useRepoSearch';
 import { useRepoStore } from '~/store/repos';
 
 const repoStore = useRepoStore();
+const { repoWithLastPipeline } = useRepos();
 
 const org = inject('org');
 const orgPermissions = inject('org-permissions');
 
 const search = ref('');
-const repos = computed(() => Array.from(repoStore.repos.values()).filter((repo) => repo.org_id === org.value?.id));
+const repos = computed(() =>
+  Array.from(repoStore.repos.values())
+    .filter((repo) => repo.org_id === org.value?.id)
+    .map(repoWithLastPipeline),
+);
 const { searchedRepos } = useRepoSearch(repos, search);
 
 onMounted(async () => {

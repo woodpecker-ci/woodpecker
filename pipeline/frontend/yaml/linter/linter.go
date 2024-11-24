@@ -158,6 +158,9 @@ func (l *Linter) lintContainers(config *WorkflowConfig, area string) error {
 		if err := l.lintPrivilegedPlugins(config, container, area); err != nil {
 			linterErr = multierr.Append(linterErr, err)
 		}
+		if err := l.lintContainerDeprecations(config, container, area); err != nil {
+			linterErr = multierr.Append(linterErr, err)
+		}
 	}
 
 	return linterErr
@@ -199,10 +202,23 @@ func (l *Linter) lintSettings(config *WorkflowConfig, c *types.Container, field 
 	if len(c.Environment) != 0 {
 		return newLinterError("Should not configure both `environment` and `settings`", config.File, fmt.Sprintf("%s.%s", field, c.Name), true)
 	}
-	if len(c.Secrets) != 0 {
-		return newLinterError("Should not configure both `secrets` and `settings`", config.File, fmt.Sprintf("%s.%s", field, c.Name), true)
-	}
 	return nil
+}
+
+func (l *Linter) lintContainerDeprecations(config *WorkflowConfig, c *types.Container, field string) (err error) {
+	if len(c.Secrets) != 0 {
+		err = multierr.Append(err, &errorTypes.PipelineError{
+			Type:    errorTypes.PipelineErrorTypeDeprecation,
+			Message: "Usage of `secrets` is deprecated, use `environment` in combination with `from_secret`",
+			Data: errors.DeprecationErrorData{
+				File:  config.File,
+				Field: fmt.Sprintf("%s.%s.secrets", field, c.Name),
+				Docs:  "https://woodpecker-ci.org/docs/usage/secrets#use-secrets-in-settings-and-environment",
+			},
+		})
+	}
+
+	return err
 }
 
 func (l *Linter) lintTrusted(config *WorkflowConfig, c *types.Container, area string) error {
@@ -284,21 +300,6 @@ func (l *Linter) lintDeprecations(config *WorkflowConfig) (err error) {
 					File:  config.File,
 					Field: fmt.Sprintf("steps.%s.detached", step.Name),
 					Docs:  "https://woodpecker-ci.org/docs/usage/services",
-				},
-				IsWarning: true,
-			})
-		}
-	}
-
-	for _, container := range parsed.Steps.ContainerList {
-		if len(container.Secrets) > 0 {
-			err = multierr.Append(err, &errorTypes.PipelineError{
-				Type:    errorTypes.PipelineErrorTypeDeprecation,
-				Message: "Usage of `secrets` is deprecated, use `environment` with `from_secret`",
-				Data: errors.DeprecationErrorData{
-					File:  config.File,
-					Field: fmt.Sprintf("steps.%s.secrets", container.Name),
-					Docs:  "https://woodpecker-ci.org/docs/usage/secrets#usage",
 				},
 				IsWarning: true,
 			})

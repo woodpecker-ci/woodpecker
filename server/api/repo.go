@@ -91,6 +91,7 @@ func PostRepo(c *gin.Context) {
 		repo.Update(from)
 	} else {
 		repo = from
+		repo.RequireApproval = model.RequireApprovalForks
 		repo.AllowPull = true
 		repo.AllowDeploy = false
 		repo.NetrcOnlyTrusted = true
@@ -250,8 +251,20 @@ func PatchRepo(c *gin.Context) {
 	if in.AllowDeploy != nil {
 		repo.AllowDeploy = *in.AllowDeploy
 	}
-	if in.IsGated != nil {
-		repo.IsGated = *in.IsGated
+
+	if in.RequireApproval != nil {
+		if mode := model.ApprovalMode(*in.RequireApproval); mode.Valid() {
+			repo.RequireApproval = mode
+		} else {
+			c.String(http.StatusBadRequest, "Invalid require-approval setting")
+			return
+		}
+	} else if in.IsGated != nil { // TODO: remove isGated in next major release
+		if *in.IsGated {
+			repo.RequireApproval = model.RequireApprovalAllEvents
+		} else {
+			repo.RequireApproval = model.RequireApprovalForks
+		}
 	}
 	if in.Timeout != nil {
 		repo.Timeout = *in.Timeout
@@ -578,16 +591,16 @@ func MoveRepo(c *gin.Context) {
 
 // GetAllRepos
 //
-//	@Summary	List all repositories on the server
+//	@Summary		List all repositories on the server
 //	@Description	Returns a list of all repositories. Requires admin rights.
-//	@Router		/repos [get]
-//	@Produce	json
-//	@Success	200	{array}	Repo
-//	@Tags		Repositories
-//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param		active			query	bool	false	"only list active repos"
-//	@Param		page			query	int		false	"for response pagination, page offset number"	default(1)
-//	@Param		perPage			query	int		false	"for response pagination, max items per page"	default(50)
+//	@Router			/repos [get]
+//	@Produce		json
+//	@Success		200	{array}	Repo
+//	@Tags			Repositories
+//	@Param			Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param			active			query	bool	false	"only list active repos"
+//	@Param			page			query	int		false	"for response pagination, page offset number"	default(1)
+//	@Param			perPage			query	int		false	"for response pagination, max items per page"	default(50)
 func GetAllRepos(c *gin.Context) {
 	_store := store.FromContext(c)
 
@@ -604,13 +617,13 @@ func GetAllRepos(c *gin.Context) {
 
 // RepairAllRepos
 //
-//	@Summary	Repair all repositories on the server
-//	@Description Executes a repair process on all repositories. Requires admin rights.
-//	@Router		/repos/repair [post]
-//	@Produce	plain
-//	@Success	204
-//	@Tags		Repositories
-//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Summary		Repair all repositories on the server
+//	@Description	Executes a repair process on all repositories. Requires admin rights.
+//	@Router			/repos/repair [post]
+//	@Produce		plain
+//	@Success		204
+//	@Tags			Repositories
+//	@Param			Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 func RepairAllRepos(c *gin.Context) {
 	_store := store.FromContext(c)
 

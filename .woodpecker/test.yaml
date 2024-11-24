@@ -10,14 +10,9 @@ variables:
         # schema changes
         - 'pipeline/schema/**'
       event: pull_request
-    - event: push
-      branch: renovate/*
-      path: *when_path
 
 when:
   - event: pull_request
-  - event: push
-    branch: renovate/*
   - event: push
     branch: ${CI_REPO_DEFAULT_BRANCH}
     path: *when_path
@@ -63,14 +58,14 @@ steps:
       - make lint
     when: *when
 
-  check-swagger:
+  check-openapi:
     depends_on:
       - vendor
     image: *golang_image
     commands:
-      - 'make generate-swagger'
+      - 'make generate-openapi'
       - 'DIFF=$(git diff | head)'
-      - '[ -n "$DIFF" ] && { echo "swagger not up to date, exec `make generate-swagger` and commit"; exit 1; } || true'
+      - '[ -n "$DIFF" ] && { echo "openapi not up to date, exec `make generate-openapi` and commit"; exit 1; } || true'
     when: *when
 
   lint-license-header:

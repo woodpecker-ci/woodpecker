@@ -1,18 +1,18 @@
 <template>
   <Panel>
-    <h1 class="text-xl text-wp-text-100">{{ title }}</h1>
-    <div class="flex flex-col gap-4 border-b mb-4 pb-4">
-      <div class="flex flex-col sm:flex-row gap-4 sm:gap-12 md:justify-between dark:border-wp-background-100">
-        <div v-if="desc" class="flex items-center gap-x-2 text-sm text-wp-text-alt-100">
-          <span class="flex flex-grow-0">{{ desc }}</span>
-          <DocsLink v-if="docsUrl" class="flex flex-grow-0" :topic="title" :url="docsUrl" />
-        </div>
+    <div class="flex flex-col border-b mb-4 pb-4 justify-center dark:border-wp-background-100">
+      <h1 class="text-xl text-wp-text-100 flex items-center gap-1">
+        {{ title }}
+        <DocsLink v-if="docsUrl" :topic="title" :url="docsUrl" />
+      </h1>
 
-        <div>
-          <slot v-if="$slots.titleActions" name="titleActions" />
+      <div class="flex flex-wrap gap-x-4 gap-y-2 items-center justify-between">
+        <p v-if="description" class="text-sm text-wp-text-alt-100">{{ description }}</p>
+        <div v-if="$slots.headerActions">
+          <slot name="headerActions" />
         </div>
       </div>
-      <Warning v-if="warning" class="text-sm mt-1" :text="warning" />
+      <slot name="headerEnd" />
     </div>
 
     <slot />
@@ -21,13 +21,11 @@
 
 <script setup lang="ts">
 import DocsLink from '~/components/atomic/DocsLink.vue';
-import Warning from '~/components/atomic/Warning.vue';
 import Panel from '~/components/layout/Panel.vue';
 
 defineProps<{
   title: string;
-  desc?: string;
+  description?: string;
   docsUrl?: string;
-  warning?: string;
 }>();
 </script>

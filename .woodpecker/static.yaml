@@ -1,7 +1,5 @@
 when:
   - event: pull_request
-  - event: push
-    branch: renovate/*
 
 steps:
   - name: lint-editorconfig
@@ -9,8 +7,6 @@ steps:
     depends_on: []
     when:
       - event: pull_request
-      - event: push
-        branch: renovate/*
 
   - name: spellcheck
     image: docker.io/node:23-alpine

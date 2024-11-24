@@ -123,19 +123,6 @@ func (c *Compiler) createProcess(container *yaml_types.Container, stepType backe
 		return nil, err
 	}
 
-	for _, requested := range container.Secrets {
-		secretValue, err := getSecretValue(requested)
-		if err != nil {
-			return nil, err
-		}
-
-		if !environmentAllowed(requested, stepType) {
-			continue
-		}
-
-		environment[requested] = secretValue
-	}
-
 	if utils.MatchImageDynamic(container.Image, c.escalated...) && container.IsPlugin() {
 		privileged = true
 	}
