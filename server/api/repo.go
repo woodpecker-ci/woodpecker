@@ -275,7 +275,7 @@ func PatchRepo(c *gin.Context) {
 		repo.CancelPreviousPipelineEvents = *in.CancelPreviousPipelineEvents
 	}
 	if in.NetrcTrusted != nil {
-		repo.NetrcTrusted = *in.NetrcTrusted
+		repo.NetrcTrustedPlugins = *in.NetrcTrusted
 	}
 	if in.Visibility != nil {
 		switch *in.Visibility {
