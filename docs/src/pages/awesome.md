@@ -17,6 +17,9 @@ If you want to add a new entry, open a [pull-request](https://github.com/woodpec
 - [Woodpecker CI](https://github.com/woodpecker-ci/woodpecker/tree/main/.woodpecker) itself
 - [All official plugins](https://github.com/woodpecker-ci?q=plugin&type=all)
 - [dessalines/thumb-key](https://github.com/dessalines/thumb-key/blob/main/.woodpecker.yml) - Android Jetpack compose linting and building
+- [Vieter](https://git.rustybever.be/vieter-v/vieter) - Archlinux/Pacman repository server & automated package build system
+  - [Rieter](https://git.rustybever.be/Chewing_Bever/rieter) - Rewrite of the Vieter project in Rust
+- [Alex](https://git.rustybever.be/Chewing_Bever/alex) - Minecraft server wrapper designed to automate backups & complement Docker installations
 
 ## Tools
 
