@@ -179,6 +179,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update golang-packages [[#4411](https://github.com/woodpecker-ci/woodpecker/pull/4411)]
 - chore(deps): update pre-commit hook igorshubovych/markdownlint-cli to v0.43.0 [[#4443](https://github.com/woodpecker-ci/woodpecker/pull/4443)]
 - chore(deps): update postgres docker tag to v17.2 [[#4442](https://github.com/woodpecker-ci/woodpecker/pull/4442)]
 - chore(deps): update docker.io/woodpeckerci/plugin-trivy docker tag to v1.3.0 [[#4434](https://github.com/woodpecker-ci/woodpecker/pull/4434)]
