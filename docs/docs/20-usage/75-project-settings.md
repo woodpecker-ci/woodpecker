@@ -45,7 +45,7 @@ The clone step may require Git credentials (e.g. for private repos) which are in
 
 They are only injected into trusted plugins listed in the env var `WOODPECKER_PLUGINS_TRUSTED_CLONE` or in this repo setting.
 
-This allows you to use a trusted plugin for in the clone section or as a step to pull or push using your git credentials.  
+This allows you to use a trusted plugin for in the clone section or as a step to pull or push using your git credentials.
 
 ## Project visibility
 
