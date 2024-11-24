@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-11-23
+## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-11-24
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -51,37 +51,9 @@
 - Replay pipeline using `cli exec` by downloading metadata [[#4103](https://github.com/woodpecker-ci/woodpecker/pull/4103)]
 - Update clone plugin to support sha256 [[#4136](https://github.com/woodpecker-ci/woodpecker/pull/4136)]
 
-### 🐛 Bug Fixes
-
-- Cleanup openapi generation [[#4331](https://github.com/woodpecker-ci/woodpecker/pull/4331)]
-- Support github refresh tokens [[#3811](https://github.com/woodpecker-ci/woodpecker/pull/3811)]
-- Fix not working overflow on repo list message [[#4420](https://github.com/woodpecker-ci/woodpecker/pull/4420)]
-- Fix avatar column type [[#4340](https://github.com/woodpecker-ci/woodpecker/pull/4340)]
-- fix `error="io: read/write on closed pipe"` on k8s backend [[#4281](https://github.com/woodpecker-ci/woodpecker/pull/4281)]
-- Move update notifier dot into settings button [[#4334](https://github.com/woodpecker-ci/woodpecker/pull/4334)]
-- gitea: add check if pull_request webhook is missing pull info [[#4305](https://github.com/woodpecker-ci/woodpecker/pull/4305)]
-- Refresh token before loading branches [[#4284](https://github.com/woodpecker-ci/woodpecker/pull/4284)]
-- Delete GitLab webhooks with partial URL match [[#4259](https://github.com/woodpecker-ci/woodpecker/pull/4259)]
-- Increase `WOODPECKER_FORGE_TIMEOUT` to fix config fetching for GitLab [[#4262](https://github.com/woodpecker-ci/woodpecker/pull/4262)]
-- Ensure cli exec has by default not the same prefix [[#4132](https://github.com/woodpecker-ci/woodpecker/pull/4132)]
-- Fix repo add loading spinner [[#4135](https://github.com/woodpecker-ci/woodpecker/pull/4135)]
-- Fix migration registries table [[#4111](https://github.com/woodpecker-ci/woodpecker/pull/4111)]
-- Wait for tracer to be done before finishing workflow [[#4068](https://github.com/woodpecker-ci/woodpecker/pull/4068)]
-- Fix schema with detached steps [[#4066](https://github.com/woodpecker-ci/woodpecker/pull/4066)]
-- Fix schema with commands and entrypoint [[#4065](https://github.com/woodpecker-ci/woodpecker/pull/4065)]
-- Read long log lines from file storage correctly [[#4048](https://github.com/woodpecker-ci/woodpecker/pull/4048)]
-- Set refspec for gitlab MR [[#4021](https://github.com/woodpecker-ci/woodpecker/pull/4021)]
-- Set `CI_PREV_COMMIT_{SOURCE,TARGET}_BRANCH` as mentioned in the documentation [[#4001](https://github.com/woodpecker-ci/woodpecker/pull/4001)]
-- [Bitbucket Datacenter] Return empty list instead of null [[#4010](https://github.com/woodpecker-ci/woodpecker/pull/4010)]
-- Fix BB PR pipeline ref [[#3985](https://github.com/woodpecker-ci/woodpecker/pull/3985)]
-- Change Bitbucket PR hook to point the source branch, commit & ref [[#3965](https://github.com/woodpecker-ci/woodpecker/pull/3965)]
-- Add updated, merged and declined events to bb webhook activation [[#3963](https://github.com/woodpecker-ci/woodpecker/pull/3963)]
-- Fix login via navbar [[#3962](https://github.com/woodpecker-ci/woodpecker/pull/3962)]
-- Truncate creation in list [[#3952](https://github.com/woodpecker-ci/woodpecker/pull/3952)]
-- Fix panic if forge is unreachable [[#3944](https://github.com/woodpecker-ci/woodpecker/pull/3944)]
-
 ### 📚 Documentation
 
+- chore(deps): update dependency isomorphic-dompurify to v2.17.0 [[#4449](https://github.com/woodpecker-ci/woodpecker/pull/4449)]
 - fix(deps): update docs npm deps non-major [[#4441](https://github.com/woodpecker-ci/woodpecker/pull/4441)]
 - chore(deps): update dependency @docusaurus/tsconfig to v3.6.2 [[#4433](https://github.com/woodpecker-ci/woodpecker/pull/4433)]
 - chore(deps): lock file maintenance [[#4435](https://github.com/woodpecker-ci/woodpecker/pull/4435)]
@@ -125,6 +97,35 @@
 - Overhaul README [[#3995](https://github.com/woodpecker-ci/woodpecker/pull/3995)]
 - fix(deps): update docs npm deps non-major [[#3990](https://github.com/woodpecker-ci/woodpecker/pull/3990)]
 - Add spellchecking for docs [[#3787](https://github.com/woodpecker-ci/woodpecker/pull/3787)]
+
+### 🐛 Bug Fixes
+
+- Cleanup openapi generation [[#4331](https://github.com/woodpecker-ci/woodpecker/pull/4331)]
+- Support github refresh tokens [[#3811](https://github.com/woodpecker-ci/woodpecker/pull/3811)]
+- Fix not working overflow on repo list message [[#4420](https://github.com/woodpecker-ci/woodpecker/pull/4420)]
+- Fix avatar column type [[#4340](https://github.com/woodpecker-ci/woodpecker/pull/4340)]
+- fix `error="io: read/write on closed pipe"` on k8s backend [[#4281](https://github.com/woodpecker-ci/woodpecker/pull/4281)]
+- Move update notifier dot into settings button [[#4334](https://github.com/woodpecker-ci/woodpecker/pull/4334)]
+- gitea: add check if pull_request webhook is missing pull info [[#4305](https://github.com/woodpecker-ci/woodpecker/pull/4305)]
+- Refresh token before loading branches [[#4284](https://github.com/woodpecker-ci/woodpecker/pull/4284)]
+- Delete GitLab webhooks with partial URL match [[#4259](https://github.com/woodpecker-ci/woodpecker/pull/4259)]
+- Increase `WOODPECKER_FORGE_TIMEOUT` to fix config fetching for GitLab [[#4262](https://github.com/woodpecker-ci/woodpecker/pull/4262)]
+- Ensure cli exec has by default not the same prefix [[#4132](https://github.com/woodpecker-ci/woodpecker/pull/4132)]
+- Fix repo add loading spinner [[#4135](https://github.com/woodpecker-ci/woodpecker/pull/4135)]
+- Fix migration registries table [[#4111](https://github.com/woodpecker-ci/woodpecker/pull/4111)]
+- Wait for tracer to be done before finishing workflow [[#4068](https://github.com/woodpecker-ci/woodpecker/pull/4068)]
+- Fix schema with detached steps [[#4066](https://github.com/woodpecker-ci/woodpecker/pull/4066)]
+- Fix schema with commands and entrypoint [[#4065](https://github.com/woodpecker-ci/woodpecker/pull/4065)]
+- Read long log lines from file storage correctly [[#4048](https://github.com/woodpecker-ci/woodpecker/pull/4048)]
+- Set refspec for gitlab MR [[#4021](https://github.com/woodpecker-ci/woodpecker/pull/4021)]
+- Set `CI_PREV_COMMIT_{SOURCE,TARGET}_BRANCH` as mentioned in the documentation [[#4001](https://github.com/woodpecker-ci/woodpecker/pull/4001)]
+- [Bitbucket Datacenter] Return empty list instead of null [[#4010](https://github.com/woodpecker-ci/woodpecker/pull/4010)]
+- Fix BB PR pipeline ref [[#3985](https://github.com/woodpecker-ci/woodpecker/pull/3985)]
+- Change Bitbucket PR hook to point the source branch, commit & ref [[#3965](https://github.com/woodpecker-ci/woodpecker/pull/3965)]
+- Add updated, merged and declined events to bb webhook activation [[#3963](https://github.com/woodpecker-ci/woodpecker/pull/3963)]
+- Fix login via navbar [[#3962](https://github.com/woodpecker-ci/woodpecker/pull/3962)]
+- Truncate creation in list [[#3952](https://github.com/woodpecker-ci/woodpecker/pull/3952)]
+- Fix panic if forge is unreachable [[#3944](https://github.com/woodpecker-ci/woodpecker/pull/3944)]
 
 ### 📈 Enhancement
 
