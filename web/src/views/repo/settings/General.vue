@@ -1,9 +1,9 @@
 <template>
-  <Settings :title="$t('repo.settings.general.general')">
+  <Settings :title="$t('repo.settings.general.project')">
     <form v-if="repoSettings" class="flex flex-col" @submit.prevent="saveRepoSettings">
       <InputField
         docs-url="docs/usage/project-settings#project-settings-1"
-        :label="$t('repo.settings.general.project')"
+        :label="$t('repo.settings.general.general')"
       >
         <Checkbox
           v-model="repoSettings.allow_pr"
@@ -74,10 +74,7 @@
         </template>
       </InputField>
 
-      <InputField
-        docs-url="docs/usage/project-settings#project-visibility"
-        :label="$t('repo.settings.general.visibility.visibility')"
-      >
+      <InputField docs-url="docs/usage/project-settings#project-visibility" :label="$t('repo.visibility.visibility')">
         <RadioField v-model="repoSettings.visibility" :options="projectVisibilityOptions" />
       </InputField>
 
@@ -215,18 +212,18 @@ onMounted(() => {
 const projectVisibilityOptions: RadioOption[] = [
   {
     value: RepoVisibility.Public,
-    text: i18n.t('repo.settings.general.visibility.public.public'),
-    description: i18n.t('repo.settings.general.visibility.public.desc'),
+    text: i18n.t('repo.visibility.public.public'),
+    description: i18n.t('repo.visibility.public.desc'),
   },
   {
     value: RepoVisibility.Internal,
-    text: i18n.t('repo.settings.general.visibility.internal.internal'),
-    description: i18n.t('repo.settings.general.visibility.internal.desc'),
+    text: i18n.t('repo.visibility.internal.internal'),
+    description: i18n.t('repo.visibility.internal.desc'),
   },
   {
     value: RepoVisibility.Private,
-    text: i18n.t('repo.settings.general.visibility.private.private'),
-    description: i18n.t('repo.settings.general.visibility.private.desc'),
+    text: i18n.t('repo.visibility.private.private'),
+    description: i18n.t('repo.visibility.private.desc'),
   },
 ];
 

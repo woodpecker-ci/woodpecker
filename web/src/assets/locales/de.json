@@ -388,8 +388,8 @@
                 },
                 "general": "Allgemein",
                 "netrc_only_trusted": {
-                    "desc": "Netrc-Zugangsdaten nur in vertrauenswürdigen Containern bereitstellen (empfohlen).",
-                    "netrc_only_trusted": "Netrc-Zugangsdaten nur in vertrauenswürdigen Containern zum Klonen bereitstellen"
+                    "desc": "Wenn aktiviert, werden Netrc-Zugangsdaten für Git nur für vertrauenswürdige Plugin zum Klonen, die in `WOODPECKER_PLUGINS_TRUSTED_CLONE` gesetzt sind, zur Verfügung gestellt. Ansonsten erhalten alle Plugins zum Klonen die Netrc-Zugangsdaten. Diese Option hat keinen Effekt auf Schritte, die nicht zum Klonen da sind.",
+                    "netrc_only_trusted": "Netrc-Zugangsdaten nur in vertrauenswürdigen Plugins zum Klonen bereitstellen"
                 },
                 "pipeline_path": {
                     "default": "Standardmäßig: .woodpecker/*.{'{yaml,yml}'} -> .woodpecker.yaml -> .woodpecker.yml",

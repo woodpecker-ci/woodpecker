@@ -116,7 +116,7 @@ func (c *client) Login(ctx context.Context, req *forge_types.OAuthRequest) (*mod
 		return nil, "", err
 	}
 
-	bc, err := c.newClient(ctx, &model.User{Token: token.AccessToken})
+	bc, err := c.newClient(ctx, &model.User{AccessToken: token.AccessToken})
 	if err != nil {
 		return nil, "", fmt.Errorf("unable to create bitbucket client: %w", err)
 	}
@@ -143,7 +143,7 @@ func (c *client) Auth(ctx context.Context, accessToken, _ string) (string, error
 func (c *client) Refresh(ctx context.Context, u *model.User) (bool, error) {
 	config := c.newOAuth2Config()
 	t := &oauth2.Token{
-		RefreshToken: u.Secret,
+		RefreshToken: u.RefreshToken,
 	}
 	ts := config.TokenSource(ctx, t)
 
@@ -623,7 +623,7 @@ func (c *client) newOAuth2Config() *oauth2.Config {
 func (c *client) newClient(ctx context.Context, u *model.User) (*bb.Client, error) {
 	config := c.newOAuth2Config()
 	t := &oauth2.Token{
-		AccessToken: u.Token,
+		AccessToken: u.AccessToken,
 	}
 	client := config.Client(ctx, t)
 	return bb.NewClient(c.urlAPI, client)

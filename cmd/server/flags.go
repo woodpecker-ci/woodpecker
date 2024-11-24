@@ -192,7 +192,7 @@ var flags = append([]cli.Flag{
 	&cli.StringSliceFlag{
 		Sources: cli.EnvVars("WOODPECKER_PLUGINS_TRUSTED_CLONE"),
 		Name:    "plugins-trusted-clone",
-		Usage:   "Plugins which are trusted to handle the netrc info in clone steps",
+		Usage:   "Plugins which are trusted to handle Git credentials in clone steps",
 		Value:   constant.TrustedClonePlugins,
 	},
 	&cli.StringSliceFlag{

@@ -14,9 +14,9 @@
     "write-heading-ids": "docusaurus write-heading-ids"
   },
   "dependencies": {
-    "@docusaurus/core": "^3.6.1",
-    "@docusaurus/plugin-content-blog": "^3.6.1",
-    "@docusaurus/preset-classic": "^3.6.1",
+    "@docusaurus/core": "^3.6.3",
+    "@docusaurus/plugin-content-blog": "^3.6.3",
+    "@docusaurus/preset-classic": "^3.6.3",
     "@easyops-cn/docusaurus-search-local": "^0.45.0",
     "@mdx-js/react": "^3.1.0",
     "@svgr/webpack": "^8.1.0",
@@ -42,14 +42,14 @@
     ]
   },
   "devDependencies": {
-    "@docusaurus/module-type-aliases": "^3.6.1",
-    "@docusaurus/tsconfig": "3.6.1",
-    "@docusaurus/types": "^3.6.1",
-    "@types/node": "^22.9.0",
+    "@docusaurus/module-type-aliases": "^3.6.3",
+    "@docusaurus/tsconfig": "3.6.3",
+    "@docusaurus/types": "^3.6.3",
+    "@types/node": "^22.9.3",
     "@types/react": "^18.3.12",
     "@types/react-helmet": "^6.1.11",
     "@types/react-router-dom": "^5.3.3",
-    "typescript": "^5.6.3"
+    "typescript": "^5.7.2"
   },
   "pnpm": {
     "overrides": {
