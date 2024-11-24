@@ -105,7 +105,7 @@
         },
         "netrc_only_trusted": {
           "netrc_only_trusted": "Custom trusted clone plugins",
-          "desc": "Plugins listed here will get access to netrc credentials that can be used to clone repositories from the forge."
+          "desc": "Plugins listed here will get access to netrc credentials that can be used to clone repositories from the forge or push to it."
         },
         "trusted": {
           "trusted": "Trusted",
