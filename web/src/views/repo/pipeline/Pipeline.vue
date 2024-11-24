@@ -11,7 +11,7 @@
         <Container v-if="pipeline!.errors?.some((e) => !e.is_warning)" fill-width class="p-0">
           <Panel>
             <div class="flex flex-col items-center text-center gap-4">
-              <Icon name="status-error" class="w-16 h-16 text-wp-state-error-100" />
+              <Icon name="status-error" class="w-16 h-16 text-wp-state-error-100" size="24" />
               <span class="text-xl">{{ $t('repo.pipeline.we_got_some_errors') }}</span>
               <Button color="red" :text="$t('repo.pipeline.show_errors')" :to="{ name: 'repo-pipeline-errors' }" />
             </div>
@@ -21,7 +21,7 @@
         <Container v-else-if="pipeline!.status === 'blocked'" fill-width class="p-0">
           <Panel>
             <div class="flex flex-col items-center gap-4">
-              <Icon name="status-blocked" class="w-16 h-16" />
+              <Icon name="status-blocked" size="24" class="w-16 h-16" />
               <span class="text-xl">{{ $t('repo.pipeline.protected.awaits') }}</span>
               <div v-if="repoPermissions!.push" class="flex gap-2 flex-wrap items-center justify-center">
                 <Button
@@ -44,7 +44,7 @@
         <Container v-else-if="pipeline!.status === 'declined'" fill-width class="p-0">
           <Panel>
             <div class="flex flex-col items-center gap-4">
-              <Icon name="status-declined" class="w-16 h-16 text-wp-state-error-100" />
+              <Icon name="status-declined" size="24" class="w-16 h-16 text-wp-state-error-100" />
               <p class="text-xl">{{ $t('repo.pipeline.protected.declined') }}</p>
             </div>
           </Panel>

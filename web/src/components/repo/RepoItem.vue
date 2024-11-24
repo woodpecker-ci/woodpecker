@@ -18,7 +18,7 @@
           </div>
 
           <div class="flex flex-shrink-0 gap-x-1 items-center ml-auto">
-            <Icon name="since" size="20" />
+            <Icon name="since" />
             <span>{{ since }}</span>
           </div>
         </template>
