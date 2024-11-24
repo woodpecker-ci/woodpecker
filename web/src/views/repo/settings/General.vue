@@ -15,11 +15,6 @@
           :label="$t('repo.settings.general.allow_deploy.allow')"
           :description="$t('repo.settings.general.allow_deploy.desc')"
         />
-        <Checkbox
-          v-model="repoSettings.gated"
-          :label="$t('repo.settings.general.protected.protected')"
-          :description="$t('repo.settings.general.protected.desc')"
-        />
       </InputField>
 
       <InputField
