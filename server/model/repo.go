@@ -62,7 +62,8 @@ type Repo struct {
 	Timeout                      int64          `json:"timeout,omitempty"               xorm:"timeout"`
 	Visibility                   RepoVisibility `json:"visibility"                      xorm:"varchar(10) 'visibility'"`
 	IsSCMPrivate                 bool           `json:"private"                         xorm:"private"`
-	RequireApproval              ApprovalMode   `json:"require_approval"          xorm:"varchar(50) require_approval"`
+	IsTrusted                    bool           `json:"trusted"                         xorm:"trusted"`
+	RequireApproval              ApprovalMode   `json:"require_approval"                xorm:"varchar(50) require_approval"`
 	IsGated                      bool           `json:"gated"                           xorm:"gated"`
 	IsActive                     bool           `json:"active"                          xorm:"active"`
 	AllowPull                    bool           `json:"allow_pr"                        xorm:"allow_pr"`
@@ -130,6 +131,7 @@ func (r *Repo) Update(from *Repo) {
 // RepoPatch represents a repository patch object.
 type RepoPatch struct {
 	Config                       *string         `json:"config_file,omitempty"`
+	IsTrusted                    *bool           `json:"trusted,omitempty"`
 	RequireApproval              *string         `json:"require_approval,omitempty"`
 	IsGated                      *bool           `json:"gated,omitempty"`
 	Timeout                      *int64          `json:"timeout,omitempty"`
