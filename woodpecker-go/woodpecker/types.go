@@ -62,13 +62,14 @@ type (
 		Visibility                   string       `json:"visibility"`
 		IsSCMPrivate                 bool         `json:"private"`
 		IsTrusted                    bool         `json:"trusted"`
-		IsGated                      bool         `json:"gated,omitempty"` // TODO: remove in next major release
 		RequireApproval              ApprovalMode `json:"require_approval"`
 		IsActive                     bool         `json:"active"`
 		AllowPullRequests            bool         `json:"allow_pr"`
 		Config                       string       `json:"config_file"`
 		CancelPreviousPipelineEvents []string     `json:"cancel_previous_pipeline_events"`
 		NetrcOnlyTrusted             bool         `json:"netrc_only_trusted"`
+		// Deprecated
+		IsGated bool `json:"gated,omitempty"` // TODO: remove in next major release
 	}
 
 	// RepoPatch defines a repository patch request.
