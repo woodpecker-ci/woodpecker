@@ -31,9 +31,9 @@ func needsApproval(repo *model.Repo, pipeline *model.Pipeline) bool {
 		return false
 	}
 
-	// to be non breaking we have this case till v3.0.0
-	if repo.RequireApproval == model.RequireApprovalNotSet {
-		repo.RequireApproval = model.RequireApprovalNone
+	// TODO: remove this option in next major release
+	if repo.RequireApproval == model.RequireApprovalOldNotGated {
+		return false
 	}
 
 	// repository allows all events without approval

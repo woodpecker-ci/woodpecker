@@ -23,7 +23,7 @@ import (
 type ApprovalMode string
 
 const (
-	RequireApprovalNotSet       ApprovalMode = ""              // require approval is decided by server default // TODO: remove it in v3.0.0
+	RequireApprovalOldNotGated  ApprovalMode = "old_not_gated" // require approval for no events (deprecated is gated) // TODO: remove it in next major
 	RequireApprovalNone         ApprovalMode = "none"          // require approval for no events
 	RequireApprovalForks        ApprovalMode = "forks"         // require approval for PRs from forks (default)
 	RequireApprovalPullRequests ApprovalMode = "pull_requests" // require approval for all PRs
@@ -65,7 +65,6 @@ type Repo struct {
 	IsSCMPrivate                 bool           `json:"private"                         xorm:"private"`
 	IsTrusted                    bool           `json:"trusted"                         xorm:"trusted"`
 	RequireApproval              ApprovalMode   `json:"require_approval"                xorm:"varchar(50) require_approval"`
-	IsGated                      bool           `json:"gated"                           xorm:"gated"`
 	IsActive                     bool           `json:"active"                          xorm:"active"`
 	AllowPull                    bool           `json:"allow_pr"                        xorm:"allow_pr"`
 	AllowDeploy                  bool           `json:"allow_deploy"                    xorm:"allow_deploy"`
@@ -134,7 +133,7 @@ type RepoPatch struct {
 	Config                       *string         `json:"config_file,omitempty"`
 	IsTrusted                    *bool           `json:"trusted,omitempty"`
 	RequireApproval              *string         `json:"require_approval,omitempty"`
-	IsGated                      *bool           `json:"gated,omitempty"`
+	IsGated                      *bool           `json:"gated,omitempty"` // TODO: remove in next major release
 	Timeout                      *int64          `json:"timeout,omitempty"`
 	Visibility                   *string         `json:"visibility,omitempty"`
 	AllowPull                    *bool           `json:"allow_pr,omitempty"`
