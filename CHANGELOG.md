@@ -1,20 +1,21 @@
 # Changelog
 
-## [2.8.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.8.0) - 2024-11-18
+## [2.8.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.8.0) - 2024-11-25
 
 ### ❤️ Thanks to all contributors! ❤️
 
 @6543, @anbraten
+
+### 🐛 Bug Fixes
+
+- Normalize aarch64 -> arm64 for docker backend (#4451) [[#4457](https://github.com/woodpecker-ci/woodpecker/pull/4457)]
+- Add migration to autofix corrupted users.org_id entrys in db (#4307) [[#4327](https://github.com/woodpecker-ci/woodpecker/pull/4327)]
 
 ### 📈 Enhancement
 
 - Deprecate `secrets` in favor of `from_secret` [[#4360](https://github.com/woodpecker-ci/woodpecker/pull/4360)]
 - Deprecate and warn of list syntax of environment [[#4358](https://github.com/woodpecker-ci/woodpecker/pull/4358)]
 - Process workflow logs in batches (#4045) [[#4356](https://github.com/woodpecker-ci/woodpecker/pull/4356)]
-
-### 🐛 Bug Fixes
-
-- Add migration to autofix corrupted users.org_id entrys in db (#4307) [[#4327](https://github.com/woodpecker-ci/woodpecker/pull/4327)]
 
 ### Misc
 
