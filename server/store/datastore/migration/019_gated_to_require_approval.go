@@ -26,8 +26,8 @@ var gatedToRequireApproval = xormigrate.Migration{
 	ID: "gated-to-require-approval",
 	MigrateSession: func(sess *xorm.Session) (err error) {
 		const (
-			RequireApprovalNotSet    string = ""
-			RequireApprovalAllEvents string = "all_events"
+			RequireApprovalOldNotGated string = "old_not_gated"
+			RequireApprovalAllEvents   string = "all_events"
 		)
 
 		type repos struct {
@@ -51,7 +51,7 @@ var gatedToRequireApproval = xormigrate.Migration{
 
 		// migrate non gated to not set to migrate to new defaults with next migration
 		if _, err := sess.Exec(
-			builder.Update(builder.Eq{"require_approval": RequireApprovalNotSet}).
+			builder.Update(builder.Eq{"require_approval": RequireApprovalOldNotGated}).
 				From("repos").
 				Where(builder.Eq{"gated": false})); err != nil {
 			return err

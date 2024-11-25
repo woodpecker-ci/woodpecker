@@ -36,8 +36,7 @@ var repoUpdateCmd = &cli.Command{
 			Usage: "repository is trusted",
 		},
 		&cli.BoolFlag{
-			Name:   "gated",
-			Usage:  "repository is gated",
+			Name:   "gated", // TODO: remove in next release
 			Hidden: true,
 		},
 		&cli.StringFlag{
@@ -93,7 +92,7 @@ func repoUpdate(ctx context.Context, c *cli.Command) error {
 		patch.IsTrusted = &trusted
 	}
 
-	// TODO: remove isGated in next release
+	// TODO: remove in next release
 	if c.IsSet("gated") {
 		return fmt.Errorf("'gated' option was used, use 'require-approval'")
 	}

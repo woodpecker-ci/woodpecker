@@ -26,10 +26,10 @@ var setNewDefaultsForRequireApproval = xormigrate.Migration{
 	ID: "set-new-defaults-for-require-approval",
 	MigrateSession: func(sess *xorm.Session) (err error) {
 		const (
-			RequireApprovalNotSet    string = ""
-			RequireApprovalNone      string = "none"
-			RequireApprovalForks     string = "forks"
-			RequireApprovalAllEvents string = "all_events"
+			RequireApprovalOldNotGated string = "old_not_gated"
+			RequireApprovalNone        string = "none"
+			RequireApprovalForks       string = "forks"
+			RequireApprovalAllEvents   string = "all_events"
 		)
 
 		type repos struct {
@@ -45,7 +45,7 @@ var setNewDefaultsForRequireApproval = xormigrate.Migration{
 		if _, err := sess.Exec(
 			builder.Update(builder.Eq{"require_approval": RequireApprovalForks}).
 				From("repos").
-				Where(builder.Eq{"require_approval": RequireApprovalNotSet, "visibility": "public"})); err != nil {
+				Where(builder.Eq{"require_approval": RequireApprovalOldNotGated, "visibility": "public"})); err != nil {
 			return err
 		}
 
@@ -53,7 +53,7 @@ var setNewDefaultsForRequireApproval = xormigrate.Migration{
 		if _, err := sess.Exec(
 			builder.Update(builder.Eq{"require_approval": RequireApprovalNone}).
 				From("repos").
-				Where(builder.Eq{"require_approval": RequireApprovalNotSet}.And(builder.Neq{"visibility": "public"}))); err != nil {
+				Where(builder.Eq{"require_approval": RequireApprovalOldNotGated}.And(builder.Neq{"visibility": "public"}))); err != nil {
 			return err
 		}
 
