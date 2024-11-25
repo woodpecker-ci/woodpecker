@@ -26,10 +26,8 @@ var gatedToRequireApproval = xormigrate.Migration{
 	ID: "gated-to-require-approval",
 	MigrateSession: func(sess *xorm.Session) (err error) {
 		const (
-			RequireApprovalNone         string = "none"
-			RequireApprovalForks        string = "forks"
-			RequireApprovalPullRequests string = "pull_requests"
-			RequireApprovalAllEvents    string = "all_events"
+			RequireApprovalNotSet    string = ""
+			RequireApprovalAllEvents string = "all_events"
 		)
 
 		type repos struct {
@@ -51,19 +49,11 @@ var gatedToRequireApproval = xormigrate.Migration{
 			return err
 		}
 
-		// migrate public repos to new default require approval
+		// migrate non gated to not set to migrate to new defaults within v3.0.0 if not explizite set
 		if _, err := sess.Exec(
-			builder.Update(builder.Eq{"require_approval": RequireApprovalForks}).
+			builder.Update(builder.Eq{"require_approval": RequireApprovalNotSet}).
 				From("repos").
-				Where(builder.Eq{"gated": false, "visibility": "public"})); err != nil {
-			return err
-		}
-
-		// migrate private repos to new default require approval
-		if _, err := sess.Exec(
-			builder.Update(builder.Eq{"require_approval": RequireApprovalNone}).
-				From("repos").
-				Where(builder.Eq{"gated": false}.And(builder.Neq{"visibility": "public"}))); err != nil {
+				Where(builder.Eq{"gated": false})); err != nil {
 			return err
 		}
 

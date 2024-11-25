@@ -31,6 +31,10 @@ func needsApproval(repo *model.Repo, pipeline *model.Pipeline) bool {
 		return false
 	}
 
+	if repo.RequireApproval == model.RequireApprovalNotSet {
+		repo.RequireApproval = model.RequireApprovalNone
+	}
+
 	// repository allows all events without approval
 	if repo.RequireApproval == model.RequireApprovalNone {
 		return false

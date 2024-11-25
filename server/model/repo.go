@@ -23,6 +23,7 @@ import (
 type ApprovalMode string
 
 const (
+	RequireApprovalNotSet       ApprovalMode = ""              // require approval is decided by server default // TODO: remove it in v3.0.0
 	RequireApprovalNone         ApprovalMode = "none"          // require approval for no events
 	RequireApprovalForks        ApprovalMode = "forks"         // require approval for PRs from forks (default)
 	RequireApprovalPullRequests ApprovalMode = "pull_requests" // require approval for all PRs

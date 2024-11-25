@@ -4873,6 +4873,9 @@ const docTemplate = `{
                 "timeout": {
                     "type": "integer"
                 },
+                "trusted": {
+                    "type": "boolean"
+                },
                 "visibility": {
                     "$ref": "#/definitions/RepoVisibility"
                 }
@@ -4907,6 +4910,9 @@ const docTemplate = `{
                 },
                 "timeout": {
                     "type": "integer"
+                },
+                "trusted": {
+                    "type": "boolean"
                 },
                 "visibility": {
                     "type": "string"
@@ -5169,6 +5175,7 @@ const docTemplate = `{
         "model.ApprovalMode": {
             "type": "string",
             "enum": [
+                "",
                 "none",
                 "forks",
                 "pull_requests",
@@ -5178,9 +5185,11 @@ const docTemplate = `{
                 "RequireApprovalAllEvents": "require approval for all external events",
                 "RequireApprovalForks": "require approval for PRs from forks (default)",
                 "RequireApprovalNone": "require approval for no events",
+                "RequireApprovalNotSet": "require approval is decided by server default // TODO: remove it in v3.0.0",
                 "RequireApprovalPullRequests": "require approval for all PRs"
             },
             "x-enum-varnames": [
+                "RequireApprovalNotSet",
                 "RequireApprovalNone",
                 "RequireApprovalForks",
                 "RequireApprovalPullRequests",
