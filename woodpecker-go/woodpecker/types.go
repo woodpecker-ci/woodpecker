@@ -75,12 +75,13 @@ type (
 	RepoPatch struct {
 		Config          *string       `json:"config_file,omitempty"`
 		IsTrusted       *bool         `json:"trusted,omitempty"`
-		IsGated         *bool         `json:"gated,omitempty"` // TODO: remove in next major release
 		RequireApproval *ApprovalMode `json:"require_approval,omitempty"`
 		Timeout         *int64        `json:"timeout,omitempty"`
 		Visibility      *string       `json:"visibility"`
 		AllowPull       *bool         `json:"allow_pr,omitempty"`
 		PipelineCounter *int          `json:"pipeline_counter,omitempty"`
+		// Deprecated
+		IsGated *bool `json:"gated,omitempty"` // TODO: remove in next major release
 	}
 
 	PipelineError struct {
