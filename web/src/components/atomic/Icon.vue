@@ -52,6 +52,9 @@
   <SvgIcon v-else-if="name === 'play'" :path="mdiPlay" size="24" />
   <SvgIcon v-else-if="name === 'remove'" :path="mdiClose" size="24" />
 
+  <SvgIcon v-else-if="name === 'visibility-private'" :path="mdiLockOutline" size="24" />
+  <SvgIcon v-else-if="name === 'visibility-internal'" :path="mdiLockOpenOutline" size="24" />
+
   <SvgIcon v-else-if="name === 'forgejo'" :path="siForgejo.path" size="32" />
   <SvgIcon v-else-if="name === 'gitea'" :path="siGitea.path" size="32" />
 
@@ -102,6 +105,8 @@ import {
   mdiGithub,
   mdiGitlab,
   mdiHelpCircleOutline,
+  mdiLockOpenOutline,
+  mdiLockOutline,
   mdiMinusCircleOutline,
   mdiPackageVariant,
   mdiPause,
@@ -176,7 +181,9 @@ export type IconNames =
   | 'attention'
   | 'spinner'
   | 'error'
-  | 'remove';
+  | 'remove'
+  | 'visibility-private'
+  | 'visibility-internal';
 
 defineProps<{
   name: IconNames;
