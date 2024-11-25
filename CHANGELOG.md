@@ -6,6 +6,10 @@
 
 @6543, @anbraten
 
+### 🔒 Security
+
+- Extend approval options (#3348) [[#4429](https://github.com/woodpecker-ci/woodpecker/pull/4429)]
+
 ### 🐛 Bug Fixes
 
 - Normalize aarch64 -> arm64 for docker backend (#4451) [[#4457](https://github.com/woodpecker-ci/woodpecker/pull/4457)]
