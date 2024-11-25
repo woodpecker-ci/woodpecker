@@ -54,14 +54,18 @@ func buildPipelineListCmd() *cli.Command {
 				Name:  "before",
 				Usage: "only return pipelines before this RFC3339 date",
 				Config: cli.TimestampConfig{
-					Layout: time.RFC3339,
+					Layouts: []string{
+						time.RFC3339,
+					},
 				},
 			},
 			&cli.TimestampFlag{
 				Name:  "after",
 				Usage: "only return pipelines after this RFC3339 date",
 				Config: cli.TimestampConfig{
-					Layout: time.RFC3339,
+					Layouts: []string{
+						time.RFC3339,
+					},
 				},
 			},
 		}...),
