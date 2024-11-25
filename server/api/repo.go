@@ -246,7 +246,6 @@ func PatchRepo(c *gin.Context) {
 			return
 		}
 	} else if in.IsGated != nil { // TODO: remove isGated in next major release
-		log.Warn().Msgf("Deprecated 'gated' option was used, use 'require_approval' in the future to update an repo settings.")
 		if *in.IsGated {
 			repo.RequireApproval = model.RequireApprovalAllEvents
 		} else {
