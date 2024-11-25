@@ -9,6 +9,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	woodpeckergo "go.woodpecker-ci.org/woodpecker/v2/woodpecker-go"
+	"go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/client"
 )
 
 func TestClient(t *testing.T) {
@@ -17,18 +18,18 @@ func TestClient(t *testing.T) {
 	assert.NotNil(t, client)
 }
 
-func TestClient_canCall() {
+func TestClient_canCall(t *testing.T) {
 	// custom HTTP client
 	hc := http.Client{}
 
 	// with a raw http.Response
 	{
-		c, err := client.NewClient("http://localhost:1234", client.WithHTTPClient(&hc))
+		c, err := woodpeckergo.NewWithClient("http://localhost:1234", &hc)
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		resp, err := c.GetClient(context.TODO())
+		resp, err := c.GetVersion(context.TODO())
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -44,7 +45,7 @@ func TestClient_canCall() {
 			log.Fatal(err)
 		}
 
-		resp, err := c.GetClientWithResponse(context.TODO())
+		resp, err := c.GetVersionWithResponse(context.TODO())
 		if err != nil {
 			log.Fatal(err)
 		}

@@ -19,7 +19,6 @@ import (
 	"net/url"
 
 	httptransport "github.com/go-openapi/runtime/client"
-	"github.com/go-openapi/strfmt"
 
 	apiClient "go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/client"
 )
@@ -27,7 +26,7 @@ import (
 //go:generate go run github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen --config=config.yaml ../docs/openapi.json
 
 type Client struct {
-	*apiClient.WoodpeckerCIAPI
+	*apiClient.ClientWithResponses
 	uri       string
 	transport *httptransport.Runtime
 }
@@ -46,11 +45,14 @@ func NewWithClient(_uri string, httpClient *http.Client) (*Client, error) {
 
 	transport := httptransport.NewWithClient(uri.Host, uri.Path, []string{"https", "http"}, httpClient)
 
-	client := &Client{
-		uri:             _uri,
-		transport:       transport,
-		WoodpeckerCIAPI: apiClient.New(transport, strfmt.Default),
+	client, err := apiClient.NewClientWithResponses(uri.Host, apiClient.WithHTTPClient(httpClient))
+	if err != nil {
+		return nil, err
 	}
 
-	return client, nil
+	return &Client{
+		uri:                 _uri,
+		transport:           transport,
+		ClientWithResponses: client,
+	}, nil
 }
