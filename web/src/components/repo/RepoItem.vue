@@ -6,8 +6,19 @@
   >
     <div class="grid grid-cols-[auto,1fr] gap-y-4 items-center">
       <div class="text-wp-text-100 text-lg">{{ `${repo.owner} / ${repo.name}` }}</div>
-      <div class="ml-auto">
-        <Badge v-if="repo.visibility === RepoVisibility.Public" :label="$t('repo.visibility.public.public')" />
+      <div class="ml-auto text-wp-text-100">
+        <div
+          v-if="repo.visibility === RepoVisibility.Private"
+          :title="`${$t('repo.visibility.visibility')}: ${$t(`repo.visibility.private.private`)}`"
+        >
+          <Icon name="visibility-private" />
+        </div>
+        <div
+          v-else-if="repo.visibility === RepoVisibility.Internal"
+          :title="`${$t('repo.visibility.visibility')}: ${$t(`repo.visibility.internal.internal`)}`"
+        >
+          <Icon name="visibility-internal" />
+        </div>
       </div>
 
       <div class="col-span-2 text-wp-text-100 flex w-full gap-x-4">
@@ -34,7 +45,6 @@
 <script lang="ts" setup>
 import { computed } from 'vue';
 
-import Badge from '~/components/atomic/Badge.vue';
 import Icon from '~/components/atomic/Icon.vue';
 import PipelineStatusIcon from '~/components/repo/pipeline/PipelineStatusIcon.vue';
 import usePipeline from '~/compositions/usePipeline';
