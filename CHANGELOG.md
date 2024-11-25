@@ -53,6 +53,7 @@
 
 ### 📚 Documentation
 
+- chore(deps): lock file maintenance [[#4453](https://github.com/woodpecker-ci/woodpecker/pull/4453)]
 - chore(deps): update dependency isomorphic-dompurify to v2.17.0 [[#4449](https://github.com/woodpecker-ci/woodpecker/pull/4449)]
 - fix(deps): update docs npm deps non-major [[#4441](https://github.com/woodpecker-ci/woodpecker/pull/4441)]
 - chore(deps): update dependency @docusaurus/tsconfig to v3.6.2 [[#4433](https://github.com/woodpecker-ci/woodpecker/pull/4433)]
