@@ -91,7 +91,6 @@ func PostRepo(c *gin.Context) {
 		repo.Update(from)
 	} else {
 		repo = from
-		repo.RequireApproval = model.RequireApprovalForks
 		repo.AllowPull = true
 		repo.AllowDeploy = false
 		repo.NetrcOnlyTrusted = true
@@ -102,8 +101,10 @@ func PostRepo(c *gin.Context) {
 
 	if repo.Visibility == "" {
 		repo.Visibility = model.VisibilityPublic
+		repo.RequireApproval = model.RequireApprovalForks
 		if repo.IsSCMPrivate {
 			repo.Visibility = model.VisibilityPrivate
+			repo.RequireApproval = model.RequireApprovalNone
 		}
 	}
 
@@ -259,12 +260,9 @@ func PatchRepo(c *gin.Context) {
 			c.String(http.StatusBadRequest, "Invalid require-approval setting")
 			return
 		}
-	} else if in.IsGated != nil { // TODO: remove isGated in next major release
-		if *in.IsGated {
-			repo.RequireApproval = model.RequireApprovalAllEvents
-		} else {
-			repo.RequireApproval = model.RequireApprovalForks
-		}
+	} else if in.IsGated != nil {
+		c.String(http.StatusBadRequest, "'gated' option was used, use 'require_approval'")
+		return
 	}
 	if in.Timeout != nil {
 		repo.Timeout = *in.Timeout

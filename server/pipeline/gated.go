@@ -31,23 +31,24 @@ func needsApproval(repo *model.Repo, pipeline *model.Pipeline) bool {
 		return false
 	}
 
+	switch repo.RequireApproval {
 	// repository allows all events without approval
-	if repo.RequireApproval == model.RequireApprovalNone {
+	case model.RequireApprovalNone:
 		return false
-	}
 
 	// repository requires approval for pull requests from forks
-	if pipeline.Event == model.EventPull && pipeline.FromFork {
-		return true
-	}
+	case model.RequireApprovalForks:
+		if pipeline.Event == model.EventPull && pipeline.FromFork {
+			return true
+		}
 
 	// repository requires approval for pull requests
-	if pipeline.Event == model.EventPull && repo.RequireApproval == model.RequireApprovalPullRequests {
-		return true
-	}
+	case model.RequireApprovalPullRequests:
+		if pipeline.Event == model.EventPull {
+			return true
+		}
 
-	// repository requires approval for all events
-	if repo.RequireApproval == model.RequireApprovalAllEvents {
+	case model.RequireApprovalAllEvents:
 		return true
 	}
 
