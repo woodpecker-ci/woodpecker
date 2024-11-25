@@ -56,5 +56,7 @@ var setNewDefaultsForRequireApproval = xormigrate.Migration{
 				Where(builder.Eq{"require_approval": RequireApprovalNotSet}.And(builder.Neq{"visibility": "public"}))); err != nil {
 			return err
 		}
+
+		return nil
 	},
 }
