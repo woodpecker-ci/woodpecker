@@ -45,8 +45,13 @@ var Command = &cli.Command{
 		&cli.StringSliceFlag{
 			Sources: cli.EnvVars("WOODPECKER_PLUGINS_TRUSTED_CLONE"),
 			Name:    "plugins-trusted-clone",
-			Usage:   "Plugins which are trusted to handle the netrc info in clone steps",
+			Usage:   "Plugins which are trusted to handle Git credentials in clone steps",
 			Value:   constant.TrustedClonePlugins,
+		},
+		&cli.BoolFlag{
+			Sources: cli.EnvVars("WOODPECKER_LINT_STRICT"),
+			Name:    "strict",
+			Usage:   "treat warnings as errors",
 		},
 	},
 }
@@ -119,7 +124,7 @@ func lintFile(_ context.Context, c *cli.Command, file string) error {
 		linter.WithTrustedClonePlugins(c.StringSlice("plugins-trusted-clone")),
 	).Lint([]*linter.WorkflowConfig{config})
 	if err != nil {
-		str, err := FormatLintError(config.File, err)
+		str, err := FormatLintError(config.File, err, c.Bool("strict"))
 
 		if str != "" {
 			fmt.Print(str)

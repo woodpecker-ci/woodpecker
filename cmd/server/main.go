@@ -12,6 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//go:build !generate
+// +build !generate
+
 package main
 
 import (
@@ -46,7 +49,7 @@ func main() {
 	}
 	app.Flags = flags
 
-	setupOpenApiStaticConfig()
+	setupOpenAPIStaticConfig()
 
 	if err := app.Run(ctx, os.Args); err != nil {
 		log.Error().Err(err).Msgf("error running server")

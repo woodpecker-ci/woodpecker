@@ -1,3 +1,5 @@
+import type { Pipeline } from './pipeline';
+
 // A version control repository.
 export interface Repo {
   // Is the repo currently active or not
@@ -65,9 +67,11 @@ export interface Repo {
 
   visibility: RepoVisibility;
 
-  last_pipeline: number;
+  last_pipeline?: number;
 
-  gated: boolean;
+  last_pipeline_item?: Pipeline;
+
+  require_approval: RepoRequireApproval;
 
   // Events that will cancel running pipelines before starting a new one
   cancel_previous_pipeline_events: string[];
@@ -81,6 +85,13 @@ export enum RepoVisibility {
   Private = 'private',
   Internal = 'internal',
 }
+
+export enum RepoRequireApproval {
+  None = 'none',
+  Forks = 'forks',
+  PullRequests = 'pull_requests',
+  AllEvents = 'all_events',
+}
 /* eslint-enable */
 
 export type RepoSettings = Pick<
@@ -89,7 +100,7 @@ export type RepoSettings = Pick<
   | 'timeout'
   | 'visibility'
   | 'trusted'
-  | 'gated'
+  | 'require_approval'
   | 'allow_pr'
   | 'allow_deploy'
   | 'cancel_previous_pipeline_events'

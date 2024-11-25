@@ -40,7 +40,7 @@ CGO_ENABLED ?= 1 # only used to compile server
 HAS_GO = $(shell hash go > /dev/null 2>&1 && echo "GO" || echo "NOGO" )
 ifeq ($(HAS_GO),GO)
   # renovate: datasource=docker depName=docker.io/techknowlogick/xgo
-	XGO_VERSION ?= go-1.22.x
+	XGO_VERSION ?= go-1.23.x
 	CGO_CFLAGS ?= $(shell go env CGO_CFLAGS)
 endif
 CGO_CFLAGS ?=
@@ -109,16 +109,15 @@ clean: ## Clean build artifacts
 clean-all: clean ## Clean all artifacts
 	rm -rf ${DIST_DIR} web/dist docs/build docs/node_modules web/node_modules
 	# delete generated
-	rm -rf docs/docs/40-cli.md docs/swagger.json
+	rm -rf docs/docs/40-cli.md docs/openapi.json
 
 .PHONY: generate
-generate: install-tools generate-swagger ## Run all code generations
+generate: install-tools generate-openapi ## Run all code generations
 	CGO_ENABLED=0 go generate ./...
 
-generate-swagger: install-tools ## Run swagger code generation
-	swag init -g server/api/ -g cmd/server/swagger.go --outputTypes go -output cmd/server/docs
-	CGO_ENABLED=0 go generate cmd/server/swagger.go
-	go generate cmd/server/woodpecker_docs_gen.go
+generate-openapi: install-tools ## Run openapi code generation and format it
+	go run github.com/swaggo/swag/cmd/swag fmt
+	CGO_ENABLED=0 go generate cmd/server/openapi.go
 
 generate-client:
 	go generate woodpecker-go/client.go
@@ -137,9 +136,6 @@ install-tools: ## Install development tools
 	fi ; \
 	hash gofumpt > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
 		go install mvdan.cc/gofumpt@latest; \
-	fi ; \
-	hash swag > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
-		go install github.com/swaggo/swag/cmd/swag@latest; \
 	fi ; \
 	hash addlicense > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
 		go install github.com/google/addlicense@latest; \
@@ -203,7 +199,7 @@ test: test-agent test-server test-server-datastore test-cli test-lib ## Run all 
 build-ui: ## Build UI
 	(cd web/; pnpm install --frozen-lockfile; pnpm build)
 
-build-server: build-ui generate-swagger ## Build server
+build-server: build-ui generate-openapi ## Build server
 	CGO_ENABLED=${CGO_ENABLED} GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -tags '$(TAGS)' -ldflags '${LDFLAGS}' -o ${DIST_DIR}/woodpecker-server${BIN_SUFFIX} go.woodpecker-ci.org/woodpecker/v2/cmd/server
 
 build-agent: ## Build agent
@@ -350,6 +346,6 @@ spellcheck:
 .PHONY: docs
 docs: ## Generate docs (currently only for the cli)
 	CGO_ENABLED=0 go generate cmd/cli/app.go
-	CGO_ENABLED=0 go generate cmd/server/swagger.go
+	CGO_ENABLED=0 go generate cmd/server/openapi.go
 
 endif

@@ -1,6 +1,6 @@
 <template>
-  <Settings :title="$t('admin.settings.agents.agents')" :desc="desc">
-    <template #titleActions>
+  <Settings :title="$t('admin.settings.agents.agents')" :description>
+    <template #headerActions>
       <Button
         v-if="selectedAgent"
         :text="$t('admin.settings.agents.show')"
@@ -46,7 +46,7 @@ import AgentForm from './AgentForm.vue';
 import AgentList from './AgentList.vue';
 
 const props = defineProps<{
-  desc: string;
+  description: string;
   loadAgents: (page: number) => Promise<Agent[] | null>;
   createAgent: (agent: Partial<Agent>) => Promise<Agent>;
   updateAgent: (agent: Agent) => Promise<Agent | void>;

@@ -10,14 +10,9 @@ variables:
         # schema changes
         - 'pipeline/schema/**'
       event: pull_request
-    - event: push
-      branch: renovate/*
-      path: *when_path
 
 when:
   - event: pull_request
-  - event: push
-    branch: renovate/*
   - event: push
     branch: ${CI_REPO_DEFAULT_BRANCH}
     path: *when_path
@@ -40,6 +35,7 @@ steps:
       - go run go.woodpecker-ci.org/woodpecker/v2/cmd/cli lint
     environment:
       WOODPECKER_DISABLE_UPDATE_CHECK: true
+      WOODPECKER_LINT_STRICT: true
       WOODPECKER_PLUGINS_PRIVILEGED: 'docker.io/woodpeckerci/plugin-docker-buildx:5.0.0'
     when:
       - event: pull_request
@@ -67,7 +63,7 @@ steps:
       - vendor
     image: *golang_image
     commands:
-      - 'make generate-swagger'
+      - 'make generate-openapi'
       - 'DIFF=$(git diff | head)'
       - '[ -n "$DIFF" ] && { echo "openapi not up to date, exec `make generate-openapi` and commit"; exit 1; } || true'
     when: *when

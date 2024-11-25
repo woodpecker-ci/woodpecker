@@ -31,12 +31,12 @@ import (
 	"github.com/getkin/kin-openapi/openapi2"
 	"github.com/getkin/kin-openapi/openapi2conv"
 
-	"go.woodpecker-ci.org/woodpecker/v2/cmd/server/docs"
+	"go.woodpecker-ci.org/woodpecker/v2/cmd/server/openapi"
 )
 
 func main() {
 	// set openapi infos
-	setupOpenApiStaticConfig()
+	setupOpenAPIStaticConfig()
 
 	basePath := path.Join("..", "..")
 	filePath := path.Join(basePath, "docs", "openapi.json")
@@ -47,7 +47,7 @@ func main() {
 		panic(err)
 	}
 	defer f.Close()
-	doc := docs.SwaggerInfo.ReadDoc()
+	doc := openapi.SwaggerInfo.ReadDoc()
 	doc, err = removeHost(doc)
 	if err != nil {
 		panic(err)

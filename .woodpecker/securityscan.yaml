@@ -3,10 +3,9 @@ when:
   - event: push
     branch:
       - ${CI_REPO_DEFAULT_BRANCH}
-      - renovate/*
 
 variables:
-  - &trivy_plugin docker.io/woodpeckerci/plugin-trivy:1.2.0
+  - &trivy_plugin docker.io/woodpeckerci/plugin-trivy:1.3.0
 
 steps:
   backend:
@@ -35,11 +34,8 @@ steps:
 services:
   server:
     image: *trivy_plugin
-    # settings:
-    #   service: true
-    #   db-repository: docker.io/aquasec/trivy-db:2
-    environment:
-      PLUGIN_SERVICE: 'true'
-      PLUGIN_DB_REPOSITORY: 'docker.io/aquasec/trivy-db:2'
+    settings:
+      service: true
+      db-repository: docker.io/aquasec/trivy-db:2
     ports:
       - 10000

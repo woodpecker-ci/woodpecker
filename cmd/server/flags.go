@@ -173,6 +173,11 @@ var flags = append([]cli.Flag{
 		Usage:   "The maximum time in minutes you can set in the repo settings before a pipeline gets killed",
 		Value:   120,
 	},
+	&cli.StringSliceFlag{
+		Sources: cli.EnvVars("WOODPECKER_DEFAULT_WORKFLOW_LABELS"),
+		Name:    "default-workflow-labels",
+		Usage:   "The default label filter to set for workflows that has no label filter set. By default workflows will be allowed to run on any agent, if not specified in the workflow.",
+	},
 	&cli.DurationFlag{
 		Sources: cli.EnvVars("WOODPECKER_SESSION_EXPIRES"),
 		Name:    "session-expires",
@@ -187,7 +192,7 @@ var flags = append([]cli.Flag{
 	&cli.StringSliceFlag{
 		Sources: cli.EnvVars("WOODPECKER_PLUGINS_TRUSTED_CLONE"),
 		Name:    "plugins-trusted-clone",
-		Usage:   "Plugins which are trusted to handle the netrc info in clone steps",
+		Usage:   "Plugins which are trusted to handle Git credentials in clone steps",
 		Value:   constant.TrustedClonePlugins,
 	},
 	&cli.StringSliceFlag{
@@ -212,6 +217,11 @@ var flags = append([]cli.Flag{
 			cli.EnvVar("WOODPECKER_AGENT_SECRET")),
 		Name:  "agent-secret",
 		Usage: "server-agent shared password",
+	},
+	&cli.BoolFlag{
+		Sources: cli.EnvVars("WOODPECKER_DISABLE_USER_AGENT_REGISTRATION"),
+		Name:    "disable-user-agent-registration",
+		Usage:   "Disable user registered agents",
 	},
 	&cli.DurationFlag{
 		Sources: cli.EnvVars("WOODPECKER_KEEPALIVE_MIN_TIME"),
