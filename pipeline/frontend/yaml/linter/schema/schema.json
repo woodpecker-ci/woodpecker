@@ -54,6 +54,20 @@
     }
   },
   "definitions": {
+    "string_or_string_slice": {
+      "oneOf": [
+        {
+          "type": "array",
+          "minLength": 1,
+          "items": {
+            "type": "string"
+          }
+        },
+        {
+          "type": "string"
+        }
+      ]
+    },
     "clone": {
       "description": "Configures the clone step. Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#clone",
       "oneOf": [
@@ -294,18 +308,7 @@
         },
         "depends_on": {
           "description": "Execute a step after another step has finished.",
-          "oneOf": [
-            {
-              "type": "array",
-              "minLength": 1,
-              "items": {
-                "type": "string"
-              }
-            },
-            {
-              "type": "string"
-            }
-          ]
+          "$ref": "#/definitions/string_or_string_slice"
         },
         "detach": {
           "description": "Detach a step to run in background until pipeline finishes. Read more: https://woodpecker-ci.org/docs/usage/services#detachment",
@@ -322,18 +325,15 @@
         },
         "entrypoint": {
           "description": "Defines container entrypoint.",
-          "oneOf": [
-            {
-              "type": "array",
-              "minLength": 1,
-              "items": {
-                "type": "string"
-              }
-            },
-            {
-              "type": "string"
-            }
-          ]
+          "$ref": "#/definitions/string_or_string_slice"
+        },
+        "dns": {
+          "description": "Change DNS server for step. Only allowed if 'Trusted Network' option is enabled in repo settings by an admin. Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#dns",
+          "$ref": "#/definitions/string_or_string_slice"
+        },
+        "dns_search": {
+          "description": "Change DNS lookup domain for step. Only allowed if 'Trusted Network' option is enabled in repo settings by an admin. Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#dns",
+          "$ref": "#/definitions/string_or_string_slice"
         }
       }
     },
@@ -370,18 +370,7 @@
         },
         "depends_on": {
           "description": "Execute a step after another step has finished.",
-          "oneOf": [
-            {
-              "type": "array",
-              "minLength": 1,
-              "items": {
-                "type": "string"
-              }
-            },
-            {
-              "type": "string"
-            }
-          ]
+          "$ref": "#/definitions/string_or_string_slice"
         },
         "detach": {
           "description": "Detach a step to run in background until pipeline finishes. Read more: https://woodpecker-ci.org/docs/usage/services#detachment",
