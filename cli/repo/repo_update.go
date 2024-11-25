@@ -36,8 +36,8 @@ var repoUpdateCmd = &cli.Command{
 			Usage: "repository is trusted",
 		},
 		&cli.BoolFlag{
-			Name:  "gated",
-			Usage: "repository is gated",
+			Name:  "gated", // TODO: remove in next major release
+			Usage: "[deprecated] repository is gated",
 		},
 		&cli.StringFlag{
 			Name:  "require-approval",
