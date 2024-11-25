@@ -332,7 +332,11 @@ func LookupRepo(c *gin.Context) {
 //	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 //	@Param		repo_id			path	int		true	"the repository id"
 func GetRepo(c *gin.Context) {
-	c.JSON(http.StatusOK, session.Repo(c))
+	repo := session.Repo(c)
+	if repo.RequireApproval == model.RequireApprovalOldNotGated {
+		repo.RequireApproval = model.RequireApprovalNone // TODO: remove in next major release
+	}
+	c.JSON(http.StatusOK, repo)
 }
 
 // GetRepoPermissions
