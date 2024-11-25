@@ -62,7 +62,6 @@ type (
 		Visibility                   string       `json:"visibility"`
 		IsSCMPrivate                 bool         `json:"private"`
 		IsTrusted                    bool         `json:"trusted"`
-		IsGated                      bool         `json:"gated,omitempty"` // TODO: remove in next major release
 		RequireApproval              ApprovalMode `json:"require_approval"`
 		IsActive                     bool         `json:"active"`
 		AllowPullRequests            bool         `json:"allow_pr"`
