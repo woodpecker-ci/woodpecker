@@ -4840,9 +4840,6 @@ const docTemplate = `{
                 "full_name": {
                     "type": "string"
                 },
-                "gated": {
-                    "type": "boolean"
-                },
                 "id": {
                     "type": "integer"
                 },
@@ -4900,6 +4897,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "gated": {
+                    "description": "TODO: remove in next major release",
                     "type": "boolean"
                 },
                 "netrc_only_trusted": {
@@ -5175,7 +5173,7 @@ const docTemplate = `{
         "model.ApprovalMode": {
             "type": "string",
             "enum": [
-                "",
+                "old_not_gated",
                 "none",
                 "forks",
                 "pull_requests",
@@ -5185,11 +5183,11 @@ const docTemplate = `{
                 "RequireApprovalAllEvents": "require approval for all external events",
                 "RequireApprovalForks": "require approval for PRs from forks (default)",
                 "RequireApprovalNone": "require approval for no events",
-                "RequireApprovalNotSet": "require approval is decided by server default // TODO: remove it in v3.0.0",
+                "RequireApprovalOldNotGated": "require approval for no events (deprecated is gated) // TODO: remove it in next major",
                 "RequireApprovalPullRequests": "require approval for all PRs"
             },
             "x-enum-varnames": [
-                "RequireApprovalNotSet",
+                "RequireApprovalOldNotGated",
                 "RequireApprovalNone",
                 "RequireApprovalForks",
                 "RequireApprovalPullRequests",
