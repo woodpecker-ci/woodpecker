@@ -94,7 +94,7 @@ func repoUpdate(ctx context.Context, c *cli.Command) error {
 	}
 	// TODO: remove isGated in next major release
 	if c.IsSet("gated") {
-		log.Warn().Msgf("Deprecated 'gated' option was used, use 'require-approval' in the future to update an repo settings.")
+		fmt.Print("[WARNING] Deprecated 'gated' option was used, use 'require-approval' in the future to update an repo settings.")
 		if gated {
 			patch.RequireApproval = &woodpecker.RequireApprovalAllEvents
 		} else {
