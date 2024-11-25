@@ -14,9 +14,9 @@
     </template>
 
     <div class="flex flex-col gap-4">
-      <RepoItem v-for="repo in searchedRepos" :key="repo.id" :repo="repo" />
+      <RepoItem v-for="repo in reposLastActivity" :key="repo.id" :repo="repo" />
     </div>
-    <div v-if="(searchedRepos || []).length <= 0" class="text-center">
+    <div v-if="(reposLastActivity || []).length <= 0" class="text-center">
       <span class="text-wp-text-100 m-auto">{{ $t('repo.user_none') }}</span>
     </div>
   </Scaffold>
@@ -34,7 +34,7 @@ import { useRepoSearch } from '~/compositions/useRepoSearch';
 import { useRepoStore } from '~/store/repos';
 
 const repoStore = useRepoStore();
-const { repoWithLastPipeline } = useRepos();
+const { repoWithLastPipeline, sortReposByLastActivity } = useRepos();
 
 const org = inject('org');
 const orgPermissions = inject('org-permissions');
@@ -46,6 +46,7 @@ const repos = computed(() =>
     .map(repoWithLastPipeline),
 );
 const { searchedRepos } = useRepoSearch(repos, search);
+const reposLastActivity = computed(() => sortReposByLastActivity(searchedRepos.value || []));
 
 onMounted(async () => {
   await repoStore.loadRepos(); // TODO: load only org repos
