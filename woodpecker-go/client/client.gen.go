@@ -75,6 +75,14 @@ const (
 	EventTag        WebhookEvent = "tag"
 )
 
+// Defines values for ModelApprovalMode.
+const (
+	RequireApprovalAllEvents    ModelApprovalMode = "all_events"
+	RequireApprovalForks        ModelApprovalMode = "forks"
+	RequireApprovalNone         ModelApprovalMode = "none"
+	RequireApprovalPullRequests ModelApprovalMode = "pull_requests"
+)
+
 // Defines values for ModelForgeType.
 const (
 	ForgeTypeAddon               ModelForgeType = "addon"
@@ -225,6 +233,7 @@ type Pipeline struct {
 	Event        *WebhookEvent         `json:"event,omitempty"`
 	Finished     *int                  `json:"finished,omitempty"`
 	ForgeUrl     *string               `json:"forge_url,omitempty"`
+	FromFork     *bool                 `json:"from_fork,omitempty"`
 	Id           *int                  `json:"id,omitempty"`
 	IsPrerelease *bool                 `json:"is_prerelease,omitempty"`
 	Message      *string               `json:"message,omitempty"`
@@ -287,7 +296,6 @@ type Repo struct {
 	ForgeRemoteId    *string                    `json:"forge_remote_id,omitempty"`
 	ForgeUrl         *string                    `json:"forge_url,omitempty"`
 	FullName         *string                    `json:"full_name,omitempty"`
-	Gated            *bool                      `json:"gated,omitempty"`
 	Id               *int                       `json:"id,omitempty"`
 	Name             *string                    `json:"name,omitempty"`
 	NetrcOnlyTrusted *bool                      `json:"netrc_only_trusted,omitempty"`
@@ -295,6 +303,7 @@ type Repo struct {
 	Owner            *string                    `json:"owner,omitempty"`
 	PrEnabled        *bool                      `json:"pr_enabled,omitempty"`
 	Private          *bool                      `json:"private,omitempty"`
+	RequireApproval  *ModelApprovalMode         `json:"require_approval,omitempty"`
 	Scm              *SCMKind                   `json:"scm,omitempty"`
 	Timeout          *int                       `json:"timeout,omitempty"`
 	Trusted          *ModelTrustedConfiguration `json:"trusted,omitempty"`
@@ -303,15 +312,18 @@ type Repo struct {
 
 // RepoPatch defines model for RepoPatch.
 type RepoPatch struct {
-	AllowDeploy                  *bool                           `json:"allow_deploy,omitempty"`
-	AllowPr                      *bool                           `json:"allow_pr,omitempty"`
-	CancelPreviousPipelineEvents *[]WebhookEvent                 `json:"cancel_previous_pipeline_events,omitempty"`
-	ConfigFile                   *string                         `json:"config_file,omitempty"`
-	Gated                        *bool                           `json:"gated,omitempty"`
-	NetrcOnlyTrusted             *bool                           `json:"netrc_only_trusted,omitempty"`
-	Timeout                      *int                            `json:"timeout,omitempty"`
-	Trusted                      *ModelTrustedConfigurationPatch `json:"trusted,omitempty"`
-	Visibility                   *string                         `json:"visibility,omitempty"`
+	AllowDeploy                  *bool           `json:"allow_deploy,omitempty"`
+	AllowPr                      *bool           `json:"allow_pr,omitempty"`
+	CancelPreviousPipelineEvents *[]WebhookEvent `json:"cancel_previous_pipeline_events,omitempty"`
+	ConfigFile                   *string         `json:"config_file,omitempty"`
+
+	// Gated TODO: deprecated in favor of RequireApproval => Remove in next major release
+	Gated            *bool                           `json:"gated,omitempty"`
+	NetrcOnlyTrusted *bool                           `json:"netrc_only_trusted,omitempty"`
+	RequireApproval  *string                         `json:"require_approval,omitempty"`
+	Timeout          *int                            `json:"timeout,omitempty"`
+	Trusted          *ModelTrustedConfigurationPatch `json:"trusted,omitempty"`
+	Visibility       *string                         `json:"visibility,omitempty"`
 }
 
 // RepoVisibility defines model for RepoVisibility.
@@ -494,6 +506,9 @@ type MetadataWorkflow struct {
 	Name   *string            `json:"name,omitempty"`
 	Number *int               `json:"number,omitempty"`
 }
+
+// ModelApprovalMode defines model for model.ApprovalMode.
+type ModelApprovalMode string
 
 // ModelForgeType defines model for model.ForgeType.
 type ModelForgeType string

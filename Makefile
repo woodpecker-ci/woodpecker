@@ -149,9 +149,6 @@ install-tools: ## Install development tools
 	hash protoc-gen-go-grpc > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
 		go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest; \
 	fi
-	hash swagger > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
-		go install github.com/go-swagger/go-swagger/cmd/swagger@latest; \
-	fi
 
 ui-dependencies: ## Install UI dependencies
 	(cd web/; pnpm install --frozen-lockfile)

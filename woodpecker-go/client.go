@@ -24,7 +24,7 @@ import (
 	apiClient "go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/client"
 )
 
-//go:generate go run github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen --config=config.yaml ../docs/swagger.json
+//go:generate go run github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen --config=config.yaml ../docs/openapi.json
 
 type Client struct {
 	*apiClient.WoodpeckerCIAPI
