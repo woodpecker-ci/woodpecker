@@ -377,6 +377,8 @@ func normalizeArchType(s string) string {
 	switch s {
 	case "x86_64":
 		return "amd64"
+	case "aarch64":
+		return "arm64"
 	default:
 		return s
 	}
