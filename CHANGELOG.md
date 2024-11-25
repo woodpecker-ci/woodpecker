@@ -243,6 +243,7 @@
 
 ### Misc
 
+- Add dns config option to official feature set [[#4418](https://github.com/woodpecker-ci/woodpecker/pull/4418)]
 - Remove `renovate` branch triggers [[#4437](https://github.com/woodpecker-ci/woodpecker/pull/4437)]
 - Improve tab layout and add hover effect [[#4431](https://github.com/woodpecker-ci/woodpecker/pull/4431)]
 - Dont run pipeline on push events to renovate branches [[#4406](https://github.com/woodpecker-ci/woodpecker/pull/4406)]
