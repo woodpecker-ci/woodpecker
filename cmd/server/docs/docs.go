@@ -4671,6 +4671,9 @@ const docTemplate = `{
                 "forge_url": {
                     "type": "string"
                 },
+                "from_fork": {
+                    "type": "boolean"
+                },
                 "id": {
                     "type": "integer"
                 },
@@ -4837,9 +4840,6 @@ const docTemplate = `{
                 "full_name": {
                     "type": "string"
                 },
-                "gated": {
-                    "type": "boolean"
-                },
                 "id": {
                     "type": "integer"
                 },
@@ -4860,6 +4860,9 @@ const docTemplate = `{
                 },
                 "private": {
                     "type": "boolean"
+                },
+                "require_approval": {
+                    "$ref": "#/definitions/model.ApprovalMode"
                 },
                 "scm": {
                     "$ref": "#/definitions/SCMKind"
@@ -4894,10 +4897,14 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "gated": {
+                    "description": "TODO: remove in next major release",
                     "type": "boolean"
                 },
                 "netrc_only_trusted": {
                     "type": "boolean"
+                },
+                "require_approval": {
+                    "type": "string"
                 },
                 "timeout": {
                     "type": "integer"
@@ -5161,6 +5168,30 @@ const docTemplate = `{
                 "EventDeploy",
                 "EventCron",
                 "EventManual"
+            ]
+        },
+        "model.ApprovalMode": {
+            "type": "string",
+            "enum": [
+                "old_not_gated",
+                "none",
+                "forks",
+                "pull_requests",
+                "all_events"
+            ],
+            "x-enum-comments": {
+                "RequireApprovalAllEvents": "require approval for all external events",
+                "RequireApprovalForks": "require approval for PRs from forks (default)",
+                "RequireApprovalNone": "require approval for no events",
+                "RequireApprovalOldNotGated": "require approval for no events (deprecated is gated) // TODO: remove it in next major",
+                "RequireApprovalPullRequests": "require approval for all PRs"
+            },
+            "x-enum-varnames": [
+                "RequireApprovalOldNotGated",
+                "RequireApprovalNone",
+                "RequireApprovalForks",
+                "RequireApprovalPullRequests",
+                "RequireApprovalAllEvents"
             ]
         },
         "model.ForgeType": {

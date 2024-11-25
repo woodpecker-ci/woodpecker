@@ -90,6 +90,7 @@ func PostRepo(c *gin.Context) {
 		repo.Update(from)
 	} else {
 		repo = from
+		repo.RequireApproval = model.RequireApprovalPullRequests
 		repo.AllowPull = true
 		repo.AllowDeploy = false
 		repo.NetrcOnlyTrusted = true
@@ -236,8 +237,20 @@ func PatchRepo(c *gin.Context) {
 	if in.AllowDeploy != nil {
 		repo.AllowDeploy = *in.AllowDeploy
 	}
-	if in.IsGated != nil {
-		repo.IsGated = *in.IsGated
+
+	if in.RequireApproval != nil {
+		if mode := model.ApprovalMode(*in.RequireApproval); mode.Valid() {
+			repo.RequireApproval = mode
+		} else {
+			c.String(http.StatusBadRequest, "Invalid require-approval setting")
+			return
+		}
+	} else if in.IsGated != nil { // TODO: remove isGated in next major release
+		if *in.IsGated {
+			repo.RequireApproval = model.RequireApprovalAllEvents
+		} else {
+			repo.RequireApproval = model.RequireApprovalOldNotGated
+		}
 	}
 	if in.IsTrusted != nil {
 		repo.IsTrusted = *in.IsTrusted
@@ -319,7 +332,11 @@ func LookupRepo(c *gin.Context) {
 //	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 //	@Param		repo_id			path	int		true	"the repository id"
 func GetRepo(c *gin.Context) {
-	c.JSON(http.StatusOK, session.Repo(c))
+	repo := session.Repo(c)
+	if repo.RequireApproval == model.RequireApprovalOldNotGated {
+		repo.RequireApproval = model.RequireApprovalNone // TODO: remove in next major release
+	}
+	c.JSON(http.StatusOK, repo)
 }
 
 // GetRepoPermissions
