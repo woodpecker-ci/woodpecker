@@ -242,6 +242,7 @@
 
 ### Misc
 
+- Use same default sort for repo and org repo list [[#4461](https://github.com/woodpecker-ci/woodpecker/pull/4461)]
 - Add dns config option to official feature set [[#4418](https://github.com/woodpecker-ci/woodpecker/pull/4418)]
 - Remove `renovate` branch triggers [[#4437](https://github.com/woodpecker-ci/woodpecker/pull/4437)]
 - Improve tab layout and add hover effect [[#4431](https://github.com/woodpecker-ci/woodpecker/pull/4431)]
