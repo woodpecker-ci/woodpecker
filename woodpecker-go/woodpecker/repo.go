@@ -39,6 +39,14 @@ type CronListOptions struct {
 	ListOptions
 }
 
+type RegistryListOptions struct {
+	ListOptions
+}
+
+type SecretListOptions struct {
+	ListOptions
+}
+
 type DeployOptions struct {
 	DeployTo string            // override the target deploy value
 	Params   map[string]string // custom KEY=value parameters to be injected into the step environment
@@ -220,10 +228,11 @@ func (c *client) Secret(repoID int64, secret string) (*Secret, error) {
 }
 
 // SecretList returns a list of all repository secrets.
-func (c *client) SecretList(repoID int64) ([]*Secret, error) {
+func (c *client) SecretList(repoID int64, opt SecretListOptions) ([]*Secret, error) {
 	var out []*Secret
-	uri := fmt.Sprintf(pathRepoSecrets, c.addr, repoID)
-	err := c.get(uri, &out)
+	uri, _ := url.Parse(fmt.Sprintf(pathRepoSecrets, c.addr, repoID))
+	uri.RawQuery = opt.getURLQuery().Encode()
+	err := c.get(uri.String(), &out)
 	return out, err
 }
 

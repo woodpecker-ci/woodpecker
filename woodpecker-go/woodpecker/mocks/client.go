@@ -431,9 +431,9 @@ func (_m *Client) GlobalRegistryDelete(registry string) error {
 	return r0
 }
 
-// GlobalRegistryList provides a mock function with given fields:
-func (_m *Client) GlobalRegistryList() ([]*woodpecker.Registry, error) {
-	ret := _m.Called()
+// GlobalRegistryList provides a mock function with given fields: opt
+func (_m *Client) GlobalRegistryList(opt woodpecker.RegistryListOptions) ([]*woodpecker.Registry, error) {
+	ret := _m.Called(opt)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GlobalRegistryList")
@@ -441,19 +441,19 @@ func (_m *Client) GlobalRegistryList() ([]*woodpecker.Registry, error) {
 
 	var r0 []*woodpecker.Registry
 	var r1 error
-	if rf, ok := ret.Get(0).(func() ([]*woodpecker.Registry, error)); ok {
-		return rf()
+	if rf, ok := ret.Get(0).(func(woodpecker.RegistryListOptions) ([]*woodpecker.Registry, error)); ok {
+		return rf(opt)
 	}
-	if rf, ok := ret.Get(0).(func() []*woodpecker.Registry); ok {
-		r0 = rf()
+	if rf, ok := ret.Get(0).(func(woodpecker.RegistryListOptions) []*woodpecker.Registry); ok {
+		r0 = rf(opt)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]*woodpecker.Registry)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func() error); ok {
-		r1 = rf()
+	if rf, ok := ret.Get(1).(func(woodpecker.RegistryListOptions) error); ok {
+		r1 = rf(opt)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -569,9 +569,9 @@ func (_m *Client) GlobalSecretDelete(secret string) error {
 	return r0
 }
 
-// GlobalSecretList provides a mock function with given fields:
-func (_m *Client) GlobalSecretList() ([]*woodpecker.Secret, error) {
-	ret := _m.Called()
+// GlobalSecretList provides a mock function with given fields: opt
+func (_m *Client) GlobalSecretList(opt woodpecker.SecretListOptions) ([]*woodpecker.Secret, error) {
+	ret := _m.Called(opt)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GlobalSecretList")
@@ -579,19 +579,19 @@ func (_m *Client) GlobalSecretList() ([]*woodpecker.Secret, error) {
 
 	var r0 []*woodpecker.Secret
 	var r1 error
-	if rf, ok := ret.Get(0).(func() ([]*woodpecker.Secret, error)); ok {
-		return rf()
+	if rf, ok := ret.Get(0).(func(woodpecker.SecretListOptions) ([]*woodpecker.Secret, error)); ok {
+		return rf(opt)
 	}
-	if rf, ok := ret.Get(0).(func() []*woodpecker.Secret); ok {
-		r0 = rf()
+	if rf, ok := ret.Get(0).(func(woodpecker.SecretListOptions) []*woodpecker.Secret); ok {
+		r0 = rf(opt)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]*woodpecker.Secret)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func() error); ok {
-		r1 = rf()
+	if rf, ok := ret.Get(1).(func(woodpecker.SecretListOptions) error); ok {
+		r1 = rf(opt)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -815,9 +815,9 @@ func (_m *Client) OrgRegistryDelete(orgID int64, registry string) error {
 	return r0
 }
 
-// OrgRegistryList provides a mock function with given fields: orgID
-func (_m *Client) OrgRegistryList(orgID int64) ([]*woodpecker.Registry, error) {
-	ret := _m.Called(orgID)
+// OrgRegistryList provides a mock function with given fields: orgID, opt
+func (_m *Client) OrgRegistryList(orgID int64, opt woodpecker.RegistryListOptions) ([]*woodpecker.Registry, error) {
+	ret := _m.Called(orgID, opt)
 
 	if len(ret) == 0 {
 		panic("no return value specified for OrgRegistryList")
@@ -825,19 +825,19 @@ func (_m *Client) OrgRegistryList(orgID int64) ([]*woodpecker.Registry, error) {
 
 	var r0 []*woodpecker.Registry
 	var r1 error
-	if rf, ok := ret.Get(0).(func(int64) ([]*woodpecker.Registry, error)); ok {
-		return rf(orgID)
+	if rf, ok := ret.Get(0).(func(int64, woodpecker.RegistryListOptions) ([]*woodpecker.Registry, error)); ok {
+		return rf(orgID, opt)
 	}
-	if rf, ok := ret.Get(0).(func(int64) []*woodpecker.Registry); ok {
-		r0 = rf(orgID)
+	if rf, ok := ret.Get(0).(func(int64, woodpecker.RegistryListOptions) []*woodpecker.Registry); ok {
+		r0 = rf(orgID, opt)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]*woodpecker.Registry)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(int64) error); ok {
-		r1 = rf(orgID)
+	if rf, ok := ret.Get(1).(func(int64, woodpecker.RegistryListOptions) error); ok {
+		r1 = rf(orgID, opt)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -953,9 +953,9 @@ func (_m *Client) OrgSecretDelete(orgID int64, secret string) error {
 	return r0
 }
 
-// OrgSecretList provides a mock function with given fields: orgID
-func (_m *Client) OrgSecretList(orgID int64) ([]*woodpecker.Secret, error) {
-	ret := _m.Called(orgID)
+// OrgSecretList provides a mock function with given fields: orgID, opt
+func (_m *Client) OrgSecretList(orgID int64, opt woodpecker.SecretListOptions) ([]*woodpecker.Secret, error) {
+	ret := _m.Called(orgID, opt)
 
 	if len(ret) == 0 {
 		panic("no return value specified for OrgSecretList")
@@ -963,19 +963,19 @@ func (_m *Client) OrgSecretList(orgID int64) ([]*woodpecker.Secret, error) {
 
 	var r0 []*woodpecker.Secret
 	var r1 error
-	if rf, ok := ret.Get(0).(func(int64) ([]*woodpecker.Secret, error)); ok {
-		return rf(orgID)
+	if rf, ok := ret.Get(0).(func(int64, woodpecker.SecretListOptions) ([]*woodpecker.Secret, error)); ok {
+		return rf(orgID, opt)
 	}
-	if rf, ok := ret.Get(0).(func(int64) []*woodpecker.Secret); ok {
-		r0 = rf(orgID)
+	if rf, ok := ret.Get(0).(func(int64, woodpecker.SecretListOptions) []*woodpecker.Secret); ok {
+		r0 = rf(orgID, opt)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]*woodpecker.Secret)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(int64) error); ok {
-		r1 = rf(orgID)
+	if rf, ok := ret.Get(1).(func(int64, woodpecker.SecretListOptions) error); ok {
+		r1 = rf(orgID, opt)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -1427,9 +1427,9 @@ func (_m *Client) RegistryDelete(repoID int64, hostname string) error {
 	return r0
 }
 
-// RegistryList provides a mock function with given fields: repoID
-func (_m *Client) RegistryList(repoID int64) ([]*woodpecker.Registry, error) {
-	ret := _m.Called(repoID)
+// RegistryList provides a mock function with given fields: repoID, opt
+func (_m *Client) RegistryList(repoID int64, opt woodpecker.RegistryListOptions) ([]*woodpecker.Registry, error) {
+	ret := _m.Called(repoID, opt)
 
 	if len(ret) == 0 {
 		panic("no return value specified for RegistryList")
@@ -1437,19 +1437,19 @@ func (_m *Client) RegistryList(repoID int64) ([]*woodpecker.Registry, error) {
 
 	var r0 []*woodpecker.Registry
 	var r1 error
-	if rf, ok := ret.Get(0).(func(int64) ([]*woodpecker.Registry, error)); ok {
-		return rf(repoID)
+	if rf, ok := ret.Get(0).(func(int64, woodpecker.RegistryListOptions) ([]*woodpecker.Registry, error)); ok {
+		return rf(repoID, opt)
 	}
-	if rf, ok := ret.Get(0).(func(int64) []*woodpecker.Registry); ok {
-		r0 = rf(repoID)
+	if rf, ok := ret.Get(0).(func(int64, woodpecker.RegistryListOptions) []*woodpecker.Registry); ok {
+		r0 = rf(repoID, opt)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]*woodpecker.Registry)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(int64) error); ok {
-		r1 = rf(repoID)
+	if rf, ok := ret.Get(1).(func(int64, woodpecker.RegistryListOptions) error); ok {
+		r1 = rf(repoID, opt)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -1799,9 +1799,9 @@ func (_m *Client) SecretDelete(repoID int64, secret string) error {
 	return r0
 }
 
-// SecretList provides a mock function with given fields: repoID
-func (_m *Client) SecretList(repoID int64) ([]*woodpecker.Secret, error) {
-	ret := _m.Called(repoID)
+// SecretList provides a mock function with given fields: repoID, opt
+func (_m *Client) SecretList(repoID int64, opt woodpecker.SecretListOptions) ([]*woodpecker.Secret, error) {
+	ret := _m.Called(repoID, opt)
 
 	if len(ret) == 0 {
 		panic("no return value specified for SecretList")
@@ -1809,19 +1809,19 @@ func (_m *Client) SecretList(repoID int64) ([]*woodpecker.Secret, error) {
 
 	var r0 []*woodpecker.Secret
 	var r1 error
-	if rf, ok := ret.Get(0).(func(int64) ([]*woodpecker.Secret, error)); ok {
-		return rf(repoID)
+	if rf, ok := ret.Get(0).(func(int64, woodpecker.SecretListOptions) ([]*woodpecker.Secret, error)); ok {
+		return rf(repoID, opt)
 	}
-	if rf, ok := ret.Get(0).(func(int64) []*woodpecker.Secret); ok {
-		r0 = rf(repoID)
+	if rf, ok := ret.Get(0).(func(int64, woodpecker.SecretListOptions) []*woodpecker.Secret); ok {
+		r0 = rf(repoID, opt)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]*woodpecker.Secret)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(int64) error); ok {
-		r1 = rf(repoID)
+	if rf, ok := ret.Get(1).(func(int64, woodpecker.SecretListOptions) error); ok {
+		r1 = rf(repoID, opt)
 	} else {
 		r1 = ret.Error(1)
 	}

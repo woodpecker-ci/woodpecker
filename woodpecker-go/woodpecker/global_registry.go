@@ -10,10 +10,6 @@ const (
 	pathGlobalRegistry   = "%s/api/registries/%s"
 )
 
-type RegistryListOptions struct {
-	ListOptions
-}
-
 // GlobalRegistry returns an global registry by name.
 func (c *client) GlobalRegistry(registry string) (*Registry, error) {
 	out := new(Registry)

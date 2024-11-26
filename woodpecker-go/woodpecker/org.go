@@ -39,10 +39,11 @@ func (c *client) OrgSecret(orgID int64, secret string) (*Secret, error) {
 }
 
 // OrgSecretList returns a list of all organization secrets.
-func (c *client) OrgSecretList(orgID int64) ([]*Secret, error) {
+func (c *client) OrgSecretList(orgID int64, opt SecretListOptions) ([]*Secret, error) {
 	var out []*Secret
-	uri := fmt.Sprintf(pathOrgSecrets, c.addr, orgID)
-	err := c.get(uri, &out)
+	uri, _ := url.Parse(fmt.Sprintf(pathOrgSecrets, c.addr, orgID))
+	uri.RawQuery = opt.getURLQuery().Encode()
+	err := c.get(uri.String(), &out)
 	return out, err
 }
 
