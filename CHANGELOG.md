@@ -8,6 +8,7 @@
 
 ### 💥 Breaking changes
 
+- Allow to set custom trusted clone plugins [[#4352](https://github.com/woodpecker-ci/woodpecker/pull/4352)]
 - Add PipelineListsOptions to woodpecker-go [[#3652](https://github.com/woodpecker-ci/woodpecker/pull/3652)]
 - Remove `secrets` in favor of `from_secret` [[#4363](https://github.com/woodpecker-ci/woodpecker/pull/4363)]
 - Kubernetes | Docker: Add support for rootless images [[#4151](https://github.com/woodpecker-ci/woodpecker/pull/4151)]
@@ -47,7 +48,6 @@
 
 ### ✨ Features
 
-- Docker Backend: fully support windows container [[#4381](https://github.com/woodpecker-ci/woodpecker/pull/4381)]
 - Implement org/user agents [[#3539](https://github.com/woodpecker-ci/woodpecker/pull/3539)]
 - Replay pipeline using `cli exec` by downloading metadata [[#4103](https://github.com/woodpecker-ci/woodpecker/pull/4103)]
 - Update clone plugin to support sha256 [[#4136](https://github.com/woodpecker-ci/woodpecker/pull/4136)]
