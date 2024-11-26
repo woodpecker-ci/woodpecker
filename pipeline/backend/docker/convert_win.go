@@ -68,9 +68,6 @@ func (e *docker) windowsPathPatch(step *types.Step) {
 	}
 
 	// patch workspace
-	if !MustNotAddWindowsLetterPattern.MatchString(step.WorkspaceBase) {
-		step.WorkspaceBase = filepath.Join(defaultWindowsDriverLetter, step.WorkspaceBase)
-	}
 	if !MustNotAddWindowsLetterPattern.MatchString(step.WorkingDir) {
 		step.WorkingDir = filepath.Join(defaultWindowsDriverLetter, step.WorkingDir)
 	}
