@@ -147,12 +147,12 @@ func (o *Table) Write(columns []string, obj any) error {
 		colName := strings.ToLower(col)
 		if alias, ok := o.fieldAlias[colName]; ok {
 			if fn, ok := o.fieldMapping[alias]; ok {
-				out = append(out, fn(obj))
+				out = append(out, sanitizeString(fn(obj)))
 				continue
 			}
 		}
 		if fn, ok := o.fieldMapping[colName]; ok {
-			out = append(out, fn(obj))
+			out = append(out, sanitizeString(fn(obj)))
 			continue
 		}
 		if value, ok := dataL[strings.ReplaceAll(colName, "_", "")]; ok {
@@ -165,10 +165,10 @@ func (o *Table) Write(columns []string, obj any) error {
 				continue
 			}
 			if s, ok := value.(string); ok {
-				out = append(out, NA(s))
+				out = append(out, NA(sanitizeString(s)))
 				continue
 			}
-			out = append(out, fmt.Sprintf("%v", value))
+			out = append(out, sanitizeString(value))
 		}
 	}
 	_, _ = fmt.Fprintln(o.w, strings.Join(out, "\t"))
@@ -200,4 +200,10 @@ func fieldName(name string) string {
 		out = append(out, unicode.ToLower(r[i]))
 	}
 	return string(out)
+}
+
+func sanitizeString(value any) string {
+	str := fmt.Sprintf("%v", value)
+	replacer := strings.NewReplacer("\n", " ", "\r", " ")
+	return strings.TrimSpace(replacer.Replace(str))
 }
