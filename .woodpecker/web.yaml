@@ -4,6 +4,9 @@ when:
     branch:
       - release/*
 
+labels:
+  platform: linux/aarch64
+
 variables:
   - &node_image 'docker.io/node:23-alpine'
   - &when

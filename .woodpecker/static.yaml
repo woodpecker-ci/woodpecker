@@ -1,6 +1,9 @@
 when:
   - event: pull_request
 
+labels:
+  platform: linux/aarch64
+
 steps:
   - name: lint-editorconfig
     image: docker.io/woodpeckerci/plugin-editorconfig-checker:0.2.0
