@@ -1,6 +1,9 @@
 package woodpecker
 
-import "fmt"
+import (
+	"fmt"
+	"net/url"
+)
 
 const (
 	pathOrg           = "%s/api/orgs/%d"
@@ -74,10 +77,11 @@ func (c *client) OrgRegistry(orgID int64, registry string) (*Registry, error) {
 }
 
 // OrgRegistryList returns a list of all organization registries.
-func (c *client) OrgRegistryList(orgID int64) ([]*Registry, error) {
+func (c *client) OrgRegistryList(orgID int64, opt RegistryListOptions) ([]*Registry, error) {
 	var out []*Registry
-	uri := fmt.Sprintf(pathOrgRegistries, c.addr, orgID)
-	err := c.get(uri, &out)
+	uri, _ := url.Parse(fmt.Sprintf(pathOrgRegistries, c.addr, orgID))
+	uri.RawQuery = opt.getURLQuery().Encode()
+	err := c.get(uri.String(), &out)
 	return out, err
 }
 

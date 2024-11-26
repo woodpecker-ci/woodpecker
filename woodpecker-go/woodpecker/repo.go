@@ -35,6 +35,10 @@ type PipelineListOptions struct {
 	After  time.Time
 }
 
+type CronListOptions struct {
+	ListOptions
+}
+
 type DeployOptions struct {
 	DeployTo string            // override the target deploy value
 	Params   map[string]string // custom KEY=value parameters to be injected into the step environment
@@ -128,7 +132,6 @@ func (c *client) RepoPost(opt RepoPostOptions) (*Repo, error) {
 	out := new(Repo)
 	uri, _ := url.Parse(fmt.Sprintf(pathRepoPost, c.addr))
 	uri.RawQuery = opt.QueryEncode()
-	fmt.Println("!!!!!!!!!!", uri.String())
 	err := c.post(uri.String(), nil, out)
 	return out, err
 }
@@ -178,10 +181,11 @@ func (c *client) Registry(repoID int64, hostname string) (*Registry, error) {
 }
 
 // RegistryList returns a list of all repository registries.
-func (c *client) RegistryList(repoID int64) ([]*Registry, error) {
+func (c *client) RegistryList(repoID int64, opt RegistryListOptions) ([]*Registry, error) {
 	var out []*Registry
-	uri := fmt.Sprintf(pathRepoRegistries, c.addr, repoID)
-	err := c.get(uri, &out)
+	uri, _ := url.Parse(fmt.Sprintf(pathRepoRegistries, c.addr, repoID))
+	uri.RawQuery = opt.getURLQuery().Encode()
+	err := c.get(uri.String(), &out)
 	return out, err
 }
 
@@ -246,10 +250,11 @@ func (c *client) SecretDelete(repoID int64, secret string) error {
 }
 
 // CronList returns a list of cronjobs for the specified repository.
-func (c *client) CronList(repoID int64) ([]*Cron, error) {
+func (c *client) CronList(repoID int64, opt CronListOptions) ([]*Cron, error) {
 	out := make([]*Cron, 0, 5)
-	uri := fmt.Sprintf(pathRepoCrons, c.addr, repoID)
-	return out, c.get(uri, &out)
+	uri, _ := url.Parse(fmt.Sprintf(pathRepoCrons, c.addr, repoID))
+	uri.RawQuery = opt.getURLQuery().Encode()
+	return out, c.get(uri.String(), &out)
 }
 
 // CronCreate creates a new cron job for the specified repository.

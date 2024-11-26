@@ -227,7 +227,7 @@ type Client interface {
 	SetLogLevel(logLevel *LogLevel) (*LogLevel, error)
 
 	// CronList list all cron jobs of a repo.
-	CronList(repoID int64) ([]*Cron, error)
+	CronList(repoID int64, opt CronListOptions) ([]*Cron, error)
 
 	// CronGet get a specific cron job of a repo by id.
 	CronGet(repoID, cronID int64) (*Cron, error)

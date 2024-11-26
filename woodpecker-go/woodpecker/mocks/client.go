@@ -263,9 +263,9 @@ func (_m *Client) CronGet(repoID int64, cronID int64) (*woodpecker.Cron, error) 
 	return r0, r1
 }
 
-// CronList provides a mock function with given fields: repoID
-func (_m *Client) CronList(repoID int64) ([]*woodpecker.Cron, error) {
-	ret := _m.Called(repoID)
+// CronList provides a mock function with given fields: repoID, opt
+func (_m *Client) CronList(repoID int64, opt woodpecker.CronListOptions) ([]*woodpecker.Cron, error) {
+	ret := _m.Called(repoID, opt)
 
 	if len(ret) == 0 {
 		panic("no return value specified for CronList")
@@ -273,19 +273,19 @@ func (_m *Client) CronList(repoID int64) ([]*woodpecker.Cron, error) {
 
 	var r0 []*woodpecker.Cron
 	var r1 error
-	if rf, ok := ret.Get(0).(func(int64) ([]*woodpecker.Cron, error)); ok {
-		return rf(repoID)
+	if rf, ok := ret.Get(0).(func(int64, woodpecker.CronListOptions) ([]*woodpecker.Cron, error)); ok {
+		return rf(repoID, opt)
 	}
-	if rf, ok := ret.Get(0).(func(int64) []*woodpecker.Cron); ok {
-		r0 = rf(repoID)
+	if rf, ok := ret.Get(0).(func(int64, woodpecker.CronListOptions) []*woodpecker.Cron); ok {
+		r0 = rf(repoID, opt)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]*woodpecker.Cron)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(int64) error); ok {
-		r1 = rf(repoID)
+	if rf, ok := ret.Get(1).(func(int64, woodpecker.CronListOptions) error); ok {
+		r1 = rf(repoID, opt)
 	} else {
 		r1 = ret.Error(1)
 	}
