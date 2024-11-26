@@ -5070,8 +5070,11 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
-                "netrc_only_trusted": {
-                    "type": "boolean"
+                "netrc_trusted": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "org_id": {
                     "type": "integer"
@@ -5124,8 +5127,11 @@ const docTemplate = `{
                     "description": "TODO: deprecated in favor of RequireApproval =\u003e Remove in next major release",
                     "type": "boolean"
                 },
-                "netrc_only_trusted": {
-                    "type": "boolean"
+                "netrc_trusted": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "require_approval": {
                     "type": "string"

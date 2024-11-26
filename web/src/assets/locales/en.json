@@ -104,8 +104,8 @@
           "desc": "Permit 'deployment' runs for successful pipelines. All users with with push permissions can trigger these, so use with caution."
         },
         "netrc_only_trusted": {
-          "netrc_only_trusted": "Only inject git credentials into trusted clone plugins",
-          "desc": "When enabled, git credentials are accessible only to trusted clone plugins specified in WOODPECKER_PLUGINS_TRUSTED_CLONE. Otherwise, custom clone plugins can use git credentials. This setting has no affect on non-clone steps."
+          "netrc_only_trusted": "Custom trusted clone plugins",
+          "desc": "Plugins listed here will get access to netrc credentials that can be used to clone repositories from the forge or push to it."
         },
         "trusted": {
           "trusted": "Trusted",
