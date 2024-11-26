@@ -26,7 +26,7 @@ import (
 // Command exports the admin command set.
 var Command = &cli.Command{
 	Name:  "admin",
-	Usage: "administrate server settings",
+	Usage: "manage server settings",
 	Commands: []*cli.Command{
 		secret.Command,
 		registry.Command,
