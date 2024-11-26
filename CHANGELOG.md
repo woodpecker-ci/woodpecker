@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-11-25
+## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-11-26
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -8,6 +8,7 @@
 
 ### 💥 Breaking changes
 
+- Add PipelineListsOptions to woodpecker-go [[#3652](https://github.com/woodpecker-ci/woodpecker/pull/3652)]
 - Remove `secrets` in favor of `from_secret` [[#4363](https://github.com/woodpecker-ci/woodpecker/pull/4363)]
 - Kubernetes | Docker: Add support for rootless images [[#4151](https://github.com/woodpecker-ci/woodpecker/pull/4151)]
 - Split repo trusted setting [[#4025](https://github.com/woodpecker-ci/woodpecker/pull/4025)]
@@ -46,6 +47,7 @@
 
 ### ✨ Features
 
+- Docker Backend: fully support windows container [[#4381](https://github.com/woodpecker-ci/woodpecker/pull/4381)]
 - Implement org/user agents [[#3539](https://github.com/woodpecker-ci/woodpecker/pull/3539)]
 - Replay pipeline using `cli exec` by downloading metadata [[#4103](https://github.com/woodpecker-ci/woodpecker/pull/4103)]
 - Update clone plugin to support sha256 [[#4136](https://github.com/woodpecker-ci/woodpecker/pull/4136)]
