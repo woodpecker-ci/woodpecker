@@ -70,6 +70,7 @@ type config struct {
 }
 type SecurityContextConfig struct {
 	RunAsNonRoot bool
+	FSGroup      *int64
 }
 
 func newDefaultDeleteOptions() meta_v1.DeleteOptions {
@@ -98,6 +99,7 @@ func configFromCliContext(ctx context.Context) (*config, error) {
 				ImagePullSecretNames:        c.StringSlice("backend-k8s-pod-image-pull-secret-names"),
 				SecurityContext: SecurityContextConfig{
 					RunAsNonRoot: c.Bool("backend-k8s-secctx-nonroot"), // cspell:words secctx nonroot
+					FSGroup:      newInt64(defaultFSGroup),
 				},
 				NativeSecretsAllowFromStep: c.Bool("backend-k8s-allow-native-secrets"),
 			}
@@ -250,10 +252,10 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 
 	finished := make(chan bool)
 
-	podUpdated := func(_, new any) {
-		pod, ok := new.(*v1.Pod)
+	podUpdated := func(_, newPod any) {
+		pod, ok := newPod.(*v1.Pod)
 		if !ok {
-			log.Error().Msgf("could not parse pod: %v", new)
+			log.Error().Msgf("could not parse pod: %v", newPod)
 			return
 		}
 
@@ -326,10 +328,10 @@ func (e *kube) TailStep(ctx context.Context, step *types.Step, taskUUID string) 
 
 	up := make(chan bool)
 
-	podUpdated := func(_, new any) {
-		pod, ok := new.(*v1.Pod)
+	podUpdated := func(_, newPod any) {
+		pod, ok := newPod.(*v1.Pod)
 		if !ok {
-			log.Error().Msgf("could not parse pod: %v", new)
+			log.Error().Msgf("could not parse pod: %v", newPod)
 			return
 		}
 
@@ -379,7 +381,6 @@ func (e *kube) TailStep(ctx context.Context, step *types.Step, taskUUID string) 
 	go func() {
 		defer logs.Close()
 		defer wc.Close()
-		defer rc.Close()
 
 		_, err = io.Copy(wc, logs)
 		if err != nil {

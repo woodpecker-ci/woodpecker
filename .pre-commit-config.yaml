@@ -10,11 +10,11 @@ repos:
       - id: end-of-file-fixer
       - id: trailing-whitespace
   - repo: https://github.com/golangci/golangci-lint
-    rev: v1.61.0
+    rev: v1.62.0
     hooks:
       - id: golangci-lint
   - repo: https://github.com/igorshubovych/markdownlint-cli
-    rev: v0.42.0
+    rev: v0.43.0
     hooks:
       - id: markdownlint
         exclude: '^(docs/versioned_docs/.*|CHANGELOG.md)$'
@@ -24,7 +24,7 @@ repos:
       - id: checkmake
         exclude: '^docker/Dockerfile.make$' # actually a Dockerfile and not a makefile
   - repo: https://github.com/hadolint/hadolint
-    rev: v2.13.0-beta
+    rev: v2.13.1-beta
     hooks:
       - id: hadolint
   - repo: https://github.com/pre-commit/mirrors-prettier

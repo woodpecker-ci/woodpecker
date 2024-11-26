@@ -57,8 +57,10 @@ type fifo struct {
 // as the agent pull in 10 milliseconds we should also give them work asap.
 const processTimeInterval = 100 * time.Millisecond
 
-// New returns a new fifo queue.
-func New(ctx context.Context) Queue {
+var ErrWorkerKicked = fmt.Errorf("worker was kicked")
+
+// NewMemoryQueue returns a new fifo queue.
+func NewMemoryQueue(ctx context.Context) Queue {
 	q := &fifo{
 		ctx:           ctx,
 		workers:       map[*worker]struct{}{},
@@ -91,27 +93,27 @@ func (q *fifo) PushAtOnce(_ context.Context, tasks []*model.Task) error {
 }
 
 // Poll retrieves and removes a task head of this queue.
-func (q *fifo) Poll(c context.Context, agentID int64, f FilterFn) (*model.Task, error) {
+func (q *fifo) Poll(c context.Context, agentID int64, filter FilterFn) (*model.Task, error) {
 	q.Lock()
 	ctx, stop := context.WithCancelCause(c)
 
-	w := &worker{
+	_worker := &worker{
 		agentID: agentID,
 		channel: make(chan *model.Task, 1),
-		filter:  f,
+		filter:  filter,
 		stop:    stop,
 	}
-	q.workers[w] = struct{}{}
+	q.workers[_worker] = struct{}{}
 	q.Unlock()
 
 	for {
 		select {
 		case <-ctx.Done():
 			q.Lock()
-			delete(q.workers, w)
+			delete(q.workers, _worker)
 			q.Unlock()
 			return nil, ctx.Err()
-		case t := <-w.channel:
+		case t := <-_worker.channel:
 			return t, nil
 		}
 	}
@@ -152,22 +154,22 @@ func (q *fifo) finished(ids []string, exitStatus model.StatusValue, err error) e
 }
 
 // Evict removes a pending task from the queue.
-func (q *fifo) Evict(c context.Context, id string) error {
-	return q.EvictAtOnce(c, []string{id})
+func (q *fifo) Evict(ctx context.Context, taskID string) error {
+	return q.EvictAtOnce(ctx, []string{taskID})
 }
 
 // EvictAtOnce removes multiple pending tasks from the queue.
-func (q *fifo) EvictAtOnce(_ context.Context, ids []string) error {
+func (q *fifo) EvictAtOnce(_ context.Context, taskIDs []string) error {
 	q.Lock()
 	defer q.Unlock()
 
-	for _, id := range ids {
+	for _, id := range taskIDs {
 		var next *list.Element
-		for e := q.pending.Front(); e != nil; e = next {
-			next = e.Next()
-			task, ok := e.Value.(*model.Task)
+		for element := q.pending.Front(); element != nil; element = next {
+			next = element.Next()
+			task, ok := element.Value.(*model.Task)
 			if ok && task.ID == id {
-				q.pending.Remove(e)
+				q.pending.Remove(element)
 				return nil
 			}
 		}
@@ -176,13 +178,13 @@ func (q *fifo) EvictAtOnce(_ context.Context, ids []string) error {
 }
 
 // Wait waits until the item is done executing.
-func (q *fifo) Wait(c context.Context, id string) error {
+func (q *fifo) Wait(ctx context.Context, taskID string) error {
 	q.Lock()
-	state := q.running[id]
+	state := q.running[taskID]
 	q.Unlock()
 	if state != nil {
 		select {
-		case <-c.Done():
+		case <-ctx.Done():
 		case <-state.done:
 			return state.error
 		}
@@ -191,11 +193,11 @@ func (q *fifo) Wait(c context.Context, id string) error {
 }
 
 // Extend extends the task execution deadline.
-func (q *fifo) Extend(_ context.Context, agentID int64, id string) error {
+func (q *fifo) Extend(_ context.Context, agentID int64, taskID string) error {
 	q.Lock()
 	defer q.Unlock()
 
-	state, ok := q.running[id]
+	state, ok := q.running[taskID]
 	if ok {
 		if state.item.AgentID != agentID {
 			return ErrAgentMissMatch
@@ -216,12 +218,12 @@ func (q *fifo) Info(_ context.Context) InfoT {
 	stats.Stats.WaitingOnDeps = q.waitingOnDeps.Len()
 	stats.Stats.Running = len(q.running)
 
-	for e := q.pending.Front(); e != nil; e = e.Next() {
-		task, _ := e.Value.(*model.Task)
+	for element := q.pending.Front(); element != nil; element = element.Next() {
+		task, _ := element.Value.(*model.Task)
 		stats.Pending = append(stats.Pending, task)
 	}
-	for e := q.waitingOnDeps.Front(); e != nil; e = e.Next() {
-		task, _ := e.Value.(*model.Task)
+	for element := q.waitingOnDeps.Front(); element != nil; element = element.Next() {
+		task, _ := element.Value.(*model.Task)
 		stats.WaitingOnDeps = append(stats.WaitingOnDeps, task)
 	}
 	for _, entry := range q.running {
@@ -252,10 +254,10 @@ func (q *fifo) KickAgentWorkers(agentID int64) {
 	q.Lock()
 	defer q.Unlock()
 
-	for w := range q.workers {
-		if w.agentID == agentID {
-			w.stop(fmt.Errorf("worker was kicked"))
-			delete(q.workers, w)
+	for worker := range q.workers {
+		if worker.agentID == agentID {
+			worker.stop(ErrWorkerKicked)
+			delete(q.workers, worker)
 		}
 	}
 }
@@ -307,13 +309,13 @@ func (q *fifo) filterWaiting() {
 	q.waitingOnDeps = list.New()
 	var filtered []*list.Element
 	var nextPending *list.Element
-	for e := q.pending.Front(); e != nil; e = nextPending {
-		nextPending = e.Next()
-		task, _ := e.Value.(*model.Task)
+	for element := q.pending.Front(); element != nil; element = nextPending {
+		nextPending = element.Next()
+		task, _ := element.Value.(*model.Task)
 		if q.depsInQueue(task) {
 			log.Debug().Msgf("queue: waiting due to unmet dependencies %v", task.ID)
 			q.waitingOnDeps.PushBack(task)
-			filtered = append(filtered, e)
+			filtered = append(filtered, element)
 		}
 	}
 
@@ -325,16 +327,24 @@ func (q *fifo) filterWaiting() {
 
 func (q *fifo) assignToWorker() (*list.Element, *worker) {
 	var next *list.Element
-	for e := q.pending.Front(); e != nil; e = next {
-		next = e.Next()
-		task, _ := e.Value.(*model.Task)
+	var bestWorker *worker
+	var bestScore int
+
+	for element := q.pending.Front(); element != nil; element = next {
+		next = element.Next()
+		task, _ := element.Value.(*model.Task)
 		log.Debug().Msgf("queue: trying to assign task: %v with deps %v", task.ID, task.Dependencies)
 
-		for w := range q.workers {
-			if w.filter(task) {
-				log.Debug().Msgf("queue: assigned task: %v with deps %v", task.ID, task.Dependencies)
-				return e, w
+		for worker := range q.workers {
+			matched, score := worker.filter(task)
+			if matched && score > bestScore {
+				bestWorker = worker
+				bestScore = score
 			}
+		}
+		if bestWorker != nil {
+			log.Debug().Msgf("queue: assigned task: %v with deps %v to worker with score %d", task.ID, task.Dependencies, bestScore)
+			return element, bestWorker
 		}
 	}
 
@@ -342,20 +352,20 @@ func (q *fifo) assignToWorker() (*list.Element, *worker) {
 }
 
 func (q *fifo) resubmitExpiredPipelines() {
-	for id, state := range q.running {
-		if time.Now().After(state.deadline) {
-			q.pending.PushFront(state.item)
-			delete(q.running, id)
-			close(state.done)
+	for taskID, taskState := range q.running {
+		if time.Now().After(taskState.deadline) {
+			q.pending.PushFront(taskState.item)
+			delete(q.running, taskID)
+			close(taskState.done)
 		}
 	}
 }
 
 func (q *fifo) depsInQueue(task *model.Task) bool {
 	var next *list.Element
-	for e := q.pending.Front(); e != nil; e = next {
-		next = e.Next()
-		possibleDep, ok := e.Value.(*model.Task)
+	for element := q.pending.Front(); element != nil; element = next {
+		next = element.Next()
+		possibleDep, ok := element.Value.(*model.Task)
 		log.Debug().Msgf("queue: pending right now: %v", possibleDep.ID)
 		for _, dep := range task.Dependencies {
 			if ok && possibleDep.ID == dep {
@@ -376,9 +386,9 @@ func (q *fifo) depsInQueue(task *model.Task) bool {
 
 func (q *fifo) updateDepStatusInQueue(taskID string, status model.StatusValue) {
 	var next *list.Element
-	for e := q.pending.Front(); e != nil; e = next {
-		next = e.Next()
-		pending, ok := e.Value.(*model.Task)
+	for element := q.pending.Front(); element != nil; element = next {
+		next = element.Next()
+		pending, ok := element.Value.(*model.Task)
 		for _, dep := range pending.Dependencies {
 			if ok && taskID == dep {
 				pending.DepStatus[dep] = status
@@ -394,9 +404,9 @@ func (q *fifo) updateDepStatusInQueue(taskID string, status model.StatusValue) {
 		}
 	}
 
-	for e := q.waitingOnDeps.Front(); e != nil; e = next {
-		next = e.Next()
-		waiting, ok := e.Value.(*model.Task)
+	for element := q.waitingOnDeps.Front(); element != nil; element = next {
+		next = element.Next()
+		waiting, ok := element.Value.(*model.Task)
 		for _, dep := range waiting.Dependencies {
 			if ok && taskID == dep {
 				waiting.DepStatus[dep] = status
@@ -408,12 +418,12 @@ func (q *fifo) updateDepStatusInQueue(taskID string, status model.StatusValue) {
 func (q *fifo) removeFromPending(taskID string) {
 	log.Debug().Msgf("queue: trying to remove %s", taskID)
 	var next *list.Element
-	for e := q.pending.Front(); e != nil; e = next {
-		next = e.Next()
-		task, _ := e.Value.(*model.Task)
+	for element := q.pending.Front(); element != nil; element = next {
+		next = element.Next()
+		task, _ := element.Value.(*model.Task)
 		if task.ID == taskID {
 			log.Debug().Msgf("queue: %s is removed from pending", taskID)
-			q.pending.Remove(e)
+			q.pending.Remove(element)
 			return
 		}
 	}

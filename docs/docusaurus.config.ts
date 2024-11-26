@@ -50,13 +50,13 @@ const config: Config = {
           position: 'left',
           items: [
             {
-              to: '/docs/next/migrations', // Always point to newest migration guide
-              activeBaseRegex: 'docs/(next/)?migrations',
+              to: '/migrations', // Always point to newest migration guide
+              activeBaseRegex: 'migrations',
               label: 'Migrations',
             },
             {
-              to: '/docs/next/awesome', // Always point to newest awesome list
-              activeBaseRegex: 'docs/(next/)?awesome',
+              to: '/awesome', // Always point to newest awesome list
+              activeBaseRegex: 'awesome',
               label: 'Awesome',
             },
             {
@@ -147,7 +147,7 @@ const config: Config = {
           ],
         },
       ],
-      copyright: `Copyright © ${new Date().getFullYear()} Woodpecker CI. Built with Docusaurus.`,
+      copyright: `Copyright © ${new Date().getFullYear()} Woodpecker Authors. Built with Docusaurus.`,
     },
     prism: {
       theme: themes.github,
@@ -279,7 +279,7 @@ const config: Config = {
         // Plugin Options for loading OpenAPI files
         specs: [
           {
-            spec: 'swagger.json',
+            spec: 'openapi.json',
             route: '/api/',
           },
         ],

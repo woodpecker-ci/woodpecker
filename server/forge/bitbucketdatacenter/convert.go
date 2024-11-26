@@ -123,6 +123,7 @@ func convertPullRequestEvent(ev *bb.PullRequestEvent, baseURL string) *model.Pip
 		Ref:       fmt.Sprintf("refs/pull-requests/%d/from", ev.PullRequest.ID),
 		ForgeURL:  fmt.Sprintf("%s/projects/%s/repos/%s/commits/%s", baseURL, ev.PullRequest.Source.Repository.Project.Key, ev.PullRequest.Source.Repository.Slug, ev.PullRequest.Source.Latest),
 		Refspec:   fmt.Sprintf("%s:%s", ev.PullRequest.Source.DisplayID, ev.PullRequest.Target.DisplayID),
+		FromFork:  ev.PullRequest.Source.Repository.ID != ev.PullRequest.Target.Repository.ID,
 	}
 
 	if ev.EventKey == bb.EventKeyPullRequestMerged || ev.EventKey == bb.EventKeyPullRequestDeclined || ev.EventKey == bb.EventKeyPullRequestDeleted {
@@ -168,7 +169,7 @@ func convertListOptions(p *model.ListOptions) bb.ListOptions {
 }
 
 func updateUserCredentials(u *model.User, t *oauth2.Token) {
-	u.Token = t.AccessToken
-	u.Secret = t.RefreshToken
+	u.AccessToken = t.AccessToken
+	u.RefreshToken = t.RefreshToken
 	u.Expiry = t.Expiry.UTC().Unix()
 }

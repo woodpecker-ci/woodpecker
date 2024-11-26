@@ -132,7 +132,7 @@ func runExec(ctx context.Context, c *cli.Command, file, repoPath string, singleE
 }
 
 func execWithAxis(ctx context.Context, c *cli.Command, file, repoPath string, axis matrix.Axis, singleExec bool) error {
-	var metadataWorkflow *metadata.Workflow
+	metadataWorkflow := &metadata.Workflow{}
 	if !singleExec {
 		// TODO: proper try to use the engine to generate the same metadata for workflows
 		// https://github.com/woodpecker-ci/woodpecker/pull/3967
@@ -207,7 +207,11 @@ func execWithAxis(ctx context.Context, c *cli.Command, file, repoPath string, ax
 
 	// lint the yaml file
 	err = linter.New(
-		linter.WithTrusted(true),
+		linter.WithTrusted(linter.TrustedConfiguration{
+			Security: c.Bool("repo-trusted-security"),
+			Network:  c.Bool("repo-trusted-network"),
+			Volumes:  c.Bool("repo-trusted-volumes"),
+		}),
 		linter.PrivilegedPlugins(privilegedPlugins),
 		linter.WithTrustedClonePlugins(constant.TrustedClonePlugins),
 	).Lint([]*linter.WorkflowConfig{{
@@ -216,7 +220,7 @@ func execWithAxis(ctx context.Context, c *cli.Command, file, repoPath string, ax
 		Workflow:  conf,
 	}})
 	if err != nil {
-		str, err := lint.FormatLintError(file, err)
+		str, err := lint.FormatLintError(file, err, false)
 		fmt.Print(str)
 		if err != nil {
 			return err

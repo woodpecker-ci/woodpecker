@@ -16,6 +16,7 @@ package pipeline
 
 import (
 	"context"
+	"time"
 
 	"github.com/urfave/cli/v3"
 
@@ -25,30 +26,50 @@ import (
 )
 
 //nolint:mnd
-var pipelineListCmd = &cli.Command{
-	Name:      "ls",
-	Usage:     "show pipeline history",
-	ArgsUsage: "<repo-id|repo-full-name>",
-	Action:    List,
-	Flags: append(common.OutputFlags("table"), []cli.Flag{
-		&cli.StringFlag{
-			Name:  "branch",
-			Usage: "branch filter",
-		},
-		&cli.StringFlag{
-			Name:  "event",
-			Usage: "event filter",
-		},
-		&cli.StringFlag{
-			Name:  "status",
-			Usage: "status filter",
-		},
-		&cli.IntFlag{
-			Name:  "limit",
-			Usage: "limit the list size",
-			Value: 25,
-		},
-	}...),
+func buildPipelineListCmd() *cli.Command {
+	return &cli.Command{
+		Name:      "ls",
+		Usage:     "show pipeline history",
+		ArgsUsage: "<repo-id|repo-full-name>",
+		Action:    List,
+		Flags: append(common.OutputFlags("table"), []cli.Flag{
+			&cli.StringFlag{
+				Name:  "branch",
+				Usage: "branch filter",
+			},
+			&cli.StringFlag{
+				Name:  "event",
+				Usage: "event filter",
+			},
+			&cli.StringFlag{
+				Name:  "status",
+				Usage: "status filter",
+			},
+			&cli.IntFlag{
+				Name:  "limit",
+				Usage: "limit the list size",
+				Value: 25,
+			},
+			&cli.TimestampFlag{
+				Name:  "before",
+				Usage: "only return pipelines before this RFC3339 date",
+				Config: cli.TimestampConfig{
+					Layouts: []string{
+						time.RFC3339,
+					},
+				},
+			},
+			&cli.TimestampFlag{
+				Name:  "after",
+				Usage: "only return pipelines after this RFC3339 date",
+				Config: cli.TimestampConfig{
+					Layouts: []string{
+						time.RFC3339,
+					},
+				},
+			},
+		}...),
+	}
 }
 
 func List(ctx context.Context, c *cli.Command) error {
@@ -72,7 +93,18 @@ func pipelineList(_ context.Context, c *cli.Command, client woodpecker.Client) (
 		return resources, err
 	}
 
-	pipelines, err := client.PipelineList(repoID)
+	opt := woodpecker.PipelineListOptions{}
+	before := c.Timestamp("before")
+	after := c.Timestamp("after")
+
+	if !before.IsZero() {
+		opt.Before = before
+	}
+	if !after.IsZero() {
+		opt.After = after
+	}
+
+	pipelines, err := client.PipelineList(repoID, opt)
 	if err != nil {
 		return resources, err
 	}

@@ -20,6 +20,7 @@ import (
 	"crypto/tls"
 	"errors"
 	"fmt"
+	"maps"
 	"net/http"
 	"os"
 	"strings"
@@ -132,7 +133,7 @@ func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 
 	agentConfig := readAgentConfig(agentConfigPath)
 
-	agentToken := c.String("grpc-token")
+	agentToken := strings.TrimSpace(c.String("grpc-token"))
 	grpcClientCtx, grpcClientCtxCancel := context.WithCancelCause(context.Background())
 	defer grpcClientCtxCancel(nil)
 	authClient := agent_rpc.NewAuthGrpcClient(authConn, agentToken, agentConfig.AgentID)
@@ -198,7 +199,22 @@ func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 	log.Debug().Msgf("loaded %s backend engine", backendEngine.Name())
 
 	maxWorkflows := int(c.Int("max-workflows"))
-	agentConfig.AgentID, err = client.RegisterAgent(grpcCtx, engInfo.Platform, backendEngine.Name(), version.String(), maxWorkflows) //nolint:contextcheck
+
+	customLabels := make(map[string]string)
+	if err := stringSliceAddToMap(c.StringSlice("labels"), customLabels); err != nil {
+		return err
+	}
+	if len(customLabels) != 0 {
+		log.Debug().Msgf("custom labels detected: %#v", customLabels)
+	}
+
+	agentConfig.AgentID, err = client.RegisterAgent(grpcCtx, rpc.AgentInfo{ //nolint:contextcheck
+		Version:      version.String(),
+		Backend:      backendEngine.Name(),
+		Platform:     engInfo.Platform,
+		Capacity:     maxWorkflows,
+		CustomLabels: customLabels,
+	})
 	if err != nil {
 		return err
 	}
@@ -210,7 +226,7 @@ func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 		<-agentCtx.Done()
 		// Remove stateless agents from server
 		if !agentConfigPersisted.Load() {
-			log.Debug().Msg("unregistering agent from server ...")
+			log.Debug().Msg("unregister agent from server ...")
 			// we want to run it explicit run when context got canceled so run it in background
 			err := client.UnregisterAgent(grpcClientCtx)
 			if err != nil {
@@ -228,16 +244,15 @@ func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 		}
 	}
 
+	// set default labels ...
 	labels := map[string]string{
 		"hostname": hostname,
 		"platform": engInfo.Platform,
 		"backend":  backendEngine.Name(),
 		"repo":     "*", // allow all repos by default
 	}
-
-	if err := stringSliceAddToMap(c.StringSlice("filter"), labels); err != nil {
-		return err
-	}
+	// ... and let it overwrite by custom ones
+	maps.Copy(labels, customLabels)
 
 	log.Debug().Any("labels", labels).Msgf("agent configured with labels")
 

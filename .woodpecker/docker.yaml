@@ -1,8 +1,8 @@
 variables:
   - &golang_image 'docker.io/golang:1.23'
-  - &node_image 'docker.io/node:22-alpine'
-  - &xgo_image 'docker.io/techknowlogick/xgo:go-1.22.x'
-  - &buildx_plugin 'docker.io/woodpeckerci/plugin-docker-buildx:4.2.0'
+  - &node_image 'docker.io/node:23-alpine'
+  - &xgo_image 'docker.io/techknowlogick/xgo:go-1.23.x'
+  - &buildx_plugin 'docker.io/woodpeckerci/plugin-docker-buildx:5.0.0'
   - &platforms_release 'linux/arm/v6,linux/arm/v7,linux/arm64/v8,linux/386,linux/amd64,linux/ppc64le,linux/riscv64,linux/s390x,freebsd/arm64,freebsd/amd64,openbsd/arm64,openbsd/amd64'
   - &platforms_server 'linux/arm/v7,linux/arm64/v8,linux/amd64,linux/ppc64le,linux/riscv64'
   - &platforms_preview 'linux/amd64'
@@ -42,9 +42,6 @@ variables:
 when:
   - event: [pull_request, tag]
   - event: push
-    branch:
-      - renovate/*
-  - event: push
     branch: ${CI_REPO_DEFAULT_BRANCH}
     path: *when_path
 
@@ -61,7 +58,6 @@ steps:
         path: *when_path
       - branch:
           - ${CI_REPO_DEFAULT_BRANCH}
-          - renovate/*
         event: [push, tag]
         path: *when_path
 
@@ -82,7 +78,6 @@ steps:
         path: *when_path
       - branch:
           - ${CI_REPO_DEFAULT_BRANCH}
-          - renovate/*
         event: [push, tag]
         path: *when_path
 
@@ -104,9 +99,6 @@ steps:
         evaluate: 'CI_COMMIT_PULL_REQUEST_LABELS contains "build_pr_images"'
       - event: pull_request
         path: *when_path
-      - event: push
-        path: *when_path
-        branch: renovate/*
 
   cross-compile-server:
     depends_on:
@@ -169,9 +161,6 @@ steps:
       - evaluate: 'not (CI_COMMIT_PULL_REQUEST_LABELS contains "build_pr_images")'
         event: pull_request
         path: *when_path
-      - event: push
-        path: *when_path
-        branch: renovate/*
 
   publish-next-server:
     depends_on:

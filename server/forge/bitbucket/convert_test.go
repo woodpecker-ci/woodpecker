@@ -98,8 +98,8 @@ func Test_helper(t *testing.T) {
 			result := convertUser(user, token)
 			g.Assert(result.Avatar).Equal(user.Links.Avatar.Href)
 			g.Assert(result.Login).Equal(user.Login)
-			g.Assert(result.Token).Equal(token.AccessToken)
-			g.Assert(result.Secret).Equal(token.RefreshToken)
+			g.Assert(result.AccessToken).Equal(token.AccessToken)
+			g.Assert(result.RefreshToken).Equal(token.RefreshToken)
 			g.Assert(result.Expiry).Equal(token.Expiry.UTC().Unix())
 		})
 

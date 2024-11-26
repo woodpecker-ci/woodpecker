@@ -60,8 +60,9 @@ var flags = []cli.Flag{
 		Value:   "/etc/woodpecker/agent.conf",
 	},
 	&cli.StringSliceFlag{
-		Sources: cli.EnvVars("WOODPECKER_FILTER_LABELS"),
-		Name:    "filter",
+		Sources: cli.EnvVars("WOODPECKER_AGENT_LABELS", "WOODPECKER_FILTER_LABELS"), // remove WOODPECKER_FILTER_LABELS in v4.x
+		Name:    "labels",
+		Aliases: []string{"filter"}, // remove in v4.x
 		Usage:   "List of labels to filter tasks on. An agent must be assigned every tag listed in a task to be selected.",
 	},
 	&cli.IntFlag{
