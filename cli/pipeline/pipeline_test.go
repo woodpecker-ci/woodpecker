@@ -53,7 +53,7 @@ func TestPipelineOutput(t *testing.T) {
 			Status:  "success",
 			Event:   "push",
 			Branch:  "main",
-			Message: "message",
+			Message: "message\n\n",
 			Author:  "John Doe",
 		},
 	}
