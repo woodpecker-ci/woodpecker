@@ -94,7 +94,6 @@ func PostRepo(c *gin.Context) {
 		repo.RequireApproval = model.RequireApprovalForks
 		repo.AllowPull = true
 		repo.AllowDeploy = false
-		repo.NetrcOnlyTrusted = true
 		repo.CancelPreviousPipelineEvents = server.Config.Pipeline.DefaultCancelPreviousPipelineEvents
 	}
 	repo.IsActive = true
@@ -275,8 +274,8 @@ func PatchRepo(c *gin.Context) {
 	if in.CancelPreviousPipelineEvents != nil {
 		repo.CancelPreviousPipelineEvents = *in.CancelPreviousPipelineEvents
 	}
-	if in.NetrcOnlyTrusted != nil {
-		repo.NetrcOnlyTrusted = *in.NetrcOnlyTrusted
+	if in.NetrcTrusted != nil {
+		repo.NetrcTrustedPlugins = *in.NetrcTrusted
 	}
 	if in.Visibility != nil {
 		switch *in.Visibility {

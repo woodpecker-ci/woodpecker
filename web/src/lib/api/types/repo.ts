@@ -76,7 +76,7 @@ export interface Repo {
   // Events that will cancel running pipelines before starting a new one
   cancel_previous_pipeline_events: string[];
 
-  netrc_only_trusted: boolean;
+  netrc_trusted: string[];
 }
 
 /* eslint-disable no-unused-vars */
@@ -104,7 +104,7 @@ export type RepoSettings = Pick<
   | 'allow_pr'
   | 'allow_deploy'
   | 'cancel_previous_pipeline_events'
-  | 'netrc_only_trusted'
+  | 'netrc_trusted'
 >;
 
 export interface RepoPermissions {
