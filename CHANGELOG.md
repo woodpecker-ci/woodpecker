@@ -54,6 +54,7 @@
 
 ### 📈 Enhancement
 
+- Change default icon size to 20 [[#4458](https://github.com/woodpecker-ci/woodpecker/pull/4458)]
 - Add visibility icon to repo list [[#4460](https://github.com/woodpecker-ci/woodpecker/pull/4460)]
 - Unify pipeline status icons [[#4414](https://github.com/woodpecker-ci/woodpecker/pull/4414)]
 - Improve project settings descriptions [[#4410](https://github.com/woodpecker-ci/woodpecker/pull/4410)]
