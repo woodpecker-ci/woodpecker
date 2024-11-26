@@ -265,3 +265,75 @@ func TestClient_UserDel(t *testing.T) {
 		})
 	}
 }
+
+func TestClient_RepoList(t *testing.T) {
+	tests := []struct {
+		name     string
+		handler  http.HandlerFunc
+		opt      RepoListOptions
+		expected []*Repo
+		wantErr  bool
+	}{
+		{
+			name: "success",
+			handler: func(w http.ResponseWriter, _ *http.Request) {
+				w.WriteHeader(http.StatusOK)
+				_, err := fmt.Fprint(w, `[{"id":1,"name":"repo1"},{"id":2,"name":"repo2"}]`)
+				assert.NoError(t, err)
+			},
+			opt:      RepoListOptions{},
+			expected: []*Repo{{ID: 1, Name: "repo1"}, {ID: 2, Name: "repo2"}},
+			wantErr:  false,
+		},
+		{
+			name: "empty response",
+			handler: func(w http.ResponseWriter, _ *http.Request) {
+				w.WriteHeader(http.StatusOK)
+				_, err := fmt.Fprint(w, `[]`)
+				assert.NoError(t, err)
+			},
+			opt:      RepoListOptions{},
+			expected: []*Repo{},
+			wantErr:  false,
+		},
+		{
+			name: "server error",
+			handler: func(w http.ResponseWriter, _ *http.Request) {
+				w.WriteHeader(http.StatusInternalServerError)
+			},
+			opt:      RepoListOptions{},
+			expected: nil,
+			wantErr:  true,
+		},
+		{
+			name: "with options",
+			handler: func(w http.ResponseWriter, r *http.Request) {
+				assert.Equal(t, "/api/user/repos?all=true", r.URL.RequestURI())
+				w.WriteHeader(http.StatusOK)
+				_, err := fmt.Fprint(w, `[]`)
+				assert.NoError(t, err)
+			},
+			opt:      RepoListOptions{All: true},
+			expected: []*Repo{},
+			wantErr:  false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ts := httptest.NewServer(tt.handler)
+			defer ts.Close()
+
+			client := NewClient(ts.URL, http.DefaultClient)
+			repos, err := client.RepoList(tt.opt)
+
+			if tt.wantErr {
+				assert.Error(t, err)
+				return
+			}
+
+			assert.NoError(t, err)
+			assert.Equal(t, tt.expected, repos)
+		})
+	}
+}
