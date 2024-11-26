@@ -35,7 +35,7 @@ type Client interface {
 	User(string) (*User, error)
 
 	// UserList returns a list of all registered users.
-	UserList() ([]*User, error)
+	UserList(opt UserListOptions) ([]*User, error)
 
 	// UserPost creates a new user account.
 	UserPost(*User) (*User, error)

@@ -2025,9 +2025,9 @@ func (_m *Client) UserDel(_a0 string) error {
 	return r0
 }
 
-// UserList provides a mock function with given fields:
-func (_m *Client) UserList() ([]*woodpecker.User, error) {
-	ret := _m.Called()
+// UserList provides a mock function with given fields: opt
+func (_m *Client) UserList(opt woodpecker.UserListOptions) ([]*woodpecker.User, error) {
+	ret := _m.Called(opt)
 
 	if len(ret) == 0 {
 		panic("no return value specified for UserList")
@@ -2035,19 +2035,19 @@ func (_m *Client) UserList() ([]*woodpecker.User, error) {
 
 	var r0 []*woodpecker.User
 	var r1 error
-	if rf, ok := ret.Get(0).(func() ([]*woodpecker.User, error)); ok {
-		return rf()
+	if rf, ok := ret.Get(0).(func(woodpecker.UserListOptions) ([]*woodpecker.User, error)); ok {
+		return rf(opt)
 	}
-	if rf, ok := ret.Get(0).(func() []*woodpecker.User); ok {
-		r0 = rf()
+	if rf, ok := ret.Get(0).(func(woodpecker.UserListOptions) []*woodpecker.User); ok {
+		r0 = rf(opt)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]*woodpecker.User)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func() error); ok {
-		r1 = rf()
+	if rf, ok := ret.Get(1).(func(woodpecker.UserListOptions) error); ok {
+		r1 = rf(opt)
 	} else {
 		r1 = ret.Error(1)
 	}
