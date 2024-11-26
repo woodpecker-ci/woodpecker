@@ -16,79 +16,69 @@ package secret
 
 import (
 	"context"
-	"fmt"
 	"html/template"
 	"os"
+	"strings"
 
 	"github.com/urfave/cli/v3"
 
 	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
 	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
-	"go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker"
 )
 
-var secretInfoCmd = &cli.Command{
-	Name:      "info",
-	Usage:     "display secret info",
+var secretListCmd = &cli.Command{
+	Name:      "ls",
+	Usage:     "list secrets",
 	ArgsUsage: "[repo-id|repo-full-name]",
-	Action:    secretInfo,
+	Action:    secretList,
 	Flags: []cli.Flag{
-		&cli.BoolFlag{
-			Name:  "global",
-			Usage: "global secret",
-		},
 		common.OrgFlag,
-		common.RepoFlag,
-		&cli.StringFlag{
-			Name:  "name",
-			Usage: "secret name",
-		},
 		common.FormatFlag(tmplSecretList, true),
 	},
 }
 
-func secretInfo(ctx context.Context, c *cli.Command) error {
-	var (
-		secretName = c.String("name")
-		format     = c.String("format") + "\n"
-	)
-
-	if secretName == "" {
-		return fmt.Errorf("secret name is missing")
-	}
+func secretList(ctx context.Context, c *cli.Command) error {
+	format := c.String("format") + "\n"
 
 	client, err := internal.NewClient(ctx, c)
 	if err != nil {
 		return err
 	}
 
-	global, orgID, repoID, err := parseTargetArgs(client, c)
+	orgID, err := parseTargetArgs(client, c)
 	if err != nil {
 		return err
 	}
 
-	var secret *woodpecker.Secret
-	switch {
-	case global:
-		secret, err = client.GlobalSecret(secretName)
-		if err != nil {
-			return err
-		}
-	case orgID != -1:
-		secret, err = client.OrgSecret(orgID, secretName)
-		if err != nil {
-			return err
-		}
-	default:
-		secret, err = client.Secret(repoID, secretName)
-		if err != nil {
-			return err
-		}
+	list, err := client.OrgSecretList(orgID)
+	if err != nil {
+		return err
 	}
 
 	tmpl, err := template.New("_").Funcs(secretFuncMap).Parse(format)
 	if err != nil {
 		return err
 	}
-	return tmpl.Execute(os.Stdout, secret)
+	for _, secret := range list {
+		if err := tmpl.Execute(os.Stdout, secret); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// Template for secret list items.
+var tmplSecretList = "\x1b[33m{{ .Name }} \x1b[0m" + `
+Events: {{ list .Events }}
+{{- if .Images }}
+Images: {{ list .Images }}
+{{- else }}
+Images: <any>
+{{- end }}
+`
+
+var secretFuncMap = template.FuncMap{
+	"list": func(s []string) string {
+		return strings.Join(s, ", ")
+	},
 }

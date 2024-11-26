@@ -17,7 +17,10 @@ package repo
 import (
 	"github.com/urfave/cli/v3"
 
+	"go.woodpecker-ci.org/woodpecker/v2/cli/repo/cron"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/repo/deploy"
 	"go.woodpecker-ci.org/woodpecker/v2/cli/repo/registry"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/repo/secret"
 )
 
 // Command exports the repository command.
@@ -34,5 +37,8 @@ var Command = &cli.Command{
 		repoChownCmd,
 		repoSyncCmd,
 		registry.Command,
+		secret.Command,
+		cron.Command,
+		deploy.Command,
 	},
 }

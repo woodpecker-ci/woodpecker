@@ -23,6 +23,7 @@ import (
 	"github.com/urfave/cli/v3"
 
 	"go.woodpecker-ci.org/woodpecker/v2/cli/output"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/pipeline/log"
 	"go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker"
 )
 
@@ -43,6 +44,7 @@ var Command = &cli.Command{
 		pipelineKillCmd,
 		pipelinePsCmd,
 		pipelineCreateCmd,
+		log.Command,
 	},
 }
 
