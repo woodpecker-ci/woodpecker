@@ -54,20 +54,16 @@ type Client interface {
 
 	// RepoList returns a list of all repositories to which the user has explicit
 	// access in the host system.
-	RepoList() ([]*Repo, error)
-
-	// RepoListOpts returns a list of all repositories to which the user has
-	// explicit access in the host system.
-	RepoListOpts(bool) ([]*Repo, error)
+	RepoList(opt RepoListOptions) ([]*Repo, error)
 
 	// RepoPost activates a repository.
-	RepoPost(forgeRemoteID int64) (*Repo, error)
+	RepoPost(opt RepoPostOptions) (*Repo, error)
 
 	// RepoPatch updates a repository.
 	RepoPatch(repoID int64, repo *RepoPatch) (*Repo, error)
 
 	// RepoMove moves the repository
-	RepoMove(repoID int64, dst string) error
+	RepoMove(repoID int64, opt RepoMoveOptions) error
 
 	// RepoChown updates a repository owner.
 	RepoChown(repoID int64) (*Repo, error)
@@ -81,13 +77,12 @@ type Client interface {
 	// Pipeline returns a repository pipeline by number.
 	Pipeline(repoID, pipeline int64) (*Pipeline, error)
 
-	// PipelineLast returns the latest repository pipeline by branch. An empty branch
-	// will result in the default branch.
-	PipelineLast(repoID int64, branch string) (*Pipeline, error)
+	// PipelineLast returns the latest repository pipeline.
+	PipelineLast(repoID int64, opt PipelineLastOptions) (*Pipeline, error)
 
 	// PipelineList returns a list of recent pipelines for the
 	// the specified repository.
-	PipelineList(repoID int64) ([]*Pipeline, error)
+	PipelineList(repoID int64, opt PipelineListOptions) ([]*Pipeline, error)
 
 	// PipelineQueue returns a list of enqueued pipelines.
 	PipelineQueue() ([]*Feed, error)
@@ -96,7 +91,7 @@ type Client interface {
 	PipelineCreate(repoID int64, opts *PipelineOptions) (*Pipeline, error)
 
 	// PipelineStart re-starts a stopped pipeline.
-	PipelineStart(repoID, num int64, params map[string]string) (*Pipeline, error)
+	PipelineStart(repoID, num int64, opt PipelineStartOptions) (*Pipeline, error)
 
 	// PipelineStop stops the given pipeline.
 	PipelineStop(repoID, pipeline int64) error
@@ -118,7 +113,7 @@ type Client interface {
 
 	// Deploy triggers a deployment for an existing pipeline using the specified
 	// target environment.
-	Deploy(repoID, pipeline int64, env string, params map[string]string) (*Pipeline, error)
+	Deploy(repoID, pipeline int64, opt DeployOptions) (*Pipeline, error)
 
 	// LogsPurge purges the pipeline logs for the specified pipeline.
 	LogsPurge(repoID, pipeline int64) error

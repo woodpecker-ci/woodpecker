@@ -22,6 +22,7 @@ import (
 	"github.com/urfave/cli/v3"
 
 	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker"
 )
 
 var repoAddCmd = &cli.Command{
@@ -43,7 +44,11 @@ func repoAdd(ctx context.Context, c *cli.Command) error {
 		return err
 	}
 
-	repo, err := client.RepoPost(int64(forgeRemoteID))
+	opt := woodpecker.RepoPostOptions{
+		ForgeRemoteID: int64(forgeRemoteID),
+	}
+
+	repo, err := client.RepoPost(opt)
 	if err != nil {
 		return err
 	}
