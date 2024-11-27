@@ -236,7 +236,7 @@ const config: Config = {
           sidebarPath: require.resolve('./sidebars.js'),
           editUrl: 'https://github.com/woodpecker-ci/woodpecker/edit/main/docs/',
           includeCurrentVersion: true,
-          lastVersion: '2.7',
+          lastVersion: '2.8',
           onlyIncludeVersions:
             process.env.NODE_ENV === 'development'
               ? ['current', '2.8']
