@@ -1,6 +1,6 @@
 # Changelog
 
-## [2.8.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.8.0) - 2024-11-25
+## [2.8.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.8.0) - 2024-11-27
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -9,6 +9,10 @@
 ### 🔒 Security
 
 - Extend approval options (#3348) [[#4429](https://github.com/woodpecker-ci/woodpecker/pull/4429)]
+
+### ✨ Features
+
+- Docker Backend: fully support windows container (#4381) [[#4464](https://github.com/woodpecker-ci/woodpecker/pull/4464)]
 
 ### 🐛 Bug Fixes
 
