@@ -24,6 +24,7 @@ import (
 
 	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
 	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker"
 )
 
 var secretListCmd = &cli.Command{
@@ -50,7 +51,9 @@ func secretList(ctx context.Context, c *cli.Command) error {
 		return err
 	}
 
-	list, err := client.OrgSecretList(orgID)
+	opt := woodpecker.SecretListOptions{}
+
+	list, err := client.OrgSecretList(orgID, opt)
 	if err != nil {
 		return err
 	}
