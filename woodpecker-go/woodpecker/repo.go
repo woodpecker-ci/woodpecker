@@ -321,6 +321,13 @@ func (c *client) PipelineList(repoID int64, opt PipelineListOptions) ([]*Pipelin
 	return out, err
 }
 
+// PipelineDelete deletes a pipeline by the specified repository ID and pipeline ID.
+func (c *client) PipelineDelete(repoID, pipeline int64) error {
+	uri := fmt.Sprintf(pathPipeline, c.addr, repoID, pipeline)
+	err := c.delete(uri)
+	return err
+}
+
 // PipelineCreate creates a new pipeline for the specified repository.
 func (c *client) PipelineCreate(repoID int64, options *PipelineOptions) (*Pipeline, error) {
 	var out *Pipeline
@@ -359,13 +366,6 @@ func (c *client) PipelineDecline(repoID, pipeline int64) (*Pipeline, error) {
 	uri := fmt.Sprintf(pathDecline, c.addr, repoID, pipeline)
 	err := c.post(uri, nil, out)
 	return out, err
-}
-
-// PipelineKill force kills the running pipeline.
-func (c *client) PipelineKill(repoID, pipeline int64) error {
-	uri := fmt.Sprintf(pathPipeline, c.addr, repoID, pipeline)
-	err := c.delete(uri)
-	return err
 }
 
 // LogsPurge purges the pipeline all steps logs for the specified pipeline.
