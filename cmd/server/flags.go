@@ -116,9 +116,6 @@ var flags = append([]cli.Flag{
 		Name:  "grpc-secret",
 		Usage: "grpc jwt secret",
 		Value: "secret",
-		Config: cli.StringConfig{
-			TrimSpace: true,
-		},
 	},
 	&cli.StringFlag{
 		Sources: cli.EnvVars("WOODPECKER_METRICS_SERVER_ADDR"),
@@ -220,9 +217,6 @@ var flags = append([]cli.Flag{
 			cli.EnvVar("WOODPECKER_AGENT_SECRET")),
 		Name:  "agent-secret",
 		Usage: "server-agent shared password",
-		Config: cli.StringConfig{
-			TrimSpace: true,
-		},
 	},
 	&cli.BoolFlag{
 		Sources: cli.EnvVars("WOODPECKER_DISABLE_USER_AGENT_REGISTRATION"),
@@ -254,9 +248,6 @@ var flags = append([]cli.Flag{
 		Aliases: []string{"datasource"}, // TODO: remove in v4.0.0
 		Usage:   "database driver configuration string",
 		Value:   datasourceDefaultValue(),
-		Config: cli.StringConfig{
-			TrimSpace: true,
-		},
 	},
 	&cli.StringFlag{
 		Sources: cli.NewValueSourceChain(
@@ -264,9 +255,6 @@ var flags = append([]cli.Flag{
 			cli.EnvVar("WOODPECKER_PROMETHEUS_AUTH_TOKEN")),
 		Name:  "prometheus-auth-token",
 		Usage: "token to secure prometheus metrics endpoint",
-		Config: cli.StringConfig{
-			TrimSpace: true,
-		},
 	},
 	&cli.StringFlag{
 		Sources: cli.EnvVars("WOODPECKER_STATUS_CONTEXT", "WOODPECKER_GITHUB_CONTEXT", "WOODPECKER_GITEA_CONTEXT"),
@@ -366,9 +354,6 @@ var flags = append([]cli.Flag{
 			cli.EnvVar("WOODPECKER_BITBUCKET_DC_CLIENT_ID")),
 		Name:  "forge-oauth-client",
 		Usage: "oauth2 client id",
-		Config: cli.StringConfig{
-			TrimSpace: true,
-		},
 	},
 	&cli.StringFlag{
 		Sources: cli.NewValueSourceChain(
@@ -390,9 +375,6 @@ var flags = append([]cli.Flag{
 			cli.EnvVar("WOODPECKER_BITBUCKET_DC_CLIENT_SECRET")),
 		Name:  "forge-oauth-secret",
 		Usage: "oauth2 client secret",
-		Config: cli.StringConfig{
-			TrimSpace: true,
-		},
 	},
 	&cli.BoolFlag{
 		Name:  "forge-skip-verify",
@@ -484,9 +466,6 @@ var flags = append([]cli.Flag{
 			cli.EnvVar("WOODPECKER_BITBUCKET_DC_GIT_USERNAME")),
 		Name:  "bitbucket-dc-git-username",
 		Usage: "Bitbucket DataCenter/Server service account username",
-		Config: cli.StringConfig{
-			TrimSpace: true,
-		},
 	},
 	&cli.StringFlag{
 		Sources: cli.NewValueSourceChain(
@@ -494,9 +473,6 @@ var flags = append([]cli.Flag{
 			cli.EnvVar("WOODPECKER_BITBUCKET_DC_GIT_PASSWORD")),
 		Name:  "bitbucket-dc-git-password",
 		Usage: "Bitbucket DataCenter/Server service account password",
-		Config: cli.StringConfig{
-			TrimSpace: true,
-		},
 	},
 	//
 	// development flags
@@ -524,17 +500,11 @@ var flags = append([]cli.Flag{
 			cli.EnvVar("WOODPECKER_ENCRYPTION_KEY")),
 		Name:  "encryption-raw-key",
 		Usage: "Raw encryption key",
-		Config: cli.StringConfig{
-			TrimSpace: true,
-		},
 	},
 	&cli.StringFlag{
 		Sources: cli.EnvVars("WOODPECKER_ENCRYPTION_TINK_KEYSET_FILE"),
 		Name:    "encryption-tink-keyset",
 		Usage:   "Google tink AEAD-compatible keyset file to encrypt secrets in DB",
-		Config: cli.StringConfig{
-			TrimSpace: true,
-		},
 	},
 	&cli.BoolFlag{
 		Sources: cli.EnvVars("WOODPECKER_ENCRYPTION_DISABLE"),
