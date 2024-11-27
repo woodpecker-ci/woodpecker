@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-11-26
+## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-11-27
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -8,6 +8,7 @@
 
 ### 💥 Breaking changes
 
+- Add pagination options to all supported endpoints in sdk [[#4463](https://github.com/woodpecker-ci/woodpecker/pull/4463)]
 - Allow to set custom trusted clone plugins [[#4352](https://github.com/woodpecker-ci/woodpecker/pull/4352)]
 - Add PipelineListsOptions to woodpecker-go [[#3652](https://github.com/woodpecker-ci/woodpecker/pull/3652)]
 - Remove `secrets` in favor of `from_secret` [[#4363](https://github.com/woodpecker-ci/woodpecker/pull/4363)]
