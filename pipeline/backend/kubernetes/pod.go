@@ -162,6 +162,16 @@ func podSpec(step *types.Step, config *config, options BackendOptions, nsp nativ
 		return spec, err
 	}
 
+	if len(step.DNS) != 0 || len(step.DNSSearch) != 0 {
+		spec.DNSConfig = &v1.PodDNSConfig{}
+		if len(step.DNS) != 0 {
+			spec.DNSConfig.Nameservers = step.DNS
+		}
+		if len(step.DNSSearch) != 0 {
+			spec.DNSConfig.Searches = step.DNSSearch
+		}
+	}
+
 	log.Trace().Msgf("using the image pull secrets: %v", config.ImagePullSecretNames)
 	spec.ImagePullSecrets = secretsReferences(config.ImagePullSecretNames)
 	if needsRegistrySecret(step) {

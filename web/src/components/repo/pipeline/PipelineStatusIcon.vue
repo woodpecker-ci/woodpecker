@@ -5,6 +5,7 @@
   >
     <Icon
       :name="service ? 'settings' : `status-${status}`"
+      size="24"
       :class="{
         'text-wp-state-error-100': pipelineStatusColors[status] === 'red',
         'text-wp-state-neutral-100': pipelineStatusColors[status] === 'gray',

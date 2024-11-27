@@ -23,6 +23,7 @@ import (
 
 	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
 	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker"
 )
 
 var cronListCmd = &cli.Command{
@@ -52,7 +53,8 @@ func cronList(ctx context.Context, c *cli.Command) error {
 	if err != nil {
 		return err
 	}
-	list, err := client.CronList(repoID)
+	opt := woodpecker.CronListOptions{}
+	list, err := client.CronList(repoID, opt)
 	if err != nil {
 		return err
 	}
