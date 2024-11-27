@@ -94,7 +94,6 @@ func PostRepo(c *gin.Context) {
 		repo.RequireApproval = model.RequireApprovalForks
 		repo.AllowPull = true
 		repo.AllowDeploy = false
-		repo.NetrcOnlyTrusted = true
 		repo.CancelPreviousPipelineEvents = server.Config.Pipeline.DefaultCancelPreviousPipelineEvents
 	}
 	repo.IsActive = true
@@ -275,8 +274,8 @@ func PatchRepo(c *gin.Context) {
 	if in.CancelPreviousPipelineEvents != nil {
 		repo.CancelPreviousPipelineEvents = *in.CancelPreviousPipelineEvents
 	}
-	if in.NetrcOnlyTrusted != nil {
-		repo.NetrcOnlyTrusted = *in.NetrcOnlyTrusted
+	if in.NetrcTrusted != nil {
+		repo.NetrcTrustedPlugins = *in.NetrcTrusted
 	}
 	if in.Visibility != nil {
 		switch *in.Visibility {
@@ -591,16 +590,16 @@ func MoveRepo(c *gin.Context) {
 
 // GetAllRepos
 //
-//	@Summary	List all repositories on the server
+//	@Summary		List all repositories on the server
 //	@Description	Returns a list of all repositories. Requires admin rights.
-//	@Router		/repos [get]
-//	@Produce	json
-//	@Success	200	{array}	Repo
-//	@Tags		Repositories
-//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param		active			query	bool	false	"only list active repos"
-//	@Param		page			query	int		false	"for response pagination, page offset number"	default(1)
-//	@Param		perPage			query	int		false	"for response pagination, max items per page"	default(50)
+//	@Router			/repos [get]
+//	@Produce		json
+//	@Success		200	{array}	Repo
+//	@Tags			Repositories
+//	@Param			Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param			active			query	bool	false	"only list active repos"
+//	@Param			page			query	int		false	"for response pagination, page offset number"	default(1)
+//	@Param			perPage			query	int		false	"for response pagination, max items per page"	default(50)
 func GetAllRepos(c *gin.Context) {
 	_store := store.FromContext(c)
 
@@ -617,13 +616,13 @@ func GetAllRepos(c *gin.Context) {
 
 // RepairAllRepos
 //
-//	@Summary	Repair all repositories on the server
-//	@Description Executes a repair process on all repositories. Requires admin rights.
-//	@Router		/repos/repair [post]
-//	@Produce	plain
-//	@Success	204
-//	@Tags		Repositories
-//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Summary		Repair all repositories on the server
+//	@Description	Executes a repair process on all repositories. Requires admin rights.
+//	@Router			/repos/repair [post]
+//	@Produce		plain
+//	@Success		204
+//	@Tags			Repositories
+//	@Param			Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 func RepairAllRepos(c *gin.Context) {
 	_store := store.FromContext(c)
 

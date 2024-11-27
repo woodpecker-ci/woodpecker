@@ -105,21 +105,21 @@ func createTmpPipeline(event model.WebhookEvent, commit *model.Commit, user *mod
 
 // GetPipelines
 //
-//	@Summary	List repository pipelines
+//	@Summary		List repository pipelines
 //	@Description	Get a list of pipelines for a repository.
-//	@Router		/repos/{repo_id}/pipelines [get]
-//	@Produce	json
-//	@Success	200	{array}	Pipeline
-//	@Tags		Pipelines
-//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param		repo_id			path	int		true	"the repository id"
-//	@Param		page			query	int		false	"for response pagination, page offset number"	default(1)
-//	@Param		perPage			query	int		false	"for response pagination, max items per page"	default(50)
-//	@Param		before			query	string	false	"only return pipelines before this RFC3339 date"
-//	@Param		after			query	string	false	"only return pipelines after this RFC3339 date"
-//	@Param		branch			query	string	false	"filter pipelines by branch"
-//	@Param		event			query	string	false	"filter pipelines by webhook events (comma separated)"
-//	@Param		ref			query	string	false	"filter pipelines by strings contained in ref"
+//	@Router			/repos/{repo_id}/pipelines [get]
+//	@Produce		json
+//	@Success		200	{array}	Pipeline
+//	@Tags			Pipelines
+//	@Param			Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param			repo_id			path	int		true	"the repository id"
+//	@Param			page			query	int		false	"for response pagination, page offset number"	default(1)
+//	@Param			perPage			query	int		false	"for response pagination, max items per page"	default(50)
+//	@Param			before			query	string	false	"only return pipelines before this RFC3339 date"
+//	@Param			after			query	string	false	"only return pipelines after this RFC3339 date"
+//	@Param			branch			query	string	false	"filter pipelines by branch"
+//	@Param			event			query	string	false	"filter pipelines by webhook events (comma separated)"
+//	@Param			ref			query	string	false	"filter pipelines by strings contained in ref"
 func GetPipelines(c *gin.Context) {
 	repo := session.Repo(c)
 

@@ -56,8 +56,8 @@ func GetOrgRegistry(c *gin.Context) {
 //	@Tags		Organization registries
 //	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 //	@Param		org_id			path	string	true	"the org's id"
-//	@Param		page				query	int			false	"for response pagination, page offset number"	default(1)
-//	@Param		perPage			query	int			false	"for response pagination, max items per page"	default(50)
+//	@Param		page			query	int		false	"for response pagination, page offset number"	default(1)
+//	@Param		perPage			query	int		false	"for response pagination, max items per page"	default(50)
 func GetOrgRegistryList(c *gin.Context) {
 	org := session.Org(c)
 
@@ -83,8 +83,8 @@ func GetOrgRegistryList(c *gin.Context) {
 //	@Success	200	{object}	Registry
 //	@Tags		Organization registries
 //	@Param		Authorization	header	string		true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param		org_id					path	string		true	"the org's id"
-//	@Param		registryData		body	Registry	true	"the new registry"
+//	@Param		org_id			path	string		true	"the org's id"
+//	@Param		registryData	body	Registry	true	"the new registry"
 func PostOrgRegistry(c *gin.Context) {
 	org := session.Org(c)
 
@@ -119,9 +119,9 @@ func PostOrgRegistry(c *gin.Context) {
 //	@Produce	json
 //	@Success	200	{object}	Registry
 //	@Tags		Organization registries
-//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param		org_id				path	string		true	"the org's id"
-//	@Param		registry			path	string		true	"the registry's name"
+//	@Param		Authorization	header	string		true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param		org_id			path	string		true	"the org's id"
+//	@Param		registry		path	string		true	"the registry's name"
 //	@Param		registryData	body	Registry	true	"the update registry data"
 func PatchOrgRegistry(c *gin.Context) {
 	org := session.Org(c)

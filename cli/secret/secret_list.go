@@ -56,20 +56,22 @@ func secretList(ctx context.Context, c *cli.Command) error {
 		return err
 	}
 
+	opt := woodpecker.SecretListOptions{}
+
 	var list []*woodpecker.Secret
 	switch {
 	case global:
-		list, err = client.GlobalSecretList()
+		list, err = client.GlobalSecretList(opt)
 		if err != nil {
 			return err
 		}
 	case orgID != -1:
-		list, err = client.OrgSecretList(orgID)
+		list, err = client.OrgSecretList(orgID, opt)
 		if err != nil {
 			return err
 		}
 	default:
-		list, err = client.SecretList(repoID)
+		list, err = client.SecretList(repoID, opt)
 		if err != nil {
 			return err
 		}

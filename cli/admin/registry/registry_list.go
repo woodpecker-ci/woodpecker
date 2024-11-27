@@ -23,6 +23,7 @@ import (
 
 	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
 	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker"
 )
 
 var registryListCmd = &cli.Command{
@@ -42,7 +43,9 @@ func registryList(ctx context.Context, c *cli.Command) error {
 		return err
 	}
 
-	list, err := client.GlobalRegistryList()
+	opt := woodpecker.RegistryListOptions{}
+
+	list, err := client.GlobalRegistryList(opt)
 	if err != nil {
 		return err
 	}
