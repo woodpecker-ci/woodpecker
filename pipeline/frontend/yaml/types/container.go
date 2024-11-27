@@ -32,20 +32,29 @@ type (
 
 	// Container defines a container.
 	Container struct {
-		BackendOptions map[string]any     `yaml:"backend_options,omitempty"`
-		Commands       base.StringOrSlice `yaml:"commands,omitempty"`
-		Entrypoint     base.StringOrSlice `yaml:"entrypoint,omitempty"`
-		Directory      string             `yaml:"directory,omitempty"`
-		Failure        string             `yaml:"failure,omitempty"`
-		Image          string             `yaml:"image,omitempty"`
-		Name           string             `yaml:"name,omitempty"`
-		Pull           bool               `yaml:"pull,omitempty"`
-		Settings       map[string]any     `yaml:"settings"`
-		Volumes        Volumes            `yaml:"volumes,omitempty"`
-		When           constraint.When    `yaml:"when,omitempty"`
-		Ports          []string           `yaml:"ports,omitempty"`
-		DependsOn      base.StringOrSlice `yaml:"depends_on,omitempty"`
-		Needs          base.StringOrSlice `yaml:"needs,omitempty"`
+		// common
+		Name       string             `yaml:"name,omitempty"`
+		Image      string             `yaml:"image,omitempty"`
+		Pull       bool               `yaml:"pull,omitempty"`
+		Commands   base.StringOrSlice `yaml:"commands,omitempty"`
+		Entrypoint base.StringOrSlice `yaml:"entrypoint,omitempty"`
+		Directory  string             `yaml:"directory,omitempty"`
+		Settings   map[string]any     `yaml:"settings"`
+		// flow control
+		DependsOn base.StringOrSlice `yaml:"depends_on,omitempty"`
+		Needs     base.StringOrSlice `yaml:"needs,omitempty"`
+		When      constraint.When    `yaml:"when,omitempty"`
+		Failure   string             `yaml:"failure,omitempty"`
+		// state
+		Volumes Volumes `yaml:"volumes,omitempty"`
+		// network
+		Ports     []string           `yaml:"ports,omitempty"`
+		DNS       base.StringOrSlice `yaml:"dns,omitempty"`
+		DNSSearch base.StringOrSlice `yaml:"dns_search,omitempty"`
+		// backend specific
+		BackendOptions map[string]any `yaml:"backend_options,omitempty"`
+
+		// ACTIVE DEVELOPMENT BELOW
 
 		// TODO deprecated remove in next major
 		Detached bool `yaml:"detach,omitempty"`
@@ -59,12 +68,10 @@ type (
 		Privileged bool `yaml:"privileged,omitempty"`
 
 		// Undocumented
-		Devices     []string           `yaml:"devices,omitempty"`
-		DNSSearch   base.StringOrSlice `yaml:"dns_search,omitempty"`
-		DNS         base.StringOrSlice `yaml:"dns,omitempty"`
-		ExtraHosts  []string           `yaml:"extra_hosts,omitempty"`
-		NetworkMode string             `yaml:"network_mode,omitempty"`
-		Tmpfs       []string           `yaml:"tmpfs,omitempty"`
+		Devices     []string `yaml:"devices,omitempty"`
+		ExtraHosts  []string `yaml:"extra_hosts,omitempty"`
+		NetworkMode string   `yaml:"network_mode,omitempty"`
+		Tmpfs       []string `yaml:"tmpfs,omitempty"`
 	}
 )
 

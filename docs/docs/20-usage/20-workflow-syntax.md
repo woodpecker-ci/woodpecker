@@ -773,6 +773,25 @@ Woodpecker supports to define multiple workflows for a repository. Those workflo
 
 Workflows that should run even on failure should set the `runs_on` tag. See [here](./25-workflows.md#flow-control) for an example.
 
+## Advanced network options for steps
+
+:::warning
+Only allowed if 'Trusted Network' option is enabled in repo settings by an admin.
+:::
+
+### `dns`
+
+If the backend engine understands to change the DNS server and lookup domain,
+this options will be used to alter the default DNS config to a custom one for a specific step.
+
+```yaml
+steps:
+  - name: build
+    image: plugin/abc
+    dns: 1.2.3.4
+    dns_search: 'internal.company'
+```
+
 ## Privileged mode
 
 Woodpecker gives the ability to configure privileged mode in the YAML. You can use this parameter to launch containers with escalated capabilities.
