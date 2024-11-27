@@ -133,7 +133,7 @@ func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 
 	agentConfig := readAgentConfig(agentConfigPath)
 
-	agentToken := c.String("grpc-token")
+	agentToken := strings.TrimSpace(c.String("grpc-token"))
 	grpcClientCtx, grpcClientCtxCancel := context.WithCancelCause(context.Background())
 	defer grpcClientCtxCancel(nil)
 	authClient := agent_rpc.NewAuthGrpcClient(authConn, agentToken, agentConfig.AgentID)

@@ -6,7 +6,7 @@
     <Container :full-width="fullWidth" class="!py-0">
       <div class="flex w-full md:items-center flex-col py-3 gap-2 md:gap-10 md:flex-row md:justify-between">
         <div
-          class="flex items-center content-start"
+          class="flex items-center content-start min-h-10"
           :class="{
             'md:flex-1': searchBoxPresent,
           }"

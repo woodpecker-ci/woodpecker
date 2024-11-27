@@ -35,7 +35,7 @@ type Client interface {
 	User(string) (*User, error)
 
 	// UserList returns a list of all registered users.
-	UserList() ([]*User, error)
+	UserList(opt UserListOptions) ([]*User, error)
 
 	// UserPost creates a new user account.
 	UserPost(*User) (*User, error)
@@ -54,20 +54,16 @@ type Client interface {
 
 	// RepoList returns a list of all repositories to which the user has explicit
 	// access in the host system.
-	RepoList() ([]*Repo, error)
-
-	// RepoListOpts returns a list of all repositories to which the user has
-	// explicit access in the host system.
-	RepoListOpts(bool) ([]*Repo, error)
+	RepoList(opt RepoListOptions) ([]*Repo, error)
 
 	// RepoPost activates a repository.
-	RepoPost(forgeRemoteID int64) (*Repo, error)
+	RepoPost(opt RepoPostOptions) (*Repo, error)
 
 	// RepoPatch updates a repository.
 	RepoPatch(repoID int64, repo *RepoPatch) (*Repo, error)
 
 	// RepoMove moves the repository
-	RepoMove(repoID int64, dst string) error
+	RepoMove(repoID int64, opt RepoMoveOptions) error
 
 	// RepoChown updates a repository owner.
 	RepoChown(repoID int64) (*Repo, error)
@@ -81,13 +77,12 @@ type Client interface {
 	// Pipeline returns a repository pipeline by number.
 	Pipeline(repoID, pipeline int64) (*Pipeline, error)
 
-	// PipelineLast returns the latest repository pipeline by branch. An empty branch
-	// will result in the default branch.
-	PipelineLast(repoID int64, branch string) (*Pipeline, error)
+	// PipelineLast returns the latest repository pipeline.
+	PipelineLast(repoID int64, opt PipelineLastOptions) (*Pipeline, error)
 
 	// PipelineList returns a list of recent pipelines for the
 	// the specified repository.
-	PipelineList(repoID int64) ([]*Pipeline, error)
+	PipelineList(repoID int64, opt PipelineListOptions) ([]*Pipeline, error)
 
 	// PipelineQueue returns a list of enqueued pipelines.
 	PipelineQueue() ([]*Feed, error)
@@ -96,7 +91,7 @@ type Client interface {
 	PipelineCreate(repoID int64, opts *PipelineOptions) (*Pipeline, error)
 
 	// PipelineStart re-starts a stopped pipeline.
-	PipelineStart(repoID, num int64, params map[string]string) (*Pipeline, error)
+	PipelineStart(repoID, num int64, opt PipelineStartOptions) (*Pipeline, error)
 
 	// PipelineStop stops the given pipeline.
 	PipelineStop(repoID, pipeline int64) error
@@ -118,7 +113,7 @@ type Client interface {
 
 	// Deploy triggers a deployment for an existing pipeline using the specified
 	// target environment.
-	Deploy(repoID, pipeline int64, env string, params map[string]string) (*Pipeline, error)
+	Deploy(repoID, pipeline int64, opt DeployOptions) (*Pipeline, error)
 
 	// LogsPurge purges the pipeline logs for the specified pipeline.
 	LogsPurge(repoID, pipeline int64) error
@@ -130,7 +125,7 @@ type Client interface {
 	Registry(repoID int64, hostname string) (*Registry, error)
 
 	// RegistryList returns a list of all repository registries.
-	RegistryList(repoID int64) ([]*Registry, error)
+	RegistryList(repoID int64, opt RegistryListOptions) ([]*Registry, error)
 
 	// RegistryCreate creates a registry.
 	RegistryCreate(repoID int64, registry *Registry) (*Registry, error)
@@ -145,7 +140,7 @@ type Client interface {
 	OrgRegistry(orgID int64, registry string) (*Registry, error)
 
 	// OrgRegistryList returns a list of all organization registries.
-	OrgRegistryList(orgID int64) ([]*Registry, error)
+	OrgRegistryList(orgID int64, opt RegistryListOptions) ([]*Registry, error)
 
 	// OrgRegistryCreate creates an organization registry.
 	OrgRegistryCreate(orgID int64, registry *Registry) (*Registry, error)
@@ -160,7 +155,7 @@ type Client interface {
 	GlobalRegistry(registry string) (*Registry, error)
 
 	// GlobalRegistryList returns a list of all global registries.
-	GlobalRegistryList() ([]*Registry, error)
+	GlobalRegistryList(opt RegistryListOptions) ([]*Registry, error)
 
 	// GlobalRegistryCreate creates a global registry.
 	GlobalRegistryCreate(registry *Registry) (*Registry, error)
@@ -175,7 +170,7 @@ type Client interface {
 	Secret(repoID int64, secret string) (*Secret, error)
 
 	// SecretList returns a list of all repository secrets.
-	SecretList(repoID int64) ([]*Secret, error)
+	SecretList(repoID int64, opt SecretListOptions) ([]*Secret, error)
 
 	// SecretCreate creates a secret.
 	SecretCreate(repoID int64, secret *Secret) (*Secret, error)
@@ -196,7 +191,7 @@ type Client interface {
 	OrgSecret(orgID int64, secret string) (*Secret, error)
 
 	// OrgSecretList returns a list of all organization secrets.
-	OrgSecretList(orgID int64) ([]*Secret, error)
+	OrgSecretList(orgID int64, opt SecretListOptions) ([]*Secret, error)
 
 	// OrgSecretCreate creates an organization secret.
 	OrgSecretCreate(orgID int64, secret *Secret) (*Secret, error)
@@ -211,7 +206,7 @@ type Client interface {
 	GlobalSecret(secret string) (*Secret, error)
 
 	// GlobalSecretList returns a list of all global secrets.
-	GlobalSecretList() ([]*Secret, error)
+	GlobalSecretList(opt SecretListOptions) ([]*Secret, error)
 
 	// GlobalSecretCreate creates a global secret.
 	GlobalSecretCreate(secret *Secret) (*Secret, error)
@@ -232,7 +227,7 @@ type Client interface {
 	SetLogLevel(logLevel *LogLevel) (*LogLevel, error)
 
 	// CronList list all cron jobs of a repo.
-	CronList(repoID int64) ([]*Cron, error)
+	CronList(repoID int64, opt CronListOptions) ([]*Cron, error)
 
 	// CronGet get a specific cron job of a repo by id.
 	CronGet(repoID, cronID int64) (*Cron, error)
