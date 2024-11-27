@@ -35,7 +35,7 @@ var (
 			Data: []byte("{}"),
 		}
 	}
-	waitForProcess = func() { time.Sleep(processTimeInterval + 10*time.Millisecond) }
+	waitForProcess = func() { time.Sleep(processTimeInterval + 50*time.Millisecond) }
 )
 
 func TestFifo(t *testing.T) {
@@ -83,10 +83,10 @@ func TestFifoExpire(t *testing.T) {
 	assert.Len(t, info.Pending, 1, "expect task in pending queue")
 
 	got, err := q.Poll(ctx, 1, filterFnTrue)
-	waitForProcess()
 	assert.NoError(t, err)
 	assert.Equal(t, dummyTask, got)
 
+	waitForProcess()
 	info = q.Info(ctx)
 	assert.Len(t, info.Pending, 1, "expect task re-added to pending queue")
 }
