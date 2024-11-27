@@ -52,7 +52,7 @@ func TestClient_UserList(t *testing.T) {
 			defer ts.Close()
 
 			client := NewClient(ts.URL, http.DefaultClient)
-			users, err := client.UserList()
+			users, err := client.UserList(UserListOptions{})
 
 			if tt.wantErr {
 				assert.Error(t, err)

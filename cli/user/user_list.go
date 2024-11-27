@@ -23,6 +23,7 @@ import (
 
 	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
 	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker"
 )
 
 var userListCmd = &cli.Command{
@@ -39,7 +40,9 @@ func userList(ctx context.Context, c *cli.Command) error {
 		return err
 	}
 
-	users, err := client.UserList()
+	opt := woodpecker.UserListOptions{}
+
+	users, err := client.UserList(opt)
 	if err != nil || len(users) == 0 {
 		return err
 	}
