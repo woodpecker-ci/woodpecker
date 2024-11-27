@@ -15,8 +15,10 @@
 package docker
 
 import (
+	"encoding/base64"
 	"reflect"
 	"sort"
+	"strings"
 	"testing"
 
 	"github.com/docker/docker/api/types"
@@ -92,7 +94,7 @@ func TestSplitVolumeParts(t *testing.T) {
 }
 
 func TestToConfigSmall(t *testing.T) {
-	engine := docker{info: types.Info{OSType: "linux/riscv64"}}
+	engine := docker{info: types.Info{OSType: "linux", Architecture: "riscv64"}}
 
 	conf := engine.toConfig(&backend.Step{
 		Name:     "test",
@@ -122,7 +124,9 @@ func TestToConfigSmall(t *testing.T) {
 }
 
 func TestToConfigFull(t *testing.T) {
-	engine := docker{info: types.Info{OSType: "linux/riscv64"}}
+	engine := docker{
+		info: types.Info{OSType: "linux", Architecture: "riscv64"},
+	}
 
 	conf := engine.toConfig(&backend.Step{
 		Name:         "test",
@@ -181,4 +185,80 @@ func TestToConfigFull(t *testing.T) {
 			"/cache": {},
 		},
 	}, conf)
+}
+
+func TestToWindowsConfig(t *testing.T) {
+	engine := docker{
+		info: types.Info{OSType: "windows", Architecture: "x86_64"},
+	}
+
+	conf := engine.toConfig(&backend.Step{
+		Name:       "test",
+		UUID:       "23434553",
+		Type:       backend.StepTypeCommands,
+		Image:      "golang:1.2.3",
+		WorkingDir: "/src/abc",
+		Environment: map[string]string{
+			"TAGS":         "sqlite",
+			"CI_WORKSPACE": "/src",
+		},
+		Commands:    []string{"go test", "go vet ./..."},
+		ExtraHosts:  []backend.HostAlias{{Name: "t", IP: "1.2.3.4"}},
+		Volumes:     []string{"wp_default_abc:/src", "/cache:/cache/some/more", "test:/test"},
+		Networks:    []backend.Conn{{Name: "extra-net", Aliases: []string{"extra.net"}}},
+		DNS:         []string{"9.9.9.9", "8.8.8.8"},
+		Failure:     "fail",
+		AuthConfig:  backend.Auth{Username: "user", Password: "123456"},
+		NetworkMode: "nat",
+		Ports:       []backend.Port{{Number: 21}, {Number: 22}},
+	})
+
+	assert.NotNil(t, conf)
+	sort.Strings(conf.Env)
+	assert.EqualValues(t, &container.Config{
+		Image:        "golang:1.2.3",
+		WorkingDir:   "C:/src/abc",
+		AttachStdout: true,
+		AttachStderr: true,
+		Entrypoint:   []string{"powershell", "-noprofile", "-noninteractive", "-command", "[System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($Env:CI_SCRIPT)) | iex"},
+		Labels: map[string]string{
+			"wp_step": "test",
+			"wp_uuid": "23434553",
+		},
+		Env: []string{
+			"CI_SCRIPT=CiRFcnJvckFjdGlvblByZWZlcmVuY2UgPSAnU3RvcCc7CiZjbWQgL2MgIm1rZGlyIGM6XHJvb3QiOwppZiAoJEVudjpDSV9ORVRSQ19NQUNISU5FKSB7CiRuZXRyYz1bc3RyaW5nXTo6Rm9ybWF0KCJ7MH1cX25ldHJjIiwkRW52OkhPTUUpOwoibWFjaGluZSAkRW52OkNJX05FVFJDX01BQ0hJTkUiID4+ICRuZXRyYzsKImxvZ2luICRFbnY6Q0lfTkVUUkNfVVNFUk5BTUUiID4+ICRuZXRyYzsKInBhc3N3b3JkICRFbnY6Q0lfTkVUUkNfUEFTU1dPUkQiID4+ICRuZXRyYzsKfTsKW0Vudmlyb25tZW50XTo6U2V0RW52aXJvbm1lbnRWYXJpYWJsZSgiQ0lfTkVUUkNfUEFTU1dPUkQiLCRudWxsKTsKW0Vudmlyb25tZW50XTo6U2V0RW52aXJvbm1lbnRWYXJpYWJsZSgiQ0lfU0NSSVBUIiwkbnVsbCk7CgpXcml0ZS1PdXRwdXQgKCcrICJnbyB0ZXN0IicpOwomIGdvIHRlc3Q7IGlmICgkTEFTVEVYSVRDT0RFIC1uZSAwKSB7ZXhpdCAkTEFTVEVYSVRDT0RFfQoKV3JpdGUtT3V0cHV0ICgnKyAiZ28gdmV0IC4vLi4uIicpOwomIGdvIHZldCAuLy4uLjsgaWYgKCRMQVNURVhJVENPREUgLW5lIDApIHtleGl0ICRMQVNURVhJVENPREV9Cgo=",
+			"CI_WORKSPACE=C:/src",
+			`HOME=c:\root`,
+			"SHELL=powershell.exe",
+			"TAGS=sqlite",
+		},
+		Volumes: map[string]struct{}{
+			"C:/cache/some/more": {},
+			"C:/src":             {},
+			"C:/test":            {},
+		},
+	}, conf)
+
+	ciScript, err := base64.StdEncoding.DecodeString(strings.TrimPrefix(conf.Env[0], "CI_SCRIPT="))
+	if assert.NoError(t, err) {
+		assert.EqualValues(t, `
+$ErrorActionPreference = 'Stop';
+&cmd /c "mkdir c:\root";
+if ($Env:CI_NETRC_MACHINE) {
+$netrc=[string]::Format("{0}\_netrc",$Env:HOME);
+"machine $Env:CI_NETRC_MACHINE" >> $netrc;
+"login $Env:CI_NETRC_USERNAME" >> $netrc;
+"password $Env:CI_NETRC_PASSWORD" >> $netrc;
+};
+[Environment]::SetEnvironmentVariable("CI_NETRC_PASSWORD",$null);
+[Environment]::SetEnvironmentVariable("CI_SCRIPT",$null);
+
+Write-Output ('+ "go test"');
+& go test; if ($LASTEXITCODE -ne 0) {exit $LASTEXITCODE}
+
+Write-Output ('+ "go vet ./..."');
+& go vet ./...; if ($LASTEXITCODE -ne 0) {exit $LASTEXITCODE}
+
+`, string(ciScript))
+	}
 }

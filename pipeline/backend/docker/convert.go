@@ -32,6 +32,8 @@ const minVolumeComponents = 2
 
 // returns a container configuration.
 func (e *docker) toConfig(step *types.Step) *container.Config {
+	e.windowsPathPatch(step)
+
 	config := &container.Config{
 		Image: step.Image,
 		Labels: map[string]string{
