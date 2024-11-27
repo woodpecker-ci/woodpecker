@@ -119,7 +119,7 @@ func createTmpPipeline(event model.WebhookEvent, commit *model.Commit, user *mod
 //	@Param			after			query	string	false	"only return pipelines after this RFC3339 date"
 //	@Param			branch			query	string	false	"filter pipelines by branch"
 //	@Param			event			query	string	false	"filter pipelines by webhook events (comma separated)"
-//	@Param			ref			query	string	false	"filter pipelines by strings contained in ref"
+//	@Param			ref				query	string	false	"filter pipelines by strings contained in ref"
 func GetPipelines(c *gin.Context) {
 	repo := session.Repo(c)
 
