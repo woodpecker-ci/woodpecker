@@ -238,7 +238,9 @@ const config: Config = {
           includeCurrentVersion: true,
           lastVersion: '2.7',
           onlyIncludeVersions:
-            process.env.NODE_ENV === 'development' ? ['current', '2.8'] : ['current', '2.8', '2.7', '2.6', '2.5', '1.0'],
+            process.env.NODE_ENV === 'development'
+              ? ['current', '2.8']
+              : ['current', '2.8', '2.7', '2.6', '2.5', '1.0'],
           versions: {
             current: {
               label: 'Next 🚧',
