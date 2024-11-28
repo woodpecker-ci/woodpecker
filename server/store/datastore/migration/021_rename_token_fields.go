@@ -32,7 +32,7 @@ var renameTokenFields = xormigrate.Migration{
 			return err
 		}
 
-		if err := renameColumn(sess, "repos", "token", "access_token"); err != nil {
+		if err := renameColumn(sess, "users", "token", "access_token"); err != nil {
 			return err
 		}
 
