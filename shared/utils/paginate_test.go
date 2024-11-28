@@ -38,7 +38,7 @@ func TestPaginate(t *testing.T) {
 
 	result, _ := Paginate(func(page int) ([]int, error) {
 		return apiMock(page), nil
-	})
+	}, -1)
 
 	assert.EqualValues(t, 3, apiExec)
 	if assert.Len(t, result, 8) {
