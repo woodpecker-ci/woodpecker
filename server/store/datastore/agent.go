@@ -22,8 +22,7 @@ import (
 
 var ErrNoTokenProvided = errors.New("please provide a token")
 
-func (s storage) AgentList(p *model.ListOptions) ([]*model.Agent, error) {
-	var agents []*model.Agent
+func (s storage) AgentList(p *model.ListOptions) (agents []*model.Agent, _ error) {
 	return agents, s.paginate(p).OrderBy("id").Find(&agents)
 }
 
@@ -54,4 +53,8 @@ func (s storage) AgentUpdate(agent *model.Agent) error {
 
 func (s storage) AgentDelete(agent *model.Agent) error {
 	return wrapDelete(s.engine.ID(agent.ID).Delete(new(model.Agent)))
+}
+
+func (s storage) AgentListForOrg(orgID int64, p *model.ListOptions) (agents []*model.Agent, _ error) {
+	return agents, s.paginate(p).Where("org_id = ?", orgID).OrderBy("id").Find(&agents)
 }

@@ -32,6 +32,8 @@ const minVolumeComponents = 2
 
 // returns a container configuration.
 func (e *docker) toConfig(step *types.Step) *container.Config {
+	e.windowsPathPatch(step)
+
 	config := &container.Config{
 		Image: step.Image,
 		Labels: map[string]string{
@@ -47,11 +49,14 @@ func (e *docker) toConfig(step *types.Step) *container.Config {
 	maps.Copy(configEnv, step.Environment)
 
 	if len(step.Commands) > 0 {
-		env, entry := common.GenerateContainerConf(step.Commands, e.info.OSType)
+		env, entry := common.GenerateContainerConf(step.Commands, e.info.OSType, step.WorkingDir)
 		for k, v := range env {
 			configEnv[k] = v
 		}
 		config.Entrypoint = entry
+
+		// step.WorkingDir will be respected by the generated script
+		config.WorkingDir = step.WorkspaceBase
 	}
 	if len(step.Entrypoint) > 0 {
 		config.Entrypoint = step.Entrypoint
@@ -68,20 +73,20 @@ func toContainerName(step *types.Step) string {
 }
 
 // returns a container host configuration.
-func toHostConfig(step *types.Step) *container.HostConfig {
+func toHostConfig(step *types.Step, conf *config) *container.HostConfig {
 	config := &container.HostConfig{
 		Resources: container.Resources{
-			CPUQuota:   step.CPUQuota,
-			CPUShares:  step.CPUShares,
-			CpusetCpus: step.CPUSet,
-			Memory:     step.MemLimit,
-			MemorySwap: step.MemSwapLimit,
+			CPUQuota:   conf.resourceLimit.CPUQuota,
+			CPUShares:  conf.resourceLimit.CPUShares,
+			CpusetCpus: conf.resourceLimit.CPUSet,
+			Memory:     conf.resourceLimit.MemLimit,
+			MemorySwap: conf.resourceLimit.MemSwapLimit,
 		},
+		ShmSize: conf.resourceLimit.ShmSize,
 		LogConfig: container.LogConfig{
 			Type: "json-file",
 		},
 		Privileged: step.Privileged,
-		ShmSize:    step.ShmSize,
 	}
 
 	if len(step.NetworkMode) != 0 {

@@ -31,7 +31,7 @@ var Command = &cli.Command{
 	Name:  "pipeline",
 	Usage: "manage pipelines",
 	Commands: []*cli.Command{
-		pipelineListCmd,
+		buildPipelineListCmd(),
 		pipelineLastCmd,
 		pipelineLogsCmd,
 		pipelineInfoCmd,

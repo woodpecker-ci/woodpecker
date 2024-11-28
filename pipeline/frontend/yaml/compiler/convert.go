@@ -114,28 +114,12 @@ func (c *Compiler) createProcess(container *yaml_types.Container, stepType backe
 		return secret.Value, nil
 	}
 
-	// TODO: why don't we pass secrets to detached steps?
-	if !detached {
-		if err := settings.ParamsToEnv(container.Settings, environment, "PLUGIN_", true, getSecretValue); err != nil {
-			return nil, err
-		}
+	if err := settings.ParamsToEnv(container.Settings, environment, "PLUGIN_", true, getSecretValue); err != nil {
+		return nil, err
 	}
 
 	if err := settings.ParamsToEnv(container.Environment, environment, "", false, getSecretValue); err != nil {
 		return nil, err
-	}
-
-	for _, requested := range container.Secrets {
-		secretValue, err := getSecretValue(requested)
-		if err != nil {
-			return nil, err
-		}
-
-		if !environmentAllowed(requested, stepType) {
-			continue
-		}
-
-		environment[requested] = secretValue
 	}
 
 	if utils.MatchImageDynamic(container.Image, c.escalated...) && container.IsPlugin() {
@@ -149,31 +133,6 @@ func (c *Compiler) createProcess(container *yaml_types.Container, stepType backe
 			authConfig.Password = registry.Password
 			break
 		}
-	}
-
-	memSwapLimit := int64(container.MemSwapLimit)
-	if c.reslimit.MemSwapLimit != 0 {
-		memSwapLimit = c.reslimit.MemSwapLimit
-	}
-	memLimit := int64(container.MemLimit)
-	if c.reslimit.MemLimit != 0 {
-		memLimit = c.reslimit.MemLimit
-	}
-	shmSize := int64(container.ShmSize)
-	if c.reslimit.ShmSize != 0 {
-		shmSize = c.reslimit.ShmSize
-	}
-	cpuQuota := int64(container.CPUQuota)
-	if c.reslimit.CPUQuota != 0 {
-		cpuQuota = c.reslimit.CPUQuota
-	}
-	cpuShares := int64(container.CPUShares)
-	if c.reslimit.CPUShares != 0 {
-		cpuShares = c.reslimit.CPUShares
-	}
-	cpuSet := container.CPUSet
-	if c.reslimit.CPUSet != "" {
-		cpuSet = c.reslimit.CPUSet
 	}
 
 	var ports []backend_types.Port
@@ -204,6 +163,7 @@ func (c *Compiler) createProcess(container *yaml_types.Container, stepType backe
 		Detached:       detached,
 		Privileged:     privileged,
 		WorkingDir:     workingDir,
+		WorkspaceBase:  workspaceBase,
 		Environment:    environment,
 		Commands:       container.Commands,
 		Entrypoint:     container.Entrypoint,
@@ -214,12 +174,6 @@ func (c *Compiler) createProcess(container *yaml_types.Container, stepType backe
 		Networks:       networks,
 		DNS:            container.DNS,
 		DNSSearch:      container.DNSSearch,
-		MemSwapLimit:   memSwapLimit,
-		MemLimit:       memLimit,
-		ShmSize:        shmSize,
-		CPUQuota:       cpuQuota,
-		CPUShares:      cpuShares,
-		CPUSet:         cpuSet,
 		AuthConfig:     authConfig,
 		OnSuccess:      onSuccess,
 		OnFailure:      onFailure,

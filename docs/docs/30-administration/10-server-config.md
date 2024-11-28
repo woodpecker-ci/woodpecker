@@ -54,6 +54,20 @@ Use the `WOODPECKER_REPO_OWNERS` variable to filter which GitHub user's repos sh
 WOODPECKER_REPO_OWNERS=my_company,my_company_oss_github_user
 ```
 
+## Disallow normal users to create agents
+
+By default, users can create new agents for their repos they have admin access to.
+If an instance admin doesn't want this feature enabled, they can disable the API and hide the Web UI elements.
+
+:::note
+You should set this option if you have, for example,
+global secrets and don't trust your users to create a rogue agent and pipeline for secret extraction.
+:::
+
+```ini
+WOODPECKER_DISABLE_USER_AGENT_REGISTRATION=true
+```
+
 ## Global registry setting
 
 If you want to make available a specific private registry to all pipelines, use the `WOODPECKER_DOCKER_CONFIG` server configuration.
@@ -63,17 +77,15 @@ Point it to your server's docker config.
 WOODPECKER_DOCKER_CONFIG=/root/.docker/config.json
 ```
 
-## Handling sensitive data in docker-compose and docker-swarm
+## Handling sensitive data in **docker compose** and **docker swarm**
 
-To handle sensitive data in docker-compose or docker-swarm configurations there are several options:
+To handle sensitive data in `docker compose` or `docker swarm` configurations there are several options:
 
-For docker-compose you can use a `.env` file next to your compose configuration to store the secrets outside of the compose file. While this separates configuration from secrets it is still not very secure.
+For docker compose you can use a `.env` file next to your compose configuration to store the secrets outside of the compose file. While this separates configuration from secrets it is still not very secure.
 
 Alternatively use docker-secrets. As it may be difficult to use docker secrets for environment variables Woodpecker allows to read sensible data from files by providing a `*_FILE` option of all sensible configuration variables. Woodpecker will try to read the value directly from this file. Keep in mind that when the original environment variable gets specified at the same time it will override the value read from the file.
 
 ```diff title="docker-compose.yaml"
- version: '3'
-
  services:
    woodpecker-server:
      [...]
@@ -161,17 +173,35 @@ Configures the logging level. Possible values are `trace`, `debug`, `info`, `war
 Output destination for logs.
 'stdout' and 'stderr' can be used as special keywords.
 
-### `WOODPECKER_LOG_XORM`
+### `WOODPECKER_DATABASE_LOG`
 
 > Default: `false`
 
-Enable XORM logs.
+Enable logging in database engine (currently xorm).
 
-### `WOODPECKER_LOG_XORM_SQL`
+### `WOODPECKER_DATABASE_LOG_SQL`
 
 > Default: `false`
 
-Enable XORM SQL command logs.
+Enable logging of sql commands.
+
+### `WOODPECKER_DATABASE_MAX_CONNECTIONS`
+
+> Default: `100`
+
+Max database connections xorm is allowed create.
+
+### `WOODPECKER_DATABASE_IDLE_CONNECTIONS`
+
+> Default: `2`
+
+Amount of database connections xorm will hold open.
+
+### `WOODPECKER_DATABASE_CONNECTION_TIMEOUT`
+
+> Default: `3 Seconds`
+
+Time an active database connection is allowed to stay open.
 
 ### `WOODPECKER_DEBUG_PRETTY`
 
@@ -327,6 +357,14 @@ The default docker image to be used when cloning the repo.
 
 It is also added to the trusted clone plugin list.
 
+### `WOODPECKER_DEFAULT_WORKFLOW_LABELS`
+
+> By default run workflows on any agent if no label conditions are set in workflow definition.
+
+You can specify default label/platform conditions that will be used for agent selection for workflows that does not have labels conditions set.
+
+Example: `platform=linux/amd64,backend=docker`
+
 ### `WOODPECKER_DEFAULT_PIPELINE_TIMEOUT`
 
 > 60 (minutes)
@@ -358,8 +396,8 @@ You should specify the tag of your images too, as this enforces exact matches.
 
 > Defaults are defined in [shared/constant/constant.go](https://github.com/woodpecker-ci/woodpecker/blob/main/shared/constant/constant.go)
 
-Plugins witch are trusted to handle the netrc info in clone steps.
-If a clone step use an image not in this list, the netrc will not be injected and an user has to use other methods (e.g. secrets) to clone non public repos.
+Plugins which are trusted to handle the Git credential info in clone steps.
+If a clone step use an image not in this list, Git credentials will not be injected and users have to use other methods (e.g. secrets) to clone non-public repos.
 
 You should specify the tag of your images too, as this enforces exact matches.
 
@@ -405,6 +443,12 @@ A shared secret used by server and agents to authenticate communication. A secre
 > Default: empty
 
 Read the value for `WOODPECKER_AGENT_SECRET` from the specified filepath
+
+### `WOODPECKER_DISABLE_USER_AGENT_REGISTRATION`
+
+> Default: false
+
+[Read about "Disallow normal users to create agents"](./10-server-config.md#disallow-normal-users-to-create-agents)
 
 ### `WOODPECKER_KEEPALIVE_MIN_TIME`
 
@@ -478,44 +522,6 @@ Supported variables:
 
 ---
 
-### `WOODPECKER_LIMIT_MEM_SWAP`
-
-> Default: `0`
-
-The maximum amount of memory a single pipeline container is allowed to swap to disk, configured in bytes. There is no limit if `0`.
-
-### `WOODPECKER_LIMIT_MEM`
-
-> Default: `0`
-
-The maximum amount of memory a single pipeline container can use, configured in bytes. There is no limit if `0`.
-
-### `WOODPECKER_LIMIT_SHM_SIZE`
-
-> Default: `0`
-
-The maximum amount of memory of `/dev/shm` allowed in bytes. There is no limit if `0`.
-
-### `WOODPECKER_LIMIT_CPU_QUOTA`
-
-> Default: `0`
-
-The number of microseconds per CPU period that the container is limited to before throttled. There is no limit if `0`.
-
-### `WOODPECKER_LIMIT_CPU_SHARES`
-
-> Default: `0`
-
-The relative weight vs. other containers.
-
-### `WOODPECKER_LIMIT_CPU_SET`
-
-> Default: empty
-
-Comma-separated list to limit the specific CPUs or cores a pipeline container can use.
-
-Example: `WOODPECKER_LIMIT_CPU_SET=1,2`
-
 ### `WOODPECKER_CONFIG_SERVICE_ENDPOINT`
 
 > Default: empty
@@ -524,7 +530,7 @@ Specify a configuration service endpoint, see [Configuration Extension](./40-adv
 
 ### `WOODPECKER_FORGE_TIMEOUT`
 
-> Default: 3s
+> Default: 5s
 
 Specify timeout when fetching the Woodpecker configuration from forge. See <https://pkg.go.dev/time#ParseDuration> for syntax reference.
 

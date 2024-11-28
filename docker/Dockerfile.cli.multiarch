@@ -8,6 +8,8 @@ RUN --mount=type=cache,target=/root/.cache/go-build \
     make build-cli
 
 FROM scratch
+WORKDIR /woodpecker
+
 ENV GODEBUG=netdns=go
 ENV WOODPECKER_DISABLE_UPDATE_CHECK=true
 

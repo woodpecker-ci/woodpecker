@@ -8,9 +8,9 @@ The Kubernetes backend executes steps inside standalone Pods. A temporary PVC is
 
 ## Images from private registries
 
-In order to pull private container images defined in your pipeline YAML you must provide [registry credentials in Kubernetes Secret](https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/).
-As the Secret is Agent-wide, it has to be placed in namespace defined by `WOODPECKER_BACKEND_K8S_NAMESPACE`.
-Besides, you need to provide the Secret name to Agent via `WOODPECKER_BACKEND_K8S_PULL_SECRET_NAMES`.
+In addition to [registries specified in the UI](../../20-usage/41-registries.md), you may provide [registry credentials in Kubernetes Secrets](https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/) to pull private container images defined in your pipeline YAML.
+
+Place these Secrets in namespace defined by `WOODPECKER_BACKEND_K8S_NAMESPACE` and provide the Secret names to Agents via `WOODPECKER_BACKEND_K8S_PULL_SECRET_NAMES`.
 
 ## Job specific configuration
 
@@ -49,6 +49,21 @@ See the [Kubernetes documentation](https://kubernetes.io/docs/concepts/container
 
 `serviceAccountName` specifies the name of the ServiceAccount which the Pod will mount. This service account must be created externally.
 See the [Kubernetes documentation](https://kubernetes.io/docs/concepts/security/service-accounts/) for more information on using service accounts.
+
+```yaml
+steps:
+  - name: 'My kubernetes step'
+    image: alpine
+    commands:
+      - echo "Hello world"
+    backend_options:
+      kubernetes:
+        # Use the service account `default` in the current namespace.
+        # This usually the same as wherever woodpecker is deployed.
+        serviceAccountName: default
+```
+
+To give steps access to the Kubernetes API via service account, take a look at [RBAC Authorization](https://kubernetes.io/docs/reference/access-authn-authz/rbac/)
 
 ### Node selector
 
@@ -119,7 +134,19 @@ steps:
 ### Volumes
 
 To mount volumes a PersistentVolume (PV) and PersistentVolumeClaim (PVC) are needed on the cluster which can be referenced in steps via the `volumes` option.
-Assuming a PVC named `woodpecker-cache` exists, it can be referenced as follows in a step:
+
+Persistent volumes must be created manually. Use the Kubernetes [Persistent Volumes](https://kubernetes.io/docs/concepts/storage/persistent-volumes/) documentation as a reference.
+
+_If your PVC is not highly available or NFS-based, you may also need to integrate affinity settings to ensure that your steps are executed on the correct node._
+
+NOTE: If you plan to use this volume in more than one workflow concurrently, make sure you have configured the PVC in `RWX` mode. Keep in mind that this feature must be supported by the used CSI driver:
+
+```yaml
+accessModes:
+  - ReadWriteMany
+```
+
+Assuming a PVC named `woodpecker-cache` exists, it can be referenced as follows in a plugin step:
 
 ```yaml
 steps:
@@ -130,6 +157,19 @@ steps:
     settings:
       mount:
         - "woodpecker-cache"
+    [...]
+```
+
+Or as follows when using a normal image:
+
+```yaml
+steps:
+  - name: "Edit cache"
+    image: alpine:latest
+    volumes:
+      - woodpecker-cache:/woodpecker/src/cache
+    commands:
+      - echo "Hello World" > /woodpecker/src/cache/output.txt
     [...]
 ```
 

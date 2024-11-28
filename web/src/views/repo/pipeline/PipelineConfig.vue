@@ -1,7 +1,7 @@
 <template>
   <div class="flex flex-col gap-y-6">
     <Panel
-      v-for="pipelineConfig in pipelineConfigsDecoded || []"
+      v-for="pipelineConfig in pipelineConfigsDecoded"
       :key="pipelineConfig.hash"
       :collapsable="pipelineConfigsDecoded && pipelineConfigsDecoded.length > 1"
       collapsed-by-default
@@ -14,21 +14,22 @@
 
 <script lang="ts" setup>
 import { decode } from 'js-base64';
-import { computed, inject, type Ref } from 'vue';
+import { computed } from 'vue';
 
 import SyntaxHighlight from '~/components/atomic/SyntaxHighlight';
 import Panel from '~/components/layout/Panel.vue';
-import type { PipelineConfig } from '~/lib/api/types';
+import { inject } from '~/compositions/useInjectProvide';
 
-const pipelineConfigs = inject<Ref<PipelineConfig[]>>('pipeline-configs');
+const pipelineConfigs = inject('pipeline-configs');
 if (!pipelineConfigs) {
   throw new Error('Unexpected: "pipelineConfigs" should be provided at this place');
 }
 
-const pipelineConfigsDecoded = computed(() =>
-  pipelineConfigs.value.map((i) => ({
-    ...i,
-    data: decode(i.data),
-  })),
+const pipelineConfigsDecoded = computed(
+  () =>
+    pipelineConfigs.value?.map((i) => ({
+      ...i,
+      data: decode(i.data),
+    })) ?? [],
 );
 </script>

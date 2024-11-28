@@ -1,19 +1,15 @@
 when:
   - event: pull_request
-  - event: push
-    branch: renovate/*
 
 steps:
   - name: lint-editorconfig
-    image: docker.io/mstruebing/editorconfig-checker:v3.0.3
+    image: docker.io/woodpeckerci/plugin-editorconfig-checker:0.2.0
     depends_on: []
     when:
       - event: pull_request
-      - event: push
-        branch: renovate/*
 
   - name: spellcheck
-    image: docker.io/node:22-alpine
+    image: docker.io/node:23-alpine
     depends_on: []
     commands:
       - corepack enable
@@ -33,5 +29,5 @@ steps:
     depends_on: []
     commands:
       - lychee pipeline/frontend/yaml/linter/schema/schema.json
-      - lychee --exclude localhost docs/docs/
-      - lychee --exclude localhost docs/src/pages/
+      - lychee --user-agent "curl/8.4.0" --exclude localhost docs/docs/
+      - lychee --user-agent "curl/8.4.0" --exclude localhost docs/src/pages/

@@ -27,9 +27,9 @@ func TestGetPipelineQueue(t *testing.T) {
 	defer closer()
 
 	user := &model.User{
-		Login: "joe",
-		Email: "foo@bar.com",
-		Token: "e42080dddf012c718e476da161d21ad5",
+		Login:       "joe",
+		Email:       "foo@bar.com",
+		AccessToken: "e42080dddf012c718e476da161d21ad5",
 	}
 	assert.NoError(t, store.CreateUser(user))
 
@@ -63,9 +63,9 @@ func TestUserFeed(t *testing.T) {
 	defer closer()
 
 	user := &model.User{
-		Login: "joe",
-		Email: "foo@bar.com",
-		Token: "e42080dddf012c718e476da161d21ad5",
+		Login:       "joe",
+		Email:       "foo@bar.com",
+		AccessToken: "e42080dddf012c718e476da161d21ad5",
 	}
 	assert.NoError(t, store.CreateUser(user))
 
@@ -109,9 +109,9 @@ func TestRepoListLatest(t *testing.T) {
 	defer closer()
 
 	user := &model.User{
-		Login: "joe",
-		Email: "foo@bar.com",
-		Token: "e42080dddf012c718e476da161d21ad5",
+		Login:       "joe",
+		Email:       "foo@bar.com",
+		AccessToken: "e42080dddf012c718e476da161d21ad5",
 	}
 	assert.NoError(t, store.CreateUser(user))
 

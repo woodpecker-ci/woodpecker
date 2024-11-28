@@ -15,6 +15,7 @@
     "apimachinery",
     "Archlinux",
     "autoincr",
+    "automerge",
     "autoscaler",
     "backporting",
     "backports",
@@ -128,6 +129,7 @@
     "nosniff",
     "ntfy",
     "octocat",
+    "openapi",
     "opensource",
     "Pacman",
     "picus",
@@ -244,13 +246,13 @@
     "**/testdata/**",
     "docs/versioned_docs/",
     "package.json",
-    "91-migrations.md",
     // generated
     "go.sum",
     "flake.lock",
     "pnpm-lock.yaml",
     "**/node_modules/**/*",
-    "cmd/server/docs/docs.go",
+    "cmd/server/openapi/docs.go",
+    "renovate.json",
     // TODO: remove the following
     "docs/**/*.js",
     "docs/**/*.ts"

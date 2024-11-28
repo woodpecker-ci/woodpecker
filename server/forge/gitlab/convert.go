@@ -138,6 +138,7 @@ func convertMergeRequestHook(hook *gitlab.MergeEvent, req *http.Request) (int, *
 	pipeline.Title = obj.Title
 	pipeline.ForgeURL = obj.URL
 	pipeline.PullRequestLabels = convertLabels(hook.Labels)
+	pipeline.FromFork = target.PathWithNamespace != source.PathWithNamespace
 
 	return obj.IID, repo, pipeline, nil
 }
@@ -303,7 +304,9 @@ func extractFromPath(str string) (string, string, error) {
 	if len(s) < minPathComponents {
 		return "", "", fmt.Errorf("minimum match not found")
 	}
-	return s[0], s[1], nil
+	owner := strings.Join(s[:len(s)-1], "/")
+	name := s[len(s)-1]
+	return owner, name, nil
 }
 
 func convertLabels(from []*gitlab.EventLabel) []string {

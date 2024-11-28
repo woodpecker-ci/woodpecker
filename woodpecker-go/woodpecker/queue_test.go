@@ -49,8 +49,7 @@ func TestClient_QueueInfo(t *testing.T) {
 			expected: &Info{
 				Running: []Task{
 					{
-						ID:   "4696",
-						Data: []byte{},
+						ID: "4696",
 						Labels: map[string]string{
 							"platform": "linux/amd64",
 							"repo":     "woodpecker-ci/woodpecker",

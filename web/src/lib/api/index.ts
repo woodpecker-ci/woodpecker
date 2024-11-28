@@ -119,6 +119,10 @@ export default class WoodpeckerClient extends ApiClient {
     return this._get(`/api/repos/${repoId}/pipelines/${pipelineNumber}/config`) as Promise<PipelineConfig[]>;
   }
 
+  async getPipelineMetadata(repoId: number, pipelineNumber: number): Promise<any> {
+    return this._get(`/api/repos/${repoId}/pipelines/${pipelineNumber}/metadata`) as Promise<any>;
+  }
+
   async getPipelineFeed(): Promise<PipelineFeed[]> {
     return this._get(`/api/user/feed`) as Promise<PipelineFeed[]>;
   }
@@ -314,12 +318,29 @@ export default class WoodpeckerClient extends ApiClient {
     return this._post('/api/agents', agent) as Promise<Agent>;
   }
 
-  async updateAgent(agent: Partial<Agent>): Promise<unknown> {
-    return this._patch(`/api/agents/${agent.id}`, agent);
+  async updateAgent(agent: Partial<Agent>): Promise<Agent> {
+    return this._patch(`/api/agents/${agent.id}`, agent) as Promise<Agent>;
   }
 
   async deleteAgent(agent: Agent): Promise<unknown> {
     return this._delete(`/api/agents/${agent.id}`);
+  }
+
+  async getOrgAgents(orgId: number, opts?: PaginationOptions): Promise<Agent[] | null> {
+    const query = encodeQueryString(opts);
+    return this._get(`/api/orgs/${orgId}/agents?${query}`) as Promise<Agent[] | null>;
+  }
+
+  async createOrgAgent(orgId: number, agent: Partial<Agent>): Promise<Agent> {
+    return this._post(`/api/orgs/${orgId}/agents`, agent) as Promise<Agent>;
+  }
+
+  async updateOrgAgent(orgId: number, agentId: number, agent: Partial<Agent>): Promise<Agent> {
+    return this._patch(`/api/orgs/${orgId}/agents/${agentId}`, agent) as Promise<Agent>;
+  }
+
+  async deleteOrgAgent(orgId: number, agentId: number): Promise<unknown> {
+    return this._delete(`/api/orgs/${orgId}/agents/${agentId}`);
   }
 
   async getForges(opts?: PaginationOptions): Promise<Forge[] | null> {
