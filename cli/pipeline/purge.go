@@ -41,7 +41,6 @@ func buildPipelinePurgeCmd() *cli.Command {
 			&cli.IntFlag{
 				Name:  "keep-min",
 				Usage: "minimum number of pipelines to keep",
-				//nolint:mnd
 				Value: 10,
 			},
 		},
