@@ -36,6 +36,9 @@ var flags = []cli.Flag{
 		Sources: cli.NewValueSourceChain(
 			cli.File(os.Getenv("WOODPECKER_AGENT_SECRET_FILE")),
 			cli.EnvVar("WOODPECKER_AGENT_SECRET")),
+		Config: cli.StringConfig{
+			TrimSpace: true,
+		},
 	},
 	&cli.BoolFlag{
 		Sources: cli.EnvVars("WOODPECKER_GRPC_SECURE"),
