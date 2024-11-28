@@ -35,6 +35,11 @@ func Paginate[T any](get func(page int) ([]T, error), limit int) ([]T, error) {
 			return nil, err
 		}
 
+		// If first batch is empty, return immediately
+		if page == 1 && len(batch) == 0 {
+			return items, nil
+		}
+
 		// Take only what we need from this batch if limit > 0
 		if limit > 0 && len(batch) > remaining {
 			batch = batch[:remaining]
