@@ -27,7 +27,7 @@ var renameTokenFields = xormigrate.Migration{
 			RefreshToken string `xorm:"TEXT 'secret'"`
 		}
 
-		// ensure columns to drop exist
+		// ensure columns to rename exist
 		if err := sess.Sync(new(users)); err != nil {
 			return err
 		}
