@@ -22,8 +22,8 @@ func Paginate[T any](get func(page int) ([]T, error), limit int) ([]T, error) {
 
 	for {
 		// limit < 0 means get all results
-		remaining := -1
-		if limit >= 0 {
+		remaining := 0
+		if limit > 0 {
 			remaining = limit - len(items)
 			if remaining <= 0 {
 				break
@@ -35,8 +35,8 @@ func Paginate[T any](get func(page int) ([]T, error), limit int) ([]T, error) {
 			return nil, err
 		}
 
-		// Take only what we need from this batch if limit >= 0
-		if limit >= 0 && len(batch) > remaining {
+		// Take only what we need from this batch if limit > 0
+		if limit > 0 && len(batch) > remaining {
 			batch = batch[:remaining]
 		}
 
