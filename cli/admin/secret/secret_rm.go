@@ -1,4 +1,4 @@
-// Copyright 2024 Woodpecker Authors
+// Copyright 2023 Woodpecker Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,21 +12,36 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package org
+package secret
 
 import (
+	"context"
+
 	"github.com/urfave/cli/v3"
 
-	"go.woodpecker-ci.org/woodpecker/v2/cli/org/registry"
-	"go.woodpecker-ci.org/woodpecker/v2/cli/org/secret"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
 )
 
-// Command exports the org command set.
-var Command = &cli.Command{
-	Name:  "org",
-	Usage: "manage organizations",
-	Commands: []*cli.Command{
-		registry.Command,
-		secret.Command,
+var secretDeleteCmd = &cli.Command{
+	Name:      "rm",
+	Usage:     "remove a secret",
+	ArgsUsage: "[repo-id|repo-full-name]",
+	Action:    secretDelete,
+	Flags: []cli.Flag{
+		&cli.StringFlag{
+			Name:  "name",
+			Usage: "secret name",
+		},
 	},
+}
+
+func secretDelete(ctx context.Context, c *cli.Command) error {
+	secretName := c.String("name")
+
+	client, err := internal.NewClient(ctx, c)
+	if err != nil {
+		return err
+	}
+
+	return client.GlobalSecretDelete(secretName)
 }

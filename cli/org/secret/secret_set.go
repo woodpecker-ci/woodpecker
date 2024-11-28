@@ -32,12 +32,7 @@ var secretUpdateCmd = &cli.Command{
 	ArgsUsage: "[repo-id|repo-full-name]",
 	Action:    secretUpdate,
 	Flags: []cli.Flag{
-		&cli.BoolFlag{
-			Name:  "global",
-			Usage: "global secret",
-		},
 		common.OrgFlag,
-		common.RepoFlag,
 		&cli.StringFlag{
 			Name:  "name",
 			Usage: "secret name",
@@ -78,19 +73,11 @@ func secretUpdate(ctx context.Context, c *cli.Command) error {
 		secret.Value = string(out)
 	}
 
-	global, orgID, repoID, err := parseTargetArgs(client, c)
+	orgID, err := parseTargetArgs(client, c)
 	if err != nil {
 		return err
 	}
 
-	if global {
-		_, err = client.GlobalSecretUpdate(secret)
-		return err
-	}
-	if orgID != -1 {
-		_, err = client.OrgSecretUpdate(orgID, secret)
-		return err
-	}
-	_, err = client.SecretUpdate(repoID, secret)
+	_, err = client.OrgSecretUpdate(orgID, secret)
 	return err
 }

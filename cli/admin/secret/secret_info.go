@@ -24,7 +24,6 @@ import (
 
 	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
 	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
-	"go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker"
 )
 
 var secretInfoCmd = &cli.Command{
@@ -33,12 +32,6 @@ var secretInfoCmd = &cli.Command{
 	ArgsUsage: "[repo-id|repo-full-name]",
 	Action:    secretInfo,
 	Flags: []cli.Flag{
-		&cli.BoolFlag{
-			Name:  "global",
-			Usage: "global secret",
-		},
-		common.OrgFlag,
-		common.RepoFlag,
 		&cli.StringFlag{
 			Name:  "name",
 			Usage: "secret name",
@@ -62,28 +55,9 @@ func secretInfo(ctx context.Context, c *cli.Command) error {
 		return err
 	}
 
-	global, orgID, repoID, err := parseTargetArgs(client, c)
+	secret, err := client.GlobalSecret(secretName)
 	if err != nil {
 		return err
-	}
-
-	var secret *woodpecker.Secret
-	switch {
-	case global:
-		secret, err = client.GlobalSecret(secretName)
-		if err != nil {
-			return err
-		}
-	case orgID != -1:
-		secret, err = client.OrgSecret(orgID, secretName)
-		if err != nil {
-			return err
-		}
-	default:
-		secret, err = client.Secret(repoID, secretName)
-		if err != nil {
-			return err
-		}
 	}
 
 	tmpl, err := template.New("_").Funcs(secretFuncMap).Parse(format)
