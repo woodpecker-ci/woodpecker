@@ -16,6 +16,7 @@
 
 ### 🐛 Bug Fixes
 
+- Enforce exact matching for GitLab groups (#4473) [[#4474](https://github.com/woodpecker-ci/woodpecker/pull/4474)]
 - Normalize aarch64 -> arm64 for docker backend (#4451) [[#4457](https://github.com/woodpecker-ci/woodpecker/pull/4457)]
 - Add migration to autofix corrupted users.org_id entrys in db (#4307) [[#4327](https://github.com/woodpecker-ci/woodpecker/pull/4327)]
 
