@@ -21,7 +21,7 @@ func Paginate[T any](get func(page int) ([]T, error), limit int) ([]T, error) {
 	lenFirstBatch := -1
 
 	for {
-		// limit < 0 means get all results
+		// limit < 1 means get all results
 		remaining := 0
 		if limit > 0 {
 			remaining = limit - len(items)
