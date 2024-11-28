@@ -16,6 +16,10 @@ type RepoListOptions struct {
 	All bool // query all repos, including inactive ones
 }
 
+type UserListOptions struct {
+	ListOptions
+}
+
 // QueryEncode returns the URL query parameters for the RepoListOptions.
 func (opt *RepoListOptions) QueryEncode() string {
 	query := make(url.Values)
@@ -42,10 +46,11 @@ func (c *client) User(login string) (*User, error) {
 }
 
 // UserList returns a list of all registered users.
-func (c *client) UserList() ([]*User, error) {
+func (c *client) UserList(opt UserListOptions) ([]*User, error) {
 	var out []*User
-	uri := fmt.Sprintf(pathUsers, c.addr)
-	err := c.get(uri, &out)
+	uri, _ := url.Parse(fmt.Sprintf(pathUsers, c.addr))
+	uri.RawQuery = opt.getURLQuery().Encode()
+	err := c.get(uri.String(), &out)
 	return out, err
 }
 

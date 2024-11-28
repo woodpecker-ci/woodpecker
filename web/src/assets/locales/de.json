@@ -388,8 +388,8 @@
                 },
                 "general": "Allgemein",
                 "netrc_only_trusted": {
-                    "desc": "Wenn aktiviert, werden Git-Zugangsdaten nur für vertrauenswürdige Plugins zum Klonen, die in `WOODPECKER_PLUGINS_TRUSTED_CLONE` gesetzt sind, zur Verfügung gestellt. Ansonsten können eigene Plugins zum Klonen die Git-Zugangsdaten verwenden. Diese Option hat keinen Effekt auf Schritte, die nicht zum Klonen da sind.",
-                    "netrc_only_trusted": "Git-Zugangsdaten nur in vertrauenswürdigen Plugins zum Klonen bereitstellen"
+                    "desc": "Hier gelistete Plugins erhalten Zugriff zu Netrc-Zugangsdaten, die genutzt werden können, um Repositorys von der Forge zu klonen oder zu pushen.",
+                    "netrc_only_trusted": "Eigene vertrauenswürdige Plugins zum Klonen"
                 },
                 "pipeline_path": {
                     "default": "Standardmäßig: .woodpecker/*.{'{yaml,yml}'} -> .woodpecker.yaml -> .woodpecker.yml",

@@ -35,7 +35,7 @@ type Client interface {
 	User(string) (*User, error)
 
 	// UserList returns a list of all registered users.
-	UserList() ([]*User, error)
+	UserList(opt UserListOptions) ([]*User, error)
 
 	// UserPost creates a new user account.
 	UserPost(*User) (*User, error)
@@ -125,7 +125,7 @@ type Client interface {
 	Registry(repoID int64, hostname string) (*Registry, error)
 
 	// RegistryList returns a list of all repository registries.
-	RegistryList(repoID int64) ([]*Registry, error)
+	RegistryList(repoID int64, opt RegistryListOptions) ([]*Registry, error)
 
 	// RegistryCreate creates a registry.
 	RegistryCreate(repoID int64, registry *Registry) (*Registry, error)
@@ -140,7 +140,7 @@ type Client interface {
 	OrgRegistry(orgID int64, registry string) (*Registry, error)
 
 	// OrgRegistryList returns a list of all organization registries.
-	OrgRegistryList(orgID int64) ([]*Registry, error)
+	OrgRegistryList(orgID int64, opt RegistryListOptions) ([]*Registry, error)
 
 	// OrgRegistryCreate creates an organization registry.
 	OrgRegistryCreate(orgID int64, registry *Registry) (*Registry, error)
@@ -155,7 +155,7 @@ type Client interface {
 	GlobalRegistry(registry string) (*Registry, error)
 
 	// GlobalRegistryList returns a list of all global registries.
-	GlobalRegistryList() ([]*Registry, error)
+	GlobalRegistryList(opt RegistryListOptions) ([]*Registry, error)
 
 	// GlobalRegistryCreate creates a global registry.
 	GlobalRegistryCreate(registry *Registry) (*Registry, error)
@@ -170,7 +170,7 @@ type Client interface {
 	Secret(repoID int64, secret string) (*Secret, error)
 
 	// SecretList returns a list of all repository secrets.
-	SecretList(repoID int64) ([]*Secret, error)
+	SecretList(repoID int64, opt SecretListOptions) ([]*Secret, error)
 
 	// SecretCreate creates a secret.
 	SecretCreate(repoID int64, secret *Secret) (*Secret, error)
@@ -191,7 +191,7 @@ type Client interface {
 	OrgSecret(orgID int64, secret string) (*Secret, error)
 
 	// OrgSecretList returns a list of all organization secrets.
-	OrgSecretList(orgID int64) ([]*Secret, error)
+	OrgSecretList(orgID int64, opt SecretListOptions) ([]*Secret, error)
 
 	// OrgSecretCreate creates an organization secret.
 	OrgSecretCreate(orgID int64, secret *Secret) (*Secret, error)
@@ -206,7 +206,7 @@ type Client interface {
 	GlobalSecret(secret string) (*Secret, error)
 
 	// GlobalSecretList returns a list of all global secrets.
-	GlobalSecretList() ([]*Secret, error)
+	GlobalSecretList(opt SecretListOptions) ([]*Secret, error)
 
 	// GlobalSecretCreate creates a global secret.
 	GlobalSecretCreate(secret *Secret) (*Secret, error)
@@ -227,7 +227,7 @@ type Client interface {
 	SetLogLevel(logLevel *LogLevel) (*LogLevel, error)
 
 	// CronList list all cron jobs of a repo.
-	CronList(repoID int64) ([]*Cron, error)
+	CronList(repoID int64, opt CronListOptions) ([]*Cron, error)
 
 	// CronGet get a specific cron job of a repo by id.
 	CronGet(repoID, cronID int64) (*Cron, error)
