@@ -532,9 +532,6 @@ var flags = append([]cli.Flag{
 		Sources: cli.EnvVars("WOODPECKER_ENCRYPTION_TINK_KEYSET_FILE"),
 		Name:    "encryption-tink-keyset",
 		Usage:   "Google tink AEAD-compatible keyset file to encrypt secrets in DB",
-		Config: cli.StringConfig{
-			TrimSpace: true,
-		},
 	},
 	&cli.BoolFlag{
 		Sources: cli.EnvVars("WOODPECKER_ENCRYPTION_DISABLE"),
