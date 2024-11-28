@@ -2,7 +2,7 @@ module go.woodpecker-ci.org/woodpecker/v2
 
 go 1.22.7
 
-toolchain go1.23.2
+toolchain go1.23.3
 
 require (
 	al.essio.dev/pkg/shellescape v1.5.1
@@ -56,7 +56,7 @@ require (
 	github.com/swaggo/gin-swagger v1.6.0
 	github.com/swaggo/swag v1.16.4
 	github.com/urfave/cli-docs/v3 v3.0.0-alpha6
-	github.com/urfave/cli/v3 v3.0.0-alpha9.4
+	github.com/urfave/cli/v3 v3.0.0-alpha9.6
 	github.com/xanzy/go-gitlab v0.114.0
 	github.com/xeipuuv/gojsonschema v1.2.0
 	github.com/yaronf/httpsign v0.3.1
