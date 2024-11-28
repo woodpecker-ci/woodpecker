@@ -26,17 +26,12 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker"
 )
 
-var secretCreateCmd = &cli.Command{
-	Name:      "add",
-	Usage:     "adds a secret",
+var secretUpdateCmd = &cli.Command{
+	Name:      "update",
+	Usage:     "update a secret",
 	ArgsUsage: "[repo-id|repo-full-name]",
-	Action:    secretCreate,
+	Action:    secretUpdate,
 	Flags: []cli.Flag{
-		&cli.BoolFlag{
-			Name:  "global",
-			Usage: "global secret",
-		},
-		common.OrgFlag,
 		common.RepoFlag,
 		&cli.StringFlag{
 			Name:  "name",
@@ -57,7 +52,7 @@ var secretCreateCmd = &cli.Command{
 	},
 }
 
-func secretCreate(ctx context.Context, c *cli.Command) error {
+func secretUpdate(ctx context.Context, c *cli.Command) error {
 	client, err := internal.NewClient(ctx, c)
 	if err != nil {
 		return err
@@ -69,9 +64,6 @@ func secretCreate(ctx context.Context, c *cli.Command) error {
 		Images: c.StringSlice("image"),
 		Events: c.StringSlice("event"),
 	}
-	if len(secret.Events) == 0 {
-		secret.Events = defaultSecretEvents
-	}
 	if strings.HasPrefix(secret.Value, "@") {
 		path := strings.TrimPrefix(secret.Value, "@")
 		out, err := os.ReadFile(path)
@@ -81,28 +73,11 @@ func secretCreate(ctx context.Context, c *cli.Command) error {
 		secret.Value = string(out)
 	}
 
-	global, orgID, repoID, err := parseTargetArgs(client, c)
+	repoID, err := parseTargetArgs(client, c)
 	if err != nil {
 		return err
 	}
 
-	if global {
-		_, err = client.GlobalSecretCreate(secret)
-		return err
-	}
-
-	if orgID != -1 {
-		_, err = client.OrgSecretCreate(orgID, secret)
-		return err
-	}
-
-	_, err = client.SecretCreate(repoID, secret)
+	_, err = client.SecretUpdate(repoID, secret)
 	return err
-}
-
-var defaultSecretEvents = []string{
-	woodpecker.EventPush,
-	woodpecker.EventTag,
-	woodpecker.EventRelease,
-	woodpecker.EventDeploy,
 }

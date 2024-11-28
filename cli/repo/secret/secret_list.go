@@ -33,11 +33,6 @@ var secretListCmd = &cli.Command{
 	ArgsUsage: "[repo-id|repo-full-name]",
 	Action:    secretList,
 	Flags: []cli.Flag{
-		&cli.BoolFlag{
-			Name:  "global",
-			Usage: "global secret",
-		},
-		common.OrgFlag,
 		common.RepoFlag,
 		common.FormatFlag(tmplSecretList, true),
 	},
@@ -51,38 +46,24 @@ func secretList(ctx context.Context, c *cli.Command) error {
 		return err
 	}
 
-	global, orgID, repoID, err := parseTargetArgs(client, c)
+	repoID, err := parseTargetArgs(client, c)
 	if err != nil {
 		return err
 	}
 
 	opt := woodpecker.SecretListOptions{}
 
-	var list []*woodpecker.Secret
-	switch {
-	case global:
-		list, err = client.GlobalSecretList(opt)
-		if err != nil {
-			return err
-		}
-	case orgID != -1:
-		list, err = client.OrgSecretList(orgID, opt)
-		if err != nil {
-			return err
-		}
-	default:
-		list, err = client.SecretList(repoID, opt)
-		if err != nil {
-			return err
-		}
+	list, err := client.SecretList(repoID, opt)
+	if err != nil {
+		return err
 	}
 
 	tmpl, err := template.New("_").Funcs(secretFuncMap).Parse(format)
 	if err != nil {
 		return err
 	}
-	for _, registry := range list {
-		if err := tmpl.Execute(os.Stdout, registry); err != nil {
+	for _, secret := range list {
+		if err := tmpl.Execute(os.Stdout, secret); err != nil {
 			return err
 		}
 	}

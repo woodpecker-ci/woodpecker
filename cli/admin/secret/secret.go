@@ -1,4 +1,4 @@
-// Copyright 2024 Woodpecker Authors
+// Copyright 2023 Woodpecker Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,21 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package org
+package secret
 
 import (
 	"github.com/urfave/cli/v3"
-
-	"go.woodpecker-ci.org/woodpecker/v2/cli/org/registry"
-	"go.woodpecker-ci.org/woodpecker/v2/cli/org/secret"
 )
 
-// Command exports the org command set.
+// Command exports the secret command.
 var Command = &cli.Command{
-	Name:  "org",
-	Usage: "manage organizations",
+	Name:  "secret",
+	Usage: "manage global secrets",
 	Commands: []*cli.Command{
-		registry.Command,
-		secret.Command,
+		secretCreateCmd,
+		secretDeleteCmd,
+		secretUpdateCmd,
+		secretInfoCmd,
+		secretListCmd,
 	},
 }
