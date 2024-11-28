@@ -240,7 +240,7 @@ const config: Config = {
           onlyIncludeVersions:
             process.env.NODE_ENV === 'development'
               ? ['current', '2.8']
-              : ['current', '2.8', '2.7', '2.6', '2.5', '1.0'],
+              : ['current', '2.8', '2.7', '2.6', '1.0'],
           versions: {
             current: {
               label: 'Next 🚧',
@@ -255,10 +255,6 @@ const config: Config = {
             },
             '2.6': {
               label: '2.6.x 💀',
-              banner: 'unmaintained',
-            },
-            '2.5': {
-              label: '2.5.x 💀',
               banner: 'unmaintained',
             },
             '1.0': {
