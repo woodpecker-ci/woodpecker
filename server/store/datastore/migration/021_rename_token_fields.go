@@ -23,7 +23,7 @@ var renameTokenFields = xormigrate.Migration{
 	ID: "rename-token-fields",
 	MigrateSession: func(sess *xorm.Session) (err error) {
 		type users struct {
-			AccessToken string `xorm:"TEXT 'token'"`
+			AccessToken  string `xorm:"TEXT 'token'"`
 			RefreshToken string `xorm:"TEXT 'secret'"`
 		}
 
