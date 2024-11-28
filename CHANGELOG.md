@@ -1,5 +1,45 @@
 # Changelog
 
+## [2.8.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.8.0) - 2024-11-28
+
+### ❤️ Thanks to all contributors! ❤️
+
+@6543, @anbraten
+
+### 🔒 Security
+
+- Extend approval options (#3348) [[#4429](https://github.com/woodpecker-ci/woodpecker/pull/4429)]
+
+### ✨ Features
+
+- Docker Backend: fully support windows container (#4381) [[#4464](https://github.com/woodpecker-ci/woodpecker/pull/4464)]
+
+### 🐛 Bug Fixes
+
+- Enforce exact matching for GitLab groups (#4473) [[#4474](https://github.com/woodpecker-ci/woodpecker/pull/4474)]
+- Normalize aarch64 -> arm64 for docker backend (#4451) [[#4457](https://github.com/woodpecker-ci/woodpecker/pull/4457)]
+- Add migration to autofix corrupted users.org_id entrys in db (#4307) [[#4327](https://github.com/woodpecker-ci/woodpecker/pull/4327)]
+
+### 📈 Enhancement
+
+- Deprecate `secrets` in favor of `from_secret` [[#4360](https://github.com/woodpecker-ci/woodpecker/pull/4360)]
+- Deprecate and warn of list syntax of environment [[#4358](https://github.com/woodpecker-ci/woodpecker/pull/4358)]
+- Process workflow logs in batches (#4045) [[#4356](https://github.com/woodpecker-ci/woodpecker/pull/4356)]
+
+### Misc
+
+- Use release-helper for release/* branches [[#4302](https://github.com/woodpecker-ci/woodpecker/pull/4302)]
+
+## [2.7.3](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.7.3) - 2024-11-04
+
+### ❤️ Thanks to all contributors! ❤️
+
+@anbraten
+
+### Misc
+
+- Use release-helper for release/* branches [[#4302](https://github.com/woodpecker-ci/woodpecker/pull/4302)]
+
 ## [2.7.2](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.7.2) - 2024-11-03
 
 ### Important
