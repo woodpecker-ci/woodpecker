@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @Fishbowler, @M0Rf30, @anbraten, @cduchenoy, @gnowland, @greenaar, @hg, @j04n-f, @jenrik, @johanneskastl, @lafriks, @lukashass, @meln5674, @not-my-profile, @pat-s, @qwerty287, @smainz, @tori-27, @xoxys, @xtexChooser, @zc-devs
+@6543, @Fishbowler, @M0Rf30, @anbraten, @cduchenoy, @fernandrone, @gnowland, @greenaar, @hg, @j04n-f, @jenrik, @johanneskastl, @lafriks, @lukashass, @meln5674, @not-my-profile, @pat-s, @qwerty287, @smainz, @tori-27, @xoxys, @xtexChooser, @zc-devs
 
 ### 💥 Breaking changes
 
@@ -249,6 +249,7 @@
 
 ### Misc
 
+- Increase log level when failing to fetch YAML [[#4107](https://github.com/woodpecker-ci/woodpecker/pull/4107)]
 - Use same default sort for repo and org repo list [[#4461](https://github.com/woodpecker-ci/woodpecker/pull/4461)]
 - Add dns config option to official feature set [[#4418](https://github.com/woodpecker-ci/woodpecker/pull/4418)]
 - Remove `renovate` branch triggers [[#4437](https://github.com/woodpecker-ci/woodpecker/pull/4437)]
