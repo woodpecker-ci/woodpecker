@@ -65,6 +65,18 @@ func (s storage) GetPipelineList(repo *model.Repo, p *model.ListOptions, f *mode
 		if f.Before != 0 {
 			cond = cond.And(builder.Lt{"created": f.Before})
 		}
+
+		if f.Branch != "" {
+			cond = cond.And(builder.Eq{"branch": f.Branch})
+		}
+
+		if len(f.Events) != 0 {
+			cond = cond.And(builder.In("event", f.Events))
+		}
+
+		if f.RefContains != "" {
+			cond = cond.And(builder.Like{"ref", f.RefContains})
+		}
 	}
 
 	return pipelines, s.paginate(p).Where(cond).
