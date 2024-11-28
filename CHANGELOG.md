@@ -56,6 +56,7 @@
 
 ### 📈 Enhancement
 
+- Add filter to list repository pipelines API [[#4416](https://github.com/woodpecker-ci/woodpecker/pull/4416)]
 - Increase log level when failing to fetch YAML [[#4107](https://github.com/woodpecker-ci/woodpecker/pull/4107)]
 - Trim space to all config flags that allow to read value from file [[#4468](https://github.com/woodpecker-ci/woodpecker/pull/4468)]
 - Change default icon size to 20 [[#4458](https://github.com/woodpecker-ci/woodpecker/pull/4458)]
