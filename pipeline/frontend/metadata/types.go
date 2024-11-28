@@ -88,6 +88,7 @@ type (
 	// Step defines runtime metadata for a step.
 	Step struct {
 		Name   string `json:"name,omitempty"`
+		Type   string `json:"type,omitempty"`
 		Number int    `json:"number,omitempty"`
 	}
 
