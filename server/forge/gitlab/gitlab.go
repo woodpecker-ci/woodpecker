@@ -753,7 +753,7 @@ func (g *GitLab) Org(ctx context.Context, u *model.User, owner string) (*model.O
 	groups, _, err := client.Groups.ListGroups(&gitlab.ListGroupsOptions{
 		ListOptions: gitlab.ListOptions{
 			Page:    1,
-			PerPage: 1,
+			PerPage: perPage,
 		},
 		Search: gitlab.Ptr(owner),
 	}, gitlab.WithContext(ctx))
@@ -761,13 +761,21 @@ func (g *GitLab) Org(ctx context.Context, u *model.User, owner string) (*model.O
 		return nil, err
 	}
 
-	if len(groups) != 1 {
+	var matchedGroup *gitlab.Group
+	for _, group := range groups {
+		if group.FullPath == owner {
+			matchedGroup = group
+			break
+		}
+	}
+
+	if matchedGroup == nil {
 		return nil, fmt.Errorf("could not find org %s", owner)
 	}
 
 	return &model.Org{
-		Name:    groups[0].FullPath,
-		Private: groups[0].Visibility != gitlab.PublicVisibility,
+		Name:    matchedGroup.FullPath,
+		Private: matchedGroup.Visibility != gitlab.PublicVisibility,
 	}, nil
 }
 
