@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v3"
 
 	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
@@ -80,30 +81,16 @@ func pipelinePurge(c *cli.Command, client woodpecker.Client) (err error) {
 		return err
 	}
 
-	pipelinesKeep, err := shared_utils.Paginate(func(page int) ([]*woodpecker.Pipeline, error) {
-		return client.PipelineList(repoID,
-			woodpecker.PipelineListOptions{
-				ListOptions: woodpecker.ListOptions{
-					Page: page,
-				},
-			},
-		)
-	}, int(keepMin))
-	if err != nil {
-		return err
+	var pipelinesKeep []*woodpecker.Pipeline
+
+	if keepMin > 0 {
+		pipelinesKeep, err = fetchPipelinesToKeep(client, repoID, int(keepMin))
+		if err != nil {
+			return err
+		}
 	}
 
-	pipelines, err := shared_utils.Paginate(func(page int) ([]*woodpecker.Pipeline, error) {
-		return client.PipelineList(repoID,
-			woodpecker.PipelineListOptions{
-				ListOptions: woodpecker.ListOptions{
-					Page: page,
-				},
-				Before: time.Now().Add(-duration),
-				After:  time.Now(),
-			},
-		)
-	}, -1)
+	pipelines, err := fetchPipelines(client, repoID, duration)
 	if err != nil {
 		return err
 	}
@@ -128,7 +115,7 @@ func pipelinePurge(c *cli.Command, client woodpecker.Client) (err error) {
 	}
 
 	for i, p := range pipelinesToPurge {
-		fmt.Printf("%sprune %v/%v pipelines from repo '%v'", msgPrefix, i, len(pipelinesToPurge), repoIDOrFullName)
+		log.Debug().Msgf("%sprune %v/%v pipelines from repo '%v'", msgPrefix, i+1, len(pipelinesToPurge), repoIDOrFullName)
 		if dryRun {
 			continue
 		}
@@ -140,4 +127,32 @@ func pipelinePurge(c *cli.Command, client woodpecker.Client) (err error) {
 	}
 
 	return nil
+}
+
+func fetchPipelinesToKeep(client woodpecker.Client, repoID int64, keepMin int) ([]*woodpecker.Pipeline, error) {
+	if keepMin <= 0 {
+		return nil, nil
+	}
+	return shared_utils.Paginate(func(page int) ([]*woodpecker.Pipeline, error) {
+		return client.PipelineList(repoID,
+			woodpecker.PipelineListOptions{
+				ListOptions: woodpecker.ListOptions{
+					Page: page,
+				},
+			},
+		)
+	}, keepMin)
+}
+
+func fetchPipelines(client woodpecker.Client, repoID int64, duration time.Duration) ([]*woodpecker.Pipeline, error) {
+	return shared_utils.Paginate(func(page int) ([]*woodpecker.Pipeline, error) {
+		return client.PipelineList(repoID,
+			woodpecker.PipelineListOptions{
+				ListOptions: woodpecker.ListOptions{
+					Page: page,
+				},
+				After: time.Now().Add(-duration),
+			},
+		)
+	}, -1)
 }

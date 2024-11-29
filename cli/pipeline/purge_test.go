@@ -61,16 +61,16 @@ func TestPipelinePurge(t *testing.T) {
 			mockClient.On("RepoLookup", mock.Anything).Maybe().Return(&woodpecker.Repo{ID: tt.repoID}, nil)
 
 			mockClient.On("PipelineList", mock.Anything, mock.Anything).Return(func(_ int64, opt woodpecker.PipelineListOptions) ([]*woodpecker.Pipeline, error) {
-				// Return keep pipelines for first call without Before/After filters
-				if opt.Before.IsZero() && opt.After.IsZero() {
+				// Return keep pipelines for first call
+				if opt.After.IsZero() {
 					if opt.Page == 1 {
 						return tt.pipelinesKeep, nil
 					}
 					return []*woodpecker.Pipeline{}, nil
 				}
 
-				// Return pipelines to purge for calls with Before filter
-				if !opt.Before.IsZero() {
+				// Return pipelines to purge for calls with After filter
+				if !opt.After.IsZero() {
 					if opt.Page == 1 {
 						return tt.pipelines, nil
 					}
