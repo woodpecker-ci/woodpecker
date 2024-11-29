@@ -26,7 +26,7 @@ import (
 
 var userAddCmd = &cli.Command{
 	Name:      "add",
-	Usage:     "adds a user",
+	Usage:     "add a user",
 	ArgsUsage: "<username>",
 	Action:    userAdd,
 }

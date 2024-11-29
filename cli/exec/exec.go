@@ -161,7 +161,7 @@ func execWithAxis(ctx context.Context, c *cli.Command, file, repoPath string, ax
 		pipelineEnv[before] = after
 		if oldVar, exists := environ[before]; exists {
 			// override existing values, but print a warning
-			log.Warn().Msgf("environment variable '%s' had value '%s', but got overwritten", before, oldVar)
+			log.Warn().Msgf("Environment variable '%s' had value '%s', but got overwritten", before, oldVar)
 		}
 		environ[before] = after
 	}

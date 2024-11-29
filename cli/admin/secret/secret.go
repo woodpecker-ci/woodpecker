@@ -26,7 +26,7 @@ var Command = &cli.Command{
 		secretCreateCmd,
 		secretDeleteCmd,
 		secretUpdateCmd,
-		secretInfoCmd,
+		secretShowCmd,
 		secretListCmd,
 	},
 }

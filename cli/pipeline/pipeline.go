@@ -35,7 +35,7 @@ var Command = &cli.Command{
 	Commands: []*cli.Command{
 		buildPipelineListCmd(),
 		pipelineLastCmd,
-		pipelineInfoCmd,
+		pipelineShowCmd,
 		pipelineStopCmd,
 		pipelineStartCmd,
 		pipelineApproveCmd,

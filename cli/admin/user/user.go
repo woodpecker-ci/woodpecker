@@ -24,7 +24,7 @@ var Command = &cli.Command{
 	Usage: "manage users",
 	Commands: []*cli.Command{
 		userListCmd,
-		userInfoCmd,
+		userShowCmd,
 		userAddCmd,
 		userRemoveCmd,
 	},

@@ -20,11 +20,11 @@ var Command = &cli.Command{
 	Flags: []cli.Flag{
 		&cli.StringFlag{
 			Name:  "server",
-			Usage: "The URL of the woodpecker server",
+			Usage: "URL of the woodpecker server",
 		},
 		&cli.StringFlag{
 			Name:  "token",
-			Usage: "The token to authenticate with the woodpecker server",
+			Usage: "token to authenticate with the woodpecker server",
 		},
 	},
 	Action: setup,

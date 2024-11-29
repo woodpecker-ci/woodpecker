@@ -56,7 +56,7 @@ func NewClient(ctx context.Context, c *cli.Command) (woodpecker.Client, error) {
 	// attempt to find system CA certs
 	certs, err := x509.SystemCertPool()
 	if err != nil {
-		log.Error().Err(err).Msg("failed to find system CA certs")
+		log.Error().Err(err).Msg("Failed to find system CA certs")
 	}
 	tlsConfig := &tls.Config{
 		RootCAs:            certs,
@@ -101,7 +101,7 @@ func getRepoFromGit(remoteName string) (string, error) {
 
 	gitRemote := strings.TrimSpace(string(stdout))
 
-	log.Debug().Str("git-remote", gitRemote).Msg("extracted remote url from git")
+	log.Debug().Str("git-remote", gitRemote).Msg("Extracted remote url from git")
 
 	if len(gitRemote) == 0 {
 		return "", fmt.Errorf("no repository provided")
@@ -113,7 +113,7 @@ func getRepoFromGit(remoteName string) (string, error) {
 	}
 
 	repoFullName := u.FullName
-	log.Debug().Str("repo", repoFullName).Msg("extracted repository from remote url")
+	log.Debug().Str("repo", repoFullName).Msg("Extracted repository from remote url")
 
 	return repoFullName, nil
 }
@@ -123,19 +123,19 @@ func ParseRepo(client woodpecker.Client, str string) (repoID int64, err error) {
 	if str == "" {
 		str, err = getRepoFromGit("upstream")
 		if err != nil {
-			log.Debug().Err(err).Msg("could not get repository from git upstream remote")
+			log.Debug().Err(err).Msg("Could not get repository from git upstream remote")
 		}
 	}
 
 	if str == "" {
 		str, err = getRepoFromGit("origin")
 		if err != nil {
-			log.Debug().Err(err).Msg("could not get repository from git origin remote")
+			log.Debug().Err(err).Msg("Could not get repository from git origin remote")
 		}
 	}
 
 	if str == "" {
-		return 0, fmt.Errorf("no repository provided")
+		return 0, fmt.Errorf("no repoSsitory provided")
 	}
 
 	if strings.Contains(str, "/") {

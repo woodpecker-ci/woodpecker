@@ -29,7 +29,7 @@ import (
 var Command = &cli.Command{
 	Name:      "log-level",
 	ArgsUsage: "[level]",
-	Usage:     "get the logging level of the server, or set it with [level]",
+	Usage:     "retrieve log level from server, or set it with [level]",
 	Action:    logLevel,
 }
 
@@ -59,6 +59,6 @@ func logLevel(ctx context.Context, c *cli.Command) error {
 		}
 	}
 
-	log.Info().Msgf("logging level: %s", ll.Level)
+	log.Info().Msgf("Log level: %s", ll.Level)
 	return nil
 }

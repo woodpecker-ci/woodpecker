@@ -25,15 +25,15 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker"
 )
 
-var pipelineInfoCmd = &cli.Command{
-	Name:      "info",
-	Usage:     "show pipeline details",
+var pipelineShowCmd = &cli.Command{
+	Name:      "show",
+	Usage:     "show pipeline information",
 	ArgsUsage: "<repo-id|repo-full-name> [pipeline]",
-	Action:    pipelineInfo,
+	Action:    pipelineShow,
 	Flags:     common.OutputFlags("table"),
 }
 
-func pipelineInfo(ctx context.Context, c *cli.Command) error {
+func pipelineShow(ctx context.Context, c *cli.Command) error {
 	repoIDOrFullName := c.Args().First()
 	client, err := internal.NewClient(ctx, c)
 	if err != nil {
