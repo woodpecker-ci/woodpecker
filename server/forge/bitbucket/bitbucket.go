@@ -143,7 +143,7 @@ func (c *config) Teams(ctx context.Context, u *model.User) ([]*model.Team, error
 			return nil, err
 		}
 		return convertWorkspaceList(resp.Values), nil
-	})
+	}, -1)
 }
 
 // Repo returns the named Bitbucket repository.
@@ -190,7 +190,7 @@ func (c *config) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error
 			return nil, err
 		}
 		return resp.Values, nil
-	})
+	}, -1)
 	if err != nil {
 		return nil, err
 	}
@@ -331,7 +331,7 @@ func (c *config) Deactivate(ctx context.Context, u *model.User, r *model.Repo, l
 			return nil, err
 		}
 		return hooks.Values, nil
-	})
+	}, -1)
 	if err != nil {
 		return err
 	}

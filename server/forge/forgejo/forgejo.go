@@ -201,7 +201,7 @@ func (c *Forgejo) Teams(ctx context.Context, u *model.User) ([]*model.Team, erro
 			teams = append(teams, toTeam(org, c.url))
 		}
 		return teams, err
-	})
+	}, -1)
 }
 
 // TeamPerm is not supported by the Forgejo driver.
@@ -253,7 +253,7 @@ func (c *Forgejo) Repos(ctx context.Context, u *model.User) ([]*model.Repo, erro
 			},
 		)
 		return repos, err
-	})
+	}, -1)
 
 	result := make([]*model.Repo, 0, len(repos))
 	for _, repo := range repos {
@@ -411,7 +411,7 @@ func (c *Forgejo) Deactivate(ctx context.Context, u *model.User, r *model.Repo, 
 			},
 		})
 		return hooks, err
-	})
+	}, -1)
 	if err != nil {
 		return err
 	}
@@ -647,7 +647,7 @@ func (c *Forgejo) getChangedFilesForPR(ctx context.Context, repo *model.Repo, in
 			files = append(files, file.Filename)
 		}
 		return files, nil
-	})
+	}, -1)
 }
 
 func (c *Forgejo) getTagCommitSHA(ctx context.Context, repo *model.Repo, tagName string) (string, error) {
