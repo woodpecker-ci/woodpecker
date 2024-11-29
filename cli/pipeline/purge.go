@@ -44,6 +44,11 @@ func buildPipelinePurgeCmd() *cli.Command {
 				Usage: "minimum number of pipelines to keep",
 				Value: 10,
 			},
+			&cli.BoolFlag{
+				Name:  "dry-run",
+				Usage: "disable non-read api calls",
+				Value: false,
+			},
 		},
 	}
 }
@@ -68,6 +73,7 @@ func pipelinePurge(c *cli.Command, client woodpecker.Client) (err error) {
 
 	olderThan := c.String("older-than")
 	keepMin := c.Int("keep-min")
+	dryRun := c.Bool("dry-run")
 
 	duration, err := time.ParseDuration(olderThan)
 	if err != nil {
@@ -116,7 +122,17 @@ func pipelinePurge(c *cli.Command, client woodpecker.Client) (err error) {
 		}
 	}
 
-	for _, p := range pipelinesToPurge {
+	msgPrefix := ""
+	if dryRun {
+		msgPrefix = "DRY-RUN: "
+	}
+
+	for i, p := range pipelinesToPurge {
+		fmt.Printf("%sprune %v/%v pipelines from repo '%v'", msgPrefix, i, len(pipelinesToPurge), repoIDOrFullName)
+		if dryRun {
+			continue
+		}
+
 		err := client.PipelineDelete(repoID, p.ID)
 		if err != nil {
 			return err
