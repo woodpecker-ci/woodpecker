@@ -58,19 +58,30 @@ func TestPipelinePurge(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			mockClient := mocks.NewClient(t)
-
 			mockClient.On("RepoLookup", mock.Anything).Maybe().Return(&woodpecker.Repo{ID: tt.repoID}, nil)
 
-			mockClient.On("PipelineList", tt.repoID, mock.MatchedBy(func(opt woodpecker.PipelineListOptions) bool {
-				return opt.PerPage > 0
-			})).Maybe().Return(tt.pipelinesKeep, nil)
+			mockClient.On("PipelineList", mock.Anything, mock.Anything).Return(func(_ int64, opt woodpecker.PipelineListOptions) ([]*woodpecker.Pipeline, error) {
+				// Return keep pipelines for first call without Before/After filters
+				if opt.Before.IsZero() && opt.After.IsZero() {
+					if opt.Page == 1 {
+						return tt.pipelinesKeep, nil
+					}
+					return []*woodpecker.Pipeline{}, nil
+				}
 
-			mockClient.On("PipelineList", tt.repoID, mock.MatchedBy(func(opt woodpecker.PipelineListOptions) bool {
-				return !opt.Before.IsZero() || !opt.After.IsZero()
-			})).Maybe().Return(tt.pipelines, nil)
+				// Return pipelines to purge for calls with Before filter
+				if !opt.Before.IsZero() {
+					if opt.Page == 1 {
+						return tt.pipelines, nil
+					}
+					return []*woodpecker.Pipeline{}, nil
+				}
+
+				return []*woodpecker.Pipeline{}, nil
+			}).Maybe()
 
 			if tt.wantDelete > 0 {
-				mockClient.On("PipelineDelete", tt.repoID, mock.Anything).Return(nil)
+				mockClient.On("PipelineDelete", tt.repoID, mock.Anything).Return(nil).Times(tt.wantDelete)
 			}
 
 			command := buildPipelinePurgeCmd()
@@ -84,8 +95,6 @@ func TestPipelinePurge(t *testing.T) {
 				}
 
 				assert.NoError(t, err)
-
-				mockClient.AssertNumberOfCalls(t, "PipelineDelete", tt.wantDelete)
 
 				return nil
 			}

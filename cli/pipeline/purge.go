@@ -22,6 +22,7 @@ import (
 	"github.com/urfave/cli/v3"
 
 	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
+	shared_utils "go.woodpecker-ci.org/woodpecker/v2/shared/utils"
 	"go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker"
 )
 
@@ -73,23 +74,30 @@ func pipelinePurge(c *cli.Command, client woodpecker.Client) (err error) {
 		return err
 	}
 
-	opt := woodpecker.PipelineListOptions{
-		ListOptions: woodpecker.ListOptions{
-			Page:    1,
-			PerPage: int(keepMin),
-		},
-	}
-
-	pipelinesKeep, err := client.PipelineList(repoID, opt)
+	pipelinesKeep, err := shared_utils.Paginate(func(page int) ([]*woodpecker.Pipeline, error) {
+		return client.PipelineList(repoID,
+			woodpecker.PipelineListOptions{
+				ListOptions: woodpecker.ListOptions{
+					Page: page,
+				},
+			},
+		)
+	}, int(keepMin))
 	if err != nil {
 		return err
 	}
 
-	opt.ListOptions = woodpecker.ListOptions{}
-	opt.Before = time.Now().Add(-duration)
-	opt.After = time.Now()
-
-	pipelines, err := client.PipelineList(repoID, opt)
+	pipelines, err := shared_utils.Paginate(func(page int) ([]*woodpecker.Pipeline, error) {
+		return client.PipelineList(repoID,
+			woodpecker.PipelineListOptions{
+				ListOptions: woodpecker.ListOptions{
+					Page: page,
+				},
+				Before: time.Now().Add(-duration),
+				After:  time.Now(),
+			},
+		)
+	}, -1)
 	if err != nil {
 		return err
 	}
