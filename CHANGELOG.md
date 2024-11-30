@@ -194,6 +194,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update module github.com/google/go-github/v66 to v67 [[#4487](https://github.com/woodpecker-ci/woodpecker/pull/4487)]
 - chore(deps): update woodpeckerci/plugin-release docker tag to v0.2.2 [[#4483](https://github.com/woodpecker-ci/woodpecker/pull/4483)]
 - chore(deps): update pre-commit hook golangci/golangci-lint to v1.62.2 [[#4482](https://github.com/woodpecker-ci/woodpecker/pull/4482)]
 - fix(deps): update golang-packages [[#4452](https://github.com/woodpecker-ci/woodpecker/pull/4452)]
