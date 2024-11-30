@@ -20,6 +20,7 @@ import (
 
 	"github.com/franela/goblin"
 	"github.com/stretchr/testify/assert"
+	"gopkg.in/yaml.v3"
 
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/metadata"
 	yaml_base_types "go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/types/base"
@@ -252,21 +253,38 @@ steps:
       event: success
 `
 
-var sampleSliceYaml = `
-steps:
-  nil_slice:
-    image: plugins/slack
-  empty_slice:
-    image: plugins/slack
-    depends_on: []
-`
+func TestReSerialize(t *testing.T) {
+	work1, err := ParseString(sampleVarYaml)
+	if !assert.NoError(t, err) {
+		t.Fail()
+	}
+
+	workBin, err := yaml.Marshal(work1)
+	if !assert.NoError(t, err) {
+		t.Fail()
+	}
+
+	assert.EqualValues(t, `steps:
+    containerlist:
+        - image: plugins/slack
+          name: notify_fail
+          settings: {}
+        - image: plugins/slack
+          name: notify_success
+          settings: {}
+          when:
+        				path:
+        					include: []
+        					exclude: []
+skip_clone: false`, string(workBin))
+}
 
 func TestSlice(t *testing.T) {
 	g := goblin.Goblin(t)
 
 	g.Describe("Parser", func() {
 		g.It("should marshal a not set slice to nil", func() {
-			out, err := ParseString(sampleSliceYaml)
+			out, err := ParseString(sampleYaml)
 			if err != nil {
 				g.Fail(err)
 			}
@@ -276,7 +294,7 @@ func TestSlice(t *testing.T) {
 		})
 
 		g.It("should marshal an empty slice", func() {
-			out, err := ParseString(sampleSliceYaml)
+			out, err := ParseString(sampleYaml)
 			if err != nil {
 				g.Fail(err)
 			}
