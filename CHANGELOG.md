@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-11-29
+## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-11-30
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -8,6 +8,7 @@
 
 ### 💥 Breaking changes
 
+- Fix woodpecker-go repo model to match server [[#4479](https://github.com/woodpecker-ci/woodpecker/pull/4479)]
 - Restructure cli commands [[#4467](https://github.com/woodpecker-ci/woodpecker/pull/4467)]
 - Add pagination options to all supported endpoints in sdk [[#4463](https://github.com/woodpecker-ci/woodpecker/pull/4463)]
 - Allow to set custom trusted clone plugins [[#4352](https://github.com/woodpecker-ci/woodpecker/pull/4352)]
