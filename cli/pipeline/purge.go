@@ -113,7 +113,8 @@ func pipelinePurge(c *cli.Command, client woodpecker.Client) (err error) {
 	}
 
 	for i, p := range pipelinesToPurge {
-		log.Debug().Msgf("%sprune %v/%v pipelines from repo '%v'", msgPrefix, i+1, len(pipelinesToPurge), repoIDOrFullName)
+		// cspell:words spurge
+		log.Debug().Msgf("%spurge %v/%v pipelines from repo '%v'", msgPrefix, i+1, len(pipelinesToPurge), repoIDOrFullName)
 		if dryRun {
 			continue
 		}
