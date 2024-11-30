@@ -28,7 +28,7 @@ import (
 
 var registryCreateCmd = &cli.Command{
 	Name:      "add",
-	Usage:     "adds a registry",
+	Usage:     "add a registry",
 	ArgsUsage: "[org-id|org-full-name]",
 	Action:    registryCreate,
 	Flags: []cli.Flag{

@@ -26,12 +26,13 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
 )
 
-var secretInfoCmd = &cli.Command{
-	Name:      "info",
-	Usage:     "display secret info",
+var secretShowCmd = &cli.Command{
+	Name:      "show",
+	Usage:     "show secret information",
 	ArgsUsage: "[repo-id|repo-full-name]",
-	Action:    secretInfo,
+	Action:    secretShow,
 	Flags: []cli.Flag{
+		common.RepoFlag,
 		&cli.StringFlag{
 			Name:  "name",
 			Usage: "secret name",
@@ -40,7 +41,7 @@ var secretInfoCmd = &cli.Command{
 	},
 }
 
-func secretInfo(ctx context.Context, c *cli.Command) error {
+func secretShow(ctx context.Context, c *cli.Command) error {
 	var (
 		secretName = c.String("name")
 		format     = c.String("format") + "\n"
@@ -55,7 +56,12 @@ func secretInfo(ctx context.Context, c *cli.Command) error {
 		return err
 	}
 
-	secret, err := client.GlobalSecret(secretName)
+	repoID, err := parseTargetArgs(client, c)
+	if err != nil {
+		return err
+	}
+
+	secret, err := client.Secret(repoID, secretName)
 	if err != nil {
 		return err
 	}

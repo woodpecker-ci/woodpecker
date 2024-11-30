@@ -1,4 +1,4 @@
-// Copyright 2024 Woodpecker Authors
+// Copyright 2023 Woodpecker Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,12 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package registry
+package user
 
 import (
 	"context"
-	"html/template"
+	"fmt"
 	"os"
+	"text/template"
 
 	"github.com/urfave/cli/v3"
 
@@ -25,46 +26,37 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
 )
 
-var registryInfoCmd = &cli.Command{
-	Name:      "info",
-	Usage:     "display registry info",
-	ArgsUsage: "[org-id|org-full-name]",
-	Action:    registryInfo,
-	Flags: []cli.Flag{
-		common.OrgFlag,
-		&cli.StringFlag{
-			Name:  "hostname",
-			Usage: "registry hostname",
-			Value: "docker.io",
-		},
-		common.FormatFlag(tmplRegistryList, true),
-	},
+var userShowCmd = &cli.Command{
+	Name:      "show",
+	Usage:     "show user information",
+	ArgsUsage: "<username>",
+	Action:    userShow,
+	Flags:     []cli.Flag{common.FormatFlag(tmplUserInfo)},
 }
 
-func registryInfo(ctx context.Context, c *cli.Command) error {
-	var (
-		hostname = c.String("hostname")
-		format   = c.String("format") + "\n"
-	)
-
+func userShow(ctx context.Context, c *cli.Command) error {
 	client, err := internal.NewClient(ctx, c)
 	if err != nil {
 		return err
 	}
 
-	orgID, err := parseTargetArgs(client, c)
+	login := c.Args().First()
+	if len(login) == 0 {
+		return fmt.Errorf("missing or invalid user login")
+	}
+
+	user, err := client.User(login)
 	if err != nil {
 		return err
 	}
 
-	registry, err := client.OrgRegistry(orgID, hostname)
+	tmpl, err := template.New("_").Parse(c.String("format") + "\n")
 	if err != nil {
 		return err
 	}
-
-	tmpl, err := template.New("_").Parse(format)
-	if err != nil {
-		return err
-	}
-	return tmpl.Execute(os.Stdout, registry)
+	return tmpl.Execute(os.Stdout, user)
 }
+
+// Template for user information.
+var tmplUserInfo = `User: {{ .Login }}
+Email: {{ .Email }}`
