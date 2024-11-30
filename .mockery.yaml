@@ -1,2 +1,11 @@
 ---
 disable-version-string: true
+outpkg: 'mocks'
+dir: '{{.InterfaceDir}}/mocks'
+packages:
+  go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/client:
+    config:
+      resolve-type-alias: false
+      issue-845-fix: true
+    interfaces:
+      ClientInterface:

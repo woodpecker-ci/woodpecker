@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Deprecated: use woodpecker-go instead.
 package woodpecker
 
 import (
@@ -21,6 +22,8 @@ import (
 //go:generate mockery --name Client --output mocks --case underscore --note "+build test"
 
 // Client is used to communicate with a Woodpecker server.
+//
+// Deprecated: use woodpecker-go.Client instead.
 type Client interface {
 	// SetClient sets the http.Client.
 	SetClient(*http.Client)
