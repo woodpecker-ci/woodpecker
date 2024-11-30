@@ -59,6 +59,6 @@ func logLevel(ctx context.Context, c *cli.Command) error {
 		}
 	}
 
-	log.Info().Msgf("Log level: %s", ll.Level)
+	log.Info().Msgf("log level: %s", ll.Level)
 	return nil
 }
