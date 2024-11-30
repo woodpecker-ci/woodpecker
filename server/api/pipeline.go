@@ -144,7 +144,12 @@ func GetPipelines(c *gin.Context) {
 	}
 
 	if status := c.Query("status"); status != "" {
-		filter.Status = model.StatusValue(status)
+		ps := model.StatusValue(status)
+		if err := ps.Validate(); err != nil {
+			_ = c.AbortWithError(http.StatusBadRequest, err)
+			return
+		}
+		filter.Status = ps
 	}
 
 	if before := c.Query("before"); before != "" {
