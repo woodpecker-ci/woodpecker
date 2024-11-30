@@ -28,7 +28,7 @@ var Command = &cli.Command{
 	Usage: "manage repositories",
 	Commands: []*cli.Command{
 		repoListCmd,
-		repoInfoCmd,
+		repoShowCmd,
 		repoAddCmd,
 		repoUpdateCmd,
 		repoRemoveCmd,

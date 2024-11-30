@@ -30,7 +30,7 @@ var Command = &cli.Command{
 		registryCreateCmd,
 		registryDeleteCmd,
 		registryUpdateCmd,
-		registryInfoCmd,
+		registryShowCmd,
 		registryListCmd,
 	},
 }

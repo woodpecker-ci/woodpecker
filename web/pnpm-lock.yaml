@@ -26,9 +26,6 @@ importers:
       ansi_up:
         specifier: ^6.0.2
         version: 6.0.2
-      dayjs:
-        specifier: ^1.11.12
-        version: 1.11.13
       dompurify:
         specifier: ^3.2.0
         version: 3.2.1
@@ -123,9 +120,6 @@ importers:
       prettier:
         specifier: ^3.3.3
         version: 3.3.3
-      replace-in-file:
-        specifier: ^8.1.0
-        version: 8.2.0
       tinycolor2:
         specifier: ^1.6.0
         version: 1.6.0
@@ -1107,10 +1101,6 @@ packages:
     resolution: {integrity: sha512-oKnbhFyRIXpUuez8iBMmyEa4nbj4IOQyuhc/wy9kY7/WVPcwIO9VA668Pu8RkO7+0G76SLROeyw9CpQ061i4mA==}
     engines: {node: '>=10'}
 
-  chalk@5.3.0:
-    resolution: {integrity: sha512-dLitG79d+GV1Nb/VYcCDFivJeK1hiukt9QjRNVOsUtTy1rR1YJsmpGGTZ3qJos+uw7WmWF4wUwBd9jxjocFC2w==}
-    engines: {node: ^12.17.0 || ^14.13 || >=16.0.0}
-
   char-regex@1.0.2:
     resolution: {integrity: sha512-kWWXztvZ5SBQV+eRgKFeh8q5sLuZY2+8WUIzlxWVTg+oGwY14qylx1KbKzHd8P6ZYkAg0xyIDU9JMHhyJMZ1jw==}
     engines: {node: '>=10'}
@@ -1213,9 +1203,6 @@ packages:
   data-urls@5.0.0:
     resolution: {integrity: sha512-ZYP5VBHshaDAiVZxjbRVcFJpc+4xGgT0bK3vzy1HLN8jTO975HEbuYzZJcHoQEY5K1a0z8YayJkyVETa08eNTg==}
     engines: {node: '>=18'}
-
-  dayjs@1.11.13:
-    resolution: {integrity: sha512-oaMBel6gjolK862uaPQOVTA7q3TZhuSvuMQAAglQDOWYO9A91IrAOUJEyKVlqJlHE0vq5p5UXxzdPfMH/x6xNg==}
 
   de-indent@1.0.2:
     resolution: {integrity: sha512-e/1zu3xH5MQryN2zdVaF0OrdNLUbvWxzMbi+iNA6Bky7l1RoP8a2fIbRocyHclXt/arDrrR6lL3TqFD9pMQTsg==}
@@ -2293,11 +2280,6 @@ packages:
 
   regjsparser@0.10.0:
     resolution: {integrity: sha512-qx+xQGZVsy55CH0a1hiVwHmqjLryfh7wQyF5HO07XJ9f7dQMY/gPQHhlyDkIzJKC+x2fUCpCcUODUUUFrm7SHA==}
-    hasBin: true
-
-  replace-in-file@8.2.0:
-    resolution: {integrity: sha512-hMsQtdYHwWviQT5ZbNsgfu0WuCiNlcUSnnD+aHAL081kbU9dPkPocDaHlDvAHKydTWWpx1apfcEcmvIyQk3CpQ==}
-    engines: {node: '>=18'}
     hasBin: true
 
   require-directory@2.1.1:
@@ -3798,8 +3780,6 @@ snapshots:
       ansi-styles: 4.3.0
       supports-color: 7.2.0
 
-  chalk@5.3.0: {}
-
   char-regex@1.0.2: {}
 
   character-entities@2.0.2: {}
@@ -3897,8 +3877,6 @@ snapshots:
     dependencies:
       whatwg-mimetype: 4.0.0
       whatwg-url: 14.0.0
-
-  dayjs@1.11.13: {}
 
   de-indent@1.0.2: {}
 
@@ -5204,12 +5182,6 @@ snapshots:
   regjsparser@0.10.0:
     dependencies:
       jsesc: 0.5.0
-
-  replace-in-file@8.2.0:
-    dependencies:
-      chalk: 5.3.0
-      glob: 10.4.5
-      yargs: 17.7.2
 
   require-directory@2.1.1: {}
 

@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package repo
+package cron
 
 import (
 	"context"
+	"html/template"
 	"os"
-	"text/template"
 
 	"github.com/urfave/cli/v3"
 
@@ -25,16 +25,31 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
 )
 
-var repoInfoCmd = &cli.Command{
-	Name:      "info",
-	Usage:     "show repository details",
-	ArgsUsage: "<repo-id|repo-full-name>",
-	Action:    repoInfo,
-	Flags:     []cli.Flag{common.FormatFlag(tmplRepoInfo)},
+var cronShowCmd = &cli.Command{
+	Name:      "show",
+	Usage:     "show cron job information",
+	ArgsUsage: "[repo-id|repo-full-name]",
+	Action:    cronShow,
+	Flags: []cli.Flag{
+		common.RepoFlag,
+		&cli.StringFlag{
+			Name:     "id",
+			Usage:    "cron id",
+			Required: true,
+		},
+		common.FormatFlag(tmplCronList, true),
+	},
 }
 
-func repoInfo(ctx context.Context, c *cli.Command) error {
-	repoIDOrFullName := c.Args().First()
+func cronShow(ctx context.Context, c *cli.Command) error {
+	var (
+		cronID           = c.Int("id")
+		repoIDOrFullName = c.String("repository")
+		format           = c.String("format") + "\n"
+	)
+	if repoIDOrFullName == "" {
+		repoIDOrFullName = c.Args().First()
+	}
 	client, err := internal.NewClient(ctx, c)
 	if err != nil {
 		return err
@@ -44,28 +59,13 @@ func repoInfo(ctx context.Context, c *cli.Command) error {
 		return err
 	}
 
-	repo, err := client.Repo(repoID)
+	cron, err := client.CronGet(repoID, cronID)
 	if err != nil {
 		return err
 	}
-
-	tmpl, err := template.New("_").Parse(c.String("format"))
+	tmpl, err := template.New("_").Parse(format)
 	if err != nil {
 		return err
 	}
-	return tmpl.Execute(os.Stdout, repo)
+	return tmpl.Execute(os.Stdout, cron)
 }
-
-// tTemplate for repo information.
-var tmplRepoInfo = `Owner: {{ .Owner }}
-Repo: {{ .Name }}
-URL: {{ .ForgeURL }}
-Config path: {{ .Config }}
-Visibility: {{ .Visibility }}
-Private: {{ .IsSCMPrivate }}
-Trusted: {{ .IsTrusted }}
-Gated: {{ .IsGated }}
-Require approval for: {{ .RequireApproval }}
-Clone url: {{ .Clone }}
-Allow pull-requests: {{ .AllowPullRequests }}
-`

@@ -26,7 +26,7 @@ import (
 
 var pipelineLastCmd = &cli.Command{
 	Name:      "last",
-	Usage:     "show latest pipeline details",
+	Usage:     "show latest pipeline information",
 	ArgsUsage: "<repo-id|repo-full-name>",
 	Action:    pipelineLast,
 	Flags: append(common.OutputFlags("table"), []cli.Flag{

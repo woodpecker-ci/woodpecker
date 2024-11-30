@@ -1,4 +1,4 @@
-// Copyright 2023 Woodpecker Authors
+// Copyright 2024 Woodpecker Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,11 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package secret
+package registry
 
 import (
 	"context"
-	"fmt"
 	"html/template"
 	"os"
 
@@ -26,30 +25,27 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
 )
 
-var secretInfoCmd = &cli.Command{
-	Name:      "info",
-	Usage:     "display secret info",
-	ArgsUsage: "[repo-id|repo-full-name]",
-	Action:    secretInfo,
+var registryShowCmd = &cli.Command{
+	Name:      "show",
+	Usage:     "show registry information",
+	ArgsUsage: "[org-id|org-full-name]",
+	Action:    registryShow,
 	Flags: []cli.Flag{
 		common.OrgFlag,
 		&cli.StringFlag{
-			Name:  "name",
-			Usage: "secret name",
+			Name:  "hostname",
+			Usage: "registry hostname",
+			Value: "docker.io",
 		},
-		common.FormatFlag(tmplSecretList, true),
+		common.FormatFlag(tmplRegistryList, true),
 	},
 }
 
-func secretInfo(ctx context.Context, c *cli.Command) error {
+func registryShow(ctx context.Context, c *cli.Command) error {
 	var (
-		secretName = c.String("name")
-		format     = c.String("format") + "\n"
+		hostname = c.String("hostname")
+		format   = c.String("format") + "\n"
 	)
-
-	if secretName == "" {
-		return fmt.Errorf("secret name is missing")
-	}
 
 	client, err := internal.NewClient(ctx, c)
 	if err != nil {
@@ -61,14 +57,14 @@ func secretInfo(ctx context.Context, c *cli.Command) error {
 		return err
 	}
 
-	secret, err := client.OrgSecret(orgID, secretName)
+	registry, err := client.OrgRegistry(orgID, hostname)
 	if err != nil {
 		return err
 	}
 
-	tmpl, err := template.New("_").Funcs(secretFuncMap).Parse(format)
+	tmpl, err := template.New("_").Parse(format)
 	if err != nil {
 		return err
 	}
-	return tmpl.Execute(os.Stdout, secret)
+	return tmpl.Execute(os.Stdout, registry)
 }

@@ -53,7 +53,7 @@ var repoUpdateCmd = &cli.Command{
 		},
 		&cli.StringFlag{
 			Name:  "config",
-			Usage: "repository configuration path (e.g. .woodpecker.yml)",
+			Usage: "repository configuration path. Example: .woodpecker.yml",
 		},
 		&cli.IntFlag{
 			Name:  "pipeline-counter",
@@ -61,7 +61,7 @@ var repoUpdateCmd = &cli.Command{
 		},
 		&cli.BoolFlag{
 			Name:  "unsafe",
-			Usage: "validate updating the pipeline-counter is unsafe",
+			Usage: "allow unsafe operations",
 		},
 	},
 }

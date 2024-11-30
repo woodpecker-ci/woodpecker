@@ -17,7 +17,7 @@
                 "delete_agent": "Odstranit agent",
                 "delete_confirm": "Opravdu chcete tohoto agenta odstranit? Už se nebude moci připojit k serveru.",
                 "deleted": "Agent smazán",
-                "desc": "Agenti registrovaní pro tento server",
+                "desc": "Agenti registrovaní na tomto serveru.",
                 "edit_agent": "Upravit agent",
                 "id": "ID",
                 "last_contact": "Poslední kontakt",
@@ -41,12 +41,12 @@
                 "token": "Tokeny",
                 "version": "Verze"
             },
-            "not_allowed": "Nemáte povolen přístup k nastavení serveru",
+            "not_allowed": "K nastavení serveru nemáte přístup.",
             "orgs": {
                 "delete_confirm": "Opravdu chcete tuto organizaci smazat? Tím se odstraní také všechna úložiště vlastněná touto organizací.",
                 "delete_org": "Odstranit organizaci",
                 "deleted": "Organizace vymazána",
-                "desc": "Organizace vlastnící úložiště na tomto serveru",
+                "desc": "Organizace vlastnící repozitáře na tomto serveru.",
                 "none": "Zatím neexistují žádné organizace.",
                 "org_settings": "Organizační nastavení",
                 "orgs": "Organizace",
@@ -74,7 +74,7 @@
                 "waiting_for": "čekání na"
             },
             "repos": {
-                "desc": "Úložiště, která jsou nebo byla na tomto serveru povolena",
+                "desc": "Repozitáře, které jsou nebo byly na tomto serveru povoleny.",
                 "disabled": "Bezbariérový",
                 "none": "Zatím neexistují žádná úložiště.",
                 "repos": "Repozitáře",
@@ -198,7 +198,7 @@
             "success": "Repozitář povoleno"
         },
         "manual_pipeline": {
-            "select_branch": "Vyberte pobočku",
+            "select_branch": "Vyberte větev",
             "title": "Spuštění ručního spuštění potrubí",
             "trigger": "Spustit potrubí",
             "variables": {
