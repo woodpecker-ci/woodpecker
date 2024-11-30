@@ -1,9 +1,8 @@
-import { copyFile, existsSync, mkdirSync, readdirSync } from 'node:fs';
+import { readdirSync } from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
 import VueI18nPlugin from '@intlify/unplugin-vue-i18n/vite';
 import vue from '@vitejs/plugin-vue';
-import { replaceInFileSync } from 'replace-in-file';
 import type { Plugin } from 'vite';
 import prismjs from 'vite-plugin-prismjs';
 import WindiCSS from 'vite-plugin-windicss';
@@ -53,44 +52,6 @@ export default defineConfig({
       const resolvedVirtualModuleId = `\0${virtualModuleId}`;
 
       const filenames = readdirSync('src/assets/locales/').map((filename) => filename.replace('.json', ''));
-
-      if (!existsSync('src/assets/dayjsLocales')) {
-        mkdirSync('src/assets/dayjsLocales');
-      }
-
-      filenames.forEach((name) => {
-        // English is always directly loaded (compiled by Vite) and thus not copied
-        if (name === 'en') {
-          return;
-        }
-        let langName = name;
-
-        // copy dayjs language
-        if (name === 'zh-Hans') {
-          // zh-Hans is called zh in dayjs
-          langName = 'zh';
-        } else if (name === 'zh-Hant') {
-          // zh-Hant is called zh-cn in dayjs
-          langName = 'zh-cn';
-        }
-
-        copyFile(
-          `node_modules/dayjs/esm/locale/${langName}.js`,
-          `src/assets/dayjsLocales/${name}.js`,
-          // eslint-disable-next-line promise/prefer-await-to-callbacks
-          (err) => {
-            if (err) {
-              throw err;
-            }
-          },
-        );
-      });
-      replaceInFileSync({
-        files: 'src/assets/dayjsLocales/*.js',
-        // remove any dayjs import and any dayjs.locale call
-        from: /(?:import dayjs.*'|dayjs\.locale.*);/g,
-        to: '',
-      });
 
       return {
         name: 'vue-i18n-supported-locales',
