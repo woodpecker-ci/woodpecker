@@ -8,6 +8,7 @@
 
 ### 💥 Breaking changes
 
+- Move pipeline logs command [[#4480](https://github.com/woodpecker-ci/woodpecker/pull/4480)]
 - Fix woodpecker-go repo model to match server [[#4479](https://github.com/woodpecker-ci/woodpecker/pull/4479)]
 - Restructure cli commands [[#4467](https://github.com/woodpecker-ci/woodpecker/pull/4467)]
 - Add pagination options to all supported endpoints in sdk [[#4463](https://github.com/woodpecker-ci/woodpecker/pull/4463)]
