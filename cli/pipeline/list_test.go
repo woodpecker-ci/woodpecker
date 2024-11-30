@@ -41,47 +41,6 @@ func TestPipelineList(t *testing.T) {
 			},
 		},
 		{
-			name:   "filter by branch",
-			repoID: 1,
-			pipelines: []*woodpecker.Pipeline{
-				{ID: 1, Branch: "main", Event: "push", Status: "success"},
-				{ID: 2, Branch: "develop", Event: "pull_request", Status: "running"},
-				{ID: 3, Branch: "main", Event: "push", Status: "failure"},
-			},
-			args: []string{"ls", "--branch", "main", "repo/name"},
-			expected: []woodpecker.Pipeline{
-				{ID: 1, Branch: "main", Event: "push", Status: "success"},
-				{ID: 3, Branch: "main", Event: "push", Status: "failure"},
-			},
-		},
-		{
-			name:   "filter by event",
-			repoID: 1,
-			pipelines: []*woodpecker.Pipeline{
-				{ID: 1, Branch: "main", Event: "push", Status: "success"},
-				{ID: 2, Branch: "develop", Event: "pull_request", Status: "running"},
-				{ID: 3, Branch: "main", Event: "push", Status: "failure"},
-			},
-			args: []string{"ls", "--event", "push", "repo/name"},
-			expected: []woodpecker.Pipeline{
-				{ID: 1, Branch: "main", Event: "push", Status: "success"},
-				{ID: 3, Branch: "main", Event: "push", Status: "failure"},
-			},
-		},
-		{
-			name:   "filter by status",
-			repoID: 1,
-			pipelines: []*woodpecker.Pipeline{
-				{ID: 1, Branch: "main", Event: "push", Status: "success"},
-				{ID: 2, Branch: "develop", Event: "pull_request", Status: "running"},
-				{ID: 3, Branch: "main", Event: "push", Status: "failure"},
-			},
-			args: []string{"ls", "--status", "success", "repo/name"},
-			expected: []woodpecker.Pipeline{
-				{ID: 1, Branch: "main", Event: "push", Status: "success"},
-			},
-		},
-		{
 			name:   "limit results",
 			repoID: 1,
 			pipelines: []*woodpecker.Pipeline{

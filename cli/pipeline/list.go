@@ -78,20 +78,18 @@ func List(ctx context.Context, c *cli.Command) error {
 	if err != nil {
 		return err
 	}
-	resources, err := pipelineList(c, client)
+	pipelines, err := pipelineList(c, client)
 	if err != nil {
 		return err
 	}
-	return pipelineOutput(c, resources)
+	return pipelineOutput(c, pipelines)
 }
 
-func pipelineList(c *cli.Command, client woodpecker.Client) ([]woodpecker.Pipeline, error) {
-	resources := make([]woodpecker.Pipeline, 0)
-
+func pipelineList(c *cli.Command, client woodpecker.Client) ([]*woodpecker.Pipeline, error) {
 	repoIDOrFullName := c.Args().First()
 	repoID, err := internal.ParseRepo(client, repoIDOrFullName)
 	if err != nil {
-		return resources, err
+		return nil, err
 	}
 
 	opt := woodpecker.PipelineListOptions{}
@@ -116,27 +114,15 @@ func pipelineList(c *cli.Command, client woodpecker.Client) ([]woodpecker.Pipeli
 				},
 				Before: opt.Before,
 				After:  opt.After,
+				Branch: branch,
+				Events: []string{event},
+				Status: status,
 			},
 		)
 	}, limit)
 	if err != nil {
-		return resources, err
+		return nil, err
 	}
 
-	var count int
-	for _, pipeline := range pipelines {
-		if branch != "" && pipeline.Branch != branch {
-			continue
-		}
-		if event != "" && pipeline.Event != event {
-			continue
-		}
-		if status != "" && pipeline.Status != status {
-			continue
-		}
-		resources = append(resources, *pipeline)
-		count++
-	}
-
-	return resources, nil
+	return pipelines, nil
 }
