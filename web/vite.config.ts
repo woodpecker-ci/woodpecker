@@ -3,7 +3,6 @@ import path from 'node:path';
 import process from 'node:process';
 import VueI18nPlugin from '@intlify/unplugin-vue-i18n/vite';
 import vue from '@vitejs/plugin-vue';
-import { replaceInFileSync } from 'replace-in-file';
 import type { Plugin } from 'vite';
 import prismjs from 'vite-plugin-prismjs';
 import WindiCSS from 'vite-plugin-windicss';
@@ -54,8 +53,8 @@ export default defineConfig({
 
       const filenames = readdirSync('src/assets/locales/').map((filename) => filename.replace('.json', ''));
 
-      if (!existsSync('src/assets/dayjsLocales')) {
-        mkdirSync('src/assets/dayjsLocales');
+      if (!existsSync('src/assets/timeAgoLocales')) {
+        mkdirSync('src/assets/timeAgoLocales');
       }
 
       filenames.forEach((name) => {
@@ -65,18 +64,14 @@ export default defineConfig({
         }
         let langName = name;
 
-        // copy dayjs language
         if (name === 'zh-Hans') {
-          // zh-Hans is called zh in dayjs
+          // zh-Hans is called zh in TimeAgo
           langName = 'zh';
-        } else if (name === 'zh-Hant') {
-          // zh-Hant is called zh-cn in dayjs
-          langName = 'zh-cn';
         }
 
         copyFile(
-          `node_modules/dayjs/esm/locale/${langName}.js`,
-          `src/assets/dayjsLocales/${name}.js`,
+          `node_modules/javascript-time-ago/locale/${langName}.json`,
+          `src/assets/timeAgoLocales/${name}.json`,
           // eslint-disable-next-line promise/prefer-await-to-callbacks
           (err) => {
             if (err) {
@@ -84,12 +79,6 @@ export default defineConfig({
             }
           },
         );
-      });
-      replaceInFileSync({
-        files: 'src/assets/dayjsLocales/*.js',
-        // remove any dayjs import and any dayjs.locale call
-        from: /(?:import dayjs.*'|dayjs\.locale.*);/g,
-        to: '',
       });
 
       return {

@@ -106,7 +106,7 @@ export default antfu(
       'tsconfig.json',
       'src/assets/locales/**/*',
       '!src/assets/locales/en.json',
-      'src/assets/dayjsLocales/',
+      'src/assets/timeAgoLocales/',
       'components.d.ts',
     ],
   },

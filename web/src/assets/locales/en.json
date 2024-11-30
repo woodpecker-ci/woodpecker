@@ -24,7 +24,6 @@
     "not_found": "Server could not find requested object"
   },
   "time": {
-    "template": "MMM D, YYYY, HH:mm z",
     "not_started": "not started yet"
   },
   "repo": {
