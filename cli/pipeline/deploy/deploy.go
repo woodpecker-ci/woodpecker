@@ -80,7 +80,7 @@ func deploy(ctx context.Context, c *cli.Command) error {
 			return err
 		}
 
-		branch = repo.DefaultBranch
+		branch = repo.Branch
 	}
 
 	pipelineArg := c.Args().Get(1)
