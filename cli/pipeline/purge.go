@@ -28,30 +28,28 @@ import (
 )
 
 //nolint:mnd
-func buildPipelinePurgeCmd() *cli.Command {
-	return &cli.Command{
-		Name:      "purge",
-		Usage:     "purge pipelines",
-		ArgsUsage: "<repo-id|repo-full-name>",
-		Action:    Purge,
-		Flags: []cli.Flag{
-			&cli.StringFlag{
-				Name:     "older-than",
-				Usage:    "remove pipelines older than the specified time limit",
-				Required: true,
-			},
-			&cli.IntFlag{
-				Name:  "keep-min",
-				Usage: "minimum number of pipelines to keep",
-				Value: 10,
-			},
-			&cli.BoolFlag{
-				Name:  "dry-run",
-				Usage: "disable non-read api calls",
-				Value: false,
-			},
+var pipelinePurgeCmd = &cli.Command{
+	Name:      "purge",
+	Usage:     "purge pipelines",
+	ArgsUsage: "<repo-id|repo-full-name>",
+	Action:    Purge,
+	Flags: []cli.Flag{
+		&cli.StringFlag{
+			Name:     "older-than",
+			Usage:    "remove pipelines older than the specified time limit",
+			Required: true,
 		},
-	}
+		&cli.IntFlag{
+			Name:  "keep-min",
+			Usage: "minimum number of pipelines to keep",
+			Value: 10,
+		},
+		&cli.BoolFlag{
+			Name:  "dry-run",
+			Usage: "disable non-read api calls",
+			Value: false,
+		},
+	},
 }
 
 func Purge(ctx context.Context, c *cli.Command) error {

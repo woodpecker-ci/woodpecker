@@ -84,7 +84,7 @@ func TestPipelinePurge(t *testing.T) {
 				mockClient.On("PipelineDelete", tt.repoID, mock.Anything).Return(nil).Times(tt.wantDelete)
 			}
 
-			command := buildPipelinePurgeCmd()
+			command := pipelinePurgeCmd
 			command.Writer = io.Discard
 			command.Action = func(_ context.Context, c *cli.Command) error {
 				err := pipelinePurge(c, mockClient)
