@@ -17,14 +17,20 @@ package admin
 import (
 	"github.com/urfave/cli/v3"
 
+	"go.woodpecker-ci.org/woodpecker/v2/cli/admin/loglevel"
 	"go.woodpecker-ci.org/woodpecker/v2/cli/admin/registry"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/admin/secret"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/admin/user"
 )
 
 // Command exports the admin command set.
 var Command = &cli.Command{
 	Name:  "admin",
-	Usage: "administer server settings",
+	Usage: "manage server settings",
 	Commands: []*cli.Command{
+		secret.Command,
 		registry.Command,
+		user.Command,
+		loglevel.Command,
 	},
 }

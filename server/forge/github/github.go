@@ -27,7 +27,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/google/go-github/v66/github"
+	"github.com/google/go-github/v67/github"
 	"github.com/rs/zerolog/log"
 	"golang.org/x/oauth2"
 
@@ -660,7 +660,7 @@ func (c *client) loadChangedFilesFromPullRequest(ctx context.Context, pull *gith
 			opts.Page = resp.NextPage
 		}
 		return utils.DeduplicateStrings(fileList), nil
-	})
+	}, -1)
 
 	return pipeline, err
 }

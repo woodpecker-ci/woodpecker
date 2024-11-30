@@ -44,10 +44,10 @@ type User struct {
 	Login string `json:"login"  xorm:"UNIQUE 'login'"`
 
 	// AccessToken is the oauth2 access token.
-	AccessToken string `json:"-"  xorm:"TEXT 'token'"`
+	AccessToken string `json:"-"  xorm:"TEXT 'access_token'"`
 
 	// RefreshToken is the oauth2 refresh token.
-	RefreshToken string `json:"-" xorm:"TEXT 'secret'"`
+	RefreshToken string `json:"-" xorm:"TEXT 'refresh_token'"`
 
 	// Expiry is the AccessToken expiration timestamp (unix seconds).
 	Expiry int64 `json:"-" xorm:"expiry"`
