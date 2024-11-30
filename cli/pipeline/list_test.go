@@ -22,7 +22,7 @@ func TestPipelineList(t *testing.T) {
 		pipelines   []*woodpecker.Pipeline
 		pipelineErr error
 		args        []string
-		expected    []woodpecker.Pipeline
+		expected    []*woodpecker.Pipeline
 		wantErr     error
 	}{
 		{
@@ -34,7 +34,7 @@ func TestPipelineList(t *testing.T) {
 				{ID: 3, Branch: "main", Event: "push", Status: "failure"},
 			},
 			args: []string{"ls", "repo/name"},
-			expected: []woodpecker.Pipeline{
+			expected: []*woodpecker.Pipeline{
 				{ID: 1, Branch: "main", Event: "push", Status: "success"},
 				{ID: 2, Branch: "develop", Event: "pull_request", Status: "running"},
 				{ID: 3, Branch: "main", Event: "push", Status: "failure"},
@@ -49,7 +49,7 @@ func TestPipelineList(t *testing.T) {
 				{ID: 3, Branch: "main", Event: "push", Status: "failure"},
 			},
 			args: []string{"ls", "--limit", "2", "repo/name"},
-			expected: []woodpecker.Pipeline{
+			expected: []*woodpecker.Pipeline{
 				{ID: 1, Branch: "main", Event: "push", Status: "success"},
 				{ID: 2, Branch: "develop", Event: "pull_request", Status: "running"},
 			},

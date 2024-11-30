@@ -65,5 +65,5 @@ func pipelineShow(ctx context.Context, c *cli.Command) error {
 		return err
 	}
 
-	return pipelineOutput(c, []woodpecker.Pipeline{*pipeline})
+	return pipelineOutput(c, []*woodpecker.Pipeline{pipeline})
 }
