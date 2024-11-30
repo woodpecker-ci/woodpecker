@@ -42,6 +42,7 @@ This will be the next version of Woodpecker.
   - `woodpecker-cli log` is now `woodpecker-cli pipeline log`
   - `woodpecker-cli cron` is now `woodpecker-cli repo cron`
   - `woodpecker-cli secret [add|rm|...] --repository` is now `woodpecker-cli repo secret [add|rm|...]`
+  - `woodpecker-cli pipeline logs` is now `woodpecker-cli pipeline log show`
 
 ## Admin migrations
 
