@@ -22,7 +22,7 @@ function splitDuration(durationMs: number) {
 }
 
 function toLocaleString(date: Date) {
-  return date.toLocaleString('de', {
+  return date.toLocaleString(currentLocale, {
     dateStyle: 'short',
     timeStyle: 'short',
   });
