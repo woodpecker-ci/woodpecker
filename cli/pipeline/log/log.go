@@ -23,6 +23,7 @@ var Command = &cli.Command{
 	Name:  "log",
 	Usage: "manage logs",
 	Commands: []*cli.Command{
+		logShowCmd,
 		logPurgeCmd,
 	},
 }
