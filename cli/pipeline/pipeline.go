@@ -46,6 +46,7 @@ var Command = &cli.Command{
 		pipelineCreateCmd,
 		log.Command,
 		deploy.Command,
+		pipelinePurgeCmd,
 	},
 }
 
