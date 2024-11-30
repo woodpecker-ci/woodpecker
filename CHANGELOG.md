@@ -193,6 +193,8 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update woodpeckerci/plugin-release docker tag to v0.2.2 [[#4483](https://github.com/woodpecker-ci/woodpecker/pull/4483)]
+- chore(deps): update pre-commit hook golangci/golangci-lint to v1.62.2 [[#4482](https://github.com/woodpecker-ci/woodpecker/pull/4482)]
 - fix(deps): update golang-packages [[#4452](https://github.com/woodpecker-ci/woodpecker/pull/4452)]
 - fix(deps): update golang-packages [[#4411](https://github.com/woodpecker-ci/woodpecker/pull/4411)]
 - chore(deps): update pre-commit hook igorshubovych/markdownlint-cli to v0.43.0 [[#4443](https://github.com/woodpecker-ci/woodpecker/pull/4443)]
