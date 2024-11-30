@@ -28,9 +28,9 @@ var Command = &cli.Command{
 	Commands: []*cli.Command{
 		registryCreateCmd,
 		registryDeleteCmd,
-		registryUpdateCmd,
-		registryShowCmd,
 		registryListCmd,
+		registryShowCmd,
+		registryUpdateCmd,
 	},
 }
 

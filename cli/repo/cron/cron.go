@@ -25,8 +25,8 @@ var Command = &cli.Command{
 	Commands: []*cli.Command{
 		cronCreateCmd,
 		cronDeleteCmd,
-		cronUpdateCmd,
-		cronShowCmd,
 		cronListCmd,
+		cronShowCmd,
+		cronUpdateCmd,
 	},
 }
