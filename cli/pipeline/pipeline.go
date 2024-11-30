@@ -42,6 +42,7 @@ var Command = &cli.Command{
 		buildPipelineListCmd(),
 		log.Command,
 		pipelinePsCmd,
+		pipelinePurgeCmd,
 		pipelineQueueCmd,
 		pipelineShowCmd,
 		pipelineStartCmd,

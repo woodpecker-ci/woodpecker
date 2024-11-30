@@ -1,1 +1,67 @@
-{}
+{
+    "back": "Vissza",
+    "logout": "Kijelentkezés",
+    "search": "Keresés…",
+    "username": "Felhasználónév",
+    "unknown_error": "Ismeretlen hiba történt",
+    "password": "Jelszó",
+    "repo": {
+        "visibility": {
+            "public": {
+                "public": "Nyilvános"
+            },
+            "private": {
+                "private": "Privát",
+                "desc": "Csak te és a többi tulajdonos láthatjátok ezt a projektet a tárolóban."
+            },
+            "internal": {
+                "internal": "Belső"
+            }
+        },
+        "settings": {
+            "general": {
+                "timeout": {
+                    "minutes": "percek"
+                },
+                "save": "Beállítások mentése",
+                "project": "Projekt beállítások",
+                "success": "Projekt beállítások frissítve"
+            },
+            "actions": {
+                "disable": {
+                    "disable": "Tároló inaktiválása"
+                },
+                "delete": {
+                    "delete": "Tároló törlése"
+                }
+            }
+        },
+        "pipeline": {
+            "loading": "Betöltés…"
+        }
+    },
+    "admin": {
+        "settings": {
+            "users": {
+                "show": "Mutasd a felhasználokat",
+                "cancel": "Mégse",
+                "save": "Felhasználó mentése",
+                "add": "Felhasználó hozzáadása",
+                "deleted": "Felhasználó törölve",
+                "created": "Felhasználó létrehozva",
+                "saved": "Felhasználó mentve",
+                "delete_user": "Felhasználó törlése",
+                "edit_user": "Felhasználó szerkesztése"
+            },
+            "orgs": {
+                "orgs": "Szervezetek",
+                "delete_org": "Szervezet törlése"
+            }
+        }
+    },
+    "cancel": "Mégse",
+    "login": "Bejelentkezés",
+    "internal_error": "Valamilyen belső hiba történt",
+    "info": "Információ",
+    "registration_closed": "A regisztráció zárva"
+}
