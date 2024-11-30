@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package pipeline
+package log
 
 import (
 	"context"
@@ -27,14 +27,14 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker"
 )
 
-var pipelineLogsCmd = &cli.Command{
-	Name:      "logs",
+var logShowCmd = &cli.Command{
+	Name:      "show",
 	Usage:     "show pipeline logs",
 	ArgsUsage: "<repo-id|repo-full-name> <pipeline> [step-number|step-name]",
-	Action:    pipelineLogs,
+	Action:    logShow,
 }
 
-func pipelineLogs(ctx context.Context, c *cli.Command) error {
+func logShow(ctx context.Context, c *cli.Command) error {
 	repoIDOrFullName := c.Args().First()
 	client, err := internal.NewClient(ctx, c)
 	if err != nil {
@@ -59,17 +59,17 @@ func pipelineLogs(ctx context.Context, c *cli.Command) error {
 
 	stepArg := c.Args().Get(2) //nolint:mnd
 	if len(stepArg) == 0 {
-		return showPipelineLog(client, repoID, number)
+		return pipelineLog(client, repoID, number)
 	}
 
 	step, err := internal.ParseStep(client, repoID, number, stepArg)
 	if err != nil {
 		return fmt.Errorf("invalid step '%s': %w", stepArg, err)
 	}
-	return showStepLog(client, repoID, number, step)
+	return stepLog(client, repoID, number, step)
 }
 
-func showPipelineLog(client woodpecker.Client, repoID, number int64) error {
+func pipelineLog(client woodpecker.Client, repoID, number int64) error {
 	pipeline, err := client.Pipeline(repoID, number)
 	if err != nil {
 		return err
@@ -85,7 +85,7 @@ func showPipelineLog(client woodpecker.Client, repoID, number int64) error {
 			if err := tmpl.Execute(os.Stdout, map[string]any{"workflow": workflow, "step": step}); err != nil {
 				return err
 			}
-			err := showStepLog(client, repoID, number, step.ID)
+			err := stepLog(client, repoID, number, step.ID)
 			if err != nil {
 				return err
 			}
@@ -95,7 +95,7 @@ func showPipelineLog(client woodpecker.Client, repoID, number int64) error {
 	return nil
 }
 
-func showStepLog(client woodpecker.Client, repoID, number, step int64) error {
+func stepLog(client woodpecker.Client, repoID, number, step int64) error {
 	logs, err := client.StepLogEntries(repoID, number, step)
 	if err != nil {
 		return err
