@@ -17,11 +17,9 @@ package main
 import (
 	"context"
 	"os"
-	"sort"
 
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/rs/zerolog/log"
-	"github.com/urfave/cli/v3"
 
 	"go.woodpecker-ci.org/woodpecker/v2/shared/utils"
 )
@@ -32,23 +30,7 @@ func main() {
 	})
 
 	app := newApp()
-
-	sortCommandsRecursive(app.Commands)
-
 	if err := app.Run(ctx, os.Args); err != nil {
 		log.Fatal().Err(err).Msg("error running cli") //nolint:forbidigo
-	}
-}
-
-func sortCommandsRecursive(commands []*cli.Command) {
-	sort.Slice(commands, func(i, j int) bool {
-		return commands[i].Name < commands[j].Name
-	})
-
-	// Recursively sort subcommands
-	for _, cmd := range commands {
-		if len(cmd.Commands) > 0 {
-			sortCommandsRecursive(cmd.Commands)
-		}
 	}
 }

@@ -135,7 +135,7 @@ func ParseRepo(client woodpecker.Client, str string) (repoID int64, err error) {
 	}
 
 	if str == "" {
-		return 0, fmt.Errorf("no repoSsitory provided")
+		return 0, fmt.Errorf("no repository provided")
 	}
 
 	if strings.Contains(str, "/") {
