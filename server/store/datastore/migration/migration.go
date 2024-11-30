@@ -49,6 +49,7 @@ var migrationTasks = []*xormigrate.Migration{
 	&correctPotentialCorruptOrgsUsersRelation,
 	&gatedToRequireApproval,
 	&removeRepoNetrcOnlyTrusted,
+	&renameTokenFields,
 	&removeRepoScm,
 }
 
