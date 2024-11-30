@@ -24,7 +24,8 @@
     "not_found": "Server could not find requested object"
   },
   "time": {
-    "not_started": "not started yet"
+    "not_started": "not started yet",
+    "just_now": "just now"
   },
   "repo": {
     "manual_pipeline": {

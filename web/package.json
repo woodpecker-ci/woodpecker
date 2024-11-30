@@ -25,7 +25,6 @@
     "ansi_up": "^6.0.2",
     "dompurify": "^3.2.0",
     "fuse.js": "^7.0.0",
-    "javascript-time-ago": "^2.5.11",
     "js-base64": "^3.7.7",
     "lodash": "^4.17.21",
     "marked": "^15.0.0",

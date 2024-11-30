@@ -1,4 +1,4 @@
-import { copyFile, existsSync, mkdirSync, readdirSync } from 'node:fs';
+import { readdirSync } from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
 import VueI18nPlugin from '@intlify/unplugin-vue-i18n/vite';
@@ -52,34 +52,6 @@ export default defineConfig({
       const resolvedVirtualModuleId = `\0${virtualModuleId}`;
 
       const filenames = readdirSync('src/assets/locales/').map((filename) => filename.replace('.json', ''));
-
-      if (!existsSync('src/assets/timeAgoLocales')) {
-        mkdirSync('src/assets/timeAgoLocales');
-      }
-
-      filenames.forEach((name) => {
-        // English is always directly loaded (compiled by Vite) and thus not copied
-        if (name === 'en') {
-          return;
-        }
-        let langName = name;
-
-        if (name === 'zh-Hans') {
-          // zh-Hans is called zh in TimeAgo
-          langName = 'zh';
-        }
-
-        copyFile(
-          `node_modules/javascript-time-ago/locale/${langName}.json`,
-          `src/assets/timeAgoLocales/${name}.json`,
-          // eslint-disable-next-line promise/prefer-await-to-callbacks
-          (err) => {
-            if (err) {
-              throw err;
-            }
-          },
-        );
-      });
 
       return {
         name: 'vue-i18n-supported-locales',

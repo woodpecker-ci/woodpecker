@@ -1,9 +1,5 @@
-import type { LocaleData } from 'javascript-time-ago';
-import TimeAgo from 'javascript-time-ago';
-import en from 'javascript-time-ago/locale/en';
+import { useI18n } from 'vue-i18n';
 
-TimeAgo.addDefaultLocale(en);
-let ta = new TimeAgo('en');
 let currentLocale = 'en';
 
 function splitDuration(durationMs: number) {
@@ -32,8 +28,32 @@ function toLocaleString(date: Date) {
   });
 }
 
-function timeAgo(date: Date) {
-  return ta.format(date);
+function timeAgo(date: number) {
+  const seconds = Math.floor((new Date().getTime() - date) / 1000);
+
+  const formatter = new Intl.RelativeTimeFormat(currentLocale);
+
+  let interval = seconds / 31536000;
+  if (interval > 1) {
+    return formatter.format(-Math.round(interval), 'year');
+  }
+  interval = seconds / 2592000;
+  if (interval > 1) {
+    return formatter.format(-Math.round(interval), 'month');
+  }
+  interval = seconds / 86400;
+  if (interval > 1) {
+    return formatter.format(-Math.round(interval), 'day');
+  }
+  interval = seconds / 3600;
+  if (interval > 1) {
+    return formatter.format(-Math.round(interval), 'hour');
+  }
+  interval = seconds / 60;
+  if (interval > 0.5) {
+    return formatter.format(-Math.round(interval), 'minute');
+  }
+  return useI18n().t('time.just_now');
 }
 
 function prettyDuration(durationMs: number) {
@@ -67,15 +87,8 @@ function durationAsNumber(durationMs: number): string {
 }
 
 export function useDate() {
-  const addedLocales = ['en'];
-
   async function setDayjsLocale(locale: string) {
     currentLocale = locale;
-    if (!addedLocales.includes(locale)) {
-      const l = (await import(`~/assets/timeAgoLocales/${locale}.json`)) as LocaleData;
-      TimeAgo.addLocale(l);
-    }
-    ta = new TimeAgo(locale);
   }
 
   return {
