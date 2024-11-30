@@ -8,6 +8,7 @@
 
 ### 💥 Breaking changes
 
+- Unify cli commands and flags [[#4481](https://github.com/woodpecker-ci/woodpecker/pull/4481)]
 - Move pipeline logs command [[#4480](https://github.com/woodpecker-ci/woodpecker/pull/4480)]
 - Fix woodpecker-go repo model to match server [[#4479](https://github.com/woodpecker-ci/woodpecker/pull/4479)]
 - Restructure cli commands [[#4467](https://github.com/woodpecker-ci/woodpecker/pull/4467)]
@@ -58,6 +59,7 @@
 
 ### 📈 Enhancement
 
+- Use JS-native date/time formatting [[#4488](https://github.com/woodpecker-ci/woodpecker/pull/4488)]
 - Add pipeline purge command to cli [[#4470](https://github.com/woodpecker-ci/woodpecker/pull/4470)]
 - Add option to limit the resultset returned by paginate helper [[#4475](https://github.com/woodpecker-ci/woodpecker/pull/4475)]
 - Add filter to list repository pipelines API [[#4416](https://github.com/woodpecker-ci/woodpecker/pull/4416)]
