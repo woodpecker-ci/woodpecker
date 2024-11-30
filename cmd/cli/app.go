@@ -43,12 +43,12 @@ func newApp() *cli.Command {
 	app.Suggest = true
 	app.Commands = []*cli.Command{
 		admin.Command,
-		org.Command,
-		repo.Command,
-		pipeline.Command,
 		exec.Command,
 		info.Command,
 		lint.Command,
+		org.Command,
+		pipeline.Command,
+		repo.Command,
 		setup.Command,
 		update.Command,
 	}
