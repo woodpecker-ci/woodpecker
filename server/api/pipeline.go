@@ -120,6 +120,7 @@ func createTmpPipeline(event model.WebhookEvent, commit *model.Commit, user *mod
 //	@Param			branch			query	string	false	"filter pipelines by branch"
 //	@Param			event			query	string	false	"filter pipelines by webhook events (comma separated)"
 //	@Param			ref				query	string	false	"filter pipelines by strings contained in ref"
+//	@Param			status			query	string	false	"filter pipelines by status"
 func GetPipelines(c *gin.Context) {
 	repo := session.Repo(c)
 
@@ -140,6 +141,15 @@ func GetPipelines(c *gin.Context) {
 			wel = append(wel, we)
 		}
 		filter.Events = wel
+	}
+
+	if status := c.Query("status"); status != "" {
+		ps := model.StatusValue(status)
+		if err := ps.Validate(); err != nil {
+			_ = c.AbortWithError(http.StatusBadRequest, err)
+			return
+		}
+		filter.Status = ps
 	}
 
 	if before := c.Query("before"); before != "" {

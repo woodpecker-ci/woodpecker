@@ -277,6 +277,35 @@ func TestPipelines(t *testing.T) {
 			g.Assert(pipelines[0].ID).Equal(pipeline1.ID)
 			g.Assert(pipelines[0].RepoID).Equal(pipeline1.RepoID)
 		})
+
+		g.It("Should get pipelines filtered by status", func() {
+			pipeline1 := &model.Pipeline{
+				RepoID: repo.ID,
+				Status: model.StatusSuccess,
+			}
+			pipeline2 := &model.Pipeline{
+				RepoID: repo.ID,
+				Status: model.StatusFailure,
+			}
+			pipeline3 := &model.Pipeline{
+				RepoID: repo.ID,
+				Status: model.StatusRunning,
+			}
+			err1 := store.CreatePipeline(pipeline1, []*model.Step{}...)
+			g.Assert(err1).IsNil()
+			err2 := store.CreatePipeline(pipeline2, []*model.Step{}...)
+			g.Assert(err2).IsNil()
+			err3 := store.CreatePipeline(pipeline3, []*model.Step{}...)
+			g.Assert(err3).IsNil()
+
+			pipelines, err := store.GetPipelineList(&model.Repo{ID: 1}, nil, &model.PipelineFilter{
+				Status: model.StatusSuccess,
+			})
+			g.Assert(err).IsNil()
+			g.Assert(len(pipelines)).Equal(1)
+			g.Assert(pipelines[0].ID).Equal(pipeline1.ID)
+			g.Assert(pipelines[0].Status).Equal(model.StatusSuccess)
+		})
 	})
 }
 

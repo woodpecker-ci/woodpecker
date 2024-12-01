@@ -70,6 +70,10 @@ func (s storage) GetPipelineList(repo *model.Repo, p *model.ListOptions, f *mode
 			cond = cond.And(builder.Eq{"branch": f.Branch})
 		}
 
+		if f.Status != "" {
+			cond = cond.And(builder.Eq{"status": f.Status})
+		}
+
 		if len(f.Events) != 0 {
 			cond = cond.And(builder.In("event", f.Events))
 		}
