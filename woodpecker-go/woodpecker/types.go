@@ -74,7 +74,7 @@ type (
 		Config                       string               `json:"config_file"`
 		CancelPreviousPipelineEvents []string             `json:"cancel_previous_pipeline_events"`
 		NetrcTrustedPlugins          []string             `json:"netrc_trusted"`
-  }
+	}
 
 	// RepoPatch defines a repository patch request.
 	RepoPatch struct {
