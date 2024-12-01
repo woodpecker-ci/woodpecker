@@ -193,9 +193,8 @@ export default defineConfig({
           200: 'var(--wp-hint-warn-200)',
         },
 
-        'wp-code': {
-          100: 'var(--wp-code-100)',
-          200: 'var(--wp-code-200)',
+        'wp-code-bg': {
+          100: 'var(--wp-code-bg-100)',
         },
         'wp-code-text': {
           100: 'var(--wp-code-text-100)',
