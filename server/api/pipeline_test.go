@@ -96,6 +96,24 @@ func TestGetPipelines(t *testing.T) {
 
 		assert.Equal(t, http.StatusOK, c.Writer.Status())
 	})
+
+	t.Run("should filter pipelines by events", func(t *testing.T) {
+		pipelines := []*model.Pipeline{fakePipeline}
+		mockStore := store_mocks.NewStore(t)
+		mockStore.On("GetPipelineList", mock.Anything, mock.Anything, mock.Anything).Return(pipelines, nil)
+
+		w := httptest.NewRecorder()
+		c, _ := gin.CreateTestContext(w)
+		c.Set("store", mockStore)
+		c.Request, _ = http.NewRequest(http.MethodGet, "/?event=push,pull_request", nil)
+
+		GetPipelines(c)
+
+		mockStore.AssertCalled(t, "GetPipelineList", mock.Anything, mock.Anything, &model.PipelineFilter{
+			Events: model.WebhookEventList{model.EventPush, model.EventPull},
+		})
+		assert.Equal(t, http.StatusOK, c.Writer.Status())
+	})
 }
 
 func TestDeletePipeline(t *testing.T) {
