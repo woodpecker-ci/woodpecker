@@ -22,6 +22,7 @@ import (
 
 	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
 	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
+	shared_utils "go.woodpecker-ci.org/woodpecker/v2/shared/utils"
 	"go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker"
 )
 
@@ -77,36 +78,27 @@ func List(ctx context.Context, c *cli.Command) error {
 	if err != nil {
 		return err
 	}
-	resources, err := pipelineList(c, client)
+	pipelines, err := pipelineList(c, client)
 	if err != nil {
 		return err
 	}
-	return pipelineOutput(c, resources)
+	return pipelineOutput(c, pipelines)
 }
 
-func pipelineList(c *cli.Command, client woodpecker.Client) ([]woodpecker.Pipeline, error) {
-	resources := make([]woodpecker.Pipeline, 0)
-
+func pipelineList(c *cli.Command, client woodpecker.Client) ([]*woodpecker.Pipeline, error) {
 	repoIDOrFullName := c.Args().First()
 	repoID, err := internal.ParseRepo(client, repoIDOrFullName)
 	if err != nil {
-		return resources, err
+		return nil, err
 	}
 
 	opt := woodpecker.PipelineListOptions{}
-	before := c.Timestamp("before")
-	after := c.Timestamp("after")
 
-	if !before.IsZero() {
+	if before := c.Timestamp("before"); !before.IsZero() {
 		opt.Before = before
 	}
-	if !after.IsZero() {
+	if after := c.Timestamp("after"); !after.IsZero() {
 		opt.After = after
-	}
-
-	pipelines, err := client.PipelineList(repoID, opt)
-	if err != nil {
-		return resources, err
 	}
 
 	branch := c.String("branch")
@@ -114,23 +106,23 @@ func pipelineList(c *cli.Command, client woodpecker.Client) ([]woodpecker.Pipeli
 	status := c.String("status")
 	limit := int(c.Int("limit"))
 
-	var count int
-	for _, pipeline := range pipelines {
-		if count >= limit {
-			break
-		}
-		if branch != "" && pipeline.Branch != branch {
-			continue
-		}
-		if event != "" && pipeline.Event != event {
-			continue
-		}
-		if status != "" && pipeline.Status != status {
-			continue
-		}
-		resources = append(resources, *pipeline)
-		count++
+	pipelines, err := shared_utils.Paginate(func(page int) ([]*woodpecker.Pipeline, error) {
+		return client.PipelineList(repoID,
+			woodpecker.PipelineListOptions{
+				ListOptions: woodpecker.ListOptions{
+					Page: page,
+				},
+				Before: opt.Before,
+				After:  opt.After,
+				Branch: branch,
+				Events: []string{event},
+				Status: status,
+			},
+		)
+	}, limit)
+	if err != nil {
+		return nil, err
 	}
 
-	return resources, nil
+	return pipelines, nil
 }
