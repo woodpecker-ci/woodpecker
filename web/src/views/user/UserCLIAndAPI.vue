@@ -10,7 +10,7 @@
     </InputField>
 
     <InputField :label="$t('user.settings.cli_and_api.token')">
-      <template #headerActions>
+      <template #titleActions>
         <Button class="ml-auto" :text="$t('user.settings.cli_and_api.reset_token')" @click="resetToken" />
       </template>
       <pre class="code-box">{{ token }}</pre>
