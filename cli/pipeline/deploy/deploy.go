@@ -53,7 +53,7 @@ var Command = &cli.Command{
 		&cli.StringSliceFlag{
 			Name:    "param",
 			Aliases: []string{"p"},
-			Usage:   "custom parameters to be injected into the step environment. Format: KEY=value",
+			Usage:   "custom parameters to inject into the step environment. Format: KEY=value",
 		},
 	},
 }
@@ -80,7 +80,7 @@ func deploy(ctx context.Context, c *cli.Command) error {
 			return err
 		}
 
-		branch = repo.DefaultBranch
+		branch = repo.Branch
 	}
 
 	pipelineArg := c.Args().Get(1)

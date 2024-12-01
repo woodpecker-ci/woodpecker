@@ -35,7 +35,7 @@ var pipelineStartCmd = &cli.Command{
 		&cli.StringSliceFlag{
 			Name:    "param",
 			Aliases: []string{"p"},
-			Usage:   "custom parameters to be injected into the step environment. Format: KEY=value",
+			Usage:   "custom parameters to inject into the step environment. Format: KEY=value",
 		},
 	},
 }

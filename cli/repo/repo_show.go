@@ -12,11 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package user
+package repo
 
 import (
 	"context"
-	"fmt"
 	"os"
 	"text/template"
 
@@ -26,37 +25,47 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
 )
 
-var userInfoCmd = &cli.Command{
-	Name:      "info",
-	Usage:     "show user details",
-	ArgsUsage: "<username>",
-	Action:    userInfo,
-	Flags:     []cli.Flag{common.FormatFlag(tmplUserInfo)},
+var repoShowCmd = &cli.Command{
+	Name:      "show",
+	Usage:     "show repository information",
+	ArgsUsage: "<repo-id|repo-full-name>",
+	Action:    repoShow,
+	Flags:     []cli.Flag{common.FormatFlag(tmplRepoInfo)},
 }
 
-func userInfo(ctx context.Context, c *cli.Command) error {
+func repoShow(ctx context.Context, c *cli.Command) error {
+	repoIDOrFullName := c.Args().First()
 	client, err := internal.NewClient(ctx, c)
 	if err != nil {
 		return err
 	}
-
-	login := c.Args().First()
-	if len(login) == 0 {
-		return fmt.Errorf("missing or invalid user login")
-	}
-
-	user, err := client.User(login)
+	repoID, err := internal.ParseRepo(client, repoIDOrFullName)
 	if err != nil {
 		return err
 	}
 
-	tmpl, err := template.New("_").Parse(c.String("format") + "\n")
+	repo, err := client.Repo(repoID)
 	if err != nil {
 		return err
 	}
-	return tmpl.Execute(os.Stdout, user)
+
+	tmpl, err := template.New("_").Parse(c.String("format"))
+	if err != nil {
+		return err
+	}
+	return tmpl.Execute(os.Stdout, repo)
 }
 
-// Template for user information.
-var tmplUserInfo = `User: {{ .Login }}
-Email: {{ .Email }}`
+// tTemplate for repo information.
+var tmplRepoInfo = `Owner: {{ .Owner }}
+Repo: {{ .Name }}
+URL: {{ .ForgeURL }}
+Config path: {{ .Config }}
+Visibility: {{ .Visibility }}
+Private: {{ .IsSCMPrivate }}
+Trusted: {{ .IsTrusted }}
+Gated: {{ .IsGated }}
+Require approval for: {{ .RequireApproval }}
+Clone url: {{ .Clone }}
+Allow pull-requests: {{ .AllowPullRequests }}
+`

@@ -1133,12 +1133,12 @@ func (_m *Client) PipelineDecline(repoID int64, pipeline int64) (*woodpecker.Pip
 	return r0, r1
 }
 
-// PipelineKill provides a mock function with given fields: repoID, pipeline
-func (_m *Client) PipelineKill(repoID int64, pipeline int64) error {
+// PipelineDelete provides a mock function with given fields: repoID, pipeline
+func (_m *Client) PipelineDelete(repoID int64, pipeline int64) error {
 	ret := _m.Called(repoID, pipeline)
 
 	if len(ret) == 0 {
-		panic("no return value specified for PipelineKill")
+		panic("no return value specified for PipelineDelete")
 	}
 
 	var r0 error
