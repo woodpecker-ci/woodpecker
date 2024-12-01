@@ -48,7 +48,7 @@ func pipelineKill(ctx context.Context, c *cli.Command) (err error) {
 		return err
 	}
 
-	err = client.PipelineKill(repoID, number)
+	err = client.PipelineDelete(repoID, number)
 	if err != nil {
 		return err
 	}

@@ -94,7 +94,6 @@ func PostRepo(c *gin.Context) {
 		repo.RequireApproval = model.RequireApprovalForks
 		repo.AllowPull = true
 		repo.AllowDeploy = false
-		repo.NetrcOnlyTrusted = true
 		repo.CancelPreviousPipelineEvents = server.Config.Pipeline.DefaultCancelPreviousPipelineEvents
 	}
 	repo.IsActive = true
@@ -131,7 +130,7 @@ func PostRepo(c *gin.Context) {
 	if errors.Is(err, types.RecordNotExist) {
 		org, err = _forge.Org(c, user, repo.Owner)
 		if err != nil {
-			msg := "could not fetch organization from forge."
+			msg := fmt.Sprintf("Organization %s not found in DB. Attempting to create new one.", repo.Owner)
 			log.Error().Err(err).Msg(msg)
 			c.String(http.StatusInternalServerError, msg)
 			return
@@ -140,7 +139,7 @@ func PostRepo(c *gin.Context) {
 		org.ForgeID = user.ForgeID
 		err = _store.OrgCreate(org)
 		if err != nil {
-			msg := "could not create organization in store."
+			msg := fmt.Sprintf("Failed to create organization %s.", repo.Owner)
 			log.Error().Err(err).Msg(msg)
 			c.String(http.StatusInternalServerError, msg)
 			return
@@ -275,8 +274,8 @@ func PatchRepo(c *gin.Context) {
 	if in.CancelPreviousPipelineEvents != nil {
 		repo.CancelPreviousPipelineEvents = *in.CancelPreviousPipelineEvents
 	}
-	if in.NetrcOnlyTrusted != nil {
-		repo.NetrcOnlyTrusted = *in.NetrcOnlyTrusted
+	if in.NetrcTrusted != nil {
+		repo.NetrcTrustedPlugins = *in.NetrcTrusted
 	}
 	if in.Visibility != nil {
 		switch *in.Visibility {

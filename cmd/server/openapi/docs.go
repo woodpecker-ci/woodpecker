@@ -2966,6 +2966,30 @@ const docTemplate = `{
                         "description": "only return pipelines after this RFC3339 date",
                         "name": "after",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "filter pipelines by branch",
+                        "name": "branch",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "filter pipelines by webhook events (comma separated)",
+                        "name": "event",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "filter pipelines by strings contained in ref",
+                        "name": "ref",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "filter pipelines by status",
+                        "name": "status",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -5070,8 +5094,11 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
-                "netrc_only_trusted": {
-                    "type": "boolean"
+                "netrc_trusted": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "org_id": {
                     "type": "integer"
@@ -5124,8 +5151,11 @@ const docTemplate = `{
                     "description": "TODO: deprecated in favor of RequireApproval =\u003e Remove in next major release",
                     "type": "boolean"
                 },
-                "netrc_only_trusted": {
-                    "type": "boolean"
+                "netrc_trusted": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "require_approval": {
                     "type": "string"
