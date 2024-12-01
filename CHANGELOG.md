@@ -59,6 +59,8 @@
 
 ### 📈 Enhancement
 
+- Use pagination helper to list pipelines in cli [[#4478](https://github.com/woodpecker-ci/woodpecker/pull/4478)]
+- Some UI improvements [[#4497](https://github.com/woodpecker-ci/woodpecker/pull/4497)]
 - Add status filter to list pipeline API [[#4494](https://github.com/woodpecker-ci/woodpecker/pull/4494)]
 - Use JS-native date/time formatting [[#4488](https://github.com/woodpecker-ci/woodpecker/pull/4488)]
 - Add pipeline purge command to cli [[#4470](https://github.com/woodpecker-ci/woodpecker/pull/4470)]
