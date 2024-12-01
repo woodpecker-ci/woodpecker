@@ -47,7 +47,7 @@ func TestPipelineOutput(t *testing.T) {
 		},
 	}
 
-	pipelines := []woodpecker.Pipeline{
+	pipelines := []*woodpecker.Pipeline{
 		{
 			Number:  1,
 			Status:  "success",
