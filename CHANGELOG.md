@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-11-30
+## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-12-01
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -199,6 +199,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update docker.io/woodpeckerci/plugin-surge-preview docker tag to v1.3.3 [[#4495](https://github.com/woodpecker-ci/woodpecker/pull/4495)]
 - fix(deps): update golang-packages [[#4477](https://github.com/woodpecker-ci/woodpecker/pull/4477)]
 - fix(deps): update dependency @vueuse/core to v12 [[#4486](https://github.com/woodpecker-ci/woodpecker/pull/4486)]
 - fix(deps): update module github.com/google/go-github/v66 to v67 [[#4487](https://github.com/woodpecker-ci/woodpecker/pull/4487)]
