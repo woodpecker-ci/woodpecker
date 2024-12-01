@@ -112,8 +112,8 @@ func TestPipelineList(t *testing.T) {
 
 			command := buildPipelineListCmd()
 			command.Writer = io.Discard
-			command.Action = func(ctx context.Context, c *cli.Command) error {
-				pipelines, err := pipelineList(ctx, c, mockClient)
+			command.Action = func(_ context.Context, c *cli.Command) error {
+				pipelines, err := pipelineList(c, mockClient)
 				if tt.wantErr != nil {
 					assert.EqualError(t, err, tt.wantErr.Error())
 					return nil

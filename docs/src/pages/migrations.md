@@ -34,6 +34,17 @@ This will be the next version of Woodpecker.
 - Replaced `registry` command with `repo registry` in cli
 - Deprecated `secrets`, use `environment` with `from_secret`
 - Empty string environment variables are not set
+- CLI commands got restructured to provide a simplified structure:
+  - `woodpecker-cli secret [add|rm|...] --global` is now `woodpecker-cli admin secret [add|rm|...]`
+  - `woodpecker-cli user` is now `woodpecker-cli admin user`
+  - `woodpecker-cli log-level` is now `woodpecker-cli admin log-level`
+  - `woodpecker-cli secret [add|rm|...] --organization` is now `woodpecker-cli org secret [add|rm|...]`
+  - `woodpecker-cli deploy` is now `woodpecker-cli pipeline deploy`
+  - `woodpecker-cli log` is now `woodpecker-cli pipeline log`
+  - `woodpecker-cli cron` is now `woodpecker-cli repo cron`
+  - `woodpecker-cli secret [add|rm|...] --repository` is now `woodpecker-cli repo secret [add|rm|...]`
+  - `woodpecker-cli pipeline logs` is now `woodpecker-cli pipeline log show`
+  - `woodpecker-cli [registry|secret|...] info` is now `woodpecker-cli [registry|secret|...] show`
 
 ## Admin migrations
 

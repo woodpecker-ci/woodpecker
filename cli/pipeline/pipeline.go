@@ -23,6 +23,8 @@ import (
 	"github.com/urfave/cli/v3"
 
 	"go.woodpecker-ci.org/woodpecker/v2/cli/output"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/pipeline/deploy"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/pipeline/log"
 	"go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker"
 )
 
@@ -31,18 +33,20 @@ var Command = &cli.Command{
 	Name:  "pipeline",
 	Usage: "manage pipelines",
 	Commands: []*cli.Command{
-		buildPipelineListCmd(),
-		pipelineLastCmd,
-		pipelineLogsCmd,
-		pipelineInfoCmd,
-		pipelineStopCmd,
-		pipelineStartCmd,
 		pipelineApproveCmd,
-		pipelineDeclineCmd,
-		pipelineQueueCmd,
-		pipelineKillCmd,
-		pipelinePsCmd,
 		pipelineCreateCmd,
+		pipelineDeclineCmd,
+		deploy.Command,
+		pipelineKillCmd,
+		pipelineLastCmd,
+		buildPipelineListCmd(),
+		log.Command,
+		pipelinePsCmd,
+		pipelinePurgeCmd,
+		pipelineQueueCmd,
+		pipelineShowCmd,
+		pipelineStartCmd,
+		pipelineStopCmd,
 	},
 }
 

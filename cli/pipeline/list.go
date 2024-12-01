@@ -52,7 +52,7 @@ func buildPipelineListCmd() *cli.Command {
 			},
 			&cli.TimestampFlag{
 				Name:  "before",
-				Usage: "only return pipelines before this RFC3339 date",
+				Usage: "only return pipelines before this date (RFC3339)",
 				Config: cli.TimestampConfig{
 					Layouts: []string{
 						time.RFC3339,
@@ -61,7 +61,7 @@ func buildPipelineListCmd() *cli.Command {
 			},
 			&cli.TimestampFlag{
 				Name:  "after",
-				Usage: "only return pipelines after this RFC3339 date",
+				Usage: "only return pipelines after this date (RFC3339)",
 				Config: cli.TimestampConfig{
 					Layouts: []string{
 						time.RFC3339,
@@ -77,14 +77,14 @@ func List(ctx context.Context, c *cli.Command) error {
 	if err != nil {
 		return err
 	}
-	resources, err := pipelineList(ctx, c, client)
+	resources, err := pipelineList(c, client)
 	if err != nil {
 		return err
 	}
 	return pipelineOutput(c, resources)
 }
 
-func pipelineList(_ context.Context, c *cli.Command, client woodpecker.Client) ([]woodpecker.Pipeline, error) {
+func pipelineList(c *cli.Command, client woodpecker.Client) ([]woodpecker.Pipeline, error) {
 	resources := make([]woodpecker.Pipeline, 0)
 
 	repoIDOrFullName := c.Args().First()

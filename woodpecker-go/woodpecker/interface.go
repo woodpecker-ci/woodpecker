@@ -84,6 +84,8 @@ type Client interface {
 	// the specified repository.
 	PipelineList(repoID int64, opt PipelineListOptions) ([]*Pipeline, error)
 
+	PipelineDelete(repoID, pipeline int64) error
+
 	// PipelineQueue returns a list of enqueued pipelines.
 	PipelineQueue() ([]*Feed, error)
 
@@ -101,9 +103,6 @@ type Client interface {
 
 	// PipelineDecline declines a blocked pipeline.
 	PipelineDecline(repoID, pipeline int64) (*Pipeline, error)
-
-	// PipelineKill force kills the running pipeline.
-	PipelineKill(repoID, pipeline int64) error
 
 	// PipelineMetadata returns metadata for a pipeline.
 	PipelineMetadata(repoID int64, pipelineNumber int) ([]byte, error)
