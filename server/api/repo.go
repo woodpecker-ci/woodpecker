@@ -260,7 +260,7 @@ func PatchRepo(c *gin.Context) {
 			return
 		}
 	} else if in.IsGated != nil {
-		c.String(http.StatusBadRequest, "'gated' option was used, use 'require_approval'")
+		c.String(http.StatusBadRequest, "'gated' option has been set in version 2.8, use 'require-approval' in >= 3.0")
 		return
 	}
 	if in.Timeout != nil {
