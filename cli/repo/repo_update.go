@@ -94,7 +94,7 @@ func repoUpdate(ctx context.Context, c *cli.Command) error {
 
 	// TODO: remove in next release
 	if c.IsSet("gated") {
-		return fmt.Errorf("'gated' option was used, use 'require-approval'")
+		return fmt.Errorf("'gated' option has been set in version 2.8, use 'require-approval' in >= 3.0")
 	}
 
 	if c.IsSet("require-approval") {
