@@ -89,7 +89,7 @@ func (opt *PipelineListOptions) QueryEncode() string {
 		query.Add("event", strings.Join(opt.Events, ","))
 	}
 	if opt.RefContains != "" {
-		query.Add("ref_contains", opt.RefContains)
+		query.Add("ref", opt.RefContains)
 	}
 	if opt.Status != "" {
 		query.Add("status", opt.Status)
