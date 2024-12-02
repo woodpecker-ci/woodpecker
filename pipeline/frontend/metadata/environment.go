@@ -30,9 +30,7 @@ const (
 	maxChangedFiles   = 500
 )
 
-var (
-	pullRegexp = regexp.MustCompile(`\d+`)
-)
+var pullRegexp = regexp.MustCompile(`\d+`)
 
 // Environ returns the metadata as a map of environment variables.
 func (m *Metadata) Environ() map[string]string {
