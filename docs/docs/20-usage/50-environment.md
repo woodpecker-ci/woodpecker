@@ -49,7 +49,7 @@ Please note that the environment section is not able to expand environment varia
 This is the reference list of all environment variables available to your pipeline containers. These are injected into your pipeline step and plugins containers, at runtime.
 
 | NAME                             | Description                                                                                                        | Example                                                                                    |
-|----------------------------------|--------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------|
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------ |
 | `CI`                             | CI environment name                                                                                                | `woodpecker`                                                                               |
 |                                  | **Repository**                                                                                                     |                                                                                            |
 | `CI_REPO`                        | repository full name `<owner>/<name>`                                                                              | `john-doe/my-repo`                                                                         |
