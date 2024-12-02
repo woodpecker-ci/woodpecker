@@ -59,6 +59,7 @@
 
 ### 📚 Documentation
 
+- chore(deps): lock file maintenance [[#4502](https://github.com/woodpecker-ci/woodpecker/pull/4502)]
 - chore(deps): lock file maintenance [[#4501](https://github.com/woodpecker-ci/woodpecker/pull/4501)]
 - chore(deps): update dependency isomorphic-dompurify to v2.18.0 [[#4493](https://github.com/woodpecker-ci/woodpecker/pull/4493)]
 - fix(deps): update docs npm deps non-major [[#4484](https://github.com/woodpecker-ci/woodpecker/pull/4484)]
