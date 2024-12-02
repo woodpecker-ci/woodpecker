@@ -8,6 +8,7 @@
 
 ### 💥 Breaking changes
 
+- Do not set empty environment variables [[#4193](https://github.com/woodpecker-ci/woodpecker/pull/4193)]
 - Unify cli commands and flags [[#4481](https://github.com/woodpecker-ci/woodpecker/pull/4481)]
 - Move pipeline logs command [[#4480](https://github.com/woodpecker-ci/woodpecker/pull/4480)]
 - Fix woodpecker-go repo model to match server [[#4479](https://github.com/woodpecker-ci/woodpecker/pull/4479)]
