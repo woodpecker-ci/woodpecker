@@ -33,6 +33,7 @@ This will be the next version of Woodpecker.
 - Removed old API routes: `registry/` -> `registries`, `/authorize/token`
 - Replaced `registry` command with `repo registry` in cli
 - Deprecated `secrets`, use `environment` with `from_secret`
+- Empty string environment variables are not set
 - CLI commands got restructured to provide a simplified structure:
   - `woodpecker-cli secret [add|rm|...] --global` is now `woodpecker-cli admin secret [add|rm|...]`
   - `woodpecker-cli user` is now `woodpecker-cli admin user`
