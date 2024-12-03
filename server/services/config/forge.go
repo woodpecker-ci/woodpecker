@@ -140,9 +140,9 @@ func (f *forgeFetcherContext) checkPipelineFile(c context.Context, config string
 func (f *forgeFetcherContext) getFirstAvailableConfig(c context.Context, configs []string) ([]*types.FileMeta, error) {
 	var forgeErr []error
 	for _, fileOrFolder := range configs {
+		log.Trace().Msgf("fetching %s from forge", fileOrFolder)
 		if strings.HasSuffix(fileOrFolder, "/") {
 			// config is a folder
-			log.Trace().Msgf("fetching %s from forge", fileOrFolder)
 			files, err := f.forge.Dir(c, f.user, f.repo, f.pipeline, strings.TrimSuffix(fileOrFolder, "/"))
 			// if folder is not supported we will get a "Not implemented" error and continue
 			if err != nil {
