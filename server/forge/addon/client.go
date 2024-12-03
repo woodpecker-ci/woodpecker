@@ -139,8 +139,8 @@ func (g *RPC) Repo(_ context.Context, u *model.User, remoteID model.ForgeRemoteI
 		return nil, err
 	}
 
-	var resp *modelRepo
-	err = json.Unmarshal(jsonResp, resp)
+	var resp modelRepo
+	err = json.Unmarshal(jsonResp, &resp)
 	if err != nil {
 		return nil, err
 	}

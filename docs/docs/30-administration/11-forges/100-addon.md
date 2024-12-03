@@ -38,7 +38,7 @@ Addons use RPC to communicate to the server and are implemented using the [`go-p
 
 This example will use the Go language.
 
-Directly import Woodpecker's Go packages (`go.woodpecker-ci.org/woodpecker/woodpecker/v2`) and use the interfaces and types defined there.
+Directly import Woodpecker's Go packages (`go.woodpecker-ci.org/woodpecker/v2`) and use the interfaces and types defined there.
 
 In the `main` function, just call `"go.woodpecker-ci.org/woodpecker/v2/server/forge/addon".Serve` with a `"go.woodpecker-ci.org/woodpecker/v2/server/forge".Forge` as argument.
 This will take care of connecting the addon forge to the server.
