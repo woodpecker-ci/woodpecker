@@ -103,7 +103,6 @@ func PostRepo(c *gin.Context) {
 		repo.RequireApproval = model.RequireApprovalForks
 		if repo.IsSCMPrivate {
 			repo.Visibility = model.VisibilityPrivate
-			repo.RequireApproval = model.RequireApprovalNone
 		}
 	}
 
