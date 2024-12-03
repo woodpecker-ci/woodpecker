@@ -33,24 +33,24 @@ var Command = &cli.Command{
 	Name:  "pipeline",
 	Usage: "manage pipelines",
 	Commands: []*cli.Command{
-		buildPipelineListCmd(),
-		pipelineLastCmd,
-		pipelineLogsCmd,
-		pipelineInfoCmd,
-		pipelineStopCmd,
-		pipelineStartCmd,
 		pipelineApproveCmd,
-		pipelineDeclineCmd,
-		pipelineQueueCmd,
-		pipelineKillCmd,
-		pipelinePsCmd,
 		pipelineCreateCmd,
-		log.Command,
+		pipelineDeclineCmd,
 		deploy.Command,
+		pipelineKillCmd,
+		pipelineLastCmd,
+		buildPipelineListCmd(),
+		log.Command,
+		pipelinePsCmd,
+		pipelinePurgeCmd,
+		pipelineQueueCmd,
+		pipelineShowCmd,
+		pipelineStartCmd,
+		pipelineStopCmd,
 	},
 }
 
-func pipelineOutput(c *cli.Command, resources []woodpecker.Pipeline, fd ...io.Writer) error {
+func pipelineOutput(c *cli.Command, pipelines []*woodpecker.Pipeline, fd ...io.Writer) error {
 	outFmt, outOpt := output.ParseOutputOptions(c.String("output"))
 	noHeader := c.Bool("output-no-headers")
 
@@ -74,7 +74,7 @@ func pipelineOutput(c *cli.Command, resources []woodpecker.Pipeline, fd ...io.Wr
 		if err != nil {
 			return err
 		}
-		if err := tmpl.Execute(out, resources); err != nil {
+		if err := tmpl.Execute(out, pipelines); err != nil {
 			return err
 		}
 	case "table":
@@ -89,7 +89,7 @@ func pipelineOutput(c *cli.Command, resources []woodpecker.Pipeline, fd ...io.Wr
 		if !noHeader {
 			table.WriteHeader(cols)
 		}
-		for _, resource := range resources {
+		for _, resource := range pipelines {
 			if err := table.Write(cols, resource); err != nil {
 				return err
 			}

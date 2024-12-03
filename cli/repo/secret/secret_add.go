@@ -28,7 +28,7 @@ import (
 
 var secretCreateCmd = &cli.Command{
 	Name:      "add",
-	Usage:     "adds a secret",
+	Usage:     "add a secret",
 	ArgsUsage: "[repo-id|repo-full-name]",
 	Action:    secretCreate,
 	Flags: []cli.Flag{
@@ -43,11 +43,11 @@ var secretCreateCmd = &cli.Command{
 		},
 		&cli.StringSliceFlag{
 			Name:  "event",
-			Usage: "secret limited to these events",
+			Usage: "limit secret to these events",
 		},
 		&cli.StringSliceFlag{
 			Name:  "image",
-			Usage: "secret limited to these images",
+			Usage: "limit secret to these images",
 		},
 	},
 }

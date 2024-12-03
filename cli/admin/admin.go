@@ -28,9 +28,9 @@ var Command = &cli.Command{
 	Name:  "admin",
 	Usage: "manage server settings",
 	Commands: []*cli.Command{
-		secret.Command,
-		registry.Command,
-		user.Command,
 		loglevel.Command,
+		registry.Command,
+		secret.Command,
+		user.Command,
 	},
 }
