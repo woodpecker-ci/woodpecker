@@ -205,6 +205,8 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update dependency vite to v6 [[#4485](https://github.com/woodpecker-ci/woodpecker/pull/4485)]
+- chore(deps): update docker.io/woodpeckerci/plugin-ready-release-go docker tag to v3 [[#4506](https://github.com/woodpecker-ci/woodpecker/pull/4506)]
 - chore(deps): update docker.io/woodpeckerci/plugin-surge-preview docker tag to v1.3.3 [[#4495](https://github.com/woodpecker-ci/woodpecker/pull/4495)]
 - fix(deps): update golang-packages [[#4477](https://github.com/woodpecker-ci/woodpecker/pull/4477)]
 - fix(deps): update dependency @vueuse/core to v12 [[#4486](https://github.com/woodpecker-ci/woodpecker/pull/4486)]
