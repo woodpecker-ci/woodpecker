@@ -248,12 +248,13 @@ func (b *StepBuilder) environmentVariables(metadata metadata.Metadata, axis matr
 	return environ
 }
 
-func (b *StepBuilder) toInternalRepresentation(parsed *yaml_types.Workflow, environ map[string]string, metadata metadata.Metadata, workflowID int64) (*backend_types.Config, error) {
-	var secrets []compiler.Secret
-	for _, sec := range b.Secs {
-		var events []string
-		for _, event := range sec.Events {
-			events = append(events, string(event))
+func toCompilerSecrets(in []*model.Secret) []compiler.Secret {
+	secrets := make([]compiler.Secret, 0, len(in))
+
+	for _, sec := range in {
+		events := make([]string, len(sec.Events))
+		for i, event := range sec.Events {
+			events[i] = string(event)
 		}
 
 		secrets = append(secrets, compiler.Secret{
@@ -264,14 +265,24 @@ func (b *StepBuilder) toInternalRepresentation(parsed *yaml_types.Workflow, envi
 		})
 	}
 
-	var registries []compiler.Registry
-	for _, reg := range b.Regs {
+	return secrets
+}
+
+func toCompilerRegistries(in []*model.Registry) []compiler.Registry {
+	registries := make([]compiler.Registry, 0, len(in))
+	for _, reg := range in {
 		registries = append(registries, compiler.Registry{
 			Hostname: reg.Address,
 			Username: reg.Username,
 			Password: reg.Password,
 		})
 	}
+	return registries
+}
+
+func (b *StepBuilder) toInternalRepresentation(parsed *yaml_types.Workflow, environ map[string]string, metadata metadata.Metadata, workflowID int64) (*backend_types.Config, error) {
+	secrets := toCompilerSecrets(b.Secs)
+	registries := toCompilerRegistries(b.Regs)
 
 	return compiler.New(
 		compiler.WithEnviron(environ),

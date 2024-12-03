@@ -84,6 +84,7 @@ type Queue interface {
 	PushAtOnce(c context.Context, tasks []*model.Task) error
 
 	// Poll retrieves and removes a task head of this queue.
+	// blocks until a task is available or the context is canceled
 	Poll(c context.Context, agentID int64, f FilterFn) (*model.Task, error)
 
 	// Extend extends the deadline for a task.
