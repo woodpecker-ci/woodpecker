@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @Fishbowler, @M0Rf30, @anbraten, @cduchenoy, @fernandrone, @gnowland, @greenaar, @hg, @j04n-f, @jenrik, @johanneskastl, @lafriks, @lukashass, @meln5674, @not-my-profile, @pat-s, @qwerty287, @smainz, @tori-27, @tsufeki, @xoxys, @xtexChooser, @zc-devs
+@6543, @Fishbowler, @M0Rf30, @anbraten, @cduchenoy, @fernandrone, @gnowland, @greenaar, @hg, @j04n-f, @jenrik, @johanneskastl, @jolheiser, @lafriks, @lukashass, @meln5674, @not-my-profile, @pat-s, @qwerty287, @smainz, @tori-27, @tsufeki, @xoxys, @xtexChooser, @zc-devs
 
 ### 💥 Breaking changes
 
@@ -60,6 +60,7 @@
 
 ### 🐛 Bug Fixes
 
+- fix: addon JSON pointers [[#4508](https://github.com/woodpecker-ci/woodpecker/pull/4508)]
 - Fix apparmorProfile being ignored when it's the only field [[#4507](https://github.com/woodpecker-ci/woodpecker/pull/4507)]
 - Sanitize strings in table output [[#4466](https://github.com/woodpecker-ci/woodpecker/pull/4466)]
 - Cleanup openapi generation [[#4331](https://github.com/woodpecker-ci/woodpecker/pull/4331)]
