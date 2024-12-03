@@ -1,4 +1,4 @@
-// Copyright 2023 Woodpecker Authors
+// Copyright 2024 Woodpecker Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -25,13 +25,11 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
 )
 
-var registryInfoCmd = &cli.Command{
-	Name:      "info",
-	Usage:     "display registry info",
-	ArgsUsage: "[repo-id|repo-full-name]",
-	Action:    registryInfo,
+var registryShowCmd = &cli.Command{
+	Name:   "show",
+	Usage:  "show registry information",
+	Action: registryShow,
 	Flags: []cli.Flag{
-		common.RepoFlag,
 		&cli.StringFlag{
 			Name:  "hostname",
 			Usage: "registry hostname",
@@ -41,7 +39,7 @@ var registryInfoCmd = &cli.Command{
 	},
 }
 
-func registryInfo(ctx context.Context, c *cli.Command) error {
+func registryShow(ctx context.Context, c *cli.Command) error {
 	var (
 		hostname = c.String("hostname")
 		format   = c.String("format") + "\n"
@@ -52,12 +50,7 @@ func registryInfo(ctx context.Context, c *cli.Command) error {
 		return err
 	}
 
-	repoID, err := parseTargetArgs(client, c)
-	if err != nil {
-		return err
-	}
-
-	registry, err := client.Registry(repoID, hostname)
+	registry, err := client.GlobalRegistry(hostname)
 	if err != nil {
 		return err
 	}

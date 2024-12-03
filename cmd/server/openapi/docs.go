@@ -2984,6 +2984,12 @@ const docTemplate = `{
                         "description": "filter pipelines by strings contained in ref",
                         "name": "ref",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "filter pipelines by status",
+                        "name": "status",
+                        "in": "query"
                     }
                 ],
                 "responses": {

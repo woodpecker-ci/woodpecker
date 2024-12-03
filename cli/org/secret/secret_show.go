@@ -1,4 +1,4 @@
-// Copyright 2024 Woodpecker Authors
+// Copyright 2023 Woodpecker Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,10 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package registry
+package secret
 
 import (
 	"context"
+	"fmt"
 	"html/template"
 	"os"
 
@@ -25,39 +26,49 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
 )
 
-var registryInfoCmd = &cli.Command{
-	Name:   "info",
-	Usage:  "display registry info",
-	Action: registryInfo,
+var secretShowCmd = &cli.Command{
+	Name:      "show",
+	Usage:     "show secret information",
+	ArgsUsage: "[repo-id|repo-full-name]",
+	Action:    secretShow,
 	Flags: []cli.Flag{
+		common.OrgFlag,
 		&cli.StringFlag{
-			Name:  "hostname",
-			Usage: "registry hostname",
-			Value: "docker.io",
+			Name:  "name",
+			Usage: "secret name",
 		},
-		common.FormatFlag(tmplRegistryList, true),
+		common.FormatFlag(tmplSecretList, true),
 	},
 }
 
-func registryInfo(ctx context.Context, c *cli.Command) error {
+func secretShow(ctx context.Context, c *cli.Command) error {
 	var (
-		hostname = c.String("hostname")
-		format   = c.String("format") + "\n"
+		secretName = c.String("name")
+		format     = c.String("format") + "\n"
 	)
+
+	if secretName == "" {
+		return fmt.Errorf("secret name is missing")
+	}
 
 	client, err := internal.NewClient(ctx, c)
 	if err != nil {
 		return err
 	}
 
-	registry, err := client.GlobalRegistry(hostname)
+	orgID, err := parseTargetArgs(client, c)
 	if err != nil {
 		return err
 	}
 
-	tmpl, err := template.New("_").Parse(format)
+	secret, err := client.OrgSecret(orgID, secretName)
 	if err != nil {
 		return err
 	}
-	return tmpl.Execute(os.Stdout, registry)
+
+	tmpl, err := template.New("_").Funcs(secretFuncMap).Parse(format)
+	if err != nil {
+		return err
+	}
+	return tmpl.Execute(os.Stdout, secret)
 }

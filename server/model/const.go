@@ -66,6 +66,17 @@ const (
 	StatusCreated  StatusValue = "created"  // created / internal use only
 )
 
+var ErrInvalidStatusValue = errors.New("invalid status value")
+
+func (s StatusValue) Validate() error {
+	switch s {
+	case StatusSkipped, StatusPending, StatusRunning, StatusSuccess, StatusFailure, StatusKilled, StatusError, StatusBlocked, StatusDeclined, StatusCreated:
+		return nil
+	default:
+		return fmt.Errorf("%w: %s", ErrInvalidStatusValue, s)
+	}
+}
+
 // RepoVisibility represent to what state a repo in woodpecker is visible to others.
 type RepoVisibility string //	@name RepoVisibility
 

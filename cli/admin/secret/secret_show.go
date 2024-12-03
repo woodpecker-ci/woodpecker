@@ -12,10 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package cron
+package secret
 
 import (
 	"context"
+	"fmt"
 	"html/template"
 	"os"
 
@@ -25,47 +26,43 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
 )
 
-var cronInfoCmd = &cli.Command{
-	Name:      "info",
-	Usage:     "display info about a cron job",
+var secretShowCmd = &cli.Command{
+	Name:      "show",
+	Usage:     "show secret information",
 	ArgsUsage: "[repo-id|repo-full-name]",
-	Action:    cronInfo,
+	Action:    secretShow,
 	Flags: []cli.Flag{
-		common.RepoFlag,
 		&cli.StringFlag{
-			Name:     "id",
-			Usage:    "cron id",
-			Required: true,
+			Name:  "name",
+			Usage: "secret name",
 		},
-		common.FormatFlag(tmplCronList, true),
+		common.FormatFlag(tmplSecretList, true),
 	},
 }
 
-func cronInfo(ctx context.Context, c *cli.Command) error {
+func secretShow(ctx context.Context, c *cli.Command) error {
 	var (
-		cronID           = c.Int("id")
-		repoIDOrFullName = c.String("repository")
-		format           = c.String("format") + "\n"
+		secretName = c.String("name")
+		format     = c.String("format") + "\n"
 	)
-	if repoIDOrFullName == "" {
-		repoIDOrFullName = c.Args().First()
+
+	if secretName == "" {
+		return fmt.Errorf("secret name is missing")
 	}
+
 	client, err := internal.NewClient(ctx, c)
 	if err != nil {
 		return err
 	}
-	repoID, err := internal.ParseRepo(client, repoIDOrFullName)
+
+	secret, err := client.GlobalSecret(secretName)
 	if err != nil {
 		return err
 	}
 
-	cron, err := client.CronGet(repoID, cronID)
+	tmpl, err := template.New("_").Funcs(secretFuncMap).Parse(format)
 	if err != nil {
 		return err
 	}
-	tmpl, err := template.New("_").Parse(format)
-	if err != nil {
-		return err
-	}
-	return tmpl.Execute(os.Stdout, cron)
+	return tmpl.Execute(os.Stdout, secret)
 }

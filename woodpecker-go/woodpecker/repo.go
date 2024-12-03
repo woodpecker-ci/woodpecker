@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/url"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -31,8 +32,12 @@ const (
 
 type PipelineListOptions struct {
 	ListOptions
-	Before time.Time
-	After  time.Time
+	Before      time.Time
+	After       time.Time
+	Branch      string
+	Events      []string
+	RefContains string
+	Status      string
 }
 
 type CronListOptions struct {
@@ -76,6 +81,18 @@ func (opt *PipelineListOptions) QueryEncode() string {
 	}
 	if !opt.After.IsZero() {
 		query.Add("after", opt.After.Format(time.RFC3339))
+	}
+	if opt.Branch != "" {
+		query.Add("branch", opt.Branch)
+	}
+	if len(opt.Events) > 0 {
+		query.Add("event", strings.Join(opt.Events, ","))
+	}
+	if opt.RefContains != "" {
+		query.Add("ref", opt.RefContains)
+	}
+	if opt.Status != "" {
+		query.Add("status", opt.Status)
 	}
 	return query.Encode()
 }
@@ -321,6 +338,13 @@ func (c *client) PipelineList(repoID int64, opt PipelineListOptions) ([]*Pipelin
 	return out, err
 }
 
+// PipelineDelete deletes a pipeline by the specified repository ID and pipeline ID.
+func (c *client) PipelineDelete(repoID, pipeline int64) error {
+	uri := fmt.Sprintf(pathPipeline, c.addr, repoID, pipeline)
+	err := c.delete(uri)
+	return err
+}
+
 // PipelineCreate creates a new pipeline for the specified repository.
 func (c *client) PipelineCreate(repoID int64, options *PipelineOptions) (*Pipeline, error) {
 	var out *Pipeline
@@ -359,13 +383,6 @@ func (c *client) PipelineDecline(repoID, pipeline int64) (*Pipeline, error) {
 	uri := fmt.Sprintf(pathDecline, c.addr, repoID, pipeline)
 	err := c.post(uri, nil, out)
 	return out, err
-}
-
-// PipelineKill force kills the running pipeline.
-func (c *client) PipelineKill(repoID, pipeline int64) error {
-	uri := fmt.Sprintf(pathPipeline, c.addr, repoID, pipeline)
-	err := c.delete(uri)
-	return err
 }
 
 // LogsPurge purges the pipeline all steps logs for the specified pipeline.

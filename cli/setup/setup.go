@@ -20,11 +20,11 @@ var Command = &cli.Command{
 	Flags: []cli.Flag{
 		&cli.StringFlag{
 			Name:  "server",
-			Usage: "The URL of the woodpecker server",
+			Usage: "URL of the woodpecker server",
 		},
 		&cli.StringFlag{
 			Name:  "token",
-			Usage: "The token to authenticate with the woodpecker server",
+			Usage: "token to authenticate with the woodpecker server",
 		},
 	},
 	Action: setup,
@@ -41,7 +41,7 @@ func setup(ctx context.Context, c *cli.Command) error {
 		}
 
 		if !setupAgain {
-			log.Info().Msg("Configuration skipped")
+			log.Info().Msg("configuration skipped")
 			return nil
 		}
 	}
@@ -87,7 +87,7 @@ func setup(ctx context.Context, c *cli.Command) error {
 		return err
 	}
 
-	log.Info().Msg("The woodpecker-cli has been successfully setup")
+	log.Info().Msg("woodpecker-cli has been successfully setup")
 
 	return nil
 }

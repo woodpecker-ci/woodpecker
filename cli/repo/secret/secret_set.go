@@ -43,11 +43,11 @@ var secretUpdateCmd = &cli.Command{
 		},
 		&cli.StringSliceFlag{
 			Name:  "event",
-			Usage: "secret limited to these events",
+			Usage: "limit secret to these events",
 		},
 		&cli.StringSliceFlag{
 			Name:  "image",
-			Usage: "secret limited to these images",
+			Usage: "limit secret to these images",
 		},
 	},
 }
