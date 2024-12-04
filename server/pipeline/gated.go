@@ -48,6 +48,7 @@ func needsApproval(repo *model.Repo, pipeline *model.Pipeline) bool {
 			return true
 		}
 
+  // repository requires approval for all events
 	case model.RequireApprovalAllEvents:
 		return true
 	}

@@ -41,7 +41,7 @@ var setNewDefaultsForRequireApproval = xormigrate.Migration{
 			return fmt.Errorf("sync new models failed: %w", err)
 		}
 
-		// migrate public repos to new default require approval
+		// migrate public repos to require approval for forks
 		if _, err := sess.Exec(
 			builder.Update(builder.Eq{"require_approval": RequireApprovalForks}).
 				From("repos").
@@ -49,7 +49,7 @@ var setNewDefaultsForRequireApproval = xormigrate.Migration{
 			return err
 		}
 
-		// migrate private repos to new default require approval
+		// migrate private repos to require no approval
 		if _, err := sess.Exec(
 			builder.Update(builder.Eq{"require_approval": RequireApprovalNone}).
 				From("repos").

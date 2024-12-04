@@ -91,6 +91,7 @@ func PostRepo(c *gin.Context) {
 		repo.Update(from)
 	} else {
 		repo = from
+		repo.RequireApproval = model.RequireApprovalForks
 		repo.AllowPull = true
 		repo.AllowDeploy = false
 		repo.CancelPreviousPipelineEvents = server.Config.Pipeline.DefaultCancelPreviousPipelineEvents
@@ -100,7 +101,6 @@ func PostRepo(c *gin.Context) {
 
 	if repo.Visibility == "" {
 		repo.Visibility = model.VisibilityPublic
-		repo.RequireApproval = model.RequireApprovalForks
 		if repo.IsSCMPrivate {
 			repo.Visibility = model.VisibilityPrivate
 		}
