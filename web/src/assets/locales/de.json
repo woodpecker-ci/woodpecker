@@ -518,7 +518,8 @@
         "not_started": "noch nicht gestartet",
         "sec_short": "sek",
         "template": "DD.MM.YYYY, HH:mm z",
-        "weeks_short": "w"
+        "weeks_short": "w",
+        "just_now": "gerade eben"
     },
     "unknown_error": "Ein unbekannter Fehler ist aufgetreten",
     "update_woodpecker": "Du solltest deine Woodpecker-Instanz auf {0} aktualisieren",

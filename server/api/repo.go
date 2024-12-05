@@ -258,12 +258,9 @@ func PatchRepo(c *gin.Context) {
 			c.String(http.StatusBadRequest, "Invalid require-approval setting")
 			return
 		}
-	} else if in.IsGated != nil { // TODO: remove isGated in next major release
-		if *in.IsGated {
-			repo.RequireApproval = model.RequireApprovalAllEvents
-		} else {
-			repo.RequireApproval = model.RequireApprovalForks
-		}
+	} else if in.IsGated != nil {
+		c.String(http.StatusBadRequest, "'gated' option has been removed, use 'require-approval' in >= 3.0")
+		return
 	}
 	if in.Timeout != nil {
 		repo.Timeout = *in.Timeout
