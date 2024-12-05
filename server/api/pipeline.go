@@ -132,7 +132,7 @@ func GetPipelines(c *gin.Context) {
 	if events := c.Query("event"); events != "" {
 		eventList := strings.Split(events, ",")
 		wel := make(model.WebhookEventList, 0, len(eventList))
-		for _, event := range events {
+		for _, event := range eventList {
 			we := model.WebhookEvent(event)
 			if err := we.Validate(); err != nil {
 				_ = c.AbortWithError(http.StatusBadRequest, err)
