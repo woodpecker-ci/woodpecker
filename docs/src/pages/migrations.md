@@ -10,6 +10,7 @@ This will be the next version of Woodpecker.
 
 ## User migrations
 
+- `gated` has been replaced by `require-approval`
 - Removed built-in environment variables:
   - `CI_COMMIT_URL` use `CI_PIPELINE_FORGE_URL`
   - `CI_STEP_FINISHED` as empty during execution
