@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-12-04
+## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-12-05
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -8,6 +8,7 @@
 
 ### 💥 Breaking changes
 
+- Set new default approval mode based on repo visibility [[#4456](https://github.com/woodpecker-ci/woodpecker/pull/4456)]
 - Do not set empty environment variables [[#4193](https://github.com/woodpecker-ci/woodpecker/pull/4193)]
 - Unify cli commands and flags [[#4481](https://github.com/woodpecker-ci/woodpecker/pull/4481)]
 - Move pipeline logs command [[#4480](https://github.com/woodpecker-ci/woodpecker/pull/4480)]
