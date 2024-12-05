@@ -159,7 +159,7 @@ func pipelineFromPullRequest(hook *pullRequestHook) *model.Pipeline {
 		Commit:   hook.PullRequest.Head.Sha,
 		ForgeURL: hook.PullRequest.HTMLURL,
 		Ref:      fmt.Sprintf("refs/pull/%d/head", hook.Number),
-		Branch:   hook.PullRequest.Base.Ref,
+		Branch:   hook.PullRequest.Head.Ref,
 		Message:  hook.PullRequest.Title,
 		Author:   hook.PullRequest.Poster.UserName,
 		Avatar:   avatar,
