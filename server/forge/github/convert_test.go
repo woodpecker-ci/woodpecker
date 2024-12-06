@@ -209,7 +209,7 @@ func Test_helper(t *testing.T) {
 			g.Assert(err).IsNil()
 			g.Assert(pull).IsNotNil()
 			g.Assert(pipeline.Event).Equal(model.EventPull)
-			g.Assert(pipeline.Branch).Equal(*from.PullRequest.Base.Ref)
+			g.Assert(pipeline.Branch).Equal(*from.PullRequest.Head.Ref)
 			g.Assert(pipeline.Ref).Equal("refs/pull/42/merge")
 			g.Assert(pipeline.Refspec).Equal("changes:main")
 			g.Assert(pipeline.Commit).Equal(*from.PullRequest.Head.SHA)

@@ -137,7 +137,7 @@ func Test_parse(t *testing.T) {
 			g.Assert(pipeline.Commit).Equal(hook.PullRequest.Head.Sha)
 			g.Assert(pipeline.Ref).Equal("refs/pull/1/head")
 			g.Assert(pipeline.ForgeURL).Equal("http://gitea.golang.org/gordon/hello-world/pull/1")
-			g.Assert(pipeline.Branch).Equal("main")
+			g.Assert(pipeline.Branch).Equal("feature/changes")
 			g.Assert(pipeline.Refspec).Equal("feature/changes:main")
 			g.Assert(pipeline.Message).Equal(hook.PullRequest.Title)
 			g.Assert(pipeline.Avatar).Equal("http://1.gravatar.com/avatar/8c58a0be77ee441bb8f8595b7f1b4e87")
