@@ -61,6 +61,7 @@
 
 ### 📚 Documentation
 
+- chore(deps): update react monorepo to v19 (major) [[#4523](https://github.com/woodpecker-ci/woodpecker/pull/4523)]
 - chore(deps): update docs npm deps non-major [[#4519](https://github.com/woodpecker-ci/woodpecker/pull/4519)]
 - chore(deps): lock file maintenance [[#4502](https://github.com/woodpecker-ci/woodpecker/pull/4502)]
 - chore(deps): lock file maintenance [[#4501](https://github.com/woodpecker-ci/woodpecker/pull/4501)]
@@ -209,6 +210,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update docker.io/woodpeckerci/plugin-prettier docker tag to v1 [[#4522](https://github.com/woodpecker-ci/woodpecker/pull/4522)]
 - chore(deps): update docker.io/alpine docker tag to v3.21 [[#4520](https://github.com/woodpecker-ci/woodpecker/pull/4520)]
 - chore(deps): update dependency vite to v6 [[#4485](https://github.com/woodpecker-ci/woodpecker/pull/4485)]
 - chore(deps): update docker.io/woodpeckerci/plugin-ready-release-go docker tag to v3 [[#4506](https://github.com/woodpecker-ci/woodpecker/pull/4506)]
