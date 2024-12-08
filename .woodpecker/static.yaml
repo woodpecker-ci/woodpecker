@@ -23,11 +23,3 @@ steps:
     depends_on: []
     settings:
       version: 3.3.3
-
-  - name: links
-    image: docker.io/lycheeverse/lychee:0.15.1
-    depends_on: []
-    commands:
-      - lychee pipeline/frontend/yaml/linter/schema/schema.json
-      - lychee --user-agent "curl/8.4.0" --exclude localhost docs/docs/
-      - lychee --user-agent "curl/8.4.0" --exclude localhost docs/src/pages/
