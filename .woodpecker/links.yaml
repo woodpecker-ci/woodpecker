@@ -14,13 +14,13 @@ steps:
       - echo -e "\nLast checked:$(date)" >> links.md
 
   - name: Update issue
-    image: docker.io/curlimages/curl:8.11.0
+    image: docker.io/alpine:3.21
     depends_on: links
     environment:
       GITHUB_TOKEN:
         from_secret: github_token
     commands:
-      - apk add -q --no-cache jq
+      - apk add -q --no-cache jq curl
       - export ISSUE_NUMBER=4514
       - export DESCRIPTION=$(cat links.md)
       - |
