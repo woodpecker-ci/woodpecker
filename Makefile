@@ -122,6 +122,9 @@ generate-openapi: install-tools ## Run openapi code generation and format it
 generate-license-header: install-tools
 	addlicense -c "Woodpecker Authors" -ignore "vendor/**" **/*.go
 
+generate-client:
+	go generate woodpecker-go/client.go
+
 check-xgo: ## Check if xgo is installed
 	@hash xgo > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
 		$(GO) install src.techknowlogick.com/xgo@latest; \

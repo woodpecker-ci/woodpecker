@@ -19,5 +19,7 @@ package main
 
 import (
 	_ "github.com/getkin/kin-openapi/cmd/validate"
+	_ "github.com/go-swagger/go-swagger/cmd/swagger"
+	_ "github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen"
 	_ "github.com/swaggo/swag/cmd/swag"
 )

@@ -223,7 +223,11 @@
     "yamls",
     "Yuno",
     "zerolog",
-    "zerologger"
+    "zerologger",
+    "woodpeckergo",
+    "httptransport",
+    "oapi",
+    "codegen"
   ],
   "ignorePaths": [
     "*.excalidraw",
