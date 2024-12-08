@@ -46,6 +46,7 @@ This will be the next version of Woodpecker.
   - `woodpecker-cli secret [add|rm|...] --repository` is now `woodpecker-cli repo secret [add|rm|...]`
   - `woodpecker-cli pipeline logs` is now `woodpecker-cli pipeline log show`
   - `woodpecker-cli [registry|secret|...] info` is now `woodpecker-cli [registry|secret|...] show`
+- Deprecated `detached` in favor of services
 
 ## Admin migrations
 

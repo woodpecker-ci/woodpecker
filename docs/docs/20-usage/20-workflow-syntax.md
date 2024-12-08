@@ -502,17 +502,27 @@ steps:
 
 :::
 
+### `needs`
+
+Just like [`depends_on`](#depends_on), but for services.
+
+```diff
+ steps:
+   - name: deploy
+     image: plugins/docker
+     settings:
+       repo: foo/bar
++    needs: [service] # deploy will be executed after service has started
+ services:
+   - name: service
+     image: xyz
+```
+
 ### `volumes`
 
 Woodpecker gives the ability to define Docker volumes in the YAML. You can use this parameter to mount files or folders on the host machine into your containers.
 
 For more details check the [volumes docs](./70-volumes.md).
-
-### `detach`
-
-Woodpecker gives the ability to detach steps to run them in background until the workflow finishes.
-
-For more details check the [service docs](./60-services.md#detachment).
 
 ### `directory`
 

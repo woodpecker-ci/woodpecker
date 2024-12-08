@@ -291,7 +291,22 @@ func (l *Linter) lintDeprecations(config *WorkflowConfig) (err error) {
 		return err
 	}
 
-	return nil
+	for _, step := range parsed.Steps.ContainerList {
+		if step.Detached {
+			err = multierr.Append(err, &errorTypes.PipelineError{
+				Type:    errorTypes.PipelineErrorTypeDeprecation,
+				Message: "Detached is deprecated, use services",
+				Data: errors.DeprecationErrorData{
+					File:  config.File,
+					Field: fmt.Sprintf("steps.%s.detached", step.Name),
+					Docs:  "https://woodpecker-ci.org/docs/usage/services",
+				},
+				IsWarning: true,
+			})
+		}
+	}
+
+	return err
 }
 
 func (l *Linter) lintBadHabits(config *WorkflowConfig) (err error) {

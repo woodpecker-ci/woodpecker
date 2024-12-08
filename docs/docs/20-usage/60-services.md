@@ -37,6 +37,8 @@ services:
       - 51820/udp
 ```
 
+You can use any step property, including `depends_on` (dependency on a step) and `needs` (dependency on another service). Services can depend on other services and steps.
+
 ## Configuration
 
 Service containers generally expose environment variables to customize service startup such as default usernames, passwords and ports. Please see the official image documentation to learn more.
@@ -51,28 +53,6 @@ Service containers generally expose environment variables to customize service s
 
    - name: cache
      image: redis
-```
-
-## Detachment
-
-Service and long running containers can also be included in the pipeline section of the configuration using the detach parameter without blocking other steps. This should be used when explicit control over startup order is required.
-
-```diff
- steps:
-   - name: build
-     image: golang
-     commands:
-       - go build
-       - go test
-
-   - name: database
-     image: redis
-+    detach: true
-
-   - name: test
-     image: golang
-     commands:
-       - go test
 ```
 
 Containers from detached steps will terminate when the pipeline ends.
