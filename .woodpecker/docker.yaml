@@ -197,8 +197,7 @@ steps:
       repo: *publish_repos_server
       dockerfile: docker/Dockerfile.server.multiarch
       platforms: *platforms_server
-      # remove 'latest' on older version branches to avoid accidental downgrade
-      tag: [latest, '${CI_COMMIT_TAG}']
+      auto_tag: true
       logins: *publish_logins
     when: &when-release
       event: tag
@@ -211,8 +210,7 @@ steps:
       repo: *publish_repos_server
       dockerfile: docker/Dockerfile.server.alpine.multiarch
       platforms: *platforms_alpine
-      # remove 'latest-alpine' on older version branches to avoid accidental downgrade
-      tag: [latest-alpine, '${CI_COMMIT_TAG}-alpine']
+      auto_tag: true
       logins: *publish_logins
     when: *when-release
 
@@ -292,8 +290,7 @@ steps:
       repo: *publish_repos_agent
       dockerfile: docker/Dockerfile.agent.multiarch
       platforms: *platforms_release
-      # remove 'latest' on older version branches to avoid accidental downgrade
-      tag: [latest, '${CI_COMMIT_TAG}']
+      auto_tag: true
       logins: *publish_logins
       build_args: *build_args
     when: *when-release
@@ -309,8 +306,7 @@ steps:
       repo: *publish_repos_agent
       dockerfile: docker/Dockerfile.agent.alpine.multiarch
       platforms: *platforms_alpine
-      # remove 'latest-alpine' on older version branches to avoid accidental downgrade
-      tag: [latest-alpine, '${CI_COMMIT_TAG}-alpine']
+      auto_tag: true
       logins: *publish_logins
       build_args: *build_args
     when: *when-release
@@ -388,8 +384,7 @@ steps:
       repo: *publish_repos_cli
       dockerfile: docker/Dockerfile.cli.multiarch
       platforms: *platforms_release
-      # remove 'latest' on older version branches to avoid accidental downgrade
-      tag: [latest, '${CI_COMMIT_TAG}']
+      auto_tag: true
       logins: *publish_logins
       build_args: *build_args
     when: *when-release
@@ -405,8 +400,7 @@ steps:
       repo: *publish_repos_cli
       dockerfile: docker/Dockerfile.cli.alpine.multiarch
       platforms: *platforms_alpine
-      # remove 'latest-alpine' on older version branches to avoid accidental downgrade
-      tag: [latest-alpine, '${CI_COMMIT_TAG}-alpine']
+      auto_tag: true
       logins: *publish_logins
       build_args: *build_args
     when: *when-release
