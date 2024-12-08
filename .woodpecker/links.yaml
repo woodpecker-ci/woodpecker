@@ -27,5 +27,5 @@ steps:
         curl -X PATCH \
           -H "Authorization: token $GITHUB_TOKEN" \
           -H "Accept: application/vnd.github.v3+json" \
-          https://api.github.com/repos/${CI_REPO}/issues/${ISSUE_NUMBER} \
+          https://api.github.com/repos/${CI_REPO}/issues/$ISSUE_NUMBER \
           -d "$(jq -n --arg body "$DESCRIPTION" '{body: $body}')"
