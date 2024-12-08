@@ -158,12 +158,6 @@ var flags = []cli.Flag{
 		Usage:   "Set the metadata environment variable \"CI_REPO_URL\".",
 	},
 	&cli.StringFlag{
-		Sources: cli.EnvVars("CI_REPO_SCM"),
-		Name:    "repo-scm",
-		Usage:   "Set the metadata environment variable \"CI_REPO_SCM\".",
-		Value:   "git",
-	},
-	&cli.StringFlag{
 		Sources: cli.EnvVars("CI_REPO_DEFAULT_BRANCH"),
 		Name:    "repo-default-branch",
 		Usage:   "Set the metadata environment variable \"CI_REPO_DEFAULT_BRANCH\".",

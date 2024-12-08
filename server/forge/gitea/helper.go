@@ -38,7 +38,6 @@ func toRepo(from *gitea.Repository) *model.Repo {
 	)
 	return &model.Repo{
 		ForgeRemoteID: model.ForgeRemoteID(fmt.Sprint(from.ID)),
-		SCMKind:       model.RepoGit,
 		Name:          name,
 		Owner:         from.Owner.UserName,
 		FullName:      from.FullName,

@@ -56,7 +56,6 @@ func TestGiteaParser(t *testing.T) {
 				Clone:         "https://codeberg.org/meisam/woodpecktester.git",
 				CloneSSH:      "git@codeberg.org:meisam/woodpecktester.git",
 				Branch:        "main",
-				SCMKind:       "git",
 				PREnabled:     true,
 				Perm: &model.Perm{
 					Pull:  true,
@@ -91,7 +90,6 @@ func TestGiteaParser(t *testing.T) {
 				ForgeURL:      "http://gitea.golang.org/gordon/hello-world",
 				Clone:         "http://gitea.golang.org/gordon/hello-world.git",
 				CloneSSH:      "git@gitea.golang.org:gordon/hello-world.git",
-				SCMKind:       "git",
 				IsSCMPrivate:  true,
 				Perm: &model.Perm{
 					Pull:  true,
@@ -127,7 +125,6 @@ func TestGiteaParser(t *testing.T) {
 				Clone:         "http://127.0.0.1:3000/Test-CI/multi-line-secrets.git",
 				CloneSSH:      "ssh://git@127.0.0.1:2200/Test-CI/multi-line-secrets.git",
 				Branch:        "main",
-				SCMKind:       "git",
 				Perm: &model.Perm{
 					Pull:  true,
 					Push:  true,
@@ -162,7 +159,6 @@ func TestGiteaParser(t *testing.T) {
 				Clone:         "http://gitea.golang.org/gordon/hello-world.git",
 				CloneSSH:      "git@gitea.golang.org:gordon/hello-world.git",
 				Branch:        "main",
-				SCMKind:       "git",
 				IsSCMPrivate:  true,
 				Perm: &model.Perm{
 					Pull:  true,
@@ -196,7 +192,6 @@ func TestGiteaParser(t *testing.T) {
 				Clone:         "https://gitea.golang.org/gordon/hello-world.git",
 				CloneSSH:      "",
 				Branch:        "main",
-				SCMKind:       "git",
 				IsSCMPrivate:  true,
 				Perm: &model.Perm{
 					Pull:  true,
@@ -234,7 +229,6 @@ func TestGiteaParser(t *testing.T) {
 				Clone:         "http://127.0.0.1:3000/Test-CI/multi-line-secrets.git",
 				CloneSSH:      "ssh://git@127.0.0.1:2200/Test-CI/multi-line-secrets.git",
 				Branch:        "main",
-				SCMKind:       "git",
 				PREnabled:     true,
 				IsSCMPrivate:  false,
 				Perm: &model.Perm{
@@ -276,7 +270,6 @@ func TestGiteaParser(t *testing.T) {
 				Clone:         "https://gitea.com/anbraten/test-repo.git",
 				CloneSSH:      "git@gitea.com:anbraten/test-repo.git",
 				Branch:        "main",
-				SCMKind:       "git",
 				PREnabled:     true,
 				Perm: &model.Perm{
 					Pull:  true,
@@ -314,7 +307,6 @@ func TestGiteaParser(t *testing.T) {
 				Clone:         "https://gitea.com/anbraten/test-repo.git",
 				CloneSSH:      "git@gitea.com:anbraten/test-repo.git",
 				Branch:        "main",
-				SCMKind:       "git",
 				PREnabled:     true,
 				Perm: &model.Perm{
 					Pull:  true,
@@ -352,7 +344,6 @@ func TestGiteaParser(t *testing.T) {
 				Clone:         "https://git.xxx/anbraten/demo.git",
 				CloneSSH:      "ssh://git@git.xxx:22/anbraten/demo.git",
 				Branch:        "main",
-				SCMKind:       "git",
 				PREnabled:     true,
 				IsSCMPrivate:  true,
 				Perm: &model.Perm{
