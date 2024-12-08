@@ -17,15 +17,60 @@ In this example, the secret named `secret_token` would be passed to the setting 
 
 ```diff
  steps:
-   - name: docker
-     image: my-plugin
-+    environment:
-+      TOKEN_ENV:
-+        from_secret: secret_token
+   - name: 'plugin step'
+     image: registry/repo/image:tag
 +    settings:
 +      token:
 +        from_secret: secret_token
+
+   - name: 'some commands using secrets'
+     image: bash
+     commands:
+       - env | grep TOKEN
++    environment:
++      TOKEN_ENV:
++        from_secret: secret_token
 ```
+
+:::info Important
+Avoid using the deprecated `secrets` or `environment` fields in plugin steps.
+These options can potentially impact plugin execution and integrity.
+Instead, provide secrets via the `settings` field, preferably using the `from_secret` syntax (see below).
+
+This rule is also enforced by the pipeline linter to promote safe and predictable plugin behavior.
+:::
+
+In the example below, the secret `SURGE_TOKEN` would be passed to the setting named `surge_token`, which will be available in the plugin as an environment variable named `PLUGIN_SURGE_TOKEN` (See [plugins](./51-plugins/20-creating-plugins.md#settings) for details).
+
+```yaml
+steps:
+  - name: deploy-preview:
+    image: woodpeckerci/plugin-surge-preview
+    settings:
+      path: 'docs/build/'
+      surge_token:
+        from_secret: SURGE_TOKEN
+```
+
+As settings can have complex structures, `from_secret` is supported at any level:
+
+```yaml
+steps:
+  - name: deploy-test:
+    image: plugin-example
+    settings:
+      path: 'artifacts'
+      simple_token:
+        from_secret: A_TOKEN
+      advanced_setting:
+        items:
+          - "value1"
+          - some:
+              from_secret: secret_value
+          - "value3"
+```
+
+This method ensures flexible and secure use of secrets within plugin settings, while preserving the integrity and security of the plugin execution environment.
 
 ### Note about parameter pre-processing
 
@@ -33,11 +78,11 @@ Please note parameter expressions are subject to pre-processing. When using secr
 
 ```diff
  steps:
-   - name: docker
-     image: docker
+   - name: "step name"
+     image: registry/repo/image:tag
      commands:
--      - echo ${TOKEN_ENV}
-+      - echo $${TOKEN_ENV}
+-      - echo ${TOKEN}
++      - echo $${TOKEN}
      environment:
        TOKEN_ENV:
          from_secret: secret_token
