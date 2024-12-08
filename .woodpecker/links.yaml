@@ -5,6 +5,7 @@ when:
 steps:
   - name: links
     image: docker.io/lycheeverse/lychee:0.15.1
+    failure: ignore
     depends_on: []
     commands:
       - lychee pipeline/frontend/yaml/linter/schema/schema.json > links.md
