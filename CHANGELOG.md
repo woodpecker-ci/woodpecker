@@ -212,6 +212,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update docker.io/woodpeckerci/plugin-ready-release-go docker tag to v3.1.0 [[#4536](https://github.com/woodpecker-ci/woodpecker/pull/4536)]
 - chore(deps): update docker.io/curlimages/curl docker tag to v8.11.0 [[#4530](https://github.com/woodpecker-ci/woodpecker/pull/4530)]
 - fix(deps): update golang-packages [[#4496](https://github.com/woodpecker-ci/woodpecker/pull/4496)]
 - chore(deps): update docker.io/woodpeckerci/plugin-docker-buildx docker tag to v5.1.0 [[#4524](https://github.com/woodpecker-ci/woodpecker/pull/4524)]
