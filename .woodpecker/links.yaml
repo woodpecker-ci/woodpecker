@@ -20,13 +20,12 @@ steps:
       GITHUB_TOKEN:
         from_secret: github_token
     commands:
-      - ISSUE_NUMBER=4514
-      - REPO_OWNER=woodpecker-ci
-      - REPO_NAME=woodpecker
-      - DESCRIPTION=$(cat links.md)
+      - apk add -q --no-cache jq
+      - export ISSUE_NUMBER=4514
+      - export DESCRIPTION=$(cat links.md)
       - |
         curl -X PATCH \
-          -H "Authorization: token ${GITHUB_TOKEN}" \
+          -H "Authorization: token $GITHUB_TOKEN" \
           -H "Accept: application/vnd.github.v3+json" \
-          https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/issues/${ISSUE_NUMBER} \
+          https://api.github.com/repos/${CI_REPO}/issues/${ISSUE_NUMBER} \
           -d "$(jq -n --arg body "$DESCRIPTION" '{body: $body}')"
