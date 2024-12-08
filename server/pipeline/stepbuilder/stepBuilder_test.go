@@ -630,3 +630,47 @@ func getMockForge(t *testing.T) forge.Forge {
 	forge.On("URL").Return("https://codeberg.org")
 	return forge
 }
+
+func TestPullRequestWhenStep(t *testing.T) {
+	t.Parallel()
+
+	b := StepBuilder{
+		Forge: getMockForge(t),
+		Repo:  &model.Repo{},
+		Curr: &model.Pipeline{
+			Event:  model.EventPull,
+			Branch: "feature-branch",
+		},
+		Prev:  &model.Pipeline{},
+		Netrc: &model.Netrc{},
+		Secs:  []*model.Secret{},
+		Regs:  []*model.Registry{},
+		Host:  "",
+		Yamls: []*forge_types.FileMeta{
+			{Name: "shouldrun", Data: []byte(`
+when:
+  event: pull_request
+steps:
+  xxx:
+    when:
+      event: pull_request
+    image: scratch
+`)},
+			{Name: "shouldbefiltered", Data: []byte(`
+steps:
+  build:
+    when:
+      branch: main
+    image: scratch
+`)},
+		},
+	}
+
+	pipelineItems, err := b.Build()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(pipelineItems) != 1 {
+		t.Fatal("Steps with branch 'main' should not run on pull_request events targeting 'main'")
+	}
+}
