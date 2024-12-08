@@ -13,8 +13,7 @@ steps:
       - echo -e "\nLast checked:$(date)" >> links.md
 
   - name: Update issue
-    depends_on: links
-    image: docker.io/curlimages/curl:8.10.1
+    image: docker.io/curlimages/curl:8.11.0
     environment:
       GITHUB_TOKEN:
         from_secret: github_token
