@@ -212,6 +212,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update docker.io/curlimages/curl docker tag to v8.11.0 [[#4530](https://github.com/woodpecker-ci/woodpecker/pull/4530)]
 - fix(deps): update golang-packages [[#4496](https://github.com/woodpecker-ci/woodpecker/pull/4496)]
 - chore(deps): update docker.io/woodpeckerci/plugin-docker-buildx docker tag to v5.1.0 [[#4524](https://github.com/woodpecker-ci/woodpecker/pull/4524)]
 - chore(deps): update docker.io/woodpeckerci/plugin-prettier docker tag to v1 [[#4522](https://github.com/woodpecker-ci/woodpecker/pull/4522)]
@@ -286,6 +287,7 @@
 
 ### Misc
 
+- Move link checks into cron-curated issue dashboard [[#4515](https://github.com/woodpecker-ci/woodpecker/pull/4515)]
 - Add settings title action [[#4499](https://github.com/woodpecker-ci/woodpecker/pull/4499)]
 - Use same default sort for repo and org repo list [[#4461](https://github.com/woodpecker-ci/woodpecker/pull/4461)]
 - Add dns config option to official feature set [[#4418](https://github.com/woodpecker-ci/woodpecker/pull/4418)]
