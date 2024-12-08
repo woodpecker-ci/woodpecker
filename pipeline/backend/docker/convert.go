@@ -31,7 +31,7 @@ import (
 const minVolumeComponents = 2
 
 // returns a container configuration.
-func (e *docker) toConfig(step *types.Step) *container.Config {
+func (e *docker) toConfig(step *types.Step, options BackendOptions) *container.Config {
 	e.windowsPathPatch(step)
 
 	config := &container.Config{
@@ -44,6 +44,7 @@ func (e *docker) toConfig(step *types.Step) *container.Config {
 		AttachStdout: true,
 		AttachStderr: true,
 		Volumes:      toVol(step.Volumes),
+		User:         options.User,
 	}
 	configEnv := make(map[string]string)
 	maps.Copy(configEnv, step.Environment)

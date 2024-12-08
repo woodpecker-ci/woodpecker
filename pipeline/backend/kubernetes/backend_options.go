@@ -86,7 +86,7 @@ const (
 
 func parseBackendOptions(step *backend.Step) (BackendOptions, error) {
 	var result BackendOptions
-	if step.BackendOptions == nil {
+	if step == nil || step.BackendOptions == nil {
 		return result, nil
 	}
 	err := mapstructure.Decode(step.BackendOptions[EngineName], &result)

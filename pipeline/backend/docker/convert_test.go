@@ -131,7 +131,7 @@ func TestToContainerName(t *testing.T) {
 
 func TestStepToConfig(t *testing.T) {
 	// StepTypeCommands
-	conf := testEngine.toConfig(testCmdStep)
+	conf := testEngine.toConfig(testCmdStep, BackendOptions{})
 	if assert.NotNil(t, conf) {
 		assert.EqualValues(t, []string{"/bin/sh", "-c", "echo $CI_SCRIPT | base64 -d | /bin/sh -e"}, conf.Entrypoint)
 		assert.Nil(t, conf.Cmd)
@@ -139,7 +139,7 @@ func TestStepToConfig(t *testing.T) {
 	}
 
 	// StepTypePlugin
-	conf = testEngine.toConfig(testPluginStep)
+	conf = testEngine.toConfig(testPluginStep, BackendOptions{})
 	if assert.NotNil(t, conf) {
 		assert.Nil(t, conf.Cmd)
 		assert.EqualValues(t, testPluginStep.UUID, conf.Labels["wp_uuid"])
@@ -174,7 +174,7 @@ func TestToConfigSmall(t *testing.T) {
 		Name:     "test",
 		UUID:     "09238932",
 		Commands: []string{"go test"},
-	})
+	}, BackendOptions{})
 
 	assert.NotNil(t, conf)
 	sort.Strings(conf.Env)
@@ -233,7 +233,7 @@ func TestToConfigFull(t *testing.T) {
 		AuthConfig:    backend.Auth{Username: "user", Password: "123456"},
 		NetworkMode:   "bridge",
 		Ports:         []backend.Port{{Number: 21}, {Number: 22}},
-	})
+	}, BackendOptions{})
 
 	assert.NotNil(t, conf)
 	sort.Strings(conf.Env)
@@ -286,7 +286,7 @@ func TestToWindowsConfig(t *testing.T) {
 		AuthConfig:  backend.Auth{Username: "user", Password: "123456"},
 		NetworkMode: "nat",
 		Ports:       []backend.Port{{Number: 21}, {Number: 22}},
-	})
+	}, BackendOptions{})
 
 	assert.NotNil(t, conf)
 	sort.Strings(conf.Env)
