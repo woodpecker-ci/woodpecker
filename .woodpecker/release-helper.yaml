@@ -1,6 +1,6 @@
 steps:
   - name: release-helper
-    image: docker.io/woodpeckerci/plugin-ready-release-go:3.0.0
+    image: docker.io/woodpeckerci/plugin-ready-release-go:3.1.0
     settings:
       release_branch: ${CI_COMMIT_BRANCH}
       forge_type: github
