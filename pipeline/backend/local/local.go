@@ -44,6 +44,7 @@ type workflowState struct {
 
 type local struct {
 	tempDir         string
+	execDir         string
 	workflows       sync.Map
 	output          io.ReadCloser
 	pluginGitBinary string
@@ -80,6 +81,7 @@ func (e *local) Load(ctx context.Context) (*types.BackendInfo, error) {
 	c, ok := ctx.Value(types.CliCommand).(*cli.Command)
 	if ok {
 		e.tempDir = c.String("backend-local-temp-dir")
+		e.execDir = c.String("backend-local-exec-dir")
 	}
 
 	e.loadClone()
@@ -99,18 +101,33 @@ func (e *local) SetupWorkflow(_ context.Context, _ *types.Config, taskUUID strin
 	}
 
 	state := &workflowState{
-		stepCMDs:     make(map[string]*exec.Cmd),
-		baseDir:      baseDir,
-		workspaceDir: filepath.Join(baseDir, "workspace"),
-		homeDir:      filepath.Join(baseDir, "home"),
+		stepCMDs: make(map[string]*exec.Cmd),
+		baseDir:  baseDir,
+		homeDir:  filepath.Join(baseDir, "home"),
 	}
+	e.saveState(taskUUID, state)
 
 	if err := os.Mkdir(state.homeDir, 0o700); err != nil {
 		return err
 	}
 
-	if err := os.Mkdir(state.workspaceDir, 0o700); err != nil {
-		return err
+	if e.execDir == "" {
+		state.workspaceDir = filepath.Join(baseDir, "workspace")
+		if err := os.Mkdir(state.workspaceDir, 0o700); err != nil {
+			return err
+		}
+	} else {
+		state.workspaceDir = e.execDir
+		if stat, err := os.Stat(e.execDir); os.IsNotExist(err) {
+			log.Debug().Msgf("create workspace directory '%s' set by WOODPECKER_BACKEND_LOCAL_EXEC_DIR", e.execDir)
+			if err := os.Mkdir(state.workspaceDir, 0o700); err != nil {
+				return err
+			}
+		} else if !stat.IsDir() {
+			err := fmt.Errorf("backend option 'WOODPECKER_BACKEND_LOCAL_EXEC_DIR' was set to an existing file")
+			log.Error().Err(err).Msg("")
+			return err
+		}
 	}
 
 	e.saveState(taskUUID, state)
