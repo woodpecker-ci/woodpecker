@@ -14,6 +14,7 @@ steps:
 
   - name: Update issue
     image: docker.io/curlimages/curl:8.11.0
+    depends_on: links
     environment:
       GITHUB_TOKEN:
         from_secret: github_token
