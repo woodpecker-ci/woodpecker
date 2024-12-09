@@ -275,12 +275,6 @@ The file must be UTF-8 encoded, to ensure all special characters are preserved.
 
 Example: `WOODPECKER_CUSTOM_JS_FILE=/usr/local/www/woodpecker.js`
 
-### `WOODPECKER_LETS_ENCRYPT`
-
-> Default: `false`
-
-Automatically generates an SSL certificate using Let's Encrypt, and configures the server to accept HTTPS requests.
-
 ### `WOODPECKER_GRPC_ADDR`
 
 > Default: `:9000`
