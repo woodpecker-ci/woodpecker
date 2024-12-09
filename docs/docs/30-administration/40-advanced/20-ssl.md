@@ -7,17 +7,17 @@ WOODPECKER_SERVER_CERT=/etc/certs/woodpecker.example.com/server.crt
 WOODPECKER_SERVER_KEY=/etc/certs/woodpecker.example.com/server.key
 ```
 
-### Certificate Chain
+## Certificate Chain
 
 The most common problem encountered is providing a certificate file without the intermediate chain.
 
 > LoadX509KeyPair reads and parses a public/private key pair from a pair of files. The files must contain PEM encoded data. The certificate file may contain intermediate certificates following the leaf certificate to form a certificate chain.
 
-### Certificate Errors
+## Certificate Errors
 
 SSL support is provided using the [ListenAndServeTLS](https://golang.org/pkg/net/http/#ListenAndServeTLS) function from the Go standard library. If you receive certificate errors or warnings please examine your configuration more closely.
 
-### Running in containers
+## Running in containers
 
 Update your configuration to expose the following ports:
 
