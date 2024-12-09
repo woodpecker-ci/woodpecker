@@ -8,6 +8,7 @@
 
 ### 💥 Breaking changes
 
+- Drop native Let's Encrypt support [[#4541](https://github.com/woodpecker-ci/woodpecker/pull/4541)]
 - Set new default approval mode based on repo visibility [[#4456](https://github.com/woodpecker-ci/woodpecker/pull/4456)]
 - Do not set empty environment variables [[#4193](https://github.com/woodpecker-ci/woodpecker/pull/4193)]
 - Unify cli commands and flags [[#4481](https://github.com/woodpecker-ci/woodpecker/pull/4481)]
