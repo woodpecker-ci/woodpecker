@@ -42,9 +42,9 @@ type (
 		Settings   map[string]any     `yaml:"settings"`
 		// flow control
 		DependsOn base.StringOrSlice `yaml:"depends_on,omitempty"`
+		Needs     base.StringOrSlice `yaml:"needs,omitempty"`
 		When      constraint.When    `yaml:"when,omitempty"`
 		Failure   string             `yaml:"failure,omitempty"`
-		Detached  bool               `yaml:"detach,omitempty"`
 		// state
 		Volumes Volumes `yaml:"volumes,omitempty"`
 		// network
@@ -56,6 +56,8 @@ type (
 
 		// ACTIVE DEVELOPMENT BELOW
 
+		// TODO deprecated remove in next major
+		Detached bool `yaml:"detach,omitempty"`
 		// TODO: remove base.EnvironmentMap and use map[string]any after v3.0.0 release
 		Environment base.EnvironmentMap `yaml:"environment,omitempty"`
 
