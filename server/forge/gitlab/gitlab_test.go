@@ -198,7 +198,7 @@ func Test_GitLab(t *testing.T) {
 					assert.NoError(t, err)
 					if assert.NotNil(t, hookRepo) && assert.NotNil(t, pipeline) {
 						assert.Equal(t, "http://example.com/uploads/project/avatar/555/Outh-20-Logo.jpg", hookRepo.Avatar)
-						assert.Equal(t, "main", hookRepo.Branch)
+						assert.Equal(t, "anbraten-main-patch-05373", hookRepo.Branch)
 						assert.Equal(t, "anbraten", hookRepo.Owner)
 						assert.Equal(t, "woodpecker", hookRepo.Name)
 						assert.Equal(t, "Update client.go 🎉", pipeline.Title)
@@ -249,7 +249,7 @@ func Test_GitLab(t *testing.T) {
 					hookRepo, pipeline, err := client.Hook(ctx, req)
 					assert.NoError(t, err)
 					if assert.NotNil(t, hookRepo) && assert.NotNil(t, pipeline) {
-						assert.Equal(t, "main", hookRepo.Branch)
+						assert.Equal(t, "patch-1", hookRepo.Branch)
 						assert.Equal(t, "anbraten", hookRepo.Owner)
 						assert.Equal(t, "woodpecker-test", hookRepo.Name)
 						assert.Equal(t, "Add new file", pipeline.Title)
@@ -270,7 +270,7 @@ func Test_GitLab(t *testing.T) {
 					hookRepo, pipeline, err := client.Hook(ctx, req)
 					assert.NoError(t, err)
 					if assert.NotNil(t, hookRepo) && assert.NotNil(t, pipeline) {
-						assert.Equal(t, "main", hookRepo.Branch)
+						assert.Equal(t, "patch-1", hookRepo.Branch)
 						assert.Equal(t, "anbraten", hookRepo.Owner)
 						assert.Equal(t, "woodpecker-test", hookRepo.Name)
 						assert.Equal(t, "Add new file", pipeline.Title)
