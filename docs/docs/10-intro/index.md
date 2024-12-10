@@ -19,7 +19,15 @@ RedHat has written an [article which explains the concept in more detail](https:
 In contrast to other CI/CD applications, Woodpecker solely focuses on using containers for executing workflows.
 If you are already using containers in your daily workflow, you'll for sure love Woodpecker.
 
-## Convinced? Get started by deploying your own Woodpecker instance
+## FOSS
+
+Woodpecker is Free-and-Open-Source Software (FOSS), licensed under the Apache-2.0 license.
+Hence, it does not come with any license cost and this will never change.
+
+Woodpecker has been forked from Drone CI in 2019 after the project has changed it license.
+The full history is available in [the about section](./50-about.md#history).
+
+## Getting started
 
 Woodpecker is [pretty lightweight](../30-administration/00-getting-started.md#hardware-requirements) and can even run on a Raspberry Pi without much impact.
 To set up your own Woodpecker instance, follow the [deployment guide](../30-administration/00-getting-started.md).
