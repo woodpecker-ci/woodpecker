@@ -25,7 +25,7 @@ Woodpecker is Free-and-Open-Source Software (FOSS), licensed under the Apache-2.
 Hence, it does not come with any license cost and this will never change.
 
 Woodpecker has been forked from Drone CI in 2019 after the project has changed it license.
-The full history is available in [the about section](./50-about.md#history).
+The full history is available in [the about section](../50-about.md#history).
 
 ## Getting started
 
