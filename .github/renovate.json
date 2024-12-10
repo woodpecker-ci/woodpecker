@@ -2,7 +2,7 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": ["github>woodpecker-ci/renovate-config"],
   "automergeType": "pr",
-  "baseBranches": ["main", "/^release\\/.*/"]
+  "baseBranches": ["main", "/^release\\/.*/"],
   "customManagers": [
     {
       "customType": "regex",
