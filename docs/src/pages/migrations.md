@@ -1,5 +1,9 @@
 # Migrations
 
+## `next`
+
+- No changes
+
 ## 3.0.0
 
 ## User-facing migrations
