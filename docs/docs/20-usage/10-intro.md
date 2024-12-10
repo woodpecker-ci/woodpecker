@@ -1,4 +1,4 @@
-# "Hello world" pipeline
+# "Hello world"
 
 Let's get started and create a simple pipeline to demonstrate the pipeline syntax and overall behavior.
 
@@ -56,15 +56,14 @@ For instance, the `build` step will run first, followed by the `test` step.
 - In the `test` step, the workflow uses the `golang:latest` image to run the executable file for testing.
 
 You can use any image any registry you have access to.
-The most common one is [Docker Hub](https://hub.docker.com/search?type=image).
-By default, `docker.io` (=Dockerhub) is used implicitly as the default registry.
+The most common one is [Docker Hub](https://hub.docker.com/search?type=image) which is implicitly used via `docker.io` as the default registry.
 If you want to use a different one, you need to prefix the registry explicitly:
 
 ```diff
  steps:
    - name: build
 -    image: debian
-+    image: my-registry/my-company/my-image:latest
++    image: my-registry/my-repo/my-image:latest
 ```
 
 ## 3. Push the file and trigger the first pipeline
