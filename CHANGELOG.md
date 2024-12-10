@@ -1,13 +1,14 @@
 # Changelog
 
-## [2.8.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.8.1) - 2024-12-05
+## [2.8.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.8.1) - 2024-12-10
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@jolheiser
+@j04n-f, @jolheiser
 
 ### 🐛 Bug Fixes
 
+- Add Bitbucket fixes to Release/2.8 [[#4547](https://github.com/woodpecker-ci/woodpecker/pull/4547)]
 - fix: addon JSON pointers (#4508) [[#4512](https://github.com/woodpecker-ci/woodpecker/pull/4512)]
 
 ## [2.8.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.8.0) - 2024-11-28
