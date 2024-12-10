@@ -248,7 +248,7 @@ Example conditional execution by branch:
 +      - branch: main
 ```
 
-> The step now triggers on main branch, but also if the target branch of a pull request is `main`. Add an event condition to limit it further to pushes on main only.
+> The step now triggers on `push` events of the `main` branch
 
 Execute a step if the branch is `main` or `develop`:
 

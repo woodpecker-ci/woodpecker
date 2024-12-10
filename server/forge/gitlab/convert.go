@@ -106,7 +106,7 @@ func convertMergeRequestHook(hook *gitlab.MergeEvent, req *http.Request) (int, *
 		repo.CloneSSH = target.SSHURL
 	}
 
-	repo.Branch = target.DefaultBranch
+	repo.Branch = hook.ObjectAttributes.SourceBranch
 
 	if target.AvatarURL != "" {
 		repo.Avatar = target.AvatarURL
