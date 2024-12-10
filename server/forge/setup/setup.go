@@ -44,7 +44,7 @@ func setupBitbucket(forge *model.Forge) (forge.Forge, error) {
 		Client: forge.Client,
 		Secret: forge.ClientSecret,
 	}
-	log.Trace().Msgf("Forge (bitbucket) opts: %#v", opts)
+	log.Trace().Msg("Setting up bitbucket")
 	return bitbucket.New(opts)
 }
 
@@ -64,7 +64,7 @@ func setupGitea(forge *model.Forge) (forge.Forge, error) {
 	if len(opts.URL) == 0 {
 		return nil, fmt.Errorf("WOODPECKER_GITEA_URL must be set")
 	}
-	log.Trace().Msgf("Forge (gitea) opts: %#v", opts)
+	log.Trace().Msg("Setting up gitea")
 	return gitea.New(opts)
 }
 
@@ -84,7 +84,7 @@ func setupForgejo(forge *model.Forge) (forge.Forge, error) {
 	if len(opts.URL) == 0 {
 		return nil, fmt.Errorf("WOODPECKER_FORGEJO_URL must be set")
 	}
-	log.Trace().Msgf("Forge (forgejo) opts: %#v", opts)
+	log.Trace().Msg("Setting up forgejo")
 	return forgejo.New(opts)
 }
 
@@ -118,7 +118,7 @@ func setupGitHub(forge *model.Forge) (forge.Forge, error) {
 		OnlyPublic: publicOnly,
 		OAuthHost:  forge.OAuthHost,
 	}
-	log.Trace().Msgf("Forge (github) opts: %#v", opts)
+	log.Trace().Msg("Setting up github")
 	return github.New(opts)
 }
 
@@ -140,16 +140,16 @@ func setupBitbucketDatacenter(forge *model.Forge) (forge.Forge, error) {
 		Password:     gitPassword,
 		OAuthHost:    forge.OAuthHost,
 	}
-	log.Trace().Msgf("Forge (bitbucketdatacenter) opts: %#v", opts)
+	log.Trace().Msg("Setting up bitbucketdatacenter")
 	return bitbucketdatacenter.New(opts)
 }
 
 func setupAddon(forge *model.Forge) (forge.Forge, error) {
 	executable, ok := forge.AdditionalOptions["executable"].(string)
 	if !ok {
-		return nil, fmt.Errorf("missing git-username")
+		return nil, fmt.Errorf("missing addon executable")
 	}
 
-	log.Trace().Msgf("Forge (addon) executable: %#v", executable)
+	log.Trace().Msgf("Forge (addon) executable: %s", executable)
 	return addon.Load(executable)
 }
