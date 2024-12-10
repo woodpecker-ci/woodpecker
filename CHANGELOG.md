@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-12-09
+## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-12-10
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -215,6 +215,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update golang-packages [[#4546](https://github.com/woodpecker-ci/woodpecker/pull/4546)]
 - chore(deps): update docker.io/woodpeckerci/plugin-ready-release-go docker tag to v3.1.0 [[#4536](https://github.com/woodpecker-ci/woodpecker/pull/4536)]
 - chore(deps): update docker.io/curlimages/curl docker tag to v8.11.0 [[#4530](https://github.com/woodpecker-ci/woodpecker/pull/4530)]
 - fix(deps): update golang-packages [[#4496](https://github.com/woodpecker-ci/woodpecker/pull/4496)]
