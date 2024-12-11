@@ -67,7 +67,7 @@
 
     ```yaml
     environment:
-      my_token:
+      MY_TOKEN:
         from_secret: my_token
     ```
 
