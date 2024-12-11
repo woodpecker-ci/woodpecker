@@ -118,7 +118,7 @@
 - Previously, some (official) plugins were granted the `privileged` option by default to allow simplified usage.
   To streamline this process and enhance security transparency, no plugin is granted the `privileged` options by default anymore.
   To allow the use of these plugins in >= 3.0, they must be set explicitly through `WOODPECKER_PLUGINS_PRIVILEGED` on the admin side.
-  This change mainly impacts the use of the `woodpeckerci/plugin-docker-buildx` plugin, which now will not work anymore unless explicitly whitelisted through this env var ([#4053](https://github.com/woodpecker-ci/woodpecker/pull/4053))
+  This change mainly impacts the use of the `woodpeckerci/plugin-docker-buildx` plugin, which now will not work anymore unless explicitly listed through this env var ([#4053](https://github.com/woodpecker-ci/woodpecker/pull/4053))
 
 - Environment variable deprecations:
 
