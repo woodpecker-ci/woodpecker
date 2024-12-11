@@ -60,7 +60,7 @@
     2.x:
 
     ```yaml
-    secret: my_token
+    secrets: [ my_token ]
     ```
 
     3.x:
