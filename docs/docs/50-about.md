@@ -1,10 +1,10 @@
 # About
 
-Woodpecker has been originally forked from Drone 0.8 as the Drone CI license was changed after the 0.8 release from Apache 2.0 to a proprietary license. Woodpecker is based on this latest freely available version.
+Woodpecker is a community-driven open source CI/CD tool. It is designed to be lightweight, fast and simple to use. It can be used with many different Git providers and runners.
 
 ## History
 
-Woodpecker was originally forked by [@laszlocph](https://github.com/laszlocph) in 2019.
+Woodpecker was originally forked by [@laszlocph](https://github.com/laszlocph) in 2019 from Drone 0.8 after licensing model was changed.
 
 A few important time points:
 
@@ -15,4 +15,4 @@ A few important time points:
 
 ## Differences to Drone
 
-Woodpecker is a community-focused software that still stay free and open source forever, while Drone is managed by [Harness](https://harness.io/) and published under [Polyform Small Business](https://polyformproject.org/licenses/small-business/1.0.0/) license.
+Woodpecker is a community-driven open source software published under Apache2 license that will always stay so. Drone CI is managed by [Harness](https://harness.io/) and available in two editions: [Open Source under Apache2 license and Enterprise under Polyform Small Business license](https://docs.drone.io/enterprise/#is-drone-open-source). In terms of functionality, Woodpecker is somewhere in between [Drone Enterprise and OSS](https://docs.drone.io/enterprise/#what-is-the-difference-between-open-source-and-enterprise).
