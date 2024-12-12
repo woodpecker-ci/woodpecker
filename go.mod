@@ -61,7 +61,7 @@ require (
 	github.com/yaronf/httpsign v0.3.1
 	github.com/zalando/go-keyring v0.2.6
 	go.uber.org/multierr v1.11.0
-	golang.org/x/crypto v0.30.0
+	golang.org/x/crypto v0.31.0
 	golang.org/x/net v0.32.0
 	golang.org/x/oauth2 v0.24.0
 	golang.org/x/sync v0.10.0
