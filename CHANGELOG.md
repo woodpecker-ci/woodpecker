@@ -215,6 +215,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update golang-packages [[#4553](https://github.com/woodpecker-ci/woodpecker/pull/4553)]
 - Update kin-openapi [[#4560](https://github.com/woodpecker-ci/woodpecker/pull/4560)]
 - fix(deps): update module golang.org/x/crypto to v0.31.0 [security] [[#4557](https://github.com/woodpecker-ci/woodpecker/pull/4557)]
 - fix(deps): update golang-packages [[#4546](https://github.com/woodpecker-ci/woodpecker/pull/4546)]
