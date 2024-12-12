@@ -11,6 +11,7 @@
     "server/store/datastore/feed.go",
     "cmd/server/openapi/docs.go",
     "_test.go",
-    "Makefile"
+    "Makefile",
+    ".lockb"
   ]
 }
