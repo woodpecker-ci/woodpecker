@@ -15,7 +15,7 @@
 package gitlab
 
 import (
-	"github.com/xanzy/go-gitlab"
+	"gitlab.com/gitlab-org/api/client-go"
 
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
