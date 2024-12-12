@@ -142,17 +142,17 @@ The following restructuring was done to achieve a more consistent grouping:
 
 - Environment variable deprecations:
 
-| Deprecated Variable              | New Variable                         |
-| -------------------------------- | ------------------------------------ |
-| `WOODPECKER_LOG_XORM`            | `WOODPECKER_DATABASE_LOG`            |
-| `WOODPECKER_LOG_XORM_SQL`        | `WOODPECKER_DATABASE_LOG_SQL`        |
-| `WOODPECKER_FILTER_LABELS`       | `WOODPECKER_AGENT_LABELS`            |
-| `WOODPECKER_ESCALATE`            | `WOODPECKER_PLUGINS_PRIVILEGED`      |
-| `WOODPECKER_DEFAULT_CLONE_IMAGE` | `WOODPECKER_DEFAULT_CLONE_PLUGIN`    |
-| `WOODPECKER_DEV_OAUTH_HOST`      | `WOODPECKER_EXPERT_FORGE_OAUTH_HOST` |
-| `WOODPECKER_DEV_GITEA_OAUTH_URL` | `WOODPECKER_EXPERT_FORGE_OAUTH_HOST` |
-| `WOODPECKER_ROOT_PATH`           | `WOODPECKER_HOST`                    |
-| `WOODPECKER_ROOT_URL`            | `WOODPECKER_HOST`                    |
+  | Deprecated Variable              | New Variable                         |
+  | -------------------------------- | ------------------------------------ |
+  | `WOODPECKER_LOG_XORM`            | `WOODPECKER_DATABASE_LOG`            |
+  | `WOODPECKER_LOG_XORM_SQL`        | `WOODPECKER_DATABASE_LOG_SQL`        |
+  | `WOODPECKER_FILTER_LABELS`       | `WOODPECKER_AGENT_LABELS`            |
+  | `WOODPECKER_ESCALATE`            | `WOODPECKER_PLUGINS_PRIVILEGED`      |
+  | `WOODPECKER_DEFAULT_CLONE_IMAGE` | `WOODPECKER_DEFAULT_CLONE_PLUGIN`    |
+  | `WOODPECKER_DEV_OAUTH_HOST`      | `WOODPECKER_EXPERT_FORGE_OAUTH_HOST` |
+  | `WOODPECKER_DEV_GITEA_OAUTH_URL` | `WOODPECKER_EXPERT_FORGE_OAUTH_HOST` |
+  | `WOODPECKER_ROOT_PATH`           | `WOODPECKER_HOST`                    |
+  | `WOODPECKER_ROOT_URL`            | `WOODPECKER_HOST`                    |
 
 - The resource limit settings for the "docker" backend were moved from the server into agent configuration.
   This allows setting limits on an agent-level which allows greater resource definition granularity ([#3174](https://github.com/woodpecker-ci/woodpecker/pull/3174))
