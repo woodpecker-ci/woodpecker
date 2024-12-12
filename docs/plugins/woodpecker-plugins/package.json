@@ -14,19 +14,20 @@
     "@docusaurus/theme-classic": "^3.6.3",
     "@docusaurus/types": "^3.6.3",
     "@tsconfig/docusaurus": "^2.0.3",
-    "@types/node": "^22.9.3",
-    "axios": "^1.7.7",
+    "@types/node": "^22.10.2",
+    "axios": "^1.7.9",
     "concurrently": "^9.1.0",
-    "isomorphic-dompurify": "^2.16.0",
-    "marked": "^15.0.2",
+    "isomorphic-dompurify": "^2.19.0",
+    "marked": "^15.0.3",
     "tslib": "^2.8.1",
     "typescript": "^5.7.2"
   },
   "peerDependencies": {
-    "react": "^17.0.2 || ^18.0.0 || ^19.0.0",
-    "react-dom": "^17.0.2 || ^18.0.0 || ^19.0.0"
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
   },
   "dependencies": {
+    "@docusaurus/faster": "^3.6.3",
     "fuse.js": "^7.0.0",
     "yaml": "^2.6.1"
   }
