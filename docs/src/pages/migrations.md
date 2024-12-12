@@ -8,9 +8,13 @@
 
 ### User-facing migrations
 
+#### Security
+
 - The "gated" option, which restricted which pipelines can start right away without requiring approval, has been replaced by "require-approval" option. Even though this feature ([#3348](https://github.com/woodpecker-ci/woodpecker/pull/3348)) was backported to 2.8, no default is explicitly set.
   The new default in 3.0 is to require approval only for forked repositories.
   This allows easier management of dependency bots and other trusted entities having write access to the repository.
+
+#### Environment variables
 
 - Environment variables must now be defined as maps. List definitions are disallowed. ([#4016](https://github.com/woodpecker-ci/woodpecker/pull/4016))
 
@@ -27,8 +31,6 @@
   environment:
     ENV1: value1
   ```
-
-#### Environment variables
 
 The following built-in environment variables have been removed/replaced:
 
@@ -85,17 +87,19 @@ The following syntax deprecations will now result in an error:
 
 The following restructuring was done to achieve a more consistent grouping:
 
-- `woodpecker-cli registry` → `woodpecker-cli repo registry`
-- `woodpecker-cli secret [add|rm|...] --global` → `woodpecker-cli admin secret [add|rm|...]`
-- `woodpecker-cli user` → `woodpecker-cli admin user`
-- `woodpecker-cli log-level` → `woodpecker-cli admin log-level`
-- `woodpecker-cli secret [add|rm|...] --organization` → `woodpecker-cli org secret [add|rm|...]`
-- `woodpecker-cli deploy` → `woodpecker-cli pipeline deploy`
-- `woodpecker-cli log` → `woodpecker-cli pipeline log`
-- `woodpecker-cli cron` → `woodpecker-cli repo cron`
-- `woodpecker-cli secret [add|rm|...] --repository` → `woodpecker-cli repo secret [add|rm|...]`
-- `woodpecker-cli pipeline logs` → `woodpecker-cli pipeline log show`
-- `woodpecker-cli [registry|secret|...] info` → `woodpecker-cli [registry|secret|...] show`
+| Old Command                                 | New Command                                 |
+| ------------------------------------------- | ------------------------------------------- |
+| `woodpecker-cli registry`                   | `woodpecker-cli repo registry`              |
+| `woodpecker-cli secret --global`            | `woodpecker-cli admin secret`               |
+| `woodpecker-cli user`                       | `woodpecker-cli admin user`                 |
+| `woodpecker-cli log-level`                  | `woodpecker-cli admin log-level`            |
+| `woodpecker-cli secret --organization`      | `woodpecker-cli org secret`                 |
+| `woodpecker-cli deploy`                     | `woodpecker-cli pipeline deploy`            |
+| `woodpecker-cli log`                        | `woodpecker-cli pipeline log`               |
+| `woodpecker-cli cron`                       | `woodpecker-cli repo cron`                  |
+| `woodpecker-cli secret --repository`        | `woodpecker-cli repo secret`                |
+| `woodpecker-cli pipeline logs`              | `woodpecker-cli pipeline log show`          |
+| `woodpecker-cli (registry,secret,...) info` | `woodpecker-cli (registry,secret,...) show` |
 
 #### Miscellaneous
 
@@ -138,12 +142,17 @@ The following restructuring was done to achieve a more consistent grouping:
 
 - Environment variable deprecations:
 
-  - `WOODPECKER_LOG_XORM` and `WOODPECKER_LOG_XORM_SQL` got deprecated in favor of `WOODPECKER_DATABASE_LOG` and `WOODPECKER_DATABASE_LOG_SQL`
-  - `WOODPECKER_FILTER_LABELS` got deprecated in favor of `WOODPECKER_AGENT_LABELS`
-  - `WOODPECKER_ESCALATE` got deprecated in favor of `WOODPECKER_PLUGINS_PRIVILEGED`
-  - `WOODPECKER_DEFAULT_CLONE_IMAGE` got deprecated in favor of `WOODPECKER_DEFAULT_CLONE_PLUGIN`
-  - `WOODPECKER_DEV_OAUTH_HOST` and `WOODPECKER_DEV_GITEA_OAUTH_URL` got deprecated in favor of `WOODPECKER_EXPERT_FORGE_OAUTH_HOST`
-  - `WOODPECKER_ROOT_PATH` and `WOODPECKER_ROOT_URL` got deprecated in favor of `WOODPECKER_HOST`
+| Deprecated Variable              | New Variable                         |
+| -------------------------------- | ------------------------------------ |
+| `WOODPECKER_LOG_XORM`            | `WOODPECKER_DATABASE_LOG`            |
+| `WOODPECKER_LOG_XORM_SQL`        | `WOODPECKER_DATABASE_LOG_SQL`        |
+| `WOODPECKER_FILTER_LABELS`       | `WOODPECKER_AGENT_LABELS`            |
+| `WOODPECKER_ESCALATE`            | `WOODPECKER_PLUGINS_PRIVILEGED`      |
+| `WOODPECKER_DEFAULT_CLONE_IMAGE` | `WOODPECKER_DEFAULT_CLONE_PLUGIN`    |
+| `WOODPECKER_DEV_OAUTH_HOST`      | `WOODPECKER_EXPERT_FORGE_OAUTH_HOST` |
+| `WOODPECKER_DEV_GITEA_OAUTH_URL` | `WOODPECKER_EXPERT_FORGE_OAUTH_HOST` |
+| `WOODPECKER_ROOT_PATH`           | `WOODPECKER_HOST`                    |
+| `WOODPECKER_ROOT_URL`            | `WOODPECKER_HOST`                    |
 
 - The resource limit settings for the "docker" backend were moved from the server into agent configuration.
   This allows setting limits on an agent-level which allows greater resource definition granularity ([#3174](https://github.com/woodpecker-ci/woodpecker/pull/3174))
