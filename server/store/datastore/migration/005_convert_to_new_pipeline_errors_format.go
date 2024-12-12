@@ -17,41 +17,35 @@ package migration
 import (
 	"src.techknowlogick.com/xormigrate"
 	"xorm.io/xorm"
-
-	errorTypes "go.woodpecker-ci.org/woodpecker/v2/pipeline/errors/types"
 )
 
 // perPage005 set the size of the slice to read per page.
 var perPage005 = 100
 
-type pipeline005 struct {
-	ID     int64                       `json:"id"              xorm:"pk autoincr 'pipeline_id'"`
-	Error  string                      `json:"error"           xorm:"LONGTEXT 'pipeline_error'"` // old error format
-	Errors []*errorTypes.PipelineError `json:"errors"          xorm:"json 'pipeline_errors'"`    // new error format
-}
-
-func (pipeline005) TableName() string {
-	return "pipelines"
-}
-
-type PipelineError005 struct {
-	Type      string `json:"type"`
-	Message   string `json:"message"`
-	IsWarning bool   `json:"is_warning"`
-	Data      any    `json:"data"`
-}
-
 var convertToNewPipelineErrorFormat = xormigrate.Migration{
 	ID:   "convert-to-new-pipeline-error-format",
 	Long: true,
 	MigrateSession: func(sess *xorm.Session) (err error) {
+		type pipelineError struct {
+			Type      string `json:"type"`
+			Message   string `json:"message"`
+			IsWarning bool   `json:"is_warning"`
+			Data      any    `json:"data"`
+		}
+
+		type pipelines struct {
+			ID     int64            `json:"id"              xorm:"pk autoincr 'pipeline_id'"`
+			Error  string           `json:"error"           xorm:"LONGTEXT 'pipeline_error'"` // old error format
+			Errors []*pipelineError `json:"errors"          xorm:"json 'pipeline_errors'"`    // new error format
+		}
+
 		// make sure pipeline_error column exists
-		if err := sess.Sync(new(pipeline005)); err != nil {
+		if err := sess.Sync(new(pipelines)); err != nil {
 			return err
 		}
 
 		page := 0
-		oldPipelines := make([]*pipeline005, 0, perPage005)
+		oldPipelines := make([]*pipelines, 0, perPage005)
 
 		for {
 			oldPipelines = oldPipelines[:0]
@@ -62,9 +56,9 @@ var convertToNewPipelineErrorFormat = xormigrate.Migration{
 			}
 
 			for _, oldPipeline := range oldPipelines {
-				var newPipeline pipeline005
+				var newPipeline pipelines
 				newPipeline.ID = oldPipeline.ID
-				newPipeline.Errors = []*errorTypes.PipelineError{{
+				newPipeline.Errors = []*pipelineError{{
 					Type:    "generic",
 					Message: oldPipeline.Error,
 				}}

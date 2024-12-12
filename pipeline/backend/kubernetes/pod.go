@@ -162,6 +162,16 @@ func podSpec(step *types.Step, config *config, options BackendOptions, nsp nativ
 		return spec, err
 	}
 
+	if len(step.DNS) != 0 || len(step.DNSSearch) != 0 {
+		spec.DNSConfig = &v1.PodDNSConfig{}
+		if len(step.DNS) != 0 {
+			spec.DNSConfig.Nameservers = step.DNS
+		}
+		if len(step.DNSSearch) != 0 {
+			spec.DNSConfig.Searches = step.DNSSearch
+		}
+	}
+
 	log.Trace().Msgf("using the image pull secrets: %v", config.ImagePullSecretNames)
 	spec.ImagePullSecrets = secretsReferences(config.ImagePullSecretNames)
 	if needsRegistrySecret(step) {
@@ -183,7 +193,7 @@ func podContainer(step *types.Step, podName, goos string, options BackendOptions
 	container := v1.Container{
 		Name:            podName,
 		Image:           step.Image,
-		WorkingDir:      step.WorkspaceBase,
+		WorkingDir:      step.WorkingDir,
 		Ports:           containerPorts(step.Ports),
 		SecurityContext: containerSecurityContext(options.SecurityContext, step.Privileged),
 	}
@@ -193,9 +203,12 @@ func podContainer(step *types.Step, podName, goos string, options BackendOptions
 	}
 
 	if len(step.Commands) > 0 {
-		scriptEnv, command := common.GenerateContainerConf(step.Commands, goos)
+		scriptEnv, command := common.GenerateContainerConf(step.Commands, goos, step.WorkingDir)
 		container.Command = command
 		maps.Copy(step.Environment, scriptEnv)
+
+		// step.WorkingDir will be respected by the generated script
+		container.WorkingDir = step.WorkspaceBase
 	}
 	if len(step.Entrypoint) > 0 {
 		container.Command = step.Entrypoint
@@ -424,7 +437,7 @@ func podSecurityContext(sc *SecurityContext, secCtxConf SecurityContextConfig, s
 		apparmor = apparmorProfile(sc.ApparmorProfile)
 	}
 
-	if nonRoot == nil && user == nil && group == nil && fsGroup == nil && seccomp == nil {
+	if nonRoot == nil && user == nil && group == nil && fsGroup == nil && seccomp == nil && apparmor == nil {
 		return nil
 	}
 

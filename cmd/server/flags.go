@@ -94,16 +94,6 @@ var flags = append([]cli.Flag{
 		Usage:   "file path for the server to serve a custom .JS file, used for customizing the UI",
 	},
 	&cli.StringFlag{
-		Sources: cli.EnvVars("WOODPECKER_LETS_ENCRYPT_EMAIL"),
-		Name:    "lets-encrypt-email",
-		Usage:   "let's encrypt email",
-	},
-	&cli.BoolFlag{
-		Sources: cli.EnvVars("WOODPECKER_LETS_ENCRYPT"),
-		Name:    "lets-encrypt",
-		Usage:   "enable let's encrypt",
-	},
-	&cli.StringFlag{
 		Sources: cli.EnvVars("WOODPECKER_GRPC_ADDR"),
 		Name:    "grpc-addr",
 		Usage:   "grpc address",
@@ -116,6 +106,9 @@ var flags = append([]cli.Flag{
 		Name:  "grpc-secret",
 		Usage: "grpc jwt secret",
 		Value: "secret",
+		Config: cli.StringConfig{
+			TrimSpace: true,
+		},
 	},
 	&cli.StringFlag{
 		Sources: cli.EnvVars("WOODPECKER_METRICS_SERVER_ADDR"),
@@ -173,6 +166,11 @@ var flags = append([]cli.Flag{
 		Usage:   "The maximum time in minutes you can set in the repo settings before a pipeline gets killed",
 		Value:   120,
 	},
+	&cli.StringSliceFlag{
+		Sources: cli.EnvVars("WOODPECKER_DEFAULT_WORKFLOW_LABELS"),
+		Name:    "default-workflow-labels",
+		Usage:   "The default label filter to set for workflows that has no label filter set. By default workflows will be allowed to run on any agent, if not specified in the workflow.",
+	},
 	&cli.DurationFlag{
 		Sources: cli.EnvVars("WOODPECKER_SESSION_EXPIRES"),
 		Name:    "session-expires",
@@ -187,7 +185,7 @@ var flags = append([]cli.Flag{
 	&cli.StringSliceFlag{
 		Sources: cli.EnvVars("WOODPECKER_PLUGINS_TRUSTED_CLONE"),
 		Name:    "plugins-trusted-clone",
-		Usage:   "Plugins which are trusted to handle the netrc info in clone steps",
+		Usage:   "Plugins which are trusted to handle Git credentials in clone steps",
 		Value:   constant.TrustedClonePlugins,
 	},
 	&cli.StringSliceFlag{
@@ -212,6 +210,14 @@ var flags = append([]cli.Flag{
 			cli.EnvVar("WOODPECKER_AGENT_SECRET")),
 		Name:  "agent-secret",
 		Usage: "server-agent shared password",
+		Config: cli.StringConfig{
+			TrimSpace: true,
+		},
+	},
+	&cli.BoolFlag{
+		Sources: cli.EnvVars("WOODPECKER_DISABLE_USER_AGENT_REGISTRATION"),
+		Name:    "disable-user-agent-registration",
+		Usage:   "Disable user registered agents",
 	},
 	&cli.DurationFlag{
 		Sources: cli.EnvVars("WOODPECKER_KEEPALIVE_MIN_TIME"),
@@ -238,6 +244,9 @@ var flags = append([]cli.Flag{
 		Aliases: []string{"datasource"}, // TODO: remove in v4.0.0
 		Usage:   "database driver configuration string",
 		Value:   datasourceDefaultValue(),
+		Config: cli.StringConfig{
+			TrimSpace: true,
+		},
 	},
 	&cli.StringFlag{
 		Sources: cli.NewValueSourceChain(
@@ -245,6 +254,9 @@ var flags = append([]cli.Flag{
 			cli.EnvVar("WOODPECKER_PROMETHEUS_AUTH_TOKEN")),
 		Name:  "prometheus-auth-token",
 		Usage: "token to secure prometheus metrics endpoint",
+		Config: cli.StringConfig{
+			TrimSpace: true,
+		},
 	},
 	&cli.StringFlag{
 		Sources: cli.EnvVars("WOODPECKER_STATUS_CONTEXT", "WOODPECKER_GITHUB_CONTEXT", "WOODPECKER_GITEA_CONTEXT"),
@@ -344,6 +356,9 @@ var flags = append([]cli.Flag{
 			cli.EnvVar("WOODPECKER_BITBUCKET_DC_CLIENT_ID")),
 		Name:  "forge-oauth-client",
 		Usage: "oauth2 client id",
+		Config: cli.StringConfig{
+			TrimSpace: true,
+		},
 	},
 	&cli.StringFlag{
 		Sources: cli.NewValueSourceChain(
@@ -365,6 +380,9 @@ var flags = append([]cli.Flag{
 			cli.EnvVar("WOODPECKER_BITBUCKET_DC_CLIENT_SECRET")),
 		Name:  "forge-oauth-secret",
 		Usage: "oauth2 client secret",
+		Config: cli.StringConfig{
+			TrimSpace: true,
+		},
 	},
 	&cli.BoolFlag{
 		Name:  "forge-skip-verify",
@@ -456,6 +474,9 @@ var flags = append([]cli.Flag{
 			cli.EnvVar("WOODPECKER_BITBUCKET_DC_GIT_USERNAME")),
 		Name:  "bitbucket-dc-git-username",
 		Usage: "Bitbucket DataCenter/Server service account username",
+		Config: cli.StringConfig{
+			TrimSpace: true,
+		},
 	},
 	&cli.StringFlag{
 		Sources: cli.NewValueSourceChain(
@@ -463,6 +484,9 @@ var flags = append([]cli.Flag{
 			cli.EnvVar("WOODPECKER_BITBUCKET_DC_GIT_PASSWORD")),
 		Name:  "bitbucket-dc-git-password",
 		Usage: "Bitbucket DataCenter/Server service account password",
+		Config: cli.StringConfig{
+			TrimSpace: true,
+		},
 	},
 	//
 	// development flags
@@ -490,6 +514,9 @@ var flags = append([]cli.Flag{
 			cli.EnvVar("WOODPECKER_ENCRYPTION_KEY")),
 		Name:  "encryption-raw-key",
 		Usage: "Raw encryption key",
+		Config: cli.StringConfig{
+			TrimSpace: true,
+		},
 	},
 	&cli.StringFlag{
 		Sources: cli.EnvVars("WOODPECKER_ENCRYPTION_TINK_KEYSET_FILE"),

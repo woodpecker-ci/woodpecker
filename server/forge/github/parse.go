@@ -22,7 +22,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/google/go-github/v66/github"
+	"github.com/google/go-github/v67/github"
 
 	"go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
@@ -157,6 +157,8 @@ func parsePullHook(hook *github.PullRequestEvent, merge bool) (*github.PullReque
 		event = model.EventPullClosed
 	}
 
+	fromFork := hook.GetPullRequest().GetHead().GetRepo().GetID() != hook.GetPullRequest().GetBase().GetRepo().GetID()
+
 	pipeline := &model.Pipeline{
 		Event:    event,
 		Commit:   hook.GetPullRequest().GetHead().GetSHA(),
@@ -173,6 +175,7 @@ func parsePullHook(hook *github.PullRequestEvent, merge bool) (*github.PullReque
 			hook.GetPullRequest().GetBase().GetRef(),
 		),
 		PullRequestLabels: convertLabels(hook.GetPullRequest().Labels),
+		FromFork:          fromFork,
 	}
 	if merge {
 		pipeline.Ref = fmt.Sprintf(mergeRefs, hook.GetPullRequest().GetNumber())

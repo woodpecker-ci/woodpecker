@@ -26,7 +26,7 @@ import (
 
 var pipelineLastCmd = &cli.Command{
 	Name:      "last",
-	Usage:     "show latest pipeline details",
+	Usage:     "show latest pipeline information",
 	ArgsUsage: "<repo-id|repo-full-name>",
 	Action:    pipelineLast,
 	Flags: append(common.OutputFlags("table"), []cli.Flag{
@@ -49,10 +49,14 @@ func pipelineLast(ctx context.Context, c *cli.Command) error {
 		return err
 	}
 
-	pipeline, err := client.PipelineLast(repoID, c.String("branch"))
+	opt := woodpecker.PipelineLastOptions{
+		Branch: c.String("branch"),
+	}
+
+	pipeline, err := client.PipelineLast(repoID, opt)
 	if err != nil {
 		return err
 	}
 
-	return pipelineOutput(c, []woodpecker.Pipeline{*pipeline})
+	return pipelineOutput(c, []*woodpecker.Pipeline{pipeline})
 }

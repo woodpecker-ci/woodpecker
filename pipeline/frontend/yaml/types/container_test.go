@@ -158,15 +158,13 @@ func TestUnmarshalContainers(t *testing.T) {
       dry_run: true
       dockerfile: docker/Dockerfile.agent
       tag: [next, latest]
-    secrets: [docker_username, docker_password]
     when:
       branch: ${CI_REPO_DEFAULT_BRANCH}
       event: push`,
 			want: []*Container{
 				{
-					Name:    "publish-agent",
-					Image:   "print/env",
-					Secrets: []string{"docker_username", "docker_password"},
+					Name:  "publish-agent",
+					Image: "print/env",
 					Settings: map[string]any{
 						"repo":       "woodpeckerci/woodpecker-agent",
 						"dockerfile": "docker/Dockerfile.agent",

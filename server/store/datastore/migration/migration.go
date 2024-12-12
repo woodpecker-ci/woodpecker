@@ -46,6 +46,11 @@ var migrationTasks = []*xormigrate.Migration{
 	&addOrgAgents,
 	&addCustomLabelsToAgent,
 	&splitTrusted,
+	&correctPotentialCorruptOrgsUsersRelation,
+	&gatedToRequireApproval,
+	&removeRepoNetrcOnlyTrusted,
+	&renameTokenFields,
+	&setNewDefaultsForRequireApproval,
 }
 
 var allBeans = []any{

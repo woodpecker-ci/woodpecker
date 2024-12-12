@@ -25,10 +25,9 @@ Only activate this option if you trust all users who have push access to your re
 Otherwise, these users will be able to steal secrets that are only available for `deploy` events.
 :::
 
-## Protected
+## Require approval for
 
-Every pipeline initiated by an webhook event needs to be approved by a project members with push permissions before being executed.
-The protected option can be used as an additional review process before running potentially harmful pipelines. Especially if pipelines can be executed by third-parties through pull-requests.
+To prevent malicious pipelines from extracting secrets or running harmful commands or to prevent accidental pipeline runs, you can require approval for an additional review process. Depending on the enabled option, a pipeline will be put on hold after creation and will only continue after approval. The default restrictive setting is `Approvals for forked repositories`.
 
 ## Trusted
 
@@ -40,9 +39,13 @@ Only server admins can set this option. If you are not a server admin this optio
 
 :::
 
-## Only inject netrc credentials into trusted containers
+## Custom trusted clone plugins
 
-Cloning pipeline step may need git credentials. They are injected via netrc. By default, they're only injected if this option is enabled, the repo is trusted ([see above](#trusted)) or the image is a trusted clone image. If you uncheck the option, git credentials will be injected into any container in clone step.
+The clone step may require Git credentials (e.g. for private repos) which are injected via `netrc`.
+
+They are only injected into trusted plugins listed in the env var `WOODPECKER_PLUGINS_TRUSTED_CLONE` or in this repo setting.
+
+This allows you to use a trusted plugin for in the clone section or as a step to pull or push using your git credentials.
 
 ## Project visibility
 

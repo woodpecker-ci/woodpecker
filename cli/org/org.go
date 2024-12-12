@@ -18,6 +18,7 @@ import (
 	"github.com/urfave/cli/v3"
 
 	"go.woodpecker-ci.org/woodpecker/v2/cli/org/registry"
+	"go.woodpecker-ci.org/woodpecker/v2/cli/org/secret"
 )
 
 // Command exports the org command set.
@@ -26,5 +27,6 @@ var Command = &cli.Command{
 	Usage: "manage organizations",
 	Commands: []*cli.Command{
 		registry.Command,
+		secret.Command,
 	},
 }

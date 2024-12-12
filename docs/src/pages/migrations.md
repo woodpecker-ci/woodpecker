@@ -10,6 +10,7 @@ This will be the next version of Woodpecker.
 
 ## User migrations
 
+- `gated` has been replaced by `require-approval`
 - Removed built-in environment variables:
   - `CI_COMMIT_URL` use `CI_PIPELINE_FORGE_URL`
   - `CI_STEP_FINISHED` as empty during execution
@@ -33,6 +34,19 @@ This will be the next version of Woodpecker.
 - Removed old API routes: `registry/` -> `registries`, `/authorize/token`
 - Replaced `registry` command with `repo registry` in cli
 - Deprecated `secrets`, use `environment` with `from_secret`
+- Empty string environment variables are not set
+- CLI commands got restructured to provide a simplified structure:
+  - `woodpecker-cli secret [add|rm|...] --global` is now `woodpecker-cli admin secret [add|rm|...]`
+  - `woodpecker-cli user` is now `woodpecker-cli admin user`
+  - `woodpecker-cli log-level` is now `woodpecker-cli admin log-level`
+  - `woodpecker-cli secret [add|rm|...] --organization` is now `woodpecker-cli org secret [add|rm|...]`
+  - `woodpecker-cli deploy` is now `woodpecker-cli pipeline deploy`
+  - `woodpecker-cli log` is now `woodpecker-cli pipeline log`
+  - `woodpecker-cli cron` is now `woodpecker-cli repo cron`
+  - `woodpecker-cli secret [add|rm|...] --repository` is now `woodpecker-cli repo secret [add|rm|...]`
+  - `woodpecker-cli pipeline logs` is now `woodpecker-cli pipeline log show`
+  - `woodpecker-cli [registry|secret|...] info` is now `woodpecker-cli [registry|secret|...] show`
+- Dropped native Let's Encrypt certificate support. You can either generate Let's Encrypt certificates externally and use `WOODPECKER_SERVER_CERT` and `WOODPECKER_SERVER_KEY` or use Woodpecker behind a reverse proxy like Caddy.
 
 ## Admin migrations
 

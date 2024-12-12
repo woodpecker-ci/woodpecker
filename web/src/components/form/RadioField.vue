@@ -5,7 +5,7 @@
       type="radio"
       class="radio relative flex-shrink-0 border bg-wp-control-neutral-100 border-wp-control-neutral-200 cursor-pointer rounded-full w-5 h-5 checked:bg-wp-control-ok-200 checked:border-wp-control-ok-200 focus-visible:border-wp-control-neutral-300 checked:focus-visible:border-wp-control-ok-300"
       :value="option.value"
-      :checked="innerValue.includes(option.value)"
+      :checked="innerValue?.includes(option.value)"
       @click="innerValue = option.value"
     />
     <div class="flex flex-col ml-4">

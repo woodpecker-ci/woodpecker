@@ -46,6 +46,7 @@ type docker struct {
 }
 
 const (
+	EngineName          = "docker"
 	networkDriverNAT    = "nat"
 	networkDriverBridge = "bridge"
 	volumeDriver        = "local"
@@ -59,7 +60,7 @@ func New() backend.Backend {
 }
 
 func (e *docker) Name() string {
-	return "docker"
+	return EngineName
 }
 
 func (e *docker) IsAvailable(ctx context.Context) bool {
@@ -170,9 +171,14 @@ func (e *docker) SetupWorkflow(ctx context.Context, conf *backend.Config, taskUU
 }
 
 func (e *docker) StartStep(ctx context.Context, step *backend.Step, taskUUID string) error {
+	options, err := parseBackendOptions(step)
+	if err != nil {
+		log.Error().Err(err).Msg("could not parse backend options")
+	}
+
 	log.Trace().Str("taskUUID", taskUUID).Msgf("start step %s", step.Name)
 
-	config := e.toConfig(step)
+	config := e.toConfig(step, options)
 	hostConfig := toHostConfig(step, &e.config)
 	containerName := toContainerName(step)
 
@@ -204,7 +210,7 @@ func (e *docker) StartStep(ctx context.Context, step *backend.Step, taskUUID str
 	// add default volumes to the host configuration
 	hostConfig.Binds = utils.DeduplicateStrings(append(hostConfig.Binds, e.config.volumes...))
 
-	_, err := e.client.ContainerCreate(ctx, config, hostConfig, nil, nil, containerName)
+	_, err = e.client.ContainerCreate(ctx, config, hostConfig, nil, nil, containerName)
 	if client.IsErrNotFound(err) {
 		// automatically pull and try to re-create the image if the
 		// failure is caused because the image does not exist.
@@ -358,6 +364,8 @@ func normalizeArchType(s string) string {
 	switch s {
 	case "x86_64":
 		return "amd64"
+	case "aarch64":
+		return "arm64"
 	default:
 		return s
 	}
