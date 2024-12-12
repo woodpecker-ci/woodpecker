@@ -1,11 +1,14 @@
 {
   "name": "woodpecker",
   "version": "0.0.0",
+  "workspaces": [
+    "plugins/woodpecker-plugins/*"
+  ],
   "private": true,
   "scripts": {
     "start": "cd ../ && make docs && cd docs && docusaurus start",
-    "build": "pnpm build:woodpecker-plugins && docusaurus build",
-    "build:woodpecker-plugins": "cd plugins/woodpecker-plugins && pnpm i && pnpm build",
+    "build": "bun build:woodpecker-plugins && docusaurus build",
+    "build:woodpecker-plugins": "cd plugins/woodpecker-plugins && bun i && bun run build",
     "swizzle": "docusaurus swizzle",
     "deploy": "docusaurus deploy",
     "clear": "docusaurus clear",
