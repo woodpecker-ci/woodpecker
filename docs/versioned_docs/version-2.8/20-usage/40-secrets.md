@@ -13,6 +13,12 @@ Woodpecker provides three different levels to add secrets to your pipeline. The 
 
 ### Use secrets in commands
 
+:::warning
+The use of secrets is deprecated as of version 2.8 and planned to be removed with version 3. 
+Instead, you can use the *secrets in settings and environment* approach outlined below. 
+You can already migrate to this strategy with version 2.8.  
+:::
+
 Secrets are exposed to your pipeline steps and plugins as uppercase environment variables and can therefore be referenced in the commands section of your pipeline,
 once their usage is declared in the `secrets` section:
 
@@ -30,9 +36,30 @@ The case of the environment variables is not changed, but secret matching is don
 
 ### Use secrets in settings and environment
 
-You can set an setting or environment value from secrets using the `from_secret` syntax.
+You can set an setting or environment value from secrets using the `from_secret` syntax. 
 
-In this example, the secret named `secret_token` would be passed to the setting named `token`,which will be available in the plugin as environment variable named `PLUGIN_TOKEN` (See [plugins](./51-plugins/20-creating-plugins.md#settings) for details), and to the environment variable `TOKEN_ENV`.
+The example below passes a secret called `token` as an environment variable that will be called `ENV_TOKEN`:
+
+```diff
+ steps:
+   - name: docker
+     image: my-plugin
++    environment:
++      TOKEN_ENV:
++        from_secret: secret_token
+```
+
+You can use the same syntax to pass secrets to settings: For example, you can pass a secret named `secret_token` to the settings (here called `token`), which will then be available in the plugin as environment variable named `PLUGIN_TOKEN` (See [plugins](./51-plugins/20-creating-plugins.md#settings) for details).
+
+```diff
+ steps:
+   - name: docker
+     image: my-plugin
++    settings:
++      token:
++        from_secret: secret_token
+```
+You can also combine the two, e.g. 
 
 ```diff
  steps:
