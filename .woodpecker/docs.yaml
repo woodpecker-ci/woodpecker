@@ -47,12 +47,11 @@ steps:
       - event: manual
 
   build:
-    image: *node_image
+    image: oven/bun:1.1.38-alpine
     directory: docs/
     commands:
-      - corepack enable
-      - pnpm install --frozen-lockfile
-      - pnpm build
+      - bun install
+      - bun run build
     when:
       - path: *when_path
         event: [tag, pull_request, push]
