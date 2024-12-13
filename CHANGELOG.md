@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-12-12
+## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-12-13
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -215,6 +215,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update module google.golang.org/grpc to v1.69.0 [[#4563](https://github.com/woodpecker-ci/woodpecker/pull/4563)]
 - fix(deps): update golang-packages [[#4553](https://github.com/woodpecker-ci/woodpecker/pull/4553)]
 - Update kin-openapi [[#4560](https://github.com/woodpecker-ci/woodpecker/pull/4560)]
 - fix(deps): update module golang.org/x/crypto to v0.31.0 [security] [[#4557](https://github.com/woodpecker-ci/woodpecker/pull/4557)]
