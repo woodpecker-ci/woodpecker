@@ -50,9 +50,7 @@ steps:
     image: oven/bun:1.1.38-alpine
     directory: docs/
     commands:
-      - bun install
-      - bun pm untrusted
-      - bun pm trust --all
+      - bun --bun install
       - bun run build
     when:
       - path: *when_path

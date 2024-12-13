@@ -30,5 +30,10 @@
     "@docusaurus/faster": "^3.6.3",
     "fuse.js": "^7.0.0",
     "yaml": "^2.6.1"
-  }
+  },
+  "trustedDependencies": [
+    "@swc/core",
+    "core-js",
+    "core-js-pure"
+  ]
 }

@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "start": "cd ../ && make docs && cd docs && docusaurus start",
-    "build": "bun build:woodpecker-plugins && docusaurus build",
-    "build:woodpecker-plugins": "cd plugins/woodpecker-plugins && bun install && bun pm trust --all && bun run build",
+    "build": "bun --bun build:woodpecker-plugins && docusaurus build",
+    "build:woodpecker-plugins": "cd plugins/woodpecker-plugins && bun --bun install && bun run build",
     "swizzle": "docusaurus swizzle",
     "deploy": "docusaurus deploy",
     "clear": "docusaurus clear",
@@ -46,5 +46,10 @@
     "@types/react-helmet": "^6.1.11",
     "@types/react-router-dom": "^5.3.3",
     "typescript": "^5.7.2"
-  }
+  },
+  "trustedDependencies": [
+    "@swc/core",
+    "core-js",
+    "core-js-pure"
+  ]
 }
