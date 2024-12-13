@@ -21,12 +21,15 @@
     "@docusaurus/faster": "^3.6.3",
     "@docusaurus/plugin-content-blog": "^3.6.3",
     "@docusaurus/preset-classic": "^3.6.3",
-    "@easyops-cn/docusaurus-search-local": "^0.46.0",
+    "@easyops-cn/docusaurus-search-local": "^0.46.1",
     "clsx": "^2.1.1",
-    "prism-react-renderer": "^2.4.0",
+    "docusaurus": "^1.14.7",
+    "postcss": "^8",
+    "prism-react-renderer": "^2.4.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "redocusaurus": "^2.2.0"
+    "redocusaurus": "^2.2.0",
+    "textlint": "^14.4.0"
   },
   "browserslist": {
     "production": [
@@ -44,8 +47,8 @@
     "@docusaurus/module-type-aliases": "^3.6.3",
     "@docusaurus/tsconfig": "3.6.3",
     "@docusaurus/types": "^3.6.3",
-    "@types/node": "^22.9.3",
-    "@types/react": "^18.3.1",
+    "@types/node": "^22.10.2",
+    "@types/react": "^18.3.16",
     "@types/react-helmet": "^6.1.11",
     "@types/react-router-dom": "^5.3.3",
     "typescript": "^5.7.2"
