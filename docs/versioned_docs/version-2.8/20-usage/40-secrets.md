@@ -42,8 +42,10 @@ The example below passes a secret called `token` as an environment variable that
 
 ```diff
  steps:
-   - name: docker
-     image: my-plugin
+   env-secret-example:
+     image: alpine
+     commands:
++      - echo "The secret is $TOKEN_ENV"
 +    environment:
 +      TOKEN_ENV:
 +        from_secret: secret_token
@@ -55,19 +57,6 @@ You can use the same syntax to pass secrets to settings. For example, you can pa
  steps:
    - name: settings-secret-example
      image: my-plugin
-+    settings:
-+      token:
-+        from_secret: secret_token
-```
-You can also combine the two, e.g.
-
-```diff
- steps:
-   - name: docker
-     image: my-plugin
-+    environment:
-+      TOKEN_ENV:
-+        from_secret: secret_token
 +    settings:
 +      token:
 +        from_secret: secret_token
