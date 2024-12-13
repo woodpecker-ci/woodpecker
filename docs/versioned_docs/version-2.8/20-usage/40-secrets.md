@@ -38,7 +38,7 @@ The case of the environment variables is not changed, but secret matching is don
 
 You can set an setting or environment value from secrets using the `from_secret` syntax.
 
-The example below passes a secret called `token` as an environment variable that will be called `ENV_TOKEN`:
+The example below passes a secret called `token` as an environment variable that will be called `TOKEN_ENV`:
 
 ```diff
  steps:
@@ -49,7 +49,7 @@ The example below passes a secret called `token` as an environment variable that
 +        from_secret: secret_token
 ```
 
-You can use the same syntax to pass secrets to settings: For example, you can pass a secret named `secret_token` to the settings (here called `token`), which will then be available in the plugin as environment variable named `PLUGIN_TOKEN` (See [plugins](./51-plugins/20-creating-plugins.md#settings) for details).
+You can use the same syntax to pass secrets to settings. For example, you can pass a secret named `secret_token` to the settings called `token`, which will then be available in the plugin as environment variable named `PLUGIN_TOKEN` (See [plugins](./51-plugins/20-creating-plugins.md#settings) for details).
 
 ```diff
  steps:
