@@ -32,12 +32,12 @@ Install make on:
 - [Windows](https://stackoverflow.com/a/32127632/8461267)
 - Mac OS: `brew install make`
 
-### Install Node.js & `pnpm`
+### Install Node.js & `bun`
 
 Install [Node.js (>=20)](https://nodejs.org/en/download/package-manager) if you want to build Woodpecker's UI or documentation.
 
 For dependency installation (`node_modules`) of UI and documentation of Woodpecker the package manager pnpm is used.
-[This guide](https://pnpm.io/installation) describes the installation of `pnpm`.
+[This guide](https://bun.sh/docs/installation) describes the installation of `bun`.
 
 ### Install `pre-commit` (optional)
 
