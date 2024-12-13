@@ -53,7 +53,7 @@ You can use the same syntax to pass secrets to settings. For example, you can pa
 
 ```diff
  steps:
-   - name: docker
+   - name: settings-secret-example
      image: my-plugin
 +    settings:
 +      token:
