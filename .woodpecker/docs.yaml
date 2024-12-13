@@ -51,6 +51,8 @@ steps:
     directory: docs/
     commands:
       - bun install
+      - bun pm untrusted
+      - bun pm trust --all
       - bun run build
     when:
       - path: *when_path
