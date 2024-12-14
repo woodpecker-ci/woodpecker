@@ -64,7 +64,7 @@ func setupGitea(forge *model.Forge) (forge.Forge, error) {
 	if len(opts.URL) == 0 {
 		return nil, fmt.Errorf("WOODPECKER_GITEA_URL must be set")
 	}
-	log.Trace().Msg("Setting up gitea")
+	log.Trace().Str("url", opts.URL).Str("oauth-host", opts.OAuthHost).Bool("skip-verify", opts.SkipVerify).Msg("Setting up gitea")
 	return gitea.New(opts)
 }
 
@@ -84,18 +84,20 @@ func setupForgejo(forge *model.Forge) (forge.Forge, error) {
 	if len(opts.URL) == 0 {
 		return nil, fmt.Errorf("WOODPECKER_FORGEJO_URL must be set")
 	}
-	log.Trace().Msg("Setting up forgejo")
+	log.Trace().Str("url", opts.URL).Str("oauth2-url", opts.OAuth2URL).Bool("skip-verify", opts.SkipVerify).Msg("Setting up forgejo")
 	return forgejo.New(opts)
 }
 
 func setupGitLab(forge *model.Forge) (forge.Forge, error) {
-	return gitlab.New(gitlab.Opts{
+	opts := gitlab.Opts{
 		URL:          forge.URL,
 		ClientID:     forge.Client,
 		ClientSecret: forge.ClientSecret,
 		SkipVerify:   forge.SkipVerify,
 		OAuthHost:    forge.OAuthHost,
-	})
+	}
+	log.Trace().Str("url", opts.URL).Str("oauth-host", opts.OAuthHost).Bool("skip-verify", opts.SkipVerify).Msg("Setting up gitlab")
+	return gitlab.New(opts)
 }
 
 func setupGitHub(forge *model.Forge) (forge.Forge, error) {
@@ -118,7 +120,7 @@ func setupGitHub(forge *model.Forge) (forge.Forge, error) {
 		OnlyPublic: publicOnly,
 		OAuthHost:  forge.OAuthHost,
 	}
-	log.Trace().Msg("Setting up github")
+	log.Trace().Str("url", opts.URL).Str("oauth-host", opts.OAuthHost).Bool("merge-ref", opts.MergeRef).Bool("only-public", opts.OnlyPublic).Bool("skip-verify", opts.SkipVerify).Msg("Setting up github")
 	return github.New(opts)
 }
 
@@ -140,7 +142,7 @@ func setupBitbucketDatacenter(forge *model.Forge) (forge.Forge, error) {
 		Password:     gitPassword,
 		OAuthHost:    forge.OAuthHost,
 	}
-	log.Trace().Msg("Setting up bitbucketdatacenter")
+	log.Trace().Str("url", opts.URL).Str("oauth-host", opts.OAuthHost).Msg("Setting up bitbucketdatacenter")
 	return bitbucketdatacenter.New(opts)
 }
 
