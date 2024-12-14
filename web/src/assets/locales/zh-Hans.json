@@ -194,7 +194,8 @@
                 "title": "添加流水线变量",
                 "value": "变量值",
                 "delete": "删除变量"
-            }
+            },
+            "enter_task": "部署任务"
         },
         "enable": {
             "disabled": "已禁用",
@@ -215,7 +216,8 @@
                 "title": "添加流水线变量",
                 "value": "变量值",
                 "delete": "删除变量"
-            }
+            },
+            "show_pipelines": "查看流水线"
         },
         "not_allowed": "你没有权限访问这个仓库",
         "open_in_forge": "在版本控制系统中打开",
@@ -436,7 +438,22 @@
             },
             "settings": "设置"
         },
-        "user_none": "此组织/用户还没有任何仓库。"
+        "user_none": "此组织/用户还没有任何仓库。",
+        "visibility": {
+            "visibility": "项目可见性",
+            "public": {
+                "desc": "任何无需登录的用户均可以看到你的项目。",
+                "public": "公共的"
+            },
+            "private": {
+                "private": "私有的",
+                "desc": "只有你和其他仓库拥有者才能看到这个项目。"
+            },
+            "internal": {
+                "internal": "内部的",
+                "desc": "只有Woodpecker的登录用户可以看到这个项目。"
+            }
+        }
     },
     "repos": "仓库",
     "repositories": "仓库",
@@ -527,5 +544,6 @@
     "cli_login_failed": "登录到 CLI 失败",
     "cli_login_denied": "登录 CLI 被拒绝",
     "login_to_cli_description": "点击继续以登录到 CLI。",
-    "return_to_cli": "您现在可以关闭此选项卡并返回 CLI。"
+    "return_to_cli": "您现在可以关闭此选项卡并返回 CLI。",
+    "login_with": "使用 {forge} 登录"
 }
