@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-12-13
+## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-12-14
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -215,6 +215,8 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update docker.io/woodpeckerci/plugin-codecov docker tag to v2.1.6 [[#4566](https://github.com/woodpecker-ci/woodpecker/pull/4566)]
+- fix(deps): update github.com/muesli/termenv digest to 8c990cd [[#4565](https://github.com/woodpecker-ci/woodpecker/pull/4565)]
 - fix(deps): update module google.golang.org/grpc to v1.69.0 [[#4563](https://github.com/woodpecker-ci/woodpecker/pull/4563)]
 - fix(deps): update golang-packages [[#4553](https://github.com/woodpecker-ci/woodpecker/pull/4553)]
 - Update kin-openapi [[#4560](https://github.com/woodpecker-ci/woodpecker/pull/4560)]
