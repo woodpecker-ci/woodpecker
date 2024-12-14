@@ -13,7 +13,7 @@ Woodpecker provides three different levels to add secrets to your pipeline. The 
 
 You can set a setting or environment value from secrets using the `from_secret` syntax.
 
-The example below passes a secret called `token` as an environment variable that will be called `TOKEN_ENV`:
+The example below passes a secret called `secret_token` as an environment variable that will be called `TOKEN_ENV`:
 
 ```diff
  steps:
