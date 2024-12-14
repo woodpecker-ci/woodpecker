@@ -36,7 +36,7 @@ The case of the environment variables is not changed, but secret matching is don
 
 ### Use secrets in settings and environment
 
-You can set an setting or environment value from secrets using the `from_secret` syntax.
+You can set a setting or environment value from secrets using the `from_secret` syntax.
 
 The example below passes a secret called `token` as an environment variable that will be called `TOKEN_ENV`:
 
