@@ -105,7 +105,7 @@ importers:
         version: 2.19.0
       marked:
         specifier: ^15.0.2
-        version: 15.0.3
+        version: 15.0.4
       tslib:
         specifier: ^2.8.1
         version: 2.8.1
@@ -4059,8 +4059,8 @@ packages:
   markdown-table@3.0.4:
     resolution: {integrity: sha512-wiYz4+JrLyb/DqW2hkFJxP7Vd7JuTDm77fvbM8VfEQdmSMqcImWeeRbHwZjBjIFki/VaMK2BhFi7oUUZeM5bqw==}
 
-  marked@15.0.3:
-    resolution: {integrity: sha512-Ai0cepvl2NHnTcO9jYDtcOEtVBNVYR31XnEA3BndO7f5As1wzpcOceSUM8FDkNLJNIODcLpDTWay/qQhqbuMvg==}
+  marked@15.0.4:
+    resolution: {integrity: sha512-TCHvDqmb3ZJ4PWG7VEGVgtefA5/euFmsIhxtD0XsBxI39gUSKL81mIRFdt0AiNQozUahd4ke98ZdirExd/vSEw==}
     engines: {node: '>= 18'}
     hasBin: true
 
@@ -11839,7 +11839,7 @@ snapshots:
 
   markdown-table@3.0.4: {}
 
-  marked@15.0.3: {}
+  marked@15.0.4: {}
 
   marked@4.3.0: {}
 
