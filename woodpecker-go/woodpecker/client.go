@@ -34,6 +34,15 @@ const (
 	// pathVersion        = "%s/version"
 )
 
+type ClientError struct {
+	StatusCode int
+	Message    string
+}
+
+func (e *ClientError) Error() string {
+	return fmt.Sprintf("client error %d: %s", e.StatusCode, e.Message)
+}
+
 type client struct {
 	client *http.Client
 	addr   string
@@ -116,16 +125,25 @@ func (c *client) do(rawURL, method string, in, out any) error {
 func (c *client) open(rawURL, method string, in any) (io.ReadCloser, error) {
 	uri, err := url.Parse(rawURL)
 	if err != nil {
-		return nil, err
+		return nil, &ClientError{
+			StatusCode: http.StatusInternalServerError,
+			Message:    err.Error(),
+		}
 	}
 	req, err := http.NewRequest(method, uri.String(), nil)
 	if err != nil {
-		return nil, err
+		return nil, &ClientError{
+			StatusCode: http.StatusInternalServerError,
+			Message:    err.Error(),
+		}
 	}
 	if in != nil {
 		decoded, decodeErr := json.Marshal(in)
 		if decodeErr != nil {
-			return nil, decodeErr
+			return nil, &ClientError{
+				StatusCode: http.StatusInternalServerError,
+				Message:    decodeErr.Error(),
+			}
 		}
 		buf := bytes.NewBuffer(decoded)
 		req.Body = io.NopCloser(buf)
@@ -135,12 +153,18 @@ func (c *client) open(rawURL, method string, in any) (io.ReadCloser, error) {
 	}
 	resp, err := c.client.Do(req)
 	if err != nil {
-		return nil, err
+		return nil, &ClientError{
+			StatusCode: http.StatusInternalServerError,
+			Message:    err.Error(),
+		}
 	}
 	if resp.StatusCode > http.StatusPartialContent {
 		defer resp.Body.Close()
 		out, _ := io.ReadAll(resp.Body)
-		return nil, fmt.Errorf("client error %d: %s", resp.StatusCode, string(out))
+		return nil, &ClientError{
+			StatusCode: resp.StatusCode,
+			Message:    string(out),
+		}
 	}
 	return resp.Body, nil
 }

@@ -1,4 +1,4 @@
-// Copyright 2022 Woodpecker Authors
+// Copyright 2024 Woodpecker Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,7 +16,9 @@ package pipeline
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"net/http"
 	"time"
 
 	"github.com/rs/zerolog/log"
@@ -121,6 +123,11 @@ func pipelinePurge(c *cli.Command, client woodpecker.Client) (err error) {
 
 		err := client.PipelineDelete(repoID, p.Number)
 		if err != nil {
+			var clientErr *woodpecker.ClientError
+			if errors.As(err, &clientErr) && clientErr.StatusCode == http.StatusUnprocessableEntity {
+				log.Error().Err(err).Msgf("failed to delete pipeline %d", p.Number)
+				continue
+			}
 			return err
 		}
 	}
