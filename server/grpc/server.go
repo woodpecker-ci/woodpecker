@@ -25,6 +25,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc"
 	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc/proto"
 	"go.woodpecker-ci.org/woodpecker/v2/server/logging"
+	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 	"go.woodpecker-ci.org/woodpecker/v2/server/pubsub"
 	"go.woodpecker-ci.org/woodpecker/v2/server/queue"
 	"go.woodpecker-ci.org/woodpecker/v2/server/store"
@@ -37,7 +38,7 @@ type WoodpeckerServer struct {
 	peer RPC
 }
 
-func NewWoodpeckerServer(queue queue.Queue, logger logging.Log, pubsub *pubsub.Publisher, store store.Store) proto.WoodpeckerServer {
+func NewWoodpeckerServer(ctx context.Context, queue queue.Queue, logger logging.Log, pubsub *pubsub.Publisher, store store.Store) proto.WoodpeckerServer {
 	pipelineTime := prometheus_auto.NewGaugeVec(prometheus.GaugeOpts{
 		Namespace: "woodpecker",
 		Name:      "pipeline_time",
@@ -49,6 +50,7 @@ func NewWoodpeckerServer(queue queue.Queue, logger logging.Log, pubsub *pubsub.P
 		Help:      "Pipeline count.",
 	}, []string{"repo", "branch", "status", "pipeline"})
 	peer := RPC{
+		ctx:           ctx,
 		store:         store,
 		queue:         queue,
 		pubsub:        pubsub,
@@ -56,7 +58,32 @@ func NewWoodpeckerServer(queue queue.Queue, logger logging.Log, pubsub *pubsub.P
 		pipelineTime:  pipelineTime,
 		pipelineCount: pipelineCount,
 	}
-	return &WoodpeckerServer{peer: peer}
+	rpcServer := &WoodpeckerServer{peer: peer}
+	go rpcServer.markSkippedDone()
+	return rpcServer
+}
+
+// mark skipped tasks done, based on dependencies.
+// TODO: find better place for this background service
+func (s *WoodpeckerServer) markSkippedDone() {
+	for {
+		task, err := s.peer.queue.Poll(s.peer.ctx, queue.InternalWorkerID, func(t *model.Task) (bool, int) {
+			return !t.ShouldRun(), 0
+		})
+		if err != nil {
+			log.Error().Err(err).Msg("got error while polling for tasks that should be skipped")
+			continue
+		}
+		if task == nil {
+			log.Error().Msg("queue poll returned nil task")
+			continue
+		}
+
+		log.Trace().Msgf("mark skipped task '%s' as done", task.String())
+		if err := s.peer.Done(s.peer.ctx, task.ID, rpc.WorkflowState{}); err != nil {
+			log.Error().Err(err).Msgf("marking workflow task '%s' as done failed", task.ID)
+		}
+	}
 }
 
 func (s *WoodpeckerServer) Version(_ context.Context, _ *proto.Empty) (*proto.VersionResponse, error) {

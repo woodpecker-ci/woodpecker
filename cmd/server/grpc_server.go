@@ -49,6 +49,7 @@ func runGrpcServer(ctx context.Context, c *cli.Command, _store store.Store) erro
 	)
 
 	woodpeckerServer := woodpeckerGrpcServer.NewWoodpeckerServer(
+		ctx,
 		server.Config.Services.Queue,
 		server.Config.Services.Logs,
 		server.Config.Services.Pubsub,
