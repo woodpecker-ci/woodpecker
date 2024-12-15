@@ -95,6 +95,10 @@ func (s storage) workflowsDelete(sess *xorm.Session, pipelineID int64) error {
 		}
 
 		for i := range stepIDs {
+			if err := s.LogDelete(&model.Step{ID: stepIDs[i]}); err != nil {
+				return err
+			}
+
 			if err := deleteStep(sess, stepIDs[i]); err != nil {
 				return err
 			}
