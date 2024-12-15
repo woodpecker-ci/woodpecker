@@ -4,7 +4,11 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@gedankenstuecke
+@gedankenstuecke, @xoxys
+
+### 🐛 Bug Fixes
+
+- Fix pipeline purge cli command [[#4569](https://github.com/woodpecker-ci/woodpecker/pull/4569)]
 
 ### 📚 Documentation
 
