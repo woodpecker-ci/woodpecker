@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.0.1-rc.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.1-rc.0) - 2024-12-14
+## [3.0.1-rc.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.1-rc.0) - 2024-12-15
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -8,6 +8,7 @@
 
 ### 📚 Documentation
 
+- chore(deps): update dependency marked to v15.0.4 [[#4570](https://github.com/woodpecker-ci/woodpecker/pull/4570)]
 - Expand docs around the deprecation of former secret syntax [[#4561](https://github.com/woodpecker-ci/woodpecker/pull/4561)]
 - fix(deps): update docs npm deps non-major [[#4568](https://github.com/woodpecker-ci/woodpecker/pull/4568)]
 
