@@ -1,5 +1,5 @@
 <template>
-  <div class="w-full p-4 mx-auto" :class="{ 'max-w-5xl': !fullWidth && !fillWidth, 'md:px-0': fullWidth }">
+  <div class="mx-auto p-4 w-full" :class="{ 'max-w-4xl': !fullWidth && !fillWidth, 'md:px-0': fullWidth }">
     <slot />
   </div>
 </template>
