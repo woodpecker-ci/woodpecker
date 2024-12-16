@@ -114,6 +114,23 @@ func Test_parseBackendOptions(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "number options",
+			step: &backend.Step{BackendOptions: map[string]any{
+				"kubernetes": map[string]any{
+					"resources": map[string]any{
+							"requests": map[string]int{"memory": 128, "cpu": 1000},
+							"limits":   map[string]int{"memory": 256, "cpu": 2},
+						},
+				},
+			}},
+			want: BackendOptions{
+				Resources: Resources{
+					Requests: map[string]string{"memory": "128", "cpu": "1000"},
+					Limits:   map[string]string{"memory": "256", "cpu": "2"},
+				},
+			},
+		},
 	}
 
 	for _, tt := range tests {
