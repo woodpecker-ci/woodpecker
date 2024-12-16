@@ -53,7 +53,3 @@ More enhanced information you can find here <https://github.com/swaggo/swag/blob
 ```bash title="generate the server's Go code containing the OpenAPI"
 make generate-openapi
 ```
-
-```bash title="update the Markdown in the ./docs folder"
-make docs
-```
