@@ -1,5 +1,5 @@
 <template>
-  <router-link v-if="to" :to="to" :title="title" :aria-label="title" class="w-4 icon-button">
+  <router-link v-if="to" :to="to" :title="title" :aria-label="title" class="w-8 icon-button">
     <slot>
       <Icon v-if="icon" :name="icon" />
     </slot>
