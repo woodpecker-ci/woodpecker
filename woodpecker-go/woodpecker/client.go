@@ -125,10 +125,7 @@ func (c *client) do(rawURL, method string, in, out any) error {
 func (c *client) open(rawURL, method string, in any) (io.ReadCloser, error) {
 	uri, err := url.Parse(rawURL)
 	if err != nil {
-		return nil, &ClientError{
-			StatusCode: http.StatusInternalServerError,
-			Message:    err.Error(),
-		}
+		return nil, err
 	}
 	req, err := http.NewRequest(method, uri.String(), nil)
 	if err != nil {
@@ -140,10 +137,7 @@ func (c *client) open(rawURL, method string, in any) (io.ReadCloser, error) {
 	if in != nil {
 		decoded, decodeErr := json.Marshal(in)
 		if decodeErr != nil {
-			return nil, &ClientError{
-				StatusCode: http.StatusInternalServerError,
-				Message:    decodeErr.Error(),
-			}
+			return nil, err
 		}
 		buf := bytes.NewBuffer(decoded)
 		req.Body = io.NopCloser(buf)
@@ -153,10 +147,7 @@ func (c *client) open(rawURL, method string, in any) (io.ReadCloser, error) {
 	}
 	resp, err := c.client.Do(req)
 	if err != nil {
-		return nil, &ClientError{
-			StatusCode: http.StatusInternalServerError,
-			Message:    err.Error(),
-		}
+		return nil, err
 	}
 	if resp.StatusCode > http.StatusPartialContent {
 		defer resp.Body.Close()
