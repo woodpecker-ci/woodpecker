@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.0.1-rc.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.1-rc.0) - 2024-12-15
+## [3.0.1-rc.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.1-rc.0) - 2024-12-16
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -18,6 +18,7 @@
 
 ### 📦️ Dependency
 
+- Replace discontinued mitchellh/mapstructure by maintained fork [[#4573](https://github.com/woodpecker-ci/woodpecker/pull/4573)]
 - chore(deps): update docker.io/woodpeckerci/plugin-codecov docker tag to v2.1.6 [[#4566](https://github.com/woodpecker-ci/woodpecker/pull/4566)]
 - fix(deps): update github.com/muesli/termenv digest to 8c990cd [[#4565](https://github.com/woodpecker-ci/woodpecker/pull/4565)]
 
