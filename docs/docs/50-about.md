@@ -15,5 +15,5 @@ A few important time points:
 
 ## Differences to Drone
 
-Woodpecker is a community-driven open source software published under Apache License 2.0 that will always stay so. Drone CI is managed by [Harness](https://harness.io/) and available in two editions: [Open Source under Apache License 2.0 and Enterprise under Polyform Small Business license](https://docs.drone.io/enterprise/#is-drone-open-source).
-In terms of Drone's feature-set coverage, Woodpecker is somewhere in between [Drone Enterprise and OSS](https://docs.drone.io/enterprise/#what-is-the-difference-between-open-source-and-enterprise), but also has a couple unique features.
+Woodpecker is a community-driven open source software published under the Apache License 2.0 and will always remain so. Drone CI is managed by [Harness](https://harness.io/) and is available in two editions: [Open Source under Apache License 2.0 and Enterprise under Polyform Small Business license](https://docs.drone.io/enterprise/#is-drone-open-source).
+In terms of Drone's feature set, Woodpecker is somewhere between [Drone Enterprise and OSS](https://docs.drone.io/enterprise/#what-is-the-difference-between-open-source-and-enterprise), but also has some unique features.
