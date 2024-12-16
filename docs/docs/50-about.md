@@ -4,7 +4,7 @@ Woodpecker is a community-driven open source CI/CD tool. It is lightweight, fast
 
 ## History
 
-Woodpecker was originally forked by [@laszlocph](https://github.com/laszlocph) in 2019 from Drone 0.8 after its licensing model was changed.
+Woodpecker was originally forked from Drone 0.8 by [@laszlocph](https://github.com/laszlocph) in 2019 after its license model was changed.
 
 A few important time points:
 
