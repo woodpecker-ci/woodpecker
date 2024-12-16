@@ -53,5 +53,5 @@ func (s storage) LogDelete(step *model.Step) error {
 }
 
 func logDelete(sess *xorm.Session, stepID int64) error {
-	return wrapDelete(sess.Where("step_id = ?", &model.Step{ID: stepID}).Delete(new(model.LogEntry)))
+	return wrapDelete(sess.Where("step_id = ?", stepID).Delete(new(model.LogEntry)))
 }
