@@ -1,6 +1,6 @@
 # About
 
-Woodpecker is a community-driven open source CI/CD tool. It is designed to be lightweight, fast and simple to use. It can be used with many different Git providers and runners.
+Woodpecker is a community-driven open source CI/CD tool. It is lightweight, fast and simple to use. It can be used with many different Git providers and runners.
 
 ## History
 
