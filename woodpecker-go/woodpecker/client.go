@@ -137,7 +137,7 @@ func (c *client) open(rawURL, method string, in any) (io.ReadCloser, error) {
 	if in != nil {
 		decoded, decodeErr := json.Marshal(in)
 		if decodeErr != nil {
-			return nil, err
+			return nil, decodeErr
 		}
 		buf := bytes.NewBuffer(decoded)
 		req.Body = io.NopCloser(buf)
