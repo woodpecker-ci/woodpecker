@@ -1,4 +1,4 @@
-// Copyright 2022 Woodpecker Authors
+// Copyright 2024 Woodpecker Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,7 +16,9 @@ package pipeline
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"net/http"
 	"time"
 
 	"github.com/rs/zerolog/log"
@@ -96,13 +98,13 @@ func pipelinePurge(c *cli.Command, client woodpecker.Client) (err error) {
 	// Create a map of pipeline IDs to keep
 	keepMap := make(map[int64]struct{})
 	for _, p := range pipelinesKeep {
-		keepMap[p.ID] = struct{}{}
+		keepMap[p.Number] = struct{}{}
 	}
 
 	// Filter pipelines to only include those not in keepMap
 	var pipelinesToPurge []*woodpecker.Pipeline
 	for _, p := range pipelines {
-		if _, exists := keepMap[p.ID]; !exists {
+		if _, exists := keepMap[p.Number]; !exists {
 			pipelinesToPurge = append(pipelinesToPurge, p)
 		}
 	}
@@ -114,13 +116,18 @@ func pipelinePurge(c *cli.Command, client woodpecker.Client) (err error) {
 
 	for i, p := range pipelinesToPurge {
 		// cspell:words spurge
-		log.Debug().Msgf("%spurge %v/%v pipelines from repo '%v'", msgPrefix, i+1, len(pipelinesToPurge), repoIDOrFullName)
+		log.Debug().Msgf("%spurge %v/%v pipelines from repo '%v' (pipeline %v)", msgPrefix, i+1, len(pipelinesToPurge), repoIDOrFullName, p.Number)
 		if dryRun {
 			continue
 		}
 
-		err := client.PipelineDelete(repoID, p.ID)
+		err := client.PipelineDelete(repoID, p.Number)
 		if err != nil {
+			var clientErr *woodpecker.ClientError
+			if errors.As(err, &clientErr) && clientErr.StatusCode == http.StatusUnprocessableEntity {
+				log.Error().Err(err).Msgf("failed to delete pipeline %d", p.Number)
+				continue
+			}
 			return err
 		}
 	}
@@ -150,7 +157,7 @@ func fetchPipelines(client woodpecker.Client, repoID int64, duration time.Durati
 				ListOptions: woodpecker.ListOptions{
 					Page: page,
 				},
-				After: time.Now().Add(-duration),
+				Before: time.Now().Add(-duration),
 			},
 		)
 	}, -1)

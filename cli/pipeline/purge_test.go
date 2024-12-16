@@ -16,20 +16,21 @@ import (
 
 func TestPipelinePurge(t *testing.T) {
 	tests := []struct {
-		name          string
-		repoID        int64
-		args          []string
-		pipelinesKeep []*woodpecker.Pipeline
-		pipelines     []*woodpecker.Pipeline
-		wantDelete    int
-		wantErr       error
+		name            string
+		repoID          int64
+		args            []string
+		pipelinesKeep   []*woodpecker.Pipeline
+		pipelines       []*woodpecker.Pipeline
+		mockDeleteError error
+		wantDelete      int
+		wantErr         error
 	}{
 		{
 			name:   "success with no pipelines to purge",
 			repoID: 1,
 			args:   []string{"purge", "--older-than", "1h", "repo/name"},
 			pipelinesKeep: []*woodpecker.Pipeline{
-				{ID: 1},
+				{Number: 1},
 			},
 			pipelines: []*woodpecker.Pipeline{},
 		},
@@ -38,12 +39,12 @@ func TestPipelinePurge(t *testing.T) {
 			repoID: 1,
 			args:   []string{"purge", "--older-than", "1h", "repo/name"},
 			pipelinesKeep: []*woodpecker.Pipeline{
-				{ID: 1},
+				{Number: 1},
 			},
 			pipelines: []*woodpecker.Pipeline{
-				{ID: 1},
-				{ID: 2},
-				{ID: 3},
+				{Number: 1},
+				{Number: 2},
+				{Number: 3},
 			},
 			wantDelete: 2,
 		},
@@ -52,6 +53,24 @@ func TestPipelinePurge(t *testing.T) {
 			repoID:  1,
 			args:    []string{"purge", "--older-than", "invalid", "repo/name"},
 			wantErr: errors.New("time: invalid duration \"invalid\""),
+		},
+		{
+			name:   "continue on 422 error",
+			repoID: 1,
+			args:   []string{"purge", "--older-than", "1h", "repo/name"},
+			pipelinesKeep: []*woodpecker.Pipeline{
+				{Number: 1},
+			},
+			pipelines: []*woodpecker.Pipeline{
+				{Number: 1},
+				{Number: 2},
+				{Number: 3},
+			},
+			wantDelete: 2,
+			mockDeleteError: &woodpecker.ClientError{
+				StatusCode: 422,
+				Message:    "test error",
+			},
 		},
 	}
 
@@ -62,15 +81,15 @@ func TestPipelinePurge(t *testing.T) {
 
 			mockClient.On("PipelineList", mock.Anything, mock.Anything).Return(func(_ int64, opt woodpecker.PipelineListOptions) ([]*woodpecker.Pipeline, error) {
 				// Return keep pipelines for first call
-				if opt.After.IsZero() {
+				if opt.Before.IsZero() {
 					if opt.Page == 1 {
 						return tt.pipelinesKeep, nil
 					}
 					return []*woodpecker.Pipeline{}, nil
 				}
 
-				// Return pipelines to purge for calls with After filter
-				if !opt.After.IsZero() {
+				// Return pipelines to purge for calls with Before filter
+				if !opt.Before.IsZero() {
 					if opt.Page == 1 {
 						return tt.pipelines, nil
 					}
@@ -80,7 +99,9 @@ func TestPipelinePurge(t *testing.T) {
 				return []*woodpecker.Pipeline{}, nil
 			}).Maybe()
 
-			if tt.wantDelete > 0 {
+			if tt.mockDeleteError != nil {
+				mockClient.On("PipelineDelete", tt.repoID, mock.Anything).Return(tt.mockDeleteError)
+			} else if tt.wantDelete > 0 {
 				mockClient.On("PipelineDelete", tt.repoID, mock.Anything).Return(nil).Times(tt.wantDelete)
 			}
 
