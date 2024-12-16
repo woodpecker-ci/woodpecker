@@ -1,8 +1,8 @@
 <template>
   <ListItem v-if="pipeline" class="p-0 w-full">
-    <div class="flex w-11 items-center md:mr-4">
+    <div class="flex items-center md:mr-4 w-11">
       <div
-        class="h-full w-3"
+        class="w-3 h-full"
         :class="{
           'bg-wp-state-warn-100': pipeline.status === 'pending',
           'bg-wp-state-error-100': pipelineStatusColors[pipeline.status] === 'red',
@@ -11,7 +11,7 @@
           'bg-wp-state-info-100': pipelineStatusColors[pipeline.status] === 'blue',
         }"
       />
-      <div class="w-8 flex flex-wrap justify-between items-center h-full">
+      <div class="flex flex-wrap justify-between items-center w-8 h-full">
         <PipelineRunningIcon v-if="pipeline.status === 'started' || pipeline.status === 'running'" />
         <PipelineStatusIcon v-else class="mx-2 md:mx-3" :status="pipeline.status" />
       </div>
@@ -20,10 +20,10 @@
     <div class="flex py-2 px-4 flex-grow min-w-0 <md:flex-wrap">
       <div class="<md:hidden flex items-center flex-shrink-0">
         <Icon v-if="pipeline.event === 'cron'" name="stopwatch" class="text-wp-text-100" />
-        <img v-else class="rounded-md w-8" :src="pipeline.author_avatar" />
+        <img v-else class="rounded-md w-5" :src="pipeline.author_avatar" />
       </div>
 
-      <div class="w-full md:w-auto md:mx-4 flex items-center min-w-0">
+      <div class="flex items-center md:mx-4 w-full md:w-auto min-w-0">
         <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
         <span class="text-wp-text-alt-100 <md:hidden">#{{ pipeline.number }}</span>
         <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
@@ -37,9 +37,9 @@
       </div>
 
       <div
-        class="grid grid-rows-2 grid-cols-2 grid-flow-col w-full md:ml-auto md:w-96 py-2 gap-x-4 gap-y-2 flex-shrink-0 text-wp-text-100"
+        class="flex-shrink-0 gap-x-4 gap-y-2 grid grid-cols-2 grid-rows-2 grid-flow-col md:ml-auto py-2 w-full md:w-96 text-wp-text-100"
       >
-        <div class="flex space-x-2 items-center min-w-0">
+        <div class="flex items-center space-x-2 min-w-0">
           <span :title="pipelineEventTitle">
             <Icon v-if="pipeline.event === 'pull_request'" name="pull-request" />
             <Icon v-else-if="pipeline.event === 'pull_request_closed'" name="pull-request-closed" />
@@ -52,17 +52,17 @@
           <span class="truncate">{{ prettyRef }}</span>
         </div>
 
-        <div class="flex space-x-2 items-center min-w-0">
+        <div class="flex items-center space-x-2 min-w-0">
           <Icon name="commit" />
           <span class="truncate">{{ pipeline.commit.slice(0, 10) }}</span>
         </div>
 
-        <div class="flex space-x-2 items-center min-w-0" :title="$t('repo.pipeline.duration')">
+        <div class="flex items-center space-x-2 min-w-0" :title="$t('repo.pipeline.duration')">
           <Icon name="duration" />
           <span class="truncate">{{ duration }}</span>
         </div>
 
-        <div class="flex space-x-2 items-center min-w-0" :title="$t('repo.pipeline.created', { created })">
+        <div class="flex items-center space-x-2 min-w-0" :title="$t('repo.pipeline.created', { created })">
           <Icon name="since" />
           <span class="truncate">{{ since }}</span>
         </div>
