@@ -12,7 +12,7 @@
     </template>
     <template #headerActions>
       <a v-if="badgeUrl" :href="badgeUrl" target="_blank">
-        <img :src="badgeUrl" />
+        <img class="max-h-4/5" :src="badgeUrl" />
       </a>
       <IconButton :href="repo.forge_url" :title="$t('repo.open_in_forge')" :icon="forgeIcon" class="w-8 forge" />
       <IconButton
