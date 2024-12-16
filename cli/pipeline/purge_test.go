@@ -16,13 +16,14 @@ import (
 
 func TestPipelinePurge(t *testing.T) {
 	tests := []struct {
-		name          string
-		repoID        int64
-		args          []string
-		pipelinesKeep []*woodpecker.Pipeline
-		pipelines     []*woodpecker.Pipeline
-		wantDelete    int
-		wantErr       error
+		name            string
+		repoID          int64
+		args            []string
+		pipelinesKeep   []*woodpecker.Pipeline
+		pipelines       []*woodpecker.Pipeline
+		mockDeleteError error
+		wantDelete      int
+		wantErr         error
 	}{
 		{
 			name:   "success with no pipelines to purge",
@@ -53,6 +54,24 @@ func TestPipelinePurge(t *testing.T) {
 			args:    []string{"purge", "--older-than", "invalid", "repo/name"},
 			wantErr: errors.New("time: invalid duration \"invalid\""),
 		},
+		{
+			name:   "continue on 422 error",
+			repoID: 1,
+			args:   []string{"purge", "--older-than", "1h", "repo/name"},
+			pipelinesKeep: []*woodpecker.Pipeline{
+				{Number: 1},
+			},
+			pipelines: []*woodpecker.Pipeline{
+				{Number: 1},
+				{Number: 2},
+				{Number: 3},
+			},
+			wantDelete: 2,
+			mockDeleteError: &woodpecker.ClientError{
+				StatusCode: 422,
+				Message:    "test error",
+			},
+		},
 	}
 
 	for _, tt := range tests {
@@ -80,7 +99,9 @@ func TestPipelinePurge(t *testing.T) {
 				return []*woodpecker.Pipeline{}, nil
 			}).Maybe()
 
-			if tt.wantDelete > 0 {
+			if tt.mockDeleteError != nil {
+				mockClient.On("PipelineDelete", tt.repoID, mock.Anything).Return(tt.mockDeleteError)
+			} else if tt.wantDelete > 0 {
 				mockClient.On("PipelineDelete", tt.repoID, mock.Anything).Return(nil).Times(tt.wantDelete)
 			}
 
