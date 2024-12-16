@@ -1,7 +1,7 @@
 package kubernetes
 
 import (
-	"github.com/mitchellh/mapstructure"
+	"github.com/go-viper/mapstructure/v2"
 
 	backend "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 )

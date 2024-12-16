@@ -30,6 +30,7 @@ require (
 	github.com/gin-gonic/gin v1.10.0
 	github.com/gitsight/go-vcsurl v1.0.1
 	github.com/go-sql-driver/mysql v1.8.1
+	github.com/go-viper/mapstructure/v2 v2.2.1
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/google/go-github/v67 v67.0.0
 	github.com/google/tink/go v1.7.0
@@ -41,7 +42,6 @@ require (
 	github.com/kinbiko/jsonassert v1.2.0
 	github.com/lib/pq v1.10.9
 	github.com/mattn/go-sqlite3 v1.14.24
-	github.com/mitchellh/mapstructure v1.5.0
 	github.com/moby/moby v27.4.0+incompatible
 	github.com/moby/term v0.5.0
 	github.com/muesli/termenv v0.15.3-0.20241212154518-8c990cd6cf4b
