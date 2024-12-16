@@ -37,15 +37,6 @@ when:
     evaluate: 'TASK == "docs"'
 
 steps:
-  build-cli:
-    image: *golang_image
-    commands:
-      - make docs
-    when:
-      - path: *when_path
-        event: [tag, pull_request, push]
-      - event: manual
-
   build:
     image: *node_image
     directory: docs/

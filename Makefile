@@ -109,7 +109,7 @@ clean: ## Clean build artifacts
 clean-all: clean ## Clean all artifacts
 	rm -rf ${DIST_DIR} web/dist docs/build docs/node_modules web/node_modules
 	# delete generated
-	rm -rf docs/docs/40-cli.md docs/openapi.json
+	rm -rf docs/openapi.json
 
 .PHONY: generate
 generate: install-tools generate-openapi ## Run all code generations
@@ -215,6 +215,11 @@ build-tarball: ## Build tar archive
 
 .PHONY: build
 build: build-agent build-server build-cli ## Build all binaries
+
+##@ Docs
+
+build-docs:
+	cd docs; pnpm install --frozen-lockfile; pnpm build
 
 release-frontend: build-frontend ## Build frontend
 
@@ -335,11 +340,5 @@ spellcheck:
 	  -I 012_columns_rename_procs_to_steps.go \
 	  -I versioned_docs -I '*opensource.svg' | \
 	  pnpx cspell lint --no-progress stdin
-
-##@ Docs
-.PHONY: docs
-docs: ## Generate docs (currently only for the cli)
-	CGO_ENABLED=0 go generate cmd/cli/app.go
-	CGO_ENABLED=0 go generate cmd/server/openapi.go
 
 endif
