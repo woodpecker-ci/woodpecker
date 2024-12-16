@@ -1,59 +1,59 @@
 <!-- cSpell:ignore radiobox timelapse -->
 <template>
-  <SvgIcon v-if="name === 'duration'" :path="mdiTimelapse" size="1em" />
-  <SvgIcon v-else-if="name === 'since'" :path="mdiClockTimeEightOutline" size="1em" />
-  <SvgIcon v-else-if="name === 'push'" :path="mdiSourceBranch" size="1em" />
-  <SvgIcon v-else-if="name === 'pull-request'" :path="mdiSourcePull" size="1em" />
-  <SvgIcon v-else-if="name === 'pull-request-closed'" :path="mdiSourceMerge" size="1em" />
-  <SvgIcon v-else-if="name === 'manual-pipeline'" :path="mdiGestureTap" size="1em" />
-  <SvgIcon v-else-if="name === 'tag'" :path="mdiTagOutline" size="1em" />
-  <SvgIcon v-else-if="name === 'deployment'" :path="mdiPackageVariant" size="1em" />
-  <SvgIcon v-else-if="name === 'commit'" :path="mdiSourceCommit" size="1em" />
-  <SvgIcon v-else-if="name === 'back'" :path="mdiArrowLeft" size="1em" />
+  <SvgIcon v-if="name === 'duration'" :path="mdiTimelapse" size="1rem" />
+  <SvgIcon v-else-if="name === 'since'" :path="mdiClockTimeEightOutline" size="1rem" />
+  <SvgIcon v-else-if="name === 'push'" :path="mdiSourceBranch" size="1rem" />
+  <SvgIcon v-else-if="name === 'pull-request'" :path="mdiSourcePull" size="1rem" />
+  <SvgIcon v-else-if="name === 'pull-request-closed'" :path="mdiSourceMerge" size="1rem" />
+  <SvgIcon v-else-if="name === 'manual-pipeline'" :path="mdiGestureTap" size="1rem" />
+  <SvgIcon v-else-if="name === 'tag'" :path="mdiTagOutline" size="1rem" />
+  <SvgIcon v-else-if="name === 'deployment'" :path="mdiPackageVariant" size="1rem" />
+  <SvgIcon v-else-if="name === 'commit'" :path="mdiSourceCommit" size="1rem" />
+  <SvgIcon v-else-if="name === 'back'" :path="mdiArrowLeft" size="1rem" />
   <SvgIcon v-else-if="name === 'github'" :path="mdiGithub" size="32" />
   <SvgIcon v-else-if="name === 'repo'" :path="mdiGit" size="32" />
   <SvgIcon v-else-if="name === 'settings'" :path="mdiCog" size="32" />
-  <SvgIcon v-else-if="name === 'trash'" :path="mdiTrashCanOutline" size="1em" />
-  <SvgIcon v-else-if="name === 'status-blocked'" :path="mdiPlayCircleOutline" size="1em" />
-  <SvgIcon v-else-if="name === 'status-declined'" :path="mdiStopCircleOutline" size="1em" />
+  <SvgIcon v-else-if="name === 'trash'" :path="mdiTrashCanOutline" size="1rem" />
+  <SvgIcon v-else-if="name === 'status-blocked'" :path="mdiPlayCircleOutline" size="1rem" />
+  <SvgIcon v-else-if="name === 'status-declined'" :path="mdiStopCircleOutline" size="1rem" />
   <SvgIcon
     v-else-if="name === 'status-failure' || name === 'status-error' || name === 'status-killed'"
     type="mdi"
     :path="mdiCloseCircleOutline"
-    size="1em"
+    size="1rem"
   />
-  <SvgIcon v-else-if="name === 'status-pending'" :path="mdiRadioboxBlank" size="1em" />
+  <SvgIcon v-else-if="name === 'status-pending'" :path="mdiRadioboxBlank" size="1rem" />
   <SvgIcon
     v-else-if="name === 'status-running' || name === 'status-started'"
     type="mdi"
     :path="mdiRadioboxIndeterminateVariant"
-    size="1em"
+    size="1rem"
   />
-  <SvgIcon v-else-if="name === 'status-skipped'" :path="mdiMinusCircleOutline" size="1em" />
-  <SvgIcon v-else-if="name === 'status-success'" :path="mdiCheckCircleOutline" size="1em" />
-  <SvgIcon v-else-if="name === 'attention'" :path="mdiAlert" size="1em" />
-  <SvgIcon v-else-if="name === 'warning'" :path="mdiAlertOutline" size="1em" />
-  <SvgIcon v-else-if="name === 'error'" :path="mdiAlertCircle" size="1em" />
+  <SvgIcon v-else-if="name === 'status-skipped'" :path="mdiMinusCircleOutline" size="1rem" />
+  <SvgIcon v-else-if="name === 'status-success'" :path="mdiCheckCircleOutline" size="1rem" />
+  <SvgIcon v-else-if="name === 'attention'" :path="mdiAlert" size="1rem" />
+  <SvgIcon v-else-if="name === 'warning'" :path="mdiAlertOutline" size="1rem" />
+  <SvgIcon v-else-if="name === 'error'" :path="mdiAlertCircle" size="1rem" />
   <SvgIcon v-else-if="name === 'gitlab'" :path="mdiGitlab" size="32" />
   <SvgIcon v-else-if="name === 'bitbucket' || name === 'bitbucket-dc'" :path="mdiBitbucket" size="32" />
-  <SvgIcon v-else-if="name === 'question'" :path="mdiHelpCircleOutline" size="1em" />
-  <SvgIcon v-else-if="name === 'plus'" :path="mdiPlus" size="1em" />
-  <SvgIcon v-else-if="name === 'list'" :path="mdiFormatListBulleted" size="1em" />
-  <SvgIcon v-else-if="name === 'heal'" :path="mdiBandage" size="1em" />
-  <SvgIcon v-else-if="name === 'turn-off'" :path="mdiPower" size="1em" />
-  <SvgIcon v-else-if="name === 'chevron-right'" :path="mdiChevronRight" size="1em" />
-  <SvgIcon v-else-if="name === 'close'" :path="mdiCloseCircleOutline" size="1em" />
-  <SvgIcon v-else-if="name === 'edit'" :path="mdiPencil" size="1em" />
-  <SvgIcon v-else-if="name === 'download'" :path="mdiDownloadCircle" size="1em" />
-  <SvgIcon v-else-if="name === 'stopwatch'" :path="mdiAlarm" size="1em" />
-  <SvgIcon v-else-if="name === 'auto-scroll'" :path="mdiDownload" size="1em" />
-  <SvgIcon v-else-if="name === 'auto-scroll-off'" :path="mdiDownloadOff" size="1em" />
-  <SvgIcon v-else-if="name === 'pause'" :path="mdiPause" size="1em" />
-  <SvgIcon v-else-if="name === 'play'" :path="mdiPlay" size="1em" />
-  <SvgIcon v-else-if="name === 'remove'" :path="mdiClose" size="1em" />
+  <SvgIcon v-else-if="name === 'question'" :path="mdiHelpCircleOutline" size="1rem" />
+  <SvgIcon v-else-if="name === 'plus'" :path="mdiPlus" size="1rem" />
+  <SvgIcon v-else-if="name === 'list'" :path="mdiFormatListBulleted" size="1rem" />
+  <SvgIcon v-else-if="name === 'heal'" :path="mdiBandage" size="1rem" />
+  <SvgIcon v-else-if="name === 'turn-off'" :path="mdiPower" size="1rem" />
+  <SvgIcon v-else-if="name === 'chevron-right'" :path="mdiChevronRight" size="1rem" />
+  <SvgIcon v-else-if="name === 'close'" :path="mdiCloseCircleOutline" size="1rem" />
+  <SvgIcon v-else-if="name === 'edit'" :path="mdiPencil" size="1rem" />
+  <SvgIcon v-else-if="name === 'download'" :path="mdiDownloadCircle" size="1rem" />
+  <SvgIcon v-else-if="name === 'stopwatch'" :path="mdiAlarm" size="1rem" />
+  <SvgIcon v-else-if="name === 'auto-scroll'" :path="mdiDownload" size="1rem" />
+  <SvgIcon v-else-if="name === 'auto-scroll-off'" :path="mdiDownloadOff" size="1rem" />
+  <SvgIcon v-else-if="name === 'pause'" :path="mdiPause" size="1rem" />
+  <SvgIcon v-else-if="name === 'play'" :path="mdiPlay" size="1rem" />
+  <SvgIcon v-else-if="name === 'remove'" :path="mdiClose" size="1rem" />
 
-  <SvgIcon v-else-if="name === 'visibility-private'" :path="mdiLockOutline" size="1em" />
-  <SvgIcon v-else-if="name === 'visibility-internal'" :path="mdiLockOpenOutline" size="1em" />
+  <SvgIcon v-else-if="name === 'visibility-private'" :path="mdiLockOutline" size="1rem" />
+  <SvgIcon v-else-if="name === 'visibility-internal'" :path="mdiLockOpenOutline" size="1rem" />
 
   <SvgIcon v-else-if="name === 'forgejo'" :path="siForgejo.path" size="32" />
   <SvgIcon v-else-if="name === 'gitea'" :path="siGitea.path" size="32" />
