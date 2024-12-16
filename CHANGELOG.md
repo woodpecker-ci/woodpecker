@@ -4,17 +4,18 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@gedankenstuecke, @xoxys
+@gedankenstuecke, @xoxys, @zc-devs
+
+### 📚 Documentation
+
+- Update About [[#4555](https://github.com/woodpecker-ci/woodpecker/pull/4555)]
+- chore(deps): update dependency marked to v15.0.4 [[#4570](https://github.com/woodpecker-ci/woodpecker/pull/4570)]
+- Expand docs around the deprecation of former secret syntax [[#4561](https://github.com/woodpecker-ci/woodpecker/pull/4561)]
+- fix(deps): update docs npm deps non-major [[#4568](https://github.com/woodpecker-ci/woodpecker/pull/4568)]
 
 ### 🐛 Bug Fixes
 
 - Fix pipeline purge cli command [[#4569](https://github.com/woodpecker-ci/woodpecker/pull/4569)]
-
-### 📚 Documentation
-
-- chore(deps): update dependency marked to v15.0.4 [[#4570](https://github.com/woodpecker-ci/woodpecker/pull/4570)]
-- Expand docs around the deprecation of former secret syntax [[#4561](https://github.com/woodpecker-ci/woodpecker/pull/4561)]
-- fix(deps): update docs npm deps non-major [[#4568](https://github.com/woodpecker-ci/woodpecker/pull/4568)]
 
 ### 📦️ Dependency
 
