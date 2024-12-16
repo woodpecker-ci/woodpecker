@@ -129,10 +129,7 @@ func (c *client) open(rawURL, method string, in any) (io.ReadCloser, error) {
 	}
 	req, err := http.NewRequest(method, uri.String(), nil)
 	if err != nil {
-		return nil, &ClientError{
-			StatusCode: http.StatusInternalServerError,
-			Message:    err.Error(),
-		}
+		return nil, err
 	}
 	if in != nil {
 		decoded, decodeErr := json.Marshal(in)
