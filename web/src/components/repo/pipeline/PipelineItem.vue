@@ -1,6 +1,6 @@
 <template>
   <ListItem v-if="pipeline" class="p-0 w-full">
-    <div class="flex items-center md:mr-4 w-11">
+    <div class="flex items-center w-11">
       <div
         class="w-3 h-full"
         :class="{
