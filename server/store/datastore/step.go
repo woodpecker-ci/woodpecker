@@ -84,6 +84,9 @@ func (s storage) StepUpdate(step *model.Step) error {
 }
 
 func deleteStep(sess *xorm.Session, stepID int64) error {
+	if err := logDelete(sess, stepID); err != nil {
+		return err
+	}
 	if _, err := sess.Where("id = ?", stepID).Delete(new(model.LogEntry)); err != nil {
 		return err
 	}
