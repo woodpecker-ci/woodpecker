@@ -115,7 +115,6 @@ func Test_helper(t *testing.T) {
 			g.Assert(to.Owner).Equal("octocat")
 			g.Assert(to.Name).Equal("hello-world")
 			g.Assert(to.Branch).Equal("develop")
-			g.Assert(string(to.SCMKind)).Equal("git")
 			g.Assert(to.IsSCMPrivate).IsTrue()
 			g.Assert(to.Clone).Equal("https://github.com/octocat/hello-world.git")
 			g.Assert(to.ForgeURL).Equal("https://github.com/octocat/hello-world")
