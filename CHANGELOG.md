@@ -8,6 +8,7 @@
 
 ### 🐛 Bug Fixes
 
+- Remove related pipeline logs during pipeline deletion [[#4572](https://github.com/woodpecker-ci/woodpecker/pull/4572)]
 - Weakly decode backend options [[#4577](https://github.com/woodpecker-ci/woodpecker/pull/4577)]
 - Add client error to sdk and fix purge cli [[#4574](https://github.com/woodpecker-ci/woodpecker/pull/4574)]
 - Fix pipeline purge cli command [[#4569](https://github.com/woodpecker-ci/woodpecker/pull/4569)]
