@@ -1,8 +1,6 @@
 module go.woodpecker-ci.org/woodpecker/v2
 
-go 1.23.0
-
-toolchain go1.23.4
+go 1.23.4
 
 require (
 	al.essio.dev/pkg/shellescape v1.5.1
@@ -59,7 +57,7 @@ require (
 	github.com/xeipuuv/gojsonschema v1.2.0
 	github.com/yaronf/httpsign v0.3.1
 	github.com/zalando/go-keyring v0.2.6
-	gitlab.com/gitlab-org/api/client-go v0.116.0
+	gitlab.com/gitlab-org/api/client-go v0.117.0
 	go.uber.org/multierr v1.11.0
 	golang.org/x/crypto v0.31.0
 	golang.org/x/net v0.32.0
@@ -68,7 +66,7 @@ require (
 	golang.org/x/term v0.27.0
 	golang.org/x/text v0.21.0
 	google.golang.org/grpc v1.69.0
-	google.golang.org/protobuf v1.35.2
+	google.golang.org/protobuf v1.36.0
 	gopkg.in/yaml.v3 v3.0.1
 	k8s.io/api v0.32.0
 	k8s.io/apimachinery v0.32.0
