@@ -31,6 +31,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 	"go.woodpecker-ci.org/woodpecker/v2/server/store"
 	"go.woodpecker-ci.org/woodpecker/v2/server/store/types"
+	shared_utils "go.woodpecker-ci.org/woodpecker/v2/shared/utils"
 )
 
 // GetBadge
@@ -72,17 +73,27 @@ func GetBadge(c *gin.Context) {
 		branch = repo.Branch
 	}
 
-	pipeline, err := _store.GetPipelineLast(repo, branch)
-	if err != nil {
-		if !errors.Is(err, types.RecordNotExist) {
-			log.Warn().Err(err).Msg("could not get last pipeline for badge")
+	pipelines, err := shared_utils.Paginate(func(page int) ([]*model.Pipeline, error) {
+		list, err := _store.GetPipelineList(repo, &model.ListOptions{Page: page, PerPage: 2}, &model.PipelineFilter{Branch: branch}) //nolint:mnd
+		if len(list) > 0 {
+			// Find first non-blocked pipeline in this batch
+			for _, p := range list {
+				if p.Status != model.StatusBlocked {
+					// Return smaller batch to trigger len(batch) < lenFirstBatch
+					return []*model.Pipeline{p}, nil
+				}
+			}
 		}
-		pipeline = nil
+		return list, err
+	}, -1)
+	if err != nil {
+		handleDBError(c, err)
+		return
 	}
 
 	// we serve an SVG, so set content type appropriately.
 	c.Writer.Header().Set("Content-Type", "image/svg+xml")
-	c.String(http.StatusOK, badges.Generate(pipeline))
+	c.String(http.StatusOK, badges.Generate(pipelines[len(pipelines)-1]))
 }
 
 // GetCC
