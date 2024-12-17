@@ -16,6 +16,7 @@ package datastore
 
 import (
 	"github.com/rs/zerolog/log"
+	"xorm.io/xorm"
 
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
 )
@@ -46,6 +47,12 @@ func (s storage) LogAppend(_ *model.Step, logEntries []*model.LogEntry) error {
 }
 
 func (s storage) LogDelete(step *model.Step) error {
-	_, err := s.engine.Where("step_id = ?", step.ID).Delete(new(model.LogEntry))
+	sess := s.engine.NewSession()
+	defer sess.Close()
+	return logDelete(sess, step.ID)
+}
+
+func logDelete(sess *xorm.Session, stepID int64) error {
+	_, err := sess.Where("step_id = ?", stepID).Delete(new(model.LogEntry))
 	return err
 }
