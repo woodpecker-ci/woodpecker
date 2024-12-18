@@ -10,7 +10,6 @@
   <SvgIcon v-else-if="name === 'deployment'" :path="mdiPackageVariant" size="20" />
   <SvgIcon v-else-if="name === 'commit'" :path="mdiSourceCommit" size="20" />
   <SvgIcon v-else-if="name === 'back'" :path="mdiArrowLeft" size="20" />
-  <SvgIcon v-else-if="name === 'github'" :path="diGithub" size="32" />
   <SvgIcon v-else-if="name === 'repo'" :path="mdiGit" size="32" />
   <SvgIcon v-else-if="name === 'settings'" :path="mdiCogOutline" size="32" />
   <SvgIcon v-else-if="name === 'trash'" :path="mdiTrashCanOutline" size="20" />
@@ -34,7 +33,6 @@
   <SvgIcon v-else-if="name === 'attention'" :path="mdiAlertOctagonOutline" size="20" />
   <SvgIcon v-else-if="name === 'warning'" :path="mdiAlertOutline" size="20" />
   <SvgIcon v-else-if="name === 'error'" :path="mdiAlertCircle" size="20" />
-  <SvgIcon v-else-if="name === 'gitlab'" :path="diGitlab" size="32" />
   <SvgIcon v-else-if="name === 'bitbucket' || name === 'bitbucket-dc'" :path="mdiBitbucket" size="32" />
   <SvgIcon v-else-if="name === 'question'" :path="mdiHelpCircleOutline" size="20" />
   <SvgIcon v-else-if="name === 'plus'" :path="mdiPlus" size="20" />
@@ -55,7 +53,9 @@
   <SvgIcon v-else-if="name === 'visibility-private'" :path="mdiLockOutline" size="24" />
   <SvgIcon v-else-if="name === 'visibility-internal'" :path="mdiLockOpenOutline" size="24" />
 
-  <SvgIcon v-else-if="name === 'forgejo'" :path="diForgejo.path" size="32" />
+  <i v-else-if="name === 'forgejo'" class="devicon-forgejo-plain" />
+  <i v-else-if="name === 'github'" class="devicon-github-plain" />
+  <i v-else-if="name === 'gitlab'" class="devicon-gitlab-plain" />
   <SvgIcon v-else-if="name === 'gitea'" :path="siGitea.path" size="32" color="#609926" />
 
   <svg v-else-if="name === 'spinner'" width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -82,6 +82,8 @@
 </template>
 
 <script lang="ts" setup>
+import '@iconify/vue';
+
 import {
   mdiAlarm,
   mdiAlertCircle,
@@ -123,7 +125,6 @@ import {
   mdiTimerOutline,
   mdiTrashCanOutline,
 } from '@mdi/js';
-import { diForgejo, diGithub, diGitlab } from 'devicon';
 import { siGitea } from 'simple-icons';
 
 import SvgIcon from './SvgIcon.vue';
