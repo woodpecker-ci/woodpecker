@@ -84,7 +84,7 @@ func setupStore(ctx context.Context, c *cli.Command) (store.Store, error) {
 		Config: datasource,
 		XORM:   xorm,
 	}
-	log.Trace().Msgf("setup datastore: %#v", *opts)
+	log.Debug().Str("driver", driver).Any("xorm", xorm).Msg("setting up datastore")
 	store, err := datastore.NewEngine(opts)
 	if err != nil {
 		return nil, fmt.Errorf("could not open datastore: %w", err)
