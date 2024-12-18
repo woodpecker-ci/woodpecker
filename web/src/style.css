@@ -39,6 +39,8 @@
   --wp-hint-warn-100: theme('colors.int-wp-hint-warn.100');
   --wp-hint-warn-200: theme('colors.int-wp-hint-warn.200');
 
+  --wp-code-100: theme('colors.int-wp-secondary.300');
+  --wp-code-200: theme('colors.int-wp-secondary.600');
   --wp-code-300: #f0f1f3;
   --wp-code-text-100: theme('colors.gray.200');
   --wp-code-text-alt-100: theme('colors.gray.300');
@@ -87,6 +89,9 @@
   --wp-hint-warn-100: theme('colors.int-wp-hint-warn-dark.100');
   --wp-hint-warn-200: theme('colors.int-wp-hint-warn-dark.200');
 
+  --wp-code-100: theme('colors.int-wp-secondary.700');
+  --wp-code-200: theme('colors.int-wp-secondary.800');
+  --wp-code-300: #262934;
   --wp-code-text-100: theme('colors.gray.300');
   --wp-code-text-alt-100: theme('colors.gray.400');
 
