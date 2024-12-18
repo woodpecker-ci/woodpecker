@@ -94,16 +94,6 @@ var flags = append([]cli.Flag{
 		Usage:   "file path for the server to serve a custom .JS file, used for customizing the UI",
 	},
 	&cli.StringFlag{
-		Sources: cli.EnvVars("WOODPECKER_LETS_ENCRYPT_EMAIL"),
-		Name:    "lets-encrypt-email",
-		Usage:   "let's encrypt email",
-	},
-	&cli.BoolFlag{
-		Sources: cli.EnvVars("WOODPECKER_LETS_ENCRYPT"),
-		Name:    "lets-encrypt",
-		Usage:   "enable let's encrypt",
-	},
-	&cli.StringFlag{
 		Sources: cli.EnvVars("WOODPECKER_GRPC_ADDR"),
 		Name:    "grpc-addr",
 		Usage:   "grpc address",

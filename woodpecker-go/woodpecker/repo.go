@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/url"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -31,8 +32,12 @@ const (
 
 type PipelineListOptions struct {
 	ListOptions
-	Before time.Time
-	After  time.Time
+	Before      time.Time
+	After       time.Time
+	Branch      string
+	Events      []string
+	RefContains string
+	Status      string
 }
 
 type CronListOptions struct {
@@ -76,6 +81,18 @@ func (opt *PipelineListOptions) QueryEncode() string {
 	}
 	if !opt.After.IsZero() {
 		query.Add("after", opt.After.Format(time.RFC3339))
+	}
+	if opt.Branch != "" {
+		query.Add("branch", opt.Branch)
+	}
+	if len(opt.Events) > 0 {
+		query.Add("event", strings.Join(opt.Events, ","))
+	}
+	if opt.RefContains != "" {
+		query.Add("ref", opt.RefContains)
+	}
+	if opt.Status != "" {
+		query.Add("status", opt.Status)
 	}
 	return query.Encode()
 }

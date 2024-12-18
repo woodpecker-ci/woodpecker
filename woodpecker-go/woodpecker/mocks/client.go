@@ -95,7 +95,7 @@ func (_m *Client) AgentDelete(_a0 int64) error {
 	return r0
 }
 
-// AgentList provides a mock function with given fields:
+// AgentList provides a mock function with no fields
 func (_m *Client) AgentList() ([]*woodpecker.Agent, error) {
 	ret := _m.Called()
 
@@ -629,7 +629,7 @@ func (_m *Client) GlobalSecretUpdate(secret *woodpecker.Secret) (*woodpecker.Sec
 	return r0, r1
 }
 
-// LogLevel provides a mock function with given fields:
+// LogLevel provides a mock function with no fields
 func (_m *Client) LogLevel() (*woodpecker.LogLevel, error) {
 	ret := _m.Called()
 
@@ -1241,7 +1241,7 @@ func (_m *Client) PipelineMetadata(repoID int64, pipelineNumber int) ([]byte, er
 	return r0, r1
 }
 
-// PipelineQueue provides a mock function with given fields:
+// PipelineQueue provides a mock function with no fields
 func (_m *Client) PipelineQueue() ([]*woodpecker.Feed, error) {
 	ret := _m.Called()
 
@@ -1319,7 +1319,7 @@ func (_m *Client) PipelineStop(repoID int64, pipeline int64) error {
 	return r0
 }
 
-// QueueInfo provides a mock function with given fields:
+// QueueInfo provides a mock function with no fields
 func (_m *Client) QueueInfo() (*woodpecker.Info, error) {
 	ret := _m.Called()
 
@@ -1859,7 +1859,7 @@ func (_m *Client) SecretUpdate(repoID int64, secret *woodpecker.Secret) (*woodpe
 	return r0, r1
 }
 
-// Self provides a mock function with given fields:
+// Self provides a mock function with no fields
 func (_m *Client) Self() (*woodpecker.User, error) {
 	ret := _m.Called()
 

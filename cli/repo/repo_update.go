@@ -36,8 +36,8 @@ var repoUpdateCmd = &cli.Command{
 			Usage: "repository is trusted",
 		},
 		&cli.BoolFlag{
-			Name:  "gated",
-			Usage: "repository is gated",
+			Name:   "gated", // TODO: remove in next release
+			Hidden: true,
 		},
 		&cli.StringFlag{
 			Name:  "require-approval",
@@ -82,7 +82,6 @@ func repoUpdate(ctx context.Context, c *cli.Command) error {
 		config          = c.String("config")
 		timeout         = c.Duration("timeout")
 		trusted         = c.Bool("trusted")
-		gated           = c.Bool("gated")
 		requireApproval = c.String("require-approval")
 		pipelineCounter = int(c.Int("pipeline-counter"))
 		unsafe          = c.Bool("unsafe")
@@ -92,28 +91,17 @@ func repoUpdate(ctx context.Context, c *cli.Command) error {
 	if c.IsSet("trusted") {
 		patch.IsTrusted = &trusted
 	}
-	// TODO: remove isGated in next major release
+
+	// TODO: remove in next release
 	if c.IsSet("gated") {
-		if gated {
-			patch.RequireApproval = &woodpecker.RequireApprovalAllEvents
-		} else {
-			patch.RequireApproval = &woodpecker.RequireApprovalNone
-		}
+		return fmt.Errorf("'gated' option has been set in version 2.8, use 'require-approval' in >= 3.0")
 	}
+
 	if c.IsSet("require-approval") {
 		if mode := woodpecker.ApprovalMode(requireApproval); mode.Valid() {
 			patch.RequireApproval = &mode
 		} else {
 			return fmt.Errorf("update approval mode failed: '%s' is no valid mode", mode)
-		}
-
-		// TODO: remove isGated in next major release
-		if requireApproval == string(woodpecker.RequireApprovalAllEvents) {
-			trueBool := true
-			patch.IsGated = &trueBool
-		} else if requireApproval == string(woodpecker.RequireApprovalNone) {
-			falseBool := false
-			patch.IsGated = &falseBool
 		}
 	}
 	if c.IsSet("timeout") {

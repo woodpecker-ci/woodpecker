@@ -518,7 +518,8 @@
         "not_started": "noch nicht gestartet",
         "sec_short": "sek",
         "template": "DD.MM.YYYY, HH:mm z",
-        "weeks_short": "w"
+        "weeks_short": "w",
+        "just_now": "gerade eben"
     },
     "unknown_error": "Ein unbekannter Fehler ist aufgetreten",
     "update_woodpecker": "Du solltest deine Woodpecker-Instanz auf {0} aktualisieren",
@@ -576,7 +577,7 @@
             "cli_and_api": {
                 "desc": "Persönlicher Zugangsschlüssel, CLI- und API-Nutzung",
                 "token": "Persönlicher Zugangsschlüssel",
-                "api_usage": "Beispiel zur Nutzung der API",
+                "api_usage": "Beispiel zur Nutzung des API",
                 "download_cli": "CLI herunterladen",
                 "reset_token": "Schlüssel zurücksetzen",
                 "swagger_ui": "Swagger-UI",

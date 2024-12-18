@@ -22,17 +22,17 @@ import (
 	"xorm.io/xorm"
 )
 
-var gatedToRequireApproval = xormigrate.Migration{
-	ID: "gated-to-require-approval",
+var setNewDefaultsForRequireApproval = xormigrate.Migration{
+	ID: "set-new-defaults-for-require-approval",
 	MigrateSession: func(sess *xorm.Session) (err error) {
 		const (
-			requireApprovalOldNotGated string = "old_not_gated"
-			requireApprovalAllEvents   string = "all_events"
+			RequireApprovalOldNotGated string = "old_not_gated"
+			RequireApprovalNone        string = "none"
+			RequireApprovalForks       string = "forks"
+			RequireApprovalAllEvents   string = "all_events"
 		)
 
 		type repos struct {
-			ID              int64  `xorm:"pk autoincr 'id'"`
-			IsGated         bool   `xorm:"gated"`
 			RequireApproval string `xorm:"require_approval"`
 			Visibility      string `xorm:"varchar(10) 'visibility'"`
 		}
@@ -41,22 +41,22 @@ var gatedToRequireApproval = xormigrate.Migration{
 			return fmt.Errorf("sync new models failed: %w", err)
 		}
 
-		// migrate gated repos
+		// migrate public repos to require approval for forks
 		if _, err := sess.Exec(
-			builder.Update(builder.Eq{"require_approval": requireApprovalAllEvents}).
+			builder.Update(builder.Eq{"require_approval": RequireApprovalForks}).
 				From("repos").
-				Where(builder.Eq{"gated": true})); err != nil {
+				Where(builder.Eq{"require_approval": RequireApprovalOldNotGated, "visibility": "public"})); err != nil {
 			return err
 		}
 
-		// migrate non gated repos to old_not_gated (no approval required)
+		// migrate private repos to require no approval
 		if _, err := sess.Exec(
-			builder.Update(builder.Eq{"require_approval": requireApprovalOldNotGated}).
+			builder.Update(builder.Eq{"require_approval": RequireApprovalNone}).
 				From("repos").
-				Where(builder.Eq{"gated": false})); err != nil {
+				Where(builder.Eq{"require_approval": RequireApprovalOldNotGated}.And(builder.Neq{"visibility": "public"}))); err != nil {
 			return err
 		}
 
-		return dropTableColumns(sess, "repos", "gated")
+		return nil
 	},
 }

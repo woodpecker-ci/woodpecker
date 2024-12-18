@@ -36,7 +36,7 @@ steps:
     environment:
       WOODPECKER_DISABLE_UPDATE_CHECK: true
       WOODPECKER_LINT_STRICT: true
-      WOODPECKER_PLUGINS_PRIVILEGED: 'docker.io/woodpeckerci/plugin-docker-buildx:5.0.0'
+      WOODPECKER_PLUGINS_PRIVILEGED: 'docker.io/woodpeckerci/plugin-docker-buildx'
     when:
       - event: pull_request
         path:
@@ -125,7 +125,7 @@ steps:
       - test
       - sqlite
     pull: true
-    image: docker.io/woodpeckerci/plugin-codecov:2.1.5
+    image: docker.io/woodpeckerci/plugin-codecov:2.1.6
     settings:
       files:
         - agent-coverage.out

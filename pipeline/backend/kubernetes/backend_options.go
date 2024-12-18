@@ -1,7 +1,7 @@
 package kubernetes
 
 import (
-	"github.com/mitchellh/mapstructure"
+	"github.com/go-viper/mapstructure/v2"
 
 	backend "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
 )
@@ -86,9 +86,9 @@ const (
 
 func parseBackendOptions(step *backend.Step) (BackendOptions, error) {
 	var result BackendOptions
-	if step.BackendOptions == nil {
+	if step == nil || step.BackendOptions == nil {
 		return result, nil
 	}
-	err := mapstructure.Decode(step.BackendOptions[EngineName], &result)
+	err := mapstructure.WeakDecode(step.BackendOptions[EngineName], &result)
 	return result, err
 }
