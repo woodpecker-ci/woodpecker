@@ -13,7 +13,7 @@
   <SvgIcon v-else-if="name === 'github'" :path="mdiGithub" size="32" />
   <SvgIcon v-else-if="name === 'repo'" :path="mdiGit" size="32" />
   <SvgIcon v-else-if="name === 'settings'" :path="mdiCogOutline" size="32" />
-  <SvgIcon v-else-if="name === 'trash'" :path="mdiTrashCanCircleOutline" size="20" />
+  <SvgIcon v-else-if="name === 'trash'" :path="mdiTrashCanOutline" size="20" />
   <SvgIcon v-else-if="name === 'status-blocked'" :path="mdiPlayCircleOutline" size="20" />
   <SvgIcon v-else-if="name === 'status-declined'" :path="mdiStopCircleOutline" size="20" />
   <SvgIcon
@@ -123,7 +123,7 @@ import {
   mdiStopCircleOutline,
   mdiTagOutline,
   mdiTimelapse,
-  mdiTrashCanCircleOutline,
+  mdiTrashCanOutline,
 } from '@mdi/js';
 import { siForgejo, siGitea } from 'simple-icons';
 
