@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.0.1-rc.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.1-rc.0) - 2024-12-17
+## [3.0.1-rc.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.1-rc.0) - 2024-12-18
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -8,6 +8,7 @@
 
 ### 🐛 Bug Fixes
 
+- Ignore blocked pipelines for badge rendering [[#4582](https://github.com/woodpecker-ci/woodpecker/pull/4582)]
 - Remove related pipeline logs during pipeline deletion [[#4572](https://github.com/woodpecker-ci/woodpecker/pull/4572)]
 - Weakly decode backend options [[#4577](https://github.com/woodpecker-ci/woodpecker/pull/4577)]
 - Add client error to sdk and fix purge cli [[#4574](https://github.com/woodpecker-ci/woodpecker/pull/4574)]
