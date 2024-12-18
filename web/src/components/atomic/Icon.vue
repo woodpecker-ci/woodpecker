@@ -53,7 +53,7 @@
   <SvgIcon v-else-if="name === 'visibility-private'" :path="mdiLockOutline" size="24" />
   <SvgIcon v-else-if="name === 'visibility-internal'" :path="mdiLockOpenOutline" size="24" />
 
-  <iconify-icon v-else-if="name === 'forgejo'" icon="devicon:forgejo" width="32" height="32" />
+  <iconify-icon v-else-if="name === 'forgejo'" icon="devicon:forgejo" />
   <!-- <i v-else-if="name === 'forgejo'" class="devicon-forgejo-plain" />
   <i v-else-if="name === 'github'" class="devicon-github-plain" />
   <i v-else-if="name === 'gitlab'" class="devicon-gitlab-plain" /> -->
@@ -83,8 +83,7 @@
 </template>
 
 <script lang="ts" setup>
-import '@iconify/vue';
-
+import "iconify-icon";
 import {
   mdiAlarm,
   mdiAlertCircle,
