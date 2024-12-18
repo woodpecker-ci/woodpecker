@@ -48,7 +48,7 @@ func setupBitbucket(forge *model.Forge) (forge.Forge, error) {
 		Bool("client-set", opts.Client != "").
 		Bool("secret-set", opts.Secret != "").
 		Str("type", string(forge.Type)).
-		Msg("Setting up forge")
+		Msg("setting up forge")
 	return bitbucket.New(opts)
 }
 
@@ -75,7 +75,7 @@ func setupGitea(forge *model.Forge) (forge.Forge, error) {
 		Bool("client-set", opts.Client != "").
 		Bool("secret-set", opts.Secret != "").
 		Str("type", string(forge.Type)).
-		Msg("Setting up forge")
+		Msg("setting up forge")
 	return gitea.New(opts)
 }
 
@@ -102,7 +102,7 @@ func setupForgejo(forge *model.Forge) (forge.Forge, error) {
 		Bool("client-set", opts.Client != "").
 		Bool("secret-set", opts.Secret != "").
 		Str("type", string(forge.Type)).
-		Msg("Setting up forge")
+		Msg("setting up forge")
 	return forgejo.New(opts)
 }
 
@@ -121,7 +121,7 @@ func setupGitLab(forge *model.Forge) (forge.Forge, error) {
 		Bool("client-id-set", opts.ClientID != "").
 		Bool("client-secret-set", opts.ClientSecret != "").
 		Str("type", string(forge.Type)).
-		Msg("Setting up forge")
+		Msg("setting up forge")
 	return gitlab.New(opts)
 }
 
@@ -154,7 +154,7 @@ func setupGitHub(forge *model.Forge) (forge.Forge, error) {
 		Bool("client-set", opts.Client != "").
 		Bool("secret-set", opts.Secret != "").
 		Str("type", string(forge.Type)).
-		Msg("Setting up forge")
+		Msg("setting up forge")
 	return github.New(opts)
 }
 
@@ -182,7 +182,7 @@ func setupBitbucketDatacenter(forge *model.Forge) (forge.Forge, error) {
 		Bool("client-id-set", opts.ClientID != "").
 		Bool("client-secret-set", opts.ClientSecret != "").
 		Str("type", string(forge.Type)).
-		Msg("Setting up forge")
+		Msg("setting up forge")
 	return bitbucketdatacenter.New(opts)
 }
 
@@ -192,6 +192,6 @@ func setupAddon(forge *model.Forge) (forge.Forge, error) {
 		return nil, fmt.Errorf("missing addon executable")
 	}
 
-	log.Debug().Str("executable", executable).Msg("Setting up forge")
+	log.Debug().Str("executable", executable).Msg("setting up forge")
 	return addon.Load(executable)
 }
