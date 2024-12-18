@@ -67,7 +67,6 @@ const { enableSwagger } = config;
 <style scoped>
 .navbar-icon {
   @apply rounded-md w-11 h-11;
-
 }
 
 .navbar-icon :deep(svg) {
