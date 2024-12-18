@@ -1,6 +1,6 @@
 <!-- cSpell:ignore radiobox timelapse -->
 <template>
-  <SvgIcon v-if="name === 'duration'" :path="mdiTimelapse" size="20" />
+  <SvgIcon v-if="name === 'duration'" :path="mdiTimerOutline" size="20" />
   <SvgIcon v-else-if="name === 'since'" :path="mdiClockTimeEightOutline" size="20" />
   <SvgIcon v-else-if="name === 'push'" :path="mdiSourceBranch" size="20" />
   <SvgIcon v-else-if="name === 'pull-request'" :path="mdiSourcePull" size="20" />
@@ -31,7 +31,7 @@
   />
   <SvgIcon v-else-if="name === 'status-skipped'" :path="mdiMinusCircleOutline" size="20" />
   <SvgIcon v-else-if="name === 'status-success'" :path="mdiCheckCircleOutline" size="20" />
-  <SvgIcon v-else-if="name === 'attention'" :path="mdiAlert" size="20" />
+  <SvgIcon v-else-if="name === 'attention'" :path="mdiAlertOctagonOutline" size="20" />
   <SvgIcon v-else-if="name === 'warning'" :path="mdiAlertOutline" size="20" />
   <SvgIcon v-else-if="name === 'error'" :path="mdiAlertCircle" size="20" />
   <SvgIcon v-else-if="name === 'gitlab'" :path="mdiGitlab" size="32" />
@@ -84,7 +84,7 @@
 <script lang="ts" setup>
 import {
   mdiAlarm,
-  mdiAlert,
+  mdiAlertOctagonOutline,
   mdiAlertCircle,
   mdiAlertOutline,
   mdiArrowLeft,
@@ -122,8 +122,9 @@ import {
   mdiSourcePull,
   mdiStopCircleOutline,
   mdiTagOutline,
-  mdiTimelapse,
+  mdiTimerOutline,
   mdiTrashCanOutline,
+  
 } from '@mdi/js';
 import { siForgejo, siGitea } from 'simple-icons';
 
