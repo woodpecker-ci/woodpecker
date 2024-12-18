@@ -8,6 +8,7 @@
 
 ### 🔒 Security
 
+- Don't log DB passwords [[#4583](https://github.com/woodpecker-ci/woodpecker/pull/4583)]
 - Do not log forge tokens [[#4551](https://github.com/woodpecker-ci/woodpecker/pull/4551)]
 
 ### 🐛 Bug Fixes
