@@ -72,7 +72,7 @@ func GetBadge(c *gin.Context) {
 		branch = repo.Branch
 	}
 
-	pipeline, err := _store.GetPipelineLast(repo, branch)
+	pipeline, err := _store.GetPipelineBadge(repo, branch)
 	if err != nil {
 		if !errors.Is(err, types.RecordNotExist) {
 			log.Warn().Err(err).Msg("could not get last pipeline for badge")

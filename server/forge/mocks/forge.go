@@ -282,7 +282,7 @@ func (_m *Forge) Login(ctx context.Context, r *types.OAuthRequest) (*model.User,
 	return r0, r1, r2
 }
 
-// Name provides a mock function with given fields:
+// Name provides a mock function with no fields
 func (_m *Forge) Name() string {
 	ret := _m.Called()
 
@@ -528,7 +528,7 @@ func (_m *Forge) Teams(ctx context.Context, u *model.User) ([]*model.Team, error
 	return r0, r1
 }
 
-// URL provides a mock function with given fields:
+// URL provides a mock function with no fields
 func (_m *Forge) URL() string {
 	ret := _m.Called()
 

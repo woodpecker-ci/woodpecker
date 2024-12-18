@@ -150,7 +150,7 @@ func (_m *Queue) KickAgentWorkers(agentID int64) {
 	_m.Called(agentID)
 }
 
-// Pause provides a mock function with given fields:
+// Pause provides a mock function with no fields
 func (_m *Queue) Pause() {
 	_m.Called()
 }
@@ -221,7 +221,7 @@ func (_m *Queue) PushAtOnce(c context.Context, tasks []*model.Task) error {
 	return r0
 }
 
-// Resume provides a mock function with given fields:
+// Resume provides a mock function with no fields
 func (_m *Queue) Resume() {
 	_m.Called()
 }
