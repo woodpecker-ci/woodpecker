@@ -47,8 +47,8 @@ func setupBitbucket(forge *model.Forge) (forge.Forge, error) {
 	log.Debug().
 		Bool("client-set", opts.Client != "").
 		Bool("secret-set", opts.Secret != "").
-		Str("type", forge.Type)
-		.Msg("Setting up forge")
+		Str("type", string(forge.Type)).
+		Msg("Setting up forge")
 	return bitbucket.New(opts)
 }
 
@@ -74,8 +74,8 @@ func setupGitea(forge *model.Forge) (forge.Forge, error) {
 		Bool("skip-verify", opts.SkipVerify).
 		Bool("client-set", opts.Client != "").
 		Bool("secret-set", opts.Secret != "").
-		Str("type", forge.Type)
-		.Msg("Setting up forge")
+		Str("type", string(forge.Type)).
+		Msg("Setting up forge")
 	return gitea.New(opts)
 }
 
@@ -101,8 +101,8 @@ func setupForgejo(forge *model.Forge) (forge.Forge, error) {
 		Bool("skip-verify", opts.SkipVerify).
 		Bool("client-set", opts.Client != "").
 		Bool("secret-set", opts.Secret != "").
-		Str("type", forge.Type)
-		.Msg("Setting up forge")
+		Str("type", string(forge.Type)).
+		Msg("Setting up forge")
 	return forgejo.New(opts)
 }
 
@@ -120,8 +120,8 @@ func setupGitLab(forge *model.Forge) (forge.Forge, error) {
 		Bool("skip-verify", opts.SkipVerify).
 		Bool("client-id-set", opts.ClientID != "").
 		Bool("client-secret-set", opts.ClientSecret != "").
-		Str("type", forge.Type)
-		.Msg("Setting up forge")
+		Str("type", string(forge.Type)).
+		Msg("Setting up forge")
 	return gitlab.New(opts)
 }
 
@@ -153,8 +153,8 @@ func setupGitHub(forge *model.Forge) (forge.Forge, error) {
 		Bool("skip-verify", opts.SkipVerify).
 		Bool("client-set", opts.Client != "").
 		Bool("secret-set", opts.Secret != "").
-		Str("type", forge.Type)
-		.Msg("Setting up forge")
+		Str("type", string(forge.Type)).
+		Msg("Setting up forge")
 	return github.New(opts)
 }
 
@@ -181,8 +181,8 @@ func setupBitbucketDatacenter(forge *model.Forge) (forge.Forge, error) {
 		Str("oauth-host", opts.OAuthHost).
 		Bool("client-id-set", opts.ClientID != "").
 		Bool("client-secret-set", opts.ClientSecret != "").
-		Str("type", forge.Type)
-		.Msg("Setting up forge")
+		Str("type", string(forge.Type)).
+		Msg("Setting up forge")
 	return bitbucketdatacenter.New(opts)
 }
 
