@@ -53,9 +53,10 @@
   <SvgIcon v-else-if="name === 'visibility-private'" :path="mdiLockOutline" size="24" />
   <SvgIcon v-else-if="name === 'visibility-internal'" :path="mdiLockOpenOutline" size="24" />
 
-  <i v-else-if="name === 'forgejo'" class="devicon-forgejo-plain" />
+  <iconify-icon v-else-if="name === 'forgejo'" icon="devicon:forgejo" width="32" height="32" />
+  <!-- <i v-else-if="name === 'forgejo'" class="devicon-forgejo-plain" />
   <i v-else-if="name === 'github'" class="devicon-github-plain" />
-  <i v-else-if="name === 'gitlab'" class="devicon-gitlab-plain" />
+  <i v-else-if="name === 'gitlab'" class="devicon-gitlab-plain" /> -->
   <SvgIcon v-else-if="name === 'gitea'" :path="siGitea.path" size="32" color="#609926" />
 
   <svg v-else-if="name === 'spinner'" width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
