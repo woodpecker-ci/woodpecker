@@ -48,7 +48,7 @@ func (_m *Manager) ConfigServiceFromRepo(repo *model.Repo) config.Service {
 	return r0
 }
 
-// EnvironmentService provides a mock function with given fields:
+// EnvironmentService provides a mock function with no fields
 func (_m *Manager) EnvironmentService() environment.Service {
 	ret := _m.Called()
 
@@ -158,7 +158,7 @@ func (_m *Manager) ForgeFromUser(user *model.User) (forge.Forge, error) {
 	return r0, r1
 }
 
-// RegistryService provides a mock function with given fields:
+// RegistryService provides a mock function with no fields
 func (_m *Manager) RegistryService() registry.Service {
 	ret := _m.Called()
 
@@ -198,7 +198,7 @@ func (_m *Manager) RegistryServiceFromRepo(repo *model.Repo) registry.Service {
 	return r0
 }
 
-// SecretService provides a mock function with given fields:
+// SecretService provides a mock function with no fields
 func (_m *Manager) SecretService() secret.Service {
 	ret := _m.Called()
 
@@ -238,7 +238,7 @@ func (_m *Manager) SecretServiceFromRepo(repo *model.Repo) secret.Service {
 	return r0
 }
 
-// SignaturePublicKey provides a mock function with given fields:
+// SignaturePublicKey provides a mock function with no fields
 func (_m *Manager) SignaturePublicKey() crypto.PublicKey {
 	ret := _m.Called()
 
