@@ -47,7 +47,8 @@ func setupBitbucket(forge *model.Forge) (forge.Forge, error) {
 	log.Debug().
 		Bool("client-set", opts.Client != "").
 		Bool("secret-set", opts.Secret != "").
-		Msg("Setting up bitbucket")
+		Str("type", forge.Type)
+		.Msg("Setting up forge")
 	return bitbucket.New(opts)
 }
 
@@ -73,7 +74,8 @@ func setupGitea(forge *model.Forge) (forge.Forge, error) {
 		Bool("skip-verify", opts.SkipVerify).
 		Bool("client-set", opts.Client != "").
 		Bool("secret-set", opts.Secret != "").
-		Msg("Setting up gitea")
+		Str("type", forge.Type)
+		.Msg("Setting up forge")
 	return gitea.New(opts)
 }
 
@@ -99,7 +101,8 @@ func setupForgejo(forge *model.Forge) (forge.Forge, error) {
 		Bool("skip-verify", opts.SkipVerify).
 		Bool("client-set", opts.Client != "").
 		Bool("secret-set", opts.Secret != "").
-		Msg("Setting up forgejo")
+		Str("type", forge.Type)
+		.Msg("Setting up forge")
 	return forgejo.New(opts)
 }
 
@@ -117,7 +120,8 @@ func setupGitLab(forge *model.Forge) (forge.Forge, error) {
 		Bool("skip-verify", opts.SkipVerify).
 		Bool("client-id-set", opts.ClientID != "").
 		Bool("client-secret-set", opts.ClientSecret != "").
-		Msg("Setting up gitlab")
+		Str("type", forge.Type)
+		.Msg("Setting up forge")
 	return gitlab.New(opts)
 }
 
@@ -149,7 +153,8 @@ func setupGitHub(forge *model.Forge) (forge.Forge, error) {
 		Bool("skip-verify", opts.SkipVerify).
 		Bool("client-set", opts.Client != "").
 		Bool("secret-set", opts.Secret != "").
-		Msg("Setting up github")
+		Str("type", forge.Type)
+		.Msg("Setting up forge")
 	return github.New(opts)
 }
 
@@ -176,7 +181,8 @@ func setupBitbucketDatacenter(forge *model.Forge) (forge.Forge, error) {
 		Str("oauth-host", opts.OAuthHost).
 		Bool("client-id-set", opts.ClientID != "").
 		Bool("client-secret-set", opts.ClientSecret != "").
-		Msg("Setting up bitbucketdatacenter")
+		Str("type", forge.Type)
+		.Msg("Setting up forge")
 	return bitbucketdatacenter.New(opts)
 }
 
@@ -186,6 +192,6 @@ func setupAddon(forge *model.Forge) (forge.Forge, error) {
 		return nil, fmt.Errorf("missing addon executable")
 	}
 
-	log.Debug().Msgf("Forge (addon) executable: %s", executable)
+	log.Debug().Str("executable", executable).Msg("Setting up forge")
 	return addon.Load(executable)
 }
