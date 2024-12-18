@@ -16,6 +16,6 @@ func parseBackendOptions(step *backend.Step) (BackendOptions, error) {
 	if step == nil || step.BackendOptions == nil {
 		return result, nil
 	}
-	err := mapstructure.Decode(step.BackendOptions[EngineName], &result)
+	err := mapstructure.WeakDecode(step.BackendOptions[EngineName], &result)
 	return result, err
 }
