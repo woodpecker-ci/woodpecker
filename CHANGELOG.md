@@ -6,6 +6,10 @@
 
 @gedankenstuecke, @qwerty287, @xoxys, @zc-devs
 
+### 🔒 Security
+
+- Do not log forge tokens [[#4551](https://github.com/woodpecker-ci/woodpecker/pull/4551)]
+
 ### 🐛 Bug Fixes
 
 - Ignore blocked pipelines for badge rendering [[#4582](https://github.com/woodpecker-ci/woodpecker/pull/4582)]
