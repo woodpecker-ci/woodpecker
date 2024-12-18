@@ -53,17 +53,8 @@
   <SvgIcon v-else-if="name === 'visibility-private'" :path="mdiLockOutline" size="24" />
   <SvgIcon v-else-if="name === 'visibility-internal'" :path="mdiLockOpenOutline" size="24" />
 
-  <iconify-icon v-else-if="name === 'forgejo'" icon="devicon:forgejo" width="32" height="32" />
-  <iconify-icon v-else-if="name === 'gitlab'" icon="devicon:gitlab" width="32" height="32" />
-  <iconify-icon v-else-if="name === 'github'" icon="devicon:github" width="32" height="32" />
-  <iconify-icon
-    v-else-if="name === 'gitea'"
-    icon="simple-icons:gitea"
-    width="32"
-    height="32"
-    style="color: #609926"
-    ;
-  />
+  <SvgIcon v-else-if="name === 'forgejo'" :path="siForgejo.path" size="32" />
+  <SvgIcon v-else-if="name === 'gitea'" :path="siGitea.path" size="32" />
 
   <svg v-else-if="name === 'spinner'" width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
     <path
@@ -89,8 +80,6 @@
 </template>
 
 <script lang="ts" setup>
-import 'iconify-icon';
-
 import {
   mdiAlarm,
   mdiAlertCircle,
@@ -132,6 +121,7 @@ import {
   mdiTimerOutline,
   mdiTrashCanOutline,
 } from '@mdi/js';
+import { siForgejo, siGitea } from 'simple-icons';
 
 import SvgIcon from './SvgIcon.vue';
 
