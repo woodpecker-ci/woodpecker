@@ -124,7 +124,7 @@ import {
   mdiTagOutline,
   mdiTimerOutline,
   mdiTrashCanOutline,
-  
+
 } from '@mdi/js';
 import { siForgejo, siGitea } from 'simple-icons';
 
