@@ -1,11 +1,11 @@
-code.gitea.io/sdk/gitea v0.18.0 h1:+zZrwVmujIrgobt6wVBWCqITz6bn1aBjnCUHmpZrerI=
-code.gitea.io/sdk/gitea v0.18.0/go.mod h1:IG9xZJoltDNeDSW0qiF2Vqx5orMWa7OhVWrjvrd5NpI=
+code.gitea.io/sdk/gitea v0.19.0 h1:8I6s1s4RHgzxiPHhOQdgim1RWIRcr0LVMbHBjBFXq4Y=
+code.gitea.io/sdk/gitea v0.19.0/go.mod h1:IG9xZJoltDNeDSW0qiF2Vqx5orMWa7OhVWrjvrd5NpI=
 codeberg.org/6543/go-yaml2json v1.0.0 h1:heGqo9VEi7gY2yNqjj7X4ADs5nzlFIbGsJtgYDLrnig=
 codeberg.org/6543/go-yaml2json v1.0.0/go.mod h1:mz61q14LWF4ZABrgMEDMmk3t9dPi6zgR1uBh2VKV2RQ=
 codeberg.org/6543/xyaml v1.1.0 h1:0PWTy8OUqshshjrrnAXFWXSPUEa8R49DIh2ah07SxFc=
 codeberg.org/6543/xyaml v1.1.0/go.mod h1:jI7afXLZUxeL4rNNsG1SlHh78L+gma9lK1bIebyFZwA=
-codeberg.org/mvdkleijn/forgejo-sdk/forgejo v1.1.0 h1:t5vPmL8JNfg1syWSZUS7miw8pwUHW+l2AB2IkFZuOiw=
-codeberg.org/mvdkleijn/forgejo-sdk/forgejo v1.1.0/go.mod h1:09wAYX9H0+wBo1baX9DdSqdfreZc6ji5aELsnu9m14M=
+codeberg.org/mvdkleijn/forgejo-sdk/forgejo v1.1.1 h1:WEI3FZdoQjaiaR15TRmyGfY091R7o+NAaso65ckbsq0=
+codeberg.org/mvdkleijn/forgejo-sdk/forgejo v1.1.1/go.mod h1:09wAYX9H0+wBo1baX9DdSqdfreZc6ji5aELsnu9m14M=
 filippo.io/edwards25519 v1.1.0 h1:FNf4tywRC1HmFuKW5xopWpigGjJKiJSV0Cqo0cJWDaA=
 filippo.io/edwards25519 v1.1.0/go.mod h1:BxyFTGdWcka3PhytdK4V28tE5sGfRvvvRV7EaN4VDT4=
 gitea.com/xorm/sqlfiddle v0.0.0-20180821085327-62ce714f951a h1:lSA0F4e9A2NcQSqGqTOXqu2aRi/XEQxDCBwM8yJtE6s=
