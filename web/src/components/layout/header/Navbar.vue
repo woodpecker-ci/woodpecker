@@ -25,7 +25,6 @@
         :title="$t('settings')"
         :to="{ name: 'admin-settings' }"
       >
-        <span v-if="user?.admin" class="text-xs" :title="$t('admin')">{{ $t('admin') }}</span>
         <Icon name="settings" />
         <div
           v-if="version?.needsUpdate"
