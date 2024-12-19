@@ -1,5 +1,15 @@
 # Changelog
 
+## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-12-19
+
+### ❤️ Thanks to all contributors! ❤️
+
+@xoxys
+
+### Misc
+
+- Backport golang security updates [[#4587](https://github.com/woodpecker-ci/woodpecker/pull/4587)]
+
 ## [2.8.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.8.1) - 2024-12-10
 
 ### ❤️ Thanks to all contributors! ❤️
