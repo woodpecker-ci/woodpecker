@@ -1,6 +1,6 @@
 <!-- cSpell:ignore radiobox timelapse -->
 <template>
-  <SvgIcon v-if="name === 'duration'" :path="mdiTimelapse" size="20" />
+  <SvgIcon v-if="name === 'duration'" :path="mdiTimerOutline" size="20" />
   <SvgIcon v-else-if="name === 'since'" :path="mdiClockTimeEightOutline" size="20" />
   <SvgIcon v-else-if="name === 'push'" :path="mdiSourceBranch" size="20" />
   <SvgIcon v-else-if="name === 'pull-request'" :path="mdiSourcePull" size="20" />
@@ -10,9 +10,8 @@
   <SvgIcon v-else-if="name === 'deployment'" :path="mdiPackageVariant" size="20" />
   <SvgIcon v-else-if="name === 'commit'" :path="mdiSourceCommit" size="20" />
   <SvgIcon v-else-if="name === 'back'" :path="mdiArrowLeft" size="20" />
-  <SvgIcon v-else-if="name === 'github'" :path="mdiGithub" size="32" />
   <SvgIcon v-else-if="name === 'repo'" :path="mdiGit" size="32" />
-  <SvgIcon v-else-if="name === 'settings'" :path="mdiCog" size="32" />
+  <SvgIcon v-else-if="name === 'settings'" :path="mdiCogOutline" size="32" />
   <SvgIcon v-else-if="name === 'trash'" :path="mdiTrashCanOutline" size="20" />
   <SvgIcon v-else-if="name === 'status-blocked'" :path="mdiPlayCircleOutline" size="20" />
   <SvgIcon v-else-if="name === 'status-declined'" :path="mdiStopCircleOutline" size="20" />
@@ -31,10 +30,9 @@
   />
   <SvgIcon v-else-if="name === 'status-skipped'" :path="mdiMinusCircleOutline" size="20" />
   <SvgIcon v-else-if="name === 'status-success'" :path="mdiCheckCircleOutline" size="20" />
-  <SvgIcon v-else-if="name === 'attention'" :path="mdiAlert" size="20" />
+  <SvgIcon v-else-if="name === 'attention'" :path="mdiAlertOctagonOutline" size="20" />
   <SvgIcon v-else-if="name === 'warning'" :path="mdiAlertOutline" size="20" />
   <SvgIcon v-else-if="name === 'error'" :path="mdiAlertCircle" size="20" />
-  <SvgIcon v-else-if="name === 'gitlab'" :path="mdiGitlab" size="32" />
   <SvgIcon v-else-if="name === 'bitbucket' || name === 'bitbucket-dc'" :path="mdiBitbucket" size="32" />
   <SvgIcon v-else-if="name === 'question'" :path="mdiHelpCircleOutline" size="20" />
   <SvgIcon v-else-if="name === 'plus'" :path="mdiPlus" size="20" />
@@ -44,10 +42,10 @@
   <SvgIcon v-else-if="name === 'chevron-right'" :path="mdiChevronRight" size="20" />
   <SvgIcon v-else-if="name === 'close'" :path="mdiCloseCircleOutline" size="20" />
   <SvgIcon v-else-if="name === 'edit'" :path="mdiPencil" size="20" />
-  <SvgIcon v-else-if="name === 'download'" :path="mdiDownloadCircle" size="20" />
+  <SvgIcon v-else-if="name === 'download'" :path="mdiDownloadCircleOutline" size="20" />
   <SvgIcon v-else-if="name === 'stopwatch'" :path="mdiAlarm" size="20" />
-  <SvgIcon v-else-if="name === 'auto-scroll'" :path="mdiDownload" size="20" />
-  <SvgIcon v-else-if="name === 'auto-scroll-off'" :path="mdiDownloadOff" size="20" />
+  <SvgIcon v-else-if="name === 'auto-scroll'" :path="mdiDownloadCircleOutline" size="20" />
+  <SvgIcon v-else-if="name === 'auto-scroll-off'" :path="mdiDownloadOffOutline" size="20" />
   <SvgIcon v-else-if="name === 'pause'" :path="mdiPause" size="20" />
   <SvgIcon v-else-if="name === 'play'" :path="mdiPlay" size="20" />
   <SvgIcon v-else-if="name === 'remove'" :path="mdiClose" size="20" />
@@ -78,14 +76,14 @@
     </path>
   </svg>
 
-  <div v-else-if="name === 'blank'" class="h-6 w-6" />
+  <div v-else-if="name === 'blank'" class="w-6 h-6" />
 </template>
 
 <script lang="ts" setup>
 import {
   mdiAlarm,
-  mdiAlert,
   mdiAlertCircle,
+  mdiAlertOctagonOutline,
   mdiAlertOutline,
   mdiArrowLeft,
   mdiBandage,
@@ -95,15 +93,12 @@ import {
   mdiClockTimeEightOutline,
   mdiClose,
   mdiCloseCircleOutline,
-  mdiCog,
-  mdiDownload,
-  mdiDownloadCircle,
-  mdiDownloadOff,
+  mdiCogOutline,
+  mdiDownloadCircleOutline,
+  mdiDownloadOffOutline,
   mdiFormatListBulleted,
   mdiGestureTap,
   mdiGit,
-  mdiGithub,
-  mdiGitlab,
   mdiHelpCircleOutline,
   mdiLockOpenOutline,
   mdiLockOutline,
@@ -123,7 +118,7 @@ import {
   mdiSourcePull,
   mdiStopCircleOutline,
   mdiTagOutline,
-  mdiTimelapse,
+  mdiTimerOutline,
   mdiTrashCanOutline,
 } from '@mdi/js';
 import { siForgejo, siGitea } from 'simple-icons';
