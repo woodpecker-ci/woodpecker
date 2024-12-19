@@ -151,4 +151,4 @@ steps:
           - <<: *when_path
           - <<: *docker_path
         branch: ${CI_REPO_DEFAULT_BRANCH}
-      - event: [manual]
+      - event: [manual, tag]
