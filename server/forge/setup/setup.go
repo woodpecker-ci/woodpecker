@@ -44,7 +44,11 @@ func setupBitbucket(forge *model.Forge) (forge.Forge, error) {
 		Client: forge.Client,
 		Secret: forge.ClientSecret,
 	}
-	log.Trace().Msgf("Forge (bitbucket) opts: %#v", opts)
+	log.Debug().
+		Bool("client-set", opts.Client != "").
+		Bool("secret-set", opts.Secret != "").
+		Str("type", string(forge.Type)).
+		Msg("setting up forge")
 	return bitbucket.New(opts)
 }
 
@@ -64,7 +68,14 @@ func setupGitea(forge *model.Forge) (forge.Forge, error) {
 	if len(opts.URL) == 0 {
 		return nil, fmt.Errorf("WOODPECKER_GITEA_URL must be set")
 	}
-	log.Trace().Msgf("Forge (gitea) opts: %#v", opts)
+	log.Debug().
+		Str("url", opts.URL).
+		Str("oauth-host", opts.OAuthHost).
+		Bool("skip-verify", opts.SkipVerify).
+		Bool("client-set", opts.Client != "").
+		Bool("secret-set", opts.Secret != "").
+		Str("type", string(forge.Type)).
+		Msg("setting up forge")
 	return gitea.New(opts)
 }
 
@@ -84,18 +95,34 @@ func setupForgejo(forge *model.Forge) (forge.Forge, error) {
 	if len(opts.URL) == 0 {
 		return nil, fmt.Errorf("WOODPECKER_FORGEJO_URL must be set")
 	}
-	log.Trace().Msgf("Forge (forgejo) opts: %#v", opts)
+	log.Debug().
+		Str("url", opts.URL).
+		Str("oauth2-url", opts.OAuth2URL).
+		Bool("skip-verify", opts.SkipVerify).
+		Bool("client-set", opts.Client != "").
+		Bool("secret-set", opts.Secret != "").
+		Str("type", string(forge.Type)).
+		Msg("setting up forge")
 	return forgejo.New(opts)
 }
 
 func setupGitLab(forge *model.Forge) (forge.Forge, error) {
-	return gitlab.New(gitlab.Opts{
+	opts := gitlab.Opts{
 		URL:          forge.URL,
 		ClientID:     forge.Client,
 		ClientSecret: forge.ClientSecret,
 		SkipVerify:   forge.SkipVerify,
 		OAuthHost:    forge.OAuthHost,
-	})
+	}
+	log.Debug().
+		Str("url", opts.URL).
+		Str("oauth-host", opts.OAuthHost).
+		Bool("skip-verify", opts.SkipVerify).
+		Bool("client-id-set", opts.ClientID != "").
+		Bool("client-secret-set", opts.ClientSecret != "").
+		Str("type", string(forge.Type)).
+		Msg("setting up forge")
+	return gitlab.New(opts)
 }
 
 func setupGitHub(forge *model.Forge) (forge.Forge, error) {
@@ -118,7 +145,16 @@ func setupGitHub(forge *model.Forge) (forge.Forge, error) {
 		OnlyPublic: publicOnly,
 		OAuthHost:  forge.OAuthHost,
 	}
-	log.Trace().Msgf("Forge (github) opts: %#v", opts)
+	log.Debug().
+		Str("url", opts.URL).
+		Str("oauth-host", opts.OAuthHost).
+		Bool("merge-ref", opts.MergeRef).
+		Bool("only-public", opts.OnlyPublic).
+		Bool("skip-verify", opts.SkipVerify).
+		Bool("client-set", opts.Client != "").
+		Bool("secret-set", opts.Secret != "").
+		Str("type", string(forge.Type)).
+		Msg("setting up forge")
 	return github.New(opts)
 }
 
@@ -140,16 +176,22 @@ func setupBitbucketDatacenter(forge *model.Forge) (forge.Forge, error) {
 		Password:     gitPassword,
 		OAuthHost:    forge.OAuthHost,
 	}
-	log.Trace().Msgf("Forge (bitbucketdatacenter) opts: %#v", opts)
+	log.Debug().
+		Str("url", opts.URL).
+		Str("oauth-host", opts.OAuthHost).
+		Bool("client-id-set", opts.ClientID != "").
+		Bool("client-secret-set", opts.ClientSecret != "").
+		Str("type", string(forge.Type)).
+		Msg("setting up forge")
 	return bitbucketdatacenter.New(opts)
 }
 
 func setupAddon(forge *model.Forge) (forge.Forge, error) {
 	executable, ok := forge.AdditionalOptions["executable"].(string)
 	if !ok {
-		return nil, fmt.Errorf("missing git-username")
+		return nil, fmt.Errorf("missing addon executable")
 	}
 
-	log.Trace().Msgf("Forge (addon) executable: %#v", executable)
+	log.Debug().Str("executable", executable).Msg("setting up forge")
 	return addon.Load(executable)
 }
