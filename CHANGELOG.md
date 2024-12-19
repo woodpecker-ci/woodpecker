@@ -6,8 +6,10 @@
 
 @xoxys
 
-### Misc
+### 🔒 Security
 
+- Do not log forge tokens (#4551) [[#4590](https://github.com/woodpecker-ci/woodpecker/pull/4590)]
+- Don't log DB passwords (#4583) [[#4589](https://github.com/woodpecker-ci/woodpecker/pull/4589)]
 - Backport golang security updates [[#4587](https://github.com/woodpecker-ci/woodpecker/pull/4587)]
 
 ## [2.8.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.8.1) - 2024-12-10
