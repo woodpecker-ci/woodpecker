@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.0.1-rc.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.1-rc.0) - 2024-12-18
+## [3.0.1-rc.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.1-rc.0) - 2024-12-19
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -28,6 +28,8 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update golang-packages [[#4586](https://github.com/woodpecker-ci/woodpecker/pull/4586)]
+- fix(deps): update module golang.org/x/net to v0.33.0 [security] [[#4585](https://github.com/woodpecker-ci/woodpecker/pull/4585)]
 - fix(deps): update golang-packages [[#4579](https://github.com/woodpecker-ci/woodpecker/pull/4579)]
 - Replace discontinued mitchellh/mapstructure by maintained fork [[#4573](https://github.com/woodpecker-ci/woodpecker/pull/4573)]
 - chore(deps): update docker.io/woodpeckerci/plugin-codecov docker tag to v2.1.6 [[#4566](https://github.com/woodpecker-ci/woodpecker/pull/4566)]
