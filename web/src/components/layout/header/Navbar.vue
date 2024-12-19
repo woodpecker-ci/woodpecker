@@ -25,10 +25,11 @@
         :title="$t('settings')"
         :to="{ name: 'admin-settings' }"
       >
+        <span v-if="user?.admin" class="text-xs" :title="$t('admin')">{{ $t('admin') }}</span>
         <Icon name="settings" />
         <div
           v-if="version?.needsUpdate"
-          class="top-[0.15rem] right-[0.4rem] absolute bg-int-wp-state-error-100 rounded-full w-3 h-3"
+          class="top-2 right-2 absolute bg-int-wp-state-error-100 rounded-full w-3 h-3"
         />
       </IconButton>
 
@@ -66,7 +67,7 @@ const { enableSwagger } = config;
 
 <style scoped>
 .navbar-icon {
-  @apply rounded-md w-11 h-11;
+  @apply p-2.5 rounded-md w-11 h-11;
 }
 
 .navbar-icon :deep(svg) {
