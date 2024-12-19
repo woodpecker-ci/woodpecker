@@ -33,7 +33,7 @@
       </IconButton>
 
       <ActivePipelines v-if="user" class="!p-1.5 navbar-icon" />
-      <IconButton v-if="user" :to="{ name: 'user' }" :title="$t('user.settings.settings')" class="navbar-icon">
+      <IconButton v-if="user" :to="{ name: 'user' }" :title="$t('user.settings.settings')" class="!p-1.5 navbar-icon">
         <img v-if="user && user.avatar_url" class="rounded-md" :src="`${user.avatar_url}`" />
       </IconButton>
       <Button v-else :text="$t('login')" :to="`/login?url=${route.fullPath}`" />
