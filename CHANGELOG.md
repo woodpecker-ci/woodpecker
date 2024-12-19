@@ -1,5 +1,18 @@
 # Changelog
 
+## [2.8.2](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.8.2) - 2024-12-19
+
+### ❤️ Thanks to all contributors! ❤️
+
+@xoxys
+
+### 🔒 Security
+
+- Backport gitea and forgejo sdk updates [[#4592](https://github.com/woodpecker-ci/woodpecker/pull/4592)]
+- Do not log forge tokens (#4551) [[#4590](https://github.com/woodpecker-ci/woodpecker/pull/4590)]
+- Don't log DB passwords (#4583) [[#4589](https://github.com/woodpecker-ci/woodpecker/pull/4589)]
+- Backport golang security updates [[#4587](https://github.com/woodpecker-ci/woodpecker/pull/4587)]
+
 ## [2.8.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.8.1) - 2024-12-10
 
 ### ❤️ Thanks to all contributors! ❤️
