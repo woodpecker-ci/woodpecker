@@ -22,6 +22,10 @@ variables:
       # Dockerfile changes
       - 'docker/**'
 
+depends_on:
+  - docker
+  - binaries
+
 when:
   - event: tag
   - event: pull_request
