@@ -1,5 +1,15 @@
 # Changelog
 
+## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-12-21
+
+### ❤️ Thanks to all contributors! ❤️
+
+@qwerty287
+
+### 🐛 Bug Fixes
+
+- Fix avatar column type (#4340) [[#4602](https://github.com/woodpecker-ci/woodpecker/pull/4602)]
+
 ## [2.8.2](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.8.2) - 2024-12-19
 
 ### ❤️ Thanks to all contributors! ❤️
