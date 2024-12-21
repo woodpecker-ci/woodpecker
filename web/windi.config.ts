@@ -197,7 +197,7 @@ export default defineConfig({
         'wp-code': {
           100: 'var(--wp-code-100)',
           200: 'var(--wp-code-200)',
-          300: 'var(--wp-code-100)',
+          300: 'var(--wp-code-300)',
         },
 
         'wp-code-text': {
