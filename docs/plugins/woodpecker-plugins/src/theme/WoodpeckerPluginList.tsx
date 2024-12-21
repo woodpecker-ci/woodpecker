@@ -41,7 +41,7 @@ export function WoodpeckerPluginList({ plugins }: { plugins: WoodpeckerPlugin[] 
 
   const fuse = useRef(
     new Fuse(plugins, {
-      keys: ['name', 'description'],
+      keys: ['name', 'description', 'tags'],
       threshold: 0.3,
     }),
   );
