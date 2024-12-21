@@ -17,6 +17,7 @@
 
 ### 📚 Documentation
 
+- Search in plugin tags [[#4604](https://github.com/woodpecker-ci/woodpecker/pull/4604)]
 - chore(deps): update dependency @types/react to v18.3.18 [[#4599](https://github.com/woodpecker-ci/woodpecker/pull/4599)]
 - Update About [[#4555](https://github.com/woodpecker-ci/woodpecker/pull/4555)]
 - chore(deps): update dependency marked to v15.0.4 [[#4570](https://github.com/woodpecker-ci/woodpecker/pull/4570)]
