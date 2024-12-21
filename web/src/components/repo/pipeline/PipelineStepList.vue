@@ -1,9 +1,9 @@
 <template>
-  <div class="flex flex-col w-full md:w-3/12 md:max-w-md md:min-w-xs text-wp-text-100 gap-2 pb-2">
+  <div class="flex flex-col gap-2 pb-2 w-full md:w-3/12 md:min-w-xs md:max-w-md text-wp-text-100">
     <div
-      class="flex flex-wrap p-4 gap-1 justify-between flex-shrink-0 rounded-md border bg-wp-background-100 border-wp-background-400 dark:bg-wp-background-200"
+      class="flex flex-wrap flex-shrink-0 justify-between gap-1 border-wp-background-500 bg-wp-background-200 dark:bg-wp-background-300 p-4 border rounded-md"
     >
-      <div class="flex space-x-1 items-center flex-shrink-0">
+      <div class="flex flex-shrink-0 items-center space-x-1">
         <div class="flex items-center">
           <Icon v-if="pipeline.event === 'cron'" name="stopwatch" />
           <img v-else class="rounded-md w-6" :src="pipeline.author_avatar" />
@@ -12,7 +12,7 @@
       </div>
       <a
         v-if="pipeline.event === 'pull_request' || pipeline.event === 'pull_request_closed'"
-        class="flex items-center space-x-1 text-wp-link-100 hover:text-wp-link-200 min-w-0"
+        class="flex items-center space-x-1 min-w-0 text-wp-link-100 hover:text-wp-link-200"
         :href="pipeline.forge_url"
       >
         <Icon name="pull-request" />
@@ -20,7 +20,7 @@
       </a>
       <router-link
         v-else-if="pipeline.event === 'push' || pipeline.event === 'manual' || pipeline.event === 'deployment'"
-        class="flex items-center space-x-1 text-wp-link-100 hover:text-wp-link-200 min-w-0"
+        class="flex items-center space-x-1 min-w-0 text-wp-link-100 hover:text-wp-link-200"
         :to="{ name: 'repo-branch', params: { branch: prettyRef } }"
       >
         <Icon v-if="pipeline.event === 'manual'" name="manual-pipeline" />
@@ -28,19 +28,19 @@
         <Icon v-else-if="pipeline.event === 'deployment'" name="deployment" />
         <span class="truncate">{{ prettyRef }}</span>
       </router-link>
-      <div v-else class="flex space-x-1 items-center min-w-0">
+      <div v-else class="flex items-center space-x-1 min-w-0">
         <Icon v-if="pipeline.event === 'tag' || pipeline.event === 'release'" name="tag" />
 
         <span class="truncate">{{ prettyRef }}</span>
       </div>
-      <div class="flex items-center flex-shrink-0">
+      <div class="flex flex-shrink-0 items-center">
         <template v-if="pipeline.event === 'pull_request'">
           <Icon name="commit" />
           <span>{{ pipeline.commit.slice(0, 10) }}</span>
         </template>
         <a
           v-else
-          class="text-wp-link-100 hover:text-wp-link-200 flex items-center"
+          class="flex items-center text-wp-link-100 hover:text-wp-link-200"
           :href="pipeline.forge_url"
           target="_blank"
         >
@@ -54,15 +54,15 @@
       <span>{{ $t('repo.pipeline.no_pipeline_steps') }}</span>
     </Panel>
 
-    <div class="flex-grow min-h-0 w-full relative">
-      <div class="absolute top-0 left-0 right-0 h-full flex flex-col md:overflow-y-auto gap-y-2">
+    <div class="relative flex-grow w-full min-h-0">
+      <div class="top-0 right-0 left-0 absolute flex flex-col gap-y-2 h-full md:overflow-y-auto">
         <div
           v-for="workflow in pipeline.workflows"
           :key="workflow.id"
-          class="p-2 rounded-md shadow border bg-wp-background-100 border-wp-background-400 dark:bg-wp-background-200"
+          class="border-wp-background-500 bg-wp-background-200 dark:bg-wp-background-300 shadow p-2 border rounded-md"
         >
           <div class="flex flex-col gap-2">
-            <div v-if="workflow.environ" class="flex flex-wrap gap-x-1 gap-y-2 text-xs justify-end pt-1 pr-1">
+            <div v-if="workflow.environ" class="flex flex-wrap justify-end gap-x-1 gap-y-2 pt-1 pr-1 text-xs">
               <div v-for="(value, key) in workflow.environ" :key="key">
                 <Badge :label="key" :value="value" />
               </div>
@@ -71,15 +71,15 @@
               v-if="!singleConfig"
               type="button"
               :title="workflow.name"
-              class="flex items-center gap-2 py-2 px-1 hover-effect hover:bg-wp-background-300 dark:hover:bg-wp-background-400 rounded-md"
+              class="flex items-center gap-2 hover:bg-wp-background-400 dark:hover:bg-wp-background-500 px-1 py-2 rounded-md hover-effect"
               @click="workflowsCollapsed[workflow.id] = !workflowsCollapsed[workflow.id]"
             >
               <Icon
                 name="chevron-right"
-                class="transition-transform duration-150 min-w-6 h-6"
+                class="min-w-6 h-6 transition-transform duration-150"
                 :class="{ 'transform rotate-90': !workflowsCollapsed[workflow.id] }"
               />
-              <PipelineStatusIcon :status="workflow.state" class="!h-4 !w-4" />
+              <PipelineStatusIcon :status="workflow.state" class="!w-4 !h-4" />
               <span class="truncate">{{ workflow.name }}</span>
               <PipelineStepDuration
                 v-if="workflow.started !== workflow.finished"
@@ -100,14 +100,14 @@
               :key="step.pid"
               type="button"
               :title="step.name"
-              class="flex p-2 gap-2 border-2 border-transparent rounded-md items-center hover-effect hover:bg-wp-background-300 dark:hover:bg-wp-background-400 w-full"
+              class="flex items-center gap-2 border-2 hover:bg-wp-background-400 dark:hover:bg-wp-background-500 p-2 border-transparent rounded-md w-full hover-effect"
               :class="{
-                'bg-wp-background-300 dark:bg-wp-background-400': selectedStepId && selectedStepId === step.pid,
+                'bg-wp-background-400 dark:bg-wp-background-500': selectedStepId && selectedStepId === step.pid,
                 'mt-1': !singleConfig || (workflow.children && step.pid !== workflow.children[0].pid),
               }"
               @click="$emit('update:selected-step-id', step.pid)"
             >
-              <PipelineStatusIcon :service="step.type === StepType.Service" :status="step.state" class="!h-4 !w-4" />
+              <PipelineStatusIcon :service="step.type === StepType.Service" :status="step.state" class="!w-4 !h-4" />
               <span class="truncate">{{ step.name }}</span>
               <PipelineStepDuration :step="step" />
             </button>

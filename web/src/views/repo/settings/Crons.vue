@@ -18,7 +18,7 @@
       <ListItem
         v-for="cron in crons"
         :key="cron.id"
-        class="items-center !bg-wp-background-200 !dark:bg-wp-background-100"
+        class="items-center !bg-wp-background-300 !dark:bg-wp-background-200"
       >
         <span class="grid grid-cols-3 w-full">
           <span>{{ cron.name }}</span>
@@ -74,7 +74,7 @@
           />
         </InputField>
 
-        <div v-if="isEditingCron" class="ml-auto mb-4">
+        <div v-if="isEditingCron" class="mb-4 ml-auto">
           <span v-if="selectedCron.next_exec && selectedCron.next_exec > 0" class="text-wp-text-100">
             <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
             {{ $t('repo.settings.crons.next_exec') }}:

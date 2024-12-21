@@ -3,11 +3,11 @@
     <ListItem
       v-for="agent in props.agents"
       :key="agent.id"
-      class="items-center !bg-wp-background-200 !dark:bg-wp-background-100"
+      class="items-center !bg-wp-background-300 !dark:bg-wp-background-200"
     >
       <span>{{ agent.name || `Agent ${agent.id}` }}</span>
       <span class="ml-auto">
-        <span class="hidden md:inline-block space-x-2">
+        <span class="md:inline-block space-x-2 hidden">
           <Badge
             v-if="props.isAdmin === true && agent.org_id !== -1"
             :label="$t('admin.settings.agents.org.badge')"
