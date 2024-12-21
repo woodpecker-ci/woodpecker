@@ -40,8 +40,8 @@ const id = (Math.random() + 1).toString(36).substring(7);
 
 <style scoped>
 .checkbox {
-  width: 1.5rem;
-  height: 1.5rem;
+  width: 1.3rem;
+  height: 1.3rem;
   appearance: none;
   outline: 0;
   cursor: pointer;

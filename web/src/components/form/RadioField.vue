@@ -42,8 +42,8 @@ const id = (Math.random() + 1).toString(36).substring(7);
 
 <style scoped>
 .radio {
-  width: 1rem;
-  height: 1rem;
+  width: 1.3rem;
+  height: 1.3rem;
   appearance: none;
   outline: 0;
   cursor: pointer;
@@ -56,8 +56,8 @@ const id = (Math.random() + 1).toString(36).substring(7);
   display: block;
   top: 50%;
   left: 50%;
-  width: 0.3rem;
-  height: 0.3rem;
+  width: 0.6rem;
+  height: 0.6rem;
   border-radius: 50%;
   background: white;
   transform: translate(-50%, -50%);
