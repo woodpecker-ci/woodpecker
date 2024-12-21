@@ -145,7 +145,7 @@ body,
 }
 
 .code-box {
-  @apply bg-wp-code-200 p-4 rounded-md text-sm text-wp-code-text-100 break-words;
+  @apply bg-wp-code-100 p-4 rounded-md text-sm text-wp-text-100 break-words;
   white-space: pre-wrap;
 }
 
