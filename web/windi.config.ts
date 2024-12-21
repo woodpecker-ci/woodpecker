@@ -195,11 +195,11 @@ export default defineConfig({
         },
 
         'wp-code-inline': {
-          100: 'var(--wp-code-inline-100'
+          100: 'var(--wp-code-inline-100)'
         },
 
         'wp-code-inline-text': {
-          100: 'var(--wp-code-inline-text-100'
+          100: 'var(--wp-code-inline-text-100)'
         },
 
         'wp-code': {
