@@ -4,7 +4,7 @@
     :to="to"
     class="flex border-wp-background-400 bg-wp-background-200 dark:bg-wp-background-300 p-4 border rounded-md w-full overflow-hidden"
     :class="{
-      'cursor-pointer hover:shadow-md hover:bg-wp-background-400 dark:hover:bg-wp-background-400': clickable || to,
+      'cursor-pointer hover:shadow-md hover:bg-wp-background-300 dark:hover:bg-wp-background-300': clickable || to,
     }"
   >
     <slot />
