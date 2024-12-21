@@ -20,7 +20,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/cenkalti/backoff/v4"
+	"github.com/cenkalti/backoff/v5"
 	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -68,7 +68,6 @@ func (c *client) Close() error {
 
 func (c *client) newBackOff() backoff.BackOff {
 	b := backoff.NewExponentialBackOff()
-	b.MaxElapsedTime = 0
 	b.MaxInterval = 10 * time.Second          //nolint:mnd
 	b.InitialInterval = 10 * time.Millisecond //nolint:mnd
 	return b
