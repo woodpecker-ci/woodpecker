@@ -5,7 +5,7 @@
       @mouseover="showActions = true"
       @mouseleave="showActions = false"
     >
-      <div class="<md:fixed <md:top-0 <md:left-0 flex flex-row items-center w-full bg-wp-code-100 px-4 py-2">
+      <div class="<md:fixed <md:top-0 <md:left-0 flex flex-row items-center w-full bg-wp-code-300 px-4 py-2">
         <span class="font-bold text-base text-wp-code-text-alt-100">
           <span class="<md:hidden">{{ $t('repo.pipeline.log_title') }}</span>
           <span class="md:hidden">{{ step?.name }}</span>

@@ -2,7 +2,7 @@
   <aside
     v-if="isOpen"
     ref="target"
-    class="z-50 flex flex-col items-center border-wp-background-400 bg-wp-background-200 dark:bg-wp-background-300 overflow-y-auto"
+    class="z-50 flex flex-col items-center border-wp-background-400 bg-wp-background-200 dark:bg-wp-background-400 overflow-y-auto"
     :aria-label="$t('pipeline_feed')"
   >
     <router-link
