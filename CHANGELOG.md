@@ -15,6 +15,10 @@
 - Don't log DB passwords [[#4583](https://github.com/woodpecker-ci/woodpecker/pull/4583)]
 - Do not log forge tokens [[#4551](https://github.com/woodpecker-ci/woodpecker/pull/4551)]
 
+### ✨ Features
+
+- Use icon sizes relative to font size [[#4575](https://github.com/woodpecker-ci/woodpecker/pull/4575)]
+
 ### 📚 Documentation
 
 - Search in plugin tags [[#4604](https://github.com/woodpecker-ci/woodpecker/pull/4604)]
