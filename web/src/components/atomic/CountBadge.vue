@@ -1,6 +1,6 @@
 <template>
   <span
-    class="inline-block bg-wp-code-100 dark:bg-wp-background-200 px-1.5 py-0.5 rounded-full min-w-5 font-bold text-center text-wp-text-100 text-xs leading-4"
+    class="bg-wp-code-inline-100 text-wp-text-code-inline-100 inline-block px-1.5 py-0.5 rounded-full min-w-5 font-bold text-center text-xs leading-4"
   >
     {{ value }}
   </span>
