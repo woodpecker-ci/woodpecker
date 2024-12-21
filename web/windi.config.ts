@@ -132,6 +132,7 @@ export default defineConfig({
           200: 'var(--wp-background-200)',
           300: 'var(--wp-background-300)',
           400: 'var(--wp-background-400)',
+          500: 'var(--wp-background-500)',
         },
 
         'wp-text': {
@@ -196,7 +197,9 @@ export default defineConfig({
         'wp-code': {
           100: 'var(--wp-code-100)',
           200: 'var(--wp-code-200)',
+          300: 'var(--wp-code-100)',
         },
+
         'wp-code-text': {
           100: 'var(--wp-code-text-100)',
         },

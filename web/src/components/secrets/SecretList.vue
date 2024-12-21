@@ -3,7 +3,7 @@
     <ListItem
       v-for="secret in secrets"
       :key="secret.id"
-      class="items-center !bg-wp-background-200 !dark:bg-wp-background-100"
+      class="items-center !bg-wp-background-300 !dark:bg-wp-background-200"
     >
       <span>{{ secret.name }}</span>
       <Badge
