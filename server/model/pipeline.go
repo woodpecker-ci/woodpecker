@@ -42,8 +42,8 @@ type Pipeline struct {
 	Message             string                 `json:"message"                 xorm:"TEXT 'message'"`
 	Timestamp           int64                  `json:"timestamp"               xorm:"'timestamp'"`
 	Sender              string                 `json:"sender"                  xorm:"sender"` // uses reported user for webhooks and name of cron for cron pipelines
-	Avatar              string                 `json:"author_avatar"           xorm:"avatar"`
-	Email               string                 `json:"author_email"            xorm:"email"`
+	Avatar              string                 `json:"author_avatar"           xorm:"varchar(500) avatar"`
+	Email               string                 `json:"author_email"            xorm:"varchar(500) email"`
 	ForgeURL            string                 `json:"forge_url"               xorm:"forge_url"`
 	Reviewer            string                 `json:"reviewed_by"             xorm:"reviewer"`
 	Reviewed            int64                  `json:"reviewed_at"             xorm:"reviewed"` // TODO change JSON field to "reviewed" in 3.0
