@@ -29,7 +29,7 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v3"
 
-	backend "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
+	backend "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 )
 
 type dummy struct {

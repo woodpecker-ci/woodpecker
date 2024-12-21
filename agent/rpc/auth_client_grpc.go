@@ -20,7 +20,7 @@ import (
 
 	"google.golang.org/grpc"
 
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc/proto"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/rpc/proto"
 )
 
 const authClientTimeout = time.Second * 5

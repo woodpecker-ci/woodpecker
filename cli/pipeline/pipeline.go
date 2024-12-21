@@ -22,10 +22,10 @@ import (
 
 	"github.com/urfave/cli/v3"
 
-	"go.woodpecker-ci.org/woodpecker/v2/cli/output"
-	"go.woodpecker-ci.org/woodpecker/v2/cli/pipeline/deploy"
-	"go.woodpecker-ci.org/woodpecker/v2/cli/pipeline/log"
-	"go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/output"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/pipeline/deploy"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/pipeline/log"
+	"go.woodpecker-ci.org/woodpecker/v3/woodpecker-go/woodpecker"
 )
 
 // Command exports the pipeline command set.

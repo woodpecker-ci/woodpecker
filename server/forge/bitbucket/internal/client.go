@@ -26,7 +26,7 @@ import (
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/bitbucket"
 
-	shared_utils "go.woodpecker-ci.org/woodpecker/v2/shared/utils"
+	shared_utils "go.woodpecker-ci.org/woodpecker/v3/shared/utils"
 )
 
 const (

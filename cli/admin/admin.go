@@ -17,10 +17,10 @@ package admin
 import (
 	"github.com/urfave/cli/v3"
 
-	"go.woodpecker-ci.org/woodpecker/v2/cli/admin/loglevel"
-	"go.woodpecker-ci.org/woodpecker/v2/cli/admin/registry"
-	"go.woodpecker-ci.org/woodpecker/v2/cli/admin/secret"
-	"go.woodpecker-ci.org/woodpecker/v2/cli/admin/user"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/admin/loglevel"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/admin/registry"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/admin/secret"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/admin/user"
 )
 
 // Command exports the admin command set.

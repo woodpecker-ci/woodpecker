@@ -18,7 +18,7 @@ import (
 	"github.com/rs/zerolog/log"
 	"xorm.io/xorm"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
 // Maximum number of records to store in one PostgreSQL statement.

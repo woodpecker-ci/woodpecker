@@ -21,9 +21,9 @@ import (
 	"codeberg.org/mvdkleijn/forgejo-sdk/forgejo"
 	"github.com/franela/goblin"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server/forge/forgejo/fixtures"
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
-	"go.woodpecker-ci.org/woodpecker/v2/shared/utils"
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge/forgejo/fixtures"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/utils"
 )
 
 func Test_parse(t *testing.T) {

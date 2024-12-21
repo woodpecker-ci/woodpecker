@@ -15,7 +15,7 @@
 package datastore
 
 import (
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
 func (s storage) ForgeGet(id int64) (*model.Forge, error) {

@@ -17,7 +17,7 @@ package datastore
 import (
 	"xorm.io/builder"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
 func (s storage) CronCreate(cron *model.Cron) error {

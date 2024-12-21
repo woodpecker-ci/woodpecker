@@ -17,7 +17,7 @@ package common
 import (
 	"github.com/urfave/cli/v3"
 
-	"go.woodpecker-ci.org/woodpecker/v2/shared/logger"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/logger"
 )
 
 var GlobalFlags = append([]cli.Flag{

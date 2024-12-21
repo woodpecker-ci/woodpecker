@@ -21,8 +21,8 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/dummy"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/dummy"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 )
 
 func TestSmalPipelineDummyRun(t *testing.T) {

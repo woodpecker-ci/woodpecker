@@ -21,7 +21,7 @@ import (
 	"github.com/franela/goblin"
 	bb "github.com/neticdk/go-bitbucket/bitbucket"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
 //nolint:misspell

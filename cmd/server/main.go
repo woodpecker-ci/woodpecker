@@ -25,9 +25,9 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v3"
 
-	_ "go.woodpecker-ci.org/woodpecker/v2/cmd/server/openapi"
-	"go.woodpecker-ci.org/woodpecker/v2/shared/utils"
-	"go.woodpecker-ci.org/woodpecker/v2/version"
+	_ "go.woodpecker-ci.org/woodpecker/v3/cmd/server/openapi"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/utils"
+	"go.woodpecker-ci.org/woodpecker/v3/version"
 )
 
 func main() {

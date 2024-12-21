@@ -5,7 +5,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"go.woodpecker-ci.org/woodpecker/v2/cmd/server/openapi"
+	"go.woodpecker-ci.org/woodpecker/v3/cmd/server/openapi"
 )
 
 func TestSetupOpenApiStaticConfig(t *testing.T) {

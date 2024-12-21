@@ -15,8 +15,8 @@
 package main
 
 import (
-	"go.woodpecker-ci.org/woodpecker/v2/cmd/server/openapi"
-	"go.woodpecker-ci.org/woodpecker/v2/version"
+	"go.woodpecker-ci.org/woodpecker/v3/cmd/server/openapi"
+	"go.woodpecker-ci.org/woodpecker/v3/version"
 )
 
 // Generate docs/openapi.json via:

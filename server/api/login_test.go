@@ -14,16 +14,16 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server"
-	"go.woodpecker-ci.org/woodpecker/v2/server/api"
-	mocks_forge "go.woodpecker-ci.org/woodpecker/v2/server/forge/mocks"
-	forge_types "go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
-	mocks_services "go.woodpecker-ci.org/woodpecker/v2/server/services/mocks"
-	"go.woodpecker-ci.org/woodpecker/v2/server/services/permissions"
-	mocks_store "go.woodpecker-ci.org/woodpecker/v2/server/store/mocks"
-	"go.woodpecker-ci.org/woodpecker/v2/server/store/types"
-	"go.woodpecker-ci.org/woodpecker/v2/shared/token"
+	"go.woodpecker-ci.org/woodpecker/v3/server"
+	"go.woodpecker-ci.org/woodpecker/v3/server/api"
+	mocks_forge "go.woodpecker-ci.org/woodpecker/v3/server/forge/mocks"
+	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	mocks_services "go.woodpecker-ci.org/woodpecker/v3/server/services/mocks"
+	"go.woodpecker-ci.org/woodpecker/v3/server/services/permissions"
+	mocks_store "go.woodpecker-ci.org/woodpecker/v3/server/store/mocks"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/token"
 )
 
 func TestHandleAuth(t *testing.T) {

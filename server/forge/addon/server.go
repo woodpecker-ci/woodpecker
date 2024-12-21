@@ -22,8 +22,8 @@ import (
 
 	"github.com/hashicorp/go-plugin"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
-	"go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge"
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 )
 
 func Serve(impl forge.Forge) {

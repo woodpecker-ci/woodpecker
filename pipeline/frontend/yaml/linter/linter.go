@@ -20,12 +20,12 @@ import (
 	"codeberg.org/6543/xyaml"
 	"go.uber.org/multierr"
 
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/errors"
-	errorTypes "go.woodpecker-ci.org/woodpecker/v2/pipeline/errors/types"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/linter/schema"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/types"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/utils"
-	"go.woodpecker-ci.org/woodpecker/v2/shared/constant"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/errors"
+	errorTypes "go.woodpecker-ci.org/woodpecker/v3/pipeline/errors/types"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/linter/schema"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/types"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/utils"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/constant"
 )
 
 // A Linter lints a pipeline configuration.

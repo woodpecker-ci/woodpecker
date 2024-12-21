@@ -14,7 +14,7 @@
 
 package pipeline
 
-import "go.woodpecker-ci.org/woodpecker/v2/server/model"
+import "go.woodpecker-ci.org/woodpecker/v3/server/model"
 
 func setApprovalState(repo *model.Repo, pipeline *model.Pipeline) {
 	if !needsApproval(repo, pipeline) {

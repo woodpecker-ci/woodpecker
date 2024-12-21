@@ -18,10 +18,10 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server"
-	"go.woodpecker-ci.org/woodpecker/v2/server/api"
-	"go.woodpecker-ci.org/woodpecker/v2/server/api/debug"
-	"go.woodpecker-ci.org/woodpecker/v2/server/router/middleware/session"
+	"go.woodpecker-ci.org/woodpecker/v3/server"
+	"go.woodpecker-ci.org/woodpecker/v3/server/api"
+	"go.woodpecker-ci.org/woodpecker/v3/server/api/debug"
+	"go.woodpecker-ci.org/woodpecker/v3/server/router/middleware/session"
 )
 
 func apiRoutes(e *gin.RouterGroup) {
