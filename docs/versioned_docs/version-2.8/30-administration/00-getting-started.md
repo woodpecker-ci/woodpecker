@@ -1,4 +1,4 @@
-# Gettings started
+# Getting started
 
 A Woodpecker deployment consists of two parts:
 
