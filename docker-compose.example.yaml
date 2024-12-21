@@ -2,7 +2,7 @@ version: '3'
 
 services:
   woodpecker-server:
-    image: woodpeckerci/woodpecker-server:latest
+    image: woodpeckerci/woodpecker-server:v3
     ports:
       - 8000:8000
     networks:
@@ -21,7 +21,7 @@ services:
     depends_on:
       woodpecker-server:
         condition: service_healthy
-    image: woodpeckerci/woodpecker-agent:latest
+    image: woodpeckerci/woodpecker-agent:v3
     networks:
       - woodpecker
     volumes:

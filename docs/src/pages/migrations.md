@@ -135,6 +135,11 @@ The following restructuring was done to achieve a more consistent grouping:
 
 ### Admin-facing migrations
 
+#### Image tags
+
+- The `latest` tag has been dropped to avoid accidental major version upgrades.
+  A dedicated semver tag specification must be used, i.e., either a fixed version (like `v3.0.0`) or a rolling tag (e.g. `v3.0` or `v3`).
+
 - Previously, some (official) plugins were granted the `privileged` option by default to allow simplified usage.
   To streamline this process and enhance security transparency, no plugin is granted the `privileged` options by default anymore.
   To allow the use of these plugins in >= 3.0, they must be set explicitly through `WOODPECKER_PLUGINS_PRIVILEGED` on the admin side.
