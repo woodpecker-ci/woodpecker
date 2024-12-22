@@ -38,7 +38,7 @@
   <SvgIcon v-else-if="name === 'question'" :path="mdiHelpCircleOutline" size="1.3rem" />
   <SvgIcon v-else-if="name === 'plus'" :path="mdiPlusCircleOutline" size="1.3rem" />
   <SvgIcon v-else-if="name === 'list'" :path="mdiFormatListBulleted" size="1.3rem" />
-  <SvgIcon v-else-if="name === 'heal'" :path="mdiBandage" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'heal'" :path="mdiHealthPotionOutline" size="1.3rem" />
   <SvgIcon v-else-if="name === 'turn-off'" :path="mdiPower" size="1.3rem" />
   <SvgIcon v-else-if="name === 'chevron-right'" :path="mdiChevronRight" size="1.3rem" />
   <SvgIcon v-else-if="name === 'close'" :path="mdiCloseCircleOutline" size="1.3rem" />
@@ -98,6 +98,7 @@ import {
   mdiFormatListBulleted,
   mdiGestureTap,
   mdiGit,
+  mdiHealthPotionOutline,
   mdiHelpCircleOutline,
   mdiLockOpenOutline,
   mdiLockOutline,
