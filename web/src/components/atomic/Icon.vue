@@ -36,20 +36,20 @@
   <SvgIcon v-else-if="name === 'error'" :path="mdiAlertOutline" size="1.3rem" />
   <SvgIcon v-else-if="name === 'bitbucket' || name === 'bitbucket-dc'" :path="mdiBitbucket" size="32" />
   <SvgIcon v-else-if="name === 'question'" :path="mdiHelpCircleOutline" size="1.3rem" />
-  <SvgIcon v-else-if="name === 'plus'" :path="mdiPlus" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'plus'" :path="mdiPlusCircleOutline" size="1.3rem" />
   <SvgIcon v-else-if="name === 'list'" :path="mdiFormatListBulleted" size="1.3rem" />
   <SvgIcon v-else-if="name === 'heal'" :path="mdiBandage" size="1.3rem" />
   <SvgIcon v-else-if="name === 'turn-off'" :path="mdiPower" size="1.3rem" />
   <SvgIcon v-else-if="name === 'chevron-right'" :path="mdiChevronRight" size="1.3rem" />
   <SvgIcon v-else-if="name === 'close'" :path="mdiCloseCircleOutline" size="1.3rem" />
-  <SvgIcon v-else-if="name === 'edit'" :path="mdiPencil" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'edit'" :path="mdiPencilCircleOutline" size="1.3rem" />
   <SvgIcon v-else-if="name === 'download'" :path="mdiDownloadCircleOutline" size="1.3rem" />
   <SvgIcon v-else-if="name === 'stopwatch'" :path="mdiAlarm" size="1.3rem" />
   <SvgIcon v-else-if="name === 'auto-scroll'" :path="mdiDownloadCircleOutline" size="1.3rem" />
   <SvgIcon v-else-if="name === 'auto-scroll-off'" :path="mdiDownloadOffOutline" size="1.3rem" />
-  <SvgIcon v-else-if="name === 'pause'" :path="mdiPause" size="1.3rem" />
-  <SvgIcon v-else-if="name === 'play'" :path="mdiPlay" size="1.3rem" />
-  <SvgIcon v-else-if="name === 'remove'" :path="mdiClose" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'pause'" :path="mdiPauseCircleOutline" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'play'" :path="mdiPlayCircleOutline" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'remove'" :path="mdiCloseCircleOutline" size="1.3rem" />
 
   <SvgIcon v-else-if="name === 'visibility-private'" :path="mdiLockOutline" size="1.3rem" />
   <SvgIcon v-else-if="name === 'visibility-internal'" :path="mdiLockOpenOutline" size="1.3rem" />
@@ -91,7 +91,6 @@ import {
   mdiCheckCircleOutline,
   mdiChevronRight,
   mdiClockTimeEightOutline,
-  mdiClose,
   mdiCloseCircleOutline,
   mdiCogOutline,
   mdiDownloadCircleOutline,
@@ -104,11 +103,10 @@ import {
   mdiLockOutline,
   mdiMinusCircleOutline,
   mdiPackageVariant,
-  mdiPause,
-  mdiPencil,
-  mdiPlay,
+  mdiPauseCircleOutline,
+  mdiPencilCircleOutline,
   mdiPlayCircleOutline,
-  mdiPlus,
+  mdiPlusCircleOutline,
   mdiPower,
   mdiRadioboxBlank,
   mdiRadioboxIndeterminateVariant,
