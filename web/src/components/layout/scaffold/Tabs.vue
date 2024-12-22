@@ -16,7 +16,7 @@
       />
       <Icon v-else name="blank" class="md:hidden" />
       <span
-        class="flex gap-2 items-center md:justify-center flex-row py-1 px-2 w-full min-w-20 dark:hover:bg-wp-background-100 hover:bg-wp-background-200 rounded-md"
+        class="flex gap-2 items-center md:justify-center flex-row py-1 px-2 w-full min-w-20 dark:hover:bg-wp-background-100 hover:bg-wp-background-200 rounded-md sm:pl-[0.6rem] md:pl-0"
       >
         <Icon v-if="tab.icon" :name="tab.icon" :class="tab.iconClass" class="flex-shrink-0" />
         <span>{{ tab.title }}</span>
