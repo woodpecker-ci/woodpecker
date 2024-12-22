@@ -128,12 +128,12 @@ export default defineConfig({
 
         // Theme colors
         'wp-background': {
-          100: 'var(--wp-background-100)',
-          200: 'var(--wp-background-200)',
-          300: 'var(--wp-background-300)',
-          400: 'var(--wp-background-400)',
-          500: 'var(--wp-background-500)',
-          600: 'var(--wp-background-600)',
+          100: 'var(--wp-secondary-100)',
+          200: 'var(--wp-secondary-200)',
+          300: 'var(--wp-secondary-300)',
+          400: 'var(--wp-secondary-400)',
+          500: 'var(--wp-secondary-500)',
+          600: 'var(--wp-secondary-600)',
         },
 
         'wp-text': {
