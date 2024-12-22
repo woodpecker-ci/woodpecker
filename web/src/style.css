@@ -41,6 +41,7 @@
 
   --wp-code-inline-100: theme('colors.gray.200');
   --wp-code-inline-200: theme('colors.gray.400');
+
   --wp-code-inline-text-100: theme('colors.gray.600');
 
   /* --wp-code-300: theme('colors.int-wp-secondary.300');
@@ -100,13 +101,13 @@
   --wp-hint-warn-200: theme('colors.int-wp-hint-warn-dark.200');
 
   --wp-code-inline-100: theme('colors.int-wp-secondary.700');
-  --wp-code-inline-100: theme('colors.int-wp-secondary.800');
+  --wp-code-inline-200: theme('colors.int-wp-secondary.300');
+
   --wp-code-inline-text-100: theme('colors.gray.300');
 
   --wp-code-100: theme('colors.int-wp-secondary.700'); /* #222631 */
   --wp-code-200: theme('colors.int-wp-secondary.600'); /* #2a2e3a */
   --wp-code-300: theme('colors.int-wp-secondary.800'); /* #1B1F28 */
-  --wp-code-400: theme('colors.int-wp-secondary.300'); /* #383c4a */
 
   --wp-code-text-100: theme('colors.gray.200');
   --wp-code-text-alt-100: theme('colors.gray.400');

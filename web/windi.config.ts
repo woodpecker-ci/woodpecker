@@ -197,6 +197,7 @@ export default defineConfig({
 
         'wp-code-inline': {
           100: 'var(--wp-code-inline-100)',
+          200: 'var(--wp-code-inline-200)',
         },
 
         'wp-code-inline-text': {
@@ -207,7 +208,6 @@ export default defineConfig({
           100: 'var(--wp-code-100)',
           200: 'var(--wp-code-200)',
           300: 'var(--wp-code-300)',
-          400: 'var(--wp-code-400)',
         },
 
         'wp-code-text': {
