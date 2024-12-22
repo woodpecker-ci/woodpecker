@@ -79,21 +79,25 @@ export default defineConfig({
           300: tinycolor(customColors['wp-primary'][600]).desaturate(10).toString(),
         },
         'int-wp-control-error': {
-          100: colors.red[700],
-          200: colors.red[800],
-          300: colors.red[900],
+          100: colors.red[500],
+          200: colors.red[600],
+          300: colors.red[700],
+          400: colors.red[800],
+          500: colors.red[900],
         },
         'int-wp-control-error-dark': {
-          100: tinycolor(colors.red[700]).desaturate(25).toString(),
-          200: tinycolor(colors.red[800]).desaturate(25).toString(),
-          300: tinycolor(colors.red[900]).desaturate(25).toString(),
+          100: tinycolor(colors.red[500]).desaturate(25).toString(),
+          200: tinycolor(colors.red[600]).desaturate(25).toString(),
+          300: tinycolor(colors.red[700]).desaturate(25).toString(),
+          400: tinycolor(colors.red[800]).desaturate(25).toString(),
+          500: tinycolor(colors.red[900]).desaturate(25).toString(),
         },
 
         'int-wp-state-error': {
-          100: colors.red[700],
+          100: colors.red[500],
         },
         'int-wp-state-error-dark': {
-          100: tinycolor(colors.red[700]).desaturate(25).toString(),
+          100: tinycolor(colors.red[500]).desaturate(25).toString(),
         },
         'int-wp-state-neutral': {
           100: colors.gray[600],
