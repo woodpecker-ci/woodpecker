@@ -32,13 +32,13 @@ import (
 	"github.com/urfave/cli/v3"
 	"golang.org/x/sync/errgroup"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server"
-	"go.woodpecker-ci.org/woodpecker/v2/server/cron"
-	"go.woodpecker-ci.org/woodpecker/v2/server/router"
-	"go.woodpecker-ci.org/woodpecker/v2/server/router/middleware"
-	"go.woodpecker-ci.org/woodpecker/v2/server/web"
-	"go.woodpecker-ci.org/woodpecker/v2/shared/logger"
-	"go.woodpecker-ci.org/woodpecker/v2/version"
+	"go.woodpecker-ci.org/woodpecker/v3/server"
+	"go.woodpecker-ci.org/woodpecker/v3/server/cron"
+	"go.woodpecker-ci.org/woodpecker/v3/server/router"
+	"go.woodpecker-ci.org/woodpecker/v3/server/router/middleware"
+	"go.woodpecker-ci.org/woodpecker/v3/server/web"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/logger"
+	"go.woodpecker-ci.org/woodpecker/v3/version"
 )
 
 const (

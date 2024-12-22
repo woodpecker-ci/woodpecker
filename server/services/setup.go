@@ -26,12 +26,12 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v3"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
-	"go.woodpecker-ci.org/woodpecker/v2/server/services/config"
-	"go.woodpecker-ci.org/woodpecker/v2/server/services/registry"
-	"go.woodpecker-ci.org/woodpecker/v2/server/services/secret"
-	"go.woodpecker-ci.org/woodpecker/v2/server/store"
-	"go.woodpecker-ci.org/woodpecker/v2/server/store/types"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/services/config"
+	"go.woodpecker-ci.org/woodpecker/v3/server/services/registry"
+	"go.woodpecker-ci.org/woodpecker/v3/server/services/secret"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
 )
 
 func setupRegistryService(store store.Store, dockerConfig string) registry.Service {

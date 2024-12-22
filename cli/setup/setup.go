@@ -8,8 +8,8 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v3"
 
-	"go.woodpecker-ci.org/woodpecker/v2/cli/internal/config"
-	"go.woodpecker-ci.org/woodpecker/v2/cli/setup/ui"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/internal/config"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/setup/ui"
 )
 
 // Command exports the setup command.
