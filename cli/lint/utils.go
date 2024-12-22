@@ -7,7 +7,7 @@ import (
 
 	term_env "github.com/muesli/termenv"
 
-	pipeline_errors "go.woodpecker-ci.org/woodpecker/v2/pipeline/errors"
+	pipeline_errors "go.woodpecker-ci.org/woodpecker/v3/pipeline/errors"
 )
 
 func FormatLintError(file string, err error, strict bool) (string, error) {

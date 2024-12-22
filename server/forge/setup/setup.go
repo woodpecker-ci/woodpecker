@@ -7,15 +7,15 @@ import (
 
 	"github.com/rs/zerolog/log"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
-	"go.woodpecker-ci.org/woodpecker/v2/server/forge/addon"
-	"go.woodpecker-ci.org/woodpecker/v2/server/forge/bitbucket"
-	"go.woodpecker-ci.org/woodpecker/v2/server/forge/bitbucketdatacenter"
-	"go.woodpecker-ci.org/woodpecker/v2/server/forge/forgejo"
-	"go.woodpecker-ci.org/woodpecker/v2/server/forge/gitea"
-	"go.woodpecker-ci.org/woodpecker/v2/server/forge/github"
-	"go.woodpecker-ci.org/woodpecker/v2/server/forge/gitlab"
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge"
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge/addon"
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge/bitbucket"
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge/bitbucketdatacenter"
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge/forgejo"
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge/gitea"
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge/github"
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge/gitlab"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
 func Forge(forge *model.Forge) (forge.Forge, error) {
