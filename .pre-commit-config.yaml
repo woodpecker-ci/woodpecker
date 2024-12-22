@@ -27,7 +27,7 @@ repos:
     rev: v2.13.1-beta
     hooks:
       - id: hadolint
-  - repo: https://github.com//rbubley/mirrors-prettier
+  - repo: https://github.com/rbubley/mirrors-prettier
     rev: v3.4.2
     hooks:
       - id: prettier
