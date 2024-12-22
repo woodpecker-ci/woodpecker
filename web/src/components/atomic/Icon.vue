@@ -38,7 +38,7 @@
   <SvgIcon v-else-if="name === 'question'" :path="mdiHelpCircleOutline" size="1.3rem" />
   <SvgIcon v-else-if="name === 'plus'" :path="mdiPlusCircleOutline" size="1.3rem" />
   <SvgIcon v-else-if="name === 'list'" :path="mdiFormatListBulleted" size="1.3rem" />
-  <SvgIcon v-else-if="name === 'heal'" :path="mdiHealthPotionOutline" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'heal'" :path="mdiWrenchCogOutline" size="1.3rem" />
   <SvgIcon v-else-if="name === 'turn-off'" :path="mdiPower" size="1.3rem" />
   <SvgIcon v-else-if="name === 'chevron-right'" :path="mdiChevronRight" size="1.3rem" />
   <SvgIcon v-else-if="name === 'close'" :path="mdiCloseCircleOutline" size="1.3rem" />
@@ -86,7 +86,6 @@ import {
   mdiAlertCircleOutline,
   mdiAlertOutline,
   mdiArrowLeft,
-  mdiBandage,
   mdiBitbucket,
   mdiCheckCircleOutline,
   mdiChevronRight,
@@ -98,7 +97,6 @@ import {
   mdiFormatListBulleted,
   mdiGestureTap,
   mdiGit,
-  mdiHealthPotionOutline,
   mdiHelpCircleOutline,
   mdiLockOpenOutline,
   mdiLockOutline,
@@ -119,6 +117,7 @@ import {
   mdiTagOutline,
   mdiTimerOutline,
   mdiTrashCanOutline,
+  mdiWrenchCogOutline,
 } from '@mdi/js';
 import { siForgejo, siGitea } from 'simple-icons';
 
