@@ -18,7 +18,7 @@
       <ListItem
         v-for="cron in crons"
         :key="cron.id"
-        class="items-center !bg-wp-background-200 !dark:bg-wp-background-200"
+        class="items-center !bg-wp-background-200 !dark:bg-wp-background-300"
       >
         <span class="grid grid-cols-3 w-full">
           <span>{{ cron.name }}</span>

@@ -13,7 +13,7 @@
       <ListItem
         v-for="repo in repos"
         :key="repo.id"
-        class="items-center gap-2 !bg-wp-background-200 !dark:bg-wp-background-200"
+        class="items-center gap-2 !bg-wp-background-200 !dark:bg-wp-background-300"
       >
         <span>{{ repo.full_name }}</span>
         <div class="flex items-center ml-auto">
