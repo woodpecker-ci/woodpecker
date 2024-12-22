@@ -12,7 +12,7 @@
         name: 'repo-pipeline',
         params: { repoId: pipeline.repo_id, pipelineId: pipeline.number },
       }"
-      class="flex border-wp-background-400 hover:bg-wp-background-300 dark:hover:bg-wp-background-500 hover:shadow-sm px-2 py-4 border-b w-full"
+      class="flex border-wp-background-400 hover:bg-wp-background-300 dark:hover:bg-wp-background-600 hover:shadow-sm px-2 py-4 border-b w-full"
     >
       <PipelineFeedItem :pipeline="pipeline" />
     </router-link>
