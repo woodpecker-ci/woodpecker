@@ -2,7 +2,7 @@
   <component
     :is="to ? 'router-link' : clickable ? 'button' : 'div'"
     :to="to"
-    class="flex border-wp-background-400 bg-wp-background-100 dark:bg-wp-background-400 p-4 border rounded-md w-full overflow-hidden"
+    class="flex border-wp-background-600 bg-wp-background-100 dark:bg-wp-background-400 p-4 border rounded-md w-full overflow-hidden"
     :class="{
       'cursor-pointer hover:shadow-md hover:bg-wp-background-300 dark:hover:bg-wp-background-500': clickable || to,
     }"
