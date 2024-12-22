@@ -49,7 +49,7 @@
 
   --wp-code-100: theme('colors.int-wp-secondary.300');
   --wp-code-200: theme('colors.int-wp-secondary.600');
-  --wp-code-300: theme('colors.int-wp-secondary.800');
+  --wp-code-300: theme('colors.int-wp-secondary.600');
 
   --wp-code-text-100: theme('colors.gray.200');
   --wp-code-text-alt-100: theme('colors.gray.300');
