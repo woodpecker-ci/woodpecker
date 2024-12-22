@@ -8,7 +8,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/stretchr/testify/assert"
 
-	"go.woodpecker-ci.org/woodpecker/v2/shared/token"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/token"
 )
 
 func TestToken(t *testing.T) {

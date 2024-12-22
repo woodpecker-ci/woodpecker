@@ -17,8 +17,8 @@ package org
 import (
 	"github.com/urfave/cli/v3"
 
-	"go.woodpecker-ci.org/woodpecker/v2/cli/org/registry"
-	"go.woodpecker-ci.org/woodpecker/v2/cli/org/secret"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/org/registry"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/org/secret"
 )
 
 // Command exports the org command set.

@@ -19,8 +19,8 @@ import (
 
 	"github.com/urfave/cli/v3"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server/services/encryption/types"
-	"go.woodpecker-ci.org/woodpecker/v2/server/store"
+	"go.woodpecker-ci.org/woodpecker/v3/server/services/encryption/types"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 )
 
 type builder struct {

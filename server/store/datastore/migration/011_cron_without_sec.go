@@ -21,7 +21,7 @@ import (
 	"src.techknowlogick.com/xormigrate"
 	"xorm.io/xorm"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
 var cronWithoutSec = xormigrate.Migration{

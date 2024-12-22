@@ -25,7 +25,7 @@ import (
 	"github.com/docker/docker/api/types/system"
 	"github.com/stretchr/testify/assert"
 
-	backend "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
+	backend "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 )
 
 func TestSplitVolumeParts(t *testing.T) {

@@ -10,8 +10,8 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/urfave/cli/v3"
 
-	"go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker"
-	"go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker/mocks"
+	"go.woodpecker-ci.org/woodpecker/v3/woodpecker-go/woodpecker"
+	"go.woodpecker-ci.org/woodpecker/v3/woodpecker-go/woodpecker/mocks"
 )
 
 func TestPipelineList(t *testing.T) {

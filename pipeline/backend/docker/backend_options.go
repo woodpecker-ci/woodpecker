@@ -3,7 +3,7 @@ package docker
 import (
 	"github.com/go-viper/mapstructure/v2"
 
-	backend "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
+	backend "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 )
 
 // BackendOptions defines all the advanced options for the docker backend.
