@@ -17,13 +17,13 @@
       <template v-if="secret.edit !== false">
         <IconButton
           icon="edit"
-          class="ml-2 <md:ml-auto w-8 h-8"
+          class="ml-2 <md:ml-auto w-9 h-9"
           :title="$t('secrets.edit')"
           @click="editSecret(secret)"
         />
         <IconButton
           icon="trash"
-          class="ml-2 w-8 h-8 hover:text-wp-control-error-100"
+          class="ml-2 w-9 h-9 hover:text-wp-control-error-100"
           :is-loading="isDeleting"
           :title="$t('secrets.delete')"
           @click="deleteSecret(secret)"

@@ -15,7 +15,7 @@
             v-if="goBack"
             icon="back"
             :title="$t('back')"
-            class="flex-shrink-0 mr-2 <md:hidden md:justify-between w-8 h-8"
+            class="flex-shrink-0 mr-2 <md:hidden md:justify-between w-9 h-9"
             @click="goBack"
           />
           <h1 class="flex text-xl min-w-0 text-wp-text-100 items-center gap-x-2">

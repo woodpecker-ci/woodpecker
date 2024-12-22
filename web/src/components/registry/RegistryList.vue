@@ -8,7 +8,7 @@
       <span>{{ registry.address }}</span>
       <IconButton
         :icon="registry.readonly ? 'chevron-right' : 'edit'"
-        class="ml-auto w-8 h-8"
+        class="ml-auto w-9 h-9"
         :title="registry.readonly ? $t('registries.view') : $t('registries.edit')"
         @click="editRegistry(registry)"
       />
