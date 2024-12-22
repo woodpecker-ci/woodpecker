@@ -39,8 +39,18 @@
   --wp-hint-warn-100: theme('colors.int-wp-hint-warn.100');
   --wp-hint-warn-200: theme('colors.int-wp-hint-warn.200');
 
+  --wp-code-inline-100: theme('colors.gray.200');
+  --wp-code-inline-200: theme('colors.gray.200');
+
+  --wp-code-inline-text-100: theme('colors.gray.600');
+
+  /* --wp-code-300: theme('colors.int-wp-secondary.300');
+  --wp-code-600: theme('colors.int-wp-secondary.600');  */
+
   --wp-code-100: theme('colors.int-wp-secondary.300');
   --wp-code-200: theme('colors.int-wp-secondary.600');
+  --wp-code-300: theme('colors.int-wp-secondary.600');
+
   --wp-code-text-100: theme('colors.gray.200');
   --wp-code-text-alt-100: theme('colors.gray.300');
 
@@ -49,10 +59,12 @@
 }
 
 :root[data-theme='dark'] {
-  --wp-background-100: theme('colors.int-wp-secondary.300');
-  --wp-background-200: theme('colors.int-wp-secondary.400');
-  --wp-background-300: theme('colors.int-wp-secondary.500');
-  --wp-background-400: theme('colors.int-wp-secondary.600');
+  --wp-background-100: theme('colors.black');
+  --wp-background-200: theme('colors.int-wp-secondary.200');
+  --wp-background-300: theme('colors.int-wp-secondary.300');
+  --wp-background-400: theme('colors.int-wp-secondary.400');
+  --wp-background-500: theme('colors.int-wp-secondary.500');
+  --wp-background-600: theme('colors.int-wp-secondary.600');
 
   --wp-text-100: theme('colors.gray.300');
   --wp-text-200: theme('colors.gray.200');
@@ -88,9 +100,16 @@
   --wp-hint-warn-100: theme('colors.int-wp-hint-warn-dark.100');
   --wp-hint-warn-200: theme('colors.int-wp-hint-warn-dark.200');
 
-  --wp-code-100: theme('colors.int-wp-secondary.700');
-  --wp-code-200: theme('colors.int-wp-secondary.800');
-  --wp-code-text-100: theme('colors.gray.300');
+  --wp-code-inline-100: theme('colors.int-wp-secondary.700');
+  --wp-code-inline-200: theme('colors.int-wp-secondary.300');
+
+  --wp-code-inline-text-100: theme('colors.gray.300');
+
+  --wp-code-100: theme('colors.int-wp-secondary.700'); /* #222631 */
+  --wp-code-200: theme('colors.int-wp-secondary.600'); /* #2a2e3a */
+  --wp-code-300: theme('colors.int-wp-secondary.800'); /* #1B1F28 */
+
+  --wp-code-text-100: theme('colors.gray.200');
   --wp-code-text-alt-100: theme('colors.gray.400');
 
   --wp-link-100: theme('colors.blue.400');
@@ -105,7 +124,7 @@ body,
 }
 
 .vue-notification {
-  @apply rounded-md text-base border-l-6;
+  @apply border-l-6 rounded-md text-base;
 }
 
 .vue-notification .notification-title {
@@ -131,7 +150,7 @@ body,
 *::-webkit-scrollbar-thumb {
   transition: background 0.2s ease-in-out;
   border: 3px solid transparent;
-  @apply bg-cool-gray-200 dark:bg-dark-200 rounded-full bg-clip-content;
+  @apply bg-clip-content bg-cool-gray-200 dark:bg-dark-200 rounded-full;
 }
 
 *::-webkit-scrollbar-thumb:hover {
@@ -143,11 +162,11 @@ body,
 }
 
 .code-box {
-  @apply bg-wp-code-200 p-4 rounded-md text-wp-code-text-100 text-sm break-words;
+  @apply bg-wp-code-300 p-4 rounded-md text-sm text-wp-code-text-100 break-words;
   white-space: pre-wrap;
 }
 
 .code-box-inline,
 code:not(pre > code) {
-  @apply bg-wp-code-200 rounded-md text-wp-code-text-100 px-1 py-px;
+  @apply bg-wp-code-inline-100 text-wp-code-inline-text-100 px-1.5 py-0.5 rounded-md;
 }

@@ -132,6 +132,8 @@ export default defineConfig({
           200: 'var(--wp-background-200)',
           300: 'var(--wp-background-300)',
           400: 'var(--wp-background-400)',
+          500: 'var(--wp-background-500)',
+          600: 'var(--wp-background-600)',
         },
 
         'wp-text': {
@@ -193,10 +195,21 @@ export default defineConfig({
           200: 'var(--wp-hint-warn-200)',
         },
 
+        'wp-code-inline': {
+          100: 'var(--wp-code-inline-100)',
+          200: 'var(--wp-code-inline-200)',
+        },
+
+        'wp-code-inline-text': {
+          100: 'var(--wp-code-inline-text-100)',
+        },
+
         'wp-code': {
           100: 'var(--wp-code-100)',
           200: 'var(--wp-code-200)',
+          300: 'var(--wp-code-300)',
         },
+
         'wp-code-text': {
           100: 'var(--wp-code-text-100)',
         },
