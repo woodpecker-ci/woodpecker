@@ -4,9 +4,9 @@
 // @ts-nocheck
 
 import tinycolor from 'tinycolor2';
-import colors from 'windicss/colors';
-import { defineConfig } from 'windicss/helpers';
-import typography from 'windicss/plugin/typography';
+import colors from 'tailwindcss/colors';
+import type { Config } from 'tailwindcss';
+import typography from '@tailwindcss/typography';
 
 const customColors = {
   'wp-primary': {
@@ -29,7 +29,8 @@ const customColors = {
 };
 
 /* eslint-disable ts/no-unsafe-call */
-export default defineConfig({
+export default {
+  content: ['./index.html', './src/**/*.{vue,js,ts,jsx,tsx}'],
   darkMode: 'class',
   theme: {
     extend: {

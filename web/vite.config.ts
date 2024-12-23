@@ -5,7 +5,6 @@ import VueI18nPlugin from '@intlify/unplugin-vue-i18n/vite';
 import vue from '@vitejs/plugin-vue';
 import type { Plugin } from 'vite';
 import prismjs from 'vite-plugin-prismjs';
-import WindiCSS from 'vite-plugin-windicss';
 import svgLoader from 'vite-svg-loader';
 import { defineConfig } from 'vitest/config';
 
@@ -69,7 +68,6 @@ export default defineConfig({
         },
       };
     })(),
-    WindiCSS(),
     svgLoader(),
     externalCSSPlugin(),
     woodpeckerInfoPlugin(),

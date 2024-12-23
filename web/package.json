@@ -23,6 +23,7 @@
     "@mdi/js": "^7.4.47",
     "@vueuse/core": "^12.0.0",
     "ansi_up": "^6.0.2",
+    "autoprefixer": "^10.4.20",
     "dompurify": "^3.2.0",
     "fuse.js": "^7.0.0",
     "js-base64": "^3.7.7",
@@ -30,9 +31,11 @@
     "marked": "^15.0.0",
     "node-emoji": "^2.1.3",
     "pinia": "^2.2.1",
+    "postcss": "^8.4.49",
     "prismjs": "^1.29.0",
     "semver": "^7.6.3",
     "simple-icons": "^13.5.0",
+    "tailwindcss": "^3.4.17",
     "vue": "^3.4.38",
     "vue-i18n": "^10.0.3",
     "vue-router": "^4.4.3"
@@ -63,8 +66,7 @@
     "vite-plugin-windicss": "^1.9.3",
     "vite-svg-loader": "^5.1.0",
     "vitest": "^2.0.5",
-    "vue-tsc": "^2.0.29",
-    "windicss": "^3.5.6"
+    "vue-tsc": "^2.0.29"
   },
   "pnpm": {
     "overrides": {
