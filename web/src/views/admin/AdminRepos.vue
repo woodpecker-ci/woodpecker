@@ -13,10 +13,10 @@
       <ListItem
         v-for="repo in repos"
         :key="repo.id"
-        class="items-center gap-2 !bg-wp-background-200 !dark:bg-wp-background-100"
+        class="items-center gap-2 admin-repos"
       >
         <span>{{ repo.full_name }}</span>
-        <div class="ml-auto flex items-center">
+        <div class="flex items-center ml-auto">
           <Badge v-if="!repo.active" class="<md:hidden mr-2" :label="$t('admin.settings.repos.disabled')" />
           <IconButton
             icon="chevron-right"
@@ -67,3 +67,9 @@ const { doSubmit: repairRepos, isLoading: isRepairingRepos } = useAsyncAction(as
   notifications.notify({ title: i18n.t('admin.settings.repos.repair.success'), type: 'success' });
 });
 </script>
+
+<style scoped>
+.admin-repos {
+  @apply bg-wp-background-200 dark:bg-wp-background-100;
+}
+</style>
