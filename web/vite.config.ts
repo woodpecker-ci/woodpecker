@@ -6,7 +6,7 @@ import vue from '@vitejs/plugin-vue';
 import type { Plugin } from 'vite';
 import prismjs from 'vite-plugin-prismjs';
 import svgLoader from 'vite-svg-loader';
-import { defineConfig } from 'vitest/config';
+import { defineConfig } from 'vite';
 
 function woodpeckerInfoPlugin(): Plugin {
   return {

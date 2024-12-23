@@ -1,6 +1,5 @@
 // cSpell:ignore Segoe Roboto Neue Noto nocheck
 
-
 // @ts-nocheck
 
 import typography from '@tailwindcss/typography';
@@ -27,9 +26,8 @@ const customColors = {
   },
 };
 
-
 export default {
-  content: ['./index.html', './src/**/*.{vue,js,ts,jsx,tsx}'],
+  content: ['./index.html', './src/**/*.{vue,js,ts,jsx,tsx}', './src/**/*.css'],
   darkMode: 'class',
   theme: {
     extend: {
@@ -209,31 +207,27 @@ export default {
           200: 'var(--wp-link-200)',
         },
       },
+      fontFamily: {
+        sans: [
+          'system-ui',
+          '-apple-system',
+          'Segoe UI',
+          'Roboto',
+          'Helvetica Neue',
+          'Noto Sans',
+          'Liberation Sans',
+          'Arial',
+          'sans-serif',
+        ],
+      },
+      borderWidth: {
+        '6': '6px',
+      },
       transitionProperty: {
         height: 'max-height',
       },
       stroke: (theme) => theme('colors'),
       fill: (theme) => theme('colors'),
-      fontFamily: [
-        'system-ui',
-        '-apple-system',
-        'Segoe UI',
-        'Roboto',
-        'Helvetica Neue',
-        'Noto Sans',
-        'Liberation Sans',
-        'Arial',
-        'sans-serif',
-      ],
-    },
-    fontFamily: {
-      sans: [
-        'system-ui',
-        '-apple-system',
-        'Segoe UI',
-        'Roboto',
-        // ...existing code...
-      ],
     },
   },
   plugins: [typography()],
