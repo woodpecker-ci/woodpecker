@@ -1,6 +1,6 @@
 <template>
   <main class="flex flex-col justify-center items-center w-full h-full">
-    <Error v-if="errorMessage" class="w-full md:w-3xl">
+    <Error v-if="errorMessage" class="w-full md:max-w-3xl h-96">
       <span class="whitespace-pre">{{ errorMessage }}</span>
       <span v-if="errorDescription" class="mt-1 whitespace-pre">{{ errorDescription }}</span>
       <a
