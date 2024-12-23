@@ -25,9 +25,3 @@ defineProps<{
   pipelines: Pipeline[] | undefined;
 }>();
 </script>
-
-<style scoped>
-.pipeline-list {
-  @apply p-0;
-}
-</style>

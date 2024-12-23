@@ -66,6 +66,6 @@ const { doSubmit: repairRepos, isLoading: isRepairingRepos } = useAsyncAction(as
 
 <style scoped>
 .admin-repos {
-  @apply bg-wp-background-200 dark:bg-wp-background-100;
+  @apply bg-wp-background-200 dark:bg-wp-background-100 p-4;
 }
 </style>
