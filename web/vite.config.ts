@@ -4,9 +4,9 @@ import process from 'node:process';
 import VueI18nPlugin from '@intlify/unplugin-vue-i18n/vite';
 import vue from '@vitejs/plugin-vue';
 import type { Plugin } from 'vite';
+import { defineConfig } from 'vite';
 import prismjs from 'vite-plugin-prismjs';
 import svgLoader from 'vite-svg-loader';
-import { defineConfig } from 'vite';
 
 function woodpeckerInfoPlugin(): Plugin {
   return {

@@ -221,7 +221,7 @@ export default {
         ],
       },
       borderWidth: {
-        '6': '6px',
+        6: '6px',
       },
       transitionProperty: {
         height: 'max-height',

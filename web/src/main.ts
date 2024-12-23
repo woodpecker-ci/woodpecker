@@ -1,5 +1,5 @@
 import '~/compositions/useFavicon';
-import '~/tailwind.css'
+import '~/tailwind.css';
 import '~/style.css';
 
 import { createPinia } from 'pinia';
