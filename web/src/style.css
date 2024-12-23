@@ -151,13 +151,3 @@ body,
 code:not(pre > code) {
   @apply bg-wp-code-200 px-1 py-px rounded-md text-wp-code-text-100;
 }
-
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-@layer components {
-  .hover-effect {
-    @apply hover:bg-black dark:hover:bg-white hover:bg-opacity-10 dark:hover:bg-opacity-5 transition-colors duration-100;
-  }
-}
