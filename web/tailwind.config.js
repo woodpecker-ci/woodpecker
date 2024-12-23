@@ -1,10 +1,9 @@
 // cSpell:ignore Segoe Roboto Neue Noto nocheck
-/* eslint-disable ts/no-unsafe-return */
-// eslint-disable-next-line ts/ban-ts-comment
+
+
 // @ts-nocheck
 
 import typography from '@tailwindcss/typography';
-import type { Config } from 'tailwindcss';
 import colors from 'tailwindcss/colors';
 import tinycolor from 'tinycolor2';
 
@@ -28,7 +27,7 @@ const customColors = {
   },
 };
 
-/* eslint-disable ts/no-unsafe-call */
+
 export default {
   content: ['./index.html', './src/**/*.{vue,js,ts,jsx,tsx}'],
   darkMode: 'class',
@@ -238,4 +237,4 @@ export default {
     },
   },
   plugins: [typography()],
-} satisfies Config;
+};
