@@ -1,12 +1,12 @@
 // cSpell:ignore Segoe Roboto Neue Noto nocheck
-/* eslint-disable ts/no-unsafe-member-access, ts/no-unsafe-assignment, ts/no-unsafe-argument, ts/no-unsafe-return */
+/* eslint-disable ts/no-unsafe-return */
 // eslint-disable-next-line ts/ban-ts-comment
 // @ts-nocheck
 
-import tinycolor from 'tinycolor2';
-import colors from 'tailwindcss/colors';
-import type { Config } from 'tailwindcss';
 import typography from '@tailwindcss/typography';
+import type { Config } from 'tailwindcss';
+import colors from 'tailwindcss/colors';
+import tinycolor from 'tinycolor2';
 
 const customColors = {
   'wp-primary': {
@@ -233,4 +233,4 @@ export default {
       'hover:bg-black hover:bg-opacity-10 dark:hover:bg-white dark:hover:bg-opacity-5 transition-colors duration-100',
   },
   plugins: [typography()],
-});
+} satisfies Config;
