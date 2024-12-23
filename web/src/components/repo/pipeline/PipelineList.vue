@@ -3,6 +3,7 @@
     <PipelineItem
       v-for="pipeline in pipelines"
       :key="pipeline.id"
+      class="pipeline-list"
       :to="{
         name: 'repo-pipeline',
         params: { pipelineId: pipeline.number },
@@ -24,3 +25,9 @@ defineProps<{
   pipelines: Pipeline[] | undefined;
 }>();
 </script>
+
+<style scoped>
+.pipeline-list {
+  @apply p-0;
+}
+</style>
