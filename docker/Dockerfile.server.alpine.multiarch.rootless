@@ -14,5 +14,7 @@ COPY dist/server/${TARGETOS}_${TARGETARCH}/woodpecker-server /bin/
 RUN addgroup -S woodpecker && adduser -S woodpecker -G woodpecker
 RUN mkdir -p /var/lib/woodpecker && chown -R woodpecker:woodpecker /var/lib/woodpecker
 
+USER woodpecker
+
 HEALTHCHECK CMD ["/bin/woodpecker-server", "ping"]
 ENTRYPOINT ["/bin/woodpecker-server"]
