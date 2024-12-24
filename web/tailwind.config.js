@@ -1,12 +1,10 @@
 // cSpell:ignore Segoe Roboto Neue Noto nocheck
-/* eslint-disable ts/no-unsafe-member-access, ts/no-unsafe-assignment, ts/no-unsafe-argument, ts/no-unsafe-return */
-// eslint-disable-next-line ts/ban-ts-comment
+
 // @ts-nocheck
 
+import typography from '@tailwindcss/typography';
+import colors from 'tailwindcss/colors';
 import tinycolor from 'tinycolor2';
-import colors from 'windicss/colors';
-import { defineConfig } from 'windicss/helpers';
-import typography from 'windicss/plugin/typography';
 
 const customColors = {
   'wp-primary': {
@@ -28,8 +26,8 @@ const customColors = {
   },
 };
 
-/* eslint-disable ts/no-unsafe-call */
-export default defineConfig({
+export default {
+  content: ['./index.html', './src/**/*.{vue,js,ts,jsx,tsx}', './src/**/*.css'],
   darkMode: 'class',
   theme: {
     extend: {
@@ -209,27 +207,28 @@ export default defineConfig({
           200: 'var(--wp-link-200)',
         },
       },
+      fontFamily: {
+        sans: [
+          'system-ui',
+          '-apple-system',
+          'Segoe UI',
+          'Roboto',
+          'Helvetica Neue',
+          'Noto Sans',
+          'Liberation Sans',
+          'Arial',
+          'sans-serif',
+        ],
+      },
+      borderWidth: {
+        6: '6px',
+      },
       transitionProperty: {
         height: 'max-height',
       },
       stroke: (theme) => theme('colors'),
       fill: (theme) => theme('colors'),
-      fontFamily: [
-        'system-ui',
-        '-apple-system',
-        'Segoe UI',
-        'Roboto',
-        'Helvetica Neue',
-        'Noto Sans',
-        'Liberation Sans',
-        'Arial',
-        'sans-serif',
-      ],
     },
   },
-  shortcuts: {
-    'hover-effect':
-      'hover:bg-black hover:bg-opacity-10 dark:hover:bg-white dark:hover:bg-opacity-5 transition-colors duration-100',
-  },
   plugins: [typography()],
-});
+};

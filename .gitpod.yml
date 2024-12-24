@@ -112,7 +112,7 @@ vscode:
     - 'EditorConfig.EditorConfig'
     - 'dbaeumer.vscode-eslint'
     - 'esbenp.prettier-vscode'
-    - 'voorjaar.windicss-intellisense'
+    - 'bradlc.vscode-tailwindcss'
     - 'Vue.volar'
     - 'redhat.vscode-yaml'
     - 'davidanson.vscode-markdownlint'

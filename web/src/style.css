@@ -105,7 +105,7 @@ body,
 }
 
 .vue-notification {
-  @apply rounded-md text-base border-l-6;
+  @apply border-l-6 rounded-md text-base;
 }
 
 .vue-notification .notification-title {
@@ -121,33 +121,33 @@ body,
 }
 
 *::-webkit-scrollbar {
-  @apply bg-transparent w-12px h-12px;
+  @apply bg-transparent w-[12px] h-[12px];
 }
 
 * {
   scrollbar-width: thin;
 }
 
-*::-webkit-scrollbar-thumb {
+/* *::-webkit-scrollbar-thumb {
   transition: background 0.2s ease-in-out;
   border: 3px solid transparent;
-  @apply bg-cool-gray-200 dark:bg-dark-200 rounded-full bg-clip-content;
+  @apply bg-clip-content bg-gray-200 dark:bg-dark-200 rounded-full;
 }
 
 *::-webkit-scrollbar-thumb:hover {
   @apply bg-cool-gray-300 dark:bg-dark-100;
-}
+} */
 
 *::-webkit-scrollbar-corner {
   @apply bg-transparent;
 }
 
 .code-box {
-  @apply bg-wp-code-200 p-4 rounded-md text-wp-code-text-100 text-sm break-words;
+  @apply bg-wp-code-200 p-4 rounded-md text-sm text-wp-code-text-100 break-words;
   white-space: pre-wrap;
 }
 
 .code-box-inline,
 code:not(pre > code) {
-  @apply bg-wp-code-200 rounded-md text-wp-code-text-100 px-1 py-px;
+  @apply bg-wp-code-200 px-1 py-px rounded-md text-wp-code-text-100;
 }
