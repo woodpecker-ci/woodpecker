@@ -1,12 +1,7 @@
 extends: default
 
-ignore-from-file:
-  - docs/.gitignore
-  - docs/plugins/woodpecker-plugins/.gitignore
-  - .gitignore
-  - server/store/datastore/migration/test-files/.gitignore
-  - web/.gitignore
-  - web/pnpm-lock.yaml
+ignore: |
+  *pnpm-lock.yaml
 
 rules:
   line-length: disable
