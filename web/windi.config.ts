@@ -28,7 +28,7 @@ const customColors = {
   },
   'wp-state-error': {
     100: '#c93c37',
-  }
+  },
 };
 
 /* eslint-disable ts/no-unsafe-call */
