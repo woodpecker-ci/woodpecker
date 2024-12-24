@@ -26,9 +26,8 @@ const customColors = {
     700: '#222631',
     800: '#1B1F28',
   },
-
   'wp-state-error': {
-    100: #c93c37,
+    100: '#c93c37',
   }
 };
 
