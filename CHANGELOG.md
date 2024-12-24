@@ -1,6 +1,6 @@
 # Changelog
 
-## [4.0.0-rc.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v4.0.0-rc.0) - 2024-12-22
+## [4.0.0-rc.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v4.0.0-rc.0) - 2024-12-24
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -38,6 +38,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update golang-packages [[#4615](https://github.com/woodpecker-ci/woodpecker/pull/4615)]
 - fix(deps): update module gitlab.com/gitlab-org/api/client-go to v0.118.0 [[#4606](https://github.com/woodpecker-ci/woodpecker/pull/4606)]
 - fix(deps): update module github.com/cenkalti/backoff/v4 to v5 [[#4601](https://github.com/woodpecker-ci/woodpecker/pull/4601)]
 - fix(deps): update golang-packages [[#4586](https://github.com/woodpecker-ci/woodpecker/pull/4586)]
