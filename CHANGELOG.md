@@ -39,6 +39,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): lock file maintenance [[#4540](https://github.com/woodpecker-ci/woodpecker/pull/4540)]
 - fix(deps): update web npm deps non-major [[#4440](https://github.com/woodpecker-ci/woodpecker/pull/4440)]
 - fix(deps): update golang-packages [[#4615](https://github.com/woodpecker-ci/woodpecker/pull/4615)]
 - fix(deps): update module gitlab.com/gitlab-org/api/client-go to v0.118.0 [[#4606](https://github.com/woodpecker-ci/woodpecker/pull/4606)]
