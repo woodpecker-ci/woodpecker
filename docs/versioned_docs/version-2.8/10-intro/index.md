@@ -17,7 +17,7 @@ checks, tests and routines along the way. A typical pipeline might include the f
 
 If you are already using containers in your daily workflow, you'll for sure love Woodpecker. If not yet, you'll be amazed how easy it is to get started with [containers](https://opencontainers.org/).
 
-## Already have access to a Woodpecker instace?
+## Already have access to a Woodpecker instance?
 
 Then you might want to jump directly into it and [start creating your first pipelines](../20-usage/10-intro.md).
 
