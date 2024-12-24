@@ -19,6 +19,15 @@
 
 - Use icon sizes relative to font size [[#4575](https://github.com/woodpecker-ci/woodpecker/pull/4575)]
 
+### 🐛 Bug Fixes
+
+- Fix misaligned step list indentation [[#4609](https://github.com/woodpecker-ci/woodpecker/pull/4609)]
+- Ignore blocked pipelines for badge rendering [[#4582](https://github.com/woodpecker-ci/woodpecker/pull/4582)]
+- Remove related pipeline logs during pipeline deletion [[#4572](https://github.com/woodpecker-ci/woodpecker/pull/4572)]
+- Weakly decode backend options [[#4577](https://github.com/woodpecker-ci/woodpecker/pull/4577)]
+- Add client error to sdk and fix purge cli [[#4574](https://github.com/woodpecker-ci/woodpecker/pull/4574)]
+- Fix pipeline purge cli command [[#4569](https://github.com/woodpecker-ci/woodpecker/pull/4569)]
+
 ### 📚 Documentation
 
 - Search in plugin tags [[#4604](https://github.com/woodpecker-ci/woodpecker/pull/4604)]
@@ -28,16 +37,9 @@
 - Expand docs around the deprecation of former secret syntax [[#4561](https://github.com/woodpecker-ci/woodpecker/pull/4561)]
 - fix(deps): update docs npm deps non-major [[#4568](https://github.com/woodpecker-ci/woodpecker/pull/4568)]
 
-### 🐛 Bug Fixes
-
-- Ignore blocked pipelines for badge rendering [[#4582](https://github.com/woodpecker-ci/woodpecker/pull/4582)]
-- Remove related pipeline logs during pipeline deletion [[#4572](https://github.com/woodpecker-ci/woodpecker/pull/4572)]
-- Weakly decode backend options [[#4577](https://github.com/woodpecker-ci/woodpecker/pull/4577)]
-- Add client error to sdk and fix purge cli [[#4574](https://github.com/woodpecker-ci/woodpecker/pull/4574)]
-- Fix pipeline purge cli command [[#4569](https://github.com/woodpecker-ci/woodpecker/pull/4569)]
-
 ### 📦️ Dependency
 
+- fix(deps): update web npm deps non-major [[#4440](https://github.com/woodpecker-ci/woodpecker/pull/4440)]
 - fix(deps): update golang-packages [[#4615](https://github.com/woodpecker-ci/woodpecker/pull/4615)]
 - fix(deps): update module gitlab.com/gitlab-org/api/client-go to v0.118.0 [[#4606](https://github.com/woodpecker-ci/woodpecker/pull/4606)]
 - fix(deps): update module github.com/cenkalti/backoff/v4 to v5 [[#4601](https://github.com/woodpecker-ci/woodpecker/pull/4601)]
