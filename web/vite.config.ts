@@ -7,6 +7,8 @@ import type { Plugin } from 'vite';
 import { defineConfig } from 'vite';
 import prismjs from 'vite-plugin-prismjs';
 import svgLoader from 'vite-svg-loader';
+import type { ViteUserConfig } from 'vitest/config';
+import { defineConfig } from 'vitest/config';
 
 function woodpeckerInfoPlugin(): Plugin {
   return {
@@ -89,4 +91,4 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
   },
-});
+} as ViteUserConfig);
