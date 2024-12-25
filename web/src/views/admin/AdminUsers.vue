@@ -14,13 +14,13 @@
       <ListItem
         v-for="user in users"
         :key="user.id"
-        class="items-center gap-2 !bg-wp-background-200 !dark:bg-wp-background-100"
+        class="items-center gap-2 !bg-wp-background-200 !dark:bg-wp-background-100 admin-users"
       >
         <img v-if="user.avatar_url" class="rounded-md h-6" :src="user.avatar_url" />
         <span>{{ user.login }}</span>
         <Badge
           v-if="user.admin"
-          class="ml-auto hidden md:inline-block"
+          class="md:inline-block hidden ml-auto"
           :label="$t('admin.settings.users.admin.admin')"
         />
         <IconButton
@@ -53,7 +53,7 @@
 
         <InputField v-slot="{ id }" :label="$t('admin.settings.users.avatar_url')">
           <div class="flex gap-2">
-            <img v-if="selectedUser.avatar_url" class="rounded-md h-8 w-8" :src="selectedUser.avatar_url" />
+            <img v-if="selectedUser.avatar_url" class="rounded-md w-8 h-8" :src="selectedUser.avatar_url" />
             <TextField :id="id" v-model="selectedUser.avatar_url" />
           </div>
         </InputField>
@@ -154,3 +154,9 @@ function showAddUser() {
   selectedUser.value = cloneDeep({ login: '' });
 }
 </script>
+
+<style scoped>
+.admin-users {
+  @apply p-4;
+}
+</style>
