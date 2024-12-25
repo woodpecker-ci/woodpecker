@@ -47,7 +47,7 @@ These credentials are provided via [`netrc`](https://everything.curl.dev/usingcu
 These credentials are injected only into trusted plugins specified in the (admin) environment variable `WOODPECKER_PLUGINS_TRUSTED_CLONE` or declared in this repository-level setting.
 
 With these credentials, it’s possible to perform any Git operations, including pushing changes back to the repo.
-To prevent unauthorized access or misuse, a plugin whitelist is required—either on the instance level or the repository level.
+To prevent unauthorized access or misuse, a plugin allowlist is required, either on the instance level or the repository level.
 Without an explicit whitelist, a malicious contributor could exploit a custom clone plugin in a Pull Request to reveal or transfer these credentials during the clone step.
 
 :::info
