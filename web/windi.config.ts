@@ -26,9 +26,6 @@ const customColors = {
     700: '#222631',
     800: '#1B1F28',
   },
-  'wp-state-error': {
-    100: '#c93c37',
-  },
 };
 
 /* eslint-disable ts/no-unsafe-call */
@@ -81,23 +78,12 @@ export default defineConfig({
           200: tinycolor(customColors['wp-primary'][500]).desaturate(10).toString(),
           300: tinycolor(customColors['wp-primary'][600]).desaturate(10).toString(),
         },
-        'int-wp-control-error': {
-          100: tinycolor(customColors['wp-state-error'][100]).desaturate(25).toString(),
-          200: colors.red[600],
-          300: colors.red[700],
-          400: colors.red[800],
-          500: colors.red[900],
-        },
-        'int-wp-control-error-dark': {
-          100: tinycolor(customColors['wp-state-error'][100]).desaturate(25).toString(),
-          200: tinycolor(colors.red[600]).desaturate(25).toString(),
-          300: tinycolor(colors.red[700]).desaturate(25).toString(),
-          400: tinycolor(colors.red[800]).desaturate(25).toString(),
-          500: tinycolor(colors.red[900]).desaturate(25).toString(),
-        },
-
         'int-wp-state-error': {
-          100: tinycolor(customColors['wp-state-error'][100]).desaturate(25).toString(),
+          100: tinycolor(colors.red[500]),
+          200: tinycolor(colors.red[600]),
+          300: tinycolor(colors.red[700]),
+          400: tinycolor(colors.red[800]),
+          500: tinycolor(colors.red[900]),
         },
         'int-wp-state-neutral': {
           100: colors.gray[600],
@@ -170,15 +156,14 @@ export default defineConfig({
           200: 'var(--wp-control-ok-200)',
           300: 'var(--wp-control-ok-300)',
         },
-        'wp-control-error': {
-          100: 'var(--wp-control-error-100)',
-          200: 'var(--wp-control-error-200)',
-          300: 'var(--wp-control-error-300)',
-        },
-
         'wp-state-error': {
           100: 'var(--wp-state-error-100)',
+          200: 'var(--wp-state-error-200)',
+          300: 'var(--wp-state-error-300)',
+          400: 'var(--wp-state-error-400)',
+          500: 'var(--wp-state-error-500)',
         },
+
         'wp-state-neutral': {
           100: 'var(--wp-state-neutral-100)',
         },
