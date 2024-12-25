@@ -1,6 +1,6 @@
 # Changelog
 
-## [4.0.0-rc.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v4.0.0-rc.0) - 2024-12-24
+## [4.0.0-rc.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v4.0.0-rc.0) - 2024-12-25
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -19,6 +19,16 @@
 
 - Use icon sizes relative to font size [[#4575](https://github.com/woodpecker-ci/woodpecker/pull/4575)]
 
+### 📚 Documentation
+
+- Update docs section about "Custom clone plugins" [[#4618](https://github.com/woodpecker-ci/woodpecker/pull/4618)]
+- Search in plugin tags [[#4604](https://github.com/woodpecker-ci/woodpecker/pull/4604)]
+- chore(deps): update dependency @types/react to v18.3.18 [[#4599](https://github.com/woodpecker-ci/woodpecker/pull/4599)]
+- Update About [[#4555](https://github.com/woodpecker-ci/woodpecker/pull/4555)]
+- chore(deps): update dependency marked to v15.0.4 [[#4570](https://github.com/woodpecker-ci/woodpecker/pull/4570)]
+- Expand docs around the deprecation of former secret syntax [[#4561](https://github.com/woodpecker-ci/woodpecker/pull/4561)]
+- fix(deps): update docs npm deps non-major [[#4568](https://github.com/woodpecker-ci/woodpecker/pull/4568)]
+
 ### 🐛 Bug Fixes
 
 - Fix misaligned step list indentation [[#4609](https://github.com/woodpecker-ci/woodpecker/pull/4609)]
@@ -27,15 +37,6 @@
 - Weakly decode backend options [[#4577](https://github.com/woodpecker-ci/woodpecker/pull/4577)]
 - Add client error to sdk and fix purge cli [[#4574](https://github.com/woodpecker-ci/woodpecker/pull/4574)]
 - Fix pipeline purge cli command [[#4569](https://github.com/woodpecker-ci/woodpecker/pull/4569)]
-
-### 📚 Documentation
-
-- Search in plugin tags [[#4604](https://github.com/woodpecker-ci/woodpecker/pull/4604)]
-- chore(deps): update dependency @types/react to v18.3.18 [[#4599](https://github.com/woodpecker-ci/woodpecker/pull/4599)]
-- Update About [[#4555](https://github.com/woodpecker-ci/woodpecker/pull/4555)]
-- chore(deps): update dependency marked to v15.0.4 [[#4570](https://github.com/woodpecker-ci/woodpecker/pull/4570)]
-- Expand docs around the deprecation of former secret syntax [[#4561](https://github.com/woodpecker-ci/woodpecker/pull/4561)]
-- fix(deps): update docs npm deps non-major [[#4568](https://github.com/woodpecker-ci/woodpecker/pull/4568)]
 
 ### 📦️ Dependency
 
