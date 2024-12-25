@@ -44,7 +44,7 @@ Only server admins can set this option. If you are not a server admin this optio
 During the clone process, Git credentials (e.g., for private repositories) may be required.
 These credentials are provided via [`netrc`](https://everything.curl.dev/usingcurl/netrc.html).
 
-These credentials are injected only into trusted plugins specified in the (admin) environment variable `WOODPECKER_PLUGINS_TRUSTED_CLONE` or declared in this repository-level setting.
+These credentials are injected only into trusted plugins specified in the environment variable `WOODPECKER_PLUGINS_TRUSTED_CLONE` (an instance-wide Woodpecker server setting) or declared in this repository-level setting.
 
 With these credentials, it’s possible to perform any Git operations, including pushing changes back to the repo.
 To prevent unauthorized access or misuse, a plugin allowlist is required, either on the instance level or the repository level.
