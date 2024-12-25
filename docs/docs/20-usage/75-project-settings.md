@@ -41,11 +41,19 @@ Only server admins can set this option. If you are not a server admin this optio
 
 ## Custom trusted clone plugins
 
-The clone step may require Git credentials (e.g. for private repos) which are injected via `netrc`.
+During the clone process, Git credentials (e.g., for private repositories) may be required.
+These credentials are provided via [`netrc`](https://everything.curl.dev/usingcurl/netrc.html).
 
-They are only injected into trusted plugins listed in the env var `WOODPECKER_PLUGINS_TRUSTED_CLONE` or in this repo setting.
+These credentials are injected only into trusted plugins specified in the (admin) environment variable `WOODPECKER_PLUGINS_TRUSTED_CLONE` or declared in this repository-level setting.
 
-This allows you to use a trusted plugin for in the clone section or as a step to pull or push using your git credentials.
+With these credentials, it’s possible to perform any Git operations, including pushing changes back to the repo.
+To prevent unauthorized access or misuse, a plugin whitelist is required—either on the instance level or the repository level.
+Without an explicit whitelist, a malicious contributor could exploit a custom clone plugin in a Pull Request to reveal or transfer these credentials during the clone step.
+
+:::info
+This setting does not affect subsequent steps, nor does it allow direct pushes to the repository.
+To enable pushing changes, you can inject Git credentials as a secret or use a dedicated plugin, such as [appleboy/drone-git-push](https://woodpecker-ci.org/plugins/Git%20Push).
+:::
 
 ## Project visibility
 
