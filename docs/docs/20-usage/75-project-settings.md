@@ -48,7 +48,7 @@ These credentials are injected only into trusted plugins specified in the (admin
 
 With these credentials, it’s possible to perform any Git operations, including pushing changes back to the repo.
 To prevent unauthorized access or misuse, a plugin allowlist is required, either on the instance level or the repository level.
-Without an explicit whitelist, a malicious contributor could exploit a custom clone plugin in a Pull Request to reveal or transfer these credentials during the clone step.
+Without an explicit allowlist, a malicious contributor could exploit a custom clone plugin in a Pull Request to reveal or transfer these credentials during the clone step.
 
 :::info
 This setting does not affect subsequent steps, nor does it allow direct pushes to the repository.
