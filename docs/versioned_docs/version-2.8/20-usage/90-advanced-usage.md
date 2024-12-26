@@ -136,6 +136,10 @@ This set up will only work on trusted repositories and for security reasons shou
 
 The snippet below shows how a step can communicate with the docker deamon via a `docker:dind` service.
 
+:::note
+If your aim ist to build/publish OCI images, cosider using the [Docker Buildx Plugin](https://woodpecker-ci.org/plugins/Docker%20Buildx) instead.
+:::
+
 The most important bit ist to allow the dind service to write/read certificates on a mounted volume that is also shared with the step that will contact the daemon (it needs the service's CA to do so successfully).
 
 The `DOCKER_*` environment variables in the step are generic settings that should work with your framework of choice (e.g. TestContainers or similar):
