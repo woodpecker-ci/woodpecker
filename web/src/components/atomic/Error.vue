@@ -1,6 +1,6 @@
 <template>
   <div
-    class="flex items-center gap-2 border-wp-state-error-300 dark:border-wp-state-error-400 bg-wp-state-error-100 dark:bg-wp-state-error-200 p-2 border border-l-6 border-solid rounded-md text-white"
+    class="flex items-center gap-2 border-wp-state-error-300 dark:border-wp-state-error-300 bg-wp-state-error-100 dark:bg-wp-state-error-200 p-2 border border-l-6 border-solid rounded-md text-white"
   >
     <Icon v-if="!textOnly" name="error" />
     <slot>
