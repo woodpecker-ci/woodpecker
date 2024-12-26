@@ -127,3 +127,40 @@ WOODPECKER_ENVIRONMENT=first_var:value1,second_var:value2
 ```
 
 Note that this tightly couples the server and app configurations (where the app is a completely separate application). But this is a good option for truly global variables which should apply to all steps in all pipelines for all apps.
+
+## Docker in docker (dind) setup
+
+:::warning
+This set up will only work on trusted repositories and for security reasons should only be used in private environments. See [project settings](./75-project-settings.md#trusted) to enable trusted mode.
+:::
+
+The snippet below shows how a step can communicate with the docker deamon via a `docker:dind` service.
+
+The most important bit ist to allow the dind service to write/read certificates on a mounted volume that is also shared with the step that will contact the daemon (it needs the service's CA to do so successfully).
+
+The `DOCKER_*` environment variables in the step are generic settings that should work with your framework of choice (e.g. TestContainers or similar):
+
+```yaml
+steps:
+  - name: test
+    image: docker:latest
+    environment:
+      DOCKER_HOST: "tcp://docker:2376"
+      DOCKER_CERT_PATH: "/dind-certs/client"
+      DOCKER_TLS_VERIFY: "1"
+    volumes:
+      - /opt/woodpeckerci/dind-certs:/dind-certs
+    commands:
+      - docker version
+
+services:
+  - name: docker
+    image: docker:dind
+    privileged: true
+    environment:
+      DOCKER_TLS_CERTDIR: /dind-certs
+    volumes:
+      - /opt/woodpeckerci/dind-certs:/dind-certs
+    ports:
+      - 2376
+```
