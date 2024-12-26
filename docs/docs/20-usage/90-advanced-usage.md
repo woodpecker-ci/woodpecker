@@ -142,7 +142,7 @@ If your aim ist to build/publish OCI images, cosider using the [Docker Buildx Pl
 
 The most important bit ist to allow the dind service to write/read certificates on a mounted volume that is also shared with the step that will contact the daemon (it needs the service's CA to do so successfully).
 
-The `DOCKER_*` environment variables in the step are generic settings that should work with your framework of choice (e.g. TestContainers or similar):
+The `DOCKER_*` environment variables in the step are generic settings that should work with the docker client used by your framework of choice (e.g. [TestContainers](https://testcontainers.com/), [Spring Boot Docker Compose](https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-docker-compose) or similar):
 
 ```yaml
 steps:
