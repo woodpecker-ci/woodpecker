@@ -158,8 +158,6 @@ export default defineConfig({
           100: 'var(--wp-state-error-100)',
           200: 'var(--wp-state-error-200)',
           300: 'var(--wp-state-error-300)',
-          400: 'var(--wp-state-error-400)',
-          500: 'var(--wp-state-error-500)',
         },
 
         'wp-state-neutral': {
