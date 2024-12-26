@@ -29,6 +29,7 @@
     "marked": "^15.0.4",
     "node-emoji": "^2.2.0",
     "pinia": "^2.3.0",
+    "prettier-plugin-tailwindcss": "^0.6.9",
     "prismjs": "^1.29.0",
     "semver": "^7.6.3",
     "simple-icons": "^13.21.0",
