@@ -131,7 +131,8 @@ Note that this tightly couples the server and app configurations (where the app 
 ## Docker in docker (dind) setup
 
 :::warning
-This set up will only work on trusted repositories and for security reasons should only be used in private environments. See [project settings](./75-project-settings.md#trusted) to enable trusted mode.
+This set up will only work on trusted repositories and for security reasons should only be used in private environments.
+See [project settings](./75-project-settings.md#trusted) to enable trusted mode.
 :::
 
 The snippet below shows how a step can communicate with the docker daemon via a `docker:dind` service.
