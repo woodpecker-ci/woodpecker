@@ -119,7 +119,7 @@ body,
 }
 
 .vue-notification.error {
-  @apply !bg-wp-state-error-100 !border-l-wp-state-error-300;
+  @apply !bg-wp-state-error-100 !dark:bg-wp-state-error-200 !border-l-wp-state-error-300;
 }
 
 *::-webkit-scrollbar {
