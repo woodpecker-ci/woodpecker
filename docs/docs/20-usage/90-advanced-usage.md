@@ -134,7 +134,7 @@ Note that this tightly couples the server and app configurations (where the app 
 This set up will only work on trusted repositories and for security reasons should only be used in private environments. See [project settings](./75-project-settings.md#trusted) to enable trusted mode.
 :::
 
-The snippet below shows how a step can communicate with the docker deamon via a `docker:dind` service. 
+The snippet below shows how a step can communicate with the docker deamon via a `docker:dind` service.
 
 :::note
 If your aim ist to build/publish OCI images, cosider using the [Docker Buildx Plugin](https://woodpecker-ci.org/plugins/Docker%20Buildx) instead.
