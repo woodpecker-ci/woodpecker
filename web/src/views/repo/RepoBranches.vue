@@ -11,7 +11,7 @@
         <Badge v-if="branch === repo?.default_branch" :label="$t('default')" class="ml-auto" />
       </ListItem>
     </template>
-    <div v-else-if="loading" class="flex justify-center text-wp-text-100">
+    <div v-else-if="loading" class="text-wp-text-100 flex justify-center">
       <Icon name="spinner" />
     </div>
     <Panel v-else class="flex justify-center">

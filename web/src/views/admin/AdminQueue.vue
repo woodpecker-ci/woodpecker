@@ -25,11 +25,11 @@
       <AdminQueueStats :stats="queueInfo?.stats" />
 
       <div v-if="tasks.length > 0" class="flex flex-col">
-        <p class="mt-6 mb-2 text-xl">{{ $t('admin.settings.queue.tasks') }}</p>
+        <p class="mb-2 mt-6 text-xl">{{ $t('admin.settings.queue.tasks') }}</p>
         <ListItem
           v-for="task in tasks"
           :key="task.id"
-          class="items-center mb-2 !bg-wp-background-200 !dark:bg-wp-background-100"
+          class="!bg-wp-background-200 !dark:bg-wp-background-100 mb-2 items-center"
         >
           <div
             class="flex items-center"
@@ -57,7 +57,7 @@
             />
           </div>
           <span class="ml-2">{{ task.id }}</span>
-          <span class="flex ml-auto gap-2">
+          <span class="ml-auto flex gap-2">
             <Badge v-if="task.agent_id !== 0" :label="$t('admin.settings.queue.agent')" :value="task.agent_id" />
             <template v-for="(value, label) in task.labels">
               <Badge v-if="value" :key="label" :label="label.toString()" :value="value" />

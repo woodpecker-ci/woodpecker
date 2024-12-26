@@ -50,7 +50,7 @@ export function WoodpeckerPluginList({ plugins }: { plugins: WoodpeckerPlugin[] 
 
   return (
     <Layout title="Woodpecker CI plugins" description="List of all Woodpecker-CI plugins">
-      <main className="container margin-vert--lg">
+      <main className="margin-vert--lg container">
         <section>
           <div style={{ display: 'flex', flexFlow: 'column', alignItems: 'center' }}>
             <h1>Woodpecker CI plugins</h1>

@@ -1,6 +1,6 @@
 <template>
   <div
-    class="flex justify-center items-center"
+    class="flex items-center justify-center"
     :title="$t('repo.pipeline.status.status', { status: statusDescriptions[status] })"
   >
     <Icon

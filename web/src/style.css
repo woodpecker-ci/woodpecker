@@ -105,11 +105,11 @@ body,
 }
 
 .vue-notification {
-  @apply rounded-md text-base border-l-6;
+  @apply border-l-6 rounded-md text-base;
 }
 
 .vue-notification .notification-title {
-  @apply font-normal text-base;
+  @apply text-base font-normal;
 }
 
 .vue-notification.success {
@@ -121,7 +121,7 @@ body,
 }
 
 *::-webkit-scrollbar {
-  @apply bg-transparent w-12px h-12px;
+  @apply w-12px h-12px bg-transparent;
 }
 
 * {
@@ -143,11 +143,11 @@ body,
 }
 
 .code-box {
-  @apply bg-wp-code-200 p-4 rounded-md text-wp-code-text-100 text-sm break-words;
+  @apply bg-wp-code-200 text-wp-code-text-100 break-words rounded-md p-4 text-sm;
   white-space: pre-wrap;
 }
 
 .code-box-inline,
 code:not(pre > code) {
-  @apply bg-wp-code-200 rounded-md text-wp-code-text-100 px-1 py-px;
+  @apply bg-wp-code-200 text-wp-code-text-100 rounded-md px-1 py-px;
 }
