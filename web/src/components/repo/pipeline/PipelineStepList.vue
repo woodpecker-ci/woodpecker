@@ -1,7 +1,7 @@
 <template>
   <div class="flex flex-col gap-2 pb-2 w-full md:w-3/12 md:min-w-xs md:max-w-md text-wp-text-100">
     <div
-      class="flex flex-wrap flex-shrink-0 justify-between gap-1 border-wp-background-600 bg-wp-background-100 dark:bg-wp-background-400 p-4 border rounded-md"
+      class="flex flex-wrap flex-shrink-0 justify-between gap-1 border-wp-background-400 bg-wp-background-100 dark:bg-wp-background-400 p-4 border rounded-md"
     >
       <div class="flex flex-shrink-0 items-center space-x-1">
         <div class="flex items-center">
@@ -59,7 +59,7 @@
         <div
           v-for="workflow in pipeline.workflows"
           :key="workflow.id"
-          class="border-wp-background-600 bg-wp-background-200 dark:bg-wp-background-400 shadow p-2 border rounded-md"
+          class="border-wp-background-400 bg-wp-background-200 dark:bg-wp-background-400 shadow p-2 border rounded-md"
         >
           <div class="flex flex-col gap-2">
             <div v-if="workflow.environ" class="flex flex-wrap justify-end gap-x-1 gap-y-2 pt-1 pr-1 text-xs">
