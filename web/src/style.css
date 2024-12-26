@@ -162,7 +162,7 @@ body,
 }
 
 .code-box {
-  @apply bg-wp-code-300 p-4 rounded-md text-sm text-wp-code-text-100 break-words;
+  @apply bg-wp-code-inline-100 text-wp-code-inline-text-100 p-4 rounded-md text-sm break-words;
   white-space: pre-wrap;
 }
 
