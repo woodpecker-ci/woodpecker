@@ -104,7 +104,7 @@
               :title="step.name"
               class="flex items-center gap-2 border-2 hover:bg-wp-background-300 dark:hover:bg-wp-background-600 p-2 border-transparent rounded-md w-full hover-effect"
               :class="{
-                'bg-wp-background-400 dark:bg-wp-background-500': selectedStepId && selectedStepId === step.pid,
+                'bg-wp-background-400 dark:bg-wp-background-600': selectedStepId && selectedStepId === step.pid,
                 'mt-1': !singleConfig || (workflow.children && step.pid !== workflow.children[0].pid),
               }"
               @click="$emit('update:selected-step-id', step.pid)"
