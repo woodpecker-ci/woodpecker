@@ -10,10 +10,10 @@
   <SvgIcon v-else-if="name === 'deployment'" :path="mdiPackageVariant" size="1.3rem" />
   <SvgIcon v-else-if="name === 'commit'" :path="mdiSourceCommit" size="1.3rem" />
   <SvgIcon v-else-if="name === 'back'" :path="mdiArrowLeft" size="1.3rem" />
-  <SvgIcon v-else-if="name === 'github'" :path="mdiGithub" size="32" />
-  <SvgIcon v-else-if="name === 'repo'" :path="mdiGit" size="32" />
-  <SvgIcon v-else-if="name === 'settings'" :path="mdiCog" size="32" />
-  <SvgIcon v-else-if="name === 'settings-outline'" :path="mdiCogOutline" size="32" />
+  <SvgIcon v-else-if="name === 'github'" :path="mdiGithub" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'repo'" :path="mdiGit" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'settings'" :path="mdiCog" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'settings-outline'" :path="mdiCogOutline" size="1.3rem" />
   <SvgIcon v-else-if="name === 'trash'" :path="mdiTrashCanOutline" size="1.3rem" />
   <SvgIcon v-else-if="name === 'status-blocked'" :path="mdiPlayCircle" size="1.3rem" />
   <SvgIcon v-else-if="name === 'status-declined'" :path="mdiStopCircleOutline" size="1.3rem" />
@@ -141,6 +141,7 @@ export type IconNames =
   | 'github'
   | 'repo'
   | 'settings'
+  | 'settings-outline'
   | 'trash'
   | 'status-blocked'
   | 'status-declined'
