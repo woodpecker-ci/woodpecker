@@ -23,3 +23,6 @@ steps:
     depends_on: []
     settings:
       version: 3.3.3
+      plugins:
+        - prettier-plugin-tailwindcss
+        - ianvs/prettier-plugin-sort-imports
