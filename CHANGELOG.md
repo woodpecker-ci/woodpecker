@@ -8,6 +8,7 @@
 
 ### 💥 Breaking changes
 
+- Support Git as only VCS [[#4346](https://github.com/woodpecker-ci/woodpecker/pull/4346)]
 - Add rolling semver tags, remove `latest` tag [[#4600](https://github.com/woodpecker-ci/woodpecker/pull/4600)]
 - Drop native Let's Encrypt support [[#4541](https://github.com/woodpecker-ci/woodpecker/pull/4541)]
 - Set new default approval mode based on repo visibility [[#4456](https://github.com/woodpecker-ci/woodpecker/pull/4456)]
