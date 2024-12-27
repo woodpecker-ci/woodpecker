@@ -92,7 +92,9 @@
             class="transition-height duration-150 overflow-hidden"
             :class="{
               'max-h-0': workflowsCollapsed[workflow.id],
-              'ml-6': !singleConfig,
+            }"
+            :style="{
+              marginLeft: !singleConfig ? '1.6rem' : '',
             }"
           >
             <button
