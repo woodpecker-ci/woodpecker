@@ -15,7 +15,7 @@
   <SvgIcon v-else-if="name === 'settings'" :path="mdiCog" size="1.3rem" />
   <SvgIcon v-else-if="name === 'settings-outline'" :path="mdiCogOutline" size="1.3rem" />
   <SvgIcon v-else-if="name === 'trash'" :path="mdiTrashCanOutline" size="1.3rem" />
-  <SvgIcon v-else-if="name === 'status-blocked'" :path="mdiPlayCircle" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'status-blocked'" :path="mdiPlayOutline" size="1.3rem" />
   <SvgIcon v-else-if="name === 'status-declined'" :path="mdiStopCircleOutline" size="1.3rem" />
   <SvgIcon
     v-else-if="name === 'status-failure' || name === 'status-error' || name === 'status-killed'"
@@ -49,7 +49,7 @@
   <SvgIcon v-else-if="name === 'auto-scroll'" :path="mdiDownloadCircle" size="1.3rem" />
   <SvgIcon v-else-if="name === 'auto-scroll-off'" :path="mdiDownloadOff" size="1.3rem" />
   <SvgIcon v-else-if="name === 'pause'" :path="mdiPause" size="1.3rem" />
-  <SvgIcon v-else-if="name === 'play'" :path="mdiPlay" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'play'" :path="mdiPlayOutline" size="1.3rem" />
   <SvgIcon v-else-if="name === 'remove'" :path="mdiCloseCircle" size="1.3rem" />
 
   <SvgIcon v-else-if="name === 'visibility-private'" :path="mdiLockOutline" size="1.3rem" />
@@ -107,8 +107,7 @@ import {
   mdiPackageVariant,
   mdiPause,
   mdiPencilOutline,
-  mdiPlay,
-  mdiPlayCircle,
+  mdiPlayOutline,
   mdiPlus,
   mdiPower,
   mdiRadioboxBlank,
