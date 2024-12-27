@@ -44,9 +44,6 @@
 
   --wp-code-inline-text-100: theme('colors.gray.600');
 
-  /* --wp-code-300: theme('colors.int-wp-secondary.300');
-  --wp-code-600: theme('colors.int-wp-secondary.600');  */
-
   --wp-code-100: theme('colors.int-wp-secondary.300');
   --wp-code-200: theme('colors.int-wp-secondary.600');
   --wp-code-300: theme('colors.int-wp-secondary.600');
