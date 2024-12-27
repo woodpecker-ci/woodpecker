@@ -9,6 +9,12 @@
       class="flex gap-2 bg-wp-background-300 px-4 py-2 w-full font-bold text-wp-text-100"
       @click="_collapsed = !_collapsed"
     >
+      <Icon
+        v-if="collapsable"
+        name="chevron-right"
+        class="min-w-6 h-6 transition-transform duration-150"
+        :class="{ 'transform rotate-90': !collapsed }"
+      />
       {{ title }}
     </component>
     <div
