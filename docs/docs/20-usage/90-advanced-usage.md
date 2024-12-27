@@ -147,7 +147,7 @@ This service must run in `privileged` mode:
 ```yaml
 services:
   - name: docker
-    image: docker:27.4-dind # use 'docker:<major-version>-dind' or similar in production
+    image: docker:dind # use 'docker:<major-version>-dind' or similar in production
     privileged: true
     ports:
       - 2376
@@ -160,7 +160,7 @@ This can be achieved by letting the daemon generate TLS certificates and share t
 ```diff
 services:
   - name: docker
-    image: docker:27.4-dind
+    image: docker:dind # use 'docker:<major-version>-dind' or similar in production
     privileged: true
 +    environment:
 +      DOCKER_TLS_CERTDIR: /dind-certs
