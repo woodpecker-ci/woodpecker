@@ -252,6 +252,8 @@
       "warnings": "Warnings",
       "show_errors": "Show errors",
       "we_got_some_errors": "Oh no, we got some errors!",
+      "duration": "Pipeline duration",
+      "created": "Created: {created}",
       "debug": {
         "title": "Debug",
         "download_metadata": "Download metadata",
