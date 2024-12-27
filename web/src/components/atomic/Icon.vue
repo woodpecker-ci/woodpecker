@@ -55,8 +55,8 @@
   <SvgIcon v-else-if="name === 'visibility-private'" :path="mdiLockOutline" size="1.3rem" />
   <SvgIcon v-else-if="name === 'visibility-internal'" :path="mdiLockOpenOutline" size="1.3rem" />
 
-  <SvgIcon v-else-if="name === 'forgejo'" :path="siForgejo.path" size="32" />
-  <SvgIcon v-else-if="name === 'gitea'" :path="siGitea.path" size="32" />
+  <SvgIcon v-else-if="name === 'forgejo'" :path="siForgejo.path" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'gitea'" :path="siGitea.path" size="1.3rem" />
 
   <svg v-else-if="name === 'spinner'" width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
     <path
