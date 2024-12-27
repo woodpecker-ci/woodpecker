@@ -1,12 +1,18 @@
 package woodpecker
 
-import "fmt"
+import (
+	"fmt"
+	"net/url"
+	"strconv"
+	"strings"
+	"time"
+)
 
 const (
-	pathRepoPost       = "%s/api/repos?forge_remote_id=%d"
+	pathRepoPost       = "%s/api/repos"
 	pathRepo           = "%s/api/repos/%d"
 	pathRepoLookup     = "%s/api/repos/lookup/%s"
-	pathRepoMove       = "%s/api/repos/%d/move?to=%s"
+	pathRepoMove       = "%s/api/repos/%d/move"
 	pathChown          = "%s/api/repos/%d/chown"
 	pathRepair         = "%s/api/repos/%d/repair"
 	pathPipelines      = "%s/api/repos/%d/pipelines"
@@ -23,6 +29,112 @@ const (
 	pathRepoCrons      = "%s/api/repos/%d/cron"
 	pathRepoCron       = "%s/api/repos/%d/cron/%d"
 )
+
+type PipelineListOptions struct {
+	ListOptions
+	Before      time.Time
+	After       time.Time
+	Branch      string
+	Events      []string
+	RefContains string
+	Status      string
+}
+
+type CronListOptions struct {
+	ListOptions
+}
+
+type RegistryListOptions struct {
+	ListOptions
+}
+
+type SecretListOptions struct {
+	ListOptions
+}
+
+type DeployOptions struct {
+	DeployTo string            // override the target deploy value
+	Params   map[string]string // custom KEY=value parameters to be injected into the step environment
+}
+
+type PipelineStartOptions struct {
+	Params map[string]string // custom KEY=value parameters to be injected into the step environment
+}
+
+type PipelineLastOptions struct {
+	Branch string // last pipeline from given branch, an empty branch will result in the default branch
+}
+
+type RepoPostOptions struct {
+	ForgeRemoteID int64
+}
+
+type RepoMoveOptions struct {
+	To string
+}
+
+// QueryEncode returns the URL query parameters for the PipelineListOptions.
+func (opt *PipelineListOptions) QueryEncode() string {
+	query := opt.getURLQuery()
+	if !opt.Before.IsZero() {
+		query.Add("before", opt.Before.Format(time.RFC3339))
+	}
+	if !opt.After.IsZero() {
+		query.Add("after", opt.After.Format(time.RFC3339))
+	}
+	if opt.Branch != "" {
+		query.Add("branch", opt.Branch)
+	}
+	if len(opt.Events) > 0 {
+		query.Add("event", strings.Join(opt.Events, ","))
+	}
+	if opt.RefContains != "" {
+		query.Add("ref", opt.RefContains)
+	}
+	if opt.Status != "" {
+		query.Add("status", opt.Status)
+	}
+	return query.Encode()
+}
+
+// QueryEncode returns the URL query parameters for the DeployOptions.
+func (opt *DeployOptions) QueryEncode() string {
+	query := mapValues(opt.Params)
+	if opt.DeployTo != "" {
+		query.Add("deploy_to", opt.DeployTo)
+	}
+	query.Add("event", EventDeploy)
+	return query.Encode()
+}
+
+// QueryEncode returns the URL query parameters for the PipelineStartOptions.
+func (opt *PipelineStartOptions) QueryEncode() string {
+	query := mapValues(opt.Params)
+	return query.Encode()
+}
+
+// QueryEncode returns the URL query parameters for the PipelineLastOptions.
+func (opt *PipelineLastOptions) QueryEncode() string {
+	query := make(url.Values)
+	if opt.Branch != "" {
+		query.Add("branch", opt.Branch)
+	}
+	return query.Encode()
+}
+
+// QueryEncode returns the URL query parameters for the RepoPostOptions.
+func (opt *RepoPostOptions) QueryEncode() string {
+	query := make(url.Values)
+	query.Add("forge_remote_id", strconv.FormatInt(opt.ForgeRemoteID, 10))
+	return query.Encode()
+}
+
+// QueryEncode returns the URL query parameters for the RepoMoveOptions.
+func (opt *RepoMoveOptions) QueryEncode() string {
+	query := make(url.Values)
+	query.Add("to", opt.To)
+	return query.Encode()
+}
 
 // Repo returns a repository by id.
 func (c *client) Repo(repoID int64) (*Repo, error) {
@@ -41,10 +153,11 @@ func (c *client) RepoLookup(fullName string) (*Repo, error) {
 }
 
 // RepoPost activates a repository.
-func (c *client) RepoPost(forgeRemoteID int64) (*Repo, error) {
+func (c *client) RepoPost(opt RepoPostOptions) (*Repo, error) {
 	out := new(Repo)
-	uri := fmt.Sprintf(pathRepoPost, c.addr, forgeRemoteID)
-	err := c.post(uri, nil, out)
+	uri, _ := url.Parse(fmt.Sprintf(pathRepoPost, c.addr))
+	uri.RawQuery = opt.QueryEncode()
+	err := c.post(uri.String(), nil, out)
 	return out, err
 }
 
@@ -78,9 +191,10 @@ func (c *client) RepoDel(repoID int64) error {
 }
 
 // RepoMove moves a repository.
-func (c *client) RepoMove(repoID int64, newFullName string) error {
-	uri := fmt.Sprintf(pathRepoMove, c.addr, repoID, newFullName)
-	return c.post(uri, nil, nil)
+func (c *client) RepoMove(repoID int64, opt RepoMoveOptions) error {
+	uri, _ := url.Parse(fmt.Sprintf(pathRepoMove, c.addr, repoID))
+	uri.RawQuery = opt.QueryEncode()
+	return c.post(uri.String(), nil, nil)
 }
 
 // Registry returns a registry by hostname.
@@ -92,10 +206,11 @@ func (c *client) Registry(repoID int64, hostname string) (*Registry, error) {
 }
 
 // RegistryList returns a list of all repository registries.
-func (c *client) RegistryList(repoID int64) ([]*Registry, error) {
+func (c *client) RegistryList(repoID int64, opt RegistryListOptions) ([]*Registry, error) {
 	var out []*Registry
-	uri := fmt.Sprintf(pathRepoRegistries, c.addr, repoID)
-	err := c.get(uri, &out)
+	uri, _ := url.Parse(fmt.Sprintf(pathRepoRegistries, c.addr, repoID))
+	uri.RawQuery = opt.getURLQuery().Encode()
+	err := c.get(uri.String(), &out)
 	return out, err
 }
 
@@ -130,10 +245,11 @@ func (c *client) Secret(repoID int64, secret string) (*Secret, error) {
 }
 
 // SecretList returns a list of all repository secrets.
-func (c *client) SecretList(repoID int64) ([]*Secret, error) {
+func (c *client) SecretList(repoID int64, opt SecretListOptions) ([]*Secret, error) {
 	var out []*Secret
-	uri := fmt.Sprintf(pathRepoSecrets, c.addr, repoID)
-	err := c.get(uri, &out)
+	uri, _ := url.Parse(fmt.Sprintf(pathRepoSecrets, c.addr, repoID))
+	uri.RawQuery = opt.getURLQuery().Encode()
+	err := c.get(uri.String(), &out)
 	return out, err
 }
 
@@ -160,10 +276,11 @@ func (c *client) SecretDelete(repoID int64, secret string) error {
 }
 
 // CronList returns a list of cronjobs for the specified repository.
-func (c *client) CronList(repoID int64) ([]*Cron, error) {
+func (c *client) CronList(repoID int64, opt CronListOptions) ([]*Cron, error) {
 	out := make([]*Cron, 0, 5)
-	uri := fmt.Sprintf(pathRepoCrons, c.addr, repoID)
-	return out, c.get(uri, &out)
+	uri, _ := url.Parse(fmt.Sprintf(pathRepoCrons, c.addr, repoID))
+	uri.RawQuery = opt.getURLQuery().Encode()
+	return out, c.get(uri.String(), &out)
 }
 
 // CronCreate creates a new cron job for the specified repository.
@@ -202,24 +319,30 @@ func (c *client) Pipeline(repoID, pipeline int64) (*Pipeline, error) {
 	return out, err
 }
 
-// Pipeline returns the latest repository pipeline by branch.
-func (c *client) PipelineLast(repoID int64, branch string) (*Pipeline, error) {
+// Pipeline returns the latest repository pipeline.
+func (c *client) PipelineLast(repoID int64, opt PipelineLastOptions) (*Pipeline, error) {
 	out := new(Pipeline)
-	uri := fmt.Sprintf(pathPipeline, c.addr, repoID, "latest")
-	if len(branch) != 0 {
-		uri += "?branch=" + branch
-	}
-	err := c.get(uri, out)
+	uri, _ := url.Parse(fmt.Sprintf(pathPipeline, c.addr, repoID, "latest"))
+	uri.RawQuery = opt.QueryEncode()
+	err := c.get(uri.String(), out)
 	return out, err
 }
 
 // PipelineList returns a list of recent pipelines for the
 // the specified repository.
-func (c *client) PipelineList(repoID int64) ([]*Pipeline, error) {
+func (c *client) PipelineList(repoID int64, opt PipelineListOptions) ([]*Pipeline, error) {
 	var out []*Pipeline
-	uri := fmt.Sprintf(pathPipelines, c.addr, repoID)
-	err := c.get(uri, &out)
+	uri, _ := url.Parse(fmt.Sprintf(pathPipelines, c.addr, repoID))
+	uri.RawQuery = opt.QueryEncode()
+	err := c.get(uri.String(), &out)
 	return out, err
+}
+
+// PipelineDelete deletes a pipeline by the specified repository ID and pipeline ID.
+func (c *client) PipelineDelete(repoID, pipeline int64) error {
+	uri := fmt.Sprintf(pathPipeline, c.addr, repoID, pipeline)
+	err := c.delete(uri)
+	return err
 }
 
 // PipelineCreate creates a new pipeline for the specified repository.
@@ -231,11 +354,11 @@ func (c *client) PipelineCreate(repoID int64, options *PipelineOptions) (*Pipeli
 }
 
 // PipelineStart re-starts a stopped pipeline.
-func (c *client) PipelineStart(repoID, pipeline int64, params map[string]string) (*Pipeline, error) {
+func (c *client) PipelineStart(repoID, pipeline int64, opt PipelineStartOptions) (*Pipeline, error) {
 	out := new(Pipeline)
-	val := mapValues(params)
-	uri := fmt.Sprintf(pathPipeline, c.addr, repoID, pipeline)
-	err := c.post(uri+"?"+val.Encode(), nil, out)
+	uri, _ := url.Parse(fmt.Sprintf(pathPipeline, c.addr, repoID, pipeline))
+	uri.RawQuery = opt.QueryEncode()
+	err := c.post(uri.String(), nil, out)
 	return out, err
 }
 
@@ -262,13 +385,6 @@ func (c *client) PipelineDecline(repoID, pipeline int64) (*Pipeline, error) {
 	return out, err
 }
 
-// PipelineKill force kills the running pipeline.
-func (c *client) PipelineKill(repoID, pipeline int64) error {
-	uri := fmt.Sprintf(pathPipeline, c.addr, repoID, pipeline)
-	err := c.delete(uri)
-	return err
-}
-
 // LogsPurge purges the pipeline all steps logs for the specified pipeline.
 func (c *client) LogsPurge(repoID, pipeline int64) error {
 	uri := fmt.Sprintf(pathPipelineLogs, c.addr, repoID, pipeline)
@@ -278,13 +394,11 @@ func (c *client) LogsPurge(repoID, pipeline int64) error {
 
 // Deploy triggers a deployment for an existing pipeline using the
 // specified target environment.
-func (c *client) Deploy(repoID, pipeline int64, env string, params map[string]string) (*Pipeline, error) {
+func (c *client) Deploy(repoID, pipeline int64, opt DeployOptions) (*Pipeline, error) {
 	out := new(Pipeline)
-	val := mapValues(params)
-	val.Set("event", EventDeploy)
-	val.Set("deploy_to", env)
-	uri := fmt.Sprintf(pathPipeline, c.addr, repoID, pipeline)
-	err := c.post(uri+"?"+val.Encode(), nil, out)
+	uri, _ := url.Parse(fmt.Sprintf(pathPipeline, c.addr, repoID, pipeline))
+	uri.RawQuery = opt.QueryEncode()
+	err := c.post(uri.String(), nil, out)
 	return out, err
 }
 

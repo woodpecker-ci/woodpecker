@@ -18,9 +18,24 @@ FROM woodpeckerci/woodpecker-server:latest-alpine
 RUN apk add -U --no-cache docker-credential-ecr-login
 ```
 
-## Podman support
+## Step specific configuration
 
-While the agent was developed with Docker/Moby, Podman can also be used by setting the environment variable `DOCKER_HOST` to point to the Podman socket. In order to work without workarounds, Podman 4.0 (or above) is required.
+### Run user
+
+By default the docker backend starts the step container without the `--user` flag. This means the step container will use the default user of the container. To change this behavior you can set the `user` backend option to the preferred user/group:
+
+```yaml
+steps:
+  - name: example
+    image: alpine
+    commands:
+      - whoami
+    backend_options:
+      docker:
+        user: 65534:65534
+```
+
+The syntax is the same as the [docker run](https://docs.docker.com/engine/reference/run/#user) `--user` flag.
 
 ## Image cleanup
 
@@ -43,6 +58,12 @@ docker image rm $(docker images --filter "dangling=true" -q --no-trunc)
 ```bash
 docker volume rm $(docker volume ls --filter name=^wp_* --filter dangling=true  -q)
 ```
+
+## Tips and tricks
+
+### Podman
+
+There is no official support for Podman, but one can try to set the environment variable `DOCKER_HOST` to point to the Podman socket. It might work. See also the [Blog posts](https://woodpecker-ci.org/blog).
 
 ## Configuration
 

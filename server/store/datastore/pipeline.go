@@ -20,7 +20,7 @@ import (
 	"xorm.io/builder"
 	"xorm.io/xorm"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
 func (s storage) GetPipeline(id int64) (*model.Pipeline, error) {
@@ -33,6 +33,15 @@ func (s storage) GetPipelineNumber(repo *model.Repo, num int64) (*model.Pipeline
 	return pipeline, wrapGet(s.engine.Where(
 		builder.Eq{"repo_id": repo.ID, "number": num},
 	).Get(pipeline))
+}
+
+func (s storage) GetPipelineBadge(repo *model.Repo, branch string) (*model.Pipeline, error) {
+	pipeline := new(model.Pipeline)
+	return pipeline, wrapGet(s.engine.
+		Desc("number").
+		Where(builder.Eq{"repo_id": repo.ID, "branch": branch, "event": model.EventPush}).
+		Where(builder.Neq{"status": model.StatusBlocked}).
+		Get(pipeline))
 }
 
 func (s storage) GetPipelineLast(repo *model.Repo, branch string) (*model.Pipeline, error) {
@@ -64,6 +73,22 @@ func (s storage) GetPipelineList(repo *model.Repo, p *model.ListOptions, f *mode
 
 		if f.Before != 0 {
 			cond = cond.And(builder.Lt{"created": f.Before})
+		}
+
+		if f.Branch != "" {
+			cond = cond.And(builder.Eq{"branch": f.Branch})
+		}
+
+		if f.Status != "" {
+			cond = cond.And(builder.Eq{"status": f.Status})
+		}
+
+		if len(f.Events) != 0 {
+			cond = cond.And(builder.In("event", f.Events))
+		}
+
+		if f.RefContains != "" {
+			cond = cond.And(builder.Like{"ref", f.RefContains})
 		}
 	}
 

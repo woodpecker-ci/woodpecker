@@ -23,11 +23,11 @@ import (
 
 	"github.com/oklog/ulid/v2"
 
-	backend_types "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/metadata"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/compiler/settings"
-	yaml_types "go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/types"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/utils"
+	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/compiler/settings"
+	yaml_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/types"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/utils"
 )
 
 const (
@@ -114,28 +114,12 @@ func (c *Compiler) createProcess(container *yaml_types.Container, stepType backe
 		return secret.Value, nil
 	}
 
-	// TODO: why don't we pass secrets to detached steps?
-	if !detached {
-		if err := settings.ParamsToEnv(container.Settings, environment, "PLUGIN_", true, getSecretValue); err != nil {
-			return nil, err
-		}
+	if err := settings.ParamsToEnv(container.Settings, environment, "PLUGIN_", true, getSecretValue); err != nil {
+		return nil, err
 	}
 
 	if err := settings.ParamsToEnv(container.Environment, environment, "", false, getSecretValue); err != nil {
 		return nil, err
-	}
-
-	for _, requested := range container.Secrets {
-		secretValue, err := getSecretValue(requested)
-		if err != nil {
-			return nil, err
-		}
-
-		if !environmentAllowed(requested, stepType) {
-			continue
-		}
-
-		environment[requested] = secretValue
 	}
 
 	if utils.MatchImageDynamic(container.Image, c.escalated...) && container.IsPlugin() {

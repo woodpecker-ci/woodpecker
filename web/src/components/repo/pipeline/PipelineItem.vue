@@ -57,12 +57,12 @@
       </div>
 
       <div class="flex md:flex-col w-full md:ml-auto md:w-42 py-2 gap-x-4 gap-y-2 flex-shrink-0 text-wp-text-100">
-        <div class="flex space-x-2 items-center min-w-0" :title="$t('pipeline_duration', { duration })">
+        <div class="flex space-x-2 items-center min-w-0" :title="$t('repo.pipeline_duration', { duration })">
           <Icon name="duration" />
           <span class="truncate">{{ duration }}</span>
         </div>
 
-        <div class="flex space-x-2 items-center min-w-0" :title="$t('pipeline_created', { created })">
+        <div class="flex items-center space-x-2 min-w-0" :title="$t('repo.pipeline.created', { created })">
           <Icon name="since" />
           <span class="truncate">{{ since }}</span>
         </div>

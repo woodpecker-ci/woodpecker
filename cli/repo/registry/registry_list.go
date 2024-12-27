@@ -21,8 +21,9 @@ import (
 
 	"github.com/urfave/cli/v3"
 
-	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
-	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/common"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v3/woodpecker-go/woodpecker"
 )
 
 var registryListCmd = &cli.Command{
@@ -49,7 +50,9 @@ func registryList(ctx context.Context, c *cli.Command) error {
 		return err
 	}
 
-	list, err := client.RegistryList(repoID)
+	opt := woodpecker.RegistryListOptions{}
+
+	list, err := client.RegistryList(repoID, opt)
 	if err != nil {
 		return err
 	}

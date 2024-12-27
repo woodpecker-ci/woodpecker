@@ -23,15 +23,17 @@ import (
 
 	"github.com/docker/docker/api/types/container"
 
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/common"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/common"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 )
 
 // Valid container volumes must have at least two components, source and destination.
 const minVolumeComponents = 2
 
 // returns a container configuration.
-func (e *docker) toConfig(step *types.Step) *container.Config {
+func (e *docker) toConfig(step *types.Step, options BackendOptions) *container.Config {
+	e.windowsPathPatch(step)
+
 	config := &container.Config{
 		Image: step.Image,
 		Labels: map[string]string{
@@ -42,16 +44,20 @@ func (e *docker) toConfig(step *types.Step) *container.Config {
 		AttachStdout: true,
 		AttachStderr: true,
 		Volumes:      toVol(step.Volumes),
+		User:         options.User,
 	}
 	configEnv := make(map[string]string)
 	maps.Copy(configEnv, step.Environment)
 
 	if len(step.Commands) > 0 {
-		env, entry := common.GenerateContainerConf(step.Commands, e.info.OSType)
+		env, entry := common.GenerateContainerConf(step.Commands, e.info.OSType, step.WorkingDir)
 		for k, v := range env {
 			configEnv[k] = v
 		}
 		config.Entrypoint = entry
+
+		// step.WorkingDir will be respected by the generated script
+		config.WorkingDir = step.WorkspaceBase
 	}
 	if len(step.Entrypoint) > 0 {
 		config.Entrypoint = step.Entrypoint

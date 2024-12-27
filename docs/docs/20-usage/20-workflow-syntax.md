@@ -289,7 +289,7 @@ The available events are:
 - `pull_request_closed`: triggered when a pull request is closed or merged.
 - `tag`: triggered when a tag is pushed.
 - `release`: triggered when a release, pre-release or draft is created. (You can apply further filters using [evaluate](#evaluate) with [environment variables](./50-environment.md#built-in-environment-variables).)
-- `deployment` (only available for GitHub): triggered when a deployment is created in the repository.
+- `deployment`: triggered when a deployment is created in the repository. (This event can be triggered from Woodpecker directly. GitHub also supports webhook triggers.)
 - `cron`: triggered when a cron job is executed.
 - `manual`: triggered when a user manually triggers a pipeline.
 
@@ -763,6 +763,25 @@ Woodpecker supports to define multiple workflows for a repository. Those workflo
 
 Workflows that should run even on failure should set the `runs_on` tag. See [here](./25-workflows.md#flow-control) for an example.
 
+## Advanced network options for steps
+
+:::warning
+Only allowed if 'Trusted Network' option is enabled in repo settings by an admin.
+:::
+
+### `dns`
+
+If the backend engine understands to change the DNS server and lookup domain,
+this options will be used to alter the default DNS config to a custom one for a specific step.
+
+```yaml
+steps:
+  - name: build
+    image: plugin/abc
+    dns: 1.2.3.4
+    dns_search: 'internal.company'
+```
+
 ## Privileged mode
 
 Woodpecker gives the ability to configure privileged mode in the YAML. You can use this parameter to launch containers with escalated capabilities.
@@ -780,8 +799,8 @@ Privileged mode is only available to trusted repositories and for security reaso
      commands:
        - docker --tls=false ps
 
- - name: services
-   docker:
+ services:
+   - name: docker
      image: docker:dind
      commands: dockerd-entrypoint.sh --storage-driver=vfs --tls=false
 +    privileged: true

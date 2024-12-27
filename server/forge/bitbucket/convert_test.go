@@ -22,8 +22,8 @@ import (
 	"github.com/franela/goblin"
 	"golang.org/x/oauth2"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server/forge/bitbucket/internal"
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge/bitbucket/internal"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
 func Test_helper(t *testing.T) {
@@ -98,8 +98,8 @@ func Test_helper(t *testing.T) {
 			result := convertUser(user, token)
 			g.Assert(result.Avatar).Equal(user.Links.Avatar.Href)
 			g.Assert(result.Login).Equal(user.Login)
-			g.Assert(result.Token).Equal(token.AccessToken)
-			g.Assert(result.Secret).Equal(token.RefreshToken)
+			g.Assert(result.AccessToken).Equal(token.AccessToken)
+			g.Assert(result.RefreshToken).Equal(token.RefreshToken)
 			g.Assert(result.Expiry).Equal(token.Expiry.UTC().Unix())
 		})
 

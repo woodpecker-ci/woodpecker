@@ -1,7 +1,7 @@
 variables:
   - &golang_image 'docker.io/golang:1.23'
   - &node_image 'docker.io/node:23-alpine'
-  - &alpine_image 'docker.io/alpine:3.20'
+  - &alpine_image 'docker.io/alpine:3.21'
   - path: &when_path
       - 'docs/**'
       - '.woodpecker/docs.yaml'
@@ -31,7 +31,6 @@ when:
       - <<: *docker_path
     branch:
       - ${CI_REPO_DEFAULT_BRANCH}
-      - renovate/*
   - event: pull_request_closed
     path: *when_path
   - event: manual
@@ -60,7 +59,7 @@ steps:
       - event: manual
 
   deploy-preview:
-    image: docker.io/woodpeckerci/plugin-surge-preview:1.3.2
+    image: docker.io/woodpeckerci/plugin-surge-preview:1.3.3
     settings:
       path: 'docs/build/'
       surge_token:
@@ -74,8 +73,9 @@ steps:
 
   deploy-prepare:
     image: *alpine_image
-    secrets:
-      - BOT_PRIVATE_KEY
+    environment:
+      BOT_PRIVATE_KEY:
+        from_secret: BOT_PRIVATE_KEY
     commands:
       - apk add openssh-client git
       - mkdir -p $HOME/.ssh
@@ -127,8 +127,9 @@ steps:
 
   deploy:
     image: *alpine_image
-    secrets:
-      - BOT_PRIVATE_KEY
+    environment:
+      BOT_PRIVATE_KEY:
+        from_secret: BOT_PRIVATE_KEY
     commands:
       - apk add openssh-client rsync git
       - mkdir -p $HOME/.ssh

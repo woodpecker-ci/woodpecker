@@ -19,9 +19,9 @@ import (
 	"testing"
 
 	"github.com/franela/goblin"
-	"github.com/google/go-github/v66/github"
+	"github.com/google/go-github/v67/github"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
 func Test_helper(t *testing.T) {

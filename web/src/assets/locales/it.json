@@ -144,8 +144,8 @@
         "add": "Aggiungi repository",
         "branches": "Rami",
         "deploy_pipeline": {
-            "enter_target": "Ambiente di destinazione del deploy",
-            "title": "Avvia evento di deploy per la pipeline corrente #{pipelineId}",
+            "enter_target": "Ambiente di destinazione della 'distribuzione'",
+            "title": "Avvia evento di 'distribuzione' per la pipeline corrente #{pipelineId}",
             "trigger": "Distribuzione",
             "variables": {
                 "add": "Aggiungi variabile",
@@ -196,13 +196,13 @@
             },
             "no_pipelines": "Non è ancora stata attivata alcuna pipeline.",
             "pipelines_for": "Pipeline per ramo \"{branch}\"",
-            "files": "File modificati ({files})",
+            "files": "File modificati",
             "no_pipeline_steps": "Nessuno step disponibile nella pipeline!",
             "step_not_started": "Questo step non è ancora iniziato.",
             "config": "Configurazione",
             "tasks": "Attività",
             "log_delete_confirm": "Vuoi davvero eliminare i registri attività di questo step?",
-            "errors": "Errori ({count})",
+            "errors": "Errori",
             "protected": {
                 "awaits": "Questa pipeline è in attesa di approvazione da parte di un manutentore!",
                 "approve": "Approva",
@@ -225,7 +225,7 @@
                 "declined": "rifiutata",
                 "error": "errore"
             },
-            "warnings": "Avvertenze ({count})",
+            "warnings": "Avvertenze",
             "show_errors": "Mostra errori",
             "we_got_some_errors": "Oh no, si sono verificati degli errori!",
             "event": {
@@ -321,7 +321,7 @@
                     "desc": "Ogni pipeline deve essere approvata prima di essere eseguita."
                 },
                 "save": "Salva impostazioni",
-                "success": "Impostazioni della repository aggiornate",
+                "success": "Impostazioni del progetto aggiornate",
                 "timeout": {
                     "minutes": "minuti",
                     "timeout": "Scadenza"
@@ -342,24 +342,36 @@
                     "visibility": "Visibilità progetto"
                 },
                 "cancel_prev": {
-                    "desc": "Consente di annullare le pipeline in sospeso e in esecuzione dello stesso evento e contesto prima di avviare quella appena attivata.",
+                    "desc": "I trigger di evento selezionati annulleranno le pipeline in sospeso e in esecuzione dello stesso evento prima di avviare quello più recente.",
                     "cancel": "Annulla pipeline precedenti"
                 },
                 "trusted": {
                     "desc": "I container eseguiti dalle pipeline ottengono accesso a funzionalità avanzate (come il montaggio di volumi).",
-                    "trusted": "Attendibile"
+                    "trusted": "Attendibile",
+                    "network": {
+                        "network": "Rete",
+                        "desc": "I container di pipeline ottengono l'accesso ai privilegi di rete, come la modifica del DNS."
+                    },
+                    "volumes": {
+                        "volumes": "Volumi",
+                        "desc": "I container di pipeline possono montare volumi."
+                    },
+                    "security": {
+                        "security": "Sicurezza",
+                        "desc": "I container di pipeline ottengono l'accesso ai privilegi di sicurezza."
+                    }
                 },
                 "allow_pr": {
                     "allow": "Consenti Richieste di Modifica",
-                    "desc": "Le pipeline possono essere eseguite su richieste di modifica."
+                    "desc": "Consenti l'esecuzione di pipeline sulle richieste di modifica."
                 },
                 "allow_deploy": {
-                    "allow": "Consenti deployment",
-                    "desc": "Consenti deployment da pipeline completate con successo. Utilizza solo se ti fidi di tutti gli utenti con accesso push."
+                    "allow": "Consenti eventi di  'distribuzione'.",
+                    "desc": "Consenti 'distribuzione' per le pipeline riuscite. Tutti gli utenti con autorizzazioni push possono attivarli, da usare con cautela."
                 },
                 "netrc_only_trusted": {
-                    "netrc_only_trusted": "Inietta le credenziali netrc solo nei container attendibili",
-                    "desc": "Inietta le credenziali netrc solo nei contenitori attendibili (consigliato)."
+                    "netrc_only_trusted": "Estensioni personalizzate affidabili per clone",
+                    "desc": "Le estensioni elencate qui avranno accesso alle credenziali netrc che possono essere utilizzate per clonare i repository dal forge o inviarvi il push."
                 }
             },
             "not_allowed": "Non ti è consentito accedere alle impostazioni di questa repository",
@@ -395,14 +407,30 @@
                 "branch": "Ramo"
             }
         },
-        "user_none": "L'organizzazione / utente non ha ancora alcun progetto."
+        "user_none": "L'organizzazione / utente non ha ancora alcun progetto.",
+        "visibility": {
+            "visibility": "Visibilità progetto",
+            "public": {
+                "public": "Pubblico",
+                "desc": "Ogni utente può vedere il tuo progetto senza aver effettuato l'accesso."
+            },
+            "private": {
+                "private": "Privato",
+                "desc": "Solo tu e gli altri proprietari del repository possono visualizzare questo progetto."
+            },
+            "internal": {
+                "internal": "Interno",
+                "desc": "Solo gli utenti autenticati dell'istanza di Woodpecker possono visualizzare questo progetto."
+            }
+        }
     },
     "repos": "Repository",
     "repositories": "Repository",
     "search": "Cerca…",
     "time": {
         "not_started": "non ancora iniziato",
-        "template": "MMM D, YYYY, HH:mm z"
+        "template": "MMM D, YYYY, HH:mm z",
+        "just_now": "poco fa"
     },
     "unknown_error": "Si è verificato un errore sconosciuto",
     "url": "URL",
@@ -528,5 +556,16 @@
         "saved": "Credenziali di registro salvate",
         "deleted": "Credenziali di registro eliminate"
     },
-    "login_with": "Accedi con {forge}"
+    "login_with": "Accedi con {forge}",
+    "all_repositories": "Tutti i repository",
+    "no_search_results": "Nessun risultato trovato",
+    "require_approval": {
+        "forks": "Richieste di modifica dal repository derivato",
+        "desc": "Impedisci alle pipeline dannose di esporre segreti o eseguire attività dannose approvandole prima dell'esecuzione.",
+        "require_approval_for": "Requisiti di approvazione",
+        "none": "Nessuno",
+        "pull_requests": "Tutte le richieste di modifica",
+        "all_events": "Tutti gli eventi del forge",
+        "none_desc": "Ogni evento attiva le pipeline, incluse le richieste di modifica. Questa impostazione può essere pericolosa ed è consigliata solo per le istanze private."
+    }
 }

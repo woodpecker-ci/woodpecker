@@ -24,8 +24,8 @@ import (
 
 	"codeberg.org/mvdkleijn/forgejo-sdk/forgejo"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
-	"go.woodpecker-ci.org/woodpecker/v2/shared/utils"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/utils"
 )
 
 // toRepo converts a Forgejo repository to a Woodpecker repository.
@@ -171,6 +171,7 @@ func pipelineFromPullRequest(hook *pullRequestHook) *model.Pipeline {
 			hook.PullRequest.Base.Ref,
 		),
 		PullRequestLabels: convertLabels(hook.PullRequest.Labels),
+		FromFork:          hook.PullRequest.Head.RepoID != hook.PullRequest.Base.RepoID,
 	}
 
 	return pipeline

@@ -19,11 +19,11 @@
   <a href="https://matrix.to/#/#woodpecker:matrix.org" title="Join the Matrix space at https://matrix.to/#/#woodpecker:matrix.org">
     <img src="https://img.shields.io/matrix/woodpecker:matrix.org?label=matrix" alt="Matrix space">
   </a>
-  <a href="https://goreportcard.com/report/go.woodpecker-ci.org/woodpecker/v2" title="Go Report Card">
-    <img src="https://goreportcard.com/badge/go.woodpecker-ci.org/woodpecker/v2" alt="Go Report Card">
+  <a href="https://goreportcard.com/report/go.woodpecker-ci.org/woodpecker/v3" title="Go Report Card">
+    <img src="https://goreportcard.com/badge/go.woodpecker-ci.org/woodpecker/v3" alt="Go Report Card">
   </a>
-  <a href="https://pkg.go.dev/go.woodpecker-ci.org/woodpecker/v2" title="go reference">
-    <img src="https://pkg.go.dev/badge/go.woodpecker-ci.org/woodpecker/v2" alt="go reference">
+  <a href="https://pkg.go.dev/go.woodpecker-ci.org/woodpecker/v3" title="go reference">
+    <img src="https://pkg.go.dev/badge/go.woodpecker-ci.org/woodpecker/v3" alt="go reference">
   </a>
   <a href="https://github.com/woodpecker-ci/woodpecker/releases/latest" title="GitHub release">
     <img src="https://img.shields.io/github/v/release/woodpecker-ci/woodpecker?sort=semver" alt="GitHub release">

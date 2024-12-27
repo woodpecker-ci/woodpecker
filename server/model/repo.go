@@ -20,6 +20,27 @@ import (
 	"strings"
 )
 
+type ApprovalMode string
+
+const (
+	RequireApprovalNone         ApprovalMode = "none"          // require approval for no events
+	RequireApprovalForks        ApprovalMode = "forks"         // require approval for PRs from forks (default)
+	RequireApprovalPullRequests ApprovalMode = "pull_requests" // require approval for all PRs
+	RequireApprovalAllEvents    ApprovalMode = "all_events"    // require approval for all external events
+)
+
+func (mode ApprovalMode) Valid() bool {
+	switch mode {
+	case RequireApprovalNone,
+		RequireApprovalForks,
+		RequireApprovalPullRequests,
+		RequireApprovalAllEvents:
+		return true
+	default:
+		return false
+	}
+}
+
 // Repo represents a repository.
 type Repo struct {
 	ID      int64 `json:"id,omitempty"                    xorm:"pk autoincr 'id'"`
@@ -42,7 +63,7 @@ type Repo struct {
 	Visibility                   RepoVisibility       `json:"visibility"                      xorm:"varchar(10) 'visibility'"`
 	IsSCMPrivate                 bool                 `json:"private"                         xorm:"private"`
 	Trusted                      TrustedConfiguration `json:"trusted"                         xorm:"json 'trusted'"`
-	IsGated                      bool                 `json:"gated"                           xorm:"gated"`
+	RequireApproval              ApprovalMode         `json:"require_approval"                xorm:"varchar(50) require_approval"`
 	IsActive                     bool                 `json:"active"                          xorm:"active"`
 	AllowPull                    bool                 `json:"allow_pr"                        xorm:"allow_pr"`
 	AllowDeploy                  bool                 `json:"allow_deploy"                    xorm:"allow_deploy"`
@@ -50,7 +71,7 @@ type Repo struct {
 	Hash                         string               `json:"-"                               xorm:"varchar(500) 'hash'"`
 	Perm                         *Perm                `json:"-"                               xorm:"-"`
 	CancelPreviousPipelineEvents []WebhookEvent       `json:"cancel_previous_pipeline_events" xorm:"json 'cancel_previous_pipeline_events'"`
-	NetrcOnlyTrusted             bool                 `json:"netrc_only_trusted"              xorm:"NOT NULL DEFAULT true 'netrc_only_trusted'"`
+	NetrcTrustedPlugins          []string             `json:"netrc_trusted" xorm:"json 'netrc_trusted'"`
 } //	@name Repo
 
 // TableName return database table name for xorm.
@@ -109,13 +130,14 @@ func (r *Repo) Update(from *Repo) {
 // RepoPatch represents a repository patch object.
 type RepoPatch struct {
 	Config                       *string                    `json:"config_file,omitempty"`
-	IsGated                      *bool                      `json:"gated,omitempty"`
+	IsGated                      *bool                      `json:"gated,omitempty"` // TODO: deprecated in favor of RequireApproval => Remove in next major release
+	RequireApproval              *string                    `json:"require_approval,omitempty"`
 	Timeout                      *int64                     `json:"timeout,omitempty"`
 	Visibility                   *string                    `json:"visibility,omitempty"`
 	AllowPull                    *bool                      `json:"allow_pr,omitempty"`
 	AllowDeploy                  *bool                      `json:"allow_deploy,omitempty"`
 	CancelPreviousPipelineEvents *[]WebhookEvent            `json:"cancel_previous_pipeline_events"`
-	NetrcOnlyTrusted             *bool                      `json:"netrc_only_trusted"`
+	NetrcTrusted                 *[]string                  `json:"netrc_trusted"`
 	Trusted                      *TrustedConfigurationPatch `json:"trusted"`
 } //	@name RepoPatch
 
