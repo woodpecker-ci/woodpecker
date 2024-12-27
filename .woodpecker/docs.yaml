@@ -60,7 +60,9 @@ steps:
       - corepack enable
       - pnpm install --frozen-lockfile
       - pnpm build
-    depends_on: prettier
+    depends_on:
+      - prettier
+      - build-cli
     when:
       - path: *when_path
         event: [tag, pull_request, push]
@@ -75,7 +77,9 @@ steps:
       forge_repo_token:
         from_secret: GITHUB_TOKEN_SURGE
     failure: ignore
-    depends_on: prettier
+    depends_on:
+      - prettier
+      - build
     when:
       event: [pull_request, pull_request_closed]
       path: *when_path
@@ -92,7 +96,9 @@ steps:
       - echo "$BOT_PRIVATE_KEY" > $HOME/.ssh/id_rsa
       - chmod 0600 $HOME/.ssh/id_rsa
       - git clone --depth 1 --single-branch git@github.com:woodpecker-ci/woodpecker-ci.github.io.git ./docs_repo
-    depends_on: prettier
+    depends_on:
+      - prettier
+      - build
     when:
       - event: push
         path:
@@ -108,7 +114,9 @@ steps:
       - apk add jq
       - jq '.next = "next-${CI_COMMIT_SHA:0:10}"' ./docs_repo/version.json > ./docs_repo/version.json.tmp
       - mv ./docs_repo/version.json.tmp ./docs_repo/version.json
-    depends_on: prettier
+    depends_on:
+      - prettier
+      - deploy-prepare
     when:
       - event: push
         path: *docker_path
@@ -121,7 +129,9 @@ steps:
       - if [[ "${CI_COMMIT_TAG}" != *"rc"* ]] ; then jq '.latest = "${CI_COMMIT_TAG}"' ./docs_repo/version.json > ./docs_repo/version.json.tmp && mv ./docs_repo/version.json.tmp ./docs_repo/version.json ; fi
       - jq '.rc = "${CI_COMMIT_TAG}"' ./docs_repo/version.json > ./docs_repo/version.json.tmp
       - mv ./docs_repo/version.json.tmp ./docs_repo/version.json
-    depends_on: prettier
+    depends_on:
+      - prettier
+      - deploy-prepare
     when:
       - event: tag
 
@@ -131,7 +141,8 @@ steps:
       - apk add rsync
       # copy all docs files and delete all old ones, but leave CNAME, index.yaml and version.json untouched
       - rsync -r --exclude .git --exclude CNAME --exclude index.yaml --exclude README.md --exclude version.json --delete docs/build/ ./docs_repo
-    depends_on: prettier
+    depends_on:
+      - prettier
     when:
       - event: push
         path: *when_path
@@ -157,7 +168,9 @@ steps:
       - test -n "$(git status --porcelain)" || exit 0
       - git commit -m "Deploy website - based on ${CI_COMMIT_SHA}"
       - git push
-    depends_on: prettier
+    depends_on:
+      - prettier
+      - copy-files
     when:
       - event: push
         path:
