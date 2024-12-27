@@ -49,7 +49,8 @@
   <SvgIcon v-else-if="name === 'auto-scroll'" :path="mdiDownloadCircle" size="1.3rem" />
   <SvgIcon v-else-if="name === 'auto-scroll-off'" :path="mdiDownloadOff" size="1.3rem" />
   <SvgIcon v-else-if="name === 'pause'" :path="mdiPause" size="1.3rem" />
-  <SvgIcon v-else-if="name === 'play'" :path="mdiPlayOutline" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'play'" :path="mdiPlay" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'play-outline'" :path="mdiPlayOutline" size="1.3rem" />
   <SvgIcon v-else-if="name === 'remove'" :path="mdiCloseCircle" size="1.3rem" />
 
   <SvgIcon v-else-if="name === 'visibility-private'" :path="mdiLockOutline" size="1.3rem" />
@@ -107,6 +108,7 @@ import {
   mdiPackageVariant,
   mdiPause,
   mdiPencilOutline,
+  mdiPlay,
   mdiPlayOutline,
   mdiPlus,
   mdiPower,
@@ -173,6 +175,7 @@ export type IconNames =
   | 'auto-scroll-off'
   | 'refresh'
   | 'play'
+  | 'play-outline'
   | 'pause'
   | 'warning'
   | 'attention'
