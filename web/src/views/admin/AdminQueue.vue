@@ -15,6 +15,7 @@
             class="w-6 h-6"
             :class="{
               'text-wp-state-error-100': queueInfo.paused,
+              'text-wp-text-100': !queueInfo.paused,
             }"
           />
         </div>
