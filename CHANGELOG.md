@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @Fishbowler, @M0Rf30, @anbraten, @cduchenoy, @fernandrone, @gedankenstuecke, @gnowland, @greenaar, @hg, @j04n-f, @jenrik, @johanneskastl, @jolheiser, @lafriks, @lukashass, @meln5674, @not-my-profile, @pat-s, @plafue, @qwerty287, @smainz, @tori-27, @tsufeki, @xoxys, @xtexChooser, @zc-devs
+@6543, @Fishbowler, @M0Rf30, @anbraten, @cduchenoy, @cevatkerim, @fernandrone, @gedankenstuecke, @gnowland, @greenaar, @hg, @j04n-f, @jenrik, @johanneskastl, @jolheiser, @lafriks, @lukashass, @meln5674, @not-my-profile, @pat-s, @plafue, @qwerty287, @smainz, @tori-27, @tsufeki, @xoxys, @xtexChooser, @zc-devs
 
 ### 💥 Breaking changes
 
@@ -67,6 +67,7 @@
 
 ### 📚 Documentation
 
+- fixed a typo [[#4621](https://github.com/woodpecker-ci/woodpecker/pull/4621)]
 - Fix misleading example in Workflow syntax/Privileged mode [[#4613](https://github.com/woodpecker-ci/woodpecker/pull/4613)]
 - Update docs section about "Custom clone plugins" [[#4618](https://github.com/woodpecker-ci/woodpecker/pull/4618)]
 - Search in plugin tags [[#4604](https://github.com/woodpecker-ci/woodpecker/pull/4604)]
