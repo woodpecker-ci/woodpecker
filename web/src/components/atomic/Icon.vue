@@ -10,7 +10,7 @@
   <SvgIcon v-else-if="name === 'deployment'" :path="mdiPackageVariant" size="1.3rem" />
   <SvgIcon v-else-if="name === 'commit'" :path="mdiSourceCommit" size="1.3rem" />
   <SvgIcon v-else-if="name === 'back'" :path="mdiArrowLeft" size="1.3rem" />
-  <SvgIcon v-else-if="name === 'github'" :path="mdiGit" size="32" />
+  <SvgIcon v-else-if="name === 'github'" :path="mdiGitHub" size="32" />
   <SvgIcon v-else-if="name === 'repo'" :path="mdiGit" size="32" />
   <SvgIcon v-else-if="name === 'settings'" :path="mdiCog" size="32" />
   <SvgIcon v-else-if="name === 'trash'" :path="mdiTrashCanOutline" size="1.3rem" />
@@ -36,7 +36,7 @@
   <SvgIcon v-else-if="name === 'error'" :path="mdiAlert" size="1.3rem" />
   <SvgIcon v-else-if="name === 'bitbucket' || name === 'bitbucket-dc'" :path="mdiBitbucket" size="32" />
   <SvgIcon v-else-if="name === 'question'" :path="mdiHelpCircle" size="1.3rem" />
-  <SvgIcon v-else-if="name === 'plus'" :path="mdiPlusCircle" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'plus'" :path="mdiPlus" size="1.3rem" />
   <SvgIcon v-else-if="name === 'list'" :path="mdiFormatListBulleted" size="1.3rem" />
   <SvgIcon v-else-if="name === 'heal'" :path="mdiWrenchCogOutline" size="1.3rem" />
   <SvgIcon v-else-if="name === 'turn-off'" :path="mdiPower" size="1.3rem" />
@@ -48,11 +48,11 @@
   <SvgIcon v-else-if="name === 'auto-scroll'" :path="mdiDownloadCircle" size="1.3rem" />
   <SvgIcon v-else-if="name === 'auto-scroll-off'" :path="mdiDownloadOff" size="1.3rem" />
   <SvgIcon v-else-if="name === 'pause'" :path="mdiPauseCircle" size="1.3rem" />
-  <SvgIcon v-else-if="name === 'play'" :path="mdiPlayCircle" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'play'" :path="mdiPlay" size="1.3rem" />
   <SvgIcon v-else-if="name === 'remove'" :path="mdiCloseCircle" size="1.3rem" />
 
-  <SvgIcon v-else-if="name === 'visibility-private'" :path="mdiLock" size="1.3rem" />
-  <SvgIcon v-else-if="name === 'visibility-internal'" :path="mdiLockOpen" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'visibility-private'" :path="mdiLockOutline" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'visibility-internal'" :path="mdiLockOpenOutline" size="1.3rem" />
 
   <SvgIcon v-else-if="name === 'forgejo'" :path="siForgejo.path" size="32" />
   <SvgIcon v-else-if="name === 'gitea'" :path="siGitea.path" size="32" />
@@ -98,14 +98,15 @@ import {
   mdiGestureTap,
   mdiGit,
   mdiHelpCircle,
-  mdiLock,
-  mdiLockOpen,
+  mdiLockOutline,
+  mdiLockOpenOutline,
   mdiMinusCircle,
   mdiPackageVariant,
   mdiPauseCircle,
   mdiPencilCircle,
+  mdiPlay,
   mdiPlayCircle,
-  mdiPlusCircle,
+  mdiPlus,
   mdiPower,
   mdiRadioboxBlank,
   mdiRadioboxIndeterminateVariant,
