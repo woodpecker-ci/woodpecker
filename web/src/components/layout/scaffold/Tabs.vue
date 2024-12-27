@@ -4,12 +4,12 @@
       v-for="tab in tabs"
       :key="tab.title"
       :to="tab.to"
-      class="flex items-center !border-wp-text-100 py-1 border-transparent md:border-b-2 w-full md:w-auto text-wp-text-100 cursor-pointer"
-      active-class="underline !border-wp-text-100"
-      exact-active-class="underline !border-wp-text-100"
+      class="flex items-center !border-wp-text-100 py-1 border-transparent w-full md:w-auto text-wp-text-100 cursor-pointer"
+      :active-class="tab.matchChildren ? '!border-wp-text-100' : ''"
+      :exact-active-class="tab.matchChildren ? '' : '!border-wp-text-100 md:border-b-2 underline'"
     >
       <span
-        class="flex flex-row md:justify-center items-center gap-2 dark:hover:bg-wp-background-100 hover:bg-wp-background-200 py-1 sm:pr-2 sm:pl-2.5 md:pl-2 rounded-md w-full min-w-20"
+        class="flex flex-row md:justify-center items-center gap-2 dark:hover:bg-wp-background-100 hover:bg-wp-background-200 py-1 rounded-md w-full min-w-20"
       >
         <Icon v-if="tab.icon" :name="tab.icon" :class="tab.iconClass" class="flex-shrink-0" />
         <span>{{ tab.title }}</span>
@@ -26,3 +26,4 @@ import { useTabsClient } from '~/compositions/useTabs';
 
 const { tabs } = useTabsClient();
 </script>
+
