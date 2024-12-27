@@ -83,15 +83,14 @@
 <script lang="ts" setup>
 import {
   mdiAlarm,
-  mdiAlertCircle,
   mdiAlert,
+  mdiAlertCircle,
   mdiArrowLeft,
   mdiBitbucket,
   mdiCheckCircle,
   mdiChevronRight,
   mdiClockTimeEightOutline,
   mdiCloseCircle,
-
   mdiCog,
   mdiDownloadCircle,
   mdiDownloadOff,
@@ -99,8 +98,8 @@ import {
   mdiGestureTap,
   mdiGit,
   mdiHelpCircle,
-  mdiLockOpen,
   mdiLock,
+  mdiLockOpen,
   mdiMinusCircle,
   mdiPackageVariant,
   mdiPauseCircle,
