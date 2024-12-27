@@ -213,11 +213,9 @@ func Test_helper(t *testing.T) {
 			g.Assert(pipeline.Ref).Equal("refs/pull/42/merge")
 			g.Assert(pipeline.Refspec).Equal("changes:main")
 			g.Assert(pipeline.Commit).Equal(*from.PullRequest.Head.SHA)
-			g.Assert(pipeline.Message).Equal(*from.PullRequest.Title)
-			g.Assert(pipeline.Title).Equal(*from.PullRequest.Title)
-			g.Assert(pipeline.Author).Equal(*from.PullRequest.User.Login)
-			g.Assert(pipeline.Avatar).Equal(*from.PullRequest.User.AvatarURL)
-			g.Assert(pipeline.Sender).Equal(*from.Sender.Login)
+			g.Assert(pipeline.PullRequest.Title).Equal(*from.PullRequest.Title)
+			g.Assert(pipeline.Author.Author).Equal(*from.PullRequest.User.Login)
+			g.Assert(pipeline.Author.Avatar).Equal(*from.PullRequest.User.AvatarURL)
 		})
 
 		g.It("should convert a deployment from webhook", func() {
@@ -237,10 +235,10 @@ func Test_helper(t *testing.T) {
 			g.Assert(pipeline.Branch).Equal("main")
 			g.Assert(pipeline.Ref).Equal("refs/heads/main")
 			g.Assert(pipeline.Commit).Equal(*from.Deployment.SHA)
-			g.Assert(pipeline.Message).Equal(*from.Deployment.Description)
+			g.Assert(pipeline.Deployment.Description).Equal(*from.Deployment.Description)
 			g.Assert(pipeline.ForgeURL).Equal(*from.Deployment.URL)
-			g.Assert(pipeline.Author).Equal(*from.Sender.Login)
-			g.Assert(pipeline.Avatar).Equal(*from.Sender.AvatarURL)
+			g.Assert(pipeline.Author.Author).Equal(*from.Sender.Login)
+			g.Assert(pipeline.Author.Avatar).Equal(*from.Sender.AvatarURL)
 		})
 
 		g.It("should convert a push from webhook", func() {
@@ -259,11 +257,11 @@ func Test_helper(t *testing.T) {
 			g.Assert(pipeline.Branch).Equal("main")
 			g.Assert(pipeline.Ref).Equal("refs/heads/main")
 			g.Assert(pipeline.Commit).Equal(*from.HeadCommit.ID)
-			g.Assert(pipeline.Message).Equal(*from.HeadCommit.Message)
+			g.Assert(pipeline.Commit.Message).Equal(*from.HeadCommit.Message)
 			g.Assert(pipeline.ForgeURL).Equal(*from.HeadCommit.URL)
 			g.Assert(pipeline.Author).Equal(*from.Sender.Login)
-			g.Assert(pipeline.Avatar).Equal(*from.Sender.AvatarURL)
-			g.Assert(pipeline.Email).Equal(*from.HeadCommit.Author.Email)
+			g.Assert(pipeline.Author.Avatar).Equal(*from.Sender.AvatarURL)
+			g.Assert(pipeline.Author.Email).Equal(*from.HeadCommit.Author.Email)
 		})
 
 		g.It("should convert a tag from webhook", func() {

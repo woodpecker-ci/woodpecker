@@ -128,7 +128,6 @@ func Test_parser(t *testing.T) {
 				g.Assert(r.SCMKind).Equal(model.RepoGit)
 				g.Assert(r.Clone).Equal("https://bitbucket.org/martinherren1984/publictestrepo")
 				g.Assert(b.Commit).Equal("c14c1bb05dfb1fdcdf06b31485fff61b0ea44277")
-				g.Assert(b.Message).Equal("a\n")
 			})
 		})
 

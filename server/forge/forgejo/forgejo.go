@@ -272,7 +272,7 @@ func (c *Forgejo) File(ctx context.Context, u *model.User, r *model.Repo, b *mod
 		return nil, err
 	}
 
-	cfg, resp, err := client.GetFile(r.Owner, r.Name, b.Commit, f)
+	cfg, resp, err := client.GetFile(r.Owner, r.Name, b.Commit.SHA, f)
 	if err != nil && resp != nil && resp.StatusCode == http.StatusNotFound {
 		return nil, errors.Join(err, &forge_types.ErrConfigNotFound{Configs: []string{f}})
 	}
@@ -288,7 +288,7 @@ func (c *Forgejo) Dir(ctx context.Context, u *model.User, r *model.Repo, b *mode
 	}
 
 	// List files in repository. Path from root
-	tree, _, err := client.GetTrees(r.Owner, r.Name, b.Commit, true)
+	tree, _, err := client.GetTrees(r.Owner, r.Name, b.Commit.SHA, true)
 	if err != nil {
 		return nil, err
 	}
@@ -496,7 +496,7 @@ func (c *Forgejo) Hook(ctx context.Context, r *http.Request) (*model.Repo, *mode
 		return nil, nil, err
 	}
 
-	if pipeline != nil && pipeline.Event == model.EventRelease && pipeline.Commit == "" {
+	if pipeline != nil && pipeline.Event == model.EventRelease && pipeline.Commit.SHA == "" {
 		tagName := strings.Split(pipeline.Ref, "/")[2]
 		sha, err := c.getTagCommitSHA(ctx, repo, tagName)
 		if err != nil {

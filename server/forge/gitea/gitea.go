@@ -274,7 +274,7 @@ func (c *Gitea) File(ctx context.Context, u *model.User, r *model.Repo, b *model
 		return nil, err
 	}
 
-	cfg, resp, err := client.GetFile(r.Owner, r.Name, b.Commit, f)
+	cfg, resp, err := client.GetFile(r.Owner, r.Name, b.Commit.SHA, f)
 	if err != nil && resp != nil && resp.StatusCode == http.StatusNotFound {
 		return nil, errors.Join(err, &forge_types.ErrConfigNotFound{Configs: []string{f}})
 	}
@@ -290,7 +290,7 @@ func (c *Gitea) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model.
 	}
 
 	// List files in repository. Path from root
-	tree, _, err := client.GetTrees(r.Owner, r.Name, b.Commit, true)
+	tree, _, err := client.GetTrees(r.Owner, r.Name, b.Commit.SHA, true)
 	if err != nil {
 		return nil, err
 	}
@@ -328,7 +328,7 @@ func (c *Gitea) Status(ctx context.Context, user *model.User, repo *model.Repo, 
 	_, _, err = client.CreateStatus(
 		repo.Owner,
 		repo.Name,
-		pipeline.Commit,
+		pipeline.Commit.SHA,
 		gitea.CreateStatusOption{
 			State:       getStatus(workflow.State),
 			TargetURL:   common.GetPipelineStatusURL(repo, pipeline, workflow),
@@ -510,7 +510,7 @@ func (c *Gitea) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.
 			return nil, nil, err
 		}
 		pipeline.Commit = &model.Commit{
-			SHA: sha.SHA,
+			SHA:      sha.SHA,
 			ForgeURL: sha.URL,
 		}
 	}

@@ -169,29 +169,29 @@ func convertPullHook(from *internal.PullRequestHook) *model.Pipeline {
 	}
 
 	pipeline := &model.Pipeline{
-		Event:  event,
+		Event: event,
 		Commit: &model.Commit{
-			SHA: from.PullRequest.Source.Commit.Hash,
+			SHA:      from.PullRequest.Source.Commit.Hash,
 			ForgeURL: from.PullRequest.Source.Commit.Links.HTML.Href,
 		},
-		Ref:    fmt.Sprintf("refs/pull-requests/%d/from", from.PullRequest.ID),
+		Ref: fmt.Sprintf("refs/pull-requests/%d/from", from.PullRequest.ID),
 		Refspec: fmt.Sprintf("%s:%s",
 			from.PullRequest.Source.Branch.Name,
 			from.PullRequest.Dest.Branch.Name,
 		),
-		ForgeURL:  from.PullRequest.Links.HTML.Href,
-		Branch:    from.PullRequest.Source.Branch.Name,
-		Message:   from.PullRequest.Title,
-		Author:    convertAuthor(from.Actor),
+		ForgeURL: from.PullRequest.Links.HTML.Href,
+		Branch:   from.PullRequest.Source.Branch.Name,
+
+		Author: convertAuthor(from.Actor),
 		PullRequest: &model.PullRequest{
-			FromFork:  from.PullRequest.Source.Repo.UUID != from.PullRequest.Dest.Repo.UUID,
+			FromFork: from.PullRequest.Source.Repo.UUID != from.PullRequest.Dest.Repo.UUID,
+			Title:    from.PullRequest.Title,
 		},
-		Timestamp: from.PullRequest.Updated.UTC().Unix(),
 	}
 
 	if from.PullRequest.State == stateClosed {
 		pipeline.Commit = &model.Commit{
-			SHA: from.PullRequest.MergeCommit.Hash,
+			SHA:      from.PullRequest.MergeCommit.Hash,
 			ForgeURL: from.PullRequest.Source.Commit.Links.HTML.Href,
 		}
 		pipeline.Ref = fmt.Sprintf("refs/heads/%s", from.PullRequest.Dest.Branch.Name)
@@ -205,15 +205,14 @@ func convertPullHook(from *internal.PullRequestHook) *model.Pipeline {
 // hook to the Woodpecker pipeline struct holding commit information.
 func convertPushHook(hook *internal.PushHook, change *internal.Change) *model.Pipeline {
 	pipeline := &model.Pipeline{
-		Commit:    &model.Commit{
-			SHA: change.New.Target.Hash,
+		Commit: &model.Commit{
+			SHA:      change.New.Target.Hash,
 			ForgeURL: change.New.Target.Links.HTML.Href,
-			Message: change.New.Target.Message,
+			Message:  change.New.Target.Message,
 		},
-		ForgeURL:  change.New.Target.Links.HTML.Href,
-		Branch:    change.New.Name,
-		Message:   change.New.Target.Message,
-		Author:    convertAuthor(hook.Actor),
+		ForgeURL: change.New.Target.Links.HTML.Href,
+		Branch:   change.New.Name,
+		Author:   convertAuthor(hook.Actor),
 	}
 	switch change.New.Type {
 	case "tag", "annotated_tag", "bookmark":

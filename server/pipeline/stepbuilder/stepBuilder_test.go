@@ -39,8 +39,10 @@ func TestGlobalEnvsubst(t *testing.T) {
 		},
 		Repo: &model.Repo{},
 		Curr: &model.Pipeline{
-			Message: "aaa",
-			Event:   model.EventPush,
+			Commit: &model.Commit{
+				Message: "aaa",
+			},
+			Event: model.EventPush,
 		},
 		Prev:  &model.Pipeline{},
 		Netrc: &model.Netrc{},
@@ -78,8 +80,10 @@ func TestMissingGlobalEnvsubst(t *testing.T) {
 		},
 		Repo: &model.Repo{},
 		Curr: &model.Pipeline{
-			Message: "aaa",
-			Event:   model.EventPush,
+			Commit: &model.Commit{
+				Message: "aaa",
+			},
+			Event: model.EventPush,
 		},
 		Prev:  &model.Pipeline{},
 		Netrc: &model.Netrc{},
@@ -113,8 +117,9 @@ func TestMultilineEnvsubst(t *testing.T) {
 		Forge: getMockForge(t),
 		Repo:  &model.Repo{},
 		Curr: &model.Pipeline{
-			Message: `aaa
-bbb`,
+			Commit: &model.Commit{
+				Message: "aaa\nbbb",
+			},
 		},
 		Prev:  &model.Pipeline{},
 		Netrc: &model.Netrc{},

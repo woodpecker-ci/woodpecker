@@ -85,11 +85,9 @@ func CreatePipeline(c *gin.Context) {
 
 func createTmpPipeline(event model.WebhookEvent, commit *model.Commit, user *model.User, opts *model.PipelineOptions) *model.Pipeline {
 	return &model.Pipeline{
-		Event:     event,
-		Commit:    commit,
-		Branch:    opts.Branch,
-
-		Message: "MANUAL PIPELINE @ " + opts.Branch,
+		Event:  event,
+		Commit: commit,
+		Branch: opts.Branch,
 
 		Ref:                 opts.Branch,
 		AdditionalVariables: opts.Variables,
@@ -97,7 +95,7 @@ func createTmpPipeline(event model.WebhookEvent, commit *model.Commit, user *mod
 		Author: model.Author{
 			Author: user.Login,
 			Avatar: user.Avatar,
-			Email: user.Email,
+			Email:  user.Email,
 		},
 
 		ForgeURL: commit.ForgeURL,
@@ -623,7 +621,7 @@ func PostPipeline(c *gin.Context) {
 	// make Deploy overridable
 
 	// make Deploy task overridable
-	pl.DeployTask = c.DefaultQuery("deploy_task", pl.DeployTask)
+	pl.Deployment.Task = c.DefaultQuery("deploy_task", pl.Deployment.Task)
 
 	// make Event overridable to deploy
 	// TODO: refactor to use own proper API for deploy
@@ -639,7 +637,7 @@ func PostPipeline(c *gin.Context) {
 			return
 		}
 
-		pl.DeployTo = c.DefaultQuery("deploy_to", pl.DeployTo)
+		pl.Deployment.Target = c.DefaultQuery("deploy_to", pl.Deployment.Target)
 	}
 
 	// Read query string parameters into pipelineParams, exclude reserved params

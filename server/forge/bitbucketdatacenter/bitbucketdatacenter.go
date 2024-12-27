@@ -257,7 +257,7 @@ func (c *client) File(ctx context.Context, u *model.User, r *model.Repo, p *mode
 		return nil, fmt.Errorf("unable to create bitbucket client: %w", err)
 	}
 
-	b, resp, err := bc.Projects.GetTextFileContent(ctx, r.Owner, r.Name, f, p.Commit)
+	b, resp, err := bc.Projects.GetTextFileContent(ctx, r.Owner, r.Name, f, p.Commit.SHA)
 	if err != nil {
 		if resp.StatusCode == http.StatusNotFound {
 			// requested directory might not exist
@@ -276,7 +276,7 @@ func (c *client) Dir(ctx context.Context, u *model.User, r *model.Repo, p *model
 		return nil, fmt.Errorf("unable to create bitbucket client: %w", err)
 	}
 
-	opts := &bb.FilesListOptions{At: p.Commit}
+	opts := &bb.FilesListOptions{At: p.Commit.SHA}
 	all := make([]*forge_types.FileMeta, 0)
 	for {
 		list, resp, err := bc.Projects.ListFiles(ctx, r.Owner, r.Name, path, opts)
@@ -316,7 +316,7 @@ func (c *client) Status(ctx context.Context, u *model.User, repo *model.Repo, pi
 		Key:         common.GetPipelineStatusContext(repo, pipeline, workflow),
 		Description: common.GetPipelineStatusDescription(pipeline.Status),
 	}
-	_, err = bc.Projects.CreateBuildStatus(ctx, repo.Owner, repo.Name, pipeline.Commit, status)
+	_, err = bc.Projects.CreateBuildStatus(ctx, repo.Owner, repo.Name, pipeline.Commit.SHA, status)
 	return err
 }
 
@@ -546,15 +546,19 @@ func (c *client) updatePipelineFromCommit(ctx context.Context, u *model.User, r 
 		return nil, fmt.Errorf("unable to create bitbucket client: %w", err)
 	}
 
-	commit, _, err := bc.Projects.GetCommit(ctx, r.Owner, r.Name, p.Commit)
+	commit, _, err := bc.Projects.GetCommit(ctx, r.Owner, r.Name, p.Commit.SHA)
 	if err != nil {
 		return nil, fmt.Errorf("unable to read commit: %w", err)
 	}
-	p.Message = commit.Message
+	p.Commit.Message = commit.Message
+	p.Commit.Author = model.Author{
+		Author: commit.Author.Name,
+		Email:  commit.Author.Email,
+	}
 
 	opts := &bb.ListOptions{}
 	for {
-		changes, resp, err := bc.Projects.ListChanges(ctx, r.Owner, r.Name, p.Commit, opts)
+		changes, resp, err := bc.Projects.ListChanges(ctx, r.Owner, r.Name, p.Commit.SHA, opts)
 		if err != nil {
 			return nil, fmt.Errorf("unable to list commit changes: %w", err)
 		}

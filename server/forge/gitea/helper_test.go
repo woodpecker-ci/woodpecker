@@ -101,9 +101,9 @@ func Test_parse(t *testing.T) {
 			g.Assert(pipeline.Ref).Equal(hook.Ref)
 			g.Assert(pipeline.ForgeURL).Equal(hook.Commits[0].URL)
 			g.Assert(pipeline.Branch).Equal("main")
-			g.Assert(pipeline.Message).Equal(hook.Commits[0].Message)
-			g.Assert(pipeline.Avatar).Equal("http://1.gravatar.com/avatar/8c58a0be77ee441bb8f8595b7f1b4e87")
-			g.Assert(pipeline.Author).Equal(hook.Sender.UserName)
+			g.Assert(pipeline.Commit.Message).Equal(hook.Commits[0].Message)
+			g.Assert(pipeline.Author.Avatar).Equal("http://1.gravatar.com/avatar/8c58a0be77ee441bb8f8595b7f1b4e87")
+			g.Assert(pipeline.Author.Author).Equal(hook.Sender.UserName)
 			g.Assert(utils.EqualSliceValues(pipeline.ChangedFiles, []string{"CHANGELOG.md", "app/controller/application.rb"})).IsTrue()
 		})
 
@@ -126,7 +126,6 @@ func Test_parse(t *testing.T) {
 			g.Assert(pipeline.Ref).Equal("refs/tags/v1.0.0")
 			g.Assert(pipeline.Branch).Equal("")
 			g.Assert(pipeline.ForgeURL).Equal("http://gitea.golang.org/gordon/hello-world/src/tag/v1.0.0")
-			g.Assert(pipeline.Message).Equal("created tag v1.0.0")
 		})
 
 		g.It("Should return a Pipeline struct from a pull_request hook", func() {
@@ -139,9 +138,9 @@ func Test_parse(t *testing.T) {
 			g.Assert(pipeline.ForgeURL).Equal("http://gitea.golang.org/gordon/hello-world/pull/1")
 			g.Assert(pipeline.Branch).Equal("main")
 			g.Assert(pipeline.Refspec).Equal("feature/changes:main")
-			g.Assert(pipeline.Message).Equal(hook.PullRequest.Title)
-			g.Assert(pipeline.Avatar).Equal("http://1.gravatar.com/avatar/8c58a0be77ee441bb8f8595b7f1b4e87")
-			g.Assert(pipeline.Author).Equal(hook.PullRequest.Poster.UserName)
+			g.Assert(pipeline.PullRequest.Title).Equal(hook.PullRequest.Title)
+			g.Assert(pipeline.Author.Avatar).Equal("http://1.gravatar.com/avatar/8c58a0be77ee441bb8f8595b7f1b4e87")
+			g.Assert(pipeline.Author.Author).Equal(hook.PullRequest.Poster.UserName)
 		})
 
 		g.It("Should return a Repo struct from a pull_request hook", func() {

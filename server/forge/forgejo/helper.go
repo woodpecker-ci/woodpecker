@@ -20,7 +20,6 @@ import (
 	"io"
 	"net/url"
 	"strings"
-	"time"
 
 	"codeberg.org/mvdkleijn/forgejo-sdk/forgejo"
 
@@ -89,16 +88,20 @@ func pipelineFromPush(hook *pushHook) *model.Pipeline {
 	}
 
 	return &model.Pipeline{
-		Event:        model.EventPush,
-		Commit:       hook.After,
-		Ref:          hook.Ref,
-		ForgeURL:     link,
-		Branch:       strings.TrimPrefix(hook.Ref, "refs/heads/"),
-		Message:      message,
-		Avatar:       avatar,
-		Author:       hook.Sender.UserName,
-		Email:        hook.Sender.Email,
-		Sender:       hook.Sender.UserName,
+		Event: model.EventPush,
+		Commit: &model.Commit{
+			SHA:      hook.After,
+			Message:  message,
+			ForgeURL: link,
+		},
+		Ref:      hook.Ref,
+		ForgeURL: link,
+		Branch:   strings.TrimPrefix(hook.Ref, "refs/heads/"),
+		Author: model.Author{
+			Author: hook.Sender.UserName,
+			Email:  hook.Sender.Email,
+			Avatar: avatar,
+		},
 		ChangedFiles: getChangedFilesFromPushHook(hook),
 	}
 }
@@ -128,15 +131,17 @@ func pipelineFromTag(hook *pushHook) *model.Pipeline {
 	ref := strings.TrimPrefix(hook.Ref, "refs/tags/")
 
 	return &model.Pipeline{
-		Event:     model.EventTag,
-		Commit:    hook.Sha,
-		Ref:       fmt.Sprintf("refs/tags/%s", ref),
-		ForgeURL:  fmt.Sprintf("%s/src/tag/%s", hook.Repo.HTMLURL, ref),
-		Message:   fmt.Sprintf("created tag %s", ref),
-		Avatar:    avatar,
-		Author:    hook.Sender.UserName,
-		Sender:    hook.Sender.UserName,
-		Email:     hook.Sender.Email,
+		Event: model.EventTag,
+		Commit: &model.Commit{
+			SHA: hook.Sha,
+		},
+		Ref:      fmt.Sprintf("refs/tags/%s", ref),
+		ForgeURL: fmt.Sprintf("%s/src/tag/%s", hook.Repo.HTMLURL, ref),
+		Author: model.Author{
+			Author: hook.Sender.UserName,
+			Email:  hook.Sender.Email,
+			Avatar: avatar,
+		},
 	}
 }
 
@@ -154,22 +159,24 @@ func pipelineFromPullRequest(hook *pullRequestHook) *model.Pipeline {
 
 	pipeline := &model.Pipeline{
 		Event:    event,
-		Commit:   hook.PullRequest.Head.Sha,
+		Commit:   &model.Commit{SHA: hook.PullRequest.Head.Sha},
 		ForgeURL: hook.PullRequest.HTMLURL,
 		Ref:      fmt.Sprintf("refs/pull/%d/head", hook.Number),
 		Branch:   hook.PullRequest.Base.Ref,
-		Message:  hook.PullRequest.Title,
-		Author:   hook.PullRequest.Poster.UserName,
-		Avatar:   avatar,
-		Sender:   hook.Sender.UserName,
-		Email:    hook.Sender.Email,
-		Title:    hook.PullRequest.Title,
+		Author: model.Author{
+			Author: hook.Sender.UserName,
+			Email:  hook.Sender.Email,
+			Avatar: avatar,
+		},
 		Refspec: fmt.Sprintf("%s:%s",
 			hook.PullRequest.Head.Ref,
 			hook.PullRequest.Base.Ref,
 		),
-		PullRequestLabels: convertLabels(hook.PullRequest.Labels),
-		FromFork:          hook.PullRequest.Head.RepoID != hook.PullRequest.Base.RepoID,
+		PullRequest: &model.PullRequest{
+			PullRequestLabels: convertLabels(hook.PullRequest.Labels),
+			FromFork:          hook.PullRequest.Head.RepoID != hook.PullRequest.Base.RepoID,
+			Title:             hook.PullRequest.Title,
+		},
 	}
 
 	return pipeline
@@ -186,11 +193,12 @@ func pipelineFromRelease(hook *releaseHook) *model.Pipeline {
 		Ref:          fmt.Sprintf("refs/tags/%s", hook.Release.TagName),
 		ForgeURL:     hook.Release.HTMLURL,
 		Branch:       hook.Release.Target,
-		Message:      fmt.Sprintf("created release %s", hook.Release.Title),
-		Avatar:       avatar,
-		Author:       hook.Sender.UserName,
-		Sender:       hook.Sender.UserName,
-		Email:        hook.Sender.Email,
+		ReleaseTitle: hook.Release.Title,
+		Author: model.Author{
+			Author: hook.Sender.UserName,
+			Email:  hook.Sender.Email,
+			Avatar: avatar,
+		},
 		IsPrerelease: hook.Release.IsPrerelease,
 	}
 }

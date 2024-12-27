@@ -150,15 +150,14 @@ func TestHelper(t *testing.T) {
 						},
 					},
 					to: &model.Pipeline{
-						Commit:    "1234567890abcdef",
-						Branch:    "branch",
-						Message:   "",
-						Avatar:    "https://base.url/users/john.doe_mail.com/avatar.png",
-						Author:    "John Doe",
-						Email:     "john.doe@mail.com",
-						Ref:       "refs/head/branch",
-						ForgeURL:  "https://base.url/projects/PRJ/repos/REPO/commits/1234567890abcdef",
-						Event:     model.EventPush,
+						Commit:   "1234567890abcdef",
+						Branch:   "branch",
+						Avatar:   "https://base.url/users/john.doe_mail.com/avatar.png",
+						Author:   "John Doe",
+						Email:    "john.doe@mail.com",
+						Ref:      "refs/head/branch",
+						ForgeURL: "https://base.url/projects/PRJ/repos/REPO/commits/1234567890abcdef",
+						Event:    model.EventPush,
 					},
 				},
 			}
@@ -268,25 +267,6 @@ func TestHelper(t *testing.T) {
 			g.Assert(to.ForgeURL).Equal("https://base.url/projects/PRJ/repos/REPO/commits/1234567890abcdef")
 			g.Assert(to.Event).Equal(model.EventPullClosed)
 			g.Assert(to.Refspec).Equal("branch:main")
-		})
-
-		g.It("should truncate author", func() {
-			tests := []struct {
-				from string
-				to   string
-			}{
-				{
-					from: "Some Short Author",
-					to:   "Some Short Author",
-				},
-				{
-					from: "Some Very Long Author That May Include Multiple Names Here",
-					to:   "Some Very Long Author That May Includ...",
-				},
-			}
-			for _, tt := range tests {
-				g.Assert(authorLabel(tt.from)).Equal(tt.to)
-			}
 		})
 
 		g.It("should convert user", func() {

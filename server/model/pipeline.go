@@ -24,30 +24,32 @@ type Pipeline struct {
 	RepoID              int64                  `json:"-"                       xorm:"UNIQUE(s) INDEX 'repo_id'"`
 	Number              int64                  `json:"number"                  xorm:"UNIQUE(s) 'number'"`
 	Parent              int64                  `json:"parent"                  xorm:"parent"`
-	Event               WebhookEvent           `json:"event"                   xorm:"event"`
 	Status              StatusValue            `json:"status"                  xorm:"INDEX 'status'"`
 	Errors              []*types.PipelineError `json:"errors"                  xorm:"json 'errors'"`
 	Created             int64                  `json:"created"                 xorm:"'created' NOT NULL DEFAULT 0 created"`
 	Updated             int64                  `json:"updated"                 xorm:"'updated' NOT NULL DEFAULT 0 updated"`
 	Started             int64                  `json:"started"                 xorm:"started"`
 	Finished            int64                  `json:"finished"                xorm:"finished"`
-	DeployTo            string                 `json:"deploy_to"               xorm:"deploy"`
-	DeployTask          string                 `json:"deploy_task"             xorm:"deploy_task"`
-	Commit              *Commit                 `json:"commit"                  xorm:"json 'commit'"`
-	Branch              string                 `json:"branch"                  xorm:"branch"`
-	Ref                 string                 `json:"ref"                     xorm:"ref"`
-	Refspec             string                 `json:"refspec"                 xorm:"refspec"`
-	Title               string                 `json:"title"                   xorm:"title"`
-	Message             string                 `json:"message"                 xorm:"TEXT 'message'"`
-	Author Author `json:"author" xorm:"json 'author"`
-	ForgeURL            string                 `json:"forge_url"               xorm:"forge_url"`
 	Reviewer            string                 `json:"reviewed_by"             xorm:"reviewer"`
 	Reviewed            int64                  `json:"reviewed"                xorm:"reviewed"`
 	Workflows           []*Workflow            `json:"workflows,omitempty"     xorm:"-"`
-	ChangedFiles        []string               `json:"changed_files,omitempty" xorm:"LONGTEXT 'changed_files'"`
 	AdditionalVariables map[string]string      `json:"variables,omitempty"     xorm:"json 'additional_variables'"`
-	IsPrerelease        bool                   `json:"is_prerelease,omitempty" xorm:"is_prerelease"`
-	PullRequest         *PullRequest               `json:"pr,omitempty"     xorm:"json 'pr'"`
+
+	// event related
+
+	Event        WebhookEvent `json:"event"                   xorm:"event"`
+	Commit       *Commit      `json:"commit"                  xorm:"json 'commit'"`
+	Branch       string       `json:"branch"                  xorm:"branch"`
+	Ref          string       `json:"ref"                     xorm:"ref"`
+	Refspec      string       `json:"refspec"                 xorm:"refspec"`
+	ForgeURL     string       `json:"forge_url"               xorm:"forge_url"`
+	Author       Author       `json:"author" xorm:"json 'author"`
+	ChangedFiles []string     `json:"changed_files,omitempty" xorm:"LONGTEXT 'changed_files'"`
+	Deployment   Deployment   `json:"deployment"               xorm:"json 'deployment'"`
+	IsPrerelease bool         `json:"is_prerelease,omitempty" xorm:"is_prerelease"`
+	PullRequest  *PullRequest `json:"pr,omitempty"     xorm:"json 'pr'"`
+	Cron         string       `json:"cron,omitempty"     xorm:"cron"`
+	ReleaseTitle string       `json:"release,omitempty" xorm:"release"`
 } //	@name Pipeline
 
 // TableName return database table name for xorm.
@@ -73,3 +75,9 @@ type PipelineOptions struct {
 	Branch    string            `json:"branch"`
 	Variables map[string]string `json:"variables"`
 } //	@name PipelineOptions
+
+type Deployment struct {
+	Target      string `json:"target"`
+	Task        string `json:"task"`
+	Description string `json:"description"`
+}

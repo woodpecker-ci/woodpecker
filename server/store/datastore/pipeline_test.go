@@ -77,13 +77,13 @@ func TestPipelines(t *testing.T) {
 			pipeline := model.Pipeline{
 				RepoID: repo.ID,
 				Status: model.StatusSuccess,
-				Commit: "85f8c029b902ed9400bc600bac301a0aadb144ac",
+				Commit: &model.Commit{SHA: "85f8c029b902ed9400bc600bac301a0aadb144aa"},
 			}
 			err := store.CreatePipeline(&pipeline)
 			g.Assert(err).IsNil()
 			g.Assert(pipeline.ID != 0).IsTrue()
 			g.Assert(pipeline.Number).Equal(int64(1))
-			g.Assert(pipeline.Commit).Equal("85f8c029b902ed9400bc600bac301a0aadb144ac")
+			g.Assert(pipeline.Commit.SHA).Equal("85f8c029b902ed9400bc600bac301a0aadb144ac")
 
 			count, err := store.GetPipelineCount()
 			g.Assert(err).IsNil()
@@ -96,7 +96,7 @@ func TestPipelines(t *testing.T) {
 				RepoID: repo.ID,
 				Number: 5,
 				Status: model.StatusSuccess,
-				Commit: "85f8c029b902ed9400bc600bac301a0aadb144ac",
+				Commit: &model.Commit{SHA: "85f8c029b902ed9400bc600bac301a0aadb144aa"},
 			}
 			err := store.CreatePipeline(&pipeline)
 			g.Assert(err).IsNil()
@@ -150,14 +150,14 @@ func TestPipelines(t *testing.T) {
 				RepoID: repo.ID,
 				Status: model.StatusFailure,
 				Branch: "main",
-				Commit: "85f8c029b902ed9400bc600bac301a0aadb144ac",
+				Commit: &model.Commit{SHA: "85f8c029b902ed9400bc600bac301a0aadb144aa"},
 				Event:  model.EventPush,
 			}
 			pipeline2 := &model.Pipeline{
 				RepoID: repo.ID,
 				Status: model.StatusSuccess,
 				Branch: "main",
-				Commit: "85f8c029b902ed9400bc600bac301a0aadb144aa",
+				Commit: &model.Commit{SHA: "85f8c029b902ed9400bc600bac301a0aadb144aa"},
 				Event:  model.EventPush,
 			}
 			err1 := store.CreatePipeline(pipeline1, []*model.Step{}...)
@@ -171,7 +171,7 @@ func TestPipelines(t *testing.T) {
 			g.Assert(pipeline2.Number).Equal(GetPipeline.Number)
 			g.Assert(pipeline2.Status).Equal(GetPipeline.Status)
 			g.Assert(pipeline2.Branch).Equal(GetPipeline.Branch)
-			g.Assert(pipeline2.Commit).Equal(GetPipeline.Commit)
+			g.Assert(pipeline2.Commit.SHA).Equal(GetPipeline.Commit)
 		})
 
 		g.It("Should Get the last Pipeline Before Pipeline N", func() {
@@ -179,19 +179,19 @@ func TestPipelines(t *testing.T) {
 				RepoID: repo.ID,
 				Status: model.StatusFailure,
 				Branch: "main",
-				Commit: "85f8c029b902ed9400bc600bac301a0aadb144ac",
+				Commit: &model.Commit{SHA: "85f8c029b902ed9400bc600bac301a0aadb144aa"},
 			}
 			pipeline2 := &model.Pipeline{
 				RepoID: repo.ID,
 				Status: model.StatusSuccess,
 				Branch: "main",
-				Commit: "85f8c029b902ed9400bc600bac301a0aadb144aa",
+				Commit: &model.Commit{SHA: "85f8c029b902ed9400bc600bac301a0aadb144aa"},
 			}
 			pipeline3 := &model.Pipeline{
 				RepoID: repo.ID,
 				Status: model.StatusRunning,
 				Branch: "main",
-				Commit: "85f8c029b902ed9400bc600bac301a0aadb144aa",
+				Commit: &model.Commit{SHA: "85f8c029b902ed9400bc600bac301a0aadb144aa"},
 			}
 			err1 := store.CreatePipeline(pipeline1, []*model.Step{}...)
 			g.Assert(err1).IsNil()
@@ -206,7 +206,7 @@ func TestPipelines(t *testing.T) {
 			g.Assert(pipeline2.Number).Equal(GetPipeline.Number)
 			g.Assert(pipeline2.Status).Equal(GetPipeline.Status)
 			g.Assert(pipeline2.Branch).Equal(GetPipeline.Branch)
-			g.Assert(pipeline2.Commit).Equal(GetPipeline.Commit)
+			g.Assert(pipeline2.Commit.SHA).Equal(GetPipeline.Commit)
 		})
 
 		g.It("Should get recent pipelines", func() {

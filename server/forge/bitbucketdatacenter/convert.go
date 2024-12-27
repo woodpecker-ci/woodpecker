@@ -18,7 +18,6 @@ import (
 	"fmt"
 	"net/url"
 	"strings"
-	"time"
 
 	bb "github.com/neticdk/go-bitbucket/bitbucket"
 	"golang.org/x/oauth2"
@@ -90,18 +89,20 @@ func convertRepositoryPushEvent(ev *bb.RepositoryPushEvent, baseURL string) *mod
 	}
 
 	pipeline := &model.Pipeline{
-		Commit:    &model.Commit{
-			SHA: change.ToHash,
+		Commit: &model.Commit{
+			// message is set later
+			SHA:      change.ToHash,
 			ForgeURL: fmt.Sprintf("%s/projects/%s/repos/%s/commits/%s", baseURL, ev.Repository.Project.Key, ev.Repository.Slug, change.ToHash),
 		},
-		Branch:    change.Ref.DisplayID,
-		Message:   "",
-		Avatar:    bitbucketAvatarURL(baseURL, ev.Actor.Slug),
-		Author:    authorLabel(ev.Actor.Name),
-		Email:     ev.Actor.Email,
-		Ref:       ev.Changes[0].RefId,
+		Branch: change.Ref.DisplayID,
+		Author: model.Author{
+			Avatar: bitbucketAvatarURL(baseURL, ev.Actor.Slug),
+			Author: ev.Actor.Name,
+			Email:  ev.Actor.Email,
+		},
+		Ref: ev.Changes[0].RefId,
 		// TODO this is wrong on tags
-		ForgeURL:  fmt.Sprintf("%s/projects/%s/repos/%s/commits/%s", baseURL, ev.Repository.Project.Key, ev.Repository.Slug, change.ToHash),
+		ForgeURL: fmt.Sprintf("%s/projects/%s/repos/%s/commits/%s", baseURL, ev.Repository.Project.Key, ev.Repository.Slug, change.ToHash),
 	}
 
 	if strings.HasPrefix(ev.Changes[0].RefId, "refs/tags/") {
@@ -115,21 +116,25 @@ func convertRepositoryPushEvent(ev *bb.RepositoryPushEvent, baseURL string) *mod
 
 func convertPullRequestEvent(ev *bb.PullRequestEvent, baseURL string) *model.Pipeline {
 	pipeline := &model.Pipeline{
-		Commit:    &model.Commit{
-			SHA: ev.PullRequest.Source.Latest,
-			ForgeURL:  fmt.Sprintf("%s/projects/%s/repos/%s/commits/%s", baseURL, ev.PullRequest.Source.Repository.Project.Key, ev.PullRequest.Source.Repository.Slug, ev.PullRequest.Source.Latest),
-		}
-		Branch:    ev.PullRequest.Source.DisplayID,
-		Title:     ev.PullRequest.Title,
-		Message:   "",
-		Avatar:    bitbucketAvatarURL(baseURL, ev.Actor.Slug),
-		Author:    authorLabel(ev.Actor.Name),
-		Email:     ev.Actor.Email,
-		Ref:       fmt.Sprintf("refs/pull-requests/%d/from", ev.PullRequest.ID),
+		Commit: &model.Commit{
+			// message is set later
+			SHA:      ev.PullRequest.Source.Latest,
+			ForgeURL: fmt.Sprintf("%s/projects/%s/repos/%s/commits/%s", baseURL, ev.PullRequest.Source.Repository.Project.Key, ev.PullRequest.Source.Repository.Slug, ev.PullRequest.Source.Latest),
+		},
+		Branch: ev.PullRequest.Source.DisplayID,
+		Author: model.Author{
+			Avatar: bitbucketAvatarURL(baseURL, ev.Actor.Slug),
+			Author: ev.Actor.Name,
+			Email:  ev.Actor.Email,
+		},
+		Ref: fmt.Sprintf("refs/pull-requests/%d/from", ev.PullRequest.ID),
+		PullRequest: &model.PullRequest{
+			FromFork: ev.PullRequest.Source.Repository.ID != ev.PullRequest.Target.Repository.ID,
+			Title:    ev.PullRequest.Title,
+		},
 		// TODO should link to the Pr
-		ForgeURL:  fmt.Sprintf("%s/projects/%s/repos/%s/commits/%s", baseURL, ev.PullRequest.Source.Repository.Project.Key, ev.PullRequest.Source.Repository.Slug, ev.PullRequest.Source.Latest),
-		Refspec:   fmt.Sprintf("%s:%s", ev.PullRequest.Source.DisplayID, ev.PullRequest.Target.DisplayID),
-		FromFork:  ev.PullRequest.Source.Repository.ID != ev.PullRequest.Target.Repository.ID,
+		ForgeURL: fmt.Sprintf("%s/projects/%s/repos/%s/commits/%s", baseURL, ev.PullRequest.Source.Repository.Project.Key, ev.PullRequest.Source.Repository.Slug, ev.PullRequest.Source.Latest),
+		Refspec:  fmt.Sprintf("%s:%s", ev.PullRequest.Source.DisplayID, ev.PullRequest.Target.DisplayID),
 	}
 
 	if ev.EventKey == bb.EventKeyPullRequestMerged || ev.EventKey == bb.EventKeyPullRequestDeclined || ev.EventKey == bb.EventKeyPullRequestDeleted {
@@ -139,19 +144,6 @@ func convertPullRequestEvent(ev *bb.PullRequestEvent, baseURL string) *model.Pip
 	}
 
 	return pipeline
-}
-
-func authorLabel(name string) string {
-	var result string
-
-	const maxNameLength = 40
-
-	if len(name) > maxNameLength {
-		result = name[0:37] + "..."
-	} else {
-		result = name
-	}
-	return result
 }
 
 func convertUser(user *bb.User, baseURL string) *model.User {
