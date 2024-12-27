@@ -32,7 +32,7 @@
         <IconButton icon="edit" class="w-8 h-8" :title="$t('repo.settings.crons.edit')" @click="selectedCron = cron" />
         <IconButton
           icon="trash"
-          class="w-8 h-8 hover:text-wp-state-error-100"
+          class="w-8 h-8 hover:text-wp-error-100"
           :is-loading="isDeleting"
           :title="$t('repo.settings.crons.delete')"
           @click="deleteCron(cron)"

@@ -28,7 +28,7 @@
         <Icon name="settings" />
         <div
           v-if="version?.needsUpdate"
-          class="top-2 right-2 absolute bg-int-wp-state-error-100 rounded-full w-3 h-3"
+          class="top-2 right-2 absolute bg-int-wp-error-100 rounded-full w-3 h-3"
         />
       </IconButton>
 

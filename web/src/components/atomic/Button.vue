@@ -8,7 +8,7 @@
         color === 'gray',
       'bg-wp-control-ok-100 hover:bg-wp-control-ok-200 border-wp-control-ok-300 text-white': color === 'green',
       'bg-wp-control-info-100 hover:bg-wp-control-info-200 border-wp-control-info-300 text-white': color === 'blue',
-      'bg-wp-state-error-100 dark:bg-wp-state-error-200 hover:bg-wp-state-error-300 border-wp-state-error-300 text-white':
+      'bg-wp-error-100 dark:bg-wp-error-200 hover:bg-wp-error-300 border-wp-error-300 text-white':
         color === 'red',
       ...passedClasses,
     }"
@@ -26,7 +26,7 @@
           'bg-wp-control-neutral-200': color === 'gray',
           'bg-wp-control-ok-200': color === 'green',
           'bg-wp-control-info-200': color === 'blue',
-          'bg-wp-state-error-200': color === 'red',
+          'bg-wp-error-200': color === 'red',
         }"
       >
         <Icon name="spinner" />

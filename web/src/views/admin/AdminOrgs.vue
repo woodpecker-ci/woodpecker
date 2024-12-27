@@ -22,7 +22,7 @@
         <IconButton
           icon="trash"
           :title="$t('admin.settings.orgs.delete_org')"
-          class="ml-2 w-8 h-8 hover:text-wp-state-error-100"
+          class="ml-2 w-8 h-8 hover:text-wp-error-100"
           :is-loading="isDeleting"
           @click="deleteOrg(org)"
         />

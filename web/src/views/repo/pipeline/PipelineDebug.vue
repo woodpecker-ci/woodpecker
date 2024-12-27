@@ -11,7 +11,7 @@
     </Panel>
   </template>
   <div v-else class="flex justify-center items-center h-full">
-    <div class="bg-wp-state-error-100 dark:bg-wp-state-error-200 shadow-lg p-8 rounded-lg text-center">
+    <div class="bg-wp-error-100 dark:bg-wp-error-200 shadow-lg p-8 rounded-lg text-center">
       <p class="font-bold text-2xl text-white">{{ $t('repo.pipeline.debug.no_permission') }}</p>
     </div>
   </div>
