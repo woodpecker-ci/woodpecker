@@ -21,7 +21,6 @@ require (
 	github.com/docker/go-units v0.5.0
 	github.com/drone/envsubst v1.0.3
 	github.com/expr-lang/expr v1.16.9
-	github.com/franela/goblin v0.0.0-20211003143422-0a4f594942bf
 	github.com/fsnotify/fsnotify v1.8.0
 	github.com/gdgvda/cron v0.3.0
 	github.com/getkin/kin-openapi v0.128.1-0.20241211220347-325cecc5e4e1
