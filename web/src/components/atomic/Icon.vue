@@ -43,7 +43,7 @@
   <SvgIcon v-else-if="name === 'turn-off'" :path="mdiPower" size="1.3rem" />
   <SvgIcon v-else-if="name === 'chevron-right'" :path="mdiChevronRight" size="1.3rem" />
   <SvgIcon v-else-if="name === 'close'" :path="mdiCloseCircle" size="1.3rem" />
-  <SvgIcon v-else-if="name === 'edit'" :path="mdiPencil" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'edit'" :path="mdiPencilOutline" size="1.3rem" />
   <SvgIcon v-else-if="name === 'download'" :path="mdiDownloadCircle" size="1.3rem" />
   <SvgIcon v-else-if="name === 'stopwatch'" :path="mdiAlarm" size="1.3rem" />
   <SvgIcon v-else-if="name === 'auto-scroll'" :path="mdiDownloadCircle" size="1.3rem" />
@@ -106,7 +106,7 @@ import {
   mdiMinusCircle,
   mdiPackageVariant,
   mdiPause,
-  mdiPencil,
+  mdiPencilOutline,
   mdiPlay,
   mdiPlayCircle,
   mdiPlus,
