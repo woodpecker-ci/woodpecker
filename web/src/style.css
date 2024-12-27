@@ -59,12 +59,10 @@
 }
 
 :root[data-theme='dark'] {
-  --wp-background-100: theme('colors.black');
-  --wp-background-200: theme('colors.int-wp-secondary.200');
-  --wp-background-300: theme('colors.int-wp-secondary.300');
-  --wp-background-400: theme('colors.int-wp-secondary.400');
-  --wp-background-500: theme('colors.int-wp-secondary.500');
-  --wp-background-600: theme('colors.int-wp-secondary.600');
+  --wp-background-100: theme('colors.int-wp-secondary.300');
+  --wp-background-200: theme('colors.int-wp-secondary.400');
+  --wp-background-300: theme('colors.int-wp-secondary.500');
+  --wp-background-400: theme('colors.int-wp-secondary.600');
 
   --wp-text-100: theme('colors.gray.300');
   --wp-text-200: theme('colors.gray.200');

@@ -2,7 +2,7 @@
   <router-link
     v-if="repo"
     :to="{ name: 'repo', params: { repoId: repo.id } }"
-    class="flex flex-col border-wp-background-400 bg-wp-background-100 hover:bg-wp-background-300 dark:hover:bg-wp-background-600 dark:bg-wp-background-400 hover:shadow-md p-4 border rounded-md cursor-pointer overflow-hidden"
+    class="flex flex-col border-wp-background-400 bg-wp-background-100 hover:bg-wp-background-300 dark:hover:bg-wp-background-300 dark:bg-wp-background-200 hover:shadow-md p-4 border rounded-md cursor-pointer overflow-hidden"
   >
     <div class="items-center gap-y-4 grid grid-cols-[auto,1fr]">
       <div class="text-lg text-wp-text-100">{{ `${repo.owner} / ${repo.name}` }}</div>
