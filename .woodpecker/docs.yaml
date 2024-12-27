@@ -37,6 +37,12 @@ when:
     evaluate: 'TASK == "docs"'
 
 steps:
+  prettier:
+    image: docker.io/woodpeckerci/plugin-prettier:1.0.0
+    depends_on: []
+    settings:
+      version: 3.3.3
+
   build-cli:
     image: *golang_image
     commands:
@@ -46,12 +52,6 @@ steps:
       - path: *when_path
         event: [tag, pull_request, push]
       - event: manual
-
-  prettier:
-    image: docker.io/woodpeckerci/plugin-prettier:1.0.0
-    depends_on: []
-    settings:
-      version: 3.3.3
 
   build:
     image: *node_image
