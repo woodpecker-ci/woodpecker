@@ -17,7 +17,7 @@ package secret_test
 import (
 	"testing"
 
-	"github.com/franela/goblin"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
@@ -25,12 +25,8 @@ import (
 	mocks_store "go.woodpecker-ci.org/woodpecker/v3/server/store/mocks"
 )
 
-func TestSecretListPipeline(t *testing.T) {
-	g := goblin.Goblin(t)
-	mockStore := mocks_store.NewStore(t)
-
-	// global secret
-	globalSecret := &model.Secret{
+var (
+	globalSecret = &model.Secret{
 		ID:     1,
 		OrgID:  0,
 		RepoID: 0,
@@ -39,7 +35,7 @@ func TestSecretListPipeline(t *testing.T) {
 	}
 
 	// org secret
-	orgSecret := &model.Secret{
+	orgSecret = &model.Secret{
 		ID:     2,
 		OrgID:  1,
 		RepoID: 0,
@@ -48,52 +44,48 @@ func TestSecretListPipeline(t *testing.T) {
 	}
 
 	// repo secret
-	repoSecret := &model.Secret{
+	repoSecret = &model.Secret{
 		ID:     3,
 		OrgID:  0,
 		RepoID: 1,
 		Name:   "secret",
 		Value:  "value-repo",
 	}
+)
 
-	g.Describe("Priority of secrets", func() {
-		g.It("should get the repo secret", func() {
-			mockStore.On("SecretList", mock.Anything, mock.Anything, mock.Anything).Once().Return([]*model.Secret{
-				globalSecret,
-				orgSecret,
-				repoSecret,
-			}, nil)
+func TestSecretListPipeline(t *testing.T) {
+	mockStore := mocks_store.NewStore(t)
 
-			s, err := secret.NewDB(mockStore).SecretListPipeline(&model.Repo{}, &model.Pipeline{})
-			g.Assert(err).IsNil()
+	mockStore.On("SecretList", mock.Anything, mock.Anything, mock.Anything).Once().Return([]*model.Secret{
+		globalSecret,
+		orgSecret,
+		repoSecret,
+	}, nil)
 
-			g.Assert(len(s)).Equal(1)
-			g.Assert(s[0].Value).Equal("value-repo")
-		})
+	s, err := secret.NewDB(mockStore).SecretListPipeline(&model.Repo{}, &model.Pipeline{})
+	assert.NoError(t, err)
 
-		g.It("should get the org secret", func() {
-			mockStore.On("SecretList", mock.Anything, mock.Anything, mock.Anything).Once().Return([]*model.Secret{
-				globalSecret,
-				orgSecret,
-			}, nil)
+	assert.Len(t, s, 1)
+	assert.Equal(t, "value-repo", s[0].Value)
 
-			s, err := secret.NewDB(mockStore).SecretListPipeline(&model.Repo{}, &model.Pipeline{})
-			g.Assert(err).IsNil()
+	mockStore.On("SecretList", mock.Anything, mock.Anything, mock.Anything).Once().Return([]*model.Secret{
+		globalSecret,
+		orgSecret,
+	}, nil)
 
-			g.Assert(len(s)).Equal(1)
-			g.Assert(s[0].Value).Equal("value-org")
-		})
+	s, err = secret.NewDB(mockStore).SecretListPipeline(&model.Repo{}, &model.Pipeline{})
+	assert.NoError(t, err)
 
-		g.It("should get the global secret", func() {
-			mockStore.On("SecretList", mock.Anything, mock.Anything, mock.Anything).Once().Return([]*model.Secret{
-				globalSecret,
-			}, nil)
+	assert.Len(t, s, 1)
+	assert.Equal(t, "value-org", s[0].Value)
 
-			s, err := secret.NewDB(mockStore).SecretListPipeline(&model.Repo{}, &model.Pipeline{})
-			g.Assert(err).IsNil()
+	mockStore.On("SecretList", mock.Anything, mock.Anything, mock.Anything).Once().Return([]*model.Secret{
+		globalSecret,
+	}, nil)
 
-			g.Assert(len(s)).Equal(1)
-			g.Assert(s[0].Value).Equal("value-global")
-		})
-	})
+	s, err = secret.NewDB(mockStore).SecretListPipeline(&model.Repo{}, &model.Pipeline{})
+	assert.NoError(t, err)
+
+	assert.Len(t, s, 1)
+	assert.Equal(t, "value-global", s[0].Value)
 }
