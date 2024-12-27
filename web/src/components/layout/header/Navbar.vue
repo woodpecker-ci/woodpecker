@@ -4,7 +4,7 @@
   >
     <div class="flex items-center space-x-2">
       <router-link :to="{ name: 'home' }" class="flex flex-col -my-2 px-2">
-        <WoodpeckerLogo class="w-9 h-9" />
+        <WoodpeckerLogo class="w-8 h-8" />
         <span class="text-xs" :title="version?.current">{{ version?.currentShort }}</span>
       </router-link>
       <router-link v-if="user" :to="{ name: 'repos' }" class="navbar-clickable navbar-link">

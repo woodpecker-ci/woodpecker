@@ -7,7 +7,7 @@
     >
       <span>{{ agent.name || `Agent ${agent.id}` }}</span>
       <span class="ml-auto">
-        <span class="hidden md:inline-block space-x-2">
+        <span class="md:inline-block space-x-2 hidden">
           <Badge
             v-if="props.isAdmin === true && agent.org_id !== -1"
             :label="$t('admin.settings.agents.org.badge')"
@@ -24,13 +24,13 @@
       <IconButton
         icon="edit"
         :title="$t('admin.settings.agents.edit_agent')"
-        class="ml-2 w-9 h-9"
+        class="ml-2 w-8 h-8"
         @click="$emit('edit', agent)"
       />
       <IconButton
         icon="trash"
         :title="$t('admin.settings.agents.delete_agent')"
-        class="ml-2 w-9 h-9 hover:text-wp-control-error-100"
+        class="ml-2 w-8 h-8 hover:text-wp-control-error-100"
         :is-loading="props.isDeleting"
         @click="$emit('delete', agent)"
       />

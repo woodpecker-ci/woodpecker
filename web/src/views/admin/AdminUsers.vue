@@ -26,14 +26,14 @@
         <IconButton
           icon="edit"
           :title="$t('admin.settings.users.edit_user')"
-          class="w-9 h-9 <md:ml-auto"
+          class="w-8 h-8 <md:ml-auto"
           :class="{ 'ml-auto': !user.admin, 'ml-2': user.admin }"
           @click="editUser(user)"
         />
         <IconButton
           icon="trash"
           :title="$t('admin.settings.users.delete_user')"
-          class="ml-2 w-9 h-9 hover:text-wp-control-error-100"
+          class="ml-2 w-8 h-8 hover:text-wp-control-error-100"
           :is-loading="isDeleting"
           @click="deleteUser(user)"
         />

@@ -10,19 +10,19 @@
         <IconButton
           icon="chevron-right"
           :title="$t('admin.settings.orgs.view')"
-          class="ml-auto w-9 h-9"
+          class="ml-auto w-8 h-8"
           :to="{ name: 'org', params: { orgId: org.id } }"
         />
         <IconButton
           icon="settings-outline"
           :title="$t('admin.settings.orgs.org_settings')"
-          class="w-9 h-9"
+          class="w-8 h-8"
           :to="{ name: 'org-settings', params: { orgId: org.id } }"
         />
         <IconButton
           icon="trash"
           :title="$t('admin.settings.orgs.delete_org')"
-          class="ml-2 w-9 h-9 hover:text-wp-control-error-100"
+          class="ml-2 w-8 h-8 hover:text-wp-control-error-100"
           :is-loading="isDeleting"
           @click="deleteOrg(org)"
         />

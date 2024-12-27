@@ -8,14 +8,14 @@
       <span>{{ registry.address }}</span>
       <IconButton
         :icon="registry.readonly ? 'chevron-right' : 'edit'"
-        class="ml-auto w-9 h-9"
+        class="ml-auto w-8 h-8"
         :title="registry.readonly ? $t('registries.view') : $t('registries.edit')"
         @click="editRegistry(registry)"
       />
       <IconButton
         v-if="!registry.readonly"
         icon="trash"
-        class="w-9 h-9 hover:text-wp-control-error-100"
+        class="w-8 h-8 hover:text-wp-control-error-100"
         :is-loading="isDeleting"
         :title="$t('registries.delete')"
         @click="deleteRegistry(registry)"
