@@ -2,7 +2,7 @@
   <component
     :is="to === undefined ? 'button' : httpLink ? 'a' : 'router-link'"
     v-bind="btnAttrs"
-    class="relative flex flex-shrink-0 whitespace-nowrap items-center py-1 px-2 rounded-md border shadow-sm cursor-pointer transition-all duration-150 overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed"
+    class="relative flex flex-shrink-0 items-center disabled:opacity-50 shadow-sm px-2 py-1 border rounded-md whitespace-nowrap transition-all duration-150 cursor-pointer disabled:cursor-not-allowed overflow-hidden"
     :class="{
       'bg-wp-control-neutral-100 hover:bg-wp-control-neutral-200 border-wp-control-neutral-300 text-wp-text-100':
         color === 'gray',
@@ -15,12 +15,12 @@
     :disabled="disabled"
   >
     <slot>
-      <Icon v-if="startIcon" :name="startIcon" class="!w-6 !h-6" :class="{ invisible: isLoading, 'mr-1': text }" />
+      <Icon v-if="startIcon" :name="startIcon" class="!w-5 !h-5" :class="{ invisible: isLoading, 'mr-1': text }" />
       <span :class="{ invisible: isLoading }">{{ text }}</span>
       <Icon v-if="endIcon" :name="endIcon" class="ml-2 w-6 h-6" :class="{ invisible: isLoading }" />
       <div
         v-if="isLoading"
-        class="absolute left-0 top-0 right-0 bottom-0 flex items-center justify-center"
+        class="top-0 right-0 bottom-0 left-0 absolute flex justify-center items-center"
         :class="{
           'bg-wp-control-neutral-200': color === 'gray',
           'bg-wp-control-ok-200': color === 'green',
