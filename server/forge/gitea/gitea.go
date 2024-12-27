@@ -503,13 +503,16 @@ func (c *Gitea) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.
 		return nil, nil, err
 	}
 
-	if pipeline != nil && pipeline.Event == model.EventRelease && pipeline.Commit == "" {
+	if pipeline != nil && pipeline.Event == model.EventRelease && pipeline.Commit.SHA == "" {
 		tagName := strings.Split(pipeline.Ref, "/")[2]
 		sha, err := c.getTagCommitSHA(ctx, repo, tagName)
 		if err != nil {
 			return nil, nil, err
 		}
-		pipeline.Commit = sha
+		pipeline.Commit = &model.Commit{
+			SHA: sha.SHA,
+			ForgeURL: sha.URL,
+		}
 	}
 
 	if pipeline != nil && (pipeline.Event == model.EventPull || pipeline.Event == model.EventPullClosed) && len(pipeline.ChangedFiles) == 0 {
@@ -657,34 +660,34 @@ func (c *Gitea) getChangedFilesForPR(ctx context.Context, repo *model.Repo, inde
 	}, -1)
 }
 
-func (c *Gitea) getTagCommitSHA(ctx context.Context, repo *model.Repo, tagName string) (string, error) {
+func (c *Gitea) getTagCommitSHA(ctx context.Context, repo *model.Repo, tagName string) (*gitea.CommitMeta, error) {
 	_store, ok := store.TryFromContext(ctx)
 	if !ok {
 		log.Error().Msg("could not get store from context")
-		return "", nil
+		return nil, nil
 	}
 
 	repo, err := _store.GetRepoNameFallback(repo.ForgeRemoteID, repo.FullName)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	user, err := _store.GetUser(repo.UserID)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	client, err := c.newClientToken(ctx, user.AccessToken)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	tag, _, err := client.GetTag(repo.Owner, repo.Name, tagName)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	return tag.Commit.SHA, nil
+	return tag.Commit, nil
 }
 
 func (c *Gitea) perPage(ctx context.Context) int {

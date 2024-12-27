@@ -137,8 +137,10 @@ func convertMergeRequestHook(hook *gitlab.MergeEvent, req *http.Request) (int, *
 
 	pipeline.Title = obj.Title
 	pipeline.ForgeURL = obj.URL
-	pipeline.PullRequestLabels = convertLabels(hook.Labels)
-	pipeline.FromFork = target.PathWithNamespace != source.PathWithNamespace
+	pipeline.PullRequest = &model.PullRequest{
+		PullRequestLabels: convertLabels(hook.Labels),
+		FromFork: target.PathWithNamespace != source.PathWithNamespace,
+	}
 
 	return obj.IID, repo, pipeline, nil
 }
@@ -181,7 +183,6 @@ func convertPushHook(hook *gitlab.PushEvent) (*model.Repo, *model.Pipeline, erro
 			pipeline.Author = cm.Author.Name
 			pipeline.Email = cm.Author.Email
 			pipeline.Message = cm.Message
-			pipeline.Timestamp = cm.Timestamp.Unix()
 			if len(pipeline.Email) != 0 {
 				pipeline.Avatar = getUserAvatar(pipeline.Email)
 			}
@@ -232,7 +233,6 @@ func convertTagHook(hook *gitlab.TagEvent) (*model.Repo, *model.Pipeline, error)
 			pipeline.Author = cm.Author.Name
 			pipeline.Email = cm.Author.Email
 			pipeline.Message = cm.Message
-			pipeline.Timestamp = cm.Timestamp.Unix()
 			if len(pipeline.Email) != 0 {
 				pipeline.Avatar = getUserAvatar(pipeline.Email)
 			}

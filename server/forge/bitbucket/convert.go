@@ -170,7 +170,10 @@ func convertPullHook(from *internal.PullRequestHook) *model.Pipeline {
 
 	pipeline := &model.Pipeline{
 		Event:  event,
-		Commit: from.PullRequest.Source.Commit.Hash,
+		Commit: &model.Commit{
+			SHA: from.PullRequest.Source.Commit.Hash,
+			ForgeURL: from.PullRequest.Source.Commit.Links.HTML.Href,
+		},
 		Ref:    fmt.Sprintf("refs/pull-requests/%d/from", from.PullRequest.ID),
 		Refspec: fmt.Sprintf("%s:%s",
 			from.PullRequest.Source.Branch.Name,
@@ -179,15 +182,18 @@ func convertPullHook(from *internal.PullRequestHook) *model.Pipeline {
 		ForgeURL:  from.PullRequest.Links.HTML.Href,
 		Branch:    from.PullRequest.Source.Branch.Name,
 		Message:   from.PullRequest.Title,
-		Avatar:    from.Actor.Links.Avatar.Href,
-		Author:    from.Actor.Login,
-		Sender:    from.Actor.Login,
+		Author:    convertAuthor(from.Actor),
+		PullRequest: &model.PullRequest{
+			FromFork:  from.PullRequest.Source.Repo.UUID != from.PullRequest.Dest.Repo.UUID,
+		},
 		Timestamp: from.PullRequest.Updated.UTC().Unix(),
-		FromFork:  from.PullRequest.Source.Repo.UUID != from.PullRequest.Dest.Repo.UUID,
 	}
 
 	if from.PullRequest.State == stateClosed {
-		pipeline.Commit = from.PullRequest.MergeCommit.Hash
+		pipeline.Commit = &model.Commit{
+			SHA: from.PullRequest.MergeCommit.Hash,
+			ForgeURL: from.PullRequest.Source.Commit.Links.HTML.Href,
+		}
 		pipeline.Ref = fmt.Sprintf("refs/heads/%s", from.PullRequest.Dest.Branch.Name)
 		pipeline.Branch = from.PullRequest.Dest.Branch.Name
 	}
@@ -199,14 +205,15 @@ func convertPullHook(from *internal.PullRequestHook) *model.Pipeline {
 // hook to the Woodpecker pipeline struct holding commit information.
 func convertPushHook(hook *internal.PushHook, change *internal.Change) *model.Pipeline {
 	pipeline := &model.Pipeline{
-		Commit:    change.New.Target.Hash,
+		Commit:    &model.Commit{
+			SHA: change.New.Target.Hash,
+			ForgeURL: change.New.Target.Links.HTML.Href,
+			Message: change.New.Target.Message,
+		},
 		ForgeURL:  change.New.Target.Links.HTML.Href,
 		Branch:    change.New.Name,
 		Message:   change.New.Target.Message,
-		Avatar:    hook.Actor.Links.Avatar.Href,
-		Author:    hook.Actor.Login,
-		Sender:    hook.Actor.Login,
-		Timestamp: change.New.Target.Date.UTC().Unix(),
+		Author:    convertAuthor(hook.Actor),
 	}
 	switch change.New.Type {
 	case "tag", "annotated_tag", "bookmark":
@@ -217,7 +224,7 @@ func convertPushHook(hook *internal.PushHook, change *internal.Change) *model.Pi
 		pipeline.Ref = fmt.Sprintf("refs/heads/%s", change.New.Name)
 	}
 	if len(change.New.Target.Author.Raw) != 0 {
-		pipeline.Email = extractEmail(change.New.Target.Author.Raw)
+		pipeline.Author.Email = extractEmail(change.New.Target.Author.Raw)
 	}
 	return pipeline
 }
@@ -232,4 +239,11 @@ func extractEmail(gitAuthor string) (author string) {
 		author = matches[0][1]
 	}
 	return
+}
+
+func convertAuthor(a internal.Account) model.Author {
+	return model.Author{
+		Author: a.Login,
+		Avatar: a.Links.Avatar.Href,
+	}
 }

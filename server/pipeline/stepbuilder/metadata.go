@@ -123,7 +123,7 @@ func metadataPipelineFromModelPipeline(pipeline *model.Pipeline, includeParent b
 		DeployTo:   pipeline.DeployTo,
 		DeployTask: pipeline.DeployTask,
 		Commit: metadata.Commit{
-			Sha:     pipeline.Commit,
+			Sha:     pipeline.Commit.SHA,
 			Ref:     pipeline.Ref,
 			Refspec: pipeline.Refspec,
 			Branch:  pipeline.Branch,
@@ -134,7 +134,7 @@ func metadataPipelineFromModelPipeline(pipeline *model.Pipeline, includeParent b
 				Avatar: pipeline.Avatar,
 			},
 			ChangedFiles:      pipeline.ChangedFiles,
-			PullRequestLabels: pipeline.PullRequestLabels,
+			PullRequestLabels: pipeline.PullRequest.PullRequestLabels,
 			IsPrerelease:      pipeline.IsPrerelease,
 		},
 		Cron: cron,

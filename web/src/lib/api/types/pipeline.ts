@@ -48,9 +48,6 @@ export interface Pipeline {
   // The commit message.
   message: string;
 
-  // When the commit was created.
-  timestamp: number;
-
   // The alias for the commit.
   ref: string;
 

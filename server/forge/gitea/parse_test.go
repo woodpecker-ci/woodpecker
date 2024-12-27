@@ -385,7 +385,6 @@ func TestGiteaParser(t *testing.T) {
 				assert.ErrorIs(t, err, tc.err)
 			} else if assert.NoError(t, err) {
 				assert.EqualValues(t, tc.repo, r)
-				p.Timestamp = 0
 				assert.EqualValues(t, tc.pipe, p)
 			}
 		})

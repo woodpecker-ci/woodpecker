@@ -156,7 +156,6 @@ func TestHelper(t *testing.T) {
 						Avatar:    "https://base.url/users/john.doe_mail.com/avatar.png",
 						Author:    "John Doe",
 						Email:     "john.doe@mail.com",
-						Timestamp: now.UTC().Unix(),
 						Ref:       "refs/head/branch",
 						ForgeURL:  "https://base.url/projects/PRJ/repos/REPO/commits/1234567890abcdef",
 						Event:     model.EventPush,
@@ -214,7 +213,6 @@ func TestHelper(t *testing.T) {
 			g.Assert(to.Avatar).Equal("https://base.url/users/john.doe_mail.com/avatar.png")
 			g.Assert(to.Author).Equal("John Doe")
 			g.Assert(to.Email).Equal("john.doe@mail.com")
-			g.Assert(to.Timestamp).Equal(now.UTC().Unix())
 			g.Assert(to.Ref).Equal("refs/pull-requests/123/from")
 			g.Assert(to.ForgeURL).Equal("https://base.url/projects/PRJ/repos/REPO/commits/1234567890abcdef")
 			g.Assert(to.Event).Equal(model.EventPull)
@@ -266,7 +264,6 @@ func TestHelper(t *testing.T) {
 			g.Assert(to.Avatar).Equal("https://base.url/users/john.doe_mail.com/avatar.png")
 			g.Assert(to.Author).Equal("John Doe")
 			g.Assert(to.Email).Equal("john.doe@mail.com")
-			g.Assert(to.Timestamp).Equal(now.UTC().Unix())
 			g.Assert(to.Ref).Equal("refs/pull-requests/123/from")
 			g.Assert(to.ForgeURL).Equal("https://base.url/projects/PRJ/repos/REPO/commits/1234567890abcdef")
 			g.Assert(to.Event).Equal(model.EventPullClosed)

@@ -98,7 +98,6 @@ func pipelineFromPush(hook *pushHook) *model.Pipeline {
 		Avatar:       avatar,
 		Author:       hook.Sender.UserName,
 		Email:        hook.Sender.Email,
-		Timestamp:    time.Now().UTC().Unix(),
 		Sender:       hook.Sender.UserName,
 		ChangedFiles: getChangedFilesFromPushHook(hook),
 	}
@@ -138,7 +137,6 @@ func pipelineFromTag(hook *pushHook) *model.Pipeline {
 		Author:    hook.Sender.UserName,
 		Sender:    hook.Sender.UserName,
 		Email:     hook.Sender.Email,
-		Timestamp: time.Now().UTC().Unix(),
 	}
 }
 

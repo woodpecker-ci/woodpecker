@@ -138,11 +138,10 @@ func CreatePipeline(ctx context.Context, store store.Store, cron *model.Cron) (*
 
 	return repo, &model.Pipeline{
 		Event:     model.EventCron,
-		Commit:    commit.SHA,
+		Commit:    commit,
 		Ref:       "refs/heads/" + cron.Branch,
 		Branch:    cron.Branch,
 		Message:   cron.Name,
-		Timestamp: cron.NextExec,
 		Sender:    cron.Name,
 		ForgeURL:  commit.ForgeURL,
 	}, nil

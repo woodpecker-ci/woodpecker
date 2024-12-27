@@ -91,7 +91,11 @@ func pipelineFromPush(hook *pushHook) *model.Pipeline {
 
 	return &model.Pipeline{
 		Event:        model.EventPush,
-		Commit:       hook.After,
+		Commit:       &model.Commit{
+			SHA: hook.After,
+			ForgeURL: hook.HeadCommit.URL,
+			Message: hook.HeadCommit.Message,
+		},
 		Ref:          hook.Ref,
 		ForgeURL:     link,
 		Branch:       strings.TrimPrefix(hook.Ref, "refs/heads/"),
@@ -99,7 +103,6 @@ func pipelineFromPush(hook *pushHook) *model.Pipeline {
 		Avatar:       avatar,
 		Author:       hook.Sender.UserName,
 		Email:        hook.Sender.Email,
-		Timestamp:    time.Now().UTC().Unix(),
 		Sender:       hook.Sender.UserName,
 		ChangedFiles: getChangedFilesFromPushHook(hook),
 	}
@@ -131,7 +134,11 @@ func pipelineFromTag(hook *pushHook) *model.Pipeline {
 
 	return &model.Pipeline{
 		Event:     model.EventTag,
-		Commit:    hook.Sha,
+		Commit:    &model.Commit{
+			SHA: hook.Sha,
+			ForgeURL: hook.HeadCommit.URL,
+			Message: hook.HeadCommit.Message,
+		},
 		Ref:       fmt.Sprintf("refs/tags/%s", ref),
 		ForgeURL:  fmt.Sprintf("%s/src/tag/%s", hook.Repo.HTMLURL, ref),
 		Message:   fmt.Sprintf("created tag %s", ref),
@@ -139,7 +146,6 @@ func pipelineFromTag(hook *pushHook) *model.Pipeline {
 		Author:    hook.Sender.UserName,
 		Sender:    hook.Sender.UserName,
 		Email:     hook.Sender.Email,
-		Timestamp: time.Now().UTC().Unix(),
 	}
 }
 
@@ -157,7 +163,9 @@ func pipelineFromPullRequest(hook *pullRequestHook) *model.Pipeline {
 
 	pipeline := &model.Pipeline{
 		Event:    event,
-		Commit:   hook.PullRequest.Head.Sha,
+		Commit:   &model.Commit{
+			SHA: hook.PullRequest.Head.Sha,
+		},
 		ForgeURL: hook.PullRequest.HTMLURL,
 		Ref:      fmt.Sprintf("refs/pull/%d/head", hook.Number),
 		Branch:   hook.PullRequest.Base.Ref,
@@ -171,8 +179,12 @@ func pipelineFromPullRequest(hook *pullRequestHook) *model.Pipeline {
 			hook.PullRequest.Head.Ref,
 			hook.PullRequest.Base.Ref,
 		),
-		PullRequestLabels: convertLabels(hook.PullRequest.Labels),
-		FromFork:          hook.PullRequest.Head.RepoID != hook.PullRequest.Base.RepoID,
+		PullRequest: &model.PullRequest{
+			Index: model.ForgeRemoteID(hook.Number),
+			PullRequestLabels: convertLabels(hook.PullRequest.Labels),
+			FromFork:          hook.PullRequest.Head.RepoID != hook.PullRequest.Base.RepoID,
+			Title: "",
+		},
 	}
 
 	return pipeline

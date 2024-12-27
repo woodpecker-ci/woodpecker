@@ -90,14 +90,17 @@ func convertRepositoryPushEvent(ev *bb.RepositoryPushEvent, baseURL string) *mod
 	}
 
 	pipeline := &model.Pipeline{
-		Commit:    change.ToHash,
+		Commit:    &model.Commit{
+			SHA: change.ToHash,
+			ForgeURL: fmt.Sprintf("%s/projects/%s/repos/%s/commits/%s", baseURL, ev.Repository.Project.Key, ev.Repository.Slug, change.ToHash),
+		},
 		Branch:    change.Ref.DisplayID,
 		Message:   "",
 		Avatar:    bitbucketAvatarURL(baseURL, ev.Actor.Slug),
 		Author:    authorLabel(ev.Actor.Name),
 		Email:     ev.Actor.Email,
-		Timestamp: time.Time(ev.Date).UTC().Unix(),
 		Ref:       ev.Changes[0].RefId,
+		// TODO this is wrong on tags
 		ForgeURL:  fmt.Sprintf("%s/projects/%s/repos/%s/commits/%s", baseURL, ev.Repository.Project.Key, ev.Repository.Slug, change.ToHash),
 	}
 
@@ -112,15 +115,18 @@ func convertRepositoryPushEvent(ev *bb.RepositoryPushEvent, baseURL string) *mod
 
 func convertPullRequestEvent(ev *bb.PullRequestEvent, baseURL string) *model.Pipeline {
 	pipeline := &model.Pipeline{
-		Commit:    ev.PullRequest.Source.Latest,
+		Commit:    &model.Commit{
+			SHA: ev.PullRequest.Source.Latest,
+			ForgeURL:  fmt.Sprintf("%s/projects/%s/repos/%s/commits/%s", baseURL, ev.PullRequest.Source.Repository.Project.Key, ev.PullRequest.Source.Repository.Slug, ev.PullRequest.Source.Latest),
+		}
 		Branch:    ev.PullRequest.Source.DisplayID,
 		Title:     ev.PullRequest.Title,
 		Message:   "",
 		Avatar:    bitbucketAvatarURL(baseURL, ev.Actor.Slug),
 		Author:    authorLabel(ev.Actor.Name),
 		Email:     ev.Actor.Email,
-		Timestamp: time.Time(ev.Date).UTC().Unix(),
 		Ref:       fmt.Sprintf("refs/pull-requests/%d/from", ev.PullRequest.ID),
+		// TODO should link to the Pr
 		ForgeURL:  fmt.Sprintf("%s/projects/%s/repos/%s/commits/%s", baseURL, ev.PullRequest.Source.Repository.Project.Key, ev.PullRequest.Source.Repository.Slug, ev.PullRequest.Source.Latest),
 		Refspec:   fmt.Sprintf("%s:%s", ev.PullRequest.Source.DisplayID, ev.PullRequest.Target.DisplayID),
 		FromFork:  ev.PullRequest.Source.Repository.ID != ev.PullRequest.Target.Repository.ID,

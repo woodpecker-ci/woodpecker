@@ -23,7 +23,6 @@ type Pipeline struct {
 	ID                  int64                  `json:"id"                      xorm:"pk autoincr 'id'"`
 	RepoID              int64                  `json:"-"                       xorm:"UNIQUE(s) INDEX 'repo_id'"`
 	Number              int64                  `json:"number"                  xorm:"UNIQUE(s) 'number'"`
-	Author              string                 `json:"author"                  xorm:"INDEX 'author'"`
 	Parent              int64                  `json:"parent"                  xorm:"parent"`
 	Event               WebhookEvent           `json:"event"                   xorm:"event"`
 	Status              StatusValue            `json:"status"                  xorm:"INDEX 'status'"`
@@ -34,25 +33,21 @@ type Pipeline struct {
 	Finished            int64                  `json:"finished"                xorm:"finished"`
 	DeployTo            string                 `json:"deploy_to"               xorm:"deploy"`
 	DeployTask          string                 `json:"deploy_task"             xorm:"deploy_task"`
-	Commit              string                 `json:"commit"                  xorm:"commit"`
+	Commit              *Commit                 `json:"commit"                  xorm:"json 'commit'"`
 	Branch              string                 `json:"branch"                  xorm:"branch"`
 	Ref                 string                 `json:"ref"                     xorm:"ref"`
 	Refspec             string                 `json:"refspec"                 xorm:"refspec"`
 	Title               string                 `json:"title"                   xorm:"title"`
 	Message             string                 `json:"message"                 xorm:"TEXT 'message'"`
-	Timestamp           int64                  `json:"timestamp"               xorm:"'timestamp'"`
-	Sender              string                 `json:"sender"                  xorm:"sender"` // uses reported user for webhooks and name of cron for cron pipelines
-	Avatar              string                 `json:"author_avatar"           xorm:"varchar(500) avatar"`
-	Email               string                 `json:"author_email"            xorm:"varchar(500) email"`
+	Author Author `json:"author" xorm:"json 'author"`
 	ForgeURL            string                 `json:"forge_url"               xorm:"forge_url"`
 	Reviewer            string                 `json:"reviewed_by"             xorm:"reviewer"`
 	Reviewed            int64                  `json:"reviewed"                xorm:"reviewed"`
 	Workflows           []*Workflow            `json:"workflows,omitempty"     xorm:"-"`
 	ChangedFiles        []string               `json:"changed_files,omitempty" xorm:"LONGTEXT 'changed_files'"`
 	AdditionalVariables map[string]string      `json:"variables,omitempty"     xorm:"json 'additional_variables'"`
-	PullRequestLabels   []string               `json:"pr_labels,omitempty"     xorm:"json 'pr_labels'"`
 	IsPrerelease        bool                   `json:"is_prerelease,omitempty" xorm:"is_prerelease"`
-	FromFork            bool                   `json:"from_fork,omitempty"     xorm:"from_fork"`
+	PullRequest         *PullRequest               `json:"pr,omitempty"     xorm:"json 'pr'"`
 } //	@name Pipeline
 
 // TableName return database table name for xorm.

@@ -145,7 +145,6 @@ func Test_helper(t *testing.T) {
 			g.Assert(pipeline.Ref).Equal("refs/pull-requests/1/from")
 			g.Assert(pipeline.Refspec).Equal("change:main")
 			g.Assert(pipeline.Message).Equal(hook.PullRequest.Title)
-			g.Assert(pipeline.Timestamp).Equal(hook.PullRequest.Updated.Unix())
 		})
 
 		g.It("should convert push hook to pipeline", func() {
@@ -171,7 +170,6 @@ func Test_helper(t *testing.T) {
 			g.Assert(pipeline.ForgeURL).Equal(change.New.Target.Links.HTML.Href)
 			g.Assert(pipeline.Ref).Equal("refs/heads/main")
 			g.Assert(pipeline.Message).Equal(change.New.Target.Message)
-			g.Assert(pipeline.Timestamp).Equal(change.New.Target.Date.Unix())
 		})
 
 		g.It("should convert tag hook to pipeline", func() {

@@ -17,4 +17,6 @@ package model
 type PullRequest struct {
 	Index ForgeRemoteID `json:"index"`
 	Title string        `json:"title"`
+	PullRequestLabels   []string               `json:"pr_labels,omitempty"`
+	FromFork            bool                   `json:"from_fork,omitempty"`
 } //	@name PullRequest
