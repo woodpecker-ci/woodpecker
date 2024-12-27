@@ -11,7 +11,7 @@
           'bg-wp-state-info-100': pipelineStatusColors[pipeline.status] === 'blue',
         }"
       />
-      <div class="flex flex-wrap justify-between items-center w-8 h-full">
+      <div class="flex flex-wrap justify-between items-center w-9 h-full">
         <PipelineRunningIcon v-if="pipeline.status === 'started' || pipeline.status === 'running'" />
         <PipelineStatusIcon v-else class="mx-2 md:mx-3" :status="pipeline.status" />
       </div>

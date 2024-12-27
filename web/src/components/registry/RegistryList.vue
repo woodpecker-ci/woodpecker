@@ -15,7 +15,7 @@
       <IconButton
         v-if="!registry.readonly"
         icon="trash"
-        class="w-8 h-8 hover:text-wp-control-error-100"
+        class="w-9 h-9 hover:text-wp-control-error-100"
         :is-loading="isDeleting"
         :title="$t('registries.delete')"
         @click="deleteRegistry(registry)"

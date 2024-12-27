@@ -20,13 +20,13 @@
         <span>{{ user.login }}</span>
         <Badge
           v-if="user.admin"
-          class="ml-auto hidden md:inline-block"
+          class="md:inline-block hidden ml-auto"
           :label="$t('admin.settings.users.admin.admin')"
         />
         <IconButton
           icon="edit"
           :title="$t('admin.settings.users.edit_user')"
-          class="w-8 h-8 <md:ml-auto"
+          class="w-9 h-9 <md:ml-auto"
           :class="{ 'ml-auto': !user.admin, 'ml-2': user.admin }"
           @click="editUser(user)"
         />
@@ -53,7 +53,7 @@
 
         <InputField v-slot="{ id }" :label="$t('admin.settings.users.avatar_url')">
           <div class="flex gap-2">
-            <img v-if="selectedUser.avatar_url" class="rounded-md h-8 w-8" :src="selectedUser.avatar_url" />
+            <img v-if="selectedUser.avatar_url" class="rounded-md w-8 h-8" :src="selectedUser.avatar_url" />
             <TextField :id="id" v-model="selectedUser.avatar_url" />
           </div>
         </InputField>

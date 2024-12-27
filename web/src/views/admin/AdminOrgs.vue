@@ -16,7 +16,7 @@
         <IconButton
           icon="settings-outline"
           :title="$t('admin.settings.orgs.org_settings')"
-          class="w-8 h-8"
+          class="w-9 h-9"
           :to="{ name: 'org-settings', params: { orgId: org.id } }"
         />
         <IconButton
