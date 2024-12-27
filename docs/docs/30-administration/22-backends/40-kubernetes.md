@@ -12,7 +12,7 @@ In addition to [registries specified in the UI](../../20-usage/41-registries.md)
 
 Place these Secrets in namespace defined by `WOODPECKER_BACKEND_K8S_NAMESPACE` and provide the Secret names to Agents via `WOODPECKER_BACKEND_K8S_PULL_SECRET_NAMES`.
 
-## Job specific configuration
+## Step specific configuration
 
 ### Resources
 
@@ -67,7 +67,7 @@ To give steps access to the Kubernetes API via service account, take a look at [
 
 ### Node selector
 
-`nodeSelector` specifies the labels which are used to select the node on which the job will be executed.
+`nodeSelector` specifies the labels which are used to select the node on which the step will be executed.
 
 Labels defined here will be appended to a list which already contains `"kubernetes.io/arch"`.
 By default `"kubernetes.io/arch"` is inferred from the agents' platform. One can override it by setting that label in the `nodeSelector` section of the `backend_options`.

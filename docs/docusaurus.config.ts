@@ -3,7 +3,7 @@ import type { Config } from '@docusaurus/types';
 import type * as Preset from '@docusaurus/preset-classic';
 import * as path from 'path';
 
-const config: Config = {
+const config = {
   title: 'Woodpecker CI',
   tagline: 'Woodpecker is a simple, yet powerful CI/CD engine with great extensibility.',
   url: 'https://woodpecker-ci.org',
@@ -248,7 +248,7 @@ const config: Config = {
               label: '2.8.x',
             },
             '2.7': {
-              label: '2.7.x',
+              label: '2.7.x 💀',
               banner: 'unmaintained',
             },
             '2.6': {
@@ -265,8 +265,6 @@ const config: Config = {
           blogTitle: 'Blog',
           blogDescription: 'A blog for release announcements, turorials...',
           onInlineAuthors: 'ignore',
-          // postsPerPage: 'ALL',
-          // blogSidebarCount: 0,
         },
         theme: {
           customCss: require.resolve('./src/css/custom.css'),
@@ -291,19 +289,12 @@ const config: Config = {
       },
     ],
   ],
-  webpack: {
-    jsLoader: (isServer) => ({
-      loader: require.resolve('esbuild-loader'),
-      options: {
-        loader: 'tsx',
-        target: isServer ? 'node12' : 'es2017',
-        supported: { 'dynamic-import': false },
-      },
-    }),
-  },
   markdown: {
     format: 'detect',
   },
-};
+  future: {
+    experimental_faster: true,
+  },
+} satisfies Config;
 
 export default config;

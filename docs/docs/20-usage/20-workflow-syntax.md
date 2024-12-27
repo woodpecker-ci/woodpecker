@@ -789,8 +789,8 @@ Privileged mode is only available to trusted repositories and for security reaso
      commands:
        - docker --tls=false ps
 
- - name: services
-   docker:
+ services:
+   - name: docker
      image: docker:dind
      commands: dockerd-entrypoint.sh --storage-driver=vfs --tls=false
 +    privileged: true

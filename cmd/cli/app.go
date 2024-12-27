@@ -17,17 +17,17 @@ package main
 import (
 	"github.com/urfave/cli/v3"
 
-	"go.woodpecker-ci.org/woodpecker/v2/cli/admin"
-	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
-	"go.woodpecker-ci.org/woodpecker/v2/cli/exec"
-	"go.woodpecker-ci.org/woodpecker/v2/cli/info"
-	"go.woodpecker-ci.org/woodpecker/v2/cli/lint"
-	"go.woodpecker-ci.org/woodpecker/v2/cli/org"
-	"go.woodpecker-ci.org/woodpecker/v2/cli/pipeline"
-	"go.woodpecker-ci.org/woodpecker/v2/cli/repo"
-	"go.woodpecker-ci.org/woodpecker/v2/cli/setup"
-	"go.woodpecker-ci.org/woodpecker/v2/cli/update"
-	"go.woodpecker-ci.org/woodpecker/v2/version"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/admin"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/common"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/exec"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/info"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/lint"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/org"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/pipeline"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/repo"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/setup"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/update"
+	"go.woodpecker-ci.org/woodpecker/v3/version"
 )
 
 //go:generate go run docs.go app.go

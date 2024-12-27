@@ -21,8 +21,8 @@ import (
 
 	"github.com/urfave/cli/v3"
 
-	"go.woodpecker-ci.org/woodpecker/v2/shared/constant"
-	"go.woodpecker-ci.org/woodpecker/v2/shared/logger"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/constant"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/logger"
 )
 
 var flags = append([]cli.Flag{
@@ -92,16 +92,6 @@ var flags = append([]cli.Flag{
 		Sources: cli.EnvVars("WOODPECKER_CUSTOM_JS_FILE"),
 		Name:    "custom-js-file",
 		Usage:   "file path for the server to serve a custom .JS file, used for customizing the UI",
-	},
-	&cli.StringFlag{
-		Sources: cli.EnvVars("WOODPECKER_LETS_ENCRYPT_EMAIL"),
-		Name:    "lets-encrypt-email",
-		Usage:   "let's encrypt email",
-	},
-	&cli.BoolFlag{
-		Sources: cli.EnvVars("WOODPECKER_LETS_ENCRYPT"),
-		Name:    "lets-encrypt",
-		Usage:   "enable let's encrypt",
 	},
 	&cli.StringFlag{
 		Sources: cli.EnvVars("WOODPECKER_GRPC_ADDR"),

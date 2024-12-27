@@ -1,12 +1,172 @@
 # Migrations
 
-Some versions need some changes to the server configuration or the pipeline configuration files. If you are an user check the `User migrations` section of an version. As an admin of a Woodpecker server or agent check the `Admin migrations` section.
-
 ## `next`
 
-:::info
-This will be the next version of Woodpecker.
-:::
+- No changes
+
+## 3.0.0
+
+### User-facing migrations
+
+#### Security
+
+- The "gated" option, which restricted which pipelines can start right away without requiring approval, has been replaced by "require-approval" option. Even though this feature ([#3348](https://github.com/woodpecker-ci/woodpecker/pull/3348)) was backported to 2.8, no default is explicitly set.
+  The new default in 3.0 is to require approval only for forked repositories.
+  This allows easier management of dependency bots and other trusted entities having write access to the repository.
+
+#### Environment variables
+
+- Environment variables must now be defined as maps. List definitions are disallowed. ([#4016](https://github.com/woodpecker-ci/woodpecker/pull/4016))
+
+  2.x:
+
+  ```yaml
+  environment:
+    - ENV1=value1
+  ```
+
+  3.x:
+
+  ```yaml
+  environment:
+    ENV1: value1
+  ```
+
+The following built-in environment variables have been removed/replaced:
+
+- `CI_COMMIT_URL` has been deprecated in favor of `CI_PIPELINE_FORGE_URL`
+- `CI_STEP_FINISHED` as it was empty during execution
+- `CI_PIPELINE_FINISHED` as it was empty during execution
+- `CI_PIPELINE_STATUS` due to always being set to `success`
+- `CI_STEP_STATUS` due to always being set to `success`
+- `WOODPECKER_WEBHOOK_HOST` in favor of `WOODPECKER_EXPERT_WEBHOOK_HOST`
+
+Environment variables which are empty after workflow parsing are not being injected into the build but filtered out beforehand ([#4193](https://github.com/woodpecker-ci/woodpecker/pull/4193))
+
+#### Former deprecations
+
+The following syntax deprecations will now result in an error:
+
+- `pipeline:` ([#3916](https://github.com/woodpecker-ci/woodpecker/pull/3916))
+- `platform:` ([#3916](https://github.com/woodpecker-ci/woodpecker/pull/3916))
+- `branches:` ([#3916](https://github.com/woodpecker-ci/woodpecker/pull/3916))
+
+#### Workflow syntax changes
+
+- Grouping of steps via `steps.[name].group` should now be done using `steps.[name].depends_on`
+- The `includes` and `excludes` event filter options have been removed
+- Previously, env vars have been automatically sanitized to uppercase.
+  As this has been confusing, the type-case of the secret definition is now respected ([#3375](https://github.com/woodpecker-ci/woodpecker/pull/3375)).
+- `secrets` have been entirely removed in favor of `environment` combined with the `from_secret` syntax.
+  As `secrets` are just normal env vars which are masked, the goal was to allow them to be declared next to normal env vars and at the same time reduce the keyword syntax count.
+  Additionally, the `from_secret` syntax gives more flexibility in naming.
+  Whereas beforehand `secrets` where always named after their initial secret name, the `from_secret` reference can now be different.
+  Last, one can inject multiple different env vars from the same secret reference.
+
+  2.x:
+
+  ```yaml
+  secrets: [my_token]
+  ```
+
+  3.x:
+
+  ```yaml
+  environment:
+    MY_TOKEN:
+      from_secret: my_token
+  ```
+
+- The `environment` filter option has been removed in favor of `when.evaluate`
+
+#### API changes
+
+- Removed deprecated `registry/` endpoint. Use `registries`, `/authorize/token`
+
+#### CLI changes
+
+The following restructuring was done to achieve a more consistent grouping:
+
+| Old Command                                 | New Command                                 |
+| ------------------------------------------- | ------------------------------------------- |
+| `woodpecker-cli registry`                   | `woodpecker-cli repo registry`              |
+| `woodpecker-cli secret --global`            | `woodpecker-cli admin secret`               |
+| `woodpecker-cli user`                       | `woodpecker-cli admin user`                 |
+| `woodpecker-cli log-level`                  | `woodpecker-cli admin log-level`            |
+| `woodpecker-cli secret --organization`      | `woodpecker-cli org secret`                 |
+| `woodpecker-cli deploy`                     | `woodpecker-cli pipeline deploy`            |
+| `woodpecker-cli log`                        | `woodpecker-cli pipeline log`               |
+| `woodpecker-cli cron`                       | `woodpecker-cli repo cron`                  |
+| `woodpecker-cli secret --repository`        | `woodpecker-cli repo secret`                |
+| `woodpecker-cli pipeline logs`              | `woodpecker-cli pipeline log show`          |
+| `woodpecker-cli (registry,secret,...) info` | `woodpecker-cli (registry,secret,...) show` |
+
+#### Miscellaneous
+
+- For `woodpecker-cli` containers, `/woodpecker` has been set as the default `workdir`
+
+- Plugin filters for secrets (in the "secrets" repo settings) can now validate against tags.
+  Additionally, the description has been updated to reflect that these filters only apply to plugins ([#4069](https://github.com/woodpecker-ci/woodpecker/pull/4069)).
+
+- SDK changes:
+
+  - The SDK fields `start_time`, `end_time`, `created_at`, `started_at`, `finished_at` and `reviewed_at` have been renamed to `started`, `finished`, `created`, `started`, `finished`, `reviewed` ([#3968](https://github.com/woodpecker-ci/woodpecker/pull/3968))
+  - The `trusted` field of the repo model was changed from `boolean` to `object`
+
+- CRON definitions now use standard Linux syntax without seconds.
+  All custom CRON definitions which do not use keywords such as `@daily` or `@weekly` must be updated.
+
+  Example definition for a CRON job running at 8 am daily:
+
+  2.x:
+
+  ```sh
+  0 0 8 * * *
+  ```
+
+  3.x:
+
+  ```sh
+  0 8 * * *
+  ```
+
+- Native Let's Encrypt certificate support has been dropped as it was almost unused and causing frequent issues.
+  Let's Encrypt needs to be set up standalone now. The SSL key pair can still be used in `WOODPECKER_SERVER_CERT` and `WOODPECKER_SERVER_KEY` as an alternative to using a reverse proxy for TLS termination.
+
+### Admin-facing migrations
+
+#### Image tags
+
+- The `latest` tag has been dropped to avoid accidental major version upgrades.
+  A dedicated semver tag specification must be used, i.e., either a fixed version (like `v3.0.0`) or a rolling tag (e.g. `v3.0` or `v3`).
+
+- Previously, some (official) plugins were granted the `privileged` option by default to allow simplified usage.
+  To streamline this process and enhance security transparency, no plugin is granted the `privileged` options by default anymore.
+  To allow the use of these plugins in >= 3.0, they must be set explicitly through `WOODPECKER_PLUGINS_PRIVILEGED` on the admin side.
+  This change mainly impacts the use of the `woodpeckerci/plugin-docker-buildx` plugin, which now will not work anymore unless explicitly listed through this env var ([#4053](https://github.com/woodpecker-ci/woodpecker/pull/4053))
+
+- Environment variable deprecations:
+
+  | Deprecated Variable              | New Variable                         |
+  | -------------------------------- | ------------------------------------ |
+  | `WOODPECKER_LOG_XORM`            | `WOODPECKER_DATABASE_LOG`            |
+  | `WOODPECKER_LOG_XORM_SQL`        | `WOODPECKER_DATABASE_LOG_SQL`        |
+  | `WOODPECKER_FILTER_LABELS`       | `WOODPECKER_AGENT_LABELS`            |
+  | `WOODPECKER_ESCALATE`            | `WOODPECKER_PLUGINS_PRIVILEGED`      |
+  | `WOODPECKER_DEFAULT_CLONE_IMAGE` | `WOODPECKER_DEFAULT_CLONE_PLUGIN`    |
+  | `WOODPECKER_DEV_OAUTH_HOST`      | `WOODPECKER_EXPERT_FORGE_OAUTH_HOST` |
+  | `WOODPECKER_DEV_GITEA_OAUTH_URL` | `WOODPECKER_EXPERT_FORGE_OAUTH_HOST` |
+  | `WOODPECKER_ROOT_PATH`           | `WOODPECKER_HOST`                    |
+  | `WOODPECKER_ROOT_URL`            | `WOODPECKER_HOST`                    |
+
+- The resource limit settings for the "docker" backend were moved from the server into agent configuration.
+  This allows setting limits on an agent-level which allows greater resource definition granularity ([#3174](https://github.com/woodpecker-ci/woodpecker/pull/3174))
+
+- "Kubernetes" backend: previously the image pull secret name was hard-coded to `regcred`.
+  To allow more flexibility and specifying multiple pull secrets, the default has been removed.
+  Image pull secrets must now be set explicitly via env var `WOODPECKER_BACKEND_K8S_PULL_SECRET_NAMES` ([#4005](https://github.com/woodpecker-ci/woodpecker/pull/4005))
+
+- Webhook signatures now use the `rfc9421` protocol
 
 ## User migrations
 
@@ -63,7 +223,8 @@ This will be the next version of Woodpecker.
 - Removed slice definition for env vars
 - Migrated to rfc9421 for webhook signatures
 - Replaced `configs` object by `netrc` in external configuration APIs
-- Disallow upgrades from 1.x, upgrade to 2.x first
+
+- Upgrading from 1.x versions to 3.x is disallowed, upgrading to 2.x first is required to ensure proper DB migrations
 
 ## 2.7.2
 

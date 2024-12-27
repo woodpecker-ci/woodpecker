@@ -18,6 +18,25 @@ FROM woodpeckerci/woodpecker-server:latest-alpine
 RUN apk add -U --no-cache docker-credential-ecr-login
 ```
 
+## Step specific configuration
+
+### Run user
+
+By default the docker backend starts the step container without the `--user` flag. This means the step container will use the default user of the container. To change this behavior you can set the `user` backend option to the preferred user/group:
+
+```yaml
+steps:
+  - name: example
+    image: alpine
+    commands:
+      - whoami
+    backend_options:
+      docker:
+        user: 65534:65534
+```
+
+The syntax is the same as the [docker run](https://docs.docker.com/engine/reference/run/#user) `--user` flag.
+
 ## Image cleanup
 
 The agent **will not** automatically remove images from the host. This task should be managed by the host system. For example, you can use a cron job to periodically do clean-up tasks for the CI runner.

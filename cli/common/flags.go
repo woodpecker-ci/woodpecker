@@ -17,7 +17,7 @@ package common
 import (
 	"github.com/urfave/cli/v3"
 
-	"go.woodpecker-ci.org/woodpecker/v2/shared/logger"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/logger"
 )
 
 var GlobalFlags = append([]cli.Flag{
@@ -48,19 +48,16 @@ var GlobalFlags = append([]cli.Flag{
 		Sources: cli.EnvVars("WOODPECKER_SKIP_VERIFY"),
 		Name:    "skip-verify",
 		Usage:   "skip ssl verification",
-		Hidden:  true,
 	},
 	&cli.StringFlag{
 		Sources: cli.EnvVars("SOCKS_PROXY"),
 		Name:    "socks-proxy",
 		Usage:   "socks proxy address",
-		Hidden:  true,
 	},
 	&cli.BoolFlag{
 		Sources: cli.EnvVars("SOCKS_PROXY_OFF"),
 		Name:    "socks-proxy-off",
 		Usage:   "socks proxy ignored",
-		Hidden:  true,
 	},
 }, logger.GlobalLoggerFlags...)
 

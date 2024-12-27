@@ -26,13 +26,13 @@ import (
 
 	"golang.org/x/oauth2"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server"
-	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
-	"go.woodpecker-ci.org/woodpecker/v2/server/forge/bitbucket/internal"
-	"go.woodpecker-ci.org/woodpecker/v2/server/forge/common"
-	forge_types "go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
-	shared_utils "go.woodpecker-ci.org/woodpecker/v2/shared/utils"
+	"go.woodpecker-ci.org/woodpecker/v3/server"
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge"
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge/bitbucket/internal"
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge/common"
+	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	shared_utils "go.woodpecker-ci.org/woodpecker/v3/shared/utils"
 )
 
 // Bitbucket cloud endpoints.
@@ -290,11 +290,11 @@ func (c *config) Dir(ctx context.Context, u *model.User, r *model.Repo, p *model
 }
 
 // Status creates a pipeline status for the Bitbucket commit.
-func (c *config) Status(ctx context.Context, user *model.User, repo *model.Repo, pipeline *model.Pipeline, _ *model.Workflow) error {
+func (c *config) Status(ctx context.Context, user *model.User, repo *model.Repo, pipeline *model.Pipeline, workflow *model.Workflow) error {
 	status := internal.PipelineStatus{
 		State: convertStatus(pipeline.Status),
 		Desc:  common.GetPipelineStatusDescription(pipeline.Status),
-		Key:   "Woodpecker",
+		Key:   common.GetPipelineStatusContext(repo, pipeline, workflow),
 		URL:   common.GetPipelineStatusURL(repo, pipeline, nil),
 	}
 	return c.newClient(ctx, user).CreateStatus(repo.Owner, repo.Name, pipeline.Commit, &status)
