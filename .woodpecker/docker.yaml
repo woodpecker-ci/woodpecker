@@ -183,7 +183,7 @@ steps:
     image: *buildx_plugin
     settings:
       repo: *publish_repos_server
-      dockerfile: docker/Dockerfile.server.alpine.multiarch
+      dockerfile: docker/Dockerfile.server.alpine.multiarch.rootless
       platforms: *platforms_alpine
       tag: [next-alpine, 'next-${CI_COMMIT_SHA:0:10}-alpine']
       logins: *publish_logins
@@ -208,26 +208,9 @@ steps:
     image: *buildx_plugin
     settings:
       repo: *publish_repos_server
-      dockerfile: docker/Dockerfile.server.alpine.multiarch
-      platforms: *platforms_alpine
-      tag: ['${CI_COMMIT_TAG%%.*}-alpine', '${CI_COMMIT_TAG%.*}-alpine', '${CI_COMMIT_TAG}-alpine']
-      logins: *publish_logins
-    when: *when-release
-
-  release-server-alpine-rootless:
-    depends_on:
-      - cross-compile-server
-    image: *buildx_plugin
-    settings:
-      repo: *publish_repos_server
       dockerfile: docker/Dockerfile.server.alpine.multiarch.rootless
       platforms: *platforms_alpine
-      tag:
-        [
-          '${CI_COMMIT_TAG%%.*}-alpine-rootless',
-          '${CI_COMMIT_TAG%.*}-alpine-rootless',
-          '${CI_COMMIT_TAG}-alpine-rootless',
-        ]
+      tag: ['${CI_COMMIT_TAG%%.*}-alpine', '${CI_COMMIT_TAG%.*}-alpine', '${CI_COMMIT_TAG}-alpine']
       logins: *publish_logins
     when: *when-release
 
@@ -289,7 +272,7 @@ steps:
     image: *buildx_plugin
     settings:
       repo: *publish_repos_agent
-      dockerfile: docker/Dockerfile.agent.alpine.multiarch
+      dockerfile: docker/Dockerfile.agent.alpine.multiarch.rootless
       platforms: *platforms_alpine
       tag: [next-alpine, 'next-${CI_COMMIT_SHA:0:10}-alpine']
       logins: *publish_logins
@@ -321,30 +304,9 @@ steps:
     image: *buildx_plugin
     settings:
       repo: *publish_repos_agent
-      dockerfile: docker/Dockerfile.agent.alpine.multiarch
-      platforms: *platforms_alpine
-      tag: ['${CI_COMMIT_TAG%%.*}-alpine', '${CI_COMMIT_TAG%.*}-alpine', '${CI_COMMIT_TAG}-alpine']
-      logins: *publish_logins
-      build_args: *build_args
-    when: *when-release
-
-  release-agent-alpine-rootless:
-    depends_on:
-      - vendor
-      # we also depend on cross-compile-server as we would have to hight
-      # ram usage otherwise
-      - cross-compile-server
-    image: *buildx_plugin
-    settings:
-      repo: *publish_repos_agent
       dockerfile: docker/Dockerfile.agent.alpine.multiarch.rootless
       platforms: *platforms_alpine
-      tag:
-        [
-          '${CI_COMMIT_TAG%%.*}-alpine-rootless',
-          '${CI_COMMIT_TAG%.*}-alpine-rootless',
-          '${CI_COMMIT_TAG}-alpine-rootless',
-        ]
+      tag: ['${CI_COMMIT_TAG%%.*}-alpine', '${CI_COMMIT_TAG%.*}-alpine', '${CI_COMMIT_TAG}-alpine']
       logins: *publish_logins
       build_args: *build_args
     when: *when-release
@@ -404,7 +366,7 @@ steps:
     image: *buildx_plugin
     settings:
       repo: *publish_repos_cli
-      dockerfile: docker/Dockerfile.cli.alpine.multiarch
+      dockerfile: docker/Dockerfile.cli.alpine.multiarch.rootless
       platforms: *platforms_alpine
       tag: [next-alpine, 'next-${CI_COMMIT_SHA:0:10}-alpine']
       logins: *publish_logins
@@ -436,30 +398,9 @@ steps:
     image: *buildx_plugin
     settings:
       repo: *publish_repos_cli
-      dockerfile: docker/Dockerfile.cli.alpine.multiarch
-      platforms: *platforms_alpine
-      tag: ['${CI_COMMIT_TAG%%.*}-alpine', '${CI_COMMIT_TAG%.*}-alpine', '${CI_COMMIT_TAG}-alpine']
-      logins: *publish_logins
-      build_args: *build_args
-    when: *when-release
-
-  release-cli-alpine-rootless:
-    depends_on:
-      - vendor
-      # we also depend on release-agent as we would have to hight
-      # ram usage otherwise
-      - release-agent
-    image: *buildx_plugin
-    settings:
-      repo: *publish_repos_cli
       dockerfile: docker/Dockerfile.cli.alpine.multiarch.rootless
       platforms: *platforms_alpine
-      tag:
-        [
-          '${CI_COMMIT_TAG%%.*}-alpine-rootless',
-          '${CI_COMMIT_TAG%.*}-alpine-rootless',
-          '${CI_COMMIT_TAG}-alpine-rootless',
-        ]
+      tag: ['${CI_COMMIT_TAG%%.*}-alpine', '${CI_COMMIT_TAG%.*}-alpine', '${CI_COMMIT_TAG}-alpine']
       logins: *publish_logins
       build_args: *build_args
     when: *when-release
