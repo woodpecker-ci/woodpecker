@@ -21,8 +21,7 @@
                 v-for="item in data"
                 :key="item.key"
                 class="h-full"
-                :class="`${item.color}`"
-                :style="{ width: `${item.percentage}%` }"
+                :class="[item.color, item.percentage <= 0 ? 'w-0' : `w-[${item.percentage}%]`]"
               >
                 &nbsp;
               </div>
