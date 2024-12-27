@@ -10,7 +10,7 @@
   <SvgIcon v-else-if="name === 'deployment'" :path="mdiPackageVariant" size="1.3rem" />
   <SvgIcon v-else-if="name === 'commit'" :path="mdiSourceCommit" size="1.3rem" />
   <SvgIcon v-else-if="name === 'back'" :path="mdiArrowLeft" size="1.3rem" />
-  <SvgIcon v-else-if="name === 'github'" :path="mdiGitHub" size="32" />
+  <SvgIcon v-else-if="name === 'github'" :path="mdiGithub" size="32" />
   <SvgIcon v-else-if="name === 'repo'" :path="mdiGit" size="32" />
   <SvgIcon v-else-if="name === 'settings'" :path="mdiCog" size="32" />
   <SvgIcon v-else-if="name === 'trash'" :path="mdiTrashCanOutline" size="1.3rem" />
@@ -97,6 +97,7 @@ import {
   mdiFormatListBulleted,
   mdiGestureTap,
   mdiGit,
+  mdiGithub,
   mdiHelpCircle,
   mdiLockOutline,
   mdiLockOpenOutline,
