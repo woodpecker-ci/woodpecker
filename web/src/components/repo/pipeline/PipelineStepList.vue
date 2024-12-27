@@ -90,7 +90,7 @@
           </div>
           <div
             class="transition-height duration-150 overflow-hidden"
-            :class="[workflowsCollapsed[workflow.id] ? 'max-h-0' : '', !singleConfig ? `ml-[1.6rem]` : '']"
+            :class="{ 'max-h-0': workflowsCollapsed[workflow.id], 'ml-[1.6rem]': !singleConfig }"
           >
             <button
               v-for="step in workflow.children"
