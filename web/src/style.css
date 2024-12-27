@@ -170,3 +170,8 @@ body,
 code:not(pre > code) {
   @apply bg-wp-code-inline-100 text-wp-code-inline-text-100 px-1.5 py-0.5 rounded-md;
 }
+
+.code-box-log {
+  @apply bg-wp-code-300 p-4 rounded-md text-sm text-wp-code-text-100 break-words;
+  white-space: pre-wrap;
+}
