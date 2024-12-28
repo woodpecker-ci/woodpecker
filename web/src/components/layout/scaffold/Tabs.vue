@@ -4,9 +4,9 @@
       v-for="tab in tabs"
       :key="tab.title"
       :to="tab.to"
-      class="flex items-center py-1 border-transparent md:border-b-2 w-full md:w-auto text-wp-text-100 cursor-pointer"
-      :active-class="tab.matchChildren ? '!border-wp-text-100 underline md:no-underline' : ''"
-      :exact-active-class="tab.matchChildren ? '' : '!border-wp-text-100 underline md:no-underline'"
+      class="flex items-center px-2 py-1 border-transparent md:border-b-2 w-auto w-full md:w-auto text-wp-text-100 cursor-pointer"
+      :active-class="tab.matchChildren ? '!border-wp-text-100 dark:wp-background-100 bg-wp-background-300' : ''"
+      :exact-active-class="tab.matchChildren ? '' : '!border-wp-text-100 dark:wp-background-100 bg-wp-background-300'"
     >
       <span
         class="flex flex-row md:justify-center items-center gap-2 dark:hover:bg-wp-background-100 hover:bg-wp-background-200 py-1 rounded-md w-full min-w-20"
