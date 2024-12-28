@@ -77,8 +77,6 @@
   --wp-state-error-100: theme('colors.int-wp-state-error.100');
   --wp-state-error-200: theme('colors.int-wp-state-error.200');
   --wp-state-error-300: theme('colors.int-wp-state-error.300');
-  --wp-state-error-400: theme('colors.int-wp-state-error.400');
-  --wp-state-error-500: theme('colors.int-wp-state-error.500');
 
   --wp-state-neutral-100: theme('colors.int-wp-state-neutral.100');
   --wp-state-ok-100: theme('colors.int-wp-state-ok-dark.100');
