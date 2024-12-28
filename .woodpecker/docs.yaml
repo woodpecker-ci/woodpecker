@@ -143,6 +143,7 @@ steps:
       - rsync -r --exclude .git --exclude CNAME --exclude index.yaml --exclude README.md --exclude version.json --delete docs/build/ ./docs_repo
     depends_on:
       - prettier
+      - build
     when:
       - event: push
         path: *when_path
