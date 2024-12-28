@@ -1,5 +1,6 @@
-import React from 'react';
 import Layout from '@theme/Layout';
+import React from 'react';
+
 import { WoodpeckerPlugin as WoodpeckerPluginType } from '../types';
 import { IconContainer, IconPlugin, IconVerified, IconWebsite } from './Icons';
 

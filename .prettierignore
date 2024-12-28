@@ -1,10 +1,8 @@
 build/
-docs/versioned_docs/
-docs/.docusaurus/
-docs/pnpm-lock.yaml
 dist/
 CHANGELOG.md
 
-# web/ must be directly formatted from there
+# web/ and docs/ must be directly formatted from there
 # to prevent conflicts with different prettier version
 web/
+docs/

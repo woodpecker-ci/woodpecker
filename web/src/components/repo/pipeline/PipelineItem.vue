@@ -5,7 +5,7 @@
         class="w-3 h-full"
         :class="{
           'bg-wp-state-warn-100': pipeline.status === 'pending',
-          'bg-wp-state-error-100': pipelineStatusColors[pipeline.status] === 'red',
+          'bg-wp-error-100 dark:bg-wp-error-200': pipelineStatusColors[pipeline.status] === 'red',
           'bg-wp-state-neutral-100': pipelineStatusColors[pipeline.status] === 'gray',
           'bg-wp-state-ok-100': pipelineStatusColors[pipeline.status] === 'green',
           'bg-wp-state-info-100': pipelineStatusColors[pipeline.status] === 'blue',

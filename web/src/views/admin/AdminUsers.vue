@@ -33,7 +33,7 @@
         <IconButton
           icon="trash"
           :title="$t('admin.settings.users.delete_user')"
-          class="ml-2 w-8 h-8 hover:text-wp-control-error-100"
+          class="ml-2 w-8 h-8 hover:text-wp-error-100"
           :is-loading="isDeleting"
           @click="deleteUser(user)"
         />
