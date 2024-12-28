@@ -236,6 +236,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update module github.com/google/go-github/v67 to v68 [[#4635](https://github.com/woodpecker-ci/woodpecker/pull/4635)]
 - fix(deps): update dependency vue-i18n to v11 [[#4634](https://github.com/woodpecker-ci/woodpecker/pull/4634)]
 - fix(deps): update dependency simple-icons to v14 [[#4633](https://github.com/woodpecker-ci/woodpecker/pull/4633)]
 - chore(deps): update dependency vite to v6.0.6 [[#4632](https://github.com/woodpecker-ci/woodpecker/pull/4632)]
