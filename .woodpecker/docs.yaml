@@ -41,7 +41,9 @@ steps:
     image: docker.io/woodpeckerci/plugin-prettier:1.0.0
     settings:
       version: 3.3.3
-
+    when:
+      event:
+        pull_request
   build-cli:
     image: *golang_image
     commands:
