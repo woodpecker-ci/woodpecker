@@ -43,6 +43,7 @@ steps:
       version: 3.3.3
     when:
       - event: pull_request
+
   build-cli:
     image: *golang_image
     commands:
