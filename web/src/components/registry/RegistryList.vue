@@ -3,7 +3,7 @@
     <ListItem
       v-for="registry in registries"
       :key="registry.id"
-      class="items-center !bg-wp-background-200 !dark:bg-wp-background-100"
+      class="items-center !bg-wp-background-200 dark:!bg-wp-background-100"
     >
       <span>{{ registry.address }}</span>
       <IconButton

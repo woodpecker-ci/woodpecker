@@ -14,7 +14,7 @@
       <ListItem
         v-for="user in users"
         :key="user.id"
-        class="items-center gap-2 !bg-wp-background-200 !dark:bg-wp-background-100"
+        class="items-center gap-2 !bg-wp-background-200 dark:!bg-wp-background-100 admin-users"
       >
         <img v-if="user.avatar_url" class="rounded-md h-6" :src="user.avatar_url" />
         <span>{{ user.login }}</span>
@@ -154,3 +154,9 @@ function showAddUser() {
   selectedUser.value = cloneDeep({ login: '' });
 }
 </script>
+
+<style scoped>
+.admin-users {
+  @apply p-4;
+}
+</style>

@@ -3,6 +3,7 @@
     <PipelineItem
       v-for="pipeline in pipelines"
       :key="pipeline.id"
+      class="pipeline-list"
       :to="{
         name: 'repo-pipeline',
         params: { pipelineId: pipeline.number },

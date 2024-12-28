@@ -115,11 +115,11 @@ body,
 }
 
 .vue-notification.error {
-  @apply !bg-wp-error-100 !dark:bg-wp-error-200 !border-l-wp-error-300;
+  @apply !bg-wp-error-100 dark:!bg-wp-error-200 !border-l-wp-error-300;
 }
 
 *::-webkit-scrollbar {
-  @apply bg-transparent w-12px h-12px;
+  @apply bg-transparent w-3 h-3;
 }
 
 * {
@@ -129,11 +129,11 @@ body,
 *::-webkit-scrollbar-thumb {
   transition: background 0.2s ease-in-out;
   border: 3px solid transparent;
-  @apply bg-clip-content bg-cool-gray-200 dark:bg-dark-200 rounded-full;
+  @apply bg-clip-content bg-gray-200 dark:bg-wp-background-200 rounded-full;
 }
 
 *::-webkit-scrollbar-thumb:hover {
-  @apply bg-cool-gray-300 dark:bg-dark-100;
+  @apply bg-gray-300 dark:bg-wp-background-100;
 }
 
 *::-webkit-scrollbar-corner {
