@@ -1,8 +1,10 @@
 // cSpell:ignore Segoe Roboto Neue Noto nocheck
-
+/* eslint-disable ts/no-unsafe-member-access, ts/no-unsafe-assignment, ts/no-unsafe-argument */
+// eslint-disable-next-line ts/ban-ts-comment
 // @ts-nocheck
 
 import typography from '@tailwindcss/typography';
+import type { Config } from 'tailwindcss';
 import colors from 'tailwindcss/colors';
 import tinycolor from 'tinycolor2';
 
@@ -211,9 +213,10 @@ export default {
       transitionProperty: {
         height: 'max-height',
       },
-      stroke: (theme) => theme('colors'),
-      fill: (theme) => theme('colors'),
+
+      stroke: (theme: (path: string) => object) => theme('colors'),
+      fill: (theme: (path: string) => object) => theme('colors'),
     },
   },
-  plugins: [typography()],
-};
+  plugins: [typography],
+} satisfies Config;

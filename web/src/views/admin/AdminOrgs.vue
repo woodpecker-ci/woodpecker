@@ -4,7 +4,7 @@
       <ListItem
         v-for="org in orgs"
         :key="org.id"
-        class="items-center gap-2 !bg-wp-background-200 !dark:bg-wp-background-100 admin-orgs"
+        class="items-center gap-2 !bg-wp-background-200 dark:!bg-wp-background-100 admin-orgs"
       >
         <span>{{ org.name }}</span>
         <IconButton

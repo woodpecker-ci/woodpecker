@@ -32,7 +32,7 @@
     "src/**/*.tsx",
     "src/**/*.vue",
     "src/**/*.json",
-    "tailwind.config.js",
+    "tailwind.config.ts",
     "vite.config.ts",
     "postcss.config.js"
   ],

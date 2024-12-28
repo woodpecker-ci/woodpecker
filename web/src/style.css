@@ -115,7 +115,7 @@ body,
 }
 
 .vue-notification.error {
-  @apply !bg-wp-error-100 !dark:bg-wp-error-200 !border-l-wp-error-300;
+  @apply !bg-wp-error-100 dark:!bg-wp-error-200 !border-l-wp-error-300;
 }
 
 *::-webkit-scrollbar {
