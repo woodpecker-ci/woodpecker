@@ -236,6 +236,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update dependency vite to v6.0.6 [[#4632](https://github.com/woodpecker-ci/woodpecker/pull/4632)]
 - fix(deps): update github.com/getkin/kin-openapi digest to cea0a13 [[#4630](https://github.com/woodpecker-ci/woodpecker/pull/4630)]
 - chore(deps): lock file maintenance [[#4540](https://github.com/woodpecker-ci/woodpecker/pull/4540)]
 - fix(deps): update web npm deps non-major [[#4440](https://github.com/woodpecker-ci/woodpecker/pull/4440)]
