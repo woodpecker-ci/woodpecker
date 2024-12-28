@@ -333,6 +333,7 @@
 
 ### Misc
 
+- Add lighter red shades for error messages [[#4611](https://github.com/woodpecker-ci/woodpecker/pull/4611)]
 - Add docker in docker example to advanced usage in docs [[#4620](https://github.com/woodpecker-ci/woodpecker/pull/4620)]
 - Move link checks into cron-curated issue dashboard [[#4515](https://github.com/woodpecker-ci/woodpecker/pull/4515)]
 - Add settings title action [[#4499](https://github.com/woodpecker-ci/woodpecker/pull/4499)]
