@@ -18,7 +18,7 @@ package github
 import (
 	"fmt"
 
-	"github.com/google/go-github/v67/github"
+	"github.com/google/go-github/v68/github"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
