@@ -50,7 +50,6 @@ steps:
     image: oven/bun:1.1.42-alpine
     directory: docs/
     commands:
-      - bun --bun install
       - bun run build
     when:
       - path: *when_path

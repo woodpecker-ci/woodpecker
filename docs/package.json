@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "start": "cd ../ && make docs && cd docs && docusaurus start",
-    "build": "bun --bun build:woodpecker-plugins && docusaurus build",
-    "build:woodpecker-plugins": "cd plugins/woodpecker-plugins && bun --bun install && bun run build",
+    "build": "bun run build:woodpecker-plugins && bun install && bun run docusaurus build",
+    "build:woodpecker-plugins": "cd plugins/woodpecker-plugins && bun install && bun run build",
     "swizzle": "docusaurus swizzle",
     "deploy": "docusaurus deploy",
     "clear": "docusaurus clear",
