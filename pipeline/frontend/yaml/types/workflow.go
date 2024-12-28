@@ -33,7 +33,6 @@ type (
 
 		// Undocumented
 		Networks WorkflowNetworks `yaml:"networks,omitempty"`
-		Volumes  WorkflowVolumes  `yaml:"volumes,omitempty"`
 	}
 
 	// Workspace defines a pipeline workspace.

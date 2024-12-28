@@ -144,14 +144,12 @@ func (e *docker) Load(ctx context.Context) (*backend.BackendInfo, error) {
 func (e *docker) SetupWorkflow(ctx context.Context, conf *backend.Config, taskUUID string) error {
 	log.Trace().Str("taskUUID", taskUUID).Msg("create workflow environment")
 
-	for _, vol := range conf.Volumes {
-		_, err := e.client.VolumeCreate(ctx, volume.CreateOptions{
-			Name:   vol.Name,
-			Driver: volumeDriver,
-		})
-		if err != nil {
-			return err
-		}
+	_, err := e.client.VolumeCreate(ctx, volume.CreateOptions{
+		Name:   conf.Volume.Name,
+		Driver: volumeDriver,
+	})
+	if err != nil {
+		return err
 	}
 
 	networkDriver := networkDriverBridge
@@ -330,10 +328,8 @@ func (e *docker) DestroyWorkflow(ctx context.Context, conf *backend.Config, task
 			}
 		}
 	}
-	for _, v := range conf.Volumes {
-		if err := e.client.VolumeRemove(ctx, v.Name, true); err != nil {
-			log.Error().Err(err).Msgf("could not remove volume '%s'", v.Name)
-		}
+	if err := e.client.VolumeRemove(ctx, conf.Volume.Name, true); err != nil {
+		log.Error().Err(err).Msgf("could not remove volume '%s'", conf.Volume.Name)
 	}
 	for _, n := range conf.Networks {
 		if err := e.client.NetworkRemove(ctx, n.Name); err != nil {

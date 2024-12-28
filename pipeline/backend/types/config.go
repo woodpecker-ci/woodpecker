@@ -18,7 +18,7 @@ package types
 type Config struct {
 	Stages   []*Stage   `json:"pipeline"` // workflow stages
 	Networks []*Network `json:"networks"` // network definitions
-	Volumes  []*Volume  `json:"volumes"`  // volume definitions
+	Volume  *Volume  `json:"volume"`  // volume definition
 	Secrets  []*Secret  `json:"secrets"`  // secret definitions
 }
 
