@@ -47,7 +47,7 @@ steps:
       - event: manual
 
   build:
-    image: oven/bun:1.1.38-alpine
+    image: oven/bun:1.1.42-alpine
     directory: docs/
     commands:
       - bun --bun install
