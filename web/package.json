@@ -36,11 +36,11 @@
     "postcss": "^8.4.49",
     "prismjs": "^1.29.0",
     "semver": "^7.6.3",
-    "simple-icons": "^13.21.0",
+    "simple-icons": "^14.0.0",
     "tailwindcss": "^3.4.17",
     "textlint": "^14.4.0",
     "vue": "^3.5.13",
-    "vue-i18n": "^10.0.5",
+    "vue-i18n": "^11.0.0",
     "vue-router": "^4.5.0"
   },
   "devDependencies": {
