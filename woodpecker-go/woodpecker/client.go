@@ -34,6 +34,15 @@ const (
 	// pathVersion        = "%s/version"
 )
 
+type ClientError struct {
+	StatusCode int
+	Message    string
+}
+
+func (e *ClientError) Error() string {
+	return fmt.Sprintf("client error %d: %s", e.StatusCode, e.Message)
+}
+
 type client struct {
 	client *http.Client
 	addr   string
@@ -140,7 +149,10 @@ func (c *client) open(rawURL, method string, in any) (io.ReadCloser, error) {
 	if resp.StatusCode > http.StatusPartialContent {
 		defer resp.Body.Close()
 		out, _ := io.ReadAll(resp.Body)
-		return nil, fmt.Errorf("client error %d: %s", resp.StatusCode, string(out))
+		return nil, &ClientError{
+			StatusCode: resp.StatusCode,
+			Message:    string(out),
+		}
 	}
 	return resp.Body, nil
 }

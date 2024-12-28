@@ -19,7 +19,7 @@ import (
 
 	"codeberg.org/6543/xyaml"
 
-	errorTypes "go.woodpecker-ci.org/woodpecker/v2/pipeline/errors/types"
+	errorTypes "go.woodpecker-ci.org/woodpecker/v3/pipeline/errors/types"
 )
 
 const (

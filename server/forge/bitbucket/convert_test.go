@@ -22,8 +22,8 @@ import (
 	"github.com/franela/goblin"
 	"golang.org/x/oauth2"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server/forge/bitbucket/internal"
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge/bitbucket/internal"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
 func Test_helper(t *testing.T) {
@@ -48,7 +48,7 @@ func Test_helper(t *testing.T) {
 			from := &internal.Repo{
 				FullName:  "octocat/hello-world",
 				IsPrivate: true,
-				Scm:       "hg",
+				Scm:       "git",
 			}
 			from.Owner.Links.Avatar.Href = "http://..."
 			from.Links.HTML.Href = "https://bitbucket.org/foo/bar"
@@ -61,8 +61,6 @@ func Test_helper(t *testing.T) {
 			g.Assert(to.FullName).Equal(from.FullName)
 			g.Assert(to.Owner).Equal("octocat")
 			g.Assert(to.Name).Equal("hello-world")
-			g.Assert(to.Branch).Equal("default")
-			g.Assert(string(to.SCMKind)).Equal(from.Scm)
 			g.Assert(to.IsSCMPrivate).Equal(from.IsPrivate)
 			g.Assert(to.Clone).Equal(from.Links.HTML.Href)
 			g.Assert(to.ForgeURL).Equal(from.Links.HTML.Href)

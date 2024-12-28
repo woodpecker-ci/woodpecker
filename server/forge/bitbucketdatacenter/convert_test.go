@@ -21,7 +21,7 @@ import (
 	"github.com/franela/goblin"
 	bb "github.com/neticdk/go-bitbucket/bitbucket"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
 //nolint:misspell
@@ -83,7 +83,6 @@ func TestHelper(t *testing.T) {
 			g.Assert(to.Name).Equal("REPO")
 			g.Assert(to.Owner).Equal("PRJ")
 			g.Assert(to.Branch).Equal("main")
-			g.Assert(to.SCMKind).Equal(model.RepoGit)
 			g.Assert(to.FullName).Equal("PRJ/REPO")
 			g.Assert(to.Perm).Equal(perm)
 			g.Assert(to.Clone).Equal("https://git.domain/clone")

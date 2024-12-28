@@ -15,31 +15,22 @@
 package migration
 
 import (
-	"fmt"
-
 	"src.techknowlogick.com/xormigrate"
 	"xorm.io/xorm"
-
-	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
-var addOrgAgents = xormigrate.Migration{
-	ID: "add-org-agents",
+var removeRepoScm = xormigrate.Migration{
+	ID: "remove-repo-scm",
 	MigrateSession: func(sess *xorm.Session) (err error) {
-		type agents struct {
-			ID      int64 `xorm:"pk autoincr 'id'"`
-			OwnerID int64 `xorm:"INDEX 'owner_id'"`
-			OrgID   int64 `xorm:"INDEX 'org_id'"`
+		type repos struct {
+			SCMKind string `xorm:"varchar(50) 'scm'"`
 		}
 
-		if err := sess.Sync(new(agents)); err != nil {
-			return fmt.Errorf("sync models failed: %w", err)
+		// ensure columns to drop exist
+		if err := sess.Sync(new(repos)); err != nil {
+			return err
 		}
 
-		// Update all existing agents to be global agents
-		_, err = sess.Cols("org_id").Update(&agents{
-			OrgID: model.IDNotSet,
-		})
-		return err
+		return dropTableColumns(sess, "repos", "scm")
 	},
 }

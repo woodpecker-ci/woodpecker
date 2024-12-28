@@ -23,7 +23,7 @@ import (
 	bb "github.com/neticdk/go-bitbucket/bitbucket"
 	"golang.org/x/oauth2"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
 func convertStatus(status model.StatusValue) bb.BuildStatusState {
@@ -56,7 +56,6 @@ func convertRepo(from *bb.Repository, perm *model.Perm, branch string) *model.Re
 		Name:          from.Slug,
 		Owner:         from.Project.Key,
 		Branch:        branch,
-		SCMKind:       model.RepoGit,
 		IsSCMPrivate:  true, // Since we have to use Netrc it has to always be private :/ TODO: Is this really true?
 		FullName:      fmt.Sprintf("%s/%s", from.Project.Key, from.Slug),
 		Perm:          perm,

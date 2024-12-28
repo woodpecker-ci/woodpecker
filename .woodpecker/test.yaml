@@ -32,7 +32,7 @@ steps:
       - vendor
     image: *golang_image
     commands:
-      - go run go.woodpecker-ci.org/woodpecker/v2/cmd/cli lint
+      - go run go.woodpecker-ci.org/woodpecker/v3/cmd/cli lint
     environment:
       WOODPECKER_DISABLE_UPDATE_CHECK: true
       WOODPECKER_LINT_STRICT: true
@@ -125,7 +125,7 @@ steps:
       - test
       - sqlite
     pull: true
-    image: docker.io/woodpeckerci/plugin-codecov:2.1.5
+    image: docker.io/woodpeckerci/plugin-codecov:2.1.6
     settings:
       files:
         - agent-coverage.out
