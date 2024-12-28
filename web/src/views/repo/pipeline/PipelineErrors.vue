@@ -10,7 +10,7 @@
                 class="flex-shrink-0 my-1"
                 :class="{
                   'text-wp-state-warn-100': error.is_warning,
-                  'text-wp-state-error-100': !error.is_warning,
+                  'text-wp-error-100': !error.is_warning,
                 }"
               />
               <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
