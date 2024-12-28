@@ -128,15 +128,15 @@ body,
   scrollbar-width: thin;
 }
 
-/* *::-webkit-scrollbar-thumb {
+*::-webkit-scrollbar-thumb {
   transition: background 0.2s ease-in-out;
   border: 3px solid transparent;
-  @apply bg-clip-content bg-gray-200 dark:bg-dark-200 rounded-full;
+  @apply bg-clip-content bg-gray-200 dark:bg-wp-background-200 rounded-full;
 }
 
 *::-webkit-scrollbar-thumb:hover {
-  @apply bg-cool-gray-300 dark:bg-dark-100;
-} */
+  @apply bg-gray-300 dark:bg-wp-background-100;
+}
 
 *::-webkit-scrollbar-corner {
   @apply bg-transparent;
