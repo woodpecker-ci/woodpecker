@@ -17,7 +17,7 @@ package types
 // Config defines the runtime configuration of a workflow.
 type Config struct {
 	Stages   []*Stage   `json:"pipeline"` // workflow stages
-	Networks []*Network `json:"networks"` // network definitions
+	Network *Network `json:"network"` // network definitions
 	Volume  *Volume  `json:"volume"`  // volume definition
 	Secrets  []*Secret  `json:"secrets"`  // secret definitions
 }

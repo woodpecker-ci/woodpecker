@@ -81,9 +81,9 @@ func TestCompilerCompile(t *testing.T) {
 		WithWorkspaceFromURL("/test", repoURL),
 	)
 
-	defaultNetworks := []*backend_types.Network{{
+	defaultNetwork := &backend_types.Network{
 		Name: "test_default",
-	}}
+	}
 	defaultVolume := &backend_types.Volume{
 		Name: "test_default",
 	}
@@ -113,7 +113,7 @@ func TestCompilerCompile(t *testing.T) {
 			name:     "empty workflow, no clone",
 			fronConf: &yaml_types.Workflow{SkipClone: true},
 			backConf: &backend_types.Config{
-				Networks: defaultNetworks,
+				Network: defaultNetwork,
 				Volume:  defaultVolume,
 			},
 		},
@@ -121,7 +121,7 @@ func TestCompilerCompile(t *testing.T) {
 			name:     "empty workflow, default clone",
 			fronConf: &yaml_types.Workflow{},
 			backConf: &backend_types.Config{
-				Networks: defaultNetworks,
+				Network: defaultNetwork,
 				Volume:  defaultVolume,
 				Stages:   []*backend_types.Stage{defaultCloneStage},
 			},
@@ -133,7 +133,7 @@ func TestCompilerCompile(t *testing.T) {
 				Image: "dummy_img",
 			}}}},
 			backConf: &backend_types.Config{
-				Networks: defaultNetworks,
+				Network: defaultNetwork,
 				Volume:  defaultVolume,
 				Stages: []*backend_types.Stage{defaultCloneStage, {
 					Steps: []*backend_types.Step{{
@@ -167,7 +167,7 @@ func TestCompilerCompile(t *testing.T) {
 				Commands: []string{"echo 2"},
 			}}}},
 			backConf: &backend_types.Config{
-				Networks: defaultNetworks,
+				Network: defaultNetwork,
 				Volume:  defaultVolume,
 				Stages: []*backend_types.Stage{
 					defaultCloneStage, {
@@ -233,7 +233,7 @@ func TestCompilerCompile(t *testing.T) {
 				Commands: []string{"echo 2"},
 			}}}},
 			backConf: &backend_types.Config{
-				Networks: defaultNetworks,
+				Network: defaultNetwork,
 				Volume:  defaultVolume,
 				Stages: []*backend_types.Stage{defaultCloneStage, {
 					Steps: []*backend_types.Step{{

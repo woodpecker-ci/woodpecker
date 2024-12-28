@@ -134,9 +134,9 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 	}
 
 	// create a default network
-	config.Networks = append(config.Networks, &backend_types.Network{
+	config.Network = &backend_types.Network{
 		Name: fmt.Sprintf("%s_default", c.prefix),
-	})
+	}
 
 	// create secrets for mask
 	for _, sec := range c.secrets {
