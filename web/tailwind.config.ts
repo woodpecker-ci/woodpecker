@@ -1,5 +1,4 @@
 // cSpell:ignore Segoe Roboto Neue Noto nocheck
-/* eslint-disable ts/no-unsafe-member-access, ts/no-unsafe-assignment, ts/no-unsafe-argument */
 // eslint-disable-next-line ts/ban-ts-comment
 // @ts-nocheck
 
