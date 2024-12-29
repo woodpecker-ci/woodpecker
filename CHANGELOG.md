@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-12-28
+## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-12-29
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -236,6 +236,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update dependency simple-icons to v14.0.1 [[#4640](https://github.com/woodpecker-ci/woodpecker/pull/4640)]
 - fix(deps): update module github.com/google/go-github/v67 to v68 [[#4635](https://github.com/woodpecker-ci/woodpecker/pull/4635)]
 - fix(deps): update dependency vue-i18n to v11 [[#4634](https://github.com/woodpecker-ci/woodpecker/pull/4634)]
 - fix(deps): update dependency simple-icons to v14 [[#4633](https://github.com/woodpecker-ci/woodpecker/pull/4633)]
