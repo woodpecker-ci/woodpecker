@@ -32,7 +32,7 @@
         <IconButton icon="edit" class="w-8 h-8" :title="$t('repo.settings.crons.edit')" @click="selectedCron = cron" />
         <IconButton
           icon="trash"
-          class="w-8 h-8 hover:text-wp-control-error-100"
+          class="w-8 h-8 hover:text-wp-error-100"
           :is-loading="isDeleting"
           :title="$t('repo.settings.crons.delete')"
           @click="deleteCron(cron)"
@@ -74,7 +74,7 @@
           />
         </InputField>
 
-        <div v-if="isEditingCron" class="ml-auto mb-4">
+        <div v-if="isEditingCron" class="mb-4 ml-auto">
           <span v-if="selectedCron.next_exec && selectedCron.next_exec > 0" class="text-wp-text-100">
             <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
             {{ $t('repo.settings.crons.next_exec') }}:

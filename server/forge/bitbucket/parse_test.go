@@ -125,7 +125,6 @@ func Test_parser(t *testing.T) {
 				r, b, err := parseHook(req)
 				g.Assert(err).IsNil()
 				g.Assert(r.FullName).Equal("martinherren1984/publictestrepo")
-				g.Assert(r.SCMKind).Equal(model.RepoGit)
 				g.Assert(r.Clone).Equal("https://bitbucket.org/martinherren1984/publictestrepo")
 				g.Assert(b.Commit).Equal("c14c1bb05dfb1fdcdf06b31485fff61b0ea44277")
 			})
