@@ -23,7 +23,11 @@
       <div v-if="hiddenTabs.length" class="relative border-transparent py-1 border-b-2">
         <IconButton icon="dots" class="w-8 h-8" @click="toggleDropdown" />
 
-        <div v-if="isDropdownOpen" class="absolute right-0 mt-1 bg-wp-background-100 border rounded-md shadow-lg z-20">
+        <div
+          v-if="isDropdownOpen"
+          class="absolute mt-1 bg-wp-background-100 border rounded-md shadow-lg z-20"
+          :class="[visibleTabs.length === 0 ? 'left-0' : 'right-0']"
+        >
           <router-link
             v-for="tab in hiddenTabs"
             :key="tab.title"
@@ -53,7 +57,6 @@ const tabsRef = ref<HTMLElement | null>(null);
 const isDropdownOpen = ref(false);
 const visibleCount = ref(tabs.value.length);
 
-const moreButtonRef = ref<HTMLElement | null>(null);
 const visibleTabs = computed(() => tabs.value.slice(0, visibleCount.value));
 const hiddenTabs = computed(() => tabs.value.slice(visibleCount.value));
 
@@ -87,8 +90,8 @@ const updateVisibleItems = () => {
     const otherElements = Array.from(parentElement?.children || []).filter((el) => el !== containerRef.value);
     const otherElementsWidth = otherElements.reduce((sum, el) => sum + el.getBoundingClientRect().width, 0);
     const availableWidth = parentWidth - otherElementsWidth;
-    const moreButtonWidth = moreButtonRef.value?.offsetWidth || 100;
-    const gapWidth = 16;
+    const moreButtonWidth = 32; // This need to match the width of the IconButton (w-8)
+    const gapWidth = 16; // This need to match the gap between the tabs (gap-4)
     let totalWidth = 0;
 
     const items = Array.from(tabsRef.value!.children);
