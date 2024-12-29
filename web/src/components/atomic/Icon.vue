@@ -15,12 +15,12 @@
   <SvgIcon v-else-if="name === 'settings'" :path="mdiCog" size="1.3rem" />
   <SvgIcon v-else-if="name === 'settings-outline'" :path="mdiCogOutline" size="1.3rem" />
   <SvgIcon v-else-if="name === 'trash'" :path="mdiTrashCanOutline" size="1.3rem" />
-  <SvgIcon v-else-if="name === 'status-blocked'" :path="mdiPlayOutline" size="1.3rem" />
-  <SvgIcon v-else-if="name === 'status-declined'" :path="mdiStopCircleOutline" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'status-blocked'" :path="mdiPlay" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'status-declined'" :path="mdiStop" size="1.3rem" />
   <SvgIcon
     v-else-if="name === 'status-failure' || name === 'status-error' || name === 'status-killed'"
     type="mdi"
-    :path="mdiCloseCircle"
+    :path="mdiClose"
     size="1.3rem"
   />
   <SvgIcon v-else-if="name === 'status-pending'" :path="mdiRadioboxBlank" size="1.3rem" />
@@ -92,6 +92,7 @@ import {
   mdiCheckCircle,
   mdiChevronRight,
   mdiClockTimeEightOutline,
+  mdiClose,
   mdiCloseCircle,
   mdiCog,
   mdiCogOutline,
@@ -118,7 +119,7 @@ import {
   mdiSourceCommit,
   mdiSourceMerge,
   mdiSourcePull,
-  mdiStopCircleOutline,
+  mdiStop,
   mdiTagOutline,
   mdiTimerOutline,
   mdiTrashCanOutline,
