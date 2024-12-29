@@ -236,6 +236,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update docker.io/woodpeckerci/plugin-ready-release-go docker tag to v3.1.1 [[#4642](https://github.com/woodpecker-ci/woodpecker/pull/4642)]
 - fix(deps): update dependency simple-icons to v14.0.1 [[#4640](https://github.com/woodpecker-ci/woodpecker/pull/4640)]
 - fix(deps): update module github.com/google/go-github/v67 to v68 [[#4635](https://github.com/woodpecker-ci/woodpecker/pull/4635)]
 - fix(deps): update dependency vue-i18n to v11 [[#4634](https://github.com/woodpecker-ci/woodpecker/pull/4634)]
