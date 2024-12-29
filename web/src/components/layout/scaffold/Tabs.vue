@@ -25,14 +25,14 @@
 
         <div
           v-if="isDropdownOpen"
-          class="absolute mt-1 bg-wp-background-100 border rounded-md shadow-lg z-20"
+          class="absolute mt-1 bg-wp-background-100 dark:bg-wp-background-200 border border-wp-background-400 rounded-md shadow-lg z-20 dark:hover:bg-wp-background-100 hover:bg-wp-background-200"
           :class="[visibleTabs.length === 0 ? 'left-0' : 'right-0']"
         >
           <router-link
             v-for="tab in hiddenTabs"
             :key="tab.title"
             :to="tab.to"
-            class="block w-full px-4 py-2 text-left hover:bg-wp-background-200 whitespace-nowrap"
+            class="block w-full px-4 py-2 text-left whitespace-nowrap"
             @click="isDropdownOpen = false"
           >
             {{ tab.title }}
