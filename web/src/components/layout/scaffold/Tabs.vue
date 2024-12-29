@@ -28,7 +28,7 @@
             v-for="tab in hiddenTabs"
             :key="tab.title"
             :to="tab.to"
-            class="block w-full px-4 py-2 text-left hover:bg-wp-background-200"
+            class="block w-full px-4 py-2 text-left hover:bg-wp-background-200 whitespace-nowrap"
             @click="isDropdownOpen = false"
           >
             {{ tab.title }}
