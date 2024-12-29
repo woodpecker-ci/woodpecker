@@ -20,7 +20,7 @@
   <SvgIcon
     v-else-if="name === 'status-failure' || name === 'status-error' || name === 'status-killed'"
     type="mdi"
-    :path="mdiClose"
+    :path="mdiCloseCircle"
     size="1.3rem"
   />
   <SvgIcon v-else-if="name === 'status-pending'" :path="mdiRadioboxBlank" size="1.3rem" />
