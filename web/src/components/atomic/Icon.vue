@@ -33,7 +33,6 @@
   <SvgIcon v-else-if="name === 'status-skipped'" :path="mdiMinusCircle" size="1.3rem" />
   <SvgIcon v-else-if="name === 'status-success'" :path="mdiCheckCircle" size="1.3rem" />
   <SvgIcon v-else-if="name === 'alert'" :path="mdiAlertCircle" size="1.3rem" />
-  <SvgIcon v-else-if="name === 'bitbucket' || name === 'bitbucket-dc'" :path="mdiBitbucket" size="32" />
   <SvgIcon v-else-if="name === 'question'" :path="mdiHelpCircle" size="1.3rem" />
   <SvgIcon v-else-if="name === 'plus'" :path="mdiPlus" size="1.3rem" />
   <SvgIcon v-else-if="name === 'list'" :path="mdiFormatListBulleted" size="1.3rem" />
@@ -55,6 +54,8 @@
 
   <SvgIcon v-else-if="name === 'forgejo'" :path="siForgejo.path" size="1.3rem" />
   <SvgIcon v-else-if="name === 'gitea'" :path="siGitea.path" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'gitlab'" :path="mdiGitlab" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'bitbucket' || name === 'bitbucket-dc'" :path="mdiBitbucket" size="1.3" />
 
   <svg v-else-if="name === 'spinner'" width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
     <path
@@ -98,6 +99,7 @@ import {
   mdiGestureTap,
   mdiGit,
   mdiGithub,
+  mdiGitlab,
   mdiHelpCircle,
   mdiLockOpenOutline,
   mdiLockOutline,
@@ -171,13 +173,11 @@ export type IconNames =
   | 'download'
   | 'auto-scroll'
   | 'auto-scroll-off'
-  | 'refresh'
   | 'play'
   | 'play-outline'
   | 'pause'
   | 'alert'
   | 'spinner'
-  | 'remove'
   | 'visibility-private'
   | 'visibility-internal';
 
