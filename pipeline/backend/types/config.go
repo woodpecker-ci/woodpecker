@@ -16,10 +16,10 @@ package types
 
 // Config defines the runtime configuration of a workflow.
 type Config struct {
-	Stages   []*Stage   `json:"pipeline"` // workflow stages
-	Network *Network `json:"network"` // network definitions
-	Volume  *Volume  `json:"volume"`  // volume definition
-	Secrets  []*Secret  `json:"secrets"`  // secret definitions
+	Stages  []*Stage  `json:"pipeline"` // workflow stages
+	Network *Network  `json:"network"`  // network definitions
+	Volume  *Volume   `json:"volume"`   // volume definition
+	Secrets []*Secret `json:"secrets"`  // secret definitions
 }
 
 // CliCommand is the context key to pass cli context to backends if needed.

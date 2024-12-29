@@ -123,7 +123,7 @@ func TestCompilerCompile(t *testing.T) {
 			backConf: &backend_types.Config{
 				Network: defaultNetwork,
 				Volume:  defaultVolume,
-				Stages:   []*backend_types.Stage{defaultCloneStage},
+				Stages:  []*backend_types.Stage{defaultCloneStage},
 			},
 		},
 		{
