@@ -15,8 +15,8 @@
   <SvgIcon v-else-if="name === 'settings'" :path="mdiCog" size="1.3rem" />
   <SvgIcon v-else-if="name === 'settings-outline'" :path="mdiCogOutline" size="1.3rem" />
   <SvgIcon v-else-if="name === 'trash'" :path="mdiTrashCanOutline" size="1.3rem" />
-  <SvgIcon v-else-if="name === 'status-blocked'" :path="mdiPlay" size="1.3rem" />
-  <SvgIcon v-else-if="name === 'status-declined'" :path="mdiStop" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'status-blocked'" :path="mdiPlayCircle" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'status-declined'" :path="mdiStopCircle" size="1.3rem" />
   <SvgIcon
     v-else-if="name === 'status-failure' || name === 'status-error' || name === 'status-killed'"
     type="mdi"
@@ -109,6 +109,7 @@ import {
   mdiPackageVariant,
   mdiPause,
   mdiPencilOutline,
+  mdiPlayCircle,
   mdiPlay,
   mdiPlayOutline,
   mdiPlus,
@@ -119,7 +120,7 @@ import {
   mdiSourceCommit,
   mdiSourceMerge,
   mdiSourcePull,
-  mdiStop,
+  mdiStopCircle,
   mdiTagOutline,
   mdiTimerOutline,
   mdiTrashCanOutline,
