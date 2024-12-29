@@ -21,13 +21,13 @@ import (
 
 	"github.com/urfave/cli/v3"
 
-	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
-	"go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v3/woodpecker-go/woodpecker"
 )
 
 var registryCreateCmd = &cli.Command{
 	Name:   "add",
-	Usage:  "adds a registry",
+	Usage:  "add a registry",
 	Action: registryCreate,
 	Flags: []cli.Flag{
 		&cli.StringFlag{

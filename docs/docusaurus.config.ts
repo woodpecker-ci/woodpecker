@@ -1,9 +1,9 @@
-import { themes } from 'prism-react-renderer';
-import type { Config } from '@docusaurus/types';
-import type * as Preset from '@docusaurus/preset-classic';
 import * as path from 'path';
+import type * as Preset from '@docusaurus/preset-classic';
+import type { Config } from '@docusaurus/types';
+import { themes } from 'prism-react-renderer';
 
-const config: Config = {
+const config = {
   title: 'Woodpecker CI',
   tagline: 'Woodpecker is a simple, yet powerful CI/CD engine with great extensibility.',
   url: 'https://woodpecker-ci.org',
@@ -236,23 +236,23 @@ const config: Config = {
           sidebarPath: require.resolve('./sidebars.js'),
           editUrl: 'https://github.com/woodpecker-ci/woodpecker/edit/main/docs/',
           includeCurrentVersion: true,
-          lastVersion: '2.7',
+          lastVersion: '2.8',
           onlyIncludeVersions:
-            process.env.NODE_ENV === 'development' ? ['current', '2.7'] : ['current', '2.7', '2.6', '2.5', '1.0'],
+            process.env.NODE_ENV === 'development' ? ['current', '2.8'] : ['current', '2.8', '2.7', '2.6', '1.0'],
           versions: {
             current: {
               label: 'Next 🚧',
               banner: 'unreleased',
             },
+            '2.8': {
+              label: '2.8.x',
+            },
             '2.7': {
-              label: '2.7.x',
+              label: '2.7.x 💀',
+              banner: 'unmaintained',
             },
             '2.6': {
               label: '2.6.x 💀',
-              banner: 'unmaintained',
-            },
-            '2.5': {
-              label: '2.5.x 💀',
               banner: 'unmaintained',
             },
             '1.0': {
@@ -265,8 +265,6 @@ const config: Config = {
           blogTitle: 'Blog',
           blogDescription: 'A blog for release announcements, turorials...',
           onInlineAuthors: 'ignore',
-          // postsPerPage: 'ALL',
-          // blogSidebarCount: 0,
         },
         theme: {
           customCss: require.resolve('./src/css/custom.css'),
@@ -279,7 +277,7 @@ const config: Config = {
         // Plugin Options for loading OpenAPI files
         specs: [
           {
-            spec: 'swagger.json',
+            spec: 'openapi.json',
             route: '/api/',
           },
         ],
@@ -291,19 +289,12 @@ const config: Config = {
       },
     ],
   ],
-  webpack: {
-    jsLoader: (isServer) => ({
-      loader: require.resolve('esbuild-loader'),
-      options: {
-        loader: 'tsx',
-        target: isServer ? 'node12' : 'es2017',
-        supported: { 'dynamic-import': false },
-      },
-    }),
-  },
   markdown: {
     format: 'detect',
   },
-};
+  future: {
+    experimental_faster: true,
+  },
+} satisfies Config;
 
 export default config;

@@ -26,9 +26,9 @@ import (
 	"github.com/franela/goblin"
 	"github.com/stretchr/testify/assert"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server/forge/gitlab/testdata"
-	"go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge/gitlab/testdata"
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
 func load(config string) *GitLab {
@@ -60,7 +60,7 @@ func Test_GitLab(t *testing.T) {
 
 	user := model.User{
 		Login:         "test_user",
-		Token:         "e3b0c44298fc1c149afbf4c8996fb",
+		AccessToken:   "e3b0c44298fc1c149afbf4c8996fb",
 		ForgeRemoteID: "3",
 	}
 

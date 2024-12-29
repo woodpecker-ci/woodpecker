@@ -26,11 +26,10 @@
   --wp-control-ok-200: theme('colors.int-wp-control-ok.200');
   --wp-control-ok-300: theme('colors.int-wp-control-ok.300');
 
-  --wp-control-error-100: theme('colors.int-wp-control-error.100');
-  --wp-control-error-200: theme('colors.int-wp-control-error.200');
-  --wp-control-error-300: theme('colors.int-wp-control-error.300');
+  --wp-error-100: theme('colors.int-wp-error.100');
+  --wp-error-200: theme('colors.int-wp-error.200');
+  --wp-error-300: theme('colors.int-wp-error.300');
 
-  --wp-state-error-100: theme('colors.int-wp-state-error.100');
   --wp-state-neutral-100: theme('colors.int-wp-state-neutral.100');
   --wp-state-ok-100: theme('colors.int-wp-state-ok.100');
   --wp-state-info-100: theme('colors.int-wp-state-info.100');
@@ -75,11 +74,10 @@
   --wp-control-ok-200: theme('colors.int-wp-control-ok-dark.200');
   --wp-control-ok-300: theme('colors.int-wp-control-ok-dark.300');
 
-  --wp-control-error-100: theme('colors.int-wp-control-error-dark.100');
-  --wp-control-error-200: theme('colors.int-wp-control-error-dark.200');
-  --wp-control-error-300: theme('colors.int-wp-control-error-dark.300');
+  --wp-error-100: theme('colors.int-wp-error.100');
+  --wp-error-200: theme('colors.int-wp-error.200');
+  --wp-error-300: theme('colors.int-wp-error.300');
 
-  --wp-state-error-100: theme('colors.int-wp-state-error-dark.100');
   --wp-state-neutral-100: theme('colors.int-wp-state-neutral.100');
   --wp-state-ok-100: theme('colors.int-wp-state-ok-dark.100');
   --wp-state-info-100: theme('colors.int-wp-state-info-dark.100');
@@ -105,7 +103,7 @@ body,
 }
 
 .vue-notification {
-  @apply rounded-md text-base border-l-6;
+  @apply border-l-6 rounded-md text-base;
 }
 
 .vue-notification .notification-title {
@@ -117,7 +115,7 @@ body,
 }
 
 .vue-notification.error {
-  @apply !bg-wp-control-error-100 !border-l-wp-control-error-300;
+  @apply !bg-wp-error-100 !dark:bg-wp-error-200 !border-l-wp-error-300;
 }
 
 *::-webkit-scrollbar {
@@ -131,7 +129,7 @@ body,
 *::-webkit-scrollbar-thumb {
   transition: background 0.2s ease-in-out;
   border: 3px solid transparent;
-  @apply bg-cool-gray-200 dark:bg-dark-200 rounded-full bg-clip-content;
+  @apply bg-clip-content bg-cool-gray-200 dark:bg-dark-200 rounded-full;
 }
 
 *::-webkit-scrollbar-thumb:hover {
@@ -143,10 +141,11 @@ body,
 }
 
 .code-box {
-  @apply bg-wp-code-200 p-4 rounded-md text-wp-code-text-100 text-sm break-words;
+  @apply bg-wp-code-200 p-4 rounded-md text-sm text-wp-code-text-100 break-words;
   white-space: pre-wrap;
 }
 
-.code-box-inline {
-  @apply bg-wp-code-200 rounded-md text-wp-code-text-100;
+.code-box-inline,
+code:not(pre > code) {
+  @apply bg-wp-code-200 px-1 py-px rounded-md text-wp-code-text-100;
 }

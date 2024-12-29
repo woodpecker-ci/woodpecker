@@ -34,7 +34,7 @@ Install make on:
 
 ### Install Node.js & `pnpm`
 
-Install [Node.js (>=14)](https://nodejs.org/en/download/) if you want to build Woodpecker's UI or documentation.
+Install [Node.js (>=20)](https://nodejs.org/en/download/package-manager) if you want to build Woodpecker's UI or documentation.
 
 For dependency installation (`node_modules`) of UI and documentation of Woodpecker the package manager pnpm is used.
 [This guide](https://pnpm.io/installation) describes the installation of `pnpm`.
@@ -128,7 +128,7 @@ make test-frontend
 If you want to test a specific Go file, you can also use:
 
 ```bash
-go test -race -timeout 30s go.woodpecker-ci.org/woodpecker/v2/<path-to-the-package-or-file-to-test>
+go test -race -timeout 30s go.woodpecker-ci.org/woodpecker/v3/<path-to-the-package-or-file-to-test>
 ```
 
 Or you can open the test-file inside [VS-Code](#developing-with-vs-code) and run or debug the test by clicking on the inline commands:

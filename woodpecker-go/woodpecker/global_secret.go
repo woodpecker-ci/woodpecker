@@ -1,6 +1,9 @@
 package woodpecker
 
-import "fmt"
+import (
+	"fmt"
+	"net/url"
+)
 
 const (
 	pathGlobalSecrets = "%s/api/secrets"
@@ -16,10 +19,11 @@ func (c *client) GlobalSecret(secret string) (*Secret, error) {
 }
 
 // GlobalSecretList returns a list of all global secrets.
-func (c *client) GlobalSecretList() ([]*Secret, error) {
+func (c *client) GlobalSecretList(opt SecretListOptions) ([]*Secret, error) {
 	var out []*Secret
-	uri := fmt.Sprintf(pathGlobalSecrets, c.addr)
-	err := c.get(uri, &out)
+	uri, _ := url.Parse(fmt.Sprintf(pathGlobalSecrets, c.addr))
+	uri.RawQuery = opt.getURLQuery().Encode()
+	err := c.get(uri.String(), &out)
 	return out, err
 }
 

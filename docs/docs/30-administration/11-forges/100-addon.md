@@ -38,9 +38,9 @@ Addons use RPC to communicate to the server and are implemented using the [`go-p
 
 This example will use the Go language.
 
-Directly import Woodpecker's Go packages (`go.woodpecker-ci.org/woodpecker/woodpecker/v2`) and use the interfaces and types defined there.
+Directly import Woodpecker's Go packages (`go.woodpecker-ci.org/woodpecker/v3`) and use the interfaces and types defined there.
 
-In the `main` function, just call `"go.woodpecker-ci.org/woodpecker/v2/server/forge/addon".Serve` with a `"go.woodpecker-ci.org/woodpecker/v2/server/forge".Forge` as argument.
+In the `main` function, just call `"go.woodpecker-ci.org/woodpecker/v3/server/forge/addon".Serve` with a `"go.woodpecker-ci.org/woodpecker/v3/server/forge".Forge` as argument.
 This will take care of connecting the addon forge to the server.
 
 ### Example structure
@@ -52,9 +52,9 @@ import (
   "context"
   "net/http"
 
-  "go.woodpecker-ci.org/woodpecker/v2/server/forge/addon"
-  forgeTypes "go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
-  "go.woodpecker-ci.org/woodpecker/v2/server/model"
+  "go.woodpecker-ci.org/woodpecker/v3/server/forge/addon"
+  forgeTypes "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
+  "go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
 func main() {
@@ -64,5 +64,5 @@ func main() {
 type config struct {
 }
 
-// `config` must implement `"go.woodpecker-ci.org/woodpecker/v2/server/forge".Forge`. You must directly use Woodpecker's packages - see imports above.
+// `config` must implement `"go.woodpecker-ci.org/woodpecker/v3/server/forge".Forge`. You must directly use Woodpecker's packages - see imports above.
 ```

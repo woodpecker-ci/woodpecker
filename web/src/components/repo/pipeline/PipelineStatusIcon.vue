@@ -1,12 +1,13 @@
 <template>
   <div
-    class="flex items-center justify-center"
+    class="flex justify-center items-center"
     :title="$t('repo.pipeline.status.status', { status: statusDescriptions[status] })"
   >
     <Icon
       :name="service ? 'settings' : `status-${status}`"
+      size="1.5rem"
       :class="{
-        'text-wp-state-error-100': pipelineStatusColors[status] === 'red',
+        'text-wp-error-100': pipelineStatusColors[status] === 'red',
         'text-wp-state-neutral-100': pipelineStatusColors[status] === 'gray',
         'text-wp-state-ok-100': pipelineStatusColors[status] === 'green',
         'text-wp-state-info-100': pipelineStatusColors[status] === 'blue',

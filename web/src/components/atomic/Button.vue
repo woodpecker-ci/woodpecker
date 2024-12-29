@@ -2,13 +2,13 @@
   <component
     :is="to === undefined ? 'button' : httpLink ? 'a' : 'router-link'"
     v-bind="btnAttrs"
-    class="relative flex items-center py-1 px-2 rounded-md border shadow-sm cursor-pointer transition-all duration-150 overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed"
+    class="relative flex flex-shrink-0 items-center disabled:opacity-50 shadow-sm px-2 py-1 border rounded-md whitespace-nowrap transition-all duration-150 cursor-pointer disabled:cursor-not-allowed overflow-hidden"
     :class="{
       'bg-wp-control-neutral-100 hover:bg-wp-control-neutral-200 border-wp-control-neutral-300 text-wp-text-100':
         color === 'gray',
       'bg-wp-control-ok-100 hover:bg-wp-control-ok-200 border-wp-control-ok-300 text-white': color === 'green',
       'bg-wp-control-info-100 hover:bg-wp-control-info-200 border-wp-control-info-300 text-white': color === 'blue',
-      'bg-wp-control-error-100 hover:bg-wp-control-error-200 border-wp-control-error-300 text-white': color === 'red',
+      'bg-wp-error-100 dark:bg-wp-error-200 hover:bg-wp-error-300 border-wp-error-300 text-white': color === 'red',
       ...passedClasses,
     }"
     :title="title"
@@ -16,16 +16,16 @@
   >
     <slot>
       <Icon v-if="startIcon" :name="startIcon" class="!w-6 !h-6" :class="{ invisible: isLoading, 'mr-1': text }" />
-      <span :class="{ invisible: isLoading }" class="flex-shrink-0">{{ text }}</span>
+      <span :class="{ invisible: isLoading }">{{ text }}</span>
       <Icon v-if="endIcon" :name="endIcon" class="ml-2 w-6 h-6" :class="{ invisible: isLoading }" />
       <div
         v-if="isLoading"
-        class="absolute left-0 top-0 right-0 bottom-0 flex items-center justify-center"
+        class="top-0 right-0 bottom-0 left-0 absolute flex justify-center items-center"
         :class="{
           'bg-wp-control-neutral-200': color === 'gray',
           'bg-wp-control-ok-200': color === 'green',
           'bg-wp-control-info-200': color === 'blue',
-          'bg-wp-control-error-200': color === 'red',
+          'bg-wp-error-200': color === 'red',
         }"
       >
         <Icon name="spinner" />

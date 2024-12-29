@@ -21,14 +21,13 @@ import (
 
 	"github.com/rs/zerolog/log"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server"
-	forge_types "go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
-	"go.woodpecker-ci.org/woodpecker/v2/server/store"
+	"go.woodpecker-ci.org/woodpecker/v3/server"
+	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 )
 
-// Approve update the status to pending for a blocked pipeline because of a gated repo
-// and start them afterward.
+// Approve update the status to pending for a blocked pipeline so it can be executed.
 func Approve(ctx context.Context, store store.Store, currentPipeline *model.Pipeline, user *model.User, repo *model.Repo) (*model.Pipeline, error) {
 	if currentPipeline.Status != model.StatusBlocked {
 		return nil, ErrBadRequest{Msg: fmt.Sprintf("cannot approve a pipeline with status %s", currentPipeline.Status)}

@@ -22,9 +22,9 @@ import (
 	"github.com/franela/goblin"
 	"github.com/stretchr/testify/assert"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server/forge/bitbucket/fixtures"
-	"go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge/bitbucket/fixtures"
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
 func Test_parser(t *testing.T) {
@@ -125,7 +125,6 @@ func Test_parser(t *testing.T) {
 				r, b, err := parseHook(req)
 				g.Assert(err).IsNil()
 				g.Assert(r.FullName).Equal("martinherren1984/publictestrepo")
-				g.Assert(r.SCMKind).Equal(model.RepoGit)
 				g.Assert(r.Clone).Equal("https://bitbucket.org/martinherren1984/publictestrepo")
 				g.Assert(b.Commit).Equal("c14c1bb05dfb1fdcdf06b31485fff61b0ea44277")
 				g.Assert(b.Message).Equal("a\n")

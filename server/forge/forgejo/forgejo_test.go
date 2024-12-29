@@ -25,11 +25,11 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/mock"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server/forge/forgejo/fixtures"
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
-	"go.woodpecker-ci.org/woodpecker/v2/server/store"
-	mocks_store "go.woodpecker-ci.org/woodpecker/v2/server/store/mocks"
-	"go.woodpecker-ci.org/woodpecker/v2/shared/utils"
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge/forgejo/fixtures"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store"
+	mocks_store "go.woodpecker-ci.org/woodpecker/v3/server/store/mocks"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/utils"
 )
 
 func Test_forgejo(t *testing.T) {
@@ -69,7 +69,7 @@ func Test_forgejo(t *testing.T) {
 				netrc, _ := forge.Netrc(fakeUser, fakeRepo)
 				g.Assert(netrc.Machine).Equal("forgejo.org")
 				g.Assert(netrc.Login).Equal(fakeUser.Login)
-				g.Assert(netrc.Password).Equal(fakeUser.Token)
+				g.Assert(netrc.Password).Equal(fakeUser.AccessToken)
 			})
 			g.It("Should return a netrc with the machine account", func() {
 				forge, _ := New(Opts{})
@@ -165,13 +165,13 @@ func Test_forgejo(t *testing.T) {
 
 var (
 	fakeUser = &model.User{
-		Login: "someuser",
-		Token: "cfcd2084",
+		Login:       "someuser",
+		AccessToken: "cfcd2084",
 	}
 
 	fakeUserNoRepos = &model.User{
-		Login: "someuser",
-		Token: "repos_not_found",
+		Login:       "someuser",
+		AccessToken: "repos_not_found",
 	}
 
 	fakeRepo = &model.Repo{

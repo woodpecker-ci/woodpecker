@@ -3,12 +3,12 @@
     <input
       :id="`checkbox-${id}`"
       type="checkbox"
-      class="checkbox flex-shrink-0 relative border bg-wp-control-neutral-100 border-wp-control-neutral-200 cursor-pointer rounded-md transition-colors duration-150 w-5 h-5 checked:bg-wp-control-ok-200 checked:border-wp-control-ok-200 focus-visible:border-wp-control-neutral-300 checked:focus-visible:border-wp-control-ok-300"
+      class="relative flex-shrink-0 border-wp-control-neutral-200 checked:border-wp-control-ok-200 focus-visible:border-wp-control-neutral-300 checked:focus-visible:border-wp-control-ok-300 bg-wp-control-neutral-100 checked:bg-wp-control-ok-200 border rounded-md w-5 h-5 transition-colors duration-150 cursor-pointer checkbox"
       :checked="innerValue"
       @click="innerValue = !innerValue"
     />
     <div class="flex flex-col ml-4">
-      <label class="cursor-pointer text-wp-text-100" :for="`checkbox-${id}`">{{ label }}</label>
+      <label class="text-wp-text-100 cursor-pointer" :for="`checkbox-${id}`">{{ label }}</label>
       <span v-if="description" class="text-sm text-wp-text-alt-100">{{ description }}</span>
     </div>
   </div>
@@ -40,6 +40,8 @@ const id = (Math.random() + 1).toString(36).substring(7);
 
 <style scoped>
 .checkbox {
+  width: 1.3rem;
+  height: 1.3rem;
   appearance: none;
   outline: 0;
   cursor: pointer;
@@ -52,8 +54,8 @@ const id = (Math.random() + 1).toString(36).substring(7);
   display: block;
   top: 50%;
   left: 50%;
-  width: 8px;
-  height: 14px;
+  width: 0.5rem;
+  height: 1rem;
   border-style: solid;
   border-color: white;
   border-width: 0 2px 2px 0;

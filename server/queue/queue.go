@@ -20,8 +20,8 @@ import (
 	"fmt"
 	"strings"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
-	"go.woodpecker-ci.org/woodpecker/v2/server/store"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 )
 
 var (
@@ -71,6 +71,8 @@ func (t *InfoT) String() string {
 // the Task is skipped and not returned to the subscriber.
 // The int return value represents the matching score (higher is better).
 type FilterFn func(*model.Task) (bool, int)
+
+//go:generate mockery --name Queue --output mocks --case underscore --note "+build test"
 
 // Queue defines a task queue for scheduling tasks among
 // a pool of workers.

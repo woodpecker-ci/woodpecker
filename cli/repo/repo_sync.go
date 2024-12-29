@@ -21,8 +21,9 @@ import (
 
 	"github.com/urfave/cli/v3"
 
-	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
-	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/common"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v3/woodpecker-go/woodpecker"
 )
 
 var repoSyncCmd = &cli.Command{
@@ -40,7 +41,11 @@ func repoSync(ctx context.Context, c *cli.Command) error {
 		return err
 	}
 
-	repos, err := client.RepoListOpts(true)
+	opt := woodpecker.RepoListOptions{
+		All: true,
+	}
+
+	repos, err := client.RepoList(opt)
 	if err != nil || len(repos) == 0 {
 		return err
 	}

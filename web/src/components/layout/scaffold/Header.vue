@@ -6,7 +6,7 @@
     <Container :full-width="fullWidth" class="!py-0">
       <div class="flex w-full md:items-center flex-col py-3 gap-2 md:gap-10 md:flex-row md:justify-between">
         <div
-          class="flex items-center content-start"
+          class="flex items-center content-start min-h-10"
           :class="{
             'md:flex-1': searchBoxPresent,
           }"
@@ -24,26 +24,26 @@
         </div>
         <TextField
           v-if="searchBoxPresent"
-          class="w-auto <md:w-full <md:order-3"
+          class="w-auto <md:w-full flex-grow <md:order-3"
           :aria-label="$t('search')"
           :placeholder="$t('search')"
           :model-value="search"
           @update:model-value="(value: string) => $emit('update:search', value)"
         />
         <div
-          v-if="$slots.titleActions"
+          v-if="$slots.headerActions"
           class="flex items-center md:justify-end gap-x-2 min-w-0"
           :class="{
             'md:flex-1': searchBoxPresent,
           }"
         >
-          <slot name="titleActions" />
+          <slot name="headerActions" />
         </div>
       </div>
 
       <div v-if="enableTabs" class="flex md:items-center flex-col py-2 md:flex-row md:justify-between md:py-0">
         <Tabs class="<md:order-2" />
-        <div v-if="$slots.titleActions" class="flex content-start md:justify-end">
+        <div v-if="$slots.headerActions" class="flex content-start md:justify-end">
           <slot name="tabActions" />
         </div>
       </div>
@@ -52,6 +52,8 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue';
+
 import IconButton from '~/components/atomic/IconButton.vue';
 import TextField from '~/components/form/TextField.vue';
 import Container from '~/components/layout/Container.vue';
@@ -69,5 +71,5 @@ defineEmits<{
   (event: 'update:search', query: string): void;
 }>();
 
-const searchBoxPresent = props.search !== undefined;
+const searchBoxPresent = computed(() => props.search !== undefined);
 </script>

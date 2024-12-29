@@ -20,16 +20,16 @@ import (
 	"strings"
 	"time"
 
-	"github.com/cenkalti/backoff/v4"
+	"github.com/cenkalti/backoff/v5"
 	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	grpcproto "google.golang.org/protobuf/proto"
 
-	backend "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc/proto"
+	backend "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/rpc"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/rpc/proto"
 )
 
 const (
@@ -68,7 +68,6 @@ func (c *client) Close() error {
 
 func (c *client) newBackOff() backoff.BackOff {
 	b := backoff.NewExponentialBackOff()
-	b.MaxElapsedTime = 0
 	b.MaxInterval = 10 * time.Second          //nolint:mnd
 	b.InitialInterval = 10 * time.Millisecond //nolint:mnd
 	return b

@@ -37,7 +37,7 @@ import (
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/cache"
 
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 )
 
 const (
@@ -252,10 +252,10 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 
 	finished := make(chan bool)
 
-	podUpdated := func(_, new any) {
-		pod, ok := new.(*v1.Pod)
+	podUpdated := func(_, newPod any) {
+		pod, ok := newPod.(*v1.Pod)
 		if !ok {
-			log.Error().Msgf("could not parse pod: %v", new)
+			log.Error().Msgf("could not parse pod: %v", newPod)
 			return
 		}
 
@@ -328,10 +328,10 @@ func (e *kube) TailStep(ctx context.Context, step *types.Step, taskUUID string) 
 
 	up := make(chan bool)
 
-	podUpdated := func(_, new any) {
-		pod, ok := new.(*v1.Pod)
+	podUpdated := func(_, newPod any) {
+		pod, ok := newPod.(*v1.Pod)
 		if !ok {
-			log.Error().Msgf("could not parse pod: %v", new)
+			log.Error().Msgf("could not parse pod: %v", newPod)
 			return
 		}
 
@@ -381,7 +381,6 @@ func (e *kube) TailStep(ctx context.Context, step *types.Step, taskUUID string) 
 	go func() {
 		defer logs.Close()
 		defer wc.Close()
-		defer rc.Close()
 
 		_, err = io.Copy(wc, logs)
 		if err != nil {

@@ -23,8 +23,8 @@ import (
 	"github.com/franela/goblin"
 	"github.com/stretchr/testify/assert"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
-	"go.woodpecker-ci.org/woodpecker/v2/server/store/types"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
 )
 
 func TestPipelines(t *testing.T) {
@@ -213,21 +213,49 @@ func TestPipelines(t *testing.T) {
 			pipeline1 := &model.Pipeline{
 				RepoID: repo.ID,
 				Status: model.StatusFailure,
+				Event:  model.EventCron,
+				Ref:    "refs/heads/some-branch",
+				Branch: "some-branch",
 			}
 			pipeline2 := &model.Pipeline{
 				RepoID: repo.ID,
 				Status: model.StatusSuccess,
+				Event:  model.EventPull,
+				Ref:    "refs/pull/32",
+				Branch: "main",
 			}
-			err1 := store.CreatePipeline(pipeline1, []*model.Step{}...)
-			g.Assert(err1).IsNil()
-			err2 := store.CreatePipeline(pipeline2, []*model.Step{}...)
-			g.Assert(err2).IsNil()
-			pipelines, err3 := store.GetPipelineList(&model.Repo{ID: 1}, &model.ListOptions{Page: 1, PerPage: 50}, nil)
-			g.Assert(err3).IsNil()
+			err := store.CreatePipeline(pipeline1, []*model.Step{}...)
+			g.Assert(err).IsNil()
+			err = store.CreatePipeline(pipeline2, []*model.Step{}...)
+			g.Assert(err).IsNil()
+			pipelines, err := store.GetPipelineList(&model.Repo{ID: 1}, &model.ListOptions{Page: 1, PerPage: 50}, nil)
+			g.Assert(err).IsNil()
 			g.Assert(len(pipelines)).Equal(2)
 			g.Assert(pipelines[0].ID).Equal(pipeline2.ID)
 			g.Assert(pipelines[0].RepoID).Equal(pipeline2.RepoID)
 			g.Assert(pipelines[0].Status).Equal(pipeline2.Status)
+
+			pipelines, err = store.GetPipelineList(&model.Repo{ID: 1}, nil, &model.PipelineFilter{
+				Branch: "main",
+			})
+			g.Assert(err).IsNil()
+			g.Assert(len(pipelines)).Equal(1)
+			g.Assert(pipelines[0].ID).Equal(pipeline2.ID)
+
+			pipelines, err = store.GetPipelineList(&model.Repo{ID: 1}, nil, &model.PipelineFilter{
+				Events: []model.WebhookEvent{model.EventCron},
+			})
+			g.Assert(err).IsNil()
+			g.Assert(len(pipelines)).Equal(1)
+			g.Assert(pipelines[0].ID).Equal(pipeline1.ID)
+
+			pipelines, err = store.GetPipelineList(&model.Repo{ID: 1}, nil, &model.PipelineFilter{
+				Events:      []model.WebhookEvent{model.EventCron, model.EventPull},
+				RefContains: "32",
+			})
+			g.Assert(err).IsNil()
+			g.Assert(len(pipelines)).Equal(1)
+			g.Assert(pipelines[0].ID).Equal(pipeline2.ID)
 		})
 
 		g.It("Should get filtered pipelines", func() {
@@ -248,6 +276,35 @@ func TestPipelines(t *testing.T) {
 			g.Assert(len(pipelines)).Equal(1)
 			g.Assert(pipelines[0].ID).Equal(pipeline1.ID)
 			g.Assert(pipelines[0].RepoID).Equal(pipeline1.RepoID)
+		})
+
+		g.It("Should get pipelines filtered by status", func() {
+			pipeline1 := &model.Pipeline{
+				RepoID: repo.ID,
+				Status: model.StatusSuccess,
+			}
+			pipeline2 := &model.Pipeline{
+				RepoID: repo.ID,
+				Status: model.StatusFailure,
+			}
+			pipeline3 := &model.Pipeline{
+				RepoID: repo.ID,
+				Status: model.StatusRunning,
+			}
+			err1 := store.CreatePipeline(pipeline1, []*model.Step{}...)
+			g.Assert(err1).IsNil()
+			err2 := store.CreatePipeline(pipeline2, []*model.Step{}...)
+			g.Assert(err2).IsNil()
+			err3 := store.CreatePipeline(pipeline3, []*model.Step{}...)
+			g.Assert(err3).IsNil()
+
+			pipelines, err := store.GetPipelineList(&model.Repo{ID: 1}, nil, &model.PipelineFilter{
+				Status: model.StatusSuccess,
+			})
+			g.Assert(err).IsNil()
+			g.Assert(len(pipelines)).Equal(1)
+			g.Assert(pipelines[0].ID).Equal(pipeline1.ID)
+			g.Assert(pipelines[0].Status).Equal(model.StatusSuccess)
 		})
 	})
 }

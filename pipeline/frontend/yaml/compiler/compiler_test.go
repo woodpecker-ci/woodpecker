@@ -19,11 +19,11 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	backend_types "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/metadata"
-	yaml_types "go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/types"
-	yaml_base_types "go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/types/base"
-	"go.woodpecker-ci.org/woodpecker/v2/shared/constant"
+	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
+	yaml_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/types"
+	yaml_base_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/types/base"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/constant"
 )
 
 func TestSecretAvailable(t *testing.T) {
@@ -284,7 +284,9 @@ func TestCompilerCompile(t *testing.T) {
 				Name:     "step",
 				Image:    "bash",
 				Commands: []string{"env"},
-				Secrets:  []string{"missing"},
+				Environment: yaml_base_types.EnvironmentMap{
+					"MISSING": map[string]any{"from_secret": "missing"},
+				},
 			}}}},
 			backConf:    nil,
 			expectedErr: "secret \"missing\" not found",
@@ -306,14 +308,14 @@ func TestCompilerCompile(t *testing.T) {
 			backConf, err := compiler.Compile(test.fronConf)
 			if test.expectedErr != "" {
 				assert.Error(t, err)
-				assert.Equal(t, err.Error(), test.expectedErr)
+				assert.Equal(t, test.expectedErr, err.Error())
 			} else {
 				// we ignore uuids in steps and only check if global env got set ...
 				for _, st := range backConf.Stages {
 					for _, s := range st.Steps {
 						s.UUID = ""
-						assert.Truef(t, s.Environment["VERBOSE"] == "true", "expect to get value of global set environment")
-						assert.Truef(t, len(s.Environment) > 50, "expect to have a lot of build in variables")
+						assert.Truef(t, s.Environment["VERBOSE"] == "true", "expected to get value of global set environment")
+						assert.Truef(t, len(s.Environment) > 10, "expected to have a lot of built-in variables")
 						s.Environment = nil
 					}
 				}

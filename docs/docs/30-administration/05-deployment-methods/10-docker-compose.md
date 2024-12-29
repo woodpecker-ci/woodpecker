@@ -115,21 +115,26 @@ The server and agents use a shared secret to authenticate communication. This sh
 
 Image variants:
 
-- The `latest` image is the latest stable release
 - The `vX.X.X` images are stable releases
-- The `vX.X` images are based on the current release branch (e.g. `release/v1.0`) and can be used to get bugfixes asap
+- The `vX.X` images are based on the current release branch (e.g. `release/v1.0`) and can be used to get bug fixes asap
+- The `vX` same as `vX.X` variant but also includes feature releases
 - The `next` images are based on the current `main` branch
+
+:::note
+The `latest` tag is not available on purpose (and has been dropped with the 3.x release) to prevent accidental major version upgrades.
+Hence, users are forced to specify a fixed or rolling tag, omitting the tag identifier (which equals to pulling `latest` implicitly) won't work.
+:::
 
 ```bash
 # server
-docker pull woodpeckerci/woodpecker-server:latest
-docker pull woodpeckerci/woodpecker-server:latest-alpine
+docker pull woodpeckerci/woodpecker-server:v3
+docker pull woodpeckerci/woodpecker-server:v3-alpine
 
 # agent
-docker pull woodpeckerci/woodpecker-agent:latest
-docker pull woodpeckerci/woodpecker-agent:latest-alpine
+docker pull woodpeckerci/woodpecker-agent:v3
+docker pull woodpeckerci/woodpecker-agent:v3-alpine
 
 # cli
-docker pull woodpeckerci/woodpecker-cli:latest
-docker pull woodpeckerci/woodpecker-cli:latest-alpine
+docker pull woodpeckerci/woodpecker-cli:v3
+docker pull woodpeckerci/woodpecker-cli:v3-alpine
 ```

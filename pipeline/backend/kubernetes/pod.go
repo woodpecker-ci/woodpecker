@@ -26,8 +26,8 @@ import (
 	"k8s.io/apimachinery/pkg/api/resource"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/common"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/common"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 )
 
 const (
@@ -160,6 +160,16 @@ func podSpec(step *types.Step, config *config, options BackendOptions, nsp nativ
 	spec.Volumes, err = pvcVolumes(step.Volumes)
 	if err != nil {
 		return spec, err
+	}
+
+	if len(step.DNS) != 0 || len(step.DNSSearch) != 0 {
+		spec.DNSConfig = &v1.PodDNSConfig{}
+		if len(step.DNS) != 0 {
+			spec.DNSConfig.Nameservers = step.DNS
+		}
+		if len(step.DNSSearch) != 0 {
+			spec.DNSConfig.Searches = step.DNSSearch
+		}
 	}
 
 	log.Trace().Msgf("using the image pull secrets: %v", config.ImagePullSecretNames)
@@ -427,7 +437,7 @@ func podSecurityContext(sc *SecurityContext, secCtxConf SecurityContextConfig, s
 		apparmor = apparmorProfile(sc.ApparmorProfile)
 	}
 
-	if nonRoot == nil && user == nil && group == nil && fsGroup == nil && seccomp == nil {
+	if nonRoot == nil && user == nil && group == nil && fsGroup == nil && seccomp == nil && apparmor == nil {
 		return nil
 	}
 

@@ -25,10 +25,9 @@ Only activate this option if you trust all users who have push access to your re
 Otherwise, these users will be able to steal secrets that are only available for `deploy` events.
 :::
 
-## Protected
+## Require approval for
 
-Every pipeline initiated by an webhook event needs to be approved by a project members with push permissions before being executed.
-The protected option can be used as an additional review process before running potentially harmful pipelines. Especially if pipelines can be executed by third-parties through pull-requests.
+To prevent malicious pipelines from extracting secrets or running harmful commands or to prevent accidental pipeline runs, you can require approval for an additional review process. Depending on the enabled option, a pipeline will be put on hold after creation and will only continue after approval. The default restrictive setting is `Approvals for forked repositories`.
 
 ## Trusted
 
@@ -40,9 +39,21 @@ Only server admins can set this option. If you are not a server admin this optio
 
 :::
 
-## Only inject netrc credentials into trusted containers
+## Custom trusted clone plugins
 
-Cloning pipeline step may need git credentials. They are injected via netrc. By default, they're only injected if this option is enabled, the repo is trusted ([see above](#trusted)) or the image is a trusted clone image. If you uncheck the option, git credentials will be injected into any container in clone step.
+During the clone process, Git credentials (e.g., for private repositories) may be required.
+These credentials are provided via [`netrc`](https://everything.curl.dev/usingcurl/netrc.html).
+
+These credentials are injected only into trusted plugins specified in the environment variable `WOODPECKER_PLUGINS_TRUSTED_CLONE` (an instance-wide Woodpecker server setting) or declared in this repository-level setting.
+
+With these credentials, it’s possible to perform any Git operations, including pushing changes back to the repo.
+To prevent unauthorized access or misuse, a plugin allowlist is required, either on the instance level or the repository level.
+Without an explicit allowlist, a malicious contributor could exploit a custom clone plugin in a Pull Request to reveal or transfer these credentials during the clone step.
+
+:::info
+This setting does not affect subsequent steps, nor does it allow direct pushes to the repository.
+To enable pushing changes, you can inject Git credentials as a secret or use a dedicated plugin, such as [appleboy/drone-git-push](https://woodpecker-ci.org/plugins/Git%20Push).
+:::
 
 ## Project visibility
 

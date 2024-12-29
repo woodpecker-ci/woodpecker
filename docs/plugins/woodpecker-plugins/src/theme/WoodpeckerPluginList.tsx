@@ -1,7 +1,9 @@
-import React, { useState, useRef } from 'react';
-import Fuse from 'fuse.js';
 import Layout from '@theme/Layout';
+import Fuse from 'fuse.js';
+import React, { useRef, useState } from 'react';
+
 import './style.css';
+
 import { WoodpeckerPlugin } from '../types';
 import { IconPlugin, IconVerified } from './Icons';
 
@@ -41,7 +43,7 @@ export function WoodpeckerPluginList({ plugins }: { plugins: WoodpeckerPlugin[] 
 
   const fuse = useRef(
     new Fuse(plugins, {
-      keys: ['name', 'description'],
+      keys: ['name', 'description', 'tags'],
       threshold: 0.3,
     }),
   );

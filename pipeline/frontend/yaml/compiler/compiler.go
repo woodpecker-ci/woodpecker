@@ -18,11 +18,11 @@ import (
 	"fmt"
 	"path"
 
-	backend_types "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/metadata"
-	yaml_types "go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/types"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/utils"
-	"go.woodpecker-ci.org/woodpecker/v2/shared/constant"
+	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
+	yaml_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/types"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/utils"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/constant"
 )
 
 const (
@@ -98,7 +98,6 @@ type Compiler struct {
 	defaultClonePlugin      string
 	trustedClonePlugins     []string
 	securityTrustedPipeline bool
-	netrcOnlyTrusted        bool
 }
 
 // New creates a new Compiler with options.
@@ -196,7 +195,7 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 			}
 
 			// only inject netrc if it's a trusted repo or a trusted plugin
-			if !c.netrcOnlyTrusted || c.securityTrustedPipeline || (container.IsPlugin() && container.IsTrustedCloneImage(c.trustedClonePlugins)) {
+			if c.securityTrustedPipeline || (container.IsPlugin() && container.IsTrustedCloneImage(c.trustedClonePlugins)) {
 				for k, v := range c.cloneEnv {
 					step.Environment[k] = v
 				}
@@ -252,7 +251,7 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 			return nil, err
 		}
 
-		// inject netrc if it's a trusted repo or a trusted clone-plugin
+		// only inject netrc if it's a trusted repo or a trusted plugin
 		if c.securityTrustedPipeline || (container.IsPlugin() && container.IsTrustedCloneImage(c.trustedClonePlugins)) {
 			for k, v := range c.cloneEnv {
 				step.Environment[k] = v

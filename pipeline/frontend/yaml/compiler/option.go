@@ -19,7 +19,7 @@ import (
 	"path"
 	"strings"
 
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/metadata"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
 )
 
 // Option configures a compiler option.
@@ -173,13 +173,6 @@ func WithTrustedClonePlugins(images []string) Option {
 func WithTrustedSecurity(trusted bool) Option {
 	return func(compiler *Compiler) {
 		compiler.securityTrustedPipeline = trusted
-	}
-}
-
-// WithNetrcOnlyTrusted configures the compiler with the netrcOnlyTrusted repo option.
-func WithNetrcOnlyTrusted(only bool) Option {
-	return func(compiler *Compiler) {
-		compiler.netrcOnlyTrusted = only
 	}
 }
 
