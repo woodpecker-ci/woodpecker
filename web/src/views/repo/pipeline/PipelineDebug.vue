@@ -2,7 +2,7 @@
   <template v-if="repoPermissions && repoPermissions.push">
     <Panel>
       <InputField :label="$t('repo.pipeline.debug.metadata_exec_title')">
-        <p class="mb-2 text-sm text-wp-text-alt-100">{{ $t('repo.pipeline.debug.metadata_exec_desc') }}</p>
+        <p class="text-wp-text-alt-100 mb-2 text-sm">{{ $t('repo.pipeline.debug.metadata_exec_desc') }}</p>
         <pre class="code-box">{{ cliExecWithMetadata }}</pre>
       </InputField>
       <div class="flex items-center space-x-4">
@@ -10,9 +10,9 @@
       </div>
     </Panel>
   </template>
-  <div v-else class="flex justify-center items-center h-full">
-    <div class="bg-wp-error-100 dark:bg-wp-error-200 shadow-lg p-8 rounded-lg text-center">
-      <p class="font-bold text-2xl text-white">{{ $t('repo.pipeline.debug.no_permission') }}</p>
+  <div v-else class="flex h-full items-center justify-center">
+    <div class="bg-wp-error-100 dark:bg-wp-error-200 rounded-lg p-8 text-center shadow-lg">
+      <p class="text-2xl font-bold text-white">{{ $t('repo.pipeline.debug.no_permission') }}</p>
     </div>
   </div>
 </template>
