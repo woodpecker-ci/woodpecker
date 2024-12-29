@@ -28,7 +28,6 @@ woodpecker-cli [GLOBAL OPTIONS] command [COMMAND OPTIONS] [ARGUMENTS...]
 
 **--token, -t**="": server auth token
 
-
 # COMMANDS
 
 ## pipeline, build
@@ -338,19 +337,19 @@ execute a local pipeline
 
 **--network**="": external networks
 
-**--pipeline-created**="":  (default: 0)
+**--pipeline-created**="": (default: 0)
 
-**--pipeline-event**="":  (default: manual)
+**--pipeline-event**="": (default: manual)
 
-**--pipeline-finished**="":  (default: 0)
+**--pipeline-finished**="": (default: 0)
 
 **--pipeline-link**="":
 
-**--pipeline-number**="":  (default: 0)
+**--pipeline-number**="": (default: 0)
 
-**--pipeline-parent**="":  (default: 0)
+**--pipeline-parent**="": (default: 0)
 
-**--pipeline-started**="":  (default: 0)
+**--pipeline-started**="": (default: 0)
 
 **--pipeline-status**="":
 
@@ -372,17 +371,17 @@ execute a local pipeline
 
 **--prev-commit-sha**="":
 
-**--prev-pipeline-created**="":  (default: 0)
+**--prev-pipeline-created**="": (default: 0)
 
 **--prev-pipeline-event**="":
 
-**--prev-pipeline-finished**="":  (default: 0)
+**--prev-pipeline-finished**="": (default: 0)
 
 **--prev-pipeline-link**="":
 
-**--prev-pipeline-number**="":  (default: 0)
+**--prev-pipeline-number**="": (default: 0)
 
-**--prev-pipeline-started**="":  (default: 0)
+**--prev-pipeline-started**="": (default: 0)
 
 **--prev-pipeline-status**="":
 
@@ -402,11 +401,11 @@ execute a local pipeline
 
 **--server, -s**="": server address
 
-**--step-name**="":  (default: 0)
+**--step-name**="": (default: 0)
 
-**--system-link**="":  (default: https://github.com/woodpecker-ci/woodpecker)
+**--system-link**="": (default: https://github.com/woodpecker-ci/woodpecker)
 
-**--system-name**="":  (default: woodpecker)
+**--system-name**="": (default: woodpecker)
 
 **--system-platform**="":
 
@@ -416,13 +415,13 @@ execute a local pipeline
 
 **--volumes**="": pipeline volumes
 
-**--workflow-name**="":  (default: 0)
+**--workflow-name**="": (default: 0)
 
-**--workflow-number**="":  (default: 0)
+**--workflow-number**="": (default: 0)
 
-**--workspace-base**="":  (default: /woodpecker)
+**--workspace-base**="": (default: /woodpecker)
 
-**--workspace-path**="":  (default: src)
+**--workspace-path**="": (default: src)
 
 ## info
 
