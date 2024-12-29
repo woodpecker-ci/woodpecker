@@ -121,8 +121,7 @@ import IconButton from '~/components/atomic/IconButton.vue';
 import PipelineStatusIcon from '~/components/repo/pipeline/PipelineStatusIcon.vue';
 import useApiClient from '~/compositions/useApiClient';
 import useNotifications from '~/compositions/useNotifications';
-import type { Pipeline, Repo, RepoPermissions } from '~/lib/api/types';
-import { findStep, isStepFinished, isStepRunning } from '~/utils/helpers';
+import type { Pipeline, PipelineStep, PipelineWorkflow, Repo, RepoPermissions } from '~/lib/api/types';
 
 interface LogLine {
   index: number;
@@ -303,12 +302,12 @@ async function loadLogs() {
     return;
   }
 
-  if (isStepFinished(step.value)) {
+  if (step.value.state !== 'running' && step.value.state !== 'pending') {
     loadedStepSlug.value = stepSlug.value;
     const logs = await apiClient.getLogs(repo.value.id, pipeline.value.number, step.value.id);
     logs?.forEach((line) => writeLog({ index: line.line, text: line.data, time: line.time }));
     flushLogs(false);
-  } else if (step.value.state === 'pending' || isStepRunning(step.value)) {
+  } else {
     loadedStepSlug.value = stepSlug.value;
     stream.value = apiClient.streamLogs(repo.value.id, pipeline.value.number, step.value.id, (line) => {
       writeLog({ index: line.line, text: line.data, time: line.time });
@@ -334,6 +333,29 @@ async function deleteLogs() {
   } catch (e) {
     notifications.notifyError(e as Error, i18n.t('repo.pipeline.log_delete_error'));
   }
+}
+
+function findStep(workflows: PipelineWorkflow[], pid: number): PipelineStep | undefined {
+  return workflows.reduce(
+    (prev, workflow) => {
+      const result = workflow.children.reduce(
+        (prevChild, step) => {
+          if (step.pid === pid) {
+            return step;
+          }
+
+          return prevChild;
+        },
+        undefined as PipelineStep | undefined,
+      );
+      if (result) {
+        return result;
+      }
+
+      return prev;
+    },
+    undefined as PipelineStep | undefined,
+  );
 }
 
 onMounted(async () => {
