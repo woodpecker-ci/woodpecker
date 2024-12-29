@@ -26,7 +26,7 @@
           :title="deleteTitle"
           @click="deleteItem(index)"
         >
-          <Icon name="remove" />
+          <Icon name="close" />
         </Button>
       </div>
     </div>
