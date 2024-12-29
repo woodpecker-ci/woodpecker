@@ -9,7 +9,7 @@ To allow users to configure the behavior of your plugin, you should use `setting
 These are passed to your plugin as uppercase env vars with a `PLUGIN_` prefix.
 Using a setting like `url` results in an env var named `PLUGIN_URL`.
 
-Characters like `-` are converted to an underscore (`_`). `some_String` gets `PLUGIN_SOME_STRING`.
+Characters like `-` are converted to an underscore (`_`). `some_String` becomes `PLUGIN_SOME_STRING`.
 CamelCase is not respected, `anInt` get `PLUGIN_ANINT`. <!-- cspell:ignore ANINT -->
 
 ### Basic settings

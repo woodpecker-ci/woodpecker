@@ -48,9 +48,9 @@ So the secret key and environment variable name can differ.
 
 ### Use secrets in plugins via settings
 
-The `from_secret` syntax also work for settings in any hierarchy.
+The `from_secret` syntax also works for settings in any hierarchy.
 
-In this example, the secret named `secret_token` would be passed to the setting named `SURGE_TOKEN`,which will be available in the plugin as environment variable named `PLUGIN_SURGE_TOKEN` (See [plugins](./51-plugins/20-creating-plugins.md#settings) for details).
+In this example, the secret named `secret_token` would be passed to the setting named `SURGE_TOKEN`, which will be available in the plugin as environment variable named `PLUGIN_SURGE_TOKEN` (See [plugins](./51-plugins/20-creating-plugins.md#settings) for details).
 
 ```diff
  steps:

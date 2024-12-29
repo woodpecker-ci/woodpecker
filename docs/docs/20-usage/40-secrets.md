@@ -12,19 +12,19 @@ Woodpecker provides three different levels to add secrets to your pipeline. The 
 ## Usage
 
 You can set a setting or an environment value from secrets using the `from_secret` syntax.
-
-In this example, the secret named `secret_token` would be passed to the setting named `token`,which will be available in the plugin as environment variable named `PLUGIN_TOKEN` (See [plugins](./51-plugins/20-creating-plugins.md#settings) for details), and to the environment variable `TOKEN_ENV`.
+TOKEN
+In this example, the secret named `SECRET_TOKEN` would be passed to the setting named `token`, which will be available in the plugin as environment variable named `PLUGIN_TOKEN` (see [plugins](./51-plugins/20-creating-plugins.md#settings) for details), and as environment variable `TOKEN_ENV`.
 
 ```diff
  steps:
    - name: 'plugin step'
      image: registry/repo/image:tag
 +    settings:
-+      token:
-+        from_secret: secret_token
++      TOKEN:
++        from_secret: SECRET_TOKEN
 
-   - name: 'some commands using secrets'
-     image: bash
+   - name: 'step name'
+     image: registry/repo/image:tag
      commands:
        - env | grep TOKEN
 +    environment:
@@ -48,7 +48,7 @@ steps:
     image: woodpeckerci/plugin-surge-preview
     settings:
       path: 'docs/build/'
-      surge_token:
+      SURGE_TOKEN:
         from_secret: SURGE_TOKEN
 ```
 
