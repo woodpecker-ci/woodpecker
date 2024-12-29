@@ -74,7 +74,7 @@ By default, secrets are not exposed to pull requests.
 However, you can change this behavior by creating the secret and enabling the `pull_request` event type.
 This can be configured either through the UI or via the CLI, as demonstrated below.
 
-:::note
+:::warning
 Be cautious when exposing secrets to pull requests.
 If your repository is public and initiates pull request runs without requiring approval, your secrets may be at risk.
 Malicious actors could potentially exploit this to expose or transmit your secrets to an external location.
