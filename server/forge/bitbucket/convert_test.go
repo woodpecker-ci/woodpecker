@@ -39,10 +39,11 @@ func Test_convertRepo(t *testing.T) {
 	from := &internal.Repo{
 		FullName:  "octocat/hello-world",
 		IsPrivate: true,
-		Scm:       "hg",
+		Scm:       "git",
 	}
 	from.Owner.Links.Avatar.Href = "http://..."
 	from.Links.HTML.Href = "https://bitbucket.org/foo/bar"
+	from.MainBranch.Name = "default"
 	fromPerm := &internal.RepoPerm{
 		Permission: "write",
 	}
@@ -53,7 +54,6 @@ func Test_convertRepo(t *testing.T) {
 	assert.Equal(t, "octocat", to.Owner)
 	assert.Equal(t, "hello-world", to.Name)
 	assert.Equal(t, "default", to.Branch)
-	assert.Equal(t, from.Scm, string(to.SCMKind))
 	assert.Equal(t, from.IsPrivate, to.IsSCMPrivate)
 	assert.Equal(t, from.Links.HTML.Href, to.Clone)
 	assert.Equal(t, from.Links.HTML.Href, to.ForgeURL)

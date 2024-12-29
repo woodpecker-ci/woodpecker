@@ -67,7 +67,6 @@ func TestBitbucketDC(t *testing.T) {
 		Perm:          &model.Perm{Pull: true, Push: true},
 		Branch:        "main",
 		IsSCMPrivate:  true,
-		SCMKind:       model.RepoGit,
 		PREnabled:     true,
 		ForgeRemoteID: model.ForgeRemoteID("1234"),
 		FullName:      "PRJ/repo-slug-2",

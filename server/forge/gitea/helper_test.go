@@ -244,7 +244,7 @@ func Test_fixMalformedAvatar(t *testing.T) {
 	}
 }
 
-func Text_expandAvatar(t *testing.T) {
+func Test_expandAvatar(t *testing.T) {
 	urls := []struct {
 		Before string
 		After  string

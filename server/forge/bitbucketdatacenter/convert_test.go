@@ -81,7 +81,6 @@ func Test_convertRepo(t *testing.T) {
 		Name:          "REPO",
 		Owner:         "PRJ",
 		Branch:        "main",
-		SCMKind:       model.RepoGit,
 		FullName:      "PRJ/REPO",
 		Perm:          perm,
 		Clone:         "https://git.domain/clone",
@@ -292,7 +291,8 @@ func Test_authorLabel(t *testing.T) {
 		},
 		{
 			from: "Some Very Long Author That May Include Multiple Names Here",
-			to:   "Some Very Long Author That May Includ...",
+			//nolint:misspell
+			to: "Some Very Long Author That May Includ...",
 		},
 	}
 	for _, tt := range tests {

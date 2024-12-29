@@ -168,6 +168,7 @@ services:
      ports:
        - 2376
 ```
+
 In the step that needs access to the daemon we need to:
 
 1. Set the `DOCKER_*` environment variables shown below, setting up the connection with the daemon. These are standardized environment variables that should work with the docker client used by your framework of choice (e.g. [TestContainers](https://testcontainers.com/), [Spring Boot Docker Compose](https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-docker-compose) or similar).

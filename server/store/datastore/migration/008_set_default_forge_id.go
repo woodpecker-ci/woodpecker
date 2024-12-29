@@ -56,7 +56,6 @@ type repoV008 struct {
 	Clone                        string               `xorm:"varchar(1000) 'repo_clone'"`
 	CloneSSH                     string               `xorm:"varchar(1000) 'repo_clone_ssh'"`
 	Branch                       string               `xorm:"varchar(500) 'repo_branch'"`
-	SCMKind                      model.SCMKind        `xorm:"varchar(50) 'repo_scm'"`
 	PREnabled                    bool                 `xorm:"DEFAULT TRUE 'repo_pr_enabled'"`
 	Timeout                      int64                `xorm:"repo_timeout"`
 	Visibility                   model.RepoVisibility `xorm:"varchar(10) 'repo_visibility'"`

@@ -34,7 +34,6 @@ var (
 		Value:  "value-global",
 	}
 
-	// org secret
 	orgSecret = &model.Secret{
 		ID:     2,
 		OrgID:  1,
@@ -43,7 +42,6 @@ var (
 		Value:  "value-org",
 	}
 
-	// repo secret
 	repoSecret = &model.Secret{
 		ID:     3,
 		OrgID:  0,
