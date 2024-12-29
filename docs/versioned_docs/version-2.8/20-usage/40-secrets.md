@@ -15,7 +15,7 @@ Woodpecker provides three different levels to add secrets to your pipeline. The 
 
 :::warning
 The use of secrets is deprecated as of version 2.8 and planned to be removed with version 3.
-Instead, you can use the *secrets in settings and environment* approach outlined below.
+Instead, you can use the _secrets in settings and environment_ approach outlined below.
 You can already migrate to this strategy with version 2.8.
 :::
 

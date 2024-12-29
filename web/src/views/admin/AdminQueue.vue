@@ -14,7 +14,7 @@
             :name="queueInfo.paused ? 'pause' : 'play'"
             class="w-6 h-6"
             :class="{
-              'text-wp-state-error-100': queueInfo.paused,
+              'text-wp-error-100': queueInfo.paused,
               'text-wp-text-100': !queueInfo.paused,
             }"
           />
@@ -51,7 +51,7 @@
                     : 'status-declined'
               "
               :class="{
-                'text-wp-state-error-100': task.status === 'waiting_on_deps',
+                'text-wp-error-100': task.status === 'waiting_on_deps',
                 'text-wp-state-info-100': task.status === 'running',
                 'text-wp-state-neutral-100': task.status === 'pending',
               }"

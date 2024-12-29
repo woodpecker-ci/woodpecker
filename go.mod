@@ -24,13 +24,13 @@ require (
 	github.com/franela/goblin v0.0.0-20211003143422-0a4f594942bf
 	github.com/fsnotify/fsnotify v1.8.0
 	github.com/gdgvda/cron v0.3.0
-	github.com/getkin/kin-openapi v0.128.1-0.20241211220347-325cecc5e4e1
+	github.com/getkin/kin-openapi v0.128.1-0.20241224102021-cea0a13b906a
 	github.com/gin-gonic/gin v1.10.0
 	github.com/gitsight/go-vcsurl v1.0.1
 	github.com/go-sql-driver/mysql v1.8.1
 	github.com/go-viper/mapstructure/v2 v2.2.1
 	github.com/golang-jwt/jwt/v5 v5.2.1
-	github.com/google/go-github/v67 v67.0.0
+	github.com/google/go-github/v68 v68.0.0
 	github.com/google/tink/go v1.7.0
 	github.com/gorilla/securecookie v1.1.2
 	github.com/hashicorp/go-hclog v1.6.3
