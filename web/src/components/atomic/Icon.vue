@@ -92,7 +92,6 @@ import {
   mdiCheckCircle,
   mdiChevronRight,
   mdiClockTimeEightOutline,
-  mdiClose,
   mdiCloseCircle,
   mdiCog,
   mdiCogOutline,
