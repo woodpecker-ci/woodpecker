@@ -1,22 +1,22 @@
 <template>
   <div v-if="stats" class="flex justify-center">
     <div
-      class="bg-wp-background-200 border-wp-background-300 dark:bg-wp-background-100 text-wp-text-100 w-full rounded-md border px-5 py-5"
+      class="border-wp-background-300 bg-wp-background-200 dark:bg-wp-background-100 px-5 py-5 border rounded-md w-full text-wp-text-100"
     >
       <div class="flex w-full">
-        <h3 class="flex-1 text-lg font-semibold uppercase leading-tight">
+        <h3 class="flex-1 font-semibold text-lg uppercase leading-tight">
           {{ $t('admin.settings.queue.stats.completed_count') }}
         </h3>
       </div>
-      <div class="relative overflow-hidden transition-all duration-500">
+      <div class="relative transition-all duration-500 overflow-hidden">
         <div>
           <div class="pb-4 lg:pb-6">
-            <h4 class="inline-block text-2xl font-semibold leading-tight lg:text-3xl">
+            <h4 class="inline-block font-semibold text-2xl lg:text-3xl leading-tight">
               {{ stats.completed_count }}
             </h4>
           </div>
           <div v-if="total > 0" class="pb-4 lg:pb-6">
-            <div class="flex h-3 overflow-hidden rounded-full transition-all duration-500">
+            <div class="flex rounded-full h-3 transition-all duration-500 overflow-hidden">
               <div
                 v-for="item in data"
                 :key="item.key"
@@ -28,19 +28,32 @@
               </div>
             </div>
           </div>
-          <div class="-mx-4 flex sm:flex-wrap">
-            <div
-              v-for="(item, index) in data"
-              :key="item.key"
-              class="px-4 sm:w-full md:w-1/4"
-              :class="{ 'border-gray-300 md:border-l dark:border-gray-600': index !== 0 }"
-            >
-              <div class="overflow-hidden text-ellipsis whitespace-nowrap text-sm">
-                <span class="mr-1 inline-block h-2 w-2 rounded-full align-middle" :class="`${item.color}`">&nbsp;</span>
-                <span class="align-middle">{{ item.label }}</span>
-              </div>
-              <div class="text-lg font-medium">
-                {{ item.value }}
+          <<<<<<< HEAD
+          <div class="flex sm:flex-wrap -mx-4">
+            =======
+            <div class="flex sm:flex-wrap -mx-4">
+              >>>>>>> main
+              <div
+                v-for="(item, index) in data"
+                :key="item.key"
+                class="px-4 sm:w-full md:w-1/4"
+                <<<<<<< HEAD
+                :class="{ 'border-gray-300 md:border-l dark:border-gray-600': index !== 0 }"
+              >
+                <div class="text-ellipsis text-sm whitespace-nowrap overflow-hidden">
+                  <span class="inline-block mr-1 rounded-full w-2 h-2 align-middle" :class="`${item.color}`">&nbsp;</span>
+                  =======
+                  :class="{ 'md:border-l border-gray-300 dark:border-gray-600': index !== 0 }"
+                  >
+                  <div class="text-ellipsis text-sm whitespace-nowrap overflow-hidden">
+                    <span class="inline-block mr-1 rounded-full w-2 h-2 align-middle" :class="`${item.color}`">&nbsp;</span>
+                    >>>>>>> main
+                    <span class="align-middle">{{ item.label }}</span>
+                  </div>
+                  <div class="font-medium text-lg">
+                    {{ item.value }}
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -104,7 +117,7 @@ const data = computed(() => {
       label: t('admin.settings.queue.stats.waiting_on_deps_count'),
       value: props.stats.waiting_on_deps_count,
       percentage: total.value > 0 ? (props.stats.waiting_on_deps_count / total.value) * 100 : 0,
-      color: 'bg-wp-state-error-100',
+      color: 'bg-wp-error-100 dark:bg-wp-error-200',
     },
   ];
 });

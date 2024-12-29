@@ -77,16 +77,6 @@ func (s StatusValue) Validate() error {
 	}
 }
 
-// SCMKind represent different version control systems.
-type SCMKind string //	@name SCMKind
-
-const (
-	RepoGit      SCMKind = "git"
-	RepoHg       SCMKind = "hg"
-	RepoFossil   SCMKind = "fossil"
-	RepoPerforce SCMKind = "perforce"
-)
-
 // RepoVisibility represent to what state a repo in woodpecker is visible to others.
 type RepoVisibility string //	@name RepoVisibility
 

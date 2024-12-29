@@ -13,7 +13,7 @@
           <Icon
             :name="queueInfo.paused ? 'pause' : 'play'"
             :class="{
-              'text-wp-state-error-100': queueInfo.paused,
+              'text-wp-error-100': queueInfo.paused,
               'text-wp-state-ok-100': !queueInfo.paused,
             }"
           />
@@ -25,11 +25,11 @@
       <AdminQueueStats :stats="queueInfo?.stats" />
 
       <div v-if="tasks.length > 0" class="flex flex-col">
-        <p class="mb-2 mt-6 text-xl">{{ $t('admin.settings.queue.tasks') }}</p>
+        <p class="mt-6 mb-2 text-xl">{{ $t('admin.settings.queue.tasks') }}</p>
         <ListItem
           v-for="task in tasks"
           :key="task.id"
-          class="!bg-wp-background-200 !dark:bg-wp-background-100 mb-2 items-center"
+          class="items-center !bg-wp-background-200 !dark:bg-wp-background-100 mb-2"
         >
           <div
             class="flex items-center"
@@ -50,14 +50,14 @@
                     : 'status-declined'
               "
               :class="{
-                'text-wp-state-error-100': task.status === 'waiting_on_deps',
+                'text-wp-error-100': task.status === 'waiting_on_deps',
                 'text-wp-state-info-100': task.status === 'running',
                 'text-wp-state-neutral-100': task.status === 'pending',
               }"
             />
           </div>
           <span class="ml-2">{{ task.id }}</span>
-          <span class="ml-auto flex gap-2">
+          <span class="flex gap-2 ml-auto">
             <Badge v-if="task.agent_id !== 0" :label="$t('admin.settings.queue.agent')" :value="task.agent_id" />
             <template v-for="(value, label) in task.labels">
               <Badge v-if="value" :key="label" :label="label.toString()" :value="value" />

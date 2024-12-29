@@ -1,9 +1,9 @@
 <template>
-  <div class="text-wp-text-100 space-y-4">
+  <div class="space-y-4 text-wp-text-100">
     <ListItem
       v-for="secret in secrets"
       :key="secret.id"
-      class="!bg-wp-background-200 !dark:bg-wp-background-100 items-center"
+      class="items-center !bg-wp-background-200 !dark:bg-wp-background-100"
     >
       <span>{{ secret.name }}</span>
       <Badge
@@ -23,7 +23,7 @@
         />
         <IconButton
           icon="trash"
-          class="hover:text-wp-control-error-100 ml-2 h-8 w-8"
+          class="ml-2 w-8 h-8 hover:text-wp-error-100"
           :is-loading="isDeleting"
           :title="$t('secrets.delete')"
           @click="deleteSecret(secret)"
