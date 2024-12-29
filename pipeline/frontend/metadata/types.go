@@ -34,7 +34,6 @@ type (
 		Owner       string               `json:"owner,omitempty"`
 		RemoteID    string               `json:"remote_id,omitempty"`
 		ForgeURL    string               `json:"forge_url,omitempty"`
-		SCM         string               `json:"scm,omitempty"`
 		CloneURL    string               `json:"clone_url,omitempty"`
 		CloneSSHURL string               `json:"clone_url_ssh,omitempty"`
 		Private     bool                 `json:"private,omitempty"`

@@ -119,20 +119,6 @@ steps:
       event: [push, tag]
       path: *when_path
 
-  publish-server-preview:
-    depends_on:
-      - cross-compile-server-preview
-    image: *buildx_plugin
-    settings:
-      repo: woodpeckerci/woodpecker-server
-      dockerfile: docker/Dockerfile.server.multiarch
-      platforms: *platforms_preview
-      tag: pull_${CI_COMMIT_PULL_REQUEST}
-      logins: *publish_logins
-    when: &when-preview
-      evaluate: 'CI_COMMIT_PULL_REQUEST_LABELS contains "build_pr_images"'
-      event: pull_request
-
   publish-server-alpine-preview:
     depends_on:
       - cross-compile-server-preview
@@ -143,7 +129,9 @@ steps:
       platforms: *platforms_preview
       tag: pull_${CI_COMMIT_PULL_REQUEST}-alpine
       logins: *publish_logins
-    when: *when-preview
+    when: &when-preview
+      evaluate: 'CI_COMMIT_PULL_REQUEST_LABELS contains "build_pr_images"'
+      event: pull_request
 
   build-server-dryrun:
     depends_on:
@@ -218,15 +206,15 @@ steps:
   # A g e n t #
   #############
 
-  publish-agent-preview:
+  publish-agent-preview-alpine:
     depends_on:
       - vendor
     image: *buildx_plugin
     settings:
       repo: woodpeckerci/woodpecker-agent
-      dockerfile: docker/Dockerfile.agent.multiarch
+      dockerfile: docker/Dockerfile.agent.alpine.multiarch
       platforms: *platforms_preview
-      tag: pull_${CI_COMMIT_PULL_REQUEST}
+      tag: pull_${CI_COMMIT_PULL_REQUEST}-alpine
       build_args: *build_args
       logins: *publish_logins
     when: *when-preview
@@ -314,19 +302,6 @@ steps:
   #########
   # C L I #
   #########
-
-  publish-cli-preview:
-    depends_on:
-      - vendor
-    image: *buildx_plugin
-    settings:
-      repo: woodpeckerci/woodpecker-cli
-      dockerfile: docker/Dockerfile.cli.multiarch
-      platforms: *platforms_preview
-      tag: pull_${CI_COMMIT_PULL_REQUEST}
-      build_args: *build_args
-      logins: *publish_logins
-    when: *when-preview
 
   build-cli-dryrun:
     depends_on:

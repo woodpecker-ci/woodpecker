@@ -686,16 +686,6 @@ Example configuration to use a custom clone plugin:
 +    image: octocat/custom-git-plugin
 ```
 
-Example configuration to clone Mercurial repository:
-
-```diff
- clone:
-   - name: hg
-+    image: plugins/hg
-+    settings:
-+      path: bitbucket.org/foo/bar
-```
-
 ### Git Submodules
 
 To use the credentials that cloned the repository to clone it's submodules, update `.gitmodules` to use `https` instead of `git`:
@@ -799,8 +789,8 @@ Privileged mode is only available to trusted repositories and for security reaso
      commands:
        - docker --tls=false ps
 
- - name: services
-   docker:
+ services:
+   - name: docker
      image: docker:dind
      commands: dockerd-entrypoint.sh --storage-driver=vfs --tls=false
 +    privileged: true

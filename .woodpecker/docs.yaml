@@ -37,6 +37,13 @@ when:
     evaluate: 'TASK == "docs"'
 
 steps:
+  prettier:
+    image: docker.io/woodpeckerci/plugin-prettier:1.0.0
+    settings:
+      version: 3.3.3
+    when:
+      - event: pull_request
+
   build-cli:
     image: *golang_image
     commands:
@@ -68,8 +75,8 @@ steps:
         from_secret: GITHUB_TOKEN_SURGE
     failure: ignore
     when:
-      event: [pull_request, pull_request_closed]
-      path: *when_path
+      - event: [pull_request, pull_request_closed]
+        path: *when_path
 
   deploy-prepare:
     image: *alpine_image
