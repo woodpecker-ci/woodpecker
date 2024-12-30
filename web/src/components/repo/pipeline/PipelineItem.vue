@@ -2,7 +2,7 @@
   <ListItem v-if="pipeline" class="p-0 w-full">
     <div class="flex items-center col-span-4">
       <div
-        class="h-full w-2"
+        class="h-full w-3"
         :class="{
           'bg-wp-state-warn-100': pipeline.status === 'pending',
           'bg-wp-error-100 dark:bg-wp-error-200': pipelineStatusColors[pipeline.status] === 'red',
