@@ -28,7 +28,12 @@
           </span>
           <span v-else class="col-span-2 <md:hidden">{{ $t('repo.settings.crons.not_executed_yet') }}</span>
         </span>
-        <IconButton icon="play" class="ml-auto w-8 h-8" :title="$t('repo.settings.crons.run')" @click="runCron(cron)" />
+        <IconButton
+          icon="play-outline"
+          class="ml-auto w-8 h-8"
+          :title="$t('repo.settings.crons.run')"
+          @click="runCron(cron)"
+        />
         <IconButton icon="edit" class="w-8 h-8" :title="$t('repo.settings.crons.edit')" @click="selectedCron = cron" />
         <IconButton
           icon="trash"
