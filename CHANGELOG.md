@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-12-29
+## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-12-30
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -68,6 +68,7 @@
 
 ### 📚 Documentation
 
+- chore(deps): lock file maintenance [[#4647](https://github.com/woodpecker-ci/woodpecker/pull/4647)]
 - chore(deps): update dependency concurrently to v9.1.1 [[#4631](https://github.com/woodpecker-ci/woodpecker/pull/4631)]
 - fixed a typo [[#4621](https://github.com/woodpecker-ci/woodpecker/pull/4621)]
 - Fix misleading example in Workflow syntax/Privileged mode [[#4613](https://github.com/woodpecker-ci/woodpecker/pull/4613)]
