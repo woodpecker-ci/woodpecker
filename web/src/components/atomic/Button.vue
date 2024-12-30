@@ -15,7 +15,7 @@
     :disabled="disabled"
   >
     <slot>
-      <Icon v-if="startIcon" :name="startIcon" class="!w-6 !h-6" :class="{ invisible: isLoading, 'mr-1': text }" />
+      <Icon v-if="startIcon" :name="startIcon" class="!w-5 !h-5" :class="{ invisible: isLoading, 'mr-1': text }" />
       <span :class="{ invisible: isLoading }">{{ text }}</span>
       <Icon v-if="endIcon" :name="endIcon" class="ml-2 w-6 h-6" :class="{ invisible: isLoading }" />
       <div
