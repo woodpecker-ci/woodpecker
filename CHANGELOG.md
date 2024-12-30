@@ -68,6 +68,7 @@
 
 ### 📈 Enhancement
 
+- Two row layout for title and context of pipeline list [[#4625](https://github.com/woodpecker-ci/woodpecker/pull/4625)]
 - Remove workflow-level volumes and networks [[#4636](https://github.com/woodpecker-ci/woodpecker/pull/4636)]
 - Migrate away from goblin [[#4624](https://github.com/woodpecker-ci/woodpecker/pull/4624)]
 - Avoid usage of inline css style [[#4629](https://github.com/woodpecker-ci/woodpecker/pull/4629)]
