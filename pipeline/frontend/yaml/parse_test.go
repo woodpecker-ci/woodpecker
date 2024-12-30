@@ -24,7 +24,6 @@ import (
 )
 
 func TestParse(t *testing.T) {
-
 	t.Run("Should unmarshal a string", func(t *testing.T) {
 		out, err := ParseString(sampleYaml)
 		assert.NoError(t, err)
