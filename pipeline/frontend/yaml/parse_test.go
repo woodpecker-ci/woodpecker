@@ -32,10 +32,6 @@ func TestParse(t *testing.T) {
 
 		assert.Equal(t, "/go", out.Workspace.Base)
 		assert.Equal(t, "src/github.com/octocat/hello-world", out.Workspace.Path)
-		assert.Equal(t, "custom", out.Volumes.WorkflowVolumes[0].Name)
-		assert.Equal(t, "blockbridge", out.Volumes.WorkflowVolumes[0].Driver)
-		assert.Equal(t, "custom", out.Networks.WorkflowNetworks[0].Name)
-		assert.Equal(t, "overlay", out.Networks.WorkflowNetworks[0].Driver)
 		assert.Equal(t, "database", out.Services.ContainerList[0].Name)
 		assert.Equal(t, "mysql", out.Services.ContainerList[0].Image)
 		assert.Equal(t, "test", out.Steps.ContainerList[0].Name)
@@ -201,12 +197,6 @@ steps:
 services:
   database:
     image: mysql
-networks:
-  custom:
-    driver: overlay
-volumes:
-  custom:
-    driver: blockbridge
 labels:
   com.example.type: "build"
   com.example.team: "frontend"
