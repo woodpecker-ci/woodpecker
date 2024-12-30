@@ -6,8 +6,8 @@
           <div class="grid grid-cols-[minmax(10rem,auto),3fr]">
             <span class="flex items-center gap-x-2">
               <Icon
-                name="attention"
-                class="my-1 flex-shrink-0"
+                name="alert"
+                class="flex-shrink-0 my-1"
                 :class="{
                   'text-wp-state-warn-100': error.is_warning,
                   'text-wp-error-100': !error.is_warning,

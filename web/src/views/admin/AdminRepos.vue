@@ -16,7 +16,7 @@
         class="!bg-wp-background-200 !dark:bg-wp-background-100 items-center gap-2"
       >
         <span>{{ repo.full_name }}</span>
-        <div class="ml-auto flex items-center">
+        <div class="flex items-center ml-auto">
           <Badge v-if="!repo.active" class="<md:hidden mr-2" :label="$t('admin.settings.repos.disabled')" />
           <IconButton
             icon="chevron-right"
@@ -25,7 +25,7 @@
             :to="{ name: 'repo', params: { repoId: repo.id } }"
           />
           <IconButton
-            icon="settings"
+            icon="settings-outline"
             :title="$t('admin.settings.repos.settings')"
             class="h-8 w-8"
             :to="{ name: 'repo-settings', params: { repoId: repo.id } }"

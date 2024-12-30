@@ -12,9 +12,10 @@
           <Button v-else :text="$t('admin.settings.queue.pause')" start-icon="pause" @click="pauseQueue" />
           <Icon
             :name="queueInfo.paused ? 'pause' : 'play'"
+            class="w-6 h-6"
             :class="{
               'text-wp-error-100': queueInfo.paused,
-              'text-wp-state-ok-100': !queueInfo.paused,
+              'text-wp-text-100': !queueInfo.paused,
             }"
           />
         </div>
