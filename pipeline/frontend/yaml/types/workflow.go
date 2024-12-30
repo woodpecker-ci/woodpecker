@@ -30,10 +30,6 @@ type (
 		DependsOn []string          `yaml:"depends_on,omitempty"`
 		RunsOn    []string          `yaml:"runs_on,omitempty"`
 		SkipClone bool              `yaml:"skip_clone"`
-
-		// Undocumented
-		Networks WorkflowNetworks `yaml:"networks,omitempty"`
-		Volumes  WorkflowVolumes  `yaml:"volumes,omitempty"`
 	}
 
 	// Workspace defines a pipeline workspace.

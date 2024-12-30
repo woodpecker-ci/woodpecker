@@ -191,11 +191,9 @@ func (e *kube) getConfig() *config {
 func (e *kube) SetupWorkflow(ctx context.Context, conf *types.Config, taskUUID string) error {
 	log.Trace().Str("taskUUID", taskUUID).Msgf("Setting up Kubernetes primitives")
 
-	for _, vol := range conf.Volumes {
-		_, err := startVolume(ctx, e, vol.Name)
-		if err != nil {
-			return err
-		}
+	_, err := startVolume(ctx, e, conf.Volume.Name)
+	if err != nil {
+		return err
 	}
 
 	var extraHosts []types.HostAlias
@@ -427,11 +425,9 @@ func (e *kube) DestroyWorkflow(ctx context.Context, conf *types.Config, taskUUID
 		}
 	}
 
-	for _, vol := range conf.Volumes {
-		err := stopVolume(ctx, e, vol.Name, defaultDeleteOptions)
-		if err != nil {
-			return err
-		}
+	err := stopVolume(ctx, e, conf.Volume.Name, defaultDeleteOptions)
+	if err != nil {
+		return err
 	}
 
 	return nil
