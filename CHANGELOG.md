@@ -68,6 +68,7 @@
 
 ### 📈 Enhancement
 
+- Remove workflow-level volumes and networks [[#4636](https://github.com/woodpecker-ci/woodpecker/pull/4636)]
 - Migrate away from goblin [[#4624](https://github.com/woodpecker-ci/woodpecker/pull/4624)]
 - Avoid usage of inline css style [[#4629](https://github.com/woodpecker-ci/woodpecker/pull/4629)]
 - Use docusaurus faster [[#4528](https://github.com/woodpecker-ci/woodpecker/pull/4528)]
