@@ -1,6 +1,6 @@
 <!-- cSpell:ignore radiobox timelapse -->
 <template>
-  <SvgIcon v-if="name === 'duration'" :path="mdiTimelapse" size="1.3rem" />
+  <SvgIcon v-if="name === 'duration'" :path="mdiTimerOutline" size="1.3rem" />
   <SvgIcon v-else-if="name === 'since'" :path="mdiClockTimeEightOutline" size="1.3rem" />
   <SvgIcon v-else-if="name === 'push'" :path="mdiSourceBranch" size="1.3rem" />
   <SvgIcon v-else-if="name === 'pull-request'" :path="mdiSourcePull" size="1.3rem" />
@@ -10,16 +10,17 @@
   <SvgIcon v-else-if="name === 'deployment'" :path="mdiPackageVariant" size="1.3rem" />
   <SvgIcon v-else-if="name === 'commit'" :path="mdiSourceCommit" size="1.3rem" />
   <SvgIcon v-else-if="name === 'back'" :path="mdiArrowLeft" size="1.3rem" />
-  <SvgIcon v-else-if="name === 'github'" :path="mdiGithub" size="32" />
-  <SvgIcon v-else-if="name === 'repo'" :path="mdiGit" size="32" />
-  <SvgIcon v-else-if="name === 'settings'" :path="mdiCog" size="32" />
+  <SvgIcon v-else-if="name === 'github'" :path="mdiGithub" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'repo'" :path="mdiGit" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'settings'" :path="mdiCog" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'settings-outline'" :path="mdiCogOutline" size="1.3rem" />
   <SvgIcon v-else-if="name === 'trash'" :path="mdiTrashCanOutline" size="1.3rem" />
-  <SvgIcon v-else-if="name === 'status-blocked'" :path="mdiPlayCircleOutline" size="1.3rem" />
-  <SvgIcon v-else-if="name === 'status-declined'" :path="mdiStopCircleOutline" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'status-blocked'" :path="mdiPlayCircle" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'status-declined'" :path="mdiStopCircle" size="1.3rem" />
   <SvgIcon
     v-else-if="name === 'status-failure' || name === 'status-error' || name === 'status-killed'"
     type="mdi"
-    :path="mdiCloseCircleOutline"
+    :path="mdiCloseCircle"
     size="1.3rem"
   />
   <SvgIcon v-else-if="name === 'status-pending'" :path="mdiRadioboxBlank" size="1.3rem" />
@@ -29,34 +30,32 @@
     :path="mdiRadioboxIndeterminateVariant"
     size="1.3rem"
   />
-  <SvgIcon v-else-if="name === 'status-skipped'" :path="mdiMinusCircleOutline" size="1.3rem" />
-  <SvgIcon v-else-if="name === 'status-success'" :path="mdiCheckCircleOutline" size="1.3rem" />
-  <SvgIcon v-else-if="name === 'attention'" :path="mdiAlert" size="1.3rem" />
-  <SvgIcon v-else-if="name === 'warning'" :path="mdiAlertOutline" size="1.3rem" />
-  <SvgIcon v-else-if="name === 'error'" :path="mdiAlertCircle" size="1.3rem" />
-  <SvgIcon v-else-if="name === 'gitlab'" :path="mdiGitlab" size="32" />
-  <SvgIcon v-else-if="name === 'bitbucket' || name === 'bitbucket-dc'" :path="mdiBitbucket" size="32" />
-  <SvgIcon v-else-if="name === 'question'" :path="mdiHelpCircleOutline" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'status-skipped'" :path="mdiMinusCircle" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'status-success'" :path="mdiCheckCircle" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'alert'" :path="mdiAlertCircle" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'question'" :path="mdiHelpCircle" size="1.3rem" />
   <SvgIcon v-else-if="name === 'plus'" :path="mdiPlus" size="1.3rem" />
   <SvgIcon v-else-if="name === 'list'" :path="mdiFormatListBulleted" size="1.3rem" />
-  <SvgIcon v-else-if="name === 'heal'" :path="mdiBandage" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'heal'" :path="mdiWrenchCogOutline" size="1.3rem" />
   <SvgIcon v-else-if="name === 'turn-off'" :path="mdiPower" size="1.3rem" />
   <SvgIcon v-else-if="name === 'chevron-right'" :path="mdiChevronRight" size="1.3rem" />
-  <SvgIcon v-else-if="name === 'close'" :path="mdiCloseCircleOutline" size="1.3rem" />
-  <SvgIcon v-else-if="name === 'edit'" :path="mdiPencil" size="1.3rem" />
-  <SvgIcon v-else-if="name === 'download'" :path="mdiDownloadCircle" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'close'" :path="mdiCloseCircle" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'edit'" :path="mdiPencilOutline" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'download'" :path="mdiDownloadOutline" size="1.3rem" />
   <SvgIcon v-else-if="name === 'stopwatch'" :path="mdiAlarm" size="1.3rem" />
-  <SvgIcon v-else-if="name === 'auto-scroll'" :path="mdiDownload" size="1.3rem" />
-  <SvgIcon v-else-if="name === 'auto-scroll-off'" :path="mdiDownloadOff" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'auto-scroll'" :path="mdiEyeOutline" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'auto-scroll-off'" :path="mdiEyeOffOutline" size="1.3rem" />
   <SvgIcon v-else-if="name === 'pause'" :path="mdiPause" size="1.3rem" />
   <SvgIcon v-else-if="name === 'play'" :path="mdiPlay" size="1.3rem" />
-  <SvgIcon v-else-if="name === 'remove'" :path="mdiClose" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'play-outline'" :path="mdiPlayOutline" size="1.3rem" />
 
   <SvgIcon v-else-if="name === 'visibility-private'" :path="mdiLockOutline" size="1.3rem" />
   <SvgIcon v-else-if="name === 'visibility-internal'" :path="mdiLockOpenOutline" size="1.3rem" />
 
-  <SvgIcon v-else-if="name === 'forgejo'" :path="siForgejo.path" size="32" />
-  <SvgIcon v-else-if="name === 'gitea'" :path="siGitea.path" size="32" />
+  <SvgIcon v-else-if="name === 'forgejo'" :path="siForgejo.path" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'gitea'" :path="siGitea.path" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'gitlab'" :path="mdiGitlab" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'bitbucket' || name === 'bitbucket-dc'" :path="mdiBitbucket" size="1.3" />
 
   <svg v-else-if="name === 'spinner'" width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
     <path
@@ -84,35 +83,33 @@
 <script lang="ts" setup>
 import {
   mdiAlarm,
-  mdiAlert,
   mdiAlertCircle,
-  mdiAlertOutline,
   mdiArrowLeft,
-  mdiBandage,
   mdiBitbucket,
-  mdiCheckCircleOutline,
+  mdiCheckCircle,
   mdiChevronRight,
   mdiClockTimeEightOutline,
-  mdiClose,
-  mdiCloseCircleOutline,
+  mdiCloseCircle,
   mdiCog,
-  mdiDownload,
-  mdiDownloadCircle,
-  mdiDownloadOff,
+  mdiCogOutline,
+  mdiDownloadOutline,
+  mdiEyeOffOutline,
+  mdiEyeOutline,
   mdiFormatListBulleted,
   mdiGestureTap,
   mdiGit,
   mdiGithub,
   mdiGitlab,
-  mdiHelpCircleOutline,
+  mdiHelpCircle,
   mdiLockOpenOutline,
   mdiLockOutline,
-  mdiMinusCircleOutline,
+  mdiMinusCircle,
   mdiPackageVariant,
   mdiPause,
-  mdiPencil,
+  mdiPencilOutline,
   mdiPlay,
-  mdiPlayCircleOutline,
+  mdiPlayCircle,
+  mdiPlayOutline,
   mdiPlus,
   mdiPower,
   mdiRadioboxBlank,
@@ -121,10 +118,11 @@ import {
   mdiSourceCommit,
   mdiSourceMerge,
   mdiSourcePull,
-  mdiStopCircleOutline,
+  mdiStopCircle,
   mdiTagOutline,
-  mdiTimelapse,
+  mdiTimerOutline,
   mdiTrashCanOutline,
+  mdiWrenchCogOutline,
 } from '@mdi/js';
 import { siForgejo, siGitea } from 'simple-icons';
 
@@ -144,6 +142,7 @@ export type IconNames =
   | 'github'
   | 'repo'
   | 'settings'
+  | 'settings-outline'
   | 'trash'
   | 'status-blocked'
   | 'status-declined'
@@ -174,14 +173,11 @@ export type IconNames =
   | 'download'
   | 'auto-scroll'
   | 'auto-scroll-off'
-  | 'refresh'
   | 'play'
+  | 'play-outline'
   | 'pause'
-  | 'warning'
-  | 'attention'
+  | 'alert'
   | 'spinner'
-  | 'error'
-  | 'remove'
   | 'visibility-private'
   | 'visibility-internal';
 

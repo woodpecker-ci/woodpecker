@@ -14,7 +14,7 @@
           :to="{ name: 'org', params: { orgId: org.id } }"
         />
         <IconButton
-          icon="settings"
+          icon="settings-outline"
           :title="$t('admin.settings.orgs.org_settings')"
           class="w-8 h-8"
           :to="{ name: 'org-settings', params: { orgId: org.id } }"

@@ -25,7 +25,7 @@
             :to="{ name: 'repo', params: { repoId: repo.id } }"
           />
           <IconButton
-            icon="settings"
+            icon="settings-outline"
             :title="$t('admin.settings.repos.settings')"
             class="w-8 h-8"
             :to="{ name: 'repo-settings', params: { repoId: repo.id } }"
