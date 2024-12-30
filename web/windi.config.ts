@@ -78,22 +78,10 @@ export default defineConfig({
           200: tinycolor(customColors['wp-primary'][500]).desaturate(10).toString(),
           300: tinycolor(customColors['wp-primary'][600]).desaturate(10).toString(),
         },
-        'int-wp-control-error': {
+        'int-wp-error': {
           100: colors.red[700],
           200: colors.red[800],
           300: colors.red[900],
-        },
-        'int-wp-control-error-dark': {
-          100: tinycolor(colors.red[700]).desaturate(25).toString(),
-          200: tinycolor(colors.red[800]).desaturate(25).toString(),
-          300: tinycolor(colors.red[900]).desaturate(25).toString(),
-        },
-
-        'int-wp-state-error': {
-          100: colors.red[700],
-        },
-        'int-wp-state-error-dark': {
-          100: tinycolor(colors.red[700]).desaturate(25).toString(),
         },
         'int-wp-state-neutral': {
           100: colors.gray[600],
@@ -168,15 +156,12 @@ export default defineConfig({
           200: 'var(--wp-control-ok-200)',
           300: 'var(--wp-control-ok-300)',
         },
-        'wp-control-error': {
-          100: 'var(--wp-control-error-100)',
-          200: 'var(--wp-control-error-200)',
-          300: 'var(--wp-control-error-300)',
+        'wp-error': {
+          100: 'var(--wp-error-100)',
+          200: 'var(--wp-error-200)',
+          300: 'var(--wp-error-300)',
         },
 
-        'wp-state-error': {
-          100: 'var(--wp-state-error-100)',
-        },
         'wp-state-neutral': {
           100: 'var(--wp-state-neutral-100)',
         },

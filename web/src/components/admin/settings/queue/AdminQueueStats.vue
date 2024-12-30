@@ -104,7 +104,7 @@ const data = computed(() => {
       label: t('admin.settings.queue.stats.waiting_on_deps_count'),
       value: props.stats.waiting_on_deps_count,
       percentage: total.value > 0 ? (props.stats.waiting_on_deps_count / total.value) * 100 : 0,
-      color: 'bg-wp-state-error-100',
+      color: 'bg-wp-error-100 dark:bg-wp-error-200',
     },
   ];
 });

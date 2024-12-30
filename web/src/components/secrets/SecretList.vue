@@ -23,7 +23,7 @@
         />
         <IconButton
           icon="trash"
-          class="ml-2 w-8 h-8 hover:text-wp-control-error-100"
+          class="ml-2 w-8 h-8 hover:text-wp-error-100"
           :is-loading="isDeleting"
           :title="$t('secrets.delete')"
           @click="deleteSecret(secret)"

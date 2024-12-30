@@ -30,7 +30,7 @@
       <IconButton
         icon="trash"
         :title="$t('admin.settings.agents.delete_agent')"
-        class="ml-2 w-8 h-8 hover:text-wp-control-error-100"
+        class="ml-2 w-8 h-8 hover:text-wp-error-100"
         :is-loading="props.isDeleting"
         @click="$emit('delete', agent)"
       />

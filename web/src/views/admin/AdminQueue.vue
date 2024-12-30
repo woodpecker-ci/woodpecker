@@ -13,7 +13,7 @@
           <Icon
             :name="queueInfo.paused ? 'pause' : 'play'"
             :class="{
-              'text-wp-state-error-100': queueInfo.paused,
+              'text-wp-error-100': queueInfo.paused,
               'text-wp-state-ok-100': !queueInfo.paused,
             }"
           />
@@ -50,7 +50,7 @@
                     : 'status-declined'
               "
               :class="{
-                'text-wp-state-error-100': task.status === 'waiting_on_deps',
+                'text-wp-error-100': task.status === 'waiting_on_deps',
                 'text-wp-state-info-100': task.status === 'running',
                 'text-wp-state-neutral-100': task.status === 'pending',
               }"
