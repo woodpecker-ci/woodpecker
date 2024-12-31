@@ -1,7 +1,7 @@
 <template>
   <div v-if="pipeline" class="flex flex-col pt-10 md:pt-0">
     <div
-      class="!md:rounded-md code-box-log flex flex-grow flex-col overflow-hidden !rounded-none !p-0 shadow md:mt-0"
+      class="code-box-log !md:rounded-md flex flex-grow flex-col overflow-hidden !rounded-none !p-0 shadow md:mt-0"
       @mouseover="showActions = true"
       @mouseleave="showActions = false"
     >
@@ -37,7 +37,7 @@
             @click="autoScroll = !autoScroll"
           />
           <IconButton
-            class="!md:hidden !hover:bg-white !hover:bg-opacity-10"
+            class="!hover:bg-white !hover:bg-opacity-10 !md:hidden"
             icon="close"
             @click="$emit('update:step-id', null)"
           />

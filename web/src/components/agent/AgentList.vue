@@ -3,7 +3,7 @@
     <ListItem
       v-for="agent in props.agents"
       :key="agent.id"
-      class="!bg-wp-background-100 !dark:bg-wp-background-200 items-center"
+      class="!bg-wp-background-200 !dark:bg-wp-background-100 items-center"
     >
       <span>{{ agent.name || `Agent ${agent.id}` }}</span>
       <span class="ml-auto">
