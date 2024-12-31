@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-12-30
+## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-12-31
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -339,6 +339,7 @@
 
 ### Misc
 
+- Revert "Two row layout for title and context of pipeline list" [[#4649](https://github.com/woodpecker-ci/woodpecker/pull/4649)]
 - Refactor icons: harmonize contextually, use filled status icons [[#4584](https://github.com/woodpecker-ci/woodpecker/pull/4584)]
 - Add lighter red shades for error messages [[#4611](https://github.com/woodpecker-ci/woodpecker/pull/4611)]
 - Add docker in docker example to advanced usage in docs [[#4620](https://github.com/woodpecker-ci/woodpecker/pull/4620)]
