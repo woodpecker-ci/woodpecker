@@ -10,7 +10,7 @@
     </template>
 
     <template #headerEnd>
-      <Warning class="text-sm mt-4" :text="$t('admin.settings.secrets.warning')" />
+      <Warning class="mt-4 text-sm" :text="$t('admin.settings.secrets.warning')" />
     </template>
 
     <SecretList

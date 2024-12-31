@@ -17,42 +17,34 @@ package matrix
 import (
 	"testing"
 
-	"github.com/franela/goblin"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestMatrix(t *testing.T) {
-	g := goblin.Goblin(t)
-	g.Describe("Calculate matrix", func() {
-		axis, _ := ParseString(fakeMatrix)
+	axis, _ := ParseString(fakeMatrix)
+	assert.Len(t, axis, 24)
 
-		g.It("Should calculate permutations", func() {
-			g.Assert(len(axis)).Equal(24)
-		})
+	set := map[string]bool{}
+	for _, perm := range axis {
+		set[perm.String()] = true
+	}
+	assert.Len(t, set, 24)
+}
 
-		g.It("Should not duplicate permutations", func() {
-			set := map[string]bool{}
-			for _, perm := range axis {
-				set[perm.String()] = true
-			}
-			g.Assert(len(set)).Equal(24)
-		})
+func TestMatrixEmpty(t *testing.T) {
+	axis, err := ParseString("")
+	assert.NoError(t, err)
+	assert.Empty(t, axis)
+}
 
-		g.It("Should return empty array if no matrix", func() {
-			axis, err := ParseString("")
-			g.Assert(err).IsNil()
-			g.Assert(len(axis) == 0).IsTrue()
-		})
-
-		g.It("Should return included axis", func() {
-			axis, err := ParseString(fakeMatrixInclude)
-			g.Assert(err).IsNil()
-			g.Assert(len(axis)).Equal(2)
-			g.Assert(axis[0]["go_version"]).Equal("1.5")
-			g.Assert(axis[1]["go_version"]).Equal("1.6")
-			g.Assert(axis[0]["python_version"]).Equal("3.4")
-			g.Assert(axis[1]["python_version"]).Equal("3.4")
-		})
-	})
+func TestMatrixIncluded(t *testing.T) {
+	axis, err := ParseString(fakeMatrixInclude)
+	assert.NoError(t, err)
+	assert.Len(t, axis, 2)
+	assert.Equal(t, "1.5", axis[0]["go_version"])
+	assert.Equal(t, "1.6", axis[1]["go_version"])
+	assert.Equal(t, "3.4", axis[0]["python_version"])
+	assert.Equal(t, "3.4", axis[1]["python_version"])
 }
 
 var fakeMatrix = `
