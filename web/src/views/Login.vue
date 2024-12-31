@@ -14,7 +14,7 @@
     </Error>
 
     <div
-      class="border-wp-background-400 bg-wp-background-100 dark:bg-wp-background-200 md:w-3xl md:h-sm flex w-full flex-col overflow-hidden border shadow md:m-8 md:flex-row md:rounded-md"
+      class="bg-wp-background-100 border-wp-background-400 dark:bg-wp-background-200 md:w-3xl md:h-sm flex w-full flex-col overflow-hidden border shadow md:m-8 md:flex-row md:rounded-md"
     >
       <div class="bg-wp-primary-200 dark:bg-wp-primary-300 flex min-h-48 items-center justify-center md:w-3/5">
         <WoodpeckerLogo preserveAspectRatio="xMinYMin slice" class="w-30 h-30 md:h-48 md:w-48" />
