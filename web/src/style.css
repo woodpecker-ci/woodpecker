@@ -121,7 +121,7 @@ body,
 }
 
 .vue-notification .notification-title {
-  @apply font-normal text-base;
+  @apply text-base font-normal;
 }
 
 .vue-notification.success {
@@ -133,7 +133,7 @@ body,
 }
 
 *::-webkit-scrollbar {
-  @apply bg-transparent w-12px h-12px;
+  @apply w-12px h-12px bg-transparent;
 }
 
 * {
@@ -143,7 +143,7 @@ body,
 *::-webkit-scrollbar-thumb {
   transition: background 0.2s ease-in-out;
   border: 3px solid transparent;
-  @apply bg-clip-content bg-cool-gray-200 dark:bg-dark-200 rounded-full;
+  @apply bg-cool-gray-200 dark:bg-dark-200 rounded-full bg-clip-content;
 }
 
 *::-webkit-scrollbar-thumb:hover {

@@ -6,7 +6,7 @@
       <div class="flex flex-shrink-0 items-center space-x-1">
         <div class="flex items-center">
           <Icon v-if="pipeline.event === 'cron'" name="stopwatch" />
-          <img v-else class="rounded-md w-6" :src="pipeline.author_avatar" />
+          <img v-else class="w-6 rounded-md" :src="pipeline.author_avatar" />
         </div>
         <span>{{ pipeline.author }}</span>
       </div>
@@ -84,12 +84,12 @@
               <PipelineStepDuration
                 v-if="workflow.started !== workflow.finished"
                 :workflow="workflow"
-                class="mr-1 pr-2px"
+                class="pr-2px mr-1"
               />
             </button>
           </div>
           <div
-            class="transition-height duration-150 overflow-hidden"
+            class="transition-height overflow-hidden duration-150"
             :class="{ 'max-h-0': workflowsCollapsed[workflow.id], 'ml-[1.6rem]': !singleConfig }"
           >
             <button

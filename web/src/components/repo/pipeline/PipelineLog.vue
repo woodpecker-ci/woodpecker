@@ -55,9 +55,9 @@
             :href="`#L${line.number}`"
             class="text-right pr-6 pl-2 text-wp-code-text-alt-100 whitespace-nowrap select-none"
             :class="{
-              'bg-opacity-40 dark:bg-opacity-50 bg-red-600 dark:bg-red-800': line.type === 'error',
-              'bg-opacity-40 dark:bg-opacity-50 bg-yellow-600 dark:bg-yellow-800': line.type === 'warning',
-              'bg-opacity-30 bg-blue-600': isSelected(line),
+              'bg-red-600 bg-opacity-40 dark:bg-red-800 dark:bg-opacity-50': line.type === 'error',
+              'bg-yellow-600 bg-opacity-40 dark:bg-yellow-800 dark:bg-opacity-50': line.type === 'warning',
+              'bg-blue-600 bg-opacity-30': isSelected(line),
               underline: isSelected(line),
             }"
           >
@@ -67,9 +67,9 @@
           <span
             class="align-top break-words whitespace-pre-wrap"
             :class="{
-              'bg-opacity-40 dark:bg-opacity-50 bg-10.168.64.121-600 dark:bg-red-800': line.type === 'error',
-              'bg-opacity-40 dark:bg-opacity-50 bg-yellow-600 dark:bg-yellow-800': line.type === 'warning',
-              'bg-opacity-30 bg-blue-600': isSelected(line),
+              'bg-10.168.64.121-600 bg-opacity-40 dark:bg-red-800 dark:bg-opacity-50': line.type === 'error',
+              'bg-yellow-600 bg-opacity-40 dark:bg-yellow-800 dark:bg-opacity-50': line.type === 'warning',
+              'bg-blue-600 bg-opacity-30': isSelected(line),
             }"
             v-html="line.text"
           />
@@ -77,9 +77,9 @@
           <span
             class="text-right pr-1 text-wp-code-text-alt-100 whitespace-nowrap select-none"
             :class="{
-              'bg-opacity-40 dark:bg-opacity-50 bg-red-600 dark:bg-red-800': line.type === 'error',
-              'bg-opacity-40 dark:bg-opacity-50 bg-yellow-600 dark:bg-yellow-800': line.type === 'warning',
-              'bg-opacity-30 bg-blue-600': isSelected(line),
+              'bg-red-600 bg-opacity-40 dark:bg-red-800 dark:bg-opacity-50': line.type === 'error',
+              'bg-yellow-600 bg-opacity-40 dark:bg-yellow-800 dark:bg-opacity-50': line.type === 'warning',
+              'bg-blue-600 bg-opacity-30': isSelected(line),
             }"
           >
             {{ formatTime(line.time) }}

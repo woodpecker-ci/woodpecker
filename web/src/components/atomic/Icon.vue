@@ -77,7 +77,7 @@
     </path>
   </svg>
 
-  <div v-else-if="name === 'blank'" class="w-6 h-6" />
+  <div v-else-if="name === 'blank'" class="h-6 w-6" />
 </template>
 
 <script lang="ts" setup>

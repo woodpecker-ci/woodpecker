@@ -2,15 +2,15 @@
   <!-- overlay -->
   <div
     v-if="open"
-    class="fixed bg-gray-900 opacity-80 left-0 top-0 right-0 bottom-0 z-500 print:hidden"
+    class="z-500 fixed bottom-0 left-0 right-0 top-0 bg-gray-900 opacity-80 print:hidden"
     @click="$emit('close')"
   />
   <!-- overlay end -->
   <div
     v-if="open"
-    class="print:hidden fixed flex max-w-1/3 <md:max-w-4/5 max-h-3/5 top-1/2 left-1/2 transform z-1000 -translate-x-1/2 -translate-y-1/2"
+    class="max-w-1/3 <md:max-w-4/5 max-h-3/5 z-1000 fixed left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 transform print:hidden"
   >
-    <div class="m-auto flex flex-col shadow-all h-auto">
+    <div class="shadow-all m-auto flex h-auto flex-col">
       <slot />
     </div>
   </div>

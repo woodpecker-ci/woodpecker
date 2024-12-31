@@ -22,10 +22,15 @@
         'max-h-auto': !collapsed,
         'max-h-0': collapsed,
       }"
-      class="transition-height duration-150 overflow-hidden"
+      class="transition-height overflow-hidden duration-150"
     >
+      <<<<<<< HEAD
       <div class="p-4 w-full text-wp-text-100">
-        <slot />
+        =======
+        <div class="text-wp-text-100 w-full p-4">
+          >>>>>>> main
+          <slot />
+        </div>
       </div>
     </div>
   </div>
