@@ -117,4 +117,5 @@ vscode:
     - 'redhat.vscode-yaml'
     - 'davidanson.vscode-markdownlint'
     - 'streetsidesoftware.code-spell-checker'
+    - 'stivo.tailwind-fold'
     # cSpell:enable

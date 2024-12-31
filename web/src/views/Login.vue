@@ -1,26 +1,26 @@
 <template>
-  <main class="flex flex-col w-full h-full justify-center items-center">
-    <Error v-if="errorMessage" class="w-full md:w-3xl">
+  <main class="flex h-full w-full flex-col items-center justify-center">
+    <Error v-if="errorMessage" class="md:w-3xl w-full">
       <span class="whitespace-pre">{{ errorMessage }}</span>
-      <span v-if="errorDescription" class="whitespace-pre mt-1">{{ errorDescription }}</span>
+      <span v-if="errorDescription" class="mt-1 whitespace-pre">{{ errorDescription }}</span>
       <a
         v-if="errorUri"
         :href="errorUri"
         target="_blank"
-        class="text-wp-link-100 hover:text-wp-link-200 cursor-pointer mt-1"
+        class="text-wp-link-100 hover:text-wp-link-200 mt-1 cursor-pointer"
       >
         <span>{{ errorUri }}</span>
       </a>
     </Error>
 
     <div
-      class="flex flex-col w-full overflow-hidden bg-wp-background-100 shadow border border-wp-background-400 dark:bg-wp-background-200 md:m-8 md:rounded-md md:flex-row md:w-3xl md:h-sm"
+      class="bg-wp-background-100 border-wp-background-400 dark:bg-wp-background-200 md:w-3xl md:h-sm flex w-full flex-col overflow-hidden border shadow md:m-8 md:flex-row md:rounded-md"
     >
-      <div class="flex justify-center items-center bg-wp-primary-200 dark:bg-wp-primary-300 min-h-48 md:w-3/5">
-        <WoodpeckerLogo preserveAspectRatio="xMinYMin slice" class="w-30 h-30 md:w-48 md:h-48" />
+      <div class="bg-wp-primary-200 dark:bg-wp-primary-300 flex min-h-48 items-center justify-center md:w-3/5">
+        <WoodpeckerLogo preserveAspectRatio="xMinYMin slice" class="w-30 h-30 md:h-48 md:w-48" />
       </div>
-      <div class="flex justify-center items-center flex-col md:w-2/5 min-h-48 gap-4 text-center">
-        <h1 class="text-xl text-wp-text-100">{{ $t('welcome') }}</h1>
+      <div class="flex min-h-48 flex-col items-center justify-center gap-4 text-center md:w-2/5">
+        <h1 class="text-wp-text-100 text-xl">{{ $t('welcome') }}</h1>
         <div class="flex flex-col gap-2">
           <Button
             v-for="forge in forges"
