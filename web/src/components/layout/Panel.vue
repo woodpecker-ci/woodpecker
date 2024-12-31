@@ -1,19 +1,19 @@
 <template>
   <div
-    class="border-wp-background-400 bg-wp-background-100 dark:bg-wp-background-200 shadow border rounded-md w-full overflow-hidden"
+    class="border-wp-background-400 bg-wp-background-100 dark:bg-wp-background-200 w-full overflow-hidden rounded-md border shadow"
   >
     <component
       :is="collapsable ? 'button' : 'div'"
       v-if="title"
       type="button"
-      class="flex gap-2 bg-wp-background-400 px-4 py-2 w-full font-bold text-wp-text-100"
+      class="bg-wp-background-400 text-wp-text-100 flex w-full gap-2 px-4 py-2 font-bold"
       @click="_collapsed = !_collapsed"
     >
       <Icon
         v-if="collapsable"
         name="chevron-right"
-        class="min-w-6 h-6 transition-transform duration-150"
-        :class="{ 'transform rotate-90': !collapsed }"
+        class="h-6 min-w-6 transition-transform duration-150"
+        :class="{ 'rotate-90 transform': !collapsed }"
       />
       {{ title }}
     </component>
@@ -25,7 +25,7 @@
       class="transition-height overflow-hidden duration-150"
     >
       <<<<<<< HEAD
-      <div class="p-4 w-full text-wp-text-100">
+      <div class="text-wp-text-100 w-full p-4">
         =======
         <div class="text-wp-text-100 w-full p-4">
           >>>>>>> main

@@ -1,17 +1,17 @@
 <template>
   <div v-if="pipeline" class="flex flex-col pt-10 md:pt-0">
     <div
-      class="flex flex-col flex-grow shadow md:mt-0 !p-0 !rounded-none !md:rounded-md overflow-hidden code-box-log"
+      class="!md:rounded-md code-box-log flex flex-grow flex-col overflow-hidden !rounded-none !p-0 shadow md:mt-0"
       @mouseover="showActions = true"
       @mouseleave="showActions = false"
     >
-      <div class="<md:fixed <md:top-0 <md:left-0 flex flex-row items-center w-full bg-wp-code-100 px-4 py-2">
-        <span class="font-bold text-base text-wp-code-text-alt-100">
+      <div class="<md:fixed <md:top-0 <md:left-0 bg-wp-code-100 flex w-full flex-row items-center px-4 py-2">
+        <span class="text-wp-code-text-alt-100 text-base font-bold">
           <span class="<md:hidden">{{ $t('repo.pipeline.log_title') }}</span>
           <span class="md:hidden">{{ step?.name }}</span>
         </span>
 
-        <div class="flex flex-row items-center gap-x-2 ml-auto">
+        <div class="ml-auto flex flex-row items-center gap-x-2">
           <IconButton
             v-if="step?.finished !== undefined && hasLogs"
             :is-loading="downloadInProgress"
@@ -47,13 +47,13 @@
       <div
         v-show="hasLogs && loadedLogs && (log?.length || 0) > 0"
         ref="consoleElement"
-        class="flex-grow grid grid-cols-[min-content,minmax(0,1fr),min-content] auto-rows-min p-4 w-full max-w-full text-xs md:text-sm overflow-x-hidden overflow-y-auto"
+        class="grid w-full max-w-full flex-grow auto-rows-min grid-cols-[min-content,minmax(0,1fr),min-content] overflow-y-auto overflow-x-hidden p-4 text-xs md:text-sm"
       >
-        <div v-for="line in log" :key="line.index" class="font-mono contents">
+        <div v-for="line in log" :key="line.index" class="contents font-mono">
           <a
             :id="`L${line.number}`"
             :href="`#L${line.number}`"
-            class="text-right pr-6 pl-2 text-wp-code-text-alt-100 whitespace-nowrap select-none"
+            class="text-wp-code-text-alt-100 select-none whitespace-nowrap pl-2 pr-6 text-right"
             :class="{
               'bg-red-600 bg-opacity-40 dark:bg-red-800 dark:bg-opacity-50': line.type === 'error',
               'bg-yellow-600 bg-opacity-40 dark:bg-yellow-800 dark:bg-opacity-50': line.type === 'warning',
@@ -65,7 +65,7 @@
           </a>
           <!-- eslint-disable vue/no-v-html -->
           <span
-            class="align-top break-words whitespace-pre-wrap"
+            class="whitespace-pre-wrap break-words align-top"
             :class="{
               'bg-10.168.64.121-600 bg-opacity-40 dark:bg-red-800 dark:bg-opacity-50': line.type === 'error',
               'bg-yellow-600 bg-opacity-40 dark:bg-yellow-800 dark:bg-opacity-50': line.type === 'warning',
@@ -75,7 +75,7 @@
           />
           <!-- eslint-enable vue/no-v-html -->
           <span
-            class="text-right pr-1 text-wp-code-text-alt-100 whitespace-nowrap select-none"
+            class="text-wp-code-text-alt-100 select-none whitespace-nowrap pr-1 text-right"
             :class="{
               'bg-red-600 bg-opacity-40 dark:bg-red-800 dark:bg-opacity-50': line.type === 'error',
               'bg-yellow-600 bg-opacity-40 dark:bg-yellow-800 dark:bg-opacity-50': line.type === 'warning',
@@ -87,7 +87,7 @@
         </div>
       </div>
 
-      <div class="m-auto text-wp-text-alt-100 text-xl">
+      <div class="text-wp-text-alt-100 m-auto text-xl">
         <span v-if="step?.state === 'skipped'">{{ $t('repo.pipeline.actions.canceled') }}</span>
         <span v-else-if="!step?.started">{{ $t('repo.pipeline.step_not_started') }}</span>
         <div v-else-if="!loadedLogs">{{ $t('repo.pipeline.loading') }}</div>
@@ -96,9 +96,9 @@
 
       <div
         v-if="step?.finished !== undefined"
-        class="flex items-center bg-wp-code-100 p-4 w-full font-bold text-md text-wp-code-text-alt-100"
+        class="bg-wp-code-100 text-md text-wp-code-text-alt-100 flex w-full items-center p-4 font-bold"
       >
-        <PipelineStatusIcon :status="step.state" class="!w-4 !h-4" />
+        <PipelineStatusIcon :status="step.state" class="!h-4 !w-4" />
         <span v-if="step?.error" class="px-2">{{ step.error }}</span>
         <span v-else class="px-2">{{ $t('repo.pipeline.exit_code', { exitCode: step.exit_code }) }}</span>
       </div>

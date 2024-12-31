@@ -2,7 +2,7 @@
   <aside
     v-if="isOpen"
     ref="target"
-    class="z-50 flex flex-col items-center border-wp-background-400 bg-wp-background-200 dark:bg-wp-background-100 overflow-y-auto"
+    class="border-wp-background-400 bg-wp-background-200 dark:bg-wp-background-100 z-50 flex flex-col items-center overflow-y-auto"
     :aria-label="$t('pipeline_feed')"
   >
     <router-link
@@ -12,12 +12,12 @@
         name: 'repo-pipeline',
         params: { repoId: pipeline.repo_id, pipelineId: pipeline.number },
       }"
-      class="flex border-wp-background-400 hover:bg-wp-background-300 dark:hover:bg-wp-background-600 hover:shadow-sm px-2 py-4 border-b w-full"
+      class="border-wp-background-400 hover:bg-wp-background-300 dark:hover:bg-wp-background-600 flex w-full border-b px-2 py-4 hover:shadow-sm"
     >
       <PipelineFeedItem :pipeline="pipeline" />
     </router-link>
 
-    <span v-if="sortedPipelines.length === 0" class="m-4 text-wp-text-100">{{ $t('repo.pipeline.no_pipelines') }}</span>
+    <span v-if="sortedPipelines.length === 0" class="text-wp-text-100 m-4">{{ $t('repo.pipeline.no_pipelines') }}</span>
   </aside>
 </template>
 

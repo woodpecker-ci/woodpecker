@@ -1,14 +1,14 @@
 <template>
-  <div class="flex flex-col bg-wp-background-200 dark:bg-wp-background-100 m-auto w-full h-full app">
+  <div class="bg-wp-background-200 dark:bg-wp-background-100 app m-auto flex h-full w-full flex-col">
     <router-view v-if="blank" />
     <template v-else>
       <Navbar />
       <main class="relative flex h-full min-h-0">
-        <div id="scroll-component" class="flex flex-col flex-grow overflow-y-auto">
+        <div id="scroll-component" class="flex flex-grow flex-col overflow-y-auto">
           <router-view />
         </div>
         <transition name="slide-right">
-          <PipelineFeedSidebar class="top-0 right-0 bottom-0 absolute shadow-md border-l w-full max-w-80 xl:max-w-96" />
+          <PipelineFeedSidebar class="absolute bottom-0 right-0 top-0 w-full max-w-80 border-l shadow-md xl:max-w-96" />
         </transition>
       </main>
     </template>

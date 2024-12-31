@@ -1,12 +1,12 @@
 <template>
-  <div class="flex flex-col mt-2 mb-4">
-    <div class="flex items-center mb-2">
-      <label class="font-bold text-wp-text-100" :for="id" v-bind="$attrs">{{ label }}</label>
+  <div class="mb-4 mt-2 flex flex-col">
+    <div class="mb-2 flex items-center">
+      <label class="text-wp-text-100 font-bold" :for="id" v-bind="$attrs">{{ label }}</label>
       <DocsLink v-if="docsUrl" :topic="label" :url="docsUrl" class="ml-2" />
       <slot v-else-if="$slots.titleActions" name="titleActions" />
     </div>
     <slot :id="id" />
-    <div v-if="$slots.description" class="mt-1 ml-1 text-wp-text-alt-100">
+    <div v-if="$slots.description" class="text-wp-text-alt-100 ml-1 mt-1">
       <slot name="description" />
     </div>
   </div>

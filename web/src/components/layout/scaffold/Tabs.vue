@@ -1,11 +1,11 @@
 <template>
-  <div class="flex flex-wrap md:gap-4 mt-2">
+  <div class="mt-2 flex flex-wrap md:gap-4">
     <router-link
       v-for="tab in tabs"
       :key="tab.title"
       v-slot="{ isActive, isExactActive }"
       :to="tab.to"
-      class="flex items-center py-1 border-transparent md:border-b-2 w-full md:w-auto text-wp-text-100 cursor-pointer"
+      class="text-wp-text-100 flex w-full cursor-pointer items-center border-transparent py-1 md:w-auto md:border-b-2"
       :active-class="tab.matchChildren ? '!border-wp-text-100' : ''"
       :exact-active-class="tab.matchChildren ? '' : '!border-wp-text-100'"
     >
@@ -16,7 +16,7 @@
       />
       <Icon v-else name="blank" class="md:hidden" />
       <span
-        class="flex flex-row md:justify-center items-center gap-2 dark:hover:bg-wp-background-100 hover:bg-wp-background-200 px-2 py-1 rounded-md w-full min-w-20"
+        class="dark:hover:bg-wp-background-100 hover:bg-wp-background-200 flex w-full min-w-20 flex-row items-center gap-2 rounded-md px-2 py-1 md:justify-center"
       >
         <Icon v-if="tab.icon" :name="tab.icon" :class="tab.iconClass" class="flex-shrink-0" />
         <span>{{ tab.title }}</span>
