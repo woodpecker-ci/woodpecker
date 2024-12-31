@@ -4,7 +4,7 @@
     :class="{ 'md:px-4': fullWidth }"
   >
     <Container :full-width="fullWidth" class="!py-0">
-      <div class="flex md:flex-row flex-col md:justify-between md:items-center gap-2 md:gap-10 py-3 w-full">
+      <div class="flex w-full flex-col gap-2 py-3 md:flex-row md:items-center md:justify-between md:gap-10">
         <div
           class="flex min-h-10 content-start items-center"
           :class="{
@@ -18,7 +18,7 @@
             class="<md:hidden mr-2 h-8 w-8 flex-shrink-0 md:justify-between"
             @click="goBack"
           />
-          <h1 class="flex items-center gap-x-2 min-w-0 text-wp-text-100 text-xl">
+          <h1 class="text-wp-text-100 flex min-w-0 items-center gap-x-2 text-xl">
             <slot name="title" />
           </h1>
         </div>
@@ -32,7 +32,7 @@
         />
         <div
           v-if="$slots.headerActions"
-          class="flex md:justify-end items-center gap-x-2 min-w-0"
+          class="flex min-w-0 items-center gap-x-2 md:justify-end"
           :class="{
             'md:flex-1': searchBoxPresent,
           }"
@@ -41,9 +41,9 @@
         </div>
       </div>
 
-      <div v-if="enableTabs" class="flex md:flex-row flex-col md:justify-between md:items-center py-2 md:py-0">
+      <div v-if="enableTabs" class="flex flex-col py-2 md:flex-row md:items-center md:justify-between md:py-0">
         <Tabs class="<md:order-2" />
-        <div v-if="$slots.headerActions" class="flex md:justify-end content-start">
+        <div v-if="$slots.headerActions" class="flex content-start md:justify-end">
           <slot name="tabActions" />
         </div>
       </div>

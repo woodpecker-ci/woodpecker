@@ -16,7 +16,7 @@
         class="!bg-wp-background-200 !dark:bg-wp-background-100 items-center gap-2"
       >
         <span>{{ repo.full_name }}</span>
-        <div class="flex items-center ml-auto">
+        <div class="ml-auto flex items-center">
           <Badge v-if="!repo.active" class="<md:hidden mr-2" :label="$t('admin.settings.repos.disabled')" />
           <IconButton
             icon="chevron-right"

@@ -30,11 +30,11 @@
         </span>
         <IconButton
           icon="play-outline"
-          class="ml-auto w-8 h-8"
+          class="ml-auto h-8 w-8"
           :title="$t('repo.settings.crons.run')"
           @click="runCron(cron)"
         />
-        <IconButton icon="edit" class="w-8 h-8" :title="$t('repo.settings.crons.edit')" @click="selectedCron = cron" />
+        <IconButton icon="edit" class="h-8 w-8" :title="$t('repo.settings.crons.edit')" @click="selectedCron = cron" />
         <IconButton
           icon="trash"
           class="hover:text-wp-error-100 h-8 w-8"
