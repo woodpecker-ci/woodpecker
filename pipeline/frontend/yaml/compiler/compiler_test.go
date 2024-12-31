@@ -81,12 +81,12 @@ func TestCompilerCompile(t *testing.T) {
 		WithWorkspaceFromURL("/test", repoURL),
 	)
 
-	defaultNetwork := &backend_types.Network{
+	defaultNetworks := []*backend_types.Network{{
 		Name: "test_default",
-	}
-	defaultVolume := &backend_types.Volume{
+	}}
+	defaultVolumes := []*backend_types.Volume{{
 		Name: "test_default",
-	}
+	}}
 
 	defaultCloneStage := &backend_types.Stage{
 		Steps: []*backend_types.Step{{
@@ -95,7 +95,7 @@ func TestCompilerCompile(t *testing.T) {
 			Image:         constant.DefaultClonePlugin,
 			OnSuccess:     true,
 			Failure:       "fail",
-			Volumes:       []string{defaultVolume.Name + ":/woodpecker"},
+			Volumes:       []string{defaultVolumes[0].Name + ":/woodpecker"},
 			WorkingDir:    "/woodpecker/src/github.com/octocat/hello-world",
 			WorkspaceBase: "/woodpecker",
 			Networks:      []backend_types.Conn{{Name: "test_default", Aliases: []string{"clone"}}},
@@ -113,17 +113,17 @@ func TestCompilerCompile(t *testing.T) {
 			name:     "empty workflow, no clone",
 			fronConf: &yaml_types.Workflow{SkipClone: true},
 			backConf: &backend_types.Config{
-				Network: defaultNetwork,
-				Volume:  defaultVolume,
+				Networks: defaultNetworks,
+				Volumes:  defaultVolumes,
 			},
 		},
 		{
 			name:     "empty workflow, default clone",
 			fronConf: &yaml_types.Workflow{},
 			backConf: &backend_types.Config{
-				Network: defaultNetwork,
-				Volume:  defaultVolume,
-				Stages:  []*backend_types.Stage{defaultCloneStage},
+				Networks: defaultNetworks,
+				Volumes:  defaultVolumes,
+				Stages:   []*backend_types.Stage{defaultCloneStage},
 			},
 		},
 		{
@@ -133,8 +133,8 @@ func TestCompilerCompile(t *testing.T) {
 				Image: "dummy_img",
 			}}}},
 			backConf: &backend_types.Config{
-				Network: defaultNetwork,
-				Volume:  defaultVolume,
+				Networks: defaultNetworks,
+				Volumes:  defaultVolumes,
 				Stages: []*backend_types.Stage{defaultCloneStage, {
 					Steps: []*backend_types.Step{{
 						Name:          "dummy",
@@ -142,7 +142,7 @@ func TestCompilerCompile(t *testing.T) {
 						Image:         "dummy_img",
 						OnSuccess:     true,
 						Failure:       "fail",
-						Volumes:       []string{defaultVolume.Name + ":/woodpecker"},
+						Volumes:       []string{defaultVolumes[0].Name + ":/woodpecker"},
 						WorkingDir:    "/woodpecker/src/github.com/octocat/hello-world",
 						WorkspaceBase: "/woodpecker",
 						Networks:      []backend_types.Conn{{Name: "test_default", Aliases: []string{"dummy"}}},
@@ -167,8 +167,8 @@ func TestCompilerCompile(t *testing.T) {
 				Commands: []string{"echo 2"},
 			}}}},
 			backConf: &backend_types.Config{
-				Network: defaultNetwork,
-				Volume:  defaultVolume,
+				Networks: defaultNetworks,
+				Volumes:  defaultVolumes,
 				Stages: []*backend_types.Stage{
 					defaultCloneStage, {
 						Steps: []*backend_types.Step{{
@@ -178,7 +178,7 @@ func TestCompilerCompile(t *testing.T) {
 							Commands:      []string{"env"},
 							OnSuccess:     true,
 							Failure:       "fail",
-							Volumes:       []string{defaultVolume.Name + ":/test"},
+							Volumes:       []string{defaultVolumes[0].Name + ":/test"},
 							WorkingDir:    "/test/src/github.com/octocat/hello-world",
 							WorkspaceBase: "/test",
 							Networks:      []backend_types.Conn{{Name: "test_default", Aliases: []string{"echo env"}}},
@@ -192,7 +192,7 @@ func TestCompilerCompile(t *testing.T) {
 							Commands:      []string{"echo 1"},
 							OnSuccess:     true,
 							Failure:       "fail",
-							Volumes:       []string{defaultVolume.Name + ":/test"},
+							Volumes:       []string{defaultVolumes[0].Name + ":/test"},
 							WorkingDir:    "/test/src/github.com/octocat/hello-world",
 							WorkspaceBase: "/test",
 							Networks:      []backend_types.Conn{{Name: "test_default", Aliases: []string{"parallel echo 1"}}},
@@ -206,7 +206,7 @@ func TestCompilerCompile(t *testing.T) {
 							Commands:      []string{"echo 2"},
 							OnSuccess:     true,
 							Failure:       "fail",
-							Volumes:       []string{defaultVolume.Name + ":/test"},
+							Volumes:       []string{defaultVolumes[0].Name + ":/test"},
 							WorkingDir:    "/test/src/github.com/octocat/hello-world",
 							WorkspaceBase: "/test",
 							Networks:      []backend_types.Conn{{Name: "test_default", Aliases: []string{"parallel echo 2"}}},
@@ -233,8 +233,8 @@ func TestCompilerCompile(t *testing.T) {
 				Commands: []string{"echo 2"},
 			}}}},
 			backConf: &backend_types.Config{
-				Network: defaultNetwork,
-				Volume:  defaultVolume,
+				Networks: defaultNetworks,
+				Volumes:  defaultVolumes,
 				Stages: []*backend_types.Stage{defaultCloneStage, {
 					Steps: []*backend_types.Step{{
 						Name:          "echo env",
@@ -243,7 +243,7 @@ func TestCompilerCompile(t *testing.T) {
 						Commands:      []string{"env"},
 						OnSuccess:     true,
 						Failure:       "fail",
-						Volumes:       []string{defaultVolume.Name + ":/test"},
+						Volumes:       []string{defaultVolumes[0].Name + ":/test"},
 						WorkingDir:    "/test/src/github.com/octocat/hello-world",
 						WorkspaceBase: "/test",
 						Networks:      []backend_types.Conn{{Name: "test_default", Aliases: []string{"echo env"}}},
@@ -255,7 +255,7 @@ func TestCompilerCompile(t *testing.T) {
 						Commands:      []string{"echo 2"},
 						OnSuccess:     true,
 						Failure:       "fail",
-						Volumes:       []string{defaultVolume.Name + ":/test"},
+						Volumes:       []string{defaultVolumes[0].Name + ":/test"},
 						WorkingDir:    "/test/src/github.com/octocat/hello-world",
 						WorkspaceBase: "/test",
 						Networks:      []backend_types.Conn{{Name: "test_default", Aliases: []string{"echo 2"}}},
@@ -269,7 +269,7 @@ func TestCompilerCompile(t *testing.T) {
 						Commands:      []string{"echo 1"},
 						OnSuccess:     true,
 						Failure:       "fail",
-						Volumes:       []string{defaultVolume.Name + ":/test"},
+						Volumes:       []string{defaultVolumes[0].Name + ":/test"},
 						WorkingDir:    "/test/src/github.com/octocat/hello-world",
 						WorkspaceBase: "/test",
 						Networks:      []backend_types.Conn{{Name: "test_default", Aliases: []string{"echo 1"}}},
