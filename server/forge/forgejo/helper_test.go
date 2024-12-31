@@ -19,255 +19,252 @@ import (
 	"testing"
 
 	"codeberg.org/mvdkleijn/forgejo-sdk/forgejo"
-	"github.com/franela/goblin"
+	"github.com/stretchr/testify/assert"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/forgejo/fixtures"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
-	"go.woodpecker-ci.org/woodpecker/v3/shared/utils"
 )
 
-func Test_parse(t *testing.T) {
-	g := goblin.Goblin(t)
-	g.Describe("Forgejo", func() {
-		g.It("Should parse push hook payload", func() {
-			buf := bytes.NewBufferString(fixtures.HookPush)
-			hook, err := parsePush(buf)
-			g.Assert(err).IsNil()
-			g.Assert(hook.Ref).Equal("refs/heads/main")
-			g.Assert(hook.After).Equal("ef98532add3b2feb7a137426bba1248724367df5")
-			g.Assert(hook.Before).Equal("4b2626259b5a97b6b4eab5e6cca66adb986b672b")
-			g.Assert(hook.Compare).Equal("http://forgejo.golang.org/gordon/hello-world/compare/4b2626259b5a97b6b4eab5e6cca66adb986b672b...ef98532add3b2feb7a137426bba1248724367df5")
-			g.Assert(hook.Repo.Name).Equal("hello-world")
-			g.Assert(hook.Repo.HTMLURL).Equal("http://forgejo.golang.org/gordon/hello-world")
-			g.Assert(hook.Repo.Owner.UserName).Equal("gordon")
-			g.Assert(hook.Repo.FullName).Equal("gordon/hello-world")
-			g.Assert(hook.Repo.Owner.Email).Equal("gordon@golang.org")
-			g.Assert(hook.Repo.Private).Equal(true)
-			g.Assert(hook.Pusher.Email).Equal("gordon@golang.org")
-			g.Assert(hook.Pusher.UserName).Equal("gordon")
-			g.Assert(hook.Sender.UserName).Equal("gordon")
-			g.Assert(hook.Sender.AvatarURL).Equal("http://forgejo.golang.org///1.gravatar.com/avatar/8c58a0be77ee441bb8f8595b7f1b4e87")
-		})
-
-		g.It("Should parse tag hook payload", func() {
-			buf := bytes.NewBufferString(fixtures.HookTag)
-			hook, err := parsePush(buf)
-			g.Assert(err).IsNil()
-			g.Assert(hook.Ref).Equal("v1.0.0")
-			g.Assert(hook.Sha).Equal("ef98532add3b2feb7a137426bba1248724367df5")
-			g.Assert(hook.Repo.Name).Equal("hello-world")
-			g.Assert(hook.Repo.HTMLURL).Equal("http://forgejo.golang.org/gordon/hello-world")
-			g.Assert(hook.Repo.FullName).Equal("gordon/hello-world")
-			g.Assert(hook.Repo.Owner.Email).Equal("gordon@golang.org")
-			g.Assert(hook.Repo.Owner.UserName).Equal("gordon")
-			g.Assert(hook.Repo.Private).Equal(true)
-			g.Assert(hook.Sender.UserName).Equal("gordon")
-			g.Assert(hook.Sender.AvatarURL).Equal("https://secure.gravatar.com/avatar/8c58a0be77ee441bb8f8595b7f1b4e87")
-		})
-
-		g.It("Should parse pull_request hook payload", func() {
-			buf := bytes.NewBufferString(fixtures.HookPullRequest)
-			hook, err := parsePullRequest(buf)
-			g.Assert(err).IsNil()
-			g.Assert(hook.Action).Equal("opened")
-			g.Assert(hook.Number).Equal(int64(1))
-
-			g.Assert(hook.Repo.Name).Equal("hello-world")
-			g.Assert(hook.Repo.HTMLURL).Equal("http://forgejo.golang.org/gordon/hello-world")
-			g.Assert(hook.Repo.FullName).Equal("gordon/hello-world")
-			g.Assert(hook.Repo.Owner.Email).Equal("gordon@golang.org")
-			g.Assert(hook.Repo.Owner.UserName).Equal("gordon")
-			g.Assert(hook.Repo.Private).Equal(true)
-			g.Assert(hook.Sender.UserName).Equal("gordon")
-			g.Assert(hook.Sender.AvatarURL).Equal("https://secure.gravatar.com/avatar/8c58a0be77ee441bb8f8595b7f1b4e87")
-
-			g.Assert(hook.PullRequest.Title).Equal("Update the README with new information")
-			g.Assert(hook.PullRequest.Body).Equal("please merge")
-			g.Assert(hook.PullRequest.State).Equal(forgejo.StateOpen)
-			g.Assert(hook.PullRequest.Poster.UserName).Equal("gordon")
-			g.Assert(hook.PullRequest.Base.Name).Equal("main")
-			g.Assert(hook.PullRequest.Base.Ref).Equal("main")
-			g.Assert(hook.PullRequest.Head.Name).Equal("feature/changes")
-			g.Assert(hook.PullRequest.Head.Ref).Equal("feature/changes")
-		})
-
-		g.It("Should return a Pipeline struct from a push hook", func() {
-			buf := bytes.NewBufferString(fixtures.HookPush)
-			hook, _ := parsePush(buf)
-			pipeline := pipelineFromPush(hook)
-			g.Assert(pipeline.Event).Equal(model.EventPush)
-			g.Assert(pipeline.Commit).Equal(hook.After)
-			g.Assert(pipeline.Ref).Equal(hook.Ref)
-			g.Assert(pipeline.ForgeURL).Equal(hook.Commits[0].URL)
-			g.Assert(pipeline.Branch).Equal("main")
-			g.Assert(pipeline.Message).Equal(hook.Commits[0].Message)
-			g.Assert(pipeline.Avatar).Equal("http://1.gravatar.com/avatar/8c58a0be77ee441bb8f8595b7f1b4e87")
-			g.Assert(pipeline.Author).Equal(hook.Sender.UserName)
-			g.Assert(utils.EqualSliceValues(pipeline.ChangedFiles, []string{"CHANGELOG.md", "app/controller/application.rb"})).IsTrue()
-		})
-
-		g.It("Should return a Repo struct from a push hook", func() {
-			buf := bytes.NewBufferString(fixtures.HookPush)
-			hook, _ := parsePush(buf)
-			repo := toRepo(hook.Repo)
-			g.Assert(repo.Name).Equal(hook.Repo.Name)
-			g.Assert(repo.Owner).Equal(hook.Repo.Owner.UserName)
-			g.Assert(repo.FullName).Equal("gordon/hello-world")
-			g.Assert(repo.ForgeURL).Equal(hook.Repo.HTMLURL)
-		})
-
-		g.It("Should return a Pipeline struct from a tag hook", func() {
-			buf := bytes.NewBufferString(fixtures.HookTag)
-			hook, _ := parsePush(buf)
-			pipeline := pipelineFromTag(hook)
-			g.Assert(pipeline.Event).Equal(model.EventTag)
-			g.Assert(pipeline.Commit).Equal(hook.Sha)
-			g.Assert(pipeline.Ref).Equal("refs/tags/v1.0.0")
-			g.Assert(pipeline.Branch).Equal("")
-			g.Assert(pipeline.ForgeURL).Equal("http://forgejo.golang.org/gordon/hello-world/src/tag/v1.0.0")
-			g.Assert(pipeline.Message).Equal("created tag v1.0.0")
-		})
-
-		g.It("Should return a Pipeline struct from a pull_request hook", func() {
-			buf := bytes.NewBufferString(fixtures.HookPullRequest)
-			hook, _ := parsePullRequest(buf)
-			pipeline := pipelineFromPullRequest(hook)
-			g.Assert(pipeline.Event).Equal(model.EventPull)
-			g.Assert(pipeline.Commit).Equal(hook.PullRequest.Head.Sha)
-			g.Assert(pipeline.Ref).Equal("refs/pull/1/head")
-			g.Assert(pipeline.ForgeURL).Equal("http://forgejo.golang.org/gordon/hello-world/pull/1")
-			g.Assert(pipeline.Branch).Equal("main")
-			g.Assert(pipeline.Refspec).Equal("feature/changes:main")
-			g.Assert(pipeline.Message).Equal(hook.PullRequest.Title)
-			g.Assert(pipeline.Avatar).Equal("http://1.gravatar.com/avatar/8c58a0be77ee441bb8f8595b7f1b4e87")
-			g.Assert(pipeline.Author).Equal(hook.PullRequest.Poster.UserName)
-		})
-
-		g.It("Should return a Repo struct from a pull_request hook", func() {
-			buf := bytes.NewBufferString(fixtures.HookPullRequest)
-			hook, _ := parsePullRequest(buf)
-			repo := toRepo(hook.Repo)
-			g.Assert(repo.Name).Equal(hook.Repo.Name)
-			g.Assert(repo.Owner).Equal(hook.Repo.Owner.UserName)
-			g.Assert(repo.FullName).Equal("gordon/hello-world")
-			g.Assert(repo.ForgeURL).Equal(hook.Repo.HTMLURL)
-		})
-
-		g.It("Should return a Perm struct from a Forgejo Perm", func() {
-			perms := []forgejo.Permission{
-				{
-					Admin: true,
-					Push:  true,
-					Pull:  true,
-				},
-				{
-					Admin: true,
-					Push:  true,
-					Pull:  false,
-				},
-				{
-					Admin: true,
-					Push:  false,
-					Pull:  false,
-				},
-			}
-			for _, from := range perms {
-				perm := toPerm(&from)
-				g.Assert(perm.Pull).Equal(from.Pull)
-				g.Assert(perm.Push).Equal(from.Push)
-				g.Assert(perm.Admin).Equal(from.Admin)
-			}
-		})
-
-		g.It("Should return a Team struct from a Forgejo Org", func() {
-			from := &forgejo.Organization{
-				UserName:  "woodpecker",
-				AvatarURL: "/avatars/1",
-			}
-
-			to := toTeam(from, "http://localhost:80")
-			g.Assert(to.Login).Equal(from.UserName)
-			g.Assert(to.Avatar).Equal("http://localhost:80/avatars/1")
-		})
-
-		g.It("Should return a Repo struct from a Forgejo Repo", func() {
-			from := forgejo.Repository{
-				FullName: "gophers/hello-world",
-				Owner: &forgejo.User{
-					UserName:  "gordon",
-					AvatarURL: "http://1.gravatar.com/avatar/8c58a0be77ee441bb8f8595b7f1b4e87",
-				},
-				CloneURL:      "http://forgejo.golang.org/gophers/hello-world.git",
-				HTMLURL:       "http://forgejo.golang.org/gophers/hello-world",
-				Private:       true,
-				DefaultBranch: "main",
-				Permissions:   &forgejo.Permission{Admin: true},
-			}
-			repo := toRepo(&from)
-			g.Assert(repo.FullName).Equal(from.FullName)
-			g.Assert(repo.Owner).Equal(from.Owner.UserName)
-			g.Assert(repo.Name).Equal("hello-world")
-			g.Assert(repo.Branch).Equal("main")
-			g.Assert(repo.ForgeURL).Equal(from.HTMLURL)
-			g.Assert(repo.Clone).Equal(from.CloneURL)
-			g.Assert(repo.Avatar).Equal(from.Owner.AvatarURL)
-			g.Assert(repo.IsSCMPrivate).Equal(from.Private)
-			g.Assert(repo.Perm.Admin).IsTrue()
-		})
-
-		g.It("Should correct a malformed avatar url", func() {
-			urls := []struct {
-				Before string
-				After  string
-			}{
-				{
-					"http://forgejo.golang.org///1.gravatar.com/avatar/8c58a0be77ee441bb8f8595b7f1b4e87",
-					"//1.gravatar.com/avatar/8c58a0be77ee441bb8f8595b7f1b4e87",
-				},
-				{
-					"//1.gravatar.com/avatar/8c58a0be77ee441bb8f8595b7f1b4e87",
-					"//1.gravatar.com/avatar/8c58a0be77ee441bb8f8595b7f1b4e87",
-				},
-				{
-					"http://forgejo.golang.org/avatars/1",
-					"http://forgejo.golang.org/avatars/1",
-				},
-				{
-					"http://forgejo.golang.org//avatars/1",
-					"http://forgejo.golang.org/avatars/1",
-				},
-			}
-
-			for _, url := range urls {
-				got := fixMalformedAvatar(url.Before)
-				g.Assert(got).Equal(url.After)
-			}
-		})
-
-		g.It("Should expand the avatar url", func() {
-			urls := []struct {
-				Before string
-				After  string
-			}{
-				{
-					"/avatars/1",
-					"http://forgejo.io/avatars/1",
-				},
-				{
-					"//1.gravatar.com/avatar/8c58a0be77ee441bb8f8595b7f1b4e87",
-					"http://1.gravatar.com/avatar/8c58a0be77ee441bb8f8595b7f1b4e87",
-				},
-				{
-					"/forgejo/avatars/2",
-					"http://forgejo.io/forgejo/avatars/2",
-				},
-			}
-
-			repo := "http://forgejo.io/foo/bar"
-			for _, url := range urls {
-				got := expandAvatar(repo, url.Before)
-				g.Assert(got).Equal(url.After)
-			}
-		})
+func Test_parsePush(t *testing.T) {
+	t.Run("Should parse push hook payload", func(t *testing.T) {
+		buf := bytes.NewBufferString(fixtures.HookPush)
+		hook, err := parsePush(buf)
+		assert.NoError(t, err)
+		assert.Equal(t, "refs/heads/main", hook.Ref)
+		assert.Equal(t, "ef98532add3b2feb7a137426bba1248724367df5", hook.After)
+		assert.Equal(t, "4b2626259b5a97b6b4eab5e6cca66adb986b672b", hook.Before)
+		assert.Equal(t, "http://forgejo.golang.org/gordon/hello-world/compare/4b2626259b5a97b6b4eab5e6cca66adb986b672b...ef98532add3b2feb7a137426bba1248724367df5", hook.Compare)
+		assert.Equal(t, "hello-world", hook.Repo.Name)
+		assert.Equal(t, "http://forgejo.golang.org/gordon/hello-world", hook.Repo.HTMLURL)
+		assert.Equal(t, "gordon", hook.Repo.Owner.UserName)
+		assert.Equal(t, "gordon/hello-world", hook.Repo.FullName)
+		assert.Equal(t, "gordon@golang.org", hook.Repo.Owner.Email)
+		assert.True(t, hook.Repo.Private)
+		assert.Equal(t, "gordon@golang.org", hook.Pusher.Email)
+		assert.Equal(t, "gordon", hook.Pusher.UserName)
+		assert.Equal(t, "gordon", hook.Sender.UserName)
+		assert.Equal(t, "http://forgejo.golang.org///1.gravatar.com/avatar/8c58a0be77ee441bb8f8595b7f1b4e87", hook.Sender.AvatarURL)
 	})
+	t.Run("Should parse tag hook payload", func(t *testing.T) {
+		buf := bytes.NewBufferString(fixtures.HookTag)
+		hook, err := parsePush(buf)
+		assert.NoError(t, err)
+		assert.Equal(t, "v1.0.0", hook.Ref)
+		assert.Equal(t, "ef98532add3b2feb7a137426bba1248724367df5", hook.Sha)
+		assert.Equal(t, "hello-world", hook.Repo.Name)
+		assert.Equal(t, "http://forgejo.golang.org/gordon/hello-world", hook.Repo.HTMLURL)
+		assert.Equal(t, "gordon/hello-world", hook.Repo.FullName)
+		assert.Equal(t, "gordon@golang.org", hook.Repo.Owner.Email)
+		assert.Equal(t, "gordon", hook.Repo.Owner.UserName)
+		assert.True(t, hook.Repo.Private)
+		assert.Equal(t, "gordon", hook.Sender.UserName)
+		assert.Equal(t, "https://secure.gravatar.com/avatar/8c58a0be77ee441bb8f8595b7f1b4e87", hook.Sender.AvatarURL)
+	})
+
+	t.Run("Should return a Pipeline struct from a push hook", func(t *testing.T) {
+		buf := bytes.NewBufferString(fixtures.HookPush)
+		hook, _ := parsePush(buf)
+		pipeline := pipelineFromPush(hook)
+		assert.Equal(t, model.EventPush, pipeline.Event)
+		assert.Equal(t, hook.After, pipeline.Commit)
+		assert.Equal(t, hook.Ref, pipeline.Ref)
+		assert.Equal(t, hook.Commits[0].URL, pipeline.ForgeURL)
+		assert.Equal(t, "main", pipeline.Branch)
+		assert.Equal(t, hook.Commits[0].Message, pipeline.Message)
+		assert.Equal(t, "http://1.gravatar.com/avatar/8c58a0be77ee441bb8f8595b7f1b4e87", pipeline.Avatar)
+		assert.Equal(t, hook.Sender.UserName, pipeline.Author)
+		assert.Equal(t, []string{"CHANGELOG.md", "app/controller/application.rb"}, pipeline.ChangedFiles)
+	})
+
+	t.Run("Should return a Repo struct from a push hook", func(t *testing.T) {
+		buf := bytes.NewBufferString(fixtures.HookPush)
+		hook, _ := parsePush(buf)
+		repo := toRepo(hook.Repo)
+		assert.Equal(t, hook.Repo.Name, repo.Name)
+		assert.Equal(t, hook.Repo.Owner.UserName, repo.Owner)
+		assert.Equal(t, "gordon/hello-world", repo.FullName)
+		assert.Equal(t, hook.Repo.HTMLURL, repo.ForgeURL)
+	})
+
+	t.Run("Should return a Pipeline struct from a tag hook", func(t *testing.T) {
+		buf := bytes.NewBufferString(fixtures.HookTag)
+		hook, _ := parsePush(buf)
+		pipeline := pipelineFromTag(hook)
+		assert.Equal(t, model.EventTag, pipeline.Event)
+		assert.Equal(t, hook.Sha, pipeline.Commit)
+		assert.Equal(t, "refs/tags/v1.0.0", pipeline.Ref)
+		assert.Empty(t, pipeline.Branch)
+		assert.Equal(t, "http://forgejo.golang.org/gordon/hello-world/src/tag/v1.0.0", pipeline.ForgeURL)
+		assert.Equal(t, "created tag v1.0.0", pipeline.Message)
+	})
+}
+
+func Test_parsePullRequest(t *testing.T) {
+	t.Run("Should parse pull_request hook payload", func(t *testing.T) {
+		buf := bytes.NewBufferString(fixtures.HookPullRequest)
+		hook, err := parsePullRequest(buf)
+		assert.NoError(t, err)
+		assert.Equal(t, "opened", hook.Action)
+		assert.Equal(t, int64(1), hook.Number)
+
+		assert.Equal(t, "hello-world", hook.Repo.Name)
+		assert.Equal(t, "http://forgejo.golang.org/gordon/hello-world", hook.Repo.HTMLURL)
+		assert.Equal(t, "gordon/hello-world", hook.Repo.FullName)
+		assert.Equal(t, "gordon@golang.org", hook.Repo.Owner.Email)
+		assert.Equal(t, "gordon", hook.Repo.Owner.UserName)
+		assert.True(t, hook.Repo.Private)
+		assert.Equal(t, "gordon", hook.Sender.UserName)
+		assert.Equal(t, "https://secure.gravatar.com/avatar/8c58a0be77ee441bb8f8595b7f1b4e87", hook.Sender.AvatarURL)
+
+		assert.Equal(t, "Update the README with new information", hook.PullRequest.Title)
+		assert.Equal(t, "please merge", hook.PullRequest.Body)
+		assert.Equal(t, forgejo.StateOpen, hook.PullRequest.State)
+		assert.Equal(t, "gordon", hook.PullRequest.Poster.UserName)
+		assert.Equal(t, "main", hook.PullRequest.Base.Name)
+		assert.Equal(t, "main", hook.PullRequest.Base.Ref)
+		assert.Equal(t, "feature/changes", hook.PullRequest.Head.Name)
+		assert.Equal(t, "feature/changes", hook.PullRequest.Head.Ref)
+	})
+
+	t.Run("Should return a Pipeline struct from a pull_request hook", func(t *testing.T) {
+		buf := bytes.NewBufferString(fixtures.HookPullRequest)
+		hook, _ := parsePullRequest(buf)
+		pipeline := pipelineFromPullRequest(hook)
+		assert.Equal(t, model.EventPull, pipeline.Event)
+		assert.Equal(t, hook.PullRequest.Head.Sha, pipeline.Commit)
+		assert.Equal(t, "refs/pull/1/head", pipeline.Ref)
+		assert.Equal(t, "http://forgejo.golang.org/gordon/hello-world/pull/1", pipeline.ForgeURL)
+		assert.Equal(t, "main", pipeline.Branch)
+		assert.Equal(t, "feature/changes:main", pipeline.Refspec)
+		assert.Equal(t, hook.PullRequest.Title, pipeline.Message)
+		assert.Equal(t, "http://1.gravatar.com/avatar/8c58a0be77ee441bb8f8595b7f1b4e87", pipeline.Avatar)
+		assert.Equal(t, hook.PullRequest.Poster.UserName, pipeline.Author)
+	})
+
+	t.Run("Should return a Repo struct from a pull_request hook", func(t *testing.T) {
+		buf := bytes.NewBufferString(fixtures.HookPullRequest)
+		hook, _ := parsePullRequest(buf)
+		repo := toRepo(hook.Repo)
+		assert.Equal(t, hook.Repo.Name, repo.Name)
+		assert.Equal(t, hook.Repo.Owner.UserName, repo.Owner)
+		assert.Equal(t, "gordon/hello-world", repo.FullName)
+		assert.Equal(t, hook.Repo.HTMLURL, repo.ForgeURL)
+	})
+}
+
+func Test_toPerm(t *testing.T) {
+	perms := []forgejo.Permission{
+		{
+			Admin: true,
+			Push:  true,
+			Pull:  true,
+		},
+		{
+			Admin: true,
+			Push:  true,
+			Pull:  false,
+		},
+		{
+			Admin: true,
+			Push:  false,
+			Pull:  false,
+		},
+	}
+	for _, from := range perms {
+		perm := toPerm(&from)
+		assert.Equal(t, from.Pull, perm.Pull)
+		assert.Equal(t, from.Push, perm.Push)
+		assert.Equal(t, from.Admin, perm.Admin)
+	}
+}
+
+func Test_toTeam(t *testing.T) {
+	from := &forgejo.Organization{
+		UserName:  "woodpecker",
+		AvatarURL: "/avatars/1",
+	}
+
+	to := toTeam(from, "http://localhost:80")
+	assert.Equal(t, from.UserName, to.Login)
+	assert.Equal(t, "http://localhost:80/avatars/1", to.Avatar)
+}
+
+func Test_toRepo(t *testing.T) {
+	from := forgejo.Repository{
+		FullName: "gophers/hello-world",
+		Owner: &forgejo.User{
+			UserName:  "gordon",
+			AvatarURL: "http://1.gravatar.com/avatar/8c58a0be77ee441bb8f8595b7f1b4e87",
+		},
+		CloneURL:      "http://forgejo.golang.org/gophers/hello-world.git",
+		HTMLURL:       "http://forgejo.golang.org/gophers/hello-world",
+		Private:       true,
+		DefaultBranch: "main",
+		Permissions:   &forgejo.Permission{Admin: true},
+	}
+	repo := toRepo(&from)
+	assert.Equal(t, from.FullName, repo.FullName)
+	assert.Equal(t, from.Owner.UserName, repo.Owner)
+	assert.Equal(t, "hello-world", repo.Name)
+	assert.Equal(t, "main", repo.Branch)
+	assert.Equal(t, from.HTMLURL, repo.ForgeURL)
+	assert.Equal(t, from.CloneURL, repo.Clone)
+	assert.Equal(t, from.Owner.AvatarURL, repo.Avatar)
+	assert.Equal(t, from.Private, repo.IsSCMPrivate)
+	assert.True(t, repo.Perm.Admin)
+}
+
+func Test_fixMalformedAvatar(t *testing.T) {
+	urls := []struct {
+		Before string
+		After  string
+	}{
+		{
+			"http://forgejo.golang.org///1.gravatar.com/avatar/8c58a0be77ee441bb8f8595b7f1b4e87",
+			"//1.gravatar.com/avatar/8c58a0be77ee441bb8f8595b7f1b4e87",
+		},
+		{
+			"//1.gravatar.com/avatar/8c58a0be77ee441bb8f8595b7f1b4e87",
+			"//1.gravatar.com/avatar/8c58a0be77ee441bb8f8595b7f1b4e87",
+		},
+		{
+			"http://forgejo.golang.org/avatars/1",
+			"http://forgejo.golang.org/avatars/1",
+		},
+		{
+			"http://forgejo.golang.org//avatars/1",
+			"http://forgejo.golang.org/avatars/1",
+		},
+	}
+
+	for _, url := range urls {
+		got := fixMalformedAvatar(url.Before)
+		assert.Equal(t, url.After, got)
+	}
+}
+
+func Test_expandAvatar(t *testing.T) {
+	urls := []struct {
+		Before string
+		After  string
+	}{
+		{
+			"/avatars/1",
+			"http://forgejo.io/avatars/1",
+		},
+		{
+			"//1.gravatar.com/avatar/8c58a0be77ee441bb8f8595b7f1b4e87",
+			"http://1.gravatar.com/avatar/8c58a0be77ee441bb8f8595b7f1b4e87",
+		},
+		{
+			"/forgejo/avatars/2",
+			"http://forgejo.io/forgejo/avatars/2",
+		},
+	}
+
+	repo := "http://forgejo.io/foo/bar"
+	for _, url := range urls {
+		got := expandAvatar(repo, url.Before)
+		assert.Equal(t, url.After, got)
+	}
 }
