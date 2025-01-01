@@ -52,6 +52,7 @@ var migrationTasks = []*xormigrate.Migration{
 	&renameTokenFields,
 	&setNewDefaultsForRequireApproval,
 	&removeRepoScm,
+	&addRepoScm,
 }
 
 var allBeans = []any{
