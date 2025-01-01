@@ -14,30 +14,30 @@
       <Button v-else start-icon="plus" :text="$t('repo.settings.crons.add')" @click="selectedCron = {}" />
     </template>
 
-    <div v-if="!selectedCron" class="space-y-4 text-wp-text-100">
+    <div v-if="!selectedCron" class="text-wp-text-100 space-y-4">
       <ListItem
         v-for="cron in crons"
         :key="cron.id"
-        class="items-center !bg-wp-background-200 !dark:bg-wp-background-100"
+        class="!bg-wp-background-200 !dark:bg-wp-background-100 items-center"
       >
-        <span class="grid grid-cols-3 w-full">
+        <span class="grid w-full grid-cols-3">
           <span>{{ cron.name }}</span>
-          <span v-if="cron.next_exec && cron.next_exec > 0" class="col-span-2 <md:hidden">
+          <span v-if="cron.next_exec && cron.next_exec > 0" class="<md:hidden col-span-2">
             <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
             {{ $t('repo.settings.crons.next_exec') }}: {{ date.toLocaleString(new Date(cron.next_exec * 1000)) }}
           </span>
-          <span v-else class="col-span-2 <md:hidden">{{ $t('repo.settings.crons.not_executed_yet') }}</span>
+          <span v-else class="<md:hidden col-span-2">{{ $t('repo.settings.crons.not_executed_yet') }}</span>
         </span>
         <IconButton
           icon="play-outline"
-          class="ml-auto w-8 h-8"
+          class="ml-auto h-8 w-8"
           :title="$t('repo.settings.crons.run')"
           @click="runCron(cron)"
         />
-        <IconButton icon="edit" class="w-8 h-8" :title="$t('repo.settings.crons.edit')" @click="selectedCron = cron" />
+        <IconButton icon="edit" class="h-8 w-8" :title="$t('repo.settings.crons.edit')" @click="selectedCron = cron" />
         <IconButton
           icon="trash"
-          class="w-8 h-8 hover:text-wp-error-100"
+          class="hover:text-wp-error-100 h-8 w-8"
           :is-loading="isDeleting"
           :title="$t('repo.settings.crons.delete')"
           @click="deleteCron(cron)"

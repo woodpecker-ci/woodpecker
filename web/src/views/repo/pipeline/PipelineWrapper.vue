@@ -18,13 +18,13 @@
     </template>
 
     <template #headerActions>
-      <div class="flex md:flex-row flex-col md:justify-between md:items-center gap-2 min-w-0">
-        <div class="flex content-start gap-2 min-w-0">
+      <div class="flex min-w-0 flex-col gap-2 md:flex-row md:items-center md:justify-between">
+        <div class="flex min-w-0 content-start gap-2">
           <PipelineStatusIcon :status="pipeline.status" class="flex flex-shrink-0" />
           <span class="flex-shrink-0 text-center">{{ $t('repo.pipeline.pipeline', { pipelineId }) }}</span>
           <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
-          <span class="md:inline-block hidden">-</span>
-          <span class="min-w-0 whitespace-nowrap overflow-ellipsis overflow-hidden" :title="message">{{
+          <span class="hidden md:inline-block">-</span>
+          <span class="min-w-0 overflow-hidden overflow-ellipsis whitespace-nowrap" :title="message">{{
             shortMessage
           }}</span>
         </div>

@@ -1,16 +1,16 @@
 <template>
-  <div v-for="option in options" :key="option.value" class="flex items-center mb-2">
+  <div v-for="option in options" :key="option.value" class="mb-2 flex items-center">
     <input
       :id="`radio-${id}-${option.value}`"
       type="radio"
-      class="relative flex-shrink-0 border-wp-control-neutral-200 checked:border-wp-control-ok-200 focus-visible:border-wp-control-neutral-300 checked:focus-visible:border-wp-control-ok-300 bg-wp-control-neutral-100 checked:bg-wp-control-ok-200 border rounded-full w-5 h-5 cursor-pointer radio"
+      class="border-wp-control-neutral-200 checked:border-wp-control-ok-200 focus-visible:border-wp-control-neutral-300 checked:focus-visible:border-wp-control-ok-300 bg-wp-control-neutral-100 checked:bg-wp-control-ok-200 radio relative h-5 w-5 flex-shrink-0 cursor-pointer rounded-full border"
       :value="option.value"
       :checked="innerValue?.includes(option.value)"
       @click="innerValue = option.value"
     />
-    <div class="flex flex-col ml-4">
+    <div class="ml-4 flex flex-col">
       <label class="text-wp-text-100 cursor-pointer" :for="`radio-${id}-${option.value}`">{{ option.text }}</label>
-      <span v-if="option.description" class="text-sm text-wp-text-alt-100">{{ option.description }}</span>
+      <span v-if="option.description" class="text-wp-text-alt-100 text-sm">{{ option.description }}</span>
     </div>
   </div>
 </template>
