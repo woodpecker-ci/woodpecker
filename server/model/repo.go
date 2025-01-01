@@ -57,6 +57,7 @@ type Repo struct {
 	Clone                        string               `json:"clone_url,omitempty"             xorm:"varchar(1000) 'clone'"`
 	CloneSSH                     string               `json:"clone_url_ssh"                   xorm:"varchar(1000) 'clone_ssh'"`
 	Branch                       string               `json:"default_branch,omitempty"        xorm:"varchar(500) 'branch'"`
+	SCMKind                      SCMKind              `json:"scm,omitempty"                   xorm:"varchar(50) 'scm'"`
 	PREnabled                    bool                 `json:"pr_enabled"                      xorm:"DEFAULT TRUE 'pr_enabled'"`
 	Timeout                      int64                `json:"timeout,omitempty"               xorm:"timeout"`
 	Visibility                   RepoVisibility       `json:"visibility"                      xorm:"varchar(10) 'visibility'"`
@@ -107,6 +108,7 @@ func (r *Repo) Update(from *Repo) {
 	r.FullName = from.FullName
 	r.Avatar = from.Avatar
 	r.ForgeURL = from.ForgeURL
+	r.SCMKind = from.SCMKind
 	r.PREnabled = from.PREnabled
 	if len(from.Clone) > 0 {
 		r.Clone = from.Clone

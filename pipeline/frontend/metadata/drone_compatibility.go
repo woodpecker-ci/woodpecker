@@ -45,6 +45,7 @@ func SetDroneEnviron(env map[string]string) {
 	copyEnv("CI_COMMIT_AUTHOR_AVATAR", "DRONE_COMMIT_AUTHOR_AVATAR", env)
 	// repo
 	copyEnv("CI_REPO", "DRONE_REPO", env)
+	copyEnv("CI_REPO_SCM", "DRONE_REPO_SCM", env)
 	copyEnv("CI_REPO_OWNER", "DRONE_REPO_OWNER", env)
 	copyEnv("CI_REPO_NAME", "DRONE_REPO_NAME", env)
 	copyEnv("CI_REPO_URL", "DRONE_REPO_LINK", env)
@@ -58,7 +59,6 @@ func SetDroneEnviron(env map[string]string) {
 	copyEnv("CI_STEP_NUMBER", "DRONE_STEP_NUMBER", env)
 
 	env["DRONE_BUILD_STATUS"] = "success"
-	env["DRONE_REPO_SCM"] = "git"
 
 	// some quirks
 
