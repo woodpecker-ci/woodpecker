@@ -22,6 +22,7 @@
     "backports",
     "binutils",
     "bitbucketdatacenter",
+    "Bluesky",
     "Boguslawski",
     "bradrydzewski",
     "BUILDPLATFORM",
@@ -275,5 +276,7 @@
     // ignore inline svg in css
     "\\s*url\\(\"data:image/svg\\+xml.*"
   ],
-  "enableFiletypes": ["dockercompose"]
+  "enableFiletypes": [
+    "dockercompose"
+  ]
 }
