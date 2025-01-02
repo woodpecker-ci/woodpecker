@@ -2,7 +2,7 @@
   <Popup :open="open" @close="$emit('close')">
     <Panel v-if="!loading">
       <form @submit.prevent="triggerDeployPipeline">
-        <span class="text-xl text-wp-text-100">{{
+        <span class="text-wp-text-100 text-xl">{{
           $t('repo.deploy_pipeline.title', { pipelineId: pipelineNumber })
         }}</span>
         <InputField v-slot="{ id }" :label="$t('repo.deploy_pipeline.enter_target')">
@@ -12,7 +12,7 @@
           <TextField :id="id" v-model="payload.task" />
         </InputField>
         <InputField v-slot="{ id }" :label="$t('repo.deploy_pipeline.variables.title')">
-          <span class="text-sm text-wp-text-alt-100 mb-2">{{ $t('repo.deploy_pipeline.variables.desc') }}</span>
+          <span class="text-wp-text-alt-100 mb-2 text-sm">{{ $t('repo.deploy_pipeline.variables.desc') }}</span>
           <KeyValueEditor
             :id="id"
             v-model="payload.variables"

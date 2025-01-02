@@ -158,6 +158,7 @@ func (e *docker) SetupWorkflow(ctx context.Context, conf *backend.Config, taskUU
 	if e.info.OSType == "windows" {
 		networkDriver = networkDriverNAT
 	}
+
 	for _, n := range conf.Networks {
 		_, err := e.client.NetworkCreate(ctx, n.Name, network.CreateOptions{
 			Driver:     networkDriver,
@@ -167,6 +168,7 @@ func (e *docker) SetupWorkflow(ctx context.Context, conf *backend.Config, taskUU
 			return err
 		}
 	}
+
 	return nil
 }
 
@@ -330,16 +332,19 @@ func (e *docker) DestroyWorkflow(ctx context.Context, conf *backend.Config, task
 			}
 		}
 	}
+
 	for _, v := range conf.Volumes {
 		if err := e.client.VolumeRemove(ctx, v.Name, true); err != nil {
 			log.Error().Err(err).Msgf("could not remove volume '%s'", v.Name)
 		}
 	}
+
 	for _, n := range conf.Networks {
 		if err := e.client.NetworkRemove(ctx, n.Name); err != nil {
 			log.Error().Err(err).Msgf("could not remove network '%s'", n.Name)
 		}
 	}
+
 	return nil
 }
 
