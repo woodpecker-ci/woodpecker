@@ -167,8 +167,7 @@ func convertPullHook(from *internal.PullRequestHook) *model.Pipeline {
 	pipeline := &model.Pipeline{
 		Event: event,
 		Commit: &model.Commit{
-			SHA:      from.PullRequest.Source.Commit.Hash,
-			ForgeURL: from.PullRequest.Source.Commit.Links.HTML.Href,
+			SHA: from.PullRequest.Source.Commit.Hash,
 		},
 		Ref: fmt.Sprintf("refs/pull-requests/%d/from", from.PullRequest.ID),
 		Refspec: fmt.Sprintf("%s:%s",
@@ -187,8 +186,7 @@ func convertPullHook(from *internal.PullRequestHook) *model.Pipeline {
 
 	if from.PullRequest.State == stateClosed {
 		pipeline.Commit = &model.Commit{
-			SHA:      from.PullRequest.MergeCommit.Hash,
-			ForgeURL: from.PullRequest.Source.Commit.Links.HTML.Href,
+			SHA: from.PullRequest.MergeCommit.Hash,
 		}
 		pipeline.Ref = fmt.Sprintf("refs/heads/%s", from.PullRequest.Dest.Branch.Name)
 		pipeline.Branch = from.PullRequest.Dest.Branch.Name
@@ -205,6 +203,7 @@ func convertPushHook(hook *internal.PushHook, change *internal.Change) *model.Pi
 			SHA:      change.New.Target.Hash,
 			ForgeURL: change.New.Target.Links.HTML.Href,
 			Message:  change.New.Target.Message,
+			Author:   convertCommitAuthor(change.New.Target.Author.Raw),
 		},
 		ForgeURL: change.New.Target.Links.HTML.Href,
 		Branch:   change.New.Name,
@@ -218,22 +217,22 @@ func convertPushHook(hook *internal.PushHook, change *internal.Change) *model.Pi
 		pipeline.Event = model.EventPush
 		pipeline.Ref = fmt.Sprintf("refs/heads/%s", change.New.Name)
 	}
-	if len(change.New.Target.Author.Raw) != 0 {
-		pipeline.Author.Email = extractEmail(change.New.Target.Author.Raw)
-	}
 	return pipeline
 }
 
 // regex for git author fields (r.g. "name <name@mail.tld>").
-var reGitMail = regexp.MustCompile("<(.*)>")
+var reGitMail = regexp.MustCompile("(.*) <(.*)>")
 
 // extracts the email from a git commit author string.
-func extractEmail(gitAuthor string) (author string) {
+func convertCommitAuthor(gitAuthor string) model.Author {
 	matches := reGitMail.FindAllStringSubmatch(gitAuthor, -1)
 	if len(matches) == 1 {
-		author = matches[0][1]
+		return model.Author{
+			Author: matches[0][1],
+			Email:  matches[0][2],
+		}
 	}
-	return
+	return model.Author{}
 }
 
 func convertAuthor(a internal.Account) model.Author {

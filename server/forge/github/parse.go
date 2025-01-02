@@ -87,9 +87,10 @@ func parsePushHook(hook *github.PushEvent) (*model.Repo, *model.Pipeline) {
 	pipeline := &model.Pipeline{
 		Event: model.EventPush,
 		Commit: &model.Commit{
-			SHA:     hook.GetHeadCommit().GetID(),
-			Author:  convertCommitAuthor(hook.GetHeadCommit().GetAuthor()),
-			Message: hook.GetHeadCommit().GetMessage(),
+			SHA:      hook.GetHeadCommit().GetID(),
+			Author:   convertCommitAuthor(hook.GetHeadCommit().GetAuthor()),
+			Message:  hook.GetHeadCommit().GetMessage(),
+			ForgeURL: hook.GetHeadCommit().GetURL(),
 		},
 		Ref:          hook.GetRef(),
 		ForgeURL:     hook.GetHeadCommit().GetURL(),

@@ -126,6 +126,7 @@ func convertMergeRequestHook(hook *gitlab.MergeEvent, req *http.Request) (int, *
 			Author: lastCommit.Author.Name,
 			Email:  lastCommit.Author.Email,
 		},
+		ForgeURL: lastCommit.URL,
 	}
 
 	pipeline.Ref = fmt.Sprintf(mergeRefs, obj.IID)
@@ -188,6 +189,7 @@ func convertPushHook(hook *gitlab.PushEvent) (*model.Repo, *model.Pipeline, erro
 		if hook.After == cm.ID {
 			pipeline.Commit.Author = model.Author{Author: cm.Author.Name, Email: cm.Author.Email}
 			pipeline.Commit.Message = cm.Message
+			pipeline.Commit.ForgeURL = cm.URL
 		}
 
 		files = append(files, cm.Added...)
@@ -237,10 +239,12 @@ func convertTagHook(hook *gitlab.TagEvent) (*model.Repo, *model.Pipeline, error)
 		Avatar: hook.UserAvatar,
 	}
 
+	// TODO does hook.Commits always contain hook.After?
 	for _, cm := range hook.Commits {
 		if hook.After == cm.ID {
 			pipeline.Commit.Author = model.Author{Author: cm.Author.Name, Email: cm.Author.Email}
 			pipeline.Commit.Message = cm.Message
+			pipeline.Commit.ForgeURL = cm.URL
 			break
 		}
 	}
@@ -276,7 +280,8 @@ func convertReleaseHook(hook *gitlab.ReleaseEvent) (*model.Repo, *model.Pipeline
 				Author: hook.Commit.Author.Name,
 				Email:  hook.Commit.Author.Email,
 			},
-			Message: hook.Commit.Message,
+			Message:  hook.Commit.Message,
+			ForgeURL: hook.Commit.URL,
 		},
 		ForgeURL:     hook.URL,
 		ReleaseTitle: hook.Name,

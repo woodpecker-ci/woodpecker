@@ -151,16 +151,25 @@ func Test_convertRepositoryPushEvent(t *testing.T) {
 				},
 			},
 			to: &model.Pipeline{
-				Commit:    "1234567890abcdef",
-				Branch:    "branch",
-				Message:   "",
-				Avatar:    "https://base.url/users/john.doe_mail.com/avatar.png",
-				Author:    "John Doe",
-				Email:     "john.doe@mail.com",
-				Timestamp: now.UTC().Unix(),
-				Ref:       "refs/head/branch",
-				ForgeURL:  "https://base.url/projects/PRJ/repos/REPO/commits/1234567890abcdef",
-				Event:     model.EventPush,
+				Commit: &model.Commit{
+					SHA:      "1234567890abcdef",
+					ForgeURL: "https://base.url/projects/PRJ/repos/REPO/commits/1234567890abcdef",
+					Message:  "",
+					Author: model.Author{
+						Avatar: "https://base.url/users/john.doe_mail.com/avatar.png",
+						Author: "John Doe",
+						Email:  "john.doe@mail.com",
+					},
+				},
+				Branch: "branch",
+				Author: model.Author{
+					Avatar: "https://base.url/users/john.doe_mail.com/avatar.png",
+					Author: "John Doe",
+					Email:  "john.doe@mail.com",
+				},
+				Ref:      "refs/head/branch",
+				ForgeURL: "https://base.url/projects/PRJ/repos/REPO/commits/1234567890abcdef",
+				Event:    model.EventPush,
 			},
 		},
 	}
@@ -211,17 +220,19 @@ func Test_convertPullRequestEvent(t *testing.T) {
 	}
 	to := convertPullRequestEvent(from, "https://base.url")
 	assert.Equal(t, &model.Pipeline{
-		Commit:    "1234567890abcdef",
-		Branch:    "branch",
-		Avatar:    "https://base.url/users/john.doe_mail.com/avatar.png",
-		Author:    "John Doe",
-		Email:     "john.doe@mail.com",
-		Timestamp: now.UTC().Unix(),
-		Ref:       "refs/pull-requests/123/from",
-		ForgeURL:  "https://base.url/projects/PRJ/repos/REPO/commits/1234567890abcdef",
-		Event:     model.EventPull,
-		Refspec:   "branch:main",
-		Title:     "my title",
+		Commit: &model.Commit{SHA: "1234567890abcdef"},
+		Branch: "branch",
+		Author: model.Author{
+			Avatar: "https://base.url/users/john.doe_mail.com/avatar.png",
+			Author: "John Doe",
+			Email:  "john.doe@mail.com",
+		},
+
+		Ref:         "refs/pull-requests/123/from",
+		ForgeURL:    "https://base.url/projects/PRJ/repos/REPO/commits/1234567890abcdef",
+		Event:       model.EventPull,
+		Refspec:     "branch:main",
+		PullRequest: &model.PullRequest{Title: "my title"},
 	}, to)
 }
 
@@ -266,38 +277,20 @@ func Test_convertPullRequestCloseEvent(t *testing.T) {
 	}
 	to := convertPullRequestEvent(from, "https://base.url")
 	assert.Equal(t, &model.Pipeline{
-		Commit:    "1234567890abcdef",
-		Branch:    "branch",
-		Avatar:    "https://base.url/users/john.doe_mail.com/avatar.png",
-		Author:    "John Doe",
-		Email:     "john.doe@mail.com",
-		Timestamp: now.UTC().Unix(),
-		Ref:       "refs/pull-requests/123/from",
-		ForgeURL:  "https://base.url/projects/PRJ/repos/REPO/commits/1234567890abcdef",
-		Event:     model.EventPullClosed,
-		Refspec:   "branch:main",
-		Title:     "my title",
-	}, to)
-}
+		Commit: &model.Commit{SHA: "1234567890abcdef"},
+		Branch: "branch",
+		Author: model.Author{
+			Avatar: "https://base.url/users/john.doe_mail.com/avatar.png",
+			Author: "John Doe",
+			Email:  "john.doe@mail.com",
+		},
 
-func Test_authorLabel(t *testing.T) {
-	tests := []struct {
-		from string
-		to   string
-	}{
-		{
-			from: "Some Short Author",
-			to:   "Some Short Author",
-		},
-		{
-			from: "Some Very Long Author That May Include Multiple Names Here",
-			//nolint:misspell
-			to: "Some Very Long Author That May Includ...",
-		},
-	}
-	for _, tt := range tests {
-		assert.Equal(t, tt.to, authorLabel(tt.from))
-	}
+		Ref:         "refs/pull-requests/123/from",
+		ForgeURL:    "https://base.url/projects/PRJ/repos/REPO/commits/1234567890abcdef",
+		Event:       model.EventPullClosed,
+		Refspec:     "branch:main",
+		PullRequest: &model.PullRequest{Title: "my title"},
+	}, to)
 }
 
 func Test_convertUser(t *testing.T) {

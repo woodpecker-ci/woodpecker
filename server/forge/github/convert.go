@@ -168,3 +168,15 @@ func convertLabels(from []*github.Label) []string {
 	}
 	return labels
 }
+
+func convertCommit(from *github.Commit) *model.Commit {
+	return &model.Commit{
+		SHA:      from.GetSHA(),
+		ForgeURL: from.GetHTMLURL(),
+		Message:  from.GetMessage(),
+		Author: model.Author{
+			Author: from.GetAuthor().GetName(),
+			Email:  from.GetAuthor().GetEmail(),
+		},
+	}
+}

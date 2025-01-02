@@ -74,15 +74,8 @@ func pipelineFromPush(hook *pushHook) *model.Pipeline {
 		fixMalformedAvatar(hook.Sender.AvatarURL),
 	)
 
-	var message string
 	link := hook.Compare
-	if len(hook.Commits) > 0 {
-		message = hook.Commits[0].Message
-		if len(hook.Commits) == 1 {
-			link = hook.Commits[0].URL
-		}
-	} else {
-		message = hook.HeadCommit.Message
+	if hook.TotalCommits <= 1 {
 		link = hook.HeadCommit.URL
 	}
 
@@ -90,8 +83,12 @@ func pipelineFromPush(hook *pushHook) *model.Pipeline {
 		Event: model.EventPush,
 		Commit: &model.Commit{
 			SHA:      hook.After,
-			Message:  message,
-			ForgeURL: link,
+			Message:  hook.HeadCommit.Message,
+			ForgeURL: hook.HeadCommit.URL,
+			Author: model.Author{
+				Author: hook.HeadCommit.Author.Name,
+				Email:  hook.HeadCommit.Author.Email,
+			},
 		},
 		Ref:      hook.Ref,
 		ForgeURL: link,

@@ -193,11 +193,10 @@ func Test_parsePullHook(t *testing.T) {
 	assert.Equal(t, "refs/pull/42/merge", pipeline.Ref)
 	assert.Equal(t, "changes:main", pipeline.Refspec)
 	assert.Equal(t, *from.PullRequest.Head.SHA, pipeline.Commit)
-	assert.Equal(t, *from.PullRequest.Title, pipeline.Message)
-	assert.Equal(t, *from.PullRequest.Title, pipeline.Title)
+	assert.Equal(t, *from.PullRequest.Title, pipeline.PullRequest.Title)
 	assert.Equal(t, *from.PullRequest.User.Login, pipeline.Author)
-	assert.Equal(t, *from.PullRequest.User.AvatarURL, pipeline.Avatar)
-	assert.Equal(t, *from.Sender.Login, pipeline.Sender)
+	assert.Equal(t, *from.PullRequest.User.AvatarURL, pipeline.Author.Avatar)
+	assert.Equal(t, *from.Sender.Login, pipeline.Author.Author)
 }
 
 func Test_parseDeployHook(t *testing.T) {
@@ -217,10 +216,10 @@ func Test_parseDeployHook(t *testing.T) {
 	assert.Equal(t, "main", pipeline.Branch)
 	assert.Equal(t, "refs/heads/main", pipeline.Ref)
 	assert.Equal(t, *from.Deployment.SHA, pipeline.Commit)
-	assert.Equal(t, *from.Deployment.Description, pipeline.Message)
+	assert.Equal(t, *from.Deployment.Description, pipeline.Deployment.Description)
 	assert.Equal(t, *from.Deployment.URL, pipeline.ForgeURL)
 	assert.Equal(t, *from.Sender.Login, pipeline.Author)
-	assert.Equal(t, *from.Sender.AvatarURL, pipeline.Avatar)
+	assert.Equal(t, *from.Sender.AvatarURL, pipeline.Author.Avatar)
 }
 
 func Test_parsePushHook(t *testing.T) {
@@ -240,11 +239,11 @@ func Test_parsePushHook(t *testing.T) {
 		assert.Equal(t, "main", pipeline.Branch)
 		assert.Equal(t, "refs/heads/main", pipeline.Ref)
 		assert.Equal(t, *from.HeadCommit.ID, pipeline.Commit)
-		assert.Equal(t, *from.HeadCommit.Message, pipeline.Message)
+		assert.Equal(t, *from.HeadCommit.Message, pipeline.Commit.Message)
 		assert.Equal(t, *from.HeadCommit.URL, pipeline.ForgeURL)
 		assert.Equal(t, *from.Sender.Login, pipeline.Author)
-		assert.Equal(t, *from.Sender.AvatarURL, pipeline.Avatar)
-		assert.Equal(t, *from.HeadCommit.Author.Email, pipeline.Email)
+		assert.Equal(t, *from.Sender.AvatarURL, pipeline.Author.Avatar)
+		assert.Equal(t, *from.HeadCommit.Author.Email, pipeline.Commit.Author.Email)
 	})
 
 	t.Run("convert tag from webhook", func(t *testing.T) {

@@ -364,22 +364,28 @@ func (c *client) BranchHead(ctx context.Context, u *model.User, r *model.Repo, b
 	if err != nil {
 		return nil, fmt.Errorf("unable to create bitbucket client: %w", err)
 	}
-	branches, _, err := bc.Projects.SearchBranches(ctx, r.Owner, r.Name, &bb.BranchSearchOptions{Filter: b})
+	commits, _, err := bc.Projects.SearchCommits(ctx, r.Owner, r.Name, &bb.CommitSearchOptions{
+		Until:       b,
+		ListOptions: bb.ListOptions{Limit: 1},
+	})
 	if err != nil {
 		return nil, err
 	}
-	if len(branches) == 0 {
+	if len(commits) == 0 {
 		return nil, fmt.Errorf("no matching branches returned")
 	}
-	for _, branch := range branches {
-		if branch.DisplayID == b {
-			return &model.Commit{
-				SHA:      branch.LatestCommit,
-				ForgeURL: fmt.Sprintf("%s/commits/%s", r.ForgeURL, branch.LatestCommit),
-			}, nil
-		}
-	}
-	return nil, fmt.Errorf("no matching branches found")
+
+	cm := commits[0]
+
+	return &model.Commit{
+		SHA:      cm.ID, // TODO check id or displayid?
+		ForgeURL: fmt.Sprintf("%s/commits/%s", r.ForgeURL, cm.ID),
+		Message:  cm.Message,
+		Author: model.Author{
+			Author: cm.Author.Name,
+			Email:  cm.Author.Email,
+		},
+	}, nil
 }
 
 func (c *client) PullRequests(ctx context.Context, u *model.User, r *model.Repo, p *model.ListOptions) ([]*model.PullRequest, error) {
