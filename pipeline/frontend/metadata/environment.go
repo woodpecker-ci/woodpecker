@@ -53,6 +53,7 @@ func (m *Metadata) Environ() map[string]string {
 	setNonEmptyEnvVar(params, "CI_REPO_NAME", repo.Name)
 	setNonEmptyEnvVar(params, "CI_REPO_OWNER", repo.Owner)
 	setNonEmptyEnvVar(params, "CI_REPO_REMOTE_ID", repo.RemoteID)
+	setNonEmptyEnvVar(params, "CI_REPO_SCM", repo.SCM)
 	setNonEmptyEnvVar(params, "CI_REPO_URL", repo.ForgeURL)
 	setNonEmptyEnvVar(params, "CI_REPO_CLONE_URL", repo.CloneURL)
 	setNonEmptyEnvVar(params, "CI_REPO_CLONE_SSH_URL", repo.CloneSSHURL)

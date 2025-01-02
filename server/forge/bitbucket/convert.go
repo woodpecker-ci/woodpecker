@@ -59,9 +59,13 @@ func convertRepo(from *internal.Repo, perm *internal.RepoPerm) *model.Repo {
 		ForgeURL:      from.Links.HTML.Href,
 		IsSCMPrivate:  from.IsPrivate,
 		Avatar:        from.Owner.Links.Avatar.Href,
+		SCMKind:       model.SCMKind(from.Scm),
 		Branch:        from.MainBranch.Name,
 		Perm:          convertPerm(perm),
 		PREnabled:     true,
+	}
+	if repo.SCMKind == model.RepoHg {
+		repo.Branch = "default"
 	}
 	return &repo
 }
