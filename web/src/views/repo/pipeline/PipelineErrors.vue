@@ -6,8 +6,8 @@
           <div class="grid grid-cols-[minmax(10rem,auto),3fr]">
             <span class="flex items-center gap-x-2">
               <Icon
-                name="attention"
-                class="flex-shrink-0 my-1"
+                name="alert"
+                class="my-1 flex-shrink-0"
                 :class="{
                   'text-wp-state-warn-100': error.is_warning,
                   'text-wp-error-100': !error.is_warning,
@@ -35,7 +35,7 @@
             </span>
             <span v-else />
           </div>
-          <div class="grid grid-cols-[minmax(10rem,auto),4fr] col-start-2">
+          <div class="col-start-2 grid grid-cols-[minmax(10rem,auto),4fr]">
             <span />
             <span>
               <RenderMarkdown :content="error.message" />
