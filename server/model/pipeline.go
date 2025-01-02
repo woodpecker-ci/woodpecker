@@ -43,13 +43,14 @@ type Pipeline struct {
 	Ref          string       `json:"ref"                     xorm:"ref"`
 	Refspec      string       `json:"refspec"                 xorm:"refspec"`
 	ForgeURL     string       `json:"forge_url"               xorm:"forge_url"`
-	Author       Author       `json:"author" xorm:"json 'author"`
+	Author       string       `json:"author"                  xorm:"author"`
+	Avatar       string       `json:"avatar"                  xorm:"avatar"`
 	ChangedFiles []string     `json:"changed_files,omitempty" xorm:"LONGTEXT 'changed_files'"`
-	Deployment   Deployment   `json:"deployment"               xorm:"json 'deployment'"`
+	Deployment   Deployment   `json:"deployment"              xorm:"json 'deployment'"`
 	IsPrerelease bool         `json:"is_prerelease,omitempty" xorm:"is_prerelease"`
-	PullRequest  *PullRequest `json:"pr,omitempty"     xorm:"json 'pr'"`
-	Cron         string       `json:"cron,omitempty"     xorm:"cron"`
-	ReleaseTitle string       `json:"release,omitempty" xorm:"release"`
+	PullRequest  *PullRequest `json:"pr,omitempty"            xorm:"json 'pr'"`
+	Cron         string       `json:"cron,omitempty"          xorm:"cron"`
+	ReleaseTitle string       `json:"release,omitempty"       xorm:"release"`
 } //	@name Pipeline
 
 // TableName return database table name for xorm.

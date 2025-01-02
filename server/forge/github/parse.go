@@ -95,7 +95,8 @@ func parsePushHook(hook *github.PushEvent) (*model.Repo, *model.Pipeline) {
 		Ref:          hook.GetRef(),
 		ForgeURL:     hook.GetHeadCommit().GetURL(),
 		Branch:       strings.ReplaceAll(hook.GetRef(), "refs/heads/", ""),
-		Author:       convertAuthor(hook.GetSender()),
+		Avatar:       hook.GetSender().GetAvatarURL(),
+		Author:       hook.GetSender().GetLogin(),
 		ChangedFiles: getChangedFilesFromCommits(hook.Commits),
 	}
 
@@ -125,7 +126,8 @@ func parseDeployHook(hook *github.DeploymentEvent) (*model.Repo, *model.Pipeline
 		ForgeURL: hook.GetDeployment().GetURL(),
 		Ref:      hook.GetDeployment().GetRef(),
 		Branch:   hook.GetDeployment().GetRef(),
-		Author:   convertAuthor(hook.GetSender()),
+		Avatar:   hook.GetSender().GetAvatarURL(),
+		Author:   hook.GetSender().GetLogin(),
 		Deployment: model.Deployment{
 			Target:      hook.GetDeployment().GetEnvironment(),
 			Task:        hook.GetDeployment().GetTask(),
@@ -167,7 +169,8 @@ func parsePullHook(hook *github.PullRequestEvent, merge bool) (*github.PullReque
 		ForgeURL: hook.GetPullRequest().GetHTMLURL(),
 		Ref:      fmt.Sprintf(headRefs, hook.GetPullRequest().GetNumber()),
 		Branch:   hook.GetPullRequest().GetBase().GetRef(),
-		Author:   convertAuthor(hook.GetPullRequest().GetUser()),
+		Avatar:   hook.GetSender().GetAvatarURL(),
+		Author:   hook.GetSender().GetLogin(),
 		Refspec: fmt.Sprintf(refSpec,
 			hook.GetPullRequest().GetHead().GetRef(),
 			hook.GetPullRequest().GetBase().GetRef(),
@@ -203,7 +206,8 @@ func parseReleaseHook(hook *github.ReleaseEvent) (*model.Repo, *model.Pipeline) 
 		Ref:          fmt.Sprintf("refs/tags/%s", hook.GetRelease().GetTagName()),
 		Branch:       hook.GetRelease().GetTargetCommitish(), // cspell:disable-line
 		ReleaseTitle: name,
-		Author:       convertAuthor(hook.GetRelease().GetAuthor()),
+		Avatar:       hook.GetSender().GetAvatarURL(),
+		Author:       hook.GetSender().GetLogin(),
 		IsPrerelease: hook.GetRelease().GetPrerelease(),
 	}
 
@@ -221,16 +225,8 @@ func getChangedFilesFromCommits(commits []*github.HeadCommit) []string {
 	return utils.DeduplicateStrings(files)
 }
 
-func convertAuthor(u *github.User) model.Author {
-	return model.Author{
-		Avatar: u.GetAvatarURL(),
-		Author: u.GetLogin(),
-		Email:  u.GetEmail(),
-	}
-}
-
-func convertCommitAuthor(u *github.CommitAuthor) model.Author {
-	return model.Author{
+func convertCommitAuthor(u *github.CommitAuthor) model.CommitAuthor {
+	return model.CommitAuthor{
 		Author: u.GetName(),
 		Email:  u.GetEmail(),
 	}

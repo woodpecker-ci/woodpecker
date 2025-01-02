@@ -92,11 +92,8 @@ func createTmpPipeline(event model.WebhookEvent, commit *model.Commit, user *mod
 		Ref:                 opts.Branch,
 		AdditionalVariables: opts.Variables,
 
-		Author: model.Author{
-			Author: user.Login,
-			Avatar: user.Avatar,
-			Email:  user.Email,
-		},
+		Author: user.Login,
+		Avatar: user.Avatar,
 
 		ForgeURL: commit.ForgeURL,
 	}

@@ -123,9 +123,8 @@ func metadataPipelineFromModelPipeline(pipeline *model.Pipeline, includeParent b
 			Branch:  pipeline.Branch,
 			Message: pipeline.Commit.Message,
 			Author: metadata.Author{
-				Name:   pipeline.Commit.Author.Author,
-				Email:  pipeline.Commit.Author.Email,
-				Avatar: pipeline.Commit.Author.Avatar,
+				Name:  pipeline.Commit.Author.Author,
+				Email: pipeline.Commit.Author.Email,
 			},
 			ChangedFiles:      pipeline.ChangedFiles,
 			PullRequestLabels: pipeline.PullRequest.PullRequestLabels,

@@ -461,7 +461,7 @@ func (c *Forgejo) BranchHead(ctx context.Context, u *model.User, r *model.Repo, 
 		SHA:      b.Commit.ID,
 		ForgeURL: b.Commit.URL,
 		Message:  b.Commit.Message,
-		Author: model.Author{
+		Author: model.CommitAuthor{
 			Author: b.Commit.Author.Name,
 			Email:  b.Commit.Author.Email,
 		},
@@ -724,7 +724,7 @@ func (c *Forgejo) getCommitFromSHA(ctx context.Context, user *model.User, repo *
 
 	return &model.Commit{
 		Message: commit.RepoCommit.Message,
-		Author: model.Author{
+		Author: model.CommitAuthor{
 			Author: commit.RepoCommit.Author.Name,
 			Email:  commit.RepoCommit.Author.Email,
 		},

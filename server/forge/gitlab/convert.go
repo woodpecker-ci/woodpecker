@@ -122,7 +122,7 @@ func convertMergeRequestHook(hook *gitlab.MergeEvent, req *http.Request) (int, *
 	pipeline.Commit = &model.Commit{
 		Message: lastCommit.Message,
 		SHA:     lastCommit.ID,
-		Author: model.Author{
+		Author: model.CommitAuthor{
 			Author: lastCommit.Author.Name,
 			Email:  lastCommit.Author.Email,
 		},
@@ -132,11 +132,8 @@ func convertMergeRequestHook(hook *gitlab.MergeEvent, req *http.Request) (int, *
 	pipeline.Ref = fmt.Sprintf(mergeRefs, obj.IID)
 	pipeline.Branch = obj.SourceBranch
 	pipeline.Refspec = fmt.Sprintf("%s:%s", obj.SourceBranch, obj.TargetBranch)
-	pipeline.Author = model.Author{
-		Author: hook.User.Username,
-		Email:  hook.User.Email,
-		Avatar: hook.User.AvatarURL,
-	}
+	pipeline.Author = hook.User.Username
+	pipeline.Avatar = hook.User.AvatarURL
 	pipeline.ForgeURL = obj.URL
 	pipeline.PullRequest = &model.PullRequest{
 		PullRequestLabels: convertLabels(hook.Labels),
@@ -177,17 +174,14 @@ func convertPushHook(hook *gitlab.PushEvent) (*model.Repo, *model.Pipeline, erro
 	pipeline.Commit = &model.Commit{SHA: hook.After}
 	pipeline.Branch = strings.TrimPrefix(hook.Ref, "refs/heads/")
 	pipeline.Ref = hook.Ref
-	pipeline.Author = model.Author{
-		Author: hook.UserUsername,
-		Email:  hook.UserEmail,
-		Avatar: hook.UserAvatar,
-	}
+	pipeline.Author = hook.UserUsername
+	pipeline.Avatar = hook.UserAvatar
 
 	// assume a capacity of 4 changed files per commit
 	files := make([]string, 0, len(hook.Commits)*4)
 	for _, cm := range hook.Commits {
 		if hook.After == cm.ID {
-			pipeline.Commit.Author = model.Author{Author: cm.Author.Name, Email: cm.Author.Email}
+			pipeline.Commit.Author = model.CommitAuthor{Author: cm.Author.Name, Email: cm.Author.Email}
 			pipeline.Commit.Message = cm.Message
 			pipeline.Commit.ForgeURL = cm.URL
 		}
@@ -233,16 +227,13 @@ func convertTagHook(hook *gitlab.TagEvent) (*model.Repo, *model.Pipeline, error)
 	}
 	pipeline.Branch = strings.TrimPrefix(hook.Ref, "refs/heads/")
 	pipeline.Ref = hook.Ref
-	pipeline.Author = model.Author{
-		Author: hook.UserUsername,
-		Email:  hook.UserEmail,
-		Avatar: hook.UserAvatar,
-	}
+	pipeline.Author = hook.UserUsername
+	pipeline.Avatar = hook.UserAvatar
 
 	// TODO does hook.Commits always contain hook.After?
 	for _, cm := range hook.Commits {
 		if hook.After == cm.ID {
-			pipeline.Commit.Author = model.Author{Author: cm.Author.Name, Email: cm.Author.Email}
+			pipeline.Commit.Author = model.CommitAuthor{Author: cm.Author.Name, Email: cm.Author.Email}
 			pipeline.Commit.Message = cm.Message
 			pipeline.Commit.ForgeURL = cm.URL
 			break
@@ -276,7 +267,7 @@ func convertReleaseHook(hook *gitlab.ReleaseEvent) (*model.Repo, *model.Pipeline
 		Event: model.EventRelease,
 		Commit: &model.Commit{
 			SHA: hook.Commit.ID,
-			Author: model.Author{
+			Author: model.CommitAuthor{
 				Author: hook.Commit.Author.Name,
 				Email:  hook.Commit.Author.Email,
 			},
@@ -285,12 +276,9 @@ func convertReleaseHook(hook *gitlab.ReleaseEvent) (*model.Repo, *model.Pipeline
 		},
 		ForgeURL:     hook.URL,
 		ReleaseTitle: hook.Name,
-		Author: model.Author{
-			// TODO gitlab actually doesn't have a user associated to the hook/release
-			Author: hook.Commit.Author.Name,
-			Email:  hook.Commit.Author.Email,
-			Avatar: getUserAvatar(hook.Commit.Author.Email),
-		},
+		// TODO gitlab actually doesn't have a user associated to the hook/release
+		Author: hook.Commit.Author.Name,
+		Avatar: getUserAvatar(hook.Commit.Author.Email),
 
 		// Tag name here is the ref. We should add the refs/tags, so
 		// it is known it's a tag (git-plugin looks for it)

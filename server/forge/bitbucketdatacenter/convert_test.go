@@ -155,18 +155,14 @@ func Test_convertRepositoryPushEvent(t *testing.T) {
 					SHA:      "1234567890abcdef",
 					ForgeURL: "https://base.url/projects/PRJ/repos/REPO/commits/1234567890abcdef",
 					Message:  "",
-					Author: model.Author{
-						Avatar: "https://base.url/users/john.doe_mail.com/avatar.png",
+					Author: model.CommitAuthor{
 						Author: "John Doe",
 						Email:  "john.doe@mail.com",
 					},
 				},
-				Branch: "branch",
-				Author: model.Author{
-					Avatar: "https://base.url/users/john.doe_mail.com/avatar.png",
-					Author: "John Doe",
-					Email:  "john.doe@mail.com",
-				},
+				Branch:   "branch",
+				Avatar:   "https://base.url/users/john.doe_mail.com/avatar.png",
+				Author:   "John Doe",
 				Ref:      "refs/head/branch",
 				ForgeURL: "https://base.url/projects/PRJ/repos/REPO/commits/1234567890abcdef",
 				Event:    model.EventPush,
@@ -220,14 +216,10 @@ func Test_convertPullRequestEvent(t *testing.T) {
 	}
 	to := convertPullRequestEvent(from, "https://base.url")
 	assert.Equal(t, &model.Pipeline{
-		Commit: &model.Commit{SHA: "1234567890abcdef"},
-		Branch: "branch",
-		Author: model.Author{
-			Avatar: "https://base.url/users/john.doe_mail.com/avatar.png",
-			Author: "John Doe",
-			Email:  "john.doe@mail.com",
-		},
-
+		Commit:      &model.Commit{SHA: "1234567890abcdef"},
+		Branch:      "branch",
+		Avatar:      "https://base.url/users/john.doe_mail.com/avatar.png",
+		Author:      "John Doe",
 		Ref:         "refs/pull-requests/123/from",
 		ForgeURL:    "https://base.url/projects/PRJ/repos/REPO/commits/1234567890abcdef",
 		Event:       model.EventPull,
@@ -279,11 +271,8 @@ func Test_convertPullRequestCloseEvent(t *testing.T) {
 	assert.Equal(t, &model.Pipeline{
 		Commit: &model.Commit{SHA: "1234567890abcdef"},
 		Branch: "branch",
-		Author: model.Author{
-			Avatar: "https://base.url/users/john.doe_mail.com/avatar.png",
-			Author: "John Doe",
-			Email:  "john.doe@mail.com",
-		},
+		Avatar: "https://base.url/users/john.doe_mail.com/avatar.png",
+		Author: "John Doe",
 
 		Ref:         "refs/pull-requests/123/from",
 		ForgeURL:    "https://base.url/projects/PRJ/repos/REPO/commits/1234567890abcdef",

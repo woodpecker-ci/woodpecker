@@ -86,19 +86,16 @@ func pipelineFromPush(hook *pushHook) *model.Pipeline {
 			SHA:      hook.After,
 			Message:  hook.HeadCommit.Message,
 			ForgeURL: hook.HeadCommit.URL,
-			Author: model.Author{
+			Author: model.CommitAuthor{
 				Author: hook.HeadCommit.Author.Name,
 				Email:  hook.HeadCommit.Author.Email,
 			},
 		},
-		Ref:      hook.Ref,
-		ForgeURL: link,
-		Branch:   strings.TrimPrefix(hook.Ref, "refs/heads/"),
-		Author: model.Author{
-			Author: hook.Sender.UserName,
-			Email:  hook.Sender.Email,
-			Avatar: avatar,
-		},
+		Ref:          hook.Ref,
+		ForgeURL:     link,
+		Branch:       strings.TrimPrefix(hook.Ref, "refs/heads/"),
+		Author:       hook.Sender.UserName,
+		Avatar:       avatar,
 		ChangedFiles: getChangedFilesFromPushHook(hook),
 	}
 }
@@ -134,11 +131,8 @@ func pipelineFromTag(hook *pushHook) *model.Pipeline {
 		},
 		Ref:      fmt.Sprintf("refs/tags/%s", ref),
 		ForgeURL: fmt.Sprintf("%s/src/tag/%s", hook.Repo.HTMLURL, ref),
-		Author: model.Author{
-			Author: hook.Sender.UserName,
-			Email:  hook.Sender.Email,
-			Avatar: avatar,
-		},
+		Author:   hook.Sender.UserName,
+		Avatar:   avatar,
 	}
 }
 
@@ -162,11 +156,8 @@ func pipelineFromPullRequest(hook *pullRequestHook) *model.Pipeline {
 		ForgeURL: hook.PullRequest.HTMLURL,
 		Ref:      fmt.Sprintf("refs/pull/%d/head", hook.Number),
 		Branch:   hook.PullRequest.Base.Ref,
-		Author: model.Author{
-			Author: hook.Sender.UserName,
-			Email:  hook.Sender.Email,
-			Avatar: avatar,
-		},
+		Author:   hook.Sender.UserName,
+		Avatar:   avatar,
 		Refspec: fmt.Sprintf("%s:%s",
 			hook.PullRequest.Head.Ref,
 			hook.PullRequest.Base.Ref,
@@ -194,11 +185,8 @@ func pipelineFromRelease(hook *releaseHook) *model.Pipeline {
 		ForgeURL:     hook.Release.HTMLURL,
 		Branch:       hook.Release.Target,
 		ReleaseTitle: hook.Release.Title,
-		Author: model.Author{
-			Author: hook.Sender.UserName,
-			Email:  hook.Sender.Email,
-			Avatar: avatar,
-		},
+		Author:       hook.Sender.UserName,
+		Avatar:       avatar,
 		IsPrerelease: hook.Release.IsPrerelease,
 	}
 }

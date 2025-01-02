@@ -381,7 +381,7 @@ func (c *client) BranchHead(ctx context.Context, u *model.User, r *model.Repo, b
 		SHA:      cm.ID, // TODO check id or displayid?
 		ForgeURL: fmt.Sprintf("%s/commits/%s", r.ForgeURL, cm.ID),
 		Message:  cm.Message,
-		Author: model.Author{
+		Author: model.CommitAuthor{
 			Author: cm.Author.Name,
 			Email:  cm.Author.Email,
 		},
@@ -557,7 +557,7 @@ func (c *client) updatePipelineFromCommit(ctx context.Context, u *model.User, r 
 		return nil, fmt.Errorf("unable to read commit: %w", err)
 	}
 	p.Commit.Message = commit.Message
-	p.Commit.Author = model.Author{
+	p.Commit.Author = model.CommitAuthor{
 		Author: commit.Author.Name,
 		Email:  commit.Author.Email,
 	}

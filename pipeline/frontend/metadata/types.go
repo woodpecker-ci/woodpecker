@@ -73,9 +73,8 @@ type (
 
 	// Author defines runtime metadata for a commit author.
 	Author struct {
-		Name   string `json:"name,omitempty"`
-		Email  string `json:"email,omitempty"`
-		Avatar string `json:"avatar,omitempty"`
+		Name  string `json:"name,omitempty"`
+		Email string `json:"email,omitempty"`
 	}
 
 	// Workflow defines runtime metadata for a workflow.

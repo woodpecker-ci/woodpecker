@@ -177,7 +177,8 @@ func convertPullHook(from *internal.PullRequestHook) *model.Pipeline {
 		ForgeURL: from.PullRequest.Links.HTML.Href,
 		Branch:   from.PullRequest.Source.Branch.Name,
 
-		Author: convertAuthor(from.Actor),
+		Author: from.Actor.Login,
+		Avatar: from.Actor.Links.Avatar.Href,
 		PullRequest: &model.PullRequest{
 			FromFork: from.PullRequest.Source.Repo.UUID != from.PullRequest.Dest.Repo.UUID,
 			Title:    from.PullRequest.Title,
@@ -207,7 +208,8 @@ func convertPushHook(hook *internal.PushHook, change *internal.Change) *model.Pi
 		},
 		ForgeURL: change.New.Target.Links.HTML.Href,
 		Branch:   change.New.Name,
-		Author:   convertAuthor(hook.Actor),
+		Author:   hook.Actor.Login,
+		Avatar:   hook.Actor.Links.Avatar.Href,
 	}
 	switch change.New.Type {
 	case "tag", "annotated_tag", "bookmark":
@@ -224,20 +226,13 @@ func convertPushHook(hook *internal.PushHook, change *internal.Change) *model.Pi
 var reGitMail = regexp.MustCompile("(.*) <(.*)>")
 
 // extracts the email from a git commit author string.
-func convertCommitAuthor(gitAuthor string) model.Author {
+func convertCommitAuthor(gitAuthor string) model.CommitAuthor {
 	matches := reGitMail.FindAllStringSubmatch(gitAuthor, -1)
 	if len(matches) == 1 {
-		return model.Author{
+		return model.CommitAuthor{
 			Author: matches[0][1],
 			Email:  matches[0][2],
 		}
 	}
-	return model.Author{}
-}
-
-func convertAuthor(a internal.Account) model.Author {
-	return model.Author{
-		Author: a.Login,
-		Avatar: a.Links.Avatar.Href,
-	}
+	return model.CommitAuthor{}
 }

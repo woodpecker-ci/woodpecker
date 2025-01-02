@@ -94,12 +94,9 @@ func convertRepositoryPushEvent(ev *bb.RepositoryPushEvent, baseURL string) *mod
 			ForgeURL: fmt.Sprintf("%s/projects/%s/repos/%s/commits/%s", baseURL, ev.Repository.Project.Key, ev.Repository.Slug, change.ToHash),
 		},
 		Branch: change.Ref.DisplayID,
-		Author: model.Author{
-			Avatar: bitbucketAvatarURL(baseURL, ev.Actor.Slug),
-			Author: ev.Actor.Name,
-			Email:  ev.Actor.Email,
-		},
-		Ref: ev.Changes[0].RefId,
+		Avatar: bitbucketAvatarURL(baseURL, ev.Actor.Slug),
+		Author: ev.Actor.Name,
+		Ref:    ev.Changes[0].RefId,
 		// TODO this is wrong on tags
 		ForgeURL: fmt.Sprintf("%s/projects/%s/repos/%s/commits/%s", baseURL, ev.Repository.Project.Key, ev.Repository.Slug, change.ToHash),
 	}
@@ -121,12 +118,9 @@ func convertPullRequestEvent(ev *bb.PullRequestEvent, baseURL string) *model.Pip
 			ForgeURL: fmt.Sprintf("%s/projects/%s/repos/%s/commits/%s", baseURL, ev.PullRequest.Source.Repository.Project.Key, ev.PullRequest.Source.Repository.Slug, ev.PullRequest.Source.Latest),
 		},
 		Branch: ev.PullRequest.Source.DisplayID,
-		Author: model.Author{
-			Avatar: bitbucketAvatarURL(baseURL, ev.Actor.Slug),
-			Author: ev.Actor.Name,
-			Email:  ev.Actor.Email,
-		},
-		Ref: fmt.Sprintf("refs/pull-requests/%d/from", ev.PullRequest.ID),
+		Avatar: bitbucketAvatarURL(baseURL, ev.Actor.Slug),
+		Author: ev.Actor.Name,
+		Ref:    fmt.Sprintf("refs/pull-requests/%d/from", ev.PullRequest.ID),
 		PullRequest: &model.PullRequest{
 			FromFork: ev.PullRequest.Source.Repository.ID != ev.PullRequest.Target.Repository.ID,
 			Title:    ev.PullRequest.Title,
