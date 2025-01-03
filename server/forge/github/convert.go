@@ -162,10 +162,10 @@ func convertRepoHook(eventRepo *github.PushEventRepository) *model.Repo {
 
 func convertPullRequest(pr *github.PullRequest) *model.PullRequest {
 	return &model.PullRequest{
-		Index:             model.ForgeRemoteID(strconv.Itoa(pr.GetNumber())),
-		Title:             pr.GetTitle(),
-		PullRequestLabels: convertLabels(pr.Labels),
-		FromFork:          pr.GetHead().GetRepo().GetID() != pr.GetBase().GetRepo().GetID(),
+		Index:    model.ForgeRemoteID(strconv.Itoa(pr.GetNumber())),
+		Title:    pr.GetTitle(),
+		Labels:   convertLabels(pr.Labels),
+		FromFork: pr.GetHead().GetRepo().GetID() != pr.GetBase().GetRepo().GetID(),
 	}
 }
 

@@ -127,7 +127,7 @@ func metadataPipelineFromModelPipeline(pipeline *model.Pipeline, includeParent b
 				Email: pipeline.Commit.Author.Email,
 			},
 			ChangedFiles:      pipeline.ChangedFiles,
-			PullRequestLabels: pipeline.PullRequest.PullRequestLabels,
+			PullRequestLabels: pipeline.PullRequest.Labels,
 			IsPrerelease:      pipeline.IsPrerelease,
 		},
 		Release: pipeline.ReleaseTitle,

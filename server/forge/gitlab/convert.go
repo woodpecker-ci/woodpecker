@@ -137,10 +137,10 @@ func convertMergeRequestHook(hook *gitlab.MergeEvent, req *http.Request) (int, *
 	pipeline.Avatar = hook.User.AvatarURL
 	pipeline.ForgeURL = obj.URL
 	pipeline.PullRequest = &model.PullRequest{
-		PullRequestLabels: convertLabels(hook.Labels),
-		FromFork:          target.PathWithNamespace != source.PathWithNamespace,
-		Title:             obj.Title,
-		Index:             model.ForgeRemoteID(strconv.Itoa(obj.IID)),
+		Labels:   convertLabels(hook.Labels),
+		FromFork: target.PathWithNamespace != source.PathWithNamespace,
+		Title:    obj.Title,
+		Index:    model.ForgeRemoteID(strconv.Itoa(obj.IID)),
 	}
 
 	return obj.IID, repo, pipeline, nil

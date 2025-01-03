@@ -40,10 +40,10 @@ var updatePipelineMessages = xormigrate.Migration{
 			Author   commitAuthor `json:"author"`
 		}
 		type pullRequest struct {
-			Index             model.ForgeRemoteID `json:"index"`
-			Title             string              `json:"title"`
-			PullRequestLabels []string            `json:"pr_labels,omitempty"`
-			FromFork          bool                `json:"from_fork,omitempty"`
+			Index    model.ForgeRemoteID `json:"index"`
+			Title    string              `json:"title"`
+			Labels   []string            `json:"labels,omitempty"`
+			FromFork bool                `json:"from_fork,omitempty"`
 		}
 
 		type deployment struct {
@@ -122,8 +122,8 @@ var updatePipelineMessages = xormigrate.Migration{
 								"/head", "",
 							),
 						),
-						FromFork:          oldPipeline.FromFork,
-						PullRequestLabels: oldPipeline.PullRequestLabels,
+						FromFork: oldPipeline.FromFork,
+						Labels:   oldPipeline.PullRequestLabels,
 					}
 				case model.EventDeploy:
 					newPipeline.Deployment = &deployment{

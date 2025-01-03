@@ -258,10 +258,10 @@ func matchingHooks(hooks []*forgejo.Hook, rawURL string) *forgejo.Hook {
 
 func convertPullRequests(from *forgejo.PullRequest) *model.PullRequest {
 	return &model.PullRequest{
-		Index:             model.ForgeRemoteID(strconv.Itoa(int(from.Index))),
-		Title:             from.Title,
-		PullRequestLabels: convertLabels(from.Labels),
-		FromFork:          from.Head.RepoID != from.Base.RepoID,
+		Index:    model.ForgeRemoteID(strconv.Itoa(int(from.Index))),
+		Title:    from.Title,
+		Labels:   convertLabels(from.Labels),
+		FromFork: from.Head.RepoID != from.Base.RepoID,
 	}
 }
 

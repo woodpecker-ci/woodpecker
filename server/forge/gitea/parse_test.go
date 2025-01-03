@@ -198,7 +198,7 @@ func TestGiteaParser(t *testing.T) {
 				Avatar:   "http://1.gravatar.com/avatar/8c58a0be77ee441bb8f8595b7f1b4e87",
 				ForgeURL: "http://gitea.golang.org/gordon/hello-world/pull/1",
 				PullRequest: &model.PullRequest{
-					PullRequestLabels: []string{},
+					Labels: []string{},
 				},
 			},
 		},
@@ -233,7 +233,7 @@ func TestGiteaParser(t *testing.T) {
 				Author:   "test",
 				Avatar:   "http://127.0.0.1:3000/avatars/dd46a756faad4727fb679320751f6dea",
 				ForgeURL: "http://127.0.0.1:3000/Test-CI/multi-line-secrets/pulls/2",
-				PullRequest: &model.PullRequest{PullRequestLabels: []string{
+				PullRequest: &model.PullRequest{Labels: []string{
 					"Kind/Bug",
 					"Kind/Security",
 				}},
@@ -270,7 +270,7 @@ func TestGiteaParser(t *testing.T) {
 				Avatar:   "https://seccdn.libravatar.org/avatar/fc9b6fe77c6b732a02925a62a81f05a0?d=identicon",
 				ForgeURL: "https://gitea.com/anbraten/test-repo/pulls/1",
 				PullRequest: &model.PullRequest{
-					PullRequestLabels: []string{},
+					Labels: []string{},
 				},
 			},
 		},
@@ -305,7 +305,7 @@ func TestGiteaParser(t *testing.T) {
 				Avatar:   "https://seccdn.libravatar.org/avatar/fc9b6fe77c6b732a02925a62a81f05a0?d=identicon",
 				ForgeURL: "https://gitea.com/anbraten/test-repo/pulls/1",
 				PullRequest: &model.PullRequest{
-					PullRequestLabels: []string{},
+					Labels: []string{},
 				},
 			},
 		},

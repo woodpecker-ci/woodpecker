@@ -259,10 +259,10 @@ func matchingHooks(hooks []*gitea.Hook, rawURL string) *gitea.Hook {
 
 func convertPullRequests(from *gitea.PullRequest) *model.PullRequest {
 	return &model.PullRequest{
-		Index:             model.ForgeRemoteID(strconv.Itoa(int(from.Index))),
-		Title:             from.Title,
-		PullRequestLabels: convertLabels(from.Labels),
-		FromFork:          from.Head.RepoID != from.Base.RepoID,
+		Index:    model.ForgeRemoteID(strconv.Itoa(int(from.Index))),
+		Title:    from.Title,
+		Labels:   convertLabels(from.Labels),
+		FromFork: from.Head.RepoID != from.Base.RepoID,
 	}
 }
 
