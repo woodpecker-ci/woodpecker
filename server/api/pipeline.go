@@ -618,6 +618,9 @@ func PostPipeline(c *gin.Context) {
 	// make Deploy overridable
 
 	// make Deploy task overridable
+	if pl.Deployment == nil {
+		pl.Deployment = new(model.Deployment)
+	}
 	pl.Deployment.Task = c.DefaultQuery("deploy_task", pl.Deployment.Task)
 
 	// make Event overridable to deploy

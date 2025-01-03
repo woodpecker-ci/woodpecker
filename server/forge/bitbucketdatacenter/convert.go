@@ -117,14 +117,11 @@ func convertPullRequestEvent(ev *bb.PullRequestEvent, baseURL string) *model.Pip
 			SHA:      ev.PullRequest.Source.Latest,
 			ForgeURL: fmt.Sprintf("%s/projects/%s/repos/%s/commits/%s", baseURL, ev.PullRequest.Source.Repository.Project.Key, ev.PullRequest.Source.Repository.Slug, ev.PullRequest.Source.Latest),
 		},
-		Branch: ev.PullRequest.Source.DisplayID,
-		Avatar: bitbucketAvatarURL(baseURL, ev.Actor.Slug),
-		Author: ev.Actor.Name,
-		Ref:    fmt.Sprintf("refs/pull-requests/%d/from", ev.PullRequest.ID),
-		PullRequest: &model.PullRequest{
-			FromFork: ev.PullRequest.Source.Repository.ID != ev.PullRequest.Target.Repository.ID,
-			Title:    ev.PullRequest.Title,
-		},
+		Branch:      ev.PullRequest.Source.DisplayID,
+		Avatar:      bitbucketAvatarURL(baseURL, ev.Actor.Slug),
+		Author:      ev.Actor.Name,
+		Ref:         fmt.Sprintf("refs/pull-requests/%d/from", ev.PullRequest.ID),
+		PullRequest: convertPullRequest(&ev.PullRequest),
 		// TODO should link to the Pr
 		ForgeURL: fmt.Sprintf("%s/projects/%s/repos/%s/commits/%s", baseURL, ev.PullRequest.Source.Repository.Project.Key, ev.PullRequest.Source.Repository.Slug, ev.PullRequest.Source.Latest),
 		Refspec:  fmt.Sprintf("%s:%s", ev.PullRequest.Source.DisplayID, ev.PullRequest.Target.DisplayID),
@@ -163,4 +160,12 @@ func updateUserCredentials(u *model.User, t *oauth2.Token) {
 	u.AccessToken = t.AccessToken
 	u.RefreshToken = t.RefreshToken
 	u.Expiry = t.Expiry.UTC().Unix()
+}
+
+func convertPullRequest(pr *bb.PullRequest) *model.PullRequest {
+	return &model.PullRequest{
+		FromFork: pr.Source.Repository.ID != pr.Target.Repository.ID,
+		Title:    pr.Title,
+		Index:    model.ForgeRemoteID(fmt.Sprint(pr.ID)),
+	}
 }

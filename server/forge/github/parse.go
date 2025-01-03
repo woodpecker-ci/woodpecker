@@ -105,11 +105,8 @@ func parsePushHook(hook *github.PushEvent) (*model.Repo, *model.Pipeline) {
 		// event we'll never know!
 		pipeline.Event = model.EventTag
 		pipeline.ChangedFiles = nil
-		// For tags, if the base_ref (tag's base branch) is set, we're using it
-		// as pipeline's branch so that we can filter events base on it
-		if strings.HasPrefix(hook.GetBaseRef(), "refs/heads/") {
-			pipeline.Branch = strings.ReplaceAll(hook.GetBaseRef(), "refs/heads/", "")
-		}
+		pipeline.Branch = ""
+		pipeline.ForgeURL = "// TODO"
 	}
 
 	return convertRepoHook(hook.GetRepo()), pipeline
@@ -128,7 +125,7 @@ func parseDeployHook(hook *github.DeploymentEvent) (*model.Repo, *model.Pipeline
 		Branch:   hook.GetDeployment().GetRef(),
 		Avatar:   hook.GetSender().GetAvatarURL(),
 		Author:   hook.GetSender().GetLogin(),
-		Deployment: model.Deployment{
+		Deployment: &model.Deployment{
 			Target:      hook.GetDeployment().GetEnvironment(),
 			Task:        hook.GetDeployment().GetTask(),
 			Description: hook.GetDeployment().GetDescription(),
@@ -159,8 +156,6 @@ func parsePullHook(hook *github.PullRequestEvent, merge bool) (*github.PullReque
 		event = model.EventPullClosed
 	}
 
-	fromFork := hook.GetPullRequest().GetHead().GetRepo().GetID() != hook.GetPullRequest().GetBase().GetRepo().GetID()
-
 	pipeline := &model.Pipeline{
 		Event: event,
 		Commit: &model.Commit{
@@ -175,11 +170,7 @@ func parsePullHook(hook *github.PullRequestEvent, merge bool) (*github.PullReque
 			hook.GetPullRequest().GetHead().GetRef(),
 			hook.GetPullRequest().GetBase().GetRef(),
 		),
-		PullRequest: &model.PullRequest{
-			Title:             hook.GetPullRequest().GetTitle(),
-			PullRequestLabels: convertLabels(hook.GetPullRequest().Labels),
-			FromFork:          fromFork,
-		},
+		PullRequest: convertPullRequest(hook.GetPullRequest()),
 	}
 	if merge {
 		pipeline.Ref = fmt.Sprintf(mergeRefs, hook.GetPullRequest().GetNumber())

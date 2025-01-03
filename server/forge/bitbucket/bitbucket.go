@@ -22,7 +22,6 @@ import (
 	"net/http"
 	"net/url"
 	"path/filepath"
-	"strconv"
 
 	"golang.org/x/oauth2"
 
@@ -390,10 +389,7 @@ func (c *config) PullRequests(ctx context.Context, u *model.User, r *model.Repo,
 	}
 	var result []*model.PullRequest
 	for _, pullRequest := range pullRequests {
-		result = append(result, &model.PullRequest{
-			Index: model.ForgeRemoteID(strconv.Itoa(int(pullRequest.ID))),
-			Title: pullRequest.Title,
-		})
+		result = append(result, convertPullRequest(pullRequest))
 	}
 	return result, nil
 }

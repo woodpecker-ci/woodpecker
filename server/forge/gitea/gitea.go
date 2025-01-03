@@ -492,10 +492,7 @@ func (c *Gitea) PullRequests(ctx context.Context, u *model.User, r *model.Repo, 
 
 	result := make([]*model.PullRequest, len(pullRequests))
 	for i := range pullRequests {
-		result[i] = &model.PullRequest{
-			Index: model.ForgeRemoteID(strconv.Itoa(int(pullRequests[i].Index))),
-			Title: pullRequests[i].Title,
-		}
+		result[i] = convertPullRequests(pullRequests[i])
 	}
 	return result, err
 }

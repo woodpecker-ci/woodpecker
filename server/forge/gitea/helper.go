@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"io"
 	"net/url"
+	"strconv"
 	"strings"
 
 	"code.gitea.io/sdk/gitea"
@@ -130,7 +131,7 @@ func pipelineFromTag(hook *pushHook) *model.Pipeline {
 			SHA: hook.Sha,
 		},
 		Ref:      fmt.Sprintf("refs/tags/%s", ref),
-		ForgeURL: fmt.Sprintf("%s/src/tag/%s", hook.Repo.HTMLURL, ref),
+		ForgeURL: fmt.Sprintf("%s/src/releases/%s", hook.Repo.HTMLURL, ref),
 		Author:   hook.Sender.UserName,
 		Avatar:   avatar,
 	}
@@ -162,12 +163,7 @@ func pipelineFromPullRequest(hook *pullRequestHook) *model.Pipeline {
 			hook.PullRequest.Head.Ref,
 			hook.PullRequest.Base.Ref,
 		),
-		PullRequest: &model.PullRequest{
-			Index:             model.ForgeRemoteID(fmt.Sprint(hook.Number)),
-			PullRequestLabels: convertLabels(hook.PullRequest.Labels),
-			FromFork:          hook.PullRequest.Head.RepoID != hook.PullRequest.Base.RepoID,
-			Title:             hook.PullRequest.Title,
-		},
+		PullRequest: convertPullRequests(hook.PullRequest),
 	}
 
 	return pipeline
@@ -259,6 +255,15 @@ func matchingHooks(hooks []*gitea.Hook, rawURL string) *gitea.Hook {
 		}
 	}
 	return nil
+}
+
+func convertPullRequests(from *gitea.PullRequest) *model.PullRequest {
+	return &model.PullRequest{
+		Index:             model.ForgeRemoteID(strconv.Itoa(int(from.Index))),
+		Title:             from.Title,
+		PullRequestLabels: convertLabels(from.Labels),
+		FromFork:          from.Head.RepoID != from.Base.RepoID,
+	}
 }
 
 func convertLabels(from []*gitea.Label) []string {

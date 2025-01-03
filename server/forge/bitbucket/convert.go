@@ -177,12 +177,9 @@ func convertPullHook(from *internal.PullRequestHook) *model.Pipeline {
 		ForgeURL: from.PullRequest.Links.HTML.Href,
 		Branch:   from.PullRequest.Source.Branch.Name,
 
-		Author: from.Actor.Login,
-		Avatar: from.Actor.Links.Avatar.Href,
-		PullRequest: &model.PullRequest{
-			FromFork: from.PullRequest.Source.Repo.UUID != from.PullRequest.Dest.Repo.UUID,
-			Title:    from.PullRequest.Title,
-		},
+		Author:      from.Actor.Login,
+		Avatar:      from.Actor.Links.Avatar.Href,
+		PullRequest: convertPullRequest(&from.PullRequest),
 	}
 
 	if from.PullRequest.State == stateClosed {
@@ -215,6 +212,7 @@ func convertPushHook(hook *internal.PushHook, change *internal.Change) *model.Pi
 	case "tag", "annotated_tag", "bookmark":
 		pipeline.Event = model.EventTag
 		pipeline.Ref = fmt.Sprintf("refs/tags/%s", change.New.Name)
+		// TODO is the forge url correct on tags?
 	default:
 		pipeline.Event = model.EventPush
 		pipeline.Ref = fmt.Sprintf("refs/heads/%s", change.New.Name)
@@ -235,4 +233,12 @@ func convertCommitAuthor(gitAuthor string) model.CommitAuthor {
 		}
 	}
 	return model.CommitAuthor{}
+}
+
+func convertPullRequest(from *internal.PullRequest) *model.PullRequest {
+	return &model.PullRequest{
+		FromFork: from.Source.Repo.UUID != from.Dest.Repo.UUID,
+		Index:    model.ForgeRemoteID(fmt.Sprint(from.ID)),
+		Title:    from.Title,
+	}
 }

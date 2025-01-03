@@ -19,6 +19,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"gitlab.com/gitlab-org/api/client-go"
@@ -139,6 +140,7 @@ func convertMergeRequestHook(hook *gitlab.MergeEvent, req *http.Request) (int, *
 		PullRequestLabels: convertLabels(hook.Labels),
 		FromFork:          target.PathWithNamespace != source.PathWithNamespace,
 		Title:             obj.Title,
+		Index:             model.ForgeRemoteID(strconv.Itoa(obj.IID)),
 	}
 
 	return obj.IID, repo, pipeline, nil
@@ -229,6 +231,7 @@ func convertTagHook(hook *gitlab.TagEvent) (*model.Repo, *model.Pipeline, error)
 	pipeline.Ref = hook.Ref
 	pipeline.Author = hook.UserUsername
 	pipeline.Avatar = hook.UserAvatar
+	pipeline.ForgeURL = "// TODO"
 
 	// TODO does hook.Commits always contain hook.After?
 	for _, cm := range hook.Commits {

@@ -10,5 +10,4 @@ type Commit struct {
 type CommitAuthor struct {
 	Author string `json:"author"`
 	Email  string `json:"email"`
-	Avatar string `json:"avatar"`
 }

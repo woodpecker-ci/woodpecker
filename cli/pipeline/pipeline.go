@@ -90,6 +90,7 @@ func pipelineOutput(c *cli.Command, pipelines []*woodpecker.Pipeline, fd ...io.W
 			table.WriteHeader(cols)
 		}
 		for _, resource := range pipelines {
+			// TODO get message from commit
 			if err := table.Write(cols, resource); err != nil {
 				return err
 			}

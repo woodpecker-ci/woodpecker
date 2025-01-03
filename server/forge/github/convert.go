@@ -17,6 +17,7 @@ package github
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/google/go-github/v68/github"
 
@@ -157,6 +158,15 @@ func convertRepoHook(eventRepo *github.PushEventRepository) *model.Repo {
 		repo.FullName = repo.Owner + "/" + repo.Name
 	}
 	return repo
+}
+
+func convertPullRequest(pr *github.PullRequest) *model.PullRequest {
+	return &model.PullRequest{
+		Index:             model.ForgeRemoteID(strconv.Itoa(pr.GetNumber())),
+		Title:             pr.GetTitle(),
+		PullRequestLabels: convertLabels(pr.Labels),
+		FromFork:          pr.GetHead().GetRepo().GetID() != pr.GetBase().GetRepo().GetID(),
+	}
 }
 
 // convertLabels is a helper function used to convert a GitHub label list to

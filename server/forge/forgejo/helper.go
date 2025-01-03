@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"io"
 	"net/url"
+	"strconv"
 	"strings"
 
 	"codeberg.org/mvdkleijn/forgejo-sdk/forgejo"
@@ -129,7 +130,7 @@ func pipelineFromTag(hook *pushHook) *model.Pipeline {
 			SHA: hook.Sha,
 		},
 		Ref:      fmt.Sprintf("refs/tags/%s", ref),
-		ForgeURL: fmt.Sprintf("%s/src/tag/%s", hook.Repo.HTMLURL, ref),
+		ForgeURL: fmt.Sprintf("%s/releases/tag/%s", hook.Repo.HTMLURL, ref),
 		Author:   hook.Sender.UserName,
 		Avatar:   avatar,
 	}
@@ -159,11 +160,7 @@ func pipelineFromPullRequest(hook *pullRequestHook) *model.Pipeline {
 			hook.PullRequest.Head.Ref,
 			hook.PullRequest.Base.Ref,
 		),
-		PullRequest: &model.PullRequest{
-			PullRequestLabels: convertLabels(hook.PullRequest.Labels),
-			FromFork:          hook.PullRequest.Head.RepoID != hook.PullRequest.Base.RepoID,
-			Title:             hook.PullRequest.Title,
-		},
+		PullRequest: convertPullRequests(hook.PullRequest),
 	}
 
 	return pipeline
@@ -257,6 +254,15 @@ func matchingHooks(hooks []*forgejo.Hook, rawURL string) *forgejo.Hook {
 		}
 	}
 	return nil
+}
+
+func convertPullRequests(from *forgejo.PullRequest) *model.PullRequest {
+	return &model.PullRequest{
+		Index:             model.ForgeRemoteID(strconv.Itoa(int(from.Index))),
+		Title:             from.Title,
+		PullRequestLabels: convertLabels(from.Labels),
+		FromFork:          from.Head.RepoID != from.Base.RepoID,
+	}
 }
 
 func convertLabels(from []*forgejo.Label) []string {

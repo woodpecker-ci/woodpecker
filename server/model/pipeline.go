@@ -44,9 +44,9 @@ type Pipeline struct {
 	Refspec      string       `json:"refspec"                 xorm:"refspec"`
 	ForgeURL     string       `json:"forge_url"               xorm:"forge_url"`
 	Author       string       `json:"author"                  xorm:"author"`
-	Avatar       string       `json:"avatar"                  xorm:"avatar"`
+	Avatar       string       `json:"author_avatar"           xorm:"varchar(500) 'avatar'"`
 	ChangedFiles []string     `json:"changed_files,omitempty" xorm:"LONGTEXT 'changed_files'"`
-	Deployment   Deployment   `json:"deployment"              xorm:"json 'deployment'"`
+	Deployment   *Deployment  `json:"deployment"              xorm:"json 'deployment'"`
 	IsPrerelease bool         `json:"is_prerelease,omitempty" xorm:"is_prerelease"`
 	PullRequest  *PullRequest `json:"pr,omitempty"            xorm:"json 'pr'"`
 	Cron         string       `json:"cron,omitempty"          xorm:"cron"`

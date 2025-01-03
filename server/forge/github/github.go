@@ -331,10 +331,7 @@ func (c *client) PullRequests(ctx context.Context, u *model.User, r *model.Repo,
 
 	result := make([]*model.PullRequest, len(pullRequests))
 	for i := range pullRequests {
-		result[i] = &model.PullRequest{
-			Index: model.ForgeRemoteID(strconv.Itoa(pullRequests[i].GetNumber())),
-			Title: pullRequests[i].GetTitle(),
-		}
+		result[i] = convertPullRequest(pullRequests[i])
 	}
 	return result, err
 }
