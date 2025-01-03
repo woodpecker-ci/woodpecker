@@ -54,7 +54,7 @@ func TestPipelines(t *testing.T) {
 	pipeline = model.Pipeline{
 		RepoID: repo.ID,
 		Status: model.StatusSuccess,
-		Commit: "85f8c029b902ed9400bc600bac301a0aadb144ac",
+		Commit: &model.Commit{SHA: "85f8c029b902ed9400bc600bac301a0aadb144ac"},
 		Branch: "some-branch",
 	}
 	err = store.CreatePipeline(&pipeline)
@@ -109,7 +109,7 @@ func TestPipelines(t *testing.T) {
 		RepoID: repo.ID,
 		Status: model.StatusRunning,
 		Branch: "main",
-		Commit: "85f8c029b902ed9400bc600bac301a0aadb144aa",
+		Commit: &model.Commit{SHA: "85f8c029b902ed9400bc600bac301a0aadb144ac"},
 	}
 	err1 = store.CreatePipeline(pipeline3, []*model.Step{}...)
 	assert.NoError(t, err1)

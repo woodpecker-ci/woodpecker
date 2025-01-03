@@ -54,7 +54,7 @@
 
         <div class="flex min-w-0 items-center space-x-2">
           <Icon name="commit" />
-          <span class="truncate">{{ pipeline.commit.slice(0, 10) }}</span>
+          <span class="truncate">{{ pipeline.commit.sha.slice(0, 10) }}</span>
         </div>
 
         <div class="flex min-w-0 items-center space-x-2" :title="$t('repo.pipeline.duration')">
