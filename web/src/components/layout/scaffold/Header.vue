@@ -6,7 +6,7 @@
     <Container :full-width="fullWidth" class="!py-0">
       <div class="flex md:flex-row flex-col md:justify-between md:items-center gap-2 md:gap-10 py-3 w-full">
         <div
-          class="flex items-center content-start min-h-10"
+          class="flex min-h-10 content-start items-center"
           :class="{
             'md:flex-1': searchBoxPresent,
           }"
@@ -15,7 +15,7 @@
             v-if="goBack"
             icon="back"
             :title="$t('back')"
-            class="flex-shrink-0 mr-2 <md:hidden md:justify-between w-8 h-8"
+            class="<md:hidden mr-2 h-8 w-8 flex-shrink-0 md:justify-between"
             @click="goBack"
           />
           <h1 class="flex items-center gap-x-2 min-w-0 text-wp-text-100 text-xl">
@@ -24,7 +24,7 @@
         </div>
         <TextField
           v-if="searchBoxPresent"
-          class="w-auto <md:w-full flex-grow <md:order-3"
+          class="<md:w-full <md:order-3 w-auto flex-grow"
           :aria-label="$t('search')"
           :placeholder="$t('search')"
           :model-value="search"

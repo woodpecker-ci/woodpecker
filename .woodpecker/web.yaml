@@ -24,6 +24,18 @@ steps:
       - pnpm install --frozen-lockfile
     when: *when
 
+  prettier:
+    depends_on:
+      - install-dependencies
+    image: docker.io/woodpeckerci/plugin-prettier:next
+    pull: true
+    settings:
+      version: 3.3.3
+      plugins:
+        - 'prettier-plugin-tailwindcss'
+        - '@ianvs/prettier-plugin-sort-imports'
+    when: *when
+
   lint:
     depends_on:
       - install-dependencies

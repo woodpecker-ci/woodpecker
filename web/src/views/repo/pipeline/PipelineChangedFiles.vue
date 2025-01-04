@@ -1,6 +1,6 @@
 <template>
   <Panel>
-    <ul class="list-disc list-inside w-full">
+    <ul class="w-full list-inside list-disc">
       <li v-for="file in pipeline!.changed_files" :key="file">{{ file }}</li>
     </ul>
   </Panel>

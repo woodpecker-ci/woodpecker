@@ -55,9 +55,9 @@
             :href="`#L${line.number}`"
             class="text-right pr-6 pl-2 text-wp-code-text-alt-100 whitespace-nowrap select-none"
             :class="{
-              'bg-opacity-40 dark:bg-opacity-50 bg-red-600 dark:bg-red-800': line.type === 'error',
-              'bg-opacity-40 dark:bg-opacity-50 bg-yellow-600 dark:bg-yellow-800': line.type === 'warning',
-              'bg-opacity-30 bg-blue-600': isSelected(line),
+              'bg-red-600 bg-opacity-40 dark:bg-red-800 dark:bg-opacity-50': line.type === 'error',
+              'bg-yellow-600 bg-opacity-40 dark:bg-yellow-800 dark:bg-opacity-50': line.type === 'warning',
+              'bg-blue-600 bg-opacity-30': isSelected(line),
               underline: isSelected(line),
             }"
           >
@@ -67,9 +67,9 @@
           <span
             class="align-top break-words whitespace-pre-wrap"
             :class="{
-              'bg-opacity-40 dark:bg-opacity-50 bg-10.168.64.121-600 dark:bg-red-800': line.type === 'error',
-              'bg-opacity-40 dark:bg-opacity-50 bg-yellow-600 dark:bg-yellow-800': line.type === 'warning',
-              'bg-opacity-30 bg-blue-600': isSelected(line),
+              'bg-10.168.64.121-600 bg-opacity-40 dark:bg-red-800 dark:bg-opacity-50': line.type === 'error',
+              'bg-yellow-600 bg-opacity-40 dark:bg-yellow-800 dark:bg-opacity-50': line.type === 'warning',
+              'bg-blue-600 bg-opacity-30': isSelected(line),
             }"
             v-html="line.text"
           />
@@ -77,9 +77,9 @@
           <span
             class="text-right pr-1 text-wp-code-text-alt-100 whitespace-nowrap select-none"
             :class="{
-              'bg-opacity-40 dark:bg-opacity-50 bg-red-600 dark:bg-red-800': line.type === 'error',
-              'bg-opacity-40 dark:bg-opacity-50 bg-yellow-600 dark:bg-yellow-800': line.type === 'warning',
-              'bg-opacity-30 bg-blue-600': isSelected(line),
+              'bg-red-600 bg-opacity-40 dark:bg-red-800 dark:bg-opacity-50': line.type === 'error',
+              'bg-yellow-600 bg-opacity-40 dark:bg-yellow-800 dark:bg-opacity-50': line.type === 'warning',
+              'bg-blue-600 bg-opacity-30': isSelected(line),
             }"
           >
             {{ formatTime(line.time) }}
@@ -121,8 +121,7 @@ import IconButton from '~/components/atomic/IconButton.vue';
 import PipelineStatusIcon from '~/components/repo/pipeline/PipelineStatusIcon.vue';
 import useApiClient from '~/compositions/useApiClient';
 import useNotifications from '~/compositions/useNotifications';
-import type { Pipeline, Repo, RepoPermissions } from '~/lib/api/types';
-import { findStep, isStepFinished, isStepRunning } from '~/utils/helpers';
+import type { Pipeline, PipelineStep, PipelineWorkflow, Repo, RepoPermissions } from '~/lib/api/types';
 
 interface LogLine {
   index: number;
@@ -303,12 +302,12 @@ async function loadLogs() {
     return;
   }
 
-  if (isStepFinished(step.value)) {
+  if (step.value.state !== 'running' && step.value.state !== 'pending') {
     loadedStepSlug.value = stepSlug.value;
     const logs = await apiClient.getLogs(repo.value.id, pipeline.value.number, step.value.id);
     logs?.forEach((line) => writeLog({ index: line.line, text: line.data, time: line.time }));
     flushLogs(false);
-  } else if (step.value.state === 'pending' || isStepRunning(step.value)) {
+  } else {
     loadedStepSlug.value = stepSlug.value;
     stream.value = apiClient.streamLogs(repo.value.id, pipeline.value.number, step.value.id, (line) => {
       writeLog({ index: line.line, text: line.data, time: line.time });
@@ -334,6 +333,29 @@ async function deleteLogs() {
   } catch (e) {
     notifications.notifyError(e as Error, i18n.t('repo.pipeline.log_delete_error'));
   }
+}
+
+function findStep(workflows: PipelineWorkflow[], pid: number): PipelineStep | undefined {
+  return workflows.reduce(
+    (prev, workflow) => {
+      const result = workflow.children.reduce(
+        (prevChild, step) => {
+          if (step.pid === pid) {
+            return step;
+          }
+
+          return prevChild;
+        },
+        undefined as PipelineStep | undefined,
+      );
+      if (result) {
+        return result;
+      }
+
+      return prev;
+    },
+    undefined as PipelineStep | undefined,
+  );
 }
 
 onMounted(async () => {

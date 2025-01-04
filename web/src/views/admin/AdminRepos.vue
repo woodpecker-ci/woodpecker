@@ -17,13 +17,13 @@
           <IconButton
             icon="chevron-right"
             :title="$t('admin.settings.repos.view')"
-            class="w-8 h-8"
+            class="h-8 w-8"
             :to="{ name: 'repo', params: { repoId: repo.id } }"
           />
           <IconButton
-            icon="settings"
+            icon="settings-outline"
             :title="$t('admin.settings.repos.settings')"
-            class="w-8 h-8"
+            class="h-8 w-8"
             :to="{ name: 'repo-settings', params: { repoId: repo.id } }"
           />
         </div>

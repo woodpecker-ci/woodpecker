@@ -10,30 +10,30 @@
       <Button v-else :text="$t('admin.settings.users.add')" start-icon="plus" @click="showAddUser" />
     </template>
 
-    <div v-if="!selectedUser" class="space-y-4 text-wp-text-100">
+    <div v-if="!selectedUser" class="text-wp-text-100 space-y-4">
       <ListItem
         v-for="user in users"
         :key="user.id"
         class="items-center gap-2 !bg-wp-background-200 dark:!bg-wp-background-100 admin-users"
       >
-        <img v-if="user.avatar_url" class="rounded-md h-6" :src="user.avatar_url" />
+        <img v-if="user.avatar_url" class="h-6 rounded-md" :src="user.avatar_url" />
         <span>{{ user.login }}</span>
         <Badge
           v-if="user.admin"
-          class="md:inline-block hidden ml-auto"
+          class="ml-auto hidden md:inline-block"
           :label="$t('admin.settings.users.admin.admin')"
         />
         <IconButton
           icon="edit"
           :title="$t('admin.settings.users.edit_user')"
-          class="w-8 h-8 <md:ml-auto"
+          class="<md:ml-auto h-8 w-8"
           :class="{ 'ml-auto': !user.admin, 'ml-2': user.admin }"
           @click="editUser(user)"
         />
         <IconButton
           icon="trash"
           :title="$t('admin.settings.users.delete_user')"
-          class="ml-2 w-8 h-8 hover:text-wp-error-100"
+          class="hover:text-wp-error-100 ml-2 h-8 w-8"
           :is-loading="isDeleting"
           @click="deleteUser(user)"
         />
@@ -53,7 +53,7 @@
 
         <InputField v-slot="{ id }" :label="$t('admin.settings.users.avatar_url')">
           <div class="flex gap-2">
-            <img v-if="selectedUser.avatar_url" class="rounded-md w-8 h-8" :src="selectedUser.avatar_url" />
+            <img v-if="selectedUser.avatar_url" class="h-8 w-8 rounded-md" :src="selectedUser.avatar_url" />
             <TextField :id="id" v-model="selectedUser.avatar_url" />
           </div>
         </InputField>

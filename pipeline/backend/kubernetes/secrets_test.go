@@ -29,7 +29,7 @@ func TestNativeSecretsEnabled(t *testing.T) {
 	nsp := newNativeSecretsProcessor(&config{
 		NativeSecretsAllowFromStep: true,
 	}, nil)
-	assert.Equal(t, true, nsp.isEnabled())
+	assert.True(t, nsp.isEnabled())
 }
 
 func TestNativeSecretsDisabled(t *testing.T) {
@@ -54,7 +54,7 @@ func TestNativeSecretsDisabled(t *testing.T) {
 			},
 		},
 	})
-	assert.Equal(t, false, nsp.isEnabled())
+	assert.False(t, nsp.isEnabled())
 
 	err := nsp.process()
 	assert.NoError(t, err)

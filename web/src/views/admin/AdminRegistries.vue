@@ -15,7 +15,7 @@
     </template>
 
     <template #headerEnd>
-      <Warning class="text-sm mt-4" :text="$t('admin.settings.registries.warning')" />
+      <Warning class="mt-4 text-sm" :text="$t('admin.settings.registries.warning')" />
     </template>
 
     <RegistryList
