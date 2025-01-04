@@ -241,6 +241,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update pre-commit hook golangci/golangci-lint to v1.63.4 [[#4660](https://github.com/woodpecker-ci/woodpecker/pull/4660)]
 - fix(deps): update module github.com/moby/term to v0.5.2 [[#4658](https://github.com/woodpecker-ci/woodpecker/pull/4658)]
 - fix(deps): update web npm deps non-major [[#4659](https://github.com/woodpecker-ci/woodpecker/pull/4659)]
 - chore(deps): update docker.io/woodpeckerci/plugin-ready-release-go docker tag to v3.1.1 [[#4642](https://github.com/woodpecker-ci/woodpecker/pull/4642)]
