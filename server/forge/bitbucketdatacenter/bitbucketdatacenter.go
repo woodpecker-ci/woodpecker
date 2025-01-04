@@ -570,10 +570,47 @@ func (c *client) updatePipelineFromCommit(ctx context.Context, u *model.User, r 
 	return p, nil
 }
 
-// Teams is not supported.
-func (*client) Teams(_ context.Context, _ *model.User) ([]*model.Team, error) {
-	var teams []*model.Team
-	return teams, nil
+func GetAllProjects(ctx context.Context, client *bb.Client, opts *bb.ListOptions) ([]*bb.Project, error) {
+	var allProjects []*bb.Project
+	path := "projects"
+
+	for {
+		// Structure to hold the API response
+		var projectPage struct {
+			bb.ListResponse
+			Values []*bb.Project `json:"values"`
+		}
+
+		// Fetch a page of projects
+		resp, err := client.GetPaged(ctx, "api", path, &projectPage, opts)
+		if err != nil {
+			return nil, fmt.Errorf("unable to fetch projects: %w", err)
+		}
+
+		allProjects = append(allProjects, projectPage.Values...)
+
+		if resp.LastPage {
+			break
+		}
+
+		opts.Start = resp.NextPageStart
+	}
+
+	return allProjects, nil
+}
+
+func (c *client) Teams(ctx context.Context, u *model.User) ([]*model.Team, error) {
+	bc, err := c.newClient(ctx, u)
+	if err != nil {
+		return nil, fmt.Errorf("unable to create client: %w", err)
+	}
+
+	opts := &bb.ListOptions{Start: 0, Limit: 50}
+	projects, err := GetAllProjects(ctx, bc, opts)
+	if err != nil {
+		return nil, fmt.Errorf("bitbucketdatacenter: error fetching all projects: %w", err)
+	}
+	return convertProjectsToTeams(projects, bc), nil
 }
 
 // TeamPerm is not supported.

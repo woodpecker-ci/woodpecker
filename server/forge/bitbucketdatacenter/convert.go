@@ -172,3 +172,15 @@ func updateUserCredentials(u *model.User, t *oauth2.Token) {
 	u.RefreshToken = t.RefreshToken
 	u.Expiry = t.Expiry.UTC().Unix()
 }
+
+func convertProjectsToTeams(projects []*bb.Project, client *bb.Client) []*model.Team {
+	var teams []*model.Team
+	for _, project := range projects {
+		team := &model.Team{
+			Login:  project.Key,
+			Avatar: fmt.Sprintf("%s/projects/%s/avatar.png", client.BaseURL, project.Key),
+		}
+		teams = append(teams, team)
+	}
+	return teams
+}
