@@ -41,7 +41,7 @@ const isLoading = ref(false);
 const metadataFileName = computed(
   () => `${repo?.value.full_name.replaceAll('/', '-')}-pipeline-${pipeline?.value.number}-metadata.json`,
 );
-const cliExecWithMetadata = computed(() => `# woodpecker exec --metadata-file ${metadataFileName.value}`);
+const cliExecWithMetadata = computed(() => `# woodpecker-cli exec --metadata-file ${metadataFileName.value}`);
 
 async function downloadMetadata() {
   if (!repo?.value || !pipeline?.value || !repoPermissions?.value?.push) {
