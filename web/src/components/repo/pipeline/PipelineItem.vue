@@ -29,7 +29,8 @@
         <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
         <span class="text-wp-text-alt-100 <md:hidden mx-2">-</span>
         <span
-          class="<md:underline overflow-hidden overflow-ellipsis whitespace-nowrap text-wp-text-100"
+          class="text-wp-text-100 <md:underline overflow-hidden overflow-ellipsis whitespace-nowrap"
+
           :title="message"
         >
           {{ shortMessage }}

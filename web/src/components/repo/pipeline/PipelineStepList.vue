@@ -59,7 +59,7 @@
         <div
           v-for="workflow in pipeline.workflows"
           :key="workflow.id"
-          class="border-wp-background-400 bg-wp-background-100 p-2 rounded-md border shadow dark:bg-wp-background-200"
+          class="border-wp-background-400 bg-wp-background-100 dark:bg-wp-background-200 rounded-md border p-2 shadow"
         >
           <div class="flex flex-col gap-2">
             <div v-if="workflow.environ" class="flex flex-wrap justify-end gap-x-1 gap-y-2 pr-1 pt-1 text-xs">

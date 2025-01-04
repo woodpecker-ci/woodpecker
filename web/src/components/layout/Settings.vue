@@ -10,7 +10,7 @@
       </div>
 
       <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
-        <p v-if="description" class="text-sm text-wp-text-alt-100">{{ description }}</p>
+        <p v-if="description" class="text-wp-text-alt-100 text-sm">{{ description }}</p>
         <div v-if="$slots.headerActions">
           <slot name="headerActions" />
         </div>
