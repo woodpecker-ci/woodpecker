@@ -178,10 +178,21 @@ export default defineConfig({
           200: 'var(--wp-hint-warn-200)',
         },
 
+        'wp-code-inline': {
+          100: 'var(--wp-code-inline-100)',
+          200: 'var(--wp-code-inline-200)',
+        },
+
+        'wp-code-inline-text': {
+          100: 'var(--wp-code-inline-text-100)',
+        },
+
         'wp-code': {
           100: 'var(--wp-code-100)',
           200: 'var(--wp-code-200)',
+          300: 'var(--wp-code-300)',
         },
+
         'wp-code-text': {
           100: 'var(--wp-code-text-100)',
         },
