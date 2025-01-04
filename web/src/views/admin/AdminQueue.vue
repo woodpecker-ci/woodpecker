@@ -30,7 +30,7 @@
         <ListItem
           v-for="task in tasks"
           :key="task.id"
-          class="items-center !bg-wp-background-200 dark:!bg-wp-background-100 mb-2"
+          class="mb-2 items-center !bg-wp-background-200 dark:!bg-wp-background-100"
         >
           <div
             class="flex items-center"

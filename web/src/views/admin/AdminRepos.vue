@@ -10,9 +10,9 @@
     </template>
 
     <div class="space-y-4 text-wp-text-100">
-      <ListItem v-for="repo in repos" :key="repo.id" class="items-center gap-2 admin-repos">
+      <ListItem v-for="repo in repos" :key="repo.id" class="admin-repos items-center gap-2">
         <span>{{ repo.full_name }}</span>
-        <div class="flex items-center ml-auto">
+        <div class="ml-auto flex items-center">
           <Badge v-if="!repo.active" class="<md:hidden mr-2" :label="$t('admin.settings.repos.disabled')" />
           <IconButton
             icon="chevron-right"
@@ -66,6 +66,6 @@ const { doSubmit: repairRepos, isLoading: isRepairingRepos } = useAsyncAction(as
 
 <style scoped>
 .admin-repos {
-  @apply bg-wp-background-200 dark:bg-wp-background-100 p-4;
+  @apply bg-wp-background-200 p-4 dark:bg-wp-background-100;
 }
 </style>

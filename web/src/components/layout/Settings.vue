@@ -1,8 +1,8 @@
 <template>
   <Panel>
-    <div class="dark:border-wp-background-100 mb-4 flex flex-col justify-center border-b pb-4">
+    <div class="mb-4 flex flex-col justify-center border-b pb-4 dark:border-wp-background-100">
       <div class="flex items-center justify-between">
-        <h1 class="text-wp-text-100 flex items-center gap-1 text-xl">
+        <h1 class="flex items-center gap-1 text-xl text-wp-text-100">
           {{ title }}
           <DocsLink v-if="docsUrl" :topic="title" :url="docsUrl" />
         </h1>
@@ -10,7 +10,7 @@
       </div>
 
       <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
-        <p v-if="description" class="text-wp-text-alt-100 text-sm">{{ description }}</p>
+        <p v-if="description" class="text-sm text-wp-text-alt-100">{{ description }}</p>
         <div v-if="$slots.headerActions">
           <slot name="headerActions" />
         </div>

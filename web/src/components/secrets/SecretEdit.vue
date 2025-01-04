@@ -22,7 +22,7 @@
       </InputField>
 
       <InputField v-slot="{ id }" :label="$t('secrets.plugins.images')">
-        <span class="text-wp-text-alt-100 mb-2 ml-1">{{ $t('secrets.plugins.desc') }}</span>
+        <span class="mb-2 ml-1 text-wp-text-alt-100">{{ $t('secrets.plugins.desc') }}</span>
 
         <div class="flex flex-col gap-2">
           <div v-for="image in innerValue.images" :key="image" class="flex gap-2">

@@ -1,9 +1,9 @@
 <template>
-  <div v-if="!props.loading" class="text-wp-text-100 space-y-4">
+  <div v-if="!props.loading" class="space-y-4 text-wp-text-100">
     <ListItem
       v-for="agent in props.agents"
       :key="agent.id"
-      class="items-center !bg-wp-background-200 dark:!bg-wp-background-100 admin-agents"
+      class="admin-agents items-center !bg-wp-background-200 dark:!bg-wp-background-100"
     >
       <span>{{ agent.name || `Agent ${agent.id}` }}</span>
       <span class="ml-auto">
@@ -30,7 +30,7 @@
       <IconButton
         icon="trash"
         :title="$t('admin.settings.agents.delete_agent')"
-        class="hover:text-wp-error-100 ml-2 h-8 w-8"
+        class="ml-2 h-8 w-8 hover:text-wp-error-100"
         :is-loading="props.isDeleting"
         @click="$emit('delete', agent)"
       />

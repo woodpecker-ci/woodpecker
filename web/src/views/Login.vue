@@ -1,26 +1,26 @@
 <template>
-  <main class="flex flex-col justify-center items-center w-full h-full">
-    <Error v-if="errorMessage" class="w-full md:max-w-3xl h-96">
+  <main class="flex h-full w-full flex-col items-center justify-center">
+    <Error v-if="errorMessage" class="h-96 w-full md:max-w-3xl">
       <span class="whitespace-pre">{{ errorMessage }}</span>
       <span v-if="errorDescription" class="mt-1 whitespace-pre">{{ errorDescription }}</span>
       <a
         v-if="errorUri"
         :href="errorUri"
         target="_blank"
-        class="mt-1 text-wp-link-100 hover:text-wp-link-200 cursor-pointer"
+        class="mt-1 cursor-pointer text-wp-link-100 hover:text-wp-link-200"
       >
         <span>{{ errorUri }}</span>
       </a>
     </Error>
 
     <div
-      class="flex md:flex-row flex-col border-wp-background-400 bg-wp-background-100 dark:bg-wp-background-200 shadow md:m-8 border md:rounded-md w-full md:max-w-3xl md:h-96 overflow-hidden"
+      class="flex w-full flex-col overflow-hidden border border-wp-background-400 bg-wp-background-100 shadow dark:bg-wp-background-200 md:m-8 md:h-96 md:max-w-3xl md:flex-row md:rounded-md"
     >
-      <div class="flex justify-center items-center bg-wp-primary-200 dark:bg-wp-primary-300 md:w-3/5 min-h-48">
-        <WoodpeckerLogo preserveAspectRatio="xMinYMin slice" class="w-30 md:w-48 h-30 md:h-48" />
+      <div class="flex min-h-48 items-center justify-center bg-wp-primary-200 dark:bg-wp-primary-300 md:w-3/5">
+        <WoodpeckerLogo preserveAspectRatio="xMinYMin slice" class="w-30 h-30 md:h-48 md:w-48" />
       </div>
-      <div class="flex flex-col justify-center items-center gap-4 md:w-2/5 min-h-48 text-center">
-        <h1 class="text-wp-text-100 text-xl">{{ $t('welcome') }}</h1>
+      <div class="flex min-h-48 flex-col items-center justify-center gap-4 text-center md:w-2/5">
+        <h1 class="text-xl text-wp-text-100">{{ $t('welcome') }}</h1>
         <div class="flex flex-col gap-2">
           <Button
             v-for="forge in forges"

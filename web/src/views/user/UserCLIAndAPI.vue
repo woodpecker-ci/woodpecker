@@ -2,7 +2,7 @@
   <Settings :title="$t('user.settings.cli_and_api.cli_and_api')" :description="$t('user.settings.cli_and_api.desc')">
     <InputField :label="$t('user.settings.cli_and_api.cli_usage')">
       <template #headerActions>
-        <a :href="cliDownload" target="_blank" class="text-wp-link-100 hover:text-wp-link-200 ml-4">{{
+        <a :href="cliDownload" target="_blank" class="ml-4 text-wp-link-100 hover:text-wp-link-200">{{
           $t('user.settings.cli_and_api.download_cli')
         }}</a>
       </template>
@@ -22,7 +22,7 @@
           v-if="enableSwagger"
           :href="`${address}/swagger/index.html`"
           target="_blank"
-          class="text-wp-link-100 hover:text-wp-link-200 ml-4"
+          class="ml-4 text-wp-link-100 hover:text-wp-link-200"
         >
           {{ $t('user.settings.cli_and_api.swagger_ui') }}
         </a>

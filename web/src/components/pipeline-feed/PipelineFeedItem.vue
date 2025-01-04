@@ -1,5 +1,5 @@
 <template>
-  <div v-if="pipeline" class="text-wp-text-100 flex w-full">
+  <div v-if="pipeline" class="flex w-full text-wp-text-100">
     <PipelineStatusIcon :status="pipeline.status" class="flex items-center" />
     <div class="ml-4 flex min-w-0 flex-col">
       <router-link

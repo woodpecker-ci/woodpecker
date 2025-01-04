@@ -8,15 +8,15 @@
         :to="{ name: 'repo-pull-request', params: { pullRequest: pullRequest.index } }"
       >
         <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
-        <span class="text-wp-text-alt-100 <md:hidden">#{{ pullRequest.index }}</span>
+        <span class="<md:hidden text-wp-text-alt-100">#{{ pullRequest.index }}</span>
         <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
-        <span class="text-wp-text-alt-100 <md:hidden mx-2">-</span>
-        <span class="text-wp-text-100 <md:underline overflow-hidden overflow-ellipsis whitespace-nowrap">{{
+        <span class="<md:hidden mx-2 text-wp-text-alt-100">-</span>
+        <span class="<md:underline overflow-hidden overflow-ellipsis whitespace-nowrap text-wp-text-100">{{
           pullRequest.title
         }}</span>
       </ListItem>
     </template>
-    <div v-else-if="loading" class="text-wp-text-100 flex justify-center">
+    <div v-else-if="loading" class="flex justify-center text-wp-text-100">
       <Icon name="spinner" />
     </div>
     <Panel v-else class="flex justify-center">
