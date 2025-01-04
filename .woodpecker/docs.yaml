@@ -38,9 +38,12 @@ when:
 
 steps:
   prettier:
-    image: docker.io/woodpeckerci/plugin-prettier:1.0.0
+    image: docker.io/woodpeckerci/plugin-prettier:next
     settings:
       version: 3.3.3
+      plugins:
+        - 'prettier-plugin-tailwindcss'
+        - '@ianvs/prettier-plugin-sort-imports'
     when:
       - event: pull_request
 
