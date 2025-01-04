@@ -34,7 +34,6 @@
           icon="trash"
           :title="$t('admin.settings.users.delete_user')"
           class="hover:text-wp-error-100 ml-2 h-8 w-8"
-
           :is-loading="isDeleting"
           @click="deleteUser(user)"
         />

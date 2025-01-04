@@ -30,7 +30,6 @@
         <span class="text-wp-text-alt-100 <md:hidden mx-2">-</span>
         <span
           class="text-wp-text-100 <md:underline overflow-hidden overflow-ellipsis whitespace-nowrap"
-
           :title="message"
         >
           {{ shortMessage }}

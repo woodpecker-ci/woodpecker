@@ -1,7 +1,7 @@
 <template>
   <div class="md:min-w-xs text-wp-text-100 flex w-full flex-col gap-2 pb-2 md:w-3/12 md:max-w-md">
     <div
-      class="border-wp-background-400 bg-wp-background-100 dark:bg-wp-background-200 flex flex-shrink-0 flex-wrap justify-between gap-1 rounded-md border  p-4"
+      class="border-wp-background-400 bg-wp-background-100 dark:bg-wp-background-200 flex flex-shrink-0 flex-wrap justify-between gap-1 rounded-md border p-4"
     >
       <div class="flex flex-shrink-0 items-center space-x-1">
         <div class="flex items-center">

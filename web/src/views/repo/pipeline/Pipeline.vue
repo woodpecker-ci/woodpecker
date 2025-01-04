@@ -44,7 +44,7 @@
         <Container v-else-if="pipeline!.status === 'declined'" fill-width class="p-0">
           <Panel>
             <div class="flex flex-col items-center gap-4">
-              <Icon name="status-declined" size="1.5rem" class="h-16 w-16 text-wp-error-100" />
+              <Icon name="status-declined" size="1.5rem" class="text-wp-error-100 h-16 w-16" />
               <p class="text-xl">{{ $t('repo.pipeline.protected.declined') }}</p>
             </div>
           </Panel>

@@ -1,6 +1,6 @@
 <template>
   <header
-    class="border-b border-wp-background-400 bg-wp-background-100 text-wp-text-100 dark:border-wp-background-100 dark:bg-wp-background-300"
+    class="border-wp-background-400 dark:border-wp-background-100 bg-wp-background-100 dark:bg-wp-background-300 border-b text-wp-text-100"
     :class="{ 'md:px-4': fullWidth }"
   >
     <Container :full-width="fullWidth" class="!py-0">

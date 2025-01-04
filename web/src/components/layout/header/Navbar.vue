@@ -1,6 +1,6 @@
 <template>
   <nav
-    class="text-neutral-content flex border-b border-wp-background-100 bg-wp-primary-200 p-4 font-bold text-wp-primary-text-100 dark:bg-wp-primary-300"
+    class="border-wp-background-100 bg-wp-primary-200 dark:bg-wp-primary-300 text-neutral-content text-wp-primary-text-100 flex border-b p-4 font-bold"
   >
     <div class="flex items-center space-x-2">
       <router-link :to="{ name: 'home' }" class="-my-2 flex flex-col px-2">
