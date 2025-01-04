@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2025-01-02
+## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2025-01-04
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -241,6 +241,8 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update module github.com/moby/term to v0.5.2 [[#4658](https://github.com/woodpecker-ci/woodpecker/pull/4658)]
+- fix(deps): update web npm deps non-major [[#4659](https://github.com/woodpecker-ci/woodpecker/pull/4659)]
 - chore(deps): update docker.io/woodpeckerci/plugin-ready-release-go docker tag to v3.1.1 [[#4642](https://github.com/woodpecker-ci/woodpecker/pull/4642)]
 - fix(deps): update dependency simple-icons to v14.0.1 [[#4640](https://github.com/woodpecker-ci/woodpecker/pull/4640)]
 - fix(deps): update module github.com/google/go-github/v67 to v68 [[#4635](https://github.com/woodpecker-ci/woodpecker/pull/4635)]
