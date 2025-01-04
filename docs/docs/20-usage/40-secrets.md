@@ -25,7 +25,7 @@ Woodpecker can mask secrets from its native secret store, but it cannot apply th
 
 You can set a setting or environment value from Woodpecker secrets using the `from_secret` syntax.
 
-The example below passes a secret called `SECRET_TOKEN` which will be stored in an environment variable named `TOKEN_ENV`:
+The example below passes a secret called `secret_token` which will be stored in an environment variable named `TOKEN_ENV`:
 
 ```diff
  steps:
@@ -35,11 +35,11 @@ The example below passes a secret called `SECRET_TOKEN` which will be stored in 
 +      - echo "The secret is $TOKEN_ENV"
 +    environment:
 +      TOKEN_ENV:
-+        from_secret: SECRET_TOKEN
++        from_secret: secret_token
 ```
 
 The same syntax can be used to pass secrets to (plugin) settings.
-A secret named `SECRET_TOKEN` is assigned to the setting `TOKEN`, which will then be available in the plugin as environment variable `PLUGIN_TOKEN` (see [plugins](./51-plugins/20-creating-plugins.md#settings) for details).
+A secret named `secret_token` is assigned to the setting `TOKEN`, which will then be available in the plugin as environment variable `PLUGIN_TOKEN` (see [plugins](./51-plugins/20-creating-plugins.md#settings) for details).
 `PLUGIN_TOKEN` is then internally consumed by the plugin itself and will be honored during execution.
 
 ```diff
