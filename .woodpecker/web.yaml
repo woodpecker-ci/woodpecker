@@ -34,6 +34,7 @@ steps:
       plugins:
         - 'prettier-plugin-tailwindcss'
         - '@ianvs/prettier-plugin-sort-imports'
+    when: *when
 
   lint:
     depends_on:
