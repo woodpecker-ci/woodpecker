@@ -345,6 +345,7 @@
 
 ### Misc
 
+- Improve code highlighting in web UI [[#4447](https://github.com/woodpecker-ci/woodpecker/pull/4447)]
 - Revert "Two row layout for title and context of pipeline list" [[#4649](https://github.com/woodpecker-ci/woodpecker/pull/4649)]
 - Refactor icons: harmonize contextually, use filled status icons [[#4584](https://github.com/woodpecker-ci/woodpecker/pull/4584)]
 - Add lighter red shades for error messages [[#4611](https://github.com/woodpecker-ci/woodpecker/pull/4611)]
