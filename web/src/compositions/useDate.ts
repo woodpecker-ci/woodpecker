@@ -87,7 +87,7 @@ function durationAsNumber(durationMs: number): string {
 }
 
 export function useDate() {
-  async function setDayjsLocale(locale: string) {
+  async function setDateLocale(locale: string) {
     currentLocale = locale;
   }
 
@@ -95,7 +95,7 @@ export function useDate() {
     toLocaleString,
     timeAgo,
     prettyDuration,
-    setDayjsLocale,
+    setDateLocale,
     durationAsNumber,
   };
 }
