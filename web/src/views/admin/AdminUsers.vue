@@ -10,11 +10,11 @@
       <Button v-else :text="$t('admin.settings.users.add')" start-icon="plus" @click="showAddUser" />
     </template>
 
-    <div v-if="!selectedUser" class="space-y-4 text-wp-text-100">
+    <div v-if="!selectedUser" class="text-wp-text-100 space-y-4">
       <ListItem
         v-for="user in users"
         :key="user.id"
-        class="admin-users items-center gap-2 !bg-wp-background-200 dark:!bg-wp-background-100"
+        class="admin-users !bg-wp-background-200 !dark:bg-wp-background-100 items-center gap-2"
       >
         <img v-if="user.avatar_url" class="h-6 rounded-md" :src="user.avatar_url" />
         <span>{{ user.login }}</span>
@@ -33,7 +33,8 @@
         <IconButton
           icon="trash"
           :title="$t('admin.settings.users.delete_user')"
-          class="ml-2 h-8 w-8 hover:text-wp-error-100"
+          class="hover:text-wp-error-100 ml-2 h-8 w-8"
+
           :is-loading="isDeleting"
           @click="deleteUser(user)"
         />

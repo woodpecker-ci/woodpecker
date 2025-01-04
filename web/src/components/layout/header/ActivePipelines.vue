@@ -41,7 +41,7 @@ onMounted(async () => {
   overflow: hidden;
 }
 .spinner::before {
-  @apply absolute bg-wp-primary-200 dark:bg-wp-primary-300;
+  @apply bg-wp-primary-200 dark:bg-wp-primary-300 absolute;
   content: '';
   left: -50%;
   top: -50%;
@@ -55,7 +55,7 @@ onMounted(async () => {
   animation: rotate 1.5s linear infinite;
 }
 .spinner::after {
-  @apply absolute inset-0.5 bg-wp-primary-200 dark:bg-wp-primary-300;
+  @apply bg-wp-primary-200 dark:bg-wp-primary-300 absolute inset-0.5;
   /*
   The nested border radius needs to be calculated correctly to look right:
   https://www.30secondsofcode.org/css/s/nested-border-radius/

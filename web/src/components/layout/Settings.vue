@@ -1,8 +1,8 @@
 <template>
   <Panel>
-    <div class="mb-4 flex flex-col justify-center border-b pb-4 dark:border-wp-background-100">
+    <div class="dark:border-wp-background-100 mb-4 flex flex-col justify-center border-b pb-4">
       <div class="flex items-center justify-between">
-        <h1 class="flex items-center gap-1 text-xl text-wp-text-100">
+        <h1 class="text-wp-text-100 flex items-center gap-1 text-xl">
           {{ title }}
           <DocsLink v-if="docsUrl" :topic="title" :url="docsUrl" />
         </h1>

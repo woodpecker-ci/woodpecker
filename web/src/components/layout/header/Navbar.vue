@@ -26,7 +26,7 @@
         :to="{ name: 'admin-settings' }"
       >
         <Icon name="settings" />
-        <div v-if="version?.needsUpdate" class="absolute right-2 top-2 h-3 w-3 rounded-full bg-int-wp-error-100" />
+        <div v-if="version?.needsUpdate" class="bg-int-wp-error-100 absolute right-2 top-2 h-3 w-3 rounded-full" />
       </IconButton>
 
       <ActivePipelines v-if="user" class="navbar-icon !p-1.5" />

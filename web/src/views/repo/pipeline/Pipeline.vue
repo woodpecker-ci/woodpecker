@@ -11,7 +11,7 @@
         <Container v-if="pipeline!.errors?.some((e) => !e.is_warning)" fill-width class="p-0">
           <Panel>
             <div class="flex flex-col items-center gap-4 text-center">
-              <Icon name="status-error" class="h-16 w-16 text-wp-error-100" size="1.5rem" />
+              <Icon name="status-error" class="text-wp-error-100 h-16 w-16" size="1.5rem" />
               <span class="text-xl">{{ $t('repo.pipeline.we_got_some_errors') }}</span>
               <Button color="red" :text="$t('repo.pipeline.show_errors')" :to="{ name: 'repo-pipeline-errors' }" />
             </div>

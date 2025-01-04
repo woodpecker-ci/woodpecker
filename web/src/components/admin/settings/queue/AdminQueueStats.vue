@@ -1,7 +1,7 @@
 <template>
   <div v-if="stats" class="flex justify-center">
     <div
-      class="w-full rounded-md border border-wp-background-300 bg-wp-background-200 px-5 py-5 text-wp-text-100 dark:bg-wp-background-100"
+      class="border-wp-background-300 dark:bg-wp-background-100 bg-wp-background-200 text-wp-text-100 w-full rounded-md border px-5 py-5"
     >
       <div class="flex w-full">
         <h3 class="flex-1 text-lg font-semibold uppercase leading-tight">
@@ -33,7 +33,7 @@
               v-for="(item, index) in data"
               :key="item.key"
               class="px-4 sm:w-full md:w-1/4"
-              :class="{ 'border-gray-300 dark:border-gray-600 md:border-l': index !== 0 }"
+              :class="{ 'border-gray-300 md:border-l dark:border-gray-600': index !== 0 }"
             >
               <div class="overflow-hidden text-ellipsis whitespace-nowrap text-sm">
                 <span class="mr-1 inline-block h-2 w-2 rounded-full align-middle" :class="`${item.color}`">&nbsp;</span>

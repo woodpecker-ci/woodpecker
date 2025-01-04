@@ -1,5 +1,5 @@
 <template>
-  <div class="m-auto flex flex-col gap-4">
+  <div class="text-wp-text-100 text-center">
     <div class="text-center text-wp-text-100">
       <WoodpeckerLogo preserveAspectRatio="xMinYMin slice" class="m-auto mb-8 w-32" />
       <template v-if="state === 'confirm'">

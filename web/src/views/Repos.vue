@@ -15,7 +15,7 @@
         </div>
 
         <div class="flex flex-col gap-4">
-          <h2 class="text-lg text-wp-text-100">{{ $t('all_repositories') }}</h2>
+          <h2 class="text-wp-text-100 text-lg">{{ $t('all_repositories') }}</h2>
           <div class="flex flex-col gap-4">
             <RepoItem v-for="repo in reposLastActivity" :key="repo.id" :repo="repo" />
           </div>
@@ -25,7 +25,7 @@
         <div v-if="reposLastActivity.length > 0" class="flex flex-col gap-4">
           <RepoItem v-for="repo in reposLastActivity" :key="repo.id" :repo="repo" />
         </div>
-        <span v-else class="text-center text-lg text-wp-text-100">{{ $t('no_search_results') }}</span>
+        <span v-else class="text-wp-text-100 text-center text-lg">{{ $t('no_search_results') }}</span>
       </div>
     </Transition>
   </Scaffold>

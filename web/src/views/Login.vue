@@ -7,20 +7,20 @@
         v-if="errorUri"
         :href="errorUri"
         target="_blank"
-        class="mt-1 cursor-pointer text-wp-link-100 hover:text-wp-link-200"
+        class="text-wp-link-100 hover:text-wp-link-200 mt-1 cursor-pointer"
       >
         <span>{{ errorUri }}</span>
       </a>
     </Error>
 
     <div
-      class="flex w-full flex-col overflow-hidden border border-wp-background-400 bg-wp-background-100 shadow dark:bg-wp-background-200 md:m-8 md:h-96 md:max-w-3xl md:flex-row md:rounded-md"
+      class="bg-wp-background-100 border-wp-background-400 dark:bg-wp-background-200 flex w-full flex-col overflow-hidden border shadow md:m-8 md:h-96 md:max-w-3xl md:flex-row md:rounded-md"
     >
-      <div class="flex min-h-48 items-center justify-center bg-wp-primary-200 dark:bg-wp-primary-300 md:w-3/5">
+      <div class="bg-wp-primary-200 dark:bg-wp-primary-300 flex min-h-48 items-center justify-center md:w-3/5">
         <WoodpeckerLogo preserveAspectRatio="xMinYMin slice" class="w-30 h-30 md:h-48 md:w-48" />
       </div>
       <div class="flex min-h-48 flex-col items-center justify-center gap-4 text-center md:w-2/5">
-        <h1 class="text-xl text-wp-text-100">{{ $t('welcome') }}</h1>
+        <h1 class="text-wp-text-100 text-xl">{{ $t('welcome') }}</h1>
         <div class="flex flex-col gap-2">
           <Button
             v-for="forge in forges"

@@ -22,7 +22,7 @@
         :label="$t('repo.settings.general.netrc_only_trusted.netrc_only_trusted')"
         docs-url="docs/usage/project-settings#custom-trusted-clone-plugins"
       >
-        <span class="mb-2 ml-1 text-wp-text-alt-100">{{ $t('repo.settings.general.netrc_only_trusted.desc') }}</span>
+        <span class="text-wp-text-alt-100 mb-2 ml-1">{{ $t('repo.settings.general.netrc_only_trusted.desc') }}</span>
 
         <div class="flex flex-col gap-2">
           <div v-for="image in repoSettings.netrc_trusted" :key="image" class="flex gap-2">
@@ -99,7 +99,7 @@
       >
         <div class="flex items-center">
           <NumberField :id="id" v-model="repoSettings.timeout" class="w-24" />
-          <span class="ml-4 text-wp-text-alt-100">{{ $t('repo.settings.general.timeout.minutes') }}</span>
+          <span class="text-wp-text-alt-100 ml-4">{{ $t('repo.settings.general.timeout.minutes') }}</span>
         </div>
       </InputField>
 
@@ -115,7 +115,7 @@
           />
         </template>
         <template #description>
-          <i18n-t keypath="repo.settings.general.pipeline_path.desc" tag="p" class="text-sm text-wp-text-alt-100">
+          <i18n-t keypath="repo.settings.general.pipeline_path.desc" tag="p" class="text-wp-text-alt-100 text-sm">
             <span class="code-box-inline">{{ $t('repo.settings.general.pipeline_path.desc_path_example') }}</span>
             <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
             <span class="code-box-inline">/</span>

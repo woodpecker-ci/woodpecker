@@ -18,7 +18,7 @@
             class="<md:hidden mr-2 h-8 w-8 flex-shrink-0 md:justify-between"
             @click="goBack"
           />
-          <h1 class="flex min-w-0 items-center gap-x-2 text-xl text-wp-text-100">
+          <h1 class="text-wp-text-100 flex min-w-0 items-center gap-x-2 text-xl">
             <slot name="title" />
           </h1>
         </div>
