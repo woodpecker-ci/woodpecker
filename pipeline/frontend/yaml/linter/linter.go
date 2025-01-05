@@ -94,9 +94,6 @@ func (l *Linter) lintFile(config *WorkflowConfig) error {
 	if err := l.lintContainers(config, "services"); err != nil {
 		linterErr = multierr.Append(linterErr, err)
 	}
-	if err := l.lintDependsOn(config); err != nil {
-		linterErr = multierr.Append(linterErr, err)
-	}
 
 	if err := l.lintSchema(config); err != nil {
 		linterErr = multierr.Append(linterErr, err)
@@ -164,30 +161,33 @@ func (l *Linter) lintContainers(config *WorkflowConfig, area string) error {
 		if err := l.lintContainerDeprecations(config, container, area); err != nil {
 			linterErr = multierr.Append(linterErr, err)
 		}
+		if err := l.lintDependsOn(config, container, area); err != nil {
+			linterErr = multierr.Append(linterErr, err)
+		}
 	}
 
 	return linterErr
 }
 
-func (l *Linter) lintDependsOn(config *WorkflowConfig) error {
+func (l *Linter) lintDependsOn(config *WorkflowConfig, c *types.Container, area string) error {
+	if area != "steps" {
+		return nil
+	}
+
 	var linterErr error
-	for _, c := range config.Workflow.Steps.ContainerList {
-		if c.DependsOn != nil {
-		check:
-			for _, dep := range c.DependsOn {
-				for _, step := range config.Workflow.Steps.ContainerList {
-					if dep == step.Name {
-						continue check
-					}
-				}
-				linterErr = multierr.Append(linterErr,
-					newLinterError(
-						"One or more of the specified dependencies do not exist",
-						config.File, fmt.Sprintf("steps.%s.depends_on", c.Name), false,
-					),
-				)
+check:
+	for _, dep := range c.DependsOn {
+		for _, step := range config.Workflow.Steps.ContainerList {
+			if dep == step.Name {
+				continue check
 			}
 		}
+		linterErr = multierr.Append(linterErr,
+			newLinterError(
+				"One or more of the specified dependencies do not exist",
+				config.File, fmt.Sprintf("%s.%s.depends_on", area, c.Name), false,
+			),
+		)
 	}
 	return linterErr
 }
