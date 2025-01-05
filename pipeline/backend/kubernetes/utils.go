@@ -34,16 +34,21 @@ var (
 func dnsName(i string) (string, error) {
 	res := strings.ToLower(strings.ReplaceAll(i, "_", "-"))
 
-	// Check for invalid characters (dnsDisallowedCharacters)
 	invalidChars := dnsDisallowedCharacters.FindAllString(res, -1)
 	if len(invalidChars) > 0 {
 		return "", fmt.Errorf("name is not a valid kubernetes DNS name: found invalid characters '%v'", strings.Join(invalidChars, ""))
 	}
 
-	// Check if the entire string matches the dnsPattern
 	if !dnsPattern.MatchString(res) {
 		return "", fmt.Errorf("name is not a valid kubernetes DNS name")
 	}
+
+	// k8s pod name limit
+	const maxPodNameLength = 253
+	if len(res) > maxPodNameLength {
+		res = res[:maxPodNameLength]
+	}
+
 	return res, nil
 }
 
