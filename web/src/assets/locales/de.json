@@ -316,7 +316,7 @@
                 "metadata_download_error": "Fehler beim Herunterladen der Metadaten",
                 "title": "Debug",
                 "metadata_exec_title": "Pipeline lokal erneut ausführen",
-                "metadata_exec_desc": "Lade die Metadaten dieser Pipeline herunter, um diese lokal auszuführen. Dies erlaubt dir, Fehler zu beheben und Änderungen zu testen, bevor du einen Commit erstellst."
+                "metadata_exec_desc": "Lade die Metadaten dieser Pipeline herunter, um diese lokal auszuführen. Dies erlaubt dir, Fehler zu beheben und Änderungen zu testen, bevor du einen Commit erstellst. `woodpecke-cli` muss in der zum Server passenden Version lokal installiert sein."
             }
         },
         "pull_requests": "Pull-Requests",
