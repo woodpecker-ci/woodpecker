@@ -570,9 +570,17 @@ func (c *client) updatePipelineFromCommit(ctx context.Context, u *model.User, r 
 	return p, nil
 }
 
-func GetAllProjects(ctx context.Context, client *bb.Client, opts *bb.ListOptions) ([]*bb.Project, error) {
+func (c *client) Teams(ctx context.Context, u *model.User) ([]*model.Team, error) {
+	// Initialize API path and options
+	const path = "projects"
+	opts := &bb.ListOptions{Start: 0, Limit: 50}
 	var allProjects []*bb.Project
-	path := "projects"
+
+	// Create a new client
+	bc, err := c.newClient(ctx, u)
+	if err != nil {
+		return nil, fmt.Errorf("unable to create client: %w", err)
+	}
 
 	for {
 		// Structure to hold the API response
@@ -582,13 +590,13 @@ func GetAllProjects(ctx context.Context, client *bb.Client, opts *bb.ListOptions
 		}
 
 		// Fetch a page of projects
-		resp, err := client.GetPaged(ctx, "api", path, &projectPage, opts)
+		resp, err := bc.GetPaged(ctx, "api", path, &projectPage, opts)
 		if err != nil {
 			return nil, fmt.Errorf("unable to fetch projects: %w", err)
 		}
 
+		// Append the projects and check if we're at the last page
 		allProjects = append(allProjects, projectPage.Values...)
-
 		if resp.LastPage {
 			break
 		}
@@ -596,21 +604,8 @@ func GetAllProjects(ctx context.Context, client *bb.Client, opts *bb.ListOptions
 		opts.Start = resp.NextPageStart
 	}
 
-	return allProjects, nil
-}
-
-func (c *client) Teams(ctx context.Context, u *model.User) ([]*model.Team, error) {
-	bc, err := c.newClient(ctx, u)
-	if err != nil {
-		return nil, fmt.Errorf("unable to create client: %w", err)
-	}
-
-	opts := &bb.ListOptions{Start: 0, Limit: 50}
-	projects, err := GetAllProjects(ctx, bc, opts)
-	if err != nil {
-		return nil, fmt.Errorf("bitbucketdatacenter: error fetching all projects: %w", err)
-	}
-	return convertProjectsToTeams(projects, bc), nil
+	// Convert projects to teams and return
+	return convertProjectsToTeams(allProjects, bc), nil
 }
 
 // TeamPerm is not supported.
