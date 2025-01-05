@@ -68,12 +68,12 @@ func Test_parsePush(t *testing.T) {
 		pipeline := pipelineFromPush(hook)
 		assert.Equal(t, model.EventPush, pipeline.Event)
 		assert.Equal(t, &model.Commit{
-			SHA: "ef98532add3b2feb7a137426bba1248724367df5",
-			Message: "bump\n",
+			SHA:      "ef98532add3b2feb7a137426bba1248724367df5",
+			Message:  "bump\n",
 			ForgeURL: "http://gitea.golang.org/gordon/hello-world/commit/ef98532add3b2feb7a137426bba1248724367df5",
 			Author: model.CommitAuthor{
 				Author: "Gordon the Gopher",
-				Email: "gordon@golang.org",
+				Email:  "gordon@golang.org",
 			},
 		}, pipeline.Commit)
 		assert.Equal(t, hook.Ref, pipeline.Ref)
@@ -103,7 +103,7 @@ func Test_parsePush(t *testing.T) {
 		assert.Equal(t, hook.Sha, pipeline.Commit.SHA)
 		assert.Equal(t, "refs/tags/v1.0.0", pipeline.Ref)
 		assert.Empty(t, pipeline.Branch)
-		assert.Equal(t, "http://gitea.golang.org/gordon/hello-world/src/releases/v1.0.0", pipeline.ForgeURL)
+		assert.Equal(t, "http://gitea.golang.org/gordon/hello-world/src/releases/tag/v1.0.0", pipeline.ForgeURL)
 	})
 }
 

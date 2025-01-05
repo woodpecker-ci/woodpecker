@@ -65,7 +65,7 @@ func TestForgejoParser(t *testing.T) {
 			pipe: &model.Pipeline{
 				Event: "push",
 				Commit: &model.Commit{
-					SHA: "28c3613ae62640216bea5e7dc71aa65356e4298b",
+					SHA:     "28c3613ae62640216bea5e7dc71aa65356e4298b",
 					Message: "Delete '.woodpecker/.check.yml'\n",
 					Author: model.CommitAuthor{
 						Author: "meisam",
@@ -110,7 +110,7 @@ func TestForgejoParser(t *testing.T) {
 						Email:  "gordon@golang.org",
 					},
 					ForgeURL: "http://forgejo.golang.org/gordon/hello-world/commit/ef98532add3b2feb7a137426bba1248724367df5",
-					Message: "bump\n",
+					Message:  "bump\n",
 				},
 				Branch:       "main",
 				Ref:          "refs/heads/main",
@@ -364,12 +364,12 @@ func TestForgejoParser(t *testing.T) {
 				},
 			},
 			pipe: &model.Pipeline{
-				Event:  "release",
-				Branch: "main",
-				Ref:    "refs/tags/0.0.5",
-				Author: "anbraten",
-				Avatar: "https://git.xxx/user/avatar/anbraten/-1",
-				ForgeURL: "https://git.xxx/anbraten/demo/releases/tag/0.0.5",
+				Event:        "release",
+				Branch:       "main",
+				Ref:          "refs/tags/0.0.5",
+				Author:       "anbraten",
+				Avatar:       "https://git.xxx/user/avatar/anbraten/-1",
+				ForgeURL:     "https://git.xxx/anbraten/demo/releases/tag/0.0.5",
 				ReleaseTitle: "Version 0.0.5",
 			},
 		},

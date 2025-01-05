@@ -67,12 +67,12 @@ func Test_parsePush(t *testing.T) {
 		pipeline := pipelineFromPush(hook)
 		assert.Equal(t, model.EventPush, pipeline.Event)
 		assert.Equal(t, &model.Commit{
-			SHA:"ef98532add3b2feb7a137426bba1248724367df5",
-			Message:"bump\n",
-			ForgeURL:"http://forgejo.golang.org/gordon/hello-world/commit/ef98532add3b2feb7a137426bba1248724367df5",
-			Author:model.CommitAuthor{
-				Author:"Gordon the Gopher",
-				Email:"gordon@golang.org",
+			SHA:      "ef98532add3b2feb7a137426bba1248724367df5",
+			Message:  "bump\n",
+			ForgeURL: "http://forgejo.golang.org/gordon/hello-world/commit/ef98532add3b2feb7a137426bba1248724367df5",
+			Author: model.CommitAuthor{
+				Author: "Gordon the Gopher",
+				Email:  "gordon@golang.org",
 			},
 		}, pipeline.Commit)
 		assert.Equal(t, hook.Ref, pipeline.Ref)

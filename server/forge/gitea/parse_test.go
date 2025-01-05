@@ -188,7 +188,7 @@ func TestGiteaParser(t *testing.T) {
 				Ref:      "refs/tags/v1.0.0",
 				Author:   "gordon",
 				Avatar:   "https://secure.gravatar.com/avatar/8c58a0be77ee441bb8f8595b7f1b4e87",
-				ForgeURL: "http://gitea.golang.org/gordon/hello-world/src/releases/v1.0.0",
+				ForgeURL: "http://gitea.golang.org/gordon/hello-world/src/releases/tag/v1.0.0",
 			},
 		},
 		{
