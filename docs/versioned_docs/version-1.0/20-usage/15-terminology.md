@@ -32,11 +32,11 @@ Sometimes there exist multiple terms that can be used for a thing, we try to def
 - **Pipelines** were previously called **builds**
 - **Steps** were previously called **jobs**
 
-[Pipeline]:  ./20-pipeline-syntax.md
-[Workflow]:  ./25-workflows.md
-[Forge]:     ../30-administration/11-forges/10-overview.md
-[Plugin]:    ./51-plugins/10-plugins.md
+[Pipeline]: ./20-pipeline-syntax.md
+[Workflow]: ./25-workflows.md
+[Forge]: ../30-administration/11-forges/10-overview.md
+[Plugin]: ./51-plugins/10-plugins.md
 [Workspace]: ./20-pipeline-syntax.md#workspace
-[Matrix]:    ./30-matrix-workflows.md
-[Docker]:    ../30-administration/22-backends/10-docker.md
-[Local]:     ../30-administration/22-backends/20-local.md
+[Matrix]: ./30-matrix-workflows.md
+[Docker]: ../30-administration/22-backends/10-docker.md
+[Local]: ../30-administration/22-backends/20-local.md

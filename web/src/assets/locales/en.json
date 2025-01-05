@@ -24,8 +24,8 @@
     "not_found": "Server could not find requested object"
   },
   "time": {
-    "template": "MMM D, YYYY, HH:mm z",
-    "not_started": "not started yet"
+    "not_started": "not started yet",
+    "just_now": "just now"
   },
   "repo": {
     "manual_pipeline": {
@@ -42,8 +42,8 @@
       "show_pipelines": "Show pipelines"
     },
     "deploy_pipeline": {
-      "title": "Trigger deployment event for current pipeline #{pipelineId}",
-      "enter_target": "Target deployment environment",
+      "title": "Trigger a 'deployment' event for current pipeline #{pipelineId}",
+      "enter_target": "Target 'deployment' environment",
       "enter_task": "Deployment task",
       "trigger": "Deploy",
       "variables": {
@@ -67,13 +67,28 @@
       "success": "Repository enabled"
     },
     "open_in_forge": "Open repository in forge",
+    "visibility": {
+      "visibility": "Project visibility",
+      "public": {
+        "public": "Public",
+        "desc": "Every user can see your project without being logged in."
+      },
+      "private": {
+        "private": "Private",
+        "desc": "Only you and other owners of the repository can see this project."
+      },
+      "internal": {
+        "internal": "Internal",
+        "desc": "Only authenticated users of the Woodpecker instance can see this project."
+      }
+    },
     "settings": {
       "not_allowed": "You are not allowed to access this repository's settings",
       "general": {
         "general": "General",
         "project": "Project settings",
         "save": "Save settings",
-        "success": "Repository settings updated",
+        "success": "Project settings updated",
         "pipeline_path": {
           "path": "Pipeline path",
           "default": "By default: .woodpecker/*.{'{yaml,yml}'} -> .woodpecker.yaml -> .woodpecker.yml",
@@ -82,37 +97,29 @@
         },
         "allow_pr": {
           "allow": "Allow Pull Requests",
-          "desc": "Pipelines can run on pull requests."
+          "desc": "Allow pipelines to run on pull requests."
         },
         "allow_deploy": {
-          "allow": "Allow deployments",
-          "desc": "Allow deployments from successful pipelines. Only use if you trust all users with push access."
-        },
-        "protected": {
-          "protected": "Protected",
-          "desc": "Every pipeline needs to be approved before being executed."
+          "allow": "Allow 'deployment' events.",
+          "desc": "Permit 'deployment' runs for successful pipelines. All users with with push permissions can trigger these, so use with caution."
         },
         "netrc_only_trusted": {
-          "netrc_only_trusted": "Only inject netrc credentials into trusted containers",
-          "desc": "Only inject netrc credentials into trusted containers (recommended)."
+          "netrc_only_trusted": "Custom trusted clone plugins",
+          "desc": "Plugins listed here will get access to netrc credentials that can be used to clone repositories from the forge or push to it."
         },
         "trusted": {
           "trusted": "Trusted",
-          "desc": "Underlying pipeline containers get access to escalated capabilities (like mounting volumes)."
-        },
-        "visibility": {
-          "visibility": "Project visibility",
-          "public": {
-            "public": "Public",
-            "desc": "Every user can see your project without being logged in."
+          "network": {
+            "network": "Network",
+            "desc": "Pipeline containers get access to network privileges like changing DNS."
           },
-          "private": {
-            "private": "Private",
-            "desc": "Only you and other owners of the repository can see this project."
+          "volumes": {
+            "volumes": "Volumes",
+            "desc": "Pipeline containers are allowed to mount volumes."
           },
-          "internal": {
-            "internal": "Internal",
-            "desc": "Only authenticated users of the Woodpecker instance can see this project."
+          "security": {
+            "security": "Security",
+            "desc": "Pipeline containers get access to security privileges."
           }
         },
         "timeout": {
@@ -121,7 +128,7 @@
         },
         "cancel_prev": {
           "cancel": "Cancel previous pipelines",
-          "desc": "Enable to cancel pending and running pipelines of the same event and context before starting the newly triggered one."
+          "desc": "Selected event triggers will cancel pending and running pipelines of the same event before starting the most recent one."
         }
       },
       "crons": {
@@ -184,7 +191,7 @@
     "pipeline": {
       "tasks": "Tasks",
       "config": "Config",
-      "files": "Changed files ({files})",
+      "files": "Changed files",
       "no_pipelines": "No pipelines have been started yet.",
       "no_pipeline_steps": "No pipeline steps available!",
       "step_not_started": "This step hasn't started yet.",
@@ -241,8 +248,8 @@
         "failure": "failure",
         "killed": "killed"
       },
-      "errors": "Errors ({count})",
-      "warnings": "Warnings ({count})",
+      "errors": "Errors",
+      "warnings": "Warnings",
       "show_errors": "Show errors",
       "we_got_some_errors": "Oh no, we got some errors!",
       "duration": "Pipeline duration",
@@ -254,7 +261,7 @@
         "metadata_download_successful": "Metadata downloaded successfully",
         "no_permission": "You don't have permission to access debug information.",
         "metadata_exec_title": "Rerun pipeline locally",
-        "metadata_exec_desc": "Download this pipeline's metadata to run it locally. This allows you to troubleshoot issues and test changes before committing them."
+        "metadata_exec_desc": "Download this pipeline's metadata to run it locally. This allows you to troubleshoot issues and test changes before committing them. `woodpecker-cli` matching the Woodpecker Server version must be installed locally."
       }
     }
   },
@@ -493,5 +500,16 @@
   "internal_error": "Some internal error occurred",
   "registration_closed": "The registration is closed",
   "access_denied": "You are not allowed to access this instance",
-  "invalid_state": "The OAuth state is invalid"
+  "invalid_state": "The OAuth state is invalid",
+  "require_approval": {
+    "desc": "Prevent malicious pipelines from exposing secrets or running harmful tasks by approving them before execution.",
+    "require_approval_for": "Approval requirements",
+    "none": "None",
+    "none_desc": "Every event triggers pipelines, including pull requests. This setting can be dangerous and is only recommended for private instances.",
+    "forks": "Pull request from forked repository",
+    "pull_requests": "All pull requests",
+    "all_events": "All events from forge"
+  },
+  "all_repositories": "All repositories",
+  "no_search_results": "No results found"
 }

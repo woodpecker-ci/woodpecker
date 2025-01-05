@@ -37,7 +37,7 @@ import (
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/cache"
 
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 )
 
 const (
@@ -70,6 +70,7 @@ type config struct {
 }
 type SecurityContextConfig struct {
 	RunAsNonRoot bool
+	FSGroup      *int64
 }
 
 func newDefaultDeleteOptions() meta_v1.DeleteOptions {
@@ -98,6 +99,7 @@ func configFromCliContext(ctx context.Context) (*config, error) {
 				ImagePullSecretNames:        c.StringSlice("backend-k8s-pod-image-pull-secret-names"),
 				SecurityContext: SecurityContextConfig{
 					RunAsNonRoot: c.Bool("backend-k8s-secctx-nonroot"), // cspell:words secctx nonroot
+					FSGroup:      newInt64(defaultFSGroup),
 				},
 				NativeSecretsAllowFromStep: c.Bool("backend-k8s-allow-native-secrets"),
 			}
@@ -189,11 +191,9 @@ func (e *kube) getConfig() *config {
 func (e *kube) SetupWorkflow(ctx context.Context, conf *types.Config, taskUUID string) error {
 	log.Trace().Str("taskUUID", taskUUID).Msgf("Setting up Kubernetes primitives")
 
-	for _, vol := range conf.Volumes {
-		_, err := startVolume(ctx, e, vol.Name)
-		if err != nil {
-			return err
-		}
+	_, err := startVolume(ctx, e, conf.Volume.Name)
+	if err != nil {
+		return err
 	}
 
 	var extraHosts []types.HostAlias
@@ -250,10 +250,10 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 
 	finished := make(chan bool)
 
-	podUpdated := func(_, new any) {
-		pod, ok := new.(*v1.Pod)
+	podUpdated := func(_, newPod any) {
+		pod, ok := newPod.(*v1.Pod)
 		if !ok {
-			log.Error().Msgf("could not parse pod: %v", new)
+			log.Error().Msgf("could not parse pod: %v", newPod)
 			return
 		}
 
@@ -326,10 +326,10 @@ func (e *kube) TailStep(ctx context.Context, step *types.Step, taskUUID string) 
 
 	up := make(chan bool)
 
-	podUpdated := func(_, new any) {
-		pod, ok := new.(*v1.Pod)
+	podUpdated := func(_, newPod any) {
+		pod, ok := newPod.(*v1.Pod)
 		if !ok {
-			log.Error().Msgf("could not parse pod: %v", new)
+			log.Error().Msgf("could not parse pod: %v", newPod)
 			return
 		}
 
@@ -379,7 +379,6 @@ func (e *kube) TailStep(ctx context.Context, step *types.Step, taskUUID string) 
 	go func() {
 		defer logs.Close()
 		defer wc.Close()
-		defer rc.Close()
 
 		_, err = io.Copy(wc, logs)
 		if err != nil {
@@ -426,11 +425,9 @@ func (e *kube) DestroyWorkflow(ctx context.Context, conf *types.Config, taskUUID
 		}
 	}
 
-	for _, vol := range conf.Volumes {
-		err := stopVolume(ctx, e, vol.Name, defaultDeleteOptions)
-		if err != nil {
-			return err
-		}
+	err := stopVolume(ctx, e, conf.Volume.Name, defaultDeleteOptions)
+	if err != nil {
+		return err
 	}
 
 	return nil

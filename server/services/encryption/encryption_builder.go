@@ -18,8 +18,8 @@ import (
 	"errors"
 	"fmt"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server/services/encryption/types"
-	storeTypes "go.woodpecker-ci.org/woodpecker/v2/server/store/types"
+	"go.woodpecker-ci.org/woodpecker/v3/server/services/encryption/types"
+	storeTypes "go.woodpecker-ci.org/woodpecker/v3/server/store/types"
 )
 
 func (b builder) getService(keyType string) (types.EncryptionService, error) {

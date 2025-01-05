@@ -26,13 +26,14 @@ import (
 	"k8s.io/apimachinery/pkg/api/resource"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/common"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/common"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 )
 
 const (
-	StepLabel = "step"
-	podPrefix = "wp-"
+	StepLabel            = "step"
+	podPrefix            = "wp-"
+	defaultFSGroup int64 = 1000
 )
 
 func mkPod(step *types.Step, config *config, podName, goos string, options BackendOptions) (*v1.Pod, error) {
@@ -161,6 +162,16 @@ func podSpec(step *types.Step, config *config, options BackendOptions, nsp nativ
 		return spec, err
 	}
 
+	if len(step.DNS) != 0 || len(step.DNSSearch) != 0 {
+		spec.DNSConfig = &v1.PodDNSConfig{}
+		if len(step.DNS) != 0 {
+			spec.DNSConfig.Nameservers = step.DNS
+		}
+		if len(step.DNSSearch) != 0 {
+			spec.DNSConfig.Searches = step.DNSSearch
+		}
+	}
+
 	log.Trace().Msgf("using the image pull secrets: %v", config.ImagePullSecretNames)
 	spec.ImagePullSecrets = secretsReferences(config.ImagePullSecretNames)
 	if needsRegistrySecret(step) {
@@ -192,9 +203,12 @@ func podContainer(step *types.Step, podName, goos string, options BackendOptions
 	}
 
 	if len(step.Commands) > 0 {
-		scriptEnv, command := common.GenerateContainerConf(step.Commands, goos)
+		scriptEnv, command := common.GenerateContainerConf(step.Commands, goos, step.WorkingDir)
 		container.Command = command
 		maps.Copy(step.Environment, scriptEnv)
+
+		// step.WorkingDir will be respected by the generated script
+		container.WorkingDir = step.WorkspaceBase
 	}
 	if len(step.Entrypoint) > 0 {
 		container.Command = step.Entrypoint
@@ -389,6 +403,9 @@ func podSecurityContext(sc *SecurityContext, secCtxConf SecurityContextConfig, s
 	if secCtxConf.RunAsNonRoot {
 		nonRoot = newBool(true)
 	}
+	if secCtxConf.FSGroup != nil {
+		fsGroup = secCtxConf.FSGroup
+	}
 
 	if sc != nil {
 		// only allow to set user if its not root or step is privileged
@@ -406,6 +423,11 @@ func podSecurityContext(sc *SecurityContext, secCtxConf SecurityContextConfig, s
 			fsGroup = sc.FSGroup
 		}
 
+		// if unset, set fsGroup to 1000 by default to support non-root images
+		if sc.FSGroup != nil {
+			fsGroup = sc.FSGroup
+		}
+
 		// only allow to set nonRoot if it's not set globally already
 		if nonRoot == nil && sc.RunAsNonRoot != nil {
 			nonRoot = sc.RunAsNonRoot
@@ -415,7 +437,7 @@ func podSecurityContext(sc *SecurityContext, secCtxConf SecurityContextConfig, s
 		apparmor = apparmorProfile(sc.ApparmorProfile)
 	}
 
-	if nonRoot == nil && user == nil && group == nil && fsGroup == nil && seccomp == nil {
+	if nonRoot == nil && user == nil && group == nil && fsGroup == nil && seccomp == nil && apparmor == nil {
 		return nil
 	}
 

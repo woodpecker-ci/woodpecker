@@ -9,8 +9,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/urfave/cli/v3"
 
-	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
-	"go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/common"
+	"go.woodpecker-ci.org/woodpecker/v3/woodpecker-go/woodpecker"
 )
 
 func TestPipelineOutput(t *testing.T) {
@@ -23,7 +23,7 @@ func TestPipelineOutput(t *testing.T) {
 		{
 			name:     "table output with default columns",
 			args:     []string{},
-			expected: "NUMBER  STATUS   EVENT  BRANCH  MESSAGE  AUTHOR\n1       success  push   main    message  John Doe\n",
+			expected: "NUMBER  STATUS   EVENT  BRANCH  MESSAGE            AUTHOR\n1       success  push   main    message multiline  John Doe\n",
 		},
 		{
 			name:     "table output with custom columns",
@@ -33,7 +33,7 @@ func TestPipelineOutput(t *testing.T) {
 		{
 			name:     "table output with no header",
 			args:     []string{"output", "--output-no-headers"},
-			expected: "1  success  push  main  message  John Doe\n",
+			expected: "1  success  push  main  message multiline  John Doe\n",
 		},
 		{
 			name:     "go-template output",
@@ -47,14 +47,14 @@ func TestPipelineOutput(t *testing.T) {
 		},
 	}
 
-	pipelines := []woodpecker.Pipeline{
+	pipelines := []*woodpecker.Pipeline{
 		{
 			Number:  1,
 			Status:  "success",
 			Event:   "push",
 			Branch:  "main",
-			Message: "message",
-			Author:  "John Doe",
+			Message: "message\nmultiline",
+			Author:  "John Doe\n",
 		},
 	}
 

@@ -1,9 +1,10 @@
-import { LoadContext, Plugin, PluginContentLoadedActions } from '@docusaurus/types';
-import path from 'path';
 import fs from 'fs';
+import path from 'path';
+import { LoadContext, Plugin, PluginContentLoadedActions } from '@docusaurus/types';
 import axios, { AxiosError } from 'axios';
-import { Content, WoodpeckerPlugin, WoodpeckerPluginHeader, WoodpeckerPluginIndexEntry } from './types';
+
 import * as markdown from './markdown';
+import { Content, WoodpeckerPlugin, WoodpeckerPluginHeader, WoodpeckerPluginIndexEntry } from './types';
 
 async function loadContent(): Promise<Content> {
   const file = path.join(__dirname, '..', 'plugins.json');

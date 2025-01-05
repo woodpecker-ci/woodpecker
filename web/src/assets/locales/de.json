@@ -204,8 +204,8 @@
         "add": "Repository hinzufügen",
         "branches": "Branches",
         "deploy_pipeline": {
-            "enter_target": "Zielumgebung des Deployments",
-            "title": "Deployment für aktuelle Pipeline #{pipelineId} starten",
+            "enter_target": "Zielumgebung des „Deployments“",
+            "title": "Ein „Deployment“-Event für die aktuelle Pipeline #{pipelineId} starten",
             "trigger": "Deploy",
             "variables": {
                 "add": "Variable hinzufügen",
@@ -255,7 +255,7 @@
                 "log_delete": "Löschen"
             },
             "config": "Konfiguration",
-            "errors": "Fehler ({count})",
+            "errors": "Fehler",
             "event": {
                 "cron": "Cron",
                 "deploy": "Deploy",
@@ -267,7 +267,7 @@
                 "pr_closed": "Pull-Request zusammengeführt/geschlossen"
             },
             "exit_code": "Exit-Code {exitCode}",
-            "files": "Geänderte Dateien ({files})",
+            "files": "Geänderte Dateien",
             "loading": "Laden…",
             "log_download_error": "Beim Herunterladen der Log-Datei ist ein Fehler aufgetreten",
             "log_title": "Logs des Schrittes",
@@ -302,7 +302,7 @@
             },
             "step_not_started": "Dieser Schritt hat noch nicht begonnen.",
             "tasks": "Vorgänge",
-            "warnings": "Warnungen ({count})",
+            "warnings": "Warnungen",
             "we_got_some_errors": "Oh nein, es gab einige Fehler!",
             "log_delete_confirm": "Möchtest du die Logs diesen Schrittes wirklich löschen?",
             "log_delete_error": "Es gab einen Fehler beim Löschen der Logs des Schrittes",
@@ -316,7 +316,7 @@
                 "metadata_download_error": "Fehler beim Herunterladen der Metadaten",
                 "title": "Debug",
                 "metadata_exec_title": "Pipeline lokal erneut ausführen",
-                "metadata_exec_desc": "Lade die Metadaten dieser Pipeline herunter, um diese lokal auszuführen. Dies erlaubt dir, Fehler zu beheben und Änderungen zu testen, bevor du einen Commit erstellst."
+                "metadata_exec_desc": "Lade die Metadaten dieser Pipeline herunter, um diese lokal auszuführen. Dies erlaubt dir, Fehler zu beheben und Änderungen zu testen, bevor du einen Commit erstellst. `woodpecke-cli` muss in der zum Server passenden Version lokal installiert sein."
             }
         },
         "pull_requests": "Pull-Requests",
@@ -380,16 +380,16 @@
             "general": {
                 "allow_pr": {
                     "allow": "Pull-Requests zulassen",
-                    "desc": "Pipelines können für Pull-Requests genutzt werden."
+                    "desc": "Pipelines für Pull-Requests erlauben."
                 },
                 "cancel_prev": {
                     "cancel": "Ältere Pipelines abbrechen",
-                    "desc": "Aktiviere diese Option, um laufende Pipelines desselben Ereignisses und Kontexts abzubrechen, bevor die neue Pipeline startet."
+                    "desc": "Bei ausgewählten Events werden laufende Pipelines desselben Ereignisses abgebrechen, bevor die neue Pipeline startet."
                 },
                 "general": "Allgemein",
                 "netrc_only_trusted": {
-                    "desc": "Netrc-Zugangsdaten nur in vertrauenswürdigen Containern bereitstellen (empfohlen).",
-                    "netrc_only_trusted": "Netrc-Zugangsdaten nur in vertrauenswürdigen Containern zum Klonen bereitstellen"
+                    "desc": "Hier gelistete Plugins erhalten Zugriff zu Netrc-Zugangsdaten, die genutzt werden können, um Repositorys von der Forge zu klonen oder zu pushen.",
+                    "netrc_only_trusted": "Eigene vertrauenswürdige Plugins zum Klonen"
                 },
                 "pipeline_path": {
                     "default": "Standardmäßig: .woodpecker/*.{'{yaml,yml}'} -> .woodpecker.yaml -> .woodpecker.yml",
@@ -403,14 +403,26 @@
                     "protected": "Geschützt"
                 },
                 "save": "Einstellungen speichern",
-                "success": "Repository-Einstellungen aktualisiert",
+                "success": "Projekt-Einstellungen aktualisiert",
                 "timeout": {
                     "minutes": "Minuten",
                     "timeout": "Zeitlimit"
                 },
                 "trusted": {
                     "desc": "Die zugrundeliegenden Pipeline-Container erhalten Zugriff auf ausgeweitete Funktionen (z. B. das Einhängen von Laufwerken).",
-                    "trusted": "Vertrauenswürdig"
+                    "trusted": "Vertrauenswürdig",
+                    "network": {
+                        "network": "Netzwerk",
+                        "desc": "Pipeline-Container erhalten Zugriff auf Netzwerk-Privilegien wie das Ändern des DNS."
+                    },
+                    "volumes": {
+                        "volumes": "Volumen",
+                        "desc": "Pipeline-Container können Volumen einhängen."
+                    },
+                    "security": {
+                        "security": "Sicherheit",
+                        "desc": "Pipeline-Container erhalten Zugriff auf Sicherheits-Privilegien."
+                    }
                 },
                 "visibility": {
                     "internal": {
@@ -428,8 +440,8 @@
                     "visibility": "Sichtbarkeit des Projekts"
                 },
                 "allow_deploy": {
-                    "allow": "Deployments erlauben",
-                    "desc": "Deployments von erfolgreichen Pipelines erlauben. Nur benutzen, wenn du allen Nutzern mit Push-Zugriff vertraust."
+                    "allow": "„Deployment“-Events erlauben",
+                    "desc": "„Deployments“ von erfolgreichen Pipelines erlauben. Alle Benutzer mit Push-Zugriff können diese auslösen, mit Vorsicht verwenden."
                 }
             },
             "not_allowed": "Zugriff auf die Einstellungen dieses Repositorys nicht erlaubt",
@@ -478,7 +490,22 @@
             },
             "settings": "Einstellungen"
         },
-        "user_none": "Diese Organisation / dieser Benutzer hat noch keine Repositorys."
+        "user_none": "Diese Organisation / dieser Benutzer hat noch keine Repositorys.",
+        "visibility": {
+            "visibility": "Projektsichtbarkeit",
+            "public": {
+                "public": "Öffentlich",
+                "desc": "Jeder Benutzer kann dein Projekt sehen, ohne eingeloggt zu sein."
+            },
+            "private": {
+                "private": "Privat",
+                "desc": "Nur du und andere Besitzer des Repositorys können dieses Projekt sehen."
+            },
+            "internal": {
+                "internal": "Intern",
+                "desc": "Nur authentifizierte Benutzer der Woodpecker-Instanz können dieses Projekt sehen."
+            }
+        }
     },
     "repos": "Repos",
     "repositories": "Repositorys",
@@ -491,7 +518,8 @@
         "not_started": "noch nicht gestartet",
         "sec_short": "sek",
         "template": "DD.MM.YYYY, HH:mm z",
-        "weeks_short": "w"
+        "weeks_short": "w",
+        "just_now": "gerade eben"
     },
     "unknown_error": "Ein unbekannter Fehler ist aufgetreten",
     "update_woodpecker": "Du solltest deine Woodpecker-Instanz auf {0} aktualisieren",
@@ -549,7 +577,7 @@
             "cli_and_api": {
                 "desc": "Persönlicher Zugangsschlüssel, CLI- und API-Nutzung",
                 "token": "Persönlicher Zugangsschlüssel",
-                "api_usage": "Beispiel zur Nutzung der API",
+                "api_usage": "Beispiel zur Nutzung des API",
                 "download_cli": "CLI herunterladen",
                 "reset_token": "Schlüssel zurücksetzen",
                 "swagger_ui": "Swagger-UI",
@@ -638,5 +666,16 @@
     "pipeline_since": "Die Pipeline wurde vor {created} Minuten erstellt",
     "pipeline_has_warnings": "Die Pipeline hat Warnungen",
     "pipeline_has_errors": "Die Pipeline hat Fehler",
-    "login_with": "Mit {forge} anmelden"
+    "login_with": "Mit {forge} anmelden",
+    "all_repositories": "Alle Repositorys",
+    "no_search_results": "Keine Ergebnisse gefunden",
+    "require_approval": {
+        "forks": "Pull-Request von geforkten Repositorys",
+        "require_approval_for": "Erfordert Genehmigung für",
+        "none": "Keine",
+        "none_desc": "Jedes Event erstellt Pipelines, einschließlich Pull-Requests. Diese Einstellung kann gefährlich sein und wird nur für private Instanzen empfohlen.",
+        "pull_requests": "Alle Pull-Requests",
+        "all_events": "Alle Ereignisse von der Forge",
+        "desc": "Verhindere, dass bösartige Pipelines Geheimnisse preisgeben oder schädliche Aufgaben ausführen, indem du diese vor der Ausführung genehmigst."
+    }
 }

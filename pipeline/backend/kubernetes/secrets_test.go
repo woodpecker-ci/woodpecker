@@ -22,14 +22,14 @@ import (
 	"github.com/stretchr/testify/assert"
 	v1 "k8s.io/api/core/v1"
 
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 )
 
 func TestNativeSecretsEnabled(t *testing.T) {
 	nsp := newNativeSecretsProcessor(&config{
 		NativeSecretsAllowFromStep: true,
 	}, nil)
-	assert.Equal(t, true, nsp.isEnabled())
+	assert.True(t, nsp.isEnabled())
 }
 
 func TestNativeSecretsDisabled(t *testing.T) {
@@ -54,7 +54,7 @@ func TestNativeSecretsDisabled(t *testing.T) {
 			},
 		},
 	})
-	assert.Equal(t, false, nsp.isEnabled())
+	assert.False(t, nsp.isEnabled())
 
 	err := nsp.process()
 	assert.NoError(t, err)

@@ -41,7 +41,7 @@ There are also other plugin lists with additional plugins. Keep in mind that [Dr
 
 - [Drone Plugins](http://plugins.drone.io)
 - [The Geek Lab Drone Plugins](https://drone-plugin-index.geekdocs.de/plugins/drone-matrix/)
-:::
+  :::
 
 ## Creating a plugin
 

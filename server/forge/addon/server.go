@@ -22,8 +22,8 @@ import (
 
 	"github.com/hashicorp/go-plugin"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
-	"go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge"
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 )
 
 func Serve(impl forge.Forge) {
@@ -54,8 +54,8 @@ func (s *RPCServer) URL(_ []byte, resp *string) error {
 }
 
 func (s *RPCServer) Teams(args []byte, resp *[]byte) error {
-	var a *modelUser
-	err := json.Unmarshal(args, a)
+	var a modelUser
+	err := json.Unmarshal(args, &a)
 	if err != nil {
 		return err
 	}
@@ -82,8 +82,8 @@ func (s *RPCServer) Repo(args []byte, resp *[]byte) error {
 }
 
 func (s *RPCServer) Repos(args []byte, resp *[]byte) error {
-	var a *modelUser
-	err := json.Unmarshal(args, a)
+	var a modelUser
+	err := json.Unmarshal(args, &a)
 	if err != nil {
 		return err
 	}
@@ -261,12 +261,12 @@ func (s *RPCServer) Hook(args []byte, resp *[]byte) error {
 }
 
 func (s *RPCServer) Login(args []byte, resp *[]byte) error {
-	var a *types.OAuthRequest
-	err := json.Unmarshal(args, a)
+	var a types.OAuthRequest
+	err := json.Unmarshal(args, &a)
 	if err != nil {
 		return err
 	}
-	user, red, err := s.Impl.Login(mkCtx(), a)
+	user, red, err := s.Impl.Login(mkCtx(), &a)
 	if err != nil {
 		return err
 	}

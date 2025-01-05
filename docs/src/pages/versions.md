@@ -19,7 +19,7 @@ the actual release will be about a week later.
 
 ### Deprecations & migrations
 
-All deprecations and migrations for Woodpecker users and instance admins are documented in the [migration guide](/docs/next/migrations).
+All deprecations and migrations for Woodpecker users and instance admins are documented in the [migration guide](/migrations).
 
 ## Next version (current state of the `main` branch)
 
@@ -33,7 +33,12 @@ Here you can find documentation for previous versions of Woodpecker.
 
 |         |            |                                                                                       |
 | ------- | ---------- | ------------------------------------------------------------------------------------- |
-| 2.6.0   | 2024-07-18 | [Documentation](https://github.com/woodpecker-ci/woodpecker/tree/v2.6.0/docs/docs/)   |
+| 2.7.3   | 2024-11-28 | [Documentation](https://github.com/woodpecker-ci/woodpecker/tree/v2.7.3/docs/docs/)   |
+| 2.7.2   | 2024-11-03 | [Documentation](https://github.com/woodpecker-ci/woodpecker/tree/v2.7.2/docs/docs/)   |
+| 2.7.1   | 2024-09-07 | [Documentation](https://github.com/woodpecker-ci/woodpecker/tree/v2.7.1/docs/docs/)   |
+| 2.7.0   | 2024-07-18 | [Documentation](https://github.com/woodpecker-ci/woodpecker/tree/v2.7.0/docs/docs/)   |
+| 2.6.1   | 2024-07-19 | [Documentation](https://github.com/woodpecker-ci/woodpecker/tree/v2.6.1/docs/docs/)   |
+| 2.6.0   | 2024-06-13 | [Documentation](https://github.com/woodpecker-ci/woodpecker/tree/v2.6.0/docs/docs/)   |
 | 2.5.0   | 2024-06-01 | [Documentation](https://github.com/woodpecker-ci/woodpecker/tree/v2.5.0/docs/docs/)   |
 | 2.4.1   | 2024-03-20 | [Documentation](https://github.com/woodpecker-ci/woodpecker/tree/v2.4.1/docs/docs/)   |
 | 2.4.0   | 2024-03-19 | [Documentation](https://github.com/woodpecker-ci/woodpecker/tree/v2.4.0/docs/docs/)   |

@@ -19,103 +19,97 @@ import (
 	"testing"
 	"time"
 
-	"github.com/franela/goblin"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"google.golang.org/grpc/metadata"
 
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc"
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
-	mocks_store "go.woodpecker-ci.org/woodpecker/v2/server/store/mocks"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/rpc"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	mocks_store "go.woodpecker-ci.org/woodpecker/v3/server/store/mocks"
 )
 
 func TestRegisterAgent(t *testing.T) {
-	g := goblin.Goblin(t)
-	g.Describe("When existing agent Name is empty", func() {
-		g.It("Should update Name with hostname from metadata", func() {
-			store := mocks_store.NewStore(t)
-			storeAgent := new(model.Agent)
-			storeAgent.ID = 1337
-			updatedAgent := model.Agent{
-				ID:          1337,
-				Created:     0,
-				Updated:     0,
-				Name:        "hostname",
-				OwnerID:     0,
-				Token:       "",
-				LastContact: 0,
-				Platform:    "platform",
-				Backend:     "backend",
-				Capacity:    2,
-				Version:     "version",
-				NoSchedule:  false,
-			}
+	t.Run("When existing agent Name is empty it should update Name with hostname from metadata", func(t *testing.T) {
+		store := mocks_store.NewStore(t)
+		storeAgent := new(model.Agent)
+		storeAgent.ID = 1337
+		updatedAgent := model.Agent{
+			ID:          1337,
+			Created:     0,
+			Updated:     0,
+			Name:        "hostname",
+			OwnerID:     0,
+			Token:       "",
+			LastContact: 0,
+			Platform:    "platform",
+			Backend:     "backend",
+			Capacity:    2,
+			Version:     "version",
+			NoSchedule:  false,
+		}
 
-			store.On("AgentFind", int64(1337)).Once().Return(storeAgent, nil)
-			store.On("AgentUpdate", &updatedAgent).Once().Return(nil)
-			grpc := RPC{
-				store: store,
-			}
-			ctx := metadata.NewIncomingContext(
-				context.Background(),
-				metadata.Pairs("hostname", "hostname", "agent_id", "1337"),
-			)
-			agentID, err := grpc.RegisterAgent(ctx, rpc.AgentInfo{
-				Version:  "version",
-				Platform: "platform",
-				Backend:  "backend",
-				Capacity: 2,
-			})
-			if !assert.NoError(t, err) {
-				return
-			}
-
-			assert.EqualValues(t, 1337, agentID)
+		store.On("AgentFind", int64(1337)).Once().Return(storeAgent, nil)
+		store.On("AgentUpdate", &updatedAgent).Once().Return(nil)
+		grpc := RPC{
+			store: store,
+		}
+		ctx := metadata.NewIncomingContext(
+			context.Background(),
+			metadata.Pairs("hostname", "hostname", "agent_id", "1337"),
+		)
+		agentID, err := grpc.RegisterAgent(ctx, rpc.AgentInfo{
+			Version:  "version",
+			Platform: "platform",
+			Backend:  "backend",
+			Capacity: 2,
 		})
+		if !assert.NoError(t, err) {
+			return
+		}
+
+		assert.EqualValues(t, 1337, agentID)
 	})
 
-	g.Describe("When existing agent hostname is present", func() {
-		g.It("Should not update the hostname", func() {
-			store := mocks_store.NewStore(t)
-			storeAgent := new(model.Agent)
-			storeAgent.ID = 1337
-			storeAgent.Name = "originalHostname"
-			updatedAgent := model.Agent{
-				ID:          1337,
-				Created:     0,
-				Updated:     0,
-				Name:        "originalHostname",
-				OwnerID:     0,
-				Token:       "",
-				LastContact: 0,
-				Platform:    "platform",
-				Backend:     "backend",
-				Capacity:    2,
-				Version:     "version",
-				NoSchedule:  false,
-			}
+	t.Run("When existing agent hostname is present it should not update the hostname", func(t *testing.T) {
+		store := mocks_store.NewStore(t)
+		storeAgent := new(model.Agent)
+		storeAgent.ID = 1337
+		storeAgent.Name = "originalHostname"
+		updatedAgent := model.Agent{
+			ID:          1337,
+			Created:     0,
+			Updated:     0,
+			Name:        "originalHostname",
+			OwnerID:     0,
+			Token:       "",
+			LastContact: 0,
+			Platform:    "platform",
+			Backend:     "backend",
+			Capacity:    2,
+			Version:     "version",
+			NoSchedule:  false,
+		}
 
-			store.On("AgentFind", int64(1337)).Once().Return(storeAgent, nil)
-			store.On("AgentUpdate", &updatedAgent).Once().Return(nil)
-			grpc := RPC{
-				store: store,
-			}
-			ctx := metadata.NewIncomingContext(
-				context.Background(),
-				metadata.Pairs("hostname", "newHostname", "agent_id", "1337"),
-			)
-			agentID, err := grpc.RegisterAgent(ctx, rpc.AgentInfo{
-				Version:  "version",
-				Platform: "platform",
-				Backend:  "backend",
-				Capacity: 2,
-			})
-			if !assert.NoError(t, err) {
-				return
-			}
-
-			assert.EqualValues(t, 1337, agentID)
+		store.On("AgentFind", int64(1337)).Once().Return(storeAgent, nil)
+		store.On("AgentUpdate", &updatedAgent).Once().Return(nil)
+		grpc := RPC{
+			store: store,
+		}
+		ctx := metadata.NewIncomingContext(
+			context.Background(),
+			metadata.Pairs("hostname", "newHostname", "agent_id", "1337"),
+		)
+		agentID, err := grpc.RegisterAgent(ctx, rpc.AgentInfo{
+			Version:  "version",
+			Platform: "platform",
+			Backend:  "backend",
+			Capacity: 2,
 		})
+		if !assert.NoError(t, err) {
+			return
+		}
+
+		assert.EqualValues(t, 1337, agentID)
 	})
 }
 

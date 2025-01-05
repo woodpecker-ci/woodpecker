@@ -27,14 +27,14 @@ import (
 	"github.com/gorilla/securecookie"
 	"github.com/rs/zerolog/log"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server"
-	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
-	forge_types "go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
-	"go.woodpecker-ci.org/woodpecker/v2/server/store"
-	"go.woodpecker-ci.org/woodpecker/v2/server/store/types"
-	"go.woodpecker-ci.org/woodpecker/v2/shared/httputil"
-	"go.woodpecker-ci.org/woodpecker/v2/shared/token"
+	"go.woodpecker-ci.org/woodpecker/v3/server"
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge"
+	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/httputil"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/token"
 )
 
 const stateTokenDuration = time.Minute * 5
@@ -159,13 +159,14 @@ func HandleAuth(c *gin.Context) {
 
 		// create the user account
 		user = &model.User{
-			Login:         userFromForge.Login,
+			ForgeID:       forgeID,
 			ForgeRemoteID: userFromForge.ForgeRemoteID,
-			Token:         userFromForge.Token,
-			Secret:        userFromForge.Secret,
+			Login:         userFromForge.Login,
+			AccessToken:   userFromForge.AccessToken,
+			RefreshToken:  userFromForge.RefreshToken,
+			Expiry:        userFromForge.Expiry,
 			Email:         userFromForge.Email,
 			Avatar:        userFromForge.Avatar,
-			ForgeID:       forgeID,
 			Hash: base32.StdEncoding.EncodeToString(
 				securecookie.GenerateRandomKey(32),
 			),
@@ -225,8 +226,8 @@ func HandleAuth(c *gin.Context) {
 	}
 
 	// update the user meta data and authorization data.
-	user.Token = userFromForge.Token
-	user.Secret = userFromForge.Secret
+	user.AccessToken = userFromForge.AccessToken
+	user.RefreshToken = userFromForge.RefreshToken
 	user.Email = userFromForge.Email
 	user.Avatar = userFromForge.Avatar
 	user.ForgeID = forgeID

@@ -25,10 +25,141 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-var (
-	pullRegexp      = regexp.MustCompile(`\d+`)
-	maxChangedFiles = 500
+const (
+	initialEnvMapSize = 100
+	maxChangedFiles   = 500
 )
+
+var pullRegexp = regexp.MustCompile(`\d+`)
+
+// Environ returns the metadata as a map of environment variables.
+func (m *Metadata) Environ() map[string]string {
+	params := make(map[string]string, initialEnvMapSize)
+
+	system := m.Sys
+	setNonEmptyEnvVar(params, "CI", system.Name)
+	setNonEmptyEnvVar(params, "CI_SYSTEM_NAME", system.Name)
+	setNonEmptyEnvVar(params, "CI_SYSTEM_URL", system.URL)
+	setNonEmptyEnvVar(params, "CI_SYSTEM_HOST", system.Host)
+	setNonEmptyEnvVar(params, "CI_SYSTEM_PLATFORM", system.Platform) // will be set by pipeline platform option or by agent
+	setNonEmptyEnvVar(params, "CI_SYSTEM_VERSION", system.Version)
+
+	forge := m.Forge
+	setNonEmptyEnvVar(params, "CI_FORGE_TYPE", forge.Type)
+	setNonEmptyEnvVar(params, "CI_FORGE_URL", forge.URL)
+
+	repo := m.Repo
+	setNonEmptyEnvVar(params, "CI_REPO", path.Join(repo.Owner, repo.Name))
+	setNonEmptyEnvVar(params, "CI_REPO_NAME", repo.Name)
+	setNonEmptyEnvVar(params, "CI_REPO_OWNER", repo.Owner)
+	setNonEmptyEnvVar(params, "CI_REPO_REMOTE_ID", repo.RemoteID)
+	setNonEmptyEnvVar(params, "CI_REPO_URL", repo.ForgeURL)
+	setNonEmptyEnvVar(params, "CI_REPO_CLONE_URL", repo.CloneURL)
+	setNonEmptyEnvVar(params, "CI_REPO_CLONE_SSH_URL", repo.CloneSSHURL)
+	setNonEmptyEnvVar(params, "CI_REPO_DEFAULT_BRANCH", repo.Branch)
+	setNonEmptyEnvVar(params, "CI_REPO_PRIVATE", strconv.FormatBool(repo.Private))
+	setNonEmptyEnvVar(params, "CI_REPO_TRUSTED_NETWORK", strconv.FormatBool(repo.Trusted.Network))
+	setNonEmptyEnvVar(params, "CI_REPO_TRUSTED_VOLUMES", strconv.FormatBool(repo.Trusted.Volumes))
+	setNonEmptyEnvVar(params, "CI_REPO_TRUSTED_SECURITY", strconv.FormatBool(repo.Trusted.Security))
+	// Deprecated remove in 4.x
+	setNonEmptyEnvVar(params, "CI_REPO_TRUSTED", strconv.FormatBool(m.Repo.Trusted.Security && m.Repo.Trusted.Network && m.Repo.Trusted.Volumes))
+
+	pipeline := m.Curr
+	setNonEmptyEnvVar(params, "CI_PIPELINE_NUMBER", strconv.FormatInt(pipeline.Number, 10))
+	setNonEmptyEnvVar(params, "CI_PIPELINE_PARENT", strconv.FormatInt(pipeline.Parent, 10))
+	setNonEmptyEnvVar(params, "CI_PIPELINE_EVENT", pipeline.Event)
+	setNonEmptyEnvVar(params, "CI_PIPELINE_URL", m.getPipelineWebURL(pipeline, 0))
+	setNonEmptyEnvVar(params, "CI_PIPELINE_FORGE_URL", pipeline.ForgeURL)
+	setNonEmptyEnvVar(params, "CI_PIPELINE_DEPLOY_TARGET", pipeline.DeployTo)
+	setNonEmptyEnvVar(params, "CI_PIPELINE_DEPLOY_TASK", pipeline.DeployTask)
+	setNonEmptyEnvVar(params, "CI_PIPELINE_CREATED", strconv.FormatInt(pipeline.Created, 10))
+	setNonEmptyEnvVar(params, "CI_PIPELINE_STARTED", strconv.FormatInt(pipeline.Started, 10))
+
+	workflow := m.Workflow
+	setNonEmptyEnvVar(params, "CI_WORKFLOW_NAME", workflow.Name)
+	setNonEmptyEnvVar(params, "CI_WORKFLOW_NUMBER", strconv.Itoa(workflow.Number))
+
+	step := m.Step
+	setNonEmptyEnvVar(params, "CI_STEP_NAME", step.Name)
+	setNonEmptyEnvVar(params, "CI_STEP_NUMBER", strconv.Itoa(step.Number))
+	setNonEmptyEnvVar(params, "CI_STEP_URL", m.getPipelineWebURL(pipeline, step.Number))
+	// CI_STEP_STARTED will be set by agent
+
+	commit := pipeline.Commit
+	setNonEmptyEnvVar(params, "CI_COMMIT_SHA", commit.Sha)
+	setNonEmptyEnvVar(params, "CI_COMMIT_REF", commit.Ref)
+	setNonEmptyEnvVar(params, "CI_COMMIT_REFSPEC", commit.Refspec)
+	setNonEmptyEnvVar(params, "CI_COMMIT_MESSAGE", commit.Message)
+	setNonEmptyEnvVar(params, "CI_COMMIT_BRANCH", commit.Branch)
+	setNonEmptyEnvVar(params, "CI_COMMIT_AUTHOR", commit.Author.Name)
+	setNonEmptyEnvVar(params, "CI_COMMIT_AUTHOR_EMAIL", commit.Author.Email)
+	setNonEmptyEnvVar(params, "CI_COMMIT_AUTHOR_AVATAR", commit.Author.Avatar)
+	if pipeline.Event == EventTag || pipeline.Event == EventRelease || strings.HasPrefix(pipeline.Commit.Ref, "refs/tags/") {
+		setNonEmptyEnvVar(params, "CI_COMMIT_TAG", strings.TrimPrefix(pipeline.Commit.Ref, "refs/tags/"))
+	}
+	if pipeline.Event == EventRelease {
+		setNonEmptyEnvVar(params, "CI_COMMIT_PRERELEASE", strconv.FormatBool(pipeline.Commit.IsPrerelease))
+	}
+	if pipeline.Event == EventPull || pipeline.Event == EventPullClosed {
+		sourceBranch, targetBranch := getSourceTargetBranches(commit.Refspec)
+		setNonEmptyEnvVar(params, "CI_COMMIT_SOURCE_BRANCH", sourceBranch)
+		setNonEmptyEnvVar(params, "CI_COMMIT_TARGET_BRANCH", targetBranch)
+		setNonEmptyEnvVar(params, "CI_COMMIT_PULL_REQUEST", pullRegexp.FindString(pipeline.Commit.Ref))
+		setNonEmptyEnvVar(params, "CI_COMMIT_PULL_REQUEST_LABELS", strings.Join(pipeline.Commit.PullRequestLabels, ","))
+	}
+
+	// Only export changed files if maxChangedFiles is not exceeded
+	changedFiles := commit.ChangedFiles
+	if len(changedFiles) == 0 {
+		params["CI_PIPELINE_FILES"] = "[]"
+	} else if len(changedFiles) <= maxChangedFiles {
+		// we have to use json, as other separators like ;, or space are valid filename chars
+		changedFiles, err := json.Marshal(changedFiles)
+		if err != nil {
+			log.Error().Err(err).Msg("marshal changed files")
+		}
+		params["CI_PIPELINE_FILES"] = string(changedFiles)
+	}
+
+	prevPipeline := m.Prev
+	setNonEmptyEnvVar(params, "CI_PREV_PIPELINE_NUMBER", strconv.FormatInt(prevPipeline.Number, 10))
+	setNonEmptyEnvVar(params, "CI_PREV_PIPELINE_PARENT", strconv.FormatInt(prevPipeline.Parent, 10))
+	setNonEmptyEnvVar(params, "CI_PREV_PIPELINE_EVENT", prevPipeline.Event)
+	setNonEmptyEnvVar(params, "CI_PREV_PIPELINE_URL", m.getPipelineWebURL(prevPipeline, 0))
+	setNonEmptyEnvVar(params, "CI_PREV_PIPELINE_FORGE_URL", prevPipeline.ForgeURL)
+	setNonEmptyEnvVar(params, "CI_PREV_COMMIT_URL", prevPipeline.ForgeURL) // why commit url?
+	setNonEmptyEnvVar(params, "CI_PREV_PIPELINE_DEPLOY_TARGET", prevPipeline.DeployTo)
+	setNonEmptyEnvVar(params, "CI_PREV_PIPELINE_DEPLOY_TASK", prevPipeline.DeployTask)
+	setNonEmptyEnvVar(params, "CI_PREV_PIPELINE_STATUS", prevPipeline.Status)
+	setNonEmptyEnvVar(params, "CI_PREV_PIPELINE_CREATED", strconv.FormatInt(prevPipeline.Created, 10))
+	setNonEmptyEnvVar(params, "CI_PREV_PIPELINE_STARTED", strconv.FormatInt(prevPipeline.Started, 10))
+	setNonEmptyEnvVar(params, "CI_PREV_PIPELINE_FINISHED", strconv.FormatInt(prevPipeline.Finished, 10))
+
+	prevCommit := prevPipeline.Commit
+	setNonEmptyEnvVar(params, "CI_PREV_COMMIT_SHA", prevCommit.Sha)
+	setNonEmptyEnvVar(params, "CI_PREV_COMMIT_REF", prevCommit.Ref)
+	setNonEmptyEnvVar(params, "CI_PREV_COMMIT_REFSPEC", prevCommit.Refspec)
+	setNonEmptyEnvVar(params, "CI_PREV_COMMIT_MESSAGE", prevCommit.Message)
+	setNonEmptyEnvVar(params, "CI_PREV_COMMIT_BRANCH", prevCommit.Branch)
+	setNonEmptyEnvVar(params, "CI_PREV_COMMIT_AUTHOR", prevCommit.Author.Name)
+	setNonEmptyEnvVar(params, "CI_PREV_COMMIT_AUTHOR_EMAIL", prevCommit.Author.Email)
+	setNonEmptyEnvVar(params, "CI_PREV_COMMIT_AUTHOR_AVATAR", prevCommit.Author.Avatar)
+	if prevPipeline.Event == EventPull || prevPipeline.Event == EventPullClosed {
+		prevSourceBranch, prevTargetBranch := getSourceTargetBranches(prevCommit.Refspec)
+		setNonEmptyEnvVar(params, "CI_PREV_COMMIT_SOURCE_BRANCH", prevSourceBranch)
+		setNonEmptyEnvVar(params, "CI_PREV_COMMIT_TARGET_BRANCH", prevTargetBranch)
+	}
+
+	return params
+}
+
+func (m *Metadata) getPipelineWebURL(pipeline Pipeline, stepNumber int) string {
+	if stepNumber == 0 {
+		return fmt.Sprintf("%s/repos/%d/pipeline/%d", m.Sys.URL, m.Repo.ID, pipeline.Number)
+	}
+
+	return fmt.Sprintf("%s/repos/%d/pipeline/%d/%d", m.Sys.URL, m.Repo.ID, pipeline.Number, stepNumber)
+}
 
 func getSourceTargetBranches(refspec string) (string, string) {
 	var (
@@ -45,120 +176,10 @@ func getSourceTargetBranches(refspec string) (string, string) {
 	return sourceBranch, targetBranch
 }
 
-// Environ returns the metadata as a map of environment variables.
-func (m *Metadata) Environ() map[string]string {
-	sourceBranch, targetBranch := getSourceTargetBranches(m.Curr.Commit.Refspec)
-	prevSourceBranch, prevTargetBranch := getSourceTargetBranches(m.Prev.Commit.Refspec)
-
-	params := map[string]string{
-		"CI":                     m.Sys.Name,
-		"CI_REPO":                path.Join(m.Repo.Owner, m.Repo.Name),
-		"CI_REPO_NAME":           m.Repo.Name,
-		"CI_REPO_OWNER":          m.Repo.Owner,
-		"CI_REPO_REMOTE_ID":      m.Repo.RemoteID,
-		"CI_REPO_SCM":            m.Repo.SCM,
-		"CI_REPO_URL":            m.Repo.ForgeURL,
-		"CI_REPO_CLONE_URL":      m.Repo.CloneURL,
-		"CI_REPO_CLONE_SSH_URL":  m.Repo.CloneSSHURL,
-		"CI_REPO_DEFAULT_BRANCH": m.Repo.Branch,
-		"CI_REPO_PRIVATE":        strconv.FormatBool(m.Repo.Private),
-		"CI_REPO_TRUSTED":        strconv.FormatBool(m.Repo.Trusted),
-
-		"CI_COMMIT_SHA":                 m.Curr.Commit.Sha,
-		"CI_COMMIT_REF":                 m.Curr.Commit.Ref,
-		"CI_COMMIT_REFSPEC":             m.Curr.Commit.Refspec,
-		"CI_COMMIT_BRANCH":              m.Curr.Commit.Branch,
-		"CI_COMMIT_SOURCE_BRANCH":       sourceBranch,
-		"CI_COMMIT_TARGET_BRANCH":       targetBranch,
-		"CI_COMMIT_MESSAGE":             m.Curr.Commit.Message,
-		"CI_COMMIT_AUTHOR":              m.Curr.Commit.Author.Name,
-		"CI_COMMIT_AUTHOR_EMAIL":        m.Curr.Commit.Author.Email,
-		"CI_COMMIT_AUTHOR_AVATAR":       m.Curr.Commit.Author.Avatar,
-		"CI_COMMIT_TAG":                 "", // will be set if event is tag
-		"CI_COMMIT_PULL_REQUEST":        "", // will be set if event is pull_request or pull_request_closed
-		"CI_COMMIT_PULL_REQUEST_LABELS": "", // will be set if event is pull_request or pull_request_closed
-
-		"CI_PIPELINE_NUMBER":        strconv.FormatInt(m.Curr.Number, 10),
-		"CI_PIPELINE_PARENT":        strconv.FormatInt(m.Curr.Parent, 10),
-		"CI_PIPELINE_EVENT":         m.Curr.Event,
-		"CI_PIPELINE_URL":           m.getPipelineWebURL(m.Curr, 0),
-		"CI_PIPELINE_FORGE_URL":     m.Curr.ForgeURL,
-		"CI_PIPELINE_DEPLOY_TARGET": m.Curr.DeployTo,
-		"CI_PIPELINE_DEPLOY_TASK":   m.Curr.DeployTask,
-		"CI_PIPELINE_CREATED":       strconv.FormatInt(m.Curr.Created, 10),
-		"CI_PIPELINE_STARTED":       strconv.FormatInt(m.Curr.Started, 10),
-
-		"CI_WORKFLOW_NAME":   m.Workflow.Name,
-		"CI_WORKFLOW_NUMBER": strconv.Itoa(m.Workflow.Number),
-
-		"CI_STEP_NAME":    m.Step.Name,
-		"CI_STEP_NUMBER":  strconv.Itoa(m.Step.Number),
-		"CI_STEP_STARTED": "", // will be set by agent
-		"CI_STEP_URL":     m.getPipelineWebURL(m.Curr, m.Step.Number),
-
-		"CI_PREV_COMMIT_SHA":           m.Prev.Commit.Sha,
-		"CI_PREV_COMMIT_REF":           m.Prev.Commit.Ref,
-		"CI_PREV_COMMIT_REFSPEC":       m.Prev.Commit.Refspec,
-		"CI_PREV_COMMIT_BRANCH":        m.Prev.Commit.Branch,
-		"CI_PREV_COMMIT_URL":           m.Prev.ForgeURL,
-		"CI_PREV_COMMIT_MESSAGE":       m.Prev.Commit.Message,
-		"CI_PREV_COMMIT_AUTHOR":        m.Prev.Commit.Author.Name,
-		"CI_PREV_COMMIT_AUTHOR_EMAIL":  m.Prev.Commit.Author.Email,
-		"CI_PREV_COMMIT_AUTHOR_AVATAR": m.Prev.Commit.Author.Avatar,
-		"CI_PREV_COMMIT_SOURCE_BRANCH": prevSourceBranch,
-		"CI_PREV_COMMIT_TARGET_BRANCH": prevTargetBranch,
-
-		"CI_PREV_PIPELINE_NUMBER":        strconv.FormatInt(m.Prev.Number, 10),
-		"CI_PREV_PIPELINE_PARENT":        strconv.FormatInt(m.Prev.Parent, 10),
-		"CI_PREV_PIPELINE_EVENT":         m.Prev.Event,
-		"CI_PREV_PIPELINE_URL":           m.getPipelineWebURL(m.Prev, 0),
-		"CI_PREV_PIPELINE_FORGE_URL":     m.Prev.ForgeURL,
-		"CI_PREV_PIPELINE_DEPLOY_TARGET": m.Prev.DeployTo,
-		"CI_PREV_PIPELINE_DEPLOY_TASK":   m.Prev.DeployTask,
-		"CI_PREV_PIPELINE_STATUS":        m.Prev.Status,
-		"CI_PREV_PIPELINE_CREATED":       strconv.FormatInt(m.Prev.Created, 10),
-		"CI_PREV_PIPELINE_STARTED":       strconv.FormatInt(m.Prev.Started, 10),
-		"CI_PREV_PIPELINE_FINISHED":      strconv.FormatInt(m.Prev.Finished, 10),
-
-		"CI_SYSTEM_NAME":     m.Sys.Name,
-		"CI_SYSTEM_URL":      m.Sys.URL,
-		"CI_SYSTEM_HOST":     m.Sys.Host,
-		"CI_SYSTEM_PLATFORM": m.Sys.Platform, // will be set by pipeline platform option or by agent
-		"CI_SYSTEM_VERSION":  m.Sys.Version,
-
-		"CI_FORGE_TYPE": m.Forge.Type,
-		"CI_FORGE_URL":  m.Forge.URL,
+func setNonEmptyEnvVar(env map[string]string, key, value string) {
+	if len(value) > 0 {
+		env[key] = value
+	} else {
+		log.Trace().Str("variable", key).Msg("env var is filtered as it's empty")
 	}
-	if m.Curr.Event == EventTag || m.Curr.Event == EventRelease || strings.HasPrefix(m.Curr.Commit.Ref, "refs/tags/") {
-		params["CI_COMMIT_TAG"] = strings.TrimPrefix(m.Curr.Commit.Ref, "refs/tags/")
-	}
-	if m.Curr.Event == EventRelease {
-		params["CI_COMMIT_PRERELEASE"] = strconv.FormatBool(m.Curr.Commit.IsPrerelease)
-	}
-	if m.Curr.Event == EventPull || m.Curr.Event == EventPullClosed {
-		params["CI_COMMIT_PULL_REQUEST"] = pullRegexp.FindString(m.Curr.Commit.Ref)
-		params["CI_COMMIT_PULL_REQUEST_LABELS"] = strings.Join(m.Curr.Commit.PullRequestLabels, ",")
-	}
-
-	// Only export changed files if maxChangedFiles is not exceeded
-	if len(m.Curr.Commit.ChangedFiles) == 0 {
-		params["CI_PIPELINE_FILES"] = "[]"
-	} else if len(m.Curr.Commit.ChangedFiles) <= maxChangedFiles {
-		// we have to use json, as other separators like ;, or space are valid filename chars
-		changedFiles, err := json.Marshal(m.Curr.Commit.ChangedFiles)
-		if err != nil {
-			log.Error().Err(err).Msg("marshal changed files")
-		}
-		params["CI_PIPELINE_FILES"] = string(changedFiles)
-	}
-
-	return params
-}
-
-func (m *Metadata) getPipelineWebURL(pipeline Pipeline, stepNumber int) string {
-	if stepNumber == 0 {
-		return fmt.Sprintf("%s/repos/%d/pipeline/%d", m.Sys.URL, m.Repo.ID, pipeline.Number)
-	}
-
-	return fmt.Sprintf("%s/repos/%d/pipeline/%d/%d", m.Sys.URL, m.Repo.ID, pipeline.Number, stepNumber)
 }

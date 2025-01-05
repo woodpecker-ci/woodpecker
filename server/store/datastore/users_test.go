@@ -18,238 +18,79 @@ package datastore
 import (
 	"testing"
 
-	"github.com/franela/goblin"
+	"github.com/stretchr/testify/assert"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
 func TestUsers(t *testing.T) {
-	store, closer := newTestStore(t, new(model.User), new(model.Repo), new(model.Pipeline), new(model.Step), new(model.Perm), new(model.Org), new(model.Secret))
+	store, closer := newTestStore(t, new(model.User), new(model.Org), new(model.Secret), new(model.Repo), new(model.Perm))
 	defer closer()
 
-	g := goblin.Goblin(t)
-	g.Describe("User", func() {
-		// before each test be sure to purge the package
-		// table data from the database.
-		g.BeforeEach(func() {
-			_, err := store.engine.Exec("DELETE FROM users")
-			g.Assert(err).IsNil()
-			_, err = store.engine.Exec("DELETE FROM repos")
-			g.Assert(err).IsNil()
-			_, err = store.engine.Exec("DELETE FROM pipelines")
-			g.Assert(err).IsNil()
-			_, err = store.engine.Exec("DELETE FROM steps")
-			g.Assert(err).IsNil()
-			_, err = store.engine.Exec("DELETE FROM orgs")
-			g.Assert(err).IsNil()
-		})
+	count, err := store.GetUserCount()
+	assert.NoError(t, err)
+	assert.Zero(t, count)
 
-		g.It("Should Update a User", func() {
-			user := model.User{
-				Login: "joe",
-				Email: "foo@bar.com",
-				Token: "e42080dddf012c718e476da161d21ad5",
-			}
-			err1 := store.CreateUser(&user)
-			err2 := store.UpdateUser(&user)
-			getUser, err3 := store.GetUser(user.ID)
-			g.Assert(err1).IsNil()
-			g.Assert(err2).IsNil()
-			g.Assert(err3).IsNil()
-			g.Assert(user.ID).Equal(getUser.ID)
-		})
+	user := model.User{
+		Login:        "joe",
+		AccessToken:  "f0b461ca586c27872b43a0685cbc2847",
+		RefreshToken: "976f22a5eef7caacb7e678d6c52f49b1",
+		Email:        "foo@bar.com",
+		Avatar:       "b9015b0857e16ac4d94a0ffd9a0b79c8",
+	}
+	err = store.CreateUser(&user)
+	assert.NoError(t, err)
+	assert.NotZero(t, user.ID)
 
-		g.It("Should Add a new User", func() {
-			user := model.User{
-				Login: "joe",
-				Email: "foo@bar.com",
-				Token: "e42080dddf012c718e476da161d21ad5",
-			}
-			err := store.CreateUser(&user)
-			g.Assert(err).IsNil()
-			g.Assert(user.ID != 0).IsTrue()
-		})
+	err2 := store.UpdateUser(&user)
+	assert.NoError(t, err2)
 
-		g.It("Should Get a User", func() {
-			user := &model.User{
-				Login:  "joe",
-				Token:  "f0b461ca586c27872b43a0685cbc2847",
-				Secret: "976f22a5eef7caacb7e678d6c52f49b1",
-				Email:  "foo@bar.com",
-				Avatar: "b9015b0857e16ac4d94a0ffd9a0b79c8",
-			}
+	getUser, err := store.GetUser(user.ID)
+	assert.NoError(t, err)
+	assert.Equal(t, user.ID, getUser.ID)
+	assert.Equal(t, user.Login, getUser.Login)
+	assert.Equal(t, user.AccessToken, getUser.AccessToken)
+	assert.Equal(t, user.RefreshToken, getUser.RefreshToken)
+	assert.Equal(t, user.Email, getUser.Email)
+	assert.Equal(t, user.Avatar, getUser.Avatar)
 
-			g.Assert(store.CreateUser(user)).IsNil()
-			getUser, err := store.GetUser(user.ID)
-			g.Assert(err).IsNil()
-			g.Assert(user.ID).Equal(getUser.ID)
-			g.Assert(user.Login).Equal(getUser.Login)
-			g.Assert(user.Token).Equal(getUser.Token)
-			g.Assert(user.Secret).Equal(getUser.Secret)
-			g.Assert(user.Email).Equal(getUser.Email)
-			g.Assert(user.Avatar).Equal(getUser.Avatar)
-		})
+	getUser, err = store.GetUserLogin(user.Login)
+	assert.NoError(t, err)
+	assert.Equal(t, user.ID, getUser.ID)
+	assert.Equal(t, user.Login, getUser.Login)
 
-		g.It("Should Get a User By Login", func() {
-			user := &model.User{
-				Login: "joe",
-				Email: "foo@bar.com",
-				Token: "e42080dddf012c718e476da161d21ad5",
-			}
-			g.Assert(store.CreateUser(user))
-			getUser, err := store.GetUserLogin(user.Login)
-			g.Assert(err).IsNil()
-			g.Assert(user.ID).Equal(getUser.ID)
-			g.Assert(user.Login).Equal(getUser.Login)
-		})
+	// check unique login
+	user2 := model.User{
+		Login:       "joe",
+		Email:       "foo@bar.com",
+		AccessToken: "ab20g0ddaf012c744e136da16aa21ad9",
+	}
+	err2 = store.CreateUser(&user2)
+	assert.Error(t, err2)
 
-		g.It("Should Enforce Unique User Login", func() {
-			user1 := model.User{
-				Login: "joe",
-				Email: "foo@bar.com",
-				Token: "e42080dddf012c718e476da161d21ad5",
-			}
-			user2 := model.User{
-				Login: "joe",
-				Email: "foo@bar.com",
-				Token: "ab20g0ddaf012c744e136da16aa21ad9",
-			}
-			err1 := store.CreateUser(&user1)
-			err2 := store.CreateUser(&user2)
-			g.Assert(err1).IsNil()
-			g.Assert(err2 == nil).IsFalse()
-		})
+	user2 = model.User{
+		Login:       "jane",
+		Email:       "foo@bar.com",
+		AccessToken: "ab20g0ddaf012c744e136da16aa21ad9",
+		Hash:        "A",
+	}
+	assert.NoError(t, store.CreateUser(&user2))
+	users, err := store.GetUserList(&model.ListOptions{Page: 1, PerPage: 50})
+	assert.NoError(t, err)
+	assert.Len(t, users, 2)
+	// "jane" user is first due to alphabetic sorting
+	assert.Equal(t, user2.Login, users[0].Login)
+	assert.Equal(t, user2.Email, users[0].Email)
+	assert.Equal(t, user2.AccessToken, users[0].AccessToken)
 
-		g.It("Should Get a User List", func() {
-			user1 := model.User{
-				Login: "jane",
-				Email: "foo@bar.com",
-				Token: "ab20g0ddaf012c744e136da16aa21ad9",
-				Hash:  "A",
-			}
-			user2 := model.User{
-				Login: "joe",
-				Email: "foo@bar.com",
-				Token: "e42080dddf012c718e476da161d21ad5",
-			}
-			g.Assert(store.CreateUser(&user1)).IsNil()
-			g.Assert(store.CreateUser(&user2)).IsNil()
-			users, err := store.GetUserList(&model.ListOptions{Page: 1, PerPage: 50})
-			g.Assert(err).IsNil()
-			g.Assert(len(users)).Equal(2)
-			g.Assert(users[0].Login).Equal(user1.Login)
-			g.Assert(users[0].Email).Equal(user1.Email)
-			g.Assert(users[0].Token).Equal(user1.Token)
-		})
+	count, err = store.GetUserCount()
+	assert.NoError(t, err)
+	assert.EqualValues(t, 2, count)
 
-		g.It("Should Get a User Count", func() {
-			user1 := model.User{
-				Login: "jane",
-				Email: "foo@bar.com",
-				Token: "ab20g0ddaf012c744e136da16aa21ad9",
-				Hash:  "A",
-			}
-			user2 := model.User{
-				Login: "joe",
-				Email: "foo@bar.com",
-				Token: "e42080dddf012c718e476da161d21ad5",
-				Hash:  "B",
-			}
-			g.Assert(store.CreateUser(&user1)).IsNil()
-			g.Assert(store.CreateUser(&user2)).IsNil()
-			count, err := store.GetUserCount()
-			g.Assert(err).IsNil()
-			g.Assert(count).Equal(int64(2))
-		})
-
-		g.It("Should Get a User Count Zero", func() {
-			count, err := store.GetUserCount()
-			g.Assert(err).IsNil()
-			g.Assert(count).Equal(int64(0))
-		})
-
-		g.It("Should Del a User", func() {
-			user := &model.User{
-				Login: "joe",
-				Email: "foo@bar.com",
-				Token: "e42080dddf012c718e476da161d21ad5",
-			}
-			g.Assert(store.CreateUser(user)).IsNil()
-			user, err1 := store.GetUser(user.ID)
-			g.Assert(err1).IsNil()
-			err2 := store.DeleteUser(user)
-			g.Assert(err2).IsNil()
-			_, err3 := store.GetUser(user.ID)
-			g.Assert(err3).IsNotNil()
-		})
-
-		g.It("Should get the Pipeline feed for a User", func() {
-			user := &model.User{
-				Login: "joe",
-				Email: "foo@bar.com",
-				Token: "e42080dddf012c718e476da161d21ad5",
-			}
-			g.Assert(store.CreateUser(user)).IsNil()
-
-			repo1 := &model.Repo{
-				Owner:         "bradrydzewski",
-				Name:          "test",
-				FullName:      "bradrydzewski/test",
-				IsActive:      true,
-				ForgeRemoteID: "1",
-			}
-			repo2 := &model.Repo{
-				Owner:         "test",
-				Name:          "test",
-				FullName:      "test/test",
-				IsActive:      true,
-				ForgeRemoteID: "2",
-			}
-			repo3 := &model.Repo{
-				Owner:         "octocat",
-				Name:          "hello-world",
-				FullName:      "octocat/hello-world",
-				IsActive:      true,
-				ForgeRemoteID: "3",
-			}
-			g.Assert(store.CreateRepo(repo1)).IsNil()
-			g.Assert(store.CreateRepo(repo2)).IsNil()
-			g.Assert(store.CreateRepo(repo3)).IsNil()
-
-			for _, perm := range []*model.Perm{
-				{UserID: user.ID, Repo: repo1, Push: true, Admin: false},
-				{UserID: user.ID, Repo: repo2, Push: false, Admin: true},
-			} {
-				g.Assert(store.PermUpsert(perm)).IsNil()
-			}
-
-			pipeline1 := &model.Pipeline{
-				RepoID: repo1.ID,
-				Status: model.StatusFailure,
-			}
-			pipeline2 := &model.Pipeline{
-				RepoID: repo1.ID,
-				Status: model.StatusSuccess,
-			}
-			pipeline3 := &model.Pipeline{
-				RepoID: repo2.ID,
-				Status: model.StatusSuccess,
-			}
-			pipeline4 := &model.Pipeline{
-				RepoID: repo3.ID,
-				Status: model.StatusSuccess,
-			}
-			g.Assert(store.CreatePipeline(pipeline1)).IsNil()
-			g.Assert(store.CreatePipeline(pipeline2)).IsNil()
-			g.Assert(store.CreatePipeline(pipeline3)).IsNil()
-			g.Assert(store.CreatePipeline(pipeline4)).IsNil()
-
-			pipelines, err := store.UserFeed(user)
-			g.Assert(err).IsNil()
-			g.Assert(len(pipelines)).Equal(3)
-			g.Assert(pipelines[0].RepoID).Equal(repo2.ID)
-			g.Assert(pipelines[1].RepoID).Equal(repo1.ID)
-			g.Assert(pipelines[2].RepoID).Equal(repo1.ID)
-		})
-	})
+	getUser, err1 := store.GetUser(user.ID)
+	assert.NoError(t, err1)
+	err2 = store.DeleteUser(getUser)
+	assert.NoError(t, err2)
+	_, err3 := store.GetUser(getUser.ID)
+	assert.Error(t, err3)
 }

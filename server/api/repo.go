@@ -27,12 +27,13 @@ import (
 	"github.com/gorilla/securecookie"
 	"github.com/rs/zerolog/log"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server"
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
-	"go.woodpecker-ci.org/woodpecker/v2/server/router/middleware/session"
-	"go.woodpecker-ci.org/woodpecker/v2/server/store"
-	"go.woodpecker-ci.org/woodpecker/v2/server/store/types"
-	"go.woodpecker-ci.org/woodpecker/v2/shared/token"
+	"go.woodpecker-ci.org/woodpecker/v3/server"
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/router/middleware/session"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/token"
 )
 
 // PostRepo
@@ -90,9 +91,9 @@ func PostRepo(c *gin.Context) {
 		repo.Update(from)
 	} else {
 		repo = from
+		repo.RequireApproval = model.RequireApprovalForks
 		repo.AllowPull = true
 		repo.AllowDeploy = false
-		repo.NetrcOnlyTrusted = true
 		repo.CancelPreviousPipelineEvents = server.Config.Pipeline.DefaultCancelPreviousPipelineEvents
 	}
 	repo.IsActive = true
@@ -129,7 +130,7 @@ func PostRepo(c *gin.Context) {
 	if errors.Is(err, types.RecordNotExist) {
 		org, err = _forge.Org(c, user, repo.Owner)
 		if err != nil {
-			msg := "could not fetch organization from forge."
+			msg := fmt.Sprintf("Organization %s not found in DB. Attempting to create new one.", repo.Owner)
 			log.Error().Err(err).Msg(msg)
 			c.String(http.StatusInternalServerError, msg)
 			return
@@ -138,7 +139,7 @@ func PostRepo(c *gin.Context) {
 		org.ForgeID = user.ForgeID
 		err = _store.OrgCreate(org)
 		if err != nil {
-			msg := "could not create organization in store."
+			msg := fmt.Sprintf("Failed to create organization %s.", repo.Owner)
 			log.Error().Err(err).Msg(msg)
 			c.String(http.StatusInternalServerError, msg)
 			return
@@ -224,10 +225,23 @@ func PatchRepo(c *gin.Context) {
 		c.String(http.StatusForbidden, fmt.Sprintf("Timeout is not allowed to be higher than max timeout (%d min)", server.Config.Pipeline.MaxTimeout))
 		return
 	}
-	if in.IsTrusted != nil && *in.IsTrusted != repo.IsTrusted && !user.Admin {
-		log.Trace().Msgf("user '%s' wants to make repo trusted without being an instance admin", user.Login)
-		c.String(http.StatusForbidden, "Insufficient privileges")
-		return
+
+	if in.Trusted != nil {
+		if (*in.Trusted.Network != repo.Trusted.Network || *in.Trusted.Volumes != repo.Trusted.Volumes || *in.Trusted.Security != repo.Trusted.Security) && !user.Admin {
+			log.Trace().Msgf("user '%s' wants to change trusted without being an instance admin", user.Login)
+			c.String(http.StatusForbidden, "Insufficient privileges")
+			return
+		}
+
+		if in.Trusted.Network != nil {
+			repo.Trusted.Network = *in.Trusted.Network
+		}
+		if in.Trusted.Security != nil {
+			repo.Trusted.Security = *in.Trusted.Security
+		}
+		if in.Trusted.Volumes != nil {
+			repo.Trusted.Volumes = *in.Trusted.Volumes
+		}
 	}
 
 	if in.AllowPull != nil {
@@ -236,11 +250,17 @@ func PatchRepo(c *gin.Context) {
 	if in.AllowDeploy != nil {
 		repo.AllowDeploy = *in.AllowDeploy
 	}
-	if in.IsGated != nil {
-		repo.IsGated = *in.IsGated
-	}
-	if in.IsTrusted != nil {
-		repo.IsTrusted = *in.IsTrusted
+
+	if in.RequireApproval != nil {
+		if mode := model.ApprovalMode(*in.RequireApproval); mode.Valid() {
+			repo.RequireApproval = mode
+		} else {
+			c.String(http.StatusBadRequest, "Invalid require-approval setting")
+			return
+		}
+	} else if in.IsGated != nil {
+		c.String(http.StatusBadRequest, "'gated' option has been removed, use 'require-approval' in >= 3.0")
+		return
 	}
 	if in.Timeout != nil {
 		repo.Timeout = *in.Timeout
@@ -251,8 +271,8 @@ func PatchRepo(c *gin.Context) {
 	if in.CancelPreviousPipelineEvents != nil {
 		repo.CancelPreviousPipelineEvents = *in.CancelPreviousPipelineEvents
 	}
-	if in.NetrcOnlyTrusted != nil {
-		repo.NetrcOnlyTrusted = *in.NetrcOnlyTrusted
+	if in.NetrcTrusted != nil {
+		repo.NetrcTrustedPlugins = *in.NetrcTrusted
 	}
 	if in.Visibility != nil {
 		switch *in.Visibility {
@@ -349,8 +369,8 @@ func GetRepoPermissions(c *gin.Context) {
 //	@Param		page			query	int		false	"for response pagination, page offset number"	default(1)
 //	@Param		perPage			query	int		false	"for response pagination, max items per page"	default(50)
 func GetRepoBranches(c *gin.Context) {
+	_store := store.FromContext(c)
 	repo := session.Repo(c)
-	user := session.User(c)
 	_forge, err := server.Config.Services.Manager.ForgeFromRepo(repo)
 	if err != nil {
 		log.Error().Err(err).Msg("Cannot get forge from repo")
@@ -358,7 +378,15 @@ func GetRepoBranches(c *gin.Context) {
 		return
 	}
 
-	branches, err := _forge.Branches(c, user, repo, session.Pagination(c))
+	repoUser, err := _store.GetUser(repo.UserID)
+	if err != nil {
+		handleDBError(c, err)
+		return
+	}
+
+	forge.Refresh(c, _forge, _store, repoUser)
+
+	branches, err := _forge.Branches(c, repoUser, repo, session.Pagination(c))
 	if err != nil {
 		log.Error().Err(err).Msg("failed to load branches")
 		c.String(http.StatusInternalServerError, "failed to load branches: %s", err)
@@ -380,8 +408,8 @@ func GetRepoBranches(c *gin.Context) {
 //	@Param		page			query	int		false	"for response pagination, page offset number"	default(1)
 //	@Param		perPage			query	int		false	"for response pagination, max items per page"	default(50)
 func GetRepoPullRequests(c *gin.Context) {
+	_store := store.FromContext(c)
 	repo := session.Repo(c)
-	user := session.User(c)
 	_forge, err := server.Config.Services.Manager.ForgeFromRepo(repo)
 	if err != nil {
 		log.Error().Err(err).Msg("Cannot get forge from repo")
@@ -389,7 +417,15 @@ func GetRepoPullRequests(c *gin.Context) {
 		return
 	}
 
-	prs, err := _forge.PullRequests(c, user, repo, session.Pagination(c))
+	repoUser, err := _store.GetUser(repo.UserID)
+	if err != nil {
+		handleDBError(c, err)
+		return
+	}
+
+	forge.Refresh(c, _forge, _store, repoUser)
+
+	prs, err := _forge.PullRequests(c, repoUser, repo, session.Pagination(c))
 	if err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
@@ -551,16 +587,16 @@ func MoveRepo(c *gin.Context) {
 
 // GetAllRepos
 //
-//	@Summary	List all repositories on the server
+//	@Summary		List all repositories on the server
 //	@Description	Returns a list of all repositories. Requires admin rights.
-//	@Router		/repos [get]
-//	@Produce	json
-//	@Success	200	{array}	Repo
-//	@Tags		Repositories
-//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param		active			query	bool	false	"only list active repos"
-//	@Param		page			query	int		false	"for response pagination, page offset number"	default(1)
-//	@Param		perPage			query	int		false	"for response pagination, max items per page"	default(50)
+//	@Router			/repos [get]
+//	@Produce		json
+//	@Success		200	{array}	Repo
+//	@Tags			Repositories
+//	@Param			Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param			active			query	bool	false	"only list active repos"
+//	@Param			page			query	int		false	"for response pagination, page offset number"	default(1)
+//	@Param			perPage			query	int		false	"for response pagination, max items per page"	default(50)
 func GetAllRepos(c *gin.Context) {
 	_store := store.FromContext(c)
 
@@ -577,13 +613,13 @@ func GetAllRepos(c *gin.Context) {
 
 // RepairAllRepos
 //
-//	@Summary	Repair all repositories on the server
-//	@Description Executes a repair process on all repositories. Requires admin rights.
-//	@Router		/repos/repair [post]
-//	@Produce	plain
-//	@Success	204
-//	@Tags		Repositories
-//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Summary		Repair all repositories on the server
+//	@Description	Executes a repair process on all repositories. Requires admin rights.
+//	@Router			/repos/repair [post]
+//	@Produce		plain
+//	@Success		204
+//	@Tags			Repositories
+//	@Param			Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 func RepairAllRepos(c *gin.Context) {
 	_store := store.FromContext(c)
 

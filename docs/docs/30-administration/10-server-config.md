@@ -54,6 +54,20 @@ Use the `WOODPECKER_REPO_OWNERS` variable to filter which GitHub user's repos sh
 WOODPECKER_REPO_OWNERS=my_company,my_company_oss_github_user
 ```
 
+## Disallow normal users to create agents
+
+By default, users can create new agents for their repos they have admin access to.
+If an instance admin doesn't want this feature enabled, they can disable the API and hide the Web UI elements.
+
+:::note
+You should set this option if you have, for example,
+global secrets and don't trust your users to create a rogue agent and pipeline for secret extraction.
+:::
+
+```ini
+WOODPECKER_DISABLE_USER_AGENT_REGISTRATION=true
+```
+
 ## Global registry setting
 
 If you want to make available a specific private registry to all pipelines, use the `WOODPECKER_DOCKER_CONFIG` server configuration.
@@ -159,17 +173,35 @@ Configures the logging level. Possible values are `trace`, `debug`, `info`, `war
 Output destination for logs.
 'stdout' and 'stderr' can be used as special keywords.
 
-### `WOODPECKER_LOG_XORM`
+### `WOODPECKER_DATABASE_LOG`
 
 > Default: `false`
 
-Enable XORM logs.
+Enable logging in database engine (currently xorm).
 
-### `WOODPECKER_LOG_XORM_SQL`
+### `WOODPECKER_DATABASE_LOG_SQL`
 
 > Default: `false`
 
-Enable XORM SQL command logs.
+Enable logging of sql commands.
+
+### `WOODPECKER_DATABASE_MAX_CONNECTIONS`
+
+> Default: `100`
+
+Max database connections xorm is allowed create.
+
+### `WOODPECKER_DATABASE_IDLE_CONNECTIONS`
+
+> Default: `2`
+
+Amount of database connections xorm will hold open.
+
+### `WOODPECKER_DATABASE_CONNECTION_TIMEOUT`
+
+> Default: `3 Seconds`
+
+Time an active database connection is allowed to stay open.
 
 ### `WOODPECKER_DEBUG_PRETTY`
 
@@ -242,12 +274,6 @@ Can be used for showing banner messages, logos, or environment-specific hints (a
 The file must be UTF-8 encoded, to ensure all special characters are preserved.
 
 Example: `WOODPECKER_CUSTOM_JS_FILE=/usr/local/www/woodpecker.js`
-
-### `WOODPECKER_LETS_ENCRYPT`
-
-> Default: `false`
-
-Automatically generates an SSL certificate using Let's Encrypt, and configures the server to accept HTTPS requests.
 
 ### `WOODPECKER_GRPC_ADDR`
 
@@ -325,6 +351,14 @@ The default docker image to be used when cloning the repo.
 
 It is also added to the trusted clone plugin list.
 
+### `WOODPECKER_DEFAULT_WORKFLOW_LABELS`
+
+> By default run workflows on any agent if no label conditions are set in workflow definition.
+
+You can specify default label/platform conditions that will be used for agent selection for workflows that does not have labels conditions set.
+
+Example: `platform=linux/amd64,backend=docker`
+
 ### `WOODPECKER_DEFAULT_PIPELINE_TIMEOUT`
 
 > 60 (minutes)
@@ -356,8 +390,8 @@ You should specify the tag of your images too, as this enforces exact matches.
 
 > Defaults are defined in [shared/constant/constant.go](https://github.com/woodpecker-ci/woodpecker/blob/main/shared/constant/constant.go)
 
-Plugins which are trusted to handle the netrc info in clone steps.
-If a clone step use an image not in this list, the netrc will not be injected and an user has to use other methods (e.g. secrets) to clone non public repos.
+Plugins which are trusted to handle the Git credential info in clone steps.
+If a clone step use an image not in this list, Git credentials will not be injected and users have to use other methods (e.g. secrets) to clone non-public repos.
 
 You should specify the tag of your images too, as this enforces exact matches.
 
@@ -403,6 +437,12 @@ A shared secret used by server and agents to authenticate communication. A secre
 > Default: empty
 
 Read the value for `WOODPECKER_AGENT_SECRET` from the specified filepath
+
+### `WOODPECKER_DISABLE_USER_AGENT_REGISTRATION`
+
+> Default: false
+
+[Read about "Disallow normal users to create agents"](./10-server-config.md#disallow-normal-users-to-create-agents)
 
 ### `WOODPECKER_KEEPALIVE_MIN_TIME`
 
