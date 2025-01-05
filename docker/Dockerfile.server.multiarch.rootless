@@ -1,4 +1,8 @@
-FROM --platform=$BUILDPLATFORM docker.io/golang:1.23 AS certs
+FROM --platform=$BUILDPLATFORM docker.io/golang:1.23 AS builder
+
+RUN adduser woodpecker && \
+  mkdir -p /var/lib/woodpecker && \
+  chown -R woodpecker:woodpecker /var/lib/woodpecker
 
 FROM scratch
 ARG TARGETOS TARGETARCH
@@ -10,9 +14,14 @@ ENV XDG_DATA_HOME=/var/lib/woodpecker
 EXPOSE 8000 9000 80 443
 
 # copy certs from certs image
-COPY --from=certs /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
+COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 # copy server binary
 COPY dist/server/${TARGETOS}_${TARGETARCH}/woodpecker-server /bin/
+COPY --from=builder /etc/passwd /etc/passwd
+COPY --from=builder /etc/group /etc/group
+COPY --from=builder /var/lib/woodpecker /var/lib/woodpecker
+
+USER woodpecker
 
 HEALTHCHECK CMD ["/bin/woodpecker-server", "ping"]
 ENTRYPOINT ["/bin/woodpecker-server"]

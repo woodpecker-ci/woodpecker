@@ -1,4 +1,7 @@
-FROM --platform=$BUILDPLATFORM docker.io/golang:1.23 AS build
+FROM --platform=$BUILDPLATFORM docker.io/golang:1.23 AS builder
+
+RUN adduser woodpecker && \
+  chown -R woodpecker:woodpecker /var/lib/woodpecker
 
 WORKDIR /src
 COPY . .
@@ -14,9 +17,13 @@ ENV GODEBUG=netdns=go
 ENV WOODPECKER_DISABLE_UPDATE_CHECK=true
 
 # copy certs from build image
-COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
+COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 # copy cli binary
-COPY --from=build /src/dist/woodpecker-cli /bin/
+COPY --from=builder /src/dist/woodpecker-cli /bin/
+COPY --from=builder /etc/passwd /etc/passwd
+COPY --from=builder /etc/group /etc/group
+
+USER woodpecker
 
 HEALTHCHECK CMD ["/bin/woodpecker-cli", "ping"]
 ENTRYPOINT ["/bin/woodpecker-cli"]

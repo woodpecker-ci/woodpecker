@@ -40,7 +40,7 @@ export PLATFORMS='linux|amd64'
 make cross-compile-server
 
 ### build the image
-docker buildx build --platform linux/amd64 -t username/repo:tag -f docker/Dockerfile.server.multiarch --push .
+docker buildx build --platform linux/amd64 -t username/repo:tag -f docker/Dockerfile.server.multiarch.rootless --push .
 ```
 
 :::info
@@ -55,7 +55,7 @@ You can try to use the `build-server` rule instead, however this one fails for s
 make build-agent
 
 ### build the image
-docker buildx build --platform linux/amd64 -t username/repo:tag -f docker/Dockerfile.agent.multiarch --push .
+docker buildx build --platform linux/amd64 -t username/repo:tag -f docker/Dockerfile.agent.multiarch.rootless --push .
 ```
 
 ### CLI
@@ -65,5 +65,5 @@ docker buildx build --platform linux/amd64 -t username/repo:tag -f docker/Docker
 make build-cli
 
 ### build the image
-docker buildx build --platform linux/amd64 -t username/repo:tag -f docker/Dockerfile.cli.multiarch --push .
+docker buildx build --platform linux/amd64 -t username/repo:tag -f docker/Dockerfile.cli.multiarch.rootless --push .
 ```
