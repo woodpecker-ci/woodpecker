@@ -388,7 +388,7 @@
                 "general": "Главное",
                 "netrc_only_trusted": {
                     "desc": "Если включено, учётные данные git будут доступны только доверенным плагинам клонирования кода, перечисленным в `WOODPECKER_PLUGINS_TRUSTED_CLONE`. В противном случае, они будут доступны всем плагинам клонирования. Настройка не влияет на другие шаги, отличные от клонирования.",
-                    "netrc_only_trusted": "Передавать учётные данные git только доверенным плагинам клонирования"
+                    "netrc_only_trusted": "Только доверенные плагины клонирования"
                 },
                 "pipeline_path": {
                     "default": "По умолчанию: .woodpecker/*.{'{yaml,yml}'} -> .woodpecker.yaml -> .woodpecker.yml",
@@ -517,7 +517,8 @@
         "not_started": "ещё не запускался",
         "sec_short": "сек.",
         "template": "D MMM, YYYY, HH:mm z",
-        "weeks_short": "нед."
+        "weeks_short": "нед.",
+        "just_now": "только что"
     },
     "unknown_error": "Произошла неизвестная ошибка",
     "update_woodpecker": "Пожалуйста, обновите свой экземпляр Woodpecker до {0}",
