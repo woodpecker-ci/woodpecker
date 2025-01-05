@@ -125,8 +125,8 @@ var (
 )
 
 func TestToContainerName(t *testing.T) {
-	assert.EqualValues(t, "wp_f51821af-4cb8-435e-a3c2-3a684185d828", toContainerName(testCmdStep))
-	assert.EqualValues(t, "wp_d841ee40-e66e-4275-bb3f-55bf89744b21", toContainerName(testPluginStep))
+	assert.EqualValues(t, "wp_f5182-hello", toContainerName(testCmdStep))
+	assert.EqualValues(t, "wp_d841e-lint", toContainerName(testPluginStep))
 }
 
 func TestStepToConfig(t *testing.T) {

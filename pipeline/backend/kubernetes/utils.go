@@ -16,6 +16,7 @@ package kubernetes
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"regexp"
 	"strings"
@@ -38,10 +39,10 @@ var (
 func dnsName(i string) (string, error) {
 	res := strings.ToLower(strings.ReplaceAll(i, "_", "-"))
 
-	if found := dnsPattern.FindStringIndex(res); found == nil {
-		return "", ErrDNSPatternInvalid
+	found := dnsPattern.FindStringIndex(res)
+	if found == nil {
+		return "", fmt.Errorf("%w: found invalid characters '%v'", ErrDNSPatternInvalid, found)
 	}
-
 	return res, nil
 }
 

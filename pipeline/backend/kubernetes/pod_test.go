@@ -26,9 +26,9 @@ import (
 )
 
 func TestPodName(t *testing.T) {
-	name, err := podName(&types.Step{UUID: "01he8bebctabr3kgk0qj36d2me-0"})
+	name, err := podName(&types.Step{UUID: "01he8bebctabr3kgk0qj36d2me-0", Name: "go-test"})
 	assert.NoError(t, err)
-	assert.Equal(t, "wp-01he8bebctabr3kgk0qj36d2me-0", name)
+	assert.Equal(t, "wp-01he8-go-test", name)
 
 	_, err = podName(&types.Step{UUID: "01he8bebctabr3kgk0qj36d2me\\0a"})
 	assert.ErrorIs(t, err, ErrDNSPatternInvalid)
@@ -40,19 +40,19 @@ func TestPodName(t *testing.T) {
 func TestStepToPodName(t *testing.T) {
 	name, err := stepToPodName(&types.Step{UUID: "01he8bebctabr3kg", Name: "clone", Type: types.StepTypeClone})
 	assert.NoError(t, err)
-	assert.EqualValues(t, "wp-01he8bebctabr3kg", name)
+	assert.EqualValues(t, "wp-01he8-clone", name)
 	name, err = stepToPodName(&types.Step{UUID: "01he8bebctabr3kg", Name: "cache", Type: types.StepTypeCache})
 	assert.NoError(t, err)
-	assert.EqualValues(t, "wp-01he8bebctabr3kg", name)
+	assert.EqualValues(t, "wp-01he8-cache", name)
 	name, err = stepToPodName(&types.Step{UUID: "01he8bebctabr3kg", Name: "release", Type: types.StepTypePlugin})
 	assert.NoError(t, err)
-	assert.EqualValues(t, "wp-01he8bebctabr3kg", name)
+	assert.EqualValues(t, "wp-01he8-release", name)
 	name, err = stepToPodName(&types.Step{UUID: "01he8bebctabr3kg", Name: "prepare-env", Type: types.StepTypeCommands})
 	assert.NoError(t, err)
-	assert.EqualValues(t, "wp-01he8bebctabr3kg", name)
+	assert.EqualValues(t, "wp-01he8-prepare-env", name)
 	name, err = stepToPodName(&types.Step{UUID: "01he8bebctabr3kg", Name: "postgres", Type: types.StepTypeService})
 	assert.NoError(t, err)
-	assert.EqualValues(t, "wp-svc-01he8bebctabr3kg-postgres", name)
+	assert.EqualValues(t, "wp-svc-01he8-postgres", name)
 }
 
 func TestStepLabel(t *testing.T) {
@@ -68,7 +68,7 @@ func TestTinyPod(t *testing.T) {
 	const expected = `
 	{
 		"metadata": {
-			"name": "wp-01he8bebctabr3kgk0qj36d2me-0",
+			"name": "wp-01he8-go-test",
 			"namespace": "woodpecker",
 			"creationTimestamp": null,
 			"labels": {
@@ -86,7 +86,7 @@ func TestTinyPod(t *testing.T) {
 			],
 			"containers": [
 				{
-					"name": "wp-01he8bebctabr3kgk0qj36d2me-0",
+					"name": "wp-01he8-go-test",
 					"image": "gradle:8.4.0-jdk21",
 					"command": [
 						"/bin/sh",
@@ -133,7 +133,7 @@ func TestTinyPod(t *testing.T) {
 		Environment: map[string]string{"CI": "woodpecker"},
 	}, &config{
 		Namespace: "woodpecker",
-	}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{})
+	}, "wp-01he8-go-test", "linux/amd64", BackendOptions{})
 	assert.NoError(t, err)
 
 	podJSON, err := json.Marshal(pod)
@@ -147,7 +147,7 @@ func TestFullPod(t *testing.T) {
 	const expected = `
 	{
 		"metadata": {
-			"name": "wp-01he8bebctabr3kgk0qj36d2me-0",
+			"name": "wp-01he8-go-test",
 			"namespace": "woodpecker",
 			"creationTimestamp": null,
 			"labels": {
@@ -171,7 +171,7 @@ func TestFullPod(t *testing.T) {
 			],
 			"containers": [
 				{
-					"name": "wp-01he8bebctabr3kgk0qj36d2me-0",
+					"name": "wp-01he8-go-test",
 					"image": "meltwater/drone-cache",
 					"command": [
 						"/bin/sh",
@@ -256,7 +256,7 @@ func TestFullPod(t *testing.T) {
 					"name": "another-pull-secret"
 				},
 				{
-					"name": "wp-01he8bebctabr3kgk0qj36d2me-0"
+					"name": "wp-01he8-go-test"
 				}
 			],
 			"tolerations": [
@@ -335,7 +335,7 @@ func TestFullPod(t *testing.T) {
 		PodAnnotationsAllowFromStep: true,
 		PodNodeSelector:             map[string]string{"topology.kubernetes.io/region": "eu-central-1"},
 		SecurityContext:             SecurityContextConfig{RunAsNonRoot: false},
-	}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{
+	}, "wp-01he8-go-test", "linux/amd64", BackendOptions{
 		Labels:             map[string]string{"part-of": "woodpecker-ci"},
 		Annotations:        map[string]string{"kubernetes.io/limit-ranger": "LimitRanger plugin set: cpu, memory request and limit for container"},
 		NodeSelector:       map[string]string{"storage": "ssd"},
@@ -366,7 +366,7 @@ func TestPodPrivilege(t *testing.T) {
 		}, &config{
 			Namespace:       "woodpecker",
 			SecurityContext: SecurityContextConfig{RunAsNonRoot: globalRunAsRoot},
-		}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{
+		}, "wp-01he8-go-test", "linux/amd64", BackendOptions{
 			SecurityContext: &secCtx,
 		})
 	}
@@ -443,7 +443,7 @@ func TestScratchPod(t *testing.T) {
 	const expected = `
 	{
 		"metadata": {
-			"name": "wp-01he8bebctabr3kgk0qj36d2me-0",
+			"name": "wp-01he8-go-test",
 			"namespace": "woodpecker",
 			"creationTimestamp": null,
 			"labels": {
@@ -453,7 +453,7 @@ func TestScratchPod(t *testing.T) {
 		"spec": {
 			"containers": [
 				{
-					"name": "wp-01he8bebctabr3kgk0qj36d2me-0",
+					"name": "wp-01he8-go-test",
 					"image": "quay.io/curl/curl",
 					"command": [
 						"/usr/bin/curl",
@@ -474,7 +474,7 @@ func TestScratchPod(t *testing.T) {
 		Entrypoint: []string{"/usr/bin/curl", "-v", "google.com"},
 	}, &config{
 		Namespace: "woodpecker",
-	}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{})
+	}, "wp-01he8-go-test", "linux/amd64", BackendOptions{})
 	assert.NoError(t, err)
 
 	podJSON, err := json.Marshal(pod)
