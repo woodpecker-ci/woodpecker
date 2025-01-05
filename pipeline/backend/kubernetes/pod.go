@@ -36,7 +36,7 @@ const (
 	defaultFSGroup int64 = 1000
 )
 
-func mkPod(step *types.Step, config *config, podName, goos string, options BackendOptions) (*v1.Pod, error) {
+func mkPod(step *types.Step, config *config, podName, goos string, options BackendOptions, workflowName string) (*v1.Pod, error) {
 	var err error
 
 	nsp := newNativeSecretsProcessor(config, options.Secrets)
@@ -45,12 +45,12 @@ func mkPod(step *types.Step, config *config, podName, goos string, options Backe
 		return nil, err
 	}
 
-	meta, err := podMeta(step, config, options, podName)
+	meta, err := podMeta(step, config, options, podName, workflowName)
 	if err != nil {
 		return nil, err
 	}
 
-	spec, err := podSpec(step, config, options, nsp)
+	spec, err := podSpec(step, config, options, nsp, workflowName)
 	if err != nil {
 		return nil, err
 	}
@@ -69,18 +69,18 @@ func mkPod(step *types.Step, config *config, podName, goos string, options Backe
 	return pod, nil
 }
 
-func stepToPodName(step *types.Step) (name string, err error) {
+func stepToPodName(step *types.Step, workflowName string) (name string, err error) {
 	if step.Type == types.StepTypeService {
-		return serviceName(step)
+		return serviceName(step, workflowName)
 	}
-	return podName(step)
+	return podName(step, workflowName)
 }
 
-func podName(step *types.Step) (string, error) {
-	return dnsName(podPrefix + step.UUID[:5] + "-" + step.Name)
+func podName(step *types.Step, workflowName string) (string, error) {
+	return dnsName(podPrefix + step.UUID[:5] + "-" + workflowName + "-" + step.Name)
 }
 
-func podMeta(step *types.Step, config *config, options BackendOptions, podName string) (meta_v1.ObjectMeta, error) {
+func podMeta(step *types.Step, config *config, options BackendOptions, podName, workflowName string) (meta_v1.ObjectMeta, error) {
 	var err error
 	meta := meta_v1.ObjectMeta{
 		Name:        podName,
@@ -88,7 +88,7 @@ func podMeta(step *types.Step, config *config, options BackendOptions, podName s
 		Annotations: podAnnotations(config, options),
 	}
 
-	meta.Labels, err = podLabels(step, config, options)
+	meta.Labels, err = podLabels(step, config, options, workflowName)
 	if err != nil {
 		return meta, err
 	}
@@ -96,7 +96,7 @@ func podMeta(step *types.Step, config *config, options BackendOptions, podName s
 	return meta, nil
 }
 
-func podLabels(step *types.Step, config *config, options BackendOptions) (map[string]string, error) {
+func podLabels(step *types.Step, config *config, options BackendOptions, workflowName string) (map[string]string, error) {
 	var err error
 	labels := make(map[string]string)
 
@@ -113,7 +113,7 @@ func podLabels(step *types.Step, config *config, options BackendOptions) (map[st
 		maps.Copy(labels, config.PodLabels)
 	}
 	if step.Type == types.StepTypeService {
-		labels[ServiceLabel], _ = serviceName(step)
+		labels[ServiceLabel], _ = serviceName(step, workflowName)
 	}
 	labels[StepLabel], err = stepLabel(step)
 	if err != nil {
@@ -146,7 +146,7 @@ func podAnnotations(config *config, options BackendOptions) map[string]string {
 	return annotations
 }
 
-func podSpec(step *types.Step, config *config, options BackendOptions, nsp nativeSecretsProcessor) (v1.PodSpec, error) {
+func podSpec(step *types.Step, config *config, options BackendOptions, nsp nativeSecretsProcessor, workflowName string) (v1.PodSpec, error) {
 	var err error
 	spec := v1.PodSpec{
 		RestartPolicy:      v1.RestartPolicyNever,
@@ -176,7 +176,7 @@ func podSpec(step *types.Step, config *config, options BackendOptions, nsp nativ
 	spec.ImagePullSecrets = secretsReferences(config.ImagePullSecretNames)
 	if needsRegistrySecret(step) {
 		log.Trace().Msgf("using an image pull secret from registries")
-		name, err := registrySecretName(step)
+		name, err := registrySecretName(step, workflowName)
 		if err != nil {
 			return spec, err
 		}
@@ -524,13 +524,13 @@ func mapToEnvVars(m map[string]string) []v1.EnvVar {
 	return ev
 }
 
-func startPod(ctx context.Context, engine *kube, step *types.Step, options BackendOptions) (*v1.Pod, error) {
-	podName, err := stepToPodName(step)
+func startPod(ctx context.Context, engine *kube, step *types.Step, options BackendOptions, workflowName string) (*v1.Pod, error) {
+	podName, err := stepToPodName(step, workflowName)
 	if err != nil {
 		return nil, err
 	}
 	engineConfig := engine.getConfig()
-	pod, err := mkPod(step, engineConfig, podName, engine.goos, options)
+	pod, err := mkPod(step, engineConfig, podName, engine.goos, options, workflowName)
 	if err != nil {
 		return nil, err
 	}
@@ -539,8 +539,8 @@ func startPod(ctx context.Context, engine *kube, step *types.Step, options Backe
 	return engine.client.CoreV1().Pods(engineConfig.Namespace).Create(ctx, pod, meta_v1.CreateOptions{})
 }
 
-func stopPod(ctx context.Context, engine *kube, step *types.Step, deleteOpts meta_v1.DeleteOptions) error {
-	podName, err := stepToPodName(step)
+func stopPod(ctx context.Context, engine *kube, step *types.Step, deleteOpts meta_v1.DeleteOptions, workflowName string) error {
+	podName, err := stepToPodName(step, workflowName)
 	if err != nil {
 		return err
 	}

@@ -34,22 +34,22 @@ func TestSmalPipelineDummyRun(t *testing.T) {
 	_, err := dummyEngine.Load(ctx)
 	assert.NoError(t, err)
 
-	assert.Error(t, dummyEngine.SetupWorkflow(ctx, nil, dummy.WorkflowSetupFailUUID))
+	assert.Error(t, dummyEngine.SetupWorkflow(ctx, nil, dummy.WorkflowSetupFailUUID, "workflowTestName"))
 
 	t.Run("expect fail of step func with non setup workflow", func(t *testing.T) {
 		step := &types.Step{Name: "step1", UUID: "SID_1"}
 		nonExistWorkflowID := "WID_NONE"
 
-		err := dummyEngine.StartStep(ctx, step, nonExistWorkflowID)
+		err := dummyEngine.StartStep(ctx, step, nonExistWorkflowID, "workflowTestName")
 		assert.Error(t, err)
 
-		_, err = dummyEngine.TailStep(ctx, step, nonExistWorkflowID)
+		_, err = dummyEngine.TailStep(ctx, step, nonExistWorkflowID, "workflowTestName")
 		assert.Error(t, err)
 
-		_, err = dummyEngine.WaitStep(ctx, step, nonExistWorkflowID)
+		_, err = dummyEngine.WaitStep(ctx, step, nonExistWorkflowID, "workflowTestName")
 		assert.Error(t, err)
 
-		err = dummyEngine.DestroyStep(ctx, step, nonExistWorkflowID)
+		err = dummyEngine.DestroyStep(ctx, step, nonExistWorkflowID, "workflowTestName")
 		assert.Error(t, err)
 	})
 
@@ -63,11 +63,11 @@ func TestSmalPipelineDummyRun(t *testing.T) {
 		}
 		workflowUUID := "WID_1"
 
-		assert.NoError(t, dummyEngine.SetupWorkflow(ctx, nil, workflowUUID))
+		assert.NoError(t, dummyEngine.SetupWorkflow(ctx, nil, workflowUUID, "workflowTestName"))
 
-		assert.NoError(t, dummyEngine.StartStep(ctx, step, workflowUUID))
+		assert.NoError(t, dummyEngine.StartStep(ctx, step, workflowUUID, "workflowTestName"))
 
-		reader, err := dummyEngine.TailStep(ctx, step, workflowUUID)
+		reader, err := dummyEngine.TailStep(ctx, step, workflowUUID, "workflowTestName")
 		assert.NoError(t, err)
 		log, err := io.ReadAll(reader)
 		assert.NoError(t, err)
@@ -81,14 +81,14 @@ echo nein
 ------------------
 `, string(log))
 
-		state, err := dummyEngine.WaitStep(ctx, step, workflowUUID)
+		state, err := dummyEngine.WaitStep(ctx, step, workflowUUID, "workflowTestName")
 		assert.NoError(t, err)
 		assert.NoError(t, state.Error)
 		assert.EqualValues(t, 0, state.ExitCode)
 
-		assert.NoError(t, dummyEngine.DestroyStep(ctx, step, workflowUUID))
+		assert.NoError(t, dummyEngine.DestroyStep(ctx, step, workflowUUID, "workflowTestName"))
 
-		assert.NoError(t, dummyEngine.DestroyWorkflow(ctx, nil, workflowUUID))
+		assert.NoError(t, dummyEngine.DestroyWorkflow(ctx, nil, workflowUUID, "workflowTestName"))
 	})
 
 	t.Run("step exec error", func(t *testing.T) {
@@ -100,21 +100,21 @@ echo nein
 		}
 		workflowUUID := "WID_1"
 
-		assert.NoError(t, dummyEngine.SetupWorkflow(ctx, nil, workflowUUID))
+		assert.NoError(t, dummyEngine.SetupWorkflow(ctx, nil, workflowUUID, "workflowTestName"))
 
-		assert.NoError(t, dummyEngine.StartStep(ctx, step, workflowUUID))
+		assert.NoError(t, dummyEngine.StartStep(ctx, step, workflowUUID, "workflowTestName"))
 
-		_, err := dummyEngine.TailStep(ctx, step, workflowUUID)
+		_, err := dummyEngine.TailStep(ctx, step, workflowUUID, "workflowTestName")
 		assert.NoError(t, err)
 
-		state, err := dummyEngine.WaitStep(ctx, step, workflowUUID)
+		state, err := dummyEngine.WaitStep(ctx, step, workflowUUID, "workflowTestName")
 		assert.NoError(t, err)
 		assert.NoError(t, state.Error)
 		assert.EqualValues(t, 1, state.ExitCode)
 
-		assert.NoError(t, dummyEngine.DestroyStep(ctx, step, workflowUUID))
+		assert.NoError(t, dummyEngine.DestroyStep(ctx, step, workflowUUID, "workflowTestName"))
 
-		assert.NoError(t, dummyEngine.DestroyWorkflow(ctx, nil, workflowUUID))
+		assert.NoError(t, dummyEngine.DestroyWorkflow(ctx, nil, workflowUUID, "workflowTestName"))
 	})
 
 	t.Run("step tail error", func(t *testing.T) {
@@ -125,19 +125,19 @@ echo nein
 		}
 		workflowUUID := "WID_1"
 
-		assert.NoError(t, dummyEngine.SetupWorkflow(ctx, nil, workflowUUID))
+		assert.NoError(t, dummyEngine.SetupWorkflow(ctx, nil, workflowUUID, "workflowTestName"))
 
-		assert.NoError(t, dummyEngine.StartStep(ctx, step, workflowUUID))
+		assert.NoError(t, dummyEngine.StartStep(ctx, step, workflowUUID, "workflowTestName"))
 
-		_, err := dummyEngine.TailStep(ctx, step, workflowUUID)
+		_, err := dummyEngine.TailStep(ctx, step, workflowUUID, "workflowTestName")
 		assert.Error(t, err)
 
-		_, err = dummyEngine.WaitStep(ctx, step, workflowUUID)
+		_, err = dummyEngine.WaitStep(ctx, step, workflowUUID, "workflowTestName")
 		assert.NoError(t, err)
 
-		assert.NoError(t, dummyEngine.DestroyStep(ctx, step, workflowUUID))
+		assert.NoError(t, dummyEngine.DestroyStep(ctx, step, workflowUUID, "workflowTestName"))
 
-		assert.NoError(t, dummyEngine.DestroyWorkflow(ctx, nil, workflowUUID))
+		assert.NoError(t, dummyEngine.DestroyWorkflow(ctx, nil, workflowUUID, "workflowTestName"))
 	})
 
 	t.Run("step start fail", func(t *testing.T) {
@@ -149,20 +149,20 @@ echo nein
 		}
 		workflowUUID := "WID_1"
 
-		assert.NoError(t, dummyEngine.SetupWorkflow(ctx, nil, workflowUUID))
+		assert.NoError(t, dummyEngine.SetupWorkflow(ctx, nil, workflowUUID, "workflowTestName"))
 
-		assert.Error(t, dummyEngine.StartStep(ctx, step, workflowUUID))
+		assert.Error(t, dummyEngine.StartStep(ctx, step, workflowUUID, "workflowTestName"))
 
-		_, err := dummyEngine.TailStep(ctx, step, workflowUUID)
+		_, err := dummyEngine.TailStep(ctx, step, workflowUUID, "workflowTestName")
 		assert.Error(t, err)
 
-		state, err := dummyEngine.WaitStep(ctx, step, workflowUUID)
+		state, err := dummyEngine.WaitStep(ctx, step, workflowUUID, "workflowTestName")
 		assert.Error(t, err)
 		assert.Error(t, state.Error)
 		assert.EqualValues(t, 0, state.ExitCode)
 
-		assert.Error(t, dummyEngine.DestroyStep(ctx, step, workflowUUID))
+		assert.Error(t, dummyEngine.DestroyStep(ctx, step, workflowUUID, "workflowTestName"))
 
-		assert.NoError(t, dummyEngine.DestroyWorkflow(ctx, nil, workflowUUID))
+		assert.NoError(t, dummyEngine.DestroyWorkflow(ctx, nil, workflowUUID, "workflowTestName"))
 	})
 }

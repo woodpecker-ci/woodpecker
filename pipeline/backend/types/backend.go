@@ -37,23 +37,23 @@ type Backend interface {
 	Load(ctx context.Context) (*BackendInfo, error)
 
 	// SetupWorkflow sets up the workflow environment.
-	SetupWorkflow(ctx context.Context, conf *Config, taskUUID string) error
+	SetupWorkflow(ctx context.Context, conf *Config, taskUUID, workflowName string) error
 
 	// StartStep starts the workflow step.
-	StartStep(ctx context.Context, step *Step, taskUUID string) error
+	StartStep(ctx context.Context, step *Step, taskUUID, workflowName string) error
 
 	// WaitStep waits for the workflow step to complete and returns
 	// the completion results.
-	WaitStep(ctx context.Context, step *Step, taskUUID string) (*State, error)
+	WaitStep(ctx context.Context, step *Step, taskUUID, workflowName string) (*State, error)
 
 	// TailStep tails the workflow step logs.
-	TailStep(ctx context.Context, step *Step, taskUUID string) (io.ReadCloser, error)
+	TailStep(ctx context.Context, step *Step, taskUUID, workflowName string) (io.ReadCloser, error)
 
 	// DestroyStep destroys the workflow step.
-	DestroyStep(ctx context.Context, step *Step, taskUUID string) error
+	DestroyStep(ctx context.Context, step *Step, taskUUID, workflowName string) error
 
 	// DestroyWorkflow destroys the workflow environment.
-	DestroyWorkflow(ctx context.Context, conf *Config, taskUUID string) error
+	DestroyWorkflow(ctx context.Context, conf *Config, taskUUID, workflowName string) error
 }
 
 // BackendInfo represents the reported information of a loaded backend.

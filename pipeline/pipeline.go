@@ -109,13 +109,13 @@ func (r *Runtime) Run(runnerCtx context.Context) error {
 		if ctx.Err() != nil {
 			ctx = GetShutdownCtx()
 		}
-		if err := r.engine.DestroyWorkflow(ctx, r.spec, r.taskUUID); err != nil {
+		if err := r.engine.DestroyWorkflow(ctx, r.spec, r.taskUUID, r.Description["pipeline_name"]); err != nil {
 			logger.Error().Err(err).Msg("could not destroy engine")
 		}
 	}()
 
 	r.started = time.Now().Unix()
-	if err := r.engine.SetupWorkflow(runnerCtx, r.spec, r.taskUUID); err != nil {
+	if err := r.engine.SetupWorkflow(runnerCtx, r.spec, r.taskUUID, r.Description["pipeline_name"]); err != nil {
 		return err
 	}
 
@@ -123,7 +123,7 @@ func (r *Runtime) Run(runnerCtx context.Context) error {
 		select {
 		case <-r.ctx.Done():
 			return ErrCancel
-		case err := <-r.execAll(stage.Steps):
+		case err := <-r.execAll(stage.Steps, r.Description["pipeline_name"]):
 			if err != nil {
 				r.err = err
 			}
@@ -163,7 +163,7 @@ func (r *Runtime) traceStep(processState *backend.State, err error, step *backen
 }
 
 // Executes a set of parallel steps.
-func (r *Runtime) execAll(steps []*backend.Step) <-chan error {
+func (r *Runtime) execAll(steps []*backend.Step, workflowName string) <-chan error {
 	var g errgroup.Group
 	done := make(chan error)
 	logger := r.MakeLogger()
@@ -206,7 +206,7 @@ func (r *Runtime) execAll(steps []*backend.Step) <-chan error {
 				Str("step", step.Name).
 				Msg("executing")
 
-			processState, err := r.exec(step)
+			processState, err := r.exec(step, workflowName)
 
 			logger.Debug().
 				Str("step", step.Name).
@@ -229,14 +229,14 @@ func (r *Runtime) execAll(steps []*backend.Step) <-chan error {
 }
 
 // Executes the step and returns the state and error.
-func (r *Runtime) exec(step *backend.Step) (*backend.State, error) {
-	if err := r.engine.StartStep(r.ctx, step, r.taskUUID); err != nil {
+func (r *Runtime) exec(step *backend.Step, workflowName string) (*backend.State, error) {
+	if err := r.engine.StartStep(r.ctx, step, r.taskUUID, workflowName); err != nil {
 		return nil, err
 	}
 
 	var wg sync.WaitGroup
 	if r.logger != nil {
-		rc, err := r.engine.TailStep(r.ctx, step, r.taskUUID)
+		rc, err := r.engine.TailStep(r.ctx, step, r.taskUUID, workflowName)
 		if err != nil {
 			return nil, err
 		}
@@ -261,7 +261,7 @@ func (r *Runtime) exec(step *backend.Step) (*backend.State, error) {
 	// We wait until all data was logged. (Needed for some backends like local as WaitStep kills the log stream)
 	wg.Wait()
 
-	waitState, err := r.engine.WaitStep(r.ctx, step, r.taskUUID)
+	waitState, err := r.engine.WaitStep(r.ctx, step, r.taskUUID, workflowName)
 	if err != nil {
 		if errors.Is(err, context.Canceled) {
 			return waitState, ErrCancel
@@ -269,7 +269,7 @@ func (r *Runtime) exec(step *backend.Step) (*backend.State, error) {
 		return nil, err
 	}
 
-	if err := r.engine.DestroyStep(r.ctx, step, r.taskUUID); err != nil {
+	if err := r.engine.DestroyStep(r.ctx, step, r.taskUUID, workflowName); err != nil {
 		return nil, err
 	}
 

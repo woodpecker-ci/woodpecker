@@ -72,6 +72,7 @@ func (r *Runner) Run(runnerCtx, shutdownCtx context.Context) error { //nolint:co
 
 	repoName := extractRepositoryName(workflow.Config)       // hack
 	pipelineNumber := extractPipelineNumber(workflow.Config) // hack
+	pipelineName := extractPipelineName(workflow.Config)     // hack
 
 	r.counter.Add(
 		workflow.ID,
@@ -149,6 +150,7 @@ func (r *Runner) Run(runnerCtx, shutdownCtx context.Context) error { //nolint:co
 			"workflow_id":     workflow.ID,
 			"repo":            repoName,
 			"pipeline_number": pipelineNumber,
+			"pipeline_name":   pipelineName,
 		}),
 	).Run(runnerCtx)
 
@@ -196,4 +198,8 @@ func extractRepositoryName(config *backend.Config) string {
 
 func extractPipelineNumber(config *backend.Config) string {
 	return config.Stages[0].Steps[0].Environment["CI_PIPELINE_NUMBER"]
+}
+
+func extractPipelineName(config *backend.Config) string {
+	return config.Stages[0].Steps[0].Environment["CI_WORKFLOW_NAME"]
 }

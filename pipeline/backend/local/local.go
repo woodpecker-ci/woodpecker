@@ -90,8 +90,8 @@ func (e *local) Load(ctx context.Context) (*types.BackendInfo, error) {
 }
 
 // SetupWorkflow the pipeline environment.
-func (e *local) SetupWorkflow(_ context.Context, _ *types.Config, taskUUID string) error {
-	log.Trace().Str("taskUUID", taskUUID).Msg("create workflow environment")
+func (e *local) SetupWorkflow(_ context.Context, _ *types.Config, taskUUID, workflowName string) error {
+	log.Trace().Str("taskUUID", taskUUID).Str("workflowName", workflowName).Msg("create workflow environment")
 
 	baseDir, err := os.MkdirTemp(e.tempDir, "woodpecker-local-*")
 	if err != nil {
@@ -119,8 +119,8 @@ func (e *local) SetupWorkflow(_ context.Context, _ *types.Config, taskUUID strin
 }
 
 // StartStep the pipeline step.
-func (e *local) StartStep(ctx context.Context, step *types.Step, taskUUID string) error {
-	log.Trace().Str("taskUUID", taskUUID).Msgf("start step %s", step.Name)
+func (e *local) StartStep(ctx context.Context, step *types.Step, taskUUID, workflowName string) error {
+	log.Trace().Str("taskUUID", taskUUID).Msgf("start step %s-%s", workflowName, step.Name)
 
 	state, err := e.getState(taskUUID)
 	if err != nil {
@@ -204,8 +204,8 @@ func (e *local) execPlugin(ctx context.Context, step *types.Step, state *workflo
 
 // WaitStep for the pipeline step to complete and returns
 // the completion results.
-func (e *local) WaitStep(_ context.Context, step *types.Step, taskUUID string) (*types.State, error) {
-	log.Trace().Str("taskUUID", taskUUID).Msgf("wait for step %s", step.Name)
+func (e *local) WaitStep(_ context.Context, step *types.Step, taskUUID, workflowName string) (*types.State, error) {
+	log.Trace().Str("taskUUID", taskUUID).Msgf("start step %s-%s", workflowName, step.Name)
 
 	state, err := e.getState(taskUUID)
 	if err != nil {
@@ -234,19 +234,19 @@ func (e *local) WaitStep(_ context.Context, step *types.Step, taskUUID string) (
 }
 
 // TailStep the pipeline step logs.
-func (e *local) TailStep(_ context.Context, step *types.Step, taskUUID string) (io.ReadCloser, error) {
-	log.Trace().Str("taskUUID", taskUUID).Msgf("tail logs of step %s", step.Name)
+func (e *local) TailStep(_ context.Context, step *types.Step, taskUUID, workflowName string) (io.ReadCloser, error) {
+	log.Trace().Str("taskUUID", taskUUID).Str("workflowName", workflowName).Msgf("tail logs of step %s", step.Name)
 	return e.output, nil
 }
 
-func (e *local) DestroyStep(_ context.Context, _ *types.Step, _ string) error {
+func (e *local) DestroyStep(_ context.Context, _ *types.Step, _, _ string) error {
 	// WaitStep already waits for the command to finish, so there is nothing to do here.
 	return nil
 }
 
 // DestroyWorkflow the pipeline environment.
-func (e *local) DestroyWorkflow(_ context.Context, _ *types.Config, taskUUID string) error {
-	log.Trace().Str("taskUUID", taskUUID).Msg("delete workflow environment")
+func (e *local) DestroyWorkflow(_ context.Context, _ *types.Config, taskUUID, workflowName string) error {
+	log.Trace().Str("taskUUID", taskUUID).Str("workflowName", workflowName).Msg("delete workflow environment")
 
 	state, err := e.getState(taskUUID)
 	if err != nil {

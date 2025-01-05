@@ -24,24 +24,24 @@ import (
 )
 
 func TestServiceName(t *testing.T) {
-	name, err := serviceName(&types.Step{Name: "database", UUID: "01he8bebctabr3kgk0qj36d2me"})
+	name, err := serviceName(&types.Step{Name: "database", UUID: "01he8bebctabr3kgk0qj36d2me"}, "workflowNameTest")
 	assert.NoError(t, err)
-	assert.Equal(t, "wp-svc-01he8-database", name)
+	assert.Equal(t, "wp-svc-01he8-workflownametest-database", name)
 
-	name, err = serviceName(&types.Step{Name: "wp-01he8-clone-0-services-0.woodpecker-runtime.svc.cluster.local", UUID: "01he8bebctabr3kgk0qj36d2me"})
+	name, err = serviceName(&types.Step{Name: "wp-01he8-workflownametest-clone-0-services-0.woodpecker-runtime.svc.cluster.local", UUID: "01he8bebctabr3kgk0qj36d2me"}, "workflowNameTest")
 	assert.NoError(t, err)
-	assert.Equal(t, "wp-svc-01he8-wp-01he8-clone-0-services-0.woodpecker-runtime.svc.cluster.local", name)
+	assert.Equal(t, "wp-svc-01he8-workflownametest-wp-01he8-workflownametest-clone-0-services-0.woodpecker-runtime.svc.cluster.local", name)
 
-	name, err = serviceName(&types.Step{Name: "awesome_service", UUID: "01he8bebctabr3kgk0qj36d2me"})
+	name, err = serviceName(&types.Step{Name: "awesome_service", UUID: "01he8bebctabr3kgk0qj36d2me"}, "workflowNameTest")
 	assert.NoError(t, err)
-	assert.Equal(t, "wp-svc-01he8-awesome-service", name)
+	assert.Equal(t, "wp-svc-01he8-workflownametest-awesome-service", name)
 }
 
 func TestService(t *testing.T) {
 	expected := `
 	{
 	  "metadata": {
-	    "name": "wp-svc-01he8-bar",
+	    "name": "wp-svc-01he8-workflownametest-bar",
 	    "namespace": "foo",
 	    "creationTimestamp": null
 	  },
@@ -66,7 +66,7 @@ func TestService(t *testing.T) {
 	      }
 	    ],
 	    "selector": {
-	      "service": "wp-svc-01he8-bar"
+	      "service": "wp-svc-01he8-workflownametest-bar"
 	    },
 	    "type": "ClusterIP"
 	  },
@@ -83,7 +83,7 @@ func TestService(t *testing.T) {
 		Name:  "bar",
 		UUID:  "01he8bebctabr3kgk0qj36d2me-0",
 		Ports: ports,
-	}, &config{Namespace: "foo"})
+	}, &config{Namespace: "foo"}, "workflowNameTest")
 	assert.NoError(t, err)
 	j, err := json.Marshal(s)
 	assert.NoError(t, err)

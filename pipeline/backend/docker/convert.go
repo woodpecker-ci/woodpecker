@@ -69,8 +69,8 @@ func (e *docker) toConfig(step *types.Step, options BackendOptions) *container.C
 	return config
 }
 
-func toContainerName(step *types.Step) string {
-	return "wp_" + step.UUID[:5] + "-" + step.Name
+func toContainerName(step *types.Step, workflowName string) string {
+	return "wp_" + step.UUID[:5] + "-" + workflowName + "-" + step.Name
 }
 
 // returns a container host configuration.

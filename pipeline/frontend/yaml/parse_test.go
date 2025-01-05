@@ -147,7 +147,7 @@ pipeline:
     commands: meh!
 `
 
-	workflow1, err := ParseString(sampleYamlPipeline)
+	workflowNameTest, err := ParseString(sampleYamlPipeline)
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -157,9 +157,9 @@ pipeline:
 		return
 	}
 
-	assert.EqualValues(t, workflow1, workflow2)
-	assert.Len(t, workflow1.Steps.ContainerList, 1)
-	assert.EqualValues(t, "say hello", workflow1.Steps.ContainerList[0].Name)
+	assert.EqualValues(t, workflowNameTest, workflow2)
+	assert.Len(t, workflowNameTest.Steps.ContainerList, 1)
+	assert.EqualValues(t, "say hello", workflowNameTest.Steps.ContainerList[0].Name)
 }
 
 var sampleYaml = `

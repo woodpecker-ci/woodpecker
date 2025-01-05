@@ -33,8 +33,8 @@ const (
 	servicePrefix = "wp-svc-"
 )
 
-func mkService(step *types.Step, config *config) (*v1.Service, error) {
-	name, err := serviceName(step)
+func mkService(step *types.Step, config *config, workflowName string) (*v1.Service, error) {
+	name, err := serviceName(step, workflowName)
 	if err != nil {
 		return nil, err
 	}
@@ -62,8 +62,8 @@ func mkService(step *types.Step, config *config) (*v1.Service, error) {
 	}, nil
 }
 
-func serviceName(step *types.Step) (string, error) {
-	return dnsName(servicePrefix + step.UUID[:5] + "-" + step.Name)
+func serviceName(step *types.Step, workflowName string) (string, error) {
+	return dnsName(servicePrefix + step.UUID[:5] + "-" + workflowName + "-" + step.Name)
 }
 
 func servicePort(port types.Port) v1.ServicePort {
@@ -77,9 +77,9 @@ func servicePort(port types.Port) v1.ServicePort {
 	}
 }
 
-func startService(ctx context.Context, engine *kube, step *types.Step) (*v1.Service, error) {
+func startService(ctx context.Context, engine *kube, step *types.Step, workflowName string) (*v1.Service, error) {
 	engineConfig := engine.getConfig()
-	svc, err := mkService(step, engineConfig)
+	svc, err := mkService(step, engineConfig, workflowName)
 	if err != nil {
 		return nil, err
 	}
@@ -88,8 +88,8 @@ func startService(ctx context.Context, engine *kube, step *types.Step) (*v1.Serv
 	return engine.client.CoreV1().Services(engineConfig.Namespace).Create(ctx, svc, meta_v1.CreateOptions{})
 }
 
-func stopService(ctx context.Context, engine *kube, step *types.Step, deleteOpts meta_v1.DeleteOptions) error {
-	svcName, err := serviceName(step)
+func stopService(ctx context.Context, engine *kube, step *types.Step, deleteOpts meta_v1.DeleteOptions, workflowName string) error {
+	svcName, err := serviceName(step, workflowName)
 	if err != nil {
 		return err
 	}

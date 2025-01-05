@@ -204,13 +204,13 @@ func needsRegistrySecret(step *types.Step) bool {
 	return step.AuthConfig.Username != "" && step.AuthConfig.Password != ""
 }
 
-func mkRegistrySecret(step *types.Step, config *config) (*v1.Secret, error) {
-	name, err := registrySecretName(step)
+func mkRegistrySecret(step *types.Step, config *config, workflowName string) (*v1.Secret, error) {
+	name, err := registrySecretName(step, workflowName)
 	if err != nil {
 		return nil, err
 	}
 
-	labels, err := registrySecretLabels(step)
+	labels, err := registrySecretLabels(step, workflowName)
 	if err != nil {
 		return nil, err
 	}
@@ -247,16 +247,16 @@ func mkRegistrySecret(step *types.Step, config *config) (*v1.Secret, error) {
 	}, nil
 }
 
-func registrySecretName(step *types.Step) (string, error) {
-	return podName(step)
+func registrySecretName(step *types.Step, workflowName string) (string, error) {
+	return podName(step, workflowName)
 }
 
-func registrySecretLabels(step *types.Step) (map[string]string, error) {
+func registrySecretLabels(step *types.Step, workflowName string) (map[string]string, error) {
 	var err error
 	labels := make(map[string]string)
 
 	if step.Type == types.StepTypeService {
-		labels[ServiceLabel], _ = serviceName(step)
+		labels[ServiceLabel], _ = serviceName(step, workflowName)
 	}
 	labels[StepLabel], err = stepLabel(step)
 	if err != nil {
@@ -266,8 +266,8 @@ func registrySecretLabels(step *types.Step) (map[string]string, error) {
 	return labels, nil
 }
 
-func startRegistrySecret(ctx context.Context, engine *kube, step *types.Step) error {
-	secret, err := mkRegistrySecret(step, engine.config)
+func startRegistrySecret(ctx context.Context, engine *kube, step *types.Step, workflowName string) error {
+	secret, err := mkRegistrySecret(step, engine.config, workflowName)
 	if err != nil {
 		return err
 	}
@@ -279,8 +279,8 @@ func startRegistrySecret(ctx context.Context, engine *kube, step *types.Step) er
 	return nil
 }
 
-func stopRegistrySecret(ctx context.Context, engine *kube, step *types.Step, deleteOpts meta_v1.DeleteOptions) error {
-	name, err := registrySecretName(step)
+func stopRegistrySecret(ctx context.Context, engine *kube, step *types.Step, deleteOpts meta_v1.DeleteOptions, workflowName string) error {
+	name, err := registrySecretName(step, workflowName)
 	if err != nil {
 		return err
 	}

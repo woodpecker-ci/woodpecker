@@ -188,7 +188,7 @@ func (e *kube) getConfig() *config {
 }
 
 // SetupWorkflow sets up the pipeline environment.
-func (e *kube) SetupWorkflow(ctx context.Context, conf *types.Config, taskUUID string) error {
+func (e *kube) SetupWorkflow(ctx context.Context, conf *types.Config, taskUUID, workflowName string) error {
 	log.Trace().Str("taskUUID", taskUUID).Msgf("Setting up Kubernetes primitives")
 
 	_, err := startVolume(ctx, e, conf.Volume.Name)
@@ -200,7 +200,7 @@ func (e *kube) SetupWorkflow(ctx context.Context, conf *types.Config, taskUUID s
 	for _, stage := range conf.Stages {
 		for _, step := range stage.Steps {
 			if step.Type == types.StepTypeService {
-				svc, err := startService(ctx, e, step)
+				svc, err := startService(ctx, e, step, workflowName)
 				if err != nil {
 					return err
 				}
@@ -220,28 +220,28 @@ func (e *kube) SetupWorkflow(ctx context.Context, conf *types.Config, taskUUID s
 }
 
 // StartStep starts the pipeline step.
-func (e *kube) StartStep(ctx context.Context, step *types.Step, taskUUID string) error {
+func (e *kube) StartStep(ctx context.Context, step *types.Step, taskUUID, workflowName string) error {
 	options, err := parseBackendOptions(step)
 	if err != nil {
 		log.Error().Err(err).Msg("could not parse backend options")
 	}
 
 	if needsRegistrySecret(step) {
-		err = startRegistrySecret(ctx, e, step)
+		err = startRegistrySecret(ctx, e, step, workflowName)
 		if err != nil {
 			return err
 		}
 	}
 
 	log.Trace().Str("taskUUID", taskUUID).Msgf("starting step: %s", step.Name)
-	_, err = startPod(ctx, e, step, options)
+	_, err = startPod(ctx, e, step, options, workflowName)
 	return err
 }
 
 // WaitStep waits for the pipeline step to complete and returns
 // the completion results.
-func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) (*types.State, error) {
-	podName, err := stepToPodName(step)
+func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID, workflowName string) (*types.State, error) {
+	podName, err := stepToPodName(step, workflowName)
 	if err != nil {
 		return nil, err
 	}
@@ -316,8 +316,8 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 }
 
 // TailStep tails the pipeline step logs.
-func (e *kube) TailStep(ctx context.Context, step *types.Step, taskUUID string) (io.ReadCloser, error) {
-	podName, err := stepToPodName(step)
+func (e *kube) TailStep(ctx context.Context, step *types.Step, taskUUID, workflowName string) (io.ReadCloser, error) {
+	podName, err := stepToPodName(step, workflowName)
 	if err != nil {
 		return nil, err
 	}
@@ -388,17 +388,17 @@ func (e *kube) TailStep(ctx context.Context, step *types.Step, taskUUID string) 
 	return rc, nil
 }
 
-func (e *kube) DestroyStep(ctx context.Context, step *types.Step, taskUUID string) error {
+func (e *kube) DestroyStep(ctx context.Context, step *types.Step, taskUUID, workflowName string) error {
 	var errs []error
 	log.Trace().Str("taskUUID", taskUUID).Msgf("Stopping step: %s", step.Name)
 	if needsRegistrySecret(step) {
-		err := stopRegistrySecret(ctx, e, step, defaultDeleteOptions)
+		err := stopRegistrySecret(ctx, e, step, defaultDeleteOptions, workflowName)
 		if err != nil {
 			errs = append(errs, err)
 		}
 	}
 
-	err := stopPod(ctx, e, step, defaultDeleteOptions)
+	err := stopPod(ctx, e, step, defaultDeleteOptions, workflowName)
 	if err != nil {
 		errs = append(errs, err)
 	}
@@ -406,18 +406,18 @@ func (e *kube) DestroyStep(ctx context.Context, step *types.Step, taskUUID strin
 }
 
 // DestroyWorkflow destroys the pipeline environment.
-func (e *kube) DestroyWorkflow(ctx context.Context, conf *types.Config, taskUUID string) error {
+func (e *kube) DestroyWorkflow(ctx context.Context, conf *types.Config, taskUUID, workflowName string) error {
 	log.Trace().Str("taskUUID", taskUUID).Msg("deleting Kubernetes primitives")
 
 	for _, stage := range conf.Stages {
 		for _, step := range stage.Steps {
-			err := stopPod(ctx, e, step, defaultDeleteOptions)
+			err := stopPod(ctx, e, step, defaultDeleteOptions, workflowName)
 			if err != nil {
 				return err
 			}
 
 			if step.Type == types.StepTypeService {
-				err := stopService(ctx, e, step, defaultDeleteOptions)
+				err := stopService(ctx, e, step, defaultDeleteOptions, workflowName)
 				if err != nil {
 					return err
 				}

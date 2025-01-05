@@ -208,7 +208,7 @@ func TestUsernameAndPasswordNeedsSecret(t *testing.T) {
 func TestRegistrySecret(t *testing.T) {
 	const expected = `{
 		"metadata": {
-			"name": "wp-01he8-go-test",
+			"name": "wp-01he8-workflownametest-go-test",
 			"namespace": "woodpecker",
 			"creationTimestamp": null,
 			"labels": {
@@ -231,7 +231,7 @@ func TestRegistrySecret(t *testing.T) {
 		},
 	}, &config{
 		Namespace: "woodpecker",
-	})
+	}, "workflowNameTest")
 	assert.NoError(t, err)
 
 	secretJSON, err := json.Marshal(secret)

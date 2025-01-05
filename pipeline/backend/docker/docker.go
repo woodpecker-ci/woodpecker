@@ -141,8 +141,8 @@ func (e *docker) Load(ctx context.Context) (*backend.BackendInfo, error) {
 	}, nil
 }
 
-func (e *docker) SetupWorkflow(ctx context.Context, conf *backend.Config, taskUUID string) error {
-	log.Trace().Str("taskUUID", taskUUID).Msg("create workflow environment")
+func (e *docker) SetupWorkflow(ctx context.Context, conf *backend.Config, taskUUID, workflowName string) error {
+	log.Trace().Str("taskUUID", taskUUID).Str("workflowName", workflowName).Msg("create workflow environment")
 
 	_, err := e.client.VolumeCreate(ctx, volume.CreateOptions{
 		Name:   conf.Volume.Name,
@@ -163,17 +163,17 @@ func (e *docker) SetupWorkflow(ctx context.Context, conf *backend.Config, taskUU
 	return err
 }
 
-func (e *docker) StartStep(ctx context.Context, step *backend.Step, taskUUID string) error {
+func (e *docker) StartStep(ctx context.Context, step *backend.Step, taskUUID, workflowName string) error {
 	options, err := parseBackendOptions(step)
 	if err != nil {
 		log.Error().Err(err).Msg("could not parse backend options")
 	}
 
-	log.Trace().Str("taskUUID", taskUUID).Msgf("start step %s", step.Name)
+	log.Trace().Str("taskUUID", taskUUID).Msgf("start step %s-%s", workflowName, step.Name)
 
 	config := e.toConfig(step, options)
 	hostConfig := toHostConfig(step, &e.config)
-	containerName := toContainerName(step)
+	containerName := toContainerName(step, workflowName)
 
 	// create pull options with encoded authorization credentials.
 	pullOpts := image.PullOptions{}
@@ -246,10 +246,10 @@ func (e *docker) StartStep(ctx context.Context, step *backend.Step, taskUUID str
 	return e.client.ContainerStart(ctx, containerName, container.StartOptions{})
 }
 
-func (e *docker) WaitStep(ctx context.Context, step *backend.Step, taskUUID string) (*backend.State, error) {
+func (e *docker) WaitStep(ctx context.Context, step *backend.Step, taskUUID, workflowName string) (*backend.State, error) {
 	log.Trace().Str("taskUUID", taskUUID).Msgf("wait for step %s", step.Name)
 
-	containerName := toContainerName(step)
+	containerName := toContainerName(step, workflowName)
 
 	wait, errC := e.client.ContainerWait(ctx, containerName, "")
 	select {
@@ -269,10 +269,10 @@ func (e *docker) WaitStep(ctx context.Context, step *backend.Step, taskUUID stri
 	}, nil
 }
 
-func (e *docker) TailStep(ctx context.Context, step *backend.Step, taskUUID string) (io.ReadCloser, error) {
+func (e *docker) TailStep(ctx context.Context, step *backend.Step, taskUUID, workflowName string) (io.ReadCloser, error) {
 	log.Trace().Str("taskUUID", taskUUID).Msgf("tail logs of step %s", step.Name)
 
-	logs, err := e.client.ContainerLogs(ctx, toContainerName(step), container.LogsOptions{
+	logs, err := e.client.ContainerLogs(ctx, toContainerName(step, workflowName), container.LogsOptions{
 		Follow:     true,
 		ShowStdout: true,
 		ShowStderr: true,
@@ -293,10 +293,10 @@ func (e *docker) TailStep(ctx context.Context, step *backend.Step, taskUUID stri
 	return rc, nil
 }
 
-func (e *docker) DestroyStep(ctx context.Context, step *backend.Step, taskUUID string) error {
+func (e *docker) DestroyStep(ctx context.Context, step *backend.Step, taskUUID, workflowName string) error {
 	log.Trace().Str("taskUUID", taskUUID).Msgf("stop step %s", step.Name)
 
-	containerName := toContainerName(step)
+	containerName := toContainerName(step, workflowName)
 
 	if err := e.client.ContainerKill(ctx, containerName, "9"); err != nil && !isErrContainerNotFoundOrNotRunning(err) {
 		return err
@@ -309,12 +309,12 @@ func (e *docker) DestroyStep(ctx context.Context, step *backend.Step, taskUUID s
 	return nil
 }
 
-func (e *docker) DestroyWorkflow(ctx context.Context, conf *backend.Config, taskUUID string) error {
+func (e *docker) DestroyWorkflow(ctx context.Context, conf *backend.Config, taskUUID, workflowName string) error {
 	log.Trace().Str("taskUUID", taskUUID).Msgf("delete workflow environment")
 
 	for _, stage := range conf.Stages {
 		for _, step := range stage.Steps {
-			containerName := toContainerName(step)
+			containerName := toContainerName(step, workflowName)
 			if err := e.client.ContainerKill(ctx, containerName, "9"); err != nil && !isErrContainerNotFoundOrNotRunning(err) {
 				log.Error().Err(err).Msgf("could not kill container '%s'", step.Name)
 			}

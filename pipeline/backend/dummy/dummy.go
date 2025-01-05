@@ -78,8 +78,11 @@ func (e *dummy) Load(_ context.Context) (*backend.BackendInfo, error) {
 	}, nil
 }
 
-func (e *dummy) SetupWorkflow(_ context.Context, _ *backend.Config, taskUUID string) error {
+func (e *dummy) SetupWorkflow(_ context.Context, _ *backend.Config, taskUUID, workflowName string) error {
 	if taskUUID == WorkflowSetupFailUUID {
+		return fmt.Errorf("expected fail to setup workflow")
+	}
+	if workflowName == "" {
 		return fmt.Errorf("expected fail to setup workflow")
 	}
 	log.Trace().Str("taskUUID", taskUUID).Msg("create workflow environment")
@@ -87,8 +90,8 @@ func (e *dummy) SetupWorkflow(_ context.Context, _ *backend.Config, taskUUID str
 	return nil
 }
 
-func (e *dummy) StartStep(_ context.Context, step *backend.Step, taskUUID string) error {
-	log.Trace().Str("taskUUID", taskUUID).Msgf("start step %s", step.Name)
+func (e *dummy) StartStep(_ context.Context, step *backend.Step, taskUUID, workflowName string) error {
+	log.Trace().Str("taskUUID", taskUUID).Msgf("start step %s-%s", workflowName, step.Name)
 
 	// internal state checks
 	_, exist := e.kv.Load("task_" + taskUUID)
@@ -114,8 +117,8 @@ func (e *dummy) StartStep(_ context.Context, step *backend.Step, taskUUID string
 	return nil
 }
 
-func (e *dummy) WaitStep(ctx context.Context, step *backend.Step, taskUUID string) (*backend.State, error) {
-	log.Trace().Str("taskUUID", taskUUID).Msgf("wait for step %s", step.Name)
+func (e *dummy) WaitStep(ctx context.Context, step *backend.Step, taskUUID, workflowName string) (*backend.State, error) {
+	log.Trace().Str("taskUUID", taskUUID).Msgf("start step %s-%s", workflowName, step.Name)
 
 	_, exist := e.kv.Load("task_" + taskUUID)
 	if !exist {
@@ -172,8 +175,8 @@ func (e *dummy) WaitStep(ctx context.Context, step *backend.Step, taskUUID strin
 	}, nil
 }
 
-func (e *dummy) TailStep(_ context.Context, step *backend.Step, taskUUID string) (io.ReadCloser, error) {
-	log.Trace().Str("taskUUID", taskUUID).Msgf("tail logs of step %s", step.Name)
+func (e *dummy) TailStep(_ context.Context, step *backend.Step, taskUUID, workflowName string) (io.ReadCloser, error) {
+	log.Trace().Str("taskUUID", taskUUID).Msgf("start step %s-%s", workflowName, step.Name)
 
 	_, exist := e.kv.Load("task_" + taskUUID)
 	if !exist {
@@ -196,8 +199,8 @@ func (e *dummy) TailStep(_ context.Context, step *backend.Step, taskUUID string)
 	return io.NopCloser(strings.NewReader(dummyExecStepOutput(step))), nil
 }
 
-func (e *dummy) DestroyStep(_ context.Context, step *backend.Step, taskUUID string) error {
-	log.Trace().Str("taskUUID", taskUUID).Msgf("stop step %s", step.Name)
+func (e *dummy) DestroyStep(_ context.Context, step *backend.Step, taskUUID, workflowName string) error {
+	log.Trace().Str("taskUUID", taskUUID).Str("workflowName", workflowName).Msgf("stop step %s", step.Name)
 
 	_, exist := e.kv.Load("task_" + taskUUID)
 	if !exist {
@@ -217,8 +220,8 @@ func (e *dummy) DestroyStep(_ context.Context, step *backend.Step, taskUUID stri
 	return nil
 }
 
-func (e *dummy) DestroyWorkflow(_ context.Context, _ *backend.Config, taskUUID string) error {
-	log.Trace().Str("taskUUID", taskUUID).Msgf("delete workflow environment")
+func (e *dummy) DestroyWorkflow(_ context.Context, _ *backend.Config, taskUUID, workflowName string) error {
+	log.Trace().Str("taskUUID", taskUUID).Str("workflowName", workflowName).Msgf("delete workflow environment")
 
 	_, exist := e.kv.Load("task_" + taskUUID)
 	if !exist {
