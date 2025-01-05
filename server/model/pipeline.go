@@ -48,7 +48,7 @@ type Pipeline struct {
 	ChangedFiles []string     `json:"changed_files,omitempty" xorm:"LONGTEXT 'changed_files'"`
 	Deployment   *Deployment  `json:"deployment"              xorm:"json 'deployment'"`
 	IsPrerelease bool         `json:"is_prerelease,omitempty" xorm:"is_prerelease"`
-	PullRequest  *PullRequest `json:"pr,omitempty"            xorm:"json 'pr'"`
+	PullRequest  *PullRequest `json:"pull_request,omitempty"            xorm:"json 'pr'"`
 	Cron         string       `json:"cron,omitempty"          xorm:"cron"`
 	ReleaseTitle string       `json:"release,omitempty"       xorm:"release"`
 } //	@name Pipeline

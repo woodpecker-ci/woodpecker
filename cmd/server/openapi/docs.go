@@ -4705,17 +4705,17 @@ const docTemplate = `{
                 "author_avatar": {
                     "type": "string"
                 },
-                "author_email": {
-                    "type": "string"
-                },
                 "branch": {
                     "type": "string"
                 },
                 "commit": {
-                    "type": "string"
+                    "$ref": "#/definitions/model.Commit"
                 },
                 "created": {
                     "type": "integer"
+                },
+                "deployment": {
+                    "$ref": "#/definitions/model.Deployment"
                 },
                 "event": {
                     "type": "string"
@@ -4726,16 +4726,19 @@ const docTemplate = `{
                 "id": {
                     "type": "integer"
                 },
-                "message": {
-                    "type": "string"
-                },
                 "number": {
                     "type": "integer"
+                },
+                "pull_request": {
+                    "$ref": "#/definitions/PullRequest"
                 },
                 "ref": {
                     "type": "string"
                 },
                 "refspec": {
+                    "type": "string"
+                },
+                "release": {
                     "type": "string"
                 },
                 "repo_id": {
@@ -4745,9 +4748,6 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "status": {
-                    "type": "string"
-                },
-                "title": {
                     "type": "string"
                 }
             }
@@ -4931,7 +4931,7 @@ const docTemplate = `{
                 "parent": {
                     "type": "integer"
                 },
-                "pr": {
+                "pull_request": {
                     "$ref": "#/definitions/PullRequest"
                 },
                 "ref": {

@@ -111,7 +111,7 @@ type (
 		Branch      string           `json:"branch"`
 		Ref         string           `json:"ref"`
 		Refspec     string           `json:"refspec"`
-		PullRequest *PullRequest     `json:"pr,omitempty"            xorm:"json 'pr'"`
+		PullRequest *PullRequest     `json:"pull_request,omitempty"`
 		Author      string           `json:"author"`
 		Avatar      string           `json:"author_avatar"`
 		ForgeURL    string           `json:"forge_url"`

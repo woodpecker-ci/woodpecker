@@ -118,7 +118,12 @@ var updatePipelineMessages = xormigrate.Migration{
 						Title: oldPipeline.Title,
 						Index: model.ForgeRemoteID(
 							strings.ReplaceAll(
-								strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(oldPipeline.Ref, "refs/pull/", ""), "refs/merge-requests/", ""), "/merge", ""),
+								strings.ReplaceAll(
+									strings.ReplaceAll(
+										strings.ReplaceAll(oldPipeline.Ref, "refs/pull/", ""),
+										"refs/merge-requests/", "",
+									),
+									"/merge", ""),
 								"/head", "",
 							),
 						),
