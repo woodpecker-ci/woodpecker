@@ -208,7 +208,7 @@ func TestUsernameAndPasswordNeedsSecret(t *testing.T) {
 func TestRegistrySecret(t *testing.T) {
 	const expected = `{
 		"metadata": {
-			"name": "wp-01he8-workflownametest-go-test",
+			"name": "wp-workflownametest-go-test-01he8",
 			"namespace": "woodpecker",
 			"creationTimestamp": null,
 			"labels": {

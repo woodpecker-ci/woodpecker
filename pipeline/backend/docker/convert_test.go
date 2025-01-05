@@ -125,8 +125,8 @@ var (
 )
 
 func TestToContainerName(t *testing.T) {
-	assert.EqualValues(t, "wp_f5182-workflowNameTest-hello", toContainerName(testCmdStep, "workflowNameTest"))
-	assert.EqualValues(t, "wp_d841e-workflowNameTest-lint", toContainerName(testPluginStep, "workflowNameTest"))
+	assert.EqualValues(t, "wp_workflowNameTest-hello-f5182", toContainerName(testCmdStep, "workflowNameTest"))
+	assert.EqualValues(t, "wp_workflowNameTest-lint-d841e", toContainerName(testPluginStep, "workflowNameTest"))
 }
 
 func TestStepToConfig(t *testing.T) {

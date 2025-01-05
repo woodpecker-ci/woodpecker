@@ -15,7 +15,6 @@
 package kubernetes
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"regexp"
@@ -28,20 +27,22 @@ import (
 )
 
 var (
-	dnsPattern = regexp.MustCompile(`^[a-z0-9]` + // must start with
-		`([-a-z0-9]*[a-z0-9])?` + // inside can als contain -
-		`(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$`, // allow the same pattern as before with dots in between but only one dot
-	)
-	dnsDisallowedCharacters = regexp.MustCompile(`[^-^.a-z0-9]+`)
-	ErrDNSPatternInvalid    = errors.New("name is not a valid kubernetes DNS name")
+	dnsPattern              = regexp.MustCompile(`^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$`)
+	dnsDisallowedCharacters = regexp.MustCompile(`[^-a-z0-9.]+`)
 )
 
 func dnsName(i string) (string, error) {
 	res := strings.ToLower(strings.ReplaceAll(i, "_", "-"))
 
-	found := dnsPattern.FindStringIndex(res)
-	if found == nil {
-		return "", fmt.Errorf("%w: found invalid characters '%v'", ErrDNSPatternInvalid, found)
+	// Check for invalid characters (dnsDisallowedCharacters)
+	invalidChars := dnsDisallowedCharacters.FindAllString(res, -1)
+	if len(invalidChars) > 0 {
+		return "", fmt.Errorf("name is not a valid kubernetes DNS name: found invalid characters '%v'", strings.Join(invalidChars, ""))
+	}
+
+	// Check if the entire string matches the dnsPattern
+	if !dnsPattern.MatchString(res) {
+		return "", fmt.Errorf("name is not a valid kubernetes DNS name")
 	}
 	return res, nil
 }

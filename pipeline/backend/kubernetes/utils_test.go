@@ -34,25 +34,25 @@ func TestDNSName(t *testing.T) {
 	assert.Equal(t, "wp-01he8bebctabr3kgk0qj36d2me-0-services-0.woodpecker-runtime.svc.cluster.local", name)
 
 	_, err = dnsName(".0-a")
-	assert.ErrorIs(t, err, ErrDNSPatternInvalid)
+	assert.ErrorContains(t, err, "name is not a valid kubernetes DNS name")
 
 	_, err = dnsName("ABC..DEF")
-	assert.ErrorIs(t, err, ErrDNSPatternInvalid)
+	assert.ErrorContains(t, err, "name is not a valid kubernetes DNS name")
 
 	_, err = dnsName("0.-a")
-	assert.ErrorIs(t, err, ErrDNSPatternInvalid)
+	assert.ErrorContains(t, err, "name is not a valid kubernetes DNS name")
 
 	_, err = dnsName("test-")
-	assert.ErrorIs(t, err, ErrDNSPatternInvalid)
+	assert.ErrorContains(t, err, "name is not a valid kubernetes DNS name")
 
 	_, err = dnsName("-test")
-	assert.ErrorIs(t, err, ErrDNSPatternInvalid)
+	assert.ErrorContains(t, err, "name is not a valid kubernetes DNS name")
 
 	_, err = dnsName("0-a.")
-	assert.ErrorIs(t, err, ErrDNSPatternInvalid)
+	assert.ErrorContains(t, err, "name is not a valid kubernetes DNS name")
 
 	_, err = dnsName("abc\\def")
-	assert.ErrorIs(t, err, ErrDNSPatternInvalid)
+	assert.ErrorContains(t, err, "name is not a valid kubernetes DNS name")
 }
 
 func TestToDnsName(t *testing.T) {
@@ -69,5 +69,5 @@ func TestToDnsName(t *testing.T) {
 	assert.Equal(t, "build--deploy", name)
 
 	_, err = toDNSName("-build-and-deploy")
-	assert.ErrorIs(t, err, ErrDNSPatternInvalid)
+	assert.ErrorContains(t, err, "name is not a valid kubernetes DNS name")
 }

@@ -28,31 +28,31 @@ import (
 func TestPodName(t *testing.T) {
 	name, err := podName(&types.Step{UUID: "01he8bebctabr3kgk0qj36d2me-0", Name: "go-test"}, "workflowNameTest")
 	assert.NoError(t, err)
-	assert.Equal(t, "wp-01he8-workflownametest-go-test", name)
+	assert.Equal(t, "wp-workflownametest-go-test-01he8", name)
 
-	_, err = podName(&types.Step{UUID: "01he8bebctabr3kgk0qj36d2me\\0a"}, "workflowNameTest")
-	assert.ErrorIs(t, err, ErrDNSPatternInvalid)
+	_, err = podName(&types.Step{UUID: "01\\he8bebctabr3kgk0qj36d2me\\0a"}, "workflowNameTest")
+	assert.ErrorContains(t, err, "name is not a valid kubernetes DNS name")
 
-	_, err = podName(&types.Step{UUID: "01he8bebctabr3kgk0qj36d2me-0-services-0..woodpecker-runtime.svc.cluster.local"}, "workflowNameTest")
-	assert.ErrorIs(t, err, ErrDNSPatternInvalid)
+	_, err = podName(&types.Step{UUID: "01..he8bebctabr3kgk0qj36d2me-0-services-0..woodpecker-runtime.svc.cluster.local"}, "workflowNameTest")
+	assert.ErrorContains(t, err, "name is not a valid kubernetes DNS name")
 }
 
 func TestStepToPodName(t *testing.T) {
 	name, err := stepToPodName(&types.Step{UUID: "01he8bebctabr3kg", Name: "clone", Type: types.StepTypeClone}, "workflowNameTest")
 	assert.NoError(t, err)
-	assert.EqualValues(t, "wp-01he8-workflownametest-clone", name)
+	assert.EqualValues(t, "wp-workflownametest-clone-01he8", name)
 	name, err = stepToPodName(&types.Step{UUID: "01he8bebctabr3kg", Name: "cache", Type: types.StepTypeCache}, "workflowNameTest")
 	assert.NoError(t, err)
-	assert.EqualValues(t, "wp-01he8-workflownametest-cache", name)
+	assert.EqualValues(t, "wp-workflownametest-cache-01he8", name)
 	name, err = stepToPodName(&types.Step{UUID: "01he8bebctabr3kg", Name: "release", Type: types.StepTypePlugin}, "workflowNameTest")
 	assert.NoError(t, err)
-	assert.EqualValues(t, "wp-01he8-workflownametest-release", name)
+	assert.EqualValues(t, "wp-workflownametest-release-01he8", name)
 	name, err = stepToPodName(&types.Step{UUID: "01he8bebctabr3kg", Name: "prepare-env", Type: types.StepTypeCommands}, "workflowNameTest")
 	assert.NoError(t, err)
-	assert.EqualValues(t, "wp-01he8-workflownametest-prepare-env", name)
+	assert.EqualValues(t, "wp-workflownametest-prepare-env-01he8", name)
 	name, err = stepToPodName(&types.Step{UUID: "01he8bebctabr3kg", Name: "postgres", Type: types.StepTypeService}, "workflowNameTest")
 	assert.NoError(t, err)
-	assert.EqualValues(t, "wp-svc-01he8-workflownametest-postgres", name)
+	assert.EqualValues(t, "wp-svc-workflownametest-postgres-01he8", name)
 }
 
 func TestStepLabel(t *testing.T) {
@@ -61,14 +61,14 @@ func TestStepLabel(t *testing.T) {
 	assert.EqualValues(t, "build-image", name)
 
 	_, err = stepLabel(&types.Step{Name: ".build.image"})
-	assert.ErrorIs(t, err, ErrDNSPatternInvalid)
+	assert.ErrorContains(t, err, "name is not a valid kubernetes DNS name")
 }
 
 func TestTinyPod(t *testing.T) {
 	const expected = `
 	{
 		"metadata": {
-			"name": "wp-01he8-workflownametest-go-test",
+			"name": "wp-workflownametest-go-test-01he8",
 			"namespace": "woodpecker",
 			"creationTimestamp": null,
 			"labels": {
@@ -86,7 +86,7 @@ func TestTinyPod(t *testing.T) {
 			],
 			"containers": [
 				{
-					"name": "wp-01he8-workflownametest-go-test",
+					"name": "wp-workflownametest-go-test-01he8",
 					"image": "gradle:8.4.0-jdk21",
 					"command": [
 						"/bin/sh",
@@ -133,7 +133,7 @@ func TestTinyPod(t *testing.T) {
 		Environment: map[string]string{"CI": "woodpecker"},
 	}, &config{
 		Namespace: "woodpecker",
-	}, "wp-01he8-workflownametest-go-test", "linux/amd64", BackendOptions{}, "workflowNameTest")
+	}, "wp-workflownametest-go-test-01he8", "linux/amd64", BackendOptions{}, "workflowNameTest")
 	assert.NoError(t, err)
 
 	podJSON, err := json.Marshal(pod)
@@ -147,7 +147,7 @@ func TestFullPod(t *testing.T) {
 	const expected = `
 	{
 		"metadata": {
-			"name": "wp-01he8-workflownametest-go-test",
+			"name": "wp-workflownametest-go-test-01he8",
 			"namespace": "woodpecker",
 			"creationTimestamp": null,
 			"labels": {
@@ -171,7 +171,7 @@ func TestFullPod(t *testing.T) {
 			],
 			"containers": [
 				{
-					"name": "wp-01he8-workflownametest-go-test",
+					"name": "wp-workflownametest-go-test-01he8",
 					"image": "meltwater/drone-cache",
 					"command": [
 						"/bin/sh",
@@ -256,7 +256,7 @@ func TestFullPod(t *testing.T) {
 					"name": "another-pull-secret"
 				},
 				{
-					"name": "wp-01he8-workflownametest-go-test"
+					"name": "wp-workflownametest-go-test-01he8"
 				}
 			],
 			"tolerations": [
@@ -335,7 +335,7 @@ func TestFullPod(t *testing.T) {
 		PodAnnotationsAllowFromStep: true,
 		PodNodeSelector:             map[string]string{"topology.kubernetes.io/region": "eu-central-1"},
 		SecurityContext:             SecurityContextConfig{RunAsNonRoot: false},
-	}, "wp-01he8-workflownametest-go-test", "linux/amd64", BackendOptions{
+	}, "wp-workflownametest-go-test-01he8", "linux/amd64", BackendOptions{
 		Labels:             map[string]string{"part-of": "woodpecker-ci"},
 		Annotations:        map[string]string{"kubernetes.io/limit-ranger": "LimitRanger plugin set: cpu, memory request and limit for container"},
 		NodeSelector:       map[string]string{"storage": "ssd"},
@@ -366,7 +366,7 @@ func TestPodPrivilege(t *testing.T) {
 		}, &config{
 			Namespace:       "woodpecker",
 			SecurityContext: SecurityContextConfig{RunAsNonRoot: globalRunAsRoot},
-		}, "wp-01he8-workflownametest-go-test", "linux/amd64", BackendOptions{
+		}, "wp-workflownametest-go-test-01he8", "linux/amd64", BackendOptions{
 			SecurityContext: &secCtx,
 		}, "workflowNameTest")
 	}
@@ -443,7 +443,7 @@ func TestScratchPod(t *testing.T) {
 	const expected = `
 	{
 		"metadata": {
-			"name": "wp-01he8-workflownametest-go-test",
+			"name": "wp-workflownametest-go-test-01he8",
 			"namespace": "woodpecker",
 			"creationTimestamp": null,
 			"labels": {
@@ -453,7 +453,7 @@ func TestScratchPod(t *testing.T) {
 		"spec": {
 			"containers": [
 				{
-					"name": "wp-01he8-workflownametest-go-test",
+					"name": "wp-workflownametest-go-test-01he8",
 					"image": "quay.io/curl/curl",
 					"command": [
 						"/usr/bin/curl",
@@ -474,7 +474,7 @@ func TestScratchPod(t *testing.T) {
 		Entrypoint: []string{"/usr/bin/curl", "-v", "google.com"},
 	}, &config{
 		Namespace: "woodpecker",
-	}, "wp-01he8-workflownametest-go-test", "linux/amd64", BackendOptions{}, "workflowNameTest")
+	}, "wp-workflownametest-go-test-01he8", "linux/amd64", BackendOptions{}, "workflowNameTest")
 	assert.NoError(t, err)
 
 	podJSON, err := json.Marshal(pod)

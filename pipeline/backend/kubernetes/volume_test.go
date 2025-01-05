@@ -27,10 +27,10 @@ func TestPvcName(t *testing.T) {
 	assert.Equal(t, "woodpecker-cache", name)
 
 	_, err = volumeName("woodpecker\\cache")
-	assert.ErrorIs(t, err, ErrDNSPatternInvalid)
+	assert.ErrorContains(t, err, "name is not a valid kubernetes DNS name")
 
 	_, err = volumeName("-woodpecker.cache:/woodpecker/src/cache")
-	assert.ErrorIs(t, err, ErrDNSPatternInvalid)
+	assert.ErrorContains(t, err, "name is not a valid kubernetes DNS name")
 }
 
 func TestPvcMount(t *testing.T) {
