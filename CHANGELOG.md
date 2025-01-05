@@ -244,6 +244,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update dependency simple-icons to v14.1.0 [[#4668](https://github.com/woodpecker-ci/woodpecker/pull/4668)]
 - fix(deps): update module golang.org/x/oauth2 to v0.25.0 [[#4665](https://github.com/woodpecker-ci/woodpecker/pull/4665)]
 - chore(deps): update pre-commit hook golangci/golangci-lint to v1.63.4 [[#4660](https://github.com/woodpecker-ci/woodpecker/pull/4660)]
 - fix(deps): update module github.com/moby/term to v0.5.2 [[#4658](https://github.com/woodpecker-ci/woodpecker/pull/4658)]
