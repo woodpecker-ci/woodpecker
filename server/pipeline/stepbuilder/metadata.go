@@ -105,17 +105,15 @@ func metadataPipelineFromModelPipeline(pipeline *model.Pipeline, includeParent b
 		parent = pipeline.Parent
 	}
 
-	return metadata.Pipeline{
-		Number:     pipeline.Number,
-		Parent:     parent,
-		Created:    pipeline.Created,
-		Started:    pipeline.Started,
-		Finished:   pipeline.Finished,
-		Status:     string(pipeline.Status),
-		Event:      string(pipeline.Event),
-		ForgeURL:   pipeline.ForgeURL,
-		DeployTo:   pipeline.Deployment.Target,
-		DeployTask: pipeline.Deployment.Task,
+	metadata := metadata.Pipeline{
+		Number:   pipeline.Number,
+		Parent:   parent,
+		Created:  pipeline.Created,
+		Started:  pipeline.Started,
+		Finished: pipeline.Finished,
+		Status:   string(pipeline.Status),
+		Event:    string(pipeline.Event),
+		ForgeURL: pipeline.ForgeURL,
 		Commit: metadata.Commit{
 			Sha:     pipeline.Commit.SHA,
 			Ref:     pipeline.Ref,
@@ -126,11 +124,21 @@ func metadataPipelineFromModelPipeline(pipeline *model.Pipeline, includeParent b
 				Name:  pipeline.Commit.Author.Author,
 				Email: pipeline.Commit.Author.Email,
 			},
-			ChangedFiles:      pipeline.ChangedFiles,
-			PullRequestLabels: pipeline.PullRequest.Labels,
-			IsPrerelease:      pipeline.IsPrerelease,
+			ChangedFiles: pipeline.ChangedFiles,
+
+			IsPrerelease: pipeline.IsPrerelease,
 		},
 		Release: pipeline.ReleaseTitle,
 		Cron:    pipeline.Cron,
 	}
+
+	if pipeline.PullRequest != nil {
+		metadata.Commit.PullRequestLabels = pipeline.PullRequest.Labels
+	}
+	if pipeline.Deployment != nil {
+		metadata.DeployTo = pipeline.Deployment.Target
+		metadata.DeployTask = pipeline.Deployment.Task
+	}
+
+	return metadata
 }
