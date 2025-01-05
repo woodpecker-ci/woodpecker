@@ -110,7 +110,7 @@ type modelUser struct {
 }
 
 func (m *modelUser) asModel() *model.User {
-	if (m == nil) {
+	if m == nil {
 		return nil
 	}
 	m.User.ForgeRemoteID = m.ForgeRemoteID
@@ -144,7 +144,7 @@ type modelRepo struct {
 }
 
 func (m *modelRepo) asModel() *model.Repo {
-	if (m == nil) {
+	if m == nil {
 		return nil
 	}
 	m.Repo.UserID = m.UserID
