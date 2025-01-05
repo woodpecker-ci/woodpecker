@@ -141,7 +141,7 @@ func pipelineFromTag(hook *pushHook) *model.Pipeline {
 func pipelineFromPullRequest(hook *pullRequestHook) *model.Pipeline {
 	avatar := expandAvatar(
 		hook.Repo.HTMLURL,
-		fixMalformedAvatar(hook.PullRequest.Poster.AvatarURL),
+		fixMalformedAvatar(hook.Sender.AvatarURL),
 	)
 
 	event := model.EventPull

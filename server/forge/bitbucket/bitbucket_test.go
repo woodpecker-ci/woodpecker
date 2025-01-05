@@ -207,12 +207,12 @@ func TestBitbucket(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, "martinherren1984/publictestrepo", r.FullName)
 	assert.Equal(t, &model.Commit{
-		SHA:"c14c1bb05dfb1fdcdf06b31485fff61b0ea44277",
-		Message:"a\n",
-		ForgeURL:"https://bitbucket.org/martinherren1984/publictestrepo/commits/c14c1bb05dfb1fdcdf06b31485fff61b0ea44277",
+		SHA:      "c14c1bb05dfb1fdcdf06b31485fff61b0ea44277",
+		Message:  "a\n",
+		ForgeURL: "https://bitbucket.org/martinherren1984/publictestrepo/commits/c14c1bb05dfb1fdcdf06b31485fff61b0ea44277",
 		Author: model.CommitAuthor{
 			Author: "Martin Herren",
-			Email: "martin.herren@yyy.com",
+			Email:  "martin.herren@yyy.com",
 		},
 	}, b.Commit)
 }

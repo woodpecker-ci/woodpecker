@@ -162,7 +162,7 @@ func TestMultiPipeline(t *testing.T) {
 		Forge: getMockForge(t),
 		Repo:  &model.Repo{},
 		Curr: &model.Pipeline{
-			Event: model.EventPush,
+			Event:  model.EventPush,
 			Commit: &model.Commit{},
 		},
 		Prev:  &model.Pipeline{Commit: &model.Commit{}},
@@ -204,8 +204,8 @@ func TestDependsOn(t *testing.T) {
 		Forge: getMockForge(t),
 		Repo:  &model.Repo{},
 		Curr: &model.Pipeline{
-			Event: model.EventPush,
-		Commit: &model.Commit{},
+			Event:  model.EventPush,
+			Commit: &model.Commit{},
 		},
 		Prev:  &model.Pipeline{Commit: &model.Commit{}},
 		Netrc: &model.Netrc{},
@@ -260,7 +260,7 @@ func TestRunsOn(t *testing.T) {
 		Forge: getMockForge(t),
 		Repo:  &model.Repo{},
 		Curr: &model.Pipeline{
-			Event: model.EventPush,
+			Event:  model.EventPush,
 			Commit: &model.Commit{},
 		},
 		Prev:  &model.Pipeline{Commit: &model.Commit{}},
@@ -302,7 +302,7 @@ func TestPipelineName(t *testing.T) {
 		Forge: getMockForge(t),
 		Repo:  &model.Repo{Config: ".woodpecker"},
 		Curr: &model.Pipeline{
-			Event: model.EventPush,
+			Event:  model.EventPush,
 			Commit: &model.Commit{},
 		},
 		Prev:  &model.Pipeline{Commit: &model.Commit{}},
@@ -347,7 +347,7 @@ func TestBranchFilter(t *testing.T) {
 		Curr: &model.Pipeline{
 			Branch: "dev",
 			Event:  model.EventPush,
-		Commit: &model.Commit{},
+			Commit: &model.Commit{},
 		},
 		Prev:  &model.Pipeline{Commit: &model.Commit{}},
 		Netrc: &model.Netrc{},

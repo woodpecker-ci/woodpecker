@@ -89,8 +89,11 @@ func pipelineOutput(c *cli.Command, pipelines []*woodpecker.Pipeline, fd ...io.W
 		if !noHeader {
 			table.WriteHeader(cols)
 		}
+		table.AddFieldFn("message", func(obj any) string {
+			pl := obj.(*woodpecker.Pipeline)
+			return pl.Commit.Message
+		})
 		for _, resource := range pipelines {
-			// TODO get message from commit
 			if err := table.Write(cols, resource); err != nil {
 				return err
 			}

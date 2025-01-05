@@ -61,7 +61,7 @@ func TestPipelines(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotZero(t, pipeline.ID)
 	assert.EqualValues(t, 1, pipeline.Number)
-	assert.Equal(t, "85f8c029b902ed9400bc600bac301a0aadb144ac", pipeline.Commit)
+	assert.Equal(t, "85f8c029b902ed9400bc600bac301a0aadb144ac", pipeline.Commit.SHA)
 
 	count, err = store.GetPipelineCount()
 	assert.NoError(t, err)

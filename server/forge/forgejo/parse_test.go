@@ -66,9 +66,10 @@ func TestForgejoParser(t *testing.T) {
 				Event: "push",
 				Commit: &model.Commit{
 					SHA: "28c3613ae62640216bea5e7dc71aa65356e4298b",
+					Message: "Delete '.woodpecker/.check.yml'\n",
 					Author: model.CommitAuthor{
-						Author: "6543",
-						Email:  "6543@obermui.de",
+						Author: "meisam",
+						Email:  "meisam@noreply.codeberg.org",
 					},
 					ForgeURL: "https://codeberg.org/meisam/woodpecktester/commit/28c3613ae62640216bea5e7dc71aa65356e4298b",
 				},
@@ -105,10 +106,11 @@ func TestForgejoParser(t *testing.T) {
 				Commit: &model.Commit{
 					SHA: "ef98532add3b2feb7a137426bba1248724367df5",
 					Author: model.CommitAuthor{
-						Author: "gordon",
+						Author: "Gordon the Gopher",
 						Email:  "gordon@golang.org",
 					},
 					ForgeURL: "http://forgejo.golang.org/gordon/hello-world/commit/ef98532add3b2feb7a137426bba1248724367df5",
+					Message: "bump\n",
 				},
 				Branch:       "main",
 				Ref:          "refs/heads/main",
@@ -139,8 +141,16 @@ func TestForgejoParser(t *testing.T) {
 				},
 			},
 			pipe: &model.Pipeline{
-				Event:        "push",
-				Commit:       &model.Commit{SHA: "29be01c073851cf0db0c6a466e396b725a670453"},
+				Event: "push",
+				Commit: &model.Commit{
+					SHA:      "29be01c073851cf0db0c6a466e396b725a670453",
+					Message:  "add some text\n",
+					ForgeURL: "http://127.0.0.1:3000/Test-CI/multi-line-secrets/commit/29be01c073851cf0db0c6a466e396b725a670453",
+					Author: model.CommitAuthor{
+						Author: "6543",
+						Email:  "6543@obermui.de",
+					},
+				},
 				Branch:       "main",
 				Ref:          "refs/heads/main",
 				Author:       "test-user",
@@ -176,7 +186,7 @@ func TestForgejoParser(t *testing.T) {
 				Ref:      "refs/tags/v1.0.0",
 				Author:   "gordon",
 				Avatar:   "https://secure.gravatar.com/avatar/8c58a0be77ee441bb8f8595b7f1b4e87",
-				ForgeURL: "http://forgejo.golang.org/gordon/hello-world/src/tag/v1.0.0",
+				ForgeURL: "http://forgejo.golang.org/gordon/hello-world/releases/tag/v1.0.0",
 			},
 		},
 		{
@@ -211,6 +221,8 @@ func TestForgejoParser(t *testing.T) {
 				ForgeURL: "http://forgejo.golang.org/gordon/hello-world/pull/1",
 				PullRequest: &model.PullRequest{
 					Labels: []string{},
+					Index:  "1",
+					Title:  "Update the README with new information",
 				},
 			},
 		},
@@ -250,6 +262,8 @@ func TestForgejoParser(t *testing.T) {
 						"Kind/Bug",
 						"Kind/Security",
 					},
+					Index: "2",
+					Title: "New Pull",
 				},
 			},
 		},
@@ -285,6 +299,8 @@ func TestForgejoParser(t *testing.T) {
 				ForgeURL: "https://forgejo.com/anbraten/test-repo/pulls/1",
 				PullRequest: &model.PullRequest{
 					Labels: []string{},
+					Index:  "1",
+					Title:  "Adjust file",
 				},
 			},
 		},
@@ -320,6 +336,8 @@ func TestForgejoParser(t *testing.T) {
 				ForgeURL: "https://forgejo.com/anbraten/test-repo/pulls/1",
 				PullRequest: &model.PullRequest{
 					Labels: []string{},
+					Index:  "1",
+					Title:  "Adjust file",
 				},
 			},
 		},
@@ -351,8 +369,8 @@ func TestForgejoParser(t *testing.T) {
 				Ref:    "refs/tags/0.0.5",
 				Author: "anbraten",
 				Avatar: "https://git.xxx/user/avatar/anbraten/-1",
-
 				ForgeURL: "https://git.xxx/anbraten/demo/releases/tag/0.0.5",
+				ReleaseTitle: "Version 0.0.5",
 			},
 		},
 	}

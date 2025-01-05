@@ -36,6 +36,19 @@ const HookPush = `
       "modified": ["app/controller/application.rb"]
     }
   ],
+	"head_commit": {
+		"id": "ef98532add3b2feb7a137426bba1248724367df5",
+		"message": "bump\n",
+		"url": "http://gitea.golang.org/gordon/hello-world/commit/ef98532add3b2feb7a137426bba1248724367df5",
+		"author": {
+			"name": "Gordon the Gopher",
+			"email": "gordon@golang.org",
+			"username": "gordon"
+		},
+		"added": ["CHANGELOG.md"],
+		"removed": [],
+		"modified": ["app/controller/application.rb"]
+	},
   "repository": {
     "id": 1,
     "name": "hello-world",
@@ -475,6 +488,7 @@ const HookPullRequest = `{
   "pull_request": {
     "html_url": "http://gitea.golang.org/gordon/hello-world/pull/1",
     "state": "open",
+		"number": 1,
     "title": "Update the README with new information",
     "body": "please merge",
     "user": {

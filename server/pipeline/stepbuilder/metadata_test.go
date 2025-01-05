@@ -41,8 +41,8 @@ func TestMetadataFromStruct(t *testing.T) {
 	}{
 		{
 			name:             "Test with empty info",
-			pipeline: &model.Pipeline{Commit: &model.Commit{}},
-			prev:     &model.Pipeline{Commit: &model.Commit{}},
+			pipeline:         &model.Pipeline{Commit: &model.Commit{}},
+			prev:             &model.Pipeline{Commit: &model.Commit{}},
 			expectedMetadata: metadata.Metadata{Sys: metadata.System{Name: "woodpecker"}},
 			expectedEnviron: map[string]string{
 				"CI":                  "woodpecker",

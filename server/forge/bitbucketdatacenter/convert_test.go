@@ -154,11 +154,6 @@ func Test_convertRepositoryPushEvent(t *testing.T) {
 				Commit: &model.Commit{
 					SHA:      "1234567890abcdef",
 					ForgeURL: "https://base.url/projects/PRJ/repos/REPO/commits/1234567890abcdef",
-					Message:  "",
-					Author: model.CommitAuthor{
-						Author: "John Doe",
-						Email:  "john.doe@mail.com",
-					},
 				},
 				Branch:   "branch",
 				Avatar:   "https://base.url/users/john.doe_mail.com/avatar.png",
@@ -216,7 +211,10 @@ func Test_convertPullRequestEvent(t *testing.T) {
 	}
 	to := convertPullRequestEvent(from, "https://base.url")
 	assert.Equal(t, &model.Pipeline{
-		Commit:      &model.Commit{SHA: "1234567890abcdef"},
+		Commit:      &model.Commit{
+			SHA: "1234567890abcdef",
+			ForgeURL: "https://base.url/projects/PRJ/repos/REPO/commits/1234567890abcdef",
+		},
 		Branch:      "branch",
 		Avatar:      "https://base.url/users/john.doe_mail.com/avatar.png",
 		Author:      "John Doe",
@@ -224,7 +222,11 @@ func Test_convertPullRequestEvent(t *testing.T) {
 		ForgeURL:    "https://base.url/projects/PRJ/repos/REPO/commits/1234567890abcdef",
 		Event:       model.EventPull,
 		Refspec:     "branch:main",
-		PullRequest: &model.PullRequest{Title: "my title"},
+		PullRequest: &model.PullRequest{
+			Index: "123",
+			Title: "my title",
+
+		},
 	}, to)
 }
 
@@ -269,7 +271,10 @@ func Test_convertPullRequestCloseEvent(t *testing.T) {
 	}
 	to := convertPullRequestEvent(from, "https://base.url")
 	assert.Equal(t, &model.Pipeline{
-		Commit: &model.Commit{SHA: "1234567890abcdef"},
+		Commit: &model.Commit{
+			SHA: "1234567890abcdef",
+			ForgeURL: "https://base.url/projects/PRJ/repos/REPO/commits/1234567890abcdef",
+		},
 		Branch: "branch",
 		Avatar: "https://base.url/users/john.doe_mail.com/avatar.png",
 		Author: "John Doe",
@@ -278,7 +283,10 @@ func Test_convertPullRequestCloseEvent(t *testing.T) {
 		ForgeURL:    "https://base.url/projects/PRJ/repos/REPO/commits/1234567890abcdef",
 		Event:       model.EventPullClosed,
 		Refspec:     "branch:main",
-		PullRequest: &model.PullRequest{Title: "my title"},
+		PullRequest: &model.PullRequest{
+			Title: "my title",
+			Index: "123",
+		},
 	}, to)
 }
 
