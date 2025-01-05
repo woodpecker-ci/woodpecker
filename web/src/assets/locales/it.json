@@ -29,7 +29,7 @@
                     "placeholder": "L'utente è un amministratore"
                 },
                 "created": "Utente creato",
-                "delete_confirm": "Vuoi davvero eliminare questo utente? Ciò eliminerà anche tutte le repository di proprietà di questo utente.",
+                "delete_confirm": "Vuoi davvero eliminare questo utente? Ciò eliminerà anche tutti i repositori di proprietà di questo utente.",
                 "delete_user": "Elimina utente",
                 "deleted": "Utente eliminato",
                 "edit_user": "Modifica utente",
@@ -37,7 +37,7 @@
                 "saved": "Utente salvato",
                 "show": "Mostra utenti",
                 "users": "Utenti",
-                "desc": "Utenti registrati per questo server",
+                "desc": "Utenti registrati su questo server",
                 "login": "Accesso",
                 "email": "E-mail",
                 "avatar_url": "URL Avatar",
@@ -92,35 +92,35 @@
                 }
             },
             "orgs": {
-                "desc": "Organizzazioni che possiedono repository su questo server.",
+                "desc": "Organizzazioni che possiedono repositori su questo server.",
                 "none": "Ancora nessuna organizzazione.",
                 "delete_org": "Elimina organizzazione",
                 "deleted": "Organizzazione eliminata",
                 "org_settings": "Impostazioni organizzazione",
-                "delete_confirm": "Vuoi davvero eliminare questa organizzazione? Ciò eliminerà anche tutte le repository di proprietà di questa organizzazione.",
+                "delete_confirm": "Vuoi davvero eliminare questa organizzazione? Ciò eliminerà anche tutti i repositori di proprietà di questa organizzazione.",
                 "view": "Mostra organizzazione",
                 "orgs": "Organizzazioni"
             },
             "secrets": {
                 "warning": "Questi segreti saranno disponibili a tutti gli utenti.",
-                "desc": "I segreti globali possono essere passati ad ogni step della pipeline della repository, come variabili d'ambiente."
+                "desc": "I segreti globali possono essere passati ad ogni step della pipeline del repositorio, come variabili d'ambiente."
             },
             "repos": {
-                "settings": "Impostazioni repository",
-                "repos": "Repository",
-                "desc": "Repository che sono o sono state abilitate su questo server.",
-                "none": "Ancora nessuna repository.",
-                "view": "Mostra repository",
+                "settings": "Impostazioni repositorio",
+                "repos": "Repositori",
+                "desc": "Repositori che sono o sono stati abilitati su questo server.",
+                "none": "Ancora nessun repositorio.",
+                "view": "Mostra repositorio",
                 "disabled": "Disabilitato",
                 "repair": {
                     "repair": "Ripara tutti",
-                    "success": "Repository riparate"
+                    "success": "Repositori riparati"
                 }
             },
             "not_allowed": "Non ti è consentito accedere alle impostazioni del server.",
             "registries": {
                 "desc": "È possibile aggiungere credenziali di registro globale per utilizzare immagini private per tutte le pipeline.",
-                "warning": "Queste credenziali di registro saranno disponibili per tutti gli utenti."
+                "warning": "Queste credenziali di registro saranno disponibili a tutti gli utenti."
             }
         }
     },
@@ -266,17 +266,17 @@
                     "repair": "Ripara repositorio"
                 },
                 "delete": {
-                    "delete": "Elimina repository",
+                    "delete": "Elimina repositorio",
                     "confirm": "Tutti i dati andranno persi dopo questa azione!!!\n\nVuoi davvero procedere?",
-                    "success": "Repository eliminata"
+                    "success": "Repositorio eliminato"
                 },
                 "disable": {
-                    "disable": "Disabilita repository",
-                    "success": "Repository disabilitata"
+                    "disable": "Disabilita repositorio",
+                    "success": "Repositorio disabilitato"
                 },
                 "enable": {
-                    "enable": "Abilita repository",
-                    "success": "Repository abiltata"
+                    "enable": "Abilita repositorio",
+                    "success": "Repositorio abiltato"
                 }
             },
             "crons": {
@@ -366,7 +366,7 @@
                     "desc": "Consenti l'esecuzione di pipeline sulle richieste di modifica."
                 },
                 "allow_deploy": {
-                    "allow": "Consenti eventi di  'distribuzione'.",
+                    "allow": "Consenti eventi di 'distribuzione'.",
                     "desc": "Consenti 'distribuzione' per le pipeline riuscite. Tutti gli utenti con autorizzazioni push possono attivarli, da usare con cautela."
                 },
                 "netrc_only_trusted": {
@@ -467,7 +467,7 @@
                 "desc": "È possibile aggiungere le credenziali di registro per utilizzare immagini private in tutte le pipeline personali."
             },
             "agents": {
-                "desc": "Agenti registrati nei repository dell'account."
+                "desc": "Agenti registrati nei repositori dell'account."
             }
         }
     },
@@ -525,7 +525,7 @@
         "settings": {
             "not_allowed": "Non ti è consentito accedere alle impostazioni di questa organizzazione",
             "secrets": {
-                "desc": "I segreti dell'organizzazione possono essere passati ad ogni step della pipeline della repository dell'organizzazione, come variabili d'ambiente."
+                "desc": "I segreti dell'organizzazione possono essere passati ad ogni step della pipeline del repositorio dell'organizzazione, come variabili d'ambiente."
             },
             "registries": {
                 "desc": "È possibile aggiungere le credenziali di registro dell'organizzazione per utilizzare immagini private per tutte le pipeline di un'organizzazione."
@@ -557,10 +557,10 @@
         "deleted": "Credenziali di registro eliminate"
     },
     "login_with": "Accedi con {forge}",
-    "all_repositories": "Tutti i repository",
+    "all_repositories": "Tutti i repositori",
     "no_search_results": "Nessun risultato trovato",
     "require_approval": {
-        "forks": "Richieste di modifica dal repository derivato",
+        "forks": "Richieste di modifica dal fork",
         "desc": "Impedisci alle pipeline dannose di esporre segreti o eseguire attività dannose approvandole prima dell'esecuzione.",
         "require_approval_for": "Requisiti di approvazione",
         "none": "Nessuno",
