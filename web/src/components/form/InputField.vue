@@ -6,7 +6,7 @@
       <slot v-else-if="$slots.titleActions" name="titleActions" />
     </div>
     <slot :id="id" />
-    <div v-if="$slots.description" class="text-wp-text-alt-100 ml-1">
+    <div v-if="$slots.description" class="text-wp-text-alt-100 ml-1 mt-1">
       <slot name="description" />
     </div>
   </div>
