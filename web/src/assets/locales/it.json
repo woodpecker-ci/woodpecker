@@ -141,7 +141,7 @@
     "pipeline_feed": "Dettagli pipeline",
     "repo": {
         "activity": "Attività",
-        "add": "Aggiungi repository",
+        "add": "Aggiungi repositorio",
         "branches": "Rami",
         "deploy_pipeline": {
             "enter_target": "Ambiente di destinazione della 'distribuzione'",
@@ -162,7 +162,7 @@
             "enabled": "Già abilitato",
             "list_reloaded": "Elenco dei repository ricaricato",
             "reload": "Ricarica i repository",
-            "success": "Repository abilitata",
+            "success": "Repositorio abilitato",
             "disabled": "Disabilitato"
         },
         "manual_pipeline": {
@@ -179,8 +179,8 @@
             },
             "show_pipelines": "Mostra pipeline"
         },
-        "not_allowed": "Non ti è consentito accedere a questa repository",
-        "open_in_forge": "Apri pagina web della repository",
+        "not_allowed": "Non ti è consentito accedere a questo repositorio",
+        "open_in_forge": "Apri repositorio sul forge",
         "pipeline": {
             "actions": {
                 "cancel": "Annulla",
@@ -254,7 +254,7 @@
                 "metadata_download_successful": "Metadati scaricati correttamente",
                 "no_permission": "Non si dispone dell'autorizzazione per accedere alle informazioni di diagnostica.",
                 "metadata_exec_title": "Riesegui pipeline localmente",
-                "metadata_exec_desc": "Scarica i metadati di questa pipeline per eseguirla in locale. In questo modo è possibile risolvere i problemi e testare le modifiche prima di eseguirne il commit."
+                "metadata_exec_desc": "Scarica i metadati di questa pipeline per eseguirla in locale. In questo modo è possibile risolvere i problemi e testare le modifiche prima di eseguirne il commit. 'woodpecker-cli' deve essere installato localmente, alla stessa versione del Server Woodpecker."
             }
         },
         "pull_requests": "Richieste di modifica",
@@ -262,8 +262,8 @@
             "actions": {
                 "actions": "Azioni",
                 "repair": {
-                    "success": "Repository riparata",
-                    "repair": "Ripara repository"
+                    "success": "Repositorio riparato",
+                    "repair": "Ripara repositorio"
                 },
                 "delete": {
                     "delete": "Elimina repository",
@@ -371,10 +371,10 @@
                 },
                 "netrc_only_trusted": {
                     "netrc_only_trusted": "Estensioni personalizzate affidabili per clone",
-                    "desc": "Le estensioni elencate qui avranno accesso alle credenziali netrc che possono essere utilizzate per clonare i repository dal forge o inviarvi il push."
+                    "desc": "Le estensioni elencate qui avranno accesso alle credenziali netrc che possono essere utilizzate per clonare i repositori dal forge o inviarvi il push."
                 }
             },
-            "not_allowed": "Non ti è consentito accedere alle impostazioni di questa repository",
+            "not_allowed": "Non ti è consentito accedere alle impostazioni di questo repositorio",
             "secrets": {
                 "name": "Nome",
                 "value": "Valore"
@@ -416,7 +416,7 @@
             },
             "private": {
                 "private": "Privato",
-                "desc": "Solo tu e gli altri proprietari del repository possono visualizzare questo progetto."
+                "desc": "Solo tu e gli altri proprietari del repositorio possono visualizzare questo progetto."
             },
             "internal": {
                 "internal": "Interno",
@@ -424,8 +424,8 @@
             }
         }
     },
-    "repos": "Repository",
-    "repositories": "Repository",
+    "repos": "Repo",
+    "repositories": "Repositori",
     "search": "Cerca…",
     "time": {
         "not_started": "non ancora iniziato",
