@@ -14,11 +14,11 @@
       <Button v-else start-icon="plus" :text="$t('repo.settings.crons.add')" @click="selectedCron = {}" />
     </template>
 
-    <div v-if="!selectedCron" class="text-wp-text-100 space-y-4">
+    <div v-if="!selectedCron" class="space-y-4 text-wp-text-100">
       <ListItem
         v-for="cron in crons"
         :key="cron.id"
-        class="!bg-wp-background-200 !dark:bg-wp-background-100 items-center"
+        class="!dark:bg-wp-background-100 items-center !bg-wp-background-200"
       >
         <span class="grid w-full grid-cols-3">
           <span>{{ cron.name }}</span>
@@ -37,7 +37,7 @@
         <IconButton icon="edit" class="h-8 w-8" :title="$t('repo.settings.crons.edit')" @click="selectedCron = cron" />
         <IconButton
           icon="trash"
-          class="hover:text-wp-error-100 h-8 w-8"
+          class="h-8 w-8 hover:text-wp-error-100"
           :is-loading="isDeleting"
           :title="$t('repo.settings.crons.delete')"
           @click="deleteCron(cron)"

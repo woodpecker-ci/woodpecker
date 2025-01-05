@@ -70,7 +70,7 @@ importers:
         version: 7.6.3
       simple-icons:
         specifier: ^14.0.1
-        version: 14.0.1
+        version: 14.1.0
       tailwindcss:
         specifier: ^3.4.17
         version: 3.4.17(ts-node@10.9.2(@types/node@22.10.5)(typescript@5.7.2))

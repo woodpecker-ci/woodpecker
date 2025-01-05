@@ -9,8 +9,8 @@
       @click="innerValue = option.value"
     />
     <div class="ml-4 flex flex-col">
-      <label class="text-wp-text-100 cursor-pointer" :for="`radio-${id}-${option.value}`">{{ option.text }}</label>
-      <span v-if="option.description" class="text-wp-text-alt-100 text-sm">{{ option.description }}</span>
+      <label class="cursor-pointer text-wp-text-100" :for="`radio-${id}-${option.value}`">{{ option.text }}</label>
+      <span v-if="option.description" class="text-sm text-wp-text-alt-100">{{ option.description }}</span>
     </div>
   </div>
 </template>

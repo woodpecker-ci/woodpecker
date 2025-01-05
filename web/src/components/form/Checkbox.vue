@@ -8,8 +8,8 @@
       @click="innerValue = !innerValue"
     />
     <div class="ml-4 flex flex-col">
-      <label class="text-wp-text-100 cursor-pointer" :for="`checkbox-${id}`">{{ label }}</label>
-      <span v-if="description" class="text-wp-text-alt-100 text-sm">{{ description }}</span>
+      <label class="cursor-pointer text-wp-text-100" :for="`checkbox-${id}`">{{ label }}</label>
+      <span v-if="description" class="text-sm text-wp-text-alt-100">{{ description }}</span>
     </div>
   </div>
 </template>

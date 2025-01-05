@@ -1,9 +1,9 @@
 <template>
-  <div class="text-wp-text-100 space-y-4">
+  <div class="space-y-4 text-wp-text-100">
     <ListItem
       v-for="registry in registries"
       :key="registry.id"
-      class="!bg-wp-background-200 dark:!bg-wp-background-100 items-center"
+      class="items-center !bg-wp-background-200 dark:!bg-wp-background-100"
     >
       <span>{{ registry.address }}</span>
       <IconButton
@@ -15,7 +15,7 @@
       <IconButton
         v-if="!registry.readonly"
         icon="trash"
-        class="hover:text-wp-error-100 h-8 w-8"
+        class="h-8 w-8 hover:text-wp-error-100"
         :is-loading="isDeleting"
         :title="$t('registries.delete')"
         @click="deleteRegistry(registry)"
