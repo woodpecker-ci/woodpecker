@@ -172,6 +172,11 @@ The following restructuring was done to achieve a more consistent grouping:
 
 - Webhook signatures now use the `rfc9421` protocol
 
+#### Rootless images
+
+From 3.0 onward, all Woodpecker images use a non-privileged user (`woodpecker`) by default.
+If you have volume mounts attached to containers, you might need to update the ownership of these directories from `root` to `woodpecker`.
+
 ## User migrations
 
 - `gated` has been replaced by `require-approval`
