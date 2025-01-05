@@ -1,7 +1,6 @@
 FROM --platform=$BUILDPLATFORM docker.io/golang:1.23 AS builder
 
-RUN adduser woodpecker && \
-  chown -R woodpecker:woodpecker /var/lib/woodpecker
+RUN adduser woodpecker
 
 WORKDIR /src
 COPY . .
