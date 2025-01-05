@@ -59,7 +59,7 @@ func Test_parseHook(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, "user_name/repo_name", r.FullName)
 		assert.Equal(t, model.EventPull, b.Event)
-		assert.Equal(t, "d3022fc0ca3d", b.Commit)
+		assert.Equal(t, "d3022fc0ca3d", b.Commit.SHA)
 	})
 
 	t.Run("pull-request merged", func(t *testing.T) {
@@ -72,7 +72,7 @@ func Test_parseHook(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, "anbraten/test-2", r.FullName)
 		assert.Equal(t, model.EventPullClosed, b.Event)
-		assert.Equal(t, "006704dbeab2", b.Commit)
+		assert.Equal(t, "006704dbeab2", b.Commit.SHA)
 	})
 
 	t.Run("pull-request closed", func(t *testing.T) {
@@ -85,7 +85,7 @@ func Test_parseHook(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, "anbraten/test-2", r.FullName)
 		assert.Equal(t, model.EventPullClosed, b.Event)
-		assert.Equal(t, "f90e18fc9d45", b.Commit)
+		assert.Equal(t, "f90e18fc9d45", b.Commit.SHA)
 	})
 
 	t.Run("malformed push", func(t *testing.T) {
@@ -120,7 +120,7 @@ func Test_parseHook(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, "martinherren1984/publictestrepo", r.FullName)
 		assert.Equal(t, "https://bitbucket.org/martinherren1984/publictestrepo", r.Clone)
-		assert.Equal(t, "c14c1bb05dfb1fdcdf06b31485fff61b0ea44277", b.Commit)
+		assert.Equal(t, "c14c1bb05dfb1fdcdf06b31485fff61b0ea44277", b.Commit.SHA)
 		assert.Equal(t, "a\n", b.Commit.Message)
 	})
 }

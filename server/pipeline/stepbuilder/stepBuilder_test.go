@@ -44,7 +44,7 @@ func TestGlobalEnvsubst(t *testing.T) {
 			},
 			Event: model.EventPush,
 		},
-		Prev:  &model.Pipeline{},
+		Prev:  &model.Pipeline{Commit: &model.Commit{}},
 		Netrc: &model.Netrc{},
 		Secs:  []*model.Secret{},
 		Regs:  []*model.Registry{},
@@ -85,7 +85,7 @@ func TestMissingGlobalEnvsubst(t *testing.T) {
 			},
 			Event: model.EventPush,
 		},
-		Prev:  &model.Pipeline{},
+		Prev:  &model.Pipeline{Commit: &model.Commit{}},
 		Netrc: &model.Netrc{},
 		Secs:  []*model.Secret{},
 		Regs:  []*model.Registry{},
@@ -121,7 +121,7 @@ func TestMultilineEnvsubst(t *testing.T) {
 				Message: "aaa\nbbb",
 			},
 		},
-		Prev:  &model.Pipeline{},
+		Prev:  &model.Pipeline{Commit: &model.Commit{}},
 		Netrc: &model.Netrc{},
 		Secs:  []*model.Secret{},
 		Regs:  []*model.Registry{},
@@ -163,8 +163,9 @@ func TestMultiPipeline(t *testing.T) {
 		Repo:  &model.Repo{},
 		Curr: &model.Pipeline{
 			Event: model.EventPush,
+			Commit: &model.Commit{},
 		},
-		Prev:  &model.Pipeline{},
+		Prev:  &model.Pipeline{Commit: &model.Commit{}},
 		Netrc: &model.Netrc{},
 		Secs:  []*model.Secret{},
 		Regs:  []*model.Registry{},
@@ -204,8 +205,9 @@ func TestDependsOn(t *testing.T) {
 		Repo:  &model.Repo{},
 		Curr: &model.Pipeline{
 			Event: model.EventPush,
+		Commit: &model.Commit{},
 		},
-		Prev:  &model.Pipeline{},
+		Prev:  &model.Pipeline{Commit: &model.Commit{}},
 		Netrc: &model.Netrc{},
 		Secs:  []*model.Secret{},
 		Regs:  []*model.Registry{},
@@ -259,8 +261,9 @@ func TestRunsOn(t *testing.T) {
 		Repo:  &model.Repo{},
 		Curr: &model.Pipeline{
 			Event: model.EventPush,
+			Commit: &model.Commit{},
 		},
-		Prev:  &model.Pipeline{},
+		Prev:  &model.Pipeline{Commit: &model.Commit{}},
 		Netrc: &model.Netrc{},
 		Secs:  []*model.Secret{},
 		Regs:  []*model.Registry{},
@@ -300,8 +303,9 @@ func TestPipelineName(t *testing.T) {
 		Repo:  &model.Repo{Config: ".woodpecker"},
 		Curr: &model.Pipeline{
 			Event: model.EventPush,
+			Commit: &model.Commit{},
 		},
-		Prev:  &model.Pipeline{},
+		Prev:  &model.Pipeline{Commit: &model.Commit{}},
 		Netrc: &model.Netrc{},
 		Secs:  []*model.Secret{},
 		Regs:  []*model.Registry{},
@@ -343,8 +347,9 @@ func TestBranchFilter(t *testing.T) {
 		Curr: &model.Pipeline{
 			Branch: "dev",
 			Event:  model.EventPush,
+		Commit: &model.Commit{},
 		},
-		Prev:  &model.Pipeline{},
+		Prev:  &model.Pipeline{Commit: &model.Commit{}},
 		Netrc: &model.Netrc{},
 		Secs:  []*model.Secret{},
 		Regs:  []*model.Registry{},
@@ -386,8 +391,8 @@ func TestRootWhenFilter(t *testing.T) {
 	b := StepBuilder{
 		Forge: getMockForge(t),
 		Repo:  &model.Repo{},
-		Curr:  &model.Pipeline{Event: "tag"},
-		Prev:  &model.Pipeline{},
+		Curr:  &model.Pipeline{Event: "tag", Commit: &model.Commit{}},
+		Prev:  &model.Pipeline{Commit: &model.Commit{}},
 		Netrc: &model.Netrc{},
 		Secs:  []*model.Secret{},
 		Regs:  []*model.Registry{},
@@ -431,13 +436,14 @@ func TestZeroSteps(t *testing.T) {
 	pipeline := &model.Pipeline{
 		Branch: "dev",
 		Event:  model.EventPush,
+		Commit: &model.Commit{},
 	}
 
 	b := StepBuilder{
 		Forge: getMockForge(t),
 		Repo:  &model.Repo{},
 		Curr:  pipeline,
-		Prev:  &model.Pipeline{},
+		Prev:  &model.Pipeline{Commit: &model.Commit{}},
 		Netrc: &model.Netrc{},
 		Secs:  []*model.Secret{},
 		Regs:  []*model.Registry{},
@@ -471,13 +477,14 @@ func TestZeroStepsAsMultiPipelineDeps(t *testing.T) {
 	pipeline := &model.Pipeline{
 		Branch: "dev",
 		Event:  model.EventPush,
+		Commit: &model.Commit{},
 	}
 
 	b := StepBuilder{
 		Forge: getMockForge(t),
 		Repo:  &model.Repo{},
 		Curr:  pipeline,
-		Prev:  &model.Pipeline{},
+		Prev:  &model.Pipeline{Commit: &model.Commit{}},
 		Netrc: &model.Netrc{},
 		Secs:  []*model.Secret{},
 		Regs:  []*model.Registry{},
@@ -529,13 +536,14 @@ func TestZeroStepsAsMultiPipelineTransitiveDeps(t *testing.T) {
 	pipeline := &model.Pipeline{
 		Branch: "dev",
 		Event:  model.EventPush,
+		Commit: &model.Commit{},
 	}
 
 	b := StepBuilder{
 		Forge: getMockForge(t),
 		Repo:  &model.Repo{},
 		Curr:  pipeline,
-		Prev:  &model.Pipeline{},
+		Prev:  &model.Pipeline{Commit: &model.Commit{}},
 		Netrc: &model.Netrc{},
 		Secs:  []*model.Secret{},
 		Regs:  []*model.Registry{},
