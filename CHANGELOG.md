@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2025-01-04
+## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2025-01-05
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -244,6 +244,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update module golang.org/x/oauth2 to v0.25.0 [[#4665](https://github.com/woodpecker-ci/woodpecker/pull/4665)]
 - chore(deps): update pre-commit hook golangci/golangci-lint to v1.63.4 [[#4660](https://github.com/woodpecker-ci/woodpecker/pull/4660)]
 - fix(deps): update module github.com/moby/term to v0.5.2 [[#4658](https://github.com/woodpecker-ci/woodpecker/pull/4658)]
 - fix(deps): update web npm deps non-major [[#4659](https://github.com/woodpecker-ci/woodpecker/pull/4659)]
