@@ -1,6 +1,6 @@
 FROM --platform=$BUILDPLATFORM docker.io/golang:1.23 AS build
 
-RUN adduser woodpecker && \
+RUN adduser -u 1000 -g 1000 woodpecker && \
   mkdir -p /var/lib/woodpecker && \
   chown -R woodpecker:woodpecker /var/lib/woodpecker
 

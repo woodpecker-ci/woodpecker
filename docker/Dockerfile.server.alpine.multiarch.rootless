@@ -11,7 +11,7 @@ EXPOSE 8000 9000 80 443
 
 COPY dist/server/${TARGETOS}_${TARGETARCH}/woodpecker-server /bin/
 
-RUN addgroup -S woodpecker && adduser -S woodpecker -G woodpecker && \
+RUN adduser -u 1000 -g 1000 woodpecker && \
   mkdir -p /var/lib/woodpecker && \
   chown -R woodpecker:woodpecker /var/lib/woodpecker
 

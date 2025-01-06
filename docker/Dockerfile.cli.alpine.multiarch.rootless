@@ -17,8 +17,7 @@ ENV WOODPECKER_DISABLE_UPDATE_CHECK=true
 
 COPY --from=build /src/dist/woodpecker-cli /bin/
 
-RUN addgroup -S woodpecker && \
-  adduser -S woodpecker -G woodpecker
+RUN adduser -u 1000 -g 1000 woodpecker
 
 USER woodpecker
 

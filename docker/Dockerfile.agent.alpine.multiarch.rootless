@@ -16,9 +16,9 @@ EXPOSE 3000
 
 COPY --from=build /src/dist/woodpecker-agent /bin/
 
-RUN mkdir -p /etc/woodpecker && \
-  addgroup -S woodpecker && adduser -S woodpecker -G woodpecker && \
-  mkdir -p /etc/woodpecker && chown -R woodpecker:woodpecker /etc/woodpecker
+RUN adduser -u 1000 -g 1000 woodpecker && \
+  mkdir -p /etc/woodpecker && \
+  chown -R woodpecker:woodpecker /etc/woodpecker
 
 USER woodpecker
 
