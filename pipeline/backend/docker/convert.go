@@ -74,7 +74,7 @@ func toContainerName(step *types.Step) string {
 }
 
 // returns a container host configuration.
-func toHostConfig(step *types.Step, conf *config) *container.HostConfig {
+func toHostConfig(step *types.Step, trusted types.TrustedConfiguration, conf *config) *container.HostConfig {
 	config := &container.HostConfig{
 		Resources: container.Resources{
 			CPUQuota:   conf.resourceLimit.CPUQuota,
@@ -87,42 +87,50 @@ func toHostConfig(step *types.Step, conf *config) *container.HostConfig {
 		LogConfig: container.LogConfig{
 			Type: "json-file",
 		},
-		Privileged: step.Privileged,
 	}
 
-	if len(step.NetworkMode) != 0 {
-		config.NetworkMode = container.NetworkMode(step.NetworkMode)
+	if trusted.Security {
+		config.Privileged = step.Privileged
 	}
-	if len(step.DNS) != 0 {
-		config.DNS = step.DNS
-	}
-	if len(step.DNSSearch) != 0 {
-		config.DNSSearch = step.DNSSearch
-	}
-	extraHosts := []string{}
-	for _, hostAlias := range step.ExtraHosts {
-		extraHosts = append(extraHosts, hostAlias.Name+":"+hostAlias.IP)
-	}
-	if len(step.ExtraHosts) != 0 {
-		config.ExtraHosts = extraHosts
-	}
-	if len(step.Devices) != 0 {
-		config.Devices = toDev(step.Devices)
-	}
-	if len(step.Volumes) != 0 {
-		config.Binds = step.Volumes
-	}
-	config.Tmpfs = map[string]string{}
-	for _, path := range step.Tmpfs {
-		if !strings.Contains(path, ":") {
-			config.Tmpfs[path] = ""
-			continue
+
+	if trusted.Network {
+		if len(step.NetworkMode) != 0 {
+			config.NetworkMode = container.NetworkMode(step.NetworkMode)
 		}
-		parts, err := splitVolumeParts(path)
-		if err != nil {
-			continue
+		if len(step.DNS) != 0 {
+			config.DNS = step.DNS
 		}
-		config.Tmpfs[parts[0]] = parts[1]
+		if len(step.DNSSearch) != 0 {
+			config.DNSSearch = step.DNSSearch
+		}
+		extraHosts := []string{}
+		for _, hostAlias := range step.ExtraHosts {
+			extraHosts = append(extraHosts, hostAlias.Name+":"+hostAlias.IP)
+		}
+		if len(step.ExtraHosts) != 0 {
+			config.ExtraHosts = extraHosts
+		}
+	}
+
+	if trusted.Volumes {
+		if len(step.Devices) != 0 {
+			config.Devices = toDev(step.Devices)
+		}
+		if len(step.Volumes) != 0 {
+			config.Binds = step.Volumes
+		}
+		config.Tmpfs = map[string]string{}
+		for _, path := range step.Tmpfs {
+			if !strings.Contains(path, ":") {
+				config.Tmpfs[path] = ""
+				continue
+			}
+			parts, err := splitVolumeParts(path)
+			if err != nil {
+				continue
+			}
+			config.Tmpfs[parts[0]] = parts[1]
+		}
 	}
 
 	return config

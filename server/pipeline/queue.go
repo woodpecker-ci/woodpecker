@@ -50,7 +50,7 @@ func queuePipeline(ctx context.Context, repo *model.Repo, pipelineItems []*stepb
 			Config:         item.Config,
 			Timeout:        repo.Timeout,
 			RepoName:       repo.FullName,
-			RepoID:         fmt.Sprint(repo.ID),
+			RepoID:         repo.ID,
 			PipelineNumber: fmt.Sprint(pipelineNumber),
 		})
 		if err != nil {

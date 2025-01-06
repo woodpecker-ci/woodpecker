@@ -50,7 +50,7 @@ type (
 		Config         *backend.Config `json:"config"`
 		Timeout        int64           `json:"timeout"`
 		RepoName       string          `json:"repo_name"`
-		RepoID         string          `json:"repo_id"`
+		RepoID         int64           `json:"repo_id"`
 		PipelineNumber string          `json:"pipeline_number"`
 	}
 

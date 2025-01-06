@@ -115,4 +115,21 @@ var flags = []cli.Flag{
 		Usage:   "duration to wait before retrying to connect to the server",
 		Value:   time.Second * 2,
 	},
+
+	// trusted repositories
+	&cli.IntSliceFlag{
+		Sources: cli.EnvVars("WOODPECKER_TRUSTED_REPOS_VOLUMES"),
+		Name:    "trusted-repos-volumes",
+		Usage:   "IDs of repos that are trusted to use extended volume features",
+	},
+	&cli.IntSliceFlag{
+		Sources: cli.EnvVars("WOODPECKER_TRUSTED_REPOS_NETWORK"),
+		Name:    "trusted-repos-network",
+		Usage:   "IDs of repos that are trusted to use extended network features",
+	},
+	&cli.IntSliceFlag{
+		Sources: cli.EnvVars("WOODPECKER_TRUSTED_REPOS_SECURITY"),
+		Name:    "trusted-repos-security",
+		Usage:   "IDs of repos that are trusted to use extended security features",
+	},
 }

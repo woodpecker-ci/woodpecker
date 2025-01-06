@@ -34,13 +34,13 @@ func TestSmalPipelineDummyRun(t *testing.T) {
 	_, err := dummyEngine.Load(ctx)
 	assert.NoError(t, err)
 
-	assert.Error(t, dummyEngine.SetupWorkflow(ctx, nil, dummy.WorkflowSetupFailUUID))
+	assert.Error(t, dummyEngine.SetupWorkflow(ctx, nil, dummy.WorkflowSetupFailUUID, types.TrustedConfiguration{}))
 
 	t.Run("expect fail of step func with non setup workflow", func(t *testing.T) {
 		step := &types.Step{Name: "step1", UUID: "SID_1"}
 		nonExistWorkflowID := "WID_NONE"
 
-		err := dummyEngine.StartStep(ctx, step, nonExistWorkflowID)
+		err := dummyEngine.StartStep(ctx, step, nonExistWorkflowID, types.TrustedConfiguration{})
 		assert.Error(t, err)
 
 		_, err = dummyEngine.TailStep(ctx, step, nonExistWorkflowID)
@@ -63,9 +63,9 @@ func TestSmalPipelineDummyRun(t *testing.T) {
 		}
 		workflowUUID := "WID_1"
 
-		assert.NoError(t, dummyEngine.SetupWorkflow(ctx, nil, workflowUUID))
+		assert.NoError(t, dummyEngine.SetupWorkflow(ctx, nil, workflowUUID, types.TrustedConfiguration{}))
 
-		assert.NoError(t, dummyEngine.StartStep(ctx, step, workflowUUID))
+		assert.NoError(t, dummyEngine.StartStep(ctx, step, workflowUUID, types.TrustedConfiguration{}))
 
 		reader, err := dummyEngine.TailStep(ctx, step, workflowUUID)
 		assert.NoError(t, err)
@@ -100,9 +100,9 @@ echo nein
 		}
 		workflowUUID := "WID_1"
 
-		assert.NoError(t, dummyEngine.SetupWorkflow(ctx, nil, workflowUUID))
+		assert.NoError(t, dummyEngine.SetupWorkflow(ctx, nil, workflowUUID, types.TrustedConfiguration{}))
 
-		assert.NoError(t, dummyEngine.StartStep(ctx, step, workflowUUID))
+		assert.NoError(t, dummyEngine.StartStep(ctx, step, workflowUUID, types.TrustedConfiguration{}))
 
 		_, err := dummyEngine.TailStep(ctx, step, workflowUUID)
 		assert.NoError(t, err)
@@ -125,9 +125,9 @@ echo nein
 		}
 		workflowUUID := "WID_1"
 
-		assert.NoError(t, dummyEngine.SetupWorkflow(ctx, nil, workflowUUID))
+		assert.NoError(t, dummyEngine.SetupWorkflow(ctx, nil, workflowUUID, types.TrustedConfiguration{}))
 
-		assert.NoError(t, dummyEngine.StartStep(ctx, step, workflowUUID))
+		assert.NoError(t, dummyEngine.StartStep(ctx, step, workflowUUID, types.TrustedConfiguration{}))
 
 		_, err := dummyEngine.TailStep(ctx, step, workflowUUID)
 		assert.Error(t, err)
@@ -149,9 +149,9 @@ echo nein
 		}
 		workflowUUID := "WID_1"
 
-		assert.NoError(t, dummyEngine.SetupWorkflow(ctx, nil, workflowUUID))
+		assert.NoError(t, dummyEngine.SetupWorkflow(ctx, nil, workflowUUID, types.TrustedConfiguration{}))
 
-		assert.Error(t, dummyEngine.StartStep(ctx, step, workflowUUID))
+		assert.Error(t, dummyEngine.StartStep(ctx, step, workflowUUID, types.TrustedConfiguration{}))
 
 		_, err := dummyEngine.TailStep(ctx, step, workflowUUID)
 		assert.Error(t, err)

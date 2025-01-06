@@ -131,7 +131,7 @@ func TestTinyPod(t *testing.T) {
 		Commands:    []string{"gradle build"},
 		Volumes:     []string{"workspace:/woodpecker/src"},
 		Environment: map[string]string{"CI": "woodpecker"},
-	}, &config{
+	}, types.TrustedConfiguration{}, &config{
 		Namespace: "woodpecker",
 	}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{})
 	assert.NoError(t, err)
@@ -326,7 +326,7 @@ func TestFullPod(t *testing.T) {
 			Username: "foo",
 			Password: "bar",
 		},
-	}, &config{
+	}, types.TrustedConfiguration{}, &config{
 		Namespace:                   "woodpecker",
 		ImagePullSecretNames:        []string{"regcred", "another-pull-secret"},
 		PodLabels:                   map[string]string{"app": "test"},
@@ -363,7 +363,7 @@ func TestPodPrivilege(t *testing.T) {
 			Name:       "go-test",
 			Image:      "golang:1.16",
 			Privileged: stepPrivileged,
-		}, &config{
+		}, types.TrustedConfiguration{Security: stepPrivileged}, &config{
 			Namespace:       "woodpecker",
 			SecurityContext: SecurityContextConfig{RunAsNonRoot: globalRunAsRoot},
 		}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{
@@ -472,7 +472,7 @@ func TestScratchPod(t *testing.T) {
 		Name:       "curl-google",
 		Image:      "quay.io/curl/curl",
 		Entrypoint: []string{"/usr/bin/curl", "-v", "google.com"},
-	}, &config{
+	}, types.TrustedConfiguration{}, &config{
 		Namespace: "woodpecker",
 	}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{})
 	assert.NoError(t, err)
@@ -570,7 +570,7 @@ func TestSecrets(t *testing.T) {
 		Image:       "alpine",
 		Environment: map[string]string{"CGO": "0"},
 		Volumes:     []string{"workspace:/woodpecker/src"},
-	}, &config{
+	}, types.TrustedConfiguration{}, &config{
 		Namespace:                  "woodpecker",
 		NativeSecretsAllowFromStep: true,
 	}, "wp-3kgk0qj36d2me01he8bebctabr-0", "linux/amd64", BackendOptions{

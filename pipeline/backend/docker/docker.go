@@ -141,7 +141,7 @@ func (e *docker) Load(ctx context.Context) (*backend.BackendInfo, error) {
 	}, nil
 }
 
-func (e *docker) SetupWorkflow(ctx context.Context, conf *backend.Config, taskUUID string) error {
+func (e *docker) SetupWorkflow(ctx context.Context, conf *backend.Config, taskUUID string, _ backend.TrustedConfiguration) error {
 	log.Trace().Str("taskUUID", taskUUID).Msg("create workflow environment")
 
 	_, err := e.client.VolumeCreate(ctx, volume.CreateOptions{
@@ -163,7 +163,7 @@ func (e *docker) SetupWorkflow(ctx context.Context, conf *backend.Config, taskUU
 	return err
 }
 
-func (e *docker) StartStep(ctx context.Context, step *backend.Step, taskUUID string) error {
+func (e *docker) StartStep(ctx context.Context, step *backend.Step, taskUUID string, trusted backend.TrustedConfiguration) error {
 	options, err := parseBackendOptions(step)
 	if err != nil {
 		log.Error().Err(err).Msg("could not parse backend options")
@@ -172,7 +172,7 @@ func (e *docker) StartStep(ctx context.Context, step *backend.Step, taskUUID str
 	log.Trace().Str("taskUUID", taskUUID).Msgf("start step %s", step.Name)
 
 	config := e.toConfig(step, options)
-	hostConfig := toHostConfig(step, &e.config)
+	hostConfig := toHostConfig(step, trusted, &e.config)
 	containerName := toContainerName(step)
 
 	// create pull options with encoded authorization credentials.
@@ -224,7 +224,7 @@ func (e *docker) StartStep(ctx context.Context, step *backend.Step, taskUUID str
 		return err
 	}
 
-	if len(step.NetworkMode) == 0 {
+	if !trusted.Network && len(step.NetworkMode) == 0 {
 		for _, net := range step.Networks {
 			err = e.client.NetworkConnect(ctx, net.Name, containerName, &network.EndpointSettings{
 				Aliases: net.Aliases,

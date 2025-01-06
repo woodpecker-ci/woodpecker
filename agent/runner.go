@@ -19,6 +19,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"slices"
 	"sync"
 	"time"
 
@@ -38,15 +39,23 @@ type Runner struct {
 	hostname string
 	counter  *State
 	backend  *backend.Backend
+	trusted  TrustedRepos
 }
 
-func NewRunner(workEngine rpc.Peer, f rpc.Filter, h string, state *State, backend *backend.Backend) Runner {
+type TrustedRepos struct {
+	Volumes  []int64
+	Network  []int64
+	Security []int64
+}
+
+func NewRunner(workEngine rpc.Peer, f rpc.Filter, h string, state *State, backend *backend.Backend, trusted TrustedRepos) Runner {
 	return Runner{
 		client:   workEngine,
 		filter:   f,
 		hostname: h,
 		counter:  state,
 		backend:  backend,
+		trusted:  trusted,
 	}
 }
 
@@ -146,6 +155,11 @@ func (r *Runner) Run(runnerCtx, shutdownCtx context.Context) error { //nolint:co
 			"workflow_id":     workflow.ID,
 			"repo":            workflow.RepoName,
 			"pipeline_number": workflow.PipelineNumber,
+		}),
+		pipeline.WithTrustedConfiguration(backend.TrustedConfiguration{
+			Network:  slices.Contains(r.trusted.Network, workflow.RepoID),
+			Volumes:  slices.Contains(r.trusted.Volumes, workflow.RepoID),
+			Security: slices.Contains(r.trusted.Security, workflow.RepoID),
 		}),
 	).Run(runnerCtx)
 

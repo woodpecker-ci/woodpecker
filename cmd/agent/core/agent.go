@@ -260,6 +260,12 @@ func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 		Labels: labels,
 	}
 
+	trustedRepos := agent.TrustedRepos{
+		Network:  c.IntSlice("trusted-repos-network"),
+		Volumes:  c.IntSlice("trusted-repos-volumes"),
+		Security: c.IntSlice("trusted-repos-security"),
+	}
+
 	log.Debug().Msgf("agent registered with ID %d", agentConfig.AgentID)
 
 	serviceWaitingGroup.Go(func() error {
@@ -281,7 +287,7 @@ func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 	for i := 0; i < maxWorkflows; i++ {
 		i := i
 		serviceWaitingGroup.Go(func() error {
-			runner := agent.NewRunner(client, filter, hostname, counter, &backendEngine)
+			runner := agent.NewRunner(client, filter, hostname, counter, &backendEngine, trustedRepos)
 			log.Debug().Msgf("created new runner %d", i)
 
 			for {
