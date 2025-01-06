@@ -81,8 +81,8 @@
   --wp-control-ok-200: theme('colors.int-wp-control-ok-dark.200');
   --wp-control-ok-300: theme('colors.int-wp-control-ok-dark.300');
 
-  --wp-error-100: theme('colors.int-wp-error.100');
-  --wp-error-200: theme('colors.int-wp-error.200');
+  --wp-error-100: theme('colors.int-wp-error.200');
+  --wp-error-200: theme('colors.int-wp-error.300');
   --wp-error-300: theme('colors.int-wp-error.300');
 
   --wp-state-neutral-100: theme('colors.int-wp-state-neutral.100');
@@ -129,7 +129,7 @@ body,
 }
 
 .vue-notification.error {
-  @apply !border-l-wp-error-300 !bg-wp-error-100 dark:!bg-wp-error-200;
+  @apply !border-l-wp-error-200 !bg-wp-error-100;
 }
 
 *::-webkit-scrollbar {
