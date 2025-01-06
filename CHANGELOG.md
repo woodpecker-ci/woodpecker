@@ -68,6 +68,7 @@
 
 ### 📚 Documentation
 
+- fix(deps): update react monorepo to v19 (major) [[#4529](https://github.com/woodpecker-ci/woodpecker/pull/4529)]
 - chore(deps): lock file maintenance [[#4672](https://github.com/woodpecker-ci/woodpecker/pull/4672)]
 - Refactor `secrets` page in docs [[#4644](https://github.com/woodpecker-ci/woodpecker/pull/4644)]
 - fix(deps): update docs npm deps non-major [[#4661](https://github.com/woodpecker-ci/woodpecker/pull/4661)]
