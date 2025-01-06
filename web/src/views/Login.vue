@@ -1,6 +1,6 @@
 <template>
   <main class="flex h-full w-full flex-col items-center justify-center">
-    <Error v-if="errorMessage" class="md:w-3xl w-full">
+    <Error v-if="errorMessage" class="w-full md:w-3xl">
       <span class="whitespace-pre">{{ errorMessage }}</span>
       <span v-if="errorDescription" class="mt-1 whitespace-pre">{{ errorDescription }}</span>
       <a
@@ -14,7 +14,7 @@
     </Error>
 
     <div
-      class="min-h-sm md:w-3xl flex w-full flex-col overflow-hidden border border-wp-background-400 bg-wp-background-100 shadow dark:bg-wp-background-200 md:m-8 md:flex-row md:rounded-md"
+      class="flex min-h-sm w-full flex-col overflow-hidden border border-wp-background-400 bg-wp-background-100 shadow dark:bg-wp-background-200 md:m-8 md:w-3xl md:flex-row md:rounded-md"
     >
       <div class="flex min-h-48 items-center justify-center bg-wp-primary-200 dark:bg-wp-primary-300 md:w-3/5">
         <WoodpeckerLogo preserveAspectRatio="xMinYMin slice" class="h-32 w-32 md:h-48 md:w-48" />
