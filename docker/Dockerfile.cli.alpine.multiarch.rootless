@@ -8,16 +8,16 @@ RUN --mount=type=cache,target=/root/.cache/go-build \
     make build-cli
 
 FROM docker.io/alpine:3.21
+
 WORKDIR /woodpecker
 
-RUN apk add -U --no-cache ca-certificates
+RUN apk add -U --no-cache ca-certificates && \
+  adduser -u 1000 -g 1000 woodpecker
 
 ENV GODEBUG=netdns=go
 ENV WOODPECKER_DISABLE_UPDATE_CHECK=true
 
 COPY --from=build /src/dist/woodpecker-cli /bin/
-
-RUN adduser -u 1000 -g 1000 woodpecker
 
 USER woodpecker
 
