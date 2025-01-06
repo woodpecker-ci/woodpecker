@@ -5,7 +5,7 @@ The `latest` tag has been deprecated as of v3.0 and will be completely removed i
 This was done to prevent accidental major version upgrades.
 :::
 
-- `vX.Y.Z`: Sem-ver tags for specific releases, no entrypoint shell (scratch image)
+- `vX.Y.Z`: SemVer tags for specific releases, no entrypoint shell (scratch image)
   - `vX.Y`
   - `vX`
 - `vX.Y.Z-alpine`: Sem-ver tags for specific releases, based on Alpine, rootless (as of v3.0).
