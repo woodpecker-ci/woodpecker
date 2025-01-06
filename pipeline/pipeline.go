@@ -109,13 +109,13 @@ func (r *Runtime) Run(runnerCtx context.Context) error {
 		if ctx.Err() != nil {
 			ctx = GetShutdownCtx()
 		}
-		if err := r.engine.DestroyWorkflow(ctx, r.spec, r.taskUUID, r.Description["pipeline_name"]); err != nil {
+		if err := r.engine.DestroyWorkflow(ctx, r.spec, r.taskUUID, r.Description["workflowName"]); err != nil {
 			logger.Error().Err(err).Msg("could not destroy engine")
 		}
 	}()
 
 	r.started = time.Now().Unix()
-	if err := r.engine.SetupWorkflow(runnerCtx, r.spec, r.taskUUID, r.Description["pipeline_name"]); err != nil {
+	if err := r.engine.SetupWorkflow(runnerCtx, r.spec, r.taskUUID, r.Description["workflowName"]); err != nil {
 		return err
 	}
 
@@ -123,7 +123,7 @@ func (r *Runtime) Run(runnerCtx context.Context) error {
 		select {
 		case <-r.ctx.Done():
 			return ErrCancel
-		case err := <-r.execAll(stage.Steps, r.Description["pipeline_name"]):
+		case err := <-r.execAll(stage.Steps, r.Description["workflowName"]):
 			if err != nil {
 				r.err = err
 			}
