@@ -1,6 +1,6 @@
 <template>
   <Container full-width class="md:min-h-xs flex flex-grow-0 flex-col md:flex-grow md:px-4">
-    <div class="flex min-h-0 w-full flex-grow flex-wrap-reverse gap-4 md:flex-nowrap">
+    <div class="flex min-h-0 w-full flex-grow flex-wrap-reverse md:flex-nowrap md:gap-4">
       <PipelineStepList
         v-model:selected-step-id="selectedStepId"
         :class="{ 'hidden md:flex': pipeline!.status === 'blocked' }"
