@@ -25,7 +25,7 @@
         <template v-if="lastPipeline">
           <div class="flex min-w-0 flex-1 items-center gap-x-1">
             <PipelineStatusIcon v-if="lastPipeline" :status="lastPipeline.status" />
-            <span class="overflow-hidden overflow-ellipsis whitespace-nowrap">{{ shortMessage }}</span>
+            <span class="overflow-hidden overflow-ellipsis whitespace-nowrap pl-1">{{ shortMessage }}</span>
           </div>
 
           <div class="ml-auto flex flex-shrink-0 items-center gap-x-1">

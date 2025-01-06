@@ -21,8 +21,8 @@
     "@easyops-cn/docusaurus-search-local": "^0.46.1",
     "clsx": "^2.1.1",
     "prism-react-renderer": "^2.4.1",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
     "redocusaurus": "^2.2.0"
   },
   "browserslist": {
@@ -42,7 +42,7 @@
     "@docusaurus/tsconfig": "3.7.0",
     "@docusaurus/types": "^3.7.0",
     "@types/node": "^22.10.5",
-    "@types/react": "^18.3.18",
+    "@types/react": "^19.0.0",
     "@types/react-helmet": "^6.1.11",
     "@types/react-router-dom": "^5.3.3",
     "typescript": "^5.7.2"
