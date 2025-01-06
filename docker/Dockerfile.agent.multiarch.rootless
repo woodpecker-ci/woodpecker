@@ -1,8 +1,8 @@
 FROM --platform=$BUILDPLATFORM docker.io/golang:1.23 AS builder
 
 RUN adduser woodpecker && \
-  mkdir -p /var/lib/woodpecker && \
-  chown -R woodpecker:woodpecker /var/lib/woodpecker
+  mkdir -p /etc/woodpecker && \
+  chown -R woodpecker:woodpecker /etc/woodpecker
 
 WORKDIR /src
 COPY . .
@@ -10,7 +10,6 @@ ARG TARGETOS TARGETARCH CI_COMMIT_SHA CI_COMMIT_TAG CI_COMMIT_BRANCH
 RUN --mount=type=cache,target=/root/.cache/go-build \
     --mount=type=cache,target=/go/pkg \
     make build-agent
-RUN mkdir -p /etc/woodpecker
 
 FROM scratch
 ENV GODEBUG=netdns=go
