@@ -1,6 +1,7 @@
 FROM --platform=$BUILDPLATFORM docker.io/golang:1.23 AS build
 
-RUN adduser -u 1000 -g 1000 woodpecker
+RUN groupadd -g 1000 woodpecker && \
+  useradd -u 1000 -g 1000 woodpecker
 
 WORKDIR /src
 COPY . .
