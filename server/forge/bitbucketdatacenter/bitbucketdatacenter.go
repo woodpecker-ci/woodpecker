@@ -570,33 +570,25 @@ func (c *client) updatePipelineFromCommit(ctx context.Context, u *model.User, r 
 	return p, nil
 }
 
+// Teams fetches all the projects for a given user and converts them into teams.
 func (c *client) Teams(ctx context.Context, u *model.User) ([]*model.Team, error) {
-	// Initialize API path and options
-	const path = "projects"
-	opts := &bb.ListOptions{Start: 0, Limit: 50}
+
+	opts := &bb.ListOptions{Limit: listLimit}
 	var allProjects []*bb.Project
 
-	// Create a new client
 	bc, err := c.newClient(ctx, u)
 	if err != nil {
 		return nil, fmt.Errorf("unable to create client: %w", err)
 	}
 
 	for {
-		// Structure to hold the API response
-		var projectPage struct {
-			bb.ListResponse
-			Values []*bb.Project `json:"values"`
-		}
-
-		// Fetch a page of projects
-		resp, err := bc.GetPaged(ctx, "api", path, &projectPage, opts)
+		projects, resp, err := bc.Projects.ListProjects(ctx, opts)
 		if err != nil {
 			return nil, fmt.Errorf("unable to fetch projects: %w", err)
 		}
 
-		// Append the projects and check if we're at the last page
-		allProjects = append(allProjects, projectPage.Values...)
+		allProjects = append(allProjects, projects...)
+
 		if resp.LastPage {
 			break
 		}
@@ -604,7 +596,6 @@ func (c *client) Teams(ctx context.Context, u *model.User) ([]*model.Team, error
 		opts.Start = resp.NextPageStart
 	}
 
-	// Convert projects to teams and return
 	return convertProjectsToTeams(allProjects, bc), nil
 }
 

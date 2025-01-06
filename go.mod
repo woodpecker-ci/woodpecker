@@ -42,7 +42,7 @@ require (
 	github.com/moby/moby v27.4.1+incompatible
 	github.com/moby/term v0.5.2
 	github.com/muesli/termenv v0.15.3-0.20241212154518-8c990cd6cf4b
-	github.com/neticdk/go-bitbucket v1.0.0
+	github.com/neticdk/go-bitbucket v1.0.1
 	github.com/oklog/ulid/v2 v2.1.0
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.20.5
