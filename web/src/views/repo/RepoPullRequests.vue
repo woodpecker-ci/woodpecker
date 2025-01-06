@@ -8,10 +8,10 @@
         :to="{ name: 'repo-pull-request', params: { pullRequest: pullRequest.index } }"
       >
         <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
-        <span class="<md:hidden text-wp-text-alt-100">#{{ pullRequest.index }}</span>
+        <span class="md:display-unset hidden text-wp-text-alt-100">#{{ pullRequest.index }}</span>
         <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
-        <span class="<md:hidden mx-2 text-wp-text-alt-100">-</span>
-        <span class="<md:underline overflow-hidden overflow-ellipsis whitespace-nowrap text-wp-text-100">{{
+        <span class="md:display-unset mx-2 hidden text-wp-text-alt-100">-</span>
+        <span class="overflow-hidden overflow-ellipsis whitespace-nowrap text-wp-text-100 underline md:no-underline">{{
           pullRequest.title
         }}</span>
       </ListItem>

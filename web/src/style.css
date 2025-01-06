@@ -165,6 +165,6 @@ code:not(pre > code) {
 }
 
 .code-box-log {
-  @apply break-words rounded-md bg-wp-code-300 p-4 text-sm text-wp-code-text-100;
+  @apply break-words bg-wp-code-300 p-4 text-wp-code-text-100;
   white-space: pre-wrap;
 }

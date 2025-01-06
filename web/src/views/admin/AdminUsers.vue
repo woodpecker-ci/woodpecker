@@ -14,19 +14,19 @@
       <ListItem
         v-for="user in users"
         :key="user.id"
-        class="!dark:bg-wp-background-100 items-center gap-2 !bg-wp-background-200 p-4"
+        class="!dark:bg-wp-background-100 items-center gap-2 !bg-wp-background-200"
       >
         <img v-if="user.avatar_url" class="h-6 rounded-md" :src="user.avatar_url" />
         <span>{{ user.login }}</span>
         <Badge
           v-if="user.admin"
-          class="ml-auto hidden md:inline-block"
+          class="md:display-unset ml-auto hidden"
           :label="$t('admin.settings.users.admin.admin')"
         />
         <IconButton
           icon="edit"
           :title="$t('admin.settings.users.edit_user')"
-          class="<md:ml-auto h-8 w-8"
+          class="md:display-unset ml-auto h-8 w-8"
           :class="{ 'ml-auto': !user.admin, 'ml-2': user.admin }"
           @click="editUser(user)"
         />

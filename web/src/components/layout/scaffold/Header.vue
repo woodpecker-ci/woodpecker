@@ -15,7 +15,7 @@
             v-if="goBack"
             icon="back"
             :title="$t('back')"
-            class="<md:hidden mr-2 h-8 w-8 flex-shrink-0 md:justify-between"
+            class="md:display-unset mr-2 hidden h-8 w-8 flex-shrink-0 md:justify-between"
             @click="goBack"
           />
           <h1 class="flex min-w-0 items-center gap-x-2 text-xl text-wp-text-100">
@@ -24,7 +24,7 @@
         </div>
         <TextField
           v-if="searchBoxPresent"
-          class="<md:w-full <md:order-3 w-auto flex-grow"
+          class="order-3 w-full flex-grow md:order-none md:w-auto"
           :aria-label="$t('search')"
           :placeholder="$t('search')"
           :model-value="search"
@@ -42,7 +42,7 @@
       </div>
 
       <div v-if="enableTabs" class="flex flex-col py-2 md:flex-row md:items-center md:justify-between md:py-0">
-        <Tabs class="<md:order-2" />
+        <Tabs class="order-2 md:order-none" />
         <div v-if="$slots.headerActions" class="flex content-start md:justify-end">
           <slot name="tabActions" />
         </div>

@@ -22,11 +22,13 @@
       >
         <span class="grid w-full grid-cols-3">
           <span>{{ cron.name }}</span>
-          <span v-if="cron.next_exec && cron.next_exec > 0" class="<md:hidden col-span-2">
+          <span v-if="cron.next_exec && cron.next_exec > 0" class="md:display-unset col-span-2 hidden">
             <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
             {{ $t('repo.settings.crons.next_exec') }}: {{ date.toLocaleString(new Date(cron.next_exec * 1000)) }}
           </span>
-          <span v-else class="<md:hidden col-span-2">{{ $t('repo.settings.crons.not_executed_yet') }}</span>
+          <span v-else class="md:display-unset col-span-2 hidden">{{
+            $t('repo.settings.crons.not_executed_yet')
+          }}</span>
         </span>
         <IconButton
           icon="play-outline"

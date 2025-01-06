@@ -1,13 +1,15 @@
 <template>
   <div v-if="pipeline" class="flex flex-col pt-10 md:pt-0">
     <div
-      class="!md:rounded-md code-box flex flex-grow flex-col overflow-hidden !p-0 shadow md:mt-0"
+      class="code-box-log flex flex-grow flex-col overflow-hidden !p-0 shadow md:mt-0 md:!rounded-md"
       @mouseover="showActions = true"
       @mouseleave="showActions = false"
     >
-      <div class="<md:fixed <md:top-0 <md:left-0 flex w-full flex-row items-center bg-wp-code-100 px-4 py-2">
+      <div
+        class="fixed left-0 top-0 flex w-full flex-row items-center bg-wp-code-100 px-4 py-2 md:relative md:left-auto md:top-auto"
+      >
         <span class="text-base font-bold text-wp-code-text-alt-100">
-          <span class="<md:hidden">{{ $t('repo.pipeline.log_title') }}</span>
+          <span class="md:display-unset hidden">{{ $t('repo.pipeline.log_title') }}</span>
           <span class="md:hidden">{{ step?.name }}</span>
         </span>
 
@@ -37,7 +39,7 @@
             @click="autoScroll = !autoScroll"
           />
           <IconButton
-            class="!hover:bg-white !hover:bg-opacity-10 !md:hidden"
+            class="!hover:bg-white !hover:bg-opacity-10 md:!hidden"
             icon="close"
             @click="$emit('update:step-id', null)"
           />

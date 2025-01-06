@@ -3,7 +3,7 @@
     <ListItem
       v-for="secret in secrets"
       :key="secret.id"
-      class="items-center !bg-wp-background-200 p-4 dark:!bg-wp-background-100"
+      class="items-center !bg-wp-background-200 dark:!bg-wp-background-100"
     >
       <span>{{ secret.name }}</span>
       <Badge
@@ -11,13 +11,13 @@
         class="ml-2"
         :label="secret.org_id === 0 ? $t('global_level_secret') : $t('org_level_secret')"
       />
-      <div class="<md:hidden ml-auto space-x-2">
+      <div class="md:display-unset ml-auto hidden space-x-2">
         <Badge v-for="event in secret.events" :key="event" :label="event" />
       </div>
       <template v-if="secret.edit !== false">
         <IconButton
           icon="edit"
-          class="<md:ml-auto ml-2 h-8 w-8"
+          class="ml-auto h-8 w-8 md:ml-2"
           :title="$t('secrets.edit')"
           @click="editSecret(secret)"
         />

@@ -12,4 +12,8 @@
     width: -moz-available;
     width: stretch;
   }
+
+  .display-unset {
+    display: unset;
+  }
 }
