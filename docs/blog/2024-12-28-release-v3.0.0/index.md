@@ -39,7 +39,7 @@ steps:
 
 Woodpecker now supports running rootless images by adjusting the entrypoints and directory permissions in the containers in a way that allows non-privileged users to execute tasks.
 
-In addition, all images published by Woodpecker (Server, Agent, CLI) now use a non-privileged user (`woodpecker`) by default.
+In addition, all images published by Woodpecker (Server, Agent, CLI) now use a non-privileged user (`woodpecker` with UID and GID 1000) by default.
 
 ## UI
 
