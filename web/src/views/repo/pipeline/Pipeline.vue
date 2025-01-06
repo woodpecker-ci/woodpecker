@@ -8,7 +8,7 @@
       />
 
       <div class="relative flex flex-grow basis-full items-start justify-center md:basis-auto">
-        <Container v-if="pipeline!.errors?.some((e) => !e.is_warning)" fill-width class="p-0">
+        <div v-if="pipeline!.errors?.some((e) => !e.is_warning)" class="mb-4 w-full md:mb-auto">
           <Panel>
             <div class="flex flex-col items-center gap-4 text-center">
               <Icon name="status-error" class="h-16 w-16 text-wp-error-100" size="1.5rem" />
@@ -16,9 +16,9 @@
               <Button color="red" :text="$t('repo.pipeline.show_errors')" :to="{ name: 'repo-pipeline-errors' }" />
             </div>
           </Panel>
-        </Container>
+        </div>
 
-        <Container v-else-if="pipeline!.status === 'blocked'" fill-width class="p-0">
+        <div v-else-if="pipeline!.status === 'blocked'" class="mb-4 w-full md:mb-auto">
           <Panel>
             <div class="flex flex-col items-center gap-4">
               <Icon name="status-blocked" size="1.5rem" class="h-16 w-16" />
@@ -39,16 +39,16 @@
               </div>
             </div>
           </Panel>
-        </Container>
+        </div>
 
-        <Container v-else-if="pipeline!.status === 'declined'" fill-width class="p-0">
+        <div v-else-if="pipeline!.status === 'declined'" class="mb-4 w-full md:mb-auto">
           <Panel>
             <div class="flex flex-col items-center gap-4">
               <Icon name="status-declined" size="1.5rem" class="h-16 w-16 text-wp-error-100" />
               <p class="text-xl">{{ $t('repo.pipeline.protected.declined') }}</p>
             </div>
           </Panel>
-        </Container>
+        </div>
 
         <PipelineLog
           v-else-if="selectedStepId !== null"
