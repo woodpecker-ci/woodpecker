@@ -26,7 +26,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/pipeline/stepbuilder"
 )
 
-func queuePipeline(ctx context.Context, repo *model.Repo, pipelineItems []*stepbuilder.Item) error {
+func queuePipeline(ctx context.Context, repo *model.Repo, pipelineItems []*stepbuilder.Item, pipelineNumber int64) error {
 	var tasks []*model.Task
 	for _, item := range pipelineItems {
 		if item.Workflow.State == model.StatusSkipped {
@@ -46,9 +46,12 @@ func queuePipeline(ctx context.Context, repo *model.Repo, pipelineItems []*stepb
 		task.DepStatus = make(map[string]model.StatusValue)
 
 		task.Data, err = json.Marshal(rpc.Workflow{
-			ID:      fmt.Sprint(item.Workflow.ID),
-			Config:  item.Config,
-			Timeout: repo.Timeout,
+			ID:             fmt.Sprint(item.Workflow.ID),
+			Config:         item.Config,
+			Timeout:        repo.Timeout,
+			RepoName:       repo.FullName,
+			RepoID:         fmt.Sprint(repo.ID),
+			PipelineNumber: fmt.Sprint(pipelineNumber),
 		})
 		if err != nil {
 			return err

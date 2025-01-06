@@ -70,20 +70,17 @@ func (r *Runner) Run(runnerCtx, shutdownCtx context.Context) error { //nolint:co
 		timeout = time.Duration(minutes) * time.Minute
 	}
 
-	repoName := extractRepositoryName(workflow.Config)       // hack
-	pipelineNumber := extractPipelineNumber(workflow.Config) // hack
-
 	r.counter.Add(
 		workflow.ID,
 		timeout,
-		repoName,
-		pipelineNumber,
+		workflow.RepoName,
+		workflow.PipelineNumber,
 	)
 	defer r.counter.Done(workflow.ID)
 
 	logger := log.With().
-		Str("repo", repoName).
-		Str("pipeline", pipelineNumber).
+		Str("repo", workflow.RepoName).
+		Str("pipeline", workflow.PipelineNumber).
 		Str("workflow_id", workflow.ID).
 		Logger()
 
@@ -147,8 +144,8 @@ func (r *Runner) Run(runnerCtx, shutdownCtx context.Context) error { //nolint:co
 		pipeline.WithBackend(*r.backend),
 		pipeline.WithDescription(map[string]string{
 			"workflow_id":     workflow.ID,
-			"repo":            repoName,
-			"pipeline_number": pipelineNumber,
+			"repo":            workflow.RepoName,
+			"pipeline_number": workflow.PipelineNumber,
 		}),
 	).Run(runnerCtx)
 
@@ -188,12 +185,4 @@ func (r *Runner) Run(runnerCtx, shutdownCtx context.Context) error { //nolint:co
 	}
 
 	return nil
-}
-
-func extractRepositoryName(config *backend.Config) string {
-	return config.Stages[0].Steps[0].Environment["CI_REPO"]
-}
-
-func extractPipelineNumber(config *backend.Config) string {
-	return config.Stages[0].Steps[0].Environment["CI_PIPELINE_NUMBER"]
 }

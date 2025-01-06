@@ -35,7 +35,7 @@ func start(ctx context.Context, forge forge.Forge, store store.Store, activePipe
 
 	publishPipeline(ctx, forge, activePipeline, repo, user)
 
-	if err := queuePipeline(ctx, repo, pipelineItems); err != nil {
+	if err := queuePipeline(ctx, repo, pipelineItems, activePipeline.Number); err != nil {
 		log.Error().Err(err).Msg("queuePipeline")
 		return nil, err
 	}

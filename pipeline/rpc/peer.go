@@ -46,9 +46,12 @@ type (
 
 	// Workflow defines the workflow execution details.
 	Workflow struct {
-		ID      string          `json:"id"`
-		Config  *backend.Config `json:"config"`
-		Timeout int64           `json:"timeout"`
+		ID             string          `json:"id"`
+		Config         *backend.Config `json:"config"`
+		Timeout        int64           `json:"timeout"`
+		RepoName       string          `json:"repo_name"`
+		RepoID         string          `json:"repo_id"`
+		PipelineNumber string          `json:"pipeline_number"`
 	}
 
 	Version struct {
