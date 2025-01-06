@@ -217,9 +217,6 @@ export default {
           'sans-serif',
         ],
       },
-      borderWidth: {
-        6: '6px',
-      },
       transitionProperty: {
         height: 'max-height',
       },

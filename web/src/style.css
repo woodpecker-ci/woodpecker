@@ -117,7 +117,7 @@ body,
 }
 
 .vue-notification {
-  @apply rounded-md border-l-6 text-base;
+  @apply rounded-md border-l-4 text-base;
 }
 
 .vue-notification .notification-title {
