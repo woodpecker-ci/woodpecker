@@ -61,7 +61,6 @@ type Repo struct {
 	Timeout                      int64                `json:"timeout,omitempty"               xorm:"timeout"`
 	Visibility                   RepoVisibility       `json:"visibility"                      xorm:"varchar(10) 'visibility'"`
 	IsSCMPrivate                 bool                 `json:"private"                         xorm:"private"`
-	Trusted                      TrustedConfiguration `json:"trusted"                         xorm:"json 'trusted'"`
 	RequireApproval              ApprovalMode         `json:"require_approval"                xorm:"varchar(50) require_approval"`
 	IsActive                     bool                 `json:"active"                          xorm:"active"`
 	AllowPull                    bool                 `json:"allow_pr"                        xorm:"allow_pr"`
@@ -136,7 +135,6 @@ type RepoPatch struct {
 	AllowDeploy                  *bool                      `json:"allow_deploy,omitempty"`
 	CancelPreviousPipelineEvents *[]WebhookEvent            `json:"cancel_previous_pipeline_events"`
 	NetrcTrusted                 *[]string                  `json:"netrc_trusted"`
-	Trusted                      *TrustedConfigurationPatch `json:"trusted"`
 } //	@name RepoPatch
 
 type ForgeRemoteID string
@@ -149,10 +147,4 @@ type TrustedConfiguration struct {
 	Network  bool `json:"network"`
 	Volumes  bool `json:"volumes"`
 	Security bool `json:"security"`
-}
-
-type TrustedConfigurationPatch struct {
-	Network  *bool `json:"network"`
-	Volumes  *bool `json:"volumes"`
-	Security *bool `json:"security"`
 }

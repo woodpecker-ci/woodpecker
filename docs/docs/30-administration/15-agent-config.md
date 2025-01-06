@@ -165,6 +165,24 @@ Configures if the connection to `WOODPECKER_SERVER` should be made using a secur
 
 Configures if the gRPC server certificate should be verified, only valid when `WOODPECKER_GRPC_SECURE` is `true`.
 
+### `WOODPECKER_TRUSTED_REPOS_VOLUMES`
+
+> Default: empty
+
+List of repositofy IDs that are trusted to use extended volume features.
+
+### `WOODPECKER_TRUSTED_REPOS_NETWORK`
+
+> Default: empty
+
+List of repositofy IDs that are trusted to use extended network features.
+
+### `WOODPECKER_TRUSTED_REPOS_SECURITY`
+
+> Default: empty
+
+List of repositofy IDs that are trusted to use extended security features.
+
 ### `WOODPECKER_BACKEND`
 
 > Default: `auto-detect`

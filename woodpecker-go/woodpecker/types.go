@@ -46,12 +46,6 @@ type (
 		Admin  bool   `json:"admin"`
 	}
 
-	TrustedConfiguration struct {
-		Network  bool `json:"network"`
-		Volumes  bool `json:"volumes"`
-		Security bool `json:"security"`
-	}
-
 	// Repo represents a repository.
 	Repo struct {
 		ID                           int64                `json:"id,omitempty"`
@@ -67,7 +61,6 @@ type (
 		Timeout                      int64                `json:"timeout,omitempty"`
 		Visibility                   string               `json:"visibility"`
 		IsSCMPrivate                 bool                 `json:"private"`
-		Trusted                      TrustedConfiguration `json:"trusted"`
 		RequireApproval              ApprovalMode         `json:"require_approval"`
 		IsActive                     bool                 `json:"active"`
 		AllowPull                    bool                 `json:"allow_pr"`

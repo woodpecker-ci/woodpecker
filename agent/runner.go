@@ -143,24 +143,26 @@ func (r *Runner) Run(runnerCtx, shutdownCtx context.Context) error { //nolint:co
 		// TODO: should we return here?
 	}
 
+	trusted := backend.TrustedConfiguration{
+			Network:  slices.Contains(r.trusted.Network, workflow.RepoID),
+			Volumes:  slices.Contains(r.trusted.Volumes, workflow.RepoID),
+			Security: slices.Contains(r.trusted.Security, workflow.RepoID),
+		}
+
 	var uploads sync.WaitGroup
 	//nolint:contextcheck
 	err = pipeline.New(workflow.Config,
 		pipeline.WithContext(workflowCtx),
 		pipeline.WithTaskUUID(fmt.Sprint(workflow.ID)),
 		pipeline.WithLogger(r.createLogger(logger, &uploads, workflow)),
-		pipeline.WithTracer(r.createTracer(ctxMeta, &uploads, logger, workflow)),
+		pipeline.WithTracer(r.createTracer(ctxMeta, &uploads, logger, workflow, trusted)),
 		pipeline.WithBackend(*r.backend),
 		pipeline.WithDescription(map[string]string{
 			"workflow_id":     workflow.ID,
 			"repo":            workflow.RepoName,
 			"pipeline_number": workflow.PipelineNumber,
 		}),
-		pipeline.WithTrustedConfiguration(backend.TrustedConfiguration{
-			Network:  slices.Contains(r.trusted.Network, workflow.RepoID),
-			Volumes:  slices.Contains(r.trusted.Volumes, workflow.RepoID),
-			Security: slices.Contains(r.trusted.Security, workflow.RepoID),
-		}),
+		pipeline.WithTrustedConfiguration(trusted),
 	).Run(runnerCtx)
 
 	state.Finished = time.Now().Unix()

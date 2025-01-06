@@ -94,11 +94,7 @@ steps:
 			conf, err := yaml.ParseString(testd.Data)
 			assert.NoError(t, err)
 
-			assert.NoError(t, linter.New(linter.WithTrusted(linter.TrustedConfiguration{
-				Network:  true,
-				Volumes:  true,
-				Security: true,
-			})).Lint([]*linter.WorkflowConfig{{
+			assert.NoError(t, linter.New().Lint([]*linter.WorkflowConfig{{
 				File:      testd.Title,
 				RawConfig: testd.Data,
 				Workflow:  conf,

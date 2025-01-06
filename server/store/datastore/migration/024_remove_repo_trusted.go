@@ -1,4 +1,4 @@
-// Copyright 2023 Woodpecker Authors
+// Copyright 2024 Woodpecker Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,21 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package linter
+package migration
 
-// Option configures a linting option.
-type Option func(*Linter)
+import (
+	"src.techknowlogick.com/xormigrate"
+	"xorm.io/xorm"
+)
 
-// PrivilegedPlugins adds the list of privileged plugins.
-func PrivilegedPlugins(plugins []string) Option {
-	return func(linter *Linter) {
-		linter.privilegedPlugins = &plugins
-	}
-}
+var removeRepoTrusted = xormigrate.Migration{
+	ID: "remove-repo-trusted",
+	MigrateSession: func(sess *xorm.Session) (err error) {
+		type repos struct {
+			SCMKind string `xorm:"varchar(50) 'scm'"`
+		}
 
-// WithTrustedClonePlugins adds the list of trusted clone plugins.
-func WithTrustedClonePlugins(plugins []string) Option {
-	return func(linter *Linter) {
-		linter.trustedClonePlugins = &plugins
-	}
+		// ensure columns to drop exist
+		if err := sess.Sync(new(repos)); err != nil {
+			return err
+		}
+
+		return dropTableColumns(sess, "repos", "trusted")
+	},
 }

@@ -29,16 +29,6 @@ Otherwise, these users will be able to steal secrets that are only available for
 
 To prevent malicious pipelines from extracting secrets or running harmful commands or to prevent accidental pipeline runs, you can require approval for an additional review process. Depending on the enabled option, a pipeline will be put on hold after creation and will only continue after approval. The default restrictive setting is `Approvals for forked repositories`.
 
-## Trusted
-
-If you set your project to trusted, a pipeline step and by this the underlying containers gets access to escalated capabilities like mounting volumes.
-
-:::note
-
-Only server admins can set this option. If you are not a server admin this option won't be shown in your project settings.
-
-:::
-
 ## Custom trusted clone plugins
 
 During the clone process, Git credentials (e.g., for private repositories) may be required.
@@ -70,3 +60,20 @@ After this timeout a pipeline has to finish or will be treated as timed out.
 ## Cancel previous pipelines
 
 By enabling this option for a pipeline event previous pipelines of the same event and context will be canceled before starting the newly triggered one.
+
+## Trusted
+
+This is a per-repo setting, but it's not managed by the server, but by the agents.
+
+The corresponding env vars are:
+- (`WOODPECKER_TRUSTED_REPOS_VOLUMES`)[../30-admininistration/15-agent-config.md#WOODPECKER_TRUSTED_REPOS_VOLUMES]
+- (`WOODPECKER_TRUSTED_REPOS_NETWORK`)[../30-admininistration/15-agent-config.md#WOODPECKER_TRUSTED_REPOS_NETWORK]
+- (`WOODPECKER_TRUSTED_REPOS_SECURITY`)[../30-admininistration/15-agent-config.md#WOODPECKER_TRUSTED_REPOS_SECURITY]
+
+If you set your project to trusted, a pipeline step and by this the underlying containers gets access to escalated capabilities like mounting volumes.
+
+:::note
+
+Only server admins can set this option. If you are not a server admin this option won't be shown in your project settings.
+
+:::

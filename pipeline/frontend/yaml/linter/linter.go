@@ -30,15 +30,8 @@ import (
 
 // A Linter lints a pipeline configuration.
 type Linter struct {
-	trusted             TrustedConfiguration
 	privilegedPlugins   *[]string
 	trustedClonePlugins *[]string
-}
-
-type TrustedConfiguration struct {
-	Network  bool
-	Volumes  bool
-	Security bool
 }
 
 // New creates a new Linter with options.
@@ -149,9 +142,6 @@ func (l *Linter) lintContainers(config *WorkflowConfig, area string) error {
 		if err := l.lintImage(config, container, area); err != nil {
 			linterErr = multierr.Append(linterErr, err)
 		}
-		if err := l.lintTrusted(config, container, area); err != nil {
-			linterErr = multierr.Append(linterErr, err)
-		}
 		if err := l.lintSettings(config, container, area); err != nil {
 			linterErr = multierr.Append(linterErr, err)
 		}
@@ -219,53 +209,6 @@ func (l *Linter) lintContainerDeprecations(config *WorkflowConfig, c *types.Cont
 	}
 
 	return err
-}
-
-func (l *Linter) lintTrusted(config *WorkflowConfig, c *types.Container, area string) error {
-	yamlPath := fmt.Sprintf("%s.%s", area, c.Name)
-	errors := []string{}
-	if !l.trusted.Security {
-		if c.Privileged {
-			errors = append(errors, "Insufficient trust level to use `privileged` mode")
-		}
-	}
-	if !l.trusted.Network {
-		if len(c.DNS) != 0 {
-			errors = append(errors, "Insufficient trust level to use custom `dns`")
-		}
-		if len(c.DNSSearch) != 0 {
-			errors = append(errors, "Insufficient trust level to use `dns_search`")
-		}
-		if len(c.ExtraHosts) != 0 {
-			errors = append(errors, "Insufficient trust level to use `extra_hosts`")
-		}
-		if len(c.NetworkMode) != 0 {
-			errors = append(errors, "Insufficient trust level to use `network_mode`")
-		}
-	}
-	if !l.trusted.Volumes {
-		if len(c.Devices) != 0 {
-			errors = append(errors, "Insufficient trust level to use `devices`")
-		}
-		if len(c.Volumes.Volumes) != 0 {
-			errors = append(errors, "Insufficient trust level to use `volumes`")
-		}
-		if len(c.Tmpfs) != 0 {
-			errors = append(errors, "Insufficient trust level to use `tmpfs`")
-		}
-	}
-
-	if len(errors) > 0 {
-		var err error
-
-		for _, e := range errors {
-			err = multierr.Append(err, newLinterError(e, config.File, yamlPath, false))
-		}
-
-		return err
-	}
-
-	return nil
 }
 
 func (l *Linter) lintSchema(config *WorkflowConfig) error {

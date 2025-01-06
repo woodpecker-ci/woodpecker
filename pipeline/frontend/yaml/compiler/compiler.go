@@ -97,7 +97,6 @@ type Compiler struct {
 	secrets                 map[string]Secret
 	defaultClonePlugin      string
 	trustedClonePlugins     []string
-	securityTrustedPipeline bool
 }
 
 // New creates a new Compiler with options.
@@ -194,8 +193,8 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 				return nil, err
 			}
 
-			// only inject netrc if it's a trusted repo or a trusted plugin
-			if c.securityTrustedPipeline || (container.IsPlugin() && container.IsTrustedCloneImage(c.trustedClonePlugins)) {
+			// only inject netrc if it's a trusted plugin
+			if container.IsPlugin() && container.IsTrustedCloneImage(c.trustedClonePlugins) {
 				for k, v := range c.cloneEnv {
 					step.Environment[k] = v
 				}
@@ -251,8 +250,8 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 			return nil, err
 		}
 
-		// only inject netrc if it's a trusted repo or a trusted plugin
-		if c.securityTrustedPipeline || (container.IsPlugin() && container.IsTrustedCloneImage(c.trustedClonePlugins)) {
+		// only inject netrc if it's a trusted plugin
+		if container.IsPlugin() && container.IsTrustedCloneImage(c.trustedClonePlugins) {
 			for k, v := range c.cloneEnv {
 				step.Environment[k] = v
 			}

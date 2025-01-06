@@ -101,6 +101,10 @@ The following restructuring was done to achieve a more consistent grouping:
 | `woodpecker-cli pipeline logs`              | `woodpecker-cli pipeline log show`          |
 | `woodpecker-cli (registry,secret,...) info` | `woodpecker-cli (registry,secret,...) show` |
 
+#### Behavior of the "trusted" settings
+
+Trusted settings are no longer managed by the server, but by the agent. This allows you to use trusted features even if you're not the instance admin by deploying a user agent. [Read more]()
+
 #### Miscellaneous
 
 - For `woodpecker-cli` containers, `/woodpecker` has been set as the default `workdir`
