@@ -18,14 +18,14 @@
             v-if="step?.finished !== undefined && hasLogs"
             :is-loading="downloadInProgress"
             :title="$t('repo.pipeline.actions.log_download')"
-            class="!hover:bg-white !hover:bg-opacity-10"
+            class="hover:!bg-white hover:!bg-opacity-10"
             icon="download"
             @click="download"
           />
           <IconButton
             v-if="step?.finished !== undefined && hasLogs && hasPushPermission"
             :title="$t('repo.pipeline.actions.log_delete')"
-            class="!hover:bg-white !hover:bg-opacity-10"
+            class="hover:!bg-white hover:!bg-opacity-10"
             icon="trash"
             @click="deleteLogs"
           />
@@ -34,12 +34,12 @@
             :title="
               autoScroll ? $t('repo.pipeline.actions.log_auto_scroll_off') : $t('repo.pipeline.actions.log_auto_scroll')
             "
-            class="!hover:bg-white !hover:bg-opacity-10"
+            class="hover:!bg-white hover:!bg-opacity-10"
             :icon="autoScroll ? 'auto-scroll' : 'auto-scroll-off'"
             @click="autoScroll = !autoScroll"
           />
           <IconButton
-            class="!hover:bg-white !hover:bg-opacity-10 md:!hidden"
+            class="hover:!bg-white hover:!bg-opacity-10 md:!hidden"
             icon="close"
             @click="$emit('update:step-id', null)"
           />
