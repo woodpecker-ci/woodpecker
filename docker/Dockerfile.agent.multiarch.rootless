@@ -1,4 +1,4 @@
-FROM --platform=$BUILDPLATFORM docker.io/golang:1.23 AS builder
+FROM --platform=$BUILDPLATFORM docker.io/golang:1.23 AS build
 
 RUN adduser woodpecker && \
   mkdir -p /etc/woodpecker && \
@@ -18,12 +18,12 @@ ENV WOODPECKER_IN_CONTAINER=true
 EXPOSE 3000
 
 # copy certs from build image
-COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
+COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 # copy agent binary
-COPY --from=builder /src/dist/woodpecker-agent /bin/
-COPY --from=builder /etc/woodpecker /etc
-COPY --from=builder /etc/passwd /etc/passwd
-COPY --from=builder /etc/group /etc/group
+COPY --from=build /src/dist/woodpecker-agent /bin/
+COPY --from=build /etc/woodpecker /etc
+COPY --from=build /etc/passwd /etc/passwd
+COPY --from=build /etc/group /etc/group
 
 USER woodpecker
 
