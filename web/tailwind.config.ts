@@ -204,6 +204,14 @@ export default {
           200: 'var(--wp-link-200)',
         },
       },
+      spacing: {
+        sm: '24rem',
+        md: '28rem',
+        lg: '32rem',
+        xl: '36rem',
+        '2xl': '42rem',
+        '3xl': '48rem',
+      },
       fontFamily: {
         sans: [
           'system-ui',
