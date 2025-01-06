@@ -17,23 +17,39 @@
       </div>
     </div>
 
+
     <div class="<md:flex-wrap flex min-w-0 flex-grow px-4 py-2">
       <div class="<md:hidden flex flex-shrink-0 items-center">
         <Icon v-if="pipeline.event === 'cron'" name="stopwatch" class="text-wp-text-100" />
         <img v-else class="w-6 rounded-md" :src="pipeline.author_avatar" />
       </div>
 
-      <div class="flex w-full min-w-0 items-center md:mx-4 md:w-auto">
-        <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
-        <span class="text-wp-text-alt-100 <md:hidden">#{{ pipeline.number }}</span>
-        <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
-        <span class="text-wp-text-alt-100 <md:hidden mx-2">-</span>
-        <span
-          class="text-wp-text-100 <md:underline overflow-hidden overflow-ellipsis whitespace-nowrap"
-          :title="message"
+      <div class="grid grid-row-2 w-full min-w-0 items-center md:mx-4 md:w-auto">
+        <div>
+          <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
+          <span class="text-wp-text-alt-100 <md:hidden">#{{ pipeline.number }}</span>
+          <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
+          <span class="text-wp-text-alt-100 <md:hidden mx-2">-</span>
+          <span
+            class="text-wp-text-100 <md:underline overflow-hidden overflow-ellipsis whitespace-nowrap"
+            :title="message"
+          >
+            {{ shortMessage }}
+          </span>
+        </div>
+
+        <div
+          v-if="context"
+          class="text-wp-text-100 flex gap-x-2 items-center <md:underline overflow-hidden overflow-ellipsis whitespace-nowrap"
+          :title="context"
         >
-          {{ shortMessage }}
-        </span>
+            <Icon v-if="pipeline.event === 'pull_request'" name="pull-request" />
+            <Icon v-else-if="pipeline.event === 'pull_request_closed'" name="pull-request-closed" />
+            <Icon v-else-if="pipeline.event === 'deployment'" name="deployment" />
+            <Icon v-else-if="pipeline.event === 'release'" name="tag" />
+
+            {{ shortContext }}
+        </div>
       </div>
 
       <div
@@ -90,7 +106,7 @@ const props = defineProps<{
 const { t } = useI18n();
 
 const pipeline = toRef(props, 'pipeline');
-const { since, duration, message, shortMessage, prettyRef, created } = usePipeline(pipeline);
+const { since, duration, message, shortMessage, context, shortContext, prettyRef, created } = usePipeline(pipeline);
 
 const pipelineEventTitle = computed(() => {
   switch (pipeline.value.event) {
