@@ -3,7 +3,7 @@
     <ListItem
       v-for="agent in props.agents"
       :key="agent.id"
-      class="admin-agents items-center !bg-wp-background-200 dark:!bg-wp-background-100"
+      class="items-center !bg-wp-background-200 p-4 dark:!bg-wp-background-100"
     >
       <span>{{ agent.name || `Agent ${agent.id}` }}</span>
       <span class="ml-auto">
@@ -65,9 +65,3 @@ defineEmits<{
 
 const date = useDate();
 </script>
-
-<style scoped>
-.admin-agents {
-  @apply p-4;
-}
-</style>

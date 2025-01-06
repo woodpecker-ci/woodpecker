@@ -4,7 +4,7 @@
       <ListItem
         v-for="org in orgs"
         :key="org.id"
-        class="admin-orgs items-center gap-2 !bg-wp-background-200 dark:!bg-wp-background-100"
+        class="items-center gap-2 !bg-wp-background-200 p-4 dark:!bg-wp-background-100"
       >
         <span>{{ org.name }}</span>
         <IconButton
@@ -66,9 +66,3 @@ const { doSubmit: deleteOrg, isLoading: isDeleting } = useAsyncAction(async (_or
   resetPage();
 });
 </script>
-
-<style scoped>
-.admin-orgs {
-  @apply p-4;
-}
-</style>
