@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @Fishbowler, @M0Rf30, @anbraten, @cduchenoy, @cevatkerim, @fernandrone, @gedankenstuecke, @gnowland, @greenaar, @hg, @j04n-f, @jenrik, @johanneskastl, @jolheiser, @lafriks, @lukashass, @meln5674, @not-my-profile, @pat-s, @plafue, @qwerty287, @smainz, @tori-27, @tsufeki, @xoxys, @xtexChooser, @zc-devs
+@6543, @Fishbowler, @Levy-Tal, @M0Rf30, @anbraten, @cduchenoy, @cevatkerim, @fernandrone, @gedankenstuecke, @gnowland, @greenaar, @hg, @j04n-f, @jenrik, @johanneskastl, @jolheiser, @lafriks, @lukashass, @meln5674, @not-my-profile, @pat-s, @plafue, @qwerty287, @smainz, @tori-27, @tsufeki, @xoxys, @xtexChooser, @zc-devs
 
 ### 💥 Breaking changes
 
@@ -69,6 +69,7 @@
 
 ### 📈 Enhancement
 
+- feat(bitbucketdatacenter): Add support for fetching and converting projects to teams [[#4663](https://github.com/woodpecker-ci/woodpecker/pull/4663)]
 - Migrate from Windi to Tailwind [[#4614](https://github.com/woodpecker-ci/woodpecker/pull/4614)]
 - Do not start metrics collector if metrics are disabled [[#4667](https://github.com/woodpecker-ci/woodpecker/pull/4667)]
 - Inline web helpers [[#4639](https://github.com/woodpecker-ci/woodpecker/pull/4639)]
