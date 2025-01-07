@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2025-01-06
+## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2025-01-07
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -250,6 +250,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update golang-packages [[#4678](https://github.com/woodpecker-ci/woodpecker/pull/4678)]
 - fix(deps): update module golang.org/x/term to v0.28.0 [[#4671](https://github.com/woodpecker-ci/woodpecker/pull/4671)]
 - fix(deps): update dependency simple-icons to v14.1.0 [[#4668](https://github.com/woodpecker-ci/woodpecker/pull/4668)]
 - fix(deps): update module golang.org/x/oauth2 to v0.25.0 [[#4665](https://github.com/woodpecker-ci/woodpecker/pull/4665)]
