@@ -208,7 +208,7 @@ func TestUsernameAndPasswordNeedsSecret(t *testing.T) {
 func TestRegistrySecret(t *testing.T) {
 	const expected = `{
 		"metadata": {
-			"name": "wp-workflownametest-go-test-01he8",
+			"name": "wp-workflownametest-go-test-01he8-0",
 			"namespace": "woodpecker",
 			"creationTimestamp": null,
 			"labels": {
@@ -222,7 +222,7 @@ func TestRegistrySecret(t *testing.T) {
 	}`
 
 	secret, err := mkRegistrySecret(&types.Step{
-		UUID:  "01he8bebctabr3kgk0qj36d2me-0",
+		UUID:  "01he8-0",
 		Name:  "go-test",
 		Image: "meltwater/drone-cache",
 		AuthConfig: types.Auth{

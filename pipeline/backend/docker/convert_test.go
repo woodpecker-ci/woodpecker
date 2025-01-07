@@ -97,7 +97,7 @@ func TestSplitVolumeParts(t *testing.T) {
 var (
 	testCmdStep = &backend.Step{
 		Name:        "hello",
-		UUID:        "f51821af-4cb8-435e-a3c2-3a684185d828",
+		UUID:        "f5182",
 		Type:        backend.StepTypeCommands,
 		Commands:    []string{"echo \"hello world\"", "ls"},
 		Image:       "alpine",
@@ -106,7 +106,7 @@ var (
 
 	testPluginStep = &backend.Step{
 		Name:        "lint",
-		UUID:        "d841ee40-e66e-4275-bb3f-55bf89744b21",
+		UUID:        "d841e",
 		Type:        backend.StepTypePlugin,
 		Image:       "mstruebing/editorconfig-checker",
 		Environment: make(map[string]string),

@@ -24,15 +24,15 @@ import (
 )
 
 func TestServiceName(t *testing.T) {
-	name, err := serviceName(&types.Step{Name: "database", UUID: "01he8bebctabr3kgk0qj36d2me"}, "workflowNameTest")
+	name, err := serviceName(&types.Step{Name: "database", UUID: "01he8"}, "workflowNameTest")
 	assert.NoError(t, err)
 	assert.Equal(t, "wp-svc-workflownametest-database-01he8", name)
 
-	name, err = serviceName(&types.Step{Name: "wp-workflownametest-clone-01he8-0-services-0.woodpecker-runtime.svc.cluster.local", UUID: "01he8bebctabr3kgk0qj36d2me"}, "workflowNameTest")
+	name, err = serviceName(&types.Step{Name: "wp-workflownametest-clone-01he8-0-services-0.woodpecker-runtime.svc.cluster.local", UUID: "01he8"}, "workflowNameTest")
 	assert.NoError(t, err)
 	assert.Equal(t, "wp-svc-workflownametest-wp-workflownametest-clone-01he8-0-services-0.woodpecker-runtime.svc.cluster.local-01he8", name)
 
-	name, err = serviceName(&types.Step{Name: "awesome_service", UUID: "01he8bebctabr3kgk0qj36d2me"}, "workflowNameTest")
+	name, err = serviceName(&types.Step{Name: "awesome_service", UUID: "01he8"}, "workflowNameTest")
 	assert.NoError(t, err)
 	assert.Equal(t, "wp-svc-workflownametest-awesome-service-01he8", name)
 }
@@ -41,7 +41,7 @@ func TestService(t *testing.T) {
 	expected := `
 	{
 	  "metadata": {
-	    "name": "wp-svc-workflownametest-bar-01he8",
+	    "name": "wp-svc-workflownametest-bar-01he8-0",
 	    "namespace": "foo",
 	    "creationTimestamp": null
 	  },
@@ -66,7 +66,7 @@ func TestService(t *testing.T) {
 	      }
 	    ],
 	    "selector": {
-	      "service": "wp-svc-workflownametest-bar-01he8"
+	      "service": "wp-svc-workflownametest-bar-01he8-0"
 	    },
 	    "type": "ClusterIP"
 	  },
@@ -81,7 +81,7 @@ func TestService(t *testing.T) {
 	}
 	s, err := mkService(&types.Step{
 		Name:  "bar",
-		UUID:  "01he8bebctabr3kgk0qj36d2me-0",
+		UUID:  "01he8-0",
 		Ports: ports,
 	}, &config{Namespace: "foo"}, "workflowNameTest")
 	assert.NoError(t, err)
