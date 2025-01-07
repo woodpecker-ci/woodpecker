@@ -1,10 +1,10 @@
 <template>
   <Settings :title="$t('admin.settings.orgs.orgs')" :description="$t('admin.settings.orgs.desc')">
-    <div class="text-wp-text-100 space-y-4">
+    <div class="space-y-4 text-wp-text-100">
       <ListItem
         v-for="org in orgs"
         :key="org.id"
-        class="!bg-wp-background-200 !dark:bg-wp-background-100 items-center gap-2"
+        class="items-center gap-2 !bg-wp-background-200 dark:!bg-wp-background-100"
       >
         <span>{{ org.name }}</span>
         <IconButton
@@ -22,7 +22,7 @@
         <IconButton
           icon="trash"
           :title="$t('admin.settings.orgs.delete_org')"
-          class="hover:text-wp-error-100 ml-2 h-8 w-8"
+          class="ml-2 h-8 w-8 hover:text-wp-error-100"
           :is-loading="isDeleting"
           @click="deleteOrg(org)"
         />
