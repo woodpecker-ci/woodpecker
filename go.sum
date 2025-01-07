@@ -418,8 +418,6 @@ github.com/muesli/termenv v0.15.3-0.20241212154518-8c990cd6cf4b h1:gmVbquSG+bANn
 github.com/muesli/termenv v0.15.3-0.20241212154518-8c990cd6cf4b/go.mod h1:hxSnBBYLK21Vtq/PHd0S2FYCxBXzBua8ov5s1RobyRQ=
 github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 h1:C3w9PqII01/Oq1c1nUAm88MOHcQC9l5mIlSMApZMrHA=
 github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822/go.mod h1:+n7T8mK8HuQTcFwEeznm/DIxMOiR9yIdICNftLE1DvQ=
-github.com/neticdk/go-bitbucket v1.0.0 h1:FPvHEgPHoDwD2VHbpyu2R2gnoWQ867RxZd2FivS4wSw=
-github.com/neticdk/go-bitbucket v1.0.0/go.mod h1:IrHeWO1CrNi0DlOvfhAA9bGRSeNSUB6/SAfzmwbA5aU=
 github.com/neticdk/go-bitbucket v1.0.1 h1:cMJZad0DCSKIqALrAjZ+ywJLr1yY3HpGfRzASdS3UUk=
 github.com/neticdk/go-bitbucket v1.0.1/go.mod h1:xeaFIGg8YtT009xUdnyGqy0zm9hwLRsc1cBkDkPO014=
 github.com/nxadm/tail v1.4.4/go.mod h1:kenIhsEOeOJmVchQTgglprH7qJGnHDVpk1VPCcaMI8A=
