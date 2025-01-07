@@ -8,7 +8,7 @@
   <!-- overlay end -->
   <div
     v-if="open"
-    class="max-w-1/3 <md:max-w-4/5 max-h-3/5 z-1000 fixed left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 transform print:hidden"
+    class="max-w-1/3 max-w-4/5 md:max-h-3/5 z-1000 fixed left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 transform print:hidden"
   >
     <div class="shadow-all m-auto flex h-auto flex-col">
       <slot />

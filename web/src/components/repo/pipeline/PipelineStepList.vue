@@ -1,7 +1,7 @@
 <template>
-  <div class="md:min-w-xs text-wp-text-100 flex w-full flex-col gap-2 pb-2 md:w-3/12 md:max-w-md">
+  <div class="md:min-w-xs flex w-full flex-col gap-2 pb-2 text-wp-text-100 md:w-3/12 md:max-w-md">
     <div
-      class="border-wp-background-400 bg-wp-background-100 dark:bg-wp-background-200 flex flex-shrink-0 flex-wrap justify-between gap-1 rounded-md border p-4"
+      class="flex flex-shrink-0 flex-wrap justify-between gap-1 rounded-md border border-wp-background-400 bg-wp-background-100 p-4 dark:bg-wp-background-200"
     >
       <div class="flex flex-shrink-0 items-center space-x-1">
         <div class="flex items-center">
@@ -12,7 +12,7 @@
       </div>
       <a
         v-if="pipeline.event === 'pull_request' || pipeline.event === 'pull_request_closed'"
-        class="text-wp-link-100 hover:text-wp-link-200 flex min-w-0 items-center space-x-1"
+        class="flex min-w-0 items-center space-x-1 text-wp-link-100 hover:text-wp-link-200"
         :href="pipeline.forge_url"
       >
         <Icon name="pull-request" />
@@ -20,7 +20,7 @@
       </a>
       <router-link
         v-else-if="pipeline.event === 'push' || pipeline.event === 'manual' || pipeline.event === 'deployment'"
-        class="text-wp-link-100 hover:text-wp-link-200 flex min-w-0 items-center space-x-1"
+        class="flex min-w-0 items-center space-x-1 text-wp-link-100 hover:text-wp-link-200"
         :to="{ name: 'repo-branch', params: { branch: prettyRef } }"
       >
         <Icon v-if="pipeline.event === 'manual'" name="manual-pipeline" />
@@ -40,7 +40,7 @@
         </template>
         <a
           v-else
-          class="text-wp-link-100 hover:text-wp-link-200 flex items-center"
+          class="flex items-center text-wp-link-100 hover:text-wp-link-200"
           :href="pipeline.forge_url"
           target="_blank"
         >
@@ -59,7 +59,7 @@
         <div
           v-for="workflow in pipeline.workflows"
           :key="workflow.id"
-          class="border-wp-background-400 bg-wp-background-100 dark:bg-wp-background-200 rounded-md border p-2 shadow"
+          class="rounded-md border border-wp-background-400 bg-wp-background-100 p-2 shadow dark:bg-wp-background-200"
         >
           <div class="flex flex-col gap-2">
             <div v-if="workflow.environ" class="flex flex-wrap justify-end gap-x-1 gap-y-2 pr-1 pt-1 text-xs">
@@ -71,7 +71,7 @@
               v-if="!singleConfig"
               type="button"
               :title="workflow.name"
-              class="hover:bg-wp-background-300 dark:hover:bg-wp-background-400 hover-effect flex items-center gap-2 rounded-md px-1 py-2"
+              class="hover-effect flex items-center gap-2 rounded-md px-1 py-2 hover:bg-wp-background-300 dark:hover:bg-wp-background-400"
               @click="workflowsCollapsed[workflow.id] = !workflowsCollapsed[workflow.id]"
             >
               <Icon
@@ -89,7 +89,7 @@
             </button>
           </div>
           <div
-            class="transition-height overflow-hidden duration-150"
+            class="overflow-hidden transition-height duration-150"
             :class="{ 'max-h-0': workflowsCollapsed[workflow.id], 'ml-[1.6rem]': !singleConfig }"
           >
             <button
@@ -97,7 +97,7 @@
               :key="step.pid"
               type="button"
               :title="step.name"
-              class="hover:bg-wp-background-300 dark:hover:bg-wp-background-400 hover-effect flex w-full items-center gap-2 rounded-md border-2 border-transparent p-2"
+              class="hover-effect flex w-full items-center gap-2 rounded-md border-2 border-transparent p-2 hover:bg-wp-background-300 dark:hover:bg-wp-background-400"
               :class="{
                 'bg-wp-background-300 dark:bg-wp-background-400': selectedStepId && selectedStepId === step.pid,
                 'mt-1': !singleConfig || (workflow.children && step.pid !== workflow.children[0].pid),
