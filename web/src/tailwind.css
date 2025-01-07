@@ -1,0 +1,19 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .hover-effect {
+    @apply transition-colors duration-100 hover:bg-black hover:bg-opacity-10 dark:hover:bg-white dark:hover:bg-opacity-5;
+  }
+
+  .w-fill {
+    width: -webkit-fill-available;
+    width: -moz-available;
+    width: stretch;
+  }
+
+  .display-unset {
+    display: unset;
+  }
+}

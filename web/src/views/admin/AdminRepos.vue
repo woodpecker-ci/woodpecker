@@ -9,15 +9,19 @@
       />
     </template>
 
-    <div class="text-wp-text-100 space-y-4">
+    <div class="space-y-4 text-wp-text-100">
       <ListItem
         v-for="repo in repos"
         :key="repo.id"
-        class="!bg-wp-background-200 !dark:bg-wp-background-100 items-center gap-2"
+        class="items-center gap-2 bg-wp-background-200 dark:!bg-wp-background-100"
       >
         <span>{{ repo.full_name }}</span>
         <div class="ml-auto flex items-center">
-          <Badge v-if="!repo.active" class="<md:hidden mr-2" :label="$t('admin.settings.repos.disabled')" />
+          <Badge
+            v-if="!repo.active"
+            class="md:display-unset mr-2 hidden"
+            :label="$t('admin.settings.repos.disabled')"
+          />
           <IconButton
             icon="chevron-right"
             :title="$t('admin.settings.repos.view')"
