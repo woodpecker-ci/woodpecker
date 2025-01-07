@@ -81,8 +81,8 @@
   --wp-control-ok-200: theme('colors.int-wp-control-ok-dark.200');
   --wp-control-ok-300: theme('colors.int-wp-control-ok-dark.300');
 
-  --wp-error-100: theme('colors.int-wp-error.100');
-  --wp-error-200: theme('colors.int-wp-error.200');
+  --wp-error-100: theme('colors.int-wp-error.200');
+  --wp-error-200: theme('colors.int-wp-error.300');
   --wp-error-300: theme('colors.int-wp-error.300');
 
   --wp-state-neutral-100: theme('colors.int-wp-state-neutral.100');
@@ -117,7 +117,7 @@ body,
 }
 
 .vue-notification {
-  @apply border-l-6 rounded-md text-base;
+  @apply rounded-md border-l-4 text-base;
 }
 
 .vue-notification .notification-title {
@@ -125,15 +125,15 @@ body,
 }
 
 .vue-notification.success {
-  @apply !bg-wp-control-ok-100 !border-l-wp-control-ok-300;
+  @apply !border-l-wp-control-ok-300 !bg-wp-control-ok-100;
 }
 
 .vue-notification.error {
-  @apply !bg-wp-error-100 !dark:bg-wp-error-200 !border-l-wp-error-300;
+  @apply !border-l-wp-error-200 !bg-wp-error-100;
 }
 
 *::-webkit-scrollbar {
-  @apply w-12px h-12px bg-transparent;
+  @apply h-3 w-3 bg-transparent;
 }
 
 * {
@@ -143,11 +143,11 @@ body,
 *::-webkit-scrollbar-thumb {
   transition: background 0.2s ease-in-out;
   border: 3px solid transparent;
-  @apply bg-cool-gray-200 dark:bg-dark-200 rounded-full bg-clip-content;
+  @apply rounded-full bg-gray-200 bg-clip-content dark:bg-wp-background-200;
 }
 
 *::-webkit-scrollbar-thumb:hover {
-  @apply bg-cool-gray-300 dark:bg-dark-100;
+  @apply bg-gray-300 dark:bg-wp-background-100;
 }
 
 *::-webkit-scrollbar-corner {
@@ -155,16 +155,16 @@ body,
 }
 
 .code-box {
-  @apply bg-wp-code-inline-100 text-wp-code-inline-text-100 break-words rounded-md p-4 text-sm;
+  @apply break-words rounded-md bg-wp-code-inline-100 p-4 text-sm text-wp-code-inline-text-100;
   white-space: pre-wrap;
 }
 
 .code-box-inline,
 code:not(pre > code) {
-  @apply bg-wp-code-inline-100 text-wp-code-inline-text-100 rounded-md px-1.5 py-0.5;
+  @apply rounded-md bg-wp-code-inline-100 px-1.5 py-0.5 text-wp-code-inline-text-100;
 }
 
 .code-box-log {
-  @apply bg-wp-code-300 text-wp-code-text-100 break-words rounded-md p-4 text-sm;
+  @apply break-words bg-wp-code-300 p-4 text-wp-code-text-100;
   white-space: pre-wrap;
 }

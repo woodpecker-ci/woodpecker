@@ -199,7 +199,7 @@ func (e *kube) SetupWorkflow(ctx context.Context, conf *types.Config, taskUUID, 
 	var extraHosts []types.HostAlias
 	for _, stage := range conf.Stages {
 		for _, step := range stage.Steps {
-			if step.Type == types.StepTypeService {
+			if step.Type == types.StepTypeService || step.Detached {
 				svc, err := startService(ctx, e, step, workflowName)
 				if err != nil {
 					return err

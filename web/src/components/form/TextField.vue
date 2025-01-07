@@ -2,7 +2,7 @@
   <input
     v-if="lines === 1"
     v-model="innerValue"
-    class="border-wp-control-neutral-200 bg-wp-background-100 focus-visible:border-wp-control-neutral-300 w-full rounded-md border px-2 py-1 focus-visible:outline-none"
+    class="w-full rounded-md border border-wp-control-neutral-200 bg-wp-background-100 px-2 py-1 focus-visible:border-wp-control-neutral-300 focus-visible:outline-none"
     :class="{ 'opacity-50': disabled }"
     :disabled="disabled"
     :type="type"
@@ -11,7 +11,7 @@
   <textarea
     v-else
     v-model="innerValue"
-    class="border-wp-control-neutral-200 bg-wp-background-100 focus-visible:border-wp-control-neutral-300 w-full rounded-md border px-2 py-1 focus-visible:outline-none"
+    class="w-full rounded-md border border-wp-control-neutral-200 bg-wp-background-100 px-2 py-1 focus-visible:border-wp-control-neutral-300 focus-visible:outline-none"
     :class="{ 'opacity-50': disabled }"
     :disabled="disabled"
     :placeholder="placeholder"
