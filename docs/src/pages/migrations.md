@@ -133,6 +133,8 @@ The following restructuring was done to achieve a more consistent grouping:
 - Native Let's Encrypt certificate support has been dropped as it was almost unused and causing frequent issues.
   Let's Encrypt needs to be set up standalone now. The SSL key pair can still be used in `WOODPECKER_SERVER_CERT` and `WOODPECKER_SERVER_KEY` as an alternative to using a reverse proxy for TLS termination.
 
+- The filename of the CLI binary changed for DEB and RPM packages, it is now called `woodpecker-cli` instead of `woodpecker`.
+
 ### Admin-facing migrations
 
 #### Image tags
