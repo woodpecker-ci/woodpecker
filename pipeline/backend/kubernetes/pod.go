@@ -77,7 +77,7 @@ func stepToPodName(step *types.Step, workflowName string) (name string, err erro
 }
 
 func podName(step *types.Step, workflowName string) (string, error) {
-	return dnsName(podPrefix + workflowName + "-" + step.Name + "-" + step.UUID[:5])
+	return dnsName(podPrefix + workflowName + "-" + step.Name + "-" + step.UUID[len(step.UUID)-5:])
 }
 
 func podMeta(step *types.Step, config *config, options BackendOptions, podName, workflowName string) (meta_v1.ObjectMeta, error) {

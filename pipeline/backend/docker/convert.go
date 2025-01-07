@@ -70,7 +70,7 @@ func (e *docker) toConfig(step *types.Step, options BackendOptions) *container.C
 }
 
 func toContainerName(step *types.Step, workflowName string) string {
-	return "wp_" + workflowName + "-" + step.Name + "-" + step.UUID[:5]
+	return "wp_" + workflowName + "-" + step.Name + "-" + step.UUID[len(step.UUID)-5:]
 }
 
 // returns a container host configuration.

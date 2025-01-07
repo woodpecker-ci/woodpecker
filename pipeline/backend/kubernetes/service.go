@@ -63,7 +63,7 @@ func mkService(step *types.Step, config *config, workflowName string) (*v1.Servi
 }
 
 func serviceName(step *types.Step, workflowName string) (string, error) {
-	return dnsName(servicePrefix + workflowName + "-" + step.Name + "-" + step.UUID[:5])
+	return dnsName(servicePrefix + workflowName + "-" + step.Name + "-" + step.UUID[len(step.UUID)-5:])
 }
 
 func servicePort(port types.Port) v1.ServicePort {
