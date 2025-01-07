@@ -42,7 +42,7 @@ require (
 	github.com/moby/moby v27.4.1+incompatible
 	github.com/moby/term v0.5.2
 	github.com/muesli/termenv v0.15.3-0.20241212154518-8c990cd6cf4b
-	github.com/neticdk/go-bitbucket v1.0.0
+	github.com/neticdk/go-bitbucket v1.0.1
 	github.com/oklog/ulid/v2 v2.1.0
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.20.5
@@ -58,8 +58,8 @@ require (
 	github.com/zalando/go-keyring v0.2.6
 	gitlab.com/gitlab-org/api/client-go v0.118.0
 	go.uber.org/multierr v1.11.0
-	golang.org/x/crypto v0.31.0
-	golang.org/x/net v0.33.0
+	golang.org/x/crypto v0.32.0
+	golang.org/x/net v0.34.0
 	golang.org/x/oauth2 v0.25.0
 	golang.org/x/sync v0.10.0
 	golang.org/x/term v0.28.0
