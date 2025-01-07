@@ -174,7 +174,7 @@ func updateUserCredentials(u *model.User, t *oauth2.Token) {
 }
 
 func convertProjectsToTeams(projects []*bb.Project, client *bb.Client) []*model.Team {
-	var teams []*model.Team
+	teams := make([]*model.Team, 0)
 	for _, project := range projects {
 		team := &model.Team{
 			Login:  project.Key,

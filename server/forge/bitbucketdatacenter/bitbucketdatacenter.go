@@ -572,9 +572,8 @@ func (c *client) updatePipelineFromCommit(ctx context.Context, u *model.User, r 
 
 // Teams fetches all the projects for a given user and converts them into teams.
 func (c *client) Teams(ctx context.Context, u *model.User) ([]*model.Team, error) {
-
 	opts := &bb.ListOptions{Limit: listLimit}
-	var allProjects []*bb.Project
+	allProjects := make([]*bb.Project, 0)
 
 	bc, err := c.newClient(ctx, u)
 	if err != nil {
