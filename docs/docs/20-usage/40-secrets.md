@@ -104,7 +104,7 @@ Create the secret using default settings.
 The secret will be available to all images in your pipeline, and will be available to all `push`, `tag`, and `deployment` events (not `pull_request` events).
 
 ```bash
-woodpecker-cli secret add \
+woodpecker-cli repo secret add \
   --repository octocat/hello-world \
   --name aws_access_key_id \
   --value <value>
@@ -123,7 +123,7 @@ Create the secret and limit it to a single image:
 Create the secrets and limit it to a set of images:
 
 ```diff
- woodpecker-cli secret add \
+ woodpecker-cli repo secret add \
    --repository octocat/hello-world \
 +  --image plugins/s3 \
 +  --image woodpeckerci/plugin-ecs \
@@ -134,7 +134,7 @@ Create the secrets and limit it to a set of images:
 Create the secret and enable it for multiple hook events:
 
 ```diff
- woodpecker-cli secret add \
+ woodpecker-cli repo secret add \
    --repository octocat/hello-world \
    --image plugins/s3 \
 +  --event pull_request \
@@ -149,7 +149,7 @@ This method is recommended for loading secrets from a file, as it ensures that n
 Here’s an example:
 
 ```diff
- woodpecker-cli secret add \
+ woodpecker-cli repo secret add \
    -repository octocat/hello-world \
    -name ssh_key \
 +  -value @/root/ssh/id_rsa
