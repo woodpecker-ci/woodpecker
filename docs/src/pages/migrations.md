@@ -181,9 +181,9 @@ If you have volume mounts attached to containers, you might need to update the o
 
 :::note
 The agent image must remain rootful by default to be able to mount the Docker socket when Woodpecker is used with the `docker` backend.
-The helm chart will start to use a non-privileged user through `securityContext`.
-Running an entirely rootless agent with the "docker" backend is possibly achievable by using a rootless docker daemon.
-Yet this needs proper testing and documentation first and is something for future versions.
+The helm chart will start to use a non-privileged user by utilizing `securityContext`.
+Running a completely rootless agent with the `docker` backend may be possible by using a rootless docker daemon.
+However, this requires more work and is currently not supported.
 :::
 
 ## 2.7.2
