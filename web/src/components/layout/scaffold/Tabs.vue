@@ -24,17 +24,22 @@
 
       <div
         v-if="isDropdownOpen"
-        class="absolute z-20 mt-1 rounded-md border border-wp-background-400 bg-wp-background-100 shadow-lg hover:bg-wp-background-200 dark:bg-wp-background-200 dark:hover:bg-wp-background-100"
+        class="absolute z-20 mt-1 rounded-md border border-wp-background-400 bg-wp-background-100 shadow-lg dark:bg-wp-background-200"
         :class="[visibleTabs.length === 0 ? 'left-0' : 'right-0']"
       >
         <router-link
           v-for="tab in hiddenTabs"
           :key="tab.title"
           :to="tab.to"
-          class="block w-full whitespace-nowrap px-4 py-2 text-left"
+          class="block w-full whitespace-nowrap p-1 text-left"
           @click="isDropdownOpen = false"
         >
-          {{ tab.title }}
+          <span
+            class="flex w-full min-w-20 flex-row items-center justify-center gap-2 rounded-md px-2 py-1 hover:bg-wp-background-200 dark:hover:bg-wp-background-100"
+          >
+            <Icon v-if="tab.icon" :name="tab.icon" :class="tab.iconClass" class="flex-shrink-0" />
+            <span>{{ tab.title }}</span>
+          </span>
         </router-link>
       </div>
     </div>
