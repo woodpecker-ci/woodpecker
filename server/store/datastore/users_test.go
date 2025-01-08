@@ -100,7 +100,6 @@ func TestCreateUserWithExistingOrg(t *testing.T) {
 	defer closer()
 
 	existingOrg := &model.Org{
-		ID:      1,
 		ForgeID: 1,
 		IsUser:  true,
 		Name:    "existingorg",
