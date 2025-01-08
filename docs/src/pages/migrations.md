@@ -176,8 +176,14 @@ The following restructuring was done to achieve a more consistent grouping:
 
 #### Rootless images
 
-All Woodpecker images now use a non-privileged user (`woodpecker`) by default.
+The `server` and `cli` images now use a non-privileged user (`woodpecker`) by default.
 If you have volume mounts attached to containers, you might need to update the ownership of these directories from `root` to `woodpecker`.
+
+:::note
+The agent image has to stay rootful by default to be able to mount the `docker.sock` for VM deployments of Woodpecker.
+The helm chart will start to use a non-privileged user through `securityContext`.
+Running an entirely rootless agent on a VM is possibly achievable through a rootless docker daemon but out of scope here.
+:::
 
 ## User migrations
 

@@ -1,0 +1,25 @@
+FROM --platform=$BUILDPLATFORM docker.io/golang:1.23 AS build
+
+WORKDIR /src
+COPY . .
+ARG TARGETOS TARGETARCH CI_COMMIT_SHA CI_COMMIT_TAG CI_COMMIT_BRANCH
+RUN --mount=type=cache,target=/root/.cache/go-build \
+    --mount=type=cache,target=/go/pkg \
+    make build-agent
+
+FROM docker.io/alpine:3.21
+
+RUN apk add -U --no-cache ca-certificates shadow && \
+  adduser -u 1000 -g 1000 -D woodpecker && \
+  mkdir -p /etc/woodpecker && \
+  chown -R woodpecker:woodpecker /etc/woodpecker
+
+ENV GODEBUG=netdns=go
+# Internal setting do NOT change! Signals that woodpecker is running inside a container
+ENV WOODPECKER_IN_CONTAINER=true
+EXPOSE 3000
+
+COPY --from=build /src/dist/woodpecker-agent /bin/
+
+HEALTHCHECK CMD ["/bin/woodpecker-agent", "ping"]
+ENTRYPOINT ["/bin/woodpecker-agent"]
