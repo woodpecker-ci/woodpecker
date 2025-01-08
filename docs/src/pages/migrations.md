@@ -103,7 +103,7 @@ The following restructuring was done to achieve a more consistent grouping:
 
 #### Behavior of the "trusted" settings
 
-Trusted settings are no longer managed by the server, but by the agent. This allows you to use trusted features even if you're not the instance admin by deploying a user agent. [Read more]()
+Trusted settings are no longer managed by the server, but by the agent. This allows you to use trusted features even if you're not the instance admin by deploying a user agent.
 
 #### Miscellaneous
 

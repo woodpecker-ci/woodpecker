@@ -66,6 +66,7 @@ By enabling this option for a pipeline event previous pipelines of the same even
 This is a per-repo setting, but it's not managed by the server, but by the agents.
 
 The corresponding env vars are:
+
 - (`WOODPECKER_TRUSTED_REPOS_VOLUMES`)[../30-admininistration/15-agent-config.md#WOODPECKER_TRUSTED_REPOS_VOLUMES]
 - (`WOODPECKER_TRUSTED_REPOS_NETWORK`)[../30-admininistration/15-agent-config.md#WOODPECKER_TRUSTED_REPOS_NETWORK]
 - (`WOODPECKER_TRUSTED_REPOS_SECURITY`)[../30-admininistration/15-agent-config.md#WOODPECKER_TRUSTED_REPOS_SECURITY]
