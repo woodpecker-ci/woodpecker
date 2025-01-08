@@ -115,7 +115,7 @@ Create the secret and limit it to a single image:
 ```diff
  woodpecker-cli secret add \
    --repository octocat/hello-world \
-+  --image plugins/s3 \
++  --image woodpeckerci/plugin-s3 \
    --name aws_access_key_id \
    --value <value>
 ```
@@ -125,8 +125,8 @@ Create the secrets and limit it to a set of images:
 ```diff
  woodpecker-cli repo secret add \
    --repository octocat/hello-world \
-+  --image plugins/s3 \
-+  --image woodpeckerci/plugin-ecs \
++  --image woodpeckerci/plugin-s3 \
++  --image woodpeckerci/plugin-docker-buildx \
    --name aws_access_key_id \
    --value <value>
 ```
@@ -136,7 +136,7 @@ Create the secret and enable it for multiple hook events:
 ```diff
  woodpecker-cli repo secret add \
    --repository octocat/hello-world \
-   --image plugins/s3 \
+   --image woodpeckerci/plugin-s3 \
 +  --event pull_request \
 +  --event push \
 +  --event tag \
