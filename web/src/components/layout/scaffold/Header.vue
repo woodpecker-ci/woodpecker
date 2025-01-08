@@ -41,9 +41,9 @@
         </div>
       </div>
 
-      <div v-if="enableTabs" class="flex flex-col py-2 md:flex-row md:items-center md:justify-between md:py-0">
-        <Tabs class="order-2 md:order-none" />
-        <div v-if="$slots.headerActions" class="flex content-start md:justify-end">
+      <div v-if="enableTabs" class="flex flex-row items-center justify-between py-0">
+        <Tabs />
+        <div v-if="$slots.headerActions" class="flex content-start justify-end">
           <slot name="tabActions" />
         </div>
       </div>

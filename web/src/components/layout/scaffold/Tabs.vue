@@ -1,35 +1,133 @@
 <template>
-  <div class="mt-2 flex flex-wrap md:gap-4">
-    <router-link
-      v-for="tab in tabs"
-      :key="tab.title"
-      v-slot="{ isActive, isExactActive }"
-      :to="tab.to"
-      class="flex w-full cursor-pointer items-center border-transparent py-1 text-wp-text-100 md:w-auto md:border-b-2"
-      :active-class="tab.matchChildren ? '!border-wp-text-100' : ''"
-      :exact-active-class="tab.matchChildren ? '' : '!border-wp-text-100'"
-    >
-      <Icon
-        v-if="isExactActive || (isActive && tab.matchChildren)"
-        name="chevron-right"
-        class="flex-shrink-0 md:hidden"
-      />
-      <Icon v-else name="blank" class="md:hidden" />
-      <span
-        class="flex w-full min-w-20 flex-row items-center gap-2 rounded-md px-2 py-1 hover:bg-wp-background-200 dark:hover:bg-wp-background-100 md:justify-center"
+  <div ref="containerRef" class="relative">
+    <!-- Main tabs container -->
+    <div ref="tabsRef" class="mt-2 flex flex-wrap gap-4">
+      <router-link
+        v-for="tab in visibleTabs"
+        :key="tab.title"
+        :to="tab.to"
+        class="flex cursor-pointer items-center border-b-2 border-transparent py-1 text-wp-text-100"
+        :active-class="tab.matchChildren ? '!border-wp-text-100' : ''"
+        :exact-active-class="tab.matchChildren ? '' : '!border-wp-text-100'"
       >
-        <Icon v-if="tab.icon" :name="tab.icon" :class="tab.iconClass" class="flex-shrink-0" />
-        <span>{{ tab.title }}</span>
-        <CountBadge v-if="tab.count" :value="tab.count" />
-      </span>
-    </router-link>
+        <span
+          class="flex w-full min-w-20 flex-row items-center justify-center gap-2 rounded-md px-2 py-1 hover:bg-wp-background-200 dark:hover:bg-wp-background-100"
+        >
+          <Icon v-if="tab.icon" :name="tab.icon" :class="tab.iconClass" class="flex-shrink-0" />
+          <span>{{ tab.title }}</span>
+          <CountBadge v-if="tab.count" :value="tab.count" />
+        </span>
+      </router-link>
+
+      <!-- Overflow dropdown -->
+      <div v-if="hiddenTabs.length" class="relative border-b-2 border-transparent py-1">
+        <IconButton icon="dots" class="h-8 w-8" @click="toggleDropdown" />
+
+        <div
+          v-if="isDropdownOpen"
+          class="absolute z-20 mt-1 rounded-md border border-wp-background-400 bg-wp-background-100 shadow-lg hover:bg-wp-background-200 dark:bg-wp-background-200 dark:hover:bg-wp-background-100"
+          :class="[visibleTabs.length === 0 ? 'left-0' : 'right-0']"
+        >
+          <router-link
+            v-for="tab in hiddenTabs"
+            :key="tab.title"
+            :to="tab.to"
+            class="block w-full whitespace-nowrap px-4 py-2 text-left"
+            @click="isDropdownOpen = false"
+          >
+            {{ tab.title }}
+          </router-link>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
+
 import CountBadge from '~/components/atomic/CountBadge.vue';
 import Icon from '~/components/atomic/Icon.vue';
+import IconButton from '~/components/atomic/IconButton.vue';
 import { useTabsClient } from '~/compositions/useTabs';
 
 const { tabs } = useTabsClient();
+const containerRef = ref<HTMLElement | null>(null);
+const tabsRef = ref<HTMLElement | null>(null);
+const isDropdownOpen = ref(false);
+const visibleCount = ref(tabs.value.length);
+
+const visibleTabs = computed(() => tabs.value.slice(0, visibleCount.value));
+const hiddenTabs = computed(() => tabs.value.slice(visibleCount.value));
+
+const toggleDropdown = () => {
+  isDropdownOpen.value = !isDropdownOpen.value;
+};
+
+const closeDropdown = (event: MouseEvent) => {
+  const target = event.target as HTMLElement;
+  if (!containerRef.value?.contains(target)) {
+    isDropdownOpen.value = false;
+  }
+};
+
+watch(isDropdownOpen, (isOpen) => {
+  if (isOpen) {
+    window.addEventListener('click', closeDropdown);
+  } else {
+    window.removeEventListener('click', closeDropdown);
+  }
+});
+
+const updateVisibleItems = () => {
+  if (!containerRef.value || !tabsRef.value) return;
+
+  visibleCount.value = tabs.value.length;
+
+  nextTick(() => {
+    const parentElement = containerRef.value!.parentElement;
+    const parentWidth = parentElement?.clientWidth || 0;
+    const otherElements = Array.from(parentElement?.children || []).filter((el) => el !== containerRef.value);
+    const otherElementsWidth = otherElements.reduce((sum, el) => sum + el.getBoundingClientRect().width, 0);
+    const availableWidth = parentWidth - otherElementsWidth;
+    const moreButtonWidth = 32; // This need to match the width of the IconButton (w-8)
+    const gapWidth = 16; // This need to match the gap between the tabs (gap-4)
+    let totalWidth = 0;
+
+    const items = Array.from(tabsRef.value!.children);
+
+    for (let i = 0; i < items.length; i++) {
+      const itemWidth = items[i].getBoundingClientRect().width;
+      totalWidth += itemWidth;
+      if (i > 0) totalWidth += gapWidth;
+
+      if (totalWidth > availableWidth - (moreButtonWidth + gapWidth)) {
+        visibleCount.value = i;
+        return;
+      }
+    }
+
+    visibleCount.value = tabs.value.length;
+  });
+};
+
+onMounted(() => {
+  const resizeObserver = new ResizeObserver(() => {
+    requestAnimationFrame(updateVisibleItems);
+  });
+
+  if (containerRef.value!) {
+    resizeObserver.observe(containerRef.value);
+  }
+
+  window.addEventListener('resize', updateVisibleItems);
+
+  nextTick(updateVisibleItems);
+
+  onUnmounted(() => {
+    resizeObserver.disconnect();
+    window.removeEventListener('resize', updateVisibleItems);
+    window.removeEventListener('click', closeDropdown);
+  });
+});
 </script>
