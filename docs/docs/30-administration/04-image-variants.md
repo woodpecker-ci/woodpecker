@@ -8,7 +8,7 @@ This was done to prevent accidental major version upgrades.
 - `vX.Y.Z`: SemVer tags for specific releases, no entrypoint shell (scratch image)
   - `vX.Y`
   - `vX`
-- `vX.Y.Z-alpine`: SemVer tags for specific releases, based on Alpine, rootless (as of v3.0).
+- `vX.Y.Z-alpine`: SemVer tags for specific releases, based on Alpine, rootless for Server and CLI (as of v3.0).
   - `vX.Y-alpine`
   - `vX-alpine`
 - `next`: Built from the `main` branch

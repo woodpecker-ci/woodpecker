@@ -21,7 +21,5 @@ EXPOSE 3000
 
 COPY --from=build /src/dist/woodpecker-agent /bin/
 
-USER woodpecker
-
 HEALTHCHECK CMD ["/bin/woodpecker-agent", "ping"]
 ENTRYPOINT ["/bin/woodpecker-agent"]
