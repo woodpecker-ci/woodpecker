@@ -94,3 +94,43 @@ func TestUsers(t *testing.T) {
 	_, err3 := store.GetUser(getUser.ID)
 	assert.Error(t, err3)
 }
+
+func TestCreateUserWithExistingOrg(t *testing.T) {
+	store, closer := newTestStore(t, new(model.User), new(model.Org), new(model.Perm))
+	defer closer()
+
+	existingOrg := &model.Org{
+		ID:      1,
+		ForgeID: 1,
+		IsUser:  true,
+		Name:    "existingorg",
+		Private: false,
+	}
+
+	err := store.OrgCreate(existingOrg)
+	assert.NoError(t, err)
+	assert.EqualValues(t, "existingorg", existingOrg.Name)
+
+	// Create a new user with the same name as the existing organization
+	newUser := &model.User{
+		Login: "existingOrg",
+		Hash:  "A",
+	}
+	err = store.CreateUser(newUser)
+	assert.NoError(t, err)
+
+	updatedOrg, err := store.OrgGet(existingOrg.ID)
+	assert.NoError(t, err)
+	assert.Equal(t, "existingorg", updatedOrg.Name)
+
+	newUser2 := &model.User{
+		Login: "new-user",
+		Hash:  "B",
+	}
+	err = store.CreateUser(newUser2)
+	assert.NoError(t, err)
+
+	newOrg, err := store.OrgFindByName("new-user")
+	assert.NoError(t, err)
+	assert.Equal(t, "new-user", newOrg.Name)
+}

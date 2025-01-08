@@ -16,6 +16,7 @@ package datastore
 
 import (
 	"fmt"
+	"log"
 	"strings"
 
 	"xorm.io/xorm"
@@ -79,7 +80,15 @@ func (s storage) OrgFindByName(name string) (*model.Org, error) {
 	name = strings.ToLower(name)
 	// find
 	org := new(model.Org)
-	return org, wrapGet(s.engine.Where("name = ?", name).Get(org))
+	has, err := s.engine.Where("name = ?", name).Get(org)
+	if err != nil {
+		return nil, fmt.Errorf("failed to check if org exists: %w", err)
+	}
+	if !has {
+		log.Printf("Organization with name %s not found", name)
+		return nil, nil
+	}
+	return org, nil
 }
 
 func (s storage) OrgRepoList(org *model.Org, p *model.ListOptions) ([]*model.Repo, error) {
