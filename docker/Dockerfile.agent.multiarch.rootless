@@ -2,6 +2,9 @@ FROM --platform=$BUILDPLATFORM docker.io/golang:1.23 AS build
 
 RUN groupadd -g 1000 woodpecker && \
   useradd -u 1000 -g 1000 woodpecker && \
+  # to allow access to docker.sock in compose environments
+  addgroup -g 1001 docker && \
+  usermod -G docker woodpecker && \
   mkdir -p /etc/woodpecker && \
   chown -R woodpecker:woodpecker /etc/woodpecker
 

@@ -11,6 +11,9 @@ FROM docker.io/alpine:3.21
 
 RUN apk add -U --no-cache ca-certificates && \
   adduser -u 1000 -g 1000 woodpecker && \
+  # to allow access to docker.sock in compose environments
+  addgroup -g 1001 docker && \
+  usermod -G docker woodpecker && \
   mkdir -p /etc/woodpecker && \
   chown -R woodpecker:woodpecker /etc/woodpecker
 
