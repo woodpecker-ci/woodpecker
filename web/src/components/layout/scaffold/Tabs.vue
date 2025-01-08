@@ -80,8 +80,7 @@ const updateVisibleItems = () => {
   visibleCount.value = tabs.value.length;
 
   nextTick(() => {
-    const parentWidth = tabsRef.value!.clientWidth || 0;
-    const availableWidth = parentWidth;
+    const availableWidth = tabsRef.value!.clientWidth || 0;
     const moreButtonWidth = 64; // This need to match 2x the width of the IconButton (w-8)
     const gapWidth = 16; // This need to match the gap between the tabs (gap-4)
     let totalWidth = 0;
