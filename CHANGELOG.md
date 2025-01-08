@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2025-01-07
+## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2025-01-08
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -8,6 +8,7 @@
 
 ### 💥 Breaking changes
 
+- Add rootless (alpine) images [[#4617](https://github.com/woodpecker-ci/woodpecker/pull/4617)]
 - Unify CLI bin name [[#4673](https://github.com/woodpecker-ci/woodpecker/pull/4673)]
 - Support Git as only VCS [[#4346](https://github.com/woodpecker-ci/woodpecker/pull/4346)]
 - Add rolling semver tags, remove `latest` tag [[#4600](https://github.com/woodpecker-ci/woodpecker/pull/4600)]
