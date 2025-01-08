@@ -5144,10 +5144,6 @@ const docTemplate = `{
                 "config_file": {
                     "type": "string"
                 },
-                "gated": {
-                    "description": "TODO: deprecated in favor of RequireApproval =\u003e Remove in next major release",
-                    "type": "boolean"
-                },
                 "netrc_trusted": {
                     "type": "array",
                     "items": {
