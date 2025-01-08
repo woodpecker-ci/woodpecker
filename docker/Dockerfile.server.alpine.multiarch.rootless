@@ -2,7 +2,7 @@ FROM docker.io/alpine:3.21
 
 ARG TARGETOS TARGETARCH
 RUN apk add -U --no-cache ca-certificates && \
-  adduser -u 1000 -g 1000 woodpecker && \
+  adduser -u 1000 -g 1000 woodpecker -D && \
   mkdir -p /var/lib/woodpecker && \
   chown -R woodpecker:woodpecker /var/lib/woodpecker
 
