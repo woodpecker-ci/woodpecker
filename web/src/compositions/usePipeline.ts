@@ -78,20 +78,20 @@ export default (pipeline: Ref<Pipeline | undefined>) => {
   const shortMessage = computed(() => message.value.split('\n')[0]);
 
   const context = computed(() => {
-    let context = ""
+    let context = '';
     if (pipeline.value?.event === 'pull_request' || pipeline.value?.event === 'pull_request_closed') {
-      context = pipeline.value.pull_request!.title
+      context = pipeline.value.pull_request!.title;
     } else if (pipeline.value?.event === 'deployment') {
-      context = pipeline.value.deployment!.description
+      context = pipeline.value.deployment!.description;
     } else if (pipeline.value?.event === 'release') {
-      context = pipeline.value.release_title!
+      context = pipeline.value.release_title!;
     }
-    return emojify(context)
+    return emojify(context);
   });
   const shortContext = computed(() => context.value.split('\n')[0]);
 
   const prettyRef = computed(() => {
-     if (pipeline.value?.event === 'tag' || pipeline.value?.event === 'release') {
+    if (pipeline.value?.event === 'tag' || pipeline.value?.event === 'release') {
       return pipeline.value.ref.replaceAll('refs/tags/', '');
     }
 

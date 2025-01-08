@@ -15,6 +15,7 @@
 package bitbucketdatacenter
 
 import (
+	"net/url"
 	"testing"
 	"time"
 
@@ -302,4 +303,50 @@ func Test_convertUser(t *testing.T) {
 		Email:         "john.doe@mail.com",
 		ForgeRemoteID: "1",
 	}, to)
+}
+
+func Test_convertProjectsToTeams(t *testing.T) {
+	tests := []struct {
+		projects []*bb.Project
+		baseURL  string
+		expected []*model.Team
+	}{
+		{
+			projects: []*bb.Project{
+				{
+					Key: "PRJ1",
+				},
+				{
+					Key: "PRJ2",
+				},
+			},
+			baseURL: "https://base.url",
+			expected: []*model.Team{
+				{
+					Login:  "PRJ1",
+					Avatar: "https://base.url/projects/PRJ1/avatar.png",
+				},
+				{
+					Login:  "PRJ2",
+					Avatar: "https://base.url/projects/PRJ2/avatar.png",
+				},
+			},
+		},
+		{
+			projects: []*bb.Project{},
+			baseURL:  "https://base.url",
+			expected: []*model.Team{},
+		},
+	}
+
+	for _, tt := range tests {
+		// Parse the baseURL string into a *url.URL
+		parsedURL, err := url.Parse(tt.baseURL)
+		assert.NoError(t, err)
+
+		mockClient := &bb.Client{BaseURL: parsedURL}
+		actual := convertProjectsToTeams(tt.projects, mockClient)
+
+		assert.Equal(t, tt.expected, actual)
+	}
 }

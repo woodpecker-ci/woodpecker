@@ -169,3 +169,15 @@ func convertPullRequest(pr *bb.PullRequest) *model.PullRequest {
 		Index:    model.ForgeRemoteID(fmt.Sprint(pr.ID)),
 	}
 }
+
+func convertProjectsToTeams(projects []*bb.Project, client *bb.Client) []*model.Team {
+	teams := make([]*model.Team, 0)
+	for _, project := range projects {
+		team := &model.Team{
+			Login:  project.Key,
+			Avatar: fmt.Sprintf("%s/projects/%s/avatar.png", client.BaseURL, project.Key),
+		}
+		teams = append(teams, team)
+	}
+	return teams
+}

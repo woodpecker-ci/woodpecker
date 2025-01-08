@@ -1,4 +1,4 @@
-import { PullRequest } from './pull_request';
+import type { PullRequest } from './pull_request';
 import type { WebhookEvents } from './webhook';
 
 export interface PipelineError<D = unknown> {

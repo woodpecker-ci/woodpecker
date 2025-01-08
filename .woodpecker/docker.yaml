@@ -125,7 +125,7 @@ steps:
     image: *buildx_plugin
     settings:
       repo: woodpeckerci/woodpecker-server
-      dockerfile: docker/Dockerfile.server.alpine.multiarch
+      dockerfile: docker/Dockerfile.server.alpine.multiarch.rootless
       platforms: *platforms_preview
       tag: pull_${CI_COMMIT_PULL_REQUEST}-alpine
       logins: *publish_logins
@@ -142,7 +142,7 @@ steps:
     settings:
       dry_run: true
       repo: woodpeckerci/woodpecker-server
-      dockerfile: docker/Dockerfile.server.multiarch
+      dockerfile: docker/Dockerfile.server.multiarch.rootless
       platforms: *platforms_preview
       tag: pull_${CI_COMMIT_PULL_REQUEST}
     when: &when-dryrun
@@ -156,7 +156,7 @@ steps:
     image: *buildx_plugin
     settings:
       repo: *publish_repos_server
-      dockerfile: docker/Dockerfile.server.multiarch
+      dockerfile: docker/Dockerfile.server.multiarch.rootless
       platforms: *platforms_server
       tag: [next, 'next-${CI_COMMIT_SHA:0:10}']
       logins: *publish_logins
@@ -171,7 +171,7 @@ steps:
     image: *buildx_plugin
     settings:
       repo: *publish_repos_server
-      dockerfile: docker/Dockerfile.server.alpine.multiarch
+      dockerfile: docker/Dockerfile.server.alpine.multiarch.rootless
       platforms: *platforms_alpine
       tag: [next-alpine, 'next-${CI_COMMIT_SHA:0:10}-alpine']
       logins: *publish_logins
@@ -183,7 +183,7 @@ steps:
     image: *buildx_plugin
     settings:
       repo: *publish_repos_server
-      dockerfile: docker/Dockerfile.server.multiarch
+      dockerfile: docker/Dockerfile.server.multiarch.rootless
       platforms: *platforms_server
       tag: ['${CI_COMMIT_TAG%%.*}', '${CI_COMMIT_TAG%.*}-alpine', '${CI_COMMIT_TAG}']
       logins: *publish_logins
@@ -196,7 +196,7 @@ steps:
     image: *buildx_plugin
     settings:
       repo: *publish_repos_server
-      dockerfile: docker/Dockerfile.server.alpine.multiarch
+      dockerfile: docker/Dockerfile.server.alpine.multiarch.rootless
       platforms: *platforms_alpine
       tag: ['${CI_COMMIT_TAG%%.*}-alpine', '${CI_COMMIT_TAG%.*}-alpine', '${CI_COMMIT_TAG}-alpine']
       logins: *publish_logins
@@ -212,7 +212,7 @@ steps:
     image: *buildx_plugin
     settings:
       repo: woodpeckerci/woodpecker-agent
-      dockerfile: docker/Dockerfile.agent.alpine.multiarch
+      dockerfile: docker/Dockerfile.agent.alpine.multiarch.rootless
       platforms: *platforms_preview
       tag: pull_${CI_COMMIT_PULL_REQUEST}-alpine
       build_args: *build_args
@@ -226,7 +226,7 @@ steps:
     settings:
       dry_run: true
       repo: woodpeckerci/woodpecker-agent
-      dockerfile: docker/Dockerfile.agent.multiarch
+      dockerfile: docker/Dockerfile.agent.multiarch.rootless
       platforms: *platforms_preview
       tag: pull_${CI_COMMIT_PULL_REQUEST}
       build_args: *build_args
@@ -241,7 +241,7 @@ steps:
     image: *buildx_plugin
     settings:
       repo: *publish_repos_agent
-      dockerfile: docker/Dockerfile.agent.multiarch
+      dockerfile: docker/Dockerfile.agent.multiarch.rootless
       platforms: *platforms_release
       tag: [next, 'next-${CI_COMMIT_SHA:0:10}']
       logins: *publish_logins
@@ -260,7 +260,7 @@ steps:
     image: *buildx_plugin
     settings:
       repo: *publish_repos_agent
-      dockerfile: docker/Dockerfile.agent.alpine.multiarch
+      dockerfile: docker/Dockerfile.agent.alpine.multiarch.rootless
       platforms: *platforms_alpine
       tag: [next-alpine, 'next-${CI_COMMIT_SHA:0:10}-alpine']
       logins: *publish_logins
@@ -276,7 +276,7 @@ steps:
     image: *buildx_plugin
     settings:
       repo: *publish_repos_agent
-      dockerfile: docker/Dockerfile.agent.multiarch
+      dockerfile: docker/Dockerfile.agent.multiarch.rootless
       platforms: *platforms_release
       tag: ['${CI_COMMIT_TAG%%.*}', '${CI_COMMIT_TAG%.*}', '${CI_COMMIT_TAG}']
       logins: *publish_logins
@@ -292,7 +292,7 @@ steps:
     image: *buildx_plugin
     settings:
       repo: *publish_repos_agent
-      dockerfile: docker/Dockerfile.agent.alpine.multiarch
+      dockerfile: docker/Dockerfile.agent.alpine.multiarch.rootless
       platforms: *platforms_alpine
       tag: ['${CI_COMMIT_TAG%%.*}-alpine', '${CI_COMMIT_TAG%.*}-alpine', '${CI_COMMIT_TAG}-alpine']
       logins: *publish_logins
@@ -310,7 +310,7 @@ steps:
     settings:
       dry_run: true
       repo: woodpeckerci/woodpecker-cli
-      dockerfile: docker/Dockerfile.cli.multiarch
+      dockerfile: docker/Dockerfile.cli.multiarch.rootless
       platforms: *platforms_preview
       tag: pull_${CI_COMMIT_PULL_REQUEST}
       build_args: *build_args
@@ -325,7 +325,7 @@ steps:
     image: *buildx_plugin
     settings:
       repo: *publish_repos_cli
-      dockerfile: docker/Dockerfile.cli.multiarch
+      dockerfile: docker/Dockerfile.cli.multiarch.rootless
       platforms: *platforms_release
       tag: [next, 'next-${CI_COMMIT_SHA:0:10}']
       logins: *publish_logins
@@ -341,7 +341,7 @@ steps:
     image: *buildx_plugin
     settings:
       repo: *publish_repos_cli
-      dockerfile: docker/Dockerfile.cli.alpine.multiarch
+      dockerfile: docker/Dockerfile.cli.alpine.multiarch.rootless
       platforms: *platforms_alpine
       tag: [next-alpine, 'next-${CI_COMMIT_SHA:0:10}-alpine']
       logins: *publish_logins
@@ -357,7 +357,7 @@ steps:
     image: *buildx_plugin
     settings:
       repo: *publish_repos_cli
-      dockerfile: docker/Dockerfile.cli.multiarch
+      dockerfile: docker/Dockerfile.cli.multiarch.rootless
       platforms: *platforms_release
       tag: ['${CI_COMMIT_TAG%%.*}', '${CI_COMMIT_TAG%.*}', '${CI_COMMIT_TAG}']
       logins: *publish_logins
@@ -373,7 +373,7 @@ steps:
     image: *buildx_plugin
     settings:
       repo: *publish_repos_cli
-      dockerfile: docker/Dockerfile.cli.alpine.multiarch
+      dockerfile: docker/Dockerfile.cli.alpine.multiarch.rootless
       platforms: *platforms_alpine
       tag: ['${CI_COMMIT_TAG%%.*}-alpine', '${CI_COMMIT_TAG%.*}-alpine', '${CI_COMMIT_TAG}-alpine']
       logins: *publish_logins
