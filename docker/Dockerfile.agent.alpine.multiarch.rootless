@@ -8,14 +8,20 @@ RUN --mount=type=cache,target=/root/.cache/go-build \
     make build-agent
 
 FROM docker.io/alpine:3.21
-RUN apk add -U --no-cache ca-certificates
+
+RUN apk add -U --no-cache ca-certificates && \
+  adduser -u 1000 -g 1000 woodpecker && \
+  mkdir -p /etc/woodpecker && \
+  chown -R woodpecker:woodpecker /etc/woodpecker
+
 ENV GODEBUG=netdns=go
 # Internal setting do NOT change! Signals that woodpecker is running inside a container
 ENV WOODPECKER_IN_CONTAINER=true
 EXPOSE 3000
 
 COPY --from=build /src/dist/woodpecker-agent /bin/
-RUN mkdir -p /etc/woodpecker
+
+USER woodpecker
 
 HEALTHCHECK CMD ["/bin/woodpecker-agent", "ping"]
 ENTRYPOINT ["/bin/woodpecker-agent"]
