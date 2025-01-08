@@ -180,7 +180,7 @@ The `server` and `cli` images now use a non-privileged user (`woodpecker`) by de
 If you have volume mounts attached to containers, you might need to update the ownership of these directories from `root` to `woodpecker`.
 
 :::note
-The agent image has to stay rootful by default to be able to mount the `docker.sock` when running WP with the "docker" backend.
+The agent image must remain rootful by default to be able to mount the Docker socket when Woodpecker is used with the `docker` backend.
 The helm chart will start to use a non-privileged user through `securityContext`.
 Running an entirely rootless agent with the "docker" backend is possibly achievable by using a rootless docker daemon.
 Yet this needs proper testing and documentation first and is something for future versions.
