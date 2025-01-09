@@ -20,11 +20,11 @@
 
     <!-- Overflow dropdown -->
     <div v-if="hiddenTabs.length" class="relative border-b-2 border-transparent py-1">
-      <IconButton icon="dots" class="h-8 w-8" @click="toggleDropdown" />
+      <IconButton icon="dots" class="tabs-more-button h-8 w-8" @click="toggleDropdown" />
 
       <div
         v-if="isDropdownOpen"
-        class="absolute z-20 mt-1 rounded-md border border-wp-background-400 bg-wp-background-100 shadow-lg dark:bg-wp-background-200"
+        class="tabs-dropdown absolute z-20 mt-1 rounded-md border border-wp-background-400 bg-wp-background-100 shadow-lg dark:bg-wp-background-200"
         :class="[visibleTabs.length === 0 ? 'left-0' : 'right-0']"
       >
         <router-link
@@ -67,8 +67,15 @@ const toggleDropdown = () => {
 };
 
 const closeDropdown = (event: MouseEvent) => {
+  const dropdown = tabsRef.value?.querySelector('.tabs-dropdown');
+  const moreButton = tabsRef.value?.querySelector('.tabs-more-button');
   const target = event.target as HTMLElement;
-  if (!tabsRef.value?.contains(target)) {
+
+  if (moreButton?.contains(target)) {
+    return;
+  }
+
+  if (dropdown && !dropdown.contains(target)) {
     isDropdownOpen.value = false;
   }
 };
