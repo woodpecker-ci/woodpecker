@@ -19,7 +19,9 @@
       <div class="flex min-h-48 items-center justify-center bg-wp-primary-200 dark:bg-wp-primary-300 md:w-3/5">
         <WoodpeckerLogo preserveAspectRatio="xMinYMin slice" class="h-32 w-32 md:h-48 md:w-48" />
       </div>
-      <div class="flex min-h-48 flex-col items-center justify-center gap-4 text-center md:w-2/5 px-4">
+      <div
+        class="flex min-h-48 flex-col items-center justify-center gap-4 !whitespace-normal px-4 text-center md:w-2/5"
+      >
         <h1 class="text-xl text-wp-text-100">{{ $t('welcome') }}</h1>
         <div class="flex flex-col gap-2">
           <Button
