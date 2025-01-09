@@ -16,7 +16,6 @@ package datastore
 
 import (
 	"fmt"
-	"log"
 	"strings"
 
 	"xorm.io/xorm"
@@ -78,14 +77,12 @@ func (s storage) orgDelete(sess *xorm.Session, id int64) error {
 func (s storage) OrgFindByName(name string) (*model.Org, error) {
 	// sanitize
 	name = strings.ToLower(name)
-	// find
 	org := new(model.Org)
 	has, err := s.engine.Where("name = ?", name).Get(org)
 	if err != nil {
 		return nil, fmt.Errorf("failed to check if org exists: %w", err)
 	}
 	if !has {
-		log.Printf("Organization with name %s not found", name)
 		return nil, nil
 	}
 	return org, nil
