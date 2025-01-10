@@ -48,6 +48,7 @@
   <SvgIcon v-else-if="name === 'pause'" :path="mdiPause" size="1.3rem" />
   <SvgIcon v-else-if="name === 'play'" :path="mdiPlay" size="1.3rem" />
   <SvgIcon v-else-if="name === 'play-outline'" :path="mdiPlayOutline" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'dots'" :path="mdiDotsVertical" size="1.3rem" />
 
   <SvgIcon v-else-if="name === 'visibility-private'" :path="mdiLockOutline" size="1.3rem" />
   <SvgIcon v-else-if="name === 'visibility-internal'" :path="mdiLockOpenOutline" size="1.3rem" />
@@ -93,6 +94,7 @@ import {
   mdiCloseCircle,
   mdiCog,
   mdiCogOutline,
+  mdiDotsVertical,
   mdiDownloadOutline,
   mdiEyeOffOutline,
   mdiEyeOutline,
@@ -180,7 +182,8 @@ export type IconNames =
   | 'alert'
   | 'spinner'
   | 'visibility-private'
-  | 'visibility-internal';
+  | 'visibility-internal'
+  | 'dots';
 
 defineProps<{
   name: IconNames;
