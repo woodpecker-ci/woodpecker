@@ -9,10 +9,10 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/dummy"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc/mocks"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/dummy"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/rpc"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/rpc/mocks"
 )
 
 type peery struct {
@@ -88,6 +88,6 @@ func TestRunnerCanceledState(t *testing.T) {
 		cancel()
 	}()
 
-	err := r.Run(ctx)
+	err := r.Run(ctx, ctx)
 	assert.NoError(t, err)
 }

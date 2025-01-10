@@ -185,7 +185,7 @@ func (s *RPC) Update(c context.Context, strWorkflowID string, state rpc.StepStat
 	}
 
 	if state.Finished == 0 {
-		if _, err := pipeline.UpdateStepStatusToRunning(s.store, *step, state); err != nil {
+		if _, err := pipeline.UpdateStepToStatusStarted(s.store, *step, state); err != nil {
 			log.Error().Err(err).Msg("rpc.update: cannot update step")
 		}
 	} else {
