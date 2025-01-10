@@ -20,14 +20,15 @@
         <WoodpeckerLogo preserveAspectRatio="xMinYMin slice" class="h-32 w-32 md:h-48 md:w-48" />
       </div>
       <div
-        class="flex min-h-48 flex-col items-center justify-center gap-4 !whitespace-normal px-4 text-center md:w-2/5"
+        class="flex min-h-48 flex-col items-center justify-center gap-4 text-center md:w-2/5"
       >
-        <h1 class="text-xl text-wp-text-100">{{ $t('welcome') }}</h1>
-        <div class="flex flex-col gap-2">
+        <h1 class="text-xl text-wp-text-100 -mb-4">{{ $t('welcome') }}</h1>
+        <div class="flex flex-col gap-2 whitespace-normal p-4">
           <Button
             v-for="forge in forges"
             :key="forge.id"
             :start-icon="forge.type === 'addon' ? 'repo' : forge.type"
+            class="!whitespace-normal"
             @click="doLogin(forge.id)"
           >
             {{ $t('login_with', { forge: getHostFromUrl(forge) }) }}
