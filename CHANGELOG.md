@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2025-01-09
+## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2025-01-10
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -70,6 +70,7 @@
 
 ### 📈 Enhancement
 
+- Add priority menu to tabs [[#4641](https://github.com/woodpecker-ci/woodpecker/pull/4641)]
 - feat(bitbucketdatacenter): Add support for fetching and converting projects to teams [[#4663](https://github.com/woodpecker-ci/woodpecker/pull/4663)]
 - Migrate from Windi to Tailwind [[#4614](https://github.com/woodpecker-ci/woodpecker/pull/4614)]
 - Do not start metrics collector if metrics are disabled [[#4667](https://github.com/woodpecker-ci/woodpecker/pull/4667)]
