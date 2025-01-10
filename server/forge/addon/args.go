@@ -110,6 +110,9 @@ type modelUser struct {
 }
 
 func (m *modelUser) asModel() *model.User {
+	if m == nil {
+		return nil
+	}
 	m.User.ForgeRemoteID = m.ForgeRemoteID
 	m.User.Token = m.Token
 	m.User.Secret = m.Secret
@@ -119,6 +122,9 @@ func (m *modelUser) asModel() *model.User {
 }
 
 func modelUserFromModel(u *model.User) *modelUser {
+	if u == nil {
+		return nil
+	}
 	return &modelUser{
 		User:          u,
 		ForgeRemoteID: u.ForgeRemoteID,
@@ -138,6 +144,9 @@ type modelRepo struct {
 }
 
 func (m *modelRepo) asModel() *model.Repo {
+	if m == nil {
+		return nil
+	}
 	m.Repo.UserID = m.UserID
 	m.Repo.Hash = m.Hash
 	m.Repo.Perm = m.Perm
@@ -145,6 +154,9 @@ func (m *modelRepo) asModel() *model.Repo {
 }
 
 func modelRepoFromModel(r *model.Repo) *modelRepo {
+	if r == nil {
+		return nil
+	}
 	return &modelRepo{
 		Repo:   r,
 		UserID: r.UserID,
