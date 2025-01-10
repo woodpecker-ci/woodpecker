@@ -1,14 +1,18 @@
 # Changelog
 
-## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-12-21
+## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2025-01-10
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@qwerty287
+@pat-s, @qwerty287
 
 ### 🐛 Bug Fixes
 
 - Fix avatar column type (#4340) [[#4602](https://github.com/woodpecker-ci/woodpecker/pull/4602)]
+
+### Misc
+
+- [release/v2.8] Fix addon `nil` values (#4666) [[#4693](https://github.com/woodpecker-ci/woodpecker/pull/4693)]
 
 ## [2.8.2](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.8.2) - 2024-12-19
 
