@@ -19,11 +19,9 @@
       <div class="flex min-h-48 items-center justify-center bg-wp-primary-200 dark:bg-wp-primary-300 md:w-3/5">
         <WoodpeckerLogo preserveAspectRatio="xMinYMin slice" class="h-32 w-32 md:h-48 md:w-48" />
       </div>
-      <div
-        class="flex min-h-48 flex-col items-center justify-center gap-4 text-center md:w-2/5"
-      >
-        <h1 class="text-xl text-wp-text-100 -mb-4">{{ $t('welcome') }}</h1>
-        <div class="flex flex-col gap-2 whitespace-normal p-4">
+      <div class="flex min-h-48 flex-col items-center justify-center gap-4 text-center md:w-2/5">
+        <h1 class="-mb-4 text-xl text-wp-text-100">{{ $t('welcome') }}</h1>
+        <div class="flex flex-col gap-2 p-4">
           <Button
             v-for="forge in forges"
             :key="forge.id"
