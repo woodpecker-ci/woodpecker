@@ -44,7 +44,7 @@ func TestRunnerCanceledState(t *testing.T) {
 		Running:  0,
 	}
 	r := NewRunner(peer, filter, hostname, state, &backend)
-	ctx, cancel := context.WithCancel(context.Background())
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Millisecond)
 
 	workflow := &rpc.Workflow{
 		ID: "1",
