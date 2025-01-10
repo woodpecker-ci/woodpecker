@@ -17,7 +17,9 @@ package store
 //go:generate mockery --name Store --output mocks --case underscore --note "+build test"
 
 import (
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"context"
+
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
 // TODO: CreateX func should return new object to not indirect let storage change an existing object (alter ID etc...)
@@ -70,6 +72,8 @@ type Store interface {
 	GetPipeline(int64) (*model.Pipeline, error)
 	// GetPipelineNumber gets a pipeline by number.
 	GetPipelineNumber(*model.Repo, int64) (*model.Pipeline, error)
+	// GetPipelineBadge gets the last relevant pipeline for the badge.
+	GetPipelineBadge(*model.Repo, string) (*model.Pipeline, error)
 	// GetPipelineLast gets the last pipeline for the branch.
 	GetPipelineLast(*model.Repo, string) (*model.Pipeline, error)
 	// GetPipelineLastBefore gets the last pipeline before pipeline number N.
@@ -141,7 +145,7 @@ type Store interface {
 
 	// Logs
 	LogFind(*model.Step) ([]*model.LogEntry, error)
-	LogAppend(logEntry *model.LogEntry) error
+	LogAppend(*model.Step, []*model.LogEntry) error
 	LogDelete(*model.Step) error
 
 	// Tasks
@@ -178,6 +182,7 @@ type Store interface {
 	AgentList(p *model.ListOptions) ([]*model.Agent, error)
 	AgentUpdate(*model.Agent) error
 	AgentDelete(*model.Agent) error
+	AgentListForOrg(orgID int64, opt *model.ListOptions) ([]*model.Agent, error)
 
 	// Workflow
 	WorkflowGetTree(*model.Pipeline) ([]*model.Workflow, error)
@@ -200,5 +205,5 @@ type Store interface {
 	// Store operations
 	Ping() error
 	Close() error
-	Migrate(bool) error
+	Migrate(context.Context, bool) error
 }

@@ -18,8 +18,8 @@ import (
 	"errors"
 	"fmt"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server/services/encryption/types"
-	storeTypes "go.woodpecker-ci.org/woodpecker/v2/server/store/types"
+	"go.woodpecker-ci.org/woodpecker/v3/server/services/encryption/types"
+	storeTypes "go.woodpecker-ci.org/woodpecker/v3/server/store/types"
 )
 
 func (b builder) getService(keyType string) (types.EncryptionService, error) {
@@ -48,8 +48,8 @@ func (b builder) isEnabled() (bool, error) {
 }
 
 func (b builder) detectKeyType() (string, error) {
-	rawKeyPresent := b.ctx.IsSet(rawKeyConfigFlag)
-	tinkKeysetPresent := b.ctx.IsSet(tinkKeysetFilepathConfigFlag)
+	rawKeyPresent := b.c.IsSet(rawKeyConfigFlag)
+	tinkKeysetPresent := b.c.IsSet(tinkKeysetFilepathConfigFlag)
 	switch {
 	case rawKeyPresent && tinkKeysetPresent:
 		return "", errors.New(errMessageCantUseBothServices)
@@ -64,9 +64,9 @@ func (b builder) detectKeyType() (string, error) {
 func (b builder) serviceBuilder(keyType string) (types.EncryptionServiceBuilder, error) {
 	switch {
 	case keyType == keyTypeTink:
-		return newTink(b.ctx, b.store), nil
+		return newTink(b.c, b.store), nil
 	case keyType == keyTypeRaw:
-		return newAES(b.ctx, b.store), nil
+		return newAES(b.c, b.store), nil
 	case keyType == keyTypeNone:
 		return &noEncryptionBuilder{}, nil
 	}

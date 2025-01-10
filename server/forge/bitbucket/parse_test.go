@@ -1,4 +1,4 @@
-// Copyright 2018 Drone.IO Inc.
+// // Copyright 2018 Drone.IO Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,121 +19,108 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/franela/goblin"
 	"github.com/stretchr/testify/assert"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server/forge/bitbucket/fixtures"
-	"go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge/bitbucket/fixtures"
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
-func Test_parser(t *testing.T) {
-	g := goblin.Goblin(t)
-	g.Describe("Bitbucket parser", func() {
-		g.It("should ignore unsupported hook", func() {
-			buf := bytes.NewBufferString(fixtures.HookPush)
-			req, _ := http.NewRequest(http.MethodPost, "/hook", buf)
-			req.Header = http.Header{}
-			req.Header.Set(hookEvent, "issue:created")
+func Test_parseHook(t *testing.T) {
+	t.Run("unsupported hook", func(t *testing.T) {
+		buf := bytes.NewBufferString(fixtures.HookPush)
+		req, _ := http.NewRequest(http.MethodPost, "/hook", buf)
+		req.Header = http.Header{}
+		req.Header.Set(hookEvent, "issue:created")
 
-			r, b, err := parseHook(req)
-			g.Assert(r).IsNil()
-			g.Assert(b).IsNil()
-			assert.ErrorIs(t, err, &types.ErrIgnoreEvent{})
-		})
+		r, b, err := parseHook(req)
+		assert.Nil(t, r)
+		assert.Nil(t, b)
+		assert.ErrorIs(t, err, &types.ErrIgnoreEvent{})
+	})
 
-		g.Describe("Given a pull-request hook payload", func() {
-			g.It("should return err when malformed", func() {
-				buf := bytes.NewBufferString("[]")
-				req, _ := http.NewRequest(http.MethodPost, "/hook", buf)
-				req.Header = http.Header{}
-				req.Header.Set(hookEvent, hookPullCreated)
+	t.Run("malformed pull-request hook", func(t *testing.T) {
+		buf := bytes.NewBufferString("[]")
+		req, _ := http.NewRequest(http.MethodPost, "/hook", buf)
+		req.Header = http.Header{}
+		req.Header.Set(hookEvent, hookPullCreated)
 
-				_, _, err := parseHook(req)
-				g.Assert(err).IsNotNil()
-			})
+		_, _, err := parseHook(req)
+		assert.Error(t, err)
+	})
 
-			g.It("should return pull-request details", func() {
-				buf := bytes.NewBufferString(fixtures.HookPull)
-				req, _ := http.NewRequest(http.MethodPost, "/hook", buf)
-				req.Header = http.Header{}
-				req.Header.Set(hookEvent, hookPullCreated)
+	t.Run("pull-request", func(t *testing.T) {
+		buf := bytes.NewBufferString(fixtures.HookPull)
+		req, _ := http.NewRequest(http.MethodPost, "/hook", buf)
+		req.Header = http.Header{}
+		req.Header.Set(hookEvent, hookPullCreated)
 
-				r, b, err := parseHook(req)
-				g.Assert(err).IsNil()
-				g.Assert(r.FullName).Equal("user_name/repo_name")
-				g.Assert(b.Event).Equal(model.EventPull)
-				g.Assert(b.Commit).Equal("ce5965ddd289")
-			})
+		r, b, err := parseHook(req)
+		assert.NoError(t, err)
+		assert.Equal(t, "user_name/repo_name", r.FullName)
+		assert.Equal(t, model.EventPull, b.Event)
+		assert.Equal(t, "d3022fc0ca3d", b.Commit)
+	})
 
-			g.It("should return pull-request details for a pull-request merged payload", func() {
-				buf := bytes.NewBufferString(fixtures.HookPullRequestMerged)
-				req, _ := http.NewRequest(http.MethodPost, "/hook", buf)
-				req.Header = http.Header{}
-				req.Header.Set(hookEvent, hookPullMerged)
+	t.Run("pull-request merged", func(t *testing.T) {
+		buf := bytes.NewBufferString(fixtures.HookPullRequestMerged)
+		req, _ := http.NewRequest(http.MethodPost, "/hook", buf)
+		req.Header = http.Header{}
+		req.Header.Set(hookEvent, hookPullMerged)
 
-				r, b, err := parseHook(req)
-				g.Assert(err).IsNil()
-				g.Assert(r.FullName).Equal("anbraten/test-2")
-				g.Assert(b.Event).Equal(model.EventPullClosed)
-				g.Assert(b.Commit).Equal("6c5f0bc9b2aa")
-			})
+		r, b, err := parseHook(req)
+		assert.NoError(t, err)
+		assert.Equal(t, "anbraten/test-2", r.FullName)
+		assert.Equal(t, model.EventPullClosed, b.Event)
+		assert.Equal(t, "006704dbeab2", b.Commit)
+	})
 
-			g.It("should return pull-request details for a pull-request closed payload", func() {
-				buf := bytes.NewBufferString(fixtures.HookPullRequestDeclined)
-				req, _ := http.NewRequest(http.MethodPost, "/hook", buf)
-				req.Header = http.Header{}
-				req.Header.Set(hookEvent, hookPullDeclined)
+	t.Run("pull-request closed", func(t *testing.T) {
+		buf := bytes.NewBufferString(fixtures.HookPullRequestDeclined)
+		req, _ := http.NewRequest(http.MethodPost, "/hook", buf)
+		req.Header = http.Header{}
+		req.Header.Set(hookEvent, hookPullDeclined)
 
-				r, b, err := parseHook(req)
-				g.Assert(err).IsNil()
-				g.Assert(r.FullName).Equal("anbraten/test-2")
-				g.Assert(b.Event).Equal(model.EventPullClosed)
-				g.Assert(b.Commit).Equal("006704dbeab2")
-			})
-		})
+		r, b, err := parseHook(req)
+		assert.NoError(t, err)
+		assert.Equal(t, "anbraten/test-2", r.FullName)
+		assert.Equal(t, model.EventPullClosed, b.Event)
+		assert.Equal(t, "f90e18fc9d45", b.Commit)
+	})
 
-		g.Describe("Given a push hook payload", func() {
-			g.It("should return err when malformed", func() {
-				buf := bytes.NewBufferString("[]")
-				req, _ := http.NewRequest(http.MethodPost, "/hook", buf)
-				req.Header = http.Header{}
-				req.Header.Set(hookEvent, hookPush)
+	t.Run("malformed push", func(t *testing.T) {
+		buf := bytes.NewBufferString("[]")
+		req, _ := http.NewRequest(http.MethodPost, "/hook", buf)
+		req.Header = http.Header{}
+		req.Header.Set(hookEvent, hookPush)
 
-				_, _, err := parseHook(req)
-				g.Assert(err).IsNotNil()
-			})
+		_, _, err := parseHook(req)
+		assert.Error(t, err)
+	})
 
-			g.It("should return nil if missing commit sha", func() {
-				buf := bytes.NewBufferString(fixtures.HookPushEmptyHash)
-				req, _ := http.NewRequest(http.MethodPost, "/hook", buf)
-				req.Header = http.Header{}
-				req.Header.Set(hookEvent, hookPush)
+	t.Run("missing commit sha", func(t *testing.T) {
+		buf := bytes.NewBufferString(fixtures.HookPushEmptyHash)
+		req, _ := http.NewRequest(http.MethodPost, "/hook", buf)
+		req.Header = http.Header{}
+		req.Header.Set(hookEvent, hookPush)
 
-				r, b, err := parseHook(req)
-				g.Assert(r).IsNil()
-				g.Assert(b).IsNil()
-				g.Assert(err).IsNil()
-			})
+		r, b, err := parseHook(req)
+		assert.Nil(t, r)
+		assert.Nil(t, b)
+		assert.NoError(t, err)
+	})
 
-			g.It("should return push details", func() {
-				buf := bytes.NewBufferString(fixtures.HookPush)
-				req, _ := http.NewRequest(http.MethodPost, "/hook", buf)
-				req.Header = http.Header{}
-				req.Header.Set(hookEvent, hookPush)
+	t.Run("push hook", func(t *testing.T) {
+		buf := bytes.NewBufferString(fixtures.HookPush)
+		req, _ := http.NewRequest(http.MethodPost, "/hook", buf)
+		req.Header = http.Header{}
+		req.Header.Set(hookEvent, hookPush)
 
-				r, b, err := parseHook(req)
-				g.Assert(err).IsNil()
-				g.Assert(r.FullName).Equal("martinherren1984/publictestrepo")
-				g.Assert(r.SCMKind).Equal(model.RepoGit)
-				g.Assert(r.Clone).Equal("https://bitbucket.org/martinherren1984/publictestrepo")
-				g.Assert(b.Commit).Equal("c14c1bb05dfb1fdcdf06b31485fff61b0ea44277")
-				g.Assert(b.Message).Equal("a\n")
-			})
-		})
-
-		g.Describe("Given a tag hook payload", func() {
-			// TODO
-		})
+		r, b, err := parseHook(req)
+		assert.NoError(t, err)
+		assert.Equal(t, "martinherren1984/publictestrepo", r.FullName)
+		assert.Equal(t, "https://bitbucket.org/martinherren1984/publictestrepo", r.Clone)
+		assert.Equal(t, "c14c1bb05dfb1fdcdf06b31485fff61b0ea44277", b.Commit)
+		assert.Equal(t, "a\n", b.Message)
 	})
 }

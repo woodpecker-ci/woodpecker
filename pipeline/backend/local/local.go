@@ -27,11 +27,11 @@ import (
 	"sync"
 
 	"github.com/rs/zerolog/log"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 	"golang.org/x/text/encoding/unicode"
 	"golang.org/x/text/transform"
 
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 )
 
 type workflowState struct {
@@ -62,8 +62,14 @@ func (e *local) Name() string {
 	return "local"
 }
 
-func (e *local) IsAvailable(context.Context) bool {
-	return true
+func (e *local) IsAvailable(ctx context.Context) bool {
+	if c, ok := ctx.Value(types.CliCommand).(*cli.Command); ok {
+		if c.String("backend-engine") == e.Name() {
+			return true
+		}
+	}
+	_, inContainer := os.LookupEnv("WOODPECKER_IN_CONTAINER")
+	return !inContainer
 }
 
 func (e *local) Flags() []cli.Flag {
@@ -71,7 +77,7 @@ func (e *local) Flags() []cli.Flag {
 }
 
 func (e *local) Load(ctx context.Context) (*types.BackendInfo, error) {
-	c, ok := ctx.Value(types.CliContext).(*cli.Context)
+	c, ok := ctx.Value(types.CliCommand).(*cli.Command)
 	if ok {
 		e.tempDir = c.String("backend-local-temp-dir")
 	}

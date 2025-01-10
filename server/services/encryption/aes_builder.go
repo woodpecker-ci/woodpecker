@@ -18,10 +18,10 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server/services/encryption/types"
-	"go.woodpecker-ci.org/woodpecker/v2/server/store"
+	"go.woodpecker-ci.org/woodpecker/v3/server/services/encryption/types"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 )
 
 type aesConfiguration struct {
@@ -30,8 +30,8 @@ type aesConfiguration struct {
 	clients  []types.EncryptionClient
 }
 
-func newAES(ctx *cli.Context, s store.Store) types.EncryptionServiceBuilder {
-	key := ctx.String(rawKeyConfigFlag)
+func newAES(c *cli.Command, s store.Store) types.EncryptionServiceBuilder {
+	key := c.String(rawKeyConfigFlag)
 	return &aesConfiguration{key, s, nil}
 }
 

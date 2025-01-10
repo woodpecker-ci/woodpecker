@@ -15,17 +15,19 @@
 package lint
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path"
 	"path/filepath"
 	"strings"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
-	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/linter"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/common"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/linter"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/constant"
 )
 
 // Command exports the info command.
@@ -34,13 +36,31 @@ var Command = &cli.Command{
 	Usage:     "lint a pipeline configuration file",
 	ArgsUsage: "[path/to/.woodpecker.yaml]",
 	Action:    lint,
+	Flags: []cli.Flag{
+		&cli.StringSliceFlag{
+			Sources: cli.EnvVars("WOODPECKER_PLUGINS_PRIVILEGED"),
+			Name:    "plugins-privileged",
+			Usage:   "allow plugins to run in privileged mode, if set empty, there is no",
+		},
+		&cli.StringSliceFlag{
+			Sources: cli.EnvVars("WOODPECKER_PLUGINS_TRUSTED_CLONE"),
+			Name:    "plugins-trusted-clone",
+			Usage:   "plugins that are trusted to handle Git credentials in cloning steps",
+			Value:   constant.TrustedClonePlugins,
+		},
+		&cli.BoolFlag{
+			Sources: cli.EnvVars("WOODPECKER_LINT_STRICT"),
+			Name:    "strict",
+			Usage:   "treat warnings as errors",
+		},
+	},
 }
 
-func lint(c *cli.Context) error {
-	return common.RunPipelineFunc(c, lintFile, lintDir)
+func lint(ctx context.Context, c *cli.Command) error {
+	return common.RunPipelineFunc(ctx, c, lintFile, lintDir)
 }
 
-func lintDir(c *cli.Context, dir string) error {
+func lintDir(ctx context.Context, c *cli.Command, dir string) error {
 	var errorStrings []string
 	if err := filepath.Walk(dir, func(path string, info os.FileInfo, e error) error {
 		if e != nil {
@@ -50,7 +70,7 @@ func lintDir(c *cli.Context, dir string) error {
 		// check if it is a regular file (not dir)
 		if info.Mode().IsRegular() && (strings.HasSuffix(info.Name(), ".yaml") || strings.HasSuffix(info.Name(), ".yml")) {
 			fmt.Println("#", info.Name())
-			if err := lintFile(c, path); err != nil {
+			if err := lintFile(ctx, c, path); err != nil {
 				errorStrings = append(errorStrings, err.Error())
 			}
 			fmt.Println("")
@@ -68,7 +88,7 @@ func lintDir(c *cli.Context, dir string) error {
 	return nil
 }
 
-func lintFile(_ *cli.Context, file string) error {
+func lintFile(_ context.Context, c *cli.Command, file string) error {
 	fi, err := os.Open(file)
 	if err != nil {
 		return err
@@ -82,7 +102,7 @@ func lintFile(_ *cli.Context, file string) error {
 
 	rawConfig := string(buf)
 
-	c, err := yaml.ParseString(rawConfig)
+	parsedConfig, err := yaml.ParseString(rawConfig)
 	if err != nil {
 		return err
 	}
@@ -90,13 +110,21 @@ func lintFile(_ *cli.Context, file string) error {
 	config := &linter.WorkflowConfig{
 		File:      path.Base(file),
 		RawConfig: rawConfig,
-		Workflow:  c,
+		Workflow:  parsedConfig,
 	}
 
 	// TODO: lint multiple files at once to allow checks for sth like "depends_on" to work
-	err = linter.New(linter.WithTrusted(true)).Lint([]*linter.WorkflowConfig{config})
+	err = linter.New(
+		linter.WithTrusted(linter.TrustedConfiguration{
+			Network:  true,
+			Volumes:  true,
+			Security: true,
+		}),
+		linter.PrivilegedPlugins(c.StringSlice("plugins-privileged")),
+		linter.WithTrustedClonePlugins(c.StringSlice("plugins-trusted-clone")),
+	).Lint([]*linter.WorkflowConfig{config})
 	if err != nil {
-		str, err := FormatLintError(config.File, err)
+		str, err := FormatLintError(config.File, err, c.Bool("strict"))
 
 		if str != "" {
 			fmt.Print(str)

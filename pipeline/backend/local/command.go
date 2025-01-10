@@ -21,7 +21,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/alessio/shellescape"
+	"al.essio.dev/pkg/shellescape"
 )
 
 func (e *local) genCmdByShell(shell string, cmdList []string) (args []string, err error) {

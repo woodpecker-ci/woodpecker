@@ -1,37 +1,37 @@
 package setup
 
 import (
+	"context"
 	"errors"
 	"strings"
 
 	"github.com/rs/zerolog/log"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
-	"go.woodpecker-ci.org/woodpecker/v2/cli/internal/config"
-	"go.woodpecker-ci.org/woodpecker/v2/cli/setup/ui"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/internal/config"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/setup/ui"
 )
 
 // Command exports the setup command.
 var Command = &cli.Command{
 	Name:      "setup",
 	Usage:     "setup the woodpecker-cli for the first time",
-	Args:      true,
 	ArgsUsage: "[server]",
 	Flags: []cli.Flag{
 		&cli.StringFlag{
 			Name:  "server",
-			Usage: "The URL of the woodpecker server",
+			Usage: "URL of the woodpecker server",
 		},
 		&cli.StringFlag{
 			Name:  "token",
-			Usage: "The token to authenticate with the woodpecker server",
+			Usage: "token to authenticate with the woodpecker server",
 		},
 	},
 	Action: setup,
 }
 
-func setup(c *cli.Context) error {
-	_config, err := config.Get(c, c.String("config"))
+func setup(ctx context.Context, c *cli.Command) error {
+	_config, err := config.Get(ctx, c, c.String("config"))
 	if err != nil {
 		return err
 	} else if _config != nil {
@@ -41,7 +41,7 @@ func setup(c *cli.Context) error {
 		}
 
 		if !setupAgain {
-			log.Info().Msg("Configuration skipped")
+			log.Info().Msg("configuration skipped")
 			return nil
 		}
 	}
@@ -68,7 +68,7 @@ func setup(c *cli.Context) error {
 
 	token := c.String("token")
 	if token == "" {
-		token, err = receiveTokenFromUI(c.Context, serverURL)
+		token, err = receiveTokenFromUI(ctx, serverURL)
 		if err != nil {
 			return err
 		}
@@ -78,7 +78,7 @@ func setup(c *cli.Context) error {
 		}
 	}
 
-	err = config.Save(c, c.String("config"), &config.Config{
+	err = config.Save(ctx, c, c.String("config"), &config.Config{
 		ServerURL: serverURL,
 		Token:     token,
 		LogLevel:  "info",
@@ -87,7 +87,7 @@ func setup(c *cli.Context) error {
 		return err
 	}
 
-	log.Info().Msg("The woodpecker-cli has been successfully setup")
+	log.Info().Msg("woodpecker-cli has been successfully setup")
 
 	return nil
 }

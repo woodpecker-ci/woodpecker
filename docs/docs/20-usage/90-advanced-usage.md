@@ -97,7 +97,7 @@ steps:
 ### References
 
 - [Official YAML specification](https://yaml.org/spec/1.2.2/#3222-anchors-and-aliases)
-- [YAML Cheatsheet](https://learnxinyminutes.com/docs/yaml)
+- [YAML cheat sheet](https://learnxinyminutes.com/docs/yaml)
 
 ## Persisting environment data between steps
 
@@ -127,3 +127,96 @@ WOODPECKER_ENVIRONMENT=first_var:value1,second_var:value2
 ```
 
 Note that this tightly couples the server and app configurations (where the app is a completely separate application). But this is a good option for truly global variables which should apply to all steps in all pipelines for all apps.
+
+## Docker in docker (dind) setup
+
+:::warning
+This set up will only work on trusted repositories and for security reasons should only be used in private environments.
+See [project settings](./75-project-settings.md#trusted) to enable "trusted" mode.
+:::
+
+The snippet below shows how a step can communicate with the docker daemon running in a `docker:dind` service.
+
+:::note
+If your goal is to build/publish OCI images, consider using the [Docker Buildx Plugin](https://woodpecker-ci.org/plugins/Docker%20Buildx) instead.
+:::
+
+First we need to define a service running a docker with the `dind` tag.
+This service must run in `privileged` mode:
+
+```yaml
+services:
+  - name: docker
+    image: docker:dind # use 'docker:<major-version>-dind' or similar in production
+    privileged: true
+    ports:
+      - 2376
+```
+
+Next, we need to set up TLS communication between the `dind` service and the step that wants to communicate with the docker daemon (unauthenticated TCP connections have been deprecated [as of docker v27](https://github.com/docker/cli/blob/v27.4.0/docs/deprecated.md#unauthenticated-tcp-connections) and will result in an error in v28).
+
+This can be achieved by letting the daemon generate TLS certificates and share them with the client through an agent volume mount (`/opt/woodpeckerci/dind-certs` in the example below).
+
+```diff
+services:
+  - name: docker
+    image: docker:dind # use 'docker:<major-version>-dind' or similar in production
+    privileged: true
++    environment:
++      DOCKER_TLS_CERTDIR: /dind-certs
++    volumes:
++      - /opt/woodpeckerci/dind-certs:/dind-certs
+     ports:
+       - 2376
+```
+
+In the docker client step:
+
+1. Set the `DOCKER_*` environment variables shown below to configure the connection with the daemon.
+   These generic docker environment variables that are framework-agnostic (e.g. frameworks like [TestContainers](https://testcontainers.com/), [Spring Boot Docker Compose](https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-docker-compose) do all respect them).
+2. Mount the volume to the location where the daemon has created the certificates (`/opt/woodpeckerci/dind-certs`)
+
+Test the connection with the docker client:
+
+```diff
+steps:
+  - name: test
+    image: docker:cli # in production use something like 'docker:<major version>-cli'
++    environment:
++      DOCKER_HOST: "tcp://docker:2376"
++      DOCKER_CERT_PATH: "/dind-certs/client"
++      DOCKER_TLS_VERIFY: "1"
++    volumes:
++      - /opt/woodpeckerci/dind-certs:/dind-certs
+    commands:
+      - docker version
+```
+
+This step should output the server and client version information if everything has been set up correctly.
+
+Full example:
+
+```yaml
+steps:
+  - name: test
+    image: docker:cli # use 'docker:<major-version>-cli' or similar in production
+    environment:
+      DOCKER_HOST: 'tcp://docker:2376'
+      DOCKER_CERT_PATH: '/dind-certs/client'
+      DOCKER_TLS_VERIFY: '1'
+    volumes:
+      - /opt/woodpeckerci/dind-certs:/dind-certs
+    commands:
+      - docker version
+
+services:
+  - name: docker
+    image: docker:dind # use 'docker:<major-version>-dind' or similar in production
+    privileged: true
+    environment:
+      DOCKER_TLS_CERTDIR: /dind-certs
+    volumes:
+      - /opt/woodpeckerci/dind-certs:/dind-certs
+    ports:
+      - 2376
+```

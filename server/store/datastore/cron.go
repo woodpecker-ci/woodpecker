@@ -17,7 +17,7 @@ package datastore
 import (
 	"xorm.io/builder"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
 func (s storage) CronCreate(cron *model.Cron) error {
@@ -35,7 +35,7 @@ func (s storage) CronFind(repo *model.Repo, id int64) (*model.Cron, error) {
 
 func (s storage) CronList(repo *model.Repo, p *model.ListOptions) ([]*model.Cron, error) {
 	var crons []*model.Cron
-	return crons, s.paginate(p).Where("repo_id = ?", repo.ID).Find(&crons)
+	return crons, s.paginate(p).Where("repo_id = ?", repo.ID).OrderBy("name").Find(&crons)
 }
 
 func (s storage) CronUpdate(_ *model.Repo, cron *model.Cron) error {

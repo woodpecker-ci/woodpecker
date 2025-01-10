@@ -21,11 +21,11 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/errors"
-	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
-	"go.woodpecker-ci.org/woodpecker/v2/server/forge/mocks"
-	forge_types "go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/errors"
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge"
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge/mocks"
+	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
 func TestGlobalEnvsubst(t *testing.T) {
@@ -42,7 +42,7 @@ func TestGlobalEnvsubst(t *testing.T) {
 			Message: "aaa",
 			Event:   model.EventPush,
 		},
-		Last:  &model.Pipeline{},
+		Prev:  &model.Pipeline{},
 		Netrc: &model.Netrc{},
 		Secs:  []*model.Secret{},
 		Regs:  []*model.Registry{},
@@ -81,7 +81,7 @@ func TestMissingGlobalEnvsubst(t *testing.T) {
 			Message: "aaa",
 			Event:   model.EventPush,
 		},
-		Last:  &model.Pipeline{},
+		Prev:  &model.Pipeline{},
 		Netrc: &model.Netrc{},
 		Secs:  []*model.Secret{},
 		Regs:  []*model.Registry{},
@@ -116,7 +116,7 @@ func TestMultilineEnvsubst(t *testing.T) {
 			Message: `aaa
 bbb`,
 		},
-		Last:  &model.Pipeline{},
+		Prev:  &model.Pipeline{},
 		Netrc: &model.Netrc{},
 		Secs:  []*model.Secret{},
 		Regs:  []*model.Registry{},
@@ -159,7 +159,7 @@ func TestMultiPipeline(t *testing.T) {
 		Curr: &model.Pipeline{
 			Event: model.EventPush,
 		},
-		Last:  &model.Pipeline{},
+		Prev:  &model.Pipeline{},
 		Netrc: &model.Netrc{},
 		Secs:  []*model.Secret{},
 		Regs:  []*model.Registry{},
@@ -200,7 +200,7 @@ func TestDependsOn(t *testing.T) {
 		Curr: &model.Pipeline{
 			Event: model.EventPush,
 		},
-		Last:  &model.Pipeline{},
+		Prev:  &model.Pipeline{},
 		Netrc: &model.Netrc{},
 		Secs:  []*model.Secret{},
 		Regs:  []*model.Registry{},
@@ -255,7 +255,7 @@ func TestRunsOn(t *testing.T) {
 		Curr: &model.Pipeline{
 			Event: model.EventPush,
 		},
-		Last:  &model.Pipeline{},
+		Prev:  &model.Pipeline{},
 		Netrc: &model.Netrc{},
 		Secs:  []*model.Secret{},
 		Regs:  []*model.Registry{},
@@ -296,7 +296,7 @@ func TestPipelineName(t *testing.T) {
 		Curr: &model.Pipeline{
 			Event: model.EventPush,
 		},
-		Last:  &model.Pipeline{},
+		Prev:  &model.Pipeline{},
 		Netrc: &model.Netrc{},
 		Secs:  []*model.Secret{},
 		Regs:  []*model.Registry{},
@@ -339,7 +339,7 @@ func TestBranchFilter(t *testing.T) {
 			Branch: "dev",
 			Event:  model.EventPush,
 		},
-		Last:  &model.Pipeline{},
+		Prev:  &model.Pipeline{},
 		Netrc: &model.Netrc{},
 		Secs:  []*model.Secret{},
 		Regs:  []*model.Registry{},
@@ -348,10 +348,10 @@ func TestBranchFilter(t *testing.T) {
 			{Data: []byte(`
 when:
   event: push
+  branch: main
 steps:
   xxx:
     image: scratch
-branches: main
 `)},
 			{Data: []byte(`
 when:
@@ -382,7 +382,7 @@ func TestRootWhenFilter(t *testing.T) {
 		Forge: getMockForge(t),
 		Repo:  &model.Repo{},
 		Curr:  &model.Pipeline{Event: "tag"},
-		Last:  &model.Pipeline{},
+		Prev:  &model.Pipeline{},
 		Netrc: &model.Netrc{},
 		Secs:  []*model.Secret{},
 		Regs:  []*model.Registry{},
@@ -432,7 +432,7 @@ func TestZeroSteps(t *testing.T) {
 		Forge: getMockForge(t),
 		Repo:  &model.Repo{},
 		Curr:  pipeline,
-		Last:  &model.Pipeline{},
+		Prev:  &model.Pipeline{},
 		Netrc: &model.Netrc{},
 		Secs:  []*model.Secret{},
 		Regs:  []*model.Registry{},
@@ -472,7 +472,7 @@ func TestZeroStepsAsMultiPipelineDeps(t *testing.T) {
 		Forge: getMockForge(t),
 		Repo:  &model.Repo{},
 		Curr:  pipeline,
-		Last:  &model.Pipeline{},
+		Prev:  &model.Pipeline{},
 		Netrc: &model.Netrc{},
 		Secs:  []*model.Secret{},
 		Regs:  []*model.Registry{},
@@ -530,7 +530,7 @@ func TestZeroStepsAsMultiPipelineTransitiveDeps(t *testing.T) {
 		Forge: getMockForge(t),
 		Repo:  &model.Repo{},
 		Curr:  pipeline,
-		Last:  &model.Pipeline{},
+		Prev:  &model.Pipeline{},
 		Netrc: &model.Netrc{},
 		Secs:  []*model.Secret{},
 		Regs:  []*model.Registry{},

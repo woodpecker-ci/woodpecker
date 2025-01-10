@@ -23,11 +23,18 @@ import (
 
 	"github.com/oklog/ulid/v2"
 
-	backend_types "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/metadata"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/compiler/settings"
-	yaml_types "go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/types"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/utils"
+	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/compiler/settings"
+	yaml_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/types"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/utils"
+)
+
+const (
+	// The pluginWorkspaceBase should not be changed, only if you are sure what you do.
+	pluginWorkspaceBase = "/woodpecker"
+	// DefaultWorkspaceBase is set if not altered by the user.
+	DefaultWorkspaceBase = pluginWorkspaceBase
 )
 
 func (c *Compiler) createProcess(container *yaml_types.Container, stepType backend_types.StepType) (*backend_types.Step, error) {
@@ -37,11 +44,16 @@ func (c *Compiler) createProcess(container *yaml_types.Container, stepType backe
 		detached   bool
 		workingDir string
 
-		workspace   = fmt.Sprintf("%s_default:%s", c.prefix, c.base)
 		privileged  = container.Privileged
 		networkMode = container.NetworkMode
-		// network    = container.Network
 	)
+
+	workspaceBase := c.workspaceBase
+	if container.IsPlugin() {
+		// plugins have a predefined workspace base to not tamper with entrypoint executables
+		workspaceBase = pluginWorkspaceBase
+	}
+	workspaceVolume := fmt.Sprintf("%s_default:%s", c.prefix, workspaceBase)
 
 	networks := []backend_types.Conn{
 		{
@@ -67,7 +79,7 @@ func (c *Compiler) createProcess(container *yaml_types.Container, stepType backe
 
 	var volumes []string
 	if !c.local {
-		volumes = append(volumes, workspace)
+		volumes = append(volumes, workspaceVolume)
 	}
 	volumes = append(volumes, c.volumes...)
 	for _, volume := range container.Volumes.Volumes {
@@ -78,15 +90,13 @@ func (c *Compiler) createProcess(container *yaml_types.Container, stepType backe
 	environment := map[string]string{}
 	maps.Copy(environment, c.env)
 
-	environment["CI_WORKSPACE"] = path.Join(c.base, c.path)
+	environment["CI_WORKSPACE"] = path.Join(workspaceBase, c.workspacePath)
 
 	if stepType == backend_types.StepTypeService || container.Detached {
 		detached = true
 	}
 
-	if !detached || len(container.Commands) != 0 {
-		workingDir = c.stepWorkingDir(container)
-	}
+	workingDir = c.stepWorkingDir(container)
 
 	getSecretValue := func(name string) (string, error) {
 		name = strings.ToLower(name)
@@ -104,29 +114,15 @@ func (c *Compiler) createProcess(container *yaml_types.Container, stepType backe
 		return secret.Value, nil
 	}
 
-	// TODO: why don't we pass secrets to detached steps?
-	if !detached {
-		if err := settings.ParamsToEnv(container.Settings, environment, "PLUGIN_", true, getSecretValue); err != nil {
-			return nil, err
-		}
+	if err := settings.ParamsToEnv(container.Settings, environment, "PLUGIN_", true, getSecretValue); err != nil {
+		return nil, err
 	}
 
 	if err := settings.ParamsToEnv(container.Environment, environment, "", false, getSecretValue); err != nil {
 		return nil, err
 	}
 
-	for _, requested := range container.Secrets.Secrets {
-		secretValue, err := getSecretValue(requested.Source)
-		if err != nil {
-			return nil, err
-		}
-
-		environment[requested.Target] = secretValue
-		// TODO: deprecated, remove in 3.x
-		environment[strings.ToUpper(requested.Target)] = secretValue
-	}
-
-	if utils.MatchImage(container.Image, c.escalated...) && container.IsPlugin() {
+	if utils.MatchImageDynamic(container.Image, c.escalated...) && container.IsPlugin() {
 		privileged = true
 	}
 
@@ -137,31 +133,6 @@ func (c *Compiler) createProcess(container *yaml_types.Container, stepType backe
 			authConfig.Password = registry.Password
 			break
 		}
-	}
-
-	memSwapLimit := int64(container.MemSwapLimit)
-	if c.reslimit.MemSwapLimit != 0 {
-		memSwapLimit = c.reslimit.MemSwapLimit
-	}
-	memLimit := int64(container.MemLimit)
-	if c.reslimit.MemLimit != 0 {
-		memLimit = c.reslimit.MemLimit
-	}
-	shmSize := int64(container.ShmSize)
-	if c.reslimit.ShmSize != 0 {
-		shmSize = c.reslimit.ShmSize
-	}
-	cpuQuota := int64(container.CPUQuota)
-	if c.reslimit.CPUQuota != 0 {
-		cpuQuota = c.reslimit.CPUQuota
-	}
-	cpuShares := int64(container.CPUShares)
-	if c.reslimit.CPUShares != 0 {
-		cpuShares = c.reslimit.CPUShares
-	}
-	cpuSet := container.CPUSet
-	if c.reslimit.CPUSet != "" {
-		cpuSet = c.reslimit.CPUSet
 	}
 
 	var ports []backend_types.Port
@@ -192,6 +163,7 @@ func (c *Compiler) createProcess(container *yaml_types.Container, stepType backe
 		Detached:       detached,
 		Privileged:     privileged,
 		WorkingDir:     workingDir,
+		WorkspaceBase:  workspaceBase,
 		Environment:    environment,
 		Commands:       container.Commands,
 		Entrypoint:     container.Entrypoint,
@@ -202,12 +174,6 @@ func (c *Compiler) createProcess(container *yaml_types.Container, stepType backe
 		Networks:       networks,
 		DNS:            container.DNS,
 		DNSSearch:      container.DNSSearch,
-		MemSwapLimit:   memSwapLimit,
-		MemLimit:       memLimit,
-		ShmSize:        shmSize,
-		CPUQuota:       cpuQuota,
-		CPUShares:      cpuShares,
-		CPUSet:         cpuSet,
 		AuthConfig:     authConfig,
 		OnSuccess:      onSuccess,
 		OnFailure:      onFailure,
@@ -222,7 +188,11 @@ func (c *Compiler) stepWorkingDir(container *yaml_types.Container) string {
 	if path.IsAbs(container.Directory) {
 		return container.Directory
 	}
-	return path.Join(c.base, c.path, container.Directory)
+	base := c.workspaceBase
+	if container.IsPlugin() {
+		base = pluginWorkspaceBase
+	}
+	return path.Join(base, c.workspacePath, container.Directory)
 }
 
 func convertPort(portDef string) (backend_types.Port, error) {

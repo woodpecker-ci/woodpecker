@@ -22,8 +22,6 @@ Otherwise, the communication should go via the `docker0` gateway (usually 172.17
 To configure the Docker network if the network's name is `gitea`, configure it like this:
 
 ```diff title="docker-compose.yaml"
- version: '3'
-
  services:
    [...]
    woodpecker-agent:
@@ -47,6 +45,10 @@ ALLOWED_HOST_LIST=external,loopback
 For reference see [Configuration Cheat Sheet](https://docs.gitea.io/en-us/config-cheat-sheet/#webhook-webhook).
 
 ![gitea oauth setup](gitea_oauth.gif)
+
+:::warning
+Make sure your Gitea configuration allows requesting the API with a fixed page length of 50. The default value for the maximum page size is 50, but if you set a value lower than 50, some Woodpecker features will not work properly. Also see the [Configuration Cheat Sheet](https://docs.gitea.com/administration/config-cheat-sheet#api-api).
+:::
 
 ## Configuration
 
@@ -93,11 +95,3 @@ Read the value for `WOODPECKER_GITEA_SECRET` from the specified filepath
 > Default: `false`
 
 Configure if SSL verification should be skipped.
-
-## Advanced options
-
-### `WOODPECKER_DEV_GITEA_OAUTH_URL`
-
-> Default: value of `WOODPECKER_GITEA_URL`
-
-Configures the user-facing Gitea server address. Should be used if `WOODPECKER_GITEA_URL` points to an internal URL used for API requests.

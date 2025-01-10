@@ -1,47 +1,25 @@
-import { inject, onMounted, provide, ref, type Ref } from 'vue';
-import { useRoute } from 'vue-router';
+import { ref } from 'vue';
+import type { RouteLocationRaw } from 'vue-router';
+
+import type { IconNames } from '~/components/atomic/Icon.vue';
+
+import { inject, provide } from './useInjectProvide';
 
 export interface Tab {
-  id: string;
+  to: RouteLocationRaw;
   title: string;
-  icon?: string;
+  count?: number;
+  icon?: IconNames;
   iconClass?: string;
+  matchChildren?: boolean;
 }
 
-export function useTabsProvider({
-  activeTab,
-  disableUrlHashMode,
-}: {
-  activeTab: Ref<string | undefined>;
-  disableUrlHashMode: Ref<boolean>;
-}) {
-  const route = useRoute();
-
+export function useTabsProvider() {
   const tabs = ref<Tab[]>([]);
-
   provide('tabs', tabs);
-  provide('disable-url-hash-mode', disableUrlHashMode);
-  provide('active-tab', activeTab);
-
-  onMounted(() => {
-    if (activeTab.value !== undefined) {
-      return;
-    }
-
-    const hashTab = route.hash.replace(/^#/, '');
-
-    activeTab.value = hashTab || tabs.value[0].id;
-  });
 }
 
 export function useTabsClient() {
-  const tabs = inject<Ref<Tab[]>>('tabs');
-  const disableUrlHashMode = inject<Ref<boolean>>('disable-url-hash-mode');
-  const activeTab = inject<Ref<string>>('active-tab');
-
-  if (activeTab === undefined || tabs === undefined || disableUrlHashMode === undefined) {
-    throw new Error('Please use this "useTabsClient" composition inside a component running "useTabsProvider".');
-  }
-
-  return { activeTab, tabs, disableUrlHashMode };
+  const tabs = inject('tabs');
+  return { tabs };
 }

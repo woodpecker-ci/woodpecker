@@ -17,20 +17,20 @@ package encryption
 import (
 	"fmt"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server/services/encryption/types"
-	"go.woodpecker-ci.org/woodpecker/v2/server/store"
+	"go.woodpecker-ci.org/woodpecker/v3/server/services/encryption/types"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 )
 
 type builder struct {
 	store   store.Store
-	ctx     *cli.Context
+	c       *cli.Command
 	clients []types.EncryptionClient
 }
 
-func Encryption(ctx *cli.Context, s store.Store) types.EncryptionBuilder {
-	return &builder{store: s, ctx: ctx}
+func Encryption(c *cli.Command, s store.Store) types.EncryptionBuilder {
+	return &builder{store: s, c: c}
 }
 
 func (b builder) WithClient(client types.EncryptionClient) types.EncryptionBuilder {
@@ -44,7 +44,7 @@ func (b builder) Build() error {
 		return err
 	}
 
-	disableFlag := b.ctx.Bool(disableEncryptionConfigFlag)
+	disableFlag := b.c.Bool(disableEncryptionConfigFlag)
 
 	keyType, err := b.detectKeyType()
 	if err != nil {

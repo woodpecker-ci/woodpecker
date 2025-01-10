@@ -1,18 +1,21 @@
 <template>
   <Panel>
-    <div class="flex flex-row border-b mb-4 pb-4 items-center dark:border-wp-background-100">
-      <div class="ml-2">
-        <h1 class="text-xl text-wp-text-100">{{ title }}</h1>
-        <p v-if="desc" class="text-sm text-wp-text-alt-100">
-          {{ desc }}
+    <div class="mb-4 flex flex-col justify-center border-b pb-4 dark:border-wp-background-100">
+      <div class="flex items-center justify-between">
+        <h1 class="flex items-center gap-1 text-xl text-wp-text-100">
+          {{ title }}
           <DocsLink v-if="docsUrl" :topic="title" :url="docsUrl" />
-        </p>
-        <Warning v-if="warning" class="text-sm mt-1" :text="warning" />
-      </div>
-
-      <div class="ml-auto">
+        </h1>
         <slot v-if="$slots.titleActions" name="titleActions" />
       </div>
+
+      <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+        <p v-if="description" class="text-sm text-wp-text-alt-100">{{ description }}</p>
+        <div v-if="$slots.headerActions">
+          <slot name="headerActions" />
+        </div>
+      </div>
+      <slot name="headerEnd" />
     </div>
 
     <slot />
@@ -21,13 +24,11 @@
 
 <script setup lang="ts">
 import DocsLink from '~/components/atomic/DocsLink.vue';
-import Warning from '~/components/atomic/Warning.vue';
 import Panel from '~/components/layout/Panel.vue';
 
 defineProps<{
   title: string;
-  desc?: string;
+  description?: string;
   docsUrl?: string;
-  warning?: string;
 }>();
 </script>

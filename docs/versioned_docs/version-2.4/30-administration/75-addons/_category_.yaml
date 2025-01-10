@@ -1,6 +1,0 @@
-label: 'Addons'
-collapsible: true
-collapsed: true
-link:
-  type: 'doc'
-  id: 'overview'

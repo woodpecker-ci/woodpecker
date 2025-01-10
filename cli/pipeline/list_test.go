@@ -1,16 +1,17 @@
 package pipeline
 
 import (
+	"context"
 	"errors"
 	"io"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
-	"go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker"
-	"go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker/mocks"
+	"go.woodpecker-ci.org/woodpecker/v3/woodpecker-go/woodpecker"
+	"go.woodpecker-ci.org/woodpecker/v3/woodpecker-go/woodpecker/mocks"
 )
 
 func TestPipelineList(t *testing.T) {
@@ -21,7 +22,7 @@ func TestPipelineList(t *testing.T) {
 		pipelines   []*woodpecker.Pipeline
 		pipelineErr error
 		args        []string
-		expected    []woodpecker.Pipeline
+		expected    []*woodpecker.Pipeline
 		wantErr     error
 	}{
 		{
@@ -33,51 +34,10 @@ func TestPipelineList(t *testing.T) {
 				{ID: 3, Branch: "main", Event: "push", Status: "failure"},
 			},
 			args: []string{"ls", "repo/name"},
-			expected: []woodpecker.Pipeline{
+			expected: []*woodpecker.Pipeline{
 				{ID: 1, Branch: "main", Event: "push", Status: "success"},
 				{ID: 2, Branch: "develop", Event: "pull_request", Status: "running"},
 				{ID: 3, Branch: "main", Event: "push", Status: "failure"},
-			},
-		},
-		{
-			name:   "filter by branch",
-			repoID: 1,
-			pipelines: []*woodpecker.Pipeline{
-				{ID: 1, Branch: "main", Event: "push", Status: "success"},
-				{ID: 2, Branch: "develop", Event: "pull_request", Status: "running"},
-				{ID: 3, Branch: "main", Event: "push", Status: "failure"},
-			},
-			args: []string{"ls", "--branch", "main", "repo/name"},
-			expected: []woodpecker.Pipeline{
-				{ID: 1, Branch: "main", Event: "push", Status: "success"},
-				{ID: 3, Branch: "main", Event: "push", Status: "failure"},
-			},
-		},
-		{
-			name:   "filter by event",
-			repoID: 1,
-			pipelines: []*woodpecker.Pipeline{
-				{ID: 1, Branch: "main", Event: "push", Status: "success"},
-				{ID: 2, Branch: "develop", Event: "pull_request", Status: "running"},
-				{ID: 3, Branch: "main", Event: "push", Status: "failure"},
-			},
-			args: []string{"ls", "--event", "push", "repo/name"},
-			expected: []woodpecker.Pipeline{
-				{ID: 1, Branch: "main", Event: "push", Status: "success"},
-				{ID: 3, Branch: "main", Event: "push", Status: "failure"},
-			},
-		},
-		{
-			name:   "filter by status",
-			repoID: 1,
-			pipelines: []*woodpecker.Pipeline{
-				{ID: 1, Branch: "main", Event: "push", Status: "success"},
-				{ID: 2, Branch: "develop", Event: "pull_request", Status: "running"},
-				{ID: 3, Branch: "main", Event: "push", Status: "failure"},
-			},
-			args: []string{"ls", "--status", "success", "repo/name"},
-			expected: []woodpecker.Pipeline{
-				{ID: 1, Branch: "main", Event: "push", Status: "success"},
 			},
 		},
 		{
@@ -89,7 +49,7 @@ func TestPipelineList(t *testing.T) {
 				{ID: 3, Branch: "main", Event: "push", Status: "failure"},
 			},
 			args: []string{"ls", "--limit", "2", "repo/name"},
-			expected: []woodpecker.Pipeline{
+			expected: []*woodpecker.Pipeline{
 				{ID: 1, Branch: "main", Event: "push", Status: "success"},
 				{ID: 2, Branch: "develop", Event: "pull_request", Status: "running"},
 			},
@@ -106,14 +66,20 @@ func TestPipelineList(t *testing.T) {
 	for _, tt := range testtases {
 		t.Run(tt.name, func(t *testing.T) {
 			mockClient := mocks.NewClient(t)
-			mockClient.On("PipelineList", mock.Anything).Return(tt.pipelines, tt.pipelineErr)
+			mockClient.On("PipelineList", mock.Anything, mock.Anything).Return(func(_ int64, opt woodpecker.PipelineListOptions) ([]*woodpecker.Pipeline, error) {
+				if tt.pipelineErr != nil {
+					return nil, tt.pipelineErr
+				}
+				if opt.Page == 1 {
+					return tt.pipelines, nil
+				}
+				return []*woodpecker.Pipeline{}, nil
+			}).Maybe()
 			mockClient.On("RepoLookup", mock.Anything).Return(&woodpecker.Repo{ID: tt.repoID}, nil)
 
-			app := &cli.App{Writer: io.Discard}
-			c := cli.NewContext(app, nil, nil)
-
-			command := pipelineListCmd
-			command.Action = func(c *cli.Context) error {
+			command := buildPipelineListCmd()
+			command.Writer = io.Discard
+			command.Action = func(_ context.Context, c *cli.Command) error {
 				pipelines, err := pipelineList(c, mockClient)
 				if tt.wantErr != nil {
 					assert.EqualError(t, err, tt.wantErr.Error())
@@ -126,7 +92,7 @@ func TestPipelineList(t *testing.T) {
 				return nil
 			}
 
-			_ = command.Run(c, tt.args...)
+			_ = command.Run(context.Background(), tt.args)
 		})
 	}
 }

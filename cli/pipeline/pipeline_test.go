@@ -2,14 +2,15 @@ package pipeline
 
 import (
 	"bytes"
+	"context"
 	"io"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
-	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
-	"go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/common"
+	"go.woodpecker-ci.org/woodpecker/v3/woodpecker-go/woodpecker"
 )
 
 func TestPipelineOutput(t *testing.T) {
@@ -22,7 +23,7 @@ func TestPipelineOutput(t *testing.T) {
 		{
 			name:     "table output with default columns",
 			args:     []string{},
-			expected: "NUMBER  STATUS   EVENT  BRANCH  MESSAGE  AUTHOR\n1       success  push   main    message  John Doe\n",
+			expected: "NUMBER  STATUS   EVENT  BRANCH  MESSAGE            AUTHOR\n1       success  push   main    message multiline  John Doe\n",
 		},
 		{
 			name:     "table output with custom columns",
@@ -32,7 +33,7 @@ func TestPipelineOutput(t *testing.T) {
 		{
 			name:     "table output with no header",
 			args:     []string{"output", "--output-no-headers"},
-			expected: "1  success  push  main  message  John Doe\n",
+			expected: "1  success  push  main  message multiline  John Doe\n",
 		},
 		{
 			name:     "go-template output",
@@ -46,41 +47,40 @@ func TestPipelineOutput(t *testing.T) {
 		},
 	}
 
-	pipelines := []woodpecker.Pipeline{
+	pipelines := []*woodpecker.Pipeline{
 		{
 			Number:  1,
 			Status:  "success",
 			Event:   "push",
 			Branch:  "main",
-			Message: "message",
-			Author:  "John Doe",
+			Message: "message\nmultiline",
+			Author:  "John Doe\n",
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			app := &cli.App{Writer: io.Discard}
-			c := cli.NewContext(app, nil, nil)
+			command := &cli.Command{
+				Writer: io.Discard,
+				Name:   "output",
+				Flags:  common.OutputFlags("table"),
+				Action: func(_ context.Context, c *cli.Command) error {
+					var buf bytes.Buffer
+					err := pipelineOutput(c, pipelines, &buf)
 
-			command := &cli.Command{}
-			command.Name = "output"
-			command.Flags = common.OutputFlags("table")
-			command.Action = func(c *cli.Context) error {
-				var buf bytes.Buffer
-				err := pipelineOutput(c, pipelines, &buf)
+					if tt.wantErr {
+						assert.Error(t, err)
+						return nil
+					}
 
-				if tt.wantErr {
-					assert.Error(t, err)
+					assert.NoError(t, err)
+					assert.Equal(t, tt.expected, buf.String())
+
 					return nil
-				}
-
-				assert.NoError(t, err)
-				assert.Equal(t, tt.expected, buf.String())
-
-				return nil
+				},
 			}
 
-			_ = command.Run(c, tt.args...)
+			_ = command.Run(context.Background(), tt.args)
 		})
 	}
 }

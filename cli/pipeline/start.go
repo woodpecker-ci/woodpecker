@@ -15,13 +15,15 @@
 package pipeline
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"strconv"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
-	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v3/woodpecker-go/woodpecker"
 )
 
 var pipelineStartCmd = &cli.Command{
@@ -33,14 +35,14 @@ var pipelineStartCmd = &cli.Command{
 		&cli.StringSliceFlag{
 			Name:    "param",
 			Aliases: []string{"p"},
-			Usage:   "custom parameters to be injected into the step environment. Format: KEY=value",
+			Usage:   "custom parameters to inject into the step environment. Format: KEY=value",
 		},
 	},
 }
 
-func pipelineStart(c *cli.Context) (err error) {
+func pipelineStart(ctx context.Context, c *cli.Command) (err error) {
 	repoIDOrFullName := c.Args().First()
-	client, err := internal.NewClient(c)
+	client, err := internal.NewClient(ctx, c)
 	if err != nil {
 		return err
 	}
@@ -53,7 +55,7 @@ func pipelineStart(c *cli.Context) (err error) {
 	var number int64
 	if pipelineArg == "last" {
 		// Fetch the pipeline number from the last pipeline
-		pipeline, err := client.PipelineLast(repoID, "")
+		pipeline, err := client.PipelineLast(repoID, woodpecker.PipelineLastOptions{})
 		if err != nil {
 			return err
 		}
@@ -68,9 +70,11 @@ func pipelineStart(c *cli.Context) (err error) {
 		}
 	}
 
-	params := internal.ParseKeyPair(c.StringSlice("param"))
+	opt := woodpecker.PipelineStartOptions{
+		Params: internal.ParseKeyPair(c.StringSlice("param")),
+	}
 
-	pipeline, err := client.PipelineStart(repoID, number, params)
+	pipeline, err := client.PipelineStart(repoID, number, opt)
 	if err != nil {
 		return err
 	}

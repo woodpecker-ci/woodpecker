@@ -20,14 +20,14 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/log"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc/mocks"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/log"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/rpc"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/rpc/mocks"
 )
 
 func TestLineWriter(t *testing.T) {
 	peer := mocks.NewPeer(t)
-	peer.On("Log", mock.Anything, mock.Anything).Return(nil)
+	peer.On("EnqueueLog", mock.Anything)
 
 	secrets := []string{"world"}
 	lw := log.NewLineWriter(peer, "e9ea76a5-44a1-4059-9c4a-6956c478b26d", secrets...)
@@ -37,7 +37,7 @@ func TestLineWriter(t *testing.T) {
 	_, err = lw.Write([]byte("the previous line had no newline at the end"))
 	assert.NoError(t, err)
 
-	peer.AssertCalled(t, "Log", mock.Anything, &rpc.LogEntry{
+	peer.AssertCalled(t, "EnqueueLog", &rpc.LogEntry{
 		StepUUID: "e9ea76a5-44a1-4059-9c4a-6956c478b26d",
 		Time:     0,
 		Type:     rpc.LogEntryStdout,
@@ -45,7 +45,7 @@ func TestLineWriter(t *testing.T) {
 		Data:     []byte("hello ********"),
 	})
 
-	peer.AssertCalled(t, "Log", mock.Anything, &rpc.LogEntry{
+	peer.AssertCalled(t, "EnqueueLog", &rpc.LogEntry{
 		StepUUID: "e9ea76a5-44a1-4059-9c4a-6956c478b26d",
 		Time:     0,
 		Type:     rpc.LogEntryStdout,

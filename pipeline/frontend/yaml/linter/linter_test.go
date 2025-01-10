@@ -19,9 +19,9 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/errors"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/linter"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/errors"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/linter"
 )
 
 func TestLint(t *testing.T) {
@@ -39,7 +39,7 @@ steps:
       - go build
       - go test
   publish:
-    image: plugins/docker
+    image: woodpeckerci/plugin-kaniko
     settings:
       repo: foo/bar
       foo: bar
@@ -61,7 +61,7 @@ steps:
       - go build
       - go test
   - name: publish
-    image: plugins/docker
+    image: woodpeckerci/plugin-kaniko
     settings:
       repo: foo/bar
       foo: bar
@@ -94,7 +94,11 @@ steps:
 			conf, err := yaml.ParseString(testd.Data)
 			assert.NoError(t, err)
 
-			assert.NoError(t, linter.New(linter.WithTrusted(true)).Lint([]*linter.WorkflowConfig{{
+			assert.NoError(t, linter.New(linter.WithTrusted(linter.TrustedConfiguration{
+				Network:  true,
+				Volumes:  true,
+				Security: true,
+			})).Lint([]*linter.WorkflowConfig{{
 				File:      testd.Title,
 				RawConfig: testd.Data,
 				Workflow:  conf,
@@ -110,7 +114,7 @@ func TestLintErrors(t *testing.T) {
 	}{
 		{
 			from: "",
-			want: "Invalid or missing steps section",
+			want: "Invalid or missing `steps` section",
 		},
 		{
 			from: "steps: { build: { image: '' }  }",
@@ -118,44 +122,68 @@ func TestLintErrors(t *testing.T) {
 		},
 		{
 			from: "steps: { build: { image: golang, privileged: true }  }",
-			want: "Insufficient privileges to use privileged mode",
-		},
-		{
-			from: "steps: { build: { image: golang, shm_size: 10gb }  }",
-			want: "Insufficient privileges to override shm_size",
+			want: "Insufficient trust level to use `privileged` mode",
 		},
 		{
 			from: "steps: { build: { image: golang, dns: [ 8.8.8.8 ] }  }",
-			want: "Insufficient privileges to use custom dns",
+			want: "Insufficient trust level to use custom `dns`",
 		},
 
 		{
 			from: "steps: { build: { image: golang, dns_search: [ example.com ] }  }",
-			want: "Insufficient privileges to use dns_search",
+			want: "Insufficient trust level to use `dns_search`",
 		},
 		{
 			from: "steps: { build: { image: golang, devices: [ '/dev/tty0:/dev/tty0' ] }  }",
-			want: "Insufficient privileges to use devices",
+			want: "Insufficient trust level to use `devices`",
 		},
 		{
 			from: "steps: { build: { image: golang, extra_hosts: [ 'somehost:162.242.195.82' ] }  }",
-			want: "Insufficient privileges to use extra_hosts",
+			want: "Insufficient trust level to use `extra_hosts`",
 		},
 		{
 			from: "steps: { build: { image: golang, network_mode: host }  }",
-			want: "Insufficient privileges to use network_mode",
-		},
-		{
-			from: "steps: { build: { image: golang, networks: [ outside, default ] }  }",
-			want: "Insufficient privileges to use networks",
+			want: "Insufficient trust level to use `network_mode`",
 		},
 		{
 			from: "steps: { build: { image: golang, volumes: [ '/opt/data:/var/lib/mysql' ] }  }",
-			want: "Insufficient privileges to use volumes",
+			want: "Insufficient trust level to use `volumes`",
 		},
 		{
 			from: "steps: { build: { image: golang, network_mode: 'container:name' }  }",
-			want: "Insufficient privileges to use network_mode",
+			want: "Insufficient trust level to use `network_mode`",
+		},
+		{
+			from: "steps: { build: { image: golang, settings: { test: 'true' }, commands: [ 'echo ja', 'echo nein' ] } }",
+			want: "Cannot configure both `commands` and `settings`",
+		},
+		{
+			from: "steps: { build: { image: golang, settings: { test: 'true' }, entrypoint: [ '/bin/fish' ] } }",
+			want: "Cannot configure both `entrypoint` and `settings`",
+		},
+		{
+			from: "steps: { build: { image: golang, settings: { test: 'true' }, environment: { 'TEST': 'true' } } }",
+			want: "Should not configure both `environment` and `settings`",
+		},
+		{
+			from: "{pipeline: { build: { image: golang, settings: { test: 'true' } } }, when: { branch: main, event: push } }",
+			want: "Additional property pipeline is not allowed",
+		},
+		{
+			from: "{steps: { build: { image: plugins/docker, settings: { test: 'true' } } }, when: { branch: main, event: push } } }",
+			want: "The formerly privileged plugin `plugins/docker` is no longer privileged by default, if required, add it to `WOODPECKER_PLUGINS_PRIVILEGED`",
+		},
+		{
+			from: "{steps: { build: { image: golang, settings: { test: 'true' } } }, when: { branch: main, event: push }, clone: { git: { image: some-other/plugin-git:v1.1.0 } } }",
+			want: "Specified clone image does not match allow list, netrc is not injected",
+		},
+		{
+			from: "steps: { build: { image: golang, secrets: [ { source: mysql_username, target: mysql_username } ] } }",
+			want: "Usage of `secrets` is deprecated, use `environment` in combination with `from_secret`",
+		},
+		{
+			from: "steps: { build: { image: golang, secrets: [ 'mysql_username' ] } }",
+			want: "Usage of `secrets` is deprecated, use `environment` in combination with `from_secret`",
 		},
 	}
 
@@ -189,11 +217,11 @@ func TestBadHabits(t *testing.T) {
 	}{
 		{
 			from: "steps: { build: { image: golang } }",
-			want: "Please set an event filter for all steps or the whole workflow on all items of the when block",
+			want: "Set an event filter for all steps or the entire workflow on all items of the `when` block",
 		},
 		{
 			from: "when: [{branch: xyz}, {event: push}]\nsteps: { build: { image: golang } }",
-			want: "Please set an event filter for all steps or the whole workflow on all items of the when block",
+			want: "Set an event filter for all steps or the entire workflow on all items of the `when` block",
 		},
 	}
 

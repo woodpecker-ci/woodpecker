@@ -22,7 +22,7 @@ Below are resources requirements for Woodpecker components itself:
 | Component | Memory | CPU |
 | --------- | ------ | --- |
 | Server    | 200 MB | 1   |
-| Agent     |  32 MB | 1   |
+| Agent     | 32 MB  | 1   |
 
 Note, that those values do not include the operating system or workload (pipelines execution) resources consumption.
 

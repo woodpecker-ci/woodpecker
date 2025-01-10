@@ -23,8 +23,8 @@ import (
 
 	"golang.org/x/oauth2"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server/forge/bitbucket/internal"
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge/bitbucket/internal"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
 const (
@@ -59,13 +59,9 @@ func convertRepo(from *internal.Repo, perm *internal.RepoPerm) *model.Repo {
 		ForgeURL:      from.Links.HTML.Href,
 		IsSCMPrivate:  from.IsPrivate,
 		Avatar:        from.Owner.Links.Avatar.Href,
-		SCMKind:       model.SCMKind(from.Scm),
 		Branch:        from.MainBranch.Name,
 		Perm:          convertPerm(perm),
 		PREnabled:     true,
-	}
-	if repo.SCMKind == model.RepoHg {
-		repo.Branch = "default"
 	}
 	return &repo
 }
@@ -133,8 +129,8 @@ func sshCloneLink(repo *internal.Repo) string {
 func convertUser(from *internal.Account, token *oauth2.Token) *model.User {
 	return &model.User{
 		Login:         from.Login,
-		Token:         token.AccessToken,
-		Secret:        token.RefreshToken,
+		AccessToken:   token.AccessToken,
+		RefreshToken:  token.RefreshToken,
 		Expiry:        token.Expiry.UTC().Unix(),
 		Avatar:        from.Links.Avatar.Href,
 		ForgeRemoteID: model.ForgeRemoteID(fmt.Sprint(from.UUID)),
@@ -168,22 +164,31 @@ func convertPullHook(from *internal.PullRequestHook) *model.Pipeline {
 		event = model.EventPullClosed
 	}
 
-	return &model.Pipeline{
+	pipeline := &model.Pipeline{
 		Event:  event,
-		Commit: from.PullRequest.Dest.Commit.Hash,
-		Ref:    fmt.Sprintf("refs/heads/%s", from.PullRequest.Dest.Branch.Name),
+		Commit: from.PullRequest.Source.Commit.Hash,
+		Ref:    fmt.Sprintf("refs/pull-requests/%d/from", from.PullRequest.ID),
 		Refspec: fmt.Sprintf("%s:%s",
 			from.PullRequest.Source.Branch.Name,
 			from.PullRequest.Dest.Branch.Name,
 		),
 		ForgeURL:  from.PullRequest.Links.HTML.Href,
-		Branch:    from.PullRequest.Dest.Branch.Name,
-		Message:   from.PullRequest.Desc,
+		Branch:    from.PullRequest.Source.Branch.Name,
+		Message:   from.PullRequest.Title,
 		Avatar:    from.Actor.Links.Avatar.Href,
 		Author:    from.Actor.Login,
 		Sender:    from.Actor.Login,
 		Timestamp: from.PullRequest.Updated.UTC().Unix(),
+		FromFork:  from.PullRequest.Source.Repo.UUID != from.PullRequest.Dest.Repo.UUID,
 	}
+
+	if from.PullRequest.State == stateClosed {
+		pipeline.Commit = from.PullRequest.MergeCommit.Hash
+		pipeline.Ref = fmt.Sprintf("refs/heads/%s", from.PullRequest.Dest.Branch.Name)
+		pipeline.Branch = from.PullRequest.Dest.Branch.Name
+	}
+
+	return pipeline
 }
 
 // convertPushHook is a helper function used to convert a Bitbucket push

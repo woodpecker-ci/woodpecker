@@ -16,18 +16,18 @@ package pipeline
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/rs/zerolog/log"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server"
-	forge_types "go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
-	"go.woodpecker-ci.org/woodpecker/v2/server/store"
+	"go.woodpecker-ci.org/woodpecker/v3/server"
+	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 )
 
-// Approve update the status to pending for a blocked pipeline because of a gated repo
-// and start them afterward.
+// Approve update the status to pending for a blocked pipeline so it can be executed.
 func Approve(ctx context.Context, store store.Store, currentPipeline *model.Pipeline, user *model.User, repo *model.Repo) (*model.Pipeline, error) {
 	if currentPipeline.Status != model.StatusBlocked {
 		return nil, ErrBadRequest{Msg: fmt.Sprintf("cannot approve a pipeline with status %s", currentPipeline.Status)}
@@ -37,7 +37,7 @@ func Approve(ctx context.Context, store store.Store, currentPipeline *model.Pipe
 	if err != nil {
 		msg := fmt.Sprintf("failure to load forge for repo '%s'", repo.FullName)
 		log.Error().Err(err).Str("repo", repo.FullName).Msg(msg)
-		return nil, fmt.Errorf(msg)
+		return nil, errors.New(msg)
 	}
 
 	// fetch the pipeline file from the database
@@ -84,7 +84,7 @@ func Approve(ctx context.Context, store store.Store, currentPipeline *model.Pipe
 	if err != nil {
 		msg := fmt.Sprintf("failure to createPipelineItems for %s", repo.FullName)
 		log.Error().Err(err).Msg(msg)
-		return nil, fmt.Errorf(msg)
+		return nil, errors.New(msg)
 	}
 
 	// we have no way to link old workflows and steps in database to new engine generated steps,
@@ -100,7 +100,7 @@ func Approve(ctx context.Context, store store.Store, currentPipeline *model.Pipe
 	if err != nil {
 		msg := fmt.Sprintf("failure to start pipeline for %s: %v", repo.FullName, err)
 		log.Error().Err(err).Msg(msg)
-		return nil, fmt.Errorf(msg)
+		return nil, errors.New(msg)
 	}
 
 	return currentPipeline, nil

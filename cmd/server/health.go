@@ -16,20 +16,21 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"strings"
 	"time"
 
 	"github.com/rs/zerolog/log"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 const pingTimeout = 1 * time.Second
 
 // handles pinging the endpoint and returns an error if the
 // server is in an unhealthy state.
-func pinger(c *cli.Context) error {
+func pinger(_ context.Context, c *cli.Command) error {
 	scheme := "http"
 	serverAddr := c.String("server-addr")
 	if strings.HasPrefix(serverAddr, ":") {
@@ -38,7 +39,7 @@ func pinger(c *cli.Context) error {
 	}
 
 	// if woodpecker do ssl on it's own
-	if c.String("server-cert") != "" || c.Bool("lets-encrypt") {
+	if c.String("server-cert") != "" {
 		scheme = "https"
 	}
 

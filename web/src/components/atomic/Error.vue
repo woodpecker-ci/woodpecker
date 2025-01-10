@@ -1,8 +1,8 @@
 <template>
   <div
-    class="flex gap-2 items-center bg-wp-control-error-100 border-l-6 border border-solid border-wp-control-error-300 text-white p-2 rounded-md"
+    class="flex items-center gap-2 rounded-md border border-l-4 border-solid border-wp-error-200 bg-wp-error-100 p-2 text-white"
   >
-    <Icon v-if="!textOnly" name="error" />
+    <Icon v-if="!textOnly" name="alert" />
     <slot>
       <span class="whitespace-pre">{{ text }}</span>
     </slot>
@@ -10,6 +10,8 @@
 </template>
 
 <script lang="ts" setup>
+import Icon from './Icon.vue';
+
 defineProps<{
   textOnly?: boolean;
   text?: string;

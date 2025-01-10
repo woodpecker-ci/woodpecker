@@ -23,7 +23,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/log"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/log"
 )
 
 type testWriter struct {
@@ -83,7 +83,7 @@ func TestCopyLineByLine(t *testing.T) {
 	assert.Lenf(t, writes, 2, "expected 2 writes, got: %v", writes)
 
 	// wait for the goroutine to write the data
-	time.Sleep(time.Millisecond)
+	time.Sleep(10 * time.Millisecond)
 
 	writtenData := strings.Join(writes, "-")
 	assert.Equal(t, "12345\n-678\n", writtenData, "unexpected writtenData: %s", writtenData)
@@ -131,6 +131,8 @@ func TestCopyLineByLineSizeLimit(t *testing.T) {
 	if _, err := w.Write([]byte("67\n89")); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
+	// wait for writer to write
+	time.Sleep(time.Millisecond)
 
 	writes = testWriter.GetWrites()
 	assert.Lenf(t, testWriter.GetWrites(), 2, "expected 2 writes, got: %v", writes)

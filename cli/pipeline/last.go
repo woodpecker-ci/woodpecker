@@ -15,16 +15,18 @@
 package pipeline
 
 import (
-	"github.com/urfave/cli/v2"
+	"context"
 
-	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
-	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
-	"go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker"
+	"github.com/urfave/cli/v3"
+
+	"go.woodpecker-ci.org/woodpecker/v3/cli/common"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v3/woodpecker-go/woodpecker"
 )
 
 var pipelineLastCmd = &cli.Command{
 	Name:      "last",
-	Usage:     "show latest pipeline details",
+	Usage:     "show latest pipeline information",
 	ArgsUsage: "<repo-id|repo-full-name>",
 	Action:    pipelineLast,
 	Flags: append(common.OutputFlags("table"), []cli.Flag{
@@ -36,9 +38,9 @@ var pipelineLastCmd = &cli.Command{
 	}...),
 }
 
-func pipelineLast(c *cli.Context) error {
+func pipelineLast(ctx context.Context, c *cli.Command) error {
 	repoIDOrFullName := c.Args().First()
-	client, err := internal.NewClient(c)
+	client, err := internal.NewClient(ctx, c)
 	if err != nil {
 		return err
 	}
@@ -47,10 +49,14 @@ func pipelineLast(c *cli.Context) error {
 		return err
 	}
 
-	pipeline, err := client.PipelineLast(repoID, c.String("branch"))
+	opt := woodpecker.PipelineLastOptions{
+		Branch: c.String("branch"),
+	}
+
+	pipeline, err := client.PipelineLast(repoID, opt)
 	if err != nil {
 		return err
 	}
 
-	return pipelineOutput(c, []woodpecker.Pipeline{*pipeline})
+	return pipelineOutput(c, []*woodpecker.Pipeline{pipeline})
 }

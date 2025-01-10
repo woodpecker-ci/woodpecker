@@ -4,7 +4,29 @@ import { computed, reactive, ref, type Ref } from 'vue';
 import useApiClient from '~/compositions/useApiClient';
 import type { Pipeline, PipelineFeed, PipelineWorkflow } from '~/lib/api/types';
 import { useRepoStore } from '~/store/repos';
-import { comparePipelines, comparePipelinesWithStatus, isPipelineActive } from '~/utils/helpers';
+
+/**
+ * Compare two pipelines by creation timestamp.
+ * @param {object} a - A pipeline.
+ * @param {object} b - A pipeline.
+ * @returns {number} 0 if created at the same time, < 0 if b was create before a, > 0 otherwise
+ */
+function comparePipelines(a: Pipeline, b: Pipeline): number {
+  return (b.created || -1) - (a.created || -1);
+}
+
+/**
+ * Compare two pipelines by the status.
+ * Giving pending, running, or started higher priority than other status
+ * @param {object} a - A pipeline.
+ * @param {object} b - A pipeline.
+ * @returns {number} 0 if status same priority, < 0 if b has higher priority, > 0 otherwise
+ */
+function comparePipelinesWithStatus(a: Pipeline, b: Pipeline): number {
+  const bPriority = ['pending', 'running', 'started'].includes(b.status) ? 1 : 0;
+  const aPriority = ['pending', 'running', 'started'].includes(a.status) ? 1 : 0;
+  return bPriority - aPriority || comparePipelines(a, b);
+}
 
 export const usePipelineStore = defineStore('pipelines', () => {
   const apiClient = useApiClient();
@@ -18,6 +40,14 @@ export const usePipelineStore = defineStore('pipelines', () => {
       ...(repoPipelines.get(pipeline.number) || {}),
       ...pipeline,
     });
+
+    // Update last pipeline number for the repo
+    const repo = repoStore.repos.get(repoId);
+    if (repo?.last_pipeline !== undefined && repo.last_pipeline < pipeline.number) {
+      repo.last_pipeline = pipeline.number;
+      repoStore.setRepo(repo);
+    }
+
     pipelines.set(repoId, repoPipelines);
   }
 
@@ -25,10 +55,14 @@ export const usePipelineStore = defineStore('pipelines', () => {
     return computed(() => Array.from(pipelines.get(repoId.value)?.values() || []).sort(comparePipelines));
   }
 
-  function getPipeline(repoId: Ref<number>, _pipelineNumber: Ref<string>) {
+  function getPipeline(repoId: Ref<number>, _pipelineNumber: Ref<string | number>) {
     return computed(() => {
-      const pipelineNumber = Number.parseInt(_pipelineNumber.value, 10);
-      return pipelines.get(repoId.value)?.get(pipelineNumber);
+      if (typeof _pipelineNumber.value === 'string') {
+        const pipelineNumber = Number.parseInt(_pipelineNumber.value, 10);
+        return pipelines.get(repoId.value)?.get(pipelineNumber);
+      }
+
+      return pipelines.get(repoId.value)?.get(_pipelineNumber.value);
     });
   }
 
@@ -75,7 +109,9 @@ export const usePipelineStore = defineStore('pipelines', () => {
       .filter((pipeline) => repoStore.ownedRepoIds.includes(pipeline.repo_id)),
   );
 
-  const activePipelines = computed(() => pipelineFeed.value.filter(isPipelineActive));
+  const activePipelines = computed(() =>
+    pipelineFeed.value.filter((pipeline) => ['pending', 'running', 'started'].includes(pipeline.status)),
+  );
 
   async function loadPipelineFeed() {
     await repoStore.loadRepos();

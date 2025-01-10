@@ -15,88 +15,114 @@
 package pipeline
 
 import (
-	"github.com/urfave/cli/v2"
+	"context"
+	"time"
 
-	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
-	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
-	"go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker"
+	"github.com/urfave/cli/v3"
+
+	"go.woodpecker-ci.org/woodpecker/v3/cli/common"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/internal"
+	shared_utils "go.woodpecker-ci.org/woodpecker/v3/shared/utils"
+	"go.woodpecker-ci.org/woodpecker/v3/woodpecker-go/woodpecker"
 )
 
 //nolint:mnd
-var pipelineListCmd = &cli.Command{
-	Name:      "ls",
-	Usage:     "show pipeline history",
-	ArgsUsage: "<repo-id|repo-full-name>",
-	Action:    List,
-	Flags: append(common.OutputFlags("table"), []cli.Flag{
-		&cli.StringFlag{
-			Name:  "branch",
-			Usage: "branch filter",
-		},
-		&cli.StringFlag{
-			Name:  "event",
-			Usage: "event filter",
-		},
-		&cli.StringFlag{
-			Name:  "status",
-			Usage: "status filter",
-		},
-		&cli.IntFlag{
-			Name:  "limit",
-			Usage: "limit the list size",
-			Value: 25,
-		},
-	}...),
+func buildPipelineListCmd() *cli.Command {
+	return &cli.Command{
+		Name:      "ls",
+		Usage:     "show pipeline history",
+		ArgsUsage: "<repo-id|repo-full-name>",
+		Action:    List,
+		Flags: append(common.OutputFlags("table"), []cli.Flag{
+			&cli.StringFlag{
+				Name:  "branch",
+				Usage: "branch filter",
+			},
+			&cli.StringFlag{
+				Name:  "event",
+				Usage: "event filter",
+			},
+			&cli.StringFlag{
+				Name:  "status",
+				Usage: "status filter",
+			},
+			&cli.IntFlag{
+				Name:  "limit",
+				Usage: "limit the list size",
+				Value: 25,
+			},
+			&cli.TimestampFlag{
+				Name:  "before",
+				Usage: "only return pipelines before this date (RFC3339)",
+				Config: cli.TimestampConfig{
+					Layouts: []string{
+						time.RFC3339,
+					},
+				},
+			},
+			&cli.TimestampFlag{
+				Name:  "after",
+				Usage: "only return pipelines after this date (RFC3339)",
+				Config: cli.TimestampConfig{
+					Layouts: []string{
+						time.RFC3339,
+					},
+				},
+			},
+		}...),
+	}
 }
 
-func List(c *cli.Context) error {
-	client, err := internal.NewClient(c)
+func List(ctx context.Context, c *cli.Command) error {
+	client, err := internal.NewClient(ctx, c)
 	if err != nil {
 		return err
 	}
-	resources, err := pipelineList(c, client)
+	pipelines, err := pipelineList(c, client)
 	if err != nil {
 		return err
 	}
-	return pipelineOutput(c, resources)
+	return pipelineOutput(c, pipelines)
 }
 
-func pipelineList(c *cli.Context, client woodpecker.Client) ([]woodpecker.Pipeline, error) {
-	resources := make([]woodpecker.Pipeline, 0)
-
+func pipelineList(c *cli.Command, client woodpecker.Client) ([]*woodpecker.Pipeline, error) {
 	repoIDOrFullName := c.Args().First()
 	repoID, err := internal.ParseRepo(client, repoIDOrFullName)
 	if err != nil {
-		return resources, err
+		return nil, err
 	}
 
-	pipelines, err := client.PipelineList(repoID)
-	if err != nil {
-		return resources, err
+	opt := woodpecker.PipelineListOptions{}
+
+	if before := c.Timestamp("before"); !before.IsZero() {
+		opt.Before = before
+	}
+	if after := c.Timestamp("after"); !after.IsZero() {
+		opt.After = after
 	}
 
 	branch := c.String("branch")
 	event := c.String("event")
 	status := c.String("status")
-	limit := c.Int("limit")
+	limit := int(c.Int("limit"))
 
-	var count int
-	for _, pipeline := range pipelines {
-		if count >= limit {
-			break
-		}
-		if branch != "" && pipeline.Branch != branch {
-			continue
-		}
-		if event != "" && pipeline.Event != event {
-			continue
-		}
-		if status != "" && pipeline.Status != status {
-			continue
-		}
-		resources = append(resources, *pipeline)
-		count++
+	pipelines, err := shared_utils.Paginate(func(page int) ([]*woodpecker.Pipeline, error) {
+		return client.PipelineList(repoID,
+			woodpecker.PipelineListOptions{
+				ListOptions: woodpecker.ListOptions{
+					Page: page,
+				},
+				Before: opt.Before,
+				After:  opt.After,
+				Branch: branch,
+				Events: []string{event},
+				Status: status,
+			},
+		)
+	}, limit)
+	if err != nil {
+		return nil, err
 	}
 
-	return resources, nil
+	return pipelines, nil
 }

@@ -23,15 +23,17 @@ import (
 
 	"github.com/docker/docker/api/types/container"
 
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/common"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/common"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 )
 
 // Valid container volumes must have at least two components, source and destination.
 const minVolumeComponents = 2
 
 // returns a container configuration.
-func (e *docker) toConfig(step *types.Step) *container.Config {
+func (e *docker) toConfig(step *types.Step, options BackendOptions) *container.Config {
+	e.windowsPathPatch(step)
+
 	config := &container.Config{
 		Image: step.Image,
 		Labels: map[string]string{
@@ -41,16 +43,21 @@ func (e *docker) toConfig(step *types.Step) *container.Config {
 		WorkingDir:   step.WorkingDir,
 		AttachStdout: true,
 		AttachStderr: true,
+		Volumes:      toVol(step.Volumes),
+		User:         options.User,
 	}
 	configEnv := make(map[string]string)
 	maps.Copy(configEnv, step.Environment)
 
 	if len(step.Commands) > 0 {
-		env, entry := common.GenerateContainerConf(step.Commands, e.info.OSType)
+		env, entry := common.GenerateContainerConf(step.Commands, e.info.OSType, step.WorkingDir)
 		for k, v := range env {
 			configEnv[k] = v
 		}
 		config.Entrypoint = entry
+
+		// step.WorkingDir will be respected by the generated script
+		config.WorkingDir = step.WorkspaceBase
 	}
 	if len(step.Entrypoint) > 0 {
 		config.Entrypoint = step.Entrypoint
@@ -58,9 +65,6 @@ func (e *docker) toConfig(step *types.Step) *container.Config {
 
 	if len(configEnv) != 0 {
 		config.Env = toEnv(configEnv)
-	}
-	if len(step.Volumes) != 0 {
-		config.Volumes = toVol(step.Volumes)
 	}
 	return config
 }
@@ -70,20 +74,20 @@ func toContainerName(step *types.Step) string {
 }
 
 // returns a container host configuration.
-func toHostConfig(step *types.Step) *container.HostConfig {
+func toHostConfig(step *types.Step, conf *config) *container.HostConfig {
 	config := &container.HostConfig{
 		Resources: container.Resources{
-			CPUQuota:   step.CPUQuota,
-			CPUShares:  step.CPUShares,
-			CpusetCpus: step.CPUSet,
-			Memory:     step.MemLimit,
-			MemorySwap: step.MemSwapLimit,
+			CPUQuota:   conf.resourceLimit.CPUQuota,
+			CPUShares:  conf.resourceLimit.CPUShares,
+			CpusetCpus: conf.resourceLimit.CPUSet,
+			Memory:     conf.resourceLimit.MemLimit,
+			MemorySwap: conf.resourceLimit.MemSwapLimit,
 		},
+		ShmSize: conf.resourceLimit.ShmSize,
 		LogConfig: container.LogConfig{
 			Type: "json-file",
 		},
 		Privileged: step.Privileged,
-		ShmSize:    step.ShmSize,
 	}
 
 	if len(step.NetworkMode) != 0 {
@@ -127,7 +131,10 @@ func toHostConfig(step *types.Step) *container.HostConfig {
 // helper function that converts a slice of volume paths to a set of
 // unique volume names.
 func toVol(paths []string) map[string]struct{} {
-	set := map[string]struct{}{}
+	if len(paths) == 0 {
+		return nil
+	}
+	set := make(map[string]struct{})
 	for _, path := range paths {
 		parts, err := splitVolumeParts(path)
 		if err != nil {
@@ -146,7 +153,9 @@ func toVol(paths []string) map[string]struct{} {
 func toEnv(env map[string]string) []string {
 	var envs []string
 	for k, v := range env {
-		envs = append(envs, k+"="+v)
+		if k != "" {
+			envs = append(envs, k+"="+v)
+		}
 	}
 	return envs
 }

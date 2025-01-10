@@ -23,13 +23,13 @@ If you still need to pass artifacts between the workflows you need use some stor
 
 ```bash
 .woodpecker/
-├── .build.yaml
-├── .deploy.yaml
-├── .lint.yaml
-└── .test.yaml
+├── build.yaml
+├── deploy.yaml
+├── lint.yaml
+└── test.yaml
 ```
 
-```yaml title=".woodpecker/.build.yaml"
+```yaml title=".woodpecker/build.yaml"
 steps:
   - name: build
     image: debian:stable-slim
@@ -38,7 +38,7 @@ steps:
       - sleep 5
 ```
 
-```yaml title=".woodpecker/.deploy.yaml"
+```yaml title=".woodpecker/deploy.yaml"
 steps:
   - name: deploy
     image: debian:stable-slim
@@ -51,7 +51,7 @@ depends_on:
   - test
 ```
 
-```yaml title=".woodpecker/.test.yaml"
+```yaml title=".woodpecker/test.yaml"
 steps:
   - name: test
     image: debian:stable-slim
@@ -63,7 +63,7 @@ depends_on:
   - build
 ```
 
-```yaml title=".woodpecker/.lint.yaml"
+```yaml title=".woodpecker/lint.yaml"
 steps:
   - name: lint
     image: debian:stable-slim

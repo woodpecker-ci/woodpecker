@@ -6,6 +6,11 @@ The Workflow section defines a list of steps to build, test and deploy your code
 An exception to this rule are steps with a [`status: [failure]`](#status) condition, which ensures that they are executed in the case of a failed run.
 :::
 
+:::note
+We support most of YAML 1.2, but preserve some behavior from 1.1 for backward compatibility.
+Read more at: [https://github.com/go-yaml/yaml](https://github.com/go-yaml/yaml/tree/v3)
+:::
+
 Example steps:
 
 ```yaml
@@ -99,7 +104,7 @@ When using the `local` backend, the `image` entry is used to specify the shell, 
        - go test
 
    - name: publish
-+    image: plugins/docker
++    image: woodpeckerci/plugin-kaniko
      repo: foo/bar
 
  services:
@@ -174,12 +179,6 @@ Woodpecker provides the ability to pass environment variables to individual step
 
 For more details, check the [environment docs](./50-environment.md).
 
-### `secrets`
-
-Woodpecker provides the ability to store named parameters external to the YAML configuration file, in a central secret store. These secrets can be passed to individual steps of the workflow at runtime.
-
-For more details, check the [secrets docs](./40-secrets.md).
-
 ### `failure`
 
 Some of the steps may be allowed to fail without causing the whole workflow and therefore pipeline to report a failure (e.g., a step executing a linting check). To enable this, add `failure: ignore` to your step. If Woodpecker encounters an error while executing the step, it will report it as failed but still executes the next steps of the workflow, if any, without affecting the status of the workflow.
@@ -196,7 +195,7 @@ Some of the steps may be allowed to fail without causing the whole workflow and 
 
 ### `when` - Conditional Execution
 
-Woodpecker supports defining a list of conditions for a step by using a `when` block. If at least one of the conditions in the `when` block evaluate to true the step is executed, otherwise it is skipped. A condition is evaluated to true if _all_ subconditions are true.
+Woodpecker supports defining a list of conditions for a step by using a `when` block. If at least one of the conditions in the `when` block evaluate to true the step is executed, otherwise it is skipped. A condition is evaluated to true if _all_ sub-conditions are true.
 A condition can be a check like:
 
 ```diff
@@ -215,7 +214,7 @@ A condition can be a check like:
 The `slack` step is executed if one of these conditions is met:
 
 1. The pipeline is executed from a pull request in the repo `test/test`
-2. The pipeline is executed from a push to `maiǹ`
+2. The pipeline is executed from a push to `main`
 
 #### `repo`
 
@@ -283,7 +282,16 @@ when:
 
 #### `event`
 
-Available events: `push`, `pull_request`, `pull_request_closed`, `tag`, `release`, `deployment`, `cron`, `manual`
+The available events are:
+
+- `push`: triggered when a commit is pushed to a branch.
+- `pull_request`: triggered when a pull request is opened or a new commit is pushed to it.
+- `pull_request_closed`: triggered when a pull request is closed or merged.
+- `tag`: triggered when a tag is pushed.
+- `release`: triggered when a release, pre-release or draft is created. (You can apply further filters using [evaluate](#evaluate) with [environment variables](./50-environment.md#built-in-environment-variables).)
+- `deployment`: triggered when a deployment is created in the repository. (This event can be triggered from Woodpecker directly. GitHub also supports webhook triggers.)
+- `cron`: triggered when a cron job is executed.
+- `manual`: triggered when a user manually triggers a pipeline.
 
 Execute a step if the build event is a `tag`:
 
@@ -470,7 +478,7 @@ Normally steps of a workflow are executed serially in the order in which they ar
        - go build
 
    - name: deploy
-     image: plugins/docker
+     image: woodpeckerci/plugin-kaniko
      settings:
        repo: foo/bar
 +    depends_on: [build, test] # deploy will be executed after build and test finished
@@ -518,7 +526,9 @@ For more details check the [services docs](./60-services.md).
 
 ## `workspace`
 
-The workspace defines the shared volume and working directory shared by all workflow steps. The default workspace matches the pattern `/woodpecker/src/github.com/octocat/hello-world`, based on your repository URL.
+The workspace defines the shared volume and working directory shared by all workflow steps.
+The default workspace base is `/woodpecker` and the path is extended with the repository URL (`src/{url-without-schema}`).
+So an example would be `/woodpecker/src/github.com/octocat/hello-world`.
 
 The workspace can be customized using the workspace block in the YAML file:
 
@@ -534,6 +544,10 @@ The workspace can be customized using the workspace block in the YAML file:
        - go get
        - go test
 ```
+
+:::note
+Plugins will always have the workspace base at `/woodpecker`
+:::
 
 The base attribute defines a shared base volume available to all steps. This ensures your source code, dependencies and compiled binaries are persisted and shared between steps.
 
@@ -590,7 +604,7 @@ For more details check the [matrix build docs](./30-matrix-workflows.md).
 
 You can set labels for your workflow to select an agent to execute the workflow on. An agent will pick up and run a workflow when **every** label assigned to it matches the agents labels.
 
-To set additional agent labels, check the [agent configuration options](../30-administration/15-agent-config.md#woodpecker_filter_labels). Agents will have at least four default labels: `platform=agent-os/agent-arch`, `hostname=my-agent`, `backend=docker` (type of the agent backend) and `repo=*`. Agents can use a `*` as a wildcard for a label. For example `repo=*` will match every repo.
+To set additional agent labels, check the [agent configuration options](../30-administration/15-agent-config.md#woodpecker_agent_labels). Agents will have at least four default labels: `platform=agent-os/agent-arch`, `hostname=my-agent`, `backend=docker` (type of the agent backend) and `repo=*`. Agents can use a `*` as a wildcard for a label. For example `repo=*` will match every repo.
 
 Workflow labels with an empty value will be ignored.
 By default, each workflow has at least the `repo=your-user/your-repo-name` label. If you have set the [platform attribute](#platform) for your workflow it will have a label like `platform=your-os/your-arch` as well.
@@ -672,16 +686,6 @@ Example configuration to use a custom clone plugin:
 +    image: octocat/custom-git-plugin
 ```
 
-Example configuration to clone Mercurial repository:
-
-```diff
- clone:
-   - name: hg
-+    image: plugins/hg
-+    settings:
-+      path: bitbucket.org/foo/bar
-```
-
 ### Git Submodules
 
 To use the credentials that cloned the repository to clone it's submodules, update `.gitmodules` to use `https` instead of `git`:
@@ -749,6 +753,25 @@ Woodpecker supports to define multiple workflows for a repository. Those workflo
 
 Workflows that should run even on failure should set the `runs_on` tag. See [here](./25-workflows.md#flow-control) for an example.
 
+## Advanced network options for steps
+
+:::warning
+Only allowed if 'Trusted Network' option is enabled in repo settings by an admin.
+:::
+
+### `dns`
+
+If the backend engine understands to change the DNS server and lookup domain,
+this options will be used to alter the default DNS config to a custom one for a specific step.
+
+```yaml
+steps:
+  - name: build
+    image: plugin/abc
+    dns: 1.2.3.4
+    dns_search: 'internal.company'
+```
+
 ## Privileged mode
 
 Woodpecker gives the ability to configure privileged mode in the YAML. You can use this parameter to launch containers with escalated capabilities.
@@ -766,8 +789,8 @@ Privileged mode is only available to trusted repositories and for security reaso
      commands:
        - docker --tls=false ps
 
- - name: services
-   docker:
+ services:
+   - name: docker
      image: docker:dind
      commands: dockerd-entrypoint.sh --storage-driver=vfs --tls=false
 +    privileged: true

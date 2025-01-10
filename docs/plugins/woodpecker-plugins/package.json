@@ -10,24 +10,24 @@
     "style": "mkdir -p dist/theme/ && cp src/theme/style.css dist/theme/style.css"
   },
   "devDependencies": {
-    "@docusaurus/module-type-aliases": "^3.3.2",
-    "@docusaurus/theme-classic": "^3.3.2",
-    "@docusaurus/types": "^3.3.2",
+    "@docusaurus/module-type-aliases": "^3.7.0",
+    "@docusaurus/theme-classic": "^3.7.0",
+    "@docusaurus/types": "^3.7.0",
     "@tsconfig/docusaurus": "^2.0.3",
-    "@types/node": "^20.12.13",
-    "axios": "^1.7.2",
-    "concurrently": "^8.2.2",
-    "isomorphic-dompurify": "^2.11.0",
-    "marked": "^13.0.0",
-    "tslib": "^2.6.2",
-    "typescript": "^5.4.5"
+    "@types/node": "^22.10.5",
+    "axios": "^1.7.9",
+    "concurrently": "^9.1.2",
+    "isomorphic-dompurify": "^2.19.0",
+    "marked": "^15.0.5",
+    "tslib": "^2.8.1",
+    "typescript": "^5.7.2"
   },
   "peerDependencies": {
-    "react": "^17.0.2 || ^18.0.0",
-    "react-dom": "^17.0.2 || ^18.0.0"
+    "react": "^17.0.2 || ^18.0.0 || ^19.0.0",
+    "react-dom": "^17.0.2 || ^18.0.0 || ^19.0.0"
   },
   "dependencies": {
     "fuse.js": "^7.0.0",
-    "yaml": "^2.4.2"
+    "yaml": "^2.7.0"
   }
 }

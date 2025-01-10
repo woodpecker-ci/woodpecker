@@ -19,13 +19,13 @@ import (
 	"net/url"
 	"strings"
 
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/metadata"
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
-	"go.woodpecker-ci.org/woodpecker/v2/version"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/version"
 )
 
 // MetadataFromStruct return the metadata from a pipeline will run with.
-func MetadataFromStruct(forge metadata.ServerForge, repo *model.Repo, pipeline, last *model.Pipeline, workflow *model.Workflow, sysURL string) metadata.Metadata {
+func MetadataFromStruct(forge metadata.ServerForge, repo *model.Repo, pipeline, prev *model.Pipeline, workflow *model.Workflow, sysURL string) metadata.Metadata {
 	host := sysURL
 	uri, err := url.Parse(sysURL)
 	if err == nil {
@@ -52,7 +52,11 @@ func MetadataFromStruct(forge metadata.ServerForge, repo *model.Repo, pipeline, 
 			CloneSSHURL: repo.CloneSSH,
 			Private:     repo.IsSCMPrivate,
 			Branch:      repo.Branch,
-			Trusted:     repo.IsTrusted,
+			Trusted: metadata.TrustedConfiguration{
+				Network:  repo.Trusted.Network,
+				Volumes:  repo.Trusted.Volumes,
+				Security: repo.Trusted.Security,
+			},
 		}
 
 		if idx := strings.LastIndex(repo.FullName, "/"); idx != -1 {
@@ -77,7 +81,7 @@ func MetadataFromStruct(forge metadata.ServerForge, repo *model.Repo, pipeline, 
 	return metadata.Metadata{
 		Repo:     fRepo,
 		Curr:     metadataPipelineFromModelPipeline(pipeline, true),
-		Prev:     metadataPipelineFromModelPipeline(last, false),
+		Prev:     metadataPipelineFromModelPipeline(prev, false),
 		Workflow: fWorkflow,
 		Step:     metadata.Step{},
 		Sys: metadata.System{

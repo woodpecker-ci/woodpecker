@@ -3,7 +3,7 @@
         "settings": {
             "agents": {
                 "add": "Agent hinzufügen",
-                "agents": "Agents",
+                "agents": "Agenten",
                 "backend": {
                     "backend": "Backend",
                     "badge": "Backend"
@@ -17,36 +17,43 @@
                 "delete_agent": "Agent löschen",
                 "delete_confirm": "Wollen Sie diesen Agent wirklich löschen? Dieser kann sich dann nicht mehr mit dem Server verbinden.",
                 "deleted": "Agent gelöscht",
-                "desc": "Für diesen Server registrierte Agents",
+                "desc": "Für diesen Server registrierte Agenten.",
                 "edit_agent": "Agent bearbeiten",
                 "id": "ID",
                 "last_contact": "Letzter Kontakt",
                 "name": {
                     "name": "Name",
-                    "placeholder": "Name des Agents"
+                    "placeholder": "Name des Agenten"
                 },
                 "never": "Nie",
                 "no_schedule": {
                     "name": "Agent deaktivieren",
                     "placeholder": "Agent daran hindern, neue Aufgaben zu nehmen"
                 },
-                "none": "Es gibt noch keine Agents.",
+                "none": "Es gibt noch keine Agenten.",
                 "platform": {
                     "badge": "Plattform",
                     "platform": "Plattform"
                 },
                 "save": "Agent speichern",
                 "saved": "Agent gespeichert",
-                "show": "Agents anzeigen",
+                "show": "Agenten anzeigen",
                 "token": "Schlüssel",
-                "version": "Version"
+                "version": "Version",
+                "org": {
+                    "badge": "Organisation"
+                },
+                "custom_labels": {
+                    "desc": "Die benutzerdefinierten Labels, die vom Agent-Administrator beim Start des Agenten festgelegt wurden.",
+                    "custom_labels": "Benutzerdefinierte Labels"
+                }
             },
-            "not_allowed": "Du darfst nicht auf die Server-Einstellungen zugreifen",
+            "not_allowed": "Du darfst nicht auf die Server-Einstellungen zugreifen.",
             "orgs": {
                 "delete_confirm": "Möchtest du diese Organisation wirklich löschen? Das wird auch alle Repositorys löschen, die dieser Organisation gehören.",
                 "delete_org": "Organisation löschen",
                 "deleted": "Organisation gelöscht",
-                "desc": "Organisationen mit Repositorys auf diesem Server",
+                "desc": "Organisationen, die Repositorys auf diesem Server besitzen.",
                 "none": "Es gibt noch keine Organisationen.",
                 "org_settings": "Organisations-Einstellungen",
                 "orgs": "Organisationen",
@@ -54,7 +61,7 @@
             },
             "queue": {
                 "agent": "Agent",
-                "desc": "Aufgaben, die darauf warten, von Agents ausgeführt zu werden",
+                "desc": "Aufgaben, die darauf warten, von Agenten ausgeführt zu werden",
                 "pause": "Pausieren",
                 "paused": "Warteschlange wurde pausiert",
                 "queue": "Warteschlange",
@@ -74,7 +81,7 @@
                 "waiting_for": "wartet auf"
             },
             "repos": {
-                "desc": "Repositorys, die auf dem Server aktiviert sind oder waren",
+                "desc": "Repositorys, die auf dem Server aktiviert sind oder waren.",
                 "disabled": "Deaktiviert",
                 "none": "Es gibt noch keine Repositorys.",
                 "repair": {
@@ -89,7 +96,7 @@
                 "add": "Geheimnis hinzufügen",
                 "created": "Globales Geheimnis erstellt",
                 "deleted": "Globales Geheimnis gelöscht",
-                "desc": "Globale Geheimnisse können an alle Repositorys als Umgebungsvariablen übergeben werden.",
+                "desc": "Globale Geheimnisse können an Pipelineschritte aller Repositorys als Umgebungsvariablen übergeben werden.",
                 "events": {
                     "events": "Verfügbar für folgende Ereignisse",
                     "pr_warning": "Bitte sei vorsichtig mit dieser Option, da eine böswillige Person über einen Pull-Request deine Geheimnisse erhalten könnte."
@@ -106,7 +113,7 @@
                 "secrets": "Geheimnisse",
                 "show": "Geheimnisse anzeigen",
                 "value": "Wert",
-                "warning": "Diese Geheimnisse können von allen Nutzern des Server eingesehen werden."
+                "warning": "Diese Geheimnisse können von allen Nutzern eingesehen werden."
             },
             "settings": "Einstellungen",
             "users": {
@@ -132,8 +139,8 @@
                 "users": "Benutzer"
             },
             "registries": {
-                "desc": "Globale Register-Zugangsdaten können für private Images aller Pipelines des Servers verwendet werden.",
-                "warning": "Diese Register-Zugangsdaten sind für alle Benutzer des Servers verfügbar."
+                "desc": "Globale Register-Zugangsdaten können hinzugefügt werden, um für private Images für alle Pipelines zu verwenden.",
+                "warning": "Diese Register-Zugangsdaten werden für alle Benutzer verfügbar sein."
             }
         }
     },
@@ -141,7 +148,7 @@
     "back": "Zurück",
     "cancel": "Abbrechen",
     "default": "Standard",
-    "docs": "Docs",
+    "docs": "Dokumentation",
     "documentation_for": "Dokumentation für „{topic}“",
     "empty_list": "Keine {entity} gefunden!",
     "errors": {
@@ -162,7 +169,7 @@
                 "add": "Geheimnis hinzufügen",
                 "created": "Organisations-Geheimnis erstellt",
                 "deleted": "Organisations-Geheimnis gelöscht",
-                "desc": "Organisation-Geheimnisse können an alle Repositorys der Organisation als Umgebungsvariablen übergeben werden.",
+                "desc": "Organisation-Geheimnisse können an alle Pipelineschritte in Repositorys der Organisation als Umgebungsvariablen übergeben werden.",
                 "events": {
                     "events": "Verfügbar für folgende Ereignisse",
                     "pr_warning": "Bitte sei vorsichtig mit dieser Option, da eine böswillige Person über einen Pull-Request deine Geheimnisse erhalten könnte."
@@ -182,7 +189,10 @@
             },
             "settings": "Einstellungen",
             "registries": {
-                "desc": "Register-Zugangsdaten der Organisation können für private Images aller Organisation-Pipelines verwendet werden."
+                "desc": "Zugangsdaten zum Register der Organisation können für private Images aller Pipelines der Organisation verwendet werden."
+            },
+            "agents": {
+                "desc": "Agents registriert für diese Organisation."
             }
         }
     },
@@ -194,8 +204,8 @@
         "add": "Repository hinzufügen",
         "branches": "Branches",
         "deploy_pipeline": {
-            "enter_target": "Zielumgebung des Deployments",
-            "title": "Deployment für aktuelle Pipeline #{pipelineId} starten",
+            "enter_target": "Zielumgebung des „Deployments“",
+            "title": "Ein „Deployment“-Event für die aktuelle Pipeline #{pipelineId} starten",
             "trigger": "Deploy",
             "variables": {
                 "add": "Variable hinzufügen",
@@ -221,12 +231,13 @@
             "trigger": "Pipeline ausführen",
             "variables": {
                 "add": "Variable hinzufügen",
-                "desc": "Spezifiziere weitere Variablen für deine Pipeline. Vordefinierte Variablen mit dem selben Namen werden überschrieben.",
+                "desc": "Füge weitere Variablen für deine Pipeline hinzu. Vordefinierte Variablen mit demselben Namen werden überschrieben.",
                 "name": "Variablenname",
                 "title": "Zusätzliche Pipeline-Variablen",
                 "value": "Variablenwert",
                 "delete": "Variable löschen"
-            }
+            },
+            "show_pipelines": "Pipelines anzeigen"
         },
         "not_allowed": "Zugriff auf dieses Repository nicht erlaubt",
         "open_in_forge": "Repository in der Forge öffnen",
@@ -244,7 +255,7 @@
                 "log_delete": "Löschen"
             },
             "config": "Konfiguration",
-            "errors": "Fehler ({count})",
+            "errors": "Fehler",
             "event": {
                 "cron": "Cron",
                 "deploy": "Deploy",
@@ -252,10 +263,11 @@
                 "pr": "Pull-Request",
                 "push": "Push",
                 "tag": "Tag",
-                "release": "Release"
+                "release": "Release",
+                "pr_closed": "Pull-Request zusammengeführt/geschlossen"
             },
             "exit_code": "Exit-Code {exitCode}",
-            "files": "Geänderte Dateien ({files})",
+            "files": "Geänderte Dateien",
             "loading": "Laden…",
             "log_download_error": "Beim Herunterladen der Log-Datei ist ein Fehler aufgetreten",
             "log_title": "Logs des Schrittes",
@@ -290,10 +302,22 @@
             },
             "step_not_started": "Dieser Schritt hat noch nicht begonnen.",
             "tasks": "Vorgänge",
-            "warnings": "Warnungen ({count})",
+            "warnings": "Warnungen",
             "we_got_some_errors": "Oh nein, es gab einige Fehler!",
             "log_delete_confirm": "Möchtest du die Logs diesen Schrittes wirklich löschen?",
-            "log_delete_error": "Es gab einen Fehler beim Löschen der Logs des Schrittes"
+            "log_delete_error": "Es gab einen Fehler beim Löschen der Logs des Schrittes",
+            "duration": "Pipeline-Dauer",
+            "created": "Erstellt: {created}",
+            "no_logs": "Keine Logs",
+            "debug": {
+                "no_permission": "Du bist nicht berechtigt auf die Debug Informationen zuzugreifen.",
+                "download_metadata": "Metadaten herunterladen",
+                "metadata_download_successful": "Die Metadaten wurden erfolgreich heruntergeladen",
+                "metadata_download_error": "Fehler beim Herunterladen der Metadaten",
+                "title": "Debug",
+                "metadata_exec_title": "Pipeline lokal erneut ausführen",
+                "metadata_exec_desc": "Lade die Metadaten dieser Pipeline herunter, um diese lokal auszuführen. Dies erlaubt dir, Fehler zu beheben und Änderungen zu testen, bevor du einen Commit erstellst. `woodpecke-cli` muss in der zum Server passenden Version lokal installiert sein."
+            }
         },
         "pull_requests": "Pull-Requests",
         "settings": {
@@ -356,16 +380,16 @@
             "general": {
                 "allow_pr": {
                     "allow": "Pull-Requests zulassen",
-                    "desc": "Pipelines können für Pull-Requests genutzt werden."
+                    "desc": "Pipelines für Pull-Requests erlauben."
                 },
                 "cancel_prev": {
                     "cancel": "Ältere Pipelines abbrechen",
-                    "desc": "Aktiviere diese Option, um laufende Pipelines desselben Ereignisses und Kontexts abzubrechen, bevor die neue Pipeline startet."
+                    "desc": "Bei ausgewählten Events werden laufende Pipelines desselben Ereignisses abgebrechen, bevor die neue Pipeline startet."
                 },
                 "general": "Allgemein",
                 "netrc_only_trusted": {
-                    "desc": "Netrc-Zugangsdaten nur in vertrauenswürdigen Containern bereitstellen (empfohlen).",
-                    "netrc_only_trusted": "Netrc-Zugangsdaten nur in vertrauenswürdigen Containern zum Klonen bereitstellen"
+                    "desc": "Hier gelistete Plugins erhalten Zugriff zu Netrc-Zugangsdaten, die genutzt werden können, um Repositorys von der Forge zu klonen oder zu pushen.",
+                    "netrc_only_trusted": "Eigene vertrauenswürdige Plugins zum Klonen"
                 },
                 "pipeline_path": {
                     "default": "Standardmäßig: .woodpecker/*.{'{yaml,yml}'} -> .woodpecker.yaml -> .woodpecker.yml",
@@ -379,14 +403,26 @@
                     "protected": "Geschützt"
                 },
                 "save": "Einstellungen speichern",
-                "success": "Repository-Einstellungen aktualisiert",
+                "success": "Projekt-Einstellungen aktualisiert",
                 "timeout": {
                     "minutes": "Minuten",
                     "timeout": "Zeitlimit"
                 },
                 "trusted": {
-                    "desc": "Die zugrundeliegenden Pipeline-Container erhalten Zugriff auf ausgeweitete Funktionen wie z. B. das Einhängen von Volumes.",
-                    "trusted": "Vertrauenswürdig"
+                    "desc": "Die zugrundeliegenden Pipeline-Container erhalten Zugriff auf ausgeweitete Funktionen (z. B. das Einhängen von Laufwerken).",
+                    "trusted": "Vertrauenswürdig",
+                    "network": {
+                        "network": "Netzwerk",
+                        "desc": "Pipeline-Container erhalten Zugriff auf Netzwerk-Privilegien wie das Ändern des DNS."
+                    },
+                    "volumes": {
+                        "volumes": "Volumen",
+                        "desc": "Pipeline-Container können Volumen einhängen."
+                    },
+                    "security": {
+                        "security": "Sicherheit",
+                        "desc": "Pipeline-Container erhalten Zugriff auf Sicherheits-Privilegien."
+                    }
                 },
                 "visibility": {
                     "internal": {
@@ -404,8 +440,8 @@
                     "visibility": "Sichtbarkeit des Projekts"
                 },
                 "allow_deploy": {
-                    "allow": "Deployments erlauben",
-                    "desc": "Deployments von erfolgreichen Pipelines erlauben. Nur benutzen, wenn du allen Nutzern mit Push-Zugriff vertraust."
+                    "allow": "„Deployment“-Events erlauben",
+                    "desc": "„Deployments“ von erfolgreichen Pipelines erlauben. Alle Benutzer mit Push-Zugriff können diese auslösen, mit Vorsicht verwenden."
                 }
             },
             "not_allowed": "Zugriff auf die Einstellungen dieses Repositorys nicht erlaubt",
@@ -454,7 +490,22 @@
             },
             "settings": "Einstellungen"
         },
-        "user_none": "Diese Organisation / dieser Benutzer hat noch keine Repositorys."
+        "user_none": "Diese Organisation / dieser Benutzer hat noch keine Repositorys.",
+        "visibility": {
+            "visibility": "Projektsichtbarkeit",
+            "public": {
+                "public": "Öffentlich",
+                "desc": "Jeder Benutzer kann dein Projekt sehen, ohne eingeloggt zu sein."
+            },
+            "private": {
+                "private": "Privat",
+                "desc": "Nur du und andere Besitzer des Repositorys können dieses Projekt sehen."
+            },
+            "internal": {
+                "internal": "Intern",
+                "desc": "Nur authentifizierte Benutzer der Woodpecker-Instanz können dieses Projekt sehen."
+            }
+        }
     },
     "repos": "Repos",
     "repositories": "Repositorys",
@@ -467,7 +518,8 @@
         "not_started": "noch nicht gestartet",
         "sec_short": "sek",
         "template": "DD.MM.YYYY, HH:mm z",
-        "weeks_short": "w"
+        "weeks_short": "w",
+        "just_now": "gerade eben"
     },
     "unknown_error": "Ein unbekannter Fehler ist aufgetreten",
     "update_woodpecker": "Du solltest deine Woodpecker-Instanz auf {0} aktualisieren",
@@ -503,7 +555,7 @@
                 "add": "Geheimnis hinzufügen",
                 "created": "Benutzer-Geheimnis erstellt",
                 "deleted": "Benutzer-Geheimnis gelöscht",
-                "desc": "Benutzer-Geheimnisse können an alle Repositorys des Benutzers als Umgebungsvariablen übergeben werden.",
+                "desc": "Benutzer-Geheimnisse können an alle persönlichen Pipelineschritte als Umgebungsvariablen übergeben werden.",
                 "events": {
                     "events": "Verfügbar für folgende Ereignisse",
                     "pr_warning": "Bitte sei vorsichtig mit dieser Option, da eine böswillige Person über einen Pull-Request deine Geheimnisse erhalten könnte."
@@ -525,19 +577,25 @@
             "cli_and_api": {
                 "desc": "Persönlicher Zugangsschlüssel, CLI- und API-Nutzung",
                 "token": "Persönlicher Zugangsschlüssel",
-                "api_usage": "Beispiel zur Nutzung der API",
+                "api_usage": "Beispiel zur Nutzung des API",
                 "download_cli": "CLI herunterladen",
                 "reset_token": "Schlüssel zurücksetzen",
                 "swagger_ui": "Swagger-UI",
                 "cli_and_api": "CLI/API",
                 "cli_usage": "Beispiel zur Nutzung des CLI"
+            },
+            "registries": {
+                "desc": "Register-Zugangsdaten des Benutzers können für private Images aller persönlichen Pipelines verwendet werden."
+            },
+            "agents": {
+                "desc": "Agenten, die für die Repositorys deines Benutzers registriert sind."
             }
         }
     },
     "username": "Benutzername",
     "welcome": "Willkommen bei Woodpecker",
     "login_to_cli": "In CLI anmelden",
-    "login_to_cli_description": "Wenn du fortfährst, wirst bei im CLI angemeldet.",
+    "login_to_cli_description": "Wenn du fortfährst, wirst du im CLI angemeldet.",
     "abort": "Abbrechen",
     "cli_login_success": "Anmelden im CLI erfolgreich",
     "cli_login_failed": "Anmelden im CLI fehlgeschlagen",
@@ -545,7 +603,7 @@
     "return_to_cli": "Du kannst diesen Tab jetzt schließen und zur CLI zurückkehren.",
     "secrets": {
         "secrets": "Geheimnisse",
-        "desc": "Geheimnisse können zur Laufzeit als Umgebungsvariablen an einzelne Pipelineschritte übergeben werden.",
+        "desc": "Geheimnisse können als Umgebungsvariablen an einzelne Pipelineschritte übergeben werden.",
         "none": "Es gibt noch keine Geheimnisse.",
         "add": "Geheimnis hinzufügen",
         "save": "Geheimnis speichern",
@@ -557,16 +615,20 @@
         "created": "Geheimnis erstellt",
         "saved": "Geheimnis gespeichert",
         "images": {
-            "images": "Verfügbar für folgende Images",
-            "desc": "Liste der Images, für die dieses Geheimnis verfügbar ist; leer lassen, um alle Images zuzulassen"
+            "images": "Verfügbar für die folgenden Images",
+            "desc": "Liste der Images, für die dieses Geheimnis verfügbar ist; leer lassen, um für alle Images zuzulassen."
         },
         "events": {
-            "events": "Verfügbar bei folgenden Ereignissen",
-            "pr_warning": "Bitte sei vorsichtig mit dieser Option, da eine böswillige Person über einen Pull-Request deine Geheimnisse erhalten könnte."
+            "events": "Verfügbar bei den folgenden Ereignissen",
+            "pr_warning": "Bitte sei vorsichtig mit dieser Option: Eine böswillige Person könnte über einen Pull-Request deine Geheimnisse erhalten."
         },
         "plugins_only": "Nur für Plugins verfügbar",
         "edit": "Geheimnis bearbeiten",
-        "delete": "Geheimnis löschen"
+        "delete": "Geheimnis löschen",
+        "plugins": {
+            "images": "Nur für die folgenden Plugins verfügbar",
+            "desc": "Liste aller Plugin-Images, für die dieses Geheimnis verwendet werden kann. Freilassen, um alle Plugins und allgemeine Schritte zu erlauben."
+        }
     },
     "settings": "Einstellungen",
     "oauth_error": "Fehler bei der Authentifizierung mit OAuth-Anbieter",
@@ -582,16 +644,38 @@
         "credentials": "Register-Zugangsdaten",
         "none": "Es gibt noch keine Register-Zugangsdaten.",
         "registries": "Register",
-        "desc": "Register-Zugangsdaten können für private Images in deiner Pipelines verwendet werden.",
+        "desc": "Register-Zugangsdaten können hinzugefügt werden, um private Images für Pipelines zu nutzen.",
         "deleted": "Register-Zugangsdaten gelöscht",
         "save": "Register speichern",
         "add": "Register hinzufügen",
-        "view": "Register anzeigen",
+        "view": "Register ansehen",
         "edit": "Register bearbeiten",
         "delete": "Register löschen",
         "created": "Register-Zugangsdaten erstellt",
         "saved": "Register-Zugangsdaten gespeichert",
-        "show": "Register anzeigen"
+        "show": "Zeige Register"
     },
-    "invalid_state": "Der OAuth-Status ist ungültig."
+    "invalid_state": "Der OAuth-Status ist ungültig",
+    "by_user": "von {user}",
+    "pushed_to": "gepusht auf",
+    "closed": "geschlossen",
+    "deployed_to": "Deployment ausgeführt auf",
+    "created": "erstellt",
+    "triggered": "ausgelöst",
+    "pipeline_duration": "Pipeline-Dauer",
+    "pipeline_since": "Die Pipeline wurde vor {created} Minuten erstellt",
+    "pipeline_has_warnings": "Die Pipeline hat Warnungen",
+    "pipeline_has_errors": "Die Pipeline hat Fehler",
+    "login_with": "Mit {forge} anmelden",
+    "all_repositories": "Alle Repositorys",
+    "no_search_results": "Keine Ergebnisse gefunden",
+    "require_approval": {
+        "forks": "Pull-Request von geforkten Repositorys",
+        "require_approval_for": "Erfordert Genehmigung für",
+        "none": "Keine",
+        "none_desc": "Jedes Event erstellt Pipelines, einschließlich Pull-Requests. Diese Einstellung kann gefährlich sein und wird nur für private Instanzen empfohlen.",
+        "pull_requests": "Alle Pull-Requests",
+        "all_events": "Alle Ereignisse von der Forge",
+        "desc": "Verhindere, dass bösartige Pipelines Geheimnisse preisgeben oder schädliche Aufgaben ausführen, indem du diese vor der Ausführung genehmigst."
+    }
 }

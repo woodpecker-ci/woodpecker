@@ -4,10 +4,6 @@ toc_max_heading_level: 2
 
 # Forgejo
 
-:::warning
-Forgejo support is experimental.
-:::
-
 Woodpecker comes with built-in support for Forgejo. To enable Forgejo you should configure the Woodpecker container using the following environment variables:
 
 ```ini
@@ -49,6 +45,10 @@ ALLOWED_HOST_LIST=external,loopback
 For reference see [Configuration Cheat Sheet](https://forgejo.org/docs/latest/admin/config-cheat-sheet/#webhook-webhook).
 
 ![forgejo oauth setup](gitea_oauth.gif)
+
+:::warning
+Make sure your Forgejo configuration allows requesting the API with a fixed page length of 50. The default value for the maximum page size is 50, but if you set a value lower than 50, some Woodpecker features will not work properly. Also see the [Configuration Cheat Sheet](https://forgejo.org/docs/latest/admin/config-cheat-sheet/#api-api).
+:::
 
 ## Configuration
 

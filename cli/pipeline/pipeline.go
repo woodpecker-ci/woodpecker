@@ -20,33 +20,37 @@ import (
 	"os"
 	"text/template"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
-	"go.woodpecker-ci.org/woodpecker/v2/cli/output"
-	"go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/output"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/pipeline/deploy"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/pipeline/log"
+	"go.woodpecker-ci.org/woodpecker/v3/woodpecker-go/woodpecker"
 )
 
 // Command exports the pipeline command set.
 var Command = &cli.Command{
 	Name:  "pipeline",
 	Usage: "manage pipelines",
-	Subcommands: []*cli.Command{
-		pipelineListCmd,
-		pipelineLastCmd,
-		pipelineLogsCmd,
-		pipelineInfoCmd,
-		pipelineStopCmd,
-		pipelineStartCmd,
+	Commands: []*cli.Command{
 		pipelineApproveCmd,
-		pipelineDeclineCmd,
-		pipelineQueueCmd,
-		pipelineKillCmd,
-		pipelinePsCmd,
 		pipelineCreateCmd,
+		pipelineDeclineCmd,
+		deploy.Command,
+		pipelineKillCmd,
+		pipelineLastCmd,
+		buildPipelineListCmd(),
+		log.Command,
+		pipelinePsCmd,
+		pipelinePurgeCmd,
+		pipelineQueueCmd,
+		pipelineShowCmd,
+		pipelineStartCmd,
+		pipelineStopCmd,
 	},
 }
 
-func pipelineOutput(c *cli.Context, resources []woodpecker.Pipeline, fd ...io.Writer) error {
+func pipelineOutput(c *cli.Command, pipelines []*woodpecker.Pipeline, fd ...io.Writer) error {
 	outFmt, outOpt := output.ParseOutputOptions(c.String("output"))
 	noHeader := c.Bool("output-no-headers")
 
@@ -70,7 +74,7 @@ func pipelineOutput(c *cli.Context, resources []woodpecker.Pipeline, fd ...io.Wr
 		if err != nil {
 			return err
 		}
-		if err := tmpl.Execute(out, resources); err != nil {
+		if err := tmpl.Execute(out, pipelines); err != nil {
 			return err
 		}
 	case "table":
@@ -85,7 +89,7 @@ func pipelineOutput(c *cli.Context, resources []woodpecker.Pipeline, fd ...io.Wr
 		if !noHeader {
 			table.WriteHeader(cols)
 		}
-		for _, resource := range resources {
+		for _, resource := range pipelines {
 			if err := table.Write(cols, resource); err != nil {
 				return err
 			}

@@ -17,25 +17,25 @@ package registry
 import (
 	"strconv"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
-	"go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker"
+	"go.woodpecker-ci.org/woodpecker/v3/woodpecker-go/woodpecker"
 )
 
 // Command exports the registry command set.
 var Command = &cli.Command{
 	Name:  "registry",
 	Usage: "manage organization registries",
-	Subcommands: []*cli.Command{
+	Commands: []*cli.Command{
 		registryCreateCmd,
 		registryDeleteCmd,
-		registryUpdateCmd,
-		registryInfoCmd,
 		registryListCmd,
+		registryShowCmd,
+		registryUpdateCmd,
 	},
 }
 
-func parseTargetArgs(client woodpecker.Client, c *cli.Context) (orgID int64, err error) {
+func parseTargetArgs(client woodpecker.Client, c *cli.Command) (orgID int64, err error) {
 	orgIDOrName := c.String("organization")
 	if orgIDOrName == "" {
 		orgIDOrName = c.Args().First()

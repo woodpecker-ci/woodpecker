@@ -19,7 +19,7 @@ import (
 	"crypto/tls"
 	"net/http"
 
-	"github.com/xanzy/go-gitlab"
+	"gitlab.com/gitlab-org/api/client-go"
 )
 
 const (

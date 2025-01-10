@@ -15,12 +15,13 @@
 package pipeline
 
 import (
+	"context"
 	"fmt"
 	"strconv"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
-	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/internal"
 )
 
 var pipelineKillCmd = &cli.Command{
@@ -31,14 +32,14 @@ var pipelineKillCmd = &cli.Command{
 	Hidden:    true,
 }
 
-func pipelineKill(c *cli.Context) (err error) {
+func pipelineKill(ctx context.Context, c *cli.Command) (err error) {
 	number, err := strconv.ParseInt(c.Args().Get(1), 10, 64)
 	if err != nil {
 		return err
 	}
 
 	repoIDOrFullName := c.Args().First()
-	client, err := internal.NewClient(c)
+	client, err := internal.NewClient(ctx, c)
 	if err != nil {
 		return err
 	}
@@ -47,7 +48,7 @@ func pipelineKill(c *cli.Context) (err error) {
 		return err
 	}
 
-	err = client.PipelineKill(repoID, number)
+	err = client.PipelineDelete(repoID, number)
 	if err != nil {
 		return err
 	}

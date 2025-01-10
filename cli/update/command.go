@@ -1,12 +1,13 @@
 package update
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
 
 	"github.com/rs/zerolog/log"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 // Command exports the update command.
@@ -22,35 +23,35 @@ var Command = &cli.Command{
 	Action: update,
 }
 
-func update(c *cli.Context) error {
-	log.Info().Msg("Checking for updates ...")
+func update(ctx context.Context, c *cli.Command) error {
+	log.Info().Msg("checking for updates ...")
 
-	newVersion, err := CheckForUpdate(c.Context, c.Bool("force"))
+	newVersion, err := CheckForUpdate(ctx, c.Bool("force"))
 	if err != nil {
 		return err
 	}
 
 	if newVersion == nil {
-		fmt.Println("You are using the latest version of woodpecker-cli")
+		fmt.Println("you are using the latest version of woodpecker-cli")
 		return nil
 	}
 
-	log.Info().Msgf("New version %s is available! Updating ...", newVersion.Version)
+	log.Info().Msgf("new version %s is available! Updating ...", newVersion.Version)
 
 	var tarFilePath string
-	tarFilePath, err = downloadNewVersion(c.Context, newVersion.AssetURL)
+	tarFilePath, err = downloadNewVersion(ctx, newVersion.AssetURL)
 	if err != nil {
 		return err
 	}
 
-	log.Debug().Msgf("New version %s has been downloaded successfully! Installing ...", newVersion.Version)
+	log.Debug().Msgf("new version %s has been downloaded successfully! Installing ...", newVersion.Version)
 
 	binFile, err := extractNewVersion(tarFilePath)
 	if err != nil {
 		return err
 	}
 
-	log.Debug().Msgf("New version %s has been extracted to %s", newVersion.Version, binFile)
+	log.Debug().Msgf("new version %s has been extracted to %s", newVersion.Version, binFile)
 
 	executablePathOrSymlink, err := os.Executable()
 	if err != nil {

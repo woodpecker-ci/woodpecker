@@ -15,13 +15,15 @@
 package repo
 
 import (
+	"context"
 	"os"
 	"text/template"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
-	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
-	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/common"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v3/woodpecker-go/woodpecker"
 )
 
 var repoSyncCmd = &cli.Command{
@@ -33,13 +35,17 @@ var repoSyncCmd = &cli.Command{
 }
 
 // TODO: remove this and add an option to the list cmd as we do not store the remote repo list anymore
-func repoSync(c *cli.Context) error {
-	client, err := internal.NewClient(c)
+func repoSync(ctx context.Context, c *cli.Command) error {
+	client, err := internal.NewClient(ctx, c)
 	if err != nil {
 		return err
 	}
 
-	repos, err := client.RepoListOpts(true)
+	opt := woodpecker.RepoListOptions{
+		All: true,
+	}
+
+	repos, err := client.RepoList(opt)
 	if err != nil || len(repos) == 0 {
 		return err
 	}

@@ -1,508 +1,605 @@
 {
-  "admin": {
-    "settings": {
-      "agents": {
-        "add": "Pievienot aģentu",
-        "agents": "Aģenti",
-        "backend": {
-          "backend": "Aizmugures sistēma",
-          "badge": "aizmugures sistēma"
-        },
-        "capacity": {
-          "badge": "paralēlie darbi",
-          "capacity": "Paralēlie darbi",
-          "desc": "Maksimālais aģenta paralēli izpildāmo konvejerdarbu skaits."
-        },
-        "created": "Aģents izveidots",
-        "delete_agent": "Dzēst aģentu",
-        "delete_confirm": "Vai patiešām dzēst šo aģentu? Tam vairs nebūs iespējas savienoties ar serveri.",
-        "deleted": "Aģents izdzēsts",
-        "desc": "Šajā serverī reģistrētie aģenti",
-        "edit_agent": "Labot aģentu",
-        "id": "ID",
-        "last_contact": "Pēdējā sazināšanās",
-        "name": {
-          "name": "Nosaukums",
-          "placeholder": "Aģenta nosaukums"
-        },
-        "never": "nekad",
-        "no_schedule": {
-          "name": "Atspējot aģentu",
-          "placeholder": "Apturēt aģentu no jaunu darbu pieņemšanas"
-        },
-        "none": "Pagaidām nav neviena aģenta.",
-        "platform": {
-          "badge": "platforma",
-          "platform": "Platforma"
-        },
-        "save": "Saglabāt aģentu",
-        "saved": "Aģents saglabāts",
-        "show": "Parādīt aģentus",
-        "token": "Drošības talons",
-        "version": "Versija"
-      },
-      "not_allowed": "Nav piekļuves servera iestatījumiem",
-      "orgs": {
-        "delete_confirm": "Vai patiešām vēlaties dzēst šo organizāciju? Tiks dzēsti arī visi organizācijai piederošie repozitoriji.",
-        "delete_org": "Dzēst organizāciju",
-        "deleted": "Organizācija tika izdzēsta",
-        "desc": "Organizācijas, kurām pieder repozitoriji šajā serverī",
-        "none": "Pagaidām nav nevienas organizācijas.",
-        "org_settings": "Organizācijas iestatījumi",
-        "orgs": "Organizācijas",
-        "view": "Skatīt organizāciju"
-      },
-      "queue": {
-        "agent": "aģents",
-        "desc": "Uzdevumi, kuri gaida izpildi",
-        "pause": "Apturēt",
-        "paused": "Rinda ir apturēta",
-        "queue": "Rinda",
-        "resume": "Atsākt",
-        "resumed": "Rindas apstrāde atsākta",
-        "stats": {
-          "completed_count": "Pabeigtie uzdevumi",
-          "pending_count": "Gaida",
-          "running_count": "Izpildās",
-          "waiting_on_deps_count": "Gaida uz atkarībām",
-          "worker_count": "Brīvi"
-        },
-        "task_pending": "Uzdevums gaida izpildi",
-        "task_running": "Uzdevums tiek izpildīts",
-        "task_waiting_on_deps": "Uzdevums gaida uz atkarībām",
-        "tasks": "Uzdevumi",
-        "waiting_for": "gaida uz"
-      },
-      "repos": {
-        "desc": "Repozitoriji, kas ir vai ir bijuši iespējoti šajā serverī",
-        "disabled": "Atspējots",
-        "none": "Pagaidām nav neviena repozitorija.",
-        "repair": {
-          "repair": "Salabot visus",
-          "success": "Repozitoriji salaboti"
-        },
-        "repos": "Repozitoriji",
-        "settings": "Repozitorija iestatījumi",
-        "view": "Skatīt repozitoriju"
-      },
-      "secrets": {
-        "add": "Pievienot noslēpumu",
-        "created": "Globālais noslēpums izveidots",
-        "deleted": "Globālais noslēpums dzēsts",
-        "desc": "Noslēpumus var padot visu repozitoriju individuāliem konvejerdarba soļiem izpildes laikā kā vides mainīgos.",
-        "events": {
-          "events": "Pieejams šādiem notikumiem",
-          "pr_warning": "Uzmanieties, jo šādā veidā tas būs pieejams visiem cilvēkiem, kas var iesūtīt izmaiņu pieprasījumu."
-        },
-        "images": {
-          "desc": "Ar komatiem atdalīts saraksts ar attēliem, kam šis noslēpums būs pieejams, atstājot tukšu, tas būs pieejams visiem attēliem",
-          "images": "Pieejami šādiem attēliem"
-        },
-        "name": "Nosaukums",
-        "none": "Pagaidām nav neviena globālā noslēpuma.",
-        "plugins_only": "Pieejams tikai spraudņiem",
-        "save": "Saglabāt noslēpumu",
-        "saved": "Globālais noslēpums saglabāts",
-        "secrets": "Noslēpumi",
-        "show": "Noslēpumu saraksts",
-        "value": "Vērtība",
-        "warning": "Šie noslēpumi būs pieejami visiem servera lietotājiem."
-      },
-      "settings": "Iestatījumi",
-      "users": {
-        "add": "Pievienot lietotāju",
-        "admin": {
-          "admin": "Administrators",
-          "placeholder": "Lietotājs ir administrators"
-        },
-        "avatar_url": "Avatāra URL",
-        "cancel": "Atcelt",
-        "created": "Lietotājs izveidots",
-        "delete_confirm": "Vai patiešām vēlaties dzēst šo lietotāju? Tiks dzēsti arī visi lietotājam piederošie repozitoriji.",
-        "delete_user": "Dzēst lietotāju",
-        "deleted": "Lietotājs izdzēsts",
-        "desc": "Lietotāji, kas ir reģistrēti šajā serverī",
-        "edit_user": "Labot lietotāju",
-        "email": "E-pasta adrese",
-        "login": "Lietotāja vārds",
-        "none": "Pašlaik vēl nav neviena lietotāja.",
-        "save": "Saglabāt lietotāju",
-        "saved": "Lietotāja dati saglabāti",
-        "show": "Parādīt lietotājus",
-        "users": "Lietotāji"
-      }
-    }
-  },
-  "api": "API",
-  "back": "Atpakaļ",
-  "cancel": "Atcelt",
-  "default": "noklusētais",
-  "docs": "Dokumentācija",
-  "documentation_for": "Dokumentācija par \"{topic}\"",
-  "errors": {
-    "not_found": "Nevarēja atrast pieprasīto objektu"
-  },
-  "info": "Informācija",
-  "login": "Autorizēties",
-  "logout": "Iziet",
-  "not_found": {
-    "back_home": "Uz sākumu",
-    "not_found": "Ak vai, 404, vai nu mēs salauzām kaut ko, vai arī tika atvērta lapa, kas neeksistē :-/"
-  },
-  "org": {
-    "settings": {
-      "not_allowed": "Nav piekļuves šīs organizācijas iestatījumiem",
-      "secrets": {
-        "add": "Pievienot noslēpumu",
-        "created": "Organizācijas noslēpums izveidots",
-        "deleted": "Organizācijas noslēpums dzēsts",
-        "desc": "Noslēpumus var padot visu organizācijas repozitoriju individuāliem konvejerdarba soļiem izpildes laikā kā vides mainīgos.",
-        "events": {
-          "events": "Pieejams šādiem notikumiem",
-          "pr_warning": "Uzmanieties, jo šādā veidā tas būs pieejams visiem cilvēkiem, kas var iesūtīt izmaiņu pieprasījumu."
-        },
-        "images": {
-          "desc": "Ar komatiem atdalīts saraksts ar attēliem, kam šis noslēpums būs pieejams, atstājot tukšu, tas būs pieejams visiem attēliem",
-          "images": "Pieejami šādiem attēliem"
-        },
-        "name": "Nosaukums",
-        "none": "Pagaidām nav neviena organizācijas noslēpuma.",
-        "plugins_only": "Pieejams tikai spraudņiem",
-        "save": "Saglabāt noslēpumu",
-        "saved": "Organizācijas noslēpums saglabāts",
-        "secrets": "Noslēpumi",
-        "show": "Noslēpumu saraksts",
-        "value": "Vērtība"
-      },
-      "settings": "Iestatījumi"
-    }
-  },
-  "password": "Parole",
-  "pipeline_feed": "Konvejerdarba padeve",
-  "repo": {
-    "activity": "Aktivitāte",
-    "add": "Pievienot repozitoriju",
-    "branches": "Atzari",
-    "deploy_pipeline": {
-      "enter_target": "Mērķa uzstādīšanas vide",
-      "title": "Iniciēt uzstādīšanas notikumu šim konvejerdarbam #{pipelineId}",
-      "trigger": "Uzstādīt",
-      "variables": {
-        "add": "Pievienot mainīgo",
-        "desc": "Norādiet papildus mainīgos, ko izmantot konvejerdarbā. Mainīgie ar šādu pašu nosaukumu tiks pārrakstīti.",
-        "name": "Mainīgā nosaukums",
-        "title": "Papildus konvejerdarba mainīgie",
-        "value": "Mainīgā vērtība"
-      }
+    "admin": {
+        "settings": {
+            "agents": {
+                "add": "Pievienot aģentu",
+                "agents": "Aģenti",
+                "backend": {
+                    "backend": "Aizmugures sistēma",
+                    "badge": "aizmugures sistēma"
+                },
+                "capacity": {
+                    "badge": "paralēlie darbi",
+                    "capacity": "Paralēlie darbi",
+                    "desc": "Maksimālais aģenta paralēli izpildāmo konvejerdarbu skaits."
+                },
+                "created": "Aģents izveidots",
+                "delete_agent": "Dzēst aģentu",
+                "delete_confirm": "Vai tiešām vēlaties dzēst šo aģentu? Tam vairs nebūs iespējas savienoties ar serveri.",
+                "deleted": "Aģents izdzēsts",
+                "desc": "Šajā serverī reģistrētie aģenti.",
+                "edit_agent": "Labot aģentu",
+                "id": "ID",
+                "last_contact": "Pēdējā sazināšanās",
+                "name": {
+                    "name": "Nosaukums",
+                    "placeholder": "Aģenta nosaukums"
+                },
+                "never": "nekad",
+                "no_schedule": {
+                    "name": "Atspējot aģentu",
+                    "placeholder": "Apturēt aģentu no jaunu darbu pieņemšanas"
+                },
+                "none": "Pagaidām nav neviena aģenta.",
+                "platform": {
+                    "badge": "platforma",
+                    "platform": "Platforma"
+                },
+                "save": "Saglabāt aģentu",
+                "saved": "Aģents saglabāts",
+                "show": "Parādīt aģentus",
+                "token": "Drošības talons",
+                "version": "Versija"
+            },
+            "not_allowed": "Nav piekļuves servera iestatījumiem.",
+            "orgs": {
+                "delete_confirm": "Vai patiešām vēlaties dzēst šo organizāciju? Tiks dzēsti arī visi organizācijai piederošie repozitoriji.",
+                "delete_org": "Dzēst organizāciju",
+                "deleted": "Organizācija tika izdzēsta",
+                "desc": "Organizācijas, kurām pieder repozitoriji šajā serverī.",
+                "none": "Pagaidām nav nevienas organizācijas.",
+                "org_settings": "Organizācijas iestatījumi",
+                "orgs": "Organizācijas",
+                "view": "Skatīt organizāciju"
+            },
+            "queue": {
+                "agent": "aģents",
+                "desc": "Uzdevumi, kuri gaida izpildi",
+                "pause": "Apturēt",
+                "paused": "Rinda ir apturēta",
+                "queue": "Rinda",
+                "resume": "Atsākt",
+                "resumed": "Rindas apstrāde atsākta",
+                "stats": {
+                    "completed_count": "Pabeigtie uzdevumi",
+                    "pending_count": "Gaida",
+                    "running_count": "Izpildās",
+                    "waiting_on_deps_count": "Gaida uz atkarībām",
+                    "worker_count": "Brīvi"
+                },
+                "task_pending": "Uzdevums gaida izpildi",
+                "task_running": "Uzdevums tiek izpildīts",
+                "task_waiting_on_deps": "Uzdevums gaida uz atkarībām",
+                "tasks": "Uzdevumi",
+                "waiting_for": "gaida uz"
+            },
+            "repos": {
+                "desc": "Repozitoriji, kas ir vai ir bijuši iespējoti šajā serverī.",
+                "disabled": "Atspējots",
+                "none": "Pagaidām nav neviena repozitorija.",
+                "repair": {
+                    "repair": "Salabot visus",
+                    "success": "Repozitoriji salaboti"
+                },
+                "repos": "Repozitoriji",
+                "settings": "Repozitorija iestatījumi",
+                "view": "Skatīt repozitoriju"
+            },
+            "secrets": {
+                "add": "Pievienot noslēpumu",
+                "created": "Globālais noslēpums izveidots",
+                "deleted": "Globālais noslēpums dzēsts",
+                "desc": "Noslēpumus var padot visu repozitoriju konvejerdarba soļiem izpildes laikā kā vides mainīgos.",
+                "events": {
+                    "events": "Pieejams šādiem notikumiem",
+                    "pr_warning": "Uzmanieties, jo šādā veidā tas būs pieejams visiem cilvēkiem, kas var iesūtīt izmaiņu pieprasījumu."
+                },
+                "images": {
+                    "desc": "Ar komatiem atdalīts saraksts ar attēliem, kam šis noslēpums būs pieejams, atstājot tukšu, tas būs pieejams visiem attēliem",
+                    "images": "Pieejami šādiem attēliem"
+                },
+                "name": "Nosaukums",
+                "none": "Pagaidām nav neviena globālā noslēpuma.",
+                "plugins_only": "Pieejams tikai spraudņiem",
+                "save": "Saglabāt noslēpumu",
+                "saved": "Globālais noslēpums saglabāts",
+                "secrets": "Noslēpumi",
+                "show": "Noslēpumu saraksts",
+                "value": "Vērtība",
+                "warning": "Šie noslēpumi būs pieejami visiem lietotājiem."
+            },
+            "settings": "Iestatījumi",
+            "users": {
+                "add": "Pievienot lietotāju",
+                "admin": {
+                    "admin": "Administrators",
+                    "placeholder": "Lietotājs ir administrators"
+                },
+                "avatar_url": "Avatāra URL",
+                "cancel": "Atcelt",
+                "created": "Lietotājs izveidots",
+                "delete_confirm": "Vai patiešām vēlaties dzēst šo lietotāju? Tiks dzēsti arī visi lietotājam piederošie repozitoriji.",
+                "delete_user": "Dzēst lietotāju",
+                "deleted": "Lietotājs izdzēsts",
+                "desc": "Lietotāji, kas ir reģistrēti šajā serverī",
+                "edit_user": "Labot lietotāju",
+                "email": "E-pasta adrese",
+                "login": "Lietotāja vārds",
+                "none": "Pašlaik vēl nav neviena lietotāja.",
+                "save": "Saglabāt lietotāju",
+                "saved": "Lietotāja dati saglabāti",
+                "show": "Parādīt lietotājus",
+                "users": "Lietotāji"
+            },
+            "registries": {
+                "warning": "Šie repozitorijas pilnvaras būs pieejamas visiem lietotājiem.",
+                "desc": "Globāli repozitoriju pilnvaras var tikt pievienoti pielietošanai privātos attēlos visiem konvejerdarbiem."
+            }
+        }
     },
-    "enable": {
-      "disabled": "Atspējots",
-      "enable": "Iespējot",
-      "enabled": "Jau ir iespējots",
-      "list_reloaded": "Repozitoriju sarakts tika pārlādēts",
-      "reload": "Pārlādēt repozitorijus",
-      "success": "Repozitorijs iespējots"
+    "api": "API",
+    "back": "Atpakaļ",
+    "cancel": "Atcelt",
+    "default": "noklusētais",
+    "docs": "Dokumentācija",
+    "documentation_for": "Dokumentācija par \"{topic}\"",
+    "errors": {
+        "not_found": "Nevarēja atrast pieprasīto objektu"
     },
-    "manual_pipeline": {
-      "select_branch": "Norādiet atzaru",
-      "title": "Iniciēt manuālu konvejerdarba izpildi",
-      "trigger": "Izpildīt konvejerdarbu",
-      "variables": {
-        "add": "Pievienot",
-        "desc": "Norādiet papildus mainīgos, ko izmantot konvejerdarbā. Mainīgie ar tādu pašu nosaukumu tiks pārrakstīti.",
-        "name": "Mainīgā nosaukums",
-        "title": "Papildus konvejerdarba mainīgie",
-        "value": "Mainīgā vērtība"
-      }
+    "info": "Informācija",
+    "login": "Autorizēties",
+    "logout": "Iziet",
+    "not_found": {
+        "back_home": "Uz sākumu",
+        "not_found": "Ak vai, 404, vai nu mēs salauzām kaut ko, vai arī tika atvērta lapa, kas neeksistē :-/"
     },
-    "not_allowed": "Nav piekļuves šim repozitorijam",
-    "open_in_forge": "Atvērt repozitoriju versijas kontroles sistēmā",
-    "pipeline": {
-      "actions": {
-        "cancel": "Atcelt",
-        "cancel_success": "Konvejerdarbs atcelts",
-        "canceled": "Šis solis tika atcelts.",
-        "deploy": "Uzstādīt",
-        "log_auto_scroll": "Automātiski ritināt",
-        "log_auto_scroll_off": "Atslēgt automātisko ritināšanu",
-        "log_download": "Lejupielādēt",
-        "restart": "Pārstartēt",
-        "restart_success": "Konvejerdarbs pārstartēts"
-      },
-      "config": "Konfigurācija",
-      "errors": "Kļūdas ({count})",
-      "event": {
-        "cron": "Plānotais darbs",
-        "deploy": "Uzstādīšana",
-        "manual": "Manuāls",
-        "pr": "Izmaiņu pieprasījums",
-        "push": "Iesūtīšana",
-        "tag": "Tags"
-      },
-      "exit_code": "Iziešanas kods {exitCode}",
-      "files": "Izmainītie faili ({files})",
-      "loading": "Notiek ielāde…",
-      "log_download_error": "Veicot žurnālfaila lejupielādi notika kļūda",
-      "log_title": "Soļa žurnāls",
-      "no_files": "Neviens fails nav mainīts.",
-      "no_pipeline_steps": "Konvejerdarbam nav neviena soļa!",
-      "no_pipelines": "Neviens konvejerdarbs vēl nav uzsākts.",
-      "pipeline": "Konvejerdarbs #{pipelineId}",
-      "pipelines_for": "Konvejerdarbi atzaram \"{branch}\"",
-      "pipelines_for_pr": "Konvejerdarbi izmaiņu pieprasījumam #{index}",
-      "protected": {
-        "approve": "Apstiprināt",
-        "approve_success": "Konvejerdarbs apstiprināts",
-        "awaits": "Šim konvejerdarbam ir nepieciešams apstiprinājums no atbildīgajām personām!",
-        "decline": "Noraidīt",
-        "decline_success": "Konvejerdarbs noraidīts",
-        "declined": "Šis konvejerdarbs tika noraidīts!",
-        "review": "Pārskatiet izmaiņas"
-      },
-      "show_errors": "Rādīt kļūdas",
-      "status": {
-        "blocked": "bloķēts",
-        "declined": "noraidīts",
-        "error": "kļūda",
-        "failure": "neveiksmīgs",
-        "killed": "apturēts",
-        "pending": "gaida izpildi",
-        "running": "izpildās",
-        "skipped": "izlaists",
-        "started": "uzsākts",
-        "status": "Statuss: {status}",
-        "success": "izpildīts"
-      },
-      "step_not_started": "Šis solis vēl nav uzsākts.",
-      "tasks": "Uzdevumi",
-      "warnings": "Brīdinājumi ({count})",
-      "we_got_some_errors": "Ak nē, notika kļūda!"
+    "org": {
+        "settings": {
+            "not_allowed": "Nav piekļuves šīs organizācijas iestatījumiem",
+            "secrets": {
+                "add": "Pievienot noslēpumu",
+                "created": "Organizācijas noslēpums izveidots",
+                "deleted": "Organizācijas noslēpums dzēsts",
+                "desc": "Noslēpumus var padot visu organizācijas repozitoriju konvejerdarba soļiem kā vides mainīgos.",
+                "events": {
+                    "events": "Pieejams šādiem notikumiem",
+                    "pr_warning": "Uzmanieties, jo šādā veidā tas būs pieejams visiem cilvēkiem, kas var iesūtīt izmaiņu pieprasījumu."
+                },
+                "images": {
+                    "desc": "Ar komatiem atdalīts saraksts ar attēliem, kam šis noslēpums būs pieejams, atstājot tukšu, tas būs pieejams visiem attēliem",
+                    "images": "Pieejami šādiem attēliem"
+                },
+                "name": "Nosaukums",
+                "none": "Pagaidām nav neviena organizācijas noslēpuma.",
+                "plugins_only": "Pieejams tikai spraudņiem",
+                "save": "Saglabāt noslēpumu",
+                "saved": "Organizācijas noslēpums saglabāts",
+                "secrets": "Noslēpumi",
+                "show": "Noslēpumu saraksts",
+                "value": "Vērtība"
+            },
+            "settings": "Iestatījumi",
+            "registries": {
+                "desc": "Organizācijas reģistrijas pilnvaras var tikt pievienoti, lai izmantotu privātas attēlos priekš visiem konvejerdarbiem organizācijā."
+            }
+        }
     },
-    "pull_requests": "Izmaiņu pieprasījumi",
-    "settings": {
-      "actions": {
-        "actions": "Darbības",
-        "delete": {
-          "confirm": "Visi repozitorija dati tiks neatgriezeniski dzēsti!\n\nVai vēlaties turpināt?",
-          "delete": "Dzēst repozitoriju",
-          "success": "Repozitorijs dzēsts"
-        },
-        "disable": {
-          "disable": "Atspējot repozitoriju",
-          "success": "Repozitorijs atspējots"
+    "password": "Parole",
+    "pipeline_feed": "Konvejerdarba padeve",
+    "repo": {
+        "activity": "Aktivitāte",
+        "add": "Pievienot repozitoriju",
+        "branches": "Atzari",
+        "deploy_pipeline": {
+            "enter_target": "Mērķa uzstādīšanas vide",
+            "title": "Iniciēt uzstādīšanas notikumu šim konvejerdarbam #{pipelineId}",
+            "trigger": "Uzstādīt",
+            "variables": {
+                "add": "Pievienot mainīgo",
+                "desc": "Norādiet papildus mainīgos, ko izmantot konvejerdarbā. Mainīgie ar šādu pašu nosaukumu tiks pārrakstīti.",
+                "name": "Mainīgā nosaukums",
+                "title": "Papildus konvejerdarba mainīgie",
+                "value": "Mainīgā vērtība",
+                "delete": "Dzēst mainīgo"
+            },
+            "enter_task": "Uzstādīšanas uzdevums"
         },
         "enable": {
-          "enable": "Iespējot repozitoriju",
-          "success": "Repozitorijs iespējots"
+            "disabled": "Atspējots",
+            "enable": "Iespējot",
+            "enabled": "Jau ir iespējots",
+            "list_reloaded": "Repozitoriju sarakts tika pārlādēts",
+            "reload": "Pārlādēt repozitorijus",
+            "success": "Repozitorijs iespējots"
         },
-        "repair": {
-          "repair": "Salabot repozitoriju",
-          "success": "Repozitorijs salabots"
-        }
-      },
-      "badge": {
-        "badge": "Nozīmīte",
-        "branch": "Atzars",
-        "type": "Pieraksta veids",
-        "type_html": "HTML",
-        "type_markdown": "Markdown",
-        "type_url": "URL"
-      },
-      "crons": {
-        "add": "Pievienot plānoto darbu",
-        "branch": {
-          "placeholder": "Atzars (atstājiet tukšu, lai izmantotu noklusēto atzaru)",
-          "title": "Atzars"
+        "manual_pipeline": {
+            "select_branch": "Norādiet atzaru",
+            "title": "Iniciēt manuālu konvejerdarba izpildi",
+            "trigger": "Izpildīt konvejerdarbu",
+            "variables": {
+                "add": "Pievienot",
+                "desc": "Norādiet papildus mainīgos, ko izmantot konvejerdarbā. Mainīgie ar tādu pašu nosaukumu tiks pārrakstīti.",
+                "name": "Mainīgā nosaukums",
+                "title": "Papildus konvejerdarba mainīgie",
+                "value": "Mainīgā vērtība",
+                "delete": "Dzēst mainīgo"
+            },
+            "show_pipelines": "Rādīt konvejerdarbus"
         },
-        "created": "Izveidots plānotais darbs",
-        "crons": "Darbu plānotājs",
-        "delete": "Dzēst darbu plānotāju",
-        "deleted": "Plānotais darbs izdzēsts",
-        "desc": "Darbu plānotājs var tikt izmantots, lai izpildītu konvejerdarbus pēc noteikta grafika.",
-        "edit": "Labot darbu plānotāju",
-        "name": {
-          "name": "Nosaukums",
-          "placeholder": "Plānotā darba nosaukums"
+        "not_allowed": "Nav piekļuves šim repozitorijam",
+        "open_in_forge": "Atvērt repozitoriju iekš forge",
+        "pipeline": {
+            "actions": {
+                "cancel": "Atcelt",
+                "cancel_success": "Konvejerdarbs atcelts",
+                "canceled": "Šis solis tika atcelts.",
+                "deploy": "Uzstādīt",
+                "log_auto_scroll": "Automātiski ritināt",
+                "log_auto_scroll_off": "Atslēgt automātisko ritināšanu",
+                "log_download": "Lejupielādēt",
+                "restart": "Pārstartēt",
+                "restart_success": "Konvejerdarbs pārstartēts",
+                "log_delete": "Dzēst"
+            },
+            "config": "Konfigurācija",
+            "errors": "Kļūdas ({count})",
+            "event": {
+                "cron": "Plānotais darbs",
+                "deploy": "Uzstādīšana",
+                "manual": "Manuāls",
+                "pr": "Izmaiņu pieprasījums",
+                "push": "Iesūtīšana",
+                "tag": "Tags",
+                "pr_closed": "Izmaiņu pieprasījums apvienots / aizvērts",
+                "release": "Relīze"
+            },
+            "exit_code": "Iziešanas kods {exitCode}",
+            "files": "Izmainītie faili ({files})",
+            "loading": "Notiek ielāde…",
+            "log_download_error": "Veicot žurnālfaila lejupielādi notika kļūda",
+            "log_title": "Soļa žurnāls",
+            "no_files": "Neviens fails nav mainīts.",
+            "no_pipeline_steps": "Konvejerdarbam nav neviena soļa!",
+            "no_pipelines": "Neviens konvejerdarbs vēl nav uzsākts.",
+            "pipeline": "Konvejerdarbs #{pipelineId}",
+            "pipelines_for": "Konvejerdarbi atzaram \"{branch}\"",
+            "pipelines_for_pr": "Konvejerdarbi izmaiņu pieprasījumam #{index}",
+            "protected": {
+                "approve": "Apstiprināt",
+                "approve_success": "Konvejerdarbs apstiprināts",
+                "awaits": "Šim konvejerdarbam ir nepieciešams apstiprinājums no atbildīgajām personām!",
+                "decline": "Noraidīt",
+                "decline_success": "Konvejerdarbs noraidīts",
+                "declined": "Šis konvejerdarbs tika noraidīts!",
+                "review": "Pārskatiet izmaiņas"
+            },
+            "show_errors": "Rādīt kļūdas",
+            "status": {
+                "blocked": "bloķēts",
+                "declined": "noraidīts",
+                "error": "kļūda",
+                "failure": "neveiksmīgs",
+                "killed": "apturēts",
+                "pending": "gaida izpildi",
+                "running": "izpildās",
+                "skipped": "izlaists",
+                "started": "uzsākts",
+                "status": "Statuss: {status}",
+                "success": "izpildīts"
+            },
+            "step_not_started": "Šis solis vēl nav uzsākts.",
+            "tasks": "Uzdevumi",
+            "warnings": "Brīdinājumi ({count})",
+            "we_got_some_errors": "Ak nē, notika kļūda!",
+            "no_logs": "Nav darbību žurnālu",
+            "duration": "Konvejerdarba ilgums",
+            "created": "Izveidots: {created}",
+            "log_delete_confirm": "Vai tiešām vēlaties dzēst šī soļa darbību žurnālus?",
+            "log_delete_error": "Notika kļūda dzēšot šī soļa darbību žurnālus"
         },
-        "next_exec": "Nākošā izpilde",
-        "none": "Nav pievienots neviens plānotais darbs.",
-        "not_executed_yet": "Vēl ne reizi nav izpildīts",
-        "run": "Izpildīt tagad",
-        "save": "Saglabāt plānoto darbu",
-        "saved": "Plānotā darba izmaiņas saglabātas",
-        "schedule": {
-          "placeholder": "Grafiks",
-          "title": "Grafiks (balstīts uz UTC laika joslu)"
+        "pull_requests": "Izmaiņu pieprasījumi",
+        "settings": {
+            "actions": {
+                "actions": "Darbības",
+                "delete": {
+                    "confirm": "Visi repozitorija dati tiks neatgriezeniski dzēsti!\n\nVai vēlaties turpināt?",
+                    "delete": "Dzēst repozitoriju",
+                    "success": "Repozitorijs dzēsts"
+                },
+                "disable": {
+                    "disable": "Atspējot repozitoriju",
+                    "success": "Repozitorijs atspējots"
+                },
+                "enable": {
+                    "enable": "Iespējot repozitoriju",
+                    "success": "Repozitorijs iespējots"
+                },
+                "repair": {
+                    "repair": "Salabot repozitoriju",
+                    "success": "Repozitorijs salabots"
+                }
+            },
+            "badge": {
+                "badge": "Nozīmīte",
+                "branch": "Atzars",
+                "type": "Pieraksta veids",
+                "type_html": "HTML",
+                "type_markdown": "Markdown",
+                "type_url": "URL"
+            },
+            "crons": {
+                "add": "Pievienot plānoto darbu",
+                "branch": {
+                    "placeholder": "Atzars (atstājiet tukšu, lai izmantotu noklusēto atzaru)",
+                    "title": "Atzars"
+                },
+                "created": "Izveidots plānotais darbs",
+                "crons": "Darbu plānotājs",
+                "delete": "Dzēst darbu plānotāju",
+                "deleted": "Plānotais darbs izdzēsts",
+                "desc": "Darbu plānotājs var tikt izmantots, lai izpildītu konvejerdarbus pēc noteikta grafika.",
+                "edit": "Labot darbu plānotāju",
+                "name": {
+                    "name": "Nosaukums",
+                    "placeholder": "Plānotā darba nosaukums"
+                },
+                "next_exec": "Nākošā izpilde",
+                "none": "Nav pievienots neviens plānotais darbs.",
+                "not_executed_yet": "Vēl ne reizi nav izpildīts",
+                "run": "Izpildīt tagad",
+                "save": "Saglabāt plānoto darbu",
+                "saved": "Plānotā darba izmaiņas saglabātas",
+                "schedule": {
+                    "placeholder": "Grafiks",
+                    "title": "Grafiks (balstīts uz UTC laika joslu)"
+                },
+                "show": "Parādīt plānotos darbus"
+            },
+            "general": {
+                "allow_pr": {
+                    "allow": "Atļaut izmaiņu pieprasījumiem",
+                    "desc": "Ļaut izpildīt konvejerdarbus izmaiņu pieprasījumiem."
+                },
+                "cancel_prev": {
+                    "cancel": "Atcelt iepriekšējos konvejerdarbus",
+                    "desc": "Iespējojot šo pazīmi, tiks atcelti visi iepriekšējie konvejerdarbi, kuriem sakrīt notikums un konteksts."
+                },
+                "general": "Pamata",
+                "netrc_only_trusted": {
+                    "desc": "Atļaut izmantot Git autorizāciju tikai uzticamiem konteineriem (ieteicams).",
+                    "netrc_only_trusted": "Atļaut izmantot Git autorizāciju tikai uzticamiem konteineriem"
+                },
+                "pipeline_path": {
+                    "default": "Pēc noklusējuma: .woodpecker/*.{'{yaml,yml}'} -> .woodpecker.yaml -> .woodpecker.yml",
+                    "desc": "Ceļš uz konvejerdarba konfigurāciju, piemēram, {0}. Mapēm jābeidzas ar {0}.",
+                    "desc_path_example": "mans/ceļš/",
+                    "path": "Konvejerdarba ceļš"
+                },
+                "project": "Projekta iestatījumi",
+                "protected": {
+                    "desc": "Nepieciešams apstiprināt visus konvejerdarbus pirms tie tiek izpildīti.",
+                    "protected": "Aizsargāts"
+                },
+                "save": "Saglabāt iestatījumus",
+                "success": "Repozitorija iestatījumi tika saglabāti",
+                "timeout": {
+                    "minutes": "minūtes",
+                    "timeout": "Noildze"
+                },
+                "trusted": {
+                    "desc": "Konvejerdarba konteineri tiks izpildīti ar paaugstinātām tiesībām (piemēram, piesaistīt servera direktorijas).",
+                    "trusted": "Uzticams"
+                },
+                "visibility": {
+                    "internal": {
+                        "desc": "Tikai autorizēti lietotāji var piekļūt šim projektam.",
+                        "internal": "Iekšējs"
+                    },
+                    "private": {
+                        "desc": "Tikai lietotāji, kam ir tiesības uz repozitoriju, var piekļūt šim projektam.",
+                        "private": "Privāts"
+                    },
+                    "public": {
+                        "desc": "Ikviens var piekļūt projektam, arī neautorizētie lietotāji.",
+                        "public": "Publisks"
+                    },
+                    "visibility": "Projekta redzamība"
+                },
+                "allow_deploy": {
+                    "desc": "Atļaut publicēšanu no veiksmīgiem konvejerdarbiem. Lietot tikai ja Jūs uzticaties visiem lietotājiem ar push permisijām.",
+                    "allow": "Atļaut publicēšanu"
+                }
+            },
+            "not_allowed": "Nav piekļuves šī repozitorija iestatījumiem",
+            "registries": {
+                "add": "Pievienot reģistru",
+                "address": {
+                    "address": "Adrese",
+                    "placeholder": "Reģistra adrese, piemēram, docker.io"
+                },
+                "created": "Reģistra autorizācijas dati pievienoti",
+                "credentials": "Reģistru autorizācijas dati",
+                "delete": "Dzēst reģistra autorizācijas datus",
+                "deleted": "Reģistra autorizācijas dati dzēsti",
+                "desc": "Reģistru autorizācijas dati var tikt izmantoti, lai izmantotu attēlos no privātiem reģistriem, konvjerdarbu soļos.",
+                "edit": "Labot reģistra autorizācijas datus",
+                "none": "Pašlaik nav pievienots neviens reģistrs.",
+                "registries": "Reģistri",
+                "save": "Saglabāt reģistru",
+                "saved": "Reģistra autorizācijas dati saglabāti",
+                "show": "Reģistru saraksts"
+            },
+            "secrets": {
+                "add": "Pievienot noslēpumu",
+                "created": "Noslēpums izveidots",
+                "delete": "Dzēst noslēpumu",
+                "delete_confirm": "Vai patiešām vēlaties dzēst šo noslēpumu?",
+                "deleted": "Noslēpums dzēsts",
+                "desc": "Noslēpumus var padot individuāliem konvejerdarba soļiem izpildes laikā kā vides mainīgos.",
+                "edit": "Labot noslēpumu",
+                "events": {
+                    "events": "Pieejams šādiem notikumiem",
+                    "pr_warning": "Uzmanieties, jo šādā veidā tas būs pieejams visiem cilvēkiem, kas var iesūtīt izmaiņu pieprasījumu."
+                },
+                "images": {
+                    "desc": "Ar komatiem atdalīts saraksts ar attēliem, kam šis noslēpums būs pieejams, atstājot tukšu, tas būs pieejams visiem attēliem",
+                    "images": "Pieejams šādiem attēliem"
+                },
+                "name": "Nosaukums",
+                "none": "Pagaidām nav neviena noslēpuma.",
+                "plugins_only": "Pieejams tikai spraudņiem",
+                "save": "Saglabāt noslēpumu",
+                "saved": "Noslēpums saglabāts",
+                "secrets": "Noslēpumi",
+                "show": "Noslēpumu saraksts",
+                "value": "Vērtība"
+            },
+            "settings": "Iestatījumi"
         },
-        "show": "Parādīt plānotos darbus"
-      },
-      "general": {
-        "allow_pr": {
-          "allow": "Atļaut izmaiņu pieprasījumiem",
-          "desc": "Ļaut izpildīt konvejerdarbus izmaiņu pieprasījumiem."
-        },
-        "cancel_prev": {
-          "cancel": "Atcelt iepriekšējos konvejerdarbus",
-          "desc": "Iespējojot šo pazīmi, tiks atcelti visi iepriekšējie konvejerdarbi, kuriem sakrīt notikums un konteksts."
-        },
-        "general": "Pamata",
-        "netrc_only_trusted": {
-          "desc": "Atļaut izmantot Git autorizāciju tikai uzticamiem konteineriem (ieteicams).",
-          "netrc_only_trusted": "Atļaut izmantot Git autorizāciju tikai uzticamiem konteineriem"
-        },
-        "pipeline_path": {
-          "default": "Pēc noklusējuma: .woodpecker/*.{'{yaml,yml}'} -> .woodpecker.yaml -> .woodpecker.yml",
-          "desc": "Ceļš uz konvejerdarba konfigurāciju, piemēram, {0}. Mapēm jābeidzas ar {0}.",
-          "desc_path_example": "mans/ceļš/",
-          "path": "Konvejerdarba ceļš"
-        },
-        "project": "Projekta iestatījumi",
-        "protected": {
-          "desc": "Nepieciešams apstiprināt visus konvejerdarbus pirms tie tiek izpildīti.",
-          "protected": "Aizsargāts"
-        },
-        "save": "Saglabāt iestatījumus",
-        "success": "Repozitorija iestatījumi tika saglabāti",
-        "timeout": {
-          "minutes": "minūtes",
-          "timeout": "Noildze"
-        },
-        "trusted": {
-          "desc": "Konvejerdarba konteineri tiks izpildīti ar paaugstinātām tiesībām, piemēram, piesaistīt servera direktorijas.",
-          "trusted": "Uzticams"
-        },
-        "visibility": {
-          "internal": {
-            "desc": "Tikai autorizēti lietotāji var piekļūt šim projektam.",
-            "internal": "Iekšējs"
-          },
-          "private": {
-            "desc": "Tikai lietotāji, kam ir tiesības uz repozitoriju, var piekļūt šim projektam.",
-            "private": "Privāts"
-          },
-          "public": {
-            "desc": "Ikviens var piekļūt projektam, arī neautorizētie lietotāji.",
-            "public": "Publisks"
-          },
-          "visibility": "Projekta redzamība"
-        }
-      },
-      "not_allowed": "Nav piekļuves šī repozitorija iestatījumiem",
-      "registries": {
-        "add": "Pievienot reģistru",
-        "address": {
-          "address": "Adrese",
-          "placeholder": "Reģistra adrese, piemēram, docker.io"
-        },
-        "created": "Reģistra autorizācijas dati pievienoti",
-        "credentials": "Reģistru autorizācijas dati",
-        "delete": "Dzēst reģistra autorizācijas datus",
-        "deleted": "Reģistra autorizācijas dati dzēsti",
-        "desc": "Reģistru autorizācijas dati var tikt izmantoti, lai izmantotu attēlos no privātiem reģistriem, konvjerdarbu soļos.",
-        "edit": "Labot reģistra autorizācijas datus",
-        "none": "Pašlaik nav pievienots neviens reģistrs.",
-        "registries": "Reģistri",
-        "save": "Saglabāt reģistru",
-        "saved": "Reģistra autorizācijas dati saglabāti",
-        "show": "Reģistru saraksts"
-      },
-      "secrets": {
-        "add": "Pievienot noslēpumu",
-        "created": "Noslēpums izveidots",
-        "delete": "Dzēst noslēpumu",
-        "delete_confirm": "Vai patiešām vēlaties dzēst šo noslēpumu?",
-        "deleted": "Noslēpums dzēsts",
-        "desc": "Noslēpumus var padot individuāliem konvejerdarba soļiem izpildes laikā kā vides mainīgos.",
-        "edit": "Labot noslēpumu",
-        "events": {
-          "events": "Pieejams šādiem notikumiem",
-          "pr_warning": "Uzmanieties, jo šādā veidā tas būs pieejams visiem cilvēkiem, kas var iesūtīt izmaiņu pieprasījumu."
-        },
-        "images": {
-          "desc": "Ar komatiem atdalīts saraksts ar attēliem, kam šis noslēpums būs pieejams, atstājot tukšu, tas būs pieejams visiem attēliem",
-          "images": "Pieejams šādiem attēliem"
-        },
-        "name": "Nosaukums",
-        "none": "Pagaidām nav neviena noslēpuma.",
-        "plugins_only": "Pieejams tikai spraudņiem",
-        "save": "Saglabāt noslēpumu",
-        "saved": "Noslēpums saglabāts",
-        "secrets": "Noslēpumi",
-        "show": "Noslēpumu saraksts",
-        "value": "Vērtība"
-      },
-      "settings": "Iestatījumi"
+        "user_none": "Šai organizācijai/lietotājam pagaidām nav neviena projekta."
     },
-    "user_none": "Šai organizācijai/lietotājam pagaidām nav neviena projekta."
-  },
-  "repos": "Repozitoriji",
-  "repositories": "Repozitoriji",
-  "running_version": "Tiek izmantota Woodpecker CI versija {0}",
-  "search": "Meklēt…",
-  "time": {
-    "days_short": "dien.",
-    "hours_short": "st.",
-    "min_short": "min.",
-    "not_started": "nav uzsākts",
-    "sec_short": "sek.",
-    "template": "YYYY. [gada] D. MMMM, HH:mm z",
-    "weeks_short": "ned."
-  },
-  "unknown_error": "Notika neparedzēta kļūda",
-  "update_woodpecker": "Pieejama jauna Woodpecker CI versija {0}",
-  "url": "URL",
-  "user": {
-    "access_denied": "Jums nav tiesību autorizēties",
-    "internal_error": "Notikusi sistēmas iekšējā kļūda",
-    "oauth_error": "Neizdevās autorizēties, izmantojot, OAuth piegādātāju",
-    "settings": {
-      "api": {
-        "api": "API",
-        "api_usage": "Piemērs API lietošanai",
-        "cli_usage": "Piemērs komandrindas lietošanai",
-        "desc": "Personīgā piekļuves pilnvara un API lietošana",
-        "dl_cli": "Lejupielādēt komandrindas rīku",
-        "reset_token": "Atiestatīt pilnvaru",
-        "shell_setup": "Komandrindas iestatīšana",
-        "shell_setup_before": "nepieciešamie komandrindas iestatīšanas soļi",
-        "swagger_ui": "API dokumentācija",
-        "token": "Personīgā piekļuves pilnvara"
-      },
-      "general": {
-        "general": "Vispārīgi",
-        "language": "Valoda",
-        "theme": {
-          "auto": "Noteikt automātiski",
-          "dark": "Tumšā",
-          "light": "Gaišā",
-          "theme": "Tēma"
+    "repos": "Repozitorijas",
+    "repositories": "Repozitoriji",
+    "running_version": "Tiek izmantota Woodpecker {0}",
+    "search": "Meklēt…",
+    "time": {
+        "days_short": "dien.",
+        "hours_short": "st.",
+        "min_short": "min.",
+        "not_started": "nav uzsākts",
+        "sec_short": "sek.",
+        "template": "YYYY. [gada] D. MMMM, HH:mm z",
+        "weeks_short": "ned."
+    },
+    "unknown_error": "Notika neparedzēta kļūda",
+    "update_woodpecker": "Lūdzu atjauniniet Woodpecker instanci uz {0}",
+    "url": "URL",
+    "user": {
+        "access_denied": "Jums nav tiesību autorizēties",
+        "internal_error": "Notikusi sistēmas iekšējā kļūda",
+        "oauth_error": "Neizdevās autorizēties, izmantojot, OAuth piegādātāju",
+        "settings": {
+            "api": {
+                "api": "API",
+                "api_usage": "Piemērs API lietošanai",
+                "cli_usage": "Piemērs komandrindas lietošanai",
+                "desc": "Personīgā piekļuves pilnvara un API lietošana",
+                "dl_cli": "Lejupielādēt komandrindas rīku",
+                "reset_token": "Atiestatīt pilnvaru",
+                "shell_setup": "Komandrindas iestatīšana",
+                "shell_setup_before": "nepieciešamie komandrindas iestatīšanas soļi",
+                "swagger_ui": "API dokumentācija",
+                "token": "Personīgā piekļuves pilnvara"
+            },
+            "general": {
+                "general": "Vispārīgi",
+                "language": "Valoda",
+                "theme": {
+                    "auto": "Noteikt automātiski",
+                    "dark": "Tumšā",
+                    "light": "Gaišā",
+                    "theme": "Tēma"
+                }
+            },
+            "secrets": {
+                "add": "Pievienot noslēpumu",
+                "created": "Lietotāja noslēpums tika izveidots",
+                "deleted": "Lietotāja noslēpums tika izdzēsts",
+                "desc": "Lietotāja noslēpumi var tikt padoti personīgajiem konvejerdarbu soļiem kā vides mainīgie.",
+                "events": {
+                    "events": "Pieejams notikumiem",
+                    "pr_warning": "Esiet uzmanīgi atzīmējot šo pazīmi, jo tas var tikt izmantots, lai izmaiņu pieprasījumā atklātu šī noslēpuma vērtību, nepiederošām personām."
+                },
+                "images": {
+                    "desc": "Ar komatu attdalīts saraksts ar attēlu nosaukumiem, kam šis noslēpums būs pieejams, atstājiet tukšu, lai tas būtu pieejams visiem attēliem",
+                    "images": "Pieejams šādiem soļu attēliem"
+                },
+                "name": "Nosaukums",
+                "none": "Pagaidām nav neviena lietotāja noslēpuma.",
+                "plugins_only": "Pieejams tikai spraudņiem",
+                "save": "Saglabāt noslēpumu",
+                "saved": "Lietotāja noslēpums tika saglabāts",
+                "secrets": "Noslēpumi",
+                "show": "Parādīt noslēpumus",
+                "value": "Vērtība"
+            },
+            "settings": "Lietotāja iestatījumi",
+            "registries": {
+                "desc": "Lietotāju reģistra pilnvaras var tikt pielietotas privātos attēlos priekš personīgiem konvejerdarbiem."
+            },
+            "cli_and_api": {
+                "token": "Personīgās Piekļuves Žetons",
+                "api_usage": "Piemēra API pielietošana",
+                "cli_usage": "Piemēra CLI lietošana",
+                "download_cli": "Lejupielādēt CLI",
+                "reset_token": "Atiestatīt žetonu",
+                "swagger_ui": "Swagger UI",
+                "cli_and_api": "CLI & API",
+                "desc": "Personīgās Piekļuves Žetons, CLI un API pielietošna"
+            }
         }
-      },
-      "secrets": {
+    },
+    "username": "Lietotājvārds",
+    "welcome": "Woodpecker",
+    "secrets": {
+        "secrets": "Noslēpumi",
+        "none": "Pašlaik nav vides noslēpumu.",
         "add": "Pievienot noslēpumu",
-        "created": "Lietotāja noslēpums tika izveidots",
-        "deleted": "Lietotāja noslēpums tika izdzēsts",
-        "desc": "Lietotāja noslēpumi var tikt padoti uz visiem lietotāja repozitoriju konvejerdarbu soļiem kā vides mainīgie.",
+        "save": "Saglabāt noslēpumu",
+        "show": "Rādīt noslēpumus",
+        "name": "Nosaukums",
+        "value": "Vērtība",
+        "delete_confirm": "Vai tiešām vēlaties dzēst šo noslēpumu?",
+        "saved": "Noslēpums saglabāts",
         "events": {
-          "events": "Pieejams notikumiem",
-          "pr_warning": "Esiet uzmanīgi atzīmējot šo pazīmi, jo tas var tikt izmantots, lai izmaiņu pieprasījumā atklātu šī noslēpuma vērtību, nepiederošām personām."
+            "events": "Pieejams sekojošajos notikumos",
+            "pr_warning": "Lūdzu esiet uzmanīgi ar šo iestatījumu: ļaunprātīgs aktieris var iesniegt ļaunprātīgu pull request, kas atklās noslēpumus."
         },
         "images": {
-          "desc": "Ar komatu attdalīts saraksts ar attēlu nosaukumiem, kam šis noslēpums būs pieejams, atstājiet tukšu, lai tas būtu pieejams visiem attēliem",
-          "images": "Pieejams šādiem soļu attēliem"
+            "desc": "Saraksts ar attēliem, kuriem šis noslēpums ir pieejams. Atstāt tukšu, lai atļautu visos attēlos.",
+            "images": "Pieejams sekojošiem attēliem"
         },
-        "name": "Nosaukums",
-        "none": "Pagaidām nav neviena lietotāja noslēpuma.",
-        "plugins_only": "Pieejams tikai spraudņiem",
-        "save": "Saglabāt noslēpumu",
-        "saved": "Lietotāja noslēpums tika saglabāts",
-        "secrets": "Noslēpumi",
-        "show": "Parādīt noslēpumus",
-        "value": "Vērtība"
-      },
-      "settings": "Lietotāja iestatījumi"
-    }
-  },
-  "username": "Lietotāja vārds",
-  "welcome": "Woodpecker"
+        "edit": "Rediģēt noslēpumu",
+        "desc": "Noslēpumi var tikt padoti individuāliem konvejerdarbu soļiem kā vides mainīgie.",
+        "deleted": "Noslēpums dzēsts",
+        "created": "Noslēpums izveidots",
+        "delete": "Dzēst noslēpumu"
+    },
+    "registries": {
+        "delete_confirm": "Vai tiešām vēlaties dzēst šo reģistru?",
+        "created": "Reģistra pilnvaras izveidotas",
+        "view": "Skatīt reģistru",
+        "edit": "Rediģēt reģistru",
+        "delete": "Dzēst reģistru",
+        "saved": "Reģistra pilnvaras saglabātas",
+        "deleted": "Reģistra pilnvaras dzēstas",
+        "save": "Saglabāt reģistru",
+        "add": "Pievienot reģistru",
+        "registries": "Reģistrijas",
+        "credentials": "Reģistriju pilnvaras",
+        "desc": "Reģistriju pilnvaras var tikt pievienotas pielietošanai privātos attēlos priekš konvejerdarbiem.",
+        "none": "Pašlaik nav rēģistrijas pilnvaru.",
+        "address": {
+            "address": "Adreses",
+            "desc": "Reģistrijas adreses (piem. docker.io)"
+        },
+        "show": "Rādīt reģistrijas"
+    },
+    "oauth_error": "Kļūda autentificējoties pret OAuth nodrošinātāju",
+    "internal_error": "Notikušas dažas iekšējās kļūdas",
+    "registration_closed": "Reģistrācijas process ir aizvērts",
+    "access_denied": "Jums nav atļaujas piekļūt šai instancei",
+    "invalid_state": "OAuth stāvoklis nav valīds",
+    "org_level_secret": "organizācijas noslēpums",
+    "cli_login_success": "Autorizēšanās CLI veiksmīga",
+    "login_to_cli": "Autorizēties CLI",
+    "login_to_cli_description": "Turpinot, Jūs autorizēs iekš CLI.",
+    "abort": "Aborts",
+    "cli_login_failed": "Autorizešanās pie CLI neizdevās",
+    "return_to_cli": "Jūs varat aizvērt šo cilni un atgriezties pie CLI.",
+    "settings": "Iestatījumi",
+    "login_with": "Autorizēties ar {forge}",
+    "empty_list": "Nav {entity}!",
+    "global_level_secret": "globāls noslēpums",
+    "cli_login_denied": "Autorizešanās pie CLI liegta"
 }

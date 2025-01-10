@@ -15,13 +15,14 @@
 package repo
 
 import (
+	"context"
 	"fmt"
 	"time"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
-	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
-	"go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v3/woodpecker-go/woodpecker"
 )
 
 var repoUpdateCmd = &cli.Command{
@@ -35,8 +36,12 @@ var repoUpdateCmd = &cli.Command{
 			Usage: "repository is trusted",
 		},
 		&cli.BoolFlag{
-			Name:  "gated",
-			Usage: "repository is gated",
+			Name:   "gated", // TODO: remove in next release
+			Hidden: true,
+		},
+		&cli.StringFlag{
+			Name:  "require-approval",
+			Usage: "repository requires approval for",
 		},
 		&cli.DurationFlag{
 			Name:  "timeout",
@@ -48,7 +53,7 @@ var repoUpdateCmd = &cli.Command{
 		},
 		&cli.StringFlag{
 			Name:  "config",
-			Usage: "repository configuration path (e.g. .woodpecker.yml)",
+			Usage: "repository configuration path. Example: .woodpecker.yml",
 		},
 		&cli.IntFlag{
 			Name:  "pipeline-counter",
@@ -56,14 +61,14 @@ var repoUpdateCmd = &cli.Command{
 		},
 		&cli.BoolFlag{
 			Name:  "unsafe",
-			Usage: "validate updating the pipeline-counter is unsafe",
+			Usage: "allow unsafe operations",
 		},
 	},
 }
 
-func repoUpdate(c *cli.Context) error {
+func repoUpdate(ctx context.Context, c *cli.Command) error {
 	repoIDOrFullName := c.Args().First()
-	client, err := internal.NewClient(c)
+	client, err := internal.NewClient(ctx, c)
 	if err != nil {
 		return err
 	}
@@ -77,8 +82,8 @@ func repoUpdate(c *cli.Context) error {
 		config          = c.String("config")
 		timeout         = c.Duration("timeout")
 		trusted         = c.Bool("trusted")
-		gated           = c.Bool("gated")
-		pipelineCounter = c.Int("pipeline-counter")
+		requireApproval = c.String("require-approval")
+		pipelineCounter = int(c.Int("pipeline-counter"))
 		unsafe          = c.Bool("unsafe")
 	)
 
@@ -86,8 +91,18 @@ func repoUpdate(c *cli.Context) error {
 	if c.IsSet("trusted") {
 		patch.IsTrusted = &trusted
 	}
+
+	// TODO: remove in next release
 	if c.IsSet("gated") {
-		patch.IsGated = &gated
+		return fmt.Errorf("'gated' option has been set in version 2.8, use 'require-approval' in >= 3.0")
+	}
+
+	if c.IsSet("require-approval") {
+		if mode := woodpecker.ApprovalMode(requireApproval); mode.Valid() {
+			patch.RequireApproval = &mode
+		} else {
+			return fmt.Errorf("update approval mode failed: '%s' is no valid mode", mode)
+		}
 	}
 	if c.IsSet("timeout") {
 		v := int64(timeout / time.Minute)

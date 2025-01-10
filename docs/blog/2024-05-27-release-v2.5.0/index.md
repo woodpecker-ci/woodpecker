@@ -45,7 +45,7 @@ NUMBER  STATUS   EVENT   BRANCH  COMMIT                                    AUTHO
 42  success  push
 ```
 
-In addition especially useful for programmtic usage there is a `go-template` output format which will output the data using the provided go template like this:
+In addition especially useful for programmatic usage there is a `go-template` output format which will output the data using the provided go template like this:
 
 ```bash
 ########
@@ -87,4 +87,4 @@ be removed in the next major release:
 - Use `WOODPECKER_EXPERT_FORGE_OAUTH_HOST` instead of `WOODPECKER_DEV_GITEA_OAUTH_URL` or `WOODPECKER_DEV_OAUTH_HOST`
 - Deprecated `WOODPECKER_WEBHOOK_HOST` in favor of `WOODPECKER_EXPERT_WEBHOOK_HOST`
 
-For a full list of deprecations that will be dropped in the `next` major release `3.0.0` (no eta yet), please check the [migrations](/docs/migrations#next) section.
+For a full list of deprecations that will be dropped in the `next` major release `3.0.0` (no eta yet), please check the [migrations](/migrations#next) section.

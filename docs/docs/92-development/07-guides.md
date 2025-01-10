@@ -21,3 +21,49 @@ To automatically execute the migration after the start of the server, the new mi
 ## Constants of official images
 
 All official default images, are saved in [shared/constant/constant.go](https://github.com/woodpecker-ci/woodpecker/blob/main/shared/constant/constant.go) and must be pinned by an exact tag.
+
+## Building images locally
+
+### Server
+
+```sh
+### build web component
+make vendor
+cd web/
+pnpm install --frozen-lockfile
+pnpm build
+cd ..
+
+### define the platforms to build for (e.g. linux/amd64)
+# (the | is not a typo here)
+export PLATFORMS='linux|amd64'
+make cross-compile-server
+
+### build the image
+docker buildx build --platform linux/amd64 -t username/repo:tag -f docker/Dockerfile.server.multiarch.rootless --push .
+```
+
+:::info
+The `cross-compile-server` rule makes use of `xgo`, a go cross-compiler. You need to be on a `amd64` host to do this, as `xgo` is only available for `amd64` (see [xgo#213](https://github.com/techknowlogick/xgo/issues/213)).
+You can try to use the `build-server` rule instead, however this one fails for some OS (e.g. macOS).
+:::
+
+### Agent
+
+```sh
+### build the agent
+make build-agent
+
+### build the image
+docker buildx build --platform linux/amd64 -t username/repo:tag -f docker/Dockerfile.agent.multiarch --push .
+```
+
+### CLI
+
+```sh
+### build the CLI
+make build-cli
+
+### build the image
+docker buildx build --platform linux/amd64 -t username/repo:tag -f docker/Dockerfile.cli.multiarch.rootless --push .
+```

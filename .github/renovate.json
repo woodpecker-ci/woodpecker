@@ -1,12 +1,13 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": ["github>woodpecker-ci/renovate-config"],
+  "automergeType": "pr",
   "customManagers": [
     {
       "customType": "regex",
       "fileMatch": ["shared/constant/constant.go"],
       "matchStrings": [
-        "//\\s*renovate:\\s*datasource=(?<datasource>.*?) depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?\\s+DefaultCloneImage = \"docker.io/woodpeckerci/plugin-git:(?<currentValue>.*)\""
+        "//\\s*renovate:\\s*datasource=(?<datasource>.*?) depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?\\s+DefaultClonePlugin = \"docker.io/woodpeckerci/plugin-git:(?<currentValue>.*)\""
       ],
       "versioningTemplate": "{{#if versioning}}{{{versioning}}}{{else}}semver{{/if}}"
     }
@@ -29,8 +30,8 @@
     },
     {
       "groupName": "golang-lang",
-      "matchPackagePatterns": ["^golang$", "xgo"],
-      "matchUpdateTypes": ["minor", "patch"]
+      "matchUpdateTypes": ["minor", "patch"],
+      "matchPackageNames": ["/^golang$/", "/xgo/"]
     },
     {
       "groupName": "golang-packages",
@@ -60,9 +61,10 @@
       "matchFileNames": ["docs/**/package.json"]
     },
     {
+      "description": "Extract version from xgo container tags",
       "matchDatasources": ["docker"],
-      "matchPackagePatterns": ["xgo"],
-      "versioning": "regex:^go-(?<major>\\d+)?(\\.(?<minor>\\d+))?(\\.(?<patch>\\d+))$"
+      "versioning": "regex:^go-(?<major>\\d+)\\.(?<minor>\\d+)\\.x$",
+      "matchPackageNames": ["/techknowlogick/xgo/"]
     }
   ]
 }

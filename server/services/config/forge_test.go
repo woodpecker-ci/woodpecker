@@ -24,10 +24,10 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server/forge/mocks"
-	forge_types "go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
-	"go.woodpecker-ci.org/woodpecker/v2/server/services/config"
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge/mocks"
+	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/services/config"
 )
 
 func TestFetch(t *testing.T) {
@@ -287,7 +287,7 @@ func TestFetch(t *testing.T) {
 			f := new(mocks.Forge)
 			dirs := map[string][]*forge_types.FileMeta{}
 			for _, file := range tt.files {
-				f.On("File", mock.Anything, mock.Anything, mock.Anything, mock.Anything, file.name).Return(file.data, nil)
+				f.On("File", mock.Anything, mock.Anything, mock.Anything, mock.Anything, file.name).Once().Return(file.data, nil)
 				path := filepath.Dir(file.name)
 				if path != "." {
 					dirs[path] = append(dirs[path], &forge_types.FileMeta{
@@ -298,7 +298,7 @@ func TestFetch(t *testing.T) {
 			}
 
 			for path, files := range dirs {
-				f.On("Dir", mock.Anything, mock.Anything, mock.Anything, mock.Anything, path).Return(files, nil)
+				f.On("Dir", mock.Anything, mock.Anything, mock.Anything, mock.Anything, path).Once().Return(files, nil)
 			}
 
 			// if the previous mocks do not match return not found errors
@@ -312,7 +312,7 @@ func TestFetch(t *testing.T) {
 			files, err := configFetcher.Fetch(
 				context.Background(),
 				f,
-				&model.User{Token: "xxx"},
+				&model.User{AccessToken: "xxx"},
 				repo,
 				&model.Pipeline{Commit: "89ab7b2d6bfb347144ac7c557e638ab402848fee"},
 				nil,

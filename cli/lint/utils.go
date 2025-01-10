@@ -7,10 +7,10 @@ import (
 
 	term_env "github.com/muesli/termenv"
 
-	pipeline_errors "go.woodpecker-ci.org/woodpecker/v2/pipeline/errors"
+	pipeline_errors "go.woodpecker-ci.org/woodpecker/v3/pipeline/errors"
 )
 
-func FormatLintError(file string, err error) (string, error) {
+func FormatLintError(file string, err error, strict bool) (string, error) {
 	if err == nil {
 		return "", nil
 	}
@@ -24,7 +24,7 @@ func FormatLintError(file string, err error) (string, error) {
 	for _, err := range linterErrors {
 		line := "  "
 
-		if err.IsWarning {
+		if !strict && err.IsWarning {
 			line = fmt.Sprintf("%s ⚠️ ", line)
 			amountWarnings++
 		} else {

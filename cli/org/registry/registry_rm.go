@@ -15,10 +15,12 @@
 package registry
 
 import (
-	"github.com/urfave/cli/v2"
+	"context"
 
-	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
-	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
+	"github.com/urfave/cli/v3"
+
+	"go.woodpecker-ci.org/woodpecker/v3/cli/common"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/internal"
 )
 
 var registryDeleteCmd = &cli.Command{
@@ -36,10 +38,10 @@ var registryDeleteCmd = &cli.Command{
 	},
 }
 
-func registryDelete(c *cli.Context) error {
+func registryDelete(ctx context.Context, c *cli.Command) error {
 	hostname := c.String("hostname")
 
-	client, err := internal.NewClient(c)
+	client, err := internal.NewClient(ctx, c)
 	if err != nil {
 		return err
 	}

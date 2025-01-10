@@ -32,12 +32,8 @@ Example registry hostname matching logic:
 - Hostname `gcr.io` matches image `gcr.io/foo/bar`
 - Hostname `docker.io` matches `golang`
 - Hostname `docker.io` matches `library/golang`
-- Hostname `docker.io` matches `bradyrydzewski/golang`
-- Hostname `docker.io` matches `bradyrydzewski/golang:latest`
-
-:::note
-The flow above doesn't work in Kubernetes. There is [workaround](../30-administration/22-backends/40-kubernetes.md#images-from-private-registries).
-:::
+- Hostname `docker.io` matches `bradrydzewski/golang`
+- Hostname `docker.io` matches `bradrydzewski/golang:latest`
 
 ## Global registry support
 

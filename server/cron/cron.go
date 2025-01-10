@@ -19,26 +19,26 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/robfig/cron"
+	"github.com/gdgvda/cron"
 	"github.com/rs/zerolog/log"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server"
-	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
-	"go.woodpecker-ci.org/woodpecker/v2/server/pipeline"
-	"go.woodpecker-ci.org/woodpecker/v2/server/store"
+	"go.woodpecker-ci.org/woodpecker/v3/server"
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/pipeline"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 )
 
 const (
 	// Specifies the interval woodpecker checks for new crons to exec.
-	checkTime = 10 * time.Second
+	checkTime = time.Minute
 
 	// Specifies the batch size of crons to retrieve per check from database.
 	checkItems = 10
 )
 
-// Start starts the cron scheduler loop.
-func Start(ctx context.Context, store store.Store) error {
+// Run starts the cron scheduler loop.
+func Run(ctx context.Context, store store.Store) error {
 	for {
 		select {
 		case <-ctx.Done():
@@ -71,7 +71,7 @@ func CalcNewNext(schedule string, now time.Time) (time.Time, error) {
 
 	// TODO: allow the users / the admin to set a specific timezone
 
-	c, err := cron.Parse(schedule)
+	c, err := cron.ParseStandard(schedule)
 	if err != nil {
 		return time.Time{}, fmt.Errorf("cron parse schedule: %w", err)
 	}

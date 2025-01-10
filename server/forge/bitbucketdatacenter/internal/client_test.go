@@ -20,7 +20,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/franela/goblin"
+	"github.com/stretchr/testify/assert"
 	"golang.org/x/oauth2"
 )
 
@@ -30,20 +30,14 @@ func TestCurrentUser(t *testing.T) {
 		_, _ = w.Write([]byte(`tal@netic.dk`))
 	}))
 
-	g := goblin.Goblin(t)
-	g.Describe("Bitbucket Current User", func() {
-		g.After(func() {
-			s.Close()
-		})
-		g.It("should return current user id", func() {
-			ctx := context.Background()
-			ts := mockSource("bearer-token")
-			client := NewClientWithToken(ctx, ts, s.URL)
-			uid, err := client.FindCurrentUser(ctx)
-			g.Assert(err).IsNil()
-			g.Assert(uid).Equal("tal_netic.dk")
-		})
-	})
+	defer s.Close()
+
+	ctx := context.Background()
+	ts := mockSource("bearer-token")
+	client := NewClientWithToken(ctx, ts, s.URL)
+	uid, err := client.FindCurrentUser(ctx)
+	assert.NoError(t, err)
+	assert.Equal(t, "tal_netic.dk", uid)
 }
 
 type mockSource string

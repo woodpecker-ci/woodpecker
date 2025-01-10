@@ -18,10 +18,10 @@ package pipeline
 import (
 	"time"
 
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc"
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
-	"go.woodpecker-ci.org/woodpecker/v2/server/store"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/rpc"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 )
 
 func UpdateStepStatus(store store.Store, step *model.Step, state rpc.StepState) error {
@@ -49,7 +49,7 @@ func UpdateStepToStatusStarted(store store.Store, step model.Step, state rpc.Ste
 	return &step, store.StepUpdate(&step)
 }
 
-func UpdateStepToStatusSkipped(store store.Store, step model.Step, finished int64) (*model.Step, error) {
+func UpdateStepStatusToSkipped(store store.Store, step model.Step, finished int64) (*model.Step, error) {
 	step.State = model.StatusSkipped
 	if step.Started != 0 {
 		step.State = model.StatusSuccess // for daemons that are killed

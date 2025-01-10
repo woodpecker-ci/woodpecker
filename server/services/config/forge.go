@@ -23,10 +23,10 @@ import (
 
 	"github.com/rs/zerolog/log"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
-	"go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
-	"go.woodpecker-ci.org/woodpecker/v2/shared/constant"
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge"
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/constant"
 )
 
 type forgeFetcher struct {
@@ -59,10 +59,9 @@ func (f *forgeFetcher) Fetch(ctx context.Context, forge forge.Forge, user *model
 	for i := 0; i < int(f.retryCount); i++ {
 		files, err = ffc.fetch(ctx, strings.TrimSpace(repo.Config))
 		if err != nil {
-			log.Trace().Err(err).Msgf("%d. try failed", i+1)
-		}
-		if errors.Is(err, context.DeadlineExceeded) {
-			continue
+			log.Trace().Err(err).Msgf("Fetching config files: Attempt #%d failed", i+1)
+		} else {
+			break
 		}
 	}
 
@@ -141,13 +140,14 @@ func (f *forgeFetcherContext) checkPipelineFile(c context.Context, config string
 func (f *forgeFetcherContext) getFirstAvailableConfig(c context.Context, configs []string) ([]*types.FileMeta, error) {
 	var forgeErr []error
 	for _, fileOrFolder := range configs {
+		log.Trace().Msgf("fetching %s from forge", fileOrFolder)
 		if strings.HasSuffix(fileOrFolder, "/") {
 			// config is a folder
 			files, err := f.forge.Dir(c, f.user, f.repo, f.pipeline, strings.TrimSuffix(fileOrFolder, "/"))
 			// if folder is not supported we will get a "Not implemented" error and continue
 			if err != nil {
 				if !(errors.Is(err, types.ErrNotImplemented) || errors.Is(err, &types.ErrConfigNotFound{})) {
-					log.Error().Err(err).Str("repo", f.repo.FullName).Str("user", f.user.Login).Msg("could not get folder from forge")
+					log.Error().Err(err).Str("repo", f.repo.FullName).Str("user", f.user.Login).Msgf("could not get folder from forge: %s", err)
 					forgeErr = append(forgeErr, err)
 				}
 				continue

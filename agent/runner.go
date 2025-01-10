@@ -25,10 +25,11 @@ import (
 	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc/metadata"
 
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline"
-	backend "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc"
-	"go.woodpecker-ci.org/woodpecker/v2/shared/utils"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline"
+	backend "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/rpc"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/constant"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/utils"
 )
 
 type Runner struct {
@@ -49,7 +50,7 @@ func NewRunner(workEngine rpc.Peer, f rpc.Filter, h string, state *State, backen
 	}
 }
 
-func (r *Runner) Run(runnerCtx context.Context) error { //nolint:contextcheck
+func (r *Runner) Run(runnerCtx, shutdownCtx context.Context) error { //nolint:contextcheck
 	log.Debug().Msg("request next execution")
 
 	meta, _ := metadata.FromOutgoingContext(runnerCtx)
@@ -118,7 +119,7 @@ func (r *Runner) Run(runnerCtx context.Context) error { //nolint:contextcheck
 				logger.Debug().Msg("pipeline done")
 				return
 
-			case <-time.After(time.Minute):
+			case <-time.After(constant.TaskTimeout / 3):
 				logger.Debug().Msg("pipeline lease renewed")
 				if err := r.client.Extend(workflowCtx, workflow.ID); err != nil {
 					log.Error().Err(err).Msg("extending pipeline deadline failed")
@@ -176,7 +177,11 @@ func (r *Runner) Run(runnerCtx context.Context) error { //nolint:contextcheck
 		Str("error", state.Error).
 		Msg("updating workflow status")
 
-	if err := r.client.Done(runnerCtx, workflow.ID, state); err != nil {
+	doneCtx := runnerCtx
+	if doneCtx.Err() != nil {
+		doneCtx = shutdownCtx
+	}
+	if err := r.client.Done(doneCtx, workflow.ID, state); err != nil {
 		logger.Error().Err(err).Msg("updating workflow status failed")
 	} else {
 		logger.Debug().Msg("updating workflow status complete")

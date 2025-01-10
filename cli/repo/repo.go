@@ -15,24 +15,28 @@
 package repo
 
 import (
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
-	"go.woodpecker-ci.org/woodpecker/v2/cli/repo/registry"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/repo/cron"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/repo/registry"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/repo/secret"
 )
 
 // Command exports the repository command.
 var Command = &cli.Command{
 	Name:  "repo",
 	Usage: "manage repositories",
-	Subcommands: []*cli.Command{
-		repoListCmd,
-		repoInfoCmd,
+	Commands: []*cli.Command{
 		repoAddCmd,
-		repoUpdateCmd,
+		repoChownCmd,
+		cron.Command,
+		repoListCmd,
+		registry.Command,
 		repoRemoveCmd,
 		repoRepairCmd,
-		repoChownCmd,
+		secret.Command,
+		repoShowCmd,
 		repoSyncCmd,
-		registry.Command,
+		repoUpdateCmd,
 	},
 }

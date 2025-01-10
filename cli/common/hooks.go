@@ -6,10 +6,10 @@ import (
 	"time"
 
 	"github.com/rs/zerolog/log"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
-	"go.woodpecker-ci.org/woodpecker/v2/cli/internal/config"
-	"go.woodpecker-ci.org/woodpecker/v2/cli/update"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/internal/config"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/update"
 )
 
 var (
@@ -17,12 +17,12 @@ var (
 	cancelWaitForUpdate context.CancelCauseFunc
 )
 
-func Before(c *cli.Context) error {
-	if err := setupGlobalLogger(c); err != nil {
-		return err
+func Before(ctx context.Context, c *cli.Command) (context.Context, error) {
+	if err := setupGlobalLogger(ctx, c); err != nil {
+		return ctx, err
 	}
 
-	go func() {
+	go func(context.Context) {
 		if c.Bool("disable-update-check") {
 			return
 		}
@@ -35,31 +35,31 @@ func Before(c *cli.Context) error {
 		waitForUpdateCheck, cancelWaitForUpdate = context.WithCancelCause(context.Background())
 		defer cancelWaitForUpdate(errors.New("update check finished"))
 
-		log.Debug().Msg("Checking for updates ...")
+		log.Debug().Msg("checking for updates ...")
 
-		newVersion, err := update.CheckForUpdate(waitForUpdateCheck, false)
+		newVersion, err := update.CheckForUpdate(waitForUpdateCheck, false) //nolint:contextcheck
 		if err != nil {
-			log.Error().Err(err).Msgf("Failed to check for updates")
+			log.Error().Err(err).Msgf("failed to check for updates")
 			return
 		}
 
 		if newVersion != nil {
-			log.Warn().Msgf("A new version of woodpecker-cli is available: %s. Update by running: %s update", newVersion.Version, c.App.Name)
+			log.Warn().Msgf("new version of woodpecker-cli is available: %s, update with: %s update", newVersion.Version, c.Root().Name)
 		} else {
-			log.Debug().Msgf("No update required")
+			log.Debug().Msgf("no update required")
 		}
-	}()
+	}(ctx)
 
-	return config.Load(c)
+	return ctx, config.Load(ctx, c)
 }
 
-func After(_ *cli.Context) error {
+func After(_ context.Context, _ *cli.Command) error {
 	if waitForUpdateCheck != nil {
 		select {
 		case <-waitForUpdateCheck.Done():
 		// When the actual command already finished, we still wait 500ms for the update check to finish
 		case <-time.After(time.Millisecond * 500):
-			log.Debug().Msg("Update check stopped due to timeout")
+			log.Debug().Msg("update check stopped due to timeout")
 			cancelWaitForUpdate(errors.New("update check timeout"))
 		}
 	}

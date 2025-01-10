@@ -15,33 +15,36 @@
 package pipeline
 
 import (
+	"context"
+	"fmt"
 	"os"
 	"strconv"
 	"text/template"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
-	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
-	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/common"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v3/woodpecker-go/woodpecker"
 )
 
 var pipelinePsCmd = &cli.Command{
 	Name:      "ps",
 	Usage:     "show pipeline steps",
-	ArgsUsage: "<repo-id|repo-full-name> [pipeline]",
+	ArgsUsage: "<repo-id|repo-full-name> <pipeline>",
 	Action:    pipelinePs,
 	Flags:     []cli.Flag{common.FormatFlag(tmplPipelinePs)},
 }
 
-func pipelinePs(c *cli.Context) error {
+func pipelinePs(ctx context.Context, c *cli.Command) error {
 	repoIDOrFullName := c.Args().First()
-	client, err := internal.NewClient(c)
+	client, err := internal.NewClient(ctx, c)
 	if err != nil {
 		return err
 	}
 	repoID, err := internal.ParseRepo(client, repoIDOrFullName)
 	if err != nil {
-		return err
+		return fmt.Errorf("invalid repo '%s': %w", repoIDOrFullName, err)
 	}
 
 	pipelineArg := c.Args().Get(1)
@@ -49,7 +52,7 @@ func pipelinePs(c *cli.Context) error {
 
 	if pipelineArg == "last" || len(pipelineArg) == 0 {
 		// Fetch the pipeline number from the last pipeline
-		pipeline, err := client.PipelineLast(repoID, "")
+		pipeline, err := client.PipelineLast(repoID, woodpecker.PipelineLastOptions{})
 		if err != nil {
 			return err
 		}
@@ -58,7 +61,7 @@ func pipelinePs(c *cli.Context) error {
 	} else {
 		number, err = strconv.ParseInt(pipelineArg, 10, 64)
 		if err != nil {
-			return err
+			return fmt.Errorf("invalid pipeline '%s': %w", pipelineArg, err)
 		}
 	}
 
@@ -72,9 +75,9 @@ func pipelinePs(c *cli.Context) error {
 		return err
 	}
 
-	for _, step := range pipeline.Workflows {
-		for _, child := range step.Children {
-			if err := tmpl.Execute(os.Stdout, child); err != nil {
+	for _, workflow := range pipeline.Workflows {
+		for _, step := range workflow.Children {
+			if err := tmpl.Execute(os.Stdout, map[string]any{"workflow": workflow, "step": step}); err != nil {
 				return err
 			}
 		}
@@ -83,8 +86,11 @@ func pipelinePs(c *cli.Context) error {
 	return nil
 }
 
-// Template for pipeline ps information.
-var tmplPipelinePs = "\x1b[33mStep #{{ .PID }} \x1b[0m" + `
-Step: {{ .Name }}
-State: {{ .State }}
+// template for pipeline ps information.
+var tmplPipelinePs = "\x1b[33m{{ .workflow.Name }} > {{ .step.Name }} (#{{ .step.PID }}):\x1b[0m" + `
+Step: {{ .step.Name }}
+Started: {{ .step.Started }}
+Stopped: {{ .step.Stopped }}
+Type: {{ .step.Type }}
+State: {{ .step.State }}
 `

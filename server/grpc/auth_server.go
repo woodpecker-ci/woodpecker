@@ -21,10 +21,10 @@ import (
 
 	"github.com/rs/zerolog/log"
 
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/rpc/proto"
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
-	"go.woodpecker-ci.org/woodpecker/v2/server/store"
-	"go.woodpecker-ci.org/woodpecker/v2/server/store/types"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/rpc/proto"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
 )
 
 type WoodpeckerAuthServer struct {
@@ -60,13 +60,12 @@ func (s *WoodpeckerAuthServer) getAgent(agentID int64, agentToken string) (*mode
 	// global agent secret auth
 	if s.agentMasterToken != "" {
 		if agentToken == s.agentMasterToken && agentID == -1 {
-			agent := new(model.Agent)
-			agent.Name = ""
-			agent.OwnerID = -1 // system agent
-			agent.Token = s.agentMasterToken
-			agent.Backend = ""
-			agent.Platform = ""
-			agent.Capacity = -1
+			agent := &model.Agent{
+				OwnerID:  model.IDNotSet,
+				OrgID:    model.IDNotSet,
+				Token:    s.agentMasterToken,
+				Capacity: -1,
+			}
 			err := s.store.AgentCreate(agent)
 			if err != nil {
 				log.Error().Err(err).Msg("error creating system agent")

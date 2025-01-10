@@ -15,13 +15,15 @@
 package repo
 
 import (
+	"context"
 	"os"
 	"text/template"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
-	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
-	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/common"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v3/woodpecker-go/woodpecker"
 )
 
 var repoListCmd = &cli.Command{
@@ -35,16 +37,24 @@ var repoListCmd = &cli.Command{
 			Name:  "org",
 			Usage: "filter by organization",
 		},
+		&cli.BoolFlag{
+			Name:  "all",
+			Usage: "query all repos, including inactive ones",
+		},
 	},
 }
 
-func repoList(c *cli.Context) error {
-	client, err := internal.NewClient(c)
+func repoList(ctx context.Context, c *cli.Command) error {
+	client, err := internal.NewClient(ctx, c)
 	if err != nil {
 		return err
 	}
 
-	repos, err := client.RepoList()
+	opt := woodpecker.RepoListOptions{
+		All: c.Bool("all"),
+	}
+
+	repos, err := client.RepoList(opt)
 	if err != nil || len(repos) == 0 {
 		return err
 	}
@@ -67,4 +77,4 @@ func repoList(c *cli.Context) error {
 }
 
 // Template for repository list items.
-var tmplRepoList = "\x1b[33m{{ .FullName }}\x1b[0m (id: {{ .ID }}, forgeRemoteID: {{ .ForgeRemoteID }})"
+var tmplRepoList = "\x1b[33m{{ .FullName }}\x1b[0m (id: {{ .ID }}, forgeRemoteID: {{ .ForgeRemoteID }}, isActive: {{ .IsActive }})"

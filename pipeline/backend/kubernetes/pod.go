@@ -26,13 +26,14 @@ import (
 	"k8s.io/apimachinery/pkg/api/resource"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/common"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/common"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 )
 
 const (
-	StepLabel = "step"
-	podPrefix = "wp-"
+	StepLabel            = "step"
+	podPrefix            = "wp-"
+	defaultFSGroup int64 = 1000
 )
 
 func mkPod(step *types.Step, config *config, podName, goos string, options BackendOptions) (*v1.Pod, error) {
@@ -84,7 +85,7 @@ func podMeta(step *types.Step, config *config, options BackendOptions, podName s
 	meta := meta_v1.ObjectMeta{
 		Name:        podName,
 		Namespace:   config.Namespace,
-		Annotations: podAnnotations(config, options, podName),
+		Annotations: podAnnotations(config, options),
 	}
 
 	meta.Labels, err = podLabels(step, config, options)
@@ -126,7 +127,7 @@ func stepLabel(step *types.Step) (string, error) {
 	return toDNSName(step.Name)
 }
 
-func podAnnotations(config *config, options BackendOptions, podName string) map[string]string {
+func podAnnotations(config *config, options BackendOptions) map[string]string {
 	annotations := make(map[string]string)
 
 	if len(options.Annotations) > 0 {
@@ -140,13 +141,6 @@ func podAnnotations(config *config, options BackendOptions, podName string) map[
 	if len(config.PodAnnotations) > 0 {
 		log.Trace().Msgf("using annotations from the configuration: %v", config.PodAnnotations)
 		maps.Copy(annotations, config.PodAnnotations)
-	}
-	securityContext := options.SecurityContext
-	if securityContext != nil {
-		key, value := apparmorAnnotation(podName, securityContext.ApparmorProfile)
-		if key != nil && value != nil {
-			annotations[*key] = *value
-		}
 	}
 
 	return annotations
@@ -168,8 +162,26 @@ func podSpec(step *types.Step, config *config, options BackendOptions, nsp nativ
 		return spec, err
 	}
 
+	if len(step.DNS) != 0 || len(step.DNSSearch) != 0 {
+		spec.DNSConfig = &v1.PodDNSConfig{}
+		if len(step.DNS) != 0 {
+			spec.DNSConfig.Nameservers = step.DNS
+		}
+		if len(step.DNSSearch) != 0 {
+			spec.DNSConfig.Searches = step.DNSSearch
+		}
+	}
+
 	log.Trace().Msgf("using the image pull secrets: %v", config.ImagePullSecretNames)
 	spec.ImagePullSecrets = secretsReferences(config.ImagePullSecretNames)
+	if needsRegistrySecret(step) {
+		log.Trace().Msgf("using an image pull secret from registries")
+		name, err := registrySecretName(step)
+		if err != nil {
+			return spec, err
+		}
+		spec.ImagePullSecrets = append(spec.ImagePullSecrets, secretReference(name))
+	}
 
 	spec.Volumes = append(spec.Volumes, nsp.volumes...)
 
@@ -191,9 +203,12 @@ func podContainer(step *types.Step, podName, goos string, options BackendOptions
 	}
 
 	if len(step.Commands) > 0 {
-		scriptEnv, command := common.GenerateContainerConf(step.Commands, goos)
+		scriptEnv, command := common.GenerateContainerConf(step.Commands, goos, step.WorkingDir)
 		container.Command = command
 		maps.Copy(step.Environment, scriptEnv)
+
+		// step.WorkingDir will be respected by the generated script
+		container.WorkingDir = step.WorkspaceBase
 	}
 	if len(step.Entrypoint) > 0 {
 		container.Command = step.Entrypoint
@@ -377,15 +392,19 @@ func toleration(backendToleration Toleration) v1.Toleration {
 
 func podSecurityContext(sc *SecurityContext, secCtxConf SecurityContextConfig, stepPrivileged bool) *v1.PodSecurityContext {
 	var (
-		nonRoot *bool
-		user    *int64
-		group   *int64
-		fsGroup *int64
-		seccomp *v1.SeccompProfile
+		nonRoot  *bool
+		user     *int64
+		group    *int64
+		fsGroup  *int64
+		seccomp  *v1.SeccompProfile
+		apparmor *v1.AppArmorProfile
 	)
 
 	if secCtxConf.RunAsNonRoot {
 		nonRoot = newBool(true)
+	}
+	if secCtxConf.FSGroup != nil {
+		fsGroup = secCtxConf.FSGroup
 	}
 
 	if sc != nil {
@@ -404,24 +423,31 @@ func podSecurityContext(sc *SecurityContext, secCtxConf SecurityContextConfig, s
 			fsGroup = sc.FSGroup
 		}
 
+		// if unset, set fsGroup to 1000 by default to support non-root images
+		if sc.FSGroup != nil {
+			fsGroup = sc.FSGroup
+		}
+
 		// only allow to set nonRoot if it's not set globally already
 		if nonRoot == nil && sc.RunAsNonRoot != nil {
 			nonRoot = sc.RunAsNonRoot
 		}
 
 		seccomp = seccompProfile(sc.SeccompProfile)
+		apparmor = apparmorProfile(sc.ApparmorProfile)
 	}
 
-	if nonRoot == nil && user == nil && group == nil && fsGroup == nil && seccomp == nil {
+	if nonRoot == nil && user == nil && group == nil && fsGroup == nil && seccomp == nil && apparmor == nil {
 		return nil
 	}
 
 	securityContext := &v1.PodSecurityContext{
-		RunAsNonRoot:   nonRoot,
-		RunAsUser:      user,
-		RunAsGroup:     group,
-		FSGroup:        fsGroup,
-		SeccompProfile: seccomp,
+		RunAsNonRoot:    nonRoot,
+		RunAsUser:       user,
+		RunAsGroup:      group,
+		FSGroup:         fsGroup,
+		SeccompProfile:  seccomp,
+		AppArmorProfile: apparmor,
 	}
 	log.Trace().Msgf("pod security context that will be used: %v", securityContext)
 	return securityContext
@@ -441,6 +467,22 @@ func seccompProfile(scp *SecProfile) *v1.SeccompProfile {
 	}
 
 	return seccompProfile
+}
+
+func apparmorProfile(scp *SecProfile) *v1.AppArmorProfile {
+	if scp == nil || len(scp.Type) == 0 {
+		return nil
+	}
+	log.Trace().Msgf("using AppArmor profile: %v", scp)
+
+	apparmorProfile := &v1.AppArmorProfile{
+		Type: v1.AppArmorProfileType(scp.Type),
+	}
+	if len(scp.LocalhostProfile) > 0 {
+		apparmorProfile.LocalhostProfile = &scp.LocalhostProfile
+	}
+
+	return apparmorProfile
 }
 
 func containerSecurityContext(sc *SecurityContext, stepPrivileged bool) *v1.SecurityContext {
@@ -469,36 +511,6 @@ func containerSecurityContext(sc *SecurityContext, stepPrivileged bool) *v1.Secu
 	}
 
 	return nil
-}
-
-func apparmorAnnotation(containerName string, scp *SecProfile) (*string, *string) {
-	if scp == nil {
-		return nil, nil
-	}
-	log.Trace().Msgf("using AppArmor profile: %v", scp)
-
-	var (
-		profileType string
-		profilePath string
-	)
-
-	if scp.Type == SecProfileTypeRuntimeDefault {
-		profileType = "runtime"
-		profilePath = "default"
-	}
-
-	if scp.Type == SecProfileTypeLocalhost {
-		profileType = "localhost"
-		profilePath = scp.LocalhostProfile
-	}
-
-	if len(profileType) == 0 {
-		return nil, nil
-	}
-
-	key := v1.DeprecatedAppArmorBetaContainerAnnotationKeyPrefix + containerName
-	value := profileType + "/" + profilePath
-	return &key, &value
 }
 
 func mapToEnvVars(m map[string]string) []v1.EnvVar {
@@ -532,6 +544,7 @@ func stopPod(ctx context.Context, engine *kube, step *types.Step, deleteOpts met
 	if err != nil {
 		return err
 	}
+
 	log.Trace().Str("name", podName).Msg("deleting pod")
 
 	err = engine.client.CoreV1().Pods(engine.config.Namespace).Delete(ctx, podName, deleteOpts)

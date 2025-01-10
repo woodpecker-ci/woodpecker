@@ -15,12 +15,14 @@
 package repo
 
 import (
+	"context"
 	"fmt"
 	"strconv"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
-	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v3/woodpecker-go/woodpecker"
 )
 
 var repoAddCmd = &cli.Command{
@@ -30,19 +32,23 @@ var repoAddCmd = &cli.Command{
 	Action:    repoAdd,
 }
 
-func repoAdd(c *cli.Context) error {
+func repoAdd(ctx context.Context, c *cli.Command) error {
 	_forgeRemoteID := c.Args().First()
 	forgeRemoteID, err := strconv.Atoi(_forgeRemoteID)
 	if err != nil {
 		return fmt.Errorf("invalid forge remote id: %s", _forgeRemoteID)
 	}
 
-	client, err := internal.NewClient(c)
+	client, err := internal.NewClient(ctx, c)
 	if err != nil {
 		return err
 	}
 
-	repo, err := client.RepoPost(int64(forgeRemoteID))
+	opt := woodpecker.RepoPostOptions{
+		ForgeRemoteID: int64(forgeRemoteID),
+	}
+
+	repo, err := client.RepoPost(opt)
 	if err != nil {
 		return err
 	}

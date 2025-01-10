@@ -18,313 +18,231 @@ package bitbucket
 import (
 	"bytes"
 	"context"
-	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
-	"github.com/franela/goblin"
 	"github.com/gin-gonic/gin"
+	"github.com/stretchr/testify/assert"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server/forge/bitbucket/fixtures"
-	"go.woodpecker-ci.org/woodpecker/v2/server/forge/bitbucket/internal"
-	"go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge/bitbucket/fixtures"
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge/bitbucket/internal"
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
-func Test_bitbucket(t *testing.T) {
+func TestNew(t *testing.T) {
+	forge, _ := New(&Opts{Client: "4vyW6b49Z", Secret: "a5012f6c6"})
+
+	f, _ := forge.(*config)
+	assert.Equal(t, DefaultURL, f.url)
+	assert.Equal(t, DefaultAPI, f.API)
+	assert.Equal(t, "4vyW6b49Z", f.Client)
+	assert.Equal(t, "a5012f6c6", f.Secret)
+}
+
+func TestBitbucket(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
 	s := httptest.NewServer(fixtures.Handler())
+	defer s.Close()
 	c := &config{url: s.URL, API: s.URL}
 
-	g := goblin.Goblin(t)
 	ctx := context.Background()
-	g.Describe("Bitbucket client", func() {
-		g.After(func() {
-			s.Close()
-		})
 
-		g.It("Should return client with default endpoint", func() {
-			forge, _ := New(&Opts{Client: "4vyW6b49Z", Secret: "a5012f6c6"})
+	forge, _ := New(&Opts{})
+	netrc, _ := forge.Netrc(fakeUser, fakeRepo)
+	assert.Equal(t, "bitbucket.org", netrc.Machine)
+	assert.Equal(t, "x-token-auth", netrc.Login)
+	assert.Equal(t, fakeUser.AccessToken, netrc.Password)
 
-			f, _ := forge.(*config)
-			g.Assert(f.url).Equal(DefaultURL)
-			g.Assert(f.API).Equal(DefaultAPI)
-			g.Assert(f.Client).Equal("4vyW6b49Z")
-			g.Assert(f.Secret).Equal("a5012f6c6")
-		})
+	user, _, err := c.Login(ctx, &types.OAuthRequest{})
+	assert.NoError(t, err)
+	assert.Nil(t, user)
 
-		g.It("Should return the netrc file", func() {
-			forge, _ := New(&Opts{})
-			netrc, _ := forge.Netrc(fakeUser, fakeRepo)
-			g.Assert(netrc.Machine).Equal("bitbucket.org")
-			g.Assert(netrc.Login).Equal("x-token-auth")
-			g.Assert(netrc.Password).Equal(fakeUser.Token)
-		})
-
-		g.Describe("Given an authorization request", func() {
-			g.It("Should redirect to authorize", func() {
-				user, _, err := c.Login(ctx, &types.OAuthRequest{})
-				g.Assert(err).IsNil()
-				g.Assert(user).IsNil()
-			})
-			g.It("Should return authenticated user", func() {
-				u, _, err := c.Login(ctx, &types.OAuthRequest{
-					Code: "code",
-				})
-				g.Assert(err).IsNil()
-				g.Assert(u.Login).Equal(fakeUser.Login)
-				g.Assert(u.Token).Equal("2YotnFZFEjr1zCsicMWpAA")
-				g.Assert(u.Secret).Equal("tGzv3JOkF0XG5Qx2TlKWIA")
-			})
-			g.It("Should handle failure to exchange code", func() {
-				_, _, err := c.Login(ctx, &types.OAuthRequest{
-					Code: "code_bad_request",
-				})
-				g.Assert(err).IsNotNil()
-			})
-			g.It("Should handle failure to resolve user", func() {
-				_, _, err := c.Login(ctx, &types.OAuthRequest{
-					Code: "code_user_not_found",
-				})
-				g.Assert(err).IsNotNil()
-			})
-		})
-
-		g.Describe("Given an access token", func() {
-			g.It("Should return the authenticated user", func() {
-				login, err := c.Auth(ctx, fakeUser.Token, fakeUser.Secret)
-				g.Assert(err).IsNil()
-				g.Assert(login).Equal(fakeUser.Login)
-			})
-			g.It("Should handle a failure to resolve user", func() {
-				_, err := c.Auth(ctx, fakeUserNotFound.Token, fakeUserNotFound.Secret)
-				g.Assert(err).IsNotNil()
-			})
-		})
-
-		g.Describe("Given a refresh token", func() {
-			g.It("Should return a refresh access token", func() {
-				ok, err := c.Refresh(ctx, fakeUserRefresh)
-				g.Assert(err).IsNil()
-				g.Assert(ok).IsTrue()
-				g.Assert(fakeUserRefresh.Token).Equal("2YotnFZFEjr1zCsicMWpAA")
-				g.Assert(fakeUserRefresh.Secret).Equal("tGzv3JOkF0XG5Qx2TlKWIA")
-			})
-			g.It("Should handle an empty access token", func() {
-				ok, err := c.Refresh(ctx, fakeUserRefreshEmpty)
-				g.Assert(err).IsNotNil()
-				g.Assert(ok).IsFalse()
-			})
-			g.It("Should handle a failure to refresh", func() {
-				ok, err := c.Refresh(ctx, fakeUserRefreshFail)
-				g.Assert(err).IsNotNil()
-				g.Assert(ok).IsFalse()
-			})
-		})
-
-		g.Describe("When requesting a repository", func() {
-			g.It("Should return the details", func() {
-				repo, err := c.Repo(ctx, fakeUser, "", fakeRepo.Owner, fakeRepo.Name)
-				g.Assert(err).IsNil()
-				g.Assert(repo.FullName).Equal(fakeRepo.FullName)
-			})
-			g.It("Should handle not found errors", func() {
-				_, err := c.Repo(ctx, fakeUser, "", fakeRepoNotFound.Owner, fakeRepoNotFound.Name)
-				g.Assert(err).IsNotNil()
-			})
-		})
-
-		g.Describe("When requesting user repositories", func() {
-			g.It("Should return the details", func() {
-				repos, err := c.Repos(ctx, fakeUser)
-				g.Assert(err).IsNil()
-				g.Assert(repos[0].FullName).Equal(fakeRepo.FullName)
-			})
-			g.It("Should handle organization not found errors", func() {
-				_, err := c.Repos(ctx, fakeUserNoTeams)
-				g.Assert(err).IsNotNil()
-			})
-			g.It("Should handle not found errors", func() {
-				_, err := c.Repos(ctx, fakeUserNoRepos)
-				g.Assert(err).IsNotNil()
-			})
-		})
-
-		g.Describe("When requesting user teams", func() {
-			g.It("Should return the details", func() {
-				teams, err := c.Teams(ctx, fakeUser)
-				g.Assert(err).IsNil()
-				g.Assert(teams[0].Login).Equal("ueberdev42")
-				g.Assert(teams[0].Avatar).Equal("https://bitbucket.org/workspaces/ueberdev42/avatar/?ts=1658761964")
-			})
-			g.It("Should handle not found error", func() {
-				_, err := c.Teams(ctx, fakeUserNoTeams)
-				g.Assert(err).IsNotNil()
-			})
-		})
-
-		g.Describe("When downloading a file", func() {
-			g.It("Should return the bytes", func() {
-				raw, err := c.File(ctx, fakeUser, fakeRepo, fakePipeline, "file")
-				g.Assert(err).IsNil()
-				g.Assert(len(raw) != 0).IsTrue()
-			})
-			g.It("Should handle not found error", func() {
-				_, err := c.File(ctx, fakeUser, fakeRepo, fakePipeline, "file_not_found")
-				g.Assert(err).IsNotNil()
-				g.Assert(errors.Is(err, &types.ErrConfigNotFound{})).IsTrue()
-			})
-		})
-
-		g.Describe("When requesting repo branch HEAD", func() {
-			g.It("Should return the details", func() {
-				branchHead, err := c.BranchHead(ctx, fakeUser, fakeRepo, "branch_name")
-				g.Assert(err).IsNil()
-				g.Assert(branchHead.SHA).Equal("branch_head_name")
-				g.Assert(branchHead.ForgeURL).Equal("https://bitbucket.org/commitlink")
-			})
-			g.It("Should handle not found errors", func() {
-				_, err := c.BranchHead(ctx, fakeUser, fakeRepo, "branch_not_found")
-				g.Assert(err).IsNotNil()
-			})
-		})
-
-		g.Describe("When requesting repo pull requests", func() {
-			listOpts := model.ListOptions{
-				All:     false,
-				Page:    1,
-				PerPage: 10,
-			}
-			g.It("Should return the details", func() {
-				repoPRs, err := c.PullRequests(ctx, fakeUser, fakeRepo, &listOpts)
-				g.Assert(err).IsNil()
-				g.Assert(repoPRs[0].Title).Equal("PRs title")
-				g.Assert(repoPRs[0].Index).Equal(model.ForgeRemoteID("123"))
-			})
-			g.It("Should handle not found errors", func() {
-				_, err := c.PullRequests(ctx, fakeUser, fakeRepoNotFound, &listOpts)
-				g.Assert(err).IsNotNil()
-			})
-		})
-
-		g.Describe("When requesting repo directory contents", func() {
-			g.It("Should return the details", func() {
-				files, err := c.Dir(ctx, fakeUser, fakeRepo, fakePipeline, "dir")
-				g.Assert(err).IsNil()
-				g.Assert(len(files)).Equal(3)
-				g.Assert(files[0].Name).Equal("README.md")
-				g.Assert(string(files[0].Data)).Equal("dummy payload")
-			})
-			g.It("Should handle not found errors", func() {
-				_, err := c.Dir(ctx, fakeUser, fakeRepo, fakePipeline, "dir_not_found")
-				g.Assert(err).IsNotNil()
-				g.Assert(errors.Is(err, &types.ErrConfigNotFound{})).IsTrue()
-			})
-		})
-
-		g.Describe("When activating a repository", func() {
-			g.It("Should error when malformed hook", func() {
-				err := c.Activate(ctx, fakeUser, fakeRepo, "%gh&%ij")
-				g.Assert(err).IsNotNil()
-			})
-			g.It("Should create the hook", func() {
-				err := c.Activate(ctx, fakeUser, fakeRepo, "http://127.0.0.1")
-				g.Assert(err).IsNil()
-			})
-		})
-
-		g.Describe("When deactivating a repository", func() {
-			g.It("Should error when listing hooks fails", func() {
-				err := c.Deactivate(ctx, fakeUser, fakeRepoNoHooks, "http://127.0.0.1")
-				g.Assert(err).IsNotNil()
-			})
-			g.It("Should successfully remove hooks", func() {
-				err := c.Deactivate(ctx, fakeUser, fakeRepo, "http://127.0.0.1")
-				g.Assert(err).IsNil()
-			})
-			g.It("Should successfully deactivate when hook already removed", func() {
-				err := c.Deactivate(ctx, fakeUser, fakeRepoEmptyHook, "http://127.0.0.1")
-				g.Assert(err).IsNil()
-			})
-		})
-
-		g.Describe("Given a list of hooks", func() {
-			g.It("Should return the matching hook", func() {
-				hooks := []*internal.Hook{
-					{URL: "http://127.0.0.1/hook"},
-				}
-				hook := matchingHooks(hooks, "http://127.0.0.1/")
-				g.Assert(hook).Equal(hooks[0])
-			})
-			g.It("Should handle no matches", func() {
-				hooks := []*internal.Hook{
-					{URL: "http://localhost/hook"},
-				}
-				hook := matchingHooks(hooks, "http://127.0.0.1/")
-				g.Assert(hook).IsNil()
-			})
-			g.It("Should handle malformed hook urls", func() {
-				var hooks []*internal.Hook
-				hook := matchingHooks(hooks, "%gh&%ij")
-				g.Assert(hook).IsNil()
-			})
-		})
-
-		g.It("Should update the status", func() {
-			err := c.Status(ctx, fakeUser, fakeRepo, fakePipeline, fakeWorkflow)
-			g.Assert(err).IsNil()
-		})
-
-		g.It("Should parse the hook", func() {
-			buf := bytes.NewBufferString(fixtures.HookPush)
-			req, _ := http.NewRequest(http.MethodPost, "/hook", buf)
-			req.Header = http.Header{}
-			req.Header.Set(hookEvent, hookPush)
-
-			r, b, err := c.Hook(ctx, req)
-			g.Assert(err).IsNil()
-			g.Assert(r.FullName).Equal("martinherren1984/publictestrepo")
-			g.Assert(b.Commit).Equal("c14c1bb05dfb1fdcdf06b31485fff61b0ea44277")
-		})
+	u, _, err := c.Login(ctx, &types.OAuthRequest{
+		Code: "code",
 	})
+	assert.NoError(t, err)
+	assert.Equal(t, fakeUser.Login, u.Login)
+	assert.Equal(t, "2YotnFZFEjr1zCsicMWpAA", u.AccessToken)
+	assert.Equal(t, "tGzv3JOkF0XG5Qx2TlKWIA", u.RefreshToken)
+
+	_, _, err = c.Login(ctx, &types.OAuthRequest{
+		Code: "code_bad_request",
+	})
+	assert.Error(t, err)
+
+	_, _, err = c.Login(ctx, &types.OAuthRequest{
+		Code: "code_user_not_found",
+	})
+	assert.Error(t, err)
+
+	login, err := c.Auth(ctx, fakeUser.AccessToken, fakeUser.RefreshToken)
+	assert.NoError(t, err)
+	assert.Equal(t, fakeUser.Login, login)
+
+	_, err = c.Auth(ctx, fakeUserNotFound.AccessToken, fakeUserNotFound.RefreshToken)
+	assert.Error(t, err)
+
+	ok, err := c.Refresh(ctx, fakeUserRefresh)
+	assert.NoError(t, err)
+	assert.True(t, ok)
+	assert.Equal(t, "2YotnFZFEjr1zCsicMWpAA", fakeUserRefresh.AccessToken)
+	assert.Equal(t, "tGzv3JOkF0XG5Qx2TlKWIA", fakeUserRefresh.RefreshToken)
+
+	ok, err = c.Refresh(ctx, fakeUserRefreshEmpty)
+	assert.Error(t, err)
+	assert.False(t, ok)
+
+	ok, err = c.Refresh(ctx, fakeUserRefreshFail)
+	assert.Error(t, err)
+	assert.False(t, ok)
+
+	repo, err := c.Repo(ctx, fakeUser, "", fakeRepo.Owner, fakeRepo.Name)
+	assert.NoError(t, err)
+	assert.Equal(t, fakeRepo.FullName, repo.FullName)
+
+	_, err = c.Repo(ctx, fakeUser, "", fakeRepoNotFound.Owner, fakeRepoNotFound.Name)
+	assert.Error(t, err)
+
+	repos, err := c.Repos(ctx, fakeUser)
+	assert.NoError(t, err)
+	assert.Equal(t, fakeRepo.FullName, repos[0].FullName)
+
+	_, err = c.Repos(ctx, fakeUserNoTeams)
+	assert.Error(t, err)
+
+	_, err = c.Repos(ctx, fakeUserNoRepos)
+	assert.Error(t, err)
+
+	teams, err := c.Teams(ctx, fakeUser)
+	assert.NoError(t, err)
+	assert.Equal(t, "ueberdev42", teams[0].Login)
+	assert.Equal(t, "https://bitbucket.org/workspaces/ueberdev42/avatar/?ts=1658761964", teams[0].Avatar)
+
+	_, err = c.Teams(ctx, fakeUserNoTeams)
+	assert.Error(t, err)
+
+	raw, err := c.File(ctx, fakeUser, fakeRepo, fakePipeline, "file")
+	assert.NoError(t, err)
+	assert.True(t, len(raw) != 0)
+
+	_, err = c.File(ctx, fakeUser, fakeRepo, fakePipeline, "file_not_found")
+	assert.Error(t, err)
+	assert.ErrorIs(t, err, &types.ErrConfigNotFound{})
+
+	branchHead, err := c.BranchHead(ctx, fakeUser, fakeRepo, "branch_name")
+	assert.NoError(t, err)
+	assert.Equal(t, "branch_head_name", branchHead.SHA)
+	assert.Equal(t, "https://bitbucket.org/commitlink", branchHead.ForgeURL)
+
+	_, err = c.BranchHead(ctx, fakeUser, fakeRepo, "branch_not_found")
+	assert.Error(t, err)
+
+	listOpts := model.ListOptions{
+		All:     false,
+		Page:    1,
+		PerPage: 10,
+	}
+
+	repoPRs, err := c.PullRequests(ctx, fakeUser, fakeRepo, &listOpts)
+	assert.NoError(t, err)
+	assert.Equal(t, "PRs title", repoPRs[0].Title)
+	assert.Equal(t, model.ForgeRemoteID("123"), repoPRs[0].Index)
+
+	_, err = c.PullRequests(ctx, fakeUser, fakeRepoNotFound, &listOpts)
+	assert.Error(t, err)
+
+	files, err := c.Dir(ctx, fakeUser, fakeRepo, fakePipeline, "dir")
+	assert.NoError(t, err)
+	assert.Len(t, files, 3)
+	assert.Equal(t, "README.md", files[0].Name)
+	assert.Equal(t, "dummy payload", string(files[0].Data))
+
+	_, err = c.Dir(ctx, fakeUser, fakeRepo, fakePipeline, "dir_not_found")
+	assert.Error(t, err)
+	assert.ErrorIs(t, err, &types.ErrConfigNotFound{})
+
+	err = c.Activate(ctx, fakeUser, fakeRepo, "%gh&%ij")
+	assert.Error(t, err)
+
+	err = c.Activate(ctx, fakeUser, fakeRepo, "http://127.0.0.1")
+	assert.NoError(t, err)
+
+	err = c.Deactivate(ctx, fakeUser, fakeRepoNoHooks, "http://127.0.0.1")
+	assert.Error(t, err)
+
+	err = c.Deactivate(ctx, fakeUser, fakeRepo, "http://127.0.0.1")
+	assert.NoError(t, err)
+
+	err = c.Deactivate(ctx, fakeUser, fakeRepoEmptyHook, "http://127.0.0.1")
+	assert.NoError(t, err)
+
+	hooks := []*internal.Hook{
+		{URL: "http://127.0.0.1/hook"},
+	}
+	hook := matchingHooks(hooks, "http://127.0.0.1/")
+	assert.Equal(t, hooks[0], hook)
+
+	hooks = []*internal.Hook{
+		{URL: "http://localhost/hook"},
+	}
+	hook = matchingHooks(hooks, "http://127.0.0.1/")
+	assert.Nil(t, hook)
+
+	hooks = nil
+	hook = matchingHooks(hooks, "%gh&%ij")
+	assert.Nil(t, hook)
+
+	err = c.Status(ctx, fakeUser, fakeRepo, fakePipeline, fakeWorkflow)
+	assert.NoError(t, err)
+
+	buf := bytes.NewBufferString(fixtures.HookPush)
+	req, _ := http.NewRequest(http.MethodPost, "/hook", buf)
+	req.Header = http.Header{}
+	req.Header.Set(hookEvent, hookPush)
+
+	r, b, err := c.Hook(ctx, req)
+	assert.NoError(t, err)
+	assert.Equal(t, "martinherren1984/publictestrepo", r.FullName)
+	assert.Equal(t, "c14c1bb05dfb1fdcdf06b31485fff61b0ea44277", b.Commit)
 }
 
 var (
 	fakeUser = &model.User{
-		Login: "superman",
-		Token: "cfcd2084",
+		Login:       "superman",
+		AccessToken: "cfcd2084",
 	}
 
 	fakeUserRefresh = &model.User{
-		Login:  "superman",
-		Secret: "cfcd2084",
+		Login:        "superman",
+		RefreshToken: "cfcd2084",
 	}
 
 	fakeUserRefreshFail = &model.User{
-		Login:  "superman",
-		Secret: "refresh_token_not_found",
+		Login:        "superman",
+		RefreshToken: "refresh_token_not_found",
 	}
 
 	fakeUserRefreshEmpty = &model.User{
-		Login:  "superman",
-		Secret: "refresh_token_is_empty",
+		Login:        "superman",
+		RefreshToken: "refresh_token_is_empty",
 	}
 
 	fakeUserNotFound = &model.User{
-		Login: "superman",
-		Token: "user_not_found",
+		Login:       "superman",
+		AccessToken: "user_not_found",
 	}
 
 	fakeUserNoTeams = &model.User{
-		Login: "superman",
-		Token: "teams_not_found",
+		Login:       "superman",
+		AccessToken: "teams_not_found",
 	}
 
 	fakeUserNoRepos = &model.User{
-		Login: "superman",
-		Token: "repos_not_found",
+		Login:       "superman",
+		AccessToken: "repos_not_found",
 	}
 
 	fakeRepo = &model.Repo{

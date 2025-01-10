@@ -1,10 +1,10 @@
+import { emojify } from 'node-emoji';
 import { computed, type Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import { useDate } from '~/compositions/useDate';
 import { useElapsedTime } from '~/compositions/useElapsedTime';
 import type { Pipeline } from '~/lib/api/types';
-import { convertEmojis } from '~/utils/emoji';
 
 const { toLocaleString, timeAgo, prettyDuration } = useDate();
 
@@ -14,7 +14,7 @@ export default (pipeline: Ref<Pipeline | undefined>) => {
       return undefined;
     }
 
-    const start = pipeline.value.created_at || 0;
+    const start = pipeline.value.created || 0;
 
     return start * 1000;
   });
@@ -44,8 +44,8 @@ export default (pipeline: Ref<Pipeline | undefined>) => {
       return undefined;
     }
 
-    const start = pipeline.value.started_at || 0;
-    const end = pipeline.value.finished_at || pipeline.value.updated_at || 0;
+    const start = pipeline.value.started || 0;
+    const end = pipeline.value.finished || pipeline.value.updated || 0;
 
     if (start === 0 || end === 0) {
       return 0;
@@ -74,10 +74,10 @@ export default (pipeline: Ref<Pipeline | undefined>) => {
     return prettyDuration(durationElapsed.value);
   });
 
-  const message = computed(() => convertEmojis(pipeline.value?.message ?? ''));
+  const message = computed(() => emojify(pipeline.value?.message ?? ''));
   const shortMessage = computed(() => message.value.split('\n')[0]);
 
-  const prTitleWithDescription = computed(() => convertEmojis(pipeline.value?.title ?? ''));
+  const prTitleWithDescription = computed(() => emojify(pipeline.value?.title ?? ''));
   const prTitle = computed(() => prTitleWithDescription.value.split('\n')[0]);
 
   const prettyRef = computed(() => {
@@ -109,7 +109,7 @@ export default (pipeline: Ref<Pipeline | undefined>) => {
       return undefined;
     }
 
-    const start = pipeline.value.created_at || 0;
+    const start = pipeline.value.created || 0;
 
     return toLocaleString(new Date(start * 1000));
   });

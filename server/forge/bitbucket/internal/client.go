@@ -26,7 +26,7 @@ import (
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/bitbucket"
 
-	shared_utils "go.woodpecker-ci.org/woodpecker/v2/shared/utils"
+	shared_utils "go.woodpecker-ci.org/woodpecker/v3/shared/utils"
 )
 
 const (
@@ -115,7 +115,7 @@ func (c *Client) ListReposAll(workspace string) ([]*Repo, error) {
 			return nil, err
 		}
 		return resp.Values, nil
-	})
+	}, -1)
 }
 
 func (c *Client) FindHook(owner, name, id string) (*Hook, error) {
@@ -183,7 +183,7 @@ func (c *Client) ListPermissionsAll() ([]*RepoPerm, error) {
 			return nil, err
 		}
 		return resp.Values, nil
-	})
+	}, -1)
 }
 
 func (c *Client) ListBranches(owner, name string, opts *ListOpts) ([]*Branch, error) {
