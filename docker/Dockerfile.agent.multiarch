@@ -26,7 +26,5 @@ COPY --from=build /etc/woodpecker /etc
 COPY --from=build /etc/passwd /etc/passwd
 COPY --from=build /etc/group /etc/group
 
-USER woodpecker
-
 HEALTHCHECK CMD ["/bin/woodpecker-agent", "ping"]
 ENTRYPOINT ["/bin/woodpecker-agent"]
