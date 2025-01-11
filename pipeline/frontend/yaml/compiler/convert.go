@@ -54,6 +54,9 @@ func (c *Compiler) createProcess(container *yaml_types.Container, stepType backe
 		workspaceBase = pluginWorkspaceBase
 	}
 	workspaceVolume := fmt.Sprintf("%s_default:%s", c.prefix, workspaceBase)
+	if c.local {
+		workspaceVolume = ""
+	}
 
 	networks := []backend_types.Conn{
 		{
@@ -78,9 +81,6 @@ func (c *Compiler) createProcess(container *yaml_types.Container, stepType backe
 	}
 
 	var volumes []string
-	if !c.local {
-		volumes = append(volumes, workspaceVolume)
-	}
 	volumes = append(volumes, c.volumes...)
 	for _, volume := range container.Volumes.Volumes {
 		volumes = append(volumes, volume.String())
@@ -168,6 +168,7 @@ func (c *Compiler) createProcess(container *yaml_types.Container, stepType backe
 		Commands:       container.Commands,
 		Entrypoint:     container.Entrypoint,
 		ExtraHosts:     extraHosts,
+		WorkspaceVolume: workspaceVolume,
 		Volumes:        volumes,
 		Tmpfs:          container.Tmpfs,
 		Devices:        container.Devices,

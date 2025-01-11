@@ -27,7 +27,7 @@ const (
 	defaultWindowsDriverLetter = "C:"
 )
 
-var MustNotAddWindowsLetterPattern = regexp.MustCompile(`^(?:` +
+var mustNotAddWindowsLetterPattern = regexp.MustCompile(`^(?:` +
 	// Drive letter followed by colon and optional backslash (C: or C:\)
 	`[a-zA-Z]:(?:\\|$)|` +
 
@@ -49,10 +49,37 @@ func (e *docker) windowsPathPatch(step *types.Step) {
 
 	// patch volumes to have an letter if not already set
 	for i, vol := range step.Volumes {
+		volume := windowsVolumePatch(vol)
+		if volume != "" {
+			step.Volumes[i] = volume
+		}
+	}
+
+	// patch workspace
+	if !mustNotAddWindowsLetterPattern.MatchString(step.WorkspaceBase) {
+		step.WorkspaceBase = filepath.Join(defaultWindowsDriverLetter, step.WorkspaceBase)
+	}
+	if !mustNotAddWindowsLetterPattern.MatchString(step.WorkingDir) {
+		step.WorkingDir = filepath.Join(defaultWindowsDriverLetter, step.WorkingDir)
+	}
+	if ciWorkspace, ok := step.Environment["CI_WORKSPACE"]; ok {
+		if !mustNotAddWindowsLetterPattern.MatchString(ciWorkspace) {
+			step.Environment["CI_WORKSPACE"] = filepath.Join(defaultWindowsDriverLetter, ciWorkspace)
+		}
+	}
+	if step.WorkspaceVolume != "" {
+		volume := windowsVolumePatch(step.WorkspaceVolume)
+		if volume != "" {
+			step.WorkspaceVolume = volume
+		}
+	}
+}
+
+func windowsVolumePatch(vol string) string {
 		volParts, err := splitVolumeParts(vol)
 		if err != nil || len(volParts) < 2 {
 			// ignore non valid volumes for now
-			continue
+			return ""
 		}
 
 		// fix source destination
@@ -61,22 +88,8 @@ func (e *docker) windowsPathPatch(step *types.Step) {
 		}
 
 		// fix mount destination
-		if !MustNotAddWindowsLetterPattern.MatchString(volParts[1]) {
+		if !mustNotAddWindowsLetterPattern.MatchString(volParts[1]) {
 			volParts[1] = filepath.Join(defaultWindowsDriverLetter, volParts[1])
 		}
-		step.Volumes[i] = strings.Join(volParts, ":")
-	}
-
-	// patch workspace
-	if !MustNotAddWindowsLetterPattern.MatchString(step.WorkspaceBase) {
-		step.WorkspaceBase = filepath.Join(defaultWindowsDriverLetter, step.WorkspaceBase)
-	}
-	if !MustNotAddWindowsLetterPattern.MatchString(step.WorkingDir) {
-		step.WorkingDir = filepath.Join(defaultWindowsDriverLetter, step.WorkingDir)
-	}
-	if ciWorkspace, ok := step.Environment["CI_WORKSPACE"]; ok {
-		if !MustNotAddWindowsLetterPattern.MatchString(ciWorkspace) {
-			step.Environment["CI_WORKSPACE"] = filepath.Join(defaultWindowsDriverLetter, ciWorkspace)
-		}
-	}
+		return strings.Join(volParts, ":")
 }

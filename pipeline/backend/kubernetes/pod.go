@@ -165,6 +165,14 @@ func podSpec(step *types.Step, trusted types.TrustedConfiguration, config *confi
 		}
 	}
 
+	if step.WorkspaceVolume != "" {
+		volumeName, err := volumeName(step.WorkspaceVolume)
+		if err != nil {
+			return spec, err
+		}
+		spec.Volumes = append(spec.Volumes, pvcVolume(volumeName))
+	}
+
 	if trusted.Network && (len(step.DNS) != 0 || len(step.DNSSearch) != 0) {
 		spec.DNSConfig = &v1.PodDNSConfig{}
 		if len(step.DNS) != 0 {
@@ -224,9 +232,19 @@ func podContainer(step *types.Step, trusted types.TrustedConfiguration, podName,
 		return container, err
 	}
 
-	container.VolumeMounts, err = volumeMounts(step.Volumes)
-	if err != nil {
-		return container, err
+	if trusted.Volumes {
+		container.VolumeMounts, err = volumeMounts(step.Volumes)
+		if err != nil {
+			return container, err
+		}
+	}
+	if step.WorkspaceVolume != "" {
+		volumeName, err := volumeName(step.WorkspaceVolume)
+		if err != nil {
+			return container, err
+		}
+
+		container.VolumeMounts = append(container.VolumeMounts, volumeMount(volumeName, volumeMountPath(step.WorkspaceVolume)))
 	}
 
 	container.EnvFrom = append(container.EnvFrom, nsp.envFromSources...)

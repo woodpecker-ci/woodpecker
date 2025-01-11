@@ -31,7 +31,7 @@ import (
 const minVolumeComponents = 2
 
 // returns a container configuration.
-func (e *docker) toConfig(step *types.Step, options BackendOptions) *container.Config {
+func (e *docker) toConfig(step *types.Step, trusted types.TrustedConfiguration, options BackendOptions) *container.Config {
 	e.windowsPathPatch(step)
 
 	config := &container.Config{
@@ -43,11 +43,20 @@ func (e *docker) toConfig(step *types.Step, options BackendOptions) *container.C
 		WorkingDir:   step.WorkingDir,
 		AttachStdout: true,
 		AttachStderr: true,
-		Volumes:      toVol(step.Volumes),
 		User:         options.User,
 	}
 	configEnv := make(map[string]string)
 	maps.Copy(configEnv, step.Environment)
+
+	var volumes []string
+	if step.WorkspaceVolume != "" {
+		volumes = append(volumes, step.WorkspaceVolume)
+	}
+	if trusted.Volumes {
+		volumes = append(volumes, step.Volumes...)
+	}
+
+	config.Volumes = toVol(volumes)
 
 	if len(step.Commands) > 0 {
 		env, entry := common.GenerateContainerConf(step.Commands, e.info.OSType, step.WorkingDir)
@@ -112,12 +121,16 @@ func toHostConfig(step *types.Step, trusted types.TrustedConfiguration, conf *co
 		}
 	}
 
+	if step.WorkspaceVolume != "" {
+		config.Binds = []string{step.WorkspaceVolume}
+	}
+
 	if trusted.Volumes {
 		if len(step.Devices) != 0 {
 			config.Devices = toDev(step.Devices)
 		}
 		if len(step.Volumes) != 0 {
-			config.Binds = step.Volumes
+			config.Binds = append(config.Binds,  step.Volumes...)
 		}
 		config.Tmpfs = map[string]string{}
 		for _, path := range step.Tmpfs {

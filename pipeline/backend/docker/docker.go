@@ -171,7 +171,7 @@ func (e *docker) StartStep(ctx context.Context, step *backend.Step, taskUUID str
 
 	log.Trace().Str("taskUUID", taskUUID).Msgf("start step %s", step.Name)
 
-	config := e.toConfig(step, options)
+	config := e.toConfig(step, trusted, options)
 	hostConfig := toHostConfig(step, trusted, &e.config)
 	containerName := toContainerName(step)
 

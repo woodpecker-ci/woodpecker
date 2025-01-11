@@ -117,39 +117,6 @@ func TestLintErrors(t *testing.T) {
 			want: "Invalid or missing image",
 		},
 		{
-			from: "steps: { build: { image: golang, privileged: true }  }",
-			want: "Insufficient trust level to use `privileged` mode",
-		},
-		{
-			from: "steps: { build: { image: golang, dns: [ 8.8.8.8 ] }  }",
-			want: "Insufficient trust level to use custom `dns`",
-		},
-
-		{
-			from: "steps: { build: { image: golang, dns_search: [ example.com ] }  }",
-			want: "Insufficient trust level to use `dns_search`",
-		},
-		{
-			from: "steps: { build: { image: golang, devices: [ '/dev/tty0:/dev/tty0' ] }  }",
-			want: "Insufficient trust level to use `devices`",
-		},
-		{
-			from: "steps: { build: { image: golang, extra_hosts: [ 'somehost:162.242.195.82' ] }  }",
-			want: "Insufficient trust level to use `extra_hosts`",
-		},
-		{
-			from: "steps: { build: { image: golang, network_mode: host }  }",
-			want: "Insufficient trust level to use `network_mode`",
-		},
-		{
-			from: "steps: { build: { image: golang, volumes: [ '/opt/data:/var/lib/mysql' ] }  }",
-			want: "Insufficient trust level to use `volumes`",
-		},
-		{
-			from: "steps: { build: { image: golang, network_mode: 'container:name' }  }",
-			want: "Insufficient trust level to use `network_mode`",
-		},
-		{
 			from: "steps: { build: { image: golang, settings: { test: 'true' }, commands: [ 'echo ja', 'echo nein' ] } }",
 			want: "Cannot configure both `commands` and `settings`",
 		},

@@ -29,6 +29,7 @@ type Step struct {
 	Entrypoint     []string          `json:"entrypoint,omitempty"`
 	Commands       []string          `json:"commands,omitempty"`
 	ExtraHosts     []HostAlias       `json:"extra_hosts,omitempty"`
+	WorkspaceVolume string          `json:"workspace_volume,omitempty"`
 	Volumes        []string          `json:"volumes,omitempty"`
 	Tmpfs          []string          `json:"tmpfs,omitempty"`
 	Devices        []string          `json:"devices,omitempty"`

@@ -129,7 +129,7 @@ func TestTinyPod(t *testing.T) {
 		Pull:        false,
 		Privileged:  false,
 		Commands:    []string{"gradle build"},
-		Volumes:     []string{"workspace:/woodpecker/src"},
+		WorkspaceVolume:     "workspace:/woodpecker/src",
 		Environment: map[string]string{"CI": "woodpecker"},
 	}, types.TrustedConfiguration{}, &config{
 		Namespace: "woodpecker",
@@ -318,6 +318,7 @@ func TestFullPod(t *testing.T) {
 		Privileged:  true,
 		Commands:    []string{"go get", "go test"},
 		Entrypoint:  []string{"/bin/sh", "-c"},
+		WorkspaceVolume: "",
 		Volumes:     []string{"woodpecker-cache:/woodpecker/src/cache"},
 		Environment: map[string]string{"CGO": "0"},
 		ExtraHosts:  hostAliases,
@@ -326,7 +327,7 @@ func TestFullPod(t *testing.T) {
 			Username: "foo",
 			Password: "bar",
 		},
-	}, types.TrustedConfiguration{}, &config{
+	}, types.TrustedConfiguration{Volumes: true, Security: true}, &config{
 		Namespace:                   "woodpecker",
 		ImagePullSecretNames:        []string{"regcred", "another-pull-secret"},
 		PodLabels:                   map[string]string{"app": "test"},
@@ -569,7 +570,7 @@ func TestSecrets(t *testing.T) {
 		Name:        "test-secrets",
 		Image:       "alpine",
 		Environment: map[string]string{"CGO": "0"},
-		Volumes:     []string{"workspace:/woodpecker/src"},
+		WorkspaceVolume: "workspace:/woodpecker/src",
 	}, types.TrustedConfiguration{}, &config{
 		Namespace:                  "woodpecker",
 		NativeSecretsAllowFromStep: true,
