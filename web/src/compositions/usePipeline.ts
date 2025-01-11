@@ -99,7 +99,11 @@ export default (pipeline: Ref<Pipeline | undefined>) => {
       return `#${pipeline.value.pull_request!.index}`;
     }
 
-    return pipeline.value?.branch || pipeline.value?.ref;
+    if (!pipeline.value) {
+      return '';
+    }
+
+    return pipeline.value.branch || pipeline.value.ref;
   });
 
   const created = computed(() => {
