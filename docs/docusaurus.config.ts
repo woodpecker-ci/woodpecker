@@ -4,7 +4,7 @@ import type * as Preset from '@docusaurus/preset-classic';
 import type { Config } from '@docusaurus/types';
 import { themes } from 'prism-react-renderer';
 
-import * as versions from './versions.json';
+import versions from './versions.json';
 
 const docsVersions: { [version: string]: VersionOptions } = {
   current: {
