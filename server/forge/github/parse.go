@@ -106,7 +106,7 @@ func parsePushHook(hook *github.PushEvent) (*model.Repo, *model.Pipeline) {
 		pipeline.Event = model.EventTag
 		pipeline.ChangedFiles = nil
 		pipeline.Branch = ""
-		pipeline.ForgeURL = hook.GetRepo().GetURL() + "/releases/tag/" + strings.TrimPrefix(pipeline.Ref, "refs/tags/")
+		pipeline.ForgeURL = fmt.Sprintf("%s/releases/tag/%s", hook.GetRepo().GetURL(), strings.TrimPrefix(pipeline.Ref, "refs/tags/"))
 	}
 
 	return convertRepoHook(hook.GetRepo()), pipeline

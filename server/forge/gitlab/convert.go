@@ -231,7 +231,7 @@ func convertTagHook(hook *gitlab.TagEvent) (*model.Repo, *model.Pipeline, error)
 	pipeline.Ref = hook.Ref
 	pipeline.Author = hook.UserUsername
 	pipeline.Avatar = hook.UserAvatar
-	pipeline.ForgeURL = repo.ForgeURL + "/-/tags/" + strings.TrimPrefix(hook.Ref, "refs/tags/")
+	pipeline.ForgeURL = fmt.Sprintf("%s/-/tags/%s", repo.ForgeURL, strings.TrimPrefix(hook.Ref, "refs/tags/"))
 
 	// TODO does hook.Commits always contain hook.After?
 	for _, cm := range hook.Commits {
