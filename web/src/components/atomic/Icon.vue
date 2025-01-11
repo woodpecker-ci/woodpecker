@@ -39,7 +39,7 @@
   <SvgIcon v-else-if="name === 'heal'" :path="mdiWrenchCogOutline" size="1.3rem" />
   <SvgIcon v-else-if="name === 'turn-off'" :path="mdiPower" size="1.3rem" />
   <SvgIcon v-else-if="name === 'chevron-right'" :path="mdiChevronRight" size="1.3rem" />
-  <SvgIcon v-else-if="name === 'close'" :path="mdiCloseCircle" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'close'" :path="mdiClose" size="1.3rem" />
   <SvgIcon v-else-if="name === 'edit'" :path="mdiPencilOutline" size="1.3rem" />
   <SvgIcon v-else-if="name === 'download'" :path="mdiDownloadOutline" size="1.3rem" />
   <SvgIcon v-else-if="name === 'stopwatch'" :path="mdiAlarm" size="1.3rem" />
@@ -48,6 +48,7 @@
   <SvgIcon v-else-if="name === 'pause'" :path="mdiPause" size="1.3rem" />
   <SvgIcon v-else-if="name === 'play'" :path="mdiPlay" size="1.3rem" />
   <SvgIcon v-else-if="name === 'play-outline'" :path="mdiPlayOutline" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'dots'" :path="mdiDotsVertical" size="1.3rem" />
 
   <SvgIcon v-else-if="name === 'visibility-private'" :path="mdiLockOutline" size="1.3rem" />
   <SvgIcon v-else-if="name === 'visibility-internal'" :path="mdiLockOpenOutline" size="1.3rem" />
@@ -55,7 +56,7 @@
   <SvgIcon v-else-if="name === 'forgejo'" :path="siForgejo.path" size="1.3rem" />
   <SvgIcon v-else-if="name === 'gitea'" :path="siGitea.path" size="1.3rem" />
   <SvgIcon v-else-if="name === 'gitlab'" :path="mdiGitlab" size="1.3rem" />
-  <SvgIcon v-else-if="name === 'bitbucket' || name === 'bitbucket-dc'" :path="mdiBitbucket" size="1.3" />
+  <SvgIcon v-else-if="name === 'bitbucket' || name === 'bitbucket-dc'" :path="mdiBitbucket" size="1.3rem" />
 
   <svg v-else-if="name === 'spinner'" width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
     <path
@@ -89,9 +90,11 @@ import {
   mdiCheckCircle,
   mdiChevronRight,
   mdiClockTimeEightOutline,
+  mdiClose,
   mdiCloseCircle,
   mdiCog,
   mdiCogOutline,
+  mdiDotsVertical,
   mdiDownloadOutline,
   mdiEyeOffOutline,
   mdiEyeOutline,
@@ -179,7 +182,8 @@ export type IconNames =
   | 'alert'
   | 'spinner'
   | 'visibility-private'
-  | 'visibility-internal';
+  | 'visibility-internal'
+  | 'dots';
 
 defineProps<{
   name: IconNames;

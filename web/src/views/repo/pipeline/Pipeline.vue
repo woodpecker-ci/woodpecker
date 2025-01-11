@@ -1,6 +1,6 @@
 <template>
   <Container full-width class="md:min-h-xs flex flex-grow-0 flex-col md:flex-grow md:px-4">
-    <div class="flex min-h-0 w-full flex-grow flex-wrap-reverse gap-4 md:flex-nowrap">
+    <div class="flex min-h-0 w-full flex-grow flex-wrap-reverse md:flex-nowrap md:gap-4">
       <PipelineStepList
         v-model:selected-step-id="selectedStepId"
         :class="{ 'hidden md:flex': pipeline!.status === 'blocked' }"
@@ -8,17 +8,17 @@
       />
 
       <div class="relative flex flex-grow basis-full items-start justify-center md:basis-auto">
-        <Container v-if="pipeline!.errors?.some((e) => !e.is_warning)" fill-width class="p-0">
+        <div v-if="pipeline!.errors?.some((e) => !e.is_warning)" class="mb-4 w-full md:mb-auto">
           <Panel>
             <div class="flex flex-col items-center gap-4 text-center">
-              <Icon name="status-error" class="text-wp-error-100 h-16 w-16" size="1.5rem" />
+              <Icon name="status-error" class="h-16 w-16 text-wp-error-100" size="1.5rem" />
               <span class="text-xl">{{ $t('repo.pipeline.we_got_some_errors') }}</span>
               <Button color="red" :text="$t('repo.pipeline.show_errors')" :to="{ name: 'repo-pipeline-errors' }" />
             </div>
           </Panel>
-        </Container>
+        </div>
 
-        <Container v-else-if="pipeline!.status === 'blocked'" fill-width class="p-0">
+        <div v-else-if="pipeline!.status === 'blocked'" class="mb-4 w-full md:mb-auto">
           <Panel>
             <div class="flex flex-col items-center gap-4">
               <Icon name="status-blocked" size="1.5rem" class="h-16 w-16" />
@@ -39,16 +39,16 @@
               </div>
             </div>
           </Panel>
-        </Container>
+        </div>
 
-        <Container v-else-if="pipeline!.status === 'declined'" fill-width class="p-0">
+        <div v-else-if="pipeline!.status === 'declined'" class="mb-4 w-full md:mb-auto">
           <Panel>
             <div class="flex flex-col items-center gap-4">
-              <Icon name="status-declined" size="1.5rem" class="text-wp-error-100 h-16 w-16" />
+              <Icon name="status-declined" size="1.5rem" class="h-16 w-16 text-wp-error-100" />
               <p class="text-xl">{{ $t('repo.pipeline.protected.declined') }}</p>
             </div>
           </Panel>
-        </Container>
+        </div>
 
         <PipelineLog
           v-else-if="selectedStepId !== null"

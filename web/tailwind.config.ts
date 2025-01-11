@@ -1,12 +1,11 @@
 // cSpell:ignore Segoe Roboto Neue Noto nocheck
-/* eslint-disable ts/no-unsafe-member-access, ts/no-unsafe-assignment, ts/no-unsafe-argument, ts/no-unsafe-return */
 // eslint-disable-next-line ts/ban-ts-comment
 // @ts-nocheck
 
+import typography from '@tailwindcss/typography';
+import type { Config } from 'tailwindcss';
+import colors from 'tailwindcss/colors';
 import tinycolor from 'tinycolor2';
-import colors from 'windicss/colors';
-import { defineConfig } from 'windicss/helpers';
-import typography from 'windicss/plugin/typography';
 
 const customColors = {
   'wp-primary': {
@@ -28,8 +27,8 @@ const customColors = {
   },
 };
 
-/* eslint-disable ts/no-unsafe-call */
-export default defineConfig({
+export default {
+  content: ['./index.html', './src/**/*.{vue,js,ts,jsx,tsx}', './src/**/*.css'],
   darkMode: 'class',
   theme: {
     extend: {
@@ -178,10 +177,21 @@ export default defineConfig({
           200: 'var(--wp-hint-warn-200)',
         },
 
+        'wp-code-inline': {
+          100: 'var(--wp-code-inline-100)',
+          200: 'var(--wp-code-inline-200)',
+        },
+
+        'wp-code-inline-text': {
+          100: 'var(--wp-code-inline-text-100)',
+        },
+
         'wp-code': {
           100: 'var(--wp-code-100)',
           200: 'var(--wp-code-200)',
+          300: 'var(--wp-code-300)',
         },
+
         'wp-code-text': {
           100: 'var(--wp-code-text-100)',
         },
@@ -194,27 +204,34 @@ export default defineConfig({
           200: 'var(--wp-link-200)',
         },
       },
+      spacing: {
+        sm: '24rem',
+        md: '28rem',
+        lg: '32rem',
+        xl: '36rem',
+        '2xl': '42rem',
+        '3xl': '48rem',
+      },
+      fontFamily: {
+        sans: [
+          'system-ui',
+          '-apple-system',
+          'Segoe UI',
+          'Roboto',
+          'Helvetica Neue',
+          'Noto Sans',
+          'Liberation Sans',
+          'Arial',
+          'sans-serif',
+        ],
+      },
       transitionProperty: {
         height: 'max-height',
       },
-      stroke: (theme) => theme('colors'),
-      fill: (theme) => theme('colors'),
-      fontFamily: [
-        'system-ui',
-        '-apple-system',
-        'Segoe UI',
-        'Roboto',
-        'Helvetica Neue',
-        'Noto Sans',
-        'Liberation Sans',
-        'Arial',
-        'sans-serif',
-      ],
+
+      stroke: (theme: (path: string) => object) => theme('colors'),
+      fill: (theme: (path: string) => object) => theme('colors'),
     },
   },
-  shortcuts: {
-    'hover-effect':
-      'hover:bg-black hover:bg-opacity-10 dark:hover:bg-white dark:hover:bg-opacity-5 transition-colors duration-100',
-  },
-  plugins: [typography()],
-});
+  plugins: [typography],
+} satisfies Config;
