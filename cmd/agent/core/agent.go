@@ -266,6 +266,8 @@ func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 		Security: c.IntSlice("trusted-repos-security"),
 	}
 
+	log.Trace().Any("trusted", trustedRepos).Msg("agent configured with trusted repos")
+
 	log.Debug().Msgf("agent registered with ID %d", agentConfig.AgentID)
 
 	serviceWaitingGroup.Go(func() error {
