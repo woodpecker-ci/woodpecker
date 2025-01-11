@@ -279,10 +279,6 @@ func convertReleaseHook(hook *gitlab.ReleaseEvent) (*model.Repo, *model.Pipeline
 		},
 		ForgeURL:     hook.URL,
 		ReleaseTitle: hook.Name,
-		// TODO gitlab actually doesn't have a user associated to the hook/release
-		Author: hook.Commit.Author.Name,
-		Avatar: getUserAvatar(hook.Commit.Author.Email),
-
 		// Tag name here is the ref. We should add the refs/tags, so
 		// it is known it's a tag (git-plugin looks for it)
 		Ref: "refs/tags/" + hook.Tag,
