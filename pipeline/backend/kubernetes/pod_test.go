@@ -123,14 +123,14 @@ func TestTinyPod(t *testing.T) {
 	}`
 
 	pod, err := mkPod(&types.Step{
-		Name:        "build-via-gradle",
-		Image:       "gradle:8.4.0-jdk21",
-		WorkingDir:  "/woodpecker/src",
-		Pull:        false,
-		Privileged:  false,
-		Commands:    []string{"gradle build"},
-		WorkspaceVolume:     "workspace:/woodpecker/src",
-		Environment: map[string]string{"CI": "woodpecker"},
+		Name:            "build-via-gradle",
+		Image:           "gradle:8.4.0-jdk21",
+		WorkingDir:      "/woodpecker/src",
+		Pull:            false,
+		Privileged:      false,
+		Commands:        []string{"gradle build"},
+		WorkspaceVolume: "workspace:/woodpecker/src",
+		Environment:     map[string]string{"CI": "woodpecker"},
 	}, types.TrustedConfiguration{}, &config{
 		Namespace: "woodpecker",
 	}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{})
@@ -310,19 +310,19 @@ func TestFullPod(t *testing.T) {
 		},
 	}
 	pod, err := mkPod(&types.Step{
-		UUID:        "01he8bebctabr3kgk0qj36d2me-0",
-		Name:        "go-test",
-		Image:       "meltwater/drone-cache",
-		WorkingDir:  "/woodpecker/src",
-		Pull:        true,
-		Privileged:  true,
-		Commands:    []string{"go get", "go test"},
-		Entrypoint:  []string{"/bin/sh", "-c"},
+		UUID:            "01he8bebctabr3kgk0qj36d2me-0",
+		Name:            "go-test",
+		Image:           "meltwater/drone-cache",
+		WorkingDir:      "/woodpecker/src",
+		Pull:            true,
+		Privileged:      true,
+		Commands:        []string{"go get", "go test"},
+		Entrypoint:      []string{"/bin/sh", "-c"},
 		WorkspaceVolume: "",
-		Volumes:     []string{"woodpecker-cache:/woodpecker/src/cache"},
-		Environment: map[string]string{"CGO": "0"},
-		ExtraHosts:  hostAliases,
-		Ports:       ports,
+		Volumes:         []string{"woodpecker-cache:/woodpecker/src/cache"},
+		Environment:     map[string]string{"CGO": "0"},
+		ExtraHosts:      hostAliases,
+		Ports:           ports,
 		AuthConfig: types.Auth{
 			Username: "foo",
 			Password: "bar",
@@ -567,9 +567,9 @@ func TestSecrets(t *testing.T) {
 	}`
 
 	pod, err := mkPod(&types.Step{
-		Name:        "test-secrets",
-		Image:       "alpine",
-		Environment: map[string]string{"CGO": "0"},
+		Name:            "test-secrets",
+		Image:           "alpine",
+		Environment:     map[string]string{"CGO": "0"},
 		WorkspaceVolume: "workspace:/woodpecker/src",
 	}, types.TrustedConfiguration{}, &config{
 		Namespace:                  "woodpecker",

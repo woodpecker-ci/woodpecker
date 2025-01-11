@@ -130,7 +130,7 @@ func toHostConfig(step *types.Step, trusted types.TrustedConfiguration, conf *co
 			config.Devices = toDev(step.Devices)
 		}
 		if len(step.Volumes) != 0 {
-			config.Binds = append(config.Binds,  step.Volumes...)
+			config.Binds = append(config.Binds, step.Volumes...)
 		}
 		config.Tmpfs = map[string]string{}
 		for _, path := range step.Tmpfs {

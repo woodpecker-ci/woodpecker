@@ -50,7 +50,7 @@ func TestMetadataFromStruct(t *testing.T) {
 				"CI_PREV_PIPELINE_FINISHED": "0", "CI_PREV_PIPELINE_NUMBER": "0", "CI_PREV_PIPELINE_PARENT": "0",
 				"CI_PREV_PIPELINE_STARTED": "0", "CI_PREV_PIPELINE_URL": "/repos/0/pipeline/0",
 				"CI_REPO_PRIVATE": "false",
-				"CI_STEP_NUMBER": "0", "CI_STEP_URL": "/repos/0/pipeline/0", "CI_SYSTEM_NAME": "woodpecker",
+				"CI_STEP_NUMBER":  "0", "CI_STEP_URL": "/repos/0/pipeline/0", "CI_SYSTEM_NAME": "woodpecker",
 				"CI_WORKFLOW_NUMBER": "0",
 			},
 		},

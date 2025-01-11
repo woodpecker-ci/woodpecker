@@ -76,20 +76,20 @@ func (e *docker) windowsPathPatch(step *types.Step) {
 }
 
 func windowsVolumePatch(vol string) string {
-		volParts, err := splitVolumeParts(vol)
-		if err != nil || len(volParts) < 2 {
-			// ignore non valid volumes for now
-			return ""
-		}
+	volParts, err := splitVolumeParts(vol)
+	if err != nil || len(volParts) < 2 {
+		// ignore non valid volumes for now
+		return ""
+	}
 
-		// fix source destination
-		if strings.HasPrefix(volParts[0], "/") {
-			volParts[0] = filepath.Join(defaultWindowsDriverLetter, volParts[0])
-		}
+	// fix source destination
+	if strings.HasPrefix(volParts[0], "/") {
+		volParts[0] = filepath.Join(defaultWindowsDriverLetter, volParts[0])
+	}
 
-		// fix mount destination
-		if !mustNotAddWindowsLetterPattern.MatchString(volParts[1]) {
-			volParts[1] = filepath.Join(defaultWindowsDriverLetter, volParts[1])
-		}
-		return strings.Join(volParts, ":")
+	// fix mount destination
+	if !mustNotAddWindowsLetterPattern.MatchString(volParts[1]) {
+		volParts[1] = filepath.Join(defaultWindowsDriverLetter, volParts[1])
+	}
+	return strings.Join(volParts, ":")
 }
