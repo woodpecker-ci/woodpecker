@@ -61,7 +61,7 @@
     "eslint": "^9.17.0",
     "eslint-plugin-promise": "^7.2.1",
     "eslint-plugin-vue-scoped-css": "^2.9.0",
-    "jsdom": "^25.0.1",
+    "jsdom": "^26.0.0",
     "prettier": "^3.4.2",
     "tinycolor2": "^1.6.0",
     "ts-node": "^10.9.2",
