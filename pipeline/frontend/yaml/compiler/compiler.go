@@ -83,20 +83,20 @@ func (s *Secret) Match(event string) bool {
 
 // Compiler compiles the yaml.
 type Compiler struct {
-	local                   bool
-	escalated               []string
-	prefix                  string
-	volumes                 []string
-	networks                []string
-	env                     map[string]string
-	cloneEnv                map[string]string
-	workspaceBase           string
-	workspacePath           string
-	metadata                metadata.Metadata
-	registries              []Registry
-	secrets                 map[string]Secret
-	defaultClonePlugin      string
-	trustedClonePlugins     []string
+	local               bool
+	escalated           []string
+	prefix              string
+	volumes             []string
+	networks            []string
+	env                 map[string]string
+	cloneEnv            map[string]string
+	workspaceBase       string
+	workspacePath       string
+	metadata            metadata.Metadata
+	registries          []Registry
+	secrets             map[string]Secret
+	defaultClonePlugin  string
+	trustedClonePlugins []string
 }
 
 // New creates a new Compiler with options.

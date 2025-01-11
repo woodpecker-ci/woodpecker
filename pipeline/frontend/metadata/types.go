@@ -29,15 +29,15 @@ type (
 
 	// Repo defines runtime metadata for a repository.
 	Repo struct {
-		ID          int64                `json:"id,omitempty"`
-		Name        string               `json:"name,omitempty"`
-		Owner       string               `json:"owner,omitempty"`
-		RemoteID    string               `json:"remote_id,omitempty"`
-		ForgeURL    string               `json:"forge_url,omitempty"`
-		CloneURL    string               `json:"clone_url,omitempty"`
-		CloneSSHURL string               `json:"clone_url_ssh,omitempty"`
-		Private     bool                 `json:"private,omitempty"`
-		Branch      string               `json:"default_branch,omitempty"`
+		ID          int64  `json:"id,omitempty"`
+		Name        string `json:"name,omitempty"`
+		Owner       string `json:"owner,omitempty"`
+		RemoteID    string `json:"remote_id,omitempty"`
+		ForgeURL    string `json:"forge_url,omitempty"`
+		CloneURL    string `json:"clone_url,omitempty"`
+		CloneSSHURL string `json:"clone_url_ssh,omitempty"`
+		Private     bool   `json:"private,omitempty"`
+		Branch      string `json:"default_branch,omitempty"`
 	}
 
 	// Pipeline defines runtime metadata for a pipeline.

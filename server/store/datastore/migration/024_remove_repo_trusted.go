@@ -23,7 +23,7 @@ var removeRepoTrusted = xormigrate.Migration{
 	ID: "remove-repo-trusted",
 	MigrateSession: func(sess *xorm.Session) (err error) {
 		type repos struct {
-				Trusted any `xorm:"json 'trusted'"`
+			Trusted any `xorm:"json 'trusted'"`
 		}
 
 		// ensure columns to drop exist

@@ -48,25 +48,25 @@ type (
 
 	// Repo represents a repository.
 	Repo struct {
-		ID                           int64                `json:"id,omitempty"`
-		ForgeRemoteID                string               `json:"forge_remote_id"`
-		Owner                        string               `json:"owner"`
-		Name                         string               `json:"name"`
-		FullName                     string               `json:"full_name"`
-		Avatar                       string               `json:"avatar_url,omitempty"`
-		ForgeURL                     string               `json:"forge_url,omitempty"`
-		Clone                        string               `json:"clone_url,omitempty"`
-		Branch                       string               `json:"default_branch,omitempty"`
-		SCMKind                      string               `json:"scm,omitempty"`
-		Timeout                      int64                `json:"timeout,omitempty"`
-		Visibility                   string               `json:"visibility"`
-		IsSCMPrivate                 bool                 `json:"private"`
-		RequireApproval              ApprovalMode         `json:"require_approval"`
-		IsActive                     bool                 `json:"active"`
-		AllowPull                    bool                 `json:"allow_pr"`
-		Config                       string               `json:"config_file"`
-		CancelPreviousPipelineEvents []string             `json:"cancel_previous_pipeline_events"`
-		NetrcTrustedPlugins          []string             `json:"netrc_trusted"`
+		ID                           int64        `json:"id,omitempty"`
+		ForgeRemoteID                string       `json:"forge_remote_id"`
+		Owner                        string       `json:"owner"`
+		Name                         string       `json:"name"`
+		FullName                     string       `json:"full_name"`
+		Avatar                       string       `json:"avatar_url,omitempty"`
+		ForgeURL                     string       `json:"forge_url,omitempty"`
+		Clone                        string       `json:"clone_url,omitempty"`
+		Branch                       string       `json:"default_branch,omitempty"`
+		SCMKind                      string       `json:"scm,omitempty"`
+		Timeout                      int64        `json:"timeout,omitempty"`
+		Visibility                   string       `json:"visibility"`
+		IsSCMPrivate                 bool         `json:"private"`
+		RequireApproval              ApprovalMode `json:"require_approval"`
+		IsActive                     bool         `json:"active"`
+		AllowPull                    bool         `json:"allow_pr"`
+		Config                       string       `json:"config_file"`
+		CancelPreviousPipelineEvents []string     `json:"cancel_previous_pipeline_events"`
+		NetrcTrustedPlugins          []string     `json:"netrc_trusted"`
 	}
 
 	// RepoPatch defines a repository patch request.

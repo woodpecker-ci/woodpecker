@@ -144,10 +144,10 @@ func (r *Runner) Run(runnerCtx, shutdownCtx context.Context) error { //nolint:co
 	}
 
 	trusted := backend.TrustedConfiguration{
-			Network:  slices.Contains(r.trusted.Network, workflow.RepoID),
-			Volumes:  slices.Contains(r.trusted.Volumes, workflow.RepoID),
-			Security: slices.Contains(r.trusted.Security, workflow.RepoID),
-		}
+		Network:  slices.Contains(r.trusted.Network, workflow.RepoID),
+		Volumes:  slices.Contains(r.trusted.Volumes, workflow.RepoID),
+		Security: slices.Contains(r.trusted.Security, workflow.RepoID),
+	}
 
 	var uploads sync.WaitGroup
 	//nolint:contextcheck
