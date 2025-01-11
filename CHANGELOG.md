@@ -12,6 +12,7 @@
 
 ### Misc
 
+- [release/v2.8] Don't fail user creation if org exists (#4687) [[#4692](https://github.com/woodpecker-ci/woodpecker/pull/4692)]
 - [release/v2.8] Improve error on config loading (#4024) [[#4698](https://github.com/woodpecker-ci/woodpecker/pull/4698)]
 - [release/v2.8] Fix addon `nil` values (#4666) [[#4693](https://github.com/woodpecker-ci/woodpecker/pull/4693)]
 
