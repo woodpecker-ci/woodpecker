@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2025-01-10
+## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2025-01-11
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -12,6 +12,7 @@
 
 ### Misc
 
+- [release/v2.8] Improve error on config loading (#4024) [[#4698](https://github.com/woodpecker-ci/woodpecker/pull/4698)]
 - [release/v2.8] Fix addon `nil` values (#4666) [[#4693](https://github.com/woodpecker-ci/woodpecker/pull/4693)]
 
 ## [2.8.2](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.8.2) - 2024-12-19
