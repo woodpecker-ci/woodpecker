@@ -15,6 +15,8 @@
 package datastore
 
 import (
+	"fmt"
+
 	"xorm.io/xorm"
 
 	"go.woodpecker-ci.org/woodpecker/v2/server/model"
@@ -59,9 +61,24 @@ func (s storage) CreateUser(user *model.User) error {
 		Name:   user.Login,
 		IsUser: true,
 	}
-	err := s.orgCreate(org, sess)
+
+	existingOrg, err := s.OrgFindByName(org.Name)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to check if org exists: %w", err)
+	}
+
+	if existingOrg != nil {
+		if existingOrg.Name == user.Login {
+			err = s.OrgUpdate(org)
+			if err != nil {
+				return fmt.Errorf("failed to update existing org: %w", err)
+			}
+		}
+	} else {
+		err = s.orgCreate(org, sess)
+		if err != nil {
+			return fmt.Errorf("failed to create new org: %w", err)
+		}
 	}
 	user.OrgID = org.ID
 	// only Insert set auto created ID back to object
