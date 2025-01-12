@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2025-01-11
+## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2025-01-12
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -257,6 +257,8 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update module code.gitea.io/sdk/gitea to v0.20.0 [[#4710](https://github.com/woodpecker-ci/woodpecker/pull/4710)]
+- fix(deps): update dependency simple-icons to v14.2.0 [[#4709](https://github.com/woodpecker-ci/woodpecker/pull/4709)]
 - chore(deps): update dependency jsdom to v26 [[#4704](https://github.com/woodpecker-ci/woodpecker/pull/4704)]
 - fix(deps): update web npm deps non-major [[#4703](https://github.com/woodpecker-ci/woodpecker/pull/4703)]
 - chore(deps): update gitea/gitea docker tag to v1.23 [[#4701](https://github.com/woodpecker-ci/woodpecker/pull/4701)]
