@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @Fishbowler, @Levy-Tal, @M0Rf30, @anbraten, @cduchenoy, @cevatkerim, @fernandrone, @gedankenstuecke, @gnowland, @greenaar, @hg, @j04n-f, @jenrik, @johanneskastl, @jolheiser, @lafriks, @lukashass, @meln5674, @not-my-profile, @pat-s, @plafue, @qwerty287, @smainz, @tori-27, @tsufeki, @xoxys, @xtexChooser, @zc-devs
+@6543, @Fishbowler, @Levy-Tal, @M0Rf30, @anbraten, @cduchenoy, @cevatkerim, @fernandrone, @gedankenstuecke, @gnowland, @greenaar, @hg, @j04n-f, @jenrik, @johanneskastl, @jolheiser, @lafriks, @lukashass, @meln5674, @not-my-profile, @pat-s, @plafue, @qwerty287, @smainz, @stevapple, @tori-27, @tsufeki, @xoxys, @xtexChooser, @zc-devs
 
 ### 💥 Breaking changes
 
@@ -70,6 +70,7 @@
 
 ### 📈 Enhancement
 
+- feat: add linter support for step-level `depends_on` existence [[#4657](https://github.com/woodpecker-ci/woodpecker/pull/4657)]
 - Reduce version redundancy [[#4707](https://github.com/woodpecker-ci/woodpecker/pull/4707)]
 - Add priority menu to tabs [[#4641](https://github.com/woodpecker-ci/woodpecker/pull/4641)]
 - feat(bitbucketdatacenter): Add support for fetching and converting projects to teams [[#4663](https://github.com/woodpecker-ci/woodpecker/pull/4663)]
