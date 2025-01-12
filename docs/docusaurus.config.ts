@@ -1,19 +1,21 @@
 import * as path from 'path';
+import type { VersionBanner, VersionOptions } from '@docusaurus/plugin-content-docs';
 import type * as Preset from '@docusaurus/preset-classic';
 import type { Config } from '@docusaurus/types';
 import { themes } from 'prism-react-renderer';
-import * as versions from './versions.json';
 
-const docsVersions = {
+import versions from './versions.json';
+
+const docsVersions: { [version: string]: VersionOptions } = {
   current: {
     label: 'Next 🚧',
-    banner: 'unreleased',
+    banner: 'unreleased' as VersionBanner,
   },
 };
 
-const includeVersions = ['current', versions.default[0]];
+const includeVersions = ['current', versions[0]];
 
-versions.default.forEach((v, index) => {
+versions.forEach((v, index) => {
   const version = {
     label: `${v}.x${index === 0 ? '' : ' 💀'}`,
   };
@@ -257,7 +259,7 @@ const config = {
           sidebarPath: require.resolve('./sidebars.js'),
           editUrl: 'https://github.com/woodpecker-ci/woodpecker/edit/main/docs/',
           includeCurrentVersion: true,
-          lastVersion: versions.default[0],
+          lastVersion: versions[0],
           onlyIncludeVersions: includeVersions,
           versions: docsVersions,
         },
