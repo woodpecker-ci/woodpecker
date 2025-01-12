@@ -1,7 +1,7 @@
 al.essio.dev/pkg/shellescape v1.5.1 h1:86HrALUujYS/h+GtqoB26SBEdkWfmMI6FubjXlsXyho=
 al.essio.dev/pkg/shellescape v1.5.1/go.mod h1:6sIqp7X2P6mThCQ7twERpZTuigpr6KbZWtls1U8I890=
-code.gitea.io/sdk/gitea v0.19.0 h1:8I6s1s4RHgzxiPHhOQdgim1RWIRcr0LVMbHBjBFXq4Y=
-code.gitea.io/sdk/gitea v0.19.0/go.mod h1:IG9xZJoltDNeDSW0qiF2Vqx5orMWa7OhVWrjvrd5NpI=
+code.gitea.io/sdk/gitea v0.20.0 h1:Zm/QDwwZK1awoM4AxdjeAQbxolzx2rIP8dDfmKu+KoU=
+code.gitea.io/sdk/gitea v0.20.0/go.mod h1:faouBHC/zyx5wLgjmRKR62ydyvMzwWf3QnU0bH7Cw6U=
 codeberg.org/6543/go-yaml2json v1.0.0 h1:heGqo9VEi7gY2yNqjj7X4ADs5nzlFIbGsJtgYDLrnig=
 codeberg.org/6543/go-yaml2json v1.0.0/go.mod h1:mz61q14LWF4ZABrgMEDMmk3t9dPi6zgR1uBh2VKV2RQ=
 codeberg.org/6543/xyaml v1.1.0 h1:0PWTy8OUqshshjrrnAXFWXSPUEa8R49DIh2ah07SxFc=

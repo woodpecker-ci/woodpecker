@@ -185,6 +185,10 @@ func TestLintErrors(t *testing.T) {
 			from: "steps: { build: { image: golang, secrets: [ 'mysql_username' ] } }",
 			want: "Usage of `secrets` is deprecated, use `environment` in combination with `from_secret`",
 		},
+		{
+			from: "steps: { build: { image: golang }, publish: { image: golang, depends_on: [ binary ] } }",
+			want: "One or more of the specified dependencies do not exist",
+		},
 	}
 
 	for _, test := range testdata {

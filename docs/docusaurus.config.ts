@@ -2,6 +2,27 @@ import * as path from 'path';
 import type * as Preset from '@docusaurus/preset-classic';
 import type { Config } from '@docusaurus/types';
 import { themes } from 'prism-react-renderer';
+import * as versions from './versions.json';
+
+const docsVersions = {
+  current: {
+    label: 'Next 🚧',
+    banner: 'unreleased',
+  },
+};
+
+const includeVersions = ['current', versions.default[0]];
+
+versions.default.forEach((v, index) => {
+  const version = {
+    label: `${v}.x${index === 0 ? '' : ' 💀'}`,
+  };
+  if (index !== 0 && process.env.NODE_ENV !== 'development') {
+    version['banner'] = 'unmaintained';
+    includeVersions.push(v);
+  }
+  docsVersions[v] = version;
+});
 
 const config = {
   title: 'Woodpecker CI',
@@ -236,26 +257,9 @@ const config = {
           sidebarPath: require.resolve('./sidebars.js'),
           editUrl: 'https://github.com/woodpecker-ci/woodpecker/edit/main/docs/',
           includeCurrentVersion: true,
-          lastVersion: '3.0',
-          onlyIncludeVersions:
-            process.env.NODE_ENV === 'development' ? ['current', '3.0'] : ['current', '3.0', '2.8', '2.7', '1.0'],
-          versions: {
-            current: {
-              label: 'Next 🚧',
-              banner: 'unreleased',
-            },
-            '2.8': {
-              label: '2.8.x',
-            },
-            '2.7': {
-              label: '2.7.x 💀',
-              banner: 'unmaintained',
-            },
-            '1.0': {
-              label: '1.0.x 💀',
-              banner: 'unmaintained',
-            },
-          },
+          lastVersion: versions.default[0],
+          onlyIncludeVersions: includeVersions,
+          versions: docsVersions,
         },
         blog: {
           blogTitle: 'Blog',
