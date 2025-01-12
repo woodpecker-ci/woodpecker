@@ -337,8 +337,11 @@ spellcheck:
 	  pnpx cspell lint --no-progress stdin
 
 ##@ Docs
+docs-dependencies: ## Install docs dependencies
+	(cd docs/; pnpm install --frozen-lockfile)
+
 .PHONY: docs
-docs: ## Generate docs (currently only for the cli)
+docs: docs-dependencies ## Generate docs (currently only for the cli)
 	CGO_ENABLED=0 go generate cmd/cli/app.go
 	CGO_ENABLED=0 go generate cmd/server/openapi.go
 
