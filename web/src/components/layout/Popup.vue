@@ -6,11 +6,8 @@
     @click="$emit('close')"
   />
   <!-- overlay end -->
-  <div
-    v-if="open"
-    class="max-w-1/3 max-w-4/5 md:max-h-3/5 fixed left-1/2 top-1/2 z-50 flex -translate-x-1/2 -translate-y-1/2 transform print:hidden"
-  >
-    <div class="shadow-all m-auto flex h-auto flex-col">
+  <div v-if="open" class="fixed inset-0 z-50 m-auto flex max-w-2xl print:hidden">
+    <div class="shadow-all m-auto flex h-auto flex-col p-2">
       <slot />
     </div>
   </div>
