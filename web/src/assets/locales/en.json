@@ -418,7 +418,7 @@
         }
       },
       "secrets": {
-        "desc": "user secrets can be used in the pipelines of all repositories owned by the user."
+        "desc": "User secrets can be used in the pipelines of all repositories owned by the user."
       },
       "registries": {
         "desc": "User registry credentials can be added to use private images for all personal pipelines."
