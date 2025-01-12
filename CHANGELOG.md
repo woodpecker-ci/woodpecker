@@ -1,5 +1,22 @@
 # Changelog
 
+## [2.8.3](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.8.3) - 2025-01-12
+
+### ❤️ Thanks to all contributors! ❤️
+
+@pat-s, @qwerty287
+
+### 🐛 Bug Fixes
+
+- Fix avatar column type (#4340) [[#4602](https://github.com/woodpecker-ci/woodpecker/pull/4602)]
+
+### Misc
+
+- Update web/ for 2.8 [[#4706](https://github.com/woodpecker-ci/woodpecker/pull/4706)]
+- [release/v2.8] Don't fail user creation if org exists (#4687) [[#4692](https://github.com/woodpecker-ci/woodpecker/pull/4692)]
+- [release/v2.8] Improve error on config loading (#4024) [[#4698](https://github.com/woodpecker-ci/woodpecker/pull/4698)]
+- [release/v2.8] Fix addon `nil` values (#4666) [[#4693](https://github.com/woodpecker-ci/woodpecker/pull/4693)]
+
 ## [2.8.2](https://github.com/woodpecker-ci/woodpecker/releases/tag/v2.8.2) - 2024-12-19
 
 ### ❤️ Thanks to all contributors! ❤️
