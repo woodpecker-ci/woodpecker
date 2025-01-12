@@ -84,6 +84,10 @@ const config = {
               to: '/api',
               label: 'API',
             },
+            {
+              to: '/about',
+              label: 'About',
+            },
           ],
         },
         {
@@ -189,7 +193,7 @@ const config = {
     },
     announcementBar: {
       id: 'github-star',
-      content: ` If you like Woodpecker-CI, <a href=https://github.com/woodpecker-ci/woodpecker rel="noopener noreferrer" target="_blank">give us a star on GitHub</a> ! ⭐️`,
+      content: `If you like Woodpecker-CI, <a href=https://github.com/woodpecker-ci/woodpecker rel="noopener noreferrer" target="_blank">give us a star on GitHub</a> ! ⭐️`,
       backgroundColor: 'var(--ifm-color-primary)',
       textColor: 'var(--ifm-color-gray-900)',
     },
@@ -284,7 +288,7 @@ const config = {
         // Theme Options for modifying how redoc renders them
         theme: {
           // Change with your site colors
-          primaryColor: '#1890ff',
+          primaryColor: '#4caf50',
         },
       },
     ],
