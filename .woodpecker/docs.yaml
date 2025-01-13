@@ -50,7 +50,7 @@ steps:
   build-cli:
     image: *golang_image
     commands:
-      - make docs
+      - make generate-docs
     when:
       - path: *when_path
         event: [tag, pull_request, push]
