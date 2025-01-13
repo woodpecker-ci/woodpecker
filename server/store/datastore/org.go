@@ -78,14 +78,7 @@ func (s storage) OrgFindByName(name string) (*model.Org, error) {
 	// sanitize
 	name = strings.ToLower(name)
 	org := new(model.Org)
-	has, err := s.engine.Where("name = ?", name).Get(org)
-	if err != nil {
-		return nil, fmt.Errorf("failed to check if org exists: %w", err)
-	}
-	if !has {
-		return nil, nil
-	}
-	return org, nil
+	return org, wrapGet(s.engine.Where("name = ?", name).Get(org))
 }
 
 func (s storage) OrgRepoList(org *model.Org, p *model.ListOptions) ([]*model.Repo, error) {

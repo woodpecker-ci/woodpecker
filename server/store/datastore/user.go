@@ -15,11 +15,13 @@
 package datastore
 
 import (
+	"errors"
 	"fmt"
 
 	"xorm.io/xorm"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
 )
 
 func (s storage) GetUser(id int64) (*model.User, error) {
@@ -63,16 +65,14 @@ func (s storage) CreateUser(user *model.User) error {
 	}
 
 	existingOrg, err := s.OrgFindByName(org.Name)
-	if err != nil {
+	if err != nil && !errors.Is(err, types.RecordNotExist) {
 		return fmt.Errorf("failed to check if org exists: %w", err)
 	}
 
 	if existingOrg != nil {
-		if existingOrg.Name == user.Login {
-			err = s.OrgUpdate(org)
-			if err != nil {
-				return fmt.Errorf("failed to update existing org: %w", err)
-			}
+		err = s.OrgUpdate(org)
+		if err != nil {
+			return fmt.Errorf("failed to update existing org: %w", err)
 		}
 	} else {
 		err = s.orgCreate(org, sess)
