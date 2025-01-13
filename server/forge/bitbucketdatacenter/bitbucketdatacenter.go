@@ -313,7 +313,7 @@ func (c *client) Status(ctx context.Context, u *model.User, repo *model.Repo, pi
 	status := &bb.BuildStatus{
 		State:       convertStatus(pipeline.Status),
 		URL:         common.GetPipelineStatusURL(repo, pipeline, workflow),
-		Key:         fmt.Sprintf("%s-%d", common.GetPipelineStatusContext(repo, pipeline, workflow), pipeline.Number),
+		Key:         common.GetPipelineStatusContext(repo, pipeline, workflow),
 		Description: common.GetPipelineStatusDescription(pipeline.Status),
 		Ref:         pipeline.Ref,
 	}
