@@ -478,7 +478,8 @@
         "saved": "Segreto salvato",
         "events": {
             "events": "Disponibile ai seguenti eventi",
-            "pr_warning": "Si prega di fare attenzione con questa opzione: un malintenzionato potrebbe inviare una richiesta di modifica dannosa, che rivela i tuoi segreti."
+            "pr_warning": "Si prega di fare attenzione con questa opzione: un malintenzionato potrebbe inviare una richiesta di modifica dannosa, che rivela i tuoi segreti.",
+            "warning": "Esporre segreti nelle pull request potrebbe consentire a malintenzionati di rubare i tuoi segreti tramite una pull request malevola."
         },
         "value": "Valore",
         "delete_confirm": "Vuoi davvero eliminare questo segreto?",
