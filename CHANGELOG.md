@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2025-01-15
+## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2025-01-16
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -256,6 +256,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update module google.golang.org/protobuf to v1.36.3 [[#4726](https://github.com/woodpecker-ci/woodpecker/pull/4726)]
 - fix(deps): update golang-packages [[#4725](https://github.com/woodpecker-ci/woodpecker/pull/4725)]
 - chore(deps): lock file maintenance [[#4721](https://github.com/woodpecker-ci/woodpecker/pull/4721)]
 - fix(deps): update module code.gitea.io/sdk/gitea to v0.20.0 [[#4710](https://github.com/woodpecker-ci/woodpecker/pull/4710)]
