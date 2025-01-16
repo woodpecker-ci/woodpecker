@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "cd ../ && make docs && cd docs && docusaurus start",
+    "start": "cd ../ && make generate-docs && cd docs && docusaurus start",
     "build": "pnpm build:woodpecker-plugins && docusaurus build",
     "build:woodpecker-plugins": "cd plugins/woodpecker-plugins && pnpm i && pnpm build",
     "swizzle": "docusaurus swizzle",
@@ -41,6 +41,7 @@
     "@docusaurus/module-type-aliases": "^3.7.0",
     "@docusaurus/tsconfig": "3.7.0",
     "@docusaurus/types": "^3.7.0",
+    "@ianvs/prettier-plugin-sort-imports": "^4.4.0",
     "@types/node": "^22.10.5",
     "@types/react": "^19.0.0",
     "@types/react-helmet": "^6.1.11",
