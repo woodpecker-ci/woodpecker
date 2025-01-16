@@ -44,10 +44,14 @@ func (s storage) OrgGet(id int64) (*model.Org, error) {
 }
 
 func (s storage) OrgUpdate(org *model.Org) error {
+	return s.orgUpdate(s.engine.NewSession(), org)
+}
+
+func (s storage) orgUpdate(sess *xorm.Session, org *model.Org) error {
 	// sanitize
 	org.Name = strings.ToLower(org.Name)
 	// update
-	_, err := s.engine.ID(org.ID).AllCols().Update(org)
+	_, err := sess.ID(org.ID).AllCols().Update(org)
 	return err
 }
 
@@ -75,17 +79,14 @@ func (s storage) orgDelete(sess *xorm.Session, id int64) error {
 }
 
 func (s storage) OrgFindByName(name string) (*model.Org, error) {
+	return s.orgFindByName(s.engine.NewSession(), name)
+}
+
+func (s storage) orgFindByName(sess *xorm.Session, name string) (*model.Org, error) {
 	// sanitize
 	name = strings.ToLower(name)
 	org := new(model.Org)
-	has, err := s.engine.Where("name = ?", name).Get(org)
-	if err != nil {
-		return nil, fmt.Errorf("failed to check if org exists: %w", err)
-	}
-	if !has {
-		return nil, nil
-	}
-	return org, nil
+	return org, wrapGet(sess.Where("name = ?", name).Get(org))
 }
 
 func (s storage) OrgRepoList(org *model.Org, p *model.ListOptions) ([]*model.Repo, error) {

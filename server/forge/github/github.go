@@ -391,23 +391,24 @@ func (c *client) OrgMembership(ctx context.Context, u *model.User, owner string)
 func (c *client) Org(ctx context.Context, u *model.User, owner string) (*model.Org, error) {
 	client := c.newClientToken(ctx, u.AccessToken)
 
-	user, _, err := client.Users.Get(ctx, owner)
-	log.Trace().Msgf("GitHub user for owner %s = %v", owner, user)
-	if user != nil && err == nil {
+	org, _, err := client.Organizations.Get(ctx, owner)
+	log.Trace().Msgf("GitHub organization for owner %s = %v", owner, org)
+	if org != nil && err == nil {
 		return &model.Org{
-			Name:   user.GetLogin(),
-			IsUser: true,
+			Name:   org.GetLogin(),
+			IsUser: false,
 		}, nil
 	}
 
-	org, _, err := client.Organizations.Get(ctx, owner)
-	log.Trace().Msgf("GitHub organization for owner %s = %v", owner, org)
+	user, _, err := client.Users.Get(ctx, owner)
+	log.Trace().Msgf("GitHub user for owner %s = %v", owner, user)
 	if err != nil {
 		return nil, err
 	}
 
 	return &model.Org{
-		Name: org.GetLogin(),
+		Name:   user.GetLogin(),
+		IsUser: true,
 	}, nil
 }
 
