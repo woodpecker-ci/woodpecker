@@ -379,6 +379,7 @@
 
 ### Misc
 
+- Use mirror.gcr.io as `trivy` registry [[#4729](https://github.com/woodpecker-ci/woodpecker/pull/4729)]
 - Add docs-dependencies target to makefile [[#4719](https://github.com/woodpecker-ci/woodpecker/pull/4719)]
 - Improve code highlighting in web UI [[#4447](https://github.com/woodpecker-ci/woodpecker/pull/4447)]
 - Revert "Two row layout for title and context of pipeline list" [[#4649](https://github.com/woodpecker-ci/woodpecker/pull/4649)]
