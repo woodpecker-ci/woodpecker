@@ -20,37 +20,37 @@ import (
 )
 
 type Pipeline struct {
-	ID                  int64                  `json:"id"                      xorm:"pk autoincr 'id'"`
-	RepoID              int64                  `json:"-"                       xorm:"UNIQUE(s) INDEX 'repo_id'"`
-	Number              int64                  `json:"number"                  xorm:"UNIQUE(s) 'number'"`
-	Parent              int64                  `json:"parent"                  xorm:"parent"`
-	Status              StatusValue            `json:"status"                  xorm:"INDEX 'status'"`
-	Errors              []*types.PipelineError `json:"errors"                  xorm:"json 'errors'"`
-	Created             int64                  `json:"created"                 xorm:"'created' NOT NULL DEFAULT 0 created"`
-	Updated             int64                  `json:"updated"                 xorm:"'updated' NOT NULL DEFAULT 0 updated"`
-	Started             int64                  `json:"started"                 xorm:"started"`
-	Finished            int64                  `json:"finished"                xorm:"finished"`
-	Reviewer            string                 `json:"reviewed_by"             xorm:"reviewer"`
-	Reviewed            int64                  `json:"reviewed"                xorm:"reviewed"`
-	Workflows           []*Workflow            `json:"workflows,omitempty"     xorm:"-"`
-	AdditionalVariables map[string]string      `json:"variables,omitempty"     xorm:"json 'additional_variables'"`
+	ID                  int64                  `json:"id"                  xorm:"pk autoincr 'id'"`
+	RepoID              int64                  `json:"-"                   xorm:"UNIQUE(s) INDEX 'repo_id'"`
+	Number              int64                  `json:"number"              xorm:"UNIQUE(s) 'number'"`
+	Parent              int64                  `json:"parent"              xorm:"parent"`
+	Status              StatusValue            `json:"status"              xorm:"INDEX 'status'"`
+	Errors              []*types.PipelineError `json:"errors"              xorm:"json 'errors'"`
+	Created             int64                  `json:"created"             xorm:"'created' NOT NULL DEFAULT 0 created"`
+	Updated             int64                  `json:"updated"             xorm:"'updated' NOT NULL DEFAULT 0 updated"`
+	Started             int64                  `json:"started"             xorm:"started"`
+	Finished            int64                  `json:"finished"            xorm:"finished"`
+	Reviewer            string                 `json:"reviewed_by"         xorm:"reviewer"`
+	Reviewed            int64                  `json:"reviewed"            xorm:"reviewed"`
+	Workflows           []*Workflow            `json:"workflows,omitempty" xorm:"-"`
+	AdditionalVariables map[string]string      `json:"variables,omitempty" xorm:"json 'additional_variables'"`
 
 	// event related
 
-	Event        WebhookEvent `json:"event"                   xorm:"event"`
-	Commit       *Commit      `json:"commit"                  xorm:"json 'commit'"`
-	Branch       string       `json:"branch"                  xorm:"branch"`
-	Ref          string       `json:"ref"                     xorm:"ref"`
-	Refspec      string       `json:"refspec"                 xorm:"refspec"`
-	ForgeURL     string       `json:"forge_url"               xorm:"forge_url"`
-	Author       string       `json:"author"                  xorm:"author"`
-	Avatar       string       `json:"author_avatar"           xorm:"varchar(500) 'avatar'"`
-	ChangedFiles []string     `json:"changed_files,omitempty" xorm:"LONGTEXT 'changed_files'"`
-	Deployment   *Deployment  `json:"deployment"              xorm:"json 'deployment'"`
-	IsPrerelease bool         `json:"is_prerelease,omitempty" xorm:"is_prerelease"`
-	PullRequest  *PullRequest `json:"pull_request,omitempty"            xorm:"json 'pr'"`
-	Cron         string       `json:"cron,omitempty"          xorm:"cron"`
-	ReleaseTitle string       `json:"release,omitempty"       xorm:"release"`
+	Event           WebhookEvent `json:"event"                       xorm:"event"`
+	Commit          *Commit      `json:"commit"                      xorm:"json 'commit'"`
+	Branch          string       `json:"branch"                      xorm:"branch"`
+	Ref             string       `json:"ref"                         xorm:"ref"`
+	Refspec         string       `json:"refspec"                     xorm:"refspec"`
+	ForgeURL        string       `json:"forge_url"                   xorm:"forge_url"`
+	Author          string       `json:"author"                      xorm:"author"`
+	Avatar          string       `json:"author_avatar"               xorm:"varchar(500) 'avatar'"`
+	ChangedFiles    []string     `json:"changed_files,omitempty"     xorm:"LONGTEXT 'changed_files'"`
+	Deployment      *Deployment  `json:"deployment,omitempty"        xorm:"json 'deployment'"`
+	IsPrerelease    bool         `json:"is_prerelease,omitempty"     xorm:"is_prerelease"`
+	PullRequest     *PullRequest `json:"pull_request,omitempty"      xorm:"json 'pr'"`
+	Cron            string       `json:"cron,omitempty"              xorm:"cron"`
+	ReleaseTagTitle string       `json:"release_tag_title,omitempty" xorm:"release_tag_title"`
 } //	@name Pipeline
 
 // TableName return database table name for xorm.

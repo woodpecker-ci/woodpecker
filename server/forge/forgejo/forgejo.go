@@ -523,7 +523,7 @@ func (c *Forgejo) Hook(ctx context.Context, r *http.Request) (*model.Repo, *mode
 			}
 			pipeline.Commit = sha
 			if pipeline.Commit.Message != msg {
-				pipeline.ReleaseTitle = msg
+				pipeline.ReleaseTagTitle = msg
 			}
 		}
 	}

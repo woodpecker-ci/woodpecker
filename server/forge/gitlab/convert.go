@@ -277,8 +277,8 @@ func convertReleaseHook(hook *gitlab.ReleaseEvent) (*model.Repo, *model.Pipeline
 			Message:  hook.Commit.Message,
 			ForgeURL: hook.Commit.URL,
 		},
-		ForgeURL:     hook.URL,
-		ReleaseTitle: hook.Name,
+		ForgeURL:        hook.URL,
+		ReleaseTagTitle: hook.Name,
 		// Tag name here is the ref. We should add the refs/tags, so
 		// it is known it's a tag (git-plugin looks for it)
 		Ref: "refs/tags/" + hook.Tag,

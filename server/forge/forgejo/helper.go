@@ -173,14 +173,14 @@ func pipelineFromRelease(hook *releaseHook) *model.Pipeline {
 	)
 
 	return &model.Pipeline{
-		Event:        model.EventRelease,
-		Ref:          fmt.Sprintf("refs/tags/%s", hook.Release.TagName),
-		ForgeURL:     hook.Release.HTMLURL,
-		Branch:       hook.Release.Target,
-		ReleaseTitle: hook.Release.Title,
-		Author:       hook.Sender.UserName,
-		Avatar:       avatar,
-		IsPrerelease: hook.Release.IsPrerelease,
+		Event:           model.EventRelease,
+		Ref:             fmt.Sprintf("refs/tags/%s", hook.Release.TagName),
+		ForgeURL:        hook.Release.HTMLURL,
+		Branch:          hook.Release.Target,
+		ReleaseTagTitle: hook.Release.Title,
+		Author:          hook.Sender.UserName,
+		Avatar:          avatar,
+		IsPrerelease:    hook.Release.IsPrerelease,
 	}
 }
 

@@ -128,7 +128,7 @@ func metadataPipelineFromModelPipeline(pipeline *model.Pipeline, includeParent b
 
 			IsPrerelease: pipeline.IsPrerelease,
 		},
-		Release: pipeline.ReleaseTitle,
+		Release: pipeline.ReleaseTagTitle,
 		Cron:    pipeline.Cron,
 	}
 

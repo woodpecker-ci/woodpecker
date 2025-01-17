@@ -192,14 +192,14 @@ func parseReleaseHook(hook *github.ReleaseEvent) (*model.Repo, *model.Pipeline) 
 	}
 
 	pipeline := &model.Pipeline{
-		Event:        model.EventRelease,
-		ForgeURL:     hook.GetRelease().GetHTMLURL(),
-		Ref:          fmt.Sprintf("refs/tags/%s", hook.GetRelease().GetTagName()),
-		Branch:       hook.GetRelease().GetTargetCommitish(), // cspell:disable-line
-		ReleaseTitle: name,
-		Avatar:       hook.GetSender().GetAvatarURL(),
-		Author:       hook.GetSender().GetLogin(),
-		IsPrerelease: hook.GetRelease().GetPrerelease(),
+		Event:           model.EventRelease,
+		ForgeURL:        hook.GetRelease().GetHTMLURL(),
+		Ref:             fmt.Sprintf("refs/tags/%s", hook.GetRelease().GetTagName()),
+		Branch:          hook.GetRelease().GetTargetCommitish(), // cspell:disable-line
+		ReleaseTagTitle: name,
+		Avatar:          hook.GetSender().GetAvatarURL(),
+		Author:          hook.GetSender().GetLogin(),
+		IsPrerelease:    hook.GetRelease().GetPrerelease(),
 	}
 
 	return convertRepo(hook.GetRepo()), pipeline

@@ -69,11 +69,11 @@ var updatePipelineMessages = xormigrate.Migration{
 			FromFork          bool     `xorm:"from_fork"`
 
 			// new fields
-			CommitNew    *commit      `xorm:"json 'commit_new'"`
-			Deployment   *deployment  `xorm:"json 'deployment'"`
-			PullRequest  *pullRequest `xorm:"json 'pr'"`
-			Cron         string       `xorm:"cron"`
-			ReleaseTitle string       `xorm:"release"`
+			CommitNew       *commit      `xorm:"json 'commit_new'"`
+			Deployment      *deployment  `xorm:"json 'deployment'"`
+			PullRequest     *pullRequest `xorm:"json 'pr'"`
+			Cron            string       `xorm:"cron"`
+			ReleaseTagTitle string       `xorm:"release_tag_title"`
 
 			// removed without replacement
 			Timestamp int64  `xorm:"'timestamp'"`
@@ -110,7 +110,7 @@ var updatePipelineMessages = xormigrate.Migration{
 
 				switch oldPipeline.Event {
 				case model.EventRelease:
-					newPipeline.ReleaseTitle = strings.TrimPrefix(oldPipeline.Message, "created release ")
+					newPipeline.ReleaseTagTitle = strings.TrimPrefix(oldPipeline.Message, "created release ")
 				case model.EventCron:
 					newPipeline.Cron = oldPipeline.Sender
 				case model.EventPull, model.EventPullClosed:
@@ -138,7 +138,7 @@ var updatePipelineMessages = xormigrate.Migration{
 					}
 				}
 
-				if _, err := sess.ID(oldPipeline.ID).Cols("commit_new", "deployment", "pr", "cron", "release").Update(newPipeline); err != nil {
+				if _, err := sess.ID(oldPipeline.ID).Cols("commit_new", "deployment", "pr", "cron", "release_tag_title").Update(newPipeline); err != nil {
 					return err
 				}
 			}
