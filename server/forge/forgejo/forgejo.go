@@ -504,17 +504,27 @@ func (c *Forgejo) Hook(ctx context.Context, r *http.Request) (*model.Repo, *mode
 	if pipeline != nil {
 		if pipeline.Event == model.EventRelease && pipeline.Commit.SHA == "" {
 			tagName := strings.Split(pipeline.Ref, "/")[2]
-			sha, err := c.getTagCommitSHA(ctx, repo, tagName)
+			sha, _, err := c.getTagMessage(ctx, repo, tagName)
 			if err != nil {
 				return nil, nil, err
 			}
 			pipeline.Commit = sha
-		} else if pipeline.Event == model.EventPull || pipeline.Event == model.EventPullClosed || pipeline.Event == model.EventTag {
+		} else if pipeline.Event == model.EventPull || pipeline.Event == model.EventPullClosed {
 			sha, err := c.getCommitFromSHAStore(ctx, repo, pipeline.Commit.SHA)
 			if err != nil {
 				return nil, nil, err
 			}
 			pipeline.Commit = sha
+		} else if pipeline.Event == model.EventTag {
+			tagName := strings.Split(pipeline.Ref, "/")[2]
+			sha, msg, err := c.getTagMessage(ctx, repo, tagName)
+			if err != nil {
+				return nil, nil, err
+			}
+			pipeline.Commit = sha
+			if pipeline.Commit.Message != msg {
+				pipeline.ReleaseTitle = msg
+			}
 		}
 	}
 
@@ -663,33 +673,34 @@ func (c *Forgejo) getChangedFilesForPR(ctx context.Context, repo *model.Repo, in
 	}, -1)
 }
 
-func (c *Forgejo) getTagCommitSHA(ctx context.Context, repo *model.Repo, tagName string) (*model.Commit, error) {
+func (c *Forgejo) getTagMessage(ctx context.Context, repo *model.Repo, tagName string) (*model.Commit, string, error) {
 	_store, ok := store.TryFromContext(ctx)
 	if !ok {
-		return nil, fmt.Errorf("could not get store from context")
+		return nil, "", fmt.Errorf("could not get store from context")
 	}
 
 	repo, err := _store.GetRepoNameFallback(repo.ForgeRemoteID, repo.FullName)
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 
 	user, err := _store.GetUser(repo.UserID)
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 
 	client, err := c.newClientToken(ctx, user.AccessToken)
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 
 	tag, _, err := client.GetTag(repo.Owner, repo.Name, tagName)
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 
-	return c.getCommitFromSHA(ctx, user, repo, tag.Commit.SHA)
+	commit, err := c.getCommitFromSHA(ctx, user, repo, tag.Commit.SHA)
+	return commit, tag.Message, err
 }
 
 func (c *Forgejo) getCommitFromSHAStore(ctx context.Context, repo *model.Repo, sha string) (*model.Commit, error) {

@@ -66,7 +66,7 @@ export interface Pipeline {
 
   deployment?: PipelineDeployment;
 
-  release_title?: string;
+  release?: string;
 
   cron: string;
 

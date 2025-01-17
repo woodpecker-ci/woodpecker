@@ -83,8 +83,8 @@ export default (pipeline: Ref<Pipeline | undefined>) => {
       context = pipeline.value.pull_request!.title;
     } else if (pipeline.value?.event === 'deployment') {
       context = pipeline.value.deployment!.description;
-    } else if (pipeline.value?.event === 'release') {
-      context = pipeline.value.release_title!;
+    } else if (pipeline.value?.event === 'release' || pipeline.value?.event === 'tag') {
+      context = pipeline.value.release || '';
     }
     return emojify(context);
   });
