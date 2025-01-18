@@ -77,7 +77,7 @@ In order to use this feature, all required pipeline elements must be passed, e.g
 However, secrets are not included in the pipeline metadata and must be passed manually to the local execution call.
 :::
 
-## Fine grained control over Pull Request approvals
+## Fine grained control over approvals options
 
 New approval options for Pull Request workflows are available.
 By default, Pull Requests pipelines from forks are not started automatically but require explicit approval.
