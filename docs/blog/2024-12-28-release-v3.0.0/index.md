@@ -43,14 +43,14 @@ Woodpecker now supports running rootless images by adjusting the entrypoints and
 
 In addition, all images published by Woodpecker (Server, Agent, CLI) now use a non-privileged user (`woodpecker` with UID and GID 1000) by default.
 ## Register Your Own Agents for Users or Organizations [#3539](https://github.com/woodpecker-ci/woodpecker/pull/3539)
-WoodpeckerCI now lets you register custom agents scoped to individual users or organizations. This means you can bring your own agents, configured to meet the unique needs of your projects, and assign them to specific users or organizational workflows.  
+WoodpeckerCI now lets you register custom agents scoped to individual users or organizations. This means you can bring your own agents, configured to meet the unique needs of your projects, and assign them to specific users or organizational workflows.
 
-This update provides flexibility for teams with diverse requirements, allowing them to integrate agents tailored to specific tasks or environments seamlessly into their pipelines.  
+This update provides flexibility for teams with diverse requirements, allowing them to integrate agents tailored to specific tasks or environments seamlessly into their pipelines.
 
 ## Replay Pipelines Locally Using `cli exec` [#4103](https://github.com/woodpecker-ci/woodpecker/pull/4103)
-Debugging pipelines no longer requires endless small adjustments and repeated pushes. With the new `cli exec` feature, you can download pipeline metadata directly from the server and replay it locally. This allows you to test and fix issues in a replica of the server environment, all from your machine.  
+Debugging pipelines no longer requires endless small adjustments and repeated pushes. With the new `cli exec` feature, you can download pipeline metadata directly from the server and replay it locally. This allows you to test and fix issues in a replica of the server environment, all from your machine.
 
-By enabling local debugging, this feature accelerates the development process and provides deeper insights into pipeline behavior without relying on server-side execution for every small change.  
+By enabling local debugging, this feature accelerates the development process and provides deeper insights into pipeline behavior without relying on server-side execution for every small change.
 :::info
 The agent image must remain rootful by default to be able to mount the Docker socket when Woodpecker is used with the `docker` backend.
 The helm chart will start to use a non-privileged user by utilizing `securityContext`.
