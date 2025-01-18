@@ -16,6 +16,7 @@
     "antfu",
     "apimachinery",
     "appleboy",
+    "aquasec",
     "Archlinux",
     "autoincr",
     "automerge",
@@ -30,6 +31,7 @@
     "buildx",
     "caddyfile",
     "ccmenu",
+    "CERTDIR",
     "certmagic",
     "charmbracelet",
     "cicd",
@@ -41,7 +43,6 @@
     "cpuset",
     "creativecommons",
     "Curr",
-    "CERTDIR",
     "datacenter",
     "DATASOURCE",
     "Debugf",
@@ -277,5 +278,7 @@
     // ignore inline svg in css
     "\\s*url\\(\"data:image/svg\\+xml.*"
   ],
-  "enableFiletypes": ["dockercompose"]
+  "enableFiletypes": [
+    "dockercompose"
+  ]
 }
