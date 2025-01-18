@@ -17,7 +17,9 @@ We are excited to announce the release of Woodpecker 3.0.0! Along with various c
 
 ## Breaking Changes
 
-To enhance the usability of Woodpecker and comply with evolving security standards, we periodically implement migrations. While we strive to minimize changes, some adjustments are essential for an improved user experience. We acknowledge that this release includes a significant number of changes, many of which require users to update their pipeline definitions. We understand that this can be a tedious task, especially when managing multiple repositories and pipelines. Rest assured that each modification was carefully considered and thoroughly discussed, with specific reasoning behind every decision.
+To enhance the usability of Woodpecker and comply with evolving security standards, we periodically implement migrations. While we strive to minimize changes, some adjustments are essential for an improved user experience.
+We acknowledge that this release includes a significant number of changes, many of which require users to update their pipeline definitions. We understand that this can be a tedious task, especially when managing multiple repositories and pipelines.
+Rest assured that each modification was carefully considered and thoroughly discussed, with specific reasoning behind every decision.
 
 A substantial portion of these updates aims to transition away from outdated and suboptimal Drone definitions. Your patience and understanding as we implement these necessary changes are greatly appreciated. If you encounter any major issues during your migration to a new version, please don't hesitate to reach out. The Woodpecker maintainers are always eager to reassess and improve our updates based on your feedback.
 
