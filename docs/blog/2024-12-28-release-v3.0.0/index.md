@@ -79,7 +79,7 @@ However, secrets are not included in the pipeline metadata and must be passed ma
 
 ## Fine grained control over approvals options
 
-Woodpecker 3.0.0 introduces enhanced approval options. Beyond requiring approval for all pipeline events, you can now configure it specifically for all pull requests or only for pull requests originating from forks. 
+Woodpecker 3.0.0 introduces enhanced approval options. Beyond requiring approval for all pipeline events, you can now configure it specifically for all pull requests or only for pull requests originating from forks.
 
 By default, public repositories will now mandate approval for pull requests from forks. This helps prevent potentially malicious PRs from exposing secrets or performing unauthorized actions without the repository owner's awareness.
 
