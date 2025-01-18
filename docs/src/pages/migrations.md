@@ -145,7 +145,7 @@ The following restructuring was done to achieve a more consistent grouping:
 
 #### Updated tokens
 
-The Webhook tokens have been changed for enhanced security and therefore existing repositories need to be updated using the `Repair all` button in the admin settings ([#4013]https://github.com/woodpecker-ci/woodpecker/pull/4013).
+The Webhook tokens have been changed for enhanced security and therefore existing repositories need to be updated using the `Repair all` button in the admin settings ([#4013](https://github.com/woodpecker-ci/woodpecker/pull/4013)).
 
 #### Image tags
 
