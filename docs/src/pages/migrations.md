@@ -119,8 +119,8 @@ The following restructuring was done to achieve a more consistent grouping:
   - The SDK fields `start_time`, `end_time`, `created_at`, `started_at`, `finished_at` and `reviewed_at` have been renamed to `started`, `finished`, `created`, `started`, `finished`, `reviewed` ([#3968](https://github.com/woodpecker-ci/woodpecker/pull/3968))
   - The `trusted` field of the repo model was changed from `boolean` to `object` ([#4025](https://github.com/woodpecker-ci/woodpecker/pull/4025))
 
-- CRON definitions now use standard Linux syntax without seconds.
-  All custom CRON definitions which do not use keywords such as `@daily` or `@weekly` must be updated.
+- CRON definitions now follow standard Linux syntax without seconds. An automatic migration will attempt to update your
+  settings - ensure the update completes successfully.
 
   Example definition for a CRON job running at 8 am daily:
 
