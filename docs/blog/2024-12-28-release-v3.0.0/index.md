@@ -11,16 +11,18 @@ tags: [release, major]
 hide_table_of_contents: false
 ---
 
-> Disclaimer upfront: The Woodpecker team is aware that this release contains _a lot_ of changes, also many which force users to update their pipeline definitions.
-> We understand that this can be a tedious task, especially when managing numerous repositories and pipelines. Each change was carefully considered and thoroughly discussed, with specific reasoning behind every decision.
-> A significant portion of these updates is focused on “breaking free” from outdated and suboptimal Drone definitions.
-> Thank you for your patience and understanding as we implement these essential breaking changes!
+:::
+Disclaimer upfront: The Woodpecker team is aware that this release contains _a lot_ of changes, also many which force users to update their pipeline definitions.
+We understand that this can be a tedious task, especially when managing numerous repositories and pipelines. Each change was carefully considered and thoroughly discussed, with specific reasoning behind every decision.
+A significant portion of these updates is focused on “breaking free” from outdated and suboptimal Drone definitions.
+Thank you for your patience and understanding as we implement these essential breaking changes!
+:::
 
 Security has been the major focus in this major release.
 Besides patching known vulnerabilities (and also backporting these to v2 releases), the secrets handling mechanism has been improved, preventing accidental leaks and making it simpler to keep sensitive information fully encrypted.
 
 Specifically, the `secrets:` keyword has been deprecated in favor of a more flexible (and secure) way to specify secrets: `from_secret:`.
-This new approach provides more flexibility (by being to use different names for the source and destination secrets) and ensures a safe internal secret parsing through a unified engine.
+This new approach provides more flexibility (by using different names for the source and destination secrets) and ensures a safe internal secret parsing through a unified engine.
 Because secrets defined via `secrets:` were simple env vars in the end, this change also removes potential confusion about the differences between values specified in `environment:` and `secrets`.
 Now, both are defined in `environment:` using an expressive syntax:
 
@@ -41,9 +43,16 @@ Woodpecker now supports running rootless images by adjusting the entrypoints and
 
 In addition, all images published by Woodpecker (Server, Agent, CLI) now use a non-privileged user (`woodpecker` with UID and GID 1000) by default.
 
+:::note
+The agent image must remain rootful by default to be able to mount the Docker socket when Woodpecker is used with the `docker` backend.
+The helm chart will start to use a non-privileged user by utilizing `securityContext`.
+Running a completely rootless agent with the `docker` backend may be possible by using a rootless docker daemon.
+However, this requires more work and is currently not supported.
+:::
+
 ## UI
 
-We squashed many UI related bug fixes in this release.
+We have fixed many UI-related bugs in this version.
 Many were small misalignment related to padding, margins or other edge cases related to small screen sizes.
 We also aimed to harmonize the icons across the UI, specifically across logical subgroups, such as status-icons or admin panel icons.
 
@@ -60,7 +69,7 @@ In order to use this feature, all required pipeline elements must be passed, e.g
 However, secrets are not included in the pipeline metadata and must be passed manually to the local execution call.
 :::
 
-## Granular control over Pull Request approvals
+## Fine grained control over Pull Request approvals
 
 New approval options for Pull Request workflows are available.
 By default, Pull Requests pipelines from forks are not started automatically but require explicit approval.
@@ -87,5 +96,5 @@ Users needs to actively updated their CRON entries, otherwise existing pipelines
 
 ## Known Issues
 
-The generic "pipeline definition not found" is still present and not yet understood.
+The generic `pipeline definition not found` is still present and not yet understood.
 This error message can be triggered by various elements (which the most likely one being a (temporary) connection issue with the forge) and the error return/output must be improved first in order to take appropriate action.
