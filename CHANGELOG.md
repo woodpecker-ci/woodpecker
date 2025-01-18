@@ -70,6 +70,7 @@
 
 ### 📚 Documentation
 
+- Add docs for 3.0 [[#4705](https://github.com/woodpecker-ci/woodpecker/pull/4705)]
 - fix(deps): update docs npm deps non-major [[#4733](https://github.com/woodpecker-ci/woodpecker/pull/4733)]
 - chore(deps): update dependency @types/react to v19.0.5 [[#4714](https://github.com/woodpecker-ci/woodpecker/pull/4714)]
 - fix(deps): update docs npm deps non-major [[#4702](https://github.com/woodpecker-ci/woodpecker/pull/4702)]
