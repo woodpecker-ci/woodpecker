@@ -1,5 +1,7 @@
 # Migrations
 
+To enhance the usability of Woodpecker and meet evolving security standards, occasional migrations are necessary. While we aim to minimize these changes, some are unavoidable. If you experience significant issues during a migration to a new version, please let us know so maintainers can reassess the updates.
+
 ## `next`
 
 - No changes
@@ -8,11 +10,35 @@
 
 ### User-facing migrations
 
-#### Security
+#### Workflow syntax changes
 
-- The "gated" option, which restricted which pipelines can start right away without requiring approval, has been replaced by "require-approval" option. Even though this feature ([#3348](https://github.com/woodpecker-ci/woodpecker/pull/3348)) was backported to 2.8, no default is explicitly set.
-  The new default in 3.0 is to require approval only for forked repositories.
-  This allows easier management of dependency bots and other trusted entities having write access to the repository.
+- `secrets` have been entirely removed in favor of `environment` combined with the `from_secret` syntax ([#4363](https://github.com/woodpecker-ci/woodpecker/pull/4363)).
+  As `secrets` are just normal env vars which are masked, the goal was to allow them to be declared next to normal env vars and at the same time reduce the keyword syntax count.
+  Additionally, the `from_secret` syntax gives more flexibility in naming.
+  Whereas beforehand `secrets` where always named after their initial secret name, the `from_secret` reference can now be different.
+  Last, one can inject multiple different env vars from the same secret reference.
+
+  2.x:
+
+  ```yaml
+  secrets: [my_token]
+  ```
+
+  3.x:
+
+  ```yaml
+  environment:
+    MY_TOKEN:
+      from_secret: my_token
+  ```
+
+  Learn more about using [secrets](https://woodpecker-ci.org/docs/next/usage/secrets#usage)
+
+- The `includes` and `excludes` event filter options have been removed
+- Previously, env vars have been automatically sanitized to uppercase.
+  As this has been confusing, the type-case of the secret definition is now respected ([#3375](https://github.com/woodpecker-ci/woodpecker/pull/3375)).
+- The `environment` filter option has been removed in favor of `when.evaluate`
+- Grouping of steps via `steps.[name].group` should now be done using `steps.[name].depends_on`
 
 #### Environment variables
 
@@ -43,6 +69,12 @@ The following built-in environment variables have been removed/replaced:
 
 Environment variables which are empty after workflow parsing are not being injected into the build but filtered out beforehand ([#4193](https://github.com/woodpecker-ci/woodpecker/pull/4193))
 
+#### Security
+
+- The "gated" option, which restricted which pipelines can start right away without requiring approval, has been replaced by "require-approval" option. Even though this feature ([#3348](https://github.com/woodpecker-ci/woodpecker/pull/3348)) was backported to 2.8, no default is explicitly set.
+  The new default in 3.0 is to require approval only for forked repositories.
+  This allows easier management of dependency bots and other trusted entities having write access to the repository.
+
 #### Former deprecations
 
 The following syntax deprecations will now result in an error:
@@ -50,38 +82,6 @@ The following syntax deprecations will now result in an error:
 - `pipeline:` ([#3916](https://github.com/woodpecker-ci/woodpecker/pull/3916))
 - `platform:` ([#3916](https://github.com/woodpecker-ci/woodpecker/pull/3916))
 - `branches:` ([#3916](https://github.com/woodpecker-ci/woodpecker/pull/3916))
-
-#### Workflow syntax changes
-
-- Grouping of steps via `steps.[name].group` should now be done using `steps.[name].depends_on`
-- The `includes` and `excludes` event filter options have been removed
-- Previously, env vars have been automatically sanitized to uppercase.
-  As this has been confusing, the type-case of the secret definition is now respected ([#3375](https://github.com/woodpecker-ci/woodpecker/pull/3375)).
-- `secrets` have been entirely removed in favor of `environment` combined with the `from_secret` syntax.
-  As `secrets` are just normal env vars which are masked, the goal was to allow them to be declared next to normal env vars and at the same time reduce the keyword syntax count.
-  Additionally, the `from_secret` syntax gives more flexibility in naming.
-  Whereas beforehand `secrets` where always named after their initial secret name, the `from_secret` reference can now be different.
-  Last, one can inject multiple different env vars from the same secret reference.
-
-  2.x:
-
-  ```yaml
-  secrets: [my_token]
-  ```
-
-  3.x:
-
-  ```yaml
-  environment:
-    MY_TOKEN:
-      from_secret: my_token
-  ```
-
-- The `environment` filter option has been removed in favor of `when.evaluate`
-
-#### API changes
-
-- Removed deprecated `registry/` endpoint. Use `registries`, `/authorize/token`
 
 #### CLI changes
 
@@ -101,6 +101,12 @@ The following restructuring was done to achieve a more consistent grouping:
 | `woodpecker-cli pipeline logs`              | `woodpecker-cli pipeline log show`          |
 | `woodpecker-cli (registry,secret,...) info` | `woodpecker-cli (registry,secret,...) show` |
 
+([#4467](https://github.com/woodpecker-ci/woodpecker/pull/4467) and [#4481](https://github.com/woodpecker-ci/woodpecker/pull/4481))
+
+#### API changes
+
+- Removed deprecated `registry/` endpoint. Use `registries`, `/authorize/token`
+
 #### Miscellaneous
 
 - For `woodpecker-cli` containers, `/woodpecker` has been set as the default `workdir`
@@ -111,7 +117,7 @@ The following restructuring was done to achieve a more consistent grouping:
 - SDK changes:
 
   - The SDK fields `start_time`, `end_time`, `created_at`, `started_at`, `finished_at` and `reviewed_at` have been renamed to `started`, `finished`, `created`, `started`, `finished`, `reviewed` ([#3968](https://github.com/woodpecker-ci/woodpecker/pull/3968))
-  - The `trusted` field of the repo model was changed from `boolean` to `object`
+  - The `trusted` field of the repo model was changed from `boolean` to `object` ([#4025](https://github.com/woodpecker-ci/woodpecker/pull/4025))
 
 - CRON definitions now use standard Linux syntax without seconds.
   All custom CRON definitions which do not use keywords such as `@daily` or `@weekly` must be updated.
@@ -131,20 +137,20 @@ The following restructuring was done to achieve a more consistent grouping:
   ```
 
 - Native Let's Encrypt certificate support has been dropped as it was almost unused and causing frequent issues.
-  Let's Encrypt needs to be set up standalone now. The SSL key pair can still be used in `WOODPECKER_SERVER_CERT` and `WOODPECKER_SERVER_KEY` as an alternative to using a reverse proxy for TLS termination.
+  Let's Encrypt needs to be set up standalone now. The SSL key pair can still be used in `WOODPECKER_SERVER_CERT` and `WOODPECKER_SERVER_KEY` as an alternative to using a reverse proxy for TLS termination. ([#4541](https://github.com/woodpecker-ci/woodpecker/pull/4541))
 
 - The filename of the CLI binary changed for DEB and RPM packages, it is now called `woodpecker-cli` instead of `woodpecker`.
 
 ### Admin-facing migrations
 
+#### Updated tokens
+
+The Webhook tokens have been changed for enhanced security and therefore existing repositories need to be updated using the `Repair all` button in the admin settings ([#4013]https://github.com/woodpecker-ci/woodpecker/pull/4013).
+
 #### Image tags
 
 - The `latest` tag has been dropped to avoid accidental major version upgrades.
   A dedicated semver tag specification must be used, i.e., either a fixed version (like `v3.0.0`) or a rolling tag (e.g. `v3.0` or `v3`).
-
-- Git is now the only officially supported SCM.
-  No others were supported previously, but the existence of the env var `CI_REPO_SCM` indicated that others might be.
-  The env var has now been removed including unused code associated with it.
 
 - Previously, some (official) plugins were granted the `privileged` option by default to allow simplified usage.
   To streamline this process and enhance security transparency, no plugin is granted the `privileged` options by default anymore.
@@ -173,6 +179,10 @@ The following restructuring was done to achieve a more consistent grouping:
   Image pull secrets must now be set explicitly via env var `WOODPECKER_BACKEND_K8S_PULL_SECRET_NAMES` ([#4005](https://github.com/woodpecker-ci/woodpecker/pull/4005))
 
 - Webhook signatures now use the `rfc9421` protocol
+
+- Git is now the only officially supported SCM.
+  No others were supported previously, but the existence of the env var `CI_REPO_SCM` indicated that others might be.
+  The env var has now been removed including unused code associated with it. ([#4346](https://github.com/woodpecker-ci/woodpecker/pull/4346))
 
 #### Rootless images
 
