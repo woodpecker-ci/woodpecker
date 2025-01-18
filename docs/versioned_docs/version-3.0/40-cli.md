@@ -16,6 +16,9 @@ woodpecker-cli
 [--nocolor]
 [--pretty]
 [--server|-s]=[value]
+[--skip-verify]
+[--socks-proxy-off]
+[--socks-proxy]=[value]
 [--token|-t]=[value]
 ```
 
@@ -44,6 +47,12 @@ woodpecker-cli [GLOBAL OPTIONS] [command [COMMAND OPTIONS]] [ARGUMENTS...]
 **--pretty**: enable pretty-printed debug output
 
 **--server, -s**="": server address
+
+**--skip-verify**: skip ssl verification
+
+**--socks-proxy**="": socks proxy address
+
+**--socks-proxy-off**: socks proxy ignored
 
 **--token, -t**="": server auth token
 
@@ -261,11 +270,11 @@ execute a local pipeline
 
 **--metadata-file**="": path to pipeline metadata file (normally downloaded from UI). Parameters can be adjusted by applying additional cli flags
 
-**--netrc-machine**="":
+**--netrc-machine**="": 
 
-**--netrc-password**="":
+**--netrc-password**="": 
 
-**--netrc-username**="":
+**--netrc-username**="": 
 
 **--network**="": external networks (default: [])
 
@@ -336,8 +345,6 @@ execute a local pipeline
 **--repo-private**="": Set the metadata environment variable "CI_REPO_PRIVATE".
 
 **--repo-remote-id**="": Set the metadata environment variable "CI_REPO_REMOTE_ID".
-
-**--repo-scm**="": Set the metadata environment variable "CI_REPO_SCM". (default: git)
 
 **--repo-trusted-network**: Set the metadata environment variable "CI_REPO_TRUSTED_NETWORK".
 
