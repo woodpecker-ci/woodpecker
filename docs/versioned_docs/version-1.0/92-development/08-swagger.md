@@ -61,7 +61,7 @@ make generate-swagger
 ##### update the Markdown in the ./docs folder
 
 ```shell
-make docs
+make generate-docs
 ```
 
 ##### auto-format swagger related godoc

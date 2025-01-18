@@ -15,11 +15,13 @@
 package datastore
 
 import (
+	"errors"
 	"fmt"
 
 	"xorm.io/xorm"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
 )
 
 func (s storage) GetUser(id int64) (*model.User, error) {
@@ -62,17 +64,18 @@ func (s storage) CreateUser(user *model.User) error {
 		IsUser: true,
 	}
 
-	existingOrg, err := s.OrgFindByName(org.Name)
-	if err != nil {
+	existingOrg, err := s.orgFindByName(sess, org.Name)
+	if err != nil && !errors.Is(err, types.RecordNotExist) {
 		return fmt.Errorf("failed to check if org exists: %w", err)
 	}
 
-	if existingOrg != nil {
-		if existingOrg.Name == user.Login {
-			err = s.OrgUpdate(org)
-			if err != nil {
-				return fmt.Errorf("failed to update existing org: %w", err)
-			}
+	if !errors.Is(err, types.RecordNotExist) {
+		org = existingOrg
+		org.IsUser = true
+		org.Name = user.Login
+		err = s.orgUpdate(sess, org)
+		if err != nil {
+			return fmt.Errorf("failed to update existing org: %w", err)
 		}
 	} else {
 		err = s.orgCreate(org, sess)
@@ -99,15 +102,15 @@ func (s storage) DeleteUser(user *model.User) error {
 	}
 
 	if err := s.orgDelete(sess, user.OrgID); err != nil {
-		return err
+		return fmt.Errorf("failed to delete org: %w", err)
 	}
 
 	if err := wrapDelete(sess.ID(user.ID).Delete(new(model.User))); err != nil {
-		return err
+		return fmt.Errorf("failed to delete user: %w", err)
 	}
 
 	if _, err := sess.Where("user_id = ?", user.ID).Delete(new(model.Perm)); err != nil {
-		return err
+		return fmt.Errorf("failed to delete perms: %w", err)
 	}
 
 	return sess.Commit()

@@ -55,7 +55,7 @@ make generate-swagger
 ```
 
 ```bash title="update the Markdown in the ./docs folder"
-make docs
+make generate-docs
 ```
 
 ```bash title="auto-format swagger related godoc"
