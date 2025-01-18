@@ -79,9 +79,9 @@ However, secrets are not included in the pipeline metadata and must be passed ma
 
 ## Fine grained control over approvals options
 
-New approval options for Pull Request workflows are available.
-By default, Pull Requests pipelines from forks are not started automatically but require explicit approval.
-This avoids potentially malicious PRs which could expose secrets or execute other unwanted tasks without the repo owner noticing it.
+Woodpecker 3.0.0 introduces enhanced approval options. Beyond requiring approval for all pipeline events, you can now configure it specifically for all pull requests or only for pull requests originating from forks. 
+
+By default, public repositories will now mandate approval for pull requests from forks. This helps prevent potentially malicious PRs from exposing secrets or performing unauthorized actions without the repository owner's awareness.
 
 ![screenshot of new approval-requirements options](approval-requirements.png)
 
