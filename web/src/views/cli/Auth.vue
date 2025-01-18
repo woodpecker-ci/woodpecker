@@ -1,7 +1,7 @@
 <template>
-  <div class="flex flex-col gap-4 m-auto">
+  <div class="m-auto flex flex-col gap-4">
     <div class="text-center text-wp-text-100">
-      <WoodpeckerLogo preserveAspectRatio="xMinYMin slice" class="w-32 m-auto mb-8" />
+      <WoodpeckerLogo preserveAspectRatio="xMinYMin slice" class="m-auto mb-8 w-32" />
       <template v-if="state === 'confirm'">
         <h1 class="text-4xl font-bold">{{ $t('login_to_cli') }}</h1>
         <p class="text-2xl">{{ $t('login_to_cli_description') }}</p>
@@ -11,16 +11,16 @@
         <p class="text-2xl">{{ $t('return_to_cli') }}</p>
       </template>
       <template v-else-if="state === 'failed'">
-        <h1 class="text-4xl font-bold mt-4">{{ $t('cli_login_failed') }}</h1>
+        <h1 class="mt-4 text-4xl font-bold">{{ $t('cli_login_failed') }}</h1>
         <p class="text-2xl">{{ $t('return_to_cli') }}</p>
       </template>
       <template v-else-if="state === 'denied'">
-        <h1 class="text-4xl font-bold mt-4">{{ $t('cli_login_denied') }}</h1>
+        <h1 class="mt-4 text-4xl font-bold">{{ $t('cli_login_denied') }}</h1>
         <p class="text-2xl">{{ $t('return_to_cli') }}</p>
       </template>
     </div>
 
-    <div v-if="state === 'confirm'" class="flex gap-4 justify-center">
+    <div v-if="state === 'confirm'" class="flex justify-center gap-4">
       <Button :text="$t('login_to_cli')" color="green" @click="sendToken(false)" />
       <Button :text="$t('abort')" color="red" @click="abortLogin" />
     </div>

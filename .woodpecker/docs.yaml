@@ -38,16 +38,19 @@ when:
 
 steps:
   prettier:
-    image: docker.io/woodpeckerci/plugin-prettier:1.0.0
+    image: docker.io/woodpeckerci/plugin-prettier:next
     settings:
       version: 3.3.3
+      plugins:
+        - 'prettier-plugin-tailwindcss'
+        - '@ianvs/prettier-plugin-sort-imports'
     when:
       - event: pull_request
 
   build-cli:
     image: *golang_image
     commands:
-      - make docs
+      - make generate-docs
     when:
       - path: *when_path
         event: [tag, pull_request, push]
@@ -66,7 +69,7 @@ steps:
       - event: manual
 
   deploy-preview:
-    image: docker.io/woodpeckerci/plugin-surge-preview:1.3.3
+    image: docker.io/woodpeckerci/plugin-surge-preview:1.3.4
     settings:
       path: 'docs/build/'
       surge_token:

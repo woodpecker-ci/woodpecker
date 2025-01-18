@@ -18,13 +18,13 @@
     </template>
 
     <template #headerActions>
-      <div class="flex md:flex-row flex-col md:justify-between md:items-center gap-2 min-w-0">
-        <div class="flex content-start gap-2 min-w-0">
+      <div class="flex w-full items-center justify-between gap-2">
+        <div class="flex min-w-0 content-start gap-2">
           <PipelineStatusIcon :status="pipeline.status" class="flex flex-shrink-0" />
           <span class="flex-shrink-0 text-center">{{ $t('repo.pipeline.pipeline', { pipelineId }) }}</span>
           <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
-          <span class="md:inline-block hidden">-</span>
-          <span class="min-w-0 whitespace-nowrap overflow-ellipsis overflow-hidden" :title="message">{{
+          <span class="hidden md:inline-block">-</span>
+          <span class="min-w-0 overflow-hidden overflow-ellipsis whitespace-nowrap" :title="message">{{
             shortMessage
           }}</span>
         </div>
@@ -61,12 +61,12 @@
     </template>
 
     <template #tabActions>
-      <div class="flex gap-x-4">
-        <div class="flex flex-shrink-0 items-center space-x-1" :title="$t('repo.pipeline.created', { created })">
+      <div class="flex flex-wrap gap-4 md:flex-nowrap">
+        <div class="flex flex-shrink-0 items-center gap-2" :title="$t('repo.pipeline.created', { created })">
           <Icon name="since" />
           <span>{{ since }}</span>
         </div>
-        <div class="flex flex-shrink-0 items-center space-x-1" :title="$t('repo.pipeline.duration')">
+        <div class="flex flex-shrink-0 items-center gap-2" :title="$t('repo.pipeline.duration')">
           <Icon name="duration" />
           <span>{{ duration }}</span>
         </div>
@@ -77,7 +77,7 @@
     <Tab
       v-if="pipeline.errors && pipeline.errors.length > 0"
       :to="{ name: 'repo-pipeline-errors' }"
-      icon="attention"
+      icon="alert"
       :title="pipeline.errors.some((e) => !e.is_warning) ? $t('repo.pipeline.errors') : $t('repo.pipeline.warnings')"
       :count="pipeline.errors?.length"
       :icon-class="pipeline.errors.some((e) => !e.is_warning) ? 'text-wp-error-100' : 'text-wp-state-warn-100'"

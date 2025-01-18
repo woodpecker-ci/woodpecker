@@ -4,25 +4,25 @@
       <ListItem
         v-for="org in orgs"
         :key="org.id"
-        class="items-center gap-2 !bg-wp-background-200 !dark:bg-wp-background-100"
+        class="items-center gap-2 !bg-wp-background-200 dark:!bg-wp-background-100"
       >
         <span>{{ org.name }}</span>
         <IconButton
           icon="chevron-right"
           :title="$t('admin.settings.orgs.view')"
-          class="ml-auto w-8 h-8"
+          class="ml-auto h-8 w-8"
           :to="{ name: 'org', params: { orgId: org.id } }"
         />
         <IconButton
-          icon="settings"
+          icon="settings-outline"
           :title="$t('admin.settings.orgs.org_settings')"
-          class="w-8 h-8"
+          class="h-8 w-8"
           :to="{ name: 'org-settings', params: { orgId: org.id } }"
         />
         <IconButton
           icon="trash"
           :title="$t('admin.settings.orgs.delete_org')"
-          class="ml-2 w-8 h-8 hover:text-wp-error-100"
+          class="ml-2 h-8 w-8 hover:text-wp-error-100"
           :is-loading="isDeleting"
           @click="deleteOrg(org)"
         />

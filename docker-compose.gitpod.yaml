@@ -13,7 +13,7 @@ services:
       - pgsql:/var/lib/postgresql/data/pgdata
 
   gitea:
-    image: gitea/gitea:1.22
+    image: gitea/gitea:1.23
     ports:
       - 3000:3000
     volumes:

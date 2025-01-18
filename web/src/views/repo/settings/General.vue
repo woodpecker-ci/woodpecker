@@ -22,7 +22,7 @@
         :label="$t('repo.settings.general.netrc_only_trusted.netrc_only_trusted')"
         docs-url="docs/usage/project-settings#custom-trusted-clone-plugins"
       >
-        <span class="ml-1 mb-2 text-wp-text-alt-100">{{ $t('repo.settings.general.netrc_only_trusted.desc') }}</span>
+        <span class="mb-2 ml-1 text-wp-text-alt-100">{{ $t('repo.settings.general.netrc_only_trusted.desc') }}</span>
 
         <div class="flex flex-col gap-2">
           <div v-for="image in repoSettings.netrc_trusted" :key="image" class="flex gap-2">

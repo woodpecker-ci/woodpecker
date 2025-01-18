@@ -1,7 +1,7 @@
 <template>
-  <span class="text-xs font-medium inline-flex">
+  <span class="inline-flex text-xs font-medium">
     <span
-      class="pl-2 pr-1 py-0.5 bg-wp-state-neutral-100 text-gray-300 border-2 border-wp-state-neutral-100 rounded-l-full flex items-center"
+      class="flex items-center rounded-l-full border-2 border-wp-state-neutral-100 bg-wp-state-neutral-100 py-0.5 pl-2 pr-1 text-gray-300"
       :class="{
         'rounded-r-full pr-2': value === undefined,
       }"
@@ -10,7 +10,7 @@
     </span>
     <span
       v-if="value !== undefined"
-      class="pl-1 pr-2 py-0.5 border-2 border-wp-state-neutral-100 rounded-r-full flex items-center"
+      class="flex items-center rounded-r-full border-2 border-wp-state-neutral-100 py-0.5 pl-1 pr-2"
     >
       {{ value }}
     </span>

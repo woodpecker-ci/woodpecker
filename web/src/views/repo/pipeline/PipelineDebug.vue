@@ -10,9 +10,9 @@
       </div>
     </Panel>
   </template>
-  <div v-else class="flex justify-center items-center h-full">
-    <div class="bg-wp-error-100 dark:bg-wp-error-200 shadow-lg p-8 rounded-lg text-center">
-      <p class="font-bold text-2xl text-white">{{ $t('repo.pipeline.debug.no_permission') }}</p>
+  <div v-else class="flex h-full items-center justify-center">
+    <div class="rounded-lg bg-wp-error-100 p-8 text-center shadow-lg dark:bg-wp-error-200">
+      <p class="text-2xl font-bold text-white">{{ $t('repo.pipeline.debug.no_permission') }}</p>
     </div>
   </div>
 </template>
@@ -41,7 +41,7 @@ const isLoading = ref(false);
 const metadataFileName = computed(
   () => `${repo?.value.full_name.replaceAll('/', '-')}-pipeline-${pipeline?.value.number}-metadata.json`,
 );
-const cliExecWithMetadata = computed(() => `# woodpecker exec --metadata-file ${metadataFileName.value}`);
+const cliExecWithMetadata = computed(() => `# woodpecker-cli exec --metadata-file ${metadataFileName.value}`);
 
 async function downloadMetadata() {
   if (!repo?.value || !pipeline?.value || !repoPermissions?.value?.push) {

@@ -1,9 +1,9 @@
 <template>
   <Settings :title="$t('info')">
     <div class="flex flex-col items-center gap-4">
-      <WoodpeckerLogo class="w-32 h-32 fill-wp-text-200" />
+      <WoodpeckerLogo class="h-32 w-32 fill-wp-text-200" />
 
-      <i18n-t keypath="running_version" tag="p" class="text-xl text-center">
+      <i18n-t keypath="running_version" tag="p" class="text-center text-xl">
         <span class="font-bold">{{ version?.current }}</span>
       </i18n-t>
 

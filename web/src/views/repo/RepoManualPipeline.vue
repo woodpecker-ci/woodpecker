@@ -6,7 +6,7 @@
         <SelectField :id="id" v-model="payload.branch" :options="branches" required />
       </InputField>
       <InputField v-slot="{ id }" :label="$t('repo.manual_pipeline.variables.title')">
-        <span class="text-sm text-wp-text-alt-100 mb-2">{{ $t('repo.manual_pipeline.variables.desc') }}</span>
+        <span class="mb-2 text-sm text-wp-text-alt-100">{{ $t('repo.manual_pipeline.variables.desc') }}</span>
         <KeyValueEditor
           :id="id"
           v-model="payload.variables"

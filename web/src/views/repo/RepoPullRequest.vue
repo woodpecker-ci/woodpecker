@@ -1,6 +1,6 @@
 <template>
-  <div class="flex w-full mb-4 justify-center">
-    <span class="text-wp-text-100 text-xl">{{ $t('repo.pipeline.pipelines_for_pr', { index: pullRequest }) }}</span>
+  <div class="mb-4 flex w-full justify-center">
+    <span class="text-xl text-wp-text-100">{{ $t('repo.pipeline.pipelines_for_pr', { index: pullRequest }) }}</span>
   </div>
   <PipelineList :pipelines="pipelines" :repo="repo" />
 </template>
