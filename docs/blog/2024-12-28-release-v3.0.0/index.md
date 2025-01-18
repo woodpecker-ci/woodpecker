@@ -43,7 +43,7 @@ Woodpecker now supports running rootless images by adjusting the entrypoints and
 
 In addition, all images published by Woodpecker (Server, Agent, CLI) now use a non-privileged user (`woodpecker` with UID and GID 1000) by default.
 
-:::note
+:::info
 The agent image must remain rootful by default to be able to mount the Docker socket when Woodpecker is used with the `docker` backend.
 The helm chart will start to use a non-privileged user by utilizing `securityContext`.
 Running a completely rootless agent with the `docker` backend may be possible by using a rootless docker daemon.
@@ -64,7 +64,7 @@ With Woodpecker 3.0 one has the option to rerun failed pipelines locally by star
 
 ![debug-pipelines-option](debug-pipelines.png)
 
-:::note
+:::info
 In order to use this feature, all required pipeline elements must be passed, e.g. secrets.
 However, secrets are not included in the pipeline metadata and must be passed manually to the local execution call.
 :::
@@ -84,7 +84,7 @@ Beforehand, there was an issue where the logs were not deleted and were kept in 
 
 You might want to check [#4572](https://github.com/woodpecker-ci/woodpecker/pull/4572) for more details including a snippet how to delete orphaned entries of a Postgres DB.
 
-:::note
+:::info
 There is no option yet to auto-delete old pipeline logs after a specific time or event.
 Please follow [#1068](https://github.com/woodpecker-ci/woodpecker/issues/1068) for future updates.
 :::
