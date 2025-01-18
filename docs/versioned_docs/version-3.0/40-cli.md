@@ -16,9 +16,6 @@ woodpecker-cli
 [--nocolor]
 [--pretty]
 [--server|-s]=[value]
-[--skip-verify]
-[--socks-proxy-off]
-[--socks-proxy]=[value]
 [--token|-t]=[value]
 ```
 
@@ -47,12 +44,6 @@ woodpecker-cli [GLOBAL OPTIONS] [command [COMMAND OPTIONS]] [ARGUMENTS...]
 **--pretty**: enable pretty-printed debug output
 
 **--server, -s**="": server address
-
-**--skip-verify**: skip ssl verification
-
-**--socks-proxy**="": socks proxy address
-
-**--socks-proxy-off**: socks proxy ignored
 
 **--token, -t**="": server auth token
 
@@ -236,7 +227,7 @@ execute a local pipeline
 
 **--backend-k8s-volume-size**="": backend k8s volume size (default 10G) (default: 10G)
 
-**--backend-local-temp-dir**="": set a different temp dir to clone workflows into (default: /var/folders/kw/d28j8m6n6y3f8dxc8gs2bqjw0000gn/T/)
+**--backend-local-temp-dir**="": set a different temp dir to clone workflows into (default: /tmp)
 
 **--backend-no-proxy**="": if set, pass the environment variable down as "NO_PROXY" to steps
 
@@ -270,11 +261,11 @@ execute a local pipeline
 
 **--metadata-file**="": path to pipeline metadata file (normally downloaded from UI). Parameters can be adjusted by applying additional cli flags
 
-**--netrc-machine**="":
+**--netrc-machine**="": 
 
-**--netrc-password**="":
+**--netrc-password**="": 
 
-**--netrc-username**="":
+**--netrc-username**="": 
 
 **--network**="": external networks (default: [])
 
@@ -345,6 +336,8 @@ execute a local pipeline
 **--repo-private**="": Set the metadata environment variable "CI_REPO_PRIVATE".
 
 **--repo-remote-id**="": Set the metadata environment variable "CI_REPO_REMOTE_ID".
+
+**--repo-scm**="": Set the metadata environment variable "CI_REPO_SCM". (default: git)
 
 **--repo-trusted-network**: Set the metadata environment variable "CI_REPO_TRUSTED_NETWORK".
 
