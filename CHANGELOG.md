@@ -1,5 +1,11 @@
 # Changelog
 
+## [3.0.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.1) - 2025-01-19
+
+### 📦️ Dependency
+
+- chore(deps): update dependency vitest to v3 [[#4736](https://github.com/woodpecker-ci/woodpecker/pull/4736)]
+
 ## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2025-01-18
 
 ### ❤️ Thanks to all contributors! ❤️
