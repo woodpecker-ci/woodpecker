@@ -2,6 +2,14 @@
 
 ## [3.0.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.1) - 2025-01-19
 
+### ❤️ Thanks to all contributors! ❤️
+
+@qwerty287
+
+### 🐛 Bug Fixes
+
+- Fix package configs [[#4741](https://github.com/woodpecker-ci/woodpecker/pull/4741)]
+
 ### 📦️ Dependency
 
 - fix(deps): update dependency simple-icons to v14.3.0 [[#4739](https://github.com/woodpecker-ci/woodpecker/pull/4739)]
