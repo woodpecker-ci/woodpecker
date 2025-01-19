@@ -4,6 +4,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update dependency simple-icons to v14.3.0 [[#4739](https://github.com/woodpecker-ci/woodpecker/pull/4739)]
 - chore(deps): update dependency vitest to v3 [[#4736](https://github.com/woodpecker-ci/woodpecker/pull/4736)]
 
 ## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2025-01-18
