@@ -18,6 +18,7 @@
 
 ### Misc
 
+- fix minor tag creation for server scratch image [[#4748](https://github.com/woodpecker-ci/woodpecker/pull/4748)]
 - use v3 woodpecker libs [[#4742](https://github.com/woodpecker-ci/woodpecker/pull/4742)]
 
 ## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2025-01-18
