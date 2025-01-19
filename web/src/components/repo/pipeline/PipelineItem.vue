@@ -23,7 +23,7 @@
         <img v-else class="w-6 rounded-md" :src="pipeline.author_avatar" />
       </div>
 
-      <div class="grid-row-2 grid w-full min-w-0 items-center md:mx-4 md:w-auto">
+      <div class="flex flex-col w-full min-w-0 md:mx-4 md:w-auto gap-y-2 justify-center">
         <div>
           <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
           <span class="md:display-unset hidden text-wp-text-alt-100">#{{ pipeline.number }}</span>
