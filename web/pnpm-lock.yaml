@@ -70,7 +70,7 @@ importers:
         version: 7.6.3
       simple-icons:
         specifier: ^14.1.0
-        version: 14.2.0
+        version: 14.3.0
       tailwindcss:
         specifier: ^3.4.17
         version: 3.4.17(ts-node@10.9.2(@types/node@22.10.7)(typescript@5.7.3))
@@ -2779,8 +2779,8 @@ packages:
     resolution: {integrity: sha512-bzyZ1e88w9O1iNJbKnOlvYTrWPDl46O1bG0D3XInv+9tkPrxrN8jUUTiFlDkkmKWgn1M6CfIA13SuGqOa9Korw==}
     engines: {node: '>=14'}
 
-  simple-icons@14.2.0:
-    resolution: {integrity: sha512-89TddGlUh9Ent3ochwjRKzyb4BpaLnfVUYLcY3K0g7Rt91++c7kDAZU1lH15NH2g9WTlmja9Pr3w6+Tjsoyxug==}
+  simple-icons@14.3.0:
+    resolution: {integrity: sha512-GXWVF/UBkR04Hg3qcoEOHzI9ZNedXPhcphWraWRCJAenkG6Vsf5ycmVFDX90OK+5oeg86M5tYqBNS4npgG7/5g==}
     engines: {node: '>=0.12.18'}
 
   sisteransi@1.0.5:
@@ -6052,7 +6052,7 @@ snapshots:
 
   signal-exit@4.1.0: {}
 
-  simple-icons@14.2.0: {}
+  simple-icons@14.3.0: {}
 
   sisteransi@1.0.5: {}
 
