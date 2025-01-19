@@ -4,10 +4,11 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@pat-s, @qwerty287
+@pat-s, @qwerty287, @xoxys
 
 ### 🐛 Bug Fixes
 
+- Add missing error message for org_access_denied [[#4744](https://github.com/woodpecker-ci/woodpecker/pull/4744)]
 - Fix package configs [[#4741](https://github.com/woodpecker-ci/woodpecker/pull/4741)]
 
 ### 📦️ Dependency
