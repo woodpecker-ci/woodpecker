@@ -105,10 +105,9 @@ There is no option yet to auto-delete old pipeline logs after a specific time or
 Please follow [#1068](https://github.com/woodpecker-ci/woodpecker/issues/1068) for future updates.
 :::
 
-## Migration to 5-char CRON syntax
+## Migration to standard Linux CRON syntax
 
-The underlying CRON package was changed to one that now uses the (more common) 5-char CRON syntax.
-Users needs to actively updated their CRON entries, otherwise existing pipelines will error during execution.
+CRON definitions now follow standard Linux syntax without seconds. An automatic migration will attempt to update your settings - ensure the update completes successfully.
 
 ## Known Issues
 
