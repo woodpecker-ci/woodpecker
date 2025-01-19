@@ -8,6 +8,8 @@
 
 ### 🐛 Bug Fixes
 
+- Fix sql identifier escaping in datastore feed [[#4746](https://github.com/woodpecker-ci/woodpecker/pull/4746)]
+- Fix log folder permissions [[#4749](https://github.com/woodpecker-ci/woodpecker/pull/4749)]
 - Add missing error message for org_access_denied [[#4744](https://github.com/woodpecker-ci/woodpecker/pull/4744)]
 - Fix package configs [[#4741](https://github.com/woodpecker-ci/woodpecker/pull/4741)]
 
