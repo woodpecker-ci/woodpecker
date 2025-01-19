@@ -69,7 +69,7 @@
     "vite": "^6.0.7",
     "vite-plugin-prismjs": "^0.0.11",
     "vite-svg-loader": "^5.1.0",
-    "vitest": "^2.1.8",
+    "vitest": "^3.0.0",
     "vue-tsc": "^2.2.0"
   },
   "pnpm": {
