@@ -48,7 +48,7 @@
                     "custom_labels": "Benutzerdefinierte Labels"
                 }
             },
-            "not_allowed": "Du darfst nicht auf die Server-Einstellungen zugreifen.",
+            "not_allowed": "Du darfst nicht auf die Server-Einstellungen zugreifen",
             "orgs": {
                 "delete_confirm": "Möchtest du diese Organisation wirklich löschen? Das wird auch alle Repositorys löschen, die dieser Organisation gehören.",
                 "delete_org": "Organisation löschen",
@@ -61,7 +61,7 @@
             },
             "queue": {
                 "agent": "Agent",
-                "desc": "Aufgaben, die darauf warten, von Agenten ausgeführt zu werden",
+                "desc": "Aufgaben, die darauf warten, von Agenten ausgeführt zu werden.",
                 "pause": "Pausieren",
                 "paused": "Warteschlange wurde pausiert",
                 "queue": "Warteschlange",
@@ -96,7 +96,7 @@
                 "add": "Geheimnis hinzufügen",
                 "created": "Globales Geheimnis erstellt",
                 "deleted": "Globales Geheimnis gelöscht",
-                "desc": "Globale Geheimnisse können an Pipelineschritte aller Repositorys als Umgebungsvariablen übergeben werden.",
+                "desc": "Globale Geheimnisse können in Pipelines in allen Repositorys genutzt werden.",
                 "events": {
                     "events": "Verfügbar für folgende Ereignisse",
                     "pr_warning": "Bitte sei vorsichtig mit dieser Option, da eine böswillige Person über einen Pull-Request deine Geheimnisse erhalten könnte."
@@ -128,7 +128,7 @@
                 "delete_confirm": "Möchtest du diesen Benutzer wirklich löschen? Das wird auch alle Repositorys löschen, die diesem Benutzer gehören.",
                 "delete_user": "Benutzer löschen",
                 "deleted": "Benutzer gelöscht",
-                "desc": "Auf diesem Server registrierte Benutzer",
+                "desc": "Auf diesem Server registrierte Benutzer.",
                 "edit_user": "Benutzer bearbeiten",
                 "email": "E-Mail",
                 "login": "Benutzername",
@@ -169,7 +169,7 @@
                 "add": "Geheimnis hinzufügen",
                 "created": "Organisations-Geheimnis erstellt",
                 "deleted": "Organisations-Geheimnis gelöscht",
-                "desc": "Organisation-Geheimnisse können an alle Pipelineschritte in Repositorys der Organisation als Umgebungsvariablen übergeben werden.",
+                "desc": "Organisation-Geheimnisse können in allen Pipelines in Repositorys, die der Organisation gehören, genutzt werden.",
                 "events": {
                     "events": "Verfügbar für folgende Ereignisse",
                     "pr_warning": "Bitte sei vorsichtig mit dieser Option, da eine böswillige Person über einen Pull-Request deine Geheimnisse erhalten könnte."
@@ -204,8 +204,8 @@
         "add": "Repository hinzufügen",
         "branches": "Branches",
         "deploy_pipeline": {
-            "enter_target": "Zielumgebung des „Deployments“",
-            "title": "Ein „Deployment“-Event für die aktuelle Pipeline #{pipelineId} starten",
+            "enter_target": "Zielumgebung des Deployments",
+            "title": "Ein Deployment-Event für die aktuelle Pipeline #{pipelineId} starten",
             "trigger": "Deploy",
             "variables": {
                 "add": "Variable hinzufügen",
@@ -231,7 +231,7 @@
             "trigger": "Pipeline ausführen",
             "variables": {
                 "add": "Variable hinzufügen",
-                "desc": "Füge weitere Variablen für deine Pipeline hinzu. Vordefinierte Variablen mit demselben Namen werden überschrieben.",
+                "desc": "Füge weitere Variablen für deine Pipeline hinzu. Variablen mit demselben Namen werden überschrieben.",
                 "name": "Variablenname",
                 "title": "Zusätzliche Pipeline-Variablen",
                 "value": "Variablenwert",
@@ -247,8 +247,8 @@
                 "cancel_success": "Pipeline abgebrochen",
                 "canceled": "Dieser Schritt wurde abgebrochen.",
                 "deploy": "Deploy",
-                "log_auto_scroll": "Automatisches Folgen",
-                "log_auto_scroll_off": "Schalte automatisches Folgen aus",
+                "log_auto_scroll": "Automatisches Scrollen aktivieren",
+                "log_auto_scroll_off": "Automatisches Scrollen deaktivieren",
                 "log_download": "Herunterladen",
                 "restart": "Neustarten",
                 "restart_success": "Pipeline neu gestartet",
@@ -303,14 +303,14 @@
             "step_not_started": "Dieser Schritt hat noch nicht begonnen.",
             "tasks": "Vorgänge",
             "warnings": "Warnungen",
-            "we_got_some_errors": "Oh nein, es gab einige Fehler!",
-            "log_delete_confirm": "Möchtest du die Logs diesen Schrittes wirklich löschen?",
-            "log_delete_error": "Es gab einen Fehler beim Löschen der Logs des Schrittes",
+            "we_got_some_errors": "Oh nein, ein Fehler ist aufgetreten!",
+            "log_delete_confirm": "Möchtest du die Logs dieses Schrittes wirklich löschen?",
+            "log_delete_error": "Ein Fehler ist beim Löschen der Logs des Schrittes aufgetreten",
             "duration": "Pipeline-Dauer",
             "created": "Erstellt: {created}",
             "no_logs": "Keine Logs",
             "debug": {
-                "no_permission": "Du bist nicht berechtigt auf die Debug Informationen zuzugreifen.",
+                "no_permission": "Du bist nicht berechtigt, auf die Debug-Informationen zuzugreifen.",
                 "download_metadata": "Metadaten herunterladen",
                 "metadata_download_successful": "Die Metadaten wurden erfolgreich heruntergeladen",
                 "metadata_download_error": "Fehler beim Herunterladen der Metadaten",
@@ -324,7 +324,7 @@
             "actions": {
                 "actions": "Aktionen",
                 "delete": {
-                    "confirm": "Alle Daten sind nach dieser Aktion verloren!!!\n\nMöchtest du wirklich fortfahren?",
+                    "confirm": "Alle Daten sind nach dieser Aktion verloren!\n\nMöchtest du wirklich fortfahren?",
                     "delete": "Repository löschen",
                     "success": "Repository gelöscht"
                 },
@@ -380,15 +380,15 @@
             "general": {
                 "allow_pr": {
                     "allow": "Pull-Requests zulassen",
-                    "desc": "Pipelines für Pull-Requests erlauben."
+                    "desc": "Die Ausführung von Pipelines für Pull-Requests erlauben."
                 },
                 "cancel_prev": {
                     "cancel": "Ältere Pipelines abbrechen",
-                    "desc": "Bei ausgewählten Events werden laufende Pipelines desselben Ereignisses abgebrechen, bevor die neue Pipeline startet."
+                    "desc": "Bei ausgewählten Events werden laufende Pipelines desselben Ereignisses abgebrochen, bevor die neue Pipeline startet."
                 },
                 "general": "Allgemein",
                 "netrc_only_trusted": {
-                    "desc": "Hier gelistete Plugins erhalten Zugriff zu Netrc-Zugangsdaten, die genutzt werden können, um Repositorys von der Forge zu klonen oder zu pushen.",
+                    "desc": "Plugins, die Zugriff auf Netrc-Zugangsdaten erhalten, die genutzt werden können, um Repositorys von der Forge zu klonen oder zu pushen.",
                     "netrc_only_trusted": "Eigene vertrauenswürdige Plugins zum Klonen"
                 },
                 "pipeline_path": {
@@ -440,8 +440,8 @@
                     "visibility": "Sichtbarkeit des Projekts"
                 },
                 "allow_deploy": {
-                    "allow": "„Deployment“-Events erlauben",
-                    "desc": "„Deployments“ von erfolgreichen Pipelines erlauben. Alle Benutzer mit Push-Zugriff können diese auslösen, mit Vorsicht verwenden."
+                    "allow": "Deployment-Events erlauben",
+                    "desc": "Deployments von erfolgreichen Pipelines erlauben. Alle Benutzer mit Push-Zugriff können diese auslösen, mit Vorsicht verwenden."
                 }
             },
             "not_allowed": "Zugriff auf die Einstellungen dieses Repositorys nicht erlaubt",
@@ -490,12 +490,12 @@
             },
             "settings": "Einstellungen"
         },
-        "user_none": "Diese Organisation / dieser Benutzer hat noch keine Repositorys.",
+        "user_none": "Diese Organisation / dieser Benutzer hat noch keine Repositorys",
         "visibility": {
             "visibility": "Projektsichtbarkeit",
             "public": {
                 "public": "Öffentlich",
-                "desc": "Jeder Benutzer kann dein Projekt sehen, ohne eingeloggt zu sein."
+                "desc": "Jeder kann dein Projekt sehen, ohne eingeloggt zu sein."
             },
             "private": {
                 "private": "Privat",
@@ -555,7 +555,7 @@
                 "add": "Geheimnis hinzufügen",
                 "created": "Benutzer-Geheimnis erstellt",
                 "deleted": "Benutzer-Geheimnis gelöscht",
-                "desc": "Benutzer-Geheimnisse können an alle persönlichen Pipelineschritte als Umgebungsvariablen übergeben werden.",
+                "desc": "Benutzer-Geheimnisse können in allen Pipelines in Repositorys, die dem Benutzer gehören, genutzt werden.",
                 "events": {
                     "events": "Verfügbar für folgende Ereignisse",
                     "pr_warning": "Bitte sei vorsichtig mit dieser Option, da eine böswillige Person über einen Pull-Request deine Geheimnisse erhalten könnte."
@@ -603,7 +603,7 @@
     "return_to_cli": "Du kannst diesen Tab jetzt schließen und zur CLI zurückkehren.",
     "secrets": {
         "secrets": "Geheimnisse",
-        "desc": "Geheimnisse können als Umgebungsvariablen an einzelne Pipelineschritte übergeben werden.",
+        "desc": "Geheimnisse können in allen Pipelines des Repositorys genutzt werden.",
         "none": "Es gibt noch keine Geheimnisse.",
         "add": "Geheimnis hinzufügen",
         "save": "Geheimnis speichern",
@@ -620,7 +620,8 @@
         },
         "events": {
             "events": "Verfügbar bei den folgenden Ereignissen",
-            "pr_warning": "Bitte sei vorsichtig mit dieser Option: Eine böswillige Person könnte über einen Pull-Request deine Geheimnisse erhalten."
+            "pr_warning": "Bitte sei vorsichtig mit dieser Option: Eine böswillige Person könnte über einen Pull-Request deine Geheimnisse erhalten.",
+            "warning": "Geheimnisse in Pull-Requests zu erlauben könnte dazu führen, dass ein böswilliger Akteur diese mit einem Pull-Request stiehlt."
         },
         "plugins_only": "Nur für Plugins verfügbar",
         "edit": "Geheimnis bearbeiten",
@@ -632,7 +633,7 @@
     },
     "settings": "Einstellungen",
     "oauth_error": "Fehler bei der Authentifizierung mit OAuth-Anbieter",
-    "internal_error": "Ein interner Fehler ist aufgetreten",
+    "internal_error": "Interner Fehler aufgetreten",
     "registration_closed": "Die Registrierung ist geschlossen",
     "access_denied": "Du darfst nicht auf diese Instanz zugreifen",
     "registries": {
