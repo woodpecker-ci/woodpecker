@@ -19,6 +19,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update golang-packages [[#4750](https://github.com/woodpecker-ci/woodpecker/pull/4750)]
 - fix(deps): update dependency simple-icons to v14.3.0 [[#4739](https://github.com/woodpecker-ci/woodpecker/pull/4739)]
 - chore(deps): update dependency vitest to v3 [[#4736](https://github.com/woodpecker-ci/woodpecker/pull/4736)]
 
