@@ -10,7 +10,10 @@
 
     <Transition name="fade" mode="out-in">
       <div v-if="search === '' && repos.length > 0" class="grid gap-8">
-        <div v-if="reposLastAccess.length > 0 && repos.length > 4" class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-2">
+        <div
+          v-if="reposLastAccess.length > 0 && repos.length > 4"
+          class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-2"
+        >
           <RepoItem v-for="repo in reposLastAccess" :key="repo.id" :repo="repo" />
         </div>
 
