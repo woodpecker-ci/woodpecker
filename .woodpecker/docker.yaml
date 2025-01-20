@@ -185,7 +185,7 @@ steps:
       repo: *publish_repos_server
       dockerfile: docker/Dockerfile.server.multiarch.rootless
       platforms: *platforms_server
-      tag: ['${CI_COMMIT_TAG%%.*}', '${CI_COMMIT_TAG%.*}-alpine', '${CI_COMMIT_TAG}']
+      tag: ['${CI_COMMIT_TAG%%.*}', '${CI_COMMIT_TAG%.*}', '${CI_COMMIT_TAG}']
       logins: *publish_logins
     when: &when-release
       event: tag
