@@ -6,16 +6,17 @@
 
 @pat-s, @qwerty287, @xoxys
 
-### 📚 Documentation
-
-- chore(deps): lock file maintenance [[#4751](https://github.com/woodpecker-ci/woodpecker/pull/4751)]
-
 ### 🐛 Bug Fixes
 
+- Only show visited repos and hide at all if less than 4 repos [[#4753](https://github.com/woodpecker-ci/woodpecker/pull/4753)]
 - Fix sql identifier escaping in datastore feed [[#4746](https://github.com/woodpecker-ci/woodpecker/pull/4746)]
 - Fix log folder permissions [[#4749](https://github.com/woodpecker-ci/woodpecker/pull/4749)]
 - Add missing error message for org_access_denied [[#4744](https://github.com/woodpecker-ci/woodpecker/pull/4744)]
 - Fix package configs [[#4741](https://github.com/woodpecker-ci/woodpecker/pull/4741)]
+
+### 📚 Documentation
+
+- chore(deps): lock file maintenance [[#4751](https://github.com/woodpecker-ci/woodpecker/pull/4751)]
 
 ### 📦️ Dependency
 
