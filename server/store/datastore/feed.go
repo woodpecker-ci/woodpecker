@@ -15,12 +15,15 @@
 package datastore
 
 import (
+	"fmt"
+
 	"xorm.io/builder"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
-var feedItemSelect = `repos.id as repo_id,
+func (s storage) getFeedSelect() string {
+	const feedTemplate = `repos.id as repo_id,
 pipelines.id as pipeline_id,
 pipelines.number as pipeline_number,
 pipelines.event as pipeline_event,
@@ -28,7 +31,7 @@ pipelines.status as pipeline_status,
 pipelines.created as pipeline_created,
 pipelines.started as pipeline_started,
 pipelines.finished as pipeline_finished,
-'pipelines.commit' as pipeline_commit,
+pipelines.%s as pipeline_commit,
 pipelines.branch as pipeline_branch,
 pipelines.ref as pipeline_ref,
 pipelines.refspec as pipeline_refspec,
@@ -38,10 +41,13 @@ pipelines.author as pipeline_author,
 pipelines.email as pipeline_email,
 pipelines.avatar as pipeline_avatar`
 
+	return fmt.Sprintf(feedTemplate, s.quoteIdentifier("commit"))
+}
+
 func (s storage) GetPipelineQueue() ([]*model.Feed, error) {
 	feed := make([]*model.Feed, 0, perPage)
 	err := s.engine.Table("pipelines").
-		Select(feedItemSelect).
+		Select(s.getFeedSelect()).
 		Join("INNER", "repos", "pipelines.repo_id = repos.id").
 		In("pipelines.status", model.StatusPending, model.StatusRunning).
 		Find(&feed)
@@ -51,7 +57,7 @@ func (s storage) GetPipelineQueue() ([]*model.Feed, error) {
 func (s storage) UserFeed(user *model.User) ([]*model.Feed, error) {
 	feed := make([]*model.Feed, 0, perPage)
 	err := s.engine.Table("repos").
-		Select(feedItemSelect).
+		Select(s.getFeedSelect()).
 		Join("INNER", "perms", "repos.id = perms.repo_id").
 		Join("INNER", "pipelines", "repos.id = pipelines.repo_id").
 		Where(userPushOrAdminCondition(user.ID)).
@@ -66,7 +72,7 @@ func (s storage) RepoListLatest(user *model.User) ([]*model.Feed, error) {
 	feed := make([]*model.Feed, 0, perPage)
 
 	err := s.engine.Table("repos").
-		Select(feedItemSelect).
+		Select(s.getFeedSelect()).
 		Join("INNER", "perms", "repos.id = perms.repo_id").
 		Join("LEFT", "pipelines", "pipelines.id = "+`(
 			SELECT pipelines.id FROM pipelines

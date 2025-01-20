@@ -29,7 +29,7 @@ func NewLogStore(base string) (log.Service, error) {
 		return nil, fmt.Errorf("file storage base path is required")
 	}
 	if _, err := os.Stat(base); err != nil && os.IsNotExist(err) {
-		err = os.MkdirAll(base, 0o600)
+		err = os.MkdirAll(base, 0o700)
 		if err != nil {
 			return nil, err
 		}

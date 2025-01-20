@@ -50,7 +50,7 @@ steps:
   build-cli:
     image: *golang_image
     commands:
-      - make docs
+      - make generate-docs
     when:
       - path: *when_path
         event: [tag, pull_request, push]
@@ -69,7 +69,7 @@ steps:
       - event: manual
 
   deploy-preview:
-    image: docker.io/woodpeckerci/plugin-surge-preview:1.3.3
+    image: docker.io/woodpeckerci/plugin-surge-preview:1.3.4
     settings:
       path: 'docs/build/'
       surge_token:

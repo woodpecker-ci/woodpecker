@@ -36,6 +36,6 @@ services:
     image: *trivy_plugin
     settings:
       service: true
-      db-repository: docker.io/aquasec/trivy-db:2
+      db-repository: mirror.gcr.io/aquasec/trivy-db:2
     ports:
       - 10000
