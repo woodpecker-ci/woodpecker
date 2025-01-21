@@ -1,5 +1,15 @@
 # Changelog
 
+## [3.0.2](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.2) - 2025-01-21
+
+### ❤️ Thanks to all contributors! ❤️
+
+@cduchenoy
+
+### 📚 Documentation
+
+- Add git basic changelog [[#4755](https://github.com/woodpecker-ci/woodpecker/pull/4755)]
+
 ## [3.0.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.1) - 2025-01-20
 
 ### ❤️ Thanks to all contributors! ❤️
