@@ -678,5 +678,6 @@
         "pull_requests": "Alle Pull-Requests",
         "all_events": "Alle Ereignisse von der Forge",
         "desc": "Verhindere, dass bösartige Pipelines Geheimnisse preisgeben oder schädliche Aufgaben ausführen, indem du diese vor der Ausführung genehmigst."
-    }
+    },
+    "org_access_denied": "Zugriff auf diese Organisation nicht erlaubt"
 }
