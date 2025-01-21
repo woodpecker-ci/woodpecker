@@ -10,6 +10,10 @@
 
 - Add git basic changelog [[#4755](https://github.com/woodpecker-ci/woodpecker/pull/4755)]
 
+### 📦️ Dependency
+
+- chore(deps): update dependency vite to v6.0.9 [security] [[#4757](https://github.com/woodpecker-ci/woodpecker/pull/4757)]
+
 ## [3.0.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.1) - 2025-01-20
 
 ### ❤️ Thanks to all contributors! ❤️
