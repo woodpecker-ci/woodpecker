@@ -247,8 +247,8 @@
                 "cancel_success": "Pipeline abgebrochen",
                 "canceled": "Dieser Schritt wurde abgebrochen.",
                 "deploy": "Deploy",
-                "log_auto_scroll": "Automatisches Folgen",
-                "log_auto_scroll_off": "Schalte automatisches Folgen aus",
+                "log_auto_scroll": "Automatisches Scrollen aktivieren",
+                "log_auto_scroll_off": "Automatisches Scrollen deaktivieren",
                 "log_download": "Herunterladen",
                 "restart": "Neustarten",
                 "restart_success": "Pipeline neu gestartet",
@@ -304,8 +304,8 @@
             "tasks": "Vorgänge",
             "warnings": "Warnungen",
             "we_got_some_errors": "Oh nein, ein Fehler ist aufgetreten!",
-            "log_delete_confirm": "Möchtest du die Logs diesen Schrittes wirklich löschen?",
-            "log_delete_error": "Es gab einen Fehler beim Löschen der Logs des Schrittes",
+            "log_delete_confirm": "Möchtest du die Logs dieses Schrittes wirklich löschen?",
+            "log_delete_error": "Ein Fehler ist beim Löschen der Logs des Schrittes aufgetreten",
             "duration": "Pipeline-Dauer",
             "created": "Erstellt: {created}",
             "no_logs": "Keine Logs",
@@ -324,7 +324,7 @@
             "actions": {
                 "actions": "Aktionen",
                 "delete": {
-                    "confirm": "Alle Daten sind nach dieser Aktion verloren!!!\n\nMöchtest du wirklich fortfahren?",
+                    "confirm": "Alle Daten sind nach dieser Aktion verloren!\n\nMöchtest du wirklich fortfahren?",
                     "delete": "Repository löschen",
                     "success": "Repository gelöscht"
                 },
@@ -384,11 +384,11 @@
                 },
                 "cancel_prev": {
                     "cancel": "Ältere Pipelines abbrechen",
-                    "desc": "Bei ausgewählten Events werden laufende Pipelines desselben Ereignisses abgebrechen, bevor die neue Pipeline startet."
+                    "desc": "Bei ausgewählten Events werden laufende Pipelines desselben Ereignisses abgebrochen, bevor die neue Pipeline startet."
                 },
                 "general": "Allgemein",
                 "netrc_only_trusted": {
-                    "desc": "Hier gelistete Plugins erhalten Zugriff zu Netrc-Zugangsdaten, die genutzt werden können, um Repositorys von der Forge zu klonen oder zu pushen.",
+                    "desc": "Plugins, die Zugriff auf Netrc-Zugangsdaten erhalten, die genutzt werden können, um Repositorys von der Forge zu klonen oder zu pushen.",
                     "netrc_only_trusted": "Eigene vertrauenswürdige Plugins zum Klonen"
                 },
                 "pipeline_path": {
@@ -441,7 +441,7 @@
                 },
                 "allow_deploy": {
                     "allow": "Deployment-Events erlauben",
-                    "desc": "„Deployments“ von erfolgreichen Pipelines erlauben. Alle Benutzer mit Push-Zugriff können diese auslösen, mit Vorsicht verwenden."
+                    "desc": "Deployments von erfolgreichen Pipelines erlauben. Alle Benutzer mit Push-Zugriff können diese auslösen, mit Vorsicht verwenden."
                 }
             },
             "not_allowed": "Zugriff auf die Einstellungen dieses Repositorys nicht erlaubt",
@@ -678,5 +678,6 @@
         "pull_requests": "Alle Pull-Requests",
         "all_events": "Alle Ereignisse von der Forge",
         "desc": "Verhindere, dass bösartige Pipelines Geheimnisse preisgeben oder schädliche Aufgaben ausführen, indem du diese vor der Ausführung genehmigst."
-    }
+    },
+    "org_access_denied": "Zugriff auf diese Organisation nicht erlaubt"
 }

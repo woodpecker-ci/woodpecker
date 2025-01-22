@@ -26,12 +26,14 @@ export default function useRepos() {
   }
 
   function sortReposByLastAccess(repos: Repo[]): Repo[] {
-    return repos.sort((a, b) => {
-      const aLastAccess = lastAccess.value.get(a.id) ?? 0;
-      const bLastAccess = lastAccess.value.get(b.id) ?? 0;
+    return repos
+      .filter((r) => lastAccess.value.get(r.id) !== undefined)
+      .sort((a, b) => {
+        const aLastAccess = lastAccess.value.get(a.id)!;
+        const bLastAccess = lastAccess.value.get(b.id)!;
 
-      return bLastAccess - aLastAccess;
-    });
+        return bLastAccess - aLastAccess;
+      });
   }
 
   function sortReposByLastActivity(repos: Repo[]): Repo[] {

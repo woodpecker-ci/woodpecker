@@ -485,6 +485,7 @@
   "internal_error": "Internal error occurred",
   "registration_closed": "The registration is closed",
   "access_denied": "You are not allowed to access this instance",
+  "org_access_denied": "You are not allowed to access this organization",
   "invalid_state": "The OAuth state is invalid",
   "require_approval": {
     "desc": "Prevent malicious pipelines from exposing secrets or running harmful tasks by approving them before execution.",

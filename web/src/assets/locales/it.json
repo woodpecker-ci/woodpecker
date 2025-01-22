@@ -252,7 +252,7 @@
                 "download_metadata": "Download metadati",
                 "metadata_download_error": "Errore durante il download dei metadati",
                 "metadata_download_successful": "Metadati scaricati correttamente",
-                "no_permission": "Non hai il permesso di accedere alle informazioni di diagnostica.",
+                "no_permission": "Non hai il permesso di accedere alle informazioni di diagnostica",
                 "metadata_exec_title": "Riesegui pipeline localmente",
                 "metadata_exec_desc": "Scarica i metadati di questa pipeline per eseguirla in locale. In questo modo è possibile risolvere i problemi e testare le modifiche prima di eseguirne il commit. 'woodpecker-cli' deve essere installato localmente, alla stessa versione del Server Woodpecker."
             }
@@ -568,5 +568,6 @@
         "pull_requests": "Tutte le richieste di modifica",
         "all_events": "Tutti gli eventi del forge",
         "none_desc": "Ogni evento attiva le pipeline, incluse le richieste di modifica. Questa impostazione può essere pericolosa ed è consigliata solo per le istanze private."
-    }
+    },
+    "org_access_denied": "Non sei autorizzato ad accedere a questa organizzazione"
 }

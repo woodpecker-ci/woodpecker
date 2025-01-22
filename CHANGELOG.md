@@ -1,5 +1,34 @@
 # Changelog
 
+## [3.0.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.1) - 2025-01-20
+
+### ❤️ Thanks to all contributors! ❤️
+
+@pat-s, @qwerty287, @xoxys
+
+### 🐛 Bug Fixes
+
+- Only show visited repos and hide at all if less than 4 repos [[#4753](https://github.com/woodpecker-ci/woodpecker/pull/4753)]
+- Fix sql identifier escaping in datastore feed [[#4746](https://github.com/woodpecker-ci/woodpecker/pull/4746)]
+- Fix log folder permissions [[#4749](https://github.com/woodpecker-ci/woodpecker/pull/4749)]
+- Add missing error message for org_access_denied [[#4744](https://github.com/woodpecker-ci/woodpecker/pull/4744)]
+- Fix package configs [[#4741](https://github.com/woodpecker-ci/woodpecker/pull/4741)]
+
+### 📚 Documentation
+
+- chore(deps): lock file maintenance [[#4751](https://github.com/woodpecker-ci/woodpecker/pull/4751)]
+
+### 📦️ Dependency
+
+- fix(deps): update golang-packages [[#4750](https://github.com/woodpecker-ci/woodpecker/pull/4750)]
+- fix(deps): update dependency simple-icons to v14.3.0 [[#4739](https://github.com/woodpecker-ci/woodpecker/pull/4739)]
+- chore(deps): update dependency vitest to v3 [[#4736](https://github.com/woodpecker-ci/woodpecker/pull/4736)]
+
+### Misc
+
+- fix minor tag creation for server scratch image [[#4748](https://github.com/woodpecker-ci/woodpecker/pull/4748)]
+- use v3 woodpecker libs [[#4742](https://github.com/woodpecker-ci/woodpecker/pull/4742)]
+
 ## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2025-01-18
 
 ### ❤️ Thanks to all contributors! ❤️
