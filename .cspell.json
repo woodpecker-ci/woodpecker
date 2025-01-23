@@ -201,6 +201,7 @@
     "typecheck",
     "Typeflag",
     "unplugin",
+    "unsanitize",
     "Upsert",
     "urfave",
     "usecase",
