@@ -29,7 +29,6 @@ func (s storage) OrgCreate(org *model.Org) error {
 
 func (s storage) orgCreate(org *model.Org, sess *xorm.Session) error {
 	// sanitize
-	org.Name = strings.ToLower(org.Name)
 	if org.Name == "" {
 		return fmt.Errorf("org name is empty")
 	}
@@ -84,7 +83,6 @@ func (s storage) OrgFindByName(name string) (*model.Org, error) {
 
 func (s storage) orgFindByName(sess *xorm.Session, name string) (*model.Org, error) {
 	// sanitize
-	name = strings.ToLower(name)
 	org := new(model.Org)
 	return org, wrapGet(sess.Where("name = ?", name).Get(org))
 }
