@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@Levy-Tal, @cduchenoy
+@Levy-Tal, @cduchenoy, @damuzhi0810
 
 ### 📈 Enhancement
 
@@ -22,6 +22,10 @@
 - chore(deps): update docker.io/woodpeckerci/plugin-ready-release-go docker tag to v3.1.3 [[#4764](https://github.com/woodpecker-ci/woodpecker/pull/4764)]
 - fix(deps): update docker to v27.5.1+incompatible [[#4761](https://github.com/woodpecker-ci/woodpecker/pull/4761)]
 - chore(deps): update dependency vite to v6.0.9 [security] [[#4757](https://github.com/woodpecker-ci/woodpecker/pull/4757)]
+
+### Misc
+
+- chore: fix some function names in comment [[#4769](https://github.com/woodpecker-ci/woodpecker/pull/4769)]
 
 ## [3.0.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.1) - 2025-01-20
 
