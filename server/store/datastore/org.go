@@ -27,7 +27,6 @@ func (s storage) OrgCreate(org *model.Org) error {
 }
 
 func (s storage) orgCreate(org *model.Org, sess *xorm.Session) error {
-
 	if org.Name == "" {
 		return fmt.Errorf("org name is empty")
 	}
