@@ -47,31 +47,31 @@ type Repo struct {
 	UserID  int64 `json:"-"                               xorm:"INDEX 'user_id'"`
 	ForgeID int64 `json:"forge_id,omitempty"              xorm:"forge_id"`
 	// ForgeRemoteID is the unique identifier for the repository on the forge.
-	ForgeRemoteID                ForgeRemoteID  `json:"forge_remote_id"                 xorm:"forge_remote_id"`
-	OrgID                        int64          `json:"org_id"                          xorm:"INDEX 'org_id'"`
-	Owner                        string         `json:"owner"                           xorm:"UNIQUE(name) 'owner'"`
-	Name                         string         `json:"name"                            xorm:"UNIQUE(name) 'name'"`
-	FullName                     string         `json:"full_name"                       xorm:"UNIQUE 'full_name'"`
-	Avatar                       string         `json:"avatar_url,omitempty"            xorm:"varchar(500) 'avatar'"`
-	ForgeURL                     string         `json:"forge_url,omitempty"             xorm:"varchar(1000) 'forge_url'"`
-	Clone                        string         `json:"clone_url,omitempty"             xorm:"varchar(1000) 'clone'"`
-	CloneSSH                     string         `json:"clone_url_ssh"                   xorm:"varchar(1000) 'clone_ssh'"`
-	Branch                       string         `json:"default_branch,omitempty"        xorm:"varchar(500) 'branch'"`
-	PREnabled                    bool           `json:"pr_enabled"                      xorm:"DEFAULT TRUE 'pr_enabled'"`
-	Timeout                      int64          `json:"timeout,omitempty"               xorm:"timeout"`
-	Visibility                   RepoVisibility `json:"visibility"                      xorm:"varchar(10) 'visibility'"`
-	IsSCMPrivate                 bool           `json:"private"                         xorm:"private"`
+	ForgeRemoteID                ForgeRemoteID        `json:"forge_remote_id"                 xorm:"forge_remote_id"`
+	OrgID                        int64                `json:"org_id"                          xorm:"INDEX 'org_id'"`
+	Owner                        string               `json:"owner"                           xorm:"UNIQUE(name) 'owner'"`
+	Name                         string               `json:"name"                            xorm:"UNIQUE(name) 'name'"`
+	FullName                     string               `json:"full_name"                       xorm:"UNIQUE 'full_name'"`
+	Avatar                       string               `json:"avatar_url,omitempty"            xorm:"varchar(500) 'avatar'"`
+	ForgeURL                     string               `json:"forge_url,omitempty"             xorm:"varchar(1000) 'forge_url'"`
+	Clone                        string               `json:"clone_url,omitempty"             xorm:"varchar(1000) 'clone'"`
+	CloneSSH                     string               `json:"clone_url_ssh"                   xorm:"varchar(1000) 'clone_ssh'"`
+	Branch                       string               `json:"default_branch,omitempty"        xorm:"varchar(500) 'branch'"`
+	PREnabled                    bool                 `json:"pr_enabled"                      xorm:"DEFAULT TRUE 'pr_enabled'"`
+	Timeout                      int64                `json:"timeout,omitempty"               xorm:"timeout"`
+	Visibility                   RepoVisibility       `json:"visibility"                      xorm:"varchar(10) 'visibility'"`
+	IsSCMPrivate                 bool                 `json:"private"                         xorm:"private"`
 	Trusted                      TrustedConfiguration `json:"trusted"                         xorm:"json 'trusted'"`
-	RequireApproval              ApprovalMode   `json:"require_approval"                xorm:"varchar(50) require_approval"`
-	ApprovalAllowedUsers         []string       `json:"approval_allowed_users"          xorm:"json approval_allowed_users"`
-	IsActive                     bool           `json:"active"                          xorm:"active"`
-	AllowPull                    bool           `json:"allow_pr"                        xorm:"allow_pr"`
-	AllowDeploy                  bool           `json:"allow_deploy"                    xorm:"allow_deploy"`
-	Config                       string         `json:"config_file"                     xorm:"varchar(500) 'config_path'"`
-	Hash                         string         `json:"-"                               xorm:"varchar(500) 'hash'"`
-	Perm                         *Perm          `json:"-"                               xorm:"-"`
-	CancelPreviousPipelineEvents []WebhookEvent `json:"cancel_previous_pipeline_events" xorm:"json 'cancel_previous_pipeline_events'"`
-	NetrcTrustedPlugins          []string       `json:"netrc_trusted" xorm:"json 'netrc_trusted'"`
+	RequireApproval              ApprovalMode         `json:"require_approval"                xorm:"varchar(50) require_approval"`
+	ApprovalAllowedUsers         []string             `json:"approval_allowed_users"          xorm:"json approval_allowed_users"`
+	IsActive                     bool                 `json:"active"                          xorm:"active"`
+	AllowPull                    bool                 `json:"allow_pr"                        xorm:"allow_pr"`
+	AllowDeploy                  bool                 `json:"allow_deploy"                    xorm:"allow_deploy"`
+	Config                       string               `json:"config_file"                     xorm:"varchar(500) 'config_path'"`
+	Hash                         string               `json:"-"                               xorm:"varchar(500) 'hash'"`
+	Perm                         *Perm                `json:"-"                               xorm:"-"`
+	CancelPreviousPipelineEvents []WebhookEvent       `json:"cancel_previous_pipeline_events" xorm:"json 'cancel_previous_pipeline_events'"`
+	NetrcTrustedPlugins          []string             `json:"netrc_trusted" xorm:"json 'netrc_trusted'"`
 } //	@name Repo
 
 // TableName return database table name for xorm.
@@ -128,9 +128,9 @@ func (r *Repo) Update(from *Repo) {
 
 // RepoPatch represents a repository patch object.
 type RepoPatch struct {
-<<<<<<< HEAD
 	Config                       *string                    `json:"config_file,omitempty"`
 	RequireApproval              *string                    `json:"require_approval,omitempty"`
+	ApprovalAllowedUsers         *[]string                  `json:"approval_allowed_users,omitempty"`
 	Timeout                      *int64                     `json:"timeout,omitempty"`
 	Visibility                   *string                    `json:"visibility,omitempty"`
 	AllowPull                    *bool                      `json:"allow_pr,omitempty"`
@@ -138,17 +138,6 @@ type RepoPatch struct {
 	CancelPreviousPipelineEvents *[]WebhookEvent            `json:"cancel_previous_pipeline_events"`
 	NetrcTrusted                 *[]string                  `json:"netrc_trusted"`
 	Trusted                      *TrustedConfigurationPatch `json:"trusted"`
-=======
-	Config                       *string         `json:"config_file,omitempty"`
-	RequireApproval              *string         `json:"require_approval,omitempty"`
-	ApprovalAllowedUsers         *[]string       `json:"approval_allowed_users,omitempty"`
-	Timeout                      *int64          `json:"timeout,omitempty"`
-	Visibility                   *string         `json:"visibility,omitempty"`
-	AllowPull                    *bool           `json:"allow_pr,omitempty"`
-	AllowDeploy                  *bool           `json:"allow_deploy,omitempty"`
-	CancelPreviousPipelineEvents *[]WebhookEvent `json:"cancel_previous_pipeline_events"`
-	NetrcTrusted                 *[]string       `json:"netrc_trusted"`
->>>>>>> 00110de7c (Add allow list for approvals)
 } //	@name RepoPatch
 
 type ForgeRemoteID string
