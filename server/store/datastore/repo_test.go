@@ -113,11 +113,7 @@ func TestGetRepoName(t *testing.T) {
 
 	// case-insensitive
 	getrepo, err = store.GetRepoName("Bradrydzewski/test")
-	assert.NoError(t, err)
-	assert.Equal(t, repo.ID, getrepo.ID)
-	assert.Equal(t, repo.UserID, getrepo.UserID)
-	assert.Equal(t, repo.Owner, getrepo.Owner)
-	assert.Equal(t, repo.Name, getrepo.Name)
+	assert.Error(t, err)
 }
 
 func TestRepoList(t *testing.T) {

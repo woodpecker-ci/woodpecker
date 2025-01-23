@@ -59,7 +59,3 @@ var unSanitizeOrgAndUserNames = xormigrate.Migration{
 		return nil
 	},
 }
-
-var Migrations = []*xormigrate.Migration{
-	&unSanitizeOrgAndUserNames,
-}

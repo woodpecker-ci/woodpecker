@@ -28,12 +28,24 @@ func (s storage) OrgCreate(org *model.Org) error {
 }
 
 func (s storage) orgCreate(org *model.Org, sess *xorm.Session) error {
-	// sanitize
+	// Get all organizations to check for conflicts (this should actually be impossible in the forge but better double-check)
+	orgs, err := s.OrgList(nil)
+	if err != nil {
+		return err
+	}
+
+	for _, existingOrg := range orgs {
+		if strings.EqualFold(existingOrg.Name, org.Name) {
+			return fmt.Errorf("organization name already exists")
+		}
+	}
+
 	if org.Name == "" {
 		return fmt.Errorf("org name is empty")
 	}
+
 	// insert
-	_, err := sess.Insert(org)
+	_, err = sess.Insert(org)
 	return err
 }
 
@@ -47,8 +59,6 @@ func (s storage) OrgUpdate(org *model.Org) error {
 }
 
 func (s storage) orgUpdate(sess *xorm.Session, org *model.Org) error {
-	// sanitize
-	org.Name = strings.ToLower(org.Name)
 	// update
 	_, err := sess.ID(org.ID).AllCols().Update(org)
 	return err

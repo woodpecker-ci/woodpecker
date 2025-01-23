@@ -17,7 +17,6 @@ package datastore
 import (
 	"errors"
 	"fmt"
-	"strings"
 
 	"xorm.io/xorm"
 
@@ -59,7 +58,6 @@ func (s storage) GetUserCount() (int64, error) {
 }
 
 func (s storage) CreateUser(user *model.User) error {
-	user.Login = strings.ToLower(user.Login)
 	sess := s.engine.NewSession()
 	org := &model.Org{
 		Name:   user.Login,
