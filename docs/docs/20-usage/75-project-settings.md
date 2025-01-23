@@ -75,9 +75,9 @@ Set them to a comma-separated list of repo IDs.
 
 If you set your project to trusted, a pipeline step and by this the underlying containers gets access to escalated capabilities:
 
-- volumes: (volumes)[./70-volumes.md] <!-- undocumented: devices, tmpfs -->
-- network: (DNS)[./20-workflow-syntax.md#dns] <!-- undocumented: extra hosts, network mode -->
-- security: (privileged)[./20-workflow-syntax.md#privileged-mode]
+- volumes: [volumes](./70-volumes.md) <!-- undocumented: devices, tmpfs -->
+- network: [DNS](./20-workflow-syntax.md#dns) <!-- undocumented: extra hosts, network mode -->
+- security: [privileged](./20-workflow-syntax.md#privileged-mode)
 
 In addition to these general options, there might be specific backend options that require you to have a trusted repo.
 
