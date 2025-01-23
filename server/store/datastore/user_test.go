@@ -102,13 +102,13 @@ func TestCreateUserWithExistingOrg(t *testing.T) {
 	existingOrg := &model.Org{
 		ForgeID: 1,
 		IsUser:  true,
-		Name:    "existingorg",
+		Name:    "existingOrg",
 		Private: false,
 	}
 
 	err := store.OrgCreate(existingOrg)
 	assert.NoError(t, err)
-	assert.EqualValues(t, "existingorg", existingOrg.Name)
+	assert.EqualValues(t, "existingOrg", existingOrg.Name)
 
 	// Create a new user with the same name as the existing organization
 	newUser := &model.User{
