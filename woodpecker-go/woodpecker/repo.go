@@ -319,7 +319,7 @@ func (c *client) Pipeline(repoID, pipeline int64) (*Pipeline, error) {
 	return out, err
 }
 
-// Pipeline returns the latest repository pipeline.
+// PipelineLast returns the latest repository pipeline.
 func (c *client) PipelineLast(repoID int64, opt PipelineLastOptions) (*Pipeline, error) {
 	out := new(Pipeline)
 	uri, _ := url.Parse(fmt.Sprintf(pathPipeline, c.addr, repoID, "latest"))
