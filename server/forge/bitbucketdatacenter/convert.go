@@ -122,8 +122,7 @@ func convertPullRequestEvent(ev *bb.PullRequestEvent, baseURL string) *model.Pip
 		Author:      ev.Actor.Name,
 		Ref:         fmt.Sprintf("refs/pull-requests/%d/from", ev.PullRequest.ID),
 		PullRequest: convertPullRequest(&ev.PullRequest),
-		// TODO should link to the Pr
-		ForgeURL: fmt.Sprintf("%s/projects/%s/repos/%s/commits/%s", baseURL, ev.PullRequest.Source.Repository.Project.Key, ev.PullRequest.Source.Repository.Slug, ev.PullRequest.Source.Latest),
+		ForgeURL: fmt.Sprintf("%s/projects/%s/repos/%s/pull-requests/%d", baseURL, ev.PullRequest.Source.Repository.Project.Key, ev.PullRequest.Source.Repository.Slug, ev.PullRequest.ID),
 		Refspec:  fmt.Sprintf("%s:%s", ev.PullRequest.Source.DisplayID, ev.PullRequest.Target.DisplayID),
 	}
 
