@@ -16,6 +16,8 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update docker.io/mysql docker tag to v9.2.0 [[#4766](https://github.com/woodpecker-ci/woodpecker/pull/4766)]
+- fix(deps): update module github.com/hashicorp/go-plugin to v1.6.3 [[#4765](https://github.com/woodpecker-ci/woodpecker/pull/4765)]
 - chore(deps): update docker.io/woodpeckerci/plugin-ready-release-go docker tag to v3.1.3 [[#4764](https://github.com/woodpecker-ci/woodpecker/pull/4764)]
 - fix(deps): update docker to v27.5.1+incompatible [[#4761](https://github.com/woodpecker-ci/woodpecker/pull/4761)]
 - chore(deps): update dependency vite to v6.0.9 [security] [[#4757](https://github.com/woodpecker-ci/woodpecker/pull/4757)]
