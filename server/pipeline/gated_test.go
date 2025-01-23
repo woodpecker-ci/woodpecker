@@ -69,6 +69,18 @@ func TestSetGatedState(t *testing.T) {
 			},
 			expectBlocked: true,
 		},
+		{
+			name: "require approval for everything with allowed user",
+			repo: &model.Repo{
+				RequireApproval: model.RequireApprovalAllEvents,
+				ApprovalAllowedUsers: []string{"user"},
+			},
+			pipeline: &model.Pipeline{
+				Event: model.EventPush,
+				Author: "user",
+			},
+			expectBlocked: false,
+		},
 	}
 
 	for _, tc := range testCases {

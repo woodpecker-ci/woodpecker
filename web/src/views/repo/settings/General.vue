@@ -18,22 +18,26 @@
       </InputField>
 
       <InputField
-        v-slot="{ id }"
         :label="$t('repo.settings.general.netrc_only_trusted.netrc_only_trusted')"
         docs-url="docs/usage/project-settings#custom-trusted-clone-plugins"
       >
-        <span class="mb-2 ml-1 text-wp-text-alt-100">{{ $t('repo.settings.general.netrc_only_trusted.desc') }}</span>
-
-        <div class="flex flex-col gap-2">
-          <div v-for="image in repoSettings.netrc_trusted" :key="image" class="flex gap-2">
-            <TextField :id="id" :model-value="image" disabled />
-            <Button type="button" color="gray" start-icon="trash" @click="removeImage(image)" />
+        <template #default="{ id }">
+          <div class="flex flex-col gap-2">
+            <div v-for="image in repoSettings.netrc_trusted" :key="image" class="flex gap-2">
+              <TextField :id="id" :model-value="image" disabled />
+              <Button type="button" color="gray" start-icon="trash" @click="removeImage(image)" />
+            </div>
+            <div class="flex gap-2">
+              <TextField :id="id" v-model="newImage" @keydown.enter.prevent="addNewImage" />
+              <Button type="button" color="gray" start-icon="plus" @click="addNewImage" />
+            </div>
           </div>
-          <div class="flex gap-2">
-            <TextField :id="id" v-model="newImage" @keydown.enter.prevent="addNewImage" />
-            <Button type="button" color="gray" start-icon="plus" @click="addNewImage" />
-          </div>
-        </div>
+        </template>
+        <template #description>
+          <p class="text-sm">
+            {{ $t('repo.settings.general.netrc_only_trusted.desc') }}
+          </p>
+        </template>
       </InputField>
 
       <InputField
@@ -84,6 +88,29 @@
         <template #description>
           <p class="text-sm">
             {{ $t('require_approval.desc') }}
+          </p>
+        </template>
+      </InputField>
+
+      <InputField
+        v-if="repoSettings.require_approval !== RepoRequireApproval.None"
+        :label="$t('require_approval.allowed_users.allowed_users')"
+      >
+        <template #default="{ id }">
+          <div class="flex flex-col gap-2">
+            <div v-for="user in repoSettings.approval_allowed_users" :key="user" class="flex gap-2">
+              <TextField :id="id" :model-value="user" disabled />
+              <Button type="button" color="gray" start-icon="trash" @click="removeUser(user)" />
+            </div>
+            <div class="flex gap-2">
+              <TextField :id="id" v-model="newUser" @keydown.enter.prevent="addNewUser" />
+              <Button type="button" color="gray" start-icon="plus" @click="addNewUser" />
+            </div>
+          </div>
+        </template>
+        <template #description>
+          <p class="text-sm">
+            {{ $t('require_approval.allowed_users.desc') }}
           </p>
         </template>
       </InputField>
@@ -189,6 +216,7 @@ function loadRepoSettings() {
     visibility: repo.value.visibility,
     require_approval: repo.value.require_approval,
     trusted: repo.value.trusted,
+    approval_allowed_users: repo.value.approval_allowed_users || [],
     allow_pr: repo.value.allow_pr,
     allow_deploy: repo.value.allow_deploy,
     cancel_previous_pipeline_events: repo.value.cancel_previous_pipeline_events || [],
@@ -265,5 +293,21 @@ function removeImage(image: string) {
   }
 
   repoSettings.value.netrc_trusted = repoSettings.value.netrc_trusted.filter((i) => i !== image);
+}
+
+const newUser = ref('');
+function addNewUser() {
+  if (!newUser.value) {
+    return;
+  }
+  repoSettings.value?.approval_allowed_users.push(newUser.value);
+  newUser.value = '';
+}
+function removeUser(user: string) {
+  if (!repoSettings.value) {
+    throw new Error('Unexpected: repoSettings should be set');
+  }
+
+  repoSettings.value.approval_allowed_users = repoSettings.value.approval_allowed_users.filter((i) => i !== user);
 }
 </script>
