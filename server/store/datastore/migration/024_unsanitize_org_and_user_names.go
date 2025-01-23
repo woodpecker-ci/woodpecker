@@ -43,7 +43,7 @@ var unSanitizeOrgAndUserNames = xormigrate.Migration{
 			return fmt.Errorf("find all repos failed: %w", err)
 		}
 
-		for _, user := range us {
+		for _, user := range users {
 			userOrg := &org{}
 			_, err := sess.Where("name = ?", user.Login).Get(userOrg)
 			if err != nil {
