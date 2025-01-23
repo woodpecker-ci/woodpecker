@@ -134,7 +134,7 @@ func alterColumnDefault(sess *xorm.Session, table, column, defValue string) erro
 	dialect := sess.Engine().Dialect().URI().DBType
 	switch dialect {
 	case schemas.MYSQL:
-		sql := fmt.Sprintf("SHOW COLUMNS FROM `%s` WHERE lower(field) = '%s'", table, strings.ToLower(column))
+		sql := fmt.Sprintf("SHOW COLUMNS FROM `%s` WHERE lower(field) = '%s'", table, column)
 		res, err := sess.Query(sql)
 		if err != nil {
 			return err
@@ -170,7 +170,7 @@ func alterColumnNull(sess *xorm.Session, table, column string, null bool) error 
 	dialect := sess.Engine().Dialect().URI().DBType
 	switch dialect {
 	case schemas.MYSQL:
-		sql := fmt.Sprintf("SHOW COLUMNS FROM `%s` WHERE lower(field) = '%s'", table, strings.ToLower(column))
+		sql := fmt.Sprintf("SHOW COLUMNS FROM `%s` WHERE lower(field) = '%s'", table, column)
 		res, err := sess.Query(sql)
 		if err != nil {
 			return err
