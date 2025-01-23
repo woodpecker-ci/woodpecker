@@ -17,6 +17,7 @@ package datastore
 import (
 	"errors"
 	"fmt"
+	"strings"
 
 	"xorm.io/builder"
 	"xorm.io/xorm"
@@ -72,7 +73,7 @@ func (s storage) GetRepoName(fullName string) (*model.Repo, error) {
 
 func (s storage) getRepoName(e *xorm.Session, fullName string) (*model.Repo, error) {
 	repo := new(model.Repo)
-	return repo, wrapGet(e.Where("full_name = ?", fullName).Get(repo))
+	return repo, wrapGet(e.Where("LOWER(full_name) = ?", strings.ToLower(fullName)).Get(repo))
 }
 
 func (s storage) GetRepoCount() (int64, error) {
