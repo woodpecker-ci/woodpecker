@@ -38,7 +38,7 @@ var unSanitizeOrgAndUserNames = xormigrate.Migration{
 		}
 
 		// get all users
-		var us []*user
+		var users []*user
 		if err := sess.Find(&us); err != nil {
 			return fmt.Errorf("find all repos failed: %w", err)
 		}
