@@ -378,7 +378,7 @@ func (c *client) BranchHead(ctx context.Context, u *model.User, r *model.Repo, b
 	cm := commits[0]
 
 	return &model.Commit{
-		SHA:      cm.ID, // TODO check id or displayid?
+		SHA:      cm.ID,
 		ForgeURL: fmt.Sprintf("%s/commits/%s", r.ForgeURL, cm.ID),
 		Message:  cm.Message,
 		Author: model.CommitAuthor{
