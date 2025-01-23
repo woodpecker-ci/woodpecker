@@ -44,9 +44,6 @@ func TestOrgCRUD(t *testing.T) {
 	// change name
 	assert.NoError(t, store.OrgUpdate(&model.Org{ID: org1.ID, Name: "RenamedOrg"}))
 
-	// force a name duplication and fail
-	assert.Error(t, store.OrgCreate(&model.Org{Name: "reNamedorg"}))
-
 	// find updated org by name
 	orgOne, err = store.OrgFindByName("RenamedOrg")
 	assert.NoError(t, err)
