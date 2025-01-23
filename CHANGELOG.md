@@ -1,10 +1,14 @@
 # Changelog
 
-## [3.0.2](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.2) - 2025-01-23
+## [3.1.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.1.0) - 2025-01-23
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@cduchenoy
+@Levy-Tal, @cduchenoy
+
+### 📈 Enhancement
+
+- Add Git Ref To Build Status in BitbucketDatacenter [[#4724](https://github.com/woodpecker-ci/woodpecker/pull/4724)]
 
 ### 📚 Documentation
 
@@ -12,7 +16,7 @@
 
 ### 📦️ Dependency
 
-- fix(deps): update golang-packages to v27.5.1+incompatible [[#4761](https://github.com/woodpecker-ci/woodpecker/pull/4761)]
+- fix(deps): update docker to v27.5.1+incompatible [[#4761](https://github.com/woodpecker-ci/woodpecker/pull/4761)]
 - chore(deps): update dependency vite to v6.0.9 [security] [[#4757](https://github.com/woodpecker-ci/woodpecker/pull/4757)]
 
 ## [3.0.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.1) - 2025-01-20
