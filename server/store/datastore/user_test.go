@@ -120,7 +120,7 @@ func TestCreateUserWithExistingOrg(t *testing.T) {
 
 	updatedOrg, err := store.OrgGet(existingOrg.ID)
 	assert.NoError(t, err)
-	assert.Equal(t, "existingorg", updatedOrg.Name)
+	assert.Equal(t, "existingOrg", updatedOrg.Name)
 
 	newUser2 := &model.User{
 		Login: "new-user",
