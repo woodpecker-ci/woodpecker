@@ -36,6 +36,7 @@ func needsApproval(repo *model.Repo, pipeline *model.Pipeline) bool {
 	}
 
 	// skip if user is allowed
+        //  It's enough to check the username as the repo matches the forge of the pipeline already (no username clashes from different forges possible)
 	if slices.Contains(repo.ApprovalAllowedUsers, pipeline.Author) {
 		return false
 	}
