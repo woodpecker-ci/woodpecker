@@ -31,7 +31,8 @@ import (
 )
 
 const (
-	StepLabel            = "step"
+	StepLabelOld         = "step"
+	StepLabel            = "woodpecker-ci.org/step"
 	podPrefix            = "wp-"
 	defaultFSGroup int64 = 1000
 )
@@ -115,6 +116,7 @@ func podLabels(step *types.Step, config *config, options BackendOptions) (map[st
 	if step.Type == types.StepTypeService {
 		labels[ServiceLabel], _ = serviceName(step)
 	}
+	labels[StepLabelOld], err = stepLabel(step)
 	labels[StepLabel], err = stepLabel(step)
 	if err != nil {
 		return labels, err
