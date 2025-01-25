@@ -5,7 +5,7 @@
     target="_blank"
     class="cursor-pointer text-wp-link-100 hover:text-wp-link-200"
   >
-    <Icon name="question" class="!h-5 !w-5" />
+    <Icon name="question" class="h-5! w-5!" />
   </a>
 </template>
 

@@ -29,8 +29,8 @@
         <div v-if="version?.needsUpdate" class="absolute right-2 top-2 h-3 w-3 rounded-full bg-wp-error-100" />
       </IconButton>
 
-      <ActivePipelines v-if="user" class="navbar-icon !p-1.5" />
-      <IconButton v-if="user" :to="{ name: 'user' }" :title="$t('user.settings.settings')" class="navbar-icon !p-1.5">
+      <ActivePipelines v-if="user" class="navbar-icon p-1.5!" />
+      <IconButton v-if="user" :to="{ name: 'user' }" :title="$t('user.settings.settings')" class="navbar-icon p-1.5!">
         <img v-if="user && user.avatar_url" class="rounded-md" :src="`${user.avatar_url}`" />
       </IconButton>
       <Button v-else :text="$t('login')" :to="`/login?url=${route.fullPath}`" />

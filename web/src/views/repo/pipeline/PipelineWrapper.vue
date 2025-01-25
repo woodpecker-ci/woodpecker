@@ -20,11 +20,11 @@
     <template #headerActions>
       <div class="flex w-full items-center justify-between gap-2">
         <div class="flex min-w-0 content-start gap-2">
-          <PipelineStatusIcon :status="pipeline.status" class="flex flex-shrink-0" />
-          <span class="flex-shrink-0 text-center">{{ $t('repo.pipeline.pipeline', { pipelineId }) }}</span>
+          <PipelineStatusIcon :status="pipeline.status" class="flex shrink-0" />
+          <span class="shrink-0 text-center">{{ $t('repo.pipeline.pipeline', { pipelineId }) }}</span>
           <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
           <span class="hidden md:inline-block">-</span>
-          <span class="min-w-0 overflow-hidden overflow-ellipsis whitespace-nowrap" :title="message">{{
+          <span class="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap" :title="message">{{
             shortMessage
           }}</span>
         </div>
@@ -33,20 +33,20 @@
           <div class="flex content-start gap-x-2">
             <Button
               v-if="pipeline.status === 'pending' || pipeline.status === 'running'"
-              class="flex-shrink-0"
+              class="shrink-0"
               :text="$t('repo.pipeline.actions.cancel')"
               :is-loading="isCancelingPipeline"
               @click="cancelPipeline"
             />
             <Button
-              class="flex-shrink-0"
+              class="shrink-0"
               :text="$t('repo.pipeline.actions.restart')"
               :is-loading="isRestartingPipeline"
               @click="restartPipeline"
             />
             <Button
               v-if="pipeline.status === 'success' && repo.allow_deploy"
-              class="flex-shrink-0"
+              class="shrink-0"
               :text="$t('repo.pipeline.actions.deploy')"
               @click="showDeployPipelinePopup = true"
             />
@@ -62,11 +62,11 @@
 
     <template #tabActions>
       <div class="flex flex-wrap gap-4 md:flex-nowrap">
-        <div class="flex flex-shrink-0 items-center gap-2" :title="$t('repo.pipeline.created', { created })">
+        <div class="flex shrink-0 items-center gap-2" :title="$t('repo.pipeline.created', { created })">
           <Icon name="since" />
           <span>{{ since }}</span>
         </div>
-        <div class="flex flex-shrink-0 items-center gap-2" :title="$t('repo.pipeline.duration')">
+        <div class="flex shrink-0 items-center gap-2" :title="$t('repo.pipeline.duration')">
           <Icon name="duration" />
           <span>{{ duration }}</span>
         </div>

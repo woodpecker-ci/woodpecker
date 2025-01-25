@@ -1,7 +1,7 @@
 <template>
   <div v-if="pipeline" class="flex flex-col pt-10 md:pt-0">
     <div
-      class="code-box-log flex flex-grow flex-col overflow-hidden !p-0 shadow md:mt-0 md:!rounded-md"
+      class="code-box-log flex grow flex-col overflow-hidden p-0! shadow-sm md:mt-0 md:rounded-md!"
       @mouseover="showActions = true"
       @mouseleave="showActions = false"
     >
@@ -18,14 +18,14 @@
             v-if="step?.finished !== undefined && hasLogs"
             :is-loading="downloadInProgress"
             :title="$t('repo.pipeline.actions.log_download')"
-            class="hover:!bg-white hover:!bg-opacity-10"
+            class="hover:bg-white! hover:bg-opacity-10!"
             icon="download"
             @click="download"
           />
           <IconButton
             v-if="step?.finished !== undefined && hasLogs && hasPushPermission"
             :title="$t('repo.pipeline.actions.log_delete')"
-            class="hover:!bg-white hover:!bg-opacity-10"
+            class="hover:bg-white! hover:bg-opacity-10!"
             icon="trash"
             @click="deleteLogs"
           />
@@ -34,12 +34,12 @@
             :title="
               autoScroll ? $t('repo.pipeline.actions.log_auto_scroll_off') : $t('repo.pipeline.actions.log_auto_scroll')
             "
-            class="hover:!bg-white hover:!bg-opacity-10"
+            class="hover:bg-white! hover:bg-opacity-10!"
             :icon="autoScroll ? 'auto-scroll' : 'auto-scroll-off'"
             @click="autoScroll = !autoScroll"
           />
           <IconButton
-            class="hover:!bg-white hover:!bg-opacity-10 md:!hidden"
+            class="hover:bg-white! hover:bg-opacity-10! md:hidden!"
             icon="close"
             @click="$emit('update:step-id', null)"
           />
@@ -49,7 +49,7 @@
       <div
         v-show="hasLogs && loadedLogs && (log?.length || 0) > 0"
         ref="consoleElement"
-        class="grid w-full max-w-full flex-grow auto-rows-min grid-cols-[min-content,minmax(0,1fr),min-content] overflow-y-auto overflow-x-hidden p-4 text-xs md:text-sm"
+        class="grid w-full max-w-full grow auto-rows-min grid-cols-[min-content_minmax(0,1fr)_min-content] overflow-y-auto overflow-x-hidden p-4 text-xs md:text-sm"
       >
         <div v-for="line in log" :key="line.index" class="contents font-mono">
           <a
@@ -100,7 +100,7 @@
         v-if="step?.finished !== undefined"
         class="text-md flex w-full items-center bg-wp-code-100 p-4 font-bold text-wp-code-text-alt-100"
       >
-        <PipelineStatusIcon :status="step.state" class="!h-4 !w-4" />
+        <PipelineStatusIcon :status="step.state" class="h-4! w-4!" />
         <span v-if="step?.error" class="px-2">{{ step.error }}</span>
         <span v-else class="px-2">{{ $t('repo.pipeline.exit_code', { exitCode: step.exit_code }) }}</span>
       </div>

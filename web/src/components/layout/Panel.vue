@@ -1,6 +1,6 @@
 <template>
   <div
-    class="w-full overflow-hidden rounded-md border border-wp-background-400 bg-wp-background-100 shadow dark:bg-wp-background-200"
+    class="w-full overflow-hidden rounded-md border border-wp-background-400 bg-wp-background-100 shadow-sm dark:bg-wp-background-200"
   >
     <component
       :is="collapsable ? 'button' : 'div'"

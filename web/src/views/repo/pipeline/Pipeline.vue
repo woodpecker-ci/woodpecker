@@ -1,13 +1,13 @@
 <template>
-  <Container full-width class="md:min-h-xs flex flex-grow-0 flex-col md:flex-grow md:px-4">
-    <div class="flex min-h-0 w-full flex-grow flex-wrap-reverse md:flex-nowrap md:gap-4">
+  <Container full-width class="md:min-h-xs flex grow-0 flex-col md:grow md:px-4">
+    <div class="flex min-h-0 w-full grow flex-wrap-reverse md:flex-nowrap md:gap-4">
       <PipelineStepList
         v-model:selected-step-id="selectedStepId"
         :class="{ 'hidden md:flex': pipeline!.status === 'blocked' }"
         :pipeline="pipeline!"
       />
 
-      <div class="relative flex flex-grow basis-full items-start justify-center md:basis-auto">
+      <div class="relative flex grow basis-full items-start justify-center md:basis-auto">
         <div v-if="pipeline!.errors?.some((e) => !e.is_warning)" class="mb-4 w-full md:mb-auto">
           <Panel>
             <div class="flex flex-col items-center gap-4 text-center">

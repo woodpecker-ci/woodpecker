@@ -1,7 +1,7 @@
 <template>
   <IconButton
     :title="pipelineCount > 0 ? `${$t('pipeline_feed')} (${pipelineCount})` : $t('pipeline_feed')"
-    class="active-pipelines-toggle relative !p-1.5 text-current"
+    class="active-pipelines-toggle relative p-1.5! text-current"
     @click="toggle"
   >
     <div v-if="pipelineCount > 0" class="spinner" />

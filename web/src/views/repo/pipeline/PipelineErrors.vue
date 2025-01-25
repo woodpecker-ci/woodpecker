@@ -3,11 +3,11 @@
     <div class="flex flex-col gap-y-4">
       <template v-for="(error, _index) in pipeline!.errors" :key="_index">
         <div>
-          <div class="grid grid-cols-[minmax(10rem,auto),3fr]">
+          <div class="grid grid-cols-[minmax(10rem,auto)_3fr]">
             <span class="flex items-center gap-x-2">
               <Icon
                 name="alert"
-                class="my-1 flex-shrink-0"
+                class="my-1 shrink-0"
                 :class="{
                   'text-wp-state-warn-100': error.is_warning,
                   'text-wp-error-100': !error.is_warning,
@@ -35,7 +35,7 @@
             </span>
             <span v-else />
           </div>
-          <div class="col-start-2 grid grid-cols-[minmax(10rem,auto),4fr]">
+          <div class="col-start-2 grid grid-cols-[minmax(10rem,auto)_4fr]">
             <span />
             <span>
               <RenderMarkdown :content="error.message" />
