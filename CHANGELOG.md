@@ -1,21 +1,23 @@
 # Changelog
 
-## [3.1.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.1.0) - 2025-01-24
+## [3.1.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.1.0) - 2025-01-25
 
 ### ❤️ Thanks to all contributors! ❤️
 
 @Levy-Tal, @cduchenoy, @damuzhi0810
 
+### 📚 Documentation
+
+- fix(deps): update docs npm deps non-major [[#4774](https://github.com/woodpecker-ci/woodpecker/pull/4774)]
+- Add git basic changelog [[#4755](https://github.com/woodpecker-ci/woodpecker/pull/4755)]
+
 ### 📈 Enhancement
 
 - Add Git Ref To Build Status in BitbucketDatacenter [[#4724](https://github.com/woodpecker-ci/woodpecker/pull/4724)]
 
-### 📚 Documentation
-
-- Add git basic changelog [[#4755](https://github.com/woodpecker-ci/woodpecker/pull/4755)]
-
 ### 📦️ Dependency
 
+- fix(deps): update module google.golang.org/protobuf to v1.36.4 [[#4775](https://github.com/woodpecker-ci/woodpecker/pull/4775)]
 - fix(deps): update module google.golang.org/grpc to v1.70.0 [[#4770](https://github.com/woodpecker-ci/woodpecker/pull/4770)]
 - chore(deps): update docker.io/woodpeckerci/plugin-docker-buildx docker tag to v5.2.0 [[#4767](https://github.com/woodpecker-ci/woodpecker/pull/4767)]
 - chore(deps): update docker.io/mysql docker tag to v9.2.0 [[#4766](https://github.com/woodpecker-ci/woodpecker/pull/4766)]
