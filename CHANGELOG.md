@@ -17,6 +17,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update dependency @antfu/eslint-config to v4 [[#4779](https://github.com/woodpecker-ci/woodpecker/pull/4779)]
 - fix(deps): update web npm deps non-major [[#4777](https://github.com/woodpecker-ci/woodpecker/pull/4777)]
 - chore(deps): update pre-commit hook igorshubovych/markdownlint-cli to v0.44.0 [[#4776](https://github.com/woodpecker-ci/woodpecker/pull/4776)]
 - fix(deps): update module google.golang.org/protobuf to v1.36.4 [[#4775](https://github.com/woodpecker-ci/woodpecker/pull/4775)]
