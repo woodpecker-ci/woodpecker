@@ -512,7 +512,7 @@
     "all_events": "All events from forge",
     "allowed_users": {
       "allowed_users": "Allowed users",
-      "desc": "Pipelines authored by users listed here never require an approval."
+      "desc": "Pipelines created by the listed users never require approval."
     }
   },
   "all_repositories": "All repositories",
