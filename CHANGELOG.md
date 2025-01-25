@@ -17,6 +17,8 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update web npm deps non-major [[#4777](https://github.com/woodpecker-ci/woodpecker/pull/4777)]
+- chore(deps): update pre-commit hook igorshubovych/markdownlint-cli to v0.44.0 [[#4776](https://github.com/woodpecker-ci/woodpecker/pull/4776)]
 - fix(deps): update module google.golang.org/protobuf to v1.36.4 [[#4775](https://github.com/woodpecker-ci/woodpecker/pull/4775)]
 - fix(deps): update module google.golang.org/grpc to v1.70.0 [[#4770](https://github.com/woodpecker-ci/woodpecker/pull/4770)]
 - chore(deps): update docker.io/woodpeckerci/plugin-docker-buildx docker tag to v5.2.0 [[#4767](https://github.com/woodpecker-ci/woodpecker/pull/4767)]
