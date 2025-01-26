@@ -31,6 +31,8 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+@reference '~/tailwind.css';
+
 @keyframes rotate {
   100% {
     transform: rotate(1turn);

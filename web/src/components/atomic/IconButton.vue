@@ -43,6 +43,8 @@ defineProps<{
 </script>
 
 <style scoped>
+@reference '~/tailwind.css';
+
 .icon-button {
   @apply hover-effect relative flex items-center justify-center overflow-hidden rounded-md bg-transparent px-1 py-1 disabled:cursor-not-allowed disabled:opacity-50;
 }

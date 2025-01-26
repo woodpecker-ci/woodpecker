@@ -41,6 +41,8 @@ const id = (Math.random() + 1).toString(36).substring(7);
 </script>
 
 <style scoped>
+@reference '~/tailwind.css';
+
 .radio {
   width: 1.3rem;
   height: 1.3rem;

@@ -1045,7 +1045,7 @@
 }
 
 @utility hover-effect {
-  @apply transition-colors duration-100 hover:bg-black hover:opacity-10 dark:hover:bg-white dark:hover:opacity-5;
+  @apply hover:bg-black/20 dark:hover:bg-white/5;
 }
 
 @utility w-fill {

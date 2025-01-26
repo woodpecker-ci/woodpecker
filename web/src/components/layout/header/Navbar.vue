@@ -62,6 +62,8 @@ const { enableSwagger } = config;
 </script>
 
 <style scoped>
+@reference '~/tailwind.css';
+
 .navbar-icon {
   @apply h-11 w-11 rounded-md p-2.5;
 }
