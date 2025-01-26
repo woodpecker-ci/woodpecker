@@ -1,5 +1,6 @@
 import { useInfiniteScroll } from '@vueuse/core';
-import { onMounted, ref, watch, type Ref, type UnwrapRef } from 'vue';
+import { onMounted, ref, watch } from 'vue';
+import type { Ref, UnwrapRef } from 'vue';
 
 const defaultPageSize = 50;
 
