@@ -315,6 +315,7 @@ func (c *client) Status(ctx context.Context, u *model.User, repo *model.Repo, pi
 		URL:         common.GetPipelineStatusURL(repo, pipeline, workflow),
 		Key:         common.GetPipelineStatusContext(repo, pipeline, workflow),
 		Description: common.GetPipelineStatusDescription(pipeline.Status),
+		Ref:         pipeline.Ref,
 	}
 	_, err = bc.Projects.CreateBuildStatus(ctx, repo.Owner, repo.Name, pipeline.Commit.SHA, status)
 	return err
