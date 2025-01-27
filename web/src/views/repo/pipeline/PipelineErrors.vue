@@ -48,7 +48,8 @@
 </template>
 
 <script lang="ts" setup>
-import { inject, type Ref } from 'vue';
+import { inject } from 'vue';
+import type { Ref } from 'vue';
 
 import DocsLink from '~/components/atomic/DocsLink.vue';
 import Icon from '~/components/atomic/Icon.vue';

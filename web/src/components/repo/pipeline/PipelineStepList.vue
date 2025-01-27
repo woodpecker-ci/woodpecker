@@ -116,7 +116,8 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, inject, ref, toRef, type Ref } from 'vue';
+import { computed, inject, ref, toRef } from 'vue';
+import type { Ref } from 'vue';
 
 import Badge from '~/components/atomic/Badge.vue';
 import Icon from '~/components/atomic/Icon.vue';
@@ -124,7 +125,8 @@ import Panel from '~/components/layout/Panel.vue';
 import PipelineStatusIcon from '~/components/repo/pipeline/PipelineStatusIcon.vue';
 import PipelineStepDuration from '~/components/repo/pipeline/PipelineStepDuration.vue';
 import usePipeline from '~/compositions/usePipeline';
-import { StepType, type Pipeline, type PipelineConfig, type PipelineStep } from '~/lib/api/types';
+import { StepType } from '~/lib/api/types';
+import type { Pipeline, PipelineConfig, PipelineStep } from '~/lib/api/types';
 
 const props = defineProps<{
   pipeline: Pipeline;
