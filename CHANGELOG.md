@@ -1,13 +1,14 @@
 # Changelog
 
-## [3.1.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.1.0) - 2025-01-26
+## [3.1.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.1.0) - 2025-01-27
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@Levy-Tal, @cduchenoy, @damuzhi0810
+@Levy-Tal, @cduchenoy, @damuzhi0810, @xoxys
 
 ### 📚 Documentation
 
+- Various docs improvements [[#4772](https://github.com/woodpecker-ci/woodpecker/pull/4772)]
 - fix(deps): update docs npm deps non-major [[#4774](https://github.com/woodpecker-ci/woodpecker/pull/4774)]
 - Add git basic changelog [[#4755](https://github.com/woodpecker-ci/woodpecker/pull/4755)]
 
