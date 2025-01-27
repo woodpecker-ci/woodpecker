@@ -6,6 +6,10 @@
 
 @Levy-Tal, @cduchenoy, @damuzhi0810, @xoxys
 
+### 🐛 Bug Fixes
+
+- Move section description to the top [[#4773](https://github.com/woodpecker-ci/woodpecker/pull/4773)]
+
 ### 📚 Documentation
 
 - Various docs improvements [[#4772](https://github.com/woodpecker-ci/woodpecker/pull/4772)]
