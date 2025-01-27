@@ -18,6 +18,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update dependency @antfu/eslint-config to v4.1.0 [[#4780](https://github.com/woodpecker-ci/woodpecker/pull/4780)]
 - fix(deps): update module github.com/bmatcuk/doublestar/v4 to v4.8.1 [[#4781](https://github.com/woodpecker-ci/woodpecker/pull/4781)]
 - chore(deps): update dependency @antfu/eslint-config to v4 [[#4779](https://github.com/woodpecker-ci/woodpecker/pull/4779)]
 - fix(deps): update web npm deps non-major [[#4777](https://github.com/woodpecker-ci/woodpecker/pull/4777)]
