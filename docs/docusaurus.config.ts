@@ -69,7 +69,7 @@ const config = {
         },
         { to: 'blog', label: 'Blog', position: 'left' },
         {
-          label: 'More Resources',
+          label: 'More',
           position: 'left',
           items: [
             {
@@ -103,15 +103,16 @@ const config = {
           ],
         },
         {
+          label: 'Sponsor Us',
+          position: 'right',
+          className: 'header-sponsor-link',
+          href: 'https://opencollective.com/woodpecker-ci',
+        },
+        {
           href: 'https://github.com/woodpecker-ci/woodpecker',
           position: 'right',
           className: 'header-github-link',
           'aria-label': 'GitHub repository',
-        },
-        {
-          label: '🧡 Sponsor Us',
-          position: 'right',
-          href: 'https://opencollective.com/woodpecker-ci',
         },
       ],
     },
@@ -122,7 +123,7 @@ const config = {
           title: 'Docs',
           items: [
             {
-              label: 'Introduction',
+              label: 'Welcome to Woodpecker',
               to: '/docs/intro',
             },
             {
@@ -130,8 +131,26 @@ const config = {
               to: '/docs/usage/intro',
             },
             {
-              label: 'Server setup',
+              label: 'Administration',
               to: '/docs/administration/getting-started',
+            },
+            {
+              to: '/migrations', // Always point to newest migration guide
+              activeBaseRegex: 'migrations',
+              label: 'Migrations',
+            },
+            {
+              to: '/awesome', // Always point to newest awesome list
+              activeBaseRegex: 'awesome',
+              label: 'Awesome',
+            },
+            {
+              to: '/api',
+              label: 'API',
+            },
+            {
+              to: '/about',
+              label: 'About',
             },
           ],
         },
