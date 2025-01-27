@@ -6,15 +6,16 @@
 
 @Levy-Tal, @cduchenoy, @damuzhi0810, @xoxys
 
-### 🐛 Bug Fixes
-
-- Move section description to the top [[#4773](https://github.com/woodpecker-ci/woodpecker/pull/4773)]
-
 ### 📚 Documentation
 
+- chore(deps): lock file maintenance [[#4783](https://github.com/woodpecker-ci/woodpecker/pull/4783)]
 - Various docs improvements [[#4772](https://github.com/woodpecker-ci/woodpecker/pull/4772)]
 - fix(deps): update docs npm deps non-major [[#4774](https://github.com/woodpecker-ci/woodpecker/pull/4774)]
 - Add git basic changelog [[#4755](https://github.com/woodpecker-ci/woodpecker/pull/4755)]
+
+### 🐛 Bug Fixes
+
+- Move section description to the top [[#4773](https://github.com/woodpecker-ci/woodpecker/pull/4773)]
 
 ### 📈 Enhancement
 
