@@ -1,4 +1,5 @@
-import { computed, onBeforeUnmount, onMounted, ref, watch, type Ref } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import type { Ref } from 'vue';
 
 export function useElapsedTime(running: Ref<boolean>, startTime: Ref<number | undefined>) {
   const time = ref<number | undefined>(startTime.value);
