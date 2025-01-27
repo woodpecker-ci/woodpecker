@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
-import { computed, reactive, ref, type Ref } from 'vue';
+import { computed, reactive, ref } from 'vue';
+import type { Ref } from 'vue';
 
 import useApiClient from '~/compositions/useApiClient';
 import type { Pipeline, PipelineFeed, PipelineWorkflow } from '~/lib/api/types';
