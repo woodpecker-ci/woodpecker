@@ -93,7 +93,7 @@ func getClientOutOfCluster() (kubernetes.Interface, error) {
 	return kubernetes.NewForConfig(config)
 }
 
-// getClient returns a k8s client set to the request from inside of cluster.
+// getClientInsideOfCluster returns a k8s client set to the request from inside of cluster.
 func getClientInsideOfCluster() (kubernetes.Interface, error) {
 	config, err := rest.InClusterConfig()
 	if err != nil {

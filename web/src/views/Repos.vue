@@ -9,13 +9,16 @@
     </template>
 
     <Transition name="fade" mode="out-in">
-      <div v-if="search === '' && repos.length > 0" class="gap-8 grid">
-        <div v-if="reposLastAccess.length > 0" class="gap-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2">
+      <div v-if="search === '' && repos.length > 0" class="grid gap-8">
+        <div
+          v-if="reposLastAccess.length > 0 && repos.length > 4"
+          class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-2"
+        >
           <RepoItem v-for="repo in reposLastAccess" :key="repo.id" :repo="repo" />
         </div>
 
         <div class="flex flex-col gap-4">
-          <h2 class="text-wp-text-100 text-lg">{{ $t('all_repositories') }}</h2>
+          <h2 class="text-lg text-wp-text-100">{{ $t('all_repositories') }}</h2>
           <div class="flex flex-col gap-4">
             <RepoItem v-for="repo in reposLastActivity" :key="repo.id" :repo="repo" />
           </div>
@@ -25,7 +28,7 @@
         <div v-if="reposLastActivity.length > 0" class="flex flex-col gap-4">
           <RepoItem v-for="repo in reposLastActivity" :key="repo.id" :repo="repo" />
         </div>
-        <span v-else class="text-wp-text-100 text-lg text-center">{{ $t('no_search_results') }}</span>
+        <span v-else class="text-center text-lg text-wp-text-100">{{ $t('no_search_results') }}</span>
       </div>
     </Transition>
   </Scaffold>

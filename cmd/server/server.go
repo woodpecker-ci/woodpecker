@@ -32,13 +32,13 @@ import (
 	"github.com/urfave/cli/v3"
 	"golang.org/x/sync/errgroup"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server"
-	"go.woodpecker-ci.org/woodpecker/v2/server/cron"
-	"go.woodpecker-ci.org/woodpecker/v2/server/router"
-	"go.woodpecker-ci.org/woodpecker/v2/server/router/middleware"
-	"go.woodpecker-ci.org/woodpecker/v2/server/web"
-	"go.woodpecker-ci.org/woodpecker/v2/shared/logger"
-	"go.woodpecker-ci.org/woodpecker/v2/version"
+	"go.woodpecker-ci.org/woodpecker/v3/server"
+	"go.woodpecker-ci.org/woodpecker/v3/server/cron"
+	"go.woodpecker-ci.org/woodpecker/v3/server/router"
+	"go.woodpecker-ci.org/woodpecker/v3/server/router/middleware"
+	"go.woodpecker-ci.org/woodpecker/v3/server/web"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/logger"
+	"go.woodpecker-ci.org/woodpecker/v3/version"
 )
 
 const (
@@ -110,8 +110,6 @@ func run(ctx context.Context, c *cli.Command) error {
 	serviceWaitingGroup := errgroup.Group{}
 
 	log.Info().Msgf("starting Woodpecker server with version '%s'", version.String())
-
-	startMetricsCollector(ctx, _store)
 
 	serviceWaitingGroup.Go(func() error {
 		log.Info().Msg("starting cron service ...")
@@ -260,6 +258,8 @@ func run(ctx context.Context, c *cli.Command) error {
 	}
 
 	if metricsServerAddr := c.String("metrics-server-addr"); metricsServerAddr != "" {
+		startMetricsCollector(ctx, _store)
+
 		serviceWaitingGroup.Go(func() error {
 			metricsRouter := gin.New()
 			metricsRouter.GET("/metrics", gin.WrapH(prometheus_http.Handler()))

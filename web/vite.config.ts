@@ -5,8 +5,8 @@ import VueI18nPlugin from '@intlify/unplugin-vue-i18n/vite';
 import vue from '@vitejs/plugin-vue';
 import type { Plugin } from 'vite';
 import prismjs from 'vite-plugin-prismjs';
-import WindiCSS from 'vite-plugin-windicss';
 import svgLoader from 'vite-svg-loader';
+import type { ViteUserConfig } from 'vitest/config';
 import { defineConfig } from 'vitest/config';
 
 function woodpeckerInfoPlugin(): Plugin {
@@ -69,7 +69,6 @@ export default defineConfig({
         },
       };
     })(),
-    WindiCSS(),
     svgLoader(),
     externalCSSPlugin(),
     woodpeckerInfoPlugin(),
@@ -84,6 +83,7 @@ export default defineConfig({
   },
   logLevel: 'warn',
   server: {
+    allowedHosts: true,
     host: process.env.VITE_DEV_SERVER_HOST ?? '127.0.0.1',
     port: 8010,
   },
@@ -91,4 +91,4 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
   },
-});
+} as ViteUserConfig);

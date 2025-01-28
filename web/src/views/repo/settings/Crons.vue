@@ -18,21 +18,28 @@
       <ListItem
         v-for="cron in crons"
         :key="cron.id"
-        class="items-center !bg-wp-background-200 !dark:bg-wp-background-100"
+        class="items-center !bg-wp-background-200 dark:!bg-wp-background-100"
       >
-        <span class="grid grid-cols-3 w-full">
+        <span class="grid w-full grid-cols-3">
           <span>{{ cron.name }}</span>
-          <span v-if="cron.next_exec && cron.next_exec > 0" class="col-span-2 <md:hidden">
+          <span v-if="cron.next_exec && cron.next_exec > 0" class="md:display-unset col-span-2 hidden">
             <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
             {{ $t('repo.settings.crons.next_exec') }}: {{ date.toLocaleString(new Date(cron.next_exec * 1000)) }}
           </span>
-          <span v-else class="col-span-2 <md:hidden">{{ $t('repo.settings.crons.not_executed_yet') }}</span>
+          <span v-else class="md:display-unset col-span-2 hidden">{{
+            $t('repo.settings.crons.not_executed_yet')
+          }}</span>
         </span>
-        <IconButton icon="play" class="ml-auto w-8 h-8" :title="$t('repo.settings.crons.run')" @click="runCron(cron)" />
-        <IconButton icon="edit" class="w-8 h-8" :title="$t('repo.settings.crons.edit')" @click="selectedCron = cron" />
+        <IconButton
+          icon="play-outline"
+          class="ml-auto h-8 w-8"
+          :title="$t('repo.settings.crons.run')"
+          @click="runCron(cron)"
+        />
+        <IconButton icon="edit" class="h-8 w-8" :title="$t('repo.settings.crons.edit')" @click="selectedCron = cron" />
         <IconButton
           icon="trash"
-          class="w-8 h-8 hover:text-wp-control-error-100"
+          class="h-8 w-8 hover:text-wp-error-100"
           :is-loading="isDeleting"
           :title="$t('repo.settings.crons.delete')"
           @click="deleteCron(cron)"
@@ -74,7 +81,7 @@
           />
         </InputField>
 
-        <div v-if="isEditingCron" class="ml-auto mb-4">
+        <div v-if="isEditingCron" class="mb-4 ml-auto">
           <span v-if="selectedCron.next_exec && selectedCron.next_exec > 0" class="text-wp-text-100">
             <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
             {{ $t('repo.settings.crons.next_exec') }}:
@@ -98,7 +105,8 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, inject, ref, type Ref } from 'vue';
+import { computed, inject, ref } from 'vue';
+import type { Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import Button from '~/components/atomic/Button.vue';

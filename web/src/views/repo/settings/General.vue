@@ -18,22 +18,24 @@
       </InputField>
 
       <InputField
-        v-slot="{ id }"
         :label="$t('repo.settings.general.netrc_only_trusted.netrc_only_trusted')"
         docs-url="docs/usage/project-settings#custom-trusted-clone-plugins"
       >
-        <span class="ml-1 mb-2 text-wp-text-alt-100">{{ $t('repo.settings.general.netrc_only_trusted.desc') }}</span>
-
-        <div class="flex flex-col gap-2">
-          <div v-for="image in repoSettings.netrc_trusted" :key="image" class="flex gap-2">
-            <TextField :id="id" :model-value="image" disabled />
-            <Button type="button" color="gray" start-icon="trash" @click="removeImage(image)" />
+        <template #default="{ id }">
+          <div class="flex flex-col gap-2">
+            <div v-for="image in repoSettings.netrc_trusted" :key="image" class="flex gap-2">
+              <TextField :id="id" :model-value="image" disabled />
+              <Button type="button" color="gray" start-icon="trash" @click="removeImage(image)" />
+            </div>
+            <div class="flex gap-2">
+              <TextField :id="id" v-model="newImage" @keydown.enter.prevent="addNewImage" />
+              <Button type="button" color="gray" start-icon="plus" @click="addNewImage" />
+            </div>
           </div>
-          <div class="flex gap-2">
-            <TextField :id="id" v-model="newImage" @keydown.enter.prevent="addNewImage" />
-            <Button type="button" color="gray" start-icon="plus" @click="addNewImage" />
-          </div>
-        </div>
+        </template>
+        <template #description>
+          {{ $t('repo.settings.general.netrc_only_trusted.desc') }}
+        </template>
       </InputField>
 
       <InputField
@@ -82,9 +84,7 @@
           ]"
         />
         <template #description>
-          <p class="text-sm">
-            {{ $t('require_approval.desc') }}
-          </p>
+          {{ $t('require_approval.desc') }}
         </template>
       </InputField>
 
@@ -114,13 +114,15 @@
             :placeholder="$t('repo.settings.general.pipeline_path.default')"
           />
         </template>
+
+        <!-- eslint-disable @intlify/vue-i18n/no-raw-text -->
         <template #description>
-          <i18n-t keypath="repo.settings.general.pipeline_path.desc" tag="p" class="text-sm text-wp-text-alt-100">
+          <i18n-t keypath="repo.settings.general.pipeline_path.desc">
             <span class="code-box-inline">{{ $t('repo.settings.general.pipeline_path.desc_path_example') }}</span>
-            <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
             <span class="code-box-inline">/</span>
           </i18n-t>
         </template>
+        <!-- eslint-enable @intlify/vue-i18n/no-raw-text -->
       </InputField>
 
       <InputField
@@ -132,9 +134,7 @@
           :options="cancelPreviousPipelineEventsOptions"
         />
         <template #description>
-          <p class="text-sm">
-            {{ $t('repo.settings.general.cancel_prev.desc') }}
-          </p>
+          {{ $t('repo.settings.general.cancel_prev.desc') }}
         </template>
       </InputField>
 
@@ -150,7 +150,8 @@
 </template>
 
 <script lang="ts" setup>
-import { inject, onMounted, ref, type Ref } from 'vue';
+import { inject, onMounted, ref } from 'vue';
+import type { Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import Button from '~/components/atomic/Button.vue';
@@ -166,7 +167,8 @@ import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useAuthentication from '~/compositions/useAuthentication';
 import useNotifications from '~/compositions/useNotifications';
-import { RepoRequireApproval, RepoVisibility, WebhookEvents, type Repo, type RepoSettings } from '~/lib/api/types';
+import { RepoRequireApproval, RepoVisibility, WebhookEvents } from '~/lib/api/types';
+import type { Repo, RepoSettings } from '~/lib/api/types';
 import { useRepoStore } from '~/store/repos';
 
 const apiClient = useApiClient();

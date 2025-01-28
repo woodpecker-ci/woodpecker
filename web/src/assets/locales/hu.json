@@ -8,37 +8,240 @@
     "repo": {
         "visibility": {
             "public": {
-                "public": "Nyilvános"
+                "public": "Nyilvános",
+                "desc": "Bárki láthatja a projekted, belépés nélkül."
             },
             "private": {
                 "private": "Privát",
-                "desc": "Csak te és a többi tulajdonos láthatjátok ezt a projektet a tárolóban."
+                "desc": "Csak te és a többi tulajdonos láthatjátok ezt a projektet."
             },
             "internal": {
-                "internal": "Belső"
-            }
+                "internal": "Belső",
+                "desc": "Csak authentikált felhasználók láthatják a Woodpecker oldalát ennek a projektnek."
+            },
+            "visibility": "Projekt láthatósága"
         },
         "settings": {
             "general": {
                 "timeout": {
-                    "minutes": "percek"
+                    "minutes": "percek",
+                    "timeout": "Időtúllépés"
                 },
                 "save": "Beállítások mentése",
                 "project": "Projekt beállítások",
-                "success": "Projekt beállítások frissítve"
+                "success": "Projekt beállítások frissítve",
+                "cancel_prev": {
+                    "cancel": "Előző pipelineok leállítása",
+                    "desc": "A kiválasztott esemény elődizések leállítják a függőben lévő és futó pipelineokat ugyanazon eseménynél, mielőtt elindítaná a következőt."
+                },
+                "pipeline_path": {
+                    "default": "Alapértelmezetten: .woodpecker/*.{'{yaml,yml}'} -> .woodpecker.yaml -> .woodpecker.yml",
+                    "path": "Pipeline elérési útja",
+                    "desc_path_example": "saját/elérési_utam/",
+                    "desc": "Az élérési út a pipeline konfigurációdhoz (például {0}). A Mappáknak {1}-ra kéne végződnie."
+                },
+                "general": "Általános",
+                "allow_pr": {
+                    "allow": "Pull Requestek bekapcsolása",
+                    "desc": "A pipelineok lefuttatásának engedélyezése a pull requesteken."
+                },
+                "trusted": {
+                    "trusted": "Megbízott",
+                    "network": {
+                        "desc": "Pipeline konténerek hálózati hozzáférést kapnak mint például a DNS megváltoztatásához.",
+                        "network": "Hálózat"
+                    },
+                    "security": {
+                        "security": "Biztonság",
+                        "desc": "A pipeline adattárolók hozzáférést kapnak a biztonsági jogosultságokhoz."
+                    },
+                    "volumes": {
+                        "volumes": "Adattárolók",
+                        "desc": "A pipeline konténerek számára engedélyezett az adattárolók csatolása."
+                    }
+                },
+                "allow_deploy": {
+                    "allow": "Üzembe helyezések bekapcsolása",
+                    "desc": "Engedélyezi az üzembe helyezését a sikeres pipelineoknak. Minden felhasználó push hozzáféréssel tud ilyet előidézni, szóval csak óvatosan."
+                },
+                "netrc_only_trusted": {
+                    "netrc_only_trusted": "Egyedi megbízott klón pluginok",
+                    "desc": "A pluginok amelyek hozzáférést kapnak a netrc hozzáférési adatokhoz tudnak repositorykat klónozni az adott kódplatformról vagy pusholni az adott kódplatformra."
+                }
             },
             "actions": {
                 "disable": {
-                    "disable": "Tároló inaktiválása"
+                    "disable": "Tároló inaktiválása",
+                    "success": "Repository kikapcsolva"
                 },
                 "delete": {
-                    "delete": "Tároló törlése"
+                    "delete": "Repository törlése",
+                    "success": "Repository törölve",
+                    "confirm": "Minden adat el fog veszni ez az akció után!\n\nBiztos, hogy folytatni akarod?"
+                },
+                "actions": "Actions",
+                "repair": {
+                    "repair": "Repository javítása",
+                    "success": "Repository javítva"
+                },
+                "enable": {
+                    "enable": "Repository bekapcsolása",
+                    "success": "Repository bekapcsolva"
                 }
+            },
+            "crons": {
+                "none": "Nincsenek még cronok.",
+                "save": "Cron mentése",
+                "created": "Cron létrehozva",
+                "saved": "Cron elmentve",
+                "desc": "A cron feladatok tudnak pipelineokat indítani időközönként.",
+                "next_exec": "Következő végrehajtás",
+                "run": "Futtatás most",
+                "deleted": "Cron törölve",
+                "not_executed_yet": "Még nincs végrehajtva",
+                "branch": {
+                    "title": "Branch",
+                    "placeholder": "Branch (az alap branchet használja ha üres)"
+                },
+                "name": {
+                    "name": "Név",
+                    "placeholder": "A cron feladat neve"
+                },
+                "schedule": {
+                    "title": "Menetrend (UTC időzónán alapozva)",
+                    "placeholder": "Menetrend"
+                },
+                "crons": "Cronok",
+                "edit": "Cron szerkesztése",
+                "delete": "Cron törlése",
+                "show": "Cronok mutatása",
+                "add": "Cron hozzáadása"
+            },
+            "not_allowed": "Nincs hozzáférésed ennek a repositorynak a beállításaihoz",
+            "badge": {
+                "branch": "Branch",
+                "type_html": "HTML",
+                "type_url": "URL",
+                "type_markdown": "Markdown",
+                "badge": "Jelvény",
+                "type": "Szintaxis"
             }
         },
         "pipeline": {
-            "loading": "Betöltés…"
-        }
+            "loading": "Betöltés…",
+            "actions": {
+                "canceled": "Ez a lépés le lett állítva.",
+                "log_download": "Letöltés",
+                "log_delete": "Törlés",
+                "restart_success": "Pipeline újraindítva",
+                "log_auto_scroll": "Automata görgetés bekapcsolása",
+                "cancel_success": "Pipeline leállítva",
+                "deploy": "Üzembe helyezés",
+                "log_auto_scroll_off": "Automata görgetés kikapcsolása",
+                "cancel": "Mégse",
+                "restart": "Újraindítás"
+            },
+            "event": {
+                "cron": "Időzítő",
+                "pr_closed": "Pull Request egyesítve/lezárva",
+                "release": "Kiadás",
+                "manual": "Manuális",
+                "tag": "Bélyeg",
+                "pr": "Pull request",
+                "deploy": "Üzembe helyezés",
+                "push": "Push"
+            },
+            "debug": {
+                "title": "Debuggolás",
+                "download_metadata": "Metaadat letöltése",
+                "metadata_download_error": "Hiba metaadat letöltése közben",
+                "metadata_download_successful": "Metadat sikeresen letöltve",
+                "no_permission": "Nincs jogosultságod a debug információkhoz",
+                "metadata_exec_title": "Pipeline újrafuttatása lokálisan",
+                "metadata_exec_desc": "A pipeline metaadatjának letöltése, hogy lokálisan lehessen futtatni. Így kitudsz javítani hibákat benne és változtatásokat tesztelni mielőtt véglegesítenéd őket. A `woodpecker-cli` lokális verziójának és a Woodpecker Szerver verziójának egyeznie kell."
+            },
+            "no_logs": "Nincsen napló",
+            "status": {
+                "pending": "folyamatban",
+                "started": "elindítva",
+                "skipped": "átlépett",
+                "running": "fut",
+                "status": "Státusz: {status}",
+                "blocked": "blokkolva",
+                "success": "sikeres",
+                "declined": "elutasítva",
+                "error": "hiba",
+                "failure": "sikertelen",
+                "killed": "terminálva"
+            },
+            "log_delete_confirm": "Biztos, hogy akarod ehhez a lépéshez tartozó naplót törölni?",
+            "protected": {
+                "awaits": "Ez a pipeline a fenntartó elfogadására vár!",
+                "declined": "Ezt a pipeline-t elutasították!",
+                "approve_success": "Pipeline elfogadva",
+                "approve": "Elfogadás",
+                "decline": "Elutasítás",
+                "decline_success": "Pipeline elutasítva"
+            },
+            "created": "Készítve: {created}",
+            "duration": "Pipeline lefutási ideje",
+            "config": "Konfiguráció",
+            "files": "Megváltoztatott fájlok",
+            "errors": "Hibák",
+            "warnings": "Figyelmeztetések",
+            "show_errors": "Hibák mutatása",
+            "we_got_some_errors": "Jaj ne, hiba történt!",
+            "log_delete_error": "Hiba lépett fel a lépés naplójának törlése közben",
+            "exit_code": "Kilépési kód {exitCode}",
+            "log_download_error": "Hiba lépett fel a napló letöltése közben",
+            "no_pipeline_steps": "Nincsenek elérhető pipeline lépések!",
+            "pipelines_for": "\"{branch}\" branchhez tartozó pipelineok",
+            "pipelines_for_pr": "#{index} pull requesthez tartozó pipelineok",
+            "tasks": "Feladatok",
+            "no_pipelines": "Egy pipeline sem indult még el.",
+            "step_not_started": "Ez a lépés még nem indult el.",
+            "pipeline": "#{pipelineId} Pipeline",
+            "log_title": "Lépés napló"
+        },
+        "manual_pipeline": {
+            "variables": {
+                "delete": "Változó törlése",
+                "title": "Egyéb pipeline változók",
+                "desc": "Adj meg egyéb változókat, hogy használhasd a pipelineodban. A megegyező nevű változók felülírják egymást.",
+                "name": "Változó neve",
+                "value": "Változó értéke"
+            },
+            "select_branch": "Branch választás",
+            "title": "Manuális pipeline futtatás előidézése",
+            "trigger": "Pipeline futtatása",
+            "show_pipelines": "Pipelineok mutatása"
+        },
+        "deploy_pipeline": {
+            "variables": {
+                "delete": "Változó törlése",
+                "value": "Változó értéke",
+                "title": "Egyéb pipeline változók",
+                "desc": "Adj meg egyéb változókat, hogy használhasd a pipelineodban. A megegyező nevű változók felülírják egymást.",
+                "name": "Változó neve"
+            },
+            "enter_target": "Az üzembe helyezés célkörnyezete",
+            "title": "Idézz elő egy üzembe helyezést a jelenlegi #{pipelineId} pipeline-hoz",
+            "trigger": "Üzembe helyezés",
+            "enter_task": "Üzembe helyezési feladat"
+        },
+        "activity": "Aktivitás",
+        "branches": "Branchek",
+        "pull_requests": "Pull requestek",
+        "add": "Repository hozzáadása",
+        "user_none": "Ez az organizáció/felhasználó nem rendelkezik még semmilyen projektekkel",
+        "not_allowed": "Nincs hozzáférésed ehhez a repositoryhoz",
+        "enable": {
+            "disabled": "Kikapcsolva",
+            "success": "Repository bekapcsolva",
+            "enabled": "Már bekapcsolva",
+            "enable": "Bekapcsolás"
+        },
+        "open_in_forge": "Repository megnyitása a kódplatformban"
     },
     "admin": {
         "settings": {
@@ -51,11 +254,117 @@
                 "created": "Felhasználó létrehozva",
                 "saved": "Felhasználó mentve",
                 "delete_user": "Felhasználó törlése",
-                "edit_user": "Felhasználó szerkesztése"
+                "edit_user": "Felhasználó szerkesztése",
+                "desc": "Regisztrált felhasználók a szerveren.",
+                "avatar_url": "Avatár URL",
+                "users": "Felhasználók",
+                "email": "Email",
+                "login": "Bejelentkezés",
+                "none": "Még nincenek felhasználók.",
+                "delete_confirm": "Biztos, hogy akarod ezt a felhasználót törölni? Minden repository ami a felhasználóhoz tartozik is törlődik.",
+                "admin": {
+                    "admin": "Adminisztrátor",
+                    "placeholder": "A felhasználó egy adminisztrátor"
+                }
             },
             "orgs": {
                 "orgs": "Szervezetek",
-                "delete_org": "Szervezet törlése"
+                "delete_org": "Szervezet törlése",
+                "delete_confirm": "Biztos, hogy akarod ezt az organizációt törölni? Minden repository ami az organizációhoz tartozik is törlődik.",
+                "deleted": "Organizáció törölve",
+                "view": "Organizáció megnézése",
+                "desc": "Organizációk amelyek repositorykat tart ezen a szerveren.",
+                "none": "Még nincsenek organizációk.",
+                "org_settings": "Organizáció beállítások"
+            },
+            "queue": {
+                "resumed": "Feldolgozási sor folytatása",
+                "tasks": "Feladatok",
+                "task_running": "Feladat folyamatban",
+                "pause": "Szüneteltetés",
+                "paused": "Feldolgozási sor szünteltetve",
+                "task_pending": "Feladat futtatása függőben",
+                "queue": "Feldolgozási sor",
+                "desc": "Feladatok amelyek az agent végrehajtására várnak.",
+                "agent": "agent",
+                "resume": "Folytatás",
+                "stats": {
+                    "waiting_on_deps_count": "Függőségekre vár",
+                    "completed_count": "Elvégzett feladatok",
+                    "worker_count": "Szabad",
+                    "running_count": "Fut",
+                    "pending_count": "Függőben"
+                },
+                "task_waiting_on_deps": "A feladat a függőségekre vár",
+                "waiting_for": "várakozás a"
+            },
+            "agents": {
+                "capacity": {
+                    "capacity": "Kapacitás",
+                    "desc": "Az agent által maximum párhuzamosan futtatható pipelineok száma.",
+                    "badge": "kapacitás"
+                },
+                "name": {
+                    "name": "Név",
+                    "placeholder": "Az Agent neve"
+                },
+                "delete_confirm": "Biztos, hogy törölni akarod ezt az agentet? Mostantól, nem fog tudni kommunikálni a szerverrel.",
+                "never": "Soha",
+                "last_contact": "Legutóbbi kommunikáció",
+                "edit_agent": "Agent szerkesztése",
+                "agents": "Agentek",
+                "none": "Még nincsenek agentek.",
+                "id": "ID",
+                "add": "Agent hozzáadása",
+                "show": "Agentek mutatása",
+                "saved": "Agent elmentve",
+                "delete_agent": "Agent törlése",
+                "custom_labels": {
+                    "custom_labels": "Egyedi bélyegek",
+                    "desc": "Az egyedi bélyegek az agent adminisztrátorja állítja be az agent elindításánál."
+                },
+                "desc": "Agentek amelyek ehhez a szerverhez vannak regisztrálva.",
+                "save": "Agent mentése",
+                "created": "Agent létrehozva",
+                "deleted": "Agent törölve",
+                "no_schedule": {
+                    "name": "Agent kikapcsolása",
+                    "placeholder": "Az agent megakadályozása, hogy új feladatokat vegyen fel"
+                },
+                "token": "Token",
+                "platform": {
+                    "platform": "Platform",
+                    "badge": "platform"
+                },
+                "backend": {
+                    "backend": "Backend",
+                    "badge": "backend"
+                },
+                "version": "Verzió",
+                "org": {
+                    "badge": "Org"
+                }
+            },
+            "repos": {
+                "view": "Repository megnézése",
+                "repos": "Repositoryk",
+                "desc": "Repositoryk amik aktiválva vagy aktiválva voltak ezen a szerveren.",
+                "none": "Még nincsenek repositoryk.",
+                "settings": "Repository beállítások",
+                "disabled": "Kikapcsolva",
+                "repair": {
+                    "repair": "Minden javítása",
+                    "success": "Repositoryk javítva"
+                }
+            },
+            "not_allowed": "Nincs hozzá",
+            "secrets": {
+                "desc": "A globális titkos változók az összes repository összes pipelinejában használhatóak.",
+                "warning": "Ezek a titkos változók minden felhasználónak elérhetőek."
+            },
+            "registries": {
+                "warning": "Ezek a regisztry hozzáférési adatok elérhetőek az összes felhasználónak.",
+                "desc": "Lehetőség van globális regisztry hozzáférési adatok hozzáadására,hogy minden pipelinenak hozzáférése legyen privát Docker környezet imagekhez."
             }
         }
     },
@@ -63,5 +372,145 @@
     "login": "Bejelentkezés",
     "internal_error": "Valamilyen belső hiba történt",
     "info": "Információ",
-    "registration_closed": "A regisztráció zárva"
+    "registration_closed": "A regisztráció zárva",
+    "repositories": "Repository-k",
+    "documentation_for": "{topic} dokumentációja",
+    "docs": "Dokumentáció",
+    "repos": "Repók",
+    "api": "API",
+    "pipeline_feed": "Pipeline felület",
+    "empty_list": "Nem található {entity}!",
+    "not_found": {
+        "not_found": "Hoppá 404, vagy valamit elrontottunk vagy te írtál el valamit :-/",
+        "back_home": "Vissza a kezdőlapra"
+    },
+    "secrets": {
+        "save": "Titkos változó mentése",
+        "show": "Titkos változók mutatása",
+        "add": "Titkos változó hozzáadása",
+        "name": "Név",
+        "value": "Érték",
+        "delete": "Titkos változó törlése",
+        "events": {
+            "events": "A következő eseményeknél elérhető",
+            "warning": "Ha a Pull Requesteknek is engedélyt adsz, akkor esély van rá, hogy a rosszakarók ellophassák a titkos változóid értékeit egy rosszindulatú Pull Requestel."
+        },
+        "edit": "Titkos változó szerkesztése",
+        "plugins": {
+            "images": "Csak a következő pluginoknak elérhető",
+            "desc": "Azon pluginok listája amelyeknél ez a titkos változó elérhető. Hagyd üresen ha minden pluginnak és normális lépésnek elérhető legyen."
+        },
+        "secrets": "Titkos változók",
+        "deleted": "Titkos változó törölve",
+        "delete_confirm": "Biztos, hogy törölni akarod ezt a titkos változót?",
+        "saved": "Titkos változó elmentve",
+        "desc": "A titkos változók minden a repositoryn futó pipelineban elérhetőek.",
+        "none": "Még nincsenek titkos változók.",
+        "created": "Titkos változó létrehozva"
+    },
+    "default": "alapértelmezett",
+    "no_search_results": "Nincs találat",
+    "all_repositories": "Összes Repository",
+    "org_access_denied": "Nincs hozzáférésed ehhez az organizáció megnézéséhez",
+    "user": {
+        "settings": {
+            "general": {
+                "theme": {
+                    "auto": "Automatikus",
+                    "light": "Világos",
+                    "theme": "Téma",
+                    "dark": "Sötét"
+                },
+                "general": "Általános",
+                "language": "Nyelv"
+            },
+            "cli_and_api": {
+                "download_cli": "CLI letöltése",
+                "reset_token": "Token visszaállítása",
+                "swagger_ui": "Swagger felület",
+                "token": "Saját Hozzáférési Token",
+                "api_usage": "Példa az API használatára",
+                "desc": "Saját Hozzáférési Token (PAT), CLI és API használat",
+                "cli_usage": "Példa a CLI használatára",
+                "cli_and_api": "CLI & API"
+            },
+            "registries": {
+                "desc": "Lehetőség van felhasználói regisztry hozzáférési adatok hozzáadására,hogy minden saját pipelinenak hozzáférése legyen privát Docker környezet imagekhez."
+            },
+            "agents": {
+                "desc": "Agentek amelyek a fiókod repositoryjaihoz vannak regisztrálva."
+            },
+            "settings": "Felhasználói beállítások",
+            "secrets": {
+                "desc": "A felhasználó titkos változójai minden a felhasználó tulajdonában álló repositoryn futó pipelinejaiban felhasználható."
+            }
+        }
+    },
+    "invalid_state": "Az OAuth helyzete érvénytelen",
+    "registries": {
+        "add": "Regisztry hozzáadása",
+        "delete_confirm": "Biztos, hogy törölni akarod ezt a regisztryt?",
+        "created": "Regisztry hozzáférési adatok létrehozva",
+        "saved": "Regisztry hozzáférési adatok elmentve",
+        "deleted": "Regisztry hozzáférési adatok törölve",
+        "credentials": "Registry hozzáférési adatok",
+        "desc": "Lehetőség van regisztry hozzáférési adatok hozzáadására,hogy minden pipelinenak hozzáférése legyen privát Docker környezet imagekhez.",
+        "none": "Nincsenek még regisztry hozzáférési adatok.",
+        "address": {
+            "address": "Cím",
+            "desc": "Regisztry Cím (pl.: docker.io)"
+        },
+        "show": "Regisztryk mutatása",
+        "registries": "Registryk",
+        "save": "Regisztry mentése",
+        "view": "Regisztry megnézése",
+        "edit": "Regisztry szerkesztése",
+        "delete": "Regisztry törlése"
+    },
+    "require_approval": {
+        "require_approval_for": "Engedélyezési feltételek",
+        "desc": "Előzz meg rosszindulatú pipelineok lefutását, amelyek titkos változókat fedhetnek fel vagy káros feladatokat futtathatnak, azáltal, hogy jóváhagyod őket a végrehajtás előtt.",
+        "none_desc": "Minden esemény előidéz pipelineokat, beleértve a Pull Requesteket. Ez a beállítás veszélyes lehet és csak privát munkamenetekhez ajánlott.",
+        "forks": "Pull Request egy forkolt repositoryból",
+        "pull_requests": "Mindegyik Pull Request",
+        "none": "Nincs",
+        "all_events": "Az összes esemény a kódplatformtól"
+    },
+    "global_level_secret": "globális titkos változó",
+    "org": {
+        "settings": {
+            "agents": {
+                "desc": "Regisztrált agentek ehhez az organizációhoz."
+            },
+            "not_allowed": "Nincs jogosultságod ennek az organizáció beállításaihoz",
+            "secrets": {
+                "desc": "Az organizáció titkos változói elérhetőek az organizáció összes repositoryhoz tartózó pipelinejainak."
+            },
+            "registries": {
+                "desc": "Az organizáció hozzáférési adatai tárolója hozzáadható, hogy privát Docker image-eket használhassanak az organizáció összes pipeline-jában."
+            }
+        }
+    },
+    "welcome": "Üdvözöllek a Woodpeckerben",
+    "running_version": "A Woodpecker {0}-t futtatod",
+    "oauth_error": "Hiba történt az OAuth szolgáltatóval való kommunikálás közben",
+    "login_with": "Belépés {forge}-al",
+    "errors": {
+        "not_found": "A szerver nem találja a kért objektumot"
+    },
+    "time": {
+        "not_started": "Nem indult még el",
+        "just_now": "Most éppen"
+    },
+    "update_woodpecker": "Kérlek frissítsd a Woodpeckered {0}-ra",
+    "org_level_secret": "organizáció titkos változó",
+    "login_to_cli": "Belépés a CLIbe",
+    "login_to_cli_description": "Ha folytatod, be leszel léptetve a CLIbe.",
+    "abort": "Megszakítás",
+    "cli_login_success": "Sikeres belépés a CLIbe",
+    "cli_login_failed": "Sikertelen belépés a CLIbe",
+    "cli_login_denied": "Belépés a CLIbe megtagadva",
+    "return_to_cli": "Mostmár bezárhatod ezt az ablakot és visszaléphetsz a CLIbe.",
+    "settings": "Beállítások",
+    "access_denied": "Nincs hozzáférésed ehhez a munkamenethez"
 }

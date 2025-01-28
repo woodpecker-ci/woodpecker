@@ -9,7 +9,8 @@
 </template>
 
 <script lang="ts" setup>
-import { inject, type Ref } from 'vue';
+import { inject } from 'vue';
+import type { Ref } from 'vue';
 
 import AgentManager from '~/components/agent/AgentManager.vue';
 import useApiClient from '~/compositions/useApiClient';

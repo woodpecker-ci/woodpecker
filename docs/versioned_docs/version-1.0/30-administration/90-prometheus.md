@@ -11,7 +11,7 @@ scrape_configs:
     bearer_token: dummyToken...
 
     static_configs:
-       - targets: ['woodpecker.domain.com']
+      - targets: ['woodpecker.domain.com']
 ```
 
 ## Authorization

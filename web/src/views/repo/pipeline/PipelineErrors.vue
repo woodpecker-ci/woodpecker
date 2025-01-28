@@ -6,11 +6,11 @@
           <div class="grid grid-cols-[minmax(10rem,auto),3fr]">
             <span class="flex items-center gap-x-2">
               <Icon
-                name="attention"
-                class="flex-shrink-0 my-1"
+                name="alert"
+                class="my-1 flex-shrink-0"
                 :class="{
                   'text-wp-state-warn-100': error.is_warning,
-                  'text-wp-state-error-100': !error.is_warning,
+                  'text-wp-error-100': !error.is_warning,
                 }"
               />
               <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
@@ -35,7 +35,7 @@
             </span>
             <span v-else />
           </div>
-          <div class="grid grid-cols-[minmax(10rem,auto),4fr] col-start-2">
+          <div class="col-start-2 grid grid-cols-[minmax(10rem,auto),4fr]">
             <span />
             <span>
               <RenderMarkdown :content="error.message" />
@@ -48,7 +48,8 @@
 </template>
 
 <script lang="ts" setup>
-import { inject, type Ref } from 'vue';
+import { inject } from 'vue';
+import type { Ref } from 'vue';
 
 import DocsLink from '~/components/atomic/DocsLink.vue';
 import Icon from '~/components/atomic/Icon.vue';

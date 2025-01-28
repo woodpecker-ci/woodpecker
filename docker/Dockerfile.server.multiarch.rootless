@@ -1,0 +1,28 @@
+FROM --platform=$BUILDPLATFORM docker.io/golang:1.23 AS build
+
+RUN groupadd -g 1000 woodpecker && \
+  useradd -u 1000 -g 1000 woodpecker && \
+  mkdir -p /var/lib/woodpecker && \
+  chown -R woodpecker:woodpecker /var/lib/woodpecker
+
+FROM scratch
+ARG TARGETOS TARGETARCH
+ENV GODEBUG=netdns=go
+# Internal setting do NOT change! Signals that woodpecker is running inside a container
+ENV WOODPECKER_IN_CONTAINER=true
+ENV XDG_CACHE_HOME=/var/lib/woodpecker
+ENV XDG_DATA_HOME=/var/lib/woodpecker
+EXPOSE 8000 9000 80 443
+
+# copy certs from certs image
+COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
+# copy server binary
+COPY dist/server/${TARGETOS}_${TARGETARCH}/woodpecker-server /bin/
+COPY --from=build /etc/passwd /etc/passwd
+COPY --from=build /etc/group /etc/group
+COPY --from=build /var/lib/woodpecker /var/lib/woodpecker
+
+USER woodpecker
+
+HEALTHCHECK CMD ["/bin/woodpecker-server", "ping"]
+ENTRYPOINT ["/bin/woodpecker-server"]

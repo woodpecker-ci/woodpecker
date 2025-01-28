@@ -18,11 +18,11 @@ import (
 	"fmt"
 	"path"
 
-	backend_types "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/metadata"
-	yaml_types "go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/types"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/utils"
-	"go.woodpecker-ci.org/woodpecker/v2/shared/constant"
+	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
+	yaml_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/types"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/utils"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/constant"
 )
 
 const (
@@ -129,14 +129,14 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 	}
 
 	// create a default volume
-	config.Volumes = append(config.Volumes, &backend_types.Volume{
+	config.Volume = &backend_types.Volume{
 		Name: fmt.Sprintf("%s_default", c.prefix),
-	})
+	}
 
 	// create a default network
-	config.Networks = append(config.Networks, &backend_types.Network{
+	config.Network = &backend_types.Network{
 		Name: fmt.Sprintf("%s_default", c.prefix),
-	})
+	}
 
 	// create secrets for mask
 	for _, sec := range c.secrets {

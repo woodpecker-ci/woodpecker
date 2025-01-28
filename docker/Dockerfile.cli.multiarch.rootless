@@ -1,0 +1,29 @@
+FROM --platform=$BUILDPLATFORM docker.io/golang:1.23 AS build
+
+RUN groupadd -g 1000 woodpecker && \
+  useradd -u 1000 -g 1000 woodpecker
+
+WORKDIR /src
+COPY . .
+ARG TARGETOS TARGETARCH CI_COMMIT_SHA CI_COMMIT_TAG CI_COMMIT_BRANCH
+RUN --mount=type=cache,target=/root/.cache/go-build \
+    --mount=type=cache,target=/go/pkg \
+    make build-cli
+
+FROM scratch
+WORKDIR /woodpecker
+
+ENV GODEBUG=netdns=go
+ENV WOODPECKER_DISABLE_UPDATE_CHECK=true
+
+# copy certs from build image
+COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
+# copy cli binary
+COPY --from=build /src/dist/woodpecker-cli /bin/
+COPY --from=build /etc/passwd /etc/passwd
+COPY --from=build /etc/group /etc/group
+
+USER woodpecker
+
+HEALTHCHECK CMD ["/bin/woodpecker-cli", "ping"]
+ENTRYPOINT ["/bin/woodpecker-cli"]

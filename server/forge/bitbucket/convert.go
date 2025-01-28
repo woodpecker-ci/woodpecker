@@ -23,8 +23,8 @@ import (
 
 	"golang.org/x/oauth2"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server/forge/bitbucket/internal"
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge/bitbucket/internal"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
 const (
@@ -59,13 +59,9 @@ func convertRepo(from *internal.Repo, perm *internal.RepoPerm) *model.Repo {
 		ForgeURL:      from.Links.HTML.Href,
 		IsSCMPrivate:  from.IsPrivate,
 		Avatar:        from.Owner.Links.Avatar.Href,
-		SCMKind:       model.SCMKind(from.Scm),
 		Branch:        from.MainBranch.Name,
 		Perm:          convertPerm(perm),
 		PREnabled:     true,
-	}
-	if repo.SCMKind == model.RepoHg {
-		repo.Branch = "default"
 	}
 	return &repo
 }

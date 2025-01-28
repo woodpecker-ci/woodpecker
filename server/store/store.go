@@ -19,7 +19,7 @@ package store
 import (
 	"context"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
 // TODO: CreateX func should return new object to not indirect let storage change an existing object (alter ID etc...)
@@ -72,6 +72,8 @@ type Store interface {
 	GetPipeline(int64) (*model.Pipeline, error)
 	// GetPipelineNumber gets a pipeline by number.
 	GetPipelineNumber(*model.Repo, int64) (*model.Pipeline, error)
+	// GetPipelineBadge gets the last relevant pipeline for the badge.
+	GetPipelineBadge(*model.Repo, string) (*model.Pipeline, error)
 	// GetPipelineLast gets the last pipeline for the branch.
 	GetPipelineLast(*model.Repo, string) (*model.Pipeline, error)
 	// GetPipelineLastBefore gets the last pipeline before pipeline number N.

@@ -21,8 +21,8 @@ import (
 
 	"xorm.io/xorm"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
-	"go.woodpecker-ci.org/woodpecker/v2/server/store/types"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
 )
 
 // wrapGet return error if err not nil or if requested entry do not exist.
@@ -75,4 +75,16 @@ func callerName(skip int) string {
 		fnName = fnName[pIndex+1:]
 	}
 	return fnName
+}
+
+func (s storage) quoteIdentifier(identifier string) string {
+	driver := s.engine.DriverName()
+	switch driver {
+	case DriverMysql:
+		return "`" + identifier + "`"
+	case DriverPostgres, DriverSqlite:
+		return "\"" + identifier + "\""
+	default:
+		return identifier
+	}
 }
