@@ -4,13 +4,19 @@
     class="active-pipelines-toggle relative p-1.5! text-current"
     @click="toggle"
   >
-    <div v-if="pipelineCount > 0" class="spinner" />
+
+    <div v-if="true" class="overflow-hidden">
+      <span class="absolute bg-wp-primary-200 dark:bg-wp-primary-300 w-2/1 h-2/1 -left-1/2 -top-1/2 bg-[linear-gradient(#fff,_#fff)] bg-no-repeat animate-[spin_1.5s_linear_infinite]"/>
+      <span class="absolute inset-0.5 bg-wp-primary-200 dark:bg-wp-primary-300 rounded-[calc(0.375rem_-_0.125rem)]"></span>
+    </div>
+
     <div
-      class="z-0 flex h-full w-full items-center justify-center rounded-md bg-white bg-opacity-15 font-bold dark:bg-black dark:bg-opacity-10"
+      class="z-0 flex h-full w-full items-center justify-center rounded-md bg-white/15 font-bold dark:bg-black/10"
     >
       <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
       {{ pipelineCount > 9 ? '9+' : pipelineCount }}
     </div>
+
   </IconButton>
 </template>
 
@@ -38,24 +44,7 @@ onMounted(async () => {
     transform: rotate(1turn);
   }
 }
-.spinner {
-  @apply absolute inset-1.5 rounded-md;
-  overflow: hidden;
-}
-.spinner::before {
-  @apply absolute bg-wp-primary-200 dark:bg-wp-primary-300;
-  content: '';
-  left: -50%;
-  top: -50%;
-  width: 200%;
-  height: 200%;
-  background-repeat: no-repeat;
-  background-size:
-    50% 50%,
-    50% 50%;
-  background-image: linear-gradient(#fff, #fff);
-  animation: rotate 1.5s linear infinite;
-}
+
 .spinner::after {
   @apply absolute inset-0.5 bg-wp-primary-200 dark:bg-wp-primary-300;
   /*
