@@ -203,7 +203,7 @@ func (b *StepBuilder) genItemForWorkflow(workflow *model.Workflow, axis matrix.A
 	}
 
 	item.Labels["woodpecker-ci.org/forge-id"] = b.Forge.Name()
-	item.Labels["woodpecker-ci.org/repo-forge-id"] = b.Repo.ForgeRemoteID.String()
+	item.Labels["woodpecker-ci.org/repo-forge-id"] = string(b.Repo.ForgeRemoteID)
 	item.Labels["woodpecker-ci.org/repo-id"] = strconv.FormatInt(b.Repo.ID, 10)
 	item.Labels["woodpecker-ci.org/repo-name"] = b.Repo.Name
 	item.Labels["woodpecker-ci.org/branch"] = b.Repo.Branch
