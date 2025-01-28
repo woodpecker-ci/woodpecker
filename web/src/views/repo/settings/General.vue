@@ -94,9 +94,9 @@
       >
         <template #default="{ id }">
           <div class="flex flex-col gap-2">
-            <div v-for="user in repoSettings.approval_allowed_users" :key="user" class="flex gap-2">
-              <TextField :id="id" :model-value="user" disabled />
-              <Button type="button" color="gray" start-icon="trash" @click="removeUser(user)" />
+            <div v-for="allowedUser in repoSettings.approval_allowed_users" :key="allowedUser" class="flex gap-2">
+              <TextField :id="id" :model-value="allowedUser" disabled />
+              <Button type="button" color="gray" start-icon="trash" @click="removeUser(allowedUser)" />
             </div>
             <div class="flex gap-2">
               <TextField :id="id" v-model="newUser" @keydown.enter.prevent="addNewUser" />

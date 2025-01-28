@@ -5054,6 +5054,12 @@ const docTemplate = `{
                 "allow_pr": {
                     "type": "boolean"
                 },
+                "approval_allowed_users": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
                 "avatar_url": {
                     "type": "string"
                 },
@@ -5134,6 +5140,12 @@ const docTemplate = `{
                 },
                 "allow_pr": {
                     "type": "boolean"
+                },
+                "approval_allowed_users": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "cancel_previous_pipeline_events": {
                     "type": "array",
