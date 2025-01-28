@@ -1,14 +1,14 @@
 # Changelog
 
-## [3.1.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.1.0) - 2025-01-27
+## [3.1.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.1.0) - 2025-01-28
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@Levy-Tal, @cduchenoy, @damuzhi0810, @xoxys
+@Levy-Tal, @anbraten, @cduchenoy, @damuzhi0810, @xoxys
 
 ### 📚 Documentation
 
-- chore(deps): lock file maintenance [[#4783](https://github.com/woodpecker-ci/woodpecker/pull/4783)]
+- Add bluesky post plugin [[#4549](https://github.com/woodpecker-ci/woodpecker/pull/4549)]
 - Various docs improvements [[#4772](https://github.com/woodpecker-ci/woodpecker/pull/4772)]
 - fix(deps): update docs npm deps non-major [[#4774](https://github.com/woodpecker-ci/woodpecker/pull/4774)]
 - Add git basic changelog [[#4755](https://github.com/woodpecker-ci/woodpecker/pull/4755)]
@@ -23,6 +23,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): lock file maintenance [[#4783](https://github.com/woodpecker-ci/woodpecker/pull/4783)]
 - chore(deps): update dependency @antfu/eslint-config to v4.1.0 [[#4780](https://github.com/woodpecker-ci/woodpecker/pull/4780)]
 - fix(deps): update module github.com/bmatcuk/doublestar/v4 to v4.8.1 [[#4781](https://github.com/woodpecker-ci/woodpecker/pull/4781)]
 - chore(deps): update dependency @antfu/eslint-config to v4 [[#4779](https://github.com/woodpecker-ci/woodpecker/pull/4779)]
