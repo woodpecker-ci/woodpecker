@@ -195,7 +195,7 @@ func (b *StepBuilder) genItemForWorkflow(workflow *model.Workflow, axis matrix.A
 		maps.Copy(item.Labels, b.DefaultLabels)
 	}
 
-	// "woodpcker-ci.org" namespace is reserved for internal use
+	// "woodpecker-ci.org" namespace is reserved for internal use
 	for key, _ := range item.Labels {
 		if strings.HasPrefix(key, "woodpecker-ci.org") {
 			delete(item.Labels, key)
