@@ -142,10 +142,6 @@ type RepoPatch struct {
 
 type ForgeRemoteID string
 
-func (r ForgeRemoteID) String() string {
-	return string(r)
-}
-
 func (r ForgeRemoteID) IsValid() bool {
 	return r != "" && r != "0"
 }
