@@ -188,7 +188,7 @@
     {
       "name": "Bluesky Post",
       "docs": "https://codeberg.org/woodpecker-plugins/bluesky-post/raw/branch/main/docs.md",
-      "verified": false
+      "verified": true
     },
     {
       "name": "Discord",
