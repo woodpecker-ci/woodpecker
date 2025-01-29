@@ -14,7 +14,11 @@
 
 package pipeline
 
-import "go.woodpecker-ci.org/woodpecker/v3/server/model"
+import (
+	"slices"
+
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+)
 
 func setApprovalState(repo *model.Repo, pipeline *model.Pipeline) {
 	if !needsApproval(repo, pipeline) {
@@ -28,6 +32,12 @@ func setApprovalState(repo *model.Repo, pipeline *model.Pipeline) {
 func needsApproval(repo *model.Repo, pipeline *model.Pipeline) bool {
 	// skip events created by woodpecker itself
 	if pipeline.Event == model.EventCron || pipeline.Event == model.EventManual {
+		return false
+	}
+
+	// skip if user is allowed
+	// It's enough to check the username as the repo matches the forge of the pipeline already (no username clashes from different forges possible)
+	if slices.Contains(repo.ApprovalAllowedUsers, pipeline.Author) {
 		return false
 	}
 

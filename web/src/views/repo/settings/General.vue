@@ -88,6 +88,27 @@
         </template>
       </InputField>
 
+      <InputField
+        v-if="repoSettings.require_approval !== RepoRequireApproval.None"
+        :label="$t('require_approval.allowed_users.allowed_users')"
+      >
+        <template #default="{ id }">
+          <div class="flex flex-col gap-2">
+            <div v-for="allowedUser in repoSettings.approval_allowed_users" :key="allowedUser" class="flex gap-2">
+              <TextField :id="id" :model-value="allowedUser" disabled />
+              <Button type="button" color="gray" start-icon="trash" @click="removeUser(allowedUser)" />
+            </div>
+            <div class="flex gap-2">
+              <TextField :id="id" v-model="newUser" @keydown.enter.prevent="addNewUser" />
+              <Button type="button" color="gray" start-icon="plus" @click="addNewUser" />
+            </div>
+          </div>
+        </template>
+        <template #description>
+          {{ $t('require_approval.allowed_users.desc') }}
+        </template>
+      </InputField>
+
       <InputField docs-url="docs/usage/project-settings#project-visibility" :label="$t('repo.visibility.visibility')">
         <RadioField v-model="repoSettings.visibility" :options="projectVisibilityOptions" />
       </InputField>
@@ -191,6 +212,7 @@ function loadRepoSettings() {
     visibility: repo.value.visibility,
     require_approval: repo.value.require_approval,
     trusted: repo.value.trusted,
+    approval_allowed_users: repo.value.approval_allowed_users || [],
     allow_pr: repo.value.allow_pr,
     allow_deploy: repo.value.allow_deploy,
     cancel_previous_pipeline_events: repo.value.cancel_previous_pipeline_events || [],
@@ -267,5 +289,21 @@ function removeImage(image: string) {
   }
 
   repoSettings.value.netrc_trusted = repoSettings.value.netrc_trusted.filter((i) => i !== image);
+}
+
+const newUser = ref('');
+function addNewUser() {
+  if (!newUser.value) {
+    return;
+  }
+  repoSettings.value?.approval_allowed_users.push(newUser.value);
+  newUser.value = '';
+}
+function removeUser(user: string) {
+  if (!repoSettings.value) {
+    throw new Error('Unexpected: repoSettings should be set');
+  }
+
+  repoSettings.value.approval_allowed_users = repoSettings.value.approval_allowed_users.filter((i) => i !== user);
 }
 </script>
