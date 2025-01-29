@@ -1,10 +1,14 @@
 # Changelog
 
-## [3.1.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.1.0) - 2025-01-28
+## [3.1.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.1.0) - 2025-01-29
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@Levy-Tal, @anbraten, @cduchenoy, @damuzhi0810, @xoxys
+@Levy-Tal, @anbraten, @cduchenoy, @damuzhi0810, @qwerty287, @xoxys
+
+### ✨ Features
+
+- Add allow list for approvals [[#4768](https://github.com/woodpecker-ci/woodpecker/pull/4768)]
 
 ### 📚 Documentation
 
