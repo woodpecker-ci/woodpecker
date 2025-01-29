@@ -1,5 +1,6 @@
 import { emojify } from 'node-emoji';
-import { computed, type Ref } from 'vue';
+import { computed } from 'vue';
+import type { Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import { useDate } from '~/compositions/useDate';

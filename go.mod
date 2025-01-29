@@ -10,7 +10,7 @@ require (
 	codeberg.org/mvdkleijn/forgejo-sdk/forgejo v1.2.0
 	github.com/6543/logfile-open v1.2.1
 	github.com/adrg/xdg v0.5.3
-	github.com/bmatcuk/doublestar/v4 v4.8.0
+	github.com/bmatcuk/doublestar/v4 v4.8.1
 	github.com/cenkalti/backoff/v5 v5.0.1
 	github.com/charmbracelet/huh v0.6.0
 	github.com/charmbracelet/huh/spinner v0.0.0-20240327025511-ec643317aa10
@@ -65,7 +65,7 @@ require (
 	golang.org/x/term v0.28.0
 	golang.org/x/text v0.21.0
 	google.golang.org/grpc v1.70.0
-	google.golang.org/protobuf v1.36.3
+	google.golang.org/protobuf v1.36.4
 	gopkg.in/yaml.v3 v3.0.1
 	k8s.io/api v0.32.1
 	k8s.io/apimachinery v0.32.1

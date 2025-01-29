@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
-import { computed, reactive, type Ref } from 'vue';
+import { computed, reactive } from 'vue';
+import type { Ref } from 'vue';
 
 import useApiClient from '~/compositions/useApiClient';
 import type { Forge } from '~/lib/api/types';
