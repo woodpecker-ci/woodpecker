@@ -196,7 +196,7 @@ func (b *StepBuilder) genItemForWorkflow(workflow *model.Workflow, axis matrix.A
 	}
 
 	// "woodpecker-ci.org" namespace is reserved for internal use
-	for key, _ := range item.Labels {
+	for key := range item.Labels {
 		if strings.HasPrefix(key, "woodpecker-ci.org") {
 			log.Debug().Str("forge", b.Forge.Name()).Str("repo", b.Repo.FullName).Str("label", key).Msg("dropped pipeline label with reserved prefix woodpecker-ci.org")
 			delete(item.Labels, key)
