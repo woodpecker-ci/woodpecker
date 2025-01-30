@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.1.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.1.0) - 2025-01-29
+## [3.1.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.1.0) - 2025-01-30
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -27,6 +27,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update module github.com/getkin/kin-openapi to v0.129.0 [[#4790](https://github.com/woodpecker-ci/woodpecker/pull/4790)]
 - chore(deps): lock file maintenance [[#4783](https://github.com/woodpecker-ci/woodpecker/pull/4783)]
 - chore(deps): update dependency @antfu/eslint-config to v4.1.0 [[#4780](https://github.com/woodpecker-ci/woodpecker/pull/4780)]
 - fix(deps): update module github.com/bmatcuk/doublestar/v4 to v4.8.1 [[#4781](https://github.com/woodpecker-ci/woodpecker/pull/4781)]
