@@ -259,6 +259,9 @@ func registrySecretLabels(step *types.Step) (map[string]string, error) {
 		labels[ServiceLabel], _ = serviceName(step)
 	}
 	labels[StepLabelLegacy], err = stepLabel(step)
+	if err != nil {
+		return labels, err
+	}
 	labels[StepLabel], err = stepLabel(step)
 	if err != nil {
 		return labels, err

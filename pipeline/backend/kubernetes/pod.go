@@ -119,6 +119,9 @@ func podLabels(step *types.Step, config *config, options BackendOptions) (map[st
 		labels[ServiceLabel], _ = serviceName(step)
 	}
 	labels[StepLabelLegacy], err = stepLabel(step)
+	if err != nil {
+		return labels, err
+	}
 	labels[StepLabel], err = stepLabel(step)
 	if err != nil {
 		return labels, err
