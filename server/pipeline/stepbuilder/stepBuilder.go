@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"maps"
 	"path/filepath"
+	"strconv"
 	"strings"
 
 	"github.com/oklog/ulid/v2"
@@ -193,6 +194,20 @@ func (b *StepBuilder) genItemForWorkflow(workflow *model.Workflow, axis matrix.A
 		// Set default labels if no labels are defined in the pipeline
 		maps.Copy(item.Labels, b.DefaultLabels)
 	}
+
+	// "woodpecker-ci.org" namespace is reserved for internal use
+	for key := range item.Labels {
+		if strings.HasPrefix(key, "woodpecker-ci.org") {
+			log.Debug().Str("forge", b.Forge.Name()).Str("repo", b.Repo.FullName).Str("label", key).Msg("dropped pipeline label with reserved prefix woodpecker-ci.org")
+			delete(item.Labels, key)
+		}
+	}
+
+	item.Labels["woodpecker-ci.org/forge-id"] = b.Forge.Name()
+	item.Labels["woodpecker-ci.org/repo-forge-id"] = string(b.Repo.ForgeRemoteID)
+	item.Labels["woodpecker-ci.org/repo-id"] = strconv.FormatInt(b.Repo.ID, 10)
+	item.Labels["woodpecker-ci.org/repo-name"] = b.Repo.Name
+	item.Labels["woodpecker-ci.org/branch"] = b.Repo.Branch
 
 	return item, errorsAndWarnings
 }
