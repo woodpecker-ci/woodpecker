@@ -17,6 +17,7 @@ package stepbuilder
 
 import (
 	"fmt"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline"
 	"maps"
 	"path/filepath"
 	"strconv"
@@ -197,17 +198,17 @@ func (b *StepBuilder) genItemForWorkflow(workflow *model.Workflow, axis matrix.A
 
 	// "woodpecker-ci.org" namespace is reserved for internal use
 	for key := range item.Labels {
-		if strings.HasPrefix(key, "woodpecker-ci.org") {
+		if strings.HasPrefix(key, pipeline.InternalLabelPrefix) {
 			log.Debug().Str("forge", b.Forge.Name()).Str("repo", b.Repo.FullName).Str("label", key).Msg("dropped pipeline label with reserved prefix woodpecker-ci.org")
 			delete(item.Labels, key)
 		}
 	}
 
-	item.Labels["woodpecker-ci.org/forge-id"] = b.Forge.Name()
-	item.Labels["woodpecker-ci.org/repo-forge-id"] = string(b.Repo.ForgeRemoteID)
-	item.Labels["woodpecker-ci.org/repo-id"] = strconv.FormatInt(b.Repo.ID, 10)
-	item.Labels["woodpecker-ci.org/repo-name"] = b.Repo.Name
-	item.Labels["woodpecker-ci.org/branch"] = b.Repo.Branch
+	item.Labels[pipeline.LabelForgeRemoteID] = b.Forge.Name()
+	item.Labels[pipeline.LabelRepoForgeID] = string(b.Repo.ForgeRemoteID)
+	item.Labels[pipeline.LabelRepoID] = strconv.FormatInt(b.Repo.ID, 10)
+	item.Labels[pipeline.LabelRepoName] = b.Repo.Name
+	item.Labels[pipeline.LabelBranch] = b.Repo.Branch
 
 	return item, errorsAndWarnings
 }
