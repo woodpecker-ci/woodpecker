@@ -31,12 +31,9 @@ import (
 )
 
 const (
-	// StepLabelLegacy is the legacy label name from before the introduction of the woodpecker-ci.org namespace.
-	// This will be removed in the future.
-	StepLabelLegacy       = "step"
-	StepLabel             = "woodpecker-ci.org/step"
-	podPrefix             = "wp-"
-	defaultFSGroup  int64 = 1000
+	StepLabel            = "step"
+	podPrefix            = "wp-"
+	defaultFSGroup int64 = 1000
 )
 
 func mkPod(step *types.Step, config *config, podName, goos string, options BackendOptions) (*v1.Pod, error) {
@@ -117,10 +114,6 @@ func podLabels(step *types.Step, config *config, options BackendOptions) (map[st
 	}
 	if step.Type == types.StepTypeService {
 		labels[ServiceLabel], _ = serviceName(step)
-	}
-	labels[StepLabelLegacy], err = stepLabel(step)
-	if err != nil {
-		return labels, err
 	}
 	labels[StepLabel], err = stepLabel(step)
 	if err != nil {

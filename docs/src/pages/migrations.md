@@ -4,7 +4,7 @@ To enhance the usability of Woodpecker and meet evolving security standards, occ
 
 ## `next`
 
-- (Kubernetes) Deprecated `step` label on pod in favor of new namespaced label `woodpecker-ci.org/step`. The `step` label will be removed in a future update.
+- No changes
 
 ## 3.0.0
 
