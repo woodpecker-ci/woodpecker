@@ -567,7 +567,11 @@
         "none": "Nessuno",
         "pull_requests": "Tutte le richieste di modifica",
         "all_events": "Tutti gli eventi del forge",
-        "none_desc": "Ogni evento attiva le pipeline, incluse le richieste di modifica. Questa impostazione può essere pericolosa ed è consigliata solo per le istanze private."
+        "none_desc": "Ogni evento attiva le pipeline, incluse le richieste di modifica. Questa impostazione può essere pericolosa ed è consigliata solo per le istanze private.",
+        "allowed_users": {
+            "allowed_users": "Utenti autorizzati",
+            "desc": "Pipeline create dagli utenti elencati non richiedono mai approvazione."
+        }
     },
     "org_access_denied": "Non sei autorizzato ad accedere a questa organizzazione"
 }
