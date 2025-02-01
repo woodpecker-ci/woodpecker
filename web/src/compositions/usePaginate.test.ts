@@ -1,6 +1,7 @@
 import { shallowMount } from '@vue/test-utils';
 import { describe, expect, it } from 'vitest';
-import { watch, type Ref } from 'vue';
+import { watch } from 'vue';
+import type { Ref } from 'vue';
 
 import { usePagination } from './usePaginate';
 
