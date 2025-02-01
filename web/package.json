@@ -20,9 +20,9 @@
   "dependencies": {
     "@kyvg/vue3-notification": "^3.4.1",
     "@mdi/js": "^7.4.47",
-    "@tailwindcss/postcss": "4.0.0",
+    "@tailwindcss/postcss": "4.0.2",
     "@tailwindcss/typography": "^0.5.15",
-    "@tailwindcss/vite": "4.0.0",
+    "@tailwindcss/vite": "4.0.2",
     "@vueuse/core": "^12.3.0",
     "ansi_up": "^6.0.2",
     "autoprefixer": "^10.4.20",
