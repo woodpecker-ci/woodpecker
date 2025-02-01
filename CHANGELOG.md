@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.1.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.1.0) - 2025-01-31
+## [3.1.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.1.0) - 2025-02-01
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -10,17 +10,18 @@
 
 - Add allow list for approvals [[#4768](https://github.com/woodpecker-ci/woodpecker/pull/4768)]
 
-### 📈 Enhancement
-
-- Tag pipeline with source information [[#4771](https://github.com/woodpecker-ci/woodpecker/pull/4771)]
-- Add Git Ref To Build Status in BitbucketDatacenter [[#4724](https://github.com/woodpecker-ci/woodpecker/pull/4724)]
-
 ### 📚 Documentation
 
+- chore(deps): update dependency @types/node to v22.13.0 [[#4799](https://github.com/woodpecker-ci/woodpecker/pull/4799)]
 - Add bluesky post plugin [[#4549](https://github.com/woodpecker-ci/woodpecker/pull/4549)]
 - Various docs improvements [[#4772](https://github.com/woodpecker-ci/woodpecker/pull/4772)]
 - fix(deps): update docs npm deps non-major [[#4774](https://github.com/woodpecker-ci/woodpecker/pull/4774)]
 - Add git basic changelog [[#4755](https://github.com/woodpecker-ci/woodpecker/pull/4755)]
+
+### 📈 Enhancement
+
+- Tag pipeline with source information [[#4771](https://github.com/woodpecker-ci/woodpecker/pull/4771)]
+- Add Git Ref To Build Status in BitbucketDatacenter [[#4724](https://github.com/woodpecker-ci/woodpecker/pull/4724)]
 
 ### 🐛 Bug Fixes
 
