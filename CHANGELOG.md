@@ -29,6 +29,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update web npm deps non-major [[#4798](https://github.com/woodpecker-ci/woodpecker/pull/4798)]
 - fix(deps): update module github.com/getkin/kin-openapi to v0.129.0 [[#4790](https://github.com/woodpecker-ci/woodpecker/pull/4790)]
 - chore(deps): lock file maintenance [[#4783](https://github.com/woodpecker-ci/woodpecker/pull/4783)]
 - chore(deps): update dependency @antfu/eslint-config to v4.1.0 [[#4780](https://github.com/woodpecker-ci/woodpecker/pull/4780)]
