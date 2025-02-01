@@ -36,6 +36,9 @@ func TestOrgCRUD(t *testing.T) {
 	assert.NoError(t, store.OrgCreate(org1))
 	assert.EqualValues(t, "someAwesomeOrg", org1.Name)
 
+	// don't allow the same name in different casing
+	assert.Error(t, store.OrgCreate(&model.Org{ID: org1.ID, Name: "someawesomeorg"}))
+
 	// retrieve it
 	orgOne, err := store.OrgGet(org1.ID)
 	assert.NoError(t, err)

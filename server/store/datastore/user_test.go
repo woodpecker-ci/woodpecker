@@ -61,8 +61,8 @@ func TestUsers(t *testing.T) {
 
 	// check unique login
 	user2 := model.User{
-		Login:       "joe",
-		Email:       "foo@bar.com",
+		Login:       "Joe",
+		Email:       "foo2@bar.com",
 		AccessToken: "ab20g0ddaf012c744e136da16aa21ad9",
 	}
 	err2 = store.CreateUser(&user2)
