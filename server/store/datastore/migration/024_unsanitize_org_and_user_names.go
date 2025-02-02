@@ -18,6 +18,7 @@ import (
 	"fmt"
 
 	"src.techknowlogick.com/xormigrate"
+	"xorm.io/builder"
 	"xorm.io/xorm"
 )
 
@@ -25,11 +26,15 @@ var unSanitizeOrgAndUserNames = xormigrate.Migration{
 	ID: "unsanitize-org-and-user-names",
 	MigrateSession: func(sess *xorm.Session) (err error) {
 		type user struct {
-			Login string `xorm:"TEXT 'login'"`
+			ID      int64  `xorm:"pk autoincr 'id'"`
+			Login   string `xorm:"TEXT 'login'"`
+			ForgeID int64  `xorm:"forge_id"`
 		}
 
 		type org struct {
-			Name string `xorm:"TEXT 'name'"`
+			ID      int64  `xorm:"pk autoincr 'id'"`
+			Name    string `xorm:"TEXT 'name'"`
+			ForgeID int64  `xorm:"forge_id"`
 		}
 
 		if err := sess.Sync(new(user), new(org)); err != nil {
@@ -44,13 +49,14 @@ var unSanitizeOrgAndUserNames = xormigrate.Migration{
 
 		for _, user := range users {
 			userOrg := &org{}
-			_, err := sess.Where("name = ?", user.Login).Get(userOrg)
+			_, err := sess.Where("name = ? AND forge_id = ?", user.Login, user.ForgeID).Get(userOrg)
 			if err != nil {
 				return fmt.Errorf("getting org failed: %w", err)
 			}
+
 			if user.Login != userOrg.Name {
 				userOrg.Name = user.Login
-				if _, err := sess.ID(userOrg.Name).Cols("Name").Update(userOrg); err != nil {
+				if _, err := sess.Where(builder.Eq{"id": userOrg.ID}).Cols("Name").Update(userOrg); err != nil {
 					return fmt.Errorf("updating org name failed: %w", err)
 				}
 			}
