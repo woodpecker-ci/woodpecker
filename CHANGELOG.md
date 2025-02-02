@@ -12,6 +12,7 @@
 
 ### 📚 Documentation
 
+- chore(deps): update dependency isomorphic-dompurify to v2.21.0 [[#4805](https://github.com/woodpecker-ci/woodpecker/pull/4805)]
 - chore(deps): update dependency @types/node to v22.13.0 [[#4799](https://github.com/woodpecker-ci/woodpecker/pull/4799)]
 - Add bluesky post plugin [[#4549](https://github.com/woodpecker-ci/woodpecker/pull/4549)]
 - Various docs improvements [[#4772](https://github.com/woodpecker-ci/woodpecker/pull/4772)]
