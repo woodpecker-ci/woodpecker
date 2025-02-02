@@ -29,6 +29,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update module gitlab.com/gitlab-org/api/client-go to v0.121.0 [[#4804](https://github.com/woodpecker-ci/woodpecker/pull/4804)]
 - fix(deps): update dependency simple-icons to v14.5.0 [[#4803](https://github.com/woodpecker-ci/woodpecker/pull/4803)]
 - fix(deps): update web npm deps non-major to v4.0.3 [[#4802](https://github.com/woodpecker-ci/woodpecker/pull/4802)]
 - fix(deps): update web npm deps non-major [[#4798](https://github.com/woodpecker-ci/woodpecker/pull/4798)]
