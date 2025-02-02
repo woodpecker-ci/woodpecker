@@ -38,8 +38,9 @@ func TestHandleAuth(t *testing.T) {
 		Admin:         false,
 	}
 	org := &model.Org{
-		ID:   1,
-		Name: user.Login,
+		ID:      1,
+		ForgeID: 1,
+		Name:    user.Login,
 	}
 
 	server.Config.Server.SessionExpires = time.Hour
