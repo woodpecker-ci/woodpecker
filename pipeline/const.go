@@ -30,3 +30,5 @@ const (
 	LabelHash           string = InternalLabelPrefix + "/hash"
 	LabelOrgID          string = InternalLabelPrefix + "/org-id"
 )
+
+var InternalLabels = []string{LabelForgeRemoteID, LabelRepoForgeID, LabelRepoID, LabelRepoName, LabelBranch, LabelHash, LabelOrgID}
