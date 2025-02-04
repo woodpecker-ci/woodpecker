@@ -27,4 +27,6 @@ const (
 	LabelRepoID         string = InternalLabelPrefix + "/repo-id"
 	LabelRepoName       string = InternalLabelPrefix + "/repo-name"
 	LabelBranch         string = InternalLabelPrefix + "/branch"
+	LabelHash           string = InternalLabelPrefix + "/hash"
+	LabelOrgID          string = InternalLabelPrefix + "/org-id"
 )

@@ -18,6 +18,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline"
 	"strings"
 
 	"github.com/distribution/reference"
@@ -210,7 +211,7 @@ func mkRegistrySecret(step *types.Step, config *config) (*v1.Secret, error) {
 		return nil, err
 	}
 
-	labels, err := registrySecretLabels(step)
+	labels, err := registrySecretLabels(step, config)
 	if err != nil {
 		return nil, err
 	}
@@ -251,9 +252,17 @@ func registrySecretName(step *types.Step) (string, error) {
 	return podName(step)
 }
 
-func registrySecretLabels(step *types.Step) (map[string]string, error) {
+func registrySecretLabels(step *types.Step, config *config) (map[string]string, error) {
 	var err error
 	labels := make(map[string]string)
+
+	for k, v := range step.WorkflowLabels {
+		// Only copy user labels if allowed by agent config.
+		// Internal labels are filtered on the server-side.
+		if config.PodLabelsAllowFromStep || strings.HasPrefix(k, pipeline.InternalLabelPrefix) {
+			labels[k] = v
+		}
+	}
 
 	if step.Type == types.StepTypeService {
 		labels[ServiceLabel], _ = serviceName(step)
