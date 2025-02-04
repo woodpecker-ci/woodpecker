@@ -209,7 +209,6 @@ func (b *StepBuilder) genItemForWorkflow(workflow *model.Workflow, axis matrix.A
 	item.Labels[pipeline.LabelRepoID] = strconv.FormatInt(b.Repo.ID, 10)
 	item.Labels[pipeline.LabelRepoName] = b.Repo.Name
 	item.Labels[pipeline.LabelBranch] = b.Repo.Branch
-	item.Labels[pipeline.LabelHash] = b.Repo.Hash
 	item.Labels[pipeline.LabelOrgID] = strconv.FormatInt(b.Repo.OrgID, 10)
 
 	for stageI := range item.Config.Stages {
