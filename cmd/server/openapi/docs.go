@@ -5097,6 +5097,9 @@ const docTemplate = `{
                 "id": {
                     "type": "integer"
                 },
+                "last_pipeline": {
+                    "$ref": "#/definitions/Pipeline"
+                },
                 "name": {
                     "type": "string"
                 },

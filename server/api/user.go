@@ -140,6 +140,26 @@ func GetRepos(c *gin.Context) {
 		return
 	}
 
+	repoIDs := make([]int64, len(activeRepos))
+	for i, repo := range activeRepos {
+		repoIDs[i] = repo.ID
+	}
+
+	pipelines, err := _store.GetRepoLatestPipelines(repoIDs)
+	if err != nil {
+		c.String(http.StatusInternalServerError, "Error fetching repository list. %s", err)
+		return
+	}
+
+	latestPipelines := make(map[int64]*model.Pipeline, len(activeRepos))
+	for _, pipeline := range pipelines {
+		latestPipelines[pipeline.RepoID] = pipeline
+	}
+
+	for _, repo := range activeRepos {
+		repo.LastPipeline = latestPipelines[repo.ID]
+	}
+
 	c.JSON(http.StatusOK, activeRepos)
 }
 
