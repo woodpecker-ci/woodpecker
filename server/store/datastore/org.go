@@ -16,7 +16,6 @@ package datastore
 
 import (
 	"fmt"
-	"strings"
 
 	"xorm.io/xorm"
 
@@ -82,7 +81,7 @@ func (s storage) OrgFindByName(name string) (*model.Org, error) {
 func (s storage) orgFindByName(sess *xorm.Session, name string) (*model.Org, error) {
 	// sanitize
 	org := new(model.Org)
-	return org, wrapGet(sess.Where("LOWER(name) = ?", strings.ToLower(name)).Get(org))
+	return org, wrapGet(sess.Where("name = ?", name).Get(org))
 }
 
 func (s storage) OrgRepoList(org *model.Org, p *model.ListOptions) ([]*model.Repo, error) {
