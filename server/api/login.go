@@ -225,7 +225,7 @@ func HandleAuth(c *gin.Context) {
 
 		// this should never happen, but if it does we should make admins aware of it
 		if org != nil && org.ForgeID != forgeID {
-			log.Error().Err(err).Msgf("user org is not from the same forge  %s", user.Login)
+			log.Error().Err(err).Msgf("user org is not from the same forge: user:  %s", user.Login)
 			c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=internal_error")
 			return
 		}
