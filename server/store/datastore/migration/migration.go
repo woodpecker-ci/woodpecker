@@ -81,7 +81,7 @@ func Migrate(_ context.Context, e *xorm.Engine, allowLong bool) error {
 
 	m := xormigrate.New(e, migrationTasks)
 	m.AllowLong(allowLong)
-	oldCount, err := e.Table("migrations").Count()
+	oldCount, err := e.Table("migration").Count()
 	if oldCount < 1 || err != nil {
 		// allow new schema initialization if old migrations table is empty or it does not exist (err != nil)
 		// schema initialization will always run if we call `InitSchema`
