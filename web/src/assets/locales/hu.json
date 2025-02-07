@@ -474,7 +474,11 @@
         "forks": "Pull Request egy forkolt repositoryból",
         "pull_requests": "Mindegyik Pull Request",
         "none": "Nincs",
-        "all_events": "Az összes esemény a kódplatformtól"
+        "all_events": "Az összes esemény a kódplatformtól",
+        "allowed_users": {
+            "desc": "Pipelineok amelyeket a következő felhasználók hoztak létre, soha nem szükséges hozzájuk engedély.",
+            "allowed_users": "Engedélyezett felhasználók"
+        }
     },
     "global_level_secret": "globális titkos változó",
     "org": {
