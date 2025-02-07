@@ -110,7 +110,7 @@ func HandleAuth(c *gin.Context) {
 
 	_forge, err := server.Config.Services.Manager.ForgeByID(forgeID)
 	if err != nil {
-		log.Error().Err(err).Msgf("Cannot get forge by id %d", forgeID)
+		log.Error().Err(err).Msgf("cannot get forge by id %d", forgeID)
 		c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=internal_error")
 		return
 	}
@@ -183,21 +183,26 @@ func HandleAuth(c *gin.Context) {
 	// create or set the user's organization if it isn't linked yet
 	if user.OrgID == 0 {
 		// check if an org with the same name exists already and assign it to the user if it does
-		if org, err := _store.OrgFindByName(user.Login); err == nil && org != nil {
-			org.IsUser = true
-			user.OrgID = org.ID
-
-			if err := _store.OrgUpdate(org); err != nil {
-				log.Error().Err(err).Msgf("on user creation, could not mark org as user")
-			}
-		}
+		// TODO: find the org by name and forgeID directly
+		org, err := _store.OrgFindByName(user.Login)
 		if err != nil && !errors.Is(err, types.RecordNotExist) {
 			log.Error().Err(err).Msgf("cannot get org %s", user.Login)
 			c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=internal_error")
 			return
 		}
 
-		if user.OrgID == 0 {
+		// if an org with the same name exists => assign org to the user
+		if err == nil && org != nil {
+			org.IsUser = true
+			user.OrgID = org.ID
+
+			if err := _store.OrgUpdate(org); err != nil {
+				log.Error().Err(err).Msgf("on login, could not assign user to existing org")
+			}
+		}
+
+		// if no org with the same name exists => create a new org
+		if user.OrgID == 0 || errors.Is(err, types.RecordNotExist) {
 			org := &model.Org{
 				Name:    user.Login,
 				IsUser:  true,
@@ -205,7 +210,7 @@ func HandleAuth(c *gin.Context) {
 				ForgeID: user.ForgeID,
 			}
 			if err := _store.OrgCreate(org); err != nil {
-				log.Error().Err(err).Msgf("on user creation, could not create org for user")
+				log.Error().Err(err).Msgf("on login, could not create org for user")
 			}
 			user.OrgID = org.ID
 		}
@@ -220,7 +225,7 @@ func HandleAuth(c *gin.Context) {
 		if org != nil && org.Name != user.Login {
 			org.Name = user.Login
 			if err := _store.OrgUpdate(org); err != nil {
-				log.Error().Err(err).Msgf("on user creation, could not mark org as user")
+				log.Error().Err(err).Msgf("on login, could not update org %d name to user name %s", org.ID, user.Login)
 			}
 		}
 	}
