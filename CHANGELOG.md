@@ -10,6 +10,11 @@
 
 - Add allow list for approvals [[#4768](https://github.com/woodpecker-ci/woodpecker/pull/4768)]
 
+### 🐛 Bug Fixes
+
+- Fix k8s secret schema [[#4819](https://github.com/woodpecker-ci/woodpecker/pull/4819)]
+- Move section description to the top [[#4773](https://github.com/woodpecker-ci/woodpecker/pull/4773)]
+
 ### 📚 Documentation
 
 - chore(deps): update dependency isomorphic-dompurify to v2.21.0 [[#4805](https://github.com/woodpecker-ci/woodpecker/pull/4805)]
@@ -23,10 +28,6 @@
 
 - Tag pipeline with source information [[#4771](https://github.com/woodpecker-ci/woodpecker/pull/4771)]
 - Add Git Ref To Build Status in BitbucketDatacenter [[#4724](https://github.com/woodpecker-ci/woodpecker/pull/4724)]
-
-### 🐛 Bug Fixes
-
-- Move section description to the top [[#4773](https://github.com/woodpecker-ci/woodpecker/pull/4773)]
 
 ### 📦️ Dependency
 
