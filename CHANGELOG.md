@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.1.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.1.0) - 2025-02-05
+## [3.1.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.1.0) - 2025-02-07
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -12,7 +12,6 @@
 
 ### 📚 Documentation
 
-- chore(deps): lock file maintenance [[#4808](https://github.com/woodpecker-ci/woodpecker/pull/4808)]
 - chore(deps): update dependency isomorphic-dompurify to v2.21.0 [[#4805](https://github.com/woodpecker-ci/woodpecker/pull/4805)]
 - chore(deps): update dependency @types/node to v22.13.0 [[#4799](https://github.com/woodpecker-ci/woodpecker/pull/4799)]
 - Add bluesky post plugin [[#4549](https://github.com/woodpecker-ci/woodpecker/pull/4549)]
@@ -33,6 +32,7 @@
 
 - fix(deps): update golang-packages [[#4812](https://github.com/woodpecker-ci/woodpecker/pull/4812)]
 - chore(deps): update dependency vitest to v3.0.5 [security] [[#4810](https://github.com/woodpecker-ci/woodpecker/pull/4810)]
+- chore(deps): lock file maintenance [[#4808](https://github.com/woodpecker-ci/woodpecker/pull/4808)]
 - chore(deps): update dependency @antfu/eslint-config to v4.1.1 [[#4806](https://github.com/woodpecker-ci/woodpecker/pull/4806)]
 - fix(deps): update module gitlab.com/gitlab-org/api/client-go to v0.121.0 [[#4804](https://github.com/woodpecker-ci/woodpecker/pull/4804)]
 - fix(deps): update dependency simple-icons to v14.5.0 [[#4803](https://github.com/woodpecker-ci/woodpecker/pull/4803)]
