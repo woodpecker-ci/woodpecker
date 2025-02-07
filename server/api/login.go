@@ -186,7 +186,7 @@ func HandleAuth(c *gin.Context) {
 		// TODO: find the org by name and forgeID directly
 		org, err := _store.OrgFindByName(user.Login)
 		if err != nil && !errors.Is(err, types.RecordNotExist) {
-			log.Error().Err(err).Msgf("cannot get org %s", user.Login)
+			log.Error().Err(err).Msgf("cannot get org for user %s", user.Login)
 			c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=internal_error")
 			return
 		}
@@ -197,11 +197,11 @@ func HandleAuth(c *gin.Context) {
 			user.OrgID = org.ID
 
 			if err := _store.OrgUpdate(org); err != nil {
-				log.Error().Err(err).Msgf("on login, could not assign user to existing org")
+				log.Error().Err(err).Msgf("cannot assign user %s to existing org %d", user.Login, org.ID)
 			}
 		}
 
-		// if no org with the same name exists => create a new org
+		// if still no org with the same name exists => create a new org
 		if user.OrgID == 0 || errors.Is(err, types.RecordNotExist) {
 			org := &model.Org{
 				Name:    user.Login,
@@ -210,7 +210,7 @@ func HandleAuth(c *gin.Context) {
 				ForgeID: user.ForgeID,
 			}
 			if err := _store.OrgCreate(org); err != nil {
-				log.Error().Err(err).Msgf("on login, could not create org for user")
+				log.Error().Err(err).Msgf("cannot create org for user %s", user.Login)
 			}
 			user.OrgID = org.ID
 		}
@@ -218,14 +218,14 @@ func HandleAuth(c *gin.Context) {
 		// update org name if necessary
 		org, err := _store.OrgGet(user.OrgID)
 		if err != nil {
-			log.Error().Err(err).Msgf("cannot get org %s", user.Login)
+			log.Error().Err(err).Msgf("cannot get org %d for user %s", user.OrgID, user.Login)
 			c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=internal_error")
 			return
 		}
 		if org != nil && org.Name != user.Login {
 			org.Name = user.Login
 			if err := _store.OrgUpdate(org); err != nil {
-				log.Error().Err(err).Msgf("on login, could not update org %d name to user name %s", org.ID, user.Login)
+				log.Error().Err(err).Msgf("cannot update org %d name to user name %s", org.ID, user.Login)
 			}
 		}
 	}
@@ -241,7 +241,7 @@ func HandleAuth(c *gin.Context) {
 	user.Admin = user.Admin || server.Config.Permissions.Admins.IsAdmin(userFromForge)
 
 	if err := _store.UpdateUser(user); err != nil {
-		log.Error().Err(err).Msgf("cannot update %s", user.Login)
+		log.Error().Err(err).Msgf("cannot update user %s", user.Login)
 		c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=internal_error")
 		return
 	}
@@ -251,14 +251,14 @@ func HandleAuth(c *gin.Context) {
 	_token.Set("user-id", strconv.FormatInt(user.ID, 10))
 	tokenString, err := _token.SignExpires(user.Hash, exp)
 	if err != nil {
-		log.Error().Msgf("cannot create token for %s", user.Login)
+		log.Error().Msgf("cannot create token for user %s", user.Login)
 		c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=internal_error")
 		return
 	}
 
 	err = updateRepoPermissions(c, user, _store, _forge)
 	if err != nil {
-		log.Error().Err(err).Msgf("cannot update repo permissions for %s", user.Login)
+		log.Error().Err(err).Msgf("cannot update repo permissions for user %s", user.Login)
 		c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=internal_error")
 		return
 	}
@@ -284,7 +284,7 @@ func updateRepoPermissions(c *gin.Context, user *model.User, _store store.Store,
 			continue
 		}
 
-		log.Debug().Msgf("synced user permission for %s %s", user.Login, dbRepo.FullName)
+		log.Debug().Msgf("synced user permission for user %s and repo %s", user.Login, dbRepo.FullName)
 		perm := forgeRepo.Perm
 		perm.Repo = dbRepo
 		perm.RepoID = dbRepo.ID
