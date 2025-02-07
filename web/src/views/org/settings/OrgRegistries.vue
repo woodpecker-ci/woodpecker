@@ -34,7 +34,8 @@
 
 <script lang="ts" setup>
 import { cloneDeep } from 'lodash';
-import { computed, inject, ref, type Ref } from 'vue';
+import { computed, inject, ref } from 'vue';
+import type { Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import Button from '~/components/atomic/Button.vue';

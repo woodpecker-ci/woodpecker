@@ -5,10 +5,10 @@
       <DocsLink v-if="docsUrl" :topic="label" :url="docsUrl" class="ml-2" />
       <slot v-else-if="$slots.titleActions" name="titleActions" />
     </div>
-    <slot :id="id" />
-    <div v-if="$slots.description" class="ml-1 mt-1 text-wp-text-alt-100">
+    <div v-if="$slots.description" class="mb-2 text-sm text-wp-text-alt-100">
       <slot name="description" />
     </div>
+    <slot :id="id" />
   </div>
 </template>
 

@@ -100,7 +100,8 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, inject, onBeforeUnmount, onMounted, ref, toRef, watch, type Ref } from 'vue';
+import { computed, inject, onBeforeUnmount, onMounted, ref, toRef, watch } from 'vue';
+import type { Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 

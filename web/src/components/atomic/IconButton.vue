@@ -30,7 +30,8 @@
 <script lang="ts" setup>
 import type { RouteLocationRaw } from 'vue-router';
 
-import Icon, { type IconNames } from '~/components/atomic/Icon.vue';
+import Icon from '~/components/atomic/Icon.vue';
+import type { IconNames } from '~/components/atomic/Icon.vue';
 
 defineProps<{
   icon?: IconNames;
