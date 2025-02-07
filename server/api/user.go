@@ -81,7 +81,7 @@ func GetFeed(c *gin.Context) {
 //	@Description	Retrieve the currently authenticated User's Repository list
 //	@Router			/user/repos [get]
 //	@Produce		json
-//	@Success		200	{array}	Repo
+//	@Success		200	{array}	RepoLastPipeline
 //	@Tags			User
 //	@Param			Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
 //	@Param			all				query	bool	false	"query all repos, including inactive ones"
@@ -156,11 +156,15 @@ func GetRepos(c *gin.Context) {
 		latestPipelines[pipeline.RepoID] = pipeline
 	}
 
-	for _, repo := range activeRepos {
-		repo.LastPipeline = latestPipelines[repo.ID]
+	repos := make([]*model.RepoLastPipeline, len(activeRepos))
+	for i, repo := range activeRepos {
+		repos[i] = &model.RepoLastPipeline{
+			Repo:         repo,
+			LastPipeline: latestPipelines[repo.ID],
+		}
 	}
 
-	c.JSON(http.StatusOK, activeRepos)
+	c.JSON(http.StatusOK, repos)
 }
 
 // PostToken
