@@ -264,7 +264,7 @@ func TestHandleAuth(t *testing.T) {
 		assert.Equal(t, "/login?error=org_access_denied", c.Writer.Header().Get("Location"))
 	})
 
-	t.Run("User org should be created if it does not exists", func(t *testing.T) {
+	t.Run("should create an user org if it does not exists", func(t *testing.T) {
 		_manager := mocks_services.NewManager(t)
 		_forge := mocks_forge.NewForge(t)
 		_store := mocks_store.NewStore(t)
@@ -298,7 +298,7 @@ func TestHandleAuth(t *testing.T) {
 		assert.NotEmpty(t, c.Writer.Header().Get("Set-Cookie"))
 	})
 
-	t.Run("User org should be linked if it has the same name as the user", func(t *testing.T) {
+	t.Run("should link an user org if it has the same name as the user", func(t *testing.T) {
 		_manager := mocks_services.NewManager(t)
 		_forge := mocks_forge.NewForge(t)
 		_store := mocks_store.NewStore(t)
@@ -332,7 +332,7 @@ func TestHandleAuth(t *testing.T) {
 		assert.NotEmpty(t, c.Writer.Header().Get("Set-Cookie"))
 	})
 
-	t.Run("User org should be updated if the user name was changed", func(t *testing.T) {
+	t.Run("should update an user org if the user name was changed", func(t *testing.T) {
 		_manager := mocks_services.NewManager(t)
 		_forge := mocks_forge.NewForge(t)
 		_store := mocks_store.NewStore(t)
