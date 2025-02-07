@@ -190,10 +190,11 @@ The Webhook tokens have been changed for enhanced security and therefore existin
 
 #### Rootless images
 
-The `server` and `cli` images now use a non-privileged user (`woodpecker`) by default.
-If you have volume mounts attached to containers, you might need to update the ownership of these directories from `root` to `woodpecker`.
+Woodpecker now supports running rootless images by adjusting the entrypoints and directory permissions in the containers in a way that allows non-privileged users to execute tasks.
 
-:::note
+In addition, all images published by Woodpecker (Server, Agent, CLI) now use a non-privileged user (`woodpecker` with UID and GID `1000`) by default. If you have volumes attached to the containers, you may need to change the ownership of these directories from `root` to `woodpecker` by executing `chown -R 1000:1000 <mount dir>`.
+
+:::info
 The agent image must remain rootful by default to be able to mount the Docker socket when Woodpecker is used with the `docker` backend.
 The helm chart will start to use a non-privileged user by utilizing `securityContext`.
 Running a completely rootless agent with the `docker` backend may be possible by using a rootless docker daemon.

@@ -241,6 +241,9 @@ func PatchRepo(c *gin.Context) {
 			return
 		}
 	}
+	if in.ApprovalAllowedUsers != nil {
+		repo.ApprovalAllowedUsers = *in.ApprovalAllowedUsers
+	}
 	if in.Timeout != nil {
 		repo.Timeout = *in.Timeout
 	}

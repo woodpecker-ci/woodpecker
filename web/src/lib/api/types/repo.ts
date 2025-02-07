@@ -68,6 +68,8 @@ export interface Repo {
 
   require_approval: RepoRequireApproval;
 
+  approval_allowed_users: string[];
+
   // Events that will cancel running pipelines before starting a new one
   cancel_previous_pipeline_events: string[];
 
@@ -95,6 +97,7 @@ export type RepoSettings = Pick<
   | 'timeout'
   | 'visibility'
   | 'require_approval'
+  | 'approval_allowed_users'
   | 'allow_pr'
   | 'allow_deploy'
   | 'cancel_previous_pipeline_events'
