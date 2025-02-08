@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.1.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.1.0) - 2025-02-07
+## [3.1.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.1.0) - 2025-02-08
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -31,6 +31,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update web npm deps non-major [[#4825](https://github.com/woodpecker-ci/woodpecker/pull/4825)]
 - fix(deps): update golang-packages [[#4812](https://github.com/woodpecker-ci/woodpecker/pull/4812)]
 - chore(deps): update dependency vitest to v3.0.5 [security] [[#4810](https://github.com/woodpecker-ci/woodpecker/pull/4810)]
 - chore(deps): lock file maintenance [[#4808](https://github.com/woodpecker-ci/woodpecker/pull/4808)]
