@@ -44,8 +44,8 @@ export const usePipelineStore = defineStore('pipelines', () => {
 
     // Update last pipeline number for the repo
     const repo = repoStore.repos.get(repoId);
-    if (repo?.last_pipeline !== undefined && repo.last_pipeline < pipeline.number) {
-      repo.last_pipeline = pipeline.number;
+    if (repo?.last_pipeline_number !== undefined && repo.last_pipeline_number < pipeline.number) {
+      repo.last_pipeline_number = pipeline.number;
       repoStore.setRepo(repo);
     }
 
