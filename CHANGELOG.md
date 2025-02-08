@@ -10,19 +10,20 @@
 
 - Add allow list for approvals [[#4768](https://github.com/woodpecker-ci/woodpecker/pull/4768)]
 
-### 🐛 Bug Fixes
-
-- Fix k8s secret schema [[#4819](https://github.com/woodpecker-ci/woodpecker/pull/4819)]
-- Move section description to the top [[#4773](https://github.com/woodpecker-ci/woodpecker/pull/4773)]
-
 ### 📚 Documentation
 
+- fix(deps): update docs npm deps non-major [[#4823](https://github.com/woodpecker-ci/woodpecker/pull/4823)]
 - chore(deps): update dependency isomorphic-dompurify to v2.21.0 [[#4805](https://github.com/woodpecker-ci/woodpecker/pull/4805)]
 - chore(deps): update dependency @types/node to v22.13.0 [[#4799](https://github.com/woodpecker-ci/woodpecker/pull/4799)]
 - Add bluesky post plugin [[#4549](https://github.com/woodpecker-ci/woodpecker/pull/4549)]
 - Various docs improvements [[#4772](https://github.com/woodpecker-ci/woodpecker/pull/4772)]
 - fix(deps): update docs npm deps non-major [[#4774](https://github.com/woodpecker-ci/woodpecker/pull/4774)]
 - Add git basic changelog [[#4755](https://github.com/woodpecker-ci/woodpecker/pull/4755)]
+
+### 🐛 Bug Fixes
+
+- Fix k8s secret schema [[#4819](https://github.com/woodpecker-ci/woodpecker/pull/4819)]
+- Move section description to the top [[#4773](https://github.com/woodpecker-ci/woodpecker/pull/4773)]
 
 ### 📈 Enhancement
 
