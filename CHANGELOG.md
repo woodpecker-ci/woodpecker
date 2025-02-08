@@ -4,11 +4,16 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@Levy-Tal, @anbraten, @cduchenoy, @damuzhi0810, @jenrik, @qwerty287, @xoxys
+@Levy-Tal, @anbraten, @cduchenoy, @damuzhi0810, @lafriks, @qwerty287, @xoxys
 
 ### ✨ Features
 
 - Add allow list for approvals [[#4768](https://github.com/woodpecker-ci/woodpecker/pull/4768)]
+
+### 📈 Enhancement
+
+- Optimize repository list loading to return also latest pipeline info [[#4814](https://github.com/woodpecker-ci/woodpecker/pull/4814)]
+- Add Git Ref To Build Status in BitbucketDatacenter [[#4724](https://github.com/woodpecker-ci/woodpecker/pull/4724)]
 
 ### 📚 Documentation
 
@@ -24,11 +29,6 @@
 
 - Fix k8s secret schema [[#4819](https://github.com/woodpecker-ci/woodpecker/pull/4819)]
 - Move section description to the top [[#4773](https://github.com/woodpecker-ci/woodpecker/pull/4773)]
-
-### 📈 Enhancement
-
-- Tag pipeline with source information [[#4771](https://github.com/woodpecker-ci/woodpecker/pull/4771)]
-- Add Git Ref To Build Status in BitbucketDatacenter [[#4724](https://github.com/woodpecker-ci/woodpecker/pull/4724)]
 
 ### 📦️ Dependency
 
