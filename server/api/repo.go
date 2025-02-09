@@ -148,19 +148,6 @@ func PostRepo(c *gin.Context) {
 
 	repo.OrgID = org.ID
 
-	if enabledOnce {
-		err = _store.UpdateRepo(repo)
-	} else {
-		repo.ForgeID = user.ForgeID // TODO: allow to use other connected forges of the user
-		err = _store.CreateRepo(repo)
-	}
-	if err != nil {
-		msg := "could not create/update repo in store."
-		log.Error().Err(err).Msg(msg)
-		c.String(http.StatusInternalServerError, msg)
-		return
-	}
-
 	// creates the jwt token used to verify the repository
 	t := token.New(token.HookToken)
 	t.Set("repo-id", strconv.FormatInt(repo.ID, 10))
@@ -181,6 +168,19 @@ func PostRepo(c *gin.Context) {
 	err = _forge.Activate(c, user, repo, hookURL)
 	if err != nil {
 		msg := "could not create webhook in forge."
+		log.Error().Err(err).Msg(msg)
+		c.String(http.StatusInternalServerError, msg)
+		return
+	}
+
+	if enabledOnce {
+		err = _store.UpdateRepo(repo)
+	} else {
+		repo.ForgeID = user.ForgeID // TODO: allow to use other connected forges of the user
+		err = _store.CreateRepo(repo)
+	}
+	if err != nil {
+		msg := "could not create/update repo in store."
 		log.Error().Err(err).Msg(msg)
 		c.String(http.StatusInternalServerError, msg)
 		return
@@ -455,10 +455,7 @@ func DeleteRepo(c *gin.Context) {
 		return
 	}
 
-	repo.IsActive = false
-	repo.UserID = 0
-
-	if err := _store.UpdateRepo(repo); err != nil {
+	if err := _forge.Deactivate(c, user, repo, server.Config.Server.WebhookHost); err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
@@ -468,12 +465,16 @@ func DeleteRepo(c *gin.Context) {
 			handleDBError(c, err)
 			return
 		}
+	} else {
+		repo.IsActive = false
+		repo.UserID = 0
+
+		if err := _store.UpdateRepo(repo); err != nil {
+			_ = c.AbortWithError(http.StatusInternalServerError, err)
+			return
+		}
 	}
 
-	if err := _forge.Deactivate(c, user, repo, server.Config.Server.WebhookHost); err != nil {
-		_ = c.AbortWithError(http.StatusInternalServerError, err)
-		return
-	}
 	c.JSON(http.StatusOK, repo)
 }
 
