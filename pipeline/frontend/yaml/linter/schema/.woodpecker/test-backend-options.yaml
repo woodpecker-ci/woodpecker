@@ -1,0 +1,10 @@
+steps:
+  - name: Build Container
+    image: woodpeckerci/plugin-kaniko:1.2.1
+    backend_options:
+      kubernetes:
+        secrets:
+          - name: aws-secret
+            key: credentials
+            target:
+              file: /root/.aws/credentials

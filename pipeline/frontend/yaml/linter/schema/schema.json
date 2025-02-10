@@ -762,15 +762,23 @@
       "description": "A target which a native Kubernetes secret maps to.",
       "oneOf": [
         {
-          "env": {
-            "description": "The name of the environment variable which secret maps to.",
-            "type": "string"
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "env": {
+              "description": "The name of the environment variable which secret maps to.",
+              "type": "string"
+            }
           }
         },
         {
-          "file": {
-            "description": "The filename (path) which secret maps to.",
-            "type": "string"
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "file": {
+              "description": "The filename (path) which secret maps to.",
+              "type": "string"
+            }
           }
         }
       ]

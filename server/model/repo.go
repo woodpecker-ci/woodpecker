@@ -71,7 +71,7 @@ type Repo struct {
 	Hash                         string               `json:"-"                               xorm:"varchar(500) 'hash'"`
 	Perm                         *Perm                `json:"-"                               xorm:"-"`
 	CancelPreviousPipelineEvents []WebhookEvent       `json:"cancel_previous_pipeline_events" xorm:"json 'cancel_previous_pipeline_events'"`
-	NetrcTrustedPlugins          []string             `json:"netrc_trusted" xorm:"json 'netrc_trusted'"`
+	NetrcTrustedPlugins          []string             `json:"netrc_trusted"                   xorm:"json 'netrc_trusted'"`
 } //	@name Repo
 
 // TableName return database table name for xorm.
@@ -157,3 +157,9 @@ type TrustedConfigurationPatch struct {
 	Volumes  *bool `json:"volumes"`
 	Security *bool `json:"security"`
 }
+
+// RepoLastPipeline represents a repository with last pipeline execution information.
+type RepoLastPipeline struct {
+	*Repo
+	LastPipeline *Pipeline `json:"last_pipeline,omitempty"`
+} //	@name RepoLastPipeline
