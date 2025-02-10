@@ -55,6 +55,6 @@ const props = defineProps<{
   repo: Repo;
 }>();
 
-const lastPipeline = computed(() => props.repo.last_pipeline_item);
+const lastPipeline = computed(() => props.repo.last_pipeline);
 const { since, shortMessage } = usePipeline(lastPipeline);
 </script>

@@ -1044,6 +1044,36 @@ func (_m *Store) GetRepoForgeID(_a0 model.ForgeRemoteID) (*model.Repo, error) {
 	return r0, r1
 }
 
+// GetRepoLatestPipelines provides a mock function with given fields: _a0
+func (_m *Store) GetRepoLatestPipelines(_a0 []int64) ([]*model.Pipeline, error) {
+	ret := _m.Called(_a0)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetRepoLatestPipelines")
+	}
+
+	var r0 []*model.Pipeline
+	var r1 error
+	if rf, ok := ret.Get(0).(func([]int64) ([]*model.Pipeline, error)); ok {
+		return rf(_a0)
+	}
+	if rf, ok := ret.Get(0).(func([]int64) []*model.Pipeline); ok {
+		r0 = rf(_a0)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*model.Pipeline)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func([]int64) error); ok {
+		r1 = rf(_a0)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // GetRepoName provides a mock function with given fields: _a0
 func (_m *Store) GetRepoName(_a0 string) (*model.Repo, error) {
 	ret := _m.Called(_a0)
