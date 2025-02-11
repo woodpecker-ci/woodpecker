@@ -31,7 +31,7 @@ func wrapGet(exist bool, err error) error {
 		return types.RecordNotExist
 	}
 	if err != nil {
-		// we only ask for the function's name if needed for performance reasons
+		// we only ask for the function's name if needed, as it's not as preformatted as to just execute it
 		fnName := callerName(2)
 		return fmt.Errorf("%s: %w", fnName, err)
 	}
@@ -44,7 +44,7 @@ func wrapDelete(c int64, err error) error {
 		return types.RecordNotExist
 	}
 	if err != nil {
-		// we only ask for the function's name if needed for performance reasons
+		// we only ask for the function's name if needed, as it's not as preformatted as to just execute it
 		fnName := callerName(2)
 		return fmt.Errorf("%s: %w", fnName, err)
 	}
