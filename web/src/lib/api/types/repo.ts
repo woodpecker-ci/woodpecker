@@ -67,9 +67,9 @@ export interface Repo {
 
   visibility: RepoVisibility;
 
-  last_pipeline?: number;
+  last_pipeline_number?: number;
 
-  last_pipeline_item?: Pipeline;
+  last_pipeline?: Pipeline;
 
   require_approval: RepoRequireApproval;
 

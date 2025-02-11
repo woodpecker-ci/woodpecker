@@ -677,7 +677,11 @@
         "none_desc": "Jedes Event erstellt Pipelines, einschließlich Pull-Requests. Diese Einstellung kann gefährlich sein und wird nur für private Instanzen empfohlen.",
         "pull_requests": "Alle Pull-Requests",
         "all_events": "Alle Ereignisse von der Forge",
-        "desc": "Verhindere, dass bösartige Pipelines Geheimnisse preisgeben oder schädliche Aufgaben ausführen, indem du diese vor der Ausführung genehmigst."
+        "desc": "Verhindere, dass bösartige Pipelines Geheimnisse preisgeben oder schädliche Aufgaben ausführen, indem du diese vor der Ausführung genehmigst.",
+        "allowed_users": {
+            "desc": "Pipelines von diesen Benutzern erfordern nie eine Genehmigung.",
+            "allowed_users": "Zugelassene Benutzer"
+        }
     },
     "org_access_denied": "Zugriff auf diese Organisation nicht erlaubt"
 }
