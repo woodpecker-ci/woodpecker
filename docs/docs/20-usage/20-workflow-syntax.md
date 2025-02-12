@@ -602,20 +602,31 @@ For more details check the [matrix build docs](./30-matrix-workflows.md).
 
 ## `labels`
 
-You can set labels for your workflow to select an agent to execute the workflow on. An agent will pick up and run a workflow when **every** label assigned to it matches the agents labels.
+Use labels to select the agent that executes your workflow. An agent will execute a workflow only if **all** its assigned labels match the workflow's labels. For Kubernetes agents, these labels propagate to any related resources created during pipeline execution, including pods and secrets.
+To configure additional agent labels, see the [agent configuration options](../30-administration/15-agent-config.md#woodpecker_agent_labels). Agents have pre-configured filters for the following automatically assigned labels:
 
-To set additional agent labels, check the [agent configuration options](../30-administration/15-agent-config.md#woodpecker_agent_labels). Agents will have at least four default labels: `platform=agent-os/agent-arch`, `hostname=my-agent`, `backend=docker` (type of the agent backend) and `repo=*`. Agents can use a `*` as a wildcard for a label. For example `repo=*` will match every repo.
+| Label                             | Description                                           |
+|-----------------------------------|-------------------------------------------------------|
+| `woodpecker-ci.org/forge-id`      | Internal Forge identifier                            |
+| `woodpecker-ci.org/repo-forge-id` | Repository identifier from the Forge                  |
+| `woodpecker-ci.org/repo-id`       | Internal repository identifier                        |
+| `woodpecker-ci.org/repo-name`     | Repository display name (excluding project/organization) |
+| `woodpecker-ci.org/branch`        | Git branch name                                       |
+| `woodpecker-ci.org/org-id`        | Internal organization/project identifier              |
+| `repo`                            | Combined repository and project name (`org/git_repo`) |
+| `platform`                        | Agent OS and CPU architecture (e.g., `linux/amd64`)  |
+| `hostname`                        | Agent name                                            |
+| `backend`                         | Agent's backend technology (kubernetes, docker, local) |
 
-Workflow labels with an empty value will be ignored.
-By default, each workflow has at least the `repo=your-user/your-repo-name` label. If you have set the [platform attribute](#platform) for your workflow it will have a label like `platform=your-os/your-arch` as well.
+You can add more labels as key-value pairs under the `labels` field in your pipeline. Labels starting with `woodpecker-ci.org` are reserved for Woodpecker and will be ignored. Labels with empty values are also ignored.
 
-You can add additional labels as a key value map:
-
+Specifying the [platform attribute](#platform) for your workflow automatically adds a corresponding `platform` label, such as `platform=your-os/your-arch`.
 ```diff
 +labels:
-+  location: europe # only agents with `location=europe` or `location=*` will be used
++  location: europe # Only agents with `location=europe` or `location=*` will execute this workflow.
 +  weather: sun
-+  hostname: "" # this label will be ignored as it is empty
++  hostname: "" # Ignored because the value is empty.
++  woodpecker-ci.org/forge-id: 1 # Ignored because it uses the reserved "woodpecker-ci.org" prefix.
 
  steps:
    - name: build
