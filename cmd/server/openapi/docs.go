@@ -5121,6 +5121,9 @@ const docTemplate = `{
                 "require_approval": {
                     "$ref": "#/definitions/model.ApprovalMode"
                 },
+                "scm": {
+                    "$ref": "#/definitions/SCMKind"
+                },
                 "timeout": {
                     "type": "integer"
                 },
@@ -5280,6 +5283,21 @@ const docTemplate = `{
                 "VisibilityPublic",
                 "VisibilityPrivate",
                 "VisibilityInternal"
+            ]
+        },
+        "SCMKind": {
+            "type": "string",
+            "enum": [
+                "git",
+                "hg",
+                "fossil",
+                "perforce"
+            ],
+            "x-enum-varnames": [
+                "RepoGit",
+                "RepoHg",
+                "RepoFossil",
+                "RepoPerforce"
             ]
         },
         "Secret": {
@@ -5662,6 +5680,9 @@ const docTemplate = `{
                     "type": "boolean"
                 },
                 "remote_id": {
+                    "type": "string"
+                },
+                "scm": {
                     "type": "string"
                 },
                 "trusted": {
