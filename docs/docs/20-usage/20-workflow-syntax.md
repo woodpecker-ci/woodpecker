@@ -764,6 +764,10 @@ Only allowed if 'Trusted Network' option is enabled in repo settings by an admin
 If the backend engine understands to change the DNS server and lookup domain,
 this options will be used to alter the default DNS config to a custom one for a specific step.
 
+:::info
+Privileged mode is only available to trusted repositories and for security reasons should only be used in private environments. See [project settings](./75-project-settings.md#trusted) to enable trusted mode.
+:::
+
 ```yaml
 steps:
   - name: build
