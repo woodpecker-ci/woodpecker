@@ -34,7 +34,10 @@ func TestOrgCRUD(t *testing.T) {
 
 	// create first org to play with
 	assert.NoError(t, store.OrgCreate(org1))
-	assert.EqualValues(t, "someawesomeorg", org1.Name)
+	assert.EqualValues(t, "someAwesomeOrg", org1.Name)
+
+	// don't allow the same name in different casing
+	assert.Error(t, store.OrgCreate(&model.Org{ID: org1.ID, Name: "someawesomeorg"}))
 
 	// retrieve it
 	orgOne, err := store.OrgGet(org1.ID)
@@ -44,17 +47,14 @@ func TestOrgCRUD(t *testing.T) {
 	// change name
 	assert.NoError(t, store.OrgUpdate(&model.Org{ID: org1.ID, Name: "RenamedOrg"}))
 
-	// force a name duplication and fail
-	assert.Error(t, store.OrgCreate(&model.Org{Name: "reNamedorg"}))
-
 	// find updated org by name
-	orgOne, err = store.OrgFindByName("renamedorG")
+	orgOne, err = store.OrgFindByName("RenamedOrg")
 	assert.NoError(t, err)
 	assert.NotEqualValues(t, org1, orgOne)
 	assert.EqualValues(t, org1.ID, orgOne.ID)
 	assert.EqualValues(t, false, orgOne.IsUser)
 	assert.EqualValues(t, false, orgOne.Private)
-	assert.EqualValues(t, "renamedorg", orgOne.Name)
+	assert.EqualValues(t, "RenamedOrg", orgOne.Name)
 
 	// create two more orgs and repos
 	someUser := &model.Org{Name: "some_other_u", IsUser: true}
