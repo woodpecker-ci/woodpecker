@@ -4,11 +4,22 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@Levy-Tal, @anbraten, @cduchenoy, @damuzhi0810, @lafriks, @qwerty287, @xoxys
+@Levy-Tal, @anbraten, @cduchenoy, @damuzhi0810, @lafriks, @mzampetakis, @qwerty287, @xoxys
 
 ### ✨ Features
 
 - Add allow list for approvals [[#4768](https://github.com/woodpecker-ci/woodpecker/pull/4768)]
+
+### 📚 Documentation
+
+- Docs: Add Radicle forge addon [[#4833](https://github.com/woodpecker-ci/woodpecker/pull/4833)]
+- fix(deps): update docs npm deps non-major [[#4823](https://github.com/woodpecker-ci/woodpecker/pull/4823)]
+- chore(deps): update dependency isomorphic-dompurify to v2.21.0 [[#4805](https://github.com/woodpecker-ci/woodpecker/pull/4805)]
+- chore(deps): update dependency @types/node to v22.13.0 [[#4799](https://github.com/woodpecker-ci/woodpecker/pull/4799)]
+- Add bluesky post plugin [[#4549](https://github.com/woodpecker-ci/woodpecker/pull/4549)]
+- Various docs improvements [[#4772](https://github.com/woodpecker-ci/woodpecker/pull/4772)]
+- fix(deps): update docs npm deps non-major [[#4774](https://github.com/woodpecker-ci/woodpecker/pull/4774)]
+- Add git basic changelog [[#4755](https://github.com/woodpecker-ci/woodpecker/pull/4755)]
 
 ### 🐛 Bug Fixes
 
@@ -20,16 +31,6 @@
 
 - Optimize repository list loading to return also latest pipeline info [[#4814](https://github.com/woodpecker-ci/woodpecker/pull/4814)]
 - Add Git Ref To Build Status in BitbucketDatacenter [[#4724](https://github.com/woodpecker-ci/woodpecker/pull/4724)]
-
-### 📚 Documentation
-
-- fix(deps): update docs npm deps non-major [[#4823](https://github.com/woodpecker-ci/woodpecker/pull/4823)]
-- chore(deps): update dependency isomorphic-dompurify to v2.21.0 [[#4805](https://github.com/woodpecker-ci/woodpecker/pull/4805)]
-- chore(deps): update dependency @types/node to v22.13.0 [[#4799](https://github.com/woodpecker-ci/woodpecker/pull/4799)]
-- Add bluesky post plugin [[#4549](https://github.com/woodpecker-ci/woodpecker/pull/4549)]
-- Various docs improvements [[#4772](https://github.com/woodpecker-ci/woodpecker/pull/4772)]
-- fix(deps): update docs npm deps non-major [[#4774](https://github.com/woodpecker-ci/woodpecker/pull/4774)]
-- Add git basic changelog [[#4755](https://github.com/woodpecker-ci/woodpecker/pull/4755)]
 
 ### 📦️ Dependency
 
