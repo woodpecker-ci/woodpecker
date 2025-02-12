@@ -61,8 +61,8 @@ func TestUsers(t *testing.T) {
 
 	// check unique login
 	user2 := model.User{
-		Login:       "joe",
-		Email:       "foo@bar.com",
+		Login:       "Joe",
+		Email:       "foo2@bar.com",
 		AccessToken: "ab20g0ddaf012c744e136da16aa21ad9",
 	}
 	err2 = store.CreateUser(&user2)
@@ -102,13 +102,13 @@ func TestCreateUserWithExistingOrg(t *testing.T) {
 	existingOrg := &model.Org{
 		ForgeID: 1,
 		IsUser:  true,
-		Name:    "existingorg",
+		Name:    "existingOrg",
 		Private: false,
 	}
 
 	err := store.OrgCreate(existingOrg)
 	assert.NoError(t, err)
-	assert.EqualValues(t, "existingorg", existingOrg.Name)
+	assert.EqualValues(t, "existingOrg", existingOrg.Name)
 
 	// Create a new user with the same name as the existing organization
 	newUser := &model.User{
@@ -120,7 +120,7 @@ func TestCreateUserWithExistingOrg(t *testing.T) {
 
 	updatedOrg, err := store.OrgGet(existingOrg.ID)
 	assert.NoError(t, err)
-	assert.Equal(t, "existingorg", updatedOrg.Name)
+	assert.Equal(t, "existingOrg", updatedOrg.Name)
 
 	newUser2 := &model.User{
 		Login: "new-user",
