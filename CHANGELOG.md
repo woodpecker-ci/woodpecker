@@ -4,11 +4,18 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@Levy-Tal, @anbraten, @cduchenoy, @damuzhi0810, @lafriks, @mzampetakis, @qwerty287, @xoxys
+@Levy-Tal, @anbraten, @cduchenoy, @damuzhi0810, @lafriks, @mzampetakis, @pat-s, @qwerty287, @xoxys
 
 ### ✨ Features
 
 - Add allow list for approvals [[#4768](https://github.com/woodpecker-ci/woodpecker/pull/4768)]
+
+### 🐛 Bug Fixes
+
+- Unsanitize user and org names in DB [[#4762](https://github.com/woodpecker-ci/woodpecker/pull/4762)]
+- Store/delete repos after forge communication [[#4827](https://github.com/woodpecker-ci/woodpecker/pull/4827)]
+- Fix k8s secret schema [[#4819](https://github.com/woodpecker-ci/woodpecker/pull/4819)]
+- Move section description to the top [[#4773](https://github.com/woodpecker-ci/woodpecker/pull/4773)]
 
 ### 📚 Documentation
 
@@ -20,12 +27,6 @@
 - Various docs improvements [[#4772](https://github.com/woodpecker-ci/woodpecker/pull/4772)]
 - fix(deps): update docs npm deps non-major [[#4774](https://github.com/woodpecker-ci/woodpecker/pull/4774)]
 - Add git basic changelog [[#4755](https://github.com/woodpecker-ci/woodpecker/pull/4755)]
-
-### 🐛 Bug Fixes
-
-- Store/delete repos after forge communication [[#4827](https://github.com/woodpecker-ci/woodpecker/pull/4827)]
-- Fix k8s secret schema [[#4819](https://github.com/woodpecker-ci/woodpecker/pull/4819)]
-- Move section description to the top [[#4773](https://github.com/woodpecker-ci/woodpecker/pull/4773)]
 
 ### 📈 Enhancement
 
