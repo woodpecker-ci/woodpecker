@@ -46,6 +46,7 @@ const (
 	pathOrgPerms      = "%s/2.0/workspaces/%s/permissions?%s"
 	pathPullRequests  = "%s/2.0/repositories/%s/%s/pullrequests?%s"
 	pathBranchCommits = "%s/2.0/repositories/%s/%s/commits/%s"
+	pathCommit        = "%s/2.0/repositories/%s/%s/commits/%s"
 	pathDir           = "%s/2.0/repositories/%s/%s/src/%s/%s"
 	pageSize          = 100
 )
@@ -204,6 +205,13 @@ func (c *Client) GetBranchHead(owner, name, branch string) (*Commit, error) {
 		return nil, fmt.Errorf("no commits in branch %s", branch)
 	}
 	return out.Values[0], nil
+}
+
+func (c *Client) GetCommit(owner, name, sha string) (*Commit, error) {
+	out := new(Commit)
+	uri := fmt.Sprintf(pathCommit, c.base, owner, name, sha)
+	_, err := c.do(uri, http.MethodGet, nil, out)
+	return out, err
 }
 
 func (c *Client) GetUserWorkspaceMembership(workspace, user string) (string, error) {

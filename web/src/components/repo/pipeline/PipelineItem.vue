@@ -23,17 +23,32 @@
         <img v-else class="w-6 rounded-md" :src="pipeline.author_avatar" />
       </div>
 
-      <div class="flex w-full min-w-0 items-center md:mx-4 md:w-auto">
-        <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
-        <span class="md:display-unset hidden text-wp-text-alt-100">#{{ pipeline.number }}</span>
-        <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
-        <span class="md:display-unset mx-2 hidden text-wp-text-alt-100">-</span>
-        <span
-          class="overflow-hidden overflow-ellipsis whitespace-nowrap text-wp-text-100 underline md:no-underline"
-          :title="message"
+      <div class="flex flex-col w-full min-w-0 md:mx-4 md:w-auto gap-y-2 py-2">
+        <div>
+          <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
+          <span class="md:display-unset hidden text-wp-text-alt-100">#{{ pipeline.number }}</span>
+          <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
+          <span class="md:display-unset mx-2 hidden text-wp-text-alt-100">-</span>
+          <span
+            class="overflow-hidden overflow-ellipsis whitespace-nowrap text-wp-text-100 underline md:no-underline"
+            :title="message"
+          >
+            {{ shortMessage }}
+          </span>
+        </div>
+
+        <div
+          v-if="context"
+          class="flex items-center gap-x-2 overflow-hidden overflow-ellipsis whitespace-nowrap text-wp-text-100"
+          :title="context"
         >
-          {{ shortMessage }}
-        </span>
+          <Icon v-if="pipeline.event === 'pull_request'" name="pull-request" />
+          <Icon v-else-if="pipeline.event === 'pull_request_closed'" name="pull-request-closed" />
+          <Icon v-else-if="pipeline.event === 'deployment'" name="deployment" />
+          <Icon v-else-if="pipeline.event === 'release' || pipeline.event === 'tag'" name="tag" />
+
+          {{ shortContext }}
+        </div>
       </div>
 
       <div
@@ -54,7 +69,7 @@
 
         <div class="flex min-w-0 items-center space-x-2">
           <Icon name="commit" />
-          <span class="truncate">{{ pipeline.commit.slice(0, 10) }}</span>
+          <span class="truncate">{{ pipeline.commit.sha.slice(0, 10) }}</span>
         </div>
 
         <div class="flex min-w-0 items-center space-x-2" :title="$t('repo.pipeline.duration')">
@@ -90,7 +105,7 @@ const props = defineProps<{
 const { t } = useI18n();
 
 const pipeline = toRef(props, 'pipeline');
-const { since, duration, message, shortMessage, prettyRef, created } = usePipeline(pipeline);
+const { since, duration, message, shortMessage, context, shortContext, prettyRef, created } = usePipeline(pipeline);
 
 const pipelineEventTitle = computed(() => {
   switch (pipeline.value.event) {
