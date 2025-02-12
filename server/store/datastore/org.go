@@ -30,7 +30,6 @@ func (s storage) orgCreate(org *model.Org, sess *xorm.Session) error {
 	if org.Name == "" {
 		return fmt.Errorf("org name is empty")
 	}
-
 	// insert
 	_, err := sess.Insert(org)
 	return err
