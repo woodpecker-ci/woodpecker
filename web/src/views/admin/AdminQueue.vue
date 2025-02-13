@@ -26,11 +26,11 @@
       <AdminQueueStats :stats="queueInfo?.stats" />
 
       <div v-if="tasks.length > 0" class="flex flex-col">
-        <p class="mb-2 mt-6 text-xl">{{ $t('admin.settings.queue.tasks') }}</p>
+        <p class="mt-6 mb-2 text-xl">{{ $t('admin.settings.queue.tasks') }}</p>
         <ListItem
           v-for="task in tasks"
           :key="task.id"
-          class="mb-2 items-center bg-wp-background-200! dark:bg-wp-background-100!"
+          class="bg-wp-background-200! dark:bg-wp-background-100! mb-2 items-center"
         >
           <div
             class="flex items-center"

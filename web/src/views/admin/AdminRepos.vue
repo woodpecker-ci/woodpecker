@@ -9,11 +9,11 @@
       />
     </template>
 
-    <div class="space-y-4 text-wp-text-100">
+    <div class="text-wp-text-100 space-y-4">
       <ListItem
         v-for="repo in repos"
         :key="repo.id"
-        class="items-center gap-2 bg-wp-background-200 dark:bg-wp-background-100!"
+        class="bg-wp-background-200 dark:bg-wp-background-100! items-center gap-2"
       >
         <span>{{ repo.full_name }}</span>
         <div class="ml-auto flex items-center">

@@ -132,8 +132,8 @@
   --spacing-2xl: 42rem;
   --spacing-3xl: 48rem;
 
-  --font-sans: system-ui, -apple-system, Segoe UI, Roboto, Helvetica Neue,
-    Noto Sans, Liberation Sans, Arial, sans-serif;
+  --font-sans:
+    system-ui, -apple-system, Segoe UI, Roboto, Helvetica Neue, Noto Sans, Liberation Sans, Arial, sans-serif;
 
   --transition-property-height: max-height;
 

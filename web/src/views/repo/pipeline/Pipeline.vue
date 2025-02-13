@@ -11,7 +11,7 @@
         <div v-if="pipeline!.errors?.some((e) => !e.is_warning)" class="mb-4 w-full md:mb-auto">
           <Panel>
             <div class="flex flex-col items-center gap-4 text-center">
-              <Icon name="status-error" class="h-16 w-16 text-wp-error-100" size="1.5rem" />
+              <Icon name="status-error" class="text-wp-error-100 h-16 w-16" size="1.5rem" />
               <span class="text-xl">{{ $t('repo.pipeline.we_got_some_errors') }}</span>
               <Button color="red" :text="$t('repo.pipeline.show_errors')" :to="{ name: 'repo-pipeline-errors' }" />
             </div>
@@ -44,7 +44,7 @@
         <div v-else-if="pipeline!.status === 'declined'" class="mb-4 w-full md:mb-auto">
           <Panel>
             <div class="flex flex-col items-center gap-4">
-              <Icon name="status-declined" size="1.5rem" class="h-16 w-16 text-wp-error-100" />
+              <Icon name="status-declined" size="1.5rem" class="text-wp-error-100 h-16 w-16" />
               <p class="text-xl">{{ $t('repo.pipeline.protected.declined') }}</p>
             </div>
           </Panel>
@@ -54,7 +54,7 @@
           v-else-if="selectedStepId !== null"
           v-model:step-id="selectedStepId"
           :pipeline="pipeline!"
-          class="fixed left-0 top-0 h-full w-full md:absolute"
+          class="fixed top-0 left-0 h-full w-full md:absolute"
         />
       </div>
     </div>

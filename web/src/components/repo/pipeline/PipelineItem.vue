@@ -25,11 +25,11 @@
 
       <div class="flex w-full min-w-0 items-center md:mx-4 md:w-auto">
         <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
-        <span class="md:display-unset hidden text-wp-text-alt-100">#{{ pipeline.number }}</span>
+        <span class="md:display-unset text-wp-text-alt-100 hidden">#{{ pipeline.number }}</span>
         <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
-        <span class="md:display-unset mx-2 hidden text-wp-text-alt-100">-</span>
+        <span class="md:display-unset text-wp-text-alt-100 mx-2 hidden">-</span>
         <span
-          class="overflow-hidden text-ellipsis whitespace-nowrap text-wp-text-100 underline md:no-underline"
+          class="text-wp-text-100 overflow-hidden text-ellipsis whitespace-nowrap underline md:no-underline"
           :title="message"
         >
           {{ shortMessage }}
@@ -37,7 +37,7 @@
       </div>
 
       <div
-        class="grid w-full shrink-0 grid-flow-col grid-cols-2 grid-rows-2 gap-x-4 gap-y-2 py-2 text-wp-text-100 md:ml-auto md:w-96"
+        class="text-wp-text-100 grid w-full shrink-0 grid-flow-col grid-cols-2 grid-rows-2 gap-x-4 gap-y-2 py-2 md:ml-auto md:w-96"
       >
         <div class="flex min-w-0 items-center space-x-2">
           <span :title="pipelineEventTitle">

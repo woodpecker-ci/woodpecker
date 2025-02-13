@@ -5,12 +5,12 @@
       v-for="tab in visibleTabs"
       :key="tab.title"
       :to="tab.to"
-      class="flex cursor-pointer items-center whitespace-nowrap border-b-2 border-transparent py-1 text-wp-text-100"
+      class="text-wp-text-100 flex cursor-pointer items-center border-b-2 border-transparent py-1 whitespace-nowrap"
       :active-class="tab.matchChildren ? 'border-wp-text-100!' : ''"
       :exact-active-class="tab.matchChildren ? '' : 'border-wp-text-100!'"
     >
       <span
-        class="flex w-full min-w-20 flex-row items-center justify-center gap-2 rounded-md px-2 py-1 hover:bg-wp-background-200 dark:hover:bg-wp-background-100"
+        class="hover:bg-wp-background-200 dark:hover:bg-wp-background-100 flex w-full min-w-20 flex-row items-center justify-center gap-2 rounded-md px-2 py-1"
       >
         <Icon v-if="tab.icon" :name="tab.icon" :class="tab.iconClass" class="shrink-0" />
         <span>{{ tab.title }}</span>
@@ -24,18 +24,18 @@
 
       <div
         v-if="isDropdownOpen"
-        class="tabs-dropdown absolute z-20 mt-1 rounded-md border border-wp-background-400 bg-wp-background-100 shadow-lg dark:bg-wp-background-200"
+        class="tabs-dropdown border-wp-background-400 bg-wp-background-100 dark:bg-wp-background-200 absolute z-20 mt-1 rounded-md border shadow-lg"
         :class="[visibleTabs.length === 0 ? 'left-0' : 'right-0']"
       >
         <router-link
           v-for="tab in hiddenTabs"
           :key="tab.title"
           :to="tab.to"
-          class="block w-full whitespace-nowrap p-1 text-left"
+          class="block w-full p-1 text-left whitespace-nowrap"
           @click="isDropdownOpen = false"
         >
           <span
-            class="flex w-full min-w-20 flex-row items-center justify-center gap-2 rounded-md px-2 py-1 hover:bg-wp-background-200 dark:hover:bg-wp-background-100"
+            class="hover:bg-wp-background-200 dark:hover:bg-wp-background-100 flex w-full min-w-20 flex-row items-center justify-center gap-2 rounded-md px-2 py-1"
           >
             <Icon v-if="tab.icon" :name="tab.icon" :class="tab.iconClass" class="shrink-0" />
             <span>{{ tab.title }}</span>
