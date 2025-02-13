@@ -64,7 +64,6 @@ const id = (Math.random() + 1).toString(36).substring(7);
   background: white;
   transform: translate(-50%, -50%);
   opacity: 0;
-  @apply dark:bg-white;
 }
 
 .radio:checked::before {

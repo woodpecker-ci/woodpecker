@@ -63,7 +63,6 @@ const id = (Math.random() + 1).toString(36).substring(7);
   border-width: 0 2px 2px 0;
   transform: translate(-50%, -60%) rotate(45deg);
   opacity: 0;
-  @apply dark:border-white;
 }
 
 .checkbox:checked::before {
