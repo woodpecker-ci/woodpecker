@@ -11,7 +11,7 @@ require (
 	github.com/6543/logfile-open v1.2.1
 	github.com/adrg/xdg v0.5.3
 	github.com/bmatcuk/doublestar/v4 v4.8.1
-	github.com/cenkalti/backoff/v5 v5.0.1
+	github.com/cenkalti/backoff/v5 v5.0.2
 	github.com/charmbracelet/huh v0.6.0
 	github.com/charmbracelet/huh/spinner v0.0.0-20240327025511-ec643317aa10
 	github.com/distribution/reference v0.6.0
@@ -59,7 +59,7 @@ require (
 	gitlab.com/gitlab-org/api/client-go v0.122.0
 	go.uber.org/multierr v1.11.0
 	golang.org/x/crypto v0.33.0
-	golang.org/x/net v0.34.0
+	golang.org/x/net v0.35.0
 	golang.org/x/oauth2 v0.26.0
 	golang.org/x/sync v0.11.0
 	golang.org/x/term v0.29.0

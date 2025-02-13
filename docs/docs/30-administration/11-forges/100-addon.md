@@ -26,9 +26,9 @@ If you experience bugs, please check which component has the issue. If it's the 
 
 ## List of addon forges
 
-If you wrote or found an addon forge, please add it here so others can find it!
+### Radicle Forge
 
-_Be the first one to add your addon forge!_
+[Radicle](https://radicle.xyz/) is an open source, peer-to-peer code collaboration stack built on Git. Radicle addon for Woodpecker CI can be found at [this repo](https://explorer.radicle.gr/nodes/seed.radicle.gr/rad:z39Cf1XzrvCLRZZJRUZnx9D1fj5ws).
 
 ## Creating addon forges
 
