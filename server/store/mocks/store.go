@@ -1808,6 +1808,198 @@ func (_m *Store) OrgUpdate(_a0 *model.Org) error {
 	return r0
 }
 
+// ParameterCreate provides a mock function with given fields: _a0, _a1
+func (_m *Store) ParameterCreate(_a0 *model.Repo, _a1 *model.Parameter) error {
+	ret := _m.Called(_a0, _a1)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ParameterCreate")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(*model.Repo, *model.Parameter) error); ok {
+		r0 = rf(_a0, _a1)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// ParameterDelete provides a mock function with given fields: _a0, _a1
+func (_m *Store) ParameterDelete(_a0 *model.Repo, _a1 string) error {
+	ret := _m.Called(_a0, _a1)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ParameterDelete")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(*model.Repo, string) error); ok {
+		r0 = rf(_a0, _a1)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// ParameterDeleteByID provides a mock function with given fields: _a0, _a1
+func (_m *Store) ParameterDeleteByID(_a0 *model.Repo, _a1 int64) error {
+	ret := _m.Called(_a0, _a1)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ParameterDeleteByID")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(*model.Repo, int64) error); ok {
+		r0 = rf(_a0, _a1)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// ParameterFind provides a mock function with given fields: _a0, _a1
+func (_m *Store) ParameterFind(_a0 *model.Repo, _a1 string) (*model.Parameter, error) {
+	ret := _m.Called(_a0, _a1)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ParameterFind")
+	}
+
+	var r0 *model.Parameter
+	var r1 error
+	if rf, ok := ret.Get(0).(func(*model.Repo, string) (*model.Parameter, error)); ok {
+		return rf(_a0, _a1)
+	}
+	if rf, ok := ret.Get(0).(func(*model.Repo, string) *model.Parameter); ok {
+		r0 = rf(_a0, _a1)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.Parameter)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(*model.Repo, string) error); ok {
+		r1 = rf(_a0, _a1)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ParameterFindByID provides a mock function with given fields: _a0, _a1
+func (_m *Store) ParameterFindByID(_a0 *model.Repo, _a1 int64) (*model.Parameter, error) {
+	ret := _m.Called(_a0, _a1)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ParameterFindByID")
+	}
+
+	var r0 *model.Parameter
+	var r1 error
+	if rf, ok := ret.Get(0).(func(*model.Repo, int64) (*model.Parameter, error)); ok {
+		return rf(_a0, _a1)
+	}
+	if rf, ok := ret.Get(0).(func(*model.Repo, int64) *model.Parameter); ok {
+		r0 = rf(_a0, _a1)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.Parameter)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(*model.Repo, int64) error); ok {
+		r1 = rf(_a0, _a1)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ParameterFindByNameAndBranch provides a mock function with given fields: _a0, _a1, _a2
+func (_m *Store) ParameterFindByNameAndBranch(_a0 *model.Repo, _a1 string, _a2 string) (*model.Parameter, error) {
+	ret := _m.Called(_a0, _a1, _a2)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ParameterFindByNameAndBranch")
+	}
+
+	var r0 *model.Parameter
+	var r1 error
+	if rf, ok := ret.Get(0).(func(*model.Repo, string, string) (*model.Parameter, error)); ok {
+		return rf(_a0, _a1, _a2)
+	}
+	if rf, ok := ret.Get(0).(func(*model.Repo, string, string) *model.Parameter); ok {
+		r0 = rf(_a0, _a1, _a2)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.Parameter)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(*model.Repo, string, string) error); ok {
+		r1 = rf(_a0, _a1, _a2)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ParameterList provides a mock function with given fields: _a0
+func (_m *Store) ParameterList(_a0 *model.Repo) ([]*model.Parameter, error) {
+	ret := _m.Called(_a0)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ParameterList")
+	}
+
+	var r0 []*model.Parameter
+	var r1 error
+	if rf, ok := ret.Get(0).(func(*model.Repo) ([]*model.Parameter, error)); ok {
+		return rf(_a0)
+	}
+	if rf, ok := ret.Get(0).(func(*model.Repo) []*model.Parameter); ok {
+		r0 = rf(_a0)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*model.Parameter)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(*model.Repo) error); ok {
+		r1 = rf(_a0)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ParameterUpdate provides a mock function with given fields: _a0, _a1
+func (_m *Store) ParameterUpdate(_a0 *model.Repo, _a1 *model.Parameter) error {
+	ret := _m.Called(_a0, _a1)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ParameterUpdate")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(*model.Repo, *model.Parameter) error); ok {
+		r0 = rf(_a0, _a1)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // PermFind provides a mock function with given fields: user, repo
 func (_m *Store) PermFind(user *model.User, repo *model.Repo) (*model.Perm, error) {
 	ret := _m.Called(user, repo)
