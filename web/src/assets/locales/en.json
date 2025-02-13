@@ -39,7 +39,12 @@
         "name": "Variable name",
         "value": "Variable value"
       },
-      "show_pipelines": "Show pipelines"
+      "show_pipelines": "Show pipelines",
+      "parameters": {
+        "title": "Parameters",
+        "trim": "Trim whitespace",
+        "desc": "Parameters are predefined variables passed to your manual pipeline."
+      }
     },
     "deploy_pipeline": {
       "title": "Trigger a deployment for current pipeline #{pipelineId}",
@@ -201,6 +206,7 @@
       "loading": "Loading…",
       "no_logs": "No logs",
       "pipeline": "Pipeline #{pipelineId}",
+      "variables": "Pipeline Variables",
       "log_title": "Step Logs",
       "log_download_error": "An error occurred while downloading the log file",
       "log_delete_confirm": "Do you really want to delete the step logs?",
@@ -437,6 +443,36 @@
         "desc": "Agents registered to your account repos."
       }
     }
+  },
+  "parameters": {
+    "parameters": "Parameters",
+    "desc": "Parameters are exposed as environment variables in manual pipelines.",
+    "description": "Description",
+    "add": "Add Parameter",
+    "show": "Show Parameters",
+    "edit": "Edit Parameter",
+    "delete": "Delete Parameter",
+    "created": "Parameter created",
+    "save": "Save parameter",
+    "saved": "Parameter saved",
+    "deleted": "Parameter deleted",
+    "name": "Name",
+    "branch": "Branch",
+    "type": "Type",
+    "default_value": "Default Value",
+    "trim_string": "Allow Whitespace Trim",
+    "set_by_default": "Set by Default",
+    "types": {
+      "boolean": "Boolean",
+      "single_choice": "Single Choice",
+      "multiple_choice": "Multiple Choice",
+      "string": "String",
+      "text": "Text",
+      "password": "Password"
+    },
+    "choices_placeholder": "Enter one choice per line",
+    "choices_help": "Enter each choice on a new line.",
+    "any_branch": "Any (*)"
   },
   "secrets": {
     "secrets": "Secrets",

@@ -18,6 +18,7 @@
 
     <Tab :to="{ name: 'repo-settings' }" :title="$t('repo.settings.general.general')" />
     <Tab :to="{ name: 'repo-settings-secrets' }" :title="$t('secrets.secrets')" />
+    <Tab :to="{ name: 'repo-settings-parameters' }" :title="$t('parameters.parameters')" />
     <Tab :to="{ name: 'repo-settings-registries' }" :title="$t('registries.registries')" />
     <Tab :to="{ name: 'repo-settings-crons' }" :title="$t('repo.settings.crons.crons')" />
     <Tab :to="{ name: 'repo-settings-badge' }" :title="$t('repo.settings.badge.badge')" />

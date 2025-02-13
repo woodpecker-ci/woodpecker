@@ -5,6 +5,7 @@ import type {
   Forge,
   Org,
   OrgPermissions,
+  Parameter,
   Pipeline,
   PipelineConfig,
   PipelineFeed,
@@ -154,6 +155,26 @@ export default class WoodpeckerClient extends ApiClient {
 
   async deleteLogs(repoId: number, pipeline: number, step: number): Promise<unknown> {
     return this._delete(`/api/repos/${repoId}/logs/${pipeline}/${step}`);
+  }
+
+  async getParameters(repo: Repo): Promise<Parameter[] | null> {
+    return this._get(`/api/repos/${repo.id}/parameters`) as Promise<Parameter[] | null>;
+  }
+
+  async getParameter(repo: Repo, id: number): Promise<Parameter | null> {
+    return this._get(`/api/repos/${repo.id}/parameters/${id}`) as Promise<Parameter | null>;
+  }
+
+  async createParameter(repo: Repo, parameter: Partial<Parameter>): Promise<Parameter | null> {
+    return this._post(`/api/repos/${repo.id}/parameters`, parameter) as Promise<Parameter | null>;
+  }
+
+  async updateParameter(repo: Repo, parameter: Partial<Parameter>): Promise<Parameter | null> {
+    return this._patch(`/api/repos/${repo.id}/parameters/${parameter.id}`, parameter) as Promise<Parameter | null>;
+  }
+
+  async deleteParameter(repo: Repo, id: number): Promise<unknown> {
+    return this._delete(`/api/repos/${repo.id}/parameters/${id}`);
   }
 
   async getSecretList(repoId: number, opts?: PaginationOptions): Promise<Secret[] | null> {

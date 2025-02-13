@@ -150,6 +150,9 @@ provide('pipeline', pipeline);
 const pipelineConfigs = ref<PipelineConfig[]>();
 provide('pipeline-configs', pipelineConfigs);
 
+const pipelineVariables = ref<Record<string, string>>();
+provide('pipeline-variables', pipelineVariables);
+
 watch(
   pipeline,
   () => {
@@ -172,6 +175,7 @@ async function loadPipeline(): Promise<void> {
   }
 
   pipelineConfigs.value = await apiClient.getPipelineConfig(repo.value.id, pipeline.value.number);
+  pipelineVariables.value = pipeline.value.variables;
 }
 
 const { doSubmit: cancelPipeline, isLoading: isCancelingPipeline } = useAsyncAction(async () => {
