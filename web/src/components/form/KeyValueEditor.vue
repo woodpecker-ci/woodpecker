@@ -17,7 +17,7 @@
         :placeholder="valuePlaceholder"
         @update:model-value="updateItem(index, 'value', $event)"
       />
-      <div class="w-10 flex-shrink-0">
+      <div class="w-10 shrink-0">
         <Button
           v-if="index !== displayItems.length - 1"
           type="button"

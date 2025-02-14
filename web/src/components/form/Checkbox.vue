@@ -3,13 +3,13 @@
     <input
       :id="`checkbox-${id}`"
       type="checkbox"
-      class="checkbox relative h-5 w-5 flex-shrink-0 cursor-pointer rounded-md border border-wp-control-neutral-200 bg-wp-control-neutral-100 transition-colors duration-150 checked:border-wp-control-ok-200 checked:bg-wp-control-ok-200 focus-visible:border-wp-control-neutral-300 checked:focus-visible:border-wp-control-ok-300"
+      class="checkbox border-wp-control-neutral-200 bg-wp-control-neutral-100 checked:border-wp-control-ok-200 checked:bg-wp-control-ok-200 focus-visible:border-wp-control-neutral-300 checked:focus-visible:border-wp-control-ok-300 relative h-5 w-5 shrink-0 cursor-pointer rounded-md border transition-colors duration-150"
       :checked="innerValue"
       @click="innerValue = !innerValue"
     />
     <div class="ml-4 flex flex-col">
-      <label class="cursor-pointer text-wp-text-100" :for="`checkbox-${id}`">{{ label }}</label>
-      <span v-if="description" class="text-sm text-wp-text-alt-100">{{ description }}</span>
+      <label class="text-wp-text-100 cursor-pointer" :for="`checkbox-${id}`">{{ label }}</label>
+      <span v-if="description" class="text-wp-text-alt-100 text-sm">{{ description }}</span>
     </div>
   </div>
 </template>
@@ -39,6 +39,8 @@ const id = (Math.random() + 1).toString(36).substring(7);
 </script>
 
 <style scoped>
+@reference '~/tailwind.css';
+
 .checkbox {
   width: 1.3rem;
   height: 1.3rem;
@@ -61,7 +63,6 @@ const id = (Math.random() + 1).toString(36).substring(7);
   border-width: 0 2px 2px 0;
   transform: translate(-50%, -60%) rotate(45deg);
   opacity: 0;
-  @apply dark:border-white;
 }
 
 .checkbox:checked::before {
