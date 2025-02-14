@@ -121,7 +121,7 @@ func PostRepo(c *gin.Context) {
 	// find org of repo
 	var org *model.Org
 	// TODO: find org by name and forge id
-	org, err = _store.OrgFindByName(repo.Owner)
+	org, err = _store.OrgFindByName(repo.Owner, user.ForgeID)
 	if err != nil && !errors.Is(err, types.RecordNotExist) {
 		c.String(http.StatusInternalServerError, err.Error())
 		return

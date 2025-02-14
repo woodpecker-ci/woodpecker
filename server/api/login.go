@@ -183,8 +183,7 @@ func HandleAuth(c *gin.Context) {
 	// create or set the user's organization if it isn't linked yet
 	if user.OrgID == 0 {
 		// check if an org with the same name exists already and assign it to the user if it does
-		// TODO: find the org by name and forgeID directly
-		org, err := _store.OrgFindByName(user.Login)
+		org, err := _store.OrgFindByName(user.Login, forgeID)
 		if err != nil && !errors.Is(err, types.RecordNotExist) {
 			log.Error().Err(err).Msgf("cannot get org for user %s", user.Login)
 			c.Redirect(http.StatusSeeOther, server.Config.Server.RootPath+"/login?error=internal_error")

@@ -28,6 +28,7 @@ func TestOrgCRUD(t *testing.T) {
 
 	org1 := &model.Org{
 		Name:    "someAwesomeOrg",
+		ForgeID: 1,
 		IsUser:  false,
 		Private: true,
 	}
@@ -45,10 +46,10 @@ func TestOrgCRUD(t *testing.T) {
 	assert.EqualValues(t, org1, orgOne)
 
 	// change name
-	assert.NoError(t, store.OrgUpdate(&model.Org{ID: org1.ID, Name: "RenamedOrg"}))
+	assert.NoError(t, store.OrgUpdate(&model.Org{ID: org1.ID, ForgeID: 1, Name: "RenamedOrg"}))
 
 	// find updated org by name
-	orgOne, err = store.OrgFindByName("RenamedOrg")
+	orgOne, err = store.OrgFindByName("RenamedOrg", 1)
 	assert.NoError(t, err)
 	assert.NotEqualValues(t, org1, orgOne)
 	assert.EqualValues(t, org1.ID, orgOne.ID)
