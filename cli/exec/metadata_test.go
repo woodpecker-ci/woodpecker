@@ -84,7 +84,7 @@ func TestMetadataFromContext(t *testing.T) {
 	})
 
 	t.Run("InvalidFile", func(t *testing.T) {
-		tempFile, err := os.CreateTemp("", "invalid.json")
+		tempFile, err := os.CreateTemp(t.TempDir(), "invalid.json")
 		require.NoError(t, err)
 		t.Cleanup(func() { os.Remove(tempFile.Name()) })
 
@@ -132,7 +132,7 @@ func TestMetadataFromContext(t *testing.T) {
 
 func createTempFile(t *testing.T, content any) string {
 	t.Helper()
-	tempFile, err := os.CreateTemp("", "metadata.json")
+	tempFile, err := os.CreateTemp(t.TempDir(), "metadata.json")
 	require.NoError(t, err)
 	t.Cleanup(func() { os.Remove(tempFile.Name()) })
 
