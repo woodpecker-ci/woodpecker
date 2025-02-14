@@ -17,6 +17,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update dependency @tailwindcss/vite to v4.0.6 [[#4846](https://github.com/woodpecker-ci/woodpecker/pull/4846)]
 - fix(deps): update dependency tailwindcss to v4 [[#4778](https://github.com/woodpecker-ci/woodpecker/pull/4778)]
 - fix(deps): update golang-packages [[#4839](https://github.com/woodpecker-ci/woodpecker/pull/4839)]
 
