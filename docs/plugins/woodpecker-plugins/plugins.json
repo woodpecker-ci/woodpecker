@@ -239,6 +239,11 @@
       "name": "Basic Git Changelog",
       "docs": "https://raw.githubusercontent.com/GECO-IT/woodpecker-plugin-git-basic-changelog/refs/heads/main/docs.md",
       "verified": false
+    },
+    {
+      "name": "Home Assistant Notify",
+      "docs": "https://raw.githubusercontent.com/DHandspikerWade/woodpecker-plugin-ha-notify/refs/heads/main/docs.md",
+      "verified": false
     }
   ]
 }
