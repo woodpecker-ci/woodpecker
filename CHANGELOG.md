@@ -2,6 +2,14 @@
 
 ## [3.1.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.1.1) - 2025-02-14
 
+### ❤️ Thanks to all contributors! ❤️
+
+@DHandspikerWade
+
+### 📚 Documentation
+
+- Add a Home Assistant notification plugin  [[#4841](https://github.com/woodpecker-ci/woodpecker/pull/4841)]
+
 ### 📦️ Dependency
 
 - fix(deps): update golang-packages [[#4839](https://github.com/woodpecker-ci/woodpecker/pull/4839)]
