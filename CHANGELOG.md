@@ -1,10 +1,14 @@
 # Changelog
 
-## [3.1.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.1.1) - 2025-02-14
+## [3.2.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.2.0) - 2025-02-14
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@DHandspikerWade
+@DHandspikerWade, @qwerty287
+
+### 📈 Enhancement
+
+- Replace deprecated linter [[#4843](https://github.com/woodpecker-ci/woodpecker/pull/4843)]
 
 ### 📚 Documentation
 
