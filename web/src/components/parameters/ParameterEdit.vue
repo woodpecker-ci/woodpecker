@@ -45,7 +45,7 @@
           <template v-if="isBoolean">
             <Checkbox
               :id="id"
-              v-model="innerParameter.default_value"
+              v-model="booleanValue"
               :label="$t('parameters.set_by_default')"
             />
           </template>
@@ -54,9 +54,9 @@
               :id="id"
               v-model="innerParameter.default_value"
               :type="passwordVisibility ? 'text' : 'password'"
+              class="text-sm"
               @dblclick="passwordVisibility = true"
               @blur="passwordVisibility = false"
-              class="text-sm"
             />
           </template>
           <template v-else-if="isChoice">
@@ -149,16 +149,7 @@ const parameterTypes = Object.values(ParameterType);
 // Create a local copy of the parameter to avoid mutating props directly
 const innerParameter = ref<Partial<Parameter>>({ ...props.modelValue });
 const passwordVisibility = ref(false);
-
-// Update local copy when prop changes
-watch(() => props.modelValue, (newVal) => {
-  innerParameter.value = { ...newVal };
-}, { deep: true });
-
-// Update parent when local copy changes
-watch(innerParameter, (newVal) => {
-  emit('update:modelValue', newVal);
-}, { deep: true });
+const booleanValue = ref(props.modelValue.default_value === 'true');
 
 // Computed properties to control field visibility
 const isBoolean = computed(() => innerParameter.value.type === ParameterType.Boolean);
@@ -171,7 +162,20 @@ const isChoice = computed(() =>
 const showDefaultValue = computed(() => innerParameter.value.type !== undefined);
 const showTrimString = computed(() => !isBoolean.value && !isPassword.value);
 
-// Initialize default values based on type
+// Update local copy when prop changes
+watch(() => props.modelValue, (newVal) => {
+  innerParameter.value = { ...newVal };
+  booleanValue.value = innerParameter.value.default_value === 'true';
+}, { deep: true });
+
+// Watch boolean value changes to update innerParameter
+watch(booleanValue, (newVal) => {
+  if (isBoolean.value) {
+    innerParameter.value.default_value = newVal ? 'true' : 'false';
+  }
+});
+
+// Convert default_value to proper type when parameter type changes
 watch(() => innerParameter.value.type, (newType) => {
   // Don't override existing values when editing
   if (props.existingParameter) {
@@ -181,20 +185,13 @@ watch(() => innerParameter.value.type, (newType) => {
   if (newType === ParameterType.Boolean) {
     innerParameter.value.default_value = 'false';
     innerParameter.value.trim_string = false;
+    booleanValue.value = false;
   } else if (newType === ParameterType.SingleChoice || newType === ParameterType.MultipleChoice) {
     innerParameter.value.default_value = '';
     innerParameter.value.trim_string = true;
   } else {
     innerParameter.value.default_value = '';
     innerParameter.value.trim_string = true;
-  }
-}, { immediate: true });
-
-// Special handling for boolean values
-watch(() => innerParameter.value.default_value, (newVal) => {
-  if (isBoolean.value && typeof newVal === 'string') {
-    // Convert string 'true'/'false' to boolean for checkbox
-    innerParameter.value.default_value = newVal === 'true';
   }
 }, { immediate: true });
 
@@ -225,10 +222,14 @@ function handleSubmit() {
 
   // Convert boolean default_value to string
   if (isBoolean.value) {
-    innerParameter.value.default_value = innerParameter.value.default_value ? 'true' : 'false';
+    innerParameter.value.default_value = booleanValue.value ? 'true' : 'false';
   }
+
+  // Update parent model before saving
+  emit('update:modelValue', innerParameter.value);
 
   // Emit the save event with the parameter data
   emit('save', innerParameter.value);
 }
+
 </script>
