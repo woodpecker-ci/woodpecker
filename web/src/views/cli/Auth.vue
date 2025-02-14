@@ -1,6 +1,6 @@
 <template>
   <div class="m-auto flex flex-col gap-4">
-    <div class="text-center text-wp-text-100">
+    <div class="text-wp-text-100 text-center">
       <WoodpeckerLogo preserveAspectRatio="xMinYMin slice" class="m-auto mb-8 w-32" />
       <template v-if="state === 'confirm'">
         <h1 class="text-4xl font-bold">{{ $t('login_to_cli') }}</h1>

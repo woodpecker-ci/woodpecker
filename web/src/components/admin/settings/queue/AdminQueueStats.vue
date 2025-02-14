@@ -1,17 +1,17 @@
 <template>
   <div v-if="stats" class="flex justify-center">
     <div
-      class="w-full rounded-md border border-wp-background-300 bg-wp-background-200 px-5 py-5 text-wp-text-100 dark:bg-wp-background-100"
+      class="border-wp-background-300 bg-wp-background-200 text-wp-text-100 dark:bg-wp-background-100 w-full rounded-md border px-5 py-5"
     >
       <div class="flex w-full">
-        <h3 class="flex-1 text-lg font-semibold uppercase leading-tight">
+        <h3 class="flex-1 text-lg leading-tight font-semibold uppercase">
           {{ $t('admin.settings.queue.stats.completed_count') }}
         </h3>
       </div>
       <div class="relative overflow-hidden transition-all duration-500">
         <div>
           <div class="pb-4 lg:pb-6">
-            <h4 class="inline-block text-2xl font-semibold leading-tight lg:text-3xl">
+            <h4 class="inline-block text-2xl leading-tight font-semibold lg:text-3xl">
               {{ stats.completed_count }}
             </h4>
           </div>
@@ -33,9 +33,9 @@
               v-for="(item, index) in data"
               :key="item.key"
               class="px-4 sm:w-full md:w-1/4"
-              :class="{ 'border-gray-300 dark:border-gray-600 md:border-l': index !== 0 }"
+              :class="{ 'border-gray-300 md:border-l dark:border-gray-600': index !== 0 }"
             >
-              <div class="overflow-hidden text-ellipsis whitespace-nowrap text-sm">
+              <div class="overflow-hidden text-sm text-ellipsis whitespace-nowrap">
                 <span class="mr-1 inline-block h-2 w-2 rounded-full align-middle" :class="`${item.color}`">&nbsp;</span>
                 <span class="align-middle">{{ item.label }}</span>
               </div>
