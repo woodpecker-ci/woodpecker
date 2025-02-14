@@ -6,13 +6,14 @@
 
 @DHandspikerWade, @qwerty287
 
+### 📚 Documentation
+
+- chore(deps): lock file maintenance [[#4845](https://github.com/woodpecker-ci/woodpecker/pull/4845)]
+- Add a Home Assistant notification plugin  [[#4841](https://github.com/woodpecker-ci/woodpecker/pull/4841)]
+
 ### 📈 Enhancement
 
 - Replace deprecated linter [[#4843](https://github.com/woodpecker-ci/woodpecker/pull/4843)]
-
-### 📚 Documentation
-
-- Add a Home Assistant notification plugin  [[#4841](https://github.com/woodpecker-ci/woodpecker/pull/4841)]
 
 ### 📦️ Dependency
 
