@@ -294,7 +294,7 @@ func (c *Gitea) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model.
 	}
 
 	for _, e := range contents {
-		if e.Type == "blob" {
+		if e.Type == "file" {
 			data, err := c.File(ctx, u, r, b, e.Path)
 			if err != nil {
 				return nil, fmt.Errorf("multi-pipeline cannot get %s: %w", e.Path, err)
