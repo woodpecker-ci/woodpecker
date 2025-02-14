@@ -289,6 +289,9 @@ func (c *Gitea) Dir(ctx context.Context, u *model.User, r *model.Repo, b *model.
 
 	// List files in repository
 	contents, _, err := client.ListContents(r.Owner, r.Name, b.Commit, f)
+	if err != nil {
+		return nil, err
+	}
 
 	for _, e := range contents {
 		if e.Type == "blob" {
