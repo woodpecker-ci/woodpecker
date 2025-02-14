@@ -1,112 +1,114 @@
+@reference "./tailwind.css";
+
 :root,
 :root[data-theme='light'] {
-  --wp-background-100: theme('colors.white');
-  --wp-background-200: theme('colors.gray.100');
-  --wp-background-300: theme('colors.gray.200');
-  --wp-background-400: theme('colors.gray.300');
+  --wp-background-100: var(--color-white);
+  --wp-background-200: var(--color-gray-100);
+  --wp-background-300: var(--color-gray-200);
+  --wp-background-400: var(--color-gray-300);
 
-  --wp-text-100: theme('colors.gray.600');
-  --wp-text-200: theme('colors.gray.700');
-  --wp-text-alt-100: theme('colors.gray.500');
+  --wp-text-100: var(--color-gray-600);
+  --wp-text-200: var(--color-gray-700);
+  --wp-text-alt-100: var(--color-gray-500);
 
-  --wp-primary-100: theme('colors.int-wp-primary.300');
-  --wp-primary-200: theme('colors.int-wp-primary.400');
-  --wp-primary-300: theme('colors.int-wp-primary.500');
-  --wp-primary-text-100: theme('colors.white');
+  --wp-primary-100: var(--color-int-wp-primary-300);
+  --wp-primary-200: var(--color-int-wp-primary-400);
+  --wp-primary-300: var(--color-int-wp-primary-500);
+  --wp-primary-text-100: var(--color-white);
 
-  --wp-control-neutral-100: theme('colors.white');
-  --wp-control-neutral-200: theme('colors.gray.300');
-  --wp-control-neutral-300: theme('colors.gray.400');
+  --wp-control-neutral-100: var(--color-white);
+  --wp-control-neutral-200: var(--color-gray-300);
+  --wp-control-neutral-300: var(--color-gray-400);
 
-  --wp-control-info-100: theme('colors.int-wp-control-info.100');
-  --wp-control-info-200: theme('colors.int-wp-control-info.200');
-  --wp-control-info-300: theme('colors.int-wp-control-info.300');
+  --wp-control-info-100: var(--color-int-wp-control-info-100);
+  --wp-control-info-200: var(--color-int-wp-control-info-200);
+  --wp-control-info-300: var(--color-int-wp-control-info-300);
 
-  --wp-control-ok-100: theme('colors.int-wp-control-ok.100');
-  --wp-control-ok-200: theme('colors.int-wp-control-ok.200');
-  --wp-control-ok-300: theme('colors.int-wp-control-ok.300');
+  --wp-control-ok-100: var(--color-int-wp-control-ok-100);
+  --wp-control-ok-200: var(--color-int-wp-control-ok-200);
+  --wp-control-ok-300: var(--color-int-wp-control-ok-300);
 
-  --wp-error-100: theme('colors.int-wp-error.100');
-  --wp-error-200: theme('colors.int-wp-error.200');
-  --wp-error-300: theme('colors.int-wp-error.300');
+  --wp-error-100: var(--color-int-wp-error-100);
+  --wp-error-200: var(--color-int-wp-error-200);
+  --wp-error-300: var(--color-int-wp-error-300);
 
-  --wp-state-neutral-100: theme('colors.int-wp-state-neutral.100');
-  --wp-state-ok-100: theme('colors.int-wp-state-ok.100');
-  --wp-state-info-100: theme('colors.int-wp-state-info.100');
-  --wp-state-warn-100: theme('colors.int-wp-state-warn.100');
+  --wp-state-neutral-100: var(--color-int-wp-state-neutral-100);
+  --wp-state-ok-100: var(--color-int-wp-state-ok-100);
+  --wp-state-info-100: var(--color-int-wp-state-info-100);
+  --wp-state-warn-100: var(--color-int-wp-state-warn-100);
 
-  --wp-hint-warn-100: theme('colors.int-wp-hint-warn.100');
-  --wp-hint-warn-200: theme('colors.int-wp-hint-warn.200');
+  --wp-hint-warn-100: var(--color-int-wp-hint-warn-100);
+  --wp-hint-warn-200: var(--color-int-wp-hint-warn-200);
 
-  --wp-code-inline-100: theme('colors.gray.200');
-  --wp-code-inline-200: theme('colors.gray.200');
+  --wp-code-inline-100: var(--color-gray-200);
+  --wp-code-inline-200: var(--color-gray-200);
 
-  --wp-code-inline-text-100: theme('colors.gray.600');
+  --wp-code-inline-text-100: var(--color-gray-600);
 
-  --wp-code-100: theme('colors.int-wp-secondary.300');
-  --wp-code-200: theme('colors.int-wp-secondary.600');
-  --wp-code-300: theme('colors.int-wp-secondary.600');
+  --wp-code-100: var(--color-int-wp-secondary-300);
+  --wp-code-200: var(--color-int-wp-secondary-600);
+  --wp-code-300: var(--color-int-wp-secondary-600);
 
-  --wp-code-text-100: theme('colors.gray.200');
-  --wp-code-text-alt-100: theme('colors.gray.300');
+  --wp-code-text-100: var(--color-gray-200);
+  --wp-code-text-alt-100: var(--color-gray-300);
 
-  --wp-link-100: theme('colors.blue.600');
-  --wp-link-200: theme('colors.blue.700');
+  --wp-link-100: var(--color-blue-600);
+  --wp-link-200: var(--color-blue-700);
 }
 
 :root[data-theme='dark'] {
-  --wp-background-100: theme('colors.int-wp-secondary.300');
-  --wp-background-200: theme('colors.int-wp-secondary.400');
-  --wp-background-300: theme('colors.int-wp-secondary.500');
-  --wp-background-400: theme('colors.int-wp-secondary.600');
+  --wp-background-100: var(--color-int-wp-secondary-300);
+  --wp-background-200: var(--color-int-wp-secondary-400);
+  --wp-background-300: var(--color-int-wp-secondary-500);
+  --wp-background-400: var(--color-int-wp-secondary-600);
 
-  --wp-text-100: theme('colors.gray.300');
-  --wp-text-200: theme('colors.gray.200');
-  --wp-text-alt-100: theme('colors.gray.400');
+  --wp-text-100: var(--color-gray-300);
+  --wp-text-200: var(--color-gray-200);
+  --wp-text-alt-100: var(--color-gray-400);
 
-  --wp-primary-100: theme('colors.int-wp-secondary.300');
-  --wp-primary-200: theme('colors.int-wp-secondary.400');
-  --wp-primary-300: theme('colors.int-wp-secondary.600');
-  --wp-primary-text-100: theme('colors.gray.300');
+  --wp-primary-100: var(--color-int-wp-secondary-300);
+  --wp-primary-200: var(--color-int-wp-secondary-400);
+  --wp-primary-300: var(--color-int-wp-secondary-600);
+  --wp-primary-text-100: var(--color-gray-300);
 
-  --wp-control-neutral-100: theme('colors.int-wp-secondary.300');
-  --wp-control-neutral-200: theme('colors.int-wp-secondary.600');
-  --wp-control-neutral-300: theme('colors.int-wp-secondary.700');
+  --wp-control-neutral-100: var(--color-int-wp-secondary-300);
+  --wp-control-neutral-200: var(--color-int-wp-secondary-600);
+  --wp-control-neutral-300: var(--color-int-wp-secondary-700);
 
-  --wp-control-info-100: theme('colors.int-wp-control-info-dark.100');
-  --wp-control-info-200: theme('colors.int-wp-control-info-dark.200');
-  --wp-control-info-300: theme('colors.int-wp-control-info-dark.300');
+  --wp-control-info-100: var(--color-int-wp-control-info-dark-100);
+  --wp-control-info-200: var(--color-int-wp-control-info-dark-200);
+  --wp-control-info-300: var(--color-int-wp-control-info-dark-300);
 
-  --wp-control-ok-100: theme('colors.int-wp-control-ok-dark.100');
-  --wp-control-ok-200: theme('colors.int-wp-control-ok-dark.200');
-  --wp-control-ok-300: theme('colors.int-wp-control-ok-dark.300');
+  --wp-control-ok-100: var(--color-int-wp-control-ok-dark-100);
+  --wp-control-ok-200: var(--color-int-wp-control-ok-dark-200);
+  --wp-control-ok-300: var(--color-int-wp-control-ok-dark-300);
 
-  --wp-error-100: theme('colors.int-wp-error.200');
-  --wp-error-200: theme('colors.int-wp-error.300');
-  --wp-error-300: theme('colors.int-wp-error.300');
+  --wp-error-100: var(--color-int-wp-error-200);
+  --wp-error-200: var(--color-int-wp-error-300);
+  --wp-error-300: var(--color-int-wp-error-300);
 
-  --wp-state-neutral-100: theme('colors.int-wp-state-neutral.100');
-  --wp-state-ok-100: theme('colors.int-wp-state-ok-dark.100');
-  --wp-state-info-100: theme('colors.int-wp-state-info-dark.100');
-  --wp-state-warn-100: theme('colors.int-wp-state-warn-dark.100');
+  --wp-state-neutral-100: var(--color-int-wp-state-neutral-100);
+  --wp-state-ok-100: var(--color-int-wp-state-ok-dark-100);
+  --wp-state-info-100: var(--color-int-wp-state-info-dark-100);
+  --wp-state-warn-100: var(--color-int-wp-state-warn-dark-100);
 
-  --wp-hint-warn-100: theme('colors.int-wp-hint-warn-dark.100');
-  --wp-hint-warn-200: theme('colors.int-wp-hint-warn-dark.200');
+  --wp-hint-warn-100: var(--color-int-wp-hint-warn-dark-100);
+  --wp-hint-warn-200: var(--color-int-wp-hint-warn-dark-200);
 
-  --wp-code-inline-100: theme('colors.int-wp-secondary.700');
-  --wp-code-inline-200: theme('colors.int-wp-secondary.300');
+  --wp-code-inline-100: var(--color-int-wp-secondary-700);
+  --wp-code-inline-200: var(--color-int-wp-secondary-300);
 
-  --wp-code-inline-text-100: theme('colors.gray.300');
+  --wp-code-inline-text-100: var(--color-gray-300);
 
-  --wp-code-100: theme('colors.int-wp-secondary.700'); /* #222631 */
-  --wp-code-200: theme('colors.int-wp-secondary.600'); /* #2a2e3a */
-  --wp-code-300: theme('colors.int-wp-secondary.800'); /* #1B1F28 */
+  --wp-code-100: var(--color-int-wp-secondary-700); /* #222631 */
+  --wp-code-200: var(--color-int-wp-secondary-600); /* #2a2e3a */
+  --wp-code-300: var(--color-int-wp-secondary-800); /* #1B1F28 */
 
-  --wp-code-text-100: theme('colors.gray.200');
-  --wp-code-text-alt-100: theme('colors.gray.400');
+  --wp-code-text-100: var(--color-gray-200);
+  --wp-code-text-alt-100: var(--color-gray-400);
 
-  --wp-link-100: theme('colors.blue.400');
-  --wp-link-200: theme('colors.blue.500');
+  --wp-link-100: var(--color-blue-400);
+  --wp-link-200: var(--color-blue-500);
 }
 
 html,
@@ -125,11 +127,11 @@ body,
 }
 
 .vue-notification.success {
-  @apply !border-l-wp-control-ok-300 !bg-wp-control-ok-100;
+  @apply !border-wp-error-200 !bg-wp-control-ok-100 !border-l;
 }
 
 .vue-notification.error {
-  @apply !border-l-wp-error-200 !bg-wp-error-100;
+  @apply !border-wp-error-200 !bg-wp-error-100 !border-l;
 }
 
 *::-webkit-scrollbar {
@@ -143,11 +145,11 @@ body,
 *::-webkit-scrollbar-thumb {
   transition: background 0.2s ease-in-out;
   border: 3px solid transparent;
-  @apply rounded-full bg-gray-200 bg-clip-content dark:bg-wp-background-200;
+  @apply dark:bg-wp-background-200 rounded-full bg-gray-200 bg-clip-content;
 }
 
 *::-webkit-scrollbar-thumb:hover {
-  @apply bg-gray-300 dark:bg-wp-background-100;
+  @apply dark:bg-wp-background-100 bg-gray-300;
 }
 
 *::-webkit-scrollbar-corner {
@@ -155,16 +157,16 @@ body,
 }
 
 .code-box {
-  @apply break-words rounded-md bg-wp-code-inline-100 p-4 text-sm text-wp-code-inline-text-100;
+  @apply bg-wp-code-inline-100 text-wp-code-inline-text-100 rounded-md p-4 text-sm break-words;
   white-space: pre-wrap;
 }
 
 .code-box-inline,
 code:not(pre > code) {
-  @apply rounded-md bg-wp-code-inline-100 px-1.5 py-0.5 text-wp-code-inline-text-100;
+  @apply bg-wp-code-inline-100 text-wp-code-inline-text-100 rounded-md px-1.5 py-0.5;
 }
 
 .code-box-log {
-  @apply break-words bg-wp-code-300 p-4 text-wp-code-text-100;
+  @apply bg-wp-code-300 text-wp-code-text-100 p-4 break-words;
   white-space: pre-wrap;
 }
