@@ -20,8 +20,6 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"path"
-	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -287,22 +285,13 @@ func (c *Forgejo) Dir(ctx context.Context, u *model.User, r *model.Repo, b *mode
 		return nil, err
 	}
 
-	// List files in repository. Path from root
-	tree, _, err := client.GetTrees(r.Owner, r.Name, b.Commit, true)
-	if err != nil {
-		return nil, err
-	}
+	// List files in repository
+	contents, _, err := client.ListContents(r.Owner, r.Name, b.Commit, f)
 
-	f = path.Clean(f) // We clean path and remove trailing slash
-	f += "/" + "*"    // construct pattern for match i.e. file in subdir
-	for _, e := range tree.Entries {
-		// Filter path matching pattern and type file (blob)
-		if m, _ := filepath.Match(f, e.Path); m && e.Type == "blob" {
+	for _, e := range contents {
+		if e.Type == "blob" {
 			data, err := c.File(ctx, u, r, b, e.Path)
 			if err != nil {
-				if errors.Is(err, &forge_types.ErrConfigNotFound{}) {
-					return nil, fmt.Errorf("git tree reported existence of file but we got: %s", err.Error())
-				}
 				return nil, fmt.Errorf("multi-pipeline cannot get %s: %w", e.Path, err)
 			}
 
