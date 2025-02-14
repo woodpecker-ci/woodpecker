@@ -12,6 +12,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update dependency tailwindcss to v4 [[#4778](https://github.com/woodpecker-ci/woodpecker/pull/4778)]
 - fix(deps): update golang-packages [[#4839](https://github.com/woodpecker-ci/woodpecker/pull/4839)]
 
 ## [3.1.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.1.0) - 2025-02-12
