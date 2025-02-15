@@ -17,6 +17,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update dependency vue-tsc to v2.2.2 [[#4859](https://github.com/woodpecker-ci/woodpecker/pull/4859)]
 - fix(deps): update web npm deps non-major [[#4857](https://github.com/woodpecker-ci/woodpecker/pull/4857)]
 - chore(deps): update pre-commit non-major [[#4855](https://github.com/woodpecker-ci/woodpecker/pull/4855)]
 - chore(deps): update postgres docker tag to v17.3 [[#4854](https://github.com/woodpecker-ci/woodpecker/pull/4854)]
