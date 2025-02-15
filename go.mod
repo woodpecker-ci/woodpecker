@@ -7,7 +7,7 @@ require (
 	code.gitea.io/sdk/gitea v0.20.0
 	codeberg.org/6543/go-yaml2json v1.0.0
 	codeberg.org/6543/xyaml v1.1.0
-	codeberg.org/mvdkleijn/forgejo-sdk/forgejo v1.2.0
+	codeberg.org/mvdkleijn/forgejo-sdk/forgejo v2.0.0
 	github.com/6543/logfile-open v1.2.1
 	github.com/adrg/xdg v0.5.3
 	github.com/bmatcuk/doublestar/v4 v4.8.1
