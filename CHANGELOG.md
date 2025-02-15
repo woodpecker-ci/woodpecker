@@ -17,6 +17,8 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update postgres docker tag to v17.3 [[#4854](https://github.com/woodpecker-ci/woodpecker/pull/4854)]
+- chore(deps): update docker.io/techknowlogick/xgo docker tag to go-1.24.x [[#4853](https://github.com/woodpecker-ci/woodpecker/pull/4853)]
 - chore(deps): update docker.io/golang docker tag to v1.24 [[#4852](https://github.com/woodpecker-ci/woodpecker/pull/4852)]
 - chore(deps): update woodpeckerci/plugin-release docker tag to v0.2.4 [[#4851](https://github.com/woodpecker-ci/woodpecker/pull/4851)]
 - fix(deps): update dependency @tailwindcss/vite to v4.0.6 [[#4846](https://github.com/woodpecker-ci/woodpecker/pull/4846)]
