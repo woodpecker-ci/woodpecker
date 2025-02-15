@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@DHandspikerWade, @qwerty287
+@DHandspikerWade, @mark-pitblado, @qwerty287
 
 ### 📚 Documentation
 
@@ -27,6 +27,10 @@
 - fix(deps): update dependency @tailwindcss/vite to v4.0.6 [[#4846](https://github.com/woodpecker-ci/woodpecker/pull/4846)]
 - fix(deps): update dependency tailwindcss to v4 [[#4778](https://github.com/woodpecker-ci/woodpecker/pull/4778)]
 - fix(deps): update golang-packages [[#4839](https://github.com/woodpecker-ci/woodpecker/pull/4839)]
+
+### Misc
+
+- docs: remove latest from docker compose example [[#4849](https://github.com/woodpecker-ci/woodpecker/pull/4849)]
 
 ## [3.1.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.1.0) - 2025-02-12
 
