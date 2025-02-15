@@ -6,6 +6,10 @@
 
 @DHandspikerWade, @mark-pitblado, @qwerty287
 
+### 🐛 Bug Fixes
+
+- Directly fetch directory contents [[#4842](https://github.com/woodpecker-ci/woodpecker/pull/4842)]
+
 ### 📚 Documentation
 
 - chore(deps): lock file maintenance [[#4845](https://github.com/woodpecker-ci/woodpecker/pull/4845)]
