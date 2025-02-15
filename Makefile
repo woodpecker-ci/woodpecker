@@ -40,7 +40,7 @@ CGO_ENABLED ?= 1 # only used to compile server
 HAS_GO = $(shell hash go > /dev/null 2>&1 && echo "GO" || echo "NOGO" )
 ifeq ($(HAS_GO),GO)
   # renovate: datasource=docker depName=docker.io/techknowlogick/xgo
-	XGO_VERSION ?= go-1.23.x
+	XGO_VERSION ?= go-1.24.x
 	CGO_CFLAGS ?= $(shell go env CGO_CFLAGS)
 endif
 CGO_CFLAGS ?=
