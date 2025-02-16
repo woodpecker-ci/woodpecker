@@ -8,6 +8,15 @@ This website is built using [Docusaurus 3](https://docusaurus.io/), a modern sta
 pnpm install
 ```
 
+## Before your first build
+Before running `build` or `start` commands for the first time, you need to build plugins in docs/plugins/woodpecker-plugins:
+
+```bash
+cd docs/plugins/woodpecker-plugins
+pnpm build
+```
+
+## Build
 ## Local Development
 
 ```bash
@@ -15,8 +24,6 @@ pnpm start
 ```
 
 This command starts a local development server and opens up a browser window. Most changes are reflected live without having to restart the server.
-
-## Build
 
 ```bash
 pnpm build
