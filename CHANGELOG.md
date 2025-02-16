@@ -4,16 +4,17 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@DHandspikerWade, @mark-pitblado, @qwerty287
+@DHandspikerWade, @mark-pitblado, @qwerty287, @xoxys
+
+### 📚 Documentation
+
+- Drop versioned docs for v1 [[#4844](https://github.com/woodpecker-ci/woodpecker/pull/4844)]
+- chore(deps): lock file maintenance [[#4845](https://github.com/woodpecker-ci/woodpecker/pull/4845)]
+- Add a Home Assistant notification plugin  [[#4841](https://github.com/woodpecker-ci/woodpecker/pull/4841)]
 
 ### 🐛 Bug Fixes
 
 - Directly fetch directory contents [[#4842](https://github.com/woodpecker-ci/woodpecker/pull/4842)]
-
-### 📚 Documentation
-
-- chore(deps): lock file maintenance [[#4845](https://github.com/woodpecker-ci/woodpecker/pull/4845)]
-- Add a Home Assistant notification plugin  [[#4841](https://github.com/woodpecker-ci/woodpecker/pull/4841)]
 
 ### 📈 Enhancement
 
@@ -21,6 +22,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update dependency pinia to v3 [[#4856](https://github.com/woodpecker-ci/woodpecker/pull/4856)]
 - fix(deps): update module gitlab.com/gitlab-org/api/client-go to v0.123.0 [[#4860](https://github.com/woodpecker-ci/woodpecker/pull/4860)]
 - chore(deps): update dependency vue-tsc to v2.2.2 [[#4859](https://github.com/woodpecker-ci/woodpecker/pull/4859)]
 - fix(deps): update web npm deps non-major [[#4857](https://github.com/woodpecker-ci/woodpecker/pull/4857)]
