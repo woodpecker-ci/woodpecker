@@ -6,15 +6,16 @@
 
 @DHandspikerWade, @anbraten, @mark-pitblado, @qwerty287, @xoxys
 
+### 📚 Documentation
+
+- chore(deps): update dependency @types/react to v19.0.9 [[#4864](https://github.com/woodpecker-ci/woodpecker/pull/4864)]
+- Drop versioned docs for v1 [[#4844](https://github.com/woodpecker-ci/woodpecker/pull/4844)]
+- Add a Home Assistant notification plugin  [[#4841](https://github.com/woodpecker-ci/woodpecker/pull/4841)]
+
 ### 🐛 Bug Fixes
 
 - Fix org assign on login [[#4817](https://github.com/woodpecker-ci/woodpecker/pull/4817)]
 - Directly fetch directory contents [[#4842](https://github.com/woodpecker-ci/woodpecker/pull/4842)]
-
-### 📚 Documentation
-
-- Drop versioned docs for v1 [[#4844](https://github.com/woodpecker-ci/woodpecker/pull/4844)]
-- Add a Home Assistant notification plugin  [[#4841](https://github.com/woodpecker-ci/woodpecker/pull/4841)]
 
 ### 📈 Enhancement
 
