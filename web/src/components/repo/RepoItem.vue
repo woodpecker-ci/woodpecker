@@ -2,11 +2,11 @@
   <router-link
     v-if="repo"
     :to="{ name: 'repo', params: { repoId: repo.id } }"
-    class="flex cursor-pointer flex-col overflow-hidden rounded-md border border-wp-background-400 bg-wp-background-100 p-4 hover:bg-wp-background-300 hover:shadow-md dark:bg-wp-background-200 dark:hover:bg-wp-background-300"
+    class="border-wp-background-400 bg-wp-background-100 hover:bg-wp-background-300 dark:bg-wp-background-200 dark:hover:bg-wp-background-300 flex cursor-pointer flex-col overflow-hidden rounded-md border p-4 hover:shadow-md"
   >
-    <div class="grid grid-cols-[auto,1fr] items-center gap-y-4">
-      <div class="text-lg text-wp-text-100">{{ `${repo.owner} / ${repo.name}` }}</div>
-      <div class="ml-auto text-wp-text-100">
+    <div class="grid grid-cols-[auto_1fr] items-center gap-y-4">
+      <div class="text-wp-text-100 text-lg">{{ `${repo.owner} / ${repo.name}` }}</div>
+      <div class="text-wp-text-100 ml-auto">
         <div
           v-if="repo.visibility === RepoVisibility.Private"
           :title="`${$t('repo.visibility.visibility')}: ${$t(`repo.visibility.private.private`)}`"
@@ -21,14 +21,14 @@
         </div>
       </div>
 
-      <div class="col-span-2 flex w-full gap-x-4 text-wp-text-100">
+      <div class="text-wp-text-100 col-span-2 flex w-full gap-x-4">
         <template v-if="lastPipeline">
           <div class="flex min-w-0 flex-1 items-center gap-x-1">
             <PipelineStatusIcon v-if="lastPipeline" :status="lastPipeline.status" />
-            <span class="overflow-hidden overflow-ellipsis whitespace-nowrap pl-1">{{ shortMessage }}</span>
+            <span class="overflow-hidden pl-1 text-ellipsis whitespace-nowrap">{{ shortMessage }}</span>
           </div>
 
-          <div class="ml-auto flex flex-shrink-0 items-center gap-x-1">
+          <div class="ml-auto flex shrink-0 items-center gap-x-1">
             <Icon name="since" />
             <span>{{ since }}</span>
           </div>

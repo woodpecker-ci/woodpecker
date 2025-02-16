@@ -1,5 +1,5 @@
 <template>
-  <div v-if="pipeline" class="flex w-full text-wp-text-100">
+  <div v-if="pipeline" class="text-wp-text-100 flex w-full">
     <PipelineStatusIcon :status="pipeline.status" class="flex items-center" />
     <div class="ml-4 flex min-w-0 flex-col">
       <router-link
@@ -12,7 +12,7 @@
         <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
         {{ repo?.owner }} / {{ repo?.name }}
       </router-link>
-      <span class="overflow-hidden overflow-ellipsis whitespace-nowrap" :title="message">{{ shortMessage }}</span>
+      <span class="overflow-hidden text-ellipsis whitespace-nowrap" :title="message">{{ shortMessage }}</span>
       <div class="mt-2 flex flex-col">
         <div class="flex items-center space-x-2" :title="created">
           <Icon name="since" />
