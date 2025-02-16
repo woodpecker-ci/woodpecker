@@ -160,7 +160,7 @@ func TestHandleAuth(t *testing.T) {
 		_forge.On("Login", mock.Anything, mock.Anything).Return(user, "", nil)
 		_store.On("GetUserRemoteID", user.ForgeRemoteID, user.Login).Return(nil, types.RecordNotExist)
 		_store.On("CreateUser", mock.Anything).Return(nil)
-		_store.On("OrgFindByName", user.Login, int64(1)).Return(nil, nil)
+		_store.On("OrgFindByName", user.Login, user.ForgeID).Return(nil, nil)
 		_store.On("OrgCreate", mock.Anything).Return(nil)
 		_store.On("UpdateUser", mock.Anything).Return(nil)
 		_forge.On("Repos", mock.Anything, mock.Anything).Return(nil, nil)
