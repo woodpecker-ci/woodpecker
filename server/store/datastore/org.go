@@ -16,6 +16,7 @@ package datastore
 
 import (
 	"fmt"
+	"strings"
 
 	"xorm.io/xorm"
 
@@ -73,14 +74,14 @@ func (s storage) orgDelete(sess *xorm.Session, id int64) error {
 	return wrapDelete(sess.ID(id).Delete(new(model.Org)))
 }
 
-func (s storage) OrgFindByName(name string) (*model.Org, error) {
-	return s.orgFindByName(s.engine.NewSession(), name)
+func (s storage) OrgFindByName(name string, forgeID int64) (*model.Org, error) {
+	return s.orgFindByName(s.engine.NewSession(), name, forgeID)
 }
 
-func (s storage) orgFindByName(sess *xorm.Session, name string) (*model.Org, error) {
+func (s storage) orgFindByName(sess *xorm.Session, name string, forgeID int64) (*model.Org, error) {
 	// sanitize
 	org := new(model.Org)
-	return org, wrapGet(sess.Where("name = ?", name).Get(org))
+	return org, wrapGet(sess.Where("LOWER(name) = ?", strings.ToLower(name)).And("forge_id = ?", forgeID).Get(org))
 }
 
 func (s storage) OrgRepoList(org *model.Org, p *model.ListOptions) ([]*model.Repo, error) {
