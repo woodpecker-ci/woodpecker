@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.2.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.2.0) - 2025-02-15
+## [3.2.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.2.0) - 2025-02-16
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -21,6 +21,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update module gitlab.com/gitlab-org/api/client-go to v0.123.0 [[#4860](https://github.com/woodpecker-ci/woodpecker/pull/4860)]
 - chore(deps): update dependency vue-tsc to v2.2.2 [[#4859](https://github.com/woodpecker-ci/woodpecker/pull/4859)]
 - fix(deps): update web npm deps non-major [[#4857](https://github.com/woodpecker-ci/woodpecker/pull/4857)]
 - chore(deps): update pre-commit non-major [[#4855](https://github.com/woodpecker-ci/woodpecker/pull/4855)]
