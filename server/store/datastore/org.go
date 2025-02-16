@@ -80,7 +80,7 @@ func (s storage) OrgFindByName(name string, forgeID int64) (*model.Org, error) {
 func (s storage) orgFindByName(sess *xorm.Session, name string, forgeID int64) (*model.Org, error) {
 	// sanitize
 	org := new(model.Org)
-	return org, wrapGet(sess.Where("name = ?", name).And("forge_id = ?", forgeID).Get(org))
+	return org, wrapGet(sess.Where("LOWER(name) = ?", strings.ToLower(name)).And("forge_id = ?", forgeID).Get(org))
 }
 
 func (s storage) OrgRepoList(org *model.Org, p *model.ListOptions) ([]*model.Repo, error) {
