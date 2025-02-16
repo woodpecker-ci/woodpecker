@@ -4,17 +4,18 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@DHandspikerWade, @mark-pitblado, @qwerty287, @xoxys
+@DHandspikerWade, @anbraten, @mark-pitblado, @qwerty287, @xoxys
+
+### 🐛 Bug Fixes
+
+- Fix org assign on login [[#4817](https://github.com/woodpecker-ci/woodpecker/pull/4817)]
+- Directly fetch directory contents [[#4842](https://github.com/woodpecker-ci/woodpecker/pull/4842)]
 
 ### 📚 Documentation
 
 - Drop versioned docs for v1 [[#4844](https://github.com/woodpecker-ci/woodpecker/pull/4844)]
 - chore(deps): lock file maintenance [[#4845](https://github.com/woodpecker-ci/woodpecker/pull/4845)]
 - Add a Home Assistant notification plugin  [[#4841](https://github.com/woodpecker-ci/woodpecker/pull/4841)]
-
-### 🐛 Bug Fixes
-
-- Directly fetch directory contents [[#4842](https://github.com/woodpecker-ci/woodpecker/pull/4842)]
 
 ### 📈 Enhancement
 
