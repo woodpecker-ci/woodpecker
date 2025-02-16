@@ -27,12 +27,33 @@ code and execute commands.
 In order to use this backend, you need to download (or build) the
 [agent](https://github.com/woodpecker-ci/woodpecker/releases/latest), configure it and run it on the host machine.
 
+## Installation
+
+Installation is possible as a build from source or pre-build packages available on the [woodpecker GitHub release page](https://github.com/woodpecker-ci/woodpecker/releases/latest).
+
+Once installed (e.g. via `dpkg -i ...`) it will add a systemd service called `woodpecker-agent`.
+
+You may  need to tune up that service config by for example adjusting the user it runs as.
+
+Additionally, you must set up the [environment variables](../15-agent-config.md) for the agent in the environment referenced by the systemd service (e.g. `/etc/woodpecker/woodpecker-agent.env`).
+
 ## Usage
 
 To enable the local backend, set the following as an agent environment variable:
 
 ```ini
 WOODPECKER_BACKEND=local
+```
+
+For more configuration options, see the [Agent  configuration](../15-agent-config.md) page.
+
+Once the agent is running, you can ensure your pipeline only is being used by that kind of agent by using proper [labels](../../20-usage/20-workflow-syntax.md#labels) configuration.
+
+e.g:
+
+```yaml
+labels:
+    backend: local
 ```
 
 ### Shell
