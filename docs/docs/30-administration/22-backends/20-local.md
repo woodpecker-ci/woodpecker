@@ -29,7 +29,7 @@ In order to use this backend, you need to download (or build) the
 
 ## Usage
 
-To enable the local backend, set the following:
+To enable the local backend, set the following as an agent environment variable:
 
 ```ini
 WOODPECKER_BACKEND=local
