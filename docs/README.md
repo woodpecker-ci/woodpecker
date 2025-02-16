@@ -9,6 +9,7 @@ pnpm install
 ```
 
 ## Before your first build
+
 Before running `build` or `start` commands for the first time, you need to build plugins in docs/plugins/woodpecker-plugins:
 
 ```bash
