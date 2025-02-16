@@ -6,8 +6,8 @@ codeberg.org/6543/go-yaml2json v1.0.0 h1:heGqo9VEi7gY2yNqjj7X4ADs5nzlFIbGsJtgYDL
 codeberg.org/6543/go-yaml2json v1.0.0/go.mod h1:mz61q14LWF4ZABrgMEDMmk3t9dPi6zgR1uBh2VKV2RQ=
 codeberg.org/6543/xyaml v1.1.0 h1:0PWTy8OUqshshjrrnAXFWXSPUEa8R49DIh2ah07SxFc=
 codeberg.org/6543/xyaml v1.1.0/go.mod h1:jI7afXLZUxeL4rNNsG1SlHh78L+gma9lK1bIebyFZwA=
-codeberg.org/mvdkleijn/forgejo-sdk/forgejo v1.2.0 h1:/z7iYYHgTuP+BnJY5qnWj6UjlA1YsAFYhi36JZY1S7Y=
-codeberg.org/mvdkleijn/forgejo-sdk/forgejo v1.2.0/go.mod h1:qGzzS6EYParzgmXvnf1QANdnQmHFSyAlJN3SiRZp7e8=
+codeberg.org/mvdkleijn/forgejo-sdk/forgejo/v2 v2.0.0 h1:DMrDRx/7ke6+IReKtbZ1ZwfuaXQfG4P3yn9O/z9a08Y=
+codeberg.org/mvdkleijn/forgejo-sdk/forgejo/v2 v2.0.0/go.mod h1:9iyacQPbTwXp9klusoNOat2ZeFsWe+mmaDdZKywK220=
 filippo.io/edwards25519 v1.1.0 h1:FNf4tywRC1HmFuKW5xopWpigGjJKiJSV0Cqo0cJWDaA=
 filippo.io/edwards25519 v1.1.0/go.mod h1:BxyFTGdWcka3PhytdK4V28tE5sGfRvvvRV7EaN4VDT4=
 gitea.com/xorm/sqlfiddle v0.0.0-20180821085327-62ce714f951a h1:lSA0F4e9A2NcQSqGqTOXqu2aRi/XEQxDCBwM8yJtE6s=
