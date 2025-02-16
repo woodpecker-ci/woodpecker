@@ -14,7 +14,6 @@
 ### 📚 Documentation
 
 - Drop versioned docs for v1 [[#4844](https://github.com/woodpecker-ci/woodpecker/pull/4844)]
-- chore(deps): lock file maintenance [[#4845](https://github.com/woodpecker-ci/woodpecker/pull/4845)]
 - Add a Home Assistant notification plugin  [[#4841](https://github.com/woodpecker-ci/woodpecker/pull/4841)]
 
 ### 📈 Enhancement
@@ -23,6 +22,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update docker.io/woodpeckerci/plugin-trivy docker tag to v1.4.0 [[#4865](https://github.com/woodpecker-ci/woodpecker/pull/4865)]
 - fix(deps): update dependency simple-icons to v14.7.0 [[#4862](https://github.com/woodpecker-ci/woodpecker/pull/4862)]
 - fix(deps): update dependency pinia to v3 [[#4856](https://github.com/woodpecker-ci/woodpecker/pull/4856)]
 - fix(deps): update module gitlab.com/gitlab-org/api/client-go to v0.123.0 [[#4860](https://github.com/woodpecker-ci/woodpecker/pull/4860)]
@@ -34,6 +34,7 @@
 - chore(deps): update docker.io/golang docker tag to v1.24 [[#4852](https://github.com/woodpecker-ci/woodpecker/pull/4852)]
 - chore(deps): update woodpeckerci/plugin-release docker tag to v0.2.4 [[#4851](https://github.com/woodpecker-ci/woodpecker/pull/4851)]
 - fix(deps): update dependency @tailwindcss/vite to v4.0.6 [[#4846](https://github.com/woodpecker-ci/woodpecker/pull/4846)]
+- chore(deps): lock file maintenance [[#4845](https://github.com/woodpecker-ci/woodpecker/pull/4845)]
 - fix(deps): update dependency tailwindcss to v4 [[#4778](https://github.com/woodpecker-ci/woodpecker/pull/4778)]
 - fix(deps): update golang-packages [[#4839](https://github.com/woodpecker-ci/woodpecker/pull/4839)]
 
