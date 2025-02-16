@@ -30,7 +30,7 @@
     "lodash": "^4.17.21",
     "marked": "^15.0.5",
     "node-emoji": "^2.2.0",
-    "pinia": "^2.3.0",
+    "pinia": "^3.0.0",
     "prettier-plugin-tailwindcss": "^0.6.11",
     "prismjs": "^1.29.0",
     "semver": "^7.6.3",
