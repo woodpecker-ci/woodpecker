@@ -16,7 +16,6 @@ cd docs/plugins/woodpecker-plugins
 pnpm build
 ```
 
-## Build
 ## Local Development
 
 ```bash
