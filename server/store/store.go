@@ -49,9 +49,9 @@ type Store interface {
 	// GetRepoForgeID gets a repo by its forge ID.
 	GetRepoForgeID(model.ForgeRemoteID) (*model.Repo, error)
 	// GetRepoNameFallback gets the repo by its forge ID and if this doesn't exist by its full name.
-	GetRepoNameFallback(remoteID model.ForgeRemoteID, fullName string) (*model.Repo, error)
+	GetRepoNameFallback(remoteID model.ForgeRemoteID, fullName string, forgeID int64) (*model.Repo, error)
 	// GetRepoName gets a repo by its full name.
-	GetRepoName(string) (*model.Repo, error)
+	GetRepoName(string, int64) (*model.Repo, error)
 	// GetRepoCount gets a count of all repositories in the system.
 	GetRepoCount() (int64, error)
 	// CreateRepo creates a new repository.
