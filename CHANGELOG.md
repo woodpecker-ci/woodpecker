@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.2.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.2.0) - 2025-02-16
+## [3.2.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.2.0) - 2025-02-17
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -8,6 +8,7 @@
 
 ### 📚 Documentation
 
+- chore(deps): lock file maintenance [[#4866](https://github.com/woodpecker-ci/woodpecker/pull/4866)]
 - chore(deps): update dependency @types/react to v19.0.9 [[#4864](https://github.com/woodpecker-ci/woodpecker/pull/4864)]
 - Drop versioned docs for v1 [[#4844](https://github.com/woodpecker-ci/woodpecker/pull/4844)]
 - Add a Home Assistant notification plugin  [[#4841](https://github.com/woodpecker-ci/woodpecker/pull/4841)]
