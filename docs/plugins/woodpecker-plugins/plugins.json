@@ -241,6 +241,11 @@
       "verified": false
     },
     {
+      "name": "Hugo",
+      "docs": "https://raw.githubusercontent.com/maurerle/woodpecker-hugo/refs/heads/main/docs.md",
+      "verified": false
+    },
+    {
       "name": "Home Assistant Notify",
       "docs": "https://raw.githubusercontent.com/DHandspikerWade/woodpecker-plugin-ha-notify/refs/heads/main/docs.md",
       "verified": false
