@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@DHandspikerWade, @anbraten, @mark-pitblado, @qwerty287, @xoxys
+@DHandspikerWade, @anbraten, @arthurpro, @mark-pitblado, @qwerty287, @xoxys
 
 ### 📚 Documentation
 
@@ -43,6 +43,7 @@
 
 ### Misc
 
+- Add Microsoft Teams Notification (Advanced) plugin [[#4868](https://github.com/woodpecker-ci/woodpecker/pull/4868)]
 - docs: remove latest from docker compose example [[#4849](https://github.com/woodpecker-ci/woodpecker/pull/4849)]
 
 ## [3.1.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.1.0) - 2025-02-12
