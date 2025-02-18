@@ -29,7 +29,7 @@ require (
 	github.com/go-sql-driver/mysql v1.8.1
 	github.com/go-viper/mapstructure/v2 v2.2.1
 	github.com/golang-jwt/jwt/v5 v5.2.1
-	github.com/google/go-github/v69 v69.1.0
+	github.com/google/go-github/v69 v69.2.0
 	github.com/google/tink/go v1.7.0
 	github.com/gorilla/securecookie v1.1.2
 	github.com/hashicorp/go-hclog v1.6.3
