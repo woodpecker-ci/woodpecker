@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.2.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.2.0) - 2025-02-18
+## [3.2.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.2.0) - 2025-02-19
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -26,6 +26,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update module github.com/go-sql-driver/mysql to v1.9.0 [[#4872](https://github.com/woodpecker-ci/woodpecker/pull/4872)]
 - fix(deps): update module github.com/google/go-github/v69 to v69.2.0 [[#4869](https://github.com/woodpecker-ci/woodpecker/pull/4869)]
 - chore(deps): update docker.io/woodpeckerci/plugin-trivy docker tag to v1.4.0 [[#4865](https://github.com/woodpecker-ci/woodpecker/pull/4865)]
 - fix(deps): update dependency simple-icons to v14.7.0 [[#4862](https://github.com/woodpecker-ci/woodpecker/pull/4862)]
