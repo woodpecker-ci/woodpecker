@@ -141,6 +141,12 @@ var flags = append([]cli.Flag{
 		Name:    "authenticate-public-repos",
 		Usage:   "Always use authentication to clone repositories even if they are public. Needed if the SCM requires to always authenticate as used by many companies.",
 	},
+	&cli.BoolFlag{
+		Sources: cli.EnvVars("WOODPECKER_DEFAULT_ALLOW_PULL_REQUESTS"),
+		Name:    "allow-pull-requests",
+		Usage:   "The default value for allowing pull requests on a repo.",
+		Value:   true,
+	},
 	&cli.StringSliceFlag{
 		Sources: cli.EnvVars("WOODPECKER_DEFAULT_CANCEL_PREVIOUS_PIPELINE_EVENTS"),
 		Name:    "default-cancel-previous-pipeline-events",

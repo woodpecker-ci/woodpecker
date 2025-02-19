@@ -337,6 +337,12 @@ Enable to allow user registration.
 
 Always use authentication to clone repositories even if they are public. Needed if the forge requires to always authenticate as used by many companies.
 
+### `WOODPECKER_DEFAULT_ALLOW_PULL_REQUESTS`
+
+> Default: `true`
+
+The default setting for allowing pull requests on a repo
+
 ### `WOODPECKER_DEFAULT_CANCEL_PREVIOUS_PIPELINE_EVENTS`
 
 > Default: `pull_request, push`
