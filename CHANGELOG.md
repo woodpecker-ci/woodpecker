@@ -4,7 +4,12 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@DHandspikerWade, @anbraten, @arthurpro, @mark-pitblado, @maurerle, @qwerty287, @xoxys
+@DHandspikerWade, @anbraten, @arthurpro, @jpgleeson, @mark-pitblado, @maurerle, @qwerty287, @xoxys
+
+### 📈 Enhancement
+
+- Add default option for allowing pull requests on repositories [[#4873](https://github.com/woodpecker-ci/woodpecker/pull/4873)]
+- Replace deprecated linter [[#4843](https://github.com/woodpecker-ci/woodpecker/pull/4843)]
 
 ### 📚 Documentation
 
@@ -19,10 +24,6 @@
 
 - Fix org assign on login [[#4817](https://github.com/woodpecker-ci/woodpecker/pull/4817)]
 - Directly fetch directory contents [[#4842](https://github.com/woodpecker-ci/woodpecker/pull/4842)]
-
-### 📈 Enhancement
-
-- Replace deprecated linter [[#4843](https://github.com/woodpecker-ci/woodpecker/pull/4843)]
 
 ### 📦️ Dependency
 
