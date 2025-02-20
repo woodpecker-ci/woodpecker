@@ -143,7 +143,7 @@ var flags = append([]cli.Flag{
 	},
 	&cli.BoolFlag{
 		Sources: cli.EnvVars("WOODPECKER_DEFAULT_ALLOW_PULL_REQUESTS"),
-		Name:    "allow-pull-requests",
+		Name:    "default-allow-pull-requests",
 		Usage:   "The default value for allowing pull requests on a repo.",
 		Value:   true,
 	},

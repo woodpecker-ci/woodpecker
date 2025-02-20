@@ -341,7 +341,7 @@ Always use authentication to clone repositories even if they are public. Needed 
 
 > Default: `true`
 
-The default setting for allowing pull requests on a repo
+The default setting for allowing pull requests on a repo.
 
 ### `WOODPECKER_DEFAULT_CANCEL_PREVIOUS_PIPELINE_EVENTS`
 
