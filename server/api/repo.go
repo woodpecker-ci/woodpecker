@@ -92,7 +92,7 @@ func PostRepo(c *gin.Context) {
 	} else {
 		repo = from
 		repo.RequireApproval = model.RequireApprovalForks
-		repo.AllowPull = true
+		repo.AllowPull = server.Config.Pipeline.DefaultAllowPullRequests
 		repo.AllowDeploy = false
 		repo.CancelPreviousPipelineEvents = server.Config.Pipeline.DefaultCancelPreviousPipelineEvents
 	}
