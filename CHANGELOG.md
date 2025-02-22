@@ -1,24 +1,25 @@
 # Changelog
 
-## [3.2.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.2.0) - 2025-02-20
+## [3.2.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.2.0) - 2025-02-22
 
 ### ❤️ Thanks to all contributors! ❤️
 
 @DHandspikerWade, @anbraten, @arthurpro, @jpgleeson, @mark-pitblado, @maurerle, @qwerty287, @xoxys
 
-### 📈 Enhancement
-
-- Add default option for allowing pull requests on repositories [[#4873](https://github.com/woodpecker-ci/woodpecker/pull/4873)]
-- Replace deprecated linter [[#4843](https://github.com/woodpecker-ci/woodpecker/pull/4843)]
-
 ### 📚 Documentation
 
+- chore(deps): update docs npm deps non-major [[#4878](https://github.com/woodpecker-ci/woodpecker/pull/4878)]
 - plugins: add Hugo plugin for woodpecker [[#4870](https://github.com/woodpecker-ci/woodpecker/pull/4870)]
 - Add Microsoft Teams Notification (Advanced) plugin [[#4868](https://github.com/woodpecker-ci/woodpecker/pull/4868)]
 - chore(deps): lock file maintenance [[#4866](https://github.com/woodpecker-ci/woodpecker/pull/4866)]
 - chore(deps): update dependency @types/react to v19.0.9 [[#4864](https://github.com/woodpecker-ci/woodpecker/pull/4864)]
 - Drop versioned docs for v1 [[#4844](https://github.com/woodpecker-ci/woodpecker/pull/4844)]
 - Add a Home Assistant notification plugin  [[#4841](https://github.com/woodpecker-ci/woodpecker/pull/4841)]
+
+### 📈 Enhancement
+
+- Add default option for allowing pull requests on repositories [[#4873](https://github.com/woodpecker-ci/woodpecker/pull/4873)]
+- Replace deprecated linter [[#4843](https://github.com/woodpecker-ci/woodpecker/pull/4843)]
 
 ### 🐛 Bug Fixes
 
@@ -27,6 +28,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update docker.io/woodpeckerci/plugin-surge-preview docker tag to v1.3.5 [[#4877](https://github.com/woodpecker-ci/woodpecker/pull/4877)]
 - fix(deps): update module github.com/prometheus/client_golang to v1.21.0 [[#4874](https://github.com/woodpecker-ci/woodpecker/pull/4874)]
 - fix(deps): update module github.com/go-sql-driver/mysql to v1.9.0 [[#4872](https://github.com/woodpecker-ci/woodpecker/pull/4872)]
 - fix(deps): update module github.com/google/go-github/v69 to v69.2.0 [[#4869](https://github.com/woodpecker-ci/woodpecker/pull/4869)]
