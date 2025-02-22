@@ -28,6 +28,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update module codeberg.org/mvdkleijn/forgejo-sdk/forgejo to v2 [[#4858](https://github.com/woodpecker-ci/woodpecker/pull/4858)]
 - fix(deps): update web npm deps non-major [[#4882](https://github.com/woodpecker-ci/woodpecker/pull/4882)]
 - chore(deps): update postgres docker tag to v17.4 [[#4881](https://github.com/woodpecker-ci/woodpecker/pull/4881)]
 - chore(deps): update woodpeckerci/plugin-git docker tag to v2.6.1 [[#4879](https://github.com/woodpecker-ci/woodpecker/pull/4879)]
