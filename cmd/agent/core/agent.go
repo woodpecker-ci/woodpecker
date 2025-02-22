@@ -40,6 +40,7 @@ import (
 
 	"go.woodpecker-ci.org/woodpecker/v3/agent"
 	agent_rpc "go.woodpecker-ci.org/woodpecker/v3/agent/rpc"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/rpc"
@@ -250,6 +251,9 @@ func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 		"platform": engInfo.Platform,
 		"backend":  backendEngine.Name(),
 		"repo":     "*", // allow all repos by default
+	}
+	for _, label := range pipeline.InternalLabels {
+		labels[label] = "*"
 	}
 	// ... and let it overwrite by custom ones
 	maps.Copy(labels, customLabels)
