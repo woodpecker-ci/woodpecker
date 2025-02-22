@@ -28,6 +28,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update woodpeckerci/plugin-git docker tag to v2.6.1 [[#4879](https://github.com/woodpecker-ci/woodpecker/pull/4879)]
 - chore(deps): update docker.io/woodpeckerci/plugin-editorconfig-checker docker tag to v0.3.0 [[#4880](https://github.com/woodpecker-ci/woodpecker/pull/4880)]
 - chore(deps): update docker.io/woodpeckerci/plugin-surge-preview docker tag to v1.3.5 [[#4877](https://github.com/woodpecker-ci/woodpecker/pull/4877)]
 - fix(deps): update module github.com/prometheus/client_golang to v1.21.0 [[#4874](https://github.com/woodpecker-ci/woodpecker/pull/4874)]
