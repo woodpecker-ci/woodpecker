@@ -28,6 +28,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update pre-commit hook rbubley/mirrors-prettier to v3.5.2 [[#4883](https://github.com/woodpecker-ci/woodpecker/pull/4883)]
 - fix(deps): update module codeberg.org/mvdkleijn/forgejo-sdk/forgejo to v2 [[#4858](https://github.com/woodpecker-ci/woodpecker/pull/4858)]
 - fix(deps): update web npm deps non-major [[#4882](https://github.com/woodpecker-ci/woodpecker/pull/4882)]
 - chore(deps): update postgres docker tag to v17.4 [[#4881](https://github.com/woodpecker-ci/woodpecker/pull/4881)]
