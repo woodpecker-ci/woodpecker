@@ -28,6 +28,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update dependency @types/eslint__js to v9 [[#4884](https://github.com/woodpecker-ci/woodpecker/pull/4884)]
 - chore(deps): update pre-commit hook rbubley/mirrors-prettier to v3.5.2 [[#4883](https://github.com/woodpecker-ci/woodpecker/pull/4883)]
 - fix(deps): update module codeberg.org/mvdkleijn/forgejo-sdk/forgejo to v2 [[#4858](https://github.com/woodpecker-ci/woodpecker/pull/4858)]
 - fix(deps): update web npm deps non-major [[#4882](https://github.com/woodpecker-ci/woodpecker/pull/4882)]
