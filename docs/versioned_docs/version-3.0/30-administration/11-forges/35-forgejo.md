@@ -33,7 +33,7 @@ To configure the Docker network if the network's name is `forgejo`, configure it
 
 ## Registration
 
-Register your application with Forgejo to create your client id and secret. You can find the OAuth applications settings of Forgejo at `https://forgejo.<host>/user/settings/`. It is very import the authorization callback URL matches your http(s) scheme and hostname exactly with `https://<host>/authorize` as the path.
+Register your application with Forgejo to create your client id and secret. You can find the OAuth applications settings of Forgejo at `https://forgejo.<host>/user/settings/`. It is very important that the authorization callback URL matches your http(s) scheme and hostname exactly with `https://<host>/authorize` as the path.
 
 If you run the Woodpecker CI server on the same host as the Forgejo instance, you might also need to allow local connections in Forgejo. Otherwise webhooks will fail. Add the following lines to your Forgejo configuration (usually at `/etc/forgejo/conf/app.ini`).
 
