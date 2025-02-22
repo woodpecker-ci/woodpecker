@@ -46,7 +46,7 @@
     "@ianvs/prettier-plugin-sort-imports": "^4.4.0",
     "@intlify/eslint-plugin-vue-i18n": "3.2.0",
     "@intlify/unplugin-vue-i18n": "^6.0.3",
-    "@types/eslint__js": "^8.42.3",
+    "@types/eslint__js": "^9.0.0",
     "@types/lodash": "^4.17.14",
     "@types/node": "^22.10.5",
     "@types/prismjs": "^1.26.5",
