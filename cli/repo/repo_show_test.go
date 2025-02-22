@@ -17,7 +17,6 @@ func TestRepoShow(t *testing.T) {
 	tests := []struct {
 		name          string
 		repoID        int64
-		format        string
 		mockRepo      *woodpecker.Repo
 		mockError     error
 		expectedError bool
@@ -27,7 +26,6 @@ func TestRepoShow(t *testing.T) {
 		{
 			name:     "valid repo by ID",
 			repoID:   123,
-			format:   "{{.Name}}",
 			mockRepo: &woodpecker.Repo{Name: "test-repo"},
 			expected: &woodpecker.Repo{Name: "test-repo"},
 			args:     []string{"show", "123"},
@@ -35,10 +33,9 @@ func TestRepoShow(t *testing.T) {
 		{
 			name:     "valid repo by full name",
 			repoID:   456,
-			format:   "{{.FullName}}",
-			mockRepo: &woodpecker.Repo{FullName: "owner/repo"},
-			expected: &woodpecker.Repo{FullName: "owner/repo"},
-			args:     []string{"show", "456", "--format", "{{.FullName}}"},
+			mockRepo: &woodpecker.Repo{ID: 456, Name: "repo", Owner: "owner"},
+			expected: &woodpecker.Repo{ID: 456, Name: "repo", Owner: "owner"},
+			args:     []string{"show", "owner/repo"},
 		},
 		{
 			name:          "invalid repo ID",
@@ -53,6 +50,7 @@ func TestRepoShow(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			mockClient := mocks.NewClient(t)
 			mockClient.On("Repo", tt.repoID).Return(tt.mockRepo, tt.mockError).Maybe()
+			mockClient.On("RepoLookup", "owner/repo").Return(tt.mockRepo, nil).Maybe()
 
 			command := repoShowCmd
 			command.Writer = io.Discard
