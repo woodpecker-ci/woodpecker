@@ -28,6 +28,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update web npm deps non-major [[#4882](https://github.com/woodpecker-ci/woodpecker/pull/4882)]
 - chore(deps): update postgres docker tag to v17.4 [[#4881](https://github.com/woodpecker-ci/woodpecker/pull/4881)]
 - chore(deps): update woodpeckerci/plugin-git docker tag to v2.6.1 [[#4879](https://github.com/woodpecker-ci/woodpecker/pull/4879)]
 - chore(deps): update docker.io/woodpeckerci/plugin-editorconfig-checker docker tag to v0.3.0 [[#4880](https://github.com/woodpecker-ci/woodpecker/pull/4880)]
