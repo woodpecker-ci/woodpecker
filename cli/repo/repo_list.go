@@ -16,8 +16,6 @@ package repo
 
 import (
 	"context"
-	"os"
-	"text/template"
 
 	"github.com/urfave/cli/v3"
 
@@ -30,51 +28,44 @@ var repoListCmd = &cli.Command{
 	Name:      "ls",
 	Usage:     "list all repos",
 	ArgsUsage: " ",
-	Action:    repoList,
-	Flags: []cli.Flag{
-		common.FormatFlag(tmplRepoList),
-		&cli.StringFlag{
-			Name:  "org",
-			Usage: "filter by organization",
-		},
+	Action:    List,
+	Flags: append(common.OutputFlags("table"), []cli.Flag{
 		&cli.BoolFlag{
 			Name:  "all",
 			Usage: "query all repos, including inactive ones",
 		},
-	},
+	}...),
 }
 
-func repoList(ctx context.Context, c *cli.Command) error {
+func List(ctx context.Context, c *cli.Command) error {
 	client, err := internal.NewClient(ctx, c)
 	if err != nil {
 		return err
 	}
+	repos, err := repoList(c, client)
+	if err != nil {
+		return err
+	}
+	return repoOutput(c, repos)
+}
 
+func repoList(c *cli.Command, client woodpecker.Client) ([]*woodpecker.Repo, error) {
+	repos := make([]*woodpecker.Repo, 0)
 	opt := woodpecker.RepoListOptions{
 		All: c.Bool("all"),
 	}
 
-	repos, err := client.RepoList(opt)
-	if err != nil || len(repos) == 0 {
-		return err
-	}
-
-	tmpl, err := template.New("_").Parse(c.String("format") + "\n")
-	if err != nil {
-		return err
+	raw, err := client.RepoList(opt)
+	if err != nil || len(raw) == 0 {
+		return nil, err
 	}
 
 	org := c.String("org")
-	for _, repo := range repos {
+	for _, repo := range raw {
 		if org != "" && org != repo.Owner {
 			continue
 		}
-		if err := tmpl.Execute(os.Stdout, repo); err != nil {
-			return err
-		}
+		repos = append(repos, repo)
 	}
-	return nil
+	return repos, nil
 }
-
-// Template for repository list items.
-var tmplRepoList = "\x1b[33m{{ .FullName }}\x1b[0m (id: {{ .ID }}, forgeRemoteID: {{ .ForgeRemoteID }}, isActive: {{ .IsActive }})"
