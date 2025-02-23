@@ -6,6 +6,12 @@
 
 @DHandspikerWade, @anbraten, @arthurpro, @jpgleeson, @mark-pitblado, @maurerle, @qwerty287, @xoxys
 
+### 📈 Enhancement
+
+- Remove eslint types [[#4893](https://github.com/woodpecker-ci/woodpecker/pull/4893)]
+- Add default option for allowing pull requests on repositories [[#4873](https://github.com/woodpecker-ci/woodpecker/pull/4873)]
+- Replace deprecated linter [[#4843](https://github.com/woodpecker-ci/woodpecker/pull/4843)]
+
 ### 📚 Documentation
 
 - chore(deps): update docs npm deps non-major [[#4878](https://github.com/woodpecker-ci/woodpecker/pull/4878)]
@@ -15,11 +21,6 @@
 - chore(deps): update dependency @types/react to v19.0.9 [[#4864](https://github.com/woodpecker-ci/woodpecker/pull/4864)]
 - Drop versioned docs for v1 [[#4844](https://github.com/woodpecker-ci/woodpecker/pull/4844)]
 - Add a Home Assistant notification plugin  [[#4841](https://github.com/woodpecker-ci/woodpecker/pull/4841)]
-
-### 📈 Enhancement
-
-- Add default option for allowing pull requests on repositories [[#4873](https://github.com/woodpecker-ci/woodpecker/pull/4873)]
-- Replace deprecated linter [[#4843](https://github.com/woodpecker-ci/woodpecker/pull/4843)]
 
 ### 🐛 Bug Fixes
 
