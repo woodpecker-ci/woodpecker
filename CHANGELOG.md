@@ -29,6 +29,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update dependency vue-tsc to v2.2.4 [[#4894](https://github.com/woodpecker-ci/woodpecker/pull/4894)]
 - fix(deps): update dependency simple-icons to v14.8.0 [[#4891](https://github.com/woodpecker-ci/woodpecker/pull/4891)]
 - fix(deps): update golang-packages [[#4890](https://github.com/woodpecker-ci/woodpecker/pull/4890)]
 - chore(deps): update dependency @types/eslint__js to v9 [[#4884](https://github.com/woodpecker-ci/woodpecker/pull/4884)]
