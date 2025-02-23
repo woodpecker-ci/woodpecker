@@ -24,6 +24,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	client_cmd "k8s.io/client-go/tools/clientcmd"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 )
 
 var (
@@ -101,6 +102,10 @@ func getClientInsideOfCluster() (kubernetes.Interface, error) {
 	}
 
 	return kubernetes.NewForConfig(config)
+}
+
+func isService(step *types.Step) bool {
+	return step.Type == types.StepTypeService || (step.Detached && dnsPattern.FindStringIndex(step.Name) != nil)
 }
 
 func newBool(val bool) *bool {
