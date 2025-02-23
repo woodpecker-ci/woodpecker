@@ -41,7 +41,7 @@ require (
 	github.com/mattn/go-sqlite3 v1.14.24
 	github.com/moby/moby v27.5.1+incompatible
 	github.com/moby/term v0.5.2
-	github.com/muesli/termenv v0.15.3-0.20241212154518-8c990cd6cf4b
+	github.com/muesli/termenv v0.16.0
 	github.com/neticdk/go-bitbucket v1.0.1
 	github.com/oklog/ulid/v2 v2.1.0
 	github.com/pkg/errors v0.9.1
@@ -58,7 +58,7 @@ require (
 	github.com/zalando/go-keyring v0.2.6
 	gitlab.com/gitlab-org/api/client-go v0.123.0
 	go.uber.org/multierr v1.11.0
-	golang.org/x/crypto v0.33.0
+	golang.org/x/crypto v0.34.0
 	golang.org/x/net v0.35.0
 	golang.org/x/oauth2 v0.26.0
 	golang.org/x/sync v0.11.0
