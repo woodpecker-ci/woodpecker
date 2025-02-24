@@ -199,7 +199,7 @@ func (e *kube) SetupWorkflow(ctx context.Context, conf *types.Config, taskUUID s
 	var extraHosts []types.HostAlias
 	for _, stage := range conf.Stages {
 		for _, step := range stage.Steps {
-			if step.Type == types.StepTypeService || step.Detached {
+			if isService(step) {
 				svc, err := startService(ctx, e, step)
 				if err != nil {
 					return err
@@ -416,7 +416,7 @@ func (e *kube) DestroyWorkflow(ctx context.Context, conf *types.Config, taskUUID
 				return err
 			}
 
-			if step.Type == types.StepTypeService {
+			if isService(step) {
 				err := stopService(ctx, e, step, defaultDeleteOptions)
 				if err != nil {
 					return err
