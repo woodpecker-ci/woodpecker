@@ -246,15 +246,13 @@ func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 	}
 
 	// set default labels ...
-	labels := map[string]string{
-		"hostname": hostname,
-		"platform": engInfo.Platform,
-		"backend":  backendEngine.Name(),
-		"repo":     "*", // allow all repos by default
-	}
+	var labels = make(map[string]string)
 	for _, label := range pipeline.InternalLabels {
 		labels[label] = "*"
 	}
+	labels[pipeline.LabelHostname] = hostname
+	labels[pipeline.LabelPlatform] = engInfo.Platform
+	labels[pipeline.LabelBackend] = backendEngine.Name()
 	// ... and let it overwrite by custom ones
 	maps.Copy(labels, customLabels)
 

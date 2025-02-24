@@ -26,8 +26,23 @@ const (
 	LabelRepoForgeID    string = InternalLabelPrefix + "/repo-forge-id"
 	LabelRepoID         string = InternalLabelPrefix + "/repo-id"
 	LabelRepoName       string = InternalLabelPrefix + "/repo-name"
+	LabelRepoFullName   string = InternalLabelPrefix + "/repo-full-name"
 	LabelBranch         string = InternalLabelPrefix + "/branch"
 	LabelOrgID          string = InternalLabelPrefix + "/org-id"
+	LabelPlatform       string = InternalLabelPrefix + "/platform"
+	LabelHostname       string = InternalLabelPrefix + "/hostname"
+	LabelBackend        string = InternalLabelPrefix + "/backend"
 )
 
-var InternalLabels = []string{LabelForgeRemoteID, LabelRepoForgeID, LabelRepoID, LabelRepoName, LabelBranch, LabelOrgID}
+var InternalLabels = []string{
+	LabelForgeRemoteID,
+	LabelRepoForgeID,
+	LabelRepoID,
+	LabelRepoName,
+	LabelRepoFullName,
+	LabelBranch,
+	LabelOrgID,
+	LabelPlatform,
+	LabelHostname,
+	LabelBackend,
+}

@@ -605,18 +605,23 @@ For more details check the [matrix build docs](./30-matrix-workflows.md).
 Use labels to select the agent that executes your workflow. An agent will execute a workflow only if **all** its assigned labels match the workflow's labels. For Kubernetes agents, these labels propagate to any related resources created during pipeline execution, including pods and secrets.
 To configure additional agent labels, see the [agent configuration options](../30-administration/15-agent-config.md#woodpecker_agent_labels). Agents have pre-configured filters for the following automatically assigned labels:
 
-| Label                             | Description                                              |
-|-----------------------------------|----------------------------------------------------------|
-| `woodpecker-ci.org/forge-id`      | Internal Forge identifier                                |
-| `woodpecker-ci.org/repo-forge-id` | Repository identifier from the Forge                     |
-| `woodpecker-ci.org/repo-id`       | Internal repository identifier                           |
-| `woodpecker-ci.org/repo-name`     | Repository display name (excluding project/organization) |
-| `woodpecker-ci.org/branch`        | Git branch name                                          |
-| `woodpecker-ci.org/org-id`        | Internal organization/project identifier                 |
-| `repo`                            | Combined repository and project name (`org/git_repo`)    |
-| `platform`                        | Agent OS and CPU architecture (e.g., `linux/amd64`)      |
-| `hostname`                        | Agent name                                               |
-| `backend`                         | Agent's backend technology (kubernetes, docker, local)   |
+| Label                              | Description                                                         |
+|------------------------------------|---------------------------------------------------------------------|
+| `woodpecker-ci.org/forge-id`       | Internal Forge identifier                                           |
+| `woodpecker-ci.org/repo-forge-id`  | Repository identifier from the Forge                                |
+| `woodpecker-ci.org/repo-id`        | Internal repository identifier                                      |
+| `woodpecker-ci.org/repo-name`      | Repository display name (excluding project/organization)            |
+| `woodpecker-ci.org/repo-full-name` | Repository display name (including project/organization)            |
+| `woodpecker-ci.org/branch`         | Git branch name                                                     |
+| `woodpecker-ci.org/org-id`         | Internal organization/project identifier                            |
+| `woodpecker-ci.org/platform`       | (deprecated) Agent OS and CPU architecture (e.g., `linux/amd64`)    |
+| `woodpecker-ci.org/hostname`       | (deprecated) Agent name                                             |
+| `woodpecker-ci.org/backend`        | (deprecated) Agent's backend technology (kubernetes, docker, local) |
+| `repo`                             | (deprecated) Combined repository and project name (`org/git_repo`)  |
+| `platform`                         | (deprecated) Agent OS and CPU architecture (e.g., `linux/amd64`)    |
+| `hostname`                         | (deprecated) Agent name                                             |
+| `backend`                          | (deprecated) Agent's backend technology (kubernetes, docker, local) |
+| `org-id`                           | (deprecated) Internal organization/project identifier               |
 
 You can add more labels as key-value pairs under the `labels` field in your pipeline. Labels starting with `woodpecker-ci.org` are reserved for Woodpecker and will be ignored. Labels with empty values are also ignored.
 

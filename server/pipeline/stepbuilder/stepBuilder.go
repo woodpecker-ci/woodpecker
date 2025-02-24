@@ -208,6 +208,7 @@ func (b *StepBuilder) genItemForWorkflow(workflow *model.Workflow, axis matrix.A
 	item.Labels[pipeline.LabelRepoForgeID] = string(b.Repo.ForgeRemoteID)
 	item.Labels[pipeline.LabelRepoID] = strconv.FormatInt(b.Repo.ID, 10)
 	item.Labels[pipeline.LabelRepoName] = b.Repo.Name
+	item.Labels[pipeline.LabelRepoFullName] = b.Repo.FullName
 	item.Labels[pipeline.LabelBranch] = b.Repo.Branch
 	item.Labels[pipeline.LabelOrgID] = strconv.FormatInt(b.Repo.OrgID, 10)
 
