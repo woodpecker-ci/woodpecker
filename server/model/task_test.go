@@ -15,6 +15,7 @@
 package model
 
 import (
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -39,8 +40,8 @@ func TestTask_GetLabels(t *testing.T) {
 		assert.NoError(t, err)
 		assert.NotNil(t, task.Labels)
 		assert.Equal(t, map[string]string{
-			"repo":           "",
-			agentFilterOrgID: "0",
+			pipeline.LabelRepoFullName: "",
+			pipeline.LabelOrgID:        "0",
 		}, task.Labels)
 	})
 
@@ -57,8 +58,8 @@ func TestTask_GetLabels(t *testing.T) {
 		assert.NoError(t, err)
 		assert.NotNil(t, task.Labels)
 		assert.Equal(t, map[string]string{
-			"repo":           "test/repo",
-			agentFilterOrgID: "456",
+			pipeline.LabelRepoFullName: "test/repo",
+			pipeline.LabelOrgID:        "456",
 		}, task.Labels)
 	})
 
@@ -79,9 +80,9 @@ func TestTask_GetLabels(t *testing.T) {
 		assert.NoError(t, err)
 		assert.NotNil(t, task.Labels)
 		assert.Equal(t, map[string]string{
-			"existing":       "label",
-			"repo":           "test/repo",
-			agentFilterOrgID: "456",
+			"existing":                 "label",
+			pipeline.LabelRepoFullName: "test/repo",
+			pipeline.LabelOrgID:        "456",
 		}, task.Labels)
 	})
 }
