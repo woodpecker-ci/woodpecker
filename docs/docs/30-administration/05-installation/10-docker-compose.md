@@ -1,8 +1,10 @@
-# docker compose
+# Docker Compose
 
-The below [docker compose](https://docs.docker.com/compose/) configuration can be used to start a Woodpecker server with a single agent.
+This example [docker-compose](https://docs.docker.com/compose/) setup shows the deployment of a Woodpecker instance connected to GitHub (`WOODPECKER_GITHUB=true`). If you are using another forge, please change this including the respective secret settings.
 
-It relies on a number of environment variables that you must set before running `docker compose up`. The variables are described below.
+It creates persistent volumes for the server and agent config directories. The bundled SQLite DB is stored in `/var/lib/woodpecker` and is the most important part to be persisted as it holds all users and repository information.
+
+The server uses the default port `8000` and gets exposed to the host here, so WoodpeckerWO can be accessed through this port on the host or by a reverse proxy sitting in front of it.
 
 ```yaml title="docker-compose.yaml"
 services:
@@ -109,32 +111,4 @@ The server and agents use a shared secret to authenticate communication. This sh
      environment:
        - [...]
 +      - WOODPECKER_AGENT_SECRET=${WOODPECKER_AGENT_SECRET}
-```
-
-## Docker images
-
-Image variants:
-
-- The `vX.X.X` images are stable releases
-- The `vX.X` images are based on the current release branch (e.g. `release/v1.0`) and can be used to get bug fixes asap
-- The `vX` same as `vX.X` variant but also includes feature releases
-- The `next` images are based on the current `main` branch
-
-:::note
-The `latest` tag is not available on purpose (and has been dropped with the 3.x release) to prevent accidental major version upgrades.
-Hence, users are forced to specify a fixed or rolling tag, omitting the tag identifier (which equals to pulling `latest` implicitly) won't work.
-:::
-
-```bash
-# server
-docker pull woodpeckerci/woodpecker-server:v3
-docker pull woodpeckerci/woodpecker-server:v3-alpine
-
-# agent
-docker pull woodpeckerci/woodpecker-agent:v3
-docker pull woodpeckerci/woodpecker-agent:v3-alpine
-
-# cli
-docker pull woodpeckerci/woodpecker-cli:v3
-docker pull woodpeckerci/woodpecker-cli:v3-alpine
 ```
