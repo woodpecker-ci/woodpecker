@@ -53,6 +53,7 @@ var migrationTasks = []*xormigrate.Migration{
 	&setNewDefaultsForRequireApproval,
 	&removeRepoScm,
 	&unSanitizeOrgAndUserNames,
+	&addParameters,
 }
 
 var allBeans = []any{
@@ -65,6 +66,7 @@ var allBeans = []any{
 	new(model.Step),
 	new(model.Registry),
 	new(model.Repo),
+	new(model.Parameter),
 	new(model.Secret),
 	new(model.Task),
 	new(model.User),

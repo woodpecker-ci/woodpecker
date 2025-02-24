@@ -112,6 +112,16 @@ type Store interface {
 	ConfigPersist(*model.Config) (*model.Config, error)
 	PipelineConfigCreate(*model.PipelineConfig) error
 
+	// Parameters
+	ParameterFind(*model.Repo, string) (*model.Parameter, error)
+	ParameterFindByID(*model.Repo, int64) (*model.Parameter, error)
+	ParameterFindByNameAndBranch(*model.Repo, string, string) (*model.Parameter, error)
+	ParameterList(*model.Repo) ([]*model.Parameter, error)
+	ParameterCreate(*model.Repo, *model.Parameter) error
+	ParameterUpdate(*model.Repo, *model.Parameter) error
+	ParameterDelete(*model.Repo, string) error
+	ParameterDeleteByID(*model.Repo, int64) error
+
 	// Secrets
 	SecretFind(*model.Repo, string) (*model.Secret, error)
 	SecretList(*model.Repo, bool, *model.ListOptions) ([]*model.Secret, error)

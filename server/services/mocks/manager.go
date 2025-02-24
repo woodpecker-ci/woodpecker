@@ -18,6 +18,8 @@ import (
 
 	model "go.woodpecker-ci.org/woodpecker/v3/server/model"
 
+	parameter "go.woodpecker-ci.org/woodpecker/v3/server/services/parameter"
+
 	registry "go.woodpecker-ci.org/woodpecker/v3/server/services/registry"
 
 	secret "go.woodpecker-ci.org/woodpecker/v3/server/services/secret"
@@ -156,6 +158,26 @@ func (_m *Manager) ForgeFromUser(user *model.User) (forge.Forge, error) {
 	}
 
 	return r0, r1
+}
+
+// ParameterServiceFromRepo provides a mock function with given fields: repo
+func (_m *Manager) ParameterServiceFromRepo(repo *model.Repo) parameter.Service {
+	ret := _m.Called(repo)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ParameterServiceFromRepo")
+	}
+
+	var r0 parameter.Service
+	if rf, ok := ret.Get(0).(func(*model.Repo) parameter.Service); ok {
+		r0 = rf(repo)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(parameter.Service)
+		}
+	}
+
+	return r0
 }
 
 // RegistryService provides a mock function with no fields
