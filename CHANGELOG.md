@@ -4,7 +4,13 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@DHandspikerWade, @anbraten, @arthurpro, @jpgleeson, @mark-pitblado, @maurerle, @qwerty287, @xoxys
+@DHandspikerWade, @anbraten, @arthurpro, @jenrik, @jpgleeson, @mark-pitblado, @maurerle, @qwerty287, @xoxys
+
+### 🐛 Bug Fixes
+
+- Fix nil dereference in Bitbucket webhook handling [[#4896](https://github.com/woodpecker-ci/woodpecker/pull/4896)]
+- Fix org assign on login [[#4817](https://github.com/woodpecker-ci/woodpecker/pull/4817)]
+- Directly fetch directory contents [[#4842](https://github.com/woodpecker-ci/woodpecker/pull/4842)]
 
 ### 📚 Documentation
 
@@ -22,11 +28,6 @@
 - Remove eslint types [[#4893](https://github.com/woodpecker-ci/woodpecker/pull/4893)]
 - Add default option for allowing pull requests on repositories [[#4873](https://github.com/woodpecker-ci/woodpecker/pull/4873)]
 - Replace deprecated linter [[#4843](https://github.com/woodpecker-ci/woodpecker/pull/4843)]
-
-### 🐛 Bug Fixes
-
-- Fix org assign on login [[#4817](https://github.com/woodpecker-ci/woodpecker/pull/4817)]
-- Directly fetch directory contents [[#4842](https://github.com/woodpecker-ci/woodpecker/pull/4842)]
 
 ### 📦️ Dependency
 
