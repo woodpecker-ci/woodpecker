@@ -151,7 +151,7 @@ func PostRepo(c *gin.Context) {
 
 	// creates the jwt token used to verify the repository
 	t := token.New(token.HookToken)
-	t.Set("forge-remote-id", string(forgeRemoteID))
+	t.Set("repo-forge-remote-id", string(forgeRemoteID))
 	t.Set("forge-id", strconv.FormatInt(repo.ForgeID, 10))
 	sig, err := t.Sign(repo.Hash)
 	if err != nil {
@@ -562,7 +562,7 @@ func MoveRepo(c *gin.Context) {
 
 	// creates the jwt token used to verify the repository
 	t := token.New(token.HookToken)
-	t.Set("forge-remote-id", string(repo.ForgeRemoteID))
+	t.Set("repo-forge-remote-id", string(repo.ForgeRemoteID))
 	t.Set("forge-id", strconv.FormatInt(repo.ForgeID, 10))
 	sig, err := t.Sign(repo.Hash)
 	if err != nil {
@@ -670,7 +670,7 @@ func repairRepo(c *gin.Context, repo *model.Repo, withPerms, skipOnErr bool) {
 
 	// creates the jwt token used to verify the repository
 	t := token.New(token.HookToken)
-	t.Set("forge-remote-id", string(repo.ForgeRemoteID))
+	t.Set("repo-forge-remote-id", string(repo.ForgeRemoteID))
 	t.Set("forge-id", strconv.FormatInt(repo.ForgeID, 10))
 	sig, err := t.Sign(repo.Hash)
 	if err != nil {
