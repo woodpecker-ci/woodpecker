@@ -162,7 +162,7 @@ linters:
     - makezero
     - rowserrcheck
     - sqlclosecheck
-    - tenv
+    - usetesting
     - unconvert
     - unparam
     - wastedassign

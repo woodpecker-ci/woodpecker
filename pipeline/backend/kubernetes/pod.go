@@ -70,7 +70,7 @@ func mkPod(step *types.Step, trusted types.TrustedConfiguration, config *config,
 }
 
 func stepToPodName(step *types.Step) (name string, err error) {
-	if step.Type == types.StepTypeService {
+	if isService(step) {
 		return serviceName(step)
 	}
 	return podName(step)
@@ -112,7 +112,7 @@ func podLabels(step *types.Step, config *config, options BackendOptions) (map[st
 		log.Trace().Msgf("using labels from the configuration: %v", config.PodLabels)
 		maps.Copy(labels, config.PodLabels)
 	}
-	if step.Type == types.StepTypeService {
+	if isService(step) {
 		labels[ServiceLabel], _ = serviceName(step)
 	}
 	labels[StepLabel], err = stepLabel(step)

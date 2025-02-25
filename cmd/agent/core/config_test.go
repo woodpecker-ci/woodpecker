@@ -26,7 +26,7 @@ func TestReadAgentIDFileNotExists(t *testing.T) {
 }
 
 func TestReadAgentIDFileExists(t *testing.T) {
-	tmpF, errTmpF := os.CreateTemp("", "tmp_")
+	tmpF, errTmpF := os.CreateTemp(t.TempDir(), "tmp_")
 	if !assert.NoError(t, errTmpF) {
 		return
 	}
@@ -48,7 +48,7 @@ func TestReadAgentIDFileExists(t *testing.T) {
 	actual = readAgentConfig(tmpF.Name())
 	assert.EqualValues(t, 33, actual.AgentID)
 
-	tmpF2, errTmpF := os.CreateTemp("", "tmp_")
+	tmpF2, errTmpF := os.CreateTemp(t.TempDir(), "tmp_")
 	if !assert.NoError(t, errTmpF) {
 		return
 	}

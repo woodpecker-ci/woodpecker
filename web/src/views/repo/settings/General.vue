@@ -98,7 +98,7 @@
       >
         <div class="flex items-center">
           <NumberField :id="id" v-model="repoSettings.timeout" class="w-24" />
-          <span class="ml-4 text-wp-text-alt-100">{{ $t('repo.settings.general.timeout.minutes') }}</span>
+          <span class="text-wp-text-alt-100 ml-4">{{ $t('repo.settings.general.timeout.minutes') }}</span>
         </div>
       </InputField>
 
