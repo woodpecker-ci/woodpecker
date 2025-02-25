@@ -54,7 +54,8 @@ func pipelineOutput(c *cli.Command, pipelines []*woodpecker.Pipeline, fd ...io.W
 	outFmt, outOpt := output.ParseOutputOptions(c.String("output"))
 	noHeader := c.Bool("output-no-headers")
 
-	out := os.Stdout
+	var out io.Writer
+	out = os.Stdout
 	if len(fd) > 0 {
 		out = fd[0]
 	}

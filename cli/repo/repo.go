@@ -52,7 +52,8 @@ func repoOutput(c *cli.Command, repos []*woodpecker.Repo, fd ...io.Writer) error
 	outFmt, outOpt := output.ParseOutputOptions(c.String("output"))
 	noHeader := c.Bool("output-no-headers")
 
-	out := os.Stdout
+	var out io.Writer
+	out = os.Stdout
 	if len(fd) > 0 {
 		out = fd[0]
 	}
