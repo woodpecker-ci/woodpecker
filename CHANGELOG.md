@@ -6,6 +6,13 @@
 
 @DHandspikerWade, @anbraten, @arthurpro, @hhomar, @jenrik, @jpgleeson, @mark-pitblado, @maurerle, @qwerty287, @xoxys
 
+### 🐛 Bug Fixes
+
+- Use forge IDs for hook tokens [[#4897](https://github.com/woodpecker-ci/woodpecker/pull/4897)]
+- Fix nil dereference in Bitbucket webhook handling [[#4896](https://github.com/woodpecker-ci/woodpecker/pull/4896)]
+- Fix org assign on login [[#4817](https://github.com/woodpecker-ci/woodpecker/pull/4817)]
+- Directly fetch directory contents [[#4842](https://github.com/woodpecker-ci/woodpecker/pull/4842)]
+
 ### 📚 Documentation
 
 - Fix typo on forgejo/gitea documentation [[#4898](https://github.com/woodpecker-ci/woodpecker/pull/4898)]
@@ -17,12 +24,6 @@
 - chore(deps): update dependency @types/react to v19.0.9 [[#4864](https://github.com/woodpecker-ci/woodpecker/pull/4864)]
 - Drop versioned docs for v1 [[#4844](https://github.com/woodpecker-ci/woodpecker/pull/4844)]
 - Add a Home Assistant notification plugin  [[#4841](https://github.com/woodpecker-ci/woodpecker/pull/4841)]
-
-### 🐛 Bug Fixes
-
-- Fix nil dereference in Bitbucket webhook handling [[#4896](https://github.com/woodpecker-ci/woodpecker/pull/4896)]
-- Fix org assign on login [[#4817](https://github.com/woodpecker-ci/woodpecker/pull/4817)]
-- Directly fetch directory contents [[#4842](https://github.com/woodpecker-ci/woodpecker/pull/4842)]
 
 ### 📈 Enhancement
 
