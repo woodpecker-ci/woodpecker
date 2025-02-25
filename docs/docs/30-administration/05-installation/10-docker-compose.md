@@ -40,7 +40,7 @@ volumes:
   woodpecker-agent-config:
 ```
 
-Woodpecker needs to know its own address. You must therefore provide the public address of it in `<scheme>://<hostname>` format. Please omit trailing slashes:
+Woodpecker must know its own address. You must therefore specify the public address in the format `<scheme>://<hostname>`. Please omit any trailing slashes:
 
 ```diff title="docker-compose.yaml"
  services:
@@ -51,8 +51,7 @@ Woodpecker needs to know its own address. You must therefore provide the public 
 +      - WOODPECKER_HOST=${WOODPECKER_HOST}
 ```
 
-Woodpecker can also have its ports configured. It uses a separate port for gRPC and for HTTP. The agent performs gRPC calls and connects to the gRPC port.
-They can be configured with `*_ADDR` variables:
+It is also possible to customize the ports used. Woodpecker uses a separate port for gRPC and for HTTP. The agent makes gRPC calls and connects to the gRPC port. They can be configured with `*_ADDR` variables:
 
 ```diff title="docker-compose.yaml"
  services:
@@ -64,11 +63,11 @@ They can be configured with `*_ADDR` variables:
 +      - WOODPECKER_SERVER_ADDR=${WOODPECKER_HTTP_ADDR}
 ```
 
-Reverse proxying can also be [configured for gRPC](../40-advanced/10-proxy.md#caddy). If the agents are connecting over the internet, it should also be SSL encrypted. The agent then needs to be configured to be secure:
+If the agents establish a connection via the Internet, TLS encryption should be activated for gRPC. The agent must then be configured properly:
 
 ```diff title="docker-compose.yaml"
  services:
-   woodpecker-server:
+   woodpecker-agent:
      [...]
      environment:
        - [...]
@@ -76,7 +75,7 @@ Reverse proxying can also be [configured for gRPC](../40-advanced/10-proxy.md#ca
 +      - WOODPECKER_GRPC_VERIFY=true # default
 ```
 
-As agents run pipeline steps as docker containers they require access to the host machine's Docker daemon:
+As agents execute pipeline steps as Docker containers, they require access to the Docker daemon of the host machine:
 
 ```diff title="docker-compose.yaml"
  services:
@@ -87,7 +86,7 @@ As agents run pipeline steps as docker containers they require access to the hos
 +      - /var/run/docker.sock:/var/run/docker.sock
 ```
 
-Agents require the server address for agent-to-server communication. The agent connects to the server's gRPC port:
+Agents require the server address for communication between agents and servers. The agent connects to the gRPC port of the server:
 
 ```diff title="docker-compose.yaml"
  services:
@@ -97,7 +96,7 @@ Agents require the server address for agent-to-server communication. The agent c
 +      - WOODPECKER_SERVER=woodpecker-server:9000
 ```
 
-The server and agents use a shared secret to authenticate communication. This should be a random string of your choosing and should be kept private. You can generate such string with `openssl rand -hex 32`:
+The server and the agents use a shared secret to authenticate the communication. This should be a random string, which you should keep secret. You can create such a string with `openssl rand -hex 32`:
 
 ```diff title="docker-compose.yaml"
  services:
@@ -111,4 +110,33 @@ The server and agents use a shared secret to authenticate communication. This sh
      environment:
        - [...]
 +      - WOODPECKER_AGENT_SECRET=${WOODPECKER_AGENT_SECRET}
+```
+
+## Handling sensitive data
+
+There are several options for handling sensitive data in `docker compose` or `docker swarm` configurations:
+
+For Docker Compose, you can use an `.env` file next to your compose configuration to store the secrets outside the compose file. Although this separates the configuration from the secrets, it is still not very secure.
+
+Alternatively, you can also use `docker-secrets`. As it can be difficult to use `docker-secrets` for environment variables, Woodpecker allows reading sensitive data from files by providing a `*_FILE` option for all sensitive configuration variables. Woodpecker will then attempt to read the value directly from this file. Note that the original environment variable will overwrite the value read from the file if it is specified at the same time.
+
+```diff title="docker-compose.yaml"
+ services:
+   woodpecker-server:
+     [...]
+     environment:
+       - [...]
++      - WOODPECKER_AGENT_SECRET_FILE=/run/secrets/woodpecker-agent-secret
++    secrets:
++      - woodpecker-agent-secret
++
++ secrets:
++   woodpecker-agent-secret:
++     external: true
+```
+
+To store values in a docker secret you can use the following command:
+
+```bash
+echo "my_agent_secret_key" | docker secret create woodpecker-agent-secret -
 ```

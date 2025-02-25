@@ -5,6 +5,79 @@
 - DEB
 - RPM
 
+The pre-built packages are available on the [GitHub releases](https://github.com/woodpecker-ci/woodpecker/releases/latest) page. The packages can be installed using the package manager of your distribution.
+
+```Shell
+# Debian/Ubuntu
+curl -L https://github.com/woodpecker-ci/woodpecker/releases/download/${RELEASE_VERSION}/woodpecker_${RELEASE_VERSION}_amd64.deb -o woodpecker-server.deb
+sudo apt --fix-broken install ./woodpecker-server.deb
+
+# CentOS/RHEL
+sudo dnf install https://github.com/woodpecker-ci/woodpecker/releases/download/${RELEASE_VERSION}/woodpecker_${RELEASE_VERSION}_amd64.rpm
+```
+
+The package installation will create a systemd service file for the Woodpecker server and agent along with an example environment file. To configure the server, copy the example environment file `/etc/woodpecker/woodpecker-server.env.example` to `/etc/woodpecker/woodpecker-server.env` and adjust the values.
+
+```ini title="/usr/local/lib/systemd/system/woodpecker-server.service"
+[Unit]
+Description=WoodpeckerCI server
+Documentation=https://woodpecker-ci.org/docs/administration/server-config
+Requires=network.target
+After=network.target
+ConditionFileNotEmpty=/etc/woodpecker/woodpecker-server.env
+ConditionPathExists=/etc/woodpecker/woodpecker-server.env
+
+[Service]
+Type=simple
+EnvironmentFile=/etc/woodpecker/woodpecker-server.env
+User=woodpecker
+Group=woodpecker
+ExecStart=/usr/local/bin/woodpecker-server
+WorkingDirectory=/var/lib/woodpecker/
+StateDirectory=woodpecker
+
+[Install]
+WantedBy=multi-user.target
+```
+
+```shell title="/etc/woodpecker/woodpecker-server.env"
+WOODPECKER_OPEN=true
+WOODPECKER_HOST=${WOODPECKER_HOST}
+WOODPECKER_GITHUB=true
+WOODPECKER_GITHUB_CLIENT=${WOODPECKER_GITHUB_CLIENT}
+WOODPECKER_GITHUB_SECRET=${WOODPECKER_GITHUB_SECRET}
+WOODPECKER_AGENT_SECRET=${WOODPECKER_AGENT_SECRET}
+```
+
+After installing the agent, copy the example environment file `/etc/woodpecker/woodpecker-agent.env.example` to `/etc/woodpecker/woodpecker-agent.env` and adjust the values as well. The agent will automatically register itself with the server.
+
+```ini title="/usr/local/lib/systemd/system/woodpecker-agent.service"
+[Unit]
+Description=WoodpeckerCI agent
+Documentation=https://woodpecker-ci.org/docs/administration/agent-config
+Requires=network.target
+After=network.target
+ConditionFileNotEmpty=/etc/woodpecker/woodpecker-agent.env
+ConditionPathExists=/etc/woodpecker/woodpecker-agent.env
+
+[Service]
+Type=simple
+EnvironmentFile=/etc/woodpecker/woodpecker-agent.env
+User=woodpecker
+Group=woodpecker
+ExecStart=/usr/local/bin/woodpecker-agent
+WorkingDirectory=/var/lib/woodpecker/
+StateDirectory=woodpecker
+
+[Install]
+WantedBy=multi-user.target
+```
+
+```shell title="/etc/woodpecker/woodpecker-agent.env"
+WOODPECKER_SERVER=localhost:9000
+WOODPECKER_AGENT_SECRET=${WOODPECKER_AGENT_SECRET}
+```
+
 ## Community packages
 
 :::info

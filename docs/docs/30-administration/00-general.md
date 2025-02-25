@@ -14,7 +14,7 @@ You can add more agents to increase the number of parallel workflows or set the 
 
 ## Database
 
-Woodpecker uses a SQLite database by default, which requires no installation or configuration. For larger instances it is recommended to use it with a Postgres or MariaDB instance. For more details take a look at the [database settings](./10-database.md) page.
+Woodpecker uses a SQLite database by default, which requires no installation or configuration. For larger instances it is recommended to use it with a Postgres or MariaDB instance. For more details take a look at the [database settings](./10-configuration/10-server.md#databases) page.
 
 ## Forge
 

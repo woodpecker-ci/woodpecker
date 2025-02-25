@@ -1,162 +1,10 @@
 ---
-toc_max_heading_level: 2
+toc_max_heading_level: 3
 ---
 
-# Server configuration
+# Environment variables
 
-## User registration
-
-Woodpecker does not have its own user registry; users are provided from your [forge](./11-forges/11-overview.md) (using OAuth2).
-
-Registration is closed by default (`WOODPECKER_OPEN=false`). If registration is open (`WOODPECKER_OPEN=true`) then every user with an account at the configured forge can login to Woodpecker.
-
-To open registration:
-
-```ini
-WOODPECKER_OPEN=true
-```
-
-You can **also restrict** registration, by keep registration closed and:
-
-- **adding** new **users manually** via the CLI: `woodpecker-cli user add`
-- allowing specific **admin users** via the `WOODPECKER_ADMIN` setting
-- by open registration and **filter by organization** membership through the `WOODPECKER_ORGS` setting
-
-### Close registration, but allow specific admin users
-
-```ini
-WOODPECKER_OPEN=false
-WOODPECKER_ADMIN=john.smith,jane_doe
-```
-
-### Only allow registration of users, who are members of approved organizations
-
-```ini
-WOODPECKER_OPEN=true
-WOODPECKER_ORGS=dolores,dog-patch
-```
-
-## Administrators
-
-Administrators should also be enumerated in your configuration.
-
-```ini
-WOODPECKER_ADMIN=john.smith,jane_doe
-```
-
-## Filtering repositories
-
-Woodpecker operates with the user's OAuth permission. Due to the coarse permission handling of GitHub, you may end up syncing more repos into Woodpecker than preferred.
-
-Use the `WOODPECKER_REPO_OWNERS` variable to filter which GitHub user's repos should be synced only. You typically want to put here your company's GitHub name.
-
-```ini
-WOODPECKER_REPO_OWNERS=my_company,my_company_oss_github_user
-```
-
-## Disallow normal users to create agents
-
-By default, users can create new agents for their repos they have admin access to.
-If an instance admin doesn't want this feature enabled, they can disable the API and hide the Web UI elements.
-
-:::note
-You should set this option if you have, for example,
-global secrets and don't trust your users to create a rogue agent and pipeline for secret extraction.
-:::
-
-```ini
-WOODPECKER_DISABLE_USER_AGENT_REGISTRATION=true
-```
-
-## Global registry setting
-
-If you want to make available a specific private registry to all pipelines, use the `WOODPECKER_DOCKER_CONFIG` server configuration.
-Point it to your server's docker config.
-
-```ini
-WOODPECKER_DOCKER_CONFIG=/root/.docker/config.json
-```
-
-## Handling sensitive data in **docker compose** and **docker swarm**
-
-To handle sensitive data in `docker compose` or `docker swarm` configurations there are several options:
-
-For docker compose you can use a `.env` file next to your compose configuration to store the secrets outside of the compose file. While this separates configuration from secrets it is still not very secure.
-
-Alternatively use docker-secrets. As it may be difficult to use docker secrets for environment variables Woodpecker allows to read sensible data from files by providing a `*_FILE` option of all sensible configuration variables. Woodpecker will try to read the value directly from this file. Keep in mind that when the original environment variable gets specified at the same time it will override the value read from the file.
-
-```diff title="docker-compose.yaml"
- services:
-   woodpecker-server:
-     [...]
-     environment:
-       - [...]
-+      - WOODPECKER_AGENT_SECRET_FILE=/run/secrets/woodpecker-agent-secret
-+    secrets:
-+      - woodpecker-agent-secret
-+
-+ secrets:
-+   woodpecker-agent-secret:
-+     external: true
-```
-
-Store a value to a docker secret like this:
-
-```bash
-echo "my_agent_secret_key" | docker secret create woodpecker-agent-secret -
-```
-
-or generate a random one like this:
-
-```bash
-openssl rand -hex 32 | docker secret create woodpecker-agent-secret -
-```
-
-## Custom JavaScript and CSS
-
-Woodpecker supports custom JS and CSS files.
-These files must be present in the server's filesystem.
-They can be backed in a Docker image or mounted from a ConfigMap inside a Kubernetes environment.
-The configuration variables are independent of each other, which means it can be just one file present, or both.
-
-```ini
-WOODPECKER_CUSTOM_CSS_FILE=/usr/local/www/woodpecker.css
-WOODPECKER_CUSTOM_JS_FILE=/usr/local/www/woodpecker.js
-```
-
-The examples below show how to place a banner message in the top navigation bar of Woodpecker.
-
-### `woodpecker.css`
-
-```css
-.banner-message {
-  position: absolute;
-  width: 280px;
-  height: 40px;
-  margin-left: 240px;
-  margin-top: 5px;
-  padding-top: 5px;
-  font-weight: bold;
-  background: red no-repeat;
-  text-align: center;
-}
-```
-
-### `woodpecker.js`
-
-```javascript
-// place/copy a minified version of your preferred lightweight JavaScript library here ...
-!(function () {
-  'use strict';
-  function e() {} /*...*/
-})();
-
-$().ready(function () {
-  $('.app nav img').first().htmlAfter("<div class='banner-message'>This is a demo banner message :)</div>");
-});
-```
-
-## All server configuration options
+## Server
 
 The following list describes all available server configuration options.
 
@@ -448,7 +296,13 @@ Read the value for `WOODPECKER_AGENT_SECRET` from the specified filepath
 
 > Default: false
 
-[Read about "Disallow normal users to create agents"](./10-server-config.md#disallow-normal-users-to-create-agents)
+By default, users can create new agents for their repos they have admin access to.
+If an instance admin doesn't want this feature enabled, they can disable the API and hide the Web UI elements.
+
+:::note
+You should set this option if you have, for example,
+global secrets and don't trust your users to create a rogue agent and pipeline for secret extraction.
+:::
 
 ### `WOODPECKER_KEEPALIVE_MIN_TIME`
 
@@ -526,7 +380,7 @@ Supported variables:
 
 > Default: empty
 
-Specify a configuration service endpoint, see [Configuration Extension](./40-advanced/100-external-configuration-api.md)
+Specify a configuration service endpoint, see [Configuration Extension](../40-advanced/100-external-configuration-api.md)
 
 ### `WOODPECKER_FORGE_TIMEOUT`
 
@@ -564,24 +418,26 @@ Where to store logs. Possible values: `database` or `file`.
 
 Directory to store logs in if [`WOODPECKER_LOG_STORE`](#woodpecker_log_store) is `file`.
 
----
+## Agent
+
+## Forge
 
 ### `WOODPECKER_GITHUB_...`
 
-See [GitHub configuration](./11-forges/20-github.md#configuration)
+See [GitHub configuration](../11-forges/20-github.md#configuration)
 
 ### `WOODPECKER_GITEA_...`
 
-See [Gitea configuration](./11-forges/30-gitea.md#configuration)
+See [Gitea configuration](../11-forges/30-gitea.md#configuration)
 
 ### `WOODPECKER_BITBUCKET_...`
 
-See [Bitbucket configuration](./11-forges/50-bitbucket.md#configuration)
+See [Bitbucket configuration](../11-forges/50-bitbucket.md#configuration)
 
 ### `WOODPECKER_GITLAB_...`
 
-See [GitLab configuration](./11-forges/40-gitlab.md#configuration)
+See [GitLab configuration](../11-forges/40-gitlab.md#configuration)
 
 ### `WOODPECKER_ADDON_FORGE`
 
-See [addon forges](./11-forges/100-addon.md).
+See [addon forges](../11-forges/100-addon.md).
