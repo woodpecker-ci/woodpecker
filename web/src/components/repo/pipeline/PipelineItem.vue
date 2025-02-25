@@ -1,5 +1,5 @@
 <template>
-  <ListItem v-if="pipeline" class="w-full !p-0">
+  <ListItem v-if="pipeline" class="w-full p-0!">
     <div class="flex w-11 items-center">
       <div
         class="h-full w-3"
@@ -17,20 +17,20 @@
       </div>
     </div>
 
-    <div class="flex min-w-0 flex-grow flex-wrap px-4 py-2 md:flex-nowrap">
-      <div class="hidden flex-shrink-0 items-center md:flex">
+    <div class="flex min-w-0 grow flex-wrap px-4 py-2 md:flex-nowrap">
+      <div class="hidden shrink-0 items-center md:flex">
         <Icon v-if="pipeline.event === 'cron'" name="stopwatch" class="text-wp-text-100" />
         <img v-else class="w-6 rounded-md" :src="pipeline.author_avatar" />
       </div>
 
-      <div class="flex flex-col w-full min-w-0 md:mx-4 md:w-auto gap-y-2 py-2">
+      <div class="flex w-full min-w-0 flex-col gap-y-2 py-2 md:mx-4 md:w-auto">
         <div>
           <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
-          <span class="md:display-unset hidden text-wp-text-alt-100">#{{ pipeline.number }}</span>
+          <span class="md:display-unset text-wp-text-alt-100 hidden">#{{ pipeline.number }}</span>
           <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
-          <span class="md:display-unset mx-2 hidden text-wp-text-alt-100">-</span>
+          <span class="md:display-unset text-wp-text-alt-100 mx-2 hidden">-</span>
           <span
-            class="overflow-hidden overflow-ellipsis whitespace-nowrap text-wp-text-100 underline md:no-underline"
+            class="text-wp-text-100 overflow-hidden overflow-ellipsis whitespace-nowrap underline md:no-underline"
             :title="message"
           >
             {{ shortMessage }}
@@ -39,7 +39,7 @@
 
         <div
           v-if="context"
-          class="flex items-center gap-x-2 overflow-hidden overflow-ellipsis whitespace-nowrap text-wp-text-100"
+          class="text-wp-text-100 flex items-center gap-x-2 overflow-hidden overflow-ellipsis whitespace-nowrap"
           :title="context"
         >
           <Icon v-if="pipeline.event === 'pull_request'" name="pull-request" />
@@ -52,7 +52,7 @@
       </div>
 
       <div
-        class="grid w-full flex-shrink-0 grid-flow-col grid-cols-2 grid-rows-2 gap-x-4 gap-y-2 py-2 text-wp-text-100 md:ml-auto md:w-96"
+        class="text-wp-text-100 grid w-full shrink-0 grid-flow-col grid-cols-2 grid-rows-2 gap-x-4 gap-y-2 py-2 md:ml-auto md:w-96"
       >
         <div class="flex min-w-0 items-center space-x-2">
           <span :title="pipelineEventTitle">

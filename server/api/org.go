@@ -127,7 +127,7 @@ func LookupOrg(c *gin.Context) {
 
 	orgFullName := strings.TrimLeft(c.Param("org_full_name"), "/")
 
-	org, err := _store.OrgFindByName(orgFullName)
+	org, err := _store.OrgFindByName(orgFullName, user.ForgeID)
 	if err != nil {
 		handleDBError(c, err)
 		return

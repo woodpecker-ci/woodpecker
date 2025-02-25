@@ -259,7 +259,7 @@ func (c *client) File(ctx context.Context, u *model.User, r *model.Repo, p *mode
 
 	b, resp, err := bc.Projects.GetTextFileContent(ctx, r.Owner, r.Name, f, p.Commit.SHA)
 	if err != nil {
-		if resp.StatusCode == http.StatusNotFound {
+		if resp != nil && resp.StatusCode == http.StatusNotFound {
 			// requested directory might not exist
 			return nil, &forge_types.ErrConfigNotFound{
 				Configs: []string{f},
@@ -281,7 +281,7 @@ func (c *client) Dir(ctx context.Context, u *model.User, r *model.Repo, p *model
 	for {
 		list, resp, err := bc.Projects.ListFiles(ctx, r.Owner, r.Name, path, opts)
 		if err != nil {
-			if resp.StatusCode == http.StatusNotFound {
+			if resp != nil && resp.StatusCode == http.StatusNotFound {
 				// requested directory might not exist
 				return nil, &forge_types.ErrConfigNotFound{
 					Configs: []string{path},
