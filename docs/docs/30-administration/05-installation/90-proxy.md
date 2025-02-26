@@ -1,4 +1,4 @@
-# Proxy
+# Reverse Proxy
 
 ## Apache
 
@@ -95,7 +95,7 @@ woodpecker-agent.example.com {
 ```
 
 :::note
-Above configuration shows how to create reverse-proxies for web and agent communication. If your agent uses SSL do not forget to enable [`WOODPECKER_GRPC_SECURE`](../15-agent-config.md#woodpecker_grpc_secure).
+Above configuration shows how to create reverse-proxies for web and agent communication. If your agent uses SSL do not forget to enable [`WOODPECKER_GRPC_SECURE`](../10-configuration/30-agent.md#woodpecker_grpc_secure).
 :::
 
 ## Tunnelmole

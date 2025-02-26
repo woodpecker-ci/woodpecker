@@ -171,15 +171,15 @@ Configures the backend engine to run pipelines on. Possible values are `auto-det
 
 ### `WOODPECKER_BACKEND_DOCKER_*`
 
-See [Docker backend configuration](../22-backends/10-docker.md#configuration)
+See [Docker backend configuration](./11-backends/10-docker.md#environment-variables)
 
 ### `WOODPECKER_BACKEND_K8S_*`
 
-See [Kubernetes backend configuration](../22-backends/40-kubernetes.md#configuration)
+See [Kubernetes backend configuration](./11-backends/20-kubernetes.md#environment-variables)
 
 ### `WOODPECKER_BACKEND_LOCAL_*`
 
-See [Local backend configuration](../22-backends/20-local.md#options)
+See [Local backend configuration](./11-backends/30-local.md#environment-variables)
 
 ### Advanced Settings
 

@@ -81,7 +81,7 @@ WOODPECKER_HEALTHCHECK=false
 
 ### Setup OAuth
 
-Create an OAuth app for your forge as described in the [forges documentation](../30-administration/11-forges/11-overview.md).
+Create an OAuth app for your forge as described in the [forges documentation](../30-administration/10-configuration/12-forges/11-overview.md).
 
 ## Developing with VS Code
 

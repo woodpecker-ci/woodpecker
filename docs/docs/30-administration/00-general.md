@@ -18,7 +18,7 @@ Woodpecker uses a SQLite database by default, which requires no installation or 
 
 ## Forge
 
-What would a CI/CD system be without any code. By connecting Woodpecker to your [forge](../20-usage/15-terminology/index.md), you can start pipelines on events like pushes or pull requests. Woodpecker will also use your forge to authenticate and report back the status of your pipelines. For more details take a look at the [forge settings](./11-forges/11-overview.md) page.
+What would a CI/CD system be without any code. By connecting Woodpecker to your [forge](../20-usage/15-terminology/index.md), you can start pipelines on events like pushes or pull requests. Woodpecker will also use your forge to authenticate and report back the status of your pipelines. For more details take a look at the [forge settings](./10-configuration/12-forges/11-overview.md) page.
 
 ## Container images
 
