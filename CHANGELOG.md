@@ -12,6 +12,7 @@
 
 ### 📚 Documentation
 
+- chore(deps): lock file maintenance [[#4906](https://github.com/woodpecker-ci/woodpecker/pull/4906)]
 - chore(deps): update dependency axios to v1.8.1 [[#4905](https://github.com/woodpecker-ci/woodpecker/pull/4905)]
 - Fix typo on forgejo/gitea documentation [[#4898](https://github.com/woodpecker-ci/woodpecker/pull/4898)]
 - chore(deps): update docs npm deps non-major [[#4878](https://github.com/woodpecker-ci/woodpecker/pull/4878)]
