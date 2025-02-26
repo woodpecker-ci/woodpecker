@@ -10,15 +10,9 @@
 
 - Fix approval requirement if PR is closed [[#4902](https://github.com/woodpecker-ci/woodpecker/pull/4902)]
 
-### 🐛 Bug Fixes
-
-- Use forge IDs for hook tokens [[#4897](https://github.com/woodpecker-ci/woodpecker/pull/4897)]
-- Fix nil dereference in Bitbucket webhook handling [[#4896](https://github.com/woodpecker-ci/woodpecker/pull/4896)]
-- Fix org assign on login [[#4817](https://github.com/woodpecker-ci/woodpecker/pull/4817)]
-- Directly fetch directory contents [[#4842](https://github.com/woodpecker-ci/woodpecker/pull/4842)]
-
 ### 📚 Documentation
 
+- chore(deps): update dependency axios to v1.8.1 [[#4905](https://github.com/woodpecker-ci/woodpecker/pull/4905)]
 - Fix typo on forgejo/gitea documentation [[#4898](https://github.com/woodpecker-ci/woodpecker/pull/4898)]
 - chore(deps): update docs npm deps non-major [[#4878](https://github.com/woodpecker-ci/woodpecker/pull/4878)]
 - plugins: add Hugo plugin for woodpecker [[#4870](https://github.com/woodpecker-ci/woodpecker/pull/4870)]
@@ -26,6 +20,13 @@
 - chore(deps): update dependency @types/react to v19.0.9 [[#4864](https://github.com/woodpecker-ci/woodpecker/pull/4864)]
 - Drop versioned docs for v1 [[#4844](https://github.com/woodpecker-ci/woodpecker/pull/4844)]
 - Add a Home Assistant notification plugin  [[#4841](https://github.com/woodpecker-ci/woodpecker/pull/4841)]
+
+### 🐛 Bug Fixes
+
+- Use forge IDs for hook tokens [[#4897](https://github.com/woodpecker-ci/woodpecker/pull/4897)]
+- Fix nil dereference in Bitbucket webhook handling [[#4896](https://github.com/woodpecker-ci/woodpecker/pull/4896)]
+- Fix org assign on login [[#4817](https://github.com/woodpecker-ci/woodpecker/pull/4817)]
+- Directly fetch directory contents [[#4842](https://github.com/woodpecker-ci/woodpecker/pull/4842)]
 
 ### 📈 Enhancement
 
@@ -35,6 +36,8 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update woodpeckerci/plugin-git docker tag to v2.6.2 [[#4903](https://github.com/woodpecker-ci/woodpecker/pull/4903)]
+- fix(deps): update web npm deps non-major [[#4904](https://github.com/woodpecker-ci/woodpecker/pull/4904)]
 - fix(deps): update golang-packages [[#4900](https://github.com/woodpecker-ci/woodpecker/pull/4900)]
 - chore(deps): lock file maintenance [[#4895](https://github.com/woodpecker-ci/woodpecker/pull/4895)]
 - chore(deps): update dependency vue-tsc to v2.2.4 [[#4894](https://github.com/woodpecker-ci/woodpecker/pull/4894)]
