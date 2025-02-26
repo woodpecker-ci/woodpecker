@@ -21,7 +21,7 @@
     "@kyvg/vue3-notification": "^3.4.1",
     "@mdi/js": "^7.4.47",
     "@tailwindcss/typography": "^0.5.15",
-    "@tailwindcss/vite": "4.0.8",
+    "@tailwindcss/vite": "4.0.9",
     "@vueuse/core": "^12.3.0",
     "ansi_up": "^6.0.2",
     "dompurify": "^3.2.3",
