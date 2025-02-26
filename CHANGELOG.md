@@ -1,10 +1,14 @@
 # Changelog
 
-## [3.2.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.2.0) - 2025-02-25
+## [3.2.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.2.0) - 2025-02-26
 
 ### ❤️ Thanks to all contributors! ❤️
 
 @DHandspikerWade, @anbraten, @arthurpro, @hhomar, @jenrik, @jpgleeson, @mark-pitblado, @maurerle, @qwerty287, @xoxys
+
+### 🔒 Security
+
+- Fix approval requirement if PR is closed [[#4902](https://github.com/woodpecker-ci/woodpecker/pull/4902)]
 
 ### 🐛 Bug Fixes
 
@@ -16,11 +20,9 @@
 ### 📚 Documentation
 
 - Fix typo on forgejo/gitea documentation [[#4898](https://github.com/woodpecker-ci/woodpecker/pull/4898)]
-- chore(deps): lock file maintenance [[#4895](https://github.com/woodpecker-ci/woodpecker/pull/4895)]
 - chore(deps): update docs npm deps non-major [[#4878](https://github.com/woodpecker-ci/woodpecker/pull/4878)]
 - plugins: add Hugo plugin for woodpecker [[#4870](https://github.com/woodpecker-ci/woodpecker/pull/4870)]
 - Add Microsoft Teams Notification (Advanced) plugin [[#4868](https://github.com/woodpecker-ci/woodpecker/pull/4868)]
-- chore(deps): lock file maintenance [[#4866](https://github.com/woodpecker-ci/woodpecker/pull/4866)]
 - chore(deps): update dependency @types/react to v19.0.9 [[#4864](https://github.com/woodpecker-ci/woodpecker/pull/4864)]
 - Drop versioned docs for v1 [[#4844](https://github.com/woodpecker-ci/woodpecker/pull/4844)]
 - Add a Home Assistant notification plugin  [[#4841](https://github.com/woodpecker-ci/woodpecker/pull/4841)]
@@ -34,6 +36,7 @@
 ### 📦️ Dependency
 
 - fix(deps): update golang-packages [[#4900](https://github.com/woodpecker-ci/woodpecker/pull/4900)]
+- chore(deps): lock file maintenance [[#4895](https://github.com/woodpecker-ci/woodpecker/pull/4895)]
 - chore(deps): update dependency vue-tsc to v2.2.4 [[#4894](https://github.com/woodpecker-ci/woodpecker/pull/4894)]
 - fix(deps): update dependency simple-icons to v14.8.0 [[#4891](https://github.com/woodpecker-ci/woodpecker/pull/4891)]
 - fix(deps): update golang-packages [[#4890](https://github.com/woodpecker-ci/woodpecker/pull/4890)]
@@ -48,6 +51,7 @@
 - fix(deps): update module github.com/prometheus/client_golang to v1.21.0 [[#4874](https://github.com/woodpecker-ci/woodpecker/pull/4874)]
 - fix(deps): update module github.com/go-sql-driver/mysql to v1.9.0 [[#4872](https://github.com/woodpecker-ci/woodpecker/pull/4872)]
 - fix(deps): update module github.com/google/go-github/v69 to v69.2.0 [[#4869](https://github.com/woodpecker-ci/woodpecker/pull/4869)]
+- chore(deps): lock file maintenance [[#4866](https://github.com/woodpecker-ci/woodpecker/pull/4866)]
 - chore(deps): update docker.io/woodpeckerci/plugin-trivy docker tag to v1.4.0 [[#4865](https://github.com/woodpecker-ci/woodpecker/pull/4865)]
 - fix(deps): update dependency simple-icons to v14.7.0 [[#4862](https://github.com/woodpecker-ci/woodpecker/pull/4862)]
 - fix(deps): update dependency pinia to v3 [[#4856](https://github.com/woodpecker-ci/woodpecker/pull/4856)]
