@@ -626,6 +626,7 @@ To configure additional agent labels, see the [agent configuration options](../3
 You can add more labels as key-value pairs under the `labels` field in your pipeline. Labels starting with `woodpecker-ci.org` are reserved for Woodpecker and will be ignored. Labels with empty values are also ignored.
 
 Specifying the [platform attribute](#platform) for your workflow automatically adds a corresponding `platform` label, such as `platform=your-os/your-arch`.
+
 ```diff
 +labels:
 +  location: europe # Only agents with `location=europe` or `location=*` will execute this workflow.
