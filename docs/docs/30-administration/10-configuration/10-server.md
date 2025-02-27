@@ -83,6 +83,325 @@ WOODPECKER_DATABASE_DRIVER=postgres
 WOODPECKER_DATABASE_DATASOURCE=postgres://root:password@1.2.3.4:5432/postgres?sslmode=disable
 ```
 
+## TLS
+
+Woodpecker supports SSL configuration by mounting certificates into your container.
+
+```ini
+WOODPECKER_SERVER_CERT=/etc/certs/woodpecker.example.com/server.crt
+WOODPECKER_SERVER_KEY=/etc/certs/woodpecker.example.com/server.key
+```
+
+TLS support is provided using the [ListenAndServeTLS](https://golang.org/pkg/net/http/#ListenAndServeTLS) function from the Go standard library.
+
+### Container configuration
+
+In addition to the ports shown in the [docker-compose](../05-installation/10-docker-compose.md) installation, port `443` must be exposed:
+
+```diff title="docker-compose.yaml"
+ services:
+   woodpecker-server:
+     [...]
+     ports:
++      - 80:80
++      - 443:443
+       - 9000:9000
+```
+
+Additionally, the certificate and key must be mounted and referenced:
+
+```diff title="docker-compose.yaml"
+ services:
+   woodpecker-server:
+     [...]
+     environment:
++      - WOODPECKER_SERVER_CERT=/etc/certs/woodpecker.example.com/server.crt
++      - WOODPECKER_SERVER_KEY=/etc/certs/woodpecker.example.com/server.key
+     volumes:
++      - /etc/certs/woodpecker.example.com/server.crt:/etc/certs/woodpecker.example.com/server.crt
++      - /etc/certs/woodpecker.example.com/server.key:/etc/certs/woodpecker.example.com/server.key
+```
+
+## Reverse Proxy
+
+### Apache
+
+This guide provides a brief overview for installing Woodpecker server behind the Apache2 web-server. This is an example configuration:
+
+<!-- cspell:ignore apacheconf -->
+
+```apacheconf
+ProxyPreserveHost On
+
+RequestHeader set X-Forwarded-Proto "https"
+
+ProxyPass / http://127.0.0.1:8000/
+ProxyPassReverse / http://127.0.0.1:8000/
+```
+
+You must have these Apache modules installed:
+
+- `proxy`
+- `proxy_http`
+
+You must configure Apache to set `X-Forwarded-Proto` when using https.
+
+```diff
+ ProxyPreserveHost On
+
++RequestHeader set X-Forwarded-Proto "https"
+
+ ProxyPass / http://127.0.0.1:8000/
+ ProxyPassReverse / http://127.0.0.1:8000/
+```
+
+### Nginx
+
+This guide provides a basic overview for installing Woodpecker server behind the Nginx web-server. For more advanced configuration options please consult the official Nginx [documentation](https://docs.nginx.com/nginx/admin-guide).
+
+Example configuration:
+
+```nginx
+server {
+    listen 80;
+    server_name woodpecker.example.com;
+
+    location / {
+        proxy_set_header X-Forwarded-For $remote_addr;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header Host $http_host;
+
+        proxy_pass http://127.0.0.1:8000;
+        proxy_redirect off;
+        proxy_http_version 1.1;
+        proxy_buffering off;
+
+        chunked_transfer_encoding off;
+    }
+}
+```
+
+You must configure the proxy to set `X-Forwarded` proxy headers:
+
+```diff
+ server {
+     listen 80;
+     server_name woodpecker.example.com;
+
+     location / {
++        proxy_set_header X-Forwarded-For $remote_addr;
++        proxy_set_header X-Forwarded-Proto $scheme;
+
+         proxy_pass http://127.0.0.1:8000;
+         proxy_redirect off;
+         proxy_http_version 1.1;
+         proxy_buffering off;
+
+         chunked_transfer_encoding off;
+     }
+ }
+```
+
+### Caddy
+
+This guide provides a brief overview for installing Woodpecker server behind the [Caddy web-server](https://caddyserver.com/). This is an example caddyfile proxy configuration:
+
+```caddy
+# expose WebUI and API
+woodpecker.example.com {
+  reverse_proxy woodpecker-server:8000
+}
+
+# expose gRPC
+woodpecker-agent.example.com {
+  reverse_proxy h2c://woodpecker-server:9000
+}
+```
+
+### Tunnelmole
+
+[Tunnelmole](https://github.com/robbie-cahill/tunnelmole-client) is an open source tunneling tool.
+
+Start by [installing tunnelmole](https://github.com/robbie-cahill/tunnelmole-client#installation).
+
+After the installation, run the following command to start tunnelmole:
+
+```bash
+tmole 8000
+```
+
+It will start a tunnel and will give a response like this:
+
+```bash
+➜  ~ tmole 8000
+http://bvdo5f-ip-49-183-170-144.tunnelmole.net is forwarding to localhost:8000
+https://bvdo5f-ip-49-183-170-144.tunnelmole.net is forwarding to localhost:8000
+```
+
+Set `WOODPECKER_HOST` to the Tunnelmole URL (`xxx.tunnelmole.net`) and start the server.
+
+### Ngrok
+
+[Ngrok](https://ngrok.com/) is a popular closed source tunnelling tool. After installing ngrok, open a new console and run the following command:
+
+```bash
+ngrok http 8000
+```
+
+Set `WOODPECKER_HOST` to the ngrok URL (usually xxx.ngrok.io) and start the server.
+
+### Traefik
+
+To install the Woodpecker server behind a [Traefik](https://traefik.io/) load balancer, you must expose both the `http` and the `gRPC` ports. Here is a comprehensive example, considering you are running Traefik with docker swarm and want to do TLS termination and automatic redirection from http to https.
+
+<!-- cspell:words redirectscheme certresolver  -->
+
+```yaml
+services:
+  server:
+    image: woodpeckerci/woodpecker-server:latest
+    environment:
+      - WOODPECKER_OPEN=true
+      - WOODPECKER_ADMIN=your_admin_user
+      # other settings ...
+
+    networks:
+      - dmz # externally defined network, so that traefik can connect to the server
+    volumes:
+      - woodpecker-server-data:/var/lib/woodpecker/
+
+    deploy:
+      labels:
+        - traefik.enable=true
+
+        # web server
+        - traefik.http.services.woodpecker-service.loadbalancer.server.port=8000
+
+        - traefik.http.routers.woodpecker-secure.rule=Host(`ci.example.com`)
+        - traefik.http.routers.woodpecker-secure.tls=true
+        - traefik.http.routers.woodpecker-secure.tls.certresolver=letsencrypt
+        - traefik.http.routers.woodpecker-secure.entrypoints=web-secure
+        - traefik.http.routers.woodpecker-secure.service=woodpecker-service
+
+        - traefik.http.routers.woodpecker.rule=Host(`ci.example.com`)
+        - traefik.http.routers.woodpecker.entrypoints=web
+        - traefik.http.routers.woodpecker.service=woodpecker-service
+
+        - traefik.http.middlewares.woodpecker-redirect.redirectscheme.scheme=https
+        - traefik.http.middlewares.woodpecker-redirect.redirectscheme.permanent=true
+        - traefik.http.routers.woodpecker.middlewares=woodpecker-redirect@docker
+
+        #  gRPC service
+        - traefik.http.services.woodpecker-grpc.loadbalancer.server.port=9000
+        - traefik.http.services.woodpecker-grpc.loadbalancer.server.scheme=h2c
+
+        - traefik.http.routers.woodpecker-grpc-secure.rule=Host(`woodpecker-grpc.example.com`)
+        - traefik.http.routers.woodpecker-grpc-secure.tls=true
+        - traefik.http.routers.woodpecker-grpc-secure.tls.certresolver=letsencrypt
+        - traefik.http.routers.woodpecker-grpc-secure.entrypoints=web-secure
+        - traefik.http.routers.woodpecker-grpc-secure.service=woodpecker-grpc
+
+        - traefik.http.routers.woodpecker-grpc.rule=Host(`woodpecker-grpc.example.com`)
+        - traefik.http.routers.woodpecker-grpc.entrypoints=web
+        - traefik.http.routers.woodpecker-grpc.service=woodpecker-grpc
+
+        - traefik.http.middlewares.woodpecker-grpc-redirect.redirectscheme.scheme=https
+        - traefik.http.middlewares.woodpecker-grpc-redirect.redirectscheme.permanent=true
+        - traefik.http.routers.woodpecker-grpc.middlewares=woodpecker-grpc-redirect@docker
+
+volumes:
+  woodpecker-server-data:
+    driver: local
+
+networks:
+  dmz:
+    external: true
+```
+
+## Metrics
+
+### Endpoint
+
+Woodpecker is compatible with Prometheus and exposes a `/metrics` endpoint if the environment variable `WOODPECKER_PROMETHEUS_AUTH_TOKEN` is set. Please note that access to the metrics endpoint is restricted and requires the authorization token from the environment variable mentioned above.
+
+```yaml
+global:
+  scrape_interval: 60s
+
+scrape_configs:
+  - job_name: 'woodpecker'
+    bearer_token: dummyToken...
+
+    static_configs:
+      - targets: ['woodpecker.domain.com']
+```
+
+### Authorization
+
+An administrator will need to generate a user API token and configure in the Prometheus configuration file as a bearer token. Please see the following example:
+
+```diff
+ global:
+   scrape_interval: 60s
+
+ scrape_configs:
+   - job_name: 'woodpecker'
++    bearer_token: dummyToken...
+
+     static_configs:
+        - targets: ['woodpecker.domain.com']
+```
+
+As an alternative, the token can also be read from a file:
+
+```diff
+ global:
+   scrape_interval: 60s
+
+ scrape_configs:
+   - job_name: 'woodpecker'
++    bearer_token_file: /etc/secrets/woodpecker-monitoring-token
+
+     static_configs:
+        - targets: ['woodpecker.domain.com']
+```
+
+### Reference
+
+List of Prometheus metrics specific to Woodpecker:
+
+```yaml
+# HELP woodpecker_pipeline_count Pipeline count.
+# TYPE woodpecker_pipeline_count counter
+woodpecker_pipeline_count{branch="main",pipeline="total",repo="woodpecker-ci/woodpecker",status="success"} 3
+woodpecker_pipeline_count{branch="dev",pipeline="total",repo="woodpecker-ci/woodpecker",status="success"} 3
+# HELP woodpecker_pipeline_time Build time.
+# TYPE woodpecker_pipeline_time gauge
+woodpecker_pipeline_time{branch="main",pipeline="total",repo="woodpecker-ci/woodpecker",status="success"} 116
+woodpecker_pipeline_time{branch="dev",pipeline="total",repo="woodpecker-ci/woodpecker",status="success"} 155
+# HELP woodpecker_pipeline_total_count Total number of builds.
+# TYPE woodpecker_pipeline_total_count gauge
+woodpecker_pipeline_total_count 1025
+# HELP woodpecker_pending_steps Total number of pending pipeline steps.
+# TYPE woodpecker_pending_steps gauge
+woodpecker_pending_steps 0
+# HELP woodpecker_repo_count Total number of repos.
+# TYPE woodpecker_repo_count gauge
+woodpecker_repo_count 9
+# HELP woodpecker_running_steps Total number of running pipeline steps.
+# TYPE woodpecker_running_steps gauge
+woodpecker_running_steps 0
+# HELP woodpecker_user_count Total number of users.
+# TYPE woodpecker_user_count gauge
+woodpecker_user_count 1
+# HELP woodpecker_waiting_steps Total number of pipeline waiting on deps.
+# TYPE woodpecker_waiting_steps gauge
+woodpecker_waiting_steps 0
+# HELP woodpecker_worker_count Total number of workers.
+# TYPE woodpecker_worker_count gauge
+woodpecker_worker_count 4
+```
+
 ## External Configuration API
 
 To provide additional management and preprocessing capabilities for pipeline configurations Woodpecker supports an HTTP API which can be enabled to call an external config service.
@@ -185,129 +504,6 @@ WOODPECKER_CONFIG_SERVICE_ENDPOINT=https://example.com/ciconfig
     }
   ]
 }
-```
-
-## TLS
-
-Woodpecker supports SSL configuration by mounting certificates into your container.
-
-```ini
-WOODPECKER_SERVER_CERT=/etc/certs/woodpecker.example.com/server.crt
-WOODPECKER_SERVER_KEY=/etc/certs/woodpecker.example.com/server.key
-```
-
-TLS support is provided using the [ListenAndServeTLS](https://golang.org/pkg/net/http/#ListenAndServeTLS) function from the Go standard library.
-
-### Container configuration
-
-In addition to the ports shown in the [docker-compose](../05-installation/10-docker-compose.md) installation, port `443` must be exposed:
-
-```diff title="docker-compose.yaml"
- services:
-   woodpecker-server:
-     [...]
-     ports:
-+      - 80:80
-+      - 443:443
-       - 9000:9000
-```
-
-Additionally, the certificate and key must be mounted and referenced:
-
-```diff title="docker-compose.yaml"
- services:
-   woodpecker-server:
-     [...]
-     environment:
-+      - WOODPECKER_SERVER_CERT=/etc/certs/woodpecker.example.com/server.crt
-+      - WOODPECKER_SERVER_KEY=/etc/certs/woodpecker.example.com/server.key
-     volumes:
-+      - /etc/certs/woodpecker.example.com/server.crt:/etc/certs/woodpecker.example.com/server.crt
-+      - /etc/certs/woodpecker.example.com/server.key:/etc/certs/woodpecker.example.com/server.key
-```
-
-## Metrics
-
-### Endpoint
-
-Woodpecker is compatible with Prometheus and exposes a `/metrics` endpoint if the environment variable `WOODPECKER_PROMETHEUS_AUTH_TOKEN` is set. Please note that access to the metrics endpoint is restricted and requires the authorization token from the environment variable mentioned above.
-
-```yaml
-global:
-  scrape_interval: 60s
-
-scrape_configs:
-  - job_name: 'woodpecker'
-    bearer_token: dummyToken...
-
-    static_configs:
-      - targets: ['woodpecker.domain.com']
-```
-
-### Authorization
-
-An administrator will need to generate a user API token and configure in the Prometheus configuration file as a bearer token. Please see the following example:
-
-```diff
- global:
-   scrape_interval: 60s
-
- scrape_configs:
-   - job_name: 'woodpecker'
-+    bearer_token: dummyToken...
-
-     static_configs:
-        - targets: ['woodpecker.domain.com']
-```
-
-As an alternative, the token can also be read from a file:
-
-```diff
- global:
-   scrape_interval: 60s
-
- scrape_configs:
-   - job_name: 'woodpecker'
-+    bearer_token_file: /etc/secrets/woodpecker-monitoring-token
-
-     static_configs:
-        - targets: ['woodpecker.domain.com']
-```
-
-### Reference
-
-List of Prometheus metrics specific to Woodpecker:
-
-```yaml
-# HELP woodpecker_pipeline_count Pipeline count.
-# TYPE woodpecker_pipeline_count counter
-woodpecker_pipeline_count{branch="main",pipeline="total",repo="woodpecker-ci/woodpecker",status="success"} 3
-woodpecker_pipeline_count{branch="dev",pipeline="total",repo="woodpecker-ci/woodpecker",status="success"} 3
-# HELP woodpecker_pipeline_time Build time.
-# TYPE woodpecker_pipeline_time gauge
-woodpecker_pipeline_time{branch="main",pipeline="total",repo="woodpecker-ci/woodpecker",status="success"} 116
-woodpecker_pipeline_time{branch="dev",pipeline="total",repo="woodpecker-ci/woodpecker",status="success"} 155
-# HELP woodpecker_pipeline_total_count Total number of builds.
-# TYPE woodpecker_pipeline_total_count gauge
-woodpecker_pipeline_total_count 1025
-# HELP woodpecker_pending_steps Total number of pending pipeline steps.
-# TYPE woodpecker_pending_steps gauge
-woodpecker_pending_steps 0
-# HELP woodpecker_repo_count Total number of repos.
-# TYPE woodpecker_repo_count gauge
-woodpecker_repo_count 9
-# HELP woodpecker_running_steps Total number of running pipeline steps.
-# TYPE woodpecker_running_steps gauge
-woodpecker_running_steps 0
-# HELP woodpecker_user_count Total number of users.
-# TYPE woodpecker_user_count gauge
-woodpecker_user_count 1
-# HELP woodpecker_waiting_steps Total number of pipeline waiting on deps.
-# TYPE woodpecker_waiting_steps gauge
-woodpecker_waiting_steps 0
-# HELP woodpecker_worker_count Total number of workers.
-# TYPE woodpecker_worker_count gauge
-woodpecker_worker_count 4
 ```
 
 ## UI customization
