@@ -614,9 +614,9 @@ To configure additional agent labels, see the [agent configuration options](../3
 | `woodpecker-ci.org/repo-full-name` | Repository display name (including project/organization)            |
 | `woodpecker-ci.org/branch`         | Git branch name                                                     |
 | `woodpecker-ci.org/org-id`         | Internal organization/project identifier                            |
-| `woodpecker-ci.org/platform`       | (deprecated) Agent OS and CPU architecture (e.g., `linux/amd64`)    |
-| `woodpecker-ci.org/hostname`       | (deprecated) Agent name                                             |
-| `woodpecker-ci.org/backend`        | (deprecated) Agent's backend technology (kubernetes, docker, local) |
+| `woodpecker-ci.org/platform`       | Agent OS and CPU architecture (e.g., `linux/amd64`)                 |
+| `woodpecker-ci.org/hostname`       | Agent name                                                          |
+| `woodpecker-ci.org/backend`        | Agent's backend technology (kubernetes, docker, local)              |
 | `repo`                             | (deprecated) Combined repository and project name (`org/git_repo`)  |
 | `platform`                         | (deprecated) Agent OS and CPU architecture (e.g., `linux/amd64`)    |
 | `hostname`                         | (deprecated) Agent name                                             |
