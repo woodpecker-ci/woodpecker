@@ -5,6 +5,16 @@ To enhance the usability of Woodpecker and meet evolving security standards, occ
 ## `next`
 
 - (Kubernetes) Deprecated `step` label on pod in favor of new namespaced label `woodpecker-ci.org/step`. The `step` label will be removed in a future update.
+- Deprecated several labels in favor of equivalents with the `woodpecker-ci.org/` prefix. The deprecated labels will be removed in a future update.
+  The following labels are affected:
+
+ | Deprecated labels | New labels                         |
+ |-------------------|------------------------------------|
+ | `repo`            | `woodpecker-ci.org/repo-full-name` |
+ | `platform`        | `woodpecker-ci.org/platform`       |
+ | `hostname`        | `woodpecker-ci.org/hostname`       |
+ | `backend`         | `woodpecker-ci.org/backend`        |
+ | `org-id`          | `woodpecker-ci.org/org-id`         |
 
 ## 3.0.0
 
