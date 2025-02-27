@@ -52,7 +52,7 @@ type RPC struct {
 }
 
 // Replaces legacy filter labels with new ones.
-func upconvertFilterLabels(filter rpc.Filter) rpc.Filter {
+func migrateFilterLabels(filter rpc.Filter) rpc.Filter {
 	if value, ok := filter.Labels["repo"]; ok {
 		filter.Labels["woodpecker-ci.org/repo-full-name"] = value
 		delete(filter.Labels, "repo")
@@ -87,7 +87,7 @@ func (s *RPC) Next(c context.Context, agentFilter rpc.Filter) (*rpc.Workflow, er
 		log.Debug().Msgf("agent connected: %s: polling", hostname)
 	}
 
-	agentFilter = upconvertFilterLabels(agentFilter)
+	agentFilter = migrateFilterLabels(agentFilter)
 
 	agent, err := s.getAgentFromContext(c)
 	if err != nil {
