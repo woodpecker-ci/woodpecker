@@ -34,15 +34,13 @@ const (
 	LabelBackend        string = InternalLabelPrefix + "/backend"
 )
 
-var InternalLabels = []string{
-	LabelForgeRemoteID,
-	LabelRepoForgeID,
-	LabelRepoID,
-	LabelRepoName,
-	LabelRepoFullName,
-	LabelBranch,
-	LabelOrgID,
-	LabelPlatform,
-	LabelHostname,
-	LabelBackend,
+// ManagedLabels is a list of all labels added automatically to tasks by Woodpecker.
+var ManagedLabels = map[string]bool{
+	LabelForgeRemoteID: true,
+	LabelRepoForgeID:   true,
+	LabelRepoID:        true,
+	LabelRepoName:      true,
+	LabelRepoFullName:  true,
+	LabelBranch:        true,
+	LabelOrgID:         true,
 }

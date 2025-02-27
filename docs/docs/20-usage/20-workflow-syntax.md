@@ -603,36 +603,36 @@ For more details check the [matrix build docs](./30-matrix-workflows.md).
 ## `labels`
 
 Use labels to select the agent that executes your workflow. An agent will execute a workflow only if **all** its assigned labels match the workflow's labels. For Kubernetes agents, these labels propagate to any related resources created during pipeline execution, including pods and secrets.
-To configure additional agent labels, see the [agent configuration options](../30-administration/15-agent-config.md#woodpecker_agent_labels). Agents have pre-configured filters for the following automatically assigned labels:
+To configure additional agent labels, see the [agent configuration options](../30-administration/15-agent-config.md#woodpecker_agent_labels). Agents have pre-configured filters for the following labels:
 
-| Label                              | Description                                                         |
-|------------------------------------|---------------------------------------------------------------------|
-| `woodpecker-ci.org/forge-id`       | Internal Forge identifier                                           |
-| `woodpecker-ci.org/repo-forge-id`  | Repository identifier from the Forge                                |
-| `woodpecker-ci.org/repo-id`        | Internal repository identifier                                      |
-| `woodpecker-ci.org/repo-name`      | Repository display name (excluding project/organization)            |
-| `woodpecker-ci.org/repo-full-name` | Repository display name (including project/organization)            |
-| `woodpecker-ci.org/branch`         | Git branch name                                                     |
-| `woodpecker-ci.org/org-id`         | Internal organization/project identifier                            |
-| `woodpecker-ci.org/platform`       | Agent OS and CPU architecture (e.g., `linux/amd64`)                 |
-| `woodpecker-ci.org/hostname`       | Agent name                                                          |
-| `woodpecker-ci.org/backend`        | Agent's backend technology (kubernetes, docker, local)              |
-| `repo`                             | (deprecated) Combined repository and project name (`org/git_repo`)  |
-| `platform`                         | (deprecated) Agent OS and CPU architecture (e.g., `linux/amd64`)    |
-| `hostname`                         | (deprecated) Agent name                                             |
-| `backend`                          | (deprecated) Agent's backend technology (kubernetes, docker, local) |
-| `org-id`                           | (deprecated) Internal organization/project identifier               |
+| Label                              | Description                                                         | Woodpecker managed |
+|------------------------------------|---------------------------------------------------------------------|--------------------|
+| `woodpecker-ci.org/forge-id`       | Internal Forge identifier                                           | 🤖 yes             |
+| `woodpecker-ci.org/repo-forge-id`  | Repository identifier from the Forge                                | 🤖 yes             |
+| `woodpecker-ci.org/repo-id`        | Internal repository identifier                                      | 🤖 yes             |
+| `woodpecker-ci.org/repo-name`      | Repository display name (excluding project/organization)            | 🤖 yes             |
+| `woodpecker-ci.org/repo-full-name` | Repository display name (including project/organization)            | 🤖 yes             |
+| `woodpecker-ci.org/branch`         | Git branch name                                                     | 🤖 yes             |
+| `woodpecker-ci.org/org-id`         | Internal organization/project identifier                            | 🤖 yes             |
+| `woodpecker-ci.org/platform`       | Agent OS and CPU architecture (e.g., `linux/amd64`)                 | 🧑‍💻 no           |
+| `woodpecker-ci.org/hostname`       | Agent name                                                          | 🧑‍💻 no           |
+| `woodpecker-ci.org/backend`        | Agent's backend technology (kubernetes, docker, local)              | 🧑‍💻 no           |
+| `repo`                             | (deprecated) Combined repository and project name (`org/git_repo`)  | 🤖 yes             |
+| `platform`                         | (deprecated) Agent OS and CPU architecture (e.g., `linux/amd64`)    | 🧑‍💻 no           |
+| `hostname`                         | (deprecated) Agent name                                             | 🧑‍💻 no           |
+| `backend`                          | (deprecated) Agent's backend technology (kubernetes, docker, local) | 🧑‍💻 no           |
+| `org-id`                           | (deprecated) Internal organization/project identifier               | 🤖 yes             |
 
-You can add more labels as key-value pairs under the `labels` field in your pipeline. Labels starting with `woodpecker-ci.org` are reserved for Woodpecker and will be ignored. Labels with empty values are also ignored.
+You can add more labels as key-value pairs under the `labels` field in your pipeline. Labels marked as Woodpecker managed can not be set as part of the pipeline definition. Labels with empty values are ignored.
 
-Specifying the [platform attribute](#platform) for your workflow automatically adds a corresponding `platform` label, such as `platform=your-os/your-arch`.
+Specifying the [platform attribute](#platform) for your workflow automatically adds a corresponding `woodpecker-ci.org/platform` label, such as `woodpecker-ci.org/platform=your-os/your-arch`.
 
 ```diff
 +labels:
 +  location: europe # Only agents with `location=europe` or `location=*` will execute this workflow.
 +  weather: sun
 +  hostname: "" # Ignored because the value is empty.
-+  woodpecker-ci.org/forge-id: 1 # Ignored because it uses the reserved "woodpecker-ci.org" prefix.
++  woodpecker-ci.org/forge-id: 1 # Ignored because it sets a managed label.
 
  steps:
    - name: build
@@ -644,7 +644,7 @@ Specifying the [platform attribute](#platform) for your workflow automatically a
 
 ### Filter by platform
 
-To configure your workflow to only be executed on an agent with a specific platform, you can use the `platform` key.
+To configure your workflow to only be executed on an agent with a specific platform, you can use the `woodpecker-ci.org/platform` key.
 Have a look at the official [go docs](https://go.dev/doc/install/source) for the available platforms. The syntax of the platform is `GOOS/GOARCH` like `linux/arm64` or `linux/amd64`.
 
 Example:
@@ -653,7 +653,7 @@ Assuming we have two agents, one `linux/arm` and one `linux/amd64`. Previously t
 
 ```diff
 +labels:
-+  platform: linux/arm64
++  woodpecker-ci.org/platform: linux/arm64
 
  steps:
    [...]
