@@ -7,7 +7,7 @@ It relies on a number of environment variables that you must set before running 
 ```yaml title="docker-compose.yaml"
 services:
   woodpecker-server:
-    image: woodpeckerci/woodpecker-server:latest
+    image: woodpeckerci/woodpecker-server:v3
     ports:
       - 8000:8000
     volumes:
@@ -21,7 +21,7 @@ services:
       - WOODPECKER_AGENT_SECRET=${WOODPECKER_AGENT_SECRET}
 
   woodpecker-agent:
-    image: woodpeckerci/woodpecker-agent:latest
+    image: woodpeckerci/woodpecker-agent:v3
     command: agent
     restart: always
     depends_on:

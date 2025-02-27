@@ -92,9 +92,10 @@ func PostRepo(c *gin.Context) {
 	} else {
 		repo = from
 		repo.RequireApproval = model.RequireApprovalForks
-		repo.AllowPull = true
+		repo.AllowPull = server.Config.Pipeline.DefaultAllowPullRequests
 		repo.AllowDeploy = false
 		repo.CancelPreviousPipelineEvents = server.Config.Pipeline.DefaultCancelPreviousPipelineEvents
+		repo.ForgeID = user.ForgeID // TODO: allow to use other connected forges of the user
 	}
 	repo.IsActive = true
 	repo.UserID = user.ID
@@ -120,7 +121,7 @@ func PostRepo(c *gin.Context) {
 
 	// find org of repo
 	var org *model.Org
-	org, err = _store.OrgFindByName(repo.Owner)
+	org, err = _store.OrgFindByName(repo.Owner, user.ForgeID)
 	if err != nil && !errors.Is(err, types.RecordNotExist) {
 		c.String(http.StatusInternalServerError, err.Error())
 		return
@@ -148,22 +149,10 @@ func PostRepo(c *gin.Context) {
 
 	repo.OrgID = org.ID
 
-	if enabledOnce {
-		err = _store.UpdateRepo(repo)
-	} else {
-		repo.ForgeID = user.ForgeID // TODO: allow to use other connected forges of the user
-		err = _store.CreateRepo(repo)
-	}
-	if err != nil {
-		msg := "could not create/update repo in store."
-		log.Error().Err(err).Msg(msg)
-		c.String(http.StatusInternalServerError, msg)
-		return
-	}
-
 	// creates the jwt token used to verify the repository
 	t := token.New(token.HookToken)
-	t.Set("repo-id", strconv.FormatInt(repo.ID, 10))
+	t.Set("repo-forge-remote-id", string(forgeRemoteID))
+	t.Set("forge-id", strconv.FormatInt(repo.ForgeID, 10))
 	sig, err := t.Sign(repo.Hash)
 	if err != nil {
 		msg := "could not generate new jwt token."
@@ -181,6 +170,18 @@ func PostRepo(c *gin.Context) {
 	err = _forge.Activate(c, user, repo, hookURL)
 	if err != nil {
 		msg := "could not create webhook in forge."
+		log.Error().Err(err).Msg(msg)
+		c.String(http.StatusInternalServerError, msg)
+		return
+	}
+
+	if enabledOnce {
+		err = _store.UpdateRepo(repo)
+	} else {
+		err = _store.CreateRepo(repo)
+	}
+	if err != nil {
+		msg := "could not create/update repo in store."
 		log.Error().Err(err).Msg(msg)
 		c.String(http.StatusInternalServerError, msg)
 		return
@@ -455,10 +456,7 @@ func DeleteRepo(c *gin.Context) {
 		return
 	}
 
-	repo.IsActive = false
-	repo.UserID = 0
-
-	if err := _store.UpdateRepo(repo); err != nil {
+	if err := _forge.Deactivate(c, user, repo, server.Config.Server.WebhookHost); err != nil {
 		_ = c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
@@ -468,12 +466,16 @@ func DeleteRepo(c *gin.Context) {
 			handleDBError(c, err)
 			return
 		}
+	} else {
+		repo.IsActive = false
+		repo.UserID = 0
+
+		if err := _store.UpdateRepo(repo); err != nil {
+			_ = c.AbortWithError(http.StatusInternalServerError, err)
+			return
+		}
 	}
 
-	if err := _forge.Deactivate(c, user, repo, server.Config.Server.WebhookHost); err != nil {
-		_ = c.AbortWithError(http.StatusInternalServerError, err)
-		return
-	}
 	c.JSON(http.StatusOK, repo)
 }
 
@@ -560,7 +562,8 @@ func MoveRepo(c *gin.Context) {
 
 	// creates the jwt token used to verify the repository
 	t := token.New(token.HookToken)
-	t.Set("repo-id", strconv.FormatInt(repo.ID, 10))
+	t.Set("repo-forge-remote-id", string(repo.ForgeRemoteID))
+	t.Set("forge-id", strconv.FormatInt(repo.ForgeID, 10))
 	sig, err := t.Sign(repo.Hash)
 	if err != nil {
 		c.String(http.StatusInternalServerError, err.Error())
@@ -667,7 +670,8 @@ func repairRepo(c *gin.Context, repo *model.Repo, withPerms, skipOnErr bool) {
 
 	// creates the jwt token used to verify the repository
 	t := token.New(token.HookToken)
-	t.Set("repo-id", strconv.FormatInt(repo.ID, 10))
+	t.Set("repo-forge-remote-id", string(repo.ForgeRemoteID))
+	t.Set("forge-id", strconv.FormatInt(repo.ForgeID, 10))
 	sig, err := t.Sign(repo.Hash)
 	if err != nil {
 		c.String(http.StatusInternalServerError, err.Error())
