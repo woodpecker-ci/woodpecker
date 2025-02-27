@@ -21,6 +21,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	pipelineconsts "go.woodpecker-ci.org/woodpecker/v3/pipeline"
 	"strconv"
 	"time"
 
@@ -54,27 +55,27 @@ type RPC struct {
 // Replaces legacy filter labels with new ones.
 func migrateFilterLabels(filter rpc.Filter) rpc.Filter {
 	if value, ok := filter.Labels["repo"]; ok {
-		filter.Labels["woodpecker-ci.org/repo-full-name"] = value
+		filter.Labels[pipelineconsts.LabelRepoFullName] = value
 		delete(filter.Labels, "repo")
 	}
 
 	if value, ok := filter.Labels["platform"]; ok {
-		filter.Labels["woodpecker-ci.org/platform"] = value
+		filter.Labels[pipelineconsts.LabelPlatform] = value
 		delete(filter.Labels, "platform")
 	}
 
 	if value, ok := filter.Labels["hostname"]; ok {
-		filter.Labels["woodpecker-ci.org/hostname"] = value
+		filter.Labels[pipelineconsts.LabelHostname] = value
 		delete(filter.Labels, "hostname")
 	}
 
 	if value, ok := filter.Labels["backend"]; ok {
-		filter.Labels["woodpecker-ci.org/backend"] = value
+		filter.Labels[pipelineconsts.LabelBackend] = value
 		delete(filter.Labels, "backend")
 	}
 
 	if value, ok := filter.Labels["org-id"]; ok {
-		filter.Labels["woodpecker-ci.org/org-id"] = value
+		filter.Labels[pipelineconsts.LabelOrgID] = value
 		delete(filter.Labels, "org-id")
 	}
 
