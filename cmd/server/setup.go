@@ -173,6 +173,9 @@ func setupEvilGlobals(ctx context.Context, c *cli.Command, s store.Store) (err e
 	// authentication
 	server.Config.Pipeline.AuthenticatePublicRepos = c.Bool("authenticate-public-repos")
 
+	// Pull requests
+	server.Config.Pipeline.DefaultAllowPullRequests = c.Bool("default-allow-pull-requests")
+
 	// Cloning
 	server.Config.Pipeline.DefaultClonePlugin = c.String("default-clone-plugin")
 	server.Config.Pipeline.TrustedClonePlugins = c.StringSlice("plugins-trusted-clone")

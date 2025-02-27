@@ -53,6 +53,57 @@ func TestStepToPodName(t *testing.T) {
 	name, err = stepToPodName(&types.Step{UUID: "01he8bebctabr3kg", Name: "postgres", Type: types.StepTypeService})
 	assert.NoError(t, err)
 	assert.EqualValues(t, "wp-svc-01he8bebctabr3kg-postgres", name)
+	// Detached service
+	name, err = stepToPodName(&types.Step{UUID: "01he8bebctabr3kg", Name: "postgres", Detached: true})
+	assert.NoError(t, err)
+	assert.EqualValues(t, "wp-svc-01he8bebctabr3kg-postgres", name)
+	// Detached long running container
+	name, err = stepToPodName(&types.Step{UUID: "01he8bebctabr3kg", Name: "long running", Detached: true})
+	assert.NoError(t, err)
+	assert.EqualValues(t, "wp-01he8bebctabr3kg", name)
+}
+
+func TestPodMeta(t *testing.T) {
+	meta, err := podMeta(&types.Step{
+		Name:        "postgres",
+		UUID:        "01he8bebctabr3kg",
+		Type:        types.StepTypeService,
+		Image:       "postgres:16",
+		WorkingDir:  "/woodpecker/src",
+		Environment: map[string]string{"CI": "woodpecker"},
+	}, &config{
+		Namespace: "woodpecker",
+	}, BackendOptions{}, "wp-01he8bebctabr3kg-0")
+	assert.NoError(t, err)
+	assert.EqualValues(t, "wp-svc-01he8bebctabr3kg-postgres", meta.Labels[ServiceLabel])
+
+	// Detached service
+	meta, err = podMeta(&types.Step{
+		Name:        "postgres",
+		UUID:        "01he8bebctabr3kg",
+		Detached:    true,
+		Image:       "postgres:16",
+		WorkingDir:  "/woodpecker/src",
+		Environment: map[string]string{"CI": "woodpecker"},
+	}, &config{
+		Namespace: "woodpecker",
+	}, BackendOptions{}, "wp-01he8bebctabr3kg-0")
+	assert.NoError(t, err)
+	assert.EqualValues(t, "wp-svc-01he8bebctabr3kg-postgres", meta.Labels[ServiceLabel])
+
+	// Detached long running container
+	meta, err = podMeta(&types.Step{
+		Name:        "long running",
+		UUID:        "01he8bebctabr3kg",
+		Detached:    true,
+		Image:       "postgres:16",
+		WorkingDir:  "/woodpecker/src",
+		Environment: map[string]string{"CI": "woodpecker"},
+	}, &config{
+		Namespace: "woodpecker",
+	}, BackendOptions{}, "wp-01he8bebctabr3kg-0")
+	assert.NoError(t, err)
+	assert.EqualValues(t, "", meta.Labels[ServiceLabel])
 }
 
 func TestStepLabel(t *testing.T) {
