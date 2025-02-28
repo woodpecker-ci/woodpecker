@@ -476,6 +476,7 @@ func (g *GitLab) Netrc(u *model.User, r *model.Repo) (*model.Netrc, error) {
 		Login:    login,
 		Password: token,
 		Machine:  host,
+		Type:     model.ForgeTypeGitlab,
 	}, nil
 }
 
