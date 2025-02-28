@@ -331,6 +331,7 @@ func (c *client) Netrc(_ *model.User, r *model.Repo) (*model.Netrc, error) {
 		Login:    c.username,
 		Password: c.password,
 		Machine:  host,
+		Type:     model.ForgeTypeBitbucketDatacenter,
 	}, nil
 }
 
