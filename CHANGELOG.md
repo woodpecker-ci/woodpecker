@@ -14,6 +14,10 @@
 
 - Include forge type in netrc [[#4908](https://github.com/woodpecker-ci/woodpecker/pull/4908)]
 
+### 📦️ Dependency
+
+- chore(deps): update web npm deps non-major [[#4912](https://github.com/woodpecker-ci/woodpecker/pull/4912)]
+
 ## [3.2.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.2.0) - 2025-02-26
 
 ### ❤️ Thanks to all contributors! ❤️
