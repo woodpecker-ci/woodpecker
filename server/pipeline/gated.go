@@ -48,13 +48,13 @@ func needsApproval(repo *model.Repo, pipeline *model.Pipeline) bool {
 
 	// repository requires approval for pull requests from forks
 	case model.RequireApprovalForks:
-		if pipeline.Event == model.EventPull && pipeline.PullRequest.FromFork {
+		if (pipeline.Event == model.EventPull || pipeline.Event == model.EventPullClosed) && pipeline.PullRequest.FromFork {
 			return true
 		}
 
 	// repository requires approval for pull requests
 	case model.RequireApprovalPullRequests:
-		if pipeline.Event == model.EventPull {
+		if pipeline.Event == model.EventPull || pipeline.Event == model.EventPullClosed {
 			return true
 		}
 

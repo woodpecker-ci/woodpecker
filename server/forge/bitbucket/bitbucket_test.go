@@ -55,6 +55,7 @@ func TestBitbucket(t *testing.T) {
 	assert.Equal(t, "bitbucket.org", netrc.Machine)
 	assert.Equal(t, "x-token-auth", netrc.Login)
 	assert.Equal(t, fakeUser.AccessToken, netrc.Password)
+	assert.Equal(t, model.ForgeTypeBitbucket, netrc.Type)
 
 	user, _, err := c.Login(ctx, &types.OAuthRequest{})
 	assert.NoError(t, err)
