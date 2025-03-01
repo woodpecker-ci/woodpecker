@@ -8,6 +8,7 @@
 
 ### 📚 Documentation
 
+- Remove Slack plugin from examples [[#4914](https://github.com/woodpecker-ci/woodpecker/pull/4914)]
 - chore(deps): update docs npm deps non-major [[#4911](https://github.com/woodpecker-ci/woodpecker/pull/4911)]
 
 ### 📈 Enhancement
