@@ -95,6 +95,7 @@ func PostRepo(c *gin.Context) {
 		repo.AllowPull = server.Config.Pipeline.DefaultAllowPullRequests
 		repo.AllowDeploy = false
 		repo.CancelPreviousPipelineEvents = server.Config.Pipeline.DefaultCancelPreviousPipelineEvents
+		repo.ForgeID = user.ForgeID // TODO: allow to use other connected forges of the user
 	}
 	repo.IsActive = true
 	repo.UserID = user.ID
@@ -150,7 +151,8 @@ func PostRepo(c *gin.Context) {
 
 	// creates the jwt token used to verify the repository
 	t := token.New(token.HookToken)
-	t.Set("repo-id", strconv.FormatInt(repo.ID, 10))
+	t.Set("repo-forge-remote-id", string(forgeRemoteID))
+	t.Set("forge-id", strconv.FormatInt(repo.ForgeID, 10))
 	sig, err := t.Sign(repo.Hash)
 	if err != nil {
 		msg := "could not generate new jwt token."
@@ -176,7 +178,6 @@ func PostRepo(c *gin.Context) {
 	if enabledOnce {
 		err = _store.UpdateRepo(repo)
 	} else {
-		repo.ForgeID = user.ForgeID // TODO: allow to use other connected forges of the user
 		err = _store.CreateRepo(repo)
 	}
 	if err != nil {
@@ -543,7 +544,8 @@ func MoveRepo(c *gin.Context) {
 
 	// creates the jwt token used to verify the repository
 	t := token.New(token.HookToken)
-	t.Set("repo-id", strconv.FormatInt(repo.ID, 10))
+	t.Set("repo-forge-remote-id", string(repo.ForgeRemoteID))
+	t.Set("forge-id", strconv.FormatInt(repo.ForgeID, 10))
 	sig, err := t.Sign(repo.Hash)
 	if err != nil {
 		c.String(http.StatusInternalServerError, err.Error())
@@ -650,7 +652,8 @@ func repairRepo(c *gin.Context, repo *model.Repo, withPerms, skipOnErr bool) {
 
 	// creates the jwt token used to verify the repository
 	t := token.New(token.HookToken)
-	t.Set("repo-id", strconv.FormatInt(repo.ID, 10))
+	t.Set("repo-forge-remote-id", string(repo.ForgeRemoteID))
+	t.Set("forge-id", strconv.FormatInt(repo.ForgeID, 10))
 	sig, err := t.Sign(repo.Hash)
 	if err != nil {
 		c.String(http.StatusInternalServerError, err.Error())
