@@ -1,5 +1,27 @@
 # Changelog
 
+## [3.3.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.3.0) - 2025-03-01
+
+### ❤️ Thanks to all contributors! ❤️
+
+@qwerty287
+
+### 📚 Documentation
+
+- chore(deps): update dependency @types/node to v22.13.8 [[#4915](https://github.com/woodpecker-ci/woodpecker/pull/4915)]
+- Remove Slack plugin from examples [[#4914](https://github.com/woodpecker-ci/woodpecker/pull/4914)]
+- chore(deps): update docs npm deps non-major [[#4911](https://github.com/woodpecker-ci/woodpecker/pull/4911)]
+
+### 📈 Enhancement
+
+- Include forge type in netrc [[#4908](https://github.com/woodpecker-ci/woodpecker/pull/4908)]
+
+### 📦️ Dependency
+
+- chore(deps): update dependency @types/node to v22.13.8 [[#4916](https://github.com/woodpecker-ci/woodpecker/pull/4916)]
+- chore(deps): update dependency @types/lodash to v4.17.16 [[#4913](https://github.com/woodpecker-ci/woodpecker/pull/4913)]
+- chore(deps): update web npm deps non-major [[#4912](https://github.com/woodpecker-ci/woodpecker/pull/4912)]
+
 ## [3.2.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.2.0) - 2025-02-26
 
 ### ❤️ Thanks to all contributors! ❤️
