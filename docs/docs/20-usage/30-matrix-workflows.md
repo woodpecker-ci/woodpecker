@@ -139,5 +139,5 @@ steps:
 ```
 
 :::note
-If you want to control the architecture of a pipeline on a Kubernetes runner, see [the nodeSelector documentation of the Kubernetes backend](../30-administration/22-backends/40-kubernetes.md#node-selector).
+If you want to control the architecture of a pipeline on a Kubernetes runner, see [the nodeSelector documentation of the Kubernetes backend](../30-administration/10-configuration/11-backends/20-kubernetes.md#node-selector).
 :::
