@@ -83,20 +83,20 @@ the same workspace it can use the previously built binary and test it.
 
 Sometimes you have some tasks that you need to do in every project. For example, deploying to Kubernetes or sending a Slack message. Therefore you can use one of the [official and community plugins](/plugins) or simply [create your own](./51-plugins/20-creating-plugins.md).
 
-If you want to get a Slack notification after your pipeline has finished, you can add a Slack plugin to your pipeline:
+If you want to publish a file to an S3 bucket, you can add an S3 plugin to your pipeline:
 
 ```yaml
 steps:
   # ...
-  - name: notify me on Slack
-    image: plugins/slack
+  - name: upload
+    image: woodpeckerci/plugin-s3
     settings:
-      channel: developers
-      username: woodpecker
-      password:
-        from_secret: slack_token
-    when:
-      status: [success, failure] # This will execute the step on success and failure
+      bucket: my-bucket-name
+      access_key: a50d28f4dd477bc184fbd10b376de753
+      secret_key:
+        from_secret: aws_secret_key
+      source: public/**/*
+      target: /target/location
 ```
 
 To configure a plugin you can use the `settings` section.
