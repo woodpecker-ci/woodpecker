@@ -17,8 +17,10 @@ package stepbuilder
 
 import (
 	"fmt"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline"
 	"maps"
 	"path/filepath"
+	"strconv"
 	"strings"
 
 	"github.com/oklog/ulid/v2"
@@ -192,6 +194,30 @@ func (b *StepBuilder) genItemForWorkflow(workflow *model.Workflow, axis matrix.A
 		item.Labels = make(map[string]string, len(b.DefaultLabels))
 		// Set default labels if no labels are defined in the pipeline
 		maps.Copy(item.Labels, b.DefaultLabels)
+	}
+
+	// Warn about managed labels in the pipeline definition
+	for key := range item.Labels {
+		_, isManagedLabel := pipeline.ManagedLabels[key]
+		if isManagedLabel {
+			log.Debug().Str("forge", b.Forge.Name()).Str("repo", b.Repo.FullName).Str("label", key).Msg("ignored Woodpecker managed label in definition pipeline")
+			delete(item.Labels, key)
+		}
+	}
+
+	// Add Woodpecker managed labels to the pipeline
+	item.Labels[pipeline.LabelForgeRemoteID] = b.Forge.Name()
+	item.Labels[pipeline.LabelRepoForgeID] = string(b.Repo.ForgeRemoteID)
+	item.Labels[pipeline.LabelRepoID] = strconv.FormatInt(b.Repo.ID, 10)
+	item.Labels[pipeline.LabelRepoName] = b.Repo.Name
+	item.Labels[pipeline.LabelRepoFullName] = b.Repo.FullName
+	item.Labels[pipeline.LabelBranch] = b.Repo.Branch
+	item.Labels[pipeline.LabelOrgID] = strconv.FormatInt(b.Repo.OrgID, 10)
+
+	for stageI := range item.Config.Stages {
+		for stepI := range item.Config.Stages[stageI].Steps {
+			item.Config.Stages[stageI].Steps[stepI].WorkflowLabels = item.Labels
+		}
 	}
 
 	return item, errorsAndWarnings

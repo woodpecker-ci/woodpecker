@@ -15,6 +15,7 @@
 package model
 
 import (
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -36,7 +37,7 @@ func TestAgent_GetServerLabels(t *testing.T) {
 		filters, err := agent.GetServerLabels()
 		assert.NoError(t, err)
 		assert.Equal(t, map[string]string{
-			agentFilterOrgID: "0",
+			pipeline.LabelOrgID: "0",
 		}, filters)
 	})
 
@@ -47,7 +48,7 @@ func TestAgent_GetServerLabels(t *testing.T) {
 		filters, err := agent.GetServerLabels()
 		assert.NoError(t, err)
 		assert.Equal(t, map[string]string{
-			agentFilterOrgID: "*",
+			pipeline.LabelOrgID: "*",
 		}, filters)
 	})
 
@@ -58,7 +59,7 @@ func TestAgent_GetServerLabels(t *testing.T) {
 		filters, err := agent.GetServerLabels()
 		assert.NoError(t, err)
 		assert.Equal(t, map[string]string{
-			agentFilterOrgID: "123",
+			pipeline.LabelOrgID: "123",
 		}, filters)
 	})
 }

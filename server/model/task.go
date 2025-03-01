@@ -16,6 +16,7 @@ package model
 
 import (
 	"fmt"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline"
 	"strings"
 )
 
@@ -48,8 +49,8 @@ func (t *Task) ApplyLabelsFromRepo(r *Repo) error {
 	if t.Labels == nil {
 		t.Labels = make(map[string]string)
 	}
-	t.Labels["repo"] = r.FullName
-	t.Labels[agentFilterOrgID] = fmt.Sprintf("%d", r.OrgID)
+	t.Labels[pipeline.LabelRepoFullName] = r.FullName
+	t.Labels[pipeline.LabelOrgID] = fmt.Sprintf("%d", r.OrgID)
 	return nil
 }
 
