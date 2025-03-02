@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.3.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.3.0) - 2025-03-01
+## [3.3.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.3.0) - 2025-03-02
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -18,6 +18,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update module gitlab.com/gitlab-org/api/client-go to v0.124.0 [[#4920](https://github.com/woodpecker-ci/woodpecker/pull/4920)]
 - chore(deps): update dependency @types/node to v22.13.8 [[#4916](https://github.com/woodpecker-ci/woodpecker/pull/4916)]
 - chore(deps): update dependency @types/lodash to v4.17.16 [[#4913](https://github.com/woodpecker-ci/woodpecker/pull/4913)]
 - chore(deps): update web npm deps non-major [[#4912](https://github.com/woodpecker-ci/woodpecker/pull/4912)]
