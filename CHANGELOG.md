@@ -4,7 +4,12 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@qwerty287
+@Levy-Tal, @qwerty287
+
+### 📈 Enhancement
+
+- BitbucketDC: optimize repository search [[#4919](https://github.com/woodpecker-ci/woodpecker/pull/4919)]
+- Include forge type in netrc [[#4908](https://github.com/woodpecker-ci/woodpecker/pull/4908)]
 
 ### 📚 Documentation
 
@@ -13,10 +18,6 @@
 - chore(deps): update dependency @types/node to v22.13.8 [[#4915](https://github.com/woodpecker-ci/woodpecker/pull/4915)]
 - Remove Slack plugin from examples [[#4914](https://github.com/woodpecker-ci/woodpecker/pull/4914)]
 - chore(deps): update docs npm deps non-major [[#4911](https://github.com/woodpecker-ci/woodpecker/pull/4911)]
-
-### 📈 Enhancement
-
-- Include forge type in netrc [[#4908](https://github.com/woodpecker-ci/woodpecker/pull/4908)]
 
 ### 📦️ Dependency
 
