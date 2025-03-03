@@ -200,10 +200,8 @@ A condition can be a check like:
 
 ```diff
  steps:
-   - name: slack
-     image: plugins/slack
-     settings:
-       channel: dev
+   - name: prettier
+     image: woodpeckerci/plugin-prettier
 +    when:
 +      - event: pull_request
 +        repo: test/test
@@ -211,7 +209,7 @@ A condition can be a check like:
 +        branch: main
 ```
 
-The `slack` step is executed if one of these conditions is met:
+The `prettier` step is executed if one of these conditions is met:
 
 1. The pipeline is executed from a pull request in the repo `test/test`
 2. The pipeline is executed from a push to `main`
@@ -222,10 +220,8 @@ Example conditional execution by repository:
 
 ```diff
  steps:
-   - name: slack
-     image: plugins/slack
-     settings:
-       channel: dev
+   - name: prettier
+     image: woodpeckerci/plugin-prettier
 +    when:
 +      - repo: test/test
 ```
@@ -240,10 +236,8 @@ Example conditional execution by branch:
 
 ```diff
  steps:
-   - name: slack
-     image: plugins/slack
-     settings:
-       channel: dev
+   - name: prettier
+     image: woodpeckerci/plugin-prettier
 +    when:
 +      - branch: main
 ```
@@ -342,14 +336,12 @@ when:
 
 #### `status`
 
-There are use cases for executing steps on failure, such as sending notifications for failed workflow / pipeline. Use the status constraint to execute steps even when the workflow fails:
+There are use cases for executing steps on failure, such as sending notifications for failed workflow/pipeline. Use the status constraint to execute steps even when the workflow fails:
 
 ```diff
  steps:
-   - name: slack
-     image: plugins/slack
-     settings:
-       channel: dev
+   - name: notify
+     image: alpine
 +    when:
 +      - status: [ success, failure ]
 ```
@@ -733,10 +725,8 @@ Example conditional execution by branch:
 +  branch: main
 +
  steps:
-   - name: slack
-     image: plugins/slack
-     settings:
-       channel: dev
+   - name: prettier
+     image: woodpeckerci/plugin-prettier
 ```
 
 The workflow now triggers on `main`, but also if the target branch of a pull request is `main`.
