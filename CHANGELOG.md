@@ -4,7 +4,11 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@Levy-Tal, @qwerty287
+@Levy-Tal, @qwerty287, @xoxys
+
+### 🐛 Bug Fixes
+
+- Fix unique constraint for orgs [[#4923](https://github.com/woodpecker-ci/woodpecker/pull/4923)]
 
 ### 📈 Enhancement
 
