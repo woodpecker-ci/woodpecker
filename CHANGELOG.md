@@ -20,6 +20,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update dependency @antfu/eslint-config to v4.4.0 [[#4917](https://github.com/woodpecker-ci/woodpecker/pull/4917)]
 - fix(deps): update module gitlab.com/gitlab-org/api/client-go to v0.124.0 [[#4920](https://github.com/woodpecker-ci/woodpecker/pull/4920)]
 - chore(deps): update dependency @types/node to v22.13.8 [[#4916](https://github.com/woodpecker-ci/woodpecker/pull/4916)]
 - chore(deps): update dependency @types/lodash to v4.17.16 [[#4913](https://github.com/woodpecker-ci/woodpecker/pull/4913)]
