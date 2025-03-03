@@ -22,7 +22,7 @@ import (
 	"xorm.io/xorm"
 )
 
-var unSanitizeOrgAndUserNames = xormigrate.Migration{
+var unsanitizeOrgAndUserNames = xormigrate.Migration{
 	ID: "unsanitize-org-and-user-names",
 	MigrateSession: func(sess *xorm.Session) (err error) {
 		type user struct {
