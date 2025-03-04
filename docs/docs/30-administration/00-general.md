@@ -9,7 +9,7 @@ The **agent** executes the [workflows](../20-usage/15-terminology/index.md) via 
 The **autoscaler** allows spinning up new VMs on a cloud provider of choice to process pending builds. After the builds finished, the VMs are destroyed again (after a short transition time).
 
 :::tip
-You can add more agents to increase the number of parallel workflows or set the agent's `WOODPECKER_MAX_WORKFLOWS=1` environment variable to increase the number of parallel workflows per agent.
+You can add more agents to increase the number of parallel workflows or set the agent's [`WOODPECKER_MAX_WORKFLOWS=1`](./30-administration/10-configuration/30-agent.md#woodpecker_max_workflows) environment variable to increase the number of parallel workflows per agent.
 :::
 
 ## Database
