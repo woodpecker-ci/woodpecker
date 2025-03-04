@@ -1,6 +1,6 @@
 # General
 
-Woodpecker consists of essential components (`server` and `agent`) and an optional component (`autoscaler).
+Woodpecker consists of essential components (`server` and `agent`) and an optional component (`autoscaler`).
 
 The **server** provides the user interface, processes webhook requests to the underlying forge, serves the API and analyzes the pipeline configurations from the YAML files.
 
