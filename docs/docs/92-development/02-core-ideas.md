@@ -8,8 +8,8 @@
 ## Addons and extensions
 
 If you are wondering whether your contribution will be accepted to be merged in the Woodpecker core, or whether it's better to write an
-[addon forge](../30-administration/11-forges/100-addon.md), [extension](../30-administration/40-advanced/100-external-configuration-api.md) or an
-[external custom backend](../30-administration/22-backends/50-custom-backends.md), please check these points:
+[addon forge](../30-administration/10-configuration/12-forges/100-addon.md), [extension](../30-administration/10-configuration/10-server.md#external-configuration-api) or an
+[external custom backend](../30-administration/10-configuration/11-backends/50-custom.md), please check these points:
 
 - Is your change very specific to your setup and unlikely to be used by anyone else?
 - Does your change violate the [guidelines](#guidelines)?

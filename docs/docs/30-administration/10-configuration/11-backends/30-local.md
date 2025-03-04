@@ -1,15 +1,15 @@
 ---
-toc_max_heading_level: 3
+toc_max_heading_level: 2
 ---
 
-# Local backend
+# Local
 
 :::danger
 The local backend executes pipelines on the local system without any isolation.
 :::
 
 :::note
-Currently we do not support [services](../../20-usage/60-services.md) for this backend.
+Currently we do not support [services](../../../20-usage/60-services.md) for this backend.
 [Read more here](https://github.com/woodpecker-ci/woodpecker/issues/3095).
 :::
 
@@ -27,13 +27,7 @@ code and execute commands.
 In order to use this backend, you need to download (or build) the
 [agent](https://github.com/woodpecker-ci/woodpecker/releases/latest), configure it and run it on the host machine.
 
-## Usage
-
-To enable the local backend, set the following:
-
-```ini
-WOODPECKER_BACKEND=local
-```
+## Step specific configuration
 
 ### Shell
 
@@ -58,9 +52,9 @@ steps:
 If no commands are provided, plugins are treated in the usual manner.
 In the context of the local backend, plugins are simply executable binaries, which can be located using their name if they are listed in `$PATH`, or through an absolute path.
 
-### Options
+## Environment variables
 
-#### `WOODPECKER_BACKEND_LOCAL_TEMP_DIR`
+### `WOODPECKER_BACKEND_LOCAL_TEMP_DIR`
 
 > Default: default temp directory
 
