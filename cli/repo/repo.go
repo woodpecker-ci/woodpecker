@@ -20,6 +20,7 @@ import (
 	"os"
 	"text/template"
 
+	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v3"
 
 	"go.woodpecker-ci.org/woodpecker/v3/cli/output"
@@ -51,6 +52,14 @@ var Command = &cli.Command{
 func repoOutput(c *cli.Command, repos []*woodpecker.Repo, fd ...io.Writer) error {
 	outFmt, outOpt := output.ParseOutputOptions(c.String("output"))
 	noHeader := c.Bool("output-no-headers")
+
+	legacyFmt := c.String("format")
+	if legacyFmt != "" {
+		log.Warn().Msgf("the --format flag is deprecated, please use --output instead")
+
+		outFmt = "go-template"
+		outOpt = []string{legacyFmt}
+	}
 
 	var out io.Writer
 	out = os.Stdout

@@ -30,6 +30,11 @@ var repoListCmd = &cli.Command{
 	ArgsUsage: " ",
 	Action:    List,
 	Flags: append(common.OutputFlags("table"), []cli.Flag{
+		common.FormatFlag("", true),
+		&cli.StringFlag{
+			Name:  "org",
+			Usage: "filter by organization",
+		},
 		&cli.BoolFlag{
 			Name:  "all",
 			Usage: "query all repos, including inactive ones",

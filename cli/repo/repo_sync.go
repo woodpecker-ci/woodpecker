@@ -31,7 +31,7 @@ var repoSyncCmd = &cli.Command{
 	Usage:     "synchronize the repository list",
 	ArgsUsage: " ",
 	Action:    repoSync,
-	Flags:     []cli.Flag{common.FormatFlag(tmplRepoList)},
+	Flags:     []cli.Flag{common.FormatFlag(tmplRepoList, false)},
 }
 
 // TODO: remove this and add an option to the list cmd as we do not store the remote repo list anymore
