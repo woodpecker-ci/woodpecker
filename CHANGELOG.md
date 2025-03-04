@@ -8,6 +8,7 @@
 
 ### 📚 Documentation
 
+- Refactor admin docs [[#4899](https://github.com/woodpecker-ci/woodpecker/pull/4899)]
 - chore(deps): lock file maintenance [[#4928](https://github.com/woodpecker-ci/woodpecker/pull/4928)]
 - chore(deps): update dependency @types/node to v22.13.9 [[#4925](https://github.com/woodpecker-ci/woodpecker/pull/4925)]
 - chore(deps): lock file maintenance [[#4922](https://github.com/woodpecker-ci/woodpecker/pull/4922)]
