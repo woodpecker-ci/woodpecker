@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.3.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.3.0) - 2025-03-03
+## [3.3.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.3.0) - 2025-03-04
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -8,6 +8,7 @@
 
 ### 🐛 Bug Fixes
 
+- Add migration to fix zero forge_id in orgs table [[#4924](https://github.com/woodpecker-ci/woodpecker/pull/4924)]
 - Fix unique constraint for orgs [[#4923](https://github.com/woodpecker-ci/woodpecker/pull/4923)]
 
 ### 📈 Enhancement
