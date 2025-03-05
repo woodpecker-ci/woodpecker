@@ -1,19 +1,23 @@
 # Changelog
 
-## [3.3.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.3.1) - 2025-03-05
+## [3.4.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.4.0) - 2025-03-05
 
 ### ❤️ Thanks to all contributors! ❤️
 
 @xoxys
 
-### 📦️ Dependency
-
-- fix(deps): update golang-packages [[#4929](https://github.com/woodpecker-ci/woodpecker/pull/4929)]
-
-### Misc
+### 📈 Enhancement
 
 - Migrate repo output format to customizable output [[#4888](https://github.com/woodpecker-ci/woodpecker/pull/4888)]
+
+### 📚 Documentation
+
 - Fix dockerhub links in docs [[#4931](https://github.com/woodpecker-ci/woodpecker/pull/4931)]
+
+### 📦️ Dependency
+
+- chore(deps): lock file maintenance [[#4933](https://github.com/woodpecker-ci/woodpecker/pull/4933)]
+- fix(deps): update golang-packages [[#4929](https://github.com/woodpecker-ci/woodpecker/pull/4929)]
 
 ## [3.3.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.3.0) - 2025-03-04
 
