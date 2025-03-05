@@ -1,8 +1,8 @@
 ---
-toc_max_heading_level: 2
+toc_max_heading_level: 3
 ---
 
-# Agent configuration
+# Agent
 
 Agents are configured by the command line or environment variables. At the minimum you need the following information:
 
@@ -56,9 +56,7 @@ To get an _agent token_ you have to register the agent manually in the server us
 1. The agent will connect to the server using the provided token and will update its status in the UI:
    ![Agent connected](./new-agent-connected.png)
 
-## All agent configuration options
-
-Here is the full list of configuration options and their default variables.
+## Environment variables
 
 ### `WOODPECKER_SERVER`
 
@@ -127,7 +125,7 @@ Configures the number of parallel workflows.
 Configures custom labels for the agent, to let workflows filter by it.
 Use a list of key-value pairs like `key=value,second-key=*`. `*` can be used as a wildcard.
 By default, agents provide three additional labels `platform=os/arch`, `hostname=my-agent` and `repo=*` which can be overwritten if needed.
-To learn how labels work, check out the [pipeline syntax page](../20-usage/20-workflow-syntax.md#labels).
+To learn how labels work, check out the [pipeline syntax page](../../20-usage/20-workflow-syntax.md#labels).
 
 ### `WOODPECKER_HEALTHCHECK`
 
@@ -191,29 +189,29 @@ Configures the backend engine to run pipelines on. Possible values are `auto-det
 
 ### `WOODPECKER_BACKEND_DOCKER_*`
 
-See [Docker backend configuration](./22-backends/10-docker.md#configuration)
+See [Docker backend configuration](./11-backends/10-docker.md#environment-variables)
 
 ### `WOODPECKER_BACKEND_K8S_*`
 
-See [Kubernetes backend configuration](./22-backends/40-kubernetes.md#configuration)
+See [Kubernetes backend configuration](./11-backends/20-kubernetes.md#environment-variables)
 
 ### `WOODPECKER_BACKEND_LOCAL_*`
 
-See [Local backend configuration](./22-backends/20-local.md#options)
+See [Local backend configuration](./11-backends/30-local.md#environment-variables)
 
-## Advanced Settings
+### Advanced Settings
 
 :::warning
 Only change these If you know what you do.
 :::
 
-### `WOODPECKER_CONNECT_RETRY_COUNT`
+#### `WOODPECKER_CONNECT_RETRY_COUNT`
 
 > Default: `5`
 
 Configures number of times agent retries to connect to the server.
 
-### `WOODPECKER_CONNECT_RETRY_DELAY`
+#### `WOODPECKER_CONNECT_RETRY_DELAY`
 
 > Default: `2s`
 
