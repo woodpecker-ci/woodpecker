@@ -31,7 +31,7 @@ var pipelineQueueCmd = &cli.Command{
 	Usage:     "show pipeline queue",
 	ArgsUsage: " ",
 	Action:    pipelineQueue,
-	Flags:     []cli.Flag{common.FormatFlag(tmplPipelineQueue)},
+	Flags:     []cli.Flag{common.FormatFlag(tmplPipelineQueue, false)},
 }
 
 func pipelineQueue(ctx context.Context, c *cli.Command) error {

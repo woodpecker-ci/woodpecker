@@ -18,13 +18,13 @@ This was done to prevent accidental major version upgrades.
 
 Images are pushed to DockerHub and Quay.
 
-[woodpecker-server (DockerHub)](https://hub.docker.com/repository/docker/woodpeckerci/woodpecker-server)
+[woodpecker-server (DockerHub)](https://hub.docker.com/r/woodpeckerci/woodpecker-server)
 [woodpecker-server (Quay)](https://quay.io/repository/woodpeckerci/woodpecker-server)
 
-[woodpecker-agent (DockerHub)](https://hub.docker.com/repository/docker/woodpeckerci/woodpecker-agent)
+[woodpecker-agent (DockerHub)](https://hub.docker.com/r/woodpeckerci/woodpecker-agent)
 [woodpecker-agent (Quay)](https://quay.io/repository/woodpeckerci/woodpecker-agent)
 
-[woodpecker-cli (DockerHub)](https://hub.docker.com/repository/docker/woodpeckerci/woodpecker-cli)
+[woodpecker-cli (DockerHub)](https://hub.docker.com/r/woodpeckerci/woodpecker-cli)
 [woodpecker-cli (Quay)](https://quay.io/repository/woodpeckerci/woodpecker-cli)
 
-[woodpecker-autoscaler (DockerHub)](https://hub.docker.com/repository/docker/woodpeckerci/autoscaler)
+[woodpecker-autoscaler (DockerHub)](https://hub.docker.com/r/woodpeckerci/autoscaler)

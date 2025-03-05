@@ -31,7 +31,7 @@ var repoSyncCmd = &cli.Command{
 	Usage:     "synchronize the repository list",
 	ArgsUsage: " ",
 	Action:    repoSync,
-	Flags:     []cli.Flag{common.FormatFlag(tmplRepoList)},
+	Flags:     []cli.Flag{common.FormatFlag(tmplRepoList, false)},
 }
 
 // TODO: remove this and add an option to the list cmd as we do not store the remote repo list anymore
@@ -66,3 +66,6 @@ func repoSync(ctx context.Context, c *cli.Command) error {
 	}
 	return nil
 }
+
+// Template for repository list items.
+var tmplRepoList = "\x1b[33m{{ .FullName }}\x1b[0m (id: {{ .ID }}, forgeRemoteID: {{ .ForgeRemoteID }}, isActive: {{ .IsActive }})"

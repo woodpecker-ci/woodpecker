@@ -47,9 +47,9 @@ Sometimes there are multiple terms that can be used to describe something. This 
 [Event]: ../20-workflow-syntax.md#event
 [Pipeline]: ../20-workflow-syntax.md
 [Workflow]: ../25-workflows.md
-[Forge]: ../../30-administration/11-forges/11-overview.md
+[Forge]: ../../30-administration/10-configuration/12-forges/11-overview.md
 [Plugin]: ../51-plugins/51-overview.md
 [Workspace]: ../20-workflow-syntax.md#workspace
 [Matrix]: ../30-matrix-workflows.md
-[Docker]: ../../30-administration/22-backends/10-docker.md
-[Local]: ../../30-administration/22-backends/20-local.md
+[Docker]: ../../30-administration/10-configuration/11-backends/10-docker.md
+[Local]: ../../30-administration/10-configuration/11-backends/30-local.md

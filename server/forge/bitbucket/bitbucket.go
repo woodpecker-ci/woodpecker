@@ -349,6 +349,7 @@ func (c *config) Netrc(u *model.User, _ *model.Repo) (*model.Netrc, error) {
 		Machine:  "bitbucket.org",
 		Login:    "x-token-auth",
 		Password: u.AccessToken,
+		Type:     model.ForgeTypeBitbucket,
 	}, nil
 }
 

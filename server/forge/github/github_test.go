@@ -61,6 +61,7 @@ func Test_github(t *testing.T) {
 		assert.Equal(t, "github.com", netrc.Machine)
 		assert.Equal(t, fakeUser.AccessToken, netrc.Login)
 		assert.Equal(t, "x-oauth-basic", netrc.Password)
+		assert.Equal(t, model.ForgeTypeGithub, netrc.Type)
 	})
 	t.Run("netrc with machine account", func(t *testing.T) {
 		forge, _ := New(Opts{})

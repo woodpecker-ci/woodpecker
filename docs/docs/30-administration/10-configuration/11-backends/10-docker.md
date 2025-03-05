@@ -2,13 +2,13 @@
 toc_max_heading_level: 2
 ---
 
-# Docker backend
+# Docker
 
 This is the original backend used with Woodpecker. The docker backend executes each step inside a separate container started on the agent.
 
-## Docker credentials
+## Private registries
 
-Woodpecker supports [Docker credentials](https://github.com/docker/docker-credential-helpers) to securely store registry credentials. Install your corresponding credential helper and configure it in your Docker config file passed via [`WOODPECKER_DOCKER_CONFIG`](../10-server-config.md#woodpecker_docker_config).
+Woodpecker supports [Docker credentials](https://github.com/docker/docker-credential-helpers) to securely store registry credentials. Install your corresponding credential helper and configure it in your Docker config file passed via [`WOODPECKER_DOCKER_CONFIG`](../10-server.md#woodpecker_docker_config).
 
 To add your credential helper to the Woodpecker server container you could use the following code to build a custom image:
 
@@ -37,7 +37,9 @@ steps:
 
 The syntax is the same as the [docker run](https://docs.docker.com/engine/reference/run/#user) `--user` flag.
 
-## Image cleanup
+## Tips and tricks
+
+### Image cleanup
 
 The agent **will not** automatically remove images from the host. This task should be managed by the host system. For example, you can use a cron job to periodically do clean-up tasks for the CI runner.
 
@@ -45,27 +47,25 @@ The agent **will not** automatically remove images from the host. This task shou
 The following commands **are destructive** and **irreversible** it is highly recommended that you test these commands on your system before running them in production via a cron job or other automation.
 :::
 
-### Remove all unused images
+- Remove all unused images
 
-<!-- cspell:ignore trunc -->
+  <!-- cspell:ignore trunc -->
 
-```bash
-docker image rm $(docker images --filter "dangling=true" -q --no-trunc)
-```
+  ```bash
+  docker image rm $(docker images --filter "dangling=true" -q --no-trunc)
+  ```
 
-### Remove Woodpecker volumes
+- Remove Woodpecker volumes
 
-```bash
-docker volume rm $(docker volume ls --filter name=^wp_* --filter dangling=true  -q)
-```
-
-## Tips and tricks
+  ```bash
+  docker volume rm $(docker volume ls --filter name=^wp_* --filter dangling=true  -q)
+  ```
 
 ### Podman
 
 There is no official support for Podman, but one can try to set the environment variable `DOCKER_HOST` to point to the Podman socket. It might work. See also the [Blog posts](https://woodpecker-ci.org/blog).
 
-## Configuration
+## Environment variables
 
 ### `WOODPECKER_BACKEND_DOCKER_NETWORK`
 

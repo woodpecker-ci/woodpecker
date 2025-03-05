@@ -58,6 +58,13 @@ If you want to add a new entry, open a [pull-request](https://github.com/woodpec
 - [Simple selfhosted CI/CD with Woodpecker](https://xyquadrat.ch/blog/simple-ci-with-woodpecker/)
 - [Notes to self on Woodpecker-CI](https://jpmens.net/2023/09/22/notes-to-self-on-woodpecker-ci/)
 - [CI/CD with Woodpecker and Gitea](https://wilw.dev/blog/2023/04/23/woodpecker-ci/)
+- [Dookerized deploy setup using Woodpecker CI and Harbor registry](https://devforth.io/blog/dookerized-deploy-setup-using-woodpecker-ci-and-harbor-registry/)
+- [Woodpecker Shenanigans](https://jan.wildeboer.net/2024/12/Woodpecker-Shenanigans/)
+- [Ansible - using Woodpecker as an alternative to Semaphore](https://pat-s.me/ansible-using-woodpecker-as-an-alternative-to-semaphore/)
+- [Building a blog using Hugo, MinIO, and Woodpecker CI](https://bluemedia.dev/blog/blog-using-hugo-minio-and-woodpcker-ci/)
+- [How to deploy Woodpecker CI 1.0.3 in docker swarm behind Caddy v2.7.5](https://www.tuneit.me/how-to-deploy-woodpecker-ci-1-0-3-in-docker-swarm-behind-caddy-v2-7-5)
+- [Woodpecker CI](https://blog.mariom.pl/posts/2023/03/woodpecker/)
+- [Deploy Gitea and Woodpecker CI with Docker Compose](https://www.alexruf.net/posts/deploy-gitea-woodpecker-docker-compose/)
 
 ## Videos
 

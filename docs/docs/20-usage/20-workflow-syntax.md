@@ -200,10 +200,8 @@ A condition can be a check like:
 
 ```diff
  steps:
-   - name: slack
-     image: plugins/slack
-     settings:
-       channel: dev
+   - name: prettier
+     image: woodpeckerci/plugin-prettier
 +    when:
 +      - event: pull_request
 +        repo: test/test
@@ -211,7 +209,7 @@ A condition can be a check like:
 +        branch: main
 ```
 
-The `slack` step is executed if one of these conditions is met:
+The `prettier` step is executed if one of these conditions is met:
 
 1. The pipeline is executed from a pull request in the repo `test/test`
 2. The pipeline is executed from a push to `main`
@@ -222,10 +220,8 @@ Example conditional execution by repository:
 
 ```diff
  steps:
-   - name: slack
-     image: plugins/slack
-     settings:
-       channel: dev
+   - name: prettier
+     image: woodpeckerci/plugin-prettier
 +    when:
 +      - repo: test/test
 ```
@@ -240,10 +236,8 @@ Example conditional execution by branch:
 
 ```diff
  steps:
-   - name: slack
-     image: plugins/slack
-     settings:
-       channel: dev
+   - name: prettier
+     image: woodpeckerci/plugin-prettier
 +    when:
 +      - branch: main
 ```
@@ -342,14 +336,12 @@ when:
 
 #### `status`
 
-There are use cases for executing steps on failure, such as sending notifications for failed workflow / pipeline. Use the status constraint to execute steps even when the workflow fails:
+There are use cases for executing steps on failure, such as sending notifications for failed workflow/pipeline. Use the status constraint to execute steps even when the workflow fails:
 
 ```diff
  steps:
-   - name: slack
-     image: plugins/slack
-     settings:
-       channel: dev
+   - name: notify
+     image: alpine
 +    when:
 +      - status: [ success, failure ]
 ```
@@ -604,7 +596,7 @@ For more details check the [matrix build docs](./30-matrix-workflows.md).
 
 You can set labels for your workflow to select an agent to execute the workflow on. An agent will pick up and run a workflow when **every** label assigned to it matches the agents labels.
 
-To set additional agent labels, check the [agent configuration options](../30-administration/15-agent-config.md#woodpecker_agent_labels). Agents will have at least four default labels: `platform=agent-os/agent-arch`, `hostname=my-agent`, `backend=docker` (type of the agent backend) and `repo=*`. Agents can use a `*` as a wildcard for a label. For example `repo=*` will match every repo.
+To set additional agent labels, check the [agent configuration options](../30-administration/10-configuration/30-agent.md#woodpecker_agent_labels). Agents will have at least four default labels: `platform=agent-os/agent-arch`, `hostname=my-agent`, `backend=docker` (type of the agent backend) and `repo=*`. Agents can use a `*` as a wildcard for a label. For example `repo=*` will match every repo.
 
 Workflow labels with an empty value will be ignored.
 By default, each workflow has at least the `repo=your-user/your-repo-name` label. If you have set the [platform attribute](#platform) for your workflow it will have a label like `platform=your-os/your-arch` as well.
@@ -733,10 +725,8 @@ Example conditional execution by branch:
 +  branch: main
 +
  steps:
-   - name: slack
-     image: plugins/slack
-     settings:
-       channel: dev
+   - name: prettier
+     image: woodpeckerci/plugin-prettier
 ```
 
 The workflow now triggers on `main`, but also if the target branch of a pull request is `main`.

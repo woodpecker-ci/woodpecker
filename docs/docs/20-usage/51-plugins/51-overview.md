@@ -23,7 +23,7 @@ steps:
       template: config/k8s/service.yaml
 ```
 
-Example pipeline using the Docker and Slack plugins:
+Example pipeline using the Docker and Prettier plugins:
 
 ```yaml
 steps:
@@ -33,16 +33,14 @@ steps:
       - go build
       - go test
 
+  - name: prettier
+    image: woodpeckerci/plugin-prettier
+
   - name: publish
     image: woodpeckerci/plugin-kaniko
     settings:
       repo: foo/bar
       tags: latest
-
-  - name: notify
-    image: plugins/slack
-    settings:
-      channel: dev
 ```
 
 ## Plugin Isolation

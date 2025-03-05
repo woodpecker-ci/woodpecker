@@ -166,6 +166,10 @@ const config = {
               href: 'https://floss.social/@WoodpeckerCI',
             },
             {
+              label: 'Bluesky',
+              href: 'https://bsky.app/profile/woodpecker-ci.org',
+            },
+            {
               label: 'X',
               href: 'https://twitter.com/woodpeckerci',
             },
