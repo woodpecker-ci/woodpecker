@@ -163,7 +163,7 @@ func (c *client) Repo(ctx context.Context, u *model.User, rID model.ForgeRemoteI
 
 	var repo *bb.Repository
 	if rID.IsValid() {
-		opts := &bb.RepositorySearchOptions{Permission: bb.PermissionRepoWrite, ListOptions: bb.ListOptions{Limit: listLimit}}
+		opts := &bb.RepositorySearchOptions{Name: name, ProjectKey: owner, Permission: bb.PermissionRepoWrite, ListOptions: bb.ListOptions{Limit: listLimit}}
 		for {
 			repos, resp, err := bc.Projects.SearchRepositories(ctx, opts)
 			if err != nil {

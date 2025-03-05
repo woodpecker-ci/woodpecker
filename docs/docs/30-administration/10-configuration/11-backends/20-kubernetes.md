@@ -2,13 +2,13 @@
 toc_max_heading_level: 2
 ---
 
-# Kubernetes backend
+# Kubernetes
 
 The Kubernetes backend executes steps inside standalone Pods. A temporary PVC is created for the lifetime of the pipeline to transfer files between steps.
 
-## Images from private registries
+## Private registries
 
-In addition to [registries specified in the UI](../../20-usage/41-registries.md), you may provide [registry credentials in Kubernetes Secrets](https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/) to pull private container images defined in your pipeline YAML.
+In addition to [registries specified in the UI](../../../20-usage/41-registries.md), you may provide [registry credentials in Kubernetes Secrets](https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/) to pull private container images defined in your pipeline YAML.
 
 Place these Secrets in namespace defined by `WOODPECKER_BACKEND_K8S_NAMESPACE` and provide the Secret names to Agents via `WOODPECKER_BACKEND_K8S_PULL_SECRET_NAMES`.
 
@@ -279,7 +279,7 @@ It configures the address of the Kubernetes API server to connect to.
 
 If running the agent within Kubernetes, this will already be set and you don't have to add it manually.
 
-## Configuration
+## Environment variables
 
 These env vars can be set in the `env:` sections of the agent.
 
