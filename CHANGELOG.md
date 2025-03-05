@@ -2,9 +2,17 @@
 
 ## [3.3.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.3.1) - 2025-03-05
 
+### ❤️ Thanks to all contributors! ❤️
+
+@xoxys
+
 ### 📦️ Dependency
 
 - fix(deps): update golang-packages [[#4929](https://github.com/woodpecker-ci/woodpecker/pull/4929)]
+
+### Misc
+
+- Fix dockerhub links in docs [[#4931](https://github.com/woodpecker-ci/woodpecker/pull/4931)]
 
 ## [3.3.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.3.0) - 2025-03-04
 
