@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.4.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.4.0) - 2025-03-05
+## [3.4.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.4.0) - 2025-03-06
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -16,6 +16,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update golang-packages [[#4936](https://github.com/woodpecker-ci/woodpecker/pull/4936)]
 - chore(deps): lock file maintenance [[#4933](https://github.com/woodpecker-ci/woodpecker/pull/4933)]
 - fix(deps): update golang-packages [[#4929](https://github.com/woodpecker-ci/woodpecker/pull/4929)]
 
