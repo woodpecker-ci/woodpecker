@@ -6,13 +6,14 @@
 
 @xoxys
 
+### 📚 Documentation
+
+- chore(deps): update dependency axios to v1.8.2 [security] [[#4941](https://github.com/woodpecker-ci/woodpecker/pull/4941)]
+- Fix dockerhub links in docs [[#4931](https://github.com/woodpecker-ci/woodpecker/pull/4931)]
+
 ### 📈 Enhancement
 
 - Migrate repo output format to customizable output [[#4888](https://github.com/woodpecker-ci/woodpecker/pull/4888)]
-
-### 📚 Documentation
-
-- Fix dockerhub links in docs [[#4931](https://github.com/woodpecker-ci/woodpecker/pull/4931)]
 
 ### 📦️ Dependency
 
