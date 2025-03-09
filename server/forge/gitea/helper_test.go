@@ -67,11 +67,19 @@ func Test_parsePush(t *testing.T) {
 		hook, _ := parsePush(buf)
 		pipeline := pipelineFromPush(hook)
 		assert.Equal(t, model.EventPush, pipeline.Event)
-		assert.Equal(t, hook.After, pipeline.Commit)
+		assert.Equal(t, &model.Commit{
+			SHA:      "ef98532add3b2feb7a137426bba1248724367df5",
+			Message:  "bump\n",
+			ForgeURL: "http://gitea.golang.org/gordon/hello-world/commit/ef98532add3b2feb7a137426bba1248724367df5",
+			Author: model.CommitAuthor{
+				Author: "Gordon the Gopher",
+				Email:  "gordon@golang.org",
+			},
+		}, pipeline.Commit)
 		assert.Equal(t, hook.Ref, pipeline.Ref)
 		assert.Equal(t, hook.Commits[0].URL, pipeline.ForgeURL)
 		assert.Equal(t, "main", pipeline.Branch)
-		assert.Equal(t, hook.Commits[0].Message, pipeline.Message)
+		assert.Equal(t, hook.Commits[0].Message, pipeline.Commit.Message)
 		assert.Equal(t, "http://1.gravatar.com/avatar/8c58a0be77ee441bb8f8595b7f1b4e87", pipeline.Avatar)
 		assert.Equal(t, hook.Sender.UserName, pipeline.Author)
 		assert.Equal(t, []string{"CHANGELOG.md", "app/controller/application.rb"}, pipeline.ChangedFiles)
@@ -92,11 +100,10 @@ func Test_parsePush(t *testing.T) {
 		hook, _ := parsePush(buf)
 		pipeline := pipelineFromTag(hook)
 		assert.Equal(t, model.EventTag, pipeline.Event)
-		assert.Equal(t, hook.Sha, pipeline.Commit)
+		assert.Equal(t, hook.Sha, pipeline.Commit.SHA)
 		assert.Equal(t, "refs/tags/v1.0.0", pipeline.Ref)
 		assert.Empty(t, pipeline.Branch)
-		assert.Equal(t, "http://gitea.golang.org/gordon/hello-world/src/tag/v1.0.0", pipeline.ForgeURL)
-		assert.Equal(t, "created tag v1.0.0", pipeline.Message)
+		assert.Equal(t, "http://gitea.golang.org/gordon/hello-world/src/releases/tag/v1.0.0", pipeline.ForgeURL)
 	})
 }
 
@@ -132,13 +139,13 @@ func Test_parsePullRequest(t *testing.T) {
 		hook, _ := parsePullRequest(buf)
 		pipeline := pipelineFromPullRequest(hook)
 		assert.Equal(t, model.EventPull, pipeline.Event)
-		assert.Equal(t, hook.PullRequest.Head.Sha, pipeline.Commit)
+		assert.Equal(t, hook.PullRequest.Head.Sha, pipeline.Commit.SHA)
 		assert.Equal(t, "refs/pull/1/head", pipeline.Ref)
 		assert.Equal(t, "http://gitea.golang.org/gordon/hello-world/pull/1", pipeline.ForgeURL)
 		assert.Equal(t, "main", pipeline.Branch)
 		assert.Equal(t, "feature/changes:main", pipeline.Refspec)
-		assert.Equal(t, hook.PullRequest.Title, pipeline.Message)
-		assert.Equal(t, "http://1.gravatar.com/avatar/8c58a0be77ee441bb8f8595b7f1b4e87", pipeline.Avatar)
+		assert.Equal(t, hook.PullRequest.Title, pipeline.PullRequest.Title)
+		assert.Equal(t, "https://secure.gravatar.com/avatar/8c58a0be77ee441bb8f8595b7f1b4e87", pipeline.Avatar)
 		assert.Equal(t, hook.PullRequest.Poster.UserName, pipeline.Author)
 	})
 

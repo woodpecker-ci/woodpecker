@@ -271,11 +271,6 @@ var flags = []cli.Flag{
 		Usage:   "Set the metadata environment variable \"CI_COMMIT_AUTHOR\".",
 	},
 	&cli.StringFlag{
-		Sources: cli.EnvVars("CI_COMMIT_AUTHOR_AVATAR"),
-		Name:    "commit-author-avatar",
-		Usage:   "Set the metadata environment variable \"CI_COMMIT_AUTHOR_AVATAR\".",
-	},
-	&cli.StringFlag{
 		Sources: cli.EnvVars("CI_COMMIT_AUTHOR_EMAIL"),
 		Name:    "commit-author-email",
 		Usage:   "Set the metadata environment variable \"CI_COMMIT_AUTHOR_EMAIL\".",
@@ -364,11 +359,6 @@ var flags = []cli.Flag{
 		Sources: cli.EnvVars("CI_PREV_COMMIT_AUTHOR"),
 		Name:    "prev-commit-author-name",
 		Usage:   "Set the metadata environment variable \"CI_PREV_COMMIT_AUTHOR\".",
-	},
-	&cli.StringFlag{
-		Sources: cli.EnvVars("CI_PREV_COMMIT_AUTHOR_AVATAR"),
-		Name:    "prev-commit-author-avatar",
-		Usage:   "Set the metadata environment variable \"CI_PREV_COMMIT_AUTHOR_AVATAR\".",
 	},
 	&cli.StringFlag{
 		Sources: cli.EnvVars("CI_PREV_COMMIT_AUTHOR_EMAIL"),
