@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.4.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.4.0) - 2025-03-08
+## [3.4.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.4.0) - 2025-03-09
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -18,6 +18,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update dependency simple-icons to v14.10.0 [[#4946](https://github.com/woodpecker-ci/woodpecker/pull/4946)]
 - chore(deps): update dependency @types/node to v22.13.10 [[#4945](https://github.com/woodpecker-ci/woodpecker/pull/4945)]
 - fix(deps): update web npm deps non-major [[#4942](https://github.com/woodpecker-ci/woodpecker/pull/4942)]
 - fix(deps): update dependency vue-i18n to v11.1.2 [security] [[#4940](https://github.com/woodpecker-ci/woodpecker/pull/4940)]
