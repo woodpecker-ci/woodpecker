@@ -36,7 +36,7 @@ func TestMustNotAddWindowsLetterPattern(t *testing.T) {
 	}
 
 	for testCase, expected := range tests {
-		result := MustNotAddWindowsLetterPattern.MatchString(testCase)
+		result := mustNotAddWindowsLetterPattern.MatchString(testCase)
 		if result != expected {
 			t.Errorf("Test case %q: expected %v but got %v", testCase, expected, result)
 		}
