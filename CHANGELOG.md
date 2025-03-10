@@ -19,6 +19,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update dependency @intlify/eslint-plugin-vue-i18n to v4 [[#4943](https://github.com/woodpecker-ci/woodpecker/pull/4943)]
 - fix(deps): update module al.essio.dev/pkg/shellescape to v1.6.0 [[#4947](https://github.com/woodpecker-ci/woodpecker/pull/4947)]
 - fix(deps): update dependency simple-icons to v14.10.0 [[#4946](https://github.com/woodpecker-ci/woodpecker/pull/4946)]
 - chore(deps): update dependency @types/node to v22.13.10 [[#4945](https://github.com/woodpecker-ci/woodpecker/pull/4945)]
