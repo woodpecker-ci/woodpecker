@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.4.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.4.0) - 2025-03-09
+## [3.4.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.4.0) - 2025-03-10
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -8,6 +8,7 @@
 
 ### 📚 Documentation
 
+- chore(deps): lock file maintenance [[#4948](https://github.com/woodpecker-ci/woodpecker/pull/4948)]
 - chore(deps): update dependency @types/node to v22.13.10 [[#4944](https://github.com/woodpecker-ci/woodpecker/pull/4944)]
 - chore(deps): update dependency axios to v1.8.2 [security] [[#4941](https://github.com/woodpecker-ci/woodpecker/pull/4941)]
 - Fix dockerhub links in docs [[#4931](https://github.com/woodpecker-ci/woodpecker/pull/4931)]
@@ -18,6 +19,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update module al.essio.dev/pkg/shellescape to v1.6.0 [[#4947](https://github.com/woodpecker-ci/woodpecker/pull/4947)]
 - fix(deps): update dependency simple-icons to v14.10.0 [[#4946](https://github.com/woodpecker-ci/woodpecker/pull/4946)]
 - chore(deps): update dependency @types/node to v22.13.10 [[#4945](https://github.com/woodpecker-ci/woodpecker/pull/4945)]
 - fix(deps): update web npm deps non-major [[#4942](https://github.com/woodpecker-ci/woodpecker/pull/4942)]
