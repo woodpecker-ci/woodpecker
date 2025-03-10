@@ -222,7 +222,7 @@ func TestFetchFromConfigService(t *testing.T) {
 				f,
 				&model.User{AccessToken: "xxx"},
 				repo,
-				&model.Pipeline{Commit: "89ab7b2d6bfb347144ac7c557e638ab402848fee"},
+				&model.Pipeline{Commit: &model.Commit{SHA: "89ab7b2d6bfb347144ac7c557e638ab402848fee"}},
 				[]*forge_types.FileMeta{},
 				false,
 			)
