@@ -196,11 +196,10 @@ func (b *StepBuilder) genItemForWorkflow(workflow *model.Workflow, axis matrix.A
 		maps.Copy(item.Labels, b.DefaultLabels)
 	}
 
-	// Warn about managed labels in the pipeline definition
+	// "woodpecker-ci.org" namespace is reserved for internal use
 	for key := range item.Labels {
-		_, isManagedLabel := pipeline.ManagedLabels[key]
-		if isManagedLabel {
-			log.Debug().Str("forge", b.Forge.Name()).Str("repo", b.Repo.FullName).Str("label", key).Msg("ignored Woodpecker managed label in definition pipeline")
+		if strings.HasPrefix(key, pipeline.InternalLabelPrefix) {
+			log.Debug().Str("forge", b.Forge.Name()).Str("repo", b.Repo.FullName).Str("label", key).Msg("dropped pipeline label with reserved prefix woodpecker-ci.org")
 			delete(item.Labels, key)
 		}
 	}

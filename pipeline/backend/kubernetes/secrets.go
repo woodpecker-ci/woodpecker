@@ -258,9 +258,8 @@ func registrySecretLabels(step *types.Step, config *config) (map[string]string, 
 
 	for k, v := range step.WorkflowLabels {
 		// Only copy user labels if allowed by agent config.
-		// Managed labels are filtered on the server-side.
-		_, isManagedLabel := pipeline.ManagedLabels[k]
-		if config.PodLabelsAllowFromStep || isManagedLabel {
+		// Internal labels are filtered on the server-side.
+		if config.PodLabelsAllowFromStep || strings.HasPrefix(k, pipeline.InternalLabelPrefix) {
 			labels[k] = v
 		}
 	}

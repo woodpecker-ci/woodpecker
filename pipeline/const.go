@@ -29,9 +29,9 @@ const (
 	LabelRepoFullName   string = InternalLabelPrefix + "/repo-full-name"
 	LabelBranch         string = InternalLabelPrefix + "/branch"
 	LabelOrgID          string = InternalLabelPrefix + "/org-id"
-	LabelPlatform       string = InternalLabelPrefix + "/platform"
-	LabelHostname       string = InternalLabelPrefix + "/hostname"
-	LabelBackend        string = InternalLabelPrefix + "/backend"
+	LabelPlatform       string = "platform"
+	LabelHostname       string = "hostname"
+	LabelBackend        string = "backend"
 )
 
 // ManagedLabels is a list of all labels added automatically to tasks by Woodpecker.
