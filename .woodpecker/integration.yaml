@@ -1,0 +1,74 @@
+variables:
+  - &golang_image 'docker.io/golang:1.24'
+  - &when
+    - path: &when_path # related config files
+        - '.woodpecker/integration.yaml'
+        # go source code
+        - '**/*.go'
+        - 'go.*'
+      event: pull_request
+
+when:
+  - event: pull_request
+  - event: push
+    branch: ${CI_REPO_DEFAULT_BRANCH}
+    path: *when_path
+
+steps:
+  vendor:
+    image: *golang_image
+    commands:
+      - go mod vendor
+    when:
+      path:
+        - <<: *when_path
+        - '.woodpecker/**'
+
+  dummy-web:
+    image: *golang_image
+    commands:
+      - mkdir -p web/dist/
+      - echo "test" > web/dist/index.html
+    when:
+      - path: *when_path
+
+  integration:
+    image: *golang_image
+    commands:
+      - go test ./test/integration/...
+    when:
+      - path: *when_path
+
+  codecov:
+    depends_on:
+      - test
+      - sqlite
+    pull: true
+    image: docker.io/woodpeckerci/plugin-codecov:2.1.6
+    settings:
+      files:
+        - agent-coverage.out
+      token:
+        from_secret: codecov_token
+    when:
+      - path: *when_path
+    failure: ignore
+
+services:
+  gitea:
+    image: docker.io/postgres:17
+    ports: ['8000']
+    environment:
+      USER_UID: 1000
+      USER_GID: 1000
+      # GITEA__server__DOMAIN: gitea.local.self
+      GITEA__server__ROOT_URL: https://3000-${GITPOD_WORKSPACE_ID}.${GITPOD_WORKSPACE_CLUSTER_HOST}
+      GITEA__database__DB_TYPE: sqlite
+      GITEA__database__HOST: gitea-database:5432
+      GITEA__database__NAME: gitea
+      GITEA__database__USER: gitea
+      GITEA__database__PASSWD: 123456
+      GITEA__webhook__ALLOWED_HOST_LIST: '*'
+      GITEA__security__INSTALL_LOCK: 'true'
+      GITEA__security__INTERNAL_TOKEN: '123456'
+    when: *when
