@@ -67,9 +67,9 @@ require (
 	google.golang.org/grpc v1.71.0
 	google.golang.org/protobuf v1.36.5
 	gopkg.in/yaml.v3 v3.0.1
-	k8s.io/api v0.32.2
-	k8s.io/apimachinery v0.32.2
-	k8s.io/client-go v0.32.2
+	k8s.io/api v0.32.3
+	k8s.io/apimachinery v0.32.3
+	k8s.io/client-go v0.32.3
 	src.techknowlogick.com/xormigrate v1.7.1
 	xorm.io/builder v0.3.13
 	xorm.io/xorm v1.3.9
