@@ -41,8 +41,7 @@ steps:
 
   codecov:
     depends_on:
-      - test
-      - sqlite
+      - integration
     pull: true
     image: docker.io/woodpeckerci/plugin-codecov:2.1.6
     settings:
