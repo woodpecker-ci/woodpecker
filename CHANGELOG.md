@@ -1,13 +1,14 @@
 # Changelog
 
-## [3.4.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.4.0) - 2025-03-13
+## [3.4.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.4.0) - 2025-03-14
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@xoxys
+@qwerty287, @xoxys
 
 ### 📚 Documentation
 
+- Add global var note [[#4956](https://github.com/woodpecker-ci/woodpecker/pull/4956)]
 - chore(deps): lock file maintenance [[#4948](https://github.com/woodpecker-ci/woodpecker/pull/4948)]
 - chore(deps): update dependency @types/node to v22.13.10 [[#4944](https://github.com/woodpecker-ci/woodpecker/pull/4944)]
 - chore(deps): update dependency axios to v1.8.2 [security] [[#4941](https://github.com/woodpecker-ci/woodpecker/pull/4941)]
