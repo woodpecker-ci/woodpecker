@@ -41,6 +41,10 @@ Directly import Woodpecker's Go packages (`go.woodpecker-ci.org/woodpecker/v3`) 
 In the `main` function, just call `"go.woodpecker-ci.org/woodpecker/v3/server/forge/addon".Serve` with a `"go.woodpecker-ci.org/woodpecker/v3/server/forge".Forge` as argument.
 This will take care of connecting the addon forge to the server.
 
+:::note
+It is not possible to access global variables from Woodpecker, for example the server config. Therefore, you have to parse the environment variables in your addon. The reason is that the addon runs in a completely separate process.
+:::
+
 ### Example structure
 
 ```go
