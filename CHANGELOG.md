@@ -21,6 +21,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update web npm deps non-major [[#4959](https://github.com/woodpecker-ci/woodpecker/pull/4959)]
 - chore(deps): update pre-commit non-major [[#4957](https://github.com/woodpecker-ci/woodpecker/pull/4957)]
 - fix(deps): update golang-packages to v0.32.3 [[#4953](https://github.com/woodpecker-ci/woodpecker/pull/4953)]
 - fix(deps): update dependency prismjs to v1.30.0 [security] [[#4951](https://github.com/woodpecker-ci/woodpecker/pull/4951)]
