@@ -1,5 +1,46 @@
 # Changelog
 
+## [3.4.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.4.0) - 2025-03-15
+
+### ❤️ Thanks to all contributors! ❤️
+
+@qwerty287, @xoxys
+
+### 🐛 Bug Fixes
+
+- Fix fs owner in scratch-based container images [[#4961](https://github.com/woodpecker-ci/woodpecker/pull/4961)]
+
+### 📚 Documentation
+
+- fix(deps): update docs npm deps non-major [[#4958](https://github.com/woodpecker-ci/woodpecker/pull/4958)]
+- Add global var note [[#4956](https://github.com/woodpecker-ci/woodpecker/pull/4956)]
+- chore(deps): lock file maintenance [[#4948](https://github.com/woodpecker-ci/woodpecker/pull/4948)]
+- chore(deps): update dependency @types/node to v22.13.10 [[#4944](https://github.com/woodpecker-ci/woodpecker/pull/4944)]
+- chore(deps): update dependency axios to v1.8.2 [security] [[#4941](https://github.com/woodpecker-ci/woodpecker/pull/4941)]
+- Fix dockerhub links in docs [[#4931](https://github.com/woodpecker-ci/woodpecker/pull/4931)]
+
+### 📈 Enhancement
+
+- Migrate repo output format to customizable output [[#4888](https://github.com/woodpecker-ci/woodpecker/pull/4888)]
+
+### 📦️ Dependency
+
+- chore(deps): update pre-commit hook adrienverge/yamllint to v1.36.1 [[#4962](https://github.com/woodpecker-ci/woodpecker/pull/4962)]
+- fix(deps): update dependency @vueuse/core to v13 [[#4960](https://github.com/woodpecker-ci/woodpecker/pull/4960)]
+- fix(deps): update web npm deps non-major [[#4959](https://github.com/woodpecker-ci/woodpecker/pull/4959)]
+- chore(deps): update pre-commit non-major [[#4957](https://github.com/woodpecker-ci/woodpecker/pull/4957)]
+- fix(deps): update golang-packages to v0.32.3 [[#4953](https://github.com/woodpecker-ci/woodpecker/pull/4953)]
+- fix(deps): update dependency prismjs to v1.30.0 [security] [[#4951](https://github.com/woodpecker-ci/woodpecker/pull/4951)]
+- chore(deps): update dependency @intlify/eslint-plugin-vue-i18n to v4 [[#4943](https://github.com/woodpecker-ci/woodpecker/pull/4943)]
+- fix(deps): update module al.essio.dev/pkg/shellescape to v1.6.0 [[#4947](https://github.com/woodpecker-ci/woodpecker/pull/4947)]
+- fix(deps): update dependency simple-icons to v14.10.0 [[#4946](https://github.com/woodpecker-ci/woodpecker/pull/4946)]
+- chore(deps): update dependency @types/node to v22.13.10 [[#4945](https://github.com/woodpecker-ci/woodpecker/pull/4945)]
+- fix(deps): update web npm deps non-major [[#4942](https://github.com/woodpecker-ci/woodpecker/pull/4942)]
+- fix(deps): update dependency vue-i18n to v11.1.2 [security] [[#4940](https://github.com/woodpecker-ci/woodpecker/pull/4940)]
+- fix(deps): update golang-packages [[#4936](https://github.com/woodpecker-ci/woodpecker/pull/4936)]
+- chore(deps): lock file maintenance [[#4933](https://github.com/woodpecker-ci/woodpecker/pull/4933)]
+- fix(deps): update golang-packages [[#4929](https://github.com/woodpecker-ci/woodpecker/pull/4929)]
+
 ## [3.3.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.3.0) - 2025-03-04
 
 ### ❤️ Thanks to all contributors! ❤️
