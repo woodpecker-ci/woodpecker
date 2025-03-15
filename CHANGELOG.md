@@ -6,6 +6,10 @@
 
 @qwerty287, @xoxys
 
+### 🐛 Bug Fixes
+
+- Fix fs owner in scratch-based container images [[#4961](https://github.com/woodpecker-ci/woodpecker/pull/4961)]
+
 ### 📚 Documentation
 
 - fix(deps): update docs npm deps non-major [[#4958](https://github.com/woodpecker-ci/woodpecker/pull/4958)]
