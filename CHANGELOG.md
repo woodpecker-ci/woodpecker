@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.4.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.4.0) - 2025-03-14
+## [3.4.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.4.0) - 2025-03-15
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -20,6 +20,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update pre-commit non-major [[#4957](https://github.com/woodpecker-ci/woodpecker/pull/4957)]
 - fix(deps): update golang-packages to v0.32.3 [[#4953](https://github.com/woodpecker-ci/woodpecker/pull/4953)]
 - fix(deps): update dependency prismjs to v1.30.0 [security] [[#4951](https://github.com/woodpecker-ci/woodpecker/pull/4951)]
 - chore(deps): update dependency @intlify/eslint-plugin-vue-i18n to v4 [[#4943](https://github.com/woodpecker-ci/woodpecker/pull/4943)]
