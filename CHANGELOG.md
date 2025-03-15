@@ -25,6 +25,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update pre-commit hook adrienverge/yamllint to v1.36.1 [[#4962](https://github.com/woodpecker-ci/woodpecker/pull/4962)]
 - fix(deps): update dependency @vueuse/core to v13 [[#4960](https://github.com/woodpecker-ci/woodpecker/pull/4960)]
 - fix(deps): update web npm deps non-major [[#4959](https://github.com/woodpecker-ci/woodpecker/pull/4959)]
 - chore(deps): update pre-commit non-major [[#4957](https://github.com/woodpecker-ci/woodpecker/pull/4957)]
