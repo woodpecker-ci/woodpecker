@@ -16,11 +16,13 @@ package docker
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/image"
@@ -175,6 +177,23 @@ func (e *docker) StartStep(ctx context.Context, step *backend.Step, taskUUID str
 	hostConfig := toHostConfig(step, &e.config)
 	containerName := toContainerName(step)
 
+	// add the volume permission fix to the subroutine so that the image can be prepared in the meantime
+	errChan := make(chan error, len(hostConfig.Binds))
+	var wg sync.WaitGroup
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		for _, vol := range hostConfig.Binds {
+			// skip volumes which are outside the workspace
+			if !strings.Contains(vol, step.WorkspaceBase) {
+				continue
+			}
+			if vpErr := fixVolumePermission(ctx, e.client, containerName, vol, step.WorkingDir); vpErr != nil {
+				errChan <- fmt.Errorf("permission fix for %s failed: %w", vol, vpErr)
+			}
+		}
+	}()
+
 	// create pull options with encoded authorization credentials.
 	pullOpts := image.PullOptions{}
 	if step.AuthConfig.Username != "" && step.AuthConfig.Password != "" {
@@ -202,6 +221,15 @@ func (e *docker) StartStep(ctx context.Context, step *backend.Step, taskUUID str
 
 	// add default volumes to the host configuration
 	hostConfig.Binds = utils.DeduplicateStrings(append(hostConfig.Binds, e.config.volumes...))
+
+	// wait for the subroutine to finish and close error channel
+	wg.Wait()
+	close(errChan)
+
+	// process errors for volume permission fix
+	for err = range errChan {
+		log.Error().Err(err).Msg("could not change volume permission")
+	}
 
 	_, err = e.client.ContainerCreate(ctx, config, hostConfig, nil, nil, containerName)
 	if client.IsErrNotFound(err) {
@@ -358,4 +386,58 @@ func normalizeArchType(s string) string {
 	default:
 		return s
 	}
+}
+
+// fixVolumePermission creates the workdir and sets the volume permission to "0777 (rwx)" to avoid writing errors for rootless images.
+func fixVolumePermission(ctx context.Context, c client.APIClient, containerName, bind, workdir string) error {
+	imageName := "busybox:latest"
+	containerName = fmt.Sprintf("%s_fix_permission", containerName)
+	bindParts := strings.Split(bind, ":")
+	if len(bindParts) < 2 {
+		return fmt.Errorf(`cannot parse bind format ("volumeName":"mountPath"): %s`, bind)
+	}
+
+	config := &container.Config{
+		Image: imageName,
+		Cmd: []string{
+			"sh", "-c",
+			fmt.Sprintf("mkdir -p %s", workdir),
+			fmt.Sprintf("chmod -R 0777 %s", bindParts[1]),
+		},
+	}
+	hostconfig := &container.HostConfig{
+		Binds:      []string{bind},
+		AutoRemove: true,
+	}
+
+	resp, err := c.ContainerCreate(ctx, config, hostconfig, nil, nil, containerName)
+	if client.IsErrNotFound(err) {
+		pullResp, pullErr := c.ImagePull(ctx, imageName, image.PullOptions{})
+		if pullErr != nil {
+			return pullErr
+		}
+
+		fd, isTerminal := term.GetFdInfo(os.Stdout)
+		if err := json_message.DisplayJSONMessagesStream(pullResp, os.Stdout, fd, isTerminal, nil); err != nil {
+			log.Error().Err(err).Msg("DisplayJSONMessagesStream")
+		}
+		pullResp.Close()
+
+		resp, err = c.ContainerCreate(ctx, config, hostconfig, nil, nil, containerName)
+	}
+	if err != nil {
+		return err
+	}
+
+	if err = c.ContainerStart(ctx, resp.ID, container.StartOptions{}); err != nil {
+		return err
+	}
+
+	wait, errC := c.ContainerWait(ctx, resp.ID, container.WaitConditionNextExit)
+	select {
+	case <-wait:
+	case <-errC:
+	}
+
+	return nil
 }
