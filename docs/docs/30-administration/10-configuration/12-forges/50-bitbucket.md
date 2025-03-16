@@ -39,33 +39,48 @@ Please also be sure to check the following permissions:
 
 This is a full list of configuration options. Please note that many of these options use default configuration values that should work for the majority of installations.
 
-### `WOODPECKER_BITBUCKET`
+---
 
-> Default: `false`
+### BITBUCKET
+
+- Name: `WOODPECKER_BITBUCKET`
+- Default: `false`
 
 Enables the Bitbucket driver.
 
-### `WOODPECKER_BITBUCKET_CLIENT`
+---
 
-> Default: empty
+### BITBUCKET_CLIENT
+
+- Name: `WOODPECKER_BITBUCKET_CLIENT`
+- Default: none
 
 Configures the Bitbucket OAuth client key. This is used to authorize access.
 
-### `WOODPECKER_BITBUCKET_CLIENT_FILE`
+---
 
-> Default: empty
+### BITBUCKET_CLIENT_FILE
+
+- Name: `WOODPECKER_BITBUCKET_CLIENT_FILE`
+- Default: none
 
 Read the value for `WOODPECKER_BITBUCKET_CLIENT` from the specified filepath
 
-### `WOODPECKER_BITBUCKET_SECRET`
+---
 
-> Default: empty
+### BITBUCKET_SECRET
+
+- Name: `WOODPECKER_BITBUCKET_SECRET`
+- Default: none
 
 Configures the Bitbucket OAuth client secret. This is used to authorize access.
 
-### `WOODPECKER_BITBUCKET_SECRET_FILE`
+---
 
-> Default: empty
+### BITBUCKET_SECRET_FILE
+
+- Name: `WOODPECKER_BITBUCKET_SECRET_FILE`
+- Default: none
 
 Read the value for `WOODPECKER_BITBUCKET_SECRET` from the specified filepath
 
