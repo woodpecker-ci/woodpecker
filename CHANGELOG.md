@@ -25,6 +25,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update dependency simple-icons to v14.11.0 [[#4966](https://github.com/woodpecker-ci/woodpecker/pull/4966)]
 - fix(deps): update golang-packages [[#4963](https://github.com/woodpecker-ci/woodpecker/pull/4963)]
 - chore(deps): update pre-commit hook adrienverge/yamllint to v1.36.1 [[#4962](https://github.com/woodpecker-ci/woodpecker/pull/4962)]
 - fix(deps): update dependency @vueuse/core to v13 [[#4960](https://github.com/woodpecker-ci/woodpecker/pull/4960)]
