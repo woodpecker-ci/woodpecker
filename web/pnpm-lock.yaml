@@ -61,7 +61,7 @@ importers:
         version: 7.7.1
       simple-icons:
         specifier: ^14.1.0
-        version: 14.10.0
+        version: 14.11.0
       tailwindcss:
         specifier: ^4.0.6
         version: 4.0.14
@@ -2786,8 +2786,8 @@ packages:
     resolution: {integrity: sha512-bzyZ1e88w9O1iNJbKnOlvYTrWPDl46O1bG0D3XInv+9tkPrxrN8jUUTiFlDkkmKWgn1M6CfIA13SuGqOa9Korw==}
     engines: {node: '>=14'}
 
-  simple-icons@14.10.0:
-    resolution: {integrity: sha512-B5Uip8C0jQ0Mux9kDDmaveexwYS+ATVMaRZmaOaJJqbi+QpRBOHRCjGAeJ4RG7DYeoAkPvEOWRcHssUQ87db7g==}
+  simple-icons@14.11.0:
+    resolution: {integrity: sha512-wZmG7JXVhFrobLIUum20blb9mvW3TfUcSLP9bOQ42Ul37GYc/59armh2wKySHzhN1/NaTan5VUQmr/9wYseRXA==}
     engines: {node: '>=0.12.18'}
 
   sisteransi@1.0.5:
@@ -6055,7 +6055,7 @@ snapshots:
 
   signal-exit@4.1.0: {}
 
-  simple-icons@14.10.0: {}
+  simple-icons@14.11.0: {}
 
   sisteransi@1.0.5: {}
 
