@@ -36,54 +36,81 @@ Use this one for the `WOODPECKER_GITHUB_SECRET` environment variable.
 
 This is a full list of configuration options. Please note that many of these options use default configuration values that should work for the majority of installations.
 
-### `WOODPECKER_GITHUB`
+---
 
-> Default: `false`
+### GITHUB
+
+- Name: `WOODPECKER_GITHUB`
+- Default: `false`
 
 Enables the GitHub driver.
 
-### `WOODPECKER_GITHUB_URL`
+---
 
-> Default: `https://github.com`
+### GITHUB_URL
+
+- Name: `WOODPECKER_GITHUB_URL`
+- Default: `https://github.com`
 
 Configures the GitHub server address.
 
-### `WOODPECKER_GITHUB_CLIENT`
+---
 
-> Default: empty
+### GITHUB_CLIENT
+
+- Name: `WOODPECKER_GITHUB_CLIENT`
+- Default: none
 
 Configures the GitHub OAuth client id to authorize access.
 
-### `WOODPECKER_GITHUB_CLIENT_FILE`
+---
 
-> Default: empty
+### GITHUB_CLIENT_FILE
+
+- Name: `WOODPECKER_GITHUB_CLIENT_FILE`
+- Default: none
 
 Read the value for `WOODPECKER_GITHUB_CLIENT` from the specified filepath.
 
-### `WOODPECKER_GITHUB_SECRET`
+---
 
-> Default: empty
+### GITHUB_SECRET
+
+- Name: `WOODPECKER_GITHUB_SECRET`
+- Default: none
 
 Configures the GitHub OAuth client secret. This is used to authorize access.
 
-### `WOODPECKER_GITHUB_SECRET_FILE`
+---
 
-> Default: empty
+### GITHUB_SECRET_FILE
+
+- Name: `WOODPECKER_GITHUB_SECRET_FILE`
+- Default: none
 
 Read the value for `WOODPECKER_GITHUB_SECRET` from the specified filepath.
 
-### `WOODPECKER_GITHUB_MERGE_REF`
+---
 
-> Default: `true`
+### GITHUB_MERGE_REF
 
-### `WOODPECKER_GITHUB_SKIP_VERIFY`
+- Name: `WOODPECKER_GITHUB_MERGE_REF`
+- Default: `true`
 
-> Default: `false`
+---
+
+### GITHUB_SKIP_VERIFY
+
+- Name: `WOODPECKER_GITHUB_SKIP_VERIFY`
+- Default: `false`
 
 Configure if SSL verification should be skipped.
 
-### `WOODPECKER_GITHUB_PUBLIC_ONLY`
+---
 
-> Default: `false`
+### GITHUB_PUBLIC_ONLY
+
+- Name: `WOODPECKER_GITHUB_PUBLIC_ONLY`
+- Default: `false`
 
 Configures the GitHub OAuth client to only obtain a token that can manage public repositories.
