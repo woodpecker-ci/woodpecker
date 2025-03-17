@@ -90,6 +90,10 @@ func setupStore(ctx context.Context, c *cli.Command) (store.Store, error) {
 		return nil, fmt.Errorf("could not open datastore: %w", err)
 	}
 
+	if err = store.Ping(); err != nil {
+		return nil, err
+	}
+
 	if err := store.Migrate(ctx, c.Bool("migrations-allow-long")); err != nil {
 		return nil, fmt.Errorf("could not migrate datastore: %w", err)
 	}

@@ -56,6 +56,12 @@ var flags = append([]cli.Flag{
 		Usage:   "time an active connection is allowed to stay open",
 		Value:   3 * time.Second,
 	},
+	&cli.UintFlag{
+		Sources: cli.EnvVars("WOODPECKER_DATABASE_MAX_RETRIES"),
+		Name:    "db-max-retries",
+		Usage:   "max number of retries for the initial connection to the database",
+		Value:   10,
+	},
 	&cli.StringFlag{
 		Sources: cli.EnvVars("WOODPECKER_HOST"),
 		Name:    "server-host",
