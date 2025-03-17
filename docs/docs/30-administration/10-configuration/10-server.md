@@ -1053,8 +1053,6 @@ Supported variables:
 
 ---
 
----
-
 ### CONFIG_SERVICE_ENDPOINT
 
 - Name: `WOODPECKER_CONFIG_SERVICE_ENDPOINT`
@@ -1115,6 +1113,26 @@ Where to store logs. Possible values: `database` or `file`.
 - Default: none
 
 Directory to store logs in if [`WOODPECKER_LOG_STORE`](#log_store) is `file`.
+
+---
+
+### EXPERT_WEBHOOK_HOST
+
+- Name: `WOODPECKER_EXPERT_WEBHOOK_HOST`
+- Default: none
+
+This option is not required in most cases and should only be used if you know what you're doing.
+Fully qualified Woodpecker server URL, called by the webhooks of the forge. Format: `<scheme>://<host>[/<prefix path>]`.
+
+---
+
+### EXPERT_FORGE_OAUTH_HOST
+
+- Name: `WOODPECKER_EXPERT_FORGE_OAUTH_HOST`
+- Default: none
+
+This option is not required in most cases and should only be used if you know what you're doing.
+Fully qualified public forge URL, used if forge url is not a public URL. Format: `<scheme>://<host>[/<prefix path>]`.
 
 ---
 
