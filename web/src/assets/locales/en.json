@@ -509,7 +509,11 @@
     "none_desc": "Every event triggers pipelines, including pull requests. This setting can be dangerous and is only recommended for private instances.",
     "forks": "Pull request from forked repository",
     "pull_requests": "All pull requests",
-    "all_events": "All events from forge"
+    "all_events": "All events from forge",
+    "allowed_users": {
+      "allowed_users": "Allowed users",
+      "desc": "Pipelines created by the listed users never require approval."
+    }
   },
   "all_repositories": "All repositories",
   "no_search_results": "No results found"

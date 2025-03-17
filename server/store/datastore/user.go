@@ -60,11 +60,12 @@ func (s storage) GetUserCount() (int64, error) {
 func (s storage) CreateUser(user *model.User) error {
 	sess := s.engine.NewSession()
 	org := &model.Org{
-		Name:   user.Login,
-		IsUser: true,
+		Name:    user.Login,
+		ForgeID: user.ForgeID,
+		IsUser:  true,
 	}
 
-	existingOrg, err := s.orgFindByName(sess, org.Name)
+	existingOrg, err := s.orgFindByName(sess, org.Name, user.ForgeID)
 	if err != nil && !errors.Is(err, types.RecordNotExist) {
 		return fmt.Errorf("failed to check if org exists: %w", err)
 	}

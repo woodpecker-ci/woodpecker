@@ -20,13 +20,11 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"path"
-	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
 
-	"codeberg.org/mvdkleijn/forgejo-sdk/forgejo"
+	"codeberg.org/mvdkleijn/forgejo-sdk/forgejo/v2"
 	"github.com/rs/zerolog/log"
 	"golang.org/x/oauth2"
 
@@ -287,22 +285,16 @@ func (c *Forgejo) Dir(ctx context.Context, u *model.User, r *model.Repo, b *mode
 		return nil, err
 	}
 
-	// List files in repository. Path from root
-	tree, _, err := client.GetTrees(r.Owner, r.Name, b.Commit, true)
+	// List files in repository
+	contents, _, err := client.ListContents(r.Owner, r.Name, b.Commit, f)
 	if err != nil {
 		return nil, err
 	}
 
-	f = path.Clean(f) // We clean path and remove trailing slash
-	f += "/" + "*"    // construct pattern for match i.e. file in subdir
-	for _, e := range tree.Entries {
-		// Filter path matching pattern and type file (blob)
-		if m, _ := filepath.Match(f, e.Path); m && e.Type == "blob" {
+	for _, e := range contents {
+		if e.Type == "file" {
 			data, err := c.File(ctx, u, r, b, e.Path)
 			if err != nil {
-				if errors.Is(err, &forge_types.ErrConfigNotFound{}) {
-					return nil, fmt.Errorf("git tree reported existence of file but we got: %s", err.Error())
-				}
 				return nil, fmt.Errorf("multi-pipeline cannot get %s: %w", e.Path, err)
 			}
 
@@ -358,6 +350,7 @@ func (c *Forgejo) Netrc(u *model.User, r *model.Repo) (*model.Netrc, error) {
 		Login:    login,
 		Password: token,
 		Machine:  host,
+		Type:     model.ForgeTypeForgejo,
 	}, nil
 }
 

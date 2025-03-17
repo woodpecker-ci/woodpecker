@@ -18,22 +18,24 @@
       </InputField>
 
       <InputField
-        v-slot="{ id }"
         :label="$t('repo.settings.general.netrc_only_trusted.netrc_only_trusted')"
         docs-url="docs/usage/project-settings#custom-trusted-clone-plugins"
       >
-        <span class="mb-2 ml-1 text-wp-text-alt-100">{{ $t('repo.settings.general.netrc_only_trusted.desc') }}</span>
-
-        <div class="flex flex-col gap-2">
-          <div v-for="image in repoSettings.netrc_trusted" :key="image" class="flex gap-2">
-            <TextField :id="id" :model-value="image" disabled />
-            <Button type="button" color="gray" start-icon="trash" @click="removeImage(image)" />
+        <template #default="{ id }">
+          <div class="flex flex-col gap-2">
+            <div v-for="image in repoSettings.netrc_trusted" :key="image" class="flex gap-2">
+              <TextField :id="id" :model-value="image" disabled />
+              <Button type="button" color="gray" start-icon="trash" @click="removeImage(image)" />
+            </div>
+            <div class="flex gap-2">
+              <TextField :id="id" v-model="newImage" @keydown.enter.prevent="addNewImage" />
+              <Button type="button" color="gray" start-icon="plus" @click="addNewImage" />
+            </div>
           </div>
-          <div class="flex gap-2">
-            <TextField :id="id" v-model="newImage" @keydown.enter.prevent="addNewImage" />
-            <Button type="button" color="gray" start-icon="plus" @click="addNewImage" />
-          </div>
-        </div>
+        </template>
+        <template #description>
+          {{ $t('repo.settings.general.netrc_only_trusted.desc') }}
+        </template>
       </InputField>
 
       <InputField
@@ -82,9 +84,28 @@
           ]"
         />
         <template #description>
-          <p class="text-sm">
-            {{ $t('require_approval.desc') }}
-          </p>
+          {{ $t('require_approval.desc') }}
+        </template>
+      </InputField>
+
+      <InputField
+        v-if="repoSettings.require_approval !== RepoRequireApproval.None"
+        :label="$t('require_approval.allowed_users.allowed_users')"
+      >
+        <template #default="{ id }">
+          <div class="flex flex-col gap-2">
+            <div v-for="allowedUser in repoSettings.approval_allowed_users" :key="allowedUser" class="flex gap-2">
+              <TextField :id="id" :model-value="allowedUser" disabled />
+              <Button type="button" color="gray" start-icon="trash" @click="removeUser(allowedUser)" />
+            </div>
+            <div class="flex gap-2">
+              <TextField :id="id" v-model="newUser" @keydown.enter.prevent="addNewUser" />
+              <Button type="button" color="gray" start-icon="plus" @click="addNewUser" />
+            </div>
+          </div>
+        </template>
+        <template #description>
+          {{ $t('require_approval.allowed_users.desc') }}
         </template>
       </InputField>
 
@@ -99,7 +120,7 @@
       >
         <div class="flex items-center">
           <NumberField :id="id" v-model="repoSettings.timeout" class="w-24" />
-          <span class="ml-4 text-wp-text-alt-100">{{ $t('repo.settings.general.timeout.minutes') }}</span>
+          <span class="text-wp-text-alt-100 ml-4">{{ $t('repo.settings.general.timeout.minutes') }}</span>
         </div>
       </InputField>
 
@@ -114,13 +135,15 @@
             :placeholder="$t('repo.settings.general.pipeline_path.default')"
           />
         </template>
+
+        <!-- eslint-disable @intlify/vue-i18n/no-raw-text -->
         <template #description>
-          <i18n-t keypath="repo.settings.general.pipeline_path.desc" tag="p" class="text-sm text-wp-text-alt-100">
+          <i18n-t keypath="repo.settings.general.pipeline_path.desc">
             <span class="code-box-inline">{{ $t('repo.settings.general.pipeline_path.desc_path_example') }}</span>
-            <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
             <span class="code-box-inline">/</span>
           </i18n-t>
         </template>
+        <!-- eslint-enable @intlify/vue-i18n/no-raw-text -->
       </InputField>
 
       <InputField
@@ -132,9 +155,7 @@
           :options="cancelPreviousPipelineEventsOptions"
         />
         <template #description>
-          <p class="text-sm">
-            {{ $t('repo.settings.general.cancel_prev.desc') }}
-          </p>
+          {{ $t('repo.settings.general.cancel_prev.desc') }}
         </template>
       </InputField>
 
@@ -150,7 +171,8 @@
 </template>
 
 <script lang="ts" setup>
-import { inject, onMounted, ref, type Ref } from 'vue';
+import { inject, onMounted, ref } from 'vue';
+import type { Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import Button from '~/components/atomic/Button.vue';
@@ -166,7 +188,8 @@ import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useAuthentication from '~/compositions/useAuthentication';
 import useNotifications from '~/compositions/useNotifications';
-import { RepoRequireApproval, RepoVisibility, WebhookEvents, type Repo, type RepoSettings } from '~/lib/api/types';
+import { RepoRequireApproval, RepoVisibility, WebhookEvents } from '~/lib/api/types';
+import type { Repo, RepoSettings } from '~/lib/api/types';
 import { useRepoStore } from '~/store/repos';
 
 const apiClient = useApiClient();
@@ -189,6 +212,7 @@ function loadRepoSettings() {
     visibility: repo.value.visibility,
     require_approval: repo.value.require_approval,
     trusted: repo.value.trusted,
+    approval_allowed_users: repo.value.approval_allowed_users || [],
     allow_pr: repo.value.allow_pr,
     allow_deploy: repo.value.allow_deploy,
     cancel_previous_pipeline_events: repo.value.cancel_previous_pipeline_events || [],
@@ -265,5 +289,21 @@ function removeImage(image: string) {
   }
 
   repoSettings.value.netrc_trusted = repoSettings.value.netrc_trusted.filter((i) => i !== image);
+}
+
+const newUser = ref('');
+function addNewUser() {
+  if (!newUser.value) {
+    return;
+  }
+  repoSettings.value?.approval_allowed_users.push(newUser.value);
+  newUser.value = '';
+}
+function removeUser(user: string) {
+  if (!repoSettings.value) {
+    throw new Error('Unexpected: repoSettings should be set');
+  }
+
+  repoSettings.value.approval_allowed_users = repoSettings.value.approval_allowed_users.filter((i) => i !== user);
 }
 </script>

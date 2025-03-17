@@ -27,14 +27,6 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": [
-    "src/**/*.ts",
-    "src/**/*.tsx",
-    "src/**/*.vue",
-    "src/**/*.json",
-    "tailwind.config.ts",
-    "vite.config.ts",
-    "postcss.config.js"
-  ],
+  "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.vue", "src/**/*.json", "vite.config.ts"],
   "exclude": ["node_modules", "**/__tests__/**/*", "**/dist/**/*"]
 }

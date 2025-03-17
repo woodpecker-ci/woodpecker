@@ -22,7 +22,7 @@
       </InputField>
 
       <InputField v-slot="{ id }" :label="$t('secrets.plugins.images')">
-        <span class="mb-2 ml-1 text-wp-text-alt-100">{{ $t('secrets.plugins.desc') }}</span>
+        <span class="text-wp-text-alt-100 mb-2 ml-1">{{ $t('secrets.plugins.desc') }}</span>
 
         <div class="flex flex-col gap-2">
           <div v-for="image in innerValue.images" :key="image" class="flex gap-2">
@@ -64,7 +64,8 @@ import CheckboxesField from '~/components/form/CheckboxesField.vue';
 import type { CheckboxOption } from '~/components/form/form.types';
 import InputField from '~/components/form/InputField.vue';
 import TextField from '~/components/form/TextField.vue';
-import { WebhookEvents, type Secret } from '~/lib/api/types';
+import { WebhookEvents } from '~/lib/api/types';
+import type { Secret } from '~/lib/api/types';
 
 const props = defineProps<{
   modelValue: Partial<Secret>;

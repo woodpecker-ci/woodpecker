@@ -41,7 +41,8 @@ import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useAuthentication from '~/compositions/useAuthentication';
 import useNotifications from '~/compositions/useNotifications';
 import { usePagination } from '~/compositions/usePaginate';
-import { WebhookEvents, type Secret } from '~/lib/api/types';
+import { WebhookEvents } from '~/lib/api/types';
+import type { Secret } from '~/lib/api/types';
 
 const emptySecret: Partial<Secret> = {
   name: '',

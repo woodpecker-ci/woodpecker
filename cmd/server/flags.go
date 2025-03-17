@@ -56,6 +56,12 @@ var flags = append([]cli.Flag{
 		Usage:   "time an active connection is allowed to stay open",
 		Value:   3 * time.Second,
 	},
+	&cli.UintFlag{
+		Sources: cli.EnvVars("WOODPECKER_DATABASE_MAX_RETRIES"),
+		Name:    "db-max-retries",
+		Usage:   "max number of retries for the initial connection to the database",
+		Value:   10,
+	},
 	&cli.StringFlag{
 		Sources: cli.EnvVars("WOODPECKER_HOST"),
 		Name:    "server-host",
@@ -140,6 +146,12 @@ var flags = append([]cli.Flag{
 		Sources: cli.EnvVars("WOODPECKER_AUTHENTICATE_PUBLIC_REPOS"),
 		Name:    "authenticate-public-repos",
 		Usage:   "Always use authentication to clone repositories even if they are public. Needed if the SCM requires to always authenticate as used by many companies.",
+	},
+	&cli.BoolFlag{
+		Sources: cli.EnvVars("WOODPECKER_DEFAULT_ALLOW_PULL_REQUESTS"),
+		Name:    "default-allow-pull-requests",
+		Usage:   "The default value for allowing pull requests on a repo.",
+		Value:   true,
 	},
 	&cli.StringSliceFlag{
 		Sources: cli.EnvVars("WOODPECKER_DEFAULT_CANCEL_PREVIOUS_PIPELINE_EVENTS"),

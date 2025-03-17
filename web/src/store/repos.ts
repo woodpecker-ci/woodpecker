@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
-import { computed, reactive, ref, type Ref } from 'vue';
+import { computed, reactive, ref } from 'vue';
+import type { Ref } from 'vue';
 
 import useApiClient from '~/compositions/useApiClient';
 import type { Repo } from '~/lib/api/types';
@@ -38,16 +39,15 @@ export const useRepoStore = defineStore('repos', () => {
 
   async function loadRepos() {
     const _ownedRepos = await apiClient.getRepoList();
-    await Promise.all(
-      _ownedRepos.map(async (repo) => {
-        const lastPipeline = await apiClient.getPipelineList(repo.id, { page: 1, perPage: 1 });
-        if (lastPipeline.length === 1) {
-          pipelineStore.setPipeline(repo.id, lastPipeline[0]);
-          repo.last_pipeline = lastPipeline[0].number;
-        }
-        setRepo(repo);
-      }),
-    );
+
+    _ownedRepos.forEach((repo) => {
+      if (repo.last_pipeline) {
+        pipelineStore.setPipeline(repo.id, repo.last_pipeline);
+        repo.last_pipeline_number = repo.last_pipeline.number;
+      }
+      setRepo(repo);
+    });
+
     ownedRepoIds.value = _ownedRepos.map((repo) => repo.id);
   }
 

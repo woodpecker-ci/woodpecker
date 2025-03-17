@@ -1,5 +1,5 @@
 variables:
-  - &golang_image 'docker.io/golang:1.23'
+  - &golang_image 'docker.io/golang:1.24'
   - &node_image 'docker.io/node:23-alpine'
   - &alpine_image 'docker.io/alpine:3.21'
   - path: &when_path
@@ -69,7 +69,7 @@ steps:
       - event: manual
 
   deploy-preview:
-    image: docker.io/woodpeckerci/plugin-surge-preview:1.3.4
+    image: docker.io/woodpeckerci/plugin-surge-preview:1.3.5
     settings:
       path: 'docs/build/'
       surge_token:

@@ -63,6 +63,7 @@ type Repo struct {
 	IsSCMPrivate                 bool                 `json:"private"                         xorm:"private"`
 	Trusted                      TrustedConfiguration `json:"trusted"                         xorm:"json 'trusted'"`
 	RequireApproval              ApprovalMode         `json:"require_approval"                xorm:"varchar(50) require_approval"`
+	ApprovalAllowedUsers         []string             `json:"approval_allowed_users"          xorm:"json approval_allowed_users"`
 	IsActive                     bool                 `json:"active"                          xorm:"active"`
 	AllowPull                    bool                 `json:"allow_pr"                        xorm:"allow_pr"`
 	AllowDeploy                  bool                 `json:"allow_deploy"                    xorm:"allow_deploy"`
@@ -70,7 +71,7 @@ type Repo struct {
 	Hash                         string               `json:"-"                               xorm:"varchar(500) 'hash'"`
 	Perm                         *Perm                `json:"-"                               xorm:"-"`
 	CancelPreviousPipelineEvents []WebhookEvent       `json:"cancel_previous_pipeline_events" xorm:"json 'cancel_previous_pipeline_events'"`
-	NetrcTrustedPlugins          []string             `json:"netrc_trusted" xorm:"json 'netrc_trusted'"`
+	NetrcTrustedPlugins          []string             `json:"netrc_trusted"                   xorm:"json 'netrc_trusted'"`
 } //	@name Repo
 
 // TableName return database table name for xorm.
@@ -129,6 +130,7 @@ func (r *Repo) Update(from *Repo) {
 type RepoPatch struct {
 	Config                       *string                    `json:"config_file,omitempty"`
 	RequireApproval              *string                    `json:"require_approval,omitempty"`
+	ApprovalAllowedUsers         *[]string                  `json:"approval_allowed_users,omitempty"`
 	Timeout                      *int64                     `json:"timeout,omitempty"`
 	Visibility                   *string                    `json:"visibility,omitempty"`
 	AllowPull                    *bool                      `json:"allow_pr,omitempty"`
@@ -155,3 +157,9 @@ type TrustedConfigurationPatch struct {
 	Volumes  *bool `json:"volumes"`
 	Security *bool `json:"security"`
 }
+
+// RepoLastPipeline represents a repository with last pipeline execution information.
+type RepoLastPipeline struct {
+	*Repo
+	LastPipeline *Pipeline `json:"last_pipeline,omitempty"`
+} //	@name RepoLastPipeline

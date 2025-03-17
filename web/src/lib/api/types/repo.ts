@@ -67,11 +67,13 @@ export interface Repo {
 
   visibility: RepoVisibility;
 
-  last_pipeline?: number;
+  last_pipeline_number?: number;
 
-  last_pipeline_item?: Pipeline;
+  last_pipeline?: Pipeline;
 
   require_approval: RepoRequireApproval;
+
+  approval_allowed_users: string[];
 
   // Events that will cancel running pipelines before starting a new one
   cancel_previous_pipeline_events: string[];
@@ -101,6 +103,7 @@ export type RepoSettings = Pick<
   | 'visibility'
   | 'trusted'
   | 'require_approval'
+  | 'approval_allowed_users'
   | 'allow_pr'
   | 'allow_deploy'
   | 'cancel_previous_pipeline_events'

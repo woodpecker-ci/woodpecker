@@ -4306,7 +4306,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/Repo"
+                                "$ref": "#/definitions/RepoLastPipeline"
                             }
                         }
                     }
@@ -5054,6 +5054,12 @@ const docTemplate = `{
                 "allow_pr": {
                     "type": "boolean"
                 },
+                "approval_allowed_users": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
                 "avatar_url": {
                     "type": "string"
                 },
@@ -5126,6 +5132,99 @@ const docTemplate = `{
                 }
             }
         },
+        "RepoLastPipeline": {
+            "type": "object",
+            "properties": {
+                "active": {
+                    "type": "boolean"
+                },
+                "allow_deploy": {
+                    "type": "boolean"
+                },
+                "allow_pr": {
+                    "type": "boolean"
+                },
+                "approval_allowed_users": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "avatar_url": {
+                    "type": "string"
+                },
+                "cancel_previous_pipeline_events": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/WebhookEvent"
+                    }
+                },
+                "clone_url": {
+                    "type": "string"
+                },
+                "clone_url_ssh": {
+                    "type": "string"
+                },
+                "config_file": {
+                    "type": "string"
+                },
+                "default_branch": {
+                    "type": "string"
+                },
+                "forge_id": {
+                    "type": "integer"
+                },
+                "forge_remote_id": {
+                    "description": "ForgeRemoteID is the unique identifier for the repository on the forge.",
+                    "type": "string"
+                },
+                "forge_url": {
+                    "type": "string"
+                },
+                "full_name": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "last_pipeline": {
+                    "$ref": "#/definitions/Pipeline"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "netrc_trusted": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "org_id": {
+                    "type": "integer"
+                },
+                "owner": {
+                    "type": "string"
+                },
+                "pr_enabled": {
+                    "type": "boolean"
+                },
+                "private": {
+                    "type": "boolean"
+                },
+                "require_approval": {
+                    "$ref": "#/definitions/model.ApprovalMode"
+                },
+                "timeout": {
+                    "type": "integer"
+                },
+                "trusted": {
+                    "$ref": "#/definitions/model.TrustedConfiguration"
+                },
+                "visibility": {
+                    "$ref": "#/definitions/RepoVisibility"
+                }
+            }
+        },
         "RepoPatch": {
             "type": "object",
             "properties": {
@@ -5134,6 +5233,12 @@ const docTemplate = `{
                 },
                 "allow_pr": {
                     "type": "boolean"
+                },
+                "approval_allowed_users": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "cancel_previous_pipeline_events": {
                     "type": "array",

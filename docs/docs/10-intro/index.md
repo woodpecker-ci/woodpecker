@@ -23,4 +23,4 @@ Then you might want to jump directly into it and [start creating your first pipe
 
 ## Want to start from scratch and deploy your own Woodpecker instance?
 
-Woodpecker is [pretty lightweight](../30-administration/00-getting-started.md#hardware-requirements) and will even run on your Raspberry Pi. You can follow the [deployment guide](../30-administration/00-getting-started.md) to set up your own Woodpecker instance.
+Woodpecker is lightweight and even runs on a Raspberry Pi. You can follow the [deployment guide](../30-administration/00-general.md) to set up your own Woodpecker instance.

@@ -163,7 +163,7 @@ func (c *client) Repo(ctx context.Context, u *model.User, rID model.ForgeRemoteI
 
 	var repo *bb.Repository
 	if rID.IsValid() {
-		opts := &bb.RepositorySearchOptions{Permission: bb.PermissionRepoWrite, ListOptions: bb.ListOptions{Limit: listLimit}}
+		opts := &bb.RepositorySearchOptions{Name: name, ProjectKey: owner, Permission: bb.PermissionRepoWrite, ListOptions: bb.ListOptions{Limit: listLimit}}
 		for {
 			repos, resp, err := bc.Projects.SearchRepositories(ctx, opts)
 			if err != nil {
@@ -259,7 +259,7 @@ func (c *client) File(ctx context.Context, u *model.User, r *model.Repo, p *mode
 
 	b, resp, err := bc.Projects.GetTextFileContent(ctx, r.Owner, r.Name, f, p.Commit)
 	if err != nil {
-		if resp.StatusCode == http.StatusNotFound {
+		if resp != nil && resp.StatusCode == http.StatusNotFound {
 			// requested directory might not exist
 			return nil, &forge_types.ErrConfigNotFound{
 				Configs: []string{f},
@@ -281,7 +281,7 @@ func (c *client) Dir(ctx context.Context, u *model.User, r *model.Repo, p *model
 	for {
 		list, resp, err := bc.Projects.ListFiles(ctx, r.Owner, r.Name, path, opts)
 		if err != nil {
-			if resp.StatusCode == http.StatusNotFound {
+			if resp != nil && resp.StatusCode == http.StatusNotFound {
 				// requested directory might not exist
 				return nil, &forge_types.ErrConfigNotFound{
 					Configs: []string{path},
@@ -315,6 +315,7 @@ func (c *client) Status(ctx context.Context, u *model.User, repo *model.Repo, pi
 		URL:         common.GetPipelineStatusURL(repo, pipeline, workflow),
 		Key:         common.GetPipelineStatusContext(repo, pipeline, workflow),
 		Description: common.GetPipelineStatusDescription(pipeline.Status),
+		Ref:         pipeline.Ref,
 	}
 	_, err = bc.Projects.CreateBuildStatus(ctx, repo.Owner, repo.Name, pipeline.Commit, status)
 	return err
@@ -330,6 +331,7 @@ func (c *client) Netrc(_ *model.User, r *model.Repo) (*model.Netrc, error) {
 		Login:    c.username,
 		Password: c.password,
 		Machine:  host,
+		Type:     model.ForgeTypeBitbucketDatacenter,
 	}, nil
 }
 

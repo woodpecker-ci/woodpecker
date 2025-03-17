@@ -2,6 +2,7 @@ import { readdirSync } from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
 import VueI18nPlugin from '@intlify/unplugin-vue-i18n/vite';
+import tailwindcss from '@tailwindcss/vite';
 import vue from '@vitejs/plugin-vue';
 import type { Plugin } from 'vite';
 import prismjs from 'vite-plugin-prismjs';
@@ -75,6 +76,7 @@ export default defineConfig({
     prismjs({
       languages: ['yaml'],
     }),
+    tailwindcss(),
   ],
   resolve: {
     alias: {
@@ -83,6 +85,7 @@ export default defineConfig({
   },
   logLevel: 'warn',
   server: {
+    allowedHosts: true,
     host: process.env.VITE_DEV_SERVER_HOST ?? '127.0.0.1',
     port: 8010,
   },

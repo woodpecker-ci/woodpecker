@@ -9,35 +9,37 @@ export default function useRepos() {
   const lastAccess = useStorage('woodpecker:repo-last-access', new Map<number, number>());
 
   function repoWithLastPipeline(repo: Repo): Repo {
-    if (repo.last_pipeline === undefined) {
+    if (repo.last_pipeline_number === undefined) {
       return repo;
     }
 
-    if (repo.last_pipeline_item?.number === repo.last_pipeline) {
+    if (repo.last_pipeline?.number === repo.last_pipeline_number) {
       return repo;
     }
 
-    const lastPipeline = pipelineStore.getPipeline(ref(repo.id), ref(repo.last_pipeline)).value;
+    const lastPipeline = pipelineStore.getPipeline(ref(repo.id), ref(repo.last_pipeline_number)).value;
 
     return {
       ...repo,
-      last_pipeline_item: lastPipeline,
+      last_pipeline: lastPipeline,
     };
   }
 
   function sortReposByLastAccess(repos: Repo[]): Repo[] {
-    return repos.sort((a, b) => {
-      const aLastAccess = lastAccess.value.get(a.id) ?? 0;
-      const bLastAccess = lastAccess.value.get(b.id) ?? 0;
+    return repos
+      .filter((r) => lastAccess.value.get(r.id) !== undefined)
+      .sort((a, b) => {
+        const aLastAccess = lastAccess.value.get(a.id)!;
+        const bLastAccess = lastAccess.value.get(b.id)!;
 
-      return bLastAccess - aLastAccess;
-    });
+        return bLastAccess - aLastAccess;
+      });
   }
 
   function sortReposByLastActivity(repos: Repo[]): Repo[] {
     return repos.sort((a, b) => {
-      const aLastActivity = a.last_pipeline_item?.created ?? 0;
-      const bLastActivity = b.last_pipeline_item?.created ?? 0;
+      const aLastActivity = a.last_pipeline?.created ?? 0;
+      const bLastActivity = b.last_pipeline?.created ?? 0;
       return bLastActivity - aLastActivity;
     });
   }
