@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.4.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.4.0) - 2025-03-16
+## [3.4.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.4.0) - 2025-03-17
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -25,6 +25,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update module github.com/expr-lang/expr to v1.17.0 [[#4969](https://github.com/woodpecker-ci/woodpecker/pull/4969)]
 - fix(deps): update dependency simple-icons to v14.11.0 [[#4966](https://github.com/woodpecker-ci/woodpecker/pull/4966)]
 - fix(deps): update golang-packages [[#4963](https://github.com/woodpecker-ci/woodpecker/pull/4963)]
 - chore(deps): update pre-commit hook adrienverge/yamllint to v1.36.1 [[#4962](https://github.com/woodpecker-ci/woodpecker/pull/4962)]
