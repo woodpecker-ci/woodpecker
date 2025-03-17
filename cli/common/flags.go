@@ -15,6 +15,8 @@
 package common
 
 import (
+	"fmt"
+
 	"github.com/urfave/cli/v3"
 
 	"go.woodpecker-ci.org/woodpecker/v3/shared/logger"
@@ -63,10 +65,15 @@ var GlobalFlags = append([]cli.Flag{
 
 // FormatFlag return format flag with value set based on template
 // if hidden value is set, flag will be hidden.
-func FormatFlag(tmpl string, hidden ...bool) *cli.StringFlag {
+func FormatFlag(tmpl string, deprecated bool, hidden ...bool) *cli.StringFlag {
+	usage := "format output"
+	if deprecated {
+		usage = fmt.Sprintf("%s (deprecated)", usage)
+	}
+
 	return &cli.StringFlag{
 		Name:   "format",
-		Usage:  "format output",
+		Usage:  usage,
 		Value:  tmpl,
 		Hidden: len(hidden) != 0,
 	}

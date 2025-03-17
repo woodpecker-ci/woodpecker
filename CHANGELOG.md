@@ -1,6 +1,43 @@
 # Changelog
 
-## [3.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.0.0) - 2024-08-04
+## [3.3.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.3.0) - 2025-03-04
+
+### ❤️ Thanks to all contributors! ❤️
+
+@Levy-Tal, @qwerty287, @xoxys
+
+### 📚 Documentation
+
+- Refactor admin docs [[#4899](https://github.com/woodpecker-ci/woodpecker/pull/4899)]
+- chore(deps): lock file maintenance [[#4928](https://github.com/woodpecker-ci/woodpecker/pull/4928)]
+- chore(deps): update dependency @types/node to v22.13.9 [[#4925](https://github.com/woodpecker-ci/woodpecker/pull/4925)]
+- chore(deps): lock file maintenance [[#4922](https://github.com/woodpecker-ci/woodpecker/pull/4922)]
+- Add some blog posts [[#4921](https://github.com/woodpecker-ci/woodpecker/pull/4921)]
+- chore(deps): update dependency @types/node to v22.13.8 [[#4915](https://github.com/woodpecker-ci/woodpecker/pull/4915)]
+- Remove Slack plugin from examples [[#4914](https://github.com/woodpecker-ci/woodpecker/pull/4914)]
+- chore(deps): update docs npm deps non-major [[#4911](https://github.com/woodpecker-ci/woodpecker/pull/4911)]
+
+### 🐛 Bug Fixes
+
+- Add migration to fix zero forge_id in orgs table [[#4924](https://github.com/woodpecker-ci/woodpecker/pull/4924)]
+- Fix unique constraint for orgs [[#4923](https://github.com/woodpecker-ci/woodpecker/pull/4923)]
+
+### 📈 Enhancement
+
+- BitbucketDC: optimize repository search [[#4919](https://github.com/woodpecker-ci/woodpecker/pull/4919)]
+- Include forge type in netrc [[#4908](https://github.com/woodpecker-ci/woodpecker/pull/4908)]
+
+### 📦️ Dependency
+
+- chore(deps): update dependency @types/node to v22.13.9 [[#4926](https://github.com/woodpecker-ci/woodpecker/pull/4926)]
+- chore(deps): update pre-commit non-major [[#4927](https://github.com/woodpecker-ci/woodpecker/pull/4927)]
+- chore(deps): update dependency @antfu/eslint-config to v4.4.0 [[#4917](https://github.com/woodpecker-ci/woodpecker/pull/4917)]
+- fix(deps): update module gitlab.com/gitlab-org/api/client-go to v0.124.0 [[#4920](https://github.com/woodpecker-ci/woodpecker/pull/4920)]
+- chore(deps): update dependency @types/node to v22.13.8 [[#4916](https://github.com/woodpecker-ci/woodpecker/pull/4916)]
+- chore(deps): update dependency @types/lodash to v4.17.16 [[#4913](https://github.com/woodpecker-ci/woodpecker/pull/4913)]
+- chore(deps): update web npm deps non-major [[#4912](https://github.com/woodpecker-ci/woodpecker/pull/4912)]
+
+## [3.2.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.2.0) - 2025-02-26
 
 ### ❤️ Thanks to all contributors! ❤️
 
