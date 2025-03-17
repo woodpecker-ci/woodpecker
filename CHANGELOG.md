@@ -8,6 +8,7 @@
 
 ### 📈 Enhancement
 
+- Remove woodpecker prefix from env var title in docs [[#4968](https://github.com/woodpecker-ci/woodpecker/pull/4968)]
 - Add backoff retry for store setup [[#4964](https://github.com/woodpecker-ci/woodpecker/pull/4964)]
 - Migrate repo output format to customizable output [[#4888](https://github.com/woodpecker-ci/woodpecker/pull/4888)]
 
