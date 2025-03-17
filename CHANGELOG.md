@@ -6,6 +6,11 @@
 
 @qwerty287, @xoxys
 
+### 📈 Enhancement
+
+- Add backoff retry for store setup [[#4964](https://github.com/woodpecker-ci/woodpecker/pull/4964)]
+- Migrate repo output format to customizable output [[#4888](https://github.com/woodpecker-ci/woodpecker/pull/4888)]
+
 ### 📚 Documentation
 
 - chore(deps): lock file maintenance [[#4970](https://github.com/woodpecker-ci/woodpecker/pull/4970)]
@@ -19,10 +24,6 @@
 ### 🐛 Bug Fixes
 
 - Fix fs owner in scratch-based container images [[#4961](https://github.com/woodpecker-ci/woodpecker/pull/4961)]
-
-### 📈 Enhancement
-
-- Migrate repo output format to customizable output [[#4888](https://github.com/woodpecker-ci/woodpecker/pull/4888)]
 
 ### 📦️ Dependency
 
