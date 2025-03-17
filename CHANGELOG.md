@@ -6,18 +6,19 @@
 
 @qwerty287, @xoxys
 
-### 🐛 Bug Fixes
-
-- Fix fs owner in scratch-based container images [[#4961](https://github.com/woodpecker-ci/woodpecker/pull/4961)]
-
 ### 📚 Documentation
 
+- chore(deps): lock file maintenance [[#4970](https://github.com/woodpecker-ci/woodpecker/pull/4970)]
 - fix(deps): update docs npm deps non-major [[#4958](https://github.com/woodpecker-ci/woodpecker/pull/4958)]
 - Add global var note [[#4956](https://github.com/woodpecker-ci/woodpecker/pull/4956)]
 - chore(deps): lock file maintenance [[#4948](https://github.com/woodpecker-ci/woodpecker/pull/4948)]
 - chore(deps): update dependency @types/node to v22.13.10 [[#4944](https://github.com/woodpecker-ci/woodpecker/pull/4944)]
 - chore(deps): update dependency axios to v1.8.2 [security] [[#4941](https://github.com/woodpecker-ci/woodpecker/pull/4941)]
 - Fix dockerhub links in docs [[#4931](https://github.com/woodpecker-ci/woodpecker/pull/4931)]
+
+### 🐛 Bug Fixes
+
+- Fix fs owner in scratch-based container images [[#4961](https://github.com/woodpecker-ci/woodpecker/pull/4961)]
 
 ### 📈 Enhancement
 
