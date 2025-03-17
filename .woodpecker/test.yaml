@@ -21,7 +21,7 @@ steps:
   vendor:
     image: *golang_image
     commands:
-      - go mod vendor
+      - make vendor
     when:
       path:
         - <<: *when_path

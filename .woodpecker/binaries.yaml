@@ -25,7 +25,7 @@ steps:
   vendor:
     image: *golang_image
     commands:
-      - go mod vendor
+      - make vendor
 
   cross-compile-server:
     depends_on:

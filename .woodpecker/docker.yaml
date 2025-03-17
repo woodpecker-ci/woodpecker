@@ -50,7 +50,7 @@ steps:
     image: *golang_image
     pull: true
     commands:
-      - go mod vendor
+      - make vendor
     when:
       - event: pull_request
         evaluate: 'CI_COMMIT_PULL_REQUEST_LABELS contains "build_pr_images"'
