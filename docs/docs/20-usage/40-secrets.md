@@ -81,7 +81,7 @@ To prevent your secrets from being misused by malicious users, you can restrict 
 If enabled, they are not available to any other plugins.
 Plugins have the advantage that they cannot execute arbitrary commands and therefore cannot reveal secrets.
 
-:::note
+:::tip
 If you specify a tag, the filter will take it into account.
 However, if the same image appears several times in the list, the least privileged entry will take precedence.
 For example, an image without a tag will allow all tags, even if it contains another entry with a tag attached.
