@@ -1,5 +1,11 @@
 # Changelog
 
+## [3.4.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.4.1) - 2025-03-18
+
+### 📦️ Dependency
+
+- fix(deps): update module gitlab.com/gitlab-org/api/client-go to v0.126.0 [[#4976](https://github.com/woodpecker-ci/woodpecker/pull/4976)]
+
 ## [3.4.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.4.0) - 2025-03-17
 
 ### ❤️ Thanks to all contributors! ❤️
