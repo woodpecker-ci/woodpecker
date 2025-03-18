@@ -54,44 +54,65 @@ Make sure your Gitea configuration allows requesting the API with a fixed page l
 
 This is a full list of configuration options. Please note that many of these options use default configuration values that should work for the majority of installations.
 
-### `WOODPECKER_GITEA`
+---
 
-> Default: `false`
+### GITEA
+
+- Name: `WOODPECKER_GITEA`
+- Default: `false`
 
 Enables the Gitea driver.
 
-### `WOODPECKER_GITEA_URL`
+---
 
-> Default: `https://try.gitea.io`
+### GITEA_URL
+
+- Name: `WOODPECKER_GITEA_URL`
+- Default: `https://try.gitea.io`
 
 Configures the Gitea server address.
 
-### `WOODPECKER_GITEA_CLIENT`
+---
 
-> Default: empty
+### GITEA_CLIENT
+
+- Name: `WOODPECKER_GITEA_CLIENT`
+- Default: none
 
 Configures the Gitea OAuth client id. This is used to authorize access.
 
-### `WOODPECKER_GITEA_CLIENT_FILE`
+---
 
-> Default: empty
+### GITEA_CLIENT_FILE
+
+- Name: `WOODPECKER_GITEA_CLIENT_FILE`
+- Default: none
 
 Read the value for `WOODPECKER_GITEA_CLIENT` from the specified filepath
 
-### `WOODPECKER_GITEA_SECRET`
+---
 
-> Default: empty
+### GITEA_SECRET
+
+- Name: `WOODPECKER_GITEA_SECRET`
+- Default: none
 
 Configures the Gitea OAuth client secret. This is used to authorize access.
 
-### `WOODPECKER_GITEA_SECRET_FILE`
+---
 
-> Default: empty
+### GITEA_SECRET_FILE
+
+- Name: `WOODPECKER_GITEA_SECRET_FILE`
+- Default: none
 
 Read the value for `WOODPECKER_GITEA_SECRET` from the specified filepath
 
-### `WOODPECKER_GITEA_SKIP_VERIFY`
+---
 
-> Default: `false`
+### GITEA_SKIP_VERIFY
+
+- Name: `WOODPECKER_GITEA_SKIP_VERIFY`
+- Default: `false`
 
 Configure if SSL verification should be skipped.
