@@ -29,18 +29,17 @@ steps:
     depends_on:
       - vendor
     commands:
-      - go test ./test/integration/...
+      - go test -race -cover -coverprofile integration.out -timeout 60s -tags 'test' ./test/integration/...
     when:
       - path: *when_path
 
   - name: codecov
+    image: docker.io/woodpeckerci/plugin-codecov:2.1.6
     depends_on:
       - integration
-    pull: true
-    image: docker.io/woodpeckerci/plugin-codecov:2.1.6
     settings:
       files:
-        - agent-coverage.out
+        - integration.out
       token:
         from_secret: codecov_token
     when:

@@ -24,4 +24,6 @@ func TestEnvStart(t *testing.T) {
 		t.Fatalf("Could not start agent %s", err)
 	}
 	defer agent.Stop()
+
+	// TODO: test agent connected to server
 }
