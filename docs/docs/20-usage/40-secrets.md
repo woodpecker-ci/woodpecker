@@ -89,20 +89,6 @@ For example, an image without a tag will allow all tags, even if it contains ano
 
 ![plugins filter](./secrets-plugins-filter.png)
 
-## Multiline secrets
-
-In general, multiline secrets are supported and newlines are preserved. This also applies for newlines added as `\n` control characters, which are converted to proper newlines if the secret is printed to stdout or file.
-
-Converting control characters to proper newlines can cause some side effects. If you rely on preserved control characters, the secret value should be base64 encoded. You can also escape the control characters with `\\n` to prevent them from being converted but you have to manually unescape them before using them in your pipeline.
-
-Example:
-
-Store `{"hi":"there\\nshould be no new\\nline"}` in `SECRET`.
-
-```shell
-echo $${SECRET} | sed -z 's/\n/\\\n/g' | sed -z 's/\\\n$//g' > /tmp/secret.json
-```
-
 ## CLI
 
 In addition to the UI, secrets can also be managed using the CLI.
