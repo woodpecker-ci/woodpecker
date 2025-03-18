@@ -31,7 +31,7 @@ var userShowCmd = &cli.Command{
 	Usage:     "show user information",
 	ArgsUsage: "<username>",
 	Action:    userShow,
-	Flags:     []cli.Flag{common.FormatFlag(tmplUserInfo)},
+	Flags:     []cli.Flag{common.FormatFlag(tmplUserInfo, false)},
 }
 
 func userShow(ctx context.Context, c *cli.Command) error {

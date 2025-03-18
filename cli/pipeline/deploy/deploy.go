@@ -35,7 +35,7 @@ var Command = &cli.Command{
 	ArgsUsage: "<repo-id|repo-full-name> <pipeline> <environment>",
 	Action:    deploy,
 	Flags: []cli.Flag{
-		common.FormatFlag(tmplDeployInfo),
+		common.FormatFlag(tmplDeployInfo, false),
 		&cli.StringFlag{
 			Name:  "branch",
 			Usage: "branch filter",

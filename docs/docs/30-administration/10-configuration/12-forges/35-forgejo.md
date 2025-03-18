@@ -54,44 +54,65 @@ Make sure your Forgejo configuration allows requesting the API with a fixed page
 
 This is a full list of configuration options. Please note that many of these options use default configuration values that should work for the majority of installations.
 
-### `WOODPECKER_FORGEJO`
+---
 
-> Default: `false`
+### FORGEJO
+
+- Name: `WOODPECKER_FORGEJO`
+- Default: `false`
 
 Enables the Forgejo driver.
 
-### `WOODPECKER_FORGEJO_URL`
+---
 
-> Default: `https://next.forgejo.org`
+### FORGEJO_URL
+
+- Name: `WOODPECKER_FORGEJO_URL`
+- Default: `https://next.forgejo.org`
 
 Configures the Forgejo server address.
 
-### `WOODPECKER_FORGEJO_CLIENT`
+---
 
-> Default: empty
+### FORGEJO_CLIENT
+
+- Name: `WOODPECKER_FORGEJO_CLIENT`
+- Default: none
 
 Configures the Forgejo OAuth client id. This is used to authorize access.
 
-### `WOODPECKER_FORGEJO_CLIENT_FILE`
+---
 
-> Default: empty
+### FORGEJO_CLIENT_FILE
+
+- Name: `WOODPECKER_FORGEJO_CLIENT_FILE`
+- Default: none
 
 Read the value for `WOODPECKER_FORGEJO_CLIENT` from the specified filepath
 
-### `WOODPECKER_FORGEJO_SECRET`
+---
 
-> Default: empty
+### FORGEJO_SECRET
+
+- Name: `WOODPECKER_FORGEJO_SECRET`
+- Default: none
 
 Configures the Forgejo OAuth client secret. This is used to authorize access.
 
-### `WOODPECKER_FORGEJO_SECRET_FILE`
+---
 
-> Default: empty
+### FORGEJO_SECRET_FILE
+
+- Name: `WOODPECKER_FORGEJO_SECRET_FILE`
+- Default: none
 
 Read the value for `WOODPECKER_FORGEJO_SECRET` from the specified filepath
 
-### `WOODPECKER_FORGEJO_SKIP_VERIFY`
+---
 
-> Default: `false`
+### FORGEJO_SKIP_VERIFY
+
+- Name: `WOODPECKER_FORGEJO_SKIP_VERIFY`
+- Default: `false`
 
 Configure if SSL verification should be skipped.
