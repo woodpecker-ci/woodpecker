@@ -9,7 +9,7 @@ The **agent** executes the [workflows](../20-usage/15-terminology/index.md) via 
 The **autoscaler** allows spinning up new VMs on a cloud provider of choice to process pending builds. After the builds finished, the VMs are destroyed again (after a short transition time).
 
 :::tip
-You can add more agents to increase the number of parallel workflows or set the agent's [`WOODPECKER_MAX_WORKFLOWS=1`](./10-configuration/30-agent.md#woodpecker_max_workflows) environment variable to increase the number of parallel workflows per agent.
+You can add more agents to increase the number of parallel workflows or set the agent's [`WOODPECKER_MAX_WORKFLOWS=1`](./10-configuration/30-agent.md#max_workflows) environment variable to increase the number of parallel workflows per agent.
 :::
 
 ## Database
@@ -37,7 +37,7 @@ No `latest` tag exists to prevent accidental major version upgrades. Either use 
 
 Images are pushed to DockerHub and Quay.
 
-- woodpecker-server ([DockerHub](https://hub.docker.com/repository/docker/woodpeckerci/woodpecker-server) or [Quay](https://quay.io/repository/woodpeckerci/woodpecker-server))
-- woodpecker-agent ([DockerHub](https://hub.docker.com/repository/docker/woodpeckerci/woodpecker-agent) or [Quay](https://quay.io/repository/woodpeckerci/woodpecker-agent))
-- woodpecker-cli ([DockerHub](https://hub.docker.com/repository/docker/woodpeckerci/woodpecker-cli) or [Quay](https://quay.io/repository/woodpeckerci/woodpecker-cli))
-- woodpecker-autoscaler ([DockerHub](https://hub.docker.com/repository/docker/woodpeckerci/autoscaler))
+- woodpecker-server ([DockerHub](https://hub.docker.com/r/woodpeckerci/woodpecker-server) or [Quay](https://quay.io/repository/woodpeckerci/woodpecker-server))
+- woodpecker-agent ([DockerHub](https://hub.docker.com/r/woodpeckerci/woodpecker-agent) or [Quay](https://quay.io/repository/woodpeckerci/woodpecker-agent))
+- woodpecker-cli ([DockerHub](https://hub.docker.com/r/woodpeckerci/woodpecker-cli) or [Quay](https://quay.io/repository/woodpeckerci/woodpecker-cli))
+- woodpecker-autoscaler ([DockerHub](https://hub.docker.com/r/woodpeckerci/autoscaler))

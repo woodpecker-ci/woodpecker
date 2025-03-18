@@ -31,7 +31,7 @@ var userListCmd = &cli.Command{
 	Usage:     "list all users",
 	ArgsUsage: " ",
 	Action:    userList,
-	Flags:     []cli.Flag{common.FormatFlag(tmplUserList)},
+	Flags:     []cli.Flag{common.FormatFlag(tmplUserList, false)},
 }
 
 func userList(ctx context.Context, c *cli.Command) error {
