@@ -8,6 +8,7 @@
 
 ### 📚 Documentation
 
+- Rework secrets docs and document multiline secrets [[#4974](https://github.com/woodpecker-ci/woodpecker/pull/4974)]
 - Add documentation for WOODPECKER_EXPERT env vars [[#4972](https://github.com/woodpecker-ci/woodpecker/pull/4972)]
 
 ### 📦️ Dependency
