@@ -2,6 +2,14 @@
 
 ## [3.4.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.4.1) - 2025-03-18
 
+### ❤️ Thanks to all contributors! ❤️
+
+@xoxys
+
+### 📚 Documentation
+
+- Add documentation for WOODPECKER_EXPERT env vars [[#4972](https://github.com/woodpecker-ci/woodpecker/pull/4972)]
+
 ### 📦️ Dependency
 
 - fix(deps): update module gitlab.com/gitlab-org/api/client-go to v0.126.0 [[#4976](https://github.com/woodpecker-ci/woodpecker/pull/4976)]
