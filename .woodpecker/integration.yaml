@@ -15,7 +15,7 @@ when:
     path: *when_path
 
 steps:
-  vendor:
+  - name: vendor
     image: *golang_image
     commands:
       - go mod vendor
@@ -24,14 +24,16 @@ steps:
         - <<: *when_path
         - '.woodpecker/**'
 
-  integration:
+  - name: integration
     image: *golang_image
+    depends_on:
+      - vendor
     commands:
       - go test ./test/integration/...
     when:
       - path: *when_path
 
-  codecov:
+  - name: codecov
     depends_on:
       - integration
     pull: true
