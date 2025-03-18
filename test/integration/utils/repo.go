@@ -9,11 +9,9 @@ type TestRepo struct {
 func (r *TestRepo) Clone(t *testing.T, sourcePath, remoteURL string) error {
 	r.folder = t.TempDir()
 
-	runOrFail(t, "cp", "-r", sourcePath, r.folder)
-
-	runOrFail(t, "git", "init")
-
-	runOrFail(t, "git", "remote", "add", remoteURL)
+	NewTask("cp", "-r", sourcePath, r.folder).RunOrFail(t)
+	NewTask("git", "init").RunOrFail(t)
+	NewTask("git", "remote", "add", remoteURL).RunOrFail(t)
 
 	r.Commit(t, ":tada: init")
 
@@ -23,13 +21,13 @@ func (r *TestRepo) Clone(t *testing.T, sourcePath, remoteURL string) error {
 }
 
 func (r *TestRepo) Commit(t *testing.T, message string) {
-	runOrFail(t, "git", "commit", "-m", message)
+	NewTask("git", "commit", "-m", message).RunOrFail(t)
 }
 
 func (r *TestRepo) Push(t *testing.T) {
-	runOrFail(t, "git", "push", "-u", "origin", "main")
+	NewTask("git", "push", "-u", "origin", "main").RunOrFail(t)
 }
 
 func (r *TestRepo) Tag(t *testing.T, name, message string) {
-	runOrFail(t, "git", "tag", "-a", name, "-m", message)
+	NewTask("git", "tag", "-a", name, "-m", message).RunOrFail(t)
 }

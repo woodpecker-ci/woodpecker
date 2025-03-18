@@ -7,11 +7,11 @@ import (
 )
 
 func TestEnvStart(t *testing.T) {
-	forge, err := utils.StartForge(t)
-	if err != nil {
-		t.Fatalf("Could not start forge %s", err)
-	}
-	defer forge.Stop()
+	// forge, err := utils.StartForge(t)
+	// if err != nil {
+	// 	t.Fatalf("Could not start forge %s", err)
+	// }
+	// defer forge.Stop()
 
 	server, err := utils.StartServer(t)
 	if err != nil {

@@ -24,14 +24,6 @@ steps:
         - <<: *when_path
         - '.woodpecker/**'
 
-  dummy-web:
-    image: *golang_image
-    commands:
-      - mkdir -p web/dist/
-      - echo "test" > web/dist/index.html
-    when:
-      - path: *when_path
-
   integration:
     image: *golang_image
     commands:
