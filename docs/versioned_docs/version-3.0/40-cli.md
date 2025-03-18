@@ -91,9 +91,19 @@ remove a registry
 
 list registries
 
+**--format**="": format output (deprecated) (default: [33m{{ .Address }} [0m
+Username: {{ .Username }}
+Email: {{ .Email }}
+)
+
 #### show
 
 show registry information
+
+**--format**="": format output (deprecated) (default: [33m{{ .Address }} [0m
+Username: {{ .Username }}
+Email: {{ .Email }}
+)
 
 **--hostname**="": registry hostname (default: docker.io)
 
@@ -133,9 +143,27 @@ remove a secret
 
 list secrets
 
+**--format**="": format output (deprecated) (default: [33m{{ .Name }} [0m
+Events: {{ list .Events }}
+{{- if .Images }}
+Images: {{ list .Images }}
+{{- else }}
+Images: <any>
+{{- end }}
+)
+
 #### show
 
 show secret information
+
+**--format**="": format output (deprecated) (default: [33m{{ .Name }} [0m
+Events: {{ list .Events }}
+{{- if .Images }}
+Images: {{ list .Images }}
+{{- else }}
+Images: <any>
+{{- end }}
+)
 
 **--name**="": secret name
 
@@ -270,11 +298,11 @@ execute a local pipeline
 
 **--metadata-file**="": path to pipeline metadata file (normally downloaded from UI). Parameters can be adjusted by applying additional cli flags
 
-**--netrc-machine**="":
+**--netrc-machine**="": 
 
-**--netrc-password**="":
+**--netrc-password**="": 
 
-**--netrc-username**="":
+**--netrc-username**="": 
 
 **--network**="": external networks (default: [])
 
@@ -378,13 +406,16 @@ execute a local pipeline
 
 show information about the current user
 
+**--format**="": format output (deprecated) (default: User: {{ .Login }}
+Email: {{ .Email }})
+
 ## lint
 
 lint a pipeline configuration file
 
 **--plugins-privileged**="": allow plugins to run in privileged mode, if set empty, there is no (default: [])
 
-**--plugins-trusted-clone**="": plugins that are trusted to handle Git credentials in cloning steps (default: [docker.io/woodpeckerci/plugin-git:2.6.0 docker.io/woodpeckerci/plugin-git quay.io/woodpeckerci/plugin-git])
+**--plugins-trusted-clone**="": plugins that are trusted to handle Git credentials in cloning steps (default: [docker.io/woodpeckerci/plugin-git:2.6.2 docker.io/woodpeckerci/plugin-git quay.io/woodpeckerci/plugin-git])
 
 **--strict**: treat warnings as errors
 
@@ -420,11 +451,21 @@ remove a registry
 
 list registries
 
+**--format**="": format output (deprecated) (default: [33m{{ .Address }} [0m
+Username: {{ .Username }}
+Email: {{ .Email }}
+)
+
 **--organization, --org**="": organization id or full name (e.g. 123 or octocat)
 
 #### show
 
 show registry information
+
+**--format**="": format output (deprecated) (default: [33m{{ .Address }} [0m
+Username: {{ .Username }}
+Email: {{ .Email }}
+)
 
 **--hostname**="": registry hostname (default: docker.io)
 
@@ -472,11 +513,29 @@ remove a secret
 
 list secrets
 
+**--format**="": format output (deprecated) (default: [33m{{ .Name }} [0m
+Events: {{ list .Events }}
+{{- if .Images }}
+Images: {{ list .Images }}
+{{- else }}
+Images: <any>
+{{- end }}
+)
+
 **--organization, --org**="": organization id or full name (e.g. 123 or octocat)
 
 #### show
 
 show secret information
+
+**--format**="": format output (deprecated) (default: [33m{{ .Name }} [0m
+Events: {{ list .Events }}
+{{- if .Images }}
+Images: {{ list .Images }}
+{{- else }}
+Images: <any>
+{{- end }}
+)
 
 **--name**="": secret name
 
@@ -660,6 +719,13 @@ add a cron job
 
 **--branch**="": cron branch
 
+**--format**="": format output (deprecated) (default: [33m{{ .Name }} [0m
+ID: {{ .ID }}
+Branch: {{ .Branch }}
+Schedule: {{ .Schedule }}
+NextExec: {{ .NextExec }}
+)
+
 **--name**="": cron name
 
 **--repository, --repo**="": repository id or full name (e.g. 134 or octocat/hello-world)
@@ -678,11 +744,25 @@ remove a cron job
 
 list cron jobs
 
+**--format**="": format output (deprecated) (default: [33m{{ .Name }} [0m
+ID: {{ .ID }}
+Branch: {{ .Branch }}
+Schedule: {{ .Schedule }}
+NextExec: {{ .NextExec }}
+)
+
 **--repository, --repo**="": repository id or full name (e.g. 134 or octocat/hello-world)
 
 #### show
 
 show cron job information
+
+**--format**="": format output (deprecated) (default: [33m{{ .Name }} [0m
+ID: {{ .ID }}
+Branch: {{ .Branch }}
+Schedule: {{ .Schedule }}
+NextExec: {{ .NextExec }}
+)
 
 **--id**="": cron id
 
@@ -693,6 +773,13 @@ show cron job information
 update a cron job
 
 **--branch**="": cron branch
+
+**--format**="": format output (deprecated) (default: [33m{{ .Name }} [0m
+ID: {{ .ID }}
+Branch: {{ .Branch }}
+Schedule: {{ .Schedule }}
+NextExec: {{ .NextExec }}
+)
 
 **--id**="": cron id
 
@@ -708,9 +795,13 @@ list all repos
 
 **--all**: query all repos, including inactive ones
 
-**--format**="": format output (default: [33m{{ .FullName }}[0m (id: {{ .ID }}, forgeRemoteID: {{ .ForgeRemoteID }}, isActive: {{ .IsActive }}))
+**--format**="": format output (deprecated)
 
 **--org**="": filter by organization
+
+**--output**="": output format (default: table)
+
+**--output-no-headers**: don't print headers
 
 ### registry
 
@@ -740,11 +831,21 @@ remove a registry
 
 list registries
 
+**--format**="": format output (deprecated) (default: [33m{{ .Address }} [0m
+Username: {{ .Username }}
+Email: {{ .Email }}
+)
+
 **--repository, --repo**="": repository id or full name (e.g. 134 or octocat/hello-world)
 
 #### show
 
 show registry information
+
+**--format**="": format output (deprecated) (default: [33m{{ .Address }} [0m
+Username: {{ .Username }}
+Email: {{ .Email }}
+)
 
 **--hostname**="": registry hostname (default: docker.io)
 
@@ -800,11 +901,29 @@ remove a secret
 
 list secrets
 
+**--format**="": format output (deprecated) (default: [33m{{ .Name }} [0m
+Events: {{ list .Events }}
+{{- if .Images }}
+Images: {{ list .Images }}
+{{- else }}
+Images: <any>
+{{- end }}
+)
+
 **--repository, --repo**="": repository id or full name (e.g. 134 or octocat/hello-world)
 
 #### show
 
 show secret information
+
+**--format**="": format output (deprecated) (default: [33m{{ .Name }} [0m
+Events: {{ list .Events }}
+{{- if .Images }}
+Images: {{ list .Images }}
+{{- else }}
+Images: <any>
+{{- end }}
+)
 
 **--name**="": secret name
 
@@ -828,18 +947,9 @@ update a secret
 
 show repository information
 
-**--format**="": format output (default: Owner: {{ .Owner }}
-Repo: {{ .Name }}
-URL: {{ .ForgeURL }}
-Config path: {{ .Config }}
-Visibility: {{ .Visibility }}
-Private: {{ .IsSCMPrivate }}
-Trusted: {{ .IsTrusted }}
-Gated: {{ .IsGated }}
-Require approval for: {{ .RequireApproval }}
-Clone url: {{ .Clone }}
-Allow pull-requests: {{ .AllowPullRequests }}
-)
+**--output**="": output format (default: table)
+
+**--output-no-headers**: don't print headers
 
 ### sync
 

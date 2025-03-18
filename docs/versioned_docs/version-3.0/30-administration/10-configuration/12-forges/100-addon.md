@@ -1,13 +1,13 @@
-# Addon forges
+# Custom
 
-If the forge you're using does not comply with [Woodpecker's requirements](../../92-development/02-core-ideas.md#forges) or your setup is too specific to be added to Woodpecker's core, you can write your own forge using an addon forge.
+If the forge you are using does not meet the [Woodpecker requirements](../../../92-development/02-core-ideas.md#forges) or your setup is too specific to be included in the Woodpecker core, you can write an addon forge.
 
 :::warning
 Addon forges are still experimental. Their implementation can change and break at any time.
 :::
 
 :::danger
-You need to trust the author of the addon forge you use. It can access authentication codes and other possibly sensitive information.
+You must trust the author of the addon forge you are using. They may have access to authentication codes and other potentially sensitive information.
 :::
 
 ## Usage
@@ -26,9 +26,7 @@ If you experience bugs, please check which component has the issue. If it's the 
 
 ## List of addon forges
 
-### Radicle Forge
-
-[Radicle](https://radicle.xyz/) is an open source, peer-to-peer code collaboration stack built on Git. Radicle addon for Woodpecker CI can be found at [this repo](https://explorer.radicle.gr/nodes/seed.radicle.gr/rad:z39Cf1XzrvCLRZZJRUZnx9D1fj5ws).
+- [Radicle](https://radicle.xyz/): Open source, peer-to-peer code collaboration stack built on Git. Radicle addon for Woodpecker CI can be found at [this repo](https://explorer.radicle.gr/nodes/seed.radicle.gr/rad:z39Cf1XzrvCLRZZJRUZnx9D1fj5ws).
 
 ## Creating addon forges
 
@@ -42,6 +40,10 @@ Directly import Woodpecker's Go packages (`go.woodpecker-ci.org/woodpecker/v3`) 
 
 In the `main` function, just call `"go.woodpecker-ci.org/woodpecker/v3/server/forge/addon".Serve` with a `"go.woodpecker-ci.org/woodpecker/v3/server/forge".Forge` as argument.
 This will take care of connecting the addon forge to the server.
+
+:::note
+It is not possible to access global variables from Woodpecker, for example the server configuration. You must therefore parse the environment variables in your addon. The reason for this is that the addon runs in a completely separate process.
+:::
 
 ### Example structure
 

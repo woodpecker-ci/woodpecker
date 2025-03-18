@@ -2,13 +2,13 @@
 toc_max_heading_level: 2
 ---
 
-# Kubernetes backend
+# Kubernetes
 
 The Kubernetes backend executes steps inside standalone Pods. A temporary PVC is created for the lifetime of the pipeline to transfer files between steps.
 
-## Images from private registries
+## Private registries
 
-In addition to [registries specified in the UI](../../20-usage/41-registries.md), you may provide [registry credentials in Kubernetes Secrets](https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/) to pull private container images defined in your pipeline YAML.
+In addition to [registries specified in the UI](../../../20-usage/41-registries.md), you may provide [registry credentials in Kubernetes Secrets](https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/) to pull private container images defined in your pipeline YAML.
 
 Place these Secrets in namespace defined by `WOODPECKER_BACKEND_K8S_NAMESPACE` and provide the Secret names to Agents via `WOODPECKER_BACKEND_K8S_PULL_SECRET_NAMES`.
 
@@ -94,7 +94,7 @@ And then overwrite the `nodeSelector` in the `backend_options` section of the st
           kubernetes.io/arch: "${ARCH}"
 ```
 
-You can use [WOODPECKER_BACKEND_K8S_POD_NODE_SELECTOR](#woodpecker_backend_k8s_pod_node_selector) if you want to set the node selector per Agent
+You can use [WOODPECKER_BACKEND_K8S_POD_NODE_SELECTOR](#backend_k8s_pod_node_selector) if you want to set the node selector per Agent
 or [PodNodeSelector](https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#podnodeselector) admission controller if you want to set the node selector by per-namespace basis.
 
 ### Tolerations
@@ -256,7 +256,7 @@ backend_options:
 ```
 
 In order to enable this configuration you need to set the appropriate environment variables to `true` on the woodpecker agent:
-[WOODPECKER_BACKEND_K8S_POD_ANNOTATIONS_ALLOW_FROM_STEP](#woodpecker_backend_k8s_pod_annotations_allow_from_step) and/or [WOODPECKER_BACKEND_K8S_POD_LABELS_ALLOW_FROM_STEP](#woodpecker_backend_k8s_pod_labels_allow_from_step).
+[WOODPECKER_BACKEND_K8S_POD_ANNOTATIONS_ALLOW_FROM_STEP](#backend_k8s_pod_annotations_allow_from_step) and/or [WOODPECKER_BACKEND_K8S_POD_LABELS_ALLOW_FROM_STEP](#backend_k8s_pod_labels_allow_from_step).
 
 ## Tips and tricks
 
@@ -279,72 +279,105 @@ It configures the address of the Kubernetes API server to connect to.
 
 If running the agent within Kubernetes, this will already be set and you don't have to add it manually.
 
-## Configuration
+## Environment variables
 
 These env vars can be set in the `env:` sections of the agent.
 
-### `WOODPECKER_BACKEND_K8S_NAMESPACE`
+---
 
-> Default: `woodpecker`
+### BACKEND_K8S_NAMESPACE
+
+- Name: `WOODPECKER_BACKEND_K8S_NAMESPACE`
+- Default: `woodpecker`
 
 The namespace to create worker Pods in.
 
-### `WOODPECKER_BACKEND_K8S_VOLUME_SIZE`
+---
 
-> Default: `10G`
+### BACKEND_K8S_VOLUME_SIZE
+
+- Name: `WOODPECKER_BACKEND_K8S_VOLUME_SIZE`
+- Default: `10G`
 
 The volume size of the pipeline volume.
 
-### `WOODPECKER_BACKEND_K8S_STORAGE_CLASS`
+---
 
-> Default: empty
+### BACKEND_K8S_STORAGE_CLASS
+
+- Name: `WOODPECKER_BACKEND_K8S_STORAGE_CLASS`
+- Default: none
 
 The storage class to use for the pipeline volume.
 
-### `WOODPECKER_BACKEND_K8S_STORAGE_RWX`
+---
 
-> Default: `true`
+### BACKEND_K8S_STORAGE_RWX
+
+- Name: `WOODPECKER_BACKEND_K8S_STORAGE_RWX`
+- Default: `true`
 
 Determines if `RWX` should be used for the pipeline volume's [access mode](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes). If false, `RWO` is used instead.
 
-### `WOODPECKER_BACKEND_K8S_POD_LABELS`
+---
 
-> Default: empty
+### BACKEND_K8S_POD_LABELS
+
+- Name: `WOODPECKER_BACKEND_K8S_POD_LABELS`
+- Default: none
 
 Additional labels to apply to worker Pods. Must be a YAML object, e.g. `{"example.com/test-label":"test-value"}`.
 
-### `WOODPECKER_BACKEND_K8S_POD_LABELS_ALLOW_FROM_STEP`
+---
 
-> Default: `false`
+### BACKEND_K8S_POD_LABELS_ALLOW_FROM_STEP
+
+- Name: `WOODPECKER_BACKEND_K8S_POD_LABELS_ALLOW_FROM_STEP`
+- Default: `false`
 
 Determines if additional Pod labels can be defined from a step's backend options.
 
-### `WOODPECKER_BACKEND_K8S_POD_ANNOTATIONS`
+---
 
-> Default: empty
+### BACKEND_K8S_POD_ANNOTATIONS
+
+- Name: `WOODPECKER_BACKEND_K8S_POD_ANNOTATIONS`
+- Default: none
 
 Additional annotations to apply to worker Pods. Must be a YAML object, e.g. `{"example.com/test-annotation":"test-value"}`.
 
-### `WOODPECKER_BACKEND_K8S_POD_ANNOTATIONS_ALLOW_FROM_STEP`
+---
 
-> Default: `false`
+### BACKEND_K8S_POD_ANNOTATIONS_ALLOW_FROM_STEP
+
+- Name: `WOODPECKER_BACKEND_K8S_POD_ANNOTATIONS_ALLOW_FROM_STEP`
+- Default: `false`
 
 Determines if Pod annotations can be defined from a step's backend options.
 
-### `WOODPECKER_BACKEND_K8S_POD_NODE_SELECTOR`
+---
 
-> Default: empty
+### BACKEND_K8S_POD_NODE_SELECTOR
+
+- Name: `WOODPECKER_BACKEND_K8S_POD_NODE_SELECTOR`
+- Default: none
 
 Additional node selector to apply to worker pods. Must be a YAML object, e.g. `{"topology.kubernetes.io/region":"eu-central-1"}`.
 
-### `WOODPECKER_BACKEND_K8S_SECCTX_NONROOT` <!-- cspell:ignore SECCTX NONROOT -->
+---
 
-> Default: `false`
+### BACKEND_K8S_SECCTX_NONROOT <!-- cspell:ignore SECCTX NONROOT -->
+
+- Name: `WOODPECKER_BACKEND_K8S_SECCTX_NONROOT`
+- Default: `false`
 
 Determines if containers must be required to run as non-root users.
 
-### `WOODPECKER_BACKEND_K8S_PULL_SECRET_NAMES`
+---
 
-> Default: empty
+### BACKEND_K8S_PULL_SECRET_NAMES
+
+- Name: `WOODPECKER_BACKEND_K8S_PULL_SECRET_NAMES`
+- Default: none
 
 Secret names to pull images from private repositories. See, how to [Pull an Image from a Private Registry](https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/).

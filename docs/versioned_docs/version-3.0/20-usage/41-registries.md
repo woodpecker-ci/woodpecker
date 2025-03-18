@@ -37,7 +37,7 @@ Example registry hostname matching logic:
 
 ## Global registry support
 
-To make a private registry globally available, check the [server configuration docs](../30-administration/10-server-config.md#global-registry-setting).
+To make a private registry globally available, check the [server configuration docs](../30-administration/10-configuration/10-server.md#docker_config).
 
 ## GCR registry support
 
