@@ -595,7 +595,7 @@ For more details check the [matrix build docs](./30-matrix-workflows.md).
 ## `labels`
 
 Use labels to select the agent that executes your workflow. An agent will execute a workflow only if **all** its assigned labels match the workflow's labels. For Kubernetes agents, these labels propagate to any related resources created during pipeline execution, including pods and secrets.
-To configure additional agent labels, see the [agent configuration options](../30-administration/15-agent-config.md#woodpecker_agent_labels). Agents have pre-configured filters for the following labels:
+To configure additional agent labels, see the [agent configuration options](../30-administration/10-configuration/30-agent.md#agent_labels). Agents have pre-configured filters for the following labels:
 
 | Label                              | Description                                                        | Woodpecker managed |
 |------------------------------------|--------------------------------------------------------------------|--------------------|
