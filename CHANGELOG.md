@@ -1,10 +1,14 @@
 # Changelog
 
-## [3.4.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.4.1) - 2025-03-19
+## [3.5.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.5.0) - 2025-03-19
 
 ### ❤️ Thanks to all contributors! ❤️
 
 @xoxys
+
+### 📈 Enhancement
+
+- Add titles and descriptions to repos page [[#4981](https://github.com/woodpecker-ci/woodpecker/pull/4981)]
 
 ### 🐛 Bug Fixes
 
