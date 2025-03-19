@@ -6,6 +6,10 @@
 
 @xoxys
 
+### 🐛 Bug Fixes
+
+- Add back cursor-pointer to pipeline step list buttons [[#4982](https://github.com/woodpecker-ci/woodpecker/pull/4982)]
+
 ### 📚 Documentation
 
 - Rework secrets docs and document multiline secrets [[#4974](https://github.com/woodpecker-ci/woodpecker/pull/4974)]
