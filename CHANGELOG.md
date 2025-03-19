@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.4.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.4.1) - 2025-03-18
+## [3.4.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.4.1) - 2025-03-19
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -13,6 +13,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update module github.com/expr-lang/expr to v1.17.1 [[#4983](https://github.com/woodpecker-ci/woodpecker/pull/4983)]
 - fix(deps): update module gitlab.com/gitlab-org/api/client-go to v0.126.0 [[#4976](https://github.com/woodpecker-ci/woodpecker/pull/4976)]
 
 ## [3.4.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.4.0) - 2025-03-17
