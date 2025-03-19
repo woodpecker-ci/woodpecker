@@ -65,8 +65,6 @@ func startMetricsCollector(ctx context.Context, _store store.Store) {
 	})
 
 	go func() {
-		log.Info().Msg("queue metric collector started")
-
 		for {
 			stats := server.Config.Services.Queue.Info(ctx)
 			pendingSteps.Set(float64(stats.Stats.Pending))
@@ -76,15 +74,12 @@ func startMetricsCollector(ctx context.Context, _store store.Store) {
 
 			select {
 			case <-ctx.Done():
-				log.Info().Msg("queue metric collector stopped")
 				return
 			case <-time.After(queueInfoRefreshInterval):
 			}
 		}
 	}()
 	go func() {
-		log.Info().Msg("store metric collector started")
-
 		for {
 			repoCount, repoErr := _store.GetRepoCount()
 			userCount, userErr := _store.GetUserCount()
@@ -99,7 +94,6 @@ func startMetricsCollector(ctx context.Context, _store store.Store) {
 
 			select {
 			case <-ctx.Done():
-				log.Info().Msg("store metric collector stopped")
 				return
 			case <-time.After(storeInfoRefreshInterval):
 			}

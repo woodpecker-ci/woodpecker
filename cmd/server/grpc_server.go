@@ -19,7 +19,6 @@ import (
 	"fmt"
 	"net"
 
-	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v3"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/keepalive"
@@ -71,9 +70,7 @@ func runGrpcServer(ctx context.Context, c *cli.Command, _store store.Store) erro
 		if grpcServer == nil {
 			return
 		}
-		log.Info().Msg("terminating grpc service gracefully")
 		grpcServer.GracefulStop()
-		log.Info().Msg("grpc service stopped")
 	}()
 
 	if err := grpcServer.Serve(lis); err != nil {
