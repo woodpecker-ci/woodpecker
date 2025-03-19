@@ -410,7 +410,7 @@ var flags = append([]cli.Flag{
 	&cli.StringFlag{
 		Sources: cli.EnvVars("WOODPECKER_EXPERT_FORGE_OAUTH_HOST"),
 		Name:    "forge-oauth-host",
-		Usage:   "!!!for experts!!! fully qualified public forge url. Use it if your forge url WOODPECKER_FORGE_URL or WOODPECKER_GITEA_URL, ... isn't a public url. Format: <scheme>://<host>[/<prefix path>]",
+		Usage:   "fully qualified public forge url, used if forge url is not a public url. Format: <scheme>://<host>[/<prefix path>]",
 	},
 	//
 	// Addon
@@ -515,7 +515,7 @@ var flags = append([]cli.Flag{
 	&cli.StringFlag{
 		Sources: cli.EnvVars("WOODPECKER_EXPERT_WEBHOOK_HOST"),
 		Name:    "server-webhook-host",
-		Usage:   "!!!for experts!!! fully qualified woodpecker server url called by forge's webhooks. Format: <scheme>://<host>[/<prefix path>]",
+		Usage:   "fully qualified woodpecker server url, called by the webhooks of the forge. Format: <scheme>://<host>[/<prefix path>]",
 	},
 	//
 	// secrets encryption in DB
