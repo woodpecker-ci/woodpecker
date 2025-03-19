@@ -21,7 +21,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	pipelineconsts "go.woodpecker-ci.org/woodpecker/v3/pipeline"
 	"strconv"
 	"time"
 
@@ -29,6 +28,7 @@ import (
 	"github.com/rs/zerolog/log"
 	grpcMetadata "google.golang.org/grpc/metadata"
 
+	pipelineConsts "go.woodpecker-ci.org/woodpecker/v3/pipeline"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/rpc"
 	"go.woodpecker-ci.org/woodpecker/v3/server"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge"
@@ -55,27 +55,27 @@ type RPC struct {
 // Replaces legacy filter labels with new ones.
 func migrateFilterLabels(filter rpc.Filter) rpc.Filter {
 	if value, ok := filter.Labels["repo"]; ok {
-		filter.Labels[pipelineconsts.LabelRepoFullName] = value
+		filter.Labels[pipelineConsts.LabelRepoFullName] = value
 		delete(filter.Labels, "repo")
 	}
 
 	if value, ok := filter.Labels["platform"]; ok {
-		filter.Labels[pipelineconsts.LabelPlatform] = value
+		filter.Labels[pipelineConsts.LabelPlatform] = value
 		delete(filter.Labels, "platform")
 	}
 
 	if value, ok := filter.Labels["hostname"]; ok {
-		filter.Labels[pipelineconsts.LabelHostname] = value
+		filter.Labels[pipelineConsts.LabelHostname] = value
 		delete(filter.Labels, "hostname")
 	}
 
 	if value, ok := filter.Labels["backend"]; ok {
-		filter.Labels[pipelineconsts.LabelBackend] = value
+		filter.Labels[pipelineConsts.LabelBackend] = value
 		delete(filter.Labels, "backend")
 	}
 
 	if value, ok := filter.Labels["org-id"]; ok {
-		filter.Labels[pipelineconsts.LabelOrgID] = value
+		filter.Labels[pipelineConsts.LabelOrgID] = value
 		delete(filter.Labels, "org-id")
 	}
 

@@ -246,7 +246,7 @@ func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 	}
 
 	// set default labels ...
-	var labels = make(map[string]string)
+	labels := make(map[string]string)
 	for label := range pipeline.ManagedLabels {
 		labels[label] = "*"
 	}

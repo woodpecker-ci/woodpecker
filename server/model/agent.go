@@ -17,9 +17,10 @@ package model
 import (
 	"encoding/base32"
 	"fmt"
-	"go.woodpecker-ci.org/woodpecker/v3/pipeline"
 
 	"github.com/gorilla/securecookie"
+
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline"
 )
 
 type Agent struct {

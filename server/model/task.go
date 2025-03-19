@@ -16,8 +16,9 @@ package model
 
 import (
 	"fmt"
-	"go.woodpecker-ci.org/woodpecker/v3/pipeline"
 	"strings"
+
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline"
 )
 
 // Task defines scheduled pipeline Task.

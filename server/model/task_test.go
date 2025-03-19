@@ -15,10 +15,11 @@
 package model
 
 import (
-	"go.woodpecker-ci.org/woodpecker/v3/pipeline"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline"
 )
 
 func TestTask_GetLabels(t *testing.T) {

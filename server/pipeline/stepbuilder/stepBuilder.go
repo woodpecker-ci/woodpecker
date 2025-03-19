@@ -17,7 +17,6 @@ package stepbuilder
 
 import (
 	"fmt"
-	"go.woodpecker-ci.org/woodpecker/v3/pipeline"
 	"maps"
 	"path/filepath"
 	"strconv"
@@ -27,6 +26,7 @@ import (
 	"github.com/rs/zerolog/log"
 	"go.uber.org/multierr"
 
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline"
 	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 	pipeline_errors "go.woodpecker-ci.org/woodpecker/v3/pipeline/errors"
 	errorTypes "go.woodpecker-ci.org/woodpecker/v3/pipeline/errors/types"
