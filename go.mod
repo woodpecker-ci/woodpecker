@@ -20,7 +20,7 @@ require (
 	github.com/docker/go-connections v0.5.0
 	github.com/docker/go-units v0.5.0
 	github.com/drone/envsubst v1.0.3
-	github.com/expr-lang/expr v1.17.0
+	github.com/expr-lang/expr v1.17.1
 	github.com/fsnotify/fsnotify v1.8.0
 	github.com/gdgvda/cron v0.4.0
 	github.com/getkin/kin-openapi v0.130.0
