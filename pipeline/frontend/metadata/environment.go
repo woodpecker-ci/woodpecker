@@ -93,7 +93,6 @@ func (m *Metadata) Environ() map[string]string {
 	setNonEmptyEnvVar(params, "CI_COMMIT_BRANCH", commit.Branch)
 	setNonEmptyEnvVar(params, "CI_COMMIT_AUTHOR", commit.Author.Name)
 	setNonEmptyEnvVar(params, "CI_COMMIT_AUTHOR_EMAIL", commit.Author.Email)
-	setNonEmptyEnvVar(params, "CI_COMMIT_AUTHOR_AVATAR", commit.Author.Avatar)
 	if pipeline.Event == EventTag || pipeline.Event == EventRelease || strings.HasPrefix(pipeline.Commit.Ref, "refs/tags/") {
 		setNonEmptyEnvVar(params, "CI_COMMIT_TAG", strings.TrimPrefix(pipeline.Commit.Ref, "refs/tags/"))
 	}
@@ -143,7 +142,6 @@ func (m *Metadata) Environ() map[string]string {
 	setNonEmptyEnvVar(params, "CI_PREV_COMMIT_BRANCH", prevCommit.Branch)
 	setNonEmptyEnvVar(params, "CI_PREV_COMMIT_AUTHOR", prevCommit.Author.Name)
 	setNonEmptyEnvVar(params, "CI_PREV_COMMIT_AUTHOR_EMAIL", prevCommit.Author.Email)
-	setNonEmptyEnvVar(params, "CI_PREV_COMMIT_AUTHOR_AVATAR", prevCommit.Author.Avatar)
 	if prevPipeline.Event == EventPull || prevPipeline.Event == EventPullClosed {
 		prevSourceBranch, prevTargetBranch := getSourceTargetBranches(prevCommit.Refspec)
 		setNonEmptyEnvVar(params, "CI_PREV_COMMIT_SOURCE_BRANCH", prevSourceBranch)
