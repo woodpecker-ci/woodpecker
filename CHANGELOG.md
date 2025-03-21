@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.5.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.5.0) - 2025-03-20
+## [3.5.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.5.0) - 2025-03-21
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -21,6 +21,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update module github.com/go-sql-driver/mysql to v1.9.1 [[#4985](https://github.com/woodpecker-ci/woodpecker/pull/4985)]
 - fix(deps): update module github.com/getkin/kin-openapi to v0.131.0 [[#4984](https://github.com/woodpecker-ci/woodpecker/pull/4984)]
 - fix(deps): update module github.com/expr-lang/expr to v1.17.1 [[#4983](https://github.com/woodpecker-ci/woodpecker/pull/4983)]
 - fix(deps): update module gitlab.com/gitlab-org/api/client-go to v0.126.0 [[#4976](https://github.com/woodpecker-ci/woodpecker/pull/4976)]
