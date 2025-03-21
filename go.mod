@@ -28,7 +28,7 @@ require (
 	github.com/gitsight/go-vcsurl v1.0.1
 	github.com/go-sql-driver/mysql v1.9.1
 	github.com/go-viper/mapstructure/v2 v2.2.1
-	github.com/golang-jwt/jwt/v5 v5.2.1
+	github.com/golang-jwt/jwt/v5 v5.2.2
 	github.com/google/go-github/v69 v69.2.0
 	github.com/google/tink/go v1.7.0
 	github.com/gorilla/securecookie v1.1.2
