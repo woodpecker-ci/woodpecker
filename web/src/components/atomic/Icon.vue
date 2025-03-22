@@ -18,6 +18,9 @@
   <SvgIcon v-else-if="name === 'status-blocked'" :path="mdiPlayCircle" size="1.3rem" />
   <SvgIcon v-else-if="name === 'status-declined'" :path="mdiStopCircle" size="1.3rem" />
   <SvgIcon v-else-if="name === 'list-group'" :path="mdiFormatListGroup" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'secret'" :path="mdiShieldKeyOutline" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'console'" :path="mdiConsole" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'agent'" :path="mdiPlayNetworkOutline" size="1.3rem" />
   <SvgIcon
     v-else-if="name === 'status-failure' || name === 'status-error' || name === 'status-killed'"
     type="mdi"
@@ -53,6 +56,7 @@
   <SvgIcon v-else-if="name === 'tray-full'" :path="mdiTrayFull" size="24" />
   <SvgIcon v-else-if="name === 'file-cog-outlined'" :path="mdiFileCogOutline" size="24" />
   <SvgIcon v-else-if="name === 'bug-outline'" :path="mdiBugOutline" size="24" />
+  <SvgIcon v-else-if="name === 'docker'" :path="mdiDocker" size="1.3rem" />
 
   <SvgIcon v-else-if="name === 'visibility-private'" :path="mdiLockOutline" size="1.3rem" />
   <SvgIcon v-else-if="name === 'visibility-internal'" :path="mdiLockOpenOutline" size="1.3rem" />
@@ -99,6 +103,8 @@ import {
   mdiCloseCircle,
   mdiCog,
   mdiCogOutline,
+  mdiConsole,
+  mdiDocker,
   mdiDotsVertical,
   mdiDownloadOutline,
   mdiEyeOffOutline,
@@ -119,11 +125,13 @@ import {
   mdiPencilOutline,
   mdiPlay,
   mdiPlayCircle,
+  mdiPlayNetworkOutline,
   mdiPlayOutline,
   mdiPlus,
   mdiPower,
   mdiRadioboxBlank,
   mdiRadioboxIndeterminateVariant,
+  mdiShieldKeyOutline,
   mdiSourceBranch,
   mdiSourceCommit,
   mdiSourceMerge,
@@ -195,7 +203,11 @@ export type IconNames =
   | 'tray-full'
   | 'file-cog-outlined'
   | 'bug-outline'
-  | 'list-group';
+  | 'list-group'
+  | 'secret'
+  | 'docker'
+  | 'console'
+  | 'agent';
 
 defineProps<{
   name: IconNames;
