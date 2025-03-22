@@ -298,11 +298,11 @@ execute a local pipeline
 
 **--metadata-file**="": path to pipeline metadata file (normally downloaded from UI). Parameters can be adjusted by applying additional cli flags
 
-**--netrc-machine**="": 
+**--netrc-machine**="":
 
-**--netrc-password**="": 
+**--netrc-password**="":
 
-**--netrc-username**="": 
+**--netrc-username**="":
 
 **--network**="": external networks (default: [])
 
