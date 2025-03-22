@@ -2,7 +2,7 @@
 <template>
   <SvgIcon v-if="name === 'duration'" :path="mdiTimerOutline" size="1.3rem" />
   <SvgIcon v-else-if="name === 'since'" :path="mdiClockTimeEightOutline" size="1.3rem" />
-  <SvgIcon v-else-if="name === 'push'" :path="mdiSourceBranch" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'branch'" :path="mdiSourceBranch" size="1.3rem" />
   <SvgIcon v-else-if="name === 'pull-request'" :path="mdiSourcePull" size="1.3rem" />
   <SvgIcon v-else-if="name === 'pull-request-closed'" :path="mdiSourceMerge" size="1.3rem" />
   <SvgIcon v-else-if="name === 'manual-pipeline'" :path="mdiGestureTap" size="1.3rem" />
@@ -17,6 +17,7 @@
   <SvgIcon v-else-if="name === 'trash'" :path="mdiTrashCanOutline" size="1.3rem" />
   <SvgIcon v-else-if="name === 'status-blocked'" :path="mdiPlayCircle" size="1.3rem" />
   <SvgIcon v-else-if="name === 'status-declined'" :path="mdiStopCircle" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'list-group'" :path="mdiFormatListGroup" size="1.3rem" />
   <SvgIcon
     v-else-if="name === 'status-failure' || name === 'status-error' || name === 'status-killed'"
     type="mdi"
@@ -104,6 +105,7 @@ import {
   mdiEyeOutline,
   mdiFileCogOutline,
   mdiFormatListBulleted,
+  mdiFormatListGroup,
   mdiGestureTap,
   mdiGit,
   mdiGithub,
@@ -140,7 +142,7 @@ import SvgIcon from './SvgIcon.vue';
 export type IconNames =
   | 'duration'
   | 'since'
-  | 'push'
+  | 'branch'
   | 'pull-request'
   | 'pull-request-closed'
   | 'manual-pipeline'
@@ -192,7 +194,8 @@ export type IconNames =
   | 'dots'
   | 'tray-full'
   | 'file-cog-outlined'
-  | 'bug-outline';
+  | 'bug-outline'
+  | 'list-group';
 
 defineProps<{
   name: IconNames;
