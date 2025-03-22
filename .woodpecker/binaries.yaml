@@ -99,7 +99,7 @@ steps:
   release:
     depends_on:
       - checksums
-    image: woodpeckerci/plugin-release:0.2.4
+    image: woodpeckerci/plugin-release:0.2.5
     settings:
       api_key:
         from_secret: github_token
