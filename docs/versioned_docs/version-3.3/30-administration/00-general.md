@@ -37,7 +37,7 @@ No `latest` tag exists to prevent accidental major version upgrades. Either use 
 
 Images are pushed to DockerHub and Quay.
 
-- woodpecker-server ([DockerHub](https://hub.docker.com/repository/docker/woodpeckerci/woodpecker-server) or [Quay](https://quay.io/repository/woodpeckerci/woodpecker-server))
-- woodpecker-agent ([DockerHub](https://hub.docker.com/repository/docker/woodpeckerci/woodpecker-agent) or [Quay](https://quay.io/repository/woodpeckerci/woodpecker-agent))
-- woodpecker-cli ([DockerHub](https://hub.docker.com/repository/docker/woodpeckerci/woodpecker-cli) or [Quay](https://quay.io/repository/woodpeckerci/woodpecker-cli))
-- woodpecker-autoscaler ([DockerHub](https://hub.docker.com/repository/docker/woodpeckerci/autoscaler))
+- woodpecker-server ([DockerHub](https://hub.docker.com/r/docker/woodpeckerci/woodpecker-server) or [Quay](https://quay.io/repository/woodpeckerci/woodpecker-server))
+- woodpecker-agent ([DockerHub](https://hub.docker.com/r/docker/woodpeckerci/woodpecker-agent) or [Quay](https://quay.io/repository/woodpeckerci/woodpecker-agent))
+- woodpecker-cli ([DockerHub](https://hub.docker.com/r/docker/woodpeckerci/woodpecker-cli) or [Quay](https://quay.io/repository/woodpeckerci/woodpecker-cli))
+- woodpecker-autoscaler ([DockerHub](https://hub.docker.com/r/docker/woodpeckerci/autoscaler))
