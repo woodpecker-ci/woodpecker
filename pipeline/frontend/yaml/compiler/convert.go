@@ -37,7 +37,7 @@ const (
 	DefaultWorkspaceBase = pluginWorkspaceBase
 )
 
-func (c *Compiler) createProcess(container *yaml_types.Container, stepType backend_types.StepType) (*backend_types.Step, error) {
+func (c *Compiler) createProcess(container *yaml_types.Container, workflow *yaml_types.Workflow, stepType backend_types.StepType) (*backend_types.Step, error) {
 	var (
 		uuid = ulid.Make()
 
@@ -181,6 +181,7 @@ func (c *Compiler) createProcess(container *yaml_types.Container, stepType backe
 		NetworkMode:    networkMode,
 		Ports:          ports,
 		BackendOptions: container.BackendOptions,
+		WorkflowLabels: workflow.Labels,
 	}, nil
 }
 
