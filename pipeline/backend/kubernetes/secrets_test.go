@@ -212,7 +212,8 @@ func TestRegistrySecret(t *testing.T) {
 			"namespace": "woodpecker",
 			"creationTimestamp": null,
 			"labels": {
-				"step": "go-test"
+				"step": "go-test",
+				"woodpecker-ci.org/step": "go-test"
 			}
 		},
 		"type": "kubernetes.io/dockerconfigjson",
