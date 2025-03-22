@@ -21,6 +21,9 @@
   <SvgIcon v-else-if="name === 'secret'" :path="mdiShieldKeyOutline" size="1.3rem" />
   <SvgIcon v-else-if="name === 'console'" :path="mdiConsole" size="1.3rem" />
   <SvgIcon v-else-if="name === 'agent'" :path="mdiPlayNetworkOutline" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'info'" :path="mdiInformationSlabCircleOutline" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'user'" :path="mdiAccountOutline" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'org'" :path="mdiAccountGroupOutline" size="1.3rem" />
   <SvgIcon
     v-else-if="name === 'status-failure' || name === 'status-error' || name === 'status-killed'"
     type="mdi"
@@ -91,6 +94,8 @@
 
 <script lang="ts" setup>
 import {
+  mdiAccountGroupOutline,
+  mdiAccountOutline,
   mdiAlarm,
   mdiAlertCircle,
   mdiArrowLeft,
@@ -117,6 +122,7 @@ import {
   mdiGithub,
   mdiGitlab,
   mdiHelpCircle,
+  mdiInformationSlabCircleOutline,
   mdiLockOpenOutline,
   mdiLockOutline,
   mdiMinusCircle,
@@ -207,7 +213,11 @@ export type IconNames =
   | 'secret'
   | 'docker'
   | 'console'
-  | 'agent';
+  | 'agent'
+  | 'info'
+  | 'repo'
+  | 'user'
+  | 'org';
 
 defineProps<{
   name: IconNames;
