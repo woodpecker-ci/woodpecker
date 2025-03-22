@@ -132,7 +132,7 @@ const config = {
             },
             {
               label: 'Administration',
-              to: '/docs/administration/getting-started',
+              to: '/docs/administration/general',
             },
             {
               to: '/migrations', // Always point to newest migration guide
