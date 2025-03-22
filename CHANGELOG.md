@@ -22,6 +22,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update web npm deps non-major [[#4989](https://github.com/woodpecker-ci/woodpecker/pull/4989)]
 - chore(deps): update pre-commit non-major [[#4988](https://github.com/woodpecker-ci/woodpecker/pull/4988)]
 - fix(deps): update module github.com/golang-jwt/jwt/v5 to v5.2.2 [security] [[#4986](https://github.com/woodpecker-ci/woodpecker/pull/4986)]
 - fix(deps): update module github.com/go-sql-driver/mysql to v1.9.1 [[#4985](https://github.com/woodpecker-ci/woodpecker/pull/4985)]
