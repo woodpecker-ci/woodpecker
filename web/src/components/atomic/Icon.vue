@@ -51,7 +51,7 @@
   <SvgIcon v-else-if="name === 'dots'" :path="mdiDotsVertical" size="1.3rem" />
   <SvgIcon v-else-if="name === 'tray-full'" :path="mdiTrayFull" size="24" />
   <SvgIcon v-else-if="name === 'file-cog-outlined'" :path="mdiFileCogOutline" size="24" />
-  <SvgIcon v-else-if="name === 'magnify-scan'" :path="mdiMagnifyScan" size="24" />
+  <SvgIcon v-else-if="name === 'bug-outline'" :path="mdiBugOutline" size="24" />
 
   <SvgIcon v-else-if="name === 'visibility-private'" :path="mdiLockOutline" size="1.3rem" />
   <SvgIcon v-else-if="name === 'visibility-internal'" :path="mdiLockOpenOutline" size="1.3rem" />
@@ -90,6 +90,7 @@ import {
   mdiAlertCircle,
   mdiArrowLeft,
   mdiBitbucket,
+  mdiBugOutline,
   mdiCheckCircle,
   mdiChevronRight,
   mdiClockTimeEightOutline,
@@ -110,7 +111,6 @@ import {
   mdiHelpCircle,
   mdiLockOpenOutline,
   mdiLockOutline,
-  mdiMagnifyScan,
   mdiMinusCircle,
   mdiPackageVariant,
   mdiPause,
@@ -192,7 +192,7 @@ export type IconNames =
   | 'dots'
   | 'tray-full'
   | 'file-cog-outlined'
-  | 'magnify-scan';
+  | 'bug-outline';
 
 defineProps<{
   name: IconNames;
