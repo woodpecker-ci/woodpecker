@@ -37,7 +37,7 @@ importers:
         version: 19.0.0(react@19.0.0)
       redocusaurus:
         specifier: ^2.2.0
-        version: 2.2.1(@docusaurus/theme-common@3.7.0(@docusaurus/plugin-content-docs@3.7.0(@docusaurus/faster@3.7.0(@docusaurus/types@3.7.0(@swc/core@1.11.9)(acorn@8.14.1)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)))(@mdx-js/react@3.1.0(@types/react@19.0.12)(react@19.0.0))(@swc/core@1.11.9)(acorn@8.14.1)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(typescript@5.8.2))(@swc/core@1.11.9)(acorn@8.14.1)(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(@docusaurus/utils@3.7.0(@swc/core@1.11.9)(acorn@8.14.1)(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(core-js@3.41.0)(enzyme@3.11.0)(mobx@6.13.6)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(styled-components@6.1.15(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(webpack@5.98.0(@swc/core@1.11.9))
+        version: 2.2.2(@docusaurus/theme-common@3.7.0(@docusaurus/plugin-content-docs@3.7.0(@docusaurus/faster@3.7.0(@docusaurus/types@3.7.0(@swc/core@1.11.9)(acorn@8.14.1)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)))(@mdx-js/react@3.1.0(@types/react@19.0.12)(react@19.0.0))(@swc/core@1.11.9)(acorn@8.14.1)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(typescript@5.8.2))(@swc/core@1.11.9)(acorn@8.14.1)(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(@docusaurus/utils@3.7.0(@swc/core@1.11.9)(acorn@8.14.1)(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(core-js@3.41.0)(enzyme@3.11.0)(mobx@6.13.7)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(styled-components@6.1.16(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(webpack@5.98.0(@swc/core@1.11.9))
     devDependencies:
       '@docusaurus/module-type-aliases':
         specifier: ^3.7.0
@@ -2771,14 +2771,14 @@ packages:
     resolution: {integrity: sha512-l4gcSouhcgIKRvyy99RNVOgxXiicE+2jZoNmaNmZ6JXiGajBOJAesk1OBlJuM5k2c+eudGdLxDqXuPCKIj6kpw==}
     engines: {node: '>=6'}
 
-  docusaurus-plugin-redoc@2.2.1:
-    resolution: {integrity: sha512-zwP5RfTLH3C4fAzCbOzJ0UJFNQ7rT1CU0C5rAWDiB86m9p2fKWS05NHeDdGE+tOsOjzEBBMSky8ooEFzo78yXA==}
+  docusaurus-plugin-redoc@2.2.2:
+    resolution: {integrity: sha512-hS/h6SYwBV+5Hihe98RPbrHp3j276yMSVaXyDjkLz/vNZJ30661uDWfb1LPqZn8nCC86lxbtnwuJgnaEM8DtLw==}
     engines: {node: '>=18'}
     peerDependencies:
       '@docusaurus/utils': ^3.6.0
 
-  docusaurus-theme-redoc@2.2.1:
-    resolution: {integrity: sha512-QO9ZU4/vWJTuCYiE4S14u4xEZEOHRNCqdT4wvPma0J8YII+z1kNSk2IIDSJDFMVHVZbOVc0KsUh7YpWrCh54nw==}
+  docusaurus-theme-redoc@2.2.2:
+    resolution: {integrity: sha512-VulnYwqwxWoCOCBjICIL9UDHojkEoerAvyrLX2DJPzijnjHrJgrYz1Rb2ekqm0rOhN90NiDUSnCzeghdSRhckw==}
     engines: {node: '>=18'}
     peerDependencies:
       '@docusaurus/theme-common': ^3.6.0
@@ -4342,8 +4342,8 @@ packages:
       react-native:
         optional: true
 
-  mobx@6.13.6:
-    resolution: {integrity: sha512-r19KNV0uBN4b+ER8Z0gA4y+MzDYIQ2SvOmn3fUrqPnWXdQfakd9yfbPBDBF/p5I+bd3N5Rk1fHONIvMay+bJGA==}
+  mobx@6.13.7:
+    resolution: {integrity: sha512-aChaVU/DO5aRPmk1GX8L+whocagUUpBQqoPtJk+cm7UOXUk87J4PeWCh6nNmTTIfEhiR9DI/+FnA8dln/hTK7g==}
 
   moo@0.5.2:
     resolution: {integrity: sha512-iSAJLHYKnX41mKcJKjqvnAN9sf0LMDTXDEvFv+ffuRR9a1MIuXLjMNL6EsnDHSkKLTWNqQQ5uo61P4EbU4NU+Q==}
@@ -4364,6 +4364,11 @@ packages:
 
   nanoid@3.3.10:
     resolution: {integrity: sha512-vSJJTG+t/dIKAUhUDw/dLdZ9s//5OxcHqLaDWWrW4Cdq7o6tdLIczUkMXt2MBNmk6sJRZBZRXVixs7URY1CmIg==}
+    engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
+    hasBin: true
+
+  nanoid@3.3.11:
+    resolution: {integrity: sha512-N8SpfPUnUp1bK+PMYW8qSWdl9U+wwNWI4QKxOYDy9JAro3WMX7p2OeVRF9v+347pnakNevPmiHhNmZ2HbFA76w==}
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
     hasBin: true
 
@@ -5284,8 +5289,8 @@ packages:
       react-dom: ^16.8.4 || ^17.0.0 || ^18.0.0
       styled-components: ^4.1.1 || ^5.1.1 || ^6.0.5
 
-  redocusaurus@2.2.1:
-    resolution: {integrity: sha512-eYk807UrZ2/gWX3DoK/NxnmVNCeOuJI9o7rsUwDFkkVMIRDEiwpF/qy/5tSLKQvn7pqmHNxFONqsAozzoDK7Fw==}
+  redocusaurus@2.2.2:
+    resolution: {integrity: sha512-s+Pqvbt7Q28zK665rvTnyZJwH8VaZaITTQA1S9HxTws9x88fWdOtrUMhZVrhGseInDHMlAQ4XOrq5gn8BOS/5w==}
     engines: {node: '>=14'}
     peerDependencies:
       '@docusaurus/theme-common': ^3.6.0
@@ -5760,8 +5765,8 @@ packages:
   style-to-object@1.0.8:
     resolution: {integrity: sha512-xT47I/Eo0rwJmaXC4oilDGDWLohVhR6o/xAQcPQN8q6QBuZVL8qMYL85kLmST5cPjAorwvqIA4qXTRQoYHaL6g==}
 
-  styled-components@6.1.15:
-    resolution: {integrity: sha512-PpOTEztW87Ua2xbmLa7yssjNyUF9vE7wdldRfn1I2E6RTkqknkBYpj771OxM/xrvRGinLy2oysa7GOd7NcZZIA==}
+  styled-components@6.1.16:
+    resolution: {integrity: sha512-KpWB6ORAWGmbWM10cDJfEV6sXc/uVkkkQV3SLwTNQ/E/PqWgNHIoMSLh1Lnk2FkB9+JHK7uuMq1i+9ArxDD7iQ==}
     engines: {node: '>= 16'}
     peerDependencies:
       react: '>= 16.8.0'
@@ -9941,11 +9946,11 @@ snapshots:
     dependencies:
       '@leichtgewicht/ip-codec': 2.0.5
 
-  docusaurus-plugin-redoc@2.2.1(@docusaurus/utils@3.7.0(@swc/core@1.11.9)(acorn@8.14.1)(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(core-js@3.41.0)(enzyme@3.11.0)(mobx@6.13.6)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(styled-components@6.1.15(react-dom@19.0.0(react@19.0.0))(react@19.0.0)):
+  docusaurus-plugin-redoc@2.2.2(@docusaurus/utils@3.7.0(@swc/core@1.11.9)(acorn@8.14.1)(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(core-js@3.41.0)(enzyme@3.11.0)(mobx@6.13.7)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(styled-components@6.1.16(react-dom@19.0.0(react@19.0.0))(react@19.0.0)):
     dependencies:
       '@docusaurus/utils': 3.7.0(@swc/core@1.11.9)(acorn@8.14.1)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       '@redocly/openapi-core': 1.16.0
-      redoc: 2.1.5(core-js@3.41.0)(enzyme@3.11.0)(mobx@6.13.6)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(styled-components@6.1.15(react-dom@19.0.0(react@19.0.0))(react@19.0.0))
+      redoc: 2.1.5(core-js@3.41.0)(enzyme@3.11.0)(mobx@6.13.7)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(styled-components@6.1.16(react-dom@19.0.0(react@19.0.0))(react@19.0.0))
     transitivePeerDependencies:
       - core-js
       - encoding
@@ -9957,17 +9962,17 @@ snapshots:
       - styled-components
       - supports-color
 
-  docusaurus-theme-redoc@2.2.1(@docusaurus/theme-common@3.7.0(@docusaurus/plugin-content-docs@3.7.0(@docusaurus/faster@3.7.0(@docusaurus/types@3.7.0(@swc/core@1.11.9)(acorn@8.14.1)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)))(@mdx-js/react@3.1.0(@types/react@19.0.12)(react@19.0.0))(@swc/core@1.11.9)(acorn@8.14.1)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(typescript@5.8.2))(@swc/core@1.11.9)(acorn@8.14.1)(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(core-js@3.41.0)(enzyme@3.11.0)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(webpack@5.98.0(@swc/core@1.11.9)):
+  docusaurus-theme-redoc@2.2.2(@docusaurus/theme-common@3.7.0(@docusaurus/plugin-content-docs@3.7.0(@docusaurus/faster@3.7.0(@docusaurus/types@3.7.0(@swc/core@1.11.9)(acorn@8.14.1)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)))(@mdx-js/react@3.1.0(@types/react@19.0.12)(react@19.0.0))(@swc/core@1.11.9)(acorn@8.14.1)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(typescript@5.8.2))(@swc/core@1.11.9)(acorn@8.14.1)(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(core-js@3.41.0)(enzyme@3.11.0)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(webpack@5.98.0(@swc/core@1.11.9)):
     dependencies:
       '@docusaurus/theme-common': 3.7.0(@docusaurus/plugin-content-docs@3.7.0(@docusaurus/faster@3.7.0(@docusaurus/types@3.7.0(@swc/core@1.11.9)(acorn@8.14.1)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)))(@mdx-js/react@3.1.0(@types/react@19.0.12)(react@19.0.0))(@swc/core@1.11.9)(acorn@8.14.1)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(typescript@5.8.2))(@swc/core@1.11.9)(acorn@8.14.1)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       '@redocly/openapi-core': 1.16.0
       clsx: 1.2.1
       lodash: 4.17.21
-      mobx: 6.13.6
+      mobx: 6.13.7
       postcss: 8.5.3
       postcss-prefix-selector: 1.16.1(postcss@8.5.3)
-      redoc: 2.1.5(core-js@3.41.0)(enzyme@3.11.0)(mobx@6.13.6)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(styled-components@6.1.15(react-dom@19.0.0(react@19.0.0))(react@19.0.0))
-      styled-components: 6.1.15(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      redoc: 2.1.5(core-js@3.41.0)(enzyme@3.11.0)(mobx@6.13.7)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(styled-components@6.1.16(react-dom@19.0.0(react@19.0.0))(react@19.0.0))
+      styled-components: 6.1.16(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       webpack: 5.98.0(@swc/core@1.11.9)
     transitivePeerDependencies:
       - core-js
@@ -11961,23 +11966,23 @@ snapshots:
 
   minimist@1.2.8: {}
 
-  mobx-react-lite@4.1.0(mobx@6.13.6)(react-dom@19.0.0(react@19.0.0))(react@19.0.0):
+  mobx-react-lite@4.1.0(mobx@6.13.7)(react-dom@19.0.0(react@19.0.0))(react@19.0.0):
     dependencies:
-      mobx: 6.13.6
+      mobx: 6.13.7
       react: 19.0.0
       use-sync-external-store: 1.4.0(react@19.0.0)
     optionalDependencies:
       react-dom: 19.0.0(react@19.0.0)
 
-  mobx-react@9.2.0(mobx@6.13.6)(react-dom@19.0.0(react@19.0.0))(react@19.0.0):
+  mobx-react@9.2.0(mobx@6.13.7)(react-dom@19.0.0(react@19.0.0))(react@19.0.0):
     dependencies:
-      mobx: 6.13.6
-      mobx-react-lite: 4.1.0(mobx@6.13.6)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      mobx: 6.13.7
+      mobx-react-lite: 4.1.0(mobx@6.13.7)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       react: 19.0.0
     optionalDependencies:
       react-dom: 19.0.0(react@19.0.0)
 
-  mobx@6.13.6: {}
+  mobx@6.13.7: {}
 
   moo@0.5.2: {}
 
@@ -11993,6 +11998,8 @@ snapshots:
       thunky: 1.1.0
 
   nanoid@3.3.10: {}
+
+  nanoid@3.3.11: {}
 
   nearley@2.20.1:
     dependencies:
@@ -12735,7 +12742,7 @@ snapshots:
 
   postcss@8.4.49:
     dependencies:
-      nanoid: 3.3.10
+      nanoid: 3.3.11
       picocolors: 1.1.1
       source-map-js: 1.2.1
 
@@ -13000,7 +13007,7 @@ snapshots:
     dependencies:
       minimatch: 3.1.2
 
-  redoc@2.1.5(core-js@3.41.0)(enzyme@3.11.0)(mobx@6.13.6)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(styled-components@6.1.15(react-dom@19.0.0(react@19.0.0))(react@19.0.0)):
+  redoc@2.1.5(core-js@3.41.0)(enzyme@3.11.0)(mobx@6.13.7)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(styled-components@6.1.16(react-dom@19.0.0(react@19.0.0))(react@19.0.0)):
     dependencies:
       '@cfaester/enzyme-adapter-react-18': 0.8.0(enzyme@3.11.0)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       '@redocly/openapi-core': 1.16.0
@@ -13013,8 +13020,8 @@ snapshots:
       lunr: 2.3.9
       mark.js: 8.11.1
       marked: 4.3.0
-      mobx: 6.13.6
-      mobx-react: 9.2.0(mobx@6.13.6)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      mobx: 6.13.7
+      mobx-react: 9.2.0(mobx@6.13.7)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       openapi-sampler: 1.6.1
       path-browserify: 1.0.1
       perfect-scrollbar: 1.5.6
@@ -13026,7 +13033,7 @@ snapshots:
       react-tabs: 6.1.0(react@19.0.0)
       slugify: 1.4.7
       stickyfill: 1.1.1
-      styled-components: 6.1.15(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      styled-components: 6.1.16(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       swagger2openapi: 7.0.8
       url-template: 2.0.8
     transitivePeerDependencies:
@@ -13035,12 +13042,12 @@ snapshots:
       - react-native
       - supports-color
 
-  redocusaurus@2.2.1(@docusaurus/theme-common@3.7.0(@docusaurus/plugin-content-docs@3.7.0(@docusaurus/faster@3.7.0(@docusaurus/types@3.7.0(@swc/core@1.11.9)(acorn@8.14.1)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)))(@mdx-js/react@3.1.0(@types/react@19.0.12)(react@19.0.0))(@swc/core@1.11.9)(acorn@8.14.1)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(typescript@5.8.2))(@swc/core@1.11.9)(acorn@8.14.1)(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(@docusaurus/utils@3.7.0(@swc/core@1.11.9)(acorn@8.14.1)(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(core-js@3.41.0)(enzyme@3.11.0)(mobx@6.13.6)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(styled-components@6.1.15(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(webpack@5.98.0(@swc/core@1.11.9)):
+  redocusaurus@2.2.2(@docusaurus/theme-common@3.7.0(@docusaurus/plugin-content-docs@3.7.0(@docusaurus/faster@3.7.0(@docusaurus/types@3.7.0(@swc/core@1.11.9)(acorn@8.14.1)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)))(@mdx-js/react@3.1.0(@types/react@19.0.12)(react@19.0.0))(@swc/core@1.11.9)(acorn@8.14.1)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(typescript@5.8.2))(@swc/core@1.11.9)(acorn@8.14.1)(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(@docusaurus/utils@3.7.0(@swc/core@1.11.9)(acorn@8.14.1)(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(core-js@3.41.0)(enzyme@3.11.0)(mobx@6.13.7)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(styled-components@6.1.16(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(webpack@5.98.0(@swc/core@1.11.9)):
     dependencies:
       '@docusaurus/theme-common': 3.7.0(@docusaurus/plugin-content-docs@3.7.0(@docusaurus/faster@3.7.0(@docusaurus/types@3.7.0(@swc/core@1.11.9)(acorn@8.14.1)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)))(@mdx-js/react@3.1.0(@types/react@19.0.12)(react@19.0.0))(@swc/core@1.11.9)(acorn@8.14.1)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(typescript@5.8.2))(@swc/core@1.11.9)(acorn@8.14.1)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       '@docusaurus/utils': 3.7.0(@swc/core@1.11.9)(acorn@8.14.1)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
-      docusaurus-plugin-redoc: 2.2.1(@docusaurus/utils@3.7.0(@swc/core@1.11.9)(acorn@8.14.1)(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(core-js@3.41.0)(enzyme@3.11.0)(mobx@6.13.6)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(styled-components@6.1.15(react-dom@19.0.0(react@19.0.0))(react@19.0.0))
-      docusaurus-theme-redoc: 2.2.1(@docusaurus/theme-common@3.7.0(@docusaurus/plugin-content-docs@3.7.0(@docusaurus/faster@3.7.0(@docusaurus/types@3.7.0(@swc/core@1.11.9)(acorn@8.14.1)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)))(@mdx-js/react@3.1.0(@types/react@19.0.12)(react@19.0.0))(@swc/core@1.11.9)(acorn@8.14.1)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(typescript@5.8.2))(@swc/core@1.11.9)(acorn@8.14.1)(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(core-js@3.41.0)(enzyme@3.11.0)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(webpack@5.98.0(@swc/core@1.11.9))
+      docusaurus-plugin-redoc: 2.2.2(@docusaurus/utils@3.7.0(@swc/core@1.11.9)(acorn@8.14.1)(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(core-js@3.41.0)(enzyme@3.11.0)(mobx@6.13.7)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(styled-components@6.1.16(react-dom@19.0.0(react@19.0.0))(react@19.0.0))
+      docusaurus-theme-redoc: 2.2.2(@docusaurus/theme-common@3.7.0(@docusaurus/plugin-content-docs@3.7.0(@docusaurus/faster@3.7.0(@docusaurus/types@3.7.0(@swc/core@1.11.9)(acorn@8.14.1)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)))(@mdx-js/react@3.1.0(@types/react@19.0.12)(react@19.0.0))(@swc/core@1.11.9)(acorn@8.14.1)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(typescript@5.8.2))(@swc/core@1.11.9)(acorn@8.14.1)(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(core-js@3.41.0)(enzyme@3.11.0)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)(webpack@5.98.0(@swc/core@1.11.9))
     transitivePeerDependencies:
       - core-js
       - encoding
@@ -13652,7 +13659,7 @@ snapshots:
     dependencies:
       inline-style-parser: 0.2.4
 
-  styled-components@6.1.15(react-dom@19.0.0(react@19.0.0))(react@19.0.0):
+  styled-components@6.1.16(react-dom@19.0.0(react@19.0.0))(react@19.0.0):
     dependencies:
       '@emotion/is-prop-valid': 1.2.2
       '@emotion/unitless': 0.8.1
