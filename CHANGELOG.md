@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.5.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.5.0) - 2025-03-22
+## [3.5.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.5.0) - 2025-03-23
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -24,6 +24,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update dependency @antfu/eslint-config to v4.11.0 [[#4994](https://github.com/woodpecker-ci/woodpecker/pull/4994)]
 - chore(deps): update woodpeckerci/plugin-release docker tag to v0.2.5 [[#4993](https://github.com/woodpecker-ci/woodpecker/pull/4993)]
 - fix(deps): update module github.com/google/go-github/v69 to v70 [[#4990](https://github.com/woodpecker-ci/woodpecker/pull/4990)]
 - fix(deps): update web npm deps non-major [[#4989](https://github.com/woodpecker-ci/woodpecker/pull/4989)]
