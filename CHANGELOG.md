@@ -8,6 +8,7 @@
 
 ### 📚 Documentation
 
+- fix(deps): update dependency redocusaurus to v2.2.2 [[#4998](https://github.com/woodpecker-ci/woodpecker/pull/4998)]
 - Add missing links to 3.x docs [[#4991](https://github.com/woodpecker-ci/woodpecker/pull/4991)]
 - chore(deps): update docs npm deps non-major [[#4987](https://github.com/woodpecker-ci/woodpecker/pull/4987)]
 - Rework secrets docs and document multiline secrets [[#4974](https://github.com/woodpecker-ci/woodpecker/pull/4974)]
