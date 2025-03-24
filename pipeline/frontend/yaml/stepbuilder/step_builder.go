@@ -18,7 +18,6 @@ package stepbuilder
 import (
 	"fmt"
 	"maps"
-	"path/filepath"
 	"strings"
 
 	"github.com/oklog/ulid/v2"
@@ -34,25 +33,21 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/linter"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/matrix"
 	yaml_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/types"
-	"go.woodpecker-ci.org/woodpecker/v3/server"
 	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
 // StepBuilder Takes the hook data and the yaml and returns in internal data model.
 type StepBuilder struct {
-	Repo          *model.Repo
-	Curr          *model.Pipeline
-	Prev          *model.Pipeline
-	Netrc         *model.Netrc
-	Secs          []*model.Secret
-	Regs          []*model.Registry
-	Host          string
-	Yamls         []*forge_types.FileMeta
-	Envs          map[string]string
-	Forge         metadata.ServerForge
-	DefaultLabels map[string]string
-	ProxyOpts     compiler.ProxyOptions
+	Yamls                []*forge_types.FileMeta
+	CompilerOptions      []compiler.Option
+	WorkflowMetadataFunc func(*model.Workflow) metadata.Metadata
+	RepoTrusted          *metadata.TrustedConfiguration
+	TrustedClonePlugins  []string
+	PrivilegedPlugins    []string
+	Host                 string
+	Envs                 map[string]string
+	DefaultLabels        map[string]string
 }
 
 type Item struct {
@@ -117,17 +112,12 @@ func (b *StepBuilder) Build() (items []*Item, errorsAndWarnings error) {
 }
 
 func (b *StepBuilder) genItemForWorkflow(workflow *model.Workflow, axis matrix.Axis, data string) (item *Item, errorsAndWarnings error) {
-	workflowMetadata := MetadataFromStruct(b.Forge, b.Repo, b.Curr, b.Prev, workflow, b.Host)
-	environ := b.environmentVariables(workflowMetadata, axis)
+	workflowMetadata := b.WorkflowMetadataFunc(workflow)
 
-	// add global environment variables for substituting
-	for k, v := range b.Envs {
-		if _, exists := environ[k]; exists {
-			// don't override existing values
-			continue
-		}
-		environ[k] = v
-	}
+	environ := map[string]string{}
+	maps.Copy(environ, b.Envs)                     // global environment data
+	maps.Copy(environ, workflowMetadata.Environ()) // workflow environment data like CI_REPO_NAME
+	maps.Copy(environ, axis)
 
 	// substitute vars
 	substituted, err := metadata.EnvVarSubst(data, environ)
@@ -144,12 +134,12 @@ func (b *StepBuilder) genItemForWorkflow(workflow *model.Workflow, axis matrix.A
 	// lint pipeline
 	errorsAndWarnings = multierr.Append(errorsAndWarnings, linter.New(
 		linter.WithTrusted(linter.TrustedConfiguration{
-			Network:  b.Repo.Trusted.Network,
-			Volumes:  b.Repo.Trusted.Volumes,
-			Security: b.Repo.Trusted.Security,
+			Network:  b.RepoTrusted.Network,
+			Volumes:  b.RepoTrusted.Volumes,
+			Security: b.RepoTrusted.Security,
 		}),
-		linter.PrivilegedPlugins(server.Config.Pipeline.PrivilegedPlugins),
-		linter.WithTrustedClonePlugins(server.Config.Pipeline.TrustedClonePlugins),
+		linter.PrivilegedPlugins(b.PrivilegedPlugins),
+		linter.WithTrustedClonePlugins(b.TrustedClonePlugins),
 	).Lint([]*linter.WorkflowConfig{{
 		Workflow:  parsed,
 		File:      workflow.Name,
@@ -172,7 +162,7 @@ func (b *StepBuilder) genItemForWorkflow(workflow *model.Workflow, axis matrix.A
 		return nil, multierr.Append(errorsAndWarnings, err)
 	}
 
-	ir, err := b.toInternalRepresentation(parsed, environ, workflowMetadata, workflow.ID)
+	ir, err := b.compileWorkflow(parsed, environ, workflowMetadata, workflow.ID)
 	if err != nil {
 		return nil, multierr.Append(errorsAndWarnings, err)
 	}
@@ -197,102 +187,13 @@ func (b *StepBuilder) genItemForWorkflow(workflow *model.Workflow, axis matrix.A
 	return item, errorsAndWarnings
 }
 
-func stepListContainsItemsToRun(items []*Item) bool {
-	for i := range items {
-		if items[i].Workflow.State == model.StatusPending {
-			return true
-		}
-	}
-	return false
-}
-
-func filterItemsWithMissingDependencies(items []*Item) []*Item {
-	itemsToRemove := make([]*Item, 0)
-
-	for _, item := range items {
-		for _, dep := range item.DependsOn {
-			if !containsItemWithName(dep, items) {
-				itemsToRemove = append(itemsToRemove, item)
-			}
-		}
-	}
-
-	if len(itemsToRemove) > 0 {
-		filtered := make([]*Item, 0)
-		for _, item := range items {
-			if !containsItemWithName(item.Workflow.Name, itemsToRemove) {
-				filtered = append(filtered, item)
-			}
-		}
-		// Recursive to handle transitive deps
-		return filterItemsWithMissingDependencies(filtered)
-	}
-
-	return items
-}
-
-func containsItemWithName(name string, items []*Item) bool {
-	for _, item := range items {
-		if name == item.Workflow.Name {
-			return true
-		}
-	}
-	return false
-}
-
-func (b *StepBuilder) environmentVariables(metadata metadata.Metadata, axis matrix.Axis) map[string]string {
-	environ := metadata.Environ()
-	for k, v := range axis {
-		environ[k] = v
-	}
-	return environ
-}
-
-func (b *StepBuilder) toInternalRepresentation(parsed *yaml_types.Workflow, environ map[string]string, metadata metadata.Metadata, workflowID int64) (*backend_types.Config, error) {
-	var secrets []compiler.Secret
-	for _, sec := range b.Secs {
-		var events []string
-		for _, event := range sec.Events {
-			events = append(events, string(event))
-		}
-
-		secrets = append(secrets, compiler.Secret{
-			Name:           sec.Name,
-			Value:          sec.Value,
-			AllowedPlugins: sec.Images,
-			Events:         events,
-		})
-	}
-
-	var registries []compiler.Registry
-	for _, reg := range b.Regs {
-		registries = append(registries, compiler.Registry{
-			Hostname: reg.Address,
-			Username: reg.Username,
-			Password: reg.Password,
-		})
-	}
-
-	return compiler.New(
+func (b *StepBuilder) compileWorkflow(parsed *yaml_types.Workflow, environ map[string]string, metadata metadata.Metadata, workflowID int64) (*backend_types.Config, error) {
+	options := []compiler.Option{}
+	options = append(options,
 		compiler.WithEnviron(environ),
 		compiler.WithEnviron(b.Envs),
-		// TODO: server deps should be moved into StepBuilder fields and set on StepBuilder creation
-		compiler.WithEscalated(server.Config.Pipeline.PrivilegedPlugins...),
-		compiler.WithVolumes(server.Config.Pipeline.Volumes...),
-		compiler.WithNetworks(server.Config.Pipeline.Networks...),
-		compiler.WithLocal(false),
-		compiler.WithOption(
-			compiler.WithNetrc(
-				b.Netrc.Login,
-				b.Netrc.Password,
-				b.Netrc.Machine,
-			),
-			b.Repo.IsSCMPrivate || server.Config.Pipeline.AuthenticatePublicRepos,
-		),
-		compiler.WithDefaultClonePlugin(server.Config.Pipeline.DefaultClonePlugin),
-		compiler.WithTrustedClonePlugins(append(b.Repo.NetrcTrustedPlugins, server.Config.Pipeline.TrustedClonePlugins...)),
-		compiler.WithRegistry(registries...),
-		compiler.WithSecret(secrets...),
+		compiler.WithEscalated(b.PrivilegedPlugins...),
+		compiler.WithTrustedClonePlugins(b.TrustedClonePlugins), // TODO: append repo trusted clone plugins
 		compiler.WithPrefix(
 			fmt.Sprintf(
 				"wp_%s_%d",
@@ -300,17 +201,10 @@ func (b *StepBuilder) toInternalRepresentation(parsed *yaml_types.Workflow, envi
 				workflowID,
 			),
 		),
-		compiler.WithProxy(b.ProxyOpts),
-		compiler.WithWorkspaceFromURL(compiler.DefaultWorkspaceBase, b.Repo.ForgeURL),
 		compiler.WithMetadata(metadata),
-		compiler.WithTrustedSecurity(b.Repo.Trusted.Security),
-	).Compile(parsed)
-}
+		compiler.WithTrustedSecurity(b.RepoTrusted.Security),
+	)
+	options = append(options, b.CompilerOptions...)
 
-func SanitizePath(path string) string {
-	path = filepath.Base(path)
-	path = strings.TrimSuffix(path, ".yml")
-	path = strings.TrimSuffix(path, ".yaml")
-	path = strings.TrimPrefix(path, ".")
-	return path
+	return compiler.New(options...).Compile(parsed)
 }

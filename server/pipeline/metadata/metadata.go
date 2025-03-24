@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package stepbuilder
+package metadata
 
 import (
 	"fmt"
@@ -25,7 +25,7 @@ import (
 )
 
 // MetadataFromStruct return the metadata from a pipeline will run with.
-func MetadataFromStruct(forge metadata.ServerForge, repo *model.Repo, pipeline, prev *model.Pipeline, workflow *model.Workflow, sysURL string) metadata.Metadata {
+func MetadataFromStruct(forge metadata.ServerForge, repo *model.Repo, pipeline, prev *model.Pipeline, sysURL string) func(workflow *model.Workflow) metadata.Metadata {
 	host := sysURL
 	uri, err := url.Parse(sysURL)
 	if err == nil {
@@ -69,29 +69,31 @@ func MetadataFromStruct(forge metadata.ServerForge, repo *model.Repo, pipeline, 
 		}
 	}
 
-	fWorkflow := metadata.Workflow{}
-	if workflow != nil {
-		fWorkflow = metadata.Workflow{
-			Name:   workflow.Name,
-			Number: workflow.PID,
-			Matrix: workflow.Environ,
+	return func(workflow *model.Workflow) metadata.Metadata {
+		fWorkflow := metadata.Workflow{}
+		if workflow != nil {
+			fWorkflow = metadata.Workflow{
+				Name:   workflow.Name,
+				Number: workflow.PID,
+				Matrix: workflow.Environ,
+			}
 		}
-	}
 
-	return metadata.Metadata{
-		Repo:     fRepo,
-		Curr:     metadataPipelineFromModelPipeline(pipeline, true),
-		Prev:     metadataPipelineFromModelPipeline(prev, false),
-		Workflow: fWorkflow,
-		Step:     metadata.Step{},
-		Sys: metadata.System{
-			Name:     "woodpecker",
-			URL:      sysURL,
-			Host:     host,
-			Platform: "", // will be set by pipeline platform option or by agent
-			Version:  version.Version,
-		},
-		Forge: fForge,
+		return metadata.Metadata{
+			Repo:     fRepo,
+			Curr:     metadataPipelineFromModelPipeline(pipeline, true),
+			Prev:     metadataPipelineFromModelPipeline(prev, false),
+			Workflow: fWorkflow,
+			Step:     metadata.Step{},
+			Sys: metadata.System{
+				Name:     "woodpecker",
+				URL:      sysURL,
+				Host:     host,
+				Platform: "", // will be set by pipeline platform option or by agent
+				Version:  version.Version,
+			},
+			Forge: fForge,
+		}
 	}
 }
 
