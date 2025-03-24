@@ -184,6 +184,14 @@ func (b *StepBuilder) genItemForWorkflow(workflow *model.Workflow, axis matrix.A
 		maps.Copy(item.Labels, b.DefaultLabels)
 	}
 
+	item.Labels = workflowMetadata.Labels(item.Labels)
+
+	for stageI := range item.Config.Stages {
+		for stepI := range item.Config.Stages[stageI].Steps {
+			item.Config.Stages[stageI].Steps[stepI].WorkflowLabels = item.Labels
+		}
+	}
+
 	return item, errorsAndWarnings
 }
 
