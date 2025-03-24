@@ -148,6 +148,12 @@ const routes: RouteRecordRaw[] = [
                 component: (): Component => import('~/views/repo/settings/Badge.vue'),
                 props: true,
               },
+              {
+                path: 'actions',
+                name: 'repo-settings-actions',
+                component: (): Component => import('~/views/repo/settings/Actions.vue'),
+                props: true,
+              },
             ],
           },
           {

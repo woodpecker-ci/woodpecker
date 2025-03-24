@@ -24,7 +24,6 @@
   <SvgIcon v-else-if="name === 'info'" :path="mdiInformationSlabCircleOutline" size="1.3rem" />
   <SvgIcon v-else-if="name === 'user'" :path="mdiAccountOutline" size="1.3rem" />
   <SvgIcon v-else-if="name === 'org'" :path="mdiAccountGroupOutline" size="1.3rem" />
-  <SvgIcon v-else-if="name === 'cron'" :path="mdiCalendarClockOutline" size="1.3rem" />
   <SvgIcon
     v-else-if="name === 'status-failure' || name === 'status-error' || name === 'status-killed'"
     type="mdi"
@@ -102,7 +101,6 @@ import {
   mdiArrowLeft,
   mdiBitbucket,
   mdiBugOutline,
-  mdiCalendarClockOutline,
   mdiCheckCircle,
   mdiChevronRight,
   mdiClockTimeEightOutline,
@@ -219,9 +217,7 @@ export type IconNames =
   | 'info'
   | 'repo'
   | 'user'
-  | 'org'
-  | 'cron'
-  | 'tag';
+  | 'org';
 
 defineProps<{
   name: IconNames;
