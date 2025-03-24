@@ -95,7 +95,7 @@
     "settings": {
       "not_allowed": "You are not allowed to access the settings of this repository",
       "general": {
-        "general": "General",
+        "general": "Project",
         "project": "Project settings",
         "save": "Save settings",
         "success": "Project settings updated",
@@ -417,7 +417,7 @@
     "settings": {
       "settings": "User Settings",
       "general": {
-        "general": "General",
+        "general": "Account",
         "language": "Language",
         "theme": {
           "theme": "Theme",
