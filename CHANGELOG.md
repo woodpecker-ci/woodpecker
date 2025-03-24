@@ -6,14 +6,9 @@
 
 @jenrik, @xoxys
 
-### 📈 Enhancement
-
-- Add icons to all tabs [[#4421](https://github.com/woodpecker-ci/woodpecker/pull/4421)]
-- Tag pipeline with source information [[#4796](https://github.com/woodpecker-ci/woodpecker/pull/4796)]
-- Add titles and descriptions to repos page [[#4981](https://github.com/woodpecker-ci/woodpecker/pull/4981)]
-
 ### 📚 Documentation
 
+- Revert manual changes to changelog [[#5007](https://github.com/woodpecker-ci/woodpecker/pull/5007)]
 - Add missing docs for 3.x minor versions [[#4992](https://github.com/woodpecker-ci/woodpecker/pull/4992)]
 - chore(deps): lock file maintenance [[#5000](https://github.com/woodpecker-ci/woodpecker/pull/5000)]
 - fix(deps): update dependency redocusaurus to v2.2.2 [[#4998](https://github.com/woodpecker-ci/woodpecker/pull/4998)]
@@ -21,6 +16,12 @@
 - chore(deps): update docs npm deps non-major [[#4987](https://github.com/woodpecker-ci/woodpecker/pull/4987)]
 - Rework secrets docs and document multiline secrets [[#4974](https://github.com/woodpecker-ci/woodpecker/pull/4974)]
 - Add documentation for WOODPECKER_EXPERT env vars [[#4972](https://github.com/woodpecker-ci/woodpecker/pull/4972)]
+
+### 📈 Enhancement
+
+- Add icons to all tabs [[#4421](https://github.com/woodpecker-ci/woodpecker/pull/4421)]
+- Tag pipeline with source information [[#4796](https://github.com/woodpecker-ci/woodpecker/pull/4796)]
+- Add titles and descriptions to repos page [[#4981](https://github.com/woodpecker-ci/woodpecker/pull/4981)]
 
 ### 🐛 Bug Fixes
 
