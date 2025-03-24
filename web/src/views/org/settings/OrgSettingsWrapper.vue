@@ -11,10 +11,11 @@
       </span>
     </template>
 
-    <Tab :to="{ name: 'org-settings-secrets' }" :title="$t('secrets.secrets')" />
-    <Tab :to="{ name: 'org-settings-registries' }" :title="$t('registries.registries')" />
+    <Tab icon="secret" :to="{ name: 'org-settings-secrets' }" :title="$t('secrets.secrets')" />
+    <Tab icon="docker" :to="{ name: 'org-settings-registries' }" :title="$t('registries.registries')" />
     <Tab
       v-if="useConfig().userRegisteredAgents"
+      icon="agent"
       :to="{ name: 'org-settings-agents' }"
       :title="$t('admin.settings.agents.agents')"
     />
