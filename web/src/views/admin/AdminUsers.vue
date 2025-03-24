@@ -21,7 +21,7 @@
         <Badge
           v-if="user.admin"
           class="md:display-unset ml-auto hidden"
-          :label="$t('admin.settings.users.admin.admin')"
+          :value="$t('admin.settings.users.admin.admin')"
         />
         <IconButton
           icon="edit"

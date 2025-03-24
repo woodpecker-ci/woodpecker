@@ -20,7 +20,7 @@
           <Badge
             v-if="!repo.active"
             class="md:display-unset mr-2 hidden"
-            :label="$t('admin.settings.repos.disabled')"
+            :value="$t('admin.settings.repos.disabled')"
           />
           <IconButton
             icon="chevron-right"
