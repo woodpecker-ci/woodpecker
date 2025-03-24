@@ -594,34 +594,24 @@ For more details check the [matrix build docs](./30-matrix-workflows.md).
 
 ## `labels`
 
-Use labels to select the agent that executes your workflow. An agent will execute a workflow only if **all** its assigned labels match the workflow's labels. For Kubernetes agents, these labels propagate to any related resources created during pipeline execution, including pods and secrets.
-To configure additional agent labels, see the [agent configuration options](../30-administration/10-configuration/30-agent.md#agent_labels). Agents have pre-configured filters for the following labels:
+You can set labels for your workflow to select an agent to execute the workflow on. An agent will pick up and run a workflow when **every** label assigned to it matches the agents labels.
 
-| Label                              | Description                                                        | Woodpecker managed |
-|------------------------------------|--------------------------------------------------------------------|--------------------|
-| `woodpecker-ci.org/forge-id`       | Internal Forge identifier                                          | 🤖 yes             |
-| `woodpecker-ci.org/repo-forge-id`  | Repository identifier from the Forge                               | 🤖 yes             |
-| `woodpecker-ci.org/repo-id`        | Internal repository identifier                                     | 🤖 yes             |
-| `woodpecker-ci.org/repo-name`      | Repository display name (excluding project/organization)           | 🤖 yes             |
-| `woodpecker-ci.org/repo-full-name` | Repository display name (including project/organization)           | 🤖 yes             |
-| `woodpecker-ci.org/branch`         | Git branch name                                                    | 🤖 yes             |
-| `woodpecker-ci.org/org-id`         | Internal organization/project identifier                           | 🤖 yes             |
-| `repo`                             | (deprecated) Combined repository and project name (`org/git_repo`) | 🤖 yes             |
-| `platform`                         | (deprecated) Agent OS and CPU architecture (e.g., `linux/amd64`)   | 🧑‍💻 no           |
-| `hostname`                         | Agent name                                                         | 🧑‍💻 no           |
-| `backend`                          | Agent's backend technology (kubernetes, docker, local)             | 🧑‍💻 no           |
-| `org-id`                           | Internal organization/project identifier                           | 🤖 yes             |
+To set additional agent labels, check the [agent configuration options](../30-administration/10-configuration/30-agent.md#agent_labels). Agents will have at least four default labels: `platform=agent-os/agent-arch`, `hostname=my-agent`, `backend=docker` (type of the agent backend) and `repo=*`. Agents can use a `*` as a wildcard for a label. For example `repo=*` will match every repo.
 
-You can add more labels as key-value pairs under the `labels` field in your pipeline. Labels marked as Woodpecker managed can not be set as part of the pipeline definition. Labels with empty values are ignored.
+Workflow labels with an empty value will be ignored.
+By default, each workflow has at least the `repo=your-user/your-repo-name` label. If you have set the [platform attribute](#platform) for your workflow it will have a label like `platform=your-os/your-arch` as well.
 
-Specifying the [platform attribute](#platform) for your workflow automatically adds a corresponding `woodpecker-ci.org/platform` label, such as `woodpecker-ci.org/platform=your-os/your-arch`.
+:::warning
+Labels with the `woodpecker-ci.org` prefix are managed by Woodpecker and can not be set as part of the pipeline definition.
+:::
+
+You can add additional labels as a key value map:
 
 ```diff
 +labels:
-+  location: europe # Only agents with `location=europe` or `location=*` will execute this workflow.
++  location: europe # only agents with `location=europe` or `location=*` will be used
 +  weather: sun
-+  hostname: "" # Ignored because the value is empty.
-+  woodpecker-ci.org/forge-id: 1 # Ignored because it sets a managed label.
++  hostname: "" # this label will be ignored as it is empty
 
  steps:
    - name: build

@@ -64,9 +64,9 @@ func (a *Agent) GetServerLabels() (map[string]string, error) {
 
 	// enforce filters for user and organization agents
 	if a.OrgID != IDNotSet {
-		filters[pipeline.LabelOrgID] = fmt.Sprintf("%d", a.OrgID)
+		filters[pipeline.LabelFilterOrg] = fmt.Sprintf("%d", a.OrgID)
 	} else {
-		filters[pipeline.LabelOrgID] = "*"
+		filters[pipeline.LabelFilterOrg] = "*"
 	}
 
 	return filters, nil

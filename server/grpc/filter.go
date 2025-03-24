@@ -15,6 +15,9 @@
 package grpc
 
 import (
+	"strings"
+
+	pipelineConsts "go.woodpecker-ci.org/woodpecker/v3/pipeline"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/rpc"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 	"go.woodpecker-ci.org/woodpecker/v3/server/queue"
@@ -22,6 +25,13 @@ import (
 
 func createFilterFunc(agentFilter rpc.Filter) queue.FilterFn {
 	return func(task *model.Task) (bool, int) {
+		// ignore internal labels for filtering
+		for k := range task.Labels {
+			if strings.HasPrefix(k, pipelineConsts.InternalLabelPrefix) {
+				delete(task.Labels, k)
+			}
+		}
+
 		score := 0
 		for taskLabel, taskLabelValue := range task.Labels {
 			// if a task label is empty it will be ignored
