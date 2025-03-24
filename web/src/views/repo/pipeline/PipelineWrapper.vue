@@ -73,7 +73,7 @@
       </div>
     </template>
 
-    <Tab :to="{ name: 'repo-pipeline' }" :title="$t('repo.pipeline.tasks')" />
+    <Tab icon="tray-full" :to="{ name: 'repo-pipeline' }" :title="$t('repo.pipeline.tasks')" />
     <Tab
       v-if="pipeline.errors && pipeline.errors.length > 0"
       :to="{ name: 'repo-pipeline-errors' }"
@@ -82,7 +82,7 @@
       :count="pipeline.errors?.length"
       :icon-class="pipeline.errors.some((e) => !e.is_warning) ? 'text-wp-error-100' : 'text-wp-state-warn-100'"
     />
-    <Tab :to="{ name: 'repo-pipeline-config' }" :title="$t('repo.pipeline.config')" />
+    <Tab icon="file-cog-outlined" :to="{ name: 'repo-pipeline-config' }" :title="$t('repo.pipeline.config')" />
     <Tab
       v-if="pipeline.changed_files && pipeline.changed_files.length > 0"
       :to="{ name: 'repo-pipeline-changed-files' }"
@@ -91,6 +91,7 @@
     />
     <Tab
       v-if="repoPermissions && repoPermissions.push"
+      icon="bug-outline"
       :to="{ name: 'repo-pipeline-debug' }"
       :title="$t('repo.pipeline.debug.title')"
     />

@@ -24,7 +24,7 @@
         :to="{ name: 'repo-branch', params: { branch: prettyRef } }"
       >
         <Icon v-if="pipeline.event === 'manual'" name="manual-pipeline" />
-        <Icon v-else-if="pipeline.event === 'push'" name="push" />
+        <Icon v-else-if="pipeline.event === 'push'" name="branch" />
         <Icon v-else-if="pipeline.event === 'deployment'" name="deployment" />
         <span class="truncate">{{ prettyRef }}</span>
       </router-link>
