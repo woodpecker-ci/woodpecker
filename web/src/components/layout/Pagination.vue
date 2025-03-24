@@ -16,7 +16,7 @@ import { computed, nextTick } from 'vue';
 
 import Button from '~/components/atomic/Button.vue';
 import Icon from '~/components/atomic/Icon.vue';
-import { usePagination } from '~/compositions/usePaginate';
+import type { usePagination } from '~/compositions/usePaginate';
 
 const props = defineProps<{
   pagination: ReturnType<typeof usePagination>;
