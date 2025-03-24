@@ -8,7 +8,10 @@
     >
       {{ label }}
     </span>
-    <span v-if="value !== undefined" class="border-wp-state-neutral-100 rounded-r-full border-1 py-0.5 pr-2 pl-1">
+    <span
+      v-if="value !== undefined"
+      class="border-wp-state-neutral-100 rounded-r-full border-1 py-0.5 pr-2 pl-1 whitespace-nowrap"
+    >
       {{ value }}
     </span>
   </span>
