@@ -1,5 +1,5 @@
 <template>
-  <router-link v-if="to" :to="to" :title="title" :aria-label="title" class="icon-button h-8 w-8">
+  <router-link v-if="to" :to="to" :title="title" :aria-label="title" class="h-8 w-8" :class="btnClass">
     <slot>
       <Icon v-if="icon" :name="icon" />
     </slot>
@@ -9,7 +9,7 @@
     :href="href"
     :title="title"
     :aria-label="title"
-    class="icon-button"
+    :class="btnClass"
     target="_blank"
     rel="noopener noreferrer"
   >
@@ -17,7 +17,7 @@
       <Icon v-if="icon" :name="icon" />
     </slot>
   </a>
-  <button v-else :disabled="disabled" class="icon-button" type="button" :title="title" :aria-label="title">
+  <button v-else :disabled="disabled" :class="btnClass" type="button" :title="title" :aria-label="title">
     <slot>
       <Icon v-if="icon" :name="icon" />
     </slot>
@@ -41,12 +41,7 @@ defineProps<{
   title?: string;
   href?: string;
 }>();
+
+const btnClass =
+  'hover-effect relative flex cursor-pointer items-center justify-center overflow-hidden rounded-md bg-transparent px-1 py-1 disabled:cursor-not-allowed disabled:opacity-50';
 </script>
-
-<style scoped>
-@reference '~/tailwind.css';
-
-.icon-button {
-  @apply hover-effect relative flex items-center justify-center overflow-hidden rounded-md bg-transparent px-1 py-1 disabled:cursor-not-allowed disabled:opacity-50;
-}
-</style>
