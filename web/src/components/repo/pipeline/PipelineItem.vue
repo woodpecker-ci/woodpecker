@@ -60,9 +60,9 @@
             <Icon v-else-if="pipeline.event === 'pull_request_closed'" name="pull-request-closed" />
             <Icon v-else-if="pipeline.event === 'deployment'" name="deployment" />
             <Icon v-else-if="pipeline.event === 'tag' || pipeline.event === 'release'" name="tag" />
-            <Icon v-else-if="pipeline.event === 'cron'" name="push" />
+            <Icon v-else-if="pipeline.event === 'cron'" name="branch" />
             <Icon v-else-if="pipeline.event === 'manual'" name="manual-pipeline" />
-            <Icon v-else name="push" />
+            <Icon v-else name="branch" />
           </span>
           <span class="truncate">{{ prettyRef }}</span>
         </div>

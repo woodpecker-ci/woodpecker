@@ -28,6 +28,7 @@ import (
 	"github.com/rs/zerolog/log"
 	grpcMetadata "google.golang.org/grpc/metadata"
 
+	pipelineConsts "go.woodpecker-ci.org/woodpecker/v3/pipeline"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/rpc"
 	"go.woodpecker-ci.org/woodpecker/v3/server"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge"
@@ -51,11 +52,43 @@ type RPC struct {
 	pipelineCount *prometheus.CounterVec
 }
 
+// Replaces legacy filter labels with new ones.
+func migrateFilterLabels(filter rpc.Filter) rpc.Filter {
+	if value, ok := filter.Labels["repo"]; ok {
+		filter.Labels[pipelineConsts.LabelRepoFullName] = value
+		delete(filter.Labels, "repo")
+	}
+
+	if value, ok := filter.Labels["platform"]; ok {
+		filter.Labels[pipelineConsts.LabelPlatform] = value
+		delete(filter.Labels, "platform")
+	}
+
+	if value, ok := filter.Labels["hostname"]; ok {
+		filter.Labels[pipelineConsts.LabelHostname] = value
+		delete(filter.Labels, "hostname")
+	}
+
+	if value, ok := filter.Labels["backend"]; ok {
+		filter.Labels[pipelineConsts.LabelBackend] = value
+		delete(filter.Labels, "backend")
+	}
+
+	if value, ok := filter.Labels["org-id"]; ok {
+		filter.Labels[pipelineConsts.LabelOrgID] = value
+		delete(filter.Labels, "org-id")
+	}
+
+	return filter
+}
+
 // Next blocks until it provides the next workflow to execute.
 func (s *RPC) Next(c context.Context, agentFilter rpc.Filter) (*rpc.Workflow, error) {
 	if hostname, err := s.getHostnameFromContext(c); err == nil {
 		log.Debug().Msgf("agent connected: %s: polling", hostname)
 	}
+
+	agentFilter = migrateFilterLabels(agentFilter)
 
 	agent, err := s.getAgentFromContext(c)
 	if err != nil {

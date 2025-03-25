@@ -38,7 +38,7 @@
         :to="{ name: 'repo-branch', params: { branch: prettyRef } }"
       >
         <Icon v-if="pipeline.event === 'manual'" name="manual-pipeline" />
-        <Icon v-else-if="pipeline.event === 'push'" name="push" />
+        <Icon v-else-if="pipeline.event === 'push'" name="branch" />
         <Icon v-else-if="pipeline.event === 'deployment'" name="deployment" />
         <Icon v-else-if="pipeline.event === 'cron'" name="stopwatch" />
         <span class="truncate">{{ prettyRef }}</span>
@@ -76,7 +76,7 @@
               v-if="!singleConfig"
               type="button"
               :title="workflow.name"
-              class="hover-effect hover:bg-wp-background-300 dark:hover:bg-wp-background-400 flex items-center gap-2 rounded-md px-1 py-2"
+              class="hover-effect hover:bg-wp-background-300 dark:hover:bg-wp-background-400 flex cursor-pointer items-center gap-2 rounded-md px-1 py-2"
               @click="workflowsCollapsed[workflow.id] = !workflowsCollapsed[workflow.id]"
             >
               <Icon
@@ -102,7 +102,7 @@
               :key="step.pid"
               type="button"
               :title="step.name"
-              class="hover-effect hover:bg-wp-background-300 dark:hover:bg-wp-background-400 flex w-full items-center gap-2 rounded-md border-2 border-transparent p-2"
+              class="hover-effect hover:bg-wp-background-300 dark:hover:bg-wp-background-400 flex w-full cursor-pointer items-center gap-2 rounded-md border-2 border-transparent p-2"
               :class="{
                 'bg-wp-background-300 dark:bg-wp-background-400': selectedStepId && selectedStepId === step.pid,
                 'mt-1': !singleConfig || (workflow.children && step.pid !== workflow.children[0].pid),

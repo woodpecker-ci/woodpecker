@@ -123,7 +123,8 @@ func TestTinyPod(t *testing.T) {
 			"namespace": "woodpecker",
 			"creationTimestamp": null,
 			"labels": {
-				"step": "build-via-gradle"
+				"step": "build-via-gradle",
+				"woodpecker-ci.org/step": "build-via-gradle"
 			}
 		},
 		"spec": {
@@ -204,7 +205,8 @@ func TestFullPod(t *testing.T) {
 			"labels": {
 				"app": "test",
 				"part-of": "woodpecker-ci",
-				"step": "go-test"
+				"step": "go-test",
+				"woodpecker-ci.org/step": "go-test"
 			},
 			"annotations": {
 				"apps.kubernetes.io/pod-index": "0",
@@ -498,7 +500,8 @@ func TestScratchPod(t *testing.T) {
 			"namespace": "woodpecker",
 			"creationTimestamp": null,
 			"labels": {
-				"step": "curl-google"
+				"step": "curl-google",
+				"woodpecker-ci.org/step": "curl-google"
 			}
 		},
 		"spec": {
@@ -543,7 +546,8 @@ func TestSecrets(t *testing.T) {
 			"namespace": "woodpecker",
 			"creationTimestamp": null,
 			"labels": {
-				"step": "test-secrets"
+				"step": "test-secrets",
+				"woodpecker-ci.org/step": "test-secrets"
 			}
 		},
 		"spec": {

@@ -2,7 +2,7 @@
 <template>
   <SvgIcon v-if="name === 'duration'" :path="mdiTimerOutline" size="1.3rem" />
   <SvgIcon v-else-if="name === 'since'" :path="mdiClockTimeEightOutline" size="1.3rem" />
-  <SvgIcon v-else-if="name === 'push'" :path="mdiSourceBranch" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'branch'" :path="mdiSourceBranch" size="1.3rem" />
   <SvgIcon v-else-if="name === 'pull-request'" :path="mdiSourcePull" size="1.3rem" />
   <SvgIcon v-else-if="name === 'pull-request-closed'" :path="mdiSourceMerge" size="1.3rem" />
   <SvgIcon v-else-if="name === 'manual-pipeline'" :path="mdiGestureTap" size="1.3rem" />
@@ -17,6 +17,15 @@
   <SvgIcon v-else-if="name === 'trash'" :path="mdiTrashCanOutline" size="1.3rem" />
   <SvgIcon v-else-if="name === 'status-blocked'" :path="mdiPlayCircle" size="1.3rem" />
   <SvgIcon v-else-if="name === 'status-declined'" :path="mdiStopCircle" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'list-group'" :path="mdiFormatListGroup" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'secret'" :path="mdiShieldKeyOutline" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'console'" :path="mdiConsole" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'agent'" :path="mdiPlayNetworkOutline" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'info'" :path="mdiInformationSlabCircleOutline" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'user'" :path="mdiAccountOutline" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'org'" :path="mdiAccountGroupOutline" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'cron'" :path="mdiCalendarClockOutline" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'toolbox'" :path="mdiToolboxOutline" size="1.3rem" />
   <SvgIcon
     v-else-if="name === 'status-failure' || name === 'status-error' || name === 'status-killed'"
     type="mdi"
@@ -49,6 +58,10 @@
   <SvgIcon v-else-if="name === 'play'" :path="mdiPlay" size="1.3rem" />
   <SvgIcon v-else-if="name === 'play-outline'" :path="mdiPlayOutline" size="1.3rem" />
   <SvgIcon v-else-if="name === 'dots'" :path="mdiDotsVertical" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'tray-full'" :path="mdiTrayFull" size="24" />
+  <SvgIcon v-else-if="name === 'file-cog-outlined'" :path="mdiFileCogOutline" size="24" />
+  <SvgIcon v-else-if="name === 'bug-outline'" :path="mdiBugOutline" size="24" />
+  <SvgIcon v-else-if="name === 'docker'" :path="mdiDocker" size="1.3rem" />
 
   <SvgIcon v-else-if="name === 'visibility-private'" :path="mdiLockOutline" size="1.3rem" />
   <SvgIcon v-else-if="name === 'visibility-internal'" :path="mdiLockOpenOutline" size="1.3rem" />
@@ -83,10 +96,14 @@
 
 <script lang="ts" setup>
 import {
+  mdiAccountGroupOutline,
+  mdiAccountOutline,
   mdiAlarm,
   mdiAlertCircle,
   mdiArrowLeft,
   mdiBitbucket,
+  mdiBugOutline,
+  mdiCalendarClockOutline,
   mdiCheckCircle,
   mdiChevronRight,
   mdiClockTimeEightOutline,
@@ -94,16 +111,21 @@ import {
   mdiCloseCircle,
   mdiCog,
   mdiCogOutline,
+  mdiConsole,
+  mdiDocker,
   mdiDotsVertical,
   mdiDownloadOutline,
   mdiEyeOffOutline,
   mdiEyeOutline,
+  mdiFileCogOutline,
   mdiFormatListBulleted,
+  mdiFormatListGroup,
   mdiGestureTap,
   mdiGit,
   mdiGithub,
   mdiGitlab,
   mdiHelpCircle,
+  mdiInformationSlabCircleOutline,
   mdiLockOpenOutline,
   mdiLockOutline,
   mdiMinusCircle,
@@ -112,11 +134,13 @@ import {
   mdiPencilOutline,
   mdiPlay,
   mdiPlayCircle,
+  mdiPlayNetworkOutline,
   mdiPlayOutline,
   mdiPlus,
   mdiPower,
   mdiRadioboxBlank,
   mdiRadioboxIndeterminateVariant,
+  mdiShieldKeyOutline,
   mdiSourceBranch,
   mdiSourceCommit,
   mdiSourceMerge,
@@ -124,7 +148,9 @@ import {
   mdiStopCircle,
   mdiTagOutline,
   mdiTimerOutline,
+  mdiToolboxOutline,
   mdiTrashCanOutline,
+  mdiTrayFull,
   mdiWrenchCogOutline,
 } from '@mdi/js';
 import { siForgejo, siGitea } from 'simple-icons';
@@ -134,7 +160,7 @@ import SvgIcon from './SvgIcon.vue';
 export type IconNames =
   | 'duration'
   | 'since'
-  | 'push'
+  | 'branch'
   | 'pull-request'
   | 'pull-request-closed'
   | 'manual-pipeline'
@@ -183,7 +209,21 @@ export type IconNames =
   | 'spinner'
   | 'visibility-private'
   | 'visibility-internal'
-  | 'dots';
+  | 'dots'
+  | 'tray-full'
+  | 'file-cog-outlined'
+  | 'bug-outline'
+  | 'list-group'
+  | 'secret'
+  | 'docker'
+  | 'console'
+  | 'agent'
+  | 'info'
+  | 'repo'
+  | 'user'
+  | 'org'
+  | 'cron'
+  | 'toolbox';
 
 defineProps<{
   name: IconNames;
