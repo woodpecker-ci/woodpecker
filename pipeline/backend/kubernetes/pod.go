@@ -18,7 +18,6 @@ import (
 	"context"
 	"fmt"
 	"maps"
-	"regexp"
 	"strings"
 
 	"github.com/rs/zerolog/log"
@@ -101,11 +100,6 @@ func podMeta(step *types.Step, config *config, options BackendOptions, podName s
 	return meta, nil
 }
 
-var (
-	k8sLabelValueSanitizer = regexp.MustCompile("[^a-zA-Z0-9-]+")
-	k8sLabelKeySanitizer   = regexp.MustCompile(`[^a-zA-Z0-9-_./]+`)
-)
-
 func podLabels(step *types.Step, config *config, options BackendOptions) (map[string]string, error) {
 	var err error
 	labels := make(map[string]string)
@@ -114,9 +108,11 @@ func podLabels(step *types.Step, config *config, options BackendOptions) (map[st
 		// Only copy user labels if allowed by agent config.
 		// Internal labels are filtered on the server-side.
 		if config.PodLabelsAllowFromStep || strings.HasPrefix(k, pipeline.InternalLabelPrefix) {
-			sanitizedValue := k8sLabelValueSanitizer.ReplaceAllString(v, "__")
-			sanitizedKey := k8sLabelKeySanitizer.ReplaceAllString(k, "__")
-			labels[sanitizedKey] = sanitizedValue
+			sanitizedValue, err := toDNSName(v)
+			if err != nil {
+				return nil, err
+			}
+			labels[k] = sanitizedValue
 		}
 	}
 
