@@ -594,12 +594,12 @@ For more details check the [matrix build docs](./30-matrix-workflows.md).
 
 ## `labels`
 
-You can set labels for your workflow to select an agent to execute the workflow on. An agent will pick up and run a workflow when **every** label assigned to it matches the agents labels.
+You can define labels for your workflow in order to select an agent to execute the workflow. An agent takes up a workflow and executes it if **every** label assigned to it matches the label of the agent.
 
-To set additional agent labels, check the [agent configuration options](../30-administration/10-configuration/30-agent.md#agent_labels). Agents will have at least four default labels: `platform=agent-os/agent-arch`, `hostname=my-agent`, `backend=docker` (type of the agent backend) and `repo=*`. Agents can use a `*` as a wildcard for a label. For example `repo=*` will match every repo.
+To specify additional agent labels, check the [Agent configuration options] (../30-administration/10-configuration/30-agent.md#agent_labels). The agents have at least four default labels: `platform=agent-os/agent-arch`, `hostname=my-agent`, `backend=docker` (type of agent backend) and `repo=*`. Agents can use an `*` as a placeholder for a label. For example, `repo=*` matches any repo.
 
-Workflow labels with an empty value will be ignored.
-By default, each workflow has at least the `repo=your-user/your-repo-name` label. If you have set the [platform attribute](#platform) for your workflow it will have a label like `platform=your-os/your-arch` as well.
+Workflow labels with an empty value are ignored.
+By default, each workflow has at least the label `repo=your-user/your-repo-name`. If you have set the [platform attribute](#platform) for your workflow, it will also have a label such as `platform=your-os/your-arch`.
 
 :::warning
 Labels with the `woodpecker-ci.org` prefix are managed by Woodpecker and can not be set as part of the pipeline definition.
