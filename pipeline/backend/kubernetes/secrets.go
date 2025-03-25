@@ -262,7 +262,7 @@ func registrySecretLabels(step *types.Step, config *config) (map[string]string, 
 		if config.PodLabelsAllowFromStep || strings.HasPrefix(k, pipeline.InternalLabelPrefix) {
 			sanitizedValue, err := toDNSName(v)
 			if err != nil {
-				return nil, err
+				return labels, err
 			}
 			labels[k] = sanitizedValue
 		}
