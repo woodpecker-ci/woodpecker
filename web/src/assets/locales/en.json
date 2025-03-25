@@ -4,7 +4,17 @@
   "login": "Login",
   "welcome": "Welcome to Woodpecker",
   "repos": "Repos",
-  "repositories": "Repositories",
+  "repositories": {
+    "title": "Repositories",
+    "all": {
+      "title": "All repositories",
+      "desc": "Repositories sorted by last pipeline creation"
+    },
+    "last": {
+      "title": "Last visited",
+      "desc": "Most recently visited repositories sorted by access time"
+    }
+  },
   "docs": "Docs",
   "api": "API",
   "logout": "Logout",
@@ -85,7 +95,7 @@
     "settings": {
       "not_allowed": "You are not allowed to access the settings of this repository",
       "general": {
-        "general": "General",
+        "general": "Project",
         "project": "Project settings",
         "save": "Save settings",
         "success": "Project settings updated",
@@ -393,7 +403,7 @@
     "settings": {
       "settings": "User Settings",
       "general": {
-        "general": "General",
+        "general": "Account",
         "language": "Language",
         "theme": {
           "theme": "Theme",
@@ -500,6 +510,5 @@
       "desc": "Pipelines created by the listed users never require approval."
     }
   },
-  "all_repositories": "All repositories",
   "no_search_results": "No results found"
 }

@@ -43,6 +43,7 @@ type Step struct {
 	NetworkMode     string            `json:"network_mode,omitempty"`
 	Ports           []Port            `json:"ports,omitempty"`
 	BackendOptions  map[string]any    `json:"backend_options,omitempty"`
+	WorkflowLabels  map[string]string `json:"workflow_labels,omitempty"`
 }
 
 // StepType identifies the type of step.

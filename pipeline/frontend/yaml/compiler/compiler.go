@@ -169,7 +169,7 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 		for k, v := range c.cloneEnv {
 			container.Environment[k] = v
 		}
-		step, err := c.createProcess(container, backend_types.StepTypeClone)
+		step, err := c.createProcess(container, conf, backend_types.StepTypeClone)
 		if err != nil {
 			return nil, err
 		}
@@ -188,7 +188,7 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 
 			stage := new(backend_types.Stage)
 
-			step, err := c.createProcess(container, backend_types.StepTypeClone)
+			step, err := c.createProcess(container, conf, backend_types.StepTypeClone)
 			if err != nil {
 				return nil, err
 			}
@@ -217,7 +217,7 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 				return nil, err
 			}
 
-			step, err := c.createProcess(container, backend_types.StepTypeService)
+			step, err := c.createProcess(container, conf, backend_types.StepTypeService)
 			if err != nil {
 				return nil, err
 			}
@@ -245,7 +245,7 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 		if container.IsPlugin() {
 			stepType = backend_types.StepTypePlugin
 		}
-		step, err := c.createProcess(container, stepType)
+		step, err := c.createProcess(container, conf, stepType)
 		if err != nil {
 			return nil, err
 		}
