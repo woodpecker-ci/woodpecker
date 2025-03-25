@@ -47,6 +47,10 @@
 - fix(deps): update module github.com/expr-lang/expr to v1.17.1 [[#4983](https://github.com/woodpecker-ci/woodpecker/pull/4983)]
 - fix(deps): update module gitlab.com/gitlab-org/api/client-go to v0.126.0 [[#4976](https://github.com/woodpecker-ci/woodpecker/pull/4976)]
 
+### Misc
+
+- Replace illegal characters in Kubernetes labels [[#5013](https://github.com/woodpecker-ci/woodpecker/pull/5013)]
+
 ## [3.4.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.4.0) - 2025-03-17
 
 ### ❤️ Thanks to all contributors! ❤️
