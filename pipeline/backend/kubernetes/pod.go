@@ -108,11 +108,10 @@ func podLabels(step *types.Step, config *config, options BackendOptions) (map[st
 		// Only copy user labels if allowed by agent config.
 		// Internal labels are filtered on the server-side.
 		if config.PodLabelsAllowFromStep || strings.HasPrefix(k, pipeline.InternalLabelPrefix) {
-			sanitizedValue, err := toDNSName(v)
+			labels[k], err = toDNSName(v)
 			if err != nil {
-				return nil, err
+				return labels, err
 			}
-			labels[k] = sanitizedValue
 		}
 	}
 
