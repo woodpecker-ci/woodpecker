@@ -32,7 +32,7 @@
     },
     {
       "name": "Prettier",
-      "docs": "https://raw.githubusercontent.com/woodpecker-ci/plugin-prettier/main/docs.md",
+      "docs": "https://codeberg.org/woodpecker-plugins/prettier/raw/branch/main/docs.md",
       "verified": true
     },
     {
@@ -186,6 +186,11 @@
       "verified": true
     },
     {
+      "name": "Bluesky Post",
+      "docs": "https://codeberg.org/woodpecker-plugins/bluesky-post/raw/branch/main/docs.md",
+      "verified": true
+    },
+    {
       "name": "Discord",
       "docs": "https://raw.githubusercontent.com/appleboy/drone-discord/master/DOCS.md",
       "verified": false
@@ -218,6 +223,36 @@
     {
       "name": "Telegram",
       "docs": "https://raw.githubusercontent.com/appleboy/drone-telegram/refs/heads/master/DOCS.md",
+      "verified": false
+    },
+    {
+      "name": "EditorConfig Checker",
+      "docs": "https://codeberg.org/woodpecker-plugins/editorconfig-checker/raw/branch/main/docs.md",
+      "verified": true
+    },
+    {
+      "name": "Microsoft Teams Notify",
+      "docs": "https://raw.githubusercontent.com/GECO-IT/woodpecker-plugin-teams-notify/refs/heads/main/docs.md",
+      "verified": false
+    },
+    {
+      "name": "Basic Git Changelog",
+      "docs": "https://raw.githubusercontent.com/GECO-IT/woodpecker-plugin-git-basic-changelog/refs/heads/main/docs.md",
+      "verified": false
+    },
+    {
+      "name": "Hugo",
+      "docs": "https://raw.githubusercontent.com/maurerle/woodpecker-hugo/refs/heads/main/docs.md",
+      "verified": false
+    },
+    {
+      "name": "Home Assistant Notify",
+      "docs": "https://raw.githubusercontent.com/DHandspikerWade/woodpecker-plugin-ha-notify/refs/heads/main/docs.md",
+      "verified": false
+    },
+    {
+      "name": "Microsoft Teams Notification (Advanced)",
+      "docs": "https://raw.githubusercontent.com/mobydeck/ci-teams-notification/refs/heads/main/docs.md",
       "verified": false
     }
   ]

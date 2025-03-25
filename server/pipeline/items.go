@@ -18,19 +18,20 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"maps"
 
 	"github.com/rs/zerolog/log"
 
-	pipeline_errors "go.woodpecker-ci.org/woodpecker/v2/pipeline/errors"
-	pipeline_metadata "go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/metadata"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/compiler"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/stepbuilder"
-	"go.woodpecker-ci.org/woodpecker/v2/server"
-	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
-	forge_types "go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
-	"go.woodpecker-ci.org/woodpecker/v2/server/pipeline/metadata"
-	"go.woodpecker-ci.org/woodpecker/v2/server/store"
+	pipeline_errors "go.woodpecker-ci.org/woodpecker/v3/pipeline/errors"
+	pipeline_metadata "go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/compiler"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/stepbuilder"
+	"go.woodpecker-ci.org/woodpecker/v3/server"
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge"
+	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/pipeline/metadata"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 )
 
 func parsePipeline(forge forge.Forge, store store.Store, currentPipeline *model.Pipeline, user *model.User, repo *model.Repo, yamls []*forge_types.FileMeta, envs map[string]string) ([]*stepbuilder.Item, error) {
@@ -65,11 +66,35 @@ func parsePipeline(forge forge.Forge, store store.Store, currentPipeline *model.
 		})
 	}
 
+	var secrets []compiler.Secret
+	for _, sec := range secs {
+		var events []string
+		for _, event := range sec.Events {
+			events = append(events, string(event))
+		}
+
+		secrets = append(secrets, compiler.Secret{
+			Name:           sec.Name,
+			Value:          sec.Value,
+			AllowedPlugins: sec.Images,
+			Events:         events,
+		})
+	}
+
 	registryService := server.Config.Services.Manager.RegistryServiceFromRepo(repo)
 	regs, err := registryService.RegistryListPipeline(repo, currentPipeline)
 	if err != nil {
 		log.Error().Err(err).Msgf("error getting registry credentials for %s#%d", repo.FullName, currentPipeline.Number)
 	}
+	var registries []compiler.Registry
+	for _, reg := range regs {
+		registries = append(registries, compiler.Registry{
+			Hostname: reg.Address,
+			Username: reg.Username,
+			Password: reg.Password,
+		})
+	}
+
 	var registries []compiler.Registry
 	for _, reg := range regs {
 		registries = append(registries, compiler.Registry{
@@ -91,15 +116,13 @@ func parsePipeline(forge forge.Forge, store store.Store, currentPipeline *model.
 		}
 	}
 
-	for k, v := range currentPipeline.AdditionalVariables {
-		envs[k] = v
-	}
+	maps.Copy(envs, currentPipeline.AdditionalVariables)
 
-	meta := metadata.NewMetadataServerForge(forge, repo, currentPipeline, prev, server.Config.Server.Host)
+	workflowMetadataFunc := metadata.MetadataFromStruct(forge, repo, currentPipeline, prev, server.Config.Server.Host)
 
-	b := &stepbuilder.StepBuilder{
-		Yamls:               yamls,
-		GetWorkflowMetadata: meta.MetadataForWorkflow,
+	b := stepbuilder.StepBuilder{
+		Yamls:                yamls,
+		WorkflowMetadataFunc: workflowMetadataFunc,
 		RepoTrusted: &pipeline_metadata.TrustedConfiguration{
 			Network:  repo.Trusted.Network,
 			Volumes:  repo.Trusted.Volumes,
@@ -107,8 +130,9 @@ func parsePipeline(forge forge.Forge, store store.Store, currentPipeline *model.
 		},
 		Host:                server.Config.Server.Host,
 		Envs:                envs,
-		TrustedClonePlugins: server.Config.Pipeline.TrustedClonePlugins,
+		TrustedClonePlugins: append(server.Config.Pipeline.TrustedClonePlugins, repo.NetrcTrustedPlugins...),
 		PrivilegedPlugins:   server.Config.Pipeline.PrivilegedPlugins,
+		DefaultLabels:       server.Config.Pipeline.DefaultWorkflowLabels,
 		CompilerOptions: []compiler.Option{
 			compiler.WithVolumes(server.Config.Pipeline.Volumes...),
 			compiler.WithNetworks(server.Config.Pipeline.Networks...),
@@ -130,7 +154,6 @@ func parsePipeline(forge forge.Forge, store store.Store, currentPipeline *model.
 				HTTPSProxy: server.Config.Pipeline.Proxy.HTTPS,
 			}),
 			compiler.WithWorkspaceFromURL(compiler.DefaultWorkspaceBase, repo.ForgeURL),
-			compiler.WithNetrcOnlyTrusted(repo.NetrcOnlyTrusted),
 		},
 	}
 

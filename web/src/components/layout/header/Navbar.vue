@@ -1,24 +1,24 @@
 <template>
   <nav
-    class="flex bg-wp-primary-200 dark:bg-wp-primary-300 text-neutral-content p-4 border-b border-wp-background-100 font-bold text-wp-primary-text-100"
+    class="text-neutral-content border-wp-background-100 bg-wp-primary-200 text-wp-primary-text-100 dark:bg-wp-primary-300 flex border-b p-4 font-bold"
   >
     <div class="flex items-center space-x-2">
-      <router-link :to="{ name: 'home' }" class="flex flex-col -my-2 px-2">
-        <WoodpeckerLogo class="w-8 h-8" />
+      <router-link :to="{ name: 'home' }" class="-my-2 flex flex-col px-2">
+        <WoodpeckerLogo class="h-8 w-8" />
         <span class="text-xs" :title="version?.current">{{ version?.currentShort }}</span>
       </router-link>
-      <router-link v-if="user" :to="{ name: 'repos' }" class="navbar-link navbar-clickable">
+      <router-link v-if="user" :to="{ name: 'repos' }" class="navbar-clickable navbar-link">
         <span class="flex md:hidden">{{ $t('repos') }}</span>
-        <span class="hidden md:flex">{{ $t('repositories') }}</span>
+        <span class="hidden md:flex">{{ $t('repositories.title') }}</span>
       </router-link>
-      <a href="https://woodpecker-ci.org/" target="_blank" class="navbar-link navbar-clickable hidden md:flex">{{
+      <a href="https://woodpecker-ci.org/" target="_blank" class="navbar-clickable navbar-link hidden md:flex">{{
         $t('docs')
       }}</a>
-      <a v-if="enableSwagger" :href="apiUrl" target="_blank" class="navbar-link navbar-clickable hidden md:flex">{{
+      <a v-if="enableSwagger" :href="apiUrl" target="_blank" class="navbar-clickable navbar-link hidden md:flex">{{
         $t('api')
       }}</a>
     </div>
-    <div class="flex ml-auto -m-1.5 items-center space-x-2">
+    <div class="-m-1.5 ml-auto flex items-center space-x-2">
       <IconButton
         v-if="user?.admin"
         class="navbar-icon relative"
@@ -26,14 +26,11 @@
         :to="{ name: 'admin-settings' }"
       >
         <Icon name="settings" />
-        <div
-          v-if="version?.needsUpdate"
-          class="absolute top-2 right-2 bg-int-wp-state-error-100 rounded-full w-3 h-3"
-        />
+        <div v-if="version?.needsUpdate" class="bg-wp-error-100 absolute top-2 right-2 h-3 w-3 rounded-full" />
       </IconButton>
 
-      <ActivePipelines v-if="user" class="navbar-icon" />
-      <IconButton v-if="user" :to="{ name: 'user' }" :title="$t('user.settings.settings')" class="navbar-icon !p-1.5">
+      <ActivePipelines v-if="user" class="navbar-icon p-1.5!" />
+      <IconButton v-if="user" :to="{ name: 'user' }" :title="$t('user.settings.settings')" class="navbar-icon p-1.5!">
         <img v-if="user && user.avatar_url" class="rounded-md" :src="`${user.avatar_url}`" />
       </IconButton>
       <Button v-else :text="$t('login')" :to="`/login?url=${route.fullPath}`" />
@@ -65,15 +62,17 @@ const { enableSwagger } = config;
 </script>
 
 <style scoped>
+@reference '~/tailwind.css';
+
 .navbar-icon {
-  @apply w-11 h-11 rounded-md p-2.5;
+  @apply h-11 w-11 rounded-md p-2.5;
 }
 
 .navbar-icon :deep(svg) {
-  @apply w-full h-full;
+  @apply h-full w-full;
 }
 
 .navbar-link {
-  @apply px-3 py-2 -my-1 rounded-md hover-effect;
+  @apply hover-effect -my-1 rounded-md px-3 py-2;
 }
 </style>

@@ -1,9 +1,32 @@
-import { themes } from 'prism-react-renderer';
-import type { Config } from '@docusaurus/types';
-import type * as Preset from '@docusaurus/preset-classic';
 import * as path from 'path';
+import type { VersionBanner, VersionOptions } from '@docusaurus/plugin-content-docs';
+import type * as Preset from '@docusaurus/preset-classic';
+import type { Config } from '@docusaurus/types';
+import { themes } from 'prism-react-renderer';
 
-const config: Config = {
+import versions from './versions.json';
+
+const docsVersions: { [version: string]: VersionOptions } = {
+  current: {
+    label: 'Next 🚧',
+    banner: 'unreleased' as VersionBanner,
+  },
+};
+
+const includeVersions = ['current', versions[0]];
+
+versions.forEach((v, index) => {
+  const version = {
+    label: `${v}.x${index === 0 ? '' : ' 💀'}`,
+  };
+  if (index !== 0 && process.env.NODE_ENV !== 'development') {
+    version['banner'] = 'unmaintained';
+    includeVersions.push(v);
+  }
+  docsVersions[v] = version;
+});
+
+const config = {
   title: 'Woodpecker CI',
   tagline: 'Woodpecker is a simple, yet powerful CI/CD engine with great extensibility.',
   url: 'https://woodpecker-ci.org',
@@ -46,7 +69,7 @@ const config: Config = {
         },
         { to: 'blog', label: 'Blog', position: 'left' },
         {
-          label: 'More Resources',
+          label: 'More',
           position: 'left',
           items: [
             {
@@ -63,6 +86,10 @@ const config: Config = {
               to: '/api',
               label: 'API',
             },
+            {
+              to: '/about',
+              label: 'About',
+            },
           ],
         },
         {
@@ -76,15 +103,16 @@ const config: Config = {
           ],
         },
         {
+          label: 'Sponsor Us',
+          position: 'right',
+          className: 'header-sponsor-link',
+          href: 'https://opencollective.com/woodpecker-ci',
+        },
+        {
           href: 'https://github.com/woodpecker-ci/woodpecker',
           position: 'right',
           className: 'header-github-link',
           'aria-label': 'GitHub repository',
-        },
-        {
-          label: '🧡 Sponsor Us',
-          position: 'right',
-          href: 'https://opencollective.com/woodpecker-ci',
         },
       ],
     },
@@ -95,7 +123,7 @@ const config: Config = {
           title: 'Docs',
           items: [
             {
-              label: 'Introduction',
+              label: 'Welcome to Woodpecker',
               to: '/docs/intro',
             },
             {
@@ -103,8 +131,26 @@ const config: Config = {
               to: '/docs/usage/intro',
             },
             {
-              label: 'Server setup',
-              to: '/docs/administration/getting-started',
+              label: 'Administration',
+              to: '/docs/administration/general',
+            },
+            {
+              to: '/migrations', // Always point to newest migration guide
+              activeBaseRegex: 'migrations',
+              label: 'Migrations',
+            },
+            {
+              to: '/awesome', // Always point to newest awesome list
+              activeBaseRegex: 'awesome',
+              label: 'Awesome',
+            },
+            {
+              to: '/api',
+              label: 'API',
+            },
+            {
+              to: '/about',
+              label: 'About',
             },
           ],
         },
@@ -118,6 +164,10 @@ const config: Config = {
             {
               label: 'Mastodon',
               href: 'https://floss.social/@WoodpeckerCI',
+            },
+            {
+              label: 'Bluesky',
+              href: 'https://bsky.app/profile/woodpecker-ci.org',
             },
             {
               label: 'X',
@@ -168,7 +218,7 @@ const config: Config = {
     },
     announcementBar: {
       id: 'github-star',
-      content: ` If you like Woodpecker-CI, <a href=https://github.com/woodpecker-ci/woodpecker rel="noopener noreferrer" target="_blank">give us a star on GitHub</a> ! ⭐️`,
+      content: `If you like Woodpecker-CI, <a href=https://github.com/woodpecker-ci/woodpecker rel="noopener noreferrer" target="_blank">give us a star on GitHub</a> ! ⭐️`,
       backgroundColor: 'var(--ifm-color-primary)',
       textColor: 'var(--ifm-color-gray-900)',
     },
@@ -236,37 +286,14 @@ const config: Config = {
           sidebarPath: require.resolve('./sidebars.js'),
           editUrl: 'https://github.com/woodpecker-ci/woodpecker/edit/main/docs/',
           includeCurrentVersion: true,
-          lastVersion: '2.7',
-          onlyIncludeVersions:
-            process.env.NODE_ENV === 'development' ? ['current', '2.7'] : ['current', '2.7', '2.6', '2.5', '1.0'],
-          versions: {
-            current: {
-              label: 'Next 🚧',
-              banner: 'unreleased',
-            },
-            '2.7': {
-              label: '2.7.x',
-            },
-            '2.6': {
-              label: '2.6.x 💀',
-              banner: 'unmaintained',
-            },
-            '2.5': {
-              label: '2.5.x 💀',
-              banner: 'unmaintained',
-            },
-            '1.0': {
-              label: '1.0.x 💀',
-              banner: 'unmaintained',
-            },
-          },
+          lastVersion: versions[0],
+          onlyIncludeVersions: includeVersions,
+          versions: docsVersions,
         },
         blog: {
           blogTitle: 'Blog',
           blogDescription: 'A blog for release announcements, turorials...',
           onInlineAuthors: 'ignore',
-          // postsPerPage: 'ALL',
-          // blogSidebarCount: 0,
         },
         theme: {
           customCss: require.resolve('./src/css/custom.css'),
@@ -279,31 +306,24 @@ const config: Config = {
         // Plugin Options for loading OpenAPI files
         specs: [
           {
-            spec: 'swagger.json',
+            spec: 'openapi.json',
             route: '/api/',
           },
         ],
         // Theme Options for modifying how redoc renders them
         theme: {
           // Change with your site colors
-          primaryColor: '#1890ff',
+          primaryColor: '#4caf50',
         },
       },
     ],
   ],
-  webpack: {
-    jsLoader: (isServer) => ({
-      loader: require.resolve('esbuild-loader'),
-      options: {
-        loader: 'tsx',
-        target: isServer ? 'node12' : 'es2017',
-        supported: { 'dynamic-import': false },
-      },
-    }),
-  },
   markdown: {
     format: 'detect',
   },
-};
+  future: {
+    experimental_faster: true,
+  },
+} satisfies Config;
 
 export default config;

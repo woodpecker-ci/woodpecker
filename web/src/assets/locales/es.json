@@ -194,7 +194,8 @@
                 "title": "Variables adicionales del pipeline",
                 "value": "Valor de la variable",
                 "delete": "Eliminar variable"
-            }
+            },
+            "enter_task": "Tarea de despliegue"
         },
         "enable": {
             "disabled": "Desactivado",
@@ -210,15 +211,16 @@
             "trigger": "Corre el pipeline",
             "variables": {
                 "add": "Añadir variable",
-                "desc": "Especifique variables adiciónalas para usar en su pipeline. Las variables con el mismo nombre se sobrescribirán.",
+                "desc": "Especifique variables adiciónales para usar en su pipeline. Las variables con el mismo nombre se sobrescribirán.",
                 "name": "Nombre de la variable",
                 "title": "Variables adicionales del pipeline",
                 "value": "Valor de la variable",
                 "delete": "Eliminar variable"
-            }
+            },
+            "show_pipelines": "Mostrar las pipelines"
         },
         "not_allowed": "No tienes acceso a este repositorio",
-        "open_in_forge": "Abrir Repositorio en el Sistema de Control de Versiones",
+        "open_in_forge": "Abrir repositorio en la forja",
         "pipeline": {
             "actions": {
                 "cancel": "Cancelar",
@@ -342,7 +344,7 @@
             "general": {
                 "allow_pr": {
                     "allow": "Permitir solicitudes de cambios",
-                    "desc": "Pipelines pueden correr en solicitudes de cambios."
+                    "desc": "Pipelines pueden ejecutar en las solicitudes de cambios."
                 },
                 "cancel_prev": {
                     "cancel": "Anular pipelines anteriores",
@@ -365,7 +367,7 @@
                     "protected": "Protegido"
                 },
                 "save": "Guardar configuración",
-                "success": "Configuración del repositorio actualizada",
+                "success": "Configuraciónes del proyecto actualizadas",
                 "timeout": {
                     "minutes": "minutos",
                     "timeout": "Tiempo de espera"
@@ -390,7 +392,7 @@
                     "visibility": "Visibilidad del proyecto"
                 }
             },
-            "not_allowed": "No tienes acceso a la configuración del repositorio",
+            "not_allowed": "No tienes acceso a las configuraciónes del repositorio",
             "registries": {
                 "add": "Añadir registry",
                 "address": {
@@ -436,7 +438,22 @@
             },
             "settings": "Configuración"
         },
-        "user_none": "Esta organización / usuario no tiene proyectos aún."
+        "user_none": "Esta organización / usuario aún no tiene proyectos.",
+        "visibility": {
+            "visibility": "Visibilidad del proyecto",
+            "public": {
+                "public": "Publico",
+                "desc": "Cualquier persona puede ver su proyecto sin iniciar sesión."
+            },
+            "private": {
+                "private": "Privado",
+                "desc": "Solo usted y los otros propietarios de el repositorio pueden ver este proyecto."
+            },
+            "internal": {
+                "internal": "Interno",
+                "desc": "Solo los usuarios autenticados de la instancia de Woodpecker pueden ver el proyecto."
+            }
+        }
     },
     "repos": "Repos",
     "repositories": "Repositorios",
@@ -449,7 +466,8 @@
         "not_started": "no iniciado aún",
         "sec_short": "s",
         "template": "MMM D, YYYY, HH:mm z",
-        "weeks_short": "w"
+        "weeks_short": "w",
+        "just_now": "Justo ahora"
     },
     "unknown_error": "Se ha producido un error desconocido",
     "update_woodpecker": "Por favor, actualice su instancia de Woodpecker a {0}",
@@ -510,5 +528,6 @@
     "welcome": "Bienvenidos a Woodpecker",
     "empty_list": "¡No {entidad} encontrado!",
     "org_level_secret": "secreto de organización",
-    "global_level_secret": "secreto global"
+    "global_level_secret": "secreto global",
+    "login_with": "Inicia sesión con {forge}"
 }

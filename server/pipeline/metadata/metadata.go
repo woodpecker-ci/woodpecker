@@ -19,33 +19,15 @@ import (
 	"net/url"
 	"strings"
 
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/metadata"
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
-	"go.woodpecker-ci.org/woodpecker/v2/version"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/version"
 )
 
-type MetadataServerForge struct {
-	forge        metadata.ServerForge
-	repo         *model.Repo
-	pipeline     *model.Pipeline
-	prevPipeline *model.Pipeline
-	sysURL       string
-}
-
-func NewMetadataServerForge(forge metadata.ServerForge, repo *model.Repo, pipeline *model.Pipeline, prevPipeline *model.Pipeline, sysURL string) *MetadataServerForge {
-	return &MetadataServerForge{
-		forge:        forge,
-		repo:         repo,
-		pipeline:     pipeline,
-		prevPipeline: prevPipeline,
-		sysURL:       sysURL,
-	}
-}
-
-// MetadataForWorkflow returns the metadata for a workflow.
-func (m *MetadataServerForge) MetadataForWorkflow(workflow *model.Workflow) metadata.Metadata {
-	host := m.sysURL
-	uri, err := url.Parse(m.sysURL)
+// MetadataFromStruct return the metadata from a pipeline will run with.
+func MetadataFromStruct(forge metadata.ServerForge, repo *model.Repo, pipeline, prev *model.Pipeline, sysURL string) func(workflow *model.Workflow) metadata.Metadata {
+	host := sysURL
+	uri, err := url.Parse(sysURL)
 	if err == nil {
 		host = uri.Host
 	}
@@ -61,16 +43,15 @@ func (m *MetadataServerForge) MetadataForWorkflow(workflow *model.Workflow) meta
 	fRepo := metadata.Repo{}
 	if m.repo != nil {
 		fRepo = metadata.Repo{
-			ID:          m.repo.ID,
-			Name:        m.repo.Name,
-			Owner:       m.repo.Owner,
-			RemoteID:    fmt.Sprint(m.repo.ForgeRemoteID),
-			ForgeURL:    m.repo.ForgeURL,
-			SCM:         string(m.repo.SCMKind),
-			CloneURL:    m.repo.Clone,
-			CloneSSHURL: m.repo.CloneSSH,
-			Private:     m.repo.IsSCMPrivate,
-			Branch:      m.repo.Branch,
+			ID:          repo.ID,
+			Name:        repo.Name,
+			Owner:       repo.Owner,
+			RemoteID:    fmt.Sprint(repo.ForgeRemoteID),
+			ForgeURL:    repo.ForgeURL,
+			CloneURL:    repo.Clone,
+			CloneSSHURL: repo.CloneSSH,
+			Private:     repo.IsSCMPrivate,
+			Branch:      repo.Branch,
 			Trusted: metadata.TrustedConfiguration{
 				Network:  m.repo.Trusted.Network,
 				Volumes:  m.repo.Trusted.Volumes,
@@ -88,29 +69,31 @@ func (m *MetadataServerForge) MetadataForWorkflow(workflow *model.Workflow) meta
 		}
 	}
 
-	fWorkflow := metadata.Workflow{}
-	if workflow != nil {
-		fWorkflow = metadata.Workflow{
-			Name:   workflow.Name,
-			Number: workflow.PID,
-			Matrix: workflow.Environ,
+	return func(workflow *model.Workflow) metadata.Metadata {
+		fWorkflow := metadata.Workflow{}
+		if workflow != nil {
+			fWorkflow = metadata.Workflow{
+				Name:   workflow.Name,
+				Number: workflow.PID,
+				Matrix: workflow.Environ,
+			}
 		}
-	}
 
-	return metadata.Metadata{
-		Repo:     fRepo,
-		Curr:     metadataPipelineFromModelPipeline(m.pipeline, true),
-		Prev:     metadataPipelineFromModelPipeline(m.prevPipeline, false),
-		Workflow: fWorkflow,
-		Step:     metadata.Step{},
-		Sys: metadata.System{
-			Name:     "woodpecker",
-			URL:      m.sysURL,
-			Host:     host,
-			Platform: "", // will be set by pipeline platform option or by agent
-			Version:  version.Version,
-		},
-		Forge: fForge,
+		return metadata.Metadata{
+			Repo:     fRepo,
+			Curr:     metadataPipelineFromModelPipeline(pipeline, true),
+			Prev:     metadataPipelineFromModelPipeline(prev, false),
+			Workflow: fWorkflow,
+			Step:     metadata.Step{},
+			Sys: metadata.System{
+				Name:     "woodpecker",
+				URL:      sysURL,
+				Host:     host,
+				Platform: "", // will be set by pipeline platform option or by agent
+				Version:  version.Version,
+			},
+			Forge: fForge,
+		}
 	}
 }
 

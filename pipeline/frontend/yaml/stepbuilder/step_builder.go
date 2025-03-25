@@ -17,35 +17,45 @@ package stepbuilder
 
 import (
 	"fmt"
+	"maps"
 	"strings"
 
 	"github.com/oklog/ulid/v2"
 	"github.com/rs/zerolog/log"
 	"go.uber.org/multierr"
 
-	backend_types "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
-	pipeline_errors "go.woodpecker-ci.org/woodpecker/v2/pipeline/errors"
-	errorTypes "go.woodpecker-ci.org/woodpecker/v2/pipeline/errors/types"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/metadata"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/compiler"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/linter"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/matrix"
-	yaml_types "go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/types"
-	forge_types "go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
+	pipeline_errors "go.woodpecker-ci.org/woodpecker/v3/pipeline/errors"
+	errorTypes "go.woodpecker-ci.org/woodpecker/v3/pipeline/errors/types"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/compiler"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/linter"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/matrix"
+	yaml_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/types"
+	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
 // StepBuilder Takes the hook data and the yaml and returns in internal data model.
 type StepBuilder struct {
-	Yamls               []*forge_types.FileMeta // TODO: get rid of server type in this package
-	CompilerOptions     []compiler.Option
-	GetWorkflowMetadata func(*model.Workflow) metadata.Metadata
-	RepoTrusted         *metadata.TrustedConfiguration
-	TrustedClonePlugins []string
-	PrivilegedPlugins   []string
-	Host                string
-	Envs                map[string]string
+	Yamls                []*forge_types.FileMeta
+	CompilerOptions      []compiler.Option
+	WorkflowMetadataFunc func(*model.Workflow) metadata.Metadata
+	RepoTrusted          *metadata.TrustedConfiguration
+	TrustedClonePlugins  []string
+	PrivilegedPlugins    []string
+	Host                 string
+	Envs                 map[string]string
+	DefaultLabels        map[string]string
+}
+
+type Item struct {
+	Workflow  *model.Workflow
+	Labels    map[string]string
+	DependsOn []string
+	RunsOn    []string
+	Config    *backend_types.Config
 }
 
 func (b *StepBuilder) Build() (items []*Item, errorsAndWarnings error) {
@@ -102,20 +112,12 @@ func (b *StepBuilder) Build() (items []*Item, errorsAndWarnings error) {
 }
 
 func (b *StepBuilder) genItemForWorkflow(workflow *model.Workflow, axis matrix.Axis, data string) (item *Item, errorsAndWarnings error) {
-	workflowMetadata := b.GetWorkflowMetadata(workflow)
-	environ := workflowMetadata.Environ()
-	for k, v := range axis {
-		environ[k] = v
-	}
+	workflowMetadata := b.WorkflowMetadataFunc(workflow)
 
-	// add global environment variables for substituting
-	for k, v := range b.Envs {
-		if _, exists := environ[k]; exists {
-			// don't override existing values
-			continue
-		}
-		environ[k] = v
-	}
+	environ := map[string]string{}
+	maps.Copy(environ, b.Envs)                     // global environment data
+	maps.Copy(environ, workflowMetadata.Environ()) // workflow environment data like CI_REPO_NAME
+	maps.Copy(environ, axis)
 
 	// substitute vars
 	substituted, err := metadata.EnvVarSubst(data, environ)
@@ -176,8 +178,18 @@ func (b *StepBuilder) genItemForWorkflow(workflow *model.Workflow, axis matrix.A
 		DependsOn: parsed.DependsOn,
 		RunsOn:    parsed.RunsOn,
 	}
-	if item.Labels == nil {
-		item.Labels = map[string]string{}
+	if len(item.Labels) == 0 {
+		item.Labels = make(map[string]string, len(b.DefaultLabels))
+		// Set default labels if no labels are defined in the pipeline
+		maps.Copy(item.Labels, b.DefaultLabels)
+	}
+
+	item.Labels = workflowMetadata.Labels(item.Labels)
+
+	for stageI := range item.Config.Stages {
+		for stepI := range item.Config.Stages[stageI].Steps {
+			item.Config.Stages[stageI].Steps[stepI].WorkflowLabels = item.Labels
+		}
 	}
 
 	return item, errorsAndWarnings
@@ -189,7 +201,7 @@ func (b *StepBuilder) compileWorkflow(parsed *yaml_types.Workflow, environ map[s
 		compiler.WithEnviron(environ),
 		compiler.WithEnviron(b.Envs),
 		compiler.WithEscalated(b.PrivilegedPlugins...),
-		compiler.WithTrustedClonePlugins(b.TrustedClonePlugins),
+		compiler.WithTrustedClonePlugins(b.TrustedClonePlugins), // TODO: append repo trusted clone plugins
 		compiler.WithPrefix(
 			fmt.Sprintf(
 				"wp_%s_%d",

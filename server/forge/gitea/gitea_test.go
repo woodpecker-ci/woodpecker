@@ -22,21 +22,32 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/franela/goblin"
 	"github.com/gin-gonic/gin"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server/forge/gitea/fixtures"
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
-	"go.woodpecker-ci.org/woodpecker/v2/server/store"
-	mocks_store "go.woodpecker-ci.org/woodpecker/v2/server/store/mocks"
-	"go.woodpecker-ci.org/woodpecker/v2/shared/utils"
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge/gitea/fixtures"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store"
+	mocks_store "go.woodpecker-ci.org/woodpecker/v3/server/store/mocks"
 )
+
+func TestNew(t *testing.T) {
+	forge, _ := New(Opts{
+		URL:        "http://localhost:8080",
+		SkipVerify: true,
+	})
+
+	f, _ := forge.(*Gitea)
+	assert.Equal(t, "http://localhost:8080", f.url)
+	assert.True(t, f.SkipVerify)
+}
 
 func Test_gitea(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
 	s := httptest.NewServer(fixtures.Handler())
+	defer s.Close()
 	c, _ := New(Opts{
 		URL:        s.URL,
 		SkipVerify: true,
@@ -45,134 +56,96 @@ func Test_gitea(t *testing.T) {
 	mockStore := mocks_store.NewStore(t)
 	ctx := store.InjectToContext(context.Background(), mockStore)
 
-	g := goblin.Goblin(t)
-	g.Describe("Gitea", func() {
-		g.After(func() {
-			s.Close()
-		})
+	t.Run("netrc with user token", func(t *testing.T) {
+		forge, _ := New(Opts{})
+		netrc, _ := forge.Netrc(fakeUser, fakeRepo)
+		assert.Equal(t, "gitea.com", netrc.Machine)
+		assert.Equal(t, fakeUser.Login, netrc.Login)
+		assert.Equal(t, fakeUser.AccessToken, netrc.Password)
+		assert.Equal(t, model.ForgeTypeGitea, netrc.Type)
+	})
+	t.Run("netrc with machine account", func(t *testing.T) {
+		forge, _ := New(Opts{})
+		netrc, _ := forge.Netrc(nil, fakeRepo)
+		assert.Equal(t, "gitea.com", netrc.Machine)
+		assert.Empty(t, netrc.Login)
+		assert.Empty(t, netrc.Password)
+	})
 
-		g.Describe("Creating a forge", func() {
-			g.It("Should return client with specified options", func() {
-				forge, _ := New(Opts{
-					URL:        "http://localhost:8080",
-					SkipVerify: true,
-				})
+	t.Run("repository details", func(t *testing.T) {
+		repo, err := c.Repo(ctx, fakeUser, fakeRepo.ForgeRemoteID, fakeRepo.Owner, fakeRepo.Name)
+		assert.NoError(t, err)
+		assert.Equal(t, fakeRepo.Owner, repo.Owner)
+		assert.Equal(t, fakeRepo.Name, repo.Name)
+		assert.Equal(t, fakeRepo.Owner+"/"+fakeRepo.Name, repo.FullName)
+		assert.True(t, repo.IsSCMPrivate)
+		assert.Equal(t, "http://localhost/test_name/repo_name.git", repo.Clone)
+		assert.Equal(t, "http://localhost/test_name/repo_name", repo.ForgeURL)
+	})
+	t.Run("repo not found", func(t *testing.T) {
+		_, err := c.Repo(ctx, fakeUser, "0", fakeRepoNotFound.Owner, fakeRepoNotFound.Name)
+		assert.Error(t, err)
+	})
 
-				f, _ := forge.(*Gitea)
-				g.Assert(f.url).Equal("http://localhost:8080")
-				g.Assert(f.SkipVerify).Equal(true)
-			})
-		})
+	t.Run("repository list", func(t *testing.T) {
+		repos, err := c.Repos(ctx, fakeUser)
+		assert.NoError(t, err)
+		assert.Equal(t, fakeRepo.ForgeRemoteID, repos[0].ForgeRemoteID)
+		assert.Equal(t, fakeRepo.Owner, repos[0].Owner)
+		assert.Equal(t, fakeRepo.Name, repos[0].Name)
+		assert.Equal(t, fakeRepo.Owner+"/"+fakeRepo.Name, repos[0].FullName)
+	})
+	t.Run("not found error", func(t *testing.T) {
+		_, err := c.Repos(ctx, fakeUserNoRepos)
+		assert.Error(t, err)
+	})
 
-		g.Describe("Generating a netrc file", func() {
-			g.It("Should return a netrc with the user token", func() {
-				forge, _ := New(Opts{})
-				netrc, _ := forge.Netrc(fakeUser, fakeRepo)
-				g.Assert(netrc.Machine).Equal("gitea.com")
-				g.Assert(netrc.Login).Equal(fakeUser.Login)
-				g.Assert(netrc.Password).Equal(fakeUser.Token)
-			})
-			g.It("Should return a netrc with the machine account", func() {
-				forge, _ := New(Opts{})
-				netrc, _ := forge.Netrc(nil, fakeRepo)
-				g.Assert(netrc.Machine).Equal("gitea.com")
-				g.Assert(netrc.Login).Equal("")
-				g.Assert(netrc.Password).Equal("")
-			})
-		})
+	t.Run("register repository", func(t *testing.T) {
+		err := c.Activate(ctx, fakeUser, fakeRepo, "http://localhost")
+		assert.NoError(t, err)
+	})
 
-		g.Describe("Requesting a repository", func() {
-			g.It("Should return the repository details", func() {
-				repo, err := c.Repo(ctx, fakeUser, fakeRepo.ForgeRemoteID, fakeRepo.Owner, fakeRepo.Name)
-				g.Assert(err).IsNil()
-				g.Assert(repo.Owner).Equal(fakeRepo.Owner)
-				g.Assert(repo.Name).Equal(fakeRepo.Name)
-				g.Assert(repo.FullName).Equal(fakeRepo.Owner + "/" + fakeRepo.Name)
-				g.Assert(repo.IsSCMPrivate).IsTrue()
-				g.Assert(repo.Clone).Equal("http://localhost/test_name/repo_name.git")
-				g.Assert(repo.ForgeURL).Equal("http://localhost/test_name/repo_name")
-			})
-			g.It("Should handle a not found error", func() {
-				_, err := c.Repo(ctx, fakeUser, "0", fakeRepoNotFound.Owner, fakeRepoNotFound.Name)
-				g.Assert(err).IsNotNil()
-			})
-		})
+	t.Run("remove hooks", func(t *testing.T) {
+		err := c.Deactivate(ctx, fakeUser, fakeRepo, "http://localhost")
+		assert.NoError(t, err)
+	})
 
-		g.Describe("Requesting a repository list", func() {
-			g.It("Should return the repository list", func() {
-				repos, err := c.Repos(ctx, fakeUser)
-				g.Assert(err).IsNil()
-				g.Assert(repos[0].ForgeRemoteID).Equal(fakeRepo.ForgeRemoteID)
-				g.Assert(repos[0].Owner).Equal(fakeRepo.Owner)
-				g.Assert(repos[0].Name).Equal(fakeRepo.Name)
-				g.Assert(repos[0].FullName).Equal(fakeRepo.Owner + "/" + fakeRepo.Name)
-			})
-			g.It("Should handle a not found error", func() {
-				_, err := c.Repos(ctx, fakeUserNoRepos)
-				g.Assert(err).IsNotNil()
-			})
-		})
+	t.Run("repository file", func(t *testing.T) {
+		raw, err := c.File(ctx, fakeUser, fakeRepo, fakePipeline, ".woodpecker.yml")
+		assert.NoError(t, err)
+		assert.Equal(t, "{ platform: linux/amd64 }", string(raw))
+	})
 
-		g.It("Should register repository hooks", func() {
-			err := c.Activate(ctx, fakeUser, fakeRepo, "http://localhost")
-			g.Assert(err).IsNil()
-		})
+	t.Run("pipeline status", func(t *testing.T) {
+		err := c.Status(ctx, fakeUser, fakeRepo, fakePipeline, fakeWorkflow)
+		assert.NoError(t, err)
+	})
 
-		g.It("Should remove repository hooks", func() {
-			err := c.Deactivate(ctx, fakeUser, fakeRepo, "http://localhost")
-			g.Assert(err).IsNil()
-		})
-
-		g.It("Should return a repository file", func() {
-			raw, err := c.File(ctx, fakeUser, fakeRepo, fakePipeline, ".woodpecker.yml")
-			g.Assert(err).IsNil()
-			g.Assert(string(raw)).Equal("{ platform: linux/amd64 }")
-		})
-
-		g.It("Should return nil from send pipeline status", func() {
-			err := c.Status(ctx, fakeUser, fakeRepo, fakePipeline, fakeWorkflow)
-			g.Assert(err).IsNil()
-		})
-
-		g.Describe("Given an authentication request", func() {
-			g.It("Should redirect to login form")
-			g.It("Should create an access token")
-			g.It("Should handle an access token error")
-			g.It("Should return the authenticated user")
-		})
-
-		g.Describe("Given a repository hook", func() {
-			g.It("Should skip non-push events")
-			g.It("Should return push details")
-			g.It("Should handle a parsing error")
-		})
-
-		g.It("Given a PR hook", func() {
-			buf := bytes.NewBufferString(fixtures.HookPullRequest)
-			req, _ := http.NewRequest(http.MethodPost, "/hook", buf)
-			req.Header = http.Header{}
-			req.Header.Set(hookEvent, hookPullRequest)
-			mockStore.On("GetRepoNameFallback", mock.Anything, mock.Anything).Return(fakeRepo, nil)
-			mockStore.On("GetUser", mock.Anything).Return(fakeUser, nil)
-			r, b, err := c.Hook(ctx, req)
-			g.Assert(r).IsNotNil()
-			g.Assert(b).IsNotNil()
-			g.Assert(err).IsNil()
-			g.Assert(b.Event).Equal(model.EventPull)
-			g.Assert(utils.EqualSliceValues(b.ChangedFiles, []string{"README.md"})).IsTrue()
-		})
+	t.Run("PR hook", func(t *testing.T) {
+		buf := bytes.NewBufferString(fixtures.HookPullRequest)
+		req, _ := http.NewRequest(http.MethodPost, "/hook", buf)
+		req.Header = http.Header{}
+		req.Header.Set(hookEvent, hookPullRequest)
+		mockStore.On("GetRepoNameFallback", mock.Anything, mock.Anything).Return(fakeRepo, nil)
+		mockStore.On("GetUser", mock.Anything).Return(fakeUser, nil)
+		r, b, err := c.Hook(ctx, req)
+		assert.NotNil(t, r)
+		assert.NotNil(t, b)
+		assert.NoError(t, err)
+		assert.Equal(t, model.EventPull, b.Event)
+		assert.Equal(t, []string{"README.md"}, b.ChangedFiles)
 	})
 }
 
 var (
 	fakeUser = &model.User{
-		Login: "someuser",
-		Token: "cfcd2084",
+		Login:       "someuser",
+		AccessToken: "cfcd2084",
 	}
 
 	fakeUserNoRepos = &model.User{
-		Login: "someuser",
-		Token: "repos_not_found",
+		Login:       "someuser",
+		AccessToken: "repos_not_found",
 	}
 
 	fakeRepo = &model.Repo{

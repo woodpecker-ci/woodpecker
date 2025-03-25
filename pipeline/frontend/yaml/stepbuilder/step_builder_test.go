@@ -20,13 +20,13 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/errors"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/metadata"
-	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
-	"go.woodpecker-ci.org/woodpecker/v2/server/forge/mocks"
-	forge_types "go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
-	server_metadata "go.woodpecker-ci.org/woodpecker/v2/server/pipeline/metadata"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/errors"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge"
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge/mocks"
+	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	server_metadata "go.woodpecker-ci.org/woodpecker/v3/server/pipeline/metadata"
 )
 
 func getMockMetadata(t *testing.T) func(*model.Workflow) metadata.Metadata {
@@ -37,8 +37,7 @@ func getMockMetadata(t *testing.T) func(*model.Workflow) metadata.Metadata {
 	}
 	last := &model.Pipeline{}
 	host := ""
-	meta := server_metadata.NewMetadataServerForge(getMockForge(t), repo, curr, last, host)
-	return meta.MetadataForWorkflow
+	return server_metadata.MetadataFromStruct(getMockForge(t), repo, curr, last, host)
 }
 
 func TestGlobalEnvsubst(t *testing.T) {
@@ -49,8 +48,13 @@ func TestGlobalEnvsubst(t *testing.T) {
 			"KEY_K": "VALUE_V",
 			"IMAGE": "scratch",
 		},
-		GetWorkflowMetadata: getMockMetadata(t),
-		Host:                "",
+		WorkflowMetadataFunc: getMockMetadata(t),
+		Host:                 "",
+		RepoTrusted: &metadata.TrustedConfiguration{
+			Network:  false,
+			Volumes:  false,
+			Security: false,
+		},
 		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
 when:
@@ -76,8 +80,13 @@ func TestMissingGlobalEnvsubst(t *testing.T) {
 			"KEY_K":    "VALUE_V",
 			"NO_IMAGE": "scratch",
 		},
-		GetWorkflowMetadata: getMockMetadata(t),
-		Host:                "",
+		WorkflowMetadataFunc: getMockMetadata(t),
+		Host:                 "",
+		RepoTrusted: &metadata.TrustedConfiguration{
+			Network:  false,
+			Volumes:  false,
+			Security: false,
+		},
 		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
 when:
@@ -99,8 +108,13 @@ func TestMultilineEnvsubst(t *testing.T) {
 	t.Parallel()
 
 	b := StepBuilder{
-		GetWorkflowMetadata: getMockMetadata(t),
-		Host:                "",
+		Host:                 "",
+		WorkflowMetadataFunc: getMockMetadata(t),
+		RepoTrusted: &metadata.TrustedConfiguration{
+			Network:  false,
+			Volumes:  false,
+			Security: false,
+		},
 		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
 when:
@@ -131,8 +145,13 @@ func TestMultiPipeline(t *testing.T) {
 	t.Parallel()
 
 	b := StepBuilder{
-		GetWorkflowMetadata: getMockMetadata(t),
-		Host:                "",
+		Host:                 "",
+		WorkflowMetadataFunc: getMockMetadata(t),
+		RepoTrusted: &metadata.TrustedConfiguration{
+			Network:  false,
+			Volumes:  false,
+			Security: false,
+		},
 		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
 when:
@@ -164,8 +183,13 @@ func TestDependsOn(t *testing.T) {
 	t.Parallel()
 
 	b := StepBuilder{
-		GetWorkflowMetadata: getMockMetadata(t),
-		Host:                "",
+		Host:                 "",
+		WorkflowMetadataFunc: getMockMetadata(t),
+		RepoTrusted: &metadata.TrustedConfiguration{
+			Network:  false,
+			Volumes:  false,
+			Security: false,
+		},
 		Yamls: []*forge_types.FileMeta{
 			{Name: "lint", Data: []byte(`
 when:
@@ -211,8 +235,13 @@ func TestRunsOn(t *testing.T) {
 	t.Parallel()
 
 	b := StepBuilder{
-		GetWorkflowMetadata: getMockMetadata(t),
-		Host:                "",
+		Host:                 "",
+		WorkflowMetadataFunc: getMockMetadata(t),
+		RepoTrusted: &metadata.TrustedConfiguration{
+			Network:  false,
+			Volumes:  false,
+			Security: false,
+		},
 		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
 when:
@@ -244,8 +273,13 @@ func TestPipelineName(t *testing.T) {
 	t.Parallel()
 
 	b := StepBuilder{
-		GetWorkflowMetadata: getMockMetadata(t),
-		Host:                "",
+		Host:                 "",
+		WorkflowMetadataFunc: getMockMetadata(t),
+		RepoTrusted: &metadata.TrustedConfiguration{
+			Network:  false,
+			Volumes:  false,
+			Security: false,
+		},
 		Yamls: []*forge_types.FileMeta{
 			{Name: ".woodpecker/lint.yml", Data: []byte(`
 when:
@@ -278,8 +312,13 @@ func TestBranchFilter(t *testing.T) {
 	t.Parallel()
 
 	b := StepBuilder{
-		GetWorkflowMetadata: getMockMetadata(t),
-		Host:                "",
+		Host:                 "",
+		WorkflowMetadataFunc: getMockMetadata(t),
+		RepoTrusted: &metadata.TrustedConfiguration{
+			Network:  false,
+			Volumes:  false,
+			Security: false,
+		},
 		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
 when:
@@ -315,8 +354,13 @@ func TestRootWhenFilter(t *testing.T) {
 	t.Parallel()
 
 	b := StepBuilder{
-		GetWorkflowMetadata: getMockMetadata(t),
-		Host:                "",
+		Host:                 "",
+		WorkflowMetadataFunc: getMockMetadata(t),
+		RepoTrusted: &metadata.TrustedConfiguration{
+			Network:  false,
+			Volumes:  false,
+			Security: false,
+		},
 		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
 when:
@@ -353,9 +397,19 @@ steps:
 func TestZeroSteps(t *testing.T) {
 	t.Parallel()
 
+	// pipeline := &model.Pipeline{
+	// 	Branch: "dev",
+	// 	Event:  model.EventPush,
+	// }
+
 	b := StepBuilder{
-		GetWorkflowMetadata: getMockMetadata(t),
-		Host:                "",
+		Host:                 "",
+		WorkflowMetadataFunc: getMockMetadata(t),
+		RepoTrusted: &metadata.TrustedConfiguration{
+			Network:  false,
+			Volumes:  false,
+			Security: false,
+		},
 		Yamls: []*forge_types.FileMeta{
 			{Data: []byte(`
 when:
@@ -382,9 +436,19 @@ steps:
 func TestZeroStepsAsMultiPipelineDeps(t *testing.T) {
 	t.Parallel()
 
+	// pipeline := &model.Pipeline{
+	// 	Branch: "dev",
+	// 	Event:  model.EventPush,
+	// }
+
 	b := StepBuilder{
-		GetWorkflowMetadata: getMockMetadata(t),
-		Host:                "",
+		Host:                 "",
+		WorkflowMetadataFunc: getMockMetadata(t),
+		RepoTrusted: &metadata.TrustedConfiguration{
+			Network:  false,
+			Volumes:  false,
+			Security: false,
+		},
 		Yamls: []*forge_types.FileMeta{
 			{Name: "zerostep", Data: []byte(`
 when:
@@ -429,9 +493,19 @@ depends_on: [ zerostep ]
 func TestZeroStepsAsMultiPipelineTransitiveDeps(t *testing.T) {
 	t.Parallel()
 
+	// pipeline := &model.Pipeline{
+	// 	Branch: "dev",
+	// 	Event:  model.EventPush,
+	// }
+
 	b := StepBuilder{
-		GetWorkflowMetadata: getMockMetadata(t),
-		Host:                "",
+		Host:                 "",
+		WorkflowMetadataFunc: getMockMetadata(t),
+		RepoTrusted: &metadata.TrustedConfiguration{
+			Network:  false,
+			Volumes:  false,
+			Security: false,
+		},
 		Yamls: []*forge_types.FileMeta{
 			{Name: "zerostep", Data: []byte(`
 when:

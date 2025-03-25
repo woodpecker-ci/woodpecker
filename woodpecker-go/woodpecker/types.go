@@ -14,6 +14,27 @@
 
 package woodpecker
 
+type ApprovalMode string
+
+var (
+	RequireApprovalNone         ApprovalMode = "none"          // require approval for no events
+	RequireApprovalForks        ApprovalMode = "forks"         // require approval for PRs from forks
+	RequireApprovalPullRequests ApprovalMode = "pull_requests" // require approval for all PRs (default)
+	RequireApprovalAllEvents    ApprovalMode = "all_events"    // require approval for all events
+)
+
+func (mode ApprovalMode) Valid() bool {
+	switch mode {
+	case RequireApprovalNone,
+		RequireApprovalForks,
+		RequireApprovalPullRequests,
+		RequireApprovalAllEvents:
+		return true
+	default:
+		return false
+	}
+}
+
 type (
 	// User represents a user account.
 	User struct {
@@ -25,39 +46,45 @@ type (
 		Admin  bool   `json:"admin"`
 	}
 
+	TrustedConfiguration struct {
+		Network  bool `json:"network"`
+		Volumes  bool `json:"volumes"`
+		Security bool `json:"security"`
+	}
+
 	// Repo represents a repository.
 	Repo struct {
-		ID                           int64    `json:"id,omitempty"`
-		ForgeRemoteID                string   `json:"forge_remote_id"`
-		Owner                        string   `json:"owner"`
-		Name                         string   `json:"name"`
-		FullName                     string   `json:"full_name"`
-		Avatar                       string   `json:"avatar_url,omitempty"`
-		ForgeURL                     string   `json:"forge_url,omitempty"`
-		Clone                        string   `json:"clone_url,omitempty"`
-		DefaultBranch                string   `json:"default_branch,omitempty"`
-		SCMKind                      string   `json:"scm,omitempty"`
-		Timeout                      int64    `json:"timeout,omitempty"`
-		Visibility                   string   `json:"visibility"`
-		IsSCMPrivate                 bool     `json:"private"`
-		IsTrusted                    bool     `json:"trusted"`
-		IsGated                      bool     `json:"gated"`
-		IsActive                     bool     `json:"active"`
-		AllowPullRequests            bool     `json:"allow_pr"`
-		Config                       string   `json:"config_file"`
-		CancelPreviousPipelineEvents []string `json:"cancel_previous_pipeline_events"`
-		NetrcOnlyTrusted             bool     `json:"netrc_only_trusted"`
+		ID                           int64                `json:"id,omitempty"`
+		ForgeRemoteID                string               `json:"forge_remote_id"`
+		Owner                        string               `json:"owner"`
+		Name                         string               `json:"name"`
+		FullName                     string               `json:"full_name"`
+		Avatar                       string               `json:"avatar_url,omitempty"`
+		ForgeURL                     string               `json:"forge_url,omitempty"`
+		Clone                        string               `json:"clone_url,omitempty"`
+		Branch                       string               `json:"default_branch,omitempty"`
+		SCMKind                      string               `json:"scm,omitempty"`
+		Timeout                      int64                `json:"timeout,omitempty"`
+		Visibility                   string               `json:"visibility"`
+		IsSCMPrivate                 bool                 `json:"private"`
+		Trusted                      TrustedConfiguration `json:"trusted"`
+		RequireApproval              ApprovalMode         `json:"require_approval"`
+		IsActive                     bool                 `json:"active"`
+		AllowPull                    bool                 `json:"allow_pr"`
+		Config                       string               `json:"config_file"`
+		CancelPreviousPipelineEvents []string             `json:"cancel_previous_pipeline_events"`
+		NetrcTrustedPlugins          []string             `json:"netrc_trusted"`
 	}
 
 	// RepoPatch defines a repository patch request.
 	RepoPatch struct {
-		Config          *string `json:"config_file,omitempty"`
-		IsTrusted       *bool   `json:"trusted,omitempty"`
-		IsGated         *bool   `json:"gated,omitempty"`
-		Timeout         *int64  `json:"timeout,omitempty"`
-		Visibility      *string `json:"visibility"`
-		AllowPull       *bool   `json:"allow_pr,omitempty"`
-		PipelineCounter *int    `json:"pipeline_counter,omitempty"`
+		Config          *string       `json:"config_file,omitempty"`
+		IsTrusted       *bool         `json:"trusted,omitempty"`
+		RequireApproval *ApprovalMode `json:"require_approval,omitempty"`
+		Timeout         *int64        `json:"timeout,omitempty"`
+		Visibility      *string       `json:"visibility"`
+		AllowPull       *bool         `json:"allow_pr,omitempty"`
+		PipelineCounter *int          `json:"pipeline_counter,omitempty"`
 	}
 
 	PipelineError struct {

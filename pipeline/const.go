@@ -20,4 +20,27 @@ const (
 	// Store no more than 1mb in a log-line as 4mb is the limit of a grpc message
 	// and log-lines needs to be parsed by the browsers later on.
 	MaxLogLineLength int = 1 * 1024 * 1024 // 1mb
+
+	InternalLabelPrefix string = "woodpecker-ci.org"
+	LabelForgeRemoteID  string = InternalLabelPrefix + "/forge-id"
+	LabelRepoForgeID    string = InternalLabelPrefix + "/repo-forge-id"
+	LabelRepoID         string = InternalLabelPrefix + "/repo-id"
+	LabelRepoName       string = InternalLabelPrefix + "/repo-name"
+	LabelRepoFullName   string = InternalLabelPrefix + "/repo-full-name"
+	LabelBranch         string = InternalLabelPrefix + "/branch"
+	LabelOrgID          string = InternalLabelPrefix + "/org-id"
+	LabelPlatform       string = "platform"
+	LabelHostname       string = "hostname"
+	LabelBackend        string = "backend"
 )
+
+// ManagedLabels is a list of all labels added automatically to tasks by Woodpecker.
+var ManagedLabels = map[string]bool{
+	LabelForgeRemoteID: true,
+	LabelRepoForgeID:   true,
+	LabelRepoID:        true,
+	LabelRepoName:      true,
+	LabelRepoFullName:  true,
+	LabelBranch:        true,
+	LabelOrgID:         true,
+}

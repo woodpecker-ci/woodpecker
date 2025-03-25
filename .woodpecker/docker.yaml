@@ -1,8 +1,8 @@
 variables:
-  - &golang_image 'docker.io/golang:1.23'
+  - &golang_image 'docker.io/golang:1.24'
   - &node_image 'docker.io/node:23-alpine'
-  - &xgo_image 'docker.io/techknowlogick/xgo:go-1.23.x'
-  - &buildx_plugin 'docker.io/woodpeckerci/plugin-docker-buildx:5.0.0'
+  - &xgo_image 'docker.io/techknowlogick/xgo:go-1.24.x'
+  - &buildx_plugin 'docker.io/woodpeckerci/plugin-docker-buildx:5.2.1'
   - &platforms_release 'linux/arm/v6,linux/arm/v7,linux/arm64/v8,linux/386,linux/amd64,linux/ppc64le,linux/riscv64,linux/s390x,freebsd/arm64,freebsd/amd64,openbsd/arm64,openbsd/amd64'
   - &platforms_server 'linux/arm/v7,linux/arm64/v8,linux/amd64,linux/ppc64le,linux/riscv64'
   - &platforms_preview 'linux/amd64'
@@ -42,9 +42,6 @@ variables:
 when:
   - event: [pull_request, tag]
   - event: push
-    branch:
-      - renovate/*
-  - event: push
     branch: ${CI_REPO_DEFAULT_BRANCH}
     path: *when_path
 
@@ -61,7 +58,6 @@ steps:
         path: *when_path
       - branch:
           - ${CI_REPO_DEFAULT_BRANCH}
-          - renovate/*
         event: [push, tag]
         path: *when_path
 
@@ -82,7 +78,6 @@ steps:
         path: *when_path
       - branch:
           - ${CI_REPO_DEFAULT_BRANCH}
-          - renovate/*
         event: [push, tag]
         path: *when_path
 
@@ -104,9 +99,6 @@ steps:
         evaluate: 'CI_COMMIT_PULL_REQUEST_LABELS contains "build_pr_images"'
       - event: pull_request
         path: *when_path
-      - event: push
-        path: *when_path
-        branch: renovate/*
 
   cross-compile-server:
     depends_on:
@@ -127,31 +119,19 @@ steps:
       event: [push, tag]
       path: *when_path
 
-  publish-server-preview:
-    depends_on:
-      - cross-compile-server-preview
-    image: *buildx_plugin
-    settings:
-      repo: woodpeckerci/woodpecker-server
-      dockerfile: docker/Dockerfile.server.multiarch
-      platforms: *platforms_preview
-      tag: pull_${CI_COMMIT_PULL_REQUEST}
-      logins: *publish_logins
-    when: &when-preview
-      evaluate: 'CI_COMMIT_PULL_REQUEST_LABELS contains "build_pr_images"'
-      event: pull_request
-
   publish-server-alpine-preview:
     depends_on:
       - cross-compile-server-preview
     image: *buildx_plugin
     settings:
       repo: woodpeckerci/woodpecker-server
-      dockerfile: docker/Dockerfile.server.alpine.multiarch
+      dockerfile: docker/Dockerfile.server.alpine.multiarch.rootless
       platforms: *platforms_preview
       tag: pull_${CI_COMMIT_PULL_REQUEST}-alpine
       logins: *publish_logins
-    when: *when-preview
+    when: &when-preview
+      evaluate: 'CI_COMMIT_PULL_REQUEST_LABELS contains "build_pr_images"'
+      event: pull_request
 
   build-server-dryrun:
     depends_on:
@@ -162,16 +142,13 @@ steps:
     settings:
       dry_run: true
       repo: woodpeckerci/woodpecker-server
-      dockerfile: docker/Dockerfile.server.multiarch
+      dockerfile: docker/Dockerfile.server.multiarch.rootless
       platforms: *platforms_preview
       tag: pull_${CI_COMMIT_PULL_REQUEST}
     when: &when-dryrun
       - evaluate: 'not (CI_COMMIT_PULL_REQUEST_LABELS contains "build_pr_images")'
         event: pull_request
         path: *when_path
-      - event: push
-        path: *when_path
-        branch: renovate/*
 
   publish-next-server:
     depends_on:
@@ -179,7 +156,7 @@ steps:
     image: *buildx_plugin
     settings:
       repo: *publish_repos_server
-      dockerfile: docker/Dockerfile.server.multiarch
+      dockerfile: docker/Dockerfile.server.multiarch.rootless
       platforms: *platforms_server
       tag: [next, 'next-${CI_COMMIT_SHA:0:10}']
       logins: *publish_logins
@@ -194,7 +171,7 @@ steps:
     image: *buildx_plugin
     settings:
       repo: *publish_repos_server
-      dockerfile: docker/Dockerfile.server.alpine.multiarch
+      dockerfile: docker/Dockerfile.server.alpine.multiarch.rootless
       platforms: *platforms_alpine
       tag: [next-alpine, 'next-${CI_COMMIT_SHA:0:10}-alpine']
       logins: *publish_logins
@@ -206,10 +183,9 @@ steps:
     image: *buildx_plugin
     settings:
       repo: *publish_repos_server
-      dockerfile: docker/Dockerfile.server.multiarch
+      dockerfile: docker/Dockerfile.server.multiarch.rootless
       platforms: *platforms_server
-      # remove 'latest' on older version branches to avoid accidental downgrade
-      tag: [latest, '${CI_COMMIT_TAG}']
+      tag: ['${CI_COMMIT_TAG%%.*}', '${CI_COMMIT_TAG%.*}', '${CI_COMMIT_TAG}']
       logins: *publish_logins
     when: &when-release
       event: tag
@@ -220,10 +196,9 @@ steps:
     image: *buildx_plugin
     settings:
       repo: *publish_repos_server
-      dockerfile: docker/Dockerfile.server.alpine.multiarch
+      dockerfile: docker/Dockerfile.server.alpine.multiarch.rootless
       platforms: *platforms_alpine
-      # remove 'latest-alpine' on older version branches to avoid accidental downgrade
-      tag: [latest-alpine, '${CI_COMMIT_TAG}-alpine']
+      tag: ['${CI_COMMIT_TAG%%.*}-alpine', '${CI_COMMIT_TAG%.*}-alpine', '${CI_COMMIT_TAG}-alpine']
       logins: *publish_logins
     when: *when-release
 
@@ -231,15 +206,15 @@ steps:
   # A g e n t #
   #############
 
-  publish-agent-preview:
+  publish-agent-preview-alpine:
     depends_on:
       - vendor
     image: *buildx_plugin
     settings:
       repo: woodpeckerci/woodpecker-agent
-      dockerfile: docker/Dockerfile.agent.multiarch
+      dockerfile: docker/Dockerfile.agent.alpine.multiarch
       platforms: *platforms_preview
-      tag: pull_${CI_COMMIT_PULL_REQUEST}
+      tag: pull_${CI_COMMIT_PULL_REQUEST}-alpine
       build_args: *build_args
       logins: *publish_logins
     when: *when-preview
@@ -303,8 +278,7 @@ steps:
       repo: *publish_repos_agent
       dockerfile: docker/Dockerfile.agent.multiarch
       platforms: *platforms_release
-      # remove 'latest' on older version branches to avoid accidental downgrade
-      tag: [latest, '${CI_COMMIT_TAG}']
+      tag: ['${CI_COMMIT_TAG%%.*}', '${CI_COMMIT_TAG%.*}', '${CI_COMMIT_TAG}']
       logins: *publish_logins
       build_args: *build_args
     when: *when-release
@@ -320,8 +294,7 @@ steps:
       repo: *publish_repos_agent
       dockerfile: docker/Dockerfile.agent.alpine.multiarch
       platforms: *platforms_alpine
-      # remove 'latest-alpine' on older version branches to avoid accidental downgrade
-      tag: [latest-alpine, '${CI_COMMIT_TAG}-alpine']
+      tag: ['${CI_COMMIT_TAG%%.*}-alpine', '${CI_COMMIT_TAG%.*}-alpine', '${CI_COMMIT_TAG}-alpine']
       logins: *publish_logins
       build_args: *build_args
     when: *when-release
@@ -330,19 +303,6 @@ steps:
   # C L I #
   #########
 
-  publish-cli-preview:
-    depends_on:
-      - vendor
-    image: *buildx_plugin
-    settings:
-      repo: woodpeckerci/woodpecker-cli
-      dockerfile: docker/Dockerfile.cli.multiarch
-      platforms: *platforms_preview
-      tag: pull_${CI_COMMIT_PULL_REQUEST}
-      build_args: *build_args
-      logins: *publish_logins
-    when: *when-preview
-
   build-cli-dryrun:
     depends_on:
       - vendor
@@ -350,7 +310,7 @@ steps:
     settings:
       dry_run: true
       repo: woodpeckerci/woodpecker-cli
-      dockerfile: docker/Dockerfile.cli.multiarch
+      dockerfile: docker/Dockerfile.cli.multiarch.rootless
       platforms: *platforms_preview
       tag: pull_${CI_COMMIT_PULL_REQUEST}
       build_args: *build_args
@@ -365,7 +325,7 @@ steps:
     image: *buildx_plugin
     settings:
       repo: *publish_repos_cli
-      dockerfile: docker/Dockerfile.cli.multiarch
+      dockerfile: docker/Dockerfile.cli.multiarch.rootless
       platforms: *platforms_release
       tag: [next, 'next-${CI_COMMIT_SHA:0:10}']
       logins: *publish_logins
@@ -381,7 +341,7 @@ steps:
     image: *buildx_plugin
     settings:
       repo: *publish_repos_cli
-      dockerfile: docker/Dockerfile.cli.alpine.multiarch
+      dockerfile: docker/Dockerfile.cli.alpine.multiarch.rootless
       platforms: *platforms_alpine
       tag: [next-alpine, 'next-${CI_COMMIT_SHA:0:10}-alpine']
       logins: *publish_logins
@@ -397,10 +357,9 @@ steps:
     image: *buildx_plugin
     settings:
       repo: *publish_repos_cli
-      dockerfile: docker/Dockerfile.cli.multiarch
+      dockerfile: docker/Dockerfile.cli.multiarch.rootless
       platforms: *platforms_release
-      # remove 'latest' on older version branches to avoid accidental downgrade
-      tag: [latest, '${CI_COMMIT_TAG}']
+      tag: ['${CI_COMMIT_TAG%%.*}', '${CI_COMMIT_TAG%.*}', '${CI_COMMIT_TAG}']
       logins: *publish_logins
       build_args: *build_args
     when: *when-release
@@ -414,10 +373,9 @@ steps:
     image: *buildx_plugin
     settings:
       repo: *publish_repos_cli
-      dockerfile: docker/Dockerfile.cli.alpine.multiarch
+      dockerfile: docker/Dockerfile.cli.alpine.multiarch.rootless
       platforms: *platforms_alpine
-      # remove 'latest-alpine' on older version branches to avoid accidental downgrade
-      tag: [latest-alpine, '${CI_COMMIT_TAG}-alpine']
+      tag: ['${CI_COMMIT_TAG%%.*}-alpine', '${CI_COMMIT_TAG%.*}-alpine', '${CI_COMMIT_TAG}-alpine']
       logins: *publish_logins
       build_args: *build_args
     when: *when-release
