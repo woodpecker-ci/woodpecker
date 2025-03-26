@@ -260,7 +260,10 @@ func registrySecretLabels(step *types.Step, config *config) (map[string]string, 
 		// Only copy user labels if allowed by agent config.
 		// Internal labels are filtered on the server-side.
 		if config.PodLabelsAllowFromStep || strings.HasPrefix(k, pipeline.InternalLabelPrefix) {
-			labels[k] = v
+			labels[k], err = toDNSName(v)
+			if err != nil {
+				return labels, err
+			}
 		}
 	}
 

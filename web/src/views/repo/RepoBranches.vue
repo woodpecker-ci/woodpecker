@@ -8,7 +8,7 @@
         :to="{ name: 'repo-branch', params: { branch } }"
       >
         {{ branch }}
-        <Badge v-if="branch === repo?.default_branch" :label="$t('default')" class="ml-auto" />
+        <Badge v-if="branch === repo?.default_branch" :value="$t('default')" class="ml-auto" />
       </ListItem>
     </template>
     <div v-else-if="loading" class="text-wp-text-100 flex justify-center">
