@@ -76,7 +76,3 @@ func callerName(skip int) string {
 	}
 	return fnName
 }
-
-func (s storage) quoteIdentifier(identifier string) string {
-	return s.engine.Dialect().Quoter().Quote(identifier)
-}
