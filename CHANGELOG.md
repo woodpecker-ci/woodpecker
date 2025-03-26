@@ -4,19 +4,20 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@anbraten, @jenrik, @xoxys
+@6543, @anbraten, @jenrik, @xoxys
+
+### 📈 Enhancement
+
+- Use xorm quoter for feed query [[#5018](https://github.com/woodpecker-ci/woodpecker/pull/5018)]
+- Use badge value instead of label for single values [[#5010](https://github.com/woodpecker-ci/woodpecker/pull/5010)]
+- Add icons to all tabs [[#4421](https://github.com/woodpecker-ci/woodpecker/pull/4421)]
+- Tag pipeline with source information [[#4796](https://github.com/woodpecker-ci/woodpecker/pull/4796)]
+- Add titles and descriptions to repos page [[#4981](https://github.com/woodpecker-ci/woodpecker/pull/4981)]
 
 ### 🐛 Bug Fixes
 
 - Use pointer cursor for icon buttons [[#5002](https://github.com/woodpecker-ci/woodpecker/pull/5002)]
 - Add back cursor-pointer to pipeline step list buttons [[#4982](https://github.com/woodpecker-ci/woodpecker/pull/4982)]
-
-### 📈 Enhancement
-
-- Use badge value instead of label for single values [[#5010](https://github.com/woodpecker-ci/woodpecker/pull/5010)]
-- Add icons to all tabs [[#4421](https://github.com/woodpecker-ci/woodpecker/pull/4421)]
-- Tag pipeline with source information [[#4796](https://github.com/woodpecker-ci/woodpecker/pull/4796)]
-- Add titles and descriptions to repos page [[#4981](https://github.com/woodpecker-ci/woodpecker/pull/4981)]
 
 ### 📚 Documentation
 
