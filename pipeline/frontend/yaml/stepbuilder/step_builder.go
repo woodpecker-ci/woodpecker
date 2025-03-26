@@ -50,14 +50,6 @@ type StepBuilder struct {
 	DefaultLabels        map[string]string
 }
 
-type Item struct {
-	Workflow  *model.Workflow
-	Labels    map[string]string
-	DependsOn []string
-	RunsOn    []string
-	Config    *backend_types.Config
-}
-
 func (b *StepBuilder) Build() (items []*Item, errorsAndWarnings error) {
 	b.Yamls = forge_types.SortByName(b.Yamls)
 
@@ -201,7 +193,7 @@ func (b *StepBuilder) compileWorkflow(parsed *yaml_types.Workflow, environ map[s
 		compiler.WithEnviron(environ),
 		compiler.WithEnviron(b.Envs),
 		compiler.WithEscalated(b.PrivilegedPlugins...),
-		compiler.WithTrustedClonePlugins(b.TrustedClonePlugins), // TODO: append repo trusted clone plugins
+		compiler.WithTrustedClonePlugins(b.TrustedClonePlugins),
 		compiler.WithPrefix(
 			fmt.Sprintf(
 				"wp_%s_%d",

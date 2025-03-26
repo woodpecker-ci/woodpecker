@@ -66,35 +66,11 @@ func parsePipeline(forge forge.Forge, store store.Store, currentPipeline *model.
 		})
 	}
 
-	var secrets []compiler.Secret
-	for _, sec := range secs {
-		var events []string
-		for _, event := range sec.Events {
-			events = append(events, string(event))
-		}
-
-		secrets = append(secrets, compiler.Secret{
-			Name:           sec.Name,
-			Value:          sec.Value,
-			AllowedPlugins: sec.Images,
-			Events:         events,
-		})
-	}
-
 	registryService := server.Config.Services.Manager.RegistryServiceFromRepo(repo)
 	regs, err := registryService.RegistryListPipeline(repo, currentPipeline)
 	if err != nil {
 		log.Error().Err(err).Msgf("error getting registry credentials for %s#%d", repo.FullName, currentPipeline.Number)
 	}
-	var registries []compiler.Registry
-	for _, reg := range regs {
-		registries = append(registries, compiler.Registry{
-			Hostname: reg.Address,
-			Username: reg.Username,
-			Password: reg.Password,
-		})
-	}
-
 	var registries []compiler.Registry
 	for _, reg := range regs {
 		registries = append(registries, compiler.Registry{

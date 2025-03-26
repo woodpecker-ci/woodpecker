@@ -1,8 +1,8 @@
 package stepbuilder
 
 import (
-	backend_types "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
 type Item struct {

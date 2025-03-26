@@ -33,15 +33,15 @@ func MetadataFromStruct(forge metadata.ServerForge, repo *model.Repo, pipeline, 
 	}
 
 	fForge := metadata.Forge{}
-	if m.forge != nil {
+	if forge != nil {
 		fForge = metadata.Forge{
-			Type: m.forge.Name(),
-			URL:  m.forge.URL(),
+			Type: forge.Name(),
+			URL:  forge.URL(),
 		}
 	}
 
 	fRepo := metadata.Repo{}
-	if m.repo != nil {
+	if repo != nil {
 		fRepo = metadata.Repo{
 			ID:          repo.ID,
 			Name:        repo.Name,
@@ -53,18 +53,18 @@ func MetadataFromStruct(forge metadata.ServerForge, repo *model.Repo, pipeline, 
 			Private:     repo.IsSCMPrivate,
 			Branch:      repo.Branch,
 			Trusted: metadata.TrustedConfiguration{
-				Network:  m.repo.Trusted.Network,
-				Volumes:  m.repo.Trusted.Volumes,
-				Security: m.repo.Trusted.Security,
+				Network:  repo.Trusted.Network,
+				Volumes:  repo.Trusted.Volumes,
+				Security: repo.Trusted.Security,
 			},
 		}
 
-		if idx := strings.LastIndex(m.repo.FullName, "/"); idx != -1 {
-			if fRepo.Name == "" && m.repo.FullName != "" {
-				fRepo.Name = m.repo.FullName[idx+1:]
+		if idx := strings.LastIndex(repo.FullName, "/"); idx != -1 {
+			if fRepo.Name == "" && repo.FullName != "" {
+				fRepo.Name = repo.FullName[idx+1:]
 			}
-			if fRepo.Owner == "" && m.repo.FullName != "" {
-				fRepo.Owner = m.repo.FullName[:idx]
+			if fRepo.Owner == "" && repo.FullName != "" {
+				fRepo.Owner = repo.FullName[:idx]
 			}
 		}
 	}
