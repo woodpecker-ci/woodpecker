@@ -17,40 +17,44 @@ package stepbuilder
 
 import (
 	"fmt"
+	"maps"
 	"path/filepath"
+	"strconv"
 	"strings"
 
 	"github.com/oklog/ulid/v2"
 	"github.com/rs/zerolog/log"
 	"go.uber.org/multierr"
 
-	backend_types "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
-	pipeline_errors "go.woodpecker-ci.org/woodpecker/v2/pipeline/errors"
-	errorTypes "go.woodpecker-ci.org/woodpecker/v2/pipeline/errors/types"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/metadata"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/compiler"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/linter"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/matrix"
-	yaml_types "go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/types"
-	"go.woodpecker-ci.org/woodpecker/v2/server"
-	forge_types "go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline"
+	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
+	pipeline_errors "go.woodpecker-ci.org/woodpecker/v3/pipeline/errors"
+	errorTypes "go.woodpecker-ci.org/woodpecker/v3/pipeline/errors/types"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/compiler"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/linter"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/matrix"
+	yaml_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/types"
+	"go.woodpecker-ci.org/woodpecker/v3/server"
+	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
 // StepBuilder Takes the hook data and the yaml and returns in internal data model.
 type StepBuilder struct {
-	Repo      *model.Repo
-	Curr      *model.Pipeline
-	Prev      *model.Pipeline
-	Netrc     *model.Netrc
-	Secs      []*model.Secret
-	Regs      []*model.Registry
-	Host      string
-	Yamls     []*forge_types.FileMeta
-	Envs      map[string]string
-	Forge     metadata.ServerForge
-	ProxyOpts compiler.ProxyOptions
+	Repo          *model.Repo
+	Curr          *model.Pipeline
+	Prev          *model.Pipeline
+	Netrc         *model.Netrc
+	Secs          []*model.Secret
+	Regs          []*model.Registry
+	Host          string
+	Yamls         []*forge_types.FileMeta
+	Envs          map[string]string
+	Forge         metadata.ServerForge
+	DefaultLabels map[string]string
+	ProxyOpts     compiler.ProxyOptions
 }
 
 type Item struct {
@@ -186,8 +190,33 @@ func (b *StepBuilder) genItemForWorkflow(workflow *model.Workflow, axis matrix.A
 		DependsOn: parsed.DependsOn,
 		RunsOn:    parsed.RunsOn,
 	}
-	if item.Labels == nil {
-		item.Labels = map[string]string{}
+	if len(item.Labels) == 0 {
+		item.Labels = make(map[string]string, len(b.DefaultLabels))
+		// Set default labels if no labels are defined in the pipeline
+		maps.Copy(item.Labels, b.DefaultLabels)
+	}
+
+	// "woodpecker-ci.org" namespace is reserved for internal use
+	for key := range item.Labels {
+		if strings.HasPrefix(key, pipeline.InternalLabelPrefix) {
+			log.Debug().Str("forge", b.Forge.Name()).Str("repo", b.Repo.FullName).Str("label", key).Msg("dropped pipeline label with reserved prefix woodpecker-ci.org")
+			delete(item.Labels, key)
+		}
+	}
+
+	// Add Woodpecker managed labels to the pipeline
+	item.Labels[pipeline.LabelForgeRemoteID] = b.Forge.Name()
+	item.Labels[pipeline.LabelRepoForgeID] = string(b.Repo.ForgeRemoteID)
+	item.Labels[pipeline.LabelRepoID] = strconv.FormatInt(b.Repo.ID, 10)
+	item.Labels[pipeline.LabelRepoName] = b.Repo.Name
+	item.Labels[pipeline.LabelRepoFullName] = b.Repo.FullName
+	item.Labels[pipeline.LabelBranch] = b.Repo.Branch
+	item.Labels[pipeline.LabelOrgID] = strconv.FormatInt(b.Repo.OrgID, 10)
+
+	for stageI := range item.Config.Stages {
+		for stepI := range item.Config.Stages[stageI].Steps {
+			item.Config.Stages[stageI].Steps[stepI].WorkflowLabels = item.Labels
+		}
 	}
 
 	return item, errorsAndWarnings
@@ -286,7 +315,7 @@ func (b *StepBuilder) toInternalRepresentation(parsed *yaml_types.Workflow, envi
 			b.Repo.IsSCMPrivate || server.Config.Pipeline.AuthenticatePublicRepos,
 		),
 		compiler.WithDefaultClonePlugin(server.Config.Pipeline.DefaultClonePlugin),
-		compiler.WithTrustedClonePlugins(server.Config.Pipeline.TrustedClonePlugins),
+		compiler.WithTrustedClonePlugins(append(b.Repo.NetrcTrustedPlugins, server.Config.Pipeline.TrustedClonePlugins...)),
 		compiler.WithRegistry(registries...),
 		compiler.WithSecret(secrets...),
 		compiler.WithPrefix(
@@ -300,7 +329,6 @@ func (b *StepBuilder) toInternalRepresentation(parsed *yaml_types.Workflow, envi
 		compiler.WithWorkspaceFromURL(compiler.DefaultWorkspaceBase, b.Repo.ForgeURL),
 		compiler.WithMetadata(metadata),
 		compiler.WithTrustedSecurity(b.Repo.Trusted.Security),
-		compiler.WithNetrcOnlyTrusted(b.Repo.NetrcOnlyTrusted),
 	).Compile(parsed)
 }
 

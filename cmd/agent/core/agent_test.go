@@ -56,8 +56,8 @@ func TestStringSliceAddToMap(t *testing.T) {
 			name:     "empty string in slice",
 			sl:       []string{"foo=bar", "", "baz=qux"},
 			m:        make(map[string]string),
-			expected: map[string]string{},
-			err:      true,
+			expected: map[string]string{"foo": "bar", "baz": "qux"},
+			err:      false,
 		},
 	}
 

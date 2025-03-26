@@ -19,9 +19,9 @@ import (
 	"net/url"
 	"strings"
 
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/metadata"
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
-	"go.woodpecker-ci.org/woodpecker/v2/version"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/version"
 )
 
 // MetadataFromStruct return the metadata from a pipeline will run with.
@@ -48,7 +48,6 @@ func MetadataFromStruct(forge metadata.ServerForge, repo *model.Repo, pipeline, 
 			Owner:       repo.Owner,
 			RemoteID:    fmt.Sprint(repo.ForgeRemoteID),
 			ForgeURL:    repo.ForgeURL,
-			SCM:         string(repo.SCMKind),
 			CloneURL:    repo.Clone,
 			CloneSSHURL: repo.CloneSSH,
 			Private:     repo.IsSCMPrivate,

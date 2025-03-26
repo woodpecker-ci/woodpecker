@@ -54,6 +54,20 @@
     }
   },
   "definitions": {
+    "string_or_string_slice": {
+      "oneOf": [
+        {
+          "type": "array",
+          "minLength": 1,
+          "items": {
+            "type": "string"
+          }
+        },
+        {
+          "type": "string"
+        }
+      ]
+    },
     "clone": {
       "description": "Configures the clone step. Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#clone",
       "oneOf": [
@@ -286,9 +300,6 @@
         "directory": {
           "$ref": "#/definitions/step_directory"
         },
-        "secrets": {
-          "$ref": "#/definitions/step_secrets"
-        },
         "when": {
           "$ref": "#/definitions/step_when"
         },
@@ -297,18 +308,7 @@
         },
         "depends_on": {
           "description": "Execute a step after another step has finished.",
-          "oneOf": [
-            {
-              "type": "array",
-              "minLength": 1,
-              "items": {
-                "type": "string"
-              }
-            },
-            {
-              "type": "string"
-            }
-          ]
+          "$ref": "#/definitions/string_or_string_slice"
         },
         "detach": {
           "description": "Detach a step to run in background until pipeline finishes. Read more: https://woodpecker-ci.org/docs/usage/services#detachment",
@@ -325,18 +325,15 @@
         },
         "entrypoint": {
           "description": "Defines container entrypoint.",
-          "oneOf": [
-            {
-              "type": "array",
-              "minLength": 1,
-              "items": {
-                "type": "string"
-              }
-            },
-            {
-              "type": "string"
-            }
-          ]
+          "$ref": "#/definitions/string_or_string_slice"
+        },
+        "dns": {
+          "description": "Change DNS server for step. Only allowed if 'Trusted Network' option is enabled in repo settings by an admin. Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#dns",
+          "$ref": "#/definitions/string_or_string_slice"
+        },
+        "dns_search": {
+          "description": "Change DNS lookup domain for step. Only allowed if 'Trusted Network' option is enabled in repo settings by an admin. Read more: https://woodpecker-ci.org/docs/usage/workflow-syntax#dns",
+          "$ref": "#/definitions/string_or_string_slice"
         }
       }
     },
@@ -373,18 +370,7 @@
         },
         "depends_on": {
           "description": "Execute a step after another step has finished.",
-          "oneOf": [
-            {
-              "type": "array",
-              "minLength": 1,
-              "items": {
-                "type": "string"
-              }
-            },
-            {
-              "type": "string"
-            }
-          ]
+          "$ref": "#/definitions/string_or_string_slice"
         },
         "detach": {
           "description": "Detach a step to run in background until pipeline finishes. Read more: https://woodpecker-ci.org/docs/usage/services#detachment",
@@ -616,14 +602,6 @@
         "type": ["boolean", "string", "number", "array", "object"]
       }
     },
-    "step_secrets": {
-      "description": "Pass secrets to a pipeline step at runtime. Read more: https://woodpecker-ci.org/docs/usage/secrets",
-      "type": "array",
-      "items": {
-        "type": "string"
-      },
-      "minLength": 1
-    },
     "step_settings": {
       "description": "Change the settings of your plugin. Read more: https://woodpecker-ci.org/docs/usage/plugins/overview",
       "type": "object",
@@ -672,7 +650,7 @@
           "$ref": "#/definitions/step_backend_kubernetes_security_context"
         },
         "runtimeClassName": {
-          "description": "Read more: https://woodpecker-ci.org/docs/administration/backends/kubernetes#runtimeclassname",
+          "description": "Read more: https://woodpecker-ci.org/docs/administration/configuration/backends/kubernetes#runtimeclassname",
           "type": "string"
         },
         "secrets": {
@@ -686,7 +664,7 @@
       }
     },
     "step_backend_kubernetes_resources": {
-      "description": "Resources for the kubernetes backend. Read more: https://woodpecker-ci.org/docs/administration/backends/kubernetes#job-specific-configuration",
+      "description": "Resources for the kubernetes backend. Read more: https://woodpecker-ci.org/docs/administration/configuration/backends/kubernetes#step-specific-configuration",
       "type": "object",
       "properties": {
         "requests": {
@@ -698,7 +676,7 @@
       }
     },
     "step_backend_kubernetes_security_context": {
-      "description": "Pods / containers security context. Read more: https://woodpecker-ci.org/docs/administration/backends/kubernetes#securitycontext",
+      "description": "Pods / containers security context. Read more: https://woodpecker-ci.org/docs/administration/configuration/backends/kubernetes#security-context",
       "type": "object",
       "properties": {
         "privileged": {
@@ -725,7 +703,7 @@
       }
     },
     "step_backend_kubernetes_secprofile": {
-      "description": "Pods / containers security profile. Read more: https://woodpecker-ci.org/docs/administration/backends/kubernetes#job-specific-configuration",
+      "description": "Pods / containers security profile. Read more: https://woodpecker-ci.org/docs/administration/configuration/backends/kubernetes#step-specific-configuration",
       "type": "object",
       "properties": {
         "type": {
@@ -744,7 +722,7 @@
       }
     },
     "step_backend_kubernetes_service_account": {
-      "description": "serviceAccountName to be use by job. Read more: https://woodpecker-ci.org/docs/administration/backends/kubernetes#serviceaccountname",
+      "description": "serviceAccountName to be use by job. Read more: https://woodpecker-ci.org/docs/administration/configuration/backends/kubernetes#service-account",
       "type": "object",
       "properties": {
         "requests": {
@@ -784,15 +762,23 @@
       "description": "A target which a native Kubernetes secret maps to.",
       "oneOf": [
         {
-          "env": {
-            "description": "The name of the environment variable which secret maps to.",
-            "type": "string"
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "env": {
+              "description": "The name of the environment variable which secret maps to.",
+              "type": "string"
+            }
           }
         },
         {
-          "file": {
-            "description": "The filename (path) which secret maps to.",
-            "type": "string"
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "file": {
+              "description": "The filename (path) which secret maps to.",
+              "type": "string"
+            }
           }
         }
       ]
@@ -844,9 +830,6 @@
         },
         "directory": {
           "$ref": "#/definitions/step_directory"
-        },
-        "secrets": {
-          "$ref": "#/definitions/step_secrets"
         },
         "settings": {
           "$ref": "#/definitions/step_settings"

@@ -20,6 +20,27 @@ import (
 	"strings"
 )
 
+type ApprovalMode string
+
+const (
+	RequireApprovalNone         ApprovalMode = "none"          // require approval for no events
+	RequireApprovalForks        ApprovalMode = "forks"         // require approval for PRs from forks (default)
+	RequireApprovalPullRequests ApprovalMode = "pull_requests" // require approval for all PRs
+	RequireApprovalAllEvents    ApprovalMode = "all_events"    // require approval for all external events
+)
+
+func (mode ApprovalMode) Valid() bool {
+	switch mode {
+	case RequireApprovalNone,
+		RequireApprovalForks,
+		RequireApprovalPullRequests,
+		RequireApprovalAllEvents:
+		return true
+	default:
+		return false
+	}
+}
+
 // Repo represents a repository.
 type Repo struct {
 	ID      int64 `json:"id,omitempty"                    xorm:"pk autoincr 'id'"`
@@ -36,13 +57,13 @@ type Repo struct {
 	Clone                        string               `json:"clone_url,omitempty"             xorm:"varchar(1000) 'clone'"`
 	CloneSSH                     string               `json:"clone_url_ssh"                   xorm:"varchar(1000) 'clone_ssh'"`
 	Branch                       string               `json:"default_branch,omitempty"        xorm:"varchar(500) 'branch'"`
-	SCMKind                      SCMKind              `json:"scm,omitempty"                   xorm:"varchar(50) 'scm'"`
 	PREnabled                    bool                 `json:"pr_enabled"                      xorm:"DEFAULT TRUE 'pr_enabled'"`
 	Timeout                      int64                `json:"timeout,omitempty"               xorm:"timeout"`
 	Visibility                   RepoVisibility       `json:"visibility"                      xorm:"varchar(10) 'visibility'"`
 	IsSCMPrivate                 bool                 `json:"private"                         xorm:"private"`
 	Trusted                      TrustedConfiguration `json:"trusted"                         xorm:"json 'trusted'"`
-	IsGated                      bool                 `json:"gated"                           xorm:"gated"`
+	RequireApproval              ApprovalMode         `json:"require_approval"                xorm:"varchar(50) require_approval"`
+	ApprovalAllowedUsers         []string             `json:"approval_allowed_users"          xorm:"json approval_allowed_users"`
 	IsActive                     bool                 `json:"active"                          xorm:"active"`
 	AllowPull                    bool                 `json:"allow_pr"                        xorm:"allow_pr"`
 	AllowDeploy                  bool                 `json:"allow_deploy"                    xorm:"allow_deploy"`
@@ -50,7 +71,7 @@ type Repo struct {
 	Hash                         string               `json:"-"                               xorm:"varchar(500) 'hash'"`
 	Perm                         *Perm                `json:"-"                               xorm:"-"`
 	CancelPreviousPipelineEvents []WebhookEvent       `json:"cancel_previous_pipeline_events" xorm:"json 'cancel_previous_pipeline_events'"`
-	NetrcOnlyTrusted             bool                 `json:"netrc_only_trusted"              xorm:"NOT NULL DEFAULT true 'netrc_only_trusted'"`
+	NetrcTrustedPlugins          []string             `json:"netrc_trusted"                   xorm:"json 'netrc_trusted'"`
 } //	@name Repo
 
 // TableName return database table name for xorm.
@@ -87,7 +108,6 @@ func (r *Repo) Update(from *Repo) {
 	r.FullName = from.FullName
 	r.Avatar = from.Avatar
 	r.ForgeURL = from.ForgeURL
-	r.SCMKind = from.SCMKind
 	r.PREnabled = from.PREnabled
 	if len(from.Clone) > 0 {
 		r.Clone = from.Clone
@@ -109,13 +129,14 @@ func (r *Repo) Update(from *Repo) {
 // RepoPatch represents a repository patch object.
 type RepoPatch struct {
 	Config                       *string                    `json:"config_file,omitempty"`
-	IsGated                      *bool                      `json:"gated,omitempty"`
+	RequireApproval              *string                    `json:"require_approval,omitempty"`
+	ApprovalAllowedUsers         *[]string                  `json:"approval_allowed_users,omitempty"`
 	Timeout                      *int64                     `json:"timeout,omitempty"`
 	Visibility                   *string                    `json:"visibility,omitempty"`
 	AllowPull                    *bool                      `json:"allow_pr,omitempty"`
 	AllowDeploy                  *bool                      `json:"allow_deploy,omitempty"`
 	CancelPreviousPipelineEvents *[]WebhookEvent            `json:"cancel_previous_pipeline_events"`
-	NetrcOnlyTrusted             *bool                      `json:"netrc_only_trusted"`
+	NetrcTrusted                 *[]string                  `json:"netrc_trusted"`
 	Trusted                      *TrustedConfigurationPatch `json:"trusted"`
 } //	@name RepoPatch
 
@@ -136,3 +157,9 @@ type TrustedConfigurationPatch struct {
 	Volumes  *bool `json:"volumes"`
 	Security *bool `json:"security"`
 }
+
+// RepoLastPipeline represents a repository with last pipeline execution information.
+type RepoLastPipeline struct {
+	*Repo
+	LastPipeline *Pipeline `json:"last_pipeline,omitempty"`
+} //	@name RepoLastPipeline

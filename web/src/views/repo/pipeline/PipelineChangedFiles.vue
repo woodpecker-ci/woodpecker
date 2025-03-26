@@ -1,13 +1,14 @@
 <template>
   <Panel>
-    <ul class="list-disc list-inside w-full">
+    <ul class="w-full list-inside list-disc">
       <li v-for="file in pipeline!.changed_files" :key="file">{{ file }}</li>
     </ul>
   </Panel>
 </template>
 
 <script lang="ts" setup>
-import { inject, type Ref } from 'vue';
+import { inject } from 'vue';
+import type { Ref } from 'vue';
 
 import Panel from '~/components/layout/Panel.vue';
 import type { Pipeline } from '~/lib/api/types';

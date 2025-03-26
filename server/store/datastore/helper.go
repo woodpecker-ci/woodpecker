@@ -21,8 +21,8 @@ import (
 
 	"xorm.io/xorm"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
-	"go.woodpecker-ci.org/woodpecker/v2/server/store/types"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
 )
 
 // wrapGet return error if err not nil or if requested entry do not exist.
@@ -31,7 +31,7 @@ func wrapGet(exist bool, err error) error {
 		return types.RecordNotExist
 	}
 	if err != nil {
-		// we only ask for the function's name if needed, as it's not as preformatted as to just execute it
+		// we only ask for the function's name if needed for performance reasons
 		fnName := callerName(2)
 		return fmt.Errorf("%s: %w", fnName, err)
 	}
@@ -44,7 +44,7 @@ func wrapDelete(c int64, err error) error {
 		return types.RecordNotExist
 	}
 	if err != nil {
-		// we only ask for the function's name if needed, as it's not as preformatted as to just execute it
+		// we only ask for the function's name if needed for performance reasons
 		fnName := callerName(2)
 		return fmt.Errorf("%s: %w", fnName, err)
 	}
@@ -52,7 +52,7 @@ func wrapDelete(c int64, err error) error {
 }
 
 func (s storage) paginate(p *model.ListOptions) *xorm.Session {
-	if p.All {
+	if p == nil || p.All {
 		return s.engine.NewSession()
 	}
 	if p.PerPage < 1 {
@@ -75,4 +75,8 @@ func callerName(skip int) string {
 		fnName = fnName[pIndex+1:]
 	}
 	return fnName
+}
+
+func (s storage) quoteIdentifier(identifier string) string {
+	return s.engine.Dialect().Quoter().Quote(identifier)
 }

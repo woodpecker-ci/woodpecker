@@ -20,7 +20,7 @@ import (
 	"src.techknowlogick.com/xormigrate"
 	"xorm.io/xorm"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
 type userV008 struct {
@@ -56,7 +56,6 @@ type repoV008 struct {
 	Clone                        string               `xorm:"varchar(1000) 'repo_clone'"`
 	CloneSSH                     string               `xorm:"varchar(1000) 'repo_clone_ssh'"`
 	Branch                       string               `xorm:"varchar(500) 'repo_branch'"`
-	SCMKind                      model.SCMKind        `xorm:"varchar(50) 'repo_scm'"`
 	PREnabled                    bool                 `xorm:"DEFAULT TRUE 'repo_pr_enabled'"`
 	Timeout                      int64                `xorm:"repo_timeout"`
 	Visibility                   model.RepoVisibility `xorm:"varchar(10) 'repo_visibility'"`
@@ -77,7 +76,7 @@ func (repoV008) TableName() string {
 	return "repos"
 }
 
-type forgeV008 struct {
+type forge struct {
 	ID                int64           `xorm:"pk autoincr 'id'"`
 	Type              model.ForgeType `xorm:"VARCHAR(250) 'type'"`
 	URL               string          `xorm:"VARCHAR(500) 'url'"`
@@ -88,14 +87,14 @@ type forgeV008 struct {
 	AdditionalOptions map[string]any  `xorm:"json 'additional_options'"`
 }
 
-func (forgeV008) TableName() string {
+func (forge) TableName() string {
 	return "forge"
 }
 
 var setForgeID = xormigrate.Migration{
 	ID: "set-forge-id",
 	MigrateSession: func(sess *xorm.Session) (err error) {
-		if err := sess.Sync(new(userV008), new(repoV008), new(forgeV008), new(model.Org)); err != nil {
+		if err := sess.Sync(new(userV008), new(repoV008), new(forge), new(model.Org)); err != nil {
 			return fmt.Errorf("sync new models failed: %w", err)
 		}
 

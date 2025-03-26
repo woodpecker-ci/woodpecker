@@ -16,14 +16,15 @@
 package gitea
 
 import (
+	"fmt"
 	"io"
 	"net/http"
 	"strings"
 
 	"github.com/rs/zerolog/log"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
 const (
@@ -109,6 +110,11 @@ func parsePullRequestHook(payload io.Reader) (*model.Repo, *model.Pipeline, erro
 	pr, err := parsePullRequest(payload)
 	if err != nil {
 		return nil, nil, err
+	}
+
+	if pr.PullRequest == nil {
+		// this should never have happened but it did - so we check
+		return nil, nil, fmt.Errorf("parsed pull_request webhook does not contain pull_request info")
 	}
 
 	// Don't trigger pipelines for non-code changes ...

@@ -23,8 +23,8 @@ import (
 
 	"github.com/rs/zerolog/log"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
-	"go.woodpecker-ci.org/woodpecker/v2/shared/constant"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/constant"
 )
 
 type entry struct {
@@ -59,8 +59,8 @@ const processTimeInterval = 100 * time.Millisecond
 
 var ErrWorkerKicked = fmt.Errorf("worker was kicked")
 
-// New returns a new fifo queue.
-func New(ctx context.Context) Queue {
+// NewMemoryQueue returns a new fifo queue.
+func NewMemoryQueue(ctx context.Context) Queue {
 	q := &fifo{
 		ctx:           ctx,
 		workers:       map[*worker]struct{}{},

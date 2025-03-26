@@ -21,27 +21,72 @@ import (
 )
 
 func TestPaginate(t *testing.T) {
-	apiExec := 0
-	apiMock := func(page int) []int {
-		apiExec++
-		switch page {
-		case 0, 1:
-			return []int{11, 12, 13}
-		case 2:
-			return []int{21, 22, 23}
-		case 3:
-			return []int{31, 32}
-		default:
-			return []int{}
+	// Generic mock generator that can handle all cases
+	createMock := func(pages [][]int) func(page int) []int {
+		return func(page int) []int {
+			if page <= 0 {
+				page = 0
+			} else {
+				page--
+			}
+
+			if page >= len(pages) {
+				return []int{}
+			}
+
+			return pages[page]
 		}
 	}
 
-	result, _ := Paginate(func(page int) ([]int, error) {
-		return apiMock(page), nil
-	})
+	tests := []struct {
+		name     string
+		limit    int
+		pages    [][]int
+		expected []int
+		apiCalls int
+	}{
+		{
+			name:     "multiple pages",
+			limit:    -1,
+			pages:    [][]int{{11, 12, 13}, {21, 22, 23}, {31, 32}},
+			expected: []int{11, 12, 13, 21, 22, 23, 31, 32},
+			apiCalls: 3,
+		},
+		{
+			name:     "zero limit",
+			limit:    0,
+			pages:    [][]int{{1, 2, 3}, {1, 2, 3}, {1, 2, 3}},
+			expected: []int{1, 2, 3, 1, 2, 3, 1, 2, 3},
+			apiCalls: 4,
+		},
+		{
+			name:     "empty result",
+			limit:    5,
+			pages:    [][]int{{}},
+			expected: []int{},
+			apiCalls: 1,
+		},
+		{
+			name:     "limit less than batch",
+			limit:    2,
+			pages:    [][]int{{1, 2, 3, 4, 5}},
+			expected: []int{1, 2},
+			apiCalls: 1,
+		},
+	}
 
-	assert.EqualValues(t, 3, apiExec)
-	if assert.Len(t, result, 8) {
-		assert.EqualValues(t, []int{11, 12, 13, 21, 22, 23, 31, 32}, result)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			apiExec := 0
+			mock := createMock(tt.pages)
+
+			result, _ := Paginate(func(page int) ([]int, error) {
+				apiExec++
+				return mock(page), nil
+			}, tt.limit)
+
+			assert.EqualValues(t, tt.apiCalls, apiExec)
+			assert.EqualValues(t, tt.expected, result)
+		})
 	}
 }

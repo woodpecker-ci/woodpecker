@@ -15,9 +15,11 @@
 package common
 
 import (
+	"fmt"
+
 	"github.com/urfave/cli/v3"
 
-	"go.woodpecker-ci.org/woodpecker/v2/shared/logger"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/logger"
 )
 
 var GlobalFlags = append([]cli.Flag{
@@ -48,28 +50,30 @@ var GlobalFlags = append([]cli.Flag{
 		Sources: cli.EnvVars("WOODPECKER_SKIP_VERIFY"),
 		Name:    "skip-verify",
 		Usage:   "skip ssl verification",
-		Hidden:  true,
 	},
 	&cli.StringFlag{
 		Sources: cli.EnvVars("SOCKS_PROXY"),
 		Name:    "socks-proxy",
 		Usage:   "socks proxy address",
-		Hidden:  true,
 	},
 	&cli.BoolFlag{
 		Sources: cli.EnvVars("SOCKS_PROXY_OFF"),
 		Name:    "socks-proxy-off",
 		Usage:   "socks proxy ignored",
-		Hidden:  true,
 	},
 }, logger.GlobalLoggerFlags...)
 
 // FormatFlag return format flag with value set based on template
 // if hidden value is set, flag will be hidden.
-func FormatFlag(tmpl string, hidden ...bool) *cli.StringFlag {
+func FormatFlag(tmpl string, deprecated bool, hidden ...bool) *cli.StringFlag {
+	usage := "format output"
+	if deprecated {
+		usage = fmt.Sprintf("%s (deprecated)", usage)
+	}
+
 	return &cli.StringFlag{
 		Name:   "format",
-		Usage:  "format output",
+		Usage:  usage,
 		Value:  tmpl,
 		Hidden: len(hidden) != 0,
 	}

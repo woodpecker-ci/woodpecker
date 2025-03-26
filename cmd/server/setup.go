@@ -29,20 +29,20 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v3"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server"
-	"go.woodpecker-ci.org/woodpecker/v2/server/cache"
-	"go.woodpecker-ci.org/woodpecker/v2/server/forge/setup"
-	"go.woodpecker-ci.org/woodpecker/v2/server/logging"
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
-	"go.woodpecker-ci.org/woodpecker/v2/server/pubsub"
-	"go.woodpecker-ci.org/woodpecker/v2/server/queue"
-	"go.woodpecker-ci.org/woodpecker/v2/server/services"
-	logService "go.woodpecker-ci.org/woodpecker/v2/server/services/log"
-	"go.woodpecker-ci.org/woodpecker/v2/server/services/log/file"
-	"go.woodpecker-ci.org/woodpecker/v2/server/services/permissions"
-	"go.woodpecker-ci.org/woodpecker/v2/server/store"
-	"go.woodpecker-ci.org/woodpecker/v2/server/store/datastore"
-	"go.woodpecker-ci.org/woodpecker/v2/server/store/types"
+	"go.woodpecker-ci.org/woodpecker/v3/server"
+	"go.woodpecker-ci.org/woodpecker/v3/server/cache"
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge/setup"
+	"go.woodpecker-ci.org/woodpecker/v3/server/logging"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/pubsub"
+	"go.woodpecker-ci.org/woodpecker/v3/server/queue"
+	"go.woodpecker-ci.org/woodpecker/v3/server/services"
+	logService "go.woodpecker-ci.org/woodpecker/v3/server/services/log"
+	"go.woodpecker-ci.org/woodpecker/v3/server/services/log/file"
+	"go.woodpecker-ci.org/woodpecker/v3/server/services/permissions"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store/datastore"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
 )
 
 const (
@@ -51,11 +51,14 @@ const (
 )
 
 func setupStore(ctx context.Context, c *cli.Command) (store.Store, error) {
-	datasource := c.String("datasource")
-	driver := c.String("driver")
+	datasource := c.String("db-datasource")
+	driver := c.String("db-driver")
 	xorm := store.XORM{
-		Log:     c.Bool("log-xorm"),
-		ShowSQL: c.Bool("log-xorm-sql"),
+		Log:             c.Bool("db-log"),
+		ShowSQL:         c.Bool("db-log-sql"),
+		MaxOpenConns:    int(c.Int("db-max-open-connections")),
+		MaxIdleConns:    int(c.Int("db-max-idle-connections")),
+		ConnMaxLifetime: c.Duration("db-max-connection-timeout"),
 	}
 
 	if driver == "sqlite3" {
@@ -81,10 +84,14 @@ func setupStore(ctx context.Context, c *cli.Command) (store.Store, error) {
 		Config: datasource,
 		XORM:   xorm,
 	}
-	log.Trace().Msgf("setup datastore: %#v", *opts)
+	log.Debug().Str("driver", driver).Any("xorm", xorm).Msg("setting up datastore")
 	store, err := datastore.NewEngine(opts)
 	if err != nil {
 		return nil, fmt.Errorf("could not open datastore: %w", err)
+	}
+
+	if err = store.Ping(); err != nil {
+		return nil, err
 	}
 
 	if err := store.Migrate(ctx, c.Bool("migrations-allow-long")); err != nil {
@@ -103,8 +110,11 @@ func checkSqliteFileExist(path string) error {
 	return err
 }
 
-func setupQueue(ctx context.Context, s store.Store) queue.Queue {
-	return queue.WithTaskStore(ctx, queue.New(ctx), s)
+func setupQueue(ctx context.Context, s store.Store) (queue.Queue, error) {
+	return queue.New(ctx, queue.Config{
+		Backend: queue.TypeMemory,
+		Store:   s,
+	})
 }
 
 func setupMembershipService(_ context.Context, _store store.Store) cache.MembershipService {
@@ -143,25 +153,32 @@ func setupJWTSecret(_store store.Store) (string, error) {
 	return jwtSecret, nil
 }
 
-func setupEvilGlobals(ctx context.Context, c *cli.Command, s store.Store) error {
+func setupEvilGlobals(ctx context.Context, c *cli.Command, s store.Store) (err error) {
 	// services
-	server.Config.Services.Queue = setupQueue(ctx, s)
 	server.Config.Services.Logs = logging.New()
 	server.Config.Services.Pubsub = pubsub.New()
 	server.Config.Services.Membership = setupMembershipService(ctx, s)
-	serviceManager, err := services.NewManager(c, s, setup.Forge)
+	server.Config.Services.Queue, err = setupQueue(ctx, s)
+	if err != nil {
+		return fmt.Errorf("could not setup queue: %w", err)
+	}
+	server.Config.Services.Manager, err = services.NewManager(c, s, setup.Forge)
 	if err != nil {
 		return fmt.Errorf("could not setup service manager: %w", err)
 	}
-	server.Config.Services.Manager = serviceManager
-
 	server.Config.Services.LogStore, err = setupLogStore(c, s)
 	if err != nil {
 		return fmt.Errorf("could not setup log store: %w", err)
 	}
 
+	// agents
+	server.Config.Agent.DisableUserRegisteredAgentRegistration = c.Bool("disable-user-agent-registration")
+
 	// authentication
 	server.Config.Pipeline.AuthenticatePublicRepos = c.Bool("authenticate-public-repos")
+
+	// Pull requests
+	server.Config.Pipeline.DefaultAllowPullRequests = c.Bool("default-allow-pull-requests")
 
 	// Cloning
 	server.Config.Pipeline.DefaultClonePlugin = c.String("default-clone-plugin")
@@ -177,6 +194,17 @@ func setupEvilGlobals(ctx context.Context, c *cli.Command, s store.Store) error 
 	server.Config.Pipeline.DefaultCancelPreviousPipelineEvents = events
 	server.Config.Pipeline.DefaultTimeout = c.Int("default-pipeline-timeout")
 	server.Config.Pipeline.MaxTimeout = c.Int("max-pipeline-timeout")
+
+	_labels := c.StringSlice("default-workflow-labels")
+	labels := make(map[string]string, len(_labels))
+	for _, v := range _labels {
+		name, value, ok := strings.Cut(v, "=")
+		if !ok {
+			return fmt.Errorf("invalid label filter: %s", v)
+		}
+		labels[name] = value
+	}
+	server.Config.Pipeline.DefaultWorkflowLabels = labels
 
 	// backend options for pipeline compiler
 	server.Config.Pipeline.Proxy.No = c.String("backend-no-proxy")

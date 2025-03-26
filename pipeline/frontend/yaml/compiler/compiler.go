@@ -18,11 +18,11 @@ import (
 	"fmt"
 	"path"
 
-	backend_types "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/metadata"
-	yaml_types "go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/types"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/utils"
-	"go.woodpecker-ci.org/woodpecker/v2/shared/constant"
+	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
+	yaml_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/types"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/utils"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/constant"
 )
 
 const (
@@ -98,7 +98,6 @@ type Compiler struct {
 	defaultClonePlugin      string
 	trustedClonePlugins     []string
 	securityTrustedPipeline bool
-	netrcOnlyTrusted        bool
 }
 
 // New creates a new Compiler with options.
@@ -130,14 +129,14 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 	}
 
 	// create a default volume
-	config.Volumes = append(config.Volumes, &backend_types.Volume{
+	config.Volume = &backend_types.Volume{
 		Name: fmt.Sprintf("%s_default", c.prefix),
-	})
+	}
 
 	// create a default network
-	config.Networks = append(config.Networks, &backend_types.Network{
+	config.Network = &backend_types.Network{
 		Name: fmt.Sprintf("%s_default", c.prefix),
-	})
+	}
 
 	// create secrets for mask
 	for _, sec := range c.secrets {
@@ -171,7 +170,7 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 		for k, v := range c.cloneEnv {
 			container.Environment[k] = v
 		}
-		step, err := c.createProcess(container, backend_types.StepTypeClone)
+		step, err := c.createProcess(container, conf, backend_types.StepTypeClone)
 		if err != nil {
 			return nil, err
 		}
@@ -190,13 +189,13 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 
 			stage := new(backend_types.Stage)
 
-			step, err := c.createProcess(container, backend_types.StepTypeClone)
+			step, err := c.createProcess(container, conf, backend_types.StepTypeClone)
 			if err != nil {
 				return nil, err
 			}
 
 			// only inject netrc if it's a trusted repo or a trusted plugin
-			if !c.netrcOnlyTrusted || c.securityTrustedPipeline || (container.IsPlugin() && container.IsTrustedCloneImage(c.trustedClonePlugins)) {
+			if c.securityTrustedPipeline || (container.IsPlugin() && container.IsTrustedCloneImage(c.trustedClonePlugins)) {
 				for k, v := range c.cloneEnv {
 					step.Environment[k] = v
 				}
@@ -219,7 +218,7 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 				return nil, err
 			}
 
-			step, err := c.createProcess(container, backend_types.StepTypeService)
+			step, err := c.createProcess(container, conf, backend_types.StepTypeService)
 			if err != nil {
 				return nil, err
 			}
@@ -247,12 +246,12 @@ func (c *Compiler) Compile(conf *yaml_types.Workflow) (*backend_types.Config, er
 		if container.IsPlugin() {
 			stepType = backend_types.StepTypePlugin
 		}
-		step, err := c.createProcess(container, stepType)
+		step, err := c.createProcess(container, conf, stepType)
 		if err != nil {
 			return nil, err
 		}
 
-		// inject netrc if it's a trusted repo or a trusted clone-plugin
+		// only inject netrc if it's a trusted repo or a trusted plugin
 		if c.securityTrustedPipeline || (container.IsPlugin() && container.IsTrustedCloneImage(c.trustedClonePlugins)) {
 			for k, v := range c.cloneEnv {
 				step.Environment[k] = v
