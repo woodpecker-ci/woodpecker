@@ -78,5 +78,13 @@ func callerName(skip int) string {
 }
 
 func (s storage) quoteIdentifier(identifier string) string {
-	return s.engine.Dialect().Quoter().Quote(identifier)
+	driver := s.engine.DriverName()
+	switch driver {
+	case DriverMysql:
+		return "`" + identifier + "`"
+	case DriverPostgres, DriverSqlite:
+		return "\"" + identifier + "\""
+	default:
+		return identifier
+	}
 }
