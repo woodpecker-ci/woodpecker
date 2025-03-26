@@ -386,7 +386,7 @@
                     "cancel": "Ältere Pipelines abbrechen",
                     "desc": "Bei ausgewählten Events werden laufende Pipelines desselben Ereignisses abgebrochen, bevor die neue Pipeline startet."
                 },
-                "general": "Allgemein",
+                "general": "Projekt",
                 "netrc_only_trusted": {
                     "desc": "Plugins, die Zugriff auf Netrc-Zugangsdaten erhalten, die genutzt werden können, um Repositorys von der Forge zu klonen oder zu pushen.",
                     "netrc_only_trusted": "Eigene vertrauenswürdige Plugins zum Klonen"
@@ -508,7 +508,17 @@
         }
     },
     "repos": "Repos",
-    "repositories": "Repositorys",
+    "repositories": {
+        "title": "Repositorys",
+        "all": {
+            "title": "Alle Repositorys",
+            "desc": "Repositorys nach der letzten Erstellung einer Pipeline sortiert"
+        },
+        "last": {
+            "title": "Zuletzt besucht",
+            "desc": "Zuletzt besuchte Repositorys nach Zugriffszeit sortiert"
+        }
+    },
     "running_version": "Du verwendest Woodpecker {0}",
     "search": "Suche…",
     "time": {
@@ -542,7 +552,7 @@
                 "token": "Persönlicher Zugangsschlüssel"
             },
             "general": {
-                "general": "Allgemein",
+                "general": "Konto",
                 "language": "Sprache",
                 "theme": {
                     "auto": "Automatisch",
