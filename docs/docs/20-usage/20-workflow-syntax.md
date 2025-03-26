@@ -200,10 +200,8 @@ A condition can be a check like:
 
 ```diff
  steps:
-   - name: slack
-     image: plugins/slack
-     settings:
-       channel: dev
+   - name: prettier
+     image: woodpeckerci/plugin-prettier
 +    when:
 +      - event: pull_request
 +        repo: test/test
@@ -211,7 +209,7 @@ A condition can be a check like:
 +        branch: main
 ```
 
-The `slack` step is executed if one of these conditions is met:
+The `prettier` step is executed if one of these conditions is met:
 
 1. The pipeline is executed from a pull request in the repo `test/test`
 2. The pipeline is executed from a push to `main`
@@ -222,10 +220,8 @@ Example conditional execution by repository:
 
 ```diff
  steps:
-   - name: slack
-     image: plugins/slack
-     settings:
-       channel: dev
+   - name: prettier
+     image: woodpeckerci/plugin-prettier
 +    when:
 +      - repo: test/test
 ```
@@ -240,10 +236,8 @@ Example conditional execution by branch:
 
 ```diff
  steps:
-   - name: slack
-     image: plugins/slack
-     settings:
-       channel: dev
+   - name: prettier
+     image: woodpeckerci/plugin-prettier
 +    when:
 +      - branch: main
 ```
@@ -289,7 +283,7 @@ The available events are:
 - `pull_request_closed`: triggered when a pull request is closed or merged.
 - `tag`: triggered when a tag is pushed.
 - `release`: triggered when a release, pre-release or draft is created. (You can apply further filters using [evaluate](#evaluate) with [environment variables](./50-environment.md#built-in-environment-variables).)
-- `deployment` (only available for GitHub): triggered when a deployment is created in the repository.
+- `deployment`: triggered when a deployment is created in the repository. (This event can be triggered from Woodpecker directly. GitHub also supports webhook triggers.)
 - `cron`: triggered when a cron job is executed.
 - `manual`: triggered when a user manually triggers a pipeline.
 
@@ -342,14 +336,12 @@ when:
 
 #### `status`
 
-There are use cases for executing steps on failure, such as sending notifications for failed workflow / pipeline. Use the status constraint to execute steps even when the workflow fails:
+There are use cases for executing steps on failure, such as sending notifications for failed workflow/pipeline. Use the status constraint to execute steps even when the workflow fails:
 
 ```diff
  steps:
-   - name: slack
-     image: plugins/slack
-     settings:
-       channel: dev
+   - name: notify
+     image: alpine
 +    when:
 +      - status: [ success, failure ]
 ```
@@ -602,12 +594,16 @@ For more details check the [matrix build docs](./30-matrix-workflows.md).
 
 ## `labels`
 
-You can set labels for your workflow to select an agent to execute the workflow on. An agent will pick up and run a workflow when **every** label assigned to it matches the agents labels.
+You can define labels for your workflow in order to select an agent to execute the workflow. An agent takes up a workflow and executes it if **every** label assigned to it matches the label of the agent.
 
-To set additional agent labels, check the [agent configuration options](../30-administration/15-agent-config.md#woodpecker_agent_labels). Agents will have at least four default labels: `platform=agent-os/agent-arch`, `hostname=my-agent`, `backend=docker` (type of the agent backend) and `repo=*`. Agents can use a `*` as a wildcard for a label. For example `repo=*` will match every repo.
+To specify additional agent labels, check the [Agent configuration options] (../30-administration/10-configuration/30-agent.md#agent_labels). The agents have at least four default labels: `platform=agent-os/agent-arch`, `hostname=my-agent`, `backend=docker` (type of agent backend) and `repo=*`. Agents can use an `*` as a placeholder for a label. For example, `repo=*` matches any repo.
 
-Workflow labels with an empty value will be ignored.
-By default, each workflow has at least the `repo=your-user/your-repo-name` label. If you have set the [platform attribute](#platform) for your workflow it will have a label like `platform=your-os/your-arch` as well.
+Workflow labels with an empty value are ignored.
+By default, each workflow has at least the label `repo=your-user/your-repo-name`. If you have set the [platform attribute](#platform) for your workflow, it will also have a label such as `platform=your-os/your-arch`.
+
+:::warning
+Labels with the `woodpecker-ci.org` prefix are managed by Woodpecker and can not be set as part of the pipeline definition.
+:::
 
 You can add additional labels as a key value map:
 
@@ -686,16 +682,6 @@ Example configuration to use a custom clone plugin:
 +    image: octocat/custom-git-plugin
 ```
 
-Example configuration to clone Mercurial repository:
-
-```diff
- clone:
-   - name: hg
-+    image: plugins/hg
-+    settings:
-+      path: bitbucket.org/foo/bar
-```
-
 ### Git Submodules
 
 To use the credentials that cloned the repository to clone it's submodules, update `.gitmodules` to use `https` instead of `git`:
@@ -743,10 +729,8 @@ Example conditional execution by branch:
 +  branch: main
 +
  steps:
-   - name: slack
-     image: plugins/slack
-     settings:
-       channel: dev
+   - name: prettier
+     image: woodpeckerci/plugin-prettier
 ```
 
 The workflow now triggers on `main`, but also if the target branch of a pull request is `main`.
@@ -762,6 +746,25 @@ Woodpecker supports to define multiple workflows for a repository. Those workflo
 ## `runs_on`
 
 Workflows that should run even on failure should set the `runs_on` tag. See [here](./25-workflows.md#flow-control) for an example.
+
+## Advanced network options for steps
+
+:::warning
+Only allowed if 'Trusted Network' option is enabled in repo settings by an admin.
+:::
+
+### `dns`
+
+If the backend engine understands to change the DNS server and lookup domain,
+this options will be used to alter the default DNS config to a custom one for a specific step.
+
+```yaml
+steps:
+  - name: build
+    image: plugin/abc
+    dns: 1.2.3.4
+    dns_search: 'internal.company'
+```
 
 ## Privileged mode
 
@@ -780,8 +783,8 @@ Privileged mode is only available to trusted repositories and for security reaso
      commands:
        - docker --tls=false ps
 
- - name: services
-   docker:
+ services:
+   - name: docker
      image: docker:dind
      commands: dockerd-entrypoint.sh --storage-driver=vfs --tls=false
 +    privileged: true

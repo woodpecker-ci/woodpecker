@@ -15,9 +15,19 @@
 package repo
 
 import (
+	"fmt"
+	"io"
+	"os"
+	"text/template"
+
+	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v3"
 
-	"go.woodpecker-ci.org/woodpecker/v2/cli/repo/registry"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/output"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/repo/cron"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/repo/registry"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/repo/secret"
+	"go.woodpecker-ci.org/woodpecker/v3/woodpecker-go/woodpecker"
 )
 
 // Command exports the repository command.
@@ -25,14 +35,97 @@ var Command = &cli.Command{
 	Name:  "repo",
 	Usage: "manage repositories",
 	Commands: []*cli.Command{
-		repoListCmd,
-		repoInfoCmd,
 		repoAddCmd,
-		repoUpdateCmd,
+		repoChownCmd,
+		cron.Command,
+		repoListCmd,
+		registry.Command,
 		repoRemoveCmd,
 		repoRepairCmd,
-		repoChownCmd,
+		secret.Command,
+		repoShowCmd,
 		repoSyncCmd,
-		registry.Command,
+		repoUpdateCmd,
 	},
+}
+
+func repoOutput(c *cli.Command, repos []*woodpecker.Repo, fd ...io.Writer) error {
+	outFmt, outOpt := output.ParseOutputOptions(c.String("output"))
+	noHeader := c.Bool("output-no-headers")
+
+	legacyFmt := c.String("format")
+	if legacyFmt != "" {
+		log.Warn().Msgf("the --format flag is deprecated, please use --output instead")
+
+		outFmt = "go-template"
+		outOpt = []string{legacyFmt}
+	}
+
+	var out io.Writer
+	out = os.Stdout
+	if len(fd) > 0 {
+		out = fd[0]
+	}
+
+	switch outFmt {
+	case "go-template":
+		if len(outOpt) < 1 {
+			return fmt.Errorf("%w: missing template", output.ErrOutputOptionRequired)
+		}
+
+		tmpl, err := template.New("_").Parse(outOpt[0] + "\n")
+		if err != nil {
+			return err
+		}
+		if err := tmpl.Execute(out, repos); err != nil {
+			return err
+		}
+	case "table":
+		fallthrough
+	default:
+		table := output.NewTable(out)
+
+		// Add custom field mapping for nested Trusted fields
+		table.AddFieldFn("TrustedNetwork", func(obj any) string {
+			repo, ok := obj.(*woodpecker.Repo)
+			if !ok {
+				return ""
+			}
+			return output.YesNo(repo.Trusted.Network)
+		})
+		table.AddFieldFn("TrustedSecurity", func(obj any) string {
+			repo, ok := obj.(*woodpecker.Repo)
+			if !ok {
+				return ""
+			}
+			return output.YesNo(repo.Trusted.Security)
+		})
+		table.AddFieldFn("TrustedVolume", func(obj any) string {
+			repo, ok := obj.(*woodpecker.Repo)
+			if !ok {
+				return ""
+			}
+			return output.YesNo(repo.Trusted.Volumes)
+		})
+
+		table.AddFieldAlias("Is_Active", "Active")
+		table.AddFieldAlias("Is_SCM_Private", "SCM_Private")
+
+		cols := []string{"Full_Name", "Branch", "Forge_URL", "Visibility", "SCM_Private", "Active", "Allow_Pull"}
+
+		if len(outOpt) > 0 {
+			cols = outOpt
+		}
+		if !noHeader {
+			table.WriteHeader(cols)
+		}
+		for _, resource := range repos {
+			if err := table.Write(cols, resource); err != nil {
+				return err
+			}
+		}
+		table.Flush()
+	}
+
+	return nil
 }

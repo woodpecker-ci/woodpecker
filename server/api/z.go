@@ -21,8 +21,8 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server/store"
-	"go.woodpecker-ci.org/woodpecker/v2/version"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store"
+	"go.woodpecker-ci.org/woodpecker/v3/version"
 )
 
 // Health
@@ -48,7 +48,7 @@ func Health(c *gin.Context) {
 //	@Description	Endpoint returns the server version and build information.
 //	@Router			/version [get]
 //	@Produce		json
-//	@Success		200	{object}	string{source=string,version=string}
+//	@Success		200	{object}	object{source=string,version=string}
 //	@Tags			System
 func Version(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{

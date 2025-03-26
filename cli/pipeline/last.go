@@ -19,14 +19,14 @@ import (
 
 	"github.com/urfave/cli/v3"
 
-	"go.woodpecker-ci.org/woodpecker/v2/cli/common"
-	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
-	"go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/common"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v3/woodpecker-go/woodpecker"
 )
 
 var pipelineLastCmd = &cli.Command{
 	Name:      "last",
-	Usage:     "show latest pipeline details",
+	Usage:     "show latest pipeline information",
 	ArgsUsage: "<repo-id|repo-full-name>",
 	Action:    pipelineLast,
 	Flags: append(common.OutputFlags("table"), []cli.Flag{
@@ -49,10 +49,14 @@ func pipelineLast(ctx context.Context, c *cli.Command) error {
 		return err
 	}
 
-	pipeline, err := client.PipelineLast(repoID, c.String("branch"))
+	opt := woodpecker.PipelineLastOptions{
+		Branch: c.String("branch"),
+	}
+
+	pipeline, err := client.PipelineLast(repoID, opt)
 	if err != nil {
 		return err
 	}
 
-	return pipelineOutput(c, []woodpecker.Pipeline{*pipeline})
+	return pipelineOutput(c, []*woodpecker.Pipeline{pipeline})
 }

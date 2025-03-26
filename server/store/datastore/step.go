@@ -18,7 +18,7 @@ import (
 	"xorm.io/builder"
 	"xorm.io/xorm"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
 func (s storage) StepLoad(id int64) (*model.Step, error) {
@@ -84,7 +84,7 @@ func (s storage) StepUpdate(step *model.Step) error {
 }
 
 func deleteStep(sess *xorm.Session, stepID int64) error {
-	if _, err := sess.Where("id = ?", stepID).Delete(new(model.LogEntry)); err != nil {
+	if err := logDelete(sess, stepID); err != nil {
 		return err
 	}
 	return wrapDelete(sess.ID(stepID).Delete(new(model.Step)))

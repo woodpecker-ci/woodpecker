@@ -21,7 +21,7 @@ import (
 
 	"github.com/urfave/cli/v3"
 
-	"go.woodpecker-ci.org/woodpecker/v2/cli/internal"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/internal"
 )
 
 var pipelineKillCmd = &cli.Command{
@@ -48,7 +48,7 @@ func pipelineKill(ctx context.Context, c *cli.Command) (err error) {
 		return err
 	}
 
-	err = client.PipelineKill(repoID, number)
+	err = client.PipelineDelete(repoID, number)
 	if err != nil {
 		return err
 	}

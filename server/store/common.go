@@ -14,9 +14,14 @@
 
 package store
 
+import "time"
+
 type XORM struct {
-	Log     bool
-	ShowSQL bool
+	Log             bool
+	ShowSQL         bool
+	MaxIdleConns    int
+	MaxOpenConns    int
+	ConnMaxLifetime time.Duration
 }
 
 // Opts are options for a new database connection.

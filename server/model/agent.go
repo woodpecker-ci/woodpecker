@@ -19,6 +19,8 @@ import (
 	"fmt"
 
 	"github.com/gorilla/securecookie"
+
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline"
 )
 
 type Agent struct {
@@ -43,8 +45,7 @@ type Agent struct {
 } //	@name Agent
 
 const (
-	IDNotSet         = -1
-	agentFilterOrgID = "org-id"
+	IDNotSet = -1
 )
 
 // TableName return database table name for xorm.
@@ -68,9 +69,9 @@ func (a *Agent) GetServerLabels() (map[string]string, error) {
 
 	// enforce filters for user and organization agents
 	if a.OrgID != IDNotSet {
-		filters[agentFilterOrgID] = fmt.Sprintf("%d", a.OrgID)
+		filters[pipeline.LabelFilterOrg] = fmt.Sprintf("%d", a.OrgID)
 	} else {
-		filters[agentFilterOrgID] = "*"
+		filters[pipeline.LabelFilterOrg] = "*"
 	}
 
 	return filters, nil

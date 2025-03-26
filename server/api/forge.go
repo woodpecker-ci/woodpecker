@@ -20,9 +20,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
-	"go.woodpecker-ci.org/woodpecker/v2/server/router/middleware/session"
-	"go.woodpecker-ci.org/woodpecker/v2/server/store"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/router/middleware/session"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 )
 
 // GetForges
@@ -144,14 +144,14 @@ func PatchForge(c *gin.Context) {
 
 // PostForge
 //
-//	@Summary	Create a new forge
-//	@Description Creates a new forge with a random token
-//	@Router		/forges [post]
-//	@Produce	json
-//	@Success	200	{object}	Forge
-//	@Tags		Forges
-//	@Param		Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
-//	@Param		forge			body	Forge	true	"the forge's data (only 'name' and 'no_schedule' are read)"
+//	@Summary		Create a new forge
+//	@Description	Creates a new forge with a random token
+//	@Router			/forges [post]
+//	@Produce		json
+//	@Success		200	{object}	Forge
+//	@Tags			Forges
+//	@Param			Authorization	header	string	true	"Insert your personal access token"	default(Bearer <personal access token>)
+//	@Param			forge			body	Forge	true	"the forge's data (only 'name' and 'no_schedule' are read)"
 func PostForge(c *gin.Context) {
 	in := &model.Forge{}
 	err := c.Bind(in)

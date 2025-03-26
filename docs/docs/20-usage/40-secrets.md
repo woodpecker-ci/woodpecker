@@ -1,35 +1,55 @@
 # Secrets
 
-Woodpecker provides the ability to store named parameters external to the YAML configuration file, in a central secret store. These secrets can be passed to individual steps of the pipeline at runtime.
+Woodpecker provides the ability to store named variables in a central secret store.
+These secrets can be securely passed on to individual pipeline steps using the keyword `from_secret`.
 
-Woodpecker provides three different levels to add secrets to your pipeline. The following list shows the priority of the different levels. If a secret is defined in multiple levels, will be used following this priorities: Repository secrets > Organization secrets > Global secrets.
+There are three different levels of secrets available. If a secret is defined in multiple levels, the following order of priority applies (last wins):
 
-1. **Repository secrets**: They are available to all pipelines of an repository.
-2. **Organization secrets**: They are available to all pipelines of an organization.
-3. **Global secrets**: Can be configured by an instance admin.
-   They are available to all pipelines of the **whole** Woodpecker instance and should therefore **only** be used for secrets that are allowed to be read by **all** users.
+1. **Repository secrets**: Available for all pipelines of a repository.
+1. **Organization secrets**: Available for all pipelines of an organization.
+1. **Global secrets**: Can only be set by instance administrators.
+   Global secrets are available for all pipelines of the **entire** Woodpecker instance and should therefore be used with caution.
+
+In addition to the native integration of secrets, external providers of secrets can also be used by interacting with them directly within pipeline steps. Access to these providers can be configured with Woodpecker secrets, which enables the retrieval of secrets from the respective external sources.
+
+:::warning
+Woodpecker can mask secrets from its own secrets store, but it cannot apply the same protection to external secrets. As a result, these external secrets can be exposed in the pipeline logs.
+:::
 
 ## Usage
 
-You can set a setting or an environment value from secrets using the `from_secret` syntax.
+You can set a setting or environment value from Woodpecker secrets by using the `from_secret` syntax.
 
-In this example, the secret named `secret_token` would be passed to the setting named `token`,which will be available in the plugin as environment variable named `PLUGIN_TOKEN` (See [plugins](./51-plugins/20-creating-plugins.md#settings) for details), and to the environment variable `TOKEN_ENV`.
+The following example passes a secret called `secret_token` which is stored in an environment variable called `TOKEN_ENV`:
 
 ```diff
  steps:
-   - name: docker
-     image: my-plugin
+   - name: 'step name'
+     image: registry/repo/image:tag
+     commands:
++      - echo "The secret is $TOKEN_ENV"
 +    environment:
 +      TOKEN_ENV:
 +        from_secret: secret_token
+```
+
+The same syntax can be used to pass secrets to (plugin) settings.
+A secret called `secret_token` is assigned to the setting `TOKEN`, which is then available in the plugin as the environment variable `PLUGIN_TOKEN` (see [plugins](./51-plugins/20-creating-plugins.md#settings) for details).
+`PLUGIN_TOKEN` is then used internally by the plugin itself and taken into account during execution.
+
+```diff
+ steps:
+   - name: 'step name'
+     image: registry/repo/image:tag
 +    settings:
-+      token:
++      TOKEN:
 +        from_secret: secret_token
 ```
 
-### Note about parameter pre-processing
+### Escape secrets
 
-Please note parameter expressions are subject to pre-processing. When using secrets in parameter expressions they should be escaped.
+Please note that parameter expressions are preprocessed, i.e. they are evaluated before the pipeline starts.
+If secrets are to be used in expressions, they must be properly escaped (with `$$`) to ensure correct processing.
 
 ```diff
  steps:
@@ -43,78 +63,85 @@ Please note parameter expressions are subject to pre-processing. When using secr
          from_secret: secret_token
 ```
 
-### Use in Pull Requests events
+### Events filter
 
-Secrets are not exposed to pull requests by default. You can override this behavior by creating the secret and enabling the `pull_request` event type, either in UI or by CLI, see below.
+By default, secrets are not exposed to pull requests.
+However, you can change this behavior by creating the secret and enabling the `pull_request` event type.
+This can be configured either via the UI or via the CLI.
 
-:::note
-Please be careful when exposing secrets to pull requests. If your repository is open source and accepts pull requests your secrets are not safe. A bad actor can submit a malicious pull request that exposes your secrets.
+:::warning
+Be careful when exposing secrets for pull requests.
+If your repository is public and accepts pull requests from everyone, your secrets may be at risk.
+Malicious actors could take advantage of this to expose your secrets or transfer them to an external location.
 :::
 
-## Plugins filter
+### Plugins filter
 
-To prevent abusing your secrets from malicious usage, you can limit a secret to a list of plugins. If enabled they are not available to any other plugin (steps without user-defined commands). If you or an attacker defines explicit commands, the secrets will not be available to the container to prevent leaking them.
+To prevent your secrets from being misused by malicious users, you can restrict a secret to a list of plugins.
+If enabled, they are not available to any other plugins.
+Plugins have the advantage that they cannot execute arbitrary commands and therefore cannot reveal secrets.
 
-:::note
-If you specify a tag, the filter will respect it.
-Just make sure you don't specify the same image without one, otherwise it will be ignored again.
+:::tip
+If you specify a tag, the filter will take it into account.
+However, if the same image appears several times in the list, the least privileged entry will take precedence.
+For example, an image without a tag will allow all tags, even if it contains another entry with a tag attached.
 :::
 
 ![plugins filter](./secrets-plugins-filter.png)
 
-## Adding Secrets
+## CLI
 
-Secrets are added to the Woodpecker in the UI or with the CLI.
+In addition to the UI, secrets can also be managed using the CLI.
 
-### CLI Examples
-
-Create the secret using default settings. The secret will be available to all images in your pipeline, and will be available to all push, tag, and deployment events (not pull request events).
+Create the secret with the default settings.
+The secret is available for all images in your pipeline and for all `push`, `tag` and `deployment` events (not for `pull_request` events).
 
 ```bash
-woodpecker-cli secret add \
-  -repository octocat/hello-world \
-  -name aws_access_key_id \
-  -value <value>
+woodpecker-cli repo secret add \
+  --repository octocat/hello-world \
+  --name aws_access_key_id \
+  --value <value>
 ```
 
-Create the secret and limit to a single image:
+Create the secret and limit it to a single image:
 
 ```diff
  woodpecker-cli secret add \
-   -repository octocat/hello-world \
-+  -image plugins/s3 \
-   -name aws_access_key_id \
-   -value <value>
+   --repository octocat/hello-world \
++  --image woodpeckerci/plugin-s3 \
+   --name aws_access_key_id \
+   --value <value>
 ```
 
-Create the secrets and limit to a set of images:
+Create the secrets and limit it to a set of images:
 
 ```diff
- woodpecker-cli secret add \
-   -repository octocat/hello-world \
-+  -image plugins/s3 \
-+  -image woodpeckerci/plugin-ecs \
-   -name aws_access_key_id \
-   -value <value>
+ woodpecker-cli repo secret add \
+   --repository octocat/hello-world \
++  --image woodpeckerci/plugin-s3 \
++  --image woodpeckerci/plugin-docker-buildx \
+   --name aws_access_key_id \
+   --value <value>
 ```
 
-Create the secret and enable for multiple hook events:
+Create the secret and enable it for multiple hook events:
 
 ```diff
- woodpecker-cli secret add \
-   -repository octocat/hello-world \
-   -image plugins/s3 \
-+  -event pull_request \
-+  -event push \
-+  -event tag \
-   -name aws_access_key_id \
-   -value <value>
+ woodpecker-cli repo secret add \
+   --repository octocat/hello-world \
+   --image woodpeckerci/plugin-s3 \
++  --event pull_request \
++  --event push \
++  --event tag \
+   --name aws_access_key_id \
+   --value <value>
 ```
 
-Loading secrets from file using curl `@` syntax. This is the recommended approach for loading secrets from file to preserve newlines:
+Secrets can be loaded from a file using the syntax `@`.
+This method is recommended for loading secrets from a file, as it ensures that line breaks are preserved (this is important for SSH keys, for example):
 
 ```diff
- woodpecker-cli secret add \
+ woodpecker-cli repo secret add \
    -repository octocat/hello-world \
    -name ssh_key \
 +  -value @/root/ssh/id_rsa

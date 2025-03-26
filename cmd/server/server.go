@@ -25,7 +25,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/caddyserver/certmagic"
+	"github.com/cenkalti/backoff/v5"
 	"github.com/gin-gonic/gin"
 	prometheus_http "github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/rs/zerolog"
@@ -33,13 +33,14 @@ import (
 	"github.com/urfave/cli/v3"
 	"golang.org/x/sync/errgroup"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server"
-	"go.woodpecker-ci.org/woodpecker/v2/server/cron"
-	"go.woodpecker-ci.org/woodpecker/v2/server/router"
-	"go.woodpecker-ci.org/woodpecker/v2/server/router/middleware"
-	"go.woodpecker-ci.org/woodpecker/v2/server/web"
-	"go.woodpecker-ci.org/woodpecker/v2/shared/logger"
-	"go.woodpecker-ci.org/woodpecker/v2/version"
+	"go.woodpecker-ci.org/woodpecker/v3/server"
+	"go.woodpecker-ci.org/woodpecker/v3/server/cron"
+	"go.woodpecker-ci.org/woodpecker/v3/server/router"
+	"go.woodpecker-ci.org/woodpecker/v3/server/router/middleware"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store"
+	"go.woodpecker-ci.org/woodpecker/v3/server/web"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/logger"
+	"go.woodpecker-ci.org/woodpecker/v3/version"
 )
 
 const (
@@ -92,10 +93,19 @@ func run(ctx context.Context, c *cli.Command) error {
 		)
 	}
 
-	_store, err := setupStore(ctx, c)
+	_store, err := backoff.Retry(ctx,
+		func() (store.Store, error) {
+			return setupStore(ctx, c)
+		},
+		backoff.WithBackOff(backoff.NewExponentialBackOff()),
+		backoff.WithMaxTries(uint(c.Uint("db-max-retries"))),
+		backoff.WithNotify(func(err error, delay time.Duration) {
+			log.Error().Msgf("failed to setup store: %v: retry in %v", err, delay)
+		}))
 	if err != nil {
-		return fmt.Errorf("can't setup store: %w", err)
+		return err
 	}
+
 	defer func() {
 		if err := _store.Close(); err != nil {
 			log.Error().Err(err).Msg("could not close store")
@@ -111,8 +121,6 @@ func run(ctx context.Context, c *cli.Command) error {
 	serviceWaitingGroup := errgroup.Group{}
 
 	log.Info().Msgf("starting Woodpecker server with version '%s'", version.String())
-
-	startMetricsCollector(ctx, _store)
 
 	serviceWaitingGroup.Go(func() error {
 		log.Info().Msg("starting cron service ...")
@@ -167,8 +175,7 @@ func run(ctx context.Context, c *cli.Command) error {
 		middleware.Store(_store),
 	)
 
-	switch {
-	case c.String("server-cert") != "":
+	if c.String("server-cert") != "" {
 		// start the server with tls enabled
 		serviceWaitingGroup.Go(func() error {
 			tlsServer := &http.Server{
@@ -234,32 +241,7 @@ func run(ctx context.Context, c *cli.Command) error {
 			}
 			return nil
 		})
-	case c.Bool("lets-encrypt"):
-		// start the server with lets-encrypt
-		certmagic.DefaultACME.Email = c.String("lets-encrypt-email")
-		certmagic.DefaultACME.Agreed = true
-
-		address, err := url.Parse(strings.TrimSuffix(c.String("server-host"), "/"))
-		if err != nil {
-			return err
-		}
-
-		serviceWaitingGroup.Go(func() error {
-			go func() {
-				<-ctx.Done()
-				log.Error().Msg("there is no certmagic.HTTPS alternative who is context aware we will fail in 2 seconds")
-				time.Sleep(time.Second * 2)
-				log.Fatal().Msg("we kill certmagic by fail") //nolint:forbidigo
-			}()
-
-			log.Info().Msg("starting certmagic server ...")
-			if err := certmagic.HTTPS([]string{address.Host}, handler); err != nil {
-				log.Error().Err(err).Msg("certmagic does not work")
-				stopServerFunc(fmt.Errorf("certmagic failed: %w", err))
-			}
-			return nil
-		})
-	default:
+	} else {
 		// start the server without tls
 		serviceWaitingGroup.Go(func() error {
 			httpServer := &http.Server{
@@ -287,6 +269,8 @@ func run(ctx context.Context, c *cli.Command) error {
 	}
 
 	if metricsServerAddr := c.String("metrics-server-addr"); metricsServerAddr != "" {
+		startMetricsCollector(ctx, _store)
+
 		serviceWaitingGroup.Go(func() error {
 			metricsRouter := gin.New()
 			metricsRouter.GET("/metrics", gin.WrapH(prometheus_http.Handler()))

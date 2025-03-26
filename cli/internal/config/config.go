@@ -44,7 +44,7 @@ func Load(ctx context.Context, c *cli.Command) error {
 	}
 
 	if config.ServerURL == "" || config.Token == "" {
-		log.Info().Msg("The woodpecker-cli is not yet set up. Please run `woodpecker-cli setup` or provide the required environment variables / flags.")
+		log.Info().Msg("woodpecker-cli is not set up, run `woodpecker-cli setup` or provide required environment variables/flags")
 		return errors.New("woodpecker-cli is not configured")
 	}
 
@@ -63,7 +63,7 @@ func Load(ctx context.Context, c *cli.Command) error {
 		return err
 	}
 
-	log.Debug().Any("config", config).Msg("Loaded config")
+	log.Debug().Any("config", config).Msg("loaded config")
 
 	return nil
 }
@@ -93,16 +93,16 @@ func Get(_ context.Context, c *cli.Command, _configPath string) (*Config, error)
 		return nil, err
 	}
 
-	log.Debug().Str("configPath", configPath).Msg("Checking for config file")
+	log.Debug().Str("configPath", configPath).Msg("checking for config file")
 
 	content, err := os.ReadFile(configPath)
 	switch {
 	case err != nil && !os.IsNotExist(err):
-		log.Debug().Err(err).Msg("Failed to read the config file")
+		log.Debug().Err(err).Msg("failed to read the config file")
 		return nil, err
 
 	case err != nil && os.IsNotExist(err):
-		log.Debug().Msg("The config file does not exist")
+		log.Debug().Msg("config file does not exist")
 
 	default:
 		configFromFile := &Config{}
@@ -111,7 +111,7 @@ func Get(_ context.Context, c *cli.Command, _configPath string) (*Config, error)
 			return nil, err
 		}
 		conf.MergeIfNotSet(configFromFile)
-		log.Debug().Msg("Loaded config from file")
+		log.Debug().Msg("loaded config from file")
 	}
 
 	// if server or token are explicitly set, use them
@@ -123,11 +123,11 @@ func Get(_ context.Context, c *cli.Command, _configPath string) (*Config, error)
 	service := c.Root().Name
 	secret, err := keyring.Get(service, conf.ServerURL)
 	if errors.Is(err, keyring.ErrUnsupportedPlatform) {
-		log.Warn().Msg("Keyring is not supported on this platform")
+		log.Warn().Msg("keyring is not supported on this platform")
 		return conf, nil
 	}
 	if errors.Is(err, keyring.ErrNotFound) {
-		log.Warn().Msg("Token not found in keyring")
+		log.Warn().Msg("token not found in keyring")
 		return conf, nil
 	}
 	conf.Token = secret

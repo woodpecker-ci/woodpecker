@@ -8,15 +8,15 @@
         :to="{ name: 'repo-pull-request', params: { pullRequest: pullRequest.index } }"
       >
         <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
-        <span class="text-wp-text-alt-100 <md:hidden">#{{ pullRequest.index }}</span>
+        <span class="md:display-unset text-wp-text-alt-100 hidden">#{{ pullRequest.index }}</span>
         <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
-        <span class="text-wp-text-alt-100 <md:hidden mx-2">-</span>
-        <span class="text-wp-text-100 <md:underline whitespace-nowrap overflow-hidden overflow-ellipsis">{{
+        <span class="md:display-unset text-wp-text-alt-100 mx-2 hidden">-</span>
+        <span class="text-wp-text-100 overflow-hidden text-ellipsis whitespace-nowrap underline md:no-underline">{{
           pullRequest.title
         }}</span>
       </ListItem>
     </template>
-    <div v-else-if="loading" class="flex justify-center text-wp-text-100">
+    <div v-else-if="loading" class="text-wp-text-100 flex justify-center">
       <Icon name="spinner" />
     </div>
     <Panel v-else class="flex justify-center">
@@ -26,7 +26,8 @@
 </template>
 
 <script lang="ts" setup>
-import { inject, watch, type Ref } from 'vue';
+import { inject, watch } from 'vue';
+import type { Ref } from 'vue';
 
 import Icon from '~/components/atomic/Icon.vue';
 import ListItem from '~/components/atomic/ListItem.vue';
