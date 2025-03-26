@@ -16,19 +16,20 @@
       </span>
     </template>
 
-    <Tab :to="{ name: 'repo-settings' }" :title="$t('repo.settings.general.general')" />
-    <Tab :to="{ name: 'repo-settings-secrets' }" :title="$t('secrets.secrets')" />
-    <Tab :to="{ name: 'repo-settings-registries' }" :title="$t('registries.registries')" />
-    <Tab :to="{ name: 'repo-settings-crons' }" :title="$t('repo.settings.crons.crons')" />
-    <Tab :to="{ name: 'repo-settings-badge' }" :title="$t('repo.settings.badge.badge')" />
-    <Tab :to="{ name: 'repo-settings-actions' }" :title="$t('repo.settings.actions.actions')" />
+    <Tab icon="settings-outline" :to="{ name: 'repo-settings' }" :title="$t('repo.settings.general.general')" />
+    <Tab icon="secret" :to="{ name: 'repo-settings-secrets' }" :title="$t('secrets.secrets')" />
+    <Tab icon="docker" :to="{ name: 'repo-settings-registries' }" :title="$t('registries.registries')" />
+    <Tab icon="cron" :to="{ name: 'repo-settings-crons' }" :title="$t('repo.settings.crons.crons')" />
+    <Tab icon="tag" :to="{ name: 'repo-settings-badge' }" :title="$t('repo.settings.badge.badge')" />
+    <Tab icon="toolbox" :to="{ name: 'repo-settings-actions' }" :title="$t('repo.settings.actions.actions')" />
 
     <router-view />
   </Scaffold>
 </template>
 
 <script lang="ts" setup>
-import { inject, onMounted, type Ref } from 'vue';
+import { inject, onMounted } from 'vue';
+import type { Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 

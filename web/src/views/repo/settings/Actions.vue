@@ -2,7 +2,7 @@
   <Settings :title="$t('repo.settings.actions.actions')">
     <div class="flex flex-wrap items-center">
       <Button
-        class="mr-4 my-1"
+        class="my-1 mr-4"
         color="blue"
         start-icon="heal"
         :is-loading="isRepairingRepo"
@@ -13,7 +13,7 @@
       <Button
         v-if="isActive"
         color="blue"
-        class="mr-4 my-1"
+        class="my-1 mr-4"
         start-icon="turn-off"
         :is-loading="isDeactivatingRepo"
         :text="$t('repo.settings.actions.disable.disable')"
@@ -21,7 +21,7 @@
       />
       <Button
         v-else
-        class="mr-4 my-1"
+        class="my-1 mr-4"
         color="blue"
         start-icon="turn-off"
         :is-loading="isActivatingRepo"
@@ -30,7 +30,7 @@
       />
 
       <Button
-        class="mr-4 my-1"
+        class="my-1 mr-4"
         color="red"
         start-icon="trash"
         :is-loading="isDeletingRepo"
@@ -42,7 +42,8 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, inject, type Ref } from 'vue';
+import { computed, inject } from 'vue';
+import type { Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 

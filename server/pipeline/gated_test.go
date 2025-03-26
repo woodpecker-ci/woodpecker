@@ -5,7 +5,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
 func TestSetGatedState(t *testing.T) {
@@ -68,6 +68,18 @@ func TestSetGatedState(t *testing.T) {
 				Event: model.EventPush,
 			},
 			expectBlocked: true,
+		},
+		{
+			name: "require approval for everything with allowed user",
+			repo: &model.Repo{
+				RequireApproval:      model.RequireApprovalAllEvents,
+				ApprovalAllowedUsers: []string{"user"},
+			},
+			pipeline: &model.Pipeline{
+				Event:  model.EventPush,
+				Author: "user",
+			},
+			expectBlocked: false,
 		},
 	}
 

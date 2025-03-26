@@ -20,12 +20,27 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/franela/goblin"
 	"github.com/gin-gonic/gin"
+	"github.com/stretchr/testify/assert"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server/forge/github/fixtures"
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge/github/fixtures"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
+
+func TestNew(t *testing.T) {
+	forge, _ := New(Opts{
+		URL:        "http://localhost:8080/",
+		Client:     "0ZXh0IjoiI",
+		Secret:     "I1NiIsInR5",
+		SkipVerify: true,
+	})
+	f, _ := forge.(*client)
+	assert.Equal(t, "http://localhost:8080", f.url)
+	assert.Equal(t, "http://localhost:8080/api/v3/", f.API)
+	assert.Equal(t, "0ZXh0IjoiI", f.Client)
+	assert.Equal(t, "I1NiIsInR5", f.Secret)
+	assert.True(t, f.SkipVerify)
+}
 
 func Test_github(t *testing.T) {
 	gin.SetMode(gin.TestMode)
@@ -36,80 +51,40 @@ func Test_github(t *testing.T) {
 		SkipVerify: true,
 	})
 
+	defer s.Close()
+
 	ctx := context.Background()
-	g := goblin.Goblin(t)
-	g.Describe("GitHub", func() {
-		g.After(func() {
-			s.Close()
-		})
 
-		g.Describe("Creating a forge", func() {
-			g.It("Should return client with specified options", func() {
-				forge, _ := New(Opts{
-					URL:        "http://localhost:8080/",
-					Client:     "0ZXh0IjoiI",
-					Secret:     "I1NiIsInR5",
-					SkipVerify: true,
-				})
-				f, _ := forge.(*client)
-				g.Assert(f.url).Equal("http://localhost:8080")
-				g.Assert(f.API).Equal("http://localhost:8080/api/v3/")
-				g.Assert(f.Client).Equal("0ZXh0IjoiI")
-				g.Assert(f.Secret).Equal("I1NiIsInR5")
-				g.Assert(f.SkipVerify).Equal(true)
-			})
-		})
+	t.Run("netrc with user token", func(t *testing.T) {
+		forge, _ := New(Opts{})
+		netrc, _ := forge.Netrc(fakeUser, fakeRepo)
+		assert.Equal(t, "github.com", netrc.Machine)
+		assert.Equal(t, fakeUser.AccessToken, netrc.Login)
+		assert.Equal(t, "x-oauth-basic", netrc.Password)
+		assert.Equal(t, model.ForgeTypeGithub, netrc.Type)
+	})
+	t.Run("netrc with machine account", func(t *testing.T) {
+		forge, _ := New(Opts{})
+		netrc, _ := forge.Netrc(nil, fakeRepo)
+		assert.Equal(t, "github.com", netrc.Machine)
+		assert.Empty(t, netrc.Login)
+		assert.Empty(t, netrc.Password)
+	})
 
-		g.Describe("Generating a netrc file", func() {
-			g.It("Should return a netrc with the user token", func() {
-				forge, _ := New(Opts{})
-				netrc, _ := forge.Netrc(fakeUser, fakeRepo)
-				g.Assert(netrc.Machine).Equal("github.com")
-				g.Assert(netrc.Login).Equal(fakeUser.AccessToken)
-				g.Assert(netrc.Password).Equal("x-oauth-basic")
-			})
-			g.It("Should return a netrc with the machine account", func() {
-				forge, _ := New(Opts{})
-				netrc, _ := forge.Netrc(nil, fakeRepo)
-				g.Assert(netrc.Machine).Equal("github.com")
-				g.Assert(netrc.Login).Equal("")
-				g.Assert(netrc.Password).Equal("")
-			})
-		})
-
-		g.Describe("Requesting a repository", func() {
-			g.It("Should return the repository details", func() {
-				repo, err := c.Repo(ctx, fakeUser, fakeRepo.ForgeRemoteID, fakeRepo.Owner, fakeRepo.Name)
-				g.Assert(err).IsNil()
-				g.Assert(repo.ForgeRemoteID).Equal(fakeRepo.ForgeRemoteID)
-				g.Assert(repo.Owner).Equal(fakeRepo.Owner)
-				g.Assert(repo.Name).Equal(fakeRepo.Name)
-				g.Assert(repo.FullName).Equal(fakeRepo.FullName)
-				g.Assert(repo.IsSCMPrivate).IsTrue()
-				g.Assert(repo.Clone).Equal(fakeRepo.Clone)
-				g.Assert(repo.ForgeURL).Equal(fakeRepo.ForgeURL)
-			})
-			g.It("Should handle a not found error", func() {
-				_, err := c.Repo(ctx, fakeUser, "0", fakeRepoNotFound.Owner, fakeRepoNotFound.Name)
-				g.Assert(err).IsNotNil()
-			})
-		})
-
-		g.It("Should return a user repository list")
-
-		g.It("Should return a user team list")
-
-		g.It("Should register repository hooks")
-
-		g.It("Should return a repository file")
-
-		g.Describe("Given an authentication request", func() {
-			g.It("Should redirect to the GitHub login page")
-			g.It("Should create an access token")
-			g.It("Should handle an access token error")
-			g.It("Should return the authenticated user")
-			g.It("Should handle authentication errors")
-		})
+	t.Run("Should return the repository details", func(t *testing.T) {
+		repo, err := c.Repo(ctx, fakeUser, fakeRepo.ForgeRemoteID, fakeRepo.Owner, fakeRepo.Name)
+		assert.NoError(t, err)
+		assert.Equal(t, fakeRepo.ForgeRemoteID, repo.ForgeRemoteID)
+		assert.Equal(t, fakeRepo.Owner, repo.Owner)
+		assert.Equal(t, fakeRepo.Name, repo.Name)
+		assert.Equal(t, fakeRepo.FullName, repo.FullName)
+		assert.True(t, repo.IsSCMPrivate)
+		assert.Equal(t, fakeRepo.Clone, repo.Clone)
+		assert.Equal(t, fakeRepo.ForgeURL, repo.ForgeURL)
+	})
+	t.Run("repo not found error", func(t *testing.T) {
+		_, err := c.Repo(ctx, fakeUser, "0", fakeRepoNotFound.Owner, fakeRepoNotFound.Name)
+		assert.Error(t, err)
 	})
 }
 

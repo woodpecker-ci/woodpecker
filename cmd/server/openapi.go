@@ -15,14 +15,14 @@
 package main
 
 import (
-	"go.woodpecker-ci.org/woodpecker/v2/cmd/server/openapi"
-	"go.woodpecker-ci.org/woodpecker/v2/version"
+	"go.woodpecker-ci.org/woodpecker/v3/cmd/server/openapi"
+	"go.woodpecker-ci.org/woodpecker/v3/version"
 )
 
 // Generate docs/openapi.json via:
 //go:generate go run github.com/swaggo/swag/cmd/swag init -g cmd/server/openapi.go --outputTypes go -output openapi -d ../../
 //go:generate go run openapi_json_gen.go openapi.go
-//go:generate go run github.com/getkin/kin-openapi/cmd/validate@latest ../../docs/openapi.json
+//go:generate go run github.com/getkin/kin-openapi/cmd/validate ../../docs/openapi.json
 
 // setupOpenAPIStaticConfig initializes static content (version) for the OpenAPI config.
 //

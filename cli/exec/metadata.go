@@ -24,9 +24,9 @@ import (
 
 	"github.com/urfave/cli/v3"
 
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/metadata"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/matrix"
-	"go.woodpecker-ci.org/woodpecker/v2/version"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/matrix"
+	"go.woodpecker-ci.org/woodpecker/v3/version"
 )
 
 // return the metadata from the cli context.
@@ -78,7 +78,6 @@ func metadataFromContext(_ context.Context, c *cli.Command, axis matrix.Axis, w 
 	// Repo
 	metadataFileAndOverrideOrDefault(c, "repo-remote-id", func(s string) { m.Repo.RemoteID = s }, c.String)
 	metadataFileAndOverrideOrDefault(c, "repo-url", func(s string) { m.Repo.ForgeURL = s }, c.String)
-	metadataFileAndOverrideOrDefault(c, "repo-scm", func(s string) { m.Repo.SCM = s }, c.String)
 	metadataFileAndOverrideOrDefault(c, "repo-default-branch", func(s string) { m.Repo.Branch = s }, c.String)
 	metadataFileAndOverrideOrDefault(c, "repo-clone-url", func(s string) { m.Repo.CloneURL = s }, c.String)
 	metadataFileAndOverrideOrDefault(c, "repo-clone-ssh-url", func(s string) { m.Repo.CloneSSHURL = s }, c.String)

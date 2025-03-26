@@ -15,9 +15,13 @@
 package datastore
 
 import (
+	"errors"
+	"fmt"
+
 	"xorm.io/xorm"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
 )
 
 func (s storage) GetUser(id int64) (*model.User, error) {
@@ -56,12 +60,29 @@ func (s storage) GetUserCount() (int64, error) {
 func (s storage) CreateUser(user *model.User) error {
 	sess := s.engine.NewSession()
 	org := &model.Org{
-		Name:   user.Login,
-		IsUser: true,
+		Name:    user.Login,
+		ForgeID: user.ForgeID,
+		IsUser:  true,
 	}
-	err := s.orgCreate(org, sess)
-	if err != nil {
-		return err
+
+	existingOrg, err := s.orgFindByName(sess, org.Name, user.ForgeID)
+	if err != nil && !errors.Is(err, types.RecordNotExist) {
+		return fmt.Errorf("failed to check if org exists: %w", err)
+	}
+
+	if !errors.Is(err, types.RecordNotExist) {
+		org = existingOrg
+		org.IsUser = true
+		org.Name = user.Login
+		err = s.orgUpdate(sess, org)
+		if err != nil {
+			return fmt.Errorf("failed to update existing org: %w", err)
+		}
+	} else {
+		err = s.orgCreate(org, sess)
+		if err != nil {
+			return fmt.Errorf("failed to create new org: %w", err)
+		}
 	}
 	user.OrgID = org.ID
 	// only Insert set auto created ID back to object
@@ -82,15 +103,15 @@ func (s storage) DeleteUser(user *model.User) error {
 	}
 
 	if err := s.orgDelete(sess, user.OrgID); err != nil {
-		return err
+		return fmt.Errorf("failed to delete org: %w", err)
 	}
 
 	if err := wrapDelete(sess.ID(user.ID).Delete(new(model.User))); err != nil {
-		return err
+		return fmt.Errorf("failed to delete user: %w", err)
 	}
 
 	if _, err := sess.Where("user_id = ?", user.ID).Delete(new(model.Perm)); err != nil {
-		return err
+		return fmt.Errorf("failed to delete perms: %w", err)
 	}
 
 	return sess.Commit()

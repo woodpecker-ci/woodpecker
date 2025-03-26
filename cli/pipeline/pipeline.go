@@ -22,10 +22,10 @@ import (
 
 	"github.com/urfave/cli/v3"
 
-	"go.woodpecker-ci.org/woodpecker/v2/cli/output"
-	"go.woodpecker-ci.org/woodpecker/v2/cli/pipeline/deploy"
-	"go.woodpecker-ci.org/woodpecker/v2/cli/pipeline/log"
-	"go.woodpecker-ci.org/woodpecker/v2/woodpecker-go/woodpecker"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/output"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/pipeline/deploy"
+	"go.woodpecker-ci.org/woodpecker/v3/cli/pipeline/log"
+	"go.woodpecker-ci.org/woodpecker/v3/woodpecker-go/woodpecker"
 )
 
 // Command exports the pipeline command set.
@@ -55,13 +55,9 @@ func pipelineOutput(c *cli.Command, pipelines []*woodpecker.Pipeline, fd ...io.W
 	noHeader := c.Bool("output-no-headers")
 
 	var out io.Writer
-	switch len(fd) {
-	case 0:
-		out = os.Stdout
-	case 1:
+	out = os.Stdout
+	if len(fd) > 0 {
 		out = fd[0]
-	default:
-		out = os.Stdout
 	}
 
 	switch outFmt {

@@ -1,12 +1,12 @@
 <template>
   <header
-    class="bg-wp-background-100 border-b-1 border-wp-background-400 dark:border-wp-background-100 dark:bg-wp-background-300 text-wp-text-100"
+    class="border-wp-background-400 bg-wp-background-100 text-wp-text-100 dark:border-wp-background-100 dark:bg-wp-background-300 border-b"
     :class="{ 'md:px-4': fullWidth }"
   >
-    <Container :full-width="fullWidth" class="!py-0">
-      <div class="flex w-full md:items-center flex-col py-3 gap-2 md:gap-10 md:flex-row md:justify-between">
+    <Container :full-width="fullWidth" class="py-0!">
+      <div class="flex w-full flex-col gap-2 py-3 md:flex-row md:items-center md:justify-between md:gap-10">
         <div
-          class="flex items-center content-start min-h-10"
+          class="flex min-h-10 content-start items-center"
           :class="{
             'md:flex-1': searchBoxPresent,
           }"
@@ -15,16 +15,16 @@
             v-if="goBack"
             icon="back"
             :title="$t('back')"
-            class="flex-shrink-0 mr-2 <md:hidden md:justify-between w-8 h-8"
+            class="md:display-unset mr-2 hidden h-8 w-8 shrink-0 md:justify-between"
             @click="goBack"
           />
-          <h1 class="flex text-xl min-w-0 text-wp-text-100 items-center gap-x-2">
+          <h1 class="text-wp-text-100 flex min-w-0 items-center gap-x-2 text-xl">
             <slot name="title" />
           </h1>
         </div>
         <TextField
           v-if="searchBoxPresent"
-          class="w-auto <md:w-full flex-grow <md:order-3"
+          class="order-3 w-full grow md:order-none md:w-auto"
           :aria-label="$t('search')"
           :placeholder="$t('search')"
           :model-value="search"
@@ -32,7 +32,7 @@
         />
         <div
           v-if="$slots.headerActions"
-          class="flex items-center md:justify-end gap-x-2 min-w-0"
+          class="flex min-w-0 items-center gap-x-2 md:justify-end"
           :class="{
             'md:flex-1': searchBoxPresent,
           }"
@@ -41,9 +41,9 @@
         </div>
       </div>
 
-      <div v-if="enableTabs" class="flex md:items-center flex-col py-2 md:flex-row md:justify-between md:py-0">
-        <Tabs class="<md:order-2" />
-        <div v-if="$slots.headerActions" class="flex content-start md:justify-end">
+      <div v-if="enableTabs" class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between md:py-0">
+        <Tabs class="order-2 md:order-none" />
+        <div v-if="$slots.headerActions" class="flex flex-wrap content-start md:justify-end">
           <slot name="tabActions" />
         </div>
       </div>

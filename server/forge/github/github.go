@@ -27,17 +27,17 @@ import (
 	"strings"
 	"time"
 
-	"github.com/google/go-github/v67/github"
+	"github.com/google/go-github/v70/github"
 	"github.com/rs/zerolog/log"
 	"golang.org/x/oauth2"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server"
-	"go.woodpecker-ci.org/woodpecker/v2/server/forge"
-	"go.woodpecker-ci.org/woodpecker/v2/server/forge/common"
-	forge_types "go.woodpecker-ci.org/woodpecker/v2/server/forge/types"
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
-	"go.woodpecker-ci.org/woodpecker/v2/server/store"
-	"go.woodpecker-ci.org/woodpecker/v2/shared/utils"
+	"go.woodpecker-ci.org/woodpecker/v3/server"
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge"
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge/common"
+	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/utils"
 )
 
 const (
@@ -360,6 +360,7 @@ func (c *client) Netrc(u *model.User, r *model.Repo) (*model.Netrc, error) {
 		Login:    login,
 		Password: token,
 		Machine:  host,
+		Type:     model.ForgeTypeGithub,
 	}, nil
 }
 
@@ -394,23 +395,24 @@ func (c *client) OrgMembership(ctx context.Context, u *model.User, owner string)
 func (c *client) Org(ctx context.Context, u *model.User, owner string) (*model.Org, error) {
 	client := c.newClientToken(ctx, u.AccessToken)
 
-	user, _, err := client.Users.Get(ctx, owner)
-	log.Trace().Msgf("GitHub user for owner %s = %v", owner, user)
-	if user != nil && err == nil {
+	org, _, err := client.Organizations.Get(ctx, owner)
+	log.Trace().Msgf("GitHub organization for owner %s = %v", owner, org)
+	if org != nil && err == nil {
 		return &model.Org{
-			Name:   user.GetLogin(),
-			IsUser: true,
+			Name:   org.GetLogin(),
+			IsUser: false,
 		}, nil
 	}
 
-	org, _, err := client.Organizations.Get(ctx, owner)
-	log.Trace().Msgf("GitHub organization for owner %s = %v", owner, org)
+	user, _, err := client.Users.Get(ctx, owner)
+	log.Trace().Msgf("GitHub user for owner %s = %v", owner, user)
 	if err != nil {
 		return nil, err
 	}
 
 	return &model.Org{
-		Name: org.GetLogin(),
+		Name:   user.GetLogin(),
+		IsUser: true,
 	}, nil
 }
 
@@ -529,18 +531,18 @@ func (c *client) Status(ctx context.Context, user *model.User, repo *model.Repo,
 		id, _ := strconv.Atoi(matches[1])
 
 		_, _, err := client.Repositories.CreateDeploymentStatus(ctx, repo.Owner, repo.Name, int64(id), &github.DeploymentStatusRequest{
-			State:       github.String(convertStatus(pipeline.Status)),
-			Description: github.String(common.GetPipelineStatusDescription(pipeline.Status)),
-			LogURL:      github.String(common.GetPipelineStatusURL(repo, pipeline, nil)),
+			State:       github.Ptr(convertStatus(pipeline.Status)),
+			Description: github.Ptr(common.GetPipelineStatusDescription(pipeline.Status)),
+			LogURL:      github.Ptr(common.GetPipelineStatusURL(repo, pipeline, nil)),
 		})
 		return err
 	}
 
 	_, _, err := client.Repositories.CreateStatus(ctx, repo.Owner, repo.Name, pipeline.Commit, &github.RepoStatus{
-		Context:     github.String(common.GetPipelineStatusContext(repo, pipeline, workflow)),
-		State:       github.String(convertStatus(workflow.State)),
-		Description: github.String(common.GetPipelineStatusDescription(workflow.State)),
-		TargetURL:   github.String(common.GetPipelineStatusURL(repo, pipeline, workflow)),
+		Context:     github.Ptr(common.GetPipelineStatusContext(repo, pipeline, workflow)),
+		State:       github.Ptr(convertStatus(workflow.State)),
+		Description: github.Ptr(common.GetPipelineStatusDescription(workflow.State)),
+		TargetURL:   github.Ptr(common.GetPipelineStatusURL(repo, pipeline, workflow)),
 	})
 	return err
 }
@@ -553,7 +555,7 @@ func (c *client) Activate(ctx context.Context, u *model.User, r *model.Repo, lin
 	}
 	client := c.newClientToken(ctx, u.AccessToken)
 	hook := &github.Hook{
-		Name: github.String("web"),
+		Name: github.Ptr("web"),
 		Events: []string{
 			"push",
 			"pull_request",
@@ -561,7 +563,7 @@ func (c *client) Activate(ctx context.Context, u *model.User, r *model.Repo, lin
 		},
 		Config: &github.HookConfig{
 			URL:         &link,
-			ContentType: github.String("form"),
+			ContentType: github.Ptr("form"),
 		},
 	}
 	_, _, err := client.Repositories.CreateHook(ctx, r.Owner, r.Name, hook)

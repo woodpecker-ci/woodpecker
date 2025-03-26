@@ -5,7 +5,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	backend "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
+	backend "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 )
 
 func Test_parseBackendOptions(t *testing.T) {
@@ -111,6 +111,23 @@ func Test_parseBackendOptions(t *testing.T) {
 						Key:    ".dockerconfigjson",
 						Target: SecretTarget{File: "~/.docker/config.json"},
 					},
+				},
+			},
+		},
+		{
+			name: "number options",
+			step: &backend.Step{BackendOptions: map[string]any{
+				"kubernetes": map[string]any{
+					"resources": map[string]any{
+						"requests": map[string]int{"memory": 128, "cpu": 1000},
+						"limits":   map[string]int{"memory": 256, "cpu": 2},
+					},
+				},
+			}},
+			want: BackendOptions{
+				Resources: Resources{
+					Requests: map[string]string{"memory": "128", "cpu": "1000"},
+					Limits:   map[string]string{"memory": "256", "cpu": "2"},
 				},
 			},
 		},

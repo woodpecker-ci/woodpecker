@@ -1,29 +1,31 @@
 <template>
   <div v-if="pipeline" class="flex flex-col pt-10 md:pt-0">
     <div
-      class="flex flex-grow flex-col code-box shadow !p-0 !rounded-none md:mt-0 !md:rounded-md overflow-hidden"
+      class="code-box-log flex grow flex-col overflow-hidden p-0! shadow-sm md:mt-0 md:rounded-md!"
       @mouseover="showActions = true"
       @mouseleave="showActions = false"
     >
-      <div class="<md:fixed <md:top-0 <md:left-0 flex flex-row items-center w-full bg-wp-code-100 px-4 py-2">
-        <span class="text-base font-bold text-wp-code-text-alt-100">
-          <span class="<md:hidden">{{ $t('repo.pipeline.log_title') }}</span>
+      <div
+        class="bg-wp-code-100 fixed top-0 left-0 flex w-full flex-row items-center px-4 py-2 md:relative md:top-auto md:left-auto"
+      >
+        <span class="text-wp-code-text-alt-100 text-base font-bold">
+          <span class="md:display-unset hidden">{{ $t('repo.pipeline.log_title') }}</span>
           <span class="md:hidden">{{ step?.name }}</span>
         </span>
 
-        <div class="flex flex-row items-center ml-auto gap-x-2">
+        <div class="ml-auto flex flex-row items-center gap-x-2">
           <IconButton
             v-if="step?.finished !== undefined && hasLogs"
             :is-loading="downloadInProgress"
             :title="$t('repo.pipeline.actions.log_download')"
-            class="!hover:bg-white !hover:bg-opacity-10"
+            class="hover:bg-white/10!"
             icon="download"
             @click="download"
           />
           <IconButton
             v-if="step?.finished !== undefined && hasLogs && hasPushPermission"
             :title="$t('repo.pipeline.actions.log_delete')"
-            class="!hover:bg-white !hover:bg-opacity-10"
+            class="hover:bg-white/10!"
             icon="trash"
             @click="deleteLogs"
           />
@@ -32,32 +34,28 @@
             :title="
               autoScroll ? $t('repo.pipeline.actions.log_auto_scroll_off') : $t('repo.pipeline.actions.log_auto_scroll')
             "
-            class="!hover:bg-white !hover:bg-opacity-10"
+            class="hover:bg-white/10!"
             :icon="autoScroll ? 'auto-scroll' : 'auto-scroll-off'"
             @click="autoScroll = !autoScroll"
           />
-          <IconButton
-            class="!hover:bg-white !hover:bg-opacity-10 !md:hidden"
-            icon="close"
-            @click="$emit('update:step-id', null)"
-          />
+          <IconButton class="hover:bg-white/10! md:hidden!" icon="close" @click="$emit('update:step-id', null)" />
         </div>
       </div>
 
       <div
         v-show="hasLogs && loadedLogs && (log?.length || 0) > 0"
         ref="consoleElement"
-        class="w-full max-w-full grid grid-cols-[min-content,minmax(0,1fr),min-content] p-4 auto-rows-min flex-grow overflow-x-hidden overflow-y-auto text-xs md:text-sm"
+        class="grid w-full max-w-full grow auto-rows-min grid-cols-[min-content_minmax(0,1fr)_min-content] overflow-x-hidden overflow-y-auto p-4 text-xs md:text-sm"
       >
         <div v-for="line in log" :key="line.index" class="contents font-mono">
           <a
             :id="`L${line.number}`"
             :href="`#L${line.number}`"
-            class="text-wp-code-text-alt-100 whitespace-nowrap select-none text-right pl-2 pr-6"
+            class="text-wp-code-text-alt-100 pr-6 pl-2 text-right whitespace-nowrap select-none"
             :class="{
-              'bg-opacity-40 dark:bg-opacity-50 bg-red-600 dark:bg-red-800': line.type === 'error',
-              'bg-opacity-40 dark:bg-opacity-50 bg-yellow-600 dark:bg-yellow-800': line.type === 'warning',
-              'bg-opacity-30 bg-blue-600': isSelected(line),
+              'bg-red-600/40 dark:bg-red-800/50': line.type === 'error',
+              'bg-yellow-600/40 dark:bg-yellow-800/50': line.type === 'warning',
+              'bg-blue-600/30': isSelected(line),
               underline: isSelected(line),
             }"
           >
@@ -65,21 +63,21 @@
           </a>
           <!-- eslint-disable vue/no-v-html -->
           <span
-            class="align-top whitespace-pre-wrap break-words"
+            class="align-top break-words whitespace-pre-wrap"
             :class="{
-              'bg-opacity-40 dark:bg-opacity-50 bg-10.168.64.121-600 dark:bg-red-800': line.type === 'error',
-              'bg-opacity-40 dark:bg-opacity-50 bg-yellow-600 dark:bg-yellow-800': line.type === 'warning',
-              'bg-opacity-30 bg-blue-600': isSelected(line),
+              'bg-red-600/40 dark:bg-red-800/50': line.type === 'error',
+              'bg-yellow-600/40 dark:bg-yellow-800/50': line.type === 'warning',
+              'bg-blue-600/30': isSelected(line),
             }"
             v-html="line.text"
           />
           <!-- eslint-enable vue/no-v-html -->
           <span
-            class="text-wp-code-text-alt-100 whitespace-nowrap select-none text-right pr-1"
+            class="text-wp-code-text-alt-100 pr-1 text-right whitespace-nowrap select-none"
             :class="{
-              'bg-opacity-40 dark:bg-opacity-50 bg-red-600 dark:bg-red-800': line.type === 'error',
-              'bg-opacity-40 dark:bg-opacity-50 bg-yellow-600 dark:bg-yellow-800': line.type === 'warning',
-              'bg-opacity-30 bg-blue-600': isSelected(line),
+              'bg-red-600/40 dark:bg-red-800/50': line.type === 'error',
+              'bg-yellow-600/40 dark:bg-yellow-800/50': line.type === 'warning',
+              'bg-blue-600/30': isSelected(line),
             }"
           >
             {{ formatTime(line.time) }}
@@ -87,7 +85,7 @@
         </div>
       </div>
 
-      <div class="m-auto text-xl text-wp-text-alt-100">
+      <div class="text-wp-text-alt-100 m-auto text-xl">
         <span v-if="step?.state === 'skipped'">{{ $t('repo.pipeline.actions.canceled') }}</span>
         <span v-else-if="!step?.started">{{ $t('repo.pipeline.step_not_started') }}</span>
         <div v-else-if="!loadedLogs">{{ $t('repo.pipeline.loading') }}</div>
@@ -96,9 +94,9 @@
 
       <div
         v-if="step?.finished !== undefined"
-        class="flex items-center w-full bg-wp-code-100 text-md text-wp-code-text-alt-100 p-4 font-bold"
+        class="text-md bg-wp-code-100 text-wp-code-text-alt-100 flex w-full items-center p-4 font-bold"
       >
-        <PipelineStatusIcon :status="step.state" class="!h-4 !w-4" />
+        <PipelineStatusIcon :status="step.state" class="h-4! w-4!" />
         <span v-if="step?.error" class="px-2">{{ step.error }}</span>
         <span v-else class="px-2">{{ $t('repo.pipeline.exit_code', { exitCode: step.exit_code }) }}</span>
       </div>
@@ -113,7 +111,8 @@ import { useStorage } from '@vueuse/core';
 import { AnsiUp } from 'ansi_up';
 import { decode } from 'js-base64';
 import { debounce } from 'lodash';
-import { computed, inject, nextTick, onBeforeUnmount, onMounted, ref, toRef, watch, type Ref } from 'vue';
+import { computed, inject, nextTick, onBeforeUnmount, onMounted, ref, toRef, watch } from 'vue';
+import type { Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
 
@@ -121,8 +120,7 @@ import IconButton from '~/components/atomic/IconButton.vue';
 import PipelineStatusIcon from '~/components/repo/pipeline/PipelineStatusIcon.vue';
 import useApiClient from '~/compositions/useApiClient';
 import useNotifications from '~/compositions/useNotifications';
-import type { Pipeline, Repo, RepoPermissions } from '~/lib/api/types';
-import { findStep, isStepFinished, isStepRunning } from '~/utils/helpers';
+import type { Pipeline, PipelineStep, PipelineWorkflow, Repo, RepoPermissions } from '~/lib/api/types';
 
 interface LogLine {
   index: number;
@@ -303,12 +301,12 @@ async function loadLogs() {
     return;
   }
 
-  if (isStepFinished(step.value)) {
+  if (step.value.state !== 'running' && step.value.state !== 'pending') {
     loadedStepSlug.value = stepSlug.value;
     const logs = await apiClient.getLogs(repo.value.id, pipeline.value.number, step.value.id);
     logs?.forEach((line) => writeLog({ index: line.line, text: line.data, time: line.time }));
     flushLogs(false);
-  } else if (step.value.state === 'pending' || isStepRunning(step.value)) {
+  } else {
     loadedStepSlug.value = stepSlug.value;
     stream.value = apiClient.streamLogs(repo.value.id, pipeline.value.number, step.value.id, (line) => {
       writeLog({ index: line.line, text: line.data, time: line.time });
@@ -334,6 +332,29 @@ async function deleteLogs() {
   } catch (e) {
     notifications.notifyError(e as Error, i18n.t('repo.pipeline.log_delete_error'));
   }
+}
+
+function findStep(workflows: PipelineWorkflow[], pid: number): PipelineStep | undefined {
+  return workflows.reduce(
+    (prev, workflow) => {
+      const result = workflow.children.reduce(
+        (prevChild, step) => {
+          if (step.pid === pid) {
+            return step;
+          }
+
+          return prevChild;
+        },
+        undefined as PipelineStep | undefined,
+      );
+      if (result) {
+        return result;
+      }
+
+      return prev;
+    },
+    undefined as PipelineStep | undefined,
+  );
 }
 
 onMounted(async () => {

@@ -23,10 +23,10 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server"
-	"go.woodpecker-ci.org/woodpecker/v2/server/router/middleware/session"
-	"go.woodpecker-ci.org/woodpecker/v2/shared/token"
-	"go.woodpecker-ci.org/woodpecker/v2/version"
+	"go.woodpecker-ci.org/woodpecker/v3/server"
+	"go.woodpecker-ci.org/woodpecker/v3/server/router/middleware/session"
+	"go.woodpecker-ci.org/woodpecker/v3/shared/token"
+	"go.woodpecker-ci.org/woodpecker/v3/version"
 )
 
 func Config(c *gin.Context) {

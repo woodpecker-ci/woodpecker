@@ -26,14 +26,18 @@ import (
 	"k8s.io/apimachinery/pkg/api/resource"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/common"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/common"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 )
 
 const (
-	StepLabel            = "step"
-	podPrefix            = "wp-"
-	defaultFSGroup int64 = 1000
+	// StepLabelLegacy is the legacy label name from before the introduction of the woodpecker-ci.org namespace.
+	// This will be removed in the future.
+	StepLabelLegacy       = "step"
+	StepLabel             = "woodpecker-ci.org/step"
+	podPrefix             = "wp-"
+	defaultFSGroup  int64 = 1000
 )
 
 func mkPod(step *types.Step, config *config, podName, goos string, options BackendOptions) (*v1.Pod, error) {
@@ -70,7 +74,7 @@ func mkPod(step *types.Step, config *config, podName, goos string, options Backe
 }
 
 func stepToPodName(step *types.Step) (name string, err error) {
-	if step.Type == types.StepTypeService {
+	if isService(step) {
 		return serviceName(step)
 	}
 	return podName(step)
@@ -100,9 +104,21 @@ func podLabels(step *types.Step, config *config, options BackendOptions) (map[st
 	var err error
 	labels := make(map[string]string)
 
+	for k, v := range step.WorkflowLabels {
+		// Only copy user labels if allowed by agent config.
+		// Internal labels are filtered on the server-side.
+		if config.PodLabelsAllowFromStep || strings.HasPrefix(k, pipeline.InternalLabelPrefix) {
+			labels[k], err = toDNSName(v)
+			if err != nil {
+				return labels, err
+			}
+		}
+	}
+
 	if len(options.Labels) > 0 {
 		if config.PodLabelsAllowFromStep {
 			log.Trace().Msgf("using labels from the backend options: %v", options.Labels)
+			// TODO should we filter out label with internal prefix?
 			maps.Copy(labels, options.Labels)
 		} else {
 			log.Debug().Msg("Pod labels were defined in backend options, but its using disallowed by instance configuration")
@@ -110,10 +126,15 @@ func podLabels(step *types.Step, config *config, options BackendOptions) (map[st
 	}
 	if len(config.PodLabels) > 0 {
 		log.Trace().Msgf("using labels from the configuration: %v", config.PodLabels)
+		// TODO should we filter out label with internal prefix?
 		maps.Copy(labels, config.PodLabels)
 	}
-	if step.Type == types.StepTypeService {
+	if isService(step) {
 		labels[ServiceLabel], _ = serviceName(step)
+	}
+	labels[StepLabelLegacy], err = stepLabel(step)
+	if err != nil {
+		return labels, err
 	}
 	labels[StepLabel], err = stepLabel(step)
 	if err != nil {

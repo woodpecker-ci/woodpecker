@@ -20,7 +20,7 @@ import (
 	"xorm.io/builder"
 	"xorm.io/xorm"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
 func (s storage) GetPipeline(id int64) (*model.Pipeline, error) {
@@ -33,6 +33,15 @@ func (s storage) GetPipelineNumber(repo *model.Repo, num int64) (*model.Pipeline
 	return pipeline, wrapGet(s.engine.Where(
 		builder.Eq{"repo_id": repo.ID, "number": num},
 	).Get(pipeline))
+}
+
+func (s storage) GetPipelineBadge(repo *model.Repo, branch string) (*model.Pipeline, error) {
+	pipeline := new(model.Pipeline)
+	return pipeline, wrapGet(s.engine.
+		Desc("number").
+		Where(builder.Eq{"repo_id": repo.ID, "branch": branch, "event": model.EventPush}).
+		Where(builder.Neq{"status": model.StatusBlocked}).
+		Get(pipeline))
 }
 
 func (s storage) GetPipelineLast(repo *model.Repo, branch string) (*model.Pipeline, error) {
@@ -86,6 +95,22 @@ func (s storage) GetPipelineList(repo *model.Repo, p *model.ListOptions, f *mode
 	return pipelines, s.paginate(p).Where(cond).
 		Desc("number").
 		Find(&pipelines)
+}
+
+// GetRepoLatestPipelines get the latest pipeline for each repo.
+func (s storage) GetRepoLatestPipelines(repoIDs []int64) ([]*model.Pipeline, error) {
+	pipelines := make([]*model.Pipeline, 0, len(repoIDs))
+
+	pipelineIDs := make([]int64, 0, len(repoIDs))
+	if err := s.engine.Select("MAX(id) AS id").
+		Table("pipelines").
+		Where(builder.In("repo_id", repoIDs)).
+		GroupBy("repo_id").
+		Find(&pipelineIDs); err != nil {
+		return nil, err
+	}
+
+	return pipelines, s.engine.Where(builder.In("id", pipelineIDs)).Find(&pipelines)
 }
 
 // GetActivePipelineList get all pipelines that are pending, running or blocked.

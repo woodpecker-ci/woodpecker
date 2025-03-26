@@ -19,9 +19,9 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/errors"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/linter"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/errors"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/linter"
 )
 
 func TestLint(t *testing.T) {
@@ -184,6 +184,10 @@ func TestLintErrors(t *testing.T) {
 		{
 			from: "steps: { build: { image: golang, secrets: [ 'mysql_username' ] } }",
 			want: "Usage of `secrets` is deprecated, use `environment` in combination with `from_secret`",
+		},
+		{
+			from: "steps: { build: { image: golang }, publish: { image: golang, depends_on: [ binary ] } }",
+			want: "One or more of the specified dependencies do not exist",
 		},
 	}
 

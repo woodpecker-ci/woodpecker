@@ -25,13 +25,13 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server"
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
-	"go.woodpecker-ci.org/woodpecker/v2/server/queue"
-	queue_mocks "go.woodpecker-ci.org/woodpecker/v2/server/queue/mocks"
-	mocks_manager "go.woodpecker-ci.org/woodpecker/v2/server/services/mocks"
-	store_mocks "go.woodpecker-ci.org/woodpecker/v2/server/store/mocks"
-	"go.woodpecker-ci.org/woodpecker/v2/server/store/types"
+	"go.woodpecker-ci.org/woodpecker/v3/server"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/queue"
+	queue_mocks "go.woodpecker-ci.org/woodpecker/v3/server/queue/mocks"
+	mocks_manager "go.woodpecker-ci.org/woodpecker/v3/server/services/mocks"
+	store_mocks "go.woodpecker-ci.org/woodpecker/v3/server/store/mocks"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store/types"
 )
 
 var fakeAgent = &model.Agent{

@@ -22,7 +22,7 @@ import (
 	"src.techknowlogick.com/xormigrate"
 	"xorm.io/xorm"
 
-	"go.woodpecker-ci.org/woodpecker/v2/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
 // APPEND NEW MIGRATIONS
@@ -51,6 +51,9 @@ var migrationTasks = []*xormigrate.Migration{
 	&removeRepoNetrcOnlyTrusted,
 	&renameTokenFields,
 	&setNewDefaultsForRequireApproval,
+	&removeRepoScm,
+	&unsanitizeOrgAndUserNames,
+	&replaceZeroForgeIDsInOrgs,
 }
 
 var allBeans = []any{

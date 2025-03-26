@@ -18,13 +18,13 @@
     </template>
 
     <template #headerActions>
-      <div class="flex md:items-center flex-col gap-2 md:flex-row md:justify-between min-w-0">
-        <div class="flex content-start gap-2 min-w-0">
-          <PipelineStatusIcon :status="pipeline.status" class="flex flex-shrink-0" />
-          <span class="flex-shrink-0 text-center">{{ $t('repo.pipeline.pipeline', { pipelineId }) }}</span>
+      <div class="flex w-full items-center justify-between gap-2">
+        <div class="flex min-w-0 content-start gap-2">
+          <PipelineStatusIcon :status="pipeline.status" class="flex shrink-0" />
+          <span class="shrink-0 text-center">{{ $t('repo.pipeline.pipeline', { pipelineId }) }}</span>
           <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
           <span class="hidden md:inline-block">-</span>
-          <span class="min-w-0 whitespace-nowrap overflow-hidden overflow-ellipsis" :title="message">{{
+          <span class="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap" :title="message">{{
             shortMessage
           }}</span>
         </div>
@@ -33,20 +33,20 @@
           <div class="flex content-start gap-x-2">
             <Button
               v-if="pipeline.status === 'pending' || pipeline.status === 'running'"
-              class="flex-shrink-0"
+              class="shrink-0"
               :text="$t('repo.pipeline.actions.cancel')"
               :is-loading="isCancelingPipeline"
               @click="cancelPipeline"
             />
             <Button
-              class="flex-shrink-0"
+              class="shrink-0"
               :text="$t('repo.pipeline.actions.restart')"
               :is-loading="isRestartingPipeline"
               @click="restartPipeline"
             />
             <Button
               v-if="pipeline.status === 'success' && repo.allow_deploy"
-              class="flex-shrink-0"
+              class="shrink-0"
               :text="$t('repo.pipeline.actions.deploy')"
               @click="showDeployPipelinePopup = true"
             />
@@ -61,28 +61,28 @@
     </template>
 
     <template #tabActions>
-      <div class="flex gap-x-4">
-        <div class="flex space-x-1 items-center flex-shrink-0" :title="$t('repo.pipeline.created', { created })">
+      <div class="flex flex-wrap gap-4 md:flex-nowrap">
+        <div class="flex shrink-0 items-center gap-2" :title="$t('repo.pipeline.created', { created })">
           <Icon name="since" />
           <span>{{ since }}</span>
         </div>
-        <div class="flex space-x-1 items-center flex-shrink-0" :title="$t('repo.pipeline.duration')">
+        <div class="flex shrink-0 items-center gap-2" :title="$t('repo.pipeline.duration')">
           <Icon name="duration" />
           <span>{{ duration }}</span>
         </div>
       </div>
     </template>
 
-    <Tab :to="{ name: 'repo-pipeline' }" :title="$t('repo.pipeline.tasks')" />
+    <Tab icon="tray-full" :to="{ name: 'repo-pipeline' }" :title="$t('repo.pipeline.tasks')" />
     <Tab
       v-if="pipeline.errors && pipeline.errors.length > 0"
       :to="{ name: 'repo-pipeline-errors' }"
-      icon="attention"
+      icon="alert"
       :title="pipeline.errors.some((e) => !e.is_warning) ? $t('repo.pipeline.errors') : $t('repo.pipeline.warnings')"
       :count="pipeline.errors?.length"
-      :icon-class="pipeline.errors.some((e) => !e.is_warning) ? 'text-wp-state-error-100' : 'text-wp-state-warn-100'"
+      :icon-class="pipeline.errors.some((e) => !e.is_warning) ? 'text-wp-error-100' : 'text-wp-state-warn-100'"
     />
-    <Tab :to="{ name: 'repo-pipeline-config' }" :title="$t('repo.pipeline.config')" />
+    <Tab icon="file-cog-outlined" :to="{ name: 'repo-pipeline-config' }" :title="$t('repo.pipeline.config')" />
     <Tab
       v-if="pipeline.changed_files && pipeline.changed_files.length > 0"
       :to="{ name: 'repo-pipeline-changed-files' }"
@@ -91,6 +91,7 @@
     />
     <Tab
       v-if="repoPermissions && repoPermissions.push"
+      icon="bug-outline"
       :to="{ name: 'repo-pipeline-debug' }"
       :title="$t('repo.pipeline.debug.title')"
     />
@@ -100,7 +101,8 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, inject, onBeforeUnmount, onMounted, ref, toRef, watch, type Ref } from 'vue';
+import { computed, inject, onBeforeUnmount, onMounted, ref, toRef, watch } from 'vue';
+import type { Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 

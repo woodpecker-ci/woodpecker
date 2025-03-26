@@ -23,11 +23,11 @@ import (
 
 	"github.com/oklog/ulid/v2"
 
-	backend_types "go.woodpecker-ci.org/woodpecker/v2/pipeline/backend/types"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/metadata"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/compiler/settings"
-	yaml_types "go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/types"
-	"go.woodpecker-ci.org/woodpecker/v2/pipeline/frontend/yaml/utils"
+	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/compiler/settings"
+	yaml_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/types"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/utils"
 )
 
 const (
@@ -37,7 +37,7 @@ const (
 	DefaultWorkspaceBase = pluginWorkspaceBase
 )
 
-func (c *Compiler) createProcess(container *yaml_types.Container, stepType backend_types.StepType) (*backend_types.Step, error) {
+func (c *Compiler) createProcess(container *yaml_types.Container, workflow *yaml_types.Workflow, stepType backend_types.StepType) (*backend_types.Step, error) {
 	var (
 		uuid = ulid.Make()
 
@@ -181,6 +181,7 @@ func (c *Compiler) createProcess(container *yaml_types.Container, stepType backe
 		NetworkMode:    networkMode,
 		Ports:          ports,
 		BackendOptions: container.BackendOptions,
+		WorkflowLabels: workflow.Labels,
 	}, nil
 }
 
