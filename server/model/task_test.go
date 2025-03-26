@@ -41,8 +41,8 @@ func TestTask_GetLabels(t *testing.T) {
 		assert.NoError(t, err)
 		assert.NotNil(t, task.Labels)
 		assert.Equal(t, map[string]string{
-			pipeline.LabelRepoFullName: "",
-			pipeline.LabelOrgID:        "0",
+			pipeline.LabelFilterRepo: "",
+			pipeline.LabelFilterOrg:  "0",
 		}, task.Labels)
 	})
 
@@ -59,8 +59,8 @@ func TestTask_GetLabels(t *testing.T) {
 		assert.NoError(t, err)
 		assert.NotNil(t, task.Labels)
 		assert.Equal(t, map[string]string{
-			pipeline.LabelRepoFullName: "test/repo",
-			pipeline.LabelOrgID:        "456",
+			pipeline.LabelFilterRepo: "test/repo",
+			pipeline.LabelFilterOrg:  "456",
 		}, task.Labels)
 	})
 
@@ -81,9 +81,9 @@ func TestTask_GetLabels(t *testing.T) {
 		assert.NoError(t, err)
 		assert.NotNil(t, task.Labels)
 		assert.Equal(t, map[string]string{
-			"existing":                 "label",
-			pipeline.LabelRepoFullName: "test/repo",
-			pipeline.LabelOrgID:        "456",
+			"existing":               "label",
+			pipeline.LabelFilterRepo: "test/repo",
+			pipeline.LabelFilterOrg:  "456",
 		}, task.Labels)
 	})
 }
