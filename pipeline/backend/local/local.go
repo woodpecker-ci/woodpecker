@@ -44,7 +44,7 @@ type workflowState struct {
 
 type local struct {
 	tempDir         string
-	execDir         string
+	internalExecDir string // to handle edge case for running local backend via cli exec
 	workflows       sync.Map
 	output          io.ReadCloser
 	pluginGitBinary string
@@ -81,7 +81,7 @@ func (e *local) Load(ctx context.Context) (*types.BackendInfo, error) {
 	c, ok := ctx.Value(types.CliCommand).(*cli.Command)
 	if ok {
 		e.tempDir = c.String("backend-local-temp-dir")
-		e.execDir = c.String("backend-local-exec-dir")
+		e.internalExecDir = c.String("internal-backend-local-exec-dir")
 	}
 
 	e.loadClone()
@@ -111,20 +111,23 @@ func (e *local) SetupWorkflow(_ context.Context, _ *types.Config, taskUUID strin
 		return err
 	}
 
-	if e.execDir == "" {
+	// normal workspace setup case
+	if e.internalExecDir == "" {
 		state.workspaceDir = filepath.Join(baseDir, "workspace")
 		if err := os.Mkdir(state.workspaceDir, 0o700); err != nil {
 			return err
 		}
-	} else {
-		state.workspaceDir = e.execDir
-		if stat, err := os.Stat(e.execDir); os.IsNotExist(err) {
-			log.Debug().Msgf("create workspace directory '%s' set by WOODPECKER_BACKEND_LOCAL_EXEC_DIR", e.execDir)
+	} else
+	// setup workspace via internal flag signaled from cli exec to a specific dir
+	{
+		state.workspaceDir = e.internalExecDir
+		if stat, err := os.Stat(e.internalExecDir); os.IsNotExist(err) {
+			log.Debug().Msgf("create workspace directory '%s' set by internal flag", e.internalExecDir)
 			if err := os.Mkdir(state.workspaceDir, 0o700); err != nil {
 				return err
 			}
 		} else if !stat.IsDir() {
-			err := fmt.Errorf("backend option 'WOODPECKER_BACKEND_LOCAL_EXEC_DIR' was set to an existing file")
+			err := fmt.Errorf("this should never happen! internalExecDir was set to an non directory path!")
 			log.Error().Err(err).Msg("")
 			return err
 		}
