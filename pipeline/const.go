@@ -29,18 +29,9 @@ const (
 	LabelRepoFullName   string = InternalLabelPrefix + "/repo-full-name"
 	LabelBranch         string = InternalLabelPrefix + "/branch"
 	LabelOrgID          string = InternalLabelPrefix + "/org-id"
-	LabelPlatform       string = "platform"
-	LabelHostname       string = "hostname"
-	LabelBackend        string = "backend"
+	LabelFilterOrg      string = "org-id"
+	LabelFilterRepo     string = "repo"
+	LabelFilterPlatform string = "platform"
+	LabelFilterHostname string = "hostname"
+	LabelFilterBackend  string = "backend"
 )
-
-// ManagedLabels is a list of all labels added automatically to tasks by Woodpecker.
-var ManagedLabels = map[string]bool{
-	LabelForgeRemoteID: true,
-	LabelRepoForgeID:   true,
-	LabelRepoID:        true,
-	LabelRepoName:      true,
-	LabelRepoFullName:  true,
-	LabelBranch:        true,
-	LabelOrgID:         true,
-}

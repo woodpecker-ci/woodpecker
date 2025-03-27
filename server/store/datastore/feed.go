@@ -41,7 +41,7 @@ pipelines.release_tag_title as pipeline_release_tag_title,
 pipelines.author as pipeline_author,
 pipelines.avatar as pipeline_avatar`
 
-	return fmt.Sprintf(feedTemplate, s.quoteIdentifier("commit"))
+	return fmt.Sprintf(feedTemplate, s.engine.Dialect().Quoter().Quote("commit"))
 }
 
 func (s storage) GetPipelineQueue() ([]*model.Feed, error) {
