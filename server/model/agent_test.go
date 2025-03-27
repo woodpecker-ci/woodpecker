@@ -38,7 +38,7 @@ func TestAgent_GetServerLabels(t *testing.T) {
 		filters, err := agent.GetServerLabels()
 		assert.NoError(t, err)
 		assert.Equal(t, map[string]string{
-			pipeline.LabelOrgID: "0",
+			pipeline.LabelFilterOrg: "0",
 		}, filters)
 	})
 
@@ -49,7 +49,7 @@ func TestAgent_GetServerLabels(t *testing.T) {
 		filters, err := agent.GetServerLabels()
 		assert.NoError(t, err)
 		assert.Equal(t, map[string]string{
-			pipeline.LabelOrgID: "*",
+			pipeline.LabelFilterOrg: "*",
 		}, filters)
 	})
 
@@ -60,7 +60,7 @@ func TestAgent_GetServerLabels(t *testing.T) {
 		filters, err := agent.GetServerLabels()
 		assert.NoError(t, err)
 		assert.Equal(t, map[string]string{
-			pipeline.LabelOrgID: "123",
+			pipeline.LabelFilterOrg: "123",
 		}, filters)
 	})
 }
