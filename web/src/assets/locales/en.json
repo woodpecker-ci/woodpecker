@@ -208,7 +208,6 @@
       "pipelines_for": "Pipelines for branch \"{branch}\"",
       "pipelines_for_pr": "Pipelines for pull request #{index}",
       "exit_code": "Exit Code {exitCode}",
-      "loading": "Loading…",
       "no_logs": "No logs",
       "pipeline": "Pipeline #{pipelineId}",
       "log_title": "Step Logs",
@@ -525,5 +524,7 @@
       "desc": "Pipelines created by the listed users never require approval."
     }
   },
-  "no_search_results": "No results found"
+  "no_search_results": "No results found",
+  "loading": "Loading …",
+  "load_more": "Load more"
 }
