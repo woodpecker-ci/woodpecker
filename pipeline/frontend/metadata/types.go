@@ -55,6 +55,7 @@ type (
 		Commit     Commit `json:"commit,omitempty"`
 		Parent     int64  `json:"parent,omitempty"`
 		Cron       string `json:"cron,omitempty"`
+		Release    string `json:"release,omitempty"`
 	}
 
 	// Commit defines runtime metadata for a commit.
@@ -72,9 +73,8 @@ type (
 
 	// Author defines runtime metadata for a commit author.
 	Author struct {
-		Name   string `json:"name,omitempty"`
-		Email  string `json:"email,omitempty"`
-		Avatar string `json:"avatar,omitempty"`
+		Name  string `json:"name,omitempty"`
+		Email string `json:"email,omitempty"`
 	}
 
 	// Workflow defines runtime metadata for a workflow.
