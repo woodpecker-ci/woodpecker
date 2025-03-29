@@ -33,6 +33,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update web npm deps non-major [[#5027](https://github.com/woodpecker-ci/woodpecker/pull/5027)]
 - chore(deps): update docker.io/woodpeckerci/plugin-ready-release-go docker tag to v3.1.4 [[#5025](https://github.com/woodpecker-ci/woodpecker/pull/5025)]
 - fix(deps): update module golang.org/x/net to v0.38.0 [[#5024](https://github.com/woodpecker-ci/woodpecker/pull/5024)]
 - chore(deps): update woodpeckerci/plugin-git docker tag to v2.6.3 [[#5021](https://github.com/woodpecker-ci/woodpecker/pull/5021)]
