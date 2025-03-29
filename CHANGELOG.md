@@ -8,6 +8,7 @@
 
 ### 📚 Documentation
 
+- fix(deps): update dependency yaml to v2.7.1 [[#5029](https://github.com/woodpecker-ci/woodpecker/pull/5029)]
 - fix(deps): update docs npm deps non-major [[#5026](https://github.com/woodpecker-ci/woodpecker/pull/5026)]
 - Revert manual changes to changelog [[#5007](https://github.com/woodpecker-ci/woodpecker/pull/5007)]
 - Add missing docs for 3.x minor versions [[#4992](https://github.com/woodpecker-ci/woodpecker/pull/4992)]
