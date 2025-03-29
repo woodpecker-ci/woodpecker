@@ -117,21 +117,6 @@
           "netrc_only_trusted": "Custom trusted clone plugins",
           "desc": "Plugins that get access to netrc credentials that can be used to clone repositories from the forge or push them into the forge."
         },
-        "trusted": {
-          "trusted": "Trusted",
-          "network": {
-            "network": "Network",
-            "desc": "Pipeline containers get access to network privileges like changing DNS."
-          },
-          "volumes": {
-            "volumes": "Volumes",
-            "desc": "Pipeline containers are allowed to mount volumes."
-          },
-          "security": {
-            "security": "Security",
-            "desc": "Pipeline containers get access to security privileges."
-          }
-        },
         "timeout": {
           "timeout": "Timeout",
           "minutes": "minutes"
