@@ -9,6 +9,8 @@ variables:
         - 'go.*'
         # schema changes
         - 'pipeline/schema/**'
+        # tools updates
+        - Makefile
       event: pull_request
 
 when:
