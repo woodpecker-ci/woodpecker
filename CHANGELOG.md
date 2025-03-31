@@ -1,10 +1,14 @@
 # Changelog
 
-## [3.5.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.5.0) - 2025-03-30
+## [4.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v4.0.0) - 2025-03-31
 
 ### ❤️ Thanks to all contributors! ❤️
 
 @6543, @anbraten, @jenrik, @xoxys
+
+### 💥 Breaking changes
+
+- Use existing WorkingDir for clone steps [[#5023](https://github.com/woodpecker-ci/woodpecker/pull/5023)]
 
 ### 📚 Documentation
 
@@ -59,6 +63,7 @@
 
 ### Misc
 
+- Bump golangci-lint to v2 [[#5034](https://github.com/woodpecker-ci/woodpecker/pull/5034)]
 - Update flake development environment [[#5022](https://github.com/woodpecker-ci/woodpecker/pull/5022)]
 
 ## [3.4.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.4.0) - 2025-03-17
