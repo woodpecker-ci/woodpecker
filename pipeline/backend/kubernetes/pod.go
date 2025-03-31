@@ -511,6 +511,7 @@ func containerSecurityContext(sc *SecurityContext, stepPrivileged bool) *v1.Secu
 		return nil
 	}
 
+	//nolint:staticcheck
 	privileged := false
 
 	// if security context privileged is set explicitly
