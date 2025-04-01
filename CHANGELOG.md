@@ -4,11 +4,21 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @anbraten, @jenrik, @qwerty287, @xoxys
+@6543, @anbraten, @jenrik, @nekowinston, @qwerty287, @xoxys
 
 ### 💥 Breaking changes
 
 - Use existing WorkingDir for clone steps [[#5023](https://github.com/woodpecker-ci/woodpecker/pull/5023)]
+
+### 📈 Enhancement
+
+- add nushell support to local backend [[#5043](https://github.com/woodpecker-ci/woodpecker/pull/5043)]
+- Style navbar login button as navbar-link [[#5033](https://github.com/woodpecker-ci/woodpecker/pull/5033)]
+- Use xorm quoter for feed query [[#5018](https://github.com/woodpecker-ci/woodpecker/pull/5018)]
+- Use badge value instead of label for single values [[#5010](https://github.com/woodpecker-ci/woodpecker/pull/5010)]
+- Add icons to all tabs [[#4421](https://github.com/woodpecker-ci/woodpecker/pull/4421)]
+- Tag pipeline with source information [[#4796](https://github.com/woodpecker-ci/woodpecker/pull/4796)]
+- Add titles and descriptions to repos page [[#4981](https://github.com/woodpecker-ci/woodpecker/pull/4981)]
 
 ### 📚 Documentation
 
@@ -24,15 +34,6 @@
 - chore(deps): update docs npm deps non-major [[#4987](https://github.com/woodpecker-ci/woodpecker/pull/4987)]
 - Rework secrets docs and document multiline secrets [[#4974](https://github.com/woodpecker-ci/woodpecker/pull/4974)]
 - Add documentation for WOODPECKER_EXPERT env vars [[#4972](https://github.com/woodpecker-ci/woodpecker/pull/4972)]
-
-### 📈 Enhancement
-
-- Style navbar login button as navbar-link [[#5033](https://github.com/woodpecker-ci/woodpecker/pull/5033)]
-- Use xorm quoter for feed query [[#5018](https://github.com/woodpecker-ci/woodpecker/pull/5018)]
-- Use badge value instead of label for single values [[#5010](https://github.com/woodpecker-ci/woodpecker/pull/5010)]
-- Add icons to all tabs [[#4421](https://github.com/woodpecker-ci/woodpecker/pull/4421)]
-- Tag pipeline with source information [[#4796](https://github.com/woodpecker-ci/woodpecker/pull/4796)]
-- Add titles and descriptions to repos page [[#4981](https://github.com/woodpecker-ci/woodpecker/pull/4981)]
 
 ### 🐛 Bug Fixes
 
