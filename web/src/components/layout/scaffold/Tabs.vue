@@ -35,7 +35,7 @@
           @click="isDropdownOpen = false"
         >
           <span
-            class="hover:bg-wp-background-200 dark:hover:bg-wp-background-100 flex w-full min-w-20 flex-row items-center justify-center gap-2 rounded-md px-2 py-1"
+            class="hover:bg-wp-background-200 dark:hover:bg-wp-background-100 flex w-full min-w-20 flex-row gap-2 rounded-md px-2 py-1"
           >
             <Icon v-if="tab.icon" :name="tab.icon" :class="tab.iconClass" class="shrink-0" />
             <span>{{ tab.title }}</span>

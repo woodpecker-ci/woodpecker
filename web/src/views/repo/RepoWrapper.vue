@@ -38,10 +38,11 @@
       />
     </template>
 
-    <Tab :to="{ name: 'repo' }" :title="$t('repo.activity')" />
-    <Tab :to="{ name: 'repo-branches' }" match-children :title="$t('repo.branches')" />
+    <Tab icon="list-group" :to="{ name: 'repo' }" :title="$t('repo.activity')" />
+    <Tab icon="branch" :to="{ name: 'repo-branches' }" match-children :title="$t('repo.branches')" />
     <Tab
       v-if="repo.pr_enabled && repo.allow_pr"
+      icon="pull-request"
       :to="{ name: 'repo-pull-requests' }"
       match-children
       :title="$t('repo.pull_requests')"

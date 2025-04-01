@@ -1,6 +1,6 @@
 {
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
+    nixpkgs.url = "github:nixos/nixpkgs?ref=master";
     flake-utils.url = "github:numtide/flake-utils";
   };
 
@@ -21,13 +21,13 @@
             tree
 
             # frontend
-            nodejs_20
+            nodejs_23
             pnpm
             nodePackages.typescript
             nodePackages.typescript-language-server
 
             # backend
-            go_1_22
+            go_1_23
             glibc.static
             gofumpt
             golangci-lint

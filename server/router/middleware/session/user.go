@@ -110,8 +110,8 @@ func MustRepoAdmin() gin.HandlerFunc {
 func MustUser() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		user := User(c)
-		switch {
-		case user == nil:
+		switch user {
+		case nil:
 			c.String(http.StatusUnauthorized, "User not authorized")
 			c.Abort()
 		default:

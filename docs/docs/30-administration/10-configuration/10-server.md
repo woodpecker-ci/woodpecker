@@ -547,64 +547,92 @@ $().ready(function () {
 
 ## Environment variables
 
-### `WOODPECKER_LOG_LEVEL`
+### LOG_LEVEL
 
-> Default: empty
+- Name: `WOODPECKER_LOG_LEVEL`
+- Default: `info`
 
 Configures the logging level. Possible values are `trace`, `debug`, `info`, `warn`, `error`, `fatal`, `panic`, `disabled` and empty.
 
-### `WOODPECKER_LOG_FILE`
+---
 
-> Default: `stderr`
+### LOG_FILE
+
+- Name: `WOODPECKER_LOG_FILE`
+- Default: `stderr`
 
 Output destination for logs.
 'stdout' and 'stderr' can be used as special keywords.
 
-### `WOODPECKER_DATABASE_LOG`
+---
 
-> Default: `false`
+### DATABASE_LOG
+
+- Name: `WOODPECKER_DATABASE_LOG`
+- Default: `false`
 
 Enable logging in database engine (currently xorm).
 
-### `WOODPECKER_DATABASE_LOG_SQL`
+---
 
-> Default: `false`
+### DATABASE_LOG_SQL
+
+- Name: `WOODPECKER_DATABASE_LOG_SQL`
+- Default: `false`
 
 Enable logging of sql commands.
 
-### `WOODPECKER_DATABASE_MAX_CONNECTIONS`
+---
 
-> Default: `100`
+### DATABASE_MAX_CONNECTIONS
+
+- Name: `WOODPECKER_DATABASE_MAX_CONNECTIONS`
+- Default: `100`
 
 Max database connections xorm is allowed create.
 
-### `WOODPECKER_DATABASE_IDLE_CONNECTIONS`
+---
 
-> Default: `2`
+### DATABASE_IDLE_CONNECTIONS
+
+- Name: `WOODPECKER_DATABASE_IDLE_CONNECTIONS`
+- Default: `2`
 
 Amount of database connections xorm will hold open.
 
-### `WOODPECKER_DATABASE_CONNECTION_TIMEOUT`
+---
 
-> Default: `3 Seconds`
+### DATABASE_CONNECTION_TIMEOUT
+
+- Name: `WOODPECKER_DATABASE_CONNECTION_TIMEOUT`
+- Default: `3 Seconds`
 
 Time an active database connection is allowed to stay open.
 
-### `WOODPECKER_DEBUG_PRETTY`
+---
 
-> Default: `false`
+### DEBUG_PRETTY
+
+- Name: `WOODPECKER_DEBUG_PRETTY`
+- Default: `false`
 
 Enable pretty-printed debug output.
 
-### `WOODPECKER_DEBUG_NOCOLOR`
+---
 
-> Default: `true`
+### DEBUG_NOCOLOR
+
+- Name: `WOODPECKER_DEBUG_NOCOLOR`
+- Default: `true`
 
 Disable colored debug output.
 
-### `WOODPECKER_HOST`
+---
 
-> Default: empty
+### HOST
+
+- Name: `WOODPECKER_HOST`
+- Default: none
 
 Server fully qualified URL of the user-facing hostname, port (if not default for HTTP/HTTPS) and path prefix.
 
@@ -614,37 +642,52 @@ Examples:
 - `WOODPECKER_HOST=http://example.org/woodpecker`
 - `WOODPECKER_HOST=http://example.org:1234/woodpecker`
 
-### `WOODPECKER_SERVER_ADDR`
+---
 
-> Default: `:8000`
+### SERVER_ADDR
+
+- Name: `WOODPECKER_SERVER_ADDR`
+- Default: `:8000`
 
 Configures the HTTP listener port.
 
-### `WOODPECKER_SERVER_ADDR_TLS`
+---
 
-> Default: `:443`
+### SERVER_ADDR_TLS
+
+- Name: `WOODPECKER_SERVER_ADDR_TLS`
+- Default: `:443`
 
 Configures the HTTPS listener port when SSL is enabled.
 
-### `WOODPECKER_SERVER_CERT`
+---
 
-> Default: empty
+### SERVER_CERT
+
+- Name: `WOODPECKER_SERVER_CERT`
+- Default: none
 
 Path to an SSL certificate used by the server to accept HTTPS requests.
 
 Example: `WOODPECKER_SERVER_CERT=/path/to/cert.pem`
 
-### `WOODPECKER_SERVER_KEY`
+---
 
-> Default: empty
+### SERVER_KEY
+
+- Name: `WOODPECKER_SERVER_KEY`
+- Default: none
 
 Path to an SSL certificate key used by the server to accept HTTPS requests.
 
 Example: `WOODPECKER_SERVER_KEY=/path/to/key.pem`
 
-### `WOODPECKER_CUSTOM_CSS_FILE`
+---
 
-> Default: empty
+### CUSTOM_CSS_FILE
+
+- Name: `WOODPECKER_CUSTOM_CSS_FILE`
+- Default: none
 
 File path for the server to serve a custom .CSS file, used for customizing the UI.
 Can be used for showing banner messages, logos, or environment-specific hints (a.k.a. white-labeling).
@@ -652,9 +695,12 @@ The file must be UTF-8 encoded, to ensure all special characters are preserved.
 
 Example: `WOODPECKER_CUSTOM_CSS_FILE=/usr/local/www/woodpecker.css`
 
-### `WOODPECKER_CUSTOM_JS_FILE`
+---
 
-> Default: empty
+### CUSTOM_JS_FILE
+
+- Name: `WOODPECKER_CUSTOM_JS_FILE`
+- Default: none
 
 File path for the server to serve a custom .JS file, used for customizing the UI.
 Can be used for showing banner messages, logos, or environment-specific hints (a.k.a. white-labeling).
@@ -662,178 +708,246 @@ The file must be UTF-8 encoded, to ensure all special characters are preserved.
 
 Example: `WOODPECKER_CUSTOM_JS_FILE=/usr/local/www/woodpecker.js`
 
-### `WOODPECKER_GRPC_ADDR`
+---
 
-> Default: `:9000`
+### GRPC_ADDR
+
+- Name: `WOODPECKER_GRPC_ADDR`
+- Default: `:9000`
 
 Configures the gRPC listener port.
 
-### `WOODPECKER_GRPC_SECRET`
+---
 
-> Default: `secret`
+### GRPC_SECRET
+
+- Name: `WOODPECKER_GRPC_SECRET`
+- Default: `secret`
 
 Configures the gRPC JWT secret.
 
-### `WOODPECKER_GRPC_SECRET_FILE`
+---
 
-> Default: empty
+### GRPC_SECRET_FILE
+
+- Name: `WOODPECKER_GRPC_SECRET_FILE`
+- Default: none
 
 Read the value for `WOODPECKER_GRPC_SECRET` from the specified filepath.
 
-### `WOODPECKER_METRICS_SERVER_ADDR`
+---
 
-> Default: empty
+### METRICS_SERVER_ADDR
+
+- Name: `WOODPECKER_METRICS_SERVER_ADDR`
+- Default: none
 
 Configures an unprotected metrics endpoint. An empty value disables the metrics endpoint completely.
 
 Example: `:9001`
 
-### `WOODPECKER_ADMIN`
+---
 
-> Default: empty
+### ADMIN
+
+- Name: `WOODPECKER_ADMIN`
+- Default: none
 
 Comma-separated list of admin accounts.
 
 Example: `WOODPECKER_ADMIN=user1,user2`
 
-### `WOODPECKER_ORGS`
+---
 
-> Default: empty
+### ORGS
+
+- Name: `WOODPECKER_ORGS`
+- Default: none
 
 Comma-separated list of approved organizations.
 
 Example: `org1,org2`
 
-### `WOODPECKER_REPO_OWNERS`
+---
 
-> Default: empty
+### REPO_OWNERS
+
+- Name: `WOODPECKER_REPO_OWNERS`
+- Default: none
 
 Repositories by those owners will be allowed to be used in woodpecker.
 
 Example: `user1,user2`
 
-### `WOODPECKER_OPEN`
+---
 
-> Default: `false`
+### OPEN
+
+- Name: `WOODPECKER_OPEN`
+- Default: `false`
 
 Enable to allow user registration.
 
-### `WOODPECKER_AUTHENTICATE_PUBLIC_REPOS`
+---
 
-> Default: `false`
+### AUTHENTICATE_PUBLIC_REPOS
+
+- Name: `WOODPECKER_AUTHENTICATE_PUBLIC_REPOS`
+- Default: `false`
 
 Always use authentication to clone repositories even if they are public. Needed if the forge requires to always authenticate as used by many companies.
 
-### `WOODPECKER_DEFAULT_ALLOW_PULL_REQUESTS`
+---
 
-> Default: `true`
+### DEFAULT_ALLOW_PULL_REQUESTS
+
+- Name: `WOODPECKER_DEFAULT_ALLOW_PULL_REQUESTS`
+- Default: `true`
 
 The default setting for allowing pull requests on a repo.
 
-### `WOODPECKER_DEFAULT_CANCEL_PREVIOUS_PIPELINE_EVENTS`
+---
 
-> Default: `pull_request, push`
+### DEFAULT_CANCEL_PREVIOUS_PIPELINE_EVENTS
+
+- Name: `WOODPECKER_DEFAULT_CANCEL_PREVIOUS_PIPELINE_EVENTS`
+- Default: `pull_request, push`
 
 List of event names that will be canceled when a new pipeline for the same context (tag, branch) is created.
 
-### `WOODPECKER_DEFAULT_CLONE_PLUGIN`
+---
 
-> Default is defined in [shared/constant/constant.go](https://github.com/woodpecker-ci/woodpecker/blob/main/shared/constant/constant.go)
+### DEFAULT_CLONE_PLUGIN
+
+- Name: `WOODPECKER_DEFAULT_CLONE_PLUGIN`
+- Default: `docker.io/woodpeckerci/plugin-git`
 
 The default docker image to be used when cloning the repo.
 
 It is also added to the trusted clone plugin list.
 
-### `WOODPECKER_DEFAULT_WORKFLOW_LABELS`
+### DEFAULT_WORKFLOW_LABELS
 
-> By default run workflows on any agent if no label conditions are set in workflow definition.
+- Name: `WOODPECKER_DEFAULT_WORKFLOW_LABELS`
+- Default: none
 
 You can specify default label/platform conditions that will be used for agent selection for workflows that does not have labels conditions set.
 
 Example: `platform=linux/amd64,backend=docker`
 
-### `WOODPECKER_DEFAULT_PIPELINE_TIMEOUT`
+### DEFAULT_PIPELINE_TIMEOUT
 
-> 60 (minutes)
+- Name: `WOODPECKER_DEFAULT_PIPELINE_TIMEOUT`
+- Default: 60
 
 The default time for a repo in minutes before a pipeline gets killed
 
-### `WOODPECKER_MAX_PIPELINE_TIMEOUT`
+### MAX_PIPELINE_TIMEOUT
 
-> 120 (minutes)
+- Name: `WOODPECKER_MAX_PIPELINE_TIMEOUT`
+- Default: 120
 
 The maximum time in minutes you can set in the repo settings before a pipeline gets killed
 
-### `WOODPECKER_SESSION_EXPIRES`
+---
 
-> Default: `72h`
+### SESSION_EXPIRES
+
+- Name: `WOODPECKER_SESSION_EXPIRES`
+- Default: `72h`
 
 Configures the session expiration time.
 Context: when someone does log into Woodpecker, a temporary session token is created.
 As long as the session is valid (until it expires or log-out),
 a user can log into Woodpecker, without re-authentication.
 
-### `WOODPECKER_PLUGINS_PRIVILEGED`
+### PLUGINS_PRIVILEGED
+
+- Name: `WOODPECKER_PLUGINS_PRIVILEGED`
+- Default: none
 
 Docker images to run in privileged mode. Only change if you are sure what you do!
 
 You should specify the tag of your images too, as this enforces exact matches.
 
-### WOODPECKER_PLUGINS_TRUSTED_CLONE
+### PLUGINS_TRUSTED_CLONE
 
-> Defaults are defined in [shared/constant/constant.go](https://github.com/woodpecker-ci/woodpecker/blob/main/shared/constant/constant.go)
+- Name: `WOODPECKER_PLUGINS_TRUSTED_CLONE`
+- Default: `docker.io/woodpeckerci/plugin-git,docker.io/woodpeckerci/plugin-git,quay.io/woodpeckerci/plugin-git`
 
 Plugins which are trusted to handle the Git credential info in clone steps.
 If a clone step use an image not in this list, Git credentials will not be injected and users have to use other methods (e.g. secrets) to clone non-public repos.
 
 You should specify the tag of your images too, as this enforces exact matches.
 
-<!--
-### `WOODPECKER_VOLUME`
-> Default: empty
+<!-- ---
+
+### `VOLUME`
+
+- Name: `WOODPECKER_VOLUME`
+- Default: none
 
 Comma-separated list of Docker volumes that are mounted into every pipeline step.
 
-Example: `WOODPECKER_VOLUME=/path/on/host:/path/in/container:rw`|
--->
+Example: `WOODPECKER_VOLUME=/path/on/host:/path/in/container:rw`| -->
 
-### `WOODPECKER_DOCKER_CONFIG`
+---
 
-> Default: empty
+### DOCKER_CONFIG
+
+- Name: `WOODPECKER_DOCKER_CONFIG`
+- Default: none
 
 Configures a specific private registry config for all pipelines.
 
 Example: `WOODPECKER_DOCKER_CONFIG=/home/user/.docker/config.json`
 
-<!--
-### `WOODPECKER_ENVIRONMENT`
-> Default: empty
+---
 
-TODO
+### ENVIRONMENT
 
-### `WOODPECKER_NETWORK`
-> Default: empty
+- Name: `WOODPECKER_ENVIRONMENT`
+- Default: none
+
+If you want specific environment variables to be available in all of your pipelines use the `WOODPECKER_ENVIRONMENT` setting on the Woodpecker server. Note that these can't overwrite any existing, built-in variables.
+
+Example: `WOODPECKER_ENVIRONMENT=first_var:value1,second_var:value2`
+
+<!-- ---
+
+### NETWORK
+
+- Name: `WOODPECKER_NETWORK`
+- Default: none
 
 Comma-separated list of Docker networks that are attached to every pipeline step.
 
-Example: `WOODPECKER_NETWORK=network1,network2`
--->
+Example: `WOODPECKER_NETWORK=network1,network2` -->
 
-### `WOODPECKER_AGENT_SECRET`
+---
 
-> Default: empty
+### AGENT_SECRET
+
+- Name: `WOODPECKER_AGENT_SECRET`
+- Default: none
 
 A shared secret used by server and agents to authenticate communication. A secret can be generated by `openssl rand -hex 32`.
 
-### `WOODPECKER_AGENT_SECRET_FILE`
+---
 
-> Default: empty
+### AGENT_SECRET_FILE
+
+- Name: `WOODPECKER_AGENT_SECRET_FILE`
+- Default: none
 
 Read the value for `WOODPECKER_AGENT_SECRET` from the specified filepath
 
-### `WOODPECKER_DISABLE_USER_AGENT_REGISTRATION`
+---
 
-> Default: false
+### DISABLE_USER_AGENT_REGISTRATION
+
+- Name: `WOODPECKER_DISABLE_USER_AGENT_REGISTRATION`
+- Default: false
 
 By default, users can create new agents for their repos they have admin access to.
 If an instance admin doesn't want this feature enabled, they can disable the API and hide the Web UI elements.
@@ -843,23 +957,32 @@ You should set this option if you have, for example,
 global secrets and don't trust your users to create a rogue agent and pipeline for secret extraction.
 :::
 
-### `WOODPECKER_KEEPALIVE_MIN_TIME`
+---
 
-> Default: empty
+### KEEPALIVE_MIN_TIME
+
+- Name: `WOODPECKER_KEEPALIVE_MIN_TIME`
+- Default: none
 
 Server-side enforcement policy on the minimum amount of time a client should wait before sending a keepalive ping.
 
 Example: `WOODPECKER_KEEPALIVE_MIN_TIME=10s`
 
-### `WOODPECKER_DATABASE_DRIVER`
+---
 
-> Default: `sqlite3`
+### DATABASE_DRIVER
+
+- Name: `WOODPECKER_DATABASE_DRIVER`
+- Default: `sqlite3`
 
 The database driver name. Possible values are `sqlite3`, `mysql` or `postgres`.
 
-### `WOODPECKER_DATABASE_DATASOURCE`
+---
 
-> Default: `woodpecker.sqlite` if not running inside a container, `/var/lib/woodpecker/woodpecker.sqlite` if running inside a container
+### DATABASE_DATASOURCE
+
+- Name: `WOODPECKER_DATABASE_DATASOURCE`
+- Default: `woodpecker.sqlite` if not running inside a container, `/var/lib/woodpecker/woodpecker.sqlite` if running inside a container
 
 The database connection string. The default value is the path of the embedded SQLite database file.
 
@@ -875,34 +998,49 @@ WOODPECKER_DATABASE_DATASOURCE=root:password@tcp(1.2.3.4:3306)/woodpecker?parseT
 WOODPECKER_DATABASE_DATASOURCE=postgres://root:password@1.2.3.4:5432/woodpecker?sslmode=disable
 ```
 
-### `WOODPECKER_DATABASE_DATASOURCE_FILE`
+---
 
-> Default: empty
+### DATABASE_DATASOURCE_FILE
+
+- Name: `WOODPECKER_DATABASE_DATASOURCE_FILE`
+- Default: none
 
 Read the value for `WOODPECKER_DATABASE_DATASOURCE` from the specified filepath
 
-### `WOODPECKER_PROMETHEUS_AUTH_TOKEN`
+---
 
-> Default: empty
+### PROMETHEUS_AUTH_TOKEN
+
+- Name: `WOODPECKER_PROMETHEUS_AUTH_TOKEN`
+- Default: none
 
 Token to secure the Prometheus metrics endpoint.
 Must be set to enable the endpoint.
 
-### `WOODPECKER_PROMETHEUS_AUTH_TOKEN_FILE`
+---
 
-> Default: empty
+### PROMETHEUS_AUTH_TOKEN_FILE
+
+- Name: `WOODPECKER_PROMETHEUS_AUTH_TOKEN_FILE`
+- Default: none
 
 Read the value for `WOODPECKER_PROMETHEUS_AUTH_TOKEN` from the specified filepath
 
-### `WOODPECKER_STATUS_CONTEXT`
+---
 
-> Default: `ci/woodpecker`
+### STATUS_CONTEXT
+
+- Name: `WOODPECKER_STATUS_CONTEXT`
+- Default: `ci/woodpecker`
 
 Context prefix Woodpecker will use to publish status messages to SCM. You probably will only need to change it if you run multiple Woodpecker instances for a single repository.
 
-### `WOODPECKER_STATUS_CONTEXT_FORMAT`
+---
 
-> Default: `{{ .context }}/{{ .event }}/{{ .workflow }}{{if not (eq .axis_id 0)}}/{{.axis_id}}{{end}}`
+### STATUS_CONTEXT_FORMAT
+
+- Name: `WOODPECKER_STATUS_CONTEXT_FORMAT`
+- Default: `{{ .context }}/{{ .event }}/{{ .workflow }}{{if not (eq .axis_id 0)}}/{{.axis_id}}{{end}}`
 
 Template for the status messages published to forges, uses [Go templates](https://pkg.go.dev/text/template) as template language.
 Supported variables:
@@ -915,66 +1053,113 @@ Supported variables:
 
 ---
 
-### `WOODPECKER_CONFIG_SERVICE_ENDPOINT`
+### CONFIG_SERVICE_ENDPOINT
 
-> Default: empty
+- Name: `WOODPECKER_CONFIG_SERVICE_ENDPOINT`
+- Default: none
 
 Specify a configuration service endpoint, see [Configuration Extension](#external-configuration-api)
 
-### `WOODPECKER_FORGE_TIMEOUT`
+---
 
-> Default: 5s
+### FORGE_TIMEOUT
+
+- Name: `WOODPECKER_FORGE_TIMEOUT`
+- Default: 5s
 
 Specify timeout when fetching the Woodpecker configuration from forge. See <https://pkg.go.dev/time#ParseDuration> for syntax reference.
 
-### `WOODPECKER_FORGE_RETRY`
+---
 
-> Default: 3
+### FORGE_RETRY
+
+- Name: `WOODPECKER_FORGE_RETRY`
+- Default: 3
 
 Specify how many retries of fetching the Woodpecker configuration from a forge are done before we fail.
 
-### `WOODPECKER_ENABLE_SWAGGER`
+---
 
-> Default: true
+### ENABLE_SWAGGER
+
+- Name: `WOODPECKER_ENABLE_SWAGGER`
+- Default: true
 
 Enable the Swagger UI for API documentation.
 
-### `WOODPECKER_DISABLE_VERSION_CHECK`
+---
 
-> Default: false
+### DISABLE_VERSION_CHECK
+
+- Name: `WOODPECKER_DISABLE_VERSION_CHECK`
+- Default: false
 
 Disable version check in admin web UI.
 
-### `WOODPECKER_LOG_STORE`
+---
 
-> Default: `database`
+### LOG_STORE
+
+- Name: `WOODPECKER_LOG_STORE`
+- Default: `database`
 
 Where to store logs. Possible values: `database` or `file`.
 
-### `WOODPECKER_LOG_STORE_FILE_PATH`
+---
 
-> Default empty
+### LOG_STORE_FILE_PATH
 
-Directory to store logs in if [`WOODPECKER_LOG_STORE`](#woodpecker_log_store) is `file`.
+- Name: `WOODPECKER_LOG_STORE_FILE_PATH`
+- Default: none
+
+Directory to store logs in if [`WOODPECKER_LOG_STORE`](#log_store) is `file`.
 
 ---
 
-### `WOODPECKER_GITHUB_...`
+### EXPERT_WEBHOOK_HOST
+
+- Name: `WOODPECKER_EXPERT_WEBHOOK_HOST`
+- Default: none
+
+:::warning
+This option is not required in most cases and should only be used if you know what you're doing.
+:::
+
+Fully qualified Woodpecker server URL, called by the webhooks of the forge. Format: `<scheme>://<host>[/<prefix path>]`.
+
+---
+
+### EXPERT_FORGE_OAUTH_HOST
+
+- Name: `WOODPECKER_EXPERT_FORGE_OAUTH_HOST`
+- Default: none
+
+:::warning
+This option is not required in most cases and should only be used if you know what you're doing.
+:::
+
+Fully qualified public forge URL, used if forge url is not a public URL. Format: `<scheme>://<host>[/<prefix path>]`.
+
+---
+
+### GITHUB\_\*
 
 See [GitHub configuration](./12-forges/20-github.md#configuration)
 
-### `WOODPECKER_GITEA_...`
+---
+
+### GITEA\_\*
 
 See [Gitea configuration](./12-forges/30-gitea.md#configuration)
 
-### `WOODPECKER_BITBUCKET_...`
+---
+
+### BITBUCKET\_\*
 
 See [Bitbucket configuration](./12-forges/50-bitbucket.md#configuration)
 
-### `WOODPECKER_GITLAB_...`
+---
+
+### GITLAB\_\*
 
 See [GitLab configuration](./12-forges/40-gitlab.md#configuration)
-
-### `WOODPECKER_ADDON_FORGE`
-
-See [addon forges](./12-forges/100-addon.md).

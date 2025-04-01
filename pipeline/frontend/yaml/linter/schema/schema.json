@@ -650,7 +650,7 @@
           "$ref": "#/definitions/step_backend_kubernetes_security_context"
         },
         "runtimeClassName": {
-          "description": "Read more: https://woodpecker-ci.org/docs/administration/backends/kubernetes#runtimeclassname",
+          "description": "Read more: https://woodpecker-ci.org/docs/administration/configuration/backends/kubernetes#runtimeclassname",
           "type": "string"
         },
         "secrets": {
@@ -664,7 +664,7 @@
       }
     },
     "step_backend_kubernetes_resources": {
-      "description": "Resources for the kubernetes backend. Read more: https://woodpecker-ci.org/docs/administration/backends/kubernetes#job-specific-configuration",
+      "description": "Resources for the kubernetes backend. Read more: https://woodpecker-ci.org/docs/administration/configuration/backends/kubernetes#step-specific-configuration",
       "type": "object",
       "properties": {
         "requests": {
@@ -676,7 +676,7 @@
       }
     },
     "step_backend_kubernetes_security_context": {
-      "description": "Pods / containers security context. Read more: https://woodpecker-ci.org/docs/administration/backends/kubernetes#securitycontext",
+      "description": "Pods / containers security context. Read more: https://woodpecker-ci.org/docs/administration/configuration/backends/kubernetes#security-context",
       "type": "object",
       "properties": {
         "privileged": {
@@ -703,7 +703,7 @@
       }
     },
     "step_backend_kubernetes_secprofile": {
-      "description": "Pods / containers security profile. Read more: https://woodpecker-ci.org/docs/administration/backends/kubernetes#job-specific-configuration",
+      "description": "Pods / containers security profile. Read more: https://woodpecker-ci.org/docs/administration/configuration/backends/kubernetes#step-specific-configuration",
       "type": "object",
       "properties": {
         "type": {
@@ -722,7 +722,7 @@
       }
     },
     "step_backend_kubernetes_service_account": {
-      "description": "serviceAccountName to be use by job. Read more: https://woodpecker-ci.org/docs/administration/backends/kubernetes#serviceaccountname",
+      "description": "serviceAccountName to be use by job. Read more: https://woodpecker-ci.org/docs/administration/configuration/backends/kubernetes#service-account",
       "type": "object",
       "properties": {
         "requests": {

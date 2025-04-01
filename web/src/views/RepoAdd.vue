@@ -15,7 +15,7 @@
           <span class="text-wp-text-100">{{ repo.full_name }}</span>
           <span v-if="repo.active" class="text-wp-text-alt-100 ml-auto">{{ $t('repo.enable.enabled') }}</span>
           <div v-else class="ml-auto flex items-center">
-            <Badge v-if="repo.id" class="md:display-unset mr-2 hidden" :label="$t('repo.enable.disabled')" />
+            <Badge v-if="repo.id" class="md:display-unset mr-2 hidden" :value="$t('repo.enable.disabled')" />
             <Button
               :text="$t('repo.enable.enable')"
               :is-loading="isActivatingRepo && repoToActivate?.forge_remote_id === repo.forge_remote_id"

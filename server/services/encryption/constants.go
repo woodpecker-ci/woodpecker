@@ -29,7 +29,7 @@ const (
 	keyTypeNone = "none"
 
 	keyIDAssociatedData   = "Primary key id"
-	AES_GCM_SIV_NonceSize = 12 //nolint:revive,stylecheck
+	AES_GCM_SIV_NonceSize = 12 //nolint:revive
 )
 
 var (

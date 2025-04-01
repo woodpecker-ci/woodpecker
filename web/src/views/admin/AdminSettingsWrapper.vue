@@ -3,14 +3,14 @@
     <template #title>
       {{ $t('settings') }}
     </template>
-    <Tab :to="{ name: 'admin-settings' }" :title="$t('info')" />
-    <Tab :to="{ name: 'admin-settings-secrets' }" :title="$t('secrets.secrets')" />
-    <Tab :to="{ name: 'admin-settings-registries' }" :title="$t('registries.registries')" />
-    <Tab :to="{ name: 'admin-settings-repos' }" :title="$t('admin.settings.repos.repos')" />
-    <Tab :to="{ name: 'admin-settings-users' }" :title="$t('admin.settings.users.users')" />
-    <Tab :to="{ name: 'admin-settings-orgs' }" :title="$t('admin.settings.orgs.orgs')" />
-    <Tab :to="{ name: 'admin-settings-agents' }" :title="$t('admin.settings.agents.agents')" />
-    <Tab :to="{ name: 'admin-settings-queue' }" :title="$t('admin.settings.queue.queue')" />
+    <Tab icon="info" :to="{ name: 'admin-settings' }" :title="$t('info')" />
+    <Tab icon="secret" :to="{ name: 'admin-settings-secrets' }" :title="$t('secrets.secrets')" />
+    <Tab icon="docker" :to="{ name: 'admin-settings-registries' }" :title="$t('registries.registries')" />
+    <Tab icon="repo" :to="{ name: 'admin-settings-repos' }" :title="$t('admin.settings.repos.repos')" />
+    <Tab icon="user" :to="{ name: 'admin-settings-users' }" :title="$t('admin.settings.users.users')" />
+    <Tab icon="org" :to="{ name: 'admin-settings-orgs' }" :title="$t('admin.settings.orgs.orgs')" />
+    <Tab icon="agent" :to="{ name: 'admin-settings-agents' }" :title="$t('admin.settings.agents.agents')" />
+    <Tab icon="tray-full" :to="{ name: 'admin-settings-queue' }" :title="$t('admin.settings.queue.queue')" />
 
     <router-view />
   </Scaffold>

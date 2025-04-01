@@ -7,6 +7,9 @@
       v-if="title"
       type="button"
       class="bg-wp-background-400 text-wp-text-100 flex w-full gap-2 px-4 py-2 font-bold"
+      :class="{
+        'cursor-pointer': collapsable,
+      }"
       @click="_collapsed = !_collapsed"
     >
       <Icon

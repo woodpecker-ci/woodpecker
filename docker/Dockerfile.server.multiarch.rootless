@@ -2,8 +2,7 @@ FROM --platform=$BUILDPLATFORM docker.io/golang:1.24 AS build
 
 RUN groupadd -g 1000 woodpecker && \
   useradd -u 1000 -g 1000 woodpecker && \
-  mkdir -p /var/lib/woodpecker && \
-  chown -R woodpecker:woodpecker /var/lib/woodpecker
+  mkdir -p /var/lib/woodpecker
 
 FROM scratch
 ARG TARGETOS TARGETARCH
@@ -20,7 +19,7 @@ COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certifica
 COPY dist/server/${TARGETOS}_${TARGETARCH}/woodpecker-server /bin/
 COPY --from=build /etc/passwd /etc/passwd
 COPY --from=build /etc/group /etc/group
-COPY --from=build /var/lib/woodpecker /var/lib/woodpecker
+COPY --from=build --chown=woodpecker:woodpecker /var/lib/woodpecker /var/lib/woodpecker
 
 USER woodpecker
 

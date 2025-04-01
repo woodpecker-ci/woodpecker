@@ -37,7 +37,7 @@ const (
 	DefaultWorkspaceBase = pluginWorkspaceBase
 )
 
-func (c *Compiler) createProcess(container *yaml_types.Container, stepType backend_types.StepType) (*backend_types.Step, error) {
+func (c *Compiler) createProcess(container *yaml_types.Container, workflow *yaml_types.Workflow, stepType backend_types.StepType) (*backend_types.Step, error) {
 	var (
 		uuid = ulid.Make()
 
@@ -96,7 +96,7 @@ func (c *Compiler) createProcess(container *yaml_types.Container, stepType backe
 		detached = true
 	}
 
-	workingDir = c.stepWorkingDir(container)
+	workingDir = c.stepWorkingDir(container, stepType)
 
 	getSecretValue := func(name string) (string, error) {
 		name = strings.ToLower(name)
@@ -181,16 +181,20 @@ func (c *Compiler) createProcess(container *yaml_types.Container, stepType backe
 		NetworkMode:    networkMode,
 		Ports:          ports,
 		BackendOptions: container.BackendOptions,
+		WorkflowLabels: workflow.Labels,
 	}, nil
 }
 
-func (c *Compiler) stepWorkingDir(container *yaml_types.Container) string {
+func (c *Compiler) stepWorkingDir(container *yaml_types.Container, stepType backend_types.StepType) string {
 	if path.IsAbs(container.Directory) {
 		return container.Directory
 	}
 	base := c.workspaceBase
 	if container.IsPlugin() {
 		base = pluginWorkspaceBase
+	}
+	if stepType == backend_types.StepTypeClone {
+		return base
 	}
 	return path.Join(base, c.workspacePath, container.Directory)
 }

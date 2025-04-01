@@ -9,7 +9,7 @@
       </router-link>
       <router-link v-if="user" :to="{ name: 'repos' }" class="navbar-clickable navbar-link">
         <span class="flex md:hidden">{{ $t('repos') }}</span>
-        <span class="hidden md:flex">{{ $t('repositories') }}</span>
+        <span class="hidden md:flex">{{ $t('repositories.title') }}</span>
       </router-link>
       <a href="https://woodpecker-ci.org/" target="_blank" class="navbar-clickable navbar-link hidden md:flex">{{
         $t('docs')

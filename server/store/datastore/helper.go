@@ -76,15 +76,3 @@ func callerName(skip int) string {
 	}
 	return fnName
 }
-
-func (s storage) quoteIdentifier(identifier string) string {
-	driver := s.engine.DriverName()
-	switch driver {
-	case DriverMysql:
-		return "`" + identifier + "`"
-	case DriverPostgres, DriverSqlite:
-		return "\"" + identifier + "\""
-	default:
-		return identifier
-	}
-}

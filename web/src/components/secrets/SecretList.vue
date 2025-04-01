@@ -9,10 +9,10 @@
       <Badge
         v-if="secret.edit === false"
         class="ml-2"
-        :label="secret.org_id === 0 ? $t('global_level_secret') : $t('org_level_secret')"
+        :value="secret.org_id === 0 ? $t('global_level_secret') : $t('org_level_secret')"
       />
       <div class="md:display-unset ml-auto hidden space-x-2">
-        <Badge v-for="event in secret.events" :key="event" :label="event" />
+        <Badge v-for="event in secret.events" :key="event" :value="event" />
       </div>
       <template v-if="secret.edit !== false">
         <IconButton

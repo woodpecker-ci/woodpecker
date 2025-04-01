@@ -2,8 +2,7 @@ FROM --platform=$BUILDPLATFORM docker.io/golang:1.24 AS build
 
 RUN groupadd -g 1000 woodpecker && \
   useradd -u 1000 -g 1000 woodpecker && \
-  mkdir -p /etc/woodpecker && \
-  chown -R woodpecker:woodpecker /etc/woodpecker
+  mkdir -p /etc/woodpecker
 
 WORKDIR /src
 COPY . .
@@ -22,7 +21,7 @@ EXPOSE 3000
 COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 # copy agent binary
 COPY --from=build /src/dist/woodpecker-agent /bin/
-COPY --from=build /etc/woodpecker /etc
+COPY --from=build --chown=woodpecker:woodpecker /etc/woodpecker /etc
 COPY --from=build /etc/passwd /etc/passwd
 COPY --from=build /etc/group /etc/group
 
