@@ -23,7 +23,14 @@ async function loadContent(): Promise<Content> {
           return undefined;
         }
 
-        const docsHeader = markdown.getHeader<WoodpeckerPluginHeader>(docsContent);
+        let docsHeader: WoodpeckerPluginHeader;
+        try {
+          docsHeader = markdown.getHeader<WoodpeckerPluginHeader>(docsContent);
+        } catch (e) {
+          console.error("Can't get header from docs file", i.docs, (e as Error).message);
+          return undefined;
+        }
+
         const docsBody = markdown.getContent(docsContent);
 
         if (!docsHeader.name) {
