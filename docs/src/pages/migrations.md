@@ -4,6 +4,14 @@ To enhance the usability of Woodpecker and meet evolving security standards, occ
 
 ## `next`
 
+### User-facing migrations
+
+#### Clone plugin working directory
+
+- Clone plugins now use `/woodpecker` as working directory instead of `/woodpecker/<workspacePath>/<directory>`. If you use the default clone plugin, you do not need to make any changes. If you use a custom clone plugin, please ensure the plugin uses absolute paths and don't rely on the working directory.
+
+#### Miscellaneous
+
 - (Kubernetes) Deprecated `step` label on pod in favor of new namespaced label `woodpecker-ci.org/step`. The `step` label will be removed in a future update.
 
 ## 3.0.0
