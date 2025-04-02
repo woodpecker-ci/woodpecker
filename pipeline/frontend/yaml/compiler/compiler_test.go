@@ -96,7 +96,7 @@ func TestCompilerCompile(t *testing.T) {
 			OnSuccess:     true,
 			Failure:       "fail",
 			Volumes:       []string{defaultVolume.Name + ":/woodpecker"},
-			WorkingDir:    "/woodpecker",
+			WorkingDir:    "/woodpecker/src/github.com/octocat/hello-world",
 			WorkspaceBase: "/woodpecker",
 			Networks:      []backend_types.Conn{{Name: "test_default", Aliases: []string{"clone"}}},
 			ExtraHosts:    []backend_types.HostAlias{},
