@@ -96,7 +96,7 @@ func (c *Compiler) createProcess(container *yaml_types.Container, workflow *yaml
 		detached = true
 	}
 
-	workingDir = c.stepWorkingDir(container)
+	workingDir = c.stepWorkingDir(container, stepType)
 
 	getSecretValue := func(name string) (string, error) {
 		name = strings.ToLower(name)
@@ -185,13 +185,16 @@ func (c *Compiler) createProcess(container *yaml_types.Container, workflow *yaml
 	}, nil
 }
 
-func (c *Compiler) stepWorkingDir(container *yaml_types.Container) string {
+func (c *Compiler) stepWorkingDir(container *yaml_types.Container, stepType backend_types.StepType) string {
 	if path.IsAbs(container.Directory) {
 		return container.Directory
 	}
 	base := c.workspaceBase
 	if container.IsPlugin() {
 		base = pluginWorkspaceBase
+	}
+	if stepType == backend_types.StepTypeClone {
+		return base
 	}
 	return path.Join(base, c.workspacePath, container.Directory)
 }

@@ -1,188 +1,202 @@
-linters-settings:
-  gofmt:
-    simplify: true
-    rewrite-rules:
-      - pattern: interface{}
-        replacement: any
-  misspell:
-    locale: US
-  gofumpt:
-    extra-rules: true
-  forbidigo:
-    forbid:
-      - context\.WithCancel$
-      - ^print.*$
-      - panic
-      - ^log.Fatal().*$
-  errorlint:
-    errorf-multi: true
-  depguard:
-    rules:
-      pipeline:
-        list-mode: lax
-        files:
-          - '**/pipeline/**/*.go'
-          - '**/pipeline/*.go'
-          - '!**/cli/pipeline/*.go'
-          - '!**/cli/pipeline/**/*.go'
-          - '!**/server/pipeline/*.go'
-          - '!**/server/pipeline/**/*.go'
-        deny:
-          - pkg: 'go.woodpecker-ci.org/woodpecker/v3/agent'
-          - pkg: 'go.woodpecker-ci.org/woodpecker/v3/cli'
-          - pkg: 'go.woodpecker-ci.org/woodpecker/v3/cmd'
-          - pkg: 'go.woodpecker-ci.org/woodpecker/v3/server'
-          - pkg: 'go.woodpecker-ci.org/woodpecker/v3/web'
-      shared:
-        list-mode: lax
-        files:
-          - '**/shared/**/*.go'
-          - '**/shared/*.go'
-          - '!**/pipeline/shared/*.go'
-          - '!**/pipeline/shared/**/*.go'
-        deny:
-          - pkg: 'go.woodpecker-ci.org/woodpecker/v3/agent'
-          - pkg: 'go.woodpecker-ci.org/woodpecker/v3/cli'
-          - pkg: 'go.woodpecker-ci.org/woodpecker/v3/cmd'
-          - pkg: 'go.woodpecker-ci.org/woodpecker/v3/pipeline'
-          - pkg: 'go.woodpecker-ci.org/woodpecker/v3/server'
-          - pkg: 'go.woodpecker-ci.org/woodpecker/v3/web'
-      woodpecker-go:
-        list-mode: lax
-        files:
-          - '**/woodpecker-go/woodpecker/**/*.go'
-          - '**/woodpecker-go/woodpecker/*.go'
-        deny:
-          - pkg: 'go.woodpecker-ci.org/woodpecker/v3/agent'
-          - pkg: 'go.woodpecker-ci.org/woodpecker/v3/cli'
-          - pkg: 'go.woodpecker-ci.org/woodpecker/v3/cmd'
-          - pkg: 'go.woodpecker-ci.org/woodpecker/v3/pipeline'
-          - pkg: 'go.woodpecker-ci.org/woodpecker/v3/server'
-          - pkg: 'go.woodpecker-ci.org/woodpecker/v3/shared'
-          - pkg: 'go.woodpecker-ci.org/woodpecker/v3/web'
-      agent:
-        list-mode: lax
-        files:
-          - '**/agent/**/*.go'
-          - '**/agent/*.go'
-          - '**/cmd/agent/**/*.go'
-          - '**/cmd/agent/*.go'
-        deny:
-          - pkg: 'go.woodpecker-ci.org/woodpecker/v3/cli'
-          - pkg: 'go.woodpecker-ci.org/woodpecker/v3/cmd/cli'
-          - pkg: 'go.woodpecker-ci.org/woodpecker/v3/cmd/server'
-          - pkg: 'go.woodpecker-ci.org/woodpecker/v3/server'
-          - pkg: 'go.woodpecker-ci.org/woodpecker/v3/web'
-          - pkg: 'go.woodpecker-ci.org/woodpecker/v3/woodpecker-go/woodpecker'
-      cli:
-        list-mode: lax
-        files:
-          - '**/cli/**/*.go'
-          - '**/cli/*.go'
-          - '**/cmd/cli/**/*.go'
-          - '**/cmd/cli/*.go'
-        deny:
-          - pkg: 'go.woodpecker-ci.org/woodpecker/v3/agent'
-          - pkg: 'go.woodpecker-ci.org/woodpecker/v3/server'
-          - pkg: 'go.woodpecker-ci.org/woodpecker/v3/cmd/agent'
-          - pkg: 'go.woodpecker-ci.org/woodpecker/v3/cmd/server'
-          - pkg: 'go.woodpecker-ci.org/woodpecker/v3/web'
-      server:
-        list-mode: lax
-        files:
-          - '**/server/**/*.go'
-          - '**/server/*.go'
-          - '**/cmd/server/**/*.go'
-          - '**/cmd/server/*.go'
-          - '**/web/**/*.go'
-          - '**/web/*.go'
-        deny:
-          - pkg: 'go.woodpecker-ci.org/woodpecker/v3/agent'
-          - pkg: 'go.woodpecker-ci.org/woodpecker/v3/cli'
-          - pkg: 'go.woodpecker-ci.org/woodpecker/v3/cmd/agent'
-          - pkg: 'go.woodpecker-ci.org/woodpecker/v3/cmd/cli'
-          - pkg: 'go.woodpecker-ci.org/woodpecker/v3/woodpecker-go/woodpecker'
-  gci:
-    custom-order: true
-    sections:
-      - standard
-      - default
-      - prefix(go.woodpecker-ci.org/woodpecker)
-  mnd:
-    ignored-numbers:
-      - '0o600'
-      - '0o660'
-      - '0o644'
-      - '0o755'
-      - '0o700'
-    ignored-functions:
-      - make
-      - time.*
-      - strings.Split
-      - callerName
-      - securecookie.GenerateRandomKey
-  godot:
-    scope: toplevel
-    period: true
-    capital: true
-    exclude:
-      - '^\s*cSpell:'
-      - '^\s*TODO:'
-
-linters:
-  disable-all: true
-  enable:
-    - bidichk
-    - errcheck
-    - gofmt
-    - gosimple
-    - govet
-    - ineffassign
-    - misspell
-    - revive
-    - staticcheck
-    - typecheck
-    - unused
-    - gofumpt
-    - errorlint
-    - forbidigo
-    - zerologlint
-    - depguard
-    - asciicheck
-    - bodyclose
-    - dogsled
-    - durationcheck
-    - errchkjson
-    - gochecknoinits
-    - goheader
-    - gomoddirectives
-    - gomodguard
-    - goprintffuncname
-    - importas
-    - makezero
-    - rowserrcheck
-    - sqlclosecheck
-    - usetesting
-    - unconvert
-    - unparam
-    - wastedassign
-    - whitespace
-    - gocritic
-    - nolintlint
-    - stylecheck
-    - contextcheck
-    - forcetypeassert
-    - gci
-    - mnd
-    - godot
-
-issues:
-  exclude-rules:
-    - path: 'fixtures|cmd/agent/flags.go|cmd/server/flags.go|pipeline/backend/kubernetes/flags.go|_test.go'
-      linters:
-        - mnd
-
+version: '2'
 run:
   timeout: 15m
   build-tags:
     - test
+linters:
+  default: none
+  enable:
+    - asciicheck
+    - bidichk
+    - bodyclose
+    - contextcheck
+    - depguard
+    - dogsled
+    - durationcheck
+    - errcheck
+    - errchkjson
+    - errorlint
+    - forbidigo
+    - forcetypeassert
+    - gochecknoinits
+    - gocritic
+    - godot
+    - goheader
+    - gomoddirectives
+    - gomodguard
+    - goprintffuncname
+    - govet
+    - importas
+    - ineffassign
+    - makezero
+    - misspell
+    - mnd
+    - nolintlint
+    - revive
+    - rowserrcheck
+    - sqlclosecheck
+    - staticcheck
+    - unconvert
+    - unparam
+    - unused
+    - usetesting
+    - wastedassign
+    - whitespace
+    - zerologlint
+  settings:
+    depguard:
+      rules:
+        agent:
+          list-mode: lax
+          files:
+            - '**/agent/**/*.go'
+            - '**/agent/*.go'
+            - '**/cmd/agent/**/*.go'
+            - '**/cmd/agent/*.go'
+          deny:
+            - pkg: go.woodpecker-ci.org/woodpecker/v3/cli
+            - pkg: go.woodpecker-ci.org/woodpecker/v3/cmd/cli
+            - pkg: go.woodpecker-ci.org/woodpecker/v3/cmd/server
+            - pkg: go.woodpecker-ci.org/woodpecker/v3/server
+            - pkg: go.woodpecker-ci.org/woodpecker/v3/web
+            - pkg: go.woodpecker-ci.org/woodpecker/v3/woodpecker-go/woodpecker
+        cli:
+          list-mode: lax
+          files:
+            - '**/cli/**/*.go'
+            - '**/cli/*.go'
+            - '**/cmd/cli/**/*.go'
+            - '**/cmd/cli/*.go'
+          deny:
+            - pkg: go.woodpecker-ci.org/woodpecker/v3/agent
+            - pkg: go.woodpecker-ci.org/woodpecker/v3/server
+            - pkg: go.woodpecker-ci.org/woodpecker/v3/cmd/agent
+            - pkg: go.woodpecker-ci.org/woodpecker/v3/cmd/server
+            - pkg: go.woodpecker-ci.org/woodpecker/v3/web
+        pipeline:
+          list-mode: lax
+          files:
+            - '**/pipeline/**/*.go'
+            - '**/pipeline/*.go'
+            - '!**/cli/pipeline/*.go'
+            - '!**/cli/pipeline/**/*.go'
+            - '!**/server/pipeline/*.go'
+            - '!**/server/pipeline/**/*.go'
+          deny:
+            - pkg: go.woodpecker-ci.org/woodpecker/v3/agent
+            - pkg: go.woodpecker-ci.org/woodpecker/v3/cli
+            - pkg: go.woodpecker-ci.org/woodpecker/v3/cmd
+            - pkg: go.woodpecker-ci.org/woodpecker/v3/server
+            - pkg: go.woodpecker-ci.org/woodpecker/v3/web
+        server:
+          list-mode: lax
+          files:
+            - '**/server/**/*.go'
+            - '**/server/*.go'
+            - '**/cmd/server/**/*.go'
+            - '**/cmd/server/*.go'
+            - '**/web/**/*.go'
+            - '**/web/*.go'
+          deny:
+            - pkg: go.woodpecker-ci.org/woodpecker/v3/agent
+            - pkg: go.woodpecker-ci.org/woodpecker/v3/cli
+            - pkg: go.woodpecker-ci.org/woodpecker/v3/cmd/agent
+            - pkg: go.woodpecker-ci.org/woodpecker/v3/cmd/cli
+            - pkg: go.woodpecker-ci.org/woodpecker/v3/woodpecker-go/woodpecker
+        shared:
+          list-mode: lax
+          files:
+            - '**/shared/**/*.go'
+            - '**/shared/*.go'
+            - '!**/pipeline/shared/*.go'
+            - '!**/pipeline/shared/**/*.go'
+          deny:
+            - pkg: go.woodpecker-ci.org/woodpecker/v3/agent
+            - pkg: go.woodpecker-ci.org/woodpecker/v3/cli
+            - pkg: go.woodpecker-ci.org/woodpecker/v3/cmd
+            - pkg: go.woodpecker-ci.org/woodpecker/v3/pipeline
+            - pkg: go.woodpecker-ci.org/woodpecker/v3/server
+            - pkg: go.woodpecker-ci.org/woodpecker/v3/web
+        woodpecker-go:
+          list-mode: lax
+          files:
+            - '**/woodpecker-go/woodpecker/**/*.go'
+            - '**/woodpecker-go/woodpecker/*.go'
+          deny:
+            - pkg: go.woodpecker-ci.org/woodpecker/v3/agent
+            - pkg: go.woodpecker-ci.org/woodpecker/v3/cli
+            - pkg: go.woodpecker-ci.org/woodpecker/v3/cmd
+            - pkg: go.woodpecker-ci.org/woodpecker/v3/pipeline
+            - pkg: go.woodpecker-ci.org/woodpecker/v3/server
+            - pkg: go.woodpecker-ci.org/woodpecker/v3/shared
+            - pkg: go.woodpecker-ci.org/woodpecker/v3/web
+    errorlint:
+      errorf-multi: true
+    forbidigo:
+      forbid:
+        - pattern: context\.WithCancel$
+        - pattern: ^print.*$
+        - pattern: panic
+        - pattern: ^log.Fatal().*$
+    godot:
+      scope: toplevel
+      exclude:
+        - '^\s*cSpell:'
+        - '^\s*TODO:'
+      capital: true
+      period: true
+    misspell:
+      locale: US
+    mnd:
+      ignored-numbers:
+        - '0o600'
+        - '0o660'
+        - '0o644'
+        - '0o755'
+        - '0o700'
+      ignored-functions:
+        - make
+        - time.*
+        - strings.Split
+        - callerName
+        - securecookie.GenerateRandomKey
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    rules:
+      - linters:
+          - mnd
+        path: fixtures|cmd/agent/flags.go|cmd/server/flags.go|pipeline/backend/kubernetes/flags.go|_test.go
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
+formatters:
+  enable:
+    - gci
+    - gofmt
+    - gofumpt
+  settings:
+    gci:
+      sections:
+        - standard
+        - default
+        - prefix(go.woodpecker-ci.org/woodpecker)
+      custom-order: true
+    gofmt:
+      simplify: true
+      rewrite-rules:
+        - pattern: interface{}
+          replacement: any
+    gofumpt:
+      extra-rules: true
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
