@@ -4,7 +4,14 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @anbraten, @jenrik, @nekowinston, @qwerty287, @rhafer, @xoxys
+@6543, @Levy-Tal, @anbraten, @jenrik, @nekowinston, @qwerty287, @rhafer, @xoxys
+
+### 🐛 Bug Fixes
+
+- BitbucketDC: add event pull request opened [[#5048](https://github.com/woodpecker-ci/woodpecker/pull/5048)]
+- Fix exclude path constraint behavior [[#5042](https://github.com/woodpecker-ci/woodpecker/pull/5042)]
+- Use pointer cursor for icon buttons [[#5002](https://github.com/woodpecker-ci/woodpecker/pull/5002)]
+- Add back cursor-pointer to pipeline step list buttons [[#4982](https://github.com/woodpecker-ci/woodpecker/pull/4982)]
 
 ### 📚 Documentation
 
@@ -21,12 +28,6 @@
 - chore(deps): update docs npm deps non-major [[#4987](https://github.com/woodpecker-ci/woodpecker/pull/4987)]
 - Rework secrets docs and document multiline secrets [[#4974](https://github.com/woodpecker-ci/woodpecker/pull/4974)]
 - Add documentation for WOODPECKER_EXPERT env vars [[#4972](https://github.com/woodpecker-ci/woodpecker/pull/4972)]
-
-### 🐛 Bug Fixes
-
-- Fix exclude path constraint behavior [[#5042](https://github.com/woodpecker-ci/woodpecker/pull/5042)]
-- Use pointer cursor for icon buttons [[#5002](https://github.com/woodpecker-ci/woodpecker/pull/5002)]
-- Add back cursor-pointer to pipeline step list buttons [[#4982](https://github.com/woodpecker-ci/woodpecker/pull/4982)]
 
 ### 📈 Enhancement
 
