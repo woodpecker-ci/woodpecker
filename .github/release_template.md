@@ -1,3 +1,5 @@
+<!-- markdownlint-disable MD041 -->
+
 ### Prerequisites
 
 - [ ] MAJOR: Check `docs/src/pages/migrations.md`
