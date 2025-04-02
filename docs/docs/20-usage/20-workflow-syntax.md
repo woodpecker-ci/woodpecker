@@ -646,13 +646,9 @@ For more details and examples check the [Advanced usage docs](./90-advanced-usag
 
 ## `clone`
 
-Woodpecker automatically configures a default clone step if it is not explicitly defined. If you are using the `local` backend, the [plugin-git](https://github.com/woodpecker-ci/plugin-git) binary must be in your `$PATH` for the default clone step to work. If this is not the case, you can still write a manual clone step.
+Woodpecker automatically configures a default clone step if not explicitly defined. When using the `local` backend, the [plugin-git](https://github.com/woodpecker-ci/plugin-git) binary must be on your `$PATH` for the default clone step to work. If not, you can still write a manual clone step.
 
-:::info
-Clone step containers use `/woodpecker` as the working directory. It is recommended that clone plugins do not rely on the working directory and use absolute paths instead.
-:::
-
-You can manually configure the clone step in your workflow to customize it:
+You can manually configure the clone step in your workflow for customization:
 
 ```diff
 +clone:
@@ -667,7 +663,7 @@ You can manually configure the clone step in your workflow to customize it:
        - go test
 ```
 
-Example configuration to override the depth:
+Example configuration to override depth:
 
 ```diff
  clone:
@@ -688,7 +684,7 @@ Example configuration to use a custom clone plugin:
 
 ### Git Submodules
 
-To use the credentials used to clone the repository to clone its submodules, update `.gitmodules` to use `https` instead of `git`:
+To use the credentials that cloned the repository to clone it's submodules, update `.gitmodules` to use `https` instead of `git`:
 
 ```diff
  [submodule "my-module"]
@@ -713,10 +709,6 @@ steps:
 ```
 
 ## `skip_clone`
-
-:::warning
-The default clone step is executed as `root` to ensure that the workspace directory can be accessed by any user (`0777`). This is necessary to allow rootless step containers to write to the workspace directory. If a rootless step container is used with `skip_clone`, the user must ensure a suitable workspace directory that can be accessed by the unprivileged container use, e.g. `/tmp`.
-:::
 
 By default Woodpecker is automatically adding a clone step. This clone step can be configured by the [clone](#clone) property. If you do not need a `clone` step at all you can skip it using:
 
