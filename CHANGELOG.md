@@ -13,22 +13,6 @@
 - Use pointer cursor for icon buttons [[#5002](https://github.com/woodpecker-ci/woodpecker/pull/5002)]
 - Add back cursor-pointer to pipeline step list buttons [[#4982](https://github.com/woodpecker-ci/woodpecker/pull/4982)]
 
-### 📚 Documentation
-
-- chore(deps): lock file maintenance [[#5044](https://github.com/woodpecker-ci/woodpecker/pull/5044)]
-- chore(deps): lock file maintenance [[#5032](https://github.com/woodpecker-ci/woodpecker/pull/5032)]
-- Print at which file docs parsing failed [[#5040](https://github.com/woodpecker-ci/woodpecker/pull/5040)]
-- fix(deps): update dependency yaml to v2.7.1 [[#5029](https://github.com/woodpecker-ci/woodpecker/pull/5029)]
-- fix(deps): update docs npm deps non-major [[#5026](https://github.com/woodpecker-ci/woodpecker/pull/5026)]
-- Revert manual changes to changelog [[#5007](https://github.com/woodpecker-ci/woodpecker/pull/5007)]
-- Add missing docs for 3.x minor versions [[#4992](https://github.com/woodpecker-ci/woodpecker/pull/4992)]
-- chore(deps): lock file maintenance [[#5000](https://github.com/woodpecker-ci/woodpecker/pull/5000)]
-- fix(deps): update dependency redocusaurus to v2.2.2 [[#4998](https://github.com/woodpecker-ci/woodpecker/pull/4998)]
-- Add missing links to 3.x docs [[#4991](https://github.com/woodpecker-ci/woodpecker/pull/4991)]
-- chore(deps): update docs npm deps non-major [[#4987](https://github.com/woodpecker-ci/woodpecker/pull/4987)]
-- Rework secrets docs and document multiline secrets [[#4974](https://github.com/woodpecker-ci/woodpecker/pull/4974)]
-- Add documentation for WOODPECKER_EXPERT env vars [[#4972](https://github.com/woodpecker-ci/woodpecker/pull/4972)]
-
 ### 📈 Enhancement
 
 - add nushell support to local backend [[#5043](https://github.com/woodpecker-ci/woodpecker/pull/5043)]
@@ -39,9 +23,24 @@
 - Tag pipeline with source information [[#4796](https://github.com/woodpecker-ci/woodpecker/pull/4796)]
 - Add titles and descriptions to repos page [[#4981](https://github.com/woodpecker-ci/woodpecker/pull/4981)]
 
+### 📚 Documentation
+
+- Print at which file docs parsing failed [[#5040](https://github.com/woodpecker-ci/woodpecker/pull/5040)]
+- fix(deps): update dependency yaml to v2.7.1 [[#5029](https://github.com/woodpecker-ci/woodpecker/pull/5029)]
+- fix(deps): update docs npm deps non-major [[#5026](https://github.com/woodpecker-ci/woodpecker/pull/5026)]
+- Revert manual changes to changelog [[#5007](https://github.com/woodpecker-ci/woodpecker/pull/5007)]
+- Add missing docs for 3.x minor versions [[#4992](https://github.com/woodpecker-ci/woodpecker/pull/4992)]
+- fix(deps): update dependency redocusaurus to v2.2.2 [[#4998](https://github.com/woodpecker-ci/woodpecker/pull/4998)]
+- Add missing links to 3.x docs [[#4991](https://github.com/woodpecker-ci/woodpecker/pull/4991)]
+- chore(deps): update docs npm deps non-major [[#4987](https://github.com/woodpecker-ci/woodpecker/pull/4987)]
+- Rework secrets docs and document multiline secrets [[#4974](https://github.com/woodpecker-ci/woodpecker/pull/4974)]
+- Add documentation for WOODPECKER_EXPERT env vars [[#4972](https://github.com/woodpecker-ci/woodpecker/pull/4972)]
+
 ### 📦️ Dependency
 
 - fix(deps): update golang-packages [[#5046](https://github.com/woodpecker-ci/woodpecker/pull/5046)]
+- chore(deps): lock file maintenance [[#5044](https://github.com/woodpecker-ci/woodpecker/pull/5044)]
+- chore(deps): lock file maintenance [[#5032](https://github.com/woodpecker-ci/woodpecker/pull/5032)]
 - fix(deps): update module github.com/urfave/cli/v3 to v3.1.0 [[#5039](https://github.com/woodpecker-ci/woodpecker/pull/5039)]
 - chore(deps): update dependency vite to v6.2.4 [security] [[#5036](https://github.com/woodpecker-ci/woodpecker/pull/5036)]
 - fix(deps): update dependency simple-icons to v14.12.0 [[#5030](https://github.com/woodpecker-ci/woodpecker/pull/5030)]
@@ -53,6 +52,7 @@
 - chore(deps): update dependency vite to v6.2.3 [security] [[#5014](https://github.com/woodpecker-ci/woodpecker/pull/5014)]
 - fix(deps): update golang-packages [[#5012](https://github.com/woodpecker-ci/woodpecker/pull/5012)]
 - chore(deps): update docker.io/woodpeckerci/plugin-docker-buildx docker tag to v5.2.2 [[#4997](https://github.com/woodpecker-ci/woodpecker/pull/4997)]
+- chore(deps): lock file maintenance [[#5000](https://github.com/woodpecker-ci/woodpecker/pull/5000)]
 - fix(deps): update dependency simple-icons to v14.11.1 [[#4999](https://github.com/woodpecker-ci/woodpecker/pull/4999)]
 - chore(deps): update pre-commit hook adrienverge/yamllint to v1.37.0 [[#4996](https://github.com/woodpecker-ci/woodpecker/pull/4996)]
 - fix(deps): update module github.com/rs/zerolog to v1.34.0 [[#4995](https://github.com/woodpecker-ci/woodpecker/pull/4995)]
