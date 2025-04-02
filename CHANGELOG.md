@@ -1,14 +1,10 @@
 # Changelog
 
-## [4.0.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v4.0.0) - 2025-04-02
+## [3.5.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.5.0) - 2025-04-02
 
 ### ❤️ Thanks to all contributors! ❤️
 
 @6543, @anbraten, @jenrik, @nekowinston, @qwerty287, @rhafer, @xoxys
-
-### 💥 Breaking changes
-
-- Use existing WorkingDir for clone steps [[#5023](https://github.com/woodpecker-ci/woodpecker/pull/5023)]
 
 ### 📚 Documentation
 
