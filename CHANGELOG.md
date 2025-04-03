@@ -8,6 +8,7 @@
 
 ### 📚 Documentation
 
+- chore(deps): lock file maintenance [[#5062](https://github.com/woodpecker-ci/woodpecker/pull/5062)]
 - chore(deps): update docs npm deps non-major [[#5060](https://github.com/woodpecker-ci/woodpecker/pull/5060)]
 
 ### 🐛 Bug Fixes
