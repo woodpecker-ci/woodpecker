@@ -28,6 +28,5 @@
 - [ ] Merge the docs PR
 - [ ] Announce release in relevant chats and on social media platforms
   - [ ] Mastodon (check if already posted from the release pipeline)
-  - [ ] Discord
   - [ ] Matrix
   - [ ] Twitter
