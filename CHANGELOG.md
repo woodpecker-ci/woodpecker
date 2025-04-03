@@ -8,7 +8,6 @@
 
 ### 📚 Documentation
 
-- chore(deps): lock file maintenance [[#5062](https://github.com/woodpecker-ci/woodpecker/pull/5062)]
 - chore(deps): update docs npm deps non-major [[#5060](https://github.com/woodpecker-ci/woodpecker/pull/5060)]
 
 ### 🐛 Bug Fixes
@@ -17,6 +16,8 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update dependency vite to v6.2.5 [[#5063](https://github.com/woodpecker-ci/woodpecker/pull/5063)]
+- chore(deps): lock file maintenance [[#5062](https://github.com/woodpecker-ci/woodpecker/pull/5062)]
 - fix(deps): update web npm deps non-major [[#5061](https://github.com/woodpecker-ci/woodpecker/pull/5061)]
 - fix(deps): update module github.com/mattn/go-sqlite3 to v1.14.27 [[#5058](https://github.com/woodpecker-ci/woodpecker/pull/5058)]
 
