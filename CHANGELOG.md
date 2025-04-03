@@ -6,12 +6,17 @@
 
 @xoxys
 
+### 📚 Documentation
+
+- chore(deps): update docs npm deps non-major [[#5060](https://github.com/woodpecker-ci/woodpecker/pull/5060)]
+
 ### 🐛 Bug Fixes
 
 - Fix cli format flag fallback [[#5057](https://github.com/woodpecker-ci/woodpecker/pull/5057)]
 
 ### 📦️ Dependency
 
+- fix(deps): update web npm deps non-major [[#5061](https://github.com/woodpecker-ci/woodpecker/pull/5061)]
 - fix(deps): update module github.com/mattn/go-sqlite3 to v1.14.27 [[#5058](https://github.com/woodpecker-ci/woodpecker/pull/5058)]
 
 ## [3.5.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.5.0) - 2025-04-02
