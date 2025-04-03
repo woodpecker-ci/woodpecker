@@ -2,6 +2,14 @@
 
 ## [3.5.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.5.1) - 2025-04-03
 
+### ❤️ Thanks to all contributors! ❤️
+
+@xoxys
+
+### 🐛 Bug Fixes
+
+- Fix cli format flag fallback [[#5057](https://github.com/woodpecker-ci/woodpecker/pull/5057)]
+
 ### 📦️ Dependency
 
 - fix(deps): update module github.com/mattn/go-sqlite3 to v1.14.27 [[#5058](https://github.com/woodpecker-ci/woodpecker/pull/5058)]
