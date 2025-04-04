@@ -58,9 +58,10 @@
   <SvgIcon v-else-if="name === 'play'" :path="mdiPlay" size="1.3rem" />
   <SvgIcon v-else-if="name === 'play-outline'" :path="mdiPlayOutline" size="1.3rem" />
   <SvgIcon v-else-if="name === 'dots'" :path="mdiDotsVertical" size="1.3rem" />
-  <SvgIcon v-else-if="name === 'tray-full'" :path="mdiTrayFull" size="24" />
-  <SvgIcon v-else-if="name === 'file-cog-outlined'" :path="mdiFileCogOutline" size="24" />
-  <SvgIcon v-else-if="name === 'bug-outline'" :path="mdiBugOutline" size="24" />
+  <SvgIcon v-else-if="name === 'tray-full'" :path="mdiTrayFull" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'file-cog-outline'" :path="mdiFileCogOutline" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'file-edit-outline'" :path="mdiFileEditOutline" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'bug-outline'" :path="mdiBugOutline" size="1.3rem" />
   <SvgIcon v-else-if="name === 'docker'" :path="mdiDocker" size="1.3rem" />
 
   <SvgIcon v-else-if="name === 'visibility-private'" :path="mdiLockOutline" size="1.3rem" />
@@ -118,6 +119,7 @@ import {
   mdiEyeOffOutline,
   mdiEyeOutline,
   mdiFileCogOutline,
+  mdiFileEditOutline,
   mdiFormatListBulleted,
   mdiFormatListGroup,
   mdiGestureTap,
@@ -211,7 +213,8 @@ export type IconNames =
   | 'visibility-internal'
   | 'dots'
   | 'tray-full'
-  | 'file-cog-outlined'
+  | 'file-cog-outline'
+  | 'file-edit-outline'
   | 'bug-outline'
   | 'list-group'
   | 'secret'

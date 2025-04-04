@@ -82,10 +82,11 @@
       :count="pipeline.errors?.length"
       :icon-class="pipeline.errors.some((e) => !e.is_warning) ? 'text-wp-error-100' : 'text-wp-state-warn-100'"
     />
-    <Tab icon="file-cog-outlined" :to="{ name: 'repo-pipeline-config' }" :title="$t('repo.pipeline.config')" />
+    <Tab icon="file-cog-outline" :to="{ name: 'repo-pipeline-config' }" :title="$t('repo.pipeline.config')" />
     <Tab
       v-if="pipeline.changed_files && pipeline.changed_files.length > 0"
       :to="{ name: 'repo-pipeline-changed-files' }"
+      icon="file-edit-outline"
       :title="$t('repo.pipeline.files')"
       :count="pipeline.changed_files?.length"
     />
