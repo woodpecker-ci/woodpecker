@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.5.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.5.1) - 2025-04-03
+## [3.5.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.5.1) - 2025-04-04
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -16,9 +16,8 @@
 
 ### 📦️ Dependency
 
-- chore(deps): update dependency vite to v6.2.5 [[#5063](https://github.com/woodpecker-ci/woodpecker/pull/5063)]
+- fix(deps): update module code.gitea.io/sdk/gitea to v0.21.0 [[#5067](https://github.com/woodpecker-ci/woodpecker/pull/5067)]
 - chore(deps): lock file maintenance [[#5062](https://github.com/woodpecker-ci/woodpecker/pull/5062)]
-- fix(deps): update web npm deps non-major [[#5061](https://github.com/woodpecker-ci/woodpecker/pull/5061)]
 - fix(deps): update module github.com/mattn/go-sqlite3 to v1.14.27 [[#5058](https://github.com/woodpecker-ci/woodpecker/pull/5058)]
 
 ## [3.5.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.5.0) - 2025-04-02
