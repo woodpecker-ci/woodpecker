@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package stepbuilder
+package metadata
 
 import (
 	"testing"
@@ -91,7 +91,7 @@ func TestMetadataFromStruct(t *testing.T) {
 
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
-			result := MetadataFromStruct(testCase.forge, testCase.repo, testCase.pipeline, testCase.prev, testCase.workflow, testCase.sysURL)
+			result := MetadataFromStruct(testCase.forge, testCase.repo, testCase.pipeline, testCase.prev, testCase.sysURL)(testCase.workflow)
 			assert.EqualValues(t, testCase.expectedMetadata, result)
 			assert.EqualValues(t, testCase.expectedEnviron, result.Environ())
 		})
