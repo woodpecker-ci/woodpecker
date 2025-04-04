@@ -4,7 +4,7 @@ go 1.23.4
 
 require (
 	al.essio.dev/pkg/shellescape v1.6.0
-	code.gitea.io/sdk/gitea v0.20.0
+	code.gitea.io/sdk/gitea v0.21.0
 	codeberg.org/6543/go-yaml2json v1.0.0
 	codeberg.org/6543/xyaml v1.1.0
 	codeberg.org/mvdkleijn/forgejo-sdk/forgejo/v2 v2.0.0
