@@ -6,13 +6,15 @@
 
 @xoxys
 
+### 🐛 Bug Fixes
+
+- Add missing icon for changes files tab [[#5068](https://github.com/woodpecker-ci/woodpecker/pull/5068)]
+- Improve CLI info text and remove markdown [[#5069](https://github.com/woodpecker-ci/woodpecker/pull/5069)]
+- Fix cli format flag fallback [[#5057](https://github.com/woodpecker-ci/woodpecker/pull/5057)]
+
 ### 📚 Documentation
 
 - chore(deps): update docs npm deps non-major [[#5060](https://github.com/woodpecker-ci/woodpecker/pull/5060)]
-
-### 🐛 Bug Fixes
-
-- Fix cli format flag fallback [[#5057](https://github.com/woodpecker-ci/woodpecker/pull/5057)]
 
 ### 📦️ Dependency
 
