@@ -21,9 +21,9 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
-func (s storage) getRedirection(e *xorm.Session, fullName string) (*model.Redirection, error) {
+func (s storage) getRedirection(e *xorm.Session, fullName string, forgeID int64) (*model.Redirection, error) {
 	repo := new(model.Redirection)
-	return repo, wrapGet(e.Where("repo_full_name = ?", fullName).Get(repo))
+	return repo, wrapGet(e.Where("repo_full_name = ?", fullName).And("forge_id = ?", forgeID).Get(repo))
 }
 
 func (s storage) CreateRedirection(redirect *model.Redirection) error {
