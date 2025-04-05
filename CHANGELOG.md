@@ -1,5 +1,24 @@
 # Changelog
 
+## [3.5.2](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.5.2) - 2025-04-05
+
+### ❤️ Thanks to all contributors! ❤️
+
+@xoxys
+
+### 📚 Documentation
+
+- chore(deps): update docs npm deps non-major [[#5075](https://github.com/woodpecker-ci/woodpecker/pull/5075)]
+
+### 🐛 Bug Fixes
+
+- Avoid db errors while executing migrations check [[#5072](https://github.com/woodpecker-ci/woodpecker/pull/5072)]
+
+### 📦️ Dependency
+
+- fix(deps): update module github.com/fsnotify/fsnotify to v1.9.0 [[#5076](https://github.com/woodpecker-ci/woodpecker/pull/5076)]
+- chore(deps): update dependency vite to v6.2.5 [security] [[#5074](https://github.com/woodpecker-ci/woodpecker/pull/5074)]
+
 ## [3.5.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.5.1) - 2025-04-04
 
 ### ❤️ Thanks to all contributors! ❤️
