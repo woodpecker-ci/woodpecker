@@ -26,6 +26,7 @@
 ### Post-release
 
 - [ ] Merge the docs PR
+- [ ] Release the Helm Chart. If renovate has not created the upgrade PR already, manually trigger if from the Dependency Dashboard.
 - [ ] Announce release in relevant chats and on social media platforms
   - [ ] Mastodon (check if already posted from the release pipeline)
   - [ ] Matrix
