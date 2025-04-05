@@ -56,8 +56,6 @@ MD013:
   tables: false
   # Include headings
   headings: true
-  # Include headings
-  headers: true
   # Strict length checking
   strict: false
   # Stern length checking
@@ -73,7 +71,7 @@ MD022:
 # MD024/no-duplicate-heading/no-duplicate-header - Multiple headings with the same content
 MD024:
   # Only check sibling headings
-  allow_different_nesting: true
+  siblings_only: true
 
 # MD025/single-title/single-h1 - Multiple top-level headings in the same document
 MD025:
