@@ -1,10 +1,14 @@
 # Changelog
 
-## [3.5.2](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.5.2) - 2025-04-04
+## [3.5.2](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.5.2) - 2025-04-05
 
 ### ❤️ Thanks to all contributors! ❤️
 
 @xoxys
+
+### 📚 Documentation
+
+- chore(deps): update docs npm deps non-major [[#5075](https://github.com/woodpecker-ci/woodpecker/pull/5075)]
 
 ### 🐛 Bug Fixes
 
