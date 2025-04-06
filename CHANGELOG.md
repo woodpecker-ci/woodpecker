@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.5.2](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.5.2) - 2025-04-05
+## [3.5.2](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.5.2) - 2025-04-06
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -16,6 +16,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update golang-packages [[#5078](https://github.com/woodpecker-ci/woodpecker/pull/5078)]
 - fix(deps): update module github.com/fsnotify/fsnotify to v1.9.0 [[#5076](https://github.com/woodpecker-ci/woodpecker/pull/5076)]
 - chore(deps): update dependency vite to v6.2.5 [security] [[#5074](https://github.com/woodpecker-ci/woodpecker/pull/5074)]
 
