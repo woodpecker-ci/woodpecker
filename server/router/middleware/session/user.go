@@ -166,3 +166,48 @@ func MustOrgMember(admin bool) gin.HandlerFunc {
 		c.Next()
 	}
 }
+
+func MustRepoAdminInOrg() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		user := User(c)
+		org := Org(c)
+
+		// Check if user or organization is missing
+		if user == nil {
+			c.String(http.StatusUnauthorized, "User not authorized")
+			c.Abort()
+			return
+		}
+		if org == nil {
+			c.String(http.StatusBadRequest, "Organization not found")
+			c.Abort()
+			return
+		}
+
+		// Fetch repositories for the organization
+		repos, err := store.FromContext(c).OrgRepoList(org, nil)
+		if err != nil {
+			log.Error().Err(err).Msg("Failed to fetch repositories for organization")
+			c.String(http.StatusInternalServerError, "Failed to fetch repositories")
+			c.Abort()
+			return
+		}
+
+		// Check if the user has admin permissions on any repository in the organization
+		for _, repo := range repos {
+			perm, err := store.FromContext(c).PermFind(user, repo)
+			if err != nil {
+				log.Warn().Err(err).Msgf("Failed to fetch permissions for repo %s", repo.FullName)
+				continue
+			}
+			if perm != nil && perm.Admin {
+				c.Next()
+				return
+			}
+		}
+
+		// If no admin permissions were found, deny access
+		c.String(http.StatusForbidden, "User is not an admin on any repository in this organization")
+		c.Abort()
+	}
+}

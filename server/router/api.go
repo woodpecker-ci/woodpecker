@@ -60,7 +60,7 @@ func apiRoutes(e *gin.RouterGroup) {
 
 				org := orgBase.Group("")
 				{
-					org.GET("/secrets", session.MustOrgMember(false), api.GetOrgSecretList)
+					org.GET("/secrets", session.MustOrgMember(false), session.MustRepoAdminInOrg(), api.GetOrgSecretList)
 					org.Use(session.MustOrgMember(true))
 					org.DELETE("", session.MustAdmin(), api.DeleteOrg)
 
