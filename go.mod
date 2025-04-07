@@ -58,7 +58,7 @@ require (
 	github.com/zalando/go-keyring v0.2.6
 	gitlab.com/gitlab-org/api/client-go v0.127.0
 	go.uber.org/multierr v1.11.0
-	golang.org/x/crypto v0.36.0
+	golang.org/x/crypto v0.37.0
 	golang.org/x/net v0.38.0
 	golang.org/x/oauth2 v0.29.0
 	golang.org/x/sync v0.13.0
