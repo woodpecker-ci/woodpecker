@@ -1,13 +1,22 @@
 {
-  "api": "API",
-  "back": "後退",
-  "login": "登入",
-  "logout": "登出",
-  "password": "密碼",
-  "repos": "儲存庫",
-  "repositories": "儲存庫",
-  "search": "搜索…",
-  "unknown_error": "出現未知錯誤",
-  "url": "URL",
-  "welcome": "歡迎使用 Woodpecker"
+    "api": "API",
+    "back": "後退",
+    "login": "登入",
+    "logout": "登出",
+    "password": "密碼",
+    "repos": "儲存庫",
+    "repositories": "儲存庫",
+    "search": "搜索…",
+    "unknown_error": "出現未知錯誤",
+    "url": "URL",
+    "welcome": "歡迎使用 Woodpecker",
+    "repo": {
+        "manual_pipeline": {
+            "select_branch": "選擇分支"
+        }
+    },
+    "cancel": "取消",
+    "not_found": {
+        "back_home": "返回首頁"
+    }
 }
