@@ -22,6 +22,10 @@
 - fix(deps): update module github.com/fsnotify/fsnotify to v1.9.0 [[#5076](https://github.com/woodpecker-ci/woodpecker/pull/5076)]
 - chore(deps): update dependency vite to v6.2.5 [security] [[#5074](https://github.com/woodpecker-ci/woodpecker/pull/5074)]
 
+### Misc
+
+- Add markdown template for release umbrella issues [[#5055](https://github.com/woodpecker-ci/woodpecker/pull/5055)]
+
 ## [3.5.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.5.1) - 2025-04-04
 
 ### ❤️ Thanks to all contributors! ❤️
