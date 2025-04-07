@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.5.2](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.5.2) - 2025-04-06
+## [3.5.2](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.5.2) - 2025-04-07
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -8,6 +8,7 @@
 
 ### 📚 Documentation
 
+- chore(deps): lock file maintenance [[#5080](https://github.com/woodpecker-ci/woodpecker/pull/5080)]
 - chore(deps): update docs npm deps non-major [[#5075](https://github.com/woodpecker-ci/woodpecker/pull/5075)]
 
 ### 🐛 Bug Fixes
@@ -16,6 +17,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update module golang.org/x/crypto to v0.37.0 [[#5079](https://github.com/woodpecker-ci/woodpecker/pull/5079)]
 - fix(deps): update golang-packages [[#5078](https://github.com/woodpecker-ci/woodpecker/pull/5078)]
 - fix(deps): update module github.com/fsnotify/fsnotify to v1.9.0 [[#5076](https://github.com/woodpecker-ci/woodpecker/pull/5076)]
 - chore(deps): update dependency vite to v6.2.5 [security] [[#5074](https://github.com/woodpecker-ci/woodpecker/pull/5074)]
