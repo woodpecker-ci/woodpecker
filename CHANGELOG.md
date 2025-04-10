@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.5.2](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.5.2) - 2025-04-08
+## [3.5.2](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.5.2) - 2025-04-10
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -17,6 +17,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update module github.com/prometheus/client_golang to v1.22.0 [[#5084](https://github.com/woodpecker-ci/woodpecker/pull/5084)]
 - fix(deps): update golang-packages [[#5083](https://github.com/woodpecker-ci/woodpecker/pull/5083)]
 - fix(deps): update module golang.org/x/crypto to v0.37.0 [[#5079](https://github.com/woodpecker-ci/woodpecker/pull/5079)]
 - fix(deps): update golang-packages [[#5078](https://github.com/woodpecker-ci/woodpecker/pull/5078)]
