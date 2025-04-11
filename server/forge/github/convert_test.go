@@ -182,7 +182,8 @@ func Test_parsePullHook(t *testing.T) {
 				AvatarURL: github.Ptr("https://avatars1.githubusercontent.com/u/583231"),
 			},
 		}, Sender: &github.User{
-			Login: github.Ptr("octocat"),
+			Login:     github.Ptr("octocat"),
+			AvatarURL: github.Ptr("https://avatars1.githubusercontent.com/u/583231"),
 		},
 	}
 	pull, _, pipeline, err := parsePullHook(from, true)
@@ -192,12 +193,11 @@ func Test_parsePullHook(t *testing.T) {
 	assert.Equal(t, *from.PullRequest.Base.Ref, pipeline.Branch)
 	assert.Equal(t, "refs/pull/42/merge", pipeline.Ref)
 	assert.Equal(t, "changes:main", pipeline.Refspec)
-	assert.Equal(t, *from.PullRequest.Head.SHA, pipeline.Commit)
-	assert.Equal(t, *from.PullRequest.Title, pipeline.Message)
-	assert.Equal(t, *from.PullRequest.Title, pipeline.Title)
+	assert.Equal(t, *from.PullRequest.Head.SHA, pipeline.Commit.SHA)
+	assert.Equal(t, *from.PullRequest.Title, pipeline.PullRequest.Title)
 	assert.Equal(t, *from.PullRequest.User.Login, pipeline.Author)
 	assert.Equal(t, *from.PullRequest.User.AvatarURL, pipeline.Avatar)
-	assert.Equal(t, *from.Sender.Login, pipeline.Sender)
+	assert.Equal(t, *from.Sender.Login, pipeline.Author)
 }
 
 func Test_parseDeployHook(t *testing.T) {
@@ -216,8 +216,8 @@ func Test_parseDeployHook(t *testing.T) {
 	assert.Equal(t, model.EventDeploy, pipeline.Event)
 	assert.Equal(t, "main", pipeline.Branch)
 	assert.Equal(t, "refs/heads/main", pipeline.Ref)
-	assert.Equal(t, *from.Deployment.SHA, pipeline.Commit)
-	assert.Equal(t, *from.Deployment.Description, pipeline.Message)
+	assert.Equal(t, *from.Deployment.SHA, pipeline.Commit.SHA)
+	assert.Equal(t, *from.Deployment.Description, pipeline.Deployment.Description)
 	assert.Equal(t, *from.Deployment.URL, pipeline.ForgeURL)
 	assert.Equal(t, *from.Sender.Login, pipeline.Author)
 	assert.Equal(t, *from.Sender.AvatarURL, pipeline.Avatar)
@@ -239,40 +239,22 @@ func Test_parsePushHook(t *testing.T) {
 		assert.Equal(t, model.EventPush, pipeline.Event)
 		assert.Equal(t, "main", pipeline.Branch)
 		assert.Equal(t, "refs/heads/main", pipeline.Ref)
-		assert.Equal(t, *from.HeadCommit.ID, pipeline.Commit)
-		assert.Equal(t, *from.HeadCommit.Message, pipeline.Message)
-		assert.Equal(t, *from.HeadCommit.URL, pipeline.ForgeURL)
-		assert.Equal(t, *from.Sender.Login, pipeline.Author)
-		assert.Equal(t, *from.Sender.AvatarURL, pipeline.Avatar)
-		assert.Equal(t, *from.HeadCommit.Author.Email, pipeline.Email)
+		assert.Equal(t, &model.Commit{SHA: "f72fc19", Message: "updated README.md", ForgeURL: "https://github.com/octocat/hello-world", Author: model.CommitAuthor{Author: "", Email: "github.Ptr(octocat@github.com"}}, pipeline.Commit)
+		assert.Equal(t, from.GetHeadCommit().GetMessage(), pipeline.Commit.Message)
+		assert.Equal(t, from.GetHeadCommit().GetURL(), pipeline.ForgeURL)
+		assert.Equal(t, from.GetSender().GetLogin(), pipeline.Author)
+		assert.Equal(t, from.GetSender().GetAvatarURL(), pipeline.Avatar)
+		assert.Equal(t, from.GetHeadCommit().GetAuthor().GetEmail(), pipeline.Commit.Author.Email)
 	})
 
 	t.Run("convert tag from webhook", func(t *testing.T) {
-		from := &github.PushEvent{}
-		from.Ref = github.Ptr("refs/tags/v1.0.0")
-
-		_, pipeline := parsePushHook(from)
-		assert.Equal(t, model.EventTag, pipeline.Event)
-		assert.Equal(t, "refs/tags/v1.0.0", pipeline.Ref)
-	})
-
-	t.Run("convert tag's base branch to pipeline's branch ", func(t *testing.T) {
 		from := &github.PushEvent{}
 		from.Ref = github.Ptr("refs/tags/v1.0.0")
 		from.BaseRef = github.Ptr("refs/heads/main")
 
 		_, pipeline := parsePushHook(from)
 		assert.Equal(t, model.EventTag, pipeline.Event)
-		assert.Equal(t, "main", pipeline.Branch)
-	})
-
-	t.Run("not convert tag's base_ref from webhook if not prefixed with 'ref/heads/'", func(t *testing.T) {
-		from := &github.PushEvent{}
-		from.Ref = github.Ptr("refs/tags/v1.0.0")
-		from.BaseRef = github.Ptr("refs/refs/main")
-
-		_, pipeline := parsePushHook(from)
-		assert.Equal(t, model.EventTag, pipeline.Event)
-		assert.Equal(t, "refs/tags/v1.0.0", pipeline.Branch)
+		assert.Equal(t, "refs/tags/v1.0.0", pipeline.Ref)
+		assert.Empty(t, pipeline.Branch)
 	})
 }
