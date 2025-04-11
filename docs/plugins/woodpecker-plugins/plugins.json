@@ -17,7 +17,7 @@
     },
     {
       "name": "Surge preview",
-      "docs": "https://raw.githubusercontent.com/woodpecker-ci/plugin-surge-preview/main/docs.md",
+      "docs": "https://codeberg.org/woodpecker-plugins/plugin-surge-preview/raw/branch/main/docs.md",
       "verified": true
     },
     {
