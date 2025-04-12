@@ -19,6 +19,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update pre-commit hook golangci/golangci-lint to v2.1.1 [[#5091](https://github.com/woodpecker-ci/woodpecker/pull/5091)]
 - chore(deps): update dependency vite to v6.2.6 [security] [[#5088](https://github.com/woodpecker-ci/woodpecker/pull/5088)]
 - fix(deps): update module github.com/prometheus/client_golang to v1.22.0 [[#5084](https://github.com/woodpecker-ci/woodpecker/pull/5084)]
 - fix(deps): update golang-packages [[#5083](https://github.com/woodpecker-ci/woodpecker/pull/5083)]
