@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.5.2](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.5.2) - 2025-04-12
+## [3.5.2](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.5.2) - 2025-04-14
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -8,6 +8,7 @@
 
 ### 📚 Documentation
 
+- chore(deps): lock file maintenance [[#5092](https://github.com/woodpecker-ci/woodpecker/pull/5092)]
 - fix(deps): update docs npm deps non-major [[#5089](https://github.com/woodpecker-ci/woodpecker/pull/5089)]
 - Move plugin-surge docs to codeberg [[#5086](https://github.com/woodpecker-ci/woodpecker/pull/5086)]
 - chore(deps): lock file maintenance [[#5080](https://github.com/woodpecker-ci/woodpecker/pull/5080)]
