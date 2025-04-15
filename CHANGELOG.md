@@ -1,5 +1,15 @@
 # Changelog
 
+## [3.5.3](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.5.3) - 2025-04-15
+
+### ❤️ Thanks to all contributors! ❤️
+
+@xoxys
+
+### 📚 Documentation
+
+- Document rootless container requirements for skip-clone [[#5056](https://github.com/woodpecker-ci/woodpecker/pull/5056)]
+
 ## [3.5.2](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.5.2) - 2025-04-15
 
 ### ❤️ Thanks to all contributors! ❤️
