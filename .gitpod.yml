@@ -3,7 +3,6 @@ tasks:
     env:
       WOODPECKER_OPEN: true
       WOODPECKER_ADMIN: woodpecker
-      WOODPECKER_HOST: http://host.docker.internal:8000
       WOODPECKER_EXPERT_WEBHOOK_HOST: http://host.docker.internal:8000
       WOODPECKER_AGENT_SECRET: '1234'
       WOODPECKER_GITEA: true
