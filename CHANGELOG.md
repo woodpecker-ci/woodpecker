@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.5.2](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.5.2) - 2025-04-14
+## [3.5.2](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.5.2) - 2025-04-15
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -20,6 +20,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update module github.com/google/go-github/v70 to v71 [[#5090](https://github.com/woodpecker-ci/woodpecker/pull/5090)]
 - chore(deps): update pre-commit hook golangci/golangci-lint to v2.1.1 [[#5091](https://github.com/woodpecker-ci/woodpecker/pull/5091)]
 - chore(deps): update dependency vite to v6.2.6 [security] [[#5088](https://github.com/woodpecker-ci/woodpecker/pull/5088)]
 - fix(deps): update module github.com/prometheus/client_golang to v1.22.0 [[#5084](https://github.com/woodpecker-ci/woodpecker/pull/5084)]
