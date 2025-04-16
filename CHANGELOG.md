@@ -1,14 +1,18 @@
 # Changelog
 
-## [3.5.3](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.5.3) - 2025-04-15
+## [3.5.3](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.5.3) - 2025-04-16
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@xoxys
+@lukashass, @xoxys
 
 ### 📚 Documentation
 
 - Document rootless container requirements for skip-clone [[#5056](https://github.com/woodpecker-ci/woodpecker/pull/5056)]
+
+### Misc
+
+- Fix gitpod golang version [[#5093](https://github.com/woodpecker-ci/woodpecker/pull/5093)]
 
 ## [3.5.2](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.5.2) - 2025-04-15
 
