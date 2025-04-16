@@ -512,9 +512,9 @@ Using `directory`, you can set a subdirectory of your repository or an absolute 
 
 ### `backend_options`
 
-Using `backend_options`, you may set options that are specific to the particular backend used to execute the steps. As an example, you may want to set the user and/or group used inside a Docker container; or you may want to specify the service account for Kubernetes.
+With `backend_options` you can define options that are specific to the respective backend that is used to execute the steps. For example, you can specify the user and/or group used in a Docker container or you can specify the service account for Kubernetes.
 
-For more details check the configuration docs of the backend you are using:
+Further details can be found in the documentation of the used backend:
 
 - [Docker](../30-administration/10-configuration/11-backends/10-docker.md#step-specific-configuration)
 - [Kubernetes](../30-administration/10-configuration/11-backends/20-kubernetes.md#step-specific-configuration)
