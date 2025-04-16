@@ -4,10 +4,11 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@lukashass, @xoxys
+@Spiffyk, @lukashass, @xoxys
 
 ### 📚 Documentation
 
+- Mention `backend_options` in workflow syntax docs [[#5096](https://github.com/woodpecker-ci/woodpecker/pull/5096)]
 - Document rootless container requirements for skip-clone [[#5056](https://github.com/woodpecker-ci/woodpecker/pull/5056)]
 
 ### Misc
