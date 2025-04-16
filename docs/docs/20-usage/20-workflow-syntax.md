@@ -510,6 +510,15 @@ For more details check the [service docs](./60-services.md#detachment).
 
 Using `directory`, you can set a subdirectory of your repository or an absolute path inside the Docker container in which your commands will run.
 
+### `backend_options`
+
+Using `backend_options`, you may set options that are specific to the particular backend used to execute the steps. As an example, you may want to set the user and/or group used inside a Docker container; or you may want to specify the service account for Kubernetes.
+
+For more details check the configuration docs of the backend you are using:
+
+- [Docker](../30-administration/10-configuration/11-backends/10-docker.md#step-specific-configuration)
+- [Kubernetes](../30-administration/10-configuration/11-backends/20-kubernetes.md#step-specific-configuration)
+
 ## `services`
 
 Woodpecker can provide service containers. They can for example be used to run databases or cache containers during the execution of workflow.
