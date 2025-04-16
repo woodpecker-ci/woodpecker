@@ -9,6 +9,7 @@ tasks:
       WOODPECKER_DEV_WWW_PROXY: http://localhost:8010
       WOODPECKER_BACKEND_DOCKER_NETWORK: ci_default
     init: |
+      # renovate: datasource=golang-version depName=golang
       GO_VERSION=1.24.2
       rm -rf ~/go
       curl -fsSL https://dl.google.com/go/go$GO_VERSION.linux-amd64.tar.gz | tar xzs -C ~/
