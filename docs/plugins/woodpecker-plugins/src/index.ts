@@ -56,7 +56,7 @@ async function loadContent(): Promise<Content> {
 
         return {
           name: docsHeader.name,
-          slug: slugify(docsHeader.name, { lower: true }),
+          slug: slugify(docsHeader.name, { lower: true, strict: true }),
           url: docsHeader.url,
           icon: docsHeader.icon,
           description: docsHeader.description,
