@@ -109,6 +109,9 @@ importers:
       marked:
         specifier: ^15.0.5
         version: 15.0.8
+      slugify:
+        specifier: ^1.6.6
+        version: 1.6.6
       tslib:
         specifier: ^2.8.1
         version: 2.8.1
@@ -5350,6 +5353,10 @@ packages:
 
   slugify@1.4.7:
     resolution: {integrity: sha512-tf+h5W1IrjNm/9rKKj0JU2MDMruiopx0jjVA5zCdBtcGjfp0+c5rHw/zADLC3IeKlGHtVbHtpfzvYA0OYT+HKg==}
+    engines: {node: '>=8.0.0'}
+
+  slugify@1.6.6:
+    resolution: {integrity: sha512-h+z7HKHYXj6wJU+AnS/+IH8Uh9fdcX1Lrhg1/VMdf9PwoBQXFcXiAdsy2tSK0P6gKwJLXp02r90ahUCqHk9rrw==}
     engines: {node: '>=8.0.0'}
 
   snake-case@3.0.4:
@@ -12736,6 +12743,8 @@ snapshots:
   slash@4.0.0: {}
 
   slugify@1.4.7: {}
+
+  slugify@1.6.6: {}
 
   snake-case@3.0.4:
     dependencies:

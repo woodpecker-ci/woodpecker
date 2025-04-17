@@ -2,6 +2,8 @@ import fs from 'fs';
 import path from 'path';
 import { LoadContext, Plugin, PluginContentLoadedActions } from '@docusaurus/types';
 import axios, { AxiosError } from 'axios';
+import slugify from 'slugify';
+
 
 import * as markdown from './markdown';
 import { Content, WoodpeckerPlugin, WoodpeckerPluginHeader, WoodpeckerPluginIndexEntry } from './types';
@@ -90,7 +92,7 @@ async function contentLoaded({
       const pluginJsonPath = await createData(`plugin-${i}.json`, JSON.stringify(plugin));
 
       addRoute({
-        path: `/plugins/${plugin.name}`,
+        path: `/plugins/${slugify(plugin.name, { lower: true, strict: true })}`,
         component: '@theme/WoodpeckerPlugin',
         modules: {
           plugin: pluginJsonPath,
