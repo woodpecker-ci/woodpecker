@@ -56,6 +56,7 @@ async function loadContent(): Promise<Content> {
 
         return {
           name: docsHeader.name,
+          slug: slugify(docsHeader.name, { lower: true }),
           url: docsHeader.url,
           icon: docsHeader.icon,
           description: docsHeader.description,
@@ -92,7 +93,7 @@ async function contentLoaded({
       const pluginJsonPath = await createData(`plugin-${i}.json`, JSON.stringify(plugin));
 
       addRoute({
-        path: `/plugins/${slugify(plugin.name, { lower: true, strict: true })}`,
+        path: `/plugins/${plugin.slug}`,
         component: '@theme/WoodpeckerPlugin',
         modules: {
           plugin: pluginJsonPath,
