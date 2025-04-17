@@ -4,7 +4,11 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@Spiffyk, @lukashass, @xoxys
+@Spiffyk, @joshuachp, @lukashass, @xoxys
+
+### 🐛 Bug Fixes
+
+- fix(cli): add name flag to adming secret add [[#5101](https://github.com/woodpecker-ci/woodpecker/pull/5101)]
 
 ### 📚 Documentation
 
