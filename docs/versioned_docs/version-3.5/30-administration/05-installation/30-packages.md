@@ -12,7 +12,7 @@ RELEASE_VERSION=$(curl -s https://api.github.com/repos/woodpecker-ci/woodpecker/
 
 # Debian/Ubuntu (x86_64)
 curl -fLOOO "https://github.com/woodpecker-ci/woodpecker/releases/download/${RELEASE_VERSION}/woodpecker-{server,agent,cli}_${RELEASE_VERSION#v}_amd64.deb"
-sudo apt --fix-broken install ./woodpecker-{server,agent,cli}_${RELEASE_VERSION}_amd64.deb
+sudo apt --fix-broken install ./woodpecker-{server,agent,cli}_${RELEASE_VERSION#v}_amd64.deb
 
 # CentOS/RHEL (x86_64)
 sudo dnf install https://github.com/woodpecker-ci/woodpecker/releases/download/v$RELEASE_VERSION/woodpecker-{server,agent,cli}-$RELEASE_VERSION.x86_64.rpm
