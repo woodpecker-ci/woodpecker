@@ -32,6 +32,10 @@ var secretCreateCmd = &cli.Command{
 	Action:    secretCreate,
 	Flags: []cli.Flag{
 		&cli.StringFlag{
+			Name:  "name",
+			Usage: "secret name",
+		},
+		&cli.StringFlag{
 			Name:  "value",
 			Usage: "secret value",
 		},
