@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.5.3](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.5.3) - 2025-04-16
+## [3.5.3](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.5.3) - 2025-04-17
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -10,6 +10,10 @@
 
 - Mention `backend_options` in workflow syntax docs [[#5096](https://github.com/woodpecker-ci/woodpecker/pull/5096)]
 - Document rootless container requirements for skip-clone [[#5056](https://github.com/woodpecker-ci/woodpecker/pull/5056)]
+
+### 📦️ Dependency
+
+- fix(deps): update golang-packages [[#5097](https://github.com/woodpecker-ci/woodpecker/pull/5097)]
 
 ### Misc
 
