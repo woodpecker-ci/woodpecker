@@ -1,10 +1,14 @@
 # Changelog
 
-## [3.5.3](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.5.3) - 2025-04-17
+## [3.6.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.6.0) - 2025-04-18
 
 ### ❤️ Thanks to all contributors! ❤️
 
 @Spiffyk, @joshuachp, @lukashass, @xoxys
+
+### 📈 Enhancement
+
+- Scroll to selected pipeline step [[#5103](https://github.com/woodpecker-ci/woodpecker/pull/5103)]
 
 ### 🐛 Bug Fixes
 
