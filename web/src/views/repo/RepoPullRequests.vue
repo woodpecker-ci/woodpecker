@@ -26,14 +26,16 @@
 </template>
 
 <script lang="ts" setup>
-import { inject, watch } from 'vue';
+import { computed, inject, watch } from 'vue';
 import type { Ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 import Icon from '~/components/atomic/Icon.vue';
 import ListItem from '~/components/atomic/ListItem.vue';
 import Panel from '~/components/layout/Panel.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { usePagination } from '~/compositions/usePaginate';
+import { useWPTitle } from '~/compositions/useWPTitle';
 import type { PullRequest, Repo } from '~/lib/api/types';
 
 const apiClient = useApiClient();
@@ -57,4 +59,7 @@ async function loadPullRequests(page: number): Promise<PullRequest[]> {
 const { resetPage, data: pullRequests, loading } = usePagination(loadPullRequests);
 
 watch(repo, resetPage);
+
+const { t } = useI18n();
+useWPTitle(computed(() => [t('repo.pull_requests'), repo.value.name]));
 </script>
