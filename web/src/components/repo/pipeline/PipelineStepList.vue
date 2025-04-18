@@ -94,7 +94,9 @@
           >
             <button
               v-for="step in workflow.children"
+              ref="steps"
               :key="step.pid"
+              :data-step-id="step.pid"
               type="button"
               :title="step.name"
               class="hover-effect hover:bg-wp-background-300 dark:hover:bg-wp-background-400 flex w-full cursor-pointer items-center gap-2 rounded-md border-2 border-transparent p-2"
@@ -116,7 +118,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, inject, ref, toRef } from 'vue';
+import { computed, inject, nextTick, ref, toRef, useTemplateRef, watch } from 'vue';
 import type { Ref } from 'vue';
 
 import Badge from '~/components/atomic/Badge.vue';
@@ -159,4 +161,18 @@ const workflowsCollapsed = ref<Record<PipelineStep['id'], boolean>>(
 const singleConfig = computed(
   () => pipelineConfigs?.value?.length === 1 && pipeline.value.workflows && pipeline.value.workflows.length === 1,
 );
+
+const steps = useTemplateRef('steps');
+watch(selectedStepId, async (newSelectedStepId, oldSelectedStepId) => {
+  if (!oldSelectedStepId && newSelectedStepId) {
+    await nextTick();
+    const step = steps.value?.find((s) => s.dataset.stepId === newSelectedStepId.toString());
+    if (step) {
+      step.scrollIntoView({
+        behavior: 'auto',
+        block: 'start',
+      });
+    }
+  }
+});
 </script>
