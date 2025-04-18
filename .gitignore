@@ -42,6 +42,7 @@ extras/
 /dist/
 /data/
 datastore/migration/testfiles/
+result
 
 docs/venv
 
