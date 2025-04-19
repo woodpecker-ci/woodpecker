@@ -3,10 +3,12 @@
 </template>
 
 <script lang="ts" setup>
-import { inject } from 'vue';
+import { computed, inject } from 'vue';
 import type { Ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 import PipelineList from '~/components/repo/pipeline/PipelineList.vue';
+import { useWPTitle } from '~/compositions/useWPTitle';
 import type { Pipeline, Repo, RepoPermissions } from '~/lib/api/types';
 
 const repo = inject<Ref<Repo>>('repo');
@@ -16,4 +18,7 @@ if (!repo || !repoPermissions) {
 }
 
 const pipelines = inject<Ref<Pipeline[]>>('pipelines');
+
+const { t } = useI18n()
+useWPTitle(computed(() => [t('repo.activity'), repo.value.name]));
 </script>
