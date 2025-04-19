@@ -1,5 +1,37 @@
 # Changelog
 
+## [3.6.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.6.0) - 2025-04-19
+
+### ❤️ Thanks to all contributors! ❤️
+
+@Spiffyk, @joshuachp, @lukashass, @xoxys
+
+### 📚 Documentation
+
+- chore(deps): update dependency @types/react to v19.1.2 [[#5107](https://github.com/woodpecker-ci/woodpecker/pull/5107)]
+- Slugify plugin names used for urls [[#5098](https://github.com/woodpecker-ci/woodpecker/pull/5098)]
+- Mention `backend_options` in workflow syntax docs [[#5096](https://github.com/woodpecker-ci/woodpecker/pull/5096)]
+- Document rootless container requirements for skip-clone [[#5056](https://github.com/woodpecker-ci/woodpecker/pull/5056)]
+
+### 📈 Enhancement
+
+- Scroll to selected pipeline step [[#5103](https://github.com/woodpecker-ci/woodpecker/pull/5103)]
+
+### 🐛 Bug Fixes
+
+- fix(cli): add name flag to adming secret add [[#5101](https://github.com/woodpecker-ci/woodpecker/pull/5101)]
+
+### 📦️ Dependency
+
+- chore(deps): update docker.io/mysql docker tag to v9.3.0 [[#5109](https://github.com/woodpecker-ci/woodpecker/pull/5109)]
+- chore(deps): update docker.io/woodpeckerci/plugin-ready-release-go docker tag to v3.2.0 [[#5110](https://github.com/woodpecker-ci/woodpecker/pull/5110)]
+- chore(deps): update pre-commit hook golangci/golangci-lint to v2.1.2 [[#5108](https://github.com/woodpecker-ci/woodpecker/pull/5108)]
+- fix(deps): update golang-packages [[#5097](https://github.com/woodpecker-ci/woodpecker/pull/5097)]
+
+### Misc
+
+- Fix gitpod golang version [[#5093](https://github.com/woodpecker-ci/woodpecker/pull/5093)]
+
 ## [3.5.2](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.5.2) - 2025-04-15
 
 ### ❤️ Thanks to all contributors! ❤️
