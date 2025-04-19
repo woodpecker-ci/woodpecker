@@ -1,6 +1,13 @@
 package model
 
 type Commit struct {
-	SHA      string
-	ForgeURL string
+	SHA      string       `json:"sha"`
+	Message  string       `json:"message"`
+	ForgeURL string       `json:"forge_url"`
+	Author   CommitAuthor `json:"author"`
+}
+
+type CommitAuthor struct {
+	Author string `json:"author"`
+	Email  string `json:"email"`
 }
