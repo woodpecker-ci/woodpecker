@@ -6,6 +6,13 @@
 
 @Spiffyk, @joshuachp, @lukashass, @xoxys
 
+### 📚 Documentation
+
+- chore(deps): update dependency @types/react to v19.1.2 [[#5107](https://github.com/woodpecker-ci/woodpecker/pull/5107)]
+- Slugify plugin names used for urls [[#5098](https://github.com/woodpecker-ci/woodpecker/pull/5098)]
+- Mention `backend_options` in workflow syntax docs [[#5096](https://github.com/woodpecker-ci/woodpecker/pull/5096)]
+- Document rootless container requirements for skip-clone [[#5056](https://github.com/woodpecker-ci/woodpecker/pull/5056)]
+
 ### 📈 Enhancement
 
 - Scroll to selected pipeline step [[#5103](https://github.com/woodpecker-ci/woodpecker/pull/5103)]
@@ -13,12 +20,6 @@
 ### 🐛 Bug Fixes
 
 - fix(cli): add name flag to adming secret add [[#5101](https://github.com/woodpecker-ci/woodpecker/pull/5101)]
-
-### 📚 Documentation
-
-- Slugify plugin names used for urls [[#5098](https://github.com/woodpecker-ci/woodpecker/pull/5098)]
-- Mention `backend_options` in workflow syntax docs [[#5096](https://github.com/woodpecker-ci/woodpecker/pull/5096)]
-- Document rootless container requirements for skip-clone [[#5056](https://github.com/woodpecker-ci/woodpecker/pull/5056)]
 
 ### 📦️ Dependency
 
