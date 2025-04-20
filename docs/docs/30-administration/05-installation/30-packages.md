@@ -15,7 +15,7 @@ curl -fLOOO "https://github.com/woodpecker-ci/woodpecker/releases/download/v${RE
 sudo apt --fix-broken install ./woodpecker-{server,agent,cli}_${RELEASE_VERSION}_amd64.deb
 
 # CentOS/RHEL (x86_64)
-sudo dnf install https://github.com/woodpecker-ci/woodpecker/releases/download/${RELEASE_VERSION}/woodpecker-{server,agent,cli}-${RELEASE_VERSION#v}.x86_64.rpm
+sudo dnf install https://github.com/woodpecker-ci/woodpecker/releases/download/v${RELEASE_VERSION}/woodpecker-{server,agent,cli}-${RELEASE_VERSION}.x86_64.rpm
 ```
 
 The package installation will create a systemd service file for the Woodpecker server and agent along with an example environment file. To configure the server, copy the example environment file `/etc/woodpecker/woodpecker-server.env.example` to `/etc/woodpecker/woodpecker-server.env` and adjust the values.
