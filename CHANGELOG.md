@@ -1,13 +1,14 @@
 # Changelog
 
-## [3.6.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.6.0) - 2025-04-19
+## [3.6.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.6.0) - 2025-04-20
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@Spiffyk, @joshuachp, @lukashass, @xoxys
+@Spiffyk, @joshuachp, @lukashass, @renich, @xoxys
 
 ### 📚 Documentation
 
+- .deb and .rpm installation commands fixed [[#5087](https://github.com/woodpecker-ci/woodpecker/pull/5087)]
 - chore(deps): update dependency @types/react to v19.1.2 [[#5107](https://github.com/woodpecker-ci/woodpecker/pull/5107)]
 - Slugify plugin names used for urls [[#5098](https://github.com/woodpecker-ci/woodpecker/pull/5098)]
 - Mention `backend_options` in workflow syntax docs [[#5096](https://github.com/woodpecker-ci/woodpecker/pull/5096)]
