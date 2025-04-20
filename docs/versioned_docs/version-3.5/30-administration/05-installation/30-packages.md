@@ -8,7 +8,7 @@
 The pre-built packages are available on the [GitHub releases](https://github.com/woodpecker-ci/woodpecker/releases/latest) page. The packages can be installed using the package manager of your distribution.
 
 ```Shell
-RELEASE_VERSION=$(curl -s https://api.github.com/repos/woodpecker-ci/woodpecker/releases/latest | grep -Po '"tag_name":\s"\K[^"]+')
+RELEASE_VERSION=$(curl -s https://api.github.com/repos/woodpecker-ci/woodpecker/releases/latest | grep -Po '"tag_name":\s"v\K[^"]+')
 
 # Debian/Ubuntu (x86_64)
 curl -fLOOO "https://github.com/woodpecker-ci/woodpecker/releases/download/${RELEASE_VERSION}/woodpecker-{server,agent,cli}_${RELEASE_VERSION#v}_amd64.deb"
