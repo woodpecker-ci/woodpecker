@@ -88,7 +88,7 @@ func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 		hostname, _ = os.Hostname()
 	}
 
-	counter.Polling = int(c.Int("max-workflows"))
+	counter.Polling = int(c.Int64("max-workflows"))
 	counter.Running = 0
 
 	if c.Bool("healthcheck") {
@@ -199,7 +199,7 @@ func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 	}
 	log.Debug().Msgf("loaded %s backend engine", backendEngine.Name())
 
-	maxWorkflows := int(c.Int("max-workflows"))
+	maxWorkflows := int(c.Int64("max-workflows"))
 
 	customLabels := make(map[string]string)
 	if err := stringSliceAddToMap(c.StringSlice("labels"), customLabels); err != nil {
@@ -313,7 +313,7 @@ func runWithRetry(backendEngines []types.Backend) func(ctx context.Context, c *c
 
 		initHealth()
 
-		retryCount := int(c.Int("connect-retry-count"))
+		retryCount := int(c.Int64("connect-retry-count"))
 		retryDelay := c.Duration("connect-retry-delay")
 		var err error
 		for i := 0; i < retryCount; i++ {

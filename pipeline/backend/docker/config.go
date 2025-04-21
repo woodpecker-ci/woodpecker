@@ -43,11 +43,11 @@ func configFromCli(c *cli.Command) (config, error) {
 		enableIPv6: c.Bool("backend-docker-ipv6"),
 		network:    c.String("backend-docker-network"),
 		resourceLimit: resourceLimit{
-			MemSwapLimit: c.Int("backend-docker-limit-mem-swap"),
-			MemLimit:     c.Int("backend-docker-limit-mem"),
-			ShmSize:      c.Int("backend-docker-limit-shm-size"),
-			CPUQuota:     c.Int("backend-docker-limit-cpu-quota"),
-			CPUShares:    c.Int("backend-docker-limit-cpu-shares"),
+			MemSwapLimit: c.Int64("backend-docker-limit-mem-swap"),
+			MemLimit:     c.Int64("backend-docker-limit-mem"),
+			ShmSize:      c.Int64("backend-docker-limit-shm-size"),
+			CPUQuota:     c.Int64("backend-docker-limit-cpu-quota"),
+			CPUShares:    c.Int64("backend-docker-limit-cpu-shares"),
 			CPUSet:       c.String("backend-docker-limit-cpu-set"),
 		},
 	}

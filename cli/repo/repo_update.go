@@ -55,7 +55,7 @@ var repoUpdateCmd = &cli.Command{
 			Name:  "config",
 			Usage: "repository configuration path. Example: .woodpecker.yml",
 		},
-		&cli.IntFlag{
+		&cli.Int64Flag{
 			Name:  "pipeline-counter",
 			Usage: "repository starting pipeline number",
 		},
@@ -83,7 +83,7 @@ func repoUpdate(ctx context.Context, c *cli.Command) error {
 		timeout         = c.Duration("timeout")
 		trusted         = c.Bool("trusted")
 		requireApproval = c.String("require-approval")
-		pipelineCounter = int(c.Int("pipeline-counter"))
+		pipelineCounter = int(c.Int64("pipeline-counter"))
 		unsafe          = c.Bool("unsafe")
 	)
 

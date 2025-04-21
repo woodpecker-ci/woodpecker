@@ -59,27 +59,27 @@ var Flags = []cli.Flag{
 	//
 	// resource limit parameters
 	//
-	&cli.IntFlag{
+	&cli.Int64Flag{
 		Sources: cli.EnvVars("WOODPECKER_BACKEND_DOCKER_LIMIT_MEM_SWAP", "WOODPECKER_LIMIT_MEM_SWAP"),
 		Name:    "backend-docker-limit-mem-swap",
 		Usage:   "maximum memory used for swap in bytes",
 	},
-	&cli.IntFlag{
+	&cli.Int64Flag{
 		Sources: cli.EnvVars("WOODPECKER_BACKEND_DOCKER_LIMIT_MEM", "WOODPECKER_LIMIT_MEM"),
 		Name:    "backend-docker-limit-mem",
 		Usage:   "maximum memory allowed in bytes",
 	},
-	&cli.IntFlag{
+	&cli.Int64Flag{
 		Sources: cli.EnvVars("WOODPECKER_BACKEND_DOCKER_LIMIT_SHM_SIZE", "WOODPECKER_LIMIT_SHM_SIZE"),
 		Name:    "backend-docker-limit-shm-size",
 		Usage:   "docker /dev/shm allowed in bytes",
 	},
-	&cli.IntFlag{
+	&cli.Int64Flag{
 		Sources: cli.EnvVars("WOODPECKER_BACKEND_DOCKER_LIMIT_CPU_QUOTA", "WOODPECKER_LIMIT_CPU_QUOTA"),
 		Name:    "backend-docker-limit-cpu-quota",
 		Usage:   "impose a cpu quota",
 	},
-	&cli.IntFlag{
+	&cli.Int64Flag{
 		Sources: cli.EnvVars("WOODPECKER_BACKEND_DOCKER_LIMIT_CPU_SHARES", "WOODPECKER_LIMIT_CPU_SHARES"),
 		Name:    "backend-docker-limit-cpu-shares",
 		Usage:   "change the cpu shares",

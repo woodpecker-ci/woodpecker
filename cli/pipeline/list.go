@@ -46,7 +46,7 @@ func buildPipelineListCmd() *cli.Command {
 				Name:  "status",
 				Usage: "status filter",
 			},
-			&cli.IntFlag{
+			&cli.Int64Flag{
 				Name:  "limit",
 				Usage: "limit the list size",
 				Value: 25,
@@ -104,7 +104,7 @@ func pipelineList(c *cli.Command, client woodpecker.Client) ([]*woodpecker.Pipel
 	branch := c.String("branch")
 	event := c.String("event")
 	status := c.String("status")
-	limit := int(c.Int("limit"))
+	limit := int(c.Int64("limit"))
 
 	pipelines, err := shared_utils.Paginate(func(page int) ([]*woodpecker.Pipeline, error) {
 		return client.PipelineList(repoID,
