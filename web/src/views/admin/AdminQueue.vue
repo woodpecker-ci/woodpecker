@@ -93,6 +93,7 @@ import ListItem from '~/components/atomic/ListItem.vue';
 import Settings from '~/components/layout/Settings.vue';
 import useApiClient from '~/compositions/useApiClient';
 import useNotifications from '~/compositions/useNotifications';
+import { useWPTitle } from '~/compositions/useWPTitle';
 import type { QueueInfo } from '~/lib/api/types';
 
 const apiClient = useApiClient();
@@ -159,4 +160,6 @@ onBeforeUnmount(() => {
     window.clearInterval(reloadInterval.value);
   }
 });
+
+useWPTitle(computed(() => [t('admin.settings.queue.queue'), t('admin.settings.settings')]));
 </script>

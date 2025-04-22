@@ -291,6 +291,7 @@
   },
   "admin": {
     "settings": {
+      "settings": "Admin Settings",
       "not_allowed": "You are not allowed to access server settings",
       "secrets": {
         "desc": "Global secrets can be used in the pipelines of all repositories.",
