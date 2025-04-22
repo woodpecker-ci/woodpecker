@@ -41,7 +41,7 @@ var pipelinePurgeCmd = &cli.Command{
 			Usage:    "remove pipelines older than the specified time limit",
 			Required: true,
 		},
-		&cli.IntFlag{
+		&cli.Int64Flag{
 			Name:  "keep-min",
 			Usage: "minimum number of pipelines to keep",
 			Value: 10,
@@ -73,7 +73,7 @@ func pipelinePurge(c *cli.Command, client woodpecker.Client) (err error) {
 	}
 
 	olderThan := c.String("older-than")
-	keepMin := c.Int("keep-min")
+	keepMin := c.Int64("keep-min")
 	dryRun := c.Bool("dry-run")
 
 	duration, err := time.ParseDuration(olderThan)

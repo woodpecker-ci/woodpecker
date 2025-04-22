@@ -83,7 +83,7 @@ func repoUpdate(ctx context.Context, c *cli.Command) error {
 		timeout         = c.Duration("timeout")
 		trusted         = c.Bool("trusted")
 		requireApproval = c.String("require-approval")
-		pipelineCounter = int(c.Int("pipeline-counter"))
+		pipelineCounter = c.Int("pipeline-counter")
 		unsafe          = c.Bool("unsafe")
 	)
 

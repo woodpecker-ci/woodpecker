@@ -52,7 +52,7 @@ require (
 	github.com/swaggo/gin-swagger v1.6.0
 	github.com/swaggo/swag v1.16.4
 	github.com/urfave/cli-docs/v3 v3.0.0-alpha6
-	github.com/urfave/cli/v3 v3.1.1
+	github.com/urfave/cli/v3 v3.2.0
 	github.com/xeipuuv/gojsonschema v1.2.0
 	github.com/yaronf/httpsign v0.3.2
 	github.com/zalando/go-keyring v0.2.6
@@ -64,7 +64,7 @@ require (
 	golang.org/x/sync v0.13.0
 	golang.org/x/term v0.31.0
 	golang.org/x/text v0.24.0
-	google.golang.org/grpc v1.71.1
+	google.golang.org/grpc v1.72.0
 	google.golang.org/protobuf v1.36.6
 	gopkg.in/yaml.v3 v3.0.1
 	k8s.io/api v0.32.3
@@ -201,8 +201,8 @@ require (
 	golang.org/x/sys v0.32.0 // indirect
 	golang.org/x/time v0.10.0 // indirect
 	golang.org/x/tools v0.27.0 // indirect
-	google.golang.org/genproto/googleapis/api v0.0.0-20250106144421-5f5ef82da422 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20250115164207-1a7da9e5054f // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20250218202821-56aae31c358a // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20250218202821-56aae31c358a // indirect
 	gopkg.in/evanphx/json-patch.v4 v4.12.0 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gotest.tools/v3 v3.4.0 // indirect
