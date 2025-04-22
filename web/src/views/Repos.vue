@@ -66,8 +66,8 @@ const reposLastActivity = computed(() => sortReposByLastActivity(searchedRepos.v
 onMounted(async () => {
   await repoStore.loadRepos();
 });
-const { t } = useI18n()
-useWPTitle(computed(() => [t('repositories.title'),]));
+const { t } = useI18n();
+useWPTitle(computed(() => [t('repositories.title')]));
 </script>
 
 <style scoped>
