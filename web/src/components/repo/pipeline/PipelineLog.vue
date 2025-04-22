@@ -118,9 +118,9 @@ import { useRoute } from 'vue-router';
 import IconButton from '~/components/atomic/IconButton.vue';
 import PipelineStatusIcon from '~/components/repo/pipeline/PipelineStatusIcon.vue';
 import useApiClient from '~/compositions/useApiClient';
+import { requiredInject } from '~/compositions/useInjectProvide';
 import useNotifications from '~/compositions/useNotifications';
 import type { Pipeline, PipelineStep, PipelineWorkflow } from '~/lib/api/types';
-import { requiredInject } from '~/compositions/useInjectProvide';
 
 interface LogLine {
   index: number;

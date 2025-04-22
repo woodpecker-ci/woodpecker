@@ -160,10 +160,6 @@ watch(
 const showDeployPipelinePopup = ref(false);
 
 async function loadPipeline(): Promise<void> {
-  if (!repo) {
-    throw new Error('Unexpected: Repo is undefined');
-  }
-
   await pipelineStore.loadPipeline(repo.value.id, Number.parseInt(pipelineId.value, 10));
 
   if (!pipeline.value?.number) {
@@ -174,10 +170,6 @@ async function loadPipeline(): Promise<void> {
 }
 
 const { doSubmit: cancelPipeline, isLoading: isCancelingPipeline } = useAsyncAction(async () => {
-  if (!repo) {
-    throw new Error('Unexpected: Repo is undefined');
-  }
-
   if (!pipeline.value?.number) {
     throw new Error('Unexpected: Pipeline number not found');
   }
@@ -187,10 +179,6 @@ const { doSubmit: cancelPipeline, isLoading: isCancelingPipeline } = useAsyncAct
 });
 
 const { doSubmit: restartPipeline, isLoading: isRestartingPipeline } = useAsyncAction(async () => {
-  if (!repo) {
-    throw new Error('Unexpected: Repo is undefined');
-  }
-
   const newPipeline = await apiClient.restartPipeline(repo.value.id, pipelineId.value, {
     fork: true,
   });
