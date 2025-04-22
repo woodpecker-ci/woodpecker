@@ -101,5 +101,5 @@ function showAddRegistry() {
   selectedRegistry.value = cloneDeep(emptyRegistry);
 }
 
-useWPTitle(computed(() => [i18n.t('registries.registries'), i18n.t('org.settings.settings')]));
+useWPTitle(computed(() => [i18n.t('registries.registries'), org.value.name]));
 </script>

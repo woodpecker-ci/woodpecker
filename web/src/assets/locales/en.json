@@ -277,7 +277,6 @@
   },
   "org": {
     "settings": {
-      "settings": "Organization Settings",
       "not_allowed": "You are not allowed to access the settings of this organization",
       "secrets": {
         "desc": "Organization secrets can be used in the pipelines of all repositories owned by the organization."

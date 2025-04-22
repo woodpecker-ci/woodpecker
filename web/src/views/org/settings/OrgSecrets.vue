@@ -94,5 +94,5 @@ function showAddSecret() {
   selectedSecret.value = cloneDeep(emptySecret);
 }
 
-useWPTitle(computed(() => [i18n.t('secrets.secrets'), i18n.t('org.settings.settings')]));
+useWPTitle(computed(() => [i18n.t('secrets.secrets'), org.value.name]));
 </script>

@@ -27,5 +27,5 @@ const updateAgent = (agent: Agent) => apiClient.updateOrgAgent(org.value.id, age
 const deleteAgent = (agent: Agent) => apiClient.deleteOrgAgent(org.value.id, agent.id);
 
 const { t } = useI18n();
-useWPTitle(computed(() => [t('admin.settings.agents.agents'), t('org.settings.settings')]));
+useWPTitle(computed(() => [t('admin.settings.agents.agents'), org.value.name]));
 </script>
