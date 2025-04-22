@@ -43,7 +43,7 @@ var cronShowCmd = &cli.Command{
 
 func cronShow(ctx context.Context, c *cli.Command) error {
 	var (
-		cronID           = c.Int("id")
+		cronID           = c.Int64("id")
 		repoIDOrFullName = c.String("repository")
 		format           = c.String("format") + "\n"
 	)

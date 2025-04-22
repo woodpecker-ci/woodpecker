@@ -57,7 +57,7 @@ var cronUpdateCmd = &cli.Command{
 func cronUpdate(ctx context.Context, c *cli.Command) error {
 	var (
 		repoIDOrFullName = c.String("repository")
-		cronID           = c.Int("id")
+		cronID           = c.Int64("id")
 		jobName          = c.String("name")
 		branch           = c.String("branch")
 		schedule         = c.String("schedule")
