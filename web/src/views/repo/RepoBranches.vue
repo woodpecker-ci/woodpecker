@@ -21,29 +21,22 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, inject, watch } from 'vue';
-import type { Ref } from 'vue';
+import { computed, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 import Badge from '~/components/atomic/Badge.vue';
 import Icon from '~/components/atomic/Icon.vue';
 import ListItem from '~/components/atomic/ListItem.vue';
 import Panel from '~/components/layout/Panel.vue';
 import useApiClient from '~/compositions/useApiClient';
+import { requiredInject } from '~/compositions/useInjectProvide';
 import { usePagination } from '~/compositions/usePaginate';
-import type { Repo } from '~/lib/api/types';
 
 const apiClient = useApiClient();
 
-const repo = inject<Ref<Repo>>('repo');
-if (!repo) {
-  throw new Error('Unexpected: "repo" should be provided at this place');
-}
+const repo = requiredInject('repo');
 
 async function loadBranches(page: number): Promise<string[]> {
-  if (!repo) {
-    throw new Error('Unexpected: "repo" should be provided at this place');
-  }
-
   return apiClient.getRepoBranches(repo.value.id, { page });
 }
 
