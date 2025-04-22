@@ -11,6 +11,7 @@
 <script lang="ts" setup>
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
+
 import AgentManager from '~/components/agent/AgentManager.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { requiredInject } from '~/compositions/useInjectProvide';
