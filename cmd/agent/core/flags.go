@@ -68,7 +68,7 @@ var flags = []cli.Flag{
 		Aliases: []string{"filter"}, // remove in v4.x
 		Usage:   "List of labels to filter tasks on. An agent must be assigned every tag listed in a task to be selected.",
 	},
-	&cli.Int64Flag{
+	&cli.IntFlag{
 		Sources: cli.EnvVars("WOODPECKER_MAX_WORKFLOWS", "WOODPECKER_MAX_PROCS"), // cspell:words PROCS
 		Name:    "max-workflows",
 		Usage:   "agent parallel workflows",

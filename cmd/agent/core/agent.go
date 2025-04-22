@@ -88,7 +88,7 @@ func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 		hostname, _ = os.Hostname()
 	}
 
-	counter.Polling = int(c.Int64("max-workflows"))
+	counter.Polling = c.Int("max-workflows")
 	counter.Running = 0
 
 	if c.Bool("healthcheck") {
@@ -199,7 +199,7 @@ func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 	}
 	log.Debug().Msgf("loaded %s backend engine", backendEngine.Name())
 
-	maxWorkflows := int(c.Int64("max-workflows"))
+	maxWorkflows := c.Int("max-workflows")
 
 	customLabels := make(map[string]string)
 	if err := stringSliceAddToMap(c.StringSlice("labels"), customLabels); err != nil {

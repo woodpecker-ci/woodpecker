@@ -38,13 +38,13 @@ var flags = append([]cli.Flag{
 		Aliases: []string{"log-xorm-sql"}, // TODO: remove in v4.0.0
 		Usage:   "enable logging of sql commands",
 	},
-	&cli.Int64Flag{
+	&cli.IntFlag{
 		Sources: cli.EnvVars("WOODPECKER_DATABASE_MAX_CONNECTIONS"),
 		Name:    "db-max-open-connections",
 		Usage:   "max connections xorm is allowed create",
 		Value:   100,
 	},
-	&cli.Int64Flag{
+	&cli.IntFlag{
 		Sources: cli.EnvVars("WOODPECKER_DATABASE_IDLE_CONNECTIONS"),
 		Name:    "db-max-idle-connections",
 		Usage:   "amount of connections xorm will hold open",
