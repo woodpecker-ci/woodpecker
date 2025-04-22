@@ -68,7 +68,7 @@ func TestMetadataFromContext(t *testing.T) {
 		flags := []cli.Flag{
 			&cli.StringFlag{Name: "metadata-file"},
 			&cli.StringFlag{Name: "repo-name"},
-			&cli.IntFlag{Name: "pipeline-number"},
+			&cli.Int64Flag{Name: "pipeline-number"},
 		}
 
 		runCommand(flags, func(c *cli.Command) {
@@ -106,7 +106,7 @@ func TestMetadataFromContext(t *testing.T) {
 	t.Run("DefaultValues", func(t *testing.T) {
 		flags := []cli.Flag{
 			&cli.StringFlag{Name: "repo-name", Value: "test/default-repo"},
-			&cli.IntFlag{Name: "pipeline-number", Value: 1},
+			&cli.Int64Flag{Name: "pipeline-number", Value: 1},
 		}
 
 		runCommand(flags, func(c *cli.Command) {
