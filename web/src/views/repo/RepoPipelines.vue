@@ -14,5 +14,5 @@ const repo = requiredInject('repo');
 const pipelines = requiredInject('pipelines');
 
 const { t } = useI18n();
-useWPTitle(computed(() => [t('repo.activity'), repo.value.name]));
+useWPTitle(computed(() => [t('repo.activity'), repo.value.full_name]));
 </script>

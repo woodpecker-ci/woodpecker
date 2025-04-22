@@ -60,5 +60,5 @@ const branchesWithDefaultBranchFirst = computed(() =>
 watch(repo, resetPage);
 
 const { t } = useI18n();
-useWPTitle(computed(() => [t('repo.branches'), repo.value.name]));
+useWPTitle(computed(() => [t('repo.branches'), repo.value.full_name]));
 </script>

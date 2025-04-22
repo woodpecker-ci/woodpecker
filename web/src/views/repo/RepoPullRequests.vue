@@ -54,5 +54,5 @@ const { resetPage, data: pullRequests, loading } = usePagination(loadPullRequest
 watch(repo, resetPage);
 
 const { t } = useI18n();
-useWPTitle(computed(() => [t('repo.pull_requests'), repo.value.name]));
+useWPTitle(computed(() => [t('repo.pull_requests'), repo.value.full_name]));
 </script>
