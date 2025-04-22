@@ -3,8 +3,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, inject } from 'vue';
-import type { Ref } from 'vue';
+import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import PipelineList from '~/components/repo/pipeline/PipelineList.vue';
