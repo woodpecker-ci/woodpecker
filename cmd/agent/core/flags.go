@@ -103,7 +103,7 @@ var flags = []cli.Flag{
 		Usage:   "backend to run pipelines on",
 		Value:   "auto-detect",
 	},
-	&cli.Int64Flag{
+	&cli.IntFlag{
 		Sources: cli.EnvVars("WOODPECKER_CONNECT_RETRY_COUNT"),
 		Name:    "connect-retry-count",
 		Usage:   "number of times to retry connecting to the server",
