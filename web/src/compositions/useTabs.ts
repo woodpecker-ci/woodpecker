@@ -3,7 +3,7 @@ import type { RouteLocationRaw } from 'vue-router';
 
 import type { IconNames } from '~/components/atomic/Icon.vue';
 
-import { requiredInject, provide } from './useInjectProvide';
+import { provide, requiredInject } from './useInjectProvide';
 
 export interface Tab {
   to: RouteLocationRaw;

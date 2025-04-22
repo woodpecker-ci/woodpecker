@@ -22,7 +22,6 @@
 
 <script lang="ts" setup>
 import { computed, watch } from 'vue';
-import { useI18n } from 'vue-i18n';
 
 import Badge from '~/components/atomic/Badge.vue';
 import Icon from '~/components/atomic/Icon.vue';
