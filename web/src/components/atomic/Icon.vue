@@ -63,6 +63,7 @@
   <SvgIcon v-else-if="name === 'file-edit-outline'" :path="mdiFileEditOutline" size="1.3rem" />
   <SvgIcon v-else-if="name === 'bug-outline'" :path="mdiBugOutline" size="1.3rem" />
   <SvgIcon v-else-if="name === 'docker'" :path="mdiDocker" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'forge'" :path="mdiCodeBraces" size="1.3rem" />
 
   <SvgIcon v-else-if="name === 'visibility-private'" :path="mdiLockOutline" size="1.3rem" />
   <SvgIcon v-else-if="name === 'visibility-internal'" :path="mdiLockOpenOutline" size="1.3rem" />
@@ -154,6 +155,7 @@ import {
   mdiTrashCanOutline,
   mdiTrayFull,
   mdiWrenchCogOutline,
+  mdiCodeBraces,
 } from '@mdi/js';
 import { siForgejo, siGitea } from 'simple-icons';
 
@@ -226,7 +228,8 @@ export type IconNames =
   | 'user'
   | 'org'
   | 'cron'
-  | 'toolbox';
+  | 'toolbox'
+  | 'forge';
 
 defineProps<{
   name: IconNames;
