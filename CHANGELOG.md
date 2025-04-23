@@ -1,10 +1,15 @@
 # Changelog
 
-## [3.6.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.6.0) - 2025-04-22
+## [3.6.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.6.0) - 2025-04-23
 
 ### ❤️ Thanks to all contributors! ❤️
 
 @Spiffyk, @gsaslis, @joshuachp, @lukashass, @renich, @xoxys
+
+### 📈 Enhancement
+
+- Use centrally typed inject provide in Vue [[#5113](https://github.com/woodpecker-ci/woodpecker/pull/5113)]
+- Scroll to selected pipeline step [[#5103](https://github.com/woodpecker-ci/woodpecker/pull/5103)]
 
 ### 📚 Documentation
 
@@ -15,10 +20,6 @@
 - Slugify plugin names used for urls [[#5098](https://github.com/woodpecker-ci/woodpecker/pull/5098)]
 - Mention `backend_options` in workflow syntax docs [[#5096](https://github.com/woodpecker-ci/woodpecker/pull/5096)]
 - Document rootless container requirements for skip-clone [[#5056](https://github.com/woodpecker-ci/woodpecker/pull/5056)]
-
-### 📈 Enhancement
-
-- Scroll to selected pipeline step [[#5103](https://github.com/woodpecker-ci/woodpecker/pull/5103)]
 
 ### 🐛 Bug Fixes
 
