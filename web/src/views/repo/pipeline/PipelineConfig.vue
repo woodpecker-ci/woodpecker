@@ -18,12 +18,9 @@ import { computed } from 'vue';
 
 import SyntaxHighlight from '~/components/atomic/SyntaxHighlight';
 import Panel from '~/components/layout/Panel.vue';
-import { inject } from '~/compositions/useInjectProvide';
+import { requiredInject } from '~/compositions/useInjectProvide';
 
-const pipelineConfigs = inject('pipeline-configs');
-if (!pipelineConfigs) {
-  throw new Error('Unexpected: "pipelineConfigs" should be provided at this place');
-}
+const pipelineConfigs = requiredInject('pipeline-configs');
 
 const pipelineConfigsDecoded = computed(
   () =>

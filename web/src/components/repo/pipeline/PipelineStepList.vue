@@ -118,17 +118,17 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, inject, nextTick, ref, toRef, useTemplateRef, watch } from 'vue';
-import type { Ref } from 'vue';
+import { computed, nextTick, ref, toRef, useTemplateRef, watch } from 'vue';
 
 import Badge from '~/components/atomic/Badge.vue';
 import Icon from '~/components/atomic/Icon.vue';
 import Panel from '~/components/layout/Panel.vue';
 import PipelineStatusIcon from '~/components/repo/pipeline/PipelineStatusIcon.vue';
 import PipelineStepDuration from '~/components/repo/pipeline/PipelineStepDuration.vue';
+import { requiredInject } from '~/compositions/useInjectProvide';
 import usePipeline from '~/compositions/usePipeline';
 import { StepType } from '~/lib/api/types';
-import type { Pipeline, PipelineConfig, PipelineStep } from '~/lib/api/types';
+import type { Pipeline, PipelineStep } from '~/lib/api/types';
 
 const props = defineProps<{
   pipeline: Pipeline;
@@ -142,7 +142,7 @@ defineEmits<{
 const pipeline = toRef(props, 'pipeline');
 const selectedStepId = toRef(props, 'selectedStepId');
 const { prettyRef } = usePipeline(pipeline);
-const pipelineConfigs = inject<Ref<PipelineConfig[]>>('pipeline-configs');
+const pipelineConfigs = requiredInject('pipeline-configs');
 
 const workflowsCollapsed = ref<Record<PipelineStep['id'], boolean>>(
   pipeline.value.workflows && pipeline.value.workflows.length > 1

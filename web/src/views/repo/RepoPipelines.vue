@@ -3,17 +3,9 @@
 </template>
 
 <script lang="ts" setup>
-import { inject } from 'vue';
-import type { Ref } from 'vue';
-
 import PipelineList from '~/components/repo/pipeline/PipelineList.vue';
-import type { Pipeline, Repo, RepoPermissions } from '~/lib/api/types';
+import { requiredInject } from '~/compositions/useInjectProvide';
 
-const repo = inject<Ref<Repo>>('repo');
-const repoPermissions = inject<Ref<RepoPermissions>>('repo-permissions');
-if (!repo || !repoPermissions) {
-  throw new Error('Unexpected: "repo" & "repoPermissions" should be provided at this place');
-}
-
-const pipelines = inject<Ref<Pipeline[]>>('pipelines');
+const repo = requiredInject('repo');
+const pipelines = requiredInject('pipelines');
 </script>
