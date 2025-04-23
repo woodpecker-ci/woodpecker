@@ -50,6 +50,7 @@
 <script lang="ts" setup>
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
+
 import DocsLink from '~/components/atomic/DocsLink.vue';
 import Icon from '~/components/atomic/Icon.vue';
 import RenderMarkdown from '~/components/atomic/RenderMarkdown.vue';
