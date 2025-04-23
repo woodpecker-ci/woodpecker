@@ -20,7 +20,6 @@ import type { Agent } from '~/lib/api/types';
 
 const apiClient = useApiClient();
 const org = requiredInject('org');
-const org = requiredInject('org');
 
 const loadAgents = (page: number) => apiClient.getOrgAgents(org.value.id, { page });
 const createAgent = (agent: Partial<Agent>) => apiClient.createOrgAgent(org.value.id, agent);
