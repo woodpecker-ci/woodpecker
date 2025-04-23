@@ -26,31 +26,24 @@
 </template>
 
 <script lang="ts" setup>
-import { inject, watch } from 'vue';
-import type { Ref } from 'vue';
+import { watch } from 'vue';
 
 import Icon from '~/components/atomic/Icon.vue';
 import ListItem from '~/components/atomic/ListItem.vue';
 import Panel from '~/components/layout/Panel.vue';
 import useApiClient from '~/compositions/useApiClient';
+import { requiredInject } from '~/compositions/useInjectProvide';
 import { usePagination } from '~/compositions/usePaginate';
-import type { PullRequest, Repo } from '~/lib/api/types';
+import type { PullRequest } from '~/lib/api/types';
 
 const apiClient = useApiClient();
 
-const repo = inject<Ref<Repo>>('repo');
-if (!repo) {
-  throw new Error('Unexpected: "repo" should be provided at this place');
-}
+const repo = requiredInject('repo');
 if (!repo.value.pr_enabled || !repo.value.allow_pr) {
   throw new Error('Unexpected: pull requests are disabled for repo');
 }
 
 async function loadPullRequests(page: number): Promise<PullRequest[]> {
-  if (!repo) {
-    throw new Error('Unexpected: "repo" should be provided at this place');
-  }
-
   return apiClient.getRepoPullRequests(repo.value.id, { page });
 }
 

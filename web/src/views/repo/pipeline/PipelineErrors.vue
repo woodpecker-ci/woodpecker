@@ -48,19 +48,14 @@
 </template>
 
 <script lang="ts" setup>
-import { inject } from 'vue';
-import type { Ref } from 'vue';
-
 import DocsLink from '~/components/atomic/DocsLink.vue';
 import Icon from '~/components/atomic/Icon.vue';
 import RenderMarkdown from '~/components/atomic/RenderMarkdown.vue';
 import Panel from '~/components/layout/Panel.vue';
-import type { Pipeline, PipelineError } from '~/lib/api/types';
+import { requiredInject } from '~/compositions/useInjectProvide';
+import type { PipelineError } from '~/lib/api/types';
 
-const pipeline = inject<Ref<Pipeline>>('pipeline');
-if (!pipeline) {
-  throw new Error('Unexpected: "pipeline" should be provided at this place');
-}
+const pipeline = requiredInject('pipeline');
 
 function isLinterError(error: PipelineError): error is PipelineError<{ file?: string; field: string }> {
   return error.type === 'linter';

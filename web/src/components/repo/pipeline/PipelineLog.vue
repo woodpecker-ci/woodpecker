@@ -111,16 +111,16 @@ import { useStorage } from '@vueuse/core';
 import { AnsiUp } from 'ansi_up';
 import { decode } from 'js-base64';
 import { debounce } from 'lodash';
-import { computed, inject, nextTick, onBeforeUnmount, onMounted, ref, toRef, watch } from 'vue';
-import type { Ref } from 'vue';
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, toRef, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
 
 import IconButton from '~/components/atomic/IconButton.vue';
 import PipelineStatusIcon from '~/components/repo/pipeline/PipelineStatusIcon.vue';
 import useApiClient from '~/compositions/useApiClient';
+import { requiredInject } from '~/compositions/useInjectProvide';
 import useNotifications from '~/compositions/useNotifications';
-import type { Pipeline, PipelineStep, PipelineWorkflow, Repo, RepoPermissions } from '~/lib/api/types';
+import type { Pipeline, PipelineStep, PipelineWorkflow } from '~/lib/api/types';
 
 interface LogLine {
   index: number;
@@ -143,8 +143,8 @@ const notifications = useNotifications();
 const i18n = useI18n();
 const pipeline = toRef(props, 'pipeline');
 const stepId = toRef(props, 'stepId');
-const repo = inject<Ref<Repo>>('repo');
-const repoPermissions = inject<Ref<RepoPermissions>>('repo-permissions');
+const repo = requiredInject('repo');
+const repoPermissions = requiredInject('repo-permissions');
 const apiClient = useApiClient();
 const route = useRoute();
 
@@ -284,10 +284,6 @@ async function download() {
 async function loadLogs() {
   if (loadedStepSlug.value === stepSlug.value) {
     return;
-  }
-
-  if (!repo) {
-    throw new Error('Unexpected: "repo" should be provided at this place');
   }
 
   log.value = undefined;

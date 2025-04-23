@@ -25,8 +25,7 @@
 
 <script lang="ts" setup>
 import { cloneDeep } from 'lodash';
-import { computed, inject, ref } from 'vue';
-import type { Ref } from 'vue';
+import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import Button from '~/components/atomic/Button.vue';
@@ -35,10 +34,11 @@ import SecretEdit from '~/components/secrets/SecretEdit.vue';
 import SecretList from '~/components/secrets/SecretList.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
+import { requiredInject } from '~/compositions/useInjectProvide';
 import useNotifications from '~/compositions/useNotifications';
 import { usePagination } from '~/compositions/usePaginate';
 import { WebhookEvents } from '~/lib/api/types';
-import type { Org, Secret } from '~/lib/api/types';
+import type { Secret } from '~/lib/api/types';
 
 const emptySecret: Partial<Secret> = {
   name: '',
@@ -51,25 +51,17 @@ const apiClient = useApiClient();
 const notifications = useNotifications();
 const i18n = useI18n();
 
-const org = inject<Ref<Org>>('org');
+const org = requiredInject('org');
 const selectedSecret = ref<Partial<Secret>>();
 const isEditingSecret = computed(() => !!selectedSecret.value?.id);
 
 async function loadSecrets(page: number): Promise<Secret[] | null> {
-  if (!org?.value) {
-    throw new Error("Unexpected: Can't load org");
-  }
-
   return apiClient.getOrgSecretList(org.value.id, { page });
 }
 
 const { resetPage, data: secrets } = usePagination(loadSecrets, () => !selectedSecret.value);
 
 const { doSubmit: createSecret, isLoading: isSaving } = useAsyncAction(async () => {
-  if (!org?.value) {
-    throw new Error("Unexpected: Can't load org");
-  }
-
   if (!selectedSecret.value) {
     throw new Error("Unexpected: Can't get secret");
   }
@@ -88,10 +80,6 @@ const { doSubmit: createSecret, isLoading: isSaving } = useAsyncAction(async () 
 });
 
 const { doSubmit: deleteSecret, isLoading: isDeleting } = useAsyncAction(async (_secret: Secret) => {
-  if (!org?.value) {
-    throw new Error("Unexpected: Can't load org");
-  }
-
   await apiClient.deleteOrgSecret(org.value.id, _secret.name);
   notifications.notify({ title: i18n.t('secrets.deleted'), type: 'success' });
   resetPage();
