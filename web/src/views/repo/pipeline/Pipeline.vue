@@ -76,6 +76,7 @@ import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
 import { requiredInject } from '~/compositions/useInjectProvide';
 import useNotifications from '~/compositions/useNotifications';
+import { useWPTitle } from '~/compositions/useWPTitle';
 import type { PipelineStep } from '~/lib/api/types';
 
 const props = defineProps<{
@@ -144,4 +145,12 @@ const { doSubmit: declinePipeline, isLoading: isDecliningPipeline } = useAsyncAc
   await apiClient.declinePipeline(repo.value.id, `${pipeline.value.number}`);
   notifications.notify({ title: i18n.t('repo.pipeline.protected.decline_success'), type: 'success' });
 });
+
+useWPTitle(
+  computed(() => [
+    i18n.t('repo.pipeline.tasks'),
+    i18n.t('repo.pipeline.pipeline', { pipelineId: pipeline.value.id }),
+    repo.value.full_name,
+  ]),
+);
 </script>
