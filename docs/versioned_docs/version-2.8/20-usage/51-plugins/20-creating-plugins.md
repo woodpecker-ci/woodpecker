@@ -136,4 +136,4 @@ docker run --rm \
 - Use [built-in env vars](../50-environment.md#built-in-environment-variables) where possible.
 - Do not use any configuration except settings (and internal env vars). This means: Don't require using [`environment`](../50-environment.md) and don't require specific secret names.
 - Add a `docs.md` file, listing all your settings and plugin metadata ([example](https://github.com/woodpecker-ci/plugin-git/blob/main/docs.md)).
-- Add your plugin to the [plugin index](/plugins) using your `docs.md` ([the example above in the index](https://woodpecker-ci.org/plugins/Git%20Clone)).
+- Add your plugin to the [plugin index](/plugins) using your `docs.md` ([the example above in the index](https://woodpecker-ci.org/plugins/git-clone)).
