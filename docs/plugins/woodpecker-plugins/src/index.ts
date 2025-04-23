@@ -21,7 +21,14 @@ async function loadContent(): Promise<Content> {
           const response = await axios(i.docs);
           docsContent = response.data;
         } catch (e) {
-          console.error("Can't fetch docs file", i.docs, (e as AxiosError).message);
+          const axiosError = e as AxiosError;
+          console.error(
+            "Can't fetch docs file",
+            i.docs,
+            axiosError.message,
+            axiosError.response?.status,
+            axiosError.response?.statusText
+          );
           return undefined;
         }
 

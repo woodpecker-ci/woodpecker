@@ -52,7 +52,7 @@ Without an explicit allowlist, a malicious contributor could exploit a custom cl
 
 :::info
 This setting does not affect subsequent steps, nor does it allow direct pushes to the repository.
-To enable pushing changes, you can inject Git credentials as a secret or use a dedicated plugin, such as [appleboy/drone-git-push](https://woodpecker-ci.org/plugins/Git%20Push).
+To enable pushing changes, you can inject Git credentials as a secret or use a dedicated plugin, such as [appleboy/drone-git-push](https://woodpecker-ci.org/plugins/git-push).
 :::
 
 ## Project visibility
