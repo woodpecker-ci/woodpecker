@@ -115,21 +115,18 @@ in
   # This automatically sets up certificates via let's encrypt
   security.acme.defaults.email = "acme@example.com";
   security.acme.acceptTerms = true;
-  security.acme.certs."${domain}" = { };
 
   # Setting up a nginx proxy that handles tls for us
-  networking.firewall.allowedTCPPorts = [ 80 443 ];
   services.nginx = {
     enable = true;
+    openFirewall = true;
     recommendedTlsSettings = true;
     recommendedOptimisation = true;
     recommendedProxySettings = true;
     virtualHosts."${domain}" = {
       enableACME = true;
       forceSSL = true;
-      locations."/" = {
-        proxyPass = "http://localhost:3007";
-      };
+      locations."/".proxyPass = "http://localhost:3007";
     };
   };
 
