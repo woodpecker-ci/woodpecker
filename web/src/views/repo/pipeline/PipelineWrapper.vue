@@ -102,7 +102,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, inject, onBeforeUnmount, onMounted, ref, toRef, watch } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref, toRef, watch } from 'vue';
 import type { Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
@@ -116,11 +116,11 @@ import PipelineStatusIcon from '~/components/repo/pipeline/PipelineStatusIcon.vu
 import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
 import { useFavicon } from '~/compositions/useFavicon';
-import { provide } from '~/compositions/useInjectProvide';
+import { provide, requiredInject } from '~/compositions/useInjectProvide';
 import useNotifications from '~/compositions/useNotifications';
 import usePipeline from '~/compositions/usePipeline';
 import { useRouteBack } from '~/compositions/useRouteBack';
-import type { PipelineConfig, Repo, RepoPermissions } from '~/lib/api/types';
+import type { Pipeline, PipelineConfig } from '~/lib/api/types';
 import { usePipelineStore } from '~/store/pipelines';
 
 const props = defineProps<{
@@ -139,15 +139,12 @@ const pipelineStore = usePipelineStore();
 const pipelineId = toRef(props, 'pipelineId');
 const _repoId = toRef(props, 'repoId');
 const repositoryId = computed(() => Number.parseInt(_repoId.value, 10));
-const repo = inject<Ref<Repo>>('repo');
-const repoPermissions = inject<Ref<RepoPermissions>>('repo-permissions');
-if (!repo || !repoPermissions) {
-  throw new Error('Unexpected: "repo" & "repoPermissions" should be provided at this place');
-}
+const repo = requiredInject('repo');
+const repoPermissions = requiredInject('repo-permissions');
 
 const pipeline = pipelineStore.getPipeline(repositoryId, pipelineId);
 const { since, duration, created, message, shortMessage } = usePipeline(pipeline);
-provide('pipeline', pipeline);
+provide('pipeline', pipeline as Ref<Pipeline>); // can't be undefined because of v-if in template
 
 const pipelineConfigs = ref<PipelineConfig[]>();
 provide('pipeline-configs', pipelineConfigs);
@@ -163,10 +160,6 @@ watch(
 const showDeployPipelinePopup = ref(false);
 
 async function loadPipeline(): Promise<void> {
-  if (!repo) {
-    throw new Error('Unexpected: Repo is undefined');
-  }
-
   await pipelineStore.loadPipeline(repo.value.id, Number.parseInt(pipelineId.value, 10));
 
   if (!pipeline.value?.number) {
@@ -177,10 +170,6 @@ async function loadPipeline(): Promise<void> {
 }
 
 const { doSubmit: cancelPipeline, isLoading: isCancelingPipeline } = useAsyncAction(async () => {
-  if (!repo) {
-    throw new Error('Unexpected: Repo is undefined');
-  }
-
   if (!pipeline.value?.number) {
     throw new Error('Unexpected: Pipeline number not found');
   }
@@ -190,10 +179,6 @@ const { doSubmit: cancelPipeline, isLoading: isCancelingPipeline } = useAsyncAct
 });
 
 const { doSubmit: restartPipeline, isLoading: isRestartingPipeline } = useAsyncAction(async () => {
-  if (!repo) {
-    throw new Error('Unexpected: Repo is undefined');
-  }
-
   const newPipeline = await apiClient.restartPipeline(repo.value.id, pipelineId.value, {
     fork: true,
   });
