@@ -4,10 +4,11 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@Spiffyk, @gsaslis, @joshuachp, @lukashass, @pat-s, @renich, @xoxys
+@Spiffyk, @SuperSandro2000, @gsaslis, @joshuachp, @lukashass, @pat-s, @renich, @xoxys
 
 ### 📚 Documentation
 
+- Fix link [[#5119](https://github.com/woodpecker-ci/woodpecker/pull/5119)]
 - Move `plugin-s3` to Codeberg [[#5118](https://github.com/woodpecker-ci/woodpecker/pull/5118)]
 - Use slugified plugin urls in docs [[#5116](https://github.com/woodpecker-ci/woodpecker/pull/5116)]
 - Fix example value for `WOODPECKER_GRPC_ADDR` in autoscaler docs [[#5102](https://github.com/woodpecker-ci/woodpecker/pull/5102)]
