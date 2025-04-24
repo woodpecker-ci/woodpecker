@@ -120,6 +120,7 @@ import { useDate } from '~/compositions/useDate';
 import { requiredInject } from '~/compositions/useInjectProvide';
 import useNotifications from '~/compositions/useNotifications';
 import { usePagination } from '~/compositions/usePaginate';
+import { useWPTitle } from '~/compositions/useWPTitle';
 import type { Cron } from '~/lib/api/types';
 import router from '~/router';
 
@@ -171,4 +172,6 @@ const { doSubmit: runCron } = useAsyncAction(async (_cron: Cron) => {
     },
   });
 });
+
+useWPTitle(computed(() => [i18n.t('repo.settings.crons.crons'), repo.value.full_name]));
 </script>

@@ -27,6 +27,7 @@ import Panel from '~/components/layout/Panel.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { requiredInject } from '~/compositions/useInjectProvide';
 import useNotifications from '~/compositions/useNotifications';
+import { useWPTitle } from '~/compositions/useWPTitle';
 
 const { t } = useI18n();
 const apiClient = useApiClient();
@@ -74,4 +75,12 @@ async function downloadMetadata() {
     isLoading.value = false;
   }
 }
+
+useWPTitle(
+  computed(() => [
+    t('repo.pipeline.debug.title'),
+    t('repo.pipeline.pipeline', { pipelineId: pipeline.value.id }),
+    repo.value.full_name,
+  ]),
+);
 </script>

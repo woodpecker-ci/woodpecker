@@ -43,6 +43,7 @@
 </template>
 
 <script lang="ts" setup>
+import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import Badge from '~/components/atomic/Badge.vue';
@@ -54,6 +55,7 @@ import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useNotifications from '~/compositions/useNotifications';
 import { usePagination } from '~/compositions/usePaginate';
+import { useWPTitle } from '~/compositions/useWPTitle';
 import type { Repo } from '~/lib/api/types';
 
 const apiClient = useApiClient();
@@ -70,4 +72,6 @@ const { doSubmit: repairRepos, isLoading: isRepairingRepos } = useAsyncAction(as
   await apiClient.repairAllRepos();
   notifications.notify({ title: i18n.t('admin.settings.repos.repair.success'), type: 'success' });
 });
+
+useWPTitle(computed(() => [i18n.t('admin.settings.repos.repos'), i18n.t('admin.settings.settings')]));
 </script>
