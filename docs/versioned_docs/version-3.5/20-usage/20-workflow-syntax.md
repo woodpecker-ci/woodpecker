@@ -605,7 +605,7 @@ For more details check the [matrix build docs](./30-matrix-workflows.md).
 
 You can define labels for your workflow in order to select an agent to execute the workflow. An agent takes up a workflow and executes it if **every** label assigned to it matches the label of the agent.
 
-To specify additional agent labels, check the [Agent configuration options] (../30-administration/10-configuration/30-agent.md#agent_labels). The agents have at least four default labels: `platform=agent-os/agent-arch`, `hostname=my-agent`, `backend=docker` (type of agent backend) and `repo=*`. Agents can use an `*` as a placeholder for a label. For example, `repo=*` matches any repo.
+To specify additional agent labels, check the [Agent configuration options](../30-administration/10-configuration/30-agent.md#agent_labels). The agents have at least four default labels: `platform=agent-os/agent-arch`, `hostname=my-agent`, `backend=docker` (type of agent backend) and `repo=*`. Agents can use an `*` as a placeholder for a label. For example, `repo=*` matches any repo.
 
 Workflow labels with an empty value are ignored.
 By default, each workflow has at least the label `repo=your-user/your-repo-name`. If you have set the [platform attribute](#platform) for your workflow, it will also have a label such as `platform=your-os/your-arch`.
