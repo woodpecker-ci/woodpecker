@@ -98,6 +98,7 @@ import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useNotifications from '~/compositions/useNotifications';
 import { usePagination } from '~/compositions/usePaginate';
+import { useWPTitle } from '~/compositions/useWPTitle';
 import type { User } from '~/lib/api/types';
 
 const apiClient = useApiClient();
@@ -153,4 +154,6 @@ function editUser(user: User) {
 function showAddUser() {
   selectedUser.value = cloneDeep({ login: '' });
 }
+
+useWPTitle(computed(() => [t('admin.settings.users.users'), t('admin.settings.settings')]));
 </script>

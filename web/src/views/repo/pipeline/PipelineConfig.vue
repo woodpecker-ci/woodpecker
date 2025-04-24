@@ -15,11 +15,15 @@
 <script lang="ts" setup>
 import { decode } from 'js-base64';
 import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 import SyntaxHighlight from '~/components/atomic/SyntaxHighlight';
 import Panel from '~/components/layout/Panel.vue';
 import { requiredInject } from '~/compositions/useInjectProvide';
+import { useWPTitle } from '~/compositions/useWPTitle';
 
+const repo = requiredInject('repo');
+const pipeline = requiredInject('pipeline');
 const pipelineConfigs = requiredInject('pipeline-configs');
 
 const pipelineConfigsDecoded = computed(
@@ -28,5 +32,14 @@ const pipelineConfigsDecoded = computed(
       ...i,
       data: decode(i.data),
     })) ?? [],
+);
+
+const { t } = useI18n();
+useWPTitle(
+  computed(() => [
+    t('repo.pipeline.config'),
+    t('repo.pipeline.pipeline', { pipelineId: pipeline.value.id }),
+    repo.value.full_name,
+  ]),
 );
 </script>

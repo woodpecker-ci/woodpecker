@@ -7,9 +7,11 @@
 
 <script lang="ts" setup>
 import { computed, toRef } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 import PipelineList from '~/components/repo/pipeline/PipelineList.vue';
 import { requiredInject } from '~/compositions/useInjectProvide';
+import { useWPTitle } from '~/compositions/useWPTitle';
 
 const props = defineProps<{
   pullRequest: string;
@@ -34,4 +36,7 @@ const pipelines = computed(() =>
         .replaceAll('/head', '') === pullRequest.value,
   ),
 );
+
+const { t } = useI18n();
+useWPTitle(computed(() => [t('repo.activity'), pullRequest.value, repo.value.full_name]));
 </script>

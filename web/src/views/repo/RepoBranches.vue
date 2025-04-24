@@ -22,6 +22,7 @@
 
 <script lang="ts" setup>
 import { computed, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 import Badge from '~/components/atomic/Badge.vue';
 import Icon from '~/components/atomic/Icon.vue';
@@ -30,6 +31,7 @@ import Panel from '~/components/layout/Panel.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { requiredInject } from '~/compositions/useInjectProvide';
 import { usePagination } from '~/compositions/usePaginate';
+import { useWPTitle } from '~/compositions/useWPTitle';
 
 const apiClient = useApiClient();
 
@@ -56,4 +58,7 @@ const branchesWithDefaultBranchFirst = computed(() =>
 );
 
 watch(repo, resetPage);
+
+const { t } = useI18n();
+useWPTitle(computed(() => [t('repo.branches'), repo.value.full_name]));
 </script>

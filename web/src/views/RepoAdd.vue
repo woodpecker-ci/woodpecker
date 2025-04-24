@@ -32,7 +32,7 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 
@@ -46,6 +46,7 @@ import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useNotifications from '~/compositions/useNotifications';
 import { useRepoSearch } from '~/compositions/useRepoSearch';
 import { useRouteBack } from '~/compositions/useRouteBack';
+import { useWPTitle } from '~/compositions/useWPTitle';
 import type { Repo } from '~/lib/api/types';
 
 const router = useRouter();
@@ -74,4 +75,6 @@ const { doSubmit: activateRepo, isLoading: isActivatingRepo } = useAsyncAction(a
 });
 
 const goBack = useRouteBack({ name: 'repos' });
+
+useWPTitle(computed(() => [i18n.t('repo.add')]));
 </script>

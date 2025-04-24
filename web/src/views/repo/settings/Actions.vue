@@ -52,6 +52,7 @@ import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
 import { requiredInject } from '~/compositions/useInjectProvide';
 import useNotifications from '~/compositions/useNotifications';
+import { useWPTitle } from '~/compositions/useWPTitle';
 
 const apiClient = useApiClient();
 const router = useRouter();
@@ -89,4 +90,6 @@ const { doSubmit: deactivateRepo, isLoading: isDeactivatingRepo } = useAsyncActi
 });
 
 const isActive = computed(() => repo?.value.active);
+
+useWPTitle(computed(() => [i18n.t('repo.settings.actions.actions'), repo.value.full_name]));
 </script>

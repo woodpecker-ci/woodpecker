@@ -171,7 +171,7 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import Button from '~/components/atomic/Button.vue';
@@ -188,6 +188,7 @@ import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useAuthentication from '~/compositions/useAuthentication';
 import { requiredInject } from '~/compositions/useInjectProvide';
 import useNotifications from '~/compositions/useNotifications';
+import { useWPTitle } from '~/compositions/useWPTitle';
 import { RepoRequireApproval, RepoVisibility, WebhookEvents } from '~/lib/api/types';
 import type { RepoSettings } from '~/lib/api/types';
 import { useRepoStore } from '~/store/repos';
@@ -294,4 +295,6 @@ function removeUser(user: string) {
 
   repoSettings.value.approval_allowed_users = repoSettings.value.approval_allowed_users.filter((i) => i !== user);
 }
+
+useWPTitle(computed(() => [i18n.t('repo.settings.general.project'), repo.value.full_name]));
 </script>

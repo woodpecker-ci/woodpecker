@@ -7,9 +7,11 @@
 
 <script lang="ts" setup>
 import { computed, toRef } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 import PipelineList from '~/components/repo/pipeline/PipelineList.vue';
 import { requiredInject } from '~/compositions/useInjectProvide';
+import { useWPTitle } from '~/compositions/useWPTitle';
 
 const props = defineProps<{
   branch: string;
@@ -24,4 +26,7 @@ const pipelines = computed(() =>
     (b) => b.branch === branch.value && b.event !== 'pull_request' && b.event !== 'pull_request_closed',
   ),
 );
+
+const { t } = useI18n();
+useWPTitle(computed(() => [t('repo.activity'), branch.value, repo.value.full_name]));
 </script>
