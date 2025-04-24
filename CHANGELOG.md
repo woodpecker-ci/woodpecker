@@ -6,9 +6,15 @@
 
 @Spiffyk, @SuperSandro2000, @gsaslis, @joshuachp, @lukashass, @pat-s, @renich, @xoxys
 
+### 📈 Enhancement
+
+- Set dynamic page titles [[#5104](https://github.com/woodpecker-ci/woodpecker/pull/5104)]
+- Use centrally typed inject provide in Vue [[#5113](https://github.com/woodpecker-ci/woodpecker/pull/5113)]
+- Scroll to selected pipeline step [[#5103](https://github.com/woodpecker-ci/woodpecker/pull/5103)]
+
 ### 📚 Documentation
 
-- Fix link [[#5119](https://github.com/woodpecker-ci/woodpecker/pull/5119)]
+- Fix link to agent configuration in `next` docs [[#5119](https://github.com/woodpecker-ci/woodpecker/pull/5119)]
 - Move `plugin-s3` to Codeberg [[#5118](https://github.com/woodpecker-ci/woodpecker/pull/5118)]
 - Use slugified plugin urls in docs [[#5116](https://github.com/woodpecker-ci/woodpecker/pull/5116)]
 - Fix example value for `WOODPECKER_GRPC_ADDR` in autoscaler docs [[#5102](https://github.com/woodpecker-ci/woodpecker/pull/5102)]
@@ -18,11 +24,6 @@
 - Slugify plugin names used for urls [[#5098](https://github.com/woodpecker-ci/woodpecker/pull/5098)]
 - Mention `backend_options` in workflow syntax docs [[#5096](https://github.com/woodpecker-ci/woodpecker/pull/5096)]
 - Document rootless container requirements for skip-clone [[#5056](https://github.com/woodpecker-ci/woodpecker/pull/5056)]
-
-### 📈 Enhancement
-
-- Use centrally typed inject provide in Vue [[#5113](https://github.com/woodpecker-ci/woodpecker/pull/5113)]
-- Scroll to selected pipeline step [[#5103](https://github.com/woodpecker-ci/woodpecker/pull/5103)]
 
 ### 🐛 Bug Fixes
 
