@@ -1,13 +1,14 @@
 # Changelog
 
-## [3.6.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.6.0) - 2025-04-23
+## [3.6.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.6.0) - 2025-04-24
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@Spiffyk, @gsaslis, @joshuachp, @lukashass, @renich, @xoxys
+@Spiffyk, @gsaslis, @joshuachp, @lukashass, @pat-s, @renich, @xoxys
 
 ### 📚 Documentation
 
+- Move `plugin-s3` to Codeberg [[#5118](https://github.com/woodpecker-ci/woodpecker/pull/5118)]
 - Use slugified plugin urls in docs [[#5116](https://github.com/woodpecker-ci/woodpecker/pull/5116)]
 - Fix example value for `WOODPECKER_GRPC_ADDR` in autoscaler docs [[#5102](https://github.com/woodpecker-ci/woodpecker/pull/5102)]
 - chore(deps): lock file maintenance [[#5112](https://github.com/woodpecker-ci/woodpecker/pull/5112)]
