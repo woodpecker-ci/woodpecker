@@ -62,12 +62,12 @@ func (b builder) detectKeyType() (string, error) {
 }
 
 func (b builder) serviceBuilder(keyType string) (types.EncryptionServiceBuilder, error) {
-	switch {
-	case keyType == keyTypeTink:
+	switch keyType {
+	case keyTypeTink:
 		return newTink(b.c, b.store), nil
-	case keyType == keyTypeRaw:
+	case keyTypeRaw:
 		return newAES(b.c, b.store), nil
-	case keyType == keyTypeNone:
+	case keyTypeNone:
 		return &noEncryptionBuilder{}, nil
 	}
 	return nil, fmt.Errorf(errMessageTemplateUnsupportedKeyType, keyType)

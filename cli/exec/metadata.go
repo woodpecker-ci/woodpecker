@@ -87,11 +87,11 @@ func metadataFromContext(_ context.Context, c *cli.Command, axis matrix.Axis, w 
 	metadataFileAndOverrideOrDefault(c, "repo-trusted-volumes", func(b bool) { m.Repo.Trusted.Volumes = b }, c.Bool)
 
 	// Current Pipeline
-	metadataFileAndOverrideOrDefault(c, "pipeline-number", func(i int64) { m.Curr.Number = i }, c.Int)
-	metadataFileAndOverrideOrDefault(c, "pipeline-parent", func(i int64) { m.Curr.Parent = i }, c.Int)
-	metadataFileAndOverrideOrDefault(c, "pipeline-created", func(i int64) { m.Curr.Created = i }, c.Int)
-	metadataFileAndOverrideOrDefault(c, "pipeline-started", func(i int64) { m.Curr.Started = i }, c.Int)
-	metadataFileAndOverrideOrDefault(c, "pipeline-finished", func(i int64) { m.Curr.Finished = i }, c.Int)
+	metadataFileAndOverrideOrDefault(c, "pipeline-number", func(i int64) { m.Curr.Number = i }, c.Int64)
+	metadataFileAndOverrideOrDefault(c, "pipeline-parent", func(i int64) { m.Curr.Parent = i }, c.Int64)
+	metadataFileAndOverrideOrDefault(c, "pipeline-created", func(i int64) { m.Curr.Created = i }, c.Int64)
+	metadataFileAndOverrideOrDefault(c, "pipeline-started", func(i int64) { m.Curr.Started = i }, c.Int64)
+	metadataFileAndOverrideOrDefault(c, "pipeline-finished", func(i int64) { m.Curr.Finished = i }, c.Int64)
 	metadataFileAndOverrideOrDefault(c, "pipeline-status", func(s string) { m.Curr.Status = s }, c.String)
 	metadataFileAndOverrideOrDefault(c, "pipeline-event", func(s string) { m.Curr.Event = s }, c.String)
 	metadataFileAndOverrideOrDefault(c, "pipeline-url", func(s string) { m.Curr.ForgeURL = s }, c.String)
@@ -111,10 +111,10 @@ func metadataFromContext(_ context.Context, c *cli.Command, axis matrix.Axis, w 
 	metadataFileAndOverrideOrDefault(c, "commit-release-is-pre", func(b bool) { m.Curr.Commit.IsPrerelease = b }, c.Bool)
 
 	// Previous Pipeline
-	metadataFileAndOverrideOrDefault(c, "prev-pipeline-number", func(i int64) { m.Prev.Number = i }, c.Int)
-	metadataFileAndOverrideOrDefault(c, "prev-pipeline-created", func(i int64) { m.Prev.Created = i }, c.Int)
-	metadataFileAndOverrideOrDefault(c, "prev-pipeline-started", func(i int64) { m.Prev.Started = i }, c.Int)
-	metadataFileAndOverrideOrDefault(c, "prev-pipeline-finished", func(i int64) { m.Prev.Finished = i }, c.Int)
+	metadataFileAndOverrideOrDefault(c, "prev-pipeline-number", func(i int64) { m.Prev.Number = i }, c.Int64)
+	metadataFileAndOverrideOrDefault(c, "prev-pipeline-created", func(i int64) { m.Prev.Created = i }, c.Int64)
+	metadataFileAndOverrideOrDefault(c, "prev-pipeline-started", func(i int64) { m.Prev.Started = i }, c.Int64)
+	metadataFileAndOverrideOrDefault(c, "prev-pipeline-finished", func(i int64) { m.Prev.Finished = i }, c.Int64)
 	metadataFileAndOverrideOrDefault(c, "prev-pipeline-status", func(s string) { m.Prev.Status = s }, c.String)
 	metadataFileAndOverrideOrDefault(c, "prev-pipeline-event", func(s string) { m.Prev.Event = s }, c.String)
 	metadataFileAndOverrideOrDefault(c, "prev-pipeline-url", func(s string) { m.Prev.ForgeURL = s }, c.String)
@@ -130,7 +130,7 @@ func metadataFromContext(_ context.Context, c *cli.Command, axis matrix.Axis, w 
 
 	// Workflow
 	metadataFileAndOverrideOrDefault(c, "workflow-name", func(s string) { m.Workflow.Name = s }, c.String)
-	metadataFileAndOverrideOrDefault(c, "workflow-number", func(i int64) { m.Workflow.Number = int(i) }, c.Int)
+	metadataFileAndOverrideOrDefault(c, "workflow-number", func(i int64) { m.Workflow.Number = int(i) }, c.Int64)
 	m.Workflow.Matrix = axis
 
 	// System

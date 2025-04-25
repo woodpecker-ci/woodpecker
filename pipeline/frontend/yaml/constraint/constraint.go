@@ -388,14 +388,19 @@ func (c *Path) Includes(v []string) bool {
 	return false
 }
 
-// Excludes returns true if the string matches any of the exclude patterns.
+// Excludes returns true if all of the strings match any of the exclude patterns.
 func (c *Path) Excludes(v []string) bool {
-	for _, pattern := range c.Exclude {
-		for _, file := range v {
+	for _, file := range v {
+		matched := false
+		for _, pattern := range c.Exclude {
 			if ok, _ := doublestar.Match(pattern, file); ok {
-				return true
+				matched = true
+				break
 			}
 		}
+		if !matched {
+			return false
+		}
 	}
-	return false
+	return true
 }

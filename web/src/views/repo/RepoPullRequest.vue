@@ -6,28 +6,25 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, inject, toRef } from 'vue';
-import type { Ref } from 'vue';
+import { computed, toRef } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 import PipelineList from '~/components/repo/pipeline/PipelineList.vue';
-import type { Pipeline, Repo, RepoPermissions } from '~/lib/api/types';
+import { requiredInject } from '~/compositions/useInjectProvide';
+import { useWPTitle } from '~/compositions/useWPTitle';
 
 const props = defineProps<{
   pullRequest: string;
 }>();
 const pullRequest = toRef(props, 'pullRequest');
-const repo = inject<Ref<Repo>>('repo');
-const repoPermissions = inject<Ref<RepoPermissions>>('repo-permissions');
-if (!repo || !repoPermissions) {
-  throw new Error('Unexpected: "repo" and "repoPermissions" should be provided at this place');
-}
+const repo = requiredInject('repo');
 if (!repo.value.pr_enabled || !repo.value.allow_pr) {
   throw new Error('Unexpected: pull requests are disabled for repo');
 }
 
-const allPipelines = inject<Ref<Pipeline[]>>('pipelines');
+const allPipelines = requiredInject('pipelines');
 const pipelines = computed(() =>
-  allPipelines?.value.filter(
+  allPipelines.value.filter(
     (b) =>
       (b.event === 'pull_request' || b.event === 'pull_request_closed') &&
       b.ref
@@ -39,4 +36,7 @@ const pipelines = computed(() =>
         .replaceAll('/head', '') === pullRequest.value,
   ),
 );
+
+const { t } = useI18n();
+useWPTitle(computed(() => [t('repo.activity'), pullRequest.value, repo.value.full_name]));
 </script>

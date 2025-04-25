@@ -138,7 +138,7 @@ See [project settings](./75-project-settings.md#trusted) to enable "trusted" mod
 The snippet below shows how a step can communicate with the docker daemon running in a `docker:dind` service.
 
 :::note
-If your goal is to build/publish OCI images, consider using the [Docker Buildx Plugin](https://woodpecker-ci.org/plugins/Docker%20Buildx) instead.
+If your goal is to build/publish OCI images, consider using the [Docker Buildx Plugin](https://woodpecker-ci.org/plugins/docker-buildx) instead.
 :::
 
 First we need to define a service running a docker with the `dind` tag.

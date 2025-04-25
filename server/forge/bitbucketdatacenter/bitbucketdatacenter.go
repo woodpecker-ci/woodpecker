@@ -429,7 +429,7 @@ func (c *client) Activate(ctx context.Context, u *model.User, r *model.Repo, lin
 	webhook := &bb.Webhook{
 		Name:   "Woodpecker",
 		URL:    link,
-		Events: []bb.EventKey{bb.EventKeyRepoRefsChanged, bb.EventKeyPullRequestFrom, bb.EventKeyPullRequestMerged, bb.EventKeyPullRequestDeclined, bb.EventKeyPullRequestDeleted},
+		Events: []bb.EventKey{bb.EventKeyRepoRefsChanged, bb.EventKeyPullRequestFrom, bb.EventKeyPullRequestMerged, bb.EventKeyPullRequestDeclined, bb.EventKeyPullRequestDeleted, bb.EventKeyPullRequestOpened},
 		Active: true,
 		Config: &bb.WebhookConfiguration{
 			Secret: r.Hash,
