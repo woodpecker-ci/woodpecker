@@ -16,7 +16,6 @@
 package github
 
 import (
-	"context"
 	"net/http/httptest"
 	"testing"
 
@@ -53,7 +52,7 @@ func Test_github(t *testing.T) {
 
 	defer s.Close()
 
-	ctx := context.Background()
+	ctx := t.Context()
 
 	t.Run("netrc with user token", func(t *testing.T) {
 		forge, _ := New(Opts{})

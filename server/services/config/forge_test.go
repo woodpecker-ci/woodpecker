@@ -15,7 +15,6 @@
 package config_test
 
 import (
-	"context"
 	"fmt"
 	"path/filepath"
 	"testing"
@@ -310,7 +309,7 @@ func TestFetch(t *testing.T) {
 				3,
 			)
 			files, err := configFetcher.Fetch(
-				context.Background(),
+				t.Context(),
 				f,
 				&model.User{AccessToken: "xxx"},
 				repo,
