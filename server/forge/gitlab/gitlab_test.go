@@ -17,7 +17,6 @@ package gitlab
 
 import (
 	"bytes"
-	"context"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -68,7 +67,7 @@ func Test_GitLab(t *testing.T) {
 		Owner: "diaspora",
 	}
 
-	ctx := context.Background()
+	ctx := t.Context()
 	// Test projects method
 	t.Run("Should return only non-archived projects is hidden", func(t *testing.T) {
 		client.HideArchives = true
