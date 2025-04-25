@@ -315,7 +315,7 @@
                 "metadata_download_successful": "Метаданные успешно загружены",
                 "metadata_download_error": "Ошибка загрузки метаданных",
                 "no_permission": "У вас нет доступа к отладочной информации",
-                "metadata_exec_title": "Локальный перезапуск конвейера"
+                "metadata_exec_title": "Перезапустить конвейер локально"
             }
         },
         "pull_requests": "Запросы на слияние",

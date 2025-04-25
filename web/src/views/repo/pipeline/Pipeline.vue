@@ -62,8 +62,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, inject, toRef } from 'vue';
-import type { Ref } from 'vue';
+import { computed, toRef } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 
@@ -75,8 +74,10 @@ import PipelineLog from '~/components/repo/pipeline/PipelineLog.vue';
 import PipelineStepList from '~/components/repo/pipeline/PipelineStepList.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
+import { requiredInject } from '~/compositions/useInjectProvide';
 import useNotifications from '~/compositions/useNotifications';
-import type { Pipeline, PipelineStep, Repo, RepoPermissions } from '~/lib/api/types';
+import { useWPTitle } from '~/compositions/useWPTitle';
+import type { PipelineStep } from '~/lib/api/types';
 
 const props = defineProps<{
   stepId?: string | null;
@@ -88,12 +89,9 @@ const route = useRoute();
 const notifications = useNotifications();
 const i18n = useI18n();
 
-const pipeline = inject<Ref<Pipeline>>('pipeline');
-const repo = inject<Ref<Repo>>('repo');
-const repoPermissions = inject<Ref<RepoPermissions>>('repo-permissions');
-if (!repo || !repoPermissions || !pipeline) {
-  throw new Error('Unexpected: "repo", "repoPermissions" & "pipeline" should be provided at this place');
-}
+const pipeline = requiredInject('pipeline');
+const repo = requiredInject('repo');
+const repoPermissions = requiredInject('repo-permissions');
 
 const stepId = toRef(props, 'stepId');
 
@@ -139,20 +137,20 @@ const selectedStepId = computed({
 });
 
 const { doSubmit: approvePipeline, isLoading: isApprovingPipeline } = useAsyncAction(async () => {
-  if (!repo) {
-    throw new Error('Unexpected: Repo is undefined');
-  }
-
   await apiClient.approvePipeline(repo.value.id, `${pipeline.value.number}`);
   notifications.notify({ title: i18n.t('repo.pipeline.protected.approve_success'), type: 'success' });
 });
 
 const { doSubmit: declinePipeline, isLoading: isDecliningPipeline } = useAsyncAction(async () => {
-  if (!repo) {
-    throw new Error('Unexpected: Repo is undefined');
-  }
-
   await apiClient.declinePipeline(repo.value.id, `${pipeline.value.number}`);
   notifications.notify({ title: i18n.t('repo.pipeline.protected.decline_success'), type: 'success' });
 });
+
+useWPTitle(
+  computed(() => [
+    i18n.t('repo.pipeline.tasks'),
+    i18n.t('repo.pipeline.pipeline', { pipelineId: pipeline.value.id }),
+    repo.value.full_name,
+  ]),
+);
 </script>

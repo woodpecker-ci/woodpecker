@@ -105,8 +105,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, inject, ref } from 'vue';
-import type { Ref } from 'vue';
+import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import Button from '~/components/atomic/Button.vue';
@@ -118,35 +117,29 @@ import Settings from '~/components/layout/Settings.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
 import { useDate } from '~/compositions/useDate';
+import { requiredInject } from '~/compositions/useInjectProvide';
 import useNotifications from '~/compositions/useNotifications';
 import { usePagination } from '~/compositions/usePaginate';
-import type { Cron, Repo } from '~/lib/api/types';
+import { useWPTitle } from '~/compositions/useWPTitle';
+import type { Cron } from '~/lib/api/types';
 import router from '~/router';
 
 const apiClient = useApiClient();
 const notifications = useNotifications();
 const i18n = useI18n();
 
-const repo = inject<Ref<Repo>>('repo');
+const repo = requiredInject('repo');
 const selectedCron = ref<Partial<Cron>>();
 const isEditingCron = computed(() => !!selectedCron.value?.id);
 const date = useDate();
 
 async function loadCrons(page: number): Promise<Cron[] | null> {
-  if (!repo?.value) {
-    throw new Error("Unexpected: Can't load repo");
-  }
-
   return apiClient.getCronList(repo.value.id, { page });
 }
 
 const { resetPage, data: crons } = usePagination(loadCrons, () => !selectedCron.value);
 
 const { doSubmit: createCron, isLoading: isSaving } = useAsyncAction(async () => {
-  if (!repo?.value) {
-    throw new Error("Unexpected: Can't load repo");
-  }
-
   if (!selectedCron.value) {
     throw new Error("Unexpected: Can't get cron");
   }
@@ -165,20 +158,12 @@ const { doSubmit: createCron, isLoading: isSaving } = useAsyncAction(async () =>
 });
 
 const { doSubmit: deleteCron, isLoading: isDeleting } = useAsyncAction(async (_cron: Cron) => {
-  if (!repo?.value) {
-    throw new Error("Unexpected: Can't load repo");
-  }
-
   await apiClient.deleteCron(repo.value.id, _cron.id);
   notifications.notify({ title: i18n.t('repo.settings.crons.deleted'), type: 'success' });
   resetPage();
 });
 
 const { doSubmit: runCron } = useAsyncAction(async (_cron: Cron) => {
-  if (!repo?.value) {
-    throw new Error("Unexpected: Can't load repo");
-  }
-
   const pipeline = await apiClient.runCron(repo.value.id, _cron.id);
   await router.push({
     name: 'repo-pipeline',
@@ -187,4 +172,6 @@ const { doSubmit: runCron } = useAsyncAction(async (_cron: Cron) => {
     },
   });
 });
+
+useWPTitle(computed(() => [i18n.t('repo.settings.crons.crons'), repo.value.full_name]));
 </script>

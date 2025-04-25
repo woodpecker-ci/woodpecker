@@ -149,8 +149,7 @@
 </template>
 
 <script lang="ts" setup>
-import { inject, onMounted, ref } from 'vue';
-import type { Ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import Button from '~/components/atomic/Button.vue';
@@ -164,9 +163,11 @@ import TextField from '~/components/form/TextField.vue';
 import Settings from '~/components/layout/Settings.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
+import { requiredInject } from '~/compositions/useInjectProvide';
 import useNotifications from '~/compositions/useNotifications';
+import { useWPTitle } from '~/compositions/useWPTitle';
 import { RepoRequireApproval, RepoVisibility, WebhookEvents } from '~/lib/api/types';
-import type { Repo, RepoSettings } from '~/lib/api/types';
+import type { RepoSettings } from '~/lib/api/types';
 import { useRepoStore } from '~/store/repos';
 
 const apiClient = useApiClient();
@@ -174,14 +175,10 @@ const notifications = useNotifications();
 const repoStore = useRepoStore();
 const i18n = useI18n();
 
-const repo = inject<Ref<Repo>>('repo');
+const repo = requiredInject('repo');
 const repoSettings = ref<RepoSettings>();
 
 function loadRepoSettings() {
-  if (!repo) {
-    throw new Error('Unexpected: Repo should be set');
-  }
-
   repoSettings.value = {
     config_file: repo.value.config_file,
     timeout: repo.value.timeout,
@@ -196,19 +193,11 @@ function loadRepoSettings() {
 }
 
 async function loadRepo() {
-  if (!repo) {
-    throw new Error('Unexpected: Repo should be set');
-  }
-
   await repoStore.loadRepo(repo.value.id);
   loadRepoSettings();
 }
 
 const { doSubmit: saveRepoSettings, isLoading: isSaving } = useAsyncAction(async () => {
-  if (!repo) {
-    throw new Error('Unexpected: Repo should be set');
-  }
-
   if (!repoSettings.value) {
     throw new Error('Unexpected: Repo-Settings should be set');
   }
@@ -281,4 +270,6 @@ function removeUser(user: string) {
 
   repoSettings.value.approval_allowed_users = repoSettings.value.approval_allowed_users.filter((i) => i !== user);
 }
+
+useWPTitle(computed(() => [i18n.t('repo.settings.general.project'), repo.value.full_name]));
 </script>

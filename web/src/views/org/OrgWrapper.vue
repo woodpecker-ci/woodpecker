@@ -19,6 +19,7 @@
 </template>
 
 <script lang="ts" setup>
+import type { Ref } from 'vue';
 import { computed, onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 
@@ -38,8 +39,8 @@ const route = useRoute();
 
 const org = ref<Org>();
 const orgPermissions = ref<OrgPermissions>();
-provide('org', org);
-provide('org-permissions', orgPermissions);
+provide('org', org as Ref<Org>); // can't be undefined because of v-if in template
+provide('org-permissions', orgPermissions as Ref<OrgPermissions>); // can't be undefined because of v-if in template
 
 async function load() {
   org.value = await apiClient.getOrg(orgId.value);

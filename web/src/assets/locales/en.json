@@ -255,8 +255,8 @@
         "metadata_download_error": "Error downloading metadata",
         "metadata_download_successful": "Metadata downloaded successfully",
         "no_permission": "You are not allowed to access the debug information",
-        "metadata_exec_title": "Rerun pipeline locally",
-        "metadata_exec_desc": "Download this pipeline's metadata to run it locally. This allows you to troubleshoot issues and test changes before committing them. `woodpecker-cli` matching the Woodpecker Server version must be installed locally."
+        "metadata_exec_title": "Re-run pipeline locally",
+        "metadata_exec_desc": "Download the metadata of this pipeline to run it locally. This allows you to fix problems and test changes before committing them. The Woodpecker CLI must be installed locally in the same version as the server."
       }
     }
   },
@@ -276,6 +276,7 @@
   },
   "admin": {
     "settings": {
+      "settings": "Admin Settings",
       "not_allowed": "You are not allowed to access server settings",
       "secrets": {
         "desc": "Global secrets can be used in the pipelines of all repositories.",
