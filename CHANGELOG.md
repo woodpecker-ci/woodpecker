@@ -32,6 +32,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update web npm deps non-major [[#5077](https://github.com/woodpecker-ci/woodpecker/pull/5077)]
 - fix(deps): update golang-packages [[#5121](https://github.com/woodpecker-ci/woodpecker/pull/5121)]
 - fix(deps): update golang-packages [[#5111](https://github.com/woodpecker-ci/woodpecker/pull/5111)]
 - chore(deps): update docker.io/mysql docker tag to v9.3.0 [[#5109](https://github.com/woodpecker-ci/woodpecker/pull/5109)]
