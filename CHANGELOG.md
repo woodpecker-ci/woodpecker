@@ -28,10 +28,11 @@
 
 ### 🐛 Bug Fixes
 
-- fix(cli): add name flag to adming secret add [[#5101](https://github.com/woodpecker-ci/woodpecker/pull/5101)]
+- Add name flag to admin secret add [[#5101](https://github.com/woodpecker-ci/woodpecker/pull/5101)]
 
 ### 📦️ Dependency
 
+- fix(deps): update golang-packages [[#5121](https://github.com/woodpecker-ci/woodpecker/pull/5121)]
 - fix(deps): update golang-packages [[#5111](https://github.com/woodpecker-ci/woodpecker/pull/5111)]
 - chore(deps): update docker.io/mysql docker tag to v9.3.0 [[#5109](https://github.com/woodpecker-ci/woodpecker/pull/5109)]
 - chore(deps): update docker.io/woodpeckerci/plugin-ready-release-go docker tag to v3.2.0 [[#5110](https://github.com/woodpecker-ci/woodpecker/pull/5110)]
