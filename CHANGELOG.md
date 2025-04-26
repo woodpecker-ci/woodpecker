@@ -4,7 +4,12 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@Spiffyk, @SuperSandro2000, @gsaslis, @joshuachp, @lukashass, @pat-s, @renich, @xoxys
+@Spiffyk, @SuperSandro2000, @gsaslis, @joshuachp, @lukashass, @pat-s, @qwerty287, @renich, @xoxys
+
+### 🐛 Bug Fixes
+
+- Fix args docs for admin secrets [[#5127](https://github.com/woodpecker-ci/woodpecker/pull/5127)]
+- Add name flag to admin secret add [[#5101](https://github.com/woodpecker-ci/woodpecker/pull/5101)]
 
 ### 📚 Documentation
 
@@ -25,10 +30,6 @@
 - Set dynamic page titles [[#5104](https://github.com/woodpecker-ci/woodpecker/pull/5104)]
 - Use centrally typed inject provide in Vue [[#5113](https://github.com/woodpecker-ci/woodpecker/pull/5113)]
 - Scroll to selected pipeline step [[#5103](https://github.com/woodpecker-ci/woodpecker/pull/5103)]
-
-### 🐛 Bug Fixes
-
-- Add name flag to admin secret add [[#5101](https://github.com/woodpecker-ci/woodpecker/pull/5101)]
 
 ### 📦️ Dependency
 
