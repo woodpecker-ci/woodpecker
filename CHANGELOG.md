@@ -6,13 +6,10 @@
 
 @Spiffyk, @SuperSandro2000, @gsaslis, @joshuachp, @lukashass, @pat-s, @qwerty287, @renich, @xoxys
 
-### 🐛 Bug Fixes
-
-- Fix args docs for admin secrets [[#5127](https://github.com/woodpecker-ci/woodpecker/pull/5127)]
-- Add name flag to admin secret add [[#5101](https://github.com/woodpecker-ci/woodpecker/pull/5101)]
-
 ### 📚 Documentation
 
+- Explain tasks [[#5129](https://github.com/woodpecker-ci/woodpecker/pull/5129)]
+- Mention named volumes [[#5130](https://github.com/woodpecker-ci/woodpecker/pull/5130)]
 - chore(deps): update docs npm deps non-major [[#5128](https://github.com/woodpecker-ci/woodpecker/pull/5128)]
 - Fix link to agent configuration in `v3.5` docs [[#5122](https://github.com/woodpecker-ci/woodpecker/pull/5122)]
 - Fix link to agent configuration in `next` docs [[#5119](https://github.com/woodpecker-ci/woodpecker/pull/5119)]
@@ -24,6 +21,11 @@
 - Slugify plugin names used for urls [[#5098](https://github.com/woodpecker-ci/woodpecker/pull/5098)]
 - Mention `backend_options` in workflow syntax docs [[#5096](https://github.com/woodpecker-ci/woodpecker/pull/5096)]
 - Document rootless container requirements for skip-clone [[#5056](https://github.com/woodpecker-ci/woodpecker/pull/5056)]
+
+### 🐛 Bug Fixes
+
+- Fix args docs for admin secrets [[#5127](https://github.com/woodpecker-ci/woodpecker/pull/5127)]
+- Add name flag to admin secret add [[#5101](https://github.com/woodpecker-ci/woodpecker/pull/5101)]
 
 ### 📈 Enhancement
 
