@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.6.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.6.0) - 2025-04-25
+## [3.6.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.6.0) - 2025-04-26
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -32,6 +32,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update pre-commit hook golangci/golangci-lint to v2.1.5 [[#5125](https://github.com/woodpecker-ci/woodpecker/pull/5125)]
 - fix(deps): update web npm deps non-major [[#5077](https://github.com/woodpecker-ci/woodpecker/pull/5077)]
 - fix(deps): update golang-packages [[#5121](https://github.com/woodpecker-ci/woodpecker/pull/5121)]
 - fix(deps): update golang-packages [[#5111](https://github.com/woodpecker-ci/woodpecker/pull/5111)]
