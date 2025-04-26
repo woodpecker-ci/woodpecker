@@ -26,9 +26,9 @@ import (
 )
 
 var secretCreateCmd = &cli.Command{
-	Name:      "add",
-	Usage:     "add a secret",
-	Action:    secretCreate,
+	Name:   "add",
+	Usage:  "add a secret",
+	Action: secretCreate,
 	Flags: []cli.Flag{
 		&cli.StringFlag{
 			Name:  "name",

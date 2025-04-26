@@ -23,9 +23,9 @@ import (
 )
 
 var secretDeleteCmd = &cli.Command{
-	Name:      "rm",
-	Usage:     "remove a secret",
-	Action:    secretDelete,
+	Name:   "rm",
+	Usage:  "remove a secret",
+	Action: secretDelete,
 	Flags: []cli.Flag{
 		&cli.StringFlag{
 			Name:  "name",

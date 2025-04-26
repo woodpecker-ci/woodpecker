@@ -28,9 +28,9 @@ import (
 )
 
 var secretListCmd = &cli.Command{
-	Name:      "ls",
-	Usage:     "list secrets",
-	Action:    secretList,
+	Name:   "ls",
+	Usage:  "list secrets",
+	Action: secretList,
 	Flags: []cli.Flag{
 		common.FormatFlag(tmplSecretList, true),
 	},
