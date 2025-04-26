@@ -33,6 +33,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update module github.com/docker/cli to v28 [[#5131](https://github.com/woodpecker-ci/woodpecker/pull/5131)]
 - fix(deps): update dependency vue-router to v4.5.1 [[#5126](https://github.com/woodpecker-ci/woodpecker/pull/5126)]
 - chore(deps): update pre-commit hook golangci/golangci-lint to v2.1.5 [[#5125](https://github.com/woodpecker-ci/woodpecker/pull/5125)]
 - fix(deps): update web npm deps non-major [[#5077](https://github.com/woodpecker-ci/woodpecker/pull/5077)]
