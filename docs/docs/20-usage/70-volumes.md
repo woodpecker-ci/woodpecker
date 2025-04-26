@@ -19,6 +19,8 @@ Volumes are only available to trusted repositories and for security reasons shou
 +      - /var/run/docker.sock:/var/run/docker.sock
 ```
 
+If you use the Docker backend, you can also use named volumes like `some_volume_name:/var/run/volume`.
+
 Please note that Woodpecker mounts volumes on the host machine. This means you must use absolute paths when you configure volumes. Attempting to use relative paths will result in an error.
 
 ```diff
