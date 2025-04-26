@@ -6,6 +6,10 @@
 
 @Spiffyk, @SuperSandro2000, @gsaslis, @joshuachp, @lukashass, @pat-s, @qwerty287, @renich, @xoxys
 
+### ✨ Features
+
+- Use docker go client directly [[#5134](https://github.com/woodpecker-ci/woodpecker/pull/5134)]
+
 ### 📚 Documentation
 
 - Explain tasks [[#5129](https://github.com/woodpecker-ci/woodpecker/pull/5129)]
