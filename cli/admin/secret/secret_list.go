@@ -30,7 +30,6 @@ import (
 var secretListCmd = &cli.Command{
 	Name:      "ls",
 	Usage:     "list secrets",
-	ArgsUsage: "[repo-id|repo-full-name]",
 	Action:    secretList,
 	Flags: []cli.Flag{
 		common.FormatFlag(tmplSecretList, true),
