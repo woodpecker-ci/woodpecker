@@ -27,10 +27,9 @@ import (
 )
 
 var secretShowCmd = &cli.Command{
-	Name:      "show",
-	Usage:     "show secret information",
-	ArgsUsage: "[repo-id|repo-full-name]",
-	Action:    secretShow,
+	Name:   "show",
+	Usage:  "show secret information",
+	Action: secretShow,
 	Flags: []cli.Flag{
 		&cli.StringFlag{
 			Name:  "name",
