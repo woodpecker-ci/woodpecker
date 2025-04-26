@@ -66,7 +66,12 @@
           <Icon name="since" />
           <span>{{ since }}</span>
         </div>
-        <div class="flex shrink-0 items-center gap-2" :title="durationElapsed > 0 ? $t('repo.pipeline.duration', { duration: durationAsNumber(durationElapsed) }) : ''">
+        <div
+          class="flex shrink-0 items-center gap-2"
+          :title="
+            durationElapsed > 0 ? $t('repo.pipeline.duration', { duration: durationAsNumber(durationElapsed) }) : ''
+          "
+        >
           <Icon name="duration" />
           <span>{{ duration }}</span>
         </div>
@@ -137,7 +142,7 @@ const favicon = useFavicon();
 const i18n = useI18n();
 
 const pipelineStore = usePipelineStore();
-const { durationAsNumber } = useDate()
+const { durationAsNumber } = useDate();
 const pipelineId = toRef(props, 'pipelineId');
 const _repoId = toRef(props, 'repoId');
 const repositoryId = computed(() => Number.parseInt(_repoId.value, 10));

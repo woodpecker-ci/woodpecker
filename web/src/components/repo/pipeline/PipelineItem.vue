@@ -57,7 +57,12 @@
           <span class="truncate">{{ pipeline.commit.slice(0, 10) }}</span>
         </div>
 
-        <div class="flex min-w-0 items-center space-x-2" :title="durationElapsed > 0 ? $t('repo.pipeline.duration', { duration: durationAsNumber(durationElapsed) }) : ''">
+        <div
+          class="flex min-w-0 items-center space-x-2"
+          :title="
+            durationElapsed > 0 ? $t('repo.pipeline.duration', { duration: durationAsNumber(durationElapsed) }) : ''
+          "
+        >
           <Icon name="duration" />
           <span class="truncate">{{ duration }}</span>
         </div>
@@ -89,7 +94,7 @@ const props = defineProps<{
 }>();
 
 const { t } = useI18n();
-const { durationAsNumber } = useDate()
+const { durationAsNumber } = useDate();
 
 const pipeline = toRef(props, 'pipeline');
 const { since, duration, durationElapsed, message, shortMessage, prettyRef, created } = usePipeline(pipeline);

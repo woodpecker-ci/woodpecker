@@ -115,5 +115,15 @@ export default (pipeline: Ref<Pipeline | undefined>) => {
     return toLocaleString(new Date(start * 1000));
   });
 
-  return { since, duration, durationElapsed, message, shortMessage, prTitle, prTitleWithDescription, prettyRef, created };
+  return {
+    since,
+    duration,
+    durationElapsed,
+    message,
+    shortMessage,
+    prTitle,
+    prTitleWithDescription,
+    prettyRef,
+    created,
+  };
 };
