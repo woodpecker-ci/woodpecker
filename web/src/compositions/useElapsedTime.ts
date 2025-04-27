@@ -45,7 +45,7 @@ export function useElapsedTime(running: Ref<boolean>, startTime: Ref<number | un
   onBeforeUnmount(stopTimer);
 
   return {
-    time: computed(() => time.value || 0),
+    time: computed(() => (time.value === undefined ? 0 : time.value)),
     running,
   };
 }
