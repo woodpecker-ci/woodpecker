@@ -262,7 +262,7 @@
       "warnings": "Warnings",
       "show_errors": "Show errors",
       "we_got_some_errors": "Oh no, an error occurred!",
-      "duration": "Pipeline duration",
+      "duration": "Pipeline duration: {duration}",
       "created": "Created: {created}",
       "debug": {
         "title": "Debug",

@@ -66,7 +66,12 @@
           <Icon name="since" />
           <span>{{ since }}</span>
         </div>
-        <div class="flex shrink-0 items-center gap-2" :title="$t('repo.pipeline.duration')">
+        <div
+          class="flex shrink-0 items-center gap-2"
+          :title="
+            durationElapsed > 0 ? $t('repo.pipeline.duration', { duration: durationAsNumber(durationElapsed) }) : ''
+          "
+        >
           <Icon name="duration" />
           <span>{{ duration }}</span>
         </div>
@@ -115,6 +120,7 @@ import Tab from '~/components/layout/scaffold/Tab.vue';
 import PipelineStatusIcon from '~/components/repo/pipeline/PipelineStatusIcon.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
+import { useDate } from '~/compositions/useDate';
 import { useFavicon } from '~/compositions/useFavicon';
 import { provide, requiredInject } from '~/compositions/useInjectProvide';
 import useNotifications from '~/compositions/useNotifications';
@@ -136,6 +142,7 @@ const favicon = useFavicon();
 const i18n = useI18n();
 
 const pipelineStore = usePipelineStore();
+const { durationAsNumber } = useDate();
 const pipelineId = toRef(props, 'pipelineId');
 const _repoId = toRef(props, 'repoId');
 const repositoryId = computed(() => Number.parseInt(_repoId.value, 10));
@@ -143,7 +150,7 @@ const repo = requiredInject('repo');
 const repoPermissions = requiredInject('repo-permissions');
 
 const pipeline = pipelineStore.getPipeline(repositoryId, pipelineId);
-const { since, duration, created, message, shortMessage } = usePipeline(pipeline);
+const { since, duration, durationElapsed, created, message, shortMessage } = usePipeline(pipeline);
 provide('pipeline', pipeline as Ref<Pipeline>); // can't be undefined because of v-if in template
 
 const pipelineConfigs = ref<PipelineConfig[]>();
