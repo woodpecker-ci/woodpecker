@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.6.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.6.0) - 2025-04-26
+## [3.6.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.6.0) - 2025-04-27
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -9,6 +9,13 @@
 ### ✨ Features
 
 - Use docker go client directly [[#5134](https://github.com/woodpecker-ci/woodpecker/pull/5134)]
+
+### 📈 Enhancement
+
+- View full pipeline duration in tooltip [[#5123](https://github.com/woodpecker-ci/woodpecker/pull/5123)]
+- Set dynamic page titles [[#5104](https://github.com/woodpecker-ci/woodpecker/pull/5104)]
+- Use centrally typed inject provide in Vue [[#5113](https://github.com/woodpecker-ci/woodpecker/pull/5113)]
+- Scroll to selected pipeline step [[#5103](https://github.com/woodpecker-ci/woodpecker/pull/5103)]
 
 ### 📚 Documentation
 
@@ -30,12 +37,6 @@
 
 - Fix args docs for admin secrets [[#5127](https://github.com/woodpecker-ci/woodpecker/pull/5127)]
 - Add name flag to admin secret add [[#5101](https://github.com/woodpecker-ci/woodpecker/pull/5101)]
-
-### 📈 Enhancement
-
-- Set dynamic page titles [[#5104](https://github.com/woodpecker-ci/woodpecker/pull/5104)]
-- Use centrally typed inject provide in Vue [[#5113](https://github.com/woodpecker-ci/woodpecker/pull/5113)]
-- Scroll to selected pipeline step [[#5103](https://github.com/woodpecker-ci/woodpecker/pull/5103)]
 
 ### 📦️ Dependency
 
