@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.6.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.6.0) - 2025-04-28
+## [3.6.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.6.0) - 2025-04-29
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -41,6 +41,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update module github.com/urfave/cli/v3 to v3.3.2 [[#5137](https://github.com/woodpecker-ci/woodpecker/pull/5137)]
 - fix(deps): update module github.com/urfave/cli/v3 to v3.3.1 [[#5135](https://github.com/woodpecker-ci/woodpecker/pull/5135)]
 - fix(deps): update module github.com/docker/docker to v28 [[#5132](https://github.com/woodpecker-ci/woodpecker/pull/5132)]
 - fix(deps): update module github.com/docker/cli to v28 [[#5131](https://github.com/woodpecker-ci/woodpecker/pull/5131)]
