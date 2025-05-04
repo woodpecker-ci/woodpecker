@@ -306,7 +306,7 @@
             "we_got_some_errors": "Oh nein, ein Fehler ist aufgetreten!",
             "log_delete_confirm": "Möchtest du die Logs dieses Schrittes wirklich löschen?",
             "log_delete_error": "Ein Fehler ist beim Löschen der Logs des Schrittes aufgetreten",
-            "duration": "Pipeline-Dauer",
+            "duration": "Pipeline-Dauer: {duration}",
             "created": "Erstellt: {created}",
             "no_logs": "Keine Logs",
             "debug": {
