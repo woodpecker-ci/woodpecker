@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@Spiffyk, @SuperSandro2000, @gsaslis, @joshuachp, @lukashass, @maurerle, @pat-s, @qwerty287, @renich, @xoxys
+@Spiffyk, @SuperSandro2000, @gsaslis, @joshuachp, @lukashass, @maurerle, @pat-s, @qwerty287, @renich, @sp1thas, @xoxys
 
 ### ✨ Features
 
@@ -64,6 +64,7 @@
 
 ### Misc
 
+- Add pre-commit plugin [[#5146](https://github.com/woodpecker-ci/woodpecker/pull/5146)]
 - Fix gitpod golang version [[#5093](https://github.com/woodpecker-ci/woodpecker/pull/5093)]
 
 ## [3.5.2](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.5.2) - 2025-04-15
