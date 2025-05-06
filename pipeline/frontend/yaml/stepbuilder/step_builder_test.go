@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package stepbuilder
+package stepbuilder_test
 
 import (
 	"testing"
@@ -22,6 +22,7 @@ import (
 
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/errors"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/stepbuilder"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/mocks"
 	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
@@ -29,7 +30,7 @@ import (
 	server_metadata "go.woodpecker-ci.org/woodpecker/v3/server/pipeline/metadata"
 )
 
-func getMockMetadata(t *testing.T) func(*model.Workflow) metadata.Metadata {
+func getMockMetadata(t *testing.T) func(*stepbuilder.Workflow) metadata.Metadata {
 	repo := &model.Repo{}
 	curr := &model.Pipeline{
 		Message: "aaa",
@@ -43,7 +44,7 @@ func getMockMetadata(t *testing.T) func(*model.Workflow) metadata.Metadata {
 func TestGlobalEnvsubst(t *testing.T) {
 	t.Parallel()
 
-	b := StepBuilder{
+	b := stepbuilder.StepBuilder{
 		Envs: map[string]string{
 			"KEY_K": "VALUE_V",
 			"IMAGE": "scratch",
@@ -75,7 +76,7 @@ steps:
 func TestMissingGlobalEnvsubst(t *testing.T) {
 	t.Parallel()
 
-	b := StepBuilder{
+	b := stepbuilder.StepBuilder{
 		Envs: map[string]string{
 			"KEY_K":    "VALUE_V",
 			"NO_IMAGE": "scratch",
@@ -107,7 +108,7 @@ steps:
 func TestMultilineEnvsubst(t *testing.T) {
 	t.Parallel()
 
-	b := StepBuilder{
+	b := stepbuilder.StepBuilder{
 		Host:                 "",
 		WorkflowMetadataFunc: getMockMetadata(t),
 		RepoTrusted: &metadata.TrustedConfiguration{
@@ -144,7 +145,7 @@ steps:
 func TestMultiPipeline(t *testing.T) {
 	t.Parallel()
 
-	b := StepBuilder{
+	b := stepbuilder.StepBuilder{
 		Host:                 "",
 		WorkflowMetadataFunc: getMockMetadata(t),
 		RepoTrusted: &metadata.TrustedConfiguration{
@@ -182,7 +183,7 @@ steps:
 func TestDependsOn(t *testing.T) {
 	t.Parallel()
 
-	b := StepBuilder{
+	b := stepbuilder.StepBuilder{
 		Host:                 "",
 		WorkflowMetadataFunc: getMockMetadata(t),
 		RepoTrusted: &metadata.TrustedConfiguration{
@@ -234,7 +235,7 @@ depends_on:
 func TestRunsOn(t *testing.T) {
 	t.Parallel()
 
-	b := StepBuilder{
+	b := stepbuilder.StepBuilder{
 		Host:                 "",
 		WorkflowMetadataFunc: getMockMetadata(t),
 		RepoTrusted: &metadata.TrustedConfiguration{
@@ -272,7 +273,7 @@ runs_on:
 func TestPipelineName(t *testing.T) {
 	t.Parallel()
 
-	b := StepBuilder{
+	b := stepbuilder.StepBuilder{
 		Host:                 "",
 		WorkflowMetadataFunc: getMockMetadata(t),
 		RepoTrusted: &metadata.TrustedConfiguration{
@@ -303,7 +304,7 @@ steps:
 		t.Fatal(err)
 	}
 	pipelineNames := []string{pipelineItems[0].Workflow.Name, pipelineItems[1].Workflow.Name}
-	if !containsItemWithName("lint", pipelineItems) || !containsItemWithName("test", pipelineItems) {
+	if !stepbuilder.ContainsItemWithName("lint", pipelineItems) || !stepbuilder.ContainsItemWithName("test", pipelineItems) {
 		t.Fatalf("Pipeline name should be 'lint' and 'test' but are '%v'", pipelineNames)
 	}
 }
@@ -311,7 +312,7 @@ steps:
 func TestBranchFilter(t *testing.T) {
 	t.Parallel()
 
-	b := StepBuilder{
+	b := stepbuilder.StepBuilder{
 		Host:                 "",
 		WorkflowMetadataFunc: getMockMetadata(t),
 		RepoTrusted: &metadata.TrustedConfiguration{
@@ -353,7 +354,7 @@ steps:
 func TestRootWhenFilter(t *testing.T) {
 	t.Parallel()
 
-	b := StepBuilder{
+	b := stepbuilder.StepBuilder{
 		Host:                 "",
 		WorkflowMetadataFunc: getMockMetadata(t),
 		RepoTrusted: &metadata.TrustedConfiguration{
@@ -402,7 +403,7 @@ func TestZeroSteps(t *testing.T) {
 	// 	Event:  model.EventPush,
 	// }
 
-	b := StepBuilder{
+	b := stepbuilder.StepBuilder{
 		Host:                 "",
 		WorkflowMetadataFunc: getMockMetadata(t),
 		RepoTrusted: &metadata.TrustedConfiguration{
@@ -441,7 +442,7 @@ func TestZeroStepsAsMultiPipelineDeps(t *testing.T) {
 	// 	Event:  model.EventPush,
 	// }
 
-	b := StepBuilder{
+	b := stepbuilder.StepBuilder{
 		Host:                 "",
 		WorkflowMetadataFunc: getMockMetadata(t),
 		RepoTrusted: &metadata.TrustedConfiguration{
@@ -498,7 +499,7 @@ func TestZeroStepsAsMultiPipelineTransitiveDeps(t *testing.T) {
 	// 	Event:  model.EventPush,
 	// }
 
-	b := StepBuilder{
+	b := stepbuilder.StepBuilder{
 		Host:                 "",
 		WorkflowMetadataFunc: getMockMetadata(t),
 		RepoTrusted: &metadata.TrustedConfiguration{
@@ -589,7 +590,7 @@ func TestSanitizePath(t *testing.T) {
 	}
 
 	for _, test := range testTable {
-		if test.sanitizedPath != SanitizePath(test.path) {
+		if test.sanitizedPath != stepbuilder.SanitizePath(test.path) {
 			t.Fatal("Path hasn't been sanitized correctly")
 		}
 	}

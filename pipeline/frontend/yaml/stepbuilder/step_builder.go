@@ -34,14 +34,13 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/matrix"
 	yaml_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/types"
 	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
-	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
 // StepBuilder Takes the hook data and the yaml and returns in internal data model.
 type StepBuilder struct {
 	Yamls                []*forge_types.FileMeta
 	CompilerOptions      []compiler.Option
-	WorkflowMetadataFunc func(*model.Workflow) metadata.Metadata
+	WorkflowMetadataFunc func(*Workflow) metadata.Metadata
 	RepoTrusted          *metadata.TrustedConfiguration
 	TrustedClonePlugins  []string
 	PrivilegedPlugins    []string
@@ -66,9 +65,9 @@ func (b *StepBuilder) Build() (items []*Item, errorsAndWarnings error) {
 		}
 
 		for i, axis := range axes {
-			workflow := &model.Workflow{
-				PID:     pidSequence,
-				State:   model.StatusPending,
+			workflow := &Workflow{
+				PID: pidSequence,
+				// State:   model.StatusPending,
 				Environ: axis,
 				Name:    SanitizePath(y.Name),
 			}
@@ -103,7 +102,7 @@ func (b *StepBuilder) Build() (items []*Item, errorsAndWarnings error) {
 	return items, errorsAndWarnings
 }
 
-func (b *StepBuilder) genItemForWorkflow(workflow *model.Workflow, axis matrix.Axis, data string) (item *Item, errorsAndWarnings error) {
+func (b *StepBuilder) genItemForWorkflow(workflow *Workflow, axis matrix.Axis, data string) (item *Item, errorsAndWarnings error) {
 	workflowMetadata := b.WorkflowMetadataFunc(workflow)
 
 	environ := map[string]string{}

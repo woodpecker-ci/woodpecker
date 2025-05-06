@@ -6,9 +6,19 @@ import (
 )
 
 type Item struct {
-	Workflow  *model.Workflow // TODO: get rid of server type in this package
+	Workflow  *Workflow
 	Labels    map[string]string
 	DependsOn []string
 	RunsOn    []string
 	Config    *backend_types.Config
+}
+
+type Workflow struct {
+	ID    int64             `json:"id"`
+	PID   int               `json:"pid"`
+	Name  string            `json:"name"`
+	State model.StatusValue `json:"state"` // TODO
+	// State   string            `json:"state"` // TODO
+	Environ map[string]string `json:"environ,omitempty"`
+	AxisID  int               `json:"-"`
 }

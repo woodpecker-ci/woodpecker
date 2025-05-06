@@ -44,7 +44,7 @@ func filterItemsWithMissingDependencies(items []*Item) []*Item {
 
 	for _, item := range items {
 		for _, dep := range item.DependsOn {
-			if !containsItemWithName(dep, items) {
+			if !ContainsItemWithName(dep, items) {
 				itemsToRemove = append(itemsToRemove, item)
 			}
 		}
@@ -53,7 +53,7 @@ func filterItemsWithMissingDependencies(items []*Item) []*Item {
 	if len(itemsToRemove) > 0 {
 		filtered := make([]*Item, 0)
 		for _, item := range items {
-			if !containsItemWithName(item.Workflow.Name, itemsToRemove) {
+			if !ContainsItemWithName(item.Workflow.Name, itemsToRemove) {
 				filtered = append(filtered, item)
 			}
 		}
@@ -64,7 +64,7 @@ func filterItemsWithMissingDependencies(items []*Item) []*Item {
 	return items
 }
 
-func containsItemWithName(name string, items []*Item) bool {
+func ContainsItemWithName(name string, items []*Item) bool {
 	for _, item := range items {
 		if name == item.Workflow.Name {
 			return true

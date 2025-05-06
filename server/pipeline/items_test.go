@@ -17,7 +17,7 @@ func TestSetPipelineStepsOnPipeline(t *testing.T) {
 	}
 
 	pipelineItems := []*stepbuilder.Item{{
-		Workflow: &model.Workflow{
+		Workflow: &stepbuilder.Workflow{
 			PID: 1,
 		},
 		Config: &types.Config{
@@ -39,7 +39,7 @@ func TestSetPipelineStepsOnPipeline(t *testing.T) {
 			},
 		},
 	}}
-	pipeline = setPipelineStepsOnPipeline(pipeline, pipelineItems)
+	pipeline = applyWorkflowsFromStepBuilder(pipeline, pipelineItems)
 	if len(pipeline.Workflows) != 1 {
 		t.Fatal("Should generate three in total")
 	}
