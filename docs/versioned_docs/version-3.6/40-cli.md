@@ -264,7 +264,7 @@ execute a local pipeline
 
 **--backend-k8s-volume-size**="": backend k8s volume size (default 10G) (default: 10G)
 
-**--backend-local-temp-dir**="": set a different temp dir to clone workflows into (default: /tmp)
+**--backend-local-temp-dir**="": set a different temp dir to clone workflows into (default: /var/folders/6m/t779gl5s7fq17_t_59fflg5w0000gn/T/)
 
 **--backend-no-proxy**="": if set, pass the environment variable down as "NO_PROXY" to steps
 
@@ -298,11 +298,11 @@ execute a local pipeline
 
 **--metadata-file**="": path to pipeline metadata file (normally downloaded from UI). Parameters can be adjusted by applying additional cli flags
 
-**--netrc-machine**="":
+**--netrc-machine**="": 
 
-**--netrc-password**="":
+**--netrc-password**="": 
 
-**--netrc-username**="":
+**--netrc-username**="": 
 
 **--network**="": external networks (default: [])
 
@@ -415,7 +415,7 @@ lint a pipeline configuration file
 
 **--plugins-privileged**="": allow plugins to run in privileged mode, if set empty, there is no (default: [])
 
-**--plugins-trusted-clone**="": plugins that are trusted to handle Git credentials in cloning steps (default: [docker.io/woodpeckerci/plugin-git:2.6.2 docker.io/woodpeckerci/plugin-git quay.io/woodpeckerci/plugin-git])
+**--plugins-trusted-clone**="": plugins that are trusted to handle Git credentials in cloning steps (default: [docker.io/woodpeckerci/plugin-git:2.6.3 docker.io/woodpeckerci/plugin-git quay.io/woodpeckerci/plugin-git])
 
 **--strict**: treat warnings as errors
 
