@@ -18,8 +18,6 @@ package stepbuilder
 import (
 	"path/filepath"
 	"strings"
-
-	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
 func SanitizePath(path string) string {
@@ -32,7 +30,7 @@ func SanitizePath(path string) string {
 
 func stepListContainsItemsToRun(items []*Item) bool {
 	for i := range items {
-		if items[i].Workflow.State == model.StatusPending {
+		if items[i].Pending {
 			return true
 		}
 	}

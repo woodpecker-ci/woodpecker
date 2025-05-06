@@ -346,7 +346,7 @@ steps:
 	if !assert.Len(t, pipelineItems, 1) {
 		t.Fatal("Should have generated 1 pipeline")
 	}
-	if pipelineItems[0].Workflow.State != model.StatusPending {
+	if !pipelineItems[0].Pending {
 		t.Fatal("Should run on dev branch")
 	}
 }

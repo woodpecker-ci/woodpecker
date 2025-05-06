@@ -108,7 +108,7 @@ func Create(ctx context.Context, _store store.Store, repo *model.Repo, pipeline 
 		return nil, ErrFiltered
 	}
 
-	pipeline = applyWorkflowsFromStepBuilder(pipeline, pipelineItems)
+	pipeline = applyWorkflowsFromStepBuilder(_store, pipeline, pipelineItems)
 
 	// persist the pipeline config for historical correctness, restarts, etc
 	var configs []*model.Config

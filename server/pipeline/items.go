@@ -155,7 +155,7 @@ func createPipelineItems(c context.Context, forge forge.Forge, store store.Store
 		err = updatePipelinePending(c, forge, store, currentPipeline, repo, user)
 	}
 
-	currentPipeline = applyWorkflowsFromStepBuilder(currentPipeline, pipelineItems)
+	currentPipeline = applyWorkflowsFromStepBuilder(store, currentPipeline, pipelineItems)
 
 	return currentPipeline, pipelineItems, err
 }
@@ -163,7 +163,7 @@ func createPipelineItems(c context.Context, forge forge.Forge, store store.Store
 // applyWorkflowsFromStepBuilder is the link between pipeline representation in "pipeline package" and server
 // to be specific this func currently is used to convert the pipeline.Item list (crafted by StepBuilder.Build()) into
 // a pipeline that can be stored in the database by the server.
-func applyWorkflowsFromStepBuilder(pipeline *model.Pipeline, pipelineItems []*stepbuilder.Item) *model.Pipeline {
+func applyWorkflowsFromStepBuilder(store store.Store, pipeline *model.Pipeline, pipelineItems []*stepbuilder.Item) *model.Pipeline {
 	var pidSequence int
 	for _, item := range pipelineItems {
 		if pidSequence < item.Workflow.PID {
@@ -176,14 +176,12 @@ func applyWorkflowsFromStepBuilder(pipeline *model.Pipeline, pipelineItems []*st
 	pipeline.Workflows = nil
 
 	for _, item := range pipelineItems {
-		workflow := &model.Workflow{
-			Name:       item.Workflow.Name,
-			ID:         item.Workflow.ID,
-			PID:        item.Workflow.PID,
-			PipelineID: pipeline.ID,
-			State:      item.Workflow.State,
-			// TODO: somehow set other values as well?
+		// TODO: should / could we prevent loading all workflow again?
+		workflow, err := store.WorkflowLoad(item.Workflow.ID)
+		if err != nil {
+			return nil
 		}
+
 		if pipeline.Status == model.StatusBlocked {
 			workflow.State = model.StatusBlocked
 		}
@@ -202,7 +200,7 @@ func applyWorkflowsFromStepBuilder(pipeline *model.Pipeline, pipelineItems []*st
 					Failure:    step.Failure,
 					Type:       model.StepType(step.Type),
 				}
-				if item.Workflow.State == model.StatusSkipped {
+				if !item.Pending {
 					step.State = model.StatusSkipped
 				}
 				if pipeline.Status == model.StatusBlocked {
