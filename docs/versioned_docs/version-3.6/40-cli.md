@@ -131,6 +131,8 @@ add a secret
 
 **--image**="": secret limited to these images (default: [])
 
+**--name**="": secret name
+
 **--value**="": secret value
 
 #### rm
