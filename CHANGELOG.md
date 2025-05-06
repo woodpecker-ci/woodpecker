@@ -12,6 +12,7 @@
 
 ### 📚 Documentation
 
+- Simplify NixOS docs [[#5120](https://github.com/woodpecker-ci/woodpecker/pull/5120)]
 - chore(deps): lock file maintenance [[#5150](https://github.com/woodpecker-ci/woodpecker/pull/5150)]
 - plugins: Add SSH/SCP plugin [[#4871](https://github.com/woodpecker-ci/woodpecker/pull/4871)]
 - chore(deps): update dependency @types/node to v22.15.3 [[#5142](https://github.com/woodpecker-ci/woodpecker/pull/5142)]
