@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.6.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.6.0) - 2025-05-05
+## [3.6.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.6.0) - 2025-05-06
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -44,6 +44,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update golang-packages [[#5152](https://github.com/woodpecker-ci/woodpecker/pull/5152)]
 - chore(deps): update pre-commit hook golangci/golangci-lint to v2.1.6 [[#5149](https://github.com/woodpecker-ci/woodpecker/pull/5149)]
 - chore(deps): update docker.io/woodpeckerci/plugin-docker-buildx docker tag to v6.0.1 [[#5147](https://github.com/woodpecker-ci/woodpecker/pull/5147)]
 - chore(deps): update pre-commit hook adrienverge/yamllint to v1.37.1 [[#5148](https://github.com/woodpecker-ci/woodpecker/pull/5148)]
