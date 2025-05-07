@@ -74,6 +74,11 @@ func (p Pipeline) IsMultiPipeline() bool {
 	return len(p.Workflows) > 1
 }
 
+// IsPullRequest checks if it's a PR event.
+func (p Pipeline) IsPullRequest() bool {
+	return p.Event == EventPull || p.Event == EventPullClosed || p.Event == EventPullEdited
+}
+
 type PipelineOptions struct {
 	Branch    string            `json:"branch"`
 	Variables map[string]string `json:"variables"`
