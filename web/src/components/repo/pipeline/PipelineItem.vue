@@ -72,7 +72,12 @@
           <span class="truncate">{{ pipeline.commit.sha.slice(0, 10) }}</span>
         </div>
 
-        <div class="flex min-w-0 items-center space-x-2" :title="$t('repo.pipeline.duration')">
+        <div
+          class="flex min-w-0 items-center space-x-2"
+          :title="
+            durationElapsed > 0 ? $t('repo.pipeline.duration', { duration: durationAsNumber(durationElapsed) }) : ''
+          "
+        >
           <Icon name="duration" />
           <span class="truncate">{{ duration }}</span>
         </div>
@@ -95,6 +100,7 @@ import ListItem from '~/components/atomic/ListItem.vue';
 import { pipelineStatusColors } from '~/components/repo/pipeline/pipeline-status';
 import PipelineRunningIcon from '~/components/repo/pipeline/PipelineRunningIcon.vue';
 import PipelineStatusIcon from '~/components/repo/pipeline/PipelineStatusIcon.vue';
+import { useDate } from '~/compositions/useDate';
 import usePipeline from '~/compositions/usePipeline';
 import type { Pipeline } from '~/lib/api/types';
 
@@ -103,9 +109,11 @@ const props = defineProps<{
 }>();
 
 const { t } = useI18n();
+const { durationAsNumber } = useDate();
 
 const pipeline = toRef(props, 'pipeline');
-const { since, duration, message, shortMessage, context, shortContext, prettyRef, created } = usePipeline(pipeline);
+const { since, duration, durationElapsed, message, shortMessage, context, shortContext, prettyRef, created } =
+  usePipeline(pipeline);
 
 const pipelineEventTitle = computed(() => {
   switch (pipeline.value.event) {
