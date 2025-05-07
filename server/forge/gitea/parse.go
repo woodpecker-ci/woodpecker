@@ -34,9 +34,10 @@ const (
 	hookPullRequest = "pull_request"
 	hookRelease     = "release"
 
-	actionOpen  = "opened"
-	actionSync  = "synchronized"
-	actionClose = "closed"
+	actionOpen   = "opened"
+	actionSync   = "synchronized"
+	actionClose  = "closed"
+	actionEdited = "edited"
 
 	refBranch = "branch"
 	refTag    = "tag"
@@ -117,9 +118,9 @@ func parsePullRequestHook(payload io.Reader) (*model.Repo, *model.Pipeline, erro
 		return nil, nil, fmt.Errorf("parsed pull_request webhook does not contain pull_request info")
 	}
 
-	// Don't trigger pipelines for non-code changes ...
-	if pr.Action != actionOpen && pr.Action != actionSync && pr.Action != actionClose {
-		log.Debug().Msgf("pull_request action is '%s' and no open or sync", pr.Action)
+	// Only trigger pipelines for selected event types
+	if pr.Action != actionOpen && pr.Action != actionSync && pr.Action != actionClose && pr.Action != actionEdited {
+		log.Debug().Msgf("pull_request action is '%s'. Only 'open', 'sync' and 'edited' are supported", pr.Action)
 		return nil, nil, nil
 	}
 

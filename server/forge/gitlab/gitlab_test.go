@@ -260,6 +260,27 @@ func Test_GitLab(t *testing.T) {
 		}
 	})
 
+	t.Run("parse merge request edited", func(t *testing.T) {
+		req, _ := http.NewRequest(
+			testdata.ServiceHookMethod,
+			testdata.ServiceHookURL.String(),
+			bytes.NewReader(testdata.HookPullRequestEdited),
+		)
+		req.Header = testdata.ServiceHookHeaders
+
+		// TODO: insert fake store into context to retrieve user & repo, this will activate fetching of ChangedFiles
+		hookRepo, pipeline, err := client.Hook(ctx, req)
+		assert.NoError(t, err)
+		if assert.NotNil(t, hookRepo) && assert.NotNil(t, pipeline) {
+			assert.Equal(t, "main", hookRepo.Branch)
+			assert.Equal(t, "anbraten", hookRepo.Owner)
+			assert.Equal(t, "woodpecker-test", hookRepo.Name)
+			assert.Equal(t, "Add new file", pipeline.Title)
+			assert.Len(t, pipeline.ChangedFiles, 0) // see L217
+			assert.Equal(t, model.EventPullEdited, pipeline.Event)
+		}
+	})
+
 	t.Run("release hook", func(t *testing.T) {
 		req, _ := http.NewRequest(
 			testdata.ServiceHookMethod,

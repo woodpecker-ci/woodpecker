@@ -240,6 +240,7 @@
         "tag": "Tag",
         "pr": "Pull Request",
         "pr_closed": "Pull Request merged/closed",
+        "pr_edited": "Pull Request edited",
         "deploy": "Deploy",
         "cron": "Cron",
         "manual": "Manual",

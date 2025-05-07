@@ -94,7 +94,11 @@ export default (pipeline: Ref<Pipeline | undefined>) => {
       return pipeline.value.ref.replaceAll('refs/tags/', '');
     }
 
-    if (pipeline.value?.event === 'pull_request' || pipeline.value?.event === 'pull_request_closed') {
+    if (
+      pipeline.value?.event === 'pull_request' ||
+      pipeline.value?.event === 'pull_request_closed' ||
+      pipeline.value?.event === 'pull_request_edited'
+    ) {
       return `#${pipeline.value.ref
         .replaceAll('refs/pull/', '')
         .replaceAll('refs/merge-requests/', '')

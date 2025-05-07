@@ -357,6 +357,12 @@ func TestSecretMatch(t *testing.T) {
 			event:  "pull_request_closed",
 			match:  true,
 		},
+		{
+			name:   "pull edited should match pull",
+			secret: Secret{Events: []string{"pull_request"}},
+			event:  "pull_request_edited",
+			match:  true,
+		},
 	}
 
 	for _, tc := range tcl {

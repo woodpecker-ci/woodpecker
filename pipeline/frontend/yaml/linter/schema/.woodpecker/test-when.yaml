@@ -33,6 +33,7 @@ steps:
         - push
         - pull_request
         - pull_request_closed
+        - pull_request_edited
         - tag
         - deployment
         - release

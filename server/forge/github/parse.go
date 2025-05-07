@@ -36,6 +36,7 @@ const (
 	actionClose    = "closed"
 	actionSync     = "synchronize"
 	actionReleased = "released"
+	actionEdited   = "edited"
 
 	stateOpen  = "open"
 	stateClose = "closed"
@@ -148,13 +149,17 @@ func parseDeployHook(hook *github.DeploymentEvent) (*model.Repo, *model.Pipeline
 // parsePullHook parses a pull request hook and returns the Repo and Pipeline
 // details.
 func parsePullHook(hook *github.PullRequestEvent, merge bool) (*github.PullRequest, *model.Repo, *model.Pipeline, error) {
-	if hook.GetAction() != actionOpen && hook.GetAction() != actionSync && hook.GetAction() != actionClose {
+	if hook.GetAction() != actionOpen && hook.GetAction() != actionSync && hook.GetAction() != actionClose && hook.GetAction() != actionEdited {
 		return nil, nil, nil, nil
 	}
 
 	event := model.EventPull
 	if hook.GetPullRequest().GetState() == stateClose {
 		event = model.EventPullClosed
+	}
+
+	if hook.GetAction() == actionEdited {
+		event = model.EventPullEdited
 	}
 
 	fromFork := hook.GetPullRequest().GetHead().GetRepo().GetID() != hook.GetPullRequest().GetBase().GetRepo().GetID()
