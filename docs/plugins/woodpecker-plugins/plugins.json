@@ -221,6 +221,11 @@
       "verified": false
     },
     {
+      "name": "SSH SCP",
+      "docs": "https://raw.githubusercontent.com/appleboy/drone-scp/refs/heads/master/DOCS.md",
+      "verified": false
+    },
+    {
       "name": "Telegram",
       "docs": "https://raw.githubusercontent.com/appleboy/drone-telegram/refs/heads/master/DOCS.md",
       "verified": false
@@ -253,6 +258,11 @@
     {
       "name": "Microsoft Teams Notification (Advanced)",
       "docs": "https://raw.githubusercontent.com/mobydeck/ci-teams-notification/refs/heads/main/docs.md",
+      "verified": false
+    },
+    {
+      "name": "Pre-commit Runner",
+      "docs": "https://codeberg.org/sp1thas/woodpecker-ci-pre-commit/raw/branch/main/docs.md",
       "verified": false
     }
   ]

@@ -24,6 +24,7 @@
 - **Dependency**: [Workflows][Workflow] can depend on each other, and if possible, they are executed in parallel.
 - **Status**: Status refers to the outcome of a step or [workflow][Workflow] after it has been executed, determined by the internal command exit code. At the end of a [workflow][Workflow], its status is sent to the [forge][Forge].
 - **Service extension**: Some parts of Woodpecker internal services like secrets storage or config fetcher can be replaced through service extensions.
+- **Task**: A task is a [workflow][Workflow] that's currently waiting for its execution in the task queue.
 
 ## Woodpecker architecture
 

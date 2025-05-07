@@ -15,7 +15,6 @@
 package internal
 
 import (
-	"context"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -32,7 +31,7 @@ func TestCurrentUser(t *testing.T) {
 
 	defer s.Close()
 
-	ctx := context.Background()
+	ctx := t.Context()
 	ts := mockSource("bearer-token")
 	client := NewClientWithToken(ctx, ts, s.URL)
 	uid, err := client.FindCurrentUser(ctx)

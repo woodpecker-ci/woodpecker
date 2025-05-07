@@ -15,7 +15,6 @@
 package config_test
 
 import (
-	"context"
 	"crypto/ed25519"
 	"crypto/rand"
 	"encoding/json"
@@ -218,7 +217,7 @@ func TestFetchFromConfigService(t *testing.T) {
 			forgeFetcher := config.NewForge(time.Second*3, 3)
 			configFetcher := config.NewCombined(forgeFetcher, httpFetcher)
 			files, err := configFetcher.Fetch(
-				context.Background(),
+				t.Context(),
 				f,
 				&model.User{AccessToken: "xxx"},
 				repo,

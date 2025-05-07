@@ -15,7 +15,6 @@
 package cron
 
 import (
-	"context"
 	"testing"
 	"time"
 
@@ -33,7 +32,7 @@ func TestCreatePipeline(t *testing.T) {
 	_manager := mocks_manager.NewManager(t)
 	_forge := mocks_forge.NewForge(t)
 	store := mocks_store.NewStore(t)
-	ctx := context.Background()
+	ctx := t.Context()
 
 	creator := &model.User{
 		ID:    1,
