@@ -98,7 +98,7 @@ func run(ctx context.Context, c *cli.Command) error {
 			return setupStore(ctx, c)
 		},
 		backoff.WithBackOff(backoff.NewExponentialBackOff()),
-		backoff.WithMaxTries(uint(c.Uint("db-max-retries"))),
+		backoff.WithMaxTries(c.Uint("db-max-retries")),
 		backoff.WithNotify(func(err error, delay time.Duration) {
 			log.Error().Msgf("failed to setup store: %v: retry in %v", err, delay)
 		}))

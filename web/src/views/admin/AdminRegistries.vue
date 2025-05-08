@@ -50,6 +50,7 @@ import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
 import useNotifications from '~/compositions/useNotifications';
 import { usePagination } from '~/compositions/usePaginate';
+import { useWPTitle } from '~/compositions/useWPTitle';
 import type { Registry } from '~/lib/api/types';
 
 const emptyRegistry: Partial<Registry> = {
@@ -102,4 +103,6 @@ function editRegistry(registry: Registry) {
 function showAddRegistry() {
   selectedRegistry.value = cloneDeep(emptyRegistry);
 }
+
+useWPTitle(computed(() => [i18n.t('registries.registries'), i18n.t('admin.settings.settings')]));
 </script>

@@ -17,7 +17,7 @@
                 "delete_agent": "删除 Agent",
                 "delete_confirm": "你真的要删除该 Agent 吗？删除后它将无法再次连接到此服务器。",
                 "deleted": "已删除 Agent",
-                "desc": "注册到此服务器的 Agents",
+                "desc": "注册到此服务器的 Agents。",
                 "edit_agent": "编辑 Agent",
                 "id": "ID",
                 "last_contact": "最后访问",
@@ -39,14 +39,17 @@
                 "saved": "已保存 Agent",
                 "show": "显示 Agents",
                 "token": "Token",
-                "version": "版本"
+                "version": "版本",
+                "custom_labels": {
+                    "custom_labels": "自定义标签"
+                }
             },
             "not_allowed": "你没有访问服务器设置的权限",
             "orgs": {
                 "delete_confirm": "你真的想删除该组织吗？这也将删除该组织拥有的所有存储库。",
                 "delete_org": "删除组织",
                 "deleted": "组织已删除",
-                "desc": "在此服务器上拥有存储库的组织",
+                "desc": "在此服务器上拥有存储库的组织。",
                 "none": "还没有任何组织。",
                 "org_settings": "组织设置",
                 "orgs": "组织",
@@ -54,7 +57,7 @@
             },
             "queue": {
                 "agent": "agent",
-                "desc": "正在等待 Agents 执行的任务",
+                "desc": "正在等待 Agents 执行的任务。",
                 "pause": "暂停",
                 "paused": "队列已暂停",
                 "queue": "队列",
@@ -74,7 +77,7 @@
                 "waiting_for": "正在等待"
             },
             "repos": {
-                "desc": "该服务器上已启用或曾经启用的仓库",
+                "desc": "该服务器上已启用或曾经启用的仓库。",
                 "disabled": "已禁用",
                 "none": "目前还没有存储库。",
                 "repair": {
@@ -121,7 +124,7 @@
                 "delete_confirm": "你真的想删除这个用户吗？这也将删除该用户拥有的所有存储库。",
                 "delete_user": "删除用户",
                 "deleted": "删除用户",
-                "desc": "注册此服务器的用户",
+                "desc": "在此服务器上注册的用户。",
                 "edit_user": "编辑用户",
                 "email": "Email",
                 "login": "登录",
@@ -231,7 +234,8 @@
                 "log_auto_scroll_off": "关闭自动滚动",
                 "log_download": "下载",
                 "restart": "重启",
-                "restart_success": "流水线已重启"
+                "restart_success": "流水线已重启",
+                "log_delete": "删除"
             },
             "config": "配置",
             "errors": "错误 ({count})",
@@ -242,7 +246,8 @@
                 "pr": "合并请求",
                 "push": "推送",
                 "tag": "标签",
-                "release": "发布"
+                "release": "发布",
+                "pr_closed": "拉取请求已合并/关闭"
             },
             "exit_code": "退出代码 {exitCode}",
             "files": "修改的文件（{files}）",
@@ -275,13 +280,22 @@
                 "running": "运行中",
                 "skipped": "已跳过",
                 "started": "已启动",
-                "status": "状态: {status}",
+                "status": "状态：{status}",
                 "success": "成功"
             },
             "step_not_started": "该步骤尚未启动。",
             "tasks": "任务",
             "warnings": "警告 ({count})",
-            "we_got_some_errors": "哦不，我们遇到了一些错误！"
+            "we_got_some_errors": "哦不，我们遇到了一些错误！",
+            "no_logs": "无日志",
+            "created": "创建于：{created}",
+            "debug": {
+                "title": "调试",
+                "download_metadata": "下载元数据",
+                "metadata_download_error": "下载元数据时出错",
+                "metadata_download_successful": "元数据下载成功",
+                "no_permission": "您无权访问调试信息"
+            }
         },
         "pull_requests": "合并请求",
         "settings": {
@@ -374,7 +388,13 @@
                 },
                 "trusted": {
                     "desc": "流水线容器可以使用高级功能，比如挂载卷。",
-                    "trusted": "受信任"
+                    "trusted": "受信任",
+                    "network": {
+                        "network": "网络"
+                    },
+                    "security": {
+                        "security": "安全"
+                    }
                 },
                 "visibility": {
                     "internal": {
@@ -390,6 +410,9 @@
                         "public": "公开"
                     },
                     "visibility": "项目可见性"
+                },
+                "allow_deploy": {
+                    "allow": "允许部署"
                 }
             },
             "not_allowed": "你没有权限访问此仓库的设置",
@@ -438,7 +461,7 @@
             },
             "settings": "设置"
         },
-        "user_none": "此组织/用户还没有任何仓库。",
+        "user_none": "该组织/用户尚无项目",
         "visibility": {
             "visibility": "项目可见性",
             "public": {
@@ -456,7 +479,16 @@
         }
     },
     "repos": "仓库",
-    "repositories": "仓库",
+    "repositories": {
+        "title": "仓库",
+        "all": {
+            "title": "所有仓库"
+        },
+        "last": {
+            "title": "上次访问",
+            "desc": "最近访问的仓库（按访问时间排序）"
+        }
+    },
     "running_version": "你正在运行 Woodpecker {0}",
     "search": "查找仓库…",
     "time": {
@@ -466,7 +498,8 @@
         "not_started": "还没有运行过",
         "sec_short": "秒",
         "template": "YYYY 年 MM 月 D 日 HH:mm z",
-        "weeks_short": "周"
+        "weeks_short": "周",
+        "just_now": "刚刚"
     },
     "unknown_error": "发生了未知错误",
     "update_woodpecker": "请更新你的 Woodpecker 实例到 {0}",
@@ -523,11 +556,11 @@
             "settings": "用户设置",
             "cli_and_api": {
                 "token": "个人访问令牌",
-                "api_usage": "API 使用示例",
+                "api_usage": "API 用法示例",
                 "cli_usage": "CLI 用法示例",
                 "download_cli": "下载 CLI",
                 "reset_token": "重置令牌",
-                "swagger_ui": "Swagger UI",
+                "swagger_ui": "Swagger 界面",
                 "desc": "个人访问令牌、CLI 和 API 用法",
                 "cli_and_api": "CLI & API"
             }
@@ -539,11 +572,44 @@
     "login_to_cli": "登录到 CLI",
     "global_level_secret": "全局密钥",
     "org_level_secret": "组织密钥",
-    "abort": "关于",
+    "abort": "中止",
     "cli_login_success": "登录到 CLI 成功",
     "cli_login_failed": "登录到 CLI 失败",
     "cli_login_denied": "登录 CLI 被拒绝",
     "login_to_cli_description": "点击继续以登录到 CLI。",
     "return_to_cli": "您现在可以关闭此选项卡并返回 CLI。",
-    "login_with": "使用 {forge} 登录"
+    "login_with": "使用 {forge} 登录",
+    "require_approval": {
+        "allowed_users": {
+            "allowed_users": "已允许的用户"
+        },
+        "none": "无",
+        "none_desc": "所有事件都会触发管道，包括拉取请求。此设置可能很危险，仅建议用于私有实例。",
+        "pull_requests": "所有拉取请求"
+    },
+    "secrets": {
+        "secrets": "密钥",
+        "add": "添加密钥",
+        "save": "保存密钥",
+        "show": "显示密钥",
+        "created": "密钥已创建",
+        "saved": "密钥已保存",
+        "edit": "编辑密钥",
+        "delete": "删除密钥",
+        "name": "名称",
+        "value": "值",
+        "deleted": "密钥已删除",
+        "delete_confirm": "您确实要删除这个密钥吗？"
+    },
+    "no_search_results": "未找到结果",
+    "org_access_denied": "您无权访问此组织",
+    "invalid_state": "OAuth 状态无效",
+    "internal_error": "发生内部错误",
+    "settings": "设置",
+    "access_denied": "您无权访问此实例",
+    "registries": {
+        "address": {
+            "address": "地址"
+        }
+    }
 }

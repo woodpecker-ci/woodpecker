@@ -28,10 +28,17 @@
 </template>
 
 <script lang="ts" setup>
+import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
+
 import WoodpeckerLogo from '~/assets/logo.svg?component';
 import Error from '~/components/atomic/Error.vue';
 import Settings from '~/components/layout/Settings.vue';
 import { useVersion } from '~/compositions/useVersion';
+import { useWPTitle } from '~/compositions/useWPTitle';
 
 const version = useVersion();
+
+const { t } = useI18n();
+useWPTitle(computed(() => [t('info'), t('admin.settings.settings')]));
 </script>

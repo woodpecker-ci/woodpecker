@@ -15,7 +15,6 @@
 package bitbucketdatacenter
 
 import (
-	"context"
 	"testing"
 	"time"
 
@@ -57,7 +56,7 @@ func TestBitbucketDC(t *testing.T) {
 		urlAPI: s.URL,
 	}
 
-	ctx := context.Background()
+	ctx := t.Context()
 
 	repo, err := c.Repo(ctx, fakeUser, model.ForgeRemoteID("1234"), "PRJ", "repo-slug")
 	assert.NoError(t, err)
