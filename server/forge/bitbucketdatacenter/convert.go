@@ -119,7 +119,7 @@ func convertPullRequestEvent(ev *bb.PullRequestEvent, baseURL string) *model.Pip
 		Author:    authorLabel(ev.Actor.Name),
 		Email:     ev.Actor.Email,
 		Timestamp: time.Time(ev.Date).UTC().Unix(),
-		Ref:       fmt.Sprintf("refs/pull-requests/%d/from", ev.PullRequest.ID),
+		Ref:       fmt.Sprintf("refs/heads/%s", ev.PullRequest.Source.DisplayID),
 		ForgeURL:  fmt.Sprintf("%s/projects/%s/repos/%s/commits/%s", baseURL, ev.PullRequest.Source.Repository.Project.Key, ev.PullRequest.Source.Repository.Slug, ev.PullRequest.Source.Latest),
 		Refspec:   fmt.Sprintf("%s:%s", ev.PullRequest.Source.DisplayID, ev.PullRequest.Target.DisplayID),
 		FromFork:  ev.PullRequest.Source.Repository.ID != ev.PullRequest.Target.Repository.ID,
