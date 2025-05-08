@@ -19,6 +19,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 
 	gitlab "gitlab.com/gitlab-org/api/client-go"
@@ -119,26 +120,28 @@ func convertMergeRequestHook(hook *gitlab.MergeEvent, req *http.Request) (int, *
 
 	lastCommit := obj.LastCommit
 
-	pipeline.Message = lastCommit.Message
-	pipeline.Commit = lastCommit.ID
+	pipeline.Commit = &model.Commit{
+		Message: lastCommit.Message,
+		SHA:     lastCommit.ID,
+		Author: model.CommitAuthor{
+			Author: lastCommit.Author.Name,
+			Email:  lastCommit.Author.Email,
+		},
+		ForgeURL: lastCommit.URL,
+	}
 
 	pipeline.Ref = fmt.Sprintf(mergeRefs, obj.IID)
 	pipeline.Branch = obj.SourceBranch
 	pipeline.Refspec = fmt.Sprintf("%s:%s", obj.SourceBranch, obj.TargetBranch)
-
-	author := lastCommit.Author
-
-	pipeline.Author = author.Name
-	pipeline.Email = author.Email
-
-	if len(pipeline.Email) != 0 {
-		pipeline.Avatar = getUserAvatar(pipeline.Email)
-	}
-
-	pipeline.Title = obj.Title
+	pipeline.Author = hook.User.Username
+	pipeline.Avatar = hook.User.AvatarURL
 	pipeline.ForgeURL = obj.URL
-	pipeline.PullRequestLabels = convertLabels(hook.Labels)
-	pipeline.FromFork = target.PathWithNamespace != source.PathWithNamespace
+	pipeline.PullRequest = &model.PullRequest{
+		Labels:   convertLabels(hook.Labels),
+		FromFork: target.PathWithNamespace != source.PathWithNamespace,
+		Title:    obj.Title,
+		Index:    model.ForgeRemoteID(strconv.Itoa(obj.IID)),
+	}
 
 	return obj.IID, repo, pipeline, nil
 }
@@ -170,21 +173,19 @@ func convertPushHook(hook *gitlab.PushEvent) (*model.Repo, *model.Pipeline, erro
 	}
 
 	pipeline.Event = model.EventPush
-	pipeline.Commit = hook.After
+	pipeline.Commit = &model.Commit{SHA: hook.After}
 	pipeline.Branch = strings.TrimPrefix(hook.Ref, "refs/heads/")
 	pipeline.Ref = hook.Ref
+	pipeline.Author = hook.UserUsername
+	pipeline.Avatar = hook.UserAvatar
 
 	// assume a capacity of 4 changed files per commit
 	files := make([]string, 0, len(hook.Commits)*4)
 	for _, cm := range hook.Commits {
 		if hook.After == cm.ID {
-			pipeline.Author = cm.Author.Name
-			pipeline.Email = cm.Author.Email
-			pipeline.Message = cm.Message
-			pipeline.Timestamp = cm.Timestamp.Unix()
-			if len(pipeline.Email) != 0 {
-				pipeline.Avatar = getUserAvatar(pipeline.Email)
-			}
+			pipeline.Commit.Author = model.CommitAuthor{Author: cm.Author.Name, Email: cm.Author.Email}
+			pipeline.Commit.Message = cm.Message
+			pipeline.Commit.ForgeURL = cm.URL
 		}
 
 		files = append(files, cm.Added...)
@@ -223,19 +224,21 @@ func convertTagHook(hook *gitlab.TagEvent) (*model.Repo, *model.Pipeline, error)
 	}
 
 	pipeline.Event = model.EventTag
-	pipeline.Commit = hook.After
+	pipeline.Commit = &model.Commit{
+		SHA: hook.After,
+	}
 	pipeline.Branch = strings.TrimPrefix(hook.Ref, "refs/heads/")
 	pipeline.Ref = hook.Ref
+	pipeline.Author = hook.UserUsername
+	pipeline.Avatar = hook.UserAvatar
+	pipeline.ForgeURL = fmt.Sprintf("%s/-/tags/%s", repo.ForgeURL, strings.TrimPrefix(hook.Ref, "refs/tags/"))
 
+	// TODO does hook.Commits always contain hook.After?
 	for _, cm := range hook.Commits {
 		if hook.After == cm.ID {
-			pipeline.Author = cm.Author.Name
-			pipeline.Email = cm.Author.Email
-			pipeline.Message = cm.Message
-			pipeline.Timestamp = cm.Timestamp.Unix()
-			if len(pipeline.Email) != 0 {
-				pipeline.Avatar = getUserAvatar(pipeline.Email)
-			}
+			pipeline.Commit.Author = model.CommitAuthor{Author: cm.Author.Name, Email: cm.Author.Email}
+			pipeline.Commit.Message = cm.Message
+			pipeline.Commit.ForgeURL = cm.URL
 			break
 		}
 	}
@@ -264,20 +267,21 @@ func convertReleaseHook(hook *gitlab.ReleaseEvent) (*model.Repo, *model.Pipeline
 	repo.IsSCMPrivate = hook.Project.VisibilityLevel > VisibilityLevelInternal
 
 	pipeline := &model.Pipeline{
-		Event:    model.EventRelease,
-		Commit:   hook.Commit.ID,
-		ForgeURL: hook.URL,
-		Message:  fmt.Sprintf("created release %s", hook.Name),
-		Sender:   hook.Commit.Author.Name,
-		Author:   hook.Commit.Author.Name,
-		Email:    hook.Commit.Author.Email,
-
+		Event: model.EventRelease,
+		Commit: &model.Commit{
+			SHA: hook.Commit.ID,
+			Author: model.CommitAuthor{
+				Author: hook.Commit.Author.Name,
+				Email:  hook.Commit.Author.Email,
+			},
+			Message:  hook.Commit.Message,
+			ForgeURL: hook.Commit.URL,
+		},
+		ForgeURL:        hook.URL,
+		ReleaseTagTitle: hook.Name,
 		// Tag name here is the ref. We should add the refs/tags, so
 		// it is known it's a tag (git-plugin looks for it)
 		Ref: "refs/tags/" + hook.Tag,
-	}
-	if len(pipeline.Email) != 0 {
-		pipeline.Avatar = getUserAvatar(pipeline.Email)
 	}
 
 	return repo, pipeline, nil
