@@ -12,6 +12,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update postgres docker tag to v17.5 [[#5165](https://github.com/woodpecker-ci/woodpecker/pull/5165)]
 - chore(deps): update dependency golang to v1.24.3 [[#5163](https://github.com/woodpecker-ci/woodpecker/pull/5163)]
 
 ### Misc
