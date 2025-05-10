@@ -6,6 +6,10 @@
 
 @qwerty287
 
+### 📚 Documentation
+
+- chore(deps): update docs npm deps non-major [[#5164](https://github.com/woodpecker-ci/woodpecker/pull/5164)]
+
 ### 📦️ Dependency
 
 - chore(deps): update dependency golang to v1.24.3 [[#5163](https://github.com/woodpecker-ci/woodpecker/pull/5163)]
