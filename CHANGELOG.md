@@ -1,10 +1,14 @@
 # Changelog
 
-## [3.6.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.6.1) - 2025-05-08
+## [3.6.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.6.1) - 2025-05-10
 
 ### ❤️ Thanks to all contributors! ❤️
 
 @qwerty287
+
+### 📦️ Dependency
+
+- chore(deps): update dependency golang to v1.24.3 [[#5163](https://github.com/woodpecker-ci/woodpecker/pull/5163)]
 
 ### Misc
 
