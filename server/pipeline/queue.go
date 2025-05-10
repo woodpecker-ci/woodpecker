@@ -20,16 +20,16 @@ import (
 	"fmt"
 	"maps"
 
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/stepbuilder"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/rpc"
 	"go.woodpecker-ci.org/woodpecker/v3/server"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
-	"go.woodpecker-ci.org/woodpecker/v3/server/pipeline/stepbuilder"
 )
 
 func queuePipeline(ctx context.Context, repo *model.Repo, pipelineItems []*stepbuilder.Item) error {
 	var tasks []*model.Task
 	for _, item := range pipelineItems {
-		if item.Workflow.State == model.StatusSkipped {
+		if !item.Pending {
 			continue
 		}
 		task := &model.Task{
