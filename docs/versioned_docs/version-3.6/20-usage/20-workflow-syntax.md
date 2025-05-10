@@ -122,7 +122,13 @@ image: index.docker.io/library/golang
 image: index.docker.io/library/golang:1.7
 ```
 
-Woodpecker does not automatically upgrade container images. Example configuration to always pull the latest image when updates are available:
+Learn more how you can use images from [different registries](./41-registries.md).
+
+### `pull`
+
+By default, Woodpecker does not automatically upgrade container images and only pulls them when they are not already present.
+
+To always pull the latest image when updates are available, use the `pull` option:
 
 ```diff
  steps:
@@ -130,8 +136,6 @@ Woodpecker does not automatically upgrade container images. Example configuratio
      image: golang:latest
 +    pull: true
 ```
-
-Learn more how you can use images from [different registries](./41-registries.md).
 
 ### `commands`
 
