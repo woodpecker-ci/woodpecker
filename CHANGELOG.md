@@ -1,5 +1,25 @@
 # Changelog
 
+## [3.6.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.6.1) - 2025-05-10
+
+### ❤️ Thanks to all contributors! ❤️
+
+@qwerty287
+
+### 📚 Documentation
+
+- chore(deps): update docs npm deps non-major [[#5164](https://github.com/woodpecker-ci/woodpecker/pull/5164)]
+
+### 📦️ Dependency
+
+- fix(deps): update web npm deps non-major [[#5166](https://github.com/woodpecker-ci/woodpecker/pull/5166)]
+- chore(deps): update postgres docker tag to v17.5 [[#5165](https://github.com/woodpecker-ci/woodpecker/pull/5165)]
+- chore(deps): update dependency golang to v1.24.3 [[#5163](https://github.com/woodpecker-ci/woodpecker/pull/5163)]
+
+### Misc
+
+- Add Bluesky post plugin [[#5156](https://github.com/woodpecker-ci/woodpecker/pull/5156)]
+
 ## [3.6.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.6.0) - 2025-05-06
 
 ### ❤️ Thanks to all contributors! ❤️
