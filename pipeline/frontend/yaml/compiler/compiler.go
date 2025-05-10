@@ -17,6 +17,7 @@ package compiler
 import (
 	"fmt"
 	"path"
+	"slices"
 
 	backend_types "go.woodpecker-ci.org/woodpecker/v3/pipeline/backend/types"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
@@ -68,17 +69,10 @@ func (s *Secret) Match(event string) bool {
 		return true
 	}
 	// treat all pull events the same way
-	if event == "pull_request_closed" {
+	if event == "pull_request_closed" || event == "pull_request_edited" {
 		event = "pull_request"
 	}
-	// one match is enough
-	for _, e := range s.Events {
-		if e == event {
-			return true
-		}
-	}
-	// a filter is set but the webhook did not match it
-	return false
+	return slices.Contains(s.Events, event)
 }
 
 // Compiler compiles the yaml.
