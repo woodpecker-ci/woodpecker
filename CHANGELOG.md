@@ -1,13 +1,14 @@
 # Changelog
 
-## [3.6.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.6.1) - 2025-05-12
+## [3.6.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.6.1) - 2025-05-13
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@Spiffyk, @qwerty287
+@OCram85, @Spiffyk, @qwerty287
 
 ### 📚 Documentation
 
+- add Portainer Service Update plugin [[#5172](https://github.com/woodpecker-ci/woodpecker/pull/5172)]
 - chore(deps): lock file maintenance [[#5171](https://github.com/woodpecker-ci/woodpecker/pull/5171)]
 - chore(deps): update docs npm deps non-major [[#5164](https://github.com/woodpecker-ci/woodpecker/pull/5164)]
 
