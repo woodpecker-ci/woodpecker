@@ -4,16 +4,21 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@OCram85, @Spiffyk, @qwerty287
+@OCram85, @Spiffyk, @qwerty287, @rruzicic
+
+### 🐛 Bug Fixes
+
+- fix(bitbucketdc): build status not reported on PR builds [[#5162](https://github.com/woodpecker-ci/woodpecker/pull/5162)]
 
 ### 📚 Documentation
 
 - add Portainer Service Update plugin [[#5172](https://github.com/woodpecker-ci/woodpecker/pull/5172)]
-- chore(deps): lock file maintenance [[#5171](https://github.com/woodpecker-ci/woodpecker/pull/5171)]
+- Split 'pull' option docs from 'image' docs [[#5161](https://github.com/woodpecker-ci/woodpecker/pull/5161)]
 - chore(deps): update docs npm deps non-major [[#5164](https://github.com/woodpecker-ci/woodpecker/pull/5164)]
 
 ### 📦️ Dependency
 
+- chore(deps): lock file maintenance [[#5171](https://github.com/woodpecker-ci/woodpecker/pull/5171)]
 - fix(deps): update module github.com/google/go-github/v71 to v72 [[#5167](https://github.com/woodpecker-ci/woodpecker/pull/5167)]
 - fix(deps): update dependency simple-icons to v14.13.0 [[#5170](https://github.com/woodpecker-ci/woodpecker/pull/5170)]
 - fix(deps): update module github.com/urfave/cli/v3 to v3.3.3 [[#5169](https://github.com/woodpecker-ci/woodpecker/pull/5169)]
@@ -23,7 +28,6 @@
 
 ### Misc
 
-- Split 'pull' option docs from 'image' docs [[#5161](https://github.com/woodpecker-ci/woodpecker/pull/5161)]
 - Add Bluesky post plugin [[#5156](https://github.com/woodpecker-ci/woodpecker/pull/5156)]
 
 ## [3.6.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.6.0) - 2025-05-06
