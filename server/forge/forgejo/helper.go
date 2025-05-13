@@ -177,7 +177,7 @@ func pipelineFromPullRequest(hook *pullRequestHook) *model.Pipeline {
 	return pipeline
 }
 
-func convertMilestone(mile *gitea.Milestone) string {
+func convertMilestone(mile *forgejo.Milestone) string {
 	if mile == nil || mile.ID == 0 {
 		return ""
 	}
