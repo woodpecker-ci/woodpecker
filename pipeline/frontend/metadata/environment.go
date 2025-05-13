@@ -106,6 +106,7 @@ func (m *Metadata) Environ() map[string]string {
 		setNonEmptyEnvVar(params, "CI_COMMIT_TARGET_BRANCH", targetBranch)
 		setNonEmptyEnvVar(params, "CI_COMMIT_PULL_REQUEST", pullRegexp.FindString(pipeline.Commit.Ref))
 		setNonEmptyEnvVar(params, "CI_COMMIT_PULL_REQUEST_LABELS", strings.Join(pipeline.Commit.PullRequestLabels, ","))
+		setNonEmptyEnvVar(params, "CI_COMMIT_PULL_REQUEST_MILESTONE", pipeline.Commit.PullRequestMilestone)
 	}
 
 	// Only export changed files if maxChangedFiles is not exceeded
