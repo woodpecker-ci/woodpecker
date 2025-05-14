@@ -207,7 +207,7 @@
     },
     {
       "name": "Gitea Package",
-      "docs": "https://gitea.ocram85.com/plugins/gitea-package/raw/branch/main/docs.md",
+      "docs": "https://codeberg.org/woodpecker-community/gitea-package/raw/branch/main/docs.md",
       "verified": false
     },
     {
