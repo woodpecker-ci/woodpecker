@@ -1,20 +1,21 @@
 # Changelog
 
-## [3.6.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.6.1) - 2025-05-13
+## [3.6.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.6.1) - 2025-05-14
 
 ### ❤️ Thanks to all contributors! ❤️
 
 @OCram85, @Spiffyk, @qwerty287, @rruzicic
 
-### 🐛 Bug Fixes
-
-- fix(bitbucketdc): build status not reported on PR builds [[#5162](https://github.com/woodpecker-ci/woodpecker/pull/5162)]
-
 ### 📚 Documentation
 
+- Move `gitea-package` plugin to codeberg [[#5175](https://github.com/woodpecker-ci/woodpecker/pull/5175)]
 - add Portainer Service Update plugin [[#5172](https://github.com/woodpecker-ci/woodpecker/pull/5172)]
 - Split 'pull' option docs from 'image' docs [[#5161](https://github.com/woodpecker-ci/woodpecker/pull/5161)]
 - chore(deps): update docs npm deps non-major [[#5164](https://github.com/woodpecker-ci/woodpecker/pull/5164)]
+
+### 🐛 Bug Fixes
+
+- fix(bitbucketdc): build status not reported on PR builds [[#5162](https://github.com/woodpecker-ci/woodpecker/pull/5162)]
 
 ### 📦️ Dependency
 
