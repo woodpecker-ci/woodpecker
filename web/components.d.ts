@@ -88,6 +88,7 @@ declare module 'vue' {
     NumberField: typeof import('./src/components/form/NumberField.vue')['default']
     OrgRegistriesTab: typeof import('./src/components/org/settings/OrgRegistriesTab.vue')['default']
     OrgSecretsTab: typeof import('./src/components/org/settings/OrgSecretsTab.vue')['default']
+    Pagination: typeof import('./src/components/layout/Pagination.vue')['default']
     Panel: typeof import('./src/components/layout/Panel.vue')['default']
     PipelineFeedItem: typeof import('./src/components/pipeline-feed/PipelineFeedItem.vue')['default']
     PipelineFeedSidebar: typeof import('./src/components/pipeline-feed/PipelineFeedSidebar.vue')['default']
