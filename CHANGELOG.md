@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.6.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.6.1) - 2025-05-14
+## [3.6.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.6.1) - 2025-05-15
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -19,6 +19,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update golang-packages [[#5180](https://github.com/woodpecker-ci/woodpecker/pull/5180)]
 - chore(deps): lock file maintenance [[#5171](https://github.com/woodpecker-ci/woodpecker/pull/5171)]
 - fix(deps): update module github.com/google/go-github/v71 to v72 [[#5167](https://github.com/woodpecker-ci/woodpecker/pull/5167)]
 - fix(deps): update dependency simple-icons to v14.13.0 [[#5170](https://github.com/woodpecker-ci/woodpecker/pull/5170)]
