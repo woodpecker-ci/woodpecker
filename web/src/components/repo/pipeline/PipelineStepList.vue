@@ -11,7 +11,11 @@
         <span>{{ pipeline.author }}</span>
       </div>
       <a
-        v-if="pipeline.event === 'pull_request' || pipeline.event === 'pull_request_closed'"
+        v-if="
+          pipeline.event === 'pull_request' ||
+          pipeline.event === 'pull_request_closed' ||
+          pipeline.event === 'pull_request_edited'
+        "
         class="text-wp-link-100 hover:text-wp-link-200 flex min-w-0 items-center space-x-1"
         :href="pipeline.forge_url"
       >

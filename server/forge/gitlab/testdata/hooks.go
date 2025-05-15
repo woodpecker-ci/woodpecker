@@ -754,6 +754,147 @@ var HookPullRequestClosed = []byte(`
 }
 `)
 
+var HookPullRequestEdited = []byte(`
+{
+	"object_kind": "merge_request",
+	"event_type": "merge_request",
+	"user": {
+		"id": 2251488,
+		"name": "Anbraten",
+		"username": "anbraten",
+		"avatar_url": "https://secure.gravatar.com/avatar/fc9b6fe77c6b732a02925a62a81f05a0?s=80&d=identicon",
+		"email": "[REDACTED]"
+	},
+	"project": {
+		"id": 32059612,
+		"name": "woodpecker-test",
+		"description": "",
+		"web_url": "https://gitlab.com/anbraten/woodpecker-test",
+		"avatar_url": null,
+		"git_ssh_url": "git@gitlab.com:anbraten/woodpecker-test.git",
+		"git_http_url": "https://gitlab.com/anbraten/woodpecker-test.git",
+		"namespace": "Anbraten",
+		"visibility_level": 20,
+		"path_with_namespace": "anbraten/woodpecker-test",
+		"default_branch": "main",
+		"ci_config_path": "",
+		"homepage": "https://gitlab.com/anbraten/woodpecker-test",
+		"url": "git@gitlab.com:anbraten/woodpecker-test.git",
+		"ssh_url": "git@gitlab.com:anbraten/woodpecker-test.git",
+		"http_url": "https://gitlab.com/anbraten/woodpecker-test.git"
+	},
+	"object_attributes": {
+		"assignee_id": null,
+		"author_id": 2251488,
+		"created_at": "2023-12-05 18:40:22 UTC",
+		"description": "",
+		"draft": false,
+		"head_pipeline_id": null,
+		"id": 268189426,
+		"iid": 4,
+		"last_edited_at": null,
+		"last_edited_by_id": null,
+		"merge_commit_sha": null,
+		"merge_error": null,
+		"merge_params": {
+			"force_remove_source_branch": "1"
+		},
+		"merge_status": "can_be_merged",
+		"merge_user_id": null,
+		"merge_when_pipeline_succeeds": false,
+		"milestone_id": null,
+		"source_branch": "patch-1",
+		"source_project_id": 32059612,
+		"state_id": 2,
+		"target_branch": "main",
+		"target_project_id": 32059612,
+		"time_estimate": 0,
+		"title": "Add new file",
+		"updated_at": "2023-12-05 18:40:34 UTC",
+		"updated_by_id": null,
+		"url": "https://gitlab.com/anbraten/woodpecker-test/-/merge_requests/4",
+		"source": {
+			"id": 32059612,
+			"name": "woodpecker-test",
+			"description": "",
+			"web_url": "https://gitlab.com/anbraten/woodpecker-test",
+			"avatar_url": null,
+			"git_ssh_url": "git@gitlab.com:anbraten/woodpecker-test.git",
+			"git_http_url": "https://gitlab.com/anbraten/woodpecker-test.git",
+			"namespace": "Anbraten",
+			"visibility_level": 20,
+			"path_with_namespace": "anbraten/woodpecker-test",
+			"default_branch": "main",
+			"ci_config_path": "",
+			"homepage": "https://gitlab.com/anbraten/woodpecker-test",
+			"url": "git@gitlab.com:anbraten/woodpecker-test.git",
+			"ssh_url": "git@gitlab.com:anbraten/woodpecker-test.git",
+			"http_url": "https://gitlab.com/anbraten/woodpecker-test.git"
+		},
+		"target": {
+			"id": 32059612,
+			"name": "woodpecker-test",
+			"description": "",
+			"web_url": "https://gitlab.com/anbraten/woodpecker-test",
+			"avatar_url": null,
+			"git_ssh_url": "git@gitlab.com:anbraten/woodpecker-test.git",
+			"git_http_url": "https://gitlab.com/anbraten/woodpecker-test.git",
+			"namespace": "Anbraten",
+			"visibility_level": 20,
+			"path_with_namespace": "anbraten/woodpecker-test",
+			"default_branch": "main",
+			"ci_config_path": "",
+			"homepage": "https://gitlab.com/anbraten/woodpecker-test",
+			"url": "git@gitlab.com:anbraten/woodpecker-test.git",
+			"ssh_url": "git@gitlab.com:anbraten/woodpecker-test.git",
+			"http_url": "https://gitlab.com/anbraten/woodpecker-test.git"
+		},
+		"last_commit": {
+			"id": "3e4db3586b65dd401de8c77b3ac343fd24cbf89b",
+			"message": "Add new file",
+			"title": "Add new file",
+			"timestamp": "2023-12-05T18:39:57+00:00",
+			"url": "https://gitlab.com/anbraten/woodpecker-test/-/commit/3e4db3586b65dd401de8c77b3ac343fd24cbf89b",
+			"author": {
+				"name": "Anbraten",
+				"email": "[redacted]"
+			}
+		},
+		"work_in_progress": false,
+		"total_time_spent": 0,
+		"time_change": 0,
+		"human_total_time_spent": null,
+		"human_time_change": null,
+		"human_time_estimate": null,
+		"assignee_ids": [],
+		"reviewer_ids": [],
+		"labels": [],
+		"state": "updated",
+		"blocking_discussions_resolved": true,
+		"first_contribution": false,
+		"detailed_merge_status": "not_open",
+		"action": "close"
+	},
+	"labels": [],
+	"changes": {
+		"state_id": {
+			"previous": 1,
+			"current": 2
+		},
+		"updated_at": {
+			"previous": "2023-12-05 18:40:28 UTC",
+			"current": "2023-12-05 18:40:34 UTC"
+		}
+	},
+	"repository": {
+		"name": "woodpecker-test",
+		"url": "git@gitlab.com:anbraten/woodpecker-test.git",
+		"description": "",
+		"homepage": "https://gitlab.com/anbraten/woodpecker-test"
+	}
+}
+`)
+
 var HookPullRequestMerged = []byte(`
 {
   "object_kind": "merge_request",

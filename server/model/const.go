@@ -26,6 +26,7 @@ const (
 	EventPush       WebhookEvent = "push"
 	EventPull       WebhookEvent = "pull_request"
 	EventPullClosed WebhookEvent = "pull_request_closed"
+	EventPullEdited WebhookEvent = "pull_request_edited"
 	EventTag        WebhookEvent = "tag"
 	EventRelease    WebhookEvent = "release"
 	EventDeploy     WebhookEvent = "deployment"
@@ -43,7 +44,7 @@ var ErrInvalidWebhookEvent = errors.New("invalid webhook event")
 
 func (s WebhookEvent) Validate() error {
 	switch s {
-	case EventPush, EventPull, EventPullClosed, EventTag, EventRelease, EventDeploy, EventCron, EventManual:
+	case EventPush, EventPull, EventPullClosed, EventPullEdited, EventTag, EventRelease, EventDeploy, EventCron, EventManual:
 		return nil
 	default:
 		return fmt.Errorf("%w: %s", ErrInvalidWebhookEvent, s)

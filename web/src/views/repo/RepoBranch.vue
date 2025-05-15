@@ -23,7 +23,11 @@ const repo = requiredInject('repo');
 const allPipelines = requiredInject('pipelines');
 const pipelines = computed(() =>
   allPipelines.value.filter(
-    (b) => b.branch === branch.value && b.event !== 'pull_request' && b.event !== 'pull_request_closed',
+    (b) =>
+      b.branch === branch.value &&
+      b.event !== 'pull_request' &&
+      b.event !== 'pull_request_closed' &&
+      b.event !== 'pull_request_edited',
   ),
 );
 
