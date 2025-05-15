@@ -377,7 +377,7 @@ func (c *client) BranchHead(ctx context.Context, u *model.User, r *model.Repo, b
 		if branch.DisplayID == b {
 			return &model.Commit{
 				SHA:      branch.LatestCommit,
-				ForgeURL: fmt.Sprintf("%s/commits/%s", r.ForgeURL, branch.LatestCommit),
+				ForgeURL: fmt.Sprintf("%s/commits/%s", strings.TrimSuffix(r.ForgeURL, "/browse"), branch.LatestCommit),
 			}, nil
 		}
 	}
