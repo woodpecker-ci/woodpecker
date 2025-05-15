@@ -178,11 +178,11 @@ func pipelineFromPullRequest(hook *pullRequestHook) *model.Pipeline {
 	return pipeline
 }
 
-func convertMilestone(mile *gitea.Milestone) string {
-	if mile == nil || mile.ID == 0 {
+func convertMilestone(milestone *gitea.Milestone) string {
+	if milestone == nil || milestone.ID == 0 {
 		return ""
 	}
-	return mile.Title
+	return milestone.Title
 }
 
 func pipelineFromRelease(hook *releaseHook) *model.Pipeline {
