@@ -27,7 +27,7 @@ const (
 	defaultWindowsDriverLetter = "C:"
 )
 
-var MustNotAddWindowsLetterPattern = regexp.MustCompile(`^(?:` +
+var mustNotAddWindowsLetterPattern = regexp.MustCompile(`^(?:` +
 	// Drive letter followed by colon and optional backslash (C: or C:\)
 	`[a-zA-Z]:(?:\\|$)|` +
 
@@ -49,34 +49,47 @@ func (e *docker) windowsPathPatch(step *types.Step) {
 
 	// patch volumes to have an letter if not already set
 	for i, vol := range step.Volumes {
-		volParts, err := splitVolumeParts(vol)
-		if err != nil || len(volParts) < 2 {
-			// ignore non valid volumes for now
-			continue
+		volume := windowsVolumePatch(vol)
+		if volume != "" {
+			step.Volumes[i] = volume
 		}
-
-		// fix source destination
-		if strings.HasPrefix(volParts[0], "/") {
-			volParts[0] = filepath.Join(defaultWindowsDriverLetter, volParts[0])
-		}
-
-		// fix mount destination
-		if !MustNotAddWindowsLetterPattern.MatchString(volParts[1]) {
-			volParts[1] = filepath.Join(defaultWindowsDriverLetter, volParts[1])
-		}
-		step.Volumes[i] = strings.Join(volParts, ":")
 	}
 
 	// patch workspace
-	if !MustNotAddWindowsLetterPattern.MatchString(step.WorkspaceBase) {
+	if !mustNotAddWindowsLetterPattern.MatchString(step.WorkspaceBase) {
 		step.WorkspaceBase = filepath.Join(defaultWindowsDriverLetter, step.WorkspaceBase)
 	}
-	if !MustNotAddWindowsLetterPattern.MatchString(step.WorkingDir) {
+	if !mustNotAddWindowsLetterPattern.MatchString(step.WorkingDir) {
 		step.WorkingDir = filepath.Join(defaultWindowsDriverLetter, step.WorkingDir)
 	}
 	if ciWorkspace, ok := step.Environment["CI_WORKSPACE"]; ok {
-		if !MustNotAddWindowsLetterPattern.MatchString(ciWorkspace) {
+		if !mustNotAddWindowsLetterPattern.MatchString(ciWorkspace) {
 			step.Environment["CI_WORKSPACE"] = filepath.Join(defaultWindowsDriverLetter, ciWorkspace)
 		}
 	}
+	if step.WorkspaceVolume != "" {
+		volume := windowsVolumePatch(step.WorkspaceVolume)
+		if volume != "" {
+			step.WorkspaceVolume = volume
+		}
+	}
+}
+
+func windowsVolumePatch(vol string) string {
+	volParts, err := splitVolumeParts(vol)
+	if err != nil || len(volParts) < 2 {
+		// ignore non valid volumes for now
+		return ""
+	}
+
+	// fix source destination
+	if strings.HasPrefix(volParts[0], "/") {
+		volParts[0] = filepath.Join(defaultWindowsDriverLetter, volParts[0])
+	}
+
+	// fix mount destination
+	if !mustNotAddWindowsLetterPattern.MatchString(volParts[1]) {
+		volParts[1] = filepath.Join(defaultWindowsDriverLetter, volParts[1])
+	}
+	return strings.Join(volParts, ":")
 }

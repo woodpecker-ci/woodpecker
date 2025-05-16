@@ -131,7 +131,7 @@ func TestToContainerName(t *testing.T) {
 
 func TestStepToConfig(t *testing.T) {
 	// StepTypeCommands
-	conf := testEngine.toConfig(testCmdStep, BackendOptions{})
+	conf := testEngine.toConfig(testCmdStep, backend.TrustedConfiguration{}, BackendOptions{})
 	if assert.NotNil(t, conf) {
 		assert.EqualValues(t, []string{"/bin/sh", "-c", "echo $CI_SCRIPT | base64 -d | /bin/sh -e"}, conf.Entrypoint)
 		assert.Nil(t, conf.Cmd)
@@ -139,7 +139,7 @@ func TestStepToConfig(t *testing.T) {
 	}
 
 	// StepTypePlugin
-	conf = testEngine.toConfig(testPluginStep, BackendOptions{})
+	conf = testEngine.toConfig(testPluginStep, backend.TrustedConfiguration{}, BackendOptions{})
 	if assert.NotNil(t, conf) {
 		assert.Nil(t, conf.Cmd)
 		assert.EqualValues(t, testPluginStep.UUID, conf.Labels["wp_uuid"])
@@ -174,7 +174,7 @@ func TestToConfigSmall(t *testing.T) {
 		Name:     "test",
 		UUID:     "09238932",
 		Commands: []string{"go test"},
-	}, BackendOptions{})
+	}, backend.TrustedConfiguration{}, BackendOptions{})
 
 	assert.NotNil(t, conf)
 	sort.Strings(conf.Env)
@@ -209,31 +209,32 @@ func TestToConfigFull(t *testing.T) {
 	}
 
 	conf := engine.toConfig(&backend.Step{
-		Name:          "test",
-		UUID:          "09238932",
-		Type:          backend.StepTypeCommands,
-		Image:         "golang:1.2.3",
-		Pull:          true,
-		Detached:      true,
-		Privileged:    true,
-		WorkingDir:    "/src/abc",
-		WorkspaceBase: "/src",
-		Environment:   map[string]string{"TAGS": "sqlite"},
-		Commands:      []string{"go test", "go vet ./..."},
-		ExtraHosts:    []backend.HostAlias{{Name: "t", IP: "1.2.3.4"}},
-		Volumes:       []string{"/cache:/cache"},
-		Tmpfs:         []string{"/tmp"},
-		Devices:       []string{"/dev/sdc"},
-		Networks:      []backend.Conn{{Name: "extra-net", Aliases: []string{"extra.net"}}},
-		DNS:           []string{"9.9.9.9", "8.8.8.8"},
-		DNSSearch:     nil,
-		OnFailure:     true,
-		OnSuccess:     true,
-		Failure:       "fail",
-		AuthConfig:    backend.Auth{Username: "user", Password: "123456"},
-		NetworkMode:   "bridge",
-		Ports:         []backend.Port{{Number: 21}, {Number: 22}},
-	}, BackendOptions{})
+		Name:            "test",
+		UUID:            "09238932",
+		Type:            backend.StepTypeCommands,
+		Image:           "golang:1.2.3",
+		Pull:            true,
+		Detached:        true,
+		Privileged:      true,
+		WorkingDir:      "/src/abc",
+		WorkspaceBase:   "/src",
+		Environment:     map[string]string{"TAGS": "sqlite"},
+		Commands:        []string{"go test", "go vet ./..."},
+		ExtraHosts:      []backend.HostAlias{{Name: "t", IP: "1.2.3.4"}},
+		WorkspaceVolume: "wp_default:/test",
+		Volumes:         []string{"/cache:/cache"},
+		Tmpfs:           []string{"/tmp"},
+		Devices:         []string{"/dev/sdc"},
+		Networks:        []backend.Conn{{Name: "extra-net", Aliases: []string{"extra.net"}}},
+		DNS:             []string{"9.9.9.9", "8.8.8.8"},
+		DNSSearch:       nil,
+		OnFailure:       true,
+		OnSuccess:       true,
+		Failure:         "fail",
+		AuthConfig:      backend.Auth{Username: "user", Password: "123456"},
+		NetworkMode:     "bridge",
+		Ports:           []backend.Port{{Number: 21}, {Number: 22}},
+	}, backend.TrustedConfiguration{Volumes: true}, BackendOptions{})
 
 	assert.NotNil(t, conf)
 	sort.Strings(conf.Env)
@@ -254,6 +255,7 @@ func TestToConfigFull(t *testing.T) {
 		},
 		Volumes: map[string]struct{}{
 			"/cache": {},
+			"/test":  {},
 		},
 	}, conf)
 }
@@ -277,16 +279,17 @@ func TestToWindowsConfig(t *testing.T) {
 			"TAGS":         "sqlite",
 			"CI_WORKSPACE": "/src",
 		},
-		Commands:    []string{"go test", "go vet ./..."},
-		ExtraHosts:  []backend.HostAlias{{Name: "t", IP: "1.2.3.4"}},
-		Volumes:     []string{"wp_default_abc:/src", "/cache:/cache/some/more", "test:/test"},
-		Networks:    []backend.Conn{{Name: "extra-net", Aliases: []string{"extra.net"}}},
-		DNS:         []string{"9.9.9.9", "8.8.8.8"},
-		Failure:     "fail",
-		AuthConfig:  backend.Auth{Username: "user", Password: "123456"},
-		NetworkMode: "nat",
-		Ports:       []backend.Port{{Number: 21}, {Number: 22}},
-	}, BackendOptions{})
+		Commands:        []string{"go test", "go vet ./..."},
+		ExtraHosts:      []backend.HostAlias{{Name: "t", IP: "1.2.3.4"}},
+		WorkspaceVolume: "wp_default_abc:/src",
+		Volumes:         []string{"/cache:/cache/some/more", "test:/test"},
+		Networks:        []backend.Conn{{Name: "extra-net", Aliases: []string{"extra.net"}}},
+		DNS:             []string{"9.9.9.9", "8.8.8.8"},
+		Failure:         "fail",
+		AuthConfig:      backend.Auth{Username: "user", Password: "123456"},
+		NetworkMode:     "nat",
+		Ports:           []backend.Port{{Number: 21}, {Number: 22}},
+	}, backend.TrustedConfiguration{Volumes: true}, BackendOptions{})
 
 	assert.NotNil(t, conf)
 	sort.Strings(conf.Env)
