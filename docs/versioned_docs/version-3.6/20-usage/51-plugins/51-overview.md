@@ -64,5 +64,6 @@ There are also other plugin lists with additional plugins. Keep in mind that [Dr
 
 - [Drone Plugins](http://plugins.drone.io)
 - [Geeklab Woodpecker Plugins](https://woodpecker-plugins.geekdocs.de/)
+- [Woodpecker Community Plugins](https://codeberg.org/woodpecker-community)
 
 :::
