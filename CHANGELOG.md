@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@OCram85, @Spiffyk, @qwerty287, @rruzicic
+@OCram85, @Spiffyk, @qwerty287, @rruzicic, @xoxys
 
 ### 📚 Documentation
 
@@ -33,6 +33,7 @@
 
 ### Misc
 
+- Add reference to woodpecker-community plugin org [[#5186](https://github.com/woodpecker-ci/woodpecker/pull/5186)]
 - Add Bluesky post plugin [[#5156](https://github.com/woodpecker-ci/woodpecker/pull/5156)]
 
 ## [3.6.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.6.0) - 2025-05-06
