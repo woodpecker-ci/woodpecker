@@ -139,3 +139,5 @@ MD046:
 MD048:
   # Code fence style
   style: 'backtick'
+
+MD059: false
