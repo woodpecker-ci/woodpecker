@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.6.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.6.1) - 2025-05-18
+## [3.6.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.6.1) - 2025-05-19
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -8,6 +8,7 @@
 
 ### 📚 Documentation
 
+- chore(deps): lock file maintenance [[#5189](https://github.com/woodpecker-ci/woodpecker/pull/5189)]
 - fix(deps): update docs npm deps non-major [[#5183](https://github.com/woodpecker-ci/woodpecker/pull/5183)]
 - Move `gitea-package` plugin to codeberg [[#5175](https://github.com/woodpecker-ci/woodpecker/pull/5175)]
 - add Portainer Service Update plugin [[#5172](https://github.com/woodpecker-ci/woodpecker/pull/5172)]
