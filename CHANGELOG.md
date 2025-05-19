@@ -6,6 +6,11 @@
 
 @OCram85, @Spiffyk, @qwerty287, @rruzicic, @xoxys
 
+### 🐛 Bug Fixes
+
+- fix(bitbucketdc): build status gets incorrectly reported on multi workflow builds [[#5178](https://github.com/woodpecker-ci/woodpecker/pull/5178)]
+- fix(bitbucketdc): build status not reported on PR builds [[#5162](https://github.com/woodpecker-ci/woodpecker/pull/5162)]
+
 ### 📚 Documentation
 
 - chore(deps): lock file maintenance [[#5189](https://github.com/woodpecker-ci/woodpecker/pull/5189)]
@@ -14,10 +19,6 @@
 - add Portainer Service Update plugin [[#5172](https://github.com/woodpecker-ci/woodpecker/pull/5172)]
 - Split 'pull' option docs from 'image' docs [[#5161](https://github.com/woodpecker-ci/woodpecker/pull/5161)]
 - chore(deps): update docs npm deps non-major [[#5164](https://github.com/woodpecker-ci/woodpecker/pull/5164)]
-
-### 🐛 Bug Fixes
-
-- fix(bitbucketdc): build status not reported on PR builds [[#5162](https://github.com/woodpecker-ci/woodpecker/pull/5162)]
 
 ### 📦️ Dependency
 
