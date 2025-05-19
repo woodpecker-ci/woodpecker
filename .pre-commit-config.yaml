@@ -14,10 +14,11 @@ repos:
     hooks:
       - id: golangci-lint
   - repo: https://github.com/igorshubovych/markdownlint-cli
-    rev: v0.44.0
+    rev: v0.45.0
     hooks:
       - id: markdownlint
         exclude: '^(docs/versioned_docs/.*|CHANGELOG.md)$'
+        language_version: 22.15.1
   - repo: https://github.com/mrtazz/checkmake
     rev: 0.2.2
     hooks:
