@@ -646,12 +646,12 @@ func (g *GitLab) Hook(ctx context.Context, req *http.Request) (*model.Repo, *mod
 		if event.ObjectAttributes.OldRev == "" && event.ObjectAttributes.Action != "open" && event.ObjectAttributes.Action != "close" && event.ObjectAttributes.Action != "merge" {
 			return nil, nil, &forge_types.ErrIgnoreEvent{Event: string(eventType), Reason: "no code changes"}
 		}
-		mergeIID, milestoneID, repo, pipeline, err := convertMergeRequestHook(event, req)
+		mergeID, milestoneID, repo, pipeline, err := convertMergeRequestHook(event, req)
 		if err != nil {
 			return nil, nil, err
 		}
 
-		if pipeline, err = g.loadMetadataFromMergeRequest(ctx, repo, pipeline, mergeIID, milestoneID); err != nil {
+		if pipeline, err = g.loadMetadataFromMergeRequest(ctx, repo, pipeline, mergeID, milestoneID); err != nil {
 			return nil, nil, err
 		}
 
@@ -776,7 +776,7 @@ func (g *GitLab) Org(ctx context.Context, u *model.User, owner string) (*model.O
 	}, nil
 }
 
-func (g *GitLab) loadMetadataFromMergeRequest(ctx context.Context, tmpRepo *model.Repo, pipeline *model.Pipeline, mergeIID, milestoneID int) (*model.Pipeline, error) {
+func (g *GitLab) loadMetadataFromMergeRequest(ctx context.Context, tmpRepo *model.Repo, pipeline *model.Pipeline, mergeID, milestoneID int) (*model.Pipeline, error) {
 	_store, ok := store.TryFromContext(ctx)
 	if !ok {
 		log.Error().Msg("could not get store from context")
@@ -803,7 +803,7 @@ func (g *GitLab) loadMetadataFromMergeRequest(ctx context.Context, tmpRepo *mode
 		return nil, err
 	}
 
-	changes, _, err := client.MergeRequests.ListMergeRequestDiffs(_repo.ID, mergeIID, &gitlab.ListMergeRequestDiffsOptions{}, gitlab.WithContext(ctx))
+	changes, _, err := client.MergeRequests.ListMergeRequestDiffs(_repo.ID, mergeID, &gitlab.ListMergeRequestDiffsOptions{}, gitlab.WithContext(ctx))
 	if err != nil {
 		return nil, err
 	}
