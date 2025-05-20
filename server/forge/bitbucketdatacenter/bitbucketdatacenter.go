@@ -381,7 +381,7 @@ func (c *client) BranchHead(ctx context.Context, u *model.User, r *model.Repo, b
 
 	return &model.Commit{
 		SHA:      cm.ID,
-		ForgeURL: fmt.Sprintf("%s/commits/%s", strings.TrimSuffix(r.ForgeURL, "/browse"), branch.LatestCommit),
+		ForgeURL: fmt.Sprintf("%s/commits/%s", strings.TrimSuffix(r.ForgeURL, "/browse"), cm.ID),
 		Message:  cm.Message,
 		Author: model.CommitAuthor{
 			Author: cm.Author.Name,
