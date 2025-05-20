@@ -4,10 +4,11 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@OCram85, @Spiffyk, @qwerty287, @rruzicic, @xoxys
+@Levy-Tal, @OCram85, @Spiffyk, @qwerty287, @rruzicic, @xoxys
 
 ### 🐛 Bug Fixes
 
+- fix(bitbucketDC): manual event has commit broken link [[#5160](https://github.com/woodpecker-ci/woodpecker/pull/5160)]
 - fix(bitbucketdc): build status gets incorrectly reported on multi workflow builds [[#5178](https://github.com/woodpecker-ci/woodpecker/pull/5178)]
 - fix(bitbucketdc): build status not reported on PR builds [[#5162](https://github.com/woodpecker-ci/woodpecker/pull/5162)]
 
