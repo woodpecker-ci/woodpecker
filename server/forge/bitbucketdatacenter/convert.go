@@ -120,7 +120,7 @@ func convertPullRequestEvent(ev *bb.PullRequestEvent, baseURL string) *model.Pip
 		Branch:      ev.PullRequest.Source.DisplayID,
 		Avatar:      bitbucketAvatarURL(baseURL, ev.Actor.Slug),
 		Author:      ev.Actor.Name,
-		Ref:         fmt.Sprintf("refs/pull-requests/%d/from", ev.PullRequest.ID),
+		Ref:         ev.PullRequest.Source.ID,
 		PullRequest: convertPullRequest(&ev.PullRequest),
 		ForgeURL: fmt.Sprintf("%s/projects/%s/repos/%s/pull-requests/%d", baseURL, ev.PullRequest.Source.Repository.Project.Key, ev.PullRequest.Source.Repository.Slug, ev.PullRequest.ID),
 		Refspec:  fmt.Sprintf("%s:%s", ev.PullRequest.Source.DisplayID, ev.PullRequest.Target.DisplayID),

@@ -207,7 +207,7 @@
     },
     {
       "name": "Gitea Package",
-      "docs": "https://gitea.ocram85.com/plugins/gitea-package/raw/branch/main/docs.md",
+      "docs": "https://codeberg.org/woodpecker-community/gitea-package/raw/branch/main/docs.md",
       "verified": false
     },
     {
@@ -263,6 +263,11 @@
     {
       "name": "Pre-commit Runner",
       "docs": "https://codeberg.org/sp1thas/woodpecker-ci-pre-commit/raw/branch/main/docs.md",
+      "verified": false
+    },
+    {
+      "name": "Portainer Service Update",
+      "docs": "https://codeberg.org/woodpecker-community/portainer-service-update/raw/branch/main/docs.md",
       "verified": false
     }
   ]

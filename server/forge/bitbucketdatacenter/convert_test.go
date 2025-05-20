@@ -219,7 +219,7 @@ func Test_convertPullRequestEvent(t *testing.T) {
 		Branch:   "branch",
 		Avatar:   "https://base.url/users/john.doe_mail.com/avatar.png",
 		Author:   "John Doe",
-		Ref:      "refs/pull-requests/123/from",
+		Ref:      "refs/head/branch",
 		ForgeURL: "https://base.url/projects/PRJ/repos/REPO/commits/1234567890abcdef",
 		Event:    model.EventPull,
 		Refspec:  "branch:main",
@@ -279,7 +279,7 @@ func Test_convertPullRequestCloseEvent(t *testing.T) {
 		Avatar: "https://base.url/users/john.doe_mail.com/avatar.png",
 		Author: "John Doe",
 
-		Ref:      "refs/pull-requests/123/from",
+		Ref:      "refs/head/branch",
 		ForgeURL: "https://base.url/projects/PRJ/repos/REPO/commits/1234567890abcdef",
 		Event:    model.EventPullClosed,
 		Refspec:  "branch:main",

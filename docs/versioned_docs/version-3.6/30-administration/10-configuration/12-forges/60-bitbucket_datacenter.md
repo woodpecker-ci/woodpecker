@@ -44,56 +44,83 @@ See also [Configure an incoming link](https://confluence.atlassian.com/bitbucket
 
 This is a full list of configuration options. Please note that many of these options use default configuration values that should work for the majority of installations.
 
-### `WOODPECKER_BITBUCKET_DC`
+---
 
-> Default: `false`
+### BITBUCKET_DC
+
+- Name: `WOODPECKER_BITBUCKET_DC`
+- Default: `false`
 
 Enables the Bitbucket Server driver.
 
-### `WOODPECKER_BITBUCKET_DC_URL`
+---
 
-> Default: empty
+### BITBUCKET_DC_URL
+
+- Name: `WOODPECKER_BITBUCKET_DC_URL`
+- Default: none
 
 Configures the Bitbucket Server address.
 
-### `WOODPECKER_BITBUCKET_DC_CLIENT_ID`
+---
 
-> Default: empty
+### BITBUCKET_DC_CLIENT_ID
+
+- Name: `WOODPECKER_BITBUCKET_DC_CLIENT_ID`
+- Default: none
 
 Configures your Bitbucket Server OAUth 2.0 client id.
 
-### `WOODPECKER_BITBUCKET_DC_CLIENT_SECRET`
+---
 
-> Default: empty
+### BITBUCKET_DC_CLIENT_SECRET
+
+- Name: `WOODPECKER_BITBUCKET_DC_CLIENT_SECRET`
+- Default: none
 
 Configures your Bitbucket Server OAUth 2.0 client secret.
 
-### `WOODPECKER_BITBUCKET_DC_GIT_USERNAME`
+---
 
-> Default: empty
+### BITBUCKET_DC_GIT_USERNAME
+
+- Name: `WOODPECKER_BITBUCKET_DC_GIT_USERNAME`
+- Default: none
 
 This username is used to authenticate and clone all private repositories.
 
-### `WOODPECKER_BITBUCKET_DC_GIT_USERNAME_FILE`
+---
 
-> Default: empty
+### BITBUCKET_DC_GIT_USERNAME_FILE
+
+- Name: `WOODPECKER_BITBUCKET_DC_GIT_USERNAME_FILE`
+- Default: none
 
 Read the value for `WOODPECKER_BITBUCKET_DC_GIT_USERNAME` from the specified filepath
 
-### `WOODPECKER_BITBUCKET_DC_GIT_PASSWORD`
+---
 
-> Default: empty
+### BITBUCKET_DC_GIT_PASSWORD
+
+- Name: `WOODPECKER_BITBUCKET_DC_GIT_PASSWORD`
+- Default: none
 
 The password is used to authenticate and clone all private repositories.
 
-### `WOODPECKER_BITBUCKET_DC_GIT_PASSWORD_FILE`
+---
 
-> Default: empty
+### BITBUCKET_DC_GIT_PASSWORD_FILE
+
+- Name: `WOODPECKER_BITBUCKET_DC_GIT_PASSWORD_FILE`
+- Default: none
 
 Read the value for `WOODPECKER_BITBUCKET_DC_GIT_PASSWORD` from the specified filepath
 
-### `WOODPECKER_BITBUCKET_DC_SKIP_VERIFY`
+---
 
-> Default: `false`
+### BITBUCKET_DC_SKIP_VERIFY
+
+- Name: `WOODPECKER_BITBUCKET_DC_SKIP_VERIFY`
+- Default: `false`
 
 Configure if SSL verification should be skipped.
