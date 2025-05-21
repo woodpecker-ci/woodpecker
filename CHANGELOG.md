@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.6.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.6.1) - 2025-05-20
+## [3.6.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.6.1) - 2025-05-21
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -14,7 +14,7 @@
 
 ### 📚 Documentation
 
-- chore(deps): lock file maintenance [[#5189](https://github.com/woodpecker-ci/woodpecker/pull/5189)]
+- Add reference to woodpecker-community plugin org [[#5186](https://github.com/woodpecker-ci/woodpecker/pull/5186)]
 - fix(deps): update docs npm deps non-major [[#5183](https://github.com/woodpecker-ci/woodpecker/pull/5183)]
 - Move `gitea-package` plugin to codeberg [[#5175](https://github.com/woodpecker-ci/woodpecker/pull/5175)]
 - add Portainer Service Update plugin [[#5172](https://github.com/woodpecker-ci/woodpecker/pull/5172)]
@@ -23,7 +23,9 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update module github.com/gin-gonic/gin to v1.10.1 [[#5193](https://github.com/woodpecker-ci/woodpecker/pull/5193)]
 - fix(deps): update module gitlab.com/gitlab-org/api/client-go to v0.129.0 [[#5190](https://github.com/woodpecker-ci/woodpecker/pull/5190)]
+- chore(deps): lock file maintenance [[#5189](https://github.com/woodpecker-ci/woodpecker/pull/5189)]
 - chore(deps): update pre-commit hook igorshubovych/markdownlint-cli to v0.45.0 [[#5187](https://github.com/woodpecker-ci/woodpecker/pull/5187)]
 - fix(deps): update dependency simple-icons to v14.14.0 [[#5188](https://github.com/woodpecker-ci/woodpecker/pull/5188)]
 - fix(deps): update web npm deps non-major [[#5185](https://github.com/woodpecker-ci/woodpecker/pull/5185)]
@@ -39,7 +41,6 @@
 
 ### Misc
 
-- Add reference to woodpecker-community plugin org [[#5186](https://github.com/woodpecker-ci/woodpecker/pull/5186)]
 - Add Bluesky post plugin [[#5156](https://github.com/woodpecker-ci/woodpecker/pull/5156)]
 
 ## [3.6.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.6.0) - 2025-05-06
