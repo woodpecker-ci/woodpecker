@@ -24,7 +24,7 @@ require (
 	github.com/fsnotify/fsnotify v1.9.0
 	github.com/gdgvda/cron v0.4.0
 	github.com/getkin/kin-openapi v0.132.0
-	github.com/gin-gonic/gin v1.10.0
+	github.com/gin-gonic/gin v1.10.1
 	github.com/gitsight/go-vcsurl v1.0.1
 	github.com/go-sql-driver/mysql v1.9.2
 	github.com/go-viper/mapstructure/v2 v2.2.1
