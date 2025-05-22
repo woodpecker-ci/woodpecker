@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.6.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.6.1) - 2025-05-21
+## [3.6.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.6.1) - 2025-05-22
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -23,6 +23,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update module github.com/oklog/ulid/v2 to v2.1.1 [[#5194](https://github.com/woodpecker-ci/woodpecker/pull/5194)]
 - fix(deps): update module github.com/gin-gonic/gin to v1.10.1 [[#5193](https://github.com/woodpecker-ci/woodpecker/pull/5193)]
 - fix(deps): update module gitlab.com/gitlab-org/api/client-go to v0.129.0 [[#5190](https://github.com/woodpecker-ci/woodpecker/pull/5190)]
 - chore(deps): lock file maintenance [[#5189](https://github.com/woodpecker-ci/woodpecker/pull/5189)]
