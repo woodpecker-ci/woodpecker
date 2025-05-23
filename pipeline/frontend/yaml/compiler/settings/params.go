@@ -24,9 +24,17 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+func captureInjectedSecret(k string, secretMapping map[string]string, getSecretValue func(name string) (string, error)) func(name string) (string, error) {
+	return func(name string) (string, error) {
+		v, err := getSecretValue(name)
+		secretMapping[k] = v
+		return v, err
+	}
+}
+
 // ParamsToEnv uses reflection to convert a map[string]interface to a list
 // of environment variables.
-func ParamsToEnv(from map[string]any, to map[string]string, prefix string, upper bool, getSecretValue func(name string) (string, error)) (err error) {
+func ParamsToEnv(from map[string]any, to map[string]string, prefix string, upper bool, getSecretValue func(name string) (string, error), secretMapping map[string]string) (err error) {
 	if to == nil {
 		return fmt.Errorf("no map to write to")
 	}
@@ -34,7 +42,7 @@ func ParamsToEnv(from map[string]any, to map[string]string, prefix string, upper
 		if v == nil || len(k) == 0 {
 			continue
 		}
-		to[sanitizeParamKey(prefix, upper, k)], err = sanitizeParamValue(v, getSecretValue)
+		to[sanitizeParamKey(prefix, upper, k)], err = sanitizeParamValue(v, captureInjectedSecret(sanitizeParamKey(prefix, upper, k), secretMapping, getSecretValue))
 		if err != nil {
 			return err
 		}
