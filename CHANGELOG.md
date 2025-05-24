@@ -24,6 +24,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update web npm deps non-major [[#5198](https://github.com/woodpecker-ci/woodpecker/pull/5198)]
 - fix(deps): update module github.com/oklog/ulid/v2 to v2.1.1 [[#5194](https://github.com/woodpecker-ci/woodpecker/pull/5194)]
 - fix(deps): update module github.com/gin-gonic/gin to v1.10.1 [[#5193](https://github.com/woodpecker-ci/woodpecker/pull/5193)]
 - fix(deps): update module gitlab.com/gitlab-org/api/client-go to v0.129.0 [[#5190](https://github.com/woodpecker-ci/woodpecker/pull/5190)]
