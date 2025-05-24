@@ -32,7 +32,7 @@ services:
       - woodpecker-agent-config:/etc/woodpecker
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
-      - WOODPECKER_SERVER=woodpecker-server:9000
+      - WOODPECKER_SERVER=woodpecker-server:8000
       - WOODPECKER_AGENT_SECRET=${WOODPECKER_AGENT_SECRET}
 
 volumes:
