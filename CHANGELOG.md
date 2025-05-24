@@ -24,6 +24,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update docker.io/woodpeckerci/plugin-surge-preview docker tag to v1.3.6 [[#5200](https://github.com/woodpecker-ci/woodpecker/pull/5200)]
 - fix(deps): update web npm deps non-major [[#5198](https://github.com/woodpecker-ci/woodpecker/pull/5198)]
 - fix(deps): update module github.com/oklog/ulid/v2 to v2.1.1 [[#5194](https://github.com/woodpecker-ci/woodpecker/pull/5194)]
 - fix(deps): update module github.com/gin-gonic/gin to v1.10.1 [[#5193](https://github.com/woodpecker-ci/woodpecker/pull/5193)]
