@@ -90,7 +90,7 @@ func (e *local) Load(ctx context.Context) (*types.BackendInfo, error) {
 }
 
 // SetupWorkflow the pipeline environment.
-func (e *local) SetupWorkflow(_ context.Context, _ *types.Config, taskUUID string) error {
+func (e *local) SetupWorkflow(_ context.Context, _ *types.Config, taskUUID string, _ types.TrustedConfiguration) error {
 	log.Trace().Str("taskUUID", taskUUID).Msg("create workflow environment")
 
 	baseDir, err := os.MkdirTemp(e.tempDir, "woodpecker-local-*")
@@ -119,7 +119,7 @@ func (e *local) SetupWorkflow(_ context.Context, _ *types.Config, taskUUID strin
 }
 
 // StartStep the pipeline step.
-func (e *local) StartStep(ctx context.Context, step *types.Step, taskUUID string) error {
+func (e *local) StartStep(ctx context.Context, step *types.Step, taskUUID string, _ types.TrustedConfiguration) error {
 	log.Trace().Str("taskUUID", taskUUID).Msgf("start step %s", step.Name)
 
 	state, err := e.getState(taskUUID)
