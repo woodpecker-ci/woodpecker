@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.6.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.6.1) - 2025-05-25
+## [3.6.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.6.1) - 2025-05-26
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -8,6 +8,7 @@
 
 ### 📚 Documentation
 
+- chore(deps): lock file maintenance [[#5204](https://github.com/woodpecker-ci/woodpecker/pull/5204)]
 - fix(deps): update dependency redocusaurus to v2.3.0 [[#5203](https://github.com/woodpecker-ci/woodpecker/pull/5203)]
 - chore(deps): update docs npm deps non-major [[#5197](https://github.com/woodpecker-ci/woodpecker/pull/5197)]
 - Add reference to woodpecker-community plugin org [[#5186](https://github.com/woodpecker-ci/woodpecker/pull/5186)]
