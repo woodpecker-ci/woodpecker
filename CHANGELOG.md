@@ -1,10 +1,14 @@
 # Changelog
 
-## [3.6.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.6.1) - 2025-05-27
+## [3.7.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.7.0) - 2025-05-27
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @Levy-Tal, @OCram85, @Spiffyk, @qwerty287, @rruzicic, @xoxys
+@6543, @Levy-Tal, @OCram85, @Spiffyk, @SuperSandro2000, @qwerty287, @rruzicic, @xoxys
+
+### 📈 Enhancement
+
+- Treat no available route in grpc as fatal error [[#5192](https://github.com/woodpecker-ci/woodpecker/pull/5192)]
 
 ### 📚 Documentation
 
