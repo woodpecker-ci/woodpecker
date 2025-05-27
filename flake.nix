@@ -27,7 +27,7 @@
             nodePackages.typescript-language-server
 
             # backend
-            go_1_23
+            go_1_24
             glibc.static
             gofumpt
             golangci-lint
