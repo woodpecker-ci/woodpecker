@@ -153,7 +153,7 @@ func pipelineFromPullRequest(hook *pullRequestHook) *model.Pipeline {
 		event = model.EventPullClosed
 	}
 	if hook.Action == actionEdited {
-		event = model.EventPullEdited
+		event = model.EventPullMetadata
 	}
 
 	pipeline := &model.Pipeline{

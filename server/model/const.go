@@ -44,7 +44,7 @@ var ErrInvalidWebhookEvent = errors.New("invalid webhook event")
 
 func (s WebhookEvent) Validate() error {
 	switch s {
-	case EventPush, EventPull, EventPullClosed, EventPullEdited, EventTag, EventRelease, EventDeploy, EventCron, EventManual:
+	case EventPush, EventPull, EventPullClosed, EventPullMetadata, EventTag, EventRelease, EventDeploy, EventCron, EventManual:
 		return nil
 	default:
 		return fmt.Errorf("%w: %s", ErrInvalidWebhookEvent, s)

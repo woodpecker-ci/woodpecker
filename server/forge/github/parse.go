@@ -159,7 +159,7 @@ func parsePullHook(hook *github.PullRequestEvent, merge bool) (*github.PullReque
 	}
 
 	if hook.GetAction() == actionEdited {
-		event = model.EventPullEdited
+		event = model.EventPullMetadata
 	}
 
 	fromFork := hook.GetPullRequest().GetHead().GetRepo().GetID() != hook.GetPullRequest().GetBase().GetRepo().GetID()

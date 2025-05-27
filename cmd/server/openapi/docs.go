@@ -5495,7 +5495,7 @@ const docTemplate = `{
                 "EventPush",
                 "EventPull",
                 "EventPullClosed",
-                "EventPullEdited",
+                "EventPullMetadata",
                 "EventTag",
                 "EventRelease",
                 "EventDeploy",

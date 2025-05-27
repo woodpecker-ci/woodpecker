@@ -65,7 +65,7 @@ func TestSetGatedState(t *testing.T) {
 				RequireApproval: model.RequireApprovalPullRequests,
 			},
 			pipeline: &model.Pipeline{
-				Event:    model.EventPullEdited,
+				Event:    model.EventPullMetadata,
 				FromFork: false,
 			},
 			expectBlocked: true,

@@ -76,7 +76,7 @@ func (p Pipeline) IsMultiPipeline() bool {
 
 // IsPullRequest checks if it's a PR event.
 func (p Pipeline) IsPullRequest() bool {
-	return p.Event == EventPull || p.Event == EventPullClosed || p.Event == EventPullEdited
+	return p.Event == EventPull || p.Event == EventPullClosed || p.Event == EventPullMetadata
 }
 
 type PipelineOptions struct {

@@ -110,7 +110,7 @@ func Test_parseHook(t *testing.T) {
 		assert.NotNil(t, r)
 		assert.NotNil(t, b)
 		assert.NotNil(t, p)
-		assert.Equal(t, model.EventPullEdited, b.Event)
+		assert.Equal(t, model.EventPullMetadata, b.Event)
 	})
 
 	t.Run("deploy hook", func(t *testing.T) {
