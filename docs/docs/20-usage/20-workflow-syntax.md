@@ -285,7 +285,7 @@ The available events are:
 - `push`: triggered when a commit is pushed to a branch.
 - `pull_request`: triggered when a pull request is opened or a new commit is pushed to it.
 - `pull_request_closed`: triggered when a pull request is closed or merged.
-- `pull_request_edited`: triggered when a pull request is edited (the PR title or body).
+- `pull_request_metadata`: triggered when a pull request metadata has changed (e.g. title, body, label, milestone, ...).
 - `tag`: triggered when a tag is pushed.
 - `release`: triggered when a release, pre-release or draft is created. (You can apply further filters using [evaluate](#evaluate) with [environment variables](./50-environment.md#built-in-environment-variables).)
 - `deployment`: triggered when a deployment is created in the repository. (This event can be triggered from Woodpecker directly. GitHub also supports webhook triggers.)

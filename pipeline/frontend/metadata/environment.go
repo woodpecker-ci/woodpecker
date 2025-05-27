@@ -100,7 +100,7 @@ func (m *Metadata) Environ() map[string]string {
 	if pipeline.Event == EventRelease {
 		setNonEmptyEnvVar(params, "CI_COMMIT_PRERELEASE", strconv.FormatBool(pipeline.Commit.IsPrerelease))
 	}
-	if pipeline.Event == EventPull || pipeline.Event == EventPullClosed || pipeline.Event == EventPullEdited {
+	if pipeline.Event == EventPull || pipeline.Event == EventPullClosed || pipeline.Event == EventPullMetadata {
 		sourceBranch, targetBranch := getSourceTargetBranches(commit.Refspec)
 		setNonEmptyEnvVar(params, "CI_COMMIT_SOURCE_BRANCH", sourceBranch)
 		setNonEmptyEnvVar(params, "CI_COMMIT_TARGET_BRANCH", targetBranch)
@@ -144,7 +144,7 @@ func (m *Metadata) Environ() map[string]string {
 	setNonEmptyEnvVar(params, "CI_PREV_COMMIT_AUTHOR", prevCommit.Author.Name)
 	setNonEmptyEnvVar(params, "CI_PREV_COMMIT_AUTHOR_EMAIL", prevCommit.Author.Email)
 	setNonEmptyEnvVar(params, "CI_PREV_COMMIT_AUTHOR_AVATAR", prevCommit.Author.Avatar)
-	if prevPipeline.Event == EventPull || prevPipeline.Event == EventPullClosed || prevPipeline.Event == EventPullEdited {
+	if prevPipeline.Event == EventPull || prevPipeline.Event == EventPullClosed || prevPipeline.Event == EventPullMetadata {
 		prevSourceBranch, prevTargetBranch := getSourceTargetBranches(prevCommit.Refspec)
 		setNonEmptyEnvVar(params, "CI_PREV_COMMIT_SOURCE_BRANCH", prevSourceBranch)
 		setNonEmptyEnvVar(params, "CI_PREV_COMMIT_TARGET_BRANCH", prevTargetBranch)

@@ -43,7 +43,7 @@
           <span :title="pipelineEventTitle">
             <Icon v-if="pipeline.event === 'pull_request'" name="pull-request" />
             <Icon v-else-if="pipeline.event === 'pull_request_closed'" name="pull-request-closed" />
-            <Icon v-else-if="pipeline.event === 'pull_request_edited'" name="pull-request-edited" />
+            <Icon v-else-if="pipeline.event === 'pull_request_metadata'" name="pull-request-metadata" />
             <Icon v-else-if="pipeline.event === 'deployment'" name="deployment" />
             <Icon v-else-if="pipeline.event === 'tag' || pipeline.event === 'release'" name="tag" />
             <Icon v-else-if="pipeline.event === 'cron'" name="branch" />
@@ -106,8 +106,8 @@ const pipelineEventTitle = computed(() => {
       return t('repo.pipeline.event.pr');
     case 'pull_request_closed':
       return t('repo.pipeline.event.pr_closed');
-    case 'pull_request_edited':
-      return t('repo.pipeline.event.pr_edited');
+    case 'pull_request_metadata':
+      return t('repo.pipeline.event.pr_metadata');
     case 'deployment':
       return t('repo.pipeline.event.deploy');
     case 'tag':

@@ -278,7 +278,7 @@ func TestForgejoParser(t *testing.T) {
 			},
 			pipe: &model.Pipeline{
 				Author:            "anbraten",
-				Event:             "pull_request_edited",
+				Event:             "pull_request_metadata",
 				Commit:            "d555a5dd07f4d0148a58d4686ec381502ae6a2d4",
 				Branch:            "main",
 				Ref:               "refs/pull/1/head",

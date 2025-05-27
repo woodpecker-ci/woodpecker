@@ -360,7 +360,7 @@ func TestSecretMatch(t *testing.T) {
 		{
 			name:   "pull edited should match pull",
 			secret: Secret{Events: []string{"pull_request"}},
-			event:  "pull_request_edited",
+			event:  "pull_request_metadata",
 			match:  true,
 		},
 	}

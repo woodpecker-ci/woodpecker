@@ -5484,7 +5484,7 @@ const docTemplate = `{
                 "push",
                 "pull_request",
                 "pull_request_closed",
-                "pull_request_edited",
+                "pull_request_metadata",
                 "tag",
                 "release",
                 "deployment",
