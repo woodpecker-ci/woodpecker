@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@Levy-Tal, @OCram85, @Spiffyk, @qwerty287, @rruzicic, @xoxys
+@6543, @Levy-Tal, @OCram85, @Spiffyk, @qwerty287, @rruzicic, @xoxys
 
 ### 📚 Documentation
 
@@ -49,6 +49,7 @@
 
 ### Misc
 
+- flake.lock: Update [[#5206](https://github.com/woodpecker-ci/woodpecker/pull/5206)]
 - Add Bluesky post plugin [[#5156](https://github.com/woodpecker-ci/woodpecker/pull/5156)]
 
 ## [3.6.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.6.0) - 2025-05-06
