@@ -311,7 +311,7 @@ func (c *client) Status(ctx context.Context, u *model.User, repo *model.Repo, pi
 		return fmt.Errorf("unable to create bitbucket client: %w", err)
 	}
 	status := &bb.BuildStatus{
-		State:       convertStatus(pipeline.Status),
+		State:       convertStatus(workflow.State),
 		URL:         common.GetPipelineStatusURL(repo, pipeline, workflow),
 		Key:         common.GetPipelineStatusContext(repo, pipeline, workflow),
 		Description: common.GetPipelineStatusDescription(pipeline.Status),
@@ -377,7 +377,7 @@ func (c *client) BranchHead(ctx context.Context, u *model.User, r *model.Repo, b
 		if branch.DisplayID == b {
 			return &model.Commit{
 				SHA:      branch.LatestCommit,
-				ForgeURL: fmt.Sprintf("%s/commits/%s", r.ForgeURL, branch.LatestCommit),
+				ForgeURL: fmt.Sprintf("%s/commits/%s", strings.TrimSuffix(r.ForgeURL, "/browse"), branch.LatestCommit),
 			}, nil
 		}
 	}
@@ -423,7 +423,7 @@ func (c *client) Activate(ctx context.Context, u *model.User, r *model.Repo, lin
 	webhook := &bb.Webhook{
 		Name:   "Woodpecker",
 		URL:    link,
-		Events: []bb.EventKey{bb.EventKeyRepoRefsChanged, bb.EventKeyPullRequestFrom, bb.EventKeyPullRequestMerged, bb.EventKeyPullRequestDeclined, bb.EventKeyPullRequestDeleted},
+		Events: []bb.EventKey{bb.EventKeyRepoRefsChanged, bb.EventKeyPullRequestFrom, bb.EventKeyPullRequestMerged, bb.EventKeyPullRequestDeclined, bb.EventKeyPullRequestDeleted, bb.EventKeyPullRequestOpened},
 		Active: true,
 		Config: &bb.WebhookConfiguration{
 			Secret: r.Hash,

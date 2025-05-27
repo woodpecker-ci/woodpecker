@@ -193,22 +193,22 @@ var flags = []cli.Flag{
 		Name:    "repo-trusted-security",
 		Usage:   "Set the metadata environment variable \"CI_REPO_TRUSTED_SECURITY\".",
 	},
-	&cli.IntFlag{
+	&cli.Int64Flag{
 		Sources: cli.EnvVars("CI_PIPELINE_NUMBER"),
 		Name:    "pipeline-number",
 		Usage:   "Set the metadata environment variable \"CI_PIPELINE_NUMBER\".",
 	},
-	&cli.IntFlag{
+	&cli.Int64Flag{
 		Sources: cli.EnvVars("CI_PIPELINE_PARENT"),
 		Name:    "pipeline-parent",
 		Usage:   "Set the metadata environment variable \"CI_PIPELINE_PARENT\".",
 	},
-	&cli.IntFlag{
+	&cli.Int64Flag{
 		Sources: cli.EnvVars("CI_PIPELINE_CREATED"),
 		Name:    "pipeline-created",
 		Usage:   "Set the metadata environment variable \"CI_PIPELINE_CREATED\".",
 	},
-	&cli.IntFlag{
+	&cli.Int64Flag{
 		Sources: cli.EnvVars("CI_PIPELINE_STARTED"),
 		Name:    "pipeline-started",
 		Usage:   "Set the metadata environment variable \"CI_PIPELINE_STARTED\".",
@@ -290,22 +290,22 @@ var flags = []cli.Flag{
 		Name:    "commit-release-is-pre",
 		Usage:   "Set the metadata environment variable \"CI_COMMIT_PRERELEASE\".",
 	},
-	&cli.IntFlag{
+	&cli.Int64Flag{
 		Sources: cli.EnvVars("CI_PREV_PIPELINE_NUMBER"),
 		Name:    "prev-pipeline-number",
 		Usage:   "Set the metadata environment variable \"CI_PREV_PIPELINE_NUMBER\".",
 	},
-	&cli.IntFlag{
+	&cli.Int64Flag{
 		Sources: cli.EnvVars("CI_PREV_PIPELINE_CREATED"),
 		Name:    "prev-pipeline-created",
 		Usage:   "Set the metadata environment variable \"CI_PREV_PIPELINE_CREATED\".",
 	},
-	&cli.IntFlag{
+	&cli.Int64Flag{
 		Sources: cli.EnvVars("CI_PREV_PIPELINE_STARTED"),
 		Name:    "prev-pipeline-started",
 		Usage:   "Set the metadata environment variable \"CI_PREV_PIPELINE_STARTED\".",
 	},
-	&cli.IntFlag{
+	&cli.Int64Flag{
 		Sources: cli.EnvVars("CI_PREV_PIPELINE_FINISHED"),
 		Name:    "prev-pipeline-finished",
 		Usage:   "Set the metadata environment variable \"CI_PREV_PIPELINE_FINISHED\".",
@@ -380,7 +380,7 @@ var flags = []cli.Flag{
 		Name:    "workflow-name",
 		Usage:   "Set the metadata environment variable \"CI_WORKFLOW_NAME\".",
 	},
-	&cli.IntFlag{
+	&cli.Int64Flag{
 		Sources: cli.EnvVars("CI_WORKFLOW_NUMBER"),
 		Name:    "workflow-number",
 		Usage:   "Set the metadata environment variable \"CI_WORKFLOW_NUMBER\".",

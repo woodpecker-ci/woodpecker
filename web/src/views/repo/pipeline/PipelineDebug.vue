@@ -18,24 +18,24 @@
 </template>
 
 <script setup lang="ts">
-import { computed, inject, ref } from 'vue';
-import type { Ref } from 'vue';
+import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import Button from '~/components/atomic/Button.vue';
 import InputField from '~/components/form/InputField.vue';
 import Panel from '~/components/layout/Panel.vue';
 import useApiClient from '~/compositions/useApiClient';
+import { requiredInject } from '~/compositions/useInjectProvide';
 import useNotifications from '~/compositions/useNotifications';
-import type { Pipeline, Repo, RepoPermissions } from '~/lib/api/types';
+import { useWPTitle } from '~/compositions/useWPTitle';
 
 const { t } = useI18n();
 const apiClient = useApiClient();
 const notifications = useNotifications();
 
-const repo = inject<Ref<Repo>>('repo');
-const pipeline = inject<Ref<Pipeline>>('pipeline');
-const repoPermissions = inject<Ref<RepoPermissions>>('repo-permissions');
+const repo = requiredInject('repo');
+const pipeline = requiredInject('pipeline');
+const repoPermissions = requiredInject('repo-permissions');
 
 const isLoading = ref(false);
 
@@ -75,4 +75,12 @@ async function downloadMetadata() {
     isLoading.value = false;
   }
 }
+
+useWPTitle(
+  computed(() => [
+    t('repo.pipeline.debug.title'),
+    t('repo.pipeline.pipeline', { pipelineId: pipeline.value.id }),
+    repo.value.full_name,
+  ]),
+);
 </script>

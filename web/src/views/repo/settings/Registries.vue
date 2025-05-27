@@ -30,8 +30,7 @@
 
 <script lang="ts" setup>
 import { cloneDeep } from 'lodash';
-import { computed, inject, ref } from 'vue';
-import type { Ref } from 'vue';
+import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import Button from '~/components/atomic/Button.vue';
@@ -40,9 +39,11 @@ import RegistryEdit from '~/components/registry/RegistryEdit.vue';
 import RegistryList from '~/components/registry/RegistryList.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
+import { requiredInject } from '~/compositions/useInjectProvide';
 import useNotifications from '~/compositions/useNotifications';
 import { usePagination } from '~/compositions/usePaginate';
-import type { Registry, Repo } from '~/lib/api/types';
+import { useWPTitle } from '~/compositions/useWPTitle';
+import type { Registry } from '~/lib/api/types';
 
 const emptyRegistry: Partial<Registry> = {
   address: '',
@@ -54,25 +55,17 @@ const apiClient = useApiClient();
 const notifications = useNotifications();
 const i18n = useI18n();
 
-const repo = inject<Ref<Repo>>('repo');
+const repo = requiredInject('repo');
 const selectedRegistry = ref<Partial<Registry>>();
 const isEditingRegistry = computed(() => !!selectedRegistry.value?.id);
 
 async function loadRegistries(page: number): Promise<Registry[] | null> {
-  if (!repo?.value) {
-    throw new Error("Unexpected: Can't load repo");
-  }
-
   return apiClient.getRegistryList(repo.value.id, { page });
 }
 
 const { resetPage, data: registries } = usePagination(loadRegistries, () => !selectedRegistry.value);
 
 const { doSubmit: createRegistry, isLoading: isSaving } = useAsyncAction(async () => {
-  if (!repo?.value) {
-    throw new Error("Unexpected: Can't load repo");
-  }
-
   if (!selectedRegistry.value) {
     throw new Error("Unexpected: Can't get registry");
   }
@@ -91,10 +84,6 @@ const { doSubmit: createRegistry, isLoading: isSaving } = useAsyncAction(async (
 });
 
 const { doSubmit: deleteRegistry, isLoading: isDeleting } = useAsyncAction(async (_registry: Registry) => {
-  if (!repo?.value) {
-    throw new Error("Unexpected: Can't load repo");
-  }
-
   const registryAddress = encodeURIComponent(_registry.address);
   await apiClient.deleteRegistry(repo.value.id, registryAddress);
   notifications.notify({ title: i18n.t('registries.deleted'), type: 'success' });
@@ -108,4 +97,6 @@ function editRegistry(registry: Registry) {
 function showAddRegistry() {
   selectedRegistry.value = cloneDeep(emptyRegistry);
 }
+
+useWPTitle(computed(() => [i18n.t('registries.registries'), repo.value.full_name]));
 </script>

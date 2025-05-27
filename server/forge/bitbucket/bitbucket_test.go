@@ -17,7 +17,6 @@ package bitbucket
 
 import (
 	"bytes"
-	"context"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -48,7 +47,7 @@ func TestBitbucket(t *testing.T) {
 	defer s.Close()
 	c := &config{url: s.URL, API: s.URL}
 
-	ctx := context.Background()
+	ctx := t.Context()
 
 	forge, _ := New(&Opts{})
 	netrc, _ := forge.Netrc(fakeUser, fakeRepo)
