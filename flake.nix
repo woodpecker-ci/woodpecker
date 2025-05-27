@@ -21,7 +21,7 @@
             tree
 
             # frontend
-            nodejs_23
+            nodejs_24
             pnpm
             nodePackages.typescript
             nodePackages.typescript-language-server
