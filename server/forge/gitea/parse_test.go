@@ -308,7 +308,7 @@ func TestGiteaParser(t *testing.T) {
 				Avatar:        "https://gitea.com/avatars/ae32f5573b27f9840942a522d59032b104a2dd15",
 				ForgeURL:      "https://gitea.com/a_nice_user/hello_world_ci",
 				Clone:         "https://gitea.com/a_nice_user/hello_world_ci.git",
-				CloneSSH:      "ssh://git@gitea.rt4u.de:3232/a_nice_user/hello_world_ci.git",
+				CloneSSH:      "ssh://git@gitea.com:3344/a_nice_user/hello_world_ci.git",
 				Branch:        "main",
 				PREnabled:     true,
 				Perm: &model.Perm{
@@ -345,7 +345,7 @@ func TestGiteaParser(t *testing.T) {
 				Avatar:        "https://gitea.com/avatars/ae32f5573b27f9840942a522d59032b104a2dd15",
 				ForgeURL:      "https://gitea.com/a_nice_user/hello_world_ci",
 				Clone:         "https://gitea.com/a_nice_user/hello_world_ci.git",
-				CloneSSH:      "ssh://git@gitea.rt4u.de:3232/a_nice_user/hello_world_ci.git",
+				CloneSSH:      "ssh://git@gitea.com:3344/a_nice_user/hello_world_ci.git",
 				Branch:        "main",
 				PREnabled:     true,
 				Perm: &model.Perm{
@@ -382,7 +382,7 @@ func TestGiteaParser(t *testing.T) {
 				Avatar:        "https://gitea.com/avatars/ae32f5573b27f9840942a522d59032b104a2dd15",
 				ForgeURL:      "https://gitea.com/a_nice_user/hello_world_ci",
 				Clone:         "https://gitea.com/a_nice_user/hello_world_ci.git",
-				CloneSSH:      "ssh://git@gitea.rt4u.de:3232/a_nice_user/hello_world_ci.git",
+				CloneSSH:      "ssh://git@gitea.com:3344/a_nice_user/hello_world_ci.git",
 				Branch:        "main",
 				PREnabled:     true,
 				Perm: &model.Perm{
@@ -419,7 +419,7 @@ func TestGiteaParser(t *testing.T) {
 				Avatar:        "https://gitea.com/avatars/ae32f5573b27f9840942a522d59032b104a2dd15",
 				ForgeURL:      "https://gitea.com/a_nice_user/hello_world_ci",
 				Clone:         "https://gitea.com/a_nice_user/hello_world_ci.git",
-				CloneSSH:      "ssh://git@gitea.rt4u.de:3232/a_nice_user/hello_world_ci.git",
+				CloneSSH:      "ssh://git@gitea.com:3344/a_nice_user/hello_world_ci.git",
 				Branch:        "main",
 				PREnabled:     true,
 				Perm: &model.Perm{
@@ -456,7 +456,7 @@ func TestGiteaParser(t *testing.T) {
 				Avatar:        "https://gitea.com/avatars/ae32f5573b27f9840942a522d59032b104a2dd15",
 				ForgeURL:      "https://gitea.com/a_nice_user/hello_world_ci",
 				Clone:         "https://gitea.com/a_nice_user/hello_world_ci.git",
-				CloneSSH:      "ssh://git@gitea.rt4u.de:3232/a_nice_user/hello_world_ci.git",
+				CloneSSH:      "ssh://git@gitea.com:3344/a_nice_user/hello_world_ci.git",
 				Branch:        "main",
 				PREnabled:     true,
 				Perm: &model.Perm{
@@ -493,7 +493,7 @@ func TestGiteaParser(t *testing.T) {
 				Avatar:        "https://gitea.com/avatars/ae32f5573b27f9840942a522d59032b104a2dd15",
 				ForgeURL:      "https://gitea.com/a_nice_user/hello_world_ci",
 				Clone:         "https://gitea.com/a_nice_user/hello_world_ci.git",
-				CloneSSH:      "ssh://git@gitea.rt4u.de:3232/a_nice_user/hello_world_ci.git",
+				CloneSSH:      "ssh://git@gitea.com:3344/a_nice_user/hello_world_ci.git",
 				Branch:        "main",
 				PREnabled:     true,
 				Perm: &model.Perm{
@@ -530,7 +530,7 @@ func TestGiteaParser(t *testing.T) {
 				Avatar:        "https://gitea.com/avatars/ae32f5573b27f9840942a522d59032b104a2dd15",
 				ForgeURL:      "https://gitea.com/a_nice_user/hello_world_ci",
 				Clone:         "https://gitea.com/a_nice_user/hello_world_ci.git",
-				CloneSSH:      "ssh://git@gitea.rt4u.de:3232/a_nice_user/hello_world_ci.git",
+				CloneSSH:      "ssh://git@gitea.com:3344/a_nice_user/hello_world_ci.git",
 				Branch:        "main",
 				PREnabled:     true,
 				Perm: &model.Perm{
@@ -567,7 +567,7 @@ func TestGiteaParser(t *testing.T) {
 				Avatar:        "https://gitea.com/avatars/ae32f5573b27f9840942a522d59032b104a2dd15",
 				ForgeURL:      "https://gitea.com/a_nice_user/hello_world_ci",
 				Clone:         "https://gitea.com/a_nice_user/hello_world_ci.git",
-				CloneSSH:      "ssh://git@gitea.rt4u.de:3232/a_nice_user/hello_world_ci.git",
+				CloneSSH:      "ssh://git@gitea.com:3344/a_nice_user/hello_world_ci.git",
 				Branch:        "main",
 				PREnabled:     true,
 				Perm: &model.Perm{
@@ -604,7 +604,7 @@ func TestGiteaParser(t *testing.T) {
 				Avatar:        "https://gitea.com/avatars/ae32f5573b27f9840942a522d59032b104a2dd15",
 				ForgeURL:      "https://gitea.com/a_nice_user/hello_world_ci",
 				Clone:         "https://gitea.com/a_nice_user/hello_world_ci.git",
-				CloneSSH:      "ssh://git@gitea.rt4u.de:3232/a_nice_user/hello_world_ci.git",
+				CloneSSH:      "ssh://git@gitea.com:3344/a_nice_user/hello_world_ci.git",
 				Branch:        "main",
 				PREnabled:     true,
 				Perm: &model.Perm{

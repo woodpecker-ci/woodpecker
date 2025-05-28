@@ -77,5 +77,11 @@ var HookPullRequestChangeMile string
 //go:embed HookPullRequestRemoveMile.json
 var HookPullRequestRemoveMile string
 
+//go:embed HookPullRequestAssigneesAdded.json
+var HookPullRequestAssigneesAdded string
+
+//go:embed HookPullRequestAssigneesRemoved.json
+var HookPullRequestAssigneesRemoved string
+
 //go:embed HookRelease.json
 var HookRelease string

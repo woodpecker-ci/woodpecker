@@ -76,7 +76,7 @@
         "html_url": "https://gitea.com/a_nice_user/hello_world_ci",
         "url": "https://gitea.com/api/v1/repos/a_nice_user/hello_world_ci",
         "link": "",
-        "ssh_url": "ssh://git@gitea.rt4u.de:3232/a_nice_user/hello_world_ci.git",
+        "ssh_url": "ssh://git@gitea.com:3344/a_nice_user/hello_world_ci.git",
         "clone_url": "https://gitea.com/a_nice_user/hello_world_ci.git",
         "default_branch": "main",
         "permissions": {
@@ -112,7 +112,7 @@
         "html_url": "https://gitea.com/a_nice_user/hello_world_ci",
         "url": "https://gitea.com/api/v1/repos/a_nice_user/hello_world_ci",
         "link": "",
-        "ssh_url": "ssh://git@gitea.rt4u.de:3232/a_nice_user/hello_world_ci.git",
+        "ssh_url": "ssh://git@gitea.com:3344/a_nice_user/hello_world_ci.git",
         "clone_url": "https://gitea.com/a_nice_user/hello_world_ci.git",
         "default_branch": "main",
         "permissions": {
@@ -150,7 +150,7 @@
     "html_url": "https://gitea.com/a_nice_user/hello_world_ci",
     "url": "https://gitea.com/api/v1/repos/a_nice_user/hello_world_ci",
     "link": "",
-    "ssh_url": "ssh://git@gitea.rt4u.de:3232/a_nice_user/hello_world_ci.git",
+    "ssh_url": "ssh://git@gitea.com:3344/a_nice_user/hello_world_ci.git",
     "clone_url": "https://gitea.com/a_nice_user/hello_world_ci.git",
     "default_branch": "main",
     "permissions": {
