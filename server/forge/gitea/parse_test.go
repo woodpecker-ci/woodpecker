@@ -324,13 +324,13 @@ func TestGiteaParser(t *testing.T) {
 				Branch:            "main",
 				Ref:               "refs/pull/7/head",
 				Refspec:           "jony-patch-1:main",
-				Title:             "somepull", // TODO: check as assumed
-				Message:           "somepull", // TODO: check as assumed
+				Title:             "Edit pull title :D",
+				Message:           "Edit pull title :D",
 				Sender:            "a_nice_user",
 				Avatar:            "https://gitea.com/avatars/ae32f5573b27f9840942a522d59032b104a2dd15",
 				Email:             "a_nice_user@noreply.example.org",
 				ForgeURL:          "https://gitea.com/a_nice_user/hello_world_ci/pulls/7",
-				PullRequestLabels: []string{}, // TODO: check as assumed
+				PullRequestLabels: []string{},
 			},
 		},
 		{
@@ -361,13 +361,13 @@ func TestGiteaParser(t *testing.T) {
 				Branch:            "main",
 				Ref:               "refs/pull/7/head",
 				Refspec:           "jony-patch-1:main",
-				Title:             "somepull", // TODO: check as assumed
-				Message:           "somepull", // TODO: check as assumed
+				Title:             "somepull",
+				Message:           "somepull",
 				Sender:            "a_nice_user",
 				Avatar:            "https://gitea.com/avatars/ae32f5573b27f9840942a522d59032b104a2dd15",
 				Email:             "a_nice_user@noreply.example.org",
 				ForgeURL:          "https://gitea.com/a_nice_user/hello_world_ci/pulls/7",
-				PullRequestLabels: []string{}, // TODO: check as assumed
+				PullRequestLabels: []string{},
 			},
 		},
 		{
@@ -404,7 +404,7 @@ func TestGiteaParser(t *testing.T) {
 				Avatar:            "https://gitea.com/avatars/ae32f5573b27f9840942a522d59032b104a2dd15",
 				Email:             "a_nice_user@noreply.example.org",
 				ForgeURL:          "https://gitea.com/a_nice_user/hello_world_ci/pulls/7",
-				PullRequestLabels: []string{"bug", "help wanted"}, // TODO: check as assumed
+				PullRequestLabels: []string{},
 			},
 		},
 		{
@@ -435,8 +435,8 @@ func TestGiteaParser(t *testing.T) {
 				Branch:            "main",
 				Ref:               "refs/pull/7/head",
 				Refspec:           "jony-patch-1:main",
-				Title:             "somepull", // TODO: check as assumed
-				Message:           "somepull", // TODO: check as assumed
+				Title:             "somepull",
+				Message:           "somepull",
 				Sender:            "a_nice_user",
 				Avatar:            "https://gitea.com/avatars/ae32f5573b27f9840942a522d59032b104a2dd15",
 				Email:             "a_nice_user@noreply.example.org",
@@ -472,13 +472,13 @@ func TestGiteaParser(t *testing.T) {
 				Branch:            "main",
 				Ref:               "refs/pull/7/head",
 				Refspec:           "jony-patch-1:main",
-				Title:             "somepull", // TODO: check as assumed
-				Message:           "somepull", // TODO: check as assumed
+				Title:             "somepull",
+				Message:           "somepull",
 				Sender:            "a_nice_user",
 				Avatar:            "https://gitea.com/avatars/ae32f5573b27f9840942a522d59032b104a2dd15",
 				Email:             "a_nice_user@noreply.example.org",
 				ForgeURL:          "https://gitea.com/a_nice_user/hello_world_ci/pulls/7",
-				PullRequestLabels: []string{"bug", "help wanted"}, // TODO: check as assumed
+				PullRequestLabels: []string{"bug"},
 			},
 		},
 		{
@@ -509,13 +509,13 @@ func TestGiteaParser(t *testing.T) {
 				Branch:            "main",
 				Ref:               "refs/pull/7/head",
 				Refspec:           "jony-patch-1:main",
-				Title:             "somepull", // TODO: check as assumed
-				Message:           "somepull", // TODO: check as assumed
+				Title:             "somepull",
+				Message:           "somepull",
 				Sender:            "a_nice_user",
 				Avatar:            "https://gitea.com/avatars/ae32f5573b27f9840942a522d59032b104a2dd15",
 				Email:             "a_nice_user@noreply.example.org",
 				ForgeURL:          "https://gitea.com/a_nice_user/hello_world_ci/pulls/7",
-				PullRequestLabels: []string{}, // TODO: check as assumed
+				PullRequestLabels: []string{},
 			},
 		},
 		{
@@ -546,13 +546,13 @@ func TestGiteaParser(t *testing.T) {
 				Branch:            "main",
 				Ref:               "refs/pull/7/head",
 				Refspec:           "jony-patch-1:main",
-				Title:             "somepull", // TODO: check as assumed
-				Message:           "somepull", // TODO: check as assumed
+				Title:             "somepull",
+				Message:           "somepull",
 				Sender:            "a_nice_user",
 				Avatar:            "https://gitea.com/avatars/ae32f5573b27f9840942a522d59032b104a2dd15",
 				Email:             "a_nice_user@noreply.example.org",
 				ForgeURL:          "https://gitea.com/a_nice_user/hello_world_ci/pulls/7",
-				PullRequestLabels: []string{"bug", "help wanted"}, // TODO: check as assumed
+				PullRequestLabels: []string{"bug", "help wanted"},
 			},
 		},
 		{
@@ -583,13 +583,13 @@ func TestGiteaParser(t *testing.T) {
 				Branch:            "main",
 				Ref:               "refs/pull/7/head",
 				Refspec:           "jony-patch-1:main",
-				Title:             "somepull", // TODO: check as assumed
-				Message:           "somepull", // TODO: check as assumed
+				Title:             "somepull",
+				Message:           "somepull",
 				Sender:            "a_nice_user",
 				Avatar:            "https://gitea.com/avatars/ae32f5573b27f9840942a522d59032b104a2dd15",
 				Email:             "a_nice_user@noreply.example.org",
 				ForgeURL:          "https://gitea.com/a_nice_user/hello_world_ci/pulls/7",
-				PullRequestLabels: []string{"bug", "help wanted"}, // TODO: check as assumed
+				PullRequestLabels: []string{"bug", "help wanted"},
 			},
 		},
 		{
@@ -626,7 +626,7 @@ func TestGiteaParser(t *testing.T) {
 				Avatar:            "https://gitea.com/avatars/ae32f5573b27f9840942a522d59032b104a2dd15",
 				Email:             "a_nice_user@noreply.example.org",
 				ForgeURL:          "https://gitea.com/a_nice_user/hello_world_ci/pulls/7",
-				PullRequestLabels: []string{},
+				PullRequestLabels: []string{"bug", "help wanted"},
 			},
 		},
 

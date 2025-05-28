@@ -35,14 +35,35 @@ const (
 	hookPullRequest = "pull_request"
 	hookRelease     = "release"
 
-	actionOpen   = "opened"
-	actionSync   = "synchronized"
-	actionClose  = "closed"
-	actionEdited = "edited"
+	actionOpen          = "opened"
+	actionSync          = "synchronized"
+	actionClose         = "closed"
+	actionEdited        = "edited"
+	actionLabelUpdate   = "label_updated"
+	actionLabelCleared  = "label_cleared"
+	actionMilestoned    = "milestoned"
+	actionDeMilestoned  = "demilestoned"
+	actionReviewRequest = "review_requested"
 
 	refBranch = "branch"
 	refTag    = "tag"
 )
+
+func supportedAction(action string) bool {
+	switch action {
+	case actionOpen,
+		actionSync,
+		actionClose,
+		actionEdited,
+		actionLabelUpdate,
+		actionMilestoned,
+		actionDeMilestoned,
+		actionReviewRequest,
+		actionLabelCleared:
+		return true
+	}
+	return false
+}
 
 // parseHook parses a Gitea hook from an http.Request and returns
 // Repo and Pipeline detail. If a hook type is unsupported nil values are returned.
@@ -120,7 +141,7 @@ func parsePullRequestHook(payload io.Reader) (*model.Repo, *model.Pipeline, erro
 	}
 
 	// Only trigger pipelines for selected event types
-	if pr.Action != actionOpen && pr.Action != actionSync && pr.Action != actionClose && pr.Action != actionEdited {
+	if !supportedAction(pr.Action) {
 		log.Debug().Msgf("pull_request action is '%s'. Only 'open', 'sync' and 'edited' are supported", pr.Action)
 		return nil, nil, nil
 	}

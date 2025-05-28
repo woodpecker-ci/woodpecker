@@ -150,11 +150,17 @@ func pipelineFromPullRequest(hook *pullRequestHook) *model.Pipeline {
 	)
 
 	event := model.EventPull
-	if hook.Action == actionClose {
+	switch hook.Action {
+	case actionClose:
 		event = model.EventPullClosed
-	}
-	if hook.Action == actionEdited {
+	case actionEdited,
+		actionLabelUpdate,
+		actionLabelCleared,
+		actionMilestoned,
+		actionDeMilestoned,
+		actionReviewRequest:
 		event = model.EventPullMetadata
+	default:
 	}
 
 	pipeline := &model.Pipeline{
