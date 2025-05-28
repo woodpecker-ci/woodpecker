@@ -27,6 +27,16 @@ const (
 	EventManual       = "manual"
 )
 
+func EventIsPull(event string) bool {
+	switch event {
+	case EventPull,
+		EventPullClosed,
+		EventPullMetadata:
+		return true
+	}
+	return false
+}
+
 // Different ways to handle failure states.
 const (
 	FailureIgnore = "ignore"
