@@ -111,6 +111,7 @@ func Test_parseHook(t *testing.T) {
 		assert.NotNil(t, b)
 		assert.NotNil(t, p)
 		assert.Equal(t, model.EventPullMetadata, b.Event)
+		assert.Equal(t, "edited", b.EventReason)
 	})
 
 	t.Run("deploy hook", func(t *testing.T) {

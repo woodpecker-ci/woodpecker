@@ -278,6 +278,7 @@ func Test_GitLab(t *testing.T) {
 			assert.Equal(t, "Add new file", pipeline.Title)
 			assert.Len(t, pipeline.ChangedFiles, 0) // see L217
 			assert.Equal(t, model.EventPullMetadata, pipeline.Event)
+			assert.Equal(t, "updated", pipeline.EventReason)
 		}
 	})
 

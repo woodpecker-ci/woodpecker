@@ -118,6 +118,7 @@ func convertMergeRequestHook(hook *gitlab.MergeEvent, req *http.Request) (int, *
 	}
 	if obj.State == "updated" {
 		pipeline.Event = model.EventPullMetadata
+		pipeline.EventReason = obj.State
 	}
 
 	lastCommit := obj.LastCommit
