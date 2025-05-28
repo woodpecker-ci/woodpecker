@@ -512,7 +512,7 @@ func TestGiteaParser(t *testing.T) {
 				Avatar:            "https://gitea.com/avatars/81027235e996f5e3ef6257152357b85d94171a2e",
 				Email:             "a_nice_user@noreply.example.org",
 				ForgeURL:          "https://gitea.com/a_nice_user/hello_world_ci/pulls/7",
-				PullRequestLabels: []string{"bug", "help wanted"}, // TODO fix!!!
+				PullRequestLabels: []string{},
 			},
 		},
 		{
