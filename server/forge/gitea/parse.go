@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"slices"
 	"strings"
 
 	"github.com/rs/zerolog/log"
@@ -50,22 +51,22 @@ const (
 	refTag    = "tag"
 )
 
+var actionList = []string{
+	actionOpen,
+	actionSync,
+	actionClose,
+	actionEdited,
+	actionLabelUpdate,
+	actionMilestoned,
+	actionDeMilestoned,
+	actionReviewRequest,
+	actionLabelCleared,
+	actionAssigned,
+	actionUnAssigned,
+}
+
 func supportedAction(action string) bool {
-	switch action {
-	case actionOpen,
-		actionSync,
-		actionClose,
-		actionEdited,
-		actionLabelUpdate,
-		actionMilestoned,
-		actionDeMilestoned,
-		actionReviewRequest,
-		actionLabelCleared,
-		actionAssigned,
-		actionUnAssigned:
-		return true
-	}
-	return false
+	return slices.Contains(actionList, action)
 }
 
 // parseHook parses a Gitea hook from an http.Request and returns
@@ -145,7 +146,7 @@ func parsePullRequestHook(payload io.Reader) (*model.Repo, *model.Pipeline, erro
 
 	// Only trigger pipelines for supported event types
 	if !supportedAction(pr.Action) {
-		log.Debug().Msgf("pull_request action is '%s'. Only 'open', 'sync' and 'edited' are supported", pr.Action)
+		log.Debug().Msgf("pull_request action is '%s'. Only '%s' are supported", pr.Action, strings.Join(actionList, "', '"))
 		return nil, nil, nil
 	}
 

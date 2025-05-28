@@ -149,25 +149,33 @@ func pipelineFromPullRequest(hook *pullRequestHook) *model.Pipeline {
 	)
 
 	event := model.EventPull
-	if hook.Action == actionClose {
+	switch hook.Action {
+	case actionClose:
 		event = model.EventPullClosed
-	}
-	if hook.Action == actionEdited {
+	case actionEdited,
+		actionLabelUpdate,
+		actionLabelCleared,
+		actionMilestoned,
+		actionDeMilestoned,
+		actionReviewRequest,
+		actionAssigned,
+		actionUnAssigned:
 		event = model.EventPullMetadata
 	}
 
 	pipeline := &model.Pipeline{
-		Event:    event,
-		Commit:   hook.PullRequest.Head.Sha,
-		ForgeURL: hook.PullRequest.HTMLURL,
-		Ref:      fmt.Sprintf("refs/pull/%d/head", hook.Number),
-		Branch:   hook.PullRequest.Base.Ref,
-		Message:  hook.PullRequest.Title,
-		Author:   hook.PullRequest.Poster.UserName,
-		Avatar:   avatar,
-		Sender:   hook.Sender.UserName,
-		Email:    hook.Sender.Email,
-		Title:    hook.PullRequest.Title,
+		Event:       event,
+		EventReason: hook.Action,
+		Commit:      hook.PullRequest.Head.Sha,
+		ForgeURL:    hook.PullRequest.HTMLURL,
+		Ref:         fmt.Sprintf("refs/pull/%d/head", hook.Number),
+		Branch:      hook.PullRequest.Base.Ref,
+		Message:     hook.PullRequest.Title,
+		Author:      hook.PullRequest.Poster.UserName,
+		Avatar:      avatar,
+		Sender:      hook.Sender.UserName,
+		Email:       hook.Sender.Email,
+		Title:       hook.PullRequest.Title,
 		Refspec: fmt.Sprintf("%s:%s",
 			hook.PullRequest.Head.Ref,
 			hook.PullRequest.Base.Ref,

@@ -26,6 +26,7 @@ type Pipeline struct {
 	Author              string                 `json:"author"                  xorm:"INDEX 'author'"`
 	Parent              int64                  `json:"parent"                  xorm:"parent"`
 	Event               WebhookEvent           `json:"event"                   xorm:"event"`
+	EventReason         string                 `json:"event_reason"            xorm:"event_reason"`
 	Status              StatusValue            `json:"status"                  xorm:"INDEX 'status'"`
 	Errors              []*types.PipelineError `json:"errors"                  xorm:"json 'errors'"`
 	Created             int64                  `json:"created"                 xorm:"'created' NOT NULL DEFAULT 0 created"`

@@ -17,6 +17,7 @@ package forgejo
 import (
 	"io"
 	"net/http"
+	"slices"
 	"strings"
 
 	"github.com/rs/zerolog/log"
@@ -32,14 +33,39 @@ const (
 	hookPullRequest = "pull_request"
 	hookRelease     = "release"
 
-	actionOpen   = "opened"
-	actionSync   = "synchronized"
-	actionClose  = "closed"
-	actionEdited = "edited"
+	actionOpen          = "opened"
+	actionSync          = "synchronized"
+	actionClose         = "closed"
+	actionEdited        = "edited"
+	actionLabelUpdate   = "label_updated"
+	actionLabelCleared  = "label_cleared"
+	actionMilestoned    = "milestoned"
+	actionDeMilestoned  = "demilestoned"
+	actionReviewRequest = "review_requested"
+	actionAssigned      = "assigned"
+	actionUnAssigned    = "unassigned"
 
 	refBranch = "branch"
 	refTag    = "tag"
 )
+
+var actionList = []string{
+	actionOpen,
+	actionSync,
+	actionClose,
+	actionEdited,
+	actionLabelUpdate,
+	actionMilestoned,
+	actionDeMilestoned,
+	actionReviewRequest,
+	actionLabelCleared,
+	actionAssigned,
+	actionUnAssigned,
+}
+
+func supportedAction(action string) bool {
+	return slices.Contains(actionList, action)
+}
 
 // parseHook parses a Forgejo hook from an http.Request and returns
 // Repo and Pipeline detail. If a hook type is unsupported nil values are returned.
@@ -111,14 +137,20 @@ func parsePullRequestHook(payload io.Reader) (*model.Repo, *model.Pipeline, erro
 		return nil, nil, err
 	}
 
-	// Only trigger pipelines for selected event types
-	if pr.Action != actionOpen && pr.Action != actionSync && pr.Action != actionClose && pr.Action != actionEdited {
-		log.Debug().Msgf("pull_request action is '%s'. Only 'open', 'sync' and 'edited' are supported", pr.Action)
+	// Only trigger pipelines for supported event types
+	if !supportedAction(pr.Action) {
+		log.Debug().Msgf("pull_request action is '%s'. Only '%s' are supported", pr.Action, strings.Join(actionList, "', '"))
 		return nil, nil, nil
 	}
 
 	repo = toRepo(pr.Repo)
 	pipeline = pipelineFromPullRequest(pr)
+
+	if pr.Action == actionLabelCleared {
+		// all other actions return the state of labels after the actions where done ... so we should too
+		pipeline.PullRequestLabels = []string{}
+	}
+
 	return repo, pipeline, err
 }
 

@@ -318,7 +318,7 @@ func TestGiteaParser(t *testing.T) {
 			repo:  pullMetaWebhookRepo,
 			pipe: &model.Pipeline{
 				Author:            "jony",
-				Event:             "pull_request_metadata",
+				Event:             model.EventPullMetadata,
 				Commit:            "07977177c2cd7d46bad37b8472a9d50e7acb9d1f",
 				Branch:            "main",
 				Ref:               "refs/pull/7/head",
@@ -339,7 +339,7 @@ func TestGiteaParser(t *testing.T) {
 			repo:  pullMetaWebhookRepo,
 			pipe: &model.Pipeline{
 				Author:            "jony",
-				Event:             "pull_request_metadata",
+				Event:             model.EventPullMetadata,
 				Commit:            "07977177c2cd7d46bad37b8472a9d50e7acb9d1f",
 				Branch:            "main",
 				Ref:               "refs/pull/7/head",
@@ -360,7 +360,7 @@ func TestGiteaParser(t *testing.T) {
 			repo:  pullMetaWebhookRepo,
 			pipe: &model.Pipeline{
 				Author:            "jony",
-				Event:             "pull_request_metadata",
+				Event:             model.EventPullMetadata,
 				Commit:            "07977177c2cd7d46bad37b8472a9d50e7acb9d1f",
 				Branch:            "main",
 				Ref:               "refs/pull/7/head",
@@ -381,7 +381,7 @@ func TestGiteaParser(t *testing.T) {
 			repo:  pullMetaWebhookRepo,
 			pipe: &model.Pipeline{
 				Author:            "jony",
-				Event:             "pull_request_metadata",
+				Event:             model.EventPullMetadata,
 				Commit:            "07977177c2cd7d46bad37b8472a9d50e7acb9d1f",
 				Branch:            "main",
 				Ref:               "refs/pull/7/head",
@@ -402,7 +402,7 @@ func TestGiteaParser(t *testing.T) {
 			repo:  pullMetaWebhookRepo,
 			pipe: &model.Pipeline{
 				Author:            "jony",
-				Event:             "pull_request_metadata",
+				Event:             model.EventPullMetadata,
 				Commit:            "07977177c2cd7d46bad37b8472a9d50e7acb9d1f",
 				Branch:            "main",
 				Ref:               "refs/pull/7/head",
@@ -423,7 +423,7 @@ func TestGiteaParser(t *testing.T) {
 			repo:  pullMetaWebhookRepo,
 			pipe: &model.Pipeline{
 				Author:            "jony",
-				Event:             "pull_request_metadata",
+				Event:             model.EventPullMetadata,
 				Commit:            "07977177c2cd7d46bad37b8472a9d50e7acb9d1f",
 				Branch:            "main",
 				Ref:               "refs/pull/7/head",
@@ -444,7 +444,7 @@ func TestGiteaParser(t *testing.T) {
 			repo:  pullMetaWebhookRepo,
 			pipe: &model.Pipeline{
 				Author:            "jony",
-				Event:             "pull_request_metadata",
+				Event:             model.EventPullMetadata,
 				Commit:            "07977177c2cd7d46bad37b8472a9d50e7acb9d1f",
 				Branch:            "main",
 				Ref:               "refs/pull/7/head",
@@ -465,7 +465,7 @@ func TestGiteaParser(t *testing.T) {
 			repo:  pullMetaWebhookRepo,
 			pipe: &model.Pipeline{
 				Author:            "jony",
-				Event:             "pull_request_metadata",
+				Event:             model.EventPullMetadata,
 				Commit:            "07977177c2cd7d46bad37b8472a9d50e7acb9d1f",
 				Branch:            "main",
 				Ref:               "refs/pull/7/head",
@@ -486,7 +486,7 @@ func TestGiteaParser(t *testing.T) {
 			repo:  pullMetaWebhookRepo,
 			pipe: &model.Pipeline{
 				Author:            "jony",
-				Event:             "pull_request_metadata",
+				Event:             model.EventPullMetadata,
 				Commit:            "07977177c2cd7d46bad37b8472a9d50e7acb9d1f",
 				Branch:            "main",
 				Ref:               "refs/pull/7/head",
@@ -507,7 +507,7 @@ func TestGiteaParser(t *testing.T) {
 			repo:  pullMetaWebhookRepo,
 			pipe: &model.Pipeline{
 				Author:            "jony",
-				Event:             "pull_request_metadata",
+				Event:             model.EventPullMetadata,
 				Commit:            "07977177c2cd7d46bad37b8472a9d50e7acb9d1f",
 				Branch:            "main",
 				Ref:               "refs/pull/7/head",
@@ -528,7 +528,7 @@ func TestGiteaParser(t *testing.T) {
 			repo:  pullMetaWebhookRepo,
 			pipe: &model.Pipeline{
 				Author:            "jony",
-				Event:             "pull_request_metadata",
+				Event:             model.EventPullMetadata,
 				Commit:            "07977177c2cd7d46bad37b8472a9d50e7acb9d1f",
 				Branch:            "main",
 				Ref:               "refs/pull/7/head",
