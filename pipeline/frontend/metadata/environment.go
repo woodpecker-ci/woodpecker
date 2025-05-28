@@ -68,6 +68,7 @@ func (m *Metadata) Environ() map[string]string {
 	setNonEmptyEnvVar(params, "CI_PIPELINE_NUMBER", strconv.FormatInt(pipeline.Number, 10))
 	setNonEmptyEnvVar(params, "CI_PIPELINE_PARENT", strconv.FormatInt(pipeline.Parent, 10))
 	setNonEmptyEnvVar(params, "CI_PIPELINE_EVENT", pipeline.Event)
+	setNonEmptyEnvVar(params, "CI_PIPELINE_EVENT_REASON", pipeline.EventReason)
 	setNonEmptyEnvVar(params, "CI_PIPELINE_URL", m.getPipelineWebURL(pipeline, 0))
 	setNonEmptyEnvVar(params, "CI_PIPELINE_FORGE_URL", pipeline.ForgeURL)
 	setNonEmptyEnvVar(params, "CI_PIPELINE_DEPLOY_TARGET", pipeline.DeployTo)
@@ -125,6 +126,7 @@ func (m *Metadata) Environ() map[string]string {
 	setNonEmptyEnvVar(params, "CI_PREV_PIPELINE_NUMBER", strconv.FormatInt(prevPipeline.Number, 10))
 	setNonEmptyEnvVar(params, "CI_PREV_PIPELINE_PARENT", strconv.FormatInt(prevPipeline.Parent, 10))
 	setNonEmptyEnvVar(params, "CI_PREV_PIPELINE_EVENT", prevPipeline.Event)
+	setNonEmptyEnvVar(params, "CI_PREV_PIPELINE_EVENT_REASON", prevPipeline.EventReason)
 	setNonEmptyEnvVar(params, "CI_PREV_PIPELINE_URL", m.getPipelineWebURL(prevPipeline, 0))
 	setNonEmptyEnvVar(params, "CI_PREV_PIPELINE_FORGE_URL", prevPipeline.ForgeURL)
 	setNonEmptyEnvVar(params, "CI_PREV_COMMIT_URL", prevPipeline.ForgeURL) // why commit url?
