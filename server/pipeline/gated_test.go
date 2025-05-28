@@ -60,6 +60,17 @@ func TestSetGatedState(t *testing.T) {
 			expectBlocked: true,
 		},
 		{
+			name: "require approval for edited PRs",
+			repo: &model.Repo{
+				RequireApproval: model.RequireApprovalPullRequests,
+			},
+			pipeline: &model.Pipeline{
+				Event:    model.EventPullMetadata,
+				FromFork: false,
+			},
+			expectBlocked: true,
+		},
+		{
 			name: "require approval for everything",
 			repo: &model.Repo{
 				RequireApproval: model.RequireApprovalAllEvents,
