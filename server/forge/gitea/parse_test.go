@@ -293,19 +293,22 @@ func TestGiteaParser(t *testing.T) {
 				PullRequestLabels: []string{},
 			},
 		},
+
+		// NEW start
+
 		{
-			name:  "pull-request events should handle a PR edited hook when PR got edited",
-			data:  fixtures.HookPullRequestEdited,
+			name:  "pull-request events should handle a PR title change hook",
+			data:  fixtures.HookPullRequestChangeTitle,
 			event: "pull_request",
 			repo: &model.Repo{
-				ForgeRemoteID: "46534",
-				Owner:         "anbraten",
-				Name:          "test-repo",
-				FullName:      "anbraten/test-repo",
-				Avatar:        "https://seccdn.libravatar.org/avatar/fc9b6fe77c6b732a02925a62a81f05a0?d=identicon",
-				ForgeURL:      "https://gitea.com/anbraten/test-repo",
-				Clone:         "https://gitea.com/anbraten/test-repo.git",
-				CloneSSH:      "git@gitea.com:anbraten/test-repo.git",
+				ForgeRemoteID: "1234",
+				Owner:         "a_nice_user",
+				Name:          "hello_world_ci",
+				FullName:      "a_nice_user/hello_world_ci",
+				Avatar:        "https://gitea.com/avatars/ae32f5573b27f9840942a522d59032b104a2dd15",
+				ForgeURL:      "https://gitea.com/a_nice_user/hello_world_ci",
+				Clone:         "https://gitea.com/a_nice_user/hello_world_ci.git",
+				CloneSSH:      "ssh://git@gitea.rt4u.de:3232/a_nice_user/hello_world_ci.git",
 				Branch:        "main",
 				PREnabled:     true,
 				Perm: &model.Perm{
@@ -315,21 +318,320 @@ func TestGiteaParser(t *testing.T) {
 				},
 			},
 			pipe: &model.Pipeline{
-				Author:            "anbraten",
+				Author:            "jony",
 				Event:             "pull_request_metadata",
-				Commit:            "d555a5dd07f4d0148a58d4686ec381502ae6a2d4",
+				Commit:            "07977177c2cd7d46bad37b8472a9d50e7acb9d1f",
 				Branch:            "main",
-				Ref:               "refs/pull/1/head",
-				Refspec:           "anbraten-patch-1:main",
-				Title:             "Adjust file",
-				Message:           "Adjust file",
-				Sender:            "anbraten",
-				Avatar:            "https://seccdn.libravatar.org/avatar/fc9b6fe77c6b732a02925a62a81f05a0?d=identicon",
-				Email:             "anbraten@sender.gitea.com",
-				ForgeURL:          "https://gitea.com/anbraten/test-repo/pulls/1",
+				Ref:               "refs/pull/7/head",
+				Refspec:           "jony-patch-1:main",
+				Title:             "somepull", // TODO: check as assumed
+				Message:           "somepull", // TODO: check as assumed
+				Sender:            "a_nice_user",
+				Avatar:            "https://gitea.com/avatars/ae32f5573b27f9840942a522d59032b104a2dd15",
+				Email:             "a_nice_user@noreply.example.org",
+				ForgeURL:          "https://gitea.com/a_nice_user/hello_world_ci/pulls/7",
+				PullRequestLabels: []string{}, // TODO: check as assumed
+			},
+		},
+		{
+			name:  "pull-request events should handle a PR body change hook",
+			data:  fixtures.HookPullRequestChangeBody,
+			event: "pull_request",
+			repo: &model.Repo{
+				ForgeRemoteID: "1234",
+				Owner:         "a_nice_user",
+				Name:          "hello_world_ci",
+				FullName:      "a_nice_user/hello_world_ci",
+				Avatar:        "https://gitea.com/avatars/ae32f5573b27f9840942a522d59032b104a2dd15",
+				ForgeURL:      "https://gitea.com/a_nice_user/hello_world_ci",
+				Clone:         "https://gitea.com/a_nice_user/hello_world_ci.git",
+				CloneSSH:      "ssh://git@gitea.rt4u.de:3232/a_nice_user/hello_world_ci.git",
+				Branch:        "main",
+				PREnabled:     true,
+				Perm: &model.Perm{
+					Pull:  true,
+					Push:  true,
+					Admin: true,
+				},
+			},
+			pipe: &model.Pipeline{
+				Author:            "jony",
+				Event:             "pull_request_metadata",
+				Commit:            "07977177c2cd7d46bad37b8472a9d50e7acb9d1f",
+				Branch:            "main",
+				Ref:               "refs/pull/7/head",
+				Refspec:           "jony-patch-1:main",
+				Title:             "somepull", // TODO: check as assumed
+				Message:           "somepull", // TODO: check as assumed
+				Sender:            "a_nice_user",
+				Avatar:            "https://gitea.com/avatars/ae32f5573b27f9840942a522d59032b104a2dd15",
+				Email:             "a_nice_user@noreply.example.org",
+				ForgeURL:          "https://gitea.com/a_nice_user/hello_world_ci/pulls/7",
+				PullRequestLabels: []string{}, // TODO: check as assumed
+			},
+		},
+		{
+			name:  "pull-request events should handle a PR add review request hook",
+			data:  fixtures.HookPullRequestAddReviewRequest,
+			event: "pull_request", // type: pull_request_review_request
+			repo: &model.Repo{
+				ForgeRemoteID: "1234",
+				Owner:         "a_nice_user",
+				Name:          "hello_world_ci",
+				FullName:      "a_nice_user/hello_world_ci",
+				Avatar:        "https://gitea.com/avatars/ae32f5573b27f9840942a522d59032b104a2dd15",
+				ForgeURL:      "https://gitea.com/a_nice_user/hello_world_ci",
+				Clone:         "https://gitea.com/a_nice_user/hello_world_ci.git",
+				CloneSSH:      "ssh://git@gitea.rt4u.de:3232/a_nice_user/hello_world_ci.git",
+				Branch:        "main",
+				PREnabled:     true,
+				Perm: &model.Perm{
+					Pull:  true,
+					Push:  true,
+					Admin: true,
+				},
+			},
+			pipe: &model.Pipeline{
+				Author:            "jony",
+				Event:             "pull_request_metadata",
+				Commit:            "07977177c2cd7d46bad37b8472a9d50e7acb9d1f",
+				Branch:            "main",
+				Ref:               "refs/pull/7/head",
+				Refspec:           "jony-patch-1:main",
+				Title:             "somepull",
+				Message:           "somepull",
+				Sender:            "a_nice_user",
+				Avatar:            "https://gitea.com/avatars/ae32f5573b27f9840942a522d59032b104a2dd15",
+				Email:             "a_nice_user@noreply.example.org",
+				ForgeURL:          "https://gitea.com/a_nice_user/hello_world_ci/pulls/7",
+				PullRequestLabels: []string{"bug", "help wanted"}, // TODO: check as assumed
+			},
+		},
+		{
+			name:  "pull-request events should handle a PR add label hook",
+			data:  fixtures.HookPullRequestAddLable,
+			event: "pull_request", // type: pull_request_label
+			repo: &model.Repo{
+				ForgeRemoteID: "1234",
+				Owner:         "a_nice_user",
+				Name:          "hello_world_ci",
+				FullName:      "a_nice_user/hello_world_ci",
+				Avatar:        "https://gitea.com/avatars/ae32f5573b27f9840942a522d59032b104a2dd15",
+				ForgeURL:      "https://gitea.com/a_nice_user/hello_world_ci",
+				Clone:         "https://gitea.com/a_nice_user/hello_world_ci.git",
+				CloneSSH:      "ssh://git@gitea.rt4u.de:3232/a_nice_user/hello_world_ci.git",
+				Branch:        "main",
+				PREnabled:     true,
+				Perm: &model.Perm{
+					Pull:  true,
+					Push:  true,
+					Admin: true,
+				},
+			},
+			pipe: &model.Pipeline{
+				Author:            "jony",
+				Event:             "pull_request_metadata",
+				Commit:            "07977177c2cd7d46bad37b8472a9d50e7acb9d1f",
+				Branch:            "main",
+				Ref:               "refs/pull/7/head",
+				Refspec:           "jony-patch-1:main",
+				Title:             "somepull", // TODO: check as assumed
+				Message:           "somepull", // TODO: check as assumed
+				Sender:            "a_nice_user",
+				Avatar:            "https://gitea.com/avatars/ae32f5573b27f9840942a522d59032b104a2dd15",
+				Email:             "a_nice_user@noreply.example.org",
+				ForgeURL:          "https://gitea.com/a_nice_user/hello_world_ci/pulls/7",
+				PullRequestLabels: []string{"bug", "help wanted"},
+			},
+		},
+		{
+			name:  "pull-request events should handle a PR change label hook",
+			data:  fixtures.HookPullRequestChangeLable,
+			event: "pull_request", // type: pull_request_label
+			repo: &model.Repo{
+				ForgeRemoteID: "1234",
+				Owner:         "a_nice_user",
+				Name:          "hello_world_ci",
+				FullName:      "a_nice_user/hello_world_ci",
+				Avatar:        "https://gitea.com/avatars/ae32f5573b27f9840942a522d59032b104a2dd15",
+				ForgeURL:      "https://gitea.com/a_nice_user/hello_world_ci",
+				Clone:         "https://gitea.com/a_nice_user/hello_world_ci.git",
+				CloneSSH:      "ssh://git@gitea.rt4u.de:3232/a_nice_user/hello_world_ci.git",
+				Branch:        "main",
+				PREnabled:     true,
+				Perm: &model.Perm{
+					Pull:  true,
+					Push:  true,
+					Admin: true,
+				},
+			},
+			pipe: &model.Pipeline{
+				Author:            "jony",
+				Event:             "pull_request_metadata",
+				Commit:            "07977177c2cd7d46bad37b8472a9d50e7acb9d1f",
+				Branch:            "main",
+				Ref:               "refs/pull/7/head",
+				Refspec:           "jony-patch-1:main",
+				Title:             "somepull", // TODO: check as assumed
+				Message:           "somepull", // TODO: check as assumed
+				Sender:            "a_nice_user",
+				Avatar:            "https://gitea.com/avatars/ae32f5573b27f9840942a522d59032b104a2dd15",
+				Email:             "a_nice_user@noreply.example.org",
+				ForgeURL:          "https://gitea.com/a_nice_user/hello_world_ci/pulls/7",
+				PullRequestLabels: []string{"bug", "help wanted"}, // TODO: check as assumed
+			},
+		},
+		{
+			name:  "pull-request events should handle a PR remove label hook",
+			data:  fixtures.HookPullRequestRemoveLable,
+			event: "pull_request", // type: pull_request_label
+			repo: &model.Repo{
+				ForgeRemoteID: "1234",
+				Owner:         "a_nice_user",
+				Name:          "hello_world_ci",
+				FullName:      "a_nice_user/hello_world_ci",
+				Avatar:        "https://gitea.com/avatars/ae32f5573b27f9840942a522d59032b104a2dd15",
+				ForgeURL:      "https://gitea.com/a_nice_user/hello_world_ci",
+				Clone:         "https://gitea.com/a_nice_user/hello_world_ci.git",
+				CloneSSH:      "ssh://git@gitea.rt4u.de:3232/a_nice_user/hello_world_ci.git",
+				Branch:        "main",
+				PREnabled:     true,
+				Perm: &model.Perm{
+					Pull:  true,
+					Push:  true,
+					Admin: true,
+				},
+			},
+			pipe: &model.Pipeline{
+				Author:            "jony",
+				Event:             "pull_request_metadata",
+				Commit:            "07977177c2cd7d46bad37b8472a9d50e7acb9d1f",
+				Branch:            "main",
+				Ref:               "refs/pull/7/head",
+				Refspec:           "jony-patch-1:main",
+				Title:             "somepull", // TODO: check as assumed
+				Message:           "somepull", // TODO: check as assumed
+				Sender:            "a_nice_user",
+				Avatar:            "https://gitea.com/avatars/ae32f5573b27f9840942a522d59032b104a2dd15",
+				Email:             "a_nice_user@noreply.example.org",
+				ForgeURL:          "https://gitea.com/a_nice_user/hello_world_ci/pulls/7",
+				PullRequestLabels: []string{}, // TODO: check as assumed
+			},
+		},
+		{
+			name:  "pull-request events should handle a PR add milestone hook",
+			data:  fixtures.HookPullRequestAddMile,
+			event: "pull_request", // type: pull_request_milestone
+			repo: &model.Repo{
+				ForgeRemoteID: "1234",
+				Owner:         "a_nice_user",
+				Name:          "hello_world_ci",
+				FullName:      "a_nice_user/hello_world_ci",
+				Avatar:        "https://gitea.com/avatars/ae32f5573b27f9840942a522d59032b104a2dd15",
+				ForgeURL:      "https://gitea.com/a_nice_user/hello_world_ci",
+				Clone:         "https://gitea.com/a_nice_user/hello_world_ci.git",
+				CloneSSH:      "ssh://git@gitea.rt4u.de:3232/a_nice_user/hello_world_ci.git",
+				Branch:        "main",
+				PREnabled:     true,
+				Perm: &model.Perm{
+					Pull:  true,
+					Push:  true,
+					Admin: true,
+				},
+			},
+			pipe: &model.Pipeline{
+				Author:            "jony",
+				Event:             "pull_request_metadata",
+				Commit:            "07977177c2cd7d46bad37b8472a9d50e7acb9d1f",
+				Branch:            "main",
+				Ref:               "refs/pull/7/head",
+				Refspec:           "jony-patch-1:main",
+				Title:             "somepull", // TODO: check as assumed
+				Message:           "somepull", // TODO: check as assumed
+				Sender:            "a_nice_user",
+				Avatar:            "https://gitea.com/avatars/ae32f5573b27f9840942a522d59032b104a2dd15",
+				Email:             "a_nice_user@noreply.example.org",
+				ForgeURL:          "https://gitea.com/a_nice_user/hello_world_ci/pulls/7",
+				PullRequestLabels: []string{"bug", "help wanted"}, // TODO: check as assumed
+			},
+		},
+		{
+			name:  "pull-request events should handle a PR change milestone hook",
+			data:  fixtures.HookPullRequestChangeMile,
+			event: "pull_request", // type: pull_request_milestone
+			repo: &model.Repo{
+				ForgeRemoteID: "1234",
+				Owner:         "a_nice_user",
+				Name:          "hello_world_ci",
+				FullName:      "a_nice_user/hello_world_ci",
+				Avatar:        "https://gitea.com/avatars/ae32f5573b27f9840942a522d59032b104a2dd15",
+				ForgeURL:      "https://gitea.com/a_nice_user/hello_world_ci",
+				Clone:         "https://gitea.com/a_nice_user/hello_world_ci.git",
+				CloneSSH:      "ssh://git@gitea.rt4u.de:3232/a_nice_user/hello_world_ci.git",
+				Branch:        "main",
+				PREnabled:     true,
+				Perm: &model.Perm{
+					Pull:  true,
+					Push:  true,
+					Admin: true,
+				},
+			},
+			pipe: &model.Pipeline{
+				Author:            "jony",
+				Event:             "pull_request_metadata",
+				Commit:            "07977177c2cd7d46bad37b8472a9d50e7acb9d1f",
+				Branch:            "main",
+				Ref:               "refs/pull/7/head",
+				Refspec:           "jony-patch-1:main",
+				Title:             "somepull", // TODO: check as assumed
+				Message:           "somepull", // TODO: check as assumed
+				Sender:            "a_nice_user",
+				Avatar:            "https://gitea.com/avatars/ae32f5573b27f9840942a522d59032b104a2dd15",
+				Email:             "a_nice_user@noreply.example.org",
+				ForgeURL:          "https://gitea.com/a_nice_user/hello_world_ci/pulls/7",
+				PullRequestLabels: []string{"bug", "help wanted"}, // TODO: check as assumed
+			},
+		},
+		{
+			name:  "pull-request events should handle a PR remove milestone hook",
+			data:  fixtures.HookPullRequestRemoveMile,
+			event: "pull_request", // type: pull_request_milestone
+			repo: &model.Repo{
+				ForgeRemoteID: "1234",
+				Owner:         "a_nice_user",
+				Name:          "hello_world_ci",
+				FullName:      "a_nice_user/hello_world_ci",
+				Avatar:        "https://gitea.com/avatars/ae32f5573b27f9840942a522d59032b104a2dd15",
+				ForgeURL:      "https://gitea.com/a_nice_user/hello_world_ci",
+				Clone:         "https://gitea.com/a_nice_user/hello_world_ci.git",
+				CloneSSH:      "ssh://git@gitea.rt4u.de:3232/a_nice_user/hello_world_ci.git",
+				Branch:        "main",
+				PREnabled:     true,
+				Perm: &model.Perm{
+					Pull:  true,
+					Push:  true,
+					Admin: true,
+				},
+			},
+			pipe: &model.Pipeline{
+				Author:            "jony",
+				Event:             "pull_request_metadata",
+				Commit:            "07977177c2cd7d46bad37b8472a9d50e7acb9d1f",
+				Branch:            "main",
+				Ref:               "refs/pull/7/head",
+				Refspec:           "jony-patch-1:main",
+				Title:             "somepull",
+				Message:           "somepull",
+				Sender:            "a_nice_user",
+				Avatar:            "https://gitea.com/avatars/ae32f5573b27f9840942a522d59032b104a2dd15",
+				Email:             "a_nice_user@noreply.example.org",
+				ForgeURL:          "https://gitea.com/a_nice_user/hello_world_ci/pulls/7",
 				PullRequestLabels: []string{},
 			},
 		},
+
+		// NEW end
+
 		{
 			name:  "pull-request events should handle a PR closed hook when PR was merged",
 			data:  fixtures.HookPullRequestMerged,

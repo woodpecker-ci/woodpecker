@@ -50,92 +50,29 @@ var HookPullRequestMerged string
 //go:embed HookPullRequestClosed.json
 var HookPullRequestClosed string
 
-const HookPullRequestChangeTitleHeader = `
-Request method: POST
-Content-Type: application/json
-X-Gitea-Event: pull_request
-X-Gitea-Event-Type: pull_request
-`
-
 //go:embed HookPullRequestChangeTitle.json
 var HookPullRequestChangeTitle string
-
-const HookPullRequestChangeBodyHeader = `
-Request method: POST
-Content-Type: application/json
-X-Gitea-Event: pull_request
-X-Gitea-Event-Type: pull_request
-`
 
 //go:embed HookPullRequestChangeBody.json
 var HookPullRequestChangeBody string
 
-const HookPullRequestAddReviewRequestHeader = `
-Request method: POST
-Content-Type: application/json
-X-Gitea-Event: pull_request
-X-Gitea-Event-Type: pull_request_review_request
-`
-
 //go:embed HookPullRequestAddReviewRequest.json
 var HookPullRequestAddReviewRequest string
-
-const HookPullRequestAddLableHeader = `
-Request method: POST
-Content-Type: application/json
-X-Gitea-Event: pull_request
-X-Gitea-Event-Type: pull_request_label
-`
 
 //go:embed HookPullRequestAddLable.json
 var HookPullRequestAddLable string
 
-const HookPullRequestChangeLableHeader = `
-Request method: POST
-Content-Type: application/json
-X-Gitea-Event: pull_request
-X-Gitea-Event-Type: pull_request_label
-`
-
 //go:embed HookPullRequestChangeLable.json
 var HookPullRequestChangeLable string
-
-const HookPullRequestRemoveLableHeader = `
-Request method: POST
-Content-Type: application/json
-X-Gitea-Event: pull_request
-X-Gitea-Event-Type: pull_request_label
-`
 
 //go:embed HookPullRequestRemoveLable.json
 var HookPullRequestRemoveLable string
 
-const HookPullRequestAddMileHeader = `
-Request method: POST
-Content-Type: application/json
-X-Gitea-Event: pull_request
-X-Gitea-Event-Type: pull_request_milestone
-`
-
 //go:embed HookPullRequestAddMile.json
 var HookPullRequestAddMile string
 
-const HookPullRequestChangeMileHeader = `
-Request method: POST
-Content-Type: application/json
-X-Gitea-Event: pull_request
-X-Gitea-Event-Type: pull_request_milestone
-`
-
 //go:embed HookPullRequestChangeMile.json
 var HookPullRequestChangeMile string
-
-const HookPullRequestRemoveMileHeader = `
-Request method: POST
-Content-Type: application/json
-X-Gitea-Event: pull_request
-X-Gitea-Event-Type: pull_request_milestone
-`
 
 //go:embed HookPullRequestRemoveMile.json
 var HookPullRequestRemoveMile string
