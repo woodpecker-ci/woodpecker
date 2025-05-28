@@ -36,25 +36,25 @@ func NewServer(t *testing.T) *httptest.Server {
 		switch r.URL.Path {
 		case "/api/v4/projects":
 			if r.FormValue("archived") == "false" {
-				w.Write(notArchivedProjectsPayload)
+				_, _ = w.Write(notArchivedProjectsPayload)
 			} else {
-				w.Write(allProjectsPayload)
+				_, _ = w.Write(allProjectsPayload)
 			}
 
 			return
 		case "/api/v4/projects/diaspora/diaspora-client":
-			w.Write(project4Payload)
+			_, _ = w.Write(project4Payload)
 			return
 		case "/api/v4/projects/brightbox/puppet":
 		case "/api/v4/projects/6":
-			w.Write(project6Payload)
+			_, _ = w.Write(project6Payload)
 			return
 		case "/api/v4/projects/4/hooks":
 			switch r.Method {
 			case http.MethodGet:
-				w.Write(project4PayloadHooks)
+				_, _ = w.Write(project4PayloadHooks)
 			case http.MethodPost:
-				w.Write(project4PayloadHook)
+				_, _ = w.Write(project4PayloadHook)
 				w.WriteHeader(201)
 			}
 			return
@@ -62,19 +62,19 @@ func NewServer(t *testing.T) *httptest.Server {
 			w.WriteHeader(201)
 			return
 		case "/api/v4/projects/4/members/all/3":
-			w.Write(project4PayloadMembers)
+			_, _ = w.Write(project4PayloadMembers)
 			return
 		case "/api/v4/projects/diaspora/diaspora-client/members/all/3":
-			w.Write(project4PayloadMembers)
+			_, _ = w.Write(project4PayloadMembers)
 			return
 		case "/api/v4/projects/6/members/all/3":
-			w.Write(project6PayloadMembers)
+			_, _ = w.Write(project6PayloadMembers)
 			return
 		case "/oauth/token":
-			w.Write(accessTokenPayload)
+			_, _ = w.Write(accessTokenPayload)
 			return
 		case "/api/v4/user":
-			w.Write(currentUserPayload)
+			_, _ = w.Write(currentUserPayload)
 			return
 		}
 
