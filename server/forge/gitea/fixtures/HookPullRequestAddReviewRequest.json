@@ -1,0 +1,174 @@
+{
+  "action": "review_requested",
+  "number": 7,
+  "pull_request": {
+    "id": 3779,
+    "url": "https://gitea.com/a_nice_user/hello_world_ci/pulls/7",
+    "number": 7,
+    "user": {
+      "id": 21,
+      "login": "jony",
+      "full_name": "Jony",
+      "email": "jony@noreply.example.org",
+      "avatar_url": "https://gitea.com/avatars/81027235e996f5e3ef6257152357b85d94171a2e",
+      "html_url": "https://gitea.com/jony",
+      "created": "2018-01-25T14:38:19+01:00",
+      "visibility": "public",
+      "username": "jony"
+    },
+    "title": "somepull",
+    "body": "wow aaa new pulll body",
+    "labels": [],
+    "milestone": null,
+    "assignees": null,
+    "requested_reviewers": [
+      {
+        "id": 8765,
+        "login": "a_nice_user",
+        "full_name": "Nice User",
+        "email": "a_nice_user@noreply.example.org",
+        "avatar_url": "https://gitea.com/avatars/ae32f5573b27f9840942a522d59032b104a2dd15",
+        "html_url": "https://gitea.com/a_nice_user",
+        "created": "2023-05-23T15:17:35+02:00",
+        "visibility": "public",
+        "username": "a_nice_user"
+      }
+    ],
+    "state": "open",
+    "additions": 1,
+    "deletions": 0,
+    "changed_files": 1,
+    "html_url": "https://gitea.com/a_nice_user/hello_world_ci/pulls/7",
+    "diff_url": "https://gitea.com/a_nice_user/hello_world_ci/pulls/7.diff",
+    "patch_url": "https://gitea.com/a_nice_user/hello_world_ci/pulls/7.patch",
+    "base": {
+      "label": "main",
+      "ref": "main",
+      "sha": "a40211c506550ebd79633d84e913dafa184c6d56",
+      "repo_id": 1234,
+      "repo": {
+        "id": 1234,
+        "owner": {
+          "id": 8765,
+          "login": "a_nice_user",
+          "full_name": "Nice User",
+          "email": "a_nice_user@me.mail",
+          "avatar_url": "https://gitea.com/avatars/ae32f5573b27f9840942a522d59032b104a2dd15",
+          "html_url": "https://gitea.com/a_nice_user",
+          "created": "2023-05-23T15:17:35+02:00",
+          "visibility": "public",
+          "username": "a_nice_user"
+        },
+        "name": "hello_world_ci",
+        "full_name": "a_nice_user/hello_world_ci",
+        "private": false,
+        "languages_url": "https://gitea.com/api/v1/repos/a_nice_user/hello_world_ci/languages",
+        "html_url": "https://gitea.com/a_nice_user/hello_world_ci",
+        "url": "https://gitea.com/api/v1/repos/a_nice_user/hello_world_ci",
+        "link": "",
+        "ssh_url": "ssh://git@gitea.rt4u.de:3232/a_nice_user/hello_world_ci.git",
+        "clone_url": "https://gitea.com/a_nice_user/hello_world_ci.git",
+        "default_branch": "main",
+        "permissions": {
+          "admin": false,
+          "push": false,
+          "pull": true
+        },
+        "object_format_name": "sha1"
+      }
+    },
+    "head": {
+      "label": "jony-patch-1",
+      "ref": "jony-patch-1",
+      "sha": "07977177c2cd7d46bad37b8472a9d50e7acb9d1f",
+      "repo_id": 1234,
+      "repo": {
+        "id": 1234,
+        "owner": {
+          "id": 8765,
+          "login": "a_nice_user",
+          "full_name": "Nice User",
+          "email": "a_nice_user@me.mail",
+          "avatar_url": "https://gitea.com/avatars/ae32f5573b27f9840942a522d59032b104a2dd15",
+          "html_url": "https://gitea.com/a_nice_user",
+          "created": "2023-05-23T15:17:35+02:00",
+          "visibility": "public",
+          "username": "a_nice_user"
+        },
+        "name": "hello_world_ci",
+        "full_name": "a_nice_user/hello_world_ci",
+        "private": false,
+        "languages_url": "https://gitea.com/api/v1/repos/a_nice_user/hello_world_ci/languages",
+        "html_url": "https://gitea.com/a_nice_user/hello_world_ci",
+        "url": "https://gitea.com/api/v1/repos/a_nice_user/hello_world_ci",
+        "link": "",
+        "ssh_url": "ssh://git@gitea.rt4u.de:3232/a_nice_user/hello_world_ci.git",
+        "clone_url": "https://gitea.com/a_nice_user/hello_world_ci.git",
+        "default_branch": "main",
+        "permissions": {
+          "admin": false,
+          "push": false,
+          "pull": true
+        },
+        "object_format_name": "sha1"
+      }
+    },
+    "merge_base": "a40211c506550ebd79633d84e913dafa184c6d56",
+    "due_date": null,
+    "closed_at": null,
+    "pin_order": 0
+  },
+  "requested_reviewer": {
+    "id": 8765,
+    "login": "a_nice_user",
+    "full_name": "Nice User",
+    "email": "a_nice_user@noreply.example.org",
+    "avatar_url": "https://gitea.com/avatars/ae32f5573b27f9840942a522d59032b104a2dd15",
+    "html_url": "https://gitea.com/a_nice_user",
+    "created": "2023-05-23T15:17:35+02:00",
+    "visibility": "public",
+    "username": "a_nice_user"
+  },
+  "repository": {
+    "id": 1234,
+    "owner": {
+      "id": 8765,
+      "login": "a_nice_user",
+      "full_name": "Nice User",
+      "email": "a_nice_user@me.mail",
+      "avatar_url": "https://gitea.com/avatars/ae32f5573b27f9840942a522d59032b104a2dd15",
+      "html_url": "https://gitea.com/a_nice_user",
+      "created": "2023-05-23T15:17:35+02:00",
+      "visibility": "public",
+      "username": "a_nice_user"
+    },
+    "name": "hello_world_ci",
+    "full_name": "a_nice_user/hello_world_ci",
+    "private": false,
+    "languages_url": "https://gitea.com/api/v1/repos/a_nice_user/hello_world_ci/languages",
+    "html_url": "https://gitea.com/a_nice_user/hello_world_ci",
+    "url": "https://gitea.com/api/v1/repos/a_nice_user/hello_world_ci",
+    "link": "",
+    "ssh_url": "ssh://git@gitea.rt4u.de:3232/a_nice_user/hello_world_ci.git",
+    "clone_url": "https://gitea.com/a_nice_user/hello_world_ci.git",
+    "default_branch": "main",
+    "permissions": {
+      "admin": true,
+      "push": true,
+      "pull": true
+    },
+    "object_format_name": "sha1"
+  },
+  "sender": {
+    "id": 8765,
+    "login": "a_nice_user",
+    "full_name": "Nice User",
+    "email": "a_nice_user@noreply.example.org",
+    "avatar_url": "https://gitea.com/avatars/ae32f5573b27f9840942a522d59032b104a2dd15",
+    "html_url": "https://gitea.com/a_nice_user",
+    "created": "2023-05-23T15:17:35+02:00",
+    "visibility": "public",
+    "username": "a_nice_user"
+  },
+  "review": null
+}
