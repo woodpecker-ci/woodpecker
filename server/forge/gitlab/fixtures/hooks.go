@@ -15,10 +15,9 @@
 package fixtures
 
 import (
+	_ "embed"
 	"net/http"
 	"net/url"
-
-	_ "embed"
 )
 
 var (

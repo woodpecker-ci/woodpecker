@@ -14,7 +14,7 @@
 
 package fixtures
 
-// sample repository list
+// sample repository list.
 var allProjectsPayload = []byte(`
 [
 	{
