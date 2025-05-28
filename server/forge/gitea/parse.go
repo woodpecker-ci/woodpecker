@@ -43,6 +43,8 @@ const (
 	actionMilestoned    = "milestoned"
 	actionDeMilestoned  = "demilestoned"
 	actionReviewRequest = "review_requested"
+	actionAssigned      = "assigned"
+	actionUnAssigned    = "unassigned"
 
 	refBranch = "branch"
 	refTag    = "tag"
@@ -58,7 +60,9 @@ func supportedAction(action string) bool {
 		actionMilestoned,
 		actionDeMilestoned,
 		actionReviewRequest,
-		actionLabelCleared:
+		actionLabelCleared,
+		actionAssigned,
+		actionUnAssigned:
 		return true
 	}
 	return false

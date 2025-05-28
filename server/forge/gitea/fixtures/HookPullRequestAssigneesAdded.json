@@ -83,9 +83,9 @@
       "label": "main",
       "ref": "main",
       "sha": "a40211c506550ebd79633d84e913dafa184c6d56",
-      "repo_id": 198,
+      "repo_id": 1234,
       "repo": {
-        "id": 198,
+        "id": 1234,
         "owner": {
           "id": 349,
           "login": "a_nice_user",
@@ -117,9 +117,9 @@
       "label": "jony-patch-1",
       "ref": "jony-patch-1",
       "sha": "07977177c2cd7d46bad37b8472a9d50e7acb9d1f",
-      "repo_id": 198,
+      "repo_id": 1234,
       "repo": {
-        "id": 198,
+        "id": 1234,
         "owner": {
           "id": 349,
           "login": "a_nice_user",
@@ -151,7 +151,7 @@
   },
   "requested_reviewer": null,
   "repository": {
-    "id": 198,
+    "id": 1234,
     "owner": {
       "id": 349,
       "login": "a_nice_user",
