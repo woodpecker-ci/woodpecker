@@ -28,7 +28,7 @@ import (
 )
 
 func TestGiteaParser(t *testing.T) {
-	var pullMetaWebhookRepo = &model.Repo{
+	pullMetaWebhookRepo := &model.Repo{
 		ForgeRemoteID: "1234",
 		Owner:         "a_nice_user",
 		Name:          "hello_world_ci",
@@ -364,6 +364,72 @@ func TestGiteaParser(t *testing.T) {
 				Author:            "jony",
 				Event:             model.EventPullMetadata,
 				EventReason:       "review_requested",
+				Commit:            "07977177c2cd7d46bad37b8472a9d50e7acb9d1f",
+				Branch:            "main",
+				Ref:               "refs/pull/7/head",
+				Refspec:           "jony-patch-1:main",
+				Title:             "somepull",
+				Message:           "somepull",
+				Sender:            "a_nice_user",
+				Avatar:            "https://gitea.com/avatars/81027235e996f5e3ef6257152357b85d94171a2e",
+				Email:             "a_nice_user@noreply.example.org",
+				ForgeURL:          "https://gitea.com/a_nice_user/hello_world_ci/pulls/7",
+				PullRequestLabels: []string{},
+			},
+		},
+		{
+			name:  "pull-request events should handle a PR add approval review request hook",
+			data:  fixtures.HookPullRequestReviewAck,
+			event: "pull_request_approved", // type: pull_request_review_approved
+			repo:  pullMetaWebhookRepo,
+			pipe: &model.Pipeline{
+				Author:            "jony",
+				Event:             model.EventPullMetadata,
+				EventReason:       "pull_request_approved",
+				Commit:            "07977177c2cd7d46bad37b8472a9d50e7acb9d1f",
+				Branch:            "main",
+				Ref:               "refs/pull/7/head",
+				Refspec:           "jony-patch-1:main",
+				Title:             "somepull",
+				Message:           "somepull",
+				Sender:            "a_nice_user",
+				Avatar:            "https://gitea.com/avatars/81027235e996f5e3ef6257152357b85d94171a2e",
+				Email:             "a_nice_user@noreply.example.org",
+				ForgeURL:          "https://gitea.com/a_nice_user/hello_world_ci/pulls/7",
+				PullRequestLabels: []string{},
+			},
+		},
+		{
+			name:  "pull-request events should handle a PR add reject review request hook",
+			data:  fixtures.HookPullRequestReviewDeny,
+			event: "pull_request_rejected", // type: pull_request_review_rejected
+			repo:  pullMetaWebhookRepo,
+			pipe: &model.Pipeline{
+				Author:            "jony",
+				Event:             model.EventPullMetadata,
+				EventReason:       "pull_request_rejected",
+				Commit:            "07977177c2cd7d46bad37b8472a9d50e7acb9d1f",
+				Branch:            "main",
+				Ref:               "refs/pull/7/head",
+				Refspec:           "jony-patch-1:main",
+				Title:             "somepull",
+				Message:           "somepull",
+				Sender:            "a_nice_user",
+				Avatar:            "https://gitea.com/avatars/81027235e996f5e3ef6257152357b85d94171a2e",
+				Email:             "a_nice_user@noreply.example.org",
+				ForgeURL:          "https://gitea.com/a_nice_user/hello_world_ci/pulls/7",
+				PullRequestLabels: []string{},
+			},
+		},
+		{
+			name:  "pull-request events should handle a PR add comment review request hook",
+			data:  fixtures.HookPullRequestReviewComment,
+			event: "pull_request_comment", // type: pull_request_review_comment
+			repo:  pullMetaWebhookRepo,
+			pipe: &model.Pipeline{
+				Author:            "jony",
+				Event:             model.EventPullMetadata,
+				EventReason:       "pull_request_comment",
 				Commit:            "07977177c2cd7d46bad37b8472a9d50e7acb9d1f",
 				Branch:            "main",
 				Ref:               "refs/pull/7/head",

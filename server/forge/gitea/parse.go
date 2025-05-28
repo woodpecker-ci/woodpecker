@@ -29,11 +29,14 @@ import (
 )
 
 const (
-	hookEvent       = "X-Gitea-Event"
-	hookPush        = "push"
-	hookCreated     = "create"
-	hookPullRequest = "pull_request"
-	hookRelease     = "release"
+	hookEvent        = "X-Gitea-Event"
+	hookPush         = "push"
+	hookCreated      = "create"
+	hookPullRequest  = "pull_request"
+	hookRelease      = "release"
+	hookPullApproved = "pull_request_approved"
+	hookPullRejected = "pull_request_rejected"
+	hookPullComment  = "pull_request_comment"
 
 	actionOpen          = "opened"
 	actionSync          = "synchronized"
@@ -46,6 +49,7 @@ const (
 	actionReviewRequest = "review_requested"
 	actionAssigned      = "assigned"
 	actionUnAssigned    = "unassigned"
+	actionReviewed      = "reviewed"
 
 	refBranch = "branch"
 	refTag    = "tag"
@@ -63,6 +67,7 @@ var actionList = []string{
 	actionLabelCleared,
 	actionAssigned,
 	actionUnAssigned,
+	actionReviewed,
 }
 
 func supportedAction(action string) bool {
@@ -80,6 +85,16 @@ func parseHook(r *http.Request) (*model.Repo, *model.Pipeline, error) {
 		return parseCreatedHook(r.Body)
 	case hookPullRequest:
 		return parsePullRequestHook(r.Body)
+	case hookPullApproved,
+		hookPullRejected,
+		hookPullComment:
+		repo, pipe, err := parsePullRequestHook(r.Body)
+		if err != nil {
+			return repo, pipe, err
+		}
+		// as actions states all the same we update it
+		pipe.EventReason = hookType
+		return repo, pipe, nil
 	case hookRelease:
 		return parseReleaseHook(r.Body)
 	}

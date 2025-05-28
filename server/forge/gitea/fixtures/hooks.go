@@ -59,6 +59,15 @@ var HookPullRequestChangeBody string
 //go:embed HookPullRequestAddReviewRequest.json
 var HookPullRequestAddReviewRequest string
 
+//go:embed HookPullRequestReviewAck.json
+var HookPullRequestReviewAck string
+
+//go:embed HookPullRequestReviewDeny.json
+var HookPullRequestReviewDeny string
+
+//go:embed HookPullRequestReviewComment.json
+var HookPullRequestReviewComment string
+
 //go:embed HookPullRequestAddLable.json
 var HookPullRequestAddLable string
 
