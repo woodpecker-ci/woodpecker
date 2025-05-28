@@ -123,7 +123,7 @@ func run(ctx context.Context, c *cli.Command) error {
 	log.Info().Msgf("starting Woodpecker server with version '%s'", version.String())
 
 	startMetricsCollector(ctx, _store)
-	
+
 	serviceWaitingGroup.Go(func() error {
 		log.Info().Msg("starting cron service ...")
 		if err := cron.Run(ctx, _store); err != nil {
