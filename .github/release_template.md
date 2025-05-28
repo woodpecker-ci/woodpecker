@@ -29,5 +29,6 @@
 - [ ] Release the Helm Chart. If renovate has not created the upgrade PR already, manually trigger it from the Dependency Dashboard.
 - [ ] Announce release in relevant chats and on social media platforms
   - [ ] Mastodon (check if already posted from the release pipeline)
+  - [ ] Bluesky (check if already posted from the release pipeline)
   - [ ] Matrix
   - [ ] Twitter
