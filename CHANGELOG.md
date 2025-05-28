@@ -4,7 +4,14 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @Levy-Tal, @OCram85, @Spiffyk, @SuperSandro2000, @qwerty287, @rruzicic, @xoxys
+@6543, @Levy-Tal, @OCram85, @Spiffyk, @SuperSandro2000, @deltamualpha, @qwerty287, @rruzicic, @xoxys
+
+### 🐛 Bug Fixes
+
+- Always collect metrics (reverts #4667) [[#5213](https://github.com/woodpecker-ci/woodpecker/pull/5213)]
+- fix(bitbucketDC): manual event has commit broken link [[#5160](https://github.com/woodpecker-ci/woodpecker/pull/5160)]
+- fix(bitbucketdc): build status gets incorrectly reported on multi workflow builds [[#5178](https://github.com/woodpecker-ci/woodpecker/pull/5178)]
+- fix(bitbucketdc): build status not reported on PR builds [[#5162](https://github.com/woodpecker-ci/woodpecker/pull/5162)]
 
 ### 📈 Enhancement
 
@@ -21,12 +28,6 @@
 - add Portainer Service Update plugin [[#5172](https://github.com/woodpecker-ci/woodpecker/pull/5172)]
 - Split 'pull' option docs from 'image' docs [[#5161](https://github.com/woodpecker-ci/woodpecker/pull/5161)]
 - chore(deps): update docs npm deps non-major [[#5164](https://github.com/woodpecker-ci/woodpecker/pull/5164)]
-
-### 🐛 Bug Fixes
-
-- fix(bitbucketDC): manual event has commit broken link [[#5160](https://github.com/woodpecker-ci/woodpecker/pull/5160)]
-- fix(bitbucketdc): build status gets incorrectly reported on multi workflow builds [[#5178](https://github.com/woodpecker-ci/woodpecker/pull/5178)]
-- fix(bitbucketdc): build status not reported on PR builds [[#5162](https://github.com/woodpecker-ci/woodpecker/pull/5162)]
 
 ### 📦️ Dependency
 
