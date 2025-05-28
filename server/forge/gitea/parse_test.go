@@ -305,7 +305,7 @@ func TestGiteaParser(t *testing.T) {
 				Owner:         "a_nice_user",
 				Name:          "hello_world_ci",
 				FullName:      "a_nice_user/hello_world_ci",
-				Avatar:        "https://gitea.com/avatars/ae32f5573b27f9840942a522d59032b104a2dd15",
+				Avatar:        "https://gitea.com/avatars/81027235e996f5e3ef6257152357b85d94171a2e",
 				ForgeURL:      "https://gitea.com/a_nice_user/hello_world_ci",
 				Clone:         "https://gitea.com/a_nice_user/hello_world_ci.git",
 				CloneSSH:      "ssh://git@gitea.rt4u.de:3232/a_nice_user/hello_world_ci.git",
