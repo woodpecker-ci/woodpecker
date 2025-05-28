@@ -28,6 +28,24 @@ import (
 )
 
 func TestGiteaParser(t *testing.T) {
+	var pullMetaWebhookRepo = &model.Repo{
+		ForgeRemoteID: "1234",
+		Owner:         "a_nice_user",
+		Name:          "hello_world_ci",
+		FullName:      "a_nice_user/hello_world_ci",
+		Avatar:        "https://gitea.com/avatars/ae32f5573b27f9840942a522d59032b104a2dd15",
+		ForgeURL:      "https://gitea.com/a_nice_user/hello_world_ci",
+		Clone:         "https://gitea.com/a_nice_user/hello_world_ci.git",
+		CloneSSH:      "ssh://git@gitea.com:3344/a_nice_user/hello_world_ci.git",
+		Branch:        "main",
+		PREnabled:     true,
+		Perm: &model.Perm{
+			Pull:  true,
+			Push:  true,
+			Admin: true,
+		},
+	}
+
 	tests := []struct {
 		name  string
 		data  string
@@ -297,23 +315,7 @@ func TestGiteaParser(t *testing.T) {
 			name:  "pull-request events should handle a PR title change hook",
 			data:  fixtures.HookPullRequestChangeTitle,
 			event: "pull_request",
-			repo: &model.Repo{
-				ForgeRemoteID: "1234",
-				Owner:         "a_nice_user",
-				Name:          "hello_world_ci",
-				FullName:      "a_nice_user/hello_world_ci",
-				Avatar:        "https://gitea.com/avatars/ae32f5573b27f9840942a522d59032b104a2dd15",
-				ForgeURL:      "https://gitea.com/a_nice_user/hello_world_ci",
-				Clone:         "https://gitea.com/a_nice_user/hello_world_ci.git",
-				CloneSSH:      "ssh://git@gitea.com:3344/a_nice_user/hello_world_ci.git",
-				Branch:        "main",
-				PREnabled:     true,
-				Perm: &model.Perm{
-					Pull:  true,
-					Push:  true,
-					Admin: true,
-				},
-			},
+			repo:  pullMetaWebhookRepo,
 			pipe: &model.Pipeline{
 				Author:            "jony",
 				Event:             "pull_request_metadata",
@@ -334,23 +336,7 @@ func TestGiteaParser(t *testing.T) {
 			name:  "pull-request events should handle a PR body change hook",
 			data:  fixtures.HookPullRequestChangeBody,
 			event: "pull_request",
-			repo: &model.Repo{
-				ForgeRemoteID: "1234",
-				Owner:         "a_nice_user",
-				Name:          "hello_world_ci",
-				FullName:      "a_nice_user/hello_world_ci",
-				Avatar:        "https://gitea.com/avatars/ae32f5573b27f9840942a522d59032b104a2dd15",
-				ForgeURL:      "https://gitea.com/a_nice_user/hello_world_ci",
-				Clone:         "https://gitea.com/a_nice_user/hello_world_ci.git",
-				CloneSSH:      "ssh://git@gitea.com:3344/a_nice_user/hello_world_ci.git",
-				Branch:        "main",
-				PREnabled:     true,
-				Perm: &model.Perm{
-					Pull:  true,
-					Push:  true,
-					Admin: true,
-				},
-			},
+			repo:  pullMetaWebhookRepo,
 			pipe: &model.Pipeline{
 				Author:            "jony",
 				Event:             "pull_request_metadata",
@@ -371,23 +357,7 @@ func TestGiteaParser(t *testing.T) {
 			name:  "pull-request events should handle a PR add review request hook",
 			data:  fixtures.HookPullRequestAddReviewRequest,
 			event: "pull_request", // type: pull_request_review_request
-			repo: &model.Repo{
-				ForgeRemoteID: "1234",
-				Owner:         "a_nice_user",
-				Name:          "hello_world_ci",
-				FullName:      "a_nice_user/hello_world_ci",
-				Avatar:        "https://gitea.com/avatars/ae32f5573b27f9840942a522d59032b104a2dd15",
-				ForgeURL:      "https://gitea.com/a_nice_user/hello_world_ci",
-				Clone:         "https://gitea.com/a_nice_user/hello_world_ci.git",
-				CloneSSH:      "ssh://git@gitea.com:3344/a_nice_user/hello_world_ci.git",
-				Branch:        "main",
-				PREnabled:     true,
-				Perm: &model.Perm{
-					Pull:  true,
-					Push:  true,
-					Admin: true,
-				},
-			},
+			repo:  pullMetaWebhookRepo,
 			pipe: &model.Pipeline{
 				Author:            "jony",
 				Event:             "pull_request_metadata",
@@ -408,23 +378,7 @@ func TestGiteaParser(t *testing.T) {
 			name:  "pull-request events should handle a PR add label hook",
 			data:  fixtures.HookPullRequestAddLable,
 			event: "pull_request", // type: pull_request_label
-			repo: &model.Repo{
-				ForgeRemoteID: "1234",
-				Owner:         "a_nice_user",
-				Name:          "hello_world_ci",
-				FullName:      "a_nice_user/hello_world_ci",
-				Avatar:        "https://gitea.com/avatars/ae32f5573b27f9840942a522d59032b104a2dd15",
-				ForgeURL:      "https://gitea.com/a_nice_user/hello_world_ci",
-				Clone:         "https://gitea.com/a_nice_user/hello_world_ci.git",
-				CloneSSH:      "ssh://git@gitea.com:3344/a_nice_user/hello_world_ci.git",
-				Branch:        "main",
-				PREnabled:     true,
-				Perm: &model.Perm{
-					Pull:  true,
-					Push:  true,
-					Admin: true,
-				},
-			},
+			repo:  pullMetaWebhookRepo,
 			pipe: &model.Pipeline{
 				Author:            "jony",
 				Event:             "pull_request_metadata",
@@ -445,23 +399,7 @@ func TestGiteaParser(t *testing.T) {
 			name:  "pull-request events should handle a PR change label hook",
 			data:  fixtures.HookPullRequestChangeLable,
 			event: "pull_request", // type: pull_request_label
-			repo: &model.Repo{
-				ForgeRemoteID: "1234",
-				Owner:         "a_nice_user",
-				Name:          "hello_world_ci",
-				FullName:      "a_nice_user/hello_world_ci",
-				Avatar:        "https://gitea.com/avatars/ae32f5573b27f9840942a522d59032b104a2dd15",
-				ForgeURL:      "https://gitea.com/a_nice_user/hello_world_ci",
-				Clone:         "https://gitea.com/a_nice_user/hello_world_ci.git",
-				CloneSSH:      "ssh://git@gitea.com:3344/a_nice_user/hello_world_ci.git",
-				Branch:        "main",
-				PREnabled:     true,
-				Perm: &model.Perm{
-					Pull:  true,
-					Push:  true,
-					Admin: true,
-				},
-			},
+			repo:  pullMetaWebhookRepo,
 			pipe: &model.Pipeline{
 				Author:            "jony",
 				Event:             "pull_request_metadata",
@@ -482,23 +420,7 @@ func TestGiteaParser(t *testing.T) {
 			name:  "pull-request events should handle a PR remove label hook",
 			data:  fixtures.HookPullRequestRemoveLable,
 			event: "pull_request", // type: pull_request_label
-			repo: &model.Repo{
-				ForgeRemoteID: "1234",
-				Owner:         "a_nice_user",
-				Name:          "hello_world_ci",
-				FullName:      "a_nice_user/hello_world_ci",
-				Avatar:        "https://gitea.com/avatars/ae32f5573b27f9840942a522d59032b104a2dd15",
-				ForgeURL:      "https://gitea.com/a_nice_user/hello_world_ci",
-				Clone:         "https://gitea.com/a_nice_user/hello_world_ci.git",
-				CloneSSH:      "ssh://git@gitea.com:3344/a_nice_user/hello_world_ci.git",
-				Branch:        "main",
-				PREnabled:     true,
-				Perm: &model.Perm{
-					Pull:  true,
-					Push:  true,
-					Admin: true,
-				},
-			},
+			repo:  pullMetaWebhookRepo,
 			pipe: &model.Pipeline{
 				Author:            "jony",
 				Event:             "pull_request_metadata",
@@ -519,23 +441,7 @@ func TestGiteaParser(t *testing.T) {
 			name:  "pull-request events should handle a PR add milestone hook",
 			data:  fixtures.HookPullRequestAddMile,
 			event: "pull_request", // type: pull_request_milestone
-			repo: &model.Repo{
-				ForgeRemoteID: "1234",
-				Owner:         "a_nice_user",
-				Name:          "hello_world_ci",
-				FullName:      "a_nice_user/hello_world_ci",
-				Avatar:        "https://gitea.com/avatars/ae32f5573b27f9840942a522d59032b104a2dd15",
-				ForgeURL:      "https://gitea.com/a_nice_user/hello_world_ci",
-				Clone:         "https://gitea.com/a_nice_user/hello_world_ci.git",
-				CloneSSH:      "ssh://git@gitea.com:3344/a_nice_user/hello_world_ci.git",
-				Branch:        "main",
-				PREnabled:     true,
-				Perm: &model.Perm{
-					Pull:  true,
-					Push:  true,
-					Admin: true,
-				},
-			},
+			repo:  pullMetaWebhookRepo,
 			pipe: &model.Pipeline{
 				Author:            "jony",
 				Event:             "pull_request_metadata",
@@ -556,23 +462,7 @@ func TestGiteaParser(t *testing.T) {
 			name:  "pull-request events should handle a PR change milestone hook",
 			data:  fixtures.HookPullRequestChangeMile,
 			event: "pull_request", // type: pull_request_milestone
-			repo: &model.Repo{
-				ForgeRemoteID: "1234",
-				Owner:         "a_nice_user",
-				Name:          "hello_world_ci",
-				FullName:      "a_nice_user/hello_world_ci",
-				Avatar:        "https://gitea.com/avatars/ae32f5573b27f9840942a522d59032b104a2dd15",
-				ForgeURL:      "https://gitea.com/a_nice_user/hello_world_ci",
-				Clone:         "https://gitea.com/a_nice_user/hello_world_ci.git",
-				CloneSSH:      "ssh://git@gitea.com:3344/a_nice_user/hello_world_ci.git",
-				Branch:        "main",
-				PREnabled:     true,
-				Perm: &model.Perm{
-					Pull:  true,
-					Push:  true,
-					Admin: true,
-				},
-			},
+			repo:  pullMetaWebhookRepo,
 			pipe: &model.Pipeline{
 				Author:            "jony",
 				Event:             "pull_request_metadata",
@@ -593,23 +483,7 @@ func TestGiteaParser(t *testing.T) {
 			name:  "pull-request events should handle a PR remove milestone hook",
 			data:  fixtures.HookPullRequestRemoveMile,
 			event: "pull_request", // type: pull_request_milestone
-			repo: &model.Repo{
-				ForgeRemoteID: "1234",
-				Owner:         "a_nice_user",
-				Name:          "hello_world_ci",
-				FullName:      "a_nice_user/hello_world_ci",
-				Avatar:        "https://gitea.com/avatars/ae32f5573b27f9840942a522d59032b104a2dd15",
-				ForgeURL:      "https://gitea.com/a_nice_user/hello_world_ci",
-				Clone:         "https://gitea.com/a_nice_user/hello_world_ci.git",
-				CloneSSH:      "ssh://git@gitea.com:3344/a_nice_user/hello_world_ci.git",
-				Branch:        "main",
-				PREnabled:     true,
-				Perm: &model.Perm{
-					Pull:  true,
-					Push:  true,
-					Admin: true,
-				},
-			},
+			repo:  pullMetaWebhookRepo,
 			pipe: &model.Pipeline{
 				Author:            "jony",
 				Event:             "pull_request_metadata",
@@ -630,23 +504,7 @@ func TestGiteaParser(t *testing.T) {
 			name:  "pull-request events should handle a PR add assignee hook",
 			data:  fixtures.HookPullRequestAssigneesAdded,
 			event: "pull_request", // type: pull_request_assign
-			repo: &model.Repo{
-				ForgeRemoteID: "1234",
-				Owner:         "a_nice_user",
-				Name:          "hello_world_ci",
-				FullName:      "a_nice_user/hello_world_ci",
-				Avatar:        "https://gitea.com/avatars/ae32f5573b27f9840942a522d59032b104a2dd15",
-				ForgeURL:      "https://gitea.com/a_nice_user/hello_world_ci",
-				Clone:         "https://gitea.com/a_nice_user/hello_world_ci.git",
-				CloneSSH:      "ssh://git@gitea.com:3344/a_nice_user/hello_world_ci.git",
-				Branch:        "main",
-				PREnabled:     true,
-				Perm: &model.Perm{
-					Pull:  true,
-					Push:  true,
-					Admin: true,
-				},
-			},
+			repo:  pullMetaWebhookRepo,
 			pipe: &model.Pipeline{
 				Author:            "jony",
 				Event:             "pull_request_metadata",
@@ -667,23 +525,7 @@ func TestGiteaParser(t *testing.T) {
 			name:  "pull-request events should handle a PR remove assignee hook",
 			data:  fixtures.HookPullRequestAssigneesRemoved,
 			event: "pull_request", // type: pull_request_assign
-			repo: &model.Repo{
-				ForgeRemoteID: "1234",
-				Owner:         "a_nice_user",
-				Name:          "hello_world_ci",
-				FullName:      "a_nice_user/hello_world_ci",
-				Avatar:        "https://gitea.com/avatars/ae32f5573b27f9840942a522d59032b104a2dd15",
-				ForgeURL:      "https://gitea.com/a_nice_user/hello_world_ci",
-				Clone:         "https://gitea.com/a_nice_user/hello_world_ci.git",
-				CloneSSH:      "ssh://git@gitea.com:3344/a_nice_user/hello_world_ci.git",
-				Branch:        "main",
-				PREnabled:     true,
-				Perm: &model.Perm{
-					Pull:  true,
-					Push:  true,
-					Admin: true,
-				},
-			},
+			repo:  pullMetaWebhookRepo,
 			pipe: &model.Pipeline{
 				Author:            "jony",
 				Event:             "pull_request_metadata",
