@@ -54,6 +54,7 @@
 
 ### Misc
 
+- Move gitea fixtures into own files [[#5208](https://github.com/woodpecker-ci/woodpecker/pull/5208)]
 - flake.lock: Update [[#5206](https://github.com/woodpecker-ci/woodpecker/pull/5206)]
 - Add Bluesky post plugin [[#5156](https://github.com/woodpecker-ci/woodpecker/pull/5156)]
 
