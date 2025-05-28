@@ -139,7 +139,7 @@ func parsePullRequestHook(payload io.Reader) (*model.Repo, *model.Pipeline, erro
 		return nil, nil, fmt.Errorf("parsed pull_request webhook does not contain pull_request info")
 	}
 
-	// Only trigger pipelines for selected event types
+	// Only trigger pipelines for supported event types
 	if !supportedAction(pr.Action) {
 		log.Debug().Msgf("pull_request action is '%s'. Only 'open', 'sync' and 'edited' are supported", pr.Action)
 		return nil, nil, nil
