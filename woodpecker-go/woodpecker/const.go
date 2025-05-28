@@ -19,6 +19,7 @@ const (
 	EventPush       = "push"
 	EventPull       = "pull_request"
 	EventPullClosed = "pull_request_closed"
+	EventPullEdited = "pull_request_edited"
 	EventTag        = "tag"
 	EventRelease    = "release"
 	EventDeploy     = "deployment"
