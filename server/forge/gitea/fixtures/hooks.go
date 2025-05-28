@@ -1406,365 +1406,1675 @@ const HookPullRequestClosed = `
 }
 `
 
-const HookPullRequestEdited = `
-{
-	"action": "edited",
-	"number": 1,
-	"pull_request": {
-		"id": 62112,
-		"url": "https://gitea.com/anbraten/test-repo/pulls/1",
-		"number": 1,
-		"user": {
-			"id": 26907,
-			"login": "anbraten",
-			"login_name": "",
-			"full_name": "",
-			"email": "anbraten@gitea.com",
-			"avatar_url": "https://seccdn.libravatar.org/avatar/fc9b6fe77c6b732a02925a62a81f05a0?d=identicon",
-			"language": "",
-			"is_admin": false,
-			"last_login": "0001-01-01T00:00:00Z",
-			"created": "2021-07-19T23:21:52Z",
-			"restricted": false,
-			"active": false,
-			"prohibit_login": false,
-			"location": "",
-			"website": "",
-			"description": "",
-			"visibility": "public",
-			"followers_count": 0,
-			"following_count": 0,
-			"starred_repos_count": 1,
-			"username": "anbraten"
-		},
-		"title": "Adjust file",
-		"body": "",
-		"labels": [],
-		"milestone": null,
-		"assignee": null,
-		"assignees": null,
-		"requested_reviewers": null,
-		"state": "open",
-		"is_locked": false,
-		"comments": 0,
-		"html_url": "https://gitea.com/anbraten/test-repo/pulls/1",
-		"diff_url": "https://gitea.com/anbraten/test-repo/pulls/1.diff",
-		"patch_url": "https://gitea.com/anbraten/test-repo/pulls/1.patch",
-		"mergeable": true,
-		"merged": false,
-		"merged_at": null,
-		"merge_commit_sha": null,
-		"merged_by": null,
-		"allow_maintainer_edit": false,
-		"base": {
-			"label": "main",
-			"ref": "main",
-			"sha": "068aee163ffd44eef28a7f9ebd43e2c01774f0fa",
-			"repo_id": 46534,
-			"repo": {
-				"id": 46534,
-				"owner": {
-					"id": 26907,
-					"login": "anbraten",
-					"login_name": "",
-					"full_name": "",
-					"email": "anbraten@noreply.gitea.com",
-					"avatar_url": "https://seccdn.libravatar.org/avatar/fc9b6fe77c6b732a02925a62a81f05a0?d=identicon",
-					"language": "",
-					"is_admin": false,
-					"last_login": "0001-01-01T00:00:00Z",
-					"created": "2021-07-19T23:21:52Z",
-					"restricted": false,
-					"active": false,
-					"prohibit_login": false,
-					"location": "",
-					"website": "",
-					"description": "",
-					"visibility": "public",
-					"followers_count": 0,
-					"following_count": 0,
-					"starred_repos_count": 1,
-					"username": "anbraten"
-				},
-				"name": "test-repo",
-				"full_name": "anbraten/test-repo",
-				"description": "",
-				"empty": false,
-				"private": false,
-				"fork": false,
-				"template": false,
-				"parent": null,
-				"mirror": false,
-				"size": 26,
-				"language": "",
-				"languages_url": "https://gitea.com/api/v1/repos/anbraten/test-repo/languages",
-				"html_url": "https://gitea.com/anbraten/test-repo",
-				"url": "https://gitea.com/api/v1/repos/anbraten/test-repo",
-				"link": "",
-				"ssh_url": "git@gitea.com:anbraten/test-repo.git",
-				"clone_url": "https://gitea.com/anbraten/test-repo.git",
-				"original_url": "",
-				"website": "",
-				"stars_count": 0,
-				"forks_count": 0,
-				"watchers_count": 1,
-				"open_issues_count": 0,
-				"open_pr_counter": 1,
-				"release_counter": 0,
-				"default_branch": "main",
-				"archived": false,
-				"created_at": "2023-12-05T18:03:55Z",
-				"updated_at": "2023-12-05T18:06:29Z",
-				"archived_at": "1970-01-01T00:00:00Z",
-				"permissions": {
-					"admin": false,
-					"push": false,
-					"pull": true
-				},
-				"has_issues": true,
-				"internal_tracker": {
-					"enable_time_tracker": true,
-					"allow_only_contributors_to_track_time": true,
-					"enable_issue_dependencies": true
-				},
-				"has_wiki": true,
-				"has_pull_requests": true,
-				"has_projects": true,
-				"has_releases": true,
-				"has_packages": false,
-				"has_actions": true,
-				"ignore_whitespace_conflicts": false,
-				"allow_merge_commits": true,
-				"allow_rebase": true,
-				"allow_rebase_explicit": true,
-				"allow_squash_merge": true,
-				"allow_rebase_update": true,
-				"default_delete_branch_after_merge": false,
-				"default_merge_style": "merge",
-				"default_allow_maintainer_edit": false,
-				"avatar_url": "",
-				"internal": false,
-				"mirror_interval": "",
-				"mirror_updated": "0001-01-01T00:00:00Z",
-				"repo_transfer": null
-			}
-		},
-		"head": {
-			"label": "anbraten-patch-1",
-			"ref": "anbraten-patch-1",
-			"sha": "d555a5dd07f4d0148a58d4686ec381502ae6a2d4",
-			"repo_id": 46534,
-			"repo": {
-				"id": 46534,
-				"owner": {
-					"id": 26907,
-					"login": "anbraten",
-					"login_name": "",
-					"full_name": "",
-					"email": "anbraten@noreply.gitea.com",
-					"avatar_url": "https://seccdn.libravatar.org/avatar/fc9b6fe77c6b732a02925a62a81f05a0?d=identicon",
-					"language": "",
-					"is_admin": false,
-					"last_login": "0001-01-01T00:00:00Z",
-					"created": "2021-07-19T23:21:52Z",
-					"restricted": false,
-					"active": false,
-					"prohibit_login": false,
-					"location": "",
-					"website": "",
-					"description": "",
-					"visibility": "public",
-					"followers_count": 0,
-					"following_count": 0,
-					"starred_repos_count": 1,
-					"username": "anbraten"
-				},
-				"name": "test-repo",
-				"full_name": "anbraten/test-repo",
-				"description": "",
-				"empty": false,
-				"private": false,
-				"fork": false,
-				"template": false,
-				"parent": null,
-				"mirror": false,
-				"size": 26,
-				"language": "",
-				"languages_url": "https://gitea.com/api/v1/repos/anbraten/test-repo/languages",
-				"html_url": "https://gitea.com/anbraten/test-repo",
-				"url": "https://gitea.com/api/v1/repos/anbraten/test-repo",
-				"link": "",
-				"ssh_url": "git@gitea.com:anbraten/test-repo.git",
-				"clone_url": "https://gitea.com/anbraten/test-repo.git",
-				"original_url": "",
-				"website": "",
-				"stars_count": 0,
-				"forks_count": 0,
-				"watchers_count": 1,
-				"open_issues_count": 0,
-				"open_pr_counter": 1,
-				"release_counter": 0,
-				"default_branch": "main",
-				"archived": false,
-				"created_at": "2023-12-05T18:03:55Z",
-				"updated_at": "2023-12-05T18:06:29Z",
-				"archived_at": "1970-01-01T00:00:00Z",
-				"permissions": {
-					"admin": false,
-					"push": false,
-					"pull": true
-				},
-				"has_issues": true,
-				"internal_tracker": {
-					"enable_time_tracker": true,
-					"allow_only_contributors_to_track_time": true,
-					"enable_issue_dependencies": true
-				},
-				"has_wiki": true,
-				"has_pull_requests": true,
-				"has_projects": true,
-				"has_releases": true,
-				"has_packages": false,
-				"has_actions": true,
-				"ignore_whitespace_conflicts": false,
-				"allow_merge_commits": true,
-				"allow_rebase": true,
-				"allow_rebase_explicit": true,
-				"allow_squash_merge": true,
-				"allow_rebase_update": true,
-				"default_delete_branch_after_merge": false,
-				"default_merge_style": "merge",
-				"default_allow_maintainer_edit": false,
-				"avatar_url": "",
-				"internal": false,
-				"mirror_interval": "",
-				"mirror_updated": "0001-01-01T00:00:00Z",
-				"repo_transfer": null
-			}
-		},
-		"merge_base": "068aee163ffd44eef28a7f9ebd43e2c01774f0fa",
-		"due_date": null,
-		"created_at": "2023-12-05T18:06:38Z",
-		"updated_at": "2023-12-05T18:06:43Z",
-		"closed_at": "2023-12-05T18:06:43Z",
-		"pin_order": 0
-	},
-	"requested_reviewer": null,
-	"repository": {
-		"id": 46534,
-		"owner": {
-			"id": 26907,
-			"login": "anbraten",
-			"login_name": "",
-			"full_name": "",
-			"email": "anbraten@repo.gitea.com",
-			"avatar_url": "https://seccdn.libravatar.org/avatar/fc9b6fe77c6b732a02925a62a81f05a0?d=identicon",
-			"language": "",
-			"is_admin": false,
-			"last_login": "0001-01-01T00:00:00Z",
-			"created": "2021-07-19T23:21:52Z",
-			"restricted": false,
-			"active": false,
-			"prohibit_login": false,
-			"location": "",
-			"website": "",
-			"description": "",
-			"visibility": "public",
-			"followers_count": 0,
-			"following_count": 0,
-			"starred_repos_count": 1,
-			"username": "anbraten"
-		},
-		"name": "test-repo",
-		"full_name": "anbraten/test-repo",
-		"description": "",
-		"empty": false,
-		"private": false,
-		"fork": false,
-		"template": false,
-		"parent": null,
-		"mirror": false,
-		"size": 26,
-		"language": "",
-		"languages_url": "https://gitea.com/api/v1/repos/anbraten/test-repo/languages",
-		"html_url": "https://gitea.com/anbraten/test-repo",
-		"url": "https://gitea.com/api/v1/repos/anbraten/test-repo",
-		"link": "",
-		"ssh_url": "git@gitea.com:anbraten/test-repo.git",
-		"clone_url": "https://gitea.com/anbraten/test-repo.git",
-		"original_url": "",
-		"website": "",
-		"stars_count": 0,
-		"forks_count": 0,
-		"watchers_count": 1,
-		"open_issues_count": 0,
-		"open_pr_counter": 1,
-		"release_counter": 0,
-		"default_branch": "main",
-		"archived": false,
-		"created_at": "2023-12-05T18:03:55Z",
-		"updated_at": "2023-12-05T18:06:29Z",
-		"archived_at": "1970-01-01T00:00:00Z",
-		"permissions": {
-			"admin": true,
-			"push": true,
-			"pull": true
-		},
-		"has_issues": true,
-		"internal_tracker": {
-			"enable_time_tracker": true,
-			"allow_only_contributors_to_track_time": true,
-			"enable_issue_dependencies": true
-		},
-		"has_wiki": true,
-		"has_pull_requests": true,
-		"has_projects": true,
-		"has_releases": true,
-		"has_packages": false,
-		"has_actions": true,
-		"ignore_whitespace_conflicts": false,
-		"allow_merge_commits": true,
-		"allow_rebase": true,
-		"allow_rebase_explicit": true,
-		"allow_squash_merge": true,
-		"allow_rebase_update": true,
-		"default_delete_branch_after_merge": false,
-		"default_merge_style": "merge",
-		"default_allow_maintainer_edit": false,
-		"avatar_url": "",
-		"internal": false,
-		"mirror_interval": "",
-		"mirror_updated": "0001-01-01T00:00:00Z",
-		"repo_transfer": null
-	},
-	"sender": {
-		"id": 26907,
-		"login": "anbraten",
-		"login_name": "",
-		"full_name": "",
-		"email": "anbraten@sender.gitea.com",
-		"avatar_url": "https://seccdn.libravatar.org/avatar/fc9b6fe77c6b732a02925a62a81f05a0?d=identicon",
-		"language": "",
-		"is_admin": false,
-		"last_login": "0001-01-01T00:00:00Z",
-		"created": "2021-07-19T23:21:52Z",
-		"restricted": false,
-		"active": false,
-		"prohibit_login": false,
-		"location": "",
-		"website": "",
-		"description"
-: "",
-		"visibility": "public",
-		"followers_count": 0,
-		"following_count": 0,
-		"starred_repos_count": 1,
-		"username": "anbraten"
-	},
-	"commit_id": "",
-	"review": null
-}
+const HookPullRequestChangeTitleHeader = `
+Request method: POST
+Content-Type: application/json
+X-Gitea-Event: pull_request
+X-Gitea-Event-Type: pull_request
 `
+
+const HookPullRequestChangeTitle = `{
+  "action": "edited",
+  "number": 7,
+  "changes": {
+    "title": {
+      "from": "Update .woodpecker.yml"
+    }
+  },
+  "pull_request": {
+    "id": 3779,
+    "url": "https://gitea.com/a_nice_user/hello_world_ci/pulls/7",
+    "number": 7,
+    "user": {
+      "id": 21,
+      "login": "jony",
+      "full_name": "Jony",
+      "email": "jony@noreply.example.org",
+      "avatar_url": "https://gitea.com/avatars/81027235e996f5e3ef6257152357b85d94171a2e",
+      "html_url": "https://gitea.com/jony",
+      "last_login": "0001-01-01T00:00:00Z",
+      "created": "2018-01-25T14:38:19+01:00",
+      "visibility": "public",
+      "username": "jony"
+    },
+    "title": "Edit pull title :D",
+    "body": "",
+    "labels": [],
+    "milestone": null,
+    "assignees": null,
+    "requested_reviewers": null,
+    "state": "open",
+    "additions": 1,
+    "deletions": 0,
+    "changed_files": 1,
+    "html_url": "https://gitea.com/a_nice_user/hello_world_ci/pulls/7",
+    "diff_url": "https://gitea.com/a_nice_user/hello_world_ci/pulls/7.diff",
+    "patch_url": "https://gitea.com/a_nice_user/hello_world_ci/pulls/7.patch",
+    "base": {
+      "label": "main",
+      "ref": "main",
+      "sha": "a40211c506550ebd79633d84e913dafa184c6d56",
+      "repo_id": 1234,
+      "repo": {
+        "id": 1234,
+        "owner": {
+          "id": 8765,
+          "login": "a_nice_user",
+          "full_name": "Nice User",
+          "email": "a_nice_user@me.mail",
+          "avatar_url": "https://gitea.com/avatars/ae32f5573b27f9840942a522d59032b104a2dd15",
+          "html_url": "https://gitea.com/a_nice_user",
+          "created": "2023-05-23T15:17:35+02:00",
+          "visibility": "public",
+          "username": "a_nice_user"
+        },
+        "name": "hello_world_ci",
+        "full_name": "a_nice_user/hello_world_ci",
+        "private": false,
+        "languages_url": "https://gitea.com/api/v1/repos/a_nice_user/hello_world_ci/languages",
+        "html_url": "https://gitea.com/a_nice_user/hello_world_ci",
+        "url": "https://gitea.com/api/v1/repos/a_nice_user/hello_world_ci",
+        "link": "",
+        "ssh_url": "ssh://git@gitea.rt4u.de:3232/a_nice_user/hello_world_ci.git",
+        "clone_url": "https://gitea.com/a_nice_user/hello_world_ci.git",
+        "default_branch": "main",
+        "permissions": {
+          "admin": false,
+          "push": false,
+          "pull": true
+        },
+        "object_format_name": "sha1",
+      }
+    },
+    "head": {
+      "label": "jony-patch-1",
+      "ref": "jony-patch-1",
+      "sha": "07977177c2cd7d46bad37b8472a9d50e7acb9d1f",
+      "repo_id": 1234,
+      "repo": {
+        "id": 1234,
+        "owner": {
+          "id": 8765,
+          "login": "a_nice_user",
+          "full_name": "Nice User",
+          "email": "a_nice_user@me.mail",
+          "avatar_url": "https://gitea.com/avatars/ae32f5573b27f9840942a522d59032b104a2dd15",
+          "html_url": "https://gitea.com/a_nice_user",
+          "created": "2023-05-23T15:17:35+02:00",
+          "visibility": "public",
+          "username": "a_nice_user"
+        },
+        "name": "hello_world_ci",
+        "full_name": "a_nice_user/hello_world_ci",
+        "private": false,
+        "languages_url": "https://gitea.com/api/v1/repos/a_nice_user/hello_world_ci/languages",
+        "html_url": "https://gitea.com/a_nice_user/hello_world_ci",
+        "url": "https://gitea.com/api/v1/repos/a_nice_user/hello_world_ci",
+        "link": "",
+        "ssh_url": "ssh://git@gitea.rt4u.de:3232/a_nice_user/hello_world_ci.git",
+        "clone_url": "https://gitea.com/a_nice_user/hello_world_ci.git",
+        "default_branch": "main",
+        "permissions": {
+          "admin": false,
+          "push": false,
+          "pull": true
+        },
+        "object_format_name": "sha1",
+      }
+    },
+    "merge_base": "a40211c506550ebd79633d84e913dafa184c6d56",
+    "due_date": null,
+    "closed_at": null,
+    "pin_order": 0
+  },
+  "requested_reviewer": null,
+  "repository": {
+    "id": 1234,
+    "owner": {
+      "id": 8765,
+      "login": "a_nice_user",
+      "full_name": "Nice User",
+      "email": "a_nice_user@me.mail",
+      "avatar_url": "https://gitea.com/avatars/ae32f5573b27f9840942a522d59032b104a2dd15",
+      "html_url": "https://gitea.com/a_nice_user",
+      "created": "2023-05-23T15:17:35+02:00",
+      "visibility": "public",
+      "username": "a_nice_user"
+    },
+    "name": "hello_world_ci",
+    "full_name": "a_nice_user/hello_world_ci",
+    "private": false,
+    "languages_url": "https://gitea.com/api/v1/repos/a_nice_user/hello_world_ci/languages",
+    "html_url": "https://gitea.com/a_nice_user/hello_world_ci",
+    "url": "https://gitea.com/api/v1/repos/a_nice_user/hello_world_ci",
+    "link": "",
+    "ssh_url": "ssh://git@gitea.rt4u.de:3232/a_nice_user/hello_world_ci.git",
+    "clone_url": "https://gitea.com/a_nice_user/hello_world_ci.git",
+    "default_branch": "main",
+    "permissions": {
+      "admin": true,
+      "push": true,
+      "pull": true
+    },
+    "object_format_name": "sha1",
+  },
+  "sender": {
+    "id": 8765,
+    "login": "a_nice_user",
+    "full_name": "Nice User",
+    "email": "a_nice_user@noreply.example.org",
+    "avatar_url": "https://gitea.com/avatars/ae32f5573b27f9840942a522d59032b104a2dd15",
+    "html_url": "https://gitea.com/a_nice_user",
+    "created": "2023-05-23T15:17:35+02:00",
+    "visibility": "public",
+    "username": "a_nice_user"
+  },
+  "review": null
+}`
+
+const HookPullRequestChangeBodyHeader = `
+Request method: POST
+Content-Type: application/json
+X-Gitea-Event: pull_request
+X-Gitea-Event-Type: pull_request
+`
+
+const HookPullRequestChangeBody = `{
+  "action": "edited",
+  "number": 7,
+  "changes": {
+    "body": {
+      "from": ""
+    }
+  },
+  "pull_request": {
+    "id": 3779,
+    "url": "https://gitea.com/a_nice_user/hello_world_ci/pulls/7",
+    "number": 7,
+    "user": {
+      "id": 21,
+      "login": "jony",
+      "full_name": "Jony",
+      "email": "jony@noreply.example.org",
+      "avatar_url": "https://gitea.com/avatars/81027235e996f5e3ef6257152357b85d94171a2e",
+      "html_url": "https://gitea.com/jony",
+      "created": "2018-01-25T14:38:19+01:00",
+      "visibility": "public",
+      "username": "jony"
+    },
+    "title": "somepull",
+    "body": "wow aaa new pulll body",
+    "labels": [],
+    "milestone": null,
+    "assignees": null,
+    "requested_reviewers": null,
+    "state": "open",
+    "additions": 1,
+    "deletions": 0,
+    "changed_files": 1,
+    "html_url": "https://gitea.com/a_nice_user/hello_world_ci/pulls/7",
+    "diff_url": "https://gitea.com/a_nice_user/hello_world_ci/pulls/7.diff",
+    "patch_url": "https://gitea.com/a_nice_user/hello_world_ci/pulls/7.patch",
+    "base": {
+      "label": "main",
+      "ref": "main",
+      "sha": "a40211c506550ebd79633d84e913dafa184c6d56",
+      "repo_id": 1234,
+      "repo": {
+        "id": 1234,
+        "owner": {
+          "id": 8765,
+          "login": "a_nice_user",
+          "full_name": "Nice User",
+          "email": "a_nice_user@me.mail",
+          "avatar_url": "https://gitea.com/avatars/ae32f5573b27f9840942a522d59032b104a2dd15",
+          "html_url": "https://gitea.com/a_nice_user",
+          "created": "2023-05-23T15:17:35+02:00",
+          "visibility": "public",
+          "username": "a_nice_user"
+        },
+        "name": "hello_world_ci",
+        "full_name": "a_nice_user/hello_world_ci",
+        "private": false,
+        "languages_url": "https://gitea.com/api/v1/repos/a_nice_user/hello_world_ci/languages",
+        "html_url": "https://gitea.com/a_nice_user/hello_world_ci",
+        "url": "https://gitea.com/api/v1/repos/a_nice_user/hello_world_ci",
+        "link": "",
+        "ssh_url": "ssh://git@gitea.rt4u.de:3232/a_nice_user/hello_world_ci.git",
+        "clone_url": "https://gitea.com/a_nice_user/hello_world_ci.git",
+        "default_branch": "main",
+        "permissions": {
+          "admin": false,
+          "push": false,
+          "pull": true
+        },
+        "object_format_name": "sha1",
+      }
+    },
+    "head": {
+      "label": "jony-patch-1",
+      "ref": "jony-patch-1",
+      "sha": "07977177c2cd7d46bad37b8472a9d50e7acb9d1f",
+      "repo_id": 1234,
+      "repo": {
+        "id": 1234,
+        "owner": {
+          "id": 8765,
+          "login": "a_nice_user",
+          "full_name": "Nice User",
+          "email": "a_nice_user@me.mail",
+          "avatar_url": "https://gitea.com/avatars/ae32f5573b27f9840942a522d59032b104a2dd15",
+          "html_url": "https://gitea.com/a_nice_user",
+          "created": "2023-05-23T15:17:35+02:00",
+          "visibility": "public",
+          "username": "a_nice_user"
+        },
+        "name": "hello_world_ci",
+        "full_name": "a_nice_user/hello_world_ci",
+        "private": false,
+        "languages_url": "https://gitea.com/api/v1/repos/a_nice_user/hello_world_ci/languages",
+        "html_url": "https://gitea.com/a_nice_user/hello_world_ci",
+        "url": "https://gitea.com/api/v1/repos/a_nice_user/hello_world_ci",
+        "link": "",
+        "ssh_url": "ssh://git@gitea.rt4u.de:3232/a_nice_user/hello_world_ci.git",
+        "clone_url": "https://gitea.com/a_nice_user/hello_world_ci.git",
+        "default_branch": "main",
+        "permissions": {
+          "admin": false,
+          "push": false,
+          "pull": true
+        },
+        "object_format_name": "sha1",
+      }
+    },
+    "merge_base": "a40211c506550ebd79633d84e913dafa184c6d56",
+    "due_date": null,
+    "closed_at": null,
+    "pin_order": 0
+  },
+  "requested_reviewer": null,
+  "repository": {
+    "id": 1234,
+    "owner": {
+      "id": 8765,
+      "login": "a_nice_user",
+      "full_name": "Nice User",
+      "email": "a_nice_user@me.mail",
+      "avatar_url": "https://gitea.com/avatars/ae32f5573b27f9840942a522d59032b104a2dd15",
+      "html_url": "https://gitea.com/a_nice_user",
+      "created": "2023-05-23T15:17:35+02:00",
+      "visibility": "public",
+      "username": "a_nice_user"
+    },
+    "name": "hello_world_ci",
+    "full_name": "a_nice_user/hello_world_ci",
+    "private": false,
+    "languages_url": "https://gitea.com/api/v1/repos/a_nice_user/hello_world_ci/languages",
+    "html_url": "https://gitea.com/a_nice_user/hello_world_ci",
+    "url": "https://gitea.com/api/v1/repos/a_nice_user/hello_world_ci",
+    "link": "",
+    "ssh_url": "ssh://git@gitea.rt4u.de:3232/a_nice_user/hello_world_ci.git",
+    "clone_url": "https://gitea.com/a_nice_user/hello_world_ci.git",
+    "default_branch": "main",
+    "permissions": {
+      "admin": true,
+      "push": true,
+      "pull": true
+    },
+    "object_format_name": "sha1",
+  },
+  "sender": {
+    "id": 8765,
+    "login": "a_nice_user",
+    "full_name": "Nice User",
+    "email": "a_nice_user@noreply.example.org",
+    "avatar_url": "https://gitea.com/avatars/ae32f5573b27f9840942a522d59032b104a2dd15",
+    "html_url": "https://gitea.com/a_nice_user",
+    "created": "2023-05-23T15:17:35+02:00",
+    "visibility": "public",
+    "username": "a_nice_user"
+  },
+  "review": null
+}`
+
+const HookPullRequestAddReviewRequestHeader = `
+Request method: POST
+Content-Type: application/json
+X-Gitea-Event: pull_request
+X-Gitea-Event-Type: pull_request_review_request
+`
+
+const HookPullRequestAddReviewRequest = `{
+  "action": "review_requested",
+  "number": 7,
+  "pull_request": {
+    "id": 3779,
+    "url": "https://gitea.com/a_nice_user/hello_world_ci/pulls/7",
+    "number": 7,
+    "user": {
+      "id": 21,
+      "login": "jony",
+      "full_name": "Jony",
+      "email": "jony@noreply.example.org",
+      "avatar_url": "https://gitea.com/avatars/81027235e996f5e3ef6257152357b85d94171a2e",
+      "html_url": "https://gitea.com/jony",
+      "created": "2018-01-25T14:38:19+01:00",
+      "visibility": "public",
+      "username": "jony"
+    },
+    "title": "somepull",
+    "body": "wow aaa new pulll body",
+    "labels": [],
+    "milestone": null,
+    "assignees": null,
+    "requested_reviewers": [
+      {
+        "id": 8765,
+        "login": "a_nice_user",
+        "full_name": "Nice User",
+        "email": "a_nice_user@noreply.example.org",
+        "avatar_url": "https://gitea.com/avatars/ae32f5573b27f9840942a522d59032b104a2dd15",
+        "html_url": "https://gitea.com/a_nice_user",
+        "created": "2023-05-23T15:17:35+02:00",
+        "visibility": "public",
+        "username": "a_nice_user"
+      }
+    ],
+    "state": "open",
+    "additions": 1,
+    "deletions": 0,
+    "changed_files": 1,
+    "html_url": "https://gitea.com/a_nice_user/hello_world_ci/pulls/7",
+    "diff_url": "https://gitea.com/a_nice_user/hello_world_ci/pulls/7.diff",
+    "patch_url": "https://gitea.com/a_nice_user/hello_world_ci/pulls/7.patch",
+    "base": {
+      "label": "main",
+      "ref": "main",
+      "sha": "a40211c506550ebd79633d84e913dafa184c6d56",
+      "repo_id": 1234,
+      "repo": {
+        "id": 1234,
+        "owner": {
+          "id": 8765,
+          "login": "a_nice_user",
+          "full_name": "Nice User",
+          "email": "a_nice_user@me.mail",
+          "avatar_url": "https://gitea.com/avatars/ae32f5573b27f9840942a522d59032b104a2dd15",
+          "html_url": "https://gitea.com/a_nice_user",
+          "created": "2023-05-23T15:17:35+02:00",
+          "visibility": "public",
+          "username": "a_nice_user"
+        },
+        "name": "hello_world_ci",
+        "full_name": "a_nice_user/hello_world_ci",
+        "private": false,
+        "languages_url": "https://gitea.com/api/v1/repos/a_nice_user/hello_world_ci/languages",
+        "html_url": "https://gitea.com/a_nice_user/hello_world_ci",
+        "url": "https://gitea.com/api/v1/repos/a_nice_user/hello_world_ci",
+        "link": "",
+        "ssh_url": "ssh://git@gitea.rt4u.de:3232/a_nice_user/hello_world_ci.git",
+        "clone_url": "https://gitea.com/a_nice_user/hello_world_ci.git",
+        "default_branch": "main",
+        "permissions": {
+          "admin": false,
+          "push": false,
+          "pull": true
+        },
+        "object_format_name": "sha1",
+      }
+    },
+    "head": {
+      "label": "jony-patch-1",
+      "ref": "jony-patch-1",
+      "sha": "07977177c2cd7d46bad37b8472a9d50e7acb9d1f",
+      "repo_id": 1234,
+      "repo": {
+        "id": 1234,
+        "owner": {
+          "id": 8765,
+          "login": "a_nice_user",
+          "full_name": "Nice User",
+          "email": "a_nice_user@me.mail",
+          "avatar_url": "https://gitea.com/avatars/ae32f5573b27f9840942a522d59032b104a2dd15",
+          "html_url": "https://gitea.com/a_nice_user",
+          "created": "2023-05-23T15:17:35+02:00",
+          "visibility": "public",
+          "username": "a_nice_user"
+        },
+        "name": "hello_world_ci",
+        "full_name": "a_nice_user/hello_world_ci",
+        "private": false,
+        "languages_url": "https://gitea.com/api/v1/repos/a_nice_user/hello_world_ci/languages",
+        "html_url": "https://gitea.com/a_nice_user/hello_world_ci",
+        "url": "https://gitea.com/api/v1/repos/a_nice_user/hello_world_ci",
+        "link": "",
+        "ssh_url": "ssh://git@gitea.rt4u.de:3232/a_nice_user/hello_world_ci.git",
+        "clone_url": "https://gitea.com/a_nice_user/hello_world_ci.git",
+        "default_branch": "main",
+        "permissions": {
+          "admin": false,
+          "push": false,
+          "pull": true
+        },
+        "object_format_name": "sha1",
+      }
+    },
+    "merge_base": "a40211c506550ebd79633d84e913dafa184c6d56",
+    "due_date": null,
+    "closed_at": null,
+    "pin_order": 0
+  },
+  "requested_reviewer": {
+    "id": 8765,
+    "login": "a_nice_user",
+    "full_name": "Nice User",
+    "email": "a_nice_user@noreply.example.org",
+    "avatar_url": "https://gitea.com/avatars/ae32f5573b27f9840942a522d59032b104a2dd15",
+    "html_url": "https://gitea.com/a_nice_user",
+    "created": "2023-05-23T15:17:35+02:00",
+    "visibility": "public",
+    "username": "a_nice_user"
+  },
+  "repository": {
+    "id": 1234,
+    "owner": {
+      "id": 8765,
+      "login": "a_nice_user",
+      "full_name": "Nice User",
+      "email": "a_nice_user@me.mail",
+      "avatar_url": "https://gitea.com/avatars/ae32f5573b27f9840942a522d59032b104a2dd15",
+      "html_url": "https://gitea.com/a_nice_user",
+      "created": "2023-05-23T15:17:35+02:00",
+      "visibility": "public",
+      "username": "a_nice_user"
+    },
+    "name": "hello_world_ci",
+    "full_name": "a_nice_user/hello_world_ci",
+    "private": false,
+    "languages_url": "https://gitea.com/api/v1/repos/a_nice_user/hello_world_ci/languages",
+    "html_url": "https://gitea.com/a_nice_user/hello_world_ci",
+    "url": "https://gitea.com/api/v1/repos/a_nice_user/hello_world_ci",
+    "link": "",
+    "ssh_url": "ssh://git@gitea.rt4u.de:3232/a_nice_user/hello_world_ci.git",
+    "clone_url": "https://gitea.com/a_nice_user/hello_world_ci.git",
+    "default_branch": "main",
+    "permissions": {
+      "admin": true,
+      "push": true,
+      "pull": true
+    },
+    "object_format_name": "sha1",
+  },
+  "sender": {
+    "id": 8765,
+    "login": "a_nice_user",
+    "full_name": "Nice User",
+    "email": "a_nice_user@noreply.example.org",
+    "avatar_url": "https://gitea.com/avatars/ae32f5573b27f9840942a522d59032b104a2dd15",
+    "html_url": "https://gitea.com/a_nice_user",
+    "created": "2023-05-23T15:17:35+02:00",
+    "visibility": "public",
+    "username": "a_nice_user"
+  },
+  "review": null
+}`
+
+const HookPullRequestAddLableHeader = `
+Request method: POST
+Content-Type: application/json
+X-Gitea-Event: pull_request
+X-Gitea-Event-Type: pull_request_label
+`
+
+const HookPullRequestAddLable = `{
+  "action": "label_updated",
+  "number": 7,
+  "pull_request": {
+    "id": 3779,
+    "url": "https://gitea.com/a_nice_user/hello_world_ci/pulls/7",
+    "number": 7,
+    "user": {
+      "id": 21,
+      "login": "jony",
+      "full_name": "Jony",
+      "email": "jony@noreply.example.org",
+      "avatar_url": "https://gitea.com/avatars/81027235e996f5e3ef6257152357b85d94171a2e",
+      "html_url": "https://gitea.com/jony",
+      "created": "2018-01-25T14:38:19+01:00",
+      "visibility": "public",
+      "username": "jony"
+    },
+    "title": "somepull",
+    "body": "wow aaa new pulll body",
+    "labels": [
+      {
+        "id": 285,
+        "name": "bug",
+        "exclusive": false,
+        "is_archived": false,
+        "color": "ee0701",
+        "description": "Something is not working",
+        "url": "https://gitea.com/api/v1/repos/a_nice_user/hello_world_ci/labels/285"
+      },
+      {
+        "id": 297,
+        "name": "help wanted",
+        "exclusive": false,
+        "is_archived": false,
+        "color": "128a0c",
+        "description": "Need some help",
+        "url": "https://gitea.com/api/v1/repos/a_nice_user/hello_world_ci/labels/297"
+      }
+    ],
+    "milestone": null,
+    "assignees": null,
+    "requested_reviewers": [
+      {
+        "id": 8765,
+        "login": "a_nice_user",
+        "full_name": "Nice User",
+        "email": "a_nice_user@noreply.example.org",
+        "avatar_url": "https://gitea.com/avatars/ae32f5573b27f9840942a522d59032b104a2dd15",
+        "html_url": "https://gitea.com/a_nice_user",
+        "created": "2023-05-23T15:17:35+02:00",
+        "visibility": "public",
+        "username": "a_nice_user"
+      }
+    ],
+    "state": "open",
+    "additions": 1,
+    "deletions": 0,
+    "changed_files": 1,
+    "html_url": "https://gitea.com/a_nice_user/hello_world_ci/pulls/7",
+    "diff_url": "https://gitea.com/a_nice_user/hello_world_ci/pulls/7.diff",
+    "patch_url": "https://gitea.com/a_nice_user/hello_world_ci/pulls/7.patch",
+    "base": {
+      "label": "main",
+      "ref": "main",
+      "sha": "a40211c506550ebd79633d84e913dafa184c6d56",
+      "repo_id": 1234,
+      "repo": {
+        "id": 1234,
+        "owner": {
+          "id": 8765,
+          "login": "a_nice_user",
+          "full_name": "Nice User",
+          "email": "a_nice_user@me.mail",
+          "avatar_url": "https://gitea.com/avatars/ae32f5573b27f9840942a522d59032b104a2dd15",
+          "html_url": "https://gitea.com/a_nice_user",
+          "created": "2023-05-23T15:17:35+02:00",
+          "visibility": "public",
+          "username": "a_nice_user"
+        },
+        "name": "hello_world_ci",
+        "full_name": "a_nice_user/hello_world_ci",
+        "private": false,
+        "languages_url": "https://gitea.com/api/v1/repos/a_nice_user/hello_world_ci/languages",
+        "html_url": "https://gitea.com/a_nice_user/hello_world_ci",
+        "url": "https://gitea.com/api/v1/repos/a_nice_user/hello_world_ci",
+        "link": "",
+        "ssh_url": "ssh://git@gitea.rt4u.de:3232/a_nice_user/hello_world_ci.git",
+        "clone_url": "https://gitea.com/a_nice_user/hello_world_ci.git",
+        "default_branch": "main",
+        "permissions": {
+          "admin": false,
+          "push": false,
+          "pull": true
+        },
+        "object_format_name": "sha1",
+      }
+    },
+    "head": {
+      "label": "jony-patch-1",
+      "ref": "jony-patch-1",
+      "sha": "07977177c2cd7d46bad37b8472a9d50e7acb9d1f",
+      "repo_id": 1234,
+      "repo": {
+        "id": 1234,
+        "owner": {
+          "id": 8765,
+          "login": "a_nice_user",
+          "full_name": "Nice User",
+          "email": "a_nice_user@me.mail",
+          "avatar_url": "https://gitea.com/avatars/ae32f5573b27f9840942a522d59032b104a2dd15",
+          "html_url": "https://gitea.com/a_nice_user",
+          "created": "2023-05-23T15:17:35+02:00",
+          "visibility": "public",
+          "username": "a_nice_user"
+        },
+        "name": "hello_world_ci",
+        "full_name": "a_nice_user/hello_world_ci",
+        "private": false,
+        "languages_url": "https://gitea.com/api/v1/repos/a_nice_user/hello_world_ci/languages",
+        "html_url": "https://gitea.com/a_nice_user/hello_world_ci",
+        "url": "https://gitea.com/api/v1/repos/a_nice_user/hello_world_ci",
+        "link": "",
+        "ssh_url": "ssh://git@gitea.rt4u.de:3232/a_nice_user/hello_world_ci.git",
+        "clone_url": "https://gitea.com/a_nice_user/hello_world_ci.git",
+        "default_branch": "main",
+        "permissions": {
+          "admin": false,
+          "push": false,
+          "pull": true
+        },
+        "object_format_name": "sha1",
+      }
+    },
+    "merge_base": "a40211c506550ebd79633d84e913dafa184c6d56",
+    "due_date": null,
+    "closed_at": null,
+    "pin_order": 0
+  },
+  "requested_reviewer": null,
+  "repository": {
+    "id": 1234,
+    "owner": {
+      "id": 8765,
+      "login": "a_nice_user",
+      "full_name": "Nice User",
+      "email": "a_nice_user@me.mail",
+      "avatar_url": "https://gitea.com/avatars/ae32f5573b27f9840942a522d59032b104a2dd15",
+      "html_url": "https://gitea.com/a_nice_user",
+      "created": "2023-05-23T15:17:35+02:00",
+      "visibility": "public",
+      "username": "a_nice_user"
+    },
+    "name": "hello_world_ci",
+    "full_name": "a_nice_user/hello_world_ci",
+    "private": false,
+    "languages_url": "https://gitea.com/api/v1/repos/a_nice_user/hello_world_ci/languages",
+    "html_url": "https://gitea.com/a_nice_user/hello_world_ci",
+    "url": "https://gitea.com/api/v1/repos/a_nice_user/hello_world_ci",
+    "link": "",
+    "ssh_url": "ssh://git@gitea.rt4u.de:3232/a_nice_user/hello_world_ci.git",
+    "clone_url": "https://gitea.com/a_nice_user/hello_world_ci.git",
+    "default_branch": "main",
+    "permissions": {
+      "admin": true,
+      "push": true,
+      "pull": true
+    },
+    "object_format_name": "sha1",
+  },
+  "sender": {
+    "id": 8765,
+    "login": "a_nice_user",
+    "full_name": "Nice User",
+    "email": "a_nice_user@noreply.example.org",
+    "avatar_url": "https://gitea.com/avatars/ae32f5573b27f9840942a522d59032b104a2dd15",
+    "html_url": "https://gitea.com/a_nice_user",
+    "created": "2023-05-23T15:17:35+02:00",
+    "visibility": "public",
+    "username": "a_nice_user"
+  },
+  "review": null
+}`
+
+const HookPullRequestChangeLableHeader = `
+Request method: POST
+Content-Type: application/json
+X-Gitea-Event: pull_request
+X-Gitea-Event-Type: pull_request_label
+`
+const HookPullRequestChangeLable = `{
+  "action": "label_updated",
+  "number": 7,
+  "pull_request": {
+    "id": 3779,
+    "url": "https://gitea.com/a_nice_user/hello_world_ci/pulls/7",
+    "number": 7,
+    "user": {
+      "id": 21,
+      "login": "jony",
+      "full_name": "Jony",
+      "email": "jony@noreply.example.org",
+      "avatar_url": "https://gitea.com/avatars/81027235e996f5e3ef6257152357b85d94171a2e",
+      "html_url": "https://gitea.com/jony",
+      "created": "2018-01-25T14:38:19+01:00",
+      "visibility": "public",
+      "username": "jony"
+    },
+    "title": "somepull",
+    "body": "wow aaa new pulll body",
+    "labels": [
+      {
+        "id": 285,
+        "name": "bug",
+        "exclusive": false,
+        "is_archived": false,
+        "color": "ee0701",
+        "description": "Something is not working",
+        "url": "https://gitea.com/api/v1/repos/a_nice_user/hello_world_ci/labels/285"
+      }
+    ],
+    "milestone": null,
+    "assignees": null,
+    "requested_reviewers": [
+      {
+        "id": 8765,
+        "login": "a_nice_user",
+        "full_name": "Nice User",
+        "email": "a_nice_user@noreply.example.org",
+        "avatar_url": "https://gitea.com/avatars/ae32f5573b27f9840942a522d59032b104a2dd15",
+        "html_url": "https://gitea.com/a_nice_user",
+        "created": "2023-05-23T15:17:35+02:00",
+        "visibility": "public",
+        "username": "a_nice_user"
+      }
+    ],
+    "state": "open",
+    "additions": 1,
+    "deletions": 0,
+    "changed_files": 1,
+    "html_url": "https://gitea.com/a_nice_user/hello_world_ci/pulls/7",
+    "diff_url": "https://gitea.com/a_nice_user/hello_world_ci/pulls/7.diff",
+    "patch_url": "https://gitea.com/a_nice_user/hello_world_ci/pulls/7.patch",
+    "base": {
+      "label": "main",
+      "ref": "main",
+      "sha": "a40211c506550ebd79633d84e913dafa184c6d56",
+      "repo_id": 1234,
+      "repo": {
+        "id": 1234,
+        "owner": {
+          "id": 8765,
+          "login": "a_nice_user",
+          "full_name": "Nice User",
+          "email": "a_nice_user@me.mail",
+          "avatar_url": "https://gitea.com/avatars/ae32f5573b27f9840942a522d59032b104a2dd15",
+          "html_url": "https://gitea.com/a_nice_user",
+          "created": "2023-05-23T15:17:35+02:00",
+          "visibility": "public",
+          "username": "a_nice_user"
+        },
+        "name": "hello_world_ci",
+        "full_name": "a_nice_user/hello_world_ci",
+        "private": false,
+        "languages_url": "https://gitea.com/api/v1/repos/a_nice_user/hello_world_ci/languages",
+        "html_url": "https://gitea.com/a_nice_user/hello_world_ci",
+        "url": "https://gitea.com/api/v1/repos/a_nice_user/hello_world_ci",
+        "link": "",
+        "ssh_url": "ssh://git@gitea.rt4u.de:3232/a_nice_user/hello_world_ci.git",
+        "clone_url": "https://gitea.com/a_nice_user/hello_world_ci.git",
+        "default_branch": "main",
+        "permissions": {
+          "admin": false,
+          "push": false,
+          "pull": true
+        },
+        "object_format_name": "sha1",
+      }
+    },
+    "head": {
+      "label": "jony-patch-1",
+      "ref": "jony-patch-1",
+      "sha": "07977177c2cd7d46bad37b8472a9d50e7acb9d1f",
+      "repo_id": 1234,
+      "repo": {
+        "id": 1234,
+        "owner": {
+          "id": 8765,
+          "login": "a_nice_user",
+          "full_name": "Nice User",
+          "email": "a_nice_user@me.mail",
+          "avatar_url": "https://gitea.com/avatars/ae32f5573b27f9840942a522d59032b104a2dd15",
+          "html_url": "https://gitea.com/a_nice_user",
+          "created": "2023-05-23T15:17:35+02:00",
+          "visibility": "public",
+          "username": "a_nice_user"
+        },
+        "name": "hello_world_ci",
+        "full_name": "a_nice_user/hello_world_ci",
+        "private": false,
+        "languages_url": "https://gitea.com/api/v1/repos/a_nice_user/hello_world_ci/languages",
+        "html_url": "https://gitea.com/a_nice_user/hello_world_ci",
+        "url": "https://gitea.com/api/v1/repos/a_nice_user/hello_world_ci",
+        "link": "",
+        "ssh_url": "ssh://git@gitea.rt4u.de:3232/a_nice_user/hello_world_ci.git",
+        "clone_url": "https://gitea.com/a_nice_user/hello_world_ci.git",
+        "default_branch": "main",
+        "permissions": {
+          "admin": false,
+          "push": false,
+          "pull": true
+        },
+        "object_format_name": "sha1",
+      }
+    },
+    "merge_base": "a40211c506550ebd79633d84e913dafa184c6d56",
+    "due_date": null,
+    "closed_at": null,
+    "pin_order": 0
+  },
+  "requested_reviewer": null,
+  "repository": {
+    "id": 1234,
+    "owner": {
+      "id": 8765,
+      "login": "a_nice_user",
+      "full_name": "Nice User",
+      "email": "a_nice_user@me.mail",
+      "avatar_url": "https://gitea.com/avatars/ae32f5573b27f9840942a522d59032b104a2dd15",
+      "html_url": "https://gitea.com/a_nice_user",
+      "created": "2023-05-23T15:17:35+02:00",
+      "visibility": "public",
+      "username": "a_nice_user"
+    },
+    "name": "hello_world_ci",
+    "full_name": "a_nice_user/hello_world_ci",
+    "private": false,
+    "languages_url": "https://gitea.com/api/v1/repos/a_nice_user/hello_world_ci/languages",
+    "html_url": "https://gitea.com/a_nice_user/hello_world_ci",
+    "url": "https://gitea.com/api/v1/repos/a_nice_user/hello_world_ci",
+    "link": "",
+    "ssh_url": "ssh://git@gitea.rt4u.de:3232/a_nice_user/hello_world_ci.git",
+    "clone_url": "https://gitea.com/a_nice_user/hello_world_ci.git",
+    "default_branch": "main",
+    "permissions": {
+      "admin": true,
+      "push": true,
+      "pull": true
+    },
+    "object_format_name": "sha1",
+  },
+  "sender": {
+    "id": 8765,
+    "login": "a_nice_user",
+    "full_name": "Nice User",
+    "email": "a_nice_user@noreply.example.org",
+    "avatar_url": "https://gitea.com/avatars/ae32f5573b27f9840942a522d59032b104a2dd15",
+    "html_url": "https://gitea.com/a_nice_user",
+    "created": "2023-05-23T15:17:35+02:00",
+    "visibility": "public",
+    "username": "a_nice_user"
+  },
+  "review": null
+}`
+
+const HookPullRequestRemoveLableHeader = `
+Request method: POST
+Content-Type: application/json
+X-Gitea-Event: pull_request
+X-Gitea-Event-Type: pull_request_label
+`
+const HookPullRequestRemoveLable = `{
+  "action": "label_cleared",
+  "number": 7,
+  "pull_request": {
+    "id": 3779,
+    "url": "https://gitea.com/a_nice_user/hello_world_ci/pulls/7",
+    "number": 7,
+    "user": {
+      "id": 21,
+      "login": "jony",
+      "full_name": "Jony",
+      "email": "jony@noreply.example.org",
+      "avatar_url": "https://gitea.com/avatars/81027235e996f5e3ef6257152357b85d94171a2e",
+      "html_url": "https://gitea.com/jony",
+      "created": "2018-01-25T14:38:19+01:00",
+      "visibility": "public",
+      "username": "jony"
+    },
+    "title": "somepull",
+    "body": "wow aaa new pulll body",
+    "labels": [
+      {
+        "id": 285,
+        "name": "bug",
+        "exclusive": false,
+        "is_archived": false,
+        "color": "ee0701",
+        "description": "Something is not working",
+        "url": "https://gitea.com/api/v1/repos/a_nice_user/hello_world_ci/labels/285"
+      },
+      {
+        "id": 297,
+        "name": "help wanted",
+        "exclusive": false,
+        "is_archived": false,
+        "color": "128a0c",
+        "description": "Need some help",
+        "url": "https://gitea.com/api/v1/repos/a_nice_user/hello_world_ci/labels/297"
+      }
+    ],
+    "milestone": null,
+    "assignees": null,
+    "requested_reviewers": [
+      {
+        "id": 8765,
+        "login": "a_nice_user",
+        "full_name": "Nice User",
+        "email": "a_nice_user@noreply.example.org",
+        "avatar_url": "https://gitea.com/avatars/ae32f5573b27f9840942a522d59032b104a2dd15",
+        "html_url": "https://gitea.com/a_nice_user",
+        "created": "2023-05-23T15:17:35+02:00",
+        "visibility": "public",
+        "username": "a_nice_user"
+      }
+    ],
+    "state": "open",
+    "additions": 1,
+    "deletions": 0,
+    "changed_files": 1,
+    "html_url": "https://gitea.com/a_nice_user/hello_world_ci/pulls/7",
+    "diff_url": "https://gitea.com/a_nice_user/hello_world_ci/pulls/7.diff",
+    "patch_url": "https://gitea.com/a_nice_user/hello_world_ci/pulls/7.patch",
+    "base": {
+      "label": "main",
+      "ref": "main",
+      "sha": "a40211c506550ebd79633d84e913dafa184c6d56",
+      "repo_id": 1234,
+      "repo": {
+        "id": 1234,
+        "owner": {
+          "id": 8765,
+          "login": "a_nice_user",
+          "full_name": "Nice User",
+          "email": "a_nice_user@me.mail",
+          "avatar_url": "https://gitea.com/avatars/ae32f5573b27f9840942a522d59032b104a2dd15",
+          "html_url": "https://gitea.com/a_nice_user",
+          "created": "2023-05-23T15:17:35+02:00",
+          "visibility": "public",
+          "username": "a_nice_user"
+        },
+        "name": "hello_world_ci",
+        "full_name": "a_nice_user/hello_world_ci",
+        "private": false,
+        "languages_url": "https://gitea.com/api/v1/repos/a_nice_user/hello_world_ci/languages",
+        "html_url": "https://gitea.com/a_nice_user/hello_world_ci",
+        "url": "https://gitea.com/api/v1/repos/a_nice_user/hello_world_ci",
+        "link": "",
+        "ssh_url": "ssh://git@gitea.rt4u.de:3232/a_nice_user/hello_world_ci.git",
+        "clone_url": "https://gitea.com/a_nice_user/hello_world_ci.git",
+        "default_branch": "main",
+        "permissions": {
+          "admin": false,
+          "push": false,
+          "pull": true
+        },
+        "object_format_name": "sha1",
+      }
+    },
+    "head": {
+      "label": "jony-patch-1",
+      "ref": "jony-patch-1",
+      "sha": "07977177c2cd7d46bad37b8472a9d50e7acb9d1f",
+      "repo_id": 1234,
+      "repo": {
+        "id": 1234,
+        "owner": {
+          "id": 8765,
+          "login": "a_nice_user",
+          "full_name": "Nice User",
+          "email": "a_nice_user@me.mail",
+          "avatar_url": "https://gitea.com/avatars/ae32f5573b27f9840942a522d59032b104a2dd15",
+          "html_url": "https://gitea.com/a_nice_user",
+          "created": "2023-05-23T15:17:35+02:00",
+          "visibility": "public",
+          "username": "a_nice_user"
+        },
+        "name": "hello_world_ci",
+        "full_name": "a_nice_user/hello_world_ci",
+        "private": false,
+        "languages_url": "https://gitea.com/api/v1/repos/a_nice_user/hello_world_ci/languages",
+        "html_url": "https://gitea.com/a_nice_user/hello_world_ci",
+        "url": "https://gitea.com/api/v1/repos/a_nice_user/hello_world_ci",
+        "link": "",
+        "ssh_url": "ssh://git@gitea.rt4u.de:3232/a_nice_user/hello_world_ci.git",
+        "clone_url": "https://gitea.com/a_nice_user/hello_world_ci.git",
+        "default_branch": "main",
+        "permissions": {
+          "admin": false,
+          "push": false,
+          "pull": true
+        },
+        "object_format_name": "sha1",
+      }
+    },
+    "merge_base": "a40211c506550ebd79633d84e913dafa184c6d56",
+    "due_date": null,
+    "closed_at": null,
+    "pin_order": 0
+  },
+  "requested_reviewer": null,
+  "repository": {
+    "id": 1234,
+    "owner": {
+      "id": 8765,
+      "login": "a_nice_user",
+      "full_name": "Nice User",
+      "email": "a_nice_user@me.mail",
+      "avatar_url": "https://gitea.com/avatars/ae32f5573b27f9840942a522d59032b104a2dd15",
+      "html_url": "https://gitea.com/a_nice_user",
+      "created": "2023-05-23T15:17:35+02:00",
+      "visibility": "public",
+      "username": "a_nice_user"
+    },
+    "name": "hello_world_ci",
+    "full_name": "a_nice_user/hello_world_ci",
+    "private": false,
+    "languages_url": "https://gitea.com/api/v1/repos/a_nice_user/hello_world_ci/languages",
+    "html_url": "https://gitea.com/a_nice_user/hello_world_ci",
+    "url": "https://gitea.com/api/v1/repos/a_nice_user/hello_world_ci",
+    "link": "",
+    "ssh_url": "ssh://git@gitea.rt4u.de:3232/a_nice_user/hello_world_ci.git",
+    "clone_url": "https://gitea.com/a_nice_user/hello_world_ci.git",
+    "default_branch": "main",
+    "permissions": {
+      "admin": true,
+      "push": true,
+      "pull": true
+    },
+    "object_format_name": "sha1",
+  },
+  "sender": {
+    "id": 8765,
+    "login": "a_nice_user",
+    "full_name": "Nice User",
+    "email": "a_nice_user@noreply.example.org",
+    "avatar_url": "https://gitea.com/avatars/ae32f5573b27f9840942a522d59032b104a2dd15",
+    "html_url": "https://gitea.com/a_nice_user",
+    "created": "2023-05-23T15:17:35+02:00",
+    "visibility": "public",
+    "username": "a_nice_user"
+  },
+  "review": null
+}`
+
+const HookPullRequestAddMileHeader = `
+Request method: POST
+Content-Type: application/json
+X-Gitea-Event: pull_request
+X-Gitea-Event-Type: pull_request_milestone
+`
+const HookPullRequestAddMile = `{
+  "action": "milestoned",
+  "number": 7,
+  "pull_request": {
+    "id": 3779,
+    "url": "https://gitea.com/a_nice_user/hello_world_ci/pulls/7",
+    "number": 7,
+    "user": {
+      "id": 21,
+      "login": "jony",
+      "full_name": "Jony",
+      "email": "jony@noreply.example.org",
+      "avatar_url": "https://gitea.com/avatars/81027235e996f5e3ef6257152357b85d94171a2e",
+      "html_url": "https://gitea.com/jony",
+      "created": "2018-01-25T14:38:19+01:00",
+      "visibility": "public",
+      "username": "jony"
+    },
+    "title": "somepull",
+    "body": "wow aaa new pulll body",
+    "labels": [
+      {
+        "id": 285,
+        "name": "bug",
+        "exclusive": false,
+        "is_archived": false,
+        "color": "ee0701",
+        "description": "Something is not working",
+        "url": "https://gitea.com/api/v1/repos/a_nice_user/hello_world_ci/labels/285"
+      },
+      {
+        "id": 297,
+        "name": "help wanted",
+        "exclusive": false,
+        "is_archived": false,
+        "color": "128a0c",
+        "description": "Need some help",
+        "url": "https://gitea.com/api/v1/repos/a_nice_user/hello_world_ci/labels/297"
+      }
+    ],
+    "milestone": {
+      "id": 277,
+      "title": "new mile",
+      "state": "open",
+      "open_issues": 1,
+      "closed_issues": 0,
+      "closed_at": null,
+      "due_on": null
+    },
+    "assignees": null,
+    "requested_reviewers": [
+      {
+        "id": 8765,
+        "login": "a_nice_user",
+        "full_name": "Nice User",
+        "email": "a_nice_user@noreply.example.org",
+        "avatar_url": "https://gitea.com/avatars/ae32f5573b27f9840942a522d59032b104a2dd15",
+        "html_url": "https://gitea.com/a_nice_user",
+        "created": "2023-05-23T15:17:35+02:00",
+        "visibility": "public",
+        "username": "a_nice_user"
+      }
+    ],
+    "state": "open",
+    "additions": 1,
+    "deletions": 0,
+    "changed_files": 1,
+    "html_url": "https://gitea.com/a_nice_user/hello_world_ci/pulls/7",
+    "diff_url": "https://gitea.com/a_nice_user/hello_world_ci/pulls/7.diff",
+    "patch_url": "https://gitea.com/a_nice_user/hello_world_ci/pulls/7.patch",
+    "base": {
+      "label": "main",
+      "ref": "main",
+      "sha": "a40211c506550ebd79633d84e913dafa184c6d56",
+      "repo_id": 1234,
+      "repo": {
+        "id": 1234,
+        "owner": {
+          "id": 8765,
+          "login": "a_nice_user",
+          "full_name": "Nice User",
+          "email": "a_nice_user@me.mail",
+          "avatar_url": "https://gitea.com/avatars/ae32f5573b27f9840942a522d59032b104a2dd15",
+          "html_url": "https://gitea.com/a_nice_user",
+          "created": "2023-05-23T15:17:35+02:00",
+          "visibility": "public",
+          "username": "a_nice_user"
+        },
+        "name": "hello_world_ci",
+        "full_name": "a_nice_user/hello_world_ci",
+        "private": false,
+        "languages_url": "https://gitea.com/api/v1/repos/a_nice_user/hello_world_ci/languages",
+        "html_url": "https://gitea.com/a_nice_user/hello_world_ci",
+        "url": "https://gitea.com/api/v1/repos/a_nice_user/hello_world_ci",
+        "link": "",
+        "ssh_url": "ssh://git@gitea.rt4u.de:3232/a_nice_user/hello_world_ci.git",
+        "clone_url": "https://gitea.com/a_nice_user/hello_world_ci.git",
+        "default_branch": "main",
+        "permissions": {
+          "admin": false,
+          "push": false,
+          "pull": true
+        },
+        "object_format_name": "sha1",
+      }
+    },
+    "head": {
+      "label": "jony-patch-1",
+      "ref": "jony-patch-1",
+      "sha": "07977177c2cd7d46bad37b8472a9d50e7acb9d1f",
+      "repo_id": 1234,
+      "repo": {
+        "id": 1234,
+        "owner": {
+          "id": 8765,
+          "login": "a_nice_user",
+          "full_name": "Nice User",
+          "email": "a_nice_user@me.mail",
+          "avatar_url": "https://gitea.com/avatars/ae32f5573b27f9840942a522d59032b104a2dd15",
+          "html_url": "https://gitea.com/a_nice_user",
+          "created": "2023-05-23T15:17:35+02:00",
+          "visibility": "public",
+          "username": "a_nice_user"
+        },
+        "name": "hello_world_ci",
+        "full_name": "a_nice_user/hello_world_ci",
+        "private": false,
+        "languages_url": "https://gitea.com/api/v1/repos/a_nice_user/hello_world_ci/languages",
+        "html_url": "https://gitea.com/a_nice_user/hello_world_ci",
+        "url": "https://gitea.com/api/v1/repos/a_nice_user/hello_world_ci",
+        "link": "",
+        "ssh_url": "ssh://git@gitea.rt4u.de:3232/a_nice_user/hello_world_ci.git",
+        "clone_url": "https://gitea.com/a_nice_user/hello_world_ci.git",
+        "default_branch": "main",
+        "permissions": {
+          "admin": false,
+          "push": false,
+          "pull": true
+        },
+        "object_format_name": "sha1",
+      }
+    },
+    "merge_base": "a40211c506550ebd79633d84e913dafa184c6d56",
+    "due_date": null,
+    "closed_at": null,
+    "pin_order": 0
+  },
+  "requested_reviewer": null,
+  "repository": {
+    "id": 1234,
+    "owner": {
+      "id": 8765,
+      "login": "a_nice_user",
+      "full_name": "Nice User",
+      "email": "a_nice_user@me.mail",
+      "avatar_url": "https://gitea.com/avatars/ae32f5573b27f9840942a522d59032b104a2dd15",
+      "html_url": "https://gitea.com/a_nice_user",
+      "created": "2023-05-23T15:17:35+02:00",
+      "visibility": "public",
+      "username": "a_nice_user"
+    },
+    "name": "hello_world_ci",
+    "full_name": "a_nice_user/hello_world_ci",
+    "private": false,
+    "languages_url": "https://gitea.com/api/v1/repos/a_nice_user/hello_world_ci/languages",
+    "html_url": "https://gitea.com/a_nice_user/hello_world_ci",
+    "url": "https://gitea.com/api/v1/repos/a_nice_user/hello_world_ci",
+    "link": "",
+    "ssh_url": "ssh://git@gitea.rt4u.de:3232/a_nice_user/hello_world_ci.git",
+    "clone_url": "https://gitea.com/a_nice_user/hello_world_ci.git",
+    "default_branch": "main",
+    "permissions": {
+      "admin": true,
+      "push": true,
+      "pull": true
+    },
+    "object_format_name": "sha1",
+  },
+  "sender": {
+    "id": 8765,
+    "login": "a_nice_user",
+    "full_name": "Nice User",
+    "email": "a_nice_user@noreply.example.org",
+    "avatar_url": "https://gitea.com/avatars/ae32f5573b27f9840942a522d59032b104a2dd15",
+    "html_url": "https://gitea.com/a_nice_user",
+    "created": "2023-05-23T15:17:35+02:00",
+    "visibility": "public",
+    "username": "a_nice_user"
+  },
+  "review": null
+}`
+
+const HookPullRequestChangeMileHeader = `
+Request method: POST
+Content-Type: application/json
+X-Gitea-Event: pull_request
+X-Gitea-Event-Type: pull_request_milestone
+`
+
+const HookPullRequestChangeMile = `{
+  "action": "milestoned",
+  "number": 7,
+  "pull_request": {
+    "id": 3779,
+    "url": "https://gitea.com/a_nice_user/hello_world_ci/pulls/7",
+    "number": 7,
+    "user": {
+      "id": 21,
+      "login": "jony",
+      "full_name": "Jony",
+      "email": "jony@noreply.example.org",
+      "avatar_url": "https://gitea.com/avatars/81027235e996f5e3ef6257152357b85d94171a2e",
+      "html_url": "https://gitea.com/jony",
+      "created": "2018-01-25T14:38:19+01:00",
+      "visibility": "public",
+      "username": "jony"
+    },
+    "title": "somepull",
+    "body": "wow aaa new pulll body",
+    "labels": [
+      {
+        "id": 285,
+        "name": "bug",
+        "exclusive": false,
+        "is_archived": false,
+        "color": "ee0701",
+        "description": "Something is not working",
+        "url": "https://gitea.com/api/v1/repos/a_nice_user/hello_world_ci/labels/285"
+      },
+      {
+        "id": 297,
+        "name": "help wanted",
+        "exclusive": false,
+        "is_archived": false,
+        "color": "128a0c",
+        "description": "Need some help",
+        "url": "https://gitea.com/api/v1/repos/a_nice_user/hello_world_ci/labels/297"
+      }
+    ],
+    "milestone": {
+      "id": 273,
+      "title": "closed mile",
+      "state": "closed",
+      "open_issues": 1,
+      "closed_issues": 0,
+      "closed_at": "2025-05-28T03:13:46+02:00",
+      "due_on": null
+    },
+    "assignees": null,
+    "requested_reviewers": [
+      {
+        "id": 8765,
+        "login": "a_nice_user",
+        "full_name": "Nice User",
+        "email": "a_nice_user@noreply.example.org",
+        "avatar_url": "https://gitea.com/avatars/ae32f5573b27f9840942a522d59032b104a2dd15",
+        "html_url": "https://gitea.com/a_nice_user",
+        "created": "2023-05-23T15:17:35+02:00",
+        "visibility": "public",
+        "username": "a_nice_user"
+      }
+    ],
+    "state": "open",
+    "additions": 1,
+    "deletions": 0,
+    "changed_files": 1,
+    "html_url": "https://gitea.com/a_nice_user/hello_world_ci/pulls/7",
+    "diff_url": "https://gitea.com/a_nice_user/hello_world_ci/pulls/7.diff",
+    "patch_url": "https://gitea.com/a_nice_user/hello_world_ci/pulls/7.patch",
+    "base": {
+      "label": "main",
+      "ref": "main",
+      "sha": "a40211c506550ebd79633d84e913dafa184c6d56",
+      "repo_id": 1234,
+      "repo": {
+        "id": 1234,
+        "owner": {
+          "id": 8765,
+          "login": "a_nice_user",
+          "full_name": "Nice User",
+          "email": "a_nice_user@me.mail",
+          "avatar_url": "https://gitea.com/avatars/ae32f5573b27f9840942a522d59032b104a2dd15",
+          "html_url": "https://gitea.com/a_nice_user",
+          "created": "2023-05-23T15:17:35+02:00",
+          "visibility": "public",
+          "username": "a_nice_user"
+        },
+        "name": "hello_world_ci",
+        "full_name": "a_nice_user/hello_world_ci",
+        "private": false,
+        "languages_url": "https://gitea.com/api/v1/repos/a_nice_user/hello_world_ci/languages",
+        "html_url": "https://gitea.com/a_nice_user/hello_world_ci",
+        "url": "https://gitea.com/api/v1/repos/a_nice_user/hello_world_ci",
+        "link": "",
+        "ssh_url": "ssh://git@gitea.rt4u.de:3232/a_nice_user/hello_world_ci.git",
+        "clone_url": "https://gitea.com/a_nice_user/hello_world_ci.git",
+        "default_branch": "main",
+        "permissions": {
+          "admin": false,
+          "push": false,
+          "pull": true
+        },
+        "object_format_name": "sha1",
+      }
+    },
+    "head": {
+      "label": "jony-patch-1",
+      "ref": "jony-patch-1",
+      "sha": "07977177c2cd7d46bad37b8472a9d50e7acb9d1f",
+      "repo_id": 1234,
+      "repo": {
+        "id": 1234,
+        "owner": {
+          "id": 8765,
+          "login": "a_nice_user",
+          "full_name": "Nice User",
+          "email": "a_nice_user@me.mail",
+          "avatar_url": "https://gitea.com/avatars/ae32f5573b27f9840942a522d59032b104a2dd15",
+          "html_url": "https://gitea.com/a_nice_user",
+          "created": "2023-05-23T15:17:35+02:00",
+          "visibility": "public",
+          "username": "a_nice_user"
+        },
+        "name": "hello_world_ci",
+        "full_name": "a_nice_user/hello_world_ci",
+        "private": false,
+        "languages_url": "https://gitea.com/api/v1/repos/a_nice_user/hello_world_ci/languages",
+        "html_url": "https://gitea.com/a_nice_user/hello_world_ci",
+        "url": "https://gitea.com/api/v1/repos/a_nice_user/hello_world_ci",
+        "link": "",
+        "ssh_url": "ssh://git@gitea.rt4u.de:3232/a_nice_user/hello_world_ci.git",
+        "clone_url": "https://gitea.com/a_nice_user/hello_world_ci.git",
+        "default_branch": "main",
+        "permissions": {
+          "admin": false,
+          "push": false,
+          "pull": true
+        },
+        "object_format_name": "sha1",
+      }
+    },
+    "merge_base": "a40211c506550ebd79633d84e913dafa184c6d56",
+    "due_date": null,
+    "closed_at": null,
+    "pin_order": 0
+  },
+  "requested_reviewer": null,
+  "repository": {
+    "id": 1234,
+    "owner": {
+      "id": 8765,
+      "login": "a_nice_user",
+      "full_name": "Nice User",
+      "email": "a_nice_user@me.mail",
+      "avatar_url": "https://gitea.com/avatars/ae32f5573b27f9840942a522d59032b104a2dd15",
+      "html_url": "https://gitea.com/a_nice_user",
+      "created": "2023-05-23T15:17:35+02:00",
+      "visibility": "public",
+      "username": "a_nice_user"
+    },
+    "name": "hello_world_ci",
+    "full_name": "a_nice_user/hello_world_ci",
+    "private": false,
+    "languages_url": "https://gitea.com/api/v1/repos/a_nice_user/hello_world_ci/languages",
+    "html_url": "https://gitea.com/a_nice_user/hello_world_ci",
+    "url": "https://gitea.com/api/v1/repos/a_nice_user/hello_world_ci",
+    "link": "",
+    "ssh_url": "ssh://git@gitea.rt4u.de:3232/a_nice_user/hello_world_ci.git",
+    "clone_url": "https://gitea.com/a_nice_user/hello_world_ci.git",
+    "default_branch": "main",
+    "permissions": {
+      "admin": true,
+      "push": true,
+      "pull": true
+    },
+    "object_format_name": "sha1",
+  },
+  "sender": {
+    "id": 8765,
+    "login": "a_nice_user",
+    "full_name": "Nice User",
+    "email": "a_nice_user@noreply.example.org",
+    "avatar_url": "https://gitea.com/avatars/ae32f5573b27f9840942a522d59032b104a2dd15",
+    "html_url": "https://gitea.com/a_nice_user",
+    "created": "2023-05-23T15:17:35+02:00",
+    "visibility": "public",
+    "username": "a_nice_user"
+  },
+  "review": null
+}`
+
+const HookPullRequestRemoveMileHeader = `
+Request method: POST
+Content-Type: application/json
+X-Gitea-Event: pull_request
+X-Gitea-Event-Type: pull_request_milestone
+`
+const HookPullRequestRemoveMile = `{
+  "action": "demilestoned",
+  "number": 7,
+  "pull_request": {
+    "id": 3779,
+    "url": "https://gitea.com/a_nice_user/hello_world_ci/pulls/7",
+    "number": 7,
+    "user": {
+      "id": 21,
+      "login": "jony",
+      "full_name": "Jony",
+      "email": "jony@noreply.example.org",
+      "avatar_url": "https://gitea.com/avatars/81027235e996f5e3ef6257152357b85d94171a2e",
+      "html_url": "https://gitea.com/jony",
+      "created": "2018-01-25T14:38:19+01:00",
+      "visibility": "public",
+      "username": "jony"
+    },
+    "title": "somepull",
+    "body": "wow aaa new pulll body",
+    "labels": [
+      {
+        "id": 285,
+        "name": "bug",
+        "exclusive": false,
+        "is_archived": false,
+        "color": "ee0701",
+        "description": "Something is not working",
+        "url": "https://gitea.com/api/v1/repos/a_nice_user/hello_world_ci/labels/285"
+      },
+      {
+        "id": 297,
+        "name": "help wanted",
+        "exclusive": false,
+        "is_archived": false,
+        "color": "128a0c",
+        "description": "Need some help",
+        "url": "https://gitea.com/api/v1/repos/a_nice_user/hello_world_ci/labels/297"
+      }
+    ],
+    "milestone": {
+      "id": 273,
+      "title": "closed mile",
+      "state": "closed",
+      "open_issues": 1,
+      "closed_issues": 0,
+      "closed_at": "2025-05-28T03:13:46+02:00",
+      "due_on": null
+    },
+    "assignees": null,
+    "requested_reviewers": [
+      {
+        "id": 8765,
+        "login": "a_nice_user",
+        "full_name": "Nice User",
+        "email": "a_nice_user@noreply.example.org",
+        "avatar_url": "https://gitea.com/avatars/ae32f5573b27f9840942a522d59032b104a2dd15",
+        "html_url": "https://gitea.com/a_nice_user",
+        "created": "2023-05-23T15:17:35+02:00",
+        "visibility": "public",
+        "username": "a_nice_user"
+      }
+    ],
+    "state": "open",
+    "additions": 1,
+    "deletions": 0,
+    "changed_files": 1,
+    "html_url": "https://gitea.com/a_nice_user/hello_world_ci/pulls/7",
+    "diff_url": "https://gitea.com/a_nice_user/hello_world_ci/pulls/7.diff",
+    "patch_url": "https://gitea.com/a_nice_user/hello_world_ci/pulls/7.patch",
+    "base": {
+      "label": "main",
+      "ref": "main",
+      "sha": "a40211c506550ebd79633d84e913dafa184c6d56",
+      "repo_id": 1234,
+      "repo": {
+        "id": 1234,
+        "owner": {
+          "id": 8765,
+          "login": "a_nice_user",
+          "full_name": "Nice User",
+          "email": "a_nice_user@me.mail",
+          "avatar_url": "https://gitea.com/avatars/ae32f5573b27f9840942a522d59032b104a2dd15",
+          "html_url": "https://gitea.com/a_nice_user",
+          "created": "2023-05-23T15:17:35+02:00",
+          "visibility": "public",
+          "username": "a_nice_user"
+        },
+        "name": "hello_world_ci",
+        "full_name": "a_nice_user/hello_world_ci",
+        "private": false,
+        "languages_url": "https://gitea.com/api/v1/repos/a_nice_user/hello_world_ci/languages",
+        "html_url": "https://gitea.com/a_nice_user/hello_world_ci",
+        "url": "https://gitea.com/api/v1/repos/a_nice_user/hello_world_ci",
+        "link": "",
+        "ssh_url": "ssh://git@gitea.rt4u.de:3232/a_nice_user/hello_world_ci.git",
+        "clone_url": "https://gitea.com/a_nice_user/hello_world_ci.git",
+        "default_branch": "main",
+        "permissions": {
+          "admin": false,
+          "push": false,
+          "pull": true
+        },
+        "object_format_name": "sha1",
+      }
+    },
+    "head": {
+      "label": "jony-patch-1",
+      "ref": "jony-patch-1",
+      "sha": "07977177c2cd7d46bad37b8472a9d50e7acb9d1f",
+      "repo_id": 1234,
+      "repo": {
+        "id": 1234,
+        "owner": {
+          "id": 8765,
+          "login": "a_nice_user",
+          "full_name": "Nice User",
+          "email": "a_nice_user@me.mail",
+          "avatar_url": "https://gitea.com/avatars/ae32f5573b27f9840942a522d59032b104a2dd15",
+          "html_url": "https://gitea.com/a_nice_user",
+          "created": "2023-05-23T15:17:35+02:00",
+          "visibility": "public",
+          "username": "a_nice_user"
+        },
+        "name": "hello_world_ci",
+        "full_name": "a_nice_user/hello_world_ci",
+        "private": false,
+        "languages_url": "https://gitea.com/api/v1/repos/a_nice_user/hello_world_ci/languages",
+        "html_url": "https://gitea.com/a_nice_user/hello_world_ci",
+        "url": "https://gitea.com/api/v1/repos/a_nice_user/hello_world_ci",
+        "link": "",
+        "ssh_url": "ssh://git@gitea.rt4u.de:3232/a_nice_user/hello_world_ci.git",
+        "clone_url": "https://gitea.com/a_nice_user/hello_world_ci.git",
+        "default_branch": "main",
+        "permissions": {
+          "admin": false,
+          "push": false,
+          "pull": true
+        },
+        "object_format_name": "sha1",
+      }
+    },
+    "merge_base": "a40211c506550ebd79633d84e913dafa184c6d56",
+    "due_date": null,
+    "closed_at": null,
+    "pin_order": 0
+  },
+  "requested_reviewer": null,
+  "repository": {
+    "id": 1234,
+    "owner": {
+      "id": 8765,
+      "login": "a_nice_user",
+      "full_name": "Nice User",
+      "email": "a_nice_user@me.mail",
+      "avatar_url": "https://gitea.com/avatars/ae32f5573b27f9840942a522d59032b104a2dd15",
+      "html_url": "https://gitea.com/a_nice_user",
+      "created": "2023-05-23T15:17:35+02:00",
+      "visibility": "public",
+      "username": "a_nice_user"
+    },
+    "name": "hello_world_ci",
+    "full_name": "a_nice_user/hello_world_ci",
+    "private": false,
+    "languages_url": "https://gitea.com/api/v1/repos/a_nice_user/hello_world_ci/languages",
+    "html_url": "https://gitea.com/a_nice_user/hello_world_ci",
+    "url": "https://gitea.com/api/v1/repos/a_nice_user/hello_world_ci",
+    "link": "",
+    "ssh_url": "ssh://git@gitea.rt4u.de:3232/a_nice_user/hello_world_ci.git",
+    "clone_url": "https://gitea.com/a_nice_user/hello_world_ci.git",
+    "default_branch": "main",
+    "permissions": {
+      "admin": true,
+      "push": true,
+      "pull": true
+    },
+    "object_format_name": "sha1",
+  },
+  "sender": {
+    "id": 8765,
+    "login": "a_nice_user",
+    "full_name": "Nice User",
+    "email": "a_nice_user@noreply.example.org",
+    "avatar_url": "https://gitea.com/avatars/ae32f5573b27f9840942a522d59032b104a2dd15",
+    "html_url": "https://gitea.com/a_nice_user",
+    "created": "2023-05-23T15:17:35+02:00",
+    "visibility": "public",
+    "username": "a_nice_user"
+  },
+  "review": null
+}`
 
 const HookRelease = `
 {
