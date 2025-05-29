@@ -17,6 +17,7 @@ package github
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/google/go-github/v72/github"
 
@@ -159,6 +160,15 @@ func convertRepoHook(eventRepo *github.PushEventRepository) *model.Repo {
 	return repo
 }
 
+func convertPullRequest(pr *github.PullRequest) *model.PullRequest {
+	return &model.PullRequest{
+		Index:    model.ForgeRemoteID(strconv.Itoa(pr.GetNumber())),
+		Title:    pr.GetTitle(),
+		Labels:   convertLabels(pr.Labels),
+		FromFork: pr.GetHead().GetRepo().GetID() != pr.GetBase().GetRepo().GetID(),
+	}
+}
+
 // convertLabels is a helper function used to convert a GitHub label list to
 // the common Woodpecker label structure.
 func convertLabels(from []*github.Label) []string {
@@ -167,4 +177,16 @@ func convertLabels(from []*github.Label) []string {
 		labels[i] = *label.Name
 	}
 	return labels
+}
+
+func convertCommit(from *github.Commit) *model.Commit {
+	return &model.Commit{
+		SHA:      from.GetSHA(),
+		ForgeURL: from.GetHTMLURL(),
+		Message:  from.GetMessage(),
+		Author: model.CommitAuthor{
+			Author: from.GetAuthor().GetName(),
+			Email:  from.GetAuthor().GetEmail(),
+		},
+	}
 }

@@ -206,7 +206,15 @@ func TestBitbucket(t *testing.T) {
 	r, b, err := c.Hook(ctx, req)
 	assert.NoError(t, err)
 	assert.Equal(t, "martinherren1984/publictestrepo", r.FullName)
-	assert.Equal(t, "c14c1bb05dfb1fdcdf06b31485fff61b0ea44277", b.Commit)
+	assert.Equal(t, &model.Commit{
+		SHA:      "c14c1bb05dfb1fdcdf06b31485fff61b0ea44277",
+		Message:  "a\n",
+		ForgeURL: "https://bitbucket.org/martinherren1984/publictestrepo/commits/c14c1bb05dfb1fdcdf06b31485fff61b0ea44277",
+		Author: model.CommitAuthor{
+			Author: "Martin Herren",
+			Email:  "martin.herren@yyy.com",
+		},
+	}, b.Commit)
 }
 
 var (
@@ -270,7 +278,7 @@ var (
 	}
 
 	fakePipeline = &model.Pipeline{
-		Commit: "9ecad50",
+		Commit: &model.Commit{SHA: "9ecad50"},
 	}
 
 	fakeWorkflow = &model.Workflow{

@@ -121,20 +121,18 @@ func Test_convertPullHook(t *testing.T) {
 	hook.PullRequest.Source.Commit.Hash = "c8411d7"
 	hook.PullRequest.Links.HTML.Href = "https://bitbucket.org/foo/bar/pulls/5"
 	hook.PullRequest.Title = "updated README"
-	hook.PullRequest.Updated = time.Now()
 	hook.PullRequest.ID = 1
 
 	pipeline := convertPullHook(hook)
 	assert.Equal(t, model.EventPull, pipeline.Event)
 	assert.Equal(t, hook.Actor.Login, pipeline.Author)
 	assert.Equal(t, hook.Actor.Links.Avatar.Href, pipeline.Avatar)
-	assert.Equal(t, hook.PullRequest.Source.Commit.Hash, pipeline.Commit)
+	assert.Equal(t, hook.PullRequest.Source.Commit.Hash, pipeline.Commit.SHA)
 	assert.Equal(t, hook.PullRequest.Source.Branch.Name, pipeline.Branch)
 	assert.Equal(t, hook.PullRequest.Links.HTML.Href, pipeline.ForgeURL)
 	assert.Equal(t, "refs/pull-requests/1/from", pipeline.Ref)
 	assert.Equal(t, "change:main", pipeline.Refspec)
-	assert.Equal(t, hook.PullRequest.Title, pipeline.Message)
-	assert.Equal(t, hook.PullRequest.Updated.Unix(), pipeline.Timestamp)
+	assert.Equal(t, hook.PullRequest.Title, pipeline.PullRequest.Title)
 }
 
 func Test_convertPushHook(t *testing.T) {
@@ -152,15 +150,14 @@ func Test_convertPushHook(t *testing.T) {
 
 	pipeline := convertPushHook(&hook, &change)
 	assert.Equal(t, model.EventPush, pipeline.Event)
-	assert.Equal(t, "test@domain.tld", pipeline.Email)
+	assert.Equal(t, "test@domain.tld", pipeline.Commit.Author.Email)
 	assert.Equal(t, hook.Actor.Login, pipeline.Author)
 	assert.Equal(t, hook.Actor.Links.Avatar.Href, pipeline.Avatar)
-	assert.Equal(t, change.New.Target.Hash, pipeline.Commit)
+	assert.Equal(t, change.New.Target.Hash, pipeline.Commit.SHA)
 	assert.Equal(t, change.New.Name, pipeline.Branch)
 	assert.Equal(t, change.New.Target.Links.HTML.Href, pipeline.ForgeURL)
 	assert.Equal(t, "refs/heads/main", pipeline.Ref)
-	assert.Equal(t, change.New.Target.Message, pipeline.Message)
-	assert.Equal(t, change.New.Target.Date.Unix(), pipeline.Timestamp)
+	assert.Equal(t, change.New.Target.Message, pipeline.Commit.Message)
 }
 
 func Test_convertPushHookTag(t *testing.T) {

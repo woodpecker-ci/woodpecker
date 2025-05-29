@@ -111,8 +111,8 @@ func Test_parseHook(t *testing.T) {
 		assert.NotNil(t, b)
 		assert.Nil(t, p)
 		assert.Equal(t, model.EventDeploy, b.Event)
-		assert.Equal(t, "production", b.DeployTo)
-		assert.Equal(t, "deploy", b.DeployTask)
+		assert.Equal(t, "production", b.Deployment.Target)
+		assert.Equal(t, "deploy", b.Deployment.Task)
 	})
 
 	t.Run("release hook", func(t *testing.T) {

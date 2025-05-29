@@ -20,8 +20,8 @@ import (
 	"fmt"
 	"io"
 	"net/url"
+	"strconv"
 	"strings"
-	"time"
 
 	"code.gitea.io/sdk/gitea"
 
@@ -76,30 +76,27 @@ func pipelineFromPush(hook *pushHook) *model.Pipeline {
 		fixMalformedAvatar(hook.Sender.AvatarURL),
 	)
 
-	var message string
 	link := hook.Compare
-	if len(hook.Commits) > 0 {
-		message = hook.Commits[0].Message
-		if len(hook.Commits) == 1 {
-			link = hook.Commits[0].URL
-		}
-	} else {
-		message = hook.HeadCommit.Message
+	if hook.TotalCommits <= 1 {
 		link = hook.HeadCommit.URL
 	}
 
 	return &model.Pipeline{
-		Event:        model.EventPush,
-		Commit:       hook.After,
+		Event: model.EventPush,
+		Commit: &model.Commit{
+			SHA:      hook.After,
+			Message:  hook.HeadCommit.Message,
+			ForgeURL: hook.HeadCommit.URL,
+			Author: model.CommitAuthor{
+				Author: hook.HeadCommit.Author.Name,
+				Email:  hook.HeadCommit.Author.Email,
+			},
+		},
 		Ref:          hook.Ref,
 		ForgeURL:     link,
 		Branch:       strings.TrimPrefix(hook.Ref, "refs/heads/"),
-		Message:      message,
-		Avatar:       avatar,
 		Author:       hook.Sender.UserName,
-		Email:        hook.Sender.Email,
-		Timestamp:    time.Now().UTC().Unix(),
-		Sender:       hook.Sender.UserName,
+		Avatar:       avatar,
 		ChangedFiles: getChangedFilesFromPushHook(hook),
 	}
 }
@@ -129,16 +126,14 @@ func pipelineFromTag(hook *pushHook) *model.Pipeline {
 	ref := strings.TrimPrefix(hook.Ref, "refs/tags/")
 
 	return &model.Pipeline{
-		Event:     model.EventTag,
-		Commit:    hook.Sha,
-		Ref:       fmt.Sprintf("refs/tags/%s", ref),
-		ForgeURL:  fmt.Sprintf("%s/src/tag/%s", hook.Repo.HTMLURL, ref),
-		Message:   fmt.Sprintf("created tag %s", ref),
-		Avatar:    avatar,
-		Author:    hook.Sender.UserName,
-		Sender:    hook.Sender.UserName,
-		Email:     hook.Sender.Email,
-		Timestamp: time.Now().UTC().Unix(),
+		Event: model.EventTag,
+		Commit: &model.Commit{
+			SHA: hook.Sha,
+		},
+		Ref:      fmt.Sprintf("refs/tags/%s", ref),
+		ForgeURL: fmt.Sprintf("%s/releases/tag/%s", hook.Repo.HTMLURL, ref),
+		Author:   hook.Sender.UserName,
+		Avatar:   avatar,
 	}
 }
 
@@ -146,7 +141,7 @@ func pipelineFromTag(hook *pushHook) *model.Pipeline {
 func pipelineFromPullRequest(hook *pullRequestHook) *model.Pipeline {
 	avatar := expandAvatar(
 		hook.Repo.HTMLURL,
-		fixMalformedAvatar(hook.PullRequest.Poster.AvatarURL),
+		fixMalformedAvatar(hook.Sender.AvatarURL),
 	)
 
 	event := model.EventPull
@@ -155,23 +150,20 @@ func pipelineFromPullRequest(hook *pullRequestHook) *model.Pipeline {
 	}
 
 	pipeline := &model.Pipeline{
-		Event:    event,
-		Commit:   hook.PullRequest.Head.Sha,
+		Event: event,
+		Commit: &model.Commit{
+			SHA: hook.PullRequest.Head.Sha,
+		},
 		ForgeURL: hook.PullRequest.HTMLURL,
 		Ref:      fmt.Sprintf("refs/pull/%d/head", hook.Number),
 		Branch:   hook.PullRequest.Base.Ref,
-		Message:  hook.PullRequest.Title,
-		Author:   hook.PullRequest.Poster.UserName,
+		Author:   hook.Sender.UserName,
 		Avatar:   avatar,
-		Sender:   hook.Sender.UserName,
-		Email:    hook.Sender.Email,
-		Title:    hook.PullRequest.Title,
 		Refspec: fmt.Sprintf("%s:%s",
 			hook.PullRequest.Head.Ref,
 			hook.PullRequest.Base.Ref,
 		),
-		PullRequestLabels: convertLabels(hook.PullRequest.Labels),
-		FromFork:          hook.PullRequest.Head.RepoID != hook.PullRequest.Base.RepoID,
+		PullRequest: convertPullRequests(hook.PullRequest),
 	}
 
 	return pipeline
@@ -184,16 +176,14 @@ func pipelineFromRelease(hook *releaseHook) *model.Pipeline {
 	)
 
 	return &model.Pipeline{
-		Event:        model.EventRelease,
-		Ref:          fmt.Sprintf("refs/tags/%s", hook.Release.TagName),
-		ForgeURL:     hook.Release.HTMLURL,
-		Branch:       hook.Release.Target,
-		Message:      fmt.Sprintf("created release %s", hook.Release.Title),
-		Avatar:       avatar,
-		Author:       hook.Sender.UserName,
-		Sender:       hook.Sender.UserName,
-		Email:        hook.Sender.Email,
-		IsPrerelease: hook.Release.IsPrerelease,
+		Event:           model.EventRelease,
+		Ref:             fmt.Sprintf("refs/tags/%s", hook.Release.TagName),
+		ForgeURL:        hook.Release.HTMLURL,
+		Branch:          hook.Release.Target,
+		ReleaseTagTitle: hook.Release.Title,
+		Author:          hook.Sender.UserName,
+		Avatar:          avatar,
+		IsPrerelease:    hook.Release.IsPrerelease,
 	}
 }
 
@@ -265,6 +255,15 @@ func matchingHooks(hooks []*gitea.Hook, rawURL string) *gitea.Hook {
 		}
 	}
 	return nil
+}
+
+func convertPullRequests(from *gitea.PullRequest) *model.PullRequest {
+	return &model.PullRequest{
+		Index:    model.ForgeRemoteID(strconv.Itoa(int(from.Index))),
+		Title:    from.Title,
+		Labels:   convertLabels(from.Labels),
+		FromFork: from.Head.RepoID != from.Base.RepoID,
+	}
 }
 
 func convertLabels(from []*gitea.Label) []string {

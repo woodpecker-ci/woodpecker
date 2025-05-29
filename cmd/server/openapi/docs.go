@@ -4705,17 +4705,17 @@ const docTemplate = `{
                 "author_avatar": {
                     "type": "string"
                 },
-                "author_email": {
-                    "type": "string"
-                },
                 "branch": {
                     "type": "string"
                 },
                 "commit": {
-                    "type": "string"
+                    "$ref": "#/definitions/model.Commit"
                 },
                 "created": {
                     "type": "integer"
+                },
+                "deployment": {
+                    "$ref": "#/definitions/model.Deployment"
                 },
                 "event": {
                     "type": "string"
@@ -4726,16 +4726,19 @@ const docTemplate = `{
                 "id": {
                     "type": "integer"
                 },
-                "message": {
-                    "type": "string"
-                },
                 "number": {
                     "type": "integer"
+                },
+                "pull_request": {
+                    "$ref": "#/definitions/PullRequest"
                 },
                 "ref": {
                     "type": "string"
                 },
                 "refspec": {
+                    "type": "string"
+                },
+                "release": {
                     "type": "string"
                 },
                 "repo_id": {
@@ -4745,9 +4748,6 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "status": {
-                    "type": "string"
-                },
-                "title": {
                     "type": "string"
                 }
             }
@@ -4883,9 +4883,6 @@ const docTemplate = `{
                 "author_avatar": {
                     "type": "string"
                 },
-                "author_email": {
-                    "type": "string"
-                },
                 "branch": {
                     "type": "string"
                 },
@@ -4896,16 +4893,16 @@ const docTemplate = `{
                     }
                 },
                 "commit": {
-                    "type": "string"
+                    "$ref": "#/definitions/model.Commit"
                 },
                 "created": {
                     "type": "integer"
                 },
-                "deploy_task": {
+                "cron": {
                     "type": "string"
                 },
-                "deploy_to": {
-                    "type": "string"
+                "deployment": {
+                    "$ref": "#/definitions/model.Deployment"
                 },
                 "errors": {
                     "type": "array",
@@ -4922,17 +4919,11 @@ const docTemplate = `{
                 "forge_url": {
                     "type": "string"
                 },
-                "from_fork": {
-                    "type": "boolean"
-                },
                 "id": {
                     "type": "integer"
                 },
                 "is_prerelease": {
                     "type": "boolean"
-                },
-                "message": {
-                    "type": "string"
                 },
                 "number": {
                     "type": "integer"
@@ -4940,16 +4931,16 @@ const docTemplate = `{
                 "parent": {
                     "type": "integer"
                 },
-                "pr_labels": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
+                "pull_request": {
+                    "$ref": "#/definitions/PullRequest"
                 },
                 "ref": {
                     "type": "string"
                 },
                 "refspec": {
+                    "type": "string"
+                },
+                "release": {
                     "type": "string"
                 },
                 "reviewed": {
@@ -4958,21 +4949,11 @@ const docTemplate = `{
                 "reviewed_by": {
                     "type": "string"
                 },
-                "sender": {
-                    "description": "uses reported user for webhooks and name of cron for cron pipelines",
-                    "type": "string"
-                },
                 "started": {
                     "type": "integer"
                 },
                 "status": {
                     "$ref": "#/definitions/StatusValue"
-                },
-                "timestamp": {
-                    "type": "integer"
-                },
-                "title": {
-                    "type": "string"
                 },
                 "updated": {
                     "type": "integer"
@@ -5008,8 +4989,17 @@ const docTemplate = `{
         "PullRequest": {
             "type": "object",
             "properties": {
+                "from_fork": {
+                    "type": "boolean"
+                },
                 "index": {
                     "type": "string"
+                },
+                "labels": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "title": {
                     "type": "string"
@@ -5504,9 +5494,6 @@ const docTemplate = `{
         "metadata.Author": {
             "type": "object",
             "properties": {
-                "avatar": {
-                    "type": "string"
-                },
                 "email": {
                     "type": "string"
                 },
@@ -5619,6 +5606,9 @@ const docTemplate = `{
                 },
                 "parent": {
                     "type": "integer"
+                },
+                "release": {
+                    "type": "string"
                 },
                 "started": {
                     "type": "integer"
@@ -5751,6 +5741,48 @@ const docTemplate = `{
                 "RequireApprovalPullRequests",
                 "RequireApprovalAllEvents"
             ]
+        },
+        "model.Commit": {
+            "type": "object",
+            "properties": {
+                "author": {
+                    "$ref": "#/definitions/model.CommitAuthor"
+                },
+                "forge_url": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "sha": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.CommitAuthor": {
+            "type": "object",
+            "properties": {
+                "author": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.Deployment": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "target": {
+                    "type": "string"
+                },
+                "task": {
+                    "type": "string"
+                }
+            }
         },
         "model.ForgeType": {
             "type": "string",

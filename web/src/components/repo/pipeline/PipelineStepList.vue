@@ -8,44 +8,49 @@
           <Icon v-if="pipeline.event === 'cron'" name="stopwatch" />
           <img v-else class="w-6 rounded-md" :src="pipeline.author_avatar" />
         </div>
-        <span>{{ pipeline.author }}</span>
+        <span>{{ pipeline.event === 'cron' ? pipeline.cron : pipeline.author }}</span>
       </div>
       <a
-        v-if="pipeline.event === 'pull_request' || pipeline.event === 'pull_request_closed'"
+        v-if="
+          pipeline.event === 'pull_request' ||
+          pipeline.event === 'pull_request_closed' ||
+          pipeline.event === 'tag' ||
+          pipeline.event === 'release'
+        "
         class="text-wp-link-100 hover:text-wp-link-200 flex min-w-0 items-center space-x-1"
         :href="pipeline.forge_url"
       >
-        <Icon name="pull-request" />
+        <Icon
+          v-if="pipeline.event === 'pull_request' || pipeline.event === 'pull_request_closed'"
+          name="pull-request"
+        />
+        <Icon v-if="pipeline.event === 'tag' || pipeline.event === 'release'" name="tag" />
         <span class="truncate">{{ prettyRef }}</span>
       </a>
       <router-link
-        v-else-if="pipeline.event === 'push' || pipeline.event === 'manual' || pipeline.event === 'deployment'"
+        v-else-if="
+          pipeline.event === 'push' ||
+          pipeline.event === 'manual' ||
+          pipeline.event === 'deployment' ||
+          pipeline.event === 'cron'
+        "
         class="text-wp-link-100 hover:text-wp-link-200 flex min-w-0 items-center space-x-1"
         :to="{ name: 'repo-branch', params: { branch: prettyRef } }"
       >
         <Icon v-if="pipeline.event === 'manual'" name="manual-pipeline" />
         <Icon v-else-if="pipeline.event === 'push'" name="branch" />
         <Icon v-else-if="pipeline.event === 'deployment'" name="deployment" />
+        <Icon v-else-if="pipeline.event === 'cron'" name="stopwatch" />
         <span class="truncate">{{ prettyRef }}</span>
       </router-link>
-      <div v-else class="flex min-w-0 items-center space-x-1">
-        <Icon v-if="pipeline.event === 'tag' || pipeline.event === 'release'" name="tag" />
-
-        <span class="truncate">{{ prettyRef }}</span>
-      </div>
-      <div class="flex shrink-0 items-center">
-        <template v-if="pipeline.event === 'pull_request'">
-          <Icon name="commit" />
-          <span>{{ pipeline.commit.slice(0, 10) }}</span>
-        </template>
+      <div class="flex flex-shrink-0 items-center">
         <a
-          v-else
           class="text-wp-link-100 hover:text-wp-link-200 flex items-center"
-          :href="pipeline.forge_url"
+          :href="pipeline.commit_pipeline.forge_url"
           target="_blank"
         >
           <Icon name="commit" />
-          <span>{{ pipeline.commit.slice(0, 10) }}</span>
+          <span>{{ pipeline.commit_pipeline.sha.slice(0, 10) }}</span>
         </a>
       </div>
     </div>

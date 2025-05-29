@@ -151,45 +151,9 @@ type PushHook struct {
 }
 
 type PullRequestHook struct {
-	Actor       Account `json:"actor"`
-	Repo        Repo    `json:"repository"`
-	PullRequest struct {
-		ID      int       `json:"id"`
-		Type    string    `json:"type"`
-		Reason  string    `json:"reason"`
-		Desc    string    `json:"description"`
-		Title   string    `json:"title"`
-		State   string    `json:"state"`
-		Links   Links     `json:"links"`
-		Created time.Time `json:"created_on"`
-		Updated time.Time `json:"updated_on"`
-
-		MergeCommit struct {
-			Hash string `json:"hash"`
-		} `json:"merge_commit"`
-
-		Source struct {
-			Repo   Repo `json:"repository"`
-			Commit struct {
-				Hash  string `json:"hash"`
-				Links Links  `json:"links"`
-			} `json:"commit"`
-			Branch struct {
-				Name string `json:"name"`
-			} `json:"branch"`
-		} `json:"source"`
-
-		Dest struct {
-			Repo   Repo `json:"repository"`
-			Commit struct {
-				Hash  string `json:"hash"`
-				Links Links  `json:"links"`
-			} `json:"commit"`
-			Branch struct {
-				Name string `json:"name"`
-			} `json:"branch"`
-		} `json:"destination"`
-	} `json:"pullrequest"`
+	Actor       Account     `json:"actor"`
+	Repo        Repo        `json:"repository"`
+	PullRequest PullRequest `json:"pullrequest"`
 }
 
 type WorkspaceMembershipResp struct {
@@ -281,6 +245,30 @@ type PullRequestResp struct {
 type PullRequest struct {
 	ID    uint   `json:"id"`
 	Title string `json:"title"`
+	State string `json:"state"`
+	Links Links  `json:"links"`
+
+	MergeCommit PullRequestCommit `json:"merge_commit"`
+
+	Source struct {
+		Repo   Repo              `json:"repository"`
+		Commit PullRequestCommit `json:"commit"`
+		Branch struct {
+			Name string `json:"name"`
+		} `json:"branch"`
+	} `json:"source"`
+
+	Dest struct {
+		Repo   Repo              `json:"repository"`
+		Commit PullRequestCommit `json:"commit"`
+		Branch struct {
+			Name string `json:"name"`
+		} `json:"branch"`
+	} `json:"destination"`
+}
+
+type PullRequestCommit struct {
+	Hash string `json:"hash"`
 }
 
 type CommitsResp struct {
@@ -288,7 +276,11 @@ type CommitsResp struct {
 }
 
 type Commit struct {
-	Hash  string `json:"hash"`
+	Hash    string `json:"hash"`
+	Message string `json:"message"`
+	Author  struct {
+		Raw string `json:"raw"`
+	}
 	Links struct {
 		HTML struct {
 			Href string `json:"href"`
