@@ -4705,11 +4705,22 @@ const docTemplate = `{
                 "author_avatar": {
                     "type": "string"
                 },
+                "author_email": {
+                    "type": "string"
+                },
                 "branch": {
                     "type": "string"
                 },
                 "commit": {
-                    "$ref": "#/definitions/model.Commit"
+                    "type": "string"
+                },
+                "commit_pipeline": {
+                    "description": "TODO change json to 'commit' in next major",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/model.Commit"
+                        }
+                    ]
                 },
                 "created": {
                     "type": "integer"
@@ -4726,6 +4737,9 @@ const docTemplate = `{
                 "id": {
                     "type": "integer"
                 },
+                "message": {
+                    "type": "string"
+                },
                 "number": {
                     "type": "integer"
                 },
@@ -4738,7 +4752,7 @@ const docTemplate = `{
                 "refspec": {
                     "type": "string"
                 },
-                "release": {
+                "release_tag_title": {
                     "type": "string"
                 },
                 "repo_id": {
@@ -4748,6 +4762,9 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "status": {
+                    "type": "string"
+                },
+                "title": {
                     "type": "string"
                 }
             }
@@ -4883,6 +4900,9 @@ const docTemplate = `{
                 "author_avatar": {
                     "type": "string"
                 },
+                "author_email": {
+                    "type": "string"
+                },
                 "branch": {
                     "type": "string"
                 },
@@ -4893,12 +4913,26 @@ const docTemplate = `{
                     }
                 },
                 "commit": {
-                    "$ref": "#/definitions/model.Commit"
+                    "type": "string"
+                },
+                "commit_pipeline": {
+                    "description": "TODO change json to 'commit' in next major",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/model.Commit"
+                        }
+                    ]
                 },
                 "created": {
                     "type": "integer"
                 },
                 "cron": {
+                    "type": "string"
+                },
+                "deploy_task": {
+                    "type": "string"
+                },
+                "deploy_to": {
                     "type": "string"
                 },
                 "deployment": {
@@ -4919,17 +4953,29 @@ const docTemplate = `{
                 "forge_url": {
                     "type": "string"
                 },
+                "from_fork": {
+                    "type": "boolean"
+                },
                 "id": {
                     "type": "integer"
                 },
                 "is_prerelease": {
                     "type": "boolean"
                 },
+                "message": {
+                    "type": "string"
+                },
                 "number": {
                     "type": "integer"
                 },
                 "parent": {
                     "type": "integer"
+                },
+                "pr_labels": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "pull_request": {
                     "$ref": "#/definitions/PullRequest"
@@ -4940,7 +4986,7 @@ const docTemplate = `{
                 "refspec": {
                     "type": "string"
                 },
-                "release": {
+                "release_tag_title": {
                     "type": "string"
                 },
                 "reviewed": {
@@ -4949,11 +4995,20 @@ const docTemplate = `{
                 "reviewed_by": {
                     "type": "string"
                 },
+                "sender": {
+                    "type": "string"
+                },
                 "started": {
                     "type": "integer"
                 },
                 "status": {
                     "$ref": "#/definitions/StatusValue"
+                },
+                "timestamp": {
+                    "type": "integer"
+                },
+                "title": {
+                    "type": "string"
                 },
                 "updated": {
                     "type": "integer"
@@ -5178,7 +5233,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "last_pipeline": {
-                    "$ref": "#/definitions/Pipeline"
+                    "$ref": "#/definitions/model.Pipeline"
                 },
                 "name": {
                     "type": "string"
@@ -5583,6 +5638,10 @@ const docTemplate = `{
         "metadata.Pipeline": {
             "type": "object",
             "properties": {
+                "avatar": {
+                    "description": "Deprecated, remove in next major",
+                    "type": "string"
+                },
                 "commit": {
                     "$ref": "#/definitions/metadata.Commit"
                 },
@@ -5804,6 +5863,109 @@ const docTemplate = `{
                 "ForgeTypeBitbucketDatacenter",
                 "ForgeTypeAddon"
             ]
+        },
+        "model.Pipeline": {
+            "type": "object",
+            "properties": {
+                "author": {
+                    "type": "string"
+                },
+                "author_avatar": {
+                    "type": "string"
+                },
+                "branch": {
+                    "type": "string"
+                },
+                "changed_files": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "commit_pipeline": {
+                    "description": "TODO change json to 'commit' in next major",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/model.Commit"
+                        }
+                    ]
+                },
+                "created": {
+                    "type": "integer"
+                },
+                "cron": {
+                    "type": "string"
+                },
+                "deployment": {
+                    "$ref": "#/definitions/model.Deployment"
+                },
+                "errors": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/types.PipelineError"
+                    }
+                },
+                "event": {
+                    "$ref": "#/definitions/WebhookEvent"
+                },
+                "finished": {
+                    "type": "integer"
+                },
+                "forge_url": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "is_prerelease": {
+                    "type": "boolean"
+                },
+                "number": {
+                    "type": "integer"
+                },
+                "parent": {
+                    "type": "integer"
+                },
+                "pull_request": {
+                    "$ref": "#/definitions/PullRequest"
+                },
+                "ref": {
+                    "type": "string"
+                },
+                "refspec": {
+                    "type": "string"
+                },
+                "release_tag_title": {
+                    "type": "string"
+                },
+                "reviewed": {
+                    "type": "integer"
+                },
+                "reviewed_by": {
+                    "type": "string"
+                },
+                "started": {
+                    "type": "integer"
+                },
+                "status": {
+                    "$ref": "#/definitions/StatusValue"
+                },
+                "updated": {
+                    "type": "integer"
+                },
+                "variables": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "workflows": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.Workflow"
+                    }
+                }
+            }
         },
         "model.TrustedConfiguration": {
             "type": "object",
