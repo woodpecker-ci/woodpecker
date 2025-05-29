@@ -93,10 +93,10 @@ func convertRepositoryPushEvent(ev *bb.RepositoryPushEvent, baseURL string) *mod
 			SHA:      change.ToHash,
 			ForgeURL: fmt.Sprintf("%s/projects/%s/repos/%s/commits/%s", baseURL, ev.Repository.Project.Key, ev.Repository.Slug, change.ToHash),
 		},
-		Branch: change.Ref.DisplayID,
-		Avatar: bitbucketAvatarURL(baseURL, ev.Actor.Slug),
-		Author: ev.Actor.Name,
-		Ref:    ev.Changes[0].RefId,
+		Branch:   change.Ref.DisplayID,
+		Avatar:   bitbucketAvatarURL(baseURL, ev.Actor.Slug),
+		Author:   ev.Actor.Name,
+		Ref:      ev.Changes[0].RefId,
 		ForgeURL: fmt.Sprintf("%s/projects/%s/repos/%s/commits/%s", baseURL, ev.Repository.Project.Key, ev.Repository.Slug, change.ToHash),
 	}
 
@@ -122,8 +122,8 @@ func convertPullRequestEvent(ev *bb.PullRequestEvent, baseURL string) *model.Pip
 		Author:      ev.Actor.Name,
 		Ref:         ev.PullRequest.Source.ID,
 		PullRequest: convertPullRequest(&ev.PullRequest),
-		ForgeURL: fmt.Sprintf("%s/projects/%s/repos/%s/pull-requests/%d", baseURL, ev.PullRequest.Source.Repository.Project.Key, ev.PullRequest.Source.Repository.Slug, ev.PullRequest.ID),
-		Refspec:  fmt.Sprintf("%s:%s", ev.PullRequest.Source.DisplayID, ev.PullRequest.Target.DisplayID),
+		ForgeURL:    fmt.Sprintf("%s/projects/%s/repos/%s/pull-requests/%d", baseURL, ev.PullRequest.Source.Repository.Project.Key, ev.PullRequest.Source.Repository.Slug, ev.PullRequest.ID),
+		Refspec:     fmt.Sprintf("%s:%s", ev.PullRequest.Source.DisplayID, ev.PullRequest.Target.DisplayID),
 	}
 
 	if ev.EventKey == bb.EventKeyPullRequestMerged || ev.EventKey == bb.EventKeyPullRequestDeclined || ev.EventKey == bb.EventKeyPullRequestDeleted {

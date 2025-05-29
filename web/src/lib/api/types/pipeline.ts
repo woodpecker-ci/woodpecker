@@ -38,7 +38,7 @@ export interface Pipeline {
   finished: number;
 
   // The commit for the pipeline.
-  commit: PipelineCommit;
+  commit_pipeline: PipelineCommit;
 
   // The branch the commit was pushed to.
   branch: string;

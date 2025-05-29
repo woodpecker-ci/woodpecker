@@ -31,7 +31,28 @@ type Feed struct {
 	Deployment      *Deployment  `json:"deployment"                  xorm:"json 'pipeline_deployment'"`
 	PullRequest     *PullRequest `json:"pull_request,omitempty"      xorm:"json 'pipeline_pr'"`
 	ReleaseTagTitle string       `json:"release_tag_title,omitempty" xorm:"pipeline_release_tag_title"`
-	Commit          *Commit      `json:"commit,omitempty"            xorm:"json 'pipeline_commit'"`
-	Author          string       `json:"author,omitempty"            xorm:"pipeline_author"`
-	Avatar          string       `json:"author_avatar,omitempty"     xorm:"pipeline_avatar"`
+	// TODO change json to 'commit' in next major
+	Commit *Commit `json:"commit_pipeline,omitempty"   xorm:"json 'pipeline_commit'"`
+	Author string  `json:"author,omitempty"            xorm:"pipeline_author"`
+	Avatar string  `json:"author_avatar,omitempty"     xorm:"pipeline_avatar"`
+}
+
+func (f *Feed) ToAPIModel() *APIFeed {
+	return &APIFeed{
+		Feed:    f,
+		Commit:  f.Commit.SHA,
+		Title:   f.Commit.Message,
+		Message: f.Commit.Message,
+		Email:   f.Commit.Author.Email,
+	}
+}
+
+// APIFeed TODO remove in next major
+type APIFeed struct {
+	*Feed
+
+	Commit  string `json:"commit,omitempty"`
+	Title   string `json:"title,omitempty"`
+	Message string `json:"message,omitempty"`
+	Email   string `json:"author_email,omitempty"`
 } //	@name Feed

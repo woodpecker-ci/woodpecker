@@ -37,8 +37,9 @@ type Pipeline struct {
 
 	// event related
 
-	Event           WebhookEvent `json:"event"                       xorm:"event"`
-	Commit          *Commit      `json:"commit"                      xorm:"json 'commit'"`
+	Event WebhookEvent `json:"event"                       xorm:"event"`
+	// TODO change json to 'commit' in next major
+	Commit          *Commit      `json:"commit_pipeline"             xorm:"json 'commit'"`
 	Branch          string       `json:"branch"                      xorm:"branch"`
 	Ref             string       `json:"ref"                         xorm:"ref"`
 	Refspec         string       `json:"refspec"                     xorm:"refspec"`
@@ -51,11 +52,51 @@ type Pipeline struct {
 	PullRequest     *PullRequest `json:"pull_request,omitempty"      xorm:"json 'pr'"`
 	Cron            string       `json:"cron,omitempty"              xorm:"cron"`
 	ReleaseTagTitle string       `json:"release_tag_title,omitempty" xorm:"release_tag_title"`
+}
+
+// APIPipeline TODO remove in next major
+type APIPipeline struct {
+	*Pipeline
+
+	DeployTo   string `json:"deploy_to"`
+	DeployTask string `json:"deploy_task"`
+	Commit     string `json:"commit"`
+
+	Title             string   `json:"title"`
+	Message           string   `json:"message"`
+	Timestamp         int64    `json:"timestamp"`
+	Sender            string   `json:"sender"`
+	Email             string   `json:"author_email"`
+	PullRequestLabels []string `json:"pr_labels,omitempty"`
+	FromFork          bool     `json:"from_fork,omitempty"`
 } //	@name Pipeline
 
 // TableName return database table name for xorm.
 func (Pipeline) TableName() string {
 	return "pipelines"
+}
+
+func (p *Pipeline) ToAPIModel() *APIPipeline {
+	ap := &APIPipeline{
+		Pipeline:  p,
+		Commit:    p.Commit.SHA,
+		Title:     p.Commit.Message,
+		Message:   p.Commit.Message,
+		Timestamp: p.Created,
+		Sender:    p.Author,
+		Email:     p.Commit.Author.Email,
+	}
+
+	if p.Deployment != nil {
+		ap.DeployTo = p.Deployment.Target
+		ap.DeployTask = p.Deployment.Task
+	}
+	if p.PullRequest != nil {
+		ap.PullRequestLabels = p.PullRequest.Labels
+		ap.FromFork = p.PullRequest.FromFork
+	}
+
+	return ap
 }
 
 type PipelineFilter struct {

@@ -75,7 +75,7 @@ export default (pipeline: Ref<Pipeline | undefined>) => {
     return prettyDuration(durationElapsed.value);
   });
 
-  const message = computed(() => emojify(pipeline.value?.commit.message ?? ''));
+  const message = computed(() => emojify(pipeline.value?.commit_pipeline.message ?? ''));
   const shortMessage = computed(() => message.value.split('\n')[0]);
 
   const context = computed(() => {

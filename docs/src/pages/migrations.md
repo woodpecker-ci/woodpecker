@@ -9,6 +9,7 @@ To enhance the usability of Woodpecker and meet evolving security standards, occ
 ### User-facing changes
 
 - (Kubernetes) Deprecated `step` label on pod in favor of new namespaced label `woodpecker-ci.org/step`. The `step` label will be removed in a future update.
+- deprecated `CI_COMMIT_AUTHOR_AVATAR` and `CI_PREV_COMMIT_AUTHOR_AVATAR` env vars as commit authors don't have an avatar
 
 ### API changes
 
@@ -73,7 +74,6 @@ The following built-in environment variables have been removed/replaced:
 - `CI_PIPELINE_FINISHED` as it was empty during execution
 - `CI_PIPELINE_STATUS` due to always being set to `success`
 - `CI_STEP_STATUS` due to always being set to `success`
-- `CI_COMMIT_AUTHOR_AVATAR` and `CI_PREV_COMMIT_AUTHOR_AVATAR` as commit authors don't have an avatar
 - `WOODPECKER_WEBHOOK_HOST` in favor of `WOODPECKER_EXPERT_WEBHOOK_HOST`
 
 Environment variables which are empty after workflow parsing are not being injected into the build but filtered out beforehand ([#4193](https://github.com/woodpecker-ci/woodpecker/pull/4193))

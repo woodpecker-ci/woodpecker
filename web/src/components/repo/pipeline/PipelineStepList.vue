@@ -46,11 +46,11 @@
       <div class="flex flex-shrink-0 items-center">
         <a
           class="text-wp-link-100 hover:text-wp-link-200 flex items-center"
-          :href="pipeline.commit.forge_url"
+          :href="pipeline.commit_pipeline.forge_url"
           target="_blank"
         >
           <Icon name="commit" />
-          <span>{{ pipeline.commit.sha.slice(0, 10) }}</span>
+          <span>{{ pipeline.commit_pipeline.sha.slice(0, 10) }}</span>
         </a>
       </div>
     </div>

@@ -148,6 +148,10 @@ func (m *Metadata) Environ() map[string]string {
 		setNonEmptyEnvVar(params, "CI_PREV_COMMIT_TARGET_BRANCH", prevTargetBranch)
 	}
 
+	// TODO Deprecated, remove in next major
+	setNonEmptyEnvVar(params, "CI_COMMIT_AUTHOR_AVATAR", pipeline.Avatar)
+	setNonEmptyEnvVar(params, "CI_PREV_COMMIT_AUTHOR_AVATAR", prevPipeline.Avatar)
+
 	return params
 }
 

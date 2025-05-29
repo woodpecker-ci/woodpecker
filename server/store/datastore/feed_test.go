@@ -48,21 +48,21 @@ func TestGetPipelineQueue(t *testing.T) {
 		assert.NoError(t, store.PermUpsert(perm))
 	}
 	pipeline1 := &model.Pipeline{
-		RepoID:  repo1.ID,
-		Status:  model.StatusPending,
-		Number:  1,
-		Event:   model.EventPush,
-		Commit:  &model.Commit{
-			SHA: "abc123",
+		RepoID: repo1.ID,
+		Status: model.StatusPending,
+		Number: 1,
+		Event:  model.EventPush,
+		Commit: &model.Commit{
+			SHA:     "abc123",
 			Message: "Initial commit",
 			Author: model.CommitAuthor{
 				Author: "joe",
-				Email: "joe@example.com",
+				Email:  "joe@example.com",
 			},
 		},
-		Branch:  "main",
-		Ref:     "refs/heads/main",
-		Author:  "joe",
+		Branch: "main",
+		Ref:    "refs/heads/main",
+		Author: "joe",
 	}
 	assert.NoError(t, store.CreatePipeline(pipeline1))
 
