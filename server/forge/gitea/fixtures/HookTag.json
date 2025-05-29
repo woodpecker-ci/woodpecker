@@ -1,0 +1,41 @@
+{
+  "sha": "ef98532add3b2feb7a137426bba1248724367df5",
+  "secret": "l26Un7G7HXogLAvsyf2hOA4EMARSTsR3",
+  "ref": "v1.0.0",
+  "ref_type": "tag",
+  "repository": {
+    "id": 12,
+    "owner": {
+      "id": 4,
+      "username": "gordon",
+      "login": "gordon",
+      "full_name": "Gordon the Gopher",
+      "email": "gordon@golang.org",
+      "avatar_url": "https://secure.gravatar.com/avatar/8c58a0be77ee441bb8f8595b7f1b4e87"
+    },
+    "name": "hello-world",
+    "full_name": "gordon/hello-world",
+    "description": "a hello world example",
+    "private": true,
+    "fork": false,
+    "html_url": "http://gitea.golang.org/gordon/hello-world",
+    "ssh_url": "git@gitea.golang.org:gordon/hello-world.git",
+    "clone_url": "http://gitea.golang.org/gordon/hello-world.git",
+    "default_branch": "main",
+    "created_at": "2015-10-22T19:32:44Z",
+    "updated_at": "2016-11-24T13:37:16Z",
+    "permissions": {
+      "admin": true,
+      "push": true,
+      "pull": true
+    }
+  },
+  "sender": {
+    "id": 1,
+    "username": "gordon",
+    "login": "gordon",
+    "full_name": "Gordon the Gopher",
+    "email": "gordon@golang.org",
+    "avatar_url": "https://secure.gravatar.com/avatar/8c58a0be77ee441bb8f8595b7f1b4e87"
+  }
+}
