@@ -47,7 +47,7 @@ func (f *Feed) ToAPIModel() *APIFeed {
 	}
 }
 
-// APIFeed TODO remove in next major
+// APIFeed TODO remove in next major.
 type APIFeed struct {
 	*Feed
 

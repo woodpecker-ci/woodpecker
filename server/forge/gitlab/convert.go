@@ -15,8 +15,6 @@
 package gitlab
 
 import (
-	"crypto/md5"
-	"encoding/hex"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -285,18 +283,6 @@ func convertReleaseHook(hook *gitlab.ReleaseEvent) (*model.Repo, *model.Pipeline
 	}
 
 	return repo, pipeline, nil
-}
-
-func getUserAvatar(email string) string {
-	hasher := md5.New()
-	hasher.Write([]byte(email))
-
-	return fmt.Sprintf(
-		"%s/%v.jpg?s=%s",
-		gravatarBase,
-		hex.EncodeToString(hasher.Sum(nil)),
-		"128",
-	)
 }
 
 // extractFromPath splits a repository path string into owner and name components.

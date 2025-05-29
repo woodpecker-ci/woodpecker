@@ -57,7 +57,7 @@ type (
 		Cron       string `json:"cron,omitempty"`
 		Release    string `json:"release,omitempty"`
 
-		// Deprecated, remove in next major
+		// Deprecated: remove in next major
 		Avatar string `json:"avatar,omitempty"`
 	}
 

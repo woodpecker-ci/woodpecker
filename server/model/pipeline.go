@@ -54,7 +54,7 @@ type Pipeline struct {
 	ReleaseTagTitle string       `json:"release_tag_title,omitempty" xorm:"release_tag_title"`
 }
 
-// APIPipeline TODO remove in next major
+// APIPipeline TODO remove in next major.
 type APIPipeline struct {
 	*Pipeline
 
