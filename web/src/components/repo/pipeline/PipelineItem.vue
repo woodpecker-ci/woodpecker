@@ -23,32 +23,17 @@
         <img v-else class="w-6 rounded-md" :src="pipeline.author_avatar" />
       </div>
 
-      <div class="flex w-full min-w-0 flex-col gap-y-2 py-2 md:mx-4 md:w-auto">
-        <div>
-          <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
-          <span class="md:display-unset text-wp-text-alt-100 hidden">#{{ pipeline.number }}</span>
-          <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
-          <span class="md:display-unset text-wp-text-alt-100 mx-2 hidden">-</span>
-          <span
-            class="text-wp-text-100 overflow-hidden overflow-ellipsis whitespace-nowrap underline md:no-underline"
-            :title="message"
-          >
-            {{ shortMessage }}
-          </span>
-        </div>
-
-        <div
-          v-if="context"
-          class="text-wp-text-100 flex items-center gap-x-2 overflow-hidden overflow-ellipsis whitespace-nowrap"
-          :title="context"
+      <div class="flex w-full min-w-0 items-center md:mx-4 md:w-auto">
+        <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
+        <span class="md:display-unset text-wp-text-alt-100 hidden">#{{ pipeline.number }}</span>
+        <!-- eslint-disable-next-line @intlify/vue-i18n/no-raw-text -->
+        <span class="md:display-unset text-wp-text-alt-100 mx-2 hidden">-</span>
+        <span
+          class="text-wp-text-100 overflow-hidden text-ellipsis whitespace-nowrap underline md:no-underline"
+          :title="message"
         >
-          <Icon v-if="pipeline.event === 'pull_request'" name="pull-request" />
-          <Icon v-else-if="pipeline.event === 'pull_request_closed'" name="pull-request-closed" />
-          <Icon v-else-if="pipeline.event === 'deployment'" name="deployment" />
-          <Icon v-else-if="pipeline.event === 'release' || pipeline.event === 'tag'" name="tag" />
-
-          {{ shortContext }}
-        </div>
+          {{ shortMessage }}
+        </span>
       </div>
 
       <div
@@ -112,8 +97,7 @@ const { t } = useI18n();
 const { durationAsNumber } = useDate();
 
 const pipeline = toRef(props, 'pipeline');
-const { since, duration, durationElapsed, message, shortMessage, context, shortContext, prettyRef, created } =
-  usePipeline(pipeline);
+const { since, duration, durationElapsed, message, shortMessage, prettyRef, created } = usePipeline(pipeline);
 
 const pipelineEventTitle = computed(() => {
   switch (pipeline.value.event) {
