@@ -5639,7 +5639,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "avatar": {
-                    "description": "Deprecated, remove in next major",
+                    "description": "Deprecated: remove in next major",
                     "type": "string"
                 },
                 "commit": {
