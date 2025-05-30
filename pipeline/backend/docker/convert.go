@@ -18,6 +18,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"maps"
+	"os"
 	"regexp"
 	"strings"
 
@@ -49,6 +50,9 @@ func (e *docker) toConfig(step *types.Step, options BackendOptions) *container.C
 	configEnv := make(map[string]string)
 	maps.Copy(configEnv, step.Environment)
 
+	// Inject mirror configurations if any *_MIRROR_URL environment variables are set
+	injectMirrorConfigs(configEnv)
+
 	if len(step.Commands) > 0 {
 		env, entry := common.GenerateContainerConf(step.Commands, e.info.OSType, step.WorkingDir)
 		for k, v := range env {
@@ -67,6 +71,155 @@ func (e *docker) toConfig(step *types.Step, options BackendOptions) *container.C
 		config.Env = toEnv(configEnv)
 	}
 	return config
+}
+
+// injectMirrorConfigs adds mirror configuration environment variables
+// based on the presence of *_MIRROR_URL environment variables
+func injectMirrorConfigs(configEnv map[string]string) {
+	// Get mirror URL from environment (step env takes precedence over system env)
+	getMirrorURL := func(envKey string) string {
+		if url := configEnv[envKey]; url != "" {
+			return url
+		}
+		if url := os.Getenv(envKey); url != "" {
+			return url
+		}
+		return ""
+	}
+
+	// Check which mirrors are configured and apply them
+	var enabledServices []string
+
+	// NPM Configuration
+	if npmURL := getMirrorURL("NPM_MIRROR_URL"); npmURL != "" {
+		enabledServices = append(enabledServices, "npm")
+		if _, exists := configEnv["NPM_CONFIG_REGISTRY"]; !exists {
+			configEnv["NPM_CONFIG_REGISTRY"] = npmURL
+		}
+		if _, exists := configEnv["NPM_CONFIG_CACHE"]; !exists {
+			configEnv["NPM_CONFIG_CACHE"] = "/tmp/.npm"
+		}
+		if _, exists := configEnv["NPM_CONFIG_STRICT_SSL"]; !exists {
+			configEnv["NPM_CONFIG_STRICT_SSL"] = "false"
+		}
+	}
+
+	// PNPM Configuration
+	if pnpmURL := getMirrorURL("PNPM_MIRROR_URL"); pnpmURL != "" {
+		enabledServices = append(enabledServices, "pnpm")
+		if _, exists := configEnv["PNPM_REGISTRY"]; !exists {
+			configEnv["PNPM_REGISTRY"] = pnpmURL
+		}
+	}
+
+	// Yarn Configuration
+	if yarnURL := getMirrorURL("YARN_MIRROR_URL"); yarnURL != "" {
+		enabledServices = append(enabledServices, "yarn")
+		if _, exists := configEnv["YARN_REGISTRY"]; !exists {
+			configEnv["YARN_REGISTRY"] = yarnURL
+		}
+	}
+
+	// Alpine Configuration
+	if alpineURL := getMirrorURL("ALPINE_MIRROR_URL"); alpineURL != "" {
+		enabledServices = append(enabledServices, "alpine")
+		if _, exists := configEnv["ALPINE_MIRROR"]; !exists {
+			configEnv["ALPINE_MIRROR"] = alpineURL
+		}
+		if _, exists := configEnv["ALPINE_SETUP_SCRIPT"]; !exists {
+			configEnv["ALPINE_SETUP_SCRIPT"] = "sed -i 's|dl-cdn.alpinelinux.org|" + strings.TrimPrefix(alpineURL, "https://") + "|g' /etc/apk/repositories 2>/dev/null || true"
+		}
+	}
+
+	// Docker Configuration
+	if dockerURL := getMirrorURL("DOCKER_MIRROR_URL"); dockerURL != "" {
+		enabledServices = append(enabledServices, "docker")
+		if _, exists := configEnv["DOCKER_REGISTRY_MIRROR"]; !exists {
+			configEnv["DOCKER_REGISTRY_MIRROR"] = dockerURL
+		}
+	}
+
+	// Python Pip Configuration
+	if pipURL := getMirrorURL("PIP_MIRROR_URL"); pipURL != "" {
+		enabledServices = append(enabledServices, "pip")
+		if _, exists := configEnv["PIP_INDEX_URL"]; !exists {
+			configEnv["PIP_INDEX_URL"] = pipURL
+		}
+		if _, exists := configEnv["PIP_TRUSTED_HOST"]; !exists {
+			if strings.Contains(pipURL, "://") {
+				parts := strings.Split(pipURL, "://")
+				if len(parts) > 1 {
+					host := strings.Split(parts[1], "/")[0]
+					configEnv["PIP_TRUSTED_HOST"] = host
+				}
+			}
+		}
+	}
+
+	// Go Configuration
+	if goURL := getMirrorURL("GO_MIRROR_URL"); goURL != "" {
+		enabledServices = append(enabledServices, "go")
+		if _, exists := configEnv["GOPROXY"]; !exists {
+			configEnv["GOPROXY"] = goURL
+		}
+		if _, exists := configEnv["GOSUMDB"]; !exists {
+			configEnv["GOSUMDB"] = "sum.golang.google.cn"
+		}
+	}
+
+	// Rust Configuration
+	if rustURL := getMirrorURL("RUST_MIRROR_URL"); rustURL != "" {
+		enabledServices = append(enabledServices, "rust")
+		if _, exists := configEnv["CARGO_REGISTRIES_CRATES_IO_INDEX"]; !exists {
+			configEnv["CARGO_REGISTRIES_CRATES_IO_INDEX"] = rustURL
+		}
+	}
+
+	// Composer Configuration
+	if composerURL := getMirrorURL("COMPOSER_MIRROR_URL"); composerURL != "" {
+		enabledServices = append(enabledServices, "composer")
+		if _, exists := configEnv["COMPOSER_REPO_PACKAGIST"]; !exists {
+			configEnv["COMPOSER_REPO_PACKAGIST"] = composerURL
+		}
+	}
+
+	// Maven Configuration
+	if mavenURL := getMirrorURL("MAVEN_MIRROR_URL"); mavenURL != "" {
+		enabledServices = append(enabledServices, "maven")
+		if _, exists := configEnv["MAVEN_MIRROR_URL"]; !exists {
+			configEnv["MAVEN_MIRROR_URL"] = mavenURL
+		}
+	}
+
+	// Gradle Configuration
+	if gradleURL := getMirrorURL("GRADLE_MIRROR_URL"); gradleURL != "" {
+		enabledServices = append(enabledServices, "gradle")
+		if _, exists := configEnv["GRADLE_REPO_OVERRIDE"]; !exists {
+			configEnv["GRADLE_REPO_OVERRIDE"] = gradleURL
+		}
+	}
+
+	// Ruby Configuration
+	if rubyURL := getMirrorURL("RUBY_MIRROR_URL"); rubyURL != "" {
+		enabledServices = append(enabledServices, "ruby")
+		if _, exists := configEnv["BUNDLE_MIRROR__HTTPS___RUBYGEMS__ORG__"]; !exists {
+			configEnv["BUNDLE_MIRROR__HTTPS___RUBYGEMS__ORG__"] = rubyURL
+		}
+	}
+
+	// NuGet Configuration
+	if nugetURL := getMirrorURL("NUGET_MIRROR_URL"); nugetURL != "" {
+		enabledServices = append(enabledServices, "nuget")
+		if _, exists := configEnv["NUGET_PACKAGES"]; !exists {
+			configEnv["NUGET_PACKAGES"] = "/tmp/.nuget/packages"
+		}
+	}
+
+	// Only create setup script if we have enabled services
+	if len(enabledServices) > 0 {
+		configEnv["MIRROR_SETUP_COMPLETE"] = "true"
+		configEnv["ENABLED_MIRRORS"] = strings.Join(enabledServices, ",")
+	}
 }
 
 func toContainerName(step *types.Step) string {
