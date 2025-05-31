@@ -1,0 +1,87 @@
+{
+  "actor": {
+    "username": "emmap1",
+    "links": {
+      "avatar": {
+        "href": "https://bitbucket-api-assetroot.s3.amazonaws.com/c/photos/2015/Feb/26/3613917261-0-emmap1-avatar_avatar.png"
+      }
+    }
+  },
+  "pullrequest": {
+    "id": 1,
+    "title": "Title of pull request",
+    "description": "Description of pull request",
+    "state": "OPEN",
+    "author": {
+      "username": "emmap1",
+      "links": {
+        "avatar": {
+          "href": "https://bitbucket-api-assetroot.s3.amazonaws.com/c/photos/2015/Feb/26/3613917261-0-emmap1-avatar_avatar.png"
+        }
+      }
+    },
+    "source": {
+      "branch": {
+        "name": "branch2"
+      },
+      "commit": {
+        "hash": "d3022fc0ca3d"
+      },
+      "repository": {
+        "links": {
+          "html": {
+            "href": "https://api.bitbucket.org/team_name/repo_name"
+          },
+          "avatar": {
+            "href": "https://api-staging-assetroot.s3.amazonaws.com/c/photos/2014/Aug/01/bitbucket-logo-2629490769-3_avatar.png"
+          }
+        },
+        "full_name": "user_name/repo_name",
+        "scm": "git",
+        "is_private": true
+      }
+    },
+    "destination": {
+      "branch": {
+        "name": "main"
+      },
+      "commit": {
+        "hash": "ce5965ddd289"
+      },
+      "repository": {
+        "links": {
+          "html": {
+            "href": "https://api.bitbucket.org/team_name/repo_name"
+          },
+          "avatar": {
+            "href": "https://api-staging-assetroot.s3.amazonaws.com/c/photos/2014/Aug/01/bitbucket-logo-2629490769-3_avatar.png"
+          }
+        },
+        "full_name": "user_name/repo_name",
+        "scm": "git",
+        "is_private": true
+      }
+    },
+    "links": {
+      "self": {
+        "href": "https://api.bitbucket.org/api/2.0/pullrequests/pullrequest_id"
+      },
+      "html": {
+        "href": "https://api.bitbucket.org/pullrequest_id"
+      }
+    }
+  },
+  "repository": {
+    "links": {
+      "html": {
+        "href": "https://api.bitbucket.org/team_name/repo_name"
+      },
+      "avatar": {
+        "href": "https://api-staging-assetroot.s3.amazonaws.com/c/photos/2014/Aug/01/bitbucket-logo-2629490769-3_avatar.png"
+      }
+    },
+    "full_name": "user_name/repo_name",
+    "scm": "git",
+    "is_private": true
+  }
+}
