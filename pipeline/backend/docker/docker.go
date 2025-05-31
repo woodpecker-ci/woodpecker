@@ -22,6 +22,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/containerd/errdefs"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/image"
 	"github.com/docker/docker/api/types/network"
@@ -204,7 +205,7 @@ func (e *docker) StartStep(ctx context.Context, step *backend.Step, taskUUID str
 	hostConfig.Binds = utils.DeduplicateStrings(append(hostConfig.Binds, e.config.volumes...))
 
 	_, err = e.client.ContainerCreate(ctx, config, hostConfig, nil, nil, containerName)
-	if client.IsErrNotFound(err) {
+	if errdefs.IsNotFound(err) {
 		// automatically pull and try to re-create the image if the
 		// failure is caused because the image does not exist.
 		responseBody, pErr := e.client.ImagePull(ctx, config.Image, pullOpts)
