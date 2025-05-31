@@ -1,4 +1,4 @@
-// Copyright 2023 Woodpecker Authors
+// Copyright 2025 Woodpecker Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,21 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package linter
+package types
 
-// Option configures a linting option.
-type Option func(*Linter)
-
-// PrivilegedPlugins adds the list of privileged plugins.
-func PrivilegedPlugins(plugins []string) Option {
-	return func(linter *Linter) {
-		linter.privilegedPlugins = &plugins
-	}
-}
-
-// WithTrustedClonePlugins adds the list of trusted clone plugins.
-func WithTrustedClonePlugins(plugins []string) Option {
-	return func(linter *Linter) {
-		linter.trustedClonePlugins = &plugins
-	}
+type TrustedConfiguration struct {
+	Network  bool `json:"network"`
+	Volumes  bool `json:"volumes"`
+	Security bool `json:"security"`
 }
