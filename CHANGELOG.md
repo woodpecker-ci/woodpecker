@@ -9,7 +9,6 @@
 ### 📈 Enhancement
 
 - Move forge webhook fixtures into own files [[#5216](https://github.com/woodpecker-ci/woodpecker/pull/5216)]
-- Move gitea fixtures into own files [[#5208](https://github.com/woodpecker-ci/woodpecker/pull/5208)]
 - Treat no available route in grpc as fatal error [[#5192](https://github.com/woodpecker-ci/woodpecker/pull/5192)]
 
 ### 🐛 Bug Fixes
@@ -32,6 +31,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update woodpeckerci/plugin-git docker tag to v2.6.5 [[#5230](https://github.com/woodpecker-ci/woodpecker/pull/5230)]
 - fix(deps): update web npm deps non-major [[#5228](https://github.com/woodpecker-ci/woodpecker/pull/5228)]
 - chore(deps): update docker.io/woodpeckerci/plugin-surge-preview docker tag to v1.4.0 [[#5225](https://github.com/woodpecker-ci/woodpecker/pull/5225)]
 - chore(deps): update docker.io/alpine docker tag to v3.22 [[#5224](https://github.com/woodpecker-ci/woodpecker/pull/5224)]
