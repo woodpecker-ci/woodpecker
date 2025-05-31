@@ -6,16 +6,18 @@
 
 @6543, @Levy-Tal, @OCram85, @Spiffyk, @SuperSandro2000, @deltamualpha, @qwerty287, @rruzicic, @xoxys
 
+### 📈 Enhancement
+
+- Move forge webhook fixtures into own files [[#5216](https://github.com/woodpecker-ci/woodpecker/pull/5216)]
+- Move gitea fixtures into own files [[#5208](https://github.com/woodpecker-ci/woodpecker/pull/5208)]
+- Treat no available route in grpc as fatal error [[#5192](https://github.com/woodpecker-ci/woodpecker/pull/5192)]
+
 ### 🐛 Bug Fixes
 
 - Always collect metrics (reverts #4667) [[#5213](https://github.com/woodpecker-ci/woodpecker/pull/5213)]
-- fix(bitbucketDC): manual event has commit broken link [[#5160](https://github.com/woodpecker-ci/woodpecker/pull/5160)]
+- fix(bitbucketDC): manual event has broken commit link [[#5160](https://github.com/woodpecker-ci/woodpecker/pull/5160)]
 - fix(bitbucketdc): build status gets incorrectly reported on multi workflow builds [[#5178](https://github.com/woodpecker-ci/woodpecker/pull/5178)]
 - fix(bitbucketdc): build status not reported on PR builds [[#5162](https://github.com/woodpecker-ci/woodpecker/pull/5162)]
-
-### 📈 Enhancement
-
-- Treat no available route in grpc as fatal error [[#5192](https://github.com/woodpecker-ci/woodpecker/pull/5192)]
 
 ### 📚 Documentation
 
@@ -58,7 +60,6 @@
 
 ### Misc
 
-- Move gitea fixtures into own files [[#5208](https://github.com/woodpecker-ci/woodpecker/pull/5208)]
 - flake.lock: Update [[#5206](https://github.com/woodpecker-ci/woodpecker/pull/5206)]
 - Add Bluesky post plugin [[#5156](https://github.com/woodpecker-ci/woodpecker/pull/5156)]
 
