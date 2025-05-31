@@ -1,3 +1,4 @@
+import type { PullRequest } from './pull_request';
 import type { WebhookEvents } from './webhook';
 
 export interface PipelineError<D = unknown> {
@@ -36,20 +37,11 @@ export interface Pipeline {
   // When the pipeline was finished.
   finished: number;
 
-  // Where the deployment should go.
-  deploy_to: string;
-
   // The commit for the pipeline.
-  commit: string;
+  commit_pipeline: PipelineCommit;
 
   // The branch the commit was pushed to.
   branch: string;
-
-  // The commit message.
-  message: string;
-
-  // When the commit was created.
-  timestamp: number;
 
   // The alias for the commit.
   ref: string;
@@ -57,21 +49,11 @@ export interface Pipeline {
   // The mapping from the local repository to a branch in the forge.
   refspec: string;
 
-  // The clone URL of the forge repository.
-  clone_url: string;
-
-  title: string;
-
-  sender: string;
-
   // The login for the author of the commit.
   author: string;
 
   // The avatar for the author of the commit.
   author_avatar: string;
-
-  //  email for the author of the commit.
-  author_email: string;
 
   // This url will point to the repository state associated with the pipeline's commit.
   forge_url: string;
@@ -79,6 +61,14 @@ export interface Pipeline {
   reviewed_by: string;
 
   reviewed: number;
+
+  pull_request?: PullRequest;
+
+  deployment?: PipelineDeployment;
+
+  release_tag_title?: string;
+
+  cron: string;
 
   // The steps associated with this pipeline.
   // A pipeline will have multiple steps if a matrix pipeline was used or if a rebuild was requested.
@@ -126,6 +116,22 @@ export interface PipelineStep {
   finished?: number;
   error?: string;
   type?: StepType;
+}
+
+export interface PipelineCommit {
+  sha: string;
+  message: string;
+  forge_url: string;
+  author: PipelineCommitAuthor;
+}
+
+export interface PipelineCommitAuthor {
+  author: string;
+  email: string;
+}
+
+export interface PipelineDeployment {
+  description: string;
 }
 
 export interface PipelineLog {

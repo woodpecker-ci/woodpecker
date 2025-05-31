@@ -49,12 +49,14 @@ func TestPipelineOutput(t *testing.T) {
 
 	pipelines := []*woodpecker.Pipeline{
 		{
-			Number:  1,
-			Status:  "success",
-			Event:   "push",
-			Branch:  "main",
-			Message: "message\nmultiline",
-			Author:  "John Doe\n",
+			Number: 1,
+			Status: "success",
+			Event:  "push",
+			Branch: "main",
+			Commit: &woodpecker.Commit{
+				Message: "message\nmultiline",
+			},
+			Author: "John Doe\n",
 		},
 	}
 

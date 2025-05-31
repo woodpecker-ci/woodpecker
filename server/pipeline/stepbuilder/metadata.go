@@ -100,42 +100,46 @@ func metadataPipelineFromModelPipeline(pipeline *model.Pipeline, includeParent b
 		return metadata.Pipeline{}
 	}
 
-	cron := ""
-	if pipeline.Event == model.EventCron {
-		cron = pipeline.Sender
-	}
-
 	parent := int64(0)
 	if includeParent {
 		parent = pipeline.Parent
 	}
 
-	return metadata.Pipeline{
-		Number:     pipeline.Number,
-		Parent:     parent,
-		Created:    pipeline.Created,
-		Started:    pipeline.Started,
-		Finished:   pipeline.Finished,
-		Status:     string(pipeline.Status),
-		Event:      string(pipeline.Event),
-		ForgeURL:   pipeline.ForgeURL,
-		DeployTo:   pipeline.DeployTo,
-		DeployTask: pipeline.DeployTask,
+	metadata := metadata.Pipeline{
+		Number:   pipeline.Number,
+		Parent:   parent,
+		Created:  pipeline.Created,
+		Started:  pipeline.Started,
+		Finished: pipeline.Finished,
+		Status:   string(pipeline.Status),
+		Event:    string(pipeline.Event),
+		ForgeURL: pipeline.ForgeURL,
 		Commit: metadata.Commit{
-			Sha:     pipeline.Commit,
+			Sha:     pipeline.Commit.SHA,
 			Ref:     pipeline.Ref,
 			Refspec: pipeline.Refspec,
 			Branch:  pipeline.Branch,
-			Message: pipeline.Message,
+			Message: pipeline.Commit.Message,
 			Author: metadata.Author{
-				Name:   pipeline.Author,
-				Email:  pipeline.Email,
-				Avatar: pipeline.Avatar,
+				Name:  pipeline.Commit.Author.Author,
+				Email: pipeline.Commit.Author.Email,
 			},
-			ChangedFiles:      pipeline.ChangedFiles,
-			PullRequestLabels: pipeline.PullRequestLabels,
-			IsPrerelease:      pipeline.IsPrerelease,
+			ChangedFiles: pipeline.ChangedFiles,
+
+			IsPrerelease: pipeline.IsPrerelease,
 		},
-		Cron: cron,
+		Release: pipeline.ReleaseTagTitle,
+		Cron:    pipeline.Cron,
+		Avatar:  pipeline.Avatar,
 	}
+
+	if pipeline.PullRequest != nil {
+		metadata.Commit.PullRequestLabels = pipeline.PullRequest.Labels
+	}
+	if pipeline.Deployment != nil {
+		metadata.DeployTo = pipeline.Deployment.Target
+		metadata.DeployTask = pipeline.Deployment.Task
+	}
+
+	return metadata
 }
