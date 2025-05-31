@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.7.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.7.0) - 2025-05-28
+## [3.7.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.7.0) - 2025-05-31
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -19,7 +19,6 @@
 
 ### 📚 Documentation
 
-- chore(deps): lock file maintenance [[#5204](https://github.com/woodpecker-ci/woodpecker/pull/5204)]
 - fix(deps): update dependency redocusaurus to v2.3.0 [[#5203](https://github.com/woodpecker-ci/woodpecker/pull/5203)]
 - chore(deps): update docs npm deps non-major [[#5197](https://github.com/woodpecker-ci/woodpecker/pull/5197)]
 - Add reference to woodpecker-community plugin org [[#5186](https://github.com/woodpecker-ci/woodpecker/pull/5186)]
@@ -31,7 +30,9 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update docker.io/alpine docker tag to v3.22 [[#5224](https://github.com/woodpecker-ci/woodpecker/pull/5224)]
 - fix(deps): update golang-packages [[#5209](https://github.com/woodpecker-ci/woodpecker/pull/5209)]
+- chore(deps): lock file maintenance [[#5204](https://github.com/woodpecker-ci/woodpecker/pull/5204)]
 - fix(deps): update dependency simple-icons to v14.15.0 [[#5202](https://github.com/woodpecker-ci/woodpecker/pull/5202)]
 - fix(deps): update dependency vue-i18n to v11.1.4 [[#5201](https://github.com/woodpecker-ci/woodpecker/pull/5201)]
 - chore(deps): update docker.io/woodpeckerci/plugin-surge-preview docker tag to v1.3.6 [[#5200](https://github.com/woodpecker-ci/woodpecker/pull/5200)]
