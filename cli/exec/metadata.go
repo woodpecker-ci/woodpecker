@@ -109,6 +109,7 @@ func metadataFromContext(_ context.Context, c *cli.Command, axis matrix.Axis, w 
 	metadataFileAndOverrideOrDefault(c, "commit-author-avatar", func(s string) { m.Curr.Commit.Author.Avatar = s }, c.String)
 
 	metadataFileAndOverrideOrDefault(c, "commit-pull-labels", func(sl []string) { m.Curr.Commit.PullRequestLabels = sl }, c.StringSlice)
+	metadataFileAndOverrideOrDefault(c, "commit-pull-milestone", func(s string) { m.Curr.Commit.PullRequestMilestone = s }, c.String)
 	metadataFileAndOverrideOrDefault(c, "commit-release-is-pre", func(b bool) { m.Curr.Commit.IsPrerelease = b }, c.Bool)
 
 	// Previous Pipeline
