@@ -27,7 +27,7 @@ var DefaultConfigOrder = [...]string{
 const (
 	// DefaultClonePlugin can be changed by 'WOODPECKER_DEFAULT_CLONE_PLUGIN' at runtime.
 	// renovate: datasource=docker depName=woodpeckerci/plugin-git
-	DefaultClonePlugin = "docker.io/woodpeckerci/plugin-git:2.6.3"
+	DefaultClonePlugin = "docker.io/woodpeckerci/plugin-git:2.6.4"
 )
 
 // TrustedClonePlugins can be changed by 'WOODPECKER_PLUGINS_TRUSTED_CLONE' at runtime.
