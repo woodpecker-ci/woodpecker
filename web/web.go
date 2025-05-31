@@ -21,7 +21,7 @@ import (
 	"net/http"
 )
 
-//go:embed dist/*
+// *go:embed dist/*
 var webFiles embed.FS
 
 func HTTPFS() (http.FileSystem, error) {
