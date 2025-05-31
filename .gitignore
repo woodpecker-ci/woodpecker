@@ -37,6 +37,7 @@ docker-compose.yml
 *.sqlite
 *.out
 /.env
+/.direnv
 extras/
 /build/
 /dist/
