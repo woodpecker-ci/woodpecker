@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.7.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.7.0) - 2025-05-31
+## [3.7.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.7.0) - 2025-06-01
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -31,6 +31,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update dependency simple-icons to v15 [[#5232](https://github.com/woodpecker-ci/woodpecker/pull/5232)]
 - chore(deps): update woodpeckerci/plugin-git docker tag to v2.6.5 [[#5230](https://github.com/woodpecker-ci/woodpecker/pull/5230)]
 - fix(deps): update web npm deps non-major [[#5228](https://github.com/woodpecker-ci/woodpecker/pull/5228)]
 - chore(deps): update docker.io/woodpeckerci/plugin-surge-preview docker tag to v1.4.0 [[#5225](https://github.com/woodpecker-ci/woodpecker/pull/5225)]
