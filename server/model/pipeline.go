@@ -92,8 +92,17 @@ func (p *Pipeline) ToAPIModel() *APIPipeline {
 		ap.DeployTask = p.Deployment.Task
 	}
 	if p.PullRequest != nil {
+		ap.Message = p.PullRequest.Title
 		ap.PullRequestLabels = p.PullRequest.Labels
 		ap.FromFork = p.PullRequest.FromFork
+	}
+	switch p.Event {
+	case EventCron:
+		ap.Message = p.Cron
+	case EventTag:
+		ap.Message = "created tag " + p.ReleaseTagTitle
+	case EventRelease:
+		ap.Message = p.ReleaseTagTitle
 	}
 
 	return ap
