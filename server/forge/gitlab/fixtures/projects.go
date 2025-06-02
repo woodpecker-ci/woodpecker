@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package testdata
+package fixtures
 
-// sample repository list
+// sample repository list.
 var allProjectsPayload = []byte(`
 [
 	{
