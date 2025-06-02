@@ -92,38 +92,6 @@ The following syntax deprecations will now result in an error:
 - `platform:` ([#3916](https://github.com/woodpecker-ci/woodpecker/pull/3916))
 - `branches:` ([#3916](https://github.com/woodpecker-ci/woodpecker/pull/3916))
 
-#### Workflow syntax changes
-
-- Grouping of steps via `steps.[name].group` should now be done using `steps.[name].depends_on`
-- The `includes` and `excludes` event filter options have been removed
-- Previously, env vars have been automatically sanitized to uppercase.
-  As this has been confusing, the type-case of the secret definition is now respected ([#3375](https://github.com/woodpecker-ci/woodpecker/pull/3375)).
-- `secrets` have been entirely removed in favor of `environment` combined with the `from_secret` syntax.
-  As `secrets` are just normal env vars which are masked, the goal was to allow them to be declared next to normal env vars and at the same time reduce the keyword syntax count.
-  Additionally, the `from_secret` syntax gives more flexibility in naming.
-  Whereas beforehand `secrets` where always named after their initial secret name, the `from_secret` reference can now be different.
-  Last, one can inject multiple different env vars from the same secret reference.
-
-  2.x:
-
-  ```yaml
-  secrets: [my_token]
-  ```
-
-  3.x:
-
-  ```yaml
-  environment:
-    MY_TOKEN:
-      from_secret: my_token
-  ```
-
-- The `environment` filter option has been removed in favor of `when.evaluate`
-
-#### API changes
-
-- Removed deprecated `registry/` endpoint. Use `registries`, `/authorize/token`
-
 #### CLI changes
 
 The following restructuring was done to achieve a more consistent grouping:
