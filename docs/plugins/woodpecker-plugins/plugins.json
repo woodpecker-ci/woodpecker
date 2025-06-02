@@ -86,6 +86,11 @@
       "verified": true
     },
     {
+      "name": "Sccache",
+      "docs": "https://seed.radicle.garden/raw/rad:zzmCBDptFLrfUEHSjcFsLJ2Aghav/head/docs.md",
+      "verified": false
+    },
+    {
       "name": "Woodpecker Email",
       "docs": "https://gitnet.fr/deblan/woodpecker-email/raw/branch/develop/DOCS.md",
       "verified": false
