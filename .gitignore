@@ -38,6 +38,7 @@ docker-compose.yml
 *.out
 /.env
 /.direnv
+/.envrc
 extras/
 /build/
 /dist/
