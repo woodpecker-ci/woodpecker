@@ -593,7 +593,7 @@ func GetPipelineQueue(c *gin.Context) {
 //	@Param			repo_id			path	int		true	"the repository id"
 //	@Param			number			path	int		true	"the number of the pipeline"
 //	@Param			event			query	string	false	"override the event type"
-//	@Param			deploy_to		query	string	false	"override the target deploy value"
+//	@Param			deploy_target	query	string	false	"override the deployment target value"
 func PostPipeline(c *gin.Context) {
 	_store := store.FromContext(c)
 	repo := session.Repo(c)
@@ -641,7 +641,8 @@ func PostPipeline(c *gin.Context) {
 			return
 		}
 
-		pl.Deployment.Target = c.DefaultQuery("deploy_to", pl.Deployment.Target)
+		// TODO drop deploy_to in next major
+		pl.Deployment.Target = c.DefaultQuery("deploy_target", c.DefaultQuery("deploy_to", pl.Deployment.Target))
 	}
 
 	// Read query string parameters into pipelineParams, exclude reserved params

@@ -3130,8 +3130,8 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "override the target deploy value",
-                        "name": "deploy_to",
+                        "description": "override the deployment target value",
+                        "name": "deploy_target",
                         "in": "query"
                     }
                 ],
