@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.7.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.7.0) - 2025-06-02
+## [3.7.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.7.0) - 2025-06-03
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -62,6 +62,7 @@
 
 ### Misc
 
+- Ignore direnv config and folder [[#5235](https://github.com/woodpecker-ci/woodpecker/pull/5235)]
 - flake.lock: Update [[#5206](https://github.com/woodpecker-ci/woodpecker/pull/5206)]
 - Add Bluesky post plugin [[#5156](https://github.com/woodpecker-ci/woodpecker/pull/5156)]
 
