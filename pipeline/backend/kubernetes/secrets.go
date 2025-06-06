@@ -308,3 +308,58 @@ func stopRegistrySecret(ctx context.Context, engine *kube, step *types.Step, del
 	}
 	return err
 }
+
+func needsStepSecret(step *types.Step) bool {
+	return len(step.SecretMapping) > 0
+}
+
+func startStepSecret(ctx context.Context, e *kube, step *types.Step) error {
+	secret, err := mkStepSecret(step, e.config)
+	if err != nil {
+		return err
+	}
+	log.Trace().Msgf("creating secret: %s", secret.Name)
+	_, err = e.client.CoreV1().Secrets(e.config.Namespace).Create(ctx, secret, meta_v1.CreateOptions{})
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func mkStepSecret(step *types.Step, config *config) (*v1.Secret, error) {
+	name, err := stepSecretName(step)
+	if err != nil {
+		return nil, err
+	}
+
+	return &v1.Secret{
+		ObjectMeta: meta_v1.ObjectMeta{
+			Namespace: config.Namespace,
+			Name:      name,
+		},
+		Type:       v1.SecretTypeOpaque,
+		StringData: step.SecretMapping,
+	}, nil
+}
+
+func stepSecretName(step *types.Step) (string, error) {
+	name, err := stepToPodName(step)
+	if err != nil {
+		return "", err
+	}
+	return fmt.Sprintf("%s-step-secret", name), nil
+}
+
+func stopStepSecret(ctx context.Context, engine *kube, step *types.Step, deleteOpts meta_v1.DeleteOptions) error {
+	name, err := stepSecretName(step)
+	if err != nil {
+		return err
+	}
+	log.Trace().Str("name", name).Msg("deleting secret")
+
+	err = engine.client.CoreV1().Secrets(engine.config.Namespace).Delete(ctx, name, deleteOpts)
+	if errors.IsNotFound(err) {
+		return nil
+	}
+	return err
+}
