@@ -4,6 +4,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update web npm deps non-major [[#5244](https://github.com/woodpecker-ci/woodpecker/pull/5244)]
 - fix(deps): update golang-packages [[#5242](https://github.com/woodpecker-ci/woodpecker/pull/5242)]
 - chore(deps): update dependency golang to v1.24.4 [[#5241](https://github.com/woodpecker-ci/woodpecker/pull/5241)]
 
