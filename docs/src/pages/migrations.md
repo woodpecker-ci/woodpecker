@@ -1,10 +1,19 @@
+<!-- markdownlint-disable no-duplicate-heading -->
+
 # Migrations
 
 To enhance the usability of Woodpecker and meet evolving security standards, occasional migrations are necessary. While we aim to minimize these changes, some are unavoidable. If you experience significant issues during a migration to a new version, please let us know so maintainers can reassess the updates.
 
 ## `next`
 
+### User-facing changes
+
 - (Kubernetes) Deprecated `step` label on pod in favor of new namespaced label `woodpecker-ci.org/step`. The `step` label will be removed in a future update.
+- deprecated `CI_COMMIT_AUTHOR_AVATAR` and `CI_PREV_COMMIT_AUTHOR_AVATAR` env vars as commit authors don't have an avatar
+
+### API changes
+
+- Changed the pipeline model to have different objects for different event metadata (e.g. pull request title)
 
 ## 3.0.0
 

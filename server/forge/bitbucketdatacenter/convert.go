@@ -18,7 +18,6 @@ import (
 	"fmt"
 	"net/url"
 	"strings"
-	"time"
 
 	bb "github.com/neticdk/go-bitbucket/bitbucket"
 	"golang.org/x/oauth2"
@@ -89,19 +88,21 @@ func convertRepositoryPushEvent(ev *bb.RepositoryPushEvent, baseURL string) *mod
 	}
 
 	pipeline := &model.Pipeline{
-		Commit:    change.ToHash,
-		Branch:    change.Ref.DisplayID,
-		Message:   "",
-		Avatar:    bitbucketAvatarURL(baseURL, ev.Actor.Slug),
-		Author:    authorLabel(ev.Actor.Name),
-		Email:     ev.Actor.Email,
-		Timestamp: time.Time(ev.Date).UTC().Unix(),
-		Ref:       ev.Changes[0].RefId,
-		ForgeURL:  fmt.Sprintf("%s/projects/%s/repos/%s/commits/%s", baseURL, ev.Repository.Project.Key, ev.Repository.Slug, change.ToHash),
+		Commit: &model.Commit{
+			// message is set later
+			SHA:      change.ToHash,
+			ForgeURL: fmt.Sprintf("%s/projects/%s/repos/%s/commits/%s", baseURL, ev.Repository.Project.Key, ev.Repository.Slug, change.ToHash),
+		},
+		Branch:   change.Ref.DisplayID,
+		Avatar:   bitbucketAvatarURL(baseURL, ev.Actor.Slug),
+		Author:   ev.Actor.Name,
+		Ref:      ev.Changes[0].RefId,
+		ForgeURL: fmt.Sprintf("%s/projects/%s/repos/%s/commits/%s", baseURL, ev.Repository.Project.Key, ev.Repository.Slug, change.ToHash),
 	}
 
 	if strings.HasPrefix(ev.Changes[0].RefId, "refs/tags/") {
 		pipeline.Event = model.EventTag
+		pipeline.ForgeURL = fmt.Sprintf("%s/projects/%s/repos/%s/browse?at=%s", baseURL, ev.Repository.Project.Key, ev.Repository.Slug, url.QueryEscape(pipeline.Ref))
 	} else {
 		pipeline.Event = model.EventPush
 	}
@@ -111,18 +112,18 @@ func convertRepositoryPushEvent(ev *bb.RepositoryPushEvent, baseURL string) *mod
 
 func convertPullRequestEvent(ev *bb.PullRequestEvent, baseURL string) *model.Pipeline {
 	pipeline := &model.Pipeline{
-		Commit:    ev.PullRequest.Source.Latest,
-		Branch:    ev.PullRequest.Source.DisplayID,
-		Title:     ev.PullRequest.Title,
-		Message:   "",
-		Avatar:    bitbucketAvatarURL(baseURL, ev.Actor.Slug),
-		Author:    authorLabel(ev.Actor.Name),
-		Email:     ev.Actor.Email,
-		Timestamp: time.Time(ev.Date).UTC().Unix(),
-		Ref:       ev.PullRequest.Source.ID,
-		ForgeURL:  fmt.Sprintf("%s/projects/%s/repos/%s/commits/%s", baseURL, ev.PullRequest.Source.Repository.Project.Key, ev.PullRequest.Source.Repository.Slug, ev.PullRequest.Source.Latest),
-		Refspec:   fmt.Sprintf("%s:%s", ev.PullRequest.Source.DisplayID, ev.PullRequest.Target.DisplayID),
-		FromFork:  ev.PullRequest.Source.Repository.ID != ev.PullRequest.Target.Repository.ID,
+		Commit: &model.Commit{
+			// message is set later
+			SHA:      ev.PullRequest.Source.Latest,
+			ForgeURL: fmt.Sprintf("%s/projects/%s/repos/%s/commits/%s", baseURL, ev.PullRequest.Source.Repository.Project.Key, ev.PullRequest.Source.Repository.Slug, ev.PullRequest.Source.Latest),
+		},
+		Branch:      ev.PullRequest.Source.DisplayID,
+		Avatar:      bitbucketAvatarURL(baseURL, ev.Actor.Slug),
+		Author:      ev.Actor.Name,
+		Ref:         ev.PullRequest.Source.ID,
+		PullRequest: convertPullRequest(&ev.PullRequest),
+		ForgeURL:    fmt.Sprintf("%s/projects/%s/repos/%s/pull-requests/%d", baseURL, ev.PullRequest.Source.Repository.Project.Key, ev.PullRequest.Source.Repository.Slug, ev.PullRequest.ID),
+		Refspec:     fmt.Sprintf("%s:%s", ev.PullRequest.Source.DisplayID, ev.PullRequest.Target.DisplayID),
 	}
 
 	if ev.EventKey == bb.EventKeyPullRequestMerged || ev.EventKey == bb.EventKeyPullRequestDeclined || ev.EventKey == bb.EventKeyPullRequestDeleted {
@@ -132,19 +133,6 @@ func convertPullRequestEvent(ev *bb.PullRequestEvent, baseURL string) *model.Pip
 	}
 
 	return pipeline
-}
-
-func authorLabel(name string) string {
-	var result string
-
-	const maxNameLength = 40
-
-	if len(name) > maxNameLength {
-		result = name[0:37] + "..."
-	} else {
-		result = name
-	}
-	return result
 }
 
 func convertUser(user *bb.User, baseURL string) *model.User {
@@ -171,6 +159,14 @@ func updateUserCredentials(u *model.User, t *oauth2.Token) {
 	u.AccessToken = t.AccessToken
 	u.RefreshToken = t.RefreshToken
 	u.Expiry = t.Expiry.UTC().Unix()
+}
+
+func convertPullRequest(pr *bb.PullRequest) *model.PullRequest {
+	return &model.PullRequest{
+		FromFork: pr.Source.Repository.ID != pr.Target.Repository.ID,
+		Title:    pr.Title,
+		Index:    model.ForgeRemoteID(fmt.Sprint(pr.ID)),
+	}
 }
 
 func convertProjectsToTeams(projects []*bb.Project, client *bb.Client) []*model.Team {
