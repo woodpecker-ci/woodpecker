@@ -1,5 +1,13 @@
 # Changelog
 
+## [3.7.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.7.1) - 2025-06-07
+
+### 📦️ Dependency
+
+- fix(deps): update web npm deps non-major [[#5244](https://github.com/woodpecker-ci/woodpecker/pull/5244)]
+- fix(deps): update golang-packages [[#5242](https://github.com/woodpecker-ci/woodpecker/pull/5242)]
+- chore(deps): update dependency golang to v1.24.4 [[#5241](https://github.com/woodpecker-ci/woodpecker/pull/5241)]
+
 ## [3.7.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.7.0) - 2025-06-06
 
 ### ❤️ Thanks to all contributors! ❤️
