@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.7.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.7.1) - 2025-06-08
+## [3.7.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.7.1) - 2025-06-10
 
 ### 📦️ Dependency
 
