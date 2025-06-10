@@ -56,7 +56,6 @@ woodpecker-cli [GLOBAL OPTIONS] [command [COMMAND OPTIONS]] [ARGUMENTS...]
 
 **--token, -t**="": server auth token
 
-
 # COMMANDS
 
 ## admin
@@ -130,6 +129,8 @@ add a secret
 **--event**="": secret limited to these events (default: [])
 
 **--image**="": secret limited to these images (default: [])
+
+**--name**="": secret name
 
 **--value**="": secret value
 
@@ -268,8 +269,6 @@ execute a local pipeline
 
 **--backend-no-proxy**="": if set, pass the environment variable down as "NO_PROXY" to steps
 
-**--commit-author-avatar**="": Set the metadata environment variable "CI_COMMIT_AUTHOR_AVATAR".
-
 **--commit-author-email**="": Set the metadata environment variable "CI_COMMIT_AUTHOR_EMAIL".
 
 **--commit-author-name**="": Set the metadata environment variable "CI_COMMIT_AUTHOR".
@@ -325,8 +324,6 @@ execute a local pipeline
 **--pipeline-url**="": Set the metadata environment variable "CI_PIPELINE_FORGE_URL".
 
 **--plugins-privileged**="": Allow plugins to run in privileged mode, if environment variable is defined but empty there will be none (default: [])
-
-**--prev-commit-author-avatar**="": Set the metadata environment variable "CI_PREV_COMMIT_AUTHOR_AVATAR".
 
 **--prev-commit-author-email**="": Set the metadata environment variable "CI_PREV_COMMIT_AUTHOR_EMAIL".
 
@@ -398,9 +395,9 @@ execute a local pipeline
 
 **--workflow-number**="": Set the metadata environment variable "CI_WORKFLOW_NUMBER". (default: 0)
 
-**--workspace-base**="":  (default: /woodpecker)
+**--workspace-base**="": (default: /woodpecker)
 
-**--workspace-path**="":  (default: src)
+**--workspace-path**="": (default: src)
 
 ## info
 
@@ -415,7 +412,7 @@ lint a pipeline configuration file
 
 **--plugins-privileged**="": allow plugins to run in privileged mode, if set empty, there is no (default: [])
 
-**--plugins-trusted-clone**="": plugins that are trusted to handle Git credentials in cloning steps (default: [docker.io/woodpeckerci/plugin-git:2.6.2 docker.io/woodpeckerci/plugin-git quay.io/woodpeckerci/plugin-git])
+**--plugins-trusted-clone**="": plugins that are trusted to handle Git credentials in cloning steps (default: [docker.io/woodpeckerci/plugin-git:2.6.3 docker.io/woodpeckerci/plugin-git quay.io/woodpeckerci/plugin-git])
 
 **--strict**: treat warnings as errors
 

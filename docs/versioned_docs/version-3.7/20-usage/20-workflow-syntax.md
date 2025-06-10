@@ -122,7 +122,13 @@ image: index.docker.io/library/golang
 image: index.docker.io/library/golang:1.7
 ```
 
-Woodpecker does not automatically upgrade container images. Example configuration to always pull the latest image when updates are available:
+Learn more how you can use images from [different registries](./41-registries.md).
+
+### `pull`
+
+By default, Woodpecker does not automatically upgrade container images and only pulls them when they are not already present.
+
+To always pull the latest image when updates are available, use the `pull` option:
 
 ```diff
  steps:
@@ -130,8 +136,6 @@ Woodpecker does not automatically upgrade container images. Example configuratio
      image: golang:latest
 +    pull: true
 ```
-
-Learn more how you can use images from [different registries](./41-registries.md).
 
 ### `commands`
 
@@ -510,6 +514,15 @@ For more details check the [service docs](./60-services.md#detachment).
 
 Using `directory`, you can set a subdirectory of your repository or an absolute path inside the Docker container in which your commands will run.
 
+### `backend_options`
+
+With `backend_options` you can define options that are specific to the respective backend that is used to execute the steps. For example, you can specify the user and/or group used in a Docker container or you can specify the service account for Kubernetes.
+
+Further details can be found in the documentation of the used backend:
+
+- [Docker](../30-administration/10-configuration/11-backends/10-docker.md#step-specific-configuration)
+- [Kubernetes](../30-administration/10-configuration/11-backends/20-kubernetes.md#step-specific-configuration)
+
 ## `services`
 
 Woodpecker can provide service containers. They can for example be used to run databases or cache containers during the execution of workflow.
@@ -594,12 +607,16 @@ For more details check the [matrix build docs](./30-matrix-workflows.md).
 
 ## `labels`
 
-You can set labels for your workflow to select an agent to execute the workflow on. An agent will pick up and run a workflow when **every** label assigned to it matches the agents labels.
+You can define labels for your workflow in order to select an agent to execute the workflow. An agent takes up a workflow and executes it if **every** label assigned to it matches the label of the agent.
 
-To set additional agent labels, check the [agent configuration options](../30-administration/10-configuration/30-agent.md#agent_labels). Agents will have at least four default labels: `platform=agent-os/agent-arch`, `hostname=my-agent`, `backend=docker` (type of the agent backend) and `repo=*`. Agents can use a `*` as a wildcard for a label. For example `repo=*` will match every repo.
+To specify additional agent labels, check the [Agent configuration options](../30-administration/10-configuration/30-agent.md#agent_labels). The agents have at least four default labels: `platform=agent-os/agent-arch`, `hostname=my-agent`, `backend=docker` (type of agent backend) and `repo=*`. Agents can use an `*` as a placeholder for a label. For example, `repo=*` matches any repo.
 
-Workflow labels with an empty value will be ignored.
-By default, each workflow has at least the `repo=your-user/your-repo-name` label. If you have set the [platform attribute](#platform) for your workflow it will have a label like `platform=your-os/your-arch` as well.
+Workflow labels with an empty value are ignored.
+By default, each workflow has at least the label `repo=your-user/your-repo-name`. If you have set the [platform attribute](#platform) for your workflow, it will also have a label such as `platform=your-os/your-arch`.
+
+:::warning
+Labels with the `woodpecker-ci.org` prefix are managed by Woodpecker and can not be set as part of the pipeline definition.
+:::
 
 You can add additional labels as a key value map:
 
@@ -642,9 +659,9 @@ For more details and examples check the [Advanced usage docs](./90-advanced-usag
 
 ## `clone`
 
-Woodpecker automatically configures a default clone step if not explicitly defined. When using the `local` backend, the [plugin-git](https://github.com/woodpecker-ci/plugin-git) binary must be on your `$PATH` for the default clone step to work. If not, you can still write a manual clone step.
+Woodpecker automatically configures a default clone step if it is not explicitly defined. If you are using the `local` backend, the [plugin-git](https://github.com/woodpecker-ci/plugin-git) binary must be in your `$PATH` for the default clone step to work. If this is not the case, you can still write a manual clone step.
 
-You can manually configure the clone step in your workflow for customization:
+You can manually configure the clone step in your workflow to customize it:
 
 ```diff
 +clone:
@@ -659,7 +676,7 @@ You can manually configure the clone step in your workflow for customization:
        - go test
 ```
 
-Example configuration to override depth:
+Example configuration to override the depth:
 
 ```diff
  clone:
@@ -680,7 +697,7 @@ Example configuration to use a custom clone plugin:
 
 ### Git Submodules
 
-To use the credentials that cloned the repository to clone it's submodules, update `.gitmodules` to use `https` instead of `git`:
+To use the credentials used to clone the repository to clone its submodules, update `.gitmodules` to use `https` instead of `git`:
 
 ```diff
  [submodule "my-module"]
@@ -705,6 +722,10 @@ steps:
 ```
 
 ## `skip_clone`
+
+:::warning
+The default clone step is executed as `root` to ensure that the workspace directory can be accessed by any user (`0777`). This is necessary to allow rootless step containers to write to the workspace directory. If a rootless step container is used with `skip_clone`, the user must ensure a suitable workspace directory that can be accessed by the unprivileged container use, e.g. `/tmp`.
+:::
 
 By default Woodpecker is automatically adding a clone step. This clone step can be configured by the [clone](#clone) property. If you do not need a `clone` step at all you can skip it using:
 

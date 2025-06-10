@@ -6,6 +6,20 @@ toc_max_heading_level: 2
 
 The Kubernetes backend executes steps inside standalone Pods. A temporary PVC is created for the lifetime of the pipeline to transfer files between steps.
 
+## Metadata labels
+
+Woodpecker adds some labels to the pods to provide additional context to the workflow. These labels can be used for various purposes, e.g. for simple debugging or as selectors for network policies.
+
+The following metadata labels are supported:
+
+- `woodpecker-ci.org/forge-id`
+- `woodpecker-ci.org/repo-forge-id`
+- `woodpecker-ci.org/repo-id`
+- `woodpecker-ci.org/repo-name`
+- `woodpecker-ci.org/repo-full-name`
+- `woodpecker-ci.org/branch`
+- `woodpecker-ci.org/org-id`
+
 ## Private registries
 
 In addition to [registries specified in the UI](../../../20-usage/41-registries.md), you may provide [registry credentials in Kubernetes Secrets](https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/) to pull private container images defined in your pipeline YAML.
