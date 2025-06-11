@@ -42,7 +42,7 @@ require (
 	github.com/mattn/go-sqlite3 v1.14.28
 	github.com/moby/term v0.5.2
 	github.com/muesli/termenv v0.16.0
-	github.com/neticdk/go-bitbucket v1.0.2
+	github.com/neticdk/go-bitbucket v1.0.3
 	github.com/oklog/ulid/v2 v2.1.1
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.22.0
@@ -215,5 +215,3 @@ require (
 	sigs.k8s.io/structured-merge-diff/v4 v4.6.0 // indirect
 	sigs.k8s.io/yaml v1.4.0 // indirect
 )
-
-replace github.com/neticdk/go-bitbucket => github.com/henkka/go-bitbucket v0.0.0-20250527093400-40a2d641e3aa
