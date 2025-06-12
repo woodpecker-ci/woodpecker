@@ -41,7 +41,7 @@
       <InputField
         v-slot="{ id }"
         :label="$t('admin.settings.agents.capacity.capacity')"
-        docs-url="docs/next/administration/configuration/agent#woodpecker_max_workflows"
+        docs-url="docs/next/administration/configuration/agent#max_workflows"
       >
         <span class="text-wp-text-alt-100">{{ $t('admin.settings.agents.capacity.desc') }}</span>
         <TextField :id="id" :model-value="agent.capacity?.toString()" disabled />
