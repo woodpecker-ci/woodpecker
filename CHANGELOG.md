@@ -1,6 +1,14 @@
 # Changelog
 
-## [3.7.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.7.1) - 2025-06-12
+## [3.8.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.8.0) - 2025-06-12
+
+### ❤️ Thanks to all contributors! ❤️
+
+@henkka
+
+### 📈 Enhancement
+
+- Support for pull request file changes in bitbucketdatacenter [[#5205](https://github.com/woodpecker-ci/woodpecker/pull/5205)]
 
 ### 📚 Documentation
 
