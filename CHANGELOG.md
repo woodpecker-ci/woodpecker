@@ -1,6 +1,10 @@
 # Changelog
 
-## [3.7.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.7.1) - 2025-06-10
+## [3.7.1](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.7.1) - 2025-06-12
+
+### 📚 Documentation
+
+- fix(deps): update docs npm deps non-major [[#5226](https://github.com/woodpecker-ci/woodpecker/pull/5226)]
 
 ### 📦️ Dependency
 
