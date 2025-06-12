@@ -207,11 +207,6 @@ func execWithAxis(ctx context.Context, c *cli.Command, file, repoPath string, ax
 
 	// lint the yaml file
 	err = linter.New(
-		linter.WithTrusted(linter.TrustedConfiguration{
-			Security: c.Bool("repo-trusted-security"),
-			Network:  c.Bool("repo-trusted-network"),
-			Volumes:  c.Bool("repo-trusted-volumes"),
-		}),
 		linter.PrivilegedPlugins(privilegedPlugins),
 		linter.WithTrustedClonePlugins(constant.TrustedClonePlugins),
 	).Lint([]*linter.WorkflowConfig{{
