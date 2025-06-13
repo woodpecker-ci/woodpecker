@@ -4,7 +4,11 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@henkka
+@henkka, @mmatous
+
+### 🐛 Bug Fixes
+
+- Fix doc links in agent settings [[#5251](https://github.com/woodpecker-ci/woodpecker/pull/5251)]
 
 ### 📈 Enhancement
 
