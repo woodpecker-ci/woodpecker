@@ -18,16 +18,19 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"maps"
 
 	"github.com/rs/zerolog/log"
 
 	pipeline_errors "go.woodpecker-ci.org/woodpecker/v3/pipeline/errors"
+	pipeline_metadata "go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/metadata"
 	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/compiler"
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/stepbuilder"
 	"go.woodpecker-ci.org/woodpecker/v3/server"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge"
 	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
-	"go.woodpecker-ci.org/woodpecker/v3/server/pipeline/stepbuilder"
+	"go.woodpecker-ci.org/woodpecker/v3/server/pipeline/metadata"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 )
 
@@ -48,11 +51,33 @@ func parsePipeline(forge forge.Forge, store store.Store, currentPipeline *model.
 	if err != nil {
 		log.Error().Err(err).Msgf("error getting secrets for %s#%d", repo.FullName, currentPipeline.Number)
 	}
+	var secrets []compiler.Secret
+	for _, sec := range secs {
+		var events []string
+		for _, event := range sec.Events {
+			events = append(events, string(event))
+		}
+
+		secrets = append(secrets, compiler.Secret{
+			Name:           sec.Name,
+			Value:          sec.Value,
+			AllowedPlugins: sec.Images,
+			Events:         events,
+		})
+	}
 
 	registryService := server.Config.Services.Manager.RegistryServiceFromRepo(repo)
 	regs, err := registryService.RegistryListPipeline(repo, currentPipeline)
 	if err != nil {
 		log.Error().Err(err).Msgf("error getting registry credentials for %s#%d", repo.FullName, currentPipeline.Number)
+	}
+	var registries []compiler.Registry
+	for _, reg := range regs {
+		registries = append(registries, compiler.Registry{
+			Hostname: reg.Address,
+			Username: reg.Username,
+			Password: reg.Password,
+		})
 	}
 
 	if envs == nil {
@@ -67,28 +92,47 @@ func parsePipeline(forge forge.Forge, store store.Store, currentPipeline *model.
 		}
 	}
 
-	for k, v := range currentPipeline.AdditionalVariables {
-		envs[k] = v
-	}
+	maps.Copy(envs, currentPipeline.AdditionalVariables)
+
+	workflowMetadataFunc := metadata.MetadataFromStruct(forge, repo, currentPipeline, prev, server.Config.Server.Host)
 
 	b := stepbuilder.StepBuilder{
-		Repo:          repo,
-		Curr:          currentPipeline,
-		Prev:          prev,
-		Netrc:         netrc,
-		Secs:          secs,
-		Regs:          regs,
-		Envs:          envs,
-		Host:          server.Config.Server.Host,
-		Yamls:         yamls,
-		Forge:         forge,
-		DefaultLabels: server.Config.Pipeline.DefaultWorkflowLabels,
-		ProxyOpts: compiler.ProxyOptions{
-			NoProxy:    server.Config.Pipeline.Proxy.No,
-			HTTPProxy:  server.Config.Pipeline.Proxy.HTTP,
-			HTTPSProxy: server.Config.Pipeline.Proxy.HTTPS,
+		Yamls:                yamls,
+		WorkflowMetadataFunc: workflowMetadataFunc,
+		RepoTrusted: &pipeline_metadata.TrustedConfiguration{
+			Network:  repo.Trusted.Network,
+			Volumes:  repo.Trusted.Volumes,
+			Security: repo.Trusted.Security,
+		},
+		Host:                server.Config.Server.Host,
+		Envs:                envs,
+		TrustedClonePlugins: append(server.Config.Pipeline.TrustedClonePlugins, repo.NetrcTrustedPlugins...),
+		PrivilegedPlugins:   server.Config.Pipeline.PrivilegedPlugins,
+		DefaultLabels:       server.Config.Pipeline.DefaultWorkflowLabels,
+		CompilerOptions: []compiler.Option{
+			compiler.WithVolumes(server.Config.Pipeline.Volumes...),
+			compiler.WithNetworks(server.Config.Pipeline.Networks...),
+			compiler.WithLocal(false),
+			compiler.WithOption(
+				compiler.WithNetrc(
+					netrc.Login,
+					netrc.Password,
+					netrc.Machine,
+				),
+				repo.IsSCMPrivate || server.Config.Pipeline.AuthenticatePublicRepos,
+			),
+			compiler.WithDefaultClonePlugin(server.Config.Pipeline.DefaultClonePlugin),
+			compiler.WithRegistry(registries...),
+			compiler.WithSecret(secrets...),
+			compiler.WithProxy(compiler.ProxyOptions{
+				NoProxy:    server.Config.Pipeline.Proxy.No,
+				HTTPProxy:  server.Config.Pipeline.Proxy.HTTP,
+				HTTPSProxy: server.Config.Pipeline.Proxy.HTTPS,
+			}),
+			compiler.WithWorkspaceFromURL(compiler.DefaultWorkspaceBase, repo.ForgeURL),
 		},
 	}
+
 	return b.Build()
 }
 
@@ -111,15 +155,15 @@ func createPipelineItems(c context.Context, forge forge.Forge, store store.Store
 		err = updatePipelinePending(c, forge, store, currentPipeline, repo, user)
 	}
 
-	currentPipeline = setPipelineStepsOnPipeline(currentPipeline, pipelineItems)
+	currentPipeline = applyWorkflowsFromStepBuilder(store, currentPipeline, pipelineItems)
 
 	return currentPipeline, pipelineItems, err
 }
 
-// setPipelineStepsOnPipeline is the link between pipeline representation in "pipeline package" and server
+// applyWorkflowsFromStepBuilder is the link between pipeline representation in "pipeline package" and server
 // to be specific this func currently is used to convert the pipeline.Item list (crafted by StepBuilder.Build()) into
 // a pipeline that can be stored in the database by the server.
-func setPipelineStepsOnPipeline(pipeline *model.Pipeline, pipelineItems []*stepbuilder.Item) *model.Pipeline {
+func applyWorkflowsFromStepBuilder(store store.Store, pipeline *model.Pipeline, pipelineItems []*stepbuilder.Item) *model.Pipeline {
 	var pidSequence int
 	for _, item := range pipelineItems {
 		if pidSequence < item.Workflow.PID {
@@ -130,7 +174,19 @@ func setPipelineStepsOnPipeline(pipeline *model.Pipeline, pipelineItems []*stepb
 	// the workflows in the pipeline should be empty as only we do populate them,
 	// but if a pipeline was already loaded form database it might contain things, so we just clean it
 	pipeline.Workflows = nil
+
 	for _, item := range pipelineItems {
+		// TODO: should / could we prevent loading all workflow again?
+		workflow, err := store.WorkflowLoad(item.Workflow.ID)
+		if err != nil {
+			return nil
+		}
+
+		if pipeline.Status == model.StatusBlocked {
+			workflow.State = model.StatusBlocked
+		}
+
+		// gather all workflow steps through stages as flat list
 		for _, stage := range item.Config.Stages {
 			for _, step := range stage.Steps {
 				pidSequence++
@@ -144,20 +200,17 @@ func setPipelineStepsOnPipeline(pipeline *model.Pipeline, pipelineItems []*stepb
 					Failure:    step.Failure,
 					Type:       model.StepType(step.Type),
 				}
-				if item.Workflow.State == model.StatusSkipped {
+				if !item.Pending {
 					step.State = model.StatusSkipped
 				}
 				if pipeline.Status == model.StatusBlocked {
 					step.State = model.StatusBlocked
 				}
-				item.Workflow.Children = append(item.Workflow.Children, step)
+				workflow.Children = append(workflow.Children, step)
 			}
 		}
-		if pipeline.Status == model.StatusBlocked {
-			item.Workflow.State = model.StatusBlocked
-		}
-		item.Workflow.PipelineID = pipeline.ID
-		pipeline.Workflows = append(pipeline.Workflows, item.Workflow)
+
+		pipeline.Workflows = append(pipeline.Workflows, workflow)
 	}
 
 	return pipeline
