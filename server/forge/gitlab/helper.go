@@ -20,6 +20,7 @@ import (
 	"net/http"
 
 	"gitlab.com/gitlab-org/api/client-go"
+	"golang.org/x/oauth2"
 )
 
 const (
@@ -29,7 +30,9 @@ const (
 // newClient is a helper function that returns a new GitHub
 // client using the provided OAuth token.
 func newClient(url, accessToken string, skipVerify bool) (*gitlab.Client, error) {
-	return gitlab.NewOAuthClient(accessToken, gitlab.WithBaseURL(url), gitlab.WithHTTPClient(&http.Client{
+	return gitlab.NewAuthSourceClient(gitlab.OAuthTokenSource{
+		TokenSource: oauth2.StaticTokenSource(&oauth2.Token{AccessToken: accessToken}),
+	}, gitlab.WithBaseURL(url), gitlab.WithHTTPClient(&http.Client{
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: skipVerify},
 			Proxy:           http.ProxyFromEnvironment,
