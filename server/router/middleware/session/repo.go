@@ -63,7 +63,7 @@ func SetRepo() gin.HandlerFunc {
 			}
 			repo, err = _store.GetRepo(repoID)
 		} else {
-			repo, err = _store.GetRepoName(fullName)
+			repo, err = _store.GetRepoName(fullName, user.ForgeID)
 		}
 
 		if repo != nil && err == nil {
