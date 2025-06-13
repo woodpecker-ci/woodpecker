@@ -20,6 +20,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update golang-packages [[#5250](https://github.com/woodpecker-ci/woodpecker/pull/5250)]
 - chore(deps): lock file maintenance [[#5233](https://github.com/woodpecker-ci/woodpecker/pull/5233)]
 - fix(deps): update dependency simple-icons to v15.1.0 [[#5246](https://github.com/woodpecker-ci/woodpecker/pull/5246)]
 - fix(deps): update web npm deps non-major [[#5244](https://github.com/woodpecker-ci/woodpecker/pull/5244)]
