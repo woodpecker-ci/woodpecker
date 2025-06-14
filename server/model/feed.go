@@ -17,20 +17,20 @@ package model
 
 // Feed represents an item in the user's feed or timeline.
 type Feed struct {
-	RepoID          int64        `json:"repo_id"                     xorm:"repo_id"`
-	ID              int64        `json:"id,omitempty"                xorm:"pipeline_id"`
-	Number          int64        `json:"number,omitempty"            xorm:"pipeline_number"`
-	Event           string       `json:"event,omitempty"             xorm:"pipeline_event"`
-	Status          string       `json:"status,omitempty"            xorm:"pipeline_status"`
-	Created         int64        `json:"created,omitempty"           xorm:"pipeline_created"`
-	Started         int64        `json:"started,omitempty"           xorm:"pipeline_started"`
-	Finished        int64        `json:"finished,omitempty"          xorm:"pipeline_finished"`
-	Branch          string       `json:"branch,omitempty"            xorm:"pipeline_branch"`
-	Ref             string       `json:"ref,omitempty"               xorm:"pipeline_ref"`
-	Refspec         string       `json:"refspec,omitempty"           xorm:"pipeline_refspec"`
-	Deployment      *Deployment  `json:"deployment"                  xorm:"json 'pipeline_deployment'"`
-	PullRequest     *PullRequest `json:"pull_request,omitempty"      xorm:"json 'pipeline_pr'"`
-	ReleaseTagTitle string       `json:"release_tag_title,omitempty" xorm:"pipeline_release_tag_title"`
+	RepoID      int64        `json:"repo_id"                     xorm:"repo_id"`
+	ID          int64        `json:"id,omitempty"                xorm:"pipeline_id"`
+	Number      int64        `json:"number,omitempty"            xorm:"pipeline_number"`
+	Event       string       `json:"event,omitempty"             xorm:"pipeline_event"`
+	Status      string       `json:"status,omitempty"            xorm:"pipeline_status"`
+	Created     int64        `json:"created,omitempty"           xorm:"pipeline_created"`
+	Started     int64        `json:"started,omitempty"           xorm:"pipeline_started"`
+	Finished    int64        `json:"finished,omitempty"          xorm:"pipeline_finished"`
+	Branch      string       `json:"branch,omitempty"            xorm:"pipeline_branch"`
+	Ref         string       `json:"ref,omitempty"               xorm:"pipeline_ref"`
+	Refspec     string       `json:"refspec,omitempty"           xorm:"pipeline_refspec"`
+	Deployment  *Deployment  `json:"deployment"                  xorm:"json 'pipeline_deployment'"`
+	PullRequest *PullRequest `json:"pull_request,omitempty"      xorm:"json 'pipeline_pr'"`
+	Release     *Release     `json:"release,omitempty" xorm:"json 'pipeline_release'"`
 	// TODO change json to 'commit' in next major
 	Commit *Commit `json:"commit_pipeline,omitempty"   xorm:"json 'pipeline_commit'"`
 	Author string  `json:"author,omitempty"            xorm:"pipeline_author"`

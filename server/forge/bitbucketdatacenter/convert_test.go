@@ -271,31 +271,13 @@ func Test_convertPullRequestCloseEvent(t *testing.T) {
 	}
 	to := convertPullRequestEvent(from, "https://base.url")
 	assert.Equal(t, &model.Pipeline{
-<<<<<<< HEAD
 		Commit: &model.Commit{
 			SHA:      "1234567890abcdef",
 			ForgeURL: "https://base.url/projects/PRJ/repos/REPO/commits/1234567890abcdef",
 		},
-		Branch: "branch",
-		Avatar: "https://base.url/users/john.doe_mail.com/avatar.png",
-		Author: "John Doe",
-=======
-		Commit:    "1234567890abcdef",
-		Branch:    "branch",
-		Avatar:    "https://base.url/users/john.doe_mail.com/avatar.png",
-		Author:    "John Doe",
-		Email:     "john.doe@mail.com",
-		Timestamp: now.UTC().Unix(),
-		Ref:       "refs/head/branch",
-		ForgeURL:  "https://base.url/projects/PRJ/repos/REPO/commits/1234567890abcdef",
-		Event:     model.EventPullClosed,
-		Refspec:   "branch:main",
-		Title:     "my title",
-		Message:   "my title",
-	}, to)
-}
->>>>>>> main
-
+		Branch:   "branch",
+		Avatar:   "https://base.url/users/john.doe_mail.com/avatar.png",
+		Author:   "John Doe",
 		Ref:      "refs/head/branch",
 		ForgeURL: "https://base.url/projects/PRJ/repos/REPO/pull-requests/123",
 		Event:    model.EventPullClosed,

@@ -520,7 +520,7 @@ func (c *Gitea) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.
 			}
 			pipeline.Commit = sha
 			if pipeline.Commit.Message != msg {
-				pipeline.ReleaseTagTitle = msg
+				pipeline.Release = &model.Release{TagTitle: msg}
 			}
 		}
 	}

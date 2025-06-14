@@ -13,7 +13,21 @@ To enhance the usability of Woodpecker and meet evolving security standards, occ
 
 ### API changes
 
-- Changed the pipeline model to have different objects for different event metadata (e.g. pull request title)
+- Changed the pipeline model to use nested objects grouped based on the event (e.g. instead of a generic `title` it now uses `pr.title`)
+  `author` => `commit.author`
+  `deploy_to` => `deployment.target`
+  `deploy_task` => `deployment.task`
+  `commit` (SHA) => `commit.sha`
+  `title` => `release.title` (for release events) or `pr.title` (for pull-request events)
+  `message` => `commit.message`
+  `timestamp` => `created`
+  `sender` => `author`
+  `avatar` => `author_avatar`
+  `author_email` => `commit.author.email`
+  `pr_labels` => `pr.labels`
+  `is_prerelease` => `is_prerelease`
+  extraction from `ref` => `release.tag_title`
+  `from_fork` => `pr.from_fork`
 
 ## 3.0.0
 

@@ -39,19 +39,18 @@ type Pipeline struct {
 
 	Event WebhookEvent `json:"event"                       xorm:"event"`
 	// TODO change json to 'commit' in next major
-	Commit          *Commit      `json:"commit_pipeline"             xorm:"json 'commit'"`
-	Branch          string       `json:"branch"                      xorm:"branch"`
-	Ref             string       `json:"ref"                         xorm:"ref"`
-	Refspec         string       `json:"refspec"                     xorm:"refspec"`
-	ForgeURL        string       `json:"forge_url"                   xorm:"forge_url"`
-	Author          string       `json:"author"                      xorm:"author"`
-	Avatar          string       `json:"author_avatar"               xorm:"varchar(500) 'avatar'"`
-	ChangedFiles    []string     `json:"changed_files,omitempty"     xorm:"LONGTEXT 'changed_files'"`
-	Deployment      *Deployment  `json:"deployment,omitempty"        xorm:"json 'deployment'"`
-	IsPrerelease    bool         `json:"is_prerelease,omitempty"     xorm:"is_prerelease"`
-	PullRequest     *PullRequest `json:"pull_request,omitempty"      xorm:"json 'pr'"`
-	Cron            string       `json:"cron,omitempty"              xorm:"cron"`
-	ReleaseTagTitle string       `json:"release_tag_title,omitempty" xorm:"release_tag_title"`
+	Commit       *Commit      `json:"commit_pipeline"             xorm:"json 'commit'"`
+	Branch       string       `json:"branch"                      xorm:"branch"`
+	Ref          string       `json:"ref"                         xorm:"ref"`
+	Refspec      string       `json:"refspec"                     xorm:"refspec"`
+	ForgeURL     string       `json:"forge_url"                   xorm:"forge_url"`
+	Author       string       `json:"author"                      xorm:"author"`
+	Avatar       string       `json:"author_avatar"               xorm:"varchar(500) 'avatar'"`
+	ChangedFiles []string     `json:"changed_files,omitempty"     xorm:"LONGTEXT 'changed_files'"`
+	Deployment   *Deployment  `json:"deployment,omitempty"        xorm:"json 'deployment'"`
+	PullRequest  *PullRequest `json:"pull_request,omitempty"      xorm:"json 'pr'"`
+	Cron         string       `json:"cron,omitempty"              xorm:"cron"`
+	Release      *Release     `json:"release,omitempty"      xorm:"json 'release'"`
 }
 
 // APIPipeline TODO remove in next major.
@@ -69,6 +68,7 @@ type APIPipeline struct {
 	Email             string   `json:"author_email"`
 	PullRequestLabels []string `json:"pr_labels,omitempty"`
 	FromFork          bool     `json:"from_fork,omitempty"`
+	IsPrerelease      bool     `json:"is_prerelease,omitempty"`
 } //	@name Pipeline
 
 // TableName return database table name for xorm.
@@ -96,13 +96,16 @@ func (p *Pipeline) ToAPIModel() *APIPipeline {
 		ap.PullRequestLabels = p.PullRequest.Labels
 		ap.FromFork = p.PullRequest.FromFork
 	}
+	if p.Release != nil {
+		ap.IsPrerelease = p.Release.IsPrerelease
+	}
 	switch p.Event {
 	case EventCron:
 		ap.Message = p.Cron
 	case EventTag:
-		ap.Message = "created tag " + p.ReleaseTagTitle
+		ap.Message = "created tag " + p.Release.TagTitle
 	case EventRelease:
-		ap.Message = p.ReleaseTagTitle
+		ap.Message = p.Release.TagTitle
 	}
 
 	return ap
@@ -131,4 +134,9 @@ type Deployment struct {
 	Target      string `json:"target"`
 	Task        string `json:"task"`
 	Description string `json:"description"`
+}
+
+type Release struct {
+	IsPrerelease bool   `json:"is_prerelease,omitempty"`
+	TagTitle     string `json:"release_tag_title,omitempty"`
 }

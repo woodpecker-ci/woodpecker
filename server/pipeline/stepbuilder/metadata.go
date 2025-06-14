@@ -125,12 +125,9 @@ func metadataPipelineFromModelPipeline(pipeline *model.Pipeline, includeParent b
 				Email: pipeline.Commit.Author.Email,
 			},
 			ChangedFiles: pipeline.ChangedFiles,
-
-			IsPrerelease: pipeline.IsPrerelease,
 		},
-		Release: pipeline.ReleaseTagTitle,
-		Cron:    pipeline.Cron,
-		Avatar:  pipeline.Avatar,
+		Cron:   pipeline.Cron,
+		Avatar: pipeline.Avatar,
 	}
 
 	if pipeline.PullRequest != nil {
@@ -139,6 +136,10 @@ func metadataPipelineFromModelPipeline(pipeline *model.Pipeline, includeParent b
 	if pipeline.Deployment != nil {
 		metadata.DeployTo = pipeline.Deployment.Target
 		metadata.DeployTask = pipeline.Deployment.Task
+	}
+	if pipeline.Release != nil {
+		metadata.Commit.IsPrerelease = pipeline.Release.IsPrerelease
+		metadata.Release = pipeline.Release.TagTitle
 	}
 
 	return metadata
