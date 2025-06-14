@@ -4,7 +4,11 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@henkka, @mmatous
+@henkka, @hhamalai, @mmatous
+
+### 🔒 Security
+
+- kubernetes: prevent secrets from leaking to api-server logs [[#5196](https://github.com/woodpecker-ci/woodpecker/pull/5196)]
 
 ### 📚 Documentation
 
