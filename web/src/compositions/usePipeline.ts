@@ -75,36 +75,34 @@ export default (pipeline: Ref<Pipeline | undefined>) => {
     return prettyDuration(durationElapsed.value);
   });
 
-  const message = computed(() => emojify(pipeline.value?.commit_pipeline.message ?? ''));
+  const message = computed(() => emojify(pipeline.value?.message ?? ''));
   const shortMessage = computed(() => message.value.split('\n')[0]);
 
-  const context = computed(() => {
-    let context = '';
-    if (pipeline.value?.event === 'pull_request' || pipeline.value?.event === 'pull_request_closed') {
-      context = pipeline.value.pull_request!.title;
-    } else if (pipeline.value?.event === 'deployment') {
-      context = pipeline.value.deployment!.description;
-    } else if (pipeline.value?.event === 'release' || pipeline.value?.event === 'tag') {
-      context = pipeline.value.release_tag_title!;
-    }
-    return emojify(context);
-  });
-  const shortContext = computed(() => context.value.split('\n')[0]);
+  const prTitleWithDescription = computed(() => emojify(pipeline.value?.title ?? ''));
+  const prTitle = computed(() => prTitleWithDescription.value.split('\n')[0]);
 
   const prettyRef = computed(() => {
-    if (pipeline.value?.event === 'tag' || pipeline.value?.event === 'release') {
+    if (pipeline.value?.event === 'push' || pipeline.value?.event === 'deployment') {
+      return pipeline.value.branch;
+    }
+
+    if (pipeline.value?.event === 'cron') {
+      return pipeline.value.ref.replaceAll('refs/heads/', '');
+    }
+
+    if (pipeline.value?.event === 'tag') {
       return pipeline.value.ref.replaceAll('refs/tags/', '');
     }
 
     if (pipeline.value?.event === 'pull_request' || pipeline.value?.event === 'pull_request_closed') {
-      return `#${pipeline.value.pull_request!.index}`;
+      return `#${pipeline.value.ref
+        .replaceAll('refs/pull/', '')
+        .replaceAll('refs/merge-requests/', '')
+        .replaceAll('/merge', '')
+        .replaceAll('/head', '')}`;
     }
 
-    if (!pipeline.value) {
-      return '';
-    }
-
-    return pipeline.value.branch || pipeline.value.ref;
+    return pipeline.value?.ref;
   });
 
   const created = computed(() => {
@@ -117,5 +115,15 @@ export default (pipeline: Ref<Pipeline | undefined>) => {
     return toLocaleString(new Date(start * 1000));
   });
 
-  return { since, duration, durationElapsed, message, shortMessage, shortContext, context, prettyRef, created };
+  return {
+    since,
+    duration,
+    durationElapsed,
+    message,
+    shortMessage,
+    prTitle,
+    prTitleWithDescription,
+    prettyRef,
+    created,
+  };
 };
