@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.8.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.8.0) - 2025-06-13
+## [3.8.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.8.0) - 2025-06-14
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -20,6 +20,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update gitea/gitea docker tag to v1.24 [[#5253](https://github.com/woodpecker-ci/woodpecker/pull/5253)]
 - fix(deps): update golang-packages [[#5250](https://github.com/woodpecker-ci/woodpecker/pull/5250)]
 - chore(deps): lock file maintenance [[#5233](https://github.com/woodpecker-ci/woodpecker/pull/5233)]
 - fix(deps): update dependency simple-icons to v15.1.0 [[#5246](https://github.com/woodpecker-ci/woodpecker/pull/5246)]
