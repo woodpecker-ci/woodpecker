@@ -6,6 +6,11 @@
 
 @henkka, @mmatous
 
+### 📚 Documentation
+
+- fix(deps): update docs npm deps non-major [[#5252](https://github.com/woodpecker-ci/woodpecker/pull/5252)]
+- fix(deps): update docs npm deps non-major [[#5226](https://github.com/woodpecker-ci/woodpecker/pull/5226)]
+
 ### 🐛 Bug Fixes
 
 - Fix doc links in agent settings [[#5251](https://github.com/woodpecker-ci/woodpecker/pull/5251)]
@@ -13,10 +18,6 @@
 ### 📈 Enhancement
 
 - Support for pull request file changes in bitbucketdatacenter [[#5205](https://github.com/woodpecker-ci/woodpecker/pull/5205)]
-
-### 📚 Documentation
-
-- fix(deps): update docs npm deps non-major [[#5226](https://github.com/woodpecker-ci/woodpecker/pull/5226)]
 
 ### 📦️ Dependency
 
