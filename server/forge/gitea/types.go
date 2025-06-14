@@ -29,7 +29,8 @@ type pushHook struct {
 
 	Repo *gitea.Repository `json:"repository"`
 
-	Commits []gitea.PayloadCommit `json:"commits"`
+	TotalCommits int                   `json:"total_commits"`
+	Commits      []gitea.PayloadCommit `json:"commits"`
 
 	HeadCommit gitea.PayloadCommit `json:"head_commit"`
 
