@@ -21,6 +21,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update web npm deps non-major [[#5254](https://github.com/woodpecker-ci/woodpecker/pull/5254)]
 - chore(deps): update gitea/gitea docker tag to v1.24 [[#5253](https://github.com/woodpecker-ci/woodpecker/pull/5253)]
 - fix(deps): update golang-packages [[#5250](https://github.com/woodpecker-ci/woodpecker/pull/5250)]
 - chore(deps): lock file maintenance [[#5233](https://github.com/woodpecker-ci/woodpecker/pull/5233)]
