@@ -23,10 +23,6 @@ import (
 	"golang.org/x/oauth2"
 )
 
-const (
-	gravatarBase = "https://www.gravatar.com/avatar"
-)
-
 // newClient is a helper function that returns a new GitHub
 // client using the provided OAuth token.
 func newClient(url, accessToken string, skipVerify bool) (*gitlab.Client, error) {
