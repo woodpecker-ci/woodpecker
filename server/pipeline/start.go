@@ -19,9 +19,9 @@ import (
 
 	"github.com/rs/zerolog/log"
 
+	"go.woodpecker-ci.org/woodpecker/v3/pipeline/frontend/yaml/stepbuilder"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
-	"go.woodpecker-ci.org/woodpecker/v3/server/pipeline/stepbuilder"
 	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 )
 
