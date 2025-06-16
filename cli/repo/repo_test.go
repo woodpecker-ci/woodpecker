@@ -27,8 +27,8 @@ func TestRepoOutput(t *testing.T) {
 		},
 		{
 			name:     "table output with custom columns",
-			args:     []string{"output", "--output", "table=Name,Forge_URL,Trusted_Network"},
-			expected: "NAME   FORGE URL        TRUSTED NETWORK\nrepo1  git.example.com  yes\n",
+			args:     []string{"output", "--output", "table=Name,Forge_URL"},
+			expected: "NAME   FORGE URL\nrepo1  git.example.com\n",
 		},
 		{
 			name:     "table output with no header",
@@ -37,8 +37,8 @@ func TestRepoOutput(t *testing.T) {
 		},
 		{
 			name:     "go-template output",
-			args:     []string{"output", "--output", "go-template={{range . }}{{.Name}} {{.ForgeURL}} {{.Trusted.Network}}{{end}}"},
-			expected: "repo1 git.example.com true\n",
+			args:     []string{"output", "--output", "go-template={{range . }}{{.Name}} {{.ForgeURL}}{{end}}"},
+			expected: "repo1 git.example.com\n",
 		},
 	}
 

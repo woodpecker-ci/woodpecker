@@ -359,16 +359,16 @@ func TestCompilerCompileWithFromSecret(t *testing.T) {
 	}
 	defaultCloneStage := &backend_types.Stage{
 		Steps: []*backend_types.Step{{
-			Name:          "clone",
-			Type:          backend_types.StepTypeClone,
-			Image:         constant.DefaultClonePlugin,
-			OnSuccess:     true,
-			Failure:       "fail",
-			WorkingDir:    "/woodpecker/src/github.com/octocat/hello-world",
-			WorkspaceBase: "/woodpecker",
-			Volumes:       []string{defaultVolume.Name + ":/woodpecker"},
-			Networks:      []backend_types.Conn{{Name: "test_default", Aliases: []string{"clone"}}},
-			ExtraHosts:    []backend_types.HostAlias{},
+			Name:            "clone",
+			Type:            backend_types.StepTypeClone,
+			Image:           constant.DefaultClonePlugin,
+			OnSuccess:       true,
+			Failure:         "fail",
+			WorkingDir:      "/woodpecker/src/github.com/octocat/hello-world",
+			WorkspaceBase:   "/woodpecker",
+			WorkspaceVolume: defaultVolume.Name + ":/woodpecker",
+			Networks:        []backend_types.Conn{{Name: "test_default", Aliases: []string{"clone"}}},
+			ExtraHosts:      []backend_types.HostAlias{},
 		}},
 	}
 	tests := []struct {
@@ -390,17 +390,17 @@ func TestCompilerCompileWithFromSecret(t *testing.T) {
 			backConf: &backend_types.Config{
 				Stages: []*backend_types.Stage{defaultCloneStage, {
 					Steps: []*backend_types.Step{{
-						Name:          "step",
-						Type:          backend_types.StepTypeCommands,
-						Image:         "bash",
-						Commands:      []string{"env"},
-						OnSuccess:     true,
-						Failure:       "fail",
-						WorkingDir:    "/test/src/github.com/octocat/hello-world",
-						WorkspaceBase: "/test",
-						Volumes:       []string{defaultVolume.Name + ":/test"},
-						Networks:      []backend_types.Conn{{Name: "test_default", Aliases: []string{"step"}}},
-						ExtraHosts:    []backend_types.HostAlias{},
+						Name:            "step",
+						Type:            backend_types.StepTypeCommands,
+						Image:           "bash",
+						Commands:        []string{"env"},
+						OnSuccess:       true,
+						Failure:         "fail",
+						WorkingDir:      "/test/src/github.com/octocat/hello-world",
+						WorkspaceBase:   "/test",
+						WorkspaceVolume: defaultVolume.Name + ":/test",
+						Networks:        []backend_types.Conn{{Name: "test_default", Aliases: []string{"step"}}},
+						ExtraHosts:      []backend_types.HostAlias{},
 						SecretMapping: map[string]string{
 							"SECRET": "VERY_SECRET",
 						},

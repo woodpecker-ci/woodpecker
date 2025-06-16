@@ -184,7 +184,7 @@ func TestTinyPod(t *testing.T) {
 		Commands:        []string{"gradle build"},
 		WorkspaceVolume: "workspace:/woodpecker/src",
 		Environment:     map[string]string{"CI": "woodpecker"},
-	}, &config{
+	}, types.TrustedConfiguration{}, &config{
 		Namespace: "woodpecker",
 	}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{})
 	assert.NoError(t, err)
@@ -630,7 +630,7 @@ func TestSecrets(t *testing.T) {
 		UUID:            "01he8bebctabr3kgk0qj36d2me-0",
 		Environment:     map[string]string{"CGO": "0"},
 		WorkspaceVolume: "workspace:/woodpecker/src",
-	}, &config{
+	}, types.TrustedConfiguration{}, &config{
 		Namespace:                  "woodpecker",
 		NativeSecretsAllowFromStep: true,
 	}, "wp-3kgk0qj36d2me01he8bebctabr-0", "linux/amd64", BackendOptions{

@@ -31,8 +31,8 @@ var splitTrusted = xormigrate.Migration{
 		}
 
 		type repos struct {
-			ID        int64                      `xorm:"pk autoincr 'id'"`
-			IsTrusted bool                       `xorm:"'trusted'"`
+			ID        int64                `xorm:"pk autoincr 'id'"`
+			IsTrusted bool                 `xorm:"'trusted'"`
 			Trusted   trustedConfiguration `xorm:"json 'trusted_conf'"`
 		}
 
