@@ -51,9 +51,6 @@ func TestRepoOutput(t *testing.T) {
 			Visibility: "public",
 			IsActive:   true,
 			AllowPull:  true,
-			Trusted: woodpecker.TrustedConfiguration{
-				Network: true,
-			},
 		},
 	}
 

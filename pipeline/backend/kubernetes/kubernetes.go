@@ -237,6 +237,13 @@ func (e *kube) StartStep(ctx context.Context, step *types.Step, taskUUID string,
 		}
 	}
 
+	if needsStepSecret(step) {
+		err = startStepSecret(ctx, e, step)
+		if err != nil {
+			return err
+		}
+	}
+
 	log.Trace().Str("taskUUID", taskUUID).Msgf("starting step: %s", step.Name)
 	_, err = startPod(ctx, e, step, trusted, options)
 	return err
@@ -397,6 +404,13 @@ func (e *kube) DestroyStep(ctx context.Context, step *types.Step, taskUUID strin
 	log.Trace().Str("taskUUID", taskUUID).Msgf("Stopping step: %s", step.Name)
 	if needsRegistrySecret(step) {
 		err := stopRegistrySecret(ctx, e, step, defaultDeleteOptions)
+		if err != nil {
+			errs = append(errs, err)
+		}
+	}
+
+	if needsStepSecret(step) {
+		err := stopStepSecret(ctx, e, step, defaultDeleteOptions)
 		if err != nil {
 			errs = append(errs, err)
 		}

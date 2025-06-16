@@ -19,17 +19,21 @@ import (
 
 	"src.techknowlogick.com/xormigrate"
 	"xorm.io/xorm"
-
-	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
 
 var splitTrusted = xormigrate.Migration{
 	ID: "split-trusted",
 	MigrateSession: func(sess *xorm.Session) error {
+		type trustedConfiguration struct {
+			Network  bool `json:"network"`
+			Volumes  bool `json:"volumes"`
+			Security bool `json:"security"`
+		}
+
 		type repos struct {
 			ID        int64                      `xorm:"pk autoincr 'id'"`
 			IsTrusted bool                       `xorm:"'trusted'"`
-			Trusted   model.TrustedConfiguration `xorm:"json 'trusted_conf'"`
+			Trusted   trustedConfiguration `xorm:"json 'trusted_conf'"`
 		}
 
 		if err := sess.Sync(new(repos)); err != nil {
@@ -37,7 +41,7 @@ var splitTrusted = xormigrate.Migration{
 		}
 
 		if _, err := sess.Where("trusted = ?", false).Cols("trusted_conf").Update(&repos{
-			Trusted: model.TrustedConfiguration{
+			Trusted: trustedConfiguration{
 				Network:  false,
 				Security: false,
 				Volumes:  false,
@@ -47,7 +51,7 @@ var splitTrusted = xormigrate.Migration{
 		}
 
 		if _, err := sess.Where("trusted = ?", true).Cols("trusted_conf").Update(&repos{
-			Trusted: model.TrustedConfiguration{
+			Trusted: trustedConfiguration{
 				Network:  true,
 				Security: true,
 				Volumes:  true,

@@ -114,11 +114,13 @@ func (c *Compiler) createProcess(container *yaml_types.Container, workflow *yaml
 		return secret.Value, nil
 	}
 
-	if err := settings.ParamsToEnv(container.Settings, environment, "PLUGIN_", true, getSecretValue); err != nil {
+	secretMapping := map[string]string{}
+
+	if err := settings.ParamsToEnv(container.Settings, environment, "PLUGIN_", true, getSecretValue, secretMapping); err != nil {
 		return nil, err
 	}
 
-	if err := settings.ParamsToEnv(container.Environment, environment, "", false, getSecretValue); err != nil {
+	if err := settings.ParamsToEnv(container.Environment, environment, "", false, getSecretValue, secretMapping); err != nil {
 		return nil, err
 	}
 
@@ -165,6 +167,7 @@ func (c *Compiler) createProcess(container *yaml_types.Container, workflow *yaml
 		WorkingDir:      workingDir,
 		WorkspaceBase:   workspaceBase,
 		Environment:     environment,
+		SecretMapping:   secretMapping,
 		Commands:        container.Commands,
 		Entrypoint:      container.Entrypoint,
 		ExtraHosts:      extraHosts,

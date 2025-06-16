@@ -117,17 +117,17 @@ var flags = []cli.Flag{
 	},
 
 	// trusted repositories
-	&cli.IntSliceFlag{
+	&cli.Int64SliceFlag{
 		Sources: cli.EnvVars("WOODPECKER_TRUSTED_REPOS_VOLUMES"),
 		Name:    "trusted-repos-volumes",
 		Usage:   "IDs of repos that are trusted to use extended volume features",
 	},
-	&cli.IntSliceFlag{
+	&cli.Int64SliceFlag{
 		Sources: cli.EnvVars("WOODPECKER_TRUSTED_REPOS_NETWORK"),
 		Name:    "trusted-repos-network",
 		Usage:   "IDs of repos that are trusted to use extended network features",
 	},
-	&cli.IntSliceFlag{
+	&cli.Int64SliceFlag{
 		Sources: cli.EnvVars("WOODPECKER_TRUSTED_REPOS_SECURITY"),
 		Name:    "trusted-repos-security",
 		Usage:   "IDs of repos that are trusted to use extended security features",

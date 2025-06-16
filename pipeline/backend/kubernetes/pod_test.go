@@ -177,13 +177,14 @@ func TestTinyPod(t *testing.T) {
 	pod, err := mkPod(&types.Step{
 		Name:            "build-via-gradle",
 		Image:           "gradle:8.4.0-jdk21",
+		UUID:            "01he8bebctabr3kgk0qj36d2me-0",
 		WorkingDir:      "/woodpecker/src",
 		Pull:            false,
 		Privileged:      false,
 		Commands:        []string{"gradle build"},
 		WorkspaceVolume: "workspace:/woodpecker/src",
 		Environment:     map[string]string{"CI": "woodpecker"},
-	}, types.TrustedConfiguration{}, &config{
+	}, &config{
 		Namespace: "woodpecker",
 	}, "wp-01he8bebctabr3kgk0qj36d2me-0", "linux/amd64", BackendOptions{})
 	assert.NoError(t, err)
@@ -416,6 +417,7 @@ func TestPodPrivilege(t *testing.T) {
 		return mkPod(&types.Step{
 			Name:       "go-test",
 			Image:      "golang:1.16",
+			UUID:       "01he8bebctabr3kgk0qj36d2me-0",
 			Privileged: stepPrivileged,
 		}, types.TrustedConfiguration{Security: stepPrivileged}, &config{
 			Namespace:       "woodpecker",
@@ -526,6 +528,7 @@ func TestScratchPod(t *testing.T) {
 	pod, err := mkPod(&types.Step{
 		Name:       "curl-google",
 		Image:      "quay.io/curl/curl",
+		UUID:       "01he8bebctabr3kgk0qj36d2me-0",
 		Entrypoint: []string{"/usr/bin/curl", "-v", "google.com"},
 	}, types.TrustedConfiguration{}, &config{
 		Namespace: "woodpecker",
@@ -624,9 +627,10 @@ func TestSecrets(t *testing.T) {
 	pod, err := mkPod(&types.Step{
 		Name:            "test-secrets",
 		Image:           "alpine",
+		UUID:            "01he8bebctabr3kgk0qj36d2me-0",
 		Environment:     map[string]string{"CGO": "0"},
 		WorkspaceVolume: "workspace:/woodpecker/src",
-	}, types.TrustedConfiguration{}, &config{
+	}, &config{
 		Namespace:                  "woodpecker",
 		NativeSecretsAllowFromStep: true,
 	}, "wp-3kgk0qj36d2me01he8bebctabr-0", "linux/amd64", BackendOptions{
@@ -657,4 +661,36 @@ func TestSecrets(t *testing.T) {
 
 	ja := jsonassert.New(t)
 	ja.Assertf(string(podJSON), expected)
+}
+
+func TestStepSecret(t *testing.T) {
+	const expected = `{
+		"metadata": {
+			"name": "wp-01he8bebctabr3kgk0qj36d2me-0-step-secret",
+			"namespace": "woodpecker",
+			"creationTimestamp": null
+		},
+		"type": "Opaque",
+		"stringData": {
+			"VERY_SECRET": "secret_value"
+		}
+	}`
+
+	secret, err := mkStepSecret(&types.Step{
+		UUID:  "01he8bebctabr3kgk0qj36d2me-0",
+		Name:  "go-test",
+		Image: "meltwater/drone-cache",
+		SecretMapping: map[string]string{
+			"VERY_SECRET": "secret_value",
+		},
+	}, &config{
+		Namespace: "woodpecker",
+	})
+	assert.NoError(t, err)
+
+	secretJSON, err := json.Marshal(secret)
+	assert.NoError(t, err)
+
+	ja := jsonassert.New(t)
+	ja.Assertf(string(secretJSON), expected)
 }

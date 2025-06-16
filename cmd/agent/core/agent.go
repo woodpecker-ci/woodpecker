@@ -261,9 +261,9 @@ func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 	}
 
 	trustedRepos := agent.TrustedRepos{
-		Network:  c.IntSlice("trusted-repos-network"),
-		Volumes:  c.IntSlice("trusted-repos-volumes"),
-		Security: c.IntSlice("trusted-repos-security"),
+		Network:  c.Int64Slice("trusted-repos-network"),
+		Volumes:  c.Int64Slice("trusted-repos-volumes"),
+		Security: c.Int64Slice("trusted-repos-security"),
 	}
 
 	log.Trace().Any("trusted", trustedRepos).Msg("agent configured with trusted repos")
