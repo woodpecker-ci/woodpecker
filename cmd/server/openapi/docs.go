@@ -4752,8 +4752,8 @@ const docTemplate = `{
                 "refspec": {
                     "type": "string"
                 },
-                "release_tag_title": {
-                    "type": "string"
+                "release": {
+                    "$ref": "#/definitions/model.Release"
                 },
                 "repo_id": {
                     "type": "integer"
@@ -4986,8 +4986,8 @@ const docTemplate = `{
                 "refspec": {
                     "type": "string"
                 },
-                "release_tag_title": {
-                    "type": "string"
+                "release": {
+                    "$ref": "#/definitions/model.Release"
                 },
                 "reviewed": {
                     "type": "integer"
@@ -5917,9 +5917,6 @@ const docTemplate = `{
                 "id": {
                     "type": "integer"
                 },
-                "is_prerelease": {
-                    "type": "boolean"
-                },
                 "number": {
                     "type": "integer"
                 },
@@ -5935,8 +5932,8 @@ const docTemplate = `{
                 "refspec": {
                     "type": "string"
                 },
-                "release_tag_title": {
-                    "type": "string"
+                "release": {
+                    "$ref": "#/definitions/model.Release"
                 },
                 "reviewed": {
                     "type": "integer"
@@ -5964,6 +5961,17 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/model.Workflow"
                     }
+                }
+            }
+        },
+        "model.Release": {
+            "type": "object",
+            "properties": {
+                "is_prerelease": {
+                    "type": "boolean"
+                },
+                "release_tag_title": {
+                    "type": "string"
                 }
             }
         },
