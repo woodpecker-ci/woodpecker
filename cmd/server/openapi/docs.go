@@ -5214,9 +5214,6 @@ const docTemplate = `{
                 "timeout": {
                     "type": "integer"
                 },
-                "trusted": {
-                    "$ref": "#/definitions/model.TrustedConfiguration"
-                },
                 "visibility": {
                     "$ref": "#/definitions/RepoVisibility"
                 }
