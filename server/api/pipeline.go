@@ -593,6 +593,7 @@ func GetPipelineQueue(c *gin.Context) {
 //	@Param			repo_id			path	int		true	"the repository id"
 //	@Param			number			path	int		true	"the number of the pipeline"
 //	@Param			event			query	string	false	"override the event type"
+//	@Param			deploy_to		query	string	false	"deprecated use deploy_target instead"
 //	@Param			deploy_target	query	string	false	"override the deployment target value"
 func PostPipeline(c *gin.Context) {
 	_store := store.FromContext(c)

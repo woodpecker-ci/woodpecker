@@ -3130,6 +3130,12 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
+                        "description": "deprecated use deploy_target instead",
+                        "name": "deploy_to",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
                         "description": "override the deployment target value",
                         "name": "deploy_target",
                         "in": "query"
