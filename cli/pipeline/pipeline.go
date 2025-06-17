@@ -87,7 +87,7 @@ func pipelineOutput(c *cli.Command, pipelines []*woodpecker.Pipeline, fd ...io.W
 		}
 		table.AddFieldFn("message", func(obj any) string {
 			pl, _ := obj.(*woodpecker.Pipeline)
-			return pl.Commit.Message
+			return pl.CommitPipeline.Message
 		})
 		for _, resource := range pipelines {
 			if err := table.Write(cols, resource); err != nil {

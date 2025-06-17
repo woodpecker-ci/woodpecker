@@ -498,8 +498,8 @@ func (c *Gitea) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.
 	}
 
 	if pipeline != nil {
-		switch {
-		case pipeline.Event == model.EventRelease:
+		switch pipeline.Event {
+		case model.EventRelease:
 			tagName := strings.Split(pipeline.Ref, "/")[2]
 			commit, tagMsg, err := c.getTagCommitAndMessage(ctx, repo, tagName)
 			if err != nil {
@@ -507,13 +507,13 @@ func (c *Gitea) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.
 			}
 			pipeline.Commit = commit
 			pipeline.Release.TagTitle = tagMsg
-		case pipeline.Event == model.EventPull || pipeline.Event == model.EventPullClosed:
+		case model.EventPull, model.EventPullClosed:
 			sha, err := c.getCommitFromSHAStore(ctx, repo, pipeline.Commit.SHA)
 			if err != nil {
 				return nil, nil, err
 			}
 			pipeline.Commit = sha
-		case pipeline.Event == model.EventTag:
+		case model.EventTag:
 			tagName := strings.Split(pipeline.Ref, "/")[2]
 			commit, tagMsg, err := c.getTagCommitAndMessage(ctx, repo, tagName)
 			if err != nil {

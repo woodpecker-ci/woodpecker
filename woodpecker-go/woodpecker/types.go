@@ -96,28 +96,38 @@ type (
 
 	// Pipeline defines a pipeline object.
 	Pipeline struct {
-		ID          int64            `json:"id"`
-		Number      int64            `json:"number"`
-		Parent      int64            `json:"parent"`
-		Event       string           `json:"event"`
-		Status      string           `json:"status"`
-		Errors      []*PipelineError `json:"errors"`
-		Created     int64            `json:"created_at"`
-		Updated     int64            `json:"updated_at"`
-		Started     int64            `json:"started_at"`
-		Finished    int64            `json:"finished_at"`
-		Deployment  *Deployment      `json:"deployment"`
-		Commit      string           `json:"commit"`
-		Branch      string           `json:"branch"`
-		Ref         string           `json:"ref"`
-		Refspec     string           `json:"refspec"`
-		PullRequest *PullRequest     `json:"pull_request,omitempty"`
-		Author      string           `json:"author"`
-		Avatar      string           `json:"author_avatar"`
-		ForgeURL    string           `json:"forge_url"`
-		Reviewer    string           `json:"reviewed_by"`
-		Reviewed    int64            `json:"reviewed_at"`
-		Workflows   []*Workflow      `json:"workflows,omitempty"`
+		ID             int64            `json:"id"`
+		Number         int64            `json:"number"`
+		Parent         int64            `json:"parent"`
+		Event          string           `json:"event"`
+		Status         string           `json:"status"`
+		Errors         []*PipelineError `json:"errors"`
+		Created        int64            `json:"created_at"`
+		Updated        int64            `json:"updated_at"`
+		Started        int64            `json:"started_at"`
+		Finished       int64            `json:"finished_at"`
+		Deployment     *Deployment      `json:"deployment"`
+		CommitPipeline *Commit          `json:"commit_pipeline"`
+		Branch         string           `json:"branch"`
+		Ref            string           `json:"ref"`
+		Refspec        string           `json:"refspec"`
+		PullRequest    *PullRequest     `json:"pull_request,omitempty"`
+		Author         string           `json:"author"`
+		Avatar         string           `json:"author_avatar"`
+		ForgeURL       string           `json:"forge_url"`
+		Reviewer       string           `json:"reviewed_by"`
+		Reviewed       int64            `json:"reviewed_at"`
+		Workflows      []*Workflow      `json:"workflows,omitempty"`
+
+		// old fields
+
+		Title     string `json:"title"`
+		Message   string `json:"message"`
+		Timestamp int64  `json:"timestamp"`
+		Sender    string `json:"sender"`
+		Commit    string `json:"commit"`
+		Email     string `json:"author_email"`
+		Deploy    string `json:"deploy_to"`
 	}
 
 	Commit struct {

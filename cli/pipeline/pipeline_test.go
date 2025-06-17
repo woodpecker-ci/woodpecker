@@ -53,7 +53,7 @@ func TestPipelineOutput(t *testing.T) {
 			Status: "success",
 			Event:  "push",
 			Branch: "main",
-			Commit: &woodpecker.Commit{
+			CommitPipeline: &woodpecker.Commit{
 				Message: "message\nmultiline",
 			},
 			Author: "John Doe\n",
