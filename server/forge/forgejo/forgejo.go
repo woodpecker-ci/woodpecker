@@ -505,7 +505,7 @@ func (c *Forgejo) Hook(ctx context.Context, r *http.Request) (*model.Repo, *mode
 			pipeline.Commit = commit
 			pipeline.Release.TagTitle = tagMsg
 		case pipeline.Event == model.EventPull || pipeline.Event == model.EventPullClosed:
-			sha, err := c.getCommitFromSHAStore(ctx, repo, pipeline.Commit.SHA)
+			sha, err := c.getCommitFromSHAWithUserFromStore(ctx, repo, pipeline.Commit.SHA)
 			if err != nil {
 				return nil, nil, err
 			}
@@ -696,7 +696,7 @@ func (c *Forgejo) getTagCommitAndMessage(ctx context.Context, repo *model.Repo, 
 	return commit, tag.Message, err
 }
 
-func (c *Forgejo) getCommitFromSHAStore(ctx context.Context, repo *model.Repo, sha string) (*model.Commit, error) {
+func (c *Forgejo) getCommitFromSHAWithUserFromStore(ctx context.Context, repo *model.Repo, sha string) (*model.Commit, error) {
 	_store, ok := store.TryFromContext(ctx)
 	if !ok {
 		return nil, fmt.Errorf("could not get store from context")
