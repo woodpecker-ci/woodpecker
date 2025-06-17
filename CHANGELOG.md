@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@henkka, @hhamalai, @mmatous
+@OCram85, @henkka, @hhamalai, @mmatous
 
 ### 🔒 Security
 
@@ -12,6 +12,7 @@
 
 ### 📚 Documentation
 
+- add Peckify plugin [[#5260](https://github.com/woodpecker-ci/woodpecker/pull/5260)]
 - fix(deps): update docs npm deps non-major [[#5252](https://github.com/woodpecker-ci/woodpecker/pull/5252)]
 - fix(deps): update docs npm deps non-major [[#5226](https://github.com/woodpecker-ci/woodpecker/pull/5226)]
 
