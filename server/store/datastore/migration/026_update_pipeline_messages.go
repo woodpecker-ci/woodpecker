@@ -75,11 +75,11 @@ var updatePipelineMessages = xormigrate.Migration{
 			IsPrerelease      bool     `xorm:"is_prerelease"`
 
 			// new fields
-			CommitNew       *commit      `xorm:"json 'commit_new'"`
-			Deployment      *deployment  `xorm:"json 'deployment'"`
-			PullRequest     *pullRequest `xorm:"json 'pr'"`
-			Cron            string       `xorm:"cron"`
-			Release *release `xorm:"json 'release'"`
+			CommitNew   *commit      `xorm:"json 'commit_new'"`
+			Deployment  *deployment  `xorm:"json 'deployment'"`
+			PullRequest *pullRequest `xorm:"json 'pr'"`
+			Cron        string       `xorm:"cron"`
+			Release     *release     `xorm:"json 'release'"`
 
 			// removed without replacement
 			Timestamp int64  `xorm:"'timestamp'"`
@@ -117,7 +117,7 @@ var updatePipelineMessages = xormigrate.Migration{
 				switch oldPipeline.Event {
 				case model.EventRelease:
 					newPipeline.Release = &release{
-						TagTitle: strings.TrimPrefix(oldPipeline.Message, "created release "),
+						TagTitle:     strings.TrimPrefix(oldPipeline.Message, "created release "),
 						IsPrerelease: oldPipeline.IsPrerelease,
 					}
 				case model.EventCron:
