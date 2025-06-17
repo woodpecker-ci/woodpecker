@@ -44,7 +44,7 @@ type Pipeline struct {
 	Ref          string       `json:"ref"                         xorm:"ref"`
 	Refspec      string       `json:"refspec"                     xorm:"refspec"`
 	ForgeURL     string       `json:"forge_url"                   xorm:"forge_url"`
-	Author       string       `json:"author"                      xorm:"author"`
+	Author       string       `json:"author"                      xorm:"author"` // The user sending the webhook data or triggering the pipeline event
 	Avatar       string       `json:"author_avatar"               xorm:"varchar(500) 'avatar'"`
 	ChangedFiles []string     `json:"changed_files,omitempty"     xorm:"LONGTEXT 'changed_files'"`
 	Deployment   *Deployment  `json:"deployment,omitempty"        xorm:"json 'deployment'"`
