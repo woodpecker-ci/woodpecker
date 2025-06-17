@@ -56,8 +56,8 @@ func TestGetPipelineQueue(t *testing.T) {
 			SHA:     "abc123",
 			Message: "Initial commit",
 			Author: model.CommitAuthor{
-				Author: "joe",
-				Email:  "joe@example.com",
+				Name:  "joe",
+				Email: "joe@example.com",
 			},
 		},
 		Branch: "main",
@@ -82,7 +82,7 @@ func TestGetPipelineQueue(t *testing.T) {
 	assert.Equal(t, pipeline1.Commit.Message, feedItem.Commit.Message)
 	assert.Equal(t, pipeline1.Commit.SHA, feedItem.Commit.SHA)
 	assert.Equal(t, pipeline1.Commit.Author.Email, feedItem.Commit.Author.Email)
-	assert.Equal(t, pipeline1.Commit.Author.Author, feedItem.Commit.Author.Author)
+	assert.Equal(t, pipeline1.Commit.Author.Name, feedItem.Commit.Author.Name)
 	assert.Equal(t, pipeline1.Author, feedItem.Author)
 }
 

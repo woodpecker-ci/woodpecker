@@ -211,8 +211,8 @@ func TestBitbucket(t *testing.T) {
 		Message:  "a\n",
 		ForgeURL: "https://bitbucket.org/martinherren1984/publictestrepo/commits/c14c1bb05dfb1fdcdf06b31485fff61b0ea44277",
 		Author: model.CommitAuthor{
-			Author: "Martin Herren",
-			Email:  "martin.herren@yyy.com",
+			Name:  "Martin Herren",
+			Email: "martin.herren@yyy.com",
 		},
 	}, b.Commit)
 }

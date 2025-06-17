@@ -228,8 +228,8 @@ func convertCommitAuthor(gitAuthor string) model.CommitAuthor {
 	matches := reGitMail.FindAllStringSubmatch(gitAuthor, -1)
 	if len(matches) == 1 {
 		return model.CommitAuthor{
-			Author: matches[0][1],
-			Email:  matches[0][2],
+			Name:  matches[0][1],
+			Email: matches[0][2],
 		}
 	}
 	return model.CommitAuthor{}

@@ -625,7 +625,7 @@ func (g *GitLab) BranchHead(ctx context.Context, u *model.User, r *model.Repo, b
 		SHA:      b.Commit.ID,
 		ForgeURL: b.Commit.WebURL,
 		Message:  b.Commit.Message,
-		Author:   model.CommitAuthor{Author: b.Commit.AuthorName, Email: b.Commit.AuthorEmail},
+		Author:   model.CommitAuthor{Name: b.Commit.AuthorName, Email: b.Commit.AuthorEmail},
 	}, nil
 }
 

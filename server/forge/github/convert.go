@@ -185,8 +185,8 @@ func convertCommit(from *github.Commit) *model.Commit {
 		ForgeURL: from.GetHTMLURL(),
 		Message:  from.GetMessage(),
 		Author: model.CommitAuthor{
-			Author: from.GetAuthor().GetName(),
-			Email:  from.GetAuthor().GetEmail(),
+			Name:  from.GetAuthor().GetName(),
+			Email: from.GetAuthor().GetEmail(),
 		},
 	}
 }

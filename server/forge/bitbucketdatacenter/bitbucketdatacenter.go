@@ -384,8 +384,8 @@ func (c *client) BranchHead(ctx context.Context, u *model.User, r *model.Repo, b
 		ForgeURL: fmt.Sprintf("%s/commits/%s", strings.TrimSuffix(r.ForgeURL, "/browse"), cm.ID),
 		Message:  cm.Message,
 		Author: model.CommitAuthor{
-			Author: cm.Author.Name,
-			Email:  cm.Author.Email,
+			Name:  cm.Author.Name,
+			Email: cm.Author.Email,
 		},
 	}, nil
 }
@@ -567,8 +567,8 @@ func (c *client) updatePipelineFromCommit(ctx context.Context, u *model.User, r 
 	}
 	p.Commit.Message = commit.Message
 	p.Commit.Author = model.CommitAuthor{
-		Author: commit.Author.Name,
-		Email:  commit.Author.Email,
+		Name:  commit.Author.Name,
+		Email: commit.Author.Email,
 	}
 
 	opts := &bb.ListOptions{}

@@ -456,8 +456,8 @@ func (c *Gitea) BranchHead(ctx context.Context, u *model.User, r *model.Repo, br
 		ForgeURL: b.Commit.URL,
 		Message:  b.Commit.Message,
 		Author: model.CommitAuthor{
-			Author: b.Commit.Author.Name,
-			Email:  b.Commit.Author.Email,
+			Name:  b.Commit.Author.Name,
+			Email: b.Commit.Author.Email,
 		},
 	}, nil
 }
@@ -732,8 +732,8 @@ func (c *Gitea) getCommitFromSHA(ctx context.Context, user *model.User, repo *mo
 	return &model.Commit{
 		Message: commit.RepoCommit.Message,
 		Author: model.CommitAuthor{
-			Author: commit.RepoCommit.Author.Name,
-			Email:  commit.RepoCommit.Author.Email,
+			Name:  commit.RepoCommit.Author.Name,
+			Email: commit.RepoCommit.Author.Email,
 		},
 		ForgeURL: commit.HTMLURL,
 		SHA:      commit.SHA,

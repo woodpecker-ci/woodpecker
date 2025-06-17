@@ -122,8 +122,8 @@ func convertMergeRequestHook(hook *gitlab.MergeEvent, req *http.Request) (int, *
 		Message: lastCommit.Message,
 		SHA:     lastCommit.ID,
 		Author: model.CommitAuthor{
-			Author: lastCommit.Author.Name,
-			Email:  lastCommit.Author.Email,
+			Name:  lastCommit.Author.Name,
+			Email: lastCommit.Author.Email,
 		},
 		ForgeURL: lastCommit.URL,
 	}
@@ -181,7 +181,7 @@ func convertPushHook(hook *gitlab.PushEvent) (*model.Repo, *model.Pipeline, erro
 	files := make([]string, 0, len(hook.Commits)*4)
 	for _, cm := range hook.Commits {
 		if hook.After == cm.ID {
-			pipeline.Commit.Author = model.CommitAuthor{Author: cm.Author.Name, Email: cm.Author.Email}
+			pipeline.Commit.Author = model.CommitAuthor{Name: cm.Author.Name, Email: cm.Author.Email}
 			pipeline.Commit.Message = cm.Message
 			pipeline.Commit.ForgeURL = cm.URL
 		}
@@ -234,7 +234,7 @@ func convertTagHook(hook *gitlab.TagEvent) (*model.Repo, *model.Pipeline, error)
 	// TODO does hook.Commits always contain hook.After?
 	for _, cm := range hook.Commits {
 		if hook.After == cm.ID {
-			pipeline.Commit.Author = model.CommitAuthor{Author: cm.Author.Name, Email: cm.Author.Email}
+			pipeline.Commit.Author = model.CommitAuthor{Name: cm.Author.Name, Email: cm.Author.Email}
 			pipeline.Commit.Message = cm.Message
 			pipeline.Commit.ForgeURL = cm.URL
 			break
@@ -269,8 +269,8 @@ func convertReleaseHook(hook *gitlab.ReleaseEvent) (*model.Repo, *model.Pipeline
 		Commit: &model.Commit{
 			SHA: hook.Commit.ID,
 			Author: model.CommitAuthor{
-				Author: hook.Commit.Author.Name,
-				Email:  hook.Commit.Author.Email,
+				Name:  hook.Commit.Author.Name,
+				Email: hook.Commit.Author.Email,
 			},
 			Message:  hook.Commit.Message,
 			ForgeURL: hook.Commit.URL,

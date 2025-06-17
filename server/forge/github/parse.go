@@ -220,7 +220,7 @@ func getChangedFilesFromCommits(commits []*github.HeadCommit) []string {
 
 func convertCommitAuthor(u *github.CommitAuthor) model.CommitAuthor {
 	return model.CommitAuthor{
-		Author: u.GetName(),
-		Email:  u.GetEmail(),
+		Name:  u.GetName(),
+		Email: u.GetEmail(),
 	}
 }

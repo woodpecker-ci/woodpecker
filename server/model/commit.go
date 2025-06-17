@@ -8,6 +8,6 @@ type Commit struct {
 }
 
 type CommitAuthor struct {
-	Author string `json:"author"`
-	Email  string `json:"email"`
+	Name  string `json:"name"`
+	Email string `json:"email"`
 }

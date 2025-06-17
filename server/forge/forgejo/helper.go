@@ -87,8 +87,8 @@ func pipelineFromPush(hook *pushHook) *model.Pipeline {
 			Message:  hook.HeadCommit.Message,
 			ForgeURL: hook.HeadCommit.URL,
 			Author: model.CommitAuthor{
-				Author: hook.HeadCommit.Author.Name,
-				Email:  hook.HeadCommit.Author.Email,
+				Name:  hook.HeadCommit.Author.Name,
+				Email: hook.HeadCommit.Author.Email,
 			},
 		},
 		Ref:          hook.Ref,

@@ -239,7 +239,7 @@ func Test_parsePushHook(t *testing.T) {
 		assert.Equal(t, model.EventPush, pipeline.Event)
 		assert.Equal(t, "main", pipeline.Branch)
 		assert.Equal(t, "refs/heads/main", pipeline.Ref)
-		assert.Equal(t, &model.Commit{SHA: "f72fc19", Message: "updated README.md", ForgeURL: "https://github.com/octocat/hello-world", Author: model.CommitAuthor{Author: "", Email: "github.Ptr(octocat@github.com"}}, pipeline.Commit)
+		assert.Equal(t, &model.Commit{SHA: "f72fc19", Message: "updated README.md", ForgeURL: "https://github.com/octocat/hello-world", Author: model.CommitAuthor{Name: "", Email: "github.Ptr(octocat@github.com"}}, pipeline.Commit)
 		assert.Equal(t, from.GetHeadCommit().GetMessage(), pipeline.Commit.Message)
 		assert.Equal(t, from.GetHeadCommit().GetURL(), pipeline.ForgeURL)
 		assert.Equal(t, from.GetSender().GetLogin(), pipeline.Author)
