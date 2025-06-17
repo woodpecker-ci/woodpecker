@@ -163,7 +163,7 @@ func pipelineFromPullRequest(hook *pullRequestHook) *model.Pipeline {
 			hook.PullRequest.Head.Ref,
 			hook.PullRequest.Base.Ref,
 		),
-		PullRequest: convertPullRequests(hook.PullRequest),
+		PullRequest: convertPullRequest(hook.PullRequest),
 	}
 
 	return pipeline
@@ -259,7 +259,7 @@ func matchingHooks(hooks []*gitea.Hook, rawURL string) *gitea.Hook {
 	return nil
 }
 
-func convertPullRequests(from *gitea.PullRequest) *model.PullRequest {
+func convertPullRequest(from *gitea.PullRequest) *model.PullRequest {
 	return &model.PullRequest{
 		Index:    model.ForgeRemoteID(strconv.Itoa(int(from.Index))),
 		Title:    from.Title,

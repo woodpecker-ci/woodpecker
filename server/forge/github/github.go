@@ -607,17 +607,17 @@ func (c *client) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model
 	if pipeline != nil {
 		if pipeline.Event == model.EventRelease && pipeline.Commit.SHA == "" {
 			tagName := strings.Split(pipeline.Ref, "/")[2]
-			sha, err := c.getTagCommitSHA(ctx, repo, tagName)
+			commit, err := c.getCommitAndMessageFromTag(ctx, repo, tagName)
 			if err != nil {
 				return nil, nil, err
 			}
-			pipeline.Commit = sha
+			pipeline.Commit = commit
 		} else if pipeline.Event == model.EventDeploy || pipeline.Event == model.EventPull || pipeline.Event == model.EventPullClosed {
-			sha, err := c.getCommitFromSHA(ctx, repo, pipeline.Commit.SHA)
+			commit, err := c.getCommitFromSHA(ctx, repo, pipeline.Commit.SHA)
 			if err != nil {
 				return nil, nil, err
 			}
-			pipeline.Commit = sha
+			pipeline.Commit = commit
 		}
 	}
 
@@ -669,7 +669,7 @@ func (c *client) loadChangedFilesFromPullRequest(ctx context.Context, pull *gith
 	return pipeline, err
 }
 
-func (c *client) getTagCommitSHA(ctx context.Context, repo *model.Repo, tagName string) (*model.Commit, error) {
+func (c *client) getCommitAndMessageFromTag(ctx context.Context, repo *model.Repo, tagName string) (*model.Commit, error) {
 	_store, ok := store.TryFromContext(ctx)
 	if !ok {
 		return nil, fmt.Errorf("could not get store from context")

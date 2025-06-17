@@ -484,7 +484,7 @@ func (c *Gitea) PullRequests(ctx context.Context, u *model.User, r *model.Repo, 
 
 	result := make([]*model.PullRequest, len(pullRequests))
 	for i := range pullRequests {
-		result[i] = convertPullRequests(pullRequests[i])
+		result[i] = convertPullRequest(pullRequests[i])
 	}
 	return result, err
 }
