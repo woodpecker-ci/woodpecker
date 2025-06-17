@@ -370,7 +370,7 @@ func TestForgejoParser(t *testing.T) {
 				Author:   "anbraten",
 				Avatar:   "https://git.xxx/user/avatar/anbraten/-1",
 				ForgeURL: "https://git.xxx/anbraten/demo/releases/tag/0.0.5",
-				Release:  &model.Release{TagTitle: "Version 0.0.5"},
+				Release:  &model.Release{Title: "Version 0.0.5", TagTitle: ""},
 			},
 		},
 	}

@@ -181,7 +181,7 @@ func pipelineFromRelease(hook *releaseHook) *model.Pipeline {
 		ForgeURL: hook.Release.HTMLURL,
 		Branch:   hook.Release.Target,
 		Release: &model.Release{
-			TagTitle:     hook.Release.Title,
+			Title:     hook.Release.Title,
 			IsPrerelease: hook.Release.IsPrerelease,
 		},
 		Author: hook.Sender.UserName,
