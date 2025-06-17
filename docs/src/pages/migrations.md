@@ -9,7 +9,6 @@ To enhance the usability of Woodpecker and meet evolving security standards, occ
 ### User-facing changes
 
 - (Kubernetes) Deprecated `step` label on pod in favor of new namespaced label `woodpecker-ci.org/step`. The `step` label will be removed in a future update.
-- deprecated `CI_COMMIT_AUTHOR_AVATAR` and `CI_PREV_COMMIT_AUTHOR_AVATAR` env vars as commit authors don't have an avatar
 
 ### API changes
 
