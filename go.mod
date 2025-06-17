@@ -28,7 +28,7 @@ require (
 	github.com/gin-gonic/gin v1.10.1
 	github.com/gitsight/go-vcsurl v1.0.1
 	github.com/go-sql-driver/mysql v1.9.3
-	github.com/go-viper/mapstructure/v2 v2.2.1
+	github.com/go-viper/mapstructure/v2 v2.3.0
 	github.com/golang-jwt/jwt/v5 v5.2.2
 	github.com/google/go-github/v72 v72.0.0
 	github.com/google/tink/go v1.7.0
