@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.8.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.8.0) - 2025-06-16
+## [3.8.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.8.0) - 2025-06-17
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -12,7 +12,6 @@
 
 ### 📚 Documentation
 
-- chore(deps): lock file maintenance [[#5257](https://github.com/woodpecker-ci/woodpecker/pull/5257)]
 - fix(deps): update docs npm deps non-major [[#5252](https://github.com/woodpecker-ci/woodpecker/pull/5252)]
 - fix(deps): update docs npm deps non-major [[#5226](https://github.com/woodpecker-ci/woodpecker/pull/5226)]
 
@@ -26,6 +25,8 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update module github.com/go-viper/mapstructure/v2 to v2.3.0 [[#5259](https://github.com/woodpecker-ci/woodpecker/pull/5259)]
+- chore(deps): lock file maintenance [[#5257](https://github.com/woodpecker-ci/woodpecker/pull/5257)]
 - fix(deps): update dependency simple-icons to v15.2.0 [[#5256](https://github.com/woodpecker-ci/woodpecker/pull/5256)]
 - fix(deps): update web npm deps non-major [[#5254](https://github.com/woodpecker-ci/woodpecker/pull/5254)]
 - chore(deps): update gitea/gitea docker tag to v1.24 [[#5253](https://github.com/woodpecker-ci/woodpecker/pull/5253)]
