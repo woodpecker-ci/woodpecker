@@ -138,6 +138,6 @@ type Deployment struct {
 
 type Release struct {
 	IsPrerelease bool   `json:"is_prerelease,omitempty"`
-	Title     string `json:"title,omitempty"`
+	Title        string `json:"title,omitempty"`
 	TagTitle     string `json:"tag_title,omitempty"`
 }

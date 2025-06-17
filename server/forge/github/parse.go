@@ -197,7 +197,7 @@ func parseReleaseHook(hook *github.ReleaseEvent) (*model.Repo, *model.Pipeline) 
 		Ref:      fmt.Sprintf("refs/tags/%s", hook.GetRelease().GetTagName()),
 		Branch:   hook.GetRelease().GetTargetCommitish(), // cspell:disable-line
 		Release: &model.Release{
-			Title:     name,
+			Title:        name,
 			IsPrerelease: hook.GetRelease().GetPrerelease(),
 		},
 		Avatar: hook.GetSender().GetAvatarURL(),

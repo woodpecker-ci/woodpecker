@@ -107,7 +107,7 @@ type (
 		Started     int64            `json:"started_at"`
 		Finished    int64            `json:"finished_at"`
 		Deployment  *Deployment      `json:"deployment"`
-		Commit      *Commit          `json:"commit"`
+		Commit      string           `json:"commit"`
 		Branch      string           `json:"branch"`
 		Ref         string           `json:"ref"`
 		Refspec     string           `json:"refspec"`

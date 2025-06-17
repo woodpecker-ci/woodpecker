@@ -63,7 +63,7 @@ func TestForgejoParser(t *testing.T) {
 				},
 			},
 			pipe: &model.Pipeline{
-				Event: model.EventPush
+				Event: model.EventPush,
 				Commit: &model.Commit{
 					SHA:     "28c3613ae62640216bea5e7dc71aa65356e4298b",
 					Message: "Delete '.woodpecker/.check.yml'\n",
@@ -102,7 +102,7 @@ func TestForgejoParser(t *testing.T) {
 				},
 			},
 			pipe: &model.Pipeline{
-				Event: model.EventPush
+				Event: model.EventPush,
 				Commit: &model.Commit{
 					SHA: "ef98532add3b2feb7a137426bba1248724367df5",
 					Author: model.CommitAuthor{
@@ -141,7 +141,7 @@ func TestForgejoParser(t *testing.T) {
 				},
 			},
 			pipe: &model.Pipeline{
-				Event: model.EventPush
+				Event: model.EventPush,
 				Commit: &model.Commit{
 					SHA:      "29be01c073851cf0db0c6a466e396b725a670453",
 					Message:  "add some text\n",
@@ -211,7 +211,7 @@ func TestForgejoParser(t *testing.T) {
 				},
 			},
 			pipe: &model.Pipeline{
-				Event: model.EventPull
+				Event:    model.EventPull,
 				Commit:   &model.Commit{SHA: "0d1a26e67d8f5eaf1f6ba5c57fc3c7d91ac0fd1c"},
 				Branch:   "main",
 				Ref:      "refs/pull/1/head",
@@ -249,7 +249,7 @@ func TestForgejoParser(t *testing.T) {
 				},
 			},
 			pipe: &model.Pipeline{
-				Event: model.EventPull
+				Event:    model.EventPull,
 				Commit:   &model.Commit{SHA: "788ed8d02d3b7fcfcf6386dbcbca696aa1d4dc25"},
 				Branch:   "main",
 				Ref:      "refs/pull/2/head",
@@ -289,7 +289,7 @@ func TestForgejoParser(t *testing.T) {
 				},
 			},
 			pipe: &model.Pipeline{
-				Event: model.EventPullClosed
+				Event:    model.EventPullClosed,
 				Commit:   &model.Commit{SHA: "d555a5dd07f4d0148a58d4686ec381502ae6a2d4"},
 				Branch:   "main",
 				Ref:      "refs/pull/1/head",
@@ -326,7 +326,7 @@ func TestForgejoParser(t *testing.T) {
 				},
 			},
 			pipe: &model.Pipeline{
-				Event: model.EventPullClosed
+				Event:    model.EventPullClosed,
 				Commit:   &model.Commit{SHA: "d555a5dd07f4d0148a58d4686ec381502ae6a2d4"},
 				Branch:   "main",
 				Ref:      "refs/pull/1/head",
