@@ -51,6 +51,7 @@ type Pipeline struct {
 	PullRequest  *PullRequest `json:"pull_request,omitempty"      xorm:"json 'pr'"`
 	Cron         string       `json:"cron,omitempty"              xorm:"cron"`
 	Release      *Release     `json:"release,omitempty"      xorm:"json 'release'"`
+	TagTitle string `json:"tag_title,omitempty" xorm:"tag_title"`
 }
 
 // APIPipeline TODO remove in next major.
@@ -103,9 +104,9 @@ func (p *Pipeline) ToAPIModel() *APIPipeline {
 	case EventCron:
 		ap.Message = p.Cron
 	case EventTag:
-		ap.Message = "created tag " + p.Release.TagTitle
+		ap.Message = "created tag " + p.TagTitle
 	case EventRelease:
-		ap.Message = p.Release.TagTitle
+		ap.Message = "created release " + p.TagTitle
 	}
 
 	return ap
@@ -139,5 +140,4 @@ type Deployment struct {
 type Release struct {
 	IsPrerelease bool   `json:"is_prerelease,omitempty"`
 	Title        string `json:"title,omitempty"`
-	TagTitle     string `json:"tag_title,omitempty"`
 }

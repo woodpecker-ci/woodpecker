@@ -503,7 +503,7 @@ func (c *Forgejo) Hook(ctx context.Context, r *http.Request) (*model.Repo, *mode
 				return nil, nil, err
 			}
 			pipeline.Commit = commit
-			pipeline.Release.TagTitle = tagMsg
+			pipeline.TagTitle = tagMsg
 		case model.EventPull, model.EventPullClosed:
 			sha, err := c.getCommitFromSHAWithUserFromStore(ctx, repo, pipeline.Commit.SHA)
 			if err != nil {
@@ -517,7 +517,7 @@ func (c *Forgejo) Hook(ctx context.Context, r *http.Request) (*model.Repo, *mode
 				return nil, nil, err
 			}
 			pipeline.Commit = commit
-			pipeline.Release = &model.Release{TagTitle: tagMsg}
+			pipeline.TagTitle = tagMsg
 		}
 	}
 

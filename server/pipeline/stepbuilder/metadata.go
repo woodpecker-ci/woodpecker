@@ -139,7 +139,7 @@ func metadataPipelineFromModelPipeline(pipeline *model.Pipeline, includeParent b
 	}
 	if pipeline.Release != nil {
 		metadata.Commit.IsPrerelease = pipeline.Release.IsPrerelease
-		metadata.Release = pipeline.Release.TagTitle
+		metadata.Release = pipeline.Release.Title
 	}
 
 	return metadata

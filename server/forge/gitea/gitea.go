@@ -506,7 +506,7 @@ func (c *Gitea) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.
 				return nil, nil, err
 			}
 			pipeline.Commit = commit
-			pipeline.Release.TagTitle = tagMsg
+			pipeline.TagTitle = tagMsg
 		case model.EventPull, model.EventPullClosed:
 			sha, err := c.getCommitFromSHAStore(ctx, repo, pipeline.Commit.SHA)
 			if err != nil {
@@ -520,7 +520,7 @@ func (c *Gitea) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.
 				return nil, nil, err
 			}
 			pipeline.Commit = commit
-			pipeline.Release = &model.Release{TagTitle: tagMsg}
+			pipeline.TagTitle = tagMsg
 		}
 	}
 
