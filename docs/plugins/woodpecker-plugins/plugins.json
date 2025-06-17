@@ -274,6 +274,11 @@
       "name": "Portainer Service Update",
       "docs": "https://codeberg.org/woodpecker-community/portainer-service-update/raw/branch/main/docs.md",
       "verified": false
+    },
+    {
+      "name": "Peckify",
+      "docs": "https://codeberg.org/woodpecker-community/peckify/raw/branch/main/docs.md",
+      "verified": false
     }
   ]
 }
