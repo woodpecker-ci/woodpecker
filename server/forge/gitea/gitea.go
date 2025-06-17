@@ -501,11 +501,11 @@ func (c *Gitea) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.
 		switch {
 		case pipeline.Event == model.EventRelease && pipeline.Commit.SHA == "":
 			tagName := strings.Split(pipeline.Ref, "/")[2]
-			sha, _, err := c.getTagMessages(ctx, repo, tagName)
+			commit, _, err := c.getTagCommitAndMessage(ctx, repo, tagName)
 			if err != nil {
 				return nil, nil, err
 			}
-			pipeline.Commit = sha
+			pipeline.Commit = commit
 		case pipeline.Event == model.EventPull || pipeline.Event == model.EventPullClosed:
 			sha, err := c.getCommitFromSHAStore(ctx, repo, pipeline.Commit.SHA)
 			if err != nil {
@@ -514,14 +514,12 @@ func (c *Gitea) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model.
 			pipeline.Commit = sha
 		case pipeline.Event == model.EventTag:
 			tagName := strings.Split(pipeline.Ref, "/")[2]
-			sha, msg, err := c.getTagMessages(ctx, repo, tagName)
+			commit, tagMsg, err := c.getTagCommitAndMessage(ctx, repo, tagName)
 			if err != nil {
 				return nil, nil, err
 			}
-			pipeline.Commit = sha
-			if pipeline.Commit.Message != msg {
-				pipeline.Release = &model.Release{TagTitle: msg}
-			}
+			pipeline.Commit = commit
+			pipeline.Release = &model.Release{TagTitle: tagMsg}
 		}
 	}
 
@@ -670,7 +668,7 @@ func (c *Gitea) getChangedFilesForPR(ctx context.Context, repo *model.Repo, inde
 	}, -1)
 }
 
-func (c *Gitea) getTagMessages(ctx context.Context, repo *model.Repo, tagName string) (*model.Commit, string, error) {
+func (c *Gitea) getTagCommitAndMessage(ctx context.Context, repo *model.Repo, tagName string) (*model.Commit, string, error) {
 	_store, ok := store.TryFromContext(ctx)
 	if !ok {
 		return nil, "", fmt.Errorf("could not get store from context")
