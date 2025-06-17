@@ -13,7 +13,7 @@ To enhance the usability of Woodpecker and meet evolving security standards, occ
 
 ### API changes
 
-- Changed the pipeline model to use nested objects grouped based on the event (e.g. instead of a generic `title` it now uses `pr.title`)
+- The pipeline model has been changed to use nested objects grouped based on the event (e.g. instead of a generic `title` it now uses `pr.title`). Following properties are deprecated and should be replaced by the their new counterparts:
   `author` => `commit.author`
   `deploy_to` => `deployment.target`
   `deploy_task` => `deployment.task`
