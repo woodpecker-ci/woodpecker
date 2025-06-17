@@ -51,6 +51,11 @@ var updatePipelineMessages = xormigrate.Migration{
 			Task        string `json:"task"`
 			Description string `json:"description"`
 		}
+		type release struct {
+			IsPrerelease bool   `json:"is_prerelease,omitempty"`
+			Title        string `json:"title,omitempty"`
+			TagTitle     string `json:"tag_title,omitempty"`
+		}
 
 		type pipelines struct {
 			ID       int64              `xorm:"pk autoincr 'id'"`
@@ -67,13 +72,14 @@ var updatePipelineMessages = xormigrate.Migration{
 			DeployTask        string   `xorm:"deploy_task"`
 			PullRequestLabels []string `xorm:"json 'pr_labels'"`
 			FromFork          bool     `xorm:"from_fork"`
+			IsPrerelease      bool     `xorm:"is_prerelease"`
 
 			// new fields
 			CommitNew       *commit      `xorm:"json 'commit_new'"`
 			Deployment      *deployment  `xorm:"json 'deployment'"`
 			PullRequest     *pullRequest `xorm:"json 'pr'"`
 			Cron            string       `xorm:"cron"`
-			ReleaseTagTitle string       `xorm:"release_tag_title"`
+			Release *release `xorm:"json 'release'"`
 
 			// removed without replacement
 			Timestamp int64  `xorm:"'timestamp'"`
@@ -90,7 +96,7 @@ var updatePipelineMessages = xormigrate.Migration{
 		for {
 			oldPipelines = oldPipelines[:0]
 
-			err := sess.Limit(perPage024, page*perPage024).Cols("id", "event", "author", "forge_url", "commit", "title", "message", "sender", "deploy", "deploy_task", "pr_labels", "from_fork", "email").Find(&oldPipelines)
+			err := sess.Limit(perPage024, page*perPage024).Cols("id", "event", "author", "forge_url", "commit", "title", "message", "sender", "deploy", "deploy_task", "pr_labels", "from_fork", "is_prerelease", "email").Find(&oldPipelines)
 			if err != nil {
 				return err
 			}
@@ -110,7 +116,10 @@ var updatePipelineMessages = xormigrate.Migration{
 
 				switch oldPipeline.Event {
 				case model.EventRelease:
-					newPipeline.ReleaseTagTitle = strings.TrimPrefix(oldPipeline.Message, "created release ")
+					newPipeline.Release = &release{
+						TagTitle: strings.TrimPrefix(oldPipeline.Message, "created release "),
+						IsPrerelease: oldPipeline.IsPrerelease,
+					}
 				case model.EventCron:
 					newPipeline.Cron = oldPipeline.Sender
 				case model.EventPull, model.EventPullClosed:
