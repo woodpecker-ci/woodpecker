@@ -7,7 +7,7 @@ require (
 	code.gitea.io/sdk/gitea v0.21.0
 	codeberg.org/6543/go-yaml2json v1.0.0
 	codeberg.org/6543/xyaml v1.1.0
-	codeberg.org/mvdkleijn/forgejo-sdk/forgejo/v2 v2.1.0
+	codeberg.org/mvdkleijn/forgejo-sdk/forgejo/v2 v2.2.0
 	github.com/6543/logfile-open v1.2.1
 	github.com/adrg/xdg v0.5.3
 	github.com/bmatcuk/doublestar/v4 v4.8.1
@@ -35,7 +35,7 @@ require (
 	github.com/gorilla/securecookie v1.1.2
 	github.com/hashicorp/go-hclog v1.6.3
 	github.com/hashicorp/go-plugin v1.6.3
-	github.com/jellydator/ttlcache/v3 v3.3.0
+	github.com/jellydator/ttlcache/v3 v3.4.0
 	github.com/joho/godotenv v1.5.1
 	github.com/kinbiko/jsonassert v1.2.0
 	github.com/lib/pq v1.10.9
