@@ -4901,6 +4901,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "author": {
+                    "description": "The user sending the webhook data or triggering the pipeline event",
                     "type": "string"
                 },
                 "author_avatar": {
@@ -5009,6 +5010,9 @@ const docTemplate = `{
                 },
                 "status": {
                     "$ref": "#/definitions/StatusValue"
+                },
+                "tag_title": {
+                    "type": "string"
                 },
                 "timestamp": {
                     "type": "integer"
@@ -5827,10 +5831,10 @@ const docTemplate = `{
         "model.CommitAuthor": {
             "type": "object",
             "properties": {
-                "author": {
+                "email": {
                     "type": "string"
                 },
-                "email": {
+                "name": {
                     "type": "string"
                 }
             }
@@ -5874,6 +5878,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "author": {
+                    "description": "The user sending the webhook data or triggering the pipeline event",
                     "type": "string"
                 },
                 "author_avatar": {
@@ -5953,6 +5958,9 @@ const docTemplate = `{
                 "status": {
                     "$ref": "#/definitions/StatusValue"
                 },
+                "tag_title": {
+                    "type": "string"
+                },
                 "updated": {
                     "type": "integer"
                 },
@@ -5976,7 +5984,7 @@ const docTemplate = `{
                 "is_prerelease": {
                     "type": "boolean"
                 },
-                "release_tag_title": {
+                "title": {
                     "type": "string"
                 }
             }
