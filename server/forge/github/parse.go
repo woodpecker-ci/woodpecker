@@ -107,6 +107,7 @@ func parsePushHook(hook *github.PushEvent) (*model.Repo, *model.Pipeline) {
 		pipeline.ChangedFiles = nil
 		pipeline.Branch = ""
 		pipeline.ForgeURL = fmt.Sprintf("%s/releases/tag/%s", hook.GetRepo().GetURL(), strings.TrimPrefix(pipeline.Ref, "refs/tags/"))
+		pipeline.TagTitle = strings.TrimPrefix(pipeline.Ref, "refs/tags/")
 	}
 
 	return convertRepoHook(hook.GetRepo()), pipeline
@@ -200,8 +201,9 @@ func parseReleaseHook(hook *github.ReleaseEvent) (*model.Repo, *model.Pipeline) 
 			Title:        name,
 			IsPrerelease: hook.GetRelease().GetPrerelease(),
 		},
-		Avatar: hook.GetSender().GetAvatarURL(),
-		Author: hook.GetSender().GetLogin(),
+		TagTitle: hook.GetRelease().GetTagName(),
+		Avatar:   hook.GetSender().GetAvatarURL(),
+		Author:   hook.GetSender().GetLogin(),
 	}
 
 	return convertRepo(hook.GetRepo()), pipeline

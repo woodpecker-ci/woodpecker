@@ -130,6 +130,7 @@ func pipelineFromTag(hook *pushHook) *model.Pipeline {
 		Commit: &model.Commit{
 			SHA: hook.Sha,
 		},
+		TagTitle: ref,
 		Ref:      fmt.Sprintf("refs/tags/%s", ref),
 		ForgeURL: fmt.Sprintf("%s/releases/tag/%s", hook.Repo.HTMLURL, ref),
 		Author:   hook.Sender.UserName,
@@ -184,8 +185,9 @@ func pipelineFromRelease(hook *releaseHook) *model.Pipeline {
 			Title:        hook.Release.Title,
 			IsPrerelease: hook.Release.IsPrerelease,
 		},
-		Author: hook.Sender.UserName,
-		Avatar: avatar,
+		TagTitle: hook.Release.TagName,
+		Author:   hook.Sender.UserName,
+		Avatar:   avatar,
 	}
 }
 

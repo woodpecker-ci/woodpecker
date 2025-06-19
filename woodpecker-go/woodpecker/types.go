@@ -118,6 +118,7 @@ type (
 		Reviewer       string           `json:"reviewed_by"`
 		Reviewed       int64            `json:"reviewed_at"`
 		Workflows      []*Workflow      `json:"workflows,omitempty"`
+		TagTitle       string           `json:"tag_title"`
 
 		// old fields
 

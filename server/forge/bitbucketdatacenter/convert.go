@@ -103,6 +103,7 @@ func convertRepositoryPushEvent(ev *bb.RepositoryPushEvent, baseURL string) *mod
 	if strings.HasPrefix(ev.Changes[0].RefId, "refs/tags/") {
 		pipeline.Event = model.EventTag
 		pipeline.ForgeURL = fmt.Sprintf("%s/projects/%s/repos/%s/browse?at=%s", baseURL, ev.Repository.Project.Key, ev.Repository.Slug, url.QueryEscape(pipeline.Ref))
+		pipeline.TagTitle = strings.TrimPrefix(ev.Changes[0].RefId, "refs/tags/")
 	} else {
 		pipeline.Event = model.EventPush
 	}

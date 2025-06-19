@@ -187,6 +187,7 @@ func TestGiteaParser(t *testing.T) {
 				Commit:   &model.Commit{SHA: "ef98532add3b2feb7a137426bba1248724367df5"},
 				Ref:      "refs/tags/v1.0.0",
 				Author:   "gordon",
+				TagTitle: "v1.0.0",
 				Avatar:   "https://secure.gravatar.com/avatar/8c58a0be77ee441bb8f8595b7f1b4e87",
 				ForgeURL: "http://gitea.golang.org/gordon/hello-world/releases/tag/v1.0.0",
 			},
@@ -373,6 +374,7 @@ func TestGiteaParser(t *testing.T) {
 				Author:   "anbraten",
 				Avatar:   "https://git.xxx/user/avatar/anbraten/-1",
 				ForgeURL: "https://git.xxx/anbraten/demo/releases/tag/0.0.5",
+				TagTitle: "0.0.5",
 			},
 		},
 	}

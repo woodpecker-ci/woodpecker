@@ -80,6 +80,7 @@ var updatePipelineMessages = xormigrate.Migration{
 			PullRequest *pullRequest `xorm:"json 'pr'"`
 			Cron        string       `xorm:"cron"`
 			Release     *release     `xorm:"json 'release'"`
+			TagTitle    string       `xorm:"tag_title"`
 
 			// removed without replacement
 			Timestamp int64  `xorm:"'timestamp'"`
@@ -120,6 +121,9 @@ var updatePipelineMessages = xormigrate.Migration{
 						TagTitle:     strings.TrimPrefix(oldPipeline.Message, "created release "),
 						IsPrerelease: oldPipeline.IsPrerelease,
 					}
+					newPipeline.TagTitle = strings.TrimPrefix(oldPipeline.Ref, "refs/tags/")
+				case model.EventTag:
+					newPipeline.TagTitle = strings.TrimPrefix(oldPipeline.Ref, "refs/tags/")
 				case model.EventCron:
 					newPipeline.Cron = oldPipeline.Sender
 				case model.EventPull, model.EventPullClosed:
@@ -147,7 +151,7 @@ var updatePipelineMessages = xormigrate.Migration{
 					}
 				}
 
-				if _, err := sess.ID(oldPipeline.ID).Cols("commit_new", "deployment", "pr", "cron", "release_tag_title").Update(newPipeline); err != nil {
+				if _, err := sess.ID(oldPipeline.ID).Cols("commit_new", "deployment", "pr", "cron", "release", "tag_title").Update(newPipeline); err != nil {
 					return err
 				}
 			}

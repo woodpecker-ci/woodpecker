@@ -225,7 +225,7 @@ func convertTagHook(hook *gitlab.TagEvent) (*model.Repo, *model.Pipeline, error)
 	pipeline.Commit = &model.Commit{
 		SHA: hook.After,
 	}
-	pipeline.Branch = strings.TrimPrefix(hook.Ref, "refs/heads/")
+	pipeline.TagTitle = strings.TrimPrefix(hook.Ref, "refs/heads/")
 	pipeline.Ref = hook.Ref
 	pipeline.Author = hook.UserUsername
 	pipeline.Avatar = hook.UserAvatar
@@ -279,7 +279,8 @@ func convertReleaseHook(hook *gitlab.ReleaseEvent) (*model.Repo, *model.Pipeline
 		Release:  &model.Release{Title: hook.Name},
 		// Tag name here is the ref. We should add the refs/tags, so
 		// it is known it's a tag (git-plugin looks for it)
-		Ref: "refs/tags/" + hook.Tag,
+		Ref:      "refs/tags/" + hook.Tag,
+		TagTitle: hook.Tag,
 	}
 
 	return repo, pipeline, nil

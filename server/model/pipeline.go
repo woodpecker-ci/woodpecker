@@ -51,7 +51,7 @@ type Pipeline struct {
 	PullRequest  *PullRequest `json:"pull_request,omitempty"      xorm:"json 'pr'"`
 	Cron         string       `json:"cron,omitempty"              xorm:"cron"`
 	Release      *Release     `json:"release,omitempty"      xorm:"json 'release'"`
-	TagTitle string `json:"tag_title,omitempty" xorm:"tag_title"`
+	TagTitle     string       `json:"tag_title,omitempty" xorm:"tag_title"`
 }
 
 // APIPipeline TODO remove in next major.

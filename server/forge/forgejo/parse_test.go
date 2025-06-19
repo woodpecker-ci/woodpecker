@@ -187,6 +187,7 @@ func TestForgejoParser(t *testing.T) {
 				Author:   "gordon",
 				Avatar:   "https://secure.gravatar.com/avatar/8c58a0be77ee441bb8f8595b7f1b4e87",
 				ForgeURL: "http://forgejo.golang.org/gordon/hello-world/releases/tag/v1.0.0",
+				TagTitle: "v1.0.0",
 			},
 		},
 		{
