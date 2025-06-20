@@ -67,10 +67,22 @@ var Flags = []cli.Flag{
 		Usage:   "backend k8s Agent-wide worker pod node selector",
 		Value:   "",
 	},
+	&cli.StringFlag{
+		Sources: cli.EnvVars("WOODPECKER_BACKEND_K8S_POD_TOLERATIONS"),
+		Name:    "backend-k8s-pod-tolerations",
+		Usage:   "backend k8s Agent-wide worker pod tolerations",
+		Value:   "",
+	},
 	&cli.BoolFlag{
 		Sources: cli.EnvVars("WOODPECKER_BACKEND_K8S_POD_ANNOTATIONS_ALLOW_FROM_STEP"),
 		Name:    "backend-k8s-pod-annotations-allow-from-step",
 		Usage:   "whether to allow using annotations from step's backend options",
+		Value:   false,
+	},
+	&cli.BoolFlag{
+		Sources: cli.EnvVars("WOODPECKER_BACKEND_K8S_POD_TOLERATIONS_ANNOTATION_ALLOW_FROM_STEP"),
+		Name:    "backend-k8s-pod-tolerations-allow-from-step",
+		Usage:   "allow pipelines to override the tolerations of a pod inside of the step",
 		Value:   false,
 	},
 	&cli.BoolFlag{
