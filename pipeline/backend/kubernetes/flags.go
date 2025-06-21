@@ -82,7 +82,7 @@ var Flags = []cli.Flag{
 	&cli.BoolFlag{
 		Sources: cli.EnvVars("WOODPECKER_BACKEND_K8S_POD_TOLERATIONS_ANNOTATION_ALLOW_FROM_STEP"),
 		Name:    "backend-k8s-pod-tolerations-allow-from-step",
-		Usage:   "allow pipelines to override the tolerations of a pod inside of the step",
+		Usage:   "whether to allow using tolerations from step's backend options",
 		Value:   false,
 	},
 	&cli.BoolFlag{
