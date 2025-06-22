@@ -27,6 +27,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update dependency vue-i18n to v11.1.7 [[#5270](https://github.com/woodpecker-ci/woodpecker/pull/5270)]
 - fix(deps): update dependency simple-icons to v15.3.0 [[#5269](https://github.com/woodpecker-ci/woodpecker/pull/5269)]
 - fix(deps): update web npm deps non-major [[#5268](https://github.com/woodpecker-ci/woodpecker/pull/5268)]
 - fix(deps): update golang-packages to v0.33.2 [[#5265](https://github.com/woodpecker-ci/woodpecker/pull/5265)]
