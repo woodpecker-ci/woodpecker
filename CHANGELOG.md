@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.8.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.8.0) - 2025-06-21
+## [3.8.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.8.0) - 2025-06-22
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -27,6 +27,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update dependency simple-icons to v15.3.0 [[#5269](https://github.com/woodpecker-ci/woodpecker/pull/5269)]
 - fix(deps): update web npm deps non-major [[#5268](https://github.com/woodpecker-ci/woodpecker/pull/5268)]
 - fix(deps): update golang-packages to v0.33.2 [[#5265](https://github.com/woodpecker-ci/woodpecker/pull/5265)]
 - fix(deps): update golang-packages [[#5261](https://github.com/woodpecker-ci/woodpecker/pull/5261)]
