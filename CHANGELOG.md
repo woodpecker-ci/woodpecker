@@ -1,14 +1,19 @@
 # Changelog
 
-## [3.8.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.8.0) - 2025-06-26
+## [3.8.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.8.0) - 2025-06-27
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@OCram85, @henkka, @hhamalai, @mmatous
+@OCram85, @henkka, @hhamalai, @johanvdw, @mmatous
 
 ### 🔒 Security
 
 - kubernetes: prevent secrets from leaking to api-server logs [[#5196](https://github.com/woodpecker-ci/woodpecker/pull/5196)]
+
+### 🐛 Bug Fixes
+
+- Adjust documentation urls [[#5273](https://github.com/woodpecker-ci/woodpecker/pull/5273)]
+- Fix doc links in agent settings [[#5251](https://github.com/woodpecker-ci/woodpecker/pull/5251)]
 
 ### 📚 Documentation
 
@@ -17,10 +22,6 @@
 - add Peckify plugin [[#5260](https://github.com/woodpecker-ci/woodpecker/pull/5260)]
 - fix(deps): update docs npm deps non-major [[#5252](https://github.com/woodpecker-ci/woodpecker/pull/5252)]
 - fix(deps): update docs npm deps non-major [[#5226](https://github.com/woodpecker-ci/woodpecker/pull/5226)]
-
-### 🐛 Bug Fixes
-
-- Fix doc links in agent settings [[#5251](https://github.com/woodpecker-ci/woodpecker/pull/5251)]
 
 ### 📈 Enhancement
 
