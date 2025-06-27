@@ -10,6 +10,11 @@
 
 - kubernetes: prevent secrets from leaking to api-server logs [[#5196](https://github.com/woodpecker-ci/woodpecker/pull/5196)]
 
+### 📈 Enhancement
+
+- Add pipeline author and avatar env vars [[#5227](https://github.com/woodpecker-ci/woodpecker/pull/5227)]
+- Support for pull request file changes in bitbucketdatacenter [[#5205](https://github.com/woodpecker-ci/woodpecker/pull/5205)]
+
 ### 🐛 Bug Fixes
 
 - Use pipeline number in title [[#5275](https://github.com/woodpecker-ci/woodpecker/pull/5275)]
@@ -23,10 +28,6 @@
 - add Peckify plugin [[#5260](https://github.com/woodpecker-ci/woodpecker/pull/5260)]
 - fix(deps): update docs npm deps non-major [[#5252](https://github.com/woodpecker-ci/woodpecker/pull/5252)]
 - fix(deps): update docs npm deps non-major [[#5226](https://github.com/woodpecker-ci/woodpecker/pull/5226)]
-
-### 📈 Enhancement
-
-- Support for pull request file changes in bitbucketdatacenter [[#5205](https://github.com/woodpecker-ci/woodpecker/pull/5205)]
 
 ### 📦️ Dependency
 
