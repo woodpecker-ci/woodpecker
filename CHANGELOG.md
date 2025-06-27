@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@OCram85, @henkka, @hhamalai, @johanvdw, @mmatous
+@OCram85, @henkka, @hhamalai, @johanvdw, @mmatous, @qwerty287
 
 ### 🔒 Security
 
@@ -12,6 +12,7 @@
 
 ### 🐛 Bug Fixes
 
+- Use pipeline number in title [[#5275](https://github.com/woodpecker-ci/woodpecker/pull/5275)]
 - Adjust documentation urls [[#5273](https://github.com/woodpecker-ci/woodpecker/pull/5273)]
 - Fix doc links in agent settings [[#5251](https://github.com/woodpecker-ci/woodpecker/pull/5251)]
 
