@@ -12,6 +12,7 @@
 
 ### 📚 Documentation
 
+- chore(deps): update dependency @types/node to v22.15.34 [[#5280](https://github.com/woodpecker-ci/woodpecker/pull/5280)]
 - chore(deps): update dependency @types/node to v22.15.33 [[#5277](https://github.com/woodpecker-ci/woodpecker/pull/5277)]
 - chore(deps): lock file maintenance [[#5271](https://github.com/woodpecker-ci/woodpecker/pull/5271)]
 - fix(deps): update docs npm deps non-major [[#5267](https://github.com/woodpecker-ci/woodpecker/pull/5267)]
