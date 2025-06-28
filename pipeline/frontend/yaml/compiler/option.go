@@ -169,13 +169,6 @@ func WithTrustedClonePlugins(images []string) Option {
 	}
 }
 
-// WithTrustedSecurity configures the compiler with the trusted repo option.
-func WithTrustedSecurity(trusted bool) Option {
-	return func(compiler *Compiler) {
-		compiler.securityTrustedPipeline = trusted
-	}
-}
-
 type ProxyOptions struct {
 	NoProxy    string
 	HTTPProxy  string
