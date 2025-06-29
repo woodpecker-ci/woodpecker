@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.8.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.8.0) - 2025-06-28
+## [3.8.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.8.0) - 2025-06-29
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -33,6 +33,8 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update dependency vite to v7 [[#5283](https://github.com/woodpecker-ci/woodpecker/pull/5283)]
+- fix(deps): update module github.com/google/go-github/v72 to v73 [[#5285](https://github.com/woodpecker-ci/woodpecker/pull/5285)]
 - chore(deps): update pre-commit hook rbubley/mirrors-prettier to v3.6.2 [[#5278](https://github.com/woodpecker-ci/woodpecker/pull/5278)]
 - fix(deps): update golang-packages to v28.3.0+incompatible [[#5274](https://github.com/woodpecker-ci/woodpecker/pull/5274)]
 - fix(deps): update dependency vue-i18n to v11.1.7 [[#5270](https://github.com/woodpecker-ci/woodpecker/pull/5270)]
