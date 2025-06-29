@@ -34,6 +34,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update pre-commit hook golangci/golangci-lint to v2.2.1 [[#5288](https://github.com/woodpecker-ci/woodpecker/pull/5288)]
 - fix(deps): update dependency marked to v16 [[#5284](https://github.com/woodpecker-ci/woodpecker/pull/5284)]
 - chore(deps): update dependency @vitejs/plugin-vue to v6 [[#5282](https://github.com/woodpecker-ci/woodpecker/pull/5282)]
 - chore(deps): update pre-commit hook golangci/golangci-lint to v2.2.0 [[#5286](https://github.com/woodpecker-ci/woodpecker/pull/5286)]
