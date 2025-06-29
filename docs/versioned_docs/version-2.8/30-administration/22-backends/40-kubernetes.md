@@ -116,6 +116,9 @@ steps:
             tolerationSeconds: 3600
 ```
 
+In order to enable this configuration you need to set the appropriate environment variables to `true` on the woodpecker agent:
+[WOODPECKER_BACKEND_K8S_POD_TOLERATIONS_ALLOW_FROM_STEP](#woodpecker_backend_k8s_pod_tolerations_allow_from_step).
+
 ### Volumes
 
 To mount volumes a PersistentVolume (PV) and PersistentVolumeClaim (PVC) are needed on the cluster which can be referenced in steps via the `volumes` option.
@@ -285,6 +288,18 @@ Additional annotations to apply to worker Pods. Must be a YAML object, e.g. `{"e
 > Default: `false`
 
 Determines if Pod annotations can be defined from a step's backend options.
+
+### WOODPECKER_BACKEND_K8S_POD_TOLERATIONS
+
+> Default: none
+
+Additional tolerations to apply to worker Pods. Must be a YAML object, e.g. `[{"effect":"NoSchedule","key":"jobs","operator":"Exists"}]`.
+
+### WOODPECKER_BACKEND_K8S_POD_TOLERATIONS_ALLOW_FROM_STEP
+
+> Default: `false`
+
+Determines if Pod tolerations can be defined from a step's backend options.
 
 ### `WOODPECKER_BACKEND_K8S_POD_NODE_SELECTOR`
 
