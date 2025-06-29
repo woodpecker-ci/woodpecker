@@ -51,7 +51,7 @@
     "@types/prismjs": "^1.26.5",
     "@types/semver": "^7.5.8",
     "@types/tinycolor2": "^1.4.6",
-    "@vitejs/plugin-vue": "^5.2.1",
+    "@vitejs/plugin-vue": "^6.0.0",
     "@vue/compiler-sfc": "^3.5.13",
     "@vue/test-utils": "^2.4.6",
     "eslint": "^9.17.0",
