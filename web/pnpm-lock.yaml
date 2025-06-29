@@ -106,8 +106,8 @@ importers:
         specifier: ^1.4.6
         version: 1.4.6
       '@vitejs/plugin-vue':
-        specifier: ^5.2.1
-        version: 5.2.4(vite@7.0.0(@types/node@22.15.32)(jiti@2.4.2)(lightningcss@1.30.1)(stylus@0.57.0)(yaml@2.8.0))(vue@3.5.17(typescript@5.8.3))
+        specifier: ^6.0.0
+        version: 6.0.0(vite@7.0.0(@types/node@22.15.32)(jiti@2.4.2)(lightningcss@1.30.1)(stylus@0.57.0)(yaml@2.8.0))(vue@3.5.17(typescript@5.8.3))
       '@vue/compiler-sfc':
         specifier: ^3.5.13
         version: 3.5.17
@@ -700,6 +700,9 @@ packages:
     resolution: {integrity: sha512-YLT9Zo3oNPJoBjBc4q8G2mjU4tqIbf5CEOORbUUr48dCD9q3umJ3IPlVqOqDakPfd2HuwccBaqlGhN4Gmr5OWg==}
     engines: {node: ^12.20.0 || ^14.18.0 || >=16.0.0}
 
+  '@rolldown/pluginutils@1.0.0-beta.19':
+    resolution: {integrity: sha512-3FL3mnMbPu0muGOCaKAhhFEYmqv9eTfPSJRJmANrCwtgK8VuxpsZDGK+m0LYAGoyO8+0j5uRe4PeyPDK1yA/hA==}
+
   '@rollup/pluginutils@5.2.0':
     resolution: {integrity: sha512-qWJ2ZTbmumwiLFomfzTyt5Kng4hwPi9rwCYN4SHb6eaRU1KNO4ccxINHr/VhH4GgPlt1XfSTLX2LBTme8ne4Zw==}
     engines: {node: '>=14.0.0'}
@@ -1034,11 +1037,11 @@ packages:
     resolution: {integrity: sha512-xoh5rJ+tgsRKoXnkBPFRLZ7rjKM0AfVbC68UZ/ECXoDbfggb9RbEySN359acY1vS3qZ0jVTVWzbtfapwm5ztxw==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
-  '@vitejs/plugin-vue@5.2.4':
-    resolution: {integrity: sha512-7Yx/SXSOcQq5HiiV3orevHUFn+pmMB4cgbEkDYgnkUWb0WfeQ/wa2yFv6D5ICiCQOVpjA7vYDXrC7AGO8yjDHA==}
-    engines: {node: ^18.0.0 || >=20.0.0}
+  '@vitejs/plugin-vue@6.0.0':
+    resolution: {integrity: sha512-iAliE72WsdhjzTOp2DtvKThq1VBC4REhwRcaA+zPAAph6I+OQhUXv+Xu2KS7ElxYtb7Zc/3R30Hwv1DxEo7NXQ==}
+    engines: {node: ^20.19.0 || >=22.12.0}
     peerDependencies:
-      vite: ^5.0.0 || ^6.0.0
+      vite: ^5.0.0 || ^6.0.0 || ^7.0.0
       vue: ^3.2.25
 
   '@vitest/eslint-plugin@1.2.7':
@@ -3630,6 +3633,8 @@ snapshots:
 
   '@pkgr/core@0.2.7': {}
 
+  '@rolldown/pluginutils@1.0.0-beta.19': {}
+
   '@rollup/pluginutils@5.2.0(rollup@4.44.0)':
     dependencies:
       '@types/estree': 1.0.8
@@ -3930,8 +3935,9 @@ snapshots:
       '@typescript-eslint/types': 8.34.1
       eslint-visitor-keys: 4.2.1
 
-  '@vitejs/plugin-vue@5.2.4(vite@7.0.0(@types/node@22.15.32)(jiti@2.4.2)(lightningcss@1.30.1)(stylus@0.57.0)(yaml@2.8.0))(vue@3.5.17(typescript@5.8.3))':
+  '@vitejs/plugin-vue@6.0.0(vite@7.0.0(@types/node@22.15.32)(jiti@2.4.2)(lightningcss@1.30.1)(stylus@0.57.0)(yaml@2.8.0))(vue@3.5.17(typescript@5.8.3))':
     dependencies:
+      '@rolldown/pluginutils': 1.0.0-beta.19
       vite: 7.0.0(@types/node@22.15.32)(jiti@2.4.2)(lightningcss@1.30.1)(stylus@0.57.0)(yaml@2.8.0)
       vue: 3.5.17(typescript@5.8.3)
 
