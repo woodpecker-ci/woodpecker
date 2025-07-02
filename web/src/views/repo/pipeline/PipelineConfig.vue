@@ -38,7 +38,7 @@ const { t } = useI18n();
 useWPTitle(
   computed(() => [
     t('repo.pipeline.config'),
-    t('repo.pipeline.pipeline', { pipelineId: pipeline.value.id }),
+    t('repo.pipeline.pipeline', { pipelineId: pipeline.value.number }),
     repo.value.full_name,
   ]),
 );
