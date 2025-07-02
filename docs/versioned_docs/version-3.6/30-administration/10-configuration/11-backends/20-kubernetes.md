@@ -371,24 +371,6 @@ Determines if Pod annotations can be defined from a step's backend options.
 
 ---
 
-### BACKEND_K8S_POD_TOLERATIONS
-
-- Name: `WOODPECKER_BACKEND_K8S_POD_TOLERATIONS`
-- Default: none
-
-Additional annotations to apply to worker Pods. Must be a YAML object, e.g. `[{"effect":"NoSchedule","key":"jobs","operator":"Exists"}]`.
-
----
-
-### BACKEND_K8S_POD_TOLERATIONS_ALLOW_FROM_STEP
-
-- Name: `WOODPECKER_BACKEND_K8S_POD_TOLERATIONS_ALLOW_FROM_STEP`
-- Default: `false`
-
-Determines if Pod tolerations can be defined from a step's backend options.
-
----
-
 ### BACKEND_K8S_POD_NODE_SELECTOR
 
 - Name: `WOODPECKER_BACKEND_K8S_POD_NODE_SELECTOR`
