@@ -168,7 +168,6 @@ func podAnnotations(config *config, options BackendOptions) map[string]string {
 }
 
 func podSpec(step *types.Step, config *config, options BackendOptions, nsp nativeSecretsProcessor) (v1.PodSpec, error) {
-
 	var err error
 	spec := v1.PodSpec{
 		RestartPolicy:      v1.RestartPolicyNever,
