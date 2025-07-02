@@ -187,8 +187,6 @@ func podSpec(step *types.Step, config *config, options BackendOptions, nsp nativ
 		spec.Tolerations = tolerations(config.PodTolerations)
 	}
 
-	fmt.Println("spec.Tolerations:", spec.Tolerations)
-
 	spec.Volumes, err = pvcVolumes(step.Volumes)
 	if err != nil {
 		return spec, err

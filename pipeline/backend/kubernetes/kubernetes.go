@@ -125,15 +125,13 @@ func configFromCliContext(ctx context.Context) (*config, error) {
 					return nil, err
 				}
 			}
-			if tolerationss := c.String("backend-k8s-pod-tolerations"); tolerationss != "" {
-				fmt.Println("tolerations:", tolerationss)
-				if err := yaml.Unmarshal([]byte(tolerationss), &config.PodTolerations); err != nil {
-					log.Error().Err(err).Msgf("could not unmarshal pod node selector '%s'", tolerationss)
+			if podTolerations := c.String("backend-k8s-pod-tolerations"); podTolerations != "" {
+				if err := yaml.Unmarshal([]byte(podTolerations), &config.PodTolerations); err != nil {
+					log.Error().Err(err).Msgf("could not unmarshal pod node selector '%s'", podTolerations)
 					return nil, err
 				}
 			}
 
-			fmt.Println("config.PodTolerations:", config.PodTolerations)
 			return &config, nil
 		}
 	}
