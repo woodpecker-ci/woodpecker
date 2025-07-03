@@ -5648,8 +5648,15 @@ const docTemplate = `{
         "metadata.Pipeline": {
             "type": "object",
             "properties": {
+<<<<<<< HEAD
                 "avatar": {
                     "description": "Deprecated: remove in next major",
+=======
+                "author": {
+                    "type": "string"
+                },
+                "avatar": {
+>>>>>>> main
                     "type": "string"
                 },
                 "commit": {

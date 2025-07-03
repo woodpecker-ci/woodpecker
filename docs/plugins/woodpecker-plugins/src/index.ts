@@ -40,7 +40,7 @@ async function loadContent(): Promise<Content> {
           return undefined;
         }
 
-        const docsBody = markdown.getContent(docsContent);
+        const docsBody = await markdown.getContent(docsContent);
 
         if (!docsHeader.name) {
           return undefined;

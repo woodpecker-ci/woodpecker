@@ -160,6 +160,13 @@ linters:
         - strings.Split
         - callerName
         - securecookie.GenerateRandomKey
+    revive:
+      rules:
+        - name: var-naming
+          arguments:
+            - []
+            - []
+            - - skipPackageNameChecks: true
   exclusions:
     generated: lax
     presets:
