@@ -4,6 +4,14 @@ To enhance the usability of Woodpecker and meet evolving security standards, occ
 
 ## `next`
 
+### Admin-facing changes
+
+#### Behavior of the "trusted" settings
+
+Trusted settings are no longer managed by the server, but by the agent. This allows you to use trusted features even if you're not the instance admin by deploying a user agent.
+
+### User-facing migrations
+
 - (Kubernetes) Deprecated `step` label on pod in favor of new namespaced label `woodpecker-ci.org/step`. The `step` label will be removed in a future update.
 - deprecated `CI_COMMIT_AUTHOR_AVATAR` and `CI_PREV_COMMIT_AUTHOR_AVATAR` env vars in favor of `CI_PIPELINE_AVATAR` and `CI_PREV_PIPELINE_AVATAR`
 
