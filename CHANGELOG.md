@@ -34,6 +34,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update web npm deps non-major [[#5281](https://github.com/woodpecker-ci/woodpecker/pull/5281)]
 - fix(deps): update golang-packages [[#5291](https://github.com/woodpecker-ci/woodpecker/pull/5291)]
 - chore(deps): update pre-commit hook golangci/golangci-lint to v2.2.1 [[#5288](https://github.com/woodpecker-ci/woodpecker/pull/5288)]
 - fix(deps): update dependency marked to v16 [[#5284](https://github.com/woodpecker-ci/woodpecker/pull/5284)]
