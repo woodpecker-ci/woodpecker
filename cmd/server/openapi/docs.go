@@ -5587,6 +5587,12 @@ const docTemplate = `{
         "metadata.Pipeline": {
             "type": "object",
             "properties": {
+                "author": {
+                    "type": "string"
+                },
+                "avatar": {
+                    "type": "string"
+                },
                 "commit": {
                     "$ref": "#/definitions/metadata.Commit"
                 },

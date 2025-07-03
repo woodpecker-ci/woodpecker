@@ -131,6 +131,8 @@ func metadataPipelineFromModelPipeline(pipeline *model.Pipeline, includeParent b
 			PullRequestLabels: pipeline.PullRequestLabels,
 			IsPrerelease:      pipeline.IsPrerelease,
 		},
-		Cron: cron,
+		Cron:   cron,
+		Author: pipeline.Author,
+		Avatar: pipeline.Avatar,
 	}
 }
