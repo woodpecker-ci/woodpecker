@@ -68,13 +68,13 @@ func TestParamsToEnv(t *testing.T) {
 
 		return "", fmt.Errorf("secret %q not found or not allowed to be used", name)
 	}
-	secretMapping := map[string]string{}
-	assert.NoError(t, ParamsToEnv(from, got, "PLUGIN_", true, getSecretValue, secretMapping))
+
+	assert.NoError(t, ParamsToEnv(from, got, "PLUGIN_", true, getSecretValue))
 	assert.EqualValues(t, want, got, "Problem converting plugin parameters to environment variables")
 
 	// handle edge cases (#1609)
 	got = map[string]string{}
-	assert.NoError(t, ParamsToEnv(map[string]any{"a": []any{"a", nil}}, got, "PLUGIN_", true, nil, nil))
+	assert.NoError(t, ParamsToEnv(map[string]any{"a": []any{"a", nil}}, got, "PLUGIN_", true, nil))
 	assert.EqualValues(t, map[string]string{"PLUGIN_A": "a,"}, got)
 }
 
@@ -92,7 +92,7 @@ func TestParamsToEnvPrefix(t *testing.T) {
 		return "", fmt.Errorf("secret %q not found or not allowed to be used", name)
 	}
 
-	assert.NoError(t, ParamsToEnv(from, got, "PLUGIN_", true, getSecretValue, nil))
+	assert.NoError(t, ParamsToEnv(from, got, "PLUGIN_", true, getSecretValue))
 	assert.EqualValues(t, wantPrefixPlugin, got, "Problem converting plugin parameters to environment variables")
 
 	wantNoPrefix := map[string]string{
@@ -102,7 +102,7 @@ func TestParamsToEnvPrefix(t *testing.T) {
 
 	// handle edge cases (#1609)
 	got = map[string]string{}
-	assert.NoError(t, ParamsToEnv(from, got, "", true, getSecretValue, nil))
+	assert.NoError(t, ParamsToEnv(from, got, "", true, getSecretValue))
 	assert.EqualValues(t, wantNoPrefix, got, "Problem converting plugin parameters to environment variables")
 }
 
@@ -166,14 +166,8 @@ list.map:
 
 		return "", fmt.Errorf("secret %q not found or not allowed to be used", name)
 	}
-	gotSecretMapping := map[string]string{}
-	wantSecretMapping := map[string]string{
-		"PLUGIN_MY_SECRET": "FooBar",
-		"PLUGIN_MAP":       "FooBar",
-		"PLUGIN_LIST_MAP":  "geheim",
-	}
-	assert.NoError(t, ParamsToEnv(from, got, "PLUGIN_", true, getSecretValue, gotSecretMapping))
-	assert.Equal(t, wantSecretMapping, gotSecretMapping, "Problem collecting secret mapping")
+
+	assert.NoError(t, ParamsToEnv(from, got, "PLUGIN_", true, getSecretValue))
 	assert.EqualValues(t, want, got, "Problem converting plugin parameters to environment variables")
 }
 
@@ -197,8 +191,7 @@ func TestYAMLToParamsToEnvError(t *testing.T) {
 		return "", fmt.Errorf("secret %q not found or not allowed to be used", name)
 	}
 
-	secretMapping := map[string]string{}
-	assert.Error(t, ParamsToEnv(from, make(map[string]string), "PLUGIN_", true, getSecretValue, secretMapping))
+	assert.Error(t, ParamsToEnv(from, make(map[string]string), "PLUGIN_", true, getSecretValue))
 }
 
 func stringsToInterface(val ...string) []any {
@@ -227,8 +220,8 @@ func TestSecretNotFound(t *testing.T) {
 		return "", fmt.Errorf("secret %q not found or not allowed to be used", name)
 	}
 	got := map[string]string{}
-	secretMapping := map[string]string{}
+
 	assert.ErrorContains(t,
-		ParamsToEnv(from, got, "PLUGIN_", true, getSecretValue, secretMapping),
+		ParamsToEnv(from, got, "PLUGIN_", true, getSecretValue),
 		fmt.Sprintf("secret %q not found or not allowed to be used", "secret_token"))
 }
