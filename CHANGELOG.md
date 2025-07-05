@@ -33,6 +33,8 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update docker.io/woodpeckerci/plugin-ready-release-go docker tag to v3.3.0 [[#5298](https://github.com/woodpecker-ci/woodpecker/pull/5298)]
+- chore(deps): update docker.io/woodpeckerci/plugin-trivy docker tag to v1.4.1 [[#5297](https://github.com/woodpecker-ci/woodpecker/pull/5297)]
 - chore(deps): update docker.io/woodpeckerci/plugin-docker-buildx docker tag to v6.0.2 [[#5295](https://github.com/woodpecker-ci/woodpecker/pull/5295)]
 - chore(deps): update docker.io/woodpeckerci/plugin-editorconfig-checker docker tag to v0.3.1 [[#5296](https://github.com/woodpecker-ci/woodpecker/pull/5296)]
 - chore(deps): lock file maintenance [[#5289](https://github.com/woodpecker-ci/woodpecker/pull/5289)]
