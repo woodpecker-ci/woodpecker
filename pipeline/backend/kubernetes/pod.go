@@ -235,15 +235,7 @@ func podContainer(step *types.Step, podName, goos string, options BackendOptions
 		container.Command = step.Entrypoint
 	}
 
-	stepSecret, err := stepSecretName(step)
-	if err != nil {
-		return container, err
-	}
-
-	// filter environment variables to non-secrets and secrets, refer secrets from step secrets
-	envs, secs := filterSecrets(step.Environment, step.SecretMapping)
-	envsFromSecrets := mapToEnvVarsFromStepSecrets(secs, stepSecret)
-	container.Env = append(mapToEnvVars(envs), envsFromSecrets...)
+	container.Env = mapToEnvVars(step.Environment)
 
 	container.Resources, err = resourceRequirements(options.Resources)
 	if err != nil {
@@ -260,38 +252,6 @@ func podContainer(step *types.Step, podName, goos string, options BackendOptions
 	container.VolumeMounts = append(container.VolumeMounts, nsp.mounts...)
 
 	return container, nil
-}
-
-func mapToEnvVarsFromStepSecrets(secs []string, stepSecretName string) []v1.EnvVar {
-	var ev []v1.EnvVar
-	for _, key := range secs {
-		ev = append(ev, v1.EnvVar{
-			Name: key,
-			ValueFrom: &v1.EnvVarSource{
-				SecretKeyRef: &v1.SecretKeySelector{
-					LocalObjectReference: v1.LocalObjectReference{
-						Name: stepSecretName,
-					},
-					Key: key,
-				},
-			},
-		})
-	}
-	return ev
-}
-
-func filterSecrets(environment, secrets map[string]string) (map[string]string, []string) {
-	ev := map[string]string{}
-	var secs []string
-
-	for k, v := range environment {
-		if _, found := secrets[k]; found {
-			secs = append(secs, k)
-		} else {
-			ev[k] = v
-		}
-	}
-	return ev, secs
 }
 
 func pvcVolumes(volumes []string) ([]v1.Volume, error) {
