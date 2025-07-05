@@ -26,7 +26,6 @@ type Step struct {
 	WorkingDir      string            `json:"working_dir,omitempty"`
 	WorkspaceBase   string            `json:"workspace_base,omitempty"`
 	Environment     map[string]string `json:"environment,omitempty"`
-	SecretMapping   map[string]string `json:"secret_mapping,omitempty"`
 	Entrypoint      []string          `json:"entrypoint,omitempty"`
 	Commands        []string          `json:"commands,omitempty"`
 	ExtraHosts      []HostAlias       `json:"extra_hosts,omitempty"`
