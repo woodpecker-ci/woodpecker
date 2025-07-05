@@ -81,12 +81,8 @@ func TestCompilerCompile(t *testing.T) {
 		WithWorkspaceFromURL("/test", repoURL),
 	)
 
-	defaultNetwork := &backend_types.Network{
-		Name: "test_default",
-	}
-	defaultVolume := &backend_types.Volume{
-		Name: "test_default",
-	}
+	defaultNetwork := "test_default"
+	defaultVolume := "test_default"
 
 	defaultCloneStage := &backend_types.Stage{
 		Steps: []*backend_types.Step{{
@@ -95,7 +91,7 @@ func TestCompilerCompile(t *testing.T) {
 			Image:         constant.DefaultClonePlugin,
 			OnSuccess:     true,
 			Failure:       "fail",
-			Volumes:       []string{defaultVolume.Name + ":/woodpecker"},
+			Volumes:       []string{defaultVolume + ":/woodpecker"},
 			WorkingDir:    "/woodpecker/src/github.com/octocat/hello-world",
 			WorkspaceBase: "/woodpecker",
 			Networks:      []backend_types.Conn{{Name: "test_default", Aliases: []string{"clone"}}},
@@ -142,7 +138,7 @@ func TestCompilerCompile(t *testing.T) {
 						Image:         "dummy_img",
 						OnSuccess:     true,
 						Failure:       "fail",
-						Volumes:       []string{defaultVolume.Name + ":/woodpecker"},
+						Volumes:       []string{defaultVolume + ":/woodpecker"},
 						WorkingDir:    "/woodpecker/src/github.com/octocat/hello-world",
 						WorkspaceBase: "/woodpecker",
 						Networks:      []backend_types.Conn{{Name: "test_default", Aliases: []string{"dummy"}}},
@@ -178,7 +174,7 @@ func TestCompilerCompile(t *testing.T) {
 							Commands:      []string{"env"},
 							OnSuccess:     true,
 							Failure:       "fail",
-							Volumes:       []string{defaultVolume.Name + ":/test"},
+							Volumes:       []string{defaultVolume + ":/test"},
 							WorkingDir:    "/test/src/github.com/octocat/hello-world",
 							WorkspaceBase: "/test",
 							Networks:      []backend_types.Conn{{Name: "test_default", Aliases: []string{"echo env"}}},
@@ -192,7 +188,7 @@ func TestCompilerCompile(t *testing.T) {
 							Commands:      []string{"echo 1"},
 							OnSuccess:     true,
 							Failure:       "fail",
-							Volumes:       []string{defaultVolume.Name + ":/test"},
+							Volumes:       []string{defaultVolume + ":/test"},
 							WorkingDir:    "/test/src/github.com/octocat/hello-world",
 							WorkspaceBase: "/test",
 							Networks:      []backend_types.Conn{{Name: "test_default", Aliases: []string{"parallel echo 1"}}},
@@ -206,7 +202,7 @@ func TestCompilerCompile(t *testing.T) {
 							Commands:      []string{"echo 2"},
 							OnSuccess:     true,
 							Failure:       "fail",
-							Volumes:       []string{defaultVolume.Name + ":/test"},
+							Volumes:       []string{defaultVolume + ":/test"},
 							WorkingDir:    "/test/src/github.com/octocat/hello-world",
 							WorkspaceBase: "/test",
 							Networks:      []backend_types.Conn{{Name: "test_default", Aliases: []string{"parallel echo 2"}}},
@@ -243,7 +239,7 @@ func TestCompilerCompile(t *testing.T) {
 						Commands:      []string{"env"},
 						OnSuccess:     true,
 						Failure:       "fail",
-						Volumes:       []string{defaultVolume.Name + ":/test"},
+						Volumes:       []string{defaultVolume + ":/test"},
 						WorkingDir:    "/test/src/github.com/octocat/hello-world",
 						WorkspaceBase: "/test",
 						Networks:      []backend_types.Conn{{Name: "test_default", Aliases: []string{"echo env"}}},
@@ -255,7 +251,7 @@ func TestCompilerCompile(t *testing.T) {
 						Commands:      []string{"echo 2"},
 						OnSuccess:     true,
 						Failure:       "fail",
-						Volumes:       []string{defaultVolume.Name + ":/test"},
+						Volumes:       []string{defaultVolume + ":/test"},
 						WorkingDir:    "/test/src/github.com/octocat/hello-world",
 						WorkspaceBase: "/test",
 						Networks:      []backend_types.Conn{{Name: "test_default", Aliases: []string{"echo 2"}}},
@@ -269,7 +265,7 @@ func TestCompilerCompile(t *testing.T) {
 						Commands:      []string{"echo 1"},
 						OnSuccess:     true,
 						Failure:       "fail",
-						Volumes:       []string{defaultVolume.Name + ":/test"},
+						Volumes:       []string{defaultVolume + ":/test"},
 						WorkingDir:    "/test/src/github.com/octocat/hello-world",
 						WorkspaceBase: "/test",
 						Networks:      []backend_types.Conn{{Name: "test_default", Aliases: []string{"echo 1"}}},
@@ -351,12 +347,8 @@ func TestCompilerCompileWithFromSecret(t *testing.T) {
 		// we use "/test" as custom workspace base to ensure the enforcement of the pluginWorkspaceBase is applied
 		WithWorkspaceFromURL("/test", repoURL),
 	)
-	defaultNetwork := &backend_types.Network{
-		Name: "test_default",
-	}
-	defaultVolume := &backend_types.Volume{
-		Name: "test_default",
-	}
+	defaultNetwork := "test_default"
+	defaultVolume := "test_default"
 	defaultCloneStage := &backend_types.Stage{
 		Steps: []*backend_types.Step{{
 			Name:          "clone",
@@ -366,7 +358,7 @@ func TestCompilerCompileWithFromSecret(t *testing.T) {
 			Failure:       "fail",
 			WorkingDir:    "/woodpecker/src/github.com/octocat/hello-world",
 			WorkspaceBase: "/woodpecker",
-			Volumes:       []string{defaultVolume.Name + ":/woodpecker"},
+			Volumes:       []string{defaultVolume + ":/woodpecker"},
 			Networks:      []backend_types.Conn{{Name: "test_default", Aliases: []string{"clone"}}},
 			ExtraHosts:    []backend_types.HostAlias{},
 		}},
@@ -398,7 +390,7 @@ func TestCompilerCompileWithFromSecret(t *testing.T) {
 						Failure:       "fail",
 						WorkingDir:    "/test/src/github.com/octocat/hello-world",
 						WorkspaceBase: "/test",
-						Volumes:       []string{defaultVolume.Name + ":/test"},
+						Volumes:       []string{defaultVolume + ":/test"},
 						Networks:      []backend_types.Conn{{Name: "test_default", Aliases: []string{"step"}}},
 						ExtraHosts:    []backend_types.HostAlias{},
 						SecretMapping: map[string]string{

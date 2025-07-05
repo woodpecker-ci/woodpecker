@@ -191,7 +191,7 @@ func (e *kube) getConfig() *config {
 func (e *kube) SetupWorkflow(ctx context.Context, conf *types.Config, taskUUID string) error {
 	log.Trace().Str("taskUUID", taskUUID).Msgf("Setting up Kubernetes primitives")
 
-	_, err := startVolume(ctx, e, conf.Volume.Name)
+	_, err := startVolume(ctx, e, conf.Volume)
 	if err != nil {
 		return err
 	}
@@ -439,7 +439,7 @@ func (e *kube) DestroyWorkflow(ctx context.Context, conf *types.Config, taskUUID
 		}
 	}
 
-	err := stopVolume(ctx, e, conf.Volume.Name, defaultDeleteOptions)
+	err := stopVolume(ctx, e, conf.Volume, defaultDeleteOptions)
 	if err != nil {
 		return err
 	}
