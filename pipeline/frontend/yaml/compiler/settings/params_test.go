@@ -169,8 +169,8 @@ list.map:
 	gotSecretMapping := map[string]string{}
 	wantSecretMapping := map[string]string{
 		"PLUGIN_MY_SECRET": "FooBar",
-		"PLUGIN_MAP":       "FooBar",
-		"PLUGIN_LIST_MAP":  "geheim",
+		"PLUGIN_MAP":       `{"entry2":["a","b",3],"key":"value","secret":"FooBar"}`,
+		"PLUGIN_LIST_MAP":  `[{"password":"geheim","registry":"https://codeberg.org","username":"6543"}]`,
 	}
 	assert.NoError(t, ParamsToEnv(from, got, "PLUGIN_", true, getSecretValue, gotSecretMapping))
 	assert.Equal(t, wantSecretMapping, gotSecretMapping, "Problem collecting secret mapping")
@@ -231,4 +231,76 @@ func TestSecretNotFound(t *testing.T) {
 	assert.ErrorContains(t,
 		ParamsToEnv(from, got, "PLUGIN_", true, getSecretValue, secretMapping),
 		fmt.Sprintf("secret %q not found or not allowed to be used", "secret_token"))
+}
+
+func TestSecretMappingSimpleSecret(t *testing.T) {
+	from := map[string]any{
+		"simple_secret": map[string]any{"from_secret": "my_token"},
+		"regular_var":   "no_secret_here",
+	}
+
+	secrets := map[string]string{
+		"my_token": "secret_value_123",
+	}
+
+	getSecretValue := func(name string) (string, error) {
+		name = strings.ToLower(name)
+		secret, ok := secrets[name]
+		if ok {
+			return secret, nil
+		}
+		return "", fmt.Errorf("secret %q not found", name)
+	}
+
+	got := map[string]string{}
+	secretMapping := map[string]string{}
+
+	assert.NoError(t, ParamsToEnv(from, got, "PLUGIN_", true, getSecretValue, secretMapping))
+
+	assert.Equal(t, "secret_value_123", got["PLUGIN_SIMPLE_SECRET"])
+	assert.Equal(t, "no_secret_here", got["PLUGIN_REGULAR_VAR"])
+
+	assert.Equal(t, "secret_value_123", secretMapping["PLUGIN_SIMPLE_SECRET"])
+	assert.NotContains(t, secretMapping, "PLUGIN_REGULAR_VAR")
+}
+
+func TestSecretMappingComplexMapWithSecrets(t *testing.T) {
+	from := map[string]any{
+		"config": map[string]any{
+			"database": map[string]any{
+				"host":     "localhost",
+				"password": map[string]any{"from_secret": "db_password"},
+				"port":     5432,
+			},
+			"api_key": map[string]any{"from_secret": "api_secret"},
+			"timeout": 30,
+		},
+		"simple_var": "no_secrets",
+	}
+
+	secrets := map[string]string{
+		"db_password": "super_secret_db_pass",
+		"api_secret":  "api_key_12345",
+	}
+
+	getSecretValue := func(name string) (string, error) {
+		name = strings.ToLower(name)
+		secret, ok := secrets[name]
+		if ok {
+			return secret, nil
+		}
+		return "", fmt.Errorf("secret %q not found", name)
+	}
+
+	got := map[string]string{}
+	secretMapping := map[string]string{}
+
+	assert.NoError(t, ParamsToEnv(from, got, "PLUGIN_", true, getSecretValue, secretMapping))
+
+	expectedJSON := `{"api_key":"api_key_12345","database":{"host":"localhost","password":"super_secret_db_pass","port":5432},"timeout":30}`
+	assert.Equal(t, expectedJSON, got["PLUGIN_CONFIG"])
+	assert.Equal(t, "no_secrets", got["PLUGIN_SIMPLE_VAR"])
+
+	assert.Equal(t, expectedJSON, secretMapping["PLUGIN_CONFIG"])
+	assert.NotContains(t, secretMapping, "PLUGIN_SIMPLE_VAR")
 }
