@@ -22,7 +22,6 @@ import (
 	"net/http"
 	"net/url"
 	"path/filepath"
-	"strconv"
 
 	"golang.org/x/oauth2"
 
@@ -32,6 +31,7 @@ import (
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/common"
 	forge_types "go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store"
 	shared_utils "go.woodpecker-ci.org/woodpecker/v3/shared/utils"
 )
 
@@ -222,7 +222,7 @@ func (c *config) Repos(ctx context.Context, u *model.User) ([]*model.Repo, error
 
 // File fetches the file from the Bitbucket repository and returns its contents.
 func (c *config) File(ctx context.Context, u *model.User, r *model.Repo, p *model.Pipeline, f string) ([]byte, error) {
-	config, err := c.newClient(ctx, u).FindSource(r.Owner, r.Name, p.Commit, f)
+	config, err := c.newClient(ctx, u).FindSource(r.Owner, r.Name, p.Commit.SHA, f)
 	if err != nil {
 		var rspErr internal.Error
 		if ok := errors.As(err, &rspErr); ok && rspErr.Status == http.StatusNotFound {
@@ -241,7 +241,7 @@ func (c *config) Dir(ctx context.Context, u *model.User, r *model.Repo, p *model
 	repoPathFiles := []*forge_types.FileMeta{}
 	client := c.newClient(ctx, u)
 	for {
-		filesResp, err := client.GetRepoFiles(r.Owner, r.Name, p.Commit, f, page)
+		filesResp, err := client.GetRepoFiles(r.Owner, r.Name, p.Commit.SHA, f, page)
 		if err != nil {
 			var rspErr internal.Error
 			if ok := errors.As(err, &rspErr); ok && rspErr.Status == http.StatusNotFound {
@@ -257,7 +257,7 @@ func (c *config) Dir(ctx context.Context, u *model.User, r *model.Repo, p *model
 				Name: filename,
 			}
 			if file.Type == "commit_file" {
-				fileData, err := c.newClient(ctx, u).FindSource(r.Owner, r.Name, p.Commit, file.Path)
+				fileData, err := c.newClient(ctx, u).FindSource(r.Owner, r.Name, p.Commit.SHA, file.Path)
 				if err != nil {
 					return nil, err
 				}
@@ -297,7 +297,7 @@ func (c *config) Status(ctx context.Context, user *model.User, repo *model.Repo,
 		Key:   common.GetPipelineStatusContext(repo, pipeline, workflow),
 		URL:   common.GetPipelineStatusURL(repo, pipeline, nil),
 	}
-	return c.newClient(ctx, user).CreateStatus(repo.Owner, repo.Name, pipeline.Commit, &status)
+	return c.newClient(ctx, user).CreateStatus(repo.Owner, repo.Name, pipeline.Commit.SHA, &status)
 }
 
 // Activate activates the repository by registering repository push hooks with
@@ -376,6 +376,8 @@ func (c *config) BranchHead(ctx context.Context, u *model.User, r *model.Repo, b
 	return &model.Commit{
 		SHA:      commit.Hash,
 		ForgeURL: commit.Links.HTML.Href,
+		Message:  commit.Message,
+		Author:   convertCommitAuthor(commit.Author.Raw),
 	}, nil
 }
 
@@ -388,18 +390,25 @@ func (c *config) PullRequests(ctx context.Context, u *model.User, r *model.Repo,
 	}
 	var result []*model.PullRequest
 	for _, pullRequest := range pullRequests {
-		result = append(result, &model.PullRequest{
-			Index: model.ForgeRemoteID(strconv.Itoa(int(pullRequest.ID))),
-			Title: pullRequest.Title,
-		})
+		result = append(result, convertPullRequest(pullRequest))
 	}
 	return result, nil
 }
 
 // Hook parses the incoming Bitbucket hook and returns the Repository and
 // Pipeline details. If the hook is unsupported nil values are returned.
-func (c *config) Hook(_ context.Context, req *http.Request) (*model.Repo, *model.Pipeline, error) {
-	return parseHook(req)
+func (c *config) Hook(ctx context.Context, req *http.Request) (*model.Repo, *model.Pipeline, error) {
+	repo, pipeline, err := parseHook(req)
+
+	if pipeline != nil && (pipeline.Event == model.EventPull || pipeline.Event == model.EventPullClosed) {
+		commit, err := c.getCommit(ctx, repo, pipeline.Commit.SHA)
+		if err != nil {
+			return nil, nil, err
+		}
+		pipeline.Commit = commit
+	}
+
+	return repo, pipeline, err
 }
 
 // OrgMembership returns if user is member of organization and if user
@@ -457,6 +466,35 @@ func (c *config) newOAuth2Config() *oauth2.Config {
 		},
 		RedirectURL: fmt.Sprintf("%s/authorize", server.Config.Server.OAuthHost),
 	}
+}
+
+func (c *config) getCommit(ctx context.Context, repo *model.Repo, sha string) (*model.Commit, error) {
+	_store, ok := store.TryFromContext(ctx)
+	if !ok {
+		return nil, fmt.Errorf("could not get store from context")
+	}
+
+	repo, err := _store.GetRepoNameFallback(repo.ForgeRemoteID, repo.FullName)
+	if err != nil {
+		return nil, err
+	}
+
+	user, err := _store.GetUser(repo.UserID)
+	if err != nil {
+		return nil, err
+	}
+
+	commit, err := c.newClient(ctx, user).GetCommit(repo.Owner, repo.Name, sha)
+	if err != nil {
+		return nil, err
+	}
+
+	return &model.Commit{
+		SHA:      commit.Hash,
+		ForgeURL: commit.Links.HTML.Href,
+		Message:  commit.Message,
+		Author:   convertCommitAuthor(commit.Author.Raw),
+	}, nil
 }
 
 // helper function to return matching hooks.
