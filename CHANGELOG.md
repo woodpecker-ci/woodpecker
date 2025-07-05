@@ -4,11 +4,17 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@OCram85, @henkka, @hhamalai, @johanvdw, @mmatous, @qwerty287
+@OCram85, @henkka, @johanvdw, @mmatous, @qwerty287
 
-### 🔒 Security
+### 📚 Documentation
 
-- kubernetes: prevent secrets from leaking to api-server logs [[#5196](https://github.com/woodpecker-ci/woodpecker/pull/5196)]
+- chore(deps): lock file maintenance [[#5302](https://github.com/woodpecker-ci/woodpecker/pull/5302)]
+- chore(deps): update dependency @types/node to v22.15.34 [[#5280](https://github.com/woodpecker-ci/woodpecker/pull/5280)]
+- chore(deps): update dependency @types/node to v22.15.33 [[#5277](https://github.com/woodpecker-ci/woodpecker/pull/5277)]
+- fix(deps): update docs npm deps non-major [[#5267](https://github.com/woodpecker-ci/woodpecker/pull/5267)]
+- add Peckify plugin [[#5260](https://github.com/woodpecker-ci/woodpecker/pull/5260)]
+- fix(deps): update docs npm deps non-major [[#5252](https://github.com/woodpecker-ci/woodpecker/pull/5252)]
+- fix(deps): update docs npm deps non-major [[#5226](https://github.com/woodpecker-ci/woodpecker/pull/5226)]
 
 ### 🐛 Bug Fixes
 
@@ -16,15 +22,6 @@
 - Use pipeline number in title [[#5275](https://github.com/woodpecker-ci/woodpecker/pull/5275)]
 - Adjust documentation urls [[#5273](https://github.com/woodpecker-ci/woodpecker/pull/5273)]
 - Fix doc links in agent settings [[#5251](https://github.com/woodpecker-ci/woodpecker/pull/5251)]
-
-### 📚 Documentation
-
-- chore(deps): update dependency @types/node to v22.15.34 [[#5280](https://github.com/woodpecker-ci/woodpecker/pull/5280)]
-- chore(deps): update dependency @types/node to v22.15.33 [[#5277](https://github.com/woodpecker-ci/woodpecker/pull/5277)]
-- fix(deps): update docs npm deps non-major [[#5267](https://github.com/woodpecker-ci/woodpecker/pull/5267)]
-- add Peckify plugin [[#5260](https://github.com/woodpecker-ci/woodpecker/pull/5260)]
-- fix(deps): update docs npm deps non-major [[#5252](https://github.com/woodpecker-ci/woodpecker/pull/5252)]
-- fix(deps): update docs npm deps non-major [[#5226](https://github.com/woodpecker-ci/woodpecker/pull/5226)]
 
 ### 📈 Enhancement
 
