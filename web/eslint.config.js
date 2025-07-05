@@ -32,6 +32,7 @@ export default antfu(
       'perfectionist/sort-imports': 'off',
       'perfectionist/sort-named-imports': 'off',
       'promise/prefer-await-to-callbacks': 'error',
+      'vue-scoped-css/no-parsing-error': 'off',
 
       // Vue I18n
       '@intlify/vue-i18n/no-raw-text': [
