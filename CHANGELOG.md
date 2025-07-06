@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.9.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.9.0) - 2025-07-05
+## [3.9.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.9.0) - 2025-07-06
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -9,6 +9,10 @@
 ### 📈 Enhancement
 
 - Simplify backend types [[#5299](https://github.com/woodpecker-ci/woodpecker/pull/5299)]
+
+### 📦️ Dependency
+
+- fix(deps): update dependency simple-icons to v15.5.0 [[#5306](https://github.com/woodpecker-ci/woodpecker/pull/5306)]
 
 ## [3.8.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.8.0) - 2025-07-05
 
