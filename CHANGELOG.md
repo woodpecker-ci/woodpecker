@@ -1,10 +1,14 @@
 # Changelog
 
-## [3.9.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.9.0) - 2025-07-06
+## [3.9.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.9.0) - 2025-07-07
 
 ### ❤️ Thanks to all contributors! ❤️
 
 @qwerty287
+
+### 📚 Documentation
+
+- chore(deps): lock file maintenance [[#5307](https://github.com/woodpecker-ci/woodpecker/pull/5307)]
 
 ### 📈 Enhancement
 
