@@ -122,12 +122,19 @@ type (
 
 		// old fields
 
+		// Deprecated
 		Title     string `json:"title"`
+		// Deprecated
 		Message   string `json:"message"`
+		// Deprecated
 		Timestamp int64  `json:"timestamp"`
+		// Deprecated
 		Sender    string `json:"sender"`
+		// Deprecated
 		Commit    string `json:"commit"`
+		// Deprecated
 		Email     string `json:"author_email"`
+		// Deprecated
 		Deploy    string `json:"deploy_to"`
 	}
 
