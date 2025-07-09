@@ -79,7 +79,7 @@ async function downloadMetadata() {
 useWPTitle(
   computed(() => [
     t('repo.pipeline.debug.title'),
-    t('repo.pipeline.pipeline', { pipelineId: pipeline.value.id }),
+    t('repo.pipeline.pipeline', { pipelineId: pipeline.value.number }),
     repo.value.full_name,
   ]),
 );
