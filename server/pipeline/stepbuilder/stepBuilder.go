@@ -216,6 +216,7 @@ func (b *StepBuilder) genItemForWorkflow(workflow *model.Workflow, axis matrix.A
 	for stageI := range item.Config.Stages {
 		for stepI := range item.Config.Stages[stageI].Steps {
 			item.Config.Stages[stageI].Steps[stepI].WorkflowLabels = item.Labels
+			item.Config.Stages[stageI].Steps[stepI].Owner = b.Repo.Owner
 		}
 	}
 
