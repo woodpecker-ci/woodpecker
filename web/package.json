@@ -21,7 +21,7 @@
     "@kyvg/vue3-notification": "^3.4.1",
     "@mdi/js": "^7.4.47",
     "@tailwindcss/typography": "^0.5.15",
-    "@tailwindcss/vite": "4.1.10",
+    "@tailwindcss/vite": "4.1.11",
     "@vueuse/core": "^13.0.0",
     "ansi_up": "^6.0.2",
     "dompurify": "^3.2.3",
@@ -66,7 +66,7 @@
     "vite-plugin-prismjs": "^0.0.11",
     "vite-svg-loader": "^5.1.0",
     "vitest": "^3.0.0",
-    "vue-tsc": "^2.2.0"
+    "vue-tsc": "^3.0.0"
   },
   "pnpm": {
     "overrides": {

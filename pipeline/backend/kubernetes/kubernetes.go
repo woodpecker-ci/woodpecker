@@ -201,7 +201,7 @@ func (e *kube) getConfig() *config {
 func (e *kube) SetupWorkflow(ctx context.Context, conf *types.Config, taskUUID string) error {
 	log.Trace().Str("taskUUID", taskUUID).Msgf("Setting up Kubernetes primitives")
 
-	_, err := startVolume(ctx, e, conf.Volume.Name)
+	_, err := startVolume(ctx, e, conf.Volume)
 	if err != nil {
 		return err
 	}
@@ -238,13 +238,6 @@ func (e *kube) StartStep(ctx context.Context, step *types.Step, taskUUID string)
 
 	if needsRegistrySecret(step) {
 		err = startRegistrySecret(ctx, e, step)
-		if err != nil {
-			return err
-		}
-	}
-
-	if needsStepSecret(step) {
-		err = startStepSecret(ctx, e, step)
 		if err != nil {
 			return err
 		}
@@ -415,13 +408,6 @@ func (e *kube) DestroyStep(ctx context.Context, step *types.Step, taskUUID strin
 		}
 	}
 
-	if needsStepSecret(step) {
-		err := stopStepSecret(ctx, e, step, defaultDeleteOptions)
-		if err != nil {
-			errs = append(errs, err)
-		}
-	}
-
 	err := stopPod(ctx, e, step, defaultDeleteOptions)
 	if err != nil {
 		errs = append(errs, err)
@@ -449,7 +435,7 @@ func (e *kube) DestroyWorkflow(ctx context.Context, conf *types.Config, taskUUID
 		}
 	}
 
-	err := stopVolume(ctx, e, conf.Volume.Name, defaultDeleteOptions)
+	err := stopVolume(ctx, e, conf.Volume, defaultDeleteOptions)
 	if err != nil {
 		return err
 	}
