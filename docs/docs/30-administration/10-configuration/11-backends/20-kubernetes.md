@@ -383,7 +383,7 @@ Additional tolerations to apply to worker Pods. Must be a YAML object, e.g. `[{"
 ### BACKEND_K8S_POD_TOLERATIONS_ALLOW_FROM_STEP
 
 - Name: `WOODPECKER_BACKEND_K8S_POD_TOLERATIONS_ALLOW_FROM_STEP`
-- Default: `false`
+- Default: `true`
 
 Determines if Pod tolerations can be defined from a step's backend options.
 

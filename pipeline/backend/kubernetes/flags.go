@@ -80,10 +80,10 @@ var Flags = []cli.Flag{
 		Value:   false,
 	},
 	&cli.BoolFlag{
-		Sources: cli.EnvVars("WOODPECKER_BACKEND_K8S_POD_TOLERATIONS_ANNOTATION_ALLOW_FROM_STEP"),
+		Sources: cli.EnvVars("WOODPECKER_BACKEND_K8S_POD_TOLERATIONS_ALLOW_FROM_STEP"),
 		Name:    "backend-k8s-pod-tolerations-allow-from-step",
 		Usage:   "whether to allow using tolerations from step's backend options",
-		Value:   false,
+		Value:   true,
 	},
 	&cli.BoolFlag{
 		Sources: cli.EnvVars("WOODPECKER_BACKEND_K8S_SECCTX_NONROOT"), // cspell:words secctx nonroot
