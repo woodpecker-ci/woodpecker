@@ -23,6 +23,7 @@ import (
 	"os"
 	"runtime"
 	"slices"
+	"strconv"
 	"strings"
 	"time"
 
@@ -71,9 +72,9 @@ type config struct {
 	NativeSecretsAllowFromStep  bool
 }
 
-func (c *config) K8sNamespace(owner string) string {
+func (c *config) K8sNamespace(orgID int64) string {
 	if c.EnableNamespacePerOrg {
-		return strings.ToLower(fmt.Sprintf("%s-%s", c.Namespace, owner))
+		return strings.ToLower(fmt.Sprintf("%s-%s", c.Namespace, strconv.FormatInt(orgID, 10)))
 	}
 	return c.Namespace
 }
@@ -202,7 +203,7 @@ func (e *kube) getConfig() *config {
 func (e *kube) SetupWorkflow(ctx context.Context, conf *types.Config, taskUUID string) error {
 	log.Trace().Str("taskUUID", taskUUID).Msgf("Setting up Kubernetes primitives")
 
-	namespace := e.config.K8sNamespace(conf.Stages[0].Steps[0].Owner)
+	namespace := e.config.K8sNamespace(conf.Stages[0].Steps[0].OrgID)
 
 	if e.config.EnableNamespacePerOrg {
 		err := ensureNamespaceExists(ctx, e, namespace)
@@ -289,7 +290,7 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 		}
 	}
 
-	si := informers.NewSharedInformerFactoryWithOptions(e.client, defaultResyncDuration, informers.WithNamespace(e.config.K8sNamespace(step.Owner)))
+	si := informers.NewSharedInformerFactoryWithOptions(e.client, defaultResyncDuration, informers.WithNamespace(e.config.K8sNamespace(step.OrgID)))
 	if _, err := si.Core().V1().Pods().Informer().AddEventHandler(
 		cache.ResourceEventHandlerFuncs{
 			UpdateFunc: podUpdated,
@@ -305,7 +306,7 @@ func (e *kube) WaitStep(ctx context.Context, step *types.Step, taskUUID string) 
 	// TODO: Cancel on ctx.Done
 	<-finished
 
-	pod, err := e.client.CoreV1().Pods(e.config.K8sNamespace(step.Owner)).Get(ctx, podName, meta_v1.GetOptions{})
+	pod, err := e.client.CoreV1().Pods(e.config.K8sNamespace(step.OrgID)).Get(ctx, podName, meta_v1.GetOptions{})
 	if err != nil {
 		return nil, err
 	}
@@ -364,7 +365,7 @@ func (e *kube) TailStep(ctx context.Context, step *types.Step, taskUUID string) 
 		}
 	}
 
-	si := informers.NewSharedInformerFactoryWithOptions(e.client, defaultResyncDuration, informers.WithNamespace(e.config.K8sNamespace(step.Owner)))
+	si := informers.NewSharedInformerFactoryWithOptions(e.client, defaultResyncDuration, informers.WithNamespace(e.config.K8sNamespace(step.OrgID)))
 	if _, err := si.Core().V1().Pods().Informer().AddEventHandler(
 		cache.ResourceEventHandlerFuncs{
 			UpdateFunc: podUpdated,
@@ -385,7 +386,7 @@ func (e *kube) TailStep(ctx context.Context, step *types.Step, taskUUID string) 
 	}
 
 	logs, err := e.client.CoreV1().RESTClient().Get().
-		Namespace(e.config.K8sNamespace(step.Owner)).
+		Namespace(e.config.K8sNamespace(step.OrgID)).
 		Name(podName).
 		Resource("pods").
 		SubResource("log").
@@ -445,7 +446,7 @@ func (e *kube) DestroyWorkflow(ctx context.Context, conf *types.Config, taskUUID
 		}
 	}
 
-	err := stopVolume(ctx, e, conf.Volume, e.config.K8sNamespace(conf.Stages[0].Steps[0].Owner), defaultDeleteOptions)
+	err := stopVolume(ctx, e, conf.Volume, e.config.K8sNamespace(conf.Stages[0].Steps[0].OrgID), defaultDeleteOptions)
 	if err != nil {
 		return err
 	}
