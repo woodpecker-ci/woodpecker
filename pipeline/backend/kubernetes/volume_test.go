@@ -42,6 +42,7 @@ func TestPvcMount(t *testing.T) {
 }
 
 func TestPersistentVolumeClaim(t *testing.T) {
+	namespace := "someNamespace"
 	expectedRwx := `
 	{
 	  "metadata": {
@@ -85,11 +86,11 @@ func TestPersistentVolumeClaim(t *testing.T) {
 	}`
 
 	pvc, err := mkPersistentVolumeClaim(&config{
-		Namespace:    "someNamespace",
+		Namespace:    namespace,
 		StorageClass: "local-storage",
 		VolumeSize:   "1Gi",
 		StorageRwx:   true,
-	}, "somename")
+	}, "somename", namespace)
 	assert.NoError(t, err)
 
 	j, err := json.Marshal(pvc)
@@ -97,11 +98,11 @@ func TestPersistentVolumeClaim(t *testing.T) {
 	assert.JSONEq(t, expectedRwx, string(j))
 
 	pvc, err = mkPersistentVolumeClaim(&config{
-		Namespace:    "someNamespace",
+		Namespace:    namespace,
 		StorageClass: "local-storage",
 		VolumeSize:   "1Gi",
 		StorageRwx:   false,
-	}, "somename")
+	}, "somename", namespace)
 	assert.NoError(t, err)
 
 	j, err = json.Marshal(pvc)
@@ -109,10 +110,10 @@ func TestPersistentVolumeClaim(t *testing.T) {
 	assert.JSONEq(t, expectedRwo, string(j))
 
 	_, err = mkPersistentVolumeClaim(&config{
-		Namespace:    "someNamespace",
+		Namespace:    namespace,
 		StorageClass: "local-storage",
 		VolumeSize:   "1Gi",
 		StorageRwx:   false,
-	}, "some0..INVALID3name")
+	}, "some0..INVALID3name", namespace)
 	assert.Error(t, err)
 }
