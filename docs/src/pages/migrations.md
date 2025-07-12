@@ -1,11 +1,33 @@
+<!-- markdownlint-disable no-duplicate-heading -->
+
 # Migrations
 
 To enhance the usability of Woodpecker and meet evolving security standards, occasional migrations are necessary. While we aim to minimize these changes, some are unavoidable. If you experience significant issues during a migration to a new version, please let us know so maintainers can reassess the updates.
 
 ## `next`
 
+### User-facing changes
+
 - (Kubernetes) Deprecated `step` label on pod in favor of new namespaced label `woodpecker-ci.org/step`. The `step` label will be removed in a future update.
 - deprecated `CI_COMMIT_AUTHOR_AVATAR` and `CI_PREV_COMMIT_AUTHOR_AVATAR` env vars in favor of `CI_PIPELINE_AVATAR` and `CI_PREV_PIPELINE_AVATAR`
+
+### API changes
+
+- The pipeline model has been changed to use nested objects grouped based on the event (e.g. instead of a generic `title` it now uses `pr.title`). Following properties are deprecated and should be replaced by the their new counterparts:
+  `author` => `commit.author`
+  `deploy_to` => `deployment.target`
+  `deploy_task` => `deployment.task`
+  `commit` (SHA) => `commit.sha`
+  `title` => `release.title` (for release events) or `pr.title` (for pull-request events)
+  `message` => `commit.message`
+  `timestamp` => `created`
+  `sender` => `author`
+  `avatar` => `author_avatar`
+  `author_email` => `commit.author.email`
+  `pr_labels` => `pr.labels`
+  `is_prerelease` => `is_prerelease`
+  extraction from `ref` => `release.tag_title`
+  `from_fork` => `pr.from_fork`
 
 ## 3.0.0
 
