@@ -646,6 +646,12 @@
             "type": ["boolean", "string", "number"]
           }
         },
+        "tolerations": {
+          "type": "object",
+          "additionalProperties": {
+            "type": ["boolean", "string", "number"]
+          }
+        },
         "securityContext": {
           "$ref": "#/definitions/step_backend_kubernetes_security_context"
         },
