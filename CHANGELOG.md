@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.9.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.9.0) - 2025-07-12
+## [3.9.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.9.0) - 2025-07-13
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -17,6 +17,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update module github.com/bmatcuk/doublestar/v4 to v4.9.0 [[#5318](https://github.com/woodpecker-ci/woodpecker/pull/5318)]
 - chore(deps): update pre-commit hook golangci/golangci-lint to v2.2.2 [[#5315](https://github.com/woodpecker-ci/woodpecker/pull/5315)]
 - chore(deps): update dependency golang to v1.24.5 [[#5314](https://github.com/woodpecker-ci/woodpecker/pull/5314)]
 - fix(deps): update golang-packages [[#5313](https://github.com/woodpecker-ci/woodpecker/pull/5313)]
