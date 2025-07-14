@@ -4,7 +4,11 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@qwerty287
+@hhamalai, @qwerty287
+
+### 🔒 Security
+
+- Prevent secrets from leaking to Kubernetes API Server logs [[#5305](https://github.com/woodpecker-ci/woodpecker/pull/5305)]
 
 ### 📚 Documentation
 
