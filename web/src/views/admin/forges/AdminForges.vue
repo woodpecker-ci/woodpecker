@@ -17,20 +17,20 @@
         />
         <IconButton
           icon="edit"
-          :title="$t('admin.settings.users.edit_user')"
+          :title="$t('edit_forge')"
           class="md:display-unset h-8 w-8"
           :to="{ name: 'admin-settings-forge', params: { forgeId: forge.id } }"
         />
         <IconButton
           icon="trash"
-          :title="$t('admin.settings.users.delete_user')"
+          :title="$t('delete_forge')"
           class="hover:text-wp-error-100 ml-2 h-8 w-8"
           :is-loading="isDeleting"
           @click="deleteForge(forge)"
         />
       </ListItem>
 
-      <div v-if="forges?.length === 0" class="ml-2">{{ $t('admin.settings.users.none') }}</div>
+      <div v-if="forges?.length === 0" class="ml-2">{{ $t('no_forges') }}</div>
     </div>
   </Settings>
 </template>
@@ -61,12 +61,12 @@ const { resetPage, data: forges } = usePagination(loadForges);
 
 const { doSubmit: deleteForge, isLoading: isDeleting } = useAsyncAction(async (_forge: Forge) => {
   // eslint-disable-next-line no-alert
-  if (!confirm(t('admin.settings.users.delete_confirm'))) {
+  if (!confirm(t('forge_delete_confirm'))) {
     return;
   }
 
   await apiClient.deleteForge(_forge);
-  notifications.notify({ title: t('admin.settings.users.deleted'), type: 'success' });
+  notifications.notify({ title: t('forge_deleted'), type: 'success' });
   resetPage();
 });
 </script>
