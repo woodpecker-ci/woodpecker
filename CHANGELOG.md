@@ -36,6 +36,10 @@
 - chore(deps): lock file maintenance [[#5307](https://github.com/woodpecker-ci/woodpecker/pull/5307)]
 - fix(deps): update dependency simple-icons to v15.5.0 [[#5306](https://github.com/woodpecker-ci/woodpecker/pull/5306)]
 
+### Misc
+
+- Update issue number for link checker [[#5327](https://github.com/woodpecker-ci/woodpecker/pull/5327)]
+
 ## [3.8.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.8.0) - 2025-07-05
 
 ### ❤️ Thanks to all contributors! ❤️
