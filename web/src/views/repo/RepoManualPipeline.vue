@@ -26,8 +26,7 @@
 
 <script lang="ts" setup>
 import { useNotification } from '@kyvg/vue3-notification';
-import type { Ref } from 'vue';
-import { computed, onMounted, ref, inject as vueInject } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 
@@ -38,9 +37,9 @@ import KeyValueEditor from '~/components/form/KeyValueEditor.vue';
 import SelectField from '~/components/form/SelectField.vue';
 import Panel from '~/components/layout/Panel.vue';
 import useApiClient from '~/compositions/useApiClient';
-import { inject } from '~/compositions/useInjectProvide';
+import { requiredInject } from '~/compositions/useInjectProvide';
 import { usePaginate } from '~/compositions/usePaginate';
-import type { RepoPermissions } from '~/lib/api/types';
+import { useWPTitle } from '~/compositions/useWPTitle';
 
 defineProps<{
   open: boolean;
@@ -54,11 +53,8 @@ const apiClient = useApiClient();
 const notifications = useNotification();
 const i18n = useI18n();
 
-const repo = inject('repo');
-const repoPermissions = vueInject<Ref<RepoPermissions>>('repo-permissions');
-if (!repoPermissions) {
-  throw new Error('Unexpected: "repo" and "repoPermissions" should be provided at this place');
-}
+const repo = requiredInject('repo');
+const repoPermissions = requiredInject('repo-permissions');
 
 const router = useRouter();
 const branches = ref<{ text: string; value: string }[]>([]);
@@ -108,4 +104,6 @@ async function triggerManualPipeline() {
 
   loading.value = false;
 }
+
+useWPTitle(computed(() => [i18n.t('repo.manual_pipeline.trigger'), repo.value.full_name]));
 </script>

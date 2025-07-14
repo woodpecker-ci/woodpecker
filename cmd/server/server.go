@@ -98,7 +98,7 @@ func run(ctx context.Context, c *cli.Command) error {
 			return setupStore(ctx, c)
 		},
 		backoff.WithBackOff(backoff.NewExponentialBackOff()),
-		backoff.WithMaxTries(uint(c.Uint("db-max-retries"))),
+		backoff.WithMaxTries(c.Uint("db-max-retries")),
 		backoff.WithNotify(func(err error, delay time.Duration) {
 			log.Error().Msgf("failed to setup store: %v: retry in %v", err, delay)
 		}))
@@ -121,6 +121,8 @@ func run(ctx context.Context, c *cli.Command) error {
 	serviceWaitingGroup := errgroup.Group{}
 
 	log.Info().Msgf("starting Woodpecker server with version '%s'", version.String())
+
+	startMetricsCollector(ctx, _store)
 
 	serviceWaitingGroup.Go(func() error {
 		log.Info().Msg("starting cron service ...")
@@ -269,8 +271,6 @@ func run(ctx context.Context, c *cli.Command) error {
 	}
 
 	if metricsServerAddr := c.String("metrics-server-addr"); metricsServerAddr != "" {
-		startMetricsCollector(ctx, _store)
-
 		serviceWaitingGroup.Go(func() error {
 			metricsRouter := gin.New()
 			metricsRouter.GET("/metrics", gin.WrapH(prometheus_http.Handler()))

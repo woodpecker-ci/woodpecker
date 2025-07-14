@@ -3,14 +3,14 @@ tasks:
     env:
       WOODPECKER_OPEN: true
       WOODPECKER_ADMIN: woodpecker
-      WOODPECKER_HOST: http://host.docker.internal:8000
       WOODPECKER_EXPERT_WEBHOOK_HOST: http://host.docker.internal:8000
       WOODPECKER_AGENT_SECRET: '1234'
       WOODPECKER_GITEA: true
       WOODPECKER_DEV_WWW_PROXY: http://localhost:8010
       WOODPECKER_BACKEND_DOCKER_NETWORK: ci_default
     init: |
-      GO_VERSION=1.22
+      # renovate: datasource=golang-version depName=golang
+      GO_VERSION=1.24.5
       rm -rf ~/go
       curl -fsSL https://dl.google.com/go/go$GO_VERSION.linux-amd64.tar.gz | tar xzs -C ~/
       go mod tidy

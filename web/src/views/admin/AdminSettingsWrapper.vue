@@ -1,7 +1,7 @@
 <template>
   <Scaffold enable-tabs>
     <template #title>
-      {{ $t('settings') }}
+      {{ $t('admin.settings.settings') }}
     </template>
     <Tab icon="info" :to="{ name: 'admin-settings' }" :title="$t('info')" />
     <Tab icon="secret" :to="{ name: 'admin-settings-secrets' }" :title="$t('secrets.secrets')" />

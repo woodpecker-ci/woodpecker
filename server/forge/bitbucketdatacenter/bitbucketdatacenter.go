@@ -311,7 +311,7 @@ func (c *client) Status(ctx context.Context, u *model.User, repo *model.Repo, pi
 		return fmt.Errorf("unable to create bitbucket client: %w", err)
 	}
 	status := &bb.BuildStatus{
-		State:       convertStatus(pipeline.Status),
+		State:       convertStatus(workflow.State),
 		URL:         common.GetPipelineStatusURL(repo, pipeline, workflow),
 		Key:         common.GetPipelineStatusContext(repo, pipeline, workflow),
 		Description: common.GetPipelineStatusDescription(pipeline.Status),
@@ -377,7 +377,7 @@ func (c *client) BranchHead(ctx context.Context, u *model.User, r *model.Repo, b
 		if branch.DisplayID == b {
 			return &model.Commit{
 				SHA:      branch.LatestCommit,
-				ForgeURL: fmt.Sprintf("%s/commits/%s", r.ForgeURL, branch.LatestCommit),
+				ForgeURL: fmt.Sprintf("%s/commits/%s", strings.TrimSuffix(r.ForgeURL, "/browse"), branch.LatestCommit),
 			}, nil
 		}
 	}
@@ -481,6 +481,7 @@ func (c *client) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model
 
 	var repo *model.Repo
 	var pipe *model.Pipeline
+
 	switch e := ev.(type) {
 	case *bb.RepositoryPushEvent:
 		repo = convertRepo(&e.Repository, nil, "")
@@ -494,7 +495,7 @@ func (c *client) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model
 
 	user, repo, err := c.getUserAndRepo(ctx, repo)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, fmt.Errorf("failed to get user and repo: %w", err)
 	}
 
 	err = bb.ValidateSignature(r, payload, []byte(repo.Hash))
@@ -502,9 +503,15 @@ func (c *client) Hook(ctx context.Context, r *http.Request) (*model.Repo, *model
 		return nil, nil, fmt.Errorf("unable to validate signature on incoming webhook payload: %w", err)
 	}
 
-	pipe, err = c.updatePipelineFromCommit(ctx, user, repo, pipe)
+	switch e := ev.(type) {
+	case *bb.RepositoryPushEvent:
+		pipe, err = c.updatePipelineFromCommit(ctx, user, repo, pipe)
+	case *bb.PullRequestEvent:
+		pipe, err = c.updatePipelineFromPullRequest(ctx, user, repo, pipe, e.PullRequest.ID)
+	}
+
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, fmt.Errorf("failed to update pipeline: %w", err)
 	}
 
 	if pipe == nil {
@@ -559,6 +566,30 @@ func (c *client) updatePipelineFromCommit(ctx context.Context, u *model.User, r 
 		changes, resp, err := bc.Projects.ListChanges(ctx, r.Owner, r.Name, p.Commit, opts)
 		if err != nil {
 			return nil, fmt.Errorf("unable to list commit changes: %w", err)
+		}
+		for _, ch := range changes {
+			p.ChangedFiles = append(p.ChangedFiles, ch.Path.Title)
+		}
+		if resp.LastPage {
+			break
+		}
+		opts.Start = resp.NextPageStart
+	}
+
+	return p, nil
+}
+
+func (c *client) updatePipelineFromPullRequest(ctx context.Context, u *model.User, r *model.Repo, p *model.Pipeline, pullRequestID uint64) (*model.Pipeline, error) {
+	bc, err := c.newClient(ctx, u)
+	if err != nil {
+		return nil, fmt.Errorf("unable to create bitbucket client: %w", err)
+	}
+
+	opts := &bb.ListOptions{}
+	for {
+		changes, resp, err := bc.Projects.ListPullRequestChanges(ctx, r.Owner, r.Name, pullRequestID, opts)
+		if err != nil {
+			return nil, fmt.Errorf("unable to list changes in pull request: %w", err)
 		}
 		for _, ch := range changes {
 			p.ChangedFiles = append(p.ChangedFiles, ch.Path.Title)

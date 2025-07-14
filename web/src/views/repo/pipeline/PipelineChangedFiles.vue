@@ -1,20 +1,28 @@
 <template>
   <Panel>
     <ul class="w-full list-inside list-disc">
-      <li v-for="file in pipeline!.changed_files" :key="file">{{ file }}</li>
+      <li v-for="file in pipeline.changed_files" :key="file">{{ file }}</li>
     </ul>
   </Panel>
 </template>
 
 <script lang="ts" setup>
-import { inject } from 'vue';
-import type { Ref } from 'vue';
+import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 import Panel from '~/components/layout/Panel.vue';
-import type { Pipeline } from '~/lib/api/types';
+import { requiredInject } from '~/compositions/useInjectProvide';
+import { useWPTitle } from '~/compositions/useWPTitle';
 
-const pipeline = inject<Ref<Pipeline>>('pipeline');
-if (!pipeline) {
-  throw new Error('Unexpected: "pipeline" should be provided at this place');
-}
+const repo = requiredInject('repo');
+const pipeline = requiredInject('pipeline');
+
+const { t } = useI18n();
+useWPTitle(
+  computed(() => [
+    t('repo.pipeline.files'),
+    t('repo.pipeline.pipeline', { pipelineId: pipeline.value.number }),
+    repo.value.full_name,
+  ]),
+);
 </script>

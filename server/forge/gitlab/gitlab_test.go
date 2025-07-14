@@ -17,7 +17,6 @@ package gitlab
 
 import (
 	"bytes"
-	"context"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -25,7 +24,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"go.woodpecker-ci.org/woodpecker/v3/server/forge/gitlab/testdata"
+	"go.woodpecker-ci.org/woodpecker/v3/server/forge/gitlab/fixtures"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
 )
@@ -50,7 +49,7 @@ func load(config string) *GitLab {
 
 func Test_GitLab(t *testing.T) {
 	// setup a dummy gitlab server
-	server := testdata.NewServer(t)
+	server := fixtures.NewServer(t)
 	defer server.Close()
 
 	env := server.URL + "?client_id=test&client_secret=test"
@@ -68,7 +67,7 @@ func Test_GitLab(t *testing.T) {
 		Owner: "diaspora",
 	}
 
-	ctx := context.Background()
+	ctx := t.Context()
 	// Test projects method
 	t.Run("Should return only non-archived projects is hidden", func(t *testing.T) {
 		client.HideArchives = true
@@ -126,11 +125,11 @@ func Test_GitLab(t *testing.T) {
 	// Test hook method
 	t.Run("parse push hook", func(t *testing.T) {
 		req, _ := http.NewRequest(
-			testdata.ServiceHookMethod,
-			testdata.ServiceHookURL.String(),
-			bytes.NewReader(testdata.HookPush),
+			fixtures.ServiceHookMethod,
+			fixtures.ServiceHookURL.String(),
+			bytes.NewReader(fixtures.HookPush),
 		)
-		req.Header = testdata.ServiceHookHeaders
+		req.Header = fixtures.ServiceHookHeaders
 
 		hookRepo, pipeline, err := client.Hook(ctx, req)
 		assert.NoError(t, err)
@@ -148,11 +147,11 @@ func Test_GitLab(t *testing.T) {
 
 	t.Run("tag push hook", func(t *testing.T) {
 		req, _ := http.NewRequest(
-			testdata.ServiceHookMethod,
-			testdata.ServiceHookURL.String(),
-			bytes.NewReader(testdata.HookTag),
+			fixtures.ServiceHookMethod,
+			fixtures.ServiceHookURL.String(),
+			bytes.NewReader(fixtures.HookTag),
 		)
-		req.Header = testdata.ServiceHookHeaders
+		req.Header = fixtures.ServiceHookHeaders
 
 		hookRepo, pipeline, err := client.Hook(ctx, req)
 		assert.NoError(t, err)
@@ -169,11 +168,11 @@ func Test_GitLab(t *testing.T) {
 
 	t.Run("merge request hook", func(t *testing.T) {
 		req, _ := http.NewRequest(
-			testdata.ServiceHookMethod,
-			testdata.ServiceHookURL.String(),
-			bytes.NewReader(testdata.HookPullRequest),
+			fixtures.ServiceHookMethod,
+			fixtures.ServiceHookURL.String(),
+			bytes.NewReader(fixtures.HookPullRequest),
 		)
-		req.Header = testdata.ServiceHookHeaders
+		req.Header = fixtures.ServiceHookHeaders
 
 		// TODO: insert fake store into context to retrieve user & repo, this will activate fetching of ChangedFiles
 		hookRepo, pipeline, err := client.Hook(ctx, req)
@@ -191,11 +190,11 @@ func Test_GitLab(t *testing.T) {
 
 	t.Run("ignore merge request hook without changes", func(t *testing.T) {
 		req, _ := http.NewRequest(
-			testdata.ServiceHookMethod,
-			testdata.ServiceHookURL.String(),
-			bytes.NewReader(testdata.HookPullRequestWithoutChanges),
+			fixtures.ServiceHookMethod,
+			fixtures.ServiceHookURL.String(),
+			bytes.NewReader(fixtures.HookPullRequestWithoutChanges),
 		)
-		req.Header = testdata.ServiceHookHeaders
+		req.Header = fixtures.ServiceHookHeaders
 
 		// TODO: insert fake store into context to retrieve user & repo, this will activate fetching of ChangedFiles
 		hookRepo, pipeline, err := client.Hook(ctx, req)
@@ -206,11 +205,11 @@ func Test_GitLab(t *testing.T) {
 
 	t.Run("ignore merge request approval", func(t *testing.T) {
 		req, _ := http.NewRequest(
-			testdata.ServiceHookMethod,
-			testdata.ServiceHookURL.String(),
-			bytes.NewReader(testdata.HookPullRequestApproved),
+			fixtures.ServiceHookMethod,
+			fixtures.ServiceHookURL.String(),
+			bytes.NewReader(fixtures.HookPullRequestApproved),
 		)
-		req.Header = testdata.ServiceHookHeaders
+		req.Header = fixtures.ServiceHookHeaders
 
 		// TODO: insert fake store into context to retrieve user & repo, this will activate fetching of ChangedFiles
 		hookRepo, pipeline, err := client.Hook(ctx, req)
@@ -221,11 +220,11 @@ func Test_GitLab(t *testing.T) {
 
 	t.Run("parse merge request closed", func(t *testing.T) {
 		req, _ := http.NewRequest(
-			testdata.ServiceHookMethod,
-			testdata.ServiceHookURL.String(),
-			bytes.NewReader(testdata.HookPullRequestClosed),
+			fixtures.ServiceHookMethod,
+			fixtures.ServiceHookURL.String(),
+			bytes.NewReader(fixtures.HookPullRequestClosed),
 		)
-		req.Header = testdata.ServiceHookHeaders
+		req.Header = fixtures.ServiceHookHeaders
 
 		// TODO: insert fake store into context to retrieve user & repo, this will activate fetching of ChangedFiles
 		hookRepo, pipeline, err := client.Hook(ctx, req)
@@ -242,11 +241,11 @@ func Test_GitLab(t *testing.T) {
 
 	t.Run("parse merge request merged", func(t *testing.T) {
 		req, _ := http.NewRequest(
-			testdata.ServiceHookMethod,
-			testdata.ServiceHookURL.String(),
-			bytes.NewReader(testdata.HookPullRequestMerged),
+			fixtures.ServiceHookMethod,
+			fixtures.ServiceHookURL.String(),
+			bytes.NewReader(fixtures.HookPullRequestMerged),
 		)
-		req.Header = testdata.ServiceHookHeaders
+		req.Header = fixtures.ServiceHookHeaders
 
 		// TODO: insert fake store into context to retrieve user & repo, this will activate fetching of ChangedFiles
 		hookRepo, pipeline, err := client.Hook(ctx, req)
@@ -263,11 +262,11 @@ func Test_GitLab(t *testing.T) {
 
 	t.Run("release hook", func(t *testing.T) {
 		req, _ := http.NewRequest(
-			testdata.ServiceHookMethod,
-			testdata.ServiceHookURL.String(),
-			bytes.NewReader(testdata.WebhookReleaseBody),
+			fixtures.ServiceHookMethod,
+			fixtures.ServiceHookURL.String(),
+			bytes.NewReader(fixtures.WebhookReleaseBody),
 		)
-		req.Header = testdata.ReleaseHookHeaders
+		req.Header = fixtures.ReleaseHookHeaders
 
 		hookRepo, pipeline, err := client.Hook(ctx, req)
 		assert.NoError(t, err)

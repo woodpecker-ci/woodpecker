@@ -262,7 +262,7 @@
       "warnings": "Warnings",
       "show_errors": "Show errors",
       "we_got_some_errors": "Oh no, an error occurred!",
-      "duration": "Pipeline duration",
+      "duration": "Pipeline duration: {duration}",
       "created": "Created: {created}",
       "debug": {
         "title": "Debug",
@@ -291,6 +291,7 @@
   },
   "admin": {
     "settings": {
+      "settings": "Admin Settings",
       "not_allowed": "You are not allowed to access server settings",
       "secrets": {
         "desc": "Global secrets can be used in the pipelines of all repositories.",

@@ -26,11 +26,14 @@ import (
 )
 
 var secretCreateCmd = &cli.Command{
-	Name:      "add",
-	Usage:     "add a secret",
-	ArgsUsage: "[repo-id|repo-full-name]",
-	Action:    secretCreate,
+	Name:   "add",
+	Usage:  "add a secret",
+	Action: secretCreate,
 	Flags: []cli.Flag{
+		&cli.StringFlag{
+			Name:  "name",
+			Usage: "secret name",
+		},
 		&cli.StringFlag{
 			Name:  "value",
 			Usage: "secret value",
