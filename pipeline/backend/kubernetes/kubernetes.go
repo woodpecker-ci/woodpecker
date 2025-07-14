@@ -206,7 +206,7 @@ func (e *kube) SetupWorkflow(ctx context.Context, conf *types.Config, taskUUID s
 	namespace := e.config.GetNamespace(conf.Stages[0].Steps[0].OrgID)
 
 	if e.config.EnableNamespacePerOrg {
-		err := mkNamespace(ctx, e, namespace)
+		err := mkNamespace(ctx, e.client.CoreV1().Namespaces(), namespace)
 		if err != nil {
 			return err
 		}
