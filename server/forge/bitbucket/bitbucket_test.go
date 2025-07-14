@@ -209,6 +209,7 @@ func TestBitbucket(t *testing.T) {
 	mockStore := mocks_store.NewStore(t)
 	ctx = store.InjectToContext(ctx, mockStore)
 	mockStore.On("GetUser", mock.Anything).Return(fakeUser, nil)
+	mockStore.On("GetRepoForgeID", mock.Anything).Return(fakeRepoFromHook, nil)
 
 	r, b, err := c.Hook(ctx, req)
 	assert.NoError(t, err)
@@ -275,6 +276,13 @@ var (
 		Owner:    "test_name",
 		Name:     "hook_empty",
 		FullName: "test_name/hook_empty",
+	}
+
+	fakeRepoFromHook = &model.Repo{
+		Owner:    "martinherren1984",
+		Name:     "publictestrepo",
+		FullName: "martinherren1984/publictestrepo",
+		UserID:   1,
 	}
 
 	fakePipeline = &model.Pipeline{
