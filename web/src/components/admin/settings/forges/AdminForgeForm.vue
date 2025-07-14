@@ -249,7 +249,7 @@ const forgeType = computed({
   },
 });
 
-const redirectUri = computed(() => [window.location.origin, config.rootPath, 'callback'].filter((a) => !!a).join('/'));
+const redirectUri = computed(() => [window.location.origin, config.rootPath, 'authorize'].filter((a) => !!a).join('/'));
 
 async function submit() {
   if (!forge.value.url?.startsWith('http')) {
