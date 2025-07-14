@@ -219,70 +219,56 @@ const routes: RouteRecordRaw[] = [
   {
     path: `${rootPath}/admin`,
     component: (): Component => import('~/views/admin/AdminSettingsWrapper.vue'),
+    props: true,
     meta: { authentication: 'required' },
     children: [
       {
         path: '',
         name: 'admin-settings',
         component: (): Component => import('~/views/admin/AdminInfo.vue'),
+        props: true,
       },
       {
         path: 'secrets',
         name: 'admin-settings-secrets',
         component: (): Component => import('~/views/admin/AdminSecrets.vue'),
+        props: true,
       },
       {
         path: 'registries',
         name: 'admin-settings-registries',
         component: (): Component => import('~/views/admin/AdminRegistries.vue'),
+        props: true,
       },
       {
         path: 'repos',
         name: 'admin-settings-repos',
         component: (): Component => import('~/views/admin/AdminRepos.vue'),
+        props: true,
       },
       {
         path: 'users',
         name: 'admin-settings-users',
         component: (): Component => import('~/views/admin/AdminUsers.vue'),
+        props: true,
       },
       {
         path: 'orgs',
         name: 'admin-settings-orgs',
         component: (): Component => import('~/views/admin/AdminOrgs.vue'),
+        props: true,
       },
       {
         path: 'agents',
         name: 'admin-settings-agents',
         component: (): Component => import('~/views/admin/AdminAgents.vue'),
+        props: true,
       },
       {
         path: 'queue',
         name: 'admin-settings-queue',
         component: (): Component => import('~/views/admin/AdminQueue.vue'),
-      },
-      {
-        path: 'forges',
-        component: (): Component => import('~/components/layout/RouteWrapper.vue'),
         props: true,
-        children: [
-          {
-            path: '',
-            name: 'admin-settings-forges',
-            component: (): Component => import('~/views/admin/forges/AdminForges.vue'),
-          },
-          {
-            path: ':forgeId',
-            name: 'admin-settings-forge',
-            component: (): Component => import('~/views/admin/forges/AdminForge.vue'),
-            props: true,
-          },
-          {
-            path: 'create',
-            name: 'admin-settings-forge-create',
-            component: (): Component => import('~/views/admin/forges/AdminForgeCreate.vue'),
-          },
-        ],
       },
     ],
   },

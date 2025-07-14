@@ -1,4 +1,4 @@
-export type ForgeType = 'github' | 'gitlab' | 'gitea' | 'bitbucket' | 'bitbucket-dc' | 'addon' | 'forgejo';
+export type ForgeType = 'github' | 'gitlab' | 'gitea' | 'bitbucket' | 'bitbucket-dc' | 'addon';
 
 export interface Forge {
   id: number;
