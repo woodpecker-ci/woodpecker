@@ -23,11 +23,14 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/bitbucket/fixtures"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/bitbucket/internal"
 	"go.woodpecker-ci.org/woodpecker/v3/server/forge/types"
 	"go.woodpecker-ci.org/woodpecker/v3/server/model"
+	"go.woodpecker-ci.org/woodpecker/v3/server/store"
+	mocks_store "go.woodpecker-ci.org/woodpecker/v3/server/store/mocks"
 )
 
 func TestNew(t *testing.T) {
@@ -203,9 +206,14 @@ func TestBitbucket(t *testing.T) {
 	req.Header = http.Header{}
 	req.Header.Set(hookEvent, hookPush)
 
+	mockStore := mocks_store.NewStore(t)
+	ctx = store.InjectToContext(ctx, mockStore)
+	mockStore.On("GetUser", mock.Anything).Return(fakeUser, nil)
+
 	r, b, err := c.Hook(ctx, req)
 	assert.NoError(t, err)
 	assert.Equal(t, "martinherren1984/publictestrepo", r.FullName)
+	assert.Equal(t, "master", r.Branch)
 	assert.Equal(t, "c14c1bb05dfb1fdcdf06b31485fff61b0ea44277", b.Commit)
 }
 

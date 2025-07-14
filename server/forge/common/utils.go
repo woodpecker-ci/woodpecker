@@ -16,6 +16,7 @@ package common
 
 import (
 	"context"
+	"errors"
 	"net"
 	"net/url"
 	"strings"
@@ -49,18 +50,26 @@ func UserToken(ctx context.Context, r *model.Repo, u *model.User) string {
 		return u.AccessToken
 	}
 
-	_store, ok := store.TryFromContext(ctx)
-	if !ok {
-		log.Error().Msg("could not get store from context")
-		return ""
-	}
-	if r == nil {
-		log.Error().Msg("cannot get user token by empty repo")
-		return ""
-	}
-	user, err := _store.GetUser(r.UserID)
+	user, err := RepoUser(ctx, r)
 	if err != nil {
+		log.Error().Err(err).Msg("could not get repo user")
 		return ""
 	}
 	return user.AccessToken
+}
+
+func RepoUser(ctx context.Context, r *model.Repo) (*model.User, error) {
+	_store, ok := store.TryFromContext(ctx)
+	if !ok {
+		return nil, errors.New("could not get store from context")
+	}
+	if r == nil {
+		log.Error().Msg("cannot get user token by empty repo")
+		return nil, errors.New("cannot get user token by empty repo")
+	}
+	user, err := _store.GetUser(r.UserID)
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
 }
