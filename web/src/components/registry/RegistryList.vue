@@ -33,10 +33,10 @@
 import { toRef } from 'vue';
 import { useI18n } from 'vue-i18n';
 
+import Icon from '~/components/atomic/Icon.vue';
 import IconButton from '~/components/atomic/IconButton.vue';
 import ListItem from '~/components/atomic/ListItem.vue';
 import type { Registry } from '~/lib/api/types';
-import Icon from '~/components/atomic/Icon.vue';
 
 const props = defineProps<{
   modelValue: (Registry & { edit?: boolean })[];

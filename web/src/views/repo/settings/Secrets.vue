@@ -70,7 +70,11 @@ async function loadSecrets(page: number, level: 'repo' | 'org' | 'global'): Prom
   }
 }
 
-const { resetPage, data: _secrets, loading } = usePagination(loadSecrets, () => !selectedSecret.value, {
+const {
+  resetPage,
+  data: _secrets,
+  loading,
+} = usePagination(loadSecrets, () => !selectedSecret.value, {
   each: ['repo', 'org', 'global'],
 });
 const secrets = computed(() => {

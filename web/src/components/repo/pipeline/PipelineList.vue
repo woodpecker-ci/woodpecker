@@ -8,7 +8,7 @@
         params: { pipelineId: pipeline.number },
       }"
       :pipeline="pipeline"
-      />
+    />
     <div v-if="loading" class="flex justify-center">
       <Icon name="spinner" class="animate-spin" />
     </div>
