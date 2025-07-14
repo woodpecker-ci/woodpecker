@@ -94,6 +94,8 @@
   </svg>
 
   <div v-else-if="name === 'blank'" class="h-6 w-6" />
+
+  <div v-else>{{ throwNotFound() }}</div>
 </template>
 
 <script lang="ts" setup>
@@ -194,7 +196,6 @@ export type IconNames =
   | 'forgejo'
   | 'question'
   | 'list'
-  | 'loading'
   | 'plus'
   | 'blank'
   | 'heal'
@@ -231,7 +232,11 @@ export type IconNames =
   | 'toolbox'
   | 'forge';
 
-defineProps<{
+const props = defineProps<{
   name: IconNames;
 }>();
+
+function throwNotFound() {
+  throw new Error(`Icon "${props.name}" not found`);
+}
 </script>

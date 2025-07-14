@@ -91,13 +91,13 @@ const { doSubmit: createRegistry, isLoading: isSaving } = useAsyncAction(async (
     type: 'success',
   });
   selectedRegistry.value = undefined;
-  resetPage();
+  await resetPage();
 });
 
 const { doSubmit: deleteRegistry, isLoading: isDeleting } = useAsyncAction(async (_registry: Registry) => {
   await apiClient.deleteOrgRegistry(user.org_id, _registry.address);
   notifications.notify({ title: i18n.t('registries.deleted'), type: 'success' });
-  resetPage();
+  await resetPage();
 });
 
 function editRegistry(registry: Registry) {

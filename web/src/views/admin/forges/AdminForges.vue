@@ -30,7 +30,10 @@
         />
       </ListItem>
 
-      <div v-if="forges?.length === 0" class="ml-2">{{ $t('no_forges') }}</div>
+      <div v-if="loading" class="flex justify-center">
+        <Icon name="spinner" class="animate-spin" />
+      </div>
+      <div v-else-if="forges?.length === 0" class="ml-2">{{ $t('no_forges') }}</div>
     </div>
   </Settings>
 </template>
@@ -40,6 +43,7 @@ import { useI18n } from 'vue-i18n';
 
 import Badge from '~/components/atomic/Badge.vue';
 import Button from '~/components/atomic/Button.vue';
+import Icon from '~/components/atomic/Icon.vue';
 import IconButton from '~/components/atomic/IconButton.vue';
 import ListItem from '~/components/atomic/ListItem.vue';
 import Settings from '~/components/layout/Settings.vue';
@@ -57,7 +61,7 @@ async function loadForges(page: number): Promise<Forge[] | null> {
   return apiClient.getForges({ page });
 }
 
-const { resetPage, data: forges } = usePagination(loadForges);
+const { resetPage, data: forges, loading } = usePagination(loadForges);
 
 const { doSubmit: deleteForge, isLoading: isDeleting } = useAsyncAction(async (_forge: Forge) => {
   // eslint-disable-next-line no-alert
@@ -67,6 +71,6 @@ const { doSubmit: deleteForge, isLoading: isDeleting } = useAsyncAction(async (_
 
   await apiClient.deleteForge(_forge);
   notifications.notify({ title: t('forge_deleted'), type: 'success' });
-  resetPage();
+  await resetPage();
 });
 </script>

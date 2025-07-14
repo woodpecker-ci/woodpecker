@@ -65,7 +65,7 @@ const { doSubmit: deleteOrg, isLoading: isDeleting } = useAsyncAction(async (_or
 
   await apiClient.deleteOrg(_org);
   notifications.notify({ title: t('admin.settings.orgs.deleted'), type: 'success' });
-  resetPage();
+  await resetPage();
 });
 
 useWPTitle(computed(() => [t('admin.settings.orgs.orgs'), t('admin.settings.settings')]));

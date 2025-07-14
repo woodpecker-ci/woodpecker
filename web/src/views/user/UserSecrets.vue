@@ -88,13 +88,13 @@ const { doSubmit: createSecret, isLoading: isSaving } = useAsyncAction(async () 
     type: 'success',
   });
   selectedSecret.value = undefined;
-  resetPage();
+  await resetPage();
 });
 
 const { doSubmit: deleteSecret, isLoading: isDeleting } = useAsyncAction(async (_secret: Secret) => {
   await apiClient.deleteOrgSecret(user.org_id, _secret.name);
   notifications.notify({ title: i18n.t('secrets.deleted'), type: 'success' });
-  resetPage();
+  await resetPage();
 });
 
 function editSecret(secret: Secret) {

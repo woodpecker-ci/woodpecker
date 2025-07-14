@@ -133,7 +133,7 @@ const { doSubmit: saveUser, isLoading: isSaving } = useAsyncAction(async () => {
     });
   }
   selectedUser.value = undefined;
-  resetPage();
+  await resetPage();
 });
 
 const { doSubmit: deleteUser, isLoading: isDeleting } = useAsyncAction(async (_user: User) => {
@@ -144,7 +144,7 @@ const { doSubmit: deleteUser, isLoading: isDeleting } = useAsyncAction(async (_u
 
   await apiClient.deleteUser(_user);
   notifications.notify({ title: t('admin.settings.users.deleted'), type: 'success' });
-  resetPage();
+  await resetPage();
 });
 
 function editUser(user: User) {

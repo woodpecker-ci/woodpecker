@@ -39,7 +39,7 @@
     <div v-if="props.agents?.length === 0" class="ml-2">{{ $t('admin.settings.agents.none') }}</div>
   </div>
   <div v-else class="flex justify-center">
-    <Icon name="loading" class="animate-spin" />
+    <Icon name="spinner" class="animate-spin" />
   </div>
 </template>
 

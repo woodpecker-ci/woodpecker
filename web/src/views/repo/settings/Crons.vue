@@ -154,13 +154,13 @@ const { doSubmit: createCron, isLoading: isSaving } = useAsyncAction(async () =>
     type: 'success',
   });
   selectedCron.value = undefined;
-  resetPage();
+  await resetPage();
 });
 
 const { doSubmit: deleteCron, isLoading: isDeleting } = useAsyncAction(async (_cron: Cron) => {
   await apiClient.deleteCron(repo.value.id, _cron.id);
   notifications.notify({ title: i18n.t('repo.settings.crons.deleted'), type: 'success' });
-  resetPage();
+  await resetPage();
 });
 
 const { doSubmit: runCron } = useAsyncAction(async (_cron: Cron) => {

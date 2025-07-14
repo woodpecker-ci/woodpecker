@@ -9,6 +9,9 @@
     </template>
 
     <AdminForgeForm v-if="forge" v-model:forge="forge" :is-saving="isSaving" @submit="saveForge" />
+    <div v-else-if="loading" class="flex justify-center">
+      <Icon name="spinner" class="animate-spin" />
+    </div>
 </Settings>
 </template>
 
@@ -32,9 +35,12 @@ const route = useRoute();
 
 const forgeId = computed(() => Number.parseInt(route.params.forgeId.toString(), 10));
 const forge = ref<Forge>();
+const loading = ref(false);
 
 async function load() {
+  loading.value = true;
   forge.value = await apiClient.getForge(forgeId.value);
+  loading.value = false;
 }
 
 onMounted(load);
