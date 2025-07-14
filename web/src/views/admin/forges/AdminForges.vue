@@ -11,10 +11,7 @@
         class="bg-wp-background-200! dark:bg-wp-background-100! items-center gap-2"
       >
         <span>{{ forge.url.replace(/http(s):\/\//, '') }}</span>
-        <Badge
-          class="md:display-unset ml-auto hidden"
-          :value="forge.type"
-        />
+        <Badge class="md:display-unset ml-auto hidden" :value="forge.type" />
         <IconButton
           icon="edit"
           :title="$t('edit_forge')"

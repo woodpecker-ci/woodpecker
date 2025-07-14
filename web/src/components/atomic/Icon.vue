@@ -113,6 +113,7 @@ import {
   mdiClockTimeEightOutline,
   mdiClose,
   mdiCloseCircle,
+  mdiCodeBraces,
   mdiCog,
   mdiCogOutline,
   mdiConsole,
@@ -157,7 +158,6 @@ import {
   mdiTrashCanOutline,
   mdiTrayFull,
   mdiWrenchCogOutline,
-  mdiCodeBraces,
 } from '@mdi/js';
 import { siForgejo, siGitea } from 'simple-icons';
 

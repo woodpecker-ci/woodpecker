@@ -1,26 +1,22 @@
 <template>
   <Settings :title="$t('forges')" :description="$t('forges_desc')">
     <template #headerActions>
-      <Button
-        :text="$t('show_forges')"
-        start-icon="back"
-        :to="{ name: 'admin-settings-forges' }"
-      />
+      <Button :text="$t('show_forges')" start-icon="back" :to="{ name: 'admin-settings-forges' }" />
     </template>
 
     <AdminForgeForm v-if="forge" v-model:forge="forge" :is-saving="isSaving" @submit="saveForge" />
     <div v-else-if="loading" class="flex justify-center">
       <Icon name="spinner" class="animate-spin" />
     </div>
-</Settings>
+  </Settings>
 </template>
 
 <script lang="ts" setup>
 import { computed, onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
-import AdminForgeForm from '~/components/admin/settings/forges/AdminForgeForm.vue';
 
+import AdminForgeForm from '~/components/admin/settings/forges/AdminForgeForm.vue';
 import Button from '~/components/atomic/Button.vue';
 import Icon from '~/components/atomic/Icon.vue';
 import Settings from '~/components/layout/Settings.vue';

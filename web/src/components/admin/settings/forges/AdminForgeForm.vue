@@ -4,7 +4,9 @@
 
     <InputField v-slot="{ id }" :label="$t('forge_type')">
       <SelectField
-        :id="id" v-model="forgeType" :options="[
+        :id="id"
+        v-model="forgeType"
+        :options="[
           { value: 'github', text: $t('github') },
           { value: 'gitlab', text: $t('gitlab') },
           { value: 'gitea', text: $t('gitea') },
@@ -25,7 +27,9 @@
     <template v-if="forge.type && forge.url">
       <InputField v-slot="{ id }" :label="$t('oauth_redirect_uri')">
         <i18n-t keypath="use_this_redirect_uri_to_create" tag="p" class="mb-2">
-          <a rel="noopener noreferrer" :href="oauthAppForgeUrl" target="_blank" class="underline">{{  $t('developer_settings') }}</a>
+          <a rel="noopener noreferrer" :href="oauthAppForgeUrl" target="_blank" class="underline">{{
+            $t('developer_settings')
+          }}</a>
         </i18n-t>
         <TextField :id="id" :model-value="redirectUri" disabled />
       </InputField>
@@ -35,15 +39,15 @@
       </InputField>
 
       <InputField v-slot="{ id }" :label="$t('oauth_client_secret')">
-        <TextField :id="id" v-model="forge.client_secret" :placeholder="isNew ? '' : $t('leave_empty_to_keep_current_value')" :required="isNew" />
+        <TextField
+          :id="id"
+          v-model="forge.client_secret"
+          :placeholder="isNew ? '' : $t('leave_empty_to_keep_current_value')"
+          :required="isNew"
+        />
       </InputField>
 
-      <Panel
-        collapsable
-        collapsed-by-default
-        :title="$t('advanced_options')"
-        class="mb-4"
-      >
+      <Panel collapsable collapsed-by-default :title="$t('advanced_options')" class="mb-4">
         <InputField v-slot="{ id }" :label="$t('oauth_host')">
           <TextField :id="id" v-model="forge.oauth_host" :placeholder="$t('public_url_for_oauth_if', [forge.url])" />
         </InputField>
@@ -69,21 +73,27 @@
           <InputField v-slot="{ id }" :label="$t('git_username')">
             <p>{{ $t('git_username_desc') }}</p>
             <TextField
-              :id="id" :model-value="getAdditionalOptions('bitbucket-dc', 'git-username')"
+              :id="id"
+              :model-value="getAdditionalOptions('bitbucket-dc', 'git-username')"
               @update:model-value="setAdditionalOptions('bitbucket-dc', 'git-username', $event)"
             />
           </InputField>
           <InputField v-slot="{ id }" :label="$t('git_password')">
             <p>{{ $t('git_password_desc') }}</p>
             <TextField
-              :id="id" :model-value="getAdditionalOptions('bitbucket-dc', 'git-password')"
+              :id="id"
+              :model-value="getAdditionalOptions('bitbucket-dc', 'git-password')"
               @update:model-value="setAdditionalOptions('bitbucket-dc', 'git-password', $event)"
             />
           </InputField>
         </template>
         <template v-if="forge.type === 'addon'">
           <InputField v-slot="{ id }" :label="$t('executable')">
-            <TextField :id="id" :model-value="getAdditionalOptions('addon', 'executable')" @update:model-value="setAdditionalOptions('addon', 'executable', $event)" />
+            <TextField
+              :id="id"
+              :model-value="getAdditionalOptions('addon', 'executable')"
+              @update:model-value="setAdditionalOptions('addon', 'executable', $event)"
+            />
           </InputField>
         </template>
 
@@ -99,12 +109,7 @@
       <div class="flex gap-2">
         <Button :text="$t('cancel')" @click="forge = {}" />
 
-        <Button
-          :is-loading="isSaving"
-          type="submit"
-          color="green"
-          :text="isNew ? $t('add') : $t('save')"
-        />
+        <Button :is-loading="isSaving" type="submit" color="green" :text="isNew ? $t('add') : $t('save')" />
       </div>
     </template>
   </form>
@@ -112,6 +117,7 @@
 
 <script lang="ts" setup>
 import { computed } from 'vue';
+
 import Button from '~/components/atomic/Button.vue';
 import Warning from '~/components/atomic/Warning.vue';
 import Checkbox from '~/components/form/Checkbox.vue';
@@ -151,23 +157,48 @@ interface AddonAdditionOptions {
   executable?: string;
 }
 
-function getAdditionalOptions<T extends keyof GitHubAdditionOptions>(forgeType: 'github', key: T): GitHubAdditionOptions[T];
+function getAdditionalOptions<T extends keyof GitHubAdditionOptions>(
+  forgeType: 'github',
+  key: T,
+): GitHubAdditionOptions[T];
 // eslint-disable-next-line no-redeclare
-function getAdditionalOptions<T extends keyof BitbucketAdditionOptions>(forgeType: 'bitbucket-dc',  key: T): BitbucketAdditionOptions[T];
+function getAdditionalOptions<T extends keyof BitbucketAdditionOptions>(
+  forgeType: 'bitbucket-dc',
+  key: T,
+): BitbucketAdditionOptions[T];
 // eslint-disable-next-line no-redeclare
-function getAdditionalOptions<T extends keyof AddonAdditionOptions>(forgeType: 'addon',  key: T): AddonAdditionOptions[T];
+function getAdditionalOptions<T extends keyof AddonAdditionOptions>(
+  forgeType: 'addon',
+  key: T,
+): AddonAdditionOptions[T];
 // eslint-disable-next-line no-redeclare
-function getAdditionalOptions<T extends keyof Record<string, unknown>>(_forgeType: ForgeType, key: T):  unknown {
+function getAdditionalOptions<T extends keyof Record<string, unknown>>(_forgeType: ForgeType, key: T): unknown {
   return forge.value?.additional_options?.[key];
 }
 
-function setAdditionalOptions<T extends keyof GitHubAdditionOptions>(forgeType: 'github', key: T, value: GitHubAdditionOptions[T]): void;
+function setAdditionalOptions<T extends keyof GitHubAdditionOptions>(
+  forgeType: 'github',
+  key: T,
+  value: GitHubAdditionOptions[T],
+): void;
 // eslint-disable-next-line no-redeclare
-function setAdditionalOptions<T extends keyof BitbucketAdditionOptions>(forgeType: 'bitbucket-dc', key: T, value: BitbucketAdditionOptions[T]): void;
+function setAdditionalOptions<T extends keyof BitbucketAdditionOptions>(
+  forgeType: 'bitbucket-dc',
+  key: T,
+  value: BitbucketAdditionOptions[T],
+): void;
 // eslint-disable-next-line no-redeclare
-function setAdditionalOptions<T extends keyof AddonAdditionOptions>(forgeType: 'addon',  key: T, value: AddonAdditionOptions[T]): void;
+function setAdditionalOptions<T extends keyof AddonAdditionOptions>(
+  forgeType: 'addon',
+  key: T,
+  value: AddonAdditionOptions[T],
+): void;
 // eslint-disable-next-line no-redeclare
-function setAdditionalOptions<T extends keyof  Record<string, unknown>>(_forgeType: ForgeType, key: string, value: T): void {
+function setAdditionalOptions<T extends keyof Record<string, unknown>>(
+  _forgeType: ForgeType,
+  key: string,
+  value: T,
+): void {
   forge.value = {
     ...forge.value,
     additional_options: {
@@ -218,7 +249,7 @@ const forgeType = computed({
   },
 });
 
-const redirectUri = computed(() => [window.location.origin, config.rootPath, 'callback'].filter(a => !!a).join('/'));
+const redirectUri = computed(() => [window.location.origin, config.rootPath, 'callback'].filter((a) => !!a).join('/'));
 
 async function submit() {
   if (!forge.value.url?.startsWith('http')) {
