@@ -46,7 +46,10 @@
         />
       </ListItem>
 
-      <div v-if="crons?.length === 0" class="ml-2">{{ $t('repo.settings.crons.none') }}</div>
+      <div v-if="loading" class="flex justify-center">
+        <Icon name="spinner" class="animate-spin" />
+      </div>
+      <div v-else-if="crons?.length === 0" class="ml-2">{{ $t('repo.settings.crons.none') }}</div>
     </div>
 
     <div v-else class="space-y-4">
@@ -109,6 +112,7 @@ import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import Button from '~/components/atomic/Button.vue';
+import Icon from '~/components/atomic/Icon.vue';
 import IconButton from '~/components/atomic/IconButton.vue';
 import ListItem from '~/components/atomic/ListItem.vue';
 import InputField from '~/components/form/InputField.vue';
@@ -137,7 +141,7 @@ async function loadCrons(page: number): Promise<Cron[] | null> {
   return apiClient.getCronList(repo.value.id, { page });
 }
 
-const { resetPage, data: crons } = usePagination(loadCrons, () => !selectedCron.value);
+const { resetPage, data: crons, loading } = usePagination(loadCrons, () => !selectedCron.value);
 
 const { doSubmit: createCron, isLoading: isSaving } = useAsyncAction(async () => {
   if (!selectedCron.value) {

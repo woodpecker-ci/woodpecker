@@ -9,6 +9,7 @@
       v-if="!selectedSecret"
       :model-value="secrets"
       :is-deleting="isDeleting"
+      :loading="loading"
       @edit="editSecret"
       @delete="deleteSecret"
     />
@@ -69,7 +70,7 @@ async function loadSecrets(page: number, level: 'repo' | 'org' | 'global'): Prom
   }
 }
 
-const { resetPage, data: _secrets } = usePagination(loadSecrets, () => !selectedSecret.value, {
+const { resetPage, data: _secrets, loading } = usePagination(loadSecrets, () => !selectedSecret.value, {
   each: ['repo', 'org', 'global'],
 });
 const secrets = computed(() => {

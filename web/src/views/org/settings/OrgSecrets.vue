@@ -9,6 +9,7 @@
       v-if="!selectedSecret"
       v-model="secrets"
       :is-deleting="isDeleting"
+      :loading="loading"
       @edit="editSecret"
       @delete="deleteSecret"
     />
@@ -60,7 +61,7 @@ async function loadSecrets(page: number): Promise<Secret[] | null> {
   return apiClient.getOrgSecretList(org.value.id, { page });
 }
 
-const { resetPage, data: secrets } = usePagination(loadSecrets, () => !selectedSecret.value);
+const { resetPage, data: secrets, loading } = usePagination(loadSecrets, () => !selectedSecret.value);
 
 const { doSubmit: createSecret, isLoading: isSaving } = useAsyncAction(async () => {
   if (!selectedSecret.value) {

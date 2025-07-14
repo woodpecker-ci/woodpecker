@@ -22,7 +22,10 @@
       />
     </ListItem>
 
-    <div v-if="registries?.length === 0" class="ml-2">{{ $t('registries.none') }}</div>
+    <div v-if="loading" class="flex justify-center">
+      <Icon name="spinner" class="animate-spin" />
+    </div>
+    <div v-else-if="registries?.length === 0" class="ml-2">{{ $t('registries.none') }}</div>
   </div>
 </template>
 
@@ -33,10 +36,12 @@ import { useI18n } from 'vue-i18n';
 import IconButton from '~/components/atomic/IconButton.vue';
 import ListItem from '~/components/atomic/ListItem.vue';
 import type { Registry } from '~/lib/api/types';
+import Icon from '../atomic/Icon.vue';
 
 const props = defineProps<{
   modelValue: (Registry & { edit?: boolean })[];
   isDeleting: boolean;
+  loading: boolean;
 }>();
 
 const emit = defineEmits<{

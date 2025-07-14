@@ -28,7 +28,10 @@
         />
       </ListItem>
 
-      <div v-if="orgs?.length === 0" class="ml-2">{{ $t('admin.settings.orgs.none') }}</div>
+      <div v-if="loading" class="flex justify-center">
+        <Icon name="spinner" class="animate-spin" />
+      </div>
+      <div v-else-if="orgs?.length === 0" class="ml-2">{{ $t('admin.settings.orgs.none') }}</div>
     </div>
   </Settings>
 </template>
@@ -55,7 +58,7 @@ async function loadOrgs(page: number): Promise<Org[] | null> {
   return apiClient.getOrgs({ page });
 }
 
-const { resetPage, data: orgs } = usePagination(loadOrgs);
+const { resetPage, data: orgs, loading } = usePagination(loadOrgs);
 
 const { doSubmit: deleteOrg, isLoading: isDeleting } = useAsyncAction(async (_org: Org) => {
   // eslint-disable-next-line no-alert
