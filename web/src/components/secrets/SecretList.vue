@@ -46,7 +46,7 @@ import Badge from '~/components/atomic/Badge.vue';
 import IconButton from '~/components/atomic/IconButton.vue';
 import ListItem from '~/components/atomic/ListItem.vue';
 import type { Secret } from '~/lib/api/types';
-import Icon from '../atomic/Icon.vue';
+import Icon from '~/components/atomic/Icon.vue';
 
 const props = defineProps<{
   modelValue: (Secret & { edit?: boolean })[];
