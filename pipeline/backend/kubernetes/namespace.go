@@ -9,7 +9,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func ensureNamespaceExists(ctx context.Context, engine *kube, namespace string) error {
+func mkNamespace(ctx context.Context, engine *kube, namespace string) error {
 	// Check if a namespace already exists
 	_, err := engine.client.CoreV1().Namespaces().Get(ctx, namespace, metav1.GetOptions{})
 	if err == nil {
