@@ -22,6 +22,7 @@ import { useRoute } from 'vue-router';
 import AdminForgeForm from '~/components/admin/settings/forges/AdminForgeForm.vue';
 
 import Button from '~/components/atomic/Button.vue';
+import Icon from '~/components/atomic/Icon.vue';
 import Settings from '~/components/layout/Settings.vue';
 import useApiClient from '~/compositions/useApiClient';
 import { useAsyncAction } from '~/compositions/useAsyncAction';
