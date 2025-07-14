@@ -404,7 +404,7 @@ func (c *config) Hook(ctx context.Context, req *http.Request) (*model.Repo, *mod
 		return nil, nil, err
 	}
 
-	u, err := common.RepoUser(ctx, repo)
+	u, err := common.RepoUserForgeID(ctx, repo.ForgeRemoteID)
 	if err != nil {
 		return nil, nil, err
 	}
