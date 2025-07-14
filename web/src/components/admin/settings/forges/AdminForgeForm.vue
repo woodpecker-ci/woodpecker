@@ -1,5 +1,5 @@
 <template>
-  <form @submit.prevent="$emit('submit')">
+  <form @submit.prevent="submit">
     <Warning v-if="!isNew && forge.id === 1" :text="$t('forge_managed_by_env')" />
 
     <InputField v-slot="{ id }" :label="$t('forge_type')">
@@ -122,23 +122,20 @@ import Panel from '~/components/layout/Panel.vue';
 import useConfig from '~/compositions/useConfig';
 import type { Forge, ForgeType } from '~/lib/api/types';
 
-const props = defineProps<{
+defineProps<{
   isNew?: boolean;
   isSaving?: boolean;
-  forge: Partial<Forge>;
 }>();
 
 const emit = defineEmits<{
   (e: 'submit'): void;
-  (e: 'update:forge', value: Partial<Forge>): void;
 }>();
 
-const forge = computed({
-  get: () => props.forge,
-  set: (value) => emit('update:forge', value),
-});
-
 const config = useConfig();
+
+const forge = defineModel<Partial<Forge>>('forge', {
+  required: true,
+});
 
 interface GitHubAdditionOptions {
   'merge-ref'?: boolean;
@@ -192,7 +189,7 @@ const oauthAppForgeUrl = computed(() => {
       return `${forgeUrl}/settings/applications/new`;
     case 'gitlab':
       return `${forgeUrl}/-/user_settings/applications`;
-      case 'gitea':
+    case 'gitea':
     case 'forgejo':
       return `${forgeUrl}/user/settings/applications`;
     case 'bitbucket':
@@ -222,4 +219,20 @@ const forgeType = computed({
 });
 
 const redirectUri = computed(() => [window.location.origin, config.rootPath, 'callback'].filter(a => !!a).join('/'));
+
+async function submit() {
+  if (!forge.value.url?.startsWith('http')) {
+    forge.value.url = `https://${forge.value.url}`;
+  }
+
+  if (forge.value.oauth_host === forge.value.url) {
+    forge.value.oauth_host = '';
+  }
+
+  if (forge.value.oauth_host && !forge.value.oauth_host.startsWith('http')) {
+    forge.value.oauth_host = `https://${forge.value.oauth_host}`;
+  }
+
+  emit('submit');
+}
 </script>

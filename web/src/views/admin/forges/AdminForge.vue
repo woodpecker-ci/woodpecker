@@ -8,7 +8,7 @@
       />
     </template>
 
-    <AdminForgeForm v-if="forge" :forge="forge" :is-saving="isSaving" @submit="saveForge" />
+    <AdminForgeForm v-if="forge" v-model:forge="forge" :is-saving="isSaving" @submit="saveForge" />
 </Settings>
 </template>
 
@@ -47,7 +47,7 @@ const { doSubmit: saveForge, isLoading: isSaving } = useAsyncAction(async () => 
 
   await apiClient.updateForge(forge.value);
   notifications.notify({
-    title: t('admin.settings.users.saved'),
+    title: t('forge_saved'),
     type: 'success',
   });
 

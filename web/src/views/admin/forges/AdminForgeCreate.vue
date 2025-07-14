@@ -8,7 +8,7 @@
       />
     </template>
 
-    <AdminForgeForm :forge="forge" :is-saving="isSaving" is-new @submit="saveForge" />
+    <AdminForgeForm v-model:forge="forge" :is-saving="isSaving" is-new @submit="saveForge" />
   </Settings>
 </template>
 

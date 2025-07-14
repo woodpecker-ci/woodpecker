@@ -569,5 +569,6 @@
   "no_forges": "There are no forges yet.",
   "use_this_redirect_uri_to_create": "Use this redirect URI to create or update the OAuth application. Go to {0} and setup the OAuth application.",
   "developer_settings": "developer settings",
-  "public_url_for_oauth_if": "Public url for oauth if different from url ({0})"
+  "public_url_for_oauth_if": "Public url for oauth if different from url ({0})",
+  "forge_saved": "Forge saved"
 }
