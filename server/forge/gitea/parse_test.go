@@ -445,7 +445,7 @@ func TestGiteaParser(t *testing.T) {
 		},
 		{
 			name:  "pull-request events should handle a PR add label hook",
-			data:  fixtures.HookPullRequestAddLable,
+			data:  fixtures.HookPullRequestAddLabel,
 			event: "pull_request", // type: pull_request_label
 			repo:  pullMetaWebhookRepo,
 			pipe: &model.Pipeline{
@@ -467,7 +467,7 @@ func TestGiteaParser(t *testing.T) {
 		},
 		{
 			name:  "pull-request events should handle a PR change label hook",
-			data:  fixtures.HookPullRequestChangeLable,
+			data:  fixtures.HookPullRequestChangeLabel,
 			event: "pull_request", // type: pull_request_label
 			repo:  pullMetaWebhookRepo,
 			pipe: &model.Pipeline{
@@ -489,7 +489,7 @@ func TestGiteaParser(t *testing.T) {
 		},
 		{
 			name:  "pull-request events should handle a PR remove label hook",
-			data:  fixtures.HookPullRequestRemoveLable,
+			data:  fixtures.HookPullRequestRemoveLabel,
 			event: "pull_request", // type: pull_request_label
 			repo:  pullMetaWebhookRepo,
 			pipe: &model.Pipeline{

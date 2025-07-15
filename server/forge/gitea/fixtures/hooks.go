@@ -68,14 +68,14 @@ var HookPullRequestReviewDeny string
 //go:embed HookPullRequestReviewComment.json
 var HookPullRequestReviewComment string
 
-//go:embed HookPullRequestAddLable.json
-var HookPullRequestAddLable string
+//go:embed HookPullRequestAddLabel.json
+var HookPullRequestAddLabel string
 
-//go:embed HookPullRequestChangeLable.json
-var HookPullRequestChangeLable string
+//go:embed HookPullRequestChangeLabel.json
+var HookPullRequestChangeLabel string
 
-//go:embed HookPullRequestRemoveLable.json
-var HookPullRequestRemoveLable string
+//go:embed HookPullRequestRemoveLabel.json
+var HookPullRequestRemoveLabel string
 
 //go:embed HookPullRequestAddMile.json
 var HookPullRequestAddMile string
