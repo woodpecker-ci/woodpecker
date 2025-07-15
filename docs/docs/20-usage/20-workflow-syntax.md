@@ -394,8 +394,7 @@ when:
 #### `path`
 
 :::info
-Path conditions are applied only to **push** and **pull_request** events.
-It is currently **only available** for GitHub, GitLab and Gitea (version 1.18.0 and newer)
+Path conditions are applied only to **push** and **pull_request** events. This feature is currently available for all forges except Bitbucket Cloud.
 :::
 
 Execute a step only on a pipeline with certain files being changed:

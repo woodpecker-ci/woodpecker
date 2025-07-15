@@ -214,6 +214,9 @@ const config = {
         'ini',
         'nix',
         'uri',
+        // php is currently needed for redocusaurus
+        // https://github.com/rohit-gohri/redocusaurus/issues/388
+        'php',
       ],
     },
     announcementBar: {
@@ -323,6 +326,7 @@ const config = {
   },
   future: {
     experimental_faster: true,
+    v4: true,
   },
 } satisfies Config;
 

@@ -345,7 +345,7 @@ func (g *GitLab) PullRequests(ctx context.Context, u *model.User, r *model.Repo,
 		return nil, err
 	}
 
-	state := "open"
+	state := "opened"
 	pullRequests, _, err := client.MergeRequests.ListProjectMergeRequests(_repo.ID, &gitlab.ListProjectMergeRequestsOptions{
 		ListOptions: gitlab.ListOptions{Page: p.Page, PerPage: p.PerPage},
 		State:       &state,
