@@ -262,11 +262,11 @@ func Test_GitLab(t *testing.T) {
 
 	t.Run("parse merge request edited", func(t *testing.T) {
 		req, _ := http.NewRequest(
-			testdata.ServiceHookMethod,
-			testdata.ServiceHookURL.String(),
-			bytes.NewReader(testdata.HookPullRequestEdited),
+			fixtures.ServiceHookMethod,
+			fixtures.ServiceHookURL.String(),
+			bytes.NewReader(fixtures.HookPullRequestEdited),
 		)
-		req.Header = testdata.ServiceHookHeaders
+		req.Header = fixtures.ServiceHookHeaders
 
 		// TODO: insert fake store into context to retrieve user & repo, this will activate fetching of ChangedFiles
 		hookRepo, pipeline, err := client.Hook(ctx, req)
