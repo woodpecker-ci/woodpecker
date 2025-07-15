@@ -94,7 +94,6 @@ export default antfu(
         },
       ],
       'vue/singleline-html-element-content-newline': ['off'],
-      'vue/html-indent': ['off'],
     },
   },
 
