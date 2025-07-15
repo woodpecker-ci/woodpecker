@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.9.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.9.0) - 2025-07-14
+## [3.9.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.9.0) - 2025-07-15
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -12,6 +12,7 @@
 
 ### 🐛 Bug Fixes
 
+- Fix loading icons and add missing loading indicators [[#5329](https://github.com/woodpecker-ci/woodpecker/pull/5329)]
 - Use correct parameter for forge selection on login [[#5325](https://github.com/woodpecker-ci/woodpecker/pull/5325)]
 
 ### 📚 Documentation
