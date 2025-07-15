@@ -84,6 +84,15 @@ type (
 		Matrix map[string]string `json:"matrix,omitempty"`
 	}
 
+	// type Workflow struct {
+	// 	ID   int64  `json:"id"`
+	// 	PID  int    `json:"pid"`
+	// 	Name string `json:"name"`
+	// 	// State      StatusValue       `json:"state"`
+	// 	Environ map[string]string `json:"environ,omitempty"`
+	// 	AxisID  int               `json:"-"`
+	// }
+
 	// Step defines runtime metadata for a step.
 	Step struct {
 		Name   string `json:"name,omitempty"`

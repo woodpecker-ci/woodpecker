@@ -23,7 +23,6 @@ import (
 	"strings"
 
 	"github.com/rs/zerolog/log"
-	"go.woodpecker-ci.org/woodpecker/v3/pipeline"
 )
 
 const (
@@ -164,21 +163,21 @@ func (m *Metadata) getPipelineWebURL(pipeline Pipeline, stepNumber int) string {
 
 func (m *Metadata) Labels(labels map[string]string) map[string]string {
 	// "woodpecker-ci.org" namespace is reserved for internal use
-	for key := range labels {
-		if strings.HasPrefix(key, pipeline.InternalLabelPrefix) {
-			log.Debug().Str("forge", m.Forge.Name()).Str("repo", m.Repo.FullName).Str("label", key).Msg("dropped pipeline label with reserved prefix woodpecker-ci.org")
-			delete(labels, key)
-		}
-	}
+	// for key := range labels {
+	// 	if strings.HasPrefix(key, pipeline.InternalLabelPrefix) {
+	// 		log.Debug().Str("forge", m.Forge.Name()).Str("repo", m.Repo.FullName).Str("label", key).Msg("dropped pipeline label with reserved prefix woodpecker-ci.org")
+	// 		delete(labels, key)
+	// 	}
+	// }
 
-	// Add Woodpecker managed labels to the pipeline
-	labels[pipeline.LabelForgeRemoteID] = m.Forge.Name()
-	labels[pipeline.LabelRepoForgeID] = string(m.Repo.RemoteID)
-	labels[pipeline.LabelRepoID] = strconv.FormatInt(m.Repo.ID, 10)
-	labels[pipeline.LabelRepoName] = m.Repo.Name
-	labels[pipeline.LabelRepoFullName] = fmt.Sprintf("%s/%s", m.Repo.Owner, m.Repo.Name)
-	labels[pipeline.LabelBranch] = m.Repo.Branch
-	labels[pipeline.LabelOrgID] = strconv.FormatInt(m.Repo.OrgID, 10)
+	// // Add Woodpecker managed labels to the pipeline
+	// labels[pipeline.LabelForgeRemoteID] = m.Forge.Name()
+	// labels[pipeline.LabelRepoForgeID] = string(m.Repo.RemoteID)
+	// labels[pipeline.LabelRepoID] = strconv.FormatInt(m.Repo.ID, 10)
+	// labels[pipeline.LabelRepoName] = m.Repo.Name
+	// labels[pipeline.LabelRepoFullName] = fmt.Sprintf("%s/%s", m.Repo.Owner, m.Repo.Name)
+	// labels[pipeline.LabelBranch] = m.Repo.Branch
+	// labels[pipeline.LabelOrgID] = strconv.FormatInt(m.Repo.OrgID, 10)
 
 	return labels
 }
