@@ -18,6 +18,7 @@
       v-if="!selectedRegistry"
       v-model="registries"
       :is-deleting="isDeleting"
+      :loading="loading"
       @edit="editRegistry"
       @delete="deleteRegistry"
     />
@@ -67,7 +68,7 @@ async function loadRegistries(page: number): Promise<Registry[] | null> {
   return apiClient.getOrgRegistryList(org.value.id, { page });
 }
 
-const { resetPage, data: registries } = usePagination(loadRegistries, () => !selectedRegistry.value);
+const { resetPage, data: registries, loading } = usePagination(loadRegistries, () => !selectedRegistry.value);
 
 const { doSubmit: createRegistry, isLoading: isSaving } = useAsyncAction(async () => {
   if (!selectedRegistry.value) {
