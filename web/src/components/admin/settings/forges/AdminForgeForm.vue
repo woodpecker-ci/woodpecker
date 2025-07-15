@@ -10,8 +10,9 @@
           { value: 'github', text: $t('github') },
           { value: 'gitlab', text: $t('gitlab') },
           { value: 'gitea', text: $t('gitea') },
-          { value: 'bitbucket', text: $t('bitbucket') },
           { value: 'forgejo', text: $t('forgejo') },
+          { value: 'bitbucket', text: $t('bitbucket') },
+          { value: 'bitbucket-dc', text: $t('bitbucket_dc') },
           { value: 'addon', text: $t('addon') },
         ]"
         required
@@ -89,6 +90,7 @@
         </template>
         <template v-if="forge.type === 'addon'">
           <InputField v-slot="{ id }" :label="$t('executable')">
+            <p>{{ $t('executable_desc') }}</p>
             <TextField
               :id="id"
               :model-value="getAdditionalOptions('addon', 'executable')"
@@ -227,7 +229,7 @@ const oauthAppForgeUrl = computed(() => {
       return `${forgeUrl}/account/settings/app-passwords`;
     case 'bitbucket-dc':
       return `${forgeUrl}/account/settings/app-passwords`;
-    case 'addon':
+    default:
       return '';
   }
 });

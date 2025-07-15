@@ -534,7 +534,7 @@
   "github": "GitHub",
   "gitlab": "GitLab",
   "bitbucket": "Bitbucket",
-  "bitbucket-dc": "Bitbucket Data Center",
+  "bitbucket_dc": "Bitbucket Data Center",
   "gitea": "Gitea",
   "forgejo": "Forgejo",
   "addon": "Addon-Forge",
