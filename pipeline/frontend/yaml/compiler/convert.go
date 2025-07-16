@@ -54,6 +54,9 @@ func (c *Compiler) createProcess(container *yaml_types.Container, workflow *yaml
 		workspaceBase = pluginWorkspaceBase
 	}
 	workspaceVolume := fmt.Sprintf("%s_default:%s", c.prefix, workspaceBase)
+	if c.local {
+		workspaceVolume = ""
+	}
 
 	networks := []backend_types.Conn{
 		{
@@ -78,9 +81,6 @@ func (c *Compiler) createProcess(container *yaml_types.Container, workflow *yaml
 	}
 
 	var volumes []string
-	if !c.local {
-		volumes = append(volumes, workspaceVolume)
-	}
 	volumes = append(volumes, c.volumes...)
 	for _, volume := range container.Volumes.Volumes {
 		volumes = append(volumes, volume.String())
@@ -157,34 +157,35 @@ func (c *Compiler) createProcess(container *yaml_types.Container, workflow *yaml
 	}
 
 	return &backend_types.Step{
-		Name:           container.Name,
-		UUID:           uuid.String(),
-		Type:           stepType,
-		Image:          container.Image,
-		Pull:           container.Pull,
-		Detached:       detached,
-		Privileged:     privileged,
-		WorkingDir:     workingDir,
-		WorkspaceBase:  workspaceBase,
-		Environment:    environment,
-		SecretMapping:  secretMapping,
-		Commands:       container.Commands,
-		Entrypoint:     container.Entrypoint,
-		ExtraHosts:     extraHosts,
-		Volumes:        volumes,
-		Tmpfs:          container.Tmpfs,
-		Devices:        container.Devices,
-		Networks:       networks,
-		DNS:            container.DNS,
-		DNSSearch:      container.DNSSearch,
-		AuthConfig:     authConfig,
-		OnSuccess:      onSuccess,
-		OnFailure:      onFailure,
-		Failure:        failure,
-		NetworkMode:    networkMode,
-		Ports:          ports,
-		BackendOptions: container.BackendOptions,
-		WorkflowLabels: workflow.Labels,
+		Name:            container.Name,
+		UUID:            uuid.String(),
+		Type:            stepType,
+		Image:           container.Image,
+		Pull:            container.Pull,
+		Detached:        detached,
+		Privileged:      privileged,
+		WorkingDir:      workingDir,
+		WorkspaceBase:   workspaceBase,
+		Environment:     environment,
+		SecretMapping:   secretMapping,
+		Commands:        container.Commands,
+		Entrypoint:      container.Entrypoint,
+		ExtraHosts:      extraHosts,
+		WorkspaceVolume: workspaceVolume,
+		Volumes:         volumes,
+		Tmpfs:           container.Tmpfs,
+		Devices:         container.Devices,
+		Networks:        networks,
+		DNS:             container.DNS,
+		DNSSearch:       container.DNSSearch,
+		AuthConfig:      authConfig,
+		OnSuccess:       onSuccess,
+		OnFailure:       onFailure,
+		Failure:         failure,
+		NetworkMode:     networkMode,
+		Ports:           ports,
+		BackendOptions:  container.BackendOptions,
+		WorkflowLabels:  workflow.Labels,
 	}, nil
 }
 
