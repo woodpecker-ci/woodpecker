@@ -58,6 +58,9 @@ var HookPullRequestWithoutChanges []byte
 //go:embed HookPullRequestApproved.json
 var HookPullRequestApproved []byte
 
+//go:embed HookPullRequestEdited.json
+var HookPullRequestEdited []byte
+
 //go:embed HookPullRequestClosed.json
 var HookPullRequestClosed []byte
 

@@ -50,5 +50,8 @@ var HookPullRequestMerged string
 //go:embed HookPullRequestClosed.json
 var HookPullRequestClosed string
 
+//go:embed HookPullRequestEdited.json
+var HookPullRequestEdited string
+
 //go:embed HookRelease.json
 var HookRelease string
