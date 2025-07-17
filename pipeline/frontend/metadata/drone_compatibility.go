@@ -42,7 +42,6 @@ func SetDroneEnviron(env map[string]string) {
 	copyEnv("CI_COMMIT_AUTHOR", "DRONE_COMMIT_AUTHOR", env)
 	copyEnv("CI_COMMIT_AUTHOR", "DRONE_COMMIT_AUTHOR_NAME", env)
 	copyEnv("CI_COMMIT_AUTHOR_EMAIL", "DRONE_COMMIT_AUTHOR_EMAIL", env)
-	copyEnv("CI_COMMIT_AUTHOR_AVATAR", "DRONE_COMMIT_AUTHOR_AVATAR", env)
 	// repo
 	copyEnv("CI_REPO", "DRONE_REPO", env)
 	copyEnv("CI_REPO_OWNER", "DRONE_REPO_OWNER", env)
