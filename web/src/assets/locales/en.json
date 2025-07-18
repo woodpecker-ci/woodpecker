@@ -537,7 +537,7 @@
   "bitbucket_dc": "Bitbucket Data Center",
   "gitea": "Gitea",
   "forgejo": "Forgejo",
-  "addon": "Addon-Forge",
+  "addon": "Addon",
   "forge_type": "Forge type",
   "oauth_client_id": "OAuth Client ID",
   "oauth_client_secret": "OAuth Client Secret",
@@ -569,6 +569,6 @@
   "no_forges": "There are no forges yet.",
   "use_this_redirect_uri_to_create": "Use this redirect URI to create or update the OAuth application. Go to {0} and setup the OAuth application.",
   "developer_settings": "Developer settings",
-  "public_url_for_oauth_if": "Public URL for oauth if different from URL ({0})",
+  "public_url_for_oauth_if": "Public URL for OAuth if different from URL ({0})",
   "forge_saved": "Forge saved"
 }
