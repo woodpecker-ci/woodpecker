@@ -398,8 +398,23 @@ func (c *config) PullRequests(ctx context.Context, u *model.User, r *model.Repo,
 
 // Hook parses the incoming Bitbucket hook and returns the Repository and
 // Pipeline details. If the hook is unsupported nil values are returned.
-func (c *config) Hook(_ context.Context, req *http.Request) (*model.Repo, *model.Pipeline, error) {
-	return parseHook(req)
+func (c *config) Hook(ctx context.Context, req *http.Request) (*model.Repo, *model.Pipeline, error) {
+	repo, pl, err := parseHook(req)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	u, err := common.RepoUserForgeID(ctx, repo.ForgeRemoteID)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	repo, err = c.Repo(ctx, u, repo.ForgeRemoteID, repo.Owner, repo.Name)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return repo, pl, nil
 }
 
 // OrgMembership returns if user is member of organization and if user
