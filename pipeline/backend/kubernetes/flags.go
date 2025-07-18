@@ -22,8 +22,14 @@ var Flags = []cli.Flag{
 	&cli.StringFlag{
 		Sources: cli.EnvVars("WOODPECKER_BACKEND_K8S_NAMESPACE"),
 		Name:    "backend-k8s-namespace",
-		Usage:   "backend k8s namespace",
+		Usage:   "backend k8s namespace, if used with WOODPECKER_BACKEND_K8S_NAMESPACE_PER_ORGANISATION, this will be the prefix for the namespace appended with the organization name.",
 		Value:   "woodpecker",
+	},
+	&cli.BoolFlag{
+		Sources: cli.EnvVars("WOODPECKER_BACKEND_K8S_NAMESPACE_PER_ORGANIZATION"),
+		Name:    "backend-k8s-namespace-per-org",
+		Usage:   "Whether to enable namespace segregation per organization feature. When enabled, Woodpecker will create the Kubernetes resources to separated Kubernetes namespaces per Woodpecker organization.",
+		Value:   false,
 	},
 	&cli.StringFlag{
 		Sources: cli.EnvVars("WOODPECKER_BACKEND_K8S_VOLUME_SIZE"),
