@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.9.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.9.0) - 2025-07-18
+## [3.9.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.9.0) - 2025-07-19
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -10,15 +10,16 @@
 
 - Prevent secrets from leaking to Kubernetes API Server logs [[#5305](https://github.com/woodpecker-ci/woodpecker/pull/5305)]
 
+### 📚 Documentation
+
+- fix(deps): update docs npm deps non-major [[#5340](https://github.com/woodpecker-ci/woodpecker/pull/5340)]
+- chore(deps): update docs npm deps non-major [[#5316](https://github.com/woodpecker-ci/woodpecker/pull/5316)]
+
 ### 🐛 Bug Fixes
 
 - Reload repo on hook [[#5324](https://github.com/woodpecker-ci/woodpecker/pull/5324)]
 - Fix loading icons and add missing loading indicators [[#5329](https://github.com/woodpecker-ci/woodpecker/pull/5329)]
 - Use correct parameter for forge selection on login [[#5325](https://github.com/woodpecker-ci/woodpecker/pull/5325)]
-
-### 📚 Documentation
-
-- chore(deps): update docs npm deps non-major [[#5316](https://github.com/woodpecker-ci/woodpecker/pull/5316)]
 
 ### 📈 Enhancement
 
