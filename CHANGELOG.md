@@ -1,5 +1,55 @@
 # Changelog
 
+## [3.9.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.9.0) - 2025-07-19
+
+### ❤️ Thanks to all contributors! ❤️
+
+@anbraten, @hhamalai, @qwerty287
+
+### 🔒 Security
+
+- Prevent secrets from leaking to Kubernetes API Server logs [[#5305](https://github.com/woodpecker-ci/woodpecker/pull/5305)]
+
+### ✨ Features
+
+- Add and edit additional forges in UI [[#5328](https://github.com/woodpecker-ci/woodpecker/pull/5328)]
+
+### 📚 Documentation
+
+- fix(deps): update docs npm deps non-major [[#5340](https://github.com/woodpecker-ci/woodpecker/pull/5340)]
+- chore(deps): update docs npm deps non-major [[#5316](https://github.com/woodpecker-ci/woodpecker/pull/5316)]
+
+### 🐛 Bug Fixes
+
+- Reload repo on hook [[#5324](https://github.com/woodpecker-ci/woodpecker/pull/5324)]
+- Fix loading icons and add missing loading indicators [[#5329](https://github.com/woodpecker-ci/woodpecker/pull/5329)]
+- Use correct parameter for forge selection on login [[#5325](https://github.com/woodpecker-ci/woodpecker/pull/5325)]
+
+### 📈 Enhancement
+
+- Simplify backend types [[#5299](https://github.com/woodpecker-ci/woodpecker/pull/5299)]
+
+### 📦️ Dependency
+
+- fix(deps): update web npm deps non-major [[#5341](https://github.com/woodpecker-ci/woodpecker/pull/5341)]
+- fix(deps): update dependency vue-i18n to v11.1.10 [security] [[#5335](https://github.com/woodpecker-ci/woodpecker/pull/5335)]
+- fix(deps): update golang-packages [[#5333](https://github.com/woodpecker-ci/woodpecker/pull/5333)]
+- chore(deps): lock file maintenance [[#5320](https://github.com/woodpecker-ci/woodpecker/pull/5320)]
+- fix(deps): update dependency simple-icons to v15.6.0 [[#5319](https://github.com/woodpecker-ci/woodpecker/pull/5319)]
+- fix(deps): update web npm deps non-major [[#5317](https://github.com/woodpecker-ci/woodpecker/pull/5317)]
+- fix(deps): update module github.com/bmatcuk/doublestar/v4 to v4.9.0 [[#5318](https://github.com/woodpecker-ci/woodpecker/pull/5318)]
+- chore(deps): update pre-commit hook golangci/golangci-lint to v2.2.2 [[#5315](https://github.com/woodpecker-ci/woodpecker/pull/5315)]
+- chore(deps): update dependency golang to v1.24.5 [[#5314](https://github.com/woodpecker-ci/woodpecker/pull/5314)]
+- fix(deps): update golang-packages [[#5313](https://github.com/woodpecker-ci/woodpecker/pull/5313)]
+- fix(deps): update golang-packages [[#5311](https://github.com/woodpecker-ci/woodpecker/pull/5311)]
+- fix(deps): update module gitlab.com/gitlab-org/api/client-go to v0.134.0 [[#5308](https://github.com/woodpecker-ci/woodpecker/pull/5308)]
+- chore(deps): lock file maintenance [[#5307](https://github.com/woodpecker-ci/woodpecker/pull/5307)]
+- fix(deps): update dependency simple-icons to v15.5.0 [[#5306](https://github.com/woodpecker-ci/woodpecker/pull/5306)]
+
+### Misc
+
+- Update issue number for link checker [[#5327](https://github.com/woodpecker-ci/woodpecker/pull/5327)]
+
 ## [3.8.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.8.0) - 2025-07-05
 
 ### ❤️ Thanks to all contributors! ❤️
