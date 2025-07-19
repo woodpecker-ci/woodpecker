@@ -63,6 +63,7 @@
   <SvgIcon v-else-if="name === 'file-edit-outline'" :path="mdiFileEditOutline" size="1.3rem" />
   <SvgIcon v-else-if="name === 'bug-outline'" :path="mdiBugOutline" size="1.3rem" />
   <SvgIcon v-else-if="name === 'docker'" :path="mdiDocker" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'forge'" :path="mdiCodeBraces" size="1.3rem" />
 
   <SvgIcon v-else-if="name === 'visibility-private'" :path="mdiLockOutline" size="1.3rem" />
   <SvgIcon v-else-if="name === 'visibility-internal'" :path="mdiLockOpenOutline" size="1.3rem" />
@@ -112,6 +113,7 @@ import {
   mdiClockTimeEightOutline,
   mdiClose,
   mdiCloseCircle,
+  mdiCodeBraces,
   mdiCog,
   mdiCogOutline,
   mdiConsole,
@@ -227,7 +229,8 @@ export type IconNames =
   | 'user'
   | 'org'
   | 'cron'
-  | 'toolbox';
+  | 'toolbox'
+  | 'forge';
 
 const props = defineProps<{
   name: IconNames;
