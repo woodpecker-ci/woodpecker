@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.9.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.9.0) - 2025-07-19
+## [3.9.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.9.0) - 2025-07-20
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -31,6 +31,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update dependency simple-icons to v15.7.0 [[#5342](https://github.com/woodpecker-ci/woodpecker/pull/5342)]
 - fix(deps): update web npm deps non-major [[#5341](https://github.com/woodpecker-ci/woodpecker/pull/5341)]
 - fix(deps): update dependency vue-i18n to v11.1.10 [security] [[#5335](https://github.com/woodpecker-ci/woodpecker/pull/5335)]
 - fix(deps): update golang-packages [[#5333](https://github.com/woodpecker-ci/woodpecker/pull/5333)]
