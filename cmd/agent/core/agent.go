@@ -297,7 +297,7 @@ func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 				log.Debug().Msg("polling new steps")
 				if err := runner.Run(agentCtx, shutdownCtx); err != nil {
 					log.Error().Err(err).Msg("runner error, retrying...")
-					// Check if context is cancelled
+					// Check if context is canceled
 					if agentCtx.Err() != nil {
 						return nil
 					}
