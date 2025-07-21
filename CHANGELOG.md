@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@anbraten, @hhamalai, @hrfee, @qwerty287
+@anbraten, @hhamalai, @hrfee, @ivaltryek, @qwerty287
 
 ### 🔒 Security
 
@@ -16,6 +16,7 @@
 
 ### 🐛 Bug Fixes
 
+- fix(agent): handle context cancellation [[#5323](https://github.com/woodpecker-ci/woodpecker/pull/5323)]
 - woodpecker-go/types: fix time-related struct field tags [[#5343](https://github.com/woodpecker-ci/woodpecker/pull/5343)]
 - Reload repo on hook [[#5324](https://github.com/woodpecker-ci/woodpecker/pull/5324)]
 - Fix loading icons and add missing loading indicators [[#5329](https://github.com/woodpecker-ci/woodpecker/pull/5329)]
