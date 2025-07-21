@@ -40,7 +40,7 @@ type Agent struct {
 	CustomLabels map[string]string `json:"custom_labels" xorm:"JSON 'custom_labels'"`
 	// OrgID is counted as unset if set to -1, this is done to ensure a new(Agent) still enforce the OrgID check by default
 	OrgID int64 `json:"org_id"        xorm:"INDEX 'org_id'"`
-} //	@name Agent
+} //	@name	Agent
 
 const (
 	IDNotSet = -1

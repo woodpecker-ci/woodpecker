@@ -5340,6 +5340,18 @@ const docTemplate = `{
                 "StatusSkipped": "skipped as another step failed",
                 "StatusSuccess": "successfully finished"
             },
+            "x-enum-descriptions": [
+                "skipped as another step failed",
+                "pending to be executed",
+                "currently running",
+                "successfully finished",
+                "failed to finish (exit code != 0)",
+                "killed by user",
+                "error with the config / while parsing / some other system problem",
+                "waiting for approval",
+                "blocked and declined",
+                "created / internal use only"
+            ],
             "x-enum-varnames": [
                 "StatusSkipped",
                 "StatusPending",
@@ -5751,6 +5763,12 @@ const docTemplate = `{
                 "RequireApprovalNone": "require approval for no events",
                 "RequireApprovalPullRequests": "require approval for all PRs"
             },
+            "x-enum-descriptions": [
+                "require approval for no events",
+                "require approval for PRs from forks (default)",
+                "require approval for all PRs",
+                "require approval for all external events"
+            ],
             "x-enum-varnames": [
                 "RequireApprovalNone",
                 "RequireApprovalForks",
@@ -5885,6 +5903,13 @@ const docTemplate = `{
                 "PipelineErrorTypeGeneric": "some generic error",
                 "PipelineErrorTypeLinter": "some error with the config syntax"
             },
+            "x-enum-descriptions": [
+                "some error with the config syntax",
+                "using some deprecated feature",
+                "some error with the config semantics",
+                "some generic error",
+                "some bad-habit error"
+            ],
             "x-enum-varnames": [
                 "PipelineErrorTypeLinter",
                 "PipelineErrorTypeDeprecation",
