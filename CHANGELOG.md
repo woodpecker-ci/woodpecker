@@ -1,10 +1,10 @@
 # Changelog
 
-## [3.9.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.9.0) - 2025-07-21
+## [3.9.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.9.0) - 2025-07-22
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@anbraten, @hhamalai, @hrfee, @ivaltryek, @qwerty287
+@anbraten, @henkka, @hhamalai, @hrfee, @ivaltryek, @qwerty287
 
 ### 🔒 Security
 
@@ -13,6 +13,11 @@
 ### ✨ Features
 
 - Add and edit additional forges in UI [[#5328](https://github.com/woodpecker-ci/woodpecker/pull/5328)]
+
+### 📈 Enhancement
+
+- feat(k8s): Kubernetes namespace per organization [[#5309](https://github.com/woodpecker-ci/woodpecker/pull/5309)]
+- Simplify backend types [[#5299](https://github.com/woodpecker-ci/woodpecker/pull/5299)]
 
 ### 🐛 Bug Fixes
 
@@ -24,16 +29,13 @@
 
 ### 📚 Documentation
 
-- chore(deps): lock file maintenance [[#5344](https://github.com/woodpecker-ci/woodpecker/pull/5344)]
 - fix(deps): update docs npm deps non-major [[#5340](https://github.com/woodpecker-ci/woodpecker/pull/5340)]
 - chore(deps): update docs npm deps non-major [[#5316](https://github.com/woodpecker-ci/woodpecker/pull/5316)]
 
-### 📈 Enhancement
-
-- Simplify backend types [[#5299](https://github.com/woodpecker-ci/woodpecker/pull/5299)]
-
 ### 📦️ Dependency
 
+- fix(deps): update golang-packages [[#5336](https://github.com/woodpecker-ci/woodpecker/pull/5336)]
+- chore(deps): lock file maintenance [[#5344](https://github.com/woodpecker-ci/woodpecker/pull/5344)]
 - fix(deps): update dependency simple-icons to v15.7.0 [[#5342](https://github.com/woodpecker-ci/woodpecker/pull/5342)]
 - fix(deps): update web npm deps non-major [[#5341](https://github.com/woodpecker-ci/woodpecker/pull/5341)]
 - fix(deps): update dependency vue-i18n to v11.1.10 [security] [[#5335](https://github.com/woodpecker-ci/woodpecker/pull/5335)]
