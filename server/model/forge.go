@@ -35,7 +35,7 @@ type Forge struct {
 	SkipVerify        bool           `json:"skip_verify,omitempty"        xorm:"bool"`
 	OAuthHost         string         `json:"oauth_host,omitempty"         xorm:"VARCHAR(250) 'oauth_host'"` // public url for oauth if different from url
 	AdditionalOptions map[string]any `json:"additional_options,omitempty" xorm:"json"`
-} //	@name Forge
+} //	@name	Forge
 
 // TableName returns the database table name for xorm.
 func (Forge) TableName() string {

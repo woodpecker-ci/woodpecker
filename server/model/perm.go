@@ -26,7 +26,7 @@ type Perm struct {
 	Synced  int64 `json:"synced"  xorm:"synced"`
 	Created int64 `json:"created" xorm:"created"`
 	Updated int64 `json:"updated" xorm:"updated"`
-} //	@name Perm
+} //	@name	Perm
 
 // TableName return database table name for xorm.
 func (Perm) TableName() string {
@@ -37,4 +37,4 @@ func (Perm) TableName() string {
 type OrgPerm struct {
 	Member bool `json:"member"`
 	Admin  bool `json:"admin"`
-} //	@name OrgPerm
+} //	@name	OrgPerm

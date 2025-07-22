@@ -275,6 +275,11 @@ func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 			err := client.ReportHealth(grpcCtx)
 			if err != nil {
 				log.Err(err).Msg("failed to report health")
+				// Check if the error is due to context cancellation
+				if grpcCtx.Err() != nil || agentCtx.Err() != nil {
+					log.Debug().Msg("terminating health reporting due to context cancellation")
+					return nil
+				}
 			}
 
 			select {
@@ -299,8 +304,18 @@ func run(ctx context.Context, c *cli.Command, backends []types.Backend) error {
 
 				log.Debug().Msg("polling new steps")
 				if err := runner.Run(agentCtx, shutdownCtx); err != nil {
-					log.Error().Err(err).Msg("runner done with error")
-					return err
+					log.Error().Err(err).Msg("runner error, retrying...")
+					// Check if context is canceled
+					if agentCtx.Err() != nil {
+						return nil
+					}
+					// Wait a bit before retrying to avoid hammering the server
+					select {
+					case <-agentCtx.Done():
+						return nil
+					case <-time.After(time.Second * 5):
+						// Continue to next iteration
+					}
 				}
 			}
 		})

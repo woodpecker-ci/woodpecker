@@ -95,10 +95,10 @@ type (
 		Event     string           `json:"event"`
 		Status    string           `json:"status"`
 		Errors    []*PipelineError `json:"errors"`
-		Created   int64            `json:"created_at"`
-		Updated   int64            `json:"updated_at"`
-		Started   int64            `json:"started_at"`
-		Finished  int64            `json:"finished_at"`
+		Created   int64            `json:"created"`
+		Updated   int64            `json:"updated"`
+		Started   int64            `json:"started"`
+		Finished  int64            `json:"finished"`
 		Deploy    string           `json:"deploy_to"`
 		Commit    string           `json:"commit"`
 		Branch    string           `json:"branch"`
@@ -113,7 +113,7 @@ type (
 		Email     string           `json:"author_email"`
 		ForgeURL  string           `json:"forge_url"`
 		Reviewer  string           `json:"reviewed_by"`
-		Reviewed  int64            `json:"reviewed_at"`
+		Reviewed  int64            `json:"reviewed"`
 		Workflows []*Workflow      `json:"workflows,omitempty"`
 	}
 
@@ -124,8 +124,8 @@ type (
 		Name     string            `json:"name"`
 		State    string            `json:"state"`
 		Error    string            `json:"error,omitempty"`
-		Started  int64             `json:"start_time,omitempty"`
-		Stopped  int64             `json:"end_time,omitempty"`
+		Started  int64             `json:"started,omitempty"`
+		Stopped  int64             `json:"finished,omitempty"`
 		AgentID  int64             `json:"agent_id,omitempty"`
 		Platform string            `json:"platform,omitempty"`
 		Environ  map[string]string `json:"environ,omitempty"`
@@ -141,8 +141,8 @@ type (
 		State    string   `json:"state"`
 		Error    string   `json:"error,omitempty"`
 		ExitCode int      `json:"exit_code"`
-		Started  int64    `json:"start_time,omitempty"`
-		Stopped  int64    `json:"end_time,omitempty"`
+		Started  int64    `json:"started,omitempty"`
+		Stopped  int64    `json:"finished,omitempty"`
 		Type     StepType `json:"type,omitempty"`
 	}
 
