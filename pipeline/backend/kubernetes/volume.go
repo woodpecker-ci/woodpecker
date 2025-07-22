@@ -25,7 +25,7 @@ import (
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func mkPersistentVolumeClaim(config *config, name string) (*v1.PersistentVolumeClaim, error) {
+func mkPersistentVolumeClaim(config *config, name, namespace string) (*v1.PersistentVolumeClaim, error) {
 	_storageClass := &config.StorageClass
 	if config.StorageClass == "" {
 		_storageClass = nil
@@ -47,7 +47,7 @@ func mkPersistentVolumeClaim(config *config, name string) (*v1.PersistentVolumeC
 	pvc := &v1.PersistentVolumeClaim{
 		ObjectMeta: meta_v1.ObjectMeta{
 			Name:      volumeName,
-			Namespace: config.Namespace,
+			Namespace: namespace,
 		},
 		Spec: v1.PersistentVolumeClaimSpec{
 			AccessModes:      []v1.PersistentVolumeAccessMode{accessMode},
@@ -75,25 +75,25 @@ func volumeMountPath(name string) string {
 	return s[0]
 }
 
-func startVolume(ctx context.Context, engine *kube, name string) (*v1.PersistentVolumeClaim, error) {
+func startVolume(ctx context.Context, engine *kube, name, namespace string) (*v1.PersistentVolumeClaim, error) {
 	engineConfig := engine.getConfig()
-	pvc, err := mkPersistentVolumeClaim(engineConfig, name)
+	pvc, err := mkPersistentVolumeClaim(engineConfig, name, namespace)
 	if err != nil {
 		return nil, err
 	}
 
 	log.Trace().Msgf("creating volume: %s", pvc.Name)
-	return engine.client.CoreV1().PersistentVolumeClaims(engineConfig.Namespace).Create(ctx, pvc, meta_v1.CreateOptions{})
+	return engine.client.CoreV1().PersistentVolumeClaims(namespace).Create(ctx, pvc, meta_v1.CreateOptions{})
 }
 
-func stopVolume(ctx context.Context, engine *kube, name string, deleteOpts meta_v1.DeleteOptions) error {
+func stopVolume(ctx context.Context, engine *kube, name, namespace string, deleteOpts meta_v1.DeleteOptions) error {
 	pvcName, err := volumeName(name)
 	if err != nil {
 		return err
 	}
 	log.Trace().Str("name", pvcName).Msg("deleting volume")
 
-	err = engine.client.CoreV1().PersistentVolumeClaims(engine.config.Namespace).Delete(ctx, pvcName, deleteOpts)
+	err = engine.client.CoreV1().PersistentVolumeClaims(namespace).Delete(ctx, pvcName, deleteOpts)
 	if errors.IsNotFound(err) {
 		// Don't abort on 404 errors from k8s, they most likely mean that the pod hasn't been created yet, usually because pipeline was canceled before running all steps.
 		log.Trace().Err(err).Msgf("unable to delete service %s", pvcName)
