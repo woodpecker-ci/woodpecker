@@ -35,7 +35,7 @@ type Registry struct {
 	Username string `json:"username" xorm:"varchar(2000) 'username'"`
 	Password string `json:"password" xorm:"TEXT 'password'"`
 	ReadOnly bool   `json:"readonly" xorm:"-"`
-} //	@name Registry
+} //	@name	Registry
 
 func (r Registry) TableName() string {
 	return "registries"

@@ -13,6 +13,7 @@
       v-if="!selectedSecret"
       v-model="secrets"
       :is-deleting="isDeleting"
+      :loading="loading"
       @edit="editSecret"
       @delete="deleteSecret"
     />
@@ -71,7 +72,7 @@ async function loadSecrets(page: number): Promise<Secret[] | null> {
   return apiClient.getOrgSecretList(user.org_id, { page });
 }
 
-const { resetPage, data: secrets } = usePagination(loadSecrets, () => !selectedSecret.value);
+const { resetPage, data: secrets, loading } = usePagination(loadSecrets, () => !selectedSecret.value);
 
 const { doSubmit: createSecret, isLoading: isSaving } = useAsyncAction(async () => {
   if (!selectedSecret.value) {
@@ -88,13 +89,13 @@ const { doSubmit: createSecret, isLoading: isSaving } = useAsyncAction(async () 
     type: 'success',
   });
   selectedSecret.value = undefined;
-  resetPage();
+  await resetPage();
 });
 
 const { doSubmit: deleteSecret, isLoading: isDeleting } = useAsyncAction(async (_secret: Secret) => {
   await apiClient.deleteOrgSecret(user.org_id, _secret.name);
   notifications.notify({ title: i18n.t('secrets.deleted'), type: 'success' });
-  resetPage();
+  await resetPage();
 });
 
 function editSecret(secret: Secret) {
