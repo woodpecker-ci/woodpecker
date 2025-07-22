@@ -22,7 +22,7 @@ var Flags = []cli.Flag{
 	&cli.StringFlag{
 		Sources: cli.EnvVars("WOODPECKER_BACKEND_K8S_NAMESPACE"),
 		Name:    "backend-k8s-namespace",
-		Usage:   "backend k8s namespace, if used with WOODPECKER_BACKEND_K8S_NAMESPACE_PER_ORGANISATION, this will be the prefix for the namespace appended with the organization name.",
+		Usage:   "backend k8s namespace, if used with WOODPECKER_BACKEND_K8S_NAMESPACE_PER_ORGANIZATION, this will be the prefix for the namespace appended with the organization name.",
 		Value:   "woodpecker",
 	},
 	&cli.BoolFlag{

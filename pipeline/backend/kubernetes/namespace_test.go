@@ -97,7 +97,7 @@ func TestMkNamespace(t *testing.T) {
 			client := &mockNamespaceClient{}
 			tt.setupMock(client)
 
-			err := mkNamespace(context.Background(), client, tt.namespace)
+			err := mkNamespace(t.Context(), client, tt.namespace)
 
 			if tt.expectError {
 				assert.Error(t, err)
