@@ -70,7 +70,7 @@ type APIPipeline struct {
 	PullRequestLabels []string `json:"pr_labels,omitempty"`
 	FromFork          bool     `json:"from_fork,omitempty"`
 	IsPrerelease      bool     `json:"is_prerelease,omitempty"`
-} //	@name Pipeline
+} //	@name	Pipeline
 
 // TableName return database table name for xorm.
 func (Pipeline) TableName() string {
@@ -129,7 +129,7 @@ func (p Pipeline) IsMultiPipeline() bool {
 type PipelineOptions struct {
 	Branch    string            `json:"branch"`
 	Variables map[string]string `json:"variables"`
-} //	@name PipelineOptions
+} //	@name	PipelineOptions
 
 type Deployment struct {
 	Target      string `json:"target"`

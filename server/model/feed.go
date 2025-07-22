@@ -55,4 +55,4 @@ type APIFeed struct {
 	Title   string `json:"title,omitempty"`
 	Message string `json:"message,omitempty"`
 	Email   string `json:"author_email,omitempty"`
-} //	@name Feed
+} //	@name	Feed

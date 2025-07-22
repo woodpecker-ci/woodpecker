@@ -19,4 +19,4 @@ type PullRequest struct {
 	Title    string        `json:"title"`
 	Labels   []string      `json:"labels,omitempty"`
 	FromFork bool          `json:"from_fork,omitempty"`
-} //	@name PullRequest
+} //	@name	PullRequest
