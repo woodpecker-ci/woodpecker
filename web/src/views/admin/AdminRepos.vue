@@ -37,7 +37,10 @@
         </div>
       </ListItem>
 
-      <div v-if="repos?.length === 0" class="ml-2">{{ $t('admin.settings.repos.none') }}</div>
+      <div v-if="loading" class="flex justify-center">
+        <Icon name="spinner" class="animate-spin" />
+      </div>
+      <div v-else-if="repos?.length === 0" class="ml-2">{{ $t('admin.settings.repos.none') }}</div>
     </div>
   </Settings>
 </template>
@@ -48,6 +51,7 @@ import { useI18n } from 'vue-i18n';
 
 import Badge from '~/components/atomic/Badge.vue';
 import Button from '~/components/atomic/Button.vue';
+import Icon from '~/components/atomic/Icon.vue';
 import IconButton from '~/components/atomic/IconButton.vue';
 import ListItem from '~/components/atomic/ListItem.vue';
 import Settings from '~/components/layout/Settings.vue';
@@ -66,7 +70,7 @@ async function loadRepos(page: number): Promise<Repo[] | null> {
   return apiClient.getAllRepos({ page });
 }
 
-const { data: repos } = usePagination(loadRepos);
+const { data: repos, loading } = usePagination(loadRepos);
 
 const { doSubmit: repairRepos, isLoading: isRepairingRepos } = useAsyncAction(async () => {
   await apiClient.repairAllRepos();

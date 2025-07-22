@@ -102,10 +102,10 @@ type (
 		Event          string           `json:"event"`
 		Status         string           `json:"status"`
 		Errors         []*PipelineError `json:"errors"`
-		Created        int64            `json:"created_at"`
-		Updated        int64            `json:"updated_at"`
-		Started        int64            `json:"started_at"`
-		Finished       int64            `json:"finished_at"`
+		Created        int64            `json:"created"`
+		Updated        int64            `json:"updated"`
+		Started        int64            `json:"started"`
+		Finished       int64            `json:"finished"`
 		Deployment     *Deployment      `json:"deployment"`
 		CommitPipeline *Commit          `json:"commit_pipeline"`
 		Branch         string           `json:"branch"`
@@ -116,26 +116,26 @@ type (
 		Avatar         string           `json:"author_avatar"`
 		ForgeURL       string           `json:"forge_url"`
 		Reviewer       string           `json:"reviewed_by"`
-		Reviewed       int64            `json:"reviewed_at"`
+		Reviewed       int64            `json:"reviewed"`
 		Workflows      []*Workflow      `json:"workflows,omitempty"`
 		TagTitle       string           `json:"tag_title"`
 
 		// old fields
 
 		// Deprecated
-		Title     string `json:"title"`
+		Title string `json:"title"`
 		// Deprecated
-		Message   string `json:"message"`
+		Message string `json:"message"`
 		// Deprecated
-		Timestamp int64  `json:"timestamp"`
+		Timestamp int64 `json:"timestamp"`
 		// Deprecated
-		Sender    string `json:"sender"`
+		Sender string `json:"sender"`
 		// Deprecated
-		Commit    string `json:"commit"`
+		Commit string `json:"commit"`
 		// Deprecated
-		Email     string `json:"author_email"`
+		Email string `json:"author_email"`
 		// Deprecated
-		Deploy    string `json:"deploy_to"`
+		Deploy string `json:"deploy_to"`
 	}
 
 	Commit struct {
@@ -171,8 +171,8 @@ type (
 		Name     string            `json:"name"`
 		State    string            `json:"state"`
 		Error    string            `json:"error,omitempty"`
-		Started  int64             `json:"start_time,omitempty"`
-		Stopped  int64             `json:"end_time,omitempty"`
+		Started  int64             `json:"started,omitempty"`
+		Stopped  int64             `json:"finished,omitempty"`
 		AgentID  int64             `json:"agent_id,omitempty"`
 		Platform string            `json:"platform,omitempty"`
 		Environ  map[string]string `json:"environ,omitempty"`
@@ -188,8 +188,8 @@ type (
 		State    string   `json:"state"`
 		Error    string   `json:"error,omitempty"`
 		ExitCode int      `json:"exit_code"`
-		Started  int64    `json:"start_time,omitempty"`
-		Stopped  int64    `json:"end_time,omitempty"`
+		Started  int64    `json:"started,omitempty"`
+		Stopped  int64    `json:"finished,omitempty"`
 		Type     StepType `json:"type,omitempty"`
 	}
 
