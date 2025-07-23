@@ -53,6 +53,7 @@
     "@vitejs/plugin-vue": "^6.0.0",
     "@vue/compiler-sfc": "^3.5.18",
     "@vue/test-utils": "^2.4.6",
+    "dotenv": "^17.2.0",
     "eslint": "^9.17.0",
     "eslint-plugin-promise": "^7.2.1",
     "eslint-plugin-vue-scoped-css": "^2.9.0",
