@@ -14,6 +14,15 @@
 
 - Add and edit additional forges in UI [[#5328](https://github.com/woodpecker-ci/woodpecker/pull/5328)]
 
+### 🐛 Bug Fixes
+
+- Correct OpenApi LookupOrg router path [[#5351](https://github.com/woodpecker-ci/woodpecker/pull/5351)]
+- fix(agent): handle context cancellation [[#5323](https://github.com/woodpecker-ci/woodpecker/pull/5323)]
+- woodpecker-go/types: fix time-related struct field tags [[#5343](https://github.com/woodpecker-ci/woodpecker/pull/5343)]
+- Reload repo on hook [[#5324](https://github.com/woodpecker-ci/woodpecker/pull/5324)]
+- Fix loading icons and add missing loading indicators [[#5329](https://github.com/woodpecker-ci/woodpecker/pull/5329)]
+- Use correct parameter for forge selection on login [[#5325](https://github.com/woodpecker-ci/woodpecker/pull/5325)]
+
 ### 📚 Documentation
 
 - chore(deps): lock file maintenance [[#5348](https://github.com/woodpecker-ci/woodpecker/pull/5348)]
@@ -24,14 +33,6 @@
 
 - feat(k8s): Kubernetes namespace per organization [[#5309](https://github.com/woodpecker-ci/woodpecker/pull/5309)]
 - Simplify backend types [[#5299](https://github.com/woodpecker-ci/woodpecker/pull/5299)]
-
-### 🐛 Bug Fixes
-
-- fix(agent): handle context cancellation [[#5323](https://github.com/woodpecker-ci/woodpecker/pull/5323)]
-- woodpecker-go/types: fix time-related struct field tags [[#5343](https://github.com/woodpecker-ci/woodpecker/pull/5343)]
-- Reload repo on hook [[#5324](https://github.com/woodpecker-ci/woodpecker/pull/5324)]
-- Fix loading icons and add missing loading indicators [[#5329](https://github.com/woodpecker-ci/woodpecker/pull/5329)]
-- Use correct parameter for forge selection on login [[#5325](https://github.com/woodpecker-ci/woodpecker/pull/5325)]
 
 ### 📦️ Dependency
 
