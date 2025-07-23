@@ -109,7 +109,7 @@ func GetOrgPermissions(c *gin.Context) {
 // LookupOrg
 //
 //	@Summary	Lookup an organization by full name
-//	@Router		/org/lookup/{org_full_name} [get]
+//	@Router		/orgs/lookup/{org_full_name} [get]
 //	@Produce	json
 //	@Success	200	{object}	Org
 //	@Tags		Organizations
