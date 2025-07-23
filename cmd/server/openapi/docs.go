@@ -960,7 +960,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Organizations"
+                    "Orgs"
                 ],
                 "summary": "Lookup an organization by full name",
                 "parameters": [
