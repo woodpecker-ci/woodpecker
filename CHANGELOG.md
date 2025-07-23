@@ -60,6 +60,7 @@
 
 ### Misc
 
+- 🧑‍💻 Add support for proxying to existing woodpecker server [[#5354](https://github.com/woodpecker-ci/woodpecker/pull/5354)]
 - Update and improve nix flake [[#5349](https://github.com/woodpecker-ci/woodpecker/pull/5349)]
 - Update issue number for link checker [[#5327](https://github.com/woodpecker-ci/woodpecker/pull/5327)]
 
