@@ -34,4 +34,4 @@ type Feed struct {
 	Author   string `json:"author,omitempty"        xorm:"pipeline_author"`
 	Avatar   string `json:"author_avatar,omitempty" xorm:"pipeline_avatar"`
 	Email    string `json:"author_email,omitempty"  xorm:"pipeline_email"`
-} //	@name Feed
+} //	@name	Feed

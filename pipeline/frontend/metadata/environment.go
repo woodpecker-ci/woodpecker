@@ -74,6 +74,8 @@ func (m *Metadata) Environ() map[string]string {
 	setNonEmptyEnvVar(params, "CI_PIPELINE_DEPLOY_TASK", pipeline.DeployTask)
 	setNonEmptyEnvVar(params, "CI_PIPELINE_CREATED", strconv.FormatInt(pipeline.Created, 10))
 	setNonEmptyEnvVar(params, "CI_PIPELINE_STARTED", strconv.FormatInt(pipeline.Started, 10))
+	setNonEmptyEnvVar(params, "CI_PIPELINE_AUTHOR", pipeline.Author)
+	setNonEmptyEnvVar(params, "CI_PIPELINE_AVATAR", pipeline.Avatar)
 
 	workflow := m.Workflow
 	setNonEmptyEnvVar(params, "CI_WORKFLOW_NAME", workflow.Name)
@@ -135,6 +137,8 @@ func (m *Metadata) Environ() map[string]string {
 	setNonEmptyEnvVar(params, "CI_PREV_PIPELINE_CREATED", strconv.FormatInt(prevPipeline.Created, 10))
 	setNonEmptyEnvVar(params, "CI_PREV_PIPELINE_STARTED", strconv.FormatInt(prevPipeline.Started, 10))
 	setNonEmptyEnvVar(params, "CI_PREV_PIPELINE_FINISHED", strconv.FormatInt(prevPipeline.Finished, 10))
+	setNonEmptyEnvVar(params, "CI_PREV_PIPELINE_AUTHOR", prevPipeline.Author)
+	setNonEmptyEnvVar(params, "CI_PREV_PIPELINE_AVATAR", prevPipeline.Avatar)
 
 	prevCommit := prevPipeline.Commit
 	setNonEmptyEnvVar(params, "CI_PREV_COMMIT_SHA", prevCommit.Sha)

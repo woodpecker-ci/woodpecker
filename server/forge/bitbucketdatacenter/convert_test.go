@@ -223,6 +223,7 @@ func Test_convertPullRequestEvent(t *testing.T) {
 		Event:     model.EventPull,
 		Refspec:   "branch:main",
 		Title:     "my title",
+		Message:   "my title",
 	}, to)
 }
 
@@ -278,6 +279,7 @@ func Test_convertPullRequestCloseEvent(t *testing.T) {
 		Event:     model.EventPullClosed,
 		Refspec:   "branch:main",
 		Title:     "my title",
+		Message:   "my title",
 	}, to)
 }
 
