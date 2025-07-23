@@ -4,7 +4,7 @@
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@anbraten, @henkka, @hhamalai, @hrfee, @ivaltryek, @qwerty287
+@6543, @anbraten, @henkka, @hhamalai, @hrfee, @ivaltryek, @qwerty287
 
 ### 🔒 Security
 
@@ -35,7 +35,7 @@
 
 ### 📦️ Dependency
 
-- chore(config): migrate renovate config [[#5350](https://github.com/woodpecker-ci/woodpecker/pull/5350)]
+- chore(config): migrate renovate config - autoclosed [[#5350](https://github.com/woodpecker-ci/woodpecker/pull/5350)]
 - fix(deps): update golang-packages [[#5347](https://github.com/woodpecker-ci/woodpecker/pull/5347)]
 - fix(deps): update golang-packages [[#5336](https://github.com/woodpecker-ci/woodpecker/pull/5336)]
 - chore(deps): lock file maintenance [[#5344](https://github.com/woodpecker-ci/woodpecker/pull/5344)]
@@ -57,6 +57,7 @@
 
 ### Misc
 
+- Update and improve nix flake [[#5349](https://github.com/woodpecker-ci/woodpecker/pull/5349)]
 - Update issue number for link checker [[#5327](https://github.com/woodpecker-ci/woodpecker/pull/5327)]
 
 ## [3.8.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.8.0) - 2025-07-05
