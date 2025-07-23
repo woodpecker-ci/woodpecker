@@ -37,7 +37,7 @@
               glibc.static
               gofumpt
               golangci-lint
-              go-mockery
+              go-mockery_2
               protobuf
               sqlite
               go-swag # for generate-openapi
