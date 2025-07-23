@@ -71,7 +71,7 @@
   "pnpm": {
     "overrides": {
       "semver@<7.5.2": ">=7.5.2",
-      "stylus": "0.0.1-security"
+      "stylus": "github:stylus/stylus#0.57.0"
     }
   }
 }
