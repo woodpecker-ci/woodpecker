@@ -5,7 +5,7 @@
   "customManagers": [
     {
       "customType": "regex",
-      "fileMatch": ["shared/constant/constant.go"],
+      "managerFilePatterns": ["/shared/constant/constant.go/"],
       "matchStrings": [
         "//\\s*renovate:\\s*datasource=(?<datasource>.*?) depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?\\s+DefaultClonePlugin = \"docker.io/woodpeckerci/plugin-git:(?<currentValue>.*)\""
       ],
