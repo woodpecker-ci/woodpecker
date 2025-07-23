@@ -533,7 +533,7 @@
     "user": {
         "settings": {
             "secrets": {
-                "desc": "Os segredos do usuário podem ser passados em tempo de execução como variáveis de ambiente para etapas individuais de qualquer pipeline de usuário.",
+                "desc": "Os segredos do usuário podem ser usados nos pipeline de todos os repositórios do usuário.",
                 "images": {
                     "desc": "Lista de imagens em que esse segredo está disponível; deixe em branco para permitir todas as imagens",
                     "images": "Disponível para as seguintes imagens"
@@ -568,7 +568,7 @@
             },
             "settings": "Configurações do usuário",
             "general": {
-                "general": "Geral",
+                "general": "Conta",
                 "language": "Idioma",
                 "theme": {
                     "theme": "Tema",
@@ -675,5 +675,48 @@
     "internal_error": "Ocorreu um erro interno",
     "registration_closed": "O registro está fechado",
     "login_with": "Acessar com {forge}",
-    "cli_login_denied": "Login na CLI negado"
+    "cli_login_denied": "Login na CLI negado",
+    "forges": "Forjas",
+    "add_forge": "Adicionar forja",
+    "show_forges": "Mostrar forjas",
+    "github": "GitHub",
+    "gitlab": "GitLab",
+    "bitbucket": "Bitbucket",
+    "bitbucket_dc": "Bitbucket Data Center",
+    "gitea": "Gitea",
+    "forgejo": "Forgejo",
+    "addon": "Complemento",
+    "forge_type": "Tipo de forja",
+    "oauth_host": "Host de OAuth",
+    "public_only_desc": "Mostra apenas repositórios públicos.",
+    "public_only": "Públicos apenas",
+    "git_username": "Nome de usuário Git",
+    "git_username_desc": "Nome de usuário do usuário Git.",
+    "git_password": "Senha Git",
+    "git_password_desc": "Senha ou token de acesso pessoal do usuário Git.",
+    "executable": "Executável",
+    "save": "Salvar",
+    "add": "Adicionar",
+    "skip_verify": "Pular verificação SSL",
+    "forge_managed_by_env": "A forja principal é gerenciada por variáveis de ambiente. Quaisquer alterações nesta forja serão revertidas na reinicialização.",
+    "oauth_redirect_uri": "URI de redirecionamento de OAuth",
+    "forge_created": "Forja criada",
+    "advanced_options": "Opções avançadas",
+    "forge_deleted": "Forja detectada",
+    "edit_forge": "Editar forja",
+    "delete_forge": "Excluir forja",
+    "no_forges": "Não há forja ainda.",
+    "use_this_redirect_uri_to_create": "Use este URI de redirecionamento para criar ou atualizar o aplicativo OAuth. Acesse {0} e configure o aplicativo OAuth.",
+    "developer_settings": "Configurações do desenvolvedor",
+    "public_url_for_oauth_if": "URL pública para OAuth se diferente da URL ({0})",
+    "forge_saved": "Forja salva",
+    "forges_desc": "Configura forjas hospedando repositórios para os quais Woodpecker deve ser executado.",
+    "executable_desc": "Caminho do executável do complemento.",
+    "forge_delete_confirm": "Você realmente deseja excluir esta forja? Isso também excluirá todos os repositórios, usuários e pipelines relacionados a esta forja.",
+    "oauth_client_id": "ID de cliente OAuth",
+    "oauth_client_secret": "Segredo de cliente OAuth",
+    "merge_ref": "Ref da mesclagem",
+    "leave_empty_to_keep_current_value": "Deixe em branco para manter o valor",
+    "merge_ref_desc": "Referência a ser usada para mesclar a base. Isso é usado para determinar a diferença entre pull requests.",
+    "skip_verify_desc": "Pula verificação SSL para a conexão API. Isso não é recomendado para uso em produção."
 }
