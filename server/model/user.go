@@ -71,7 +71,7 @@ type User struct {
 
 	// OrgID is the of the user as model.Org.
 	OrgID int64 `json:"org_id" xorm:"org_id"`
-} //	@name User
+} //	@name	User
 
 // TableName return database table name for xorm.
 func (User) TableName() string {

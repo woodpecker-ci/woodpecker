@@ -54,7 +54,7 @@ type Pipeline struct {
 	PullRequestLabels   []string               `json:"pr_labels,omitempty"     xorm:"json 'pr_labels'"`
 	IsPrerelease        bool                   `json:"is_prerelease,omitempty" xorm:"is_prerelease"`
 	FromFork            bool                   `json:"from_fork,omitempty"     xorm:"from_fork"`
-} //	@name Pipeline
+} //	@name	Pipeline
 
 // TableName return database table name for xorm.
 func (Pipeline) TableName() string {
@@ -83,4 +83,4 @@ func (p Pipeline) IsPullRequest() bool {
 type PipelineOptions struct {
 	Branch    string            `json:"branch"`
 	Variables map[string]string `json:"variables"`
-} //	@name PipelineOptions
+} //	@name	PipelineOptions

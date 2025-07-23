@@ -90,6 +90,8 @@ func getRepo(c *gin.Context) {
 		c.String(http.StatusNotFound, "")
 	case "permission_read", "permission_write", "permission_admin":
 		c.String(http.StatusOK, fmt.Sprintf(permissionRepoPayload, c.Param("name")))
+	case "{898477b2-a080-4089-b385-597a783db392}":
+		c.String(http.StatusOK, repoPayloadFromHook)
 	default:
 		c.String(http.StatusOK, repoPayload)
 	}
@@ -224,6 +226,137 @@ const permissionRepoPayload = `
   "full_name": "test_name/%s",
   "scm": "git",
   "is_private": true
+}
+`
+
+const repoPayloadFromHook = `
+{
+  "type": "repository",
+  "full_name": "martinherren1984/publictestrepo",
+  "links": {
+    "self": {
+      "href": "https://api.bitbucket.org/2.0/repositories/martinherren1984/publictestrepo"
+    },
+    "html": {
+      "href": "https://bitbucket.org/martinherren1984/publictestrepo"
+    },
+    "avatar": {
+      "href": "https://bytebucket.org/ravatar/%7B898477b2-a080-4089-b385-597a783db392%7D?ts=default"
+    },
+    "pullrequests": {
+      "href": "https://api.bitbucket.org/2.0/repositories/martinherren1984/publictestrepo/pullrequests"
+    },
+    "commits": {
+      "href": "https://api.bitbucket.org/2.0/repositories/martinherren1984/publictestrepo/commits"
+    },
+    "forks": {
+      "href": "https://api.bitbucket.org/2.0/repositories/martinherren1984/publictestrepo/forks"
+    },
+    "watchers": {
+      "href": "https://api.bitbucket.org/2.0/repositories/martinherren1984/publictestrepo/watchers"
+    },
+    "branches": {
+      "href": "https://api.bitbucket.org/2.0/repositories/martinherren1984/publictestrepo/refs/branches"
+    },
+    "tags": {
+      "href": "https://api.bitbucket.org/2.0/repositories/martinherren1984/publictestrepo/refs/tags"
+    },
+    "downloads": {
+      "href": "https://api.bitbucket.org/2.0/repositories/martinherren1984/publictestrepo/downloads"
+    },
+    "source": {
+      "href": "https://api.bitbucket.org/2.0/repositories/martinherren1984/publictestrepo/src"
+    },
+    "clone": [
+      {
+        "name": "https",
+        "href": "https://bitbucket.org/martinherren1984/publictestrepo.git"
+      },
+      {
+        "name": "ssh",
+        "href": "git@bitbucket.org:martinherren1984/publictestrepo.git"
+      }
+    ],
+    "hooks": {
+      "href": "https://api.bitbucket.org/2.0/repositories/martinherren1984/publictestrepo/hooks"
+    }
+  },
+  "name": "PublicTestRepo",
+  "slug": "publictestrepo",
+  "description": "",
+  "scm": "git",
+  "website": null,
+  "owner": {
+    "display_name": "Martin Herren",
+    "links": {
+      "self": {
+        "href": "https://api.bitbucket.org/2.0/users/%7Bc5a0d676-fd27-4bd4-ac69-a7540d7b495b%7D"
+      },
+      "avatar": {
+        "href": "https://secure.gravatar.com/avatar/37de364488b2ec474b5458ca86442bbb?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FMH-2.png"
+      },
+      "html": {
+        "href": "https://bitbucket.org/%7Bc5a0d676-fd27-4bd4-ac69-a7540d7b495b%7D/"
+      }
+    },
+    "type": "user",
+    "uuid": "{c5a0d676-fd27-4bd4-ac69-a7540d7b495b}",
+    "account_id": "5cf8e3a9678ca90f8e7cc8a8",
+    "nickname": "Martin Herren"
+  },
+  "workspace": {
+    "type": "workspace",
+    "uuid": "{c5a0d676-fd27-4bd4-ac69-a7540d7b495b}",
+    "name": "Martin Herren",
+    "slug": "martinherren1984",
+    "links": {
+      "avatar": {
+        "href": "https://bitbucket.org/workspaces/martinherren1984/avatar/?ts=1658761964"
+      },
+      "html": {
+        "href": "https://bitbucket.org/martinherren1984/"
+      },
+      "self": {
+        "href": "https://api.bitbucket.org/2.0/workspaces/martinherren1984"
+      }
+    }
+  },
+  "is_private": false,
+  "project": {
+    "type": "project",
+    "key": "PUB",
+    "uuid": "{2cede481-f59e-49ec-88d0-a85629b7925d}",
+    "name": "PublicTestProject",
+    "links": {
+      "self": {
+        "href": "https://api.bitbucket.org/2.0/workspaces/martinherren1984/projects/PUB"
+      },
+      "html": {
+        "href": "https://bitbucket.org/martinherren1984/workspace/projects/PUB"
+      },
+      "avatar": {
+        "href": "https://bitbucket.org/martinherren1984/workspace/projects/PUB/avatar/32?ts=1658768453"
+      }
+    }
+  },
+  "fork_policy": "allow_forks",
+  "created_on": "2022-07-25T17:01:20.950706+00:00",
+  "updated_on": "2022-09-07T20:19:30.622886+00:00",
+  "size": 85955,
+  "language": "",
+  "uuid": "{898477b2-a080-4089-b385-597a783db392}",
+  "mainbranch": {
+    "name": "master",
+    "type": "branch"
+  },
+  "override_settings": {
+    "default_merge_strategy": true,
+    "branching_model": true
+  },
+  "parent": null,
+  "enforced_signed_commits": null,
+  "has_issues": false,
+  "has_wiki": false
 }
 `
 
