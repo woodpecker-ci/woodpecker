@@ -1,10 +1,10 @@
 # Changelog
 
-## [3.9.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.9.0) - 2025-07-23
+## [3.9.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.9.0) - 2025-07-24
 
 ### ❤️ Thanks to all contributors! ❤️
 
-@6543, @anbraten, @henkka, @hhamalai, @hrfee, @ivaltryek, @qwerty287
+@6543, @anbraten, @henkka, @hhamalai, @hrfee, @ivaltryek, @qwerty287, @wgroeneveld
 
 ### 🔒 Security
 
@@ -14,6 +14,13 @@
 
 - Add and edit additional forges in UI [[#5328](https://github.com/woodpecker-ci/woodpecker/pull/5328)]
 
+### 📚 Documentation
+
+- Add ASCII JUnit Test Report plugin [[#5355](https://github.com/woodpecker-ci/woodpecker/pull/5355)]
+- chore(deps): lock file maintenance [[#5348](https://github.com/woodpecker-ci/woodpecker/pull/5348)]
+- fix(deps): update docs npm deps non-major [[#5340](https://github.com/woodpecker-ci/woodpecker/pull/5340)]
+- chore(deps): update docs npm deps non-major [[#5316](https://github.com/woodpecker-ci/woodpecker/pull/5316)]
+
 ### 🐛 Bug Fixes
 
 - Correct OpenApi LookupOrg router path [[#5351](https://github.com/woodpecker-ci/woodpecker/pull/5351)]
@@ -22,12 +29,6 @@
 - Reload repo on hook [[#5324](https://github.com/woodpecker-ci/woodpecker/pull/5324)]
 - Fix loading icons and add missing loading indicators [[#5329](https://github.com/woodpecker-ci/woodpecker/pull/5329)]
 - Use correct parameter for forge selection on login [[#5325](https://github.com/woodpecker-ci/woodpecker/pull/5325)]
-
-### 📚 Documentation
-
-- chore(deps): lock file maintenance [[#5348](https://github.com/woodpecker-ci/woodpecker/pull/5348)]
-- fix(deps): update docs npm deps non-major [[#5340](https://github.com/woodpecker-ci/woodpecker/pull/5340)]
-- chore(deps): update docs npm deps non-major [[#5316](https://github.com/woodpecker-ci/woodpecker/pull/5316)]
 
 ### 📈 Enhancement
 
