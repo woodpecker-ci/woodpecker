@@ -11,7 +11,7 @@ require (
 	github.com/6543/logfile-open v1.2.1
 	github.com/adrg/xdg v0.5.3
 	github.com/bmatcuk/doublestar/v4 v4.9.0
-	github.com/cenkalti/backoff/v5 v5.0.2
+	github.com/cenkalti/backoff/v5 v5.0.3
 	github.com/charmbracelet/huh v0.7.0
 	github.com/charmbracelet/huh/spinner v0.0.0-20240327025511-ec643317aa10
 	github.com/containerd/errdefs v1.0.0
@@ -39,7 +39,7 @@ require (
 	github.com/joho/godotenv v1.5.1
 	github.com/kinbiko/jsonassert v1.2.0
 	github.com/lib/pq v1.10.9
-	github.com/mattn/go-sqlite3 v1.14.28
+	github.com/mattn/go-sqlite3 v1.14.29
 	github.com/moby/term v0.5.2
 	github.com/muesli/termenv v0.16.0
 	github.com/neticdk/go-bitbucket v1.0.3
