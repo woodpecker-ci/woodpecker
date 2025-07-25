@@ -39,7 +39,6 @@
 
 - fix(deps): update golang-packages [[#5356](https://github.com/woodpecker-ci/woodpecker/pull/5356)]
 - 📦 update web dependencies [[#5352](https://github.com/woodpecker-ci/woodpecker/pull/5352)]
-- 📦 Use stylus from GitHub [[#5353](https://github.com/woodpecker-ci/woodpecker/pull/5353)]
 - chore(config): migrate renovate config - autoclosed [[#5350](https://github.com/woodpecker-ci/woodpecker/pull/5350)]
 - fix(deps): update golang-packages [[#5347](https://github.com/woodpecker-ci/woodpecker/pull/5347)]
 - fix(deps): update golang-packages [[#5336](https://github.com/woodpecker-ci/woodpecker/pull/5336)]
