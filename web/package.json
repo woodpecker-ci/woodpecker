@@ -71,8 +71,7 @@
   },
   "pnpm": {
     "overrides": {
-      "semver@<7.5.2": ">=7.5.2",
-      "stylus": "github:stylus/stylus#0.57.0"
+      "semver@<7.5.2": ">=7.5.2"
     }
   }
 }
