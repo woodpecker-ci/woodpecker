@@ -37,6 +37,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update docker.io/mysql docker tag to v9.4.0 [[#5359](https://github.com/woodpecker-ci/woodpecker/pull/5359)]
 - chore(deps): update pre-commit hook golangci/golangci-lint to v2.3.0 [[#5360](https://github.com/woodpecker-ci/woodpecker/pull/5360)]
 - fix(deps): update golang-packages [[#5356](https://github.com/woodpecker-ci/woodpecker/pull/5356)]
 - 📦 update web dependencies [[#5352](https://github.com/woodpecker-ci/woodpecker/pull/5352)]
