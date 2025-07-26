@@ -67,6 +67,8 @@ type config struct {
 	PodAnnotations              map[string]string
 	PodAnnotationsAllowFromStep bool
 	PodNodeSelector             map[string]string
+	PodTolerationsAllowFromStep bool
+	PodTolerations              []Toleration
 	ImagePullSecretNames        []string
 	SecurityContext             SecurityContextConfig
 	NativeSecretsAllowFromStep  bool
@@ -107,6 +109,7 @@ func configFromCliContext(ctx context.Context) (*config, error) {
 				PodLabelsAllowFromStep:      c.Bool("backend-k8s-pod-labels-allow-from-step"),
 				PodAnnotations:              make(map[string]string), // just init empty map to prevent nil panic
 				PodAnnotationsAllowFromStep: c.Bool("backend-k8s-pod-annotations-allow-from-step"),
+				PodTolerationsAllowFromStep: c.Bool("backend-k8s-pod-tolerations-allow-from-step"),
 				PodNodeSelector:             make(map[string]string), // just init empty map to prevent nil panic
 				ImagePullSecretNames:        c.StringSlice("backend-k8s-pod-image-pull-secret-names"),
 				SecurityContext: SecurityContextConfig{
@@ -134,6 +137,13 @@ func configFromCliContext(ctx context.Context) (*config, error) {
 					return nil, err
 				}
 			}
+			if podTolerations := c.String("backend-k8s-pod-tolerations"); podTolerations != "" {
+				if err := yaml.Unmarshal([]byte(podTolerations), &config.PodTolerations); err != nil {
+					log.Error().Err(err).Msgf("could not unmarshal pod tolerations '%s'", podTolerations)
+					return nil, err
+				}
+			}
+
 			return &config, nil
 		}
 	}
