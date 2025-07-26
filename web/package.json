@@ -38,7 +38,7 @@
     "vue-router": "^4.5.1"
   },
   "devDependencies": {
-    "@antfu/eslint-config": "^4.0.0",
+    "@antfu/eslint-config": "^5.0.0",
     "@eslint/js": "^9.17.0",
     "@ianvs/prettier-plugin-sort-imports": "^4.5.1",
     "@intlify/eslint-plugin-vue-i18n": "4.0.1",
