@@ -36,6 +36,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update dependency simple-icons to v15.8.0 [[#5366](https://github.com/woodpecker-ci/woodpecker/pull/5366)]
 - fix(deps): update module github.com/bmatcuk/doublestar/v4 to v4.9.1 [[#5365](https://github.com/woodpecker-ci/woodpecker/pull/5365)]
 - fix(deps): update module github.com/google/go-github/v73 to v74 [[#5363](https://github.com/woodpecker-ci/woodpecker/pull/5363)]
 - chore(deps): update dependency @antfu/eslint-config to v5 [[#5362](https://github.com/woodpecker-ci/woodpecker/pull/5362)]
