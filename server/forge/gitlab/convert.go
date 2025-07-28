@@ -132,7 +132,7 @@ func convertMergeRequestHook(hook *gitlab.MergeEvent, req *http.Request) (int, *
 	pipeline.Branch = obj.SourceBranch
 	pipeline.Refspec = fmt.Sprintf("%s:%s", obj.SourceBranch, obj.TargetBranch)
 	pipeline.Author = hook.User.Username
-	pipeline.Avatar = hook.User.AvatarURL
+	pipeline.AuthorAvatar = hook.User.AvatarURL
 	pipeline.ForgeURL = obj.URL
 	pipeline.PullRequest = &model.PullRequest{
 		Labels:   convertLabels(hook.Labels),
@@ -175,7 +175,7 @@ func convertPushHook(hook *gitlab.PushEvent) (*model.Repo, *model.Pipeline, erro
 	pipeline.Branch = strings.TrimPrefix(hook.Ref, "refs/heads/")
 	pipeline.Ref = hook.Ref
 	pipeline.Author = hook.UserUsername
-	pipeline.Avatar = hook.UserAvatar
+	pipeline.AuthorAvatar = hook.UserAvatar
 
 	// assume a capacity of 4 changed files per commit
 	files := make([]string, 0, len(hook.Commits)*4)
@@ -228,7 +228,7 @@ func convertTagHook(hook *gitlab.TagEvent) (*model.Repo, *model.Pipeline, error)
 	pipeline.TagTitle = strings.TrimPrefix(hook.Ref, "refs/heads/")
 	pipeline.Ref = hook.Ref
 	pipeline.Author = hook.UserUsername
-	pipeline.Avatar = hook.UserAvatar
+	pipeline.AuthorAvatar = hook.UserAvatar
 	pipeline.ForgeURL = fmt.Sprintf("%s/-/tags/%s", repo.ForgeURL, strings.TrimPrefix(hook.Ref, "refs/tags/"))
 
 	// TODO does hook.Commits always contain hook.After?

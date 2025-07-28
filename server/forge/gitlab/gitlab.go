@@ -863,7 +863,7 @@ func (g *GitLab) loadReleaseAuthor(ctx context.Context, tmpRepo *model.Repo, pip
 	}
 
 	pipeline.Author = release.Author.Username
-	pipeline.Avatar = release.Author.AvatarURL
+	pipeline.AuthorAvatar = release.Author.AvatarURL
 
 	return pipeline, nil
 }

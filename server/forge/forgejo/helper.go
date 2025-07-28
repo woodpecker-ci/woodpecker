@@ -95,7 +95,7 @@ func pipelineFromPush(hook *pushHook) *model.Pipeline {
 		ForgeURL:     link,
 		Branch:       strings.TrimPrefix(hook.Ref, "refs/heads/"),
 		Author:       hook.Sender.UserName,
-		Avatar:       avatar,
+		AuthorAvatar: avatar,
 		ChangedFiles: getChangedFilesFromPushHook(hook),
 	}
 }
@@ -129,11 +129,11 @@ func pipelineFromTag(hook *pushHook) *model.Pipeline {
 		Commit: &model.Commit{
 			SHA: hook.Sha,
 		},
-		Ref:      fmt.Sprintf("refs/tags/%s", ref),
-		TagTitle: ref,
-		ForgeURL: fmt.Sprintf("%s/releases/tag/%s", hook.Repo.HTMLURL, ref),
-		Author:   hook.Sender.UserName,
-		Avatar:   avatar,
+		Ref:          fmt.Sprintf("refs/tags/%s", ref),
+		TagTitle:     ref,
+		ForgeURL:     fmt.Sprintf("%s/releases/tag/%s", hook.Repo.HTMLURL, ref),
+		Author:       hook.Sender.UserName,
+		AuthorAvatar: avatar,
 	}
 }
 
@@ -150,13 +150,13 @@ func pipelineFromPullRequest(hook *pullRequestHook) *model.Pipeline {
 	}
 
 	pipeline := &model.Pipeline{
-		Event:    event,
-		Commit:   &model.Commit{SHA: hook.PullRequest.Head.Sha},
-		ForgeURL: hook.PullRequest.HTMLURL,
-		Ref:      fmt.Sprintf("refs/pull/%d/head", hook.Number),
-		Branch:   hook.PullRequest.Base.Ref,
-		Author:   hook.Sender.UserName,
-		Avatar:   avatar,
+		Event:        event,
+		Commit:       &model.Commit{SHA: hook.PullRequest.Head.Sha},
+		ForgeURL:     hook.PullRequest.HTMLURL,
+		Ref:          fmt.Sprintf("refs/pull/%d/head", hook.Number),
+		Branch:       hook.PullRequest.Base.Ref,
+		Author:       hook.Sender.UserName,
+		AuthorAvatar: avatar,
 		Refspec: fmt.Sprintf("%s:%s",
 			hook.PullRequest.Head.Ref,
 			hook.PullRequest.Base.Ref,
@@ -182,9 +182,9 @@ func pipelineFromRelease(hook *releaseHook) *model.Pipeline {
 			Title:        hook.Release.Title,
 			IsPrerelease: hook.Release.IsPrerelease,
 		},
-		TagTitle: hook.Release.TagName,
-		Author:   hook.Sender.UserName,
-		Avatar:   avatar,
+		TagTitle:     hook.Release.TagName,
+		Author:       hook.Sender.UserName,
+		AuthorAvatar: avatar,
 	}
 }
 

@@ -4908,6 +4908,11 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "author_email": {
+                    "description": "deprecated, use commit.author.email instead",
+                    "type": "string"
+                },
+                "avatar": {
+                    "description": "deprecated, use author_avatar instead",
                     "type": "string"
                 },
                 "branch": {
@@ -4920,6 +4925,7 @@ const docTemplate = `{
                     }
                 },
                 "commit": {
+                    "description": "deprecated, use commit_pipeline.sha instead",
                     "type": "string"
                 },
                 "commit_pipeline": {
@@ -4934,12 +4940,15 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "cron": {
+                    "description": "name of the cron job",
                     "type": "string"
                 },
                 "deploy_task": {
+                    "description": "deprecated, use deployment.task instead",
                     "type": "string"
                 },
                 "deploy_to": {
+                    "description": "deprecated, use deployment.target instead",
                     "type": "string"
                 },
                 "deployment": {
@@ -4961,15 +4970,18 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "from_fork": {
+                    "description": "deprecated, use pull_request.from_fork instead",
                     "type": "boolean"
                 },
                 "id": {
                     "type": "integer"
                 },
                 "is_prerelease": {
+                    "description": "deprecated, use release.is_prerelease instead",
                     "type": "boolean"
                 },
                 "message": {
+                    "description": "deprecated, use commit.message (pull_request, pull_request_closed \u0026 push), deployment.description, cron (cron) or tag_title (tag) instead",
                     "type": "string"
                 },
                 "number": {
@@ -4979,6 +4991,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "pr_labels": {
+                    "description": "deprecated, use pull_request.labels instead",
                     "type": "array",
                     "items": {
                         "type": "string"
@@ -4997,12 +5010,14 @@ const docTemplate = `{
                     "$ref": "#/definitions/model.Release"
                 },
                 "reviewed": {
+                    "description": "timestamp of the review",
                     "type": "integer"
                 },
                 "reviewed_by": {
                     "type": "string"
                 },
                 "sender": {
+                    "description": "deprecated, use author instead",
                     "type": "string"
                 },
                 "started": {
@@ -5015,9 +5030,11 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "timestamp": {
+                    "description": "deprecated, use created instead",
                     "type": "integer"
                 },
                 "title": {
+                    "description": "deprecated, use pull_request.title (pull_request \u0026 pull_request_closed) or deployment.description",
                     "type": "string"
                 },
                 "updated": {
@@ -5926,6 +5943,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "cron": {
+                    "description": "name of the cron job",
                     "type": "string"
                 },
                 "deployment": {
@@ -5968,6 +5986,7 @@ const docTemplate = `{
                     "$ref": "#/definitions/model.Release"
                 },
                 "reviewed": {
+                    "description": "timestamp of the review",
                     "type": "integer"
                 },
                 "reviewed_by": {

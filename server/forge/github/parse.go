@@ -95,7 +95,7 @@ func parsePushHook(hook *github.PushEvent) (*model.Repo, *model.Pipeline) {
 		Ref:          hook.GetRef(),
 		ForgeURL:     hook.GetHeadCommit().GetURL(),
 		Branch:       strings.ReplaceAll(hook.GetRef(), "refs/heads/", ""),
-		Avatar:       hook.GetSender().GetAvatarURL(),
+		AuthorAvatar: hook.GetSender().GetAvatarURL(),
 		Author:       hook.GetSender().GetLogin(),
 		ChangedFiles: getChangedFilesFromCommits(hook.Commits),
 	}
@@ -121,11 +121,11 @@ func parseDeployHook(hook *github.DeploymentEvent) (*model.Repo, *model.Pipeline
 		Commit: &model.Commit{
 			SHA: hook.GetDeployment().GetSHA(),
 		},
-		ForgeURL: hook.GetDeployment().GetURL(),
-		Ref:      hook.GetDeployment().GetRef(),
-		Branch:   hook.GetDeployment().GetRef(),
-		Avatar:   hook.GetSender().GetAvatarURL(),
-		Author:   hook.GetSender().GetLogin(),
+		ForgeURL:     hook.GetDeployment().GetURL(),
+		Ref:          hook.GetDeployment().GetRef(),
+		Branch:       hook.GetDeployment().GetRef(),
+		AuthorAvatar: hook.GetSender().GetAvatarURL(),
+		Author:       hook.GetSender().GetLogin(),
 		Deployment: &model.Deployment{
 			Target:      hook.GetDeployment().GetEnvironment(),
 			Task:        hook.GetDeployment().GetTask(),
@@ -162,11 +162,11 @@ func parsePullHook(hook *github.PullRequestEvent, merge bool) (*github.PullReque
 		Commit: &model.Commit{
 			SHA: hook.GetPullRequest().GetHead().GetSHA(),
 		},
-		ForgeURL: hook.GetPullRequest().GetHTMLURL(),
-		Ref:      fmt.Sprintf(headRefs, hook.GetPullRequest().GetNumber()),
-		Branch:   hook.GetPullRequest().GetBase().GetRef(),
-		Avatar:   hook.GetSender().GetAvatarURL(),
-		Author:   hook.GetSender().GetLogin(),
+		ForgeURL:     hook.GetPullRequest().GetHTMLURL(),
+		Ref:          fmt.Sprintf(headRefs, hook.GetPullRequest().GetNumber()),
+		Branch:       hook.GetPullRequest().GetBase().GetRef(),
+		AuthorAvatar: hook.GetSender().GetAvatarURL(),
+		Author:       hook.GetSender().GetLogin(),
 		Refspec: fmt.Sprintf(refSpec,
 			hook.GetPullRequest().GetHead().GetRef(),
 			hook.GetPullRequest().GetBase().GetRef(),
@@ -201,9 +201,9 @@ func parseReleaseHook(hook *github.ReleaseEvent) (*model.Repo, *model.Pipeline) 
 			Title:        name,
 			IsPrerelease: hook.GetRelease().GetPrerelease(),
 		},
-		TagTitle: hook.GetRelease().GetTagName(),
-		Avatar:   hook.GetSender().GetAvatarURL(),
-		Author:   hook.GetSender().GetLogin(),
+		TagTitle:     hook.GetRelease().GetTagName(),
+		AuthorAvatar: hook.GetSender().GetAvatarURL(),
+		Author:       hook.GetSender().GetLogin(),
 	}
 
 	return convertRepo(hook.GetRepo()), pipeline

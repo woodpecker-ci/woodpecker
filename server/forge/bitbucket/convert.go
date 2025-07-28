@@ -177,9 +177,9 @@ func convertPullHook(from *internal.PullRequestHook) *model.Pipeline {
 		ForgeURL: from.PullRequest.Links.HTML.Href,
 		Branch:   from.PullRequest.Source.Branch.Name,
 
-		Author:      from.Actor.Login,
-		Avatar:      from.Actor.Links.Avatar.Href,
-		PullRequest: convertPullRequest(&from.PullRequest),
+		Author:       from.Actor.Login,
+		AuthorAvatar: from.Actor.Links.Avatar.Href,
+		PullRequest:  convertPullRequest(&from.PullRequest),
 	}
 
 	if from.PullRequest.State == stateClosed {
@@ -203,10 +203,10 @@ func convertPushHook(hook *internal.PushHook, change *internal.Change) *model.Pi
 			Message:  change.New.Target.Message,
 			Author:   convertCommitAuthor(change.New.Target.Author.Raw),
 		},
-		ForgeURL: change.New.Target.Links.HTML.Href,
-		Branch:   change.New.Name,
-		Author:   hook.Actor.Login,
-		Avatar:   hook.Actor.Links.Avatar.Href,
+		ForgeURL:     change.New.Target.Links.HTML.Href,
+		Branch:       change.New.Name,
+		Author:       hook.Actor.Login,
+		AuthorAvatar: hook.Actor.Links.Avatar.Href,
 	}
 	switch change.New.Type {
 	case "tag", "annotated_tag", "bookmark":

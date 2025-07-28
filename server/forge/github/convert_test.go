@@ -196,7 +196,7 @@ func Test_parsePullHook(t *testing.T) {
 	assert.Equal(t, *from.PullRequest.Head.SHA, pipeline.Commit.SHA)
 	assert.Equal(t, *from.PullRequest.Title, pipeline.PullRequest.Title)
 	assert.Equal(t, *from.PullRequest.User.Login, pipeline.Author)
-	assert.Equal(t, *from.PullRequest.User.AvatarURL, pipeline.Avatar)
+	assert.Equal(t, *from.PullRequest.User.AvatarURL, pipeline.AuthorAvatar)
 	assert.Equal(t, *from.Sender.Login, pipeline.Author)
 }
 
@@ -220,7 +220,7 @@ func Test_parseDeployHook(t *testing.T) {
 	assert.Equal(t, *from.Deployment.Description, pipeline.Deployment.Description)
 	assert.Equal(t, *from.Deployment.URL, pipeline.ForgeURL)
 	assert.Equal(t, *from.Sender.Login, pipeline.Author)
-	assert.Equal(t, *from.Sender.AvatarURL, pipeline.Avatar)
+	assert.Equal(t, *from.Sender.AvatarURL, pipeline.AuthorAvatar)
 }
 
 func Test_parsePushHook(t *testing.T) {
@@ -243,7 +243,7 @@ func Test_parsePushHook(t *testing.T) {
 		assert.Equal(t, from.GetHeadCommit().GetMessage(), pipeline.Commit.Message)
 		assert.Equal(t, from.GetHeadCommit().GetURL(), pipeline.ForgeURL)
 		assert.Equal(t, from.GetSender().GetLogin(), pipeline.Author)
-		assert.Equal(t, from.GetSender().GetAvatarURL(), pipeline.Avatar)
+		assert.Equal(t, from.GetSender().GetAvatarURL(), pipeline.AuthorAvatar)
 		assert.Equal(t, from.GetHeadCommit().GetAuthor().GetEmail(), pipeline.Commit.Author.Email)
 	})
 
