@@ -225,3 +225,55 @@ Example variable substitution strips `v` prefix from `v.1.0.0`:
      settings:
 +      tags: ${CI_COMMIT_TAG##v}
 ```
+
+## Forge specific environments
+
+For the `pull_request_metadata` event, the exact reason a metadata change was detected is passe through in `CI_PIPELINE_EVENT_REASON`.
+
+### GitHub
+
+:::Critical
+TODO
+:::
+
+### Gitea
+
+| NAME            | Description                                       |
+|-----------------|---------------------------------------------------|
+|assigned         | user assigned                                     |
+|demilestoned     | milestone removed                                 |
+|edited           | title or description edited                       |
+|label_cleared    | all labels removed                                |
+|label_updated    | new label added / label changed                   |
+|milestoned       | milestone added / changed                         |
+|review_requested | new review was requested                          |
+|reviewed         | review was done (accepted / commented / rejected) |
+|unassigned       | all assignees removed                             |
+
+### Forgejo
+
+| NAME            | Description                                       |
+|-----------------|---------------------------------------------------|
+|assigned         | user assigned                                     |
+|demilestoned     | milestone removed                                 |
+|edited           | title or description edited                       |
+|label_cleared    | all labels removed                                |
+|label_updated    | new label added / label changed                   |
+|milestoned       | milestone added / changed                         |
+|review_requested | new review was requested                          |
+|reviewed         | review was done (accepted / commented / rejected) |
+|unassigned       | all assignees removed                             |
+
+### GitLab
+
+:::Critical
+TODO
+:::
+
+### Bitbucket
+
+[Not supported atm](https://github.com/woodpecker-ci/woodpecker/pull/5214)
+
+### Bitbucket Datacenter
+
+[Not supported atm](https://github.com/woodpecker-ci/woodpecker/pull/5214)
