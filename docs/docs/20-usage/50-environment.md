@@ -221,5 +221,5 @@ Example variable substitution strips `v` prefix from `v.1.0.0`:
    - name: s3
      image: woodpeckerci/plugin-s3
      settings:
-+      tags: /target/${CI_COMMIT_TAG##v}
++      target: /target/${CI_COMMIT_TAG##v}
 ```
