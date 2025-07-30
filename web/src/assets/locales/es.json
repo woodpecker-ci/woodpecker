@@ -455,8 +455,13 @@
             }
         }
     },
-    "repos": "Repos",
-    "repositories": "Repositorios",
+    "repos": "Repositorios",
+    "repositories": {
+        "title": "Repositorios",
+        "all": {
+            "title": "Todos los repositorios"
+        }
+    },
     "running_version": "Está ejecutando Woodpecker {0}",
     "search": "Buscar…",
     "time": {
@@ -525,9 +530,9 @@
         }
     },
     "username": "Nombre de usuario",
-    "welcome": "Bienvenidos a Woodpecker",
-    "empty_list": "¡No {entidad} encontrado!",
+    "welcome": "Bienvenido a Woodpecker",
+    "empty_list": "¡No se ha encontrado {entidad}!",
     "org_level_secret": "secreto de organización",
     "global_level_secret": "secreto global",
-    "login_with": "Inicia sesión con {forge}"
+    "login_with": "Iniciar sesión con {forge}"
 }
