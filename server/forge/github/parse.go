@@ -159,12 +159,6 @@ func parsePullHook(hook *github.PullRequestEvent, merge bool) (*github.PullReque
 		eventAction = hook.GetAction()
 	}
 
-	// TODO: check if we need it
-	// if pr.Action == actionLabelCleared {
-	// 	// all other actions return the state of labels after the actions where done ... so we should too
-	// 	pipeline.PullRequestLabels = []string{}
-	// }
-
 	fromFork := hook.GetPullRequest().GetHead().GetRepo().GetID() != hook.GetPullRequest().GetBase().GetRepo().GetID()
 
 	pipeline := &model.Pipeline{
