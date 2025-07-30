@@ -211,7 +211,7 @@ Example variable substitution with substring:
    - name: s3
      image: woodpeckerci/plugin-s3
      settings:
-+      tags: /target/${CI_COMMIT_SHA:0:8}
++      target: /target/${CI_COMMIT_SHA:0:8}
 ```
 
 Example variable substitution strips `v` prefix from `v.1.0.0`:
