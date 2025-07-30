@@ -35,6 +35,11 @@ var (
 		"User-Agent":     []string{"GitLab/14.3.0"},
 		"X-Gitlab-Event": []string{"Release Hook"},
 	}
+	MergeRequestHookHeaders = http.Header{
+		"Content-Type":   []string{"application/json"},
+		"User-Agent":     []string{"GitLab/18.3.0-pre"},
+		"X-Gitlab-Event": []string{"Merge Request Hook"},
+	}
 )
 
 // HookPush is payload of a push event

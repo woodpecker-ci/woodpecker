@@ -30,6 +30,11 @@ import (
 const (
 	mergeRefs               = "refs/merge-requests/%d/head" // merge request merged with base
 	VisibilityLevelInternal = 10
+
+	stateOpen = "open"
+
+	actionClose = "close"
+	actionMerge = "merge"
 )
 
 func (g *GitLab) convertGitLabRepo(_repo *gitlab.Project, projectMember *gitlab.ProjectMember) (*model.Repo, error) {
@@ -71,6 +76,17 @@ func convertMergeRequestHook(hook *gitlab.MergeEvent, req *http.Request) (int, *
 	source := hook.ObjectAttributes.Source
 	obj := hook.ObjectAttributes
 
+	// if some git action happened then OldRev != "" -> it's a normal pull_request trigger
+	// https://docs.gitlab.com/ee/user/project/integrations/webhook_events.html#merge-request-events
+	if obj.OldRev != "" && obj.State == stateOpen {
+		pipeline.Event = model.EventPull
+	} else if obj.Action == actionClose || obj.Action == actionMerge {
+		pipeline.Event = model.EventPullClosed
+	} else {
+		pipeline.Event = model.EventPullMetadata
+		pipeline.EventReason = obj.Action
+	}
+
 	switch {
 	case target == nil && source == nil:
 		return 0, nil, nil, fmt.Errorf("target and source keys expected in merge request hook")
@@ -110,15 +126,6 @@ func convertMergeRequestHook(hook *gitlab.MergeEvent, req *http.Request) (int, *
 
 	if target.AvatarURL != "" {
 		repo.Avatar = target.AvatarURL
-	}
-
-	pipeline.Event = model.EventPull
-	if obj.State == "closed" || obj.State == "merged" {
-		pipeline.Event = model.EventPullClosed
-	}
-	if obj.State == "updated" {
-		pipeline.Event = model.EventPullMetadata
-		pipeline.EventReason = obj.State
 	}
 
 	lastCommit := obj.LastCommit

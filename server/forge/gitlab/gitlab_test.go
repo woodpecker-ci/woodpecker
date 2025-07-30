@@ -122,182 +122,205 @@ func Test_GitLab(t *testing.T) {
 		assert.NoError(t, err)
 	})
 
-	// Test hook method
-	t.Run("parse push hook", func(t *testing.T) {
-		req, _ := http.NewRequest(
-			fixtures.ServiceHookMethod,
-			fixtures.ServiceHookURL.String(),
-			bytes.NewReader(fixtures.HookPush),
-		)
-		req.Header = fixtures.ServiceHookHeaders
+	t.Run("test parse webhook", func(t *testing.T) {
+		// Test hook method
+		t.Run("parse push hook", func(t *testing.T) {
+			req, _ := http.NewRequest(
+				fixtures.ServiceHookMethod,
+				fixtures.ServiceHookURL.String(),
+				bytes.NewReader(fixtures.HookPush),
+			)
+			req.Header = fixtures.ServiceHookHeaders
 
-		hookRepo, pipeline, err := client.Hook(ctx, req)
-		assert.NoError(t, err)
-		if assert.NotNil(t, hookRepo) && assert.NotNil(t, pipeline) {
-			assert.Equal(t, pipeline.Event, model.EventPush)
-			assert.Equal(t, "test", hookRepo.Owner)
-			assert.Equal(t, "woodpecker", hookRepo.Name)
-			assert.Equal(t, "http://example.com/uploads/project/avatar/555/Outh-20-Logo.jpg", hookRepo.Avatar)
-			assert.Equal(t, "develop", hookRepo.Branch)
-			assert.Equal(t, "refs/heads/main", pipeline.Ref)
-			assert.Equal(t, []string{"cmd/cli/main.go"}, pipeline.ChangedFiles)
-			assert.Equal(t, model.EventPush, pipeline.Event)
-		}
-	})
+			hookRepo, pipeline, err := client.Hook(ctx, req)
+			assert.NoError(t, err)
+			if assert.NotNil(t, hookRepo) && assert.NotNil(t, pipeline) {
+				assert.Equal(t, pipeline.Event, model.EventPush)
+				assert.Equal(t, "test", hookRepo.Owner)
+				assert.Equal(t, "woodpecker", hookRepo.Name)
+				assert.Equal(t, "http://example.com/uploads/project/avatar/555/Outh-20-Logo.jpg", hookRepo.Avatar)
+				assert.Equal(t, "develop", hookRepo.Branch)
+				assert.Equal(t, "refs/heads/main", pipeline.Ref)
+				assert.Equal(t, []string{"cmd/cli/main.go"}, pipeline.ChangedFiles)
+				assert.Equal(t, model.EventPush, pipeline.Event)
+			}
+		})
 
-	t.Run("tag push hook", func(t *testing.T) {
-		req, _ := http.NewRequest(
-			fixtures.ServiceHookMethod,
-			fixtures.ServiceHookURL.String(),
-			bytes.NewReader(fixtures.HookTag),
-		)
-		req.Header = fixtures.ServiceHookHeaders
+		t.Run("tag push hook", func(t *testing.T) {
+			req, _ := http.NewRequest(
+				fixtures.ServiceHookMethod,
+				fixtures.ServiceHookURL.String(),
+				bytes.NewReader(fixtures.HookTag),
+			)
+			req.Header = fixtures.ServiceHookHeaders
 
-		hookRepo, pipeline, err := client.Hook(ctx, req)
-		assert.NoError(t, err)
-		if assert.NotNil(t, hookRepo) && assert.NotNil(t, pipeline) {
-			assert.Equal(t, "test", hookRepo.Owner)
-			assert.Equal(t, "woodpecker", hookRepo.Name)
-			assert.Equal(t, "http://example.com/uploads/project/avatar/555/Outh-20-Logo.jpg", hookRepo.Avatar)
-			assert.Equal(t, "develop", hookRepo.Branch)
-			assert.Equal(t, "refs/tags/v22", pipeline.Ref)
-			assert.Len(t, pipeline.ChangedFiles, 0)
-			assert.Equal(t, model.EventTag, pipeline.Event)
-		}
-	})
+			hookRepo, pipeline, err := client.Hook(ctx, req)
+			assert.NoError(t, err)
+			if assert.NotNil(t, hookRepo) && assert.NotNil(t, pipeline) {
+				assert.Equal(t, "test", hookRepo.Owner)
+				assert.Equal(t, "woodpecker", hookRepo.Name)
+				assert.Equal(t, "http://example.com/uploads/project/avatar/555/Outh-20-Logo.jpg", hookRepo.Avatar)
+				assert.Equal(t, "develop", hookRepo.Branch)
+				assert.Equal(t, "refs/tags/v22", pipeline.Ref)
+				assert.Len(t, pipeline.ChangedFiles, 0)
+				assert.Equal(t, model.EventTag, pipeline.Event)
+			}
+		})
 
-	t.Run("merge request hook", func(t *testing.T) {
-		req, _ := http.NewRequest(
-			fixtures.ServiceHookMethod,
-			fixtures.ServiceHookURL.String(),
-			bytes.NewReader(fixtures.HookPullRequest),
-		)
-		req.Header = fixtures.ServiceHookHeaders
+		t.Run("merge request hook", func(t *testing.T) {
+			req, _ := http.NewRequest(
+				fixtures.ServiceHookMethod,
+				fixtures.ServiceHookURL.String(),
+				bytes.NewReader(fixtures.HookPullRequest),
+			)
+			req.Header = fixtures.ServiceHookHeaders
 
-		// TODO: insert fake store into context to retrieve user & repo, this will activate fetching of ChangedFiles
-		hookRepo, pipeline, err := client.Hook(ctx, req)
-		assert.NoError(t, err)
-		if assert.NotNil(t, hookRepo) && assert.NotNil(t, pipeline) {
-			assert.Equal(t, "http://example.com/uploads/project/avatar/555/Outh-20-Logo.jpg", hookRepo.Avatar)
-			assert.Equal(t, "main", hookRepo.Branch)
-			assert.Equal(t, "anbraten", hookRepo.Owner)
-			assert.Equal(t, "woodpecker", hookRepo.Name)
-			assert.Equal(t, "Update client.go 🎉", pipeline.Title)
-			assert.Len(t, pipeline.ChangedFiles, 0) // see L217
-			assert.Equal(t, model.EventPull, pipeline.Event)
-		}
-	})
+			// TODO: insert fake store into context to retrieve user & repo, this will activate fetching of ChangedFiles
+			hookRepo, pipeline, err := client.Hook(ctx, req)
+			assert.NoError(t, err)
+			if assert.NotNil(t, hookRepo) && assert.NotNil(t, pipeline) {
+				assert.Equal(t, "http://example.com/uploads/project/avatar/555/Outh-20-Logo.jpg", hookRepo.Avatar)
+				assert.Equal(t, "main", hookRepo.Branch)
+				assert.Equal(t, "anbraten", hookRepo.Owner)
+				assert.Equal(t, "woodpecker", hookRepo.Name)
+				assert.Equal(t, "Update client.go 🎉", pipeline.Title)
+				assert.Len(t, pipeline.ChangedFiles, 0) // see L217
+				assert.Equal(t, model.EventPull, pipeline.Event)
+			}
+		})
 
-	t.Run("ignore merge request hook without changes", func(t *testing.T) {
-		req, _ := http.NewRequest(
-			fixtures.ServiceHookMethod,
-			fixtures.ServiceHookURL.String(),
-			bytes.NewReader(fixtures.HookPullRequestWithoutChanges),
-		)
-		req.Header = fixtures.ServiceHookHeaders
+		t.Run("ignore merge request hook without changes", func(t *testing.T) {
+			req, _ := http.NewRequest(
+				fixtures.ServiceHookMethod,
+				fixtures.ServiceHookURL.String(),
+				bytes.NewReader(fixtures.HookPullRequestWithoutChanges),
+			)
+			req.Header = fixtures.ServiceHookHeaders
 
-		// TODO: insert fake store into context to retrieve user & repo, this will activate fetching of ChangedFiles
-		hookRepo, pipeline, err := client.Hook(ctx, req)
-		assert.Nil(t, hookRepo)
-		assert.Nil(t, pipeline)
-		assert.ErrorIs(t, err, &types.ErrIgnoreEvent{})
-	})
+			// TODO: insert fake store into context to retrieve user & repo, this will activate fetching of ChangedFiles
+			hookRepo, pipeline, err := client.Hook(ctx, req)
+			assert.Nil(t, hookRepo)
+			assert.Nil(t, pipeline)
+			assert.ErrorIs(t, err, &types.ErrIgnoreEvent{})
+		})
 
-	t.Run("ignore merge request approval", func(t *testing.T) {
-		req, _ := http.NewRequest(
-			fixtures.ServiceHookMethod,
-			fixtures.ServiceHookURL.String(),
-			bytes.NewReader(fixtures.HookPullRequestApproved),
-		)
-		req.Header = fixtures.ServiceHookHeaders
+		t.Run("ignore merge request approval", func(t *testing.T) {
+			req, _ := http.NewRequest(
+				fixtures.ServiceHookMethod,
+				fixtures.ServiceHookURL.String(),
+				bytes.NewReader(fixtures.HookPullRequestApproved),
+			)
+			req.Header = fixtures.ServiceHookHeaders
 
-		// TODO: insert fake store into context to retrieve user & repo, this will activate fetching of ChangedFiles
-		hookRepo, pipeline, err := client.Hook(ctx, req)
-		assert.Nil(t, hookRepo)
-		assert.Nil(t, pipeline)
-		assert.ErrorIs(t, err, &types.ErrIgnoreEvent{})
-	})
+			// TODO: insert fake store into context to retrieve user & repo, this will activate fetching of ChangedFiles
+			hookRepo, pipeline, err := client.Hook(ctx, req)
+			assert.Nil(t, hookRepo)
+			assert.Nil(t, pipeline)
+			assert.ErrorIs(t, err, &types.ErrIgnoreEvent{})
+		})
 
-	t.Run("parse merge request closed", func(t *testing.T) {
-		req, _ := http.NewRequest(
-			fixtures.ServiceHookMethod,
-			fixtures.ServiceHookURL.String(),
-			bytes.NewReader(fixtures.HookPullRequestClosed),
-		)
-		req.Header = fixtures.ServiceHookHeaders
+		t.Run("parse merge request closed", func(t *testing.T) {
+			req, _ := http.NewRequest(
+				fixtures.ServiceHookMethod,
+				fixtures.ServiceHookURL.String(),
+				bytes.NewReader(fixtures.HookPullRequestClosed),
+			)
+			req.Header = fixtures.ServiceHookHeaders
 
-		// TODO: insert fake store into context to retrieve user & repo, this will activate fetching of ChangedFiles
-		hookRepo, pipeline, err := client.Hook(ctx, req)
-		assert.NoError(t, err)
-		if assert.NotNil(t, hookRepo) && assert.NotNil(t, pipeline) {
-			assert.Equal(t, "main", hookRepo.Branch)
-			assert.Equal(t, "anbraten", hookRepo.Owner)
-			assert.Equal(t, "woodpecker-test", hookRepo.Name)
-			assert.Equal(t, "Add new file", pipeline.Title)
-			assert.Len(t, pipeline.ChangedFiles, 0) // see L217
-			assert.Equal(t, model.EventPullClosed, pipeline.Event)
-		}
-	})
+			// TODO: insert fake store into context to retrieve user & repo, this will activate fetching of ChangedFiles
+			hookRepo, pipeline, err := client.Hook(ctx, req)
+			assert.NoError(t, err)
+			if assert.NotNil(t, hookRepo) && assert.NotNil(t, pipeline) {
+				assert.Equal(t, "main", hookRepo.Branch)
+				assert.Equal(t, "anbraten", hookRepo.Owner)
+				assert.Equal(t, "woodpecker-test", hookRepo.Name)
+				assert.Equal(t, "Add new file", pipeline.Title)
+				assert.Len(t, pipeline.ChangedFiles, 0) // see L217
+				assert.Equal(t, model.EventPullClosed, pipeline.Event)
+			}
+		})
 
-	t.Run("parse merge request merged", func(t *testing.T) {
-		req, _ := http.NewRequest(
-			fixtures.ServiceHookMethod,
-			fixtures.ServiceHookURL.String(),
-			bytes.NewReader(fixtures.HookPullRequestMerged),
-		)
-		req.Header = fixtures.ServiceHookHeaders
+		t.Run("parse merge request merged", func(t *testing.T) {
+			req, _ := http.NewRequest(
+				fixtures.ServiceHookMethod,
+				fixtures.ServiceHookURL.String(),
+				bytes.NewReader(fixtures.HookPullRequestMerged),
+			)
+			req.Header = fixtures.ServiceHookHeaders
 
-		// TODO: insert fake store into context to retrieve user & repo, this will activate fetching of ChangedFiles
-		hookRepo, pipeline, err := client.Hook(ctx, req)
-		assert.NoError(t, err)
-		if assert.NotNil(t, hookRepo) && assert.NotNil(t, pipeline) {
-			assert.Equal(t, "main", hookRepo.Branch)
-			assert.Equal(t, "anbraten", hookRepo.Owner)
-			assert.Equal(t, "woodpecker-test", hookRepo.Name)
-			assert.Equal(t, "Add new file", pipeline.Title)
-			assert.Len(t, pipeline.ChangedFiles, 0) // see L217
-			assert.Equal(t, model.EventPullClosed, pipeline.Event)
-		}
-	})
+			// TODO: insert fake store into context to retrieve user & repo, this will activate fetching of ChangedFiles
+			hookRepo, pipeline, err := client.Hook(ctx, req)
+			assert.NoError(t, err)
+			if assert.NotNil(t, hookRepo) && assert.NotNil(t, pipeline) {
+				assert.Equal(t, "main", hookRepo.Branch)
+				assert.Equal(t, "anbraten", hookRepo.Owner)
+				assert.Equal(t, "woodpecker-test", hookRepo.Name)
+				assert.Equal(t, "Add new file", pipeline.Title)
+				assert.Len(t, pipeline.ChangedFiles, 0) // see L217
+				assert.Equal(t, model.EventPullClosed, pipeline.Event)
+			}
+		})
 
-	t.Run("parse merge request edited", func(t *testing.T) {
-		req, _ := http.NewRequest(
-			fixtures.ServiceHookMethod,
-			fixtures.ServiceHookURL.String(),
-			bytes.NewReader(fixtures.HookPullRequestEdited),
-		)
-		req.Header = fixtures.ServiceHookHeaders
+		t.Run("parse merge request edited", func(t *testing.T) {
+			req, _ := http.NewRequest(
+				fixtures.ServiceHookMethod,
+				fixtures.ServiceHookURL.String(),
+				bytes.NewReader(fixtures.HookPullRequestEdited),
+			)
+			req.Header = fixtures.MergeRequestHookHeaders
 
-		// TODO: insert fake store into context to retrieve user & repo, this will activate fetching of ChangedFiles
-		hookRepo, pipeline, err := client.Hook(ctx, req)
-		assert.NoError(t, err)
-		if assert.NotNil(t, hookRepo) && assert.NotNil(t, pipeline) {
-			assert.Equal(t, "main", hookRepo.Branch)
-			assert.Equal(t, "anbraten", hookRepo.Owner)
-			assert.Equal(t, "woodpecker-test", hookRepo.Name)
-			assert.Equal(t, "Add new file", pipeline.Title)
-			assert.Len(t, pipeline.ChangedFiles, 0) // see L217
-			assert.Equal(t, model.EventPullMetadata, pipeline.Event)
-			assert.Equal(t, "updated", pipeline.EventReason)
-		}
-	})
+			// TODO: insert fake store into context to retrieve user & repo, this will activate fetching of ChangedFiles
+			hookRepo, pipeline, err := client.Hook(ctx, req)
+			assert.NoError(t, err)
+			if assert.NotNil(t, hookRepo) && assert.NotNil(t, pipeline) {
+				assert.Equal(t, "main", hookRepo.Branch)
+				assert.Equal(t, "anbraten", hookRepo.Owner)
+				assert.Equal(t, "woodpecker-test", hookRepo.Name)
+				assert.Equal(t, "Add new file", pipeline.Title)
+				assert.Len(t, pipeline.ChangedFiles, 0) // see L217
+				assert.Equal(t, model.EventPullMetadata, pipeline.Event)
+				assert.Equal(t, "updated", pipeline.EventReason)
+			}
+		})
 
-	t.Run("release hook", func(t *testing.T) {
-		req, _ := http.NewRequest(
-			fixtures.ServiceHookMethod,
-			fixtures.ServiceHookURL.String(),
-			bytes.NewReader(fixtures.WebhookReleaseBody),
-		)
-		req.Header = fixtures.ReleaseHookHeaders
+		t.Run("release hook", func(t *testing.T) {
+			req, _ := http.NewRequest(
+				fixtures.ServiceHookMethod,
+				fixtures.ServiceHookURL.String(),
+				bytes.NewReader(fixtures.WebhookReleaseBody),
+			)
+			req.Header = fixtures.ReleaseHookHeaders
 
-		hookRepo, pipeline, err := client.Hook(ctx, req)
-		assert.NoError(t, err)
-		if assert.NotNil(t, hookRepo) && assert.NotNil(t, pipeline) {
-			assert.Equal(t, "refs/tags/0.0.2", pipeline.Ref)
-			assert.Equal(t, "ci", hookRepo.Name)
-			assert.Equal(t, "created release Awesome version 0.0.2", pipeline.Message)
-			assert.Equal(t, model.EventRelease, pipeline.Event)
-		}
+			hookRepo, pipeline, err := client.Hook(ctx, req)
+			assert.NoError(t, err)
+			if assert.NotNil(t, hookRepo) && assert.NotNil(t, pipeline) {
+				assert.Equal(t, "refs/tags/0.0.2", pipeline.Ref)
+				assert.Equal(t, "ci", hookRepo.Name)
+				assert.Equal(t, "created release Awesome version 0.0.2", pipeline.Message)
+				assert.Equal(t, model.EventRelease, pipeline.Event)
+			}
+		})
+
+		t.Run("merge request review acknowledgment", func(t *testing.T) {
+			req, _ := http.NewRequest(
+				fixtures.ServiceHookMethod,
+				fixtures.ServiceHookURL.String(),
+				bytes.NewReader(fixtures.HookPullRequestReviewAck),
+			)
+			req.Header = fixtures.MergeRequestHookHeaders
+
+			hookRepo, pipeline, err := client.Hook(ctx, req)
+			assert.NoError(t, err)
+			if assert.NotNil(t, hookRepo) && assert.NotNil(t, pipeline) {
+				assert.Equal(t, "main", hookRepo.Branch)
+				assert.Equal(t, "demoaccount2-commits-group", hookRepo.Owner)
+				assert.Equal(t, "test_ci_tmp", hookRepo.Name)
+				assert.Equal(t, "Some ned more AAAA", pipeline.Title)
+				assert.Len(t, pipeline.ChangedFiles, 0)
+				assert.Equal(t, model.EventPullMetadata, pipeline.Event)
+				assert.Equal(t, "approved", pipeline.EventReason)
+			}
+		})
 	})
 }
 
