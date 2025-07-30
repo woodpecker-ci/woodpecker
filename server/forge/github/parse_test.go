@@ -258,7 +258,7 @@ func Test_parseHook(t *testing.T) {
 	})
 
 	t.Run("pull request labeled", func(t *testing.T) {
-		req := testHookRequest([]byte(fixtures.HookPullRequestLableAdded), hookPull)
+		req := testHookRequest([]byte(fixtures.HookPullRequestLabelAdded), hookPull)
 		p, r, b, err := parseHook(req, false)
 		assert.NoError(t, err)
 		assert.NotNil(t, r)
@@ -305,10 +305,10 @@ func Test_parseHook(t *testing.T) {
 		}
 	})
 
-	// lable change will result two webhooks an unlable and labled
+	// lable change will result two webhooks an unlable and labelled
 
 	t.Run("pull request unlabeled", func(t *testing.T) {
-		req := testHookRequest([]byte(fixtures.HookPullRequestLableRemoved), hookPull)
+		req := testHookRequest([]byte(fixtures.HookPullRequestLabelRemoved), hookPull)
 		p, r, b, err := parseHook(req, false)
 		assert.NoError(t, err)
 		assert.NotNil(t, r)
