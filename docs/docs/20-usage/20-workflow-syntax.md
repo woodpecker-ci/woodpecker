@@ -103,9 +103,8 @@ When using the `local` backend, the `image` entry is used to specify the shell, 
        - go build
        - go test
 
-   - name: publish
-+    image: woodpeckerci/plugin-kaniko
-     repo: foo/bar
+   - name: prettier
++    image: woodpeckerci/plugin-prettier
 
  services:
    - name: database
@@ -474,9 +473,11 @@ Normally steps of a workflow are executed serially in the order in which they ar
        - go build
 
    - name: deploy
-     image: woodpeckerci/plugin-kaniko
+     image: woodpeckerci/plugin-s3
      settings:
-       repo: foo/bar
+       bucket: my-bucket-name
+       source: some-file-name
+       target: /target/some-file
 +    depends_on: [build, test] # deploy will be executed after build and test finished
 
    - name: test # test will be executed immediately as no dependencies are set
