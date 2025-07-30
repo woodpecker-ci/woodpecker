@@ -23,7 +23,7 @@ steps:
       template: config/k8s/service.yaml
 ```
 
-Example pipeline using the Docker and Prettier plugins:
+Example pipeline using the Prettier and S3 plugins:
 
 ```yaml
 steps:
@@ -37,10 +37,11 @@ steps:
     image: woodpeckerci/plugin-prettier
 
   - name: publish
-    image: woodpeckerci/plugin-kaniko
+    image: woodpeckerci/plugin-s3
     settings:
-      repo: foo/bar
-      tags: latest
+      bucket: my-bucket-name
+      source: some-file-name
+      target: /target/some-file
 ```
 
 ## Plugin Isolation
