@@ -18,6 +18,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"maps"
 	"os"
 	"path"
 	"path/filepath"
@@ -146,12 +147,12 @@ func execWithAxis(ctx context.Context, c *cli.Command, file, repoPath string, ax
 	}
 
 	environ := metadata.Environ()
+	maps.Copy(environ, metadata.Workflow.Matrix)
 	var secrets []compiler.Secret
-	for key, val := range metadata.Workflow.Matrix {
-		environ[key] = val
+	for k, v := range c.StringMap("secrets") {
 		secrets = append(secrets, compiler.Secret{
-			Name:  key,
-			Value: val,
+			Name:  k,
+			Value: v,
 		})
 	}
 
