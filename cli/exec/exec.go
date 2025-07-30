@@ -149,10 +149,10 @@ func execWithAxis(ctx context.Context, c *cli.Command, file, repoPath string, ax
 	environ := metadata.Environ()
 	maps.Copy(environ, metadata.Workflow.Matrix)
 	var secrets []compiler.Secret
-	for k, v := range c.StringMap("secrets") {
+	for key, val := range c.StringMap("secrets") {
 		secrets = append(secrets, compiler.Secret{
-			Name:  k,
-			Value: v,
+			Name:  key,
+			Value: val,
 		})
 	}
 
