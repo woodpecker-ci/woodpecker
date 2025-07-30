@@ -77,6 +77,7 @@ func convertMergeRequestHook(hook *gitlab.MergeEvent, req *http.Request) (int, *
 	obj := hook.ObjectAttributes
 
 	// if some git action happened then OldRev != "" -> it's a normal pull_request trigger
+	// https://github.com/woodpecker-ci/woodpecker/pull/3338
 	// https://docs.gitlab.com/ee/user/project/integrations/webhook_events.html#merge-request-events
 	if obj.OldRev != "" && obj.State == stateOpen {
 		pipeline.Event = model.EventPull
