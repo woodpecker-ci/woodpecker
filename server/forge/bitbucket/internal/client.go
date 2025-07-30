@@ -23,6 +23,7 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/rs/zerolog/log"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/bitbucket"
 
@@ -151,7 +152,8 @@ func (c *Client) FindSource(owner, name, revision, path string) (*string, error)
 
 func (c *Client) CreateStatus(owner, name, revision string, status *PipelineStatus) error {
 	uri := fmt.Sprintf(pathStatus, c.base, owner, name, revision)
-	_, err := c.do(uri, http.MethodPost, status, nil)
+	responseBody, err := c.do(uri, http.MethodPost, status, nil)
+	log.Info().Any("reponse", responseBody).Msg("response from bb")
 	return err
 }
 

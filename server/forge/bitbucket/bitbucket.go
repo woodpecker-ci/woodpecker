@@ -24,6 +24,7 @@ import (
 	"path/filepath"
 	"strconv"
 
+	"github.com/rs/zerolog/log"
 	"golang.org/x/oauth2"
 
 	"go.woodpecker-ci.org/woodpecker/v3/server"
@@ -297,6 +298,9 @@ func (c *config) Status(ctx context.Context, user *model.User, repo *model.Repo,
 		Key:   common.GetPipelineStatusContext(repo, pipeline, workflow),
 		URL:   common.GetPipelineStatusURL(repo, pipeline, nil),
 	}
+
+	log.Info().Any("payload", status).Msg("sending status to bitbucket")
+
 	return c.newClient(ctx, user).CreateStatus(repo.Owner, repo.Name, pipeline.Commit, &status)
 }
 
