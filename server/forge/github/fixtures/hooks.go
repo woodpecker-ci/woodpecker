@@ -76,3 +76,24 @@ var HookPullRequestEdited string
 
 //go:embed HookRelease.json
 var HookRelease string
+
+//go:embed HookPullRequestReviewRequested.json
+var HookPullRequestReviewRequested string
+
+//go:embed HookPullRequestMilestoneAdded.json
+var HookPullRequestMilestoneAdded string
+
+//go:embed HookPullRequestMilestoneRemoved.json
+var HookPullRequestMilestoneRemoved string
+
+//go:embed HookPullRequestLableAdded.json
+var HookPullRequestLableAdded string
+
+//go:embed HookPullRequestLableRemoved.json
+var HookPullRequestLableRemoved string
+
+//go:embed HookPullRequestAssigneeAdded.json
+var HookPullRequestAssigneeAdded string
+
+//go:embed HookPullRequestAssigneeRemoved.json
+var HookPullRequestAssigneeRemoved string

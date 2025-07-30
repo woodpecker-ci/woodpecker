@@ -37,7 +37,6 @@ const (
 	actionClose    = "closed"
 	actionSync     = "synchronize"
 	actionReleased = "released"
-	actionEdited   = "edited"
 )
 
 // parseHook parses a GitHub hook from an http.Request request and returns

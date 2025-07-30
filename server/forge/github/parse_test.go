@@ -137,4 +137,285 @@ func Test_parseHook(t *testing.T) {
 		assert.Len(t, strings.Split(b.Ref, "/"), 3)
 		assert.True(t, strings.HasPrefix(b.Ref, "refs/tags/"))
 	})
+
+	t.Run("pull review requested", func(t *testing.T) {
+		req := testHookRequest([]byte(fixtures.HookPullRequestReviewRequested), hookPull)
+		p, r, b, err := parseHook(req, false)
+		assert.NoError(t, err)
+		assert.NotNil(t, r)
+		assert.NotNil(t, b)
+		assert.Equal(t, model.EventPullMetadata, b.Event)
+		assert.Equal(t, "review_requested", b.EventReason)
+		if assert.NotNil(t, p) {
+			assert.Equal(t, int64(2705176047), *p.ID)
+			assert.Equal(t, 1, *p.Number)
+			assert.Equal(t, "open", *p.State)
+			assert.Equal(t, "Some ned more AAAA", *p.Title)
+			assert.Equal(t, "yeaaa", *p.Body)
+			assert.Equal(t, false, *p.Draft)
+			assert.Equal(t, false, *p.Merged)
+			assert.Equal(t, true, *p.Mergeable)
+			assert.Equal(t, "unstable", *p.MergeableState)
+			if assert.NotNil(t, p.User) {
+				assert.Equal(t, "6543", *p.User.Login)
+				assert.Equal(t, int64(24977596), *p.User.ID)
+			}
+			if assert.Len(t, p.RequestedReviewers, 1) {
+				assert.Equal(t, "demoaccount2-commits", *p.RequestedReviewers[0].Login)
+				assert.Equal(t, int64(223550959), *p.RequestedReviewers[0].ID)
+			}
+			if assert.NotNil(t, p.Head) {
+				assert.Equal(t, "6543-patch-1", *p.Head.Ref)
+				assert.Equal(t, "36b5813240a9d2daa29b05046d56a53e18f39a3e", *p.Head.SHA)
+			}
+			if assert.NotNil(t, p.Base) {
+				assert.Equal(t, "main", *p.Base.Ref)
+				assert.Equal(t, "67012991d6c69b1c58378346fca366b864d8d1a1", *p.Base.SHA)
+			}
+		}
+	})
+
+	t.Run("pull milestoned", func(t *testing.T) {
+		req := testHookRequest([]byte(fixtures.HookPullRequestMilestoneAdded), hookPull)
+		p, r, b, err := parseHook(req, false)
+		assert.NoError(t, err)
+		assert.NotNil(t, r)
+		assert.NotNil(t, b)
+		assert.Equal(t, model.EventPullMetadata, b.Event)
+		assert.Equal(t, "milestoned", b.EventReason)
+		if assert.NotNil(t, p) {
+			assert.Equal(t, int64(2705176047), *p.ID)
+			assert.Equal(t, 1, *p.Number)
+			assert.Equal(t, "open", *p.State)
+			assert.Equal(t, "Some ned more AAAA", *p.Title)
+			assert.Equal(t, "yeaaa", *p.Body)
+			assert.Equal(t, false, *p.Draft)
+			assert.Equal(t, false, *p.Merged)
+			assert.Equal(t, true, *p.Mergeable)
+			assert.Equal(t, "unstable", *p.MergeableState)
+			if assert.NotNil(t, p.User) {
+				assert.Equal(t, "6543", *p.User.Login)
+				assert.Equal(t, int64(24977596), *p.User.ID)
+			}
+			if assert.NotNil(t, p.Milestone) {
+				assert.Equal(t, int64(13392101), *p.Milestone.ID)
+				assert.Equal(t, 2, *p.Milestone.Number)
+				assert.Equal(t, "open mile", *p.Milestone.Title)
+				assert.Equal(t, "ongoing", *p.Milestone.Description)
+				assert.Equal(t, "open", *p.Milestone.State)
+				if assert.NotNil(t, p.Milestone.Creator) {
+					assert.Equal(t, "demoaccount2-commits", *p.Milestone.Creator.Login)
+					assert.Equal(t, int64(223550959), *p.Milestone.Creator.ID)
+				}
+			}
+			assert.Empty(t, p.RequestedReviewers)
+			if assert.NotNil(t, p.Head) {
+				assert.Equal(t, "6543-patch-1", *p.Head.Ref)
+				assert.Equal(t, "36b5813240a9d2daa29b05046d56a53e18f39a3e", *p.Head.SHA)
+			}
+			if assert.NotNil(t, p.Base) {
+				assert.Equal(t, "main", *p.Base.Ref)
+				assert.Equal(t, "67012991d6c69b1c58378346fca366b864d8d1a1", *p.Base.SHA)
+			}
+		}
+	})
+
+	// milestone change will result two webhooks an demilestoned and milestoned
+
+	t.Run("pull request demilestoned", func(t *testing.T) {
+		req := testHookRequest([]byte(fixtures.HookPullRequestMilestoneRemoved), hookPull)
+		p, r, b, err := parseHook(req, false)
+		assert.NoError(t, err)
+		assert.NotNil(t, r)
+		assert.NotNil(t, b)
+		assert.Equal(t, model.EventPullMetadata, b.Event)
+		assert.Equal(t, "demilestoned", b.EventReason)
+		if assert.NotNil(t, p) {
+			assert.Equal(t, int64(2705176047), *p.ID)
+			assert.Equal(t, 1, *p.Number)
+			assert.Equal(t, "open", *p.State)
+			assert.Equal(t, "Some ned more AAAA", *p.Title)
+			if assert.NotNil(t, p.User) {
+				assert.Equal(t, "6543", *p.User.Login)
+				assert.Equal(t, int64(24977596), *p.User.ID)
+			}
+			if assert.Len(t, p.Labels, 1) {
+				assert.Equal(t, int64(9024465370), *p.Labels[0].ID)
+				assert.Equal(t, "bug", *p.Labels[0].Name)
+				assert.Equal(t, "d73a4a", *p.Labels[0].Color)
+				assert.Equal(t, "Something isn't working", *p.Labels[0].Description)
+			}
+			assert.Nil(t, p.Milestone)
+			if assert.NotNil(t, p.Head) {
+				assert.Equal(t, "6543-patch-1", *p.Head.Ref)
+				assert.Equal(t, "36b5813240a9d2daa29b05046d56a53e18f39a3e", *p.Head.SHA)
+			}
+			if assert.NotNil(t, p.Base) {
+				assert.Equal(t, "main", *p.Base.Ref)
+				assert.Equal(t, "67012991d6c69b1c58378346fca366b864d8d1a1", *p.Base.SHA)
+			}
+		}
+	})
+
+	t.Run("pull request labeled", func(t *testing.T) {
+		req := testHookRequest([]byte(fixtures.HookPullRequestLableAdded), hookPull)
+		p, r, b, err := parseHook(req, false)
+		assert.NoError(t, err)
+		assert.NotNil(t, r)
+		assert.NotNil(t, b)
+		assert.Equal(t, model.EventPullMetadata, b.Event)
+		assert.Equal(t, "labeled", b.EventReason)
+		if assert.NotNil(t, p) {
+			assert.Equal(t, int64(2705176047), *p.ID)
+			assert.Equal(t, 1, *p.Number)
+			assert.Equal(t, "open", *p.State)
+			assert.Equal(t, "Some ned more AAAA", *p.Title)
+			assert.Equal(t, "yeaaa", *p.Body)
+			assert.Equal(t, false, *p.Draft)
+			assert.Equal(t, false, *p.Merged)
+			assert.Equal(t, true, *p.Mergeable)
+			assert.Equal(t, "unstable", *p.MergeableState)
+			if assert.NotNil(t, p.User) {
+				assert.Equal(t, "6543", *p.User.Login)
+				assert.Equal(t, int64(24977596), *p.User.ID)
+			}
+			if assert.Len(t, p.Labels, 2) {
+				assert.Equal(t, int64(9024465376), *p.Labels[0].ID)
+				assert.Equal(t, "documentation", *p.Labels[0].Name)
+				assert.Equal(t, "0075ca", *p.Labels[0].Color)
+				assert.Equal(t, "Improvements or additions to documentation", *p.Labels[0].Description)
+				assert.Equal(t, int64(9024465382), *p.Labels[1].ID)
+				assert.Equal(t, "enhancement", *p.Labels[1].Name)
+				assert.Equal(t, "a2eeef", *p.Labels[1].Color)
+				assert.Equal(t, "New feature or request", *p.Labels[1].Description)
+			}
+			if assert.NotNil(t, p.Milestone) {
+				assert.Equal(t, int64(13392101), *p.Milestone.ID)
+				assert.Equal(t, "open mile", *p.Milestone.Title)
+			}
+			assert.Empty(t, p.RequestedReviewers)
+			if assert.NotNil(t, p.Head) {
+				assert.Equal(t, "6543-patch-1", *p.Head.Ref)
+				assert.Equal(t, "36b5813240a9d2daa29b05046d56a53e18f39a3e", *p.Head.SHA)
+			}
+			if assert.NotNil(t, p.Base) {
+				assert.Equal(t, "main", *p.Base.Ref)
+				assert.Equal(t, "67012991d6c69b1c58378346fca366b864d8d1a1", *p.Base.SHA)
+			}
+		}
+	})
+
+	// lable change will result two webhooks an unlable and labled
+
+	t.Run("pull request unlabeled", func(t *testing.T) {
+		req := testHookRequest([]byte(fixtures.HookPullRequestLableRemoved), hookPull)
+		p, r, b, err := parseHook(req, false)
+		assert.NoError(t, err)
+		assert.NotNil(t, r)
+		assert.NotNil(t, b)
+		assert.Equal(t, model.EventPullMetadata, b.Event)
+		assert.Equal(t, "unlabeled", b.EventReason)
+		if assert.NotNil(t, p) {
+			assert.Equal(t, int64(2705176047), *p.ID)
+			assert.Equal(t, 1, *p.Number)
+			assert.Equal(t, "open", *p.State)
+			assert.Equal(t, "Some ned more AAAA", *p.Title)
+			if assert.NotNil(t, p.User) {
+				assert.Equal(t, "6543", *p.User.Login)
+				assert.Equal(t, int64(24977596), *p.User.ID)
+			}
+			if assert.Len(t, p.Labels, 1) {
+				assert.Equal(t, int64(9024465370), *p.Labels[0].ID)
+				assert.Equal(t, "bug", *p.Labels[0].Name)
+				assert.Equal(t, "d73a4a", *p.Labels[0].Color)
+				assert.Equal(t, "Something isn't working", *p.Labels[0].Description)
+			}
+			if assert.NotNil(t, p.Head) {
+				assert.Equal(t, "6543-patch-1", *p.Head.Ref)
+				assert.Equal(t, "36b5813240a9d2daa29b05046d56a53e18f39a3e", *p.Head.SHA)
+			}
+			if assert.NotNil(t, p.Base) {
+				assert.Equal(t, "main", *p.Base.Ref)
+				assert.Equal(t, "67012991d6c69b1c58378346fca366b864d8d1a1", *p.Base.SHA)
+			}
+		}
+	})
+
+	t.Run("pull request assigned", func(t *testing.T) {
+		req := testHookRequest([]byte(fixtures.HookPullRequestAssigneeAdded), hookPull)
+		p, r, b, err := parseHook(req, false)
+		assert.NoError(t, err)
+		assert.NotNil(t, r)
+		assert.NotNil(t, b)
+		assert.Equal(t, model.EventPullMetadata, b.Event)
+		assert.Equal(t, "assigned", b.EventReason)
+		if assert.NotNil(t, p) {
+			assert.Equal(t, int64(2705176047), *p.ID)
+			assert.Equal(t, 1, *p.Number)
+			assert.Equal(t, "open", *p.State)
+			assert.Equal(t, "Some ned more AAAA", *p.Title)
+			if assert.NotNil(t, p.User) {
+				assert.Equal(t, "6543", *p.User.Login)
+				assert.Equal(t, int64(24977596), *p.User.ID)
+			}
+			if assert.NotNil(t, p.Assignee) {
+				assert.Equal(t, "demoaccount2-commits", *p.Assignee.Login)
+				assert.Equal(t, int64(223550959), *p.Assignee.ID)
+			}
+			if assert.Len(t, p.Assignees, 1) {
+				assert.Equal(t, "demoaccount2-commits", *p.Assignees[0].Login)
+				assert.Equal(t, int64(223550959), *p.Assignees[0].ID)
+			}
+			if assert.Len(t, p.Labels, 1) {
+				assert.Equal(t, int64(9024465370), *p.Labels[0].ID)
+				assert.Equal(t, "bug", *p.Labels[0].Name)
+			}
+			assert.Nil(t, p.Milestone)
+			if assert.NotNil(t, p.Head) {
+				assert.Equal(t, "6543-patch-1", *p.Head.Ref)
+				assert.Equal(t, "36b5813240a9d2daa29b05046d56a53e18f39a3e", *p.Head.SHA)
+			}
+			if assert.NotNil(t, p.Base) {
+				assert.Equal(t, "main", *p.Base.Ref)
+				assert.Equal(t, "67012991d6c69b1c58378346fca366b864d8d1a1", *p.Base.SHA)
+			}
+		}
+	})
+
+	// assigne change will result two webhooks an assigned and unassigned
+
+	t.Run("pull request unassigned", func(t *testing.T) {
+		req := testHookRequest([]byte(fixtures.HookPullRequestAssigneeRemoved), hookPull)
+		p, r, b, err := parseHook(req, false)
+		assert.NoError(t, err)
+		assert.NotNil(t, r)
+		assert.NotNil(t, b)
+		assert.Equal(t, model.EventPullMetadata, b.Event)
+		assert.Equal(t, "unassigned", b.EventReason)
+		if assert.NotNil(t, p) {
+			assert.Equal(t, int64(2705176047), *p.ID)
+			assert.Equal(t, 1, *p.Number)
+			assert.Equal(t, "open", *p.State)
+			assert.Equal(t, "Some ned more AAAA", *p.Title)
+			if assert.NotNil(t, p.User) {
+				assert.Equal(t, "6543", *p.User.Login)
+				assert.Equal(t, int64(24977596), *p.User.ID)
+			}
+			assert.Nil(t, p.Assignee)
+			assert.Empty(t, p.Assignees)
+			if assert.Len(t, p.Labels, 1) {
+				assert.Equal(t, int64(9024465370), *p.Labels[0].ID)
+				assert.Equal(t, "bug", *p.Labels[0].Name)
+			}
+			assert.Nil(t, p.Milestone)
+			if assert.NotNil(t, p.Head) {
+				assert.Equal(t, "6543-patch-1", *p.Head.Ref)
+				assert.Equal(t, "36b5813240a9d2daa29b05046d56a53e18f39a3e", *p.Head.SHA)
+			}
+			if assert.NotNil(t, p.Base) {
+				assert.Equal(t, "main", *p.Base.Ref)
+				assert.Equal(t, "67012991d6c69b1c58378346fca366b864d8d1a1", *p.Base.SHA)
+			}
+		}
+	})
 }
