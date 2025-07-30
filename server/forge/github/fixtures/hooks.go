@@ -86,11 +86,11 @@ var HookPullRequestMilestoneAdded string
 //go:embed HookPullRequestMilestoneRemoved.json
 var HookPullRequestMilestoneRemoved string
 
-//go:embed HookPullRequestLableAdded.json
-var HookPullRequestLableAdded string
+//go:embed HookPullRequestLabelAdded.json
+var HookPullRequestLabelAdded string
 
-//go:embed HookPullRequestLableRemoved.json
-var HookPullRequestLableRemoved string
+//go:embed HookPullRequestLabelRemoved.json
+var HookPullRequestLabelRemoved string
 
 //go:embed HookPullRequestAssigneeAdded.json
 var HookPullRequestAssigneeAdded string
