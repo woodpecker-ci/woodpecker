@@ -112,7 +112,6 @@ import {
   mdiBugOutline,
   mdiCalendarClockOutline,
   mdiCheckCircle,
-  mdiChevronDown,
   mdiChevronRight,
   mdiClockTimeEightOutline,
   mdiClose,
