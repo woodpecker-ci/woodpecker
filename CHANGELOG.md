@@ -15,6 +15,12 @@
 
 - Add and edit additional forges in UI [[#5328](https://github.com/woodpecker-ci/woodpecker/pull/5328)]
 
+### 📈 Enhancement
+
+- Support secrets in `cli exec` [[#5374](https://github.com/woodpecker-ci/woodpecker/pull/5374)]
+- feat(k8s): Kubernetes namespace per organization [[#5309](https://github.com/woodpecker-ci/woodpecker/pull/5309)]
+- Simplify backend types [[#5299](https://github.com/woodpecker-ci/woodpecker/pull/5299)]
+
 ### 📚 Documentation
 
 - Remove kaniko plugin and refs [[#5371](https://github.com/woodpecker-ci/woodpecker/pull/5371)]
@@ -30,11 +36,6 @@
 - Reload repo on hook [[#5324](https://github.com/woodpecker-ci/woodpecker/pull/5324)]
 - Fix loading icons and add missing loading indicators [[#5329](https://github.com/woodpecker-ci/woodpecker/pull/5329)]
 - Use correct parameter for forge selection on login [[#5325](https://github.com/woodpecker-ci/woodpecker/pull/5325)]
-
-### 📈 Enhancement
-
-- feat(k8s): Kubernetes namespace per organization [[#5309](https://github.com/woodpecker-ci/woodpecker/pull/5309)]
-- Simplify backend types [[#5299](https://github.com/woodpecker-ci/woodpecker/pull/5299)]
 
 ### 📦️ Dependency
 
