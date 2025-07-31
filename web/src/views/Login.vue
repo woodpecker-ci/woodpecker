@@ -20,7 +20,7 @@
         <WoodpeckerLogo preserveAspectRatio="xMinYMin slice" class="h-32 w-32 md:h-48 md:w-48" />
       </div>
       <div class="flex min-h-48 flex-col items-center justify-center gap-4 p-4 text-center md:w-2/5">
-        <h1 class="text-wp-text-100 text-xl">{{ $t('welcome') }}</h1>
+        <h1 class="text-wp-text-100 text-xl">{{ $t('login_to_woodpecker_with') }}</h1>
         <div class="flex flex-col gap-2">
           <Button
             v-for="forge in forges"
@@ -29,21 +29,17 @@
             class="whitespace-normal!"
             @click="doLogin(forge.id)"
           >
-            <i18n-t keypath="login_with">
-              <template #forge>
-                <div class="mr-1 ml-2 w-4">
-                  <img
-                    v-if="!failedForgeFavicons.has(forge.id)"
-                    :src="getFaviconUrl(forge)"
-                    :alt="$t('login_with', { forge: getHostFromUrl(forge) })"
-                    @error="() => failedForgeFavicons.add(forge.id)"
-                  />
-                  <Icon v-else :name="forge.type === 'addon' ? 'repo' : forge.type" />
-                </div>
+            <div class="mr-2 w-4">
+              <img
+                v-if="!failedForgeFavicons.has(forge.id)"
+                :src="getFaviconUrl(forge)"
+                :alt="$t('login_to_woodpecker_with', { forge: getHostFromUrl(forge) })"
+                @error="() => failedForgeFavicons.add(forge.id)"
+              />
+              <Icon v-else :name="forge.type === 'addon' ? 'repo' : forge.type" />
+            </div>
 
-                {{ getHostFromUrl(forge) }}
-              </template>
-            </i18n-t>
+            {{ getHostFromUrl(forge) }}
           </Button>
         </div>
       </div>
