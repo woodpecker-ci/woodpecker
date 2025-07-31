@@ -58,6 +58,10 @@ watch(
   -moz-osx-font-smoothing: grayscale;
 }
 
+#scroll-component {
+  scrollbar-gutter: stable;
+}
+
 .slide-right-enter-active,
 .slide-right-leave-active {
   transition: all 0.3s ease;
