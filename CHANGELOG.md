@@ -17,6 +17,7 @@
 
 ### 📈 Enhancement
 
+- Show oauth host and favicon on login [[#5376](https://github.com/woodpecker-ci/woodpecker/pull/5376)]
 - Support secrets in `cli exec` [[#5374](https://github.com/woodpecker-ci/woodpecker/pull/5374)]
 - feat(k8s): Kubernetes namespace per organization [[#5309](https://github.com/woodpecker-ci/woodpecker/pull/5309)]
 - Simplify backend types [[#5299](https://github.com/woodpecker-ci/woodpecker/pull/5299)]
