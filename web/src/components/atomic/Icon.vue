@@ -48,6 +48,7 @@
   <SvgIcon v-else-if="name === 'heal'" :path="mdiWrenchCogOutline" size="1.3rem" />
   <SvgIcon v-else-if="name === 'turn-off'" :path="mdiPower" size="1.3rem" />
   <SvgIcon v-else-if="name === 'chevron-right'" :path="mdiChevronRight" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'chevron-down'" :path="mdiChevronDown" size="1.3rem" />
   <SvgIcon v-else-if="name === 'close'" :path="mdiClose" size="1.3rem" />
   <SvgIcon v-else-if="name === 'edit'" :path="mdiPencilOutline" size="1.3rem" />
   <SvgIcon v-else-if="name === 'download'" :path="mdiDownloadOutline" size="1.3rem" />
@@ -61,6 +62,9 @@
   <SvgIcon v-else-if="name === 'tray-full'" :path="mdiTrayFull" size="1.3rem" />
   <SvgIcon v-else-if="name === 'file-cog-outline'" :path="mdiFileCogOutline" size="1.3rem" />
   <SvgIcon v-else-if="name === 'file-edit-outline'" :path="mdiFileEditOutline" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'folder'" :path="mdiFolderOutline" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'folder-open'" :path="mdiFolderOpenOutline" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'file'" :path="mdiFileOutline" size="1.3rem" />
   <SvgIcon v-else-if="name === 'bug-outline'" :path="mdiBugOutline" size="1.3rem" />
   <SvgIcon v-else-if="name === 'docker'" :path="mdiDocker" size="1.3rem" />
   <SvgIcon v-else-if="name === 'forge'" :path="mdiCodeBraces" size="1.3rem" />
@@ -109,6 +113,7 @@ import {
   mdiBugOutline,
   mdiCalendarClockOutline,
   mdiCheckCircle,
+  mdiChevronDown,
   mdiChevronRight,
   mdiClockTimeEightOutline,
   mdiClose,
@@ -124,6 +129,9 @@ import {
   mdiEyeOutline,
   mdiFileCogOutline,
   mdiFileEditOutline,
+  mdiFileOutline,
+  mdiFolderOpenOutline,
+  mdiFolderOutline,
   mdiFormatListBulleted,
   mdiFormatListGroup,
   mdiGestureTap,
@@ -230,7 +238,14 @@ export type IconNames =
   | 'org'
   | 'cron'
   | 'toolbox'
-  | 'forge';
+  | 'forge'
+  | 'fullscreen'
+  | 'exit-fullscreen'
+  | 'folder'
+  | 'folder-open'
+  | 'file'
+  | 'chevron-right'
+  | 'chevron-down';
 
 const props = defineProps<{
   name: IconNames;
