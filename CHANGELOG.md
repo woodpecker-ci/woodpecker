@@ -17,6 +17,7 @@
 
 ### 📈 Enhancement
 
+- Prevent body jump when scrollbar appears [[#5381](https://github.com/woodpecker-ci/woodpecker/pull/5381)]
 - Show oauth host and favicon on login [[#5376](https://github.com/woodpecker-ci/woodpecker/pull/5376)]
 - Support secrets in `cli exec` [[#5374](https://github.com/woodpecker-ci/woodpecker/pull/5374)]
 - feat(k8s): Kubernetes namespace per organization [[#5309](https://github.com/woodpecker-ci/woodpecker/pull/5309)]
