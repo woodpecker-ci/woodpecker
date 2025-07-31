@@ -17,6 +17,7 @@
 
 ### 📈 Enhancement
 
+- Show changed files as file-tree [[#5379](https://github.com/woodpecker-ci/woodpecker/pull/5379)]
 - Replace header bg with border [[#5380](https://github.com/woodpecker-ci/woodpecker/pull/5380)]
 - Prevent body jump when scrollbar appears [[#5381](https://github.com/woodpecker-ci/woodpecker/pull/5381)]
 - Show oauth host and favicon on login [[#5376](https://github.com/woodpecker-ci/woodpecker/pull/5376)]
