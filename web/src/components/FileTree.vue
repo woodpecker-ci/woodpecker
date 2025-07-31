@@ -14,8 +14,9 @@
       <div class="mr-1 flex w-4 items-center justify-start">
         <Icon
           v-if="node.isDirectory"
-          :name="collapsed ? 'chevron-right' : 'chevron-down'"
-          class="text-wp-text-alt-100 group-hover:text-wp-text-200 transition-transform duration-200"
+          name="chevron-right"
+          class="text-wp-text-alt-100 group-hover:text-wp-text-200 h-6 min-w-6 transition-transform duration-150"
+          :class="{ 'rotate-90 transform': !collapsed }"
         />
       </div>
 
