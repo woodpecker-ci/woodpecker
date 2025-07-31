@@ -299,7 +299,7 @@ func (c *config) Status(ctx context.Context, user *model.User, repo *model.Repo,
 		URL:   common.GetPipelineStatusURL(repo, pipeline, nil),
 	}
 
-	log.Info().Any("payload", status).Msg("sending status to bitbucket")
+	log.Info().Any("payload", status).Str("status", string(pipeline.Status)).Msg("sending status to bitbucket")
 
 	return c.newClient(ctx, user).CreateStatus(repo.Owner, repo.Name, pipeline.Commit, &status)
 }
