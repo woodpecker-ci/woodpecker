@@ -356,6 +356,7 @@ func (s *RPC) Done(c context.Context, strWorkflowID string, state rpc.WorkflowSt
 		}
 	}
 
+	log.Info().Any("workflow", workflow).Msg("rpc done: sending forge status")
 	s.updateForgeStatus(c, repo, currentPipeline, workflow)
 
 	// make sure writes to pubsub are non blocking (https://github.com/woodpecker-ci/woodpecker/blob/c919f32e0b6432a95e1a6d3d0ad662f591adf73f/server/logging/log.go#L9)
@@ -564,6 +565,7 @@ func (s *RPC) updateForgeStatus(ctx context.Context, repo *model.Repo, pipeline 
 	forge.Refresh(ctx, _forge, s.store, user)
 
 	// only do status updates for parent steps
+	log.Info().Any("workflow", workflow).Msg("going to send status to forge")
 	if workflow != nil {
 		err = _forge.Status(ctx, user, repo, pipeline, workflow)
 		if err != nil {
