@@ -28,7 +28,7 @@ import (
 
 func convertStatus(status model.StatusValue) bb.BuildStatusState {
 	switch status {
-	case model.StatusPending, model.StatusRunning:
+	case model.StatusPending, model.StatusRunning, model.StatusCreated, model.StatusBlocked:
 		return bb.BuildStatusStateInProgress
 	case model.StatusSuccess:
 		return bb.BuildStatusStateSuccessful

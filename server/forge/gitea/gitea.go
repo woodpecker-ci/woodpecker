@@ -594,16 +594,10 @@ func (c *Gitea) newClientToken(ctx context.Context, token string) (*gitea.Client
 // status to a Gitea status.
 func getStatus(status model.StatusValue) gitea.StatusState {
 	switch status {
-	case model.StatusPending, model.StatusBlocked:
-		return gitea.StatusPending
-	case model.StatusRunning:
+	case model.StatusPending, model.StatusBlocked, model.StatusRunning, model.StatusCreated:
 		return gitea.StatusPending
 	case model.StatusSuccess:
 		return gitea.StatusSuccess
-	case model.StatusFailure:
-		return gitea.StatusFailure
-	case model.StatusKilled:
-		return gitea.StatusFailure
 	case model.StatusDeclined:
 		return gitea.StatusWarning
 	case model.StatusError:

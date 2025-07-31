@@ -37,7 +37,7 @@ const (
 // Bitbucket commit status.
 func convertStatus(status model.StatusValue) string {
 	switch status {
-	case model.StatusPending, model.StatusRunning, model.StatusCreated:
+	case model.StatusPending, model.StatusRunning, model.StatusCreated, model.StatusBlocked:
 		return statusPending
 	case model.StatusSuccess:
 		return statusSuccess
