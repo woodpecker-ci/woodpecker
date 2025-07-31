@@ -29,7 +29,21 @@
             class="whitespace-normal!"
             @click="doLogin(forge.id)"
           >
-            {{ $t('login_with', { forge: getHostFromUrl(forge) }) }}
+            <i18n-t keypath="login_with">
+              <template #forge>
+                <div class="mr-1 ml-2 w-4">
+                  <img
+                    v-if="!failedForgeFavicons.has(forge.id)"
+                    :src="getFaviconUrl(forge)"
+                    :alt="$t('login_with', { forge: getHostFromUrl(forge) })"
+                    @error="() => failedForgeFavicons.add(forge.id)"
+                  />
+                  <Icon v-else :name="forge.type === 'addon' ? 'repo' : forge.type" />
+                </div>
+
+                {{ getHostFromUrl(forge) }}
+              </template>
+            </i18n-t>
           </Button>
         </div>
       </div>
@@ -45,6 +59,7 @@ import { useRoute, useRouter } from 'vue-router';
 import WoodpeckerLogo from '~/assets/logo.svg?component';
 import Button from '~/components/atomic/Button.vue';
 import Error from '~/components/atomic/Error.vue';
+import Icon from '~/components/atomic/Icon.vue';
 import useApiClient from '~/compositions/useApiClient';
 import useAuthentication from '~/compositions/useAuthentication';
 import { useWPTitle } from '~/compositions/useWPTitle';
@@ -57,15 +72,6 @@ const i18n = useI18n();
 const apiClient = useApiClient();
 
 const forges = ref<Forge[]>([]);
-
-function getHostFromUrl(forge: Forge) {
-  if (!forge.url) {
-    return forge.type.charAt(0).toUpperCase() + forge.type.slice(1);
-  }
-
-  const url = new URL(forge.url);
-  return url.hostname;
-}
 
 function doLogin(forgeId?: number) {
   const url = typeof route.query.url === 'string' ? route.query.url : '';
@@ -100,4 +106,19 @@ onMounted(async () => {
 });
 
 useWPTitle(computed(() => [i18n.t('login')]));
+
+function getHostFromUrl(forge: Forge) {
+  if (!forge.url && !forge.oauth_host) {
+    return forge.type.charAt(0).toUpperCase() + forge.type.slice(1);
+  }
+
+  const url = new URL(forge.oauth_host ?? forge.url);
+  return url.hostname;
+}
+
+const failedForgeFavicons = ref(new Set<number>()); // Track which favicons failed to load
+function getFaviconUrl(forge: Forge) {
+  const url = new URL(forge.oauth_host ?? forge.url);
+  return `${url.origin}/favicon.ico`;
+}
 </script>
