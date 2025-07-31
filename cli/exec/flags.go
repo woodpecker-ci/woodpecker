@@ -64,6 +64,11 @@ var flags = []cli.Flag{
 		Usage:   "backend engine to run pipelines on",
 		Value:   "auto-detect",
 	},
+	&cli.StringMapFlag{
+		Sources: cli.EnvVars("WOODPECKER_SECRETS"),
+		Name:    "secrets",
+		Usage:   "map of secrets, ex. 'secret=\"val\",secret2=\"value2\"'",
+	},
 
 	//
 	// backend options for pipeline compiler
