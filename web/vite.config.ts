@@ -6,7 +6,6 @@ import tailwindcss from '@tailwindcss/vite';
 import vue from '@vitejs/plugin-vue';
 import dotenv from 'dotenv';
 import type { Plugin } from 'vite';
-import prismjs from 'vite-plugin-prismjs';
 import svgLoader from 'vite-svg-loader';
 import type { ViteUserConfig } from 'vitest/config';
 import { defineConfig } from 'vitest/config';
@@ -93,9 +92,6 @@ export default defineConfig({
     svgLoader(),
     externalCSSPlugin(),
     woodpeckerInfoPlugin(),
-    prismjs({
-      languages: ['yaml'],
-    }),
     tailwindcss(),
   ],
   resolve: {

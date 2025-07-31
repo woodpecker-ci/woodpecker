@@ -17,7 +17,7 @@ import { decode } from 'js-base64';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
-import SyntaxHighlight from '~/components/atomic/SyntaxHighlight';
+import SyntaxHighlight from '~/components/atomic/SyntaxHighlight.vue';
 import Panel from '~/components/layout/Panel.vue';
 import { requiredInject } from '~/compositions/useInjectProvide';
 import { useWPTitle } from '~/compositions/useWPTitle';
