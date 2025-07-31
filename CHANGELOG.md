@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.9.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.9.0) - 2025-07-30
+## [3.9.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.9.0) - 2025-07-31
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -38,6 +38,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update golang-packages [[#5375](https://github.com/woodpecker-ci/woodpecker/pull/5375)]
 - chore(deps): lock file maintenance [[#5369](https://github.com/woodpecker-ci/woodpecker/pull/5369)]
 - fix(deps): update dependency simple-icons to v15.8.0 [[#5366](https://github.com/woodpecker-ci/woodpecker/pull/5366)]
 - fix(deps): update module github.com/bmatcuk/doublestar/v4 to v4.9.1 [[#5365](https://github.com/woodpecker-ci/woodpecker/pull/5365)]
@@ -48,7 +49,7 @@
 - chore(deps): update pre-commit hook golangci/golangci-lint to v2.3.0 [[#5360](https://github.com/woodpecker-ci/woodpecker/pull/5360)]
 - fix(deps): update golang-packages [[#5356](https://github.com/woodpecker-ci/woodpecker/pull/5356)]
 - 📦 update web dependencies [[#5352](https://github.com/woodpecker-ci/woodpecker/pull/5352)]
-- chore(config): migrate renovate config - autoclosed [[#5350](https://github.com/woodpecker-ci/woodpecker/pull/5350)]
+- chore(config): migrate renovate config [[#5350](https://github.com/woodpecker-ci/woodpecker/pull/5350)]
 - chore(deps): lock file maintenance [[#5348](https://github.com/woodpecker-ci/woodpecker/pull/5348)]
 - fix(deps): update golang-packages [[#5347](https://github.com/woodpecker-ci/woodpecker/pull/5347)]
 - fix(deps): update golang-packages [[#5336](https://github.com/woodpecker-ci/woodpecker/pull/5336)]
