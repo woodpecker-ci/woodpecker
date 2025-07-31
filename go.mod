@@ -16,7 +16,7 @@ require (
 	github.com/charmbracelet/huh/spinner v0.0.0-20240327025511-ec643317aa10
 	github.com/containerd/errdefs v1.0.0
 	github.com/distribution/reference v0.6.0
-	github.com/docker/cli v28.3.2+incompatible
+	github.com/docker/cli v28.3.3+incompatible
 	github.com/docker/docker v28.3.3+incompatible
 	github.com/docker/go-connections v0.5.0
 	github.com/docker/go-units v0.5.0
@@ -29,7 +29,7 @@ require (
 	github.com/gitsight/go-vcsurl v1.0.1
 	github.com/go-sql-driver/mysql v1.9.3
 	github.com/go-viper/mapstructure/v2 v2.4.0
-	github.com/golang-jwt/jwt/v5 v5.2.3
+	github.com/golang-jwt/jwt/v5 v5.3.0
 	github.com/google/go-github/v74 v74.0.0
 	github.com/google/tink/go v1.7.0
 	github.com/gorilla/securecookie v1.1.2
@@ -39,7 +39,7 @@ require (
 	github.com/joho/godotenv v1.5.1
 	github.com/kinbiko/jsonassert v1.2.0
 	github.com/lib/pq v1.10.9
-	github.com/mattn/go-sqlite3 v1.14.29
+	github.com/mattn/go-sqlite3 v1.14.30
 	github.com/moby/term v0.5.2
 	github.com/muesli/termenv v0.16.0
 	github.com/neticdk/go-bitbucket v1.0.3
@@ -50,7 +50,7 @@ require (
 	github.com/stretchr/testify v1.10.0
 	github.com/swaggo/files v1.0.1
 	github.com/swaggo/gin-swagger v1.6.0
-	github.com/swaggo/swag v1.16.5
+	github.com/swaggo/swag v1.16.6
 	github.com/urfave/cli-docs/v3 v3.0.0-alpha6
 	github.com/urfave/cli/v3 v3.3.8
 	github.com/xeipuuv/gojsonschema v1.2.0
