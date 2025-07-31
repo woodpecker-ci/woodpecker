@@ -104,6 +104,10 @@ onMounted(async () => {
 useWPTitle(computed(() => [i18n.t('login')]));
 
 function getHostFromUrl(forge: Forge) {
+  if (!forge.url && !forge.oauth_host) {
+    return forge.type.charAt(0).toUpperCase() + forge.type.slice(1);
+  }
+
   const url = new URL(forge.oauth_host ?? forge.url);
   return url.hostname;
 }
