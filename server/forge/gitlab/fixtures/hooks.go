@@ -35,6 +35,11 @@ var (
 		"User-Agent":     []string{"GitLab/14.3.0"},
 		"X-Gitlab-Event": []string{"Release Hook"},
 	}
+	MergeRequestHookHeaders = http.Header{
+		"Content-Type":   []string{"application/json"},
+		"User-Agent":     []string{"GitLab/18.3.0-pre"},
+		"X-Gitlab-Event": []string{"Merge Request Hook"},
+	}
 )
 
 // HookPush is payload of a push event
@@ -58,6 +63,9 @@ var HookPullRequestWithoutChanges []byte
 //go:embed HookPullRequestApproved.json
 var HookPullRequestApproved []byte
 
+//go:embed HookPullRequestEdited.json
+var HookPullRequestEdited []byte
+
 //go:embed HookPullRequestClosed.json
 var HookPullRequestClosed []byte
 
@@ -66,3 +74,16 @@ var HookPullRequestMerged []byte
 
 //go:embed WebhookReleaseBody.json
 var WebhookReleaseBody []byte
+
+//go:embed HookPullRequestReviewAck.json
+var HookPullRequestReviewAck []byte
+
+/// HookPullRequestReviewAck:
+///   Content-Type: application/json
+///   User-Agent: GitLab/18.3.0-pre
+///   Idempotency-Key: 72e93f1d-b856-4989-b8aa-cf711c58f8fc
+///   X-Gitlab-Event: Merge Request Hook
+///   X-Gitlab-Webhook-UUID: 416c6b60-1350-4d1c-abc1-fa2b807ef434
+///   X-Gitlab-Instance: https://gitlab.com
+///   X-Gitlab-Token: [REDACTED]
+///   X-Gitlab-Event-UUID: c321aa65-ee6d-4c2e-9570-847bd8f40fe3
