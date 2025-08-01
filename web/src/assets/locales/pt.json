@@ -108,7 +108,7 @@
                     "visibility": "Visibilidade do projeto"
                 },
                 "netrc_only_trusted": {
-                    "desc": "Concede acesso para credenciais netrc que podem ser usadas para clonar repositórios da forja ou fazer push para a forja.",
+                    "desc": "Plugins que obtém acesso para credenciais netrc que podem ser usadas para clonar repositórios da forja ou fazer push para a forja.",
                     "netrc_only_trusted": "Contêineres confiáveis personalizados"
                 },
                 "pipeline_path": {
@@ -587,7 +587,8 @@
                 "cli_and_api": "CLI & API",
                 "desc": "Uso de token de acesso pessoal, CLI e API",
                 "token": "Token de acesso pessoal",
-                "api_usage": "Exemplo de uso da API"
+                "api_usage": "Exemplo de uso da API",
+                "swagger_ui": "Swagger UI"
             },
             "agents": {
                 "desc": "Os agentes registrados para os repositórios da sua conta."
@@ -718,5 +719,6 @@
     "merge_ref": "Ref da mesclagem",
     "leave_empty_to_keep_current_value": "Deixe em branco para manter o valor",
     "merge_ref_desc": "Referência a ser usada para mesclar a base. Isso é usado para determinar a diferença entre pull requests.",
-    "skip_verify_desc": "Pula verificação SSL para a conexão API. Isso não é recomendado para uso em produção."
+    "skip_verify_desc": "Pula verificação SSL para a conexão API. Isso não é recomendado para uso em produção.",
+    "login_to_woodpecker_with": "Entrar no Woodpecker com"
 }
