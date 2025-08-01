@@ -67,6 +67,8 @@
   <SvgIcon v-else-if="name === 'bug-outline'" :path="mdiBugOutline" size="1.3rem" />
   <SvgIcon v-else-if="name === 'docker'" :path="mdiDocker" size="1.3rem" />
   <SvgIcon v-else-if="name === 'forge'" :path="mdiCodeBraces" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'fullscreen'" :path="mdiFullscreen" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'exit-fullscreen'" :path="mdiFullscreenExit" size="1.3rem" />
 
   <SvgIcon v-else-if="name === 'visibility-private'" :path="mdiLockOutline" size="1.3rem" />
   <SvgIcon v-else-if="name === 'visibility-internal'" :path="mdiLockOpenOutline" size="1.3rem" />
@@ -132,6 +134,8 @@ import {
   mdiFolderOutline,
   mdiFormatListBulleted,
   mdiFormatListGroup,
+  mdiFullscreen,
+  mdiFullscreenExit,
   mdiGestureTap,
   mdiGit,
   mdiGithub,
@@ -237,6 +241,8 @@ export type IconNames =
   | 'cron'
   | 'toolbox'
   | 'forge'
+  | 'fullscreen'
+  | 'exit-fullscreen'
   | 'folder'
   | 'folder-open'
   | 'file';
