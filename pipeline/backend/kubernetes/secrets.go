@@ -319,7 +319,7 @@ func startStepSecret(ctx context.Context, e *kube, step *types.Step) error {
 		return err
 	}
 	log.Trace().Msgf("creating secret: %s", secret.Name)
-	_, err = e.client.CoreV1().Secrets(e.config.Namespace).Create(ctx, secret, meta_v1.CreateOptions{})
+	_, err = e.client.CoreV1().Secrets(e.config.GetNamespace(step.OrgID)).Create(ctx, secret, meta_v1.CreateOptions{})
 	if err != nil {
 		return err
 	}
@@ -334,7 +334,7 @@ func mkStepSecret(step *types.Step, config *config) (*v1.Secret, error) {
 
 	return &v1.Secret{
 		ObjectMeta: meta_v1.ObjectMeta{
-			Namespace: config.Namespace,
+			Namespace: config.GetNamespace(step.OrgID),
 			Name:      name,
 		},
 		Type:       v1.SecretTypeOpaque,
@@ -357,7 +357,7 @@ func stopStepSecret(ctx context.Context, engine *kube, step *types.Step, deleteO
 	}
 	log.Trace().Str("name", name).Msg("deleting secret")
 
-	err = engine.client.CoreV1().Secrets(engine.config.Namespace).Delete(ctx, name, deleteOpts)
+	err = engine.client.CoreV1().Secrets(engine.config.GetNamespace(step.OrgID)).Delete(ctx, name, deleteOpts)
 	if errors.IsNotFound(err) {
 		return nil
 	}
