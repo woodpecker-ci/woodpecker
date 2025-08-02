@@ -44,6 +44,7 @@
 
 ### 📦️ Dependency
 
+- fix(deps): update web npm deps non-major [[#5385](https://github.com/woodpecker-ci/woodpecker/pull/5385)]
 - fix(deps): update module github.com/prometheus/client_golang to v1.23.0 [[#5382](https://github.com/woodpecker-ci/woodpecker/pull/5382)]
 - fix(deps): update golang-packages [[#5375](https://github.com/woodpecker-ci/woodpecker/pull/5375)]
 - chore(deps): lock file maintenance [[#5369](https://github.com/woodpecker-ci/woodpecker/pull/5369)]
