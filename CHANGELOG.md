@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.9.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.9.0) - 2025-08-02
+## [3.9.0](https://github.com/woodpecker-ci/woodpecker/releases/tag/v3.9.0) - 2025-08-03
 
 ### ❤️ Thanks to all contributors! ❤️
 
@@ -44,6 +44,7 @@
 
 ### 📦️ Dependency
 
+- chore(deps): update pre-commit hook golangci/golangci-lint to v2.3.1 [[#5386](https://github.com/woodpecker-ci/woodpecker/pull/5386)]
 - fix(deps): update web npm deps non-major [[#5385](https://github.com/woodpecker-ci/woodpecker/pull/5385)]
 - fix(deps): update module github.com/prometheus/client_golang to v1.23.0 [[#5382](https://github.com/woodpecker-ci/woodpecker/pull/5382)]
 - fix(deps): update golang-packages [[#5375](https://github.com/woodpecker-ci/woodpecker/pull/5375)]
