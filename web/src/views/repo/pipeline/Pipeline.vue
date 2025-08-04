@@ -50,12 +50,7 @@
           </Panel>
         </div>
 
-        <PipelineLog
-          v-else-if="selectedStepId !== null"
-          v-model:step-id="selectedStepId"
-          :pipeline="pipeline!"
-          class="fixed top-0 left-0 h-full w-full md:absolute"
-        />
+        <PipelineLog v-else-if="selectedStepId !== null" v-model:step-id="selectedStepId" :pipeline="pipeline!" />
       </div>
     </div>
   </Container>
