@@ -15,6 +15,17 @@
 
 - Add and edit additional forges in UI [[#5328](https://github.com/woodpecker-ci/woodpecker/pull/5328)]
 
+### 📈 Enhancement
+
+- Add pipeline log fullscreen [[#5377](https://github.com/woodpecker-ci/woodpecker/pull/5377)]
+- Show changed files as file-tree [[#5379](https://github.com/woodpecker-ci/woodpecker/pull/5379)]
+- Replace header bg with border [[#5380](https://github.com/woodpecker-ci/woodpecker/pull/5380)]
+- Prevent body jump when scrollbar appears [[#5381](https://github.com/woodpecker-ci/woodpecker/pull/5381)]
+- Show oauth host and favicon on login [[#5376](https://github.com/woodpecker-ci/woodpecker/pull/5376)]
+- Support secrets in `cli exec` [[#5374](https://github.com/woodpecker-ci/woodpecker/pull/5374)]
+- feat(k8s): Kubernetes namespace per organization [[#5309](https://github.com/woodpecker-ci/woodpecker/pull/5309)]
+- Simplify backend types [[#5299](https://github.com/woodpecker-ci/woodpecker/pull/5299)]
+
 ### 📚 Documentation
 
 - chore(deps): lock file maintenance [[#5388](https://github.com/woodpecker-ci/woodpecker/pull/5388)]
@@ -23,16 +34,6 @@
 - Add ASCII JUnit Test Report plugin [[#5355](https://github.com/woodpecker-ci/woodpecker/pull/5355)]
 - fix(deps): update docs npm deps non-major [[#5340](https://github.com/woodpecker-ci/woodpecker/pull/5340)]
 - chore(deps): update docs npm deps non-major [[#5316](https://github.com/woodpecker-ci/woodpecker/pull/5316)]
-
-### 📈 Enhancement
-
-- Show changed files as file-tree [[#5379](https://github.com/woodpecker-ci/woodpecker/pull/5379)]
-- Replace header bg with border [[#5380](https://github.com/woodpecker-ci/woodpecker/pull/5380)]
-- Prevent body jump when scrollbar appears [[#5381](https://github.com/woodpecker-ci/woodpecker/pull/5381)]
-- Show oauth host and favicon on login [[#5376](https://github.com/woodpecker-ci/woodpecker/pull/5376)]
-- Support secrets in `cli exec` [[#5374](https://github.com/woodpecker-ci/woodpecker/pull/5374)]
-- feat(k8s): Kubernetes namespace per organization [[#5309](https://github.com/woodpecker-ci/woodpecker/pull/5309)]
-- Simplify backend types [[#5299](https://github.com/woodpecker-ci/woodpecker/pull/5299)]
 
 ### 🐛 Bug Fixes
 
