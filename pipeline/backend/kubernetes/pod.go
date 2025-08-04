@@ -453,12 +453,13 @@ func toleration(backendToleration Toleration) v1.Toleration {
 
 func podSecurityContext(sc *SecurityContext, secCtxConf SecurityContextConfig, stepPrivileged bool) *v1.PodSecurityContext {
 	var (
-		nonRoot  *bool
-		user     *int64
-		group    *int64
-		fsGroup  *int64
-		seccomp  *v1.SeccompProfile
-		apparmor *v1.AppArmorProfile
+		nonRoot             *bool
+		user                *int64
+		group               *int64
+		fsGroup             *int64
+		fsGroupChangePolicy *v1.PodFSGroupChangePolicy
+		seccomp             *v1.SeccompProfile
+		apparmor            *v1.AppArmorProfile
 	)
 
 	if secCtxConf.RunAsNonRoot {
@@ -496,6 +497,7 @@ func podSecurityContext(sc *SecurityContext, secCtxConf SecurityContextConfig, s
 
 		seccomp = seccompProfile(sc.SeccompProfile)
 		apparmor = apparmorProfile(sc.ApparmorProfile)
+		fsGroupChangePolicy = sc.FsGroupChangePolicy
 	}
 
 	if nonRoot == nil && user == nil && group == nil && fsGroup == nil && seccomp == nil && apparmor == nil {
@@ -503,12 +505,13 @@ func podSecurityContext(sc *SecurityContext, secCtxConf SecurityContextConfig, s
 	}
 
 	securityContext := &v1.PodSecurityContext{
-		RunAsNonRoot:    nonRoot,
-		RunAsUser:       user,
-		RunAsGroup:      group,
-		FSGroup:         fsGroup,
-		SeccompProfile:  seccomp,
-		AppArmorProfile: apparmor,
+		RunAsNonRoot:        nonRoot,
+		RunAsUser:           user,
+		RunAsGroup:          group,
+		FSGroup:             fsGroup,
+		FSGroupChangePolicy: fsGroupChangePolicy,
+		SeccompProfile:      seccomp,
+		AppArmorProfile:     apparmor,
 	}
 	log.Trace().Msgf("pod security context that will be used: %v", securityContext)
 	return securityContext
