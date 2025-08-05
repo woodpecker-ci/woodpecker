@@ -62,9 +62,14 @@
   <SvgIcon v-else-if="name === 'tray-full'" :path="mdiTrayFull" size="1.3rem" />
   <SvgIcon v-else-if="name === 'file-cog-outline'" :path="mdiFileCogOutline" size="1.3rem" />
   <SvgIcon v-else-if="name === 'file-edit-outline'" :path="mdiFileEditOutline" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'folder'" :path="mdiFolderOutline" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'folder-open'" :path="mdiFolderOpenOutline" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'file'" :path="mdiFileOutline" size="1.3rem" />
   <SvgIcon v-else-if="name === 'bug-outline'" :path="mdiBugOutline" size="1.3rem" />
   <SvgIcon v-else-if="name === 'docker'" :path="mdiDocker" size="1.3rem" />
   <SvgIcon v-else-if="name === 'forge'" :path="mdiCodeBraces" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'fullscreen'" :path="mdiFullscreen" size="1.3rem" />
+  <SvgIcon v-else-if="name === 'exit-fullscreen'" :path="mdiFullscreenExit" size="1.3rem" />
 
   <SvgIcon v-else-if="name === 'visibility-private'" :path="mdiLockOutline" size="1.3rem" />
   <SvgIcon v-else-if="name === 'visibility-internal'" :path="mdiLockOpenOutline" size="1.3rem" />
@@ -125,8 +130,13 @@ import {
   mdiEyeOutline,
   mdiFileCogOutline,
   mdiFileEditOutline,
+  mdiFileOutline,
+  mdiFolderOpenOutline,
+  mdiFolderOutline,
   mdiFormatListBulleted,
   mdiFormatListGroup,
+  mdiFullscreen,
+  mdiFullscreenExit,
   mdiGestureTap,
   mdiGit,
   mdiGithub,
@@ -232,7 +242,12 @@ export type IconNames =
   | 'org'
   | 'cron'
   | 'toolbox'
-  | 'forge';
+  | 'forge'
+  | 'fullscreen'
+  | 'exit-fullscreen'
+  | 'folder'
+  | 'folder-open'
+  | 'file';
 
 const props = defineProps<{
   name: IconNames;
