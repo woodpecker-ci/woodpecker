@@ -188,7 +188,7 @@ func Test_GitLab(t *testing.T) {
 		}
 	})
 
-	t.Run("merge request hook", func(t *testing.T) {
+	t.Run("merge request reopened", func(t *testing.T) {
 		req, _ := http.NewRequest(
 			fixtures.ServiceHookMethod,
 			fixtures.ServiceHookURL.String(),
