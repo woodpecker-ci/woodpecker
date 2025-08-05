@@ -81,4 +81,4 @@ var HookPullRequestLabelsCleared string
 var HookPullRequestMilestoneCleared string
 
 //go:embed HookPullRequestReopened.json
-var HookPullRequestReopened []byte
+var HookPullRequestReopened string
