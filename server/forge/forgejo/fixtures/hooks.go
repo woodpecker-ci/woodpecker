@@ -52,3 +52,6 @@ var HookPullRequestClosed string
 
 //go:embed HookRelease.json
 var HookRelease string
+
+//go:embed HookPullRequestReopened.json
+var HookPullRequestReopened []byte
