@@ -97,3 +97,6 @@ var HookPullRequestAssigneeAdded string
 
 //go:embed HookPullRequestAssigneeRemoved.json
 var HookPullRequestAssigneeRemoved string
+
+//go:embed HookPullRequestReopened.json
+var HookPullRequestReopened []byte

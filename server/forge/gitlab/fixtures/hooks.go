@@ -78,12 +78,5 @@ var WebhookReleaseBody []byte
 //go:embed HookPullRequestReviewAck.json
 var HookPullRequestReviewAck []byte
 
-/// HookPullRequestReviewAck:
-///   Content-Type: application/json
-///   User-Agent: GitLab/18.3.0-pre
-///   Idempotency-Key: 72e93f1d-b856-4989-b8aa-cf711c58f8fc
-///   X-Gitlab-Event: Merge Request Hook
-///   X-Gitlab-Webhook-UUID: 416c6b60-1350-4d1c-abc1-fa2b807ef434
-///   X-Gitlab-Instance: https://gitlab.com
-///   X-Gitlab-Token: [REDACTED]
-///   X-Gitlab-Event-UUID: c321aa65-ee6d-4c2e-9570-847bd8f40fe3
+//go:embed HookPullRequestReopened.json
+var HookPullRequestReopened []byte
