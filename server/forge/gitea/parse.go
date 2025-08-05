@@ -50,6 +50,7 @@ const (
 	actionAssigned      = "assigned"
 	actionUnAssigned    = "unassigned"
 	actionReviewed      = "reviewed"
+	actionReopen        = "reopened"
 
 	refBranch = "branch"
 	refTag    = "tag"
@@ -68,6 +69,7 @@ var actionList = []string{
 	actionAssigned,
 	actionUnAssigned,
 	actionReviewed,
+	actionReopen,
 }
 
 func supportedAction(action string) bool {

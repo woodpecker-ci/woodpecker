@@ -240,7 +240,6 @@ func Test_GitLab(t *testing.T) {
 			}
 		})
 
-		// TODO: is no metadata event!!!
 		t.Run("merge request reopened", func(t *testing.T) {
 			req, _ := http.NewRequest(
 				fixtures.ServiceHookMethod,
