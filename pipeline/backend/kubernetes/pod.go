@@ -173,6 +173,7 @@ func podSpec(step *types.Step, config *config, options BackendOptions, nsp nativ
 		RestartPolicy:      v1.RestartPolicyNever,
 		RuntimeClassName:   options.RuntimeClassName,
 		ServiceAccountName: options.ServiceAccountName,
+		PriorityClassName:  config.PriorityClassName,
 		HostAliases:        hostAliases(step.ExtraHosts),
 		NodeSelector:       nodeSelector(options.NodeSelector, config.PodNodeSelector, step.Environment["CI_SYSTEM_PLATFORM"]),
 		Tolerations:        tolerations(options.Tolerations),
