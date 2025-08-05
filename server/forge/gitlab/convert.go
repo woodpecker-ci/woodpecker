@@ -33,8 +33,9 @@ const (
 
 	stateOpen = "open"
 
-	actionClose = "close"
-	actionMerge = "merge"
+	actionClose  = "close"
+	actionReopen = "reopen"
+	actionMerge  = "merge"
 )
 
 func (g *GitLab) convertGitLabRepo(_repo *gitlab.Project, projectMember *gitlab.ProjectMember) (*model.Repo, error) {
@@ -79,7 +80,7 @@ func convertMergeRequestHook(hook *gitlab.MergeEvent, req *http.Request) (int, *
 	// if some git action happened then OldRev != "" -> it's a normal pull_request trigger
 	// https://github.com/woodpecker-ci/woodpecker/pull/3338
 	// https://docs.gitlab.com/ee/user/project/integrations/webhook_events.html#merge-request-events
-	if obj.OldRev != "" && obj.State == stateOpen {
+	if (obj.OldRev != "" && obj.State == stateOpen) || obj.State == actionReopen {
 		pipeline.Event = model.EventPull
 	} else if obj.Action == actionClose || obj.Action == actionMerge {
 		pipeline.Event = model.EventPullClosed

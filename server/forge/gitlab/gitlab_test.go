@@ -240,6 +240,27 @@ func Test_GitLab(t *testing.T) {
 			}
 		})
 
+		// TODO: is no metadata event!!!
+		t.Run("merge request reopened", func(t *testing.T) {
+			req, _ := http.NewRequest(
+				fixtures.ServiceHookMethod,
+				fixtures.ServiceHookURL.String(),
+				bytes.NewReader(fixtures.HookPullRequestReopened),
+			)
+			req.Header = fixtures.ServiceHookHeaders
+
+			hookRepo, pipeline, err := client.Hook(ctx, req)
+			assert.NoError(t, err)
+			if assert.NotNil(t, hookRepo) && assert.NotNil(t, pipeline) {
+				assert.Equal(t, "main", hookRepo.Branch)
+				assert.Equal(t, "demoaccount2-commits-group", hookRepo.Owner)
+				assert.Equal(t, "test_ci_tmp", hookRepo.Name)
+				assert.Equal(t, "Some ned more AAAA", pipeline.Title)
+				assert.Len(t, pipeline.ChangedFiles, 0)
+				assert.Equal(t, model.EventPull, pipeline.Event)
+			}
+		})
+
 		t.Run("parse merge request merged", func(t *testing.T) {
 			req, _ := http.NewRequest(
 				fixtures.ServiceHookMethod,
