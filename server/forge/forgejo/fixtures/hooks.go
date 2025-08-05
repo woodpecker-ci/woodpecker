@@ -79,3 +79,6 @@ var HookPullRequestLabelsCleared string
 
 //go:embed HookPullRequestMilestoneCleared.json
 var HookPullRequestMilestoneCleared string
+
+//go:embed HookPullRequestReopened.json
+var HookPullRequestReopened []byte
